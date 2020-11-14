@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -535,7 +538,7 @@ void CObjectViewer::loadConfigFile()
 	}
 	catch (const Exception& e)
 	{
-		::MessageBox (NULL, utf8ToTStr(e.what()), _T("Objectviewer.cfg"), MB_OK|MB_ICONEXCLAMATION);
+		::MessageBox(NULL, nlUtf8ToTStr(e.what()), _T("Objectviewer.cfg"), MB_OK | MB_ICONEXCLAMATION);
 	}
 }
 
@@ -606,7 +609,6 @@ bool CObjectViewer::initUI (HWND parent)
 	{
 		new NLMISC::CApplicationContext();
 		nldebug("NeL Object Viewer: initUI");
-		NLMISC::CSheetId::initWithoutSheet();
 	}
 
 	// The fonts manager
@@ -823,7 +825,7 @@ bool CObjectViewer::initUI (HWND parent)
 		catch (const NLMISC::EStream &e)
 		{
 			std::string msg = toString("Unable to load the default scheme bank file : %s", e.what());
-			::MessageBox(NULL, utf8ToTStr(msg), _T("Object Viewer"), MB_ICONEXCLAMATION);
+			::MessageBox(NULL, nlUtf8ToTStr(msg), _T("Object Viewer"), MB_ICONEXCLAMATION);
 		}
 	}
 	iF.close();
@@ -840,7 +842,7 @@ bool CObjectViewer::initUI (HWND parent)
 		catch (const Exception& e)
 		{
 			std::string msg = toString("Error while loading default.ovcgf : %s", e.what());
-			::MessageBox (NULL, utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+			::MessageBox(NULL, nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 		}
 	}
 
@@ -1312,7 +1314,7 @@ void CObjectViewer::go ()
 				);
 
 			// Display
-			_MainFrame->StatusBar.SetWindowText (utf8ToTStr(msgBar));
+			_MainFrame->StatusBar.SetWindowText(nlUtf8ToTStr(msgBar));
 
 			// Display Vegetable info.
 			if(_VegetableDlg!=NULL)
@@ -1794,7 +1796,7 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 						{
 							// Error message
 							std::string message = toString("File not found %s", readed[i].ShapeFilename.c_str());
-							_MainFrame->MessageBox (utf8ToTStr(message), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+							_MainFrame->MessageBox(nlUtf8ToTStr(message), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 
 							// Stop loading
 							break;
@@ -1829,7 +1831,7 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 				{
 					// Error message
 					std::string message = toString("Error loading shape %s: %s", readed[i].ShapeFilename.c_str(), e.what());
-					_MainFrame->MessageBox (utf8ToTStr(message), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+					_MainFrame->MessageBox(nlUtf8ToTStr(message), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 
 					// Stop loading
 					break;
@@ -1899,7 +1901,7 @@ bool CObjectViewer::loadInstanceGroup(const std::string &igFilename)
 		{
 			// clean
 			delete ig;
-			_MainFrame->MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+			_MainFrame->MessageBox(nlUtf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 	}
@@ -1907,7 +1909,7 @@ bool CObjectViewer::loadInstanceGroup(const std::string &igFilename)
 	{
 		// Create a message
 		std::string msg = toString("Can't open the file %s for reading.", igFilename.c_str());
-		_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+		_MainFrame->MessageBox(nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
@@ -1962,7 +1964,7 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const std:
 			}
 			catch (const Exception& e)
 			{
-				_MainFrame->MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+				_MainFrame->MessageBox(nlUtf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 
 				// error
 				skelError=true;
@@ -1972,7 +1974,7 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const std:
 		{
 			// Create a message
 			std::string msg = NLMISC::toString("Can't open the file %s for reading.", skeleton.c_str());
-			_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+			_MainFrame->MessageBox(nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 
 			// error
 			skelError=true;
@@ -2015,7 +2017,7 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const std:
 			}
 			catch (const Exception& e)
 			{
-				_MainFrame->MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+				_MainFrame->MessageBox(nlUtf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 				continue;
 			}
 		}
@@ -2023,7 +2025,7 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const std:
 		{
 			// Create a message
 			std::string msg = NLMISC::toString("Can't open the file %s for reading.", fileName.c_str());
-			_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+			_MainFrame->MessageBox(nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 			continue;
 		}
 
@@ -2848,7 +2850,7 @@ void CObjectViewer::enableDynamicObjectLightingTest(NLPACS::CGlobalRetriever *gl
 			if (!_ObjectLightTestShape.empty())
 			{			
 				string	str= string("Path not found for Light Test Shape: ") + _ObjectLightTestShape;
-				::MessageBox(NULL, utf8ToTStr(str.c_str()), _T("Dynamic Object Light Test"), MB_OK|MB_ICONEXCLAMATION);
+				::MessageBox(NULL, nlUtf8ToTStr(str.c_str()), _T("Dynamic Object Light Test"), MB_OK | MB_ICONEXCLAMATION);
 			}
 			// disable.
 			_ObjectLightTest= NULL;
@@ -3223,7 +3225,7 @@ bool		CObjectViewer::createVegetableLandscape()
 			// close the progress dialog
 			dlgProgress.DestroyWindow();
 
-			MessageBox(_MainFrame->m_hWnd, utf8ToTStr(e.what()), _T("Failed to Load landscape"), MB_OK | MB_APPLMODAL);
+			MessageBox(_MainFrame->m_hWnd, nlUtf8ToTStr(e.what()), _T("Failed to Load landscape"), MB_OK | MB_APPLMODAL);
 
 			// remove first possibly created collisions objects.
 			if(_VegetableCollisionEntity)
@@ -3557,7 +3559,7 @@ void CObjectViewer::loadAnimation(const std::string &fileName, uint instance)
 	{
 		// Create a message
 		std::string msg = NLMISC::toString("Can't open the file %s for reading.", fileName.c_str());
-		_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+		_MainFrame->MessageBox(nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 	}
 }
 
@@ -3587,7 +3589,7 @@ void CObjectViewer::loadSWT (const std::string &fileName, uint instance)
 	{
 		// Create a message
 		std::string msg = NLMISC::toString("Can't open the file %s for reading.", fileName.c_str());
-		_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+		_MainFrame->MessageBox(nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 	}
 }
 
@@ -3771,14 +3773,14 @@ void		CObjectViewer::shootScene()
 					else
 					{
 						std::string message = toString("Can't open the file %s for writing.", filenamefinal.c_str());
-						_MainFrame->MessageBox (utf8ToTStr(message), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+						_MainFrame->MessageBox(nlUtf8ToTStr(message), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 						break;
 					}
 				}
 				catch (const Exception &e)
 				{
 					std::string message = toString("Error during writing of the file %s: %s", filenamefinal.c_str(), e.what());
-					_MainFrame->MessageBox (utf8ToTStr(message), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+					_MainFrame->MessageBox(nlUtf8ToTStr(message), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 					break;
 				}
 			}

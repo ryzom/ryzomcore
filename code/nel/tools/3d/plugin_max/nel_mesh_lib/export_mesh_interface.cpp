@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -316,7 +319,7 @@ static void AddNodeToQuadGrid(const NLMISC::CAABBox &delimiter, TNodeFaceQG &des
 	{
 		if (delimiter.intersect(nodeBBox))
 		{
-			nldebug("Adding %s to mesh interface quad grid", tStrToUtf8(node.GetName()).c_str());
+			nldebug("Adding %s to mesh interface quad grid", MCharStrToUtf8(node.GetName()).c_str());
 			// add this node tris
 			ObjectState os = node.EvalWorldState(time);
 			Object *obj = os.obj;	
@@ -578,10 +581,10 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 	for (i=0; i<size; i++)
 	{
 		// Rename the material
-		string newName = "NelAutoMergeRenamedTmp" + toString (i);
-		string originalName = (*lib)[i]->GetName ().ToUTF8();
+		string newName = "NelAutoMergeRenamedTmp" + toString(i);
+		string originalName = MaxTStrToUtf8((*lib)[i]->GetName());
 		renameMap.insert (map<string, string>::value_type (newName, originalName));
-		(*lib)[i]->SetName (utf8ToTStr(newName));
+		(*lib)[i]->SetName (MaxTStrFromUtf8(newName));
 	}
 
 	// Merge the interface project
@@ -604,7 +607,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 	for (i=0; i<size; i++)
 	{
 		// Find the name in the map ?
-		string key = (*lib)[i]->GetName ().ToUTF8();
+		string key = MaxTStrToUtf8((*lib)[i]->GetName());
 		map<string, string>::iterator ite = renameMap.find (key);
 
 		// Not found ? This is a merged material
@@ -612,9 +615,9 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 		{
 			// Rename the material
 			string newName = "NelAutoMergeRenamed" + toString (i);
-			string originalName = (*lib)[i]->GetName ().ToUTF8();
+			string originalName = MaxTStrToUtf8((*lib)[i]->GetName());
 			renameMap.insert (map<string, string>::value_type (newName, originalName));
-			(*lib)[i]->SetName (utf8ToTStr(newName));
+			(*lib)[i]->SetName (MaxTStrFromUtf8(newName));
 		}
 	}
 
@@ -622,12 +625,12 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 	for (i=0; i<size; i++)
 	{
 		// Find the name
-		string key = (*lib)[i]->GetName ().ToUTF8();
+		string key = MaxTStrToUtf8((*lib)[i]->GetName());
 		map<string, string>::iterator ite = renameMap.find (key);
 		if (ite != renameMap.end ())
 		{
 			// Rename the material with its original name
-			(*lib)[i]->SetName (utf8ToTStr(ite->second));
+			(*lib)[i]->SetName (MaxTStrFromUtf8(ite->second));
 		}
 	}
 

@@ -43,7 +43,9 @@ public:
 	uint16				PetIdx;	// must be returned to EGS with CPetSpawnConfirmationMsg class
 	sint32				Coordinate_X, Coordinate_Y, Coordinate_H; //For NEAR_POINT mode
 	float				Heading; //For NEAR_POINT mode
+#ifdef RYZOM_FORGE_PET_NAME
 	ucstring			CustomName;
+#endif
 
 	virtual void description ()
 	{
@@ -57,7 +59,9 @@ public:
 		property ("Coordinate_Y", PropSInt32, (sint32)0, Coordinate_Y);
 		property ("Coordinate_H", PropSInt32, (sint32)0, Coordinate_H);
 		property ("Heading", PropFloat, 0.0f, Heading);
+#ifdef RYZOM_FORGE_PET_NAME
 		property ("CustomName", PropUCString, ucstring(""), CustomName);
+#endif
 	}
 
 	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}

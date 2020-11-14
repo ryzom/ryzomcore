@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -62,7 +65,7 @@ void CRadialVertices::init (INode *node, Mesh *mesh, TimeValue time, Interface &
 			_SmoothingGroupMask |= (1<<app);
 
 			// Get the node by name
-			INode *pivotNode = ip.GetINodeByName(utf8ToTStr(pivotName));
+			INode *pivotNode = ip.GetINodeByName(MaxTStrFromUtf8(pivotName));
 			if (pivotNode)
 			{
 				// Get the world Pivot point

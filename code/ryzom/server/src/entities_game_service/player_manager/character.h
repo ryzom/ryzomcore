@@ -298,7 +298,9 @@ struct CPetAnimal
 	bool				IsMounted;
 	bool				IsTpAllowed;
 	bool				spawnFlag;
+#ifdef RYZOM_FORGE_PET_NAME
 	ucstring			CustomName;
+#endif
 	
 	// ctor
 	CPetAnimal();
@@ -312,7 +314,9 @@ struct CPetAnimal
 	// get the max bulk of the animal inventory
 	uint32 getAnimalMaxBulk();
 
+#ifdef RYZOM_FORGE_PET_NAME
 	void setCustomName(const ucstring& customName) { CustomName = customName; }
+#endif
 };
 
 /**
@@ -1016,10 +1020,12 @@ public:
 	// return the index of a player pet, or -1 if not found
 	sint32 getPlayerPet( const TDataSetRow& petRowId ) const;
 
+#ifdef RYZOM_FORGE_PET_NAME
 	// Set the name of the animal
 	void setAnimalName( uint8 petIndex, ucstring customName );
 
 	void sendPetCustomNameToClient(uint8 petIndex);
+#endif
 
 	// near character's pets are TP with player (continent tp)
 	void allowNearPetTp();
@@ -1197,11 +1203,13 @@ public:
 	/// get the number of faction point given a faction
 	uint32	getFactionPoint(PVP_CLAN::TPVPClan clan);
 
+#ifdef RYZOM_FORGE
 	/// set the number of pvp point
 	void	setPvpPoint(uint32 nbPt);
 
 	/// get the number of pvp point given a faction
 	uint32	getPvpPoint();
+#endif
 
 	/// set the SDB path where player wins HoF points in PvP (if not empty)
 	void	setSDBPvPPath(const std::string & sdbPvPPath);
@@ -1212,6 +1220,7 @@ public:
 	/// init faction point in client database
 	void	initFactionPointDb();
 
+#ifdef RYZOM_FORGE
 	/// init pvp point in client database
 	void	initPvpPointDb();
 
@@ -1220,6 +1229,7 @@ public:
 	void setOrganizationStatus(uint32 status);
 	void changeOrganizationStatus(sint32 status);
 	void changeOrganizationPoints(sint32 points);
+#endif
 
 	/// send faction point gain phrase to the client
 	void	sendFactionPointGainMessage(PVP_CLAN::TPVPClan clan, uint32 fpGain);
@@ -1500,7 +1510,7 @@ public:
 	uint8 interfaceCounter() const;
 
 	/// Register character name in IOS
-	void registerName(const ucstring &newName = std::string(""));
+	void registerName(const ucstring &newName = std::string());
 
 	/// Mount a mount
 	void mount( TDataSetRow PetRowId );
@@ -1554,8 +1564,10 @@ public:
 	/// client (in)validate melee combat
 	void validateMeleeCombat(bool flag);
 
+#ifdef RYZOM_FORGE
 	/// check is player can spawn npc group in here position
 	bool isSpawnValid(bool inVillage, bool inOutpost, bool inStable, bool inAtys);
+#endif
 
 	/// memorize a phrase 
 	void memorize(uint8 memorizationSet, uint8 index, uint16 phraseId, const std::vector<NLMISC::CSheetId> &bricks);
@@ -1675,6 +1687,7 @@ public:
 	/// get ammo item
 	virtual CGameItemPtr getAmmoItem() const;
 
+#ifdef RYZOM_FORGE
 	/// send dynamic message
 	void sendDynamicMessage(const std::string &phrase, const std::string &message);
 
@@ -1695,7 +1708,9 @@ public:
 
  	/// validate dynamic mission step sending url
  	void validateDynamicMissionStep(const std::string &url);
+#endif
 
+#ifdef RYZOM_FORGE
 	/// add web command validation check
 	void addWebCommandCheck(const std::string &url, const std::string &data, const std::string &salt);
 
@@ -1704,6 +1719,7 @@ public:
 
 	/// validate web command. Return web command item index in bag if command is valid or INVENTORIES::NbBagSlots if not
 	uint checkWebCommand(const std::string &url, const std::string &data, const std::string &hmac, const std::string &salt);
+#endif
 
 	/// get the available phrases
 	void getAvailablePhrasesList(const std::string &brickFilter, std::vector<NLMISC::CSheetId> &selectedPhrases, EGSPD::CPeople::TPeople people = EGSPD::CPeople::Common, bool bypassBrickRequirements = false, bool includeNonRolemasterBricks = true );
@@ -1844,7 +1860,7 @@ public:
 	virtual float getActualDamageFromExplosionWithArmor( float dmg ) const;
 
 	/// send temp inventory close impulsion to client
-	void sendCloseTempInventoryImpulsion();
+	void sendCloseTempInventoryImpulsion(bool onlyIfEmpty = false);
 
 	/// set a fame value for the player, send info to the client.
 	void setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint32 fameMax, uint16 fameTrend);
@@ -1958,6 +1974,7 @@ public:
 		void removePlayerFromFriendListByContactId(uint32 contactId);
 		void removePlayerFromFriendListByEntityId(const NLMISC::CEntityId &id);
 
+#ifdef RYZOM_FORGE_ROOM
 		void setInRoomOfPlayer(const NLMISC::CEntityId &id);
 		const NLMISC::CEntityId& getInRoomOfPlayer();
 
@@ -1969,6 +1986,7 @@ public:
 		
 		/// remove room acces to player
 		void removeRoomAccesToPlayer(const NLMISC::CEntityId &id, bool kick);
+#endif
 
 		/// remove player from league list
 		void removePlayerFromLeagueListByContactId(uint32 contactId);
@@ -2377,10 +2395,12 @@ public:
 	void setPvPSafeZoneActive();
 	/// clear pvp zone safe flag
 	void clearSafeInPvPSafeZone();
+#ifdef RYZOM_FORGE
 	/// get pvp fames allies
 	TYPE_PVP_CLAN getPVPFamesAllies();
 	/// get pvp fames ennemys
 	TYPE_PVP_CLAN getPVPFamesEnemies();
+#endif
 	/// update the clan in visuale property
 	void updatePVPClanVP() const;
 	//@}
@@ -2417,6 +2437,7 @@ public:
 	uint32 getLastConnectedDate() const;
 	uint32 getPlayedTime() const;
 
+#ifdef RYZOM_FORGE
 	const std::string& getLangChannel() const;
 	void setLangChannel(const std::string &lang);
 
@@ -2424,7 +2445,9 @@ public:
 	void setNewTitle(const std::string &title);
 
 	std::string getFullTitle() const;
+#endif
 
+#ifdef RYZOM_FORGE
 	std::string getTagA() const;
 	void setTagA(const std::string &tag);
 
@@ -2436,9 +2459,13 @@ public:
 
 	std::string getTagPvPB() const;
 	void setTagPvPB(const std::string &tag);
+#endif
 
+#ifdef RYZOM_FORGE
 	uint32 getOrganization() const;
 	uint32 getOrganizationStatus() const;
+#endif
+
 	const std::list<TCharacterLogTime>& getLastLogStats() const;
 	void updateConnexionStat();
 	void setDisconnexionTime();		
@@ -2644,13 +2671,13 @@ public:
 	CGameItemPtr createItemInInventoryFreeSlot(INVENTORIES::TInventory invId, uint16 obtainedQuality, uint32 quantity, const NLMISC::CSheetId & obtainedItem, const NLMISC::CEntityId & creatorId = NLMISC::CEntityId::Unknown, const std::string * phraseId = NULL);
 
 	/// action on an item in the temp inventory (move it to bag)
-	void itemTempInventoryToBag(uint32 scrSlot, bool sendCloseTempImpulsion = true);
+	void itemTempInventoryToBag(uint32 scrSlot); // , bool sendCloseTempImpulsion = true);
 
 	/// clear temp inventory
 	void clearTempInventory();
 
 	/// get all items in temp inventory
-	void getAllTempInventoryItems(bool sendCloseTempImpulsion = true);
+	void getAllTempInventoryItems(); // bool sendCloseTempImpulsion = true);
 
 	/// return true if temp inventory is empty
 	bool tempInventoryEmpty();
@@ -3071,19 +3098,28 @@ private:
 
 	uint32								_FactionPoint[PVP_CLAN::EndClans-PVP_CLAN::BeginClans+1];
 
+#ifdef RYZOM_FORGE
 	uint32								_PvpPoint;
+#endif
 
+#ifdef RYZOM_FORGE
 	uint32								_Organization;
 	uint32								_OrganizationStatus;
 	uint32								_OrganizationPoints;
+#endif
 
+#ifdef RYZOM_FORGE
 	std::string							_LangChannel;
 
 	std::string							_NewTitle;
+#endif
+
+#ifdef RYZOM_FORGE
 	std::string							_TagPvPA;
 	std::string							_TagPvPB;
 	std::string							_TagA;
 	std::string							_TagB;
+#endif
 
 	/// SDB path where player wins HoF points in PvP (if not empty)
 	std::string							_SDBPvPPath;
@@ -3339,6 +3375,7 @@ private:
 	/// nb of users channels
 	uint8						_NbUserChannels;
 
+#ifdef RYZOM_FORGE
 	/// last webcommand index
 	uint32						_LastWebCommandIndex;
 
@@ -3346,6 +3383,7 @@ private:
 	uint32						_LastUrlIndex;
 
  	std::map<std::string, std::string>	_CustomMissionsParams;
+#endif
 
 	// for a power/combat event, stores start and end ticks
 	struct CFlagTickRange {
@@ -3407,8 +3445,10 @@ private:
 	};
 	uint32							_ContactIdPool;
 
+#ifdef RYZOM_FORGE_ROOM
 	std::vector<NLMISC::CEntityId>	_RoomersList; // Players who have acces to player's room
 	NLMISC::CEntityId				_inRoomOfPlayer;
+#endif
 
 	// friends list
 	std::vector<CContactId>	_FriendsList;
@@ -3745,8 +3785,10 @@ private:
 	/// keep the Ids of the mission queues in which is this player
 	std::vector<uint32>	_MissionsQueues;
 
+#ifdef RYZOM_FORGE
 	/// keep the validated web commandes
 	std::set<uint32>	_ValideWebCommandIndex;
+#endif
 
 	/// keep here the queue for which this player currently has an enter critical zone proposal
 	uint32				_EnterCriticalZoneProposalQueueId;
@@ -3810,7 +3852,7 @@ private:
 	/// General god flag for persistence
 	bool			_GodModeSave;
 public:
-
+#ifdef RYZOM_FORGE
 	void			setWebCommandIndex(uint32 index) { _LastWebCommandIndex = index;}
 	uint32			getWebCommandIndex() const { return _LastWebCommandIndex;}
 
@@ -3819,6 +3861,7 @@ public:
 
 	void			setUrlIndex(uint32 index) { _LastUrlIndex = index;}
 	uint32			getUrlIndex() const { return _LastUrlIndex;}
+#endif
 
 	bool			getInvisibility() const	{ return _Invisibility;}
 	/// Set the invisibility flag, NB : just for persistence, do not change nothing.

@@ -986,6 +986,10 @@ void CPlayerService::egsAddMonkeyPlayer()
 			}
 			idx++;
 		}
+		else
+		{
+			return;
+		}
 	}
 
 	if( PlayerManager.getPlayer( userId ) != 0 )

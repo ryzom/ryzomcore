@@ -1,6 +1,11 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -99,6 +104,13 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		else
 		{
 			driver->_WndActive = true;
+		}
+	}
+	else if ((message == WM_SETFOCUS) || (message == WM_KILLFOCUS))
+	{
+		if (driver != NULL)
+		{
+			driver->_WindowFocus = (message == WM_SETFOCUS);
 		}
 	}
 
@@ -286,6 +298,18 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 
 		break;
 
+		case FocusIn:
+		{
+			driver->_WindowFocus = true;
+			return driver->_EventEmitter.processMessage(e);
+		}
+
+		case FocusOut:
+		{
+			driver->_WindowFocus = false;
+			return driver->_EventEmitter.processMessage(e);
+		}
+
 		default:
 
 		// Process the message by the emitter
@@ -316,7 +340,7 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 		wc.lpfnWndProc		= (WNDPROC)WndProc;
 		wc.cbClsExtra		= 0;
 		wc.cbWndExtra		= 0;
-		wc.hInstance		= GetModuleHandle(NULL);
+		wc.hInstance		= GetModuleHandleW(NULL);
 		wc.hIcon			= (HICON)windowIcon;
 		wc.hCursor			= _DefaultCursor;
 		wc.hbrBackground	= WHITE_BRUSH;
@@ -2644,7 +2668,7 @@ IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const c
 {
 	H_AUTO_OGL(CDriverGL_systemMessageBox)
 #ifdef NL_OS_WINDOWS
-	switch (::MessageBoxW (NULL, utf8ToWide(message), utf8ToWide(title), ((type==retryCancelType)?MB_RETRYCANCEL:
+	switch (::MessageBoxW(NULL, nlUtf8ToWide(message), nlUtf8ToWide(title), ((type == retryCancelType) ? MB_RETRYCANCEL :
 										(type==yesNoCancelType)?MB_YESNOCANCEL:
 										(type==okCancelType)?MB_OKCANCEL:
 										(type==abortRetryIgnoreType)?MB_ABORTRETRYIGNORE:
@@ -2676,8 +2700,11 @@ IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const c
 										}
 	nlstop;
 #else // NL_OS_WINDOWS
-	// Call the console version!
-	IDriver::systemMessageBox (message, title, type, icon);
+	// TODO: if user did not launch from console, then program "freezes" without explanation or possibility to continue
+	//IDriver::systemMessageBox (message, title, type, icon);
+	// log only
+	printf("%s:%s\n", title, message);
+	nlwarning("%s: %s", title, message);
 #endif // NL_OS_WINDOWS
 	return okId;
 }

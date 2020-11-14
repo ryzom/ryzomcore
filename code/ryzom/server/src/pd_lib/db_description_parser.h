@@ -167,7 +167,7 @@ public:
 	/**
 	 * Get HashKey
 	 */
-	const CHashKey&	getHashKey() const				{ return _HashKey; }
+	const NLMISC::CHashKey&	getHashKey() const				{ return _HashKey; }
 
 	/**
 	 * Get Description
@@ -204,7 +204,7 @@ private:
 	std::string										_Description;
 
 	/// Description hashkey
-	CHashKey										_HashKey;
+	NLMISC::CHashKey										_HashKey;
 
 	/// Database node
 	CDatabaseNode									_Database;

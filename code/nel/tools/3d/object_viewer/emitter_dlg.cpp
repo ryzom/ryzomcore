@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -85,7 +88,7 @@ void CEmitterDlg::initEmittedType()
 		NL3D::CPSLocated *loc = dynamic_cast<NL3D::CPSLocated *>(ps->getProcess(k));
 		if (loc) // is this a located
 		{
-			m_EmittedTypeCtrl.AddString(utf8ToTStr(loc->getName()));
+			m_EmittedTypeCtrl.AddString(nlUtf8ToTStr(loc->getName()));
 			_LocatedList.push_back(loc);			
 			if (loc == _Emitter->getEmittedType())
 			{

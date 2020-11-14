@@ -31,6 +31,8 @@ public:
 	std::vector<std::string>	SearchPaths;
 	std::vector<std::string>	CWMapList;
 	std::string					CWMapCachePath;
+	std::string					CompleteIslandsFile;
+	std::string					EntryPointsFile;
 	float						CamSpeed;
 	bool						Fly;
 	bool						HeightMapsAsTga;

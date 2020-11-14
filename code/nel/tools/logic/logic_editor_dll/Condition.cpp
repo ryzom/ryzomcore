@@ -260,8 +260,8 @@ void cConditionNodeToCLogicConditionNode(CConditionNode * conditionNode, CLogicC
 			{
 				logicConditionNode->LogicBlock.Type = CLogicConditionLogicBlock::COMPARISON;
 				
-				logicConditionNode->LogicBlock.ComparisonBlock.VariableName = tStrToUtf8(conditionNode->m_sVariableName);
-				logicConditionNode->LogicBlock.ComparisonBlock.Operator = tStrToUtf8(conditionNode->m_sOperator);
+				logicConditionNode->LogicBlock.ComparisonBlock.VariableName = NLMISC::tStrToUtf8(conditionNode->m_sVariableName);
+			    logicConditionNode->LogicBlock.ComparisonBlock.Operator = NLMISC::tStrToUtf8(conditionNode->m_sOperator);
 				logicConditionNode->LogicBlock.ComparisonBlock.Comparand = (sint64)conditionNode->m_dComparand;
 			}
 			break;
@@ -270,7 +270,7 @@ void cConditionNodeToCLogicConditionNode(CConditionNode * conditionNode, CLogicC
 			{
 				logicConditionNode->LogicBlock.Type = CLogicConditionLogicBlock::SUB_CONDITION;
 				
-				logicConditionNode->LogicBlock.SubCondition = tStrToUtf8(conditionNode->m_sConditionName);
+				logicConditionNode->LogicBlock.SubCondition = NLMISC::tStrToUtf8(conditionNode->m_sConditionName);
 			}
 			break;
 		}
@@ -298,7 +298,7 @@ void cConditionNodeToCLogicConditionNode(CConditionNode * conditionNode, CLogicC
 void cConditionToCLogicCondition( CCondition& condition, CLogicCondition& logicCondition )
 {
 	// condition name
-	logicCondition.setName(tStrToUtf8(condition.m_sName));
+	logicCondition.setName(NLMISC::tStrToUtf8(condition.m_sName));
 
 	// nodes
 	POSITION pos;

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -77,7 +80,7 @@ void CTypeManagerDlg::OnAddtype()
 	if (typeDlg.DoModal() == IDOK)
 	{
 		SType typeTmp;
-		typeTmp.Name = tStrToUtf8(typeDlg.EditName);
+		typeTmp.Name = NLMISC::tStrToUtf8(typeDlg.EditName);
 		typeTmp.Color = typeDlg.ButtonColorValue;
 		// Check if the name of the new type is the same as an existing one
 		bool bFound = false;
@@ -91,7 +94,7 @@ void CTypeManagerDlg::OnAddtype()
 		if (!bFound)
 		{
 			LocalTypes.push_back (typeTmp);
-			ListType.InsertString(-1, utf8ToTStr(typeTmp.Name));
+			ListType.InsertString(-1, nlUtf8ToTStr(typeTmp.Name));
 		}
 	}
 }
@@ -111,11 +114,11 @@ void CTypeManagerDlg::OnEdittype()
 	if (typeDlg.DoModal() == IDOK)
 	{
 		SType typeTmp;
-		typeTmp.Name = tStrToUtf8(typeDlg.EditName);
+		typeTmp.Name = NLMISC::tStrToUtf8(typeDlg.EditName);
 		typeTmp.Color = typeDlg.ButtonColorValue;
 		LocalTypes[cursel] = typeTmp;
 		ListType.DeleteString (ListType.GetCurSel());
-		ListType.InsertString (cursel, utf8ToTStr(typeTmp.Name));
+		ListType.InsertString(cursel, nlUtf8ToTStr(typeTmp.Name));
 	}
 }
 
@@ -138,7 +141,7 @@ BOOL CTypeManagerDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	for (uint32 i = 0; i < LocalTypes.size(); ++i)
 	{
-		ListType.InsertString(-1, utf8ToTStr(LocalTypes[i].Name));
+		ListType.InsertString(-1, nlUtf8ToTStr(LocalTypes[i].Name));
 	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control

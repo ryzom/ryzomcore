@@ -73,7 +73,7 @@ void CR2EasterEgg::dropMissionItem(std::vector< CGameItemPtr > items, TSessionId
 	if( c != 0 )
 	{
 		CEntityState &pos = c->getState();
-		_SpawnEasterEgg( egg.EasterEggId, CSheetId(EaterEggBagSheet), aiInstanceId, pos.X, pos.Y, pos.Z, pos.Heading );
+		_SpawnEasterEgg( egg.EasterEggId, CSheetId(EaterEggBagSheet.get()), aiInstanceId, pos.X, pos.Y, pos.Z, pos.Heading );
 	}
 }
 
@@ -200,7 +200,7 @@ void CR2EasterEgg::activateEasterEgg(uint32 easterEggId, TSessionId scenarioId, 
 	_EasterEgg.insert( make_pair( egg.EasterEggId, egg ) );
 
 	// send message to AIS for spawn the easter egg
-	_SpawnEasterEgg( egg.EasterEggId, CSheetId(EasterEggChestSheet), aiInstanceId, pos.PosState.X, pos.PosState.Y, pos.PosState.Z, pos.PosState.Heading, name, look );
+	_SpawnEasterEgg( egg.EasterEggId, CSheetId(EasterEggChestSheet.get()), aiInstanceId, pos.PosState.X, pos.PosState.Y, pos.PosState.Z, pos.PosState.Heading, name, look );
 }
 
 //----------------------------------------------------------------------------
@@ -272,7 +272,7 @@ void CR2EasterEgg::easterEggTPActChange(const NLMISC::CEntityId &characterId, co
 		{
 			_UnspawnEasterEgg( easterEggToTP[i].EasterEggId, easterEggToTP[i].InstanceId );
 			_RemoveEntityEasterAssociation( easterEggToTP[i].CreatureId, easterEggToTP[i].EasterEggId );
-			_SpawnEasterEgg(easterEggToTP[i].EasterEggId, CSheetId(EaterEggBagSheet), easterEggToTP[i].InstanceId, pos.PosState.X, pos.PosState.Y,pos.PosState.Z, pos.PosState.Heading, easterEggToTP[i].Name, easterEggToTP[i].Look );
+			_SpawnEasterEgg(easterEggToTP[i].EasterEggId, CSheetId(EaterEggBagSheet.get()), easterEggToTP[i].InstanceId, pos.PosState.X, pos.PosState.Y,pos.PosState.Z, pos.PosState.Heading, easterEggToTP[i].Name, easterEggToTP[i].Look );
 		}
 		easterEggToTP.clear();
 	}

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2018  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -17,6 +20,8 @@
 #ifndef NLSOUND_AUDIO_DECODER_MP3_H
 #define NLSOUND_AUDIO_DECODER_MP3_H
 #include <nel/misc/types_nl.h>
+
+#if !defined(NL_OS_WINDOWS) || (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
 
 #include <nel/sound/audio_decoder.h>
 
@@ -90,6 +95,8 @@ public:
 }; /* class CAudioDecoderMP3 */
 
 } /* namespace NLSOUND */
+
+#endif /* (NL_COMP_VC_VERSION > 90) */
 
 #endif // NLSOUND_AUDIO_DECODER_MP3_H
 

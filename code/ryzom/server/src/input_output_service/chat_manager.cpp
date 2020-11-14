@@ -2154,8 +2154,7 @@ void CChatManager::displayChatClients(NLMISC::CLog &log)
 		}
 		else
 		{
-			log.displayNL("*no name* %s:%x %s mode '%s'",
-				ci->EntityId.toString().c_str(),
+			log.displayNL("*no name* *no id*:%x %s mode '%s'",
 				im->first.getIndex(),
 				im->second->isMuted()?"(muted)":"",
 				CChatGroup::groupTypeToString(im->second->getChatMode()).c_str() );

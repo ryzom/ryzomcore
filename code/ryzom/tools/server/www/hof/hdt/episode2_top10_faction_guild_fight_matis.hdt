@@ -1,0 +1,9 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs killers de l'episode 2
+	"nom_Top10_Best_Guild_Kill_matis_kami", "storyline.episode2.matis.kami.kill.*", "GuildName", "*", "Sum",
+	"nom_Top10_Best_Guild_Kill_matis_karavan", "storyline.episode2.matis.karavan.kill.*", "GuildName", "*", "Sum",
+	
+	"score_Top10_Best_Guild_Kill_matis_kami", "storyline.episode2.matis.kami.kill.*", "GuildValue", "*", "Sum",
+	"score_Top10_Best_Guild_Kill_matis_karavan", "storyline.episode2.matis.karavan.kill.*", "GuildValue", "*", "Sum",
+};

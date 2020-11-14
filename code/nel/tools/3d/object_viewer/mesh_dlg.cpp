@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -94,7 +97,7 @@ void CMeshDlg::OnBrowseShape()
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path
-		std::string fullPath = tStrToUtf8(fd.GetPathName());
+		std::string fullPath = NLMISC::tStrToUtf8(fd.GetPathName());
 		std::string fname = NLMISC::CFile::getFilenameWithoutExtension(fullPath);
 		std::string ext = NLMISC::CFile::getExtension(fullPath);
 
@@ -104,12 +107,12 @@ void CMeshDlg::OnBrowseShape()
 		try
 		{		
 			_ShapeParticle->setShape(fname + "." + ext);		
-			m_ShapeName = utf8ToTStr(fname + "." + ext);
+			m_ShapeName = nlUtf8ToTStr(fname + "." + ext);
 			touchPSState();			
 		}
 		catch (const NLMISC::Exception &e)
 		{
-			MessageBox(utf8ToTStr(e.what()), _T("shape loading error"));
+			MessageBox(nlUtf8ToTStr(e.what()), _T("shape loading error"));
 		}		
 
 		updateMeshErrorString();
@@ -159,7 +162,7 @@ void CMeshDlg::updateForMorph()
 		GetDlgItem(IDC_SHAPE_NAME)->EnableWindow(!enable);
 		if (!enable)
 		{
-			m_ShapeName = utf8ToTStr(cm->getShape());
+			m_ShapeName = nlUtf8ToTStr(cm->getShape());
 		}
 		else
 		{

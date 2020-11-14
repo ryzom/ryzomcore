@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -762,10 +765,10 @@ void updateEntities ()
 			switch (entity.Type)
 			{
 			case CEntity::Self:
-				jdir = CVector(-(float)cos(entity.Angle), -(float)sin(entity.Angle), 0.0f);
+				jdir = CVector(-(float)cos(entity.Angle - (Pi * 0.5)), -(float)sin(entity.Angle - (Pi * 0.5)), 0.0f);
 				break;
 			case CEntity::Other:
-				jdir = CVector(-(float)cos(entity.Angle), -(float)sin(entity.Angle), 0.0f);
+				jdir = CVector(-(float)cos(entity.Angle - (Pi * 0.5)), -(float)sin(entity.Angle - (Pi * 0.5)), 0.0f);
 				break;
 			case CEntity::Snowball:
 				jdir = entity.Trajectory.evalSpeed(LocalTime).normed();

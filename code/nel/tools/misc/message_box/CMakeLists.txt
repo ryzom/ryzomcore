@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(message_box WIN32 ${SRC})
 

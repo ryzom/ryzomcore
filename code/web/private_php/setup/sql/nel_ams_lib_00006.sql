@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS `settings` (
 `idSettings` int(11) NOT NULL,
-  `Setting` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
-  `Value` varchar(256) COLLATE utf8_unicode_ci NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `Setting` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Value` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `settings` (`idSettings`, `Setting`, `Value`) VALUES
 (1, 'userRegistration', '0');

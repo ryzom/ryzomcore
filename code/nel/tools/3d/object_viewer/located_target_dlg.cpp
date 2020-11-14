@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -112,7 +115,7 @@ void CLocatedTargetDlg::OnAddTarget()
 		nlassert(loc);
 		_LBTarget->attachTarget(loc);
 		m_AvailableTargets.DeleteString(indexs[k] - k);
-		int l = m_Targets.AddString(utf8ToTStr(loc->getName()));
+		int l = m_Targets.AddString(nlUtf8ToTStr(loc->getName()));
 		m_Targets.SetItemData(l, (DWORD_PTR) loc);
 	}	
 	UpdateData(FALSE);
@@ -135,7 +138,7 @@ void CLocatedTargetDlg::OnRemoveTarget()
 		nlassert(loc);
 		_LBTarget->detachTarget(loc);
 		m_Targets.DeleteString(indexs[k] - k);
-		int l = m_AvailableTargets.AddString(utf8ToTStr(loc->getName()));
+		int l = m_AvailableTargets.AddString(nlUtf8ToTStr(loc->getName()));
 	
 		m_AvailableTargets.SetItemData(l, (DWORD_PTR) loc);
 	}
@@ -159,7 +162,7 @@ BOOL CLocatedTargetDlg::OnInitDialog()
 	// fill the box thta tells us what the target are
 	for(k = 0; k < nbTarg; ++k)
 	{
-		m_Targets.AddString(utf8ToTStr(_LBTarget->getTarget(k)->getName()));
+		m_Targets.AddString(nlUtf8ToTStr(_LBTarget->getTarget(k)->getName()));
 		m_Targets.SetItemData(k, (DWORD_PTR) _LBTarget->getTarget(k));
 		targetSet.insert(_LBTarget->getTarget(k));
 	};
@@ -179,7 +182,7 @@ BOOL CLocatedTargetDlg::OnInitDialog()
 		{
 			if (targetSet.find(loc) == targetSet.end())
 			{
-				int l = m_AvailableTargets.AddString(utf8ToTStr(loc->getName()));
+				int l = m_AvailableTargets.AddString(nlUtf8ToTStr(loc->getName()));
 				m_AvailableTargets.SetItemData(l, (DWORD_PTR) loc);
 			}
 		}

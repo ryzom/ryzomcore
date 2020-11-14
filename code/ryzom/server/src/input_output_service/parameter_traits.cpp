@@ -85,8 +85,7 @@ bool CStringManager::CParameterTraits::eval(CStringManager::TLanguages lang,cons
 	}
 	
 	uint32 stringId = ew.getStringId(rowIndex, colIndex);
-	const std::string &str = SM->getString(stringId).toString();
-	NLMISC::strlwr(str);
+	std::string str = NLMISC::toLower(SM->getString(stringId).toString());
 
 	LOG("SM : (paramTraits) eval condition for property %s [%s] %s [%s]", cond.Property.c_str(), str.c_str(), OperatorNames[cond.Operator], cond.ReferenceStr.c_str());
 

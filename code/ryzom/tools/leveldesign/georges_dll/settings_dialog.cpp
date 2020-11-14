@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -103,13 +106,13 @@ void CSettingsDialog::OnOK()
 	UpdateData ();
 
 	// Make a config file
-	theApp.RootSearchPath = RootSearchPath;
-	theApp.TypeDfnSubDirectory = TypeDfnSubDirectory;
+	theApp.RootSearchPath = NLMISC::tStrToUtf8(RootSearchPath);
+	theApp.TypeDfnSubDirectory = NLMISC::tStrToUtf8(TypeDfnSubDirectory);
 	theApp.RememberListSize = RememberListSize;
 	theApp.StartExpanded = StartExpanded ? TRUE : FALSE;
 	theApp.MaxUndo = MaxUndo;
-	theApp.DefaultDfn = DefaultDfn;
-	theApp.DefaultType = DefaultType;
+	theApp.DefaultDfn = NLMISC::tStrToUtf8(DefaultDfn);
+	theApp.DefaultType = NLMISC::tStrToUtf8(DefaultType);
 	theApp.saveCfg ();
 	theApp.initCfg ();
 
@@ -118,30 +121,30 @@ void CSettingsDialog::OnOK()
 
 void CSettingsDialog::OnBrowse() 
 {
-	UpdateData ();
-	
+	UpdateData();
+
 	// Select a directory.
-	char path[MAX_PATH];
+	TCHAR path[MAX_PATH];
 
 	// Build the struct
 	BROWSEINFO info;
-	memset (&info, 0, sizeof (BROWSEINFO));
-	info.lpszTitle="Select the root search directory";
-	info.ulFlags=BIF_RETURNONLYFSDIRS;
+	memset(&info, 0, sizeof(BROWSEINFO));
+	info.lpszTitle = _T("Select the root search directory");
+	info.ulFlags = BIF_RETURNONLYFSDIRS;
 
 	// Select the path
 	LPITEMIDLIST list;
-	if (list=SHBrowseForFolder (&info))
+	if (list = SHBrowseForFolder(&info))
 	{
 		// Convert item into path string
-		BOOL bRet=SHGetPathFromIDList(list, path);
+		BOOL bRet = SHGetPathFromIDList(list, path);
 		if (bRet)
 		{
 			// Set the path
 			RootSearchPath = path;
 		}
-	}	
-	UpdateData (FALSE);
+	}
+	UpdateData(FALSE);
 }
 
 void CSettingsDialog::OnChangeRememberListSize() 

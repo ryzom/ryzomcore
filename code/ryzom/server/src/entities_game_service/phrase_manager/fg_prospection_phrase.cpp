@@ -756,8 +756,8 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 	for ( uint iSource=0; iSource!=nbOfSources; ++iSource )
 	{
 		TNothingFoundReason reason;
-		const CStaticDepositRawMaterial *rawMaterial;
-		CDeposit *deposit, *depositForK;
+		const CStaticDepositRawMaterial *rawMaterial = NULL;
+		CDeposit *deposit = NULL, *depositForK;
 
 		// Make several attempts to find a pos that matches the filters
 		for ( uint iAttempt=0; iAttempt!=(uint)_NbAttempts; ++iAttempt )
@@ -782,7 +782,7 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 				break; // stop attempts if RM found (rawMaterial) or impossible to find one (!deposit)
 		}
 
-		if ( rawMaterial )
+		if ( rawMaterial && deposit )
 		{
 			// Find or open a forage site //nlassert( deposit && depositForK && forageSite );
 			CRecentForageSite *forageSite = deposit->findOrCreateForageSite( pos );
@@ -1003,6 +1003,7 @@ void CFgProspectionPhrase::startLocateDeposit( CCharacter *player )
 	else
 	{
 		// Retain the first found matching deposit in which we are, or the nearest matching deposit
+		nlassert(matchingDeposits.size());
 		TDepositLoc *retainedLoc = NULL;
 		float minDist = _ForageRange;
 		for ( vector<CDeposit*>::iterator itd=matchingDeposits.begin(); itd!=matchingEnd; ++itd )
@@ -1024,6 +1025,7 @@ void CFgProspectionPhrase::startLocateDeposit( CCharacter *player )
 		}
 
 		// Start the effect
+		nlassert(retainedLoc);
 		CVector2f locatedPoint( retainedLoc->NearestPos );
 		TReportAction report;
 		sint32 effectFocusCostByUpdate = _FocusCost / ForageFocusRatioOfLocateDeposit.get();

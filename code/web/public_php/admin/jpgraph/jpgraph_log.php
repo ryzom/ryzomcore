@@ -23,8 +23,8 @@ class LogScale extends LinearScale {
 // CONSTRUCTOR
 
     // Log scale is specified using the log of min and max
-    function LogScale($min,$max,$type="y") {
-	$this->LinearScale($min,$max,$type);
+    function __construct($min,$max,$type="y") {
+		parent::__construct($min,$max,$type);
 	$this->ticks = new LogTicks();
 	$this->name = 'log';
     }
@@ -84,7 +84,7 @@ class LogScale extends LinearScale {
     // Note that for log autoscale the "maxstep" the fourth argument
     // isn't used. This is just included to give the method the same
     // signature as the linear counterpart.
-    function AutoScale(&$img,$min,$max,$dummy) {
+    function AutoScale(&$img,$min,$max,$dummy, $dummy2 = true) {
 	if( $min==0 ) $min=1;
 	
 	if( $max <= 0 ) {
@@ -107,7 +107,8 @@ class LogTicks extends Ticks{
     var $label_logtype=LOGLABELS_MAGNITUDE;
 //---------------
 // CONSTRUCTOR
-    function LogTicks() {
+	function __construct() {
+		parent::__construct();
     }
 //---------------
 // PUBLIC METHODS	

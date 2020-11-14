@@ -996,12 +996,12 @@ restartLoop:
 			if (authorCharId != 0)
 			{
 				author = CCharacter::load(_RingDb, authorCharId, __FILE__, __LINE__);
-				BOMB_IF(author == NULL, "Failed to load the scenario author character "<<authorCharId, return;)
+				BOMB_IF(author == NULL, "Failed to load the scenario author character " << authorCharId, return;);
 			}
 
 			// load the animator
 			CCharacterPtr animator = CCharacter::load(_RingDb, session->getOwnerId(), __FILE__, __LINE__);
-			BOMB_IF(animator == NULL, "Failed to load the scenario animator character "<<session->getOwnerId(), return;)
+			BOMB_IF(animator == NULL, "Failed to load the scenario animator character " << session->getOwnerId(), return;);
 
 			// try to load an existing scenario record
 			CScenarioPtr scenario;
@@ -1127,12 +1127,12 @@ restartLoop:
 			if (authorCharId != 0)
 			{
 				author = CCharacter::load(_RingDb, authorCharId, __FILE__, __LINE__);
-				BOMB_IF(author == NULL, "Failed to load the scenario author character "<<authorCharId, return;)
+				BOMB_IF(author == NULL, "Failed to load the scenario author character " << authorCharId, return;);
 			}
 
 			// load the animator
 			CCharacterPtr animator = CCharacter::load(_RingDb, session->getOwnerId(), __FILE__, __LINE__);
-			BOMB_IF(animator == NULL, "Failed to load the scenario animator character "<<session->getOwnerId(), return;)
+			BOMB_IF(animator == NULL, "Failed to load the scenario animator character " << session->getOwnerId(), return;);
 
 			// try to load an existing scenario record
 			CScenarioPtr scenario;
@@ -3115,7 +3115,7 @@ endOfWelcomeUserResult:
 			for (uint i=0; i<session->getSessionParticipants().size(); ++i)
 			{
 				const CSessionParticipantPtr &part = session->getSessionParticipantsByIndex(i);
-				BOMB_IF(part == NULL, "RSM:on_unsubsribeSession : error accessing participants at index "<<i<<", part is NULL", invokeResult(from, charId>>4, 4, "failed to accesss participants record"); return)
+				BOMB_IF(part == NULL, "RSM:on_unsubsribeSession : error accessing participants at index " << i << ", part is NULL", invokeResult(from, charId >> 4, 4, "failed to accesss participants record"); return);
 
 				if (part->getCharId() == charId
 					&& part->getStatus() == TSessionPartStatus::sps_play_subscribed)

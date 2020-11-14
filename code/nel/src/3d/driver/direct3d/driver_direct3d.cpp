@@ -1,6 +1,11 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014  Matthew LAGOE (Botanic) <cyberempires@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -192,6 +197,7 @@ CDriverD3D::CDriverD3D()
 	_BackBuffer = NULL;
 	_Maximized = false;
 	_HandlePossibleSizeChangeNextSize = false;
+	_WindowFocus = true;
 	_Interval = 1;
 	_AGPMemoryAllocated = 0;
 	_VRAMMemoryAllocated = 0;
@@ -1159,6 +1165,14 @@ void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPAR
 		}
 	}
 
+	if ((message == WM_SETFOCUS) || (message == WM_KILLFOCUS))
+	{
+		if (driver != NULL)
+		{
+			driver->_WindowFocus = (message == WM_SETFOCUS);
+		}
+	}
+
 	if (driver->_EventEmitter.getNumEmitters() > 0)
 	{
 		CWinEventEmitter *we = NLMISC::safe_cast<CWinEventEmitter *>(driver->_EventEmitter.getEmitter(0));
@@ -1247,23 +1261,23 @@ bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	createCursors();
 
-	_WindowClass = "NLD3D" + toString(windowIcon);
+	_WindowClass = utf8ToWide("NLD3D" + toString(windowIcon));
 
 	// Register a window class
-	WNDCLASSA		wc;
+	WNDCLASSW		wc;
 
 	memset(&wc,0,sizeof(wc));
 	wc.style			= 0; // CS_HREDRAW | CS_VREDRAW ;//| CS_DBLCLKS;
 	wc.lpfnWndProc		= (WNDPROC)WndProc;
 	wc.cbClsExtra		= 0;
 	wc.cbWndExtra		= 0;
-	wc.hInstance		= GetModuleHandleA(NULL);
+	wc.hInstance		= GetModuleHandleW(NULL);
 	wc.hIcon			= (HICON)windowIcon;
 	wc.hCursor			= _DefaultCursor;
 	wc.hbrBackground	= WHITE_BRUSH;
 	wc.lpszClassName	= _WindowClass.c_str();
 	wc.lpszMenuName		= NULL;
-	if (!RegisterClassA(&wc))
+	if (!RegisterClassW(&wc))
 	{
 		DWORD error = GetLastError();
 		if (error != ERROR_CLASS_ALREADY_EXISTS)
@@ -1365,6 +1379,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	// Reset window state
 	_Maximized = false;
 	_HandlePossibleSizeChangeNextSize = false;
+	_WindowFocus = true;
 
 	if (_HWnd)
 	{
@@ -1416,8 +1431,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		AdjustWindowRect(&WndRect,WndFlags,FALSE);
 
 		// Create
-		ucstring ustr(_WindowClass);
-		_HWnd = CreateWindowW((LPCWSTR)ustr.c_str(), L"", WndFlags, CW_USEDEFAULT,CW_USEDEFAULT, WndRect.right-WndRect.left,WndRect.bottom-WndRect.top, NULL, NULL,
+		_HWnd = CreateWindowW(_WindowClass.c_str(), L"", WndFlags, CW_USEDEFAULT,CW_USEDEFAULT, WndRect.right-WndRect.left,WndRect.bottom-WndRect.top, NULL, NULL,
 			GetModuleHandleW(NULL), NULL);
 		if (!_HWnd)
 		{
@@ -1810,7 +1824,7 @@ emptyProc CDriverD3D::getWindowProc()
 
 IDriver::TMessageBoxId CDriverD3D::systemMessageBox (const char* message, const char* title, TMessageBoxType type, TMessageBoxIcon icon)
 {
-	switch (::MessageBoxW (_HWnd, utf8ToWide(message), utf8ToWide(title), ((type==retryCancelType)?MB_RETRYCANCEL:
+	switch (::MessageBoxW(_HWnd, nlUtf8ToWide(message), nlUtf8ToWide(title), ((type == retryCancelType) ? MB_RETRYCANCEL :
 		(type==yesNoCancelType)?MB_YESNOCANCEL:
 		(type==okCancelType)?MB_OKCANCEL:
 		(type==abortRetryIgnoreType)?MB_ABORTRETRYIGNORE:

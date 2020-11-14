@@ -1,0 +1,143 @@
+sub localConnect
+	cmd 0 **this** modulesAdd gushub 44748
+	cmd 0 **this** modulesAdd gusnet localhost:44748
+
+sub joltConnect
+	cmd 0 **this** modulesAdd gusnet 213.208.119.219:44748
+
+sub rfrTest
+	runScript 0 rfrTestMini
+//	runScript 0 rfrTestLocal
+//	runScript 0 rfrTestJolt
+
+
+sub rfrTest2
+	runScript 0 joltConnect
+
+	cmd 6 **this** modulesAdd rfr
+	cmd 6 **this** rfrUseShard enx
+	cmd 6 **this** rfrUseShard aniro
+	cmd 6 **this** rfrUseShard leanon
+	cmd 6 **this** rfrUseShard arispotle
+
+	cmd 10 **this** rfrListShards
+
+
+sub rfrTestMini
+	runScript 0 localConnect
+	cmd 0 **this** modulesAdd rfr
+	cmd 0 **this** rfrUseShard toto
+//	cmd 1 **this** modulesAdd saves toto shard	R:/test/shards/toto
+	cmd 1 **this** modulesAdd saves toto bak	R:/test/backup/toto
+
+
+sub rfrTestLocal
+	runScript 0 localConnect
+
+	cmd 0 **this** modulesAdd saves toto shard	R:/test/shards/toto
+//	cmd 0 **this** modulesAdd saves toto www	x:/toto/www
+//	cmd 0 **this** modulesAdd saves toto bak	x:/toto/bak
+
+//	cmd 0 **this** modulesAdd rs titi shard
+//	cmd 0 **this** modulesAdd rs titi www
+//	cmd 0 **this** modulesAdd rs titi bak
+
+//	cmd 0 **this** modulesAdd saves tata shard	R:/test/shards/tata
+//	cmd 0 **this** modulesAdd saves tata www	x:/tata/www
+//	cmd 0 **this** modulesAdd saves tata bak	x:/tata/bak
+
+
+//	cmd 1 **this** modulesAdd rs toto shard
+//	cmd 1 **this** modulesAdd rs toto www
+//	cmd 1 **this** modulesAdd rs toto bak
+
+//	cmd 1 **this** modulesAdd saves titi shard	R:/test/shards/titi
+//	cmd 1 **this** modulesAdd saves titi www	x:/titi/www
+//	cmd 1 **this** modulesAdd saves titi bak	x:/titi/bak
+
+//	cmd 1 **this** modulesAdd rs tata shard
+//	cmd 1 **this** modulesAdd rs tata www
+//	cmd 1 **this** modulesAdd rs tata bak
+
+
+	cmd 2 **this** modulesAdd rfr
+
+//	cmd 3 **this** rfrListShards
+
+	cmd 3 **this** rfrUseShard toto
+	cmd 3 **this** rfrListShards
+
+//	cmd 3 **this** rfrUseShard titi
+//	cmd 3 **this** rfrListShards
+
+//	cmd 4 **this** rfrStopUsingShard		toto
+//	cmd 4 **this** rfrListShards
+
+//	cmd 5 **this** rfrListCharacterFiles		77 1
+//	cmd 5 **this** rfrListNamedCharacterFiles	titi sadge
+//	cmd 5 **this** rfrUseShard toto
+//	cmd 5 **this** rfrListAccountFiles			77
+//	cmd 5 **this** rfrListNamedAccountFiles		miller
+//	cmd 5 **this** rfrWorkDirectory
+//	cmd 5 **this** rfrWorkDirectory				./tmp
+//	cmd 5 **this** rfrWorkDirectory
+//	cmd 5 **this** rfrGetCharacterFile			titi 77 1
+//	cmd 5 **this** rfrGetCharacterFile			titi seeker
+//	cmd 5 **this** rfrGetOldCharacterFileSet	titi 77 1
+//	cmd 5 **this** rfrGetOldCharacterFileSet	titi gorg
+//	cmd 5 **this** rfrUploadFile				toto account_77_4_pdr.bin
+//	cmd 5 **this** rfrListRootFiles
+//	cmd 5 **this** rfrListGuildFiles			toto
+//	cmd 5 **this** rfrListMailForumFiles		toto gorg
+//	cmd 5 **this** rfrMoveMailForumFiles		toto giorg georg
+
+
+sub charScanTest
+//	cmd 0 **this** InputFileDirectory R:/code/ryzom/save_shard/characters
+	cmd 0 **this** InputFileDirectory D:/restored/result/characters
+
+	cmd 0 **this** charScanScriptNew test
+
+	cmd 0 **this** charScanScriptAddInfoExtractor Name
+	cmd 0 **this** charScanScriptAddInfoExtractor Money
+	cmd 0 **this** charScanScriptAddInfoExtractor HighestSkills
+	cmd 0 **this** charScanScriptAddInfoExtractor RespawnPointCount
+	cmd 0 **this** charScanScriptAddInfoExtractor PlayerRoomAndPets
+
+	cmd 0 **this** charScanScriptAddInfoExtractor VisPropStats
+	cmd 0 **this** charScanScriptAddInfoExtractor StanzaStats
+	cmd 0 **this** charScanScriptAddInfoExtractor RespawnPointStats
+	cmd 0 **this** charScanScriptAddInfoExtractor PlayerRoomStats
+
+	cmd 0 **this** charScanScriptAddInputFileRule AddFiles account*
+	cmd 0 **this** charScanScriptAddInputFileRule MinFileSize 10000
+	cmd 0 **this** charScanScriptAddInputFileRule MaxFileSize 42000
+
+	cmd 0 **this** charScanScriptAddFilter Money 1000 10000
+	cmd 0 **this** charScanScriptAddFilter BestSkill 20
+
+	cmd 0 **this** charScanScriptSave test.css
+
+	cmd 0 **this** charScanScriptTestFileList
+	cmd 0 **this** charScanScriptTestFilteredFileList generate
+
+	cmd 0 **this** charScanScriptRun
+
+sub eventTest
+	cmd 0 **this** ToolsArchiveDirectory r:/code/ryzom/events/test
+	cmd 0 **this** ToolsShardName home
+	cmd 0 **this** modulesAdd gusnet localhost:44748
+	cmd 0 **this** modulesAdd gushub 44748
+	cmd 0 **this** modulesAdd ss
+	cmd 0 **this** ssScrLoad event_load_script.gss
+	cmd 0 **this** modulesAdd ee home ais egs ios
+	cmd 0 **this** modulesAdd em
+
+sub thisTest
+	cmd 5 **this** help
+
+sub doTests
+	runScript 0 rfrTest
+//	runScript 0 charScanTest
+//	runScript 0 eventTest
+//	runScript 0 thisTest

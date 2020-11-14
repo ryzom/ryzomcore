@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -119,7 +122,7 @@ void CLBExternIDDlg::OnChangeIdValue()
 	TCHAR buf[6];
 	::memset(buf, 0, 6);
 	GetDlgItem(IDC_ID_VALUE)->GetWindowText(buf, 6);
-	_ID = StringToID(tStrToUtf8(buf).c_str());
+	_ID = StringToID(NLMISC::tStrToUtf8(buf).c_str());
 	if (_ID)
 	{
 		GetDlgItem(IDOK)->EnableWindow(TRUE);

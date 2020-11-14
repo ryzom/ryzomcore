@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -15,15 +18,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <windows.h>
+#include <tchar.h>
+
 #include <string>
 #include <stdio.h>
 
 using namespace std;
-
-int APIENTRY WinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
-                     int       nCmdShow)
+int APIENTRY _tWinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPTSTR lpCmdLine, int /* nCmdShow */)
 {
 	char *filename;
 	if (filename = strstr (lpCmdLine, "-f "))

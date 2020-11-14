@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BCFMEA"/>
+      <ATOM Name="SabrinaCost" Value="15"/>
+      <ATOM Name="LearnRequiresOneOfSkills" Value="SCFM2 200"/>
+      <ATOM Name="Skill" Value="SCFM2SAB"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="MW_2h_axe.tga"/>
+      <ATOM Name="IconBack" Value="BK_fyros_brick.tga"/>
+      <ATOM Name="IconOver" Value="FP_over.tga"/>
+      <ATOM Name="IconOver2"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Tool type" Value="Sharpener"/>
+      <ATOM Name="Durability Factor" Value="1"/>
+      <ATOM Name="Weight Factor" Value="1"/>
+      <ATOM Name="DMG Factor" Value="1"/>
+      <ATOM Name="Slashing protect factor" Value="1"/>
+      <ATOM Name="Blunt protect factor" Value="1"/>
+      <ATOM Name="Piercing protect factor" Value="1"/>
+      <ATOM Name="Dodge factor" Value="1"/>
+      <ATOM Name="Parry factor" Value="1"/>
+      <ATOM Name="Speed Factor" Value="1"/>
+      <ATOM Name="Range Factor" Value="1"/>
+      <ATOM Name="SapLoad Factor" Value="1"/>
+      <STRUCT Name="Create">
+        <ATOM Name="Crafted Item" Value="icfm2sa.sitem"/>
+        <ATOM Name="Nb built items" Value="1"/>
+        <ATOM Name="MP 1 Group"/>
+        <ATOM Name="MP 1" Value="Raw Material for Blade"/>
+        <ATOM Name="MP 1 Property" Value="Undefined"/>
+        <ATOM Name="Quantity 1" Value="1"/>
+        <ATOM Name="MP 2 Group"/>
+        <ATOM Name="MP 2" Value="Raw Material for Shaft"/>
+        <ATOM Name="MP 2 Property" Value="Stiff"/>
+        <ATOM Name="Quantity 2" Value="1"/>
+        <ATOM Name="MP 3 Group"/>
+        <ATOM Name="MP 3" Value="Raw Material for Grip"/>
+        <ATOM Name="MP 3 Property" Value="Gripping"/>
+        <ATOM Name="Quantity 3" Value="1"/>
+        <ATOM Name="MP 4 Group"/>
+        <ATOM Name="MP 4" Value="Raw Material for Counterweight"/>
+        <ATOM Name="MP 4 Property" Value="Dense"/>
+        <ATOM Name="Quantity 4" Value="1"/>
+        <ATOM Name="MP 5 Group"/>
+        <ATOM Name="MP 5"/>
+        <ATOM Name="MP 5 Property" Value="Undefined"/>
+        <ATOM Name="Quantity 5" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

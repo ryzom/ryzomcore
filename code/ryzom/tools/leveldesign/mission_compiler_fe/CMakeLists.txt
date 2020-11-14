@@ -1,8 +1,10 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2 res/*.rc2 res/*.ico)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
-ADD_EXECUTABLE(ryzom_mission_compiler_fe WIN32 ${SRC} mission_compiler_fe.rc)
+ADD_EXECUTABLE(ryzom_mission_compiler_fe WIN32 ${SRC})
 
 TARGET_LINK_LIBRARIES(ryzom_mission_compiler_fe nelmisc nelligo ryzom_mission_compiler_lib)
 

@@ -23,7 +23,6 @@
 // Nel Misc
 #include "nel/misc/types_nl.h"
 #include "nel/misc/entity_id.h"
-#include "game_share/news_types.h"
 #include "game_share/bot_chat_types.h"
 
 // the class

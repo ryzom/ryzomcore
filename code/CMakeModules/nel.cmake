@@ -247,6 +247,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_INSTALL_LIBRARIES   "Install development files."                    ON )
 
   OPTION(WITH_ASSIMP              "Use assimp exporter"                           OFF)
+  OPTION(WITH_LIBGSF              "Use libgsf for max file library"               OFF)
 
   ###
   # GUI toolkits
@@ -280,6 +281,8 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_RYZOM               "Build Ryzom Core."                             ON )
   OPTION(WITH_SNOWBALLS           "Build Snowballs."                              OFF)
   OPTION(WITH_TOOLS               "Build Tools"                                   OFF)
+
+  OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
@@ -288,6 +291,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_NET                 "Build NLNET"                                   ON )
   OPTION(WITH_3D                  "Build NL3D"                                    ON )
+  OPTION(WITH_WEB                 "Build WEB"                                     ON )
   OPTION(WITH_GUI                 "Build GUI"                                     ON )
   OPTION(WITH_PACS                "Build NLPACS"                                  ON )
   OPTION(WITH_GEORGES             "Build NLGEORGES"                               ON )
@@ -565,6 +569,11 @@ MACRO(NL_SETUP_BUILD)
 
   IF(WITH_LOGGING)
     ADD_PLATFORM_FLAGS("-DENABLE_LOGS")
+  ENDIF()
+
+  SET(CUSTOM_FLAGS "" CACHE STRING "Custom compile flags (useful for /MPn)")
+  IF(NOT ${CUSTOM_FLAGS} STREQUAL "")
+    ADD_PLATFORM_FLAGS(${CUSTOM_FLAGS})
   ENDIF()
 
   IF(MSVC)

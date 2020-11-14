@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -191,11 +194,11 @@ BOOL CPageBgFades::OnInitDialog()
 	for (uint i =0; i<32; ++i)
 	{
 		char tmp[128];
-		GetDlgItem(FILTER_NAMES[i])->SetWindowText(SoundDialog->EnvNames[i].Name.c_str());
-		sprintf(tmp, "%u", SoundDialog->FilterFades.FadeIns[i]);
-		GetDlgItem(FILTER_FADE_IN[i])->SetWindowText(tmp);
-		sprintf(tmp, "%u", SoundDialog->FilterFades.FadeOuts[i]);
-		GetDlgItem(FILTER_FADE_OUT[i])->SetWindowText(tmp);
+		GetDlgItem(FILTER_NAMES[i])->SetWindowText(nlUtf8ToTStr(SoundDialog->EnvNames[i].Name));
+		sprintf(tmp, "%u", (unsigned int)SoundDialog->FilterFades.FadeIns[i]);
+		GetDlgItem(FILTER_FADE_IN[i])->SetWindowText(nlUtf8ToTStr(tmp));
+		sprintf(tmp, "%u", (unsigned int)SoundDialog->FilterFades.FadeOuts[i]);
+		GetDlgItem(FILTER_FADE_OUT[i])->SetWindowText(nlUtf8ToTStr(tmp));
 	}
 
 	SoundDialog->getSoundPlugin()->getMixer()->setBackgroundFilterFades(SoundDialog->FilterFades);
@@ -209,20 +212,20 @@ BOOL CPageBgFades::OnCommand(WPARAM wParam, LPARAM lParam)
 	if (lParam != 0 && HIWORD(wParam) == EN_CHANGE)
 	{
 		int id = ::GetDlgCtrlID(HWND(lParam));
-		char tmp[1024];
+		TCHAR tmp[1024];
 
 		if (FILTER_FADE_IN_IDX.find(id) != FILTER_FADE_IN_IDX.end())
 		{
 			// this is a fade in value modified !
 			GetDlgItem(id)->GetWindowText(tmp, 1024);
-			SoundDialog->FilterFades.FadeIns[FILTER_FADE_IN_IDX[id]] = atoi(tmp);
+			SoundDialog->FilterFades.FadeIns[FILTER_FADE_IN_IDX[id]] = atoi(nlTStrToUtf8(tmp));
 			SoundDialog->getSoundPlugin()->getMixer()->setBackgroundFilterFades(SoundDialog->FilterFades);
 		}
 		else if (FILTER_FADE_OUT_IDX.find(id) != FILTER_FADE_OUT_IDX.end())
 		{
 			// this is a fade in value modified !
 			GetDlgItem(id)->GetWindowText(tmp, 1024);
-			SoundDialog->FilterFades.FadeOuts[FILTER_FADE_OUT_IDX[id]] = atoi(tmp);
+			SoundDialog->FilterFades.FadeOuts[FILTER_FADE_OUT_IDX[id]] = atoi(nlTStrToUtf8(tmp));
 			SoundDialog->getSoundPlugin()->getMixer()->setBackgroundFilterFades(SoundDialog->FilterFades);
 		}
 	}

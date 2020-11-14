@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -42,7 +46,6 @@ extern bool					Render;
 extern bool					WantProfiling;			// Do we want a CPU profile?
 extern bool					WantProfilingVBLock;			// Do we want a VBLock profile?
 extern bool					PACSBorders;
-extern bool					ARKPACSBorders;
 extern bool					DebugClusters;
 extern bool					SoundBox;
 extern uint8				ShowInfos;
@@ -92,21 +95,6 @@ REGISTER_ACTION_HANDLER (CAHDisplayInfos, "display_infos");
 *										move player handlers  actions									  *
 *																										  *
 ***********************************************************************************************************/
-
-// ------------------------------------------------------------------------------------------------
-class CAHToggleARKPACSBorders : public IActionHandler
-{
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
-	{
-		if (!getParam(Params, "on").empty())
-			ARKPACSBorders = true;
-		else if (!getParam(Params, "off").empty())
-			ARKPACSBorders = false;
-		else ARKPACSBorders = !ARKPACSBorders;
-
-	}
-};
-REGISTER_ACTION_HANDLER (CAHToggleARKPACSBorders, "ark_pacs_borders");
 
 #if !FINAL_VERSION
 // ------------------------------------------------------------------------------------------------

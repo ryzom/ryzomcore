@@ -65,7 +65,7 @@ bool	CDBDescriptionParser::loadDescriptionFile(const string& filename)
 
 	bool	success = loadDescription(buffer);
 
-	delete buffer;
+	delete[] buffer;
 	return success;
 }
 

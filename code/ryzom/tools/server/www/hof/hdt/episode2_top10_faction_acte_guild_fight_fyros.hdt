@@ -1,0 +1,22 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs killers par faction (par chantier) par acte
+//fyros
+	"nom_Top10_Best_Guild_Kill_fyros_kami_Acte1",	"storyline.episode2.fyros.kami.kill.acte1",	"GuildName",	"*", "Sum",
+	"nom_Top10_Best_Guild_Kill_fyros_karavan_Acte1",	"storyline.episode2.fyros.karavan.kill.acte1",	"GuildName",	"*", "Sum",
+
+	"score_Top10_Best_Guild_Kill_fyros_kami_Acte1",	"storyline.episode2.fyros.kami.kill.acte1",	"GuildValue",	"*", "Sum",
+	"score_Top10_Best_Guild_Kill_fyros_karavan_Acte1",	"storyline.episode2.fyros.karavan.kill.acte1",	"GuildValue",	"*", "Sum",
+
+	"nom_Top10_Best_Guild_Kill_fyros_kami_Acte2",	"storyline.episode2.fyros.kami.kill.acte2",	"GuildName",	"*", "Sum",
+	"nom_Top10_Best_Guild_Kill_fyros_karavan_Acte2",	"storyline.episode2.fyros.karavan.kill.acte2",	"GuildName",	"*", "Sum",
+
+	"score_Top10_Best_Guild_Kill_fyros_kami_Acte2",	"storyline.episode2.fyros.kami.kill.acte2",	"GuildValue",	"*", "Sum",
+	"score_Top10_Best_Guild_Kill_fyros_karavan_Acte2",	"storyline.episode2.fyros.karavan.kill.acte2",	"GuildValue",	"*", "Sum",
+
+	"nom_Top10_Best_Guild_Kill_fyros_kami_Acte3",	"storyline.episode2.fyros.kami.kill.acte3",	"GuildName",	"*", "Sum",
+	"nom_Top10_Best_Guild_Kill_fyros_karavan_Acte3",	"storyline.episode2.fyros.karavan.kill.acte3",	"GuildName",	"*", "Sum",
+
+	"score_Top10_Best_Guild_Kill_fyros_kami_Acte3",	"storyline.episode2.fyros.kami.kill.acte3",	"GuildValue",	"*", "Sum",
+	"score_Top10_Best_Guild_Kill_fyros_karavan_Acte3",	"storyline.episode2.fyros.karavan.kill.acte3",	"GuildValue",	"*", "Sum",
+};

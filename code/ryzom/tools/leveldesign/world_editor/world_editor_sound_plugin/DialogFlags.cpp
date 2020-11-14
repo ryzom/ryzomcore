@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -118,7 +121,7 @@ void CDialogFlags::init(CSoundPlugin *plugin)
 	for (uint i =0; i<NLSOUND::UAudioMixer::TBackgroundFlags::NB_BACKGROUND_FLAGS; ++i)
 	{
 		static_cast<CButton*>(GetDlgItem(BG_FLAG_ID[i]))->SetCheck(flags.Flags[i] ? 1 : 0);
-		GetDlgItem(BG_FLAG_ID[i])->SetWindowText(utf8ToTStr(_Mixer->getBackgroundFlagName(i)));
+		GetDlgItem(BG_FLAG_ID[i])->SetWindowText(nlUtf8ToTStr(_Mixer->getBackgroundFlagName(i)));
 	}
 
 
@@ -229,7 +232,7 @@ void CDialogFlags::OnTimer(UINT_PTR nIDEvent)
 		_stprintf(temp, _T("%6.2f"), SampleBanks[i].second / (1024.0f*1024.0f));
 
 		TCHAR bankName[1024];
-		_tcscpy_s(bankName, 1024, utf8ToTStr(SampleBanks[i].first));
+		_tcscpy_s(bankName, 1024, nlUtf8ToTStr(SampleBanks[i].first));
 
 		if (i < c)
 		{

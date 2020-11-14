@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -114,7 +117,7 @@ INode *CExportNel::getNELScaleReferenceNode(INode &node)
 		{
 			std::string	boneScaleName= getName(node) + boneScaleNameExt;
 			// Get the reference node
-			referenceNode= _Ip->GetINodeByName(utf8ToTStr(boneScaleName));
+			referenceNode= _Ip->GetINodeByName(MaxTStrFromUtf8(boneScaleName));
 		}
 	}
 
@@ -455,7 +458,7 @@ uint CExportNel::buildSkinning (CMesh::CMeshBuild& buildMesh, const TInodePtrInt
 		nlassert ((uint)ite->second<buildMesh.BonesNames.size());
 
 		// Names
-		buildMesh.BonesNames[ite->second] = tStrToUtf8(ite->first->GetName());
+		buildMesh.BonesNames[ite->second] = MCharStrToUtf8(ite->first->GetName());
 
 		// Next
 		ite++;
@@ -1306,7 +1309,7 @@ static sint	getBoneSide(INode *bone, std::string &mirrorName)
 {
 	sint	side= 0;
 	sint	pos;
-	mirrorName = tStrToUtf8(bone->GetName());
+	mirrorName = MCharStrToUtf8(bone->GetName());
 
 	if((pos= mirrorName.find(" R "))!=std::string::npos)
 	{
@@ -1335,7 +1338,7 @@ static INode *getMirrorBone(const std::vector<INode*>	&skeletonNodes, INode *bon
 		// find
 		for(uint i=0;i<skeletonNodes.size();i++)
 		{
-			if(mirrorName == tStrToUtf8(skeletonNodes[i]->GetName()))
+			if(mirrorName == MCharStrToUtf8(skeletonNodes[i]->GetName()))
 				return skeletonNodes[i];
 		}
 	}

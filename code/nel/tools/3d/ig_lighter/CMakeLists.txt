@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h ../ig_lighter_lib/*.cpp ../ig_lighter_lib/*.h)
+FILE(GLOB SRC *.cpp *.h ../ig_lighter_lib/*.cpp ../ig_lighter_lib/*.h *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(ig_lighter ${SRC})
 

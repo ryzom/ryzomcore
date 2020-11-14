@@ -421,7 +421,8 @@ void CDynamicItems::tickUpdate()
 				CMaximumShopStoreTimeReached::makeStringCommande( command, subVec[ _NextItemToCheck]->getOwner(), subVec[ _NextItemToCheck]->getSheetId(), quantity, subVec[ _NextItemToCheck]->getIdentifier() );
 				COfflineCharacterCommand::getInstance()->addOfflineCommand( command );
 			}
-			
+
+			TLogNoContext_Item noLog;
 			subVec[_NextItemToCheck] = subVec.back();
 			subVec.pop_back();
 			TotalNbItemsForSale = --_TotalNbItemsForSale;

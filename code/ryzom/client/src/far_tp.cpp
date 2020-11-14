@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2011  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -608,7 +612,7 @@ void CLoginStateMachine::run()
 			break;
 		case st_disconnect:
 			// Far TP part 2: disconnect from the FS and unload shard-specific data (called from farTPmainLoop())
-			// FarTP.disconnectFromPreviousShard();
+			FarTP.disconnectFromPreviousShard();
 
 			SM_BEGIN_EVENT_TABLE
 				SM_EVENT(ev_connect, st_reconnect_fs);
@@ -1145,6 +1149,9 @@ void CFarTP::disconnectFromPreviousShard()
 	}
 	else
 	{
+		// flush the server string cache
+		STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
+
 		// String manager: remove all waiting callbacks and removers
 		// (if some interface stuff has not received its string yet, its remover will get useless)
 		STRING_MANAGER::CStringManagerClient::release( false );
@@ -1200,7 +1207,7 @@ void CFarTP::connectToNewShard()
 	}
 
 	// Reinit the string manager cache.
-	STRING_MANAGER::CStringManagerClient::instance()->initCache(FSAddr, ClientCfg.LanguageCode);
+	STRING_MANAGER::CStringManagerClient::instance()->initCache(ClientCfg.LanguageCode);
 
 	// reset the chat mode
 	ChatMngr.resetChatMode();
@@ -1449,7 +1456,7 @@ void CFarTP::farTPmainLoop()
 	ConnectionReadySent = false;
 	LoginSM.pushEvent(CLoginStateMachine::ev_far_tp_main_loop_entered);
 
-	disconnectFromPreviousShard();
+	// disconnectFromPreviousShard();
 
 	uint nbRecoSelectCharReceived = 0;
 

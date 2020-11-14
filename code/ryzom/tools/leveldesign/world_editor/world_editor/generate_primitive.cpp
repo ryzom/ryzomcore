@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -15,6 +18,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdafx.h"
+
+#include <sstream>
 
 #include "editor_primitive.h"
 #include "generate_primitive.h"
@@ -361,18 +366,15 @@ bool CGeneratePrimitive::generate (std::vector< std::vector<IPrimitive*> > &dest
 		}
 
 		// Error ?
-		if (!_FileNotFound.empty ())
+		if (!_FileNotFound.empty())
 		{
 			// Continue ?
-			char message[2048];
-			message[0] = 0;
-			for (uint i=0; i<_FileNotFound.size (); i++)
+			stringstream ssmessage;
+			for (uint i = 0; i < _FileNotFound.size(); i++)
 			{
-				strcat (message, _FileNotFound[i].c_str ());
-				strcat (message, "\n");
+				ssmessage << _FileNotFound[i] << "\n";
 			}
-
-			if (!theApp.yesNoMessage ("Can't load some files:\n%s\nContinue ?", message))
+			if (!theApp.yesNoMessage("Can't load some files:\n%s\nContinue ?", ssmessage.str()))
 			{
 				return false;
 			}

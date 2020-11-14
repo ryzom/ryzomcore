@@ -1,8 +1,10 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc *.rc2)
 
-LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/nel_paint.cpp)
+LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/nel_paint.cpp)
 
-ADD_LIBRARY(nel_patch_paint SHARED ${SRC} nel_patch_paint.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_LIBRARY(nel_patch_paint SHARED ${SRC})
 
 INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 

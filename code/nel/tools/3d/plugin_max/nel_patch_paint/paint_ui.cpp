@@ -319,7 +319,7 @@ void getColors (COLORREF *array)
 			DWORD len=4;
 			DWORD type;
 			std::string regName = toString("Color%u", i);
-			RegQueryValueEx (hKey, utf8ToTStr(regName), 0, &type, (LPBYTE)(array+i), &len);
+			RegQueryValueEx (hKey, MaxTStrFromUtf8(regName).data(), 0, &type, (LPBYTE)(array+i), &len);
 		}
 		RegCloseKey (hKey);
 	}
@@ -337,7 +337,7 @@ void setColors (const COLORREF *array)
 		{
 			DWORD len=4;
 			std::string regName = toString("Color%u", i);
-			RegSetValueEx (hKey, utf8ToTStr(regName), 0, REG_DWORD, (LPBYTE)(array+i), 4);
+			RegSetValueEx (hKey, MaxTStrFromUtf8(regName).data(), 0, REG_DWORD, (LPBYTE)(array+i), 4);
 		}
 		RegCloseKey (hKey);
 	}
@@ -412,7 +412,7 @@ void LoadKeyCfg ()
 		if (res)
 		{
 			// Make a new path
-			std::string cfgPath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath)) + "keys.cfg";
+			std::string cfgPath = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath)) + "keys.cfg";
 	
 			CConfigFile cf;
 
@@ -455,7 +455,7 @@ void LoadVarCfg ()
 		{
 			// Make a new path
 			char cgfPath[256];
-			std::string cfgPath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath)) + "keys.cfg";
+			std::string cfgPath = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath)) + "keys.cfg";
 	
 			CConfigFile cf;
 

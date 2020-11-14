@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -77,8 +80,8 @@ struct CTreeItemInfo
 		pParentFolder=NULL;
 		dwFlags=NULL;
 	}
-	ITEMIDLIST*   pidlSelf;
-	ITEMIDLIST*   pidlFullyQual;
+	LPITEMIDLIST  pidlSelf;
+	LPITEMIDLIST  pidlFullyQual;
 	IShellFolder* pParentFolder;
 	DWORD		  dwFlags;
 	std::string	  displayName;
@@ -97,8 +100,8 @@ bool CFileTreeCtrl::setRootDirectory (const char *dir)
 			_TreeCtrl.DeleteAllItems ();
 
 			IShellFolder* pDesktop;
-			ITEMIDLIST*   pidl;
-			ITEMIDLIST*   pidlDir;
+			LPITEMIDLIST  pidl;
+			LPITEMIDLIST  pidlDir;
 			TV_ITEM tvItem={0};
 			TV_INSERTSTRUCT   tvInsert={0};
 
@@ -318,11 +321,11 @@ BOOL CFileTreeCtrl::OnNotify ( WPARAM wParam, LPARAM lParam, LRESULT* pResult )
 	return CWnd::OnNotify ( wParam, lParam, pResult );
 }
 
-inline ITEMIDLIST* Pidl_GetNextItem(LPCITEMIDLIST pidl)
+inline LPITEMIDLIST Pidl_GetNextItem(LPCITEMIDLIST pidl)
 {
 	if(pidl)
 	{
-	   return (ITEMIDLIST*)(BYTE*)(((BYTE*)pidl) + pidl->mkid.cb);
+	   return (LPITEMIDLIST)(BYTE*)(((BYTE*)pidl) + pidl->mkid.cb);
 	}
 	else
 	   return NULL;
@@ -347,7 +350,7 @@ return pidl;
 UINT Pidl_GetSize(LPCITEMIDLIST pidl)
 {
 	UINT           cbTotal = 0;
-	ITEMIDLIST*   pidlTemp = (ITEMIDLIST*) pidl;
+	LPITEMIDLIST   pidlTemp = (LPITEMIDLIST)pidl;
 
 	if(pidlTemp)
 	{
@@ -415,12 +418,12 @@ int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	return 0;
 }
 
-bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolder, ITEMIDLIST* pidlParent)
+bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolder, LPITEMIDLIST pidlParent)
 {
 	IEnumIDList* pEnum;
 	if(SUCCEEDED(pParentFolder->EnumObjects(NULL, SHCONTF_NONFOLDERS |SHCONTF_FOLDERS|SHCONTF_INCLUDEHIDDEN, &pEnum)))
 	{
-		ITEMIDLIST* pidl;
+		LPITEMIDLIST pidl;
 		DWORD  dwFetched = 1;
 		TV_ITEM tvItem={0};
 		TV_INSERTSTRUCT   tvInsert={0};
@@ -445,7 +448,7 @@ bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolde
 			nlverify ( SHGetPathFromIDList ( pidl, name ) );
 
 			// Save it
-			pItemInfo->displayName = tStrToUtf8(name);
+			pItemInfo->displayName = NLMISC::tStrToUtf8(name);
 
 			// Is a folder ?
 			bool folder = (pItemInfo->dwFlags&SFGAO_FOLDER) !=0;
@@ -457,7 +460,9 @@ bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolde
 			string ext5 = pItemInfo->displayName.substr(displayNameSize-5);
 
 			bool cvs = ext3 == "CVS" || ext4 == "CVS\\" || ext4 == "CVS/" ||
-				ext4 == ".svn" || ext5 == ".svn\\" || ext5 == ".svn/";
+				ext4 == ".svn" || ext5 == ".svn\\" || ext5 == ".svn/" ||
+				ext4 == ".hg" || ext5 == ".hg\\" || ext5 == ".hg/" ||
+				ext4 == ".git" || ext5 == ".git\\" || ext5 == ".git/";
 
 /*			bool cvs = ( pItemInfo->displayName[displayNameSize-3] == 'C') &&
 				(pItemInfo->displayName[displayNameSize-2] == 'V') &&
@@ -720,7 +725,7 @@ bool CFileTreeCtrl::getCurrentFilename (std::string &result)
 	if (curSel)
 	{
 		CString str = _TreeCtrl.GetItemText (curSel);
-		result = tStrToUtf8(str);
+		result = NLMISC::tStrToUtf8(str);
 		return true;
 	}
 	return false;

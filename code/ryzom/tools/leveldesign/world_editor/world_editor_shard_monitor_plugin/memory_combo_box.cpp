@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -95,14 +98,14 @@ bool CMemoryComboBox::getMemory (int slot, std::string &ret)
 {
 	// Open the key
 	HKEY hKey;
-	if (RegOpenKey (HKEY_CURRENT_USER, utf8ToTStr(RegisterAdress), &hKey) == ERROR_SUCCESS)
+	if (RegOpenKey(HKEY_CURRENT_USER, nlUtf8ToTStr(RegisterAdress), &hKey) == ERROR_SUCCESS)
 	{
 		// Get the value
 		char strSrc[512];
 		smprintf (strSrc, 512, "%d", slot);
 		TCHAR str[512];
 		long size = 512*sizeof(TCHAR);
-		if (RegQueryValue (hKey, utf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
+		if (RegQueryValue(hKey, nlUtf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
 		{
 			ret = tStrToUtf8(str);
 
@@ -124,7 +127,7 @@ void CMemoryComboBox::scrollDown (int start, int end)
 {
 	// Open the key
 	HKEY hKey;
-	if (RegCreateKey (HKEY_CURRENT_USER, utf8ToTStr(RegisterAdress), &hKey) == ERROR_SUCCESS)
+	if (RegCreateKey (HKEY_CURRENT_USER, nlUtf8ToTStr(RegisterAdress), &hKey) == ERROR_SUCCESS)
 	{
 		// Scroll down the list
 		for (int i=end-1; i>start; i--)
@@ -134,12 +137,12 @@ void CMemoryComboBox::scrollDown (int start, int end)
 			smprintf (strSrc, 512, "%d", i-1);
 			TCHAR str[512];
 			long size = 512 * sizeof(TCHAR);
-			if (RegQueryValue (hKey, utf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
+			if (RegQueryValue(hKey, nlUtf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
 			{
 				// Set the value
 				char strDst[512];
 				smprintf (strDst, 512, "%d", i);
-				RegSetValue (hKey, utf8ToTStr(strDst), REG_SZ, str, size);
+				RegSetValue(hKey, nlUtf8ToTStr(strDst), REG_SZ, str, size);
 			} 
 		}
 
@@ -154,10 +157,10 @@ void CMemoryComboBox::writeStringInRegistry (const std::string &str)
 {
 	// Open the key
 	HKEY hKey;
-	if (RegCreateKey (HKEY_CURRENT_USER, utf8ToTStr(RegisterAdress), &hKey) == ERROR_SUCCESS)
+	if (RegCreateKey(HKEY_CURRENT_USER, nlUtf8ToTStr(RegisterAdress), &hKey) == ERROR_SUCCESS)
 	{
 		// Set the value
-		RegSetValue (hKey, _T("0"), REG_SZ, utf8ToTStr(str), str.size ());
+		RegSetValue(hKey, _T("0"), REG_SZ, nlUtf8ToTStr(str), str.size());
 
 		// Close
 		RegCloseKey (hKey);
@@ -428,7 +431,7 @@ void CMemoryComboBox::pushString (const std::string &str)
 			if (i == (int)(itemCount+Commands.size()+ StaticStrings.size()))
 			{
 				// Insert the sting
-				_ComboBox.InsertString (Commands.size()+ StaticStrings.size(), utf8ToTStr(str));
+				_ComboBox.InsertString(Commands.size() + StaticStrings.size(), nlUtf8ToTStr(str));
 			}
 		}
 	}
@@ -449,7 +452,7 @@ void CMemoryComboBox::refreshStrings ()
 	int count = Commands.size();
 	for (i=0; i<StaticStrings.size(); i++)
 	{
-		_ComboBox.InsertString (count, utf8ToTStr(StaticStrings[i]));
+		_ComboBox.InsertString(count, nlUtf8ToTStr(StaticStrings[i]));
 		count++;
 	}
 
@@ -458,7 +461,7 @@ void CMemoryComboBox::refreshStrings ()
 		std::string ret;
 		if (getMemory (i, ret))
 		{
-			_ComboBox.InsertString (count, utf8ToTStr(ret));
+			_ComboBox.InsertString(count, nlUtf8ToTStr(ret));
 			count++;
 		}
 	}
@@ -497,7 +500,7 @@ void CMemoryComboBox::clearCommand ()
 
 void CMemoryComboBox::addLabelCommands (uint i)
 {
-	_ComboBox.InsertString (i, utf8ToTStr(Commands[i].Label));
+	_ComboBox.InsertString(i, nlUtf8ToTStr(Commands[i].Label));
 }
 
 // ***************************************************************************
@@ -688,7 +691,7 @@ BOOL CMemoryComboBox::PreTranslateMessage(MSG* pMsg)
 						if ((!str2.empty ()) && (str2.find ('.') == string::npos))
 						{
 							str2 += "." + _Extension;
-							_ComboBox.SetWindowText (utf8ToTStr(str2));
+						    _ComboBox.SetWindowText(nlUtf8ToTStr(str2));
 						}
 					}
 
@@ -739,7 +742,7 @@ CString CMemoryComboBox::getCurrString() const
 // ***************************************************************************
 void CMemoryComboBox::setCurSel(const std::string &value)
 {
-	int index = _ComboBox.FindStringExact(0, utf8ToTStr(value));
+	int index = _ComboBox.FindStringExact(0, nlUtf8ToTStr(value));
 	if (index != CB_ERR)
 	{
 		_ComboBox.SetCurSel(index);

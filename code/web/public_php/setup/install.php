@@ -35,13 +35,6 @@ require_once('setup/version.php');
 		printalert("danger", "No server roles selected");
 		$continue = false;
 	}
-
-	if ($continue) {
-		if (!extension_loaded('mcrypt')) {
-			printalert("danger", "The mcrypt extension is missing. Please check your PHP configuration");
-			$continue = false;
-		}
-	}
     
 	if ($continue) {
 		try {
@@ -161,8 +154,8 @@ require_once('setup/version.php');
 			$config = str_replace("%nelDomainName%", addslashes($_POST["nelDomainName"]), $config);
 			$config = str_replace("%nelSetupVersion%", addslashes($NEL_SETUP_VERSION), $config);
 			$cryptKeyLength = 16;
-			$cryptKey = str_replace("=", "", base64_encode(mcrypt_create_iv(ceil(0.75 * $cryptKeyLength), MCRYPT_DEV_URANDOM)));
-			$cryptKeyIMAP = str_replace("=", "", base64_encode(mcrypt_create_iv(ceil(0.75 * $cryptKeyLength), MCRYPT_DEV_URANDOM)));
+			$cryptKey = substr(str_replace(['+', '/', '='], '', base64_encode(random_bytes($cryptKeyLength * 2))), 0, $cryptKeyLength); 
+			$cryptKeyIMAP = substr(str_replace(['+', '/', '='], '', base64_encode(random_bytes($cryptKeyLength * 2))), 0, $cryptKeyLength); 
 			$config = str_replace("%cryptKey%", addslashes($cryptKey), $config);
 			$config = str_replace("%cryptKeyIMAP%", addslashes($cryptKeyIMAP), $config);
 			if (file_put_contents("config.php", $config)) {

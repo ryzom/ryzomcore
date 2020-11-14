@@ -759,6 +759,7 @@ CSpireSquadManager::CSpireSquadManager(CSpire* parent, uint32 alias, std::string
 	eventAction = NULL;
 	
 	// Register event handler
+	// FIXME: 0 == CAIAliasDescriptionNode instance
 	event = new CAIEventReaction(getStateMachine(), 0, eventDescription.EventType);
 	event->processEventDescription(&eventDescription, getStateMachine());
 	getStateMachine()->eventReactions().addChild(event);
@@ -782,6 +783,7 @@ CSpireSquadManager::CSpireSquadManager(CSpire* parent, uint32 alias, std::string
 	eventAction = NULL;
 	
 	// Register event handler
+	// FIXME: 0 == CAIAliasDescriptionNode instance
 	event = new CAIEventReaction(getStateMachine(), 0, eventDescription.EventType);
 	event->processEventDescription(&eventDescription, getStateMachine());
 	getStateMachine()->eventReactions().addChild(event);
@@ -805,6 +807,7 @@ CSpireSquadManager::CSpireSquadManager(CSpire* parent, uint32 alias, std::string
 	eventAction = NULL;
 	
 	// Register event handler
+	// FIXME: 0 == CAIAliasDescriptionNode instance
 	event = new CAIEventReaction(getStateMachine(), 0, eventDescription.EventType);
 	event->processEventDescription(&eventDescription, getStateMachine());
 	getStateMachine()->eventReactions().addChild(event);
@@ -839,6 +842,7 @@ CSpireSquadManager::CSpireSquadManager(CSpire* parent, uint32 alias, std::string
 	eventAction = NULL;
 	
 	// Register event handler
+	// FIXME: 0 == CAIAliasDescriptionNode instance
 	event = new CAIEventReaction(getStateMachine(), 0, eventDescription.EventType);
 	event->processEventDescription(&eventDescription, getStateMachine());
 	getStateMachine()->eventReactions().addChild(event);

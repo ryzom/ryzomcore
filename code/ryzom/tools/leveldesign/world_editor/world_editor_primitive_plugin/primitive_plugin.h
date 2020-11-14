@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -18,8 +21,13 @@
 #define PRIMITIVE_PLUGIN_H
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
-#define _WIN32_WINNT 0x0501
+#ifdef _WIN64
+#define _WIN32_WINNT 0x0600
+#else
+#define _WIN32_WINNT 0x0500
+#endif
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions

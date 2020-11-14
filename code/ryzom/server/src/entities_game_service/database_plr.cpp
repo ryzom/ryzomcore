@@ -1,3 +1,4 @@
+
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -17,6 +18,7 @@
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
+
 #include "stdpch.h"
 #include "database_plr.h"
 
@@ -3135,7 +3137,7 @@ void CBankAccessor_PLR::TPACK_ANIMAL::TBEAST::init(ICDBStructNode *parent, uint 
 	nlassert(node != NULL);
 	_DESPAWN = node;
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), true );
+	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), false );
 	nlassert(node != NULL);
 	_NAME = node;
 	

@@ -265,6 +265,7 @@ void CDirectionMap::serial(NLMISC::IStream& f)
 		{
 			if (f.isReading())
 				Layers[i] = new CDirectionLayer();
+			nlassert(Layers[i]);
 			f.serial(*Layers[i]);
 		}
 	}
@@ -430,6 +431,7 @@ void CMultiLayerCell::serial(NLMISC::IStream& f)
 			}
 			else
 			{
+				nlassert(_Layers[slot]);
 				I16x16Layer::save(f, _Layers[slot]->_HeightMap);
 			}
 
@@ -657,6 +659,7 @@ void	CWorldMap::serial(NLMISC::IStream &f)
 			if (present)
 			{
 				//nldebug("Save SuperCell %d/%d", i, j);
+				nlassert(_GridFastAccess[i]);
 				f.serial(*(_GridFastAccess[i]));
 			}
 

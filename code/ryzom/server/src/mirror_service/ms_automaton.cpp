@@ -528,13 +528,13 @@ void CMirrorService::serialToMessageFromLocalQueue( CMessage& msgout, const TMes
 }
 
 
-NLMISC_COMMAND( displayAutomatonState, "Display the current state of the MS automaton", "" )
+NLMISC_CATEGORISED_COMMAND( ms_automaton, displayAutomatonState, "Display the current state of the MS automaton", "" )
 {
 	MSInstance->displayAutomatonState( &log );
 	return true;
 }
 
-NLMISC_COMMAND( doNextTask, "Update automaton state", "" )
+NLMISC_CATEGORISED_COMMAND( ms_automaton, doNextTask, "Update automaton state", "" )
 {
 	MSInstance->doNextTask();
 	return true;

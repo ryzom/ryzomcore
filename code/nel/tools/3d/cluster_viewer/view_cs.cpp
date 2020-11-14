@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -201,9 +204,9 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 // Main
 // ---------------------------------------------------------------------------
 #ifdef NL_OS_WINDOWS
-int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+int APIENTRY nltWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nShowCmd)
 #else // NL_OS_WINDOWS
-int main(int argc, char **argv)
+int nltmain(int argc, NLMISC::tchar **argv)
 #endif // NL_OS_WINDOWS
 {
 	double rGlobalTime = 0;

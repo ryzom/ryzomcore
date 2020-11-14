@@ -1,0 +1,9 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs harvesteurs de l'episode 2
+	"nom_Top10_Best_Harvest_zorai_kami", "storyline.episode2.zorai.kami.harvest.*", "PlayerName", "*", "Sum",
+	"nom_Top10_Best_Harvest_zorai_karavan", "storyline.episode2.zorai.karavan.harvest.*", "PlayerName", "*", "Sum",
+	
+	"score_Top10_Best_Harvest_zorai_kami", "storyline.episode2.zorai.kami.harvest.*", "PlayerValue", "*", "Sum",
+	"score_Top10_Best_Harvest_zorai_karavan", "storyline.episode2.zorai.karavan.harvest.*", "PlayerValue", "*", "Sum",
+};

@@ -807,16 +807,21 @@ Just press Continue button and follow the different steps until everything is do
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="207"/>
+        <source>Language:</source>
+        <translation>Язык:</translation>
+    </message>
+    <message>
+        <location filename="../ui/profilesdialog.ui" line="214"/>
         <source>Create shortcuts:</source>
         <translation>Создать ярлыки:</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="216"/>
+        <location filename="../ui/profilesdialog.ui" line="223"/>
         <source>Desktop</source>
         <translation>Рабочий стол</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="223"/>
+        <location filename="../ui/profilesdialog.ui" line="230"/>
         <source>Start Menu</source>
         <translation>меню Пуск</translation>
     </message>

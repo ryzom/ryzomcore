@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -49,14 +52,13 @@ __declspec( dllexport ) IEditPlugin *IGeorgesEditGetInterface (int version, NLGE
 		}
 		catch (const std::exception &e)
 		{
-			string reason = e.what();
-			MessageBox (NULL, reason.c_str(), "Sound plugin", MB_OK);
+			MessageBox (NULL, nlUtf8ToTStr(e.what()), _T("Sound plugin"), MB_OK);
 			return NULL;
 		}
 	}
 	else
 	{
-		MessageBox (NULL, "Plugin version invalid.", "Sound plugin for georges editor", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, _T("Plugin version invalid."), _T("Sound plugin for georges editor"), MB_OK|MB_ICONEXCLAMATION);
 		return NULL;
 	}
 

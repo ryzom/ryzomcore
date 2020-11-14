@@ -446,8 +446,10 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	c->initAnimalHungerDb();
 
 	c->initFactionPointDb();
+#ifdef RYZOM_FORGE
 	c->initPvpPointDb();
 	c->initOrganizationInfos();
+#endif
 
 	c->updateOutpostAdminFlagInDB();
 
@@ -519,7 +521,26 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	// ask backup for offline commands file
 	COfflineCharacterCommand::getInstance()->characterOnline( characterId );
 
+#ifdef RYZOM_EPISODE2_REACTIVATE
+	if( CGameEventManager::getInstance().getChannelEventId() != TChanID::Unknown )
+	{
+		if( c->haveAnyPrivilege() )
+		{
+			DynChatEGS.addSession(CGameEventManager::getInstance().getChannelEventId(), entityIndex, true);
+		}
+		else
+		{
+			DynChatEGS.addSession(CGameEventManager::getInstance().getChannelEventId(), entityIndex, false);
+		}
+	}
+#endif
+
 	c->onConnection();
+
+#ifdef RYZOM_EPISODE2_REACTIVATE
+	CPVPManager2::getInstance()->sendFactionWarsToClient( c );
+	CPVPManager2::getInstance()->addOrRemoveFactionChannel( c );
+#endif
 } // cbClientReady //
 
 
@@ -965,10 +986,12 @@ void cbCreateChar( CMessage& msgin, const std::string &serviceName, NLNET::TServ
 	createCharMsg.serial( msgin );
 
 	// Yoyo: fix to force new newbieland.
+#ifdef RYZOM_FORGE
 	if(UseNewNewbieLandStartingPoint)
 	{
 		createCharMsg.StartPoint= RYZOM_STARTING_POINT::starting_city;
 	}
+#endif
 
 	// acceptable name if: first char is an upper case, all the name is lower case
 	for (uint i = 0; i < createCharMsg.Name.size(); i++)
@@ -3050,6 +3073,7 @@ void cbTeleportPlayer(NLNET::CMessage& msgin, const std::string &serviceName, NL
 	chr->teleportCharacter(x, y, z, true, true, t);
 }
 
+#ifdef RYZOM_FORGE
 //---------------------------------------------------
 // trigger the webig
 //---------------------------------------------------
@@ -3074,7 +3098,7 @@ void cbTriggerWebig(NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 		chr->sendUrl(event, "");
 	}
 }
-
+#endif
 
 //---------------------------------------------------
 /// Forage source position validation

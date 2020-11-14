@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -60,13 +64,13 @@ NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListAscensor, std::string, "list_sheet
 #define WIN_GUILD							"ui:interface:guild"
 #define WIN_GUILD_CHAT						"ui:interface:guild_chat"
 #define WIN_GUILD_FORUM						"ui:interface:guild_forum"
-#define VIEW_TEXT_GUILD_QUIT				"ui:interface:guild:content:tab_guild:quit_guild"
-#define CTRL_SHEET_GUILD_BLASON				"ui:interface:guild:content:tab_guild:blason"
-#define VIEW_TEXT_GUILD_MEMBER_COUNT		"ui:interface:guild:content:tab_guild:member_count"
+#define VIEW_TEXT_GUILD_QUIT				"ui:interface:guild:content:tab_guild_info:quit_guild"
+#define CTRL_SHEET_GUILD_BLASON				"ui:interface:guild:content:tab_guild_info:blason"
+#define VIEW_TEXT_GUILD_MEMBER_COUNT		"ui:interface:guild:content:tab_guild_info:member_count"
 
 
 #define LIST_GUILD_MEMBERS					"ui:interface:guild:content:tab_guild:list_member:guild_members"
-#define CTRL_QUIT_GUILD						"ui:interface:guild:content:tab_guild:quit_guild"
+#define CTRL_QUIT_GUILD						"ui:interface:guild:content:tab_guild_info:quit_guild"
 #define TEMPLATE_GUILD_MEMBER				"member_template"
 #define TEMPLATE_GUILD_MEMBER_NAME			"name"
 #define TEMPLATE_GUILD_MEMBER_GRADE			"grade"
@@ -867,6 +871,10 @@ class CAHGuildSheetOpen : public IActionHandler
 						break;
 					}
 				}
+				
+				CCtrlBase *inviteButton = pLine->getCtrl("invite_button");
+				if (inviteButton != NULL)
+					inviteButton->setActive(rGuildMembers[i].Online != ccs_offline && rGuildMembers[i].Name != UserEntity->getEntityName());
 
 				// Enter Date
 				CViewText *pViewEnterDate = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_GUILD_MEMBER_ENTER_DATE));

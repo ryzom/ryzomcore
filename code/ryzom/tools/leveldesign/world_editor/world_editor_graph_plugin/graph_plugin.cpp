@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -172,7 +175,7 @@ void CGraphPlugin::refreshPrimitives()
 			{
 				string msg("Can't write script file '");
 				msg += tmpPath+"/lang.dot'";
-				AfxMessageBox(utf8ToTStr(msg));
+				AfxMessageBox(nlUtf8ToTStr(msg));
 			}
 			else
 			{
@@ -207,11 +210,11 @@ void CGraphPlugin::refreshPrimitives()
 
 				err = toString("%s : %s", primName.c_str(), e.Why.c_str());
 			}
-			AfxMessageBox(utf8ToTStr(err));
+			AfxMessageBox(nlUtf8ToTStr(err));
 		}
 		catch (const exception &e) //catch a possible exception from getRootFileName
 		{
-			AfxMessageBox(utf8ToTStr(e.what()));
+			AfxMessageBox(nlUtf8ToTStr(e.what()));
 		}
 	}
 	else
@@ -254,7 +257,7 @@ void CGraphPlugin::refreshMachine()
 		{
 			string msg("Can't write script file '");
 			msg += tmpPath+"/lang.dot'";
-			AfxMessageBox(utf8ToTStr(msg));
+			AfxMessageBox(nlUtf8ToTStr(msg));
 		}
 		else
 		{
@@ -298,7 +301,7 @@ void CGraphPlugin::refreshMachine()
 			{
 				string msg("Can't write script file '");
 				msg += tmpPath+"/lang.dot'";
-				AfxMessageBox(utf8ToTStr(msg));
+				AfxMessageBox(nlUtf8ToTStr(msg));
 			}
 			else
 			{
@@ -940,7 +943,7 @@ void CGraphPlugin::doSelection(const string& primPath)
 		}
 		catch(const exception &e)
 		{
-			GraphDlg->MessageBox(utf8ToTStr(e.what()));
+			GraphDlg->MessageBox(nlUtf8ToTStr(e.what()));
 		}
 	}
 }

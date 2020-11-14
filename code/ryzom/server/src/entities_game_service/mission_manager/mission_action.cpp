@@ -599,6 +599,7 @@ class CMissionActionRecvItem : public IMissionAction
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
+		nlassert(instance);
 		if ( dynamic_cast<CMissionSolo*>(instance) )
 		{
 			if ( _Group )
@@ -957,6 +958,7 @@ class CMissionActionRecvNamedItem : public IMissionAction
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
+		nlassert(instance);
 		if ( dynamic_cast<CMissionSolo*>(instance) )
 		{
 			if ( _Group )
@@ -1624,6 +1626,7 @@ class CMissionActionLearnBrick : public IMissionAction
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
+		nlassert(instance);
 		if ( dynamic_cast<CMissionSolo*>(instance) )
 		{
 			if ( _Group )
@@ -1768,6 +1771,7 @@ class CMissionActionUnlearnBrick : public IMissionAction
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
+		nlassert(instance);
 		if ( dynamic_cast<CMissionSolo*>(instance) )
 		{
 			if ( _Group )
@@ -4356,7 +4360,7 @@ class CMissionActionSetRespawnPoints : public IMissionAction
 		CMissionParser::tokenizeString(script[2], ";", args);
 
 		// check that the given respawn points exist and are all in the same continent
-		CONTINENT::TContinent lastContinent;
+		CONTINENT::TContinent lastContinent = CONTINENT::UNKNOWN;
 		for (uint i = 0; i < args.size(); i++)
 		{
 			string respawnPointName = CMissionParser::getNoBlankString(args[i]);

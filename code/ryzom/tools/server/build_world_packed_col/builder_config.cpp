@@ -28,6 +28,8 @@ CBuilderConfig::CBuilderConfig()
 	CachePath = "island_packed_zones_cache";
 	CWMapCachePath = "island_cwmap_cache";
 	OutputPath = "islands_col_meshes";
+	CompleteIslandsFile = "r2_islands.xml";
+	EntryPointsFile = "r2_entry_points.txt";
 	CamSpeed = 100;
 	Fly = false;
 	HeightMapsAsTga = false;
@@ -74,6 +76,18 @@ void CBuilderConfig::build(NLMISC::CConfigFile &cf)
 		{
 			CWMapList[k] = cwMapListVar->asString(k);
 		}
+	}
+	//
+	CConfigFile::CVar *completeIslandsFileVar = cf.getVarPtr("CompleteIslandsFile");
+	if (completeIslandsFileVar)
+	{
+		CompleteIslandsFile = completeIslandsFileVar->asString();
+	}
+	//
+	CConfigFile::CVar *entryPointsFileVar = cf.getVarPtr("EntryPointsFile");
+	if (entryPointsFileVar)
+	{
+		EntryPointsFile = entryPointsFileVar->asString();
 	}
 	//
 	CConfigFile::CVar *camSpeedVar = cf.getVarPtr("CamSpeed");

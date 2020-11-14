@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1231,7 +1234,7 @@ BOOL CCreateDialog::OnInitDialog ()
 
 	for (uint32 i = 0; i < TypesForInit->size(); ++i)
 	{
-		ComboType.InsertString (-1, utf8ToTStr(TypesForInit->operator[](i).Name));
+		ComboType.InsertString(-1, nlUtf8ToTStr(TypesForInit->operator[](i).Name));
 	}
 
 	if (TypesForInit->size()>0)
@@ -1264,10 +1267,10 @@ void CCreateDialog::OnOK()
 	UpdateData ();
 
 	// If the "region_" do not exist add it
-	if (_tcsnccmp(utf8ToTStr(RegionPost), Name, strlen(RegionPost.c_str())) != 0)
+	if (_tcsnccmp(nlUtf8ToTStr(RegionPost), Name, strlen(RegionPost.c_str())) != 0)
 	{
 		TCHAR sTmp[128];
-		_tcscpy (sTmp, utf8ToTStr(RegionPost));
+		_tcscpy(sTmp, nlUtf8ToTStr(RegionPost));
 		_tcscat (sTmp, Name);
 		_tcscpy (Name, sTmp);
 		UpdateData (false);
@@ -1303,11 +1306,11 @@ void CCreateDialog::OnSelChange ()
 
 	if (PropType == tStrToUtf8(sTmp))
 	{
-		_tcscpy (Name, utf8ToTStr(PropName));
+		_tcscpy(Name, nlUtf8ToTStr(PropName));
 	}
 	else
 	{
-		_tcscpy(Name, utf8ToTStr(RegionPost));
+		_tcscpy(Name, nlUtf8ToTStr(RegionPost));
 		_tcscat (Name, (LPCTSTR)sTmp);
 		_tcscat (Name, _T("-"));
 	}

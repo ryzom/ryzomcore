@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -53,6 +53,10 @@ private slots:
 
 	void onExecutableDefaultClicked();
 	void onExecutableBrowseClicked();
+
+	int getIndexFromProfileLanguage(const QString &langId) const;
+
+	QString getProfileLanguageFromIndex(int index) const;
 
 private:
 	CProfilesModel *m_model;

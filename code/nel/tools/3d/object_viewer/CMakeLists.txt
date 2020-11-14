@@ -1,6 +1,8 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
 
-ADD_LIBRARY(object_viewer_dll SHARED ${SRC} object_viewer.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_LIBRARY(object_viewer_dll SHARED ${SRC})
 
 TARGET_LINK_LIBRARIES(object_viewer_dll 
 							nelmisc

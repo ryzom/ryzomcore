@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -23,6 +26,7 @@
 
 #include "nel/gui/group_container.h"
 #include "nel/gui/group_editbox.h"
+#include "nel/gui/group_menu.h"
 #include "dbctrl_sheet.h"
 #include "interface_3d_scene.h"
 #include "character_3d.h"
@@ -74,7 +78,31 @@ class CAHActiveMenu : public IActionHandler
 		// open the menu
 		if (CDBCtrlSheet::getDraggedSheet() == NULL)
 		{
-			CWidgetManager::getInstance()->enableModalWindow (pCaller, getParam(Params, "menu"));
+			std::string menuId = getParam(Params, "menu");
+			CGroupMenu *groupMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(menuId));
+			if (groupMenu)
+			{
+				bool pushModal;
+				// default = false
+				fromString(getParam(Params, "pushmodal"), pushModal);
+
+				if (pushModal)
+				{
+					// if false, then close all modal window when groupMenu deactivates
+					bool popModal;
+					if (!fromString(getParam(Params, "popmodal"), popModal))
+					{
+						popModal = true;
+					}
+					groupMenu->setCloseSubMenuUsingPopModal(popModal);
+					CWidgetManager::getInstance()->pushModalWindow(pCaller, groupMenu);
+				}
+				else
+				{
+					groupMenu->setCloseSubMenuUsingPopModal(false);
+					CWidgetManager::getInstance()->enableModalWindow(pCaller, groupMenu);
+				}
+			}
 		}
 	}
 };

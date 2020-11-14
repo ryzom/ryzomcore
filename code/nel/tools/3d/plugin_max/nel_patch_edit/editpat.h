@@ -574,7 +574,7 @@ class EditPatchMod : public Modifier, IPatchOps, IPatchSelect, ISubMtlAPI, Attac
 		static bool		additiveTile;
 		static bool		automaticLighting;
 
-		RefResult NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate) { return REF_SUCCEED; }
+		RefResult NotifyRefChanged(NOTIFY_REF_PARAMS) { return REF_SUCCEED; }
 
 		int selLevel;
 
@@ -751,7 +751,7 @@ class EditPatchMod : public Modifier, IPatchOps, IPatchSelect, ISubMtlAPI, Attac
 		void BeginEditParams( IObjParam  *ip, ULONG flags, Animatable *prev );
 		void EndEditParams( IObjParam *ip, ULONG flags, Animatable *next );
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
-		const MCHAR *GetObjectName() { return GetString(IDS_TH_EDITPATCH); }
+		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return GetString(IDS_TH_EDITPATCH); }
 		void ActivateSubobjSel(int level, XFormModes& modes );
 		int NeedUseSubselButton() { return 0; }
 		void SelectSubPatch(int index);

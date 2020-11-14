@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2011-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -193,7 +196,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 				}
 				catch (const EStream& e)
 				{
-					MessageBox (NULL, utf8ToTStr(e.what()), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, MaxTStrFromUtf8(e.what()).data(), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}
@@ -267,8 +270,8 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 		}
 
 		// Show the message
-		mprintf (utf8ToTStr(error));
-		nlwarning (error.c_str());
+		mprintf(_M("%s\n"), MaxTStrFromUtf8(error).data());
+		nlwarning("%s", error.c_str());
 
 		// Error
 		return false;
@@ -395,8 +398,8 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 					icv=getCommonVertex(pPM,idstpatch,isrcpatch,&orderdstvtx);			
 					if (icv==-1)
 					{
-						mprintf (_T("Invalid bind"));
-						nlwarning ("Invalid bind");
+						mprintf(_M("Invalid bind\n"));
+						nlwarning("Invalid bind");
 						return false;
 					}
 					if (idstedge==orderdstvtx) 
@@ -419,7 +422,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 						icv=getCommonVertex(pPM,idstpatch,isrcpatch);			
 						if (icv==-1)
 						{
-							mprintf (_T("Invalid bind"));
+							mprintf(_M("Invalid bind\n"));
 							nlwarning ("Invalid bind");
 							return false;
 						}
@@ -436,7 +439,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 						icv=getCommonVertex(pPM,idstpatch,isrcpatch);			
 						if (icv==-1)
 						{
-							mprintf (_T("Invalid bind"));
+							mprintf(_M("Invalid bind\n"));
 							nlwarning ("Invalid bind");
 							return false;
 						}
@@ -448,8 +451,8 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 					isrcedge=getEdge(pPM,srcpatch,srcpatch->v[nv],icv);
 					if (isrcedge==-1)
 					{
-						mprintf (_T("Invalid edge"));
-						nlwarning ("Invalid bind");
+						mprintf(_M("Invalid edge\n"));
+						nlwarning("Invalid edge");
 						return false;
 					}
 					// let's fill the dst patch (n is important here... it's the order)
@@ -592,8 +595,8 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 		sym.invert ();
 		if (!CPatchInfo::transform (patchinfo, zoneSymmetry, bank, symmetry, rotate, snapCell, weldThreshold, sym))
 		{
-			mprintf (_T("Can't transform the zone"));
-			nlwarning ("Invalid bind");
+			mprintf(_M("Can't transform the zone\n"));
+			nlwarning("Can't transform the zone");
 			return false;
 		}
 	}
@@ -609,7 +612,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 			uint i;
 			for (i=0; i<error.Errors.size (); i++)
 			{
-				mprintf (utf8ToTStr(error.Errors[i]));
+				mprintf(_M("%s\n"), MaxTStrFromUtf8(error.Errors[i]));
 			}
 			return false;
 		}

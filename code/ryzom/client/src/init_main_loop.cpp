@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2017  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,6 +32,7 @@
 #include "nel/misc/path.h"
 #include "nel/misc/sheet_id.h"
 #include "nel/misc/big_file.h"
+#include "nel/web/curl_certificates.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/u_driver.h"
@@ -184,9 +189,20 @@ struct CStatThread : public NLMISC::IRunnable
 		CURL *curl = curl_easy_init();
 		if(!curl) return;
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
-		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)"); // FIXME
-		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzomcore.org/" + referer).c_str());
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)");
+#ifdef RYZOM_FORGE
+		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzom.com/" + referer).c_str());
+#else
+		curl_easy_setopt(curl, CURLOPT_REFERER, string("https://ryzom.dev/" + referer).c_str());
+#endif
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+		if (url.length() > 8 && (url[4] == 's' || url[4] == 'S')) // 01234 https
+		{
+			NLWEB::CCurlCertificates::addCertificateFile("cacert.pem");
+			NLWEB::CCurlCertificates::useCertificates(curl);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+		}
 		CURLcode res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 		//curl_global_cleanup();
@@ -240,7 +256,11 @@ struct CStatThread : public NLMISC::IRunnable
 		addParam(params, "page", "");
 		addParam(params, "pagetitle", referer);
 		addParam(params, "screen", toString("%dx%d", ClientCfg.ConfigFile.getVar("Width").asInt(), ClientCfg.ConfigFile.getVar("Height").asInt()));
-		addParam(params, "referer", "http%3A%2F%2Fwww.ryzomcore.org%2F" + referer);
+#ifdef RYZOM_FORGE
+		addParam(params, "referer", "http%3A%2F%2Fwww.ryzom.com%2F" + referer);
+#else
+		addParam(params, "referer", "https%3A%2F%2Fryzom.dev%2F" + referer);
+#endif
 		time_t rawtime;
 		struct tm * timeinfo;
 		char buffer [80];
@@ -263,7 +283,9 @@ struct CStatThread : public NLMISC::IRunnable
 		default: shard= "unknown"; break;
 		}
 		addParam(params, "cv_Shard", shard);
-		/* get("http://ryzom.com.woopra-ns.com/visit/" + params); */// FIXME
+#ifdef RYZOM_FORGE
+		get("http://ryzom.com.woopra-ns.com/visit/"+params);
+#endif
 		return true;
 	}
 
@@ -273,7 +295,9 @@ struct CStatThread : public NLMISC::IRunnable
 		std::string params;
 		addParam(params, "cookie", cookie());
 		addParam(params, "ra", randomString());
-		/* get("http://ryzom.com.woopra-ns.com/ping/" + params); */// FIXME
+#ifdef RYZOM_FORGE
+		get("http://ryzom.com.woopra-ns.com/ping/"+params);
+#endif
 	}
 
 	void run()

@@ -1,5 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -276,6 +281,36 @@ template <class T> T trimRightWhiteSpaces (const T &str)
 	return str.substr (0, end);
 }
 
+// remove spaces and tabs at the begin and end of the string
+template <class T> T trimSeparators (const T &str)
+{
+	typename T::size_type start = 0;
+	typename T::size_type size = str.size();
+	while (start < size && (str[start] == ' ' || str[start] == '\t'))
+		start++;
+	typename T::size_type end = size;
+	while (end > start && (str[end-1] == ' ' || str[end-1] == '\t'))
+		end--;
+	return str.substr (start, end-start);
+}
+
+// if both first and last char are quotes (' or "), then remove them
+template <class T> T trimQuotes (const T &str)
+{
+	typename T::size_type size = str.size();
+	if (size == 0)
+		return str;
+	if (str[0] != str[size-1])
+		return str;
+	if (str[0] != '"' && str[0] != '\'')
+		return str;
+	return str.substr(1, size - 2);
+}
+
+// encode/decode uri component using %AB hex encoding
+std::string encodeURIComponent(const std::string &in);
+std::string decodeURIComponent(const std::string &in);
+
 //////////////////////////////////////////////////////////////////////////
 // ****  DEPRECATED *****: PLEASE DON'T USE THESE METHODS BUT FUNCTIONS ABOVE toLower() and toUpper()
 //////////////////////////////////////////////////////////////////////////
@@ -303,28 +338,23 @@ inline sint nlstricmp(const std::string &lhs, const std::string &rhs) { return s
 inline sint nlstricmp(const std::string &lhs, const char *rhs) { return stricmp(lhs.c_str(),rhs); }
 inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(lhs,rhs.c_str()); }
 
-// macros helper to convert UTF-8 std::string and wchar_t*
-#define wideToUtf8(str) (ucstring((ucchar*)str).toUtf8())
-#define utf8ToWide(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
-
-// macros helper to convert UTF-8 std::string and TCHAR*
-#ifdef _UNICODE
-#define tStrToUtf8(str) (ucstring((ucchar*)(LPCWSTR)str).toUtf8())
-#define utf8ToTStr(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
-#else
-#define tStrToUtf8(str) (std::string((LPCSTR)str))
-#define utf8ToTStr(str) (str.c_str())
+#if (NL_COMP_VC_VERSION <= 90)
+inline float nlroundf(float x)
+{
+	return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
+}
+#define roundf(x) NLMISC::nlroundf(x)
 #endif
 
-// wrapper for fopen to be able to open files with an UTF-8 filename
-FILE* nlfopen(const std::string &filename, const std::string &mode);
+// Wrapper for fopen to be able to open files with an UTF-8 filename
+FILE *nlfopen(const std::string &filename, const std::string &mode);
 
 /** Signed 64 bit fseek. Same interface as fseek
   */
-int		nlfseek64( FILE *stream, sint64 offset, int origin );
+int nlfseek64(FILE *stream, sint64 offset, int origin);
 
 // Retrieve position in a file, same interface as ftell
-sint64  nlftell64(FILE *stream);
+sint64 nlftell64(FILE *stream);
 
 /**
  * Base class for all NeL exception.
@@ -338,8 +368,8 @@ public:
 	Exception();
 	Exception(const std::string &reason);
 	Exception(const char *format, ...);
-	virtual ~Exception() throw() {}
-	virtual const char	*what() const throw();
+	virtual ~Exception() NL_OVERRIDE {}
+	virtual const char	*what() const throw() NL_OVERRIDE;
 };
 
 

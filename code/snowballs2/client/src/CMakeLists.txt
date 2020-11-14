@@ -12,9 +12,9 @@ NL_DEFAULT_PROPS(snowballs_client "Snowballs, Client: Snowballs Client")
 NL_ADD_RUNTIME_FLAGS(snowballs_client)
 
 # If sound is enabled then add the definitions and link the libraries.
-IF(ENABLE_SOUND)
+IF(WITH_SOUND)
   ADD_DEFINITIONS(-DSBCLIENT_WITH_SOUND)
-  TARGET_LINK_LIBRARIES(snowballs_client ${NELSOUND_LIBRARY})
+  TARGET_LINK_LIBRARIES(snowballs_client nelsound)
 ENDIF()
 
 INSTALL(TARGETS snowballs_client RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT snowballsclient)

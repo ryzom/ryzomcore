@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -304,7 +307,7 @@ void RPO::GetDeformBBox(TimeValue t, Box3& box, Matrix3 *tm, BOOL useSel )
 // ------------------------------------------------------------------------------------------------------------------------------------------------
 
 //From ReferenceMaker
-RefResult RPO::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget,PartID& partID, RefMessage message, BOOL propagate )
+RefResult RPO::NotifyRefChanged(NOTIFY_REF_PARAMS)
 {
 	//TODO: Implement, if the object makes references to other things
 	//return PatchObject::NotifyRefChanged( changeInt, hTarget, partID, message, propagate);

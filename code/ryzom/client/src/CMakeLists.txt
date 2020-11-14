@@ -3,11 +3,6 @@ IF(WITH_RYZOM_TOOLS OR WITH_RYZOM_CLIENT)
   ADD_SUBDIRECTORY(client_sheets)
 ENDIF()
 
-IF(WITH_RYZOM_TOOLS OR WITH_RYZOM_CLIENT OR WITH_RYZOM_INSTALLER)
-  # Need seven_zip lib for patch_gen tool
-  ADD_SUBDIRECTORY(seven_zip)
-ENDIF()
-
 IF(WITH_RYZOM_CLIENT)
   IF(NOT WITH_GUI)
     MESSAGE(FATAL_ERROR "The client cannot be built without the NeL GUI Library (WITH_GUI)")
@@ -65,11 +60,11 @@ IF(WITH_RYZOM_CLIENT)
       SET(RYZOM_BUILD ${RYZOM_VERSION_SHORT})
     ENDIF()
 
-    SET(MACOSX_BUNDLE_INFO_STRING "Ryzom Core Client")
+    SET(MACOSX_BUNDLE_INFO_STRING "Ryzom Classic")
     SET(MACOSX_BUNDLE_ICON_FILE "ryzom.icns")
-    SET(MACOSX_BUNDLE_GUI_IDENTIFIER "")
+    SET(MACOSX_BUNDLE_GUI_IDENTIFIER "dev.ryzom.classic")
     SET(MACOSX_BUNDLE_LONG_VERSION_STRING ${RYZOM_VERSION})
-    SET(MACOSX_BUNDLE_BUNDLE_NAME "Ryzom Core Client")
+    SET(MACOSX_BUNDLE_BUNDLE_NAME "Ryzom Classic")
     SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${RYZOM_VERSION_SHORT})
     SET(MACOSX_BUNDLE_BUNDLE_VERSION ${RYZOM_BUILD})
     SET(MACOSX_BUNDLE_COPYRIGHT ${COPYRIGHT})
@@ -158,6 +153,8 @@ IF(WITH_RYZOM_CLIENT)
         ${OPENSSL_INCLUDE_DIR}
   )
 
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/nel/3rdparty)
+
   IF(STEAM_FOUND)
     INCLUDE_DIRECTORIES(${STEAM_INCLUDE_DIRS})
   ENDIF()
@@ -170,7 +167,7 @@ IF(WITH_RYZOM_CLIENT)
               nel3d
               nelgui
               nelsound
-              ryzom_sevenzip
+              nel_sevenzip
               ryzom_clientsheets
               ryzom_gameshare
               nelpacs
@@ -190,7 +187,7 @@ IF(WITH_RYZOM_CLIENT)
 
   ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${CURL_DEFINITIONS} ${LUABIND_DEFINITIONS})
 
-  NL_DEFAULT_PROPS(ryzom_client "Ryzom, Client: Ryzom Core Client")
+  NL_DEFAULT_PROPS(ryzom_client "Ryzom, Client: Ryzom Classic")
   NL_ADD_RUNTIME_FLAGS(ryzom_client)
 
   IF(FINAL_VERSION)

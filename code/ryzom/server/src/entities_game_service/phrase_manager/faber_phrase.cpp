@@ -249,13 +249,14 @@ bool CFaberPhrase::validate()
 		return false;
 	}
 
-
+#ifdef RYZOM_FORGE_CRAFT_TOOL
 	// check quality of right hand item (need be >= Recommended (level of item))
 	if (rightHandItem->recommended()+49 < _Recommended)
 	{
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "CRAFT_NEED_RECOMMENDED_CRAFTING_TOOL");
 		return false;
 	}
+#endif
 
 	// entities cant craft if in combat
 	/* commented as test of right hand item is now made...

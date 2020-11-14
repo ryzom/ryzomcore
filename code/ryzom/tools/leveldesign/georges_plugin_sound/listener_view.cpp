@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -68,7 +71,7 @@ bool CListenerView::registerClass()
 	}
 	catch (CResourceException* e)
 	{
-		  AfxMessageBox("Couldn't register class! (Already registered?)");
+		  AfxMessageBox(_T("Couldn't register class! (Already registered?)"));
 		  e->Delete();
 		  return false;
 	}
@@ -80,7 +83,7 @@ bool CListenerView::registerClass()
 	_VolumeCurve.CreatePen(PS_SOLID, 1, RGB(255, 0, 128)); 
 
 	_Font.CreateFont(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, 
-					CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Arial");
+					CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, _T("Arial"));
 
 	return true;
 }
@@ -99,7 +102,7 @@ void CListenerView::init(CSoundPlugin* plugin, CRect& rect, CWnd* parent)
 	_OuterAngle = 360;
 	_InnerAngle = 360;
 
-	if (!Create((LPCTSTR) _WndClass, "Listener", WS_CHILD | WS_VISIBLE, rect, parent, ++_WndId))
+	if (!Create((LPCTSTR) _WndClass, _T("Listener"), WS_CHILD | WS_VISIBLE, rect, parent, ++_WndId))
 	{
 		throw exception("failed to create the listener view");
 	}

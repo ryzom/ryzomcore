@@ -395,7 +395,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 	// the form was found so read the true values from George
 	_SheetId = sheetId;
 #ifdef NL_DEBUG
-	nlassert(debugSheet.get().empty() || _SheetId!=NLMISC::CSheetId(debugSheet));
+	nlassert(debugSheet.get().empty() || _SheetId!=NLMISC::CSheetId(debugSheet.get()));
 #endif
 	
 	item.getValueByName(_Level,"Basics.Level");
@@ -677,7 +677,7 @@ void AISHEETS::CCreature::serial(NLMISC::IStream &s)
 {
 	s.serial(_SheetId, _Level);
 #ifdef NL_DEBUG
-	nlassert(debugSheet.get().empty() || _SheetId!=NLMISC::CSheetId(debugSheet));
+	nlassert(debugSheet.get().empty() || _SheetId!=NLMISC::CSheetId(debugSheet.get()));
 #endif
 	
 	s.serial(_DynamicGroupCountMultiplier);
@@ -828,7 +828,7 @@ void AISHEETS::CRaceStats::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const
 	// the form was found so read the true values from George
 	_SheetId = sheetId;
 #ifdef NL_DEBUG
-	nlassert(debugSheet.get().empty() || _SheetId!=NLMISC::CSheetId(debugSheet));
+	nlassert(debugSheet.get().empty() || _SheetId!=NLMISC::CSheetId(debugSheet.get()));
 #endif
 	
 	item.getValueByName(_Race, "Race");
@@ -843,7 +843,7 @@ void AISHEETS::CRaceStats::serial(NLMISC::IStream &s)
 {
 	s.serial(_SheetId);
 #ifdef NL_DEBUG
-	nlassert(debugSheet.get().empty() || _SheetId!=NLMISC::CSheetId(debugSheet));
+	nlassert(debugSheet.get().empty() || _SheetId!=NLMISC::CSheetId(debugSheet.get()));
 #endif
 	
 	s.serial(_SheetId);

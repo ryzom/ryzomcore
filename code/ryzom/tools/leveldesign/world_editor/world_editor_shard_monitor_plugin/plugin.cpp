@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1189,7 +1192,7 @@ void CPlugin::updateConnectionState()
 				// Change the text
 				_DialogFlag->ConnectCtrl.SetWindowText (getStringRsc(IDS_DISCONNECT));
 				_DialogFlag->State = (LPCTSTR) (getStringRsc(IDS_CONNECTED_TO) + _SHost.c_str());
-				_DialogFlag->Sent = CString(utf8ToTStr(toString (_Client->getBytesSent ()))) + getStringRsc(IDS_BYTE_SENT);
+			    _DialogFlag->Sent = CString(nlUtf8ToTStr(toString(_Client->getBytesSent()))) + getStringRsc(IDS_BYTE_SENT);
 				//_DialogFlag->Received = (toString ((uint32)_Client->getBytesReceived ()) + " bytes received").c_str();
 				_DialogFlag->Received = (toString("%.1f", bandwidth/1024.0) + " kB/s").c_str();
 				_DialogFlag->DownloadValue = (toString("%.1f kB/s", _DialogFlag->Download/1024.0)).c_str();
@@ -1198,7 +1201,7 @@ void CPlugin::updateConnectionState()
 			break;
 			case WaitingServerParams:				
 				_DialogFlag->ConnectCtrl.SetWindowText (getStringRsc(IDS_CANCEL_CONNECT));
-				_DialogFlag->State = getStringRsc(IDS_WAITING_SERVER_PARAMS) + utf8ToTStr(_SHost);
+			    _DialogFlag->State = getStringRsc(IDS_WAITING_SERVER_PARAMS) + nlUtf8ToTStr(_SHost);
 			break;
 			case WaitingLoginConfirmation:
 			{

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -53,10 +56,10 @@ void CChoosePoolID::OnOK()
 	CString val;
 	GetDlgItem(IDC_POOL_ID)->GetWindowText(val);
 
-	if (NLMISC::fromString(tStrToUtf8(val), PoolID))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(val), PoolID))
 	{
 		GetDlgItem(IDC_POOL_NAME)->GetWindowText(val);
-		Name = tStrToUtf8(val);
+		Name = NLMISC::tStrToUtf8(val);
 		CDialog::OnOK();
 	}
 	else
@@ -71,8 +74,8 @@ BOOL CChoosePoolID::OnInitDialog()
 
 	std::string val = NLMISC::toString(PoolID);
 
-	GetDlgItem(IDC_POOL_ID)->SetWindowText(utf8ToTStr(val));
-	GetDlgItem(IDC_POOL_NAME)->SetWindowText(utf8ToTStr(Name));
+	GetDlgItem(IDC_POOL_ID)->SetWindowText(nlUtf8ToTStr(val));
+	GetDlgItem(IDC_POOL_NAME)->SetWindowText(nlUtf8ToTStr(Name));
 
 	if (_FreezeID)
 	{

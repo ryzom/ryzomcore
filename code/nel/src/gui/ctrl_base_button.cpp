@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -992,6 +995,28 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 0);
 
 		runLeftClickAction();
+
+		return 0;
+	}
+
+		// ***************************************************************************
+	void CCtrlBaseButton::runRightClickAction()
+	{
+		if(_AHOnRightClick != NULL)
+		{
+
+			CAHManager::getInstance()->submitEvent( "button_click:" + getId() );
+			CAHManager::getInstance()->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
+		}
+	}
+
+	// ***************************************************************************
+	int CCtrlBaseButton::luaRunRightClickAction(CLuaState &ls)
+	{
+		const char *funcName = "onRightClick";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+
+		runRightClickAction();
 
 		return 0;
 	}

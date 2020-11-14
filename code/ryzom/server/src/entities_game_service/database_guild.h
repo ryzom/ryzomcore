@@ -1,3 +1,5 @@
+
+
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -14,12 +16,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#ifndef INCLUDED_database_GUILD_H
-#define INCLUDED_database_GUILD_H
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
+
+#ifndef INCLUDED_DATABASE__GUILD_H
+#define INCLUDED_DATABASE__GUILD_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -28,16 +30,13 @@
 
 
 #include "game_share/far_position.h"
-	
-inline void _setProp(CCDBSynchronised &db, ICDBStructNode *node, TCharConnectionState value, bool forceSending = false)
-{
-	db.x_setProp(node, uint64(value), forceSending);
-}
-inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, TCharConnectionState &value)
-{
-	value = (TCharConnectionState)db.x_getProp(node);
-}
-			
+	inline void _setProp(CCDBSynchronised &db,
+      ICDBStructNode *node, TCharConnectionState value, bool
+      forceSending = false) { db.x_setProp(node, uint64(value),
+      forceSending); } inline void _getProp(const CCDBSynchronised
+      &db, ICDBStructNode *node, TCharConnectionState
+      &value) { value =
+      (TCharConnectionState)db.x_getProp(node); }
 
 
 #ifndef _SET_PROP_ACCESSOR_
@@ -151,15 +150,15 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 
 		
 	class TGUILD
-	{	
+	{
 	public:
 		
 	class TFAME
-	{	
+	{
 	public:
 		
 	class TArray
-	{	
+	{
 	public:
 		
 
@@ -316,11 +315,11 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 		
 	class TMEMBERS
-	{	
+	{
 	public:
 		
 	class TArray
-	{	
+	{
 	public:
 		
 
@@ -465,7 +464,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 		
 	class TINVENTORY
-	{	
+	{
 	public:
 		
 
@@ -529,6 +528,8 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	
 		void setMONEY(CCDBGroup &dbGroup, uint64 value, bool forceSending = false)
 		{
+			
+
 			_setProp(dbGroup.Database, _MONEY, value, forceSending);
 		}
 
@@ -548,15 +549,15 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 		
 	class TOUTPOST
-	{	
+	{
 	public:
 		
 	class TO
-	{	
+	{
 	public:
 		
 	class TGUILD
-	{	
+	{
 	public:
 		
 
@@ -686,11 +687,11 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 		
 	class TSQUAD_SPAWN_ZONE
-	{	
+	{
 	public:
 		
 	class TArray
-	{	
+	{
 	public:
 		
 
@@ -778,11 +779,11 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 		
 	class TSQUAD_SHOP
-	{	
+	{
 	public:
 		
 	class TArray
-	{	
+	{
 	public:
 		
 
@@ -849,11 +850,11 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 		
 	class TSQUADS
-	{	
+	{
 	public:
 		
 	class TSP
-	{	
+	{
 	public:
 		
 
@@ -896,7 +897,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 		
 	class TT
-	{	
+	{
 	public:
 		
 
@@ -961,17 +962,19 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		}
 	
 	};
+		
 
 	private:
 		ICDBStructNode	*_BranchNode;
 
-		TSP __SP[24];
+		TSP C_SP[24];
 		TT _T[24];
+		
 
 	public:
 		void init(ICDBStructNode *parent);
 
-		// accessors to branch node
+		// accessor to branch node
 		ICDBStructNode *getCDBNode()
 		{
 			return _BranchNode;
@@ -980,7 +983,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		TSP &getSP(uint32 index)
 		{
 			nlassert(index < 24);
-			return __SP[index];
+			return C_SP[index];
 		}
 		TT &getT(uint32 index)
 		{
@@ -991,11 +994,11 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 		
 	class TBUILDINGS
-	{	
+	{
 	public:
 		
 	class TArray
-	{	
+	{
 	public:
 		
 
@@ -1844,4 +1847,4 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 	
 
-#endif // INCLUDED_database_GUILD_H
+#endif // INCLUDED_DATABASE__GUILD_H

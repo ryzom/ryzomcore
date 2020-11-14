@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(nl_probe_timers ${SRC})
 

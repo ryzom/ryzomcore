@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # 
 # \file 0_setup.py
-# \brief Setup sound
-# \date 2009-06-03 10:47GMT
+# \brief setup sound
+# \date 2010-05-24 13:42GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Setup sound
@@ -45,22 +45,19 @@ printLog(log, "")
 
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
-mkPath(log, LeveldesignDirectory)
-mkPath(log, LeveldesignDfnDirectory)
-mkPath(log, DatabaseDirectory + "/" + SoundSamplebanksSourceDirectory)
+mkPath(log, SoundDirectory)
+mkPath(log, SoundDfnDirectory)
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
+mkPath(log, ExportBuildDirectory + "/" + SoundExportDirectory)
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
-mkPath(log, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory)
-mkPath(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, InstallDirectory + "/" + SoundSheetsInstallDirectory)
-mkPath(log, InstallDirectory + "/" + SoundSamplebanksInstallDirectory)
+mkPath(log, InstallDirectory + "/" + SoundInstallDirectory)
 
 log.close()
 

@@ -1043,7 +1043,7 @@ void CShopTypeManager::addTpShopBase( uint32 shopCategoryNumber, uint32 ecosyste
 //----------------------------------------------------------------------------
 void CShopTypeManager::addShopBase( uint32 shopCategoryNumber, CMerchant& merchant, std::vector< uint32 >& rmSelector, std::vector< uint32 >& originSelector, std::vector< uint32 >& qualitySelector, std::vector< uint32 >& levelSelector, std::vector< uint32 >& shopTypeSelector )
 {
-	TShopTypeSelected shopTypeSelected;
+	TShopTypeSelected shopTypeSelected = InvalidShopSelected;
 	if( shopTypeSelector.size() == 0 )
 	{
 		shopTypeSelected = AllShopSelected;
@@ -1052,15 +1052,15 @@ void CShopTypeManager::addShopBase( uint32 shopCategoryNumber, CMerchant& mercha
 	{
 		for( uint32 i = 0; i < shopTypeSelector.size(); ++i )
 		{
-			if( _CategoryName[ shopTypeSelector[ i ] ] == string("STATIC_SHOP") )
+			if( _CategoryName[ shopTypeSelector[ i ] ] == "STATIC_SHOP" )
 			{
 				shopTypeSelected = StaticShopSelected;
 			}
-			else if( _CategoryName[ shopTypeSelector[ i ] ] == string("DYNAMIC_SHOP") )
+			else if( _CategoryName[ shopTypeSelector[ i ] ] == "DYNAMIC_SHOP" )
 			{
 				shopTypeSelected = DynamicShopSelected;
 			}
-			else if( _CategoryName[ shopTypeSelector[ i ] ] == string("STATIC_DYNAMIC_SHOP") )
+			else if( _CategoryName[ shopTypeSelector[ i ] ] == "STATIC_DYNAMIC_SHOP" )
 			{
 				shopTypeSelected = AllShopSelected;
 			}

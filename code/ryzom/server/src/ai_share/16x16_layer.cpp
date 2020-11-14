@@ -88,9 +88,9 @@ I16x16Layer		*I16x16Layer::compress(I16x16Layer *layer, sint32 blank)
 
 	map<sint32, uint>	count;
 
-	for (i=0; i<256; ++i)
+	for (i=0; i<16; ++i) for (j=0;j<16;++j)
 	{
-		sint32	val = flayer->Array[0][i];
+		sint32	val = flayer->Array[i][j];
 
 		if (val == blank)
 			continue;

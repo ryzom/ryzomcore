@@ -595,6 +595,7 @@ COutpostSquadManager::COutpostSquadManager(COutpost* parent, uint32 alias, std::
 	eventAction = NULL;
 	
 	// Register event handler
+	// FIXME: 0 == CAIAliasDescriptionNode instance
 	event = new CAIEventReaction(getStateMachine(), 0, eventDescription.EventType);
 	event->processEventDescription(&eventDescription, getStateMachine());
 	getStateMachine()->eventReactions().addChild(event);
@@ -618,6 +619,7 @@ COutpostSquadManager::COutpostSquadManager(COutpost* parent, uint32 alias, std::
 	eventAction = NULL;
 	
 	// Register event handler
+	// FIXME: 0 == CAIAliasDescriptionNode instance
 	event = new CAIEventReaction(getStateMachine(), 0, eventDescription.EventType);
 	event->processEventDescription(&eventDescription, getStateMachine());
 	getStateMachine()->eventReactions().addChild(event);
@@ -641,6 +643,7 @@ COutpostSquadManager::COutpostSquadManager(COutpost* parent, uint32 alias, std::
 	eventAction = NULL;
 	
 	// Register event handler
+	// FIXME: 0 == CAIAliasDescriptionNode instance
 	event = new CAIEventReaction(getStateMachine(), 0, eventDescription.EventType);
 	event->processEventDescription(&eventDescription, getStateMachine());
 	getStateMachine()->eventReactions().addChild(event);
@@ -675,6 +678,7 @@ COutpostSquadManager::COutpostSquadManager(COutpost* parent, uint32 alias, std::
 	eventAction = NULL;
 	
 	// Register event handler
+	// FIXME: 0 == CAIAliasDescriptionNode instance
 	event = new CAIEventReaction(getStateMachine(), 0, eventDescription.EventType);
 	event->processEventDescription(&eventDescription, getStateMachine());
 	getStateMachine()->eventReactions().addChild(event);
@@ -1149,7 +1153,7 @@ NLMISC_COMMAND(displayOutposts, "list the available outpost", "")
 	if (args.size() > 0)
 		return false;
 	
-	uint32 instanceNumber = std::numeric_limits<uint32>::max();
+	static const uint32 instanceNumber = std::numeric_limits<uint32>::max();
 	for (uint i=0; i<CAIS::instance().AIList().size(); ++i)
 	{
 		CAIInstance	*const	aii = CAIS::instance().AIList()[i];

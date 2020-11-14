@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -126,7 +129,7 @@ void CPrecomputedRotationsDlg::OnUpdateMinRotSpeed()
 	nlassert(_RotatedParticle);
 	UpdateData();
 	float newValue, valueMin, valueMax;
-	if (NLMISC::fromString(tStrToUtf8(m_RotSpeedMin), newValue))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(m_RotSpeedMin), newValue))
 	{
 		uint32 nbModels = _RotatedParticle->checkHintRotateTheSame(valueMin, valueMax);
 		valueMin = newValue;
@@ -146,7 +149,7 @@ void CPrecomputedRotationsDlg::OnUpdateMaxRotSpeed()
 	nlassert(_RotatedParticle);
 	UpdateData();
 	float newValue, valueMin, valueMax;
-	if (NLMISC::fromString(tStrToUtf8(m_RotSpeedMax), newValue))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(m_RotSpeedMax), newValue))
 	{
 		uint32 nbModels = _RotatedParticle->checkHintRotateTheSame(valueMin, valueMax);
 		valueMax = newValue;
@@ -167,7 +170,7 @@ void CPrecomputedRotationsDlg::OnUpdateNbModels()
 	UpdateData();
 	float valueMin, valueMax;
 	sint32 newNbModels;
-	bool valid = (NLMISC::fromString(tStrToUtf8(m_NbModels), newNbModels) && newNbModels > 0);
+	bool valid = (NLMISC::fromString(NLMISC::tStrToUtf8(m_NbModels), newNbModels) && newNbModels > 0);
 	if (dynamic_cast<NL3D::CPSConstraintMesh *>(_RotatedParticle))
 	{
 		valid &= (newNbModels < NL3D::ConstraintMeshMaxNumPrerotatedModels);

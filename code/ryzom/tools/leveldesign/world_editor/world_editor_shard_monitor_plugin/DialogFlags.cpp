@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -301,7 +304,7 @@ void CDialogFlags::setCurrentEntityDisplayMode(TEntityDisplayMode edm)
 void CDialogFlags::loadEntityDisplayInfoToRegistry(TEntityDisplayInfoVect &infos, const std::string &regId)
 {
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, utf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, nlUtf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
 	{
 		DWORD index  = 0;
 		for(;;)
@@ -338,7 +341,7 @@ void CDialogFlags::loadEntityDisplayInfoToRegistry(TEntityDisplayInfoVect &infos
 void CDialogFlags::saveEntityDisplayInfoToRegistry(const TEntityDisplayInfoVect &infos, const std::string &regId)
 {
 	HKEY hKey;
-	if (RegCreateKeyEx(HKEY_CURRENT_USER, utf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
+	if (RegCreateKeyEx(HKEY_CURRENT_USER, nlUtf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
 	{
 		for(uint k = 0; k < infos.size(); ++k)
 		{

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -781,6 +784,94 @@ bool fromHexa(const char hexa, uint8 &b)
 	return false;
 }
 
+static std::vector<char> makeCharLookupTable(const std::string &chars)
+{
+	std::vector<char> out(256, -1);
+	for(uint i = 0; i< chars.size(); i++)
+		out[chars[i]] = i;
+
+	return out;
+}
+
+std::string encodeURIComponent(const std::string &in)
+{
+	static const char hexLookup[] = "0123456789ABCDEF";
+	static const std::vector<char> notEscaped(makeCharLookupTable(
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz"
+		"0123456789"
+		"-_.!~*'()"
+	));
+
+	if (in.empty())
+		return std::string();
+
+	std::string out;
+
+	size_t inSize = in.size();
+	size_t outSize = in.size();
+
+	// resize to worst case for smaller strings,
+	// give some replacements for free for larger strings
+	if (in.size() < 100)
+		out.reserve(in.size() * 3);
+	else
+		out.reserve(in.size() + 200);
+
+	for(size_t i = 0; i < inSize; i++)
+	{
+		char ch = in[i];
+		if (notEscaped[(uint8)ch] == -1)
+		{
+			out += '%';
+			out += hexLookup[(ch>>4)& 0x0F];
+			out += hexLookup[ch & 0x0F];
+			outSize += 2;
+		}
+		else
+		{
+			out += ch;
+		}
+	}
+	// resize back to correct size
+	out.resize(outSize);
+
+	return out;
+}
+
+std::string decodeURIComponent(const std::string &in)
+{
+	if (in.find("%") == std::string::npos)
+		return in;
+
+	std::string out;
+	out.resize(in.size());
+
+	size_t outIndex = 0, inSize = in.size();
+	for(size_t i = 0; i < inSize; i++, outIndex++)
+	{
+		if (in[i] == '%' && (i+2 < inSize))
+		{
+			uint8 a;
+			uint8 b;
+			if (fromHexa(in[i+1], a) && fromHexa(in[i+2], b))
+			{
+				out[outIndex] = (a << 4) | b;
+				i += 2;
+			} else {
+				// not hex chars
+				out[outIndex] = in[i];
+			}
+		}
+		else
+		{
+			out[outIndex] = in[i];
+		}
+	}
+	out.resize(outIndex);
+	return out;
+}
+
 std::string formatThousands(const std::string& s)
 {
 	sint i, k;
@@ -911,7 +1002,7 @@ static bool createProcess(const std::string &programName, const std::string &arg
 	}
 
 	// or 0 for a window
-	BOOL res = CreateProcessW(sProgramName, utf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
+	BOOL res = CreateProcessW(sProgramName, (LPWSTR)nlUtf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
 
 	if (sProgramName)
 	{
@@ -1453,7 +1544,7 @@ void displayDwordBits( uint32 b, uint nbits, sint beginpos, bool displayBegin, N
 FILE* nlfopen(const std::string &filename, const std::string &mode)
 {
 #ifdef NL_OS_WINDOWS
-	return _wfopen(utf8ToWide(filename), utf8ToWide(mode));
+	return _wfopen(nlUtf8ToWide(filename), nlUtf8ToWide(mode));
 #else
 	return fopen(filename.c_str(), mode.c_str());
 #endif
@@ -1632,7 +1723,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 {
 #ifdef NL_OS_WINDOWS
 	// First try ShellExecute()
-	HINSTANCE result = ShellExecuteW(NULL, L"open", utf8ToWide(document), NULL, NULL, SW_SHOWDEFAULT);
+	HINSTANCE result = ShellExecuteW(NULL, L"open", nlUtf8ToWide(document), NULL, NULL, SW_SHOWDEFAULT);
 
 	// If it failed, get the .htm regkey and lookup the program
 	if ((uintptr_t)result <= HINSTANCE_ERROR)
@@ -1640,7 +1731,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 		wchar_t key[MAX_PATH + MAX_PATH];
 
 		// get the type of the extension
-		if (GetRegKey(HKEY_CLASSES_ROOT, utf8ToWide("." + ext), key) == ERROR_SUCCESS)
+		if (GetRegKey(HKEY_CLASSES_ROOT, nlUtf8ToWide("." + ext), key) == ERROR_SUCCESS)
 		{
 			lstrcatW(key, L"\\shell\\open\\command");
 

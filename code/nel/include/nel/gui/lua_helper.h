@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -84,7 +88,7 @@ namespace NLGUI
 	{
 	public:
 		ELuaError() { CLuaStackChecker::incrementExceptionContextCounter(); }
-		virtual ~ELuaError() throw() { CLuaStackChecker::decrementExceptionContextCounter(); }
+		virtual ~ELuaError() NL_OVERRIDE { CLuaStackChecker::decrementExceptionContextCounter(); }
 		ELuaError(const std::string &reason) : Exception(reason) { CLuaStackChecker::incrementExceptionContextCounter(); }
 		// what(), plus append the Reason
 		virtual std::string luaWhat() const throw() {return NLMISC::toString("LUAError: %s", what());}
@@ -96,9 +100,9 @@ namespace NLGUI
 	public:
 		ELuaParseError() {}
 		ELuaParseError(const std::string &reason) : ELuaError(reason) {}
-		virtual ~ELuaParseError() throw() { }
+		virtual ~ELuaParseError() NL_OVERRIDE { }
 		// what(), plus append the Reason
-		virtual std::string luaWhat() const throw() {return NLMISC::toString("ELuaParseError: %s", what());}
+		virtual std::string luaWhat() const throw() NL_OVERRIDE {return NLMISC::toString("ELuaParseError: %s", what());}
 	};
 
 	/** Exception thrown when something went wrong inside a wrapped function called by lua
@@ -109,8 +113,8 @@ namespace NLGUI
 		ELuaWrappedFunctionException(CLuaState *luaState);
 		ELuaWrappedFunctionException(CLuaState *luaState, const std::string &reason);
 		ELuaWrappedFunctionException(CLuaState *luaState, const char *format, ...);
-		virtual ~ELuaWrappedFunctionException() throw() { }
-		virtual const char	*what() const throw() {return _Reason.c_str();}
+		virtual ~ELuaWrappedFunctionException() NL_OVERRIDE { }
+		virtual const char	*what() const throw() NL_OVERRIDE {return _Reason.c_str();}
 	protected:
 		void	init(CLuaState *ls, const std::string &reason);
 	protected:
@@ -123,9 +127,9 @@ namespace NLGUI
 	public:
 		ELuaExecuteError() {}
 		ELuaExecuteError(const std::string &reason) : ELuaError(reason) {}
-		virtual ~ELuaExecuteError() throw() { }
+		virtual ~ELuaExecuteError() NL_OVERRIDE { }
 		// what(), plus append the Reason
-		virtual std::string luaWhat() const throw() {return NLMISC::toString("ELuaExecuteError: %s", what());}
+		virtual std::string luaWhat() const throw() NL_OVERRIDE {return NLMISC::toString("ELuaExecuteError: %s", what());}
 	};
 
 	// A bad cast occurred when using lua_checkcast

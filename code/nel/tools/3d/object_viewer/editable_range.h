@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -317,7 +320,7 @@ inline void CEditableRangeT<float>::value2CString(float value, CString &dest)
 
 inline const TCHAR *CEditableRangeT<float>::string2value(const CString &value, float &result)
 {			
-	if (NLMISC::fromString(tStrToUtf8(value), result))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(value), result))
 	{			
 		return NULL;
 	}
@@ -344,7 +347,7 @@ inline void CEditableRangeT<uint32>::value2CString(uint32 value, CString &dest)
 inline const TCHAR *CEditableRangeT<uint32>::string2value(const CString &value, uint32 &result)
 {			
 	sint32 tmp;
-	if (NLMISC::fromString(tStrToUtf8(value), tmp))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(value), tmp))
 	{
 		if (value.Find(_T("-")) > -1)
 		{
@@ -380,7 +383,7 @@ inline void CEditableRangeT<sint32>::value2CString(sint32 value, CString &dest)
 inline const TCHAR *CEditableRangeT<sint32>::string2value(const CString &value, sint32 &result)
 {			
 	sint32 tmp;
-	if (NLMISC::fromString(tStrToUtf8(value), tmp))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(value), tmp))
 	{				
 		result = tmp;
 		return NULL;				

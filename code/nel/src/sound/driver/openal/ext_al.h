@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -17,12 +20,12 @@
 #ifndef NL_EXT_AL_H
 #define NL_EXT_AL_H
 
-#ifdef NL_OS_WINDOWS
-#	define EFX_CREATIVE_AVAILABLE 1
-#	define EAX_AVAILABLE 0
-#else
-#	define EFX_CREATIVE_AVAILABLE 0
-#	define EAX_AVAILABLE 0
+#ifndef EFX_CREATIVE_AVAILABLE
+#define EFX_CREATIVE_AVAILABLE 0
+#endif
+
+#ifndef EAX_AVAILABLE
+#define EAX_AVAILABLE 0
 #endif
 
 #if EAX_AVAILABLE

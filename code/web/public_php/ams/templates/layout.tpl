@@ -22,6 +22,7 @@
     <link id="bs-css" href="css/bootstrap-cerulean.min.css" rel="stylesheet">
 
     <link href="css/charisma-app.css" rel="stylesheet">
+    <link href="css/jquery-ui-1.8.21.custom.css" rel="stylesheet">
     <link href='css/jquery.noty.css' rel='stylesheet'>
     <link href='css/noty_theme_default.css' rel='stylesheet'>
     <link href='css/elfinder.min.css' rel='stylesheet'>
@@ -32,11 +33,6 @@
 
 	<!-- jQuery -->
     <script src="js/jquery.min.js"></script>
-
-	<!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
-	<!--[if lt IE 9]>
-	  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
 
 	<!-- The fav icon -->
 	<!--<link rel="shortcut icon" href="img/favicon.ico">-->
@@ -229,9 +225,6 @@
 			_("status").innerHTML = "upload Aborted";
 			}
 	</script>
-	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 
 	<script>
 	 $(document).ready(function() {

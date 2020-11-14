@@ -30,7 +30,7 @@
 				reset($file_list);
 				foreach($file_list as $tmp_key => $tmp_val)
 				{
-					$date_ary[$tmp_key] = $file_list['date'];
+					$date_ary[$tmp_key] = $tmp_val['date'];
 				}
 
 				array_multisort($date_ary, SORT_DESC, $file_list);

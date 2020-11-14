@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -33,13 +36,13 @@
 #undef max
 #endif
 
+#include "../nel_3dsmax_shared/string_common.h"
+
 #define PO2RPO_CLASS_ID Class_ID(0x43bb65e6, 0x68935530)
 
 extern TCHAR *GetString(int id);
 
 extern HINSTANCE hInstance;
-
-
 
 class PO2RPO : public Modifier {
 	public:
@@ -50,7 +53,7 @@ class PO2RPO : public Modifier {
 		HWND hRollup;
 
 		// From Animatable
-		const MCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
+		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
 
 		//From Modifier
 		//TODO: Add the channels that the modifier needs to perform its modification
@@ -87,7 +90,7 @@ class PO2RPO : public Modifier {
 		void GetClassName(TSTR& s) {s = GetString(IDS_CLASS_NAME);}
 		
 		RefTargetHandle Clone( RemapDir &remap );
-		RefResult NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message, BOOL propagate);
+		RefResult NotifyRefChanged(NOTIFY_REF_PARAMS);
 
 		int NumSubs() { return 0; }
 		TSTR SubAnimName(int i) { return GetString(IDS_PARAMS); }

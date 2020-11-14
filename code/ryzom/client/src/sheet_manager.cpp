@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -93,6 +93,8 @@ public:
 	CTypeVersion(std::string type, uint version) {Type=type; Version=version;}
 };
 
+// if you change these values please rebuild the packed_sheets with an updated sheets_packer binary.
+//   This is the only way to have correct version in both client and packed_sheets
 CTypeVersion TypeVersion [] =
 {
 	CTypeVersion("creature",                17),

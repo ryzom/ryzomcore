@@ -6,24 +6,21 @@
  * IAudioDecoder
  */
 
-/* 
- * Copyright (C) 2008-2012  by authors
- * 
- * This file is part of RYZOM CORE.
- * RYZOM CORE is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- * 
- * RYZOM CORE is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE.  If not, see
- * <http://www.gnu.org/licenses/>.
- */
+// NeL - MMORPG Framework <https://wiki.ryzom.dev/>
+// Copyright (C) 2008-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdsound.h"
 #include <nel/sound/audio_decoder.h>
@@ -103,10 +100,12 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 	{
 		return new CAudioDecoderVorbis(stream, loop);
 	}
+#if !defined(NL_OS_WINDOWS) || (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
 	else if (type_lower == "mp3")
 	{
 		return new CAudioDecoderMP3(stream, loop);
 	}
+#endif
 	else
 	{
 		nlwarning("Music file type unknown: '%s'", type_lower.c_str());
@@ -144,6 +143,7 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 
 		nlwarning("Unable to open: '%s'", filepath.c_str());
 	}
+#if !defined(NL_OS_WINDOWS) || (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
 	else if (type_lower == "mp3")
 	{
 		CIFile ifile;
@@ -154,6 +154,7 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 
 		nlwarning("Unable to open: '%s'", filepath.c_str());
 	}
+#endif
 	else
 	{
 		nlwarning("Music file type unknown: '%s'", type_lower.c_str());

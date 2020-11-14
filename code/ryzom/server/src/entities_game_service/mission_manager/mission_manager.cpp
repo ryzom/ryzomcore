@@ -1488,6 +1488,9 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
                 {
                     // inform client
                     closeDynChat( user, botRow );
+					_DynChats.erase(it);
+					it = _DynChats.end();
+					reStart = true;
 
 					std::list< CMissionEvent * > eventList;
                     inst->jump( templ->JumpPoints[i].Step,templ->JumpPoints[i].Action,eventList );
@@ -1495,37 +1498,6 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
 					// Send to AIS (to stop the bot). Important: there must be the same number of items pushed in DynChatEnd that in DynChatStart for the bot to resume.
 					CharacterDynChatBeginEnd.DynChatEnd.push_back( botRow );
 
-// HERE "it" IS INVALID, NEED TO FIND IT AGAIN TO ERASE IT
-
-					it = _DynChats.end(); // to be sure
-
-					{
-						/* We need to find the mission that we are working on as we invalidated the iterator
-						 * in the jump()
-						 */
-						CHashMultiMap<TDataSetRow,CDynChat,TDataSetRow::CHashCode>::iterator itToLookForMission = _DynChats.find( user->getEntityRowId() );
-						while (itToLookForMission != _DynChats.end() && (*itToLookForMission).first == user->getEntityRowId())
-						{
-							if ( (*itToLookForMission).second.Bot == botRow )
-							{
-								CMission * missionIterated = (*itToLookForMission).second.Mission;
-								if (missionIterated && inst  == missionIterated)
-								{
-									_DynChats.erase(itToLookForMission);
-									break;
-								}
-							}
-							++itToLookForMission;
-						}
-					}
-
-//            _DynChats.erase(it);
-
-// END PATCH
-
-
-
-                    reStart = true;
                     switch ( inst->getProcessingState() )
                     {
 	                    case CMission::Failed:

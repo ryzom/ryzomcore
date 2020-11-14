@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -33,6 +33,7 @@ void CProfile::loadFromSettings(const QSettings &settings)
 	executable = settings.value("executable").toString();
 	arguments = settings.value("arguments").toString();
 	comments = settings.value("comments").toString();
+	language = settings.value("language").toString();
 	desktopShortcut = settings.value("desktop_shortcut").toBool();
 	menuShortcut = settings.value("menu_shortcut").toBool();
 }
@@ -45,6 +46,7 @@ void CProfile::saveToSettings(QSettings &settings) const
 	settings.setValue("executable", executable);
 	settings.setValue("arguments", arguments);
 	settings.setValue("comments", comments);
+	settings.setValue("language", language);
 	settings.setValue("desktop_shortcut", desktopShortcut);
 	settings.setValue("menu_shortcut", menuShortcut);
 }
@@ -175,7 +177,7 @@ bool CProfile::createClientConfig() const
 
 	// create the 2 initial lines of client.cfg
 	QString rootConfigFilenameLine = QString("RootConfigFilename = \"%1\";").arg(s.getDefaultClientConfigFullPath());
-	QString languageCodeline = QString("LanguageCode = \"%1\";\n").arg(CConfigFile::getInstance()->getLanguage());
+	QString languageCodeline = QString("LanguageCode = \"%1\";\n").arg(language);
 
 	QString content;
 

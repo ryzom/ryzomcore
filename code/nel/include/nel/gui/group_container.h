@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -274,10 +277,13 @@ namespace NLGUI
 		// Lua exports
 		int luaBlink(CLuaState &ls);
 		int luaSetHeaderColor(CLuaState &ls);
+		int luaSetModalParentList(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CGroupContainer, CGroupContainerBase)
 			REFLECT_LUA_METHOD("blink", luaBlink);
 			REFLECT_LUA_METHOD("setHeaderColor", luaSetHeaderColor);
+			REFLECT_LUA_METHOD("setModalParentList", luaSetModalParentList);
+			
 			REFLECT_STRING("title", getTitle, setTitle);
 			REFLECT_STRING("title_opened", getTitleOpened, setTitleOpened);
 			REFLECT_STRING("title_closed", getTitleClosed, setTitleClosed);

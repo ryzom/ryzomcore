@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -352,7 +355,7 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 		string Name = widget.Parameter.Name;
 
 		// Create a check box
-		nlverify (widget.CheckBox.Create (utf8ToTStr(Name), BS_3STATE|WS_VISIBLE|WS_TABSTOP|(enabled?0:WS_DISABLED), widgetPos, &m_PropertyCont, id));
+		nlverify(widget.CheckBox.Create(nlUtf8ToTStr(Name), BS_3STATE | WS_VISIBLE | WS_TABSTOP | (enabled ? 0 : WS_DISABLED), widgetPos, &m_PropertyCont, id));
 		widget.CheckBox.SetFont (GetFont ());
 	}
 	else if (widget.Parameter.Type == CPrimitiveClass::CParameter::ConstString)
@@ -522,7 +525,7 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 			
 			for (vector<string>::iterator	it=PathList.begin(), itEnd=PathList.end(); it!=itEnd; ++it)
 			{
-				widget.ListEditBox.StringSelectComboBox.InsertString( -1, utf8ToTStr(*it));
+				widget.ListEditBox.StringSelectComboBox.InsertString( -1, nlUtf8ToTStr(*it));
 			}
 		}
 
@@ -549,7 +552,7 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 				
 				for (vector<string>::iterator	it=PathList.begin(), itEnd=PathList.end(); it!=itEnd; ++it)
 				{
-					widget.ListEditBox.StringSelectComboBox.InsertString( -1, utf8ToTStr(*it));
+					widget.ListEditBox.StringSelectComboBox.InsertString(-1, nlUtf8ToTStr(*it));
 				}
 			}
 		}
@@ -915,11 +918,11 @@ bool CDialogProperties::CWidget::fromParameter (const IProperty *property, const
 						updateBoolean ();
 						break;
 					case  CPrimitiveClass::CParameter::ConstString:
-						if (Parameter.Editable || ComboBox.SelectString(-1, utf8ToTStr(propString->String)) == CB_ERR)
+						if (Parameter.Editable || ComboBox.SelectString(-1, nlUtf8ToTStr(propString->String)) == CB_ERR)
 						{
-							ComboBox.SetWindowText(utf8ToTStr(propString->String));
-							ComboBox.InsertString( -1, utf8ToTStr(propString->String));
-							ComboBox.SelectString(-1, utf8ToTStr(propString->String));
+							ComboBox.SetWindowText(nlUtf8ToTStr(propString->String));
+							ComboBox.InsertString(-1, nlUtf8ToTStr(propString->String));
+							ComboBox.SelectString(-1, nlUtf8ToTStr(propString->String));
 						}
 						OriginalString = propString->String.c_str();
 						updateCombo ();
@@ -953,7 +956,7 @@ bool CDialogProperties::CWidget::fromParameter (const IProperty *property, const
 							updateBoolean ();
 							break;
 						case  CPrimitiveClass::CParameter::ConstString:
-							ComboBox.SelectString(-1, utf8ToTStr(result));
+							ComboBox.SelectString(-1, nlUtf8ToTStr(result));
 							OriginalString = result.c_str();
 							updateCombo ();
 							break;
@@ -1282,7 +1285,7 @@ void CDialogProperties::CWidget::updateCombo ()
 		DialogProperties->setDefaultValue (this, value);
 		if (value != "")
 		{
-			int index = ComboBox.FindString (-1, utf8ToTStr(value));
+			int index = ComboBox.FindString(-1, nlUtf8ToTStr(value));
 			if (index != CB_ERR)
 				ComboBox.SetCurSel (index);
 		}
@@ -1621,14 +1624,14 @@ BOOL CDialogProperties::OnCommand(WPARAM wParam, LPARAM lParam)
 					/* todo hulud remove
 					CString oldValue;
 					widget->EditBox.GetWindowText (oldValue);*/
-					CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("default"), TRUE, utf8ToTStr(widget->Parameter.FileExtension), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
-						utf8ToTStr(widget->Parameter.FileExtension+" (*."+widget->Parameter.FileExtension+")|*."+widget->Parameter.FileExtension+"|All Files (*.*)|*.*||"), getMainFrame ());
+				    CFileDialogEx dialog(BASE_REGISTRY_KEY, _T("default"), TRUE, nlUtf8ToTStr(widget->Parameter.FileExtension), NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+				        nlUtf8ToTStr(widget->Parameter.FileExtension + " (*." + widget->Parameter.FileExtension + ")|*." + widget->Parameter.FileExtension + "|All Files (*.*)|*.*||"), getMainFrame());
 
 					TCHAR temp[MAX_PATH];
 
 					if (!widget->Parameter.Folder.empty())
 					{
-						_tcscpy_s(temp, MAX_PATH, utf8ToTStr(widget->Parameter.Folder));
+					    _tcscpy_s(temp, MAX_PATH, nlUtf8ToTStr(widget->Parameter.Folder));
 						dialog.m_ofn.lpstrInitialDir = temp;
 					}
 
@@ -1636,7 +1639,7 @@ BOOL CDialogProperties::OnCommand(WPARAM wParam, LPARAM lParam)
 					{
 						CString str;
 						str = dialog.GetFileTitle();
-						setWindowTextUTF8 (widget->EditBox, tStrToUtf8(str));
+						setWindowTextUTF8 (widget->EditBox, NLMISC::tStrToUtf8(str));
 
 			/* todo hulud remove
 						if ((const char*)oldValue != str)
@@ -2305,7 +2308,7 @@ void CDialogProperties::rebuildDialog ()
 	m_ScrollBar.MoveWindow(&scrollRect, TRUE);
 
 	// set the name of the dlg according to displayed class
-	SetWindowText( CString(_T("Properties for : ")) + utf8ToTStr(windowName) );
+	SetWindowText(CString(_T("Properties for : ")) + nlUtf8ToTStr(windowName));
 
 //	// JC: added scrolling properties
 //	::CRect clientRect;
@@ -2982,13 +2985,12 @@ void CDialogProperties::SelectFolder(CWidget *widget)
 
 	LPITEMIDLIST pidlRoot = NULL;
 	LPSHELLFOLDER desktop;
-	ULONG ulDummy;
 	
 	SHGetDesktopFolder (&desktop);
 	
 	if (widget->Parameter.Folder != "")
 	{
-		desktop->ParseDisplayName (NULL, NULL, utf8ToTStr(widget->Parameter.Folder), &ulDummy, &pidlRoot, &ulDummy);
+		desktop->ParseDisplayName(NULL, NULL, (LPTSTR)nlUtf8ToTStr(widget->Parameter.Folder), NULL, &pidlRoot, NULL);
 	}
 	bi.pidlRoot = pidlRoot;
 	
@@ -3454,7 +3456,7 @@ void CMyComboBox::reloadData()
 		SetRedraw(FALSE);
 		InsertString(-1, _T(""));
 		for (vector<string>::iterator it=_data.begin(), itEnd=_data.end(); it!=itEnd; ++it)
-			InsertString(-1, utf8ToTStr(*it));
+			InsertString(-1, nlUtf8ToTStr(*it));
 		loaded = true;
 		SetRedraw(TRUE);
 		if(n != CB_ERR) SelectString(-1, s);

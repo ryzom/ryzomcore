@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -217,7 +220,7 @@ void CSoundAnimView::save()
 
 				// Create a dialog
 				TCHAR BASED_CODE szFilter[] = _T("NeL Sound Animations (*.sound_anim)|*.sound_anim|All Files (*.*)|*.*||");
-				CFileDialog fileDlg( FALSE, _T(".sound_anim"), utf8ToTStr(filename), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+				CFileDialog fileDlg(FALSE, _T(".sound_anim"), nlUtf8ToTStr(filename), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 
 				if (fileDlg.DoModal() == IDOK)
 				{
@@ -236,7 +239,7 @@ void CSoundAnimView::save()
 			}
 			catch (const Exception& e)
 			{
-				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+				MessageBox(nlUtf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 			}
 		}
 	}

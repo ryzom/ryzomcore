@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -114,7 +117,7 @@ BOOL CPrimitiveConfigurationDlg::OnInitDialog()
 	uint i;
 	for (i=0; i<configurations.size(); i++)
 	{
-		ListCtrl.InsertItem (i, utf8ToTStr(configurations[i].Name));
+		ListCtrl.InsertItem(i, nlUtf8ToTStr(configurations[i].Name));
 		// setItemTextUTF8 (List, nItem, subString++, entry.Strings[CEntryFile::OldSize].c_str ());
 	}
 

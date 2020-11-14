@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -58,7 +61,7 @@ bool EditExternalText (const std::string &editor, std::string &text, const std::
 		}
 
 		// Hide the file
-		SetFileAttributes (utf8ToTStr(tempFilename), FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM);
+		SetFileAttributes(nlUtf8ToTStr(tempFilename), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM);
 
 		// Open the temp file with a text editor
 		if (saved)

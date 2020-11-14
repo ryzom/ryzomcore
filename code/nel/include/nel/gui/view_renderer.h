@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -100,6 +103,12 @@ namespace NLGUI
 			{
 				return _TextureId;
 			}
+
+			// Return true if TextureId is not set
+			bool empty() const { return _TextureId < 0; };
+
+			// delete TextureId if set
+			void clear();
 
 			void serial(NLMISC::IStream &f);
 
@@ -258,6 +267,8 @@ namespace NLGUI
 							  bool bReleasable=true
 							 );
 
+		// Create texture from dataURL "data:image/png;base64," string
+		sint32 createTextureFromDataURL(const std::string &data, bool uploadDXTC=true, bool bReleasable=true);
 
 		// change position of a sub-texture (inside its big texture) from the sub-texture filename
 		void updateTexturePos(const std::string &texturefileName,

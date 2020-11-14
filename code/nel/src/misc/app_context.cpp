@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -135,7 +138,7 @@ CApplicationContext::~CApplicationContext()
 		std::string message = toString("Instance '%s' still allocated at %p", it->first.c_str(), it->second);
 
 #ifdef NL_OS_WINDOWS
-		OutputDebugStringW(utf8ToWide(message));
+		OutputDebugStringW(nlUtf8ToWide(message));
 #else
 		printf("%s\n", message.c_str());
 #endif

@@ -52,7 +52,7 @@ public:
 	CItemDesc()
 		:	_NoContextCount(0)
 	{
-		_LogDefs.resize(34);
+		_LogDefs.resize(39);
 		
 		{
 			LGS::TLogDefinition  &logDef = _LogDefs[0];
@@ -549,6 +549,51 @@ public:
 			logDef.getParams()[1].setType(LGS::TSupportedParamType::spt_entityId);
 				
 		}
+
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[34];
+
+			logDef.setLogName("Item_EnchantPhrase");
+			logDef.setLogText("Player character crystallizes a spell phrase");
+
+			logDef.setContext(true);
+		}
+
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[35];
+
+			logDef.setLogName("Item_CheckSaleStore");
+			logDef.setLogText("Check coherency between player and sale store");
+
+			logDef.setContext(true);
+		}
+
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[36];
+
+			logDef.setLogName("Item_SaleStoreSold");
+			logDef.setLogText("An item was sold through the store and money is received");
+
+			logDef.setContext(true);
+		}
+
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[37];
+
+			logDef.setLogName("Item_EnchantOrRecharge");
+			logDef.setLogText("A player character enchants an item with a crystallized spell phrase or recharges the sap load");
+
+			logDef.setContext(true);
+		}
+
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[38];
+
+			logDef.setLogName("Item_SapRechargeSpell");
+			logDef.setLogText("A player character creates a sap load recharge");
+
+			logDef.setContext(true);
+		}
 		
 
 		// Register the log definitions
@@ -955,6 +1000,52 @@ TLogContext_Item_SaleStoreTimeout::~TLogContext_Item_SaleStoreTimeout()
 	
 }
 
+const std::string TLogContext_Item_CheckSaleStore::_ContextName("Item_CheckSaleStore");
+/// The constructor push a log context in the logger system
+TLogContext_Item_CheckSaleStore::TLogContext_Item_CheckSaleStore(const NLMISC::CEntityId &charId)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	ItemDesc.pushContextVar_charId(charId);
+
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_Item_CheckSaleStore::~TLogContext_Item_CheckSaleStore()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	ItemDesc.popContextVar_charId();
+
+}
+
+const std::string TLogContext_Item_SaleStoreSold::_ContextName("Item_SaleStoreSold");
+/// The constructor push a log context in the logger system
+TLogContext_Item_SaleStoreSold::TLogContext_Item_SaleStoreSold(const NLMISC::CEntityId &charId)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	ItemDesc.pushContextVar_charId(charId);
+
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_Item_SaleStoreSold::~TLogContext_Item_SaleStoreSold()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	ItemDesc.popContextVar_charId();
+
+}
+
 const std::string TLogContext_Item_ConsumeAmmo::_ContextName("Item_ConsumeAmmo");
 /// The constructor push a log context in the logger system
 TLogContext_Item_ConsumeAmmo::TLogContext_Item_ConsumeAmmo(const NLMISC::CEntityId &charId)
@@ -1187,6 +1278,75 @@ TLogContext_Item_OutpostDriller::~TLogContext_Item_OutpostDriller()
 	
 }
 
+const std::string TLogContext_Item_EnchantPhrase::_ContextName("Item_EnchantPhrase");
+/// The constructor push a log context in the logger system
+TLogContext_Item_EnchantPhrase::TLogContext_Item_EnchantPhrase(const NLMISC::CEntityId &charId)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	ItemDesc.pushContextVar_charId(charId);
+
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_Item_EnchantPhrase::~TLogContext_Item_EnchantPhrase()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	ItemDesc.popContextVar_charId();
+
+}
+
+const std::string TLogContext_Item_EnchantOrRecharge::_ContextName("Item_EnchantOrRecharge");
+/// The constructor push a log context in the logger system
+TLogContext_Item_EnchantOrRecharge::TLogContext_Item_EnchantOrRecharge(const NLMISC::CEntityId &charId)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	ItemDesc.pushContextVar_charId(charId);
+
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_Item_EnchantOrRecharge::~TLogContext_Item_EnchantOrRecharge()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	ItemDesc.popContextVar_charId();
+
+}
+
+const std::string TLogContext_Item_SapRechargeSpell::_ContextName("Item_SapRechargeSpell");
+/// The constructor push a log context in the logger system
+TLogContext_Item_SapRechargeSpell::TLogContext_Item_SapRechargeSpell(const NLMISC::CEntityId &charId)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	ItemDesc.pushContextVar_charId(charId);
+
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_Item_SapRechargeSpell::~TLogContext_Item_SapRechargeSpell()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	ItemDesc.popContextVar_charId();
+
+}
+
 
 /// No context context. Use this to disable any contextual log underneath
 TLogNoContext_Item::TLogNoContext_Item()
@@ -1217,7 +1377,7 @@ void _log_Item_Create(INVENTORIES::TItemId itemId, const NLMISC::CSheetId &sheet
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1256,7 +1416,7 @@ void _log_Item_UpdateQuantity(INVENTORIES::TItemId itemId, uint32 quantity, uint
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1293,7 +1453,7 @@ void _log_Item_Move(INVENTORIES::TItemId itemId, INVENTORIES::TInventory srcInve
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1330,7 +1490,7 @@ void _log_Item_PutInSaleStore(INVENTORIES::TItemId itemId, const char *_filename
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1363,7 +1523,7 @@ void _log_Item_RemoveFromSaleStore(INVENTORIES::TItemId itemId, const char *_fil
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1396,7 +1556,7 @@ void _log_Item_Delete(INVENTORIES::TItemId itemId, const NLMISC::CSheetId &sheet
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1435,7 +1595,7 @@ void _log_Item_FailedAddBoughtItem(INVENTORIES::TItemId itemId, INVENTORIES::TIn
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1470,7 +1630,7 @@ void _log_Item_Money(uint64 moneyBefore, uint64 moneyAfter, const char *_filenam
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1505,7 +1665,7 @@ void _log_Item_ExchangeWithChar(const char *_filename_, uint _lineNo_)
 		NLMISC::CEntityId	validatorCharId;
 	if (!ItemDesc.getContextVar_validatorCharId(validatorCharId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1517,7 +1677,7 @@ void _log_Item_ExchangeWithChar(const char *_filename_, uint _lineNo_)
 		NLMISC::CEntityId	otherEntityId;
 	if (!ItemDesc.getContextVar_otherEntityId(otherEntityId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1548,7 +1708,7 @@ void _log_Item_ExchangeWithNPC(const char *_filename_, uint _lineNo_)
 		NLMISC::CEntityId	validatorCharId;
 	if (!ItemDesc.getContextVar_validatorCharId(validatorCharId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1560,7 +1720,7 @@ void _log_Item_ExchangeWithNPC(const char *_filename_, uint _lineNo_)
 		NLMISC::CEntityId	otherEntityId;
 	if (!ItemDesc.getContextVar_otherEntityId(otherEntityId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}

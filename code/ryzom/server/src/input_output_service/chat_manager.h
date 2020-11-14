@@ -415,7 +415,7 @@ public:
 	 * \param sender is the id of the sender
 	 * \param customTxt is a custom text which can be added immediately after the chat message, on the same line
 	 */
-	void sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender = TDataSetRow(), ucstring customTxt = ucstring(""));
+	void sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender = TDataSetRow(), ucstring customTxt = ucstring());
 
 	/**
 	 * Send a custom emote chat message

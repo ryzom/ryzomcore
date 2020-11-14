@@ -1,0 +1,9 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs harvesteurs de l'episode 2
+	"nom_Top10_Best_Harvest_fyros_kami", "storyline.episode2.fyros.kami.harvest.*", "PlayerName", "*", "Sum",
+	"nom_Top10_Best_Harvest_fyros_karavan", "storyline.episode2.fyros.karavan.harvest.*", "PlayerName", "*", "Sum",
+	
+	"score_Top10_Best_Harvest_fyros_kami", "storyline.episode2.fyros.kami.harvest.*", "PlayerValue", "*", "Sum",
+	"score_Top10_Best_Harvest_fyros_karavan", "storyline.episode2.fyros.karavan.harvest.*", "PlayerValue", "*", "Sum",
+};

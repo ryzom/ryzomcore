@@ -2,9 +2,10 @@
 
 // This file contains all variables needed by other php scripts
 
-require_once('../config.php');
+require_once dirname(__DIR__).'/config.php';
 
-$LogRelativePath = 'logs/';
+// !! IMPORTANT !! keep these outside public webroot
+$LogRelativePath = '../../logs/';
 
 // ----------------------------------------------------------------------------------------
 // Variables for nel database access

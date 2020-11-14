@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -115,7 +119,7 @@ namespace NLGUI
 		{
 		#if !FINAL_VERSION
 			#ifdef NL_OS_WINDOWS
-				ShellExecuteW(NULL, utf8ToWide(operation), utf8ToWide(fileName), utf8ToWide(parameters), NULL, SW_SHOWDEFAULT);
+				ShellExecuteW(NULL, nlUtf8ToWide(operation), nlUtf8ToWide(fileName), nlUtf8ToWide(parameters), NULL, SW_SHOWDEFAULT);
 			#endif
 		#endif
 		}
@@ -737,7 +741,7 @@ namespace NLGUI
 		}
 		// because this is a method,    first parameter is the 'this'
 		CReflectableRefPtrTarget *pRPT = getReflectableOnStack(*state,    1);
-		if (pRPT == NULL)
+		if (!pRPT)
 		{
 			state->push(NLMISC::toString("Error while calling lua method %s:%s : 'self' pointer is nil or of bad type,    can't make the call.",
 									prop->ParentClass->ClassName.c_str(),    prop->Name.c_str())
@@ -748,19 +752,22 @@ namespace NLGUI
 		state->remove(1); // remove 'self' reference from parameters stack
 		//
 		sint numResults = 0;
-		sint initialStackSize = state->getTop();
-		try
+		if (pRPT)
 		{
-			// call the actual method
-			numResults = (pRPT->*(prop->GetMethod.GetLuaMethod))(*state);
-		}
-		catch(const std::exception &e)
-		{
-			// restore stack to its initial size
-			state->setTop(initialStackSize);
-			lua_pushstring(ls,      e.what());
-			// TODO : see if this is safe to call lua error there" ... (it does a long jump)
-			lua_error(ls);
+			sint initialStackSize = state->getTop();
+			try
+			{
+				// call the actual method
+				numResults = (pRPT->*(prop->GetMethod.GetLuaMethod))(*state);
+			}
+			catch (const std::exception & e)
+			{
+				// restore stack to its initial size
+				state->setTop(initialStackSize);
+				lua_pushstring(ls, e.what());
+				// TODO : see if this is safe to call lua error there" ... (it does a long jump)
+				lua_error(ls);
+			}
 		}
 		return numResults;
 	}
@@ -783,6 +790,7 @@ namespace NLGUI
 		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
 		std::string			script;
 		ls.toString(2,    script);
+		nlassert(pIE);
 
 		// must be a group
 		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
@@ -792,6 +800,35 @@ namespace NLGUI
 		group->setLuaScriptOnDraw(script);
 
 		return 0;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::getOnDraw(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_getOnDraw
+		CLuaStackChecker lsc(&ls, 1);
+
+		// params: CInterfaceElement*.
+		// return: "script" (nil if empty)
+		CLuaIHM::checkArgCount(ls, "getOnDraw", 1);
+		CLuaIHM::check(ls, CLuaIHM::isUIOnStack(ls, 1), "getOnDraw() requires a UI object in param 1");
+
+		// retrieve arguments
+		CInterfaceElement *pIE = CLuaIHM::getUIOnStack(ls, 1);
+		if (pIE)
+		{
+			// must be a group
+			CInterfaceGroup *group = dynamic_cast<CInterfaceGroup*>(pIE);
+			if (group)
+			{
+				if (!group->getLuaScriptOnDraw().empty()) {
+					ls.push(group->getLuaScriptOnDraw());
+					return 1;
+				}
+			}
+		}
+		ls.pushNil();
+		return 1;
 	}
 
 	// ***************************************************************************
@@ -812,6 +849,7 @@ namespace NLGUI
 		std::string			dbList,    script;
 		ls.toString(2,    dbList);
 		ls.toString(3,    script);
+		nlassert(pIE);
 
 		// must be a group
 		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
@@ -840,6 +878,7 @@ namespace NLGUI
 		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
 		std::string			dbList;
 		ls.toString(2,    dbList);
+		nlassert(pIE);
 
 		// must be a group
 		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
@@ -1402,6 +1441,20 @@ namespace NLGUI
 	#endif
 			}
 			break;
+			case CReflectedProperty::UCStringRef:
+			{
+				ucstring str = (reflectedObject.*(property.GetMethod.GetUCStringRef))();
+	#if LUABIND_VERSION > 600
+				luabind::detail::push(ls.getStatePointer(), str);
+	#else
+				luabind::object obj(ls.getStatePointer(), str);
+				obj.pushvalue();
+	#endif
+			}
+			break;
+			case CReflectedProperty::StringRef:
+				ls.push( (reflectedObject.*(property.GetMethod.GetStringRef))() );
+			break;
 			case CReflectedProperty::RGBA:
 			{
 				CRGBA color = (reflectedObject.*(property.GetMethod.GetRGBA))();
@@ -1466,6 +1519,7 @@ namespace NLGUI
 					return;
 				}
 			case CReflectedProperty::String:
+			case CReflectedProperty::StringRef:
 				{
 					std::string val;
 					ls.toString(stackIndex,    val);
@@ -1473,6 +1527,7 @@ namespace NLGUI
 					return;
 				}
 			case CReflectedProperty::UCString:
+			case CReflectedProperty::UCStringRef:
 				{
 					ucstring val;
 					// Additionaly return of CInterfaceExpr may be std::string... test std string too
@@ -1589,6 +1644,7 @@ namespace NLGUI
 
 		// *** Register Functions
 		ls.registerFunc("setOnDraw",    setOnDraw);
+		ls.registerFunc("getOnDraw", getOnDraw);
 		ls.registerFunc("setCaptureKeyboard", setCaptureKeyboard);
 		ls.registerFunc("resetCaptureKeyboard", resetCaptureKeyboard);
 		ls.registerFunc("setTopWindow", setTopWindow);

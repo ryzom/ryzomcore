@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(build_clod_bank ${SRC})
 

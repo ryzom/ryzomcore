@@ -47,7 +47,7 @@ class PolarPlot {
     var $csimalts=null;			// ALT:s for corresponding target
     var $line_style='solid',$mark;
 
-    function PolarPlot($aData) {
+    function __construct($aData) {
 	$n = count($aData);
 	if( $n & 1 ) {
 	    JpGraphError::RaiseL(17001);

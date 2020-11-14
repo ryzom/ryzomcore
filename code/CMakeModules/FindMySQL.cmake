@@ -16,10 +16,12 @@ IF(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
 ELSE()
 
   FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
-      PATH_SUFFIXES mysql
+      PATH_SUFFIXES mysql mariadb
       PATHS
       /usr/include/mysql
+      /usr/include/mariadb
       /usr/local/include/mysql
+      /usr/local/include/mariadb
       /opt/local/include/mysql5/mysql
       /opt/local/include/mysql55/mysql
       /opt/local/include/mysql51/mysql
@@ -27,28 +29,29 @@ ELSE()
       $ENV{SystemDrive}/MySQL/*/include)
 
   IF(WIN32 AND MSVC)
-    FIND_LIBRARY(MYSQL_LIBRARY_RELEASE NAMES libmysql mysqlclient
+    FIND_LIBRARY(MYSQL_LIBRARY_RELEASE NAMES libmysql mysqlclient libmariadb mariadbclient
       PATHS
       $ENV{ProgramFiles}/MySQL/*/lib/opt
       $ENV{SystemDrive}/MySQL/*/lib/opt)
-
-    FIND_LIBRARY(MYSQL_LIBRARY_DEBUG NAMES libmysqld mysqlclientd
+    FIND_LIBRARY(MYSQL_LIBRARY_DEBUG NAMES libmysqld mysqlclientd libmariadb mariadbclient
       PATHS
       $ENV{ProgramFiles}/MySQL/*/lib/opt
       $ENV{SystemDrive}/MySQL/*/lib/opt)
   ELSE()
-    FIND_LIBRARY(MYSQL_LIBRARY_RELEASE NAMES mysqlclient
+    FIND_LIBRARY(MYSQL_LIBRARY_RELEASE NAMES mysqlclient mariadbclient
       PATHS
       /usr/lib
       /usr/local/lib
+      /usr/lib/mariadb
       /usr/lib/mysql
       /usr/local/lib/mysql
+      /usr/local/lib/mariadb
       /opt/local/lib/mysql5/mysql
       /opt/local/lib/mysql55/mysql
       /opt/local/lib/mysql51/mysql
       )
 
-    FIND_LIBRARY(MYSQL_LIBRARY_DEBUG NAMES mysqlclientd
+    FIND_LIBRARY(MYSQL_LIBRARY_DEBUG NAMES mysqlclientd mariadbclientd
       PATHS
       /usr/lib
       /usr/local/lib
@@ -80,6 +83,10 @@ ELSE()
   IF(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
     SET(MYSQL_FOUND TRUE)
     MESSAGE(STATUS "Found MySQL: ${MYSQL_INCLUDE_DIR}, ${MYSQL_LIBRARIES}")
+    IF (MYSQL_LIBRARIES MATCHES "libmariadb" OR MYSQL_LIBRARIES MATCHES "mariadbclient")
+      SET(MARIADB_FOUND TRUE)
+      MESSAGE(STATUS "Found MariaDB.")
+    ENDIF()
   ELSE()
     SET(MYSQL_FOUND FALSE)
     MESSAGE(STATUS "MySQL not found.")

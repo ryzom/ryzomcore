@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -104,11 +107,14 @@ std::string GetBankPathName ()
 	if (RegOpenKeyEx(HKEY_CURRENT_USER, REGKEY_TILEDIT, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
 	{
 		TCHAR path[256];
-		DWORD len=256 * sizeof(TCHAR);
+		DWORD len = 256 * sizeof(TCHAR);
 		DWORD type;
 		if (RegQueryValueEx(hKey, _T("Bank Path"), 0, &type, (LPBYTE)path, &len)==ERROR_SUCCESS)
-			return tStrToUtf8(path);
-		RegCloseKey (hKey);
+		{
+			RegCloseKey(hKey);
+			return MCharStrToUtf8(path);
+		}
+		RegCloseKey(hKey);
 	}
 	return "";
 }
@@ -119,11 +125,14 @@ int GetBankTileSetSet ()
 	if (RegOpenKeyEx(HKEY_CURRENT_USER, REGKEY_TILEDIT, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
 	{
 		int tileSetSet;
-		DWORD len=256;
+		DWORD len = 256;
 		DWORD type;
 		if (RegQueryValueEx(hKey, _T("Tileset Set"), 0, &type, (LPBYTE)&tileSetSet, &len)==ERROR_SUCCESS)
+		{
+			RegCloseKey(hKey);
 			return tileSetSet;
-		RegCloseKey (hKey);
+		}
+		RegCloseKey(hKey);
 	}
 	return -1;
 }
@@ -134,8 +143,7 @@ void SetBankPathName (const std::string& path)
 	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
 	{
 		TCHAR buffer[MAX_PATH];
-		_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(path));
-
+		_tcscpy_s(buffer, MAX_PATH, MaxTStrFromUtf8(path).data());
 		RegSetValueEx(hKey, _T("Bank Path"), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer)+1)*sizeof(TCHAR));
 		RegCloseKey (hKey);
 	}

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -768,7 +771,7 @@ void CExportNel::buildAMaterial (NL3D::CMaterial& material, CMaxMaterialInfo& ma
 
 		// Set material name		
 		TSTR name=mtl.GetName();
-		materialInfo.MaterialName = name.ToUTF8();
+		materialInfo.MaterialName = MaxTStrToUtf8(name);
 	}
 	else
 	{
@@ -1120,7 +1123,7 @@ void CExportNel::buildAMaterial (NL3D::CMaterial& material, CMaxMaterialInfo& ma
 
 		// Set material name		
 		TSTR name=mtl.GetName();
-		materialInfo.MaterialName = name.ToUTF8();
+		materialInfo.MaterialName = MaxTStrToUtf8(name);
 	}
 }
 
@@ -1255,7 +1258,7 @@ ITexture* CExportNel::buildATexture (Texmap& texmap, CMaterialDesc &remap3dsTexC
 		else // standard texture
 		{
 			srcTex = new CTextureFile;
-			std::string mapName = tStrToUtf8(pBitmap->GetMapName());
+			std::string mapName = MCharStrToUtf8(pBitmap->GetMapName());
 			static_cast<CTextureFile *>(srcTex)->setFileName (ConvertTexFileName(mapName, _AbsolutePath));
 		}
 

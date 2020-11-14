@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -691,6 +695,7 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 
 	return NULL;
 }
+	
 // ----------------------------------------------------------------------------
 string CInterface3DScene::getCurrentCamera() const
 {
@@ -1237,6 +1242,7 @@ CInterface3DShape::~CInterface3DShape()
 // ----------------------------------------------------------------------------
 bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 {
+	nlinfo("SHAPE ID PARENT = %s", parentGroup->getId().c_str());
 	if (!CInterfaceElement::parse(cur, parentGroup))
 		return false;
 

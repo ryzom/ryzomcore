@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -75,9 +78,9 @@ void CProjectSettings::OnBrowse()
 {
 	UpdateData ();
 
-	BROWSEINFO	bi;
-	TCHAR		str[MAX_PATH];
-	ITEMIDLIST*	pidl;
+	BROWSEINFO	 bi;
+	TCHAR		 str[MAX_PATH];
+	LPITEMIDLIST pidl;
 	TCHAR sTemp[1024];
 
 	bi.hwndOwner = this->m_hWnd;
@@ -133,11 +136,11 @@ BOOL CProjectSettings::OnInitDialog()
 	for (uint i=0; i<contexts.size (); i++)
 	{
 		// Add the string
-		Context.InsertString (-1, utf8ToTStr(contexts[i]));
+		Context.InsertString(-1, nlUtf8ToTStr(contexts[i]));
 	}
 
 	// Select the string 
-	Context.SelectString (-1, utf8ToTStr(doc->getContext ()));
+	Context.SelectString(-1, nlUtf8ToTStr(doc->getContext()));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -628,8 +632,8 @@ void CContinentManager::readFrom(xmlNodePtr node)
 			for(uint i = 0; i< itContinent->second->UserLandMarks.size(); ++i)
 			{
 				const CUserLandMark& test = itContinent->second->UserLandMarks[i];
-				uint xdiff = abs(test.Pos.x - lm.Pos.x) * 100;
-				uint ydiff = abs(test.Pos.y - lm.Pos.y) * 100;
+				uint xdiff = fabs(test.Pos.x - lm.Pos.x) * 100.f;
+				uint ydiff = fabs(test.Pos.y - lm.Pos.y) * 100.f;
 				if (xdiff == 0 && ydiff == 0)
 				{
 					add = false;

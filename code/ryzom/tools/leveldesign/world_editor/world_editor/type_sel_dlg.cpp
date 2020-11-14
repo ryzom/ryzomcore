@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -60,7 +63,7 @@ void CTypeSelDlg::OnOK()
 
 	CString sTmp;
 	TypeList.GetText(TypeList.GetCurSel(), sTmp);
-	_TypeSelected = tStrToUtf8(sTmp);
+	_TypeSelected = NLMISC::tStrToUtf8(sTmp);
 
 	CDialog::OnOK();
 }
@@ -72,7 +75,7 @@ BOOL CTypeSelDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	for (uint32 i = 0; i < _TypesInit->size(); ++i)
 	{
-		TypeList.InsertString(-1, utf8ToTStr(_TypesInit->operator[](i).Name));
+		TypeList.InsertString(-1, nlUtf8ToTStr(_TypesInit->operator[](i).Name));
 	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control

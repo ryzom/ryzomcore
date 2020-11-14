@@ -14,7 +14,7 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `ring_mini01`
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `characters` (
   KEY `user_id_idx` (`user_id`),
   KEY `guild_idx` (`guild_id`),
   KEY `guild_id_idx` (`guild_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `folder` (
   PRIMARY KEY (`Id`),
   KEY `owner_idx` (`owner`),
   KEY `title_idx` (`title`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS `folder_access` (
   PRIMARY KEY (`Id`),
   KEY `folder_id_idx` (`folder_id`),
   KEY `user_idx` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=FIXED AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `guilds` (
   PRIMARY KEY (`guild_id`),
   KEY `shard_id_idx` (`shard_id`),
   KEY `guild_name_idx` (`guild_name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 -- --------------------------------------------------------
 
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `guild_invites` (
   PRIMARY KEY (`Id`),
   KEY `guild_id_idx` (`guild_id`),
   KEY `session_id_idx` (`session_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=FIXED AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `journal_entry` (
   `time_stamp` datetime NOT NULL DEFAULT '2005-09-07 12:41:33',
   PRIMARY KEY (`Id`),
   KEY `session_id_idx` (`session_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `known_users` (
   `comments` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`Id`),
   KEY `user_index` (`owner`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `mfs_erased_mail_series` (
   `erased_series` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `erase_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`erased_series`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `mfs_guild_thread` (
   `post_count` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`thread_id`),
   KEY `guild_index` (`guild_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -190,7 +190,7 @@ CREATE TABLE IF NOT EXISTS `mfs_guild_thread_message` (
   `date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `content` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS `mfs_mail` (
   `content` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `dest_index` (`dest_char_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS `outlands` (
   `billing_instance_id` int(11) unsigned NOT NULL DEFAULT '0',
   `anim_session_id` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`session_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS `player_rating` (
   PRIMARY KEY (`Id`),
   KEY `session_id_idx` (`scenario_id`),
   KEY `author_idx` (`author`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS `ring_users` (
   UNIQUE KEY `user_name_idx` (`user_name`),
   KEY `cookie_idx` (`cookie`),
   KEY `current_session_idx` (`current_session`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 -- --------------------------------------------------------
 
@@ -297,7 +297,7 @@ CREATE TABLE IF NOT EXISTS `scenario` (
   `level` enum('sl_a','sl_b','sl_c','sl_d','sl_e','sl_f') NOT NULL DEFAULT 'sl_a',
   `allow_free_trial` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -316,7 +316,7 @@ CREATE TABLE IF NOT EXISTS `scenario_desc` (
   PRIMARY KEY (`session_id`),
   UNIQUE KEY `title_idx` (`title`),
   KEY `parent_idx` (`parent_scenario`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 -- --------------------------------------------------------
 
@@ -358,7 +358,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   KEY `owner_idx` (`owner`),
   KEY `folder_idx` (`folder_id`),
   KEY `state_type_idx` (`state`,`session_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1001 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1001 ;
 
 -- --------------------------------------------------------
 
@@ -377,7 +377,7 @@ CREATE TABLE IF NOT EXISTS `session_log` (
   `owner` varchar(32) NOT NULL DEFAULT '0',
   `guild_name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 -- --------------------------------------------------------
 
@@ -395,7 +395,7 @@ CREATE TABLE IF NOT EXISTS `session_participant` (
   PRIMARY KEY (`Id`),
   KEY `session_idx` (`session_id`),
   KEY `user_idx` (`char_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=FIXED AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -410,7 +410,7 @@ CREATE TABLE IF NOT EXISTS `shard` (
   `OldState` enum('ds_close','ds_dev','ds_restricted','ds_open') NOT NULL DEFAULT 'ds_restricted',
   `RequiredState` enum('ds_close','ds_dev','ds_restricted','ds_open') NOT NULL DEFAULT 'ds_dev',
   PRIMARY KEY (`shard_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=FIXED;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

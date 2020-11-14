@@ -1020,6 +1020,9 @@ void CStringManager::updateUserLanguage( uint32 userId, TServiceId frontEndId, c
 	NLMISC::CBitMemStream bmsOut;
 	GenericXmlMsgHeaderMngr.pushNameToStream( "STRING_MANAGER:RELOAD_CACHE", bmsOut);
 	bmsOut.serial(timestamp);
+	
+	uint32	shardId = IService::getInstance()->getShardId();
+	bmsOut.serial(shardId);
 
 	// send the message to Front End
 	NLNET::CMessage msgout( "IMPULSION_UID" );

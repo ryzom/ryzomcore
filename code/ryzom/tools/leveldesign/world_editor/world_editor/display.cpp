@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -318,7 +321,7 @@ void CDisplay::init (CMainFrame *pMF)
 		}
 	}
 
-	SetCurrentDirectory (utf8ToTStr(pMF->_ExeDir));
+	SetCurrentDirectory (nlUtf8ToTStr(pMF->_ExeDir));
 }
 
 // ***************************************************************************
@@ -3554,7 +3557,7 @@ void CDisplay::DrawCollisionTexture(sint32 count, float x1, float y1)
 				string dir = getDocument ()->getDataDir ();
 				if (dir.empty()) dir = _MainFrame->_ExeDir;
 				dir += "\\collisionmap\\";
-				SetCurrentDirectory (utf8ToTStr(dir));
+				SetCurrentDirectory(nlUtf8ToTStr(dir));
 
 				if(NLMISC::CFile::fileExists(Name+".tga") || NLMISC::CFile::fileExists(Name+".png"))
 				{

@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -123,8 +126,13 @@ namespace NLGUI
 		if (prop)
 		{
 			const char *propPtr = prop;
-
-			_ContextHelp = ucstring(propPtr);
+#ifdef RYZOM_FORGE
+			if (strlen(propPtr) > 2 && propPtr[0] == 'u' && propPtr[1] == ':')
+				_ContextHelp = ucstring::makeFromUtf8(std::string(propPtr).substr(2));
+			else
+#endif
+				_ContextHelp = ucstring(propPtr);
+			
 
 			if( !editorMode && ( strlen(propPtr) > 2 ) )
 			{
@@ -256,7 +264,7 @@ namespace NLGUI
 	{
 		if( name == "tooltip" )
 		{
-			_ContextHelp = value;
+			_ContextHelp = ucstring::makeFromUtf8(value);
 			return;
 		}
 		else

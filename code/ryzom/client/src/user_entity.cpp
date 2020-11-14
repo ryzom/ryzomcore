@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1257,6 +1261,8 @@ void CUserEntity::applyMotion(CEntityCL *target)
 			mount->_Stages.addStage(NetMngr.getCurrentClientTick()+time, CLFECOMMON::PROPERTY_POSZ, z);
 		}
 	}
+
+
 }// applyMotion //
 
 
@@ -3106,9 +3112,9 @@ void CUserEntity::rollDice(sint16 min, sint16 max, bool local)
 		sint16 roll = min + (sint16)dice->rand(max-min);
 
 		ucstring msg = CI18N::get("msgRollDiceLocal");
-		strFindReplace(msg, "%min", std::to_string(min));
-		strFindReplace(msg, "%max", std::to_string(max));
-		strFindReplace(msg, "%roll", std::to_string(roll));
+		strFindReplace(msg, "%min", toString(min));
+		strFindReplace(msg, "%max", toString(max));
+		strFindReplace(msg, "%roll", toString(roll));
 
 		CInterfaceManager *pIM= CInterfaceManager::getInstance();
 

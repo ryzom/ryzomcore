@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -23,9 +26,11 @@
 #include "nel/gui/group_frame.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/ctrl_button.h"
+#include "nel/gui/css_types.h"
 
 namespace NLGUI
 {
+	class CSSBorderRenderer;
 
 	/**
 	  * This group is used to simulate HTML cells.
@@ -39,6 +44,7 @@ namespace NLGUI
         DECLARE_UI_CLASS( CGroupCell )
 
 		CGroupCell(const TCtorParam &param);
+		~CGroupCell();
 
 		enum TAlign
 		{
@@ -91,11 +97,18 @@ namespace NLGUI
 		// The cell color
 		NLMISC::CRGBA	BgColor;
 
+		CSSBorderRenderer* Border;
+		uint32 PaddingTop, PaddingRight, PaddingBottom, PaddingLeft;
+
 		// Texture
-		CViewRenderer::CTextureId	_TextureId;	/// Accelerator
-		bool _UserTexture;
+		CViewRenderer::CTextureId	_TextureId;
 		bool _TextureTiled;
 		bool _TextureScaled;
+		// cached absolute coords for background texture
+		sint32 _TextureXReal;
+		sint32 _TextureYReal;
+		sint32 _TextureWReal;
+		sint32 _TextureHReal;
 
 		// Alignment
 		TAlign	Align;
@@ -112,10 +125,17 @@ namespace NLGUI
 		void setTextureTile(bool tiled);
 		void setTextureScale(bool scaled);
 
+		uint32 getPaddingLeftRight() const { return PaddingLeft + PaddingRight; };
+		uint32 getPaddingTopBottom() const { return PaddingTop + PaddingBottom; };
+
+		virtual void updateCoords();
+
 		static void setDebugUICell( bool d ){ DebugUICell = d; }
 		static bool getDebugUICell(){ return DebugUICell; }
 
 	private:
+		void updateTextureCoords();
+
 		void setEnclosedGroupDefaultParams();
 		static bool DebugUICell;
 	};
@@ -143,9 +163,10 @@ namespace NLGUI
 		// The Width you want in pixel. This is the <table width="100"> parameter
 		sint32	ForceWidthMin;
 
-		// Table borders
-		sint32	Border;
-		NLMISC::CRGBA BorderColor;
+		CSSBorderRenderer* Border;
+
+		// Cell has 1px solid border when <table> has 'border' attribute with width > 0
+		bool	CellBorder;
 		sint32	CellPadding;
 		sint32	CellSpacing;
 
@@ -154,6 +175,10 @@ namespace NLGUI
 		uint8	CurrentAlpha;
 
 		bool    ContinuousUpdate;
+
+		void setTexture(const std::string & TxName);
+		void setTextureTile(bool tiled);
+		void setTextureScale(bool scaled);
 
 		std::string getProperties( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
@@ -175,6 +200,18 @@ namespace NLGUI
 		virtual void checkCoords();
 
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+
+		// Texture
+		CViewRenderer::CTextureId _TextureId;
+		bool _TextureTiled;
+		bool _TextureScaled;
+		// cached absolute coords for background texture
+		sint32 _TextureXReal;
+		sint32 _TextureYReal;
+		sint32 _TextureWReal;
+		sint32 _TextureHReal;
+
+		void updateTextureCoords();
 
 		// Content validated
 		bool	_ContentValidated;

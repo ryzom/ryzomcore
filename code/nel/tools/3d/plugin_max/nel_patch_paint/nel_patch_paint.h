@@ -422,7 +422,7 @@ class PaintPatchMod : public Modifier
 		static bool		automaticLighting;
 		static bool		lockBorders;
 
-		RefResult NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate) { return REF_SUCCEED; }
+		RefResult NotifyRefChanged(NOTIFY_REF_PARAMS) { return REF_SUCCEED; }
 
 		bool includeMeshes;
 		bool preloadTiles;
@@ -481,7 +481,7 @@ class PaintPatchMod : public Modifier
 		void BeginEditParams( IObjParam  *ip, ULONG flags, Animatable *prev );
 		void EndEditParams( IObjParam *ip, ULONG flags, Animatable *next );
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
-		const MCHAR *GetObjectName() { return _M("NeL Patch Painter"); }
+		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return _M("NeL Patch Painter"); }
 		
 		void RescaleWorldUnits(float f);
 

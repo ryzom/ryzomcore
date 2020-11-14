@@ -822,13 +822,6 @@ void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVE
 	if (!srcItem->getMovable() && (srcItem->getUnMovable() || (!srcForm->DropOrSell && !canPutNonDropableItemInInventory(dstInvId)) || isAnActiveXpCatalyser(srcItem)))
 		return;
 
-	// You cannot exchange genesis named items
-	if (srcItem->getPhraseId().find("genesis_") == 0 && !canPutNonDropableItemInInventory(dstInvId))
-	{
-		nlwarning("Character %s tries to move '%s' to inv %u", _Id.toString().c_str(), srcItem->getPhraseId().c_str(), dstInvId );
-		return;
-	}
-
 	// cannot move a pet animal ticket
 	if (srcForm->Family == ITEMFAMILY::PET_ANIMAL_TICKET)
 		return;
@@ -1325,22 +1318,6 @@ bool CCharacter::checkPreRequired(const CGameItemPtr & item, bool equipCheck )
 			}
 		}
 	}
-	
-	pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegeance = getAllegiance();
-	bool neutralcult = (allegeance.first == PVP_CLAN::Neutral || allegeance.first == PVP_CLAN::None);
-	bool neutralciv = (allegeance.second == PVP_CLAN::Neutral || allegeance.second == PVP_CLAN::None);
-	if (item->getPhraseId().find("foragetool_") != 0 && (
-		(item->getRequiredFaction() == "kami" && (allegeance.first != PVP_CLAN::Kami || getOrganization() != 0)) ||
-		(item->getRequiredFaction() == "karavan" && (allegeance.first != PVP_CLAN::Karavan || getOrganization() != 0)) ||
-		(item->getRequiredFaction() == "marauder" && (!neutralcult || !neutralciv || getOrganization() != 5)) ||
-		(item->getRequiredFaction() == "neutralcult" && (!neutralcult || getOrganization() != 0)) ||
-		(item->getRequiredFaction() == "neutralciv" && (!neutralciv || getOrganization() != 0)) ||
-		(item->getRequiredFaction() == "neutral" && (!neutralcult || !neutralciv || getOrganization() != 0)) ||
-		(item->getRequiredFaction() == "fyros" && (allegeance.second != PVP_CLAN::Fyros || getOrganization() != 0)) ||
-		(item->getRequiredFaction() == "matis" && (allegeance.second != PVP_CLAN::Matis || getOrganization() != 0)) ||
-		(item->getRequiredFaction() == "tryker" && (allegeance.second != PVP_CLAN::Tryker || getOrganization() != 0)) ||
-		(item->getRequiredFaction() == "zorai" && (allegeance.second != PVP_CLAN::Zorai || getOrganization() != 0))))
-			requiredRespected = false;
 	
 	if( requiredRespected == false && equipCheck )
 	{
@@ -1857,7 +1834,7 @@ CGameItemPtr CCharacter::createItemInInventoryFreeSlot(INVENTORIES::TInventory i
 }
 
 // ****************************************************************************
-void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpulsion)
+void CCharacter::itemTempInventoryToBag(uint32 srcSlot) // , bool sendCloseTempImpulsion)
 {
 	H_AUTO(CCharacter_itemTempInventoryToBag);
 	
@@ -1882,7 +1859,7 @@ void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpuls
 				endForageSession();
 				if (lastMaterial)
 				{
-					endHarvest();
+					endHarvest(); // sendCloseTempImpulsion);
 
 					// inform IA that everything was looted
 					CCreatureDespawnMsg msg;
@@ -2031,7 +2008,7 @@ void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpuls
 						CWorldInstances::instance().msgToAIInstance(getInstanceNumber(), msg);
 					}
 					
-					endHarvest(sendCloseTempImpulsion);
+					endHarvest(); // sendCloseTempImpulsion);
 					
 					leaveTempInventoryMode();
 				}
@@ -2124,12 +2101,12 @@ void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpuls
 }
 
 // ****************************************************************************
-void CCharacter::getAllTempInventoryItems(bool sendCloseTempImpulsion)
+void CCharacter::getAllTempInventoryItems() // bool sendCloseTempImpulsion)
 {
 	H_AUTO(CCharacter_getAllTempInventoryItems);
 
 	for (uint i = 0 ; i < INVENTORIES::NbTempInvSlots; ++i)
-		itemTempInventoryToBag(i, sendCloseTempImpulsion);
+		itemTempInventoryToBag(i); // , sendCloseTempImpulsion);
 }
 
 // ****************************************************************************
@@ -2464,28 +2441,8 @@ void CCharacter::sendItemInfos( uint16 slotId )
 		infos.RequiredCharacLevel = item->getRequiredCharacLevel();
 
 		infos.TypeSkillMods = item->getTypeSkillMods();
-		
-		// Special case of web missions items
-		if (item->getStaticForm()->Name == "Web Transaction")
-		{
-			string cText = item->getCustomText().toString();
-			string::size_type sPos = cText.find(" ");
-			string::size_type ePos = cText.find("\n---\n");
-			if (sPos != string::npos && sPos != (cText.length()-1) && ePos != string::npos && ePos != (cText.length()-1))
-			{
-				string cUrl = cText.substr(sPos, ePos-sPos);
-				infos.CustomText = ucstring("@WEBIG "+cUrl);
-			}
-		}
-		else
-		{
-			infos.CustomText = item->getCustomText();
-		}
-		
-		if (item->getPetIndex() < MAX_INVENTORY_ANIMAL)
-		{
-			infos.PetNumber = item->getPetIndex() + 1;
-		}
+
+		infos.CustomText = item->getCustomText();
 
 		CMessage msgout( "IMPULSION_ID" );
 		CBitMemStream bms;
@@ -2568,10 +2525,15 @@ void CCharacter::createCrystallizedActionItem(const std::vector<NLMISC::CSheetId
 // ****************************************************************************
 void CCharacter::createRechargeItem(uint32 sapRecharge)
 {
+#ifndef RYZOM_FORGE
+	static const CSheetId rechargeSheetId("item_sap_recharge.sitem");
+#endif
+
 	if (!EnchantSystemEnabled)
 		return;
 
-	/*** OLD METHOD **********************************************
+#ifndef RYZOM_FORGE
+
 	if (!enterTempInventoryMode(TEMP_INV_MODE::Crystallize))
 		return;
 
@@ -2580,7 +2542,9 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 	{
 		item->setSapLoad(sapRecharge);
 		addItemToInventory(INVENTORIES::temporary, item);
-	}******/
+	}
+
+#else
 
 	CInventoryPtr handlingInv = getInventory(INVENTORIES::handling);
 	if (handlingInv == NULL)
@@ -2616,6 +2580,8 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 	params[1].Int = rightHandItem->sapLoad();
 	params[2].Int = rightHandItem->maxSapLoad();
 	sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_RECHARGED", params);
+
+#endif
 }
 
 // check if enchant or recharge an item 
@@ -2624,7 +2590,6 @@ void CCharacter::enchantOrRechargeItem(INVENTORIES::TInventory invId, uint32 slo
 {
 	static const CSheetId crystalSheetId("crystalized_spell.sitem");
 	static const CSheetId rechargeSheetId("item_sap_recharge.sitem");
-	static const CSheetId lightRechargeSheetId("light_sap_recharge.sitem");
 
 	if (!EnchantSystemEnabled)
 		return;
@@ -2640,11 +2605,12 @@ void CCharacter::enchantOrRechargeItem(INVENTORIES::TInventory invId, uint32 slo
 	if (item == NULL)
 		return;
 
+	TLogContext_Item_EnchantOrRecharge logContext(_Id);
 	if (item->getSheetId() == crystalSheetId)
 	{
 		enchantItem(invId, slot);
 	}
-	else if ((item->getSheetId() == rechargeSheetId) || (item->getSheetId() == lightRechargeSheetId))
+	else if (item->getSheetId() == rechargeSheetId)
 	{
 		rechargeItem(invId, slot);
 	}
@@ -2658,7 +2624,6 @@ bool CCharacter::checkSlotsForEnchantOrRecharge(INVENTORIES::TInventory invId, u
 {
 	static const CSheetId crystalSheetId("crystalized_spell.sitem");
 	static const CSheetId rechargeSheetId("item_sap_recharge.sitem");
-	static const CSheetId lightRechargeSheetId("light_sap_recharge.sitem");
 
 	if (!EnchantSystemEnabled)
 		return false;
@@ -2702,7 +2667,7 @@ bool CCharacter::checkSlotsForEnchantOrRecharge(INVENTORIES::TInventory invId, u
 	else
 	{
 		// check if the item is a recharge
-		if ((item->getSheetId() != rechargeSheetId) && (item->getSheetId() != lightRechargeSheetId))
+		if (item->getSheetId() != rechargeSheetId)
 		{
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
 			params[0].SheetId = item->getSheetId();
@@ -2864,8 +2829,8 @@ void CCharacter::procEnchantment()
 						rightHandItem->setLatencyEndDate( phrase.getCastingTime() + CTickEventHandler::getGameCycle() );
 					}
 				}
-			/*	else
-					nlwarning("user %s : no valid image for right weapon", _Id.toString().c_str());*/
+				else
+					nlwarning("user %s : no valid image for right weapon", _Id.toString().c_str());
 			} 
 			else
 			{
@@ -2938,15 +2903,6 @@ void CCharacter::useItem(uint32 slot)
 
 	if ( form->Family  == ITEMFAMILY::TELEPORT )
 	{
-		pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegeance = getAllegiance();
-		if ((form->TpType == TELEPORT_TYPES::KAMI) && (allegeance.first == PVP_CLAN::Karavan)
-			|| (form->TpType == TELEPORT_TYPES::KARAVAN) && (allegeance.first == PVP_CLAN::Kami)
-			|| getOrganization() == 5 ) //marauder
-		{
-			CCharacter::sendDynamicSystemMessage(_Id, "ALTAR_RESTRICTION");
-			return;
-		}
-
 		if( CPVPManager2::getInstance()->isTPValid(this, item) && IsRingShard == false )
 		{
 			// teleport dont work in the same way if the user is dead or alive
@@ -2981,6 +2937,7 @@ void CCharacter::useItem(uint32 slot)
 				_TpTicketSlot = slot;
 				lockItem( INVENTORIES::bag, slot, 1 );
 
+#ifdef RYZOM_FORGE
 				// add fx
 				CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, _EntityRowId, DSPropertyVISUAL_FX );
 				CVisualFX fx;
@@ -3009,6 +2966,7 @@ void CCharacter::useItem(uint32 slot)
 				sint64 prop;
 				fx.pack(prop);
 				visualFx = (sint16)prop;
+#endif
 
 				// add tp phrase in manager
 				static CSheetId tpBrick("bapa01.sbrick");
@@ -3060,7 +3018,8 @@ void CCharacter::stopUseItem( bool isRingCatalyser )
 	{
 		CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( getId() ));
 		BOMB_IF(p == NULL,"Failed to find player record for character: "<<getId().toString(),return);
-		if (p->isTrialPlayer()) {		
+		if (p->isTrialPlayer())
+		{		
 			PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "XP_CATALYSER_NO_MORE_ACTIVE");
 			_RingXpCatalyserSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Level", 0 );
@@ -3086,6 +3045,7 @@ void CCharacter::useTeleport(const CStaticItem & form)
 	}
 	else
 	{	
+#ifdef RYZOM_FORGE
 		CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, _EntityRowId, DSPropertyVISUAL_FX );
 		CVisualFX fx;
 		fx.unpack(visualFx.getValue());
@@ -3093,6 +3053,7 @@ void CCharacter::useTeleport(const CStaticItem & form)
 		sint64 prop;
 		fx.pack(prop);
 		visualFx = (sint16)prop;
+#endif
 		sint32 x,y,z;
 		float theta;
 		zone->getRandomPoint( x,y,z,theta );

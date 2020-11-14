@@ -8,7 +8,7 @@ class DATABASE_CONFIG {
 		'login' => 'webtt',
 		'password' => 'webtt77',
 		'database' => 'webtt2',
-		'encoding' => 'utf8'
+		'encoding' => 'utf8mb4'
 	);
 	var $raw_files = array(
 		'datasource' => 'RawFilesSource',

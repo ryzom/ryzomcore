@@ -14,7 +14,7 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `nel_ams_lib`
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `ams_querycache` (
   `type` varchar(64) NOT NULL,
   `query` varchar(512) NOT NULL,
   `db` varchar(80) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `ams_querycache` (
 CREATE TABLE IF NOT EXISTS `assigned` (
   `Ticket` int(10) unsigned NOT NULL,
   `User` int(10) unsigned NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `email` (
   `MessageId` varchar(45) DEFAULT NULL,
   `TicketId` int(10) unsigned DEFAULT NULL,
   `Sender` int(10) unsigned DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `email` (
 CREATE TABLE IF NOT EXISTS `forwarded` (
   `Group` int(10) unsigned NOT NULL,
   `Ticket` int(10) unsigned NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `forwarded` (
 CREATE TABLE IF NOT EXISTS `in_group` (
   `Ticket_Group` int(10) unsigned NOT NULL,
   `Ticket` int(10) unsigned NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `in_group` (
 CREATE TABLE IF NOT EXISTS `in_support_group` (
   `User` int(10) unsigned NOT NULL,
   `Group` int(10) unsigned NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `plugins` (
   `Status` int(11) NOT NULL DEFAULT '0',
   `Weight` int(11) NOT NULL DEFAULT '0',
   `Info` text
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `plugins`
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `support_group` (
   `IMAP_MailServer` varchar(60) DEFAULT NULL,
   `IMAP_Username` varchar(45) DEFAULT NULL,
   `IMAP_Password` varchar(90) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS `support_group` (
 CREATE TABLE IF NOT EXISTS `tag` (
 `TagId` int(10) unsigned NOT NULL,
   `Value` varchar(60) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `tag` (
 CREATE TABLE IF NOT EXISTS `tagged` (
   `Ticket` int(10) unsigned NOT NULL,
   `Tag` int(10) unsigned NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `ticket` (
   `Ticket_Category` int(10) unsigned NOT NULL,
   `Author` int(10) unsigned NOT NULL,
   `Priority` int(3) DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS `ticket` (
 CREATE TABLE IF NOT EXISTS `ticket_category` (
 `TCategoryId` int(10) unsigned NOT NULL,
   `Name` varchar(45) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `ticket_category`
@@ -208,7 +208,7 @@ INSERT INTO `ticket_category` (`TCategoryId`, `Name`) VALUES
 CREATE TABLE IF NOT EXISTS `ticket_content` (
 `TContentId` int(10) unsigned NOT NULL,
   `Content` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -219,7 +219,7 @@ CREATE TABLE IF NOT EXISTS `ticket_content` (
 CREATE TABLE IF NOT EXISTS `ticket_group` (
 `TGroupId` int(10) unsigned NOT NULL,
   `Title` varchar(80) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -248,7 +248,7 @@ CREATE TABLE IF NOT EXISTS `ticket_info` (
   `PlayerName` varchar(45) DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
   `TimeInGame` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -262,7 +262,7 @@ CREATE TABLE IF NOT EXISTS `ticket_log` (
   `Query` varchar(255) NOT NULL,
   `Ticket` int(10) unsigned NOT NULL,
   `Author` int(10) unsigned DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS `ticket_reply` (
   `Content` int(10) unsigned NOT NULL,
   `Timestamp` timestamp NULL DEFAULT NULL,
   `Hidden` tinyint(1) DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -289,7 +289,7 @@ CREATE TABLE IF NOT EXISTS `ticket_user` (
 `TUserId` int(10) unsigned NOT NULL,
   `Permission` int(3) NOT NULL DEFAULT '1',
   `ExternId` int(10) unsigned NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -300,9 +300,9 @@ CREATE TABLE IF NOT EXISTS `ticket_user` (
 CREATE TABLE IF NOT EXISTS `updates` (
 `s.no` int(10) NOT NULL,
   `PluginId` int(10) DEFAULT NULL,
-  `UpdatePath` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-  `UpdateInfo` text CHARACTER SET utf8 COLLATE utf8_unicode_ci
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `UpdatePath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `UpdateInfo` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Indexes for dumped tables

@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -456,6 +460,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getTargetTitle", getTargetTitle);
 	ls.registerFunc("addSearchPathUser", addSearchPathUser);
 	ls.registerFunc("displaySystemInfo", displaySystemInfo);
+	ls.registerFunc("displayChatMessage", displayChatMessage);
 	ls.registerFunc("disableContextHelpForControl", disableContextHelpForControl);
 	ls.registerFunc("disableContextHelp", disableContextHelp);
 	ls.registerFunc("setWeatherValue", setWeatherValue);
@@ -493,8 +498,11 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getDbProp),
 		LUABIND_FUNC(getDbProp64),
 		LUABIND_FUNC(setDbProp),
+		LUABIND_FUNC(setDbProp64),
 		LUABIND_FUNC(addDbProp),
 		LUABIND_FUNC(delDbProp),
+		LUABIND_FUNC(getDbRGBA),
+		LUABIND_FUNC(setDbRGBA),
 		LUABIND_FUNC(debugInfo),
 		LUABIND_FUNC(rawDebugInfo),
 		LUABIND_FUNC(dumpCallStack),
@@ -531,6 +539,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(isDynStringAvailable),
 		LUABIND_FUNC(isFullyPatched),
 		LUABIND_FUNC(getSheetType),
+		LUABIND_FUNC(getSheetFamily),
 		LUABIND_FUNC(getSheetName),
 		LUABIND_FUNC(getFameIndex),
 		LUABIND_FUNC(getFameName),
@@ -2585,10 +2594,12 @@ sint64	CLuaIHMRyzom::getDbProp64(const std::string &dbProp)
 	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp,    false);
 
 	if (node)
+	{
 		return node->getValue64();
+	}
 	else
 	{
-		debugInfo(toString("getDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
+		debugInfo(toString("getDbProp64(): '%s' dbProp Not found",    dbProp.c_str()));
 		return 0;
 	}
 }
@@ -2622,6 +2633,36 @@ void	CLuaIHMRyzom::setDbProp(const std::string &dbProp,    sint32 value)
 	else
 		debugInfo(toString("setDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
 }
+
+void	CLuaIHMRyzom::setDbProp64(const std::string &dbProp,    sint64 value)
+{
+	//H_AUTO(Lua_CLuaIHM_setDbProp)
+	// Do not allow Write on SERVER: or LOCAL:
+	static const std::string	dbServer = "SERVER:";
+	static const std::string	dbLocal = "LOCAL:";
+	static const std::string	dbLocalR2 = "LOCAL:R2";
+
+	if ((dbProp.compare(0,    dbServer.size(),    dbServer) == 0) ||
+		(dbProp.compare(0,    dbLocal.size(),    dbLocal) == 0)
+		)
+	{
+		if (dbProp.compare(0,    dbLocalR2.size(),    dbLocalR2) != 0)
+		{
+			nlstop;
+			throw ELuaIHMException("setDbProp(): You are not allowed to write on 'SERVER:...' or 'LOCAL:...' database");
+		}
+	}
+
+	// Write to the DB if found
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp,    false);
+
+	if (node)
+		node->setValue64(value);
+	else
+		debugInfo(toString("setDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
+}
+
 
 void	CLuaIHMRyzom::delDbProp(const string &dbProp)
 {
@@ -3151,7 +3192,7 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 	if (groupHtml)
 	{
 		// if true, it means that we want to display a web page that use webig auth
-		bool webig = urlIn.find("http://") == 0;
+		bool webig = urlIn.find("http://") == 0 || urlIn.find("https://") == 0;
 
 		string	url;
 
@@ -3207,7 +3248,6 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 		groupHtml->setTimeout((float)std::max(0.0, timeout));
 
 		// Browse the url
-		groupHtml->clean();
 		groupHtml->browse(url.c_str());
 		// Set top of the page
 		CCtrlScroll *pScroll = groupHtml->getScrollBar();
@@ -3264,6 +3304,21 @@ std::string CLuaIHMRyzom::getSheetType(const std::string &sheet)
 	return CEntitySheet::typeToString(sheetPtr->Type);
 }
 
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getSheetFamily(const std::string &sheet)
+{
+	CEntitySheet *pES = SheetMngr.get ( CSheetId(sheet) );
+	if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+	{
+		CItemSheet *pIS = (CItemSheet*)pES;
+
+		if (pIS)
+			return ITEMFAMILY::toString(pIS->Family);
+	}
+	
+	return "";
+}
 
 // ***************************************************************************
 std::string CLuaIHMRyzom::getSheetName(uint32 sheetId)
@@ -3826,4 +3881,101 @@ std::string	CLuaIHMRyzom::createGotoFileButtonTag(const char *fileName, uint lin
 	}
 
 	return "";
+}
+
+// ***************************************************************************
+void CLuaIHMRyzom::setDbRGBA(const std::string &dbProp, const NLMISC::CRGBA &color)
+{
+	//H_AUTO(Lua_CLuaIHM_setDbRGBA)
+	static const std::string dbServer = "SERVER:";
+	static const std::string dbLocal = "LOCAL:";
+	static const std::string dbLocalR2 = "LOCAL:R2";
+
+	// do not allow write on SERVER: or LOCAL:
+	if ((dbProp.compare(0, dbServer.size(), dbServer) == 0) || (dbProp.compare(0, dbLocal.size(), dbLocal) == 0))
+	{
+		if (dbProp.compare(0, dbLocalR2.size(), dbLocalR2) != 0)
+		{
+			nlstop;
+			throw ELuaIHMException("setDbRGBA(): You are not allowed to write on 'SERVER:...' or 'LOCAL:...' database");
+		}
+	}
+	// write to the db
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp, true);
+	if (node)
+		node->setValue64(color.R+(color.G<<8)+(color.B<<16)+(color.A<<24));
+	return;
+}
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getDbRGBA(const std::string &dbProp)
+{
+	//H_AUTO(Lua_CLuaIHM_getDbRGBA)
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp, false);
+	if (node)
+	{
+		CRGBA color = CRGBA::White;
+		sint64 rgba = (sint64)node->getValue64();
+
+		color.R = (sint8)(rgba & 0xff);
+		color.G = (sint8)((rgba >> 8) & 0xff);
+		color.B = (sint8)((rgba >> 16) & 0xff);
+		color.A = (sint8)((rgba >> 24) & 0xff);
+
+		return toString("%i %i %i %i", color.R, color.G, color.B, color.A);
+	}
+	return "";
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_displayChatMessage)
+	const char *funcName = "displayChatMessage";
+	CLuaIHM::checkArgMin(ls, funcName, 2);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+
+	CInterfaceProperty prop;
+	CChatStdInput &ci = PeopleInterraction.ChatInput;
+
+	std::string msg = ls.toString(1);
+	const std::string dbPath = "UI:SAVE:CHAT:COLORS";
+
+	if (ls.type(2) == LUA_TSTRING)
+	{
+		std::string input = toLower(ls.toString(2));
+		if (input == "around")
+		{
+			prop.readRGBA(std::string(dbPath + ":SAY").c_str(), " ");
+			ci.AroundMe.displayMessage(ucstring(msg), prop.getRGBA());
+		}
+		else if (input == "region")
+		{
+			prop.readRGBA(std::string(dbPath + ":REGION").c_str(), " ");
+			ci.Region.displayMessage(ucstring(msg), prop.getRGBA());
+		}
+		else if (input == "universe")
+		{
+			prop.readRGBA(std::string(dbPath + ":UNIVERSE_NEW").c_str(), " ");
+			ci.Universe.displayMessage(ucstring(msg), prop.getRGBA());
+		}
+		else if (input == "guild")
+		{
+			prop.readRGBA(std::string(dbPath + ":CLADE").c_str(), " ");
+			ci.Guild.displayMessage(ucstring(msg), prop.getRGBA());
+		}
+		else if (input == "team")
+		{
+			prop.readRGBA(std::string(dbPath + ":GROUP").c_str(), " ");
+			ci.Team.displayMessage(ucstring(msg), prop.getRGBA());
+		}
+	}
+	if (ls.type(2) == LUA_TNUMBER)
+	{
+		sint64 id = ls.toInteger(2);
+		prop.readRGBA(toString("%s:DYN:%i", dbPath.c_str(), id).c_str(), " ");
+		if (id >= 0 && id < CChatGroup::MaxDynChanPerPlayer)
+			ci.DynamicChat[id].displayMessage(ucstring(msg), prop.getRGBA());
+	}
+	return 1;
 }

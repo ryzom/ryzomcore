@@ -514,7 +514,7 @@ namespace SAVES
 
 		// run through the buffer performing a very simple shift and xor checksum (good enough for our purposes)
 		// note that we could have used an MD5 but his is much much much faster (less strain on the CPU)
-		uint64 checksum;
+		uint64 checksum = 0;
 		for (uint32 i=fileBody.size()/8;i--;)
 		{
 			checksum= ((checksum<<1)|(checksum>>63))^((uint64*)&fileBody[0])[i];

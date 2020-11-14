@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -70,10 +73,10 @@ public:
 	static void setRootKey(const std::string &root);
 
 	/// Read a value from registry.
-	static std::string getRegKey(const std::string &Entry);
+	static std::string getRegKey(const std::string &entry);
 
 	/// Write a value to registry.
-	static bool setRegKey(const std::string &ValueName, const std::string &Value);
+	static bool setRegKey(const std::string &valueName, const std::string &value);
 
 	/// Get desktop current color depth without using UDriver.
 	static uint getCurrentColorDepth();

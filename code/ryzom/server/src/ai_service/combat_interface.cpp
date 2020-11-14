@@ -79,8 +79,8 @@ void CBSAIEventReportMsg::callback(const std::string &name, NLNET::TServiceId id
 	{
 		uint8	actionType=ActionType[i];
 		if (	(	actionType!=ACTNATURE::FIGHT
-				||	actionType!=ACTNATURE::OFFENSIVE_MAGIC
-				||	actionType!=ACTNATURE::CURATIVE_MAGIC	)
+				&&	actionType!=ACTNATURE::OFFENSIVE_MAGIC
+				&&	actionType!=ACTNATURE::CURATIVE_MAGIC	)
 			&&	AggroAdd[i]==0	)
 			continue; 
 

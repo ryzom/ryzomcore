@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -32,6 +36,7 @@
 #include "nel/gui/action_handler.h"
 #include "../dummy_progress.h"
 #include "group_compas.h"
+#include "group_html_cs.h"
 #include "../connection.h"
 #include "../net_manager.h"
 #include "people_interraction.h" // for MaxNumPeopleInTeam
@@ -100,6 +105,12 @@ const uint32 ISLAND_PIXEL_PER_METER = 2;
 
 static void setupFromZoom(CViewBase *pVB, CContLandMark::TContLMType t, float fMeterPerPixel);
 
+// calculate distance (squared) between two points
+static float distsqr(const CVector2f a, const CVector2f b)
+{
+	return pow(a.x - b.x, 2) + pow(a.y - b.y, 2);
+}
+
 // popup the landmark name dialog
 
 static void popupLandMarkNameDialog()
@@ -114,10 +125,10 @@ static void popupLandMarkNameDialog()
 	gc->center();
 	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->enableBlink(1);
-	
+
 	CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
-	if (!eb) return; 
-	
+	if (!eb) return;
+
 	// Load ComboBox for Landmarks & sort entries
 	CDBGroupComboBox *cb = dynamic_cast<CDBGroupComboBox *>(gc->getGroup("landmarktypes"));
 	cb->sortText();
@@ -126,7 +137,7 @@ static void popupLandMarkNameDialog()
 	{
 		CGroupMap *map = dynamic_cast<CGroupMap *>(LastSelectedLandMark->getParent());
 		if (!map) return;
-		
+
 		const CUserLandMark userLM = map->getUserLandMark(LastSelectedLandMark);
 
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(userLM.Type));
@@ -1346,7 +1357,7 @@ void CGroupMap::checkCoords()
 	{
 
 		if (_TeammateLM[i])
-		{		
+		{
 			sint32	px, py;
 
 			if (_TeammatePosStates[i]->getPos(px, py))
@@ -2589,6 +2600,9 @@ static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 
 	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:user_land_mark_menu:lmteleport");
 	if(ie) ie->setActive(showTeleport);
+
+	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:user_land_mark_menu_base:lmteleport");
+	if(ie) ie->setActive(showTeleport);
 }
 
 //============================================================================================================
@@ -2652,8 +2666,8 @@ CGroupMap::CLandMarkButton *CGroupMap::createLandMarkButton(const CLandMarkOptio
 	lmb->setModulateGlobalColorAll(false);
 	if (!options.LandMarkMenu.empty())
 	{
-		lmb->setActionOnRightClick("active_menu");
-		lmb->setParamsOnRightClick(NLMISC::toString("menu=%s", options.LandMarkMenu.c_str()));
+		lmb->setActionOnRightClick("world_map_right_click");
+		lmb->setParamsOnRightClick(NLMISC::toString("map=%s|menu=%s", _Id.c_str(), options.LandMarkMenu.c_str()));
 	}
 	lmb->setPosRef(Hotspot_MM);
 	return lmb;
@@ -2671,19 +2685,36 @@ void CGroupMap::updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOption
 }
 
 //============================================================================================================
-bool CGroupMap::filterLandmark(const ucstring &title) const
+bool CGroupMap::filterLandmark(const ucstring &title, const std::vector<ucstring> filter, bool startsWith) const
 {
-	if (_LandmarkFilter.size() > 0)
+	if (filter.size() > 0)
 	{
 		ucstring lcTitle = toLower(title);
-		for(uint i = 0; i< _LandmarkFilter.size(); ++i) {
-			if (lcTitle.find(_LandmarkFilter[i]) == ucstring::npos) {
+		if (startsWith)
+		{
+			if (lcTitle.find(filter[0]) != 0)
+			{
 				return false;
 			}
 		}
+		else
+		{
+			for(uint i = 0; i< filter.size(); ++i)
+			{
+				if (lcTitle.find(filter[i]) == ucstring::npos)
+				{
+					return false;
+				}
+			}
+		}
 	}
-
 	return true;
+}
+
+//============================================================================================================
+bool CGroupMap::filterLandmark(const ucstring &title) const
+{
+	return filterLandmark(title, _LandmarkFilter);
 }
 
 //============================================================================================================
@@ -2718,6 +2749,23 @@ CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucst
 	CInterfaceManager::getInstance()->saveLandmarks();
 
 	return _UserLM.back();
+}
+
+//============================================================================================================
+CCtrlButton* CGroupMap::getLandmarkCtrl(const std::string &lmType, uint lmIndex) const
+{
+	CCtrlButton *ctrl = NULL;
+	if (lmType == "user")
+	{
+		if (lmIndex < _UserLM.size())
+		{
+			ctrl = _UserLM[lmIndex];
+		}
+		else nlwarning("_UserLM index out of bounds (size:%u, index:%u)", (uint)_UserLM.size(), lmIndex);
+	}
+	else nlwarning("unsupported landmark type '%s'", lmType.c_str());
+
+	return ctrl;
 }
 
 //============================================================================================================
@@ -2780,7 +2828,7 @@ CUserLandMark CGroupMap::getUserLandMark(CCtrlButton *button) const
 		}
 	}
 
-	
+
 	return ulm;
 }
 
@@ -2793,7 +2841,7 @@ uint CGroupMap::getNumUserLandMarks() const
 //============================================================================================================
 CLandMarkOptions CGroupMap::getUserLandMarkOptions(uint32 lmindex) const
 {
-	if (_CurContinent == NULL || _CurContinent->UserLandMarks.size() < lmindex) 
+	if (_CurContinent == NULL || _CurContinent->UserLandMarks.size() < lmindex)
 		return _UserLMOptions;
 
 	CLandMarkOptions clmo(_UserLMOptions);
@@ -3187,6 +3235,129 @@ void CGroupMap::targetLandmarkResult(uint32 index)
 }
 
 //=========================================================================================================
+CGroupMap::CLandMarkButton* CGroupMap::findClosestLandmark(const CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkButtonVect &landmarks, float &closest) const
+{
+	CLandMarkButton *ret = NULL;
+
+	std::vector<ucstring> keywords;
+	if (startsWith)
+		keywords.push_back(search);
+	else
+		splitUCString(toLower(search), ucstring(" "), keywords);
+
+	closest = std::numeric_limits<float>::max();
+	for(TLandMarkButtonVect::const_iterator it = landmarks.begin(); it != landmarks.end(); ++it)
+	{
+		ucstring lc;
+		(*it)->getContextHelp(lc);
+		if(filterLandmark(lc, keywords, startsWith)) {
+			CVector2f pos;
+			mapToWorld(pos, (*it)->Pos);
+			float dist = distsqr(center, pos);
+			if (dist < closest)
+			{
+				ret = (*it);
+				closest = dist;
+			}
+		}
+	}
+
+	return ret;
+}
+
+//=========================================================================================================
+CGroupMap::CLandMarkText* CGroupMap::findClosestLandmark(const CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkTextVect &landmarks, float &closest) const
+{
+	CLandMarkText *ret = NULL;
+
+	std::vector<ucstring> keywords;
+	if (startsWith)
+		keywords.push_back(search);
+	else
+		splitUCString(toLower(search), ucstring(" "), keywords);
+
+	closest = std::numeric_limits<float>::max();
+	for(TLandMarkTextVect::const_iterator it = landmarks.begin(); it != landmarks.end(); ++it)
+	{
+		ucstring lc;
+		lc = (*it)->getText();
+		if(filterLandmark(lc, keywords, startsWith)) {
+			CVector2f pos;
+			mapToWorld(pos, (*it)->Pos);
+			float dist = distsqr(center, pos);
+			if (dist < closest)
+			{
+				ret = (*it);
+				closest = dist;
+			}
+		}
+	}
+
+	return ret;
+}
+
+bool CGroupMap::targetLandmarkByName(const ucstring &search, bool startsWith) const
+{
+	CCompassTarget ct;
+	CLandMarkButton* lm;
+	float dist;
+	float closest = std::numeric_limits<float>::max();
+	bool found = false;
+	CVector2f center;
+	mapToWorld(center, _PlayerPos);
+
+	lm = findClosestLandmark(center, search, startsWith, _UserLM, dist);
+	if (lm && dist < closest)
+	{
+		ct.setType(CCompassTarget::UserLandMark);
+		mapToWorld(ct.Pos, lm->Pos);
+		lm->getContextHelp(ct.Name);
+		closest = dist;
+		found = true;
+	}
+
+	// only check other types if user landmark was not found
+	if (!found)
+	{
+		lm = findClosestLandmark(center, search, startsWith, _ContinentLM, dist);
+		if (lm && dist < closest)
+		{
+			ct.setType(CCompassTarget::ContinentLandMark);
+			mapToWorld(ct.Pos, lm->Pos);
+			lm->getContextHelp(ct.Name);
+			closest = dist;
+			found = true;
+		}
+
+		CLandMarkText* lmt;
+		lmt = findClosestLandmark(center, search, startsWith, _ContinentText, dist);
+		if (lmt && dist < closest)
+		{
+			ct.setType(CCompassTarget::ContinentLandMark);
+			mapToWorld(ct.Pos, lmt->Pos);
+			ct.Name = lmt->getText();
+			closest = dist;
+			found = true;
+		}
+	}
+
+	if (found)
+	{
+		CInterfaceManager *im = CInterfaceManager::getInstance();
+		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId(_CompassId));
+		if (gc)
+		{
+			gc->setActive(true);
+			gc->setTarget(ct);
+			gc->blink();
+			CWidgetManager::getInstance()->setTopWindow(gc);
+		}
+	}
+
+	return found;
+}
+
+//=========================================================================================================
 void CGroupMap::getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &worldPos)
 {
 	if (!lm) return;
@@ -3409,6 +3580,126 @@ int CGroupMap::luaIsIsland(CLuaState &ls)
 /////////////////////
 // ACTION HANDLERS //
 /////////////////////
+
+//=========================================================================================================
+void CGroupMap::updateClosestLandMarkMenu(const std::string &menu, const NLMISC::CVector2f &pos) const
+{
+	static uint nbShowLandmarks = 5;
+	static uint nbShowLandmarksMax = 5;
+
+	const CGroupMenu *pMenu = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(menu));
+	if (!pMenu) return;
+
+	CGroupSubMenu *rootMenu = pMenu->getRootMenu();
+	if (!rootMenu) return;
+
+	// remove previous markers from menu
+	for(uint i = 0; i < nbShowLandmarksMax; ++i)
+	{
+		std::string lineId = toString("%s:lmcosest%d", menu.c_str(), i);
+		sint index = rootMenu->getLineFromId(lineId);
+		if (index < 0) break;
+		rootMenu->removeLine(index);
+	}
+
+	// no continent selected (ie world map view)
+	if (!_CurContinent) return;
+
+	// sort landmarks, keep indices
+	typedef std::pair<uint, float> TSortedDistPair;
+	std::vector<TSortedDistPair> sortedIndices;
+	for(uint i = 0; i < _CurContinent->UserLandMarks.size(); ++i)
+	{
+		float dist = distsqr(pos, _CurContinent->UserLandMarks[i].Pos);
+		if (sortedIndices.empty())
+		{
+			sortedIndices.push_back(TSortedDistPair(i, dist));
+		}
+		else
+		{
+			bool found = false;
+			for(uint j = 0; j< sortedIndices.size(); j++)
+			{
+				if (dist < sortedIndices[j].second)
+				{
+					sortedIndices.insert(sortedIndices.begin() + j, TSortedDistPair(i, dist));
+					found = true;
+					if (sortedIndices.size() > nbShowLandmarks)
+					{
+						sortedIndices.pop_back();
+					}
+					break;
+				}
+			}
+
+			if (!found && sortedIndices.size() < nbShowLandmarks)
+			{
+				sortedIndices.push_back(TSortedDistPair(i, dist));
+			}
+		}
+	}
+
+	// add landmarks to menu
+	uint lineIndex = rootMenu->getNumLines();
+	for(uint i = 0; i< sortedIndices.size(); ++i)
+	{
+		uint32 index = sortedIndices[i].first;
+		ucstring name = ucstring(toString("%.2fm ", sqrt(sortedIndices[i].second))) + _CurContinent->UserLandMarks[index].Title;
+		std::string lineId = toString("%s:lmcosest%d", menu.c_str(), i);
+		std::string ahParams = toString("type=user|map=%s|index=%d", _Id.c_str(), index);
+
+		CViewTextMenu* vt = rootMenu->addLine(ucstring(""), "map_landmark_by_index", ahParams, lineId.c_str(), "", "", false, false, false);
+		if (!vt) break;
+
+		vt->setSingleLineTextFormatTaged(name);
+		// TODO: should calculate from mouse pos and client width
+		vt->setLineMaxW(800);
+
+		CLandMarkOptions options = getUserLandMarkOptions(index);
+
+		typedef std::pair<std::string, std::string> TTmplParams;
+		std::vector<TTmplParams> vparams;
+		vparams.push_back(TTmplParams("id", toString("lmicon%d", i)));
+		vparams.push_back(TTmplParams("sizeref", ""));
+		vparams.push_back(TTmplParams("icon_texture", options.LandMarkTexNormal));
+		vparams.push_back(TTmplParams("icon_color", options.ColorNormal.toString()));
+
+		CInterfaceGroup *pUGLeft = CWidgetManager::getInstance()->getParser()->createGroupInstance("landmark_row_icon", lineId, vparams);
+		if (pUGLeft)
+			rootMenu->setUserGroupLeft(lineIndex, pUGLeft, true);
+
+		rootMenu->setRightClickHandler(lineIndex, "map_landmark_by_index");
+		rootMenu->setRightClickHandlerParam(lineIndex, toString("%s|menu=%s_base", ahParams.c_str(), options.LandMarkMenu.c_str()));
+		lineIndex++;
+	}
+}
+
+//=========================================================================================================
+// remap caller with landmark using index/type and call popup menu or set compass target if no menu is set
+class CAHMapLandmarkByIndex : public IActionHandler
+{
+	virtual void execute (CCtrlBase* pCaller, const string &params )
+	{
+		const std::string mapName = getParam(params, "map");
+		const std::string lmType = getParam(params, "type");
+		const std::string menuId = getParam(params, "menu");
+		uint index;
+		if (!fromString(getParam(params, "index"), index)) return;
+
+		CGroupMap *map = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(mapName));
+		if (!map) return;
+
+		// remap caller to landmark from menu row
+		CCtrlButton* pButton = map->getLandmarkCtrl(lmType, index);
+		if (!pButton) return;
+
+		if (menuId.empty())
+			map->targetLandmark(pButton);
+		else
+			CAHManager::getInstance()->runActionHandler("active_menu", pButton, toString("pushmodal=true|popmodal=false|menu=%s", menuId.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHMapLandmarkByIndex, "map_landmark_by_index");
 
 //=========================================================================================================
 // Set landmark filter
@@ -3714,20 +4005,23 @@ class CAHWorldMapRightClick : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &params)
 	{
 		std::string map = getParam(params, "map");
-		CInterfaceManager *im = CInterfaceManager::getInstance();
+		std::string menu = getParam(params, "menu");
 
 		hideTeleportButtonsInPopupMenuIfNotEnoughPriv();
 
 		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
-		if (!gm->isIsland())
+
+		if (gm->isIsland())
 		{
-			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu");
+			menu = "ui:interface:map_menu_island";
 		}
 		else
 		{
 			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
 		}
+
+		CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=" + menu);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHWorldMapRightClick, "world_map_right_click")
@@ -3787,9 +4081,9 @@ REGISTER_ACTION_HANDLER(CAHMapTeleport, "map_teleport");
 
 //=========================================================================================================
 // update LandMarks Colors
-class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)	
-{		
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();		
+class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	CUserLandMark::_LandMarksColor[CUserLandMark::Misc] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:MISC")->getValueRGBA();
 	CUserLandMark::_LandMarksColor[CUserLandMark::Tribe] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:TRIBE")->getValueRGBA();
@@ -3823,10 +4117,10 @@ class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute
 	CUserLandMark::_LandMarksColor[CUserLandMark::Teleporter] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:TELEPORTER")->getValueRGBA();
 
 
-	
-	CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));		
-	if (pGM == NULL) return;		
-	pGM->updateUserLandMarks();	
+
+	CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pGM == NULL) return;
+	pGM->updateUserLandMarks();
 
 }};
 REGISTER_ACTION_HANDLER (CUpdateLandMarksColor, "update_landmarks_color");

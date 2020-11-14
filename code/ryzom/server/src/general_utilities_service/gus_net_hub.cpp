@@ -242,8 +242,8 @@ namespace GUSNET
 	void CHubModule::registerRemoteModule(TRemoteModuleOnHubPtr module)
 	{
 		// make sure the module isn't already registered
-		for (TRemoteModules::iterator it=_RemoteModules.begin();it!=_RemoteModules.end();++it)
-			BOMB_IF((*it).second==module,"Attempt to add the same module to a hub more than once",return)
+		for (TRemoteModules::iterator it = _RemoteModules.begin(); it != _RemoteModules.end(); ++it)
+			BOMB_IF((*it).second == module, "Attempt to add the same module to a hub more than once", return);
 
 		// add the module to the _RemoteModules map
 		_RemoteModules[module->getUniqueId()]=module;

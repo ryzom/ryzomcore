@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2017  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -99,22 +99,28 @@ namespace STRING_MANAGER
 		}
 	}
 
-
-	void CStringManagerClient::initCache(const std::string &shardId, const std::string &languageCode)
+	void CStringManagerClient::initCache(const std::string &languageCode)
 	{
-		H_AUTO( CStringManagerClient_initCache )
+		H_AUTO( CStringManagerClient_initLanguage )
 
-		_ShardId = shardId;
-		_LanguageCode = languageCode;
+		m_LanguageCode = languageCode;
 
-		// to be inited, shard id and language code must be filled
-		if (!_ShardId.empty() && !_LanguageCode.empty())
-			_CacheInited = true;
-		else
-			_CacheInited = false;
+		// clear all current data.
+		_ReceivedStrings.clear();
+		_ReceivedDynStrings.clear();
+		_CacheStringToSave.clear();
+		// NB : we keep the waiting strings and dyn strings
+
+		// insert the empty string.
+		_ReceivedStrings.insert(make_pair((uint)EmptyStringId, ucstring()));
+
+		// to be inited, language code must be filled
+		_CacheInited = !m_LanguageCode.empty();
+		_CacheLoaded = false;
+		_CacheFilename.clear();
 	}
 
-	void CStringManagerClient::loadCache(uint32 timestamp)
+	void CStringManagerClient::loadCache(uint32 timestamp, uint32 shardId)
 	{
 		H_AUTO( CStringManagerClient_loadCache )
 
@@ -122,7 +128,8 @@ namespace STRING_MANAGER
 		{
 			try
 			{
-				_CacheFilename = std::string("save/") + _ShardId.substr(0, _ShardId.find(":")) + ".string_cache";
+				std::string clientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
+				_CacheFilename = std::string("save/") + clientApp + "_" + toString(shardId) + "_" + m_LanguageCode + ".string_cache";
 
 				nlinfo("SM : Try to open the string cache : %s", _CacheFilename.c_str());
 
@@ -157,6 +164,7 @@ namespace STRING_MANAGER
 				// clear all current data.
 				_ReceivedStrings.clear();
 				_ReceivedDynStrings.clear();
+				_CacheStringToSave.clear();
 				// NB : we keep the waiting strings and dyn strings
 
 				// insert the empty string.
@@ -528,7 +536,7 @@ restartLoop:
 
 	void CStringManagerClient::flushStringCache()
 	{
-		if(!_CacheStringToSave.empty())
+		if (!_CacheStringToSave.empty() && !_CacheFilename.empty())
 		{
 			NLMISC::COFile file(_CacheFilename, true);
 			for(uint i=0;i<_CacheStringToSave.size();i++)

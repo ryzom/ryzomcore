@@ -243,7 +243,7 @@ void CSpawnBotNpc::updateChat(CAIState const* state)
 		
 		// update chat information if any
 		CNpcChatProfileImp const* const chatProfile = botNpc.getChat();
-		if (!chatProfile)
+		if (chatProfile)
 		{
 			_CurrentChatProfile = CNpcChatProfileImp::combineChatProfile(*chatProfile, itChat->getChat());
 			// the chat profile has been combined, send it to EGS

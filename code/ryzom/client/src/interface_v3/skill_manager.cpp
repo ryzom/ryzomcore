@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -144,21 +147,21 @@ void CSkillManager::initInGame()
 
 
 	// **** Player State management
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+	NLGUI::CDBManager *pCDBM = NLGUI::CDBManager::getInstance();
 	// get now the nodes on Skill values
 	for(i=0;i<SKILLS::NUM_SKILLS;i++)
 	{
-		_SkillValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
-		_SkillBaseValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
+		_SkillValues[i] = pCDBM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
+		_SkillBaseValues[i] = pCDBM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
 	}
 
 	// compute max child values
 	computeMaxChildValues(); // must be called after setting all _SkillBaseValues
 
 	// Get a node used to inform interface that a skill has changed
-	_TrackSkillChange= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
+	_TrackSkillChange = pCDBM->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
 	// Add a branch observer on skill value change
-	NLGUI::CDBManager::getInstance()->addBranchObserver( "SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs );
+	pCDBM->addBranchObserver("SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs);
 }
 
 // ***************************************************************************
@@ -1040,7 +1043,7 @@ void CSkillManager::setPlayerTitle(const std::string &name)
 // ***************************************************************************
 // ***************************************************************************
 
-#define GROUP_TITLE_COMBO "ui:interface:info_player_skills:content:webinfos:title:player_title"
+#define GROUP_TITLE_COMBO "ui:interface:info_player_skills:header_opened:title:player_title"
 
 // ***************************************************************************
 class CHandlerTitleInit: public IActionHandler

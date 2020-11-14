@@ -14,7 +14,7 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `nel_ams_lib`
@@ -29,12 +29,12 @@ SET time_zone = "+00:00";
 CREATE TABLE IF NOT EXISTS `ticket_attachments` (
 `idticket_attachments` int(10) unsigned NOT NULL,
   `ticket_TId` int(10) unsigned NOT NULL,
-  `Filename` varchar(45) COLLATE utf8_unicode_ci NOT NULL,
+  `Filename` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL,
   `Timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `Filesize` int(10) NOT NULL,
   `Uploader` int(10) unsigned NOT NULL,
   `Path` VARCHAR(128) NOT NULL 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Indexes for dumped tables

@@ -2067,7 +2067,7 @@ public:
 		CGrpFauna *grpFauna = safe_cast<CGrpFauna*>(group);
 
 		CGrpFauna::TPlaces place;
-		_Activity == fa_rest ? place = CGrpFauna::REST_PLACE : CGrpFauna::EAT_PLACE;
+		place = (_Activity == fa_rest ? CGrpFauna::REST_PLACE : CGrpFauna::EAT_PLACE);
 		// change the state of the fauna group if needed
 		// lookup for the cycle we want
 		uint32 i;
@@ -2688,7 +2688,7 @@ CAILogicActionCode::CAILogicActionCode (const std::vector<std::string> &args, 	c
 	const CAIAliasDescriptionNode *eventNode, 	CStateMachine *container)
 {
 	nldebug("loadActionCode");
-	_byteCode=CCompiler::getInstance().compileCode	(args, eventNode->fullName());
+	_byteCode=CCompiler::getInstance().compileCode	(args, eventNode ? eventNode->fullName() : "NULL");
 }
 	
 bool	CAILogicActionCode::executeAction(CStateInstance	*entity,const IAIEvent *event)

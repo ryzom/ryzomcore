@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,12 +13,6 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-
-
-
-
 
 #ifndef FACTORY_H
 #define FACTORY_H

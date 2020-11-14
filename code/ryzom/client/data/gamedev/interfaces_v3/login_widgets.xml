@@ -852,7 +852,7 @@
 <group type="modal" id="valid_message_box" exit_click_out="false" posref="MM MM" w="1024" h="768"
  on_enter="proc" on_enter_params="proc_valid_message_box_ok" options="no_bordure" mouse_pos="false"
 >
-	<view type="bitmap" posref="MM MM" id="log" texture="new_launcher_bg.tga" global_color="false" render_layer="-1" />
+	<view type="bitmap" posref="MM MM" id="log" texture="launcher_bg.tga" global_color="false" render_layer="-1" />
 	
 	<view type="text" id="text" posref="MM MM" line_maxw="412" w="412" x="0" y="0" color="135 243 28 255" fontsize="18" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
 	
@@ -1023,6 +1023,32 @@
           fontsize="12"
           highlight_over="255 255 255 128"
           force_inside_screen="false"></group>
+	</template>
+
+	<template name="html_meter" keep="true"
+		id="meter" w="0" h="0" active="true" border_x2="0"
+		bgtexture="blank.tga" bgcolor="0 0 0 255"
+		value_w="0" value_texture="blank.tga" value_color="100 100 100 100"
+		>
+		<group id="#id" w="#w" h="#h" active="#active">
+			<view type="bitmap" id="bg" posref="MM MM"  sizeref="wh" scale="true" texture="#bgtexture" color="#bgcolor" />
+			<group id="inner" posref="MM MM" sizeref="wh" w="-#border_x2" h="-#border_x2">
+				<view type="bitmap" id="gauge" posref="ML ML" posparent="bg" sizeref="h" sizeparent="bg" w="#value_w" scale="true" texture="#value_texture" color="#value_color" />
+			</group>
+		</group>
+	</template>
+
+	<template name="html_progress" keep="true"
+		id="meter" w="0" h="0" active="true" border_x2="0"
+		bgtexture="blank.tga" bgcolor="0 0 0 255"
+		value_w="0" value_texture="blank.tga" value_color="100 100 100 100"
+		>
+		<group id="#id" w="#w" h="#h" active="#active">
+			<view type="bitmap" id="bg" posref="MM MM"  sizeref="wh" scale="true" texture="#bgtexture" color="#bgcolor" />
+			<group id="inner" posref="MM MM" sizeref="wh" w="-#border_x2" h="-#border_x2">
+				<view type="bitmap" id="gauge" posref="ML ML" posparent="bg" sizeref="h" sizeparent="bg" w="#value_w" scale="true" texture="#value_texture" color="#value_color" />
+			</group>
+		</group>
 	</template>
 
 </interface_config>

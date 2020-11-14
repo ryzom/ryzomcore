@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -70,7 +73,7 @@ INT_PTR CALLBACK CalculatingDialogCallback (
 			string all;
 			for (uint32 i = 0; i < 14; ++i)
 				all += pClass->sInfoProgress[i] + "\n";
-			SendMessage (GetDlgItem (hwndDlg, IDC_STATICINFO), WM_SETTEXT, 0, (LPARAM)utf8ToTStr(all));
+			SendMessage (GetDlgItem (hwndDlg, IDC_STATICINFO), WM_SETTEXT, 0, (LPARAM)MaxTStrFromUtf8(all).data());
 		}
 		break;
 

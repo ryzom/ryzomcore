@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -161,6 +164,7 @@ namespace NLGUI
 		static int luaMethodCall(lua_State *ls);
 		
 		static int	setOnDraw(CLuaState &ls);		// params: CInterfaceGroup*, "script". return: none
+		static int	getOnDraw(CLuaState &ls);		// params: CInterfaceGroup*. return: "script" (nil if none)
 		static int	addOnDbChange(CLuaState &ls);	// params: CInterfaceGroup*, "dblist", "script". return: none
 		static int	removeOnDbChange(CLuaState &ls);// params: CInterfaceGroup*. return: none
 		static int  setCaptureKeyboard(CLuaState &ls);

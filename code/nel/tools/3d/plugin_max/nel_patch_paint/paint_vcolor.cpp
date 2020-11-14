@@ -402,7 +402,7 @@ bool CPaintColor::loadBrush (const std::string &brushFileName)
 		{
 			// Error message
 			std::string msg = toString("Can't open the file %s.", brushFileName.c_str());
-			MessageBox ((HWND)CNELU::Driver->getDisplay(), utf8ToTStr(msg), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
+			MessageBox((HWND)CNELU::Driver->getDisplay(), MaxTStrFromUtf8(msg).data(), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 
 			// Return false
 			return false;
@@ -411,7 +411,7 @@ bool CPaintColor::loadBrush (const std::string &brushFileName)
 	catch (const Exception &e)
 	{
 		// Error message
-		MessageBox ((HWND)CNELU::Driver->getDisplay(), utf8ToTStr(e.what()), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
+		MessageBox((HWND)CNELU::Driver->getDisplay(), MaxTStrFromUtf8(e.what()).data(), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 
 		// Return false
 		return false;

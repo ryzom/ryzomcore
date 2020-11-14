@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -51,14 +55,14 @@ namespace NLGUI
 	CInterfaceGroup::CInterfaceGroup(const TCtorParam &param) : CCtrlBase(param)
 	{
 		_ParentSizeMax = NULL;
-		_MaxW = _MaxH = 16384;
+		_MaxW = _MaxH = std::numeric_limits<sint32>::max();
 		_OffsetX = _OffsetY = 0;
 		_Overlappable= true;
 		_ResizeFromChildW= false;
 		_ResizeFromChildH= false;
 		_ResizeFromChildWMargin= 0;
 		_ResizeFromChildHMargin= 0;
-		_MaxWReal = _MaxHReal = 16384;
+		_MaxWReal = _MaxHReal = std::numeric_limits<sint32>::max();
 		_GroupSizeRef = 0;
 		_Escapable= false;
 		_Priority= WIN_PRIORITY_NORMAL;
@@ -618,13 +622,30 @@ namespace NLGUI
 		{
 			std::string parentId;
 
-			if( value != "parent" ){
-				if( _Parent != NULL )
+			if (value != "parent")
+			{
+				if (_Parent != NULL)
+				{
 					parentId = _Parent->getId() + ":" + value;
+				}
 				else
-					parentId = _Parent->getId();
+				{
+					parentId = "ui:" + value;
+				}
 			}
-			CWidgetManager::getInstance()->getParser()->addParentSizeMaxAssociation( this, parentId );
+			else
+			{
+				if (_Parent)
+				{
+					parentId = _Parent->getId();
+				}
+				else
+				{
+					parentId = value;
+				}
+			}
+
+			CWidgetManager::getInstance()->getParser()->addParentSizeMaxAssociation(this, parentId);
 			return;
 		}
 		else
@@ -829,7 +850,7 @@ namespace NLGUI
 
 		const std::map< uint32, SLinkData > &linkMap =
 			CWidgetManager::getInstance()->getParser()->getLinkMap();
-		
+
 		xmlNodePtr node = NULL;
 
 		std::map< uint32, SLinkData >::const_iterator itr;
@@ -847,17 +868,17 @@ namespace NLGUI
 			xmlAddChild( parentNode, node );
 
 			xmlSetProp( node, BAD_CAST "expr", BAD_CAST data.expr.c_str() );
-			
+
 			if( !data.target.empty() )
 				xmlSetProp( node, BAD_CAST "target", BAD_CAST data.target.c_str() );
-			
+
 			if( !data.action.empty() )
 			{
 				xmlSetProp( node, BAD_CAST "action", BAD_CAST data.action.c_str() );
-				
+
 				if( !data.params.empty() )
 					xmlSetProp( node, BAD_CAST "params", BAD_CAST data.params.c_str() );
-				
+
 				if( !data.cond.empty() )
 					xmlSetProp( node, BAD_CAST "cond", BAD_CAST data.cond.c_str() );
 			}
@@ -1519,6 +1540,7 @@ namespace NLGUI
 		for (ite = _EltOrder.begin() ; ite != _EltOrder.end(); ite++)
 		{
 			CViewBase *pIE = *ite;
+			nlassert(pIE);
 			if (pIE->getActive())
 			{
 				const CInterfaceElement *el = pIE->getParentPos() ? pIE->getParentPos() : pIE->getParent();
@@ -1542,12 +1564,8 @@ namespace NLGUI
 				// \todo yoyo: do not know why but don't work if this==scroll_text
 				if(sonGroup && !isGroupScrollText())
 				{
-					sint32	oldSciX= -16384;
-					sint32	oldSciY= -16384;
-					sint32	oldSciW= 32768;
-					sint32	oldSciH= 32768;
 					sint32	w, h;
-					sonGroup->computeCurrentClipContribution(oldSciX, oldSciY, oldSciW, oldSciH, x0, y0, w, h);
+					sonGroup->computeClipContribution(x0, y0, w, h);
 					x1= x0 + w;
 					y1= y0 + h;
 				}
@@ -1792,7 +1810,7 @@ namespace NLGUI
 			CInterfaceGroup *pChild = *itg;
 			if (pChild->getActive())
 			{
-	//		bool bUnder = 
+	//		bool bUnder =
 				pChild->getViewsUnder (x, y, clipX, clipY, clipW, clipH, vVB);
 	//			if (bUnder && !vICL.empty())
 	//				return true;
@@ -1847,7 +1865,7 @@ namespace NLGUI
 			CInterfaceGroup *pChild = *itg;
 			if (pChild->getActive())
 			{
-	//		bool bUnder = 
+	//		bool bUnder =
 				pChild->getCtrlsUnder (x, y, clipX, clipY, clipW, clipH, vICL);
 	//			if (bUnder && !vICL.empty())
 	//				return true;
@@ -1903,7 +1921,7 @@ namespace NLGUI
 			CInterfaceGroup *pChild = *itg;
 			if (pChild->getActive())
 			{
-	//		bool bUnder = 
+	//		bool bUnder =
 				pChild->getGroupsUnder (x, y, clipX, clipY, clipW, clipH, vIGL);
 	//			if (bUnder && !vICL.empty())
 	//				return true;
@@ -1926,8 +1944,7 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::computeCurrentClipContribution(sint32 oldSciX, sint32 oldSciY, sint32 oldSciW, sint32 oldSciH,
-														 sint32 &newSciXDest, sint32 &newSciYDest, sint32 &newSciWDest, sint32 &newSciHDest) const
+	void CInterfaceGroup::computeClipContribution(sint32 &newSciXDest, sint32 &newSciYDest, sint32 &newSciWDest, sint32 &newSciHDest) const
 	{
 		sint32 newSciX = _XReal;
 		sint32 newSciY = _YReal;
@@ -1947,6 +1964,21 @@ namespace NLGUI
 				newSciY = _YReal + _HReal - _MaxHReal;
 			newSciH = _MaxHReal;
 		}
+		// Don't apply margins because HTML list marker is drawn outside group paragraph inner content.
+		// Should not be an issue because horizontal scolling not used.
+		newSciXDest = newSciX/* + _MarginLeft*/;
+		newSciYDest = newSciY;
+		newSciWDest = newSciW/* - _MarginLeft*/;
+		newSciHDest = newSciH;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::computeCurrentClipContribution(sint32 oldSciX, sint32 oldSciY, sint32 oldSciW, sint32 oldSciH,
+														 sint32 &newSciXDest, sint32 &newSciYDest, sint32 &newSciWDest, sint32 &newSciHDest) const
+	{
+		sint32 newSciX, newSciY, newSciW, newSciH;
+		computeClipContribution(newSciX, newSciY, newSciW, newSciH);
+
 		// Clip Left
 		if (newSciX < oldSciX)
 		{
@@ -2149,7 +2181,34 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::dumpGroups()
+	int CInterfaceGroup::luaDumpSize(CLuaState &ls)
+	{
+		const char *funcName = "dumpSize";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		dumpSize();
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	int CInterfaceGroup::luaDumpEltsOrder(CLuaState &ls)
+	{
+		const char *funcName = "dumpEltsOrder";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		dumpEltsOrder();
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	int CInterfaceGroup::luaDumpGroups(CLuaState &ls)
+	{
+		const char *funcName = "dumpGroups";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		dumpGroups();
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::dumpGroups() const
 	{
 		nlinfo("Num groups = %d", (int) _ChildrenGroups.size());
 		for(uint k = 0; k < _ChildrenGroups.size(); ++k)
@@ -2166,21 +2225,18 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::dumpEltsOrder()
+	void CInterfaceGroup::dumpEltsOrder() const
 	{
-		nlinfo("Num elements = %d", (int) _EltOrder.size());
+		nlinfo("Num elements = %d, num groups = %d", (int) _EltOrder.size(), _ChildrenGroups.size());
 		for(uint k = 0; k < _EltOrder.size(); ++k)
 		{
-			std::string typeName = "???";
-			if (_ChildrenGroups[k])
-			{
-				NLGUI::CViewBase *view = _EltOrder[k];
-				const type_info &ti = typeid(*view);
-				typeName = ti.name();
-			}
 			CInterfaceElement *el = _EltOrder[k];
 			if (el)
 			{
+				std::string typeName;
+				NLGUI::CViewBase *view = _EltOrder[k];
+				const type_info &ti = typeid(*view);
+				typeName = ti.name();
 				nlinfo("Element %d, name = %s, type=%s, x=%d, y=%d, parent_name=%s parentposname=%s xreal=%d, yreal=%d, wreal=%d, hreal=%d",
 					   k, el->getId().c_str(), typeName.c_str(), el->getX(), el->getY(), el->getParent() ? el->getParent()->getId().c_str() : "no parent",
 					   el->getParentPos() ? el->getParentPos()->getId().c_str() : "parent",
@@ -2595,7 +2651,7 @@ namespace NLGUI
 			e->setSizeRef("");
 
 			e->setParent(p);
-			
+
 			e->setParentPos(p);
 			e->setParentSize(p);
 			e->alignTo(p);

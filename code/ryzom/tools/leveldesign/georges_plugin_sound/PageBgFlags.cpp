@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -421,8 +424,8 @@ BOOL CPageBgFlags::OnInitDialog()
 	const NLSOUND::UAudioMixer::TBackgroundFlags &flag = SoundDialog->getSoundPlugin()->getMixer()->getBackgroundFlags();
 	for (uint i=0; i<32; ++i)
 	{
-		GetDlgItem(FILTER_EDIT_NAME[i])->SetWindowText(SoundDialog->EnvNames[i].Name.c_str());
-		GetDlgItem(FILTER_SIM_NAME[i])->SetWindowText(SoundDialog->EnvNames[i].ShortName.c_str());
+		GetDlgItem(FILTER_EDIT_NAME[i])->SetWindowText(nlUtf8ToTStr(SoundDialog->EnvNames[i].Name));
+		GetDlgItem(FILTER_SIM_NAME[i])->SetWindowText(nlUtf8ToTStr(SoundDialog->EnvNames[i].ShortName));
 
 		static_cast<CButton*>(GetDlgItem(FILTER_SIM[i]))->SetCheck(flag.Flags[i] ? 1 : 0);
 	}

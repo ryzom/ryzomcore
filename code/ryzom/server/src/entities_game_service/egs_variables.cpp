@@ -568,7 +568,9 @@ CVariable<NLMISC::TGameCycle> OutpostLeavePeriod("egs","OutpostLeavePeriod", "ti
 
 CVariable<bool>	VerboseFactionPoint("egs", "VerboseFactionPoint", "set if faction point system is verbose or not", false, 0, true);
 
+#ifdef RYZOM_FORGE
 CVariable<bool> UseNewNewbieLandStartingPoint("egs", "UseNewNewbieLandStartingPoint", "set if create new character start at new noobland or old", false, 0, true);
+#endif
 
 // Fame
 // - Limits

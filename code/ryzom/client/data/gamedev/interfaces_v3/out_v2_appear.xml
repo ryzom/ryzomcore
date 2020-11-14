@@ -353,12 +353,12 @@
 <proc id="proc_finish3">
 	<action handler="proc" params="appear_disable_buttons" />
 	<action handler="set" params="dblink=UI:TEMP:FROM|value=1" />
-	<!--
 	<action handler="set" params="dblink=UI:NEXT_SCREEN|value=%screen_location" />
 	<action handler="copy" params="dbdst=UI:CURRENT_SCREEN|dbsrc=UI:NEXT_SCREEN" />
-	-->
+	<!--
 	<action handler="set" params="dblink=UI:TEMP:CHAR3D:DEST|value=1" />
 	<action handler="ask_create_char" params="name=ui:outgame:appear_name:eb|caracs=UI:TEMP:JOB_|charsum=UI:TEMP:CHAR3D|loc=UI:TEMP:CHAR3D:DEST|slot=@UI:TEMP:CHARSELSLOT" />
+	-->
 </proc>
 
 

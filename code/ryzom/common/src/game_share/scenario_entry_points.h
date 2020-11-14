@@ -135,6 +135,8 @@ namespace R2
 		// get the vector of complete islands
 		const TCompleteIslands&  getCompleteIslands();
 
+		void setFiles(const std::string &completeIslandsFilename, const std::string &entryPointsFilename);
+
 	private:
 		//-------------------------------------------------------------------------
 		// this is a singleton so prevent instantiation
@@ -184,7 +186,8 @@ namespace R2
 		NLMISC::CVector2f	_LastTestedCoords;
 		CCompleteIsland		*_LastFoundIsland;
 
-		std::string _CompleteIslandsFilename;
+		bool _HardIslandsPath;
+		std::vector<std::string> _CompleteIslandsFilenames;
 		std::string _EntryPointsFilename;
 	};
 

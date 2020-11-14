@@ -368,7 +368,7 @@ CScriptStack::CStackEntry& CScriptStack::CStackEntry::operator=(std::string cons
 {
 	clean();
 	std::string* const strPt = new std::string(str);
-	_valp = *((int*)&strPt);
+	_valp = *((uintptr_t*)&strPt);
 	_type = EString;
 	return *this;
 }
@@ -376,7 +376,7 @@ inline
 CScriptStack::CStackEntry& CScriptStack::CStackEntry::operator=(IScriptContext* sc)
 {
 	clean();
-	_valp = *((int*)&sc);
+	_valp = *((uintptr_t*)&sc);
 	_type = EContext;
 	return *this;
 }

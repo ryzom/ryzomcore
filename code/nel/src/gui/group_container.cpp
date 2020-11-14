@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -814,6 +818,8 @@ namespace NLGUI
 						// move window
 						_Parent->setX(x);
 						_Parent->setY(y);
+
+						CWidgetManager::getInstance()->snapIfClose(_Parent);
 
 						// if some action handler to call when moving
 						if(gc->getAHOnMovePtr())
@@ -2385,7 +2391,7 @@ namespace NLGUI
 			{
 				_W = _Parent->getW();
 			}
-			setMaxH (16384); // No scrollbar for container of layer > 0
+			setMaxH (std::numeric_limits<sint32>::max()); // No scrollbar for container of layer > 0
 			newH = (pLayer->H_T - pLayer->InsetT);
 		}
 
@@ -2468,7 +2474,7 @@ namespace NLGUI
 			else
 			{
 				if (_List != NULL)
-					_List->setMaxH (16384);
+					_List->setMaxH (std::numeric_limits<sint32>::max());
 			}
 
 			if (_LayerSetup == 0)
@@ -4756,6 +4762,7 @@ namespace NLGUI
 			if (_Resizer[k]) _Resizer[k]->HMax = maxH;
 		}
 	}
+
 	// ***************************************************************************
 	int CGroupContainer::luaSetHeaderColor(CLuaState &ls)
 	{
@@ -4763,6 +4770,16 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		_HeaderColor.link(ls.toString(1));
+		return 0;
+	}
+	
+	// ***************************************************************************
+	int CGroupContainer::luaSetModalParentList(CLuaState &ls)
+	{
+		const char *funcName = "setModalParentList";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		setModalParentList(ls.toString(1));
 		return 0;
 	}
 

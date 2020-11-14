@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -36,6 +39,18 @@ REGISTER_UI_CLASS(CViewBitmap)
 
 namespace NLGUI
 {
+
+	CViewBitmap::~CViewBitmap()
+	{
+		if (_HtmlDownload)
+		{
+			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
+			if (groupHtml) {
+				_HtmlDownload = false;
+				groupHtml->removeImageDownload(dynamic_cast<CViewBase*>(this));
+			}
+		}
+	}
 
 	std::string CViewBitmap::getProperty( const std::string &name ) const
 	{
@@ -311,7 +326,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"texture" );
 		if (prop)
 		{
-			string TxName = toLower((const char *) prop);
+			string TxName = (const char *) prop;
 			setTexture (TxName);
 			//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			//CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -461,6 +476,7 @@ namespace NLGUI
 				if (!CFile::fileExists(localname))
 					localname = "web_del.tga";
 				_TextureId.setTexture (localname.c_str(), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
+				_HtmlDownload = true;
 				groupHtml->addImageDownload(TxName, dynamic_cast<CViewBase*>(this));
 			}
 		}

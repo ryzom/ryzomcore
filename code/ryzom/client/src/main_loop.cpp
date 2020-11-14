@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -275,7 +279,6 @@ CTimedFXManager::TDebugDisplayMode	ShowTimedFXMode = CTimedFXManager::NoText;
 
 // DEBUG
 bool				PACSBorders = false;
-bool				ARKPACSBorders = false;
 bool				DebugClusters = false;
 CVector				LastDebugClusterCameraThirdPersonStart= CVector::Null;
 CVector				LastDebugClusterCameraThirdPersonEnd= CVector::Null;
@@ -1081,6 +1084,8 @@ bool mainLoop()
 
 	ProgressBar.finish();
 
+	bool musicTriggerAutoPlay = true;
+
 	// Main loop. If the window is no more Active -> Exit.
 	while( !UserEntity->permanentDeath()
 		&& !game_exit )
@@ -1733,7 +1738,7 @@ bool mainLoop()
 					bool wantTraversals = !StereoDisplay || StereoDisplay->isSceneFirst();
 					bool keepTraversals = StereoDisplay && !StereoDisplay->isSceneLast();
 					doRenderScene(wantTraversals, keepTraversals);
-					
+
 					if (!StereoDisplay || StereoDisplay->isSceneLast())
 					{
 						if (fullDetail)
@@ -1798,12 +1803,6 @@ bool mainLoop()
 						displayPACSPrimitive();
 					}
 
-					// Display PACS borders only (for ARK).
-					if (ARKPACSBorders)
-					{
-						displayPACSPrimitive();
-					}
-					
 					// display Sound box
 					if (SoundBox)
 					{
@@ -2418,6 +2417,17 @@ bool mainLoop()
 		// Update ingame duration and stat report sending
 		updateStatReport ();
 
+		// Auto play once on character login
+		if (musicTriggerAutoPlay)
+		{
+			musicTriggerAutoPlay = false;
+			if (ClientCfg.SoundOn && ClientCfg.MediaPlayerAutoPlay)
+			{
+				MusicPlayer.stop();
+				CAHManager::getInstance()->runActionHandler("music_player", NULL, "play_songs");
+				MusicPlayer.play();
+			}
+		}
 		// Update the music player
 		MusicPlayer.update ();
 
@@ -2452,6 +2462,9 @@ bool mainLoop()
 
 				// we have just completed init main loop, after reselecting character
 				//	repeat the steps before the main loop itself
+
+				// new char, retrigger music autoplay
+				musicTriggerAutoPlay = true;
 
 				// pre main loop in mainLoop
 				resetIngameTime ();

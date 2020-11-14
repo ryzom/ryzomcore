@@ -338,7 +338,7 @@ static INT_PTR CALLBACK PickSetDlgProc(
 			Tab<TSTR*> &names = *((Tab < TSTR*>*)lParam);
 			for (int i = 0; i < names.Count(); i++)
 			{
-				int pos  = SendDlgItemMessage(hWnd, IDC_NS_LIST, LB_ADDSTRING, 0, (LPARAM)(TCHAR*)*names[i]->ToMCHAR());
+				int pos  = SendDlgItemMessage(hWnd, IDC_NS_LIST, LB_ADDSTRING, 0, (LPARAM)(*names[i]->data()));
 				SendDlgItemMessage(hWnd, IDC_NS_LIST, LB_SETITEMDATA, pos, i);
 			}
 			break;

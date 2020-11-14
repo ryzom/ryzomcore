@@ -667,11 +667,12 @@ void CAttributeToProperty::setAiStateName(const std::string& prefix)
 	std::string name;
 
 	CObject* tmp=_Object->getAttr("Id");
-	if( !(tmp&&tmp->isString())&&((name = tmp->toString()).length()!=0))
+	if (!tmp || !tmp->isString())
 	{
 		nlwarning("R2Ani: invalide rtData");
 		return;
 	}
+	name = tmp->toString();
 
 	_Primitive->addPropertyByName("name", new CPropertyString(prefix + name));
 
@@ -1807,7 +1808,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		CObject* tree = act->getAttr("UserTriggers");
 		if (!tree || !tree->isTable())
 		{
-			nlwarning("R2An: Data corrupted");
+			nlwarning("R2An: Data corrupted: UserTriggers missing");
 			return false;
 		}
 		uint32 lastnode = tree->getSize();
@@ -1820,7 +1821,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 				|| !node->isString("Name")
 				|| !node->isString("Grp")	)
 			{
-				nlwarning("R2An: Data corrupted");
+				nlwarning("R2An: Data corrupted: Invalid UserTrigger");
 				return false;
 			}
 
@@ -1898,7 +1899,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 	CObject* plotItems = rtScenario->getAttr("PlotItems");
 	if (!plotItems || !plotItems->isTable())
 	{
-		nlwarning("R2An: Data corrupted:session '%u'",sessionId.asInt());
+		nlwarning("R2An: Data corrupted:session '%u': missing PlotItems",sessionId.asInt());
 		return false;
 	}
 
@@ -1915,7 +1916,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 			|| !plotItem->isString("Comment")
 			)
 		{
-			nlwarning("R2An: Data corrupted:session '%u'",sessionId.asInt());
+			nlwarning("R2An: Data corrupted:session '%u': Invalid PlotItem",sessionId.asInt());
 			return false;
 		}
 
@@ -1956,7 +1957,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		CObject* locations = rtScenario->getAttr("Locations");
 		if (!locations || !locations->isTable())
 		{
-			nlwarning("R2An: Data corrupted");
+			nlwarning("R2An: Data corrupted: Missing Locations");
 			return false;
 		}
 		uint32 lastLocation = locations->getSize();
@@ -1972,7 +1973,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 
 				)
 			{
-				nlwarning("R2An: Data corrupted:session '%u'",sessionId.asInt());
+				nlwarning("R2An: Data corrupted:session '%u': Invalid Location",sessionId.asInt());
 				return false;
 			}
 
@@ -2009,7 +2010,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		bool ok = translateActToPrimitive(components, animSession, act, firstAct, primDocs[firstAct] ); //TODO
 		if (!ok)
 		{
-			nlwarning("R2An: Data corrupted:session '%u'",sessionId.asInt());
+			nlwarning("R2An: Data corrupted:session '%u': Failed Act translation",sessionId.asInt());
 			return false;
 		}
 	}

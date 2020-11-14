@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2015  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -23,6 +27,7 @@
 #include "nel/misc/progress_callback.h"
 #include "nel/misc/file.h"
 #include "nel/misc/xml_pack.h"
+#include "nel/misc/streamed_package_manager.h"
 
 #ifdef NL_OS_WINDOWS
 #	include <sys/types.h>
@@ -288,6 +293,7 @@ void CFileContainer::clearMap ()
 	nlassert(!_MemoryCompressed);
 	_Files.clear ();
 	CBigFile::getInstance().removeAll ();
+	CStreamedPackageManager::getInstance().unloadAll ();
 	NL_DISPLAY_PATH("PATH: CPath::clearMap(): map directory cleared");
 }
 
@@ -336,7 +342,7 @@ void CFileContainer::remapExtension (const string &ext1, const string &ext2, boo
 		nlwarning ("PATH: CPath::remapExtension(%s, %s, %d): can't remap empty extension", ext1lwr.c_str(), ext2lwr.c_str(), substitute);
 	}
 
-	if (ext1lwr == "bnp" || ext2lwr == "bnp")
+	if (ext1lwr == "bnp" || ext2lwr == "bnp" || ext1lwr == "snp" || ext2lwr == "snp")
 	{
 		nlwarning ("PATH: CPath::remapExtension(%s, %s, %d): you can't remap a big file", ext1lwr.c_str(), ext2lwr.c_str(), substitute);
 	}
@@ -700,7 +706,7 @@ bool CFileContainer::setCurrentPath (const std::string &path)
 	int res;
 	//nldebug("Change current path to '%s' (current path is '%s')", path.c_str(), getCurrentPath().c_str());
 #ifdef NL_OS_WINDOWS
-	res = _wchdir(utf8ToWide(path));
+	res = _wchdir(nlUtf8ToWide(path));
 #else
 	res = chdir(path.c_str());
 #endif
@@ -792,7 +798,7 @@ dirent *readdir (DIR *dir)
 	// first visit in this directory : FindFirstFile()
 	if (hFind == NULL)
 	{
-		hFind = FindFirstFileW (utf8ToWide(CPath::standardizePath(sDir) + "*"), &findData);
+		hFind = FindFirstFileW(nlUtf8ToWide(CPath::standardizePath(sDir) + "*"), &findData);
 	}
 	// directory already visited : FindNextFile()
 	else
@@ -898,9 +904,9 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 		if (isdirectory(de))
 		{
 			// skip CVS, .svn and .hg directory
-			if ((!showEverything) && (fn == "CVS" || fn == ".svn" || fn == ".hg"))
+			if ((!showEverything) && (fn == "CVS" || fn == ".svn" || fn == ".hg" || fn == ".git"))
 			{
-				NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): skip CVS, .svn and .hg directory", path.c_str(), recurse, wantDir, wantFile);
+				NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): skip '%s' directory", path.c_str(), recurse, wantDir, wantFile, fn.c_str());
 				continue;
 			}
 
@@ -1162,16 +1168,26 @@ void CFileContainer::addSearchFile (const string &file, bool remap, const string
 		return;
 	}
 
+	std::string fileExtension = CFile::getExtension(newFile);
+
 	// check if it s a big file
-	if (CFile::getExtension(newFile) == "bnp")
+	if (fileExtension == "bnp")
 	{
 		NL_DISPLAY_PATH ("PATH: CPath::addSearchFile(%s, %d, '%s'): '%s' is a big file, add it", file.c_str(), remap, virtual_ext.c_str(), newFile.c_str());
 		addSearchBigFile(file, false, false, progressCallBack);
 		return;
 	}
 
+	// check if it s a streamed package
+	if (fileExtension == "snp")
+	{
+		NL_DISPLAY_PATH ("PATH: CPath::addSearchStreamedPackage(%s, %d, '%s'): '%s' is a streamed package, add it", file.c_str(), remap, virtual_ext.c_str(), newFile.c_str());
+		addSearchStreamedPackage(file, false, false, progressCallBack);
+		return;
+	}
+
 	// check if it s an xml pack file
-	if (CFile::getExtension(newFile) == "xml_pack")
+	if (fileExtension == "xml_pack")
 	{
 		NL_DISPLAY_PATH ("PATH: CPath::addSearchFile(%s, %d, '%s'): '%s' is an xml pack file, add it", file.c_str(), remap, virtual_ext.c_str(), newFile.c_str());
 		addSearchXmlpackFile(file, false, false, progressCallBack);
@@ -1390,6 +1406,64 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 	}
 
 	fclose (Handle);
+}
+
+void CPath::addSearchStreamedPackage (const string &filename, bool recurse, bool alternative, NLMISC::IProgressCallback *progressCallBack)
+{
+	getInstance()->_FileContainer.addSearchBigFile(filename, recurse, alternative, progressCallBack);
+}
+
+void CFileContainer::addSearchStreamedPackage (const string &filename, bool recurse, bool alternative, NLMISC::IProgressCallback *progressCallBack)
+{
+	// Check if filename is not empty
+	if (filename.empty())
+	{
+		nlwarning ("PATH: CPath::addSearchStreamedPackage(%s, %d, %d): can't add empty file, skip it", filename.c_str(), recurse, alternative);
+		return;
+	}
+	// Check if the file exists
+	if (!CFile::isExists(filename))
+	{
+		nlwarning ("PATH: CPath::addSearchStreamedPackage(%s, %d, %d): '%s' is not found, skip it", filename.c_str(), recurse, alternative, filename.c_str());
+		return;
+	}
+	// Check if it s a file
+	if (CFile::isDirectory(filename))
+	{
+		nlwarning ("PATH: CPath::addSearchStreamedPackage(%s, %d, %d): '%s' is not a file, skip it", filename.c_str(), recurse, alternative, filename.c_str());
+		return;
+	}
+
+	// Add the file itself
+	std::string packname = NLMISC::toLower(CFile::getFilename(filename));
+	insertFileInMap(packname, filename, false, CFile::getExtension(filename));
+
+	// Add the package to the package manager
+	if (CStreamedPackageManager::getInstance().loadPackage(filename))
+	{
+		std::vector<std::string> fileNames;
+		CStreamedPackageManager::getInstance().list(fileNames, packname);
+
+		for (std::vector<std::string>::iterator it(fileNames.begin()), end(fileNames.end()); it != end; ++it)
+		{
+			// Add the file to the lookup
+			std::string filePackageName = packname + "@" + (*it);
+			// nldebug("Insert '%s'", filePackageName.c_str());
+			insertFileInMap((*it), filePackageName, false, CFile::getExtension(*it));
+
+			// Remapped extensions
+			std::string ext = CFile::getExtension(*it);
+			for (uint j = 0; j < _Extensions.size (); j++)
+			{
+				if (_Extensions[j].first == ext)
+				{
+					// Need to remap
+					insertFileInMap(CFile::getFilenameWithoutExtension(*it) + "." + _Extensions[j].second,
+						filePackageName, true, _Extensions[j].first);
+				}
+			}
+		}
+	}
 }
 
 // WARNING : recurse is not used
@@ -1679,7 +1753,7 @@ void CFileContainer::memoryCompress()
 	while (it != _Files.end())
 	{
 		string sTmp = SSMpath.get(it->second.idPath);
-		if ((sTmp.find("@@") == string::npos) && (sTmp.find('@') != string::npos) && !it->second.Remapped)
+		if ((sTmp.find("@@") == string::npos) && (sTmp.find('@') != string::npos) && (sTmp.find("snp@") == string::npos) && !it->second.Remapped)
 		{
 			// This is a file included in a bigfile (so the name is in the bigfile manager)
 		}
@@ -1702,7 +1776,7 @@ void CFileContainer::memoryCompress()
 	{
 		CFileEntry &rFE = it->second;
 		string sTmp = SSMpath.get(rFE.idPath);
-		if (sTmp.find("@") == string::npos || sTmp.find("@@") != string::npos || rFE.Remapped)
+		if ((sTmp.find("@") == string::npos) || (sTmp.find("@@") != string::npos) || (sTmp.find("snp@") != string::npos) || rFE.Remapped)
 		{
 			strcpy(_AllFileNames+nSize, rFE.Name.c_str());
 			_MCFiles[nNb].Name = _AllFileNames+nSize;
@@ -1914,7 +1988,7 @@ string CFile::getPath (const string &filename)
 bool CFile::isDirectory (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	DWORD res = GetFileAttributesW(utf8ToWide(filename));
+	DWORD res = GetFileAttributesW(nlUtf8ToWide(filename));
 	if (res == INVALID_FILE_ATTRIBUTES)
 	{
 		// nlwarning ("PATH: '%s' is not a valid file or directory name", filename.c_str ());
@@ -1937,7 +2011,7 @@ bool CFile::isDirectory (const string &filename)
 bool CFile::isExists (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	return GetFileAttributesW(utf8ToWide(filename)) != INVALID_FILE_ATTRIBUTES;
+	return GetFileAttributesW(nlUtf8ToWide(filename)) != INVALID_FILE_ATTRIBUTES;
 #else // NL_OS_WINDOWS
 	struct stat buf;
 	return stat (filename.c_str (), &buf) == 0;
@@ -1999,6 +2073,7 @@ string CFile::findNewFile (const string &filename)
 // \warning doesn't work with big file
 uint32	CFile::getFileSize (const std::string &filename)
 {
+	std::string::size_type pos;
 	if (filename.find("@@") != string::npos)
 	{
 		uint32 fs = 0, bfo;
@@ -2006,18 +2081,27 @@ uint32	CFile::getFileSize (const std::string &filename)
 		CXMLPack::getInstance().getFile (filename, fs, bfo, c, d);
 		return fs;
 	}
-	else if (filename.find('@') != string::npos)
+	else if ((pos = filename.find('@')) != string::npos)
 	{
-		uint32 fs = 0, bfo;
-		bool c, d;
-		CBigFile::getInstance().getFile (filename, fs, bfo, c, d);
-		return fs;
+		if (pos > 3 && filename[pos-3] == 's' && filename[pos-2] == 'n' && filename[pos-1] == 'p')
+		{
+			uint32 fs = 0;
+			CStreamedPackageManager::getInstance().getFileSize (fs, filename.substr(pos+1));
+			return fs;
+		}
+		else
+		{
+			uint32 fs = 0, bfo;
+			bool c, d;
+			CBigFile::getInstance().getFile (filename, fs, bfo, c, d);
+			return fs;
+		}
 	}
 	else
 	{
 #if defined (NL_OS_WINDOWS)
 		struct _stat buf;
-		int result = _wstat (utf8ToWide(filename), &buf);
+		int result = _wstat(nlUtf8ToWide(filename), &buf);
 #elif defined (NL_OS_UNIX)
 		struct stat buf;
 		int result = stat (filename.c_str (), &buf);
@@ -2068,7 +2152,7 @@ uint32	CFile::getFileModificationDate(const std::string &filename)
 	// Use the WIN32 API to read the file times in UTC
 
 	// create a file handle (this does not open the file)
-	HANDLE h = CreateFileW(utf8ToWide(fn), 0, 0, NULL, OPEN_EXISTING, 0, 0);
+	HANDLE h = CreateFileW(nlUtf8ToWide(fn), 0, 0, NULL, OPEN_EXISTING, 0, 0);
 	if (h == INVALID_HANDLE_VALUE)
 	{
 		nlwarning("Can't get modification date on file '%s' : %s", fn.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
@@ -2138,7 +2222,7 @@ bool	CFile::setFileModificationDate(const std::string &filename, uint32 modTime)
 	// Use the WIN32 API to set the file times in UTC
 
 	// create a file handle (this does not open the file)
-	HANDLE h = CreateFileW(utf8ToWide(fn), GENERIC_WRITE|GENERIC_READ, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
+	HANDLE h = CreateFileW(nlUtf8ToWide(fn), GENERIC_WRITE | GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
 	if (h == INVALID_HANDLE_VALUE)
 	{
 		nlwarning("Can't set modification date on file '%s' (error accessing file) : %s", fn.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
@@ -2223,7 +2307,7 @@ uint32	CFile::getFileCreationDate(const std::string &filename)
 
 #if defined (NL_OS_WINDOWS)
 	struct _stat buf;
-	int result = _wstat(utf8ToWide(fn), &buf);
+	int result = _wstat(nlUtf8ToWide(fn), &buf);
 #elif defined (NL_OS_UNIX)
 	struct stat buf;
 	int result = stat(fn.c_str (), &buf);
@@ -2357,7 +2441,7 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 	else
 	{
 #ifdef NL_OS_WINDOWS
-		if (MoveFileW(utf8ToWide(ssrc), utf8ToWide(sdest)) == 0)
+		if (MoveFileW(nlUtf8ToWide(ssrc), nlUtf8ToWide(sdest)) == 0)
 		{
 			sint lastError = NLMISC::getLastError();
 			nlwarning ("PATH: CopyMoveFile error: can't link/move '%s' into '%s', error %u (%s)",
@@ -2482,7 +2566,7 @@ bool CFile::moveFile(const std::string &dest, const std::string &src)
 bool CFile::createDirectory(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	return _wmkdir(utf8ToWide(filename))==0;
+	return _wmkdir(nlUtf8ToWide(filename)) == 0;
 #else
 	// Set full permissions....
 	return mkdir(filename.c_str(), 0xFFFF)==0;
@@ -2751,7 +2835,7 @@ bool CFile::deleteFile(const std::string &filename)
 {
 	setRWAccess(filename);
 #ifdef NL_OS_WINDOWS
-	sint res = _wunlink(utf8ToWide(filename));
+	sint res = _wunlink(nlUtf8ToWide(filename));
 #else
 	sint res = unlink(filename.c_str());
 #endif
@@ -2770,7 +2854,7 @@ bool CFile::deleteDirectory(const std::string &filename)
 {
 	setRWAccess(filename);
 #ifdef NL_OS_WINDOWS
-	sint res = _wrmdir(utf8ToWide(filename));
+	sint res = _wrmdir(nlUtf8ToWide(filename));
 #else
 	sint res = rmdir(filename.c_str());
 #endif

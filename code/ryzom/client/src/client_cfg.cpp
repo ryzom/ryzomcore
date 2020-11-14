@@ -1,5 +1,11 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -41,6 +47,10 @@
 #include "nel/3d/u_scene.h"
 // Game Share.
 #include "game_share/time_weather_season/time_and_season.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifdef NL_OS_MAC
 #include "app_bundle_utils.h"
@@ -306,6 +316,9 @@ CClientConfig::CClientConfig()
 	InterfaceScale_step	= 0.05;
 	BilinearUI			= true;
 
+	WindowSnapInvert	= false;
+	WindowSnapDistance	= 10;
+
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
 	VRDisplayDeviceId	= "";
@@ -313,30 +326,17 @@ CClientConfig::CClientConfig()
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
 
-#if 1 // Yubo hack
-	// The order is important here, because in a layer, global texture are rendered through this order
-	TexturesInterface.push_back("texture_interfaces_v3");
-	// DXTC contain all items and bricks bitmaps, they must come after standard texture
-	TexturesInterface.push_back("new_texture_interfaces_dxtc");
-	// Added icons by Yubo's Team 2009
-	TexturesInterface.push_back("texture_extra");
-#else
 	TexturesInterface.push_back("texture_interfaces_v3");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc");
-#endif
 
 	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
 
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
-	ConditionsTermsURL	= "http://www.gnu.org/licenses/agpl-3.0.html";
-	EditAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
-	BetaAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
-	ForgetPwdURL		= "http://shard.ryzomcore.org/ams/index.php?page=forgot_password";
-	FreeTrialURL		= "http://shard.ryzomcore.org/ams/index.php?page=register";
-	LoginSupportURL		= "http://shard.ryzomcore.org/ams/index.php";
+	CreateAccountURL	= RYZOM_CLIENT_CREATE_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	EditAccountURL		= RYZOM_CLIENT_EDIT_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	ForgetPwdURL		= RYZOM_CLIENT_FORGET_PASSWORD_URL;	// "https://open.ryzom.dev/ams/";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -429,18 +429,20 @@ CClientConfig::CClientConfig()
 #endif
 
 	PatchUrl.clear();
+#ifdef RYZOM_FORGE
 	PatchletUrl.clear();
+#endif
 	PatchVersion.clear();
 
-	WebIgMainDomain = "shard.ryzomcore.org";
-	WebIgTrustedDomains.push_back(WebIgMainDomain);
+	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
+	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
 	WebIgNotifInterval = 10; // time in minutes
 
-	CurlMaxConnections = 2;
+	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = WebIgMainDomain + "/releasenotes_ring/index.php";
+	ReleaseNotePath = WebIgMainDomain + "/releasenotes/index.php";
 
 
 	///////////////
@@ -456,7 +458,7 @@ CClientConfig::CClientConfig()
 	SoundOn				= true;						// Default is with sound.
 	DriverSound			= SoundDrvAuto;
 	SoundForceSoftwareBuffer = true;
-	SoundOutGameMusic	= "Main Menu Loop.ogg";
+	SoundOutGameMusic	= "main menu loop.ogg";
 	SoundSFXVolume		= 1.f;
 	SoundGameMusicVolume	= 1.f;
 	SoundTPFade			= 500;
@@ -471,6 +473,12 @@ CClientConfig::CClientConfig()
 
 	ColorShout			= CRGBA(150,0,0,255);		// Default Shout color.
 	ColorTalk			= CRGBA(255,255,255,255);	// Default Talk color.
+
+	StreamedPackagePath = "stream";
+
+	// MP3 player
+	MediaPlayerDirectory	= "music";
+	MediaPlayerAutoPlay		= false;
 
 //	PreDataPath.push_back("data/gamedev/language/");	// Default Path for the language data
 
@@ -613,6 +621,8 @@ CClientConfig::CClientConfig()
 
 	MaxMapScale			= 2.0f;
 	R2EDMaxMapScale		= 8.0f;
+
+	TargetChangeCompass	= true;
 
 	// VERBOSES
 	VerboseVP				= false;
@@ -852,6 +862,8 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(InterfaceScale_step);
 	clamp(ClientCfg.InterfaceScale, ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
 	READ_BOOL_FV(BilinearUI);
+	READ_BOOL_FV(WindowSnapInvert);
+	READ_INT_FV(WindowSnapDistance);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");
 	if (varPtr)
@@ -895,19 +907,13 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(DisplayAccountButtons)
 	READ_STRING_DEV(CreateAccountURL)
 	READ_STRING_DEV(EditAccountURL)
-	READ_STRING_DEV(ConditionsTermsURL)
-	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(ForgetPwdURL)
+	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(FreeTrialURL)
-	READ_STRING_DEV(LoginSupportURL)
 
-	READ_STRING_FV(CreateAccountURL)
-	READ_STRING_FV(EditAccountURL)
+	// defined in client_default.cfg
 	READ_STRING_FV(ConditionsTermsURL)
 	READ_STRING_FV(NamingPolicyURL)
-	READ_STRING_FV(BetaAccountURL)
-	READ_STRING_FV(ForgetPwdURL)
-	READ_STRING_FV(FreeTrialURL)
 	READ_STRING_FV(LoginSupportURL)
 
 #ifndef RZ_NO_CLIENT
@@ -1090,13 +1096,18 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ReleaseNotePath)
 #endif
 
-	/////////////////////////
-	// NEW PATCHLET SYSTEM //
+#ifdef RYZOM_FORGE
+	/////////////////////////////
+	// GARBAGE PATCHLET SYSTEM //
 	READ_STRING_FV(PatchletUrl)
+#endif
 
 	///////////
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
+	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
+		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
+		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);
@@ -1104,7 +1115,13 @@ void CClientConfig::setValues()
 		ClientCfg.CurlMaxConnections = 2;
 
 	READ_STRING_FV(CurlCABundle);
-
+	if (!ClientCfg.CurlCABundle.empty() && ClientCfg.CurlCABundle[0] == '%') // Path is relative to client_default.cfg path (used by ryzom patch)
+	{
+		string defaultConfigFileName;
+		if (ClientCfg.getDefaultConfigLocation(defaultConfigFileName))
+			ClientCfg.CurlCABundle = CFile::getPath(defaultConfigFileName)+ClientCfg.CurlCABundle.substr(1);
+	}
+		
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold
@@ -1247,6 +1264,10 @@ void CClientConfig::setValues()
 	// Max track
 	READ_INT_FV(MaxTrack)
 
+	// MP3 Player
+	READ_STRING_FV(MediaPlayerDirectory);
+	READ_BOOL_FV(MediaPlayerAutoPlay);
+
 	/////////////////
 	// USER COLORS //
 	// Shout Color
@@ -1275,17 +1296,24 @@ void CClientConfig::setValues()
 
 	//////////
 	// MISC //
+
 	// Pre Data Path.
 	READ_STRINGVECTOR_FV(PreDataPath);
 
 	// Data Path.
 	READ_STRINGVECTOR_FV(DataPath);
 
-	// List of files that trigger R2ED reload when touched
-	READ_STRINGVECTOR_FV(R2EDReloadFiles);
-
 	// Data Path no recurse.
 	READ_STRINGVECTOR_FV(DataPathNoRecurse);
+
+	// Streamed package path
+	READ_STRING_FV(StreamedPackagePath);
+
+	// Streamed package hosts
+	READ_STRINGVECTOR_FV(StreamedPackageHosts);
+
+	// List of files that trigger R2ED reload when touched
+	READ_STRINGVECTOR_FV(R2EDReloadFiles);
 
 	// Update packed sheet Path
 	READ_STRINGVECTOR_FV(UpdatePackedSheetPath);
@@ -1490,6 +1518,9 @@ void CClientConfig::setValues()
 	// Default values for CGroupMap
 	READ_FLOAT_FV(MaxMapScale);
 	READ_FLOAT_FV(R2EDMaxMapScale);
+
+	// /tar to update compass or not
+	READ_BOOL_FV(TargetChangeCompass);
 
 	/////////////
 	// SHADOWS //
@@ -2015,24 +2046,39 @@ void CClientConfig::init(const string &configFileName)
 
 	// now we can continue loading and parsing the config file
 
-
 	// if the config file will be modified, it calls automatically the function setValuesOnFileChange()
 	ClientCfg.ConfigFile.setCallback (CClientConfig::setValuesOnFileChange);
 
 	// load the config files
 	ClientCfg.ConfigFile.load (configFileName);
 
-
-	// update the ConfigFile variable in the config file
-	CConfigFile::CVar *varPtr = ClientCfg.ConfigFile.getVarPtr ("ClientVersion");
+	CConfigFile::CVar *varPtr;
+	// check language code is supported
+	varPtr = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
 	if (varPtr)
 	{
-		string str = varPtr->asString ();
+		std::string lang = varPtr->asString();
+		if (!CI18N::isLanguageCodeSupported(lang))
+		{
+			nlinfo("Unsupported language code \"%s\" fallback on default", lang.c_str());
+			// fallback to default language
+			ClientCfg.LanguageCode = CI18N::getSystemLanguageCode();
+			// update ConfigFile variable
+			varPtr->setAsString(ClientCfg.LanguageCode);
+			ClientCfg.ConfigFile.save();
+		}
+	}
+
+	// update the ConfigFile variable in the config file
+	varPtr = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
+	if (varPtr)
+	{
+		std::string str = varPtr->asString ();
 		if (str != getVersion() && ClientCfg.SaveConfig)
 		{
 			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), getVersion().c_str());
-			varPtr->setAsString (getVersion());
-			ClientCfg.ConfigFile.save ();
+			varPtr->setAsString(getVersion());
+			ClientCfg.ConfigFile.save();
 		}
 	}
 	else

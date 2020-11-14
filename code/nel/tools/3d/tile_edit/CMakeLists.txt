@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 FILE(GLOB SRC2 cpu.cpp DllEntry.cpp Popup.* thread_win32.* TileCtrl.* TileList.* TileView.*)
 LIST(REMOVE_ITEM SRC ${SRC2})

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2011-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -216,7 +219,7 @@ export_zone_cf (Value** arg_list, int count)
 			if (tri->rpatch->exportZone (node, &tri->patch, zone, zoneSymmetry, nZone, 160, 1, false))
 			{
 				// Export path 
-				const std::string sPath = tStrToUtf8(arg_list[1]->to_string());
+				const std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 				COFile file;
 				if (file.open (sPath))
@@ -246,7 +249,7 @@ Value* import_zone_cf (Value** arg_list, int count)
 	Interface *ip = MAXScript_interface;
 
 	// Get the filename
-	string filename = tStrToUtf8(arg_list[0]->to_string());
+	string filename = MCharStrToUtf8(arg_list[0]->to_string());
 
 	// Get the flip
 	bool dialog = arg_list[1]->to_bool ()!=FALSE;
@@ -289,14 +292,14 @@ Value* import_zone_cf (Value** arg_list, int count)
 		{
 			// Error message
 			std::string msg = toString("Error when loading file %s: %s", filename.c_str(), e.what());
-			errorMessage (utf8ToTStr(msg), _T("NeL import zone"), *ip, dialog);
+			errorMessage (MaxTStrFromUtf8(msg), _M("NeL import zone"), *ip, dialog);
 		}
 	}
 	else
 	{
 		// Error message
 		std::string msg = toString("Can't open the file %s for reading.", filename.c_str());
-		errorMessage (utf8ToTStr(msg), _T("NeL import zone"), *ip, dialog);
+		errorMessage (MaxTStrFromUtf8(msg), _M("NeL import zone"), *ip, dialog);
 	}
 
 	return ret;
@@ -1708,7 +1711,7 @@ Value* set_tile_bank_cf (Value** arg_list, int count)
 	type_check(arg_list[0], String, _M("NelSetTileBank [tile bank pathname]"));
 
 	// ok ?
-	const std::string pathname = tStrToUtf8(arg_list[0]->to_string());
+	const std::string pathname = MCharStrToUtf8(arg_list[0]->to_string());
 
 	// Get tile number
 	SetBankPathName (pathname);

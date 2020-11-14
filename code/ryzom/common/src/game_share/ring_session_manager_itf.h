@@ -1,3 +1,4 @@
+
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -33,22 +34,22 @@
 #include "game_share/callback_adaptor.h"
 
 #include "nel/misc/entity_id.h"
-
+	
 #include "game_share/r2_basic_types.h"
-
+	
 #include "game_share/r2_share_itf.h"
-
+	
 #include "nel/net/login_cookie.h"
-
+	
 #include "game_share/welcome_service_itf.h"
-
+	
 #include "game_share/character_sync_itf.h"
-
+	
 #include "game_share/security_check.h"
-
+	
 namespace RSMGR
 {
-
+	
 	class TRunningSessionInfo;
 
 	class TSessionDesc;
@@ -78,7 +79,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 7
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -94,13 +95,13 @@ namespace RSMGR
 				indexTable.insert(std::make_pair(sps_playing, 4));
 				indexTable.insert(std::make_pair(sps_editing, 5));
 				indexTable.insert(std::make_pair(sps_animating, 6));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -116,7 +117,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -194,16 +196,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 
 	struct TSessionType
 	{
@@ -223,7 +225,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -236,13 +238,13 @@ namespace RSMGR
 				indexTable.insert(std::make_pair(st_anim, 1));
 				indexTable.insert(std::make_pair(st_outland, 2));
 				indexTable.insert(std::make_pair(st_mainland, 3));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -255,7 +257,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -333,16 +336,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 
 	struct TSessionOrientation
 	{
@@ -364,7 +367,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 6
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -379,13 +382,13 @@ namespace RSMGR
 				indexTable.insert(std::make_pair(so_hack_slash, 3));
 				indexTable.insert(std::make_pair(so_guild_training, 4));
 				indexTable.insert(std::make_pair(so_other, 5));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -400,7 +403,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -478,16 +482,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 
 	struct TSessionState
 	{
@@ -507,7 +511,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -520,13 +524,13 @@ namespace RSMGR
 				indexTable.insert(std::make_pair(ss_open, 1));
 				indexTable.insert(std::make_pair(ss_locked, 2));
 				indexTable.insert(std::make_pair(ss_closed, 3));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -539,7 +543,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -617,16 +622,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 
 	struct TAnimMode
 	{
@@ -644,7 +649,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -655,13 +660,13 @@ namespace RSMGR
 				// fill the index table
 				indexTable.insert(std::make_pair(am_dm, 0));
 				indexTable.insert(std::make_pair(am_autonomous, 1));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -672,7 +677,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -750,16 +756,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 
 	struct TAccessType
 	{
@@ -777,7 +783,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -788,13 +794,13 @@ namespace RSMGR
 				// fill the index table
 				indexTable.insert(std::make_pair(at_public, 0));
 				indexTable.insert(std::make_pair(at_private, 1));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -805,7 +811,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -883,16 +890,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 
 	struct TRuleType
 	{
@@ -910,7 +917,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -921,13 +928,13 @@ namespace RSMGR
 				// fill the index table
 				indexTable.insert(std::make_pair(rt_strict, 0));
 				indexTable.insert(std::make_pair(rt_liberal, 1));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -938,7 +945,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -1016,16 +1024,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 
 	struct TLevelFilterEnum
 	{
@@ -1037,13 +1045,14 @@ namespace RSMGR
 			lf_d = 8,
 			lf_e = 16,
 			lf_f = 32,
-
-			invalid_val,
+			
+			empty_val = 0,
+			max_val = ((uint32)lf_f << 1) - 1,
 
 			/// Number of enumerated values
 			nb_enum_items = 6
 		};
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1054,11 +1063,11 @@ namespace RSMGR
 				NL_STRING_CONVERSION_TABLE_ENTRY(lf_d)
 				NL_STRING_CONVERSION_TABLE_ENTRY(lf_e)
 				NL_STRING_CONVERSION_TABLE_ENTRY(lf_f)
-				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			empty_val);
 
 			return conversionTable;
 		}
@@ -1067,7 +1076,7 @@ namespace RSMGR
 
 	public:
 		TLevelFilterEnum()
-			: _Value(invalid_val)
+			: _Value(empty_val)
 		{
 		}
 		TLevelFilterEnum(TValues value)
@@ -1129,17 +1138,15 @@ namespace RSMGR
 		// return true if the actual value of the enum is valid, otherwise false
 		bool isValid()
 		{
-			if (_Value == invalid_val)
-				return false;
 
 			// not invalid, check other enum value
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 	};
-
-	typedef NLMISC::CEnumBitset < TLevelFilterEnum, uint32, TLevelFilterEnum::invalid_val, ',', NLMISC::TContainedEnum < TLevelFilterEnum, uint32 >, TLevelFilterEnum::TValues > TLevelFilter;
+	
+	typedef NLMISC::CEnumBitset < TLevelFilterEnum, uint32, TLevelFilterEnum::max_val, ',', NLMISC::TContainedEnum < TLevelFilterEnum, uint32 >, TLevelFilterEnum::TValues > TLevelFilter;
 
 
 	struct TEstimatedDuration
@@ -1159,7 +1166,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -1171,13 +1178,13 @@ namespace RSMGR
 				indexTable.insert(std::make_pair(et_short, 0));
 				indexTable.insert(std::make_pair(et_medium, 1));
 				indexTable.insert(std::make_pair(et_long, 2));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1189,7 +1196,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -1267,16 +1275,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 
 	struct TRaceFilterEnum
 	{
@@ -1286,13 +1294,14 @@ namespace RSMGR
 			rf_matis = 2,
 			rf_tryker = 4,
 			rf_zorai = 8,
-
-			invalid_val,
+			
+			empty_val = 0,
+			max_val = ((uint32)rf_zorai << 1) - 1,
 
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1301,11 +1310,11 @@ namespace RSMGR
 				NL_STRING_CONVERSION_TABLE_ENTRY(rf_matis)
 				NL_STRING_CONVERSION_TABLE_ENTRY(rf_tryker)
 				NL_STRING_CONVERSION_TABLE_ENTRY(rf_zorai)
-				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			empty_val);
 
 			return conversionTable;
 		}
@@ -1314,7 +1323,7 @@ namespace RSMGR
 
 	public:
 		TRaceFilterEnum()
-			: _Value(invalid_val)
+			: _Value(empty_val)
 		{
 		}
 		TRaceFilterEnum(TValues value)
@@ -1376,17 +1385,15 @@ namespace RSMGR
 		// return true if the actual value of the enum is valid, otherwise false
 		bool isValid()
 		{
-			if (_Value == invalid_val)
-				return false;
 
 			// not invalid, check other enum value
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 	};
-
-	typedef NLMISC::CEnumBitset < TRaceFilterEnum, uint32, TRaceFilterEnum::invalid_val, ',', NLMISC::TContainedEnum < TRaceFilterEnum, uint32 >, TRaceFilterEnum::TValues > TRaceFilter;
+	
+	typedef NLMISC::CEnumBitset < TRaceFilterEnum, uint32, TRaceFilterEnum::max_val, ',', NLMISC::TContainedEnum < TRaceFilterEnum, uint32 >, TRaceFilterEnum::TValues > TRaceFilter;
 
 
 	struct TReligionFilterEnum
@@ -1396,13 +1403,14 @@ namespace RSMGR
 			rf_kami = 1,
 			rf_karavan = 2,
 			rf_neutral = 4,
-
-			invalid_val,
+			
+			empty_val = 0,
+			max_val = ((uint32)rf_neutral << 1) - 1,
 
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1410,11 +1418,11 @@ namespace RSMGR
 				NL_STRING_CONVERSION_TABLE_ENTRY(rf_kami)
 				NL_STRING_CONVERSION_TABLE_ENTRY(rf_karavan)
 				NL_STRING_CONVERSION_TABLE_ENTRY(rf_neutral)
-				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			empty_val);
 
 			return conversionTable;
 		}
@@ -1423,7 +1431,7 @@ namespace RSMGR
 
 	public:
 		TReligionFilterEnum()
-			: _Value(invalid_val)
+			: _Value(empty_val)
 		{
 		}
 		TReligionFilterEnum(TValues value)
@@ -1485,17 +1493,15 @@ namespace RSMGR
 		// return true if the actual value of the enum is valid, otherwise false
 		bool isValid()
 		{
-			if (_Value == invalid_val)
-				return false;
 
 			// not invalid, check other enum value
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 	};
-
-	typedef NLMISC::CEnumBitset < TReligionFilterEnum, uint32, TReligionFilterEnum::invalid_val, ',', NLMISC::TContainedEnum < TReligionFilterEnum, uint32 >, TReligionFilterEnum::TValues > TReligionFilter;
+	
+	typedef NLMISC::CEnumBitset < TReligionFilterEnum, uint32, TReligionFilterEnum::max_val, ',', NLMISC::TContainedEnum < TReligionFilterEnum, uint32 >, TReligionFilterEnum::TValues > TReligionFilter;
 
 
 	struct TGuildFilter
@@ -1514,7 +1520,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -1525,13 +1531,13 @@ namespace RSMGR
 				// fill the index table
 				indexTable.insert(std::make_pair(gf_only_my_guild, 0));
 				indexTable.insert(std::make_pair(gf_any_player, 1));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1542,7 +1548,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -1620,16 +1627,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 
 	struct TShardFilterEnum
 	{
@@ -1666,13 +1673,15 @@ namespace RSMGR
 			sf_shard28 = 1<<28,
 			sf_shard29 = 1<<29,
 			sf_shard30 = 1<<30,
-
-			invalid_val,
+			sf_shard31 = 1<<31,
+			
+			empty_val = 0,
+			max_val = ((uint32)sf_shard31 << 1) - 1,
 
 			/// Number of enumerated values
-			nb_enum_items = 31
+			nb_enum_items = 32
 		};
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1708,11 +1717,12 @@ namespace RSMGR
 				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard28)
 				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard29)
 				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard30)
-				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
+				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard31)
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			empty_val);
 
 			return conversionTable;
 		}
@@ -1721,7 +1731,7 @@ namespace RSMGR
 
 	public:
 		TShardFilterEnum()
-			: _Value(invalid_val)
+			: _Value(empty_val)
 		{
 		}
 		TShardFilterEnum(TValues value)
@@ -1783,17 +1793,15 @@ namespace RSMGR
 		// return true if the actual value of the enum is valid, otherwise false
 		bool isValid()
 		{
-			if (_Value == invalid_val)
-				return false;
 
 			// not invalid, check other enum value
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 	};
-
-	typedef NLMISC::CEnumBitset < TShardFilterEnum, uint32, TShardFilterEnum::invalid_val, ',', NLMISC::TContainedEnum < TShardFilterEnum, uint32 >, TShardFilterEnum::TValues > TShardFilter;
+	
+	typedef NLMISC::CEnumBitset < TShardFilterEnum, uint32, TShardFilterEnum::max_val, ',', NLMISC::TContainedEnum < TShardFilterEnum, uint32 >, TShardFilterEnum::TValues > TShardFilter;
 	// Info about a running session in a DSS
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
@@ -1858,7 +1866,7 @@ namespace RSMGR
 				_NbPlayingChars = value;
 
 		}
-
+	
 		bool operator == (const TRunningSessionInfo &other) const
 		{
 			return _SessionId == other._SessionId
@@ -1882,10 +1890,10 @@ namespace RSMGR
 			s.serial(_NbPlayingChars);
 
 		}
-
+		
 
 	private:
-
+	
 
 	};
 
@@ -1912,7 +1920,7 @@ namespace RSMGR
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
-
+		
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -1924,13 +1932,13 @@ namespace RSMGR
 				indexTable.insert(std::make_pair(se_char_enter, 0));
 				indexTable.insert(std::make_pair(se_char_leave, 1));
 				indexTable.insert(std::make_pair(se_session_closing, 2));
-
+			
 				init = true;
 			}
 
 			return indexTable;
 		}
-
+		
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1942,7 +1950,8 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]), 
+			invalid_val);
 
 			return conversionTable;
 		}
@@ -2020,16 +2029,16 @@ namespace RSMGR
 			return getConversionTable().isValid(_Value);
 		}
 
-
+		
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-
+		
 	};
-
+	
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -2055,9 +2064,9 @@ namespace RSMGR
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -2068,7 +2077,7 @@ namespace RSMGR
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-
+		
 		void registerDSS_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void sessionCreated_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -2175,22 +2184,22 @@ namespace RSMGR
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_registerDSS(NLNET::CMessage &__message, uint32 shardId, const std::vector < TRunningSessionInfo > &runningSessions);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_sessionCreated(NLNET::CMessage &__message, const RSMGR::TRunningSessionInfo &sessionInfo);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportSessionEvent(NLNET::CMessage &__message, RSMGR::TSessionEvent event, TSessionId sessionId, uint32 charId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_scenarioStarted(NLNET::CMessage &__message, TSessionId sessionId, const R2::TRunningScenarioInfo &scenarioInfo);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportCharacterKicked(NLNET::CMessage &__message, TSessionId sessionId, uint32 charId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_scenarioEnded(NLNET::CMessage &__message, TSessionId sessionId, const R2::TRunningScenarioInfo &scenarioInfo, uint32 rrpScored, uint32 scenarioPointScored, uint32 timeTaken, const std::vector < uint32 > &participants);
-
+	
 
 
 
@@ -2221,9 +2230,9 @@ namespace RSMGR
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -2234,7 +2243,7 @@ namespace RSMGR
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-
+		
 		void createSession_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void addCharacterInSession_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -2357,38 +2366,38 @@ namespace RSMGR
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_createSession(NLNET::CMessage &__message, uint32 ownerCharId, TSessionId sessionId, const RSMGR::TSessionType &type);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_addCharacterInSession(NLNET::CMessage &__message, TSessionId sessionId, uint32 charId, const WS::TUserRole &enterAs, const std::string &ringAccess, bool newcomer);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_closeSession(NLNET::CMessage &__message, TSessionId sessionId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_stopHibernation(NLNET::CMessage &__message, TSessionId sessionId, uint32 ownerId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_characterKicked(NLNET::CMessage &__message, TSessionId sessionId, uint32 charId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_characterUnkicked(NLNET::CMessage &__message, TSessionId sessionId, uint32 charId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_teleportOneCharacterToAnother(NLNET::CMessage &__message, TSessionId sessionId, uint32 sourceCharId, uint32 destCharId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_hibernateSession(NLNET::CMessage &__message, TSessionId sessionId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_setSessionStartParams(NLNET::CMessage &__message, uint32 charId, TSessionId sessionId, const std::string &initialIslandLocation, const std::string &initialEntryPointLocation, const std::string &initialSeason);
-
+	
 
 
 
 	};
 	// Callback interface used by web server during 'outgame' operation
 
-	class CRingSessionManagerWebItf
+	class CRingSessionManagerWebItf 
 	{
 	protected:
 
@@ -3853,12 +3862,12 @@ namespace RSMGR
 	 *	Derive from this class to invoke method on the callback server
 	 */
 
-	class CRingSessionManagerWebClientItf
+	class CRingSessionManagerWebClientItf 
 	{
 	protected:
 
 		/// the callback client adaptor
-		CUniquePtr < ICallbackClientAdaptor >	_CallbackClient;
+		CUniquePtr<ICallbackClientAdaptor>	_CallbackClient;
 
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
@@ -3922,12 +3931,12 @@ namespace RSMGR
 			if (adaptorReplacement == NULL)
 			{
 				// use the default Nel adaptor
-				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(new CNelCallbackClientAdaptor(this));
+				_CallbackClient = CUniquePtr<ICallbackClientAdaptor>(new CNelCallbackClientAdaptor(this));
 			}
 			else
 			{
 				// use the replacement one
-				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(adaptorReplacement);
+				_CallbackClient = CUniquePtr<ICallbackClientAdaptor>(adaptorReplacement);
 			}
 		}
 
@@ -4826,48 +4835,48 @@ namespace RSMGR
 	class TSessionDesc
 	{
 	protected:
-		//
+		// 
 		TSessionId	_SessionId;
-		//
+		// 
 		bool	_RequesterCharInvited;
-		//
+		// 
 		bool	_RequesterCharKicked;
-		//
+		// 
 		std::string	_OwnerName;
-		//
+		// 
 		std::string	_Title;
-		//
+		// 
 		std::string	_Description;
-		//
+		// 
 		TAnimMode	_AnimMode;
-		//
+		// 
 		R2::TSessionLevel	_SessionLevel;
-		//
+		// 
 		bool	_AllowFreeTrial;
-		//
+		// 
 		uint32	_LaunchDate;
-		//
+		// 
 		uint32	_NbConnectedPlayer;
-		//
+		// 
 		std::string	_Language;
-		//
+		// 
 		TSessionOrientation	_Orientation;
-		//
+		// 
 		uint32	_NbRating;
-		//
+		// 
 		uint32	_RateFun;
-		//
+		// 
 		uint32	_RateDifficulty;
-		//
+		// 
 		uint32	_RateAccessibility;
-		//
+		// 
 		uint32	_RateOriginality;
-		//
+		// 
 		uint32	_RateDirection;
-		//
+		// 
 		uint32	_ScenarioRRPTotal;
 	public:
-		//
+		// 
 		TSessionId getSessionId() const
 		{
 			return _SessionId;
@@ -4879,7 +4888,7 @@ namespace RSMGR
 				_SessionId = value;
 
 		}
-			//
+			// 
 		bool getRequesterCharInvited() const
 		{
 			return _RequesterCharInvited;
@@ -4891,7 +4900,7 @@ namespace RSMGR
 				_RequesterCharInvited = value;
 
 		}
-			//
+			// 
 		bool getRequesterCharKicked() const
 		{
 			return _RequesterCharKicked;
@@ -4903,7 +4912,7 @@ namespace RSMGR
 				_RequesterCharKicked = value;
 
 		}
-			//
+			// 
 		const std::string &getOwnerName() const
 		{
 			return _OwnerName;
@@ -4921,9 +4930,9 @@ namespace RSMGR
 
 				_OwnerName = value;
 
-
+				
 		}
-			//
+			// 
 		const std::string &getTitle() const
 		{
 			return _Title;
@@ -4941,9 +4950,9 @@ namespace RSMGR
 
 				_Title = value;
 
-
+				
 		}
-			//
+			// 
 		const std::string &getDescription() const
 		{
 			return _Description;
@@ -4961,9 +4970,9 @@ namespace RSMGR
 
 				_Description = value;
 
-
+				
 		}
-			//
+			// 
 		TAnimMode getAnimMode() const
 		{
 			return _AnimMode;
@@ -4975,7 +4984,7 @@ namespace RSMGR
 				_AnimMode = value;
 
 		}
-			//
+			// 
 		R2::TSessionLevel getSessionLevel() const
 		{
 			return _SessionLevel;
@@ -4987,7 +4996,7 @@ namespace RSMGR
 				_SessionLevel = value;
 
 		}
-			//
+			// 
 		bool getAllowFreeTrial() const
 		{
 			return _AllowFreeTrial;
@@ -4999,7 +5008,7 @@ namespace RSMGR
 				_AllowFreeTrial = value;
 
 		}
-			//
+			// 
 		uint32 getLaunchDate() const
 		{
 			return _LaunchDate;
@@ -5011,7 +5020,7 @@ namespace RSMGR
 				_LaunchDate = value;
 
 		}
-			//
+			// 
 		uint32 getNbConnectedPlayer() const
 		{
 			return _NbConnectedPlayer;
@@ -5023,7 +5032,7 @@ namespace RSMGR
 				_NbConnectedPlayer = value;
 
 		}
-			//
+			// 
 		const std::string &getLanguage() const
 		{
 			return _Language;
@@ -5041,9 +5050,9 @@ namespace RSMGR
 
 				_Language = value;
 
-
+				
 		}
-			//
+			// 
 		TSessionOrientation getOrientation() const
 		{
 			return _Orientation;
@@ -5055,7 +5064,7 @@ namespace RSMGR
 				_Orientation = value;
 
 		}
-			//
+			// 
 		uint32 getNbRating() const
 		{
 			return _NbRating;
@@ -5067,7 +5076,7 @@ namespace RSMGR
 				_NbRating = value;
 
 		}
-			//
+			// 
 		uint32 getRateFun() const
 		{
 			return _RateFun;
@@ -5079,7 +5088,7 @@ namespace RSMGR
 				_RateFun = value;
 
 		}
-			//
+			// 
 		uint32 getRateDifficulty() const
 		{
 			return _RateDifficulty;
@@ -5091,7 +5100,7 @@ namespace RSMGR
 				_RateDifficulty = value;
 
 		}
-			//
+			// 
 		uint32 getRateAccessibility() const
 		{
 			return _RateAccessibility;
@@ -5103,7 +5112,7 @@ namespace RSMGR
 				_RateAccessibility = value;
 
 		}
-			//
+			// 
 		uint32 getRateOriginality() const
 		{
 			return _RateOriginality;
@@ -5115,7 +5124,7 @@ namespace RSMGR
 				_RateOriginality = value;
 
 		}
-			//
+			// 
 		uint32 getRateDirection() const
 		{
 			return _RateDirection;
@@ -5127,7 +5136,7 @@ namespace RSMGR
 				_RateDirection = value;
 
 		}
-			//
+			// 
 		uint32 getScenarioRRPTotal() const
 		{
 			return _ScenarioRRPTotal;
@@ -5139,7 +5148,7 @@ namespace RSMGR
 				_ScenarioRRPTotal = value;
 
 		}
-
+	
 		bool operator == (const TSessionDesc &other) const
 		{
 			return _SessionId == other._SessionId
@@ -5195,10 +5204,10 @@ namespace RSMGR
 			s.serial(_ScenarioRRPTotal);
 
 		}
-
+		
 
 	private:
-
+	
 
 	};
 
@@ -5209,30 +5218,30 @@ namespace RSMGR
 	class TCharDesc
 	{
 	protected:
-		//
+		// 
 		uint32	_CharId;
-		//
+		// 
 		bool	_Connected;
-		//
+		// 
 		bool	_Kicked;
-		//
+		// 
 		std::string	_CharName;
-		//
+		// 
 		std::string	_GuildName;
-		//
+		// 
 		uint32	_ShardId;
-		//
+		// 
 		R2::TSessionLevel	_Level;
-		//
+		// 
 		CHARSYNC::TRace	_Race;
-		//
+		// 
 		CHARSYNC::TCivilisation	_Civilisation;
-		//
+		// 
 		CHARSYNC::TCult	_Cult;
-		//
+		// 
 		TSessionPartStatus	_PartStatus;
 	public:
-		//
+		// 
 		uint32 getCharId() const
 		{
 			return _CharId;
@@ -5244,7 +5253,7 @@ namespace RSMGR
 				_CharId = value;
 
 		}
-			//
+			// 
 		bool getConnected() const
 		{
 			return _Connected;
@@ -5256,7 +5265,7 @@ namespace RSMGR
 				_Connected = value;
 
 		}
-			//
+			// 
 		bool getKicked() const
 		{
 			return _Kicked;
@@ -5268,7 +5277,7 @@ namespace RSMGR
 				_Kicked = value;
 
 		}
-			//
+			// 
 		const std::string &getCharName() const
 		{
 			return _CharName;
@@ -5286,9 +5295,9 @@ namespace RSMGR
 
 				_CharName = value;
 
-
+				
 		}
-			//
+			// 
 		const std::string &getGuildName() const
 		{
 			return _GuildName;
@@ -5306,9 +5315,9 @@ namespace RSMGR
 
 				_GuildName = value;
 
-
+				
 		}
-			//
+			// 
 		uint32 getShardId() const
 		{
 			return _ShardId;
@@ -5320,7 +5329,7 @@ namespace RSMGR
 				_ShardId = value;
 
 		}
-			//
+			// 
 		R2::TSessionLevel getLevel() const
 		{
 			return _Level;
@@ -5332,7 +5341,7 @@ namespace RSMGR
 				_Level = value;
 
 		}
-			//
+			// 
 		CHARSYNC::TRace getRace() const
 		{
 			return _Race;
@@ -5344,7 +5353,7 @@ namespace RSMGR
 				_Race = value;
 
 		}
-			//
+			// 
 		CHARSYNC::TCivilisation getCivilisation() const
 		{
 			return _Civilisation;
@@ -5356,7 +5365,7 @@ namespace RSMGR
 				_Civilisation = value;
 
 		}
-			//
+			// 
 		CHARSYNC::TCult getCult() const
 		{
 			return _Cult;
@@ -5368,7 +5377,7 @@ namespace RSMGR
 				_Cult = value;
 
 		}
-			//
+			// 
 		TSessionPartStatus getPartStatus() const
 		{
 			return _PartStatus;
@@ -5380,7 +5389,7 @@ namespace RSMGR
 				_PartStatus = value;
 
 		}
-
+	
 		bool operator == (const TCharDesc &other) const
 		{
 			return _CharId == other._CharId
@@ -5418,10 +5427,10 @@ namespace RSMGR
 			s.serial(_PartStatus);
 
 		}
-
+		
 
 	private:
-
+	
 
 	};
 
@@ -5931,13 +5940,13 @@ namespace RSMGR
 		// The invited char id is deducted from the name by using.
 		// the full name rules for shard resolution.
 		// Return invoke_result with the following error codes :
-		//   0   : no error
-		//   100 : unknown onwer char
-		//   101 : player already invited
-		//   102 : no current session
-		//   103 : internal error
-		//   104 : invited char not found
-		//   plus all the error code from inviteCharacter in the ring session manager interface
+		// 		0   :	no error
+		// 		100 :	unknown onwer char
+		// 		101 :	player already invited
+		// 		102 :	no current session
+		// 		103 :	internal error
+		// 		104 :	invited char not found
+		// 		plus all the error code from inviteCharacter in the ring session manager interface
 		virtual void on_inviteCharacterByName(NLNET::TSockId from, uint32 charId, std::string invitedCharName) =0;
 
 		// Ask for character existing rating for the current session scenario
@@ -6132,13 +6141,13 @@ namespace RSMGR
 		// The invited char id is deducted from the name by using.
 		// the full name rules for shard resolution.
 		// Return invoke_result with the following error codes :
-		//   0   : no error
-		//   100 : unknown onwer char
-		//   101 : player already invited
-		//   102 : no current session
-		//   103 : internal error
-		//   104 : invited char not found
-		//   plus all the error code from inviteCharacter in the ring session manager interface
+		// 		0   :	no error
+		// 		100 :	unknown onwer char
+		// 		101 :	player already invited
+		// 		102 :	no current session
+		// 		103 :	internal error
+		// 		104 :	invited char not found
+		// 		plus all the error code from inviteCharacter in the ring session manager interface
 
 		void inviteCharacterByName(uint32 charId, std::string invitedCharName)
 		{
@@ -6465,5 +6474,5 @@ namespace RSMGR
 	};
 
 }
-
+	
 #endif

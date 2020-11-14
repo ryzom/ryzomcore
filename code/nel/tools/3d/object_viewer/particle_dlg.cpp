@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -428,7 +431,7 @@ bool CParticleDlg::savePSAs(HWND parent, CParticleWorkspace::CNode &psNode ,cons
 		}
 		else
 		{
-			::MessageBox(parent, utf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
+			::MessageBox(parent, nlUtf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
 			return false;
 		}
 	}
@@ -474,7 +477,7 @@ bool CParticleDlg::loadPS(HWND parent, CParticleWorkspace::CNode &psNode, TLoadP
 		{
 			case Silent: return false; // no op
 			case ReportError:	
-				::MessageBox(parent, utf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_OK|MB_ICONEXCLAMATION);
+				::MessageBox(parent, nlUtf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_OK | MB_ICONEXCLAMATION);
 				return true;
 			break;
 			case ReportErrorSkippable:
@@ -549,7 +552,7 @@ void CParticleDlg::OnCreateNewPsWorkspace()
 			}
 			catch(const NLMISC::EStream &e)
 			{
-				MessageBox(utf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
+				MessageBox(nlUtf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
 			}
 			closeWorkspace();			
 			_PW = newPW;
@@ -567,7 +570,7 @@ void CParticleDlg::OnLoadPSWorkspace()
 	CFileDialog fd( TRUE, _T(".pws"), _T("*.pws"), 0, szFilter);
 	INT_PTR result = fd.DoModal();
 	if (result != IDOK) return;
-	loadWorkspace(tStrToUtf8(fd.GetPathName()));
+	loadWorkspace(NLMISC::tStrToUtf8(fd.GetPathName()));
 }
 
 //**************************************************************************************************************************
@@ -585,7 +588,7 @@ void CParticleDlg::loadWorkspace(const std::string &fullPath)
 	}
 	catch(const NLMISC::EStream &e)
 	{
-		MessageBox(utf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
+		MessageBox(nlUtf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
 		setStatusBarText(CString(e.what()));
 		return;
 	}	
@@ -635,7 +638,7 @@ void CParticleDlg::saveWorkspaceStructure()
 	}
 	catch(const NLMISC::EStream &e)
 	{
-		localizedMessageBox(*this, utf8ToTStr(e.what()), IDS_ERROR, MB_ICONEXCLAMATION);
+		localizedMessageBox(*this, nlUtf8ToTStr(e.what()), IDS_ERROR, MB_ICONEXCLAMATION);
 		setStatusBarText(CString(e.what()));
 	}
 }

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -23,6 +26,7 @@
 
 namespace	NLMISC
 {
+	class IStream;
 
 // ***************************************************************************
 /**
@@ -52,6 +56,13 @@ public:
 	//CClassId& operator=(const CClassId &o) { Uid = o.Uid; return *this;}
 	operator uint64() const {return Uid;}
 
+	inline uint32 a() const { return (uint32)(Uid >> 32); }
+	inline uint32 b() const { return (uint32)(Uid & 0xFFFFFFFFL); }
+	inline void setA(uint32 a) { Uid = ((uint64)a<<32) | (Uid & 0xFFFFFFFFL); }
+	inline void setB(uint32 b) { Uid = (Uid & 0xFFFFFFFF00000000L) | b; }
+
+	void serial(NLMISC::IStream &s);
+	std::string toString() const;
 };
 
 /**

@@ -6,6 +6,12 @@ IF(WITH_NEL_TOOLS)
         mesh_utils
         mesh_export)
     ENDIF()
+    IF(WITH_LIBGSF)
+      SUBDIRS(
+        pipeline_max
+        pipeline_max_dump
+        pipeline_max_rewrite_assets)
+    ENDIF()
     SUBDIRS(
       anim_builder
       animation_set_builder
@@ -26,6 +32,7 @@ IF(WITH_NEL_TOOLS)
       zone_ig_lighter
       zone_lighter
       zone_welder
+      zone_elevation
       shapes_exporter
       shape2obj
       zone_check_bind
@@ -34,6 +41,7 @@ IF(WITH_NEL_TOOLS)
   ENDIF()
   SUBDIRS(
     build_interface
+    unbuild_interface
     get_neighbors
     textures_optimizer
     textures_tool

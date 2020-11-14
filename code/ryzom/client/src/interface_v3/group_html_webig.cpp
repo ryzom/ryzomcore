@@ -1,6 +1,11 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -30,6 +35,7 @@
 #include "../connection.h"
 
 #include <curl/curl.h>
+#include "nel/web/curl_certificates.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -71,6 +77,9 @@ static string getWebAuthKey()
 
 void addWebIGParams (string &url, bool trustedDomain)
 {
+	// no extras parameters added to url if not in trusted domains list
+	if (!trustedDomain) return;
+
 	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
@@ -165,6 +174,17 @@ public:
 		_Thread = NULL;
 		curl_global_init(CURL_GLOBAL_ALL);
 
+		Curl = NULL;
+		//nlinfo("ctor CWebigNotificationThread");
+	}
+
+	void init()
+	{
+		if (Curl)
+		{
+			return;
+		}
+
 		Curl = curl_easy_init();
 		if(!Curl) return;
 		curl_easy_setopt(Curl, CURLOPT_COOKIEFILE, "");
@@ -172,7 +192,8 @@ public:
 		curl_easy_setopt(Curl, CURLOPT_USERAGENT, getUserAgent().c_str());
 		curl_easy_setopt(Curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_easy_setopt(Curl, CURLOPT_WRITEFUNCTION, writeDataFromCurl);
-		//nlinfo("ctor CWebigNotificationThread");
+
+		NLWEB::CCurlCertificates::useCertificates(Curl);
 	}
 
 	~CWebigNotificationThread()
@@ -180,7 +201,7 @@ public:
 		if(Curl)
 		{
 			curl_easy_cleanup(Curl);
-			Curl = 0;
+			Curl = NULL;
 		}
 		if (_Thread)
 		{
@@ -251,7 +272,7 @@ public:
 		uint c = 0;
 		while (_Running)
 		{
-			string url = "https://"+domain+"/index.php?app=notif&format=lua&rnd="+randomString();
+			string url = domain + "/index.php?app=notif&format=lua&rnd=" + randomString();
 			addWebIGParams(url, true);
 			get(url);
 
@@ -272,6 +293,9 @@ public:
 
 	void startThread()
 	{
+		// initialize curl outside thread
+		init();
+
 		if (!_Thread)
 		{
 			_Thread = IThread::create(this);
@@ -283,7 +307,6 @@ public:
 		{
 			nlwarning("WebIgNotification thread already started");
 		}
-		
 	}
 
 	void stopThread()
@@ -302,7 +325,7 @@ public:
 		}
 	}
 
-	bool isRunning() const 
+	bool isRunning() const
 	{
 		return _Running;
 	}
@@ -354,6 +377,9 @@ void CGroupHTMLAuth::addHTTPGetParams (string &url, bool trustedDomain)
 
 void CGroupHTMLAuth::addHTTPPostParams (SFormFields &formfields, bool trustedDomain)
 {
+	// no extras parameters added to url if not in trusted domains list
+	if (!trustedDomain) return;
+
 	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
@@ -370,7 +396,7 @@ void CGroupHTMLAuth::addHTTPPostParams (SFormFields &formfields, bool trustedDom
 
 // ***************************************************************************
 
-string CGroupHTMLAuth::home ()
+string CGroupHTMLAuth::home () const
 {
 	return Home;
 }
@@ -416,7 +442,7 @@ void CGroupHTMLWebIG::addHTTPPostParams (SFormFields &formfields, bool trustedDo
 
 // ***************************************************************************
 
-string CGroupHTMLWebIG::home ()
+string CGroupHTMLWebIG::home () const
 {
 	return Home;
 }

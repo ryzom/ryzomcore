@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -31,11 +34,7 @@
 
 using namespace std;
 
-
-int APIENTRY WinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
-                     int       nCmdShow)
+int APIENTRY nltWinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPTSTR lpCmdLine, int nCmdShow)
 {
 	// Init the NeL application context
 	NLMISC::CApplicationContext context;
@@ -48,7 +47,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		// Init ui
 		pGeorges->initUI(nCmdShow, true);
 
- 		string cmd = lpCmdLine;
+ 		string cmd = NLMISC::tStrToUtf8(lpCmdLine);
  		if(!cmd.empty())
  		{
  			nlinfo("Using command line '%s'", cmd.c_str());

@@ -94,7 +94,7 @@ namespace SAVES
 	{
 		for (uint32 i=_Callbacks.size();i--;)
 		{
-			BOMB_IF(_Callbacks[i]==cb,"BUG: Attempting to add the same callback to an RS module more than once",return)
+			BOMB_IF(_Callbacks[i] == cb, "BUG: Attempting to add the same callback to an RS module more than once", return);
 		}
 		_Callbacks.push_back(cb);
 		if (isReady())

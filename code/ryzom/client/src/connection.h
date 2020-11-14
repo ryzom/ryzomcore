@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -34,6 +34,7 @@ extern ucstring		PlayerSelectedHomeShardName;					// The home shard name (aniro,
 extern ucstring		PlayerSelectedHomeShardNameWithParenthesis;		// Same with parenthesis
 extern std::vector<CCharacterSummary>	CharacterSummaries;
 extern std::string UserPrivileges;
+extern sint LoginCharsel;
 
 extern ucstring NewKeysCharNameWanted;
 extern ucstring NewKeysCharNameValidated;

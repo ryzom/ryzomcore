@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -176,7 +179,7 @@ void CWords_dicDlg::lookUp( const CString& inputStr )
 			const CSString& res = (*ivs);
 			if ( showAll || (res.find( "lvl" ) == string::npos) )
 			{
-				m_Results.AddString( utf8ToTStr(res) );
+				m_Results.AddString(nlUtf8ToTStr(res));
 			}
 			else
 				lvlRemoved = true;
@@ -234,7 +237,7 @@ void CWords_dicDlg::OnFileList()
 	const vector<string>& fileList = Dico.getFileList();
 	for ( vector<string>::const_iterator ifl=fileList.begin(); ifl!=fileList.end(); ++ifl )
 	{
-		m_Results.AddString( utf8ToTStr(*ifl) );
+		m_Results.AddString( nlUtf8ToTStr(*ifl) );
 	}
 }
 

@@ -1,6 +1,8 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
 
-ADD_EXECUTABLE(branch_patcher WIN32 ${SRC} branch_patcher.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_EXECUTABLE(branch_patcher WIN32 ${SRC})
 
 #TARGET_LINK_LIBRARIES(branch_patcher ${PLATFORM_LINKFLAGS})
 NL_DEFAULT_PROPS(branch_patcher "NeL, Tools, Misc: branch_patcher")

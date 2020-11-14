@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -100,7 +103,7 @@ void CVegetableDensityPage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 	{
 		// Init ShapeName
 		// ----------
-		StaticVegetableShape.SetWindowText(utf8ToTStr(_Vegetable->ShapeName));
+		StaticVegetableShape.SetWindowText(nlUtf8ToTStr(_Vegetable->ShapeName));
 
 		// init Creation Distance.
 		// ----------
@@ -228,7 +231,7 @@ void		CVegetableDensityPage::updateAngleMinFromEditText()
 	TCHAR	stmp[256];
 	AngleMinEdit.GetWindowText(stmp, 256);
 	float	angleMin;
-	NLMISC::fromString(tStrToUtf8(stmp), angleMin);
+	NLMISC::fromString(NLMISC::tStrToUtf8(stmp), angleMin);
 	NLMISC::clamp(angleMin, -90, 90);
 	// make a sinus, because 90 => 1, and -90 =>-1
 	float	cosAngleMin= (float)sin(angleMin*NLMISC::Pi/180.f);
@@ -252,7 +255,7 @@ void		CVegetableDensityPage::updateAngleMaxFromEditText()
 	TCHAR	stmp[256];
 	AngleMaxEdit.GetWindowText(stmp, 256);
 	float	angleMax;
-	NLMISC::fromString(tStrToUtf8(stmp), angleMax);
+	NLMISC::fromString(NLMISC::tStrToUtf8(stmp), angleMax);
 	NLMISC::clamp(angleMax, -90, 90);
 	// make a sinus, because 90 => 1, and -90 =>-1
 	float	cosAngleMax= (float)sin(angleMax*NLMISC::Pi/180.f);
@@ -523,10 +526,10 @@ void CVegetableDensityPage::OnButtonVegetableBrowse()
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path
-		std::string fileName = tStrToUtf8(fd.GetFileName());
+		std::string fileName = NLMISC::tStrToUtf8(fd.GetFileName());
 
 		// Add search path for the .veget
-		std::string path = NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName()));
+		std::string path = NLMISC::CFile::getPath(NLMISC::tStrToUtf8(fd.GetPathName()));
 		NLMISC::CPath::addSearchPath (path);
 
 		try
@@ -546,7 +549,7 @@ void CVegetableDensityPage::OnButtonVegetableBrowse()
 		}
 		catch (const NLMISC::EPathNotFound &ep)
 		{
-			MessageBox(utf8ToTStr(ep.what()), _T("Can't open file"));
+			MessageBox(nlUtf8ToTStr(ep.what()), _T("Can't open file"));
 		}
 	}
 }

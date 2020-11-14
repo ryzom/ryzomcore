@@ -318,11 +318,11 @@ class DboMysqliTest extends CakeTestCase {
  */
 	function testReadTableParameters() {
 		$this->db->cacheSources = $this->db->testing = false;
-		$this->db->query('CREATE TABLE ' . $this->db->fullTableName('tinyint') . ' (id int(11) AUTO_INCREMENT, bool tinyint(1), small_int tinyint(2), primary key(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+		$this->db->query('CREATE TABLE ' . $this->db->fullTableName('tinyint') . ' (id int(11) AUTO_INCREMENT, bool tinyint(1), small_int tinyint(2), primary key(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;');
 		$result = $this->db->readTableParameters('tinyint');
 		$expected = array(
-			'charset' => 'utf8',
-			'collate' => 'utf8_unicode_ci',
+			'charset' => 'utf8mb4',
+			'collate' => 'utf8mb4_unicode_ci',
 			'engine' => 'InnoDB');
 		$this->assertEqual($result, $expected);
 

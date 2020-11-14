@@ -29,7 +29,9 @@ sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
 	os.remove("log.log")
-log = open("log.log", "w")
+if os.path.isfile("temp_log.log"):
+	os.remove("temp_log.log")
+log = open("temp_log.log", "w")
 from scripts import *
 from buildsite import *
 from process import *
@@ -61,8 +63,9 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemZoneLigoExportDirectory)
 	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemCmbExportDirectory)
 	mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory[0])
-	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory)
-	if (needUpdateDirByTagLogFiltered(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory, ".max.tag", [ "zonematerial", "zonetransition", "zonespecial" ])):
+	tagDirectory = ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory
+	mkPath(log, tagDirectory)
+	if (needUpdateDirByTagLogFiltered(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", tagDirectory, ".max.tag", [ "zonematerial", "zonetransition", "zonespecial" ])):
 		printLog(log, "WRITE " + ligoIniPath)
 		ligoIni = open(ligoIniPath, "w")
 		ligoIni.write("[LigoConfig]\n")
@@ -71,34 +74,77 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 		ligoIni.write("LigoOldZonePath=" + DatabaseDirectory + "/" + ZoneSourceDirectory[0] + "/\n")
 		ligoIni.close()
 		
-		outDirTag = ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory
-		logFile = ScriptDirectory + "/processes/ligo/log.log"
+		outputLogfile = ScriptDirectory + "/processes/ligo/log.log"
 		smallBank = ExportBuildDirectory + "/" + SmallbankExportDirectory + "/" + BankTileBankName + ".smallbank"
+		maxRunningTagFile = tagDirectory + "/max_running.tag"
 		
 		scriptSrc = "maxscript/nel_ligo_export.ms"
 		scriptDst = MaxUserDirectory + "/scripts/nel_ligo_export.ms"
 		
+		tagList = findFiles(log, tagDirectory, "", ".max.tag")
+		tagLen = len(tagList)
+		
 		if os.path.isfile(scriptDst):
 			os.remove(scriptDst)
 		
+		tagDiff = 1
 		printLog(log, "WRITE " + scriptDst)
 		sSrc = open(scriptSrc, "r")
 		sDst = open(scriptDst, "w")
 		for line in sSrc:
-			newline = line.replace("output_logfile", logFile)
-			newline = newline.replace("output_directory_tag", outDirTag)
-			newline = newline.replace("bankFilename", smallBank)
+			newline = line.replace("%OutputLogfile%", outputLogfile)
+			newline = newline.replace("%TagDirectory%", tagDirectory)
+			newline = newline.replace("%SmallBankFilename%", smallBank)
 			sDst.write(newline)
 		sSrc.close()
 		sDst.close()
 		
-		printLog(log, "MAXSCRIPT " + scriptDst)
-		subprocess.call([ Max, "-U", "MAXScript", "nel_ligo_export.ms", "-q", "-mi", "-mip" ])
+		zeroRetryLimit = 3
+		while tagDiff > 0:
+			mrt = open(maxRunningTagFile, "w")
+			mrt.write("moe-moe-kyun")
+			mrt.close()
+			printLog(log, "MAXSCRIPT " + scriptDst)
+			subprocess.call([ Max, "-U", "MAXScript", "nel_ligo_export.ms", "-q", "-mi", "-mip" ])
+			if os.path.exists(outputLogfile):
+				try:
+					lSrc = open(outputLogfile, "r")
+					for line in lSrc:
+						lineStrip = line.strip()
+						if (len(lineStrip) > 0):
+							printLog(log, lineStrip)
+					lSrc.close()
+					os.remove(outputLogfile)
+				except Exception:
+					printLog(log, "ERROR Failed to read 3dsmax log")
+			else:
+				printLog(log, "WARNING No 3dsmax log")
+			tagList = findFiles(log, tagDirectory, "", ".max.tag")
+			newTagLen = len(tagList)
+			tagDiff = newTagLen - tagLen
+			tagLen = newTagLen
+			addTagDiff = 0
+			if os.path.exists(maxRunningTagFile):
+				printLog(log, "FAIL 3ds Max crashed and/or file export failed!")
+				if tagDiff == 0:
+					if zeroRetryLimit > 0:
+						zeroRetryLimit = zeroRetryLimit - 1
+						addTagDiff = 1
+					else:
+						printLog(log, "FAIL Retry limit reached!")
+				else:
+					addTagDiff = 1
+				os.remove(maxRunningTagFile)
+			printLog(log, "Exported " + str(tagDiff) + " .max files!")
+			tagDiff += addTagDiff
 		
 		os.remove(scriptDst)
 	printLog(log, "")
 
 log.close()
+if os.path.isfile("log.log"):
+	os.remove("log.log")
+shutil.move("temp_log.log", "log.log")
 
 
 # end of file

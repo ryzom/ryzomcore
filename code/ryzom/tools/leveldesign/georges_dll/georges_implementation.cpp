@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -579,12 +582,12 @@ void CGeorgesImpl::LoadDocument( const std::string& _sxfullname )
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	try
 	{
-		theApp.OpenDocumentFile(_sxfullname.c_str());
+		theApp.OpenDocumentFile(nlUtf8ToTStr(_sxfullname));
 	}
 	catch (const NLMISC::Exception &e)
 	{
 		std::string tmp = std::string(e.what()) + "(" + _sxfullname + ")";
-		theApp.m_pMainWnd->MessageBox(tmp.c_str(), "Georges_Lib", MB_ICONERROR | MB_OK);
+		theApp.m_pMainWnd->MessageBox(nlUtf8ToTStr(tmp), _T("Georges_Lib"), MB_ICONERROR | MB_OK);
 	}
 }
 
@@ -666,7 +669,7 @@ IGeorges* IGeorges::getInterface (int version)
 	// Check version number
 	if (version != GEORGES_VERSION)
 	{
-		MessageBox (NULL, "Bad version of georges.dll.", "Georges", MB_ICONEXCLAMATION|MB_OK);
+		MessageBox(NULL, _T("Bad version of georges.dll."), _T("Georges"), MB_ICONEXCLAMATION | MB_OK);
 		return NULL;
 	}
 	else

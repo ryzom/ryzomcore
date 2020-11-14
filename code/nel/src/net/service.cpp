@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2016-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -492,6 +495,13 @@ void IService::setArgs (int argc, const char **argv)
 	}
 }
 
+void IService::setArgs(int argc, const wchar_t **argv)
+{
+	for (sint i = 0; i < argc; i++)
+	{
+		_Args.push_back(nlWideToUtf8(argv[i]));
+	}
+}
 
 void cbLogFilter (CConfigFile::CVar &var)
 {

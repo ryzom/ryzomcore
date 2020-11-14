@@ -230,7 +230,7 @@ void	CMirrors::processMirrorUpdates()
 	DataSet->getNextChangedValue( entityIndex, propIndex );
 	while	(entityIndex != LAST_CHANGED)
 	{
-		if (propIndex == DSPropertyPOSX || propIndex == DSPropertyPOSX )
+		if (propIndex == DSPropertyPOSX || propIndex == DSPropertyPOSY )
 		{
 			const CEntityId		&entityId=DataSet->getEntityId(entityIndex);
 			if	(entityId.getType() == RYZOMID::player)

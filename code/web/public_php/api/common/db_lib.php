@@ -134,7 +134,7 @@ class ryDB {
 		global $_RYZOM_API_CONFIG;
 		$this->db_name = $db_name;
 		$this->db = new ServerDatabase(RYAPI_WEBDB_HOST, RYAPI_WEBDB_LOGIN, RYAPI_WEBDB_PASS, $db_name);
-		$this->db->query("SET NAMES utf8");
+		$this->db->query("SET NAMES utf8mb4");
 	}
 
 	public static function getInstance($db_name) {
@@ -480,7 +480,7 @@ class ryDB {
 		$c = "Updating DB Structure...\n";
 		foreach ($defs as $dbname => $tables) {
 			$db = new ServerDatabase(RYAPI_WEBDB_HOST, RYAPI_WEBDB_LOGIN, RYAPI_WEBDB_PASS, $dbname);
-			$db->query("SET NAMES utf8");
+			$db->query("SET NAMES utf8mb4");
 			$c .= "\n	Selected DB '$dbname'\n";
 			foreach ($tables as $table => $sql)
 			{

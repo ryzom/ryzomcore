@@ -195,7 +195,7 @@
 	<td width="10px">&nbsp;</td>
 
 	<td align="right" valign="top">
-{if tool_domain_selected && $tool_shard_selected}
+{if $tool_domain_selected && $tool_shard_selected}
 		<table width="100%" border="0" cellpadding="1" bgcolor="#cccccc" class="view">
 		<form action="index.php" method="post">
 {if $tool_annotation_info || $tool_has_lock}

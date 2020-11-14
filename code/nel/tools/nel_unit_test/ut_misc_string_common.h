@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -707,6 +710,12 @@ struct CUTMiscStringCommon : public Test::Suite
 		ret = NLMISC::fromString("yes", val);
 		TEST_ASSERT(ret && val);
 
+		ret = NLMISC::fromString("YES", val);
+		TEST_ASSERT(ret && val);
+
+		ret = NLMISC::fromString("True", val);
+		TEST_ASSERT(ret && val);
+
 		// false values
 		ret = NLMISC::fromString("0", val);
 		TEST_ASSERT(ret && !val);
@@ -730,13 +739,16 @@ struct CUTMiscStringCommon : public Test::Suite
 		TEST_ASSERT(ret && !val);
 
 		// wrong values
-		ret = NLMISC::fromString("YES", val);
-		TEST_ASSERT(!ret && !val);
-
 		ret = NLMISC::fromString("foo", val);
 		TEST_ASSERT(!ret && !val);
 
 		ret = NLMISC::fromString("a", val);
+		TEST_ASSERT(!ret && !val);
+
+		ret = NLMISC::fromString("Yesss", val);
+		TEST_ASSERT(!ret && !val);
+
+		ret = NLMISC::fromString("nope", val);
 		TEST_ASSERT(!ret && !val);
 	}
 };

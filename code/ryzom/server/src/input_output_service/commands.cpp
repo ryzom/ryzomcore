@@ -150,6 +150,7 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 			else
 			{
 				log.displayNL("Unknown player name '%s'", args[2].c_str());
+				return true;
 			}
 		}
 		else if (args[1] == "TEST_ENTITY")
@@ -173,6 +174,7 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 			else
 			{
 				log.displayNL("Can't make entity ID from '%s'", args[2].c_str());
+				return true;
 			}
 		}
 		else if (args[1] == "TEST_SBRICK")

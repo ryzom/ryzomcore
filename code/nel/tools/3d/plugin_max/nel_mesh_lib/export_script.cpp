@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2011-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -36,7 +39,7 @@ bool CExportNel::scriptEvaluate (const char *script, void *out, TNelScriptValueT
 	four_typed_value_locals(Parser* parser,Value* code,Value* result,StringStream* source);
 
 	vl.parser = new Parser;
-	vl.source = new StringStream (utf8ToTStr(script));
+	vl.source = new StringStream(MaxTStrFromUtf8(script));
 	vl.source->log_to(NULL);
 
 #if MAX_VERSION_MAJOR < 19

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -46,11 +49,11 @@ public:
 
 	void onOK ();
 	void onCancel ();
-	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const char *registerAdress, int memoryCount);
+	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const TCHAR *registerAdress, int memoryCount);
 	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId);
-	void setRegisterAdress(const std::string &registerAdress);
+	void setRegisterAdress (const TCHAR *registerAdress);
 	void clearCommand ();
-	void addCommand(const std::string &commandLabel, uint commandId);
+	void addCommand (const char* commandLabel, uint commandId);
 	void clearStaticStrings ();
 	void addStaticStrings (const char* strings);
 	uint getCommandCount () const;
@@ -59,7 +62,7 @@ public:
 	bool isWnd (const CWnd *wnd) const;
 	void enableAutoCompleteExtension (bool enable, const char * ext);
 
-	std::string			RegisterAdress;
+	NLMISC::tstring		RegisterAdress;
 	int					MemoryCount;
 	UINT				Id;
 

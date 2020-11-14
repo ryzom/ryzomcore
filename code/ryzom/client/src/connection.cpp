@@ -1,5 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -144,14 +149,13 @@ ucstring	PlayerSelectedHomeShardName;
 ucstring	PlayerSelectedHomeShardNameWithParenthesis;
 extern std::string CurrentCookie;
 
-
 ucstring NewKeysCharNameWanted; // name of the character for which a new keyset must be created
 ucstring NewKeysCharNameValidated;
 std::string GameKeySet = "keys.xml";
 std::string RingEditorKeySet = "keys_r2ed.xml";
 
 string		ScenarioFileName;
-
+sint 		LoginCharsel = -1;
 
 static const char *KeySetVarName = "BuiltInKeySets";
 
@@ -439,8 +443,7 @@ bool connection (const string &cookie, const string &fsaddr)
 	Actions.enable(false);
 	EditActions.enable(false);
 
-//	resetTextContext ("ingame.ttf", true);
-	resetTextContext ("ryzom.ttf", true);
+	resetTextContext("noto_sans_display.ttf", true);
 
 	if (InterfaceState == GOGOGO_IN_THE_GAME)
 	{
@@ -573,8 +576,7 @@ bool reconnection()
 	Actions.enable(false);
 	EditActions.enable(false);
 
-//	resetTextContext ("ingame.ttf", true);
-	resetTextContext ("ryzom.ttf", true);
+	resetTextContext("noto_sans_display.ttf", true);
 
 	if (InterfaceState == GOGOGO_IN_THE_GAME)
 	{
@@ -641,7 +643,7 @@ TInterfaceState autoLogin (const string &cookie, const string &fsaddr, bool firs
 			NetMngr.setDataBase (IngameDbMngr.getNodePtr());
 
 			// init the string manager cache.
-			STRING_MANAGER::CStringManagerClient::instance()->initCache(UsedFSAddr, ClientCfg.LanguageCode);
+			STRING_MANAGER::CStringManagerClient::instance()->initCache(ClientCfg.LanguageCode);
 		}
 	}
 	else
@@ -1095,8 +1097,15 @@ TInterfaceState globalMenu()
 				noUserChar = userChar = false;
 				if( FarTP.isReselectingChar() || !FarTP.isServerHopInProgress() ) // if doing a Server Hop, expect serverReceivedReady without action from the user
 				{
+					sint charSelect = -1;
+					if (ClientCfg.SelectCharacter != -1)
+						charSelect = ClientCfg.SelectCharacter;
+
+					if (LoginCharsel != -1)
+						charSelect = LoginCharsel;
+
 					WaitServerAnswer = false;
-					if (ClientCfg.SelectCharacter == -1)
+					if (charSelect == -1)
 					{
 						CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
 						if (pNL != NULL)
@@ -1112,7 +1121,7 @@ TInterfaceState globalMenu()
 					else
 					{
 						// check that the pre selected character is available
-						if (CharacterSummaries[ClientCfg.SelectCharacter].People == EGSPD::CPeople::Unknown)
+						if (CharacterSummaries[charSelect].People == EGSPD::CPeople::Unknown || charSelect > 4)
 						{
 							// BAD ! preselected char does not exist, use the first available or fail
 							uint i;
@@ -1132,12 +1141,14 @@ TInterfaceState globalMenu()
 								if (ret == UDriver::noId)
 									exit(-1);
 								else
-									ClientCfg.SelectCharacter = i;
+									charSelect = i;
 							}
 						}
-
 						// Auto-selection for fast launching (dev only)
-						CAHManager::getInstance()->runActionHandler("launch_game", NULL, toString("slot=%d|edit_mode=0", ClientCfg.SelectCharacter));
+						CAHManager::getInstance()->runActionHandler("launch_game", NULL, toString("slot=%d|edit_mode=0", charSelect));
+
+						if (LoginCharsel == -1)
+							ClientCfg.SelectCharacter = charSelect;
 					}
 
 				}
@@ -2009,7 +2020,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string sName = getParam(Params, "name");
-		CSheetId id = CSheetId(sName, "sound");
+		TStringId id = CStringMapper::map(sName);
 		if (SoundMngr != NULL)
 			SoundMngr->spawnSource(id,CVector(0,0,0));
 	}

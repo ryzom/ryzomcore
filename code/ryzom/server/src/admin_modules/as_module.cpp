@@ -221,6 +221,13 @@ namespace ADMIN
 				fclose(fp);
 			}
 
+			string rrddirname = CPath::standardizePath (IService::getInstance()->ConfigFile.getVar("RRDVarPath").asString());
+			if (!NLMISC::CFile::isExists(rrddirname))
+			{
+				CFile::createDirectory(rrddirname);
+				CFile::setRWAccess(rrddirname);
+			}
+
 			return true;
 		}
 
@@ -778,9 +785,9 @@ retry_pending_command:
 			if (buffer.FrameStart == buffer.FrameEnd)
 			{
 				// the buffer is empty
-				ret.push_back(0);
-				ret.push_back(0);
-				ret.push_back(0);
+				ret.push_back(std::string());
+				ret.push_back(std::string());
+				ret.push_back(std::string());
 			}
 			else
 			{

@@ -159,8 +159,8 @@ function domain_management_hook_return_global()
 function domain_management_hook_activate()
  {
     $dbl = new DBLayer( "lib" );
-     $sql = "INSERT INTO `settings` (Setting) 
-            SELECT 'Domain_Auto_Add' FROM DUAL
+     $sql = "INSERT INTO `settings` (Setting, Value) 
+            SELECT 'Domain_Auto_Add', 0 FROM DUAL
             WHERE NOT EXISTS 
             (SELECT Setting FROM settings WHERE Setting='Domain_Auto_Add');";
 

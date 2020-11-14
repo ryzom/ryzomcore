@@ -21,7 +21,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TSessionPartStatus()
+		function __construct()
 		{
 			global $RSMGR_TSessionPartStatus_InvalidValue;
 			$this->Value = $RSMGR_TSessionPartStatus_InvalidValue;
@@ -81,7 +81,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TSessionType()
+		function __construct()
 		{
 			global $RSMGR_TSessionType_InvalidValue;
 			$this->Value = $RSMGR_TSessionType_InvalidValue;
@@ -143,7 +143,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TSessionOrientation()
+		function __construct()
 		{
 			global $RSMGR_TSessionOrientation_InvalidValue;
 			$this->Value = $RSMGR_TSessionOrientation_InvalidValue;
@@ -203,7 +203,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TSessionState()
+		function __construct()
 		{
 			global $RSMGR_TSessionState_InvalidValue;
 			$this->Value = $RSMGR_TSessionState_InvalidValue;
@@ -261,7 +261,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TAnimMode()
+		function __construct()
 		{
 			global $RSMGR_TAnimMode_InvalidValue;
 			$this->Value = $RSMGR_TAnimMode_InvalidValue;
@@ -319,7 +319,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TAccessType()
+		function __construct()
 		{
 			global $RSMGR_TAccessType_InvalidValue;
 			$this->Value = $RSMGR_TAccessType_InvalidValue;
@@ -377,7 +377,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TRuleType()
+		function __construct()
 		{
 			global $RSMGR_TRuleType_InvalidValue;
 			$this->Value = $RSMGR_TRuleType_InvalidValue;
@@ -439,7 +439,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TLevelFilter()
+		function __construct()
 		{
 			global $RSMGR_TLevelFilter_InvalidValue;
 			$this->Value = $RSMGR_TLevelFilter_InvalidValue;
@@ -498,7 +498,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TEstimatedDuration()
+		function __construct()
 		{
 			global $RSMGR_TEstimatedDuration_InvalidValue;
 			$this->Value = $RSMGR_TEstimatedDuration_InvalidValue;
@@ -558,7 +558,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TRaceFilter()
+		function __construct()
 		{
 			global $RSMGR_TRaceFilter_InvalidValue;
 			$this->Value = $RSMGR_TRaceFilter_InvalidValue;
@@ -617,7 +617,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TReligionFilter()
+		function __construct()
 		{
 			global $RSMGR_TReligionFilter_InvalidValue;
 			$this->Value = $RSMGR_TReligionFilter_InvalidValue;
@@ -675,7 +675,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TGuildFilter()
+		function __construct()
 		{
 			global $RSMGR_TGuildFilter_InvalidValue;
 			$this->Value = $RSMGR_TGuildFilter_InvalidValue;
@@ -763,7 +763,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TShardFilter()
+		function __construct()
 		{
 			global $RSMGR_TShardFilter_InvalidValue;
 			$this->Value = $RSMGR_TShardFilter_InvalidValue;
@@ -822,7 +822,7 @@
 	{
 		var $Value;
 		
-		function RSMGR_TSessionEvent()
+		function __construct()
 		{
 			global $RSMGR_TSessionEvent_InvalidValue;
 			$this->Value = $RSMGR_TSessionEvent_InvalidValue;

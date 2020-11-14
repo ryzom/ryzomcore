@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -163,7 +166,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	AssertLog->addDisplayer (&Displayer);
 
 	// JC: added LoadBarState
-	LoadBarState("Georges");
+	LoadBarState(_T("Georges"));
 
 	return 0;
 }
@@ -322,7 +325,7 @@ void CMainFrame::OnClose()
 	if (theApp.SaveAllModified())
 	{
 		// JC: added save bar state
-		SaveBarState("Georges");
+		SaveBarState(_T("Georges"));
 		// Save state
 		theApp.saveState ();
 
@@ -436,7 +439,7 @@ void CMainFrame::OnUpdateModules0(CCmdUI* pCmdUI)
 		pCmdUI->Enable ();
 		string name;
 		theApp.PluginArray[0].PluginInterface->getPluginName (name);
-		pCmdUI->SetText (name.c_str ());
+		pCmdUI->SetText(nlUtf8ToTStr(name));
 		pCmdUI->SetCheck (theApp.PluginArray[0].Activated);
 	}
 	else
@@ -464,7 +467,7 @@ void CMainFrame::OnUpdateModules1(CCmdUI* pCmdUI)
 		pCmdUI->Enable ();
 		string name;
 		theApp.PluginArray[1].PluginInterface->getPluginName (name);
-		pCmdUI->SetText (name.c_str ());
+		pCmdUI->SetText(nlUtf8ToTStr(name));
 		pCmdUI->SetCheck (theApp.PluginArray[1].Activated);
 	}
 	else
@@ -492,7 +495,7 @@ void CMainFrame::OnUpdateModules2(CCmdUI* pCmdUI)
 		pCmdUI->Enable ();
 		string name;
 		theApp.PluginArray[2].PluginInterface->getPluginName (name);
-		pCmdUI->SetText (name.c_str ());
+		pCmdUI->SetText(nlUtf8ToTStr(name));
 		pCmdUI->SetCheck (theApp.PluginArray[2].Activated);
 	}
 	else
@@ -520,7 +523,7 @@ void CMainFrame::OnUpdateModules3(CCmdUI* pCmdUI)
 		pCmdUI->Enable ();
 		string name;
 		theApp.PluginArray[3].PluginInterface->getPluginName (name);
-		pCmdUI->SetText (name.c_str ());
+		pCmdUI->SetText(nlUtf8ToTStr(name));
 		pCmdUI->SetCheck (theApp.PluginArray[3].Activated);
 	}
 	else

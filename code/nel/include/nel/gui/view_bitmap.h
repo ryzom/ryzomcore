@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -56,7 +59,13 @@ namespace NLGUI
 			_TxtOffsetY = 0;
 			_TxtWidth = -1;
 			_TxtHeight = -1;
+
+			// Support for https://.. textures
+			_HtmlDownload = false;
 		}
+
+		/// Destructor
+		virtual ~CViewBitmap();
 
 		std::string getProperty( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
@@ -132,6 +141,7 @@ namespace NLGUI
 		bool	_Flip           : 1;
 		bool	_Tile           : 1;
 		bool	_InheritGCAlpha : 1;
+		bool	_HtmlDownload   : 1;
 
 		// For single texture
 

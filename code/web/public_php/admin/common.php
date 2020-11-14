@@ -32,7 +32,7 @@
 	$tpl = new Smarty;
 	if (!is_object($tpl)) die("error on smarty init");
 
-    $iPhone = (strstr($_SERVER['HTTP_USER_AGENT'], "iPhone") !== FALSE);
+	$iPhone = (strstr($_SERVER['HTTP_USER_AGENT'], "iPhone") !== FALSE);
 	$tpl->assign('iPhone', $iPhone);
 
 	$tpl->template_dir	= NELTOOL_SYSTEMBASE .'/templates/default/';

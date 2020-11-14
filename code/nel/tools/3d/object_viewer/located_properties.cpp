@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -322,7 +325,7 @@ void CLocatedProperties::goPostRender()
 		_MaxNbParticles->update();
 	}
 	// in all cases, show the current number of particles being used
-	GetDlgItem(IDC_CURR_NUM_PARTS)->SetWindowText(utf8ToTStr(NLMISC::toString(_Located->getSize())));
+	GetDlgItem(IDC_CURR_NUM_PARTS)->SetWindowText(nlUtf8ToTStr(NLMISC::toString(_Located->getSize())));
 }
 
 //****************************************************************************************************************

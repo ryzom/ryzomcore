@@ -97,7 +97,7 @@ private:
 	};
 
 	uint32 _GetEasterNextId() { return _EasterEggNextId++; } 
-	void _SpawnEasterEgg(uint32 easterEggId, NLMISC::CSheetId sheet, uint32 aiInstanceId, sint32 x, sint32 y, sint32 z, float heading, const std::string&name="", const std::string& look="") const;
+	void _SpawnEasterEgg(uint32 easterEggId, NLMISC::CSheetId sheet, uint32 aiInstanceId, sint32 x, sint32 y, sint32 z, float heading, const std::string &name = std::string(), const std::string &look = std::string()) const;
 	void _UnspawnEasterEgg(uint32 easterEggId, uint32 aiInstanceId);
 	void _AddEntityEasterAssociation(const NLMISC::CEntityId &entityId, uint32 easterEggId);
 	void _RemoveEntityEasterAssociation(const NLMISC::CEntityId &entityId, uint32 easterEggId);

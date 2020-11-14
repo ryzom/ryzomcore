@@ -190,8 +190,6 @@ AdminCommandsInit[] =
 
 		// Web commands managment
 		"webExecCommand",					true,
-		"webDelCommandsIds",				true,
-		"webAddCommandsIds",				true,
 
 		"addPetAnimal",						true,
 		"addSkillPoints",					true,
@@ -229,13 +227,14 @@ AdminCommandsInit[] =
 		"allowSummonPet",					true,
 		"setPetAnimalSatiety",				true,
 		"getPetAnimalSatiety",				true,
+#ifdef RYZOM_FORGE_PET_NAME
 		"setPetAnimalName",					true,
+#endif
 		"taskPass",							true,
 		"setFamePlayer",					true,
 		"guildMOTD",						true,
 
 		// CSR commands
-		"setSalt",							true,
 		"motd",								false,
 		"broadcast",						false,
 		"summon",							true,
@@ -373,7 +372,9 @@ AdminCommandsInit[] =
 
 		"addFactionAttackableToTarget",		true,
 		"eventCreateNpcGroup",				true,
+#ifdef RYZOM_FORGE_EXECSCRIPT
 		"eScript",							true,
+#endif
 		"eventNpcGroupScript",				true,
 		"eventSetBotName",					true,
 		"eventSetBotScale",					true,
@@ -397,8 +398,10 @@ AdminCommandsInit[] =
 		"eventGiveControl",					true,
 		"eventLeaveControl",				true,
 
+#ifdef RYZOM_FORGE
 		"setOrganization",					true,
 		"setOrganizationStatus", 			true,
+#endif
 
 		"addGuildBuilding",					true,
 };
@@ -407,8 +410,6 @@ static vector<CAdminCommand>	AdminCommands;
 static string					CommandsPrivilegesFileName;
 static string					PositionFlagsFileName;
 static const char *				DefaultPriv = ":DEV:";
-
-static string					Salt;
 
 // forward declarations
 static void loadCommandsPrivileges(const string & fileName, bool init);
@@ -549,7 +550,6 @@ void initCommandsPrivileges(const std::string & fileName)
 {
 	H_AUTO(initCommandsPrivileges);
 
-	initSalt();
 	loadCommandsPrivileges(fileName, true);
 }
 
@@ -679,34 +679,6 @@ void initPositionFlags(const std::string & fileName)
 	PositionFlagsFileName = fileName;
 }
 
-struct SaltFileLoadCallback: public IBackupFileReceiveCallback
-{
-	std::string FileName;
-
-	SaltFileLoadCallback(const std::string& fileName): FileName(fileName)  {}
-
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
-	{
-		// if the file isn't found then just give up
-		DROP_IF(fileDescription.FileName.empty(),"<SaltFileLoadCallback> file not found: "<< FileName, return);
-		
-		dataStream.serial(Salt);
-		nlinfo("Salt loaded : %s", Salt.c_str());
-	}
-};
-
-void initSalt()
-{
-	H_AUTO(initSalt);
-
-	string fileNameAndPath = Bsi.getLocalPath() + "salt_egs.txt";
-	if (CFile::fileExists(fileNameAndPath))
-	{
-		nlinfo("Salt loading : salt_egs.txt");
-		Bsi.syncLoadFile("salt_egs.txt", new SaltFileLoadCallback("salt_egs.txt"));
-	}
-}
-
 string getStringFromHash(const string &hash)
 {
 	ucstring finaltext;
@@ -737,21 +709,6 @@ void getUCstringFromHash(const string &hash, ucstring &finaltext)
 		
 		finaltext.push_back((ucchar)ch);
 	}
-}
-
-const string &getSalt()
-{
-	if (Salt.empty()) Salt = "abcdefghijklmnopqrstuvwxyz0123456";
-
-	return Salt;
-}
-
-void saveSalt(const string salt)
-{
-	Salt = salt;
-	CBackupMsgSaveFile msg("salt_egs.txt", CBackupMsgSaveFile::SaveFile, Bsi );
-	msg.DataMsg.serial(Salt);
-	Bsi.sendFile(msg);
 }
 
 static void selectEntities (const string &entityName, vector <CEntityId> &entities)
@@ -2476,6 +2433,7 @@ NLMISC_COMMAND(getPetAnimalSatiety,"Get the satiety of pet animal (petIndex in 0
 	return true;
 }
 
+#ifdef RYZOM_FORGE_PET_NAME
 NLMISC_COMMAND(setPetAnimalName, "Set the name of a pet animal","<eid> <petIndex (0..3)> [<name>]")
 {
 	if (args.size () < 2) return false;
@@ -2493,6 +2451,7 @@ NLMISC_COMMAND(setPetAnimalName, "Set the name of a pet animal","<eid> <petIndex
 
 	return true;
 }
+#endif
 
 NLMISC_COMMAND (addSkillPoints, "add skill points of given type (Fight = 0,	Magic = 1,Craft = 2, Harvest = 3)", "<eid> <SP type [0..3]> <nb SP>")
 {
@@ -4583,6 +4542,7 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 
 }
 
+#ifdef RYZOM_FORGE
 NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang> <leave:0|1>")
 {
 	if ((args.size() < 2) || (args.size() > 3))
@@ -4623,69 +4583,12 @@ NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang>
 	CCharacter::sendDynamicSystemMessage( eid, "EGS_CHANNEL_INVALID_NAME", params );
 	return false;
 }
+#endif
 
 NLMISC_COMMAND (updateTarget, "Update current target", "<user id>")
 {
 	GET_CHARACTER
 	c->updateTarget();
-	return true;
-}
-
-NLMISC_COMMAND (setSalt, "Set Salt", "<dev_eid> <salt>")
-{
-	if (args.size() != 2)
-		return false;
-
-	GET_CHARACTER
-
-	string salt = args[1];
-	if (salt.empty())
-		return false;
-
-	saveSalt(salt);
-	return true;
-}
-
-// !!! Deprecated !!!
-NLMISC_COMMAND (webAddCommandsIds, "Add ids of commands will be run from webig", "<user id> <bot_name> <web_app_url> <indexes>")
-{
-	if (args.size() != 4)
-		return false;
-
-	GET_CHARACTER
-
-	string web_app_url = args[2];
-	string indexes = args[3];
-	string salt = getSalt();
-
-	if (salt.empty())
-	{
-		nlwarning("no salt");
-		return false;
-	}
-
-	c->addWebCommandCheck(web_app_url, indexes, salt);
-	return true;
-}
-
-// !!! Deprecated !!!
-NLMISC_COMMAND (webDelCommandsIds, "Del ids of commands", "<user id> <web_app_url>")
-{
-	if (args.size() != 2)
-		return false;
-
-	GET_CHARACTER
-
-	string web_app_url = args[1];
-	uint item_idx = c->getWebCommandCheck(web_app_url);
-	if (item_idx == INVENTORIES::NbBagSlots)
-		return false;
-
-	CInventoryPtr inv = c->getInventory(INVENTORIES::bag);
-	CGameItemPtr item = inv->getItem(item_idx);
-	inv->removeItem(item_idx);
-	item.deleteItem();
-	c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=deleted", getSalt());
 	return true;
 }
 
@@ -4717,6 +4620,7 @@ CInventoryPtr getInv(CCharacter *c, const string &inv)
 	return inventoryPtr;
 }
 
+#ifdef RYZOM_FORGE
 NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url> <index> <command> <hmac> [<new_check=0|1|2|3>] [<next_step=0|1>] [<send_url=0|1|2>]")
 {
 
@@ -4757,7 +4661,8 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 	uint32 iindex;
 	NLMISC::fromString(index, iindex);
 	string command = args[3];
-	string hmac = args[4];
+	std::string hmac = args[4];
+	NLMISC::CHashKey hmacBin = NLMISC::CHashKey(hmac);
 
 	vector<string> infos;
 	CGameItemPtr item;
@@ -4785,9 +4690,9 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 		string checksumRowId = web_app_url + toString(c->getLastConnectedDate()) + index + command + toString(c->getEntityRowId().getIndex());
 
-		string realhmacEid = getHMacSHA1((uint8*)&checksumEid[0], checksumEid.size(), (uint8*)&salt[0], salt.size()).toString();
-		string realhmacRowId = getHMacSHA1((uint8*)&checksumRowId[0], checksumRowId.size(), (uint8*)&salt[0], salt.size()).toString();
-		if (realhmacEid != hmac && realhmacRowId != hmac && command != "is_valid_index")
+		NLMISC::CHashKey realhmacEid = NLMISC::getHMacSHA1((uint8*)&checksumEid[0], checksumEid.size(), (uint8*)&salt[0], salt.size());
+		NLMISC::CHashKey realhmacRowId = NLMISC::getHMacSHA1((uint8*)&checksumRowId[0], checksumRowId.size(), (uint8*)&salt[0], salt.size());
+		if (realhmacEid != hmacBin && realhmacRowId != hmacBin && command != "is_valid_index")
 		{
 			if (send_url)
 				c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_auth", getSalt());
@@ -6765,6 +6670,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 	return true;
 }
+#endif
 
 //----------------------------------------------------------------------------
 ENTITY_VARIABLE (PriviledgePVP, "Priviledge Pvp Mode")
@@ -6987,6 +6893,7 @@ NLMISC_COMMAND(listGuildMembers, "display guild members list", "<csr eid> <guild
 	return true;
 }
 
+#ifdef RYZOM_FORGE_ROOM
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(roomInvite, "send a room invite to a player character", "<eid> <member name>")
 {
@@ -7070,6 +6977,7 @@ NLMISC_COMMAND(roomKick, "kick player from room", "<eid> <member name>")
 
 	return true;
 }
+#endif
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(guildInvite, "send a guild invite to a player character", "<eid> <member name>")
@@ -7953,6 +7861,7 @@ NLMISC_COMMAND(addGuildBuilding, "sadd a building to guild", "<player eid> <buil
 	return true;
 }
 
+#ifdef RYZOM_FORGE
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setOrganization, "set the organization of a player to the given faction", "<player eid> <faction>")
 {
@@ -7999,6 +7908,7 @@ NLMISC_COMMAND(setOrganizationStatus, "set the organization status of a player",
 
 	return true;
 }
+#endif
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m>] [<spawnBots=true>] [<orientation=random|self|-360..360>] [<name>] [<x>] [<y>] [client_sheet] [inVIllage?inOutpost?inStable?inAtys?]")
@@ -8151,6 +8061,7 @@ NLMISC_COMMAND(eventNpcGroupScript, "executes a script on an event npc group", "
 	return true;
 }
 
+#ifdef RYZOM_FORGE_EXECSCRIPT
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(eScript, "executes a script on an event npc group", "<player eid> <groupname> <script>")
 {
@@ -8211,6 +8122,7 @@ NLMISC_COMMAND(eScript, "executes a script on an event npc group", "<player eid>
 
 	return true;
 }
+#endif
 
 NLMISC_COMMAND(eventSetBotName, "changes the name of a bot", "<bot eid> <name>")
 {

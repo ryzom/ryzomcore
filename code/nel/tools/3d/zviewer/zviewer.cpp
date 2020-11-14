@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -953,12 +956,11 @@ void initViewerConfig(const char * configFileName)
 							MAIN
 \****************************************************************/
 #ifdef NL_OS_WINDOWS
-int WINAPI WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR cmdline, int /* nCmdShow */)
+int APIENTRY nltWinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPTSTR /* lpCmdLine */, int /* nCmdShow */)
+#else // NL_OS_WINDOWS
+int nltmain(int /* argc */, NLMISC::tchar ** /* argv */)
+#endif // NL_OS_WINDOWS
 {
-#else
-int main(int /* argc */, char ** /* argv */)
-{
-#endif
 	try
 	{
 		NLMISC::CApplicationContext myApplicationContext;

@@ -430,6 +430,7 @@ bool CExitDestination::isUserAllowed(CCharacter * user, uint16 ownerIdx)
 	if (user && user->isDead())
 		return false;
 
+	nlassert(user);
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
 	sint32 cell = mirrorCell;			
 	const IRoomInstance * room = CBuildingManager::getInstance()->getRoomInstanceFromCell( cell );

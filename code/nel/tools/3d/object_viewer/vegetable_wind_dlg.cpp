@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -73,19 +76,19 @@ void	CVegetableWindDlg::updateView()
 
 	// update Power.
 	a= _ObjViewer->getVegetableWindPower();
-	StaticPower.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
+	StaticPower.SetWindowText(nlUtf8ToTStr(NLMISC::toString("%.2f", a)));
 	NLMISC::clamp(a, 0, NL_VEGETABLE_EDIT_WIND_MAX_POWER);
 	SliderPower.SetPos((sint)(a*NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE / NL_VEGETABLE_EDIT_WIND_MAX_POWER));
 
 	// update BendStart.
 	a= _ObjViewer->getVegetableWindBendStart();
-	StaticBendStart.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
+	StaticBendStart.SetWindowText(nlUtf8ToTStr(NLMISC::toString("%.2f", a)));
 	NLMISC::clamp(a, 0, NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART);
 	SliderBendStart.SetPos((sint)(a*NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE / NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART));
 
 	// update Frequency.
 	a= _ObjViewer->getVegetableWindFrequency();
-	StaticFrequency.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
+	StaticFrequency.SetWindowText(nlUtf8ToTStr(NLMISC::toString("%.2f", a)));
 	NLMISC::clamp(a, 0, NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY);
 	SliderFrequency.SetPos((sint)(a*NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE / NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY));
 
@@ -129,20 +132,20 @@ void CVegetableWindDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 		{
 			a= (float)nPos * NL_VEGETABLE_EDIT_WIND_MAX_POWER / NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE;
 			_ObjViewer->setVegetableWindPower(a);
-			StaticPower.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
+			StaticPower.SetWindowText(nlUtf8ToTStr(NLMISC::toString("%.2f", a)));
 		}
 		else if(sliderCtrl == &SliderBendStart)
 		{
 			a= (float)nPos * NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART / NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE;
 			_ObjViewer->setVegetableWindBendStart(a);
-			StaticBendStart.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
+			StaticBendStart.SetWindowText(nlUtf8ToTStr(NLMISC::toString("%.2f", a)));
 		}
 		else if(sliderCtrl == &SliderFrequency)
 		{
 		
 			a= (float)nPos * NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY / NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE;
 			_ObjViewer->setVegetableWindFrequency(a);
-			StaticFrequency.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
+			StaticFrequency.SetWindowText(nlUtf8ToTStr(NLMISC::toString("%.2f", a)));
 		}
 	}
 	else

@@ -460,7 +460,9 @@ void CPlayerManager::addClientCallback()
 		{ "SET_PLAYER_SEASON",					cbSetPlayerSeason		}, // from DSS
 
 		{ "TELEPORT_PLAYER",					cbTeleportPlayer		}, // from AIS
+#ifdef RYZOM_FORGE
 		{ "TRIGGER_WEBIG",						cbTriggerWebig			}, // from AIS
+#endif
 		
 		{ "SET_CHAR_AIINSTANCE",			cbSetCharacterAIInstance},
 
@@ -2252,7 +2254,7 @@ bool CPlayerManager::hasBetterCSRGrade( CPlayer* p1, CPlayer *p2, bool devIsNorm
 	if ( p2->havePriv(":SGM:") )
 		return ( p1->havePriv(":SGM:") );
 	if ( p2->havePriv(":EM:") )
-		return ( p1->havePriv(":SGM:EM:GM:") );
+		return ( p1->havePriv(":SGM:EM:") );
 	if ( p2->havePriv(":GM:") )
 		return ( p1->havePriv(":SGM:EM:GM:") );
 	if ( p2->havePriv(":EG:") )
