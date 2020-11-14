@@ -214,7 +214,7 @@ void extractStringsFromBinary (const vector<char> &fileArray, set<string> &filen
 				if (str != "")
 				{
 					// Lower case
-					str = toLower (str);
+					str = toLowerAscii (str);
 
 					// Filter extensions
 					if (filterExtension (str.c_str(), extensions))
@@ -280,7 +280,7 @@ void extractStringsFromASCII (const vector<char> &fileArray, set<string> &filena
 						temp[c] = begin[c];
 
 					// Lower case
-					temp = toLower (temp);
+					temp = toLowerAscii (temp);
 
 					// Filter extensions
 					if (filterExtension (temp.c_str(), extensions))
@@ -325,7 +325,7 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 		while (fgets (name, 512, file))
 		{
 			// To string and lower
-			temp = toLower (string(name));
+			temp = toLowerAscii (string(name));
 
 			// Remove return
 			removeChar (temp, '\n');
@@ -374,8 +374,8 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 					while (fgets (name, 512, file))
 					{
 						// To lower
-						temp = toLower (string(name));
-						temp2 = toLower (string(name));
+						temp = toLowerAscii (string(name));
+						temp2 = toLowerAscii (string(name));
 
 						// Remove space
 						removeBeginEndSpaces (temp);
@@ -597,7 +597,7 @@ int main(int argc, char* argv[])
 				// It is used ?
 				if (usedFiles.find (available->first) == usedFiles.end())
 				{
-					string temp = toLower (available->second);
+					string temp = toLowerAscii (available->second);
 					fprintf (stderr, "UNUSED: %s\n", temp.c_str());
 				}
 

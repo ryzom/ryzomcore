@@ -222,7 +222,7 @@ void CPlugin::drawFaunaGraph(CDisplay &display, const NLLIGO::IPrimitive &grp)
 				if (!grp.getChild(child, k)) continue;
 				std::string className;
 				if (!child->getPropertyByName("class", className)) continue;
-				if (NLMISC::toLower(className) != FAUNA_PLACE) continue;
+				if (NLMISC::toLowerAscii(className) != FAUNA_PLACE) continue;
 				if (_PluginAccess->isSelected(*child))
 				{
 					found = true;
@@ -239,7 +239,7 @@ void CPlugin::drawFaunaGraph(CDisplay &display, const NLLIGO::IPrimitive &grp)
 		if (!grp.getChild(child, k)) continue;
 		std::string className;
 		if (!child->getPropertyByName("class", className)) continue;
-		if (NLMISC::toLower(className) != FAUNA_PLACE) continue;
+		if (NLMISC::toLowerAscii(className) != FAUNA_PLACE) continue;
 		std::string indexStr;
 		int index;
 		if (!child->getPropertyByName("index", indexStr)) continue;

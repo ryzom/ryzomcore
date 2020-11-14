@@ -42,6 +42,8 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	CAHManager	*CAHManager::_GlobalInstance = NULL;
 	bool CAHManager::editorMode = false;
+	CAHManager::CDeleter CAHManager::s_Deleter;
+	bool CAHManager::s_Deleted = false;
 	// ------------------------------------------------------------------------------------------------
 
 	// ------------------------------------------------------------------------------------------------

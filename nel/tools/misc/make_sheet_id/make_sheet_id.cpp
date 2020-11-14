@@ -320,10 +320,10 @@ void addId( string fileName )
 	if( itFI == FormToId.end() )
 	{
 		// double check : if file not found we check with lower case version of filename
-		map<string,TFormId>::iterator itFILwr = FormToId.find( toLower(fileName) );
+		map<string,TFormId>::iterator itFILwr = FormToId.find( toLowerAscii(fileName) );
 		if( itFILwr != FormToId.end() )
 		{
-			nlwarning("Trying to add %s but the file %s is already known ! becareful with lower case and upper case.", fileName.c_str(), toLower(fileName).c_str());
+			nlwarning("Trying to add %s but the file %s is already known ! becareful with lower case and upper case.", fileName.c_str(), toLowerAscii(fileName).c_str());
 			NbFilesDiscarded++;
 			return;
 		}

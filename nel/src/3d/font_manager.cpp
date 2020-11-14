@@ -146,8 +146,10 @@ void CFontManager::computeString (NLMISC::CUtfStringView sv,
 		{
 			// Creating font
 			k.Char = *it;
-			if (k.Char < 0x20)
+			if (k.Char < 0x20) // Control Characters
 				k.Char += 0x2400;
+			if (k.Char == 0x7F) // DEL
+				k.Char = 0x2421;
 			k.FontGenerator = fontGen;
 			k.Size = fontSize;
 			k.Embolden = embolden;

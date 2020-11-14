@@ -135,12 +135,12 @@ CApplicationContext::~CApplicationContext()
 	while (it != iend)
 	{
 		// can't use nldebug there because it'll create new displayers
-		std::string message = toString("Instance '%s' still allocated at %p", it->first.c_str(), it->second);
+		std::string message = toString("Instance '%s' still allocated at %p\n", it->first.c_str(), it->second);
 
 #ifdef NL_OS_WINDOWS
 		OutputDebugStringW(nlUtf8ToWide(message));
 #else
-		printf("%s\n", message.c_str());
+		printf("%s", message.c_str());
 #endif
 
 		++it;

@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 		if (inputFile.open (argv[1]))
 		{
 			// Zone name
-			string zoneName=toLower (string ("zone_"+getName (argv[1])));
+			string zoneName=toLowerAscii (string ("zone_"+getName (argv[1])));
 
 			// Load the zone
 			try
@@ -413,7 +413,7 @@ int main(int argc, char* argv[])
 						if(group->getInstance(instance).DontCastShadow || group->getInstance(instance).DontCastShadowForExterior)
 							continue;
 
-						if (toLower (CFile::getExtension (name)) == "pacs_prim")
+						if (toLowerAscii (CFile::getExtension (name)) == "pacs_prim")
 						{
 							nlwarning("EXPORT BUG: Can't read %s (not a shape), should not be part of .ig!", name.c_str());
 							continue;

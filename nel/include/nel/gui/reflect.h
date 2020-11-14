@@ -42,9 +42,13 @@ namespace NLGUI
 					 UInt32,
 					 Float,
 					 String,
+#ifdef RYZOM_LUA_UCSTRING
 					 UCString,
+#endif
 					 StringRef,
+#ifdef RYZOM_LUA_UCSTRING
 					 UCStringRef,
+#endif
 					 RGBA,
 					 LuaMethod
 					}; // other types will be added when needed
@@ -79,9 +83,13 @@ namespace NLGUI
 			TGetUInt32		GetUInt32;
 			TGetFloat		GetFloat;
 			TGetString		GetString;
+#ifdef RYZOM_LUA_UCSTRING
 			TGetUCString	GetUCString;
+#endif
 			TGetStringRef	GetStringRef;
+#ifdef RYZOM_LUA_UCSTRING
 			TGetUCStringRef	GetUCStringRef;
+#endif
 			TGetRGBA		GetRGBA;
 			TLuaMethod		GetLuaMethod; // lua method can only be obtained, not written ...
 		} GetMethod;
@@ -92,7 +100,9 @@ namespace NLGUI
 			TSetUInt32		SetUInt32;
 			TSetFloat		SetFloat;
 			TSetString		SetString;
+#ifdef RYZOM_LUA_UCSTRING
 			TSetUCString	SetUCString;
+#endif
 			TSetRGBA		SetRGBA;
 		} SetMethod;
 		// name of the property

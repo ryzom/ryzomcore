@@ -64,7 +64,7 @@ bool keepFile (const char *fileName)
 	uint i;
 	bool ifPresent = false;
 	bool ifTrue = false;
-	string file = toLower(CFile::getFilename (fileName));
+	string file = toLowerAscii(CFile::getFilename (fileName));
 	for (i=0; i<WildCards.size(); i++)
 	{
 		if (WildCards[i].Not)

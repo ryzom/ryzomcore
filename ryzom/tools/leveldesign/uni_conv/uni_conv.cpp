@@ -17,6 +17,7 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/ucstring.h>
+#include <nel/misc/utf_string_view.h>
 #include <nel/misc/common.h>
 #include <nel/misc/sstring.h>
 #include <nel/misc/i18n.h>
@@ -76,21 +77,10 @@ int main(int argc, char *argv[])
 	ucstring	str;
 	CI18N::readTextFile(inputFile, str, false, false);
 
-	if (outMode == ASCII)
-	{
-		// remove any outof ascii char
-		ucstring temp;
-		for (uint i=0; i<str.size(); ++i)
-		{
-			if (str[i] < 256)
-				temp += str[i];
-		}
-		str = temp;
-	}
-
 	if (xmlSupport)
 	{
 		ucstring temp;
+		temp.reserve(str.size());
 		for (uint i=0; i<str.size(); ++i)
 		{
 			switch(str[i])
@@ -121,9 +111,16 @@ int main(int argc, char *argv[])
 		break;
 	case ASCII:
 		{
-			string s = str.toString();
+			std::string res;
+			res.reserve(str.size());
+			for (ucstring::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+			{
+				ucchar c = *it;
+				if (c < 0x80)
+					res += (char)c;
+			}
 			FILE *fp = nlfopen(outputFile, "wt");
-			fwrite(s.data(), s.size(), 1, fp);
+			fwrite(res.data(), res.size(), 1, fp);
 			fclose(fp);
 		}
 		break;

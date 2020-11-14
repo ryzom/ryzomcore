@@ -104,7 +104,7 @@ bool parseOptions(int argc, char **argv)
 			// Filename
 			else
 			{
-				std::string ext = NLMISC::toLower(NLMISC::CFile::getExtension(option));
+				std::string ext = NLMISC::toLowerAscii(NLMISC::CFile::getExtension(option));
 
 				if (ext == "png" || ext == "tga")
 				{
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 
 	for(uint i = 0; i < InputFilenames.size(); ++i)
 	{
-		std::string ext = NLMISC::toLower(NLMISC::CFile::getExtension(InputFilenames[i]));
+		std::string ext = NLMISC::toLowerAscii(NLMISC::CFile::getExtension(InputFilenames[i]));
 
 		NLMISC::CIFile input;
 

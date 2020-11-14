@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 			if (!zonePath.empty())
 			{
 				presentZonePathes.push_back(zonePath);
-				presentZoneNames.push_back(toLower(zoneNames[l]));
+				presentZoneNames.push_back(toLowerAscii(zoneNames[l]));
 			}
 		}
 		//

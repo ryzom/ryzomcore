@@ -229,7 +229,7 @@ uint32 CTextContextUser::textPush(const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
 
-	return _TextContext.textPush(ucstring(str)) ;
+	return _TextContext.textPush(str) ;
 }
 uint32 CTextContextUser::textPush(NLMISC::CUtfStringView sv)
 {
@@ -340,7 +340,7 @@ void CTextContextUser::printfAt(float x, float y, const char * format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
 
-	_TextContext.printAt(x, y, ucstring(str)) ;
+	_TextContext.printAt(x, y, str) ;
 	_DriverUser->restoreMatrixContext();
 }
 

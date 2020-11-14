@@ -353,7 +353,7 @@ int main(int nNbArg, char**ppArgs)
 	vector<string> vAllFiles;
 	for(uint i = 0, len = (uint)vAllFilesUnfiltered.size(); i < len; ++i)
 	{
-		if (toLower(CFile::getExtension(vAllFilesUnfiltered[i])) == "ig")
+		if (toLowerAscii(CFile::getExtension(vAllFilesUnfiltered[i])) == "ig")
 		{
 			vAllFiles.push_back(vAllFilesUnfiltered[i]);
 		}

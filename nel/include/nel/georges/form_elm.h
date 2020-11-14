@@ -282,6 +282,10 @@ public:
 		{
 			Element = NULL;
 		}
+		~CFormElmStructElm()
+		{
+			nlassert(!Element);
+		}
 
 		std::string		Name;
 		CFormElm*		Element;
@@ -399,6 +403,10 @@ public:
 		CElement ()
 		{
 			Element = NULL;
+		}
+		~CElement ()
+		{
+			nlassert(!Element);
 		}
 
 		std::string		Name;

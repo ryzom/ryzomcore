@@ -230,6 +230,18 @@ size_t CUtfStringView::count() const
 	return res;
 }
 
+ptrdiff_t CUtfStringView::offset(ptrdiff_t i)
+{
+	size_t res = 0;
+	for (iterator it(begin()), end(this->end()); it != end; ++it)
+	{
+		if (res == i)
+			return (ptrdiff_t)it.ptr() - (ptrdiff_t)ptr();
+		++res;
+	}
+	return res;
+}
+
 u32char CUtfStringView::utf8Iterator(const void **addr)
 {
 	// Decode UTF-8
@@ -275,6 +287,12 @@ u32char CUtfStringView::utf8Iterator(const void **addr)
 								// Replacement character �
 								return 0xFFFD;
 							}
+							else if (c0 < 0x10000)
+							{
+								// Invalid encoding
+								// Replacement character �
+								return 0xFFFD;
+							}
 						}
 						else
 						{
@@ -308,12 +326,24 @@ u32char CUtfStringView::utf8Iterator(const void **addr)
 						// Replacement character �
 						return 0xFFFD;
 					}
+					else if (c0 < 0x0800)
+					{
+						// Invalid encoding
+						// Replacement character �
+						return 0xFFFD;
+					}
 				}
 				else
 				{
 					// Replacement character �
 					return 0xFFFD;
 				}
+			}
+			else if (c0 < 0x80)
+			{
+				// Invalid encoding
+				// Replacement character �
+				return 0xFFFD;
 			}
 		}
 		else

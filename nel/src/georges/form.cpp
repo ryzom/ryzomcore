@@ -191,6 +191,9 @@ void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const std
 	// Reset form
 	clean ();
 
+	// Save the dfn
+	_Dfn = dfn;
+
 	// Check node name
 	if ( ((const char*)node->name == NULL) || (strcmp ((const char*)node->name, "FORM") != 0) )
 	{

@@ -1708,7 +1708,7 @@ public:
 		string sCharSumPath = getParam(Params, "charsum");
 		SCharacter3DSetup::setupCharacterSummaryFromDB(CS, sCharSumPath);
 		CS.Mainland = MainlandSelected;
-		CS.Name = sFirstName;
+		CS.Name = ucstring::makeFromUtf8(sFirstName); // FIXME: UTF-8 (serial)
 		//CS.Surname = sSurName;
 
 		// Create the message to send to the server from the character summary
@@ -1865,8 +1865,9 @@ string getTarget(CCtrlBase * /* ctrl */, const string &targetName)
 	return "";
 }
 
+#ifdef RYZOM_LUA_UCSTRING
 // ------------------------------------------------------------------------------------------------
-ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName) // TODO: UTF-8 Lua
+ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName)
 {
 	string sTmp = targetName;
 	std::vector<CInterfaceLink::CTargetInfo> targetsVector;
@@ -1886,6 +1887,7 @@ ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName) // TODO: 
 		return ((elem->*(pRP->GetMethod.GetUCString))());
 	return ucstring(""); // TODO: UTF-8 Lua
 }
+#endif
 
 /*// Ask the server to rename a character
 // ------------------------------------------------------------------------------------------------
@@ -1957,7 +1959,11 @@ public:
 		string sDBLink = getParam(Params, "dblink");
 		CharNameValidDBLink = sDBLink;
 
+#ifdef RYZOM_LUA_UCSTRING
 		string sName = getUCTarget(NULL,sTarget).toUtf8(); // TODO: UTF-8 Lua
+#else
+		string sName = getTarget(NULL, sTarget);
+#endif
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (sName.empty())

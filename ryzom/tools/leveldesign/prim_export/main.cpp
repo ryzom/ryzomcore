@@ -527,7 +527,7 @@ public:
 		formDate = 0;
 
 		// In the map ?
-		string formShortName = NLMISC::toLower(CFile::getFilename (formName));
+		string formShortName = NLMISC::toLowerAscii(CFile::getFilename (formName));
 		map<string, CValue >::iterator ite = _FormMap.find (formShortName);
 		if (ite == _FormMap.end ())
 		{
@@ -614,7 +614,7 @@ void addPointPrimitive (CLandscape &landscape, const char *primFilename, uint32 
 				if (point->getPropertyByName ("form", plantFilename))
 				{
 					// Add an extension
-					if (NLMISC::toLower(CFile::getExtension (plantFilename)) != "plant")
+					if (NLMISC::toLowerAscii(CFile::getExtension (plantFilename)) != "plant")
 						plantFilename += ".plant";
 
 					// Load this form
@@ -669,7 +669,7 @@ void addPointPrimitive (CLandscape &landscape, const char *primFilename, uint32 
 								instance.Scale = CVector (scale, scale, scale);
 								instance.nParent = -1;
 								instance.Name = shape;
-								instance.InstanceName = NLMISC::toLower(CFile::getFilename (plantFilename));
+								instance.InstanceName = NLMISC::toLowerAscii(CFile::getFilename (plantFilename));
 
 								// Get the instance group ref
 								CIgContainer::CIG	&instances = igs.get (x, y);
@@ -826,7 +826,7 @@ int main (int argc, char**argv)
 				callback.progress ((float)i/(float)files.size ());
 
 				// Zonew ?
-				if (NLMISC::toLower(CFile::getExtension (files[i])) == "zonew")
+				if (NLMISC::toLowerAscii(CFile::getExtension (files[i])) == "zonew")
 				{
 					// Load it
 					try
@@ -890,7 +890,7 @@ int main (int argc, char**argv)
 			for (i=0; i<fileCount; i++)
 			{
 				// Primitive file ?
-				if (NLMISC::toLower(CFile::getExtension (files[i])) == "primitive")
+				if (NLMISC::toLowerAscii(CFile::getExtension (files[i])) == "primitive")
 				{
 					// Progress bar
 					nlinfo (files[i].c_str());
