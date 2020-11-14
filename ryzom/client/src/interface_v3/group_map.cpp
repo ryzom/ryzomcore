@@ -2677,7 +2677,7 @@ void CGroupMap::setLandmarkFilter(const std::string &s)
 	_LandmarkFilter.clear();
 
 	if (!s.empty()) {
-		splitUCString(ucstring(toLower(s)), ucstring(" "), _LandmarkFilter);
+		splitUCString(ucstring::makeFromUtf8(toLower(s)), ucstring(" "), _LandmarkFilter);
 	}
 
 	// recreate landmarks

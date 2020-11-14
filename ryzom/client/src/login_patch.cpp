@@ -1280,6 +1280,19 @@ void CPatchManager::readDescFile(sint32 nVersion)
 
 		CBNPFileSet &bnpFS = const_cast<CBNPFileSet &>(DescFile.getFiles());
 
+		// TODO: .ref files are expected to follow platform category naming (they are in 'main' category)
+		std::set<std::string>::const_iterator it;
+		for(it = forceRemovePatchCategories.begin(); it != forceRemovePatchCategories.end(); ++it)
+		{
+			std::string name = *it;
+			std::string::size_type pos = name.find("_");
+			if (pos != std::string::npos)
+			{
+				name = name.substr(pos+1) + "_.ref";
+				bnpFS.removeFile(name);
+			}
+		}
+
 		for (cat = 0; cat < DescFile.getCategories().categoryCount();)
 		{
 			const CBNPCategory &bnpCat = DescFile.getCategories().getCategory(cat);
@@ -2967,7 +2980,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				PatchSizeProgress += rFTP.PatcheSizes[j];
 				currentPatchedSize += rFTP.PatcheSizes[j];
 			}
-
+		}
 			if (tmpSourceName != DestinationName)
 			{
 				pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
@@ -2981,7 +2994,6 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					pPM->renameFile(tmpSourceName, DestinationName);
 				}
 			}
-		}
 	}
 	else
 	{
