@@ -519,7 +519,7 @@ bool	CCDBSynchronised::writePermanentDelta( NLMISC::CBitMemStream& s )
 inline void pushPackedValue( CBitMemStream& s, uint64 value, uint32& bitsize, uint &bits )
 {
 	// fast count of max bit
-	uint32 next = (uint32)(value >> 32);
+	uint32 next = (uint32)(value >> (32 + 4));
 	uint32 test;
 	bits = 0;
 	if (next) // 64bit
@@ -529,7 +529,7 @@ inline void pushPackedValue( CBitMemStream& s, uint64 value, uint32& bitsize, ui
 	}
 	else
 	{
-		test = (uint32)(value & 0xFFFFFFFF); // 32 lsb
+		test = (uint32)((value >> 4) & 0xFFFFFFFF); // 32 lsb
 	}
 	next = (test >> 16);
 	if (next)
@@ -562,6 +562,7 @@ inline void pushPackedValue( CBitMemStream& s, uint64 value, uint32& bitsize, ui
 	}
 	uint64 nibbleCount = (bits >> 2);
 	s.serialAndLog2( nibbleCount, 4 );
+	bits += 4;
 	s.serialAndLog2( value, bits );
 	bitsize += (4 + bits);
 }
