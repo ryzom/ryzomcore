@@ -720,6 +720,8 @@ void CFormDialog::onLastFocus ()
 
 int CFormDialog::getWidget (uint dialogId) const
 {
+	if (dialogId == 0xFFFE)
+		dialogId = 0;
 	for (uint i=0; i<Widgets.size(); i++)
 	{
 		if (Widgets[i]->isDialog (dialogId))
@@ -1198,6 +1200,11 @@ void CFormDialog::onGetSubFocus (uint id)
 {
 	// Get the widget
 	int widget = getWidget (id);
+	if (widget < 0)
+	{
+		nldebug("Invalid widget id %d", (int)id);
+		return;
+	}
 	WidgetFocused = widget;
 
 	// Window view
@@ -1584,7 +1591,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 	{
 		// Create the mem combobox
 		parent->setComboSpinSize (currentPos);
-		Combo.create (WS_CHILD|WS_TABSTOP, currentPos, parent, dialog_index, reg, theApp.RememberListSize);
+		Combo.create (WS_CHILD|WS_TABSTOP, currentPos, parent, dialog_index ? dialog_index : 0xFFFE, reg, theApp.RememberListSize);
 		parent->initWidget (Combo);
 
 		// Create the spin
@@ -1599,7 +1606,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 	{
 		// Create the mem combobox
 		parent->setComboBrowseSize (currentPos);
-		Combo.create (WS_CHILD|WS_TABSTOP, currentPos, parent, dialog_index, reg, theApp.RememberListSize);
+		Combo.create (WS_CHILD|WS_TABSTOP, currentPos, parent, dialog_index ? dialog_index : 0xFFFE, reg, theApp.RememberListSize);
 		parent->initWidget (Combo);
 
 		// Create the spin
@@ -1621,7 +1628,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 	{
 		// Create the mem combobox
 		parent->setComboSize (currentPos, parent->SmallWidget);
-		Combo.create (WS_CHILD|WS_TABSTOP, currentPos, parent, dialog_index, reg, theApp.RememberListSize);
+		Combo.create (WS_CHILD|WS_TABSTOP, currentPos, parent, dialog_index ? dialog_index : 0xFFFE, reg, theApp.RememberListSize);
 		parent->initWidget (Combo);
 		parent->getNextPos (currentPos);
 	}
@@ -1914,7 +1921,7 @@ void CFormCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, ui
 	parent->setComboSize (currentPos, parent->SmallWidget);
 	RECT comboPos = currentPos;
 	parent->adjusteComboSize (comboPos);
-	Combo.Create (WS_CHILD|WS_VSCROLL|WS_VISIBLE|CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_CHILD|WS_TABSTOP, comboPos, parent, dialog_index);
+	Combo.Create (WS_CHILD|WS_VSCROLL|WS_VISIBLE|CBS_DROPDOWNLIST|CBS_HASSTRINGS|WS_CHILD|WS_TABSTOP, comboPos, parent, dialog_index ? dialog_index : 0xFFFE);
 	parent->initWidget (Combo);
 	parent->getNextPos (currentPos);
 
@@ -2097,7 +2104,7 @@ void CFormBigEdit::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, 
 
 	// Create the mem combobox
 	parent->setBigEditSize (currentPos, parent->SmallWidget);
-	Edit.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), _T(""), WS_VSCROLL|ES_OEMCONVERT|ES_MULTILINE|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|ES_AUTOVSCROLL, currentPos, parent, dialog_index);
+	Edit.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), _T(""), WS_VSCROLL|ES_OEMCONVERT|ES_MULTILINE|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|ES_AUTOVSCROLL, currentPos, parent, dialog_index ? dialog_index : 0xFFFE);
 	parent->initWidget (Edit);
 	parent->getNextPos (currentPos);
 
@@ -2271,7 +2278,7 @@ void CColorEdit::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, ui
 
 	// Create the mem combobox
 	parent->setColorSize (currentPos, parent->SmallWidget);
-	Color.create (WS_CHILD|WS_VISIBLE|WS_TABSTOP, currentPos, parent, dialog_index);
+	Color.create (WS_CHILD|WS_VISIBLE|WS_TABSTOP, currentPos, parent, dialog_index ? dialog_index : 0xFFFE);
 	parent->initWidget (Color);
 
 	// Create the reset button
@@ -2501,7 +2508,7 @@ void CListWidget::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, u
 
 	// Create the mem combobox
 	parent->setListSize (currentPos, parent->SmallWidget);
-	ListCtrl.create (WS_CHILD|WS_VISIBLE|WS_TABSTOP, currentPos, parent, dialog_index);
+	ListCtrl.create (WS_CHILD|WS_VISIBLE|WS_TABSTOP, currentPos, parent, dialog_index ? dialog_index : 0xFFFE);
 	parent->initWidget (ListCtrl);
 	parent->getNextPos (currentPos);
 
@@ -2759,7 +2766,7 @@ void CIconWidget::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, u
 
 	// Create the mem combobox
 	parent->setEditSize (currentPos, parent->IconHeight, parent->IconHeight);
-	Icon.create (WS_CHILD|WS_VISIBLE|WS_TABSTOP, currentPos, parent, dialog_index);
+	Icon.create (WS_CHILD|WS_VISIBLE|WS_TABSTOP, currentPos, parent, dialog_index ? dialog_index : 0xFFFE);
 	parent->initWidget (Icon);
 
 	parent->getNextPos (currentPos);

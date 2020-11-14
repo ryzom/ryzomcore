@@ -329,7 +329,7 @@ feature.create = function()
 		debugInfo("Cancel form for 'TimeTrigger' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'TimeTrigger' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'TimeTrigger' at pos (%f, %f, %f)", x, y, z))
 		r2:doForm("TimeTriggerForm", {X=x, Y=y}, paramsOk, paramsCancel)
 	end
 	local function posCancel()

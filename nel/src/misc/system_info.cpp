@@ -179,7 +179,6 @@
 #else
 #	include <sys/types.h>
 #	include <sys/stat.h>
-#	include <sys/sysctl.h>
 #	include <fcntl.h>
 #	include <unistd.h>
 #	include <cerrno>

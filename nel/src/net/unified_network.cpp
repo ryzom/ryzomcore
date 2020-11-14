@@ -2090,6 +2090,14 @@ void CUnifiedNetwork::addNetworkAssociation (const string &networkName, uint8 ni
 
 void CUnifiedNetwork::callServiceUpCallback (const std::string &serviceName, TServiceId sid, bool callGlobalCallback)
 {
+	std::pair<std::string, TServiceId> pss = std::make_pair(serviceName, sid);
+	if (_NotifiedUpCallbacks.find(pss) != _NotifiedUpCallbacks.end())
+	{
+		nlwarning("HNETL5: Attempt to call service UP callback twice for '%s', ignored!", serviceName.c_str());
+		return;
+	}
+	_NotifiedUpCallbacks.insert(pss);
+
 	// now we warn the user
 	CUnifiedNetwork::TNameMappedCallback::iterator	it = _UpCallbacks.find(serviceName);
 	if (it != _UpCallbacks.end())
@@ -2119,6 +2127,14 @@ void CUnifiedNetwork::callServiceUpCallback (const std::string &serviceName, TSe
 
 void CUnifiedNetwork::callServiceDownCallback (const std::string &serviceName, TServiceId sid, bool callGlobalCallback)
 {
+	std::pair<std::string, TServiceId> pss = std::make_pair(serviceName, sid);
+	if (_NotifiedUpCallbacks.find(pss) == _NotifiedUpCallbacks.end())
+	{
+		nlwarning("HNETL5: Attempt to call service DOWN callback twice for '%s', ignored!", serviceName.c_str());
+		return;
+	}
+	_NotifiedUpCallbacks.erase(pss);
+
 	// now we warn the user
 	CUnifiedNetwork::TNameMappedCallback::iterator	it = _DownCallbacks.find(serviceName);
 	if (it != _DownCallbacks.end())

@@ -13,7 +13,7 @@
 	<param name="ctrl_sheet_gray_color"	value="255 255 255 128" />
 	<param name="ctrl_sheet_redify_color"	value="255 100 100 128" />
 	<param name="ctrl_text_redify_color" 	value="255 32 32 160" />
-	<param name="font" value="noto_sans_display.ttf" />
+	<param name="font" value="noto_sans.ttf" />
 	<param name="monospace_font" value="noto_mono.ttf" />
 	<param name="add_coef_font" value="3" />
 	<param name="mul_coef_anim" value="0.8" />

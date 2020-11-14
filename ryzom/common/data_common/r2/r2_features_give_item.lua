@@ -452,7 +452,7 @@ component.create = function()
 		debugInfo("Cancel form for 'GiveItem' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'GiveItem' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'GiveItem' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("GiveItem") == 1 then 
 			r2.displayFeatureHelp("GiveItem")
 		end

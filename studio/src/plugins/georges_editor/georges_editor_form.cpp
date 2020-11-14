@@ -116,7 +116,7 @@ namespace GeorgesQt
         m_lastSheetDir = ".";
         QSettings *settings = Core::ICore::instance()->settings();
         settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-        m_lastSheetDir = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
+        m_lastSheetDir = settings->value(Core::Constants::LEVELDESIGN_PATH, "R:/leveldesign").toString();
         settings->endGroup();
 
 		connect(Core::ICore::instance(), SIGNAL(changeSettings()),
@@ -234,7 +234,7 @@ namespace GeorgesQt
 		settings->endGroup();
 
 		settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-		m_leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
+		m_leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, "R:/leveldesign").toString();
 		settings->endGroup();
 	}
 
@@ -279,7 +279,7 @@ namespace GeorgesQt
 
 		settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 		QString oldLDPath = m_leveldesignPath;
-		m_leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
+		m_leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, "R:/leveldesign").toString();
 		settings->endGroup();
 
 		if (oldLDPath != m_leveldesignPath)

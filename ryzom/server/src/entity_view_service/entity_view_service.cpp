@@ -371,7 +371,7 @@ void CEntityViewService::init()
 	// Text context
 	pDriver->setDisplay (UDriver::CMode(640, 480, 0));
 	pDriver->setFontManagerMaxMemory (2000000);
-	textContext=pDriver->createTextContext ("R:\\code\\ryzom\\data\\3d\\common\\fonts\\arialuni.ttf");
+	textContext=pDriver->createTextContext ("R:\\graphics\\fonts\\noto_sans.ttf");
 	textContext->setHotSpot (UTextContext::TopLeft);
 	textContext->setColor (CRGBA (255,255,255));
 	textContext->setFontSize (12);

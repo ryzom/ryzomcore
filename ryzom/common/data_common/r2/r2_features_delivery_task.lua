@@ -562,7 +562,7 @@ component.create = function()
 	if not r2:checkAiQuota() then return end
 
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'DeliveryTask' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'DeliveryTask' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("DeliveryTask") == 1 then 
 			r2.displayFeatureHelp("DeliveryTask")
 		end

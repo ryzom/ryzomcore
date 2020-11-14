@@ -1342,7 +1342,7 @@ void prelogInit()
 
 
 		// Create a text context. We need to put the full path because we not already add search path
-		resetTextContext("noto_sans_display.ttf", true);
+		resetTextContext("noto_sans.ttf", true);
 
 
 		CInterfaceManager::getInstance();
@@ -1409,6 +1409,42 @@ void prelogInit()
 		{
 			// Init stereo display resources
 			StereoDisplay->setDriver(Driver); // VR_DRIVER
+		}
+
+		{
+			H_AUTO(InitRZSound)
+
+			// Init the sound manager
+			nmsg = "Initializing sound manager...";
+			ProgressBar.newMessage(ClientCfg.buildLoadingString(nmsg));
+			if (ClientCfg.SoundOn)
+			{
+				nlassert(!SoundMngr);
+				SoundMngr = new CSoundManager(&ProgressBar);
+				try
+				{
+					SoundMngr->init(&ProgressBar);
+				}
+				catch(const Exception &e)
+				{
+					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
+					delete SoundMngr;
+					SoundMngr = NULL;
+				}
+
+				// Play Music just after the SoundMngr is inited
+				if (SoundMngr)
+				{
+					// init the SoundMngr with backuped volume
+					SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
+					SoundMngr->setGameMusicVolume(ClientCfg.SoundGameMusicVolume);
+
+					// Play the login screen music
+					SoundMngr->playMusic(ClientCfg.StartMusic, 0, true, true, true);
+				}
+			}
+
+			CPath::memoryCompress(); // Because sound calls addSearchPath
 		}
 
 		nlinfo ("PROFILE: %d seconds for prelogInit", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
@@ -1552,55 +1588,6 @@ void postlogInit()
 
 		// set the primitive context
 		CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
-
-		{
-			H_AUTO(InitRZSound)
-
-			// Init the sound manager
-			nmsg = "Initializing sound manager...";
-			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
-			if(ClientCfg.SoundOn)
-			{
-				SoundMngr = new CSoundManager(&ProgressBar);
-				try
-				{
-					SoundMngr->init(&ProgressBar);
-				}
-				catch(const Exception &e)
-				{
-					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
-					delete SoundMngr;
-					SoundMngr = NULL;
-				}
-
-				// Play Music just after the SoundMngr is inited
-				if(SoundMngr)
-				{
-					// init the SoundMngr with backuped volume
-					SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
-					SoundMngr->setGameMusicVolume(ClientCfg.SoundGameMusicVolume);
-
-					// no fadein, and not async because don't work well because of loading in the main thread
-					// Force use GameMusic volume
-					const uint	fadeInTime= 500;
-					SoundMngr->playMusic(ClientCfg.SoundOutGameMusic, fadeInTime, false, true, true);
-					// Because of blocking loading, force the fadeIn
-					TTime	t0= ryzomGetLocalTime();
-					TTime	t1;
-					while((t1=ryzomGetLocalTime())<t0+fadeInTime)
-					{
-						//ProgressBar.progress(1.f);
-						SoundMngr->updateAudioMixerOnly();
-					}
-				}
-			}
-
-			CPath::memoryCompress(); // Because sound call addSearchPath
-
-			initLast = initCurrent;
-			initCurrent = ryzomGetLocalTime();
-			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing sound manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
-		}
 
 		{
 			H_AUTO(InitRZShIdI)

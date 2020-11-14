@@ -3723,7 +3723,7 @@ NLMISC_COMMAND( createItemInBagTest," create_item_in_bag", "player id(id:type:cr
 		{
 			string sheetName = args[1];
 			if (sheetName.find(".") == string::npos)
-				sheetName += string(".item");
+				sheetName += string(".sitem");
 			sheet = CSheetId(sheetName.c_str());
 		}
 		uint quantity, quality;

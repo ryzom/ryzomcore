@@ -71,7 +71,7 @@ namespace GUIEditor
 		NLMISC::CPath::remapExtension( "png", "tga", true );
 
 		w->init();
-		w->createTextContext( "Ryzom.ttf" );
+		w->createTextContext("noto_sans.ttf");
 
 		NLGUI::CAHManager::setEditorMode( true );
 		NLGUI::CLuaManager::setEditorMode( true );

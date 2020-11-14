@@ -42,12 +42,16 @@ public:
 	class CSongs
 	{
 	public:
+		CSongs(std::string file = std::string(), std::string title = std::string(), float length = 0.f)
+		: Filename(file), Title(title), Length(length)
+		{ }
+
 		std::string	Filename;
 		std::string	Title;
 		float       Length;
 	};
 
-	void playSongs (const std::vector<CSongs> &songs);
+	void playSongs (const std::vector<std::string> &filenames);
 	void play (sint index = -1);						// Play the song at current position, if playing, restart. If paused, resume.
 	void pause ();
 	void stop ();
@@ -58,6 +62,10 @@ public:
 
 	void update ();
 
+	// update currently playing song info/duration on main gui
+	void updatePlayingInfo(const std::string info);
+	void clearPlayingInfo();
+
 	bool isRepeatEnabled() const;
 	bool isShuffleEnabled() const;
 
@@ -67,6 +75,20 @@ public:
 	void shuffleAndRebuildPlaylist();
 	// Update playlist active row
 	void updatePlaylist(sint prevIndex = -1);
+	// set/remove playlist highlight
+	void updatePlaylist(uint index, bool state);
+
+	// Update single song title/duration on _Songs and on playlist
+	void updateSong(const CSongs &song);
+
+	// Update _Songs and playlist from _SongUpdateQueue
+	void updateSongs();
+
+	// update song from worker thread
+	void updateSong(const std::string filename, const std::string title, float length);
+
+	// scan music folder and rebuild playlist
+	void createPlaylistFromMusic();
 
 private:
 
@@ -74,6 +96,8 @@ private:
 	CSongs								_CurrentSong;
 	uint								_CurrentSongIndex;	// If (!_Songs.empty()) must always be <_Songs.size()
 	std::vector<CSongs>					_Songs;
+	// updated info from worker thread
+	std::vector<CSongs>					_SongUpdateQueue;
 
 	// State
 	enum TState { Stopped, Playing, Paused }	_State;

@@ -3962,15 +3962,19 @@ function Translator.translateDialog(entity, context)
 			end
 
 			rtAction = Translator.createAction("chat_step", rtNpcGrp.Id, param)
+			assert(rtAction)
 			table.insert(rtDialogOk.Children, rtAction)
 
+			assert(param.Index)
+			assert(param.Emote)
+			assert(param.Says)
+			assert(param.WhoNoEntity)
 			table.insert(endParam.Indexs, param.Index)
-			table.insert(endParam.Grps, param.WhoGrp)
-			table.insert(endParam.Whos, param.Who)
+			table.insert(endParam.Grps, param.WhoGrp or '')
+			table.insert(endParam.Whos, param.Who or '')
 			table.insert(endParam.Emotes, param.Emote)
 			table.insert(endParam.Says, param.Says)
-			table.insert(endParam.WhoNoEntitys, param.WhoNoEntity)			
-		
+			table.insert(endParam.WhoNoEntitys, param.WhoNoEntity)
 
 		else -- !if isKindOf("ChatStep")
 			componentIndex, component = next(entity.Components, componentIndex)
@@ -4403,7 +4407,7 @@ function Translator.CreateUserComponent(featureName)
 	end
 
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of '"..featureName.."' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of '"..featureName.."' at pos (%f, %f, %f)", x, y, z))
 		local component = r2.Features[featureName].createUserComponent( x, y)
 		component.Texts = nil
 		r2.requestInsertNode(r2:getCurrentAct().InstanceId, "Features", -1, "", component)

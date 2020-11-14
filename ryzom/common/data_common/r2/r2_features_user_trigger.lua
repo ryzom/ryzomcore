@@ -268,7 +268,7 @@ component.create = function(this)
 	end
 
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'UserTrigger' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'UserTrigger' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("UserTrigger") == 1 then 
 			r2.displayFeatureHelp("UserTrigger")
 		end

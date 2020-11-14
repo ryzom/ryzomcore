@@ -351,7 +351,7 @@ component.create = function()
 		debugInfo("Cancel form for 'NpcInteraction' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'NpcInteraction' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'NpcInteraction' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("NpcInteraction") == 1 then 
 			r2.displayFeatureHelp("NpcInteraction")
 		end

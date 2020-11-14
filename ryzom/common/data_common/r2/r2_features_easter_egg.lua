@@ -434,7 +434,7 @@ function component.create()
 		debugInfo("Cancel form for 'EasterEggFeature' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'EasterEggFeature' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'EasterEggFeature' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("EasterEgg") == 1 then 
 			r2.displayFeatureHelp("EasterEgg")
 		end

@@ -34,12 +34,12 @@ struct metazone (name, posMin, posMax)
 -- Trykers : X: [194 - 215] Y: [DV - EW]     Generate : X: [96 - 115] Y: [-215 - -215+22]
 
 -- Parameters, uppercase for cell position
-old_zone_directory_fyros	=	"w:/database/landscape/zones/fyros"
-ligo_directory_fyros		=	"w:/database/landscape/ligo/desert"
+old_zone_directory_fyros	=	"R:/graphics/landscape/zones/fyros"
+ligo_directory_fyros		=	"R:/graphics/landscape/ligo/desert"
 metazones_fyros				=	#(metazone "1_MZ_city" "152_EK" "155_EO", metazone "bridge_a" "158_EM" "158_EO", metazone "brandon" "164_ES" "165_ET", metazone "ecorce_A" "155_EI" "157_EJ")
 
-old_zone_directory_tryker	=	"w:/database/landscape/zones/tryker"
-ligo_directory_tryker		=	"r:/database/landscape/ligo/lacustre"
+old_zone_directory_tryker	=	"R:/graphics/landscape/zones/tryker"
+ligo_directory_tryker		=	"R:/graphics/landscape/ligo/lacustre"
 metazones_tryker			=	#(metazone "village_a" "205_EC" "208_EE", metazone "village_b" "199_EH" "200_EI", metazone "village_c" "206_EH" "208_EJ", metazone "village_d" "206_DS" "208_DU")
 
 cell_size			=	160.0

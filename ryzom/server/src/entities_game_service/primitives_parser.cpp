@@ -48,7 +48,7 @@ void CPrimitivesParser::init()
 	{
 	if (!_LigoConfig.readPrimitiveClass (WORLD_EDITOR_CLASSES_FILE, false))
 	{
-		// Should be in l:\leveldesign\world_editor_files
+		// Should be in R:\leveldesign\world_editor_files
 		nlerror ("Can't load ligo primitive config file world_editor_classes.xml");
 		}
 		_LigoInit = true;

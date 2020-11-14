@@ -598,7 +598,7 @@ bool CConfigFile::areRyzomDataInstalledIn(const QString &directory) const
 	if (dir.entryList(QStringList() << "*.bnp", QDir::Files).size() < 200) return false;
 
 	//  ryzom.ttf or fonts.bnp is required
-	if (!dir.exists("fonts/ryzom.ttf") && !dir.exists("fonts.bnp")) return false;
+	if (!dir.exists("fonts/noto_sans.ttf") && !dir.exists("fonts.bnp")) return false;
 
 	//  gamedev.bnp is required
 	if (!dir.exists("gamedev.bnp")) return false;

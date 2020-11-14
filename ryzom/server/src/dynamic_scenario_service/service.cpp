@@ -303,7 +303,7 @@ void CDynamicScenarioService::init()
 	// Init ligo
 	if (!R2LigoConfig.readPrimitiveClass ("world_editor_classes.xml", false))
 	{
-		// Should be in l:\leveldesign\world_editor_files
+		// Should be in R:\leveldesign\world_editor_files
 		nlerror ("Can't load ligo primitive config file world_editor_classes.xml");
 	}
 	R2LigoConfig.updateDynamicAliasBitCount(16);

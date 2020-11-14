@@ -67,6 +67,9 @@ static unsigned long __stdcall ProxyFunc (void *arg)
 	// Set the thread pointer in TLS memory
 	nlverify (TlsSetValue (TLSThreadPointer, (void*)parent) != 0);
 
+	// Attach exception handler
+	attachExceptionHandler();
+
 	// Run the thread
 	parent->Runnable->run();
 

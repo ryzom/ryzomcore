@@ -427,7 +427,7 @@ void doFileInitialize(const std::string &filePath)
 	KnownFileCache[NLMISC::CFile::getFilename(filePath)] = standardizePath(filePath, false);
 }
 
-// maxRewritePaths W:/database/interfaces/anims_max
+// maxRewritePaths R:/graphics/interfaces/anims_max
 
 void doDirectoryInitialize(const std::string &directoryPath)
 {

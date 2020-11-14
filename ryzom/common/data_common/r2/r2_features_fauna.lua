@@ -636,7 +636,7 @@ component.create = function()
 		resetForm()
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'FaunaFeature' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'FaunaFeature' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("Fauna") == 1 then 
 			r2.displayFeatureHelp("Fauna")
 		end

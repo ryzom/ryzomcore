@@ -669,7 +669,7 @@ Logic.Components.ChatSequence = {
 				if r2.mustDisplayInfo("ChatSequence") == 1 then 
 					r2.displayFeatureHelp("ChatSequence")
 				end
-				debugInfo(string.format("Validate creation of 'Dialog' at pos (%d, %d, %d)", x, y, z))
+				debugInfo(string.format("Validate creation of 'Dialog' at pos (%f, %f, %f)", x, y, z))
 				r2.dialogs:newSequenceInst(x, y, z)
 			end
 			local function posCancel()

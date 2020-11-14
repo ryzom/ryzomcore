@@ -56,6 +56,7 @@ class COutpostBuildingSheet;
 namespace NLGUI
 {
 	class CViewRenderer;
+	class CViewText;
 }
 
 class CDBCtrlSheet;
@@ -736,6 +737,8 @@ protected:
 	sint8			_ArmourColorIndex;
 
 	CTickRange		_RegenTickRange;
+	NLGUI::CViewText	*_RegenText;
+	uint32			_RegenTextValue;
 
 	/// D'n'd
 	sint32		_DragX, _DragY;

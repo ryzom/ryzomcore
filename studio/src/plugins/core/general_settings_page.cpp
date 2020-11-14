@@ -211,10 +211,10 @@ void GeneralSettingsPage::readSettings()
 
 	QStringList paths;
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	m_ui.leveldesignPathLineEdit->setText(settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString());
-	m_ui.assetsPathLineEdit->setText(settings->value(Core::Constants::ASSETS_PATH, "w:/database").toString());
-	m_ui.primitivesPathLineEdit->setText(settings->value(Core::Constants::PRIMITIVES_PATH, "l:/primitives").toString());
-	m_ui.ligoConfigFileLineEdit->setText(settings->value(Core::Constants::LIGOCONFIG_FILE, "l:/leveldesign/world_editor_files/world_editor_classes.xml").toString());
+	m_ui.leveldesignPathLineEdit->setText(settings->value(Core::Constants::LEVELDESIGN_PATH, "R:/leveldesign").toString());
+	m_ui.assetsPathLineEdit->setText(settings->value(Core::Constants::ASSETS_PATH, "R:/graphics").toString());
+	m_ui.primitivesPathLineEdit->setText(settings->value(Core::Constants::PRIMITIVES_PATH, "R:/leveldesign/primitives").toString());
+	m_ui.ligoConfigFileLineEdit->setText(settings->value(Core::Constants::LIGOCONFIG_FILE, "R:/leveldesign/world_editor_files/world_editor_classes.xml").toString());
 	settings->endGroup();
 }
 

@@ -111,7 +111,7 @@ CObject *CScenario::find(const std::string& instanceId, const std::string & attr
 	CObject *src = _InstanceMap->find(instanceId);
 	if (!src)
 	{
-		nlwarning("Can't find object with id %s", instanceId.c_str());
+		nlwarning("Can't find object with id '%s' (looking for attribute '%s[%d]' or '...[%s]')", instanceId.c_str(), attrName.c_str(), (int)position, key.c_str());
 		return NULL;
 	}
 	if (!attrName.empty())

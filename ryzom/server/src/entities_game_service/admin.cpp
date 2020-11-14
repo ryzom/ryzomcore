@@ -1511,7 +1511,7 @@ NLMISC_COMMAND (createItemInTmpInv, "Create an item and put it in the player tem
 	else
 	{
 		if (sheetName.find(".") == string::npos)
-			sheetName += ".item";
+			sheetName += ".sitem";
 		sheet = CSheetId(sheetName.c_str());
 	}
 

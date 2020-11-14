@@ -373,7 +373,7 @@ component.create = function()
 		debugInfo("Cancel form for 'TargetMob' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'TargetMob' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'TargetMob' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("TargetMob") == 1 then 
 			r2.displayFeatureHelp("TargetMob")
 		end

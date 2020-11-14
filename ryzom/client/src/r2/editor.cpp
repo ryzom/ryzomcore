@@ -497,7 +497,7 @@ void CEditor::requestSetLocalNode(const std::string& instanceId, const std::stri
 		CObject *src = _DMC->find(instanceId);
 		if (!src)
 		{
-			nlwarning("Can't find object with id %s", instanceId.c_str());
+			nlwarning("Can't find object with id '%s' (setting attribute '%s')", instanceId.c_str(), attrName.c_str());
 			return;
 		}
 		if (!attrName.empty())
@@ -7808,7 +7808,8 @@ NLMISC_COMMAND(saveScenarioRtData, "save scenario RtData to file", "<filename>")
 		output.open(fullFileName);
 		pRtData->serialize(ss);
 		//std::string str = ss.str();
-		output.serial(ss);
+		// output.serial(ss);
+		output.serialBuffer((uint8 *)ss.c_str(), ss.length());
 		output.flush();
 		output.close();
 	}
