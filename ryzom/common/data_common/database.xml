@@ -599,11 +599,13 @@
       <leaf name="BRICKS" type="I64" />
     </branch>
   </branch>
+  <!--
   <branch name="FABER_PLANS" bank="PLR">
     <branch name="" count="64">
       <leaf name="KNOWN" type="I64" />
     </branch>
   </branch>
+  -->
   <branch name="MISSIONS" bank="PLR">
     <branch name="" count="15">
       <!-- see game_share/mission_desc.h TMissionType -->
