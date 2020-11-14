@@ -650,7 +650,7 @@ void	CCDBSynchronised::pushDeltaPermanent( NLMISC::CBitMemStream& s, CCDBStructN
 			uint bits;
 			pushPackedValue( s, value, bitsize, bits );
 			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing permanent value %"NL_I64"d (PACKED %u bits) for index %d prop %s", (sint64)value, bits, index, node->buildTextId().toString().c_str() );
+				nldebug( "CDB: Pushing permanent value %" NL_I64 "d (PACKED %u bits) for index %d prop %s", (sint64)value, bits, index, node->buildTextId().toString().c_str() );
 		}
 		else
 		{
