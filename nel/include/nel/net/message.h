@@ -92,6 +92,11 @@ public:
 	/// exchange memory data
 	void swap(CMessage &other);
 
+#ifdef NL_CPP14
+	/// Move operator
+	CMessage &operator=(CMessage &&other) noexcept { swap(other); }
+#endif
+
 	/// Sets the message type as a string and put it in the buffer if we are in writing mode
 	void setType (const std::string &name, TMessageType type=OneWay);
 
