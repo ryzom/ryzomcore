@@ -94,7 +94,7 @@ public:
 
 #ifdef NL_CPP14
 	/// Move operator
-	CMessage &operator=(CMessage &&other) noexcept { swap(other); }
+	CMessage &operator=(CMessage &&other) noexcept { swap(other); return *this; }
 #endif
 
 	/// Sets the message type as a string and put it in the buffer if we are in writing mode
