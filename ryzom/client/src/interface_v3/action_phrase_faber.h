@@ -91,6 +91,7 @@ private:
 		sint32					Quality;
 		sint32					Quantity;
 		sint32					UserColor;
+		uint8					CharacBuffs;
 		sint32					Weight;
 		// BitField to know which itemReqLine has selected this Item
 		uint					Selected;
@@ -102,7 +103,8 @@ private:
 		{
 			Quality= 0;
 			Quantity= 0;
-			UserColor= 0;
+			UserColor= 1;
+			CharacBuffs= 0;
 			Weight= 0;
 			Selected= 0;
 			OriginalQuantity= 0;
@@ -115,7 +117,8 @@ private:
 			Sheet= NLMISC::CSheetId::Unknown;
 			Quality= 0;
 			Quantity= 0;
-			UserColor= 0;
+			UserColor= 1;
+			CharacBuffs= 0;
 			Weight= 0;
 			Selected= 0;
 			OriginalQuantity= 0;

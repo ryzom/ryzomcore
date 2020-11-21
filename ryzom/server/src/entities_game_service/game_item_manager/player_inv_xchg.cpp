@@ -326,6 +326,8 @@ void CExchangeView::onInterlocutorSlotChanged(uint32 interlocutorGiveSlot)
 		recvItem.setQUANTITY(getCharacter()->_PropertyDatabase, uint16(exchangeQuantity));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		item->color());
 		recvItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, item->color());
+//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		item->buffFlags());
+		recvItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, item->buffFlags());
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			item->weight() / 10);
 		recvItem.setWEIGHT(getCharacter()->_PropertyDatabase, uint16(item->weight() / 10));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			item->sendNameId(getCharacter()));
@@ -349,7 +351,9 @@ void CExchangeView::onInterlocutorSlotChanged(uint32 interlocutorGiveSlot)
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
 		recvItem.setQUANTITY(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		0);
-		recvItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 0);
+		recvItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 1);
+//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
+		recvItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			0);
 		recvItem.setWEIGHT(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			0);
@@ -396,6 +400,8 @@ void CExchangeView::updateExchangeSlot(uint32 exchangeSlot)
 		giveItem.setQUANTITY(getCharacter()->_PropertyDatabase, uint16(exchangeQuantity));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		item->color());
 		giveItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, item->color());
+//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		item->buffFlags());
+		giveItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, item->buffFlags());
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			item->weight() / 10);
 		giveItem.setWEIGHT(getCharacter()->_PropertyDatabase, uint16(item->weight() / 10));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			item->sendNameId(getCharacter()));
@@ -419,7 +425,9 @@ void CExchangeView::updateExchangeSlot(uint32 exchangeSlot)
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
 		giveItem.setQUANTITY(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		0);
-		giveItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 0);
+		giveItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 1);
+//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
+		giveItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			0);
 		giveItem.setWEIGHT(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			0);

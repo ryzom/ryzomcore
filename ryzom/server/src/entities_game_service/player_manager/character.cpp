@@ -9476,6 +9476,8 @@ void CCharacter::fillTradePage(uint16 session, bool enableBuildingLossWarning)
 			itemElem.setQUALITY(_PropertyDatabase, 0);
 //			_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:USER_COLOR",index  ),  1 );
 			itemElem.setUSER_COLOR(_PropertyDatabase, 1);
+//			_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:CHARAC_BUFFS",index  ),  0 );
+			itemElem.setCHARAC_BUFFS(_PropertyDatabase, 0);
 //			_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:WEIGHT",index  ),  0 );
 			itemElem.setWEIGHT(_PropertyDatabase, 0);
 //			_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:INFO_VERSION",index  ),  0 );
@@ -9518,6 +9520,8 @@ void CCharacter::fillTradePage(uint16 session, bool enableBuildingLossWarning)
 		itemElem.setQUALITY(_PropertyDatabase, 0);
 //		_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:USER_COLOR",index  ),  1 );
 		itemElem.setUSER_COLOR(_PropertyDatabase, 1);
+//		_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:CHARAC_BUFFS",index  ),  0 );
+		itemElem.setCHARAC_BUFFS(_PropertyDatabase, 0);
 //		_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:WEIGHT",index  ),  0 );
 		itemElem.setWEIGHT(_PropertyDatabase, 0);
 //		_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:INFO_VERSION",index  ),  0 );

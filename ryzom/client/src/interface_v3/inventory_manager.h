@@ -64,6 +64,7 @@ public:
 	NLMISC::CCDBNodeLeaf *Quality;
 	NLMISC::CCDBNodeLeaf *Quantity;
 	NLMISC::CCDBNodeLeaf *UserColor;
+	NLMISC::CCDBNodeLeaf *CharacBuffs;
 	NLMISC::CCDBNodeLeaf *Price;
 	NLMISC::CCDBNodeLeaf *Weight;
 	NLMISC::CCDBNodeLeaf *NameId;
@@ -79,7 +80,8 @@ public:
 	uint32 getSheetID() const						{ return (uint32)			(Sheet ? Sheet->getValue32() : 0); }
 	uint16 getQuality() const						{ return (uint16)			(Quality ? Quality->getValue16() : 0); }
 	uint16 getQuantity() const						{ return (uint16)			(Quantity ? Quantity->getValue16() : 0); }
-	uint8  getUserColor() const						{ return (uint8)			(UserColor ? UserColor->getValue16() : 0); }
+	uint8  getUserColor() const						{ return (uint8)			(UserColor ? UserColor->getValue8() : 0); }
+	uint8  getCharacBuffs() const					{ return (uint8)			(CharacBuffs ? CharacBuffs->getValue8() : 0); }
 	uint32 getPrice() const							{ return (uint32)			(Price ? Price->getValue32() : 0); }
 	uint32 getWeight() const						{ return (uint32)			(Weight ? Weight->getValue32() : 0); }
 	uint32 getNameId() const						{ return (uint32)			(NameId ? NameId->getValue32() : 0); }
@@ -91,6 +93,7 @@ public:
 	void   setQuality(uint16 quality)				{ if (Quality) Quality->setValue16((sint16) quality); }
 	void   setQuantity(uint16 quantity)				{ if (Quantity) Quantity->setValue16((sint16) quantity); }
 	void   setUserColor(uint8 uc)					{ if (UserColor) UserColor->setValue8((sint8) uc); }
+	void   setCharacBuffs(uint8 uc)					{ if (CharacBuffs) CharacBuffs->setValue8((sint8) uc); }
 	void   setPrice(uint32 price)					{ if (Price) Price->setValue32((sint32) price); }
 	void   setWeight(uint32 wgt)					{ if (Weight) Weight->setValue32((sint32) wgt); }
 	void   setNameId(uint32 nid)					{ if (NameId) NameId->setValue32((sint32) nid); }

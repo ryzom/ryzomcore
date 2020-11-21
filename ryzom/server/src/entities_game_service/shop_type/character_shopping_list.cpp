@@ -599,6 +599,8 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 			trade->ItemTrade->getItemPtr()->recommended( trade->ItemTrade->getLevel() );
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:USER_COLOR",index  ), trade->ItemTrade->getItemPtr()->color() );
 			tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, trade->ItemTrade->getItemPtr()->color());
+//			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:CHARAC_BUFFS",index  ), trade->ItemTrade->getItemPtr()->buffFlags() );
+			tradeElem.setCHARAC_BUFFS(_Character->_PropertyDatabase, trade->ItemTrade->getItemPtr()->buffFlags());
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:WEIGHT",index  ), (uint16) (trade->ItemTrade->getItemPtr()->weight() / 10 ) );
 			tradeElem.setWEIGHT(_Character->_PropertyDatabase, (uint16) (trade->ItemTrade->getItemPtr()->weight() / 10 ));
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:NAMEID",index  ), trade->ItemTrade->getItemPtr()->sendNameId(_Character) );
@@ -619,6 +621,8 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 			const CStaticItem * staticSheet = CSheets::getForm( trade->ItemTrade->getSheetId() );
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:USER_COLOR",index  ), 1 );
 			tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, 1);
+//			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:CHARAC_BUFFS",index  ), 0 );
+			tradeElem.setCHARAC_BUFFS(_Character->_PropertyDatabase, 0);
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:WEIGHT",index  ), staticSheet != NULL ? staticSheet->Weight / 10 : 0 );
 			tradeElem.setWEIGHT(_Character->_PropertyDatabase, uint16(staticSheet != NULL ? staticSheet->Weight / 10 : 0));
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:NAMEID",index  ), 0 );
@@ -644,7 +648,9 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:QUALITY",index  ), 0);
 		tradeElem.setQUALITY(_Character->_PropertyDatabase, 0);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:USER_COLOR",index  ), 1);
-		tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, 0);
+		tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, 1);
+//		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:CHARAC_BUFFS",index  ), 0);
+		tradeElem.setCHARAC_BUFFS(_Character->_PropertyDatabase, 0);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:WEIGHT",index  ), 0 );
 		tradeElem.setWEIGHT(_Character->_PropertyDatabase, 0);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:NAMEID",index  ), 0 );

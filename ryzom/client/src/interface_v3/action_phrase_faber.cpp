@@ -95,6 +95,7 @@ void			CActionPhraseFaber::fillDBWithMP(const std::string &sheetBase, const CIte
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUALITY")->setValue32(item.Quality);
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUANTITY")->setValue32(item.Quantity);
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":USER_COLOR")->setValue32(item.UserColor);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":CHARAC_BUFFS")->setValue32(item.CharacBuffs);
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":WEIGHT")->setValue32(item.Weight);
 }
 
@@ -470,6 +471,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 				_InventoryMirror[i].Quality= itemImage->getQuality();
 				_InventoryMirror[i].Quantity= itemImage->getQuantity();
 				_InventoryMirror[i].UserColor= itemImage->getUserColor();
+				_InventoryMirror[i].CharacBuffs= itemImage->getCharacBuffs();
 				_InventoryMirror[i].Weight= itemImage->getWeight();
 				// Bkup original quantity from inventory
 				_InventoryMirror[i].OriginalQuantity= _InventoryMirror[i].Quantity;
@@ -1384,6 +1386,7 @@ void		CActionPhraseFaber::onInventoryChange()
 				newInvItem.Quality= itemImage->getQuality();
 				newInvItem.Quantity= itemImage->getQuantity();
 				newInvItem.UserColor= itemImage->getUserColor();
+				newInvItem.CharacBuffs= itemImage->getCharacBuffs();
 				newInvItem.Weight= itemImage->getWeight();
 				newInvItem.OriginalQuantity= newInvItem.Quantity;
 				newInvItem.LockedByOwner = bLockedByOwner;
@@ -1417,6 +1420,7 @@ void		CActionPhraseFaber::onInventoryChange()
 				sameMp=	curInvItem.Sheet == newInvItem.Sheet &&
 						curInvItem.Quality == newInvItem.Quality &&
 						curInvItem.UserColor == newInvItem.UserColor &&
+						curInvItem.CharacBuffs == newInvItem.CharacBuffs &&
 						curInvItem.LockedByOwner == newInvItem.LockedByOwner;
 
 				// if the Mp was deleted from this slot, delete it from all faber execution

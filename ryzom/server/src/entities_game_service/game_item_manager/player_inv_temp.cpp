@@ -118,7 +118,9 @@ void CTempInventory::clearDisp(uint32 slot)
 //	_Char->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
 	tempEntry.setQUANTITY(_Char->_PropertyDatabase, 0);
 //	_Char->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",			0);
-	tempEntry.setUSER_COLOR(_Char->_PropertyDatabase, 0);
+	tempEntry.setUSER_COLOR(_Char->_PropertyDatabase, 1);
+//	_Char->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
+	tempEntry.setCHARAC_BUFFS(_Char->_PropertyDatabase, 0);
 //	_Char->_PropertyDatabase.setProp(sDBPath+":WEIGHT",				0);
 	tempEntry.setWEIGHT(_Char->_PropertyDatabase, 0);
 //	_Char->_PropertyDatabase.setProp(sDBPath+":NAMEID",				0);
@@ -272,6 +274,8 @@ void CTempInvView::updateClientSlot(uint32 clientSlot, const CGameItemPtr item)
 		tempItem.setQUANTITY(getCharacter()->_PropertyDatabase, uint16(item->getStackSize()));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		item->color());
 		tempItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, item->color());
+//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		item->buffFlags());
+		tempItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, item->buffFlags());
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			item->weight() / 10);
 		tempItem.setWEIGHT(getCharacter()->_PropertyDatabase, uint16(item->weight()/10));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			item->sendNameId(getCharacter()));
@@ -295,7 +299,9 @@ void CTempInvView::updateClientSlot(uint32 clientSlot, const CGameItemPtr item)
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
 		tempItem.setQUANTITY(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		0);
-		tempItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 0);
+		tempItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 1);
+//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
+		tempItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			0);
 		tempItem.setWEIGHT(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			0);

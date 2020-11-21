@@ -126,6 +126,7 @@ CItemImage::CItemImage()
 	Quality = NULL;
 	Quantity = NULL;
 	UserColor = NULL;
+	CharacBuffs = NULL;
 	Price = NULL;
 	Weight= NULL;
 	NameId= NULL;
@@ -140,6 +141,7 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	Quality = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("QUALITY"), false));
 	Quantity = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("QUANTITY"), false));
 	UserColor = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("USER_COLOR"), false));
+	CharacBuffs = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("CHARAC_BUFFS"), false));
 	Price = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("PRICE"), false));
 	Weight = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("WEIGHT"), false));
 	NameId = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("NAMEID"), false));
