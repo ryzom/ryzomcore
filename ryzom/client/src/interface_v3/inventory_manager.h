@@ -129,6 +129,8 @@ public:
 	void			refreshInfoVersion(uint8 infoVersion) { InfoVersionFromMsg= infoVersion; }
 };
 
+#ifdef RYZOM_FORGE
+
 class CItemInfoCache
 {
 public:
@@ -148,6 +150,8 @@ private:
 	typedef std::map<uint64, CClientItemInfo> TItemInfoCacheMap;
 	TItemInfoCacheMap _ItemInfoCacheMap;
 };
+
+#endif
 
 // ***************************************************************************
 /** This manager gives direct access to inventory slots (bag, temporary inventory, hands, and equip inventory)
@@ -283,8 +287,10 @@ public:
 		uint16				getItemSlotId(CDBCtrlSheet *ctrl);
 		uint16				getItemSlotId(const std::string &itemDb, uint slotIndex);
 		const	CClientItemInfo	&getItemInfo(uint slotId) const;
+#ifdef RYZOM_FORGE
 		// get item info from cache
 		const	CClientItemInfo *getItemInfoCache(uint32 serial, uint32 createTime) const;
+#endif
 		uint				getItemSheetForSlotId(uint slotId) const;
 		// Returns true if the item info is already in slot cache
 		bool				isItemInfoAvailable(uint slotId) const;
@@ -299,7 +305,9 @@ public:
 		void				onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion);
 		// Log for debug
 		void				debugItemInfoWaiters();
+#ifdef RYZOM_FORGE
 		void				debugItemInfoCache() const;
+#endif
 
 		void				sortBag();
 
@@ -342,8 +350,10 @@ private:
 		CDBCtrlSheet	*DNDCurrentItem;
 
 	// ItemExtraInfo management.
+#ifdef RYZOM_FORGE
 		std::string								_ItemInfoCacheFilename;
 		CItemInfoCache							_ItemInfoCache;
+#endif
 		typedef std::map<uint, CClientItemInfo>	TItemInfoMap;
 		TItemInfoMap							_ItemInfoMap;
 		typedef std::list<IItemInfoWaiter*>		TItemInfoWaiters;

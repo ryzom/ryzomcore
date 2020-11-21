@@ -78,6 +78,8 @@ REGISTER_UI_CLASS(CDBCtrlSheet)
 
 const uint64 NOTIFY_ANIM_MS_DURATION = 1000;
 
+#ifdef RYZOM_FORGE
+
 // state kept and changed by UI:SAVE:SHOW_ICON_BUFFS
 bool CDBCtrlSheet::_ShowIconBuffs = true;
 
@@ -147,12 +149,16 @@ string CControlSheetInfoWaiter::infoValidated() const
 #endif
 }
 
+#endif
+
 // ***************************************************************************
 int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
 {
 	CLuaIHM::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) ));
 	return 1;
 }
+
+#ifdef RYZOM_FORGE
 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
@@ -188,6 +194,8 @@ int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
 
 	return 1;
 }
+
+#endif
 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetName(CLuaState &ls)
@@ -533,7 +541,9 @@ CCtrlDraggable(param)
 	_Useable= true;
 	_GrayedLink= NULL;
 	_NeedSetup= true;
+#ifdef RYZOM_FORGE
 	_ItemInfoChanged = true;
+#endif
 	_IconW = 0;
 	_IconH = 0;
 	_SetupInit= false;
@@ -572,10 +582,12 @@ CDBCtrlSheet::~CDBCtrlSheet()
 {
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
+#ifdef RYZOM_FORGE
 	if (_ItemInfoWaiter.Requesting)
 	{
 		getInventory().removeItemInfoWaiter(&_ItemInfoWaiter);
 	}
+#endif
 
 	if (_GuildBack)
 	{
@@ -1097,6 +1109,7 @@ void CDBCtrlSheet::updateIconSize()
 	}
 }
 
+#ifdef RYZOM_FORGE
 // ***************************************************************************
 void CDBCtrlSheet::clearIconBuffs()
 {
@@ -1163,6 +1176,7 @@ void CDBCtrlSheet::infoReceived()
 		}
 	}
 }
+#endif
 
 // ***************************************************************************
 void CDBCtrlSheet::setupPact()
@@ -1205,6 +1219,8 @@ void CDBCtrlSheet::setupPact()
 	}
 }
 
+#ifdef RYZOM_FORGE
+
 // ***************************************************************************
 bool CDBCtrlSheet::useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const
 {
@@ -1219,6 +1235,8 @@ bool CDBCtrlSheet::useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const
 		|| family == ITEMFAMILY::TAMING_TOOL
 		|| family == ITEMFAMILY::TRAINING_TOOL;
 }
+
+#endif
 
 // ***************************************************************************
 void CDBCtrlSheet::setupItem ()
@@ -1328,8 +1346,10 @@ void CDBCtrlSheet::setupItem ()
 			// Special Item requirement
 			updateItemCharacRequirement(_LastSheetId);
 
+#ifdef RYZOM_FORGE
 			// update item info markers
 			_ItemInfoChanged = true;
+#endif
 		}
 		else
 		{
@@ -1405,12 +1425,14 @@ void CDBCtrlSheet::setupItem ()
 	}
 */
 
+#ifdef RYZOM_FORGE
 	// at each frame, update item info icon if changed
 	if (_ItemInfoChanged)
 	{
 		_ItemInfoChanged = false;
 		setupItemInfoWaiter();
 	}
+#endif
 }
 
 
@@ -2390,7 +2412,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					rVR.draw11RotFlipBitmap (_RenderLayer+1, x, y, 0, false, _DispOver2BmpId, fastMulRGB(curSheetColor, _IconOver2Color));
 				}
 
-				if (_ShowIconBuffs && !_BuffIcons.empty())
+#ifdef RYZOM_FORGE
+				if (_ShowIconBuffs && 
+#else
+				if (
+#endif
+					!_BuffIcons.empty())
 				{
 					// there is max 4 icons
 					sint32 hArea = (hSheet / 4);
@@ -2425,7 +2452,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					drawNumber(x+1, y-2+hSheet-rVR.getFigurTextureH(), wSheet, hSheet, numberColor, enchant, false);
 				}
 
-				if (_ShowIconBuffs && !_EnchantIcons.empty())
+#ifdef RYZOM_FORGE
+				if (_ShowIconBuffs && 
+#else
+				if (
+#endif
+					!_EnchantIcons.empty())
 				{
 					// should only only 2 icons at most
 					// draw them in single line, top-right
@@ -3225,8 +3257,10 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 		swapDBProps(getItemRMClassTypePtr(), other->getItemRMClassTypePtr());
 		swapDBProps(getItemRMFaberStatTypePtr(), other->getItemRMFaberStatTypePtr());
 		swapDBProps(getItemPrerequisitValidPtr(), other->getItemPrerequisitValidPtr());
+#ifdef RYZOM_FORGE
 		swapDBProps(getItemSerialPtr(), other->getItemSerialPtr());
 		swapDBProps(getItemCreateTimePtr(), other->getItemCreateTimePtr());
+#endif
 	}
 }
 
@@ -3338,6 +3372,7 @@ const COutpostBuildingSheet *CDBCtrlSheet::asOutpostBuildingSheet() const
 	return NULL;
 }
 
+#ifdef RYZOM_FORGE
 // ***************************************************************************
 void	CDBCtrlSheet::setupItemInfoWaiter()
 {
@@ -3393,6 +3428,7 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 		}
 	}
 }
+#endif
 
 // ***************************************************************************
 void	CDBCtrlSheet::getContextHelp(std::string &help) const
@@ -3455,6 +3491,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		const CItemSheet	*item= asItemSheet();
 		if(item)
 		{
+#ifdef RYZOM_FORGE
 			if (useItemInfoForFamily(item->Family))
 			{
 				// call lua function to update tooltip window
@@ -3464,7 +3501,9 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 				if (help.empty())
 					help = getItemActualName();
 			}
-			else if (!_ContextHelp.empty())
+			else
+#endif
+			if (!_ContextHelp.empty())
 			{
 				help = _ContextHelp;
 			}
@@ -3587,6 +3626,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 // ***************************************************************************
 void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 {
+#ifdef RYZOM_FORGE
 	// Special case for buff items and spell crystals, only for tooltips
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
 	{
@@ -3601,6 +3641,7 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 			}
 		}
 	}
+#endif
 
 	// Default
 	getContextHelp(help);
@@ -3812,7 +3853,9 @@ void CDBCtrlSheet::resetAllTexIDs()
 	_IconW = 0;
 	_IconH = 0;
 
+#ifdef RYZOM_FORGE
 	_ItemInfoChanged = true;
+#endif
 	_EnchantIcons.clear();
 	_BuffIcons.clear();
 }
@@ -3895,10 +3938,12 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		dest->setItemRMFaberStatType(getItemRMFaberStatType());
 		// copy prerequisit valid flag
 		dest->setItemPrerequisitValid(getItemPrerequisitValid());
+#ifdef RYZOM_FORGE
 		// copy item serial
 		dest->setItemSerial(getItemSerial());
 		// copy item create time
 		dest->setItemCreateTime(getItemCreateTime());
+#endif
 	}
 	// if brick, sphrase or sphraseId
 	if(isSBrick() || isSPhrase() || isSPhraseId())
@@ -4430,6 +4475,8 @@ void CDBCtrlSheet::setItemResaleFlag(sint32 rf)
 	node->setValue32(rf);
 }
 
+#ifdef RYZOM_FORGE
+
 // ***************************************************************************
 sint32 CDBCtrlSheet::getItemCreateTime() const
 {
@@ -4477,6 +4524,8 @@ void CDBCtrlSheet::setItemSerial(sint32 rf)
 	if (!node) return;
 	node->setValue32(rf);
 }
+
+#endif
 
 // ***************************************************************************
 bool CDBCtrlSheet::getLockedByOwner() const
@@ -4736,6 +4785,7 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 	{
 		return "action_context_help";
 	}
+#ifdef RYZOM_FORGE
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
 	{
 		const CItemSheet	*item= asItemSheet();
@@ -4751,6 +4801,7 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 			}
 		}
 	}
+#endif
 	return CCtrlBase::getContextHelpWindowName();
 }
 

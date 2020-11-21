@@ -150,6 +150,8 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	nlassert(Sheet && Quality && Quantity && UserColor && Weight && NameId && InfoVersion);
 }
 
+#ifdef RYZOM_FORGE
+
 // *************************************************************************************************
 void CItemInfoCache::load(const std::string &filename)
 {
@@ -283,6 +285,8 @@ void CItemInfoCache::debugItemInfoCache() const
 	pIM->displaySystemInfo(toString("ItemInfoCache: %d entries written to client.log", _ItemInfoCacheMap.size()));
 }
 
+#endif
+
 // *************************************************************************************************
 // CInventoryManager
 // *************************************************************************************************
@@ -311,8 +315,12 @@ CInventoryManager::CInventoryManager()
 		BagItemEquipped[i]= false;
 	}
 
+#ifdef RYZOM_FORGE
+
 	_ItemInfoCacheFilename = toString("save/item_infos_%d.cache", CharacterHomeSessionId.asInt());
 	_ItemInfoCache.load(_ItemInfoCacheFilename);
+
+#endif
 
 	nlctassert(NumInventories== sizeof(InventoryIndexes)/sizeof(InventoryIndexes[0]));
 }
@@ -320,7 +328,9 @@ CInventoryManager::CInventoryManager()
 // ***************************************************************************
 CInventoryManager::~CInventoryManager()
 {
+#ifdef RYZOM_FORGE
 	_ItemInfoCache.save(_ItemInfoCacheFilename);
+#endif
 }
 
 // *************************************************************************************************
@@ -3385,11 +3395,13 @@ uint				CInventoryManager::getItemSheetForSlotId(uint slotId) const
 	return 0;
 }
 
+#ifdef RYZOM_FORGE
 // ***************************************************************************
 const	CClientItemInfo *CInventoryManager::getItemInfoCache(uint32 serial, uint32 createTime) const
 {
 	return _ItemInfoCache.getItemInfo(serial, createTime);
 }
+#endif
 
 // ***************************************************************************
 const	CClientItemInfo	&CInventoryManager::getItemInfo(uint slotId) const
@@ -3674,10 +3686,12 @@ void			CInventoryManager::debugItemInfoWaiters()
 }
 
 // ***************************************************************************
+#ifdef RYZOM_FORGE
 void			CInventoryManager::debugItemInfoCache() const
 {
 	_ItemInfoCache.debugItemInfoCache();
 }
+#endif
 
 // ***************************************************************************
 void CInventoryManager::sortBag()

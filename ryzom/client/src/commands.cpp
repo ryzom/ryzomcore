@@ -4487,12 +4487,14 @@ NLMISC_COMMAND(debugItemInfoWaiters, "log ItemInfoWaiters", "")
 	return true;
 }
 
+#ifdef RYZOM_FORGE
 NLMISC_COMMAND(debugItemInfoCache, "log ItemInfoCache", "")
 {
 	getInventory().debugItemInfoCache();
 
 	return true;
 }
+#endif
 
 NLMISC_COMMAND(debugInfoWindows, "log info windows sheetId", "")
 {
