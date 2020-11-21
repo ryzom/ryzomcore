@@ -627,7 +627,8 @@
 <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:SHEET" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:QUANTITY" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:QUALITY" type="sint32" value="0" />
-<variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:USER_COLOR" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:USER_COLOR" type="sint32" value="1" />
+<variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:CHARAC_BUFFS" type="sint8" value="0" />
 <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:WEIGHT" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:NAMEID" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:INFOVERSION" type="sint32" value="0" />
@@ -897,7 +898,8 @@
 <variable entry="UI:DROP_DESTROY_ITEM:ITEM:SHEET" type="sint64" value="0" />
 <variable entry="UI:DROP_DESTROY_ITEM:ITEM:QUANTITY" type="sint64" value="0" />
 <variable entry="UI:DROP_DESTROY_ITEM:ITEM:QUALITY" type="sint64" value="0" />
-<variable entry="UI:DROP_DESTROY_ITEM:ITEM:USER_COLOR" type="sint64" value="0" />
+<variable entry="UI:DROP_DESTROY_ITEM:ITEM:USER_COLOR" type="sint64" value="1" />
+<variable entry="UI:DROP_DESTROY_ITEM:ITEM:CHARAC_BUFFS" type="sint8" value="0" />
 <variable entry="UI:DROP_DESTROY_ITEM:ITEM:LOCKED" type="sint64" value="0" />
 <variable entry="UI:DROP_DESTROY_ITEM:ITEM:WEIGHT" type="sint64" value="0" />
 <variable entry="UI:DROP_DESTROY_ITEM:ITEM:NAMEID" type="sint64" value="0" />
@@ -1141,7 +1143,8 @@
 <variable entry="UI:glob_var:help:$i:QUALITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:QUANTITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:SLOT_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
-<variable entry="UI:glob_var:help:$i:USER_COLOR" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
+<variable entry="UI:glob_var:help:$i:USER_COLOR" type="sint32" value="1" size="%MAX_HELP_WINDOW" />
+<variable entry="UI:glob_var:help:$i:CHARAC_BUFFS" type="sint8" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:NAMEID" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:INFO_VERSION" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:ENCHANT" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
@@ -1165,7 +1168,8 @@
 	<variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:QUALITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 	<variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:QUANTITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 	<variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:SLOT_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
-	<variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:USER_COLOR" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
+	<variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:USER_COLOR" type="sint32" value="1" size="%MAX_HELP_WINDOW" />
+	<variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:CHARAC_BUFFS" type="sint8" value="0" size="%MAX_HELP_WINDOW" />
 	<variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:NAMEID" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 	<variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:INFO_VERSION" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 	<variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:ENCHANT" type="sint32" value="0" size="%MAX_HELP_WINDOW" />

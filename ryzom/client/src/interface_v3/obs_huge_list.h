@@ -143,6 +143,7 @@ private:
 		NLMISC::CCDBNodeLeaf *NameId;
 		NLMISC::CCDBNodeLeaf *InfoVersion;
 		NLMISC::CCDBNodeLeaf *UserColor;
+		NLMISC::CCDBNodeLeaf *CharacBuffs;
 		NLMISC::CCDBNodeLeaf *Enchant;
 		NLMISC::CCDBNodeLeaf *RMClassType;
 		NLMISC::CCDBNodeLeaf *RMFaberStatType;
@@ -172,6 +173,7 @@ private:
 							NameId(NULL),
 							InfoVersion(NULL),
 							UserColor(NULL),
+							CharacBuffs(NULL),
 							Enchant(NULL),
 							RMClassType(NULL),
 							RMFaberStatType(NULL),
@@ -233,6 +235,7 @@ private:
 		uint32 NameId;		// Valid for items
 		uint32 InfoVersion; // Valid for items
 		sint32 UserColor;   // Valid for items
+		uint32 CharacBuffs;	// Valid for items
 		uint32 Enchant;
 		uint32 RMClassType;
 		uint32 RMFaberStatType;

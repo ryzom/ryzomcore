@@ -581,7 +581,7 @@ public:
 	// set item FABER_STAT_TYPE
 	void setItemRMFaberStatType(sint32 fss);
 
-	// get item PREREQUISIT_VALID. true of no DB
+	// get item PREREQUISIT_VALID. true if no DB
 	bool getItemPrerequisitValid() const;
 	NLMISC::CCDBNodeLeaf *getItemPrerequisitValidPtr() const;
 	// set item PREREQUISIT_VALID
@@ -591,6 +591,18 @@ public:
 	sint32	getItemColor() const {if(_UserColor) return _UserColor->getValue32(); else return -1;}
 	// set item color (if possible)
 	void	setItemColor(sint32 val) {if(_UserColor) _UserColor->setValue32(val);}
+
+	// get item CHARAC_BUFFS. 0 if no DB
+	uint8 getItemCharacBuffs() const;
+	NLMISC::CCDBNodeLeaf *getItemCharacBuffsPtr() const;
+	// set item CHARAC_BUFFS
+	void setItemCharacBuffs(uint8 val);
+
+	// get item ACCESS. 0 if no DB
+	uint8 getItemAccess() const; // TODO: Guild grade & proper default
+	NLMISC::CCDBNodeLeaf *getItemAccessPtr() const;
+	// set item CHARAC_BUFFS
+	void setItemAccess(uint8 val);
 
 	// Get the Actual item name. Localized version of SheetId, or given by server through NAMEID.
 	std::string getItemActualName() const;
@@ -615,6 +627,8 @@ public:
 
 	// start notify anim (at the end of regen usually)
 	void	startNotifyAnim();
+
+	void updateCharacBuffs();
 
 #ifdef RYZOM_FORGE
 	// callback from info waiter
@@ -682,10 +696,12 @@ protected:
 	sint32				_DispOverBmpId;		// Over Icon
 	sint32				_DispOver2BmpId;	// Over Icon N0 2 for bricks / items. Useful for items when _DispOverBmpId is used to paint user color on the item.
 
+#ifdef RYZOM_FORGE
 	std::string			_HpBuffIcon;
 	std::string			_SapBuffIcon;
 	std::string			_StaBuffIcon;
 	std::string			_FocusBuffIcon;
+#endif
 
 	// texture ids to show
 	struct SBuffIcon

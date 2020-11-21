@@ -500,14 +500,16 @@
 <variable entry="UI:PHRASE:FABER:MP_SELECT:$i:SHEET" type="sint32" value="0" size="%phrase_faber_selection_max" />
 <variable entry="UI:PHRASE:FABER:MP_SELECT:$i:QUALITY" type="sint32" value="0" size="%phrase_faber_selection_max" />
 <variable entry="UI:PHRASE:FABER:MP_SELECT:$i:QUANTITY" type="sint32" value="0" size="%phrase_faber_selection_max" />
-<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:USER_COLOR" type="sint32" value="0" size="%phrase_faber_selection_max" />
+<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:USER_COLOR" type="sint32" value="1" size="%phrase_faber_selection_max" />
+<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:CHARAC_BUFFS" type="sint8" value="0" size="%phrase_faber_selection_max" />
 <variable entry="UI:PHRASE:FABER:MP_SELECT:$i:WEIGHT" type="sint32" value="0" size="%phrase_faber_selection_max" />
 <!-- Define varaibles for the mp selected array-->
 <template name="phrase_faber_def_build_mps" index="" id="" >
 	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:SHEET" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
 	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:QUALITY" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
 	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:QUANTITY" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
-	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:USER_COLOR" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
+	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:USER_COLOR" type="sint32" value="1" size="%phrase_faber_max_mp_slot" />
+	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:CHARAC_BUFFS" type="sint8" value="0" size="%phrase_faber_max_mp_slot" />
 	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:WEIGHT" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
 </template>
 <vector template="phrase_faber_def_build_mps" id="yoyo_pipo_faber$i" index="$i" _size="%phrase_faber_max_item_req" _firstpos="TL TL" _xfirst="0" _nextpos="TR TL" _yfirst="0" />
@@ -520,7 +522,8 @@
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:SHEET" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:QUALITY" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:QUANTITY" type="sint32" value="0" />
-<variable entry="UI:PHRASE:FABER:STACK_SELECT:USER_COLOR" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:USER_COLOR" type="sint32" value="1" />
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:CHARAC_BUFFS" type="sint8" value="0" />
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:WEIGHT" type="sint32" value="0" />
 <!-- declare the dummy mp stack selection value -->
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:CUR_QUANTITY" type="sint32" value="0" />
@@ -529,7 +532,8 @@
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:SHEET" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:QUALITY" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:QUANTITY" type="sint32" value="0" />
-<variable entry="UI:PHRASE:FABER:RESULT_ITEM:USER_COLOR" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:USER_COLOR" type="sint32" value="1" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:CHARAC_BUFFS" type="sint8" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:LOCKED" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:WEIGHT" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:NAMEID" type="sint32" value="0" />

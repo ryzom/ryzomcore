@@ -299,7 +299,8 @@
 <variable entry="UI:TEMP:TRADE_ITEM:QUALITY" type="sint64" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:QUANTITY" type="sint64" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:SLOT_TYPE" type="sint64" value="0" />
-<variable entry="UI:TEMP:TRADE_ITEM:USER_COLOR" type="sint32" value="0" />
+<variable entry="UI:TEMP:TRADE_ITEM:USER_COLOR" type="sint32" value="1" />
+<variable entry="UI:TEMP:TRADE_ITEM:CHARAC_BUFFS" type="sint8" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:WEIGHT" type="sint32" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:NAMEID" type="sint32" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:INFO_VERSION" type="sint32" value="0" />
@@ -314,7 +315,8 @@
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:QUALITY" type="sint32" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:QUANTITY" type="sint32" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:SLOT_TYPE" type="sint32" value="0" size="64" />
-<variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:USER_COLOR" type="sint32" value="0" size="64" />
+<variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:USER_COLOR" type="sint32" value="1" size="64" />
+<variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:CHARAC_BUFFS" type="sint8" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:NAMEID" type="sint32" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:INFO_VERSION" type="sint32" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:ENCHANT" type="sint32" value="0" size="64" />
@@ -532,6 +534,7 @@
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:QUALITY" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:QUANTITY" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:USER_COLOR" type="sint32" value="1" />
+<variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:CHARAC_BUFFS" type="sint8" value="0" />
 <!-- init beige by default -->
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:WEIGHT" type="sint32" value="0" />
 <!-- selection of the item type -->
@@ -539,6 +542,7 @@
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:QUALITY" type="sint32" value="0" size="128" />
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:QUANTITY" type="sint32" value="0" size="128" />
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:USER_COLOR" type="sint32" value="1" size="128" />
+<variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:CHARAC_BUFFS" type="sint8" value="0" size="128" />
 <!-- init beige by default -->
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:WEIGHT" type="sint32" value="0" size="128" />
 <!-- selection of the item type is automatically modified when the bitfield change -->

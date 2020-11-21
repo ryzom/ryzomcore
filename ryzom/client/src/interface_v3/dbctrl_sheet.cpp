@@ -568,10 +568,12 @@ CCtrlDraggable(param)
 	_ItemRMFaberStatType= NULL;
 	_NotifyAnimEndTime = 0;
 
+#ifdef RYZOM_FORGE
 	_HpBuffIcon = "ico_heal.tga";
 	_SapBuffIcon = "ico_sap.tga";
 	_StaBuffIcon = "ico_stamina.tga";
 	_FocusBuffIcon = "ico_focus.tga";
+#endif
 
 	_RegenText = NULL;
 	_RegenTextValue = 0;
@@ -672,6 +674,7 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"slot" );
 	if(prop)	_DrawSlot= CInterfaceElement::convertBool(prop);
 
+#ifdef RYZOM_FORGE
 	//
 	_HpBuffIcon = "ico_heal.tga";
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"hp_buff_icon" );
@@ -688,6 +691,7 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	_FocusBuffIcon = "ico_focus.tga";
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"focus_buff_icon" );
 	if (prop)	_FocusBuffIcon = string((const char *)prop);
+#endif
 
 	updateActualType();
 	// Init size for Type
@@ -1109,6 +1113,24 @@ void CDBCtrlSheet::updateIconSize()
 	}
 }
 
+void CDBCtrlSheet::updateCharacBuffs()
+{
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
+	uint8 characBuffs = getItemCharacBuffs();
+
+	_BuffIcons.clear();
+	if (characBuffs & (1 << CHARACTERISTICS::constitution)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_heal.tga")));
+	if (characBuffs & (1 << CHARACTERISTICS::intelligence)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_sap.tga")));
+	if (characBuffs & (1 << CHARACTERISTICS::strength)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_stamina.tga")));
+	if (characBuffs & (1 << CHARACTERISTICS::dexterity)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_focus.tga")));
+
+	// update sizes
+	for(uint i = 0; i < _BuffIcons.size(); ++i)
+	{
+		rVR.getTextureSizeFromId(_BuffIcons[i].TextureId, _BuffIcons[i].IconW, _BuffIcons[i].IconH);
+	}
+}
+
 #ifdef RYZOM_FORGE
 // ***************************************************************************
 void CDBCtrlSheet::clearIconBuffs()
@@ -1160,6 +1182,7 @@ void CDBCtrlSheet::infoReceived()
 		}
 	}
 
+#if 0
 	// buff icons
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -1175,6 +1198,7 @@ void CDBCtrlSheet::infoReceived()
 			rVR.getTextureSizeFromId(_BuffIcons[i].TextureId, _BuffIcons[i].IconW, _BuffIcons[i].IconH);
 		}
 	}
+#endif
 }
 #endif
 
@@ -1345,6 +1369,9 @@ void CDBCtrlSheet::setupItem ()
 
 			// Special Item requirement
 			updateItemCharacRequirement(_LastSheetId);
+
+			// Update buff icons
+			updateCharacBuffs();
 
 #ifdef RYZOM_FORGE
 			// update item info markers
@@ -2433,11 +2460,11 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 							hIcon = hArea;
 						}
 						rVR.drawRotFlipBitmap (_RenderLayer+1, xIcon, yIcon, wIcon, hIcon, 0, false, _BuffIcons[i].TextureId, fastMulRGB(curSheetColor, _BuffIcons[i].Color));
-						xIcon += wIcon;
+						xIcon += wIcon / 2;
 						// move up the row for 3rd/4th icon
 						if (i % 3 == 1) {
 							xIcon = x;
-							yIcon += hIcon;
+							yIcon += hIcon / 2;
 						}
 					}
 				}
@@ -3251,6 +3278,8 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 
 		// swap the other props only if the DB exist in the 2 version. else no-op
 		swapDBProps(_UserColor, other->_UserColor);
+		swapDBProps(getItemCharacBuffsPtr(), other->getItemCharacBuffsPtr());
+		swapDBProps(getItemAccessPtr(), other->getItemAccessPtr());
 		swapDBProps(getItemLockedPtr(), other->getItemLockedPtr());
 		swapDBProps(getItemWeightPtr(), other->getItemWeightPtr());
 		swapDBProps(getItemInfoVersionPtr(), other->getItemInfoVersionPtr());
@@ -3922,6 +3951,10 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		// copy color for items
 		sint col = getItemColor();
 		if (col != -1) dest->setItemColor(col);
+		// copy charac buffs
+		dest->setItemCharacBuffs(getItemCharacBuffs());
+		// copy access
+		dest->setItemAccess(getItemAccess());
 		// copy weight
 		dest->setItemWeight(getItemWeight());
 		// copy nameId
@@ -4614,6 +4647,52 @@ void CDBCtrlSheet::setItemPrerequisitValid(bool prv)
 	CCDBNodeLeaf *node = getItemPrerequisitValidPtr();
 	if (!node) return;
 	node->setValueBool(prv);
+}
+
+// ***************************************************************************
+uint8 CDBCtrlSheet::getItemCharacBuffs() const
+{
+	CCDBNodeLeaf *node = getItemCharacBuffsPtr();
+	return (node ? (uint8)node->getValue8() : 0);
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemCharacBuffsPtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("CHARAC_BUFFS"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemCharacBuffs(uint8 val)
+{
+	CCDBNodeLeaf *node = getItemCharacBuffsPtr();
+	if (!node) return;
+	node->setValue8((sint8)val);
+}
+
+// ***************************************************************************
+uint8 CDBCtrlSheet::getItemAccess() const // TODO: Guild grade & proper default
+{
+	CCDBNodeLeaf *node = getItemAccessPtr();
+	return (node ? (uint8)node->getValue8() : 0);
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemAccessPtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("ACCESS"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemAccess(uint8 val)
+{
+	CCDBNodeLeaf *node = getItemAccessPtr();
+	if (!node) return;
+	node->setValue8((sint8)val);
 }
 
 // ***************************************************************************

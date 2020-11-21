@@ -137,7 +137,7 @@ void CGuildInventoryView::updateClientSlot(uint32 slot)
 	itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );
 	itemSlot.setItemProp( INVENTORIES::Quantity, item->getStackSize() );
 	itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
-	itemSlot.setItemProp( INVENTORIES::Buffs, item->buffFlags() );
+	itemSlot.setItemProp( INVENTORIES::CharacBuffs, item->buffFlags() );
 	itemSlot.setItemProp( INVENTORIES::Locked, 0 );
 	itemSlot.setItemProp( INVENTORIES::Access, item->getAccessGrade() );
 	itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );

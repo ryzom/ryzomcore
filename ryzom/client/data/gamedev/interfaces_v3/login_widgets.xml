@@ -908,7 +908,8 @@
 <variable entry="UI:glob_var:help:$i:QUALITY" type="sint32" value="0" size="%MAX_HELP_WINDOW"/>
 <variable entry="UI:glob_var:help:$i:QUANTITY" type="sint32" value="0" size="%MAX_HELP_WINDOW"/>
 <variable entry="UI:glob_var:help:$i:SLOT_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW"/>
-<variable entry="UI:glob_var:help:$i:USER_COLOR" type="sint32" value="0" size="%MAX_HELP_WINDOW"/>
+<variable entry="UI:glob_var:help:$i:USER_COLOR" type="sint32" value="1" size="%MAX_HELP_WINDOW"/>
+<variable entry="UI:glob_var:help:$i:CHARAC_BUFFS" type="sint8" value="0" size="%MAX_HELP_WINDOW"/>
 <variable entry="UI:glob_var:help:$i:ENCHANT" type="sint32" value="0" size="%MAX_HELP_WINDOW"/>
 <variable entry="UI:glob_var:help:$i:RM_CLASS_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW"/>
 <variable entry="UI:glob_var:help:$i:RM_FABER_STAT_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW"/>
