@@ -635,6 +635,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 {
 	void execute (CCtrlBase *pCaller, const string &sParams)
 	{
+#ifdef RYZOM_FORGE
 		// display web profile if necessary
 		if (getParam(sParams, "from") == "contact")
 		{
@@ -704,7 +705,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 				return;
 			}
 		}
-
+#endif
 		CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(NULL);
 		if (!group) return;
 
