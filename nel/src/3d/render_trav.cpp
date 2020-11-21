@@ -921,7 +921,7 @@ void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool exclude
 		Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Diffuse[i], color);
 	}
 
-	nlassert(_VPNumLights < MaxVPLight);
+	nlassert(_VPNumLights <= MaxVPLight);
 	if (i != _VPNumLights)
 	{
 		color= _VPLightDiffuse[i] * matDiff;
@@ -1240,7 +1240,7 @@ std::string		CRenderTrav::getLightVPFragmentNeLVP(uint numActivePointLights, uin
 
 	// Code frag written for 4 light max.
 	nlassert(MaxVPLight==4);
-	nlassert(numActivePointLights<=MaxVPLight-1);
+	nlassert(numActivePointLights<=MaxVPLight);
 
 	// Add LightingVPFragmentNormalize fragment?
 	if(normalize)
