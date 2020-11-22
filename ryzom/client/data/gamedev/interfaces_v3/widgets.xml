@@ -1408,7 +1408,7 @@
 		<instance template="tinv_item_list_filter" id="filter_armor" x="-2" posref="ML MR" posparent="filter_weapon" inv_type="#inv_type" dblink="UI:SAVE:#inv_type:FILTER_ARMOR" texture="filter_armor.tga" tooltip="uittFilterArmor" />
 		<!-- search -->
 		<ctrl type="button" id="but_inv_search" button_type="toggle_button" x="-7" posref="ML MR" posparent="but_filter_armor" tx_normal="w_button_filter_off.tga" tx_pushed="w_button_filter_on.tga" tx_over="" tooltip="uittInventorySearch" onclick_l="inv_search_button" params_l="inv_query_eb" />
-		<view type="bitmap" id="bit_inv_search" posref="MM MM" posparent="but_inv_search" texture="w_help_1.tga" global_color="false" color="255 255 255 150" />
+		<view type="bitmap" id="bit_inv_search" posref="MM MM" posparent="but_inv_search" texture="filter_search.png" global_color="false" color="255 255 255 150" />
 		<instance template="edit_box_widget" id="inv_query_eb" active="false" posref="TR BR" posparent="but_detail" x="0" y="8" w="100" render_layer="9" clear_on_escape="true" enter_recover_focus="false" max_num_chars="20" max_historic="0" onenter="inv_set_search" onchange="inv_set_search" on_focus_lost="inv_search_unfocus" on_focus_lost_params="but_inv_search" />
 	</group>
 </template>
