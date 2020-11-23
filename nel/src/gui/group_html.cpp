@@ -5417,7 +5417,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::insertFormImageButton(const std::string &name, const std::string &tooltip, const std::string &src, const std::string &over, const std::string &formId, const std::string &action, uint32 minWidth, const std::string &templateName)
 	{
-		_FormSubmit.push_back(SFormSubmitButton(formId, name, "", "image"));
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, "", "image", action));
 		// Action handler parameters
 		std::string param = "name=" + getId() + "|button=" + toString(_FormSubmit.size()-1);
 
@@ -5428,7 +5428,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::insertFormTextButton(const std::string &name, const std::string &tooltip, const std::string &value, const std::string &formId, const std::string &formAction, uint32 minWidth, const std::string &templateName)
 	{
-		_FormSubmit.push_back(SFormSubmitButton(formId, name, value, "submit"));
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, value, "submit", formAction));
 		// Action handler parameters
 		string param = "name=" + getId() + "|button=" + toString(_FormSubmit.size()-1);
 
@@ -6065,16 +6065,27 @@ namespace NLGUI
 			string name = elm.getAttribute("name");
 			string src = elm.getAttribute("src");
 			string over = elm.getAttribute("data-over-src");
+			string formId = elm.getAttribute("form");
+			string formAction = elm.getAttribute("formaction");
 
-			insertFormImageButton(name, tooltip, src, over, _Forms.back().id, "", minWidth, templateName);
+			if (formId.empty() && _FormOpen) {
+				formId = _Forms.back().id;
+			}
+
+			insertFormImageButton(name, tooltip, src, over, formId, formAction, minWidth, templateName);
 		}
 		else if (type == "button" || type == "submit")
 		{
-			// The submit button
 			string name = elm.getAttribute("name");
 			string value = elm.getAttribute("value");
+			string formId = elm.getAttribute("form");
+			string formAction = elm.getAttribute("formaction");
 
-			insertFormTextButton(name, tooltip, value, _Forms.back().id, "", minWidth, templateName);
+			if (formId.empty() && _FormOpen) {
+				formId = _Forms.back().id;
+			}
+
+			insertFormTextButton(name, tooltip, value, formId, formAction, minWidth, templateName);
 		}
 		else if (type == "text")
 		{
