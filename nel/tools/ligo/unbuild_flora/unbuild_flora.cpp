@@ -72,6 +72,10 @@ std::string s_PrimitiveFile; /* R:\graphics\primitive\r2_desert\r2_desert.primit
 Debug arguments:
 
 "R:\leveldesign\DFN" "R:\leveldesign\game_elem\plant\ecosystem" "R:\reference\2008_july\data\r2_desert2" "R:\pipeline\export\continents\r2_desert\zone_lighted_ig_land" "R:\graphics\primitive\r2_desert\r2_desert.primitive"
+"R:\leveldesign\DFN" "R:\leveldesign\game_elem\plant\ecosystem" "R:\reference\2008_july\data\r2_forest2" "R:\pipeline\export\continents\r2_forest\zone_lighted_ig_land" "R:\graphics\primitive\r2_forest\r2_forest.primitive"
+"R:\leveldesign\DFN" "R:\leveldesign\game_elem\plant\ecosystem" "R:\reference\2008_july\data\r2_jungle2" "R:\pipeline\export\continents\r2_jungle\zone_lighted_ig_land" "R:\graphics\primitive\r2_jungle\r2_jungle.primitive"
+"R:\leveldesign\DFN" "R:\leveldesign\game_elem\plant\ecosystem" "R:\reference\2008_july\data\r2_lakes2" "R:\pipeline\export\continents\r2_lakes\zone_lighted_ig_land" "R:\graphics\primitive\r2_lakes\r2_lakes.primitive"
+"R:\leveldesign\DFN" "R:\leveldesign\game_elem\plant\ecosystem" "R:\reference\2008_july\data\r2_roots2" "R:\pipeline\export\continents\r2_roots\zone_lighted_ig_land" "R:\graphics\primitive\r2_roots\r2_roots.primitive"
 
 */
 
