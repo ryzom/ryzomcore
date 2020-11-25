@@ -366,7 +366,7 @@ void CRTWorld::addNode (INode *pNode, vector< CMesh::CMeshBuild* > &Meshes,  vec
 		{
 			for( uint32 i = 0; i < AllLights.size(); ++i )
 			{
-				if( isInteractionWithLight (AllLights[i], aabbox))
+				if( isInteractionWithLight (AllLights[i], aabbox)) // FIXME: This is always true with sunlight!
 				{
 					bInteract = true;
 					break;
@@ -382,7 +382,7 @@ void CRTWorld::addNode (INode *pNode, vector< CMesh::CMeshBuild* > &Meshes,  vec
 			{
 				CMesh::CMeshBuild *pMB;
 				CMeshBase::CMeshBaseBuild *pMBB;
-				pMB = exportNel.createMeshBuild ( *pNode, tvTime, pMBB);
+				pMB = exportNel.createMeshBuild ( *pNode, tvTime, pMBB); // FIXME: This is slow!
 				if( pMBB->bCastShadows )
 				{
 					Meshes.push_back( pMB );
