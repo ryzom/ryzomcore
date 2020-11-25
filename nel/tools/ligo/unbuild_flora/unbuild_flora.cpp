@@ -30,6 +30,7 @@
 #include <nel/misc/common.h>
 #include <nel/misc/cmd_args.h>
 //#include <nel/misc/bitmap.h>
+#include <nel/misc/string_view.h>
 
 #include <nel/georges/u_form.h>
 #include <nel/georges/u_form_elm.h>
@@ -41,8 +42,9 @@
 //#include <nel/3d/zone_smoother.h>
 //#include <nel/3d/zone_tgt_smoother.h>
 //#include <nel/3d/zone_corner_smoother.h>
-//#include <nel/ligo/zone_region.h>
 #include <nel/3d/scene_group.h>
+
+//#include <nel/ligo/zone_region.h>
 
 #include <vector>
 //#include <set>
@@ -50,7 +52,7 @@
 
 using namespace std;
 using namespace NLMISC;
-//using namespace NL3D;
+using namespace NL3D;
 using namespace NLGEORGES;
 //using namespace NLLIGO;
 
@@ -60,8 +62,8 @@ namespace /* anonymous */
 /*
 
 Process:
-- Load all .plant sheets, map from .shape to .plant and bounding radius
-- Load all source igs
+- Load all .plant sheets, map from .shape to .plant and bounding radius (Reference: prim_export, main.cpp)
+- Load all source igs (Reference: ig_info, ig_info.cpp)
 - Load all reference igs, remove matching entries from source igs
 - Generate primitives
 
@@ -83,12 +85,17 @@ Debug arguments:
 
 struct CPoint
 {
+	std::string ZoneLwr;
+
 	CVector Pos; /* Position, height not necessarily specified (X="26218.738281" Y="-1092.078979" Z="0.000000") */
 	float Angle; /* (2.827213) */
+	float Scale; /* Scale (0.643217) */
+
+	bool Plant;
 	std::string Form; /* (FY_S2_savantree_B) */
 	std::string Name; /* Generated unique name (ilot_008_savantree 13) */
-	float Radius; /* Bounding radius (from plant sheet and scale) (0.450252) */
-	float Scale; /* Scale (0.643217) */
+	float Radius; /* Bounding radius (calculated from plant sheet and scale) (0.450252) */
+
 };
 
 /*
@@ -158,6 +165,7 @@ struct CPlant
 };
 
 std::map<std::string, CPlant> s_ShapeToForm;
+std::set<CPoint> s_Instances;
 
 bool loadLeveldesign()
 {
@@ -185,11 +193,64 @@ bool loadLeveldesign()
 		if (plant.Shape.empty())
 			continue;
 		plant.Shape.c_str();
-		toLowerAscii(&plant.Shape[0]);
+		(void)toLowerAscii(&plant.Shape[0]);
 		if (!form->getRootNode().getValueByName(plant.Radius, "3D.Bounding Radius"))
 			continue;
 		printf(" = '%s', %f\n", plant.Shape.c_str(), plant.Radius);
 		s_ShapeToForm[plant.Shape] = plant;
+	}
+
+	return true;
+}
+
+bool loadInstances()
+{
+	std::vector<std::string> igs;
+	CPath::getPathContent(s_SourceDir, true, false, true, igs);
+
+	for (std::vector<std::string>::iterator it(igs.begin()), end(igs.end()); it != end; ++it)
+	{
+		if (CFile::getExtension(*it) != nlstr("ig"))
+			continue;
+		printf("%s\n", (*it).c_str());
+		CInstanceGroup ig;
+		CIFile inputStream;
+		if (!inputStream.open(*it))
+		{
+			nlwarning("Unable to open %s\n", (*it).c_str());
+			return false;
+		}
+		ig.serial(inputStream);
+		CVector gpos = ig.getGlobalPos();
+		if (gpos.x != 0.0f || gpos.y != 0.0f || gpos.z != 0.0f)
+		{
+			nlwarning("Invalid global pos: %f, %f, %f", gpos.x, gpos.y, gpos.z);
+			return false;
+		}
+		string zoneLwr = toLowerAscii(CFile::getFilenameWithoutExtension(*it));
+		for (ptrdiff_t i = 0; i < (ptrdiff_t)ig._InstancesInfos.size(); ++i)
+		{
+			CInstanceGroup::CInstance &info = ig._InstancesInfos[i];
+			CPoint instance;
+			instance.Pos = info.Pos;
+			instance.Angle = info.Rot.getAngle();
+			instance.Scale = info.Scale.z;
+			string shape = toLowerAscii(info.Name);
+			printf("%s\n", shape.c_str());
+			std::map<std::string, CPlant>::iterator formIt = s_ShapeToForm.find(shape);
+			if (formIt != s_ShapeToForm.end())
+			{
+				instance.Form = formIt->second.Form;
+				instance.Name = CFile::getFilenameWithoutExtension(instance.Form) + nlstr("_") + zoneLwr + nlstr("_") + toString(i);
+				instance.Radius = instance.Scale * formIt->second.Radius;
+				printf(" = %f, %f, %f, %f, %f, '%s', '%s', %f\n",  instance.Pos.x, instance.Pos.y, instance.Pos.z, instance.Angle, instance.Scale, instance.Form .c_str(), instance.Name.c_str(), instance.Radius);
+				instance.Plant = true;
+			}
+			else
+			{
+				instance.Plant = false;
+			}
+		}
 	}
 
 	return true;
@@ -200,21 +261,8 @@ bool unbuildFlora()
 	CPath::addSearchPath(s_DfnDir, true, false);
 	CPath::addSearchPath(s_LeveldesignDir, true, false);
 
-	if (!loadLeveldesign())
-		return false;
-
-
-	/*
-	CInstanceGroup ig;
-	CIFile inputStream;
-	if (!inputStream.open(string(argv[1])))
-	{
-		printf("unable to open %s\n", argv[1]);
-		return -1;
-	}
-	*/
-
-	return false;
+	return loadLeveldesign()
+		&& loadInstances();
 }
 
 bool unbuildFlora(NLMISC::CCmdArgs &args)
