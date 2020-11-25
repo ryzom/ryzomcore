@@ -32,6 +32,11 @@ using namespace NLMISC;
 // CRTWorld
 // ***********************************************************************************************
 
+std::map<INode *, std::pair<NL3D::CMesh::CMeshBuild *, NL3D::CMeshBase::CMeshBaseBuild *>> CRTWorld::s_WorldCache;
+std::map<INode *, NLMISC::CAABBox> CRTWorld::s_WorldCacheAABBox;
+INode *CRTWorld::s_WorldCacheRoot;
+std::string CRTWorld::s_WorldCacheFile;
+
 // -----------------------------------------------------------------------------------------------
 CRTWorld::CRTWorld (bool errorInDialog, bool view, bool absolutePath, Interface *ip, std::string errorTitle, CExportNel *exp)
 {
@@ -351,22 +356,33 @@ void CRTWorld::testCell (CRGBAF &retValue, SGridCell &cell, CVector &vLightPos, 
 void CRTWorld::addNode (INode *pNode, vector< CMesh::CMeshBuild* > &Meshes,  vector< CMeshBase::CMeshBaseBuild* > &MeshesBase,
 						vector< INode* > &INodes, vector<SLightBuild> &AllLights, const set<INode*> &excludeNode, TimeValue tvTime)
 {
-	if (! RPO::isZone (*pNode, tvTime) )
-	if (CExportNel::isMesh (*pNode, tvTime))
+	if (!RPO::isZone(*pNode, tvTime)
+		&& CExportNel::isMesh(*pNode, tvTime))
 	{
 		// Nel export
-		CExportNel exportNel (_ErrorInDialog, _View, true, _Ip, _ErrorTitle, NULL);
+		nlassert(_Ip->GetRootNode() == s_WorldCacheRoot);
 		CAABBox aabbox;
-		exportNel.buildMeshAABBox(*pNode, aabbox, tvTime);
-		aabbox.setCenter(aabbox.getCenter()+GlobalTrans);
+		std::map<INode *, CAABBox>::iterator aabboxIt = s_WorldCacheAABBox.find(pNode);
+		if (aabboxIt == s_WorldCacheAABBox.end())
+		{
+			CExportNel exportNel(_ErrorInDialog, _View, true, _Ip, _ErrorTitle, NULL);
+			exportNel.buildMeshAABBox(*pNode, aabbox, tvTime);
+			s_WorldCacheAABBox[pNode] = aabbox;
+		}
+		else
+		{
+			// FIXME: This breaks repeated exports while the file is open and being changed!!! Not an issue for now
+			aabbox = aabboxIt->second;
+		}
+		aabbox.setCenter(aabbox.getCenter() + GlobalTrans);
 
 		// Not an excluded node ?
 		bool bInteract = false;
-		if (excludeNode.find (pNode) == excludeNode.end())
+		if (excludeNode.find(pNode) == excludeNode.end())
 		{
-			for( uint32 i = 0; i < AllLights.size(); ++i )
+			for (uint32 i = 0; i < AllLights.size(); ++i)
 			{
-				if( isInteractionWithLight (AllLights[i], aabbox)) // FIXME: This is always true with sunlight!
+				if (isInteractionWithLight(AllLights[i], aabbox)) // FIXME: This is always true with sunlight!
 				{
 					bInteract = true;
 					break;
@@ -374,25 +390,41 @@ void CRTWorld::addNode (INode *pNode, vector< CMesh::CMeshBuild* > &Meshes,  vec
 			}
 		}
 
-
-		if( bInteract )
+		if (bInteract)
 		{
-			int nAccelType = CExportNel::getScriptAppData (pNode, NEL3D_APPDATA_ACCEL, 32);
-			if ((nAccelType&3) == 0) // If not an accelerator
+			int nAccelType = CExportNel::getScriptAppData(pNode, NEL3D_APPDATA_ACCEL, 32);
+			if ((nAccelType & 3) == 0) // If not an accelerator
 			{
+				nlassert(_Ip->GetRootNode() == s_WorldCacheRoot);
+
 				CMesh::CMeshBuild *pMB;
 				CMeshBase::CMeshBaseBuild *pMBB;
-				pMB = exportNel.createMeshBuild ( *pNode, tvTime, pMBB); // FIXME: This is slow!
-				if( pMBB->bCastShadows )
+				std::map<INode *, std::pair<NL3D::CMesh::CMeshBuild *, NL3D::CMeshBase::CMeshBaseBuild *>>::iterator buildIt = s_WorldCache.find(pNode);
+				if (buildIt == s_WorldCache.end())
 				{
-					Meshes.push_back( pMB );
-					MeshesBase.push_back( pMBB );
-					INodes.push_back( pNode );
+					CExportNel exportNel(_ErrorInDialog, _View, true, _Ip, _ErrorTitle, NULL);
+					pMB = exportNel.createMeshBuild(*pNode, tvTime, pMBB);
+					if (!pMBB->bCastShadows)
+					{
+						delete pMB; // No interaction so delete the mesh
+						pMB = NULL;
+						delete pMBB; // No interaction so delete the mesh
+						pMBB = NULL;
+					}
+					s_WorldCache[pNode] = std::make_pair(pMB ? new CMesh::CMeshBuild(*pMB) : NULL, pMBB ? new CMeshBase::CMeshBaseBuild(*pMBB) : NULL);
 				}
 				else
 				{
-					delete pMB; // No interaction so delete the mesh
-					delete pMBB; // No interaction so delete the mesh
+					// FIXME: This breaks repeated exports while the file is open and being changed!!! Not an issue for now
+					pMB = buildIt->second.first ? new CMesh::CMeshBuild(*buildIt->second.first) : NULL;
+					pMBB = buildIt->second.second ? new CMeshBase::CMeshBaseBuild(*buildIt->second.second) : NULL;
+				}
+
+				if (pMBB) // Implies pMBB->bCastShadows
+				{
+					Meshes.push_back(pMB);
+					MeshesBase.push_back(pMBB);
+					INodes.push_back(pNode);
 				}
 			}
 		}
@@ -405,6 +437,20 @@ void CRTWorld::getAllSelectedNode	(vector< CMesh::CMeshBuild* > &Meshes,
 									vector< INode* > &INodes,
 									vector<SLightBuild> &AllLights, const set<INode*> &excludeNode, const set<INode*> &includeNode)
 {
+	if (_Ip->GetRootNode() != s_WorldCacheRoot || MaxTStrToUtf8(_Ip->GetCurFileName()) != s_WorldCacheFile) // FIXME: This breaks repeated exports while the file is open and being changed!!! Not an issue for now
+	{
+		// Erase all cached builds
+		for (std::map<INode *, std::pair<NL3D::CMesh::CMeshBuild *, NL3D::CMeshBase::CMeshBaseBuild *>>::iterator it(s_WorldCache.begin()), end(s_WorldCache.end()); it != end; ++it)
+		{
+			delete it->second.first;
+			delete it->second.second;
+		}
+		s_WorldCache.clear();
+		s_WorldCacheAABBox.clear();
+		s_WorldCacheRoot = _Ip->GetRootNode();
+		s_WorldCacheFile = MaxTStrToUtf8(_Ip->GetCurFileName());
+	}
+
 	// Get time
 	TimeValue tvTime = _Ip->GetTime();
 
@@ -443,6 +489,20 @@ void CRTWorld::getAllNodeInScene	(vector< CMesh::CMeshBuild* > &Meshes,
 									vector<SLightBuild> &AllLights, const set<INode*> &excludeNode,
 									INode* pNode)
 {
+	if (_Ip->GetRootNode() != s_WorldCacheRoot || MaxTStrToUtf8(_Ip->GetCurFileName()) != s_WorldCacheFile) // FIXME: This breaks repeated exports while the file is open and being changed!!! Not an issue for now
+	{
+		// Erase all cached builds
+		for (std::map<INode *, std::pair<NL3D::CMesh::CMeshBuild *, NL3D::CMeshBase::CMeshBaseBuild *>>::iterator it(s_WorldCache.begin()), end(s_WorldCache.end()); it != end; ++it)
+		{
+			delete it->second.first;
+			delete it->second.second;
+		}
+		s_WorldCache.clear();
+		s_WorldCacheAABBox.clear();
+		s_WorldCacheRoot = _Ip->GetRootNode();
+		s_WorldCacheFile = MaxTStrToUtf8(_Ip->GetCurFileName());
+	}
+
 	if( pNode == NULL )
 		pNode = _Ip->GetRootNode();
 
