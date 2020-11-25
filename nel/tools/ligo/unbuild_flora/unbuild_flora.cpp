@@ -26,26 +26,18 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/file.h>
-//#include <nel/misc/o_xml.h>
 #include <nel/misc/common.h>
 #include <nel/misc/cmd_args.h>
-//#include <nel/misc/bitmap.h>
 #include <nel/misc/string_view.h>
 
 #include <nel/georges/u_form.h>
 #include <nel/georges/u_form_elm.h>
 #include <nel/georges/u_form_loader.h>
 
-//#include <nel/3d/quad_tree.h>
-//#include <nel/3d/zone.h>
-//#include <nel/3d/landscape.h>
-//#include <nel/3d/zone_smoother.h>
-//#include <nel/3d/zone_tgt_smoother.h>
-//#include <nel/3d/zone_corner_smoother.h>
 #include <nel/3d/scene_group.h>
 
-//#include <nel/ligo/zone_region.h>
-
+#include <iostream>
+#include <fstream>
 #include <vector>
 #include <list>
 #include <map>
@@ -178,7 +170,7 @@ bool loadLeveldesign()
 
 	for (std::vector<std::string>::iterator it(plants.begin()), end(plants.end()); it != end; ++it)
 	{
-		printf("%s\n", (*it).c_str());
+		printf("%s\n", nlUtf8ToMbcs(*it));
 		CSmartPtr <UForm> form = formLoader->loadForm(*it);
 		if (!form)
 			continue;
@@ -193,11 +185,11 @@ bool loadLeveldesign()
 		}
 		if (plant.Shape.empty())
 			continue;
-		plant.Shape.c_str();
-		(void)toLowerAscii(&plant.Shape[0]);
+		(void)plant.Shape.c_str();
+		toLowerAscii(&plant.Shape[0]);
 		if (!form->getRootNode().getValueByName(plant.Radius, "3D.Bounding Radius"))
 			continue;
-		printf(" = '%s', %f\n", plant.Shape.c_str(), plant.Radius);
+		printf(" = '%s', %f\n", nlUtf8ToMbcs(plant.Shape), plant.Radius);
 		s_ShapeToForm[plant.Shape] = plant;
 	}
 
@@ -213,7 +205,7 @@ bool loadInstances()
 	{
 		if (CFile::getExtension(*it) != nlstr("ig"))
 			continue;
-		printf("%s\n", (*it).c_str());
+		printf("%s\n", nlUtf8ToMbcs(*it));
 		CInstanceGroup ig;
 		CIFile inputStream;
 		if (!inputStream.open(*it))
@@ -237,14 +229,14 @@ bool loadInstances()
 			instance.Angle = info.Rot.getAngle();
 			instance.Scale = info.Scale.z;
 			instance.Shape = toLowerAscii(info.Name);
-			printf("%s\n", instance.Shape.c_str());
+			printf("%s\n", nlUtf8ToMbcs(instance.Shape));
 			std::map<std::string, CPlant>::iterator formIt = s_ShapeToForm.find(instance.Shape);
 			if (formIt != s_ShapeToForm.end())
 			{
 				instance.Form = formIt->second.Form;
 				instance.Name = CFile::getFilenameWithoutExtension(instance.Form) + nlstr("_") + zoneLwr + nlstr("_") + toString(i);
 				instance.Radius = instance.Scale * formIt->second.Radius;
-				printf(" = %f, %f, %f, %f, %f, '%s', '%s', %f\n",  instance.Pos.x, instance.Pos.y, instance.Pos.z, instance.Angle, instance.Scale, instance.Form .c_str(), instance.Name.c_str(), instance.Radius);
+				printf(" = %f, %f, %f, %f, %f, '%s', '%s', %f\n",  instance.Pos.x, instance.Pos.y, instance.Pos.z, instance.Angle, instance.Scale, nlUtf8ToMbcs(instance.Form), nlUtf8ToMbcs(instance.Name), instance.Radius);
 				instance.Plant = true;
 			}
 			else
@@ -267,7 +259,7 @@ bool eraseReference()
 	{
 		if (CFile::getExtension(*it) != nlstr("ig"))
 			continue;
-		printf("%s\n", (*it).c_str());
+		printf("%s\n", nlUtf8ToMbcs(*it));
 		CInstanceGroup ig;
 		CIFile inputStream;
 		if (!inputStream.open(*it))
@@ -287,7 +279,7 @@ bool eraseReference()
 		{
 			CInstanceGroup::CInstance &info = ig._InstancesInfos[i];
 			string shape = toLowerAscii(info.Name);
-			printf("%s\n", shape.c_str());
+			printf("%s\n", nlUtf8ToMbcs(shape));
 			bool erased = false;
 			for (std::list<CPoint>::iterator it(s_Instances.begin()), end(s_Instances.end()); it != end; ++it)
 			{
@@ -317,7 +309,7 @@ bool eraseNonPlants()
 		const CPoint &instance = *it;
 		if (!instance.Plant)
 		{
-			printf("Erase '%s' because it's not a plant!\n", instance.Shape.c_str());
+			printf("Erase '%s' because it's not a plant!\n", nlUtf8ToMbcs(instance.Shape));
 			std::list<CPoint>::iterator nextIt = it;
 			++nextIt;
 			s_Instances.erase(it);
@@ -332,6 +324,62 @@ bool eraseNonPlants()
 	return true;
 }
 
+bool writeFlora()
+{
+	ofstream fo;
+	fo.open(utf8ToWide(s_PrimitiveFile));
+	fo << "<?xml version=\"1.0\"?>\n";
+	fo << "<PRIMITIVES VERSION=\"1\">\n";
+	fo << "  <ROOT_PRIMITIVE TYPE=\"CPrimNode\">\n";
+	fo << "    <ALIAS LAST_GENERATED=\"0\"/>\n";
+	fo << "    <CHILD TYPE=\"CPrimNode\">\n";
+	fo << "      <PROPERTY TYPE=\"string\">\n";
+	fo << "        <NAME>class</NAME>\n";
+	fo << "        <STRING>flora</STRING>\n";
+	fo << "      </PROPERTY>\n";
+	fo << "      <PROPERTY TYPE=\"string\">\n";
+	fo << "        <NAME>name</NAME>\n";
+	fo << "        <STRING>" << CFile::getFilenameWithoutExtension(s_PrimitiveFile) << "_flora</STRING>\n";
+	fo << "      </PROPERTY>\n";
+	for (std::list<CPoint>::iterator it(s_Instances.begin()), end(s_Instances.end()); it != end; ++it)
+	{
+		const CPoint &instance = *it;
+		fo << "      <CHILD TYPE=\"CPrimPoint\">\n";
+		fo << "        <PT X=\"" << instance.Pos.x << "\" Y=\"" << instance.Pos.y << "\" Z=\"0.000000\"/>\n";
+		fo << "        <ANGLE VALUE=\"" << instance.Angle << "\"/>\n";
+		fo << "        <PROPERTY TYPE=\"string\">\n";
+		fo << "          <NAME>class</NAME>\n";
+		fo << "          <STRING>prim</STRING>\n";
+		fo << "        </PROPERTY>\n";
+		fo << "        <PROPERTY TYPE=\"string\">\n";
+		fo << "          <NAME>form</NAME>\n";
+		fo << "          <STRING>" << CFile::getFilenameWithoutExtension(instance.Form) << "</STRING>\n";
+		fo << "        </PROPERTY>\n";
+		fo << "        <PROPERTY TYPE=\"string\">\n";
+		fo << "          <NAME>layer</NAME>\n";
+		fo << "          <STRING>0</STRING>\n";
+		fo << "        </PROPERTY>\n";
+		fo << "        <PROPERTY TYPE=\"string\">\n";
+		fo << "          <NAME>name</NAME>\n";
+		fo << "          <STRING>" << instance.Name << "</STRING>\n";
+		fo << "        </PROPERTY>\n";
+		fo << "        <PROPERTY TYPE=\"string\">\n";
+		fo << "          <NAME>radius</NAME>\n";
+		fo << "          <STRING>" << instance.Radius << "</STRING>\n";
+		fo << "        </PROPERTY>\n";
+		fo << "        <PROPERTY TYPE=\"string\">\n";
+		fo << "          <NAME>scale</NAME>\n";
+		fo << "          <STRING>" << instance.Scale << "</STRING>\n";
+		fo << "        </PROPERTY>\n";
+		fo << "      </CHILD>\n";
+	}
+	fo << "    </CHILD>\n";
+	fo << "  </ROOT_PRIMITIVE>\n";
+	fo << "</PRIMITIVES>\n";
+	printf("Generated:\n%s\n", nlUtf8ToMbcs(s_PrimitiveFile));
+	return true;
+}
+
 bool unbuildFlora()
 {
 	CPath::addSearchPath(s_DfnDir, true, false);
@@ -340,7 +388,8 @@ bool unbuildFlora()
 	return loadLeveldesign()
 		&& loadInstances()
 		&& eraseReference()
-		&& eraseNonPlants();
+		&& eraseNonPlants()
+		&& writeFlora();
 }
 
 bool unbuildFlora(NLMISC::CCmdArgs &args)
