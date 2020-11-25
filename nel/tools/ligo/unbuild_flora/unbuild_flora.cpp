@@ -47,7 +47,7 @@
 //#include <nel/ligo/zone_region.h>
 
 #include <vector>
-//#include <set>
+#include <list>
 #include <map>
 
 using namespace std;
@@ -90,6 +90,7 @@ struct CPoint
 	CVector Pos; /* Position, height not necessarily specified (X="26218.738281" Y="-1092.078979" Z="0.000000") */
 	float Angle; /* (2.827213) */
 	float Scale; /* Scale (0.643217) */
+	std::string Shape;
 
 	bool Plant;
 	std::string Form; /* (FY_S2_savantree_B) */
@@ -165,7 +166,7 @@ struct CPlant
 };
 
 std::map<std::string, CPlant> s_ShapeToForm;
-std::set<CPoint> s_Instances;
+std::list<CPoint> s_Instances;
 
 bool loadLeveldesign()
 {
@@ -235,9 +236,9 @@ bool loadInstances()
 			instance.Pos = info.Pos;
 			instance.Angle = info.Rot.getAngle();
 			instance.Scale = info.Scale.z;
-			string shape = toLowerAscii(info.Name);
-			printf("%s\n", shape.c_str());
-			std::map<std::string, CPlant>::iterator formIt = s_ShapeToForm.find(shape);
+			instance.Shape = toLowerAscii(info.Name);
+			printf("%s\n", instance.Shape.c_str());
+			std::map<std::string, CPlant>::iterator formIt = s_ShapeToForm.find(instance.Shape);
 			if (formIt != s_ShapeToForm.end())
 			{
 				instance.Form = formIt->second.Form;
@@ -250,6 +251,81 @@ bool loadInstances()
 			{
 				instance.Plant = false;
 			}
+			s_Instances.push_back(instance);
+		}
+	}
+
+	return true;
+}
+
+bool eraseReference()
+{
+	std::vector<std::string> igs;
+	CPath::getPathContent(s_ReferenceDir, true, false, true, igs);
+
+	for (std::vector<std::string>::iterator it(igs.begin()), end(igs.end()); it != end; ++it)
+	{
+		if (CFile::getExtension(*it) != nlstr("ig"))
+			continue;
+		printf("%s\n", (*it).c_str());
+		CInstanceGroup ig;
+		CIFile inputStream;
+		if (!inputStream.open(*it))
+		{
+			nlwarning("Unable to open %s\n", (*it).c_str());
+			return false;
+		}
+		ig.serial(inputStream);
+		CVector gpos = ig.getGlobalPos();
+		if (gpos.x != 0.0f || gpos.y != 0.0f || gpos.z != 0.0f)
+		{
+			nlwarning("Invalid global pos: %f, %f, %f", gpos.x, gpos.y, gpos.z);
+			return false;
+		}
+		string zoneLwr = toLowerAscii(CFile::getFilenameWithoutExtension(*it));
+		for (ptrdiff_t i = 0; i < (ptrdiff_t)ig._InstancesInfos.size(); ++i)
+		{
+			CInstanceGroup::CInstance &info = ig._InstancesInfos[i];
+			string shape = toLowerAscii(info.Name);
+			printf("%s\n", shape.c_str());
+			bool erased = false;
+			for (std::list<CPoint>::iterator it(s_Instances.begin()), end(s_Instances.end()); it != end; ++it)
+			{
+				const CPoint &instance = *it;
+				if (instance.Pos.x == info.Pos.x
+					&& instance.Pos.y == info.Pos.y
+					&& instance.Shape == shape)
+				{
+					printf(" = Found and erased\n");
+					s_Instances.erase(it);
+					erased = true;
+					break;
+				}
+			}
+			if (!erased)
+				printf(" = NOT FOUND!\n");
+		}
+	}
+
+	return true;
+}
+
+bool eraseNonPlants()
+{
+	for (std::list<CPoint>::iterator it(s_Instances.begin()), end(s_Instances.end()); it != end;)
+	{
+		const CPoint &instance = *it;
+		if (!instance.Plant)
+		{
+			printf("Erase '%s' because it's not a plant!\n", instance.Shape.c_str());
+			std::list<CPoint>::iterator nextIt = it;
+			++nextIt;
+			s_Instances.erase(it);
+			it = nextIt;
+		}
+		else
+		{
+			++it;
 		}
 	}
 
@@ -262,7 +338,9 @@ bool unbuildFlora()
 	CPath::addSearchPath(s_LeveldesignDir, true, false);
 
 	return loadLeveldesign()
-		&& loadInstances();
+		&& loadInstances()
+		&& eraseReference()
+		&& eraseNonPlants();
 }
 
 bool unbuildFlora(NLMISC::CCmdArgs &args)
