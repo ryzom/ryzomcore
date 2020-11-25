@@ -331,7 +331,11 @@ bool eraseNonPlants()
 bool writeFlora()
 {
 	ofstream fo;
+#ifdef NL_OS_WINDOWS
 	fo.open(utf8ToWide(s_PrimitiveFile));
+#else
+	fo.open(s_PrimitiveFile);
+#endif
 	fo << "<?xml version=\"1.0\"?>\n";
 	fo << "<PRIMITIVES VERSION=\"1\">\n";
 	fo << "  <ROOT_PRIMITIVE TYPE=\"CPrimNode\">\n";
