@@ -257,7 +257,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 		case CDBCtrlSheet::Pact:		text= CI18N::get("uiBotChatPact") + text; break;
 		case CDBCtrlSheet::Skill:		text= CI18N::get("uiBotChatSkill") + text; break;
 		case CDBCtrlSheet::GuildFlag:	text= CI18N::get("uiBotChatSkill") + text; break;
-		case CDBCtrlSheet::Phrase:		text= CI18N::get("uiBotChatPhrase") + text; break;
+		case CDBCtrlSheet::Phrase:		text= text; break;
 		default: break;
 	}
 
@@ -536,12 +536,12 @@ bool CDBGroupListSheetTrade::CSheetChildTrade::isSheetValid(CDBGroupListSheetTex
 				nlwarning("Brick %d has type %s", (int) k, BRICK_TYPE::toString(bs->getBrickType()).c_str());
 			}
 			else
-			{	
+			{
 				nlwarning("Brick %d : not a brick sheet", (int) k);
 			}
 		}
 	}
-	*/	
+	*/
 
 	if (phraseSheet)
 	{
@@ -563,7 +563,7 @@ bool CDBGroupListSheetTrade::CSheetChildTrade::isSheetValid(CDBGroupListSheetTex
 			break;
 		}
 	}
-		
+
 
 
 	return true;
