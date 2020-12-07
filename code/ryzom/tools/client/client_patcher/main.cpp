@@ -191,7 +191,8 @@ struct CClientPatcherTranslations : public NLMISC::CI18N::ILoadProxy
 };
 
 // hardcoded URL to not depend on external files
-static const std::string PatchUrl = RYZOM_CLIENT_PATCH_URL; // "https://cdn.ryzom.dev/open/patch";
+static const std::string DefaultPatchUrl = RYZOM_CLIENT_PATCH_URL; // "https://cdn.ryzom.dev/open/patch";
+static const std::string DefaultAppName = RYZOM_CLIENT_APP_NAME; // "default"
 
 int main(int argc, char *argv[])
 {
@@ -204,6 +205,8 @@ int main(int argc, char *argv[])
 	Args.addArg("s", "source", "source", "Name of source file to xdelta with patch file");
 	Args.addArg("d", "destination", "destination", "Name of destination operation (patch or unpack)");
 	Args.addArg("u", "unpack", "unpack", "Name of bnp file to unpack");
+	Args.addArg("", "url", "PatchUrl", "Patch server url, ie 'https://dl.ryzom.com/patch_live'");
+	Args.addArg("", "app", "Application", "Patch application name for version file, ie 'ryzom_live' requests ryzom_live.version from PatchUrl");
 
 	if (!Args.parse(argc, argv)) return 1;
 
@@ -269,14 +272,32 @@ int main(int argc, char *argv[])
 	// now translations are read, we don't need it anymore
 	delete trans;
 
+	// create minimal client.cfg file in memory for patcher
+	{
+		CConfigFile::CVar patchUrl;
+		patchUrl.forceAsString(DefaultPatchUrl);
+		if (Args.haveLongArg("url") && !Args.getLongArg("url").empty())
+			patchUrl.forceAsString(Args.getLongArg("url").front());
+
+		CConfigFile::CVar appName;
+		appName.forceAsString(DefaultAppName);
+		if (Args.haveLongArg("app") && !Args.getLongArg("app").empty())
+			appName.forceAsString(Args.getLongArg("app").front());
+
+		ClientCfg.ConfigFile.insertVar("PatchUrl", patchUrl);
+		ClientCfg.ConfigFile.insertVar("Application", appName);
+	}
+
+	//
 	Args.displayVersion();
 	printf("\n");
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
-
+	printf("Using '%s/%s.version'\n", ClientCfg.ConfigFile.getVar("PatchUrl").asString().c_str(),
+		ClientCfg.ConfigFile.getVar("Application").asString().c_str());
 
 	// use PatchUrl
 	vector<string> patchURLs;
-	pPM->init(patchURLs, PatchUrl, "");
+	pPM->init(patchURLs, ClientCfg.ConfigFile.getVar("PatchUrl").asString(), "");
 	pPM->startCheckThread(true /* include background patchs */);
 
 	ucstring state;
