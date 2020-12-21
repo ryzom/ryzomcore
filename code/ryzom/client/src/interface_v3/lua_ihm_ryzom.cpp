@@ -3495,6 +3495,25 @@ std::string CLuaIHMRyzom::getSheetShape(const std::string &sheet)
 
 
 
+	if (!sheetPtr)
+		return "";
+
+	if (sheetPtr->type() == CEntitySheet::ITEM)
+	{
+		CItemSheet *sheet = (CItemSheet*)sheetPtr;
+		return sheet->getShape();
+	}
+	else if (sheetPtr->type() == CEntitySheet::FAUNA)
+	{
+		CCharacterSheet *sheet = (CCharacterSheet*)(sheetPtr);
+		return sheet->Body.getItem();
+	}
+
+	return "";
+}
+
+
+
 // ***************************************************************************
 std::string CLuaIHMRyzom::getSheetFamily(const std::string &sheet)
 {
