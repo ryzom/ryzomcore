@@ -565,6 +565,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(isDynStringAvailable),
 		LUABIND_FUNC(isFullyPatched),
 		LUABIND_FUNC(getSheetType),
+		LUABIND_FUNC(getSheetShape),
 		LUABIND_FUNC(getSheetFamily),
 		LUABIND_FUNC(getSheetName),
 		LUABIND_FUNC(getFameIndex),
@@ -3470,6 +3471,25 @@ std::string CLuaIHMRyzom::getSheetType(const std::string &sheet)
 }
 
 
+	if (!sheetPtr)
+		return "";
+
+	if (sheetPtr->type() == CEntitySheet::ITEM)
+	{
+		CItemSheet *sheet = (CItemSheet*)sheetPtr;
+		return sheet->getShape();
+	}
+	else if (sheetPtr->type() == CEntitySheet::FAUNA)
+	{
+		CCharacterSheet *sheet = (CCharacterSheet*)(sheetPtr);
+		return sheet->Body.getItem();
+	}
+
+	return "";
+}
+
+
+
 // ***************************************************************************
 std::string CLuaIHMRyzom::getSheetFamily(const std::string &sheet)
 {
@@ -3879,42 +3899,42 @@ sint32 CLuaIHMRyzom::getPlayerLevel()
 // ***************************************************************************
 std::string CLuaIHMRyzom::getPlayerVpaHex()
 {
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 	return NLMISC::toString("%X", prop);
 }
 
 // ***************************************************************************
 std::string CLuaIHMRyzom::getPlayerVpbHex()
 {
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	return NLMISC::toString("%X", prop);
 }
 
 // ***************************************************************************
 std::string CLuaIHMRyzom::getPlayerVpcHex()
 {
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	return NLMISC::toString("%X", prop);
 }
 
 // ***************************************************************************
 sint64 CLuaIHMRyzom::getPlayerVpa()
 {
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 	return prop;
 }
 
 // ***************************************************************************
 sint64 CLuaIHMRyzom::getPlayerVpb()
 {
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	return prop;
 }
 
 // ***************************************************************************
 sint64 CLuaIHMRyzom::getPlayerVpc()
 {
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	return prop;
 }
 
@@ -3964,7 +3984,7 @@ std::string CLuaIHMRyzom::getTargetVpaHex()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 	return NLMISC::toString("%X", prop);
 }
 
@@ -3974,7 +3994,7 @@ std::string CLuaIHMRyzom::getTargetVpbHex()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	return NLMISC::toString("%X", prop);
 }
 
@@ -3984,7 +4004,7 @@ std::string CLuaIHMRyzom::getTargetVpcHex()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	return NLMISC::toString("%X", prop);
 }
 
@@ -3994,7 +4014,7 @@ sint64 CLuaIHMRyzom::getTargetVpa()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 
 	return prop;
 }
