@@ -870,13 +870,13 @@ void CScriptVM::interpretCode(
 				{
 					otherContext = callerContext;
 				}
-				else
+				else if (thisContext != NULL)
 				{
 					otherContext = thisContext->findContext(strId);
 				}
 				if (!otherContext)
 					nlinfo("Group %s unknown, pushing a NULL context on the stack, this may lead to bad behaviours", CStringMapper::unmap(strId).c_str());
-				
+
 				stack.push(otherContext);
 				index+=2;
 			}
