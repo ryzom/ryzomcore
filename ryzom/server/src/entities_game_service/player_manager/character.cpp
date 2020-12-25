@@ -7811,7 +7811,7 @@ void CCharacter::setAnimalTitle(uint8 petIndex, string title)
 		name = name.substr(0, name.find('$'));
 	}
 	ucstring customName;
-	customName.fromUtf8(name+"$"+title)
+	customName.fromUtf8(name+"$"+title);
 	animal.setCustomName(customName);
 
 	sendPetCustomNameToClient(petIndex);
