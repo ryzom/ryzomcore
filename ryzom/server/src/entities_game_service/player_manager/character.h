@@ -358,6 +358,11 @@ struct CPetAnimal
 		CustomName = customName;
 	}
 
+	ucstring getCustomName()
+	{
+		return CustomName;
+	}
+
 	void setSheetId(NLMISC::CSheetId sheetId)
 	{
 		PetSheetId = sheetId;
