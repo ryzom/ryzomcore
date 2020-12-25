@@ -3292,6 +3292,26 @@ NLMISC_COMMAND(setPlayerPetName, "change the name of a player pet", "<uid> <inde
 	return true;
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setPlayerPetTitle, "change the name of a player pet", "<uid> <index> <title>")
+{
+	if (args.size() != 3)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+	uint8 index;
+	fromString(args[1], index);
+	string title;
+	if (args[2] != "-")
+		title = args[2];
+	else
+		title = "";
+
+	c->setAnimalTitle(index, title);
+	log.displayNL("OK");
+	return true;
+}
+
 //setPlayerVisual 530162 haircut fy_hof_hair_basic02.sitem
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setPlayerVisual, "get visual of a player", "<uid> <visual_prop1>[,<visual_prop1>,...] <arg1>[,<arg2>,...]")

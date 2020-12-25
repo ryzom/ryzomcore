@@ -7796,6 +7796,32 @@ void CCharacter::setAnimalName(uint8 petIndex, ucstring customName)
 	sendMessageViaMirror("IOS", msgout);
 }
 
+void CCharacter::setAnimalTitle(uint8 petIndex, string title)
+{
+	if (petIndex < 0 || petIndex >= MAX_INVENTORY_ANIMAL)
+	{
+		nlwarning("<CCharacter::setAnimalName> Incorect animal index '%d'.", petIndex);
+		return;
+	}
+
+	CPetAnimal &animal = _PlayerPets[petIndex];
+	string name = animal.getCustomName().toUtf8();
+	if (name.find('$') != string::npos)
+	{
+		name = name.substr(0, name.find('$'));
+	}
+	ucstring customName;
+	customName.fromUtf8(name+"$"+title)
+	animal.setCustomName(customName);
+
+	sendPetCustomNameToClient(petIndex);
+	TDataSetRow row = animal.SpawnedPets;
+	NLNET::CMessage msgout("CHARACTER_NAME");
+	msgout.serial(row);
+	msgout.serial(customName);
+	sendMessageViaMirror("IOS", msgout);
+}
+
 //-----------------------------------------------------------------------------
 void CCharacter::sendPetCustomNameToClient(uint8 petIndex)
 {

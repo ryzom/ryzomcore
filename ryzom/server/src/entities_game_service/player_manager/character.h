@@ -1111,6 +1111,7 @@ public:
 
 	// Set the name of the animal
 	void setAnimalName(uint8 petIndex, ucstring customName);
+	void setAnimalTitle(uint8 petIndex, string title);
 
 	void sendPetCustomNameToClient(uint8 petIndex);
 
