@@ -351,6 +351,7 @@ int main(int argc, char *argv[])
 		try
 		{
 			// move downloaded files to final location
+			// batch file will not be created
 			pPM->createBatchFile(pPM->getDescFile(), false, false);
 			CFile::createEmptyFile("show_eula");
 
@@ -381,17 +382,20 @@ int main(int argc, char *argv[])
 			printError(convert(CI18N::get("uiErrPatchApply")) + " " + error);
 			return 1;
 		}
-
-		pPM->executeBatchFile();
 	}
 
-/*
-	// Start Scanning
-	pPM->startScanDataThread();
-
-	// request to stop the thread
-	pPM->askForStopScanDataThread();
-*/
+	// upgd_nl.sh will normally take care of the permissions
+	//
+	// for linux/macOS (no-op on windows)
+	// Set for current executable (might be 'dev' version),
+	// and also 'ryzom_client_patcher' directly (from patched files)
+	CFile::setExecutable(Args.getProgramPath() + Args.getProgramName());
+	CFile::setExecutable("ryzom_client_patcher");
+	// other
+	CFile::setExecutable("crash_report");
+	CFile::setExecutable("ryzom_client");
+	CFile::setExecutable("ryzom_installer_qt");
+	CFile::setExecutable("ryzom_configuration_qt");
 
 	return 0;
 }
