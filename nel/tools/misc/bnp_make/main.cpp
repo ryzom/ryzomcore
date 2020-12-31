@@ -138,6 +138,8 @@ int main(int argc, char **argv)
 	args.addArg("o", "output", "destination", "Output directory or file");
 	args.addArg("i", "if", "wildcard", "Add the file if it matches the wilcard (at least one 'if' conditions must be met for a file to be adding)", false);
 	args.addArg("n", "ifnot", "wildcard", "Add the file if it doesn't match the wilcard (all the 'ifnot' conditions must be met for a file to be adding)", false);
+	args.addArg("", "list-verbose", "", "List files using 'pos size name' format");
+	args.addArg("", "extract", "name", "Extract file(s) from BNP into --output");
 	args.addAdditionalArg("input", "Input directory or BNP file depending on command");
 
 	if (!args.parse(argc, argv)) return 1;
@@ -232,6 +234,60 @@ int main(int argc, char **argv)
 		{
 			printf("%s\n", gBNPHeader.SFiles[i].Name.c_str());
 		}
+
+		return 0;
+	}
+
+	if (args.haveLongArg("list-verbose"))
+	{
+		gBNPHeader.BigFileName = args.getAdditionalArg("input").front();
+
+		// Read header of BNP file
+		if (!gBNPHeader.readHeader()) return -1;
+
+		for (uint i = 0; i < gBNPHeader.SFiles.size(); ++i)
+		{
+			printf("%u %u %s\n", gBNPHeader.SFiles[i].Pos, gBNPHeader.SFiles[i].Size, gBNPHeader.SFiles[i].Name.c_str());
+		}
+
+		return 0;
+	}
+
+	// --extract <name>
+	if (args.haveLongArg("extract") && !args.getLongArg("extract").empty())
+	{
+		std::string bnpName = args.getAdditionalArg("input").front();
+		CBigFile::getInstance().add(bnpName, BF_ALWAYS_OPENED);
+
+		// Output directory or filename
+		if (!args.haveArg("o") || args.getArg("o").empty())
+		{
+			nlerror("Output file or directory not set");
+		}
+
+		std::string srcName = args.getLongArg("extract").front();
+		std::string dstName = args.getArg("o").front();
+		if (CFile::fileExists(dstName) && CFile::isDirectory(dstName))
+		{
+			dstName += "/" + srcName;
+		}
+
+		CIFile inFile;
+		// bnpName without path
+		if (!inFile.open(CFile::getFilename(bnpName) + "@" + srcName))
+		{
+			nlerror("Unable to open '%s' for reading", inFile.getStreamName().c_str());
+		}
+
+		COFile outFile;
+		if (!outFile.open(dstName))
+		{
+			nlerror("Unable to open '%s' for writing", outFile.getStreamName().c_str());
+		}
+
+		std::string buf;
+		inFile.readAll(buf);
+		outFile.serialBuffer((uint8 *)&buf[0], buf.size());
 
 		return 0;
 	}
