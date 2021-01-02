@@ -28,6 +28,7 @@
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
 #include "nel/gui/html_element.h"
+#include "nel/gui/html_parser.h"
 #include "nel/gui/css_style.h"
 
 // forward declaration
@@ -376,7 +377,9 @@ namespace NLGUI
 		// true if renderer is waiting for css files to finish downloading (link rel=stylesheet)
 		bool			_WaitingForStylesheet;
 		// list of css file urls that are queued up for download
-		std::vector<std::string> _StylesheetQueue;
+		std::vector<CHtmlParser::StyleLink> _StylesheetQueue;
+		// <style> and downloaded <link rel=stylesheet> elements
+		std::vector<std::string> _HtmlStyles;
 
 		// Valid base href was found
 		bool            _IgnoreBaseUrlTag;
@@ -890,7 +893,7 @@ namespace NLGUI
 		std::string localBnpName(const std::string &url);
 
 		// add css file from <link href=".." rel="stylesheet"> to download queue
-		void addStylesheetDownload(std::vector<std::string> links);
+		void addStylesheetDownload(std::vector<CHtmlParser::StyleLink> links);
 
 		// stop all curl downalods (html and data)
 		void releaseDownloads();

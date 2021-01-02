@@ -57,7 +57,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// recursive function to walk html document
-	void CHtmlParser::parseNode(xmlNode *a_node, CHtmlElement &parent, std::string &styleString, std::vector<std::string> &links) const
+	void CHtmlParser::parseNode(xmlNode *a_node, CHtmlElement &parent, std::vector<std::string> &styles, std::vector<StyleLink> &links) const
 	{
 		uint childIndex = 0;
 		uint element_number;
@@ -145,7 +145,9 @@ namespace NLGUI
 
 					if (useStyle)
 					{
-						parseStyle(node->children, styleString);
+						std::string style;
+						parseStyle(node->children, style);
+						styles.push_back(style);
 					}
 					// style tag is kept in dom
 				}
@@ -163,13 +165,14 @@ namespace NLGUI
 
 					if (useStyle)
 					{
-						links.push_back(elm.getAttribute("href"));
+						styles.push_back("");
+						links.push_back(StyleLink(styles.size()-1, elm.getAttribute("href")));
 					}
 					// link tag is kept in dom
 				}
 				else if (node->children)
 				{
-					parseNode(node->children, elm, styleString, links);
+					parseNode(node->children, elm, styles, links);
 
 					// must cleanup nested tags that libxml2 does not fix
 					// dt without end tag: <dl><dt><dt></dl>
@@ -406,7 +409,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CHtmlParser::getDOM(std::string htmlString, CHtmlElement &dom, std::string &styleString, std::vector<std::string> &links) const
+	void CHtmlParser::getDOM(std::string htmlString, CHtmlElement &dom, std::vector<std::string> &styles, std::vector<StyleLink> &links) const
 	{
 		htmlParserCtxtPtr parser = htmlCreatePushParserCtxt(NULL, NULL, NULL, 0, NULL, XML_CHAR_ENCODING_UTF8);
 		if (!parser)
@@ -428,8 +431,7 @@ namespace NLGUI
 			xmlNode *root = xmlDocGetRootElement(parser->myDoc);
 			if (root)
 			{
-				styleString.clear();
-				parseNode(root, dom, styleString, links);
+				parseNode(root, dom, styles, links);
 			}
 			else
 			{
