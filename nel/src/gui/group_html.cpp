@@ -858,21 +858,16 @@ namespace NLGUI
 			CFile::createDirectory( pathName );
 	}
 
-	void CGroupHTML::addStylesheetDownload(std::vector<std::string> links)
+	void CGroupHTML::addStylesheetDownload(const std::vector<CHtmlParser::StyleLink> links)
 	{
 		for(uint i = 0; i < links.size(); ++i)
 		{
-			std::string url = getAbsoluteUrl(links[i]);
-			std::string local = localImageName(url);
+			_StylesheetQueue.push_back(links[i]);
+			std::string url = getAbsoluteUrl(links[i].Url);
+			_StylesheetQueue.back().Url = url;
 
-			// insert only if url not already downloading
-			std::vector<std::string>::const_iterator it = std::find(_StylesheetQueue.begin(), _StylesheetQueue.end(), url);
-			if (it == _StylesheetQueue.end())
-			{
-				_StylesheetQueue.push_back(url);
-				// push to the front of the queue
-				Curls.push_front(CDataDownload(url, local, StylesheetType, NULL, "", ""));
-			}
+			// push to the front of the queue
+			Curls.push_front(CDataDownload(url, localImageName(url), StylesheetType, NULL, "", ""));
 		}
 		pumpCurlQueue();
 	}
@@ -4184,19 +4179,28 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::cssDownloadFinished(const std::string &url, const std::string &local)
 	{
-		// remove file from download queue
-		std::vector<std::string>::iterator it = std::find(_StylesheetQueue.begin(), _StylesheetQueue.end(), url);
-		if (it != _StylesheetQueue.end())
+		for(std::vector<CHtmlParser::StyleLink>::iterator it = _StylesheetQueue.begin();
+				it != _StylesheetQueue.end(); ++it)
 		{
-			_StylesheetQueue.erase(it);
-		}
+			if (it->Url == url)
+			{
+				// read downloaded file into HtmlStyles
+				if (CFile::fileExists(local) && it->Index < _HtmlStyles.size())
+				{
+					CIFile in;
+					if (in.open(local))
+					{
+						if (!in.readAll(_HtmlStyles[it->Index]))
+						{
+							nlwarning("Failed to read downloaded css file(%s), url(%s)", local.c_str(), url.c_str());
+						}
+					}
+				}
 
-		if (!CFile::fileExists(local))
-		{
-			return;
+				_StylesheetQueue.erase(it);
+				break;
+			}
 		}
-
-		parseStylesheetFile(local);
 	}
 
 	void CGroupHTML::renderDocument()
@@ -4213,6 +4217,16 @@ namespace NLGUI
 		// clear previous state and page
 		beginBuild();
 		removeContent();
+
+		// process all <style> and <link rel=stylesheet> elements
+		for(uint i = 0; i < _HtmlStyles.size(); ++i)
+		{
+			if (!_HtmlStyles[i].empty())
+			{
+				_Style.parseStylesheet(_HtmlStyles[i]);
+			}
+		}
+		_HtmlStyles.clear();
 
 		std::list<CHtmlElement>::iterator it = _HtmlDOM.Children.begin();
 		while(it != _HtmlDOM.Children.end())
@@ -4821,9 +4835,6 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CGroupHTML::parseHtml(const std::string &htmlString)
 	{
-		std::vector<std::string> links;
-		std::string styleString;
-
 		CHtmlElement *parsedDOM;
 		if (_CurrentHTMLElement == NULL)
 		{
@@ -4836,16 +4847,28 @@ namespace NLGUI
 			parsedDOM = _CurrentHTMLElement;
 		}
 
-		CHtmlParser parser;
-		parser.getDOM(htmlString, *parsedDOM, styleString, links);
+		std::vector<CHtmlParser::StyleLink> links;
 
-		if (!styleString.empty())
-		{
-			_Style.parseStylesheet(styleString);
-		}
-		if (!links.empty())
+		CHtmlParser parser;
+		parser.getDOM(htmlString, *parsedDOM, _HtmlStyles, links);
+
+		// <link> elements inserted from lua::parseHtml are ignored
+		if (_CurrentHTMLElement == NULL && !links.empty())
 		{
 			addStylesheetDownload(links);
+		}
+		else if (_CurrentHTMLElement != NULL)
+		{
+			// Called from active element (lua)
+			// <style> order is not preserved as document is already being rendered
+			for(uint i = 0; i < _HtmlStyles.size(); ++i)
+			{
+				if (!_HtmlStyles[i].empty())
+				{
+					_Style.parseStylesheet(_HtmlStyles[i]);
+				}
+			}
+			_HtmlStyles.clear();
 		}
 
 		// this should rarely fail as first element should be <html>
@@ -4856,7 +4879,7 @@ namespace NLGUI
 		{
 			if (it->Type == CHtmlElement::ELEMENT_NODE && it->Value == "html")
 			{
-				// more newly parsed childs from <body> into siblings
+				// move newly parsed childs from <body> into siblings
 				if (_CurrentHTMLElement) {
 					std::list<CHtmlElement>::iterator it2 = it->Children.begin();
 					while(it2 != it->Children.end())
@@ -5417,7 +5440,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::insertFormImageButton(const std::string &name, const std::string &tooltip, const std::string &src, const std::string &over, const std::string &formId, const std::string &action, uint32 minWidth, const std::string &templateName)
 	{
-		_FormSubmit.push_back(SFormSubmitButton(formId, name, "", "image"));
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, "", "image", action));
 		// Action handler parameters
 		std::string param = "name=" + getId() + "|button=" + toString(_FormSubmit.size()-1);
 
@@ -5428,7 +5451,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::insertFormTextButton(const std::string &name, const std::string &tooltip, const std::string &value, const std::string &formId, const std::string &formAction, uint32 minWidth, const std::string &templateName)
 	{
-		_FormSubmit.push_back(SFormSubmitButton(formId, name, value, "submit"));
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, value, "submit", formAction));
 		// Action handler parameters
 		string param = "name=" + getId() + "|button=" + toString(_FormSubmit.size()-1);
 
@@ -6065,16 +6088,27 @@ namespace NLGUI
 			string name = elm.getAttribute("name");
 			string src = elm.getAttribute("src");
 			string over = elm.getAttribute("data-over-src");
+			string formId = elm.getAttribute("form");
+			string formAction = elm.getAttribute("formaction");
 
-			insertFormImageButton(name, tooltip, src, over, _Forms.back().id, "", minWidth, templateName);
+			if (formId.empty() && _FormOpen) {
+				formId = _Forms.back().id;
+			}
+
+			insertFormImageButton(name, tooltip, src, over, formId, formAction, minWidth, templateName);
 		}
 		else if (type == "button" || type == "submit")
 		{
-			// The submit button
 			string name = elm.getAttribute("name");
 			string value = elm.getAttribute("value");
+			string formId = elm.getAttribute("form");
+			string formAction = elm.getAttribute("formaction");
 
-			insertFormTextButton(name, tooltip, value, _Forms.back().id, "", minWidth, templateName);
+			if (formId.empty() && _FormOpen) {
+				formId = _Forms.back().id;
+			}
+
+			insertFormTextButton(name, tooltip, value, formId, formAction, minWidth, templateName);
 		}
 		else if (type == "text")
 		{

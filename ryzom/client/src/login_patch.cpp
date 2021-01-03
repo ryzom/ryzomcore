@@ -1035,6 +1035,7 @@ void CPatchManager::executeBatchFile()
 
 	// make script executable
 	CFile::setRWAccess(batchFilename);
+	CFile::setExecutable(batchFilename);
 
 	// append login, password and shard
 	if (!LoginLogin.empty())

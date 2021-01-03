@@ -131,6 +131,12 @@ class CRTWorld
 	//vector<SCubeGrid> cgAccel;	// One cube grid by light point or spot
 	//vector<SDirGrid> dirAccel;	// One grid by light (directionnal only)
 	NLMISC::CVector	GlobalTrans;
+
+	static std::map<INode *, std::pair<NL3D::CMesh::CMeshBuild *, NL3D::CMeshBase::CMeshBaseBuild *>> s_WorldCache;
+	static std::map<INode *, NLMISC::CAABBox> s_WorldCacheAABBox;
+	static INode *s_WorldCacheRoot;
+	static std::string s_WorldCacheFile;
+
 public:
 
 	CRTWorld (bool errorInDialog, bool view, bool absolutePath, Interface *ip, std::string errorTitle, CExportNel *exp);

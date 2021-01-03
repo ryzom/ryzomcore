@@ -2571,8 +2571,8 @@ bool CFile::createDirectory(const std::string &filename)
 #ifdef NL_OS_WINDOWS
 	return _wmkdir(nlUtf8ToWide(filename)) == 0;
 #else
-	// Set full permissions....
-	return mkdir(filename.c_str(), 0xFFFF)==0;
+	// set rwxrwxr-x permissions
+	return mkdir(filename.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IXOTH)==0;
 #endif
 }
 
@@ -2810,7 +2810,17 @@ bool CFile::setRWAccess(const std::string &filename)
 	if (access (filename.c_str(), F_OK) == 0)
 	{
 		// try to set the read/write access
-		if (chmod (filename.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH) == -1)
+		// rw-rw-r--
+		mode_t mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH;
+
+		// set +x only for directory
+		// rwxrwxr-x
+		if (CFile::isDirectory(filename))
+		{
+			mode |= S_IXUSR|S_IXGRP|S_IXOTH;
+		}
+
+		if (chmod (filename.c_str(), mode) == -1)
 		{
 			if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
 			{
@@ -2828,6 +2838,34 @@ bool CFile::setRWAccess(const std::string &filename)
 		}
 //		return false;
 	}
+	return true;
+}
+
+bool CFile::setExecutable(const std::string &filename)
+{
+#ifndef NL_OS_WINDOWS
+	struct stat buf;
+	if (stat(filename.c_str (), &buf) == 0)
+	{
+		mode_t mode = buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH;
+		if (chmod(filename.c_str(), mode) == -1)
+		{
+			if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
+			{
+				nlwarning ("PATH: Can't set +x flag on file '%s': %d %s", filename.c_str(), errno, strerror(errno));
+			}
+			return false;
+		}
+	}
+	else
+	{
+		if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
+		{
+			nlwarning("PATH: Can't access file '%s': %d %s", filename.c_str(), errno, strerror(errno));
+		}
+		return false;
+	}
+#endif
 	return true;
 }
 

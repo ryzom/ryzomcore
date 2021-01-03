@@ -33,6 +33,7 @@
 #include <nel/misc/progress_callback.h>
 #include <nel/misc/random.h>
 #include <nel/misc/common.h>
+#include <nel/misc/wang_hash.h>
 #include <nel/3d/u_material.h>
 
 #include <nel/3d/u_driver.h>
@@ -1369,6 +1370,7 @@ void CScreenshotIslands::buildIslandsTextures()
 	// Create and load landscape
 	ULandscape * landscape = scene->createLandscape();
 	landscape->setThreshold(0.0005);
+	landscape->setTileNear(10000);
 	if(_InverseZTest)
 	{
 		landscape->setZFunc(UMaterial::greaterequal);
@@ -1464,7 +1466,7 @@ void CScreenshotIslands::buildIslandsTextures()
 						vector<string>		zonesAdded;
 						vector<string>		zonesRemoved;
 						IProgressCallback progress;
-						landscape->refreshAllZonesAround(camera.getMatrix().getPos(), 1000, zonesAdded, zonesRemoved, progress);
+						landscape->refreshAllZonesAround(camera.getMatrix().getPos(), 2000, zonesAdded, zonesRemoved, progress);
 						if(_Vegetation)
 						{
 							LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
@@ -1644,8 +1646,8 @@ void CScreenshotIslands::buildIslandsTextures()
 
 
 							// little tga
-							bitmapLittle.resample(bitmapLittle.getWidth()/10, bitmapLittle.getHeight()/10);
-							if(!isPowerOf2(bitmapLittle.getWidth()) || !isPowerOf2(bitmapLittle.getHeight()) )
+							bitmapLittle.resample(bitmapLittle.getWidth() / 20, bitmapLittle.getHeight() / 20);
+							if (!isPowerOf2(bitmapLittle.getWidth()) || !isPowerOf2(bitmapLittle.getHeight()))
 							{
 								uint pow2w = NLMISC::raiseToNextPowerOf2(bitmapLittle.getWidth());
 								uint pow2h = NLMISC::raiseToNextPowerOf2(bitmapLittle.getHeight());
@@ -1871,15 +1873,19 @@ void CScreenshotIslands::buildBackTextureHLS(const std::string & islandName, con
 	{
 		_BackColor = maxColor;
 
-		CRandom	randomGenerator;
+		std::string islandNameLwr = toLowerAscii(islandName);
+		uint32_t seed = 0;
+		for (ptrdiff_t i = 0; i < (ptrdiff_t)islandNameLwr.size(); ++i)
+			seed += wangHash(seed ^ islandNameLwr[i]);
 
 		uint8 * backPixels = &(_BackBitmap.getPixels(0)[0]);
 
+		uint i = 0;
 		for(uint x=0; x<_BackBitmap.getWidth(); x++)
 		{
-			for(uint y=0; y<_BackBitmap.getHeight(); y++)
+			for(uint y=0; y<_BackBitmap.getHeight(); y++, i++)
 			{
-				sint32 randomVal = randomGenerator.rand(colorsNb-1);
+				sint32 randomVal = wangHash(seed ^ i) % colorsNb;
 				const CRGBA & color = sortedColors[randomVal];
 
 				*backPixels = (uint8) color.R;
