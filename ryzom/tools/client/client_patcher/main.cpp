@@ -201,6 +201,10 @@ int main(int argc, char *argv[])
 
 	Args.setVersion(getDisplayVersion());
 	Args.setDescription("Ryzom client");
+	Args.addArg("p", "patch", "patch", "Name of the file to use tp xdelta the source file");
+	Args.addArg("s", "source", "source", "Name of source file to xdelta with patch file");
+	Args.addArg("d", "destination", "destination", "Name of destination operation (patch or unpack)");
+	Args.addArg("u", "unpack", "unpack", "Name of bnp file to unpack");
 	Args.addArg("", "url", "PatchUrl", "Patch server url, ie 'https://dl.ryzom.com/patch_live'");
 	Args.addArg("", "app", "Application", "Patch application name for version file, ie 'ryzom_live' requests ryzom_live.version from PatchUrl");
 
@@ -289,8 +293,7 @@ int main(int argc, char *argv[])
 	printf("\n");
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
 	printf("Using '%s/%s.version'\n", ClientCfg.ConfigFile.getVar("PatchUrl").asString().c_str(),
-		ClientCfg.ConfigFile.getVar("Application").asString().c_str());
-
+	ClientCfg.ConfigFile.getVar("Application").asString().c_str());
 
 	// use PatchUrl
 	vector<string> patchURLs;
