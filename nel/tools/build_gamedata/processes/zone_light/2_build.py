@@ -68,7 +68,8 @@ else:
 		destFile = destDir + "/" + file[0:-len(".zonew")] + ".zonel"
 		if (needUpdateLogRemoveDest(log, srcFile, destFile)):
 			dependFile = dependDir + "/" + file[0:-len(".zonew")] + ".depend"
-			subprocess.call([ ExecTimeout, str(ZoneLightBuildTimeout), ZoneLighter, srcFile, destFile, ActiveProjectDirectory + "/generated/properties.cfg", dependFile ])
+			callParallelProcess([ ExecTimeout, str(ZoneLightBuildTimeout), ZoneLighter, srcFile, destFile, ActiveProjectDirectory + "/generated/properties.cfg", dependFile ])
+	flushParallelProcesses()
 printLog(log, "")
 
 # For each zone_light ig

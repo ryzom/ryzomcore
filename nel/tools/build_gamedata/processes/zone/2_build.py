@@ -147,7 +147,8 @@ else:
 		sourceFile = ExportBuildDirectory + "/" + ZoneWeldBuildDirectory + "/" + file
 		destFile = ExportBuildDirectory + "/" + ZoneWeldBuildDirectory + "/" + os.path.basename(file)[0:-len(".zonenhw")] + ".zonew"
 		if needUpdateLogRemoveDest(log, sourceFile, destFile):
-			subprocess.call([ ZoneElevation, sourceFile, destFile, "--land", land, "--heightmap", heightMap1, "--zfactor", LigoExportZFactor1, "--heightmap2", heightMap2, "--zfactor2", LigoExportZFactor2 ])
+			callParallelProcess([ ZoneElevation, sourceFile, destFile, "--land", land, "--heightmap", heightMap1, "--zfactor", LigoExportZFactor1, "--heightmap2", heightMap2, "--zfactor2", LigoExportZFactor2 ])
+	flushParallelProcesses()
 printLog(log, "")
 
 log.close()
