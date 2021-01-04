@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess, distutils.dir_util, multiprocessing
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -226,15 +226,20 @@ else:
 		else:
 			printLog(log, "SKIP " + lr1)
 	while len(zonesToBuild) > 0:
-		processCommand = [ ExecTimeout, str(RbankBuildTesselTimeout), BuildRbank, "-c", "-P", "-g" ]
-		processCommand.extend(zonesToBuild[:min(len(zonesToBuild), 64)])
-		if len(zonesToBuild) > 64:
-			zonesToBuild = zonesToBuild[64:]
-		else:
-			zonesToBuild = []
-		print processCommand
-		print len(processCommand)
-		subprocess.call(processCommand)
+		procs = []
+		for i in range(0, multiprocessing.cpu_count()):
+			processCommand = [ ExecTimeout, str(RbankBuildTesselTimeout), BuildRbank, "-c", "-P", "-g" ]
+			processCommand.extend(zonesToBuild[:min(len(zonesToBuild), 64)])
+			if len(zonesToBuild) > 64:
+				zonesToBuild = zonesToBuild[64:]
+			else:
+				zonesToBuild = []
+			print processCommand
+			print len(processCommand)
+			proc = subprocess.Popen(processCommand)
+			procs.append(proc)
+		for proc in procs:
+			proc.wait()
 printLog(log, "")
 
 printLog(log, ">>> Detect modifications to rebuild lr <<<")
