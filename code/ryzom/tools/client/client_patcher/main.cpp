@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 
 	if (!Args.parse(argc, argv)) return 1;
 
-	if (Args.haveArg("p") && Args.haveArg("p") && Args.haveArg("p"))
+	if (Args.haveArg("p") && Args.haveArg("s") && Args.haveArg("d"))
 	{
 		string	patchName = Args.getArg("p").front();
 		string	sourceName = Args.getArg("s").front();
