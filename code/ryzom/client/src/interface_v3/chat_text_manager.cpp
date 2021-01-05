@@ -425,6 +425,9 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 	ucstring::size_type pos = 0;
 
 	// Manage Translations
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TRANSLATION_ONLY_AS_TOOLTIP_CB", false);
+	bool originalFirst = node->getValueBool();
+
 	string::size_type startTr = msg.find(ucstring("{:"));
 	string::size_type endOfOriginal = msg.find(ucstring("}@{"));
 
@@ -436,12 +439,22 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 
 		string texture = "flag-"+toLower(msg.substr(startTr+2, 2)).toString()+".tga";
 		ucstring original = msg.substr(startTr+5, endOfOriginal-startTr-5);
-		pos = endOfOriginal+3;
+		ucstring translation = msg.substr(endOfOriginal+3);
 		CCtrlButton *ctrlButton = new CCtrlButton(CViewBase::TCtorParam());
 		ctrlButton->setTexture(texture);
 		ctrlButton->setTextureOver(texture);
 		ctrlButton->setTexturePushed(texture);
-		ctrlButton->setDefaultContextHelp(original);
+		if (!originalFirst)
+		{
+		  ctrlButton->setDefaultContextHelp(original);
+		  pos = endOfOriginal+3;
+		}
+		else
+		{
+		  ctrlButton->setDefaultContextHelp(translation);
+		  pos = startTr+5;
+		  textSize = endOfOriginal;
+		}
 		ctrlButton->setId("tr");
 		para->addChild(ctrlButton);
 	}
