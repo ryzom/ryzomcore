@@ -67,12 +67,13 @@ public:
 		}
 	};
 
-
 	// Holds info for glyphs rendered on atlas
-	struct SGlyphInfo
+	struct SGlyphInfo : SLetterKey
 	{
 		// font atlas info
 		uint32 CacheVersion;
+
+		uint32 GlyphIndex;
 
 		// atlas region with padding
 		uint32 X, Y, W, H;
@@ -84,17 +85,10 @@ public:
 		// UV coords for rendered glyph without padding
 		float U0, V0, U1, V1;
 
-		uint32 GlyphIndex;
-		sint Size;
-		bool Embolden;
-		bool Oblique;
-		CFontGenerator *FontGenerator;
-
 		SGlyphInfo()
-			: CacheVersion(0),
+			: CacheVersion(0), GlyphIndex(0),
 			  U0(0.f), V0(0.f), U1(0.f), V1(0.f),
-			  X(0), Y(0), W(0), H(0), CharWidth(0), CharHeight(0),
-			  GlyphIndex(0), Size(0), Embolden(false), Oblique(false), FontGenerator(NULL)
+			  X(0), Y(0), W(0), H(0), CharWidth(0), CharHeight(0)
 		{
 		}
 	};
@@ -172,7 +166,7 @@ private:
 	uint _GlyphSizeStep;
 
 	// rendered glyph cache
-	std::list<SGlyphInfo> _GlyphCache;
+	std::map<SLetterKey, SGlyphInfo> _GlyphCache;
 	SGlyphInfo* findLetterGlyph(SLetterInfo *letter, bool insert);
 
 	// render letter glyph into glyph cache
