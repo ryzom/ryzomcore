@@ -53,6 +53,8 @@ NLMISC::CBitmap *s_HeightMap;
 float s_ZFactor2 = 1.0f;
 NLMISC::CBitmap *s_HeightMap2;
 
+bool s_ExtendCoords;
+
 std::string s_InputZone; // UTF-8
 std::string s_OutputZone; // UTF-8
 
@@ -121,13 +123,18 @@ float getHeight(float x, float y)
 	sint32 sizeX = s_ZoneMaxX - s_ZoneMinX + 1;
 	sint32 sizeY = s_ZoneMaxY - s_ZoneMinY + 1;
 
-	clamp(x, s_CellSize * s_ZoneMinX, s_CellSize * (s_ZoneMaxX + 1));
-	clamp(y, s_CellSize * s_ZoneMinY, s_CellSize * (s_ZoneMaxY + 1));
-
 	if (s_HeightMap != NULL)
 	{
 		float xc = (x - s_CellSize * s_ZoneMinX) / (s_CellSize * sizeX);
 		float yc = 1.0f - ((y - s_CellSize * s_ZoneMinY) / (s_CellSize * sizeY));
+		if (s_ExtendCoords)
+		{
+			uint32 w = s_HeightMap->getWidth(), h = s_HeightMap->getHeight();
+			xc -= .5f / (float)w;
+			yc -= .5f / (float)h;
+			xc = xc * (float)(w + 1) / (float)w;
+			yc = yc * (float)(h + 1) / (float)h;
+		}
 		color = s_HeightMap->getColor(xc, yc);
 		color *= 255;
 		deltaZ = color.A;
@@ -139,6 +146,14 @@ float getHeight(float x, float y)
 	{
 		float xc = (x - s_CellSize * s_ZoneMinX) / (s_CellSize * sizeX);
 		float yc = 1.0f - ((y - s_CellSize * s_ZoneMinY) / (s_CellSize * sizeY));
+		if (s_ExtendCoords)
+		{
+			uint32 w = s_HeightMap2->getWidth(), h = s_HeightMap2->getHeight();
+			xc -= .5f / (float)w;
+			yc -= .5f / (float)h;
+			xc = xc * (float)(w + 1) / (float)w;
+			yc = yc * (float)(h + 1) / (float)h;
+		}
 		color = s_HeightMap2->getColor(xc, yc);
 		color *= 255;
 		deltaZ2 = color.A;
@@ -475,6 +490,7 @@ int main(int argc, char **argv)
 	args.addArg("", "heightmap", "bitmap", "Heightmap");
 	args.addArg("", "zfactor2", "factor", "Factor for second heightmap");
 	args.addArg("", "heightmap2", "bitmap", "Second heightmap");
+	args.addArg("", "extendcoords", "flag", "Extend coordinates to edge of bitmap pixels");
 	// TODO: args.addArg("", "batch", "", "Process all zones in input (specify input as C:/folder/.zonenhw)");
 
 	if (!args.parse(argc, argv))
@@ -577,6 +593,8 @@ int main(int argc, char **argv)
 		if (!NLMISC::fromString(args.getLongArg("zfactor2")[0], s_ZFactor2))
 			goto Fail;
 	}
+
+	s_ExtendCoords = args.haveLongArg("extendcoords");
 
 	if (args.haveLongArg("cellsize"))
 	{
