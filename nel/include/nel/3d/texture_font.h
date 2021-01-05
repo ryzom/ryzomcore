@@ -38,6 +38,36 @@ class CTextureFont : public ITexture
 
 public:
 
+	struct SLetterKey
+	{
+		u32char Char;
+		sint Size;
+		bool Embolden;
+		bool Oblique;
+		CFontGenerator *FontGenerator;
+
+		SLetterKey() : Char(0), Size(0), Embolden(false), Oblique(false), FontGenerator(NULL)
+		{
+		}
+
+		// Does not use FontGenerator in return value
+		inline uint64 getVal() const
+		{
+			return Char                           // 32 bits
+				| (uint64(Size & 0xFFFF) << 32)   // 16 bits
+				| (uint64(Embolden) << (32+16))   // 1 bit
+				| (uint64(Oblique) << (32+16+1)); // 1 bit
+		}
+
+		bool operator<(const SLetterKey &rhs) const
+		{
+			uint64 a = getVal();
+			uint64 b = rhs.getVal();
+			return (a < b) || ((a == b) && (FontGenerator < rhs.FontGenerator));
+		}
+	};
+
+
 	// Holds info for glyphs rendered on atlas
 	struct SGlyphInfo
 	{
@@ -70,14 +100,8 @@ public:
 	};
 
 	// Holds info for glyphs displayed on screen
-	struct SLetterInfo
+	struct SLetterInfo : SLetterKey
 	{
-		u32char Char;
-		sint Size;
-		bool Embolden;
-		bool Oblique;
-		CFontGenerator *FontGenerator;
-
 		uint32 GlyphIndex;
 		uint32 CharWidth;	// Displayed glyph height
 		uint32 CharHeight;	// Displayed glyph height
@@ -88,25 +112,8 @@ public:
 		SGlyphInfo* glyph;
 
 		SLetterInfo()
-			: Char(0), Size(0), Embolden(false), Oblique(false), FontGenerator(NULL),
-			  GlyphIndex(0), CharWidth(0), CharHeight(0), Top(0), Left(0), AdvX(0),
+			: GlyphIndex(0), CharWidth(0), CharHeight(0), Top(0), Left(0), AdvX(0),
 			  glyph(NULL)
-		{
-		}
-	};
-
-	struct SLetterKey
-	{
-		u32char Char;
-		sint Size;
-		bool Embolden;
-		bool Oblique;
-		CFontGenerator *FontGenerator;
-
-		// Does not use FontGenerator in return value
-		uint32 getVal();
-
-		SLetterKey():Char(0), FontGenerator(NULL), Size(0), Embolden(false), Oblique(false)
 		{
 		}
 	};
@@ -151,7 +158,7 @@ private:
 	// Keep track of available space in main texture
 	std::vector<NLMISC::CRect> _AtlasNodes;
 
-	std::vector <SLetterInfo> _Letters;
+	std::map<SLetterKey, SLetterInfo> _Letters;
 
 	// lookup letter from letter cache or create new
 	SLetterInfo* findLetter(SLetterKey& k, bool insert);

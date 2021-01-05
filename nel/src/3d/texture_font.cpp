@@ -112,9 +112,9 @@ void CTextureFont::clearAtlas()
 	_Data[0].fill(0);
 
 	// clear glyph cache
-	for(uint i = 0; i< _Letters.size(); ++i)
+	for(std::map<SLetterKey, SLetterInfo>::iterator it = _Letters.begin(); it != _Letters.end(); ++it)
 	{
-		_Letters[i].glyph = NULL;
+		it->second.glyph = NULL;
 	}
 	_GlyphCache.clear();
 
@@ -473,21 +473,15 @@ CTextureFont::SGlyphInfo* CTextureFont::findLetterGlyph(SLetterInfo *letter, boo
 // ---------------------------------------------------------------------------
 CTextureFont::SLetterInfo* CTextureFont::findLetter(SLetterKey &k, bool insert)
 {
-	// TODO: use std::map<uint64>
-	for(uint i = 0; i < _Letters.size(); ++i)
+	std::map<SLetterKey, SLetterInfo>::iterator it = _Letters.find(k);
+	if (it != _Letters.end())
 	{
-		if (_Letters[i].Char == k.Char && _Letters[i].Size == k.Size &&
-			_Letters[i].Embolden == k.Embolden && _Letters[i].Oblique == k.Oblique &&
-			_Letters[i].FontGenerator == k.FontGenerator)
-		{
-			return &_Letters[i];
-		}
+		return &(it->second);
 	}
 
 	if (insert)
 	{
-		_Letters.push_back(SLetterInfo());
-		SLetterInfo* letter = &_Letters.back();
+		SLetterInfo* letter = &_Letters[k];
 
 		// get metrics for requested size
 		letter->Char = k.Char;
