@@ -68,6 +68,7 @@ int s_Warnings;
 
 // --land "R:\graphics\landscape\ligo\desert\r2_desert.land" --referenceext zonew "X:\wsl\check_r2_desert.py" "R:\reference\2008_july\data\r2_desert" "R:\pipeline\export\continents\r2_desert\zone_weld" --extendcoords
 // --land "R:\graphics\landscape\ligo\jungle\r2_jungle.land" --referenceext zonew "X:\wsl\check_r2_jungle.py" "R:\reference\2008_july\data\r2_jungle" "R:\pipeline\export\continents\r2_jungle\zone_weld" --extendcoords
+// --land "R:\graphics\landscape\ligo\primes_racines\r2_roots.land" --referenceext zonew "X:\wsl\check_r2_roots.py" "R:\reference\2008_july\data\r2_roots" "R:\pipeline\export\continents\r2_roots\zone_weld" --extendcoords
 
 bool loadLand(const string &filename)
 {
@@ -295,6 +296,9 @@ bool unbuildElevation()
 		std::string sourceZone = s_SourceDir + "/" + CFile::getFilenameWithoutExtension(*it) + "." + s_SourceExt;
 
 		if (!CFile::fileExists(sourceZone))
+			continue;
+
+		if (zone == "137_JK") // Bad zone
 			continue;
 
 		printf("%s\n", nlUtf8ToMbcs(zone));
