@@ -132,6 +132,12 @@ void getBitmapSize(int &w, int &h)
 	sint32 sizeY = s_ZoneMaxY - s_ZoneMinY + 1;
 	w = sizeX * 20;
 	h = sizeY * 20;
+
+	if (!s_ExtendCoords)
+	{
+		++w;
+		++h;
+	}
 }
 
 void getBitmapCoord(float &xc, float &yc, float x, float y)
