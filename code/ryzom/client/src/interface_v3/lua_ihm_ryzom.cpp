@@ -4187,7 +4187,7 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 {
 	const char* funcName = "addLandMark";
 	CLuaIHM::checkArgMin(ls, funcName, 4);
-	CLuaIHM::checkArgMax(ls, funcName, 9);
+	CLuaIHM::checkArgMax(ls, funcName, 11);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER); // x
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER); // y
 	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING); // title
@@ -4196,6 +4196,9 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 6, LUA_TSTRING); // left click param
 	CLuaIHM::checkArgType(ls, funcName, 7, LUA_TSTRING); // right click action
 	CLuaIHM::checkArgType(ls, funcName, 8, LUA_TSTRING); // right click params
+	CLuaIHM::checkArgType(ls, funcName, 9, LUA_TSTRING); // over click action
+	CLuaIHM::checkArgType(ls, funcName, 10, LUA_TSTRING); // over click params
+	// 11 : Color
 
 	CArkPoint point;
 	point.x = (sint32)(ls.toNumber(1)*1000.f);
@@ -4206,10 +4209,12 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 	point.LeftClickParam = ls.toString(6);
 	point.RightClickAction = ls.toString(7);
 	point.RightClickParam = ls.toString(8);
+	point.OverClickAction = ls.toString(9);
+	point.OverClickParam = ls.toString(10);
 
 	point.Color = CRGBA(255,255,255,255);
 
-	if (ls.getTop() >= 9)
+	if (ls.getTop() >= 11)
 		CLuaIHM::pop(ls, point.Color);
 
 	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
