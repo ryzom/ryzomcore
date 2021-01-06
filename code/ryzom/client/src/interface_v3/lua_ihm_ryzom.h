@@ -272,9 +272,9 @@ private:
 	static std::string getPlayerVpaHex();
 	static std::string getPlayerVpbHex();
 	static std::string getPlayerVpcHex();
-	static sint64 getPlayerVpa();
-	static sint64 getPlayerVpb();
-	static sint64 getPlayerVpc();
+	static uint64 getPlayerVpa();
+	static uint64 getPlayerVpb();
+	static uint64 getPlayerVpc();
 	static sint32 getTargetLevel();		// get current, precise level of the selected target, or -1 if there's no such selected target
 	static sint32 getTargetForceRegion(); // get 'force region' for current target, or -1 if there's no selected target
 	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target
@@ -282,9 +282,9 @@ private:
 	static std::string getTargetVpaHex();
 	static std::string getTargetVpbHex();
 	static std::string getTargetVpcHex();
-	static sint64 getTargetVpa();
-	static sint64 getTargetVpb();
-	static sint64 getTargetVpc();
+	static uint64 getTargetVpa();
+	static uint64 getTargetVpb();
+	static uint64 getTargetVpc();
 	static bool	isTargetNPC(); // return 'true' if the target is an npc
 	static bool	isTargetPlayer(); // return 'true' if the target is a player
 	static bool	isTargetUser(); // return 'true' if the target is the user
