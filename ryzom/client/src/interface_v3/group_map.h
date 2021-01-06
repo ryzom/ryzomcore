@@ -95,6 +95,8 @@ public:
 	std::string			LeftClickParam;
 	std::string			RightClickAction;
 	std::string			RightClickParam;
+	std::string			OverClickAction;
+	std::string			OverClickParam;
 
 public:
 	CArkPoint()
@@ -230,7 +232,7 @@ public:
 	void addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, NLMISC::CRGBA color);
 	void addUserRespawnPoint(const NLMISC::CVector2f &pos);
 	void delArkPoints();
-	
+
 
 	// set landmarks visibility based text query
 	void setLandmarkFilter(const std::string &s);
@@ -602,7 +604,7 @@ private:
 	CLandMarkButton *createLandMarkButton(const CLandMarkOptions &options);
 	// Create a Ark landmark button, but do not add it to this group
 	CLandMarkButton *createArkPointButton(const CArkPoint &point);
-	
+
 	// update a landmark button
 	void updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOptions &options);
 

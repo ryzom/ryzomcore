@@ -15,7 +15,7 @@ private:
 
 	static int luaClientCfgIndex(CLuaState &ls);
 	static int luaClientCfgNewIndex(CLuaState &ls);
-	
+
 	// CInterfaceElement management on stack, stored by a CRefPtr.
 public:
 
@@ -234,6 +234,7 @@ private:
 	static bool	isDynStringAvailable(sint32 dynStringId);
 	static bool	isFullyPatched();
 	static std::string getSheetType(const std::string &sheet);
+	static std::string getSheetShape(const std::string &sheet);
 	static std::string getSheetFamily(const std::string &sheet);
 	static std::string getSheetName(uint32 sheetId);
 	static sint32 getFameIndex(const std::string &factionName);
@@ -281,7 +282,7 @@ private:
 	static int addRespawnPoint(CLuaState &ls);
 	static int delArkPoints(CLuaState &ls);
 	static int setArkPowoOptions(CLuaState &ls);
-	
+
 
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
     // else, current command of the chat window will be replaced with tell 'player'
@@ -294,7 +295,7 @@ private:
 	static void updateTooltipCoords();
 	// test if the ctrl key is down (NB nico : I didn't add other key,
 	// because it would be too easy to write a key recorder ...)
-	static bool	isCtrlKeyDown(); 							     
+	static bool	isCtrlKeyDown();
 #ifdef RYZOM_LUA_UCSTRING
 	static std::string encodeURLUnicodeParam(const ucstring &text);
 #else

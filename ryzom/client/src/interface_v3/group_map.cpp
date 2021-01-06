@@ -2751,6 +2751,8 @@ CGroupMap::CLandMarkButton *CGroupMap::createArkPointButton(const CArkPoint &poi
 	lmb->setParamsOnLeftClick(point.LeftClickParam);
 	lmb->setActionOnRightClick(point.RightClickAction);
 	lmb->setParamsOnRightClick(point.RightClickParam);
+	lmb->setActionOnOver(point.OverClickAction);
+	lmb->setParamsOnOver(point.OverClickParam);
 	lmb->setColor(point.Color);
 	lmb->setColorOver(point.Color);
 	lmb->setColorPushed(point.Color);
