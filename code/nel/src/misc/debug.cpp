@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -445,7 +449,7 @@ public:
 
 	EDebug() { _Reason = "Nothing about EDebug"; }
 
-	virtual ~EDebug() throw() {}
+	virtual ~EDebug() NL_OVERRIDE {}
 
 	EDebug(EXCEPTION_POINTERS * pexp) : m_pexp(pexp) { nlassert(pexp != 0); createWhat(); }
 	EDebug(const EDebug& se) : m_pexp(se.m_pexp) { createWhat(); }
@@ -859,9 +863,10 @@ public:
 					cleanType (type, displayType);
 
 					char tmp[1024];
+					tmp[0]='\0';
 					if(type == "void")
 					{
-						tmp[0]='\0';
+						// tmp[0]='\0';
 					}
 					else if(type == "int")
 					{
@@ -1048,9 +1053,9 @@ void getCallStack(std::string &result, sint skipNFirst)
 }
 
 
-void getCallStackAndLog (string &result, sint /* skipNFirst */)
+void getCallStackAndLog (string &result, sint skipNFirst)
 {
-	//getCallStack(result, skipNFirst);
+	getCallStack(result, skipNFirst);
 //#ifdef NL_OS_WINDOWS
 //	try
 //	{
@@ -1712,6 +1717,7 @@ NLMISC_CATEGORISED_COMMAND(nel, writeaccess, "write a uint8 value in an invalid 
 #endif
 	}
 	if(args.size() >= 2) NLMISC::fromString(args[1], val);
+	nlassume(adr);
 	*adr = val;
 	return true;
 }
@@ -1732,6 +1738,7 @@ NLMISC_CATEGORISED_COMMAND(nel, readaccess, "read a uint8 value in an invalid ad
 		adr = (uint8*)addr32;
 #endif
 	}
+	nlassume(adr);
 	val = *adr;
 	log.displayNL("value is %hu", (uint16)val);
 	return true;

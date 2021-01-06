@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,6 +32,7 @@
 #include "nel/misc/thread.h"
 #include "nel/misc/big_file.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/streamed_package_manager.h"
 
 #include "nel/net/tcp_sock.h"
 #include "nel/3d/u_driver.h"
@@ -50,7 +55,7 @@
 #include "global.h"
 #include "input.h"
 #include "nel/gui/libwww.h"
-#include "http_client_curl.h"
+#include "nel/web/http_client_curl.h"
 #include "login_progress_post_thread.h"
 
 #include "init.h"
@@ -68,6 +73,7 @@ void ConnectToShard();
 // ***************************************************************************
 
 using namespace NLMISC;
+using namespace NLWEB;
 using namespace NLNET;
 using namespace NL3D;
 using namespace std;
@@ -155,7 +161,12 @@ CLoginStateMachine LoginSM;
 
 bool CStartupHttpClient::connectToLogin()
 {
-	return connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0));
+	bool checkConnect = connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0));
+
+	if (ClientCfg.ConfigFile.exists("StartupVerify"))
+		checkConnect = checkConnect && verifyServer(ClientCfg.ConfigFile.getVar("StartupVerify").asBool(0));
+
+	return checkConnect;
 }
 
 CStartupHttpClient HttpClient;
@@ -860,7 +871,7 @@ void initAutoLogin()
 void initAltLogin()
 {
 	// Check the alt param
-	if (!LoginCustomParameters.empty())
+	if (!LoginCustomParameters.empty() && LoginCustomParameters != "&dbg=1")
 	{
 		// don't use login and password for alternate login
 		string res = checkLogin("", "", ClientApp, LoginCustomParameters);
@@ -1685,6 +1696,7 @@ void initPatch()
 		CBGDownloaderAccess::getInstance().startTask(taskDesc, string(), true /* showDownloader */); // no command line since bg downloader should already be started
 		// release lock on bnp, so that they can be written
 		NLMISC::CBigFile::getInstance().removeAll();
+		NLMISC::CStreamedPackageManager::getInstance().unloadAll();
 	}
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
 
@@ -1961,7 +1973,7 @@ class CAHOpenURL : public IActionHandler
 		}
 
 		// modify existing languages
-		
+
 		// old site
 		string::size_type pos_lang = url.find("/en/");
 
@@ -2825,7 +2837,36 @@ string checkLogin(const string &login, const string &password, const string &cli
 		if(res.empty())
 			return "Empty answer from server (error code 62)";
 
-		if(res[0] == '0')
+		size_t first = res.find("\n\n");
+		if (first == std::string::npos)
+		{
+			first = res.find("\r\r");
+			if (first == std::string::npos)
+			{
+				first = res.find("\r\n\r\n");
+				if (first != std::string::npos)
+				{
+					res = res.substr(first + 4);
+				}
+			}
+			else
+			{
+				res = res.substr(first + 2);
+			}
+		}
+		else
+		{
+			res = res.substr(first + 2);
+		}
+
+		nldebug("res1: %s", res.c_str());
+
+		if (res[0] == 'H')
+		{
+			nlwarning("missing response body: %s", res.c_str());
+			return "missing response body (error code 64)";
+		}
+		else if(res[0] == '0')
 		{
 			// server returns an error
 			nlwarning("server error: %s", res.substr(2).c_str());
@@ -2878,7 +2919,36 @@ string checkLogin(const string &login, const string &password, const string &cli
 		if(res.empty())
 			return "Empty answer from server (error code 4)";
 
-		if(res[0] == '0')
+		size_t first = res.find("\n\n");
+		if (first == std::string::npos)
+		{
+			first = res.find("\r\r");
+			if (first == std::string::npos)
+			{
+				first = res.find("\r\n\r\n");
+				if (first != std::string::npos)
+				{
+					res = res.substr(first + 4);
+				}
+			}
+			else
+			{
+				res = res.substr(first + 2);
+			}
+		}
+		else
+		{
+			res = res.substr(first + 2);
+		}
+
+		nldebug("res2: %s", res.c_str());
+
+		if (res[0] == 'H')
+		{
+			nlwarning("missing response body: %s", res.c_str());
+			return "missing response body (error code 65)";
+		}
+		else if(res[0] == '0')
 		{
 			// server returns an error
 			nlwarning("server error: %s", res.substr(2).c_str());
@@ -2960,7 +3030,36 @@ string checkLogin(const string &login, const string &password, const string &cli
 		if(res.empty())
 			return "Empty answer from server (error code 4)";
 
-		if(res[0] == '0')
+		size_t first = res.find("\n\n");
+		if (first == std::string::npos)
+		{
+			first = res.find("\r\r");
+			if (first == std::string::npos)
+			{
+				first = res.find("\r\n\r\n");
+				if (first != std::string::npos)
+				{
+					res = res.substr(first + 4);
+				}
+			}
+			else
+			{
+				res = res.substr(first + 2);
+			}
+		}
+		else
+		{
+			res = res.substr(first + 2);
+		}
+
+		nldebug("res2: %s", res.c_str());
+
+		if (res[0] == 'H')
+		{
+			nlwarning("missing response body: %s", res.c_str());
+			return "missing response body (error code 66)";
+		}
+		else if(res[0] == '0')
 		{
 			// server returns an error
 			nlwarning("server error: %s", res.substr(2).c_str());
@@ -3065,7 +3164,36 @@ string selectShard(uint32 shardId, string &cookie, string &addr)
 	if(res.empty())
 		return "Empty result (error code 13)";
 
-	if(res[0] == '0')
+	size_t first = res.find("\n\n");
+	if (first == std::string::npos)
+	{
+		first = res.find("\r\r");
+		if (first == std::string::npos)
+		{
+			first = res.find("\r\n\r\n");
+			if (first != std::string::npos)
+			{
+				res = res.substr(first + 4);
+			}
+		}
+		else
+		{
+			res = res.substr(first + 2);
+		}
+	}
+	else
+	{
+		res = res.substr(first + 2);
+	}
+
+	nldebug("res2: %s", res.c_str());
+
+	if (res[0] == 'H')
+	{
+		nlwarning("missing response body: %s", res.c_str());
+		return "missing response body (error code 66)";
+	}
+	else if(res[0] == '0')
 	{
 		// server returns an error
 		nlwarning("server error: %s", res.substr(2).c_str());

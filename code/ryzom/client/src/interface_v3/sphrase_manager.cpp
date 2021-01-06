@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -407,7 +411,7 @@ void				CSPhraseManager::forgetPhrase(uint32 memoryLine, uint32 memorySlot)
 	_Memories[memoryLine].Slot[memorySlot].Id= 0;
 
 	// must update DB?
-	if((sint32)memoryLine==_SelectedMemoryDB)
+	if((sint32)memoryLine==_SelectedMemoryDB || (sint32)memoryLine==_SelectedMemoryDBalt)
 	{
 		// update the db
 		updateMemoryDBSlot(memorySlot);
@@ -461,7 +465,7 @@ void				CSPhraseManager::memorizePhrase(uint32 memoryLine, uint32 memorySlot, ui
 	_Memories[memoryLine].Slot[memorySlot].Id= slot;
 
 	// must update DB?
-	if((sint32)memoryLine==_SelectedMemoryDB)
+	if((sint32)memoryLine==_SelectedMemoryDB || (sint32)memoryLine==_SelectedMemoryDBalt)
 	{
 		// update the DB
 		updateMemoryDBSlot(memorySlot);
@@ -3272,7 +3276,7 @@ void	CSPhraseManager::memorizeMacro(uint32 memoryLine, uint32 memorySlot, uint32
 	_Memories[memoryLine].Slot[memorySlot].Id= macroId;
 
 	// must update DB?
-	if((sint32)memoryLine==_SelectedMemoryDB)
+	if((sint32)memoryLine==_SelectedMemoryDB || (sint32)memoryLine==_SelectedMemoryDBalt)
 	{
 		// update the DB
 		updateMemoryDBSlot(memorySlot);
@@ -3298,7 +3302,7 @@ void	CSPhraseManager::forgetMacro(uint32 memoryLine, uint32 memorySlot)
 	_Memories[memoryLine].Slot[memorySlot].Id= 0;
 
 	// must update DB?
-	if((sint32)memoryLine==_SelectedMemoryDB)
+	if((sint32)memoryLine==_SelectedMemoryDB || (sint32)memoryLine==_SelectedMemoryDBalt)
 	{
 		// update the db
 		updateMemoryDBSlot(memorySlot);

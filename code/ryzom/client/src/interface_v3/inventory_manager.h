@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -818,6 +821,15 @@ private:
 
 #define LIST_PA3_TEXT				"ui:interface:inv_pa3:content:iil:bag_list"
 #define LIST_PA3_ICONS				"ui:interface:inv_pa3:content:iil:bag_icons"
+
+#define LIST_PA4_TEXT				"ui:interface:inv_pa4:content:iil:bag_list"
+#define LIST_PA4_ICONS				"ui:interface:inv_pa4:content:iil:bag_icons"
+
+#define LIST_PA5_TEXT				"ui:interface:inv_pa5:content:iil:bag_list"
+#define LIST_PA5_ICONS				"ui:interface:inv_pa5:content:iil:bag_icons"
+
+#define LIST_PA6_TEXT				"ui:interface:inv_pa6:content:iil:bag_list"
+#define LIST_PA6_ICONS				"ui:interface:inv_pa6:content:iil:bag_icons"
 
 // Theorically never used
 #define LIST_BAG2_TEXT				"ui:interface:inv_bag:content:iil:bag_list"

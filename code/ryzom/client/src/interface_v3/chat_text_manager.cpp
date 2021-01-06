@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -418,6 +422,42 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 		return para;
 	}
 
+	ucstring::size_type pos = 0;
+
+	// Manage Translations
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TRANSLATION_ONLY_AS_TOOLTIP_CB", false);
+	bool originalFirst = node->getValueBool();
+
+	string::size_type startTr = msg.find(ucstring("{:"));
+	string::size_type endOfOriginal = msg.find(ucstring("}@{"));
+
+	// Original/Translated case, example: {:enHello the world!}@{ Bonjour le monde !
+	if (startTr != string::npos && endOfOriginal != string::npos)
+	{
+		CViewBase *vt = createMsgTextSimple(msg.substr(0, startTr), col, justified, NULL);
+		para->addChild(vt);
+
+		string texture = "flag-"+toLower(msg.substr(startTr+2, 2)).toString()+".tga";
+		ucstring original = msg.substr(startTr+5, endOfOriginal-startTr-5);
+		ucstring translation = msg.substr(endOfOriginal+3);
+		CCtrlButton *ctrlButton = new CCtrlButton(CViewBase::TCtorParam());
+		ctrlButton->setTexture(texture);
+		ctrlButton->setTextureOver(texture);
+		ctrlButton->setTexturePushed(texture);
+		if (!originalFirst)
+		{
+		  ctrlButton->setDefaultContextHelp(original);
+		  pos = endOfOriginal+3;
+		}
+		else
+		{
+		  ctrlButton->setDefaultContextHelp(translation);
+		  pos = startTr+5;
+		  textSize = endOfOriginal;
+		}
+		ctrlButton->setId("tr");
+		para->addChild(ctrlButton);
+	}
 
 	// quickly check if text has links or not
 	bool hasUrl;
@@ -426,8 +466,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 		hasUrl = (s.find(ucstring("http://")) || s.find(ucstring("https://")));
 	}
 
-	ucstring::size_type pos = 0;
-	for (ucstring::size_type i = 0; i< textSize;)
+	for (ucstring::size_type i = pos; i< textSize;)
 	{
 		if (hasUrl && isUrlTag(msg, i, textSize))
 		{

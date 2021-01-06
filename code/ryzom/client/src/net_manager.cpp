@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -143,6 +147,7 @@ extern bool CharNameValidArrived;
 extern bool CharNameValid;
 bool IsInRingSession = false;
 TSessionId HighestMainlandSessionId; // highest in the position stack
+ucstring lastUniversMessage;
 
 extern const char *CDBBankNames[INVALID_CDB_BANK+1];
 
@@ -766,7 +771,11 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		}
 		else if (mode == CChatGroup::universe)
 		{
-			PeopleInterraction.ChatInput.Universe.displayMessage(finalString, col, 2, &windowVisible);
+			if (lastUniversMessage != finalString)
+			{
+				PeopleInterraction.ChatInput.Universe.displayMessage(finalString, col, 2, &windowVisible);
+				lastUniversMessage = finalString;
+			}
 		}
 		else if (mode == CChatGroup::dyn_chat)
 		{
@@ -2763,7 +2772,7 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 			const string invBranchStr = CInventoryCategoryTemplate::getDbStr( (typename CInventoryCategoryTemplate::TInventoryId)invId );
 			ICDBNode::CTextId textId( invBranchStr );
 			ICDBNode *inventoryNode = IngameDbMngr.getNodePtr()->getNode( textId, false );
-			BOMB_IF( !inventoryNode, "Inventory missing in database", return )
+			BOMB_IF(!inventoryNode, "Inventory missing in database", return);
 
 			// List of updates
 			for ( uint c=0; c!=nbChanges; ++c )
@@ -3292,7 +3301,7 @@ private:
 			if(i != digitMaxEnd)
 			{
 				ucstring web_app = contentStr.substr(digitStart, i-digitStart);
-				contentStr = ucstring("http://"+ClientCfg.WebIgMainDomain+"/")+web_app+ucstring("/index.php?")+contentStr.substr(i+1);
+				contentStr = ucstring(ClientCfg.WebIgMainDomain + "/") + web_app + ucstring("/index.php?") + contentStr.substr((size_t)i + 1);
 			}
 			else
 			{

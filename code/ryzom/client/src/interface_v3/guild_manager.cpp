@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -63,6 +67,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListAscensor, std::string, "list_sheet
 #define VIEW_TEXT_GUILD_QUIT				"ui:interface:guild:content:tab_guild_info:quit_guild"
 #define CTRL_SHEET_GUILD_BLASON				"ui:interface:guild:content:tab_guild_info:blason"
 #define VIEW_TEXT_GUILD_MEMBER_COUNT		"ui:interface:guild:content:tab_guild_info:member_count"
+#define VIEW_TEXT_GUILD_MEMBER_COUNT_ONLINE		"ui:interface:guild:content:tab_guild_info:member_count_online"
 
 
 #define LIST_GUILD_MEMBERS					"ui:interface:guild:content:tab_guild:list_member:guild_members"
@@ -813,6 +818,7 @@ class CAHGuildSheetOpen : public IActionHandler
 			if (pParent == NULL) return;
 			pParent->clearGroups();
 			pParent->setDynamicDisplaySize(false);
+			uint member_online = 0;
 			for (uint i = 0; i < rGuildMembers.size(); i++)
 			{
 				// create the member line
@@ -851,11 +857,13 @@ class CAHGuildSheetOpen : public IActionHandler
 					switch(rGuildMembers[i].Online)
 					{
 					case ccs_online:
+						member_online++;
 						onlineView->setTexture("w_online.tga");
 						if (toolTip)
 							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnline"));
 						break;
 					case ccs_online_abroad:
+						member_online++;
 						onlineView->setTexture("w_online_abroad.tga");
 						if (toolTip)
 							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnlineAbroad"));
@@ -891,6 +899,12 @@ class CAHGuildSheetOpen : public IActionHandler
 				pLine->setParent (pParent);
 				pParent->addChild (pLine);
 			}
+			
+			// update member online count view
+			CViewText	*pOnlineMember = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TEXT_GUILD_MEMBER_COUNT_ONLINE));
+			if (pOnlineMember)
+ 				pOnlineMember->setText(toString(member_online));
+			
 		}
 	}
 };

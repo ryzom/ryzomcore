@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1271,7 +1275,7 @@ static bool	setupNVFragmentProgram2(const char *glext)
 {
 	H_AUTO_OGL(setupNVFragmentProgram2);
 	CHECK_EXT("GL_NV_fragment_program2");
-	
+
 	return true;
 }
 
@@ -1280,7 +1284,7 @@ static bool	setupARBFragmentShader(const char *glext)
 {
 	H_AUTO_OGL(setupNVFragmentProgram2);
 	CHECK_EXT("GL_ARB_fragment_shader");
-	
+
 	return true;
 }
 
@@ -1580,6 +1584,14 @@ void	registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
 
+#ifdef NL_OS_MAC
+	CGLContextObj ctx = CGLGetCurrentContext();
+	if (ctx == NULL)
+	{
+		nlerror("No OpenGL context set");
+	}
+#endif
+
 	// OpenGL 1.2 ??
 	const char	*nglVersion = (const char *)glGetString (GL_VERSION);
 
@@ -1687,12 +1699,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.EXTVertexShader = false;
 		ext.ARBVertexProgram = false;
 	}
-	
+
 	// Check pixel program
 	// Disable feature ???
 	if (!ext.DisableHardwarePixelProgram)
 	{
-		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);	
+		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);
 		ext.NVFragmentProgram2 = setupNVFragmentProgram2(glext);
 		ext.ARBFragmentShader = setupARBFragmentShader(glext);
 	}

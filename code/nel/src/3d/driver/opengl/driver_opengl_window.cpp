@@ -1,6 +1,11 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -99,6 +104,13 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		else
 		{
 			driver->_WndActive = true;
+		}
+	}
+	else if ((message == WM_SETFOCUS) || (message == WM_KILLFOCUS))
+	{
+		if (driver != NULL)
+		{
+			driver->_WindowFocus = (message == WM_SETFOCUS);
 		}
 	}
 
@@ -285,6 +297,18 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 		}
 
 		break;
+
+		case FocusIn:
+		{
+			driver->_WindowFocus = true;
+			return driver->_EventEmitter.processMessage(e);
+		}
+
+		case FocusOut:
+		{
+			driver->_WindowFocus = false;
+			return driver->_EventEmitter.processMessage(e);
+		}
 
 		default:
 
@@ -1048,6 +1072,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	[_ctx flushBuffer];
 	[_glView display];
 
+	// Set context as thread context
+	CGLSetCurrentContext((CGLContextObj)[_ctx CGLContextObj]);
+	
 	_EventEmitter.init(this, _glView, _DestroyWindow);
 
 #elif defined(NL_OS_UNIX)
@@ -2676,8 +2703,11 @@ IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const c
 										}
 	nlstop;
 #else // NL_OS_WINDOWS
-	// Call the console version!
-	IDriver::systemMessageBox (message, title, type, icon);
+	// TODO: if user did not launch from console, then program "freezes" without explanation or possibility to continue
+	//IDriver::systemMessageBox (message, title, type, icon);
+	// log only
+	printf("%s:%s\n", title, message);
+	nlwarning("%s: %s", title, message);
 #endif // NL_OS_WINDOWS
 	return okId;
 }

@@ -26,6 +26,8 @@ struct CUTMiscCommon : public Test::Suite
 	{
 		TEST_ADD(CUTMiscCommon::bytesToHumanReadableUnits);
 		TEST_ADD(CUTMiscCommon::humanReadableToBytes);
+		TEST_ADD(CUTMiscCommon::encodeURIComponent);
+		TEST_ADD(CUTMiscCommon::decodeURIComponent);
 
 		// Add a line here when adding a new test METHOD
 	}
@@ -165,6 +167,27 @@ struct CUTMiscCommon : public Test::Suite
 		// not a positive number
 		bytes = NLMISC::humanReadableToBytes("-1 B");
 		TEST_ASSERT(bytes == 0);
+	}
+
+	void encodeURIComponent()
+	{
+		TEST_ASSERT("%00" == NLMISC::encodeURIComponent(std::string("\x00", 1)));
+		TEST_ASSERT("%0A" == NLMISC::encodeURIComponent(std::string("\x0A", 1)));
+		TEST_ASSERT("%A0" == NLMISC::encodeURIComponent(std::string("\xA0", 1)));
+		TEST_ASSERT("a%20b" == NLMISC::encodeURIComponent("a b"));
+		TEST_ASSERT("a%2Bb" == NLMISC::encodeURIComponent("a+b"));
+	}
+
+	void decodeURIComponent()
+	{
+		TEST_ASSERT(std::string("\x00", 1) == NLMISC::decodeURIComponent(std::string("\x00", 1)));
+		TEST_ASSERT(std::string("\x0A", 1) == NLMISC::decodeURIComponent(std::string("\x0A", 1)));
+		TEST_ASSERT(std::string("\xA0", 1) == NLMISC::decodeURIComponent(std::string("\xA0", 1)));
+		TEST_ASSERT("a b" == NLMISC::decodeURIComponent("a%20b"));
+		TEST_ASSERT("a+b" == NLMISC::decodeURIComponent("a%2Bb"));
+
+		TEST_ASSERT("a%A" == NLMISC::decodeURIComponent("a%A"));
+		TEST_ASSERT("a%AX" == NLMISC::decodeURIComponent("a%AX"));
 	}
 };
 

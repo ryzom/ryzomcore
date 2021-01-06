@@ -1,5 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -561,6 +566,11 @@ CDBCtrlSheet::~CDBCtrlSheet()
 		if (Driver)
 			Driver->deleteTextureFile(_GuildSymb);
 		_GuildSymb = NULL;
+	}
+	if (_RegenText)
+	{
+		delete _RegenText;
+		_RegenText = NULL;
 	}
 
 	// ensure erase static
@@ -2865,7 +2875,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 				}
 				else
 				{
-					validClic = isDraggable() && !isDragged() && ((!getItemWeared()&&!getGrayed()) || isShortCut());
+					validClic = isDraggable() && !isDragged() && ((!getItemWeared()&&!getGrayed()) || isSPhraseId());
 				}
 			}
 			if (_Type == SheetType_Macro)
