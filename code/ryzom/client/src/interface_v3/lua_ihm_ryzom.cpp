@@ -3904,40 +3904,40 @@ sint32 CLuaIHMRyzom::getPlayerLevel()
 // ***************************************************************************
 std::string CLuaIHMRyzom::getPlayerVpaHex()
 {
-	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
-	return NLMISC::toString("%X", prop);
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	return NLMISC::toString("%" NL_I64 "X", prop);
 }
 
 // ***************************************************************************
 std::string CLuaIHMRyzom::getPlayerVpbHex()
 {
-	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
-	return NLMISC::toString("%X", prop);
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	return NLMISC::toString("%" NL_I64 "X", prop);
 }
 
 // ***************************************************************************
 std::string CLuaIHMRyzom::getPlayerVpcHex()
 {
-	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
-	return NLMISC::toString("%X", prop);
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
+	return NLMISC::toString("%" NL_I64 "X", prop);
 }
 
 // ***************************************************************************
-sint64 CLuaIHMRyzom::getPlayerVpa()
+uint64 CLuaIHMRyzom::getPlayerVpa()
 {
 	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 	return prop;
 }
 
 // ***************************************************************************
-sint64 CLuaIHMRyzom::getPlayerVpb()
+uint64 CLuaIHMRyzom::getPlayerVpb()
 {
 	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	return prop;
 }
 
 // ***************************************************************************
-sint64 CLuaIHMRyzom::getPlayerVpc()
+uint64 CLuaIHMRyzom::getPlayerVpc()
 {
 	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	return prop;
@@ -3989,8 +3989,8 @@ std::string CLuaIHMRyzom::getTargetVpaHex()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
-	return NLMISC::toString("%X", prop);
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	return NLMISC::toString("%" NL_I64 "X", prop);
 }
 
 // ***************************************************************************
@@ -3999,8 +3999,8 @@ std::string CLuaIHMRyzom::getTargetVpbHex()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
-	return NLMISC::toString("%X", prop);
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	return NLMISC::toString("%" NL_I64 "X", prop);
 }
 
 // ***************************************************************************
@@ -4009,40 +4009,37 @@ std::string CLuaIHMRyzom::getTargetVpcHex()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
-	return NLMISC::toString("%X", prop);
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
+	return NLMISC::toString("%" NL_I64 "X", prop);
 }
 
 // ***************************************************************************
-sint64 CLuaIHMRyzom::getTargetVpa()
+uint64 CLuaIHMRyzom::getTargetVpa()
 {
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
 	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
-
 	return prop;
 }
 
 // ***************************************************************************
-sint64 CLuaIHMRyzom::getTargetVpb()
+uint64 CLuaIHMRyzom::getTargetVpb()
 {
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
-
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	return prop;
 }
 
 // ***************************************************************************
-sint64 CLuaIHMRyzom::getTargetVpc()
+uint64 CLuaIHMRyzom::getTargetVpc()
 {
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
-
+	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	return prop;
 }
 
@@ -4178,7 +4175,7 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 {
 	const char* funcName = "addLandMark";
 	CLuaIHM::checkArgMin(ls, funcName, 4);
-	CLuaIHM::checkArgMax(ls, funcName, 9);
+	CLuaIHM::checkArgMax(ls, funcName, 11);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER); // x
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER); // y
 	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING); // title
@@ -4187,6 +4184,9 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 6, LUA_TSTRING); // left click param
 	CLuaIHM::checkArgType(ls, funcName, 7, LUA_TSTRING); // right click action
 	CLuaIHM::checkArgType(ls, funcName, 8, LUA_TSTRING); // right click params
+	CLuaIHM::checkArgType(ls, funcName, 9, LUA_TSTRING); // over click action
+	CLuaIHM::checkArgType(ls, funcName, 10, LUA_TSTRING); // over click params
+	// 11 : Color
 
 	CArkPoint point;
 	point.x = (sint32)(ls.toNumber(1)*1000.f);
@@ -4197,10 +4197,12 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 	point.LeftClickParam = ls.toString(6);
 	point.RightClickAction = ls.toString(7);
 	point.RightClickParam = ls.toString(8);
+	point.OverClickAction = ls.toString(9);
+	point.OverClickParam = ls.toString(10);
 
 	point.Color = CRGBA(255,255,255,255);
 
-	if (ls.getTop() >= 9)
+	if (ls.getTop() >= 11)
 		CLuaIHM::pop(ls, point.Color);
 
 	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
