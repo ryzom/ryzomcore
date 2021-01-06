@@ -23,7 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess, distutils.dir_util, multiprocessing, math
 
 ActiveProjectDirectory = os.getenv("NELBUILDACTIVEPROJECT", "configuration/project")
 sys.path.append(ActiveProjectDirectory)
@@ -31,6 +31,27 @@ sys.path.append(ActiveProjectDirectory)
 def printLog(log, text):
 	log.write(text + "\n")
 	print text
+
+pendingProcesses = []
+processLimit = math.ceil(multiprocessing.cpu_count() * 0.75)
+
+def callParallelProcess(command):
+	res = 0
+	if len(pendingProcesses) >= processLimit:
+		waitingProc = pendingProcesses.pop(0)
+		res = waitingProc.wait()
+	proc = subprocess.Popen(command)
+	pendingProcesses.append(proc)
+	return res
+
+def flushParallelProcesses():
+	res = 0
+	while (len(pendingProcesses) > 0):
+		waitingProc = pendingProcesses.pop(0)
+		procRes = waitingProc.wait()
+		if procRes != 0:
+			res = procRes
+	return res
 
 def mkPath(log, path):
 	printLog(log, "DIR " + path)

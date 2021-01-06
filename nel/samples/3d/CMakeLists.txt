@@ -1,4 +1,5 @@
 ADD_SUBDIRECTORY(font)
+ADD_SUBDIRECTORY(font_perf)
 ADD_SUBDIRECTORY(cluster_viewer)
 ADD_SUBDIRECTORY(shape_viewer)
 

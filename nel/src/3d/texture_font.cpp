@@ -112,9 +112,9 @@ void CTextureFont::clearAtlas()
 	_Data[0].fill(0);
 
 	// clear glyph cache
-	for(uint i = 0; i< _Letters.size(); ++i)
+	for(std::map<SLetterKey, SLetterInfo>::iterator it = _Letters.begin(); it != _Letters.end(); ++it)
 	{
-		_Letters[i].glyph = NULL;
+		it->second.glyph = NULL;
 	}
 	_GlyphCache.clear();
 
@@ -161,15 +161,15 @@ void CTextureFont::repackAtlas(uint32 newW, uint32 newH)
 	_AtlasNodes.push_back(CRect(0, 0, _TextureSizeX, _TextureSizeY));
 
 	CObjectVector<uint8>&src = btm.getPixels();
-	for(std::list<SGlyphInfo>::iterator it = _GlyphCache.begin(); it != _GlyphCache.end(); ++it)
+	for(std::map<SLetterKey, SGlyphInfo>::iterator it = _GlyphCache.begin(); it != _GlyphCache.end(); ++it)
 	{
-		if (it->CacheVersion != _CacheVersion)
+		if (it->second.CacheVersion != _CacheVersion)
 		{
 			// TODO: must remove glyph from all letters before removing glyph from cache
 			//continue;
 		}
 
-		SGlyphInfo &glyph = *it;
+		SGlyphInfo &glyph = it->second;
 
 		glyph.CacheVersion = newCacheVersion;
 
@@ -403,18 +403,10 @@ CTextureFont::SGlyphInfo* CTextureFont::renderLetterGlyph(SLetterInfo *letter, u
 	}
 	copyGlyphBitmap(bitmap, charWidth, charHeight, atlasX, atlasY);
 
-	SGlyphInfo* glyphInfo = NULL;
-	{
-		// keep cache sorted by height (smaller first)
-		std::list<SGlyphInfo>::iterator it = _GlyphCache.begin();
-		while(it != _GlyphCache.end() && it->CharHeight < charHeight)
-		{
-			++it;
-		}
+	SLetterKey k = *letter;
+	k.Size = bitmapFontSize;
 
-		it = _GlyphCache.insert(it, SGlyphInfo());
-		glyphInfo = &(*it);
-	}
+	SGlyphInfo* glyphInfo = &_GlyphCache[k];
 
 	glyphInfo->GlyphIndex = glyphIndex;
 	glyphInfo->Size = bitmapFontSize;
@@ -450,16 +442,13 @@ CTextureFont::SGlyphInfo* CTextureFont::findLetterGlyph(SLetterInfo *letter, boo
 	}
 
 	// CacheVersion not checked, all glyphs in cache must be rendered on texture
-	for(std::list<SGlyphInfo>::iterator it = _GlyphCache.begin(); it != _GlyphCache.end(); ++it)
+	SLetterKey g = *letter;
+	g.Size = bitmapFontSize;
+
+	std::map<SLetterKey, SGlyphInfo>::iterator it = _GlyphCache.find(g);
+	if (it != _GlyphCache.end())
 	{
-		if (it->GlyphIndex == letter->GlyphIndex &&
-			it->Size == bitmapFontSize &&
-			it->Embolden == letter->Embolden &&
-			it->Oblique == letter->Oblique &&
-			it->FontGenerator == letter->FontGenerator)
-		{
-			return &(*it);
-		}
+		return &(it->second);
 	}
 
 	if (insert)
@@ -473,21 +462,15 @@ CTextureFont::SGlyphInfo* CTextureFont::findLetterGlyph(SLetterInfo *letter, boo
 // ---------------------------------------------------------------------------
 CTextureFont::SLetterInfo* CTextureFont::findLetter(SLetterKey &k, bool insert)
 {
-	// TODO: use std::map<uint64>
-	for(uint i = 0; i < _Letters.size(); ++i)
+	std::map<SLetterKey, SLetterInfo>::iterator it = _Letters.find(k);
+	if (it != _Letters.end())
 	{
-		if (_Letters[i].Char == k.Char && _Letters[i].Size == k.Size &&
-			_Letters[i].Embolden == k.Embolden && _Letters[i].Oblique == k.Oblique &&
-			_Letters[i].FontGenerator == k.FontGenerator)
-		{
-			return &_Letters[i];
-		}
+		return &(it->second);
 	}
 
 	if (insert)
 	{
-		_Letters.push_back(SLetterInfo());
-		SLetterInfo* letter = &_Letters.back();
+		SLetterInfo* letter = &_Letters[k];
 
 		// get metrics for requested size
 		letter->Char = k.Char;

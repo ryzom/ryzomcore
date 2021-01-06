@@ -55,7 +55,10 @@ bool CCurlHttpClient::connect(const std::string &/* server */)
 	curl_global_init(CURL_GLOBAL_ALL);
 	_CurlStruct = curl_easy_init();
 	if(_Curl == NULL)
+	{
+		curl_global_cleanup();
 		return false;
+	}
 
 	return true;
 }
@@ -195,8 +198,8 @@ void CCurlHttpClient::disconnect()
 	{
 		curl_easy_cleanup(_Curl);
 		_CurlStruct = NULL;
+		curl_global_cleanup();
 	}
-	curl_global_cleanup();
 }
 
 CCurlHttpClient CurlHttpClient;
