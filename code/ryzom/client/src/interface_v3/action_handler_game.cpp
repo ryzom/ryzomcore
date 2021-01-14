@@ -4686,7 +4686,7 @@ class CHandlerOutgameNaviGetKeys : public IActionHandler
 				id = "sel";
 
 			if (event != -1)
--				CLuaManager::getInstance().executeLuaScript(toString("outgame:eventChar%sKeyGet(%i)", id.c_str(), event));
+				CLuaManager::getInstance().executeLuaScript(toString("outgame:eventChar%sKeyGet(%i)", id.c_str(), event));
 		}
 		// reset previous input
 		Driver->AsyncListener.reset();
