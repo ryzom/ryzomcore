@@ -804,7 +804,12 @@ void CPeopleList::removeAllPeoples()
 	{
 		_BaseContainer->removeAllContainers();
 	}
+	for (uint k = 0; k < _GroupContainers.size(); ++k)
+	{
+		_GroupContainers[k].second->removeAllContainers();
+	}
 	NLMISC::contReset(_Peoples);
+	NLMISC::contReset(_GroupContainers);
 }
 
 //==================================================================
