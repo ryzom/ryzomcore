@@ -566,6 +566,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(isFullyPatched),
 		LUABIND_FUNC(getSheetType),
 		LUABIND_FUNC(getSheetShape),
+		LUABIND_FUNC(getCharacterSheetScale),
 		LUABIND_FUNC(getSheetFamily),
 		LUABIND_FUNC(getSheetName),
 		LUABIND_FUNC(getFameIndex),
@@ -3493,7 +3494,15 @@ std::string CLuaIHMRyzom::getSheetShape(const std::string &sheet)
 	return "";
 }
 
+// ***************************************************************************
+float CLuaIHMRyzom::getCharacterSheetScale(const std::string &sheet)
+{
+	const CEntitySheet *sheetPtr = SheetMngr.get(CSheetId(sheet));
+	const CCharacterSheet *charSheet = dynamic_cast<const CCharacterSheet*>(sheetPtr);
 
+	if (charSheet) return charSheet->Scale;
+	return 1;
+}
 
 // ***************************************************************************
 std::string CLuaIHMRyzom::getSheetFamily(const std::string &sheet)
