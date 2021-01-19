@@ -15,7 +15,7 @@ private:
 
 	static int luaClientCfgIndex(CLuaState &ls);
 	static int luaClientCfgNewIndex(CLuaState &ls);
-	
+
 	// CInterfaceElement management on stack, stored by a CRefPtr.
 public:
 
@@ -204,6 +204,7 @@ private:
 	static bool	isDynStringAvailable(sint32 dynStringId);
 	static bool	isFullyPatched();
 	static std::string getSheetType(const std::string &sheet);
+	static std::string getSheetShape(const std::string &sheet);
 	static std::string getSheetFamily(const std::string &sheet);
 	static std::string getSheetName(uint32 sheetId);
 	static sint32 getFameIndex(const std::string &factionName);
@@ -251,7 +252,7 @@ private:
 	static int addRespawnPoint(CLuaState &ls);
 	static int delArkPoints(CLuaState &ls);
 	static int setArkPowoOptions(CLuaState &ls);
-	
+
 
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
     // else, current command of the chat window will be replaced with tell 'player'
@@ -260,7 +261,7 @@ private:
 	static void updateTooltipCoords();
 	// test if the ctrl key is down (NB nico : I didn't add other key,
 	// because it would be too easy to write a key recorder ...)
-	static bool	isCtrlKeyDown(); 							     
+	static bool	isCtrlKeyDown();
 	static std::string encodeURLUnicodeParam(const ucstring &text);
 	static std::string encodeURLParam(const std::string &text);
 
@@ -271,9 +272,9 @@ private:
 	static std::string getPlayerVpaHex();
 	static std::string getPlayerVpbHex();
 	static std::string getPlayerVpcHex();
-	static sint64 getPlayerVpa();
-	static sint64 getPlayerVpb();
-	static sint64 getPlayerVpc();
+	static uint64 getPlayerVpa();
+	static uint64 getPlayerVpb();
+	static uint64 getPlayerVpc();
 	static sint32 getTargetLevel();		// get current, precise level of the selected target, or -1 if there's no such selected target
 	static sint32 getTargetForceRegion(); // get 'force region' for current target, or -1 if there's no selected target
 	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target
@@ -281,9 +282,9 @@ private:
 	static std::string getTargetVpaHex();
 	static std::string getTargetVpbHex();
 	static std::string getTargetVpcHex();
-	static sint64 getTargetVpa();
-	static sint64 getTargetVpb();
-	static sint64 getTargetVpc();
+	static uint64 getTargetVpa();
+	static uint64 getTargetVpb();
+	static uint64 getTargetVpc();
 	static bool	isTargetNPC(); // return 'true' if the target is an npc
 	static bool	isTargetPlayer(); // return 'true' if the target is a player
 	static bool	isTargetUser(); // return 'true' if the target is the user
