@@ -136,6 +136,7 @@ namespace MAGICFX
 		OtherFireWall = 14,
 		TeleportKami = 15, // No effect aura
 		TeleportKara = 16, // No effect aura
+		TeleportMarauder = 17, // No effect aura
 	};
 }
 
