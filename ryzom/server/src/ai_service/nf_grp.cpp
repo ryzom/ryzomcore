@@ -1828,6 +1828,25 @@ void addHP_f_(CStateInstance* entity, CScriptStack& stack)
 	}
 }
 
+void giveHP_f_(CStateInstance* entity, CScriptStack& stack)
+{
+	float addHP = stack.top();
+	stack.pop();
+
+	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
+
+	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
+	{
+		if (!bot->isSpawned())
+			continue;
+
+		CSpawnBot* const sbot = bot->getSpawnObj();
+
+		msgList.Entities.push_back(sbot->dataSetRow());
+		msgList.DeltaHp.push_back((sint32)(addHP));
+	}
+}
+
 //----------------------------------------------------------------------------
 /** @page code
 
@@ -4797,6 +4816,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, downScaleHP_f_);
 	REGISTER_NATIVE_FUNC(functions, upScaleHP_f_);
 	REGISTER_NATIVE_FUNC(functions, addHP_f_);
+	REGISTER_NATIVE_FUNC(functions, giveHP_f_);
 	REGISTER_NATIVE_FUNC(functions, aiAction_s_);
 	REGISTER_NATIVE_FUNC(functions, aiActionSelf_s_);
 	REGISTER_NATIVE_FUNC(functions, addProfileParameter_s_);
