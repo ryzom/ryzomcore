@@ -89,24 +89,24 @@ void setFactionProp_ss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	TStringId const factionType = CStringMapper::map(stack.top());
 	stack.pop();
-	
+
 	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("setFactionProp on a non Npc Group, doesnt work");
 		return;
 	}
-	
+
 	static TStringId factionStrId = CStringMapper::map("faction");
 	static TStringId ennemyFactionStrId = CStringMapper::map("ennemyFaction");
 	static TStringId friendFactionStrId = CStringMapper::map("friendFaction");
 	breakable
 	{
-		CPropertySetWithExtraList<TAllianceId> tmpSet;	
+		CPropertySetWithExtraList<TAllianceId> tmpSet;
 		CStringSeparator const sep(params,"|");
 		while (sep.hasNext())
 			tmpSet.addProperty(AITYPES::CPropertyId::create(sep.get()));
-		
+
 		if (factionType==factionStrId)
 		{
 			grpNpc->faction() = tmpSet;
@@ -151,7 +151,7 @@ void setOupostMode_ss_(CStateInstance* entity, CScriptStack& stack)
 	{
 		nlwarning("setOutpostMode: invalid side");
 	}
-	
+
 	npcGroup->setOutpostSide(side);
 	npcGroup->setOutpostFactions(aliasStr, side);
 	FOREACH(botIt, CCont<CBot>, npcGroup->bots())
@@ -194,12 +194,12 @@ void moveToZone_ss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	TStringId const zoneSrc = CStringMapper::map(stack.top());
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (!entity)
 	{
 		nlwarning("moveToZone failed: no state instance!");
@@ -224,10 +224,10 @@ void moveToZone_ss_(CStateInstance* entity, CScriptStack& stack)
 		nlwarning(" - to %s", CStringMapper::unmap(zoneDest).c_str());
 		return;
 	}
-	
+
 	CNpcZone const* const destZone = aiInstance->getZone(zoneDest);
 	CNpcZone const* const srcZone = aiInstance->getZone(zoneSrc);
-	
+
 	if (!destZone)
 	{
 		nlwarning("moveToZone: getZone destination failed!");
@@ -242,7 +242,7 @@ void moveToZone_ss_(CStateInstance* entity, CScriptStack& stack)
 	}
 	if (!destZone || !srcZone)
 		return;
-	
+
 	if (destZone==srcZone)
 	{
 		nlwarning("Trying to find a path between two same zones in %s, aborting moveToZone", entity->getActiveState()->getAliasFullName().c_str());
@@ -250,7 +250,7 @@ void moveToZone_ss_(CStateInstance* entity, CScriptStack& stack)
 		nlwarning(" - to %s", CStringMapper::unmap(zoneDest).c_str());
 		return;
 	}
-	
+
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileDynFollowPath(spawnGroup, srcZone, destZone, AITYPES::CPropertySet()));
 }
 
@@ -281,14 +281,14 @@ void setActivity_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	string activity = stack.top();
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (!entity) { nlwarning("setActivity failed!"); return; }
-	
+
 	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!group)
 	{	nlwarning("setActivity failed: no NPC group");
@@ -299,12 +299,12 @@ void setActivity_s_(CStateInstance* entity, CScriptStack& stack)
 	{	nlwarning("setActivity failed: no spawned group");
 		return;
 	}
-	
+
 	breakable
 	{
 		if (activity=="no_change")
 			break;
-		
+
 		if (activity=="escorted")
 		{
 			spawnGroup->activityProfile().setAIProfile(new CGrpProfileEscorted(spawnGroup));
@@ -369,13 +369,13 @@ void waitInZone_s_(CStateInstance* entity, CScriptStack& stack)
 	std::string zoneName = stack.top();
 	TStringId const zoneDest = CStringMapper::map(zoneName);
 	stack.pop();
-	
+
 	if (!entity)
 	{
 		nlwarning("waitInZone failed!");
 		return;
 	}
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
@@ -384,7 +384,7 @@ void waitInZone_s_(CStateInstance* entity, CScriptStack& stack)
 		//nlwarning("waitInZone failed!");
 		return;
 	}
-	
+
 	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!group)
 	{
@@ -397,9 +397,9 @@ void waitInZone_s_(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("waitInZone failed: no spawned group");
 		return;
 	}
-	
+
 	CNpcZone const* const destZone = aiInstance->getZone(zoneDest);
-	
+
 	if (!destZone)
 	{
 		nlwarning("waitInZone: getZone destination failed! (%s)", zoneName.c_str());
@@ -429,12 +429,12 @@ void stopMoving__(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("stopMoving failed!");
 		return;
 	}
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!group)
 	{
@@ -447,7 +447,7 @@ void stopMoving__(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("stopMoving failed: no spawned group");
 		return;
 	}
-	
+
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileIdle(spawnGroup));
 }
 
@@ -470,14 +470,14 @@ void startWander_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	uint32 dispersionRadius = (uint32)(float&)stack.top();
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (!entity) { nlwarning("setActivity failed!"); return; }
-	
+
 	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!group)
 	{	nlwarning("startWander failed: no NPC group");
@@ -523,14 +523,14 @@ void startMoving_fff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	float const x = (float&)stack.top();
  	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (!entity) { nlwarning("setActivity failed!"); return; }
-	
+
 	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!group)
 	{	nlwarning("setActivity failed: no NPC group");
@@ -569,14 +569,14 @@ void followPlayer_sf_(CStateInstance* entity, CScriptStack& stack)
 {
 	uint32 dispersionRadius = (uint32)(float&)stack.top(); stack.pop();
 	NLMISC::CEntityId playerId = NLMISC::CEntityId((std::string)stack.top());
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (!entity) { nlwarning("followPlayer failed!"); return; }
-	
+
 	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!group)
 	{	nlwarning("followPlayer failed: no NPC group");
@@ -622,12 +622,12 @@ void wander__(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("wander failed!");
 		return;
 	}
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!group)
 	{
@@ -640,7 +640,7 @@ void wander__(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("wander failed: no spawned group");
 		return;
 	}
-	
+
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWander(spawnGroup));
 }
 
@@ -664,14 +664,14 @@ void setAttackable_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	bool const attackable = (float&)stack.top()!=0.0f;
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
-	
+
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	npcGroup->setPlayerAttackable(attackable);
 	npcGroup->setBotAttackable(attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -696,12 +696,12 @@ void setPlayerAttackable_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	bool attackable = (float&)stack.top()!=0.0f;
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	npcGroup->setPlayerAttackable(attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -728,12 +728,12 @@ void setBotAttackable_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	bool attackable = (float&)stack.top()!=0.0f;
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	npcGroup->setBotAttackable(attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -771,12 +771,12 @@ void setFactionAttackableAbove_sff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string faction = (std::string&)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	npcGroup->setFactionAttackableAbove(faction, threshold, attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -814,12 +814,12 @@ void setFactionAttackableBelow_sff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string faction = (std::string&)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	npcGroup->setFactionAttackableBelow(faction, threshold, attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -844,10 +844,10 @@ void addBotChat_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	string const botChat = (string)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
 		CBot* bot = *botIt;
@@ -886,7 +886,7 @@ void clearBotChat__(CStateInstance* entity, CScriptStack& stack)
 {
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
 		CBot* bot = *botIt;
@@ -926,7 +926,7 @@ void ignoreOffensiveActions_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	bool const ignoreOffensiveActions = ((float)stack.top())!=0.f;
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
@@ -956,10 +956,10 @@ void setDespawnTime_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float time = stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	uint32 despawntime = (uint32)(sint32)time; // -1 => ~0
 	// TODO:kxu: fix CAITimer!
 	if (despawntime > 0x7fffffff)
@@ -988,19 +988,19 @@ void despawnBotByAlias_s_(CStateInstance* entity, CScriptStack& stack)
 	uint32 alias =  LigoConfig.aliasFromString((string)stack.top()); stack.pop();
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
 
 		CBot* bot = *botIt;
-		
+
 		if (bot->getAlias() != alias) { continue; }
-		if (!bot->isSpawned()) return;	
+		if (!bot->isSpawned()) return;
 		if (bot->getRyzomType() == RYZOMID::npc)
 		{
 			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
 			CSpawnBotNpc* spawnBotNpc = botNpc->getSpawn();
-			spawnBotNpc->spawnGrp().addBotToDespawnAndRespawnTime(&spawnBotNpc->getPersistent(), 1, spawnBotNpc->spawnGrp().getPersistent().respawnTime());				
+			spawnBotNpc->spawnGrp().addBotToDespawnAndRespawnTime(&spawnBotNpc->getPersistent(), 1, spawnBotNpc->spawnGrp().getPersistent().respawnTime());
 		}
 
 	}
@@ -1026,7 +1026,7 @@ void setRespawnTime_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float const time = stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
 
@@ -1332,7 +1332,7 @@ void addNamedEntityListener_ssf_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!grpNpc)
 	{
@@ -1368,7 +1368,7 @@ void delNamedEntityListener_ssf_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!grpNpc)
 	{
@@ -1405,7 +1405,7 @@ void addNamedEntityListener_sss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!grpNpc)
 	{
@@ -1442,7 +1442,7 @@ void delNamedEntityListener_sss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (!grpNpc)
 	{
@@ -1562,7 +1562,7 @@ void activateEasterEgg_fffsffffsss_(CStateInstance* si, CScriptStack& stack)
 	float z = (float)stack.top(); stack.pop();
 	float y = (float)stack.top(); stack.pop();
 	float x = (float)stack.top(); stack.pop();
-	
+
 	string items = (string)stack.top(); stack.pop();
 	uint32 actId = static_cast<uint32>( (float)stack.top()); stack.pop();
 	TSessionId scenarioId( static_cast<uint32>( (float)stack.top())); stack.pop();
@@ -1712,12 +1712,12 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 			DEBUG_STOP;
 			return;
 		}
-		// if LD use this the function outside a ring shard 
+		// if LD use this the function outside a ring shard
 		if (IsRingShard)
 		{
 			// Here we destroy the item: so we do not want that a user create a scenario where we destroy
 			// other players precious items
-			
+
 			static std::set<CSheetId> r2PlotItemSheetId; // :TODO: use R2Share::CRingAccess
 			// lazy intialisation
 			if (r2PlotItemSheetId.empty())
@@ -1735,7 +1735,7 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 				nlwarning("!!!!!!!!!!!!");
 				nlwarning("!!!!!!!!!!!! Someone is trying to hack us");
 				nlwarning("!!!!!!!!!!!!");
-				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());								
+				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());
 				nlwarning("His ai instanceId is %u, use log to know the sessionId and the user ", msg.InstanceId );
 				nlwarning("!!!!!!!!!!!!");
 				nlwarning("!!!!!!!!!!!!");
@@ -1879,7 +1879,7 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 		}
 
 
-		// if LD use this the function outside a ring shard 
+		// if LD use this the function outside a ring shard
 		if (IsRingShard)
 		{
 			static std::set<CSheetId> r2PlotItemSheetId; // :TODO: use R2Share::CRingAccess
@@ -1899,7 +1899,7 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 				nlwarning("!!!!!!!!!!!!");
 				nlwarning("!!!!!!!!!!!! Someone is trying to hack us");
 				nlwarning("!!!!!!!!!!!!");
-				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());								
+				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());
 				nlwarning("His ai instanceId is %u, use log to know the sessionId and the user ", msg.InstanceId );
 				nlwarning("!!!!!!!!!!!!");
 				nlwarning("!!!!!!!!!!!!");
@@ -2015,20 +2015,20 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 {
 	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() );
 	stack.pop();
-	
+
 	string notEnoughPointsText = (string)stack.top();
 	stack.pop();
-	
+
 	string inventoryFullText = (string)stack.top();
 	stack.pop();
-	
+
 	string rareRewardText = (string)stack.top();
 	stack.pop();
-	
+
 	string rewardText = (string)stack.top();
 	stack.pop();
-	
-	
+
+
 	if (groupToNotify == NULL)
 	{
 		nlwarning("giveReward failed: groupToNotify is NULL");
@@ -2091,14 +2091,14 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 
 	// turn the npc to face the player
 	talkingNpc->setTheta(talkingNpc->pos().angleTo(talkingPlayer->pos()));
-	
+
 	TDataSetRow	CharacterRowId = talkingPlayer->dataSetRow();
 	TDataSetRow	CreatureRowId = talkingNpc->dataSetRow();
-	
-	IAisControl::getInstance()->giveRewardMessage(CharacterRowId, CreatureRowId, 
+
+	IAisControl::getInstance()->giveRewardMessage(CharacterRowId, CreatureRowId,
 		rewardText, rareRewardText, inventoryFullText, notEnoughPointsText);
-	
-	
+
+
 }
 
 
@@ -2109,12 +2109,12 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 {
 	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() );
 	stack.pop();
-	
+
 	float z = (float)stack.top(); stack.pop();
 	float y = (float)stack.top(); stack.pop();
 	float x = (float)stack.top(); stack.pop();
-	
-	
+
+
 	if (groupToNotify == NULL)
 	{
 		nlwarning("teleportNear failed: groupToNotify is NULL");
@@ -2177,17 +2177,17 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 
 	// turn the npc to face the player
 ///	talkingNpc->setTheta(talkingNpc->pos().angleTo(talkingPlayer->pos()));
-	
+
 	TDataSetRow	CharacterRowId = talkingPlayer->dataSetRow();
 	TDataSetRow	CreatureRowId = talkingNpc->dataSetRow();
 
 	NLMISC::CEntityId player = CMirrors::getEntityId(CharacterRowId);
 	if (player != NLMISC::CEntityId::Unknown)
-	{		
+	{
 		IAisControl::getInstance()->teleportNearMessage(player, x, y, z);
 	}
 
-	
+
 }
 
 
@@ -2200,7 +2200,7 @@ static CSpawnBot* getSpawnBotFromGroupByName(CGroupNpc* const group, const std::
 	if (!group) { return 0; }
 
 	// Group is in a valid AIInstance
-	{		
+	{
 		if (!group->getOwner())  { return 0;	}
 		IManagerParent* const managerParent = group->getOwner()->getOwner();
 		CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
@@ -2209,7 +2209,7 @@ static CSpawnBot* getSpawnBotFromGroupByName(CGroupNpc* const group, const std::
 
 	// Bot is spawn and alive
 	{
-		
+
 		CSpawnBot* spawnBot=0;
 		CAliasCont<CBot> const& bots = group->bots();
 		CCont<CBot> & cc_bots = group->bots();
@@ -2218,11 +2218,11 @@ static CSpawnBot* getSpawnBotFromGroupByName(CGroupNpc* const group, const std::
 			child = bots.getFirstChild();
 		else
 			child = bots.getChildByName(botname);
-		if (!child)	{  return 0; }			
-		
+		if (!child)	{  return 0; }
+
 		spawnBot = child->getSpawnObj();
 		if (!spawnBot || !spawnBot->isAlive())	{ return 0; }
-		return spawnBot;		
+		return spawnBot;
 	}
 
 	nlassert(0); //this path is never used
@@ -2257,11 +2257,11 @@ Arguments: c(group1), s(botname1), c(group2), s(botname2),  ->
 
 void facing_cscs_(CStateInstance* entity, CScriptStack& stack)
 {
-	string botname2 = (string)stack.top(); stack.pop();	
-	CGroupNpc* const group2 = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();	
-	string botname1 = (string)stack.top(); stack.pop();	
+	string botname2 = (string)stack.top(); stack.pop();
+	CGroupNpc* const group2 = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();
+	string botname1 = (string)stack.top(); stack.pop();
 	CGroupNpc* const group1 = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();
-		
+
 	CSpawnBot* bot1 = getSpawnBotFromGroupByName(group1, botname1);
 	CSpawnBot* bot2 = getSpawnBotFromGroupByName(group2, botname2);
 
@@ -2313,14 +2313,14 @@ void execSayHelper(CSpawnBot *spawnBot, NLMISC::CSString text, CChatGroup::TGrou
 		NLMISC::CSString prefix = text.left(4);
 		if (prefix=="DSS_")
 		{
-			
+
 			NLMISC::CSString phrase = text.right(text.length() - 4);
 			NLMISC::CSString idStr = phrase.strtok(" ",false,false,false,false);
 			uint32 scenarioId = atoi(idStr.c_str());
 			forwardToDss(spawnBot->dataSetRow(), mode, phrase, scenarioId);
 			return;
 		}
-		
+
 		if (prefix=="RAW ")
 		{
 			std::string phrase = text.right(text.length()-4);
@@ -2336,10 +2336,10 @@ void execSayHelper(CSpawnBot *spawnBot, NLMISC::CSString text, CChatGroup::TGrou
 
 void npcSay_css_(CStateInstance* entity, CScriptStack& stack)
 {
-	string text = (string)stack.top(); stack.pop();	
-	string botname = (string)stack.top(); stack.pop();	
-	CGroupNpc* const group = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();	
-		
+	string text = (string)stack.top(); stack.pop();
+	string botname = (string)stack.top(); stack.pop();
+	CGroupNpc* const group = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();
+
 	CSpawnBot* spawnBot = getSpawnBotFromGroupByName(group, botname);
 
 	if (!spawnBot) { return; }
@@ -2417,11 +2417,11 @@ Arguments: f(easterEggId), f(scenarioId), f(actId) ->
 
 void dssMessage_fsss_(CStateInstance* entity, CScriptStack& stack)
 {
-	string msg = (string)stack.top(); stack.pop();	
-	string who = (string)stack.top(); stack.pop();	
-	string mode = (string)stack.top(); stack.pop();	
-	float instance = (float)stack.top(); stack.pop();	
-	
+	string msg = (string)stack.top(); stack.pop();
+	string who = (string)stack.top(); stack.pop();
+	string mode = (string)stack.top(); stack.pop();
+	float instance = (float)stack.top(); stack.pop();
+
 	IAisControl::getInstance()->dssMessage(TSessionId(uint32(instance)), mode, who, msg);
 	return;
 }
@@ -2444,9 +2444,9 @@ Arguments: f(scenarioInstance), f(scenarioPoints) ->
 
 void setScenarioPoints_ff_(CStateInstance* entity, CScriptStack& stack)
 {
-	float scenarioPoints = (float)stack.top(); stack.pop();	
-	float instance = (float)stack.top(); stack.pop();	
-	
+	float scenarioPoints = (float)stack.top(); stack.pop();
+	float instance = (float)stack.top(); stack.pop();
+
 	IAisControl::getInstance()->setScenarioPoints(TSessionId(uint32(instance)), scenarioPoints);
 	return;
 }
@@ -2467,9 +2467,9 @@ Arguments: f(scenarioInstance),
 */
 
 void startScenarioTiming_f_(CStateInstance* entity, CScriptStack& stack)
-{	
-	float instance = (float)stack.top(); stack.pop();	
-	
+{
+	float instance = (float)stack.top(); stack.pop();
+
 	IAisControl::getInstance()->startScenarioTiming(TSessionId(uint32(instance)));
 	return;
 }
@@ -2490,9 +2490,9 @@ Arguments: f(scenarioInstance),
 */
 
 void endScenarioTiming_f_(CStateInstance* entity, CScriptStack& stack)
-{	
-	float instance = (float)stack.top(); stack.pop();	
-	
+{
+	float instance = (float)stack.top(); stack.pop();
+
 	IAisControl::getInstance()->endScenarioTiming(TSessionId(uint32(instance)));
 	return;
 }
@@ -2524,16 +2524,16 @@ Arguments: c(group1), s(botname1), c(group2), s(botname2),  ->
 
 void emote_css_(CStateInstance* entity, CScriptStack& stack)
 {
-	string emoteName = (string)stack.top(); stack.pop();	
-	string botname = (string)stack.top(); stack.pop();	
-	CGroupNpc* const group = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();	
-		
+	string emoteName = (string)stack.top(); stack.pop();
+	string botname = (string)stack.top(); stack.pop();
+	CGroupNpc* const group = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();
+
 	CSpawnBot* spawnBot = getSpawnBotFromGroupByName(group, botname);
 
 	if (!spawnBot) { return; }
 
 	//CBot& bot = spawnBot->getPersistent();
-	
+
 	// The entity Id must be valid (we know that the bot is alive so its entity Id must be ok)
 	NLMISC::CEntityId	entityId=spawnBot->getEntityId();
 	if (entityId == NLMISC::CEntityId::Unknown)
@@ -2550,7 +2550,7 @@ void emote_css_(CStateInstance* entity, CScriptStack& stack)
 
 	// Get the behaviour Id
 	MBEHAV::EBehaviour behaviourId = (MBEHAV::EBehaviour)(emoteId + MBEHAV::EMOTE_BEGIN);
-	
+
 	// Change the behaviour
 	NLNET::CMessage msgout("SET_BEHAVIOUR");
 	msgout.serial(entityId);
@@ -2564,7 +2564,7 @@ void emote_css_(CStateInstance* entity, CScriptStack& stack)
 
 void emote_ss_(CStateInstance* entity, CScriptStack& stack)
 {
-	string emoteName = (string)stack.top(); stack.pop();	
+	string emoteName = (string)stack.top(); stack.pop();
 	NLMISC::CEntityId botId = NLMISC::CEntityId((std::string)stack.top());
 
 	if (botId == NLMISC::CEntityId::Unknown)
@@ -2581,7 +2581,7 @@ void emote_ss_(CStateInstance* entity, CScriptStack& stack)
 
 	// Get the behaviour Id
 	MBEHAV::EBehaviour behaviourId = (MBEHAV::EBehaviour)(emoteId + MBEHAV::EMOTE_BEGIN);
-	
+
 	// Change the behaviour
 	NLNET::CMessage msgout("SET_BEHAVIOUR");
 	msgout.serial(botId);
@@ -2605,10 +2605,10 @@ void emote_s_(CStateInstance* entity, CScriptStack& stack)
 
 	// Get the behaviour Id
 	MBEHAV::EBehaviour behaviourId = (MBEHAV::EBehaviour)(emoteId + MBEHAV::EMOTE_BEGIN);
-	
+
 
 	CGroup* group = entity->getGroup();
-	
+
 	if (group->isSpawned())
 	{
 		FOREACH(itBot, CCont<CBot>, group->bots())
@@ -2635,15 +2635,15 @@ void emote_s_(CStateInstance* entity, CScriptStack& stack)
 			}
 		}
 	}
-	
+
 }
 
 void rename_s_(CStateInstance* entity, CScriptStack& stack)
 {
-	string newName = (string)stack.top(); stack.pop();	
+	string newName = (string)stack.top(); stack.pop();
+	ucstring name;
+	name.fromUtf8(newName);	CGroup* group = entity->getGroup();
 
-	CGroup* group = entity->getGroup();
-	
 	if (group->isSpawned())
 	{
 		FOREACH(itBot, CCont<CBot>, group->bots())
@@ -2653,12 +2653,10 @@ void rename_s_(CStateInstance* entity, CScriptStack& stack)
 			{
 				if (bot->isSpawned())
 				{
-					CSpawnBot *spawnBot = bot->getSpawnObj(); 
+					CSpawnBot *spawnBot = bot->getSpawnObj();
 					if (spawnBot)
 					{
 						TDataSetRow	row = spawnBot->dataSetRow();
-						ucstring name;
-						name.fromUtf8(newName);
 						NLNET::CMessage	msgout("CHARACTER_NAME");
 						msgout.serial(row);
 						msgout.serial(name);
@@ -2669,15 +2667,15 @@ void rename_s_(CStateInstance* entity, CScriptStack& stack)
 			}
 		}
 	}
-	
+
 }
 
 void vpx_s_(CStateInstance* entity, CScriptStack& stack)
 {
-	string vpx = (string)stack.top(); stack.pop();	
+	string vpx = (string)stack.top(); stack.pop();
 
 	CGroup* group = entity->getGroup();
-	
+
 	if (group->isSpawned())
 	{
 		FOREACH(itBot, CCont<CBot>, group->bots())
@@ -2689,7 +2687,7 @@ void vpx_s_(CStateInstance* entity, CScriptStack& stack)
 				bot->sendVisualProperties();
 			}
 		}
-	}	
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -2712,12 +2710,12 @@ void maxHitRange_f_(CStateInstance* entity, CScriptStack& stack)
 	float maxHitRange = (float&)stack.top(); stack.pop();
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
 	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
 		CBot* bot = *botIt;
-		
-		if (!bot->isSpawned()) return;	
+
+		if (!bot->isSpawned()) return;
 		if (bot->getRyzomType() == RYZOMID::npc)
 		{
 			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
@@ -2732,7 +2730,7 @@ void maxHitRange_f_(CStateInstance* entity, CScriptStack& stack)
 
 @subsection addUserModel_sss_
 
-Arguments:  -> 
+Arguments:  ->
 
 arg0: is the user model id (a name)
 arg1: is the base sheet
@@ -2747,10 +2745,10 @@ void addUserModel_sss_(CStateInstance* entity, CScriptStack& stack)
 {
 	string script = stack.top();
 	stack.pop();
-	
+
 	string baseSheet = stack.top();
 	stack.pop();
-	
+
 	string userModelId = stack.top(); // prefix with ARK_ to prevent stupid overwrite
 	stack.pop();
 
@@ -2758,13 +2756,13 @@ void addUserModel_sss_(CStateInstance* entity, CScriptStack& stack)
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-		
+
 	std::vector<CAIActions::CArg> args;
 	args.push_back(CAIActions::CArg(900+aiInstance->getInstanceNumber()));
 	args.push_back(CAIActions::CArg("ARK_"+userModelId));
 	args.push_back(CAIActions::CArg(baseSheet));
 	args.push_back(CAIActions::CArg(scriptHex_decode(script)));
-	
+
 	CAIActions::execute("USR_MDL", args);
 }
 
@@ -2773,7 +2771,7 @@ void addUserModel_sss_(CStateInstance* entity, CScriptStack& stack)
 
 @subsection addCustomLoot_ss_
 
-Arguments:  -> 
+Arguments:  ->
 
 arg0: is the custom table id (a name)
 arg1: is the script with syntax : <PROBA_1>:<hex:LOOT_SET_1>,<PROBA_2>:<hex:LOOT_SET_2>,...
@@ -2787,7 +2785,7 @@ void addCustomLoot_ss_(CStateInstance* entity, CScriptStack& stack)
 {
 	string script = stack.top();
 	stack.pop();
-		
+
 	string customTableId = stack.top();
 	stack.pop();
 
@@ -2825,7 +2823,7 @@ void addCustomLoot_ss_(CStateInstance* entity, CScriptStack& stack)
 			args.push_back(CAIActions::CArg(scriptHex_decode(lootSet[1])));
 		}
 	}
-	
+
 	CAIActions::execute("CUSTOMLT", args);
 }
 
@@ -2848,15 +2846,15 @@ void setUserModel_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	string userModel = stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
-	
+
 	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
 		CBot* bot = *botIt;
-		
+
 		//if (!bot->isSpawned()) return;
-		
+
 		if (bot->getRyzomType() == RYZOMID::npc)
 		{
 			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
@@ -2884,15 +2882,15 @@ void setCustomLoot_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	string customTable = stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
-	
+
 	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
 		CBot* bot = *botIt;
-		
+
 		//if (!bot->isSpawned()) return;
-		
+
 		if (bot->getRyzomType() == RYZOMID::npc)
 		{
 			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
@@ -2918,12 +2916,12 @@ void setCustomLoot_s_(CStateInstance* entity, CScriptStack& stack)
 //	bool b = (bool&)stack.top(); stack.pop();
 //	CGroup* group = entity->getGroup();
 //	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-//	
+//
 //	FOREACH(botIt, CCont<CBot>,	group->bots())
 //	{
 //		CBot* bot = *botIt;
-//		
-//		if (!bot->isSpawned()) return;	
+//
+//		if (!bot->isSpawned()) return;
 //		if (bot->getRyzomType() == RYZOMID::npc)
 //		{
 //			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
@@ -2948,12 +2946,12 @@ void setCustomLoot_s_(CStateInstance* entity, CScriptStack& stack)
 //	bool b = (bool&)stack.top(); stack.pop();
 //	CGroup* group = entity->getGroup();
 //	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-//	
+//
 //	FOREACH(botIt, CCont<CBot>,	group->bots())
 //	{
 //		CBot* bot = *botIt;
-//		
-//		if (!bot->isSpawned()) return;	
+//
+//		if (!bot->isSpawned()) return;
 //		if (bot->getRyzomType() == RYZOMID::npc)
 //		{
 //			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
@@ -2969,7 +2967,7 @@ void setCustomLoot_s_(CStateInstance* entity, CScriptStack& stack)
 Sets and event to execute when event triggers
 
 Arguments:
-s(event) -> @param[in] The name of the state 
+s(event) -> @param[in] The name of the state
 s(event) -> @param[in] The name of the event
 s(code) -> @param[in] The string to execute code in hex
 
@@ -2998,12 +2996,12 @@ void setEventCode_sss_(CStateInstance* entity, CScriptStack& stack)
 		strFindReplace(code, "https://", "");
 		strFindReplace(code, "/index.php?", " ");
 		strFindReplace(code, "&nbsp&", " ");
-		
+
 		CGroup* group = entity->getGroup();
 		FOREACH(botIt, CCont<CBot>,	group->bots())
 		{
 			CBot* bot = *botIt;
-			
+
 			if (!bot->isSpawned()) return;
 
 			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
@@ -3023,14 +3021,14 @@ void setEventCode_sss_(CStateInstance* entity, CScriptStack& stack)
 	}
 	///////////////////////////////////////////////////////
 
-	
+
 	CAIEventDescription eventDescription;
 	CAIEventActionNode::TSmartPtr eventAction;
 	CAIEventReaction* event;
-	
+
 	// Create event handler
 	eventDescription.EventType = event_name;
-	
+
 	// Create event action
 	eventAction = new CAIEventActionNode;
 	eventAction->Action = "code";
@@ -3047,16 +3045,16 @@ void setEventCode_sss_(CStateInstance* entity, CScriptStack& stack)
 			eventAction->Args.push_back(*it);
 		}
 	}
-	
+
 	// Register event action
 	eventDescription.Action = eventAction;
 	eventAction = NULL;
-	
+
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
 	CStateMachine* sm = &npcGroup->getEventContainer();
 	CAIStatePositional* statePositional;
-	
+
 	uint32 stateAlias = npcGroup->getStateAlias(state_name);
 	if (stateAlias == 0)
 	{
@@ -3083,11 +3081,11 @@ void setEventCode_sss_(CStateInstance* entity, CScriptStack& stack)
 	event = new CAIEventReaction(sm, stateEventAlias, eventDescription.EventType);
 	event->processEventDescription(&eventDescription, sm);
 	event->setGroup(npcGroup->getAlias());
-	nlinfo("Add Event: %s(%d) in State : %d", event_name.c_str(), stateEventAlias, statePositional->getAlias());
+	nlinfo("Add Event: %s(%d) in State : %d for group %d", event_name.c_str(), stateEventAlias, statePositional->getAlias(), npcGroup->getAlias());
 	event->setState(statePositional->getAlias());
 	npcGroup->setStateEventAlias(event_name, stateEventAlias);
-	
-	
+
+
 	sm->eventReactions().addChild(event);
 	event = NULL;
 }
@@ -3096,7 +3094,7 @@ void setEventCode_sss_(CStateInstance* entity, CScriptStack& stack)
 std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 {
 	std::map<std::string, FScrptNativeFunc> functions;
-	
+
 #define REGISTER_NATIVE_FUNC(cont, func) cont.insert(std::make_pair(std::string(#func), &func))
 
 	REGISTER_NATIVE_FUNC(functions, setFactionProp_ss_);
@@ -3147,7 +3145,7 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, npcSay_css_);
 	REGISTER_NATIVE_FUNC(functions, npcSay_ss_);
 	REGISTER_NATIVE_FUNC(functions, dssMessage_fsss_);
-	REGISTER_NATIVE_FUNC(functions, despawnBotByAlias_s_);	
+	REGISTER_NATIVE_FUNC(functions, despawnBotByAlias_s_);
 	REGISTER_NATIVE_FUNC(functions, giveReward_ssssc_);
 	REGISTER_NATIVE_FUNC(functions, teleportNear_fffc_);
 
@@ -3169,6 +3167,6 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 
 
 #undef REGISTER_NATIVE_FUNC
-	
+
 	return functions;
 }
