@@ -191,7 +191,7 @@ void CCharacter::initInventoriesDb()
 		CPlayer* p = PlayerManager.getPlayer(PlayerManager.getPlayerId(getId()));
 		if (p->isTrialPlayer() && _BaseParryLevel > 125)
 			_BaseParryLevel = 125;
-		
+
 		_CurrentParryLevel = max(sint32(0), _BaseParryLevel + _ParryModifier);
 		//		_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.ParryBase, _BaseParryLevel);
 		CBankAccessor_PLR::getCHARACTER_INFO().getPARRY().setBase(
@@ -1168,7 +1168,7 @@ void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bo
 		CPlayer* p = PlayerManager.getPlayer(PlayerManager.getPlayerId(getId()));
 		if (p->isTrialPlayer() && _BaseParryLevel > 125)
 			_BaseParryLevel = 125;
-		
+
 		_CurrentParryLevel = max(sint32(0), _BaseParryLevel + _ParryModifier);
 		//		_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.ParryBase, _BaseParryLevel);
 		CBankAccessor_PLR::getCHARACTER_INFO().getPARRY().setBase(
@@ -1510,7 +1510,7 @@ bool CCharacter::checkPreRequired(const CGameItemPtr &item, bool equipCheck)
 			requiredRespected = false;
 		}
 	}
-	
+
 	if (requiredRespected == false && equipCheck)
 	{
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "REQUIRED_EQUIP");
@@ -3330,6 +3330,11 @@ void CCharacter::useItem(uint32 slot)
 					{
 						fx.Aura = MAGICFX::NoAura;
 					}
+				}
+				else if (getOrganization() == 5 && CFameInterface::getInstance().getFameIndexed(_Id, PVP_CLAN::getFactionIndex(PVP_CLAN::Marauder)))
+						>= 600000)
+				{
+					fx.Aura = MAGICFX::MarauderKami;
 				}
 				else
 				{

@@ -11880,9 +11880,21 @@ void CCharacter::setOrganization(uint32 org)
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(1).setVALUE(_PropertyDatabase, _Organization);
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(2).setVALUE(_PropertyDatabase, _OrganizationStatus);
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(3).setVALUE(_PropertyDatabase, _OrganizationPoints);
-	CPVPManager2::getInstance()->updateFactionChannel(this);
 
+	if (org != 0)
+	{
+		setDeclaredCult(PVP_CLAN::Neutral);
+		setDeclaredCiv(PVP_CLAN::Neutral);
+	}
+
+	CPVPManager2::getInstance()->updateFactionChannel(this);
 	updateJewelsTags(false);
+
+	// Make sure fame values are properly capped.
+	CFameManager::getInstance().enforceFameCaps(getId(), org, getAllegiance());
+
+	// set tribe fame threshold and clamp fame if necessary
+	CFameManager::getInstance().setAndEnforceTribeFameCap(getId(), org, getAllegiance());
 }
 
 //-----------------------------------------------------------------------------
@@ -16541,7 +16553,7 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 			sint32	marauderFame = CFameInterface::getInstance().getFameIndexed(_Id, marauderIdx);
 			if (factionIndex != marauderIdx)
 			{
-				sint32 maxOtherfame = -100*6000;
+				sint32 maxOtherfame = -100*kFameMultipler;
 				for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
 				{
 					if (fameIdx == marauderIdx)
@@ -16553,11 +16565,16 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 						maxOtherfame = fame;
 				}
 
-				// Marauder fame is when player have negative fame in other clans
-				maxOtherfame = -maxOtherfame;
-
-				if (marauderFame < 50 * 6000 || maxOtherfame < 50 * 6000) {
-					CFameManager::getInstance().setEntityFame(_Id, marauderIdx, maxOtherfame, false);
+				if (marauderFame < 50*kFameMultipler)
+				{
+					if (maxOtherfame < -50*kFameMultipler) // Cap to 50
+						maxOtherfame = -50*kFameMultipler;
+					CFameManager::getInstance().setEntityFame(_Id, marauderIdx, -maxOtherfame, false);
+				}
+				else
+				{
+					if (maxOtherfame > -40*kFameMultipler)
+						CFameManager::getInstance().setEntityFame(_Id, marauderIdx, -maxOtherfame, false);
 				}
 			}
 
@@ -16642,15 +16659,15 @@ void CCharacter::resetFameDatabase()
 	// Check fames and fix bad values
 	if (!haveAnyPrivilege())
 	{
-		CFameManager::getInstance().enforceFameCaps(getId(), getAllegiance());
-		CFameManager::getInstance().setAndEnforceTribeFameCap(getId(), getAllegiance());
+		CFameManager::getInstance().enforceFameCaps(getId(), getOrganization(), getAllegiance());
+		CFameManager::getInstance().setAndEnforceTribeFameCap(getId(), getOrganization(), getAllegiance());
 	}
 
 	for (uint i = 0; i < CStaticFames::getInstance().getNbFame(); ++i)
 	{
 		// update player fame info
 		sint32 fame = fi.getFameIndexed(_Id, i, false, true);
-		sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), i);
+		sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), getOrganization(), i);
 		setFameValuePlayer(i, fame, maxFame, 0);
 	}
 }
@@ -20297,9 +20314,9 @@ bool CCharacter::setDeclaredCult(PVP_CLAN::TPVPClan newClan)
 		{
 			// No problems, let the change happen.
 			// Make sure fame values are properly capped.
-			CFameManager::getInstance().enforceFameCaps(this->getId(), this->getAllegiance());
+			CFameManager::getInstance().enforceFameCaps(this->getId(), this->getOrganization(), this->getAllegiance());
 			// set tribe fame threshold and clamp fame if necessary
-			CFameManager::getInstance().setAndEnforceTribeFameCap(this->getId(), this->getAllegiance());
+			CFameManager::getInstance().setAndEnforceTribeFameCap(this->getId(), this->getOrganization(), this->getAllegiance());
 			// handle with faction channel
 			CPVPManager2::getInstance()->updateFactionChannel(this);
 			// write new allegiance in database
@@ -20358,9 +20375,9 @@ bool CCharacter::setDeclaredCiv(PVP_CLAN::TPVPClan newClan)
 		{
 			// No problems, let the change happen.
 			// Make sure fame values are properly capped.
-			CFameManager::getInstance().enforceFameCaps(this->getId(), this->getAllegiance());
+			CFameManager::getInstance().enforceFameCaps(this->getId(), this->getOrganization(), this->getAllegiance());
 			// set tribe fame threshold and clamp fame if necessary
-			CFameManager::getInstance().setAndEnforceTribeFameCap(this->getId(), this->getAllegiance());
+			CFameManager::getInstance().setAndEnforceTribeFameCap(this->getId(), this->getOrganization(), this->getAllegiance());
 			// handle with faction channel
 			CPVPManager2::getInstance()->updateFactionChannel(this);
 			// write new allegiance in database

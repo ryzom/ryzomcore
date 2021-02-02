@@ -5131,10 +5131,10 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		if (command_args.size() == 4 || (command_args.size () == 5 && command_args[4] != "0"))
 		{
 			// Make sure fame values are properly capped.
-			CFameManager::getInstance().enforceFameCaps(c->getId(), c->getAllegiance());
+			CFameManager::getInstance().enforceFameCaps(c->getId(), c->getOrganization(), c->getAllegiance());
 
 			// set tribe fame threshold and clamp fame if necessary
-			CFameManager::getInstance().setAndEnforceTribeFameCap(c->getId(), c->getAllegiance());
+			CFameManager::getInstance().setAndEnforceTribeFameCap(c->getId(), c->getOrganization(), c->getAllegiance());
 		}
 	}
 

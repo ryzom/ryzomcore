@@ -147,14 +147,14 @@ public:
 	sint32 getStartFame(PVP_CLAN::TPVPClan playerClan, PVP_CLAN::TPVPClan targetClan);
 	// - getMaxFameByClan: playerClan must be Neutral or the same type (Cult or Clan) as targetClan,
 	//   targetClan must be any non-neutral clan.
-	sint32 getMaxFameByClan(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> playerClans, PVP_CLAN::TPVPClan targetClan);
-	sint32 getMaxFameByFactionIndex(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> playerClans, uint32 factionIndex);
-	
+	sint32 getMaxFameByClan(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> playerClans, uint32 organization, PVP_CLAN::TPVPClan targetClan);
+	sint32 getMaxFameByFactionIndex(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> playerClans, uint32 organization, uint32 factionIndex);
+
 	// Ensures that the fame values are properly capped based on allegiance.
-	void enforceFameCaps(const NLMISC::CEntityId &entityId, std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance);
+	void enforceFameCaps(const NLMISC::CEntityId &entityId, uint32 organization, std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance);
 
 	// Set tribe fame cap and ensures fame values are properly capped, based on allegiance
-	void setAndEnforceTribeFameCap(const NLMISC::CEntityId &entityId, std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance);
+	void setAndEnforceTribeFameCap(const NLMISC::CEntityId &entityId, uint32 organization, std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance);
 
 	// Callback function for when one of the threshold CVariables are changed.
 	static void thresholdChanged(NLMISC::IVariable &var);
@@ -201,10 +201,10 @@ private:
 		/// declare the 100 fame mirror value
 		CMirrorPropValueAlice<sint32>			Fames[MAX_FACTION];
 
-		/** Fame memory. Used for player to remember guild fame status when they change/join/quit guild	
+		/** Fame memory. Used for player to remember guild fame status when they change/join/quit guild
 		 *	The reason for this is to reduce the resulting fame variation when the player change/join/quit a guild.
 		 *	The table will receive the current evaluated player guild fame when the player guild status change.
-		 *	Then, a progressive interpolation will slop the evaluated player guild fame from the new player guild fame 
+		 *	Then, a progressive interpolation will slop the evaluated player guild fame from the new player guild fame
 		 *	value.
 		 */
 		sint32		LastGuildFame[MAX_FACTION];
@@ -226,7 +226,7 @@ private:
 			FameMemory = TDataSetRow::createFromRawIndex(INVALID_DATASET_ROW );
 			LastGuildStatusChange = 0;
 			LastFameChangeDate = 0;
-			
+
 			for (uint i=0; i<MAX_FACTION; ++i)
 			{
 				Fames[i].init(dataSet, entityRow, FirstFamePropIndex+i);
