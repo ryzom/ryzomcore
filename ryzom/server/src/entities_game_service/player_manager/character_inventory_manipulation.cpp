@@ -3258,10 +3258,10 @@ void CCharacter::useItem(uint32 slot)
 					if (factionIndex != CStaticFames::INVALID_FACTION_INDEX)
 					{
 						const sint32 fame = CFameInterface::getInstance().getFameIndexed(getId(), factionIndex);
-						if (fame >= 33*6000) // 198000
+						if (fame >= 33*kFameMultipler) // 198000
 						{
 							destroy = false;
-							if (fame < 60*6000 && item->getStaticForm()->TpEcosystem == 7) // 360000
+							if (fame < 60*kFameMultipler && item->getStaticForm()->TpEcosystem == 7) // 360000
 								destroy = true;
 
 							if (!destroy)
@@ -3315,8 +3315,7 @@ void CCharacter::useItem(uint32 slot)
 				fx.unpack(visualFx.getValue());
 
 				if (allegeance.first != PVP_CLAN::None && allegeance.first != PVP_CLAN::Neutral
-						&& CFameInterface::getInstance().getFameIndexed(_Id, PVP_CLAN::getFactionIndex(allegeance.first))
-						>= 600000)
+						&& CFameInterface::getInstance().getFameIndexed(_Id, PVP_CLAN::getFactionIndex(allegeance.first)) >= 100*kFameMultipler)
 				{
 					if (allegeance.first == PVP_CLAN::Kami)
 					{
@@ -3331,10 +3330,9 @@ void CCharacter::useItem(uint32 slot)
 						fx.Aura = MAGICFX::NoAura;
 					}
 				}
-				else if (getOrganization() == 5 && CFameInterface::getInstance().getFameIndexed(_Id, PVP_CLAN::getFactionIndex(PVP_CLAN::Marauder)))
-						>= 600000)
+				else if (getOrganization() == 5 && CFameInterface::getInstance().getFameIndexed(_Id, PVP_CLAN::getFactionIndex(PVP_CLAN::Marauder))>= 100*kFameMultipler)
 				{
-					fx.Aura = MAGICFX::MarauderKami;
+					fx.Aura = MAGICFX::TeleportMarauder;
 				}
 				else
 				{

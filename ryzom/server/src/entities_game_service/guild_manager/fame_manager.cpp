@@ -412,7 +412,7 @@ void CFameManager::savePlayerFame(const NLMISC::CEntityId &playerId, EGSPD::CFam
 				if( entry == NULL )
 					entry = fameContainer.addToEntries( id );
 				EGS_PD_AST(entry);
-				nlinfo("%d : %d", it->second->Fames[i]);
+				nlinfo("%d : %i", MAX_FACTION, (sint32) it->second->Fames[i]);
 				entry->setFame( it->second->Fames[i] );
 				entry->setLastFameChangeTrend( fow->LastFameChangeTrends[i] );
 			}
@@ -1291,7 +1291,7 @@ sint32 CFameManager::getMaxFameByClan(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TP
 
 	if (organization == 5) // marauder
 	{
-		return -30*kFameMultipler;
+		return -40*kFameMultipler;
 	}
 
 	// Local variables for the lookup values.
