@@ -151,6 +151,16 @@ public :
 	CChatGroup& getGroup( const TGroupId& gId );
 
 	/**
+	 * Check if a message need be deeplized or not
+	 * \param itCl is the client info
+	 * \param ucstr is the chat content
+	 * \param senderLang is lang code of sender
+	 * \param langs is string to fill all langs where translated
+	 * \param nbrReceivers is a integer to fill with number of players who will receive the message
+	 */
+	void checkNeedDeeplize(const TDataSetRow& sender, const ucstring& ucstr, const std::string& senderLang, std::string &langs, uint &nbrReceivers, TGroupId grpId = NLMISC::CEntityId::Unknown);
+
+	/**
 	 * Transmit a chat message
 	 * \param sender is the id of the talking char
 	 * \param str is the chat content

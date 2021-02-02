@@ -702,6 +702,11 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 		mode = CChatGroup::region;
 		groupId.fromString(args[1].substr(7).c_str());
 	}
+	else if (args[1].substr(0, 6) == "guild:")
+	{
+		mode = CChatGroup::guild;
+		groupId.fromString(args[1].substr(6).c_str());
+	}
 	else
 	{
 		mode = CChatGroup::stringToGroupType(args[1]);
@@ -722,6 +727,9 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 
 		if (mode == CChatGroup::region)
 			IOS->getChatManager().getClient(rowId).setRegionChatGroup(groupId);
+
+		if (mode == CChatGroup::guild)
+			IOS->getChatManager().getClient(rowId).setGuildChatGroup(groupId);
 
 
 		IOS->getChatManager().getClient(rowId).updateAudience();

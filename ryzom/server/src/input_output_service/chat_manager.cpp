@@ -245,6 +245,10 @@ void CChatManager::addClient( const TDataSetRow& id )
 			// add player in the group universe
 			TGroupId grpUniverse = CEntityId(RYZOMID::chatGroup,0);
 			addToGroup(grpUniverse, id);
+
+			client->setChatMode(CChatGroup::say);
+			client->updateAudience();
+
 		}
 	}
 	else
@@ -521,8 +525,6 @@ void CChatManager::removeFromGroup( TGroupId gId, const TDataSetRow &charId )
 } // removeFromGroup //
 
 
-
-
 //-----------------------------------------------
 //	getGroup
 //
@@ -542,6 +544,145 @@ CChatGroup& CChatManager::getGroup( const TGroupId& gId )
 } // getGroup //
 
 
+//-----------------------------------------------
+//	checkNeedDeeplize
+//
+//-----------------------------------------------
+void CChatManager::checkNeedDeeplize( const TDataSetRow& sender, const ucstring& ucstr, const string& senderLang, string &langs, uint &nbrReceivers, TGroupId grpId)
+{
+	TClientInfoCont::iterator itCl = _Clients.find( sender );
+	CChatManager &cm = IOS->getChatManager();
+	CChatClient &senderClient = cm.getClient(sender);
+
+	bool have_fr = false;
+	bool have_de = false;
+	bool have_en = false;
+	bool have_ru = false;
+	bool have_es = false;
+	CChatGroup::TMemberCont::iterator itA;
+	CChatGroup::TMemberCont::iterator itEnd;
+
+	nbrReceivers = 0;
+
+	if (grpId == CEntityId::Unknown)
+	{
+		itA = itCl->second->getAudience().Members.begin();
+		itEnd = itCl->second->getAudience().Members.end();
+	}
+	else
+	{
+		map< TGroupId, CChatGroup >::iterator itGrp = _Groups.find( grpId );
+		if( itGrp != _Groups.end() )
+		{
+			CChatGroup &chatGrp = itGrp->second;
+			itA = chatGrp.Members.begin();
+			itEnd = chatGrp.Members.end();
+		}
+		else
+		{
+			itA = itCl->second->getAudience().Members.end();
+			itEnd = itCl->second->getAudience().Members.end();
+		}
+	}
+
+
+	for( ; itA != itEnd; ++itA )
+	{
+		ucstring message;
+		string receiverName;
+		NLMISC::CEntityId receiverId = TheDataset.getEntityId(*itA);
+		CCharacterInfos* co = IOS->getCharInfos(receiverId);
+
+		_DestUsers.push_back(receiverId);
+		string receiverLang;
+		if (co == NULL)
+		{
+			receiverName = receiverId.toString();
+		}
+		else
+		{
+			receiverName = co->Name.toString();
+			receiverLang = SM->getLanguageCodeString(co->Language);
+		}
+
+		if (EnableDeepL && !senderClient.dontSendTranslation(senderLang))
+		{
+			CChatClient &client = getClient(*itA);
+
+			if (senderLang == "wk")
+				receiverLang = senderLang;
+
+			if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
+			{
+				if (grpId == CEntityId::Unknown && ucstr.length() > 5 && ucstr[1] == ':' && ucstr[4] == ':') // check lang prefix only for chat()
+				{
+					string usedLang = ucstr.toString().substr(2, 2);
+					if (usedLang == receiverLang && !client.dontReceiveTranslation(usedLang))
+						message = ucstr.substr(5);
+				}
+				else
+				{
+					message = ucstr.substr(1);
+				}
+			}
+			else if (senderLang == receiverLang || client.dontReceiveTranslation(senderLang)) // Sent directly if sender and receiver uses same lang
+			{
+				message = ucstr;
+			}
+			else
+			{
+				if (!have_fr && receiverLang == "fr")
+					have_fr = true;
+				if (!have_de && receiverLang == "de")
+					have_de = true;
+				if (!have_en && receiverLang == "en")
+					have_en = true;
+				if (!have_ru && receiverLang == "ru")
+					have_ru = true;
+				if (!have_es && receiverLang == "es")
+					have_es = true;
+				nbrReceivers++;
+			}
+		}
+		else
+		{
+			message = ucstr;
+		}
+
+		if (!message.empty())
+		{
+			if (grpId == CEntityId::Unknown)
+				sendChat( itCl->second->getChatMode(), *itA, message, sender);
+		}
+	}
+
+	if (grpId != CEntityId::Unknown) // Chat in group must be sent only one time
+	{
+		if (ucstr[0] == '>') // direct, no translation
+			chatInGroup( grpId, ucstr.substr(1), sender );
+		else if (ucstr.length() > 5 && ucstr[1] == ':' && ucstr[4] == ':') // Already have filter
+			chatInGroup( grpId, ucstr, sender );
+		else
+			chatInGroup( grpId, ucstring(":"+senderLang+":")+ucstr, sender ); // Need filter
+	}
+
+
+	langs = senderLang;
+	if (have_fr)
+		langs += "-fr";
+	if (have_de)
+		langs += "-de";
+	if (have_en)
+		langs += "-en";
+	if (have_ru)
+		langs += "-ru";
+	if (have_es)
+		langs += "-es";
+
+}
+
+
+
 
 //-----------------------------------------------
 //	chat
@@ -549,6 +690,7 @@ CChatGroup& CChatManager::getGroup( const TGroupId& gId )
 //-----------------------------------------------
 void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 {
+
 	TClientInfoCont::iterator itCl = _Clients.find( sender );
 	if( itCl != _Clients.end() )
 	{
@@ -613,93 +755,14 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 			// dynamic group
 		case CChatGroup::shout :
 		case CChatGroup::say :
+		case CChatGroup::arround :
 			{
-				uint nbr_receiver = 0;
-				bool have_fr = false;
-				bool have_de = false;
-				bool have_en = false;
-				bool have_ru = false;
-				bool have_es = false;
-				CChatGroup::TMemberCont::iterator itA;
+				string langs;
+				uint nbrReceivers;
+				checkNeedDeeplize(sender, ucstr, senderLang, langs, nbrReceivers);
 
-				for( itA = itCl->second->getAudience().Members.begin();
-						itA != itCl->second->getAudience().Members.end();
-							++itA )
-				{
-					string				receiverName;
-					NLMISC::CEntityId	receiverId = TheDataset.getEntityId(*itA);
-					CCharacterInfos*	co = IOS->getCharInfos(receiverId);
-
-					_DestUsers.push_back(receiverId);
-					string receiver_lang;
-					if (co == NULL)
-					{
-						receiverName = receiverId.toString();
-					}
-					else
-					{
-						receiverName = co->Name.toString();
-						receiver_lang = SM->getLanguageCodeString(co->Language);
-					}
-
-					if (EnableDeepL && !senderClient.dontSendTranslation(senderLang))
-					{
-						CChatClient &client = getClient(*itA);
-
-						if (senderLang == "wk")
-							receiver_lang = senderLang;
-
-						if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
-						{
-							if (ucstr.length() > 5 && ucstr[1] == ':' && ucstr[4] == ':') // check lang prefix
-							{
-								string usedlang = ucstr.toString().substr(2, 2);
-								//nlinfo("used: %s, user: %s", usedlang.c_str(), receiver_lang.c_str());
-								if (usedlang == receiver_lang && !client.dontReceiveTranslation(usedlang))
-									sendChat( itCl->second->getChatMode(), *itA, ucstr.substr(5), sender );
-							}
-							else
-							{
-								sendChat( itCl->second->getChatMode(), *itA, ucstr.substr(1), sender );
-							}
-						}
-						else if (senderLang == receiver_lang || client.dontReceiveTranslation(senderLang)) // Sent directly if sender and receiver uses same lang
-						{
-							sendChat( itCl->second->getChatMode(), *itA, ucstr, sender );
-						}
-						else
-						{
-							if (!have_fr && receiver_lang == "fr")
-								have_fr = true;
-							if (!have_de && receiver_lang == "de")
-								have_de = true;
-							if (!have_en && receiver_lang == "en")
-								have_en = true;
-							if (!have_ru && receiver_lang == "ru")
-								have_ru = true;
-							if (!have_es && receiver_lang == "es")
-								have_es = true;
-							nbr_receiver++;
-						}
-					}
-					else
-						sendChat( itCl->second->getChatMode(), *itA, ucstr, sender );
-				}
-
-				string langs = senderLang;
-				if (have_fr)
-					langs += "-fr";
-				if (have_de)
-					langs += "-de";
-				if (have_en)
-					langs += "-en";
-				if (have_ru)
-					langs += "-ru";
-				if (have_es)
-					langs += "-es";
-
-				if (nbr_receiver > 0)
-					_Log.displayNL("%s|%s|%d|%s|%s", groupNames[itCl->second->getChatMode()], fullName.c_str(), nbr_receiver, langs.c_str(), ucstr.toUtf8().c_str() );
+				if (nbrReceivers > 0)
+					_Log.displayNL("%s|%s|%d|%s|%s", groupNames[itCl->second->getChatMode()], fullName.c_str(), nbrReceivers, langs.c_str(), ucstr.toUtf8().c_str() );
 			}
 			break;
 		case CChatGroup::region :
@@ -712,8 +775,13 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 
 				TGroupId grpId = itCl->second->getRegionChatGroup();
 				_DestUsers.push_back(grpId);
+				string langs;
+				uint nbrReceivers;
+				checkNeedDeeplize(sender, ucstr, senderLang, langs, nbrReceivers, grpId);
+				if (nbrReceivers > 0)
+					_Log.displayNL("region:%s|%s|%d|%s|%s", grpId.toString().c_str(), fullName.c_str(), nbrReceivers, langs.c_str(), ucstr.toUtf8().c_str() );
 
-				if (EnableDeepL)
+				/*if (EnableDeepL && !senderClient.dontSendTranslation(senderLang))
 				{
 					if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
 						chatInGroup( grpId, ucstr.substr(1), sender );
@@ -723,7 +791,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 						_Log.displayNL("region:%s|%s|*|%s-*|%s", grpId.toString().c_str(), fullName.c_str(), senderLang.c_str(), ucstr.toUtf8().c_str() );
 				}
 				else
-					chatInGroup( grpId, ucstr, sender );
+					chatInGroup( grpId, ucstr, sender );*/
 			}
 			break;
 
@@ -860,8 +928,16 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 			{
 				TGroupId grpId = itCl->second->getGuildChatGroup();
 				_DestUsers.push_back(grpId);
+				string langs;
+				uint nbrReceivers;
+				checkNeedDeeplize(sender, ucstr, senderLang, langs, nbrReceivers, grpId);
+				if (nbrReceivers > 0)
+				{
+					//sendToMongo = false;
+					_Log.displayNL("guild:%s|%s|%d|%s|%s", grpId.toString().c_str(), fullName.c_str(), nbrReceivers, langs.c_str(), ucstr.toUtf8().c_str() );
+				}
 
-				_Log.displayNL("%s' (%s) : %s", fullName.c_str(), groupNames[itCl->second->getChatMode()], ucstr.toString().c_str() );
+				//_Log.displayNL("%s' (%s) : %s", fullName.c_str(), groupNames[itCl->second->getChatMode()], ucstr.toString().c_str() );
 
 				uint32 guildId = grpId.getShortId() - 0x10000000;
 
@@ -871,9 +947,27 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 				double date = 1000.0*(double)CTime::getSecondsSince1970();
 
 #ifdef HAVE_MONGO
-				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': 1 }", CMongo::quote(fullName).c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), sGuildId.str().c_str(), date));
+				string mongoText = ucstr.toUtf8();
+				string translatedLang = senderLang;
+				if (mongoText[0] == '>')
+					mongoText = mongoText.substr(1);
+
+				if (mongoText.size() > 4 && mongoText[0] == ':' && mongoText[3] == ':')
+				{
+					translatedLang = mongoText.substr(1, 2);
+					mongoText = mongoText.substr(4);
+				}
+
+				if (translatedLang == "en")
+					translatedLang = "gb";
+
+				string::size_type endOfOriginal = mongoText.find("}@{");
+				if (endOfOriginal != string::npos)
+					mongoText = mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
+
+				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': 1 }", CMongo::quote(fullName).c_str(), CMongo::quote(":"+translatedLang+":"+mongoText).c_str(), sGuildId.str().c_str(), date));
 #endif
-				chatInGroup( grpId, ucstr, sender );
+				//chatInGroup( grpId, ucstr, sender );
 			}
 			break;
 		case CChatGroup::dyn_chat:
@@ -937,8 +1031,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 									haveOriginMessage = true;
 									if (mongoText.size() > 9)
 										originLang = mongoText.substr(6, 2);
-									string originText = mongoText.substr(9, endOfOriginal-9);
-									strFindReplace(originText, ")", "}");
+									string sourceText = mongoText.substr(9, endOfOriginal-9);
+									strFindReplace(sourceText, ")", "}");
 									mongoText = "["+originLang+"](http://chat.ryzom.com/channel/pub-forge-"+originLang+"?%20"+encodeURIComponent(sourceText)+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
 								}
 								else
@@ -1742,16 +1836,19 @@ void CChatManager::sendEmoteCustomTextToAll( const TDataSetRow& sender, const uc
 		CChatGroup::TGroupType oldMode = itCl->second->getChatMode();
 		TChanID	oldChan = itCl->second->getDynChatChan();
 		itCl->second->setChatMode(CChatGroup::say);
-		itCl->second->updateAudience();
+		itCl->second->updateAudience(); // Use the say audience to get the correct members
+		itCl->second->setChatMode(CChatGroup::arround);
 
 		// get audience around the emoting player
 		CChatGroup::TMemberCont::iterator itA;
-		for( itA = itCl->second->getAudience().Members.begin();
+/*		for( itA = itCl->second->getAudience().Members.begin();
 		itA != itCl->second->getAudience().Members.end();
 		++itA )
 		{
 			sendChatCustomEmote( sender, *itA, ustr );
 		}
+		*/
+		chat(sender, ustr);
 		// restore old chat mode
 		itCl->second->setChatMode( oldMode, oldChan );
 	}
@@ -1821,6 +1918,14 @@ void CChatManager::sendEmoteCustomTextToAll( const TDataSetRow& sender, const uc
 //-----------------------------------------------
 void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, const ucstring& ucstr, const TDataSetRow &sender, TChanID chanID, const ucstring &senderName)
 {
+
+
+	if (senderChatMode == CChatGroup::arround)
+	{
+		sendChatCustomEmote(sender, receiver, ucstr );
+		return;
+	}
+
 	//if( receiver != sender )
 	{
 		CCharacterInfos * charInfos = NULL;
@@ -1865,6 +1970,7 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 						ucstring senderName("<BROADCAST MESSAGE>");
 						senderNameIndex = SM->storeString( senderName );
 					}
+
 					if (!senderName.empty())
 					{
 						// the sender overloaded the name
@@ -2868,7 +2974,7 @@ ucstring CChatManager::filterClientInput(ucstring &text)
 	while (text.size() > 0 && (*(text.rbegin()) == ' ' || *(text.rbegin()) == '\t'))
 		text.resize(text.size()-1);
 
-	if (pos < text.size() && text[pos] == ':')
+	if (pos+3 < text.size() && text[pos] == ':' && text[pos+3] == ':')
 		++pos;
 
 	if (pos+1 < text.size() && text[pos] == '>' && text[pos+1] == ':')
