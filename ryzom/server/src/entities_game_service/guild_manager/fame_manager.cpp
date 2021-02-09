@@ -412,7 +412,6 @@ void CFameManager::savePlayerFame(const NLMISC::CEntityId &playerId, EGSPD::CFam
 				if( entry == NULL )
 					entry = fameContainer.addToEntries( id );
 				EGS_PD_AST(entry);
-				nlinfo("%d : %i", MAX_FACTION, (sint32) it->second->Fames[i]);
 				entry->setFame( it->second->Fames[i] );
 				entry->setLastFameChangeTrend( fow->LastFameChangeTrends[i] );
 			}

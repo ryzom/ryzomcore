@@ -2069,6 +2069,15 @@ NLMISC_COMMAND(teleportMe, "teleport", "<uid> [x,y,z,h|player name|bot name] tel
 		return true;
 	}
 
+	CMirrorPropValue<TYPE_VISUAL_FX> visualFx(TheDataset, c->getEntityRowId(), DSPropertyVISUAL_FX);
+	CVisualFX fx;
+	fx.unpack(visualFx.getValue());
+	fx.Aura = MAGICFX::NoAura;
+	sint64 prop;
+	fx.pack(prop);
+	visualFx = (sint16)prop;
+
+
 	c->teleportCharacter(x,y,z,allowPetTp,true,h,0xFF,cell);
 
 	if (cont)
@@ -2081,6 +2090,27 @@ NLMISC_COMMAND(teleportMe, "teleport", "<uid> [x,y,z,h|player name|bot name] tel
 
 	log.displayNL("OK");
 
+	return true;
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setAuraFx, "setAuraFx", "<uid> aura")
+{
+	if (args.size() != 2)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	CMirrorPropValue<TYPE_VISUAL_FX> visualFx(TheDataset, c->getEntityRowId(), DSPropertyVISUAL_FX);
+	CVisualFX fx;
+	fx.unpack(visualFx.getValue());
+
+	if (args[1] == "marauder")
+		fx.Aura = MAGICFX::TeleportMarauder;
+
+	sint64 prop;
+	fx.pack(prop);
+	visualFx = (sint16)prop;
 	return true;
 }
 
