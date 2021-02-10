@@ -185,6 +185,23 @@ REGISTER_ACTION_HANDLER(CHandlerLUA,    "lua");
 std::deque<CRefPtr<CCtrlBase> >		CHandlerLUA::_UICallerStack;
 
 // ***************************************************************************
+class CHandlerSCRIPT : public IActionHandler
+{
+public:
+	void execute(CCtrlBase *pCaller,    const std::string &sParams)
+	{
+		string script = sParams;
+		strFindReplace(script, "[[", "\\[\\[");
+		strFindReplace(script, "]]", "\\]\\]");
+		strFindReplace(script, "\\[\\[", "]]..'[['..[[");
+		strFindReplace(script, "\\]\\]", "]]..']]'..[[");
+		strFindReplace(script, "|", "\n");
+		CLuaManager::getInstance().executeLuaScript("\ngame:executeRyzomScript([["+script+"]])\n",   true);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerSCRIPT,    "script");
+
+// ***************************************************************************
 // Allow also to call script from expression
 static DECLARE_INTERFACE_USER_FCT(lua)
 {
