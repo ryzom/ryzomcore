@@ -6378,15 +6378,15 @@ namespace NLGUI
 		}
 		else if (_ObjectType=="application/ryzom-tutorial")
 		{
-			strFindReplace(_ObjectScript, "[", "〈");
-			strFindReplace(_ObjectScript, "]", "〉");
+			while(strFindReplace(_ObjectScript, "[", "〈"));
+			while(strFindReplace(_ObjectScript, "]", "〉"));
 			CLuaManager::getInstance().executeLuaScript("\ngame:executeTutorial([["+_ObjectScript+"]])\n", true);
 			_ObjectScript.clear();
 		}
 		else if (_ObjectType=="application/ryzom-script")
 		{
-			strFindReplace(_ObjectScript, "[", "〈");
-			strFindReplace(_ObjectScript, "]", "〉");
+			while(strFindReplace(_ObjectScript, "[", "〈"));
+			while(strFindReplace(_ObjectScript, "]", "〉"));
 			CLuaManager::getInstance().executeLuaScript("\ngame:executeRyzomScript([["+_ObjectScript+"]])\n", true);
 			_ObjectScript.clear();
 		}
