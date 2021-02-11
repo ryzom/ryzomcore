@@ -191,10 +191,8 @@ public:
 	void execute(CCtrlBase *pCaller,    const std::string &sParams)
 	{
 		string script = sParams;
-		strFindReplace(script, "[[", "\\[\\[");
-		strFindReplace(script, "]]", "\\]\\]");
-		strFindReplace(script, "\\[\\[", "]]..'[['..[[");
-		strFindReplace(script, "\\]\\]", "]]..']]'..[[");
+		strFindReplace(script, "[", "〈");
+		strFindReplace(script, "]", "〉");
 		strFindReplace(script, "|", "\n");
 		CLuaManager::getInstance().executeLuaScript("\ngame:executeRyzomScript([["+script+"]])\n",   true);
 	}
