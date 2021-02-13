@@ -4412,7 +4412,8 @@ uint16 CGameItem::getClientEnchantValue() const
 	}
 	if ( sabrinaValue != 0)
 	{
-		return uint8( 1 + sapLoad / (uint32)(sabrinaValue * sabrinaRelativeValue) );
+		// client side value is limited to 10bits
+		return std::min(uint(999), uint(1 + sapLoad / (uint32)(sabrinaValue * sabrinaRelativeValue)));
 	}
 	else
 	{
