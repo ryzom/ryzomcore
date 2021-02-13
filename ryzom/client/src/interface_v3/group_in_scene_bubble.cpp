@@ -29,6 +29,7 @@
 #include "nel/gui/action_handler.h"
 #include "../entities.h"
 #include "nel/gui/group_paragraph.h" // For CCtrlLink
+#include "nel/gui/view_bitmap.h"
 #include "../net_manager.h"
 #include "../string_manager_client.h"
 #include "../login.h"
@@ -644,13 +645,41 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const string &message, C
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
+		ucstring finalMessage = message;
+
+		ucstring::size_type pos = message.find(ucstring("|"));
+		if (pos != std::string::npos)
+		{
+			CViewBitmap *pViewIcon = dynamic_cast<CViewBitmap*>(group->getView("iconA"));
+			if (pViewIcon != NULL)
+			{
+				string texture = message.substr(0, pos).toString();
+				pViewIcon->setTexture(texture);
+			}
+
+			ucstring::size_type end = message.find(ucstring("|"), pos+1);
+			if (end != std::string::npos)
+			{
+				CViewBitmap *pViewIcon = dynamic_cast<CViewBitmap*>(group->getView("iconZ"));
+				if (pViewIcon != NULL)
+				{
+					string texture = message.substr(end+1).toString();
+					pViewIcon->setTexture(texture);
+				}
+				finalMessage = message.substr(pos+1, end-pos-1);
+			}
+			else
+				finalMessage = message.substr(pos+1);
+		}
+
 		// Skill name
 		CViewText *pViewName = dynamic_cast<CViewText*>(group->getView("name"));
 		if (pViewName != NULL)
 		{
-			pViewName->setTextFormatTaged(message);
+			pViewName->setTextFormatTaged(finalMessage);
 			pViewName->setColor (color);
 		}
+
 
 		// Link to the interface
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
@@ -865,7 +894,7 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const std::string &ucsTe
 			textSize = endOfOriginal;
 		}
 	}
-		
+
 	// Output the message in a bubble
 
 	bool show = false;
