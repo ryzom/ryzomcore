@@ -101,6 +101,7 @@ struct SExportOptions
 	float			ZFactor;
 	std::string		HeightMapFile2;
 	float			ZFactor2;
+	bool			ExtendCoords;
 
 	uint8			Light; // Roughly light the zone (0-none, 1-patch, 2-noise)
 

@@ -43,6 +43,7 @@ namespace /* anonymous */
 
 sint32 s_ZoneMinX, s_ZoneMinY, s_ZoneMaxX, s_ZoneMaxY;
 float s_CellSize = 160.0f;
+bool s_ExtendCoords;
 
 std::string s_SourceDir; /* R:\reference\2008_july\data\r2_desert */
 std::string s_ReferenceDir; /* R:\pipeline\export\continents\r2_desert\zone_weld */
@@ -58,11 +59,16 @@ int s_Warnings;
 
 // unbuild_elevation --land "R:\graphics\landscape\ligo\desert\r2_desert.land" "Y:\temp\r2_desert_elevation.Py" "R:\reference\2008_july\data\r2_desert" "R:\pipeline\export\continents\r2_desert\zone_weld"
 // --land "R:\graphics\landscape\ligo\jungle\zorai.land" --referenceext zonenhw "X:\wsl\big_zorai.py" "R:\reference\2008_july\data\zorai_zones" "R:\pipeline\export\continents\zorai\zone_weld"
-// --land "R:\graphics\landscape\ligo\desert\r2_desert.land" "X:\wsl\big_r2_desert.py" "R:\reference\2008_july\data\r2_desert" "R:\pipeline\export\continents\r2_desert\zone_weld"
-// --land "R:\graphics\landscape\ligo\jungle\r2_jungle.land" "X:\wsl\big_r2_jungle.py" "R:\reference\2008_july\data\r2_jungle" "R:\pipeline\export\continents\r2_jungle\zone_weld"
-// --land "R:\graphics\landscape\ligo\jungle\r2_forest.land" "X:\wsl\big_r2_forest.py" "R:\reference\2008_july\data\r2_forest" "R:\pipeline\export\continents\r2_forest\zone_weld"
-// --land "R:\graphics\landscape\ligo\lacustre\r2_lakes.land" "X:\wsl\big_r2_lakes.py" "R:\reference\2008_july\data\r2_lakes" "R:\pipeline\export\continents\r2_lakes\zone_weld"
-// --land "R:\graphics\landscape\ligo\primes_racines\r2_roots.land" "X:\wsl\big_r2_roots.py" "R:\reference\2008_july\data\r2_roots" "R:\pipeline\export\continents\r2_roots\zone_weld"
+
+// --land "R:\graphics\landscape\ligo\desert\r2_desert.land" "X:\wsl\big_r2_desert.py" "R:\reference\2008_july\data\r2_desert" "R:\pipeline\export\continents\r2_desert\zone_weld" --extendcoords
+// --land "R:\graphics\landscape\ligo\jungle\r2_jungle.land" "X:\wsl\big_r2_jungle.py" "R:\reference\2008_july\data\r2_jungle" "R:\pipeline\export\continents\r2_jungle\zone_weld" --extendcoords
+// --land "R:\graphics\landscape\ligo\jungle\r2_forest.land" "X:\wsl\big_r2_forest.py" "R:\reference\2008_july\data\r2_forest" "R:\pipeline\export\continents\r2_forest\zone_weld" --extendcoords
+// --land "R:\graphics\landscape\ligo\lacustre\r2_lakes.land" "X:\wsl\big_r2_lakes.py" "R:\reference\2008_july\data\r2_lakes" "R:\pipeline\export\continents\r2_lakes\zone_weld" --extendcoords
+// --land "R:\graphics\landscape\ligo\primes_racines\r2_roots.land" "X:\wsl\big_r2_roots.py" "R:\reference\2008_july\data\r2_roots" "R:\pipeline\export\continents\r2_roots\zone_weld" --extendcoords
+
+// --land "R:\graphics\landscape\ligo\desert\r2_desert.land" --referenceext zonew "X:\wsl\check_r2_desert.py" "R:\reference\2008_july\data\r2_desert" "R:\pipeline\export\continents\r2_desert\zone_weld" --extendcoords
+// --land "R:\graphics\landscape\ligo\jungle\r2_jungle.land" --referenceext zonew "X:\wsl\check_r2_jungle.py" "R:\reference\2008_july\data\r2_jungle" "R:\pipeline\export\continents\r2_jungle\zone_weld" --extendcoords
+// --land "R:\graphics\landscape\ligo\primes_racines\r2_roots.land" --referenceext zonew "X:\wsl\check_r2_roots.py" "R:\reference\2008_july\data\r2_roots" "R:\pipeline\export\continents\r2_roots\zone_weld" --extendcoords
 
 bool loadLand(const string &filename)
 {
@@ -126,6 +132,12 @@ void getBitmapSize(int &w, int &h)
 	sint32 sizeY = s_ZoneMaxY - s_ZoneMinY + 1;
 	w = sizeX * 20;
 	h = sizeY * 20;
+
+	if (!s_ExtendCoords)
+	{
+		++w;
+		++h;
+	}
 }
 
 void getBitmapCoord(float &xc, float &yc, float x, float y)
@@ -135,11 +147,18 @@ void getBitmapCoord(float &xc, float &yc, float x, float y)
 	sint32 sizeX = s_ZoneMaxX - s_ZoneMinX + 1;
 	sint32 sizeY = s_ZoneMaxY - s_ZoneMinY + 1;
 
-	clamp(x, s_CellSize * s_ZoneMinX, s_CellSize * (s_ZoneMaxX + 1));
-	clamp(y, s_CellSize * s_ZoneMinY, s_CellSize * (s_ZoneMaxY + 1));
-
 	xc = (x - s_CellSize * s_ZoneMinX) / (s_CellSize * sizeX);
 	yc = 1.0f - ((y - s_CellSize * s_ZoneMinY) / (s_CellSize * sizeY));
+
+	if (s_ExtendCoords)
+	{
+		int w, h;
+		getBitmapSize(w, h);
+		xc -= .5f / (float)w;
+		yc -= .5f / (float)h;
+		xc = xc * (float)(w + 1) / (float)w;
+		yc = yc * (float)(h + 1) / (float)h;
+	}
 }
 
 bool processZone(std::vector<NLMISC::CVector> &output, const std::string &sourceFile, const std::string &referenceFile)
@@ -285,6 +304,9 @@ bool unbuildElevation()
 		if (!CFile::fileExists(sourceZone))
 			continue;
 
+		if (zone == "137_JK") // Bad zone
+			continue;
+
 		printf("%s\n", nlUtf8ToMbcs(zone));
 		++totalZones;
 
@@ -427,6 +449,8 @@ bool unbuildElevation(NLMISC::CCmdArgs &args)
 			return false;
 	}
 
+	s_ExtendCoords = args.haveLongArg("extendcoords");
+
 	if (args.haveLongArg("sourceext"))
 	{
 		s_SourceExt = args.getLongArg("sourceext")[0];
@@ -459,6 +483,7 @@ int main(int argc, char **argv)
 	args.addArg("", "zonemin", "zone", "Zone boundary");
 	args.addArg("", "zonemax", "zone", "Zone boundary");
 	args.addArg("", "cellsize", "meters", "Zone cell size (default: 160)");
+	args.addArg("", "extendcoords", "flag", "Extend coordinates to edge of bitmap pixels");
 
 	if (!args.parse(argc, argv))
 	{

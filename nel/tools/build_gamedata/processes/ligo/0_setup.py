@@ -96,6 +96,7 @@ if LigoExportLand != "":
 	cf.write("ZFactor1 = " + LigoExportZFactor1 + ";\n")
 	cf.write("HeightMapFile2 = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportHeightmap2 + "\";\n")
 	cf.write("ZFactor2 = " + LigoExportZFactor2 + ";\n")
+	cf.write("ExtendCoords = " + str(LigoExportExtendCoords) + ";\n")
 	cf.write("\n")
 	cf.write("ZoneLight = 0;\n")
 	cf.write("CellSize = 160;\n")

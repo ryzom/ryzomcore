@@ -94,6 +94,7 @@ def igElevation(inputIgDir, outputIgDir):
 		cf.write("ZFactor1 = " + LigoExportZFactor1 + ";\n")
 		cf.write("HeightMapFile2 = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportHeightmap2 + "\";\n")
 		cf.write("ZFactor2 = " + LigoExportZFactor2 + ";\n")
+		cf.write("ExtendCoords = " + str(LigoExportExtendCoords) + ";\n")
 		cf.write("\n")
 		cf.write("LandFile = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportLand + "\";\n")
 		cf.write("\n")

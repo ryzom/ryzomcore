@@ -176,6 +176,7 @@ struct SOptions : public SExportOptions
 			this->ZFactor = getFloat ("ZFactor1");
 			this->HeightMapFile2 = getStr ("HeightMapFile2");
 			this->ZFactor2 = getFloat ("ZFactor2");
+			this->ExtendCoords = getFloat ("ExtendCoords");
 			this->Light = (uint8)getInt ("ZoneLight");
 			this->CellSize = getFloat ("CellSize");
 			this->Threshold = getFloat ("Threshold");
