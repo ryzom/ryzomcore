@@ -54,7 +54,7 @@ public:
 
 	/// remove an association
 	inline void removeAssociation(NLMISC::CEntityId& entityId);
-	
+
 	/**
 	 * Get a bot entityId
 	 * \param aiid : the AI id of the bot
@@ -65,7 +65,7 @@ public:
 	/**
 	 * Get a bot AIId
 	 * \param entityId: the entityId of the searched bot
-	 * \return he AI id of the bot	 
+	 * \return he AI id of the bot
 	 */
 	TAIAlias getAIAlias(const NLMISC::CEntityId & entityId) const;
 
@@ -107,7 +107,7 @@ public:
 	 * WARNING : SLOW : use it only for commands / stats ( iteration through a hash_map )
 	 */
 	inline const std::string &getMissionNameFromUniqueId(TAIAlias alias) const;
-	
+
 	/**
 	 * Get an AI groupalias from its name
 	 * \param botName : name of the group
@@ -117,7 +117,7 @@ public:
 
 
 	/**
-	 * Send alias, and eid to ios via mirror.	 
+	 * Send alias, and eid to ios via mirror.
 	 */
 
 	void sendAliasToIOS() const	;
@@ -135,7 +135,7 @@ private:
 	 * \param prim : the primitive to be parsed
 	 */
 	void buildMissionTree(const NLLIGO::IPrimitive* prim);
-	
+
 	/// Constructor (private because it is a singleton)
 	CAIAliasTranslator();
 
@@ -148,7 +148,7 @@ private:
 	/// hash table using AI id as keys
 	CHashMap< uint, NLMISC::CEntityId >						_HashTableAiId;
 	CHashMap< NLMISC::CEntityId, TAIAlias,NLMISC::CEntityIdHashMapTraits>	_HashTableEntityId;
-	
+
 	/// map linking bot names to ids
 	CHashMultiMap< std::string, TAIAlias >		_BotNamesToIds;
 	/// map linking bot ids to names
@@ -188,7 +188,7 @@ inline void CAIAliasTranslator::removeNPCAlias(TAIAlias alias)
 	std::string lwr = NLMISC::strlwr((*it).second);
 	std::pair< CHashMultiMap< std::string, TAIAlias>::const_iterator, CHashMultiMap< std::string, TAIAlias>::const_iterator > result = _BotNamesToIds.equal_range(lwr);
 	CHashMultiMap< std::string, TAIAlias>::const_iterator it2 = result.first;
-	
+
 	while ( it2 != result.second )
 	{
 		if ((*it2).second == alias)
@@ -202,17 +202,17 @@ inline void CAIAliasTranslator::removeNPCAlias(TAIAlias alias)
 inline void CAIAliasTranslator::removeName(const std::string &name)
 {
 	std::string lwr = NLMISC::strlwr(name);
-	
+
 	std::pair< CHashMultiMap< std::string, TAIAlias>::const_iterator, CHashMultiMap< std::string, TAIAlias>::const_iterator > result = _BotNamesToIds.equal_range(lwr);
 
 	CHashMultiMap< std::string, TAIAlias>::const_iterator it2 = result.first;
-	
+
 	while ( it2 != result.second )
 	{
 		CHashMap< uint,std::string >::const_iterator it = _BotIdsToNames.find((*it2).second);
 		if ( it != _BotIdsToNames.end() )
 			_BotIdsToNames.erase(it);
-		
+
 		if ((*it2).first == lwr)
 			it2 = _BotNamesToIds.erase(it2);
 		else
@@ -325,7 +325,7 @@ inline void CAIAliasTranslator::updateAssociation(TAIAlias aiid, const NLMISC::C
 
 	_HashTableAiId.insert( std::make_pair( (uint)aiid,entityId ) );
 	_HashTableEntityId.insert( std::make_pair( entityId,aiid ) );
-	
+
 }// CAIAliasTranslator updateAssociation
 
 //-----------------------------------------------
@@ -359,7 +359,7 @@ inline const NLMISC::CEntityId& CAIAliasTranslator::getEntityId(TAIAlias aiid) c
 	if(  it != _HashTableAiId.end() )
 		return (*it).second;
 #ifndef FINAL_VERSION
-	nlerror( "Illegal call to getEntityId on entity with no alias" ); // see 
+	nlerror( "Illegal call to getEntityId on entity with no alias" ); // see
 #endif
 	return NLMISC::CEntityId::Unknown;
 }// CAIAliasTranslator getEntityId
