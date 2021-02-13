@@ -645,26 +645,24 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const string &message, C
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
-		ucstring finalMessage = message;
+		string finalMessage = message;
 
-		ucstring::size_type pos = message.find(ucstring("|"));
+		string::size_type pos = message.find("|");
 		if (pos != std::string::npos)
 		{
 			CViewBitmap *pViewIcon = dynamic_cast<CViewBitmap*>(group->getView("iconA"));
 			if (pViewIcon != NULL)
 			{
-				string texture = message.substr(0, pos).toString();
-				pViewIcon->setTexture(texture);
+				pViewIcon->setTexture(message.substr(0, pos));
 			}
 
-			ucstring::size_type end = message.find(ucstring("|"), pos+1);
+			string::size_type end = message.find("|", pos+1);
 			if (end != std::string::npos)
 			{
 				CViewBitmap *pViewIcon = dynamic_cast<CViewBitmap*>(group->getView("iconZ"));
 				if (pViewIcon != NULL)
 				{
-					string texture = message.substr(end+1).toString();
-					pViewIcon->setTexture(texture);
+					pViewIcon->setTexture(message.substr(end+1));
 				}
 				finalMessage = message.substr(pos+1, end-pos-1);
 			}

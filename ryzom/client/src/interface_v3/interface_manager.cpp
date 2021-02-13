@@ -2532,11 +2532,11 @@ void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
 
-	ucstring cleanStr = str;
-	ucstring::size_type pos = str.find(ucstring("|"));
+	string cleanStr = str;
+	string::size_type pos = str.find("|");
 	if (pos != std::string::npos)
 	{
-		ucstring::size_type end = str.find(ucstring("|"), pos+1);
+		string::size_type end = str.find("|", pos+1);
 		if (end != std::string::npos)
 			cleanStr = str.substr(pos+1, end-pos-1);
 		else
