@@ -2566,6 +2566,54 @@ NLMISC_COMMAND(temporaryRename, "rename a player for the event", "<uid> <new nam
 	return true;
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setTitle, "set player title", "<uid> <title>")
+{
+	if (args.size() != 2) {
+		log.displayNL("ERR: invalid arg count");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	TDataSetRow row = c->getEntityRowId();
+	c->setNewTitle(args[1]);
+	string fullname = c->getName().toString()+"$"+args[1]+"#"+c->getTagPvPA()+"#"+c->getTagPvPB()+"#"+c->getTagA()+"#"+c->getTagB()+"$";
+	ucstring name;
+	name.fromUtf8(fullname);
+	nlinfo("Set title : %s", name.toUtf8().c_str());
+	NLNET::CMessage	msgout("CHARACTER_NAME");
+	msgout.serial(row);
+	msgout.serial(name);
+	sendMessageViaMirror("IOS", msgout);
+	return true;
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setTag, "set player title", "<uid> <tag> <value>")
+{
+	if (args.size() != 3) {
+		log.displayNL("ERR: invalid arg count");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	TDataSetRow row = c->getEntityRowId();
+	if (args[1] == "pvpA") c->setTagPvPA(args[2]);
+	if (args[1] == "pvpB") c->setTagPvPB(args[2]);
+	if (args[1] == "A") c->setTagA(args[2]);
+	if (args[1] == "B") c->setTagB(args[2]);
+	string fullname = c->getName().toString()+"$"+c->getNewTitle()+"#"+c->getTagPvPA()+"#"+c->getTagPvPB()+"#"+c->getTagA()+"#"+c->getTagB()+"$";
+	ucstring name;
+	name.fromUtf8(fullname);
+	NLNET::CMessage	msgout("CHARACTER_NAME");
+	msgout.serial(row);
+	msgout.serial(name);
+	sendMessageViaMirror("IOS", msgout);
+	return true;
+}
+
 //-----------------------------------------------
 NLMISC_COMMAND(getArkMissions,"dump character ark missions","<uid>")
 {
