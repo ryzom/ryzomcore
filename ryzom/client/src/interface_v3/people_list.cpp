@@ -195,7 +195,7 @@ bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
 //==================================================================
 bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 {
-	return -NLMISC::compareCaseInsensitive(a.getName(), b.getName()); // FIXME: Locale-dependent sort
+	return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
 }
 
 //==================================================================
@@ -204,7 +204,7 @@ bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 	// We want order: online/alpha, offworld/alpha, offline/alpha
 	if (a.Online == b.Online)
 	{
-		return -NLMISC::compareCaseInsensitive(a.getName(), b.getName()); // FIXME: Locale-dependent sort
+		return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
 	}
 	else
 	{
