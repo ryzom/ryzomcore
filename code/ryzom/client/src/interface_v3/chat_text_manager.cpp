@@ -450,7 +450,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 		if (!inverse)
 		{
 		  ctrlButton->setDefaultContextHelp(original);
-		  pos = endOfOriginal+3;
+		  pos = endOfOriginal+4;
 		}
 		else
 		{
