@@ -118,6 +118,9 @@ namespace NLGUI
 		// Browse error
 		void browseError (const char *msg);
 
+		// Error message with html content
+		void browseErrorHtml(const std::string &html);
+
 		bool isBrowsing();
 
 		// Update coords
