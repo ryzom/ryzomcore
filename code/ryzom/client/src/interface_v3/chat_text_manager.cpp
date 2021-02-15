@@ -424,27 +424,30 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 
 	ucstring::size_type pos = 0;
 
-	// Manage Translations
-	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TRANSLATION_ONLY_AS_TOOLTIP_CB", false);
-	bool originalFirst = node->getValueBool();
-
 	string::size_type startTr = msg.find(ucstring("{:"));
 	string::size_type endOfOriginal = msg.find(ucstring("}@{"));
 
 	// Original/Translated case, example: {:enHello the world!}@{ Bonjour le monde !
 	if (startTr != string::npos && endOfOriginal != string::npos)
 	{
+		string lang = toUpper(msg.substr(startTr+2, 2)).toString();
+		
+		CCDBNodeLeaf *nodeInverse = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
+		bool inverse = nodeInverse->getValueBool();
+		CCDBNodeLeaf *nodeHideFlag = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":HIDE_FLAG", false);
+		bool hideFlag = nodeHideFlag->getValueBool();
+		
 		CViewBase *vt = createMsgTextSimple(msg.substr(0, startTr), col, justified, NULL);
 		para->addChild(vt);
 
 		string texture = "flag-"+toLower(msg.substr(startTr+2, 2)).toString()+".tga";
 		ucstring original = msg.substr(startTr+5, endOfOriginal-startTr-5);
-		ucstring translation = msg.substr(endOfOriginal+3);
+		ucstring translation = msg.substr(endOfOriginal+4);
 		CCtrlButton *ctrlButton = new CCtrlButton(CViewBase::TCtorParam());
 		ctrlButton->setTexture(texture);
 		ctrlButton->setTextureOver(texture);
 		ctrlButton->setTexturePushed(texture);
-		if (!originalFirst)
+		if (!inverse)
 		{
 		  ctrlButton->setDefaultContextHelp(original);
 		  pos = endOfOriginal+3;
@@ -456,7 +459,11 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 		  textSize = endOfOriginal;
 		}
 		ctrlButton->setId("tr");
-		para->addChild(ctrlButton);
+		if (hideFlag) {
+		  delete ctrlButton;
+		} else {
+		  para->addChild(ctrlButton);
+		}
 	}
 
 	// quickly check if text has links or not
