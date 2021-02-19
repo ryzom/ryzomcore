@@ -625,6 +625,9 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 						string name;
 
 						CAIAliasTranslator::getInstance()->getNPCNameFromAlias(c->getAlias(), name);
+						if (name.find('$') != string::npos)
+							name = name.substr(0, name.find('$'));
+						nlinfo("NEED: %s GET : %s", name.c_str(), params[1].c_str());
 						if ( NLMISC::strlwr(name) == NLMISC::strlwr(params[1]) )
 						{
 							user->validateDynamicMissionStep(webAppUrl);
