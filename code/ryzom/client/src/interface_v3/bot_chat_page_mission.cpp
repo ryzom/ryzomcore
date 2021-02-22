@@ -161,6 +161,7 @@ void CBotChatPageMission::acceptMission()
 	/// close the botchat
 	//CBotChatManager::getInstance()->setCurrPage(NULL);
 	_CurrSel = NULL;
+	CBotChatManager::getInstance()->setAHAfterEnd("context_choose_mission");
 }
 
 

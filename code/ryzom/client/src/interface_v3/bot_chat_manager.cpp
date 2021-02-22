@@ -86,6 +86,12 @@ void CBotChatManager::setCurrPage(CBotChatPage *page)
 			UserEntity->trader(CLFECOMMON::INVALID_SLOT);
 	}
 	_CurrPage = page;
+
+	if (page == NULL && !_AHAfterEnd.empty())
+	{
+		CAHManager::getInstance()->runActionHandler(_AHAfterEnd, NULL, "");
+		_AHAfterEnd = "";
+	}
 }
 
 // ********************************************************************************************

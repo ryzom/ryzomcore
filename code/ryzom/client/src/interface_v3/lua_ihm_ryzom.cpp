@@ -185,6 +185,21 @@ REGISTER_ACTION_HANDLER(CHandlerLUA,    "lua");
 std::deque<CRefPtr<CCtrlBase> >		CHandlerLUA::_UICallerStack;
 
 // ***************************************************************************
+class CHandlerSCRIPT : public IActionHandler
+{
+public:
+	void execute(CCtrlBase *pCaller,    const std::string &sParams)
+	{
+		string script = sParams;
+		while(strFindReplace(script, "[", "〈"));
+		while(strFindReplace(script, "]", "〉"));
+		strFindReplace(script, "|", "\n");
+		CLuaManager::getInstance().executeLuaScript("\ngame:executeRyzomScript([["+script+"]])\n",   true);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerSCRIPT,    "script");
+
+// ***************************************************************************
 // Allow also to call script from expression
 static DECLARE_INTERFACE_USER_FCT(lua)
 {
@@ -566,6 +581,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(isFullyPatched),
 		LUABIND_FUNC(getSheetType),
 		LUABIND_FUNC(getSheetShape),
+		LUABIND_FUNC(getCharacterSheetScale),
 		LUABIND_FUNC(getSheetFamily),
 		LUABIND_FUNC(getSheetName),
 		LUABIND_FUNC(getFameIndex),
@@ -3493,7 +3509,15 @@ std::string CLuaIHMRyzom::getSheetShape(const std::string &sheet)
 	return "";
 }
 
+// ***************************************************************************
+float CLuaIHMRyzom::getCharacterSheetScale(const std::string &sheet)
+{
+	const CEntitySheet *sheetPtr = SheetMngr.get(CSheetId(sheet));
+	const CCharacterSheet *charSheet = dynamic_cast<const CCharacterSheet*>(sheetPtr);
 
+	if (charSheet) return charSheet->Scale;
+	return 1;
+}
 
 // ***************************************************************************
 std::string CLuaIHMRyzom::getSheetFamily(const std::string &sheet)

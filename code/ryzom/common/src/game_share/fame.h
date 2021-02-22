@@ -52,26 +52,30 @@ public:
 			Kami = 0;
 			Karavan = 0;
 			Neutral = 0;
+			Marauder = 0;
 		}
 
 		void setKami(sint32 t) { Kami = t; }
 		void setKaravan(sint32 t) { Karavan = t; }
 		void setNeutral(sint32 t) { Neutral = t; }
+		void setMarauder(sint32 t) { Marauder = t; }
 
 		sint32 getKami() const { return Kami; }
 		sint32 getKaravan() const { return Karavan; }
 		sint32 getNeutral() const { return Neutral; }
+		sint32 getMarauder() const { return Marauder; }
 
 	private:
 		sint32 Kami;
 		sint32 Karavan;
 		sint32 Neutral;
+		sint32 Marauder;
 	};
 
 	class CTribeCultThresholdPerCiv
 	{
 	public:
-		bool getCultThresholdForCiv( PVP_CLAN::TPVPClan civ, sint32& kami, sint32& karavan, sint32& neutral) const
+		bool getCultThresholdForCiv( PVP_CLAN::TPVPClan civ, sint32& kami, sint32& karavan, sint32& neutral, sint32& marauder) const
 		{
 			const CTribeCultThreshold * tc = 0;
 			switch( civ )
@@ -88,12 +92,16 @@ public:
 			case PVP_CLAN::Neutral:
 				tc = &Neutral;
 				break;
+			case PVP_CLAN::Marauder:
+				tc = &Marauder;
+				break;
 			default:
 				return false;
 			}
 			kami = tc->getKami();
 			karavan = tc->getKaravan();
 			neutral = tc->getNeutral();
+			marauder = tc->getMarauder();
 			return true;
 		}
 
@@ -103,6 +111,7 @@ public:
 		CTribeCultThreshold Tryker;
 		CTribeCultThreshold Zorai;
 		CTribeCultThreshold Neutral;
+		CTribeCultThreshold Marauder;
 	};
 
 	// declare scoped constant value
