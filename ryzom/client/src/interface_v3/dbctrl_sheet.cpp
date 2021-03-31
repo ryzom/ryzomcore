@@ -56,6 +56,7 @@
 #include "../r2/editor.h"
 
 #include "nel/gui/lua_manager.h"
+#include "nel/misc/xml_macros.h"
 
 extern CSheetManager SheetMngr;
 
@@ -565,6 +566,14 @@ CCtrlDraggable(param)
 
 	_RegenText = NULL;
 	_RegenTextValue = 0;
+	_RegenTextEnabled = true;
+	_RegenTextShadow = true;
+	_RegenTextOutline = false;
+	_RegenTextY = 2;
+	_RegenTextFontSize = 8;
+	_RegenTextColor = NLMISC::CRGBA::White;
+	_RegenTextShadowColor = NLMISC::CRGBA::Black;
+	_RegenTextOutlineColor = NLMISC::CRGBA::Black;
 }
 
 // ----------------------------------------------------------------------------
@@ -676,6 +685,15 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	_FocusBuffIcon = "ico_focus.tga";
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"focus_buff_icon" );
 	if (prop)	_FocusBuffIcon = string((const char *)prop);
+
+	XML_READ_BOOL(cur, "regen_text", _RegenTextEnabled, true);
+	XML_READ_BOOL(cur, "regen_text_shadow", _RegenTextShadow, true);
+	XML_READ_BOOL(cur, "regen_text_outline", _RegenTextOutline, false);
+	XML_READ_SINT(cur, "regen_text_y", _RegenTextY, 2);
+	XML_READ_UINT(cur, "regen_text_fontsize", _RegenTextFontSize, 8);
+	XML_READ_COLOR(cur, "regen_text_color", _RegenTextColor, NLMISC::CRGBA::White);
+	XML_READ_COLOR(cur, "regen_text_shadow_color", _RegenTextShadowColor, NLMISC::CRGBA::Black);
+	XML_READ_COLOR(cur, "regen_text_outline_color", _RegenTextOutlineColor, NLMISC::CRGBA::Black);
 
 	updateActualType();
 	// Init size for Type
@@ -2108,35 +2126,8 @@ void CDBCtrlSheet::draw()
 				rVR.drawQuad(_RenderLayer + 1, regenTris[tri], backTex, CRGBA::White, false);
 			}
 
-			if (!_RegenText) {
-				_RegenText = new CViewText(CViewBase::TCtorParam());
-				_RegenText->setId(getId() + ":regen");
-				_RegenText->setParent(_Parent);
-				_RegenText->setOverflowText(std::string());
-				_RegenText->setModulateGlobalColor(false);
-				_RegenText->setMultiLine(false);
-				_RegenText->setTextMode(CViewText::ClipWord);
-				_RegenText->setFontSizing("0", "0");
-				// TODO: font size / color hardcoded.
-				_RegenText->setFontSize(8);
-				_RegenText->setColor(CRGBA::White);
-				_RegenText->setShadow(true);
-				_RegenText->setActive(true);
-				_RegenText->updateTextContext();
-			}
-
-			// TODO: ticks in second hardcoded
-			uint32 nextValue = _RegenTickRange.EndTick > LastGameCycle ? (_RegenTickRange.EndTick - LastGameCycle) / 10 : 0;
-			if (_RegenTextValue != nextValue)
-			{
-				_RegenTextValue = nextValue;
-				_RegenText->setText(toString("%d", _RegenTextValue));
-				_RegenText->updateTextContext();
-			}
-			_RegenText->setXReal(_XReal+1);
-			_RegenText->setYReal(_YReal+2);
-			_RegenText->setRenderLayer(_RenderLayer+2);
-			_RegenText->draw();
+			if (_RegenTextEnabled)
+				drawRegenText();
 		}
 	}
 
@@ -2166,6 +2157,85 @@ void CDBCtrlSheet::draw()
 	}
 }
 
+// ----------------------------------------------------------------------------
+void CDBCtrlSheet::drawRegenText()
+{
+	if (!_RegenText) {
+		_RegenText = new CViewText(CViewBase::TCtorParam());
+		_RegenText->setId(getId() + ":regen");
+		_RegenText->setParent(_Parent);
+		_RegenText->setOverflowText(std::string());
+		_RegenText->setModulateGlobalColor(false);
+		_RegenText->setMultiLine(false);
+		_RegenText->setTextMode(CViewText::ClipWord);
+		_RegenText->setFontSize(_RegenTextFontSize);
+		_RegenText->setColor(_RegenTextColor);
+		// do not set shadow if outline is set to avoid clearing it on draw (would call invalidate)
+		_RegenText->setShadow(_RegenTextShadow && !_RegenTextOutline);
+		_RegenText->setShadowOutline(false);//_RegenTextOutline);
+		_RegenText->setShadowColor(_RegenTextShadowColor);
+
+		_RegenText->setActive(true);
+		_RegenText->updateTextContext();
+	}
+
+	// TODO: 10 hardcoded (ticks in second)
+	uint32 nextValue = _RegenTickRange.EndTick > LastGameCycle ? (_RegenTickRange.EndTick - LastGameCycle) / 10 : 0;
+	if (_RegenTextValue != nextValue)
+	{
+		_RegenTextValue = nextValue;
+		// format as "10m", "9'59", "59"
+		if (_RegenTextValue > 600)
+		{
+			_RegenText->setText(toString("%dm", _RegenTextValue / 60));
+		}
+		else if (_RegenTextValue > 0)
+		{
+			if (_RegenTextValue < 60)
+				_RegenText->setText(toString("%d", _RegenTextValue));
+			else
+				_RegenText->setText(toString("%d'%02d", _RegenTextValue / 60, _RegenTextValue % 60));
+		}
+		else
+		{
+			_RegenText->setText("");
+		}
+
+		_RegenText->updateTextContext();
+		// todo: posref
+		_RegenText->setX(_WReal / 2 -_RegenText->getMaxUsedW() / 2);
+		// move RegenTextY=0 to baseline
+		_RegenText->setY(_RegenTextY - _RegenText->getFontLegHeight());
+	}
+
+	_RegenText->setXReal(_XReal + _RegenText->getX());
+	_RegenText->setYReal(_YReal + _RegenText->getY());
+	_RegenText->setRenderLayer(_RenderLayer+2);
+
+	// TODO: create shader for this
+	if (_RegenTextOutline)
+	{
+		// player.xml t_bonus_text template way of drawing
+		sint x = _RegenText->getXReal();
+		sint y = _RegenText->getYReal();
+
+		_RegenText->setColor(_RegenTextShadowColor);
+		_RegenText->setXReal(x-1); _RegenText->setYReal(y+0); _RegenText->draw();
+		_RegenText->setXReal(x+1); _RegenText->setYReal(y+0); _RegenText->draw();
+		_RegenText->setXReal(x+0); _RegenText->setYReal(y-1); _RegenText->draw();
+		_RegenText->setXReal(x+0); _RegenText->setYReal(y+1); _RegenText->draw();
+
+		_RegenText->setColor(_RegenTextColor);
+		_RegenText->setXReal(x); _RegenText->setYReal(y);
+		_RegenText->draw();
+		_RegenText->draw();
+	}
+	else
+	{
+		_RegenText->draw();
+		_RegenText->draw();
+	}
+}
 
 // ----------------------------------------------------------------------------
 void CDBCtrlSheet::drawRotatedQuad(CViewRenderer &vr, float angle, float scale, uint renderLayer, uint32 texId, sint32 texWidth, sint32 texHeight)

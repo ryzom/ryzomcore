@@ -602,6 +602,16 @@ public:
 	void	setRegenTickRange(const CTickRange &tickRange);
 	const CTickRange &getRegenTickRange() const { return _RegenTickRange; }
 
+	// Default regen text is displayed on bottom of icon.
+	void setRegenText(bool b) { _RegenTextEnabled = b; }
+	void setRegenTextY(sint32 y) { _RegenTextY = y; }
+	void setRegenTextShadow(bool b) { _RegenTextShadow = b; }
+	void setRegenTextShadowColor(NLMISC::CRGBA c) { _RegenTextShadowColor = c; }
+	void setRegenTextOutline(bool b) { _RegenTextOutline = b; }
+	void setRegenTextOutlineColor(NLMISC::CRGBA c) { _RegenTextOutlineColor = c; }
+	void setRegenTextFontSize(uint32 s) { _RegenTextFontSize = s; }
+	void setRegenTextColor(NLMISC::CRGBA c) { _RegenTextColor = c; }
+
 	// start notify anim (at the end of regen usually)
 	void	startNotifyAnim();
 
@@ -739,6 +749,16 @@ protected:
 	CTickRange		_RegenTickRange;
 	NLGUI::CViewText	*_RegenText;
 	uint32			_RegenTextValue;
+	//
+	bool			_RegenTextEnabled;
+	bool			_RegenTextShadow;
+	bool			_RegenTextOutline;
+	sint32			_RegenTextY;
+	uint32			_RegenTextFontSize;
+	NLMISC::CRGBA	_RegenTextShadowColor;
+	NLMISC::CRGBA	_RegenTextOutlineColor;
+	NLMISC::CRGBA	_RegenTextColor;
+
 
 	/// D'n'd
 	sint32		_DragX, _DragY;
@@ -851,6 +871,9 @@ private:
 
 	// gelper to draw the notify animation
 	void drawRotatedQuad(CViewRenderer &vr, float angle, float scale, uint renderLayer, uint32 textureId, sint32 texWidth, sint32 texHeight);
+
+	// create and draw regen text over icon
+	void drawRegenText();
 
 };
 
