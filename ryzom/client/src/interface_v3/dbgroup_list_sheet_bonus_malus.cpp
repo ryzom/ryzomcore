@@ -36,6 +36,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListSheetBonusMalus, std::string, "lis
 // ***************************************************************************
 CDBGroupListSheetBonusMalus::CDBGroupListSheetBonusMalus(const TCtorParam &param)
 :	CDBGroupListSheet(param),
+	_RegenTextEnabled(true),
 	_RegenTextY(-14), _RegenTextFontSize(8),
 	_RegenTextColor(NLMISC::CRGBA::White),
 	_RegenTextDisabledColor(NLMISC::CRGBA(127,127,127))
@@ -77,6 +78,8 @@ void CDBGroupListSheetBonusMalus::CSheetChildTimer::init(CDBGroupListSheet *pFat
 			Ctrl->setRegenTextY(owner->_RegenTextY);
 			Ctrl->setRegenTextColor(owner->_RegenTextColor);
 			Ctrl->setRegenTextFontSize(owner->_RegenTextFontSize);
+			if (!owner->_RegenTextFct.empty())
+				Ctrl->setRegenTextFct(owner->_RegenTextFct);
 		}
 
 		Ctrl->setRegenTextOutline(true);
@@ -130,6 +133,7 @@ bool CDBGroupListSheetBonusMalus::parse (xmlNodePtr cur, CInterfaceGroup *parent
 	XML_READ_UINT(cur, "regen_text_fontsize", _RegenTextFontSize, 8);
 	XML_READ_COLOR(cur, "regen_text_color", _RegenTextColor, NLMISC::CRGBA::White);
 	XML_READ_COLOR(cur, "regen_text_disabled_color", _RegenTextDisabledColor, NLMISC::CRGBA(127, 127, 127));
+	XML_READ_STRING(cur, "regen_text_fct", _RegenTextFct, "");
 
 	return true;
 }

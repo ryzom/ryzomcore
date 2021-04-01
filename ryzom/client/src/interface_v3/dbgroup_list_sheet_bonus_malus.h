@@ -62,6 +62,7 @@ private:
 	friend CSheetChildTimer;
 
 	bool _RegenTextEnabled;
+	std::string _RegenTextFct;
 	sint32 _RegenTextY;
 	uint32 _RegenTextFontSize;
 	NLMISC::CRGBA _RegenTextColor;
