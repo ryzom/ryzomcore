@@ -604,6 +604,15 @@ public:
 
 	// Default regen text is displayed on bottom of icon.
 	void setRegenText(bool b) { _RegenTextEnabled = b; }
+	// Allow to override default formatter.
+	// First parameter will be replaced with current timer value (always >= 0)
+	// If its a lua function, then parameters are
+	// 1: current timer value; can be negative
+	// 2: DB path for ctrl root (ie UI:VARIABLES:BONUSES:0), or nil
+	//
+	// ie: "secondsToTimeStringShort"     -> CInterfaceExpr::evalAsString("secondsToTimeStringShort(123)", ret)
+	// ie: "lua:secondsToTimeStringShort" -> CInterfaceExpr::evalAsString("lua:secondsToTimeStringShort(123, 'UI:VARIABLES:BONUSES:0')", ret)
+	void setRegenTextFct(const std::string &s);
 	void setRegenTextY(sint32 y) { _RegenTextY = y; }
 	void setRegenTextShadow(bool b) { _RegenTextShadow = b; }
 	void setRegenTextShadowColor(NLMISC::CRGBA c) { _RegenTextShadowColor = c; }
@@ -748,8 +757,10 @@ protected:
 
 	CTickRange		_RegenTickRange;
 	NLGUI::CViewText	*_RegenText;
-	uint32			_RegenTextValue;
+	sint32			_RegenTextValue;
 	//
+	std::string		_RegenTextFct;
+	bool			_RegenTextFctLua;
 	bool			_RegenTextEnabled;
 	bool			_RegenTextShadow;
 	bool			_RegenTextOutline;
