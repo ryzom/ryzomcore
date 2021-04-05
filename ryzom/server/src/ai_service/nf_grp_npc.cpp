@@ -2777,7 +2777,7 @@ arg0: is the custom table id (a name)
 arg1: is the script with syntax : <PROBA_1>:<hex:LOOT_SET_1>,<PROBA_2>:<hex:LOOT_SET_2>,...
 
 @code
-()addUserModel("toto", "<PROBA_1>:<hex:LOOT_SET_1>,<PROBA_2>:<hex:LOOT_SET_2>,...");
+()addCustomLoot("toto", "<PROBA_1>:<hex:LOOT_SET_1>,<PROBA_2>:<hex:LOOT_SET_2>,...");
 @endcode
 
 */

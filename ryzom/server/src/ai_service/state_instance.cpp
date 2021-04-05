@@ -194,11 +194,21 @@ IScriptContext* CStateInstance::findContext(NLMISC::TStringId const strId)
 	nlassert(this->getGroup());
 #endif
 	std::vector<CGroup*> grps;
-	this->getGroup()->getAIInstance()->findGroup(grps, CStringMapper::unmap(strId));
-	if (grps.size() >= 1)
-		return grps.back()->getPersistentStateInstance();
-	else
-		return NULL;
+	getGroup()->getAIInstance()->findGroup(grps, CStringMapper::unmap(strId));
+
+	FOREACH(grpIt, std::vector<CGroup*>, grps) {
+		CGroup *grp =  *grpIt;
+		if (grp) {
+			if (!grp->isSpawned())
+				continue;
+
+			CStateInstance	*stateInstance = grp->getPersistentStateInstance();
+			if (stateInstance)
+				return stateInstance;
+		}
+	}
+
+	return NULL;
 }
 
 std::string CStateInstance::getContextName()

@@ -705,7 +705,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	grp->clrBotsAreNamedFlag();
 
-	addGroupInfo(grp, name, grp->getAlias());
+	//addGroupInfo(grp, name, grp->getAlias());
 
 
 	{
