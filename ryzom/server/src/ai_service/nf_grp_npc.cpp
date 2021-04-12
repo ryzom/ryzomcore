@@ -2853,12 +2853,12 @@ void setUserModel_s_(CStateInstance* entity, CScriptStack& stack)
 	{
 		CBot* bot = *botIt;
 
-		//if (!bot->isSpawned()) return;
-
 		if (bot->getRyzomType() == RYZOMID::npc)
 		{
 			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
 			botNpc->setUserModelId("ARK_"+userModel);
+			if (bot->isSpawned())
+				bot->getSpawnObj()->sendInfoToEGS();
 		}
 	}
 }
@@ -2895,6 +2895,8 @@ void setCustomLoot_s_(CStateInstance* entity, CScriptStack& stack)
 		{
 			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
 			botNpc->setCustomLootTableId(customTable);
+			if (bot->isSpawned())
+				bot->getSpawnObj()->sendInfoToEGS();
 		}
 	}
 }
@@ -3037,13 +3039,17 @@ void setEventCode_sss_(CStateInstance* entity, CScriptStack& stack)
 	code = scriptHex_decode(code);
 	vector<string> lines_of_code;
 	NLMISC::splitString(code, "\n", lines_of_code);
+	uint32 line = 0;
 	if (!lines_of_code.empty())
 	{
+		nlinfo("=== Code ===");
 		FOREACHC(it, vector<string>, lines_of_code)
 		{
-			nlinfo("Code: %s", (*it).c_str());
+			nlinfo("#%d %s", line, (*it).c_str());
 			eventAction->Args.push_back(*it);
+			line++;
 		}
+		nlinfo("=== * ===");
 	}
 
 	// Register event action
@@ -3089,6 +3095,104 @@ void setEventCode_sss_(CStateInstance* entity, CScriptStack& stack)
 	sm->eventReactions().addChild(event);
 	event = NULL;
 }
+
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection setParent_s_
+
+A a link child -> parent from child
+
+
+Arguments: parent(direction)
+@param[in] the name of group who will be the parent of this group
+
+@code
+()setParent("group_name");
+@endcode
+
+*/
+
+void setParent_s_(CStateInstance* entity, CScriptStack& stack)
+{
+
+	string parent = stack.top();
+
+	std::vector<CGroup*> grps;
+	entity->getGroup()->getAIInstance()->findGroup(grps, parent);
+	if (grps.size() > 0)
+	{
+		CGroup* parentGroup = grps.back();
+		CGroupNpc* parentNpcGroup = NLMISC::safe_cast<CGroupNpc*>(parentGroup);
+
+		CGroup* group = entity->getGroup();
+		CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
+		if (npcGroup && parentNpcGroup)
+			npcGroup->getPersistentStateInstance()->setParentStateInstance(parentNpcGroup->getPersistentStateInstance());
+	}
+}
+
+
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection addHealGroup_s_
+
+Add a link to be able to heal a group
+
+
+Arguments: group(direction)
+@param[in] the name of group who will able to heal
+
+@code
+()addHealGroup("group_name");
+@endcode
+
+*/
+
+void addHealGroup_s_(CStateInstance* entity, CScriptStack& stack)
+{
+
+	string healGroup = stack.top();
+
+	std::vector<CGroup*> healGrps;
+	entity->getGroup()->getAIInstance()->findGroup(healGrps, healGroup);
+
+	CGroup* group = entity->getGroup();
+	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
+
+	for (uint i=0; i<healGrps.size(); ++i)
+	{
+		CGroupNpc* healNpcGroup = NLMISC::safe_cast<CGroupNpc*>(healGrps[i]);
+		if (healNpcGroup)
+			npcGroup->addHealGroup(healNpcGroup);
+	}
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection resetHealGroups_
+
+Add a link to be able to heal a group
+
+@code
+()resetHealGroups();
+@endcode
+
+*/
+
+void resetHealGroups_(CStateInstance* entity, CScriptStack& stack)
+{
+	CGroup* group = entity->getGroup();
+	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
+	npcGroup->resetHealGroups();
+}
+
+
+
 
 
 std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
@@ -3156,6 +3260,8 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, maxHitRange_f_);
 
 	REGISTER_NATIVE_FUNC(functions, setEventCode_sss_);
+	REGISTER_NATIVE_FUNC(functions, setParent_s_);
+	REGISTER_NATIVE_FUNC(functions, addHealGroup_s_);
 
 	REGISTER_NATIVE_FUNC(functions, addUserModel_sss_);
 	REGISTER_NATIVE_FUNC(functions, addCustomLoot_ss_);
