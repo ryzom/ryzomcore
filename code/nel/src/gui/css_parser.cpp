@@ -363,6 +363,14 @@ namespace NLGUI
 				continue;
 			}
 
+			if (sel[pos] == '*' && current.empty())
+			{
+				pos++;
+				current.Element = "*";
+				start = pos;
+				continue;
+			}
+
 			if(sel[pos] == '#')
 			{
 				pos++;
