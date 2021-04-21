@@ -633,7 +633,7 @@ sint32	CStaticFames::getStaticFameIndexed(uint factionIndex1, uint factionIndex2
 
 	if (factionIndex1 >= _FameTableSize || factionIndex2 >= _FameTableSize)
 	{
-		nlwarning("FAME: CStaticFames::getStaticFame invalid faction, return 0");
+		//nlwarning("FAME: CStaticFames::getStaticFame invalid faction, return 0");
 		return 0;
 	}
 
