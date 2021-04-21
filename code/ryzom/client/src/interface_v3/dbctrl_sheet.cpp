@@ -2875,7 +2875,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 				}
 				else
 				{
-					validClic = isDraggable() && !isDragged() && ((!getItemWeared()&&!getGrayed()) || isShortCut());
+					validClic = isDraggable() && !isDragged() && ((!getItemWeared()&&!getGrayed()) || isSPhraseId());
 				}
 			}
 			if (_Type == SheetType_Macro)

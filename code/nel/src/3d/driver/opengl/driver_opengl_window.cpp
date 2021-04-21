@@ -1072,6 +1072,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	[_ctx flushBuffer];
 	[_glView display];
 
+	// Set context as thread context
+	CGLSetCurrentContext((CGLContextObj)[_ctx CGLContextObj]);
+	
 	_EventEmitter.init(this, _glView, _DestroyWindow);
 
 #elif defined(NL_OS_UNIX)

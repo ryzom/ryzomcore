@@ -621,9 +621,7 @@ namespace NLGUI
 			return;
 
 		sint32 txw, txh;
-		SImage &rImage = *getSImage(nTxId);
-		txw = (sint32)((rImage.UVMax.U - rImage.UVMin.U)*rImage.GlobalTexturePtr->Width+0.5f);
-		txh = (sint32)((rImage.UVMax.V - rImage.UVMin.V)*rImage.GlobalTexturePtr->Height+0.5f);
+		getTextureSizeFromId(nTxId, txw, txh);
 
 		drawRotFlipBitmap (layerId, x, y, txw, txh, rot, flipv, nTxId, col);
 	}
@@ -859,6 +857,14 @@ namespace NLGUI
 		CIFile ifTmp;
 		if (ifTmp.open(filename))
 			CBitmap::loadSize (ifTmp, gt.Width, gt.Height);
+
+		// extract textures scale from filename
+		// texture_interface_v3_2x.tga / texture_interface_v3_4x.tga
+		if (textureFileName.find("_2x.") != std::string::npos)
+			gt.Scale = 2.f;
+		else if (textureFileName.find("_4x.") != std::string::npos)
+			gt.Scale = 4.f;
+
 		gt.Texture = driver->createTextureFile (filename);
 		// Force to generate the texture now. This way we can extract the mouse bitmaps from it now without having to load it again.
 		// Its why we don't release it at the end, because it is likely to be uploaded soon)
@@ -932,6 +938,10 @@ namespace NLGUI
 						CBitmap curs;
 						curs.resize(x1 - x0, y1 - y0);
 						curs.blit(*texDatas, x0, y0, (x1 - x0), (y1 - y0), 0, 0);
+						// TODO: scaled cursors not supported
+						if (gt.Scale > 1.f) {
+							curs.resample((sint)(curs.getWidth() / gt.Scale), (sint)(curs.getHeight() / gt.Scale));
+						}
 						driver->addCursor(image.Name, curs);
 					}
 				}
@@ -1357,8 +1367,8 @@ namespace NLGUI
 		else
 		{
 			SImage &rImage = *getSImage(id);
-			width = (sint32)((rImage.UVMax.U - rImage.UVMin.U)*rImage.GlobalTexturePtr->Width+0.5f);
-			height = (sint32)((rImage.UVMax.V - rImage.UVMin.V)*rImage.GlobalTexturePtr->Height+0.5f);
+			width = (sint32)(((rImage.UVMax.U - rImage.UVMin.U)*rImage.GlobalTexturePtr->Width / rImage.GlobalTexturePtr->Scale)+0.5f);
+			height = (sint32)(((rImage.UVMax.V - rImage.UVMin.V)*rImage.GlobalTexturePtr->Height / rImage.GlobalTexturePtr->Scale)+0.5f);
 		}
 	}
 	/*
@@ -1373,9 +1383,11 @@ namespace NLGUI
 
 		SImage &rImage = *getSImage(id);
 		SGlobalTexture &rGT = *rImage.GlobalTexturePtr;
+		// get (possibly) scaled width/height
 		sint32 width, height;
-		width = (sint32)((rImage.UVMax.U - rImage.UVMin.U)*rGT.Width+0.5f);
-		height = (sint32)((rImage.UVMax.V - rImage.UVMin.V)*rGT.Height+0.5f);
+		getTextureSizeFromId(id, width, height);
+		if (width == 0 || height == 0)
+			return CRGBA(255,255,255);
 		float xRatio = ((float)x) / ((float)(width));
 		float yRatio = ((float)y) / ((float)(height));
 		UTexture *pTF = rGT.Texture;

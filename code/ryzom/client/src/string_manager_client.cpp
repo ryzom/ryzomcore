@@ -750,7 +750,7 @@ restartLoop:
 						// if the string contains a special rename of creature, remove it
 						if (str.size() > 2 && str[0] == '<' && str[1] == '#')
 						{
-							str = str.substr(2);
+							str = toUpper(str[2])+str.substr(3);
 						}
 
 						// append this string

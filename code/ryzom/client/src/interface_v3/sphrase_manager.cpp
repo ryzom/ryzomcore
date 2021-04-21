@@ -411,7 +411,7 @@ void				CSPhraseManager::forgetPhrase(uint32 memoryLine, uint32 memorySlot)
 	_Memories[memoryLine].Slot[memorySlot].Id= 0;
 
 	// must update DB?
-	if((sint32)memoryLine==_SelectedMemoryDB)
+	if((sint32)memoryLine==_SelectedMemoryDB || (sint32)memoryLine==_SelectedMemoryDBalt)
 	{
 		// update the db
 		updateMemoryDBSlot(memorySlot);
@@ -465,7 +465,7 @@ void				CSPhraseManager::memorizePhrase(uint32 memoryLine, uint32 memorySlot, ui
 	_Memories[memoryLine].Slot[memorySlot].Id= slot;
 
 	// must update DB?
-	if((sint32)memoryLine==_SelectedMemoryDB)
+	if((sint32)memoryLine==_SelectedMemoryDB || (sint32)memoryLine==_SelectedMemoryDBalt)
 	{
 		// update the DB
 		updateMemoryDBSlot(memorySlot);
@@ -3276,7 +3276,7 @@ void	CSPhraseManager::memorizeMacro(uint32 memoryLine, uint32 memorySlot, uint32
 	_Memories[memoryLine].Slot[memorySlot].Id= macroId;
 
 	// must update DB?
-	if((sint32)memoryLine==_SelectedMemoryDB)
+	if((sint32)memoryLine==_SelectedMemoryDB || (sint32)memoryLine==_SelectedMemoryDBalt)
 	{
 		// update the DB
 		updateMemoryDBSlot(memorySlot);
@@ -3302,7 +3302,7 @@ void	CSPhraseManager::forgetMacro(uint32 memoryLine, uint32 memorySlot)
 	_Memories[memoryLine].Slot[memorySlot].Id= 0;
 
 	// must update DB?
-	if((sint32)memoryLine==_SelectedMemoryDB)
+	if((sint32)memoryLine==_SelectedMemoryDB || (sint32)memoryLine==_SelectedMemoryDBalt)
 	{
 		// update the db
 		updateMemoryDBSlot(memorySlot);
