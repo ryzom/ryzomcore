@@ -47,7 +47,11 @@ namespace NLGUI
 			pos = elements[i].find_first_of(':');
 			if (pos != std::string::npos)
 			{
-				std::string key = trim(toLower(elements[i].substr(0, pos)));
+				// css properties are case-insensitive, but
+				// custom properties (--name; ...;) are case sensitive
+				std::string key = trim(elements[i].substr(0, pos));
+				if (key.size() < 2 || (key[0] != '-' && key[1] != '-'))
+					key = toLower(key);
 				std::string value = trim(elements[i].substr(pos+1));
 				styles.push_back(TStylePair(key, value));
 			}

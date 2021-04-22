@@ -386,27 +386,35 @@ namespace NLGUI
 	// - normalize values
 	void CCssStyle::normalize(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const
 	{
+		std::set<std::string> seenProperties;
+
 		TStyle::const_iterator it;
 		for (it=styleRules.begin(); it != styleRules.end(); ++it)
 		{
+			std::string value = it->second;
+
+			// replace possible custom properties, ignore property if var() fails
+			if (!cssFuncVar(value, styleRules, seenProperties))
+				continue;
+
 			// update local copy of applied style
-			style.StyleRules[it->first] = it->second;
+			style.StyleRules[it->first] = value;
 
 			if (it->first == "color")
 			{
-				if (it->second == "inherit")
+				if (value == "inherit")
 				{
 					style.TextColor = current.TextColor;
 				}
 				else
 				{
-					scanHTMLColor(it->second.c_str(), style.TextColor);
+					scanHTMLColor(value.c_str(), style.TextColor);
 				}
 			}
 			else
 			if (it->first == "font")
 			{
-				if (it->second == "inherit")
+				if (value == "inherit")
 				{
 					style.FontSize = current.FontSize;
 					style.FontFamily = current.FontFamily;
@@ -417,42 +425,42 @@ namespace NLGUI
 			else
 			if (it->first == "font-size")
 			{
-				if (it->second == "inherit")
+				if (value == "inherit")
 				{
 					style.FontSize = current.FontSize;
 				}
-				else if (it->second == "x-small")
+				else if (value == "x-small")
 				{
 					style.FontSize = 10; // 62.5%
 				}
-				else if (it->second == "small")
+				else if (value == "small")
 				{
 					style.FontSize = 13; // 80%;
 				}
-				else if (it->second == "medium")
+				else if (value == "medium")
 				{
 					style.FontSize = 16; // 100%;
 				}
-				else if (it->second == "large")
+				else if (value == "large")
 				{
 					style.FontSize = 18; // 112.5%
 				}
-				else if (it->second == "x-large")
+				else if (value == "x-large")
 				{
 					style.FontSize = 24; // 150%
 				}
-				else if (it->second == "xx-large")
+				else if (value == "xx-large")
 				{
 					style.FontSize = 32; // 200%;
 				}
-				else if (it->second == "smaller")
+				else if (value == "smaller")
 				{
 					if (style.FontSize < 5)
 						style.FontSize = 3;
 					else
 						style.FontSize -= 2;
 				}
-				else if (it->second == "larger")
+				else if (value == "larger")
 				{
 					style.FontSize += 2;
 				}
@@ -460,7 +468,7 @@ namespace NLGUI
 				{
 					float tmpf;
 					std::string unit;
-					if (getCssLength(tmpf, unit, it->second.c_str()))
+					if (getCssLength(tmpf, unit, value.c_str()))
 					{
 						if (unit == "rem")
 							style.FontSize = Root.FontSize * tmpf;
@@ -479,16 +487,16 @@ namespace NLGUI
 			if (it->first == "background-repeat")
 			{
 				// old ryzom specific value
-				if (it->second == "1")
+				if (value == "1")
 					style.StyleRules[it->first] = "repeat";
 			}
 			else
 			if (it->first == "display")
 			{
-				if (it->second == "inherit")
+				if (value == "inherit")
 					style.DisplayBlock = current.DisplayBlock;
 				else
-					style.DisplayBlock = (it->second == "block" || it->second == "table");
+					style.DisplayBlock = (value == "block" || value == "table");
 			}
 		}
 	}
@@ -1666,6 +1674,182 @@ namespace NLGUI
 			width = maxw;
 			height = minh;
 		}
+	}
+
+	// ***************************************************************************
+	static void skipString(const std::string &value, std::string::size_type &pos)
+	{
+		char quote = value[pos];
+		while(pos < value.size() && value[pos] != quote)
+		{
+			if (value[pos] == '\\')
+				pos++;
+
+			pos++;
+		}
+	}
+	static void skipBlock(const std::string &value, std::string::size_type &pos, bool isString)
+	{
+		char openChar = value[pos];
+		char closeChar = value[pos];
+		if (openChar == '(') closeChar = ')';
+		else if (openChar == '[') closeChar = ']';
+		else if (openChar == '{') closeChar = '}';
+		pos++;
+
+		while(pos < value.size())
+		{
+			char c = value[pos];
+			if (c == '\\')
+				pos++;
+			else if (!isString && (c == '(' || c == '[' || c == '{'))
+				skipBlock(value, pos, false);
+			else if (c == closeChar)
+				break;
+			else if (c == '"' || c == '\'')
+			{
+				if (isString)
+					break;
+
+				skipBlock(value, pos, true);
+			}
+
+			pos++;
+		}
+	}
+
+	static void skipWhitespace(const std::string &value, std::string::size_type &pos)
+	{
+		while(pos < value.size() && (value[pos] == ' ' || value[pos] == '\t' || value[pos] == '\r'))
+			pos++;
+	}
+
+	// ***************************************************************************
+	bool CCssStyle::cssFuncVar(std::string &func, const TStyle &styleRules, const std::set<std::string> &seenProperties) const
+	{
+		// TODO: fails if var() is inside string, ie '--text: ".. var(...) .."';
+
+		// start of 'var('
+		std::string::size_type pos = func.find("var(");
+		if (pos == std::string::npos)
+			return true;
+
+		// simple test to make sure 'var' is not substring
+		if (pos > 0 && (func[pos-1] != '_') && ((func[pos-1] >= 'a' && func[pos-1] <= 'z') || (func[pos-1] >= 'A' && func[pos-1] <='Z')))
+			return true;
+
+		// find closing ')'
+		std::string::size_type funcStart = pos;
+		std::string::size_type funcEnd = funcStart + 3;
+		skipBlock(func, funcEnd, false);
+
+		pos += 4;
+
+		// ',' separator
+		std::string::size_type sep = func.find_first_of(",)", pos);
+		if (sep > funcEnd)
+		{
+			// unlikely
+			sep = funcEnd;
+		}
+		else if (sep + 1 == funcEnd)
+		{
+			// no whitespace between ',' and ')', ie 'var(--name,)'
+			return false;
+		}
+
+		// extract name
+		std::string name = func.substr(funcStart + 4, sep - pos);
+		if (seenProperties.count(name) > 0)
+			return false;
+
+		std::string value;
+		// if name is not defined or resolves to 'initial', use fallback
+		bool found = lookupPropertyValue(name, value, styleRules);
+		if (found) {
+			// check if substituted value has 'var()'
+			std::set<std::string> newSeen = seenProperties;
+			newSeen.insert(name);
+			found = cssFuncVar(value, styleRules, newSeen);
+			if (value == "initial")
+				found = false;
+		}
+
+		// --name failed and we have fallback
+		if (!found && func[sep] == ',')
+		{
+			sep++;
+			skipWhitespace(func, sep);
+
+			value = func.substr(sep, funcEnd - sep);
+			if (value.empty())
+			{
+				found = true;
+			}
+			else
+			{
+				// check if substituted fallback has 'var()'
+				std::set<std::string> newSeen = seenProperties;
+				newSeen.insert(name);
+				found = cssFuncVar(value, styleRules, newSeen);
+				if (value == "initial")
+					found = false;
+			}
+		}
+
+		// invalidate property as both name and fallback failed
+		if (!found)
+			return false;
+
+		// everything before 'var(' and after ')'
+		std::string result;
+		if (funcStart > 0)
+			result = trim(func.substr(0, funcStart)) + " ";
+
+		result += trim(value);
+		if ((funcEnd+1) < func.size())
+			result += " " + trim(func.substr(funcEnd+1));
+
+		// check replaced string for var()
+		std::set<std::string> newSeen = seenProperties;
+		newSeen.insert(name);
+		bool success = cssFuncVar(result, styleRules, newSeen);
+		if (result == "initial")
+			success = false;
+
+		func = result;
+		return success;
+	}
+
+	// ***************************************************************************
+	bool CCssStyle::lookupPropertyValue(const std::string &name, std::string &value, const TStyle &styleRules) const
+	{
+		bool success = true;
+		TStyle::const_iterator it = styleRules.find(name);
+		if (it != styleRules.end())
+			value = it->second;
+		else if (Current.hasStyle(name))
+			value = Current.getStyle(name);
+		else
+			success = false;
+
+		if (success && value != "inherit")
+			return true;
+
+		std::vector<CStyleParams>::const_reverse_iterator rit = _StyleStack.rbegin();
+		for(; rit != _StyleStack.rend(); ++rit)
+		{
+			if (rit->hasStyle(name))
+			{
+				value = rit->getStyle(name);
+				if (value != "inherit")
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 } // namespace

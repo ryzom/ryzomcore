@@ -188,6 +188,12 @@ namespace NLGUI
 		void applyLineStyle(const std::string &value, CSSLineStyle *dest, const CSSLineStyle &currentStyle) const;
 		void applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const;
 
+		// parse and replace var(--name, fallback) function
+		// return false if property should be ignored
+		bool cssFuncVar(std::string &func, const TStyle &styleRules, const std::set<std::string> &seenProperties) const;
+		// return false if property was not defined
+		bool lookupPropertyValue(const std::string &name, std::string &value, const TStyle &styleRules) const;
+
 	public:
 		void reset();
 
