@@ -5190,6 +5190,9 @@ struct CSBrickParamJewelAttrs : public TBrickParam::IId
 	std::string  RequiredFaction;
 	// required Fame
 	sint32  RequiredFame;
+	// required Zone
+	std::string RequiredZones;
+
 
 	CSBrickParamJewelAttrs():
 		Attribute(),
@@ -5197,7 +5200,8 @@ struct CSBrickParamJewelAttrs : public TBrickParam::IId
 		Charge(),
 		Modifier(),
 		RequiredFaction(),
-		RequiredFame()
+		RequiredFame(),
+		RequiredZones()
 
 	{
 		_Id = TBrickParam::JEWEL_ATTRS;
@@ -5208,6 +5212,19 @@ struct CSBrickParamJewelAttrs : public TBrickParam::IId
 		*this=CSBrickParamJewelAttrs();
 		*this=str;
 	}
+
+	void copy(const CSBrickParamJewelAttrs& attr)
+	{
+		ParsedOk=true;
+		Attribute = attr.Attribute;
+		Value = attr.Value;
+		Charge = attr.Charge;
+		Modifier = attr.Modifier;
+		RequiredFaction = attr.RequiredFaction;
+		RequiredFame = attr.RequiredFame;
+		RequiredZones = attr.RequiredZones;
+	}
+
 
 	const CSBrickParamJewelAttrs& operator=(const std::string& input)
 	{
@@ -5222,8 +5239,9 @@ struct CSBrickParamJewelAttrs : public TBrickParam::IId
 		Value=args[1].c_str();
 		NLMISC::fromString(args[2], Charge);
 		NLMISC::fromString(args[3], Modifier);
-		if (args.size() > 4)
-			RequiredFaction = args[4].c_str();
+
+		if (args.size() > 4 && args[4] != "*")
+			RequiredFaction = args[4];
 		else
 			RequiredFaction = "";
 
@@ -5231,6 +5249,11 @@ struct CSBrickParamJewelAttrs : public TBrickParam::IId
 			NLMISC::fromString(args[5], RequiredFame);
 		else
 			RequiredFame = -200;
+
+		if (args.size() > 6)
+			RequiredZones = args[6];
+		else
+			RequiredZones = "";
 
 		return *this;
 	}

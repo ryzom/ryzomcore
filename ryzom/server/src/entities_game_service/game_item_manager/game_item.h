@@ -437,6 +437,9 @@ public :
 	void consumeSapLoad( uint32 sapConsumed );
 	// apply an enchantment to item
 	void applyEnchantment( const std::vector< NLMISC::CSheetId >& action );
+	// get jewel enchantements if are tags or not
+	void getJewelTagsEnchantments( std::vector< NLMISC::CSheetId >& sheets );
+	void getJewelNonTagsEnchantments( std::vector< NLMISC::CSheetId >& sheets );
 	// get enchantment
 	const std::vector< NLMISC::CSheetId >& getEnchantment() const { return _Enchantment; }
 	// set sapLoad for recharge sap item

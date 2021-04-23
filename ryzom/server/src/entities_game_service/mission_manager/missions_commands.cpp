@@ -1026,12 +1026,34 @@ NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory",
 	return true;
 }
 
+
+
+string getJewelEnchantAttr(CSheetId sbrick)
+{
+	const CStaticBrick * brick = CSheets::getSBrickForm(sbrick);
+	if (brick && (brick->Family == BRICK_FAMILIES::BSGMC || brick->Family == BRICK_FAMILIES::BSGMCB))
+	{
+		if (brick->Params.size() > 0)
+		{
+			const TBrickParam::IId* param = brick->Params[0];
+			CSBrickParamJewelAttrs *sbrickParam = (CSBrickParamJewelAttrs*)param;
+			if (param->id() == TBrickParam::JEWEL_ATTRS)
+				return sbrickParam->Attribute;
+		}
+	}
+	return "";
+}
+
+
+//enchantEquipedItem 530162 WristR jmod_focus_tryker_1.sbrick
+//enchantEquipedItem 530162 Neck tag_fyros_3.sbrick
+//enchantEquipedItem 530162 Neck jrez_fulllife_tryker.sbrick,jboost2.sbrick
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(enchantEquipedItem, "enchantEquipedItem", "<uid> <slotname> <sheet1>,[<sheet2> ...] [<maxSpaLoad>]")
 {
 	if (args.size () < 3)
 	{
-		log.displayNL("ERR: Invalid number of parameters. Parameters: <inventory> <sheetnames> <quality> <quantity>");
+		log.displayNL("ERR: Invalid number of parameters. Parameters: <uid> <slotname> <sheet1>,[<sheet2> ...] [<maxSpaLoad>]");
 		return false;
 	}
 
@@ -1039,20 +1061,31 @@ NLMISC_COMMAND(enchantEquipedItem, "enchantEquipedItem", "<uid> <slotname> <shee
 
 	string selected_slot = args[1];
 
+	bool isTag = false;
+
 	std::vector<CSheetId> sheets;
 	if (args[2] != "*")
 	{
 		std::vector<string> sheet_names;
 		NLMISC::splitString(args[2], ",", sheet_names);
 		for (uint32 i=0; i<sheet_names.size(); i++)
-			sheets.push_back(CSheetId(sheet_names[i]));
+		{
+			CSheetId sheet = CSheetId(sheet_names[i]);
+			if (getJewelEnchantAttr(sheet) == "tag")
+				isTag = true;
+			sheets.push_back(sheet);
+		}
 	}
 
 	CGameItemPtr itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
 	if (itemPtr != NULL)
 	{
+		if (isTag)
+			itemPtr->getJewelNonTagsEnchantments(sheets);
+		else
+			itemPtr->getJewelTagsEnchantments(sheets);
+
 		itemPtr->applyEnchantment(sheets);
-		c->updateJewelsTags(false);
 
 		if (args.size() > 3)
 		{

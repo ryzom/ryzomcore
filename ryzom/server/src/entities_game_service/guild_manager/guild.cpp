@@ -1001,6 +1001,15 @@ void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 se
 		return;
 	}
 
+	// you cannot exchange jewels with non tags allegories
+	std::vector<CSheetId> sheets;
+	item->getJewelNonTagsEnchantments(sheets);
+	if (sheets.size() > 0)
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_CANT_BE_PUT" );
+		return;
+	}
+
 	// try to move the required quantity of the item
 	if ( CInventoryBase::moveItem(
 		user->getInventory(INVENTORIES::bag), slot,

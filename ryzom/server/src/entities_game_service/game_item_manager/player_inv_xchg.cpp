@@ -102,6 +102,15 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 		return false;
 	}
 
+	// you cannot exchange jewels with non tags allegories
+	std::vector<CSheetId> sheets;
+	item->getJewelNonTagsEnchantments(sheets);
+	if (sheets.size() > 0)
+	{
+		CCharacter::sendDynamicSystemMessage(getCharacter()->getId(), "JEWEL_WITH_ALLEGORIES");
+		return false;
+	}
+
 	if( getCharacter()->isAnActiveXpCatalyser(item) )
 		return false;
 

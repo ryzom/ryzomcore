@@ -2439,7 +2439,10 @@ public:
 	void updateParry(ITEMFAMILY::EItemFamily family, SKILLS::ESkills skill);
 
 	// Jewel enchants used for Tags
-	void updateJewelsTags(bool remove, bool update=true);
+	void updateJewelsTags(bool justRemove, bool update=true);
+
+	// Jewel enchants used for Modifiers
+	void updateJewelsModifiers(bool justRemove = false);
 
 	// Jewel equipment or skill or region are changed, recompute protection and resistances
 	void updateMagicProtectionAndResistance();
@@ -2619,7 +2622,7 @@ public:
 	std::string getDontTranslate() const;
 	void setDontTranslate(const std::string &langs);
 
-	CSBrickParamJewelAttrs *getJewelAttrs(const std::string &attribute, SLOT_EQUIPMENT::TSlotEquipment slot);
+	CSBrickParamJewelAttrs getJewelAttrs(const std::string &attribute, SLOT_EQUIPMENT::TSlotEquipment slot, NLMISC::CSheetId &usedSheet);
 
 	uint32 getOrganization() const;
 	uint32 getOrganizationStatus() const;
@@ -3757,6 +3760,8 @@ private:
 	/// current protection for each type of magic damage and max magic damage absorption gived by jewels
 	uint32 _MagicProtection[PROTECTION_TYPE::NB_PROTECTION_TYPE];
 	uint32 _MaxAbsorption;
+
+	CSBrickParamJewelAttrs _JewelEnchants[SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT];
 
 	// current resistance for each type of magic resistance
 	uint32 _MagicResistance[RESISTANCE_TYPE::NB_RESISTANCE_TYPE];

@@ -755,6 +755,7 @@ void CCharacter::destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 
 	}
 	else if (quantity == item->getStackSize())
 	{
+		nlinfo("Player %s has destroy %d items %s(%s) Q%d at slot %d", getName().toString().c_str(), quantity, sheetId.toString().c_str(), item->getItemId().toString().c_str(), quality, slot);
 		// just delete the item
 		inv->deleteItem(slot);
 		remainingQuantity = 0;
@@ -1481,6 +1482,10 @@ bool CCharacter::checkPreRequired(const CGameItemPtr &item, bool equipCheck)
 			}
 		}
 	}
+
+	// check if it's a powo item
+	if (!item->getRequiredPowo().empty() && getPowoCell() == 0)
+		requiredRespected = false;
 
 	pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegeance = getAllegiance();
 	bool neutralcult = (allegeance.first == PVP_CLAN::Neutral || allegeance.first == PVP_CLAN::None);

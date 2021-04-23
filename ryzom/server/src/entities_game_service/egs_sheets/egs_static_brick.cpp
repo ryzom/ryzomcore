@@ -1705,12 +1705,13 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 
 	case TBrickParam::JEWEL_ATTRS:
 		// $*STRUCT CSBrickParamJewelAttrs TBrickParam::JEWEL_ATTRS
-		// $*-s std::string		Attribute	// attribute name
-		// $*-s std::string		Value	// attribute value
-		// $*-i uint32			Charge		// initial charge of sapload
+		// $*-s std::string		Attribute		// attribute name
+		// $*-s std::string		Value			// attribute value
+		// $*-i uint32			Charge			// initial charge of sapload
 		// $*-i uint32			Modifier		// Bonus on attribute
-		// $*-i uint32			Faction		// Required faction
-		// $*-i uint32			Fame		// Required fame in faction (if fame >= 30, require the rite too)
+		// $*-i uint32			RequiredFaction	// Required faction
+		// $*-i uint32			RequiredFame	// Required fame in faction (if fame >= 30, require the rite too)
+		// $*-s std::string		RequiredZones	// Required continent/regions (separated by ,)
 		Params.push_back(new CSBrickParamJewelAttrs(tail));
 		break;
 	}

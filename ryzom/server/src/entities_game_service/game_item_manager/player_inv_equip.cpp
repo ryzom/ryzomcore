@@ -42,7 +42,7 @@ uint32 CEquipInventory::getMaxSlot() const
 float CEquipInventory::getWearMalus()
 {
 	float fWearEquipmentMalus = 0.0f;
-	
+
 	for (uint i = 0; i < getSlotCount(); ++i)
 	{
 		CGameItemPtr pItem = getItem(i);
@@ -55,7 +55,7 @@ float CEquipInventory::getWearMalus()
 				deleteItem(i);
 		}
 	}
-	
+
 	return fWearEquipmentMalus;
 }
 
@@ -74,7 +74,7 @@ void CEquipInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags cha
 	{
 		const CGameItemPtr item = getInventory()->getItem(slot);
 		nlassert(item != NULL);
-		
+
 		updateClientSlot(slot, item);
 
 		const CStaticItem * form = CSheets::getForm( item->getSheetId() );
@@ -82,9 +82,9 @@ void CEquipInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags cha
 		{
 			getCharacter()->addWearMalus(form->WearEquipmentMalus);
 		}
-		
+
 		getCharacter()->applyItemModifiers(item);
-		
+
 		// if equipped item is a jewel, re-compute max protection and resistance
 		if( form )
 		{
@@ -100,10 +100,10 @@ void CEquipInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags cha
 	{
 		const CGameItemPtr item = getInventory()->getItem(slot);
 		nlassert(item != NULL);
-		
+
 		updateClientSlot(slot, item);
 	}
-	
+
 	if (changeFlags.checkEnumValue(INVENTORIES::itc_removed))
 	{
 		const CGameItemPtr item = getInventory()->getItem(slot);
@@ -117,13 +117,14 @@ void CEquipInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags cha
 				if( form->Family == ITEMFAMILY::JEWELRY )
 				{
 					getCharacter()->updateMagicProtectionAndResistance();
-				}					
+				}
 			}
 		}
 	}
 
-	// Update tags
+	// Update jewels enchants
 	getCharacter()->updateJewelsTags(false);
+	getCharacter()->updateJewelsModifiers();
 }
 
 // ****************************************************************************

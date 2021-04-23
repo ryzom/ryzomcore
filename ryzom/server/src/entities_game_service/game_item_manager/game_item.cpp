@@ -70,7 +70,7 @@ CCraftParameters::CCraftParameters()
 	nbWeight = 0;
 	StatEnergy = 0.0f;
 	nbStatEnergy = 0;
-	
+
 	Dmg = 0.0f;
 	nbDmg = 0;
 	Speed = 0.0f;
@@ -87,7 +87,7 @@ CCraftParameters::CCraftParameters()
 	nbAdversaryDodgeModifier = 0;
 	AdversaryParryModifier = 0.0f;
 	nbAdversaryParryModifier = 0;
-	
+
 	ProtectionFactor = 0.0f;
 	nbProtectionFactor = 0;
 	MaxSlashingProtection = 0.0f;
@@ -97,7 +97,7 @@ CCraftParameters::CCraftParameters()
 	MaxPiercingProtection = 0.0f;
 	nbMaxPiercingProtection = 0;
 	Color.resize(8, 0); //need replace 8 by an enumerate type of color
-	
+
 	AcidProtectionFactor = 0.0f;
 	nbAcidProtectionFactor = 0;
 	ColdProtectionFactor = 0.0f;
@@ -140,7 +140,7 @@ CCraftParameters::CCraftParameters()
 	nbDefensiveAfflictionCastingTimeFactor = 0;
 	DefensiveAfflictionPowerFactor = 0.0f;
 	nbDefensiveAfflictionPowerFactor = 0;
-	
+
 	HpBuff = 0;
 	SapBuff = 0;
 	StaBuff = 0;
@@ -161,7 +161,7 @@ void CItemCraftParameters::clear()
 	Durability = 0.0f;
 	Weight = 0.0f;
 	StatEnergy = 0.0f;
-	
+
 	Dmg = 0.0f;
 	Speed = 0.0f;
 	SapLoad = 0.0f;
@@ -170,13 +170,13 @@ void CItemCraftParameters::clear()
 	ParryModifier = 0.0f;
 	AdversaryDodgeModifier = 0.0f;
 	AdversaryParryModifier = 0.0f;
-	
+
 	ProtectionFactor = 0.0f;
 	MaxSlashingProtection = 0.0f;
 	MaxBluntProtection = 0.0f;
 	MaxPiercingProtection = 0.0f;
 	Color = 1;
-	
+
 	Protection = BACK_COMPAT::OLD_PROTECTION_TYPE::None;
 	Protection1 = PROTECTION_TYPE::None;
 	Protection1Factor = 0.0f;
@@ -184,13 +184,13 @@ void CItemCraftParameters::clear()
 	Protection2Factor = 0.0f;
 	Protection3 = PROTECTION_TYPE::None;
 	Protection3Factor = 0.0f;
-	
+
 	DesertResistanceFactor = 0.0f;
 	ForestResistanceFactor = 0.0f;
 	LacustreResistanceFactor = 0.0f;
 	JungleResistanceFactor = 0.0f;
 	PrimaryRootResistanceFactor = 0.0f;
-	
+
 	ElementalCastingTimeFactor = 0.0f;
 	ElementalPowerFactor = 0.0f;
 	OffensiveAfflictionCastingTimeFactor = 0.0f;
@@ -199,7 +199,7 @@ void CItemCraftParameters::clear()
 	HealPowerFactor = 0.0f;
 	DefensiveAfflictionCastingTimeFactor = 0.0f;
 	DefensiveAfflictionPowerFactor = 0.0f;
-	
+
 	HpBuff = 0;
 	SapBuff = 0;
 	StaBuff = 0;
@@ -321,13 +321,13 @@ void CItemCraftParameters::serial(NLMISC::IStream &f)
 	f.serial( ParryModifier );
 	f.serial( AdversaryDodgeModifier );
 	f.serial( AdversaryParryModifier );
-	
+
 	f.serial( ProtectionFactor );
 	f.serial( MaxSlashingProtection );
 	f.serial( MaxBluntProtection );
 	f.serial( MaxPiercingProtection );
 	f.serial( Color );
-	
+
 	f.serialEnum( Protection );
 	if (version >= 4)
 	{
@@ -338,7 +338,7 @@ void CItemCraftParameters::serial(NLMISC::IStream &f)
 		f.serialEnum( Protection3 );
 		f.serial( Protection3Factor );
 	}
-	
+
 	if( version >= 5)
 	{
 		f.serial( DesertResistanceFactor );
@@ -359,7 +359,7 @@ void CItemCraftParameters::serial(NLMISC::IStream &f)
 		f.serial( DefensiveAfflictionCastingTimeFactor );
 		f.serial( DefensiveAfflictionPowerFactor );
 	}
-	
+
 	f.serial( HpBuff );
 	f.serial( SapBuff );
 	f.serial( StaBuff );
@@ -451,7 +451,7 @@ const CItemCraftParameters& CItemCraftParameters::operator = ( const CCraftParam
 {
 	Durability = p.Durability;
 	Weight = p.Weight;
-	
+
 	Dmg = p.Dmg;
 	Speed = p.Speed;
 	SapLoad = p.SapLoad;
@@ -461,7 +461,7 @@ const CItemCraftParameters& CItemCraftParameters::operator = ( const CCraftParam
 	ParryModifier = p.ParryModifier;
 	AdversaryDodgeModifier = p.AdversaryDodgeModifier;
 	AdversaryParryModifier = p.AdversaryParryModifier;
-	
+
 	ProtectionFactor = p.ProtectionFactor;
 	MaxSlashingProtection = p.MaxSlashingProtection;
 	MaxBluntProtection = p.MaxBluntProtection;
@@ -491,7 +491,7 @@ const CItemCraftParameters& CItemCraftParameters::operator = ( const CCraftParam
 		}
 	}
 	Color = DominanteColor;
-	
+
 	HpBuff = p.HpBuff;
 	SapBuff = p.SapBuff;
 	StaBuff = p.StaBuff;
@@ -508,7 +508,7 @@ void CItemCraftParameters::keepTheThreeBestProtection( const CCraftParameters& p
 		float protectionFactor;
 
 		protection = (PROTECTION_TYPE::TProtectionType) i;
-		
+
 		switch( (PROTECTION_TYPE::TProtectionType) i )
 		{
 		case PROTECTION_TYPE::Acid:
@@ -656,7 +656,7 @@ void CItemCraftParameters::keepTheThreeBestResistance( const CCraftParameters& p
 	bestResistance.keepResistanceIfBest( p.LacustreResistanceFactor, RESISTANCE_TYPE::Lacustre );
 	bestResistance.keepResistanceIfBest( p.JungleResistanceFactor, RESISTANCE_TYPE::Jungle );
 	bestResistance.keepResistanceIfBest( p.PrimaryRootResistanceFactor, RESISTANCE_TYPE::PrimaryRoot );
-	
+
 	DesertResistanceFactor = bestResistance.getResistanceValueIfBest(RESISTANCE_TYPE::Desert);
 	ForestResistanceFactor = bestResistance.getResistanceValueIfBest(RESISTANCE_TYPE::Forest);
 	LacustreResistanceFactor = bestResistance.getResistanceValueIfBest(RESISTANCE_TYPE::Lacustre);
@@ -675,15 +675,15 @@ bool CGameItem::areStackable(const CGameItemPtr item1, const CGameItemPtr item2)
 {
 	if (item1 == NULL || item2 == NULL)
 		return false;
-	
+
 	// test sheet
 	if (item1->_SheetId != item2->_SheetId)
 		return false;
-	
+
 	// test quality/recommanded level
 	if (item1->_Recommended != item2->_Recommended)
 		return false;
-	
+
 	// for craftable items test craft params
 	if (item1->_Form != NULL && item1->_Form->CraftPlan != NLMISC::CSheetId::Unknown)
 	{
@@ -694,14 +694,14 @@ bool CGameItem::areStackable(const CGameItemPtr item1, const CGameItemPtr item2)
 				if ( *item1->_CraftParameters != *item2->_CraftParameters )
 					return false;
 			}
-			else 
+			else
 				return false;
 		}
 		else
 			if( item2->_CraftParameters != 0 )
 				return false;
 	}
-	
+
 	return true;
 }
 
@@ -742,8 +742,8 @@ void CGameItemPtr::deleteItem()
 
 	// only unlink if the pointer 'this' is not the same as the inventory ptr for the item
 	// after the unlink this == NULL
-//	if (! ( item->_Parent!=NULL && 
-//			item->Loc.Slot<item->_Parent->getChildren().size() && 
+//	if (! ( item->_Parent!=NULL &&
+//			item->Loc.Slot<item->_Parent->getChildren().size() &&
 //			&(item->_Parent->getChildren()[item->Loc.Slot])==this ) )
 	unlinkFromItem();
 
@@ -844,14 +844,14 @@ void CGameItem::computeRequiredLevel()
 				value = _Form->MinRequiredSkillLevel;
 			}
 			_RequiredSkillLevel = (uint16) value;
-			
+
 			value = (sint32) (_Form->RequiredSkillQualityFactor2 * _Recommended + _Form->RequiredSkillQualityOffset2);
 			if( value < (sint32)_Form->MinRequiredSkillLevel2 || value < 0 )
 			{
 				value = _Form->MinRequiredSkillLevel2;
 			}
 			_RequiredSkillLevel2 = (uint16) value;
-			
+
 			value = (sint32) (_Form->RequiredCharacQualityFactor * _Recommended + _Form->RequiredCharacQualityOffset);
 			if( value < (sint32)_Form->MinRequiredCharacLevel || value < 0 )
 			{
@@ -896,7 +896,7 @@ void CGameItem::computeRequiredLevel()
 					break;
 				}
 				break;
-				
+
 			// **** MELEE_WEAPONS
 			case ITEMFAMILY::MELEE_WEAPON:
 				switch( _Form->Type )
@@ -911,18 +911,18 @@ void CGameItem::computeRequiredLevel()
 					break;
 				}
 				break;
-				
+
 			// **** RANGE_WEAPON
 			case ITEMFAMILY::RANGE_WEAPON:
 				_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended-10)));
 				break;
-				
+
 				// No carac requirement
 			default:
 				break;
 			};
 		}
-	}		
+	}
 
 	computeHasPrerequisit();
 }
@@ -1002,7 +1002,7 @@ void CGameItem::computeRequirementFromOldSystem()
 				break;
 			}
 			break;
-			
+
 		// **** MELEE_WEAPONS
 		case ITEMFAMILY::MELEE_WEAPON:
 			switch( _Form->Type )
@@ -1019,7 +1019,7 @@ void CGameItem::computeRequirementFromOldSystem()
 				break;
 			}
 			break;
-				
+
 		// **** RANGE_WEAPON
 		case ITEMFAMILY::RANGE_WEAPON:
 			_RequiredCharac = CHARACTERISTICS::well_balanced;
@@ -1052,7 +1052,7 @@ void CGameItem::reloadSapLoad( uint32 sapAdded )
 //-----------------------------------------------
 void CGameItem::consumeSapLoad( uint32 sapConsumed )
 {
-	_SapLoad = (uint32) ( (sint32) ( std::max( (sint32)0, ((sint32)(_SapLoad)) - ((sint32)sapConsumed) ) ) ); 
+	_SapLoad = (uint32) ( (sint32) ( std::max( (sint32)0, ((sint32)(_SapLoad)) - ((sint32)sapConsumed) ) ) );
 
 	if (getInventory() != NULL)
 		getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_enchant));
@@ -1066,18 +1066,62 @@ void CGameItem::setSapLoad( uint32 sap )
 	if ((_SheetId == NLMISC::CSheetId("item_sap_recharge.sitem")) || (_SheetId == NLMISC::CSheetId("light_sap_recharge.sitem")))
 	{
 		_SapLoad = sap;
-	} 
+	}
 }
 
 //-----------------------------------------------
 // applyEnchantment :
 //-----------------------------------------------
-void CGameItem::applyEnchantment( const vector< CSheetId >& action ) 
-{ 
-	_Enchantment = action; 
+void CGameItem::applyEnchantment( const vector< CSheetId >& action )
+{
+	_Enchantment = action;
 
 	if (getInventory() != NULL)
 		getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_enchant));
+}
+
+void CGameItem::getJewelTagsEnchantments( vector< CSheetId >& sheets )
+{
+	if (_Enchantment .empty())
+		return;
+
+	for ( uint i = 0; i< _Enchantment.size(); i++ )
+	{
+		const CStaticBrick * brick = CSheets::getSBrickForm(_Enchantment[i]);
+		if (brick && brick->Family == BRICK_FAMILIES::BSGMC)
+		{
+			if (brick->Params.size() > 0)
+			{
+				const TBrickParam::IId* param = brick->Params[0];
+				CSBrickParamJewelAttrs *sbrickParam = (CSBrickParamJewelAttrs*)param;
+				if (param->id() == TBrickParam::JEWEL_ATTRS && sbrickParam->Attribute == "tag")
+					sheets.push_back(_Enchantment[i]);
+			}
+		}
+	}
+	return;
+}
+
+void CGameItem::getJewelNonTagsEnchantments( vector< CSheetId >& sheets )
+{
+	if (_Enchantment.empty())
+		return;
+
+	for ( uint i = 0; i< _Enchantment.size(); i++ )
+	{
+		const CStaticBrick * brick = CSheets::getSBrickForm(_Enchantment[i]);
+		if (brick && (brick->Family == BRICK_FAMILIES::BSGMC || brick->Family == BRICK_FAMILIES::BSGMCB))
+		{
+			if (brick->Params.size() > 0)
+			{
+				const TBrickParam::IId* param = brick->Params[0];
+				CSBrickParamJewelAttrs *sbrickParam = (CSBrickParamJewelAttrs*)param;
+				if (param->id() == TBrickParam::JEWEL_ATTRS && sbrickParam->Attribute != "tag")
+					sheets.push_back(_Enchantment[i]);
+			}
+		}
+	}
+	return;
 }
 
 //-----------------------------------------------
@@ -1100,11 +1144,11 @@ void CGameItem::resetEnchantment()
 void CGameItem::computeItemWornState()
 {
 	const uint32 maxHp = maxDurability();
-	
+
 	// Do not evaluate the worn state if the item max durability is zero (mp case)
 	if (maxHp == 0)
 		return;
-	
+
 	if (_HP > 1 && _HP > uint32(WornState1*maxHp) )
 	{
 		_CurrentWornState = ITEM_WORN_STATE::Unspoiled;
@@ -1133,8 +1177,8 @@ void CGameItem::computeItemWornState()
 	}
 }
 
-void CGameItem::setLockCount(uint32 lockCount) 
-{ 
+void CGameItem::setLockCount(uint32 lockCount)
+{
 	nlassert(lockCount <= _StackSize);
 	_LockCount = lockCount;
 
@@ -1257,7 +1301,7 @@ void CGameItem::dtor()
 		getInventory()->removeItem(getInventorySlot());
 	}
 
-	// destroy children. As they call detachFromParent() when destroyed and _Children vector may be resized 
+	// destroy children. As they call detachFromParent() when destroyed and _Children vector may be resized
 	// we must make a copy of _children ptrs before
 	// so we now work on a safe copy of _Children vector
 //	vector<CGameItemPtr> children = _Children;
@@ -1267,9 +1311,9 @@ void CGameItem::dtor()
 //		if(children[i] != NULL && children[i] != this)
 //		{
 //			// debug level 2 loop
-//			for(uint j = 0; j  < children[i]->_Children.size(); j++) 
+//			for(uint j = 0; j  < children[i]->_Children.size(); j++)
 //				if(children[i]->_Children[j] == this) goto failed;
-//				
+//
 //				detachChild(i);
 //				children[i].deleteItem();
 //		}
@@ -1403,7 +1447,7 @@ void CGameItem::setStackSize(uint32 size)
 	_StackSize = size;
 
 //	log_Item_UpdateQuantity(_ItemId, _StackSize, prevSize);
-	
+
 	if (_LockCount > _StackSize)
 		_LockCount = _StackSize;
 
@@ -1538,7 +1582,7 @@ uint32 CGameItem::getMaxStackSize() const
 //		//(*item).Loc.Slot = (uint8)slot;
 //		//(*item).attachTo( this, (uint8)slot );
 //	}
-//	
+//
 //	item->_Parent = this;
 //	item->Loc.Slot = (uint8) slot;
 //	item->Owner = getId();
@@ -1564,7 +1608,7 @@ uint32 CGameItem::getMaxStackSize() const
 //		nlwarning("<CGameItem::detachChild> can't detach item in slot %d, only %d slots allocated",slot,childrenSize);
 //		return NULL;
 //	}
-//	
+//
 //	CGameItemPtr  detachedItem = _Children[slot];
 //	if ( detachedItem == NULL)
 //	{
@@ -1621,7 +1665,7 @@ uint32 CGameItem::getMaxStackSize() const
 	{
 		if ( (*it) != NULL )
 		{
-			(**it).detachFromParent(); 
+			(**it).detachFromParent();
 			(*it) = NULL;
 		}
 	}
@@ -1705,22 +1749,22 @@ uint32 CGameItem::getMaxStackSize() const
 // detachFromParent :
 //
 //-----------------------------------------------
-//void CGameItem::detachFromParent() 
+//void CGameItem::detachFromParent()
 //{
 //	if (_Parent == NULL) return;
 //
 //	nlassert( _Parent->getChildren()[Loc.Slot] == this);
 //
 //	(*_Parent)->detachChild(Loc.Slot);
-//	_Parent = NULL; 
-//	Loc.Slot = 0; 
+//	_Parent = NULL;
+//	Loc.Slot = 0;
 //}
 
 //-----------------------------------------------
 // attachTo :
 //
 //-----------------------------------------------
-//void CGameItem::attachTo(CGameItemPtr item, uint8 slot) 
+//void CGameItem::attachTo(CGameItemPtr item, uint8 slot)
 //{
 //	// if the item is still attached, detach it from its parent
 //	if ( _Parent != NULL )
@@ -1806,7 +1850,7 @@ uint32 CGameItem::getMaxStackSize() const
 //
 //-----------------------------------------------
 CGameItem * CGameItem::getItem(uint idx)
-{	
+{
 	BOMB_IF( idx>=_Items.size(), "Attempt to access an item beyond end of item vector", return 0 );
 	BOMB_IF( _Items[idx]._AllocatorData>=0, NLMISC::toString("Attempt to access an item that is not allocated or has been freed (idx: %d)",idx), return 0 );
 	return &_Items[idx];
@@ -1879,7 +1923,7 @@ void CGameItem::deleteItem(CGameItem *item)
 
 	log_Item_Delete(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 
-	// this test would only have value if the implementation of std::vector<> doesn't guarantee a 
+	// this test would only have value if the implementation of std::vector<> doesn't guarantee a
 	// continuous memory address space for the vector's data
 	// It's not in the #IFDEF DEBUG because it may only be triggered in very obscure conditions
 	nlassert(&_Items[idx]==item);
@@ -1901,7 +1945,7 @@ void CGameItem::deleteItem(CGameItem *item)
 				++k;
 			nlassert(j==k);
 		#endif
-			
+
 		// TODO: replace this egs_giinfo() with a LOG()
 //			egs_giinfo("deleteItem(): %5d (free: %d/%d)",idx,j,_Items.size());
 	#endif
@@ -1913,7 +1957,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //void CGameItem::save( NLMISC::IStream &f )
 //{
 //	//NLMEMORY::CheckHeap (true);
-//	
+//
 //	if ( _IsOnTheGround )
 //			nlwarning("<CGameItem load> saving an object on the ground should never happen sheet: %s, id: %s ",_SheetId.toString().c_str(), _Id.toString().c_str() );
 //	// save item infos
@@ -1947,25 +1991,25 @@ void CGameItem::deleteItem(CGameItem *item)
 //	f.serial( _LostHPremains );
 //
 //	//NLMEMORY::CheckHeap (true);
-//	
+//
 //	// serial rm used for craft item
 ////	f.serialCont( _RmUsedForCraft );
 //	std::vector<CSheetId> RmUsedCraft;
 //	f.serialCont( RmUsedCraft );
 //
 //	//NLMEMORY::CheckHeap (true);
-//	
+//
 //	// serial position in bag inventory
 //	f.serial(_ClientInventoryPosition);
 //
-//	
+//
 //	f.serial( _SapLoad );
 //	f.serialCont( _Enchantment );
 //
 //	//NLMEMORY::CheckHeap (true);
-//	
+//
 //	// save children count
-//	uint32 childrenCount = _Children.size(); 
+//	uint32 childrenCount = _Children.size();
 //	f.serial( childrenCount );
 //
 //	// save non null children count
@@ -1973,7 +2017,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //	uint32 i;
 //	for( i = 0; i < childrenCount; ++i )
 //	{
-//		if( _Children[i]!=NULL && _Children[i] != this ) 
+//		if( _Children[i]!=NULL && _Children[i] != this )
 //			++nonNullChildrenCount;
 //	}
 //	f.serial( nonNullChildrenCount );
@@ -1981,7 +2025,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //	//NLMEMORY::CheckHeap (true);
 //
 //	string sheetName = _SheetId.toString();
-//	
+//
 //	// for each non null child
 //	for( i = 0; i < childrenCount; ++i )
 //	{
@@ -2051,7 +2095,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //				f.serial(coord);
 //				f.serial(coord);
 //			}
-//			
+//
 //			//NLMEMORY::CheckHeap (true);
 //
 ////			f.serial( TimeOnTheGround );
@@ -2064,9 +2108,9 @@ void CGameItem::deleteItem(CGameItem *item)
 //			f.serial( _Destroyable );
 //			if ( characterSerialVersion >= 19 )
 //				f.serial(_Dropable);
-//			
+//
 //			f.serial( _CreatorId );
-//			
+//
 //			f.serial( _HP );
 //			f.serial( _Recommended );
 //
@@ -2078,7 +2122,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //				f.serial(_LostHPremains);
 //
 //			//NLMEMORY::CheckHeap (true);
-//			
+//
 //			// serial rm used for craft item
 ////			f.serialCont( _RmUsedForCraft );
 //			std::vector<CSheetId> RmUsedCraft;
@@ -2087,7 +2131,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //			// ANTIBUG : huge rm vector serialized !!!!
 ////			if ( f.isReading() && _RmUsedForCraft.size() >= 1000 )
 ////				_RmUsedForCraft.clear();
-//			
+//
 //			//NLMEMORY::CheckHeap (true);
 //
 //			f.serial(_ClientInventoryPosition);
@@ -2099,15 +2143,15 @@ void CGameItem::deleteItem(CGameItem *item)
 //			}
 //
 //			// load children count
-//			uint32 childrenCount = 0; 
+//			uint32 childrenCount = 0;
 //			f.serial( childrenCount );
-////			
+////
 ////			// load non null children count
 //			uint32 nonNullChildrenCount = 0;
 //			f.serial( nonNullChildrenCount );
 ////
 ////			//NLMEMORY::CheckHeap (true);
-////			
+////
 //			bool isStack = false;
 //			if ( _SheetId == CSheetId("stack.sitem") )
 //			{
@@ -2116,7 +2160,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //				if ( nonNullChildrenCount != childrenCount )
 //				{
 ////					nlwarning("<CGameItem::load>char %s a stack contains NULL items! children: '%d' non null children: '%d'", Idc.toString().c_str(),childrenCount,nonNullChildrenCount);
-//					nlwarning("<CGameItem::load> A stack contains NULL items! children: '%d' non null children: '%d'", 
+//					nlwarning("<CGameItem::load> A stack contains NULL items! children: '%d' non null children: '%d'",
 //						childrenCount,
 //						nonNullChildrenCount);
 //				}
@@ -2126,7 +2170,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //				nlassertex(childrenCount == 0, ("Can't read old inventory item as item, must be read as inventory"));
 ////				_Children.resize( childrenCount, NULL );
 //			}
-////			
+////
 ////			//NLMEMORY::CheckHeap (true);
 ////
 //			uint32 i;
@@ -2137,7 +2181,7 @@ void CGameItem::deleteItem(CGameItem *item)
 ////
 //				uint32 index;
 //				f.serial( index );
-////				
+////
 ////				//NLMEMORY::CheckHeap (true);
 ////
 ////				// load child
@@ -2167,7 +2211,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //					// replace the current item with the first stacked item
 //					copyItem(item);
 //				}
-////				
+////
 //				// delete this garbage item
 //				item.deleteItem();
 //
@@ -2181,7 +2225,7 @@ void CGameItem::deleteItem(CGameItem *item)
 ////					if( index == ((uint32)-1) || (index >= _Children.size()) )
 ////					{
 ////						nlwarning("<CGameItem::load> load children item with bad index = %d (item number slots %d ), skip it...", index, _Children.size() );
-////						
+////
 ////						for( index = 0; index < _Children.size(); ++index )
 ////						{
 ////							if(_Children[index] == 0 ) break;
@@ -2196,12 +2240,12 @@ void CGameItem::deleteItem(CGameItem *item)
 ////						nlwarning("<CGameItem::load> load children item with bad index = %d (item number slots %d ), skip it...", index, _Children.size() );
 ////					}
 ////				}
-////				
+////
 ////				//NLMEMORY::CheckHeap (true);
 ////
 ////				// set the parent
 ////				(*item)->setParent( this );
-////				
+////
 ////				//NLMEMORY::CheckHeap (true);
 ////
 ////				// add item in manager
@@ -2284,7 +2328,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //			_Recommended = dummy_uint16;
 //
 //			f.serial( _HP ); //uint32
-//		
+//
 //			if( characterSerialVersion < 7 )
 //			{
 //				f.serial( dummy_uint16 );
@@ -2293,7 +2337,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //			{
 //				f.serial( dummy_f );
 //			}
-//			
+//
 //			//NLMEMORY::CheckHeap (true);
 //
 //			if( characterSerialVersion < 8 )
@@ -2306,7 +2350,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //
 //			f.serial( dummy_uint16 );
 //			f.serial( dummy_uint16 );
-//			
+//
 //			//NLMEMORY::CheckHeap (true);
 //
 //			if( characterSerialVersion < 8 )
@@ -2314,7 +2358,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //				f.serial( dummy_f );
 //			}
 //			f.serial( dummy_uint16 );
-//			
+//
 //			f.serial( dummy_uint32 );
 //			f.serial( dummy_uint16 );
 //			f.serial( dummy_uint32 );
@@ -2326,7 +2370,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //
 //			vector< SProtection > dummy_protection;
 //			f.serialCont(dummy_protection);
-//			
+//
 //			//NLMEMORY::CheckHeap (true);
 //
 //			f.serial( timeOnGround );
@@ -2343,7 +2387,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //			f.serial( _CreatorId );
 //
 //			// load children count
-//			uint32 childrenCount = 0; 
+//			uint32 childrenCount = 0;
 //			f.serial( childrenCount );
 //
 //			// load non null children count
@@ -2388,13 +2432,13 @@ void CGameItem::deleteItem(CGameItem *item)
 ////				//NLMEMORY::CheckHeap (true);
 ////
 //				item.newItem();
-////				
+////
 ////				//NLMEMORY::CheckHeap (true);
-////				
+////
 ////				CEntityId id( RYZOMID::object, GameItemManager.getFreeItemIndice() );
-////				
+////
 ////				item->_Id = id;
-////				
+////
 ////				//NLMEMORY::CheckHeap (true);
 //				if( item!=NULL )
 //				{
@@ -2445,8 +2489,8 @@ void CGameItem::deleteItem(CGameItem *item)
 ////					}
 ////					break;
 ////				}
-////				
-////			
+////
+////
 ////				//NLMEMORY::CheckHeap (true);
 //			}
 //
@@ -2496,7 +2540,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //	// memory optimization for non craftable items
 //	if (_Form != NULL)
 //	{
-//		switch(_Form->Family) 
+//		switch(_Form->Family)
 //		{
 //			//craftable families, do nothing
 //		case ITEMFAMILY::ARMOR:
@@ -2548,7 +2592,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //		}
 //		else
 //			_RefInventorySlot = CInventoryBase::INVALID_INVENTORY_SLOT;
-//			
+//
 //		//ownerPtr->equipCharacter(refInventoryId, slot, getInventorySlot());
 //	}
 //	else
@@ -2571,7 +2615,7 @@ void CGameItem::dumpGameItemStats( const string& fileName )
 	{
 		FILE * f;
 		f = fopen(fileName.c_str(),"w");
-		
+
 		if(f)
 		{
 //			fprintf(f,"ItemID   : %s\n", _ItemId.toString().c_str());
@@ -2597,14 +2641,14 @@ void CGameItem::dumpGameItemStats( const string& fileName )
 	else
 	{
 
-	}	
+	}
 } // dumpGameItemStats //
 
 
 //-----------------------------------------------
 // removeHp :
 //-----------------------------------------------
-uint32 CGameItem::removeHp( double hpLost ) 
+uint32 CGameItem::removeHp( double hpLost )
 {
 	if (_Form != NULL && _Form->Shield != NULL && _Form->Shield->Unbreakable)
 		return 0;
@@ -2623,7 +2667,7 @@ uint32 CGameItem::removeHp( double hpLost )
 	if( hp >= _HP)
 	{
 		_HP = 1;
-	
+
 //		// if states differs send a message if owner is a player
 //		if (_CurrentWornState != ITEM_WORN_STATE::Worned)
 //		{
@@ -2690,7 +2734,7 @@ void CGameItem::addHp( double hpGain )
 	// get new worn state
 	ITEM_WORN_STATE::TItemWornState wornState = _CurrentWornState;
 	computeItemWornState();
-	
+
 //	// if states differs send a message if owner is a player
 //	if (wornState != _CurrentWornState)
 //	{
@@ -2706,7 +2750,7 @@ void CGameItem::addHp( double hpGain )
 //			}
 //		}
 //	}
-	
+
 	getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_hp));
 
 } // addHp //
@@ -2722,11 +2766,11 @@ void CGameItem::setCustomText(const ucstring &val)
 
 void CGameItem::setInventory(const CInventoryPtr &inv, uint32 slot)
 {
-	nlassert((_Inventory == NULL && inv != NULL) 
+	nlassert((_Inventory == NULL && inv != NULL)
 			|| (_Inventory != NULL && inv == NULL));
-	nlassert((_InventorySlot == INVENTORIES::INVALID_INVENTORY_SLOT && _Inventory == NULL) 
+	nlassert((_InventorySlot == INVENTORIES::INVALID_INVENTORY_SLOT && _Inventory == NULL)
 			||(_InventorySlot != INVENTORIES::INVALID_INVENTORY_SLOT && _Inventory != NULL));
-	nlassert((slot == INVENTORIES::INVALID_INVENTORY_SLOT && inv == NULL) 
+	nlassert((slot == INVENTORIES::INVALID_INVENTORY_SLOT && inv == NULL)
 			||(slot != INVENTORIES::INVALID_INVENTORY_SLOT && inv != NULL));
 	nlassert(inv == NULL || (slot < inv->getSlotCount()));
 
@@ -2737,14 +2781,14 @@ void CGameItem::setInventory(const CInventoryPtr &inv, uint32 slot)
 /// set link information between item and reference inventory (used by CRefInventory)
 void CGameItem::setRefInventory(const CInventoryPtr &inv, uint32 slot)
 {
-	nlassert((_RefInventory == NULL && inv != NULL) 
+	nlassert((_RefInventory == NULL && inv != NULL)
 		|| (_RefInventory != NULL && inv == NULL));
-	nlassert((_RefInventorySlot == INVENTORIES::INVALID_INVENTORY_SLOT && _RefInventory == NULL) 
+	nlassert((_RefInventorySlot == INVENTORIES::INVALID_INVENTORY_SLOT && _RefInventory == NULL)
 		||(_RefInventorySlot != INVENTORIES::INVALID_INVENTORY_SLOT && _RefInventory != NULL));
-	nlassert((slot == INVENTORIES::INVALID_INVENTORY_SLOT && inv == NULL) 
+	nlassert((slot == INVENTORIES::INVALID_INVENTORY_SLOT && inv == NULL)
 		||(slot != INVENTORIES::INVALID_INVENTORY_SLOT && inv != NULL));
 	nlassert(inv == NULL || (slot < inv->getSlotCount()));
-	
+
 	_RefInventory = inv;
 	_RefInventorySlot = slot;
 }
@@ -2753,8 +2797,8 @@ void CGameItem::setRefInventory(const CInventoryPtr &inv, uint32 slot)
 //-----------------------------------------------
 // get stat energy of item
 //-----------------------------------------------
-float CGameItem::getStatEnergy() 
-{ 
+float CGameItem::getStatEnergy()
+{
 	if (_Form == NULL)
 		return 0.0f;
 
@@ -2778,10 +2822,10 @@ float CGameItem::getStatEnergy()
 	}
 	else
 	{
-		if( _CraftParameters->StatEnergy == 0.0f ) 
-			return estimateStatEnergy(); 
-		else 
-			return _CraftParameters->StatEnergy; 
+		if( _CraftParameters->StatEnergy == 0.0f )
+			return estimateStatEnergy();
+		else
+			return _CraftParameters->StatEnergy;
 	}
 }
 
@@ -2800,7 +2844,7 @@ RM_CLASS_TYPE::TRMClassType CGameItem::getItemClass()
 float CGameItem::estimateStatEnergy()
 {
 	float statEnergy = 0.0f;
-	
+
 	if( _CraftParameters )
 	{
 		statEnergy += _CraftParameters->Durability;
@@ -2846,7 +2890,7 @@ uint32 CGameItem::maxDurability() const
 		switch( _Form->Type )
 		{
 			// melee weapons
-			case ITEM_TYPE::DAGGER:			d = CWeaponCraftParameters::DaggerDurability;		break;				
+			case ITEM_TYPE::DAGGER:			d = CWeaponCraftParameters::DaggerDurability;		break;
 			case ITEM_TYPE::SWORD:			d = CWeaponCraftParameters::SwordDurability;		break;
 			case ITEM_TYPE::MACE:			d = CWeaponCraftParameters::MaceDurability;			break;
 			case ITEM_TYPE::AXE:			d = CWeaponCraftParameters::AxeDurability;			break;
@@ -2857,7 +2901,7 @@ uint32 CGameItem::maxDurability() const
 			case ITEM_TYPE::TWO_HAND_AXE:	d = CWeaponCraftParameters::TwoHandAxeDurability;	break;
 			case ITEM_TYPE::PIKE:			d = CWeaponCraftParameters::PikeDurability;			break;
 			case ITEM_TYPE::TWO_HAND_MACE:	d = CWeaponCraftParameters::TwoHandMaceDurability;	break;
-		
+
 			// range weapon
 			case ITEM_TYPE::AUTOLAUCH:	d = CWeaponCraftParameters::AutolauchDurability;	break;
 			case ITEM_TYPE::BOWRIFLE:	d = CWeaponCraftParameters::BowrifleDurability;		break;
@@ -2865,7 +2909,7 @@ uint32 CGameItem::maxDurability() const
 			case ITEM_TYPE::PISTOL:		d = CWeaponCraftParameters::PistolDurability;		break;
 			case ITEM_TYPE::BOWPISTOL:	d = CWeaponCraftParameters::BowpistolDurability;	break;
 			case ITEM_TYPE::RIFLE:		d = CWeaponCraftParameters::RifleDurability;		break;
-		
+
 			// ammo
 			case ITEM_TYPE::AUTOLAUNCH_AMMO:d = CWeaponCraftParameters::AutolaunchAmmoDurability;	break;
 			case ITEM_TYPE::BOWRIFLE_AMMO:	d = CWeaponCraftParameters::BowrifleAmmoDurability;		break;
@@ -2873,7 +2917,7 @@ uint32 CGameItem::maxDurability() const
 			case ITEM_TYPE::PISTOL_AMMO:	d = CWeaponCraftParameters::PistolAmmoDurability;		break;
 			case ITEM_TYPE::BOWPISTOL_AMMO: d = CWeaponCraftParameters::BowpistolAmmoDurability;	break;
 			case ITEM_TYPE::RIFLE_AMMO:		d = CWeaponCraftParameters::RifleAmmoDurability;		break;
-		
+
 			// armor and shield
 			case ITEM_TYPE::SHIELD:			d = CWeaponCraftParameters::ShieldDurability;		break;
 			case ITEM_TYPE::BUCKLER:		d = CWeaponCraftParameters::BucklerDurability;		break;
@@ -2893,7 +2937,7 @@ uint32 CGameItem::maxDurability() const
 			case ITEM_TYPE::HEAVY_SLEEVES:	d = CWeaponCraftParameters::HeavySleevesDurability; break;
 			case ITEM_TYPE::HEAVY_VEST:		d = CWeaponCraftParameters::HeavyVestDurability;	break;
 			case ITEM_TYPE::HEAVY_HELMET:	d = CWeaponCraftParameters::HeavyHelmetDurability;	break;
-		
+
 			// jewel
 			case ITEM_TYPE::ANKLET:		d = CWeaponCraftParameters::AnkletDurability;	break;
 			case ITEM_TYPE::BRACELET:	d = CWeaponCraftParameters::BraceletDurability; break;
@@ -2915,7 +2959,7 @@ uint32 CGameItem::maxDurability() const
 			default:
 				return 0;
 		}
-		
+
 		if (_CraftParameters != NULL)
 			return (uint32) ( d + d * _CraftParameters->Durability );
 		else
@@ -2934,7 +2978,7 @@ uint32 CGameItem::maxDurability() const
 			case ITEM_TYPE::JewelryTool:	return (uint32)CWeaponCraftParameters::JewelryCraftingToolDurability;
 			case ITEM_TYPE::MeleeWeaponTool:return (uint32)CWeaponCraftParameters::MeleeWeaponCraftingToolDurability;
 			case ITEM_TYPE::RangeWeaponTool:return (uint32)CWeaponCraftParameters::RangeWeaponCraftingToolDurability;
-			
+
 			default:
 				return 0;
 		}
@@ -3042,7 +3086,7 @@ uint32 CGameItem::maxSapLoad() const
 								m = CWeaponCraftParameters::PikeSapLoadMax; break;
 		case ITEM_TYPE::TWO_HAND_MACE:	s = CWeaponCraftParameters::TwoHandMaceSapLoad;
 										m = CWeaponCraftParameters::TwoHandMaceSapLoadMax; break;
-		
+
 		// range weapon
 		case ITEM_TYPE::AUTOLAUCH:	s = CWeaponCraftParameters::AutolauchSapLoad;
 									m = CWeaponCraftParameters::AutolauchSapLoadMax; break;
@@ -3056,7 +3100,7 @@ uint32 CGameItem::maxSapLoad() const
 									m = CWeaponCraftParameters::BowpistolSapLoadMax; break;
 		case ITEM_TYPE::RIFLE:	s = CWeaponCraftParameters::RifleSapLoad;
 								m = CWeaponCraftParameters::RifleSapLoadMax; break;
-		
+
 		// ammo
 		case ITEM_TYPE::AUTOLAUNCH_AMMO:	s = CWeaponCraftParameters::AutolaunchAmmoSapLoad;
 											m = CWeaponCraftParameters::AutolaunchAmmoSapLoadMax; break;
@@ -3070,7 +3114,7 @@ uint32 CGameItem::maxSapLoad() const
 											m = CWeaponCraftParameters::BowpistolAmmoSapLoadMax; break;
 		case ITEM_TYPE::RIFLE_AMMO:	s = CWeaponCraftParameters::RifleAmmoSapLoad;
 									m = CWeaponCraftParameters::RifleAmmoSapLoadMax; break;
-		
+
 		// armor and shield
 		case ITEM_TYPE::SHIELD:	s = CWeaponCraftParameters::ShieldSapLoad;
 								m = CWeaponCraftParameters::ShieldSapLoadMax; break;
@@ -3108,7 +3152,7 @@ uint32 CGameItem::maxSapLoad() const
 										m = CWeaponCraftParameters::HeavyVestSapLoadMax; break;
 		case ITEM_TYPE::HEAVY_HELMET:		s = CWeaponCraftParameters::HeavyHelmetSapLoad;
 											m = CWeaponCraftParameters::HeavyHelmetSapLoadMax; break;
-		
+
 		// jewel
 		case ITEM_TYPE::ANKLET:		s = CWeaponCraftParameters::AnkletSapLoad;
 									m = CWeaponCraftParameters::AnkletSapLoadMax; break;
@@ -3165,7 +3209,7 @@ float CGameItem::damageFactor() const
 			return CWeaponCraftParameters::PikeDmg + (CWeaponCraftParameters::PikeDmgMax - CWeaponCraftParameters::PikeDmg) * _CraftParameters->Dmg;
 		case ITEM_TYPE::TWO_HAND_MACE:
 			return CWeaponCraftParameters::TwoHandMaceDmg + (CWeaponCraftParameters::TwoHandMaceDmgMax - CWeaponCraftParameters::TwoHandMaceDmg) * _CraftParameters->Dmg;
-			
+
 			// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
 			return CWeaponCraftParameters::AutolauchDmg + (CWeaponCraftParameters::AutolauchDmgMax - CWeaponCraftParameters::AutolauchDmg) * _CraftParameters->Dmg;
@@ -3179,7 +3223,7 @@ float CGameItem::damageFactor() const
 			return CWeaponCraftParameters::BowpistolDmg + (CWeaponCraftParameters::BowpistolDmgMax - CWeaponCraftParameters::BowpistolDmg) * _CraftParameters->Dmg;
 		case ITEM_TYPE::RIFLE:
 			return CWeaponCraftParameters::RifleDmg + (CWeaponCraftParameters::RifleDmgMax - CWeaponCraftParameters::RifleDmg) * _CraftParameters->Dmg;
-			
+
 			// ammo
 		case ITEM_TYPE::AUTOLAUNCH_AMMO:
 			return CWeaponCraftParameters::AutolaunchAmmoDmg + (CWeaponCraftParameters::AutolaunchAmmoDmgMax - CWeaponCraftParameters::AutolaunchAmmoDmg) * _CraftParameters->Dmg;
@@ -3214,7 +3258,7 @@ void CGameItem::damage( sint32 skill, uint32& currentDamage, uint32& maxDamage )
 	dmgFactor = damageFactor();
 	if( dmgFactor != 0.0f )
 	{
-		currentDamage = (uint32) ( ( CWeaponDamageTable::getInstance().getRefenceDamage( _Recommended, skill ) * dmgFactor ) ); 
+		currentDamage = (uint32) ( ( CWeaponDamageTable::getInstance().getRefenceDamage( _Recommended, skill ) * dmgFactor ) );
 		maxDamage = (uint32) ( ( CWeaponDamageTable::getInstance().getRefenceDamage( _Recommended, _Recommended ) * dmgFactor ) );
 	}
 }
@@ -3268,7 +3312,7 @@ float CGameItem::hitRate() const
 			return CWeaponCraftParameters::BowpistolHitRate + (CWeaponCraftParameters::BowpistolHitRateMax - CWeaponCraftParameters::BowpistolHitRate) * _CraftParameters->Speed;
 		case ITEM_TYPE::RIFLE:
 			return CWeaponCraftParameters::RifleHitRate + (CWeaponCraftParameters::RifleHitRateMax - CWeaponCraftParameters::RifleHitRate) * _CraftParameters->Speed;
-		
+
 		// ammo
 		case ITEM_TYPE::AUTOLAUNCH_AMMO:
 			return CWeaponCraftParameters::AutolaunchAmmoHitRate + (CWeaponCraftParameters::AutolaunchAmmoHitRateMax - CWeaponCraftParameters::AutolaunchAmmoHitRate) * _CraftParameters->Speed;
@@ -3313,7 +3357,7 @@ float CGameItem::range() const
 			return CWeaponCraftParameters::BowpistolRange + CWeaponCraftParameters::BowpistolRange * _CraftParameters->Range;
 		case ITEM_TYPE::RIFLE:
 			return CWeaponCraftParameters::RifleRange + CWeaponCraftParameters::RifleRange * _CraftParameters->Range;
-		
+
 		// ammo
 		case ITEM_TYPE::AUTOLAUNCH_AMMO:
 			return CWeaponCraftParameters::AutolaunchAmmoRange + CWeaponCraftParameters::AutolaunchAmmoRange * _CraftParameters->Range;
@@ -3369,7 +3413,7 @@ sint32 CGameItem::dodgeModifier() const
 			return (sint32) ( CWeaponCraftParameters::PikeDodgeMinModifier + (CWeaponCraftParameters::PikeDodgeMaxModifier - CWeaponCraftParameters::PikeDodgeMinModifier ) * _CraftParameters->DodgeModifier );
 		case ITEM_TYPE::TWO_HAND_MACE:
 			return (sint32) ( CWeaponCraftParameters::TwoHandMaceDodgeMinModifier + (CWeaponCraftParameters::TwoHandMaceDodgeMaxModifier - CWeaponCraftParameters::TwoHandMaceDodgeMinModifier ) * _CraftParameters->DodgeModifier );
-		
+
 		// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
 			return (sint32) ( CWeaponCraftParameters::AutolauchDodgeMinModifier + (CWeaponCraftParameters::AutolauchDodgeMaxModifier - CWeaponCraftParameters::AutolauchDodgeMinModifier ) * _CraftParameters->DodgeModifier );
@@ -3383,7 +3427,7 @@ sint32 CGameItem::dodgeModifier() const
 			return (sint32) ( CWeaponCraftParameters::BowpistolDodgeMinModifier + (CWeaponCraftParameters::BowpistolDodgeMaxModifier - CWeaponCraftParameters::BowpistolDodgeMinModifier ) * _CraftParameters->DodgeModifier );
 		case ITEM_TYPE::RIFLE:
 			return (sint32) ( CWeaponCraftParameters::RifleDodgeMinModifier + (CWeaponCraftParameters::RifleDodgeMaxModifier - CWeaponCraftParameters::RifleDodgeMinModifier ) * _CraftParameters->DodgeModifier );
-		
+
 		// armor and shield
 		case ITEM_TYPE::SHIELD:
 			return (sint32) ( CWeaponCraftParameters::ShieldDodgeMinModifier + (CWeaponCraftParameters::ShieldDodgeMaxModifier - CWeaponCraftParameters::ShieldDodgeMinModifier ) * _CraftParameters->DodgeModifier );
@@ -3462,7 +3506,7 @@ sint32 CGameItem::parryModifier() const
 			return (sint32) ( CWeaponCraftParameters::PikeParryMinModifier + (CWeaponCraftParameters::PikeParryMaxModifier - CWeaponCraftParameters::PikeParryMinModifier ) * _CraftParameters->ParryModifier );
 		case ITEM_TYPE::TWO_HAND_MACE:
 			return (sint32) ( CWeaponCraftParameters::TwoHandMaceParryMinModifier + (CWeaponCraftParameters::TwoHandMaceParryMaxModifier - CWeaponCraftParameters::TwoHandMaceParryMinModifier ) * _CraftParameters->ParryModifier );
-			
+
 			// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
 			return (sint32) ( CWeaponCraftParameters::AutolauchParryMinModifier + (CWeaponCraftParameters::AutolauchParryMaxModifier - CWeaponCraftParameters::AutolauchParryMinModifier ) * _CraftParameters->ParryModifier );
@@ -3476,7 +3520,7 @@ sint32 CGameItem::parryModifier() const
 			return (sint32) ( CWeaponCraftParameters::BowpistolParryMinModifier + (CWeaponCraftParameters::BowpistolParryMaxModifier - CWeaponCraftParameters::BowpistolParryMinModifier ) * _CraftParameters->ParryModifier );
 		case ITEM_TYPE::RIFLE:
 			return (sint32) ( CWeaponCraftParameters::RifleParryMinModifier + (CWeaponCraftParameters::RifleParryMaxModifier - CWeaponCraftParameters::RifleParryMinModifier ) * _CraftParameters->ParryModifier );
-			
+
 			// armor and shield
 		case ITEM_TYPE::SHIELD:
 			return (sint32) ( CWeaponCraftParameters::ShieldParryMinModifier + (CWeaponCraftParameters::ShieldParryMaxModifier - CWeaponCraftParameters::ShieldParryMinModifier ) * _CraftParameters->ParryModifier );
@@ -3554,7 +3598,7 @@ sint32 CGameItem::adversaryDodgeModifier() const
 			return (sint32) ( CWeaponCraftParameters::PikeAdversaryDodgeMinModifier + (CWeaponCraftParameters::PikeAdversaryDodgeMaxModifier - CWeaponCraftParameters::PikeAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
 		case ITEM_TYPE::TWO_HAND_MACE:
 			return (sint32) ( CWeaponCraftParameters::TwoHandMaceAdversaryDodgeMinModifier + (CWeaponCraftParameters::TwoHandMaceAdversaryDodgeMaxModifier - CWeaponCraftParameters::TwoHandMaceAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
-			
+
 			// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
 			return (sint32) ( CWeaponCraftParameters::AutolauchAdversaryDodgeMinModifier + (CWeaponCraftParameters::AutolauchAdversaryDodgeMaxModifier - CWeaponCraftParameters::AutolauchAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
@@ -3608,7 +3652,7 @@ sint32 CGameItem::adversaryParryModifier() const
 			return (sint32) ( CWeaponCraftParameters::PikeAdversaryParryMinModifier + (CWeaponCraftParameters::PikeAdversaryParryMaxModifier - CWeaponCraftParameters::PikeAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
 		case ITEM_TYPE::TWO_HAND_MACE:
 			return (sint32) ( CWeaponCraftParameters::TwoHandMaceAdversaryParryMinModifier + (CWeaponCraftParameters::TwoHandMaceAdversaryParryMaxModifier - CWeaponCraftParameters::TwoHandMaceAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
-			
+
 			// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
 			return (sint32) ( CWeaponCraftParameters::AutolauchAdversaryParryMinModifier + (CWeaponCraftParameters::AutolauchAdversaryParryMaxModifier - CWeaponCraftParameters::AutolauchAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
@@ -3878,7 +3922,7 @@ void CGameItem::magicProtection(uint32 protectionNumber, PROTECTION_TYPE::TProte
 
 
 //-----------------------------------------------
-// return the CWeaponCraftParameters variable corresponding to protection type 
+// return the CWeaponCraftParameters variable corresponding to protection type
 //-----------------------------------------------
 float CGameItem::getMagicProtectionCraftParateters( PROTECTION_TYPE::TProtectionType protection ) const
 {
@@ -3904,7 +3948,7 @@ float CGameItem::getMagicProtectionCraftParateters( PROTECTION_TYPE::TProtection
 }
 
 //-----------------------------------------------
-// return protection gived by item for a protection type 
+// return protection gived by item for a protection type
 //-----------------------------------------------
 uint32 CGameItem::magicProtection(PROTECTION_TYPE::TProtectionType protectionType) const
 {
@@ -3982,7 +4026,7 @@ sint32 CGameItem::armorHpBuff() const
 }
 
 //-----------------------------------------------
-// return ElementalCastingTimeFactor 
+// return ElementalCastingTimeFactor
 //-----------------------------------------------
 float CGameItem::getElementalCastingTimeFactor() const
 {
@@ -4146,7 +4190,7 @@ float CGameItem::getOffensiveAfflictionPowerFactor() const
 
 
 //-----------------------------------------------
-// return getHealCastingTimeFactor 
+// return getHealCastingTimeFactor
 //-----------------------------------------------
 float CGameItem::getHealCastingTimeFactor() const
 {
@@ -4227,7 +4271,7 @@ float CGameItem::getHealPowerFactor() const
 }
 
 //-----------------------------------------------
-// return DefensiveAfflictionCastingTimeFactor 
+// return DefensiveAfflictionCastingTimeFactor
 //-----------------------------------------------
 float CGameItem::getDefensiveAfflictionCastingTimeFactor() const
 {
@@ -4329,7 +4373,7 @@ void CGameItem::displayInLog( CLog &log )
 		durability(), maxDurability(), sapLoad(), maxSapLoad(), getCreator().toString().c_str() );
 
 	if (_Form)
-	{						
+	{
 		log.displayRawNL("\t%s Bulk=%u Weight=%u", _Form->Name.c_str(), _Form->Bulk, _Form->Weight );
 	}
 } // displayInLog //
@@ -4514,7 +4558,7 @@ float CGameItem::getWearPerAction() const
 			nlwarning("Bad family for a getWearPerAction");
 		};
 	}
-	
+
 	return 0.0f;
 }
 
@@ -4549,7 +4593,7 @@ static bool IsRootSheet(NLMISC::CSheetId sheet)
 void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * owner)
 {
 	_Form = CSheets::getForm(_SheetId);
-	
+
 //	GameItemManager.insertItem(this);
 
 	computeItemWornState();
@@ -4563,7 +4607,7 @@ void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * o
 	// memory optimization for non craftable items, also mandatory for tools otherwise maxDurability() would always return 0
 	if (_Form != NULL)
 	{
-		switch(_Form->Family) 
+		switch(_Form->Family)
 		{
 			//craftable families
 		case ITEMFAMILY::ARMOR:
@@ -4638,7 +4682,7 @@ void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * o
 				CGameItemPtr itemPtr(this);
 				inv->insertItem(itemPtr, slot);
 			}
-			
+
 			//owner->equipCharacter(refInventoryId, slot,getInventorySlot());
 		}
 	}
@@ -4770,11 +4814,11 @@ void CGameItem::testItemsForBugs()
 //	nlassert(inventory[INVENTORIES::pickup]->getSheetId()==NLMISC::CSheetId("temporary_inventory.sitem"));
 //	nlassert(inventory[INVENTORIES::equipment]->getSheetId()==NLMISC::CSheetId("equipment_inventory.sitem"));
 //	nlassert(inventory[INVENTORIES::bag]->getSheetId()==NLMISC::CSheetId("bag_inventory.sitem"));
-//	for( int ii = 0; ii < MAX_INVENTORY_ANIMAL; ++ii ) 
+//	for( int ii = 0; ii < MAX_INVENTORY_ANIMAL; ++ii )
 //	{
 //		nlassert(inventory[INVENTORIES::pack_animal+ii]->getSheetId()==NLMISC::CSheetId("pack_animal_inventory.sitem")); //must be re-init with true pack animal inventory (but this break character save, waiting the backup system)
 //	}
-//	nlassert(inventory[INVENTORIES::harvest]->getSheetId()==NLMISC::CSheetId("temporary_inventory.sitem")); 
+//	nlassert(inventory[INVENTORIES::harvest]->getSheetId()==NLMISC::CSheetId("temporary_inventory.sitem"));
 //	nlassert(inventory[INVENTORIES::bot_gift]->getSheetId()==NLMISC::CSheetId("bot_gift_inventory.sitem"));
 ////	nlassert(inventory[INVENTORIES::pack_steed ]->getSheetId()==NLMISC::CSheetId("pack_animal_inventory.sitem")); //must be re-init with true pack animal inventory (but this break character save, waiting the backup system)
 //
@@ -4885,7 +4929,7 @@ NLMISC_COMMAND(testParanoidItemSystem,"run some test code that should provoke a 
 	log.displayNL("not implemented yet");
 #define TEST(x) egs_giinfo("Testing: " #x); x
 
-	return true;	
+	return true;
 //#define TEST(x) nlinfo("Testing: " #x); x
 //
 //	if (args.size()!=1)
@@ -4906,12 +4950,12 @@ NLMISC_COMMAND(testParanoidItemSystem,"run some test code that should provoke a 
 //
 //		// the following should run fine too...
 //		CGameItem::testItemsForBugs();
-//		TEST( p0->quality(p0->quality()+1); )								
+//		TEST( p0->quality(p0->quality()+1); )
 //		CGameItem::testItemsForBugs();
 //
 //		// the following block should bomb out due to use of 'p1' without derefferencing a gameItemPtr
 //		CGameItem::testItemsForBugs();
-//		TEST( p1->quality(p1->quality()+1); )								
+//		TEST( p1->quality(p1->quality()+1); )
 //		CGameItem::testItemsForBugs();
 //		break;
 //		}
@@ -4960,7 +5004,7 @@ std::string CGameItem::showItemsStats()
 //	uint32 detachedItemCount=0;
 //	uint32 attachedStackCount=0;
 //	uint32 detachedStackCount=0;
-//	
+//
 //	for (uint32 i=0;i<_Items.size();++i)
 //	{
 //		const CGameItem& item= _Items[i];
@@ -4970,7 +5014,7 @@ std::string CGameItem::showItemsStats()
 //			// this item is supposedly allocated so run a few tests
 //			bool isRootItem= IsRootSheet(item._SheetId);
 //			bool isStack= item._SheetId==stackSheet;
-//			
+//
 //			if (isRootItem)
 //			{
 //				nlassert(item._Parent==NULL);
@@ -4993,7 +5037,7 @@ std::string CGameItem::showItemsStats()
 //						++attachedItemCount;
 //				}
 //			}
-//			
+//
 //			if (isStack)
 //			{
 //				// make sure my children refference me
@@ -5019,7 +5063,7 @@ std::string CGameItem::showItemsStats()
 //		{
 //			// this item is free so just skip it and move on to the next one
 //			++freeItemCount;
-//		}		
+//		}
 //	}
 //	return NLMISC::toString("Item stats: FREE:%d  ROOT:%d  STACK_ATTACHED:%d  STACK_DETACHED:%d  CHILD:%d  ITEM_ATTACHED:%d  ITEM_DETACHED:%d, TOTAL: %d (Allocated Memory %d)",
 //		freeItemCount,rootItemCount,attachedStackCount,detachedStackCount,stackChildrenCount,attachedItemCount,detachedItemCount, _Items.size(), sizeof(CGameItem) * _Items.size());
