@@ -21171,7 +21171,6 @@ void CPetAnimal::clear()
 	IsTpAllowed = false;
 	spawnFlag = false;
 	IsInBag = false;
-	LockedByOwner = false;
 	Cell = 0;
 }
 
