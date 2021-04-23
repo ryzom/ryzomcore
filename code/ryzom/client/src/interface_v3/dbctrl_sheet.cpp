@@ -1086,6 +1086,7 @@ void CDBCtrlSheet::clearIconBuffs()
 {
 	_EnchantIcons.clear();
 	_BuffIcons.clear();
+	_BoostIcons.clear();
 }
 
 // ***************************************************************************
@@ -1118,8 +1119,15 @@ void CDBCtrlSheet::infoReceived()
 			if (brick)
 			{
 				if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
+				if (brick->BrickFamily == BRICK_FAMILIES::BSGMCB) // Boost of Allegories, use it as boost icon
 				{
 					if (!haveRoot)
+					_BoostIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
+					rVR.getTextureSizeFromId(_BoostIcons.back().TextureId, _BoostIcons.back().IconW, _BoostIcons.back().IconH);
+				}
+				else if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
+				{
+					if (!haveRoot && !brick->getIconBack().empty())
 					{
 						_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
 						rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
@@ -2444,9 +2452,17 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 						}
 						yIcon -= hIcon;
 						rVR.drawRotFlipBitmap(_RenderLayer + 1, xIcon, yIcon, wIcon, hIcon, 0, false, _EnchantIcons[0].TextureId, fastMulRGB(curSheetColor, _EnchantIcons[0].Color));
-						rVR.drawRotFlipBitmap(_RenderLayer+1, xIcon, yIcon, wIcon, hIcon, 0, false, _EnchantIcons[i].TextureId, fastMulRGB(curSheetColor, _EnchantIcons[i].Color));
+						rVR.drawRotFlipBitmap(_RenderLayer + 1, xIcon, yIcon, wIcon, hIcon, 0, false, _EnchantIcons[i].TextureId, fastMulRGB(curSheetColor, _EnchantIcons[i].Color));
+
+
+						if ((i - 1) < _BoostIcons.size()) {
+							nlinfo("Boost icon  = %s", rVR.getTextureNameFromId(_BoostIcons[i-1].TextureId).c_str());
+							rVR.drawRotFlipBitmap(_RenderLayer + 2, xIcon+wIcon-_BoostIcons[i-1].IconW, yIcon, _BoostIcons[i-1].IconW, _BoostIcons[i-1].IconH, 0, false, _BoostIcons[i-1].TextureId, fastMulRGB(curSheetColor, _BoostIcons[i-1].Color));
+						}
 					}
 				}
+
+
 
 				// Draw Quality. -1 for lookandfeel. Draw it with global color
 				if (_DispQuality != -1)
@@ -3804,6 +3820,7 @@ void CDBCtrlSheet::resetAllTexIDs()
 	_ItemInfoChanged = true;
 	_EnchantIcons.clear();
 	_BuffIcons.clear();
+	_BoostIcons.clear();
 }
 
 
