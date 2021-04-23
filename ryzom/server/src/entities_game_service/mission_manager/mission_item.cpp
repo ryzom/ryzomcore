@@ -59,7 +59,7 @@ bool CMissionItem::buildFromScript(const std::vector<std::string> & script) {
 		MISLOG("Invalid sitem sheet '%s'", (script[0]+".sitem").c_str());
 		return false;
 	}
-	
+
 	NLMISC::fromString(script[1], _Quality);
 
 	_NoDrop = script[2] == "0";
@@ -67,7 +67,7 @@ bool CMissionItem::buildFromScript(const std::vector<std::string> & script) {
 	if (script.size() > 3) {
 		vector<string> vars;
 		NLMISC::splitString(script[3], ",", vars);
-		
+
 		for (uint i = 0; i < vars.size(); i++)
 		{
 			vector<string> args;
@@ -79,6 +79,10 @@ bool CMissionItem::buildFromScript(const std::vector<std::string> & script) {
 					_CustomName.fromUtf8(hex_decode(args[1]));
 				else if(!nlstricmp(args[0], "CustomText"))
 					_CustomText.fromUtf8(hex_decode(args[1]));
+				else if(!nlstricmp(args[0], "RequiredFaction"))
+					_RequiredFaction = args[1];
+				else if(!nlstricmp(args[0], "RequiredPowo"))
+					_RequiredPowo = args[1];
 				else
 				{
 					float value;
@@ -189,7 +193,7 @@ bool CMissionItem::buildFromScript(const std::vector<std::string> & script) {
 			}
 		}
 	}
-	
+
 	return true;
 }// CMissionItem::buildFromScript
 
@@ -223,7 +227,7 @@ CGameItemPtr CMissionItem::createItem(uint16 quantity)
 		nlwarning("<CMissionItem createItem> could not create mission item");
 		return NULL;
 	}
-	
+
 	setItemParam(item);
 	return item;
 }// CMissionItem::createItem
@@ -274,6 +278,12 @@ void CMissionItem::setItemParam(CGameItemPtr item)
 
 		if (!_CustomName.empty())
 			item->setCustomName(_CustomName);
+
+		if (!_RequiredFaction.empty())
+			item->setRequiredFaction(_RequiredFaction);
+
+		if (!_RequiredPowo.empty())
+			item->setRequiredPowo(_RequiredPowo);
 	}
 }// CMissionItem::setItemParam
 

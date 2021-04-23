@@ -1388,6 +1388,7 @@ private:
 	PROP2(_CreatorId,					CEntityId,	_CreatorId,					_CreatorId=val)\
 	PROP2(_PhraseId,					string,		_PhraseId,					_PhraseId=val)\
 	PROP2(_RequiredFaction,				string,		_RequiredFaction,			_RequiredFaction=val)\
+	PROP2(_RequiredPowo,				string,		_RequiredPowo,				_RequiredPowo=val)\
 	LSTRUCT2(_CraftParameters,						if (_CraftParameters != NULL),	_CraftParameters->store(pdr),	_CraftParameters = new CItemCraftParameters; _CraftParameters->apply(pdr))\
 	LPROP2(_SlotImage,					uint16,		if (0),		0xffff,				slotImage=val)\
 	LPROP2(_SapLoad,					uint32,		if (_SapLoad!=0),			_SapLoad,							_SapLoad=val)\

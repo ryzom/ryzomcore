@@ -48,7 +48,7 @@ private:
 	// set a created item parameter
 	void setItemParam(CGameItemPtr item);
 
-	
+
 	/// sheet describing the item type
 	NLMISC::CSheetId		_SheetId;
 	/// parameters of the item
@@ -63,6 +63,8 @@ private:
 	NLMISC::CSheetId		_SPhraseId;
 	ucstring				_CustomText;
 	ucstring				_CustomName;
+	std::string				_RequiredFaction;
+	std::string				_RequiredPowo;
 };
 
 
