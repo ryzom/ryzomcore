@@ -27,7 +27,6 @@ shift
 
 CTRL_CMDLINE=$*
 
-
 mkdir -p $NAME
 
 DOMAIN=shard
@@ -71,24 +70,39 @@ do
 
 			# we have a launch command so prepare, launch, wait for exit and do the housekeeping
 			echo -----------------------------------------------------------------------
-			echo Launching ...
+			echo Launching $(pwd) $EXECUTABLE $CTRL_CMDLINE...
 			echo
 			printf RUNNING > $STATE_FILE
 
+
 			#notify start
+			if [ "$NAME" = "egs" ] || [ "$NAME" = "ios" ] || [ "$NAME" = "gpms" ]
+			then
+				sleep 2
+			elif [ "$NAME" = "ais_fyros" ] || [ "$NAME" = "ais_matis" ] || [ "$NAME" = "ais_tryker" ] || [ "$NAME" = "ais_roots" ] || [ "$NAME" = "ais_zorai" ] || [ "$NAME" = "ais_ark" ]
+			then
+				sleep 4
+			fi
+
+			echo "notifying $CWD/notify.sh ServiceStarted $NAME"
 			"$CWD/notify.sh" ServiceStarted $NAME
+
+			export LC_ALL=C; unset LANGUAGE
 
 			if [[ "$USE_GDB" == "1" ]]
 			then
-				if [ "$NAME" = "egs" ] || [ "$NAME" = "ios" ] || [ "$NAME" = "ais_fyros" ] || [ "$NAME" = "ais_matis" ] || [ "$NAME" = "ais_tryker" ] || [ "$NAME" = "ais_roots" ] || [ "$NAME" = "ais_zorai" ] || [ "$NAME" = "ais_ark" ] || [ "$NAME" = "ais_gpms" ]
+				if [ "$NAME" = "egs" ] || [ "$NAME" = "ios" ] || [ "$NAME" = "ais_fyros" ] || [ "$NAME" = "ais_matis" ] || [ "$NAME" = "ais_tryker" ] || [ "$NAME" = "ais_roots" ] || [ "$NAME" = "ais_zorai" ] || [ "$NAME" = "ais_ark" ] || [ "$NAME" = "gpms" ]
 				then
-					gdb -batch -ex "set logging file $NAME/gdb_dump.txt" -ex "set logging on" -ex "run $CTRL_CMDLINE" -ex "bt" $EXECUTABLE
+					echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SHARD_PATH/lib gdb -batch -ex 'set logging file $NAME/gdb_dump.txt' -ex 'set logging on' -ex 'run $CTRL_CMDLINE' -ex 'bt' $EXECUTABLE" > /tmp/run_$NAME
+				else
+					echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SHARD_PATH/lib $EXECUTABLE $CTRL_CMDLINE" > /tmp/run_$NAME
 				fi
-				$EXECUTABLE $CTRL_CMDLINE
+
 			else
-				$EXECUTABLE $CTRL_CMDLINE
+				echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SHARD_PATH/lib $EXECUTABLE $CTRL_CMDLINE" > /tmp/run_$NAME
 			fi
 
+			schroot -p -c atys -- sh /tmp/run_$NAME
 			#notify stop
 			"$CWD/notify.sh" ServiceStopped $NAME
 

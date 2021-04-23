@@ -16,20 +16,38 @@
 #
 
 COMMAND=$1
-shift
 
 CWD=$(dirname "$0")
 . "$CWD/config.sh"
 
-if [[ "$COMMAND" = "ServiceStarted" ]]
+echo $COMMAND
+if [[ "$COMMAND" == "ServiceStarted" ]]
 then
-	if [[ -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
+	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
 	then
-		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=started&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY&service=$2"
+		echo "nofitiy $(hostname -s):$2 started"
+		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=started&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY&service=$2" & 2> /dev/null
 	fi
-
-elif [[ "$COMMAND" = "ServiceStoped" ]]
+elif [[ "$COMMAND" == "ServiceStopped" ]]
 then
-	curl "$NOTIFY_URL_SERVICE_RESTARTED?command=stoped&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY&service=$2"
+	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
+	then
+		echo "nofitiy $(hostname -s):$2 stopped"
+		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=stopped&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY&service=$2" & 2> /dev/null
+	fi
+elif [[ "$COMMAND" == "ShardStopped" ]]
+then
+	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
+	then
+		echo "nofitiy $(hostname -s):$2 shard stopped"
+		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=shard_stopped&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY" & 2> /dev/null
+	fi
+elif [[ "$COMMAND" == "ShardStarted" ]]
+then
+	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
+	then
+		echo "nofitiy $(hostname -s):$2 shard started"
+		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=shard_started&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY" & 2> /dev/null
+	fi
 fi
 
