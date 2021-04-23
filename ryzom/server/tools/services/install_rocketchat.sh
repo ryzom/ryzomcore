@@ -15,7 +15,7 @@
 # Script to build Rocketchat with ryzombridge
 #
 
-VERSION="1.0.0-rc.0"
+VERSION="3.3.3"
 BUILD_PATH=~/builds
 
 echo "INSTALLATION OF VERSION $VERSION !!!!"
@@ -37,6 +37,7 @@ if [[ ! -d "megacorp" ]]
 	hg clone ssh://hg@bitbucket.org/ryzom/megacorp
 fi
 
+
 cd megacorp
 hg pull
 hg update -v
@@ -47,22 +48,33 @@ git clone https://github.com/RocketChat/Rocket.Chat.git
 cd Rocket.Chat
 git checkout $VERSION
 
-cp $BUILD_PATH/RocketChat/megacorp/ryzom-rocket-bridge/ packages/
-echo -e "\nryzom-rocket-bridge" >> .meteor/packages
+cp -r ../megacorp/ryzom-rocket-bridge/ app/
 
-npm install --production
+echo "import '../app/ryzom-rocket-bridge';" >> client/importPackages.js
+echo "import '../app/ryzom-rocket-bridge';" >> server/importPackages.js
+
+meteor npm install
+meteor npm run postinstall
 
 rm -rf ../rc-bundle
-meteor build ../rc-bundle --architecture os.linux.x86_64
-meteor build ../rc-bundle --architecture os.linux.x86_64
+meteor build --server-only --directory ../rc-bundle
+rm -rf ~/scripts/Rocket.Chat
+cp -r ../rc-bundle/bundle/ ~/scripts/Rocket.Chat/
 
-cd ../rc-bundle
-tar xvfz Rocket.Chat.tar.gz
-
-cd ~
-mv Rocket.Chat/ Rocket.Chat.old
-cp -r src/rc-bundle/bundle/ Rocket.Chat/
-
-cd ~/Rocket.Chat/programs/server
+cd ~/scripts/Rocket.Chat/programs/server
 npm install
+
+
+
+#meteor build ../rc-bundle --architecture os.linux.x86_64
+#meteor build ../rc-bundle --architecture os.linux.x86_64
+
+#cd ../rc-bundle
+#tar xvfz Rocket.Chat.tar.gz
+
+#cd ~
+#mv Rocket.Chat/ Rocket.Chat.old
+#cp -r src/rc-bundle/bundle/ Rocket.Chat/
+
+
 
