@@ -84,6 +84,9 @@ namespace NLGUI
 		TStyle getPseudo(const std::string &key) const;
 		void setPseudo(const std::string &key, const TStyle &style);
 
+		// return lang property for css :lang() pseudo class
+		std::string getInheritedLanguage() const;
+
 	private:
 		// pseudo elements like ":before" and ":after"
 		std::map<std::string, TStyle> _Pseudo;

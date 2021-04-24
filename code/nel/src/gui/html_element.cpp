@@ -123,6 +123,21 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	std::string CHtmlElement::getInheritedLanguage() const
+	{
+		const CHtmlElement *node = this;
+		while(node)
+		{
+			if (node->hasAttribute("lang"))
+				return node->getAttribute("lang");
+
+			node = node->parent;
+		}
+
+		return "";
+	}
+
+	// ***************************************************************************
 	std::string CHtmlElement::toString(bool tree, uint depth) const
 	{
 		std::string result;
