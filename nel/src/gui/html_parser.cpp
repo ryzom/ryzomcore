@@ -66,7 +66,15 @@ namespace NLGUI
 		{
 			if (node->type == XML_TEXT_NODE)
 			{
-				parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content)));
+				// linebreak right after pre,textare open tag should be removed
+				if (parent.Children.empty() && (*node->content == '\n') && (parent.ID == HTML_PRE || parent.ID == HTML_TEXTAREA))
+				{
+					parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content) + 1));
+				}
+				else
+				{
+					parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content)));
+				}
 			}
 			else
 			if (node->type == XML_ELEMENT_NODE)
