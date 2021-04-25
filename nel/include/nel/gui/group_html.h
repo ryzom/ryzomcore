@@ -858,6 +858,7 @@ namespace NLGUI
 			CCurlWWWData *data;
 			std::string url;
 			std::string dest;
+			std::string tmpdest;
 			std::string luaScript;
 			std::string md5sum;
 			TDataType type;

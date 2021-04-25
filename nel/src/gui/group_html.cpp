@@ -525,18 +525,19 @@ namespace NLGUI
 			return false;
 		}
 
-		string tmpdest = download.dest + ".tmp";
+		// use browser Id so that two browsers would not use same temp file
+		download.tmpdest = localImageName(_Id + download.dest) + ".tmp";
 
 		// erase the tmp file if exists
-		if (CFile::fileExists(tmpdest))
+		if (CFile::fileExists(download.tmpdest))
 		{
-			CFile::deleteFile(tmpdest);
+			CFile::deleteFile(download.tmpdest);
 		}
 
-		FILE *fp = nlfopen (tmpdest, "wb");
+		FILE *fp = nlfopen (download.tmpdest, "wb");
 		if (fp == NULL)
 		{
-			nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
+			nlwarning("Can't open file '%s' for writing: code=%d '%s'", download.tmpdest.c_str (), errno, strerror(errno));
 			return false;
 		}
 
@@ -544,7 +545,7 @@ namespace NLGUI
 		if (!curl)
 		{
 			fclose(fp);
-			CFile::deleteFile(tmpdest);
+			CFile::deleteFile(download.tmpdest);
 
 			nlwarning("Creating cURL handle failed, unable to download '%s'", download.url.c_str());
 			return false;
@@ -608,54 +609,57 @@ namespace NLGUI
 
 	void CGroupHTML::finishCurlDownload(const CDataDownload &download)
 	{
-		std::string tmpfile = download.dest + ".tmp";
-
 		if (download.type == ImgType)
 		{
-			// there is race condition if two browser instances are downloading same file
-			// second instance deletes first tmpfile and creates new file for itself.
-			if (CFile::getFileSize(tmpfile) > 0)
+			if (CFile::fileExists(download.tmpdest) && CFile::getFileSize(download.tmpdest) > 0)
 			{
 				try
 				{
 					// verify that image is not corrupted
 					uint32 w, h;
-					CBitmap::loadSize(tmpfile, w, h);
+					CBitmap::loadSize(download.tmpdest, w, h);
 					if (w != 0 && h != 0)
 					{
-						// if not tmpfile, then img is already in cache
-						if (CFile::fileExists(tmpfile))
-						{
-							if (CFile::fileExists(download.dest))
-							{
-								CFile::deleteFile(download.dest);
-							}
+						if (CFile::fileExists(download.dest))
+							CFile::deleteFile(download.dest);
 
-							// to reload image on page, the easiest seems to be changing texture
-							// to temp file temporarily. that forces driver to reload texture from disk
-							// ITexture::touch() seem not to do this.
-							// cache was updated, first set texture as temp file
-							for(uint i = 0; i < download.imgs.size(); i++)
-							{
-								setImage(download.imgs[i].Image, tmpfile, download.imgs[i].Type);
-								setImageSize(download.imgs[i].Image, download.imgs[i].Style);
-							}
-
-							CFile::moveFile(download.dest, tmpfile);
-						}
-
+						// to reload image on page, the easiest seems to be changing texture
+						// to temp file temporarily. that forces driver to reload texture from disk
+						// ITexture::touch() seem not to do this.
+						// cache was updated, first set texture as temp file
 						for(uint i = 0; i < download.imgs.size(); i++)
 						{
-							setImage(download.imgs[i].Image, download.dest, download.imgs[i].Type);
+							setImage(download.imgs[i].Image, download.tmpdest, download.imgs[i].Type);
 							setImageSize(download.imgs[i].Image, download.imgs[i].Style);
 						}
 
+						CFile::moveFile(download.dest, download.tmpdest);
 					}
 				}
 				catch(const NLMISC::Exception &e)
 				{
 					// exception message has .tmp file name, so keep it for further analysis
-					nlwarning("Invalid image (%s): %s", download.url.c_str(), e.what());
+					nlwarning("Invalid image (%s) from url (%s): %s", download.tmpdest.c_str(), download.url.c_str(), e.what());
+				}
+			}
+
+			if (CFile::fileExists(download.dest) && CFile::getFileSize(download.dest) > 0)
+			{
+				try
+				{
+					// verify that image is not corrupted
+					uint32 w, h;
+					CBitmap::loadSize(download.dest, w, h);
+					if (w != 0 && h != 0)
+					for(uint i = 0; i < download.imgs.size(); i++)
+					{
+						setImage(download.imgs[i].Image, download.dest, download.imgs[i].Type);
+						setImageSize(download.imgs[i].Image, download.imgs[i].Style);
+					}
+				}
+				catch(const NLMISC::Exception &e)
+				{
+					nlwarning("Invalid image (%s) from url (%s): %s", download.dest.c_str(), download.url.c_str(), e.what());
 				}
 			}
 
@@ -664,13 +668,13 @@ namespace NLGUI
 
 		if (download.type == StylesheetType)
 		{
-			if (CFile::fileExists(tmpfile))
+			if (CFile::fileExists(download.tmpdest))
 			{
 				if (CFile::fileExists(download.dest))
 				{
 					CFile::deleteFile(download.dest);
 				}
-				CFile::moveFile(download.dest, tmpfile);
+				CFile::moveFile(download.dest, download.tmpdest);
 			}
 			cssDownloadFinished(download.url, download.dest);
 
@@ -681,20 +685,20 @@ namespace NLGUI
 		{
 			bool verified = false;
 			// no tmpfile if file was already in cache
-			if (CFile::fileExists(tmpfile))
+			if (CFile::fileExists(download.tmpdest))
 			{
-				verified = download.md5sum.empty() || (download.md5sum != getMD5(tmpfile).toString());
+				verified = download.md5sum.empty() || (download.md5sum != getMD5(download.tmpdest).toString());
 				if (verified)
 				{
 					if (CFile::fileExists(download.dest))
 					{
 						CFile::deleteFile(download.dest);
 					}
-					CFile::moveFile(download.dest, tmpfile);
+					CFile::moveFile(download.dest, download.tmpdest);
 				}
 				else
 				{
-					CFile::deleteFile(tmpfile);
+					CFile::deleteFile(download.tmpdest);
 				}
 			}
 			else if (CFile::fileExists(download.dest))
@@ -746,7 +750,7 @@ namespace NLGUI
 		if (type != OverImage)
 		{
 			std::string temp = dest;
-			if (!CFile::fileExists(temp))
+			if (!CFile::fileExists(temp) || CFile::getFileSize(temp) == 0)
 			{
 				temp = placeholder;
 			}
@@ -967,9 +971,9 @@ namespace NLGUI
 				{
 					fclose(it->fp);
 
-					if (CFile::fileExists(it->dest + ".tmp"))
+					if (CFile::fileExists(it->tmpdest))
 					{
-						CFile::deleteFile(it->dest + ".tmp");
+						CFile::deleteFile(it->tmpdest);
 					}
 				}
 			}
@@ -4071,10 +4075,9 @@ namespace NLGUI
 				obj.LastModified = data.data->getLastModified();
 
 				CHttpCache::getInstance()->store(data.dest, obj);
-				std::string tmpfile = data.dest + ".tmp";
-				if (code == 304 && CFile::fileExists(tmpfile))
+				if (code == 304 && CFile::fileExists(data.tmpdest))
 				{
-					CFile::deleteFile(tmpfile);
+					CFile::deleteFile(data.tmpdest);
 				}
 			}
 			else if ((code >= 301 && code <= 303) || code == 307 || code == 308)
@@ -4102,10 +4105,9 @@ namespace NLGUI
 
 						LOG_DL("Redirect '%s'", location.c_str());
 						// no finished callback called, so cleanup old temp
-						std::string tmpfile = data.dest + ".tmp";
-						if (CFile::fileExists(tmpfile))
+						if (CFile::fileExists(data.tmpdest))
 						{
-							CFile::deleteFile(tmpfile);
+							CFile::deleteFile(data.tmpdest);
 						}
 						return;
 					}
