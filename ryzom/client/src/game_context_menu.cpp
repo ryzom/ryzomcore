@@ -268,7 +268,7 @@ void		CGameContextMenu::update()
 
 	setupContextMenuCantTalk(); // can't talk by default
 
-	bool showGMOptions = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER());
+	bool showGMOptions = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER() || hasPrivilegeTESTER());
 
 	if (_TextInvisible)
 		_TextInvisible->setActive(showGMOptions);

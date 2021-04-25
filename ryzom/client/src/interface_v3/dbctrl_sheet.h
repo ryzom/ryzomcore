@@ -701,6 +701,7 @@ protected:
 	};
 	std::vector<SBuffIcon> _BuffIcons;
 	std::vector<SBuffIcon> _EnchantIcons;
+	std::vector<SBuffIcon> _BoostIcons;
 
 	// Level Brick or Quality
 	union

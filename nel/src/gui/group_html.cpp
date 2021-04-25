@@ -2640,6 +2640,17 @@ namespace NLGUI
 		invalidateCoords();
 	}
 
+	void CGroupHTML::browseErrorHtml(const std::string &html)
+	{
+		releaseDownloads();
+		removeContent();
+
+		renderHtmlString(html);
+
+		updateRefreshButton();
+		invalidateCoords();
+	}
+
 	// ***************************************************************************
 
 	bool CGroupHTML::isBrowsing()
@@ -3959,11 +3970,22 @@ namespace NLGUI
 	{
 		if (!success)
 		{
+			CUrlParser uri(_CurlWWW->Url);
+
+			// potentially unwanted chars
+			std::string url = _CurlWWW->Url;
+			url = strFindReplaceAll(url, string("<"), string("%3C"));
+			url = strFindReplaceAll(url, string(">"), string("%3E"));
+			url = strFindReplaceAll(url, string("\""), string("%22"));
+			url = strFindReplaceAll(url, string("'"), string("%27"));
+
 			std::string err;
-			err = "Connection failed with cURL error: ";
+			err = "<html><head><title>cURL error</title></head><body>";
+			err += "<h1>Connection failed with cURL error</h1>";
 			err += error;
-			err += "\nURL '" + _CurlWWW->Url + "'";
-			browseError(err.c_str());
+			err += "<hr>(" + uri.scheme + "://" + uri.host + ") <a href=\"" + url + "\">reload</a>";
+			err += "</body></html>";
+			browseErrorHtml(err);
 			return;
 		}
 
