@@ -182,6 +182,16 @@ namespace NLGUI
 				{
 					parseNode(node->children, elm, styles, links);
 
+					if (!elm.Children.empty() && elm.ID == HTML_PRE && elm.Children.back().Type == CHtmlElement::TEXT_NODE)
+					{
+						std::string::size_type size = elm.Children.back().Value.size();
+						// strip last '\n' from non-empty line
+						if (size > 1 && elm.Children.back().Value[size-1] == '\n')
+						{
+							elm.Children.back().Value = elm.Children.back().Value.substr(0, size - 1);
+						}
+					}
+
 					// must cleanup nested tags that libxml2 does not fix
 					// dt without end tag: <dl><dt><dt></dl>
 					// dd without end tag: <dl><dd><dd></dl>
