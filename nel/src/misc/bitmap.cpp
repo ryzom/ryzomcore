@@ -3568,7 +3568,7 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		}
 		while(!eof);
 	}
-	else if(fileType == JPG_HEADER)
+	else if(memcmp(&fileType, &JPG_HEADER, 2) == 0)
 	{
 		uint8 blockMarker1 = 0;
 		uint8 blockMarker2 = 0;
