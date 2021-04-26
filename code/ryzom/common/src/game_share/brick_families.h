@@ -310,7 +310,7 @@ namespace BRICK_FAMILIES
 				BCOGENR02,
 				BCOGENT02,
 
-			EndFaberMandatory = BCOKART02,
+			EndFaberMandatory = BCOGENT02,
 
 			// OPTION FABER
 			BeginFaberOption,
