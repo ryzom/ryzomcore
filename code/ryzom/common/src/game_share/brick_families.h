@@ -675,7 +675,8 @@ namespace BRICK_FAMILIES
 				BSCMD, // heal Focus
 			EndPowerParameter = BSCMD,
 
-			BSGMC, // jewels s2e0
+			BSGMC, // allegories
+				BSGMCB, // boost allegories
 
 			BeginMagicPowerCredit,
 				BSXCA = BeginMagicPowerCredit, // recast time
