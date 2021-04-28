@@ -68,7 +68,7 @@ void	COutpostManager::startPvpJoinProposal(OUTPOSTENUMS::TPVPType type, bool out
 
 	ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:neutral"));
 	if (ctrl)
-		ctrl->setActive(type != OUTPOSTENUMS::GVE || !outpostInFire);
+		ctrl->setActive(type == OUTPOSTENUMS::GVE || !outpostInFire);
 
 	// GvE: only attacker guild can have the option
 	ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:attack"));
