@@ -139,37 +139,15 @@ namespace NLGUI
 		float	getTimeout() const {return (float)_TimeoutValue;}
 
 		// Some constants
-		NLMISC::CRGBA	BgColor;
 		NLMISC::CRGBA	ErrorColor;
 		NLMISC::CRGBA	LinkColor;
-		NLMISC::CRGBA	TextColor;
-		NLMISC::CRGBA	H1Color;
-		NLMISC::CRGBA	H2Color;
-		NLMISC::CRGBA	H3Color;
-		NLMISC::CRGBA	H4Color;
-		NLMISC::CRGBA	H5Color;
-		NLMISC::CRGBA	H6Color;
 		bool			ErrorColorGlobalColor;
 		bool			LinkColorGlobalColor;
 		bool			TextColorGlobalColor;
-		bool			H1ColorGlobalColor;
-		bool			H2ColorGlobalColor;
-		bool			H3ColorGlobalColor;
-		bool			H4ColorGlobalColor;
-		bool			H5ColorGlobalColor;
-		bool			H6ColorGlobalColor;
-		uint			TextFontSize;
-		uint			H1FontSize;
-		uint			H2FontSize;
-		uint			H3FontSize;
-		uint			H4FontSize;
-		uint			H5FontSize;
-		uint			H6FontSize;
 		uint			TDBeginSpace;
 		uint			PBeginSpace;
 		uint			LIBeginSpace;
 		uint			ULBeginSpace;
-		uint			LIIndent;
 		uint			ULIndent;
 		float			LineSpaceFontFactor;
 		std::string		DefaultButtonGroup;
@@ -184,7 +162,6 @@ namespace NLGUI
 		std::string		DefaultRadioButtonBitmapPushed;
 		std::string		DefaultRadioButtonBitmapOver;
 		std::string		DefaultBackgroundBitmapView;
-		std::string		CurrentLinkTitle;
 
 		struct TFormField {
 		public:

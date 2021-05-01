@@ -1460,37 +1460,15 @@ namespace NLGUI
 		CWidgetManager::getInstance()->registerClockMsgTarget(this);
 
 		// HTML parameters
-		BgColor = CRGBA::Black;
 		ErrorColor = CRGBA(255, 0, 0);
 		LinkColor = CRGBA(0, 0, 255);
-		TextColor = CRGBA(255, 255, 255);
-		H1Color = CRGBA(255, 255, 255);
-		H2Color = CRGBA(255, 255, 255);
-		H3Color = CRGBA(255, 255, 255);
-		H4Color = CRGBA(255, 255, 255);
-		H5Color = CRGBA(255, 255, 255);
-		H6Color = CRGBA(255, 255, 255);
 		ErrorColorGlobalColor = false;
 		LinkColorGlobalColor = false;
 		TextColorGlobalColor = false;
-		H1ColorGlobalColor = false;
-		H2ColorGlobalColor = false;
-		H3ColorGlobalColor = false;
-		H4ColorGlobalColor = false;
-		H5ColorGlobalColor = false;
-		H6ColorGlobalColor = false;
-		TextFontSize = 9;
-		H1FontSize = 18;
-		H2FontSize = 15;
-		H3FontSize = 12;
-		H4FontSize = 9;
-		H5FontSize = 9;
-		H6FontSize = 9;
 		LIBeginSpace = 4;
 		ULBeginSpace = 12;
 		PBeginSpace	 = 12;
 		TDBeginSpace = 0;
-		LIIndent = -10;
 		ULIndent = 30;
 		LineSpaceFontFactor = 0.5f;
 		DefaultButtonGroup =			"html_text_button";
@@ -1562,11 +1540,6 @@ namespace NLGUI
 			return _TitlePrefix;
 		}
 		else
-		if( name == "background_color" )
-		{
-			return toString( BgColor );
-		}
-		else
 		if( name == "error_color" )
 		{
 			return toString( ErrorColor );
@@ -1575,36 +1548,6 @@ namespace NLGUI
 		if( name == "link_color" )
 		{
 			return toString( LinkColor );
-		}
-		else
-		if( name == "h1_color" )
-		{
-			return toString( H1Color );
-		}
-		else
-		if( name == "h2_color" )
-		{
-			return toString( H2Color );
-		}
-		else
-		if( name == "h3_color" )
-		{
-			return toString( H3Color );
-		}
-		else
-		if( name == "h4_color" )
-		{
-			return toString( H4Color );
-		}
-		else
-		if( name == "h5_color" )
-		{
-			return toString( H5Color );
-		}
-		else
-		if( name == "h6_color" )
-		{
-			return toString( H6Color );
 		}
 		else
 		if( name == "error_color_global_color" )
@@ -1620,71 +1563,6 @@ namespace NLGUI
 		if( name == "text_color_global_color" )
 		{
 			return toString( TextColorGlobalColor );
-		}
-		else
-		if( name == "h1_color_global_color" )
-		{
-			return toString( H1ColorGlobalColor );
-		}
-		else
-		if( name == "h2_color_global_color" )
-		{
-			return toString( H2ColorGlobalColor );
-		}
-		else
-		if( name == "h3_color_global_color" )
-		{
-			return toString( H3ColorGlobalColor );
-		}
-		else
-		if( name == "h4_color_global_color" )
-		{
-			return toString( H4ColorGlobalColor );
-		}
-		else
-		if( name == "h5_color_global_color" )
-		{
-			return toString( H5ColorGlobalColor );
-		}
-		else
-		if( name == "h6_color_global_color" )
-		{
-			return toString( H6ColorGlobalColor );
-		}
-		else
-		if( name == "text_font_size" )
-		{
-			return toString( TextFontSize );
-		}
-		else
-		if( name == "h1_font_size" )
-		{
-			return toString( H1FontSize );
-		}
-		else
-		if( name == "h2_font_size" )
-		{
-			return toString( H2FontSize );
-		}
-		else
-		if( name == "h3_font_size" )
-		{
-			return toString( H3FontSize );
-		}
-		else
-		if( name == "h4_font_size" )
-		{
-			return toString( H4FontSize );
-		}
-		else
-		if( name == "h5_font_size" )
-		{
-			return toString( H5FontSize );
-		}
-		else
-		if( name == "h6_font_size" )
-		{
-			return toString( H6FontSize );
 		}
 		else
 		if( name == "td_begin_space" )
@@ -1705,11 +1583,6 @@ namespace NLGUI
 		if( name == "ul_begin_space" )
 		{
 			return toString( ULBeginSpace );
-		}
-		else
-		if( name == "li_indent" )
-		{
-			return toString( LIIndent );
 		}
 		else
 		if( name == "ul_indent" )
@@ -1824,14 +1697,6 @@ namespace NLGUI
 			return;
 		}
 		else
-		if( name == "background_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				BgColor = c;
-			return;
-		}
-		else
 		if( name == "error_color" )
 		{
 			CRGBA c;
@@ -1845,54 +1710,6 @@ namespace NLGUI
 			CRGBA c;
 			if( fromString( value, c ) )
 				LinkColor = c;
-			return;
-		}
-		else
-		if( name == "h1_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H1Color = c;
-			return;
-		}
-		else
-		if( name == "h2_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H2Color = c;
-			return;
-		}
-		else
-		if( name == "h3_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H3Color = c;
-			return;
-		}
-		else
-		if( name == "h4_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H4Color = c;
-			return;
-		}
-		else
-		if( name == "h5_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H5Color = c;
-			return;
-		}
-		else
-		if( name == "h6_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H6Color = c;
 			return;
 		}
 		else
@@ -1917,110 +1734,6 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				TextColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h1_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H1ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h2_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H2ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h3_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H3ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h4_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H4ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h5_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H5ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h6_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H6ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "text_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				TextFontSize = i;
-			return;
-		}
-		else
-		if( name == "h1_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H1FontSize = i;
-			return;
-		}
-		else
-		if( name == "h2_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H2FontSize = i;
-			return;
-		}
-		else
-		if( name == "h3_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H3FontSize = i;
-			return;
-		}
-		else
-		if( name == "h4_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H4FontSize = i;
-			return;
-		}
-		else
-		if( name == "h5_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H5FontSize = i;
-			return;
-		}
-		else
-		if( name == "h6_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H6FontSize = i;
 			return;
 		}
 		else
@@ -2053,14 +1766,6 @@ namespace NLGUI
 			uint i;
 			if( fromString( value, i ) )
 				ULBeginSpace = i;
-			return;
-		}
-		else
-		if( name == "li_indent" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				LIIndent = i;
 			return;
 		}
 		else
@@ -2222,16 +1927,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "html" );
 		xmlSetProp( node, BAD_CAST "url", BAD_CAST _URL.c_str() );
 		xmlSetProp( node, BAD_CAST "title_prefix", BAD_CAST _TitlePrefix.c_str() );
-		xmlSetProp( node, BAD_CAST "background_color", BAD_CAST toString( BgColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "error_color", BAD_CAST toString( ErrorColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "link_color", BAD_CAST toString( LinkColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "background_color", BAD_CAST toString( BgColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h1_color", BAD_CAST toString( H1Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h2_color", BAD_CAST toString( H2Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h3_color", BAD_CAST toString( H3Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h4_color", BAD_CAST toString( H4Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h5_color", BAD_CAST toString( H5Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h6_color", BAD_CAST toString( H6Color ).c_str() );
 
 		xmlSetProp( node, BAD_CAST "error_color_global_color",
 			BAD_CAST toString( ErrorColorGlobalColor ).c_str() );
@@ -2239,31 +1936,11 @@ namespace NLGUI
 			BAD_CAST toString( LinkColorGlobalColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "text_color_global_color",
 			BAD_CAST toString( TextColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h1_color_global_color",
-			BAD_CAST toString( H1ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h2_color_global_color",
-			BAD_CAST toString( H2ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h3_color_global_color",
-			BAD_CAST toString( H3ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h4_color_global_color",
-			BAD_CAST toString( H4ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h5_color_global_color",
-			BAD_CAST toString( H5ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h6_color_global_color",
-			BAD_CAST toString( H6ColorGlobalColor ).c_str() );
 
-		xmlSetProp( node, BAD_CAST "text_font_size", BAD_CAST toString( TextFontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h1_font_size", BAD_CAST toString( H1FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h2_font_size", BAD_CAST toString( H2FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h3_font_size", BAD_CAST toString( H3FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h4_font_size", BAD_CAST toString( H4FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h5_font_size", BAD_CAST toString( H5FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h6_font_size", BAD_CAST toString( H6FontSize ).c_str() );
 		xmlSetProp( node, BAD_CAST "td_begin_space", BAD_CAST toString( TDBeginSpace ).c_str() );
 		xmlSetProp( node, BAD_CAST "paragraph_begin_space", BAD_CAST toString( PBeginSpace ).c_str() );
 		xmlSetProp( node, BAD_CAST "li_begin_space", BAD_CAST toString( LIBeginSpace ).c_str() );
 		xmlSetProp( node, BAD_CAST "ul_begin_space", BAD_CAST toString( ULBeginSpace ).c_str() );
-		xmlSetProp( node, BAD_CAST "li_indent", BAD_CAST toString( LIIndent ).c_str() );
 		xmlSetProp( node, BAD_CAST "ul_indent", BAD_CAST toString( ULIndent ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_line_space_factor", BAD_CAST toString( LineSpaceFontFactor ).c_str() );
 		xmlSetProp( node, BAD_CAST "form_text_area_group", BAD_CAST DefaultFormTextGroup.c_str() );
@@ -2315,36 +1992,12 @@ namespace NLGUI
 			_TitlePrefix = CI18N::get((const char*)ptr);
 
 		// Parameters
-		ptr = xmlGetProp (cur, (xmlChar*)"background_color");
-		if (ptr)
-			BgColor = convertColor(ptr);
 		ptr = xmlGetProp (cur, (xmlChar*)"error_color");
 		if (ptr)
 			ErrorColor = convertColor(ptr);
 		ptr = xmlGetProp (cur, (xmlChar*)"link_color");
 		if (ptr)
 			LinkColor = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"text_color");
-		if (ptr)
-			TextColor = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h1_color");
-		if (ptr)
-			H1Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h2_color");
-		if (ptr)
-			H2Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h3_color");
-		if (ptr)
-			H3Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h4_color");
-		if (ptr)
-			H4Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h5_color");
-		if (ptr)
-			H5Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h6_color");
-		if (ptr)
-			H6Color = convertColor(ptr);
 		ptr = xmlGetProp (cur, (xmlChar*)"error_color_global_color");
 		if (ptr)
 			ErrorColorGlobalColor = convertBool(ptr);
@@ -2354,45 +2007,6 @@ namespace NLGUI
 		ptr = xmlGetProp (cur, (xmlChar*)"text_color_global_color");
 		if (ptr)
 			TextColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h1_color_global_color");
-		if (ptr)
-			H1ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h2_color_global_color");
-		if (ptr)
-			H2ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h3_color_global_color");
-		if (ptr)
-			H3ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h4_color_global_color");
-		if (ptr)
-			H4ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h5_color_global_color");
-		if (ptr)
-			H5ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h6_color_global_color");
-		if (ptr)
-			H6ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"text_font_size");
-		if (ptr)
-			fromString((const char*)ptr, TextFontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h1_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H1FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h2_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H2FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h3_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H3FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h4_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H4FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h5_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H5FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h6_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H6FontSize);
 		ptr = xmlGetProp (cur, (xmlChar*)"td_begin_space");
 		if (ptr)
 			fromString((const char*)ptr, TDBeginSpace);
@@ -2405,9 +2019,6 @@ namespace NLGUI
 		ptr = xmlGetProp (cur, (xmlChar*)"ul_begin_space");
 		if (ptr)
 			fromString((const char*)ptr, ULBeginSpace);
-		ptr = xmlGetProp (cur, (xmlChar*)"li_indent");
-		if (ptr)
-			fromString((const char*)ptr, LIIndent);
 		ptr = xmlGetProp (cur, (xmlChar*)"ul_indent");
 		if (ptr)
 			fromString((const char*)ptr, ULIndent);
@@ -4395,7 +4006,7 @@ namespace NLGUI
 		clearContext();
 
 		// Reset default background color
-		setBackgroundColor (BgColor);
+		setBackgroundColor (_BrowserStyle.Current.BackgroundColor);
 		setBackground ("blank.tga", true, false);
 
 		paragraphChange ();
