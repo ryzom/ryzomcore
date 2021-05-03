@@ -2370,6 +2370,12 @@ public:
 	/// get building exit pos
 	NLMISC::CVector getBuildingExitPos() const;
 
+	/// set last outside outpost position
+	void setOutOutpostPos(sint32 x, sint32 y);
+
+	/// get last outside outpost position
+	NLMISC::CVector getOutOutpostPos() const;
+
 	/// set building exit zone
 	void setBuildingExitZone(uint16 zoneIdx);
 
@@ -3798,6 +3804,7 @@ private:
 
 	uint16 _BuildingExitZone;
 	NLMISC::CVector _BuildingExitPos;
+	NLMISC::CVector _OutOutpostPos;
 
 	// used for force respawn player who are in a mainland in town of this mainland
 	bool _RespawnMainLandInTown;

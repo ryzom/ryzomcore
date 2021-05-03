@@ -31,7 +31,7 @@
 #include "database_outpost.h"
 
 /**
- * All classes in this file : 
+ * All classes in this file :
  * \author Nicolas Brigand
  * \author Olivier Cado
  * \author Sebastien Guignot
@@ -63,10 +63,10 @@ class COutpost
 	NLMISC_COMMAND_FRIEND(outpostSetFightData);
 
 public:
-	
+
 	/// outposts are persistent and stored through PDR
 	DECLARE_PERSISTENCE_METHODS
-	
+
 public:
 	enum TChallengeOutpostErrors {
 		NoError = 0,
@@ -82,7 +82,7 @@ public:
 		TooManyGuildOutposts,
 		UnknownError,
 	};
-	
+
 	enum TEditingAccessType
 	{
 		EditSquads,
@@ -91,14 +91,14 @@ public:
 
 		NbEditingAccessType
 	};
-	
+
 	enum TBroadcastAudience
 	{
 		OwnerGuild,
 		AttackerGuild,
 		OwnerFighters,
 		AttackerFighters,
-		
+
 		NbBroadcastAudience
 	};
 	enum TBroadcastMessage
@@ -115,16 +115,16 @@ public:
 		AttackRounds,
 		DefenseRounds,
 		WarDeclared,
-		
+
 		NbBroadcastMessage
 	};
-	
+
 public:
 	COutpost();
-	
+
 	/// build an outpost from a primitive
 	bool build(const NLLIGO::IPrimitive* prim,const std::string &filename,const std::string &dynSystem, CONTINENT::TContinent continent);
-	
+
 	/// return true if this building was awaited to be built
 	bool onBuildingSpawned(CCreature *pBuilding);
 
@@ -153,7 +153,7 @@ public:
 
 	/// get challenge cost (price to attack this outpost)
 	uint32 getChallengeCost() const;
-	
+
 	/// get a random spawn zone of the outpost
 	TAIAlias getRandomSpawnZone() const;
 	//@}
@@ -168,18 +168,18 @@ public:
 	EGSPD::TGuildId getOwnerGuild() const { return _OwnerGuildId; }
 	/// return the id of the guild attacking the outpost (opponent), or 0 in peace time
 	EGSPD::TGuildId getAttackerGuild() const { return _AttackerGuildId; }
-	
+
 	/// challenges the outpost (war declaration). attackerGuild must be non-null.
 	TChallengeOutpostErrors challengeOutpost(CGuild* attackerGuild, bool simulate = false);
-	
+
 	/// if the attacking guild want to stop the attack (or counter attack)
 	void giveupAttack();
 	/// if the attacking guild want to stop the attack (or counter attack)
 	void giveupOwnership();
-	
+
 	void ownerGuildVanished();
 	void attackerGuildVanished();
-	
+
 	/// set a squad in the given slot
 	bool setSquad(OUTPOSTENUMS::TPVPSide side, uint32 squadSlot, uint32 shopSquadIndex);
 	/// set the spawn zone of a squad
@@ -199,7 +199,7 @@ public:
 	/// get a one line description string (for debug)
 	std::string toString() const;
 	//@}
-	
+
 	/// PVP zone management (IPVPZone implementation)
 	//@{
 	virtual bool leavePVP(CCharacter * user, IPVP::TEndType type);
@@ -207,12 +207,12 @@ public:
 	virtual bool isCharacterInConflict(CCharacter *user) const;
 	virtual PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
 	//@}
-	
+
 	/// get PVP mode to send to the client (IPVP implementation)
 	//@{
 	virtual PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpZoneOutpost; }
 	//@}
-	
+
 	/// Init
 	//@{
 	/// called on outposts that have never been saved before
@@ -220,12 +220,12 @@ public:
 	/// register outpost in its owner/attacker guilds if any
 	void registerOutpostInGuilds();
 	//@}
-	
+
 	/// @name Manager used methods
 	//@{
 	/// return the AI instance number of the continent of the outpost
 	uint32 getAIInstanceNumber() const;
-	
+
 	/// send dynamic data to the corresponding AIS, when restarting EGS or
 	/// AIS. aisUp() and aisDown() must be called alternatively (not two
 	/// aisUp() between two aisDown()).
@@ -234,11 +234,11 @@ public:
 	void aisDown();
 
 	bool isAISUp() const { return _AISUp; }
-	
+
 	/// update the outpost state depending on the elapsing time
 	/// \param currentTime : seconds since 1970
 	void updateOutpost(uint32 currentTime);
-	
+
 	/// simulate a timer end
 	void simulateTimer0End(uint32 endTime = 1);
 	/// simulate a timer end
@@ -246,7 +246,7 @@ public:
 	/// simulate a timer end
 	void simulateTimer2End(uint32 endTime = 1);
 	//@}
-	
+
 	/// @name AIS events
 	//@{
 	/// called when a squad was created
@@ -260,12 +260,12 @@ public:
 	/// called when a squad leader died
 	void aieventSquadLeaderDied(uint32 groupId);
 	//@}
-	
+
 	/// @name Squad used methods
 	//@{
 	/// return the AIS Id corresponding to the instance of the continent of the outpost, or 0 (with a nlwarning) if not found (AIS not online...)
 	NLNET::TServiceId getAISId() const;
-	
+
 	/// send a message to the AIS hosting the outpost
 	template <class T>
 		void sendOutpostMessage(const std::string& msgName, T& paramStruct)
@@ -279,7 +279,7 @@ public:
 		}
 	}
 	//@}
-	
+
 	/// @name AIS interface
 	//@{
 	/// initialize default squads
@@ -289,7 +289,7 @@ public:
 	//@}
 
 
-	/// Banishment management	
+	/// Banishment management
 	bool isPlayerBanishedForAttack( NLMISC::CEntityId& id ) const;
 	bool isPlayerBanishedForDefense( NLMISC::CEntityId& id ) const;
 	bool isGuildBanishedForAttack( uint32 guildId ) const;
@@ -303,7 +303,7 @@ public:
 	void unBanishGuildForAttack( uint32 guildId );
 	void unBanishGuildForDefense( uint32 guildId );
 	void clearBanishment();
-	
+
 	/// Time
 	void timeSetAttackHour(uint32 val);
 	void timeSetDefenseHour(uint32 val);
@@ -314,7 +314,7 @@ public:
 
 	static std::string getErrorString(TChallengeOutpostErrors error);
 
-	
+
 
 private:
 	/// an event affecting outpost state occured
@@ -322,7 +322,7 @@ private:
 	/// an event affecting outpost state occured and has not been handled
 	/// WARNING: it should only be called from eventTriggered
 	void eventException(OUTPOSTENUMS::TOutpostEvent event, void* eventParams);
-	
+
 	// State machine parameters
 	uint32 computeRoundCount() const;
 	uint32 computeRoundTime() const;
@@ -348,7 +348,7 @@ private:
 	uint32 computeTimeRangeLengthForClient() const;
 	uint32 computeTribeOutpostLevel() const;
 	uint32 computeGuildMinimumOutpostLevel() const;
-	
+
 public:
 	static uint32 s_computeEstimatedAttackTimeForClient(uint32 hour);
 private:
@@ -395,7 +395,7 @@ private:
 		uint32 _MaxAttackLevel;
 		uint32 _MaxDefenseLevel;
 	} _FightData;
-	
+
 private:
 	/// called before storing a pdr save record
 	void preStore() const;
@@ -409,9 +409,9 @@ private:
 	void setNextAttackSquadB(uint32 index, COutpostSquadData const& squadData);
 	void setNextDefenseSquadA(uint32 index, COutpostSquadData const& squadData);
 	void setNextDefenseSquadB(uint32 index, COutpostSquadData const& squadData);
-	
+
 	bool createSquad(COutpostSquadPtr& squad, COutpostSquadData const& squadData, CGuildCharProxy* leader, CGuild* originGuild, OUTPOSTENUMS::TPVPSide side);
-	
+
 public: //for commands
 	/// changes the state of the outpost
 	void setState(OUTPOSTENUMS::TOutpostState state);
@@ -451,7 +451,7 @@ private:
 	void broadcastMessageMsg(std::vector<TDataSetRow> const& audience, std::string const& message, TVectorParamCheck const& params=TVectorParamCheck()) const;
 	void broadcastMessagePopup(std::vector<TDataSetRow> const& audience, std::string const& message, TVectorParamCheck const& params=TVectorParamCheck(), TVectorParamCheck const& paramsTitle=TVectorParamCheck()) const;
 	void broadcastMessage(TBroadcastAudience audience, TBroadcastMessage message) const;
-	
+
 private:
 	/// @name Static data read from primitive
 	//@{
@@ -463,7 +463,7 @@ private:
 	NLMISC::CSheetId						_Sheet;
 	/// continent of the outpost
 	CONTINENT::TContinent					_Continent;
-	
+
 	/// current buildings
 	std::vector< COutpostBuilding >			_Buildings;
 
@@ -477,14 +477,14 @@ private:
 	std::vector<COutpostSquadDescriptor>	_BuyableSquads;
 	/// spawn zones of the outpost
 	std::vector<COutpostSpawnZone>			_SpawnZones;
-	
+
 	/// PVP type allowed in the outpost
 	OUTPOSTENUMS::TPVPType					_PVPType;
-	
+
 	/// outpost sheet
 	const CStaticOutpost*					_Form;
 	//@}
-	
+
 	/// @name Dynamic persistent data
 	//@{
 	/// current state of the outpost
@@ -527,7 +527,7 @@ private:
 
 	/// tells if last outpost challenge ended in a server crash
 	bool									_CrashHappened;
-	
+
 	/// Timings
 	///
 	/// Challenge starts at _ChallengeHour on day D (or _ChallengeTime since 1970)
@@ -543,7 +543,7 @@ private:
 	uint32	_DefenseHour;	///< Hour in the day, starting at UTC midnight, from 0 to 23
 	//@}
 	//@}
-	
+
 	/// \name Temporary data
 	//@{
 	/// next state of the outpost
@@ -574,7 +574,7 @@ private:
 	std::set<NLMISC::CEntityId>		_DefenseBanishedPlayers;
 	std::set<NLMISC::CEntityId>		_AttackBanishedPlayers;
 
-	
+
 	/// @name CDB stuff
 	//@{
 public:
@@ -591,7 +591,7 @@ private:
 
 private:
 	/// CDB group for outpost state
-//	CCDBGroup	_DbGroup;	
+//	CCDBGroup	_DbGroup;
 	CBankAccessor_OUTPOST	_DbGroup;
 
 	bool		_NeedOutpostDBUpdate;
@@ -611,6 +611,8 @@ public:
 	void	setRealChallengeTime(uint32 t) { _RealChallengeTime = t; }
 	void	setChallengeTime(uint32 t) { _ChallengeTime = t; }
 	void	setChallengeHour(uint32 t) { _ChallengeHour = t; }
+	void	setPvpType(OUTPOSTENUMS::TPVPType type) { _PVPType = type; }
+	OUTPOSTENUMS::TPVPType	getPvpType() { return _PVPType; }
 };
 
 

@@ -49,7 +49,9 @@ using namespace NLNET;
 //COutpostManager* COutpostManager::_Instance = NULL;
 
 extern NLMISC::CVariable<bool>    		UseBS;
+
 CVariable<bool> LoadOutposts("egs", "LoadOutposts", "If false outposts won't be loaded", true, 0, true );
+CVariable<bool> OutpostInTestTeleportOutNeutrals("egs", "OutpostInTestTeleportOutNeutrals", "If true, teleport out of OP zone the neutrals", false, 0, true );
 
 CFileDisplayer OutpostDisplayer("outposts.log");
 CLog OutpostDbgLog(CLog::LOG_DEBUG), OutpostInfLog(CLog::LOG_INFO), OutpostWrnLog(CLog::LOG_WARNING), OutpostErrLog(CLog::LOG_ERROR);
@@ -174,7 +176,7 @@ void COutpostManager::loadOutpostPrimitives()
 	for ( first = primsList.begin(), last = primsList.end(); first != last; ++first )
 	{
 		// get the squad_template nodes
-		for ( uint i = 0; i < first->Primitive.RootNode->getNumChildren(); ++i )	
+		for ( uint i = 0; i < first->Primitive.RootNode->getNumChildren(); ++i )
 		{
 			const NLLIGO::IPrimitive* stNode = NULL;
 			if ( first->Primitive.RootNode->getChild( stNode, i ) && stNode != NULL )
@@ -185,9 +187,9 @@ void COutpostManager::loadOutpostPrimitives()
 					string path = first->FileName;
 					CSquadTemplate squadTemplate;
 					squadTemplate.SquadName = readProperty( stNode, "name", parentClass, path, false, true );
-					
+
 					// get the squad_template variants
-					for ( uint j = 0; j < stNode->getNumChildren(); ++j )	
+					for ( uint j = 0; j < stNode->getNumChildren(); ++j )
 					{
 						const NLLIGO::IPrimitive* stvNode = NULL;
 						if ( stNode->getChild( stvNode, j ) && stvNode != NULL )
@@ -246,14 +248,14 @@ void COutpostManager::loadOutpostPrimitives()
 		}
 	}
 	OUTPOST_DBG("Squad templates loaded.");
-	
+
 	OUTPOST_DBG("Loading outposts...");
 	// *** Outposts (must be done after squad templates) ***
 	// get the primitive list and parse each primitive
 	for ( first = primsList.begin(), last = primsList.end(); first != last; ++first )
 	{
 		// get the dynamic_system nodes
-		for ( uint i = 0; i < first->Primitive.RootNode->getNumChildren(); ++i )	
+		for ( uint i = 0; i < first->Primitive.RootNode->getNumChildren(); ++i )
 		{
 			const NLLIGO::IPrimitive* dynSystemNode = NULL;
 			if ( first->Primitive.RootNode->getChild( dynSystemNode,i ) && dynSystemNode != NULL )
@@ -267,12 +269,12 @@ void COutpostManager::loadOutpostPrimitives()
 					CONTINENT::TContinent continent = CONTINENT::toContinent( value );
 					if ( continent == CONTINENT::UNKNOWN )
 					{
-						OUTPOST_WRN("Invalid continent '%s' in dynamic system '%s' of primitive file '%s'", 
+						OUTPOST_WRN("Invalid continent '%s' in dynamic system '%s' of primitive file '%s'",
 						value.c_str(), dynSystemName.c_str(), first->FileName.c_str() );
 						break;
 					}
 					// parse all the outpost within this dynamic system.
-					for ( uint j = 0; j < dynSystemNode->getNumChildren(); ++j )	
+					for ( uint j = 0; j < dynSystemNode->getNumChildren(); ++j )
 					{
 						const NLLIGO::IPrimitive* outpostNode = NULL;
 						if ( dynSystemNode->getChild( outpostNode,j ) && outpostNode != NULL )
@@ -302,7 +304,7 @@ void COutpostManager::loadOutpostPrimitives()
 										_OutpostsByAlias.insert( make_pair( outpost->getAlias(), outpost ) );
 										_OutpostsBySheet.insert( make_pair( outpost->getSheet(), outpost ) );
 										OUTPOST_INF("Outpost '%s' was successfully parsed", outpost->getName().c_str());
-									
+
 										// nb : short id starts at 1, 0 is used for invalid
 										_OutpostAliasToShortId.insert( make_pair( outpost->getAlias(), (uint16)_Outposts.size()) );
 									}
@@ -315,7 +317,7 @@ void COutpostManager::loadOutpostPrimitives()
 		}
 	}
 	OUTPOST_DBG("Outposts loaded.");
-	
+
 	OUTPOST_DBG("Clearing squad templates...");
 	// No more need of squad templates
 	_SquadTemplates.clear();
@@ -392,7 +394,7 @@ void COutpostManager::loadOutpostSaveFiles()
 	string path = /*Bsi.getLocalPath() +*/ string("outposts");
 	// create the saved file directory, if needed
 //	CFile::createDirectory(path);
-	
+
 	// get all the outpost files
 	TOupostFileClassCallback *ccb = new TOupostFileClassCallback;
 	OutpostFiles.clear();
@@ -437,7 +439,7 @@ void COutpostManager::loadOutpostSaveFiles()
 //		}
 //	}
 	OUTPOST_DBG("Outpost save files applied.");
-	
+
 	OUTPOST_DBG("Initializing unsaved outposts...");
 	// Init new outpost that have never been saved
 	uint nbNewOutposts = 0;
@@ -653,7 +655,7 @@ void COutpostManager::onAIInstanceReadyOrDown( uint32 instanceNumber, bool start
 void COutpostManager::tickUpdate()
 {
 	H_AUTO(COutpostManager_tickUpdate);
-	
+
 	// do nothing until outpost save files are loaded
 	if (!_OutpostSaveFilesLoaded)
 		return;
@@ -665,10 +667,10 @@ void COutpostManager::tickUpdate()
 	// update outposts
 	{
 		H_AUTO(COutpostManagerUPDATE);
-		
+
 		if (OutpostUpdatePeriod.get() == 0)
 			OutpostUpdatePeriod.set(1);
-		
+
 		if (OutpostUpdatePeriod.get() == 1)
 		{
 			// update every outposts each tick
@@ -677,7 +679,7 @@ void COutpostManager::tickUpdate()
 			{
 				_Outposts[i]->updateOutpost(currentTime);
 			}
-			
+
 			if (_OutpostUpdateCursor != 0)
 				_OutpostUpdateCursor = 0;
 		}
@@ -686,16 +688,16 @@ void COutpostManager::tickUpdate()
 			uint32 nbOutpost = (uint32)_Outposts.size();
 			uint32 nbOutpostPerTick = (uint32)floor(double(nbOutpost) / double(OutpostUpdatePeriod.get()));
 			nbOutpostPerTick = std::max(uint32(1), nbOutpostPerTick); // The strict minimum is a single outpost update per tick
-			
+
 			uint32 beginIndex = _OutpostUpdateCursor;
 			nlassert(beginIndex < _Outposts.size());
-			
+
 			// move the cursor and roll it in valid outpost indexes range
 			_OutpostUpdateCursor += nbOutpostPerTick;
 			uint32 endIndex = _OutpostUpdateCursor;
 			if (_OutpostUpdateCursor >= nbOutpost)
 				_OutpostUpdateCursor -= nbOutpost;
-			
+
 			if (beginIndex != endIndex)
 			{
 				// update a range of outposts each tick
@@ -716,10 +718,10 @@ void COutpostManager::tickUpdate()
 			}
 		}
 	}
-	
+
 	// do outpost guild database updates
 	doOutpostGuildDBUpdates();
-	
+
 	// save 1 outpost
 	if ( ( CTickEventHandler::getGameCycle() % OutpostSavingPeriod ) == 0 )
 	{
@@ -790,7 +792,7 @@ void COutpostManager::saveOutpost(NLMISC::CSmartPtr<COutpost> outpost)
 			}
 			else
 			{
-				H_AUTO(COutpostSerialBin);					
+				H_AUTO(COutpostSerialBin);
 				uint32 bufSize= pdr.totalDataSize();
 				vector<char> buffer;
 				buffer.resize(bufSize);
@@ -856,13 +858,13 @@ uint16 COutpostManager::getOutpostShortId( TAIAlias alias )
 TAIAlias COutpostManager::getOutpostAliasFromShortId( uint16 shortId )
 {
 	TAIAlias alias = 0;
-	
+
 	map<uint16,TAIAlias>::iterator it = _OutpostShortIdToAlias.find( shortId );
 	if( it != _OutpostShortIdToAlias.end() )
 	{
 		alias = (*it).second;
 	}
-	
+
 	return alias;
 }
 
@@ -915,20 +917,31 @@ TAIAlias COutpostManager::getOutpostFromUserPosition( CCharacter *user ) const
 	for (uint i = 0; i < _Outposts.size(); i++)
 	{
 		COutpost * outpost = _Outposts[i];
-		if( outpost->contains(vect, false) )
+		CVector nearPos;
+		float distance;
+		if( outpost->contains(vect, distance, nearPos) )
 		{
-			// Maybe we should check here that user is owner of the outpost
-		//	if( outpost->isCharacterInConflict(user) )
-		//	{
-				return outpost->getAlias();
-		//	}
-		//	else
-		//	{
-		//		OUTPOST_DBG("<CPVPManager::getPVPZoneFromUserPosition> user not in conflict");
-		//	}
+			if (OutpostInTestTeleportOutNeutrals.get())
+			{
+				OUTPOSTENUMS::TOutpostState state = outpost->getState();
+				bool outpostInFire = state == OUTPOSTENUMS::AttackBefore || state == OUTPOSTENUMS::AttackRound || state == OUTPOSTENUMS::DefenseBefore || state == OUTPOSTENUMS::DefenseRound;
+				if (outpost->getName().substr(0, 14) == "outpost_nexus_" && outpostInFire)
+				{
+					nlinfo("DISTANCE TO OUTPOST = %f", distance);
+					if (distance > 20.f && user->getOutpostSide() == OUTPOSTENUMS::UnknownPVPSide)
+					{
+						CVector outPos = user->getOutOutpostPos();
+						user->teleportCharacter(outPos.x*1000.f, outPos.y*1000.f);
+						return CAIAliasTranslator::Invalid;
+					}
+				}
+			}
+
+			return outpost->getAlias();
 		}
 	}
 
+	user->setOutOutpostPos(vect.x, vect.y);
 	return CAIAliasTranslator::Invalid;
 }
 
@@ -936,9 +949,9 @@ TAIAlias COutpostManager::getOutpostFromUserPosition( CCharacter *user ) const
 void COutpostManager::enterOutpostZone(CCharacter* user)
 {
 	H_AUTO(COutpostManager_enterPVPZone);
-	
+
 	nlassert(user);
-	
+
 	COutpost* outpost = getOutpostFromAlias(user->getCurrentOutpostZone());
 	if (outpost && outpost->getOwnerGuild()==user->getGuildId())
 		PlayerManager.sendImpulseToClient(user->getId(), "GUILD:OPEN_INVENTORY");
@@ -948,9 +961,9 @@ void COutpostManager::enterOutpostZone(CCharacter* user)
 void COutpostManager::leaveOutpostZone(CCharacter* user)
 {
 	H_AUTO(COutpostManager_leavePVPZone);
-	
+
 	nlassert(user);
-	
+
 //	COutpost* outpost = getOutpostFromAlias(user->getCurrentOutpostZone());
 //	if (outpost && outpost->getOwnerGuild()==user->getGuildId())
 		PlayerManager.sendImpulseToClient(user->getId(), "GUILD:CLOSE_INVENTORY");

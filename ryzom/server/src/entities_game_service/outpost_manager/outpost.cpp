@@ -76,6 +76,8 @@ static uint32 const hours = 60*minutes;
 static uint32 const days = 24*hours;
 
 CVariable<uint32> OutpostFightRoundCount("egs","OutpostFightRoundCount","number of rounds in an outpost fight", 24, 0, true);
+CVariable<uint32> OutpostInTestFightRoundCount("egs","OutpostInTestFightRoundCount","number of rounds in an outpost (in test) fight", 11, 0, true);
+CVariable<float> OutpostInTestFightSquadCount("egs", "OutpostInTestFightSquadCount", "Coef for squad count per round", 1.2f, 0, true );
 CVariable<uint32> OutpostFightRoundTime("egs","OutpostFightRoundTime","time of a round in an outpost fight, in seconds", 5*minutes, 0, true);
 CVariable<uint32> OutpostLevelDecrementTime("egs","OutpostLevelDecrementTime","time to decrement an outpost level in seconds (in peace time)", 2*days, 0, true);
 CVariable<uint32> OutpostEditingConcurrencyCheckDelay("egs", "OutpostEditingConcurrencyCheckDelay", "delay in ticks used to check if 2 actions for editing an outpost are concurrent", 50, 0, true );
@@ -203,14 +205,14 @@ void COutpost::fillOutpostDB()
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setSTATE_END_DATE(_DbGroup, STATE_END_DATE);		//setClientDBProp("OUTPOST_SELECTED:STATE_END_DATE",			STATE_END_DATE);
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setDISPLAY_CRASH(_DbGroup, _CrashHappened);	//	setClientDBProp("OUTPOST_SELECTED:DISPLAY_CRASH",			DISPLAY_CRASH);
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setWARCOST(_DbGroup, WARCOST);				//		setClientDBProp("OUTPOST_SELECTED:WARCOST",					WARCOST);
-	
+
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setROUND_LVL_THRESHOLD(_DbGroup, ROUND_LVL_THRESHOLD);	//		setClientDBProp("OUTPOST_SELECTED:ROUND_LVL_THRESHOLD",		ROUND_LVL_THRESHOLD);
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setROUND_LVL_MAX_ATT(_DbGroup, ROUND_LVL_MAX_ATT);		//		setClientDBProp("OUTPOST_SELECTED:ROUND_LVL_MAX_ATT",		ROUND_LVL_MAX_ATT);
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setROUND_LVL_MAX_DEF(_DbGroup, ROUND_LVL_MAX_DEF);		//		setClientDBProp("OUTPOST_SELECTED:ROUND_LVL_MAX_DEF",		ROUND_LVL_MAX_DEF);
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setROUND_LVL_CUR(_DbGroup, ROUND_LVL_CUR);				//		setClientDBProp("OUTPOST_SELECTED:ROUND_LVL_CUR",			ROUND_LVL_CUR);
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setROUND_ID_CUR(_DbGroup, ROUND_ID_CUR);					//		setClientDBProp("OUTPOST_SELECTED:ROUND_ID_CUR",			ROUND_ID_CUR);
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setROUND_ID_MAX(_DbGroup, ROUND_ID_MAX);					//		setClientDBProp("OUTPOST_SELECTED:ROUND_ID_MAX",			ROUND_ID_MAX);
-	
+
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setTIME_RANGE_DEF_WANTED(_DbGroup, TIME_RANGE_DEF_WANTED);	//		setClientDBProp("OUTPOST_SELECTED:TIME_RANGE_DEF_WANTED",	TIME_RANGE_DEF_WANTED);
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setTIME_RANGE_DEF(_DbGroup, TIME_RANGE_DEF);				//		setClientDBProp("OUTPOST_SELECTED:TIME_RANGE_DEF",			TIME_RANGE_DEF);
 	CBankAccessor_OUTPOST::getOUTPOST_SELECTED().setTIME_RANGE_ATT(_DbGroup, TIME_RANGE_ATT);				//		setClientDBProp("OUTPOST_SELECTED:TIME_RANGE_ATT",			TIME_RANGE_ATT);
@@ -245,7 +247,7 @@ void COutpost::fillCharacterOutpostDB( CCharacter * user )
 bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,const std::string &dynSystem, CONTINENT::TContinent continent)
 {
 	_Alias = 0;
-	
+
 	_State = OUTPOSTENUMS::Peace;
 	_OwnerGuildId = 0;
 	_AttackerGuildId = 0;
@@ -264,7 +266,7 @@ bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,
 
 	// parse identifier
 	nlverify( prim->getPropertyByName("name",_Name) );
-	
+
 	nlverify( prim->getPropertyByName("disable_outpost", value) );
 	if (value == "true")
 	{
@@ -284,7 +286,7 @@ bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,
 	string deathPenaltyFactor;
 	nlverify( prim->getPropertyByName("death_penalty_factor", deathPenaltyFactor) );
 	_DeathPenaltyFactor = (float)atof( deathPenaltyFactor.c_str() );
-	
+
 	// get the sheet and check it
 	nlverify( prim->getPropertyByName("outpost_sheet", value ) );
 	_Sheet = CSheetId( value+".outpost" );
@@ -293,7 +295,7 @@ bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,
 		OUTPOST_WRN("PRIM_ERROR : invalid sheet '%s' (the sheet is not in sheet_id.bin)", value.c_str());
 		ret = false;
 	}
-	
+
 	_Form = CSheets::getOutpostForm(_Sheet);
 	if ( _Form == NULL )
 	{
@@ -305,7 +307,7 @@ bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,
 	{
 		OUTPOST_WRN("PRIM_ERROR : the outposts %s and %s have the same sheet %s", getName().c_str(), otherOutpost->getName().c_str(), _Sheet.toString().c_str() );
 	}
-	
+
 	// get the PVP type
 	nlverify( prim->getPropertyByName("PVP_Type", value ) );
 	_PVPType = OUTPOSTENUMS::toPVPType( value );
@@ -314,7 +316,7 @@ bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,
 		OUTPOST_WRN("PRIM_ERROR : invalid PVP type '%s' (the sheet exists but contained errors)", value.c_str());
 		ret = false;
 	}
-	
+
 	// build the outpost PVP zone
 	const NLLIGO::CPrimZone * zone = dynamic_cast<const NLLIGO::CPrimZone*> ( prim );
 	nlassert( zone );
@@ -393,7 +395,7 @@ bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,
 		OUTPOST_WRN( "PRIM_ERROR : found no valid default squads in %s", _Name.c_str() );
 		ret = false;
 	}
-	
+
 	// get buyable squads
 	nlverify ( prim->getPropertyByName("buyable_squads",params) && params );
 	for (size_t i = 0; i < params->size(); ++i)
@@ -424,7 +426,7 @@ bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,
 	// tribe
 	nlverifyex ( prim->getPropertyByName("owner_tribe",value) && (!value.empty()), ("Missing owner tribe in outpost '%s' in %s", _Name.c_str(), filename.c_str()) );
 	string tribeName = value;
-	
+
 	// get tribe squads
 	nlverify ( prim->getPropertyByName("tribe_squads",params) && params );
 	if (!params->empty())
@@ -487,7 +489,7 @@ bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,
 		}
 	}
 
-	
+
 	OUTPOST_DBG( "Outpost %s has %u default squads (free), %u buyable squads, %u(A)/%u(B) tribe squads, %u default buildings",
 		_Name.c_str(),
 		_DefaultSquads.size(),
@@ -496,9 +498,9 @@ bool COutpost::build(const NLLIGO::IPrimitive* prim,const std::string &filename,
 		_TribeSquadsB.size(),
 		_Buildings.size()
 		);
-	
+
 	// spawn zones
-	for ( uint i = 0; i < prim->getNumChildren(); ++i )	
+	for ( uint i = 0; i < prim->getNumChildren(); ++i )
 	{
 		const NLLIGO::IPrimitive* outpostChildNode = NULL;
 		std::string className;
@@ -596,7 +598,7 @@ void COutpost::initNewOutpost()
 	_NextAttackSquadsB.resize(OUTPOSTENUMS::OUTPOST_NB_SQUAD_SLOTS);
 	_NextDefenseSquadsA.resize(OUTPOSTENUMS::OUTPOST_NB_SQUAD_SLOTS);
 	_NextDefenseSquadsB.resize(OUTPOSTENUMS::OUTPOST_NB_SQUAD_SLOTS);
-	
+
 	// tribes own new outposts
 	_OwnerGuildId = 0;
 
@@ -651,7 +653,7 @@ bool COutpost::isBelongingToAGuild() const
 //----------------------------------------------------------------------------
 uint32 COutpost::getAIInstanceNumber() const
 {
-	return CUsedContinent::instance().getInstanceForContinent( _Continent ); 
+	return CUsedContinent::instance().getInstanceForContinent( _Continent );
 }
 
 //----------------------------------------------------------------------------
@@ -673,19 +675,19 @@ NLNET::TServiceId COutpost::getAISId() const
 }
 
 //----------------------------------------------------------------------------
-// Sets the guild and resend data to AIS. 
+// Sets the guild and resend data to AIS.
 // The case when _OwnerGuildId==ownerGuild only resends data (see resendDynamicDataToAIS()).
 void COutpost::setOwnerGuild( EGSPD::TGuildId ownerGuild )
 {
 	// clear the attacker if the new owner was the attacker
 	if (ownerGuild != 0 && ownerGuild == _AttackerGuildId)
 		setAttackerGuild(0);
-	
+
 	EGSPD::TGuildId oldOwnerGuildId = _OwnerGuildId;
-	
+
 	_OwnerGuildId = ownerGuild;
 	OUTPOST_DBG( "Outpost %s is now owned by 0x%x", _Name.c_str(), _OwnerGuildId );
-	
+
 	if (ownerGuild != oldOwnerGuildId)
 	{
 		CGuild* oldOwner = CGuildManager::getInstance()->getGuildFromId(oldOwnerGuildId);
@@ -708,7 +710,7 @@ void COutpost::setOwnerGuild( EGSPD::TGuildId ownerGuild )
 		// register new owner
 		owner->addOwnedOutpost(_Alias);
 	}
-	
+
 	// Send to AIS
 	CSetOutpostOwner ownerParams;
 	ownerParams.Outpost = getAlias();
@@ -717,7 +719,7 @@ void COutpost::setOwnerGuild( EGSPD::TGuildId ownerGuild )
 }
 
 //----------------------------------------------------------------------------
-// Sets the guild and resend data to AIS. 
+// Sets the guild and resend data to AIS.
 // The case when _Owner==attackerGuild only resends data (see resendDynamicDataToAIS()).
 void COutpost::setAttackerGuild( EGSPD::TGuildId attackerGuild )
 {
@@ -746,7 +748,7 @@ void COutpost::setAttackerGuild( EGSPD::TGuildId attackerGuild )
 		// register new challenger
 		attacker->addChallengedOutpost(_Alias);
 	}
-	
+
 	// Send to AIS
 	CSetOutpostAttacker attackerParams;
 	attackerParams.Outpost = getAlias();
@@ -762,7 +764,7 @@ void COutpost::setState(OUTPOSTENUMS::TOutpostState state)
 		switch( state )
 		{
 			case OUTPOSTENUMS::Peace :
-			{	
+			{
 				clearBanishment();
 			}
 			break;
@@ -773,7 +775,7 @@ void COutpost::setState(OUTPOSTENUMS::TOutpostState state)
 			}
 			break;
 			case OUTPOSTENUMS::DefenseRound :
-			{	
+			{
 				broadcastMessage(OwnerGuild, DefenseRounds);
 				broadcastMessage(AttackerGuild, DefenseRounds);
 			}
@@ -790,7 +792,7 @@ void COutpost::setState(OUTPOSTENUMS::TOutpostState state)
 
 	OUTPOST_DBG( "Outpost %s: [%s] -> [%s]", _Name.c_str(), OUTPOSTENUMS::toString( _State ).c_str(), OUTPOSTENUMS::toString( state ).c_str() );
 	_State = state;
-	
+
 	// Send to AIS
 	COutpostSetStateMsg params;
 	params.Outpost = getAlias();
@@ -856,7 +858,7 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 		eventTriggered(OUTPOSTENUMS::Challenged);
 	}
 
-	log_Outpost_Challenge(_Name, 
+	log_Outpost_Challenge(_Name,
 		this->_OwnerGuildId ? CGuildManager::getInstance()->getGuildFromId(this->_OwnerGuildId)->getName().toUtf8() : "TRIBES_OWNED",
 		attackerGuild->getName().toUtf8());
 
@@ -1049,7 +1051,7 @@ void COutpost::aieventSquadDied(uint32 groupId)
 	{
 		if (!it->isNull() && (*it)->getGroupId()==groupId)
 		{
-			++_FightData._KilledSquads;			
+			++_FightData._KilledSquads;
 			(*it)->died();
 			askGuildDBUpdate(COutpostGuildDBUpdater::SQUAD_SPAWNED);
 			return;
@@ -1060,7 +1062,7 @@ void COutpost::aieventSquadDied(uint32 groupId)
 	{
 		if (!it->isNull() && (*it)->getGroupId()==groupId)
 		{
-			++_FightData._KilledSquads;			
+			++_FightData._KilledSquads;
 			(*it)->died();
 			askGuildDBUpdate(COutpostGuildDBUpdater::SQUAD_SPAWNED);
 			return;
@@ -1081,7 +1083,7 @@ void COutpost::aieventSquadLeaderDied(uint32 groupId)
 		if (!it->isNull() && (*it)->getGroupId()==groupId)
 		{
 
-//			++_FightData._KilledSquads;			
+//			++_FightData._KilledSquads;
 			(*it)->leaderDied();
 			askGuildDBUpdate(COutpostGuildDBUpdater::SQUAD_SPAWNED);
 			return;
@@ -1092,7 +1094,7 @@ void COutpost::aieventSquadLeaderDied(uint32 groupId)
 	{
 		if (!it->isNull() && (*it)->getGroupId()==groupId)
 		{
-//			++_FightData._KilledSquads;			
+//			++_FightData._KilledSquads;
 			(*it)->leaderDied();
 			askGuildDBUpdate(COutpostGuildDBUpdater::SQUAD_SPAWNED);
 			return;
@@ -1105,7 +1107,7 @@ void COutpost::aieventSquadLeaderDied(uint32 groupId)
 void COutpost::aisUp()
 {
 	OUTPOST_DBG( "Outpost %s: resending dynamic data to AIS", _Name.c_str() );
-	
+
 	nlassert(!_AISUp);
 	_AISUp = true;
 
@@ -1113,7 +1115,7 @@ void COutpost::aisUp()
 	setAttackerGuild( _AttackerGuildId );
 
 	setState( _State );
-	
+
 //	vector<COutpostSquadPtr>::iterator it, itEnd;
 //	itEnd = _CurrentSquadsA.end();
 //	for (it=_CurrentSquadsA.begin(); it!=itEnd; ++it)
@@ -1123,7 +1125,7 @@ void COutpost::aisUp()
 //	for (it=_CurrentSquadsB.begin(); it!=itEnd; ++it)
 //		if (!it->isNull())
 //			(*it)->AISUp();
-	
+
 	eventTriggered(OUTPOSTENUMS::EventAisUp);
 
 	// buildings
@@ -1135,10 +1137,10 @@ void COutpost::aisUp()
 void COutpost::aisDown()
 {
 	OUTPOST_DBG( "Outpost %s: resetting dynamic data of AIS", _Name.c_str() );
-	
+
 	nlassert(_AISUp);
 	_AISUp = false;
-	
+
 	vector<COutpostSquadPtr>::iterator it, itEnd;
 	itEnd = _CurrentSquadsA.end();
 	for (it=_CurrentSquadsA.begin(); it!=itEnd; ++it)
@@ -1154,9 +1156,9 @@ void COutpost::aisDown()
 			(*it)->AISDown();
 			(*it) = NULL;
 		}
-	
+
 	eventTriggered(OUTPOSTENUMS::EventAisDown);
-	
+
 	_CurrentSquadsA.clear();
 	_CurrentSquadsB.clear();
 
@@ -1199,10 +1201,10 @@ void COutpost::updateOutpost(uint32 currentTime)
 			nlerror("Undefined state in outpost");
 		}
 	}
-	
+
 	// Child updates
 	// Squads
-	
+
 	for (vector<COutpostSquadPtr>::iterator its=_CurrentSquadsA.begin(); its!=_CurrentSquadsA.end(); ++its)
 	{
 		if (!its->isNull() && !(*its)->updateSquad(currentTime) )
@@ -1459,7 +1461,7 @@ PVP_RELATION::TPVPRelation COutpost::getPVPRelation( CCharacter * user, CEntityB
 {
 	H_AUTO(COutpost_getPVPRelation);
 	BOMB_IF( ! (user && target), "ErrorCUHTT", return PVP_RELATION::Unknown );
-	
+
 	if( IsRingShard )
 		return PVP_RELATION::Neutral;
 
@@ -1471,7 +1473,7 @@ PVP_RELATION::TPVPRelation COutpost::getPVPRelation( CCharacter * user, CEntityB
 	{
 		return PVP_RELATION::Neutral;
 	}
-	
+
 	CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
 	if (pTarget == 0)
 		return PVP_RELATION::Unknown;
@@ -1553,7 +1555,7 @@ bool COutpost::isPlayerBanishedForDefense( CEntityId& id ) const
 		}
 		return false;
 	}
-	
+
 }
 
 //----------------------------------------------------------------------------
@@ -1575,7 +1577,7 @@ bool COutpost::isGuildBanishedForDefense( uint32 guildId ) const
 		return true;
 	else
 		return false;
-	
+
 }
 
 //-----------------------------------------------------------------------------
@@ -1657,13 +1659,13 @@ void COutpost::banishGuildForDefense( uint32 guildId )
 		OUTPOST_WRN("<COutpost::banishGuild> guild id 0 is not a valid guild id");
 		return;
 	}
-	
+
 	set<uint32>::const_iterator it = _DefenseBanishedGuilds.find( guildId );
 	if( it != _DefenseBanishedGuilds.end() )
 		return;
 	else
 		_DefenseBanishedGuilds.insert( guildId );
-	
+
 	// each members of guild are removed from outpost conflict
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( guildId );
 	if( guild )
@@ -1865,7 +1867,7 @@ bool COutpost::convertSpawnZoneIndex(uint32 spawnZoneIndex, TAIAlias & spawnZone
 {
 	if (spawnZoneIndex >= _SpawnZones.size())
 		return false;
-	
+
 	spawnZoneAlias = _SpawnZones[spawnZoneIndex].alias();
 	return true;
 }
@@ -1889,7 +1891,7 @@ void COutpost::setNextAttackSquadA(uint32 index, COutpostSquadData const& nextSq
 	nlassert(index < OUTPOSTENUMS::OUTPOST_NB_SQUAD_SLOTS);
 	nlassert(nextSquad.getSquadDescriptor().sheet()!=CSheetId::Unknown);
 	_NextAttackSquadsA[index] = nextSquad;
-}	
+}
 
 //----------------------------------------------------------------------------
 void COutpost::setNextAttackSquadB(uint32 index, COutpostSquadData const& nextSquad)
@@ -1898,21 +1900,21 @@ void COutpost::setNextAttackSquadB(uint32 index, COutpostSquadData const& nextSq
 	nlassert(index < OUTPOSTENUMS::OUTPOST_NB_SQUAD_SLOTS);
 	nlassert(nextSquad.getSquadDescriptor().sheet()!=CSheetId::Unknown);
 	_NextAttackSquadsB[index] = nextSquad;
-}	
+}
 
 //----------------------------------------------------------------------------
 void COutpost::setNextDefenseSquadA(uint32 index, COutpostSquadData const& nextSquad)
 {
 	nlassert(index < _NextDefenseSquadsA.size());
 	_NextDefenseSquadsA[index] = nextSquad;
-}	
+}
 
 //----------------------------------------------------------------------------
 void COutpost::setNextDefenseSquadB(uint32 index, COutpostSquadData const& nextSquad)
 {
 	nlassert(index < _NextDefenseSquadsA.size());
 	_NextDefenseSquadsB[index] = nextSquad;
-}	
+}
 
 //----------------------------------------------------------------------------
 bool COutpost::createSquad(COutpostSquadPtr& squad, COutpostSquadData const& squadData, CGuildCharProxy* leader, CGuild* originGuild, OUTPOSTENUMS::TPVPSide side)
@@ -2320,10 +2322,10 @@ void COutpost::actionChangeOwner()
 {
 	EGSPD::TGuildId newOwner = _AttackerGuildId;
 	EGSPD::TGuildId newAttacker = _OwnerGuildId;
-	
+
 	setOwnerGuild(newOwner);
 	setAttackerGuild(newAttacker);
-	
+
 	std::swap(_NextAttackSquadsA, _NextDefenseSquadsA);
 	std::swap(_NextAttackSquadsB, _NextDefenseSquadsB);
 	std::swap(_OwnerExpenseLimit, _AttackerExpenseLimit);
@@ -2393,6 +2395,11 @@ void COutpost::actionPayBackMoneySpent()
 //----------------------------------------------------------------------------
 uint32 COutpost::computeRoundCount() const
 {
+	///// Nexus test : only 11 rounds
+	if (getName().substr(0, 14) == "outpost_nexus_")
+		return OutpostInTestFightRoundCount.get();
+	//////
+
 	return std::min(OutpostFightRoundCount.get(), OUTPOSTENUMS::OUTPOST_MAX_SQUAD_SPAWNED);
 }
 
@@ -2423,13 +2430,24 @@ uint32 COutpost::computeSpawnDelay(uint32 roundLevel) const
 //----------------------------------------------------------------------------
 uint32 COutpost::computeSquadCountA(uint32 roundLevel) const
 {
-	return (uint32)ceil((float)(roundLevel+1)/2.f);
+
+	///// Nexus test : Number of squad increase faster
+	if (getName().substr(0, 14) == "outpost_nexus_")
+		return (uint32)ceil((float)(roundLevel+1)/OutpostInTestFightSquadCount.get());
+	//////
+
+	return (uint32)ceil((float)(roundLevel+1)/1.5f);
 }
 
 //----------------------------------------------------------------------------
 uint32 COutpost::computeSquadCountB(uint32 roundLevel) const
 {
-	return (uint32)floor((float)(roundLevel+1)/2.f);
+	///// Nexus test : Number of squad increase faster
+	if (getName().substr(0, 14) == "outpost_nexus_")
+		return (uint32)floor((float)(roundLevel+1)/OutpostInTestFightSquadCount.get());
+	//////
+
+	return (uint32)floor((float)(roundLevel+1)/1.5f);
 }
 
 //----------------------------------------------------------------------------
@@ -3153,7 +3171,7 @@ std::string COutpost::toString() const
 #define PERSISTENT_DATA\
 	PROP2(VERSION, uint32, COutpostVersionAdapter::getInstance()->currentVersionNumber(), version = val)\
 	\
-	/*PROP2(_PVPType, string, OUTPOSTENUMS::toString( _PVPType );, _PVPType = OUTPOSTENUMS::toPVPType( val ); )*/\
+	PROP2(_PVPType, string, OUTPOSTENUMS::toString( _PVPType );, _PVPType = OUTPOSTENUMS::toPVPType( val ); )\
 	PROP2(_State, string, OUTPOSTENUMS::toString( _State );, _State = OUTPOSTENUMS::toOutpostState( val ); )\
 	PROP2(_OwnerGuildId, uint32, _OwnerGuildId & ((1<<20)-1), _OwnerGuildId = val != 0 ? ((val & ((1<<20)-1)) | (IService::getInstance()->getShardId()<<20)) : 0)\
 	PROP2(_AttackerGuildId, uint32, _AttackerGuildId & ((1<<20)-1), _AttackerGuildId = val != 0 ? ((val & ((1<<20)-1)) | (IService::getInstance()->getShardId()<<20)) : 0)\
