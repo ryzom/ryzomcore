@@ -3806,6 +3806,8 @@ NLMISC_COMMAND(getPlayerGuild, "get player guild informations", "<uid>")
 			else
 				log.displayNL("Member");
 
+			log.displayNL("%d", c->getGuildId());
+			log.displayNL("%s", guild->getName().toString().c_str());
 			return true;
 		}
 	}
