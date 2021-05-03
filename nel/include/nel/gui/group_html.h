@@ -36,6 +36,7 @@ typedef void CURLM;
 
 namespace NLGUI
 {
+	class CViewLink;
 	class CCtrlButton;
 	class CCtrlTextButton;
 	class CCtrlScroll;
@@ -300,6 +301,9 @@ namespace NLGUI
 
 		// Translate a char
 		bool translateChar(u32char &output, u32char input, u32char lastChar) const;
+
+		// return true if text has same style
+		bool isSameStyle(CViewLink *text, const CStyleParams &style) const;
 
 		// Add a string in the current paragraph
 		void addString(const std::string &str);

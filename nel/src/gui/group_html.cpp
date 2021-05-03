@@ -2360,6 +2360,34 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	bool CGroupHTML::isSameStyle(CViewLink *text, const CStyleParams &style) const
+	{
+		if (!text) return false;
+
+		bool embolden = style.FontWeight >= FONT_WEIGHT_BOLD;
+		bool sameShadow = style.TextShadow.Enabled && text->getShadow();
+		if (sameShadow && style.TextShadow.Enabled)
+		{
+			sint sx, sy;
+			text->getShadowOffset(sx, sy);
+			sameShadow = (style.TextShadow.Color == text->getShadowColor());
+			sameShadow = sameShadow && (style.TextShadow.Outline == text->getShadowOutline());
+			sameShadow = sameShadow && (style.TextShadow.X == sx) && (style.TextShadow.Y == sy);
+		}
+		// Compatible with current parameters ?
+		return sameShadow &&
+			(style.TextColor == text->getColor()) &&
+			(style.FontFamily == text->getFontName()) &&
+			(style.FontSize == (uint)text->getFontSize()) &&
+			(style.Underlined == text->getUnderlined()) &&
+			(style.StrikeThrough == text->getStrikeThrough()) &&
+			(embolden == text->getEmbolden()) &&
+			(style.FontOblique == text->getOblique()) &&
+			(getLink() == text->Link) &&
+			(style.GlobalColor == text->getModulateGlobalColor());
+	}
+
+	// ***************************************************************************
 
 	void CGroupHTML::addString(const std::string &str)
 	{
@@ -2433,32 +2461,12 @@ namespace NLGUI
 
 			// Text added ?
 			bool added = false;
-			bool embolden = style.FontWeight >= FONT_WEIGHT_BOLD;
 
 			// Number of child in this paragraph
 			if (_CurrentViewLink)
 			{
 				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == '\n';
-				bool sameShadow = style.TextShadow.Enabled && _CurrentViewLink->getShadow();
-				if (sameShadow && style.TextShadow.Enabled)
-				{
-					sint sx, sy;
-					_CurrentViewLink->getShadowOffset(sx, sy);
-					sameShadow = (style.TextShadow.Color == _CurrentViewLink->getShadowColor());
-					sameShadow = sameShadow && (style.TextShadow.Outline == _CurrentViewLink->getShadowOutline());
-					sameShadow = sameShadow && (style.TextShadow.X == sx) && (style.TextShadow.Y == sy);
-				}
-				// Compatible with current parameters ?
-				if (!skipLine && sameShadow &&
-					(style.TextColor == _CurrentViewLink->getColor()) &&
-					(style.FontFamily == _CurrentViewLink->getFontName()) &&
-					(style.FontSize == (uint)_CurrentViewLink->getFontSize()) &&
-					(style.Underlined == _CurrentViewLink->getUnderlined()) &&
-					(style.StrikeThrough == _CurrentViewLink->getStrikeThrough()) &&
-					(embolden == _CurrentViewLink->getEmbolden()) &&
-					(style.FontOblique == _CurrentViewLink->getOblique()) &&
-					(getLink() == _CurrentViewLink->Link) &&
-					(style.GlobalColor == _CurrentViewLink->getModulateGlobalColor()))
+				if (!skipLine && isSameStyle(_CurrentViewLink, style))
 				{
 					// Concat the text
 					_CurrentViewLink->setText(_CurrentViewLink->getText()+tmpStr);
