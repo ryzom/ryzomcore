@@ -107,6 +107,52 @@ void despawn_f_(CStateInstance* entity, CScriptStack& stack)
 	grp->despawnBots(immediatly!=0);
 }
 
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection spawnBot_fsssffff_
+Spawn new bots in the current group.
+
+Arguments: f(NbrBots), s(Sheet), s(Name), s(Look), f(x), f(y), f(orientation), f(dispersion) ->
+
+@code
+
+@endcode
+
+*/
+// CGroup
+void spawnBot_fsssffff_(CStateInstance* entity, CScriptStack& stack)
+{
+	double dispersionRadius = (double)(float)stack.top();
+	stack.pop();
+	double orientation = (double)(float)stack.top();
+	stack.pop();
+	double y = (double)(float)stack.top();
+	stack.pop();
+	double x = (double)(float)stack.top();
+	stack.pop();
+	string look = (string)stack.top();
+	stack.pop();
+	string name = (string)stack.top();
+
+	stack.pop();
+	CSheetId sheetId((string)stack.top());
+	stack.pop();
+	uint nbBots = (uint)(float)stack.top();
+	stack.pop();
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+
+	CGroupNpc* grp = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if (grp)
+		aiInstance->eventCreateNpcBot(grp, nbBots, true, sheetId, CAIVector(x, y), name, orientation, dispersionRadius, look);
+	return;
+}
+
+
 
 //----------------------------------------------------------------------------
 /** @page code
@@ -2422,6 +2468,49 @@ void getPlayerStat_ss_f(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("Try to call %s with wrong state %s", funName.c_str(), statName.c_str() );
 	}
 	stack.push((float)0);
+	return;
+
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection getPlayerPosition_ss_ff
+Get player position (x or y).
+
+Arguments: s(playerEidAsString), s(statName) -> s(result)
+@param[in] playerEidAsString is EntityId as string from the player we want infos
+@param[in] axis ("X" or "Y")
+@param[out] value is a the value of the parameter
+
+@code
+($playerEid)getCurrentPlayerEid();
+(x, y)getPlayerPosition($playerEid);
+@endcode
+*/
+void getPlayerPosition_s_ff(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string funName = "getPlayerPosition_s_ff";
+	// reaed input
+	std::string statName = ((std::string)stack.top()); stack.pop();
+	std::string playerEidStr = ((std::string)stack.top()); stack.pop();
+
+
+	// get Dataset of the player to have access to mirror values
+	NLMISC::CEntityId playerEid;
+	playerEid.fromString(playerEidStr.c_str());
+	TDataSetRow playerRow = TheDataset.getDataSetRow( playerEid );
+	if (! TheDataset.isAccessible( playerRow  ) )
+	{
+		nlwarning("Try to call %s with on a player '%s' that is not accessible. The isPlayerAlived function must be called to be sure that the palyer is still alived.", funName.c_str(), playerEidStr.c_str() );
+		stack.push((float)0);
+		return;
+	}
+
+	CMirrorPropValue<sint32> mirrorSymbol( TheDataset, playerRow, DSPropertyPOSY );
+	stack.push((float)mirrorSymbol.getValue());
+	CMirrorPropValue<sint32> mirrorSymbol2( TheDataset, playerRow, DSPropertyPOSX );
+	stack.push((float)mirrorSymbol2.getValue());
 	return;
 
 }
@@ -4771,6 +4860,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, spawn__);
 	REGISTER_NATIVE_FUNC(functions, despawn_f_);
 	REGISTER_NATIVE_FUNC(functions, isAlived__f);
+	REGISTER_NATIVE_FUNC(functions, spawnBot_fsssffff_);
 	REGISTER_NATIVE_FUNC(functions, newNpcChildGroupPos_ssfff_c);
 	REGISTER_NATIVE_FUNC(functions, newNpcChildGroupPos_ssfff_);
 	REGISTER_NATIVE_FUNC(functions, newNpcChildGroupPos_ssff_c);
@@ -4858,6 +4948,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	// Boss functions (Player infos)
 	REGISTER_NATIVE_FUNC(functions, isPlayerAlived_s_f);
 	REGISTER_NATIVE_FUNC(functions, getPlayerStat_ss_f);
+	REGISTER_NATIVE_FUNC(functions, getPlayerPosition_s_ff);
 	REGISTER_NATIVE_FUNC(functions, getPlayerDistance_fs_f);
 	REGISTER_NATIVE_FUNC(functions, getCurrentPlayerEid__s);
 	REGISTER_NATIVE_FUNC(functions, queryEgs_sscfs_);

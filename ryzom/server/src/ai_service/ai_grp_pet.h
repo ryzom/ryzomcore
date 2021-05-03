@@ -33,7 +33,7 @@ class CPetOwner;
 class CSpawnGroupPet
 : public CSpawnGroup
 {
-public:	
+public:
 	CSpawnGroupPet(CPersistent<CSpawnGroup>& owner)
 	: CSpawnGroup(owner)
 	, _PathCont(NLMISC::safe_cast<CGroup*>(&owner)->getAStarFlag())
@@ -41,18 +41,19 @@ public:
 		_LastUpdate = CTimeInterface::gameCycle();
 		_IsPlayerSpawned = true;
 	}
-	
+
 	CGrpPet& getPersistent() const;
-	
+
 	void spawnBots() { }
+	void spawnBots(const std::string &name) { }
 	void despawnBots (bool immediately) { }
-	
+
 	void update();
-		
+
 	CPathCont& getPathCont() { return _PathCont; }
-	
+
 	CAIVector const& getPos() const { return _PathCont.getDestination(); }
-	
+
 private:
 	CPathCont	_PathCont;		// this path container is share by all player pets .. (thats accelerate our computing).
 	uint32		_LastUpdate;
@@ -68,37 +69,37 @@ class CGrpPet
 {
 public:
 	CGrpPet(CMgrPet* mgr, NLMISC::CEntityId const& owner, CAIAliasDescriptionNode* aliasTree = NULL);
-	
+
 	CDynGrpBase* getGrpDynBase() { return NULL; }
-	
+
 	RYZOMID::TTypeId getRyzomType() { return RYZOMID::pack_animal; }
-	
+
 	CAIS::CCounter& getSpawnCounter();
-	
+
 	/// @name Service events
 	//@{
 	void serviceUp(uint32 serviceId, std::string const& serviceName);
 	void serviceDown(uint32 serviceId, std::string const& serviceName);
 	//@}
-	
+
 	void init() { }
-	
+
 	void release() { }
-	
+
 	void setEvent(uint eventId);
-	
+
 	NLMISC::CSmartPtr<CSpawnGroup> createSpawnGroup();
-	
+
 	CPersistentStateInstance* getPersistentStateInstance();
-	
+
 	NLMISC::CEntityId const& getPetOwner() const { return _PetOwner; }
-	
+
 	CMgrPet& getPetManager() { return *(NLMISC::safe_cast<CMgrPet*>(getOwner())); }
-	
+
 	CCont<CBot>& bots() { return _Bots; }
-	
+
 	virtual std::string	getOneLineInfoString() const { return std::string("Pet group '") + getName() + "'"; }
-	
+
 private:
 	NLMISC::CEntityId const _PetOwner;
 };

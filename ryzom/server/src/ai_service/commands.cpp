@@ -65,6 +65,7 @@ RYAI_TEMPLATED_COMMAND(listCellZones,	"display the list of cell zones",	"[<filte
 RYAI_TEMPLATED_COMMAND(listFamilyBehaviours,	"display the list of family behaviours",	"[<filter>]",	CFamilyBehavior,	buildFamilyBehaviorList,	displayList)
 RYAI_TEMPLATED_COMMAND(listOutposts,	"display the list of outposts",		"[<filter>]", COutpost,		buildOutpostList,	displayList)
 RYAI_TEMPLATED_COMMAND(listManagers,	"display the list of managers",		"[<filter>]", CManager,		buildManagerList,	displayList)
+RYAI_TEMPLATED_COMMAND(listNpcManagers,	"display the list of managers",		"[<filter>]", CManager,		buildNpcManagerList,	displayList)
 RYAI_TEMPLATED_COMMAND(listGroups,		"display the list of groups",		"[<filter>]", CGroup,		buildGroupList,		displayList)
 RYAI_TEMPLATED_COMMAND(listBots,		"display the list of bots",			"[<filter>]", CBot,			buildBotList,		displayList)
 RYAI_TEMPLATED_COMMAND(listPlayers,		"display the list of players",		"[<filter>]", CBotPlayer,	buildPlayerList,	displayList)
@@ -114,77 +115,77 @@ NLMISC_COMMAND(search, "search all the data tree for a name part","<name_part>")
 {
 	if (args.size() != 1)
 		return false;
-	
+
 	{
 	log.displayNL("- Search results in instances ------------------------------------------------");
 	std::deque<CAIInstance*> container;
 	buildInstanceList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	{
 	log.displayNL("- Search results in continents -----------------------------------------------");
 	std::deque<CContinent*> container;
 	buildContinentList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	{
 	log.displayNL("- Search results in regions --------------------------------------------------");
 	std::deque<CRegion*> container;
 	buildRegionList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	{
 	log.displayNL("- Search results in cell zones -----------------------------------------------");
 	std::deque<CCellZone*> container;
 	buildCellZoneList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	{
 	log.displayNL("- Search results in family behaviors -----------------------------------------");
 	std::deque<CFamilyBehavior*> container;
 	buildFamilyBehaviorList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	{
 	log.displayNL("- Search results in outposts -------------------------------------------------");
 	std::deque<COutpost*> container;
 	buildOutpostList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	{
 	log.displayNL("- Search results in managers -------------------------------------------------");
 	std::deque<CManager*> container;
 	buildManagerList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	{
 	log.displayNL("- Search results in groups ---------------------------------------------------");
 	std::deque<CGroup*> container;
 	buildGroupList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	{
 	log.displayNL("- Search results in bots -----------------------------------------------------");
 	std::deque<CBot*> container;
 	buildBotList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	{
 	log.displayNL("- Search results in players --------------------------------------------------");
 	std::deque<CBotPlayer*> container;
 	buildPlayerList(container);
 	displayList(log, container, args[0]);
 	}
-	
+
 	return true;
 }
 
@@ -194,9 +195,9 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 {
 	if (args.size()<5)
 		return false;
-	
+
 	CLogStringWriter stringWriter(&log);
-	
+
 	CAIInstance* aiInstance = NULL;
 	{
 		uint32 aiInstanceId = NLMISC::atoui(args[0].c_str());
@@ -212,14 +213,14 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 			return true;
 		}
 	}
-	
+
 	uint32 nbBots = NLMISC::atoui(args[1].c_str());
 	if (nbBots<=0)
 	{
 		stringWriter.append("invalid bot count");
 		return true;
 	}
-	
+
 	NLMISC::CSheetId sheetId(args[2]);
 	if (sheetId==NLMISC::CSheetId::Unknown)
 		sheetId = args[2] + ".creature";
@@ -228,7 +229,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 		stringWriter.append("invalid sheet id");
 		return true;
 	}
-	
+
 	double x, y;
 	NLMISC::fromString(args[3], x);
 	NLMISC::fromString(args[4], y);
@@ -243,7 +244,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 			return true;
 		}
 	}
-	
+
 	bool spawnBots = true;
 	if (args.size()>6)
 	{
@@ -261,7 +262,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 	if (args.size()>8) botsName = args[8];
 
 	aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawnBots, orientation, botsName, "");
-	
+
 	return true;
 }
 
@@ -323,7 +324,7 @@ NLMISC_COMMAND(dumpRoadCon, "dump road/cell connectivity graph","<continentName>
 				CRegion *region = regions[i];
 				if (!region)
 					continue;
-				
+
 				CAliasCont<CCellZone> &cellZones = region->cellZones();
 
 				for (uint i=0; i<cellZones.size(); ++i)
@@ -343,7 +344,7 @@ NLMISC_COMMAND(dumpRoadCon, "dump road/cell connectivity graph","<continentName>
 					}
 				}
 
-				
+
 				for (uint i=0; i<cellZones.size(); ++i)
 				{
 					CCellZone *czone = cellZones[i];
@@ -363,7 +364,7 @@ NLMISC_COMMAND(dumpRoadCon, "dump road/cell connectivity graph","<continentName>
 							{
 								nldebug("NpcZone '%s' host road '%s'", nz->getAliasTreeOwner().getName().c_str(), nz->roads()[l]->getName().c_str());
 							}
-							
+
 						}
 
 						CAliasCont<CRoad> &roads = cell->roads();
@@ -373,17 +374,17 @@ NLMISC_COMMAND(dumpRoadCon, "dump road/cell connectivity graph","<continentName>
 							if (!road)
 								continue;
 							// clear existing link;
-							nldebug("Road '%s' link from '%s' %s to '%s' %s", road->getName().c_str(), 
+							nldebug("Road '%s' link from '%s' %s to '%s' %s", road->getName().c_str(),
 								road->startZone().isNULL() ? "none" : road->startZone()->getAliasTreeOwner().getName().c_str(),
 								road->startExternal() ? "(external)" : "",
 								road->endZone().isNULL() ? "none" : road->endZone()->getAliasTreeOwner().getName().c_str(),
 								road->endExternal() ? "(external)" : "");
 						}
-						
+
 					}
 				}
 			}
-			
+
 		}
 	}
 
@@ -431,15 +432,15 @@ bool dumpContinentImp(uint instanceIndex, const std::string &continentName, NLMI
 			for (uint j=0; j<cont->regions().size(); ++j)
 			{
 				CRegion *region = cont->regions()[j];
-				if (!region)	
+				if (!region)
 				{
 					log.displayNL(" +- %u null entry", j);
 					continue;
 				}
 
-				log.displayNL(" +- Region '%s'%s @ %p", 
-					region->getName().c_str(), 
-					region->getAliasString().c_str(), 
+				log.displayNL(" +- Region '%s'%s @ %p",
+					region->getName().c_str(),
+					region->getAliasString().c_str(),
 					static_cast<CAliasTreeOwner*>(region));
 
 				for (uint k=0; k<region->cellZones().size(); ++k)
@@ -451,11 +452,11 @@ bool dumpContinentImp(uint instanceIndex, const std::string &continentName, NLMI
 						continue;
 					}
 
-					log.displayNL(" | +- CellZone '%s'%s @ %p", 
-						cz->getName().c_str(), 
-						cz->getAliasString().c_str(), 
+					log.displayNL(" | +- CellZone '%s'%s @ %p",
+						cz->getName().c_str(),
+						cz->getAliasString().c_str(),
 						static_cast<CAliasTreeOwner*>(cz));
-	
+
 					for (uint l=0; l<cz->cells().size(); ++l)
 					{
 						CCell *cell = cz->cells()[l];
@@ -465,9 +466,9 @@ bool dumpContinentImp(uint instanceIndex, const std::string &continentName, NLMI
 							continue;
 						}
 
-						log.displayNL(" | | +- Cell '%s'%s @ %p", 
-							cell->getName().c_str(), 
-							cell->getAliasString().c_str(), 
+						log.displayNL(" | | +- Cell '%s'%s @ %p",
+							cell->getName().c_str(),
+							cell->getAliasString().c_str(),
 							static_cast<CAliasTreeOwner*>(cell));
 
 						for (uint m=0; m<cell->npcZoneCount(); ++m)
@@ -480,10 +481,10 @@ bool dumpContinentImp(uint instanceIndex, const std::string &continentName, NLMI
 							}
 
 //							log.displayNL(" | | | +- NpcZone '%s' (alias A:%u @ %p)", nz->getName().c_str(), nz->getAlias(), static_cast<CAliasTreeOwner*>(nz));
-							log.displayNL(" | | | +- NpcZone '%s'%s", 
-								nz->getAliasTreeOwner().getName().c_str(), 
+							log.displayNL(" | | | +- NpcZone '%s'%s",
+								nz->getAliasTreeOwner().getName().c_str(),
 								nz->getAliasTreeOwner().getAliasString().c_str());
-							
+
 						}
 
 						for (uint k=0; k<cell->roads().size(); ++k)
@@ -494,12 +495,12 @@ bool dumpContinentImp(uint instanceIndex, const std::string &continentName, NLMI
 								log.displayNL(" | | +- %u null entry", k);
 								continue;
 							}
-							
-							log.displayNL(" | | +- Road '%s'%s @ %p", 
-								road->getName().c_str(), 
-								road->getAliasString().c_str(), 
+
+							log.displayNL(" | | +- Road '%s'%s @ %p",
+								road->getName().c_str(),
+								road->getAliasString().c_str(),
 								static_cast<CAliasTreeOwner*>(road));
-						}						
+						}
 
 						for (uint m=0; m<cell->faunaZones().size(); ++m)
 						{
@@ -510,9 +511,9 @@ bool dumpContinentImp(uint instanceIndex, const std::string &continentName, NLMI
 								continue;
 							}
 
-							log.displayNL(" | | | +- FaunaZone '%s'%s @ %p", 
-								fz->getName().c_str(), 
-								fz->getAliasString().c_str(), 
+							log.displayNL(" | | | +- FaunaZone '%s'%s @ %p",
+								fz->getName().c_str(),
+								fz->getAliasString().c_str(),
 								static_cast<CAliasTreeOwner*>(fz));
 						}
 					}
@@ -527,7 +528,7 @@ bool dumpContinentImp(uint instanceIndex, const std::string &continentName, NLMI
 	log.displayNL("Can't find continent '%s' in ai instance %u",
 		continentName.c_str(),
 		instanceIndex);
-	
+
 	return true;
 }
 
@@ -540,7 +541,7 @@ NLMISC_COMMAND(loadContinent, "load a continent collision map","<landName>")
 		return false;
 
 	CWorldContainer::loadContinent(args[0]);
-	
+
 	return true;
 }
 
@@ -556,14 +557,14 @@ NLMISC_COMMAND(createDynamicAIInstance, "Create a new dynamic AIInstance","")
 	uint32 in;
 	NLMISC::fromString(args[0], in);
 	if( !CAIS::instance().getAIInstance(in) )
-	{	
+	{
 		std::string name= NLMISC::toString("ring_%d",in);
 		const int index = CAIS::instance().createAIInstance(name, in);
 
 		nlinfo("AIInstance %u created for continent '%s' (Instance Index : %u)", in, name.c_str(), index);
 	}
 
-	
+
 	// activate the current AIInstance
 	currentInstance = CAIS::instance().getAIInstance(in);	//CAIS::instance().getAIInstance(continentInstanceId);
 	CWorkPtr::aiInstance(currentInstance);
@@ -574,7 +575,7 @@ NLMISC_COMMAND(createStaticAIInstance, "Create a new static AIInstance for a giv
 {
 	if	(args.size() != 1)
 		return false;
-	
+
 	CUsedContinent &uc = CUsedContinent::instance();
 
 	const	uint32 in = uc.getInstanceForContinent(args[0]);
@@ -588,7 +589,7 @@ NLMISC_COMMAND(createStaticAIInstance, "Create a new static AIInstance for a giv
 	if	(!CAIS::instance().getAIInstance(in))
 	{
 		const int index = CAIS::instance().createAIInstance(args[0], in);
-		nlinfo("AIInstance %u created for continent '%s' (Instance Index : %u)", 
+		nlinfo("AIInstance %u created for continent '%s' (Instance Index : %u)",
 			in, args[0].c_str(), index);
 	}
 
@@ -644,7 +645,7 @@ NLMISC_COMMAND(energy, "set or get the effective energy (affects group type).","
 	bool	detailled=false;
 
 	CLogStringWriter	stringWriter(&log);
-	
+
 	{
 		for	(uint32	i=0;i<args.size();i++)
 		{
@@ -746,7 +747,7 @@ public:
 	{}
 	virtual	void	doOnFamily		(CFamilyBehavior	*fb)	const	=	0;
 	virtual	void	doOnCellZone	(CCellZone	*cz)	const	=	0;
-protected:	
+protected:
 private:
 };
 
@@ -755,21 +756,21 @@ bool	doOnFamily	(const std::vector<std::string> &args, CDoOnFamily	*fam)
 {
 	std::string	family;
 	std::string	cellZoneName;
-	
+
 	for	(uint32	i=0;i<args.size();i++)
 	{
 		const	std::string	&str=args[i];
 		string	res;
-		
+
 		if (getParameter(str,"cellZone-",res))
 			cellZoneName=res;
-		
+
 		if (getParameter(str,"family-",res))
 			family = res;
 	}
-		
+
 	const	CStringFilter	familyFilter(family);
-	
+
 	FOREACH(aiiIt, CCont<CAIInstance>, CAIS::instance().AIList())
 	{
 		FOREACH(contIt, CCont<CContinent>, (*aiiIt)->continents())
@@ -783,7 +784,7 @@ bool	doOnFamily	(const std::vector<std::string> &args, CDoOnFamily	*fam)
 						continue;
 
 					fam->doOnCellZone(*czIt);
-					
+
 					FOREACH(fb, CCont<CFamilyBehavior>, czIt->_Families)
 					{
 						if	(	!family.empty()
@@ -813,7 +814,7 @@ public:
 		for	(uint32	i=0;i<args.size();i++)
 		{
 			const	std::string	&str=args[i];
-			string	res;			
+			string	res;
 			if (getParameter(str,"index-",res))
 				NLMISC::fromString(res, _index);
 			if (getParameter(str,"value-",res))
@@ -821,7 +822,7 @@ public:
 			_detailled|=getParameter(str,"detailled",res);
 		}
 	}
-	
+
 	void	doOnFamily(CFamilyBehavior	*fb)	const
 	{
 		if	(_value==-1)	//	not for affectation.
@@ -837,13 +838,13 @@ public:
 		}
 		fb->setModifier	(_value, (uint32)_index);
 	}
-	
+
 	virtual	void	doOnCellZone(CCellZone	*cz)	const
 	{
 		if	(_value==-1)
 			_stringWriter.append("");
 	}
-protected:	
+protected:
 private:
 	uint32	_index;
 	float	_value;
@@ -952,7 +953,7 @@ NLMISC_COMMAND(globalEnergy, "set or get the effective energy for a family.","[<
 	string	family;
 
 	CLogStringWriter	stringWriter(&log);
-	
+
 	if (args.size() > 0)
 	{
 		family=args[0];
@@ -1020,16 +1021,16 @@ NLMISC_COMMAND(globalEnergy, "set or get the effective energy for a family.","[<
 	}
 	return true;
 }
-	
+
 //-------------------------------------------------------------------------
 // memory report
 // NLMISC_COMMAND(statMemory, "generate a memory usage statistic file","<begin|end>")
 // {
 // 	if (args.size() != 1)
 // 		return false;
-// 	
+//
 // 	CLogStringWriter	stringWriter(&log);
-// 	
+//
 // 	if (args[0] == "begin")
 // 	{
 // 		stringWriter.append("Writing begin memory state in 'memory_report_begin.csv'...");
@@ -1044,7 +1045,7 @@ NLMISC_COMMAND(globalEnergy, "set or get the effective energy for a family.","[<
 // 	}
 // 	else
 // 		return false;
-// 	
+//
 // 	return true;
 // }
 
@@ -1075,8 +1076,8 @@ NLMISC_COMMAND(setGroupVar,"display the logic var of the group in the given AI I
 			return	false;
 		}
 	}
-	
-	
+
+
 	// first, try to find the group by alias
 	uint32 alias = NLMISC::atoui(args[1].c_str());
 	if (alias != 0)
@@ -1151,7 +1152,7 @@ NLMISC_COMMAND(displayGroupVar,"display the logic var of the group in the given 
 		}
 	}
 
-	
+
 	CGroup	*grp = NULL;
 
 	// first, try to find the group by alias
@@ -1223,25 +1224,25 @@ NLMISC_COMMAND(displayPlayerTeams,"display all the player teams"," [<-no_detail>
 	CCont<CAIInstance>::iterator	it=CAIS::instance().AIList().begin(), itEnd=CAIS::instance().AIList().end();
 
 	CLogStringWriter	stringWriter(&log);
-	
+
 	while (it!=itEnd)
 	{
 		std::vector<uint16>	teamIds;
 		CAIInstance			*aiInstance=*it;
 		aiInstance->getPlayerMgr()->getTeamIds(teamIds);
-		
+
 		if	(teamIds.empty())
 		{
 			continue;
 		}
-		
+
 		std::vector<uint16>::iterator first(teamIds.begin()), last(teamIds.end());
 		for (; first != last; ++first)
 		{
 			int id = *first;
 			{
 				stringWriter.append("Player Team "+toString(id)+" :");
-				
+
 				if (!noDetail)
 				{
 					const std::set<TDataSetRow> &team = aiInstance->getPlayerMgr()->getPlayerTeam(uint16(id));
@@ -1283,7 +1284,7 @@ NLMISC_COMMAND(setEscortId,"set the escort team id for a group in the given aIIn
 			return	false;
 		}
 	}
-	
+
 	CGroup	*grp = NULL;
 
 	// first, try to find the group by alias
@@ -1361,7 +1362,7 @@ void	execBufferedCommands()
 {
 	vector<string>	retStrings;
 	CArrayStringWriter	sw(retStrings);
-	
+
 	FOREACHC(it, TCommandList, setEventCommands)
 	{
 		execSetEvent(sw, *it);
@@ -1409,7 +1410,7 @@ bool	execSetEvent(CStringWriter	&stringWriter, const vector<string> &args)
 		&&	!(	args.size() == 4
 		&&	args[1] == "-no_detail"))
 		return false;
-		
+
 	CAIInstance	*aiInstance=NULL;
 	{
 		const	uint32 aiInstanceId = NLMISC::atoui(args[0].c_str());
@@ -1425,32 +1426,32 @@ bool	execSetEvent(CStringWriter	&stringWriter, const vector<string> &args)
 			return	false;
 		}
 	}
-	
-	
+
+
 	bool noDetail = false;
-	
+
 	if (args.size() == 4)
 		noDetail = true;
-	
+
 	uint32 eventId = NLMISC::atoui(args[1].c_str());
 	NLMISC::clamp(eventId, 0u, 9u);
-	
+
 	CGroup	*grp = NULL;
-	
+
 	// first, try to find the group by alias
 	uint32 alias = NLMISC::atoui(args[2].c_str());
 	if (alias != 0)
 	{
 		grp = aiInstance->findGroup(alias);
-		
+
 		if	(!grp)
 			return	false;
-		
+
 		stringWriter.append("Setting event "+toString(eventId)+" on groups '"+grp->aliasTreeOwner()->getName()+"' ("+toString(grp->getChildIndex())+")");
 		grp->setEvent(eventId);
 		return true;
 	}
-	
+
 	std::vector<CGroup*> grps;
 	if	(!grp)
 	{
@@ -1476,12 +1477,12 @@ bool	execSetEvent(CStringWriter	&stringWriter, const vector<string> &args)
 			return false;
 		}
 	}
-	
+
 	stringWriter.append("Setting event "+toString(eventId)+" on groups '"+args[2]+"'");
-	
+
 	for (uint i=0; i<grps.size(); ++i)
 		grps[i]->setEvent(eventId);
-	
+
 	return true;
 }
 
@@ -1498,7 +1499,7 @@ bool execScript(CStringWriter& stringWriter, TCommand const& args)
 {
 	if (args.size()<1)
 		return false;
-	
+
 	string const& groupName = args[0];
 	typedef vector<CGroup*> TGroupContainer;
 	TGroupContainer grps;
@@ -1511,17 +1512,17 @@ bool execScript(CStringWriter& stringWriter, TCommand const& args)
 			return false;
 		}
 	}
-	
+
 	stringWriter.append("do script on groups '"+groupName+"'");
-	
+
 	if (args.size()>1)
 	{
 		vector<string> codeLines;
 		for (size_t i=1; i<args.size(); ++i)
 			codeLines.push_back(args[i]);
-		
+
 		CSmartPtr<const CByteCode> codePtr = CCompiler::getInstance().compileCode(codeLines, "script Command");
-		
+
 		FOREACHC(itGrp, TGroupContainer, grps)
 		{
 			CGroup* grp = *itGrp;
@@ -1550,7 +1551,7 @@ bool execScript2(CStringWriter& stringWriter, TCommand const& args)
 {
 	if (args.size()<1)
 		return false;
-	
+
 	string const& botName = args[0];
 	typedef set<CGroup*> TGroupContainer;
 	TGroupContainer grps;
@@ -1574,17 +1575,17 @@ bool execScript2(CStringWriter& stringWriter, TCommand const& args)
 			}
 		}
 	}
-	
+
 	stringWriter.append("do script on groups containing bot '"+botName+"'");
-	
+
 	if (args.size()>1)
 	{
 		vector<string> codeLines;
 		for (size_t i=1; i<args.size(); ++i)
 			codeLines.push_back(args[i]);
-		
+
 		CSmartPtr<const CByteCode> codePtr = CCompiler::getInstance().compileCode(codeLines, "script2 Command");
-		
+
 		FOREACHC(itGrp, TGroupContainer, grps)
 		{
 			CGroup* grp = *itGrp;
@@ -1613,7 +1614,7 @@ bool execScriptBotById(CStringWriter& stringWriter, TCommand const& args)
 {
 	if (args.size()<2)
 		return false;
-	
+
 	NLMISC::CEntityId botId = NLMISC::CEntityId(args[0]);
 	if (botId==NLMISC::CEntityId::Unknown)
 		return false;
@@ -1625,15 +1626,15 @@ bool execScriptBotById(CStringWriter& stringWriter, TCommand const& args)
 		return false;
 	if (!bot->getPersistent().getOwner()->getPersistentStateInstance())
 		return false;
-	
+
 	vector<string> codeLines;
 	for (size_t i=1; i<args.size(); ++i)
 		codeLines.push_back(args[i]);
-	
+
 	CSmartPtr<const CByteCode> codePtr = CCompiler::getInstance().compileCode(codeLines, "script2 Command");
-	
+
 	bot->getPersistent().getOwner()->getPersistentStateInstance()->interpretCode(NULL, codePtr);
-	
+
 	return true;
 }
 
@@ -1643,7 +1644,7 @@ bool execScriptGroupByName(CStringWriter& stringWriter, TCommand const& args)
 {
 	if (args.size()<2)
 		return false;
-	
+
 	string const& groupName = args[0];
 //	NLMISC::CEntityId botId = NLMISC::CEntityId(args[0]);
 //	if (botId==NLMISC::CEntityId::Unknown)
@@ -1653,15 +1654,15 @@ bool execScriptGroupByName(CStringWriter& stringWriter, TCommand const& args)
 		return false;
 	if (!group->getPersistentStateInstance())
 		return false;
-	
+
 	vector<string> codeLines;
 	for (size_t i=1; i<args.size(); ++i)
 		codeLines.push_back(args[i]);
-	
+
 	CSmartPtr<const CByteCode> codePtr = CCompiler::getInstance().compileCode(codeLines, "script2 Command");
-	
+
 	group->getPersistentStateInstance()->interpretCode(NULL, codePtr);
-	
+
 	return true;
 }
 
@@ -1779,7 +1780,7 @@ bool execLoadScript(CStringWriter& stringWriter, vector<string> const& args)
 {
 	if (args.size()!=3)
 		return false;
-	
+
 	CAIInstance* aiInstance = NULL;
 	{
 		uint32 const aiInstanceId = NLMISC::atoui(args[0].c_str());
@@ -1795,9 +1796,9 @@ bool execLoadScript(CStringWriter& stringWriter, vector<string> const& args)
 			return false;
 		}
 	}
-	
+
 	bool noDetail = false;
-		
+
 	string const& groupName = args[1];
 	std::vector<CGroup*> grps;
 	{
@@ -1823,13 +1824,13 @@ bool execLoadScript(CStringWriter& stringWriter, vector<string> const& args)
 			return false;
 		}
 	}
-	
+
 	stringWriter.append("do script on groups '"+groupName+"'");
-	
+
 	try
 	{
 		NLMISC::CIFile file(NLMISC::CPath::lookup(args[2]));
-		
+
 		vector<string> lines;
 		while (!file.eof())
 		{
@@ -1840,7 +1841,7 @@ bool execLoadScript(CStringWriter& stringWriter, vector<string> const& args)
 		}
 		// Compile the buffer
 		CSmartPtr<const CByteCode>	codePtr=CCompiler::getInstance().compileCode(lines, "script Command");
-		
+
 		// Interpret the code for each group
 		FOREACHC(itGrp, vector<CGroup*>, grps)
 			(*itGrp)->getPersistentStateInstance()->interpretCode(NULL, codePtr);
@@ -1863,12 +1864,12 @@ NLMISC_COMMAND(loadScript, "execute a script from a file for a group in the give
 NLMISC_COMMAND(getInfo,"display returned values of buffered commands","")
 {
 	CLogStringWriter	stringWriter(&log);
-	
+
 	FOREACHC(strIt, vector<string>, bufferedRetStrings)
 	{
 		stringWriter.append(*strIt);
 	}
-	
+
 	return true;
 }
 
@@ -1912,7 +1913,7 @@ NLMISC_COMMAND(displayTarget,"display bot target status for given bot(s) or play
 {
 	if(args.size() <1)
 		return false;
-	
+
 	CLogStringWriter	stringWriter(&log);
 
 	for (uint i=0;i<args.size();++i)
@@ -1933,12 +1934,12 @@ NLMISC_COMMAND(displayTarget,"display bot target status for given bot(s) or play
 		}
 
 		bool	found=false;
-		
+
 		switch	(phys->getRyzomType())
 		{
 		case RYZOMID::npc:
 		case RYZOMID::creature:
-		case RYZOMID::pack_animal:				
+		case RYZOMID::pack_animal:
 			break;
 		case RYZOMID::player:
 				log.displayNL("=> target is a player");
@@ -1960,9 +1961,9 @@ NLMISC_COMMAND(displayTarget,"display bot target status for given bot(s) or play
 
 		if	(!found)
 		{
-			log.displayNL("=> can't display information for the target of: %s", args[i].c_str());		
+			log.displayNL("=> can't display information for the target of: %s", args[i].c_str());
 		}
-		
+
 	}
 	return	true;
 }
@@ -2059,7 +2060,7 @@ NLMISC_COMMAND(displayVisionRadius,"display roughly 'radius' cell vision centred
 			return	false;
 		}
 	}
-	
+
 	uint32 dist=100;
 	CAICoord x, y;
 	x=atof(args[1].c_str());
@@ -2083,7 +2084,7 @@ NLMISC_COMMAND(displayVisionRadius,"display roughly 'radius' cell vision centred
 		const	CBotPlayer*	const	playerPtr=dynamic_cast<const CBotPlayer* const>(&entityPtr);
 		if (!playerPtr)
 			continue;
-		
+
 		//	have to implement players.
 #ifdef NL_DEBUG
 		nlwarning("Not Implemented");
@@ -2129,7 +2130,7 @@ NLMISC_COMMAND(countEntitesInVisionMatrix,"scan the vision matrix for entities i
 			return	false;
 		}
 	}
-	
+
 	// build an iterator table for our scan
 	CAIEntityMatrixIteratorTblRandom tbl;
 	tbl.push_back(0,0);
@@ -2149,7 +2150,7 @@ NLMISC_COMMAND(countEntitesInVisionMatrix,"scan the vision matrix for entities i
 	CAIVector	position(0,0);
 	// count entities in bot matrix
 	for (it=aiInstance->botMatrix().beginCells(&tbl,position);!it.end();++it)
-	{		
+	{
 		for (CEntityListLink<CPersistentOfPhysical> *listLink=(*it)->next();listLink!=*it;listLink=listLink->next())
 			++botCount;
 	}
@@ -2219,7 +2220,7 @@ NLMISC_VARIABLE(string, WATCH7, "watch string 7");
 NLMISC_VARIABLE(string, WATCH8, "watch string 8");
 NLMISC_VARIABLE(string, WATCH9, "watch string 9");
 
-// 
+//
 bool FAUNA_GRAPH_USES_DEBUG_TIME = false;
 NLMISC_VARIABLE(bool, FAUNA_GRAPH_USES_DEBUG_TIME, "force fauna graph to use local time (for debug)");
 
@@ -2229,7 +2230,7 @@ void UpdateWatches()
 {
 //	if (!CAIS::initialised())
 //		return;
-	
+
 	for (uint i=0;i<sizeof(watchStrings)/sizeof(watchStrings[0]);++i)
 	{
 		if (watchEntity[i])
@@ -2268,7 +2269,7 @@ NLMISC_COMMAND(setWatch,"setup one of the watch variables","<watch id> <mgr, grp
 		return true;
 
 	watchEntity[idx]=CAIEntityPtr;
-	
+
 	if	(args.size()==3)
 		NLMISC::fromString(args[2], watchIdx[idx]);
 	else
@@ -2290,14 +2291,14 @@ static bool setBotRecordHistory(std::vector<std::string> args,bool onOff)
 				while (grpPtr!=NULL)
 				{
 					grpPtr->getDebugHistory()->setRecording(onOff);
-					
+
 					CBot*	botPtr	=	grpPtr->getNextValidBotChild();
 					while (botPtr!=NULL)
 					{
 						botPtr->getDebugHistory()->setRecording(onOff);
 
 						botPtr=grpPtr->getNextValidBotChild(botPtr);
-					}			
+					}
 					grpPtr=mgrPtr->getNextValidGroupChild(grpPtr);
 				}
 				mgrPtr=instancePtr->managers().getNextValidChild(mgrPtr);
@@ -2309,7 +2310,7 @@ static bool setBotRecordHistory(std::vector<std::string> args,bool onOff)
 	{
 		CAIInstance*	instancePtr	=	CAIS::instance().AIList().getNextValidChild();
 		while (instancePtr!=NULL)
-		{			
+		{
 			CManager*	mgrPtr	=	instancePtr->managers().getNextValidChild();
 			while (mgrPtr!=NULL)
 			{
@@ -2318,7 +2319,7 @@ static bool setBotRecordHistory(std::vector<std::string> args,bool onOff)
 				{
 					if (onOff)
 						grpPtr->getDebugHistory()->setRecording(onOff);
-					
+
 					CBot*	botPtr	=	grpPtr->getNextValidBotChild();
 					while (botPtr!=NULL)
 					{
@@ -2328,14 +2329,14 @@ static bool setBotRecordHistory(std::vector<std::string> args,bool onOff)
 								botPtr->getDebugHistory()->setRecording(onOff);
 							}
 							botPtr=grpPtr->getNextValidBotChild(botPtr);
-					}			
+					}
 					grpPtr=mgrPtr->getNextValidGroupChild(grpPtr);
 				}
 				mgrPtr=instancePtr->managers().getNextValidChild(mgrPtr);
 			}
 			instancePtr=CAIS::instance().AIList().getNextValidChild(instancePtr);
 		}
-	}	
+	}
 	return true;
 }
 
@@ -2373,16 +2374,16 @@ NLMISC_COMMAND(botViewHistory,"view recorded history for named entity","<bot nam
 							botPtr->getDebugHistory()->writeAsInfo();
 							break;	//	don't need to write info more than one time.
 						}
-						
-					}				
+
+					}
 					botPtr=grpPtr->getNextValidBotChild(botPtr);
-				}			
+				}
 				grpPtr=mgrPtr->getNextValidGroupChild(grpPtr);
 			}
 			mgrPtr=instancePtr->managers().getNextValidChild(mgrPtr);
 		}
 		instancePtr=CAIS::instance().AIList().getNextValidChild(instancePtr);
-	}	
+	}
 	return true;
 }
 
@@ -2400,7 +2401,7 @@ NLMISC_COMMAND(grpHistoryRecordLog,"toggle grp history recorder 'nlinfo' logging
 // DISPLAYING VISION OF FAUNA GROUPS
 
 NLMISC_COMMAND(displayFaunaGrpVision,"display the vision of a fauna group","<grp id>")
-{	
+{
 	return	false;
 }
 
@@ -2425,7 +2426,7 @@ NLMISC_COMMAND(advanceGrpState,"advance the group to the next state in its cycle
 	else
 	{
 		grp->getSpawnObj()->resetTimer();
-	}		
+	}
 	return true;
 }
 
@@ -2489,19 +2490,19 @@ NLMISC_COMMAND(updateAI,"call CAIS::update() (simulate a tick off-line)","[tick]
 NLMISC_COMMAND(addPetsToPlayer,"Add some pets specified with a sheet to the specified player.","<player id> <nb pets> <pet_sheet>")
 {
 	if	(	args.size() !=3	)
-		return	false;	
+		return	false;
 
 #ifdef NL_DEBUG
 	nlstopex(("Not Implemented"));
 #endif
-	return	true;	
+	return	true;
 }
 
 //-------------------------------------------------------------------------
 // DISPLAYING FIGHT SHEET.
 
 NLMISC_COMMAND(displayFightSheet,"display the sheet","<sheet name>")
-{	
+{
 	if	(args.size() !=1)
 	{
 		log.displayNL("One argument needed");
@@ -2519,16 +2520,16 @@ NLMISC_COMMAND(displayFightSheet,"display the sheet","<sheet name>")
 		std::string	creatureString=args[0]+std::string(".creature");
 		sheet = /*const_cast<AISHEETS::ICreature*>(*/AISHEETS::CSheets::getInstance()->lookup(CSheetId(creatureString))/*)*/;
 	}
-	
+
 	if (sheet->SheetId()==NLMISC::CSheetId::Unknown)
 	{
 		log.displayNL("Failed to identify sheet: %s",args[0].c_str());
 		return	false;
 	}
-	
+
 	log.displayNL("all these values are used to compute a score for a possible new target");
 	log.displayNL("beware the fact that in this version we used 'level' to represent relative force, it may be changed, so don't take too much time tuning courage");
-	
+
 	log.displayNL("- DistModulator      [0 n]:   %f value=1/(1+distance*DistModulator)",	sheet->DistModulator());
 	log.displayNL("value means the distance sensitivity of the bot, equals to zero means the bot never mind the distance");
 
@@ -2537,10 +2538,10 @@ NLMISC_COMMAND(displayFightSheet,"display the sheet","<sheet name>")
 
 	log.displayNL("- ScoreModulator     [0 1]:   %f score>ScoreModulator",	sheet->ScoreModulator());
 	log.displayNL("value means the minimum value (threshold) needed for the bot to attack, 0 means always, 1 never (also impossible)");
-	
+
 	log.displayNL("- FearModulator      [0 1]:   %f score>FearModulator",	sheet->FearModulator());
 	log.displayNL("value means the minimum value (threshold) needed for the bot to flee, 0 means always, 1 never (also impossible)");
-	
+
 	log.displayNL("- LifeLevelModulator [0 1]:   %f value=LifeLevelModulator*lifeCoef+(1.f-LifeLevelModulator)*levelCoef",	sheet->LifeLevelModulator());
 	log.displayNL("value means the ratio between the life and level ratio, 1 means life is only take in count, 0 means level only take in count");
 
@@ -2549,10 +2550,10 @@ NLMISC_COMMAND(displayFightSheet,"display the sheet","<sheet name>")
 
 	log.displayNL("- GroupCohesionModulator   [0 1]: %f",	sheet->GroupCohesionModulator());
 	log.displayNL("value used to make bots of a group aware of each other, 0 each bot is individual, 1 they fight in group");
-	
+
 	log.displayNL("- GroupDispersion   [0 1]: %f",	sheet->GroupDispersion());
 	log.displayNL("value used to make bots of a group far or not of each other, 0 each all bots are at the same place, 1 they go everywere in the place");
-	
+
 	return true;
 }
 
@@ -2560,30 +2561,30 @@ NLMISC_COMMAND(displayFightSheet,"display the sheet","<sheet name>")
 
 // all these values are used to compute a score for a possible new target
 // beware the fact that in this version we used 'level' to represent relative force, it may be changed, so don't take too much time tuning courage
-// 
+//
 // - DistModulator      [0 n]:   value=1/(1+distance*DistModulator)
 // value means the distance sensitivity of the bot, equals to zero means the bot never mind the distance
-// 
+//
 // - TargetModulator    [0 n]:   value=1/(1+nbTarget*TargetModulator)
 // value means the number of attacker sensitivity of the bot, equals to zero means the bot never mind the number of attackers on the target
-// 
+//
 // - ScoreModulator     [0 1]:   score>ScoreModulator
 // value means the minimum value (threshold) needed for the bot to attack, 0 means always, 1 never (also impossible)
-// 
+//
 // - FearModulator      [0 1]:   score>FearModulator
 // value means the minimum value (threshold) needed for the bot to flee, 0 means always, 1 never (also impossible)
-// 
+//
 // - LifeLevelModulator [0 1]:   value=LifeLevelModulator*lifeCoef+(1.f-LifeLevelModulator)*levelCoef
 // value means the ratio between the life and level ratio, 1 means life is only take in count, 0 means level only take in count
-// 
+//
 // - CourageModulator   [-n +n]:
 // value used to make a bot courageous or feared, -n the bot is feared, +n its courageous
-// 
+//
 // - GroupCohesionModulator   [0 1]:
 // value used to make bots of a group aware of each other, 0 each bot is individual, 1 they fight in group
 /*
 NLMISC_COMMAND(setFightSheet,"change a value in the fight sheet","<sheet name> <value name> <value> (use name without 'modulator', ex: 'Dist')")
-{	
+{
 	if	(args.size() !=3)
 	{
 		log.displayNL("three argument needed");
@@ -2602,9 +2603,9 @@ NLMISC_COMMAND(setFightSheet,"change a value in the fight sheet","<sheet name> <
 		log.displayNL("Failed to identify sheet: %s",args[0].c_str());
 		return	false;
 	}
-	
+
 	float	value = float(atof(args[2].c_str()));
-	
+
 	if (NLMISC::nlstricmp(args[1].c_str(), "dist")==0)
 	{
 		if (value<0)
@@ -2616,7 +2617,7 @@ NLMISC_COMMAND(setFightSheet,"change a value in the fight sheet","<sheet name> <
 		log.displayNL("Done, DistModulator=%f", value);
 		return	true;
 	}
-	
+
 	if (NLMISC::nlstricmp(args[1].c_str(), "target")==0)
 	{
 		if (value<0)
@@ -2671,7 +2672,7 @@ NLMISC_COMMAND(setFightSheet,"change a value in the fight sheet","<sheet name> <
 		log.displayNL("Done, CourageModulator=%f", value);
 		return	true;
 	}
-	
+
 	if (NLMISC::nlstricmp(args[1].c_str(), "GroupCohesion")==0)
 	{
 		if (value<0 || value>1)
@@ -2758,7 +2759,7 @@ NLMISC_COMMAND(botSetPosition,"set the position of one or several bots","<eid> [
 		if (args.size()==4)
 			NLMISC::fromString(args[3], z);
 	}
-	
+
 	// For each bot
 	FOREACH (itInstance, CCont<CAIInstance>, CAIS::instance().AIList())
 	{
@@ -2806,7 +2807,7 @@ NLMISC_COMMAND(despawnEntity, "despawn an entity.","[entityId]")
 	const	TDataSetRow	dataSetRow=TheDataset.getDataSetRow(entity);
 
 	CAIEntityPhysical	*const	phys=CAIS::instance().getEntityPhysical(dataSetRow);
-	
+
 	if (!phys) { return true;}
 
 	switch(phys->getRyzomType())
@@ -2943,7 +2944,7 @@ static void initBugSimulationTexts()
 		bugSimulationTextInited = true;
 		for (int i=0; i<bugSimulationCount; ++i)
 			simulateBugTexts[i] = "[No bug with this id]                    ";
-		
+
 		simulateBugTexts[0] = "Bots didn't use range weapons            ";
 		simulateBugTexts[1] = "Assign. a string var in another group    ";
 		simulateBugTexts[2] = "Destination reach detection was delayed  ";
@@ -3055,7 +3056,7 @@ static void displayTime(const CRyzomTime &rt, NLMISC::CLog &log)
 	uint32 month = rt.getRyzomMonth();
 	MONTH::EMonth monthInCycle = rt.getRyzomMonthInCurrentCycle();
 	std::string monthName = MONTH::toString((MONTH::EMonth) monthInCycle);
-	uint32 dayOfMonth = rt.getRyzomDayOfMonth();			
+	uint32 dayOfMonth = rt.getRyzomDayOfMonth();
 	std::string dayName = WEEKDAY::toString((WEEKDAY::EWeekDay) rt.getRyzomDayOfWeek());
 	result = NLMISC::toString("mm:dd:yy = %d:%d:%d  (%s:%s)",
 		                       (int)  (month + 1),
@@ -3071,7 +3072,7 @@ static void displayTime(const CRyzomTime &rt, NLMISC::CLog &log)
 NLMISC_COMMAND(time, "Display current time.", "<>")
 {
 	if (!args.empty()) return false;
-	const CRyzomTime &rt = CTimeInterface::getRyzomTime();	
+	const CRyzomTime &rt = CTimeInterface::getRyzomTime();
 	displayTime(rt, log);
 	return true;
 }
@@ -3079,7 +3080,7 @@ NLMISC_COMMAND(time, "Display current time.", "<>")
 NLMISC_COMMAND(localTime, "Display current local time (debug time).", "<>")
 {
 	if (!args.empty()) return false;
-	const CRyzomTime &rt = CTimeInterface::getRyzomDebugTime();	
+	const CRyzomTime &rt = CTimeInterface::getRyzomDebugTime();
 	displayTime(rt, log);
 	return true;
 }
@@ -3087,8 +3088,8 @@ NLMISC_COMMAND(localTime, "Display current local time (debug time).", "<>")
 
 struct CRyzomDate
 {
-	float Time;	
-	uint Day;	
+	float Time;
+	uint Day;
 	uint Year;
 };
 
@@ -3108,7 +3109,7 @@ static void setRyzomDebugDate(CRyzomDate &rd)
 
 NLMISC_COMMAND(setDebugHour, "set the current debug hour", "<hour>")
 {
-	if (args.size() != 1) return false;	
+	if (args.size() != 1) return false;
 	sint hour;
 	if (!fromString(args[0], hour)) return false;
 	CRyzomDate rd;
@@ -3120,10 +3121,10 @@ NLMISC_COMMAND(setDebugHour, "set the current debug hour", "<hour>")
 
 NLMISC_COMMAND(setDebugDayOfYear, "set the current debug day of year (first day has index 1)", "<day>")
 {
-	if (args.size() != 1) return false;	
+	if (args.size() != 1) return false;
 	sint day;
 	if (!fromString(args[0], day)) return false;
-	CRyzomDate rd;	
+	CRyzomDate rd;
 	getRyzomDebugDate(rd);
 	rd.Day = day - 1; // for the user, days start at '1'
 	setRyzomDebugDate(rd);
@@ -3134,7 +3135,7 @@ NLMISC_COMMAND(setDebugDayOfYear, "set the current debug day of year (first day 
 // setPersistentVar setname:varName value
 //
 NLMISC_COMMAND(setPersistentVar, "sets an AI script persistent var", "<command> [<command_arg>]")
-{	
+{
 	if (args.size() == 2)
 	{
 		std::string varName = args[0].c_str();
@@ -3145,7 +3146,7 @@ NLMISC_COMMAND(setPersistentVar, "sets an AI script persistent var", "<command> 
 		log.displayNL("Var '%s' set to '%s'", varName.c_str(), value.c_str());
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -3155,7 +3156,7 @@ NLMISC_COMMAND(setPersistentVar, "sets an AI script persistent var", "<command> 
 NLMISC_COMMAND(listPersistentVar, "display all persistent vars", "")
 {
 	if (!args.empty()) return false;
-	
+
 	const CPersistentVariables &persistentVar = CAIScriptDataManager::getInstance()->getPersistentVariables();
 
 	const TVariableSets &variableSet = persistentVar.getVariableSet();
@@ -3186,7 +3187,7 @@ NLMISC_COMMAND(getPersistentVarAsString, "get a persistent ai var", "")
 		log.displayNL("Variable '%s' has value '%s'", varName.c_str(), value.c_str() );
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -3203,12 +3204,12 @@ NLMISC_COMMAND(getPersistentVarAsFloat, "get a persistent ai var", "")
 		nlinfo("Variable '%s' has value '%f'", varName.c_str(), value );
 		return true;
 	}
-	
+
 	return false;
 }
 
 NLMISC_COMMAND(deletePersistentVar, "deletes an AI script persistent var", "")
-{	
+{
 	if (args.size() == 1)
 	{
 		std::string varName = args[0].c_str();
@@ -3218,7 +3219,7 @@ NLMISC_COMMAND(deletePersistentVar, "deletes an AI script persistent var", "")
 		log.displayNL("Var '%s' deleted", varName.c_str());
 		return true;
 	}
-	
+
 	return false;
 }
 

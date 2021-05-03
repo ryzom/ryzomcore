@@ -1048,6 +1048,74 @@ string getJewelEnchantAttr(CSheetId sbrick)
 //enchantEquipedItem 530162 Neck tag_fyros_3.sbrick
 //enchantEquipedItem 530162 Neck jrez_fulllife_tryker.sbrick,jboost2.sbrick
 //----------------------------------------------------------------------------
+NLMISC_COMMAND(checkInventoryItems, "Check items from a characters inventory", "<uid> <inventory> <sheetnames> <quality> <quantity>")
+{
+	if (args.size () < 5)
+	{
+		log.displayNL("ERR: Invalid number of parameters. Parameters: <inventory> <sheetnames> <quality> <quantity>");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	std::map<string, uint32> need_items;
+
+	string selected_inv = args[1];
+
+	std::vector<string> sheet_names;
+	NLMISC::splitString(args[2], ",", sheet_names);
+	std::vector<string> qualities;
+	NLMISC::splitString(args[3], ",", qualities);
+	std::vector<string> quantities;
+	NLMISC::splitString(args[4], ",", quantities);
+
+	for (uint32 i=0; i < std::min(quantities.size(), std::min(qualities.size(), sheet_names.size())); i++)
+	{
+		uint32 quantity = 0;
+		fromString(quantities[i], quantity);
+		need_items.insert(make_pair(sheet_names[i]+":"+qualities[i], quantity));
+	}
+
+	std::map<uint32, uint32> slots;
+	std::map<string, uint32>::iterator itNeedItems;
+
+	// Save list of slots and quantities to delete
+	CInventoryPtr inventory = getInventory(c, selected_inv);
+	if (inventory != NULL)
+	{
+		for (uint32 j = 0; j < inventory->getSlotCount(); j++)
+		{
+			CGameItemPtr itemPtr = inventory->getItem(j);
+			if (itemPtr != NULL)
+			{
+				string sheet = itemPtr->getSheetId().toString();
+				uint32 item_quality = itemPtr->quality();
+				itNeedItems = need_items.find(sheet+":"+NLMISC::toString("%d", item_quality));
+				if (itNeedItems != need_items.end() && (*itNeedItems).second > 0)
+				{
+					uint32 quantity = std::min((*itNeedItems).second, itemPtr->getStackSize());
+					slots.insert(make_pair(j, quantity));
+					(*itNeedItems).second -= quantity;
+				}
+			}
+		}
+
+		// Check if all items has been found
+		for (itNeedItems = need_items.begin(); itNeedItems != need_items.end(); ++itNeedItems)
+		{
+			if ((*itNeedItems).second != 0) {
+				log.displayNL("ERR: Not enough items.");
+				return false;
+			}
+		}
+	}
+
+	log.displayNL("OK");
+	return true;
+}
+
+
+//----------------------------------------------------------------------------
 NLMISC_COMMAND(enchantEquipedItem, "enchantEquipedItem", "<uid> <slotname> <sheet1>,[<sheet2> ...] [<maxSpaLoad>]")
 {
 	if (args.size () < 3)

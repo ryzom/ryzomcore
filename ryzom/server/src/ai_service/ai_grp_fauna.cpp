@@ -546,6 +546,11 @@ void CSpawnGroupFauna::spawnBots()
 	_Timer.set(getPersistent().timer(CGrpFauna::SPAWN_TIME));
 }
 
+void CSpawnGroupFauna::spawnBots(const std::string &name)
+{
+}
+
+
 void CSpawnGroupFauna::despawnBots(bool immediately)
 {
 	setDespawnImmediately(immediately);

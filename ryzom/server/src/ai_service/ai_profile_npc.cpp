@@ -4229,7 +4229,7 @@ void CBotProfileMoveTo::updateProfile(uint ticksSinceLastUpdate)
 		{
 			// get a base pointer to allow virtual call to work
 
-			nlwarning("Follow No Path : %s", _Bot->getPersistent().getOneLineInfoString().c_str());
+			//nlwarning("Follow No Path : %s", _Bot->getPersistent().getOneLineInfoString().c_str());
 		}
 	}
 }

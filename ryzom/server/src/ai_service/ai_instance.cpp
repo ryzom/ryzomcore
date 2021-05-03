@@ -705,61 +705,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	grp->clrBotsAreNamedFlag();
 
-	//addGroupInfo(grp, name, grp->getAlias());
-
-
-	{
-		// build unnamed bot
-		for	(uint i=0; i<nbBots; ++i)
-		{
-			_LastSpawnAlias++;
-			nlinfo("Spawn with alias : %d (%s)", _LastSpawnAlias, _LigoConfig.aliasToString(_LastSpawnAlias).c_str());
-			grp->bots().addChild(new CBotNpc(grp, _LastSpawnAlias, name), i); // Doub: 0 instead of getAlias()+i otherwise aliases are wrong
-
-			CBotNpc* const bot = NLMISC::safe_cast<CBotNpc*>(grp->bots()[i]);
-
-			bot->setSheet(sheet);
-			bot->setPrimAlias(900+_InstanceNumber);
-			if (!look.empty())
-				bot->setClientSheet(look);
-			bot->equipmentInit();
-			bot->initEnergy(/*groupEnergyCoef()*/0);
-			CAIVector rpos(pos);
-			if (dispersionRadius == 0)
-			{
-				nlinfo("Stucked !");
-				bot->setStuck(true);
-			}
-
-			float angle = 0.f;
-			if (orientation < (NLMISC::Pi * 2.0) && orientation > (-NLMISC::Pi * 2.0))
-				angle = (float)orientation;
-			else
-				angle = randomAngle();
-
-			// Spawn all randomly except if only 1 bot
-			if (nbBots > 1 || dispersionRadius > 1)
-			{
-				bot->saveFirstPosition(pos, dispersionRadius);
-				RYAI_MAP_CRUNCH::CWorldMap const& worldMap = CWorldContainer::getWorldMap();
-				RYAI_MAP_CRUNCH::CWorldPosition	wp;
-				uint32 maxTries = 100;
-				do
-				{
-					rpos = pos;
-					rpos += randomPos(dispersionRadius);
-					--maxTries;
-				}
-				while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
-				if (maxTries<=0)
-					rpos = pos;
-
-				bot->setStartPos(pos.x().asDouble(), pos.y().asDouble(), angle, AITYPES::vp_auto);
-			}
-			else
-				bot->setStartPos(rpos.x().asDouble(),rpos.y().asDouble(), angle, AITYPES::vp_auto);
-		}
-	}
+	eventCreateNpcBot(grp, nbBots, false, sheetId, pos, "", orientation, dispersionRadius, look);
 
 	grp->spawn();
 	CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
@@ -801,6 +747,71 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	return grp;
 }
+
+bool CAIInstance::eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, const std::string &name, double orientation, double dispersionRadius, const std::string &look)
+{
+	uint32 offset = grp->bots().size();
+	for	(uint i=0; i<nbBots; ++i)
+	{
+		_LastSpawnAlias++;
+		grp->bots().addChild(new CBotNpc(grp, _LastSpawnAlias, grp->getName()), offset+i);
+
+		CBotNpc* const bot = NLMISC::safe_cast<CBotNpc*>(grp->bots()[offset+i]);
+
+		AISHEETS::ICreatureCPtr sheet = AISHEETS::CSheets::getInstance()->lookup(sheetId);
+		if (!sheet)
+		{
+			nlwarning("invalid sheet while creating event npc group");
+			return false;
+		}
+
+		bot->setSheet(sheet);
+		bot->setPrimAlias(900+_InstanceNumber);
+		if (!look.empty())
+			bot->setClientSheet(look);
+		bot->equipmentInit();
+		bot->initEnergy(/*groupEnergyCoef()*/0);
+		CAIVector rpos(pos);
+		if (dispersionRadius == 0)
+			bot->setStuck(true);
+
+		float angle = 0.f;
+		if (orientation < (NLMISC::Pi * 2.0) && orientation > (-NLMISC::Pi * 2.0))
+			angle = (float)orientation;
+		else
+			angle = randomAngle();
+
+		// Spawn all randomly except if only 1 bot
+		if (nbBots > 1 || dispersionRadius > 1)
+		{
+			bot->saveFirstPosition(pos, dispersionRadius);
+			RYAI_MAP_CRUNCH::CWorldMap const& worldMap = CWorldContainer::getWorldMap();
+			RYAI_MAP_CRUNCH::CWorldPosition	wp;
+			uint32 maxTries = 100;
+			do
+			{
+				rpos = pos;
+				rpos += randomPos(dispersionRadius);
+				--maxTries;
+			}
+			while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
+			if (maxTries<=0)
+				rpos = pos;
+
+			bot->setStartPos(pos.x().asDouble(), pos.y().asDouble(), angle, AITYPES::vp_auto);
+		}
+		else
+			bot->setStartPos(rpos.x().asDouble(),rpos.y().asDouble(), angle, AITYPES::vp_auto);
+	}
+
+	if (spawnBots)
+		grp->getSpawnObj()->spawnBots(name);
+
+	return true;
+}
+
+
+
 
 CBotEasterEgg* CAIInstance::createEasterEgg(uint32 easterEggId, NLMISC::CSheetId const& sheetId, std::string const& botName, double x, double y, double z, double heading, const std::string& look)
 {

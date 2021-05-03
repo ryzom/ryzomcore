@@ -45,6 +45,7 @@ public:
 	CGroupNpc& getPersistent() const;
 
 	virtual void spawnBots();
+	virtual void spawnBots(const std::string &name);
 	virtual void despawnBots(bool immediately);
 
 	void update();

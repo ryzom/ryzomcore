@@ -63,6 +63,7 @@ public:
 	void aggroGain(TDataSetRow const& aggroBot) const { }
 
 	virtual void spawnBots() = 0;
+	virtual void spawnBots(const std::string &name) = 0;
 	virtual void despawnBots(bool immediately) = 0;
 
 	virtual void update() = 0;

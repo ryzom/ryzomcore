@@ -32,10 +32,10 @@ public:
 	{
 	}
 	virtual ~CStringFilter() { }
-	
+
 	bool operator !=(std::string const& other) const { return !operator ==(other); }
 	bool operator ==(std::string const& other) const { return NLMISC::testWildCard(other, _Filter); }
-	
+
 private:
 	std::string _Filter;
 };
@@ -183,6 +183,25 @@ void buildOutpostList(TContainer& container)
 	}
 }
 
+
+template <class TContainer>
+void buildNpcManagerList(TContainer& container)
+{
+	std::deque<CAIInstance*> aiinstances;
+	buildInstanceList(aiinstances);
+	FOREACH(itAIInstance, std::deque<CAIInstance*>, aiinstances)
+	{
+		CAIInstance* aiinstance = *itAIInstance;
+		if (aiinstance == NULL)
+			continue;
+
+		CManager*	ManagerPtr	=	CAIS::instance().tryToGetManager("i0:m1");
+		if (ManagerPtr)
+			container.push_back(ManagerPtr);
+	}
+}
+
+
 template <class TContainer>
 void buildManagerList(TContainer& container)
 {
@@ -329,9 +348,9 @@ void buildFaunaPlaceList(TContainer& container)
 	{
 		CGrpFauna *grpFauna = dynamic_cast<CGrpFauna *>(*itGroup);
 		if (!grpFauna)
-			continue;		
+			continue;
 		FOREACH(itPlaces, CAliasCont<CAIPlace>, grpFauna->places())
-		{			
+		{
 			container.push_back(*itPlaces);
 		}
 	}
@@ -535,7 +554,7 @@ void despawn(CAIPlace &value)
 		else
 		{
 			nlwarning("Places %s is not time driven, cannot deactivate it", value.getIndexString().c_str());
-		}		
+		}
 	}
 }
 

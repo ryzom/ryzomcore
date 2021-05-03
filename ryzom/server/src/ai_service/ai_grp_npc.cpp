@@ -341,6 +341,57 @@ void CSpawnGroupNpc::stateChange(CAIState const* oldState, CAIState const* newSt
 	}
 }
 
+void CSpawnGroupNpc::spawnBots(const std::string &name)
+{
+	ucstring ucName;
+	ucName.fromUtf8(name);
+
+	FOREACH(itBot, CCont<CBot>, bots())
+	{
+		CBot* bot = *itBot;
+		if (!bot->isSpawned()) {
+			bot->spawn();
+
+			if (!ucName.empty())
+			{
+				CSpawnBot *spawnBot = bot->getSpawnObj();
+				if (spawnBot)
+				{
+					TDataSetRow	row = spawnBot->dataSetRow();
+					NLNET::CMessage	msgout("CHARACTER_NAME");
+					msgout.serial(row);
+					msgout.serial(ucName);
+					sendMessageViaMirror("IOS", msgout);
+					spawnBot->getPersistent().setCustomName(ucName);
+				}
+			}
+
+			if (_Cell < 0) {
+				CEntityId id = bot->getSpawnObj()->getEntityId();
+				sint32 x = bot->getSpawnObj()->pos().x();
+				sint32 y = bot->getSpawnObj()->pos().y();
+				sint32 z = bot->getSpawnObj()->pos().h();
+				float t = bot->getSpawnObj()->pos().theta().asRadians();
+				uint8 cont = 0;
+				uint8 slide = 1;
+				NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle() + 1;
+				CMessage msgout2("ENTITY_TELEPORTATION");
+				msgout2.serial( id );
+				msgout2.serial( x );
+				msgout2.serial( y );
+				msgout2.serial( z );
+				msgout2.serial( t );
+				msgout2.serial( tick );
+				msgout2.serial( cont );
+				msgout2.serial( _Cell );
+				msgout2.serial( slide );
+
+				sendMessageViaMirror("GPMS", msgout2);
+			}
+		}
+	}
+}
+
 void CSpawnGroupNpc::spawnBots()
 {
 	FOREACH(itBot, CCont<CBot>, bots())
@@ -348,6 +399,7 @@ void CSpawnGroupNpc::spawnBots()
 		CBot* bot = *itBot;
 		if (!bot->isSpawned()) {
 			bot->spawn();
+
 			if (_Cell < 0) {
 				CEntityId id = bot->getSpawnObj()->getEntityId();
 				sint32 x = bot->getSpawnObj()->pos().x();
