@@ -218,8 +218,10 @@ void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGr
 
 	
 
+	bool noTranslation = false;
 	CCDBNodeLeaf *nodeNoTranslation = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(gt)) + ":DISABLE", false);
-	bool noTranslation = nodeNoTranslation->getValueBool();
+	if (nodeNoTranslation)
+		noTranslation = nodeNoTranslation->getValueBool();
 
 	ucstring msgNoTranslate = msg;
 
