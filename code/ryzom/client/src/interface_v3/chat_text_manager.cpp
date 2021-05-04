@@ -431,11 +431,15 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 	if (startTr != string::npos && endOfOriginal != string::npos)
 	{
 		string lang = toUpper(msg.substr(startTr+2, 2)).toString();
-		
+
+		bool inverse = false;
+		bool hideFlag = false;
 		CCDBNodeLeaf *nodeInverse = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
-		bool inverse = nodeInverse->getValueBool();
+		if (nodeInverse)
+			inverse = nodeInverse->getValueBool();
 		CCDBNodeLeaf *nodeHideFlag = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":HIDE_FLAG", false);
-		bool hideFlag = nodeHideFlag->getValueBool();
+		if (nodeHideFlag)
+			hideFlag = nodeHideFlag->getValueBool();
 		
 		CViewBase *vt = createMsgTextSimple(msg.substr(0, startTr), col, justified, NULL);
 		para->addChild(vt);
