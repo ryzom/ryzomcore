@@ -730,9 +730,7 @@ namespace NLGUI
 		bool			_Localize;
 
 		// Current node is a text area
-		bool			_TextArea;
 		std::string		_TextAreaTemplate;
-		std::string		_TextAreaContent;
 		std::string		_TextAreaName;
 		uint			_TextAreaRow;
 		uint			_TextAreaCols;
@@ -983,11 +981,9 @@ namespace NLGUI
 		void htmlTD(const CHtmlElement &elm);
 		void htmlTDend(const CHtmlElement &elm);
 		void htmlTEXTAREA(const CHtmlElement &elm);
-		void htmlTEXTAREAend(const CHtmlElement &elm);
 		void htmlTH(const CHtmlElement &elm);
 		void htmlTHend(const CHtmlElement &elm);
 		void htmlTITLE(const CHtmlElement &elm);
-		void htmlTITLEend(const CHtmlElement &elm);
 		void htmlTR(const CHtmlElement &elm);
 		void htmlTRend(const CHtmlElement &elm);
 		//void htmlU(const CHtmlElement &elm);

@@ -1231,10 +1231,10 @@ namespace NLGUI
 		case HTML_TABLE:    htmlTABLEend(elm); break;
 		case HTML_TD:       htmlTDend(elm); break;
 		case HTML_TBODY:    renderPseudoElement(":after", elm); break;
-		case HTML_TEXTAREA: htmlTEXTAREAend(elm); break;
+		case HTML_TEXTAREA: break;
 		case HTML_TFOOT:    renderPseudoElement(":after", elm); break;
 		case HTML_TH:       htmlTHend(elm); break;
-		case HTML_TITLE:    htmlTITLEend(elm); break;
+		case HTML_TITLE:    break;
 		case HTML_TR:       htmlTRend(elm); break;
 		case HTML_U:        renderPseudoElement(":after", elm); break;
 		case HTML_UL:       htmlULend(elm); break;
@@ -1396,9 +1396,9 @@ namespace NLGUI
 		{
 			beginElement(elm);
 
-			std::list<CHtmlElement>::iterator it = elm.Children.begin();
 			if (!_IgnoreChildElements)
 			{
+				std::list<CHtmlElement>::iterator it = elm.Children.begin();
 				while(it != elm.Children.end())
 				{
 					renderDOM(*it);
@@ -2426,15 +2426,7 @@ namespace NLGUI
 		}
 
 		// In title ?
-		if (_Title)
-		{
-			_TitleString += tmpStr;
-		}
-		else if (_TextArea)
-		{
-			_TextAreaContent += tmpStr;
-		}
-		else if (_Object)
+		if (_Object)
 		{
 			_ObjectScript += tmpStr;
 		}
@@ -2899,8 +2891,6 @@ namespace NLGUI
 		_Anchors.clear();
 		_AnchorName.clear();
 		_CellParams.clear();
-		_Title = false;
-		_TextArea = false;
 		_Object = false;
 		_Localize = false;
 		_ReadingHeadTag = false;
@@ -3036,12 +3026,10 @@ namespace NLGUI
 
 	void CGroupHTML::setTitle(const std::string &title)
 	{
-		_TitleString.clear();
-		if(!_TitlePrefix.empty())
-		{
-			_TitleString = _TitlePrefix + " - ";
-		}
-		_TitleString += title;
+		if(_TitlePrefix.empty())
+			_TitleString = title;
+		else
+			_TitleString = _TitlePrefix + " - " + title;
 
 		setContainerTitle(_TitleString);
 	}
@@ -6601,6 +6589,9 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTEXTAREA(const CHtmlElement &elm)
 	{
+		_IgnoreChildElements = true;
+
+		// TODO: allow textarea without form
 		if (_Forms.empty())
 			return;
 
@@ -6615,7 +6606,6 @@ namespace NLGUI
 		_TextAreaName.clear();
 		_TextAreaRow = 1;
 		_TextAreaCols = 10;
-		_TextAreaContent.clear();
 		_TextAreaMaxLength = 1024;
 		if (elm.hasNonEmptyAttribute("name"))
 			_TextAreaName = elm.getAttribute("name");
@@ -6627,16 +6617,11 @@ namespace NLGUI
 			fromString(elm.getAttribute("maxlength"), _TextAreaMaxLength);
 
 		_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
-		_TextArea = true;
-		_PRE.push_back(true);
-	}
 
-	void CGroupHTML::htmlTEXTAREAend(const CHtmlElement &elm)
-	{
-		if (_Forms.empty())
-			return;
+		std::string content = strFindReplaceAll(elm.serializeChilds(), std::string("\t"), std::string(" "));
+		content = strFindReplaceAll(content, std::string("\n"), std::string(" "));
 
-		CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent, _TextAreaMaxLength);
+		CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, content, _TextAreaMaxLength);
 		if (textArea)
 		{
 			// Add the text area to the form
@@ -6645,9 +6630,6 @@ namespace NLGUI
 			entry.TextArea = textArea;
 			_Forms.back().Entries.push_back (entry);
 		}
-
-		_TextArea = false;
-		popIfNotEmpty (_PRE);
 	}
 
 	// ***************************************************************************
@@ -6664,18 +6646,14 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTITLE(const CHtmlElement &elm)
 	{
+		_IgnoreChildElements = true;
+
 		// TODO: only from <head>
 		// if (!_ReadingHeadTag) return;
-		if(!_TitlePrefix.empty())
-			_TitleString = _TitlePrefix + " - ";
-		else
-			_TitleString.clear();
-		_Title = true;
-	}
 
-	void CGroupHTML::htmlTITLEend(const CHtmlElement &elm)
-	{
-		_Title = false;
+		// consume all child elements
+		_TitleString = strFindReplaceAll(elm.serializeChilds(), std::string("\t"), std::string(" "));
+		_TitleString = strFindReplaceAll(_TitleString, std::string("\n"), std::string(" "));
 		setTitle(_TitleString);
 	}
 
