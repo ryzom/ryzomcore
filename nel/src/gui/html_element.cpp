@@ -18,6 +18,7 @@
 #include "stdpch.h"
 
 #include "nel/gui/html_element.h"
+#include "nel/gui/libwww.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -135,6 +136,103 @@ namespace NLGUI
 		}
 
 		return "";
+	}
+
+	// ***************************************************************************
+	std::string CHtmlElement::htmlEscape(std::string val, bool isAttribute) const
+	{
+		static const std::vector<std::string> searchReplace = {
+			"&", "&amp;",
+			"<", "&lt;",
+			">", "&gt;",
+			"\xA0", "&nbsp;",
+		};
+
+		for(uint i = 0; i < searchReplace.size(); i+=2)
+			val = strFindReplaceAll(val, searchReplace[i], searchReplace[i+1]);
+
+		if (isAttribute)
+		{
+			static const std::string q = "\"";
+			static const std::string quot = "&quot;";
+			val = strFindReplaceAll(val, q, quot);
+		}
+
+		return val;
+	}
+
+	// ***************************************************************************
+	std::string CHtmlElement::serializeAttributes() const
+	{
+		std::string result;
+		for(std::map<std::string, std::string>::const_iterator it = Attributes.begin(); it != Attributes.end(); ++it)
+		{
+			if (it->first == "class")
+			{
+				result += " class=\"";
+				for(std::set<std::string>::const_iterator it2 = ClassNames.begin(); it2 != ClassNames.end(); ++it2)
+				{
+					if (it2 != ClassNames.begin())
+					{
+						result += " ";
+					}
+					result += htmlEscape(*it2, true);
+				}
+				result += "\"";
+			}
+			else
+			{
+				result += " " + it->first + "=\"" + htmlEscape(it->second, true) + "\"";
+			}
+		}
+		return result;
+	}
+
+	// ***************************************************************************
+	std::string CHtmlElement::serializeChilds() const
+	{
+		std::string result;
+		for(std::list<CHtmlElement>::const_iterator it = Children.begin(); it != Children.end(); ++it)
+			result += it->serialize();
+
+		return result;
+	}
+
+	// ***************************************************************************
+	std::string CHtmlElement::serialize() const
+	{
+		if (Type == TEXT_NODE)
+		{
+			if (parent && (parent->ID == HTML_SCRIPT || parent->ID == HTML_STYLE ||
+				parent->ID == HTML_IFRAME || parent->ID == HTML_NOEMBED ||
+				parent->ID == HTML_NOSCRIPT))
+			{
+				return Value;
+			} else {
+				return htmlEscape(Value);
+			}
+		}
+
+		std::string result = "<" + Value + serializeAttributes() + ">";
+
+		if (ID == HTML_AREA || ID == HTML_BASE || ID == HTML_BR ||
+			ID == HTML_COL || ID == HTML_EMBED || ID == HTML_HR ||
+			ID == HTML_IMG || ID == HTML_INPUT || ID == HTML_LINK ||
+			ID == HTML_META || ID == HTML_PARAM || ID == HTML_WBR)
+		{
+			return result;
+		}
+
+		// first linebreak that will be ignored on parse time
+		if (ID == HTML_PRE || ID == HTML_TEXTAREA)
+			result += "\n";
+
+		if (!Children.empty())
+			result += serializeChilds();
+
+		result += "</" + Value + ">";
+
+		return result;
 	}
 
 	// ***************************************************************************
