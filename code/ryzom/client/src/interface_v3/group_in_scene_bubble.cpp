@@ -875,16 +875,19 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 
 
 	// Clean bubble from translation system
-	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TRANSLATION_ONLY_AS_TOOLTIP_CB", false);
-	bool originalFirst = node->getValueBool();
 
 	ucstring::size_type pos = 0;
 	ucstring::size_type textSize = ucsText.size();
 	string::size_type startTr = ucsText.find(ucstring("{:"));
 	string::size_type endOfOriginal = ucsText.find(ucstring("}@{"));
+
+	string lang = toUpper(ucsText.substr(startTr+2, 2)).toString();
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
+	bool inverse = node->getValueBool();
+
 	if (endOfOriginal != string::npos)
 	{
-		if (!originalFirst)
+		if (!inverse)
 		{
 			pos = endOfOriginal+4;
 		}
