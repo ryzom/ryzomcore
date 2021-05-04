@@ -881,12 +881,11 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 	string::size_type startTr = ucsText.find(ucstring("{:"));
 	string::size_type endOfOriginal = ucsText.find(ucstring("}@{"));
 
-	string lang = toUpper(ucsText.substr(startTr+2, 2)).toString();
-	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
-	bool inverse = node->getValueBool();
+	if (startTr != string::npos && endOfOriginal != string::npos) {
+		string lang = toUpper(ucsText.substr(startTr+2, 2)).toString();
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
+		bool inverse = node->getValueBool();
 
-	if (endOfOriginal != string::npos)
-	{
 		if (!inverse)
 		{
 			pos = endOfOriginal+4;
