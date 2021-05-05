@@ -64,6 +64,7 @@ namespace NLGUI
 		_Indent = 0;
 		_FirstViewIndentView = false;
 		_TextId = 0;
+		_TextAlign = AlignLeft;
 	}
 
 	// ----------------------------------------------------------------------------
