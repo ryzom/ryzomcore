@@ -415,6 +415,19 @@ private:
 public: //for commands
 	/// changes the state of the outpost
 	void setState(OUTPOSTENUMS::TOutpostState state);
+
+	/// update timers for client
+	/// the updated values are accessible with the following methods:
+	/// 	computeStateEndDateTickForClient()
+	///		computeRoundEndDateTickForClient()
+	void updateTimersForClient();
+
+	/// ask an update in the guild database for this outpost
+	void askGuildDBUpdate(COutpostGuildDBUpdater::TDBPropSet dbPropSet) const;
+
+	/// ask an update of the outpost database
+	void askOutpostDBUpdate();
+
 private:
 
 	/// get an attack/defense squad from slot
@@ -434,18 +447,6 @@ private:
 	/// \param spawnZoneAlias : return the alias of the spawn zone
 	/// \return false if index cannot be converted
 	bool convertSpawnZoneIndex(uint32 spawnZoneIndex, TAIAlias & spawnZoneAlias) const;
-
-	/// ask an update in the guild database for this outpost
-	void askGuildDBUpdate(COutpostGuildDBUpdater::TDBPropSet dbPropSet) const;
-
-	/// ask an update of the outpost database
-	void askOutpostDBUpdate();
-
-	/// update timers for client
-	/// the updated values are accessible with the following methods:
-	/// 	computeStateEndDateTickForClient()
-	///		computeRoundEndDateTickForClient()
-	void updateTimersForClient();
 
 	std::string getBroadcastString(TBroadcastMessage message) const;
 	void broadcastMessageMsg(std::vector<TDataSetRow> const& audience, std::string const& message, TVectorParamCheck const& params=TVectorParamCheck()) const;
