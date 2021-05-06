@@ -136,6 +136,11 @@ NLMISC_COMMAND(outpostSimulateTimer0End, "", "<outpost_id> [<absolute end time> 
 	if (endTime==0) endTime = 1;
 
 	outpost->simulateTimer0End(endTime);
+
+	outpost->updateTimersForClient();
+	outpost->askOutpostDBUpdate();
+	outpost->askGuildDBUpdate(COutpostGuildDBUpdater::STATE_END_DATE);
+
 	return true;
 }
 
