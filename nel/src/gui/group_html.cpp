@@ -2399,6 +2399,85 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CGroupHTML::newTextButton(const std::string &text, const std::string &tpl)
+	{
+		_CurrentViewLink = NULL;
+		_CurrentViewImage = NULL;
+
+		// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
+		string param = "name=" + this->_Id + "|url=" + getLink();
+		string name;
+		if (!_AnchorName.empty())
+			name = _AnchorName.back();
+
+		typedef pair<string, string> TTmplParam;
+		vector<TTmplParam> tmplParams;
+		tmplParams.push_back(TTmplParam("id", ""));
+		tmplParams.push_back(TTmplParam("onclick", "browse"));
+		tmplParams.push_back(TTmplParam("onclick_param", param));
+		tmplParams.push_back(TTmplParam("active", "true"));
+		CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(tpl, getId()+":"+name, tmplParams);
+		if (!buttonGroup)
+		{
+			nlinfo("Text button template '%s' not found", tpl.c_str());
+			return;
+		}
+		buttonGroup->setId(getId()+":"+name);
+
+		// Add the ctrl button
+		CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
+		if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
+		if (!ctrlButton)
+		{
+			nlinfo("Text button template '%s' is missing :button or :b text element", tpl.c_str());
+			return;
+		}
+		ctrlButton->setModulateGlobalColorAll(false);
+
+		// Translate the tooltip
+		ctrlButton->setText(text);
+		ctrlButton->setDefaultContextHelp(std::string(getLinkTitle()));
+		// empty url / button disabled
+		ctrlButton->setFrozen(*getLink() == '\0');
+
+		setTextButtonStyle(ctrlButton, _Style.Current);
+
+		_Paragraph->addChild(buttonGroup);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::newTextLink(const std::string &text)
+	{
+		CViewLink *newLink = new CViewLink(CViewBase::TCtorParam());
+		if (getA())
+		{
+			newLink->Link = getLink();
+			newLink->LinkTitle = getLinkTitle();
+			if (!newLink->Link.empty())
+			{
+				newLink->setHTMLView (this);
+				newLink->setActionOnLeftClick("browse");
+				newLink->setParamsOnLeftClick("name=" + getId() + "|url=" + newLink->Link);
+			}
+		}
+		newLink->setText(text);
+		newLink->setMultiLineSpace((uint)((float)(_Style.Current.FontSize)*LineSpaceFontFactor));
+		newLink->setMultiLine(true);
+		newLink->setModulateGlobalColor(_Style.Current.GlobalColor);
+		setTextStyle(newLink, _Style.Current);
+
+		registerAnchor(newLink);
+
+		if (getA() && !newLink->Link.empty())
+			getParagraph()->addChildLink(newLink);
+		else
+			getParagraph()->addChild(newLink);
+
+		_CurrentViewLink = newLink;
+		_CurrentViewImage = NULL;
+	}
+
+	// ***************************************************************************
 
 	void CGroupHTML::addString(const std::string &str)
 	{
@@ -2465,7 +2544,6 @@ namespace NLGUI
 			// Text added ?
 			bool added = false;
 
-			// Number of child in this paragraph
 			if (_CurrentViewLink)
 			{
 				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == '\n';
@@ -2482,78 +2560,9 @@ namespace NLGUI
 			if (!added)
 			{
 				if (getA() && string(getLinkClass()) == "ryzom-ui-button")
-				{
-					string buttonTemplate = DefaultButtonGroup;
-					// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-					string param = "name=" + this->_Id + "|url=" + getLink();
-					string name;
-					if (!_AnchorName.empty())
-						name = _AnchorName.back();
-					typedef pair<string, string> TTmplParam;
-					vector<TTmplParam> tmplParams;
-					tmplParams.push_back(TTmplParam("id", ""));
-					tmplParams.push_back(TTmplParam("onclick", "browse"));
-					tmplParams.push_back(TTmplParam("onclick_param", param));
-					tmplParams.push_back(TTmplParam("active", "true"));
-					CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, getId()+":"+name, tmplParams);
-					if (buttonGroup)
-					{
-						buttonGroup->setId(getId()+":"+name);
-						// Add the ctrl button
-						CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
-						if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
-						if (ctrlButton)
-						{
-							ctrlButton->setModulateGlobalColorAll (false);
-
-							// Translate the tooltip
-							ctrlButton->setDefaultContextHelp(getLinkTitle());
-							ctrlButton->setText(tmpStr);
-							// empty url / button disabled
-							bool disabled = string(getLink()).empty();
-							ctrlButton->setFrozen(disabled);
-
-							setTextButtonStyle(ctrlButton, style);
-						}
-						getParagraph()->addChild (buttonGroup);
-						paragraphChange ();
-					}
-
-				}
+					newTextButton(tmpStr, DefaultButtonGroup);
 				else
-				{
-					CViewLink *newLink = new CViewLink(CViewBase::TCtorParam());
-					if (getA())
-					{
-						newLink->Link = getLink();
-						newLink->LinkTitle = getLinkTitle();
-						if (!newLink->Link.empty())
-						{
-							newLink->setHTMLView (this);
-
-							newLink->setActionOnLeftClick("browse");
-							newLink->setParamsOnLeftClick("name=" + getId() + "|url=" + newLink->Link);
-						}
-					}
-					newLink->setText(tmpStr);
-					newLink->setMultiLineSpace((uint)((float)(style.FontSize)*LineSpaceFontFactor));
-					newLink->setMultiLine(true);
-					newLink->setModulateGlobalColor(style.GlobalColor);
-					setTextStyle(newLink, style);
-					// newLink->setLineAtBottom (true);
-
-					registerAnchor(newLink);
-
-					if (getA() && !newLink->Link.empty())
-					{
-						getParagraph()->addChildLink(newLink);
-					}
-					else
-					{
-						getParagraph()->addChild(newLink);
-					}
-					paragraphChange ();
-				}
+					newTextLink(tmpStr);
 			}
 		}
 	}

@@ -304,6 +304,9 @@ namespace NLGUI
 
 		// return true if text has same style
 		bool isSameStyle(CViewLink *text, const CStyleParams &style) const;
+		// add text link using template
+		void newTextButton(const std::string &text, const std::string &tpl);
+		void newTextLink(const std::string &text);
 
 		// Add a string in the current paragraph
 		void addString(const std::string &str);
