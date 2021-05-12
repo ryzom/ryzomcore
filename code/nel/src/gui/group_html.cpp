@@ -6846,6 +6846,9 @@ namespace NLGUI
 		// setting ModulateGlobalColor must be after addImageDownload
 		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
 			table->setModulateGlobalColor(true);
+		else if (_Style.checkStyle("-ryzom-modulate-bgcolor", "false"))
+			table->setModulateGlobalColor(false);
+
 		table->setMarginLeft(getIndent());
 		addHtmlGroup (table, 0);
 
