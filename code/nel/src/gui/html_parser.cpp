@@ -57,7 +57,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// recursive function to walk html document
-	void CHtmlParser::parseNode(xmlNode *a_node, CHtmlElement &parent, std::string &styleString, std::vector<std::string> &links) const
+	void CHtmlParser::parseNode(xmlNode *a_node, CHtmlElement &parent, std::vector<std::string> &styles, std::vector<StyleLink> &links) const
 	{
 		uint childIndex = 0;
 		uint element_number;
@@ -66,7 +66,15 @@ namespace NLGUI
 		{
 			if (node->type == XML_TEXT_NODE)
 			{
-				parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content)));
+				// linebreak right after pre,textare open tag should be removed
+				if (parent.Children.empty() && (*node->content == '\n') && (parent.ID == HTML_PRE || parent.ID == HTML_TEXTAREA))
+				{
+					parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content) + 1));
+				}
+				else
+				{
+					parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content)));
+				}
 			}
 			else
 			if (node->type == XML_ELEMENT_NODE)
@@ -145,7 +153,9 @@ namespace NLGUI
 
 					if (useStyle)
 					{
-						parseStyle(node->children, styleString);
+						std::string style;
+						parseStyle(node->children, style);
+						styles.push_back(style);
 					}
 					// style tag is kept in dom
 				}
@@ -163,13 +173,24 @@ namespace NLGUI
 
 					if (useStyle)
 					{
-						links.push_back(elm.getAttribute("href"));
+						styles.push_back("");
+						links.push_back(StyleLink(styles.size()-1, elm.getAttribute("href")));
 					}
 					// link tag is kept in dom
 				}
 				else if (node->children)
 				{
-					parseNode(node->children, elm, styleString, links);
+					parseNode(node->children, elm, styles, links);
+
+					if (!elm.Children.empty() && elm.ID == HTML_PRE && elm.Children.back().Type == CHtmlElement::TEXT_NODE)
+					{
+						std::string::size_type size = elm.Children.back().Value.size();
+						// strip last '\n' from non-empty line
+						if (size > 1 && elm.Children.back().Value[size-1] == '\n')
+						{
+							elm.Children.back().Value = elm.Children.back().Value.substr(0, size - 1);
+						}
+					}
 
 					// must cleanup nested tags that libxml2 does not fix
 					// dt without end tag: <dl><dt><dt></dl>
@@ -406,7 +427,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CHtmlParser::getDOM(std::string htmlString, CHtmlElement &dom, std::string &styleString, std::vector<std::string> &links) const
+	void CHtmlParser::getDOM(std::string htmlString, CHtmlElement &dom, std::vector<std::string> &styles, std::vector<StyleLink> &links) const
 	{
 		htmlParserCtxtPtr parser = htmlCreatePushParserCtxt(NULL, NULL, NULL, 0, NULL, XML_CHAR_ENCODING_UTF8);
 		if (!parser)
@@ -428,8 +449,7 @@ namespace NLGUI
 			xmlNode *root = xmlDocGetRootElement(parser->myDoc);
 			if (root)
 			{
-				styleString.clear();
-				parseNode(root, dom, styleString, links);
+				parseNode(root, dom, styles, links);
 			}
 			else
 			{
