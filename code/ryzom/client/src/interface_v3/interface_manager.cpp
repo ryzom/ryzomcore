@@ -2523,6 +2523,17 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
 
+	ucstring cleanStr = str;
+	ucstring::size_type pos = str.find(ucstring("|"));
+	if (pos != std::string::npos)
+	{
+		ucstring::size_type end = str.find(ucstring("|"), pos+1);
+		if (end != std::string::npos)
+			cleanStr = str.substr(pos+1, end-pos-1);
+		else
+			cleanStr = str.substr(pos+1);
+	}
+
 	// If broadcast, parse lua code
 	if (toLower(cat) == "bc" && str.size() > 3 && str[0]=='@' && str[1]=='L' && str[2]=='U' && str[3]=='A')
 	{
@@ -2542,11 +2553,11 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 	if (mode != CClientConfig::SSysInfoParam::OverOnly && mode != CClientConfig::SSysInfoParam::Around)
 	{
 		if (PeopleInterraction.SystemInfo)
-			PeopleInterraction.ChatInput.SystemInfo.displayMessage(str, color, 2);
+			PeopleInterraction.ChatInput.SystemInfo.displayMessage(cleanStr, color, 2);
 		else
 		{
 			CPeopleInterraction::CSysMsg sysMsg;
-			sysMsg.Str = str;
+			sysMsg.Str = cleanStr;
 			sysMsg.Cat = cat;
 			PeopleInterraction.SystemMessageBuffer.push_back( sysMsg );
 		}
@@ -2557,10 +2568,10 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 
 	// If over popup a string at the bottom of the screen
 	if ((mode == CClientConfig::SSysInfoParam::Over) || (mode == CClientConfig::SSysInfoParam::OverOnly))
-		InSceneBubbleManager.addMessagePopup(str, color);
+		InSceneBubbleManager.addMessagePopup(cleanStr, color);
 	else if ( (mode == CClientConfig::SSysInfoParam::Around || mode == CClientConfig::SSysInfoParam::CenterAround)
 		&& PeopleInterraction.AroundMe.Window)
-		PeopleInterraction.ChatInput.AroundMe.displayMessage(str, color, 2);
+		PeopleInterraction.ChatInput.AroundMe.displayMessage(cleanStr, color, 2);
 
 }
 
