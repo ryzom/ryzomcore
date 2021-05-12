@@ -796,8 +796,8 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 #define PERSISTENT_CLASS CPowerActivationDate
 
 #define PERSISTENT_DATA\
-	PROP2(DeactivationDate, NLMISC::TGameCycle, CTickEventHandler::getGameCycle() - DeactivationDate, DeactivationDate = val)\
-	PROP2(ActivationDate, NLMISC::TGameCycle, ActivationDate - CTickEventHandler::getGameCycle(), ActivationDate = val)\
+	PROP_GAME_CYCLE(DeactivationDate)\
+	PROP_GAME_CYCLE(ActivationDate)\
 	PROP(uint16, ConsumableFamilyId)\
 	PROP2(PowerType,string,POWERS::toString(PowerType),PowerType=POWERS::toPowerType(val))\
 
@@ -829,7 +829,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 #define PERSISTENT_CLASS CConsumableOverdoseTimer
 
 #define PERSISTENT_DATA\
-	LPROP2(ActivationDate, NLMISC::TGameCycle, if(ActivationDate >= CTickEventHandler::getGameCycle()), ActivationDate - CTickEventHandler::getGameCycle(), ActivationDate = val)\
+	PROP_GAME_CYCLE(ActivationDate)\
 	PROP2(Family,string,  CConsumable::getFamilyName(Family), Family=CConsumable::getFamilyIndex(val))\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )

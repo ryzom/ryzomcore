@@ -10369,10 +10369,10 @@ void CCharacter::setDatabase()
 	CBankAccessor_PLR::getFAME().setCIV_ALLEGIANCE(_PropertyDatabase, _DeclaredCiv);
 	// activate effects active on character
 	_PersistentEffects.activate();
-	// activate forbid power end date, infective aura end date and consumable overdose timer
-	_ForbidPowerDates.activate();
-	_IneffectiveAuras.activate();
-	_ConsumableOverdoseEndDates.activate();
+	// cleanup expired forbid power, infective aura, and consumable overdose timer
+	_ForbidPowerDates.cleanVector();
+	_IneffectiveAuras.cleanVector();
+	_ConsumableOverdoseEndDates.cleanVector();
 	// init the RRPs
 	// RingRewardPoints.initDb();
 } // setDatabase //
@@ -16951,7 +16951,7 @@ void CCharacter::setPowerFlagDates()
 	{
 		uint32 flag = BRICK_FLAGS::powerTypeToFlag((*it).PowerType) - BRICK_FLAGS::BeginPowerFlags;
 
-		if ((*it).ActivationDate <= time && _ForbidPowerDates.doNotClear == false)
+		if ((*it).ActivationDate <= time)
 		{
 			// erase returns an iterator that designates the first element remaining beyond any elements removed, or
 			// end() if no such element exists.
@@ -17211,7 +17211,7 @@ bool CCharacter::addSabrinaEffect(CSEffect* effect)
 
 		if (sheet != CSheetId::Unknown)
 		{
-			effect->setEffectIndexInDB(addEffectInDB(sheet, EFFECT_FAMILIES::isEffectABonus(effect->getFamily())));
+			effect->setEffectIndexInDB(addEffectInDB(sheet, EFFECT_FAMILIES::isEffectABonus(effect->getFamily()), effect->getEndTime()));
 		}
 
 		return true;
@@ -22949,9 +22949,9 @@ void CCharacter::incParryModifier(sint32 inc)
 
 //------------------------------------------------------------------------------
 
-sint8 CCharacter::addEffectInDB(const NLMISC::CSheetId &sheetId, bool bonus)
+sint8 CCharacter::addEffectInDB(const NLMISC::CSheetId &sheetId, bool bonus, NLMISC::TGameCycle endTime)
 {
-	return _ModifiersInDB.addEffect(sheetId, bonus, _PropertyDatabase);
+	return _ModifiersInDB.addEffect(sheetId, bonus, endTime, _PropertyDatabase);
 }
 
 //------------------------------------------------------------------------------
@@ -22963,9 +22963,16 @@ void CCharacter::removeEffectInDB(uint8 index, bool bonus)
 
 //------------------------------------------------------------------------------
 
-void CCharacter::disableEffectInDB(uint8 index, bool bonus, NLMISC::TGameCycle activationDate)
+void CCharacter::disableEffectInDB(uint8 index, bool bonus, const NLMISC::CSheetId &sheetId, NLMISC::TGameCycle activationDate)
 {
-	_ModifiersInDB.disableEffect(index, bonus, activationDate, _PropertyDatabase);
+	_ModifiersInDB.disableEffect(index, bonus, sheetId, activationDate, _PropertyDatabase);
+}
+
+//------------------------------------------------------------------------------
+
+void CCharacter::updateEffectInDB(uint8 index, bool bonus, NLMISC::TGameCycle activationDate)
+{
+	_ModifiersInDB.updateEffect(index, bonus, activationDate, _PropertyDatabase);
 }
 
 //------------------------------------------------------------------------------

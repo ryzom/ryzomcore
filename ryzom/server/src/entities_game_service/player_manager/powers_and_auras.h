@@ -61,9 +61,6 @@ struct CPowerActivationDateVector
 	DECLARE_PERSISTENCE_METHODS
 
 	std::vector <CPowerActivationDate>	PowerActivationDates;
-	bool doNotClear;
-
-	CPowerActivationDateVector() { doNotClear = true; }
 
 	void clear();
 
@@ -79,8 +76,6 @@ struct CPowerActivationDateVector
 	bool isPowerAllowed(POWERS::TPowerType type, uint16 consumableFamilyId, NLMISC::TGameCycle &endDate);
 
 	void writeUsablePowerFlags( uint32 &usablePowerFlags);
-
-	void activate();
 };
 
 /************************************************************************/
@@ -116,8 +111,6 @@ public:
 	void cleanVector();
 
 	bool isAuraEffective(POWERS::TPowerType type, const NLMISC::CEntityId &user, NLMISC::TGameCycle &endDate);
-
-	void activate();
 };
 
 /************************************************************************/
@@ -170,8 +163,6 @@ struct CConsumableOverdoseTimerVector
 
 	/// can consume this family ? also clean the vector
 	bool canConsume(uint16 family, NLMISC::TGameCycle &endDate);
-
-	void activate();
 };
 
 

@@ -74,13 +74,16 @@ struct CModifiersInDB
 	void update(CCDBSynchronised &database);
 
 	/// add an active effect
-	sint8 addEffect(const NLMISC::CSheetId &sheetId, bool bonus, CCDBSynchronised &database);
+	sint8 addEffect(const NLMISC::CSheetId &sheetId, bool bonus, NLMISC::TGameCycle endTime, CCDBSynchronised &database);
 
 	/// remove an effect
 	void removeEffect(uint8 index, bool bonus, CCDBSynchronised &database);
 
 	/// disable an effect
-	void disableEffect(uint8 index, bool bonus, NLMISC::TGameCycle activationDate, CCDBSynchronised &database);
+	void disableEffect(uint8 index, bool bonus, const NLMISC::CSheetId &sheetId, NLMISC::TGameCycle activationDate, CCDBSynchronised &database);
+
+	/// update an effect activation date
+	void updateEffect(uint8 index, bool bonus, NLMISC::TGameCycle activationDate, CCDBSynchronised &database);
 	
 private:
 	void _addBonus(const CModifierInDB& bonus);

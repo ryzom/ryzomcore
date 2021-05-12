@@ -158,9 +158,13 @@ void CAuraRootEffect::createEffectOnEntity(CEntityBase *entity, CEntityBase *cre
 		if (effect)
 		{
 			effect->setIsFromConsumable(_IsFromConsumable);
-			effect->setEffectDisabledEndDate( CTickEventHandler::getGameCycle() + _TargetDisableTime );
+			effect->setEffectDisabledEndDate( _ActivationDate + _TargetDisableTime );
 			entity->addSabrinaEffect(effect);
-			character->useAura(_PowerType, CTickEventHandler::getGameCycle(), CTickEventHandler::getGameCycle() + _TargetDisableTime, creator->getId());
+			character->useAura(_PowerType, _ActivationDate, _ActivationDate + _TargetDisableTime, creator->getId());
+
+			// CAuraBaseEffect has short (~2sec) AurasUpdateFrequency timer as it needs to update in-range players.
+			// Send (our) CAuraRootEffect timer to client instead
+			character->updateEffectInDB(effect->getEffectIndexInDB(), EFFECT_FAMILIES::isEffectABonus(effect->getFamily()), getEndDate());
 
 			//send message to newly affected entity
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::power_type);
@@ -274,7 +278,7 @@ void CAuraBaseEffect::removed()
 		if (_IsFromConsumable)
 			player->removeEffectInDB((uint8)_EffectIndexInDB, true);
 		else
-			player->disableEffectInDB( (uint8)_EffectIndexInDB,true, _DisabledEndDate);
+			player->disableEffectInDB( (uint8)_EffectIndexInDB,true, getAssociatedSheetId(), _DisabledEndDate);
 	}
 } // removed //
 
