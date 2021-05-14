@@ -93,12 +93,15 @@ public:
 	// Called for local client debugging
 	void				debugLocalReceiveMissionInfo();
 
+	void				setAHAfterEnd(const std::string &ah) { _AHAfterEnd = ah ;}
+
 
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 private:
 	CBotChatPage  *_CurrPage;
 	uint16		   _SessionID;
+	std::string		_AHAfterEnd;
 	static CBotChatManager *_Instance;
 	//uint           _ChosenMissionFlags;
 
