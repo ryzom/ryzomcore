@@ -48,6 +48,9 @@ private:
 	static int	launchContextMenuInGame(CLuaState &ls); // params : menu name
 	static int  parseInterfaceFromString(CLuaState &ls); // params : intreface script
 	static int  updateAllLocalisedElements(CLuaState &ls);
+	static int  isShiftDown(CLuaState &ls);
+	static int  isCtrlDown(CLuaState &ls);
+	static int  getTimestampHuman(CLuaState &ls);
 	static int  breakPoint(CLuaState &ls);
 	static int  i18n(CLuaState &ls);			// retrieve an unicode string from CI18N
 	static int	setTextFormatTaged(CLuaState &ls);	// set a text that may contains Tag Format infos
