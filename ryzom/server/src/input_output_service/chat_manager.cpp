@@ -2028,7 +2028,7 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const string &chan)
 {
 	const TChanID *chanId = _ChanNames.getA(chan);
-	if (chanId || chan == "universe")
+	if (chanId || chan == "universe" || chan.substr(0, 6) == "guild:")
 	{
 
 		string usedlang = "";
@@ -2089,6 +2089,12 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 		{
 			TGroupId grpId = CEntityId(RYZOMID::chatGroup, 0);
 			farChatInGroup(grpId, 0, ucstr, ucstring("~")+ucstring(name));
+		}
+		else if (chan.substr(0, 6) == "guild:")
+		{
+			TGroupId groupId = CEntityId::Unknown;
+			groupId.fromString(chan.substr(6).c_str());
+			farChatInGroup(groupId, 0, ucstr, ucstring("~")+ucstring(name));
 		}
 		else
 		{
