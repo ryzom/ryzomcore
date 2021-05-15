@@ -37,7 +37,7 @@ struct SPropVisualA
 		uint64	JacketColor		: 3;  // max: 8		current: 8
 		uint64	TrouserModel	: 8;  // max: 256	current: 104
 		uint64	TrouserColor	: 3;  // max: 8		current: 8
-		uint64	WeaponRightHand	: 10; // max: 1024	current: 457
+		uint64	WeaponRightHand	: 10; // max: 1024	current: 625
 		uint64	WeaponLeftHand	: 8;  // max: 256	current: 63
 		uint64	ArmModel		: 8;  // max: 256	current: 94
 		uint64	ArmColor		: 3;  // max: 8		current: 8
