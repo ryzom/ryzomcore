@@ -2654,7 +2654,7 @@ void CGroupMap::createContinentLandMarks()
 
 static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 {
-	bool showTeleport = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER());
+	bool showTeleport = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER()|| hasPrivilegeTESTER());
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 
 	CInterfaceElement *ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu:teleport");
@@ -2755,6 +2755,8 @@ CGroupMap::CLandMarkButton *CGroupMap::createArkPointButton(const CArkPoint &poi
 	lmb->setParamsOnLeftClick(point.LeftClickParam);
 	lmb->setActionOnRightClick(point.RightClickAction);
 	lmb->setParamsOnRightClick(point.RightClickParam);
+	lmb->setActionOnOver(point.OverClickAction);
+	lmb->setParamsOnOver(point.OverClickParam);
 	lmb->setColor(point.Color);
 	lmb->setColorOver(point.Color);
 	lmb->setColorPushed(point.Color);

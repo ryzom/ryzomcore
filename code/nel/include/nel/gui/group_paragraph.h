@@ -54,6 +54,8 @@ namespace NLGUI
 			Right
 		};
 
+		enum TTextAlign { AlignLeft = 0, AlignCenter, AlignRight, AlignJustify };
+
 		///constructor
 		CGroupParagraph(const TCtorParam &param);
 
@@ -96,6 +98,8 @@ namespace NLGUI
 		void addTextChildID (uint32 id, bool multiLine = true);
 		// the same, but with id taken from the database
 		void addTextChildID (const std::string &dbPath, bool multiLine = true);
+
+		void setTextAlign(const TTextAlign align) { _TextAlign = align; }
 
 	protected:
 
@@ -269,6 +273,9 @@ namespace NLGUI
 		// To conserve elements in the order they have been added
 		// (the element drawn are stored in _views, _contrlos or _childrengroups of cinterfacegroup
 		std::vector<CElementInfo> _Elements;
+
+		// Horizontal align for elements
+		TTextAlign _TextAlign;
 
 		// Last parent width
 		sint32		_LastW;
