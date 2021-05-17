@@ -180,6 +180,7 @@ int main(int argc, char **argv)
 
 	Args.setVersion(getDisplayVersion());
 	Args.setDescription("Ryzom client");
+	Args.addArg("n", "nopatch", "value", "Use this to not use patch system");
 	Args.addArg("p", "profile", "id", "Use this profile to determine what directory to use by default");
 	Args.addAdditionalArg("login", "Login to use", true, false);
 	Args.addAdditionalArg("password", "Password to use", true, false);
