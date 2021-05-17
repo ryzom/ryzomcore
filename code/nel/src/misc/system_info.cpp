@@ -188,6 +188,7 @@
 #	endif // NL_CPU_INTEL
 #	ifdef NL_OS_MAC
 #		include <sys/mount.h>
+#		include <sys/sysctl.h>
 #	else
 #		include <sys/vfs.h>
 #	endif
