@@ -216,7 +216,7 @@ void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGr
 
 	gl = dynamic_cast<CGroupList *>(_Chat->getGroup("cb:text_list"));
 
-	
+
 
 	bool noTranslation = false;
 	CCDBNodeLeaf *nodeNoTranslation = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(gt)) + ":DISABLE", false);
@@ -233,7 +233,7 @@ void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGr
 			msgNoTranslate = msg.substr(0, startTr) + msg.substr(startTr+5, endOfOriginal-startTr-5);
 		}
 	}
-	
+
 	CViewBase *child = ctm.createMsgText(msgNoTranslate, col);
 	if (child)
 	{
@@ -586,8 +586,10 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 	ucstring newmsg = msg;
 	ucstring prefix;
 
+	bool noTranslation = false;
 	CCDBNodeLeaf *nodeNoTranslation = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(gt)) + ":DISABLE", false);
-	bool noTranslation = nodeNoTranslation->getValueBool();
+	if (nodeNoTranslation)
+		noTranslation = nodeNoTranslation->getValueBool();
 
 	if (noTranslation) {
 		string::size_type startTr = msg.find(ucstring("{:"));
