@@ -13774,11 +13774,11 @@ void CCharacter::abandonMission(uint8 indexClient)
 		CCharacter::sendDynamicSystemMessage(_EntityRowId, "ABANDON_MISSION");
 	}
 
-	vector<string> params = getCustomMissionParams(toUpper(templ->getMissionName())+"_CALLBACK");
+	vector<string> params  = getCustomMissionParams(toUpper(templ->getMissionName())+"_CALLBACK");
 	if (params.size() >= 1)
 	{
 		if (mission->getFinished() && mission->getMissionSuccess())
-			validateDynamicMissionStep(params[0]+"&result=SUCCESS");
+			validateDynamicMissionStep(params[0]+"&result=FINABD");
 		else
 			validateDynamicMissionStep(params[0]+"&result=ABD");
 		setCustomMissionParams(toUpper(templ->getMissionName())+"_CALLBACK", "");
@@ -14687,6 +14687,21 @@ void CCharacter::updateSavedMissions()
 			mission->setClientIndex(idx);
 			mission->putInGame();
 			mission->updateUsersJournalEntry();
+
+			sint32 x = 0;
+			sint32 y = 0;
+			string msg;
+			getPositionCheck(toUpper(templ->getMissionName()), x, y, msg);
+
+			if (x != 0 && y != 0)
+			{
+				SM_STATIC_PARAMS_1(textParams, STRING_MANAGER::literal);
+				textParams[0].Literal.fromUtf8(msg);
+				uint32 txt = STRING_MANAGER::sendStringToClient(getEntityRowId(), "LITERAL", textParams );
+				(*it).second->addCompassTarget((TAIAlias)txt,true,true);
+			}
+
+
 			list<CMissionEvent*> eventList;
 
 			for (map<uint32, EGSPD::CActiveStepPD>::iterator itStep = mission->getStepsBegin();
@@ -14725,16 +14740,31 @@ void CCharacter::updateSavedMissions()
 			mission->setTaker(_EntityRowId);
 			mission->putInGame();
 
+			sint32 x = 0;
+			sint32 y = 0;
+			string msg;
+			getPositionCheck(toUpper(templ->getMissionName()), x, y, msg);
+
 			for (map<uint32, EGSPD::CMissionCompassPD>::iterator itCompass = (*it).second->getCompassBegin();
 					itCompass != (*it).second->getCompassEnd(); ++itCompass)
 			{
 				TVectorParamCheck params(1);
-				sint32 x = 0;
-				sint32 y = 0;
-				string msg;
-				CCreature* c = CreatureManager.getCreature(
-								   CAIAliasTranslator::getInstance()->getEntityId((*itCompass).second.getBotId()));
+				x = 0;
+				y = 0;
+				msg = "";
 
+				getPositionCheck(toUpper(templ->getMissionName()), x, y, msg);
+				if (x != 0 && y != 0)
+				{
+					SM_STATIC_PARAMS_1(textParams, STRING_MANAGER::literal);
+					textParams[0].Literal.fromUtf8(msg);
+					uint32 txt = STRING_MANAGER::sendStringToClient(getEntityRowId(), "LITERAL", textParams );
+					PlayerManager.sendImpulseToClient(_Id, "JOURNAL:ADD_COMPASS", x, y, txt);
+					++it;
+					continue;
+				}
+
+				CCreature* c = CreatureManager.getCreature(CAIAliasTranslator::getInstance()->getEntityId((*itCompass).second.getBotId()));
 				if (c)
 				{
 					x = c->getState().X();
@@ -14746,35 +14776,21 @@ void CCharacter::updateSavedMissions()
 					params[0].setEIdAIAlias(c->getId(), CAIAliasTranslator::getInstance()->getAIAlias(c->getId()));
 					msg = "COMPASS_BOT";
 					uint32 txt = STRING_MANAGER::sendStringToClient(_EntityRowId, msg, params);
-					PlayerManager.sendImpulseToClient(
-						_Id, "JOURNAL:ADD_COMPASS_BOT", x, y, txt, c->getEntityRowId().getCompressedIndex());
+					PlayerManager.sendImpulseToClient(_Id, "JOURNAL:ADD_COMPASS_BOT", x, y, txt, c->getEntityRowId().getCompressedIndex());
 				}
 				else
 				{
-					CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate((*it).second->getTemplateId());
-					string textName;
-					getPositionCheck(toUpper(templ->getMissionName()), x, y, textName);
-					if (x != 0 && y != 0)
-					{
-						SM_STATIC_PARAMS_1(textParams, STRING_MANAGER::literal);
-						textParams[0].Literal.fromUtf8(textName);
-						uint32 txt = STRING_MANAGER::sendStringToClient( c->getEntityRowId(), "LITERAL", textParams );
-						PlayerManager.sendImpulseToClient(_Id, "JOURNAL:ADD_COMPASS", x, y, txt);
-					}
-					else
-					{
-						CPlace* place = CZoneManager::getInstance().getPlaceFromId((uint16)(*itCompass).second.getPlace());
 
-						if (place)
-						{
-							x = place->getCenterX();
-							y = place->getCenterY();
-							params[0].Identifier = place->getName();
-							params[0].Type = STRING_MANAGER::place;
-							msg = "COMPASS_PLACE";
-							uint32 txt = STRING_MANAGER::sendStringToClient(_EntityRowId, msg, params);
-							PlayerManager.sendImpulseToClient(_Id, "JOURNAL:ADD_COMPASS", x, y, txt);
-						}
+					CPlace* place = CZoneManager::getInstance().getPlaceFromId((uint16)(*itCompass).second.getPlace());
+					if (place)
+					{
+						x = place->getCenterX();
+						y = place->getCenterY();
+						params[0].Identifier = place->getName();
+						params[0].Type = STRING_MANAGER::place;
+						msg = "COMPASS_PLACE";
+						uint32 txt = STRING_MANAGER::sendStringToClient(_EntityRowId, msg, params);
+						PlayerManager.sendImpulseToClient(_Id, "JOURNAL:ADD_COMPASS", x, y, txt);
 					}
 				}
 			}
