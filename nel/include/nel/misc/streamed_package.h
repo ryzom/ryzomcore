@@ -32,7 +32,7 @@ public:
 		uint32 Size;
 		uint32 LastModified;
 
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 
 	};
 
@@ -40,7 +40,7 @@ public:
 	CStreamedPackage();
 	~CStreamedPackage();
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/// result: [out] ex. /00/00/000000000..
 	/// hash: [in]
