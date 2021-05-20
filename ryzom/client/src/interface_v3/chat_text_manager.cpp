@@ -433,6 +433,17 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 	// Original/Translated case, example: {:enHello the world!}@{ Bonjour le monde !
 	if (startTr != string::npos && endOfOriginal != string::npos)
 	{
+		string lang = toUpperAscii(msg.substr(startTr+2, 2));
+
+		bool inverse = false;
+		bool hideFlag = false;
+		CCDBNodeLeaf *nodeInverse = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
+		if (nodeInverse)
+			inverse = nodeInverse->getValueBool();
+		CCDBNodeLeaf *nodeHideFlag = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":HIDE_FLAG", false);
+		if (nodeHideFlag)
+			hideFlag = nodeHideFlag->getValueBool();
+		
 		CViewBase *vt = createMsgTextSimple(msg.substr(0, startTr), col, justified, NULL);
 		para->addChild(vt);
 
@@ -443,10 +454,10 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		ctrlButton->setTexture(texture);
 		ctrlButton->setTextureOver(texture);
 		ctrlButton->setTexturePushed(texture);
-		if (!originalFirst)
+		if (!inverse)
 		{
 		  ctrlButton->setDefaultContextHelp(original);
-		  pos = endOfOriginal+3;
+		  pos = endOfOriginal+4;
 		}
 		else
 		{
@@ -455,7 +466,11 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		  textSize = endOfOriginal;
 		}
 		ctrlButton->setId("tr");
-		para->addChild(ctrlButton);
+		if (hideFlag) {
+		  delete ctrlButton;
+		} else {
+		  para->addChild(ctrlButton);
+		}
 	}
 
 	// quickly check if text has links or not

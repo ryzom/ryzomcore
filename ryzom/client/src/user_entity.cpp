@@ -2674,17 +2674,6 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 		{
 			playerGiftNeeded->setValue32(0);
 		}
-		//
-		missionOption = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k), false);
-		if (missionOption)
-		{
-			missionOption->setValue32(0);
-		}
-		playerGiftNeeded = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:PLAYER_GIFT_NEEDED", (int) k), false);
-		if (playerGiftNeeded)
-		{
-			playerGiftNeeded->setValue32(0);
-		}
 	}
 /* TODO ULU : Add RP tags */
 

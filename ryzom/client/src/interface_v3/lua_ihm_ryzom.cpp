@@ -96,6 +96,7 @@
 #include "../continent_manager.h"
 #include "../zone_util.h"
 #include "../motion/user_controls.h"
+#include "../events_listener.h"
 #include "group_html_cs.h"
 #include "group_map.h"
 #include "bonus_malus.h"
@@ -153,6 +154,7 @@ using namespace R2;
 extern NLMISC::CLog	g_log;
 extern CContinentManager ContinentMngr;
 extern CClientChatManager		ChatMngr;
+extern CEventsListener		EventsListener;				// Inputs Manager
 
 // ***************************************************************************
 class CHandlerLUA : public IActionHandler
@@ -445,6 +447,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("launchContextMenuInGame",    launchContextMenuInGame);
 	ls.registerFunc("parseInterfaceFromString",    parseInterfaceFromString);
 	ls.registerFunc("updateAllLocalisedElements",    updateAllLocalisedElements);
+	ls.registerFunc("getTimestampHuman",    getTimestampHuman);
 	ls.registerFunc("formatUI",    formatUI);
 	ls.registerFunc("formatDB",    formatDB);
 	ls.registerFunc("dumpUI",    dumpUI);
@@ -471,6 +474,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getMouseDown", getMouseDown),
 	ls.registerFunc("getMouseMiddleDown", getMouseMiddleDown),
 	ls.registerFunc("getMouseRightDown", getMouseRightDown),
+	ls.registerFunc("isShiftDown", isShiftDown),
+	ls.registerFunc("isCtrlDown", isCtrlDown),
 	ls.registerFunc("getShapeIdAt", getShapeIdAt),
 	ls.registerFunc("getPlayerFront", getPlayerFront);
 	ls.registerFunc("getPlayerDirection", getPlayerDirection);
@@ -1299,7 +1304,7 @@ int CLuaIHMRyzom::getMouseDown(CLuaState &ls)
 	sint32 x, y;
 	bool down;
 	CTool::getMouseDown(down, x, y);
-	ls.push(down);
+	ls.push(EventsListener.isMouseButtonPushed(leftButton));
 	ls.push(x);
 	ls.push(y);
 
@@ -1311,8 +1316,7 @@ int CLuaIHMRyzom::getMouseMiddleDown(CLuaState &ls)
 	sint32 x, y;
 	bool down;
 	CTool::getMouseMiddleDown(down, x, y);
-
-	ls.push(down);
+	ls.push(EventsListener.isMouseButtonPushed(middleButton));
 	ls.push(x);
 	ls.push(y);
 
@@ -1325,12 +1329,29 @@ int CLuaIHMRyzom::getMouseRightDown(CLuaState &ls)
 	bool down;
 	CTool::getMouseRightDown(down, x, y);
 
-	ls.push(down);
+	ls.push(EventsListener.isMouseButtonPushed(rightButton));
 	ls.push(x);
 	ls.push(y);
 
 	return 3;
 }
+
+int CLuaIHMRyzom::isShiftDown(CLuaState &ls)
+{
+	ls.push(Driver->AsyncListener.isKeyDown(KeySHIFT) ||
+	Driver->AsyncListener.isKeyDown(KeyLSHIFT) ||
+	Driver->AsyncListener.isKeyDown(KeyRSHIFT));
+	return 1;
+}
+
+int CLuaIHMRyzom::isCtrlDown(CLuaState &ls)
+{
+	ls.push(Driver->AsyncListener.isKeyDown(KeyCONTROL) ||
+	Driver->AsyncListener.isKeyDown(KeyLCONTROL) ||
+	Driver->AsyncListener.isKeyDown(KeyRCONTROL));
+	return 1;
+}
+
 
 
 int CLuaIHMRyzom::getShapeIdAt(CLuaState &ls)
@@ -2157,6 +2178,31 @@ int CLuaIHMRyzom::updateAllLocalisedElements(CLuaState &ls)
 
 	return 0;
 }
+
+// ***************************************************************************
+int CLuaIHMRyzom::getTimestampHuman(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_getIslandId)
+	const char *funcName = "getTimestampHuman";
+	CLuaIHM::checkArgCount(ls, funcName, 1);
+	CLuaIHM::check(ls,   ls.isString(1),    "getTimestampHuman() requires a string in param 1");
+
+	static char cstime[25];
+	time_t date;
+	time (&date);
+	struct tm *tms = localtime(&date);
+	string param = ls.toString(1);
+	if (tms)
+		strftime(cstime, 25, param.c_str(), tms);
+	else
+		strcpy(cstime, "");
+	ls.push(string(cstime));
+	return 1;
+}
+
+
+
+
 
 // ***************************************************************************
 int CLuaIHMRyzom::getCompleteIslands(CLuaState &ls)
@@ -4012,7 +4058,9 @@ void CLuaIHMRyzom::updateTooltipCoords()
 	CWidgetManager::getInstance()->updateTooltipCoords();
 }
 
+
 // ***************************************************************************
+// WARNING PROBABLY DON'T WORKS
 bool CLuaIHMRyzom::isCtrlKeyDown()
 {
 	//H_AUTO(Lua_CLuaIHM_isCtrlKeyDown)
@@ -4024,6 +4072,7 @@ bool CLuaIHMRyzom::isCtrlKeyDown()
 
 	return ctrlDown;
 }
+
 
 // ***************************************************************************
 #ifdef RYZOM_LUA_UCSTRING

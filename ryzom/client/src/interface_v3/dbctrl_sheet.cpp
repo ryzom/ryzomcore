@@ -1161,10 +1161,8 @@ void CDBCtrlSheet::infoReceived()
 			const CSBrickSheet *brick = pBM->getBrick(itemInfo->Enchantment.Bricks[i]);
 			if (brick)
 			{
-				if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
 				if (brick->BrickFamily == BRICK_FAMILIES::BSGMCB) // Boost of Allegories, use it as boost icon
 				{
-					if (!haveRoot)
 					_BoostIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
 					rVR.getTextureSizeFromId(_BoostIcons.back().TextureId, _BoostIcons.back().IconW, _BoostIcons.back().IconH);
 				}
@@ -2584,7 +2582,6 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 
 						if ((i - 1) < _BoostIcons.size()) {
-							nlinfo("Boost icon  = %s", rVR.getTextureNameFromId(_BoostIcons[i-1].TextureId).c_str());
 							rVR.drawRotFlipBitmap(_RenderLayer + 2, xIcon+wIcon-_BoostIcons[i-1].IconW, yIcon, _BoostIcons[i-1].IconW, _BoostIcons[i-1].IconH, 0, false, _BoostIcons[i-1].TextureId, fastMulRGB(curSheetColor, _BoostIcons[i-1].Color));
 						}
 					}

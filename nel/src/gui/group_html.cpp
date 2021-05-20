@@ -2547,6 +2547,17 @@ namespace NLGUI
 		newParagraph->setResizeFromChildH(true);
 
 		newParagraph->setMarginLeft(getIndent());
+		if (!_Style.Current.TextAlign.empty())
+		{
+			if (_Style.Current.TextAlign == "left")
+				newParagraph->setTextAlign(CGroupParagraph::AlignLeft);
+			else if (_Style.Current.TextAlign == "center")
+				newParagraph->setTextAlign(CGroupParagraph::AlignCenter);
+			else if (_Style.Current.TextAlign == "right")
+				newParagraph->setTextAlign(CGroupParagraph::AlignRight);
+			else if (_Style.Current.TextAlign == "justify")
+				newParagraph->setTextAlign(CGroupParagraph::AlignJustify);
+		}
 
 		// Add to the group
 		addHtmlGroup (newParagraph, beginSpace);
@@ -5401,6 +5412,11 @@ namespace NLGUI
 				cellParams.Align = CGroupCell::Center;
 			else if (align == "right")
 				cellParams.Align = CGroupCell::Right;
+			else if (align != "justify")
+				align.clear();
+
+			// copy td align (can be empty) attribute back into css
+			_Style.Current.TextAlign = align;
 		}
 
 		{
@@ -6833,6 +6849,9 @@ namespace NLGUI
 		// setting ModulateGlobalColor must be after addImageDownload
 		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
 			table->setModulateGlobalColor(true);
+		else if (_Style.checkStyle("-ryzom-modulate-bgcolor", "false"))
+			table->setModulateGlobalColor(false);
+
 		table->setMarginLeft(getIndent());
 		addHtmlGroup (table, 0);
 

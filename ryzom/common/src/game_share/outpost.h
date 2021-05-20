@@ -50,7 +50,9 @@ namespace OUTPOSTENUMS
 		PVE,	// can only be attacked if the outpost is held by a tribe and if the attacking guild comes from the same continent as the outpost
 		PVP,	// can only be attacked if the attacking guild comes from the same continent as the outpost
 		RVR,	// can only be attacked if the attacking guild comes from another continent as the outpost
-		Full	// same as RVR but cant be set by the high council
+		Full,	// same as RVR but cant be set by the high council
+		GVE,	// Only one guild vs tribes
+		GVG,	// Only one guild vs another guild
 	};
 
 	enum TPVPSide

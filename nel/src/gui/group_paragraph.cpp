@@ -65,6 +65,7 @@ namespace NLGUI
 		_Indent = 0;
 		_FirstViewIndentView = false;
 		_TextId = 0;
+		_TextAlign = AlignLeft;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -713,6 +714,10 @@ namespace NLGUI
 							CViewText *viewText = dynamic_cast<CViewText*>(_Elements[i].Element);
 							if (viewText)
 							{
+								// FIXME: this does not work with multiple view text on same line
+								if (_TextAlign == AlignCenter && elmCount == 1)
+									viewText->setTextMode(CViewText::Centered);
+
 								viewText->setFirstLineX(x + ((i==0)?_FirstViewIndentView:0));
 								viewText->setX(0);
 								viewText->updateTextContext();
@@ -730,6 +735,12 @@ namespace NLGUI
 							// Does we balance the last line height ?
 							if (viewText)
 							{
+								if (_TextAlign == AlignCenter && elmCount == 1)
+								{
+									sint pad =  width - viewText->getWReal();
+									viewText->setX(pad/2);
+								}
+
 								changeLine = viewText->getNumLine() > 1;
 								if (!viewText->getText().empty() && *(viewText->getText().rbegin()) == '\n')
 								{
