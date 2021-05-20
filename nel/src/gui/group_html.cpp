@@ -1231,10 +1231,10 @@ namespace NLGUI
 		case HTML_TABLE:    htmlTABLEend(elm); break;
 		case HTML_TD:       htmlTDend(elm); break;
 		case HTML_TBODY:    renderPseudoElement(":after", elm); break;
-		case HTML_TEXTAREA: htmlTEXTAREAend(elm); break;
+		case HTML_TEXTAREA: break;
 		case HTML_TFOOT:    renderPseudoElement(":after", elm); break;
 		case HTML_TH:       htmlTHend(elm); break;
-		case HTML_TITLE:    htmlTITLEend(elm); break;
+		case HTML_TITLE:    break;
 		case HTML_TR:       htmlTRend(elm); break;
 		case HTML_U:        renderPseudoElement(":after", elm); break;
 		case HTML_UL:       htmlULend(elm); break;
@@ -1396,9 +1396,9 @@ namespace NLGUI
 		{
 			beginElement(elm);
 
-			std::list<CHtmlElement>::iterator it = elm.Children.begin();
 			if (!_IgnoreChildElements)
 			{
+				std::list<CHtmlElement>::iterator it = elm.Children.begin();
 				while(it != elm.Children.end())
 				{
 					renderDOM(*it);
@@ -1460,37 +1460,15 @@ namespace NLGUI
 		CWidgetManager::getInstance()->registerClockMsgTarget(this);
 
 		// HTML parameters
-		BgColor = CRGBA::Black;
 		ErrorColor = CRGBA(255, 0, 0);
 		LinkColor = CRGBA(0, 0, 255);
-		TextColor = CRGBA(255, 255, 255);
-		H1Color = CRGBA(255, 255, 255);
-		H2Color = CRGBA(255, 255, 255);
-		H3Color = CRGBA(255, 255, 255);
-		H4Color = CRGBA(255, 255, 255);
-		H5Color = CRGBA(255, 255, 255);
-		H6Color = CRGBA(255, 255, 255);
 		ErrorColorGlobalColor = false;
 		LinkColorGlobalColor = false;
 		TextColorGlobalColor = false;
-		H1ColorGlobalColor = false;
-		H2ColorGlobalColor = false;
-		H3ColorGlobalColor = false;
-		H4ColorGlobalColor = false;
-		H5ColorGlobalColor = false;
-		H6ColorGlobalColor = false;
-		TextFontSize = 9;
-		H1FontSize = 18;
-		H2FontSize = 15;
-		H3FontSize = 12;
-		H4FontSize = 9;
-		H5FontSize = 9;
-		H6FontSize = 9;
 		LIBeginSpace = 4;
 		ULBeginSpace = 12;
 		PBeginSpace	 = 12;
 		TDBeginSpace = 0;
-		LIIndent = -10;
 		ULIndent = 30;
 		LineSpaceFontFactor = 0.5f;
 		DefaultButtonGroup =			"html_text_button";
@@ -1562,11 +1540,6 @@ namespace NLGUI
 			return _TitlePrefix;
 		}
 		else
-		if( name == "background_color" )
-		{
-			return toString( BgColor );
-		}
-		else
 		if( name == "error_color" )
 		{
 			return toString( ErrorColor );
@@ -1575,36 +1548,6 @@ namespace NLGUI
 		if( name == "link_color" )
 		{
 			return toString( LinkColor );
-		}
-		else
-		if( name == "h1_color" )
-		{
-			return toString( H1Color );
-		}
-		else
-		if( name == "h2_color" )
-		{
-			return toString( H2Color );
-		}
-		else
-		if( name == "h3_color" )
-		{
-			return toString( H3Color );
-		}
-		else
-		if( name == "h4_color" )
-		{
-			return toString( H4Color );
-		}
-		else
-		if( name == "h5_color" )
-		{
-			return toString( H5Color );
-		}
-		else
-		if( name == "h6_color" )
-		{
-			return toString( H6Color );
 		}
 		else
 		if( name == "error_color_global_color" )
@@ -1620,71 +1563,6 @@ namespace NLGUI
 		if( name == "text_color_global_color" )
 		{
 			return toString( TextColorGlobalColor );
-		}
-		else
-		if( name == "h1_color_global_color" )
-		{
-			return toString( H1ColorGlobalColor );
-		}
-		else
-		if( name == "h2_color_global_color" )
-		{
-			return toString( H2ColorGlobalColor );
-		}
-		else
-		if( name == "h3_color_global_color" )
-		{
-			return toString( H3ColorGlobalColor );
-		}
-		else
-		if( name == "h4_color_global_color" )
-		{
-			return toString( H4ColorGlobalColor );
-		}
-		else
-		if( name == "h5_color_global_color" )
-		{
-			return toString( H5ColorGlobalColor );
-		}
-		else
-		if( name == "h6_color_global_color" )
-		{
-			return toString( H6ColorGlobalColor );
-		}
-		else
-		if( name == "text_font_size" )
-		{
-			return toString( TextFontSize );
-		}
-		else
-		if( name == "h1_font_size" )
-		{
-			return toString( H1FontSize );
-		}
-		else
-		if( name == "h2_font_size" )
-		{
-			return toString( H2FontSize );
-		}
-		else
-		if( name == "h3_font_size" )
-		{
-			return toString( H3FontSize );
-		}
-		else
-		if( name == "h4_font_size" )
-		{
-			return toString( H4FontSize );
-		}
-		else
-		if( name == "h5_font_size" )
-		{
-			return toString( H5FontSize );
-		}
-		else
-		if( name == "h6_font_size" )
-		{
-			return toString( H6FontSize );
 		}
 		else
 		if( name == "td_begin_space" )
@@ -1705,11 +1583,6 @@ namespace NLGUI
 		if( name == "ul_begin_space" )
 		{
 			return toString( ULBeginSpace );
-		}
-		else
-		if( name == "li_indent" )
-		{
-			return toString( LIIndent );
 		}
 		else
 		if( name == "ul_indent" )
@@ -1824,14 +1697,6 @@ namespace NLGUI
 			return;
 		}
 		else
-		if( name == "background_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				BgColor = c;
-			return;
-		}
-		else
 		if( name == "error_color" )
 		{
 			CRGBA c;
@@ -1845,54 +1710,6 @@ namespace NLGUI
 			CRGBA c;
 			if( fromString( value, c ) )
 				LinkColor = c;
-			return;
-		}
-		else
-		if( name == "h1_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H1Color = c;
-			return;
-		}
-		else
-		if( name == "h2_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H2Color = c;
-			return;
-		}
-		else
-		if( name == "h3_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H3Color = c;
-			return;
-		}
-		else
-		if( name == "h4_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H4Color = c;
-			return;
-		}
-		else
-		if( name == "h5_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H5Color = c;
-			return;
-		}
-		else
-		if( name == "h6_color" )
-		{
-			CRGBA c;
-			if( fromString( value, c ) )
-				H6Color = c;
 			return;
 		}
 		else
@@ -1917,110 +1734,6 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				TextColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h1_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H1ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h2_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H2ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h3_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H3ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h4_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H4ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h5_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H5ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "h6_color_global_color" )
-		{
-			bool b;
-			if( fromString( value, b ) )
-				H6ColorGlobalColor = b;
-			return;
-		}
-		else
-		if( name == "text_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				TextFontSize = i;
-			return;
-		}
-		else
-		if( name == "h1_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H1FontSize = i;
-			return;
-		}
-		else
-		if( name == "h2_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H2FontSize = i;
-			return;
-		}
-		else
-		if( name == "h3_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H3FontSize = i;
-			return;
-		}
-		else
-		if( name == "h4_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H4FontSize = i;
-			return;
-		}
-		else
-		if( name == "h5_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H5FontSize = i;
-			return;
-		}
-		else
-		if( name == "h6_font_size" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				H6FontSize = i;
 			return;
 		}
 		else
@@ -2053,14 +1766,6 @@ namespace NLGUI
 			uint i;
 			if( fromString( value, i ) )
 				ULBeginSpace = i;
-			return;
-		}
-		else
-		if( name == "li_indent" )
-		{
-			uint i;
-			if( fromString( value, i ) )
-				LIIndent = i;
 			return;
 		}
 		else
@@ -2222,16 +1927,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "html" );
 		xmlSetProp( node, BAD_CAST "url", BAD_CAST _URL.c_str() );
 		xmlSetProp( node, BAD_CAST "title_prefix", BAD_CAST _TitlePrefix.c_str() );
-		xmlSetProp( node, BAD_CAST "background_color", BAD_CAST toString( BgColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "error_color", BAD_CAST toString( ErrorColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "link_color", BAD_CAST toString( LinkColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "background_color", BAD_CAST toString( BgColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h1_color", BAD_CAST toString( H1Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h2_color", BAD_CAST toString( H2Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h3_color", BAD_CAST toString( H3Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h4_color", BAD_CAST toString( H4Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h5_color", BAD_CAST toString( H5Color ).c_str() );
-		xmlSetProp( node, BAD_CAST "h6_color", BAD_CAST toString( H6Color ).c_str() );
 
 		xmlSetProp( node, BAD_CAST "error_color_global_color",
 			BAD_CAST toString( ErrorColorGlobalColor ).c_str() );
@@ -2239,31 +1936,11 @@ namespace NLGUI
 			BAD_CAST toString( LinkColorGlobalColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "text_color_global_color",
 			BAD_CAST toString( TextColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h1_color_global_color",
-			BAD_CAST toString( H1ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h2_color_global_color",
-			BAD_CAST toString( H2ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h3_color_global_color",
-			BAD_CAST toString( H3ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h4_color_global_color",
-			BAD_CAST toString( H4ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h5_color_global_color",
-			BAD_CAST toString( H5ColorGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "h6_color_global_color",
-			BAD_CAST toString( H6ColorGlobalColor ).c_str() );
 
-		xmlSetProp( node, BAD_CAST "text_font_size", BAD_CAST toString( TextFontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h1_font_size", BAD_CAST toString( H1FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h2_font_size", BAD_CAST toString( H2FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h3_font_size", BAD_CAST toString( H3FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h4_font_size", BAD_CAST toString( H4FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h5_font_size", BAD_CAST toString( H5FontSize ).c_str() );
-		xmlSetProp( node, BAD_CAST "h6_font_size", BAD_CAST toString( H6FontSize ).c_str() );
 		xmlSetProp( node, BAD_CAST "td_begin_space", BAD_CAST toString( TDBeginSpace ).c_str() );
 		xmlSetProp( node, BAD_CAST "paragraph_begin_space", BAD_CAST toString( PBeginSpace ).c_str() );
 		xmlSetProp( node, BAD_CAST "li_begin_space", BAD_CAST toString( LIBeginSpace ).c_str() );
 		xmlSetProp( node, BAD_CAST "ul_begin_space", BAD_CAST toString( ULBeginSpace ).c_str() );
-		xmlSetProp( node, BAD_CAST "li_indent", BAD_CAST toString( LIIndent ).c_str() );
 		xmlSetProp( node, BAD_CAST "ul_indent", BAD_CAST toString( ULIndent ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_line_space_factor", BAD_CAST toString( LineSpaceFontFactor ).c_str() );
 		xmlSetProp( node, BAD_CAST "form_text_area_group", BAD_CAST DefaultFormTextGroup.c_str() );
@@ -2315,36 +1992,12 @@ namespace NLGUI
 			_TitlePrefix = CI18N::get((const char*)ptr);
 
 		// Parameters
-		ptr = xmlGetProp (cur, (xmlChar*)"background_color");
-		if (ptr)
-			BgColor = convertColor(ptr);
 		ptr = xmlGetProp (cur, (xmlChar*)"error_color");
 		if (ptr)
 			ErrorColor = convertColor(ptr);
 		ptr = xmlGetProp (cur, (xmlChar*)"link_color");
 		if (ptr)
 			LinkColor = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"text_color");
-		if (ptr)
-			TextColor = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h1_color");
-		if (ptr)
-			H1Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h2_color");
-		if (ptr)
-			H2Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h3_color");
-		if (ptr)
-			H3Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h4_color");
-		if (ptr)
-			H4Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h5_color");
-		if (ptr)
-			H5Color = convertColor(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h6_color");
-		if (ptr)
-			H6Color = convertColor(ptr);
 		ptr = xmlGetProp (cur, (xmlChar*)"error_color_global_color");
 		if (ptr)
 			ErrorColorGlobalColor = convertBool(ptr);
@@ -2354,45 +2007,6 @@ namespace NLGUI
 		ptr = xmlGetProp (cur, (xmlChar*)"text_color_global_color");
 		if (ptr)
 			TextColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h1_color_global_color");
-		if (ptr)
-			H1ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h2_color_global_color");
-		if (ptr)
-			H2ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h3_color_global_color");
-		if (ptr)
-			H3ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h4_color_global_color");
-		if (ptr)
-			H4ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h5_color_global_color");
-		if (ptr)
-			H5ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"h6_color_global_color");
-		if (ptr)
-			H6ColorGlobalColor = convertBool(ptr);
-		ptr = xmlGetProp (cur, (xmlChar*)"text_font_size");
-		if (ptr)
-			fromString((const char*)ptr, TextFontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h1_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H1FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h2_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H2FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h3_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H3FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h4_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H4FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h5_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H5FontSize);
-		ptr = xmlGetProp (cur, (xmlChar*)"h6_font_size");
-		if (ptr)
-			fromString((const char*)ptr, H6FontSize);
 		ptr = xmlGetProp (cur, (xmlChar*)"td_begin_space");
 		if (ptr)
 			fromString((const char*)ptr, TDBeginSpace);
@@ -2405,9 +2019,6 @@ namespace NLGUI
 		ptr = xmlGetProp (cur, (xmlChar*)"ul_begin_space");
 		if (ptr)
 			fromString((const char*)ptr, ULBeginSpace);
-		ptr = xmlGetProp (cur, (xmlChar*)"li_indent");
-		if (ptr)
-			fromString((const char*)ptr, LIIndent);
 		ptr = xmlGetProp (cur, (xmlChar*)"ul_indent");
 		if (ptr)
 			fromString((const char*)ptr, ULIndent);
@@ -2771,6 +2382,113 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	bool CGroupHTML::isSameStyle(CViewLink *text, const CStyleParams &style) const
+	{
+		if (!text) return false;
+
+		bool embolden = style.FontWeight >= FONT_WEIGHT_BOLD;
+		bool sameShadow = style.TextShadow.Enabled && text->getShadow();
+		if (sameShadow && style.TextShadow.Enabled)
+		{
+			sint sx, sy;
+			text->getShadowOffset(sx, sy);
+			sameShadow = (style.TextShadow.Color == text->getShadowColor());
+			sameShadow = sameShadow && (style.TextShadow.Outline == text->getShadowOutline());
+			sameShadow = sameShadow && (style.TextShadow.X == sx) && (style.TextShadow.Y == sy);
+		}
+		// Compatible with current parameters ?
+		return sameShadow &&
+			(style.TextColor == text->getColor()) &&
+			(style.FontFamily == text->getFontName()) &&
+			(style.FontSize == (uint)text->getFontSize()) &&
+			(style.Underlined == text->getUnderlined()) &&
+			(style.StrikeThrough == text->getStrikeThrough()) &&
+			(embolden == text->getEmbolden()) &&
+			(style.FontOblique == text->getOblique()) &&
+			(getLink() == text->Link) &&
+			(style.GlobalColor == text->getModulateGlobalColor());
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::newTextButton(const std::string &text, const std::string &tpl)
+	{
+		_CurrentViewLink = NULL;
+		_CurrentViewImage = NULL;
+
+		// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
+		string param = "name=" + this->_Id + "|url=" + getLink();
+		string name;
+		if (!_AnchorName.empty())
+			name = _AnchorName.back();
+
+		typedef pair<string, string> TTmplParam;
+		vector<TTmplParam> tmplParams;
+		tmplParams.push_back(TTmplParam("id", ""));
+		tmplParams.push_back(TTmplParam("onclick", "browse"));
+		tmplParams.push_back(TTmplParam("onclick_param", param));
+		tmplParams.push_back(TTmplParam("active", "true"));
+		CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(tpl, getId()+":"+name, tmplParams);
+		if (!buttonGroup)
+		{
+			nlinfo("Text button template '%s' not found", tpl.c_str());
+			return;
+		}
+		buttonGroup->setId(getId()+":"+name);
+
+		// Add the ctrl button
+		CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
+		if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
+		if (!ctrlButton)
+		{
+			nlinfo("Text button template '%s' is missing :button or :b text element", tpl.c_str());
+			return;
+		}
+		ctrlButton->setModulateGlobalColorAll(false);
+
+		// Translate the tooltip
+		ctrlButton->setText(text);
+		ctrlButton->setDefaultContextHelp(std::string(getLinkTitle()));
+		// empty url / button disabled
+		ctrlButton->setFrozen(*getLink() == '\0');
+
+		setTextButtonStyle(ctrlButton, _Style.Current);
+
+		_Paragraph->addChild(buttonGroup);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::newTextLink(const std::string &text)
+	{
+		CViewLink *newLink = new CViewLink(CViewBase::TCtorParam());
+		if (getA())
+		{
+			newLink->Link = getLink();
+			newLink->LinkTitle = getLinkTitle();
+			if (!newLink->Link.empty())
+			{
+				newLink->setHTMLView (this);
+				newLink->setActionOnLeftClick("browse");
+				newLink->setParamsOnLeftClick("name=" + getId() + "|url=" + newLink->Link);
+			}
+		}
+		newLink->setText(text);
+		newLink->setMultiLineSpace((uint)((float)(_Style.Current.FontSize)*LineSpaceFontFactor));
+		newLink->setMultiLine(true);
+		newLink->setModulateGlobalColor(_Style.Current.GlobalColor);
+		setTextStyle(newLink, _Style.Current);
+
+		registerAnchor(newLink);
+
+		if (getA() && !newLink->Link.empty())
+			getParagraph()->addChildLink(newLink);
+		else
+			getParagraph()->addChild(newLink);
+
+		_CurrentViewLink = newLink;
+		_CurrentViewImage = NULL;
+	}
+
+	// ***************************************************************************
 
 	void CGroupHTML::addString(const std::string &str)
 	{
@@ -2809,15 +2527,7 @@ namespace NLGUI
 		}
 
 		// In title ?
-		if (_Title)
-		{
-			_TitleString += tmpStr;
-		}
-		else if (_TextArea)
-		{
-			_TextAreaContent += tmpStr;
-		}
-		else if (_Object)
+		if (_Object)
 		{
 			_ObjectScript += tmpStr;
 		}
@@ -2844,32 +2554,11 @@ namespace NLGUI
 
 			// Text added ?
 			bool added = false;
-			bool embolden = style.FontWeight >= FONT_WEIGHT_BOLD;
 
-			// Number of child in this paragraph
 			if (_CurrentViewLink)
 			{
 				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == '\n';
-				bool sameShadow = style.TextShadow.Enabled && _CurrentViewLink->getShadow();
-				if (sameShadow && style.TextShadow.Enabled)
-				{
-					sint sx, sy;
-					_CurrentViewLink->getShadowOffset(sx, sy);
-					sameShadow = (style.TextShadow.Color == _CurrentViewLink->getShadowColor());
-					sameShadow = sameShadow && (style.TextShadow.Outline == _CurrentViewLink->getShadowOutline());
-					sameShadow = sameShadow && (style.TextShadow.X == sx) && (style.TextShadow.Y == sy);
-				}
-				// Compatible with current parameters ?
-				if (!skipLine && sameShadow &&
-					(style.TextColor == _CurrentViewLink->getColor()) &&
-					(style.FontFamily == _CurrentViewLink->getFontName()) &&
-					(style.FontSize == (uint)_CurrentViewLink->getFontSize()) &&
-					(style.Underlined == _CurrentViewLink->getUnderlined()) &&
-					(style.StrikeThrough == _CurrentViewLink->getStrikeThrough()) &&
-					(embolden == _CurrentViewLink->getEmbolden()) &&
-					(style.FontOblique == _CurrentViewLink->getOblique()) &&
-					(getLink() == _CurrentViewLink->Link) &&
-					(style.GlobalColor == _CurrentViewLink->getModulateGlobalColor()))
+				if (!skipLine && isSameStyle(_CurrentViewLink, style))
 				{
 					// Concat the text
 					_CurrentViewLink->setText(_CurrentViewLink->getText()+tmpStr);
@@ -2882,78 +2571,9 @@ namespace NLGUI
 			if (!added)
 			{
 				if (getA() && string(getLinkClass()) == "ryzom-ui-button")
-				{
-					string buttonTemplate = DefaultButtonGroup;
-					// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-					string param = "name=" + this->_Id + "|url=" + getLink();
-					string name;
-					if (!_AnchorName.empty())
-						name = _AnchorName.back();
-					typedef pair<string, string> TTmplParam;
-					vector<TTmplParam> tmplParams;
-					tmplParams.push_back(TTmplParam("id", ""));
-					tmplParams.push_back(TTmplParam("onclick", "browse"));
-					tmplParams.push_back(TTmplParam("onclick_param", param));
-					tmplParams.push_back(TTmplParam("active", "true"));
-					CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, getId()+":"+name, tmplParams);
-					if (buttonGroup)
-					{
-						buttonGroup->setId(getId()+":"+name);
-						// Add the ctrl button
-						CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
-						if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
-						if (ctrlButton)
-						{
-							ctrlButton->setModulateGlobalColorAll (false);
-
-							// Translate the tooltip
-							ctrlButton->setDefaultContextHelp(getLinkTitle());
-							ctrlButton->setText(tmpStr);
-							// empty url / button disabled
-							bool disabled = string(getLink()).empty();
-							ctrlButton->setFrozen(disabled);
-
-							setTextButtonStyle(ctrlButton, style);
-						}
-						getParagraph()->addChild (buttonGroup);
-						paragraphChange ();
-					}
-
-				}
+					newTextButton(tmpStr, DefaultButtonGroup);
 				else
-				{
-					CViewLink *newLink = new CViewLink(CViewBase::TCtorParam());
-					if (getA())
-					{
-						newLink->Link = getLink();
-						newLink->LinkTitle = getLinkTitle();
-						if (!newLink->Link.empty())
-						{
-							newLink->setHTMLView (this);
-
-							newLink->setActionOnLeftClick("browse");
-							newLink->setParamsOnLeftClick("name=" + getId() + "|url=" + newLink->Link);
-						}
-					}
-					newLink->setText(tmpStr);
-					newLink->setMultiLineSpace((uint)((float)(style.FontSize)*LineSpaceFontFactor));
-					newLink->setMultiLine(true);
-					newLink->setModulateGlobalColor(style.GlobalColor);
-					setTextStyle(newLink, style);
-					// newLink->setLineAtBottom (true);
-
-					registerAnchor(newLink);
-
-					if (getA() && !newLink->Link.empty())
-					{
-						getParagraph()->addChildLink(newLink);
-					}
-					else
-					{
-						getParagraph()->addChild(newLink);
-					}
-					paragraphChange ();
-				}
+					newTextLink(tmpStr);
 			}
 		}
 	}
@@ -3302,8 +2922,6 @@ namespace NLGUI
 		_Anchors.clear();
 		_AnchorName.clear();
 		_CellParams.clear();
-		_Title = false;
-		_TextArea = false;
 		_Object = false;
 		_Localize = false;
 		_ReadingHeadTag = false;
@@ -3439,12 +3057,10 @@ namespace NLGUI
 
 	void CGroupHTML::setTitle(const std::string &title)
 	{
-		_TitleString.clear();
-		if(!_TitlePrefix.empty())
-		{
-			_TitleString = _TitlePrefix + " - ";
-		}
-		_TitleString += title;
+		if(_TitlePrefix.empty())
+			_TitleString = title;
+		else
+			_TitleString = _TitlePrefix + " - " + title;
 
 		setContainerTitle(_TitleString);
 	}
@@ -4428,7 +4044,7 @@ namespace NLGUI
 		clearContext();
 
 		// Reset default background color
-		setBackgroundColor (BgColor);
+		setBackgroundColor (_BrowserStyle.Current.BackgroundColor);
 		setBackground ("blank.tga", true, false);
 
 		paragraphChange ();
@@ -6845,12 +6461,11 @@ namespace NLGUI
 			string image = _Style.getStyle("background-image");
 			addImageDownload(image, table, CStyleParams(), NormalImage, "");
 		}
-
-		// setting ModulateGlobalColor must be after addImageDownload
-		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
-			table->setModulateGlobalColor(true);
-		else if (_Style.checkStyle("-ryzom-modulate-bgcolor", "false"))
-			table->setModulateGlobalColor(false);
+		else
+		{
+			// will be set in addImageDownload if background-image exists
+			table->setModulateGlobalColor(_Style.Current.GlobalColor);
+		}
 
 		table->setMarginLeft(getIndent());
 		addHtmlGroup (table, 0);
@@ -6935,6 +6550,11 @@ namespace NLGUI
 			string image = _Style.getStyle("background-image");
 			addImageDownload(image, _Cells.back(), CStyleParams(), NormalImage, "");
 		}
+		else
+		{
+			// will be set in addImageDownload if background-image is set
+			_Cells.back()->setModulateGlobalColor(_Style.Current.GlobalColor);
+		}
 
 		if (elm.hasNonEmptyAttribute("colspan"))
 			fromString(elm.getAttribute("colspan"), _Cells.back()->ColSpan);
@@ -6970,10 +6590,6 @@ namespace NLGUI
 		}
 
 		_Cells.back()->NewLine = getTR();
-
-		// setting ModulateGlobalColor must be after addImageDownload
-		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
-			_Cells.back()->setModulateGlobalColor(true);
 
 		// border from <table border="1">
 		if (table->CellBorder)
@@ -7039,6 +6655,9 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTEXTAREA(const CHtmlElement &elm)
 	{
+		_IgnoreChildElements = true;
+
+		// TODO: allow textarea without form
 		if (_Forms.empty())
 			return;
 
@@ -7053,7 +6672,6 @@ namespace NLGUI
 		_TextAreaName.clear();
 		_TextAreaRow = 1;
 		_TextAreaCols = 10;
-		_TextAreaContent.clear();
 		_TextAreaMaxLength = 1024;
 		if (elm.hasNonEmptyAttribute("name"))
 			_TextAreaName = elm.getAttribute("name");
@@ -7065,16 +6683,11 @@ namespace NLGUI
 			fromString(elm.getAttribute("maxlength"), _TextAreaMaxLength);
 
 		_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
-		_TextArea = true;
-		_PRE.push_back(true);
-	}
 
-	void CGroupHTML::htmlTEXTAREAend(const CHtmlElement &elm)
-	{
-		if (_Forms.empty())
-			return;
+		std::string content = strFindReplaceAll(elm.serializeChilds(), std::string("\t"), std::string(" "));
+		content = strFindReplaceAll(content, std::string("\n"), std::string(" "));
 
-		CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent, _TextAreaMaxLength);
+		CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, content, _TextAreaMaxLength);
 		if (textArea)
 		{
 			// Add the text area to the form
@@ -7083,9 +6696,6 @@ namespace NLGUI
 			entry.TextArea = textArea;
 			_Forms.back().Entries.push_back (entry);
 		}
-
-		_TextArea = false;
-		popIfNotEmpty (_PRE);
 	}
 
 	// ***************************************************************************
@@ -7102,18 +6712,14 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTITLE(const CHtmlElement &elm)
 	{
+		_IgnoreChildElements = true;
+
 		// TODO: only from <head>
 		// if (!_ReadingHeadTag) return;
-		if(!_TitlePrefix.empty())
-			_TitleString = _TitlePrefix + " - ";
-		else
-			_TitleString.clear();
-		_Title = true;
-	}
 
-	void CGroupHTML::htmlTITLEend(const CHtmlElement &elm)
-	{
-		_Title = false;
+		// consume all child elements
+		_TitleString = strFindReplaceAll(elm.serializeChilds(), std::string("\t"), std::string(" "));
+		_TitleString = strFindReplaceAll(_TitleString, std::string("\n"), std::string(" "));
 		setTitle(_TitleString);
 	}
 

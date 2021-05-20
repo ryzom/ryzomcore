@@ -75,6 +75,18 @@ namespace NLGUI
 		// update Children index/parent/next/prevSibling pointers
 		void reindexChilds();
 
+		// escape text tag or attribute value
+		std::string htmlEscape(std::string val, bool isAttribute = false) const;
+
+		// serialize element attributes as string
+		std::string serializeAttributes() const;
+
+		// serialize child elements as html string
+		std::string serializeChilds() const;
+
+		// serialize itself and children as html string
+		std::string serialize() const;
+
 		// debug
 		std::string toString(bool tree = false, uint depth = 0) const;
 

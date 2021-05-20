@@ -170,8 +170,8 @@ void CGroupQuickHelp::setGroupTextSize (CInterfaceGroup *group, bool selected)
 {
 	bool globalColor = selected ? TextColorGlobalColor : _NonSelectedGlobalColor;
 	bool linkGlobalColor = selected ? LinkColorGlobalColor : _NonSelectedGlobalColor;
-	uint fontSize = selected ? TextFontSize : _NonSelectedSize;
-	NLMISC::CRGBA color = selected ? TextColor : _NonSelectedColor;
+	uint fontSize = selected ? _BrowserStyle.Current.FontSize : _NonSelectedSize;
+	NLMISC::CRGBA color = selected ? _BrowserStyle.Current.TextColor : _NonSelectedColor;
 	NLMISC::CRGBA linkColor = selected ? LinkColor : _NonSelectedLinkColor;
 
 	// Look for text in this group

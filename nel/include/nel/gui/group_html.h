@@ -36,6 +36,7 @@ typedef void CURLM;
 
 namespace NLGUI
 {
+	class CViewLink;
 	class CCtrlButton;
 	class CCtrlTextButton;
 	class CCtrlScroll;
@@ -142,37 +143,15 @@ namespace NLGUI
 		float	getTimeout() const {return (float)_TimeoutValue;}
 
 		// Some constants
-		NLMISC::CRGBA	BgColor;
 		NLMISC::CRGBA	ErrorColor;
 		NLMISC::CRGBA	LinkColor;
-		NLMISC::CRGBA	TextColor;
-		NLMISC::CRGBA	H1Color;
-		NLMISC::CRGBA	H2Color;
-		NLMISC::CRGBA	H3Color;
-		NLMISC::CRGBA	H4Color;
-		NLMISC::CRGBA	H5Color;
-		NLMISC::CRGBA	H6Color;
 		bool			ErrorColorGlobalColor;
 		bool			LinkColorGlobalColor;
 		bool			TextColorGlobalColor;
-		bool			H1ColorGlobalColor;
-		bool			H2ColorGlobalColor;
-		bool			H3ColorGlobalColor;
-		bool			H4ColorGlobalColor;
-		bool			H5ColorGlobalColor;
-		bool			H6ColorGlobalColor;
-		uint			TextFontSize;
-		uint			H1FontSize;
-		uint			H2FontSize;
-		uint			H3FontSize;
-		uint			H4FontSize;
-		uint			H5FontSize;
-		uint			H6FontSize;
 		uint			TDBeginSpace;
 		uint			PBeginSpace;
 		uint			LIBeginSpace;
 		uint			ULBeginSpace;
-		uint			LIIndent;
 		uint			ULIndent;
 		float			LineSpaceFontFactor;
 		std::string		DefaultButtonGroup;
@@ -187,7 +166,6 @@ namespace NLGUI
 		std::string		DefaultRadioButtonBitmapPushed;
 		std::string		DefaultRadioButtonBitmapOver;
 		std::string		DefaultBackgroundBitmapView;
-		std::string		CurrentLinkTitle;
 
 		struct TFormField {
 		public:
@@ -326,6 +304,12 @@ namespace NLGUI
 
 		// Translate a char
 		bool translateChar(u32char &output, u32char input, u32char lastChar) const;
+
+		// return true if text has same style
+		bool isSameStyle(CViewLink *text, const CStyleParams &style) const;
+		// add text link using template
+		void newTextButton(const std::string &text, const std::string &tpl);
+		void newTextLink(const std::string &text);
 
 		// Add a string in the current paragraph
 		void addString(const std::string &str);
@@ -752,9 +736,7 @@ namespace NLGUI
 		bool			_Localize;
 
 		// Current node is a text area
-		bool			_TextArea;
 		std::string		_TextAreaTemplate;
-		std::string		_TextAreaContent;
 		std::string		_TextAreaName;
 		uint			_TextAreaRow;
 		uint			_TextAreaCols;
@@ -1005,11 +987,9 @@ namespace NLGUI
 		void htmlTD(const CHtmlElement &elm);
 		void htmlTDend(const CHtmlElement &elm);
 		void htmlTEXTAREA(const CHtmlElement &elm);
-		void htmlTEXTAREAend(const CHtmlElement &elm);
 		void htmlTH(const CHtmlElement &elm);
 		void htmlTHend(const CHtmlElement &elm);
 		void htmlTITLE(const CHtmlElement &elm);
-		void htmlTITLEend(const CHtmlElement &elm);
 		void htmlTR(const CHtmlElement &elm);
 		void htmlTRend(const CHtmlElement &elm);
 		//void htmlU(const CHtmlElement &elm);
