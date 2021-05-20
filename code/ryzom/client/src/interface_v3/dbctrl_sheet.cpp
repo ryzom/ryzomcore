@@ -1127,10 +1127,20 @@ void CDBCtrlSheet::infoReceived()
 				}
 				else if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
 				{
-					if (!haveRoot && !brick->getIconBack().empty())
+					if (!haveRoot)
 					{
-						_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
-						rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+						haveRoot = true;
+						if (brick->getIconBack().empty())
+						{
+							// use blank texture with size from main icon
+							_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("blank.tga"), NLMISC::CRGBA::White));
+							rVR.getTextureSizeFromId(rVR.getTextureIdFromName(brick->getIcon()), _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+						}
+						else
+						{
+							_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
+							rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+						}
 					}
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
