@@ -6423,10 +6423,12 @@ namespace NLGUI
 			string image = _Style.getStyle("background-image");
 			addImageDownload(image, table, CStyleParams(), NormalImage, "");
 		}
+		else
+		{
+			// will be set in addImageDownload if background-image exists
+			table->setModulateGlobalColor(_Style.Current.GlobalColor);
+		}
 
-		// setting ModulateGlobalColor must be after addImageDownload
-		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
-			table->setModulateGlobalColor(true);
 		table->setMarginLeft(getIndent());
 		addHtmlGroup (table, 0);
 
@@ -6510,6 +6512,11 @@ namespace NLGUI
 			string image = _Style.getStyle("background-image");
 			addImageDownload(image, _Cells.back(), CStyleParams(), NormalImage, "");
 		}
+		else
+		{
+			// will be set in addImageDownload if background-image is set
+			_Cells.back()->setModulateGlobalColor(_Style.Current.GlobalColor);
+		}
 
 		if (elm.hasNonEmptyAttribute("colspan"))
 			fromString(elm.getAttribute("colspan"), _Cells.back()->ColSpan);
@@ -6545,10 +6552,6 @@ namespace NLGUI
 		}
 
 		_Cells.back()->NewLine = getTR();
-
-		// setting ModulateGlobalColor must be after addImageDownload
-		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
-			_Cells.back()->setModulateGlobalColor(true);
 
 		// border from <table border="1">
 		if (table->CellBorder)
