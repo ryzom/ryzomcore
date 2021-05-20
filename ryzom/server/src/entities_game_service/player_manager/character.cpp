@@ -11442,6 +11442,15 @@ void CCharacter::sellItem(INVENTORIES::TInventory inv, uint32 slot, uint32 quant
 			return;
 		}
 
+		// you cannot exchange jewels with non tags allegories
+		std::vector<CSheetId> sheets;
+		item->getJewelNonTagsEnchantments(sheets);
+		if (sheets.size() > 0)
+		{
+			nlwarning("Character %s tries to sell '%s'", _Id.toString().c_str(), item->getPhraseId().c_str());
+			return;
+		}
+
 		if (!ITEMFAMILY::isSellableByPlayer(itemForm->Family))
 		{
 			nlwarning(
