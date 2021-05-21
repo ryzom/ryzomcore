@@ -423,10 +423,6 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 
 	string::size_type pos = 0;
 
-	// Manage Translations
-	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TRANSLATION_ONLY_AS_TOOLTIP_CB", false);
-	bool originalFirst = node->getValueBool();
-
 	string::size_type startTr = msg.find("{:");
 	string::size_type endOfOriginal = msg.find("}@{");
 
