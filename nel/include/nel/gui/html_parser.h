@@ -19,6 +19,9 @@
 
 #include "nel/misc/types_nl.h"
 
+// Forward declarations for libxml2
+typedef struct _xmlNode xmlNode;
+
 namespace NLGUI
 {
 	class CHtmlElement;

@@ -146,6 +146,9 @@ void CFontManager::computeString (NLMISC::CUtfStringView sv,
 		{
 			// Creating font
 			k.Char = *it;
+			// draw tab as space
+			if (k.Char == '\t')
+				k.Char = ' ';
 			if (k.Char < 0x20) // Control Characters
 				k.Char += 0x2400;
 			if (k.Char == 0x7F) // DEL
@@ -304,6 +307,9 @@ void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
 	{
 		// Creating font
 		k.Char = *it;
+		// draw tab as space
+		if (k.Char == '\t')
+			k.Char = ' ';
 		if (k.Char < 0x20)
 			k.Char += 0x2400;
 		k.FontGenerator = fontGen;

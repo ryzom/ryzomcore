@@ -131,7 +131,6 @@ void COutpostBuildingSheet::build(const NLGEORGES::UFormElm &root)
 	string IconText;
 	if(!root.getValueByName (IconText, "text overlay"))
 		debug("key 'text overlay' not found.");
-	IconText = toLowerAscii(IconText);
 	IdIconText = ClientSheetsStrings.add(IconText);
 }
 

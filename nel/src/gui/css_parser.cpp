@@ -50,7 +50,11 @@ namespace NLGUI
 			pos = elements[i].find_first_of(':');
 			if (pos != std::string::npos)
 			{
-				std::string key = trim(toLowerAscii(elements[i].substr(0, pos)));
+				// css properties are case-insensitive, but
+				// custom properties (--name; ...;) are case sensitive
+				std::string key = trim(elements[i].substr(0, pos));
+				if (key.size() < 2 || (key[0] != '-' && key[1] != '-'))
+					key = toLowerAscii(key);
 				std::string value = trim(elements[i].substr(pos+1));
 				styles.push_back(TStylePair(key, value));
 			}
@@ -94,25 +98,22 @@ namespace NLGUI
 	// @internal
 	void CCssParser::parseRule(const std::string &selectorString, const std::string &styleString)
 	{
-		std::vector<std::string> selectors;
-		NLMISC::explode(selectorString, std::string(","), selectors);
-
 		TStyleVec props;
 		props = parseDecls(styleString);
 
 		// duplicate props to each selector in selector list,
 		// example 'div > p, h1' creates 'div>p' and 'h1'
-		for(uint i=0; i<selectors.size(); ++i)
+		for(std::string::size_type pos = 0; pos < selectorString.size(); pos++)
 		{
+			while(pos < selectorString.size() && is_whitespace(selectorString[pos]))
+				pos++;
+
 			CCssStyle::SStyleRule rule;
-
-			rule.Selector = parse_selector(trim(selectors[i]), rule.PseudoElement);
+			rule.Selector = parse_selector(selectorString, rule.PseudoElement, pos);
 			rule.Properties = props;
-
 			if (!rule.Selector.empty())
-			{
 				_Rules.push_back(rule);
-			}
+
 		}
 	}
 
@@ -341,7 +342,7 @@ namespace NLGUI
 	// ***************************************************************************
 	// parse selector list
 	// @internal
-	std::vector<CCssSelector> CCssParser::parse_selector(const std::string &sel, std::string &pseudoElement) const
+	std::vector<CCssSelector> CCssParser::parse_selector(const std::string &sel, std::string &pseudoElement, std::string::size_type &pos) const
 	{
 		std::vector<CCssSelector> result;
 		CCssSelector current;
@@ -349,8 +350,8 @@ namespace NLGUI
 		pseudoElement.clear();
 
 		bool failed = false;
-		std::string::size_type start = 0, pos = 0;
-		while(pos < sel.size())
+		std::string::size_type start = pos;
+		while(pos < sel.size() && sel[pos] != ',')
 		{
 			std::string uc;
 			uc = sel[pos];
@@ -362,6 +363,14 @@ namespace NLGUI
 					pos++;
 
 				current.Element = toLowerAscii(sel.substr(start, pos - start));
+				start = pos;
+				continue;
+			}
+
+			if (sel[pos] == '*' && current.empty())
+			{
+				pos++;
+				current.Element = "*";
 				start = pos;
 				continue;
 			}
@@ -612,7 +621,8 @@ namespace NLGUI
 				}
 				else if (isSpace)
 				{
-					current.Combinator = ' ';
+					if (sel[pos] != ',' && sel[pos] != '\0')
+						current.Combinator = ' ';
 				}
 				else
 				{

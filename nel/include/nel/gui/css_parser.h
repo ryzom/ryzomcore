@@ -73,7 +73,7 @@ namespace NLGUI
 		void preprocess();
 
 		// parse selectors + combinators
-		std::vector<CCssSelector> parse_selector(const std::string &sel, std::string &pseudoElement) const;
+		std::vector<CCssSelector> parse_selector(const std::string &sel, std::string &pseudoElement, std::string::size_type &pos) const;
 
 		// parse selector and style
 		void parseRule(const std::string &selectorString, const std::string &styleString);

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+:root {
+	--main-color: #06c;
+	--accent-color: #006;
+	--MAIN-COLOR: #f00;
+}
+/* The rest of the CSS file */
+#foo h1 {
+	color: var(--main-color);
+}
+h2 {
+	color: var(--MAIN-COLOR);
+}
+		</style>
+		<div id="foo">
+			<h1 data-ruleset="color: #06c;">Header1</h1>
+			<h2 data-ruleset="color: #f00;">Header2</h1>
+		</div>
+	</body>
+</html>
