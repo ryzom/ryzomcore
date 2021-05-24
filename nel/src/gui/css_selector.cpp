@@ -235,6 +235,11 @@ namespace NLGUI
 					// 1st child should be '1' and not '0'
 					if (!matchNth(elm.childIndex+1, a, b)) return false;
 				}
+				else if (startsWith(PseudoClass[i], "lang("))
+				{
+					std::string lang = PseudoClass[i].substr(5, PseudoClass[i].size() - 6);
+					if (lang.empty() || !matchLang(elm, lang)) return false;
+				}
 				else
 				{
 					return false;
@@ -322,6 +327,29 @@ namespace NLGUI
 			// a is negative from '-An+B'
 			return childNr <= b && (b - childNr) % (-a) == 0;
 		}
+	}
+
+	bool CCssSelector::matchLang(const CHtmlElement &elm, const std::string &pseudo) const
+	{
+		// TODO: does not support comma separated, or escaped/quoted/wildcard tags
+		std::string lang = toLowerAscii(elm.getInheritedLanguage());
+		if (lang.empty() || pseudo.empty())
+			return false;
+
+		// lang = 'en', pseudo = 'en-US'
+		if (lang.size() < pseudo.size())
+			return false;
+
+		std::string selector = toLowerAscii(pseudo);
+		bool selectorHasRegion = selector.find("-") != std::string::npos;
+		bool langHasRegion = lang.find("-") != std::string::npos;
+
+		// both are 'en', or 'en-US' type
+		if (langHasRegion == selectorHasRegion)
+			return lang == selector;
+
+		// lang = 'en-US', selector = 'en'
+		return lang[selector.size()] == '-' && startsWith(lang, selector);
 	}
 
 	std::string CCssSelector::toString() const

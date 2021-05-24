@@ -66,7 +66,15 @@ namespace NLGUI
 		{
 			if (node->type == XML_TEXT_NODE)
 			{
-				parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content)));
+				// linebreak right after pre,textare open tag should be removed
+				if (parent.Children.empty() && (*node->content == '\n') && (parent.ID == HTML_PRE || parent.ID == HTML_TEXTAREA))
+				{
+					parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content) + 1));
+				}
+				else
+				{
+					parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content)));
+				}
 			}
 			else
 			if (node->type == XML_ELEMENT_NODE)
@@ -173,6 +181,16 @@ namespace NLGUI
 				else if (node->children)
 				{
 					parseNode(node->children, elm, styles, links);
+
+					if (!elm.Children.empty() && elm.ID == HTML_PRE && elm.Children.back().Type == CHtmlElement::TEXT_NODE)
+					{
+						std::string::size_type size = elm.Children.back().Value.size();
+						// strip last '\n' from non-empty line
+						if (size > 1 && elm.Children.back().Value[size-1] == '\n')
+						{
+							elm.Children.back().Value = elm.Children.back().Value.substr(0, size - 1);
+						}
+					}
 
 					// must cleanup nested tags that libxml2 does not fix
 					// dt without end tag: <dl><dt><dt></dl>

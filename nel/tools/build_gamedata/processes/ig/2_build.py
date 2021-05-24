@@ -265,7 +265,8 @@ printLog(log, ">>> Merge other IGs <<<") # (not true merge, since not necesserar
 mkPath(log, ExportBuildDirectory + "/" + IgStaticOtherExportDirectory)
 mkPath(log, ExportBuildDirectory + "/" + LigoIgOtherBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + IgOtherBuildDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + IgStaticOtherExportDirectory, ExportBuildDirectory + "/" + IgOtherBuildDirectory, ".ig")
+# copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + IgStaticOtherExportDirectory, ExportBuildDirectory + "/" + IgOtherBuildDirectory, ".ig")
+igElevation(ExportBuildDirectory + "/" + IgStaticOtherExportDirectory, ExportBuildDirectory + "/" + IgOtherBuildDirectory)
 copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + LigoIgOtherBuildDirectory, ExportBuildDirectory + "/" + IgOtherBuildDirectory, ".ig")
 
 log.close()

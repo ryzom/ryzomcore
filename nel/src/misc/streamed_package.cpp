@@ -32,7 +32,7 @@ CStreamedPackage::~CStreamedPackage()
 	// release
 }
 
-void CStreamedPackage::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStreamedPackage::serial(NLMISC::IStream &f)
 {
 	f.serialCheck(NELID("SNPK"));
 
@@ -42,7 +42,7 @@ void CStreamedPackage::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serialCont(Entries);
 }
 
-void CStreamedPackage::CEntry::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStreamedPackage::CEntry::serial(NLMISC::IStream &f)
 {
 	uint version = 1;
 	f.serialVersion(version);
