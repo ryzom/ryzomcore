@@ -591,8 +591,6 @@ bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 	vector<sint>		vertexToVSkin;
 	vertexToVSkin.resize(vertexUsed.size());
 	shadowVertices.reserve(vertexUsed.size());
-	// use a map to remove duplicates (because of UV/normal discontinuities before!!)
-	uint						numMerged= 0;
 	
 	for(i=0;i<vertexUsed.size(); ++i)
 	{
@@ -615,13 +613,38 @@ bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 
 	ofstream ofs(string(filename + ".obj").c_str());
 
+	map<CVector, sint> weldedVerticesToId;
+	vector<CVector> weldedVertices;
+	vector<sint> shadowToWelded;
+	weldedVertices.reserve(shadowVertices.size());
+	shadowToWelded.resize(shadowVertices.size());
+
+	for (i = 0; i < shadowVertices.size(); ++i)
+	{
+		CVector v = shadowVertices[i].vertex;
+		map<CVector, sint>::iterator it = weldedVerticesToId.find(v);
+		if (it == weldedVerticesToId.end())
+		{
+			weldedVerticesToId[v] = weldedVertices.size();
+			shadowToWelded[i] = weldedVertices.size();
+			weldedVertices.push_back(v);
+		}
+		else
+		{
+			shadowToWelded[i] = it->second;
+		}
+	}
+
+	for(size_t y = 0; y < weldedVertices.size(); ++y)
+	{
+		CVector v = weldedVertices[y];
+		ofs << "v " << v.x << " " << v.y << " " << v.z << endl;
+	}
+
 	for(size_t y = 0; y < shadowVertices.size(); ++y)
 	{
-		CVector v = shadowVertices[y].vertex;
 		CVector vn = shadowVertices[y].normal;
 		CUV vt = shadowVertices[y].uv;
-
-		ofs << "v " << v.x << " " << v.y << " " << v.z << endl;
 		ofs << "vn " << vn.x << " " << vn.y << " " << vn.z << endl;
 		ofs << "vt " << vt.U << " " << (1.0f - vt.V) << endl;
 	}
@@ -672,9 +695,9 @@ bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 
 		for(size_t pass = 0; pass<shadowTriangles.size(); pass += 3)
 		{
-			ofs << "f " << shadowTriangles[pass]+1 << "/" << shadowTriangles[pass]+1 << "/" << shadowTriangles[pass]+1 << " ";
-			ofs << shadowTriangles[pass+1]+1 << "/" << shadowTriangles[pass+1]+1 << "/" << shadowTriangles[pass+1]+1 << " ";
-			ofs << shadowTriangles[pass+2]+1 << "/" << shadowTriangles[pass+2]+1 << "/" << shadowTriangles[pass+2]+1 << endl;
+			ofs << "f " << shadowToWelded[shadowTriangles[pass]]+1 << "/" << shadowTriangles[pass]+1 << "/" << shadowTriangles[pass]+1 << " ";
+			ofs << shadowToWelded[shadowTriangles[pass+1]]+1 << "/" << shadowTriangles[pass+1]+1 << "/" << shadowTriangles[pass+1]+1 << " ";
+			ofs << shadowToWelded[shadowTriangles[pass+2]]+1 << "/" << shadowTriangles[pass+2]+1 << "/" << shadowTriangles[pass+2]+1 << endl;
 		}
 
 		shadowTriangles.clear();
