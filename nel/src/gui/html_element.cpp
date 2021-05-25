@@ -141,14 +141,14 @@ namespace NLGUI
 	// ***************************************************************************
 	std::string CHtmlElement::htmlEscape(std::string val, bool isAttribute) const
 	{
-		static const std::vector<std::string> searchReplace = {
+		static const std::string searchReplace[] = {
 			"&", "&amp;",
 			"<", "&lt;",
 			">", "&gt;",
 			"\xA0", "&nbsp;",
 		};
-
-		for(uint i = 0; i < searchReplace.size(); i+=2)
+		
+		for(uint i = 0; i < (sizeof(searchReplace) / sizeof(searchReplace[0])); i+=2)
 			val = strFindReplaceAll(val, searchReplace[i], searchReplace[i+1]);
 
 		if (isAttribute)
