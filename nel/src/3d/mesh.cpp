@@ -775,9 +775,8 @@ void	CMeshGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 	{
 		uint maxVertices = meshSkinManager->getMaxVertices();
 		uint vertexSize = meshSkinManager->getVertexSize();
-		nlassert(vertexSize == 32);
 
-		if (_OriginalSkinVertices.size() <= maxVertices)
+		if (maxVertices >= _OriginalSkinVertices.size() && vertexSize == 32)
 		{
 			// apply the skinning
 			uint8 *dstVb = meshSkinManager->lock();
@@ -787,16 +786,13 @@ void	CMeshGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 		else
 		{
 			supportVertexStream = false;
-			nlwarning("Unable to animate skinned model, too many vertices");
+			nlwarning("Unable to animate skinned model, too many vertices, or stream format unsupported");
 		}
 	}
 	else
 	{
 		nlwarning("Unable to animate skinned model, unsupported vertex format");
 	}
-
-	// apply the skinning: _VBuffer is modified.
-	// applySkin(skeleton);
 
 
 	// Setup meshVertexProgram
@@ -1837,26 +1833,13 @@ void	CMeshGeom::applySkin(void *dstVb, CSkeletonModel *skeleton)
 		return;
 
 	// Use correct skinning
-	TSkinType	skinType;
-	if( _OriginalSkinNormals.empty() )
-		skinType= SkinPosOnly;
-	else if( _OriginalTGSpace.empty() )
-		skinType= SkinWithNormal;
-	else
-		skinType= SkinWithTgSpace;
-	nlassert(skinType == SkinWithNormal); // Only support the streamable vertex buffer format
+	nlassert(!_OriginalSkinNormals.empty());
+	nlassert(_OriginalTGSpace.empty());
 
 	// Get VB src/dst info/ptrs.
 	uint	numVertices= (uint)_OriginalSkinVertices.size();
 	static const uint	dstStride = 32; // _VBuffer.getVertexSize();
 	uint	srcStride = _VBuffer.getVertexSize();
-	// Get dst TgSpace.
-	uint	tgSpaceStage = 0;
-	if( skinType>= SkinWithTgSpace)
-	{
-		nlassert(_VBuffer.getNumTexCoordUsed() > 0);
-		tgSpaceStage= _VBuffer.getNumTexCoordUsed() - 1;
-	}
 
 	// Mark all vertices flag to not computed.
 	static	vector<uint8>	skinFlags;
@@ -1887,24 +1870,10 @@ void	CMeshGeom::applySkin(void *dstVb, CSkeletonModel *skeleton)
 		CVector		*srcVector= &_OriginalSkinVertices[0];
 		uint8		*srcPal= (uint8*)vba.getPaletteSkinPointer(0);
 		uint8		*srcWgt= (uint8*)vba.getWeightPointer(0);
-		uint8		*dstVector = dstVbPos; // (uint8 *)vba.getVertexCoordPointer(0);
+		uint8		*dstVector = dstVbPos;
 		// Normal.
-		CVector		*srcNormal= NULL;
-		uint8		*dstNormal= NULL;
-		if(skinType>=SkinWithNormal)
-		{
-			srcNormal= &_OriginalSkinNormals[0];
-			dstNormal = dstVbNormal; // (uint8 *)vba.getNormalCoordPointer(0);
-		}
-		// TgSpace.
-		CVector		*srcTgSpace= NULL;
-		uint8		*dstTgSpace= NULL;
-		if(skinType>=SkinWithTgSpace)
-		{
-			nlassert(false);
-			srcTgSpace= &_OriginalTGSpace[0];
-			dstTgSpace = (uint8 *)vba.getTexCoordPointer(0, tgSpaceStage);
-		}
+		CVector		*srcNormal= &_OriginalSkinNormals[0];
+		uint8		*dstNormal = dstVbNormal;
 
 		// For all vertices that need to be computed.
 		uint		size= numVertices;
@@ -1928,12 +1897,7 @@ void	CMeshGeom::applySkin(void *dstVb, CSkeletonModel *skeleton)
 				computeSoftwarePointSkinning(matrixes, srcVector, psPal, (float*)srcWgt, (CVector*)dstVector);
 
 				// compute normal part.
-				if(skinType>=SkinWithNormal)
-					computeSoftwareVectorSkinning(matrixes, srcNormal, psPal, (float*)srcWgt, (CVector*)dstNormal);
-
-				// compute tg part.
-				if(skinType>=SkinWithTgSpace)
-					computeSoftwareVectorSkinning(matrixes, srcTgSpace, psPal, (float*)srcWgt, (CVector*)dstTgSpace);
+				computeSoftwareVectorSkinning(matrixes, srcNormal, psPal, (float*)srcWgt, (CVector*)dstNormal);
 			}
 
 			// inc flags.
@@ -1941,13 +1905,11 @@ void	CMeshGeom::applySkin(void *dstVb, CSkeletonModel *skeleton)
 			// inc src (all whatever skin type used...)
 			srcVector++;
 			srcNormal++;
-			srcTgSpace++;
 			// inc paletteSkin and dst  (all whatever skin type used...)
 			srcPal+= srcStride;
 			srcWgt+= srcStride;
 			dstVector+= dstStride;
 			dstNormal+= dstStride;
-			dstTgSpace+= dstStride;
 		}
 	}
 
@@ -1983,9 +1945,6 @@ void	CMeshGeom::applySkin(void *dstVb, CSkeletonModel *skeleton)
 			dstUV += dstStride;
 		}
 	}
-
-	// dirt
-	_OriginalSkinRestored= false;
 }
 
 
