@@ -898,7 +898,7 @@ void CCharacter3D::setup (const SCharacter3DSetup &c3ds)
 		if (c3ds.People != EGSPD::CPeople::Undefined)
 		if ((c3ds.People != _CurrentSetup.People) || bInstanceRebuilt || bQualityRebuilt)
 		{
-			if (!_Instances[i].empty())
+			if (!_Instances[i].empty() && i != Char3DPart_HandRightItem && i != Char3DPart_HandLeftItem)
 			{
 				ColorSlotManager.setInstanceSlot (	_Instances[i],
 													0u, // Slot 0 is for skin
