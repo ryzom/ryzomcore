@@ -222,7 +222,7 @@ void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot, bool 
 	{
 		if (isBot)
 		{
-			
+
 			const CEntityId & id = CAIAliasTranslator::getInstance()->getEntityId( targetId );
 			if (id != CEntityId::Unknown)
 			{
@@ -294,44 +294,48 @@ void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot, bool 
 		}
 	}
 
-	nlassert(_Mission->getCompass(freeIdx) == NULL);
-	EGSPD::CMissionCompassPD * compass = _Mission->addToCompass(freeIdx);
-	nlassert(compass != NULL);
-	if (c != NULL)
+	if (freeIdx < 8)
 	{
-		compass->setBotId(c->getAlias());
-		compass->setPlace(CAIAliasTranslator::Invalid);
-	}
-	else if (place != NULL)
-	{
-		compass->setBotId(CAIAliasTranslator::Invalid);
-		compass->setPlace(place->getAlias());
-	}
-	else
-	{
-		if (isPosition)
+		if (_Mission->getCompass(freeIdx) == NULL)
 		{
-			compass->setBotId(targetId);
-			compass->setPlace(CAIAliasTranslator::Invalid);
-	
-			sint32 x;
-			sint32 y;
-			string textName;
-			
-			CCharacter * user = getMainEntity();
-			user->getPositionCheck(toUpper(templ->getMissionName()), x, y, textName);
+			EGSPD::CMissionCompassPD * compass = _Mission->addToCompass(freeIdx);
 
-			if (targetId != 0) {
-				CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(freeIdx).setX(user->_PropertyDatabase, x*1000);
-				CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(freeIdx).setY(user->_PropertyDatabase, y*1000);
-				CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(freeIdx).setTITLE(user->_PropertyDatabase, targetId);
+			if (compass)
+			{
+				if (c != NULL)
+				{
+					compass->setBotId(c->getAlias());
+					compass->setPlace(CAIAliasTranslator::Invalid);
+				}
+				else if (place != NULL)
+				{
+					compass->setBotId(CAIAliasTranslator::Invalid);
+					compass->setPlace(place->getAlias());
+				}
+				else
+				{
+					if (isPosition)
+					{
+						compass->setBotId(targetId);
+						compass->setPlace(CAIAliasTranslator::Invalid);
+
+						sint32 x;
+						sint32 y;
+						string textName;
+
+						CCharacter * user = getMainEntity();
+						user->getPositionCheck(toUpper(templ->getMissionName()), x, y, textName);
+
+						if (targetId != 0) {
+							CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(freeIdx).setX(user->_PropertyDatabase, x*1000);
+							CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(freeIdx).setY(user->_PropertyDatabase, y*1000);
+							CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(freeIdx).setTITLE(user->_PropertyDatabase, targetId);
+						}
+
+						targetId = CAIAliasTranslator::Invalid;
+					}
+				}
 			}
-			
-			targetId = CAIAliasTranslator::Invalid;
-		}
-		else
-		{
-			nlstop;
 		}
 	}
 
@@ -344,7 +348,7 @@ void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot, bool 
 		sint32 y = 0;
 		uint32 txt = 0;
 		string msg;
-		
+
 		if ( c )
 		{
 			x = c->getState().X();
@@ -372,12 +376,12 @@ void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot, bool 
 				user->getPositionCheck(toUpper(templ->getMissionName()), x, y, textName);
 			txt = targetId;
 		}
-		
+
 		for ( uint i  = 0; i < entities.size(); i++)
 		{
 			if (!isPosition)
 				txt = STRING_MANAGER::sendStringToClient( entities[i],msg,params );
-				
+
 			PlayerManager.sendImpulseToClient( getEntityIdFromRow(entities[i]), "JOURNAL:ADD_COMPASS", x,y,txt );
 		}
 	}
@@ -1486,18 +1490,18 @@ uint CMissionBaseBehaviour::_updateCompass(CCharacter & user, DBType &missionDb)
 			compassIdx++;
 		}
 	}
-	
+
 	CMissionTemplate * tpl = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	
+
 	sint32 x;
 	sint32 y;
 	string txtName;
-	
+
 	user.getPositionCheck(toUpper(tpl->getMissionName()), x, y, txtName);
-	
+
 	if (!txtName.empty())
 		compassIdx++;
-		
+
 	return compassIdx;
 }
 
