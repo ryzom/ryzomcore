@@ -3193,7 +3193,64 @@ void resetHealGroups_(CStateInstance* entity, CScriptStack& stack)
 }
 
 
+//----------------------------------------------------------------------------
+/** @page code
 
+@subsection spawnGroup_fsssffff_
+Spawn new group.
+
+Arguments: f(NbrBots), f(spawnBot) s(Sheet), s(Name), s(Look), f(x), f(y), f(orientation), f(dispersion) ->
+
+@code
+
+@endcode
+
+*/
+// CGroup
+void spawnGroup_ffsssffff_(CStateInstance* entity, CScriptStack& stack)
+{
+	double dispersionRadius = (double)(float)stack.top();
+	stack.pop();
+
+	double orientation = (double)(float)stack.top();
+	stack.pop();
+
+	double y = (double)(float)stack.top();
+	stack.pop();
+
+	double x = (double)(float)stack.top();
+	stack.pop();
+
+	string look = (string)stack.top();
+	stack.pop();
+
+	string name = (string)stack.top();
+	stack.pop();
+
+	CSheetId sheetId((string)stack.top());
+	stack.pop();
+
+	bool spawn = (float&)stack.top()!=0.0f;
+	stack.pop();
+
+	uint nbBots = (uint)(float)stack.top();
+	stack.pop();
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+
+	CGroupNpc* grp = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if (grp)
+	{
+		CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
+		if (spawnGroup)
+			aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look, spawnGroup->getCell());
+		else
+			aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look);
+	}
+}
 
 
 std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
@@ -3268,6 +3325,8 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, addCustomLoot_ss_);
 	REGISTER_NATIVE_FUNC(functions, setUserModel_s_);
 	REGISTER_NATIVE_FUNC(functions, setCustomLoot_s_);
+
+	REGISTER_NATIVE_FUNC(functions, spawnGroup_ffsssffff_);
 
 //	REGISTER_NATIVE_FUNC(functions, hideMissionStepIcon_b_);
 //	REGISTER_NATIVE_FUNC(functions, hideMissionGiverIcon_b_);

@@ -1471,6 +1471,12 @@ NLMISC_COMMAND(getTarget, "get target of player", "<uid>")
 NLMISC_COMMAND(getMoney, "get money of player (if quantity, give/take/set the money)", "<uid> [+-]<quantity>")
 {
 
+	if (args.size () < 2)
+	{
+		log.displayNL("ERR: invalid arg count");
+		return false;
+	}
+
 	GET_ACTIVE_CHARACTER
 
 	uint64 money = c->getMoney();
@@ -1515,6 +1521,62 @@ NLMISC_COMMAND(getMoney, "get money of player (if quantity, give/take/set the mo
 
 	return true;
 }
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getGuildMoney, "get money of guild (if quantity, give/take/set the money)", "<uid> [+-]<quantity>")
+{
+
+	GET_ACTIVE_CHARACTER
+
+	CGuild * g = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (g)
+	{
+		uint64 money = g->getMoney();
+
+		if (args.size() == 2)
+		{
+			string quant = args[1];
+			uint64 quantity;
+			if (quant[0] == '+')
+			{
+				if (quant.size() > 1)
+				{
+					fromString(quant.substr(1), quantity);
+					money += quantity;
+				}
+			}
+			else if (quant[0] == '-')
+			{
+				if (quant.size() > 1)
+				{
+					fromString(quant.substr(1), quantity);
+					if (money >= quantity)
+					{
+						money -= quantity;
+					}
+					else
+					{
+						log.displayNL("-1"); // No enough money
+						return true;
+					}
+				}
+			}
+			else
+			{
+				fromString(quant, money);
+			}
+
+			g->setMoney(money);
+		}
+
+		log.displayNL("%" NL_I64 "u", money);
+	} else {
+		log.displayNL("ERR: no guild");
+	}
+
+	return true;
+}
+
 
 
 //----------------------------------------------------------------------------
@@ -3879,6 +3941,9 @@ NLMISC_COMMAND(getPlayerGuild, "get player guild informations", "<uid>")
 
 			log.displayNL("%d", c->getGuildId());
 			log.displayNL("%s", guild->getName().toString().c_str());
+			CGuild::TAllegiances allegiance = guild->getAllegiance();
+			log.displayNL("%s", PVP_CLAN::toString(allegiance.first).c_str());
+			log.displayNL("%s", PVP_CLAN::toString(allegiance.second).c_str());
 			return true;
 		}
 	}
@@ -4614,7 +4679,7 @@ NLMISC_COMMAND(despawnTargetSource, "Despawn the target source", "<uid>")
 
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(setServerPhrase, "Set an IOS phrase", "<id> <phrase> [<language code>]")
+NLMISC_COMMAND(setServerPhrase, "Set an IOS phrase", "<phrase> [<language code>]")
 {
 	if (args.size() < 2)
 		return false;
