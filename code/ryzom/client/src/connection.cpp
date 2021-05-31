@@ -33,6 +33,7 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/stream.h"
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
@@ -149,6 +150,7 @@ ucstring	PlayerSelectedHomeShardName;
 ucstring	PlayerSelectedHomeShardNameWithParenthesis;
 extern std::string CurrentCookie;
 
+
 ucstring NewKeysCharNameWanted; // name of the character for which a new keyset must be created
 ucstring NewKeysCharNameValidated;
 std::string GameKeySet = "keys.xml";
@@ -157,9 +159,11 @@ std::string RingEditorKeySet = "keys_r2ed.xml";
 string		ScenarioFileName;
 sint 		LoginCharsel = -1;
 
+std::string ImportCharacter;
+
 static const char *KeySetVarName = "BuiltInKeySets";
 
-
+#define GROUP_LIST_CHARACTER            "ui:outgame:charsel_import:import_list"
 #define	GROUP_LIST_MAINLAND				"ui:outgame:appear_mainland:mainland_list"
 #define	GROUP_LIST_KEYSET				"ui:outgame:appear_keyset:keyset_list"
 vector<CMainlandSummary>	Mainlands;
@@ -189,6 +193,7 @@ bool hasPrivilegeG() { return (UserPrivileges.find(":G:") != std::string::npos);
 bool hasPrivilegeEM() { return (UserPrivileges.find(":EM:") != std::string::npos); }
 bool hasPrivilegeEG() { return (UserPrivileges.find(":EG:") != std::string::npos); }
 bool hasPrivilegeOBSERVER() { return (UserPrivileges.find(":OBSERVER:") != std::string::npos); }
+bool hasPrivilegeTESTER() { return (UserPrivileges.find(":TESTER:") != std::string::npos); }
 
 
 // Restore the video mode (fullscreen for example) after the connection (done in a window)
@@ -2124,7 +2129,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		if (pList == NULL)
@@ -2203,7 +2208,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		pList->clearGroups();
 	}
@@ -2214,32 +2219,56 @@ REGISTER_ACTION_HANDLER (CAHResetMainlandList, "reset_mainland_list");
 // ***************************************************************************
 class CAHMainlandSelect : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const std::string &Params)
 	{
-		nlinfo("CAHMainlandSelect called");
-
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-
-		CCtrlButton *pCB = NULL;
-		// Unselect
-		if (MainlandSelected.asInt() != 0)
+		//nlinfo("CAHMainlandSelect called");
+		struct CUnpush : public CInterfaceElementVisitor
 		{
-			pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(MainlandSelected)+":but"));
-			if (pCB != NULL)
-				pCB->setPushed(false);
+			CCtrlBase *Ref;
+			virtual void visitCtrl(CCtrlBase *ctrl)
+			{
+				if (ctrl == Ref) return;
+				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(ctrl);
+				if (but)
+				{
+					but->setPushed(false);
+				}
+			}
+		};
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
+		if (!list)
+			return;
+
+		// unselect
+		if (Params.empty())
+		{
+			CUnpush unpusher;
+			unpusher.Ref = pCaller;
+			list->visit(&unpusher);
 		}
 
-		pCB = dynamic_cast<CCtrlButton*>(pCaller);
-		if (pCB != NULL)
+		// now select
+		uint32 mainland;
+		if (Params.empty())
 		{
-			string name = pCB->getId();
-			name = name.substr(0,name.rfind(':'));
-			uint32 mainland;
-			fromString(name.substr(name.rfind(':')+1,name.size()), mainland);
-			MainlandSelected = (TSessionId)mainland;
+			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pCaller);
+			if (!pCB)
+				return;
+
+			std::string name = pCB->getId();
+			name = name.substr(0, name.rfind(':'));
+
+			if (!fromString(name.substr(name.rfind(':')+1, name.size()), mainland))
+				return;
 
 			pCB->setPushed(true);
 		}
+		else
+			if (!fromString(Params, mainland))
+				return;
+
+		// and store
+		MainlandSelected = (TSessionId)mainland;
 	}
 };
 REGISTER_ACTION_HANDLER (CAHMainlandSelect, "mainland_select");
@@ -2444,7 +2473,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		pList->clearGroups();
 	}
@@ -2455,59 +2484,66 @@ REGISTER_ACTION_HANDLER (CAHResetKeysetList, "reset_keyset_list");
 // ***************************************************************************
 class CAHResetKeysetSelect : public IActionHandler
 {
-public:
 	std::string getIdPostFix(const std::string fullId)
 	{
 		std::string::size_type pos = fullId.find_last_of(":");
 		if (pos != std::string::npos)
-		{
 			return fullId.substr(pos + 1);
-		}
+
 		return "";
 	}
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+
+	virtual void execute(CCtrlBase *pCaller, const std::string &Params)
 	{
-		if (!pCaller) return;
 		// 'unpush' all groups but the caller
-		//
 		struct CUnpush : public CInterfaceElementVisitor
 		{
 			CCtrlBase *Ref;
 			virtual void visitCtrl(CCtrlBase *ctrl)
 			{
 				if (ctrl == Ref) return;
-				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton *>(ctrl);
+				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(ctrl);
 				if (but)
 				{
 					but->setPushed(false);
 				}
 			}
 		};
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup * list = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
-		if (list)
-		{
-			CUnpush unpusher;
-			unpusher.Ref = pCaller;
-			list->visit(&unpusher);
-		}
-		CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton *>(pCaller);
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
+		if (!list)
+			return;
+
+		// unselect
+		CUnpush unpusher;
+		unpusher.Ref = pCaller;
+		list->visit(&unpusher);
+
+		// now select
+		CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(pCaller);
 		if (but)
-		{
 			but->setPushed(true);
+
+		std::string id;
+		if (Params.empty())
+		{
+			if (!pCaller) return;
+			if (!pCaller->getParent()) return;
+
+			id = getIdPostFix(pCaller->getParent()->getId());
 		}
-		//
+		else
+			id = getIdPostFix(Params);
+
 		GameKeySet = "keys.xml";
 		RingEditorKeySet = "keys_r2ed.xml";
-		if (!pCaller->getParent()) return;
-		// compute the 2 filenames from the id
-		// if id is in the built-in keysets :
+
+		// compute the two filenames from the id
+		// if id is in the built-in keysets
 		CConfigFile::CVar *keySetVar = ClientCfg.ConfigFile.getVarPtr(KeySetVarName);
-		if (keySetVar && keySetVar->size() != 0)
+		if (keySetVar && keySetVar->size() > 0)
 		{
 			for (uint k = 0; k < keySetVar->size(); ++k)
 			{
-				std::string id = getIdPostFix(pCaller->getParent()->getId());
 				if (keySetVar->asString(k) == id)
 				{
 					GameKeySet = "keys" + string(id.empty() ? "" : "_") + id + ".xml";
@@ -2516,17 +2552,15 @@ public:
 				}
 			}
 		}
-		// ... else maybe from a previous character	?
-		if (CFile::isExists("save/keys_" + getIdPostFix(pCaller->getParent()->getId()) + ".xml") )
-		{
-			GameKeySet = "keys_" + getIdPostFix(pCaller->getParent()->getId()) + ".xml";
-		}
-		if (CFile::isExists("save/keys_r2ed_" + getIdPostFix(pCaller->getParent()->getId()) + ".xml") )
-		{
-			RingEditorKeySet = "keys_r2ed_" + getIdPostFix(pCaller->getParent()->getId()) + ".xml";
-		}
-		// NB : key file will be copied for real when the new 'character summary' is
 
+		// else maybe from a previous character?
+		if (CFile::isExists("save/keys_" + id + ".xml"))
+			GameKeySet = "keys_" + id + ".xml";
+
+		if (CFile::isExists("save/keys_r2ed_" + id + ".xml"))
+			RingEditorKeySet = "keys_r2ed_" + id + ".xml";
+
+		// NB: key file will be copied for real when the new character summary is
 	}
 };
 REGISTER_ACTION_HANDLER (CAHResetKeysetSelect, "keyset_select");
@@ -3421,3 +3455,239 @@ class CAHOpenRingSessions : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOpenRingSessions, "open_ring_sessions");
+
+// ***************************************************************************
+class CAHInitImportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CHARACTER));
+		if (!list)
+		{
+			nlwarning("element " GROUP_LIST_CHARACTER " not found probably bad outgame.xml");
+			return;
+		}
+
+		// retrieve saved files
+		std::vector<string> savedCharacters;
+		CPath::getPathContent("save/", false, false, true, savedCharacters);
+
+		CInterfaceGroup *newLine;
+		CInterfaceGroup *prevLine;
+
+		for (uint i = 0; i < savedCharacters.size(); ++i)
+		{
+			// search saved characters only
+			if (testWildCard(CFile::getFilename(savedCharacters[i]), "character_*.save"))
+			{
+				const std::string id = CFile::getFilenameWithoutExtension(savedCharacters[i]).substr(strlen("character_"));
+				if (id.empty())
+					continue;
+
+				std::vector<pair<string, string>> params;
+				params.clear();
+				params.push_back(std::pair<string, string>("id", id));
+				// adjust ref
+				if (list->getNumGroup() > 0)
+					params.push_back(std::pair<string, string>("posref", "BL TL"));
+
+				newLine = CWidgetManager::getInstance()->getParser()->createGroupInstance("t_import", GROUP_LIST_CHARACTER, params);
+				if (newLine)
+				{
+					CViewText *text = dynamic_cast<CViewText*>(newLine->getView("name"));
+					if (text)
+						text->setText(ucstring(savedCharacters[i]));
+
+					// first button is pushed
+					CCtrlButton *button = dynamic_cast<CCtrlButton*>(newLine->getCtrl("but"));
+					if (button && list->getNumGroup() == 0)
+						button->setPushed(true);
+
+					// add to the list now
+					newLine->setParent(list);
+					newLine->setParentSize(list);
+					newLine->setParentPos(prevLine);
+
+					list->addGroup(newLine);
+
+					prevLine = newLine;
+				}
+			}
+		}
+		// none case
+		if (list->getNumGroup() == 0)
+			CLuaManager::getInstance().executeLuaScript("outgame:procCharselNotifaction(3)");
+
+		list->invalidateCoords();
+	}
+};
+REGISTER_ACTION_HANDLER( CAHInitImportCharacter, "import_char_init" );
+
+// ***************************************************************************
+class CAHResetImportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CHARACTER));
+		if (list)
+			list->clearGroups();
+
+		if (!ImportCharacter.empty())
+			ImportCharacter = "";
+	}
+};
+REGISTER_ACTION_HANDLER( CAHResetImportCharacter, "import_char_reset" );
+
+// ***************************************************************************
+class CAHSelectImportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const std::string &Params)
+	{
+		struct CUnpush : public CInterfaceElementVisitor
+		{
+			CCtrlBase *Ref;
+			virtual void visitCtrl(CCtrlBase *ctrl)
+			{
+				if (ctrl == Ref) return;
+				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(ctrl);
+				if (but)
+				{
+					but->setPushed(false);
+				}
+			}
+		};
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CHARACTER));
+		if (!list)
+			return;
+
+		// unselect
+		if (Params.empty())
+		{
+			CUnpush unpusher;
+			unpusher.Ref = pCaller;
+			list->visit(&unpusher);
+		}
+
+		// now select
+		std::string name;
+		if (Params.empty())
+		{
+			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pCaller);
+			if (!pCB)
+				return;
+
+			std::string id = pCB->getId();
+			id = id.substr(0, id.rfind(':'));
+
+			if (!fromString(id.substr(id.rfind(':')+1, id.size()), name))
+				return;
+
+			pCB->setPushed(true);
+		}
+		else
+			if (!fromString(Params, name))
+				return;
+
+		ImportCharacter = "";
+		// check filename and store
+		if (CFile::fileExists(toString("save/character_%s.save", name.c_str())))
+			ImportCharacter = name;
+	}
+};
+REGISTER_ACTION_HANDLER( CAHSelectImportCharacter, "import_char_select" );
+
+// ***************************************************************************
+class CAHImportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		if (ImportCharacter.empty())
+			return;
+
+		if (!CFile::fileExists(toString("save/character_%s.save", ImportCharacter.c_str())))
+			return;
+
+		bool success = false;
+
+		CIFile fd;
+		CCharacterSummary CS;
+		// use temporary file until close()
+		if (fd.open(toString("save/character_%s.save", ImportCharacter.c_str())))
+		{
+			try
+			{
+				CS.serial(fd);
+				SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", CS);
+
+				// validate import
+				CDBManager::getInstance()->getDbProp("UI:TEMP:IMPORT")->setValue32(1);
+				success = true;
+			}
+			catch (const EStream &e)
+			{
+				nlwarning(e.what());
+			}
+			fd.close();
+		}
+		else
+			nlwarning("Failed to open file: save/character_%s.save", ImportCharacter.c_str());
+
+		// user notification
+		if (!success)
+			CLuaManager::getInstance().executeLuaScript("outgame:procCharselNotifaction(2)");
+		else
+			CAHManager::getInstance()->runActionHandler("proc", NULL, "proc_charsel_create_new");
+	}
+};
+REGISTER_ACTION_HANDLER( CAHImportCharacter, "import_char" );
+
+// ***************************************************************************
+class CAHExportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	{
+		if (Params.empty())
+			return;
+
+		sint32 slot = -1;
+		if (!fromString(getParam(Params, "slot"), slot))
+			return;
+
+		if (slot >= CharacterSummaries.size() || slot < 0)
+			return;
+
+		// retrieve infos
+		CCharacterSummary &CS = CharacterSummaries[slot];
+		if (CS.Name.empty())
+			return;
+
+		// extract name
+		const std::string name = buildPlayerNameForSaveFile(CS.Name.toString());
+
+		COFile fd;
+		bool success = false;
+		// use temporary file until close()
+		if (fd.open(toString("save/character_%s.save", name.c_str()), false, false, true))
+		{
+			try
+			{
+				fd.serial(CS);
+				fd.flush();
+				// validate
+				success = true;
+			}
+			catch (const EStream &e)
+			{
+				nlwarning(e.what());
+			}
+			fd.close();
+		}
+		else
+			nlwarning("Failed to open file: save/character_%s.save", name.c_str());
+
+		const uint8 val = (success == true) ? 0 : 1;
+		// user notification
+		CLuaManager::getInstance().executeLuaScript(toString("outgame:procCharselNotifaction(%i)", val));
+	}
+};
+REGISTER_ACTION_HANDLER( CAHExportCharacter, "export_char" );

@@ -179,7 +179,6 @@
 #else
 #	include <sys/types.h>
 #	include <sys/stat.h>
-#	include <sys/sysctl.h>
 #	include <fcntl.h>
 #	include <unistd.h>
 #	include <cerrno>
@@ -189,6 +188,7 @@
 #	endif // NL_CPU_INTEL
 #	ifdef NL_OS_MAC
 #		include <sys/mount.h>
+#		include <sys/sysctl.h>
 #	else
 #		include <sys/vfs.h>
 #	endif

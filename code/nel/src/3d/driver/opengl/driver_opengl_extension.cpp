@@ -1275,7 +1275,7 @@ static bool	setupNVFragmentProgram2(const char *glext)
 {
 	H_AUTO_OGL(setupNVFragmentProgram2);
 	CHECK_EXT("GL_NV_fragment_program2");
-	
+
 	return true;
 }
 
@@ -1284,7 +1284,7 @@ static bool	setupARBFragmentShader(const char *glext)
 {
 	H_AUTO_OGL(setupNVFragmentProgram2);
 	CHECK_EXT("GL_ARB_fragment_shader");
-	
+
 	return true;
 }
 
@@ -1584,6 +1584,14 @@ void	registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
 
+#ifdef NL_OS_MAC
+	CGLContextObj ctx = CGLGetCurrentContext();
+	if (ctx == NULL)
+	{
+		nlerror("No OpenGL context set");
+	}
+#endif
+
 	// OpenGL 1.2 ??
 	const char	*nglVersion = (const char *)glGetString (GL_VERSION);
 
@@ -1691,12 +1699,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.EXTVertexShader = false;
 		ext.ARBVertexProgram = false;
 	}
-	
+
 	// Check pixel program
 	// Disable feature ???
 	if (!ext.DisableHardwarePixelProgram)
 	{
-		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);	
+		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);
 		ext.NVFragmentProgram2 = setupNVFragmentProgram2(glext);
 		ext.ARBFragmentShader = setupARBFragmentShader(glext);
 	}

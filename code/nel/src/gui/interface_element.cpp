@@ -1028,21 +1028,16 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	bool			CInterfaceElement::convertBool (const char *ptr)
+	bool CInterfaceElement::convertBool (const char *ptr)
 	{
-		std::string str = toLower(ptr);
-		bool b = false;
-		fromString( str, b );
-		return b;
+		return NLMISC::toBool(ptr);
 	}
 
 	// ------------------------------------------------------------------------------------------------
 	NLMISC::CVector CInterfaceElement::convertVector (const char *ptr)
 	{
 		float x = 0.0f, y = 0.0f, z = 0.0f;
-
 		sscanf (ptr, "%f %f %f", &x, &y, &z);
-
 		return CVector(x,y,z);
 	}
 
@@ -1168,6 +1163,8 @@ namespace NLGUI
 		{
 			_Active = state;
 			invalidateCoords();
+			// force invalidate CViewText/CGroupTable inner elements
+			invalidateContent();
 		}
 	}
 

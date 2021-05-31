@@ -326,17 +326,8 @@ CClientConfig::CClientConfig()
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
 
-#if 1 // Yubo hack
-	// The order is important here, because in a layer, global texture are rendered through this order
-	TexturesInterface.push_back("texture_interfaces_v3");
-	// DXTC contain all items and bricks bitmaps, they must come after standard texture
-	TexturesInterface.push_back("new_texture_interfaces_dxtc");
-	// Added icons by Yubo's Team 2009
-	TexturesInterface.push_back("texture_extra");
-#else
-	TexturesInterface.push_back("texture_interfaces_v3");
-	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc");
-#endif
+	TexturesInterface.push_back("texture_interfaces_v3_2x");
+	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc_2x");
 
 	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
 
@@ -448,8 +439,8 @@ CClientConfig::CClientConfig()
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
+	ReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
 
 
 	///////////////
@@ -791,8 +782,8 @@ void CClientConfig::setValues()
 	READ_STRINGVECTOR_FV(TexturesOutGameInterfaceDXTC);
 
 	// interface textures ingame and r2
-	READ_STRINGVECTOR_FV(TexturesInterface);
-	READ_STRINGVECTOR_FV(TexturesInterfaceDXTC);
+	//READ_STRINGVECTOR_FV(TexturesInterface);
+	//READ_STRINGVECTOR_FV(TexturesInterfaceDXTC);
 
 	// interface files login menus
 	READ_STRINGVECTOR_FV(XMLLoginInterfaceFiles);
@@ -1126,7 +1117,7 @@ void CClientConfig::setValues()
 		if (ClientCfg.getDefaultConfigLocation(defaultConfigFileName))
 			ClientCfg.CurlCABundle = CFile::getPath(defaultConfigFileName)+ClientCfg.CurlCABundle.substr(1);
 	}
-		
+
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold

@@ -549,6 +549,6 @@ bool							CSBrickSheet::mustDisplayLevel() const
 	// NB: Yoyo Hack. special interface with indexInFamily==63 means "want to display the level"
 	return !(	isMandatory() ||
 				isRoot() ||
-				(BrickFamily>= BRICK_FAMILIES::BeginInterface && BrickFamily<= BRICK_FAMILIES::EndInterface && IndexInFamily!=63) ||
+				//(BrickFamily>= BRICK_FAMILIES::BeginInterface && BrickFamily<= BRICK_FAMILIES::EndInterface && IndexInFamily!=63) ||
 				Level==0 );
 }

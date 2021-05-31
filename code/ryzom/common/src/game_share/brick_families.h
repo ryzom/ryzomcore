@@ -297,7 +297,20 @@ namespace BRICK_FAMILIES
 				BCOKARM02,
 				BCOKARR02,
 				BCOKART02,
-			EndFaberMandatory = BCOKART02,
+				BCOMARM01,
+				BCOMARR01,
+				BCOMART01,
+				BCOMARM02,
+				BCOMARR02,
+				BCOMART02,
+				BCOGENM01,
+				BCOGENR01,
+				BCOGENT01,
+				BCOGENM02,
+				BCOGENR02,
+				BCOGENT02,
+
+			EndFaberMandatory = BCOGENT02,
 
 			// OPTION FABER
 			BeginFaberOption,
@@ -675,7 +688,8 @@ namespace BRICK_FAMILIES
 				BSCMD, // heal Focus
 			EndPowerParameter = BSCMD,
 
-			BSGMC, // jewels s2e0
+			BSGMC, // allegories
+				BSGMCB, // boost allegories
 
 			BeginMagicPowerCredit,
 				BSXCA = BeginMagicPowerCredit, // recast time

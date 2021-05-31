@@ -116,10 +116,9 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 
 bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, std::string &title, float &length)
 {
-	std::string lookup = CPath::lookup(filepath, false);
-	if (lookup.empty())
+	if (filepath.empty() || !CFile::fileExists(filepath))
 	{
-		nlwarning("Music file %s does not exist!", filepath.c_str());
+		nlwarning("Music file '%s' does not exist!", filepath.c_str());
 		return false;
 	}
 
@@ -127,7 +126,7 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 	CIFile ifile;
 	ifile.setCacheFileOnOpen(false);
 	ifile.allowBNPCacheFileOnOpen(false);
-	if (ifile.open(lookup))
+	if (ifile.open(filepath))
 		return CAudioDecoderFfmpeg::getInfo(&ifile, artist, title, length);
 #else
 	std::string type = CFile::getExtension(filepath);
@@ -138,7 +137,7 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 		CIFile ifile;
 		ifile.setCacheFileOnOpen(false);
 		ifile.allowBNPCacheFileOnOpen(false);
-		if (ifile.open(lookup))
+		if (ifile.open(filepath))
 			return CAudioDecoderVorbis::getInfo(&ifile, artist, title, length);
 
 		nlwarning("Unable to open: '%s'", filepath.c_str());
@@ -149,7 +148,7 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 		CIFile ifile;
 		ifile.setCacheFileOnOpen(false);
 		ifile.allowBNPCacheFileOnOpen(false);
-		if (ifile.open(lookup))
+		if (ifile.open(filepath))
 			return CAudioDecoderMP3::getInfo(&ifile, artist, title, length);
 
 		nlwarning("Unable to open: '%s'", filepath.c_str());

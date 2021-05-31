@@ -245,7 +245,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 #endif
 
 		// App name matches Domain on the SQL server
-		std::string appName = cf->getVarPtr("Application") 
+		std::string appName = cf->getVarPtr("Application")
 			? cf->getVar("Application").asString(0)
 			: "default";
 
@@ -1280,6 +1280,19 @@ void CPatchManager::readDescFile(sint32 nVersion)
 
 		CBNPFileSet &bnpFS = const_cast<CBNPFileSet &>(DescFile.getFiles());
 
+		// TODO: .ref files are expected to follow platform category naming (they are in 'main' category)
+		std::set<std::string>::const_iterator it;
+		for(it = forceRemovePatchCategories.begin(); it != forceRemovePatchCategories.end(); ++it)
+		{
+			std::string name = *it;
+			std::string::size_type pos = name.find("_");
+			if (pos != std::string::npos)
+			{
+				name = name.substr(pos+1) + "_.ref";
+				bnpFS.removeFile(name);
+			}
+		}
+
 		for (cat = 0; cat < DescFile.getCategories().categoryCount();)
 		{
 			const CBNPCategory &bnpCat = DescFile.getCategories().getCategory(cat);
@@ -1354,7 +1367,7 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 		{
 			//nlwarning("EXCEPTION CATCH: getServerFile() failed - try to find an alternative: %i: %s",UsedServer,PatchServers[UsedServer].DisplayedServerPath.c_str());
 
-			nlwarning("EXCEPTION CATCH: getServerFile() failed - try to find an alternative :");
+			nlwarning("EXCEPTION CATCH: getServerFile() failed - try to find an alternative : %s", (serverPath+srcName).c_str());
 			nlwarning("%i", UsedServer);
 			if (UsedServer >= 0 && UsedServer < (int) PatchServers.size())
 			{
@@ -2676,6 +2689,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 	string OutFilename;
 	bool usePatchFile = true;
+	bool haveAllreadyTryiedDownloadingOfFile = false;
 
 	// compute the total size of patch to download
 	uint32 totalPatchSize = 0;
@@ -2743,6 +2757,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			{
 				// can not load the 7zip file, use normal patching
 				usePatchFile = true;
+				haveAllreadyTryiedDownloadingOfFile = true;
 				break;
 			}
 
@@ -2754,6 +2769,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				{
 					// fallback to standard patch method
 					usePatchFile = true;
+					haveAllreadyTryiedDownloadingOfFile = true;
 					break;
 				}
 			}
@@ -2766,6 +2782,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				nlwarning("Failed to unpack lzma file %s", (pPM->ClientPatchPath+lzmaFile).c_str());
 				// fallback to standard patch method
 				usePatchFile = true;
+				haveAllreadyTryiedDownloadingOfFile = true;
 				break;
 			}
 
@@ -2874,34 +2891,109 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			sTranslate = CI18N::get("uiApplyingDelta") + " " + CFile::getFilename(PatchName);
 			pPM->setState(true, sTranslate);
 
-			xDeltaPatch(PatchName, SourceNameXD, OutFilename);
+			bool deltaPatchResult = xDeltaPatch(PatchName, SourceNameXD, OutFilename);
 
-			if (rFTP.LocalFileExists)
-				pPM->deleteFile(SourceName);
-			pPM->deleteFile(PatchName);
-
-			if (j > 0)
+			if (!deltaPatchResult && !haveAllreadyTryiedDownloadingOfFile) // Patch failed, try to download and apply lzma
 			{
-				pPM->deleteFile(SourceNameXD, false, false); // File can exists if bad BNP loading
-			}
-			tmpSourceName = OutFilename;
-			PatchSizeProgress += rFTP.PatcheSizes[j];
-			currentPatchedSize += rFTP.PatcheSizes[j];
-		}
+				breakable
+				{
+					// compute the seven zip filename
+					string lzmaFile = rFTP.FileName+".lzma";
 
-		if (tmpSourceName != DestinationName)
-		{
-			pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
-			if (!_CommitPatch)
-			{
-				// let the patch in the unpack directory
-				pPM->renameFile(tmpSourceName, pPM->ClientPatchPath + rFTP.FileName + ".tmp");
+					// download the 7zip file
+					try
+					{
+						// first, try in the file version subfolfer
+						try
+						{
+							progress.Scale = 1.f;
+							progress.Bias = 0.f;
+							if (!rFTP.Patches.empty())
+							{
+								pPM->getServerFile(toString("%05u/", rFTP.Patches.back())+lzmaFile, false, "", &progress);
+							}
+							// else -> file comes from a previous download (with .tmp extension, and is up to date)
+							// the remaining code will just rename it with good name and exit
+						}
+						catch (const NLMISC::EWriteError &)
+						{
+							// this is a local error, rethrow ...
+							throw;
+						}
+						catch(...)
+						{
+							// failed with version subfolder, try in the root patch directory
+							pPM->getServerFile(lzmaFile, false, "", &progress);
+						}
+					}
+					catch (const NLMISC::EWriteError &)
+					{
+						// this is a local error, rethrow ...
+						throw;
+					}
+					catch (...)
+					{
+						break;
+					}
+
+					OutFilename = pPM->ClientPatchPath + NLMISC::CFile::getFilename(rFTP.FileName);
+					// try to unpack the file
+					try
+					{
+						if (!unpackLZMA(pPM->ClientPatchPath+lzmaFile, OutFilename+".tmp"))
+						{
+							break;
+						}
+					}
+					catch (const NLMISC::EWriteError&)
+					{
+						throw;
+					}
+					catch (...)
+					{
+						nlwarning("Failed to unpack lzma file %s", (pPM->ClientPatchPath+lzmaFile).c_str());
+						break;
+					}
+
+					if (rFTP.LocalFileExists)
+						pPM->deleteFile(SourceName);
+
+					pPM->deleteFile(pPM->ClientPatchPath+lzmaFile);	// delete the archive file
+					pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
+					if (_CommitPatch)
+					{
+						pPM->renameFile(OutFilename+".tmp", DestinationName);
+					}
+				}
 			}
 			else
 			{
-				pPM->renameFile(tmpSourceName, DestinationName);
+				if (rFTP.LocalFileExists)
+					pPM->deleteFile(SourceName);
+				pPM->deleteFile(PatchName);
+
+				if (j > 0)
+				{
+					pPM->deleteFile(SourceNameXD, false, false); // File can exists if bad BNP loading
+				}
+				tmpSourceName = OutFilename;
+				PatchSizeProgress += rFTP.PatcheSizes[j];
+				currentPatchedSize += rFTP.PatcheSizes[j];
 			}
 		}
+			if (tmpSourceName != DestinationName)
+			{
+				pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
+				if (!_CommitPatch)
+				{
+					// let the patch in the unpack directory
+					pPM->renameFile(tmpSourceName, pPM->ClientPatchPath + rFTP.FileName + ".tmp");
+				}
+				else
+				{
+					pPM->renameFile(tmpSourceName, DestinationName);
+				}
+			}
 	}
 	else
 	{
@@ -2915,7 +3007,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 }
 
 // ****************************************************************************
-void CPatchThread::xDeltaPatch(const string &patch, const string &src, const string &out)
+bool CPatchThread::xDeltaPatch(const string &patch, const string &src, const string &out)
 {
 	// Internal xdelta
 
@@ -2941,12 +3033,13 @@ void CPatchThread::xDeltaPatch(const string &patch, const string &src, const str
 			break;
 			default:
 			{
-				std::string str = toString("Error applying %s to %s giving %s", patch.c_str(), src.c_str(), out.c_str());
-				throw Exception (str);
+				nlinfo("Error applying %s to %s giving %s", patch.c_str(), src.c_str(), out.c_str());
+				return false;
 			}
 			break;
 		}
-	}
+	} else
+		return true;
 
 
 	// Launching xdelta

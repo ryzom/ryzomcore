@@ -28,6 +28,7 @@
 #include "nel/gui/action_handler.h"
 #include "../entities.h"
 #include "nel/gui/group_paragraph.h" // For CCtrlLink
+#include "nel/gui/view_bitmap.h"
 #include "../net_manager.h"
 #include "../string_manager_client.h"
 #include "../login.h"
@@ -644,13 +645,41 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
+		ucstring finalMessage = message;
+
+		ucstring::size_type pos = message.find(ucstring("|"));
+		if (pos != std::string::npos)
+		{
+			CViewBitmap *pViewIcon = dynamic_cast<CViewBitmap*>(group->getView("iconA"));
+			if (pViewIcon != NULL)
+			{
+				string texture = message.substr(0, pos).toString();
+				pViewIcon->setTexture(texture);
+			}
+
+			ucstring::size_type end = message.find(ucstring("|"), pos+1);
+			if (end != std::string::npos)
+			{
+				CViewBitmap *pViewIcon = dynamic_cast<CViewBitmap*>(group->getView("iconZ"));
+				if (pViewIcon != NULL)
+				{
+					string texture = message.substr(end+1).toString();
+					pViewIcon->setTexture(texture);
+				}
+				finalMessage = message.substr(pos+1, end-pos-1);
+			}
+			else
+				finalMessage = message.substr(pos+1);
+		}
+
 		// Skill name
 		CViewText *pViewName = dynamic_cast<CViewText*>(group->getView("name"));
 		if (pViewName != NULL)
 		{
-			pViewName->setTextFormatTaged(message);
+			pViewName->setTextFormatTaged(finalMessage);
 			pViewName->setColor (color);
 		}
+
 
 		// Link to the interface
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
@@ -843,6 +872,33 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 	if (pChar == NULL || nUID==CLFECOMMON::INVALID_CLIENT_DATASET_INDEX) return;
 	if (bubbleTimer == 0) bubbleTimer = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 
+
+
+	// Clean bubble from translation system
+
+	ucstring::size_type pos = 0;
+	ucstring::size_type textSize = ucsText.size();
+	string::size_type startTr = ucsText.find(ucstring("{:"));
+	string::size_type endOfOriginal = ucsText.find(ucstring("}@{"));
+
+	if (startTr != string::npos && endOfOriginal != string::npos) {
+		bool inverse = false;
+		string lang = toUpper(ucsText.substr(startTr+2, 2)).toString();
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
+		if (node)
+			inverse = node->getValueBool();
+
+		if (!inverse)
+		{
+			pos = endOfOriginal+4;
+		}
+		else
+		{
+			pos = startTr+5;
+			textSize = endOfOriginal;
+		}
+	}
+
 	// Output the message in a bubble
 
 	bool show = false;
@@ -862,7 +918,7 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 				return;
 
 		// Get a bubble
-		CGroupInSceneBubble *bubble = newBubble (ucsText);
+		CGroupInSceneBubble *bubble = newBubble (ucsText.substr(pos, textSize-pos));
 		if (bubble)
 		{
 			// Link the bubble

@@ -267,7 +267,7 @@ void		CGameContextMenu::update()
 
 	setupContextMenuCantTalk(); // can't talk by default
 
-	bool showGMOptions = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER());
+	bool showGMOptions = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER() || hasPrivilegeTESTER());
 
 	if (_TextInvisible)
 		_TextInvisible->setActive(showGMOptions);
@@ -451,18 +451,19 @@ void		CGameContextMenu::update()
 	else if (continent == "lepaysmalade.continent")
 		fameIndex = CStaticFames::getInstance().getFactionIndex("zorai");
 
-	
+
 	if (fameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
 		CCDBNodeLeaf *pLeafFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", fameIndex), false);
 		if (pLeafFame != NULL)
 			fameValue = pLeafFame->getValue8();
 	}
+
 	if (_TextNews)
-		_TextNews->setActive(selection && !canAttack() && selection->isNPC() && fameValue >= -30);
+		_TextNews->setActive(!UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue >= -30);
 
 	if (_TextNewsAgressive)
-		_TextNewsAgressive->setActive(selection && !canAttack() && selection->isNPC() && fameValue < -30);
+		_TextNewsAgressive->setActive(!UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue < -30);
 
 
 	if (_TextDuel && _TextUnDuel)
