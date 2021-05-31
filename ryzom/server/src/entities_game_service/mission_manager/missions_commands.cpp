@@ -1471,7 +1471,7 @@ NLMISC_COMMAND(getTarget, "get target of player", "<uid>")
 NLMISC_COMMAND(getMoney, "get money of player (if quantity, give/take/set the money)", "<uid> [+-]<quantity>")
 {
 
-	if (args.size () < 2)
+	if (args.size () < 1)
 	{
 		log.displayNL("ERR: invalid arg count");
 		return false;
