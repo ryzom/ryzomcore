@@ -606,6 +606,39 @@ namespace NLGUI
 		}
 	}
 
+	void CCssStyle::applyMarginWidth(const std::string &value, uint32 *dest, const uint32 current, uint32 fontSize) const
+	{
+		if (!dest) return;
+
+		if (value == "inherit")
+		{
+			*dest = current;
+			return;
+		}
+		else if (value == "auto")
+		{
+			// TODO: requires content width;
+			*dest = 0;
+			return;
+		}
+
+		float tmpf;
+		std::string unit;
+		if (getCssLength(tmpf, unit, value.c_str()))
+		{
+			if (unit == "rem")
+				*dest = fontSize * tmpf;
+			else if (unit == "em")
+				*dest = fontSize * tmpf;
+			else if (unit == "pt")
+				*dest = tmpf / 0.75f;
+			else if (unit == "%")
+				*dest = 0; // TODO: requires content width, must remember 'unit' type
+			else
+				*dest = tmpf;
+		}
+	}
+
 	// apply style rules
 	void CCssStyle::apply(CStyleParams &style, const CStyleParams &current) const
 	{
@@ -625,6 +658,10 @@ namespace NLGUI
 			else if (it->first == "border-left-width")	 applyBorderWidth(it->second, &style.BorderLeftWidth, current.BorderLeftWidth, current.FontSize);
 			else if (it->first == "border-left-color")	 applyBorderColor(it->second, &style.BorderLeftColor, current.BorderLeftColor, current.TextColor);
 			else if (it->first == "border-left-style")	 applyLineStyle(it->second, &style.BorderLeftStyle, current.BorderLeftStyle);
+			else if (it->first == "margin-top")			 applyMarginWidth(it->second, &style.MarginTop, current.MarginTop, current.FontSize);
+			else if (it->first == "margin-right")		 applyMarginWidth(it->second, &style.MarginRight, current.MarginRight, current.FontSize);
+			else if (it->first == "margin-bottom")		 applyMarginWidth(it->second, &style.MarginBottom, current.MarginBottom, current.FontSize);
+			else if (it->first == "margin-left")		 applyMarginWidth(it->second, &style.MarginLeft, current.MarginLeft, current.FontSize);
 			else if (it->first == "padding-top")		 applyPaddingWidth(it->second, &style.PaddingTop, current.PaddingTop, current.FontSize);
 			else if (it->first == "padding-right")		 applyPaddingWidth(it->second, &style.PaddingRight, current.PaddingRight, current.FontSize);
 			else if (it->first == "padding-bottom")		 applyPaddingWidth(it->second, &style.PaddingBottom, current.PaddingBottom, current.FontSize);
@@ -1554,6 +1591,22 @@ namespace NLGUI
 		style["padding-right"] = parts[r];
 		style["padding-bottom"] = parts[b];
 		style["padding-left"] = parts[l];
+	}
+
+	// ***************************************************************************
+	void CCssStyle::expandMarginShorthand(const std::string &value, TStyle &style) const
+	{
+		std::vector<std::string> parts;
+		splitParams(toLowerAscii(value), ' ', parts);
+
+		uint8 t, r, b, l;
+		if (!getShorthandIndices(parts.size(), t, r, b, l))
+			return;
+
+		style["margin-top"] = parts[t];
+		style["margin-right"] = parts[r];
+		style["margin-bottom"] = parts[b];
+		style["margin-left"] = parts[l];
 	}
 
 	// ***************************************************************************

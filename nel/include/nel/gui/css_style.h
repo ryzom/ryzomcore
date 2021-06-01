@@ -72,6 +72,7 @@ namespace NLGUI
 			// background
 			BackgroundColor=NLMISC::CRGBA::Black;
 			BackgroundColorOver=NLMISC::CRGBA::Black;
+			MarginTop = MarginRight = MarginBottom = MarginLeft = 0;
 			PaddingTop = PaddingRight = PaddingBottom = PaddingLeft = 0;
 		}
 
@@ -106,6 +107,7 @@ namespace NLGUI
 		NLMISC::CRGBA BorderTopColor, BorderRightColor, BorderBottomColor, BorderLeftColor;
 		NLMISC::CRGBA BackgroundColor;
 		NLMISC::CRGBA BackgroundColorOver;
+		uint32 MarginTop, MarginRight, MarginBottom, MarginLeft;
 		uint32 PaddingTop, PaddingRight, PaddingBottom, PaddingLeft;
 
 		std::string WhiteSpace;
@@ -177,6 +179,7 @@ namespace NLGUI
 
 		// parse 'padding' into 'padding-top', 'padding-left', etc
 		void expandPaddingShorthand(const std::string &value, TStyle &style) const;
+		void expandMarginShorthand(const std::string &value, TStyle &style) const;
 
 		// expand shorthand rule, ie "border", into longhand names, ie "border-top-width"
 		// if shorthand is present in style, then its removed
@@ -187,6 +190,7 @@ namespace NLGUI
 		void applyBorderColor(const std::string &value, NLMISC::CRGBA *dest, const NLMISC::CRGBA &currentColor, const NLMISC::CRGBA &textColor) const;
 		void applyLineStyle(const std::string &value, CSSLineStyle *dest, const CSSLineStyle &currentStyle) const;
 		void applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const;
+		void applyMarginWidth(const std::string &value, uint32 *dest, const uint32 current, uint32 fontSize) const;
 
 		// parse and replace var(--name, fallback) function
 		// return false if property should be ignored
@@ -224,6 +228,7 @@ namespace NLGUI
 			Current.BorderTopWidth = Current.BorderRightWidth = Current.BorderBottomWidth = Current.BorderLeftWidth = CSS_LINE_WIDTH_MEDIUM;
 			Current.BorderTopStyle = Current.BorderRightStyle = Current.BorderBottomStyle = Current.BorderLeftStyle = CSS_LINE_STYLE_NONE;
 			Current.BorderTopColor = Current.BorderRightColor = Current.BorderBottomColor = Current.BorderLeftColor = Current.TextColor;
+			Current.MarginTop = Current.MarginRight = Current.MarginBottom = Current.MarginLeft = 0;
 			Current.PaddingTop = Current.PaddingRight = Current.PaddingBottom = Current.PaddingLeft = 0;
 
 			Current.StyleRules.clear();
