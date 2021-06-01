@@ -178,7 +178,7 @@ short_authors["Xtarsia"] = "xtarsia"
 # short_authors["Michael Witrant <mike@lepton.fr>"] = "-"
 
 generic_authors = [ ]
-generic_authors += [ "Ryzom Core <http://ryzomcore.org/>" ]
+generic_authors += [ "Ryzom Core <http://ryzom.dev/>" ]
 generic_authors += [ "by authors" ]
 
 # Reverse mapping for parsing original annotation
@@ -229,6 +229,9 @@ def remap_author(blob, commit, author):
 	short_author = short_authors.get(author)
 	if short_author == None:
 		short_author = "?"
+	if "Update GPL headers" in commit.message:
+		# Ignore if commit message matches "Update GPL headers"
+		short_author = "-"
 	# If you're paid by Winch Gate, or signed copyright transfer with 
 	# them, remap here, limit by authored_date if needed.
 	if short_author == "ulukyn" or short_author == "ace":
@@ -242,7 +245,9 @@ def remap_author(blob, commit, author):
 	if "feature-export-assimp" in commit.message and authored_date.year <= 2015:
 		# Project paid for by Winch Gate
 		short_author = "winch_gate"
-	if short_author == "kervala" or short_author == "nimetu":
+	if short_author == "nimetu" and authored_date.year >= 2009:
+		short_author = "winch_gate"
+	if short_author == "kervala":
 		# Don't know if they signed the copyright assignment agreement with Winch Gate or Ryzom Forge
 		short_author = "?"
 	if short_author == "karu" or short_author == "kishan" or short_author == "glorf":
