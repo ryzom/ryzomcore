@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -141,14 +144,14 @@ namespace NLGUI
 	// ***************************************************************************
 	std::string CHtmlElement::htmlEscape(std::string val, bool isAttribute) const
 	{
-		static const std::vector<std::string> searchReplace = {
+		static const std::string searchReplace[] = {
 			"&", "&amp;",
 			"<", "&lt;",
 			">", "&gt;",
 			"\xA0", "&nbsp;",
 		};
-
-		for(uint i = 0; i < searchReplace.size(); i+=2)
+		
+		for(uint i = 0; i < (sizeof(searchReplace) / sizeof(searchReplace[0])); i+=2)
 			val = strFindReplaceAll(val, searchReplace[i], searchReplace[i+1]);
 
 		if (isAttribute)
