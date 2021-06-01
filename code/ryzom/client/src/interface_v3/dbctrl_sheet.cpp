@@ -1139,19 +1139,27 @@ void CDBCtrlSheet::infoReceived()
 			const CSBrickSheet *brick = pBM->getBrick(itemInfo->Enchantment.Bricks[i]);
 			if (brick)
 			{
-				if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
 				if (brick->BrickFamily == BRICK_FAMILIES::BSGMCB) // Boost of Allegories, use it as boost icon
 				{
-					if (!haveRoot)
 					_BoostIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
 					rVR.getTextureSizeFromId(_BoostIcons.back().TextureId, _BoostIcons.back().IconW, _BoostIcons.back().IconH);
 				}
 				else if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
 				{
-					if (!haveRoot && !brick->getIconBack().empty())
+					if (!haveRoot)
 					{
-						_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
-						rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+						haveRoot = true;
+						if (brick->getIconBack().empty())
+						{
+							// use blank texture with size from main icon
+							_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("blank.tga"), NLMISC::CRGBA::White));
+							rVR.getTextureSizeFromId(rVR.getTextureIdFromName(brick->getIcon()), _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+						}
+						else
+						{
+							_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
+							rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+						}
 					}
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
