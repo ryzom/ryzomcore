@@ -41,7 +41,7 @@ TUnifiedCallbackItem CallbackArray[] =
 //---------------------------------------------------
 void CServiceTest::init (void)
 {
-	// init obligatoire pour george (penser à demander l'encapsulation de ça dans une methode init)
+	// init obligatoire pour george (penser Ã  demander l'encapsulation de Ã§a dans une methode init)
 	NLMISC_REGISTER_CLASS( CFormBodyElt );
 	NLMISC_REGISTER_CLASS( CFormBodyEltAtom );
 	NLMISC_REGISTER_CLASS( CFormBodyEltList );

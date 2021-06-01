@@ -14,13 +14,13 @@ namespace client_install
 	using namespace System::Drawing;
 
 	/// <summary>
-	/// Description résumée de CClientInstallForm
+	/// Description rÃ©sumÃ©e de CClientInstallForm
 	///
-	/// AVERTISSEMENT : si vous modifiez le nom de cette classe, vous devrez modifier la
-	///          propriété 'Nom du fichier de ressources' de l'outil de compilation de ressource managée
-	///          pour tous les fichiers .resx dont dépend cette classe. Dans le cas contraire,
+	/// AVERTISSEMENTÂ : si vous modifiez le nom de cette classe, vous devrez modifier la
+	///          propriÃ©tÃ© 'Nom du fichier de ressources' de l'outil de compilation de ressource managÃ©e
+	///          pour tous les fichiers .resx dont dÃ©pend cette classe. Dans le cas contraire,
 	///          les concepteurs ne pourront pas interagir correctement avec les ressources
-	///          localisées associées à ce formulaire.
+	///          localisÃ©es associÃ©es Ã  ce formulaire.
 	/// </summary>
 	ref class CInstallPopupForm;
 	public ref class CClientInstallForm : public System::Windows::Forms::Form
@@ -31,7 +31,7 @@ namespace client_install
 		{
 			InitializeComponent();
 			//
-			//TODO : ajoutez ici le code du constructeur
+			//TODOÂ : ajoutez ici le code du constructeur
 			//
 			init();
 			_NewProgressBarValue = -1;
@@ -39,7 +39,7 @@ namespace client_install
 
 	protected:
 		/// <summary>
-		/// Nettoyage des ressources utilisées.
+		/// Nettoyage des ressources utilisÃ©es.
 		/// </summary>
 		~CClientInstallForm()
 		{
@@ -69,14 +69,14 @@ namespace client_install
 
 	private:
 		/// <summary>
-		/// Variable nécessaire au concepteur.
+		/// Variable nÃ©cessaire au concepteur.
 		/// </summary>
 
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
-		/// Méthode requise pour la prise en charge du concepteur - ne modifiez pas
-		/// le contenu de cette méthode avec l'éditeur de code.
+		/// MÃ©thode requise pour la prise en charge du concepteur - ne modifiez pas
+		/// le contenu de cette mÃ©thode avec l'Ã©diteur de code.
 		/// </summary>
 		void InitializeComponent(void)
 		{

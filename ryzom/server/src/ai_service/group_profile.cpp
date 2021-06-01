@@ -226,7 +226,7 @@ void CGrpProfileDynCamping::beginProfile()
 		}
 
 	}
-	// set the timer for end of camping to 5 à 10 mn
+	// set the timer for end of camping to 5 Ã  10 mn
 	_EndOfCamping.set(5*60*10 + CAIS::rand32(5*60*10));
 }
 

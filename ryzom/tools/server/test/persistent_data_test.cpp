@@ -110,7 +110,7 @@ public:
 		f		= (float)counter+123.456f;
 		d		= counter+987.654;
 		s		= NLMISC::toString("Testing...%d",counter);
-		ucs		= (ucstring)NLMISC::toString("Tésting UCString ...%d",counter);
+		ucs		= (ucstring)NLMISC::toString("TÃ©sting UCString ...%d",counter);
 		sid		= NLMISC::CSheetId();
 		eid		= NLMISC::CEntityId();
 		mpcs	= CMyPersistentClass_Struct("hello",NLMISC::toString("World...%d",counter));

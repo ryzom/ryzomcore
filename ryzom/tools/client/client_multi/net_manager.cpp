@@ -333,9 +333,9 @@ static char *longNews[] = {
 	"They have taken over one of our richest sources", "of KamiBast, and are exploiting it", "for their own occult purposes.",
 	"They now hold an important source", "of Live Seed hostage,", "close to one of our forward posts.",
 	"We use the magical properties of KamiBast and", "its unusually rich fibers for all our crafts.", "",
-	"If we don’t harvest new Seed soon,", "we will have no way of purchasing goods", "and resources, beyond what we produce ourselves",
+	"If we donâ€™t harvest new Seed soon,", "we will have no way of purchasing goods", "and resources, beyond what we produce ourselves",
 	"We use the rich Sap of Live Seed to produce", "an antidote that counters the disastrous", "effects of the Goo on all Atysian life forms.",
-	"The Kamis are shaken by the Black Circle's", "presence. If the Circle continues it’s occult", "practices, we will all suffer the Kamic anger.",
+	"The Kamis are shaken by the Black Circle's", "presence. If the Circle continues itâ€™s occult", "practices, we will all suffer the Kamic anger.",
 };
 */
 /*

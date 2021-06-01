@@ -22,7 +22,7 @@
 using	namespace	std;
 using	namespace	NLMISC;
 
-//	renvoie le bout de la string jusqu'au prochain ',' en respectant les priorités des parenthèses.
+//	renvoie le bout de la string jusqu'au prochain ',' en respectant les prioritÃ©s des parenthÃ¨ses.
 void	explodeSubStrings(const	std::string	&str, vector<std::string>	&strings, sint32 parenthesis=0)
 {
 	const	std::string	separators("(),");

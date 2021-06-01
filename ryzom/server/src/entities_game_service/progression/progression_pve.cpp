@@ -17,32 +17,32 @@
 
 //XP
 	 //
-	 // -	On garde les points de dégâts infligés sur chaque créature par chaque team ou joueur sans team (considéré comme une team de 1)
+	 // -	On garde les points de dÃ©gÃ¢ts infligÃ©s sur chaque crÃ©ature par chaque team ou joueur sans team (considÃ©rÃ© comme une team de 1)
 	 //
-	 // -	la « team » avec le plus de dégâts est la seule a gagner l’xp de la créature
+	 // -	la Â« team Â» avec le plus de dÃ©gÃ¢ts est la seule a gagner lâ€™xp de la crÃ©ature
 	 //
-	 // -	Tout joueur membre d’une team ayant fait une action ‘de combat’ a moins de X mètres de la créature tuée par son groupe gagne sa part
-	 // d’Xp, qu’il soit ou non dans l’aggro list de la créature. L’Xp est réparti équitablement entre les joueurs éligibles.
-	 // Chaque créature a une valeur d’XP fixe renseignée dans sa fiche. Cette valeur est multipliée par le facteur d’Xp obtenu par l’écart
-	 // de niveau entre la créature (XpLevel) et la plus forte skill utilisée par n’importe quel membre du groupe (magie ou combat, soins compris).
-	 // Chaque team a un « poids » égal a 1 + 0.8 par membre au délà de 1 (cette valeur de 0.8 est réglable dans le cfg de l’egs)
-	 // Une fois le total d’Xp calculé on divise par le « poids » de la team et on donne a chacun sa part.
+	 // -	Tout joueur membre dâ€™une team ayant fait une action â€˜de combatâ€™ a moins de X mÃ¨tres de la crÃ©ature tuÃ©e par son groupe gagne sa part
+	 // dâ€™Xp, quâ€™il soit ou non dans lâ€™aggro list de la crÃ©ature. Lâ€™Xp est rÃ©parti Ã©quitablement entre les joueurs Ã©ligibles.
+	 // Chaque crÃ©ature a une valeur dâ€™XP fixe renseignÃ©e dans sa fiche. Cette valeur est multipliÃ©e par le facteur dâ€™Xp obtenu par lâ€™Ã©cart
+	 // de niveau entre la crÃ©ature (XpLevel) et la plus forte skill utilisÃ©e par nâ€™importe quel membre du groupe (magie ou combat, soins compris).
+	 // Chaque team a un Â« poids Â» Ã©gal a 1 + 0.8 par membre au dÃ©lÃ  de 1 (cette valeur de 0.8 est rÃ©glable dans le cfg de lâ€™egs)
+	 // Une fois le total dâ€™Xp calculÃ© on divise par le Â« poids Â» de la team et on donne a chacun sa part.
 	 //
-	 //  NB : Si un joueur éligible se trouve a plus de Y mètres de la créature ET qu’il n’est plus dans l’aggro list au moment de la mort de
+	 //  NB : Si un joueur Ã©ligible se trouve a plus de Y mÃ¨tres de la crÃ©ature ET quâ€™il nâ€™est plus dans lâ€™aggro list au moment de la mort de
 	 //	 celle-ci il ne gagne pas sa part mais il compte dans la division !!
 	 //
-	 //	 -	Si un joueur rejoint une team il ‘fusionne’ ses dégâts avec celle-ci.
+	 //	 -	Si un joueur rejoint une team il â€˜fusionneâ€™ ses dÃ©gÃ¢ts avec celle-ci.
 	 //
-	 //	 -	Si un joueur quitte une team il ‘emmène’ une partie des dégâts sur chaque créature pour laquelle il aurait pu gagner de l’XP.
-	 //	 Cette partie est tout simplement le total des dégâts de la team divisé par le nb de membres avant son départ.
+	 //	 -	Si un joueur quitte une team il â€˜emmÃ¨neâ€™ une partie des dÃ©gÃ¢ts sur chaque crÃ©ature pour laquelle il aurait pu gagner de lâ€™XP.
+	 //	 Cette partie est tout simplement le total des dÃ©gÃ¢ts de la team divisÃ© par le nb de membres avant son dÃ©part.
 	 //
-	 //	 -	Si tous les membres de la team sortent de l’aggro list d’une créature leurs degats sur celle-ci sont transférés sur le compte d'une
-	 //	 créature fictive. Par exemple on a 2 joueurs sans team, l’un fait 99% des degats et meurt et respawn, ses 99% sont transférés à une
-	 //	 créature fictive. Le 2ème joueur achève la créature, il a fait 1% des degats, la créature fictive a fait le plus de dégats et donc aucun
-	 //	 joueur réel ne gagne d’XP.
+	 //	 -	Si tous les membres de la team sortent de lâ€™aggro list dâ€™une crÃ©ature leurs degats sur celle-ci sont transfÃ©rÃ©s sur le compte d'une
+	 //	 crÃ©ature fictive. Par exemple on a 2 joueurs sans team, lâ€™un fait 99% des degats et meurt et respawn, ses 99% sont transfÃ©rÃ©s Ã  une
+	 //	 crÃ©ature fictive. Le 2Ã¨me joueur achÃ¨ve la crÃ©ature, il a fait 1% des degats, la crÃ©ature fictive a fait le plus de dÃ©gats et donc aucun
+	 //	 joueur rÃ©el ne gagne dâ€™XP.
 	 //
-	 //	 - ATTENTION : les gardes et autres npcs sont aussi comptabilisés pour leur degats, et n’ont pas de ‘range’ de validité (par contre
-	 //	 ils doivent etre ds l’aggro liste ??). Ce qui veut dire que si une créature est gravement blessée par un garde le joueur qui l’achève
+	 //	 - ATTENTION : les gardes et autres npcs sont aussi comptabilisÃ©s pour leur degats, et nâ€™ont pas de â€˜rangeâ€™ de validitÃ© (par contre
+	 //	 ils doivent etre ds lâ€™aggro liste ??). Ce qui veut dire que si une crÃ©ature est gravement blessÃ©e par un garde le joueur qui lâ€™achÃ¨ve
 	 //	 ne gagne rien.
 	 //
 	 // - si un joueur soigne un joueur qui n'est PAS un membre de sa team il ne gagnera pas d'Xp pour cette action

@@ -76,15 +76,15 @@ IAiFactory<IFamilyProfile>	*_ProfileTribe=&_singleProfileTribe;
 
 // Todo:
 //
-//			+faire gaffe ‡ l'init du CGrpProfileFollowRoute dans le cadre statique .. :\ (adapter?)//
-//			(done)+ dynCamping n'a pas une bonne current zone, -> ‡ mettre.
-//			(done)+ problËme d'ordre des points pour le suivit de chemin.
-//			+ vÈrifier que les comportements statiques fonctionnent toujours avec le nouveau code (rÈgression).
+//			+faire gaffe √† l'init du CGrpProfileFollowRoute dans le cadre statique .. :\ (adapter?)//
+//			(done)+ dynCamping n'a pas une bonne current zone, -> √† mettre.
+//			(done)+ probl√®me d'ordre des points pour le suivit de chemin.
+//			+ v√©rifier que les comportements statiques fonctionnent toujours avec le nouveau code (r√©gression).
 //
 //	- Choisir le comportement au spawn des groupes.
-//	- Mettre des activitÈs dans les ÈvËnements d'OutPosts. (pas de chianlie..).
-//	- VÈrifer la logique des comportements (pas de trous).
-//	- VÈrifier que currentZone est bien gÈrÈ dans les classes.
+//	- Mettre des activit√©s dans les √©v√©nements d'OutPosts. (pas de chianlie..).
+//	- V√©rifer la logique des comportements (pas de trous).
+//	- V√©rifier que currentZone est bien g√©r√© dans les classes.
 //
 //	- Death report / OutPosts.
 //	- getGeometry (forced by the unconceptualized finite state machine script implementation legacy in the leveldesign :( ).

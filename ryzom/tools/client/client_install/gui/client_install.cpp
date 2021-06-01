@@ -1,4 +1,4 @@
-// launcher.cpp : fichier projet principal.
+// launcher.cppÂ : fichier projet principal.
 
 #include "stdafx.h"
 #include "CClientInstallForm.h"

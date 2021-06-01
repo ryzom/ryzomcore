@@ -1,6 +1,6 @@
-// stdafx.cpp : fichier source incluant simplement les fichiers Include standard
-// launcher.pch représente l'en-tête précompilé
-// stdafx.obj contient les informations de type précompilées
+// stdafx.cppÂ : fichier source incluant simplement les fichiers Include standard
+// launcher.pch reprÃ©sente l'en-tÃªte prÃ©compilÃ©
+// stdafx.obj contient les informations de type prÃ©compilÃ©es
 
 #include "stdafx.h"
 
