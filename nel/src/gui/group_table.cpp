@@ -514,7 +514,24 @@ namespace NLGUI
 		{
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 
+			// flush draw queue to force correct draw order for color+image
+			rVR.flush();
+
 			bool flush = false;
+
+			if (BgColor.A > 0)
+			{
+				CRGBA finalColor = BgColor;
+				if (_ModulateGlobalColor)
+					finalColor.modulateFromColor (finalColor, CWidgetManager::getInstance()->getGlobalColor());
+				finalColor.A = (uint8) (((uint16) CurrentAlpha * (uint16) finalColor.A) >> 8);
+
+				if (finalColor.A > 0)
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
+
+				flush = true;
+			}
+
 			if (CurrentAlpha > 0 && !_TextureId.empty())
 			{
 				CRGBA col = CRGBA::White;
@@ -536,19 +553,6 @@ namespace NLGUI
 				}
 
 				restoreClip (oldSciX, oldSciY, oldSciW, oldSciH);
-
-				flush = true;
-			}
-
-			if (BgColor.A > 0)
-			{
-				CRGBA finalColor = BgColor;
-				if (_ModulateGlobalColor)
-					finalColor.modulateFromColor (finalColor, CWidgetManager::getInstance()->getGlobalColor());
-				finalColor.A = (uint8) (((uint16) CurrentAlpha * (uint16) finalColor.A) >> 8);
-
-				if (finalColor.A > 0)
-					rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
 
 				flush = true;
 			}
@@ -1502,6 +1506,10 @@ namespace NLGUI
 			bool flush = false;
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 
+			// flush draw queue to force correct draw order for color+image
+			if (BgColor.A >0 || !_TextureId.empty())
+				rVR.flush();
+
 			if (BgColor.A > 0)
 			{
 				CRGBA finalColor = BgColor;
@@ -1539,7 +1547,6 @@ namespace NLGUI
 				flush = true;
 			}
 
-			// flush background color and image
 			if (flush)
 				rVR.flush();
 
