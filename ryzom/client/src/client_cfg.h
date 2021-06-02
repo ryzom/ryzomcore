@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
@@ -391,6 +391,8 @@ struct CClientConfig
 	std::vector<string>			DataPath;
 	/// Data Path no recurse.
 	std::vector<string>			DataPathNoRecurse;
+	/// Pre-load path
+	std::string					PreLoadPath;
 	/// Streamed package path
 	std::string					StreamedPackagePath;
 	/// Streamed package hosts

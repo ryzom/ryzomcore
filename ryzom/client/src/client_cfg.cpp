@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
@@ -1313,6 +1313,9 @@ void CClientConfig::setValues()
 
 	// Data Path no recurse.
 	READ_STRINGVECTOR_FV(DataPathNoRecurse);
+
+	// Pre-load path
+	READ_STRING_DEV(PreLoadPath);
 
 	// Streamed package path
 	READ_STRING_FV(StreamedPackagePath);

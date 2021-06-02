@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -45,7 +48,22 @@ bool operator == (const CVertex &v1, const CVertex &v2)
 
 bool operator < (const CVertex &v1, const CVertex &v2)
 {
+	/*
+	if (v1.vertex == v2.vertex)
+	{
+		if (v1.normal == v2.normal)
+		{
+			return (v1.uv < v2.uv);
+		}
+		return (v1.normal < v1.normal);
+	}
+	*/
 	return (v1.vertex < v2.vertex);
+}
+
+const CIndexBuffer *getRdrPassPrimitiveBlock(const CMeshGeom *mesh, uint lodId, uint renderPass)
+{
+	return &(mesh->getRdrPassPrimitiveBlock(lodId, renderPass));
 }
 
 const CIndexBuffer *getRdrPassPrimitiveBlock(const CMeshMRMGeom *mesh, uint lodId, uint renderPass)
@@ -66,7 +84,7 @@ const CIndexBuffer *getRdrPassPrimitiveBlock(const CMeshMRMSkinnedGeom *mesh, ui
 
 bool ProcessMeshMRMSkinned(const std::string &filename, IShape *shapeMesh);
 bool ProcessMeshMRM(const std::string &filename, IShape *shapeMesh);
-//bool ProcessMesh(const std::string &filename, IShape *shapeMesh);
+bool ProcessMesh(const std::string &filename, IShape *shapeMesh);
 
 int main(int argc, char* argv[])
 {
@@ -110,9 +128,9 @@ int main(int argc, char* argv[])
 
 	if (ProcessMeshMRMSkinned(filename, shapeMesh)) return 0;
 	if (ProcessMeshMRM(filename, shapeMesh)) return 0;
-//	if (ProcessMesh(filename, shapeMesh)) return 0;
+	if (ProcessMesh(filename, shapeMesh)) return 0;
 
-	return 0;
+	return 1;
 }
 
 bool ProcessMeshMRMSkinned(const std::string &filename, IShape *shapeMesh)
@@ -256,7 +274,7 @@ bool ProcessMeshMRMSkinned(const std::string &filename, IShape *shapeMesh)
 
 		ofs << "v " << v.x << " " << v.y << " " << v.z << endl;
 		ofs << "vn " << vn.x << " " << vn.y << " " << vn.z << endl;
-		ofs << "vt " << vt.U << " " << vt.V << endl;
+		ofs << "vt " << vt.U << " " << (1.0f - vt.V) << endl;
 	}
 
 	// **** Get All Faces 
@@ -457,7 +475,7 @@ bool ProcessMeshMRM(const std::string &filename, IShape *shapeMesh)
 
 		ofs << "v " << v.x << " " << v.y << " " << v.z << endl;
 		ofs << "vn " << vn.x << " " << vn.y << " " << vn.z << endl;
-		ofs << "vt " << vt.U << " " << vt.V << endl;
+		ofs << "vt " << vt.U << " " << (1.0f - vt.V) << endl;
 	}
 
 	// **** Get All Faces 
@@ -519,9 +537,6 @@ bool ProcessMeshMRM(const std::string &filename, IShape *shapeMesh)
 	return true;
 }
 
-/*
-
-TODO: implement this
 
 bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 {
@@ -531,85 +546,110 @@ bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 
 	COFile ofile;
 
-	CMeshGeom* meshIn = (CMeshGeom*)&mesh->getMeshGeom();
+	const CMeshGeom *meshIn = &mesh->getMeshGeom();
 
 	CVertexBuffer vertexBuffer = meshIn->getVertexBuffer();
 
-//	CVertexBufferRead vba;
-//	vertexBuffer.lock (vba);
+	CVertexBufferRead vba;
+	vertexBuffer.lock (vba);
+	uint	i, j;
 
-	uint i = vertexBuffer.getNumVertices();
-
-	std::vector<NLMISC::CVector> vertices;
-	meshIn->retrieveVertices(vertices);
-
-	std::vector<uint32> indices;
-	meshIn->retrieveTriangles(indices);
+	// **** First, for the best lod indicate what vertex is used or not. Also index geomorphs to know what real vertex is used
+	vector<sint>		vertexUsed;
+	// -1 means "not used"
+	vertexUsed.resize(vertexBuffer.capacity(), -1);
+	// Parse all triangles.
+	for(i=0;i<meshIn->getNbRdrPass(0); ++i)
+	{
+		const CIndexBuffer *pb = getRdrPassPrimitiveBlock(meshIn, 0, i);
+		CIndexBufferRead iba;
+		pb->lock (iba);
+		if (iba.getFormat() == CIndexBuffer::Indices32)
+		{
+			const uint32	*triPtr= (const uint32 *) iba.getPtr();
+			for(j=0;j<pb->getNumIndexes(); ++j)
+			{
+				uint	idx= *triPtr;
+				// Flag the vertex with its own index => used.
+				vertexUsed[idx]= idx;
+				triPtr++;
+			}
+		}
+		else
+		{
+			const uint16	*triPtr= (const uint16 *) iba.getPtr();
+			for(j=0;j<pb->getNumIndexes(); ++j)
+			{
+				uint	idx= *triPtr;
+				// Flag the vertex with its own index => used.
+				vertexUsed[idx]= idx;
+				triPtr++;
+			}
+		}
+	}
 
 
 	// **** For all vertices used (not geomorphs), compute vertex Skins.
 	vector<CVertex>		shadowVertices;
 	vector<sint>		vertexToVSkin;
-	vertexToVSkin.resize(indices.size());
-	shadowVertices.reserve(indices.size());
-	// use a map to remove duplicates (because of UV/normal discontinuities before!!)
-	map<CVertex, uint>	shadowVertexMap;
-	uint						numMerged= 0;
-	// Skip Geomorphs.
-	for(i=0;i<indices.size(); ++i)
+	vertexToVSkin.resize(vertexUsed.size());
+	shadowVertices.reserve(vertexUsed.size());
+	
+	for(i=0;i<vertexUsed.size(); ++i)
 	{
-		// Build the vertex
-		CVertex shadowVert;
-		CUV uv;
-		shadowVert.vertex = *(CVector*)vba.getVertexCoordPointer(i);
-		shadowVert.normal = *(CVector*)vba.getNormalCoordPointer(i);
-		shadowVert.uv = *(CUV*)vba.getTexCoordPointer(i);
-
-		// Select the best Matrix.
-		CMesh::CSkinWeight		sw= skinWeights[i];
-		float	maxW= 0;
-		uint	matId= 0;
-		for(j=0;j<NL3D_MESH_SKINNING_MAX_MATRIX;j++)
+		// If this vertex is used.
+		if(vertexUsed[i]!=-1)
 		{
-			// if no more matrix influenced, stop
-			if(sw.Weights[j]==0)
-				break;
-			if(sw.Weights[j]>maxW)
-			{
-				matId= sw.MatrixId[j];
-				maxW= sw.Weights[j];
-			}
-		}
+			// Build the vertex
+			CVertex shadowVert;
+			CUV uv;
+			shadowVert.vertex = *(CVector*)vba.getVertexCoordPointer(i);
+			shadowVert.normal = *(CVector*)vba.getNormalCoordPointer(i);
+			shadowVert.uv = *(CUV*)vba.getTexCoordPointer(i);
 
-		// If dont find the shadowVertex in the map.
-		map<CVertex, uint>::iterator		it= shadowVertexMap.find(shadowVert);
-		if(it==shadowVertexMap.end())
-		{
 			// Append
 			uint	index= shadowVertices.size();
 			vertexToVSkin[i]= index;
 			shadowVertices.push_back(shadowVert);
-			shadowVertexMap.insert(make_pair(shadowVert, index));
-		}
-		else
-		{
-			// Ok, map.
-			vertexToVSkin[i]= it->second;
-			numMerged++;
 		}
 	}
 
 	ofstream ofs(string(filename + ".obj").c_str());
 
+	map<CVector, sint> weldedVerticesToId;
+	vector<CVector> weldedVertices;
+	vector<sint> shadowToWelded;
+	weldedVertices.reserve(shadowVertices.size());
+	shadowToWelded.resize(shadowVertices.size());
+
+	for (i = 0; i < shadowVertices.size(); ++i)
+	{
+		CVector v = shadowVertices[i].vertex;
+		map<CVector, sint>::iterator it = weldedVerticesToId.find(v);
+		if (it == weldedVerticesToId.end())
+		{
+			weldedVerticesToId[v] = weldedVertices.size();
+			shadowToWelded[i] = weldedVertices.size();
+			weldedVertices.push_back(v);
+		}
+		else
+		{
+			shadowToWelded[i] = it->second;
+		}
+	}
+
+	for(size_t y = 0; y < weldedVertices.size(); ++y)
+	{
+		CVector v = weldedVertices[y];
+		ofs << "v " << v.x << " " << v.y << " " << v.z << endl;
+	}
+
 	for(size_t y = 0; y < shadowVertices.size(); ++y)
 	{
-		CVector v = shadowVertices[y].vertex;
 		CVector vn = shadowVertices[y].normal;
 		CUV vt = shadowVertices[y].uv;
-
-		ofs << "v " << v.x << " " << v.y << " " << v.z << endl;
 		ofs << "vn " << vn.x << " " << vn.y << " " << vn.z << endl;
-		ofs << "vt " << vt.U << " " << vt.V << endl;
+		ofs << "vt " << vt.U << " " << (1.0f - vt.V) << endl;
 	}
 
 	// **** Get All Faces 
@@ -617,11 +657,11 @@ bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 	vector<uint32>			shadowTriangles;
 	shadowTriangles.reserve(1000);
 	// Parse all input tri of the mesh.
-	for(i=0; i<meshIn->getNbRdrPass(lodId); ++i)
+	for(i=0; i<meshIn->getNbRdrPass(0); ++i)
 	{
-		ofs << "g pass" << i << endl;
+		ofs << "g " << filename << endl;
 
-		const CIndexBuffer *pb = getRdrPassPrimitiveBlock(meshIn, lodId, i);
+		const CIndexBuffer *pb = getRdrPassPrimitiveBlock(meshIn, 0, i);
 		CIndexBufferRead iba;
 		pb->lock (iba);
 		if (iba.getFormat() == CIndexBuffer::Indices32)
@@ -658,9 +698,9 @@ bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 
 		for(size_t pass = 0; pass<shadowTriangles.size(); pass += 3)
 		{
-			ofs << "f " << shadowTriangles[pass]+1 << "/" << shadowTriangles[pass]+1 << "/" << shadowTriangles[pass]+1 << " ";
-			ofs << shadowTriangles[pass+1]+1 << "/" << shadowTriangles[pass+1]+1 << "/" << shadowTriangles[pass+1]+1 << " ";
-			ofs << shadowTriangles[pass+2]+1 << "/" << shadowTriangles[pass+2]+1 << "/" << shadowTriangles[pass+2]+1 << endl;
+			ofs << "f " << shadowToWelded[shadowTriangles[pass]]+1 << "/" << shadowTriangles[pass]+1 << "/" << shadowTriangles[pass]+1 << " ";
+			ofs << shadowToWelded[shadowTriangles[pass+1]]+1 << "/" << shadowTriangles[pass+1]+1 << "/" << shadowTriangles[pass+1]+1 << " ";
+			ofs << shadowToWelded[shadowTriangles[pass+2]]+1 << "/" << shadowTriangles[pass+2]+1 << "/" << shadowTriangles[pass+2]+1 << endl;
 		}
 
 		shadowTriangles.clear();
@@ -670,5 +710,3 @@ bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 
 	return true;
 }
-
-*/

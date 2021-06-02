@@ -837,7 +837,7 @@ private:
 	void	restoreOriginalSkinVertices();
 
 	// apply Skin to all vertices from _OriginalSkin* to _VBuffer.
-	void	applySkin(CSkeletonModel *skeleton);
+	void	applySkin(void *dstVb, CSkeletonModel *skeleton);
 
 
 	void	flagSkinVerticesForMatrixBlock(uint8 *skinFlags, CMatrixBlock &mb);
