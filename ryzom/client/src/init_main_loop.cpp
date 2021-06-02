@@ -1071,14 +1071,18 @@ void initMainLoop()
 				ProgressBar.pushCropedValues (0, 0.25f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName, "data/3d/common/characters/shapes", "*.shape", false, &ProgressBar);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/characters/shapes" : ClientCfg.PreLoadPath + "/characters_shapes",
+						"*.shape", false, &ProgressBar);
 				}
 				ProgressBar.popCropedValues ();
 				ProgressBar.progress (0.25f);
 				ProgressBar.pushCropedValues (0.25f,0.5f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName, "data/3d/common/characters/skeletons", "*.skel", false, &ProgressBar);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/characters/skeletons" : ClientCfg.PreLoadPath + "/characters_skeletons",
+						"*.skel", false, &ProgressBar);
 				}
 				ProgressBar.popCropedValues ();
 			}
@@ -1126,14 +1130,18 @@ void initMainLoop()
 				ProgressBar.pushCropedValues (0.5f, 0.75f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName, "data/3d/common/fauna/shapes", "*.shape", false, &ProgressBar);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/fauna/shapes" : ClientCfg.PreLoadPath + "/fauna_shapes",
+						"*.shape", false, &ProgressBar);
 				}
 				ProgressBar.popCropedValues ();
 				ProgressBar.progress (0.75f);
 				ProgressBar.pushCropedValues (0.75f,1);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName, "data/3d/common/fauna/skeletons", "*.skel", false, &ProgressBar);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/fauna/skeletons" : ClientCfg.PreLoadPath + "/fauna_skeletons",
+						"*.skel", false, &ProgressBar);
 				}
 				ProgressBar.popCropedValues ();
 			}
@@ -1174,14 +1182,18 @@ void initMainLoop()
 				ProgressBar.pushCropedValues (0.0f, 0.5f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameFX, "data/3d/common/sfx", "*.ps", true, &ProgressBar, preloadFXTextures);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameFX,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/sfx" : ClientCfg.PreLoadPath + "/sfx",
+						"*.ps", true, &ProgressBar, preloadFXTextures);
 				}
 				ProgressBar.popCropedValues ();
 				ProgressBar.progress (0.5f);
 				ProgressBar.pushCropedValues (0.5f,1);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameFX, "data/3d/common/sfx", "*.shape", true, &ProgressBar, preloadFXTextures);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameFX,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/sfx" : ClientCfg.PreLoadPath + "/sfx",
+						"*.shape", true, &ProgressBar, preloadFXTextures);
 				}
 				ProgressBar.popCropedValues ();
 			}
@@ -1214,7 +1226,9 @@ void initMainLoop()
 				ProgressBar.pushCropedValues (0.0f, 1.f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameObjects, "data/3d/common/objects", "*.shape", true, &ProgressBar, preloadObjectTextures);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameObjects,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/objects" : ClientCfg.PreLoadPath + "/objects",
+						"*.shape", true, &ProgressBar, preloadObjectTextures);
 				}
 				ProgressBar.popCropedValues ();
 			}

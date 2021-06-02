@@ -1314,6 +1314,9 @@ void CClientConfig::setValues()
 	// Data Path no recurse.
 	READ_STRINGVECTOR_FV(DataPathNoRecurse);
 
+	// Pre-load path
+	READ_STRING_DEV(PreLoadPath);
+
 	// Streamed package path
 	READ_STRING_FV(StreamedPackagePath);
 
