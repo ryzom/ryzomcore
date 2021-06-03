@@ -64,12 +64,12 @@ if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 			$config = str_replace("%cryptKey%", addslashes($cfg['crypt']['key']), $config);
 			$config = str_replace("%cryptKeyIMAP%", addslashes($SUPPORT_GROUP_IMAP_CRYPTKEY), $config);
 			if ($NEL_SETUP_VERSION_CONFIGURED < 2) {
-				$config = str_replace("%domainDatabase%", addslashes($NEL_DOMAIN_NAME + "_ring"), $config);
+				$config = str_replace("%domainDatabase%", addslashes($NEL_DOMAIN_NAME . "_ring"), $config);
 			} else {
 				$config = str_replace("%domainDatabase%", addslashes($cfg['db']['ring']['name']), $config);
 			}
 			if ($NEL_SETUP_VERSION_CONFIGURED < 9) {
-				$config = str_replace("%domainUsersDir%", addslashes("/home/nevrax/" + $NEL_DOMAIN_NAME + "/www"), $config);
+				$config = str_replace("%domainUsersDir%", addslashes("/home/nevrax/" . $NEL_DOMAIN_NAME . "/www"), $config);
 			} else {
 				$config = str_replace("%domainUsersDir%", addslashes($USERS_DIR), $config);
 			}
