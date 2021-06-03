@@ -402,8 +402,8 @@ include_once('login/config.php');
 // -------------------------------------
 function connect_to_ring_db()
 {
-	global $DBHost, $RingDBUserName, $RingDBPassword, $RingDBName;
-	$ringDb = mysql_connect($DBHost, $RingDBUserName, $RingDBPassword) or die("can't connect to ring db @'".$DBHost."' with user '".$RingDBUserName."'");
+	global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword, $RingDBName;
+	$ringDb = mysql_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("can't connect to ring db @'".$DBHost."' with user '".$RingDBUserName."'");
 	mysql_select_db($RingDBName, $ringDb) or die("can't select ring db: '$RingDBName' Host=$DBHost User=$RingDBUserName (not enough privilege?)");
 	return $ringDb;
 }

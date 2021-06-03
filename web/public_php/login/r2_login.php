@@ -45,9 +45,9 @@
 			if ($resultCode == 0 && $cookie != "")
 			{
 				// gather the domain information (server version, patch urls and backup patch url
-				global $DBHost, $DBUserName, $DBPassword, $DBName, $AutoInsertInRing;
+				global $DBHost, $DBPort, $DBUserName, $DBPassword, $DBName, $AutoInsertInRing;
 
-				$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+				$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
 				mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 				$query = "SELECT * FROM domain WHERE domain_id=$domainId";
 				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
@@ -191,7 +191,7 @@
 			if ($AutoCreateRingInfo)
 			{
 				// check if the ring user exist, and create it if not
-				$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die(errorMsgBlock(3004, 'Ring', $DBHost, $RingDBUserName));
+				$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die(errorMsgBlock(3004, 'Ring', $DBHost, $RingDBUserName));
 				mysqli_select_db ($ringDb, $domainInfo['ring_db_name']) or die(errorMsgBlock(3005, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName));
 				$query = "SELECT user_id FROM ring_users where user_id = '".$id."'";
 				$result = mysqli_query ($ringDb, $query) or die(errorMsgBlock(3006, $query, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName, mysqli_error($ringDb)));
@@ -268,11 +268,11 @@
 	// return true if the check is ok
 	function checkUserValidity ($login, $password, $clientApplication, $cp, &$id, &$reason, &$priv, &$extended, &$domainId, $lang)
 	{
-		global $DBHost, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
+		global $DBHost, $DBPort, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
 
 		setMsgLanguage($lang);
 
-		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
 		mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 
 		// we map the client application to the domain name
@@ -445,12 +445,12 @@
 	function askSalt($login, $lang)
 	{
 		global $PHP_SELF;
-		global $DBHost, $DBUserName, $DBPassword, $DBName;
+		global $DBHost, $DBPort, $DBUserName, $DBPassword, $DBName;
 		global $AcceptUnknownUser;
 
 		setMsgLanguage($lang);
 
-		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
 		mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 
 		$login = mysqli_real_escape_string($link, $login);

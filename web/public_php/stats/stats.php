@@ -82,6 +82,7 @@
 	function debug($str)
 	{
 		global $StatsDBHost;
+		global $DBPort;
 		global $StatsDBUserName;
 		global $StatsDBPassword;
 		global $StatsDBName;
@@ -91,7 +92,7 @@
 		
 		if ($link == NULL)
 		{
-			$link = mysql_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$StatsDBHost user:$StatsDBUserName");
+			$link = mysql_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$StatsDBHost user:$StatsDBUserName");
 			$newConnection = 1;
 
 			mysql_select_db ($StatsDBName, $link) or die2 (__FILE__. " " .__LINE__." Can't access to the table dbname:$StatsDBName");
@@ -139,7 +140,7 @@
 		$date = date('Y-m-d H:i:s', time());
 		$ip = getIp();
 		$log = getenv("QUERY_STRING");
-		$link = mysql_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$StatsDBHost user:$StatsDBUserName");
+		$link = mysql_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$StatsDBHost user:$StatsDBUserName");
 		mysql_select_db ($StatsDBName, $link) or die2 (__FILE__. " " .__LINE__." Can't access to the table dbname:$StatsDBName");
 
 

@@ -30,6 +30,8 @@ require_once('setup/version.php');
 	$roleService = isset($_POST["roleService"]) && $_POST["roleService"] == "on";
 	$roleSupport = isset($_POST["roleSupport"]) && $_POST["roleSupport"] == "on";
 	$roleDomain = isset($_POST["roleDomain"]) && $_POST["roleDomain"] == "on";
+	
+	$continue = true;
 
 	if (!$roleService && !$roleSupport && !$roleDomain) {
 		printalert("danger", "No server roles selected");
@@ -61,13 +63,13 @@ require_once('setup/version.php');
 	}
 	if ($continue) {
 		if ($roleService) {
-			$continue = validate_writable($continue, "login/logs/");
-			$continue = validate_writable($continue, "admin/graphs_output/");
-			$continue = validate_writable($continue, "admin/templates/default_c/");
+			$continue = validate_writable($continue, "login/logs/") && $continue;
+			$continue = validate_writable($continue, "admin/graphs_output/") && $continue;
+			$continue = validate_writable($continue, "admin/templates/default_c/") && $continue;
 		}
 		if ($roleSupport) {
-			$continue = validate_writable($continue, "ams/cache/");
-			$continue = validate_writable($continue, "ams/templates_c/");
+			$continue = validate_writable($continue, "ams/cache/") && $continue;
+			$continue = validate_writable($continue, "ams/templates_c/") && $continue;
 		}
 		$continue = validate_writable($continue, "./");
 		if ($continue) {
@@ -77,7 +79,7 @@ require_once('setup/version.php');
 
 	$con = null;
 	if ($continue) { // NOTE: Also test if this is reachable when not Service role
-		$con = mysqli_connect($_POST["nelSqlHostname"], $_POST["nelSqlUsername"], $_POST["nelSqlPassword"]);
+		$con = mysqli_connect($_POST["nelSqlHostname"], $_POST["nelSqlUsername"], $_POST["nelSqlPassword"], NULL, $_POST["nelSqlPort"]);
 		if (mysqli_connect_errno()) {
 			printalert("danger", "Failed to connect to Service SQL: " . mysqli_connect_error());
 			$continue = false;
@@ -89,44 +91,28 @@ require_once('setup/version.php');
 
 	if ($roleService) {
 		// Create NeL database
-		$continue = create_use_database($continue, $con, $_POST["nelDatabase"]);
+		$continue = create_use_database($continue, $con, $_POST["nelDatabase"]) && $continue;
 
 		// Create NeL Tools database
-		$continue = create_use_database($continue, $con, $_POST["toolDatabase"]);
+		$continue = create_use_database($continue, $con, $_POST["toolDatabase"]) && $continue;
 	}
 
 	if ($roleDomain) {
 		// Create Ring database
-		$continue = create_use_database($continue, $con, $_POST["domainDatabase"]);
+		$continue = create_use_database($continue, $con, $_POST["domainDatabase"]) && $continue;
+	}
+
+	if ($roleSupport) {
+		// Create AMS database
+		$continue = create_use_database($continue, $con, $_POST["amsDatabase"]) && $continue;
+
+		// Create AMS Library database
+		$continue = create_use_database($continue, $con, $_POST["amsLibDatabase"]) && $continue;
 	}
 
 	if ($con) {
 		mysqli_close($con);
 		printalert("info", "Disconnected from the Service SQL server");
-	}
-
-	if ($roleSupport) {
-		if ($continue) {
-			$con = mysqli_connect($_POST["amsSqlHostname"], $_POST["amsSqlUsername"], $_POST["amsSqlPassword"]);
-			if (mysqli_connect_errno()) {
-				printalert("danger", "Failed to connect to Support SQL: " . mysqli_connect_error());
-				$continue = false;
-				$con = null;
-			} else {
-				printalert("success", "Connected to the Support SQL server");
-			}
-		}
-
-		// Create AMS database
-		$continue = create_use_database($continue, $con, $_POST["amsDatabase"]);
-
-		// Create AMS Library database
-		$continue = create_use_database($continue, $con, $_POST["amsLibDatabase"]);
-
-		if ($con) {
-			mysqli_close($con);
-			printalert("info", "Disconnected from the Support SQL server");
-		}
 	}
 
 	// Write config.php
@@ -140,6 +126,7 @@ require_once('setup/version.php');
 			$config = str_replace("%privatePhpDirectory%", addslashes(realpath($cwd . "/" . $_POST["privatePhpDirectory"])), $config);
 			$config = str_replace("%publicPhpDirectory%", addslashes(realpath($cwd)), $config);
 			$config = str_replace("%nelSqlHostname%", addslashes($_POST["nelSqlHostname"]), $config);
+			$config = str_replace("%nelSqlPort%", addslashes($_POST["nelSqlPort"]), $config);
 			$config = str_replace("%nelSqlUsername%", addslashes($_POST["nelSqlUsername"]), $config);
 			$config = str_replace("%nelSqlPassword%", addslashes($_POST["nelSqlPassword"]), $config);
 			$config = str_replace("%nelDatabase%", addslashes($_POST["nelDatabase"]), $config);
@@ -193,15 +180,15 @@ require_once('setup/version.php');
 	require_once('database.php');
 
 	if ($roleSupport) {
-		$continue = upgrade_support_databases($continue);
+		$continue = upgrade_support_databases($continue) && $continue;
 	}
 
 	if ($roleService) {
-		$continue = upgrade_service_databases($continue);
+		$continue = upgrade_service_databases($continue) && $continue;
 	}
 
 	if ($roleDomain) {
-		$continue = upgrade_domain_databases($continue);
+		$continue = upgrade_domain_databases($continue) && $continue;
 	}
 
 	if ($roleService) {

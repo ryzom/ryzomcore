@@ -74,7 +74,7 @@
 			die2();
 		}
 		$domainName = getPost("domain");
-		$nelLink = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$DBHost user:$DBUserName");
+		$nelLink = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$DBHost user:$DBUserName");
 		mysqli_select_db ($nelLink, $DBName) or die2 (__FILE__. " " .__LINE__." Can't access to the table dbname:$DBName");
 
 		$domainName = mysqli_real_escape_string($nelLink, $domainName);

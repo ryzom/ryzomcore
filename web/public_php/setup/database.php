@@ -42,7 +42,8 @@ function connect_database($continue, $name) {
 			$cfg['db'][$name]['host'],
 			$cfg['db'][$name]['user'],
 			$cfg['db'][$name]['pass'],
-			$cfg['db'][$name]['name']);
+			$cfg['db'][$name]['name'],
+			$cfg['db'][$name]['port']);
 		if (mysqli_connect_errno()) {
 			printalert("danger", "Failed to connect to the <em>" . $name . "</em> SQL server: " . mysqli_connect_error());
 			$con = null;
