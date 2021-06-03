@@ -393,6 +393,8 @@ struct CClientConfig
 	std::vector<string>			DataPath;
 	/// Data Path no recurse.
 	std::vector<string>			DataPathNoRecurse;
+	/// Pre-load path
+	std::string					PreLoadPath;
 	/// Streamed package path
 	std::string					StreamedPackagePath;
 	/// Streamed package hosts
