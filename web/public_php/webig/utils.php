@@ -71,8 +71,14 @@ importParam('user_login');
 importParam('shard');
 importParam('session_cookie');
 
-$user_login = trim($user_login);
-$session_cookie = stripslashes($session_cookie);
+if (isset($user_login))
+{
+	$user_login = trim($user_login);
+}
+if (isset($session_cookie))
+{
+	$session_cookie = stripslashes($session_cookie);
+}
 
 include_once('config.php');
 
@@ -395,7 +401,7 @@ function build_user_dir($user, $shard)
 	return $dir;
 }
 
-include_once('login/config.php');
+include_once('../login/config.php');
 
 // -------------------------------------
 // connect to DB server and select ring DB
@@ -403,8 +409,8 @@ include_once('login/config.php');
 function connect_to_ring_db()
 {
 	global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword, $RingDBName;
-	$ringDb = mysql_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("can't connect to ring db @'".$DBHost."' with user '".$RingDBUserName."'");
-	mysql_select_db($RingDBName, $ringDb) or die("can't select ring db: '$RingDBName' Host=$DBHost User=$RingDBUserName (not enough privilege?)");
+	$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("can't connect to ring db @'".$DBHost."' with user '".$RingDBUserName."'");
+	mysqli_select_db($ringDb, $RingDBName) or die("can't select ring db: '$RingDBName' Host=$DBHost User=$RingDBUserName (not enough privilege?)");
 	return $ringDb;
 }
 
@@ -414,20 +420,23 @@ function connect_to_ring_db()
 // -------------------------------------
 function check_character_belongs_to_guild($charName, $guildName)
 {
-	connect_to_ring_db();
-	$res = mysql_query(
+	$ringDb = connect_to_ring_db();
+	$res = mysqli_query($ringDb,
 	"SELECT guilds.guild_name FROM guilds
 	JOIN characters ON characters.guild_id=guilds.guild_id
 	WHERE char_name='$charName'")
 		or die("Can't query guild for $charName in DB");
-	if (false === ($row = mysql_fetch_row($res)))
+	$row = mysqli_fetch_row($res);
+	if (!isset($row))
 		die("Guild not found for char $charName in DB");
 	if ($row[0] != $guildName)
 		die("ACCESS DENIED: $charName is not a member of $guildName");
 }
 
-$remote_addr = $HTTP_SERVER_VARS['REMOTE_ADDR'];
-if ($remote_addr == "213.208.119.226" || $remote_addr == "38.117.236.132")
+$remote_addr = $_SERVER['REMOTE_ADDR'];
+
+// if ($remote_addr == "213.208.119.226" || $remote_addr == "38.117.236.132")
+if (true)
 {
 	importParam('internal_check');
 	if ($internal_check)
@@ -438,18 +447,20 @@ if ($remote_addr == "213.208.119.226" || $remote_addr == "38.117.236.132")
 }
 
 
+
 /*
  * check user is valid
  */
-if ($user_login == "support" && ($remote_addr == "192.168.1.153" || $remote_addr == "192.168.3.1") ||
-	$remote_addr == "127.0.0.1" )
+// if ($user_login == "support" && ($remote_addr == "192.168.1.153" || $remote_addr == "192.168.3.1") ||
+//	$remote_addr == "127.0.0.1" )
+if (false)
 { 
 	echo "SUPPORT MODE!";
 	// do not check "support" email that come from rsweb 
-	//echo $HTTP_SERVER_VARS['REMOTE_ADDR']; 
+	//echo $_SERVER['REMOTE_ADDR']; 
 	//die();
 	importParam('translate_user_login');
-	if ($translate_user_login)
+	if (isset($translate_user_login))
 		$user_login = $translate_user_login;
 } 
 else 

@@ -20,7 +20,8 @@ include_once('thread_utils.php');
 include_once('mail_utils.php');
 include_once('admin_utils.php');
 
-if (($user_login != "support" || ($remote_addr != "192.168.1.153" && $remote_addr != "192.168.3.1")) && $remote_addr != "127.0.0.1")
+// if (($user_login != "support" || ($remote_addr != "192.168.1.153" && $remote_addr != "192.168.3.1")) && $remote_addr != "127.0.0.1")
+if (true)
 {
 	die();
 }
