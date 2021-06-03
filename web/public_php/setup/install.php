@@ -151,6 +151,7 @@ require_once('setup/version.php');
 			$config = str_replace("%amsLibDatabase%", addslashes($_POST["amsLibDatabase"]), $config);
 			$config = str_replace("%nelSetupPassword%", addslashes($_POST["nelSetupPassword"]), $config);
 			$config = str_replace("%domainDatabase%", addslashes($_POST["domainDatabase"]), $config);
+			$config = str_replace("%domainUsersDir%", addslashes($_POST["domainUsersDir"]), $config);
 			$config = str_replace("%nelDomainName%", addslashes($_POST["nelDomainName"]), $config);
 			$config = str_replace("%nelSetupVersion%", addslashes($NEL_SETUP_VERSION), $config);
 			$cryptKeyLength = 16;
@@ -530,6 +531,12 @@ require_once('setup/version.php');
 							<label for="domainDatabase" class="col-sm-3 control-label">Database</label>
 							<div class="col-sm-6">
 								<input type="text" class="form-control" id="domainDatabase" name="domainDatabase" value="ring_mini01">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="domainUsersDir" class="col-sm-3 control-label">Users Directory (MFS, etc)</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="domainUsersDir" name="domainUsersDir" value="/home/nevrax/mini01/www">
 							</div>
 						</div>
 					</div>

@@ -130,6 +130,9 @@ $FORCE_INGAME = false;
 $FILE_STORAGE_PATH = $PUBLIC_PHP_PATH . '/ams/files/';
 $FILE_WEB_PATH = $BASE_WEBPATH . 'files/';
 
+// Shard web storage (without final /)
+$USERS_DIR = '%domainUsersDir%';
+
 // Setup password
 $NEL_SETUP_PASSWORD = '%nelSetupPassword%';
 
