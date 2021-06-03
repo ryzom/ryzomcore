@@ -144,9 +144,6 @@ require_once('setup/version.php');
 			$config = str_replace("%nelSqlPassword%", addslashes($_POST["nelSqlPassword"]), $config);
 			$config = str_replace("%nelDatabase%", addslashes($_POST["nelDatabase"]), $config);
 			$config = str_replace("%toolDatabase%", addslashes($_POST["toolDatabase"]), $config);
-			$config = str_replace("%amsSqlHostname%", addslashes($_POST["amsSqlHostname"]), $config);
-			$config = str_replace("%amsSqlUsername%", addslashes($_POST["amsSqlUsername"]), $config);
-			$config = str_replace("%amsSqlPassword%", addslashes($_POST["amsSqlPassword"]), $config);
 			$config = str_replace("%amsDatabase%", addslashes($_POST["amsDatabase"]), $config);
 			$config = str_replace("%amsLibDatabase%", addslashes($_POST["amsLibDatabase"]), $config);
 			$config = str_replace("%nelSetupPassword%", addslashes($_POST["nelSetupPassword"]), $config);
@@ -400,13 +397,19 @@ require_once('setup/version.php');
 				</div>
 				<div class="panel panel-default">
 					<div class="panel-heading">
-						<h2 class="panel-title">Service Database <small>(Used for NeL login, admin tools and domain databases)</small></h2>
+						<h2 class="panel-title">SQL Database</h2>
 					</div>
 					<div class="panel-body">
 						<div class="form-group">
 							<label for="nelSqlHostname" class="col-sm-3 control-label">SQL Hostname</label>
 							<div class="col-sm-6">
 								<input type="text" class="form-control" id="nelSqlHostname" name="nelSqlHostname" value="localhost">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="nelSqlPort" class="col-sm-3 control-label">SQL Port</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="nelSqlPort" name="nelSqlPort" value="3306">
 							</div>
 						</div>
 						<div class="form-group">
@@ -421,6 +424,13 @@ require_once('setup/version.php');
 								<input type="password" class="form-control" id="nelSqlPassword" name="nelSqlPassword" value="">
 							</div>
 						</div>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">Login Service</h2>
+					</div>
+					<div class="panel-body">
 						<div class="form-group">
 							<label for="nelDatabase" class="col-sm-3 control-label">NeL Database</label>
 							<div class="col-sm-6">
@@ -460,25 +470,7 @@ require_once('setup/version.php');
 					</div>
 					<div class="panel-body">
 						<div class="form-group">
-							<label for="amsSqlHostname" class="col-sm-3 control-label">SQL Hostname</label>
-							<div class="col-sm-6">
-								<input type="text" class="form-control" id="amsSqlHostname" name="amsSqlHostname" value="localhost">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="amsSqlUsername" class="col-sm-3 control-label">SQL Username</label>
-							<div class="col-sm-6">
-								<input type="text" class="form-control" id="amsSqlUsername" name="amsSqlUsername" value="root">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="amsSqlPassword" class="col-sm-3 control-label">SQL Password</label>
-							<div class="col-sm-6">
-								<input type="password" class="form-control" id="amsSqlPassword" name="amsSqlPassword" value="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="amsDatabase" class="col-sm-3 control-label">CMS Database</label>
+							<label for="amsDatabase" class="col-sm-3 control-label">AMS Database</label>
 							<div class="col-sm-6">
 								<input type="text" class="form-control" id="amsDatabase" name="amsDatabase" value="nel_ams">
 							</div>
