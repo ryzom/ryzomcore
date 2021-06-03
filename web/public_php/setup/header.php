@@ -33,7 +33,7 @@ function printalert($type, $message) {
 	print '</div>';
 }
 function is__writable($path) {
-	if ($path{strlen($path) - 1} == '/') {
+	if ($path[strlen($path) - 1] == '/' || $path[strlen($path) - 1] == '\\') {
 		return is__writable($path.uniqid(mt_rand()).'.tmp');
 	}
 
