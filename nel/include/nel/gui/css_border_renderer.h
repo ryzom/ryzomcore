@@ -43,7 +43,7 @@ namespace NLGUI
 		NLMISC::CQuadUV _QuadB;
 		NLMISC::CQuadUV _QuadL;
 
-		uint8 _RenderLayer;
+		sint8 _RenderLayer;
 		bool _ModulateGlobalColor;
 
 		// if true, then updateCoords() is called from draw()
