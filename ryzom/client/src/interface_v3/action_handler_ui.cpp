@@ -373,61 +373,17 @@ string urlencode(const string &param)
 // ***************************************************************************
 class CAHUIShowHide : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
-		string webapp, window = Params;
-		vector<string> res;
-		explode(Params, string("|"), res);
-		if(res[0]=="webig" || res[0]=="mailbox" || res[0]=="guild_forum" || res[0]=="profile")
-		{
-			window = "webig";
-			if(res[0]=="mailbox")
-				webapp = "mail";
-			else if(res[0]=="guild_forum")
-				webapp = "forum";
-			else if(res[0]=="profile")
-				webapp = "profile&pname="+urlencode(getParam(Params,"pname"))+"&ptype="+getParam(Params,"ptype");
-			else
-				webapp = "web";
-		}
-
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", window));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
-			nlwarning("%s is not a container", window.c_str());
+			nlwarning("%s is not a container", Params.c_str());
 			return;
-		}
+		}	
 		if (!isContainerAuthorized(pGC)) return;
-
-		if(window == "webig")
-		{
-			if(pGC->getActive() && currentWebApp == webapp)
-			{
-				pGC->setActive(false);
-				currentWebApp.clear();
-			}
-			else
-			{
-				pGC->setActive(true);
-				currentWebApp = webapp;
-			}
-			if(!webapp.empty() && pGC->getActive())
-			{
-				CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
-				if (pGH == NULL)
-				{
-					nlwarning("%s is not a group html", window.c_str());
-					return;
-				}
-				pGH->setURL(ClientCfg.WebIgMainDomain + "/index.php?app=" + webapp);
-			}
-		}
-		else
-		{
-			// normal open/close swap
-			pGC->setActive(!pGC->getActive());
-		}
+		pGC->setActive(!pGC->getActive());
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUIShowHide, "show_hide" );

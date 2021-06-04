@@ -503,6 +503,7 @@ void impulseServerReady(NLMISC::CBitMemStream &impulse)
 	LoginSM.pushEvent(CLoginStateMachine::ev_ready_received);
 }
 
+void setGroupHTMLWebServer(const std::string &webServer);
 void impulseShardId(NLMISC::CBitMemStream &impulse)
 {
 	// received SHARD_ID
@@ -515,7 +516,14 @@ void impulseShardId(NLMISC::CBitMemStream &impulse)
 	impulse.serial(webHost);
 	if (!webHost.empty())
 	{
-		WebServer = webHost;
+		if (webHost[webHost.size() - 1] == '/') // strip trailing slash
+			webHost.resize(webHost.size() - 1);
+
+		if (!webHost.empty())
+		{
+			WebServer = webHost;
+			setGroupHTMLWebServer(webHost);
+		}
 	}
 
 	nlinfo("WEB: Received SHARD_ID %d, web hosted at '%s', using '%s'", shardId, webHost.c_str(), WebServer.c_str());
@@ -3266,43 +3274,12 @@ private:
 
 		// get the content string (should have been received!)
 		string	contentStr;
-		string	titleStr;
 		if(!pSMC->getDynString(_TextId[ContentType], contentStr))
-			return;
-
-		if(!pSMC->getDynString(_TextId[TitleType], titleStr))
 			return;
 
 		// if the string start with a @{Wxxxx} code, remove it and get the wanted window size
 		sint	w = 256;		// default size to 256 !!
-		bool	is_webig = false;
-
-		if(contentStr.size()>=6 && contentStr[0]=='W' && contentStr[1]=='E' && contentStr[2]=='B'
-			&& contentStr[3]==' ' && contentStr[4]==':' && contentStr[5]==' ' )
-		{
-			uint i;
-			const uint digitStart= 6;
-			const uint digitMaxEnd= (uint)contentStr.size();
-
-			is_webig = true;
-
-			for(i = digitStart; i < digitMaxEnd; i++)
-			{
-				if(contentStr[i] == ' ')
-					break;
-			}
-			if(i != digitMaxEnd)
-			{
-				string web_app = contentStr.substr(digitStart, i-digitStart);
-				contentStr = string(ClientCfg.WebIgMainDomain + "/") + web_app + string("/index.php?") + contentStr.substr((size_t)i + 1);
-			}
-			else
-			{
-				contentStr.clear();
-				i = digitStart;
-			}
-		}
-		else if(contentStr.size()>=5 && contentStr[0]=='@' && contentStr[1]=='{' && contentStr[2]=='W')
+		if(contentStr.size()>=5 && contentStr[0]=='@' && contentStr[1]=='{' && contentStr[2]=='W')
 		{
 			uint	i;
 			const	uint digitStart= 3;
@@ -3322,45 +3299,9 @@ private:
 			}
 		}
 
-		// open the message box window or web ig
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-
-		if (is_webig)
+		// open the message box window
 		{
-			CGroupHTML *groupHtml;
-			string group = titleStr;
-			// <missing:XXX>
-			group = group.substr(9, group.size()-10);
-			groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:"+group+":content:html"));
-			if (!groupHtml)
-			{
-				groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
-				group = "webig";
-			}
-
-			if (groupHtml)
-			{
-				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:"+group));
-				if (pGC)
-				{
-					if (contentStr.empty())
-					{
-						pGC->setActive(false);
-					}
-					else
-					{
-						if (group == "webig")
-							pGC->setActive(true);
-						string url = contentStr;
-						addWebIGParams(url, true);
-						groupHtml->browse(url.c_str());
-						CWidgetManager::getInstance()->setTopWindow(pGC);
-					}
-				}
-			}
-		}
-		else
-		{
+			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:server_message_box"));
 			if (pGC)
 			{

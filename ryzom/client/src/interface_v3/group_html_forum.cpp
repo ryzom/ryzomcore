@@ -120,13 +120,12 @@ string	CGroupHTMLForum::home () const
 
 void CGroupHTMLForum::handle ()
 {
-/*	// Do nothing if WebServer is not initialized
+	// Do nothing if WebServer is not initialized
 	if (!WebServer.empty())
 	{
-		Home = WebServer+"forum.php";
+		Home = "/webig/forum.php";
 		CGroupHTML::handle ();
 	}
-*/
 }
 
 // ***************************************************************************

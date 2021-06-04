@@ -223,7 +223,7 @@
 		</group>
 	</group>
 </group>
-<define id="cs_url" value="http://app.ryzom.com/ticket_system/index.php?mode=load" />
+<define id="cs_url" value="/ticket_system/index.php?mode=load" />
 <group type="container" id="cs_browser" w="410" h="400" title="uiHelp" global_color="false" header_color="UI:SAVE:WIN:COLORS:HELP" resizer="true" pop_min_w="400" pop_min_h="96" pop_max_w="2000" pop_max_h="1600" title_bar_open="false" open_button="false" force_open_out="true" lockable="true" openable="true" opened="true" movable="true" active="true">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" on_active="lua" on_active_params="help:closeCSBrowserHeader('cs_browser')">
 	</group>

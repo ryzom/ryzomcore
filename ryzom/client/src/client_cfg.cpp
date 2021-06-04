@@ -434,14 +434,13 @@ CClientConfig::CClientConfig()
 #endif
 	PatchVersion.clear();
 
-	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
-	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
+	WebIgTrustedDomains.clear();
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_RING_URL;
+	ReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_URL;
 
 
 	///////////////
@@ -1109,10 +1108,6 @@ void CClientConfig::setValues()
 
 	///////////
 	// WEBIG //
-	READ_STRING_FV(WebIgMainDomain);
-	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
-		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
-		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)

@@ -321,7 +321,6 @@ struct CClientConfig
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
 
-	std::string		WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
 
 	sint32			CurlMaxConnections;

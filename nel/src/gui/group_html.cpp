@@ -269,8 +269,11 @@ namespace NLGUI
 	// Check if domain is on TrustedDomain
 	bool CGroupHTML::isTrustedDomain(const string &domain)
 	{
+		if (domain == options.webServerDomain)
+			return true;
+
 		vector<string>::iterator it;
-		it = find ( options.trustedDomains.begin(), options.trustedDomains.end(), domain);
+		it = find(options.trustedDomains.begin(), options.trustedDomains.end(), domain);
 		return it != options.trustedDomains.end();
 	}
 
@@ -3271,6 +3274,11 @@ namespace NLGUI
 
 			string finalUrl;
 			bool isLocal = lookupLocalFile (finalUrl, _URL.c_str(), true);
+
+			if (!isLocal && _URL.c_str()[0] == '/' && !options.webServer.empty())
+				finalUrl = options.webServer + finalUrl;
+
+			// FIXME: In case options.webServer is empty(), can we defer browsing? -Kaetemi
 
 			_URL = finalUrl;
 
