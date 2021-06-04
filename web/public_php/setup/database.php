@@ -9,7 +9,7 @@ $db_nel_ams = 2;
 $db_nel_ams_lib = 7;
 
 // Domain
-$db_ring_domain = 1;
+$db_ring_domain = 2;
 
 
 function set_db_version($continue_r, $name, $version) {
