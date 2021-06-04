@@ -3275,10 +3275,15 @@ namespace NLGUI
 			string finalUrl;
 			bool isLocal = lookupLocalFile (finalUrl, _URL.c_str(), true);
 
-			if (!isLocal && _URL.c_str()[0] == '/' && !options.webServer.empty())
+			if (!isLocal && _URL.c_str()[0] == '/')
+			{
+				if (options.webServer.empty())
+				{
+					// Try again later
+					return;
+				}
 				finalUrl = options.webServer + finalUrl;
-
-			// FIXME: In case options.webServer is empty(), can we defer browsing? -Kaetemi
+			}
 
 			_URL = finalUrl;
 
