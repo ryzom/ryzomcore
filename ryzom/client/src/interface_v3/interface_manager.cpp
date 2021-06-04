@@ -1071,8 +1071,6 @@ void CInterfaceManager::initInGame()
 	{
 		displaySystemInfo(CI18N::get("uiLogTurnedOff"));
 	}
-
-	startWebIgNotificationThread();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1326,8 +1324,6 @@ void CInterfaceManager::uninitInGame0 ()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::uninitInGame1 ()
 {
-	stopWebIgNotificationThread();
-
 	// release Bar Manager (HP, SAP etc... Bars)
 	CBarManager::getInstance()->releaseInGame();
 

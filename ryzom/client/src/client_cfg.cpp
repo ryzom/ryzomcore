@@ -436,7 +436,6 @@ CClientConfig::CClientConfig()
 
 	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
 	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
-	WebIgNotifInterval = 10; // time in minutes
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
@@ -1115,7 +1114,6 @@ void CClientConfig::setValues()
 		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
 		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
-	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;

@@ -25,9 +25,6 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/group_html.h"
 
-void startWebIgNotificationThread();
-void stopWebIgNotificationThread();
-
 /**
 * Auth HTML group
 */
