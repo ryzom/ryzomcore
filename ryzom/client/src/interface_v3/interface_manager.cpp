@@ -1152,7 +1152,7 @@ void CInterfaceManager::configureQuitDialogBox()
 				eltEdit->setActive(false);
 
 				if (eltCancel)
-					(safe_cast<CCtrlTextButton*>(eltCancel))->setText(sessionOwner ? CI18N::get("uittQuitCancel") : CI18N::get("uittQuitCancelEditor"));
+					(safe_cast<CCtrlTextButton*>(eltCancel))->setText(R2::getEditor().getMode() != R2::CEditor::EditionMode ? CI18N::get("uittQuitCancel") : CI18N::get("uittQuitCancelEditor"));
 			}
 		}
 
