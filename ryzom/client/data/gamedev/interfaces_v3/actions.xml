@@ -31,7 +31,6 @@
 	<value value="inventory"			hardtext="uiInventory" contexts="game, r2ed_anim_test"/>
 	<value value="phrase_book"			hardtext="uiPhraseBook" contexts="game, r2ed_anim_test"/>
 	<value value="mailbox"				hardtext="uiMailBox" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
-	<value value="webig"				hardtext="uiWebIG" contexts="game"/>
 
 	<value value="animal_global"		hardtext="uiAnimals" contexts="game"/>
 
