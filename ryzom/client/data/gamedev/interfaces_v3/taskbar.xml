@@ -87,6 +87,12 @@
 	<action handler="leave_modal" />
 </proc>
 
+<proc id="quit_dialog_launch_editor" >
+	<action handler="leave_modal" /> <!-- must leave modal first because 'launch game' may pop a message box in some cases if patching was uncomplete -->
+	<action handler="launch_game" params="slot=ingame_auto|edit_mode=1" />	
+</proc>
+
+
 <!-- the modal (formerly: h="60") -->
 <define id="quit_button_delta_y" value="-4" />
 <group type="modal" id="quit_dialog" exit_click_out="false" mouse_pos="false" posref="MM MM" child_resize_w="true" child_resize_wmargin="16" child_resize_h="true" child_resize_hmargin="16" win_priority="%win_priority_highest"
@@ -106,7 +112,10 @@
 			color="180 250 180 255" col_over="180 250 180 255" col_pushed="180 250 180 255" text_color_normal="180 250 180 160" />
 		<ctrl style="quit_button" id="return_mainland" posparent="cancel" posref="BL TL" y="%quit_button_delta_y" hardtext="uittReturnToMainland" onclick_l="proc" params_l="quit_dialog_mainland"
 			color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
-		<ctrl style="quit_button" id="reselect_char" posparent="return_mainland" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char"
+		<ctrl style="quit_button" id="launch_editor" posparent="return_mainland" posref="BL TL" y="%quit_button_delta_y" hardtext="uittLaunchEditor" onclick_l="proc" params_l="quit_dialog_launch_editor"
+			color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
+
+		<ctrl style="quit_button" id="reselect_char" posparent="launch_editor" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char"
 			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />
 		<!--<ctrl style="quit_button" id="game" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_game"
 			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />-->
@@ -351,27 +360,12 @@
 </template>
 
 <!-- milko_pad -->
-<group type="container"
-	id="milko_pad" 
-	header_active="false" 
-	right_button="false" 
-	options="layer0_pad" 
-	global_color="false" 
-	opened="true" 
-	openable="false" 
-	resizer="false" 
-	locked="false"
-	movable="true" 
-	active="true" 
-	header_color="UI:SAVE:WIN:COLORS:HELP" 
-	savable="true"
-	group_onclick_r="active_menu" 
-	group_params_r="menu=ui:interface:milko_menu"
-	w="142" 
-	h="200" 
-	pop_max_h="400"
-	on_active="proc" 
-	on_active_params="mk_proc_active"
+<group type="container" id="milko_pad" header_active="false" right_button="false" options="layer0_pad" 
+	global_color="false" opened="true" openable="false" resizer="false" locked="false"
+	movable="true" active="true" header_color="UI:SAVE:WIN:COLORS:HELP" savable="true"
+	group_onclick_r="active_menu" group_params_r="menu=ui:interface:milko_menu"
+	w="142" h="200" pop_max_h="400"
+	on_active="proc" on_active_params="mk_proc_active"
 	on_deactive="set"
 	on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:MILKO_PAD|value=0" >
 
@@ -760,14 +754,9 @@
 	<instance template="mk_icon_text" id="sys5" hardtext="uiMk_interaction5" posparent="sys4" posref="BL TL"
 		onclick_l="show_hide" params_l="mailbox" tooltip="uiMk_interaction5"
 		tx_normal="tb_mail.tga" tx_pushed="tb_mail.tga" c="%color_yellow" />
-
-	<!-- WebIG -->
-	<instance template="mk_icon_text" id="sys5b" hardtext="uiMk_interaction5b" posparent="sys5" posref="BL TL"
-		onclick_l="show_hide" params_l="webig" tooltip="uiMk_interaction5b"
-		tx_normal="tb_mail.tga" tx_pushed="tb_mail.tga" c="%color_yellow" />
 	
 	<!-- Team -->
-	<instance template="mk_icon_text" id="sys6" hardtext="uiMk_interaction6" posparent="sys5b" posref="BL TL"
+	<instance template="mk_icon_text" id="sys6" hardtext="uiMk_interaction6" posparent="sys5" posref="BL TL"
 		onclick_l="show_hide" params_l="team_list" tooltip="uiMk_interaction6"
 		tx_normal="tb_team.tga" tx_pushed="tb_team.tga" c="%color_yellow" />
 	<link expr="not(%is_team_present)" target="sys6:button:frozen" />
@@ -1083,10 +1072,7 @@
 
 		<instance template="win_button" id="fame"	color="UI:SAVE:WIN:COLORS:COM" text="uimwFame" posparent="mailbox" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:FAME"		win_name="fame" />
-
-		<instance template="win_button" id="webig"	color="UI:SAVE:WIN:COLORS:COM" text="uimwWebIG" posparent="fame" posref="BL TL" x="0" y="-4"
-			pushflag="UI:VARIABLES:ISACTIVE:WEBIG"		win_name="webig" />
-
+		
 	</group>
 	<view type="bitmap" id="com_ico_back" posparent="communication" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
 	<view type="bitmap" id="com_ico" posparent="com_ico_back" posref="MM MM" x="2" y="-2" texture="spe_com.tga" global_color="false" />
@@ -1219,7 +1205,6 @@
 	<param value="communication:contact_list|contact_list" />
 	<param value="communication:mailbox|mailbox" />
 	<param value="communication:fame|fame" />
-	<param value="communication:webig|webig" />
 	
 	<param value="options:game_config|game_config" />
 	<param value="options:keys|keys" />
