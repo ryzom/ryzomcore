@@ -62,6 +62,7 @@ namespace MSW
 		std::string		_ConnUserName;
 		std::string		_ConnPassword;
 		std::string		_ConnDefaultDatabase;
+		uint			_ConnPort;
 		
 
 		/// The mysql connection context
@@ -94,7 +95,7 @@ namespace MSW
 		void addOption(mysql_option option, const char *value);
 		void clearOption(mysql_option option);
 
-		bool connect(const std::string &hostName, const std::string &userName, const std::string &password, const std::string &defaultDatabase);
+		bool connect(const std::string &hostName, const std::string &userName, const std::string &password, const std::string &defaultDatabase, uint port);
 		bool connect(const NLNET::TParsedCommandLine &databaseInfo);
 
 		void closeConn();

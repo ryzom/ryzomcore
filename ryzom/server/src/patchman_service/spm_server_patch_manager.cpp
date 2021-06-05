@@ -821,7 +821,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchManager, setLaunchVersion)
 NLMISC_CLASS_COMMAND_IMPL(CServerPatchManager, updateAESdataBase)
 {
 	// check for command syntax
-	if (args.size()!=4)
+	if (args.size() != 4 && args.size() != 5)
 		return false;
 
 	// extract our command arguments
@@ -829,13 +829,18 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchManager, updateAESdataBase)
 	CSString dbHost		= args[1];
 	CSString dbLogin	= args[2];
 	CSString dbPassword	= args[3];
+	uint port;
+	if (args.size() < 5 || !NLMISC::fromString(args[4], port)) // parse port
+	{
+		port = 0; // or use default
+	}
 
 	// if the domain doesn't exist then bomb out
 	DROP_IF(_Domains.find(domainName)==_Domains.end(),"Domain not recognised: "+domainName, return true);
 
 	// prepare our sql database connection...
 	MSW::CConnection conn;
-	conn.connect(dbHost, dbLogin, dbPassword, "nel_tool");
+	conn.connect(dbHost, dbLogin, dbPassword, "nel_tool", port);
 
 	// get hold of of the domain description object
 	SDomainDescription domainDescription;

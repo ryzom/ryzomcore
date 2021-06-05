@@ -82,7 +82,7 @@ namespace MSW
 	bool CConnection::connect(const TParsedCommandLine &dbInfo)
 	{
 		const TParsedCommandLine *dbHost= dbInfo.getParam("host");
-		const TParsedCommandLine *dbport= dbInfo.getParam("port");
+		const TParsedCommandLine *dbPort= dbInfo.getParam("port");
 		const TParsedCommandLine *dbUser= dbInfo.getParam("user");
 		const TParsedCommandLine *dbPassword= dbInfo.getParam("password");
 		const TParsedCommandLine *dbBase= dbInfo.getParam("base");
@@ -98,18 +98,24 @@ namespace MSW
 			}
 			return false;
 		}
+		uint port;
+		if (!dbPort || !NLMISC::fromString(dbPort->ParamValue, port)) // parse port
+		{
+			port = 0; // or use default
+		}
 
 		// connect to the database
-		return connect(dbHost->ParamValue, dbUser->ParamValue, dbPassword->ParamValue, dbBase->ParamValue);
+		return connect(dbHost->ParamValue, dbUser->ParamValue, dbPassword->ParamValue, dbBase->ParamValue, port);
 	}
 
-	bool CConnection::connect(const std::string &hostName, const std::string &userName, const std::string &password, const std::string &defaultDatabase)
+	bool CConnection::connect(const std::string &hostName, const std::string &userName, const std::string &password, const std::string &defaultDatabase, uint port)
 	{
 		// store the connection info
 		_ConnHostName = hostName;
 		_ConnUserName = userName;
 		_ConnPassword = password;
 		_ConnDefaultDatabase = defaultDatabase;
+		_ConnPort = port;
 
 		nlassert(!_Connected);
 
@@ -147,13 +153,13 @@ namespace MSW
 										_ConnUserName.c_str(),
 										_ConnPassword.c_str(), 
 										_ConnDefaultDatabase.c_str(), 
-										0,
+										_ConnPort,
 										NULL,
 										CLIENT_FOUND_ROWS);
 
 		if (res == NULL)
 		{
-			nlwarning("Error during connection to database '%s:%s@%s' :", _ConnUserName.c_str(), _ConnDefaultDatabase.c_str(), _ConnHostName.c_str());
+			nlwarning("Error during connection to database '%s:%s@%s:%d' :", _ConnUserName.c_str(), _ConnDefaultDatabase.c_str(), _ConnHostName.c_str(), _ConnPort);
 			nlwarning("Mysql_real_connect error :%s ", mysql_error(_MysqlContext));
 			// the connection failed !
 			mysql_close(_MysqlContext);
