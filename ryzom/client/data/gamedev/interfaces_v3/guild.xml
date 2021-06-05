@@ -1,18 +1,24 @@
 <interface_config>
+
 <root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
 <variable entry="UI:TEMP:GUILD_SHEET:ICON" type="sint64" value="1" />
 <variable entry="UI:TEMP:GUILD_SHEET:NAME" type="sint64" value="1" />
+
 <!-- Variable to store the guild symbol and name for each entity in game -->
 <variable entry="UI:ENTITY:GUILD:$i:ICON" type="sint64" value="0" size="256" />
 <variable entry="UI:ENTITY:GUILD:$i:NAME" type="sint64" value="0" size="256" />
+
 <proc id="guild_proc_active">
 	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:GUILD|value=1" />
 	<action handler="guild_sheet_open" params="update_members=1" />
 	<action handler="set" cond="not(%is_guild_present)" params="target='ui:interface:guild:active'|value=0" />
 </proc>
+
 <proc id="guild_proc_deactive">
 	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:GUILD|value=0" />
 </proc>
+
 <proc id="guild_tell_member_proc">
 	<action handler="guild_tell_member" params="" />
 </proc>

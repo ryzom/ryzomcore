@@ -204,7 +204,7 @@
 		params="target_property=ui:interface:compass:visuel:radar:world_size|value=switch(@0, 50.0, 100.0, 250.0, 500.0)" />
 </proc>
 
-<group id="compass_menu" type="menu_compas" extends="base_menu_with_color" posref="TL TL" x="0" y="0
+<group id="compass_menu" type="menu_compas" extends="base_menu_with_color" posref="TL TL" x="0" y="0"
 	mouse_pos="true" exit_click_b="true" force_inside_screen="true" compass="ui:interface:compass">
 
 
