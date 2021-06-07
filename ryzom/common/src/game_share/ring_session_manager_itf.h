@@ -2530,7 +2530,7 @@ namespace RSMGR
 		{
 			H_AUTO(invokeResult_invokeResult);
 #ifdef NL_DEBUG
-			nldebug("CRingSessionManagerWeb::invokeResult called");
+			nldebug("CRingSessionManagerWeb::invokeResult called (%s)", resultString.c_str());
 #endif
 			NLNET::CMessage message("RET");
 			nlWrite(message, serial, userId);
