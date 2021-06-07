@@ -35,6 +35,8 @@
 #include "deployment_configuration_synchroniser.h"
 #include "patchman_constants.h"
 
+#include <sstream>
+
 
 //-------------------------------------------------------------------------------------------------
 // namespaces
@@ -72,8 +74,10 @@ NLMISC::CVariablePtr<string> __varSPTMessageE("spt","SPTE","watch for displaying
 NLMISC::CVariablePtr<string> __varSPTMessageF("spt","SPTF","watch for displaying recent state updates", &SPTMessage[0xF]);
 NLMISC::CVariable<uint32> NumSPTWatches("spt","NumSPTWatches","number of SPT watches used by this service",16,0,true);
 
-NLMISC::CVariable<string> DevConfigDirectory("spt", "DevConfigDirectory", "Directory used to build developer configuration file", "../../", 0, true);
-NLMISC::CVariable<string> DevWorkingDirectory("spt", "DevWorkingDirectory", "Directory set as default directory in generated startup batch", "../../", 0, true);
+NLMISC::CVariable<string> DevConfigDirectory("spt", "DevConfigDirectory", "Directory used to build developer configuration file", "../../save/dev", 0, true);
+NLMISC::CVariable<string> DevWorkingDirectory("spt", "DevWorkingDirectory", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\save\\dev", 0, true);
+NLMISC::CVariable<string> DevSleepCmd("spt", "DevSleepCmd", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\distribution\\ryzom_tools_win_x64-distribution\\nircmd.exe wait 100", 0, true);
+NLMISC::CVariable<string> DevExeSuffix("spt", "DevExeSuffix", "Executable suffix used in development startup batch", ".exe", 0, true);
 
 static void addSPTMessage(const CSString& moduleName, const CSString& msgText)
 {
@@ -759,23 +763,85 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 	bool ok=	CDeploymentConfiguration::getInstance().read(fileName);
 	DROP_IF(!ok,"Aborting operation due to errors while reading file: "+fileName,return true);
 
+	// remapping old to new executable names
+	// TODO: adjust patchman configurations and pipeline scripts (linux production side)
+	static map<string, string> exeMap;
+	if (exeMap.empty())
+	{
+		exeMap["shard_unifier_service"] = "ryzom_shard_unifier_service";
+		exeMap["mail_forum_service"] = "ryzom_mail_forum_service";
+		exeMap["logger_service"] = "ryzom_logger_service";
+		exeMap["backup_service"] = "ryzom_backup_service";
+		exeMap["pd_support_service"] = "ryzom_pd_support_service";
+		exeMap["log_analyser_service"] = "ryzom_log_analyser_service";
+		exeMap["tick_service"] = "ryzom_tick_service";
+		exeMap["mirror_service"] = "ryzom_mirror_service";
+		exeMap["input_output_service"] = "ryzom_ios_service"; // FIXME: Redundant name
+		exeMap["gpm_service"] = "ryzom_gpm_service";
+		exeMap["session_browser_server"] = "ryzom_session_browser_service";
+		exeMap["entities_game_service"] = "ryzom_entities_game_service";
+		exeMap["ai_service"] = "ryzom_ai_service";
+		exeMap["frontend_service"] = "ryzom_frontend_service";
+		exeMap["dynamic_scenario_service"] = "ryzom_dynamic_scenario_service";
+	}
+	const std::string &exeSuffix = DevExeSuffix.get();
+
+	// remapping exe names to cfg names
+	// TODO: fix services to be consistent
+	/*
+	static map<string, string> cfgMap;
+	if (cfgMap.empty())
+	{
+		cfgMap["ryzom_admin_service"] = "admin_service";
+		cfgMap["ryzom_shard_unifier_service"] = "shard_unifier_service";
+		cfgMap["ryzom_mail_forum_service"] = "mail_forum_service";
+		cfgMap["ryzom_logger_service"] = "logger_service";
+		cfgMap["ryzom_backup_service"] = "backup_service";
+		cfgMap["ryzom_naming_service"] = "naming_service";
+		cfgMap["ryzom_welcome_service"] = "welcome_service";
+		cfgMap["ryzom_tick_service"] = "tick_service";
+		cfgMap["ryzom_mirror_service"] = "mirror_service";
+		cfgMap["ryzom_ios_service"] = "input_output_service";
+		cfgMap["ryzom_gpm_service"] = "gpm_service";
+		cfgMap["ryzom_session_browser_service"] = "session_browser_server";
+		cfgMap["ryzom_entities_game_service"] = "entities_game_service";
+		cfgMap["ryzom_ai_service"] = "ai_service";
+		cfgMap["ryzom_frontend_service"] = "frontend_service";
+		cfgMap["ryzom_dynamic_scenario_service"] = "dynamic_scenario_service";
+	}
+	*/
+
 	vector<CSString> appNames;
 	CDeploymentConfiguration::getInstance().getAppNames(IService::getInstance()->getHostName(), "dev", appNames);
+
+#if 1
+	std::map<string, stringstream> batches;
+#endif
 
 	for (uint i=0; i<appNames.size(); ++i)
 	{
 		SAppDescription appDesc;
 		CDeploymentConfiguration::getInstance().getApp("dev", appNames[i], appDesc);
 
-		string configDirectory = DevConfigDirectory.get()+"/"+appDesc.ShardName+"/";
+#if 0 // Nevrax layout, for reference
+		string configDirectory = DevConfigDirectory.get() + "/" + appDesc.ShardName + "/";
+#else
+		string configDirectory = DevConfigDirectory.get() + "/" + appDesc.AppName + "/";
+#endif
 		// create a directory for each shard configuration files
 		if (!CFile::isExists(configDirectory))
 			CFile::createDirectoryTree(configDirectory);
 
 		// ok, write the configuration file in the config directory
-		CSString cfgFileName= appDesc.CmdLine.firstWord()+".cfg";
+		/*
+		string cfgName = appDesc.CmdLine.firstWord();
+		map<string, string>::iterator cfgNameIt = cfgMap.find(toLowerAscii(cfgName));
+		if (cfgNameIt != cfgMap.end())
+			cfgName = cfgNameIt->second;
+		*/
+		CSString cfgFileName = appDesc.CmdLine.firstWord() + ".cfg"; // NOTE: This uses the original cfg names
 
-		string fileName = configDirectory+cfgFileName;
+		string fileName = configDirectory + cfgFileName;
 		FILE *fp = nlfopen(fileName, "wt");
 		nlassert(fp != NULL);
 		fwrite(appDesc.CfgFile.data(), appDesc.CfgFile.size(), 1, fp);
@@ -784,7 +850,6 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		string fullConfigPath = CPath::getFullPath(configDirectory);
 
 		// generate a batch starter
-		CSString batch;
 		// hack the cmd line
 		CVectorSString cmdParams;
 		explode(string(appDesc.CmdLine), string(" "), reinterpret_cast<vector<string>&>(cmdParams), true);
@@ -792,19 +857,32 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		{
 			string &p = cmdParams[i];
 			if (i == 0)
-				p+="_rd.exe";
+			{
+				map<string, string>::iterator it = exeMap.find(toLowerAscii(p));
+				if (it != exeMap.end())
+					p = it->second;
+				p += exeSuffix;
+			}
 			else
 			{
+#if 0 // Nevrax layout, for reference
 				if (p == "-C.")
 					p = string("-C")+fullConfigPath;
 				else if (p == "-L."
 					|| p == "--nobreak"
 					|| p == "--writepid")
 					p = "";
+#else
+				if (p == "--nobreak" || p == "--writepid")
+					p = "";
+#endif
 			}
 		}
+
 		CSString cmdLine;
 		cmdLine.join(cmdParams, " ");
+#if 0 // Nevrax layout, for reference
+		CSString batch;
 		batch << "cd \""<<DevWorkingDirectory.get()<<"\"\n";
 		batch << "start " << cmdLine;
 
@@ -812,6 +890,28 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		fp = nlfopen(fileName, "wt");
 		nlassert(fp != NULL);
 		fwrite(batch.data(), batch.size(), 1, fp);
+		fclose(fp);
+#else
+		// Write a single batch per shard
+		// TODO: Order by appDesc.StartOrder, but appDesc.StartOrder appears to be empty currently
+		map<string, stringstream>::iterator batchIt = batches.find(appDesc.ShardName);
+		if (batchIt == batches.end())
+			batchIt = batches.insert(pair<string, stringstream>(appDesc.ShardName, stringstream())).first;
+		stringstream &batch = batchIt->second;
+		batch << "cd \"" << DevWorkingDirectory.get() << "\\" << appDesc.AppName << "\"\n";
+		batch << "start " << cmdLine << "\n";
+		batch << DevSleepCmd.get() << "\n";
+		batch << "\n";
+#endif
+	}
+
+	for (map<string, stringstream>::iterator it = batches.begin(), end = batches.end(); it != end; ++it)
+	{
+		fileName = DevConfigDirectory.get() + "/start_" + it->first + ".bat";
+		FILE *fp = nlfopen(fileName, "wt");
+		nlassert(fp != NULL);
+		string s = it->second.str();
+		fwrite(s.c_str(), s.size(), 1, fp);
 		fclose(fp);
 	}
 
