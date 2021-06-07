@@ -921,6 +921,8 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		fclose(fp);
 	}
 
+	// TODO: Development AES configuration
+
 	return true;
 }
 
