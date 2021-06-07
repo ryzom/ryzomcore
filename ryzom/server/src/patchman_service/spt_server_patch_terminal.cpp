@@ -823,6 +823,12 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		SAppDescription appDesc;
 		CDeploymentConfiguration::getInstance().getApp("dev", appNames[i], appDesc);
 
+		if (appDesc.CmdLine.firstWord() == "none")
+		{
+			// AES placeholder, skip
+			continue;
+		}
+
 #if 0 // Nevrax layout, for reference
 		string configDirectory = DevConfigDirectory.get() + "/" + appDesc.ShardName + "/";
 #else
