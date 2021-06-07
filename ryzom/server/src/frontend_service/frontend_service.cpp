@@ -247,7 +247,7 @@ public:
 		while (!StopThread)
 		{
 			while (!StopThread && !SendBuffer)
-				nlSleep(0);
+				nlSleep(1); // FIXME: Use thread event instead. This is only called once per tick, so no need to heat up the CPU here either
 
 			if (StopThread)
 				break;
