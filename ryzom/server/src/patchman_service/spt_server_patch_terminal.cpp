@@ -76,8 +76,9 @@ NLMISC::CVariable<uint32> NumSPTWatches("spt","NumSPTWatches","number of SPT wat
 
 NLMISC::CVariable<string> DevConfigDirectory("spt", "DevConfigDirectory", "Directory used to build developer configuration file", "../../save/dev", 0, true);
 NLMISC::CVariable<string> DevWorkingDirectory("spt", "DevWorkingDirectory", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\save\\dev", 0, true);
-NLMISC::CVariable<string> DevSleepCmd("spt", "DevSleepCmd", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\distribution\\ryzom_tools_win_x64-distribution\\nircmd.exe wait 100", 0, true);
-NLMISC::CVariable<string> DevExeSuffix("spt", "DevExeSuffix", "Executable suffix used in development startup batch", ".exe", 0, true);
+NLMISC::CVariable<string> DevSleepCmd("spt", "DevSleepCmd", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\distribution\\ryzom_tools_win_x64-distribution\\nircmd.exe wait 1000", 0, true);
+NLMISC::CVariable<string> DevExePrefix("spt", "DevExePrefix", "Executable prefix used in development startup batch", "", 0, true);
+NLMISC::CVariable<string> DevExeSuffix("spt", "DevExeSuffix", "Executable suffix used in development startup batch", ".exe -new_console", 0, true);
 
 static void addSPTMessage(const CSString& moduleName, const CSString& msgText)
 {
@@ -788,28 +789,12 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 
 	// remapping exe names to cfg names
 	// TODO: fix services to be consistent
-	/*
 	static map<string, string> cfgMap;
 	if (cfgMap.empty())
 	{
-		cfgMap["ryzom_admin_service"] = "admin_service";
-		cfgMap["ryzom_shard_unifier_service"] = "shard_unifier_service";
-		cfgMap["ryzom_mail_forum_service"] = "mail_forum_service";
-		cfgMap["ryzom_logger_service"] = "logger_service";
-		cfgMap["ryzom_backup_service"] = "backup_service";
 		cfgMap["ryzom_naming_service"] = "naming_service";
 		cfgMap["ryzom_welcome_service"] = "welcome_service";
-		cfgMap["ryzom_tick_service"] = "tick_service";
-		cfgMap["ryzom_mirror_service"] = "mirror_service";
-		cfgMap["ryzom_ios_service"] = "input_output_service";
-		cfgMap["ryzom_gpm_service"] = "gpm_service";
-		cfgMap["ryzom_session_browser_service"] = "session_browser_server";
-		cfgMap["ryzom_entities_game_service"] = "entities_game_service";
-		cfgMap["ryzom_ai_service"] = "ai_service";
-		cfgMap["ryzom_frontend_service"] = "frontend_service";
-		cfgMap["ryzom_dynamic_scenario_service"] = "dynamic_scenario_service";
 	}
-	*/
 
 	vector<CSString> appNames;
 	CDeploymentConfiguration::getInstance().getAppNames(IService::getInstance()->getHostName(), "dev", appNames);
@@ -839,13 +824,11 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			CFile::createDirectoryTree(configDirectory);
 
 		// ok, write the configuration file in the config directory
-		/*
 		string cfgName = appDesc.CmdLine.firstWord();
 		map<string, string>::iterator cfgNameIt = cfgMap.find(toLowerAscii(cfgName));
 		if (cfgNameIt != cfgMap.end())
 			cfgName = cfgNameIt->second;
-		*/
-		CSString cfgFileName = appDesc.CmdLine.firstWord() + ".cfg"; // NOTE: This uses the original cfg names
+		CSString cfgFileName = cfgName + ".cfg"; // NOTE: This uses the original cfg names
 
 		string fileName = configDirectory + cfgFileName;
 		FILE *fp = nlfopen(fileName, "wt");
@@ -905,7 +888,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			batchIt = batches.insert(pair<string, stringstream>(appDesc.ShardName, stringstream())).first;
 		stringstream &batch = batchIt->second;
 		batch << "cd \"" << DevWorkingDirectory.get() << "\\" << appDesc.AppName << "\"\n";
-		batch << "start " << cmdLine << "\n";
+		batch << DevExePrefix.get() << cmdLine << "\n";
 		batch << DevSleepCmd.get() << "\n";
 		batch << "\n";
 #endif
