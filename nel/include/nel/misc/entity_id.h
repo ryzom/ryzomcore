@@ -25,6 +25,7 @@
 #include "debug.h"
 #include "common.h"
 #include "stream.h"
+#include "wang_hash.h"
 
 namespace NLMISC {
 
@@ -577,6 +578,7 @@ public:
 };*/
 
 // Traits for hash_map using CEntityId
+#if 0
 struct CEntityIdHashMapTraits
 {
 	enum { bucket_size = 4, min_buckets = 8 };
@@ -596,7 +598,27 @@ struct CEntityIdHashMapTraits
 		return id1.getShortId() < id2.getShortId();
 	}
 };
-
+#else
+struct CEntityIdHashMapTraits
+{
+	enum { bucket_size = 4, min_buckets = 8 };
+	CEntityIdHashMapTraits() { }
+	size_t operator() (const NLMISC::CEntityId &id ) const
+	{
+		uint64 hash64 = id.getUniqueId();
+		if (sizeof(size_t) == 8)
+		{
+			return (size_t)NLMISC::wangHash64(hash64);
+		}
+		else
+		{
+			uint32 hash32a = NLMISC::wangHash((uint32)(hash64 & 0xFFFFFFFF));
+			uint32 hash32b = NLMISC::wangHash((uint32)(hash64 >> 32));
+			return hash32a ^ hash32b;
+		}
+	}
+};
+#endif
 
 /*inline std::stringstream &operator << (std::stringstream &__os, const CEntityId &__t)
 {
