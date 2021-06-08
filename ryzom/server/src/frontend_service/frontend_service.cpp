@@ -66,6 +66,9 @@
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
+#include <mutex>
+#include <condition_variable>
+
 using namespace std;
 using namespace NLNET;
 using namespace NLMISC;
@@ -236,33 +239,50 @@ void flushMessagesToSend()
 class CSendRunnable : public IRunnable
 {
 public:
+	CSendRunnable() : m_StopThread(false), m_SendBuffer(false) {}
 
-	CSendRunnable() : StopThread(false), SendBuffer(false)	{}
-
-	volatile bool	StopThread;
-	volatile bool	SendBuffer;
-
-	virtual void	run()
+	virtual void run()
 	{
-		while (!StopThread)
+		for (;;)
 		{
-			while (!StopThread && !SendBuffer)
-				nlSleep(1); // FIXME: Use thread event instead. This is only called once per tick, so no need to heat up the CPU here either
-
-			if (StopThread)
-				break;
-
-			SendBuffer = false;
+			{
+				std::unique_lock<std::mutex> lock(m_Mutex);
+				m_CondVar.wait(lock, [&]() -> bool { return m_StopThread || m_SendBuffer; });
+				m_SendBuffer = false;
+				if (m_StopThread)
+				{
+					m_StopThread = false;
+					return;
+				}
+			}
 			flushMessagesToSend();
 		}
-
-		StopThread = false;
 	}
+
+	void sendBuffer()
+	{
+		std::unique_lock<std::mutex> lock(m_Mutex);
+		m_SendBuffer = true;
+		m_CondVar.notify_one();
+	}
+
+	void stopThread()
+	{
+		std::unique_lock<std::mutex> lock(m_Mutex);
+		m_StopThread = true;
+		m_CondVar.notify_one();
+	}
+
+private:
+	bool m_StopThread;
+	bool m_SendBuffer;
+	std::condition_variable m_CondVar;
+	std::mutex m_Mutex;
 
 };
 
-CSendRunnable	SendTask;
-IThread*		SendThread = NULL;
+CSendRunnable *SendTask;
+IThread *SendThread;
 
 /*
  * Receive task
@@ -1138,7 +1158,7 @@ inline void	CFrontEndService::onTick()
 			fillPrioritizedActionsToSend();
 			swapSendBuffers(); // waits for the end of flushMessagesToSend using the boolean FlushInProgress (with addWait there would be a deadlock at the beginning)
 
-			SendTask.SendBuffer = true;
+			SendTask->sendBuffer();
 
 			if (SendThread == NULL)
 			{
@@ -1328,7 +1348,8 @@ void CFrontEndService::init()
 		{
 			// Init send thread
 			nlinfo("UseSendThread on, initialise send thread");
-			SendThread = IThread::create(&SendTask);
+			SendTask = new CSendRunnable();
+			SendThread = IThread::create(SendTask);
 			SendThread->start();
 		}
 
@@ -1379,7 +1400,10 @@ void	CFrontEndService::postInit()
  */
 void CFrontEndService::release()
 {
-	SendTask.StopThread = true;
+	if (SendTask)
+	{
+		SendTask->stopThread();
+	}
 
 	_ReceiveSub.release();
 
@@ -1402,12 +1426,15 @@ void CFrontEndService::release()
 	{
 		nlinfo("Release send thread, waiting for task to terminate");
 		// stop send thread
-		while (SendTask.StopThread)
+		while (SendThread->isRunning()) // FIXME: Implement thread.join()
 			nlSleep(1);
 
 		delete SendThread;
 		SendThread = NULL;
 	}
+
+	delete SendTask;
+	SendTask = NULL;
 }
 
 
