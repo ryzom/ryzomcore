@@ -271,9 +271,13 @@ namespace ADMIN
 				if ((now & 0xf) == 0)
 				{
 					// every 16 seconds because very slow
+					/*
+					// FIXME: This is too slow
 					IVariable *var = dynamic_cast<IVariable*>(ICommand::getCommand("ProcessUsedMemory"));
 					if (var != NULL)
 						NLMISC::fromString(var->toString(), _ProcessUsedMemory);
+					*/
+					_ProcessUsedMemory = 0;
 				}
 
 				// at least one second as passed, check for updates to send to 
