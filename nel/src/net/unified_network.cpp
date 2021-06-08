@@ -45,8 +45,8 @@ uint32 TotalCallbackCalled = 0;
 
 uint32 TimeInCallback =0;
 
-#ifdef NL_OS_UNIX
-/// Yield method (Unix only)
+#if defined(NL_OS_UNIX) || defined(NL_OS_WINDOWS)
+/// Yield method
 CVariable<uint32> UseYieldMethod("nel", "UseYieldMethod", "0=select 1=usleep 2=nanosleep 3=sched_yield 4=none", 0, 0, true );
 #endif
 
@@ -564,11 +564,15 @@ bool	CUnifiedNetwork::init(const CInetAddress *addr, CCallbackNetBase::TRecordin
 			port = CNamingClient::queryServicePort ();
 	}
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	/// Init the main pipe to select() on data available
 	if ( ::pipe( _MainDataAvailablePipe ) != 0 )
 		nlwarning( "Unable to create main D.A. pipe" );
 	//nldebug( "Pipe: created" );
+#elif defined(NL_OS_WINDOWS)
+	_MainDataAvailableHandle = CreateEventW(NULL, FALSE, FALSE, NULL);
+	if (!_MainDataAvailableHandle)
+		nlwarning("Unable to create main D.A. event");
 #endif
 
 	// setup the server callback only if server port != 0, otherwise there's no server callback
@@ -578,9 +582,11 @@ bool	CUnifiedNetwork::init(const CInetAddress *addr, CCallbackNetBase::TRecordin
 	{
 		nlassert (_CbServer == 0);
 		_CbServer = new CCallbackServer( CCallbackNetBase::Off, "", true, false ); // don't init one pipe per connection
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 		_CbServer->setExternalPipeForDataAvailable( _MainDataAvailablePipe ); // the main pipe is shared for all connections
 		//nldebug( "Pipe: set (server %p)", _CbServer );
+#elif defined(NL_OS_WINDOWS)
+		_CbServer->setExternalPipeForDataAvailable(_MainDataAvailableHandle);
 #endif
 		bool retry = false;
 		do
@@ -754,9 +760,15 @@ void	CUnifiedNetwork::release(bool mustFlushSendQueues, const std::vector<std::s
 	if (CNamingClient::connected ())
 		CNamingClient::disconnect ();
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	::close( _MainDataAvailablePipe[PipeRead] );
 	::close( _MainDataAvailablePipe[PipeWrite] );
+#elif defined(NL_OS_WINDOWS)
+	if (_MainDataAvailableHandle)
+	{
+		CloseHandle(_MainDataAvailableHandle);
+		_MainDataAvailableHandle = NULL;
+	}
 #endif
 }
 
@@ -856,9 +868,11 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 
 		// Create a new connection with the service, setup callback and connect
 		CCallbackClient	*cbc = new CCallbackClient( CCallbackNetBase::Off, "", true, false ); // don't init one pipe per connection
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 		cbc->setExternalPipeForDataAvailable( _MainDataAvailablePipe ); // the main pipe is shared for all connections
 		//nldebug( "Pipe: set (client %p)", cbc );
+#elif defined(NL_OS_WINDOWS)
+		cbc->setExternalPipeForDataAvailable(_MainDataAvailableHandle);
 #endif
 		cbc->setDisconnectionCallback(uncbDisconnection, NULL);
 		cbc->setDefaultCallback(uncbMsgProcessing);
@@ -1147,7 +1161,7 @@ void	CUnifiedNetwork::update(TTime timeout)
 			t0 = currentTime - (timeout - remainingTime);
 		}
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 		// Sleep until the time expires or we receive a message
 		H_BEFORE(L5UpdateSleep);
 		switch ( UseYieldMethod.get() )
@@ -1156,6 +1170,18 @@ void	CUnifiedNetwork::update(TTime timeout)
 		case 1: ::usleep(1000); break; // 20 ms
 		case 2: nlSleep(1); break; // 10 ms (by nanosleep, but 20 ms measured on kernel 2.4.20)
 		case 3:	::sched_yield(); break; // makes all slow (at least on kernel 2.4.20) !
+		default: break; // don't sleep at all, makes all slow!
+		}
+		H_AFTER(L5UpdateSleep);
+#elif defined(NL_OS_WINDOWS)
+		// Sleep until the time expires or we receive a message
+		H_BEFORE(L5UpdateSleep);
+		switch (UseYieldMethod.get())
+		{
+		case 0: sleepUntilDataAvailable(remainingTime); break; // accurate sleep
+		case 1: nlSleep(1); break;
+		case 2: nlSleep(1); break;
+		case 3: SwitchToThread(); break;
 		default: break; // don't sleep at all, makes all slow!
 		}
 		H_AFTER(L5UpdateSleep);
@@ -1222,10 +1248,7 @@ void CUnifiedNetwork::autoReconnect( CUnifiedConnection &uc, uint connectionInde
 	}
 }
 
-#ifdef NL_OS_UNIX
-/*
- *
- */
+#if defined(NL_OS_UNIX)
 void CUnifiedNetwork::sleepUntilDataAvailable( TTime msecMax )
 {
 	// Prevent looping infinitely if an erroneous time was provided
@@ -1248,6 +1271,15 @@ void CUnifiedNetwork::sleepUntilDataAvailable( TTime msecMax )
 	if ( res == -1 )
 		nlwarning( "HNETL5: Select failed in sleepUntilDataAvailable");
 	//nldebug( "Slept %u ms", (uint)(CTime::getLocalTime()-before) );
+}
+#elif defined(NL_OS_WINDOWS)
+void CUnifiedNetwork::sleepUntilDataAvailable(TTime msecMax)
+{
+	if (msecMax > 999)
+		msecMax = 999;
+
+	nlassert(_MainDataAvailableHandle);
+	WaitForSingleObject(_MainDataAvailableHandle, msecMax);
 }
 #endif
 
