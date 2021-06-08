@@ -638,7 +638,7 @@ protected:
 	/// Auto-reconnect
 	void				autoReconnect( CUnifiedConnection &uc, uint connectionIndex );
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) || defined(NL_OS_WINDOWS)
 	/// Sleep (implemented by select())
 	void				sleepUntilDataAvailable( NLMISC::TTime msecMax );
 #endif
@@ -700,9 +700,11 @@ private:
 	/// for each services, which network to take
 	std::vector<std::string>					_DefaultNetwork;
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	/// Pipe to select() on data available (shared among all connections)
 	int											_MainDataAvailablePipe [2];
+#elif defined(NL_OS_WINDOWS)
+	HANDLE										_MainDataAvailableHandle;
 #endif
 
 	/// Service id of the running service
