@@ -563,6 +563,7 @@ public:
 class CPositionMsg
 {
 public:
+	NLMISC::TGameCycle Tick;
 	sint32	X;
 	sint32	Y;
 	sint32	Z;
@@ -571,6 +572,7 @@ public:
 	void serial(NLMISC::CBitMemStream &f)
 	{
 		// Serialize the user character.
+		f.serial(Tick);
 		f.serial(X);
 		f.serial(Y);
 		f.serial(Z);

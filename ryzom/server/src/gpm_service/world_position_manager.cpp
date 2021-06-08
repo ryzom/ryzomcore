@@ -2218,14 +2218,8 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 
 		if (movNorm > sqr(maxDist))
 		{
-			if (movNorm > sqr(5 * SecuritySpeedFactor * CTickEventHandler::getGameTimeStep() * ticksSinceLastUpdate)) {
-				movVector *= (maxDist / sqrt(movNorm));
-				nlwarning("Player limitSpeed=%2.f, entitySpeed=%.2f, masterSpeed=%.2f", limitSpeedToUse, maxSpeed(), mountWalkSpeed);
-			}
-			else
-			{
-				nlwarning("Player limitSpeed=%2.f, entitySpeed=%.2f, masterSpeed=%.2f", limitSpeedToUse, maxSpeed(), mountWalkSpeed);
-			}
+			movVector *= (maxDist / sqrt(movNorm));
+			nlwarning("Player limitSpeed=%2.f, entitySpeed=%.2f, masterSpeed=%.2f", limitSpeedToUse, maxSpeed(), mountWalkSpeed);
 		}
 	}
 

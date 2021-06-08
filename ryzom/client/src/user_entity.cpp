@@ -1711,6 +1711,7 @@ bool CUserEntity::sendToServer(CBitMemStream &out)
 		if (_Primitive) _Primitive->getGlobalPosition(_LastGPosSent, dynamicWI);
 		// Send Position & Orientation
 		CPositionMsg positionMsg;
+		positionMsg.Tick = NetMngr.getCurrentClientTick();
 		positionMsg.X = (sint32)(pos().x * 1000);
 		positionMsg.Y = (sint32)(pos().y * 1000);
 		positionMsg.Z = (sint32)(pos().z * 1000);

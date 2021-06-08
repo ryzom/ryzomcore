@@ -50,8 +50,8 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 	H_AUTO(cbClientPosition);
 
 	CEntityId			id;
-	NLMISC::TGameCycle	tick;
-	msgin.serial(id, tick);
+	NLMISC::TGameCycle	fsTick;
+	msgin.serial(id, fsTick);
 
 	TDataSetRow entityIndex = TheDataset.getDataSetRow( id );
 	if ( !entityIndex.isValid() )
@@ -62,15 +62,16 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 	}
 	
 	// entity pos (x, y, z, theta)
+	NLMISC::TGameCycle	clientTick;
 	sint32				x, y, z;
 	float				heading;
-	msgin.serial(x, y, z, heading);
+	msgin.serial(clientTick, x, y, z, heading);
 
 	if (IsRingShard)
 	{
 		// make sure the move that the player is trying to make is legal
 		// if the move wasn't legal then the values of 'x' and 'y' will be changed to make them legal
-		bool moveWasLegal= pCGPMS->MoveChecker->checkMove(entityIndex, x, y, tick);
+		bool moveWasLegal= pCGPMS->MoveChecker->checkMove(entityIndex, x, y, clientTick);
 
 		// if the move wasn't legal then dispatch a message to the player
 		if (!moveWasLegal)
@@ -102,7 +103,7 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 		CMirrorPropValue1DS<sint32>( TheDataset, entityIndex, DSPropertyPOSY )= y;
 		CMirrorPropValue1DS<sint32>( TheDataset, entityIndex, DSPropertyPOSZ )= (z&~7) + (local ? 1 : 0) + (interior ? 2 : 0) + (water ? 4 : 0);
 		CMirrorPropValue1DS<float>( TheDataset, entityIndex, DSPropertyORIENTATION )= heading;
-		CMirrorPropValue1DS<NLMISC::TGameCycle>( TheDataset, entityIndex, DSPropertyTICK_POS )= tick;
+		CMirrorPropValue1DS<NLMISC::TGameCycle>( TheDataset, entityIndex, DSPropertyTICK_POS )= clientTick;
 
 		CMirrorPropValue1DS<TYPE_CELL> cell ( TheDataset, entityIndex, DSPropertyCELL );
 		uint32	cx = (uint16) ( + x/CWorldPositionManager::getCellSize() );
@@ -143,7 +144,7 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 		//CWorldPositionManager::setEntityPosition(id, x, y, z, heading, tick);
 		if (player->getType() == CWorldEntity::Player && player->CheckMotion && player->PosInitialised)
 		{
-			CWorldPositionManager::movePlayer(player, x, y, z, heading, tick);
+			CWorldPositionManager::movePlayer(player, x, y, z, heading, clientTick);
 		}
 	}
 } // cbClientPosition //
