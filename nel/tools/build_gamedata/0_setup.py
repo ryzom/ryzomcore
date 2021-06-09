@@ -83,7 +83,7 @@ if not args.noconf:
 			DummyUnknownName
 		ToolDirectories
 	except NameError:
-		ToolDirectories = [ 'R:/distribution/nel_tools_win_x64-distribution', 'R:/distribution/ryzom_tools_win_x64-distribution' ]
+		ToolDirectories = [ 'R:/distribution/nel_tools_win_x64', 'R:/distribution/ryzom_tools_win_x64' ]
 	try:
 		ToolSuffix
 	except NameError:
