@@ -2155,7 +2155,8 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 	}
 
 	// check position received is not older than last received
-	if (entity->Tick > tick && !forceTick)
+	NLMISC::TGameCycle lastTick = (entity->Tick() - GPMS_LCT_TICKS);
+	if (lastTick >= tick && !forceTick)
 	{
 		if (Verbose)
 			nlwarning("CWorldPositionManager::movePlayer%s: received a position older (t=%d) than previous (t=%d)", entity->Id.toString().c_str(), tick, entity->Tick.getValue());
@@ -2180,7 +2181,11 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 	CVectorD							targetPos = CVectorD(x*0.001, y*0.001, z*0.001);
 	CVectorD							finalPos;
 
-	NLMISC::TGameCycle ticksSinceLastUpdate = tick - entity->Tick();
+	NLMISC::TGameCycle ticksSinceLastUpdate = tick - lastTick;
+
+	// limit interval to 1s
+	if (ticksSinceLastUpdate > GPMS_LCT_TICKS)
+		ticksSinceLastUpdate = GPMS_LCT_TICKS;
 
 	// Get master (player) entity (in case of a mount)
 	CWorldEntity	*master = entity;
@@ -2285,14 +2290,14 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 		targetPos = finalPos;
 
 		// Update entity coordinates directly in mirror
-		entity->updatePosition((sint32)(finalPos.x * 1000), (sint32)(finalPos.y * 1000), (sint32)(finalPos.z * 1000), theta, tick, interior, water);
+		entity->updatePosition((sint32)(finalPos.x * 1000), (sint32)(finalPos.y * 1000), (sint32)(finalPos.z * 1000), theta, tick + GPMS_LCT_TICKS, interior, water);
 	}
 	else
 	{
 		nlwarning("CWorldPositionManager::movePlayer(%s): entity has no NLPACS::MovePrimitive, motion cannot be checked!", entity->Id.toString().c_str(), tick, entity->Tick.getValue());
 
 		// Update entity coordinates directly in mirror
-		entity->updatePosition(x, y, z, theta, tick, interior, water);
+		entity->updatePosition(x, y, z, theta, tick + GPMS_LCT_TICKS, interior, water);
 	}
 
 	// and update entity links (and children) in cell map

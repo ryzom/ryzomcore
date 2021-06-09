@@ -56,7 +56,7 @@
 class CWorldPositionManager;
 class ConstIteratorType;
 
-
+#define GPMS_LCT_TICKS (10)
 
 
 

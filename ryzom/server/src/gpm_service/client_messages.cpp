@@ -103,7 +103,7 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 		CMirrorPropValue1DS<sint32>( TheDataset, entityIndex, DSPropertyPOSY )= y;
 		CMirrorPropValue1DS<sint32>( TheDataset, entityIndex, DSPropertyPOSZ )= (z&~7) + (local ? 1 : 0) + (interior ? 2 : 0) + (water ? 4 : 0);
 		CMirrorPropValue1DS<float>( TheDataset, entityIndex, DSPropertyORIENTATION )= heading;
-		CMirrorPropValue1DS<NLMISC::TGameCycle>( TheDataset, entityIndex, DSPropertyTICK_POS )= clientTick;
+		CMirrorPropValue1DS<NLMISC::TGameCycle>( TheDataset, entityIndex, DSPropertyTICK_POS )= clientTick + GPMS_LCT_TICKS;
 
 		CMirrorPropValue1DS<TYPE_CELL> cell ( TheDataset, entityIndex, DSPropertyCELL );
 		uint32	cx = (uint16) ( + x/CWorldPositionManager::getCellSize() );
