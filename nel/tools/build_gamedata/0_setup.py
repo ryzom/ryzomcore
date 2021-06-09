@@ -464,6 +464,8 @@ if not args.noconf:
 	sfr.close()
 	sf.close()
 
+from buildsite_local import *
+
 sys.path.append(WorkspaceDirectory)
 from projects import *
 
