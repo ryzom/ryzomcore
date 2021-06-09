@@ -43,7 +43,7 @@
     <leaf name="INIT_BANK" />
     <leaf name="RESET_BANK" />
   </branch>
-  <leaf name="POSITION" sendto="GPMS" format="u32 s32 s32 s32 f" usecycle="yes" description="the client moves to ($i32,$i32,$i32) with heading $f" />
+  <leaf name="POSITION" sendto="GPMS" format="u32 s32 s32 s32 f" description="the client moves at $u32 to ($i32,$i32,$i32) with heading $f" />
   <branch name="HARVEST">
     <leaf name="DEPOSIT" sendto="EGS" format="u16" description="the client shearch a deposit for harvest/digging (param = skill used)" />
     <leaf name="CORPSE" />
