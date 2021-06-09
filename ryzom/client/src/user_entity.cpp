@@ -187,6 +187,8 @@ CUserEntity::CUserEntity()
 	_MoveToDist= 0.0;
 	_MoveToColStartTime= 0;
 
+	_LastSentClientTick = 0;
+
 	_FollowForceHeadPitch= false;
 
 	_ForceLookSlot= CLFECOMMON::INVALID_SLOT;
@@ -1705,6 +1707,10 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 //-----------------------------------------------
 bool CUserEntity::sendToServer(CBitMemStream &out)
 {
+	if (NetMngr.getCurrentClientTick() == _LastSentClientTick)
+	{
+		return false;
+	}
 	if(GenericMsgHeaderMngr.pushNameToStream("POSITION", out))
 	{
 		// Backup the position sent.
@@ -1717,6 +1723,7 @@ bool CUserEntity::sendToServer(CBitMemStream &out)
 		positionMsg.Z = (sint32)(pos().z * 1000);
 		positionMsg.Heading = frontYaw();
 		out.serial(positionMsg);
+		_LastSentClientTick = NetMngr.getCurrentClientTick();
 		return true;
 	}
 	else

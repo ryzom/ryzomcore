@@ -606,6 +606,8 @@ protected:
 	/// Time in MS when the User started beiing in collision with anything that avoid him to do an Action (and still is).
 	sint64						_MoveToColStartTime;
 
+	NLMISC::TGameCycle			_LastSentClientTick;
+
 
 	/// CSkill points observer
 	class CSkillPointsObserver : public NLMISC::ICDBNode::IPropertyObserver
