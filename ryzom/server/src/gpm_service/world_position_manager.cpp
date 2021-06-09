@@ -2224,7 +2224,7 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 		if (movNorm > sqr(maxDist))
 		{
 			movVector *= (maxDist / sqrt(movNorm));
-			nlwarning("Player limitSpeed=%2.f, entitySpeed=%.2f, masterSpeed=%.2f", limitSpeedToUse, maxSpeed(), mountWalkSpeed);
+			// nlwarning("Player limitSpeed=%2.f, entitySpeed=%.2f, masterSpeed=%.2f", limitSpeedToUse, maxSpeed(), mountWalkSpeed);
 		}
 	}
 
