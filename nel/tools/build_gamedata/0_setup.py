@@ -139,6 +139,12 @@ if not args.noconf:
 	try:
 		if args.preset:
 			DummyUnknownName
+		ClientDevLiveDirectory
+	except NameError:
+		ClientDevLiveDirectory = "R:/pipeline/client_dev_live"
+	try:
+		if args.preset:
+			DummyUnknownName
 		ClientPatchDirectory
 	except NameError:
 		ClientPatchDirectory = "R:/pipeline/client_patch"
@@ -154,6 +160,12 @@ if not args.noconf:
 		ShardInstallDirectory
 	except NameError:
 		ShardInstallDirectory = "R:/pipeline/shard"
+	try:
+		if args.preset:
+			DummyUnknownName
+		ShardDevDirectory
+	except NameError:
+		ShardDevDirectory = "R:/pipeline/shard_dev"
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -320,9 +332,11 @@ if not args.noconf:
 		ExportBuildDirectory = askVar(log, "[OUT] Export Build Directory", ExportBuildDirectory).replace("\\", "/")
 		InstallDirectory = askVar(log, "[OUT] Install Directory", InstallDirectory).replace("\\", "/")
 		ClientDevDirectory = askVar(log, "[OUT] Client Dev Directory", ClientDevDirectory).replace("\\", "/")
+		ClientDevLiveDirectory = askVar(log, "[OUT] Client Dev Live Directory", ClientDevLiveDirectory).replace("\\", "/")
 		ClientPatchDirectory = askVar(log, "[OUT] Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
 		ClientInstallDirectory = askVar(log, "[OUT] Client Install Directory", ClientInstallDirectory).replace("\\", "/")
 		ShardInstallDirectory = askVar(log, "[OUT] Shard Data Install Directory", ShardInstallDirectory).replace("\\", "/")
+		ShardDevDirectory = askVar(log, "[OUT] Shard Dev Directory", ShardDevDirectory).replace("\\", "/")
 		WorldEditInstallDirectory = askVar(log, "[OUT] World Edit Data Install Directory", WorldEditInstallDirectory).replace("\\", "/")
 		LeveldesignDirectory = askVar(log, "[IN] Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
 		LeveldesignDfnDirectory = askVar(log, "[IN] Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
@@ -413,9 +427,11 @@ if not args.noconf:
 	sf.write("# Install directories\n")
 	sf.write("InstallDirectory = \"" + str(InstallDirectory) + "\"\n")
 	sf.write("ClientDevDirectory = \"" + str(ClientDevDirectory) + "\"\n")
+	sf.write("ClientDevLiveDirectory = \"" + str(ClientDevLiveDirectory) + "\"\n")
 	sf.write("ClientPatchDirectory = \"" + str(ClientPatchDirectory) + "\"\n")
 	sf.write("ClientInstallDirectory = \"" + str(ClientInstallDirectory) + "\"\n")
 	sf.write("ShardInstallDirectory = \"" + str(ShardInstallDirectory) + "\"\n")
+	sf.write("ShardDevDirectory = \"" + str(ShardDevDirectory) + "\"\n")
 	sf.write("WorldEditInstallDirectory = \"" + str(WorldEditInstallDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Utility directories\n")
@@ -505,6 +521,7 @@ printLog(log, "")
 # Additional directories
 printLog(log, ">>> Setup additional directories <<<")
 mkPath(log, ClientDevDirectory)
+mkPath(log, ClientDevLiveDirectory)
 mkPath(log, ClientPatchDirectory)
 mkPath(log, ClientInstallDirectory)
 
