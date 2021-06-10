@@ -228,6 +228,10 @@ namespace NLGUI
 			Current.BorderTopWidth = Current.BorderRightWidth = Current.BorderBottomWidth = Current.BorderLeftWidth = CSS_LINE_WIDTH_MEDIUM;
 			Current.BorderTopStyle = Current.BorderRightStyle = Current.BorderBottomStyle = Current.BorderLeftStyle = CSS_LINE_STYLE_NONE;
 			Current.BorderTopColor = Current.BorderRightColor = Current.BorderBottomColor = Current.BorderLeftColor = Current.TextColor;
+
+			Current.BackgroundColor = NLMISC::CRGBA::Transparent;
+			Current.BackgroundColorOver = NLMISC::CRGBA::Transparent;
+
 			Current.MarginTop = Current.MarginRight = Current.MarginBottom = Current.MarginLeft = 0;
 			Current.PaddingTop = Current.PaddingRight = Current.PaddingBottom = Current.PaddingLeft = 0;
 
