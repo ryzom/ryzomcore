@@ -215,6 +215,13 @@ namespace NLGUI
 			return false;
 		}
 
+		if (len == 1 && str[0] == '0')
+		{
+			value = 0;
+			unit.clear();
+			return true;
+		}
+
 		while(pos < len)
 		{
 			bool isNumeric = (str[pos] >= '0' && str[pos] <= '9')
