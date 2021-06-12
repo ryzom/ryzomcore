@@ -11,6 +11,8 @@ include('header.php');
 
 require_once('setup/version.php');
 
+$shardDev = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
+
 ?>
 
 <?php if (file_exists('config.php')) { ?>
@@ -396,7 +398,7 @@ require_once('setup/version.php');
 						<div class="form-group">
 							<label for="nelSqlPort" class="col-sm-3 control-label">SQL Port</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="nelSqlPort" name="nelSqlPort" value="3306">
+								<input type="text" class="form-control" id="nelSqlPort" name="nelSqlPort" value="<?php if ($shardDev) { print 9040; } else { print 3306; } ?>">
 							</div>
 						</div>
 						<div class="form-group">
@@ -503,19 +505,19 @@ require_once('setup/version.php');
 						<div class="form-group">
 							<label for="nelDomainName" class="col-sm-3 control-label">Name</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="nelDomainName" name="nelDomainName" value="mini01">
+								<input type="text" class="form-control" id="nelDomainName" name="nelDomainName" value="<?php if ($shardDev) { print "dev"; } else { print "mini01"; } ?>">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="domainDatabase" class="col-sm-3 control-label">Database</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="domainDatabase" name="domainDatabase" value="ring_mini01">
+								<input type="text" class="form-control" id="domainDatabase" name="domainDatabase" value="ring_<?php if ($shardDev) { print "dev"; } else { print "mini01"; } ?>">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="domainUsersDir" class="col-sm-3 control-label">Users Directory (MFS, etc)</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="domainUsersDir" name="domainUsersDir" value="/home/nevrax/mini01/www">
+								<input type="text" class="form-control" id="domainUsersDir" name="domainUsersDir" value="<?php if ($shardDev) { print "Y:/ryzomcore/pipeline/shard_dev/www"; } else { print "/home/nevrax/mini01/www"; } ?>">
 							</div>
 						</div>
 					</div>
