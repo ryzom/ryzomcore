@@ -45,6 +45,10 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
+# Find tools
+PatchmanService = findTool(log, ToolDirectories, PatchmanServiceTool, ToolSuffix)
+printLog(log, "")
+
 mkPath(log, ShardDevDirectory)
 mkPath(log, ShardDevDirectory + "/local")
 printLog(log, ">>> Generate shard dev local.cfg <<<")
@@ -79,6 +83,23 @@ for execDir in InstallShardDataExecutables:
 	copyFileListNoTreeIfNeeded(log, PatchmanCfgDefaultDirectory, ShardDevDirectory + "/live/" + dstDir, execDir[2])
 	copyFileListNoTreeIfNeeded(log, InstallDirectory, ShardDevDirectory + "/live/" + dstDir, execDir[3])
 printLog(log, "")
+
+
+if PatchmanService == "":
+	toolLogFail(log, PatchmanServiceTool, ToolSuffix)
+else:
+	mkPath(log, PatchmanDevDirectory)
+	cwDir = os.getcwd().replace("\\", "/")
+	os.chdir(PatchmanDevDirectory)
+	os.remove("log.log")
+	subprocess.call([ PatchmanService, "-C.", "-L." ])
+	if os.path.isfile("log.log"):
+		f = open("log.log", "r")
+		for l in f:
+			log.write(l)
+		f.close()
+	os.chdir(cwDir)
+	printLog(log, "")
 
 log.close()
 if os.path.isfile("b3_shard_dev.log"):
