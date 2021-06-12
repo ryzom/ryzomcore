@@ -42,7 +42,7 @@
 
 // Current version is 2, Ryzom Live uses 1
 // Provided to allow compatibility with old binary files
-#define NLSOUND_SHEET_VERSION_BUILT 1
+#define NLSOUND_SHEET_VERSION_BUILT 2
 
 namespace NLLIGO {
 	class CLigoConfig;
