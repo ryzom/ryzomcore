@@ -1512,7 +1512,7 @@ bool  CCombatPhrase::update()
 
 					CCharacter *character = dynamic_cast<CCharacter *> (actor);
 					CCharacter *defender = dynamic_cast<CCharacter *> (combatDefender->getEntity());
-					if ( combatDefender->getEntity()->getId().getType() == RYZOMID::player )
+					if ( defender && defender->getId().getType() == RYZOMID::player )
 					{
 						if (character && character->hasMoved() && defender && defender->hasMoved() )
 							range = 10000;
