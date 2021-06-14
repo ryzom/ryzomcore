@@ -1039,36 +1039,39 @@ namespace NLGUI
 						// second loop -> false && break
 						loop = !loop;
 
-						val = toLowerAscii(parts[next]);
-						if (val == "center")
+						if (next < parts.size())
 						{
-							if (bgPositionX.empty()) bgPositionX = "center";
-							if (bgPositionY.empty()) bgPositionY = "center";
-							// consume 'center'
-							next++;
-						}
-						else if (val == "left" || val == "right")
-						{
-							bgPositionX = val;
-							// consume 'left|right'
-							next++;
-							if(next < parts.size() && getCssLength(fval, unit, parts[next]))
+							val = toLowerAscii(parts[next]);
+							if (val == "center")
 							{
-								bgPositionX += " " + toString("%.0f%s", fval, unit.c_str());
-								// consume css length
+								if (bgPositionX.empty()) bgPositionX = "center";
+								if (bgPositionY.empty()) bgPositionY = "center";
+								// consume 'center'
 								next++;
 							}
-						}
-						else if (val == "top" || val == "bottom")
-						{
-							bgPositionY = val;
-							// consume top|bottom
-							next++;
-							if (next < parts.size() && getCssLength(fval, unit, parts[next]))
+							else if (val == "left" || val == "right")
 							{
-								bgPositionY += " " + toString("%.0f%s", fval, unit.c_str());
-								// consume css length
+								bgPositionX = val;
+								// consume 'left|right'
 								next++;
+								if (next < parts.size() && getCssLength(fval, unit, parts[next]))
+								{
+									bgPositionX += " " + toString("%.0f%s", fval, unit.c_str());
+									// consume css length
+									next++;
+								}
+							}
+							else if (val == "top" || val == "bottom")
+							{
+								bgPositionY = val;
+								// consume top|bottom
+								next++;
+								if (next < parts.size() && getCssLength(fval, unit, parts[next]))
+								{
+									bgPositionY += " " + toString("%.0f%s", fval, unit.c_str());
+									// consume css length
+									next++;
+								}
 							}
 						}
 					} while (loop);
