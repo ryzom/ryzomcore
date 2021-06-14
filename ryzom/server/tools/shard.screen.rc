@@ -63,7 +63,7 @@ screen -t Trk /bin/bash $SHARD_PATH/tools/service_launcher.sh ais_tryker ../sbin
 screen -t Zor /bin/bash $SHARD_PATH/tools/service_launcher.sh ais_zorai ../sbin/ryzom_ai_service -C../cfgs -L../logs -Nais_zorai --nobreak --writepid -mCommon:Indoors:Zorai:ZoraiNewbie:ZoraiIsland:Post
 
 # ais_roots
-screen -t Pri /bin/bash $SHARD_PATH/tools/service_launcher.sh ais_roots ../sbin/ryzom_ai_service -C../cfgs -L../logs -Nais_roots --nobreak --writepid -mCommon:Bagne:Nexus:RouteGouffre:Sources:Terre:Kitiniere:Post
+screen -t Pri /bin/bash $SHARD_PATH/tools/service_launcher.sh ais_roots ../sbin/ryzom_ai_service -C../cfgs -L../logs -Nais_roots --nobreak --writepid -mCommon:Nexus:Bagne:RouteGouffre:Sources:Terre:Kitiniere:Post
 
 #ais_ark
 screen -t Ark /bin/bash $SHARD_PATH/tools/service_launcher.sh ais_ark ../sbin/ryzom_ai_service -C../cfgs -L../logs -Nais_ark --nobreak --writepid -mCommon:Indoors::R2Desert:R2Roots:R2Jungle:R2Forest:R2Lakes:Post
@@ -108,6 +108,9 @@ screen -t sbs /bin/bash $SHARD_PATH/tools/service_launcher.sh sbs ../sbin/ryzom_
 
 # lgs
 screen -t lgs /bin/bash $SHARD_PATH/tools/service_launcher.sh lgs ../sbin/ryzom_logger_service -C../cfgs -L../logs --nobreak --writepid
+
+# las
+screen -t las /bin/bash $SHARD_PATH/tools/service_launcher.sh las ../sbin/ryzom_log_analyser_service -C../cfgs -L../logs --nobreak --writepid
 
 # mos
 screen -t mos /bin/bash $SHARD_PATH/tools/service_launcher.sh mos ../sbin/ryzom_monitor_service -C../cfgs -L../logs --nobreak --writepid

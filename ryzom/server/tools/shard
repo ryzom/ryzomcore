@@ -83,6 +83,7 @@ then
 		echo Cannot start domain \'${DOMAIN}\' because this domain is already started
 		screen -list | grep $DOMAIN
 	else
+		echo "Starting shard screen from $(pwd) with SHARD_PATH=$SHARD_PATH"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SHARD_PATH/lib
 		export SHARD_PATH=$SHARD_PATH
 		screen $STARTARGS -S ${DOMAIN} -c $SHARD_PATH/tools/${DOMAIN}.screen${LIGHT}.rc
