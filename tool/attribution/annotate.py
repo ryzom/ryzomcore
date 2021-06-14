@@ -207,6 +207,9 @@ override_author["8e21fed1e6b79bf92f6364c7cb4f0c56e1dda103"] = "-" # Header clean
 override_author["c8e562f37781d62ebc54b68ef74f7693de79a907"] = "-" # Header cleanup
 override_author["dc734ed66226b257becae9fcd140898e14510e6a"] = "-" # Header cleanup
 override_author["e97cf09e043e2e4b6f0f899b9230f4b6303fcc23"] = "/" # Initial commit.
+override_author["a3a074f455a3f52e6fa4d44214f6c34289fa6f8c"] = "-" # Sync
+override_author["141e7c645966ee3475097a75a65def8c9bd7086a"] = "-" # Sync
+override_author["e6a617b8bcd1630dba5fc3b6ae9815775ba2c19d"] = "-" # Sync
 
 # Exclude some paths
 exclude_paths = { }
