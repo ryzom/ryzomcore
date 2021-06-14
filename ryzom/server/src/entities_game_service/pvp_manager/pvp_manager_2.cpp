@@ -30,6 +30,7 @@
 #include "game_share/msg_client_server.h"
 #include "game_share/fame.h"
 #include "game_share/send_chat.h"
+#include "server_share/mongo_wrapper.h"
 
 #include "pvp_manager/pvp_manager_2.h"
 #include "pvp_manager/pvp_manager.h"
@@ -75,11 +76,6 @@ void CPVPManager2::init()
 	IPVPInterface * pvpFaction = new CPVPFaction();
 	BOMB_IF(pvpFaction == 0, "Can't allocate CPVPFaction", nlstop );
 	_Instance->_PVPInterface.push_back(pvpFaction);
-#ifdef RYZOM_EPISODE2_REACTIVATE
-	// add war between kami and karavan faction (must be controled by GM tools later
-	_Instance->addFactionWar(PVP_CLAN::Kami, PVP_CLAN::Karavan);
-#endif
-	
 	// instantiate pvp duel class
 	IPVPInterface * pvpDuel = new CPVPDuel();
 	BOMB_IF(pvpDuel == 0, "Can't allocate CPVPDuel", nlstop );
@@ -218,9 +214,6 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 	std::vector<TChanID> result;
 	result.clear();
 
-	// NOTE: It's better to just rely on user-made channels. -Kaetemi
-
-#ifdef RYZOM_FORGE
 	// Add lang channel, should be first.
 	if (!user->getLangChannel().empty())
 	{
@@ -243,19 +236,14 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 			result.push_back((*it).second);
 		}		
 	}
-#endif
 
-#ifdef RYZOM_FORGE
 	PVP_CLAN::TPVPClan faction = user->getAllegiance().first;
 	if( faction != PVP_CLAN::Neutral )
 	{
-		if (isFactionInWar(faction))
+		TMAPFactionChannel::iterator it = _FactionChannel.find(faction);
+		if( it != _FactionChannel.end() )
 		{
-			TMAPFactionChannel::iterator it = _FactionChannel.find(faction);
-			if (it != _FactionChannel.end())
-			{
-				result.push_back((*it).second);
-			}
+			result.push_back((*it).second);
 		}
 	}
 
@@ -268,7 +256,25 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 			result.push_back((*it).second);
 		}
 	}
-#endif
+	
+	// Organizations
+	if (user->getOrganization() == 5) // marauder
+	{
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("marauders");
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}
+	}
+		
+	if (user->getOrganization() == 7) // ranger
+	{
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("ranger");
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}
+	}
 
 	/*
 	bool matis = CFameInterface::getInstance().getFameIndexed(user->getId(), 0) >= PVPFameRequired*6000;
@@ -464,10 +470,18 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 	{
 		if (DynChatEGS.addSession(channel, user->getEntityRowId(), writeRight))
 		{
+			string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+			string::size_type pos = playerName.find('(');
+			if (pos != string::npos)
+				playerName = playerName.substr(0, pos);
 			std::vector<TChanID> currentChannels = getCharacterRegisteredChannels(user);
 			currentChannels.push_back(channel);
 			_CharacterChannels.erase(user->getId());
 			_CharacterChannels.insert( make_pair(user->getId(), currentChannels) );
+#ifdef HAVE_MONGO
+			string channelName = DynChatEGS.getChanNameFromID(channel);
+			CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{ $addToSet: {'channels': '%s'} }", channelName.c_str()), true, false);
+#endif
 			if (userChannel)
 			{
 				currentChannels = getCharacterUserChannels(user);
@@ -487,9 +501,7 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 					(*it).second.push_back(user->getId());
 				}
 
-				const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
 				broadcastMessage(channel, string("<INFO>"), "<-- "+playerName);
-
 				sendChannelUsers(channel, user);
 			}
 		}
@@ -499,23 +511,23 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 //----------------------------------------------------------------------------
 void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter * user, bool userChannel)
 {
+	const string channelName = DynChatEGS.getChanNameFromID(channel);
 	std::vector<TChanID> currentChannels;
+	string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+	string::size_type pos = playerName.find('(');
+	if (pos != string::npos)
+		playerName = playerName.substr(0, pos);
+
 
 	if (channel == DYN_CHAT_INVALID_CHAN) // Send leaves message to all user channels
 	{
 		currentChannels = getCharacterUserChannels(user);
 		for (uint i = 0; i < currentChannels.size(); i++)
-		{
-			const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
 			broadcastMessage(currentChannels[i], string("<INFO>"), playerName+" -->[]");
-		}
 	}
 
 	if (userChannel)
-	{
-		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
 		broadcastMessage(channel, string("<INFO>"), playerName+" -->[]");
-	}
 
 	currentChannels = getCharacterRegisteredChannels(user);
 	for (uint i = 0; i < currentChannels.size(); i++)
@@ -574,6 +586,10 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 			_UserChannelCharacters[channel] = lst;
 		}
 	}
+
+#ifdef HAVE_MONGO
+		CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{ $pull: {channels: '%s'} }", channelName.c_str()));
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -596,12 +612,19 @@ void CPVPManager2::addRemoveFactionChannelToUserWithPriviledge(TChanID channel, 
 //----------------------------------------------------------------------------
 void CPVPManager2::playerConnects(CCharacter * user)
 {
+	string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+	string::size_type pos = playerName.find('(');
+	if (pos != string::npos)
+		playerName = playerName.substr(0, pos);
+
+#ifdef HAVE_MONGO
+	CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'online': true} }", user->getId().getShortId(), user->getGuildId()), true);
+#endif
+
 	std::vector<TChanID> currentChannels = getCharacterUserChannels(user);
 	for (uint i = 0; i < currentChannels.size(); i++)
-	{
-		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
 		broadcastMessage(currentChannels[i], string("<INFO>"), "<-- "+playerName);
-	}
+
 }
 
 //----------------------------------------------------------------------------
@@ -610,6 +633,10 @@ void CPVPManager2::playerDisconnects(CCharacter * user)
 	nlassert(user);
 	removeDuelInvitor(user->getId());
 	endDuel(user, "DUEL_DISCONNECT", "");
+
+#ifdef HAVE_MONGO
+	CMongo::update("ryzom_users", toString("{'cid': %" NL_I64 "u}", user->getId().getShortId()), "{ $set: {'online': false} }");
+#endif
 
 	CPVPManager::getInstance()->playerDisconnects(user);
 
@@ -1137,13 +1164,19 @@ bool CPVPManager2::addFactionWar( PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan c
 /// create the faction chat channel when IOS mirror ready
 void CPVPManager2::onIOSMirrorUp()
 {
+#ifdef HAVE_MONGO
+	CMongo::init();
+#endif
+
 	// create extra factions channels
 	/*
 	createExtraFactionChannel("hominists");
 	createExtraFactionChannel("urasies");
-	createExtraFactionChannel("marauders");
 	createExtraFactionChannel("agnos");
 	*/
+
+	createExtraFactionChannel("marauders");
+	createExtraFactionChannel("ranger");
 
 	// Community Channels
 	createExtraFactionChannel("en", true);
@@ -1151,6 +1184,27 @@ void CPVPManager2::onIOSMirrorUp()
 	createExtraFactionChannel("de", true);
 	createExtraFactionChannel("ru", true);
 	createExtraFactionChannel("es", true);
+	createExtraFactionChannel("rf", true);
+	
+#ifdef HAVE_MONGO
+	CUniquePtr<DBClientCursor> cursor = CMongo::query("ryzom_channels", toString("{}"));
+	if (cursor.get())
+	{
+		while (cursor->more())
+		{
+			mongo::BSONObj obj = cursor->next();
+			nlinfo("mongo: new dyn channel to parse '%s'", obj.jsonString().c_str());
+
+			string name;
+			string password;
+
+			name = obj.getStringField("name");
+			password = obj.getStringField("password");
+			
+			createUserChannel(name, password);
+		}
+	}
+#endif
 
 	for (uint i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; i++)
 	{
@@ -1197,7 +1251,6 @@ void CPVPManager2::createFactionChannel(PVP_CLAN::TPVPClan clan)
 
 void CPVPManager2::createExtraFactionChannel(const std::string & channelName, bool universalChannel)
 {
-
 	TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(channelName);
 	if( it == _ExtraFactionChannel.end() )
 	{
@@ -1218,6 +1271,17 @@ TChanID CPVPManager2::createUserChannel(const std::string & channelName, const s
 	{
 		return DYN_CHAT_INVALID_CHAN;
 	}
+	
+	// Don't allow channels starting with "FACTION_" (to not clash with the faction channels)
+	if (channelName.substr(0, 8) == "FACTION_")
+	{
+		return DYN_CHAT_INVALID_CHAN;
+	}
+
+	if (channelName.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789_") != std::string::npos) {
+		return DYN_CHAT_INVALID_CHAN;
+	}
+
 
 	TMAPExtraFactionChannel::iterator it = _UserChannel.find(channelName);
 	if( it == _UserChannel.end() )
@@ -1228,11 +1292,18 @@ TChanID CPVPManager2::createUserChannel(const std::string & channelName, const s
 		else
 			channelTitle = channelName;
 
+	
 		TChanID factionChannelId = DynChatEGS.addChan(channelName, channelTitle);
-		DynChatEGS.setHistoricSize( factionChannelId, FactionChannelHistoricSize );
+		if (factionChannelId != DYN_CHAT_INVALID_CHAN)
+		{
+#ifdef HAVE_MONGO
+			CMongo::update("ryzom_channels", toString("{'name': '%s'}", channelName.c_str()), toString("{ $set: {'ryzomId': '%s', 'password': '%s', 'last_access': %d} }", factionChannelId.toString().c_str(), pass.c_str(), CTime::getSecondsSince1970()), true, false);
+#endif
+			DynChatEGS.setHistoricSize( factionChannelId, FactionChannelHistoricSize );
 
-		_UserChannel.insert( make_pair(channelName, factionChannelId) );
-		_PassChannels.insert( make_pair(factionChannelId, pass) );
+			_UserChannel.insert( make_pair(channelName, factionChannelId) );
+			_PassChannels.insert( make_pair(factionChannelId, pass) );
+		}
 		return factionChannelId;
 	}
 
@@ -1244,6 +1315,9 @@ void CPVPManager2::deleteUserChannel(const std::string & channelName)
 	TMAPExtraFactionChannel::iterator it = _UserChannel.find(channelName);
 	if( it != _UserChannel.end() )
 	{
+#ifdef HAVE_MONGO
+		CMongo::remove("ryzom_channels", toString("{'name': '%s'}", channelName.c_str()));
+#endif
 		DynChatEGS.removeChan( (*it).second );
 		TMAPPassChannel::iterator it2 = _PassChannels.find((*it).second);
 		if( it2 != _PassChannels.end() )
@@ -1435,7 +1509,7 @@ void CPVPManager2::askForDuel( const NLMISC::CEntityId & userId )
 			++it;
 		}
 	}
-	// problem occurred : bail out
+	// problem occured : bail out
 	if ( problem )
 		return;
 	

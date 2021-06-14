@@ -295,28 +295,16 @@ public :
 	}
 
 	/// add a muted user
-	void addMutedUser( const NLMISC::CEntityId &eid )
-	{
-		_MutedUsers.insert( eid );
-	}
+	void addMutedUser( const NLMISC::CEntityId &eid );
 
 	/// remove a muted user
-	void removeMutedUser( const NLMISC::CEntityId &eid )
-	{
-		_MutedUsers.erase( eid );
-	}
+	void removeMutedUser( const NLMISC::CEntityId &eid );
 
 	// add a muted universe channel user
-	void addUniverseMutedUser( const NLMISC::CEntityId &eid )
-	{
-		_MutedUniverseUsers.insert( eid );
-	}
+	void addUniverseMutedUser( const NLMISC::CEntityId &eid );
 
 	// remove a muted universe channel user
-	void removeUniverseMutedUser( const NLMISC::CEntityId &eid )
-	{
-		_MutedUniverseUsers.erase( eid );
-	}
+	void removeUniverseMutedUser( const NLMISC::CEntityId &eid );
 
 	/// get the dyn chat
 	CDynChat &getDynChat() { return _DynChat; }
@@ -418,7 +406,7 @@ public:
 	 * \param sender is the id of the sender
 	 * \param customTxt is a custom text which can be added immediately after the chat message, on the same line
 	 */
-	void sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender = TDataSetRow(), ucstring customTxt = ucstring());
+	void sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender = TDataSetRow(), ucstring customTxt = ucstring(""));
 
 	/**
 	 * Send a custom emote chat message
@@ -427,6 +415,8 @@ public:
 	 * \param ucstr is the message content
 	 */
 	void sendChatCustomEmote( const TDataSetRow &sender, const TDataSetRow &receiver, const ucstring& ucstr );
+
+	void update();
 };
 
 

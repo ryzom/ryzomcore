@@ -35,9 +35,9 @@ public:
 	/// ctor
 	inline IRoomInstance();
 	/// remove a user from the room
-	virtual void removeUser( CCharacter* user ) = 0;
+	virtual void removeUser( CCharacter* user, bool send_url=true, bool keep_room=false ) = 0;
 	/// add a user in the room
-	virtual void addUser( CCharacter* user, CCharacter* owner ) = 0;
+	virtual void addUser( CCharacter* user, const NLMISC::CEntityId & owner, bool send_url=true) = 0;
 	/// create the room from a building
 	virtual bool create( IBuildingPhysical * building, uint16 roomIdx, uint16 ownerIdx , sint32 cell);
 	/// return true if the room is valid
@@ -78,8 +78,8 @@ public:
 	virtual std::string getRoomDescription() const;
 
 private:
-	virtual void removeUser( CCharacter* user );
-	virtual void addUser( CCharacter* user, CCharacter* owner );
+	virtual void removeUser( CCharacter* user, bool send_url=true, bool keep_room=false );
+	virtual void addUser( CCharacter* user, const NLMISC::CEntityId & owner, bool send_url=true );
 };
 
 /// a guild room
@@ -98,8 +98,8 @@ public:
 
 private:
 	virtual bool create( IBuildingPhysical * building, uint16 roomIdx, uint16 ownerIdx , sint32 cell);
-	virtual void removeUser( CCharacter* user );
-	virtual void addUser( CCharacter* user, CCharacter* owner );
+	virtual void removeUser( CCharacter* user, bool send_url=true, bool keep_room=false );
+	virtual void addUser( CCharacter* user, const NLMISC::CEntityId & owner, bool send_url=true );
 
 	EGSPD::TGuildId	_GuildId;
 };
@@ -116,8 +116,8 @@ public:
 
 private:
 	virtual bool create( IBuildingPhysical * building, uint16 roomIdx, uint16 ownerIdx , sint32 cell);
-	virtual void removeUser( CCharacter* user );
-	virtual void addUser( CCharacter* user, CCharacter* owner );
+	virtual void removeUser( CCharacter* user, bool send_url=true, bool keep_room=false);
+	virtual void addUser( CCharacter* user, const NLMISC::CEntityId & owner, bool send_url=true);
 	/// owner player
 	NLMISC::CEntityId				_Player;
 };

@@ -18,6 +18,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <libxml/parser.h>
 #include <math.h>
 #include <stdio.h>
 #include <stddef.h>
@@ -29,6 +30,7 @@
 #include <deque>
 #include <exception>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <list>
@@ -37,7 +39,10 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <functional>
+
+#ifdef _SP
+#undef _SP
+#endif
 
 // NeL georges
 #include "nel/georges/load_form.h"

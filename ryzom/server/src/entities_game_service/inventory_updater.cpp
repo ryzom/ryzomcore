@@ -43,6 +43,9 @@ const CInventoryUpdaterForCharacter::TInventoryId CInventoryUpdaterForCharacter:
 	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+1),
 	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+2),
 	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+3),
+	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+4),
+	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+5),
+	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+6),
 //	CInventoryCategoryForCharacter::InvalidInvId, //harvest,					
 //	CInventoryCategoryForCharacter::InvalidInvId, //bot_gift,					
 	CInventoryCategoryForCharacter::InvalidInvId, //NUM_INVENTORY,				
@@ -191,8 +194,7 @@ void		CInventoryUpdaterForCharacter::resetItemIntoClassicDatabase( INVENTORIES::
 				arrayItem.setSHEET(*_PropertyDatabasePt, CSheetId::Unknown);
 				arrayItem.setQUALITY(*_PropertyDatabasePt, 0);
 				arrayItem.setQUANTITY(*_PropertyDatabasePt, 0);
-				arrayItem.setUSER_COLOR(*_PropertyDatabasePt, 1);
-				arrayItem.setCHARAC_BUFFS(*_PropertyDatabasePt, 0);
+				arrayItem.setUSER_COLOR(*_PropertyDatabasePt, 0);
 	//			arrayItem.setLOCKED(_PropertyDatabasePt, 0);
 				arrayItem.setWEIGHT(*_PropertyDatabasePt, 0);
 				arrayItem.setNAMEID(*_PropertyDatabasePt, 0);
@@ -249,6 +251,7 @@ void		CInventoryUpdaterForCharacter::setItemPropsToClassicDatabase( INVENTORIES:
 //			_PropertyDatabasePt->setProp( node, CItemSlot::ItemPropStr[i], (sint64)itemSlot.getItemProp( (INVENTORIES::TItemPropId)i ) );
 //		}
 //	}
+	nlinfo("%s", (string("INVENTORY:") + DatabaseStringFromEInventory[inventory] + NLMISC::toString(":%d", itemSlot.getSlotIndex())).c_str());
 	ICDBStructNode *node = _PropertyDatabasePt->getICDBStructNodeFromName( string("INVENTORY:") + DatabaseStringFromEInventory[inventory] + NLMISC::toString(":%d", itemSlot.getSlotIndex()) );
 	for ( uint i=0; i!=NbItemPropId; ++i )
 	{

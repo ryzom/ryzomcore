@@ -61,7 +61,6 @@ CCharacterShoppingList::CCharacterShoppingList( CSmartPtr<CMerchant>& merchant, 
 //-----------------------------------------------------------------------------
 CCharacterShoppingList::~CCharacterShoppingList()
 {
-	TLogNoContext_Item noLog;
 	_CurrentTradeListNpc.clear();
 	_CurrentTradeListPlayer.clear();
 	_CurrentTradeListYours.clear();
@@ -161,11 +160,11 @@ void CCharacterShoppingList::mountShoppingList( CONTINENT::TContinent continent 
 					{
 						_CurrentTradeListNpc.push_back(TShopStruct(curItem, shop));
 						setOfNpcItem.insert(curItem);
-						// for debug // nlinfo("inserted item : %s lvl %d qlt %d", curItem->getSheetId().toString().c_str(), curItem->getLevel(), curItem->getQuality());
+						// for debug nlinfo("inserted item : %s lvl %d qlt %d", curItem->getSheetId().toString().c_str(), curItem->getLevel(), curItem->getQuality());
 					}
 					else
 					{
-						// for debug // nlinfo("cannot insert item : %s lvl %d qlt %d", curItem->getSheetId().toString().c_str(), curItem->getLevel(), curItem->getQuality());
+						// for debug nlinfo("cannot insert item : %s lvl %d qlt %d", curItem->getSheetId().toString().c_str(), curItem->getLevel(), curItem->getQuality());
 					}
 				}
 			}
@@ -197,11 +196,8 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 {
 	const CStaticItem * form = CSheets::getForm( itemTrade->getSheetId() );
 
-	if (!_Character)
-		return false;
-
 	// No filter on Faction trade
-	if(_Character->getBotChatType() == BOTCHATTYPE::TradeFactionFlag)
+	if(_Character && _Character->getBotChatType() == BOTCHATTYPE::TradeFactionFlag)
 		return true;
 
 	if( form != 0 )
@@ -599,11 +595,12 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 
 		if( trade->ItemTrade->getItemPtr() != 0 ) 
 		{
+			const INVENTORIES::TItemId &itemId = trade->ItemTrade->getItemPtr()->getItemId();
 			trade->ItemTrade->getItemPtr()->recommended( trade->ItemTrade->getLevel() );
+			tradeElem.setSERIAL(_Character->_PropertyDatabase, uint32(itemId.getSerialNumber()));
+			tradeElem.setCREATE_TIME(_Character->_PropertyDatabase, uint32(itemId.getCreateTime()));
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:USER_COLOR",index  ), trade->ItemTrade->getItemPtr()->color() );
 			tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, trade->ItemTrade->getItemPtr()->color());
-//			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:CHARAC_BUFFS",index  ), trade->ItemTrade->getItemPtr()->buffFlags() );
-			tradeElem.setCHARAC_BUFFS(_Character->_PropertyDatabase, trade->ItemTrade->getItemPtr()->buffFlags());
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:WEIGHT",index  ), (uint16) (trade->ItemTrade->getItemPtr()->weight() / 10 ) );
 			tradeElem.setWEIGHT(_Character->_PropertyDatabase, (uint16) (trade->ItemTrade->getItemPtr()->weight() / 10 ));
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:NAMEID",index  ), trade->ItemTrade->getItemPtr()->sendNameId(_Character) );
@@ -622,10 +619,10 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 		else
 		{
 			const CStaticItem * staticSheet = CSheets::getForm( trade->ItemTrade->getSheetId() );
+			tradeElem.setSERIAL(_Character->_PropertyDatabase, 0);
+			tradeElem.setCREATE_TIME(_Character->_PropertyDatabase, 0);
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:USER_COLOR",index  ), 1 );
 			tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, 1);
-//			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:CHARAC_BUFFS",index  ), 0 );
-			tradeElem.setCHARAC_BUFFS(_Character->_PropertyDatabase, 0);
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:WEIGHT",index  ), staticSheet != NULL ? staticSheet->Weight / 10 : 0 );
 			tradeElem.setWEIGHT(_Character->_PropertyDatabase, uint16(staticSheet != NULL ? staticSheet->Weight / 10 : 0));
 //			_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:NAMEID",index  ), 0 );
@@ -650,10 +647,10 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 		tradeElem.setSHEET(_Character->_PropertyDatabase, CSheetId::Unknown);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:QUALITY",index  ), 0);
 		tradeElem.setQUALITY(_Character->_PropertyDatabase, 0);
+		tradeElem.setSERIAL(_Character->_PropertyDatabase, 0);
+		tradeElem.setCREATE_TIME(_Character->_PropertyDatabase, 0);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:USER_COLOR",index  ), 1);
-		tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, 1);
-//		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:CHARAC_BUFFS",index  ), 0);
-		tradeElem.setCHARAC_BUFFS(_Character->_PropertyDatabase, 0);
+		tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, 0);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:WEIGHT",index  ), 0 );
 		tradeElem.setWEIGHT(_Character->_PropertyDatabase, 0);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:NAMEID",index  ), 0 );

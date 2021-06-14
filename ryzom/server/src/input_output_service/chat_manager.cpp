@@ -20,6 +20,13 @@
 
 #include "stdpch.h"
 
+#include <sstream>
+
+// MongoDB
+
+/*b#include <mongo.h>*/
+
+
 #include <nel/misc/command.h>
 
 //#include "game_share/generic_msg_mngr.h"
@@ -30,11 +37,14 @@
 #include "game_share/backup_service_interface.h"
 
 #include "server_share/r2_variables.h"
-#include "server_share/log_chat_gen.h"
+#include "server_share/mongo_wrapper.h"
 
 #include "chat_manager.h"
+#include "string_manager.h"
 #include "input_output_service.h"
 #include "chat_unifier_client.h"
+
+#include "server_share/log_chat_gen.h"
 
 //#include "ios_pd.h"
 
@@ -42,6 +52,9 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
+#ifdef LOG_INFO
+#undef LOG_INFO
+#endif
 
 void	logChatDirChanged(IVariable &var)
 {
@@ -52,8 +65,12 @@ void	logChatDirChanged(IVariable &var)
 CVariable<bool>			VerboseChatManagement("ios","VerboseChatManagement", "Set verbosity for chat management", false, 0, true);
 CVariable<std::string>	LogChatDirectory("ios", "LogChatDirectory", "Log Chat directory (default, unset is SaveFiles service directory", "", 0, true, logChatDirChanged);
 CVariable<bool>			ForceFarChat("ios","ForceFarChat", "Force the use of SU to dispatch chat", false, 0, true);
+CVariable<bool>			EnableDeepL("ios","EnableDeepL", "Enable DeepL auto-translation system", false, 0, true);
 
+double last_mongo_chat_date = 1000.0*(double)CTime::getSecondsSince1970();
 
+typedef NLMISC::CTwinMap<TChanID, string> TChanTwinMap;
+TChanTwinMap 	_ChanNames;
 
 
 CChatManager::CChatManager () : _Log(CLog::LOG_INFO)
@@ -73,6 +90,13 @@ void CChatManager::init( /*const string& staticDBFileName, const string& dynDBFi
 //
 //	if (!dynDBFileName.empty())
 //		_DynDB.load( dynDBFileName );
+
+#ifdef HAVE_MONGO
+	CMongo::init();
+
+	// reset all muted players
+	CMongo::update("ryzom_users", "{ 'muted': true}", toString("{ $set:{ 'muted': false } }"), false, true);
+#endif
 
 	// create a chat group 'universe'
 	addGroup(CEntityId(RYZOMID::chatGroup,0), CChatGroup::universe, "");
@@ -148,6 +172,45 @@ bool CChatManager::checkClient( const TDataSetRow& id )
 
 	return itCl != _Clients.end();
 }
+
+
+
+void CChatManager::addMutedUser( const NLMISC::CEntityId &eid )
+{
+#ifdef HAVE_MONGO
+	CMongo::update("ryzom_users", toString("{ 'cid': %d}", eid.getShortId()), toString("{ $set:{ 'muted': true } }"));
+#endif
+
+	_MutedUsers.insert( eid );
+}
+
+void CChatManager::removeMutedUser( const NLMISC::CEntityId &eid )
+{
+#ifdef HAVE_MONGO
+	CMongo::update("ryzom_users", toString("{ 'cid': %d}", eid.getShortId()), toString("{ $set:{ 'muted': false } }"));
+#endif
+
+	_MutedUsers.erase( eid );
+}
+
+void CChatManager::addUniverseMutedUser( const NLMISC::CEntityId &eid )
+{
+#ifdef HAVE_MONGO
+	CMongo::update("ryzom_users", toString("{ 'cid': %d}", eid.getShortId()), toString("{ $set:{ 'muted': true } }"));
+#endif
+
+	_MutedUniverseUsers.insert( eid );
+}
+
+void CChatManager::removeUniverseMutedUser( const NLMISC::CEntityId &eid )
+{
+#ifdef HAVE_MONGO
+	CMongo::update("ryzom_users", toString("{ 'cid': %d}", eid.getShortId()), toString("{ $set:{ 'muted': false } }"));
+#endif
+
+	_MutedUniverseUsers.erase( eid );
+}
+
 
 //-----------------------------------------------
 //	addClient
@@ -493,7 +556,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 		CEntityId eid = TheDataset.getEntityId(sender);
 		if(_MutedUsers.find( eid ) != _MutedUsers.end())
 		{
-			nldebug("IOSCM:  chat The player %s:%x is universe muted",
+			nldebug("IOSCM:  chat The player %s:%x is muted",
 				TheDataset.getEntityId(sender).toString().c_str(),
 				sender.getIndex());
 			return;
@@ -506,6 +569,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 
 		// info for log the chat message
 		string senderName;
+		ucstring ucSenderName;
 		{
 			// ignore muted users
 //			if ( _MutedUsers.find( eid ) != _MutedUsers.end() )
@@ -516,7 +580,10 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 				senderName = TheDataset.getEntityId(sender).toString();
 			}
 			else
-				senderName = ci->Name.toString();
+			{
+				ucSenderName = ci->Name;
+				senderName = ucSenderName.toString();
+			}
 		}
 
 		static const char*	groupNames[]=
@@ -546,30 +613,99 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 		case CChatGroup::shout :
 		case CChatGroup::say :
 			{
+				uint nbr_receiver = 0;
+				bool have_fr = false;
+				bool have_de = false;
+				bool have_en = false;
+				bool have_ru = false;
+				bool have_es = false;
 				CChatGroup::TMemberCont::iterator itA;
+
+				string sender_lang = SM->getLanguageCodeString(ci->Language);
+				if (sender_lang == "en") // 'en' must be converted to 'us' because translation uses :us: code
+					sender_lang = "us";
+
+				
 				for( itA = itCl->second->getAudience().Members.begin();
 						itA != itCl->second->getAudience().Members.end();
 							++itA )
 				{
 					string				receiverName;
 					NLMISC::CEntityId	receiverId = TheDataset.getEntityId(*itA);
-					CCharacterInfos*	ci = IOS->getCharInfos(receiverId);
+					CCharacterInfos*	co = IOS->getCharInfos(receiverId);
 
 					_DestUsers.push_back(receiverId);
-
-					if (ci == NULL)
+					string receiver_lang;
+					if (co == NULL)
 					{
 						receiverName = receiverId.toString();
 					}
 					else
 					{
-						receiverName = ci->Name.toString();
+						receiverName = co->Name.toString();
+						receiver_lang = SM->getLanguageCodeString(co->Language);
+						if (receiver_lang == "en") // en must be converted to us because translation uses :us: code
+							receiver_lang = "us";
 					}
 
-					_Log.displayNL("'%s' to '%s' (%s) : \t\"%s\"", senderName.c_str(), receiverName.c_str(), groupNames[itCl->second->getChatMode()], ucstr.toString().c_str() );
-
-					sendChat( itCl->second->getChatMode(), *itA, ucstr, sender );
+					if (EnableDeepL)
+					{
+						CChatClient &client = getClient(*itA);
+						if (ucstr[0] != '>' && client.haveDisabledTranslation(sender_lang))
+							receiver_lang = sender_lang;
+						
+						if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
+						{
+							if (ucstr.length() > 5 && ucstr[1] == ':' && ucstr[4] == ':') // check lang prefix
+							{
+								string usedlang = ucstr.toString().substr(2, 2);
+								//nlinfo("used: %s, user: %s", usedlang.c_str(), receiver_lang.c_str());
+								if (usedlang == receiver_lang)
+									sendChat( itCl->second->getChatMode(), *itA, ucstr.substr(5), sender );
+							}
+							else
+							{
+								sendChat( itCl->second->getChatMode(), *itA, ucstr.substr(1), sender );
+							}
+						}
+						else if (sender_lang == receiver_lang) // Sent directly if sender and receiver uses same lang
+						{
+							sendChat( itCl->second->getChatMode(), *itA, ucstr, sender );
+						}
+						else
+						{
+						
+							if (!have_fr && receiver_lang == "fr")
+								have_fr = true;
+							if (!have_de && receiver_lang == "de")
+								have_de = true;
+							if (!have_en && receiver_lang == "us")
+								have_en = true;
+							if (!have_ru && receiver_lang == "ru")
+								have_ru = true;
+							if (!have_es && receiver_lang == "es")
+								have_es = true;
+							nbr_receiver++;
+						}
+					}
+					else
+						sendChat( itCl->second->getChatMode(), *itA, ucstr, sender );
 				}
+				
+				string langs = sender_lang;
+				if (have_fr)
+					langs += "-fr";
+				if (have_de)
+					langs += "-de";
+				if (have_en)
+					langs += "-us";
+				if (have_ru)
+					langs += "-ru";
+				if (have_es)
+					langs += "-es";
+
+				if (nbr_receiver > 0)
+					_Log.displayNL("|%s|(%s:%d:%s)|%s", IOS->getRocketName(senderName).c_str(), groupNames[itCl->second->getChatMode()], nbr_receiver, langs.c_str(), ucstr.toUtf8().c_str() );
 			}
 			break;
 		case CChatGroup::region :
@@ -618,6 +754,17 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 				_Log.displayNL("'%s' (%s) : \t\"%s\"", senderName.c_str(), groupNames[itCl->second->getChatMode()], ucstr.toString().c_str() );
 				_DestUsers.push_back(grpId);
 
+				double date = 1000.0*(double)CTime::getSecondsSince1970();
+
+				string name;
+				if (!ucSenderName.empty())
+					name = IOS->getRocketName(ucSenderName);
+				else
+					name = senderName;
+
+#ifdef HAVE_MONGO
+				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'univers', 'chatId': 'all', 'date': %f, 'ig': true }", name.c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), date));
+#endif
 				chatInGroup( grpId, ucstr, sender );
 			}
 			break;
@@ -630,6 +777,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 				chatInGroup( grpId, ucstr, sender );
 			}
 			break;
+
 		case CChatGroup::guild:
 			{
 				TGroupId grpId = itCl->second->getGuildChatGroup();
@@ -639,13 +787,31 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 					senderName.c_str(),
 					groupNames[itCl->second->getChatMode()],
 					ucstr.toString().c_str() );
+
+				uint32 guildId = grpId.getShortId() - 0x10000000;
+
+				ostringstream sGuildId;
+				sGuildId << guildId;
+
+				double date = 1000.0*(double)CTime::getSecondsSince1970();
+
+				string name;
+				if (!ucSenderName.empty())
+					name = IOS->getRocketName(ucSenderName);
+				else
+					name = senderName;
+
+#ifdef HAVE_MONGO
+				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true }", name.c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), sGuildId.str().c_str(), date));
+#endif
 				chatInGroup( grpId, ucstr, sender );
 			}
 			break;
 		case CChatGroup::dyn_chat:
 		{
-			TChanID chanID = itCl->second->getDynChatChan();
-			CDynChatSession *session = _DynChat.getSession(chanID, sender);
+			TChanID chanId = itCl->second->getDynChatChan();
+
+			CDynChatSession *session = _DynChat.getSession(chanId, sender);
 			if (session) // player must have a session in that channel
 			{
 				if (session->WriteRight) // player must have the right to speak in the channel
@@ -653,7 +819,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 					// If universal channel check if player muted
 					if (session->getChan()->UniversalChannel)
 					{
-						if(_MutedUniverseUsers.find( eid ) != _MutedUniverseUsers.end())
+						if(_MutedUsers.find( eid ) != _MutedUsers.end())
 						{
 							nldebug("IOSCM:  chat The player %s:%x is muted",
 								TheDataset.getEntityId(sender).toString().c_str(),
@@ -661,6 +827,24 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 							return;
 						}
 					}
+
+#ifdef HAVE_MONGO
+					const std::string *tmpChatId = _ChanNames.getB(chanId);
+					string chatId;
+					if (tmpChatId)
+						chatId = *tmpChatId;
+
+					nlinfo("CHAT : %s", chatId.c_str());
+					double date = 1000.0*(double)CTime::getSecondsSince1970();
+
+					string name;
+					if (!ucSenderName.empty())
+						name = IOS->getRocketName(ucSenderName);
+					else
+						name = senderName;
+
+					CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': '%s', 'date': %f, 'ig': true }", name.c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), chatId.c_str(), date));
+#endif
 
 					if (!session->getChan()->getDontBroadcastPlayerInputs())
 					{
@@ -699,22 +883,22 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 						CDynChatSession *dcc = session->getChan()->getFirstSession();
 						while (dcc)
 						{
-							sendChat(itCl->second->getChatMode(), dcc->getClient()->getID(), content, sender, chanID);
+							sendChat(itCl->second->getChatMode(), dcc->getClient()->getID(), content, sender, chanId);
 							dcc = dcc->getNextChannelSession(); // next session in this channel
 						}
 					}
 					else
 					{
 						// only send an echo to the sender
-						sendChat(itCl->second->getChatMode(), itCl->first, ucstr, sender, chanID);
+						sendChat(itCl->second->getChatMode(), itCl->first, ucstr, sender, chanId);
 					}
 					if (session->getChan()->getForwardPlayerIntputToOwnerService())
 					{
 						// send player input to service owner
-						NLNET::TServiceId serviceId(chanID.getCreatorId());
+						NLNET::TServiceId serviceId(chanId.getCreatorId());
 
 						TPlayerInputForward	pif;
-						pif.ChanID = chanID;
+						pif.ChanID = chanId;
 						pif.Sender = sender;
 						pif.Content = ucstr;
 
@@ -734,6 +918,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 		}
 		break;
 			// static group
+
 		default :
 			nlwarning("<CChatManager::chat> client %u chat in %s ! don't know how to handle it.",
 				sender.getIndex(),
@@ -1925,7 +2110,7 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				}
 
 				// info for log the chat message
-				string senderName = senderInfos->Name.toString();
+				//string senderName = senderInfos->Name.toString(); // removed by ulukyn to prevent crash
 /*
 				{
 					if (senderInfos == NULL)
@@ -1938,7 +2123,7 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 */
 
 				// info for log the chat message
-				string receiverName = receiverInfos->Name.toString();
+				//string receiverName = receiverInfos->Name.toString();  // removed by ulukyn to prevent crash
 /*
 				{
 					CCharacterInfos *ci = IOS->getCharInfos(senderInfos->EntityId);
@@ -1951,7 +2136,7 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				}
 */
 
-				_Log.displayNL("'%s' to '%s' (%s) : \t\"%s\"", senderName.c_str(), receiverName.c_str(), "tell", ucstr.toString().c_str() );
+				//_Log.displayNL("'%s' to '%s' (%s) : \t\"%s\"", senderName.c_str(), receiverName.c_str(), "tell", ucstr.toString().c_str() );  // removed by ulukyn to prevent crash
 
 
 				// if the client doesn't know this dynamic string(name of sender), we send it to him
@@ -2051,6 +2236,43 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 
 void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr  )
 {
+	if (receiver[0] == '~')
+	{
+		double date = 1000.0*(double)CTime::getSecondsSince1970();
+
+		string username = IOS->getRocketName(senderName);
+
+		string chatId = receiver.toString().substr(1);
+		ucstring::size_type pos = chatId.find('(');
+		if (pos != string::npos)
+			chatId = chatId.substr(0, pos);
+
+#ifdef HAVE_MONGO
+		CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'username', 'chatId': '%s', 'date': %f, 'ig': true }", username.c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), chatId.c_str(), date));
+#endif
+
+/*
+		bson base;
+		bson_init( &base );
+			bson_append_string( &base, "username", username.c_str() );
+			bson_append_string( &base, "chat", ucstr.toUtf8().c_str() );
+			bson_append_string( &base, "chatType", "username" );
+			bson_append_string( &base, "chatId", chatId.c_str());
+			bson_append_double( &base, "date", date );
+			bson_append_bool( &base, "ig", true );
+		bson_finish( &base );
+
+		if (mongo_insert( &conn, mongo_col.c_str(), &base, 0 ) != MONGO_OK)
+		{
+			nlwarning("MongoDB : Error inserting data: %d %d", conn.err, conn.errcode);
+		}
+
+		bson_destroy ( &base );
+*/
+		/////
+		return;
+	}
+
 	CCharacterInfos * receiverInfos = IOS->getCharInfos( receiver );
 	if( receiverInfos )
 	{
@@ -2157,7 +2379,8 @@ void CChatManager::displayChatClients(NLMISC::CLog &log)
 		}
 		else
 		{
-			log.displayNL("*no name* *no id*:%x %s mode '%s'",
+			log.displayNL("*no name* %s:%x %s mode '%s'",
+				ci->EntityId.toString().c_str(),
 				im->first.getIndex(),
 				im->second->isMuted()?"(muted)":"",
 				CChatGroup::groupTypeToString(im->second->getChatMode()).c_str() );
@@ -2422,4 +2645,87 @@ void CChatManager::unsubscribeCharacterInRingUniverse(const NLMISC::CEntityId &c
 	}
 }
 
+/// Update from input_output_service.cpp to check MongoDb changes
+void CChatManager::update()
+{
+#ifdef HAVE_MONGO
+	try {
+		TTime before = CTime::getLocalTime();
+		CUniquePtr<DBClientCursor> cursor = CMongo::query("ryzom_chats", toString("{'date': { $gt: %f }, 'ig': false }", last_mongo_chat_date));
+		TTime after = CTime::getLocalTime();
 
+		if(!cursor.get()) return;
+
+		while (cursor->more())
+		{
+			mongo::BSONObj obj = cursor->next();
+			nlinfo("mongo: new entry to parse '%s'", obj.jsonString().c_str());
+
+			string name;
+			string chat;
+			string chatType;
+			string chatId;
+			double date;
+			bool ig;
+
+			name = obj.getStringField("username");
+			chat = obj.getStringField("chat");
+			chatType = obj.getStringField("chatType");
+			chatId = obj.getStringField("chatId");
+			date = obj.getField("date").numberDouble();
+
+			if(date > last_mongo_chat_date)
+				last_mongo_chat_date = date;
+
+			ig = obj.getBoolField("ig");
+			if(ig) continue;
+
+			ucstring text;
+			text.fromUtf8(chat);
+
+			TGroupId grpId = CEntityId(RYZOMID::chatGroup, 0);
+
+			if (chatType == "guildId") // Chat avec la guilde
+			{
+				uint32 guildId;
+				NLMISC::fromString(chatId, guildId);
+
+				grpId.setShortId(guildId + 0x10000000);  // 0x10000000 is the GuildBase to chat group id
+				grpId.setDynamicId(0);
+				grpId.setCreatorId(0);
+			}
+			else if (chatType == "dynamic")
+			{
+				// broadcast to other client in the channel
+				const TChanID *chanId = _ChanNames.getA(chatId);
+				if (chanId)
+				{
+					CDynChatSession *dcc = _DynChat.getChan(*chanId)->getFirstSession();
+					while (dcc)
+					{
+						sendFarChat((CChatGroup::TGroupType)12, dcc->getClient()->getID(), text, ucstring("~")+ucstring(name), *chanId);
+						dcc = dcc->getNextChannelSession(); // next session in this channel
+					}
+				}
+				// void CChatManager::sendFarChat( C const ucstring& ucstr, const ucstring &senderName, TChanID chanID)
+				continue;
+			}
+			else if (chatType == "username")
+			{
+				if (IService::getInstance()->getShardId() == 301)
+					chatId = chatId+"(Yubo)";
+				else
+					chatId = chatId+"(Atys)";
+
+				farTell(CEntityId(uint64(0)), ucstring("~")+ucstring(name), false, ucstring(chatId), text);
+				continue;
+			}
+			farChatInGroup(grpId, 0, text, ucstring("~")+ucstring(name));
+		}
+	}
+	catch(const DBException& e)
+	{
+		cout << "caught DBException " << e.toString() << endl;
+	}
+#endif
+}

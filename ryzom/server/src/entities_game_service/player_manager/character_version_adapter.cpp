@@ -97,8 +97,11 @@ uint32 CCharacterVersionAdapter::currentVersionNumber() const
 	// 23 : (05/04/2013) fix post merge marauder plan issue
 	// 24 : (23/10/2014) fix post merge rite bonus issue
 	// 25 : (05/03/2015) fix required faction in items on inventory
+	// 26 : (23/04/2015) fix foragetool HP
+	// 27 : (10/10/2017) fix /learnAllBrick exploit
+	// 28 : (21/07/2018) fix amps HP reset
 	////////////////////////////////////
-	return 25;
+	return 28;
 }
 
 
@@ -133,6 +136,9 @@ void CCharacterVersionAdapter::adaptCharacterFromVersion( CCharacter &character,
 	case 22: adaptToVersion23(character);
 	case 23: adaptToVersion24(character);
 	case 24: adaptToVersion25(character);
+	case 25: adaptToVersion26(character);
+	case 26: adaptToVersion27(character);
+	case 27: adaptToVersion28(character);
 	default:;
 	}
 }
@@ -663,7 +669,9 @@ void CCharacterVersionAdapter::adaptToVersion11(CCharacter &character) const
 		case EGSPD::CPeople::Zorai :
 			mission = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName( "ZORAI_NEWB_WELCOME_SHENG_WO_1" );
 			CAIAliasTranslator::getInstance()->getNPCAliasesFromName("welcomer_sheng_wo_1", bots);
-			break;	
+			break;
+		default:
+			break;
 		}
 	}
 	// other give him a rite intro mission
@@ -1023,7 +1031,6 @@ void CCharacterVersionAdapter::adaptToVersion22(CCharacter &character) const
 //---------------------------------------------------
 void CCharacterVersionAdapter::adaptToVersion23(CCharacter &character) const
 {
-#ifdef RYZOM_FORGE
 	nlinfo("Start");
 	//check if phrase is already known and Fix marauder sbricks + sp craft
 	uint16 sp = 0;
@@ -1061,13 +1068,12 @@ void CCharacterVersionAdapter::adaptToVersion23(CCharacter &character) const
 		nlinfo("Adding %d SP Craft !", sp);
 		character._SpType[EGSPD::CSPType::Craft] += sp;
 	}
-#endif
+
 }
 
 //---------------------------------------------------
 void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 {
-#ifdef RYZOM_FORGE
 	// HP
 	uint32 bonus;
 	vector<string> bricks;
@@ -1173,14 +1179,13 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 		nlinfo("RITE BONUS FIX: Player %s need %d (stamina) but have %d !", character.getName().toString().c_str(),bonus, character.getScorePermanentModifiers(SCORES::stamina));
 		character.setScorePermanentModifiers(SCORES::stamina, bonus);
 	}
-#endif
 }
 
 
 //---------------------------------------------------
 void CCharacterVersionAdapter::adaptToVersion25(CCharacter &character) const
 {
-#ifdef RYZOM_FORGE
+
 	const uint sizeInv = INVENTORIES::NUM_INVENTORY;
 	for ( uint i = 0; i < sizeInv ; ++i )
 	if (character._Inventory[i] != NULL)
@@ -1347,5 +1352,118 @@ void CCharacterVersionAdapter::adaptToVersion25(CCharacter &character) const
 	}
 
 	character.unequipCharacter( INVENTORIES::handling, INVENTORIES::left );
-#endif
 }
+
+
+//---------------------------------------------------
+void CCharacterVersionAdapter::adaptToVersion26(CCharacter &character) const
+{
+
+	const uint sizeInv = INVENTORIES::NUM_INVENTORY;
+	for ( uint i = 0; i < sizeInv ; ++i )
+	if (character._Inventory[i] != NULL)
+	{
+		CInventoryPtr childSrc = character._Inventory[i];
+		for ( uint j = 0; j < childSrc->getSlotCount(); j++ )
+		{
+			CGameItemPtr item = childSrc->getItem(j);
+			if (item != NULL)
+			{
+				string phraseId = item->getPhraseId();
+
+				if (phraseId.substr(0, 11) == "foragetool_")
+					item->addHp(item->durability());
+			}
+		}
+	}
+}
+
+
+//---------------------------------------------------
+void CCharacterVersionAdapter::adaptToVersion27(CCharacter &character) const
+{
+
+	vector<string> bricks;
+	bricks.push_back("bmcc00180");
+	bricks.push_back("bmcc00250");
+	bricks.push_back("bmcr00100");
+	bricks.push_back("bmcr00120");
+	bricks.push_back("bmcc00225");
+	bricks.push_back("bmcc00200");
+
+	nlinfo("Adapt to v27");
+	const uint sizeInv = INVENTORIES::NUM_INVENTORY;
+	for ( uint i = 0; i < sizeInv ; i++ )
+	if (character._Inventory[i] != NULL)
+	{
+		CInventoryPtr childSrc = character._Inventory[i];
+		for ( uint j = 0; j < childSrc->getSlotCount(); j++ )
+		{
+			CGameItemPtr item = childSrc->getItem(j);
+			if (item != NULL && item->getEnchantment().size() > 0)
+			{
+				nlinfo("Have item with enchant!");
+				vector< CSheetId > enchant = item->getEnchantment();
+				bool reset_it = false;
+				for (uint k = 0; k < enchant.size(); k++)
+				{
+					nlinfo("Check brick : %s", enchant[k].toString().c_str());
+					for (uint l = 0; l < bricks.size(); l++)
+					{
+						if (CSheetId(bricks[l]+".sbrick") == enchant[k]) {
+							nlinfo("Have unautorized brick !");
+							reset_it = true;
+							break;
+						}
+					}
+
+					if (reset_it)
+					{
+						nlinfo("Reset Enchant");
+						item->resetEnchantment();
+						break;
+					}
+				}
+			}
+			else if (item->getSheetId() == CSheetId("crystalized_spell.sitem"))
+			{
+					
+			}
+		}
+	}
+}
+
+//---------------------------------------------------
+void CCharacterVersionAdapter::adaptToVersion28(CCharacter &character) const
+{
+	// parse all inventories and set amplis to max Hp
+	const uint sizeInv = INVENTORIES::NUM_INVENTORY;
+	for ( uint i = 0; i < sizeInv ; ++i )
+	{
+		if (character._Inventory[i] != NULL)
+		{
+			CInventoryPtr childSrc = character._Inventory[i];
+			for ( uint j = 0; j < childSrc->getSlotCount(); j++ )
+			{
+				CGameItemPtr item = childSrc->getItem(j);
+				if (item != NULL)
+				{
+					const CStaticItem * form = CSheets::getForm( item->getSheetId() );
+					if( form )
+					{
+						if( form->Type == ITEM_TYPE::MAGICIAN_STAFF )
+						{
+							if (item->maxDurability() > 0)
+							{
+								nlinfo("player %s, patching ampli %s HP, new value= %u", 
+									character.getId().toString().c_str(), item->getSheetId().toString().c_str(), item->maxDurability());
+								item->addHp(item->maxDurability());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+

@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -168,6 +165,7 @@ public:
 	//-------------------------------------------------------------------
 	// group name/alias retreiver
 	void addGroupInfo(CGroup* grp);
+	void addGroupInfo(CGroup* grp, const std::string &name, uint32 alias);
 	void removeGroupInfo(CGroup* grp, CAliasTreeOwner* grpAliasTreeOwner);
 	CGroup* findGroup(uint32 alias);
 	void findGroup(std::vector<CGroup*>& result, std::string const& name);
@@ -190,7 +188,7 @@ public:
 	/// Store mapping 'name:variant' -> squad to be used later by getSquadByVariantName()
 	void registerSquadVariant(const std::string& nameAndVariant, CGroupDesc<COutpostSquadFamily> *squad )
 	{
-		if ( ! _SquadVariantNameToGroupDesc.insert( std::make_pair( NLMISC::toLowerAscii( nameAndVariant ), squad ) ).second )
+		if ( ! _SquadVariantNameToGroupDesc.insert( std::make_pair( NLMISC::toLower( nameAndVariant ), squad ) ).second )
 			nlwarning( "Duplicate squad template / squad variant '%s'", nameAndVariant.c_str() );
 	}
 
@@ -203,7 +201,7 @@ public:
 	/// Get a squad by name:variant (works only during primitive parsing), or NULL if not found. Not case-sensitive.
 	CGroupDesc<COutpostSquadFamily> *getSquadByVariantName(const std::string& nameAndVariant)
 	{
-		std::map<std::string, NLMISC::CSmartPtr< CGroupDesc<COutpostSquadFamily> > >::iterator it = _SquadVariantNameToGroupDesc.find( NLMISC::toLowerAscii( nameAndVariant ) );
+		std::map<std::string, NLMISC::CSmartPtr< CGroupDesc<COutpostSquadFamily> > >::iterator it = _SquadVariantNameToGroupDesc.find( NLMISC::toLower( nameAndVariant ) );
 		if ( it != _SquadVariantNameToGroupDesc.end() )
 			return (*it).second;
 		else
@@ -231,6 +229,8 @@ private:
 	CAliasCont<CManager> _Managers;
 	//@}
 	
+	static NLLIGO::CLigoConfig	_LigoConfig;
+	
 	/// The ai instance continent name (multi ai system)
 	std::string _ContinentName;
 	/// The ai instance number (multi ai system)
@@ -245,6 +245,10 @@ private:
 	CManagerPlayer* _PlayerManager;
 	///	event npc Manager.
 	CMgrNpc* _EventNpcManager;
+
+	uint32 _LastSpawnAlias;
+	uint32 _LastStateAlias;
+	
 	///	easter egg manager
 	NLMISC::CRefPtr<CMgrNpc> _EasterEggManager;
 

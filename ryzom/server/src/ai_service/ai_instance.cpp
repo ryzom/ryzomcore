@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2018-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -20,6 +17,7 @@
 #include "stdpch.h"
 #include "server_share/r2_vision.h"
 #include "ai_instance.h"
+#include "ais_actions.h"
 
 #include "ai_player.h"
 #include "ai_grp_npc.h"
@@ -29,6 +27,8 @@
 
 #include "ai_instance_inline.h"
 
+#include "nel/ligo/primitive_utils.h"
+
 #include "commands.h"
 #include "messages.h"
 
@@ -36,6 +36,10 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 using namespace MULTI_LINE_FORMATER;
+using namespace NLLIGO;
+
+NLLIGO::CLigoConfig		CAIInstance::_LigoConfig;
+
 
 CAIInstance::CAIInstance(CAIS* owner)
 : CChild<CAIS>(owner)
@@ -212,6 +216,9 @@ void CAIInstance::initInstance(string const& continentName, uint32 instanceNumbe
 	_ContinentName = continentName;
 	_InstanceNumber = instanceNumber;
 
+	_LastSpawnAlias =  (900 + _InstanceNumber) << LigoConfig.getDynamicAliasSize();
+	_LastStateAlias = 0;
+
 	sendInstanceInfoToEGS();
 
 	if	(!EGSHasMirrorReady)
@@ -288,12 +295,20 @@ void CAIInstance::addGroupInfo(CGroup* grp)
 {
 	string const& name = grp->aliasTreeOwner()->getName();
 	uint32 alias = grp->aliasTreeOwner()->getAlias();
-
 	if (!name.empty())
 		_GroupFromNames[name].push_back(grp);
 	if (alias)
 		_GroupFromAlias[alias] = grp;
 }
+
+void CAIInstance::addGroupInfo(CGroup* grp, const string &name, uint32 alias)
+{
+	if (!name.empty())
+		_GroupFromNames[name].push_back(grp);
+	if (alias)
+		_GroupFromAlias[alias] = grp;
+}
+
 
 void CAIInstance::removeGroupInfo(CGroup* grp, CAliasTreeOwner* grpAliasTreeOwner)
 {
@@ -639,7 +654,7 @@ static CAIVector randomPos(double dispersionRadius)
 	{
 		return CAIVector(0., 0.);
 	}
-	static const uint32 maxLimit = std::numeric_limits<uint32>::max() >> 1;
+	const uint32 maxLimit = std::numeric_limits<uint32>::max() >> 1;
 	double rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
 	double r = dispersionRadius*sqrt(rval);
 	rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
@@ -675,7 +690,10 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	_EventNpcManager->groups().addAliasChild(grp);
 	// Set the group parameters
 	grp->setAutoSpawn(false);
-	grp->setName(NLMISC::toString("event_group_%u", grp->getChildIndex()));
+
+	string name = botsName.empty() ? NLMISC::toString("event_group_%u", grp->getChildIndex()):botsName;
+
+	grp->setName(name);
 	grp->clearParameters();
 	grp->setPlayerAttackable(true);
 	grp->setBotAttackable(true);
@@ -684,15 +702,21 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	grp->clrBotsAreNamedFlag();
 
+	addGroupInfo(grp, name, grp->getAlias());
+
+
 	{
 		// build unnamed bot
-		for	(uint i=0; i<nbBots; ++i)
+		for	(uint i=0; i<nbBots; ++i) 
 		{
-			grp->bots().addChild(new CBotNpc(grp, 0, botsName.empty() ? grp->getName():botsName), i); // Doub: 0 instead of getAlias()+i otherwise aliases are wrong
+			_LastSpawnAlias++;
+			nlinfo("Spawn with alias : %d (%s)", _LastSpawnAlias, _LigoConfig.aliasToString(_LastSpawnAlias).c_str());
+			grp->bots().addChild(new CBotNpc(grp, _LastSpawnAlias, name), i); // Doub: 0 instead of getAlias()+i otherwise aliases are wrong
 
 			CBotNpc* const bot = NLMISC::safe_cast<CBotNpc*>(grp->bots()[i]);
 
 			bot->setSheet(sheet);
+			bot->setPrimAlias(900+_InstanceNumber);
 			if (!look.empty())
 				bot->setClientSheet(look);
 			bot->equipmentInit();
@@ -744,6 +768,25 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(pos, 0, 0), (uint32)(dispersionRadius*1000.));
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
 
+	if (!botsName.empty())
+	{
+		CStateMachine* sm = _EventNpcManager->getStateMachine();
+		uint32 stateAlias = grp->getStateAlias("start");
+		CAIStatePositional* statePositional;
+		if (stateAlias == 0)
+		{
+			_LastStateAlias++;
+			statePositional = new CAIStatePositional(sm, _LastStateAlias, "start");
+			grp->setStateAlias("start", statePositional->getAlias());
+			sm->states().addChild(statePositional);
+		}
+		else
+		{
+			statePositional = safe_cast<CAIStatePositional*>(sm->states().getChildByAlias(stateAlias));
+		}
+		grp->setNextState(statePositional);
+	}
+	
 	if (spawnBots)
 		grp->getSpawnObj()->spawnBots();
 
@@ -942,28 +985,27 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 
 	if (firstCommand[0] == '(') // Old eventNpcGroupScript command : (boteid, commands...)
 	{
-		nlinfo("Event group script with %d strings :", nbString);
 		strings.resize(nbString);
 		strings[0] = eid;
-		nlinfo("  %d '%s'", 0, strings[0].c_str());
 		strings[1] = firstCommand;
-		nlinfo("  %d '%s'", 1, strings[1].c_str());
 		for (uint32 i=2; i<nbString-2; ++i)
 		{
 			msgin.serial(strings[i]);
-			nlinfo("  %d '%s'", i, strings[i].c_str());
 		}
 	}
 	else
 	{
 		nlinfo("Event group script with %d strings :", nbString-1);
-		CEntityId playerId(eid);
+		CEntityId playerId;
+		if (!eid.empty())
+			playerId = CEntityId(eid);
+		
 		strings.resize(nbString-1);
-		NLMISC::CSString groupname = CSString(firstCommand);
+		CSString groupname = CSString(firstCommand);
 		if (firstCommand[0] == '#' && firstCommand[1] == '(')
 		{
-			NLMISC::CEntityId botEId = NLMISC::CEntityId(firstCommand.substr(1));
-			if (botEId==NLMISC::CEntityId::Unknown)
+			CEntityId botEId = CEntityId(firstCommand.substr(1));
+			if (botEId==CEntityId::Unknown)
 				return;
 			CAIEntityPhysical* entity = CAIEntityPhysicalLocator::getInstance()->getEntity(botEId);
 			CSpawnBotNpc* bot = dynamic_cast<CSpawnBotNpc*>(entity);
@@ -976,13 +1018,14 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 		}
 		else
 		{
-			strings[0] =  (string)groupname.replace("#last", _PlayersLastCreatedNpcGroup[playerId].c_str());
+			if (!eid.empty())
+				strings[0] = (string)groupname.replace("#last", _PlayersLastCreatedNpcGroup[playerId].c_str());
+			else
+				strings[0] = (string)groupname;
 		}
-		nlinfo("  %d '%s'", 0, strings[0].c_str());
 		for (uint32 i=1; i<nbString-1; ++i)
 		{
 			msgin.serial(strings[i]);
-			nlinfo("  %d '%s'", i, strings[i].c_str());
 		}
 	}
 	scriptCommands2.push_back(strings);
@@ -1569,5 +1612,3 @@ NLMISC_COMMAND(simulateMsgDespawnEasterEgg, "", "<service_id> <ai_instance> <eas
 
 	return true;
 }
-
-#include "event_reaction_include.h"

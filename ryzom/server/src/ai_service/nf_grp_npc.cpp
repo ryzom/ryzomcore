@@ -153,7 +153,7 @@ void setOupostMode_ss_(CStateInstance* entity, CScriptStack& stack)
 	}
 	
 	npcGroup->setOutpostSide(side);
-	npcGroup->setOutpostFactions(side);
+	npcGroup->setOutpostFactions(aliasStr, side);
 	FOREACH(botIt, CCont<CBot>, npcGroup->bots())
 	{
 		CBot* bot = *botIt;
@@ -1610,7 +1610,6 @@ Then user events are triggered on the group to inform it about what happens:
 - user_event_3: triggered after the player has given the mission items to the npc.
 
 Warning: this function can only be called after the event "player_target_npc".
-Warning: only works on an R2 shard for R2 plot items.
 
 Arguments: s(missionItems), s(missionText), c(groupToNotify) ->
 @param[in] missionItems is the list of mission items, the string format is "item1:qty1;item2:qty2;...".
@@ -1713,6 +1712,36 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 			DEBUG_STOP;
 			return;
 		}
+		// if LD use this the function outside a ring shard 
+		if (IsRingShard)
+		{
+			// Here we destroy the item: so we do not want that a user create a scenario where we destroy
+			// other players precious items
+			
+			static std::set<CSheetId> r2PlotItemSheetId; // :TODO: use R2Share::CRingAccess
+			// lazy intialisation
+			if (r2PlotItemSheetId.empty())
+			{
+				for (uint32 i = 0 ; i <= 184 ; ++i)
+				{
+					r2PlotItemSheetId.insert( CSheetId( NLMISC::toString("r2_plot_item_%d.sitem", i)));
+				}
+			}
+
+			// A npc give a mission to take an item given by another npc
+			// but the item instead of being a r2_plot_item is a normal item like system_mp or big armor
+			if ( r2PlotItemSheetId.find(sheetId) ==  r2PlotItemSheetId.end())
+			{
+				nlwarning("!!!!!!!!!!!!");
+				nlwarning("!!!!!!!!!!!! Someone is trying to hack us");
+				nlwarning("!!!!!!!!!!!!");
+				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());								
+				nlwarning("His ai instanceId is %u, use log to know the sessionId and the user ", msg.InstanceId );
+				nlwarning("!!!!!!!!!!!!");
+				nlwarning("!!!!!!!!!!!!");
+				return ;
+			}
+		}
 
 		uint32 quantity;
 		NLMISC::fromString(itemAndQty[1], quantity);
@@ -1746,7 +1775,6 @@ Then user events are triggered on the group to inform it about what happens:
 - user_event_1: triggered after the player has received the mission items from the npc.
 
 Warning: this function can only be called after the event "player_target_npc".
-Warning: only works on an R2 shard for R2 plot items.
 
 Arguments: s(missionItems), s(missionText), c(groupToNotify) ->
 @param[in] missionItems is the list of mission items, the string format is "item1:qty1;item2:qty2;...".
@@ -1848,6 +1876,36 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 			nlwarning("giveMissionItems failed: invalid mission item sheet '%s'", itemAndQty[0].c_str());
 			DEBUG_STOP;
 			return;
+		}
+
+
+		// if LD use this the function outside a ring shard 
+		if (IsRingShard)
+		{
+			static std::set<CSheetId> r2PlotItemSheetId; // :TODO: use R2Share::CRingAccess
+			// lazy intialisation
+			if (r2PlotItemSheetId.empty())
+			{
+				for (uint32 i = 0 ; i <= 184 ; ++i)
+				{
+					r2PlotItemSheetId.insert( CSheetId( NLMISC::toString("r2_plot_item_%d.sitem", i)));
+				}
+			}
+
+			// A npc give a mission to give a item to another npc
+			// but the item instead of being a r2_plot_item is a normal item like system_mp or big armor
+			if ( r2PlotItemSheetId.find(sheetId) ==  r2PlotItemSheetId.end())
+			{
+				nlwarning("!!!!!!!!!!!!");
+				nlwarning("!!!!!!!!!!!! Someone is trying to hack us");
+				nlwarning("!!!!!!!!!!!!");
+				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());								
+				nlwarning("His ai instanceId is %u, use log to know the sessionId and the user ", msg.InstanceId );
+				nlwarning("!!!!!!!!!!!!");
+				nlwarning("!!!!!!!!!!!!");
+				return ;
+			}
+
 		}
 
 		uint32 quantity;
@@ -2605,7 +2663,7 @@ void rename_s_(CStateInstance* entity, CScriptStack& stack)
 						msgout.serial(row);
 						msgout.serial(name);
 						sendMessageViaMirror("IOS", msgout);
-						bot->setCustomName(name);
+						spawnBot->getPersistent().setCustomName(name);
 					}
 				}
 			}
@@ -2668,6 +2726,182 @@ void maxHitRange_f_(CStateInstance* entity, CScriptStack& stack)
 	}
 }
 
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection addUserModel_sss_
+
+Arguments:  -> 
+
+arg0: is the user model id (a name)
+arg1: is the base sheet
+arg3: is the script (in hex)
+
+@code
+()addUserModel("toto", "ccbha1", "xxxxx");
+@endcode
+
+*/
+void addUserModel_sss_(CStateInstance* entity, CScriptStack& stack)
+{
+	string script = stack.top();
+	stack.pop();
+	
+	string baseSheet = stack.top();
+	stack.pop();
+	
+	string userModelId = stack.top(); // prefix with ARK_ to prevent stupid overwrite
+	stack.pop();
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+		
+	std::vector<CAIActions::CArg> args;
+	args.push_back(CAIActions::CArg(900+aiInstance->getInstanceNumber()));
+	args.push_back(CAIActions::CArg("ARK_"+userModelId));
+	args.push_back(CAIActions::CArg(baseSheet));
+	args.push_back(CAIActions::CArg(scriptHex_decode(script)));
+	
+	CAIActions::execute("USR_MDL", args);
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection addCustomLoot_ss_
+
+Arguments:  -> 
+
+arg0: is the custom table id (a name)
+arg1: is the script with syntax : <PROBA_1>:<hex:LOOT_SET_1>,<PROBA_2>:<hex:LOOT_SET_2>,...
+
+@code
+()addUserModel("toto", "<PROBA_1>:<hex:LOOT_SET_1>,<PROBA_2>:<hex:LOOT_SET_2>,...");
+@endcode
+
+*/
+void addCustomLoot_ss_(CStateInstance* entity, CScriptStack& stack)
+{
+	string script = stack.top();
+	stack.pop();
+		
+	string customTableId = stack.top();
+	stack.pop();
+
+	std::vector<std::string> loots;
+	NLMISC::splitString(script, ",", loots);
+	if (loots.empty())
+		return;
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+
+	std::vector<CAIActions::CArg> args;
+	uint32 nbTables = 1;
+	args.push_back(CAIActions::CArg(nbTables));
+	args.push_back(CAIActions::CArg(900+aiInstance->getInstanceNumber()));
+	uint32 lootSets = loots.size();
+	args.push_back(CAIActions::CArg(lootSets));
+	args.push_back(CAIActions::CArg(customTableId));
+	float moneyProba = 0.0;
+	args.push_back(CAIActions::CArg(moneyProba));
+	float moneyFactor = 0.0;
+	args.push_back(CAIActions::CArg(moneyFactor));
+	uint32 moneyBase = 0;
+	args.push_back(CAIActions::CArg(moneyBase));
+
+	FOREACHC(it, std::vector<std::string>, loots)
+	{
+		std::vector<string> lootSet;
+		NLMISC::splitString(*it, ":", lootSet);
+		if (lootSet.size() == 2)
+		{
+			args.push_back(CAIActions::CArg(lootSet[0]));
+			args.push_back(CAIActions::CArg(scriptHex_decode(lootSet[1])));
+		}
+	}
+	
+	CAIActions::execute("CUSTOMLT", args);
+}
+
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection setUserModel_s_
+Set the user model of a creature
+
+Arguments: -> s(userModel)
+
+@code
+()setUserModel('my_model');
+
+@endcode
+
+*/
+void setUserModel_s_(CStateInstance* entity, CScriptStack& stack)
+{
+	string userModel = stack.top();
+	stack.pop();
+	
+	CGroup* group = entity->getGroup();
+	
+	FOREACH(botIt, CCont<CBot>,	group->bots())
+	{
+		CBot* bot = *botIt;
+		
+		//if (!bot->isSpawned()) return;
+		
+		if (bot->getRyzomType() == RYZOMID::npc)
+		{
+			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+			botNpc->setUserModelId("ARK_"+userModel);
+		}
+	}
+}
+
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection setCustomLoot_s_
+Set the custom loot of a creature
+
+Arguments: -> s(customTable)
+
+@code
+()setUserModel('my_loot_table');
+
+@endcode
+
+*/
+void setCustomLoot_s_(CStateInstance* entity, CScriptStack& stack)
+{
+	string customTable = stack.top();
+	stack.pop();
+	
+	CGroup* group = entity->getGroup();
+	
+	FOREACH(botIt, CCont<CBot>,	group->bots())
+	{
+		CBot* bot = *botIt;
+		
+		//if (!bot->isSpawned()) return;
+		
+		if (bot->getRyzomType() == RYZOMID::npc)
+		{
+			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+			botNpc->setCustomLootTableId(customTable);
+		}
+	}
+}
+
+
 ////----------------------------------------------------------------------------
 ///** @page code
 //
@@ -2727,6 +2961,135 @@ void maxHitRange_f_(CStateInstance* entity, CScriptStack& stack)
 //		}
 //	}
 //}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection setEventCode_sss
+Sets and event to execute when event triggers
+
+Arguments:
+s(event) -> @param[in] The name of the state 
+s(event) -> @param[in] The name of the event
+s(code) -> @param[in] The string to execute code in hex
+
+@code
+()maxHitRange(50); // Set the max hit range in 50 meters all npc in group
+@endcode
+
+*/
+// CBotNpc
+void setEventCode_sss_(CStateInstance* entity, CScriptStack& stack)
+{
+	string code = stack.top();
+	stack.pop();
+
+	string event_name = stack.top();
+	stack.pop();
+
+	string state_name = stack.top();
+	stack.pop();
+
+
+	//////////// Special Cases for Ark
+	if (event_name == "notify_on_death")
+	{
+		strFindReplace(code, "http://", "");
+		strFindReplace(code, "https://", "");
+		strFindReplace(code, "/index.php?", " ");
+		
+		CGroup* group = entity->getGroup();
+		FOREACH(botIt, CCont<CBot>,	group->bots())
+		{
+			CBot* bot = *botIt;
+			
+			if (!bot->isSpawned()) return;
+
+			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+			if (botNpc)
+			{
+				CSpawnBotNpc* spawnBotNpc = botNpc->getSpawn();
+				if (spawnBotNpc)
+				{
+					CAINotifyDeathMsg *msg = new CAINotifyDeathMsg;
+					msg->Url = code;
+					msg->TargetRowId = spawnBotNpc->dataSetRow();
+					msg->send("EGS");
+				}
+			}
+		}
+		return;
+	}
+	///////////////////////////////////////////////////////
+
+	
+	CAIEventDescription eventDescription;
+	CAIEventActionNode::TSmartPtr eventAction;
+	CAIEventReaction* event;
+	
+	// Create event handler
+	eventDescription.EventType = event_name;
+	
+	// Create event action
+	eventAction = new CAIEventActionNode;
+	eventAction->Action = "code";
+	eventAction->Weight = 1;
+
+	code = scriptHex_decode(code);
+	vector<string> lines_of_code;
+	NLMISC::splitString(code, "\n", lines_of_code);
+	if (!lines_of_code.empty())
+	{
+		FOREACHC(it, vector<string>, lines_of_code)
+		{
+			nlinfo("Code: %s", (*it).c_str());
+			eventAction->Args.push_back(*it);
+		}
+	}
+	
+	// Register event action
+	eventDescription.Action = eventAction;
+	eventAction = NULL;
+	
+	CGroup* group = entity->getGroup();
+	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
+	CStateMachine* sm = &npcGroup->getEventContainer();
+	CAIStatePositional* statePositional;
+	
+	uint32 stateAlias = npcGroup->getStateAlias(state_name);
+	if (stateAlias == 0)
+	{
+		nlinfo("STATE %s not found !", state_name.c_str());
+		statePositional = new CAIStatePositional(sm, 0, state_name);
+		npcGroup->setStateAlias(state_name, statePositional->getAlias());
+		sm->states().addChild(statePositional);
+	}
+	else
+	{
+		statePositional = safe_cast<CAIStatePositional*>(sm->states().getChildByAlias(stateAlias));
+	}
+
+	uint32 stateEventAlias = npcGroup->getStateEventAlias(event_name);
+	/*if (stateEventAlias != 0)
+	{
+		CAIEventReaction er = sm->eventReactions().getChildByAlias(stateEventAlias);
+		er->setGroup(0);
+	}*/
+	//	sm->eventReactions().removeChildByIndex(sm->eventReactions().getChildIndexByAlias(stateEventAlias));
+
+	// Register event handler
+	stateEventAlias = sm->getLastStateEventAlias();
+	event = new CAIEventReaction(sm, stateEventAlias, eventDescription.EventType);
+	event->processEventDescription(&eventDescription, sm);
+	event->setGroup(npcGroup->getAlias());
+	nlinfo("Add Event: %s(%d) in State : %d", event_name.c_str(), stateEventAlias, statePositional->getAlias());
+	event->setState(statePositional->getAlias());
+	npcGroup->setStateEventAlias(event_name, stateEventAlias);
+	
+	
+	sm->eventReactions().addChild(event);
+	event = NULL;
+}
 
 
 std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
@@ -2792,6 +3155,13 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, endScenarioTiming_f_);
 
 	REGISTER_NATIVE_FUNC(functions, maxHitRange_f_);
+
+	REGISTER_NATIVE_FUNC(functions, setEventCode_sss_);
+
+	REGISTER_NATIVE_FUNC(functions, addUserModel_sss_);
+	REGISTER_NATIVE_FUNC(functions, addCustomLoot_ss_);
+	REGISTER_NATIVE_FUNC(functions, setUserModel_s_);
+	REGISTER_NATIVE_FUNC(functions, setCustomLoot_s_);
 
 //	REGISTER_NATIVE_FUNC(functions, hideMissionStepIcon_b_);
 //	REGISTER_NATIVE_FUNC(functions, hideMissionGiverIcon_b_);

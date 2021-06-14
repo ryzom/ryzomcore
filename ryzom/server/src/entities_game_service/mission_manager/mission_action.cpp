@@ -423,6 +423,12 @@ protected:
 			MISLOGSYNTAXERROR("<title_id>*[;<param>] : <phrase_id>*[;<param>]");
 			return false;
 		}
+		if (CMissionParser::getNoBlankString(script[1]) == "WEB")
+		{
+			_Title = "WEB";
+			_Text = CMissionParser::getNoBlankString(script[2]);
+			return true;
+		}
 		// store all texts params temporary in the _Params vector, we'll solve them at the end of the parsing
 		// keep first space for player name
 		return CMissionParser::parseParamText(line, script[1], _Title, _TitleParams )
@@ -431,8 +437,12 @@ protected:
 
 	bool solveTextsParams( CMissionSpecificParsingData & missionData )
 	{
+		if (_Title != "WEB")
+		{
 		return CMissionParser::solveTextsParams( _SourceLine, _TitleParams, missionData )
 			&& CMissionParser::solveTextsParams( _SourceLine, _TextParams, missionData );
+	}
+		return true;
 	}
 	
 	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
@@ -440,14 +450,21 @@ protected:
 		LOGMISSIONACTION("popup_msg");
 		std::vector<TDataSetRow> entities;
 		instance->getEntities( entities );
-		// solve bot names for title and text
+
 		TVectorParamCheck titleParams = _TitleParams;
 		TVectorParamCheck textParams = _TextParams;
+
+		if (_Title != "WEB")
+		{
+			// solve bot names for title and text
 		CMissionParser::solveBotNames(titleParams,CAIAliasTranslator::getInstance()->getEntityId(instance->getGiver()));
 		CMissionParser::solveBotNames(textParams,CAIAliasTranslator::getInstance()->getEntityId(instance->getGiver()));
+		}
 		// For all entities that do this mission
 		for ( uint i  = 0; i < entities.size(); i++)
 		{
+			if (_Title != "WEB")
+			{
 			// solve player name
 			CMissionParser::solvePlayerName(titleParams, entities[i]);
 			CMissionParser::solvePlayerName(textParams, entities[i]);
@@ -457,7 +474,13 @@ protected:
 			uint32 textId = STRING_MANAGER::sendStringToClient(entities[i], _Text, textParams);
 			CEntityId eid = TheDataset.getEntityId(entities[i]);
 			PlayerManager.sendImpulseToClient(eid, "USER:POPUP", titleId, textId);
-			
+			}
+			else
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if (user)
+					user->sendUrl(_Text);
+			}
 		}
 	};
 	MISSION_ACTION_GETNEWPTR(CMissionActionPopupMsg)
@@ -602,7 +625,6 @@ class CMissionActionRecvItem : public IMissionAction
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
-		nlassert(instance);
 		if ( dynamic_cast<CMissionSolo*>(instance) )
 		{
 			if ( _Group )
@@ -961,7 +983,6 @@ class CMissionActionRecvNamedItem : public IMissionAction
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
-		nlassert(instance);
 		if ( dynamic_cast<CMissionSolo*>(instance) )
 		{
 			if ( _Group )
@@ -1629,7 +1650,6 @@ class CMissionActionLearnBrick : public IMissionAction
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
-		nlassert(instance);
 		if ( dynamic_cast<CMissionSolo*>(instance) )
 		{
 			if ( _Group )
@@ -1774,7 +1794,6 @@ class CMissionActionUnlearnBrick : public IMissionAction
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
-		nlassert(instance);
 		if ( dynamic_cast<CMissionSolo*>(instance) )
 		{
 			if ( _Group )
@@ -2729,8 +2748,8 @@ class CMissionActionFailMissionCat : public IMissionAction
 			MISLOGSYNTAXERROR("<mission_category>");
 			return false;
 		}
-		_MissionCategory = NLMISC::toLowerAscii(CMissionParser::getNoBlankString(script[1]));
-		if (NLMISC::toLowerAscii(missionData.Template->MissionCategory) == _MissionCategory)
+		_MissionCategory = NLMISC::toLower(CMissionParser::getNoBlankString(script[1]));
+		if (NLMISC::toLower(missionData.Template->MissionCategory) == _MissionCategory)
 		{
 			MISLOGERROR1("a mission cannot make fail its own category '%s'", _MissionCategory.c_str());
 			return false;
@@ -2765,7 +2784,7 @@ class CMissionActionFailMissionCat : public IMissionAction
 				pMissTemplate = pMM->getTemplate(pMiss->getTemplateId());
 				if (pMissTemplate != NULL)
 				{
-					if (NLMISC::toLowerAscii(pMissTemplate->MissionCategory) == _MissionCategory)
+					if (NLMISC::toLower(pMissTemplate->MissionCategory) == _MissionCategory)
 					{
 						pMiss->onFailure(true, false);
 						bFailed = true;
@@ -2778,7 +2797,7 @@ class CMissionActionFailMissionCat : public IMissionAction
 					pMissTemplate = pMM->getTemplate(pMiss->getMainMissionTemplateId());
 					if (pMissTemplate != NULL)
 					{
-						if (NLMISC::toLowerAscii(pMissTemplate->MissionCategory) == _MissionCategory)
+						if (NLMISC::toLower(pMissTemplate->MissionCategory) == _MissionCategory)
 							pMiss->onFailure(true, false);
 					}
 				}
@@ -2799,19 +2818,72 @@ class CMissionActionCompassNpc : public IMissionAction
 	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
 	{
 		_SourceLine = line;
+		IsDynamic = false;
+
 		if ( script.size() != 2)
 		{
 			MISLOGSYNTAXERROR("<bot>");
 			return false;
 		}
-		if ( !CMissionParser::parseBotName(script[1],Alias,missionData) )
-			return false;
+		if (CMissionParser::getNoBlankString(script[1]) == "#dynamic#") {
+			IsDynamic = true;
+		}
+		else
+		{
+			if ( !CMissionParser::parseBotName(script[1],Alias,missionData) )
+				return false;
+		}
 		return true;
 	}
 	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
 	{
 		LOGMISSIONACTION("add_compass_npc");
 		TAIAlias alias;
+		if (IsDynamic)
+		{
+			const CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
+			if (templ)
+			{
+				vector<TDataSetRow> entities;
+				instance->getEntities(entities);
+				if (entities.size() >= 1)
+				{
+					CCharacter *c = PlayerManager.getChar(entities.front());
+					if (c != NULL)
+					{
+						vector<string> params = c->getCustomMissionParams(toUpper(templ->getMissionName()));
+						if (params.size() >= 2)
+						{
+							if (params[1] == "*") // The position is defined by 'addCheckPos' command
+							{
+								sint32 x;
+								sint32 y;
+								string textName;
+								c->getPositionCheck(toUpper(templ->getMissionName()), x, y, textName);
+								
+								SM_STATIC_PARAMS_1(textParams, STRING_MANAGER::literal);
+								textParams[0].Literal.fromUtf8(textName);
+								uint32 txtId = STRING_MANAGER::sendStringToClient( c->getEntityRowId(), "LITERAL", textParams );
+								instance->addCompassTarget((TAIAlias)txtId,true,true);
+								return;
+							}
+							else
+							{
+								vector<TAIAlias> aliases;
+								CAIAliasTranslator::getInstance()->getNPCAliasesFromName( params[1] , aliases );
+								if (aliases.empty())
+								{
+									MISLOG( "<parseBotName> Invalid bot %s",params[1].c_str() );
+									return;
+								}
+								Alias = aliases[aliases.size() - 1];
+							}
+						}
+					}
+				}
+			}
+		}
+
 		if ( Alias == CAIAliasTranslator::Invalid )
 			alias = instance->getGiver();
 		else
@@ -2820,6 +2892,7 @@ class CMissionActionCompassNpc : public IMissionAction
 		instance->addCompassTarget(alias,true);
 	}
 	TAIAlias Alias;
+	bool IsDynamic;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionCompassNpc)
 };
@@ -4363,7 +4436,7 @@ class CMissionActionSetRespawnPoints : public IMissionAction
 		CMissionParser::tokenizeString(script[2], ";", args);
 
 		// check that the given respawn points exist and are all in the same continent
-		CONTINENT::TContinent lastContinent = CONTINENT::UNKNOWN;
+		CONTINENT::TContinent lastContinent;
 		for (uint i = 0; i < args.size(); i++)
 		{
 			string respawnPointName = CMissionParser::getNoBlankString(args[i]);

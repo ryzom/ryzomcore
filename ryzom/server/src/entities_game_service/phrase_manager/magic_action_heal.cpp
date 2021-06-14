@@ -195,10 +195,16 @@ protected:
 			if (_HealSap != 0)
 			{
 				targetInfos.HealSap = sint32(_HealSap * factor);
+
+				// update behaviour for healed Sap
+				behav.DeltaHP += sint16(targetInfos.HealSap);
 			}
 			if ( _HealSta != 0 )
 			{
 				targetInfos.HealSta = sint32(_HealSta * factor);
+
+				// update behaviour for healed Sta
+				behav.DeltaHP += sint16(targetInfos.HealSta);
 			}
 
 			_ApplyTargets.push_back(targetInfos);

@@ -143,7 +143,7 @@ public:
 			_ExceptionString = std::string("<CEntityBase> : Invalid stat name ") + var;
 			return _ExceptionString.c_str();
 		}
-		virtual ~EInvalidStat() NL_OVERRIDE {}
+		virtual ~EInvalidStat() throw() {}
 	private:
 		mutable std::string _ExceptionString;
 	};
@@ -356,7 +356,7 @@ public:
 	 *	Set the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the new value for the variable
-	 * \return true if the value has been set, false if an error occurred
+	 * \return true if the value has been set, false if an error occured
 	 */
 	bool setValue( const std::string& var, const std::string& value );
 
@@ -364,7 +364,7 @@ public:
 	 *	Modify the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the modification value
-	 * \return true if the value has been changed, false if an error occurred
+	 * \return true if the value has been changed, false if an error occured
 	 */
 	bool modifyValue( const std::string& var, const std::string& value );
 
@@ -524,7 +524,7 @@ public:
 	 * \param var is the name of the variable
 	 * \return ref on the stat value
 	 */
-	sint32& lookupStat( const std::string& stat);
+	sint32& lookupStat(const std::string& stat);
 
 	/**
 	 *	get a reference on a characterristics value
@@ -848,7 +848,7 @@ public:
 	inline void decPreventEntityMove() { if (_PreventEntityMoves>0) --_PreventEntityMoves; }
 
 	// tp wanted for an entity
-	virtual void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0) = 0;
+	virtual void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0, bool fromVortex = false) = 0;
 
 // memorize xp gain per agressor for offensive action
 //	void addAgressorXp( const NLMISC::CEntityId& agressor, double xp, const std::string& Skill );

@@ -1,10 +1,9 @@
 
 
+#ifndef INCLUDED_database_PLR_H
+#define INCLUDED_database_PLR_H
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
-//
-// This source file has been modified by the following contributors:
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -20,11 +19,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
-
-#ifndef INCLUDED_DATABASE__PLR_H
-#define INCLUDED_DATABASE__PLR_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -498,7 +505,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_IS_INVISIBLE;
 		ICDBStructNode	*_COUNTER;
 		TSKILL_POINTS_ _SKILL_POINTS_[4];
-		TFACTION_POINTS_ _FACTION_POINTS_[6];
+		TFACTION_POINTS_ _FACTION_POINTS_[7];
 		TRRPS_LEVELS _RRPS_LEVELS[6];
 		TNPC_CONTROL	_NPC_CONTROL;
 		
@@ -1008,7 +1015,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		}
 		TFACTION_POINTS_ &getFACTION_POINTS_(uint32 index)
 		{
-			nlassert(index < 6);
+			nlassert(index < 7);
 			return _FACTION_POINTS_[index];
 		}
 		TRRPS_LEVELS &getRRPS_LEVELS(uint32 index)
@@ -1810,7 +1817,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		{
 			
 			// Check that the value is not out of database precision
-			STOP_IF(value > (1<<4)-1, "setCOUNTER : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 4 bits");
+			STOP_IF(value > (1<<5)-1, "setCOUNTER : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 5 bits");
 				
 
 			_setProp(dbGroup, _COUNTER, value, forceSending);
@@ -2787,16 +2794,16 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_SHEET;
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
+		ICDBStructNode	*_CREATE_TIME;
+		ICDBStructNode	*_SERIAL;
 		ICDBStructNode	*_USER_COLOR;
-		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
+		ICDBStructNode	*_INFO_VERSION;
 		ICDBStructNode	*_ENCHANT;
 		ICDBStructNode	*_RM_CLASS_TYPE;
 		ICDBStructNode	*_RM_FABER_STAT_TYPE;
 		ICDBStructNode	*_PREREQUISIT_VALID;
-		ICDBStructNode	*_WORNED;
-		ICDBStructNode	*_INFO_VERSION;
 		
 
 	public:
@@ -2875,6 +2882,46 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 			return _QUANTITY;
 		}
 	
+		void setCREATE_TIME(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CREATE_TIME, value, forceSending);
+		}
+
+		uint32 getCREATE_TIME(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _CREATE_TIME, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCREATE_TIMECDBNode()
+		{
+			return _CREATE_TIME;
+		}
+	
+		void setSERIAL(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _SERIAL, value, forceSending);
+		}
+
+		uint32 getSERIAL(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _SERIAL, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getSERIALCDBNode()
+		{
+			return _SERIAL;
+		}
+	
 		void setUSER_COLOR(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
 		{
 			
@@ -2896,26 +2943,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
-		}
-	
-		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
-		}
-
-		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _CHARAC_BUFFS, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getCHARAC_BUFFSCDBNode()
-		{
-			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -2956,6 +2983,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getNAMEIDCDBNode()
 		{
 			return _NAMEID;
+		}
+	
+		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
+		}
+
+		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _INFO_VERSION, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getINFO_VERSIONCDBNode()
+		{
+			return _INFO_VERSION;
 		}
 	
 		void setENCHANT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -3045,46 +3092,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getPREREQUISIT_VALIDCDBNode()
 		{
 			return _PREREQUISIT_VALID;
-		}
-	
-		void setWORNED(CCDBSynchronised &dbGroup, bool value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _WORNED, value, forceSending);
-		}
-
-		bool getWORNED(const CCDBSynchronised &dbGroup)
-		{
-			bool value;
-			_getProp(dbGroup, _WORNED, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getWORNEDCDBNode()
-		{
-			return _WORNED;
-		}
-	
-		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
-		}
-
-		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _INFO_VERSION, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getINFO_VERSIONCDBNode()
-		{
-			return _INFO_VERSION;
 		}
 	
 	};
@@ -3128,16 +3135,16 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_SHEET;
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
+		ICDBStructNode	*_CREATE_TIME;
+		ICDBStructNode	*_SERIAL;
 		ICDBStructNode	*_USER_COLOR;
-		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
+		ICDBStructNode	*_INFO_VERSION;
 		ICDBStructNode	*_ENCHANT;
 		ICDBStructNode	*_RM_CLASS_TYPE;
 		ICDBStructNode	*_RM_FABER_STAT_TYPE;
 		ICDBStructNode	*_PREREQUISIT_VALID;
-		ICDBStructNode	*_WORNED;
-		ICDBStructNode	*_INFO_VERSION;
 		
 
 	public:
@@ -3216,6 +3223,46 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 			return _QUANTITY;
 		}
 	
+		void setCREATE_TIME(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CREATE_TIME, value, forceSending);
+		}
+
+		uint32 getCREATE_TIME(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _CREATE_TIME, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCREATE_TIMECDBNode()
+		{
+			return _CREATE_TIME;
+		}
+	
+		void setSERIAL(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _SERIAL, value, forceSending);
+		}
+
+		uint32 getSERIAL(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _SERIAL, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getSERIALCDBNode()
+		{
+			return _SERIAL;
+		}
+	
 		void setUSER_COLOR(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
 		{
 			
@@ -3237,26 +3284,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
-		}
-	
-		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
-		}
-
-		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _CHARAC_BUFFS, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getCHARAC_BUFFSCDBNode()
-		{
-			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -3297,6 +3324,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getNAMEIDCDBNode()
 		{
 			return _NAMEID;
+		}
+	
+		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
+		}
+
+		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _INFO_VERSION, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getINFO_VERSIONCDBNode()
+		{
+			return _INFO_VERSION;
 		}
 	
 		void setENCHANT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -3386,46 +3433,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getPREREQUISIT_VALIDCDBNode()
 		{
 			return _PREREQUISIT_VALID;
-		}
-	
-		void setWORNED(CCDBSynchronised &dbGroup, bool value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _WORNED, value, forceSending);
-		}
-
-		bool getWORNED(const CCDBSynchronised &dbGroup)
-		{
-			bool value;
-			_getProp(dbGroup, _WORNED, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getWORNEDCDBNode()
-		{
-			return _WORNED;
-		}
-	
-		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
-		}
-
-		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _INFO_VERSION, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getINFO_VERSIONCDBNode()
-		{
-			return _INFO_VERSION;
 		}
 	
 	};
@@ -3802,16 +3809,16 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_SHEET;
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
+		ICDBStructNode	*_CREATE_TIME;
+		ICDBStructNode	*_SERIAL;
 		ICDBStructNode	*_USER_COLOR;
-		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
+		ICDBStructNode	*_INFO_VERSION;
 		ICDBStructNode	*_ENCHANT;
 		ICDBStructNode	*_RM_CLASS_TYPE;
 		ICDBStructNode	*_RM_FABER_STAT_TYPE;
 		ICDBStructNode	*_PREREQUISIT_VALID;
-		ICDBStructNode	*_WORNED;
-		ICDBStructNode	*_INFO_VERSION;
 		
 
 	public:
@@ -3848,7 +3855,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		{
 			
 			// Check that the value is not out of database precision
-			STOP_IF(value > (1<<10)-1, "setQUALITY : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 10 bits");
+			STOP_IF(value > (1<<12)-1, "setQUALITY : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 12 bits");
 				
 
 			_setProp(dbGroup, _QUALITY, value, forceSending);
@@ -3871,7 +3878,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		{
 			
 			// Check that the value is not out of database precision
-			STOP_IF(value > (1<<10)-1, "setQUANTITY : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 10 bits");
+			STOP_IF(value > (1<<12)-1, "setQUANTITY : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 12 bits");
 				
 
 			_setProp(dbGroup, _QUANTITY, value, forceSending);
@@ -3888,6 +3895,46 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getQUANTITYCDBNode()
 		{
 			return _QUANTITY;
+		}
+	
+		void setCREATE_TIME(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CREATE_TIME, value, forceSending);
+		}
+
+		uint32 getCREATE_TIME(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _CREATE_TIME, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCREATE_TIMECDBNode()
+		{
+			return _CREATE_TIME;
+		}
+	
+		void setSERIAL(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _SERIAL, value, forceSending);
+		}
+
+		uint32 getSERIAL(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _SERIAL, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getSERIALCDBNode()
+		{
+			return _SERIAL;
 		}
 	
 		void setUSER_COLOR(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
@@ -3911,26 +3958,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
-		}
-	
-		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
-		}
-
-		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _CHARAC_BUFFS, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getCHARAC_BUFFSCDBNode()
-		{
-			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -3971,6 +3998,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getNAMEIDCDBNode()
 		{
 			return _NAMEID;
+		}
+	
+		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
+		}
+
+		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _INFO_VERSION, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getINFO_VERSIONCDBNode()
+		{
+			return _INFO_VERSION;
 		}
 	
 		void setENCHANT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -4060,46 +4107,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getPREREQUISIT_VALIDCDBNode()
 		{
 			return _PREREQUISIT_VALID;
-		}
-	
-		void setWORNED(CCDBSynchronised &dbGroup, bool value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _WORNED, value, forceSending);
-		}
-
-		bool getWORNED(const CCDBSynchronised &dbGroup)
-		{
-			bool value;
-			_getProp(dbGroup, _WORNED, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getWORNEDCDBNode()
-		{
-			return _WORNED;
-		}
-	
-		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
-		}
-
-		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _INFO_VERSION, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getINFO_VERSIONCDBNode()
-		{
-			return _INFO_VERSION;
 		}
 	
 	};
@@ -4185,15 +4192,16 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_SHEET;
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
+		ICDBStructNode	*_CREATE_TIME;
+		ICDBStructNode	*_SERIAL;
 		ICDBStructNode	*_USER_COLOR;
-		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
+		ICDBStructNode	*_INFO_VERSION;
 		ICDBStructNode	*_ENCHANT;
 		ICDBStructNode	*_RM_CLASS_TYPE;
 		ICDBStructNode	*_RM_FABER_STAT_TYPE;
 		ICDBStructNode	*_PREREQUISIT_VALID;
-		ICDBStructNode	*_INFO_VERSION;
 		ICDBStructNode	*_NB_MEMBER;
 		ICDBStructNode	*_WANTED;
 		ICDBStructNode	*_CHANCE;
@@ -4275,6 +4283,46 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 			return _QUANTITY;
 		}
 	
+		void setCREATE_TIME(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CREATE_TIME, value, forceSending);
+		}
+
+		uint32 getCREATE_TIME(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _CREATE_TIME, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCREATE_TIMECDBNode()
+		{
+			return _CREATE_TIME;
+		}
+	
+		void setSERIAL(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _SERIAL, value, forceSending);
+		}
+
+		uint32 getSERIAL(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _SERIAL, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getSERIALCDBNode()
+		{
+			return _SERIAL;
+		}
+	
 		void setUSER_COLOR(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
 		{
 			
@@ -4296,26 +4344,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
-		}
-	
-		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
-		}
-
-		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _CHARAC_BUFFS, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getCHARAC_BUFFSCDBNode()
-		{
-			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -4356,6 +4384,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getNAMEIDCDBNode()
 		{
 			return _NAMEID;
+		}
+	
+		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
+		}
+
+		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _INFO_VERSION, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getINFO_VERSIONCDBNode()
+		{
+			return _INFO_VERSION;
 		}
 	
 		void setENCHANT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -4445,26 +4493,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getPREREQUISIT_VALIDCDBNode()
 		{
 			return _PREREQUISIT_VALID;
-		}
-	
-		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
-		}
-
-		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _INFO_VERSION, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getINFO_VERSIONCDBNode()
-		{
-			return _INFO_VERSION;
 		}
 	
 		void setNB_MEMBER(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
@@ -5849,15 +5877,16 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_SHEET;
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
+		ICDBStructNode	*_CREATE_TIME;
+		ICDBStructNode	*_SERIAL;
 		ICDBStructNode	*_USER_COLOR;
-		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
+		ICDBStructNode	*_INFO_VERSION;
 		ICDBStructNode	*_ENCHANT;
 		ICDBStructNode	*_RM_CLASS_TYPE;
 		ICDBStructNode	*_RM_FABER_STAT_TYPE;
 		ICDBStructNode	*_PREREQUISIT_VALID;
-		ICDBStructNode	*_INFO_VERSION;
 		ICDBStructNode	*_CURRENCY;
 		ICDBStructNode	*_RRP_LEVEL;
 		ICDBStructNode	*_MONEY_SHEET;
@@ -5948,6 +5977,46 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 			return _QUANTITY;
 		}
 	
+		void setCREATE_TIME(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CREATE_TIME, value, forceSending);
+		}
+
+		uint32 getCREATE_TIME(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _CREATE_TIME, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCREATE_TIMECDBNode()
+		{
+			return _CREATE_TIME;
+		}
+	
+		void setSERIAL(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _SERIAL, value, forceSending);
+		}
+
+		uint32 getSERIAL(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _SERIAL, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getSERIALCDBNode()
+		{
+			return _SERIAL;
+		}
+	
 		void setUSER_COLOR(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
 		{
 			
@@ -5969,26 +6038,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
-		}
-	
-		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
-		}
-
-		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _CHARAC_BUFFS, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getCHARAC_BUFFSCDBNode()
-		{
-			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -6029,6 +6078,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getNAMEIDCDBNode()
 		{
 			return _NAMEID;
+		}
+	
+		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
+		}
+
+		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _INFO_VERSION, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getINFO_VERSIONCDBNode()
+		{
+			return _INFO_VERSION;
 		}
 	
 		void setENCHANT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -6118,26 +6187,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getPREREQUISIT_VALIDCDBNode()
 		{
 			return _PREREQUISIT_VALID;
-		}
-	
-		void setINFO_VERSION(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _INFO_VERSION, value, forceSending);
-		}
-
-		uint8 getINFO_VERSION(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _INFO_VERSION, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getINFO_VERSIONCDBNode()
-		{
-			return _INFO_VERSION;
 		}
 	
 		void setCURRENCY(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
@@ -6726,6 +6775,77 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		
 	};
 		
+	class TFABER_PLANS
+	{
+	public:
+		
+	class TArray
+	{
+	public:
+		
+
+	private:
+		ICDBStructNode	*_BranchNode;
+
+		ICDBStructNode	*_KNOWN;
+		
+
+	public:
+		void init(ICDBStructNode *parent, uint index);
+
+		// accessor to branch node
+		ICDBStructNode *getCDBNode()
+		{
+			return _BranchNode;
+		}
+
+		
+		void setKNOWN(CCDBSynchronised &dbGroup, uint64 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _KNOWN, value, forceSending);
+		}
+
+		uint64 getKNOWN(const CCDBSynchronised &dbGroup)
+		{
+			uint64 value;
+			_getProp(dbGroup, _KNOWN, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getKNOWNCDBNode()
+		{
+			return _KNOWN;
+		}
+	
+	};
+		
+
+	private:
+		ICDBStructNode	*_BranchNode;
+
+		TArray _Array[64];
+		
+
+	public:
+		void init(ICDBStructNode *parent);
+
+		// accessor to branch node
+		ICDBStructNode *getCDBNode()
+		{
+			return _BranchNode;
+		}
+
+		TArray &getArray(uint32 index)
+		{
+			nlassert(index < 64);
+			return _Array[index];
+		}
+		
+	};
+		
 	class TMISSIONS
 	{
 	public:
@@ -7273,6 +7393,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_BranchNode;
 
 		ICDBStructNode	*_PHRASE;
+		ICDBStructNode	*_COUNTER;
 		ICDBStructNode	*_HP_COST;
 		ICDBStructNode	*_SAP_COST;
 		ICDBStructNode	*_STA_COST;
@@ -7280,7 +7401,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_TARGET_HP;
 		ICDBStructNode	*_TARGET_SAP;
 		ICDBStructNode	*_TARGET_STA;
-		ICDBStructNode	*_COUNTER;
 		
 
 	public:
@@ -7311,6 +7431,29 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getPHRASECDBNode()
 		{
 			return _PHRASE;
+		}
+	
+		void setCOUNTER(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+			// Check that the value is not out of database precision
+			STOP_IF(value > (1<<4)-1, "setCOUNTER : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 4 bits");
+				
+
+			_setProp(dbGroup, _COUNTER, value, forceSending);
+		}
+
+		uint8 getCOUNTER(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _COUNTER, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCOUNTERCDBNode()
+		{
+			return _COUNTER;
 		}
 	
 		void setHP_COST(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -7472,29 +7615,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getTARGET_STACDBNode()
 		{
 			return _TARGET_STA;
-		}
-	
-		void setCOUNTER(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
-		{
-			
-			// Check that the value is not out of database precision
-			STOP_IF(value > (1<<4)-1, "setCOUNTER : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 4 bits");
-				
-
-			_setProp(dbGroup, _COUNTER, value, forceSending);
-		}
-
-		uint8 getCOUNTER(const CCDBSynchronised &dbGroup)
-		{
-			uint8 value;
-			_getProp(dbGroup, _COUNTER, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getCOUNTERCDBNode()
-		{
-			return _COUNTER;
 		}
 	
 	};
@@ -9191,7 +9311,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	private:
 		ICDBStructNode	*_BranchNode;
 
-		TBEAST _BEAST[4];
+		TBEAST _BEAST[7];
 		
 
 	public:
@@ -9205,7 +9325,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 
 		TBEAST &getBEAST(uint32 index)
 		{
-			nlassert(index < 4);
+			nlassert(index < 7);
 			return _BEAST[index];
 		}
 		
@@ -9870,7 +9990,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_CIV_ALLEGIANCE;
 		ICDBStructNode	*_THRESHOLD_TRADE;
 		ICDBStructNode	*_THRESHOLD_KOS;
-		TPLAYER _PLAYER[6];
+		TPLAYER _PLAYER[7];
 		TTRIBE _TRIBE[53];
 		
 
@@ -9971,7 +10091,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		}
 	TPLAYER &getPLAYER(uint32 index)
 		{
-			nlassert(index < 6);
+			nlassert(index < 7);
 			return _PLAYER[index];
 		}
 		TTRIBE &getTRIBE(uint32 index)
@@ -10439,6 +10559,8 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 
 		static TBRICK_FAMILY	_BRICK_FAMILY;
 
+		static TFABER_PLANS	_FABER_PLANS;
+
 		static TMISSIONS	_MISSIONS;
 
 		static TEXECUTE_PHRASE	_EXECUTE_PHRASE;
@@ -10547,6 +10669,10 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		{
 			return _BRICK_FAMILY;
 		}
+		static TFABER_PLANS &getFABER_PLANS()
+		{
+			return _FABER_PLANS;
+		}
 		static TMISSIONS &getMISSIONS()
 		{
 			return _MISSIONS;
@@ -10600,4 +10726,4 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 	
 
-#endif // INCLUDED_DATABASE__PLR_H
+#endif // INCLUDED_database_PLR_H

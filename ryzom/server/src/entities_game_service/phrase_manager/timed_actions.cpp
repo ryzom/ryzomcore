@@ -29,7 +29,9 @@
 #include "pvp_manager/pvp_manager_2.h"
 #include "phrase_manager/phrase_utilities_functions.h"
 #include "server_share/r2_vision.h"
-
+//
+#include "shop_type/shop_type_manager.h"
+//
 #include "egs_sheets/egs_sheets.h"
 //
 #include "nel/net/message.h"
@@ -111,22 +113,66 @@ void CTPTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 
 	if( CPVPManager2::getInstance()->isTPValid(character, item) )
 	{
+		std::pair<PVP_CLAN::TPVPClan,PVP_CLAN::TPVPClan> allegeance = character->getAllegiance();
+
+		const uint64 cost = CShopTypeManager::computeBasePrice(item, (uint16)1);
 		const uint32 slot = character->getTpTicketSlot();
 
+		bool destroy = true;
+
 		character->useTeleport(*item->getStaticForm());
-		character->destroyItem(INVENTORIES::bag, slot, 1, true);
+		if (item->getNonLockedStackSize() == 1)
+		{
+			if (character->doPact() && character->getMoney() >= cost)
+			{
+				if (allegeance.first == PVP_CLAN::Kami || allegeance.first == PVP_CLAN::Karavan)
+				{
+					std::string faction = PVP_CLAN::toString(allegeance.first);
+					const uint32 factionIndex = CStaticFames::getInstance().getFactionIndex(faction.c_str());
+
+					if (factionIndex != CStaticFames::INVALID_FACTION_INDEX)
+					{
+						const sint32 fame = CFameInterface::getInstance().getFameIndexed(character->getId(), factionIndex);
+						if (fame >= 33*6000) // 198000
+						{
+							destroy = false;
+							if (fame < 60*6000 && item->getStaticForm()->TpEcosystem == 7) // 360000
+								destroy = true;
+
+							if (!destroy)
+							{
+								character->spendMoney(cost);
+								SM_STATIC_PARAMS_4(
+									params,
+									STRING_MANAGER::item,
+									STRING_MANAGER::integer,
+									STRING_MANAGER::integer,
+									STRING_MANAGER::integer
+								);
+								params[0].SheetId = item->getSheetId();
+								params[1].Int = 1; // qty
+								params[2].Int = cost;
+								params[3].Int = 0; // fp
+
+								sendDynamicSystemMessage(character->getEntityRowId(), "INVENTORY_BUY_ITEM", params);
+							}
+							else
+								sendDynamicSystemMessage(character->getEntityRowId(), "ALTAR_RESTRICTION");
+						}
+					}
+				}
+			}
+		}
+		if (destroy)
+			character->destroyItem(INVENTORIES::bag, slot, 1, true);
 		character->resetTpTicketSlot();
 	}
 	else
 	{
-		if( character->getPvPRecentActionFlag() )
-		{
+		if (character->getPvPRecentActionFlag())
 			sendDynamicSystemMessage(character->getEntityRowId(), "PVP_TP_FORBIDEN");
-		}
 		else
-		{
 			sendDynamicSystemMessage(character->getEntityRowId(), "PVP_TP_ENEMY_REGION_FORBIDEN");
-		}
 	}
 }
 

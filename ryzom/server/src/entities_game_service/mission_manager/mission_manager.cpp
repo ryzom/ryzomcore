@@ -380,7 +380,7 @@ CMissionManager::CMissionManager()
 		std::map<TAIAlias,std::string>::iterator itName = globalData.NameMap.find( (*it).first );
 		if ( itName != globalData.NameMap.end() )
 		{
-			MISLOG("'%s' alias = %s",(*itName).second.c_str(), CPrimitivesParser::aliasToString((*it).first).c_str());
+			MISLOG("'%s' alias = %u giver = %u",(*itName).second.c_str(), (*it).first, (*it).second->getDefaultNpcGiver());
 			count++;
 		}
 		else
@@ -724,7 +724,16 @@ void CMissionManager::instanciateChargeMission(TAIAlias  alias, TAIAlias giver, 
 	*/
 }
 
-void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission)
+bool CMissionManager::isMissionSuccessfull(CCharacter* user,TAIAlias  alias)
+{
+	CMissionTemplate * templ = getTemplate( alias );
+	if ( !templ )
+		return false;
+
+	return user->isMissionSuccessfull(*templ);
+}
+
+uint8 CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission)
 {
 	nlassert(user);
 
@@ -735,7 +744,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 	if ( !templ )
 	{
 		MISDBG("%s ERROR instanciateMission : invalid mission template can't get template from alias", sDebugPrefix.c_str());
-		return;
+		return 1;
 	}
 	sDebugPrefix += ",'" + templ->getMissionName() + "' instanciateMission :";
 	MISDBG("%s begin", sDebugPrefix.c_str());
@@ -743,7 +752,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 	if ( templ->testPrerequisits(user, true) != MISSION_DESC::PreReqSuccess )
 	{
 		MISDBG("%s test prerequisits fails", sDebugPrefix.c_str());
-		return;
+		return 2;
 	}
 
 	CMission* inst;
@@ -753,13 +762,13 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		if ( !templ->Tags.NoList && user->getMissionsCount() >= MaxSoloMissionCount )
 		{
 			CCharacter::sendDynamicSystemMessage(user->getId(), "MISSION_MAX_SOLO_REACHED" );
-			return;
+			return 3;
 		}
 		CMissionSolo * soloMission = EGS_PD_CAST<CMissionSolo*>( EGSPD::CMissionSoloPD::create( templ->Alias ) );
 		if ( !soloMission )
 		{
 			MISDBG("%s could not create solo mission", sDebugPrefix.c_str());
-			return;
+			return 4;
 		}
 
 		soloMission->onCreation( giver );
@@ -806,14 +815,14 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 			if ( !templ->Tags.NoList && team->getMissions().size() >= MaxGroupMissionCount )
 			{
 				CCharacter::sendDynamicSystemMessage(user->getId(), "MISSION_MAX_GROUP_REACHED" );
-				return;
+				return 5;
 			}
 
 			CMissionTeam * teamMission = EGS_PD_CAST<CMissionTeam*>( EGSPD::CMissionTeamPD::create( templ->Alias ) );
 			if ( !teamMission )
 			{
 				MISDBG("%s could not create team mission", sDebugPrefix.c_str());
-				return;
+				return 6;
 			}
 			teamMission->onCreation( giver );
 			teamMission->setTeam( user->getTeamId() );
@@ -841,7 +850,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		else
 		{
 			MISDBG("%s invalid team %d", sDebugPrefix.c_str(), user->getTeamId());
-			return;
+			return 7;
 		}
 	}
 	else if ( templ->Type  == MISSION_DESC::Guild )
@@ -851,7 +860,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		if ( !user->getModuleParent().getModule( module ) )
 		{
 			MISDBG("%s user not in a guild", sDebugPrefix.c_str());
-			return;
+			return 8;
 		}
 		/* /// This is already checked in the prerequisites 
 		if (!module->pickMission( templ->Alias ))
@@ -864,19 +873,19 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		if (!guild)
 		{
 			nlwarning( "<MISSIONS>cant find guild ID : %d", user->getGuildId() );
-			return;
+			return 9;
 		}
 		if ( !templ->Tags.NoList && guild->getMissions().size() >= MaxGuildMissionCount)
 		{
 			CCharacter::sendDynamicSystemMessage(user->getId(), "MISSION_MAX_GUILD_REACHED" );
-			return;
+			return 10;
 		}
 
 		CMissionGuild * guildMission = EGS_PD_CAST<CMissionGuild*>( EGSPD::CMissionGuildPD::create( templ->Alias ) );
 		if ( !guildMission )
 		{
 			MISDBG("%s could not create guild mission", sDebugPrefix.c_str());
-			return;
+			return 11;
 		}
 		guildMission->onCreation( giver );
 		guildMission->setGuild(user->getGuildId());
@@ -938,7 +947,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 	else
 	{
 		MISDBG("%s unimplemented mission type %u", sDebugPrefix.c_str(), templ->Type);
-		return;
+		return 12;
 	}
 	inst->setGiver( giver );
 	inst->setMainMissionTemplateId(mainMission);
@@ -946,6 +955,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 	STL_ALLOC_TEST
 	initInstanciatedMission(inst, eventList);
 	MISDBG("%s end (ok)", sDebugPrefix.c_str());
+	return 0;
 }// CMissionManager::instanciateMission
 
 void CMissionManager::deInstanciateMission(CMission * mission)
@@ -1491,9 +1501,6 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
                 {
                     // inform client
                     closeDynChat( user, botRow );
-					_DynChats.erase(it);
-					it = _DynChats.end();
-					reStart = true;
 
 					std::list< CMissionEvent * > eventList;
                     inst->jump( templ->JumpPoints[i].Step,templ->JumpPoints[i].Action,eventList );
@@ -1501,6 +1508,37 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
 					// Send to AIS (to stop the bot). Important: there must be the same number of items pushed in DynChatEnd that in DynChatStart for the bot to resume.
 					CharacterDynChatBeginEnd.DynChatEnd.push_back( botRow );
 
+// HERE "it" IS INVALID, NEED TO FIND IT AGAIN TO ERASE IT
+
+					it = _DynChats.end(); // to be sure
+
+					{
+						/* We need to find the mission that we are working on as we invalidated the iterator
+						 * in the jump()
+						 */
+						CHashMultiMap<TDataSetRow,CDynChat,TDataSetRow::CHashCode>::iterator itToLookForMission = _DynChats.find( user->getEntityRowId() );
+						while (itToLookForMission != _DynChats.end() && (*itToLookForMission).first == user->getEntityRowId())
+						{
+							if ( (*itToLookForMission).second.Bot == botRow )
+							{
+								CMission * missionIterated = (*itToLookForMission).second.Mission;
+								if (missionIterated && inst  == missionIterated)
+								{
+									_DynChats.erase(itToLookForMission);
+									break;
+								}
+							}
+							++itToLookForMission;
+						}
+					}
+
+//            _DynChats.erase(it);
+
+// END PATCH
+
+
+
+                    reStart = true;
                     switch ( inst->getProcessingState() )
                     {
 	                    case CMission::Failed:

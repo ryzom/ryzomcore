@@ -34,7 +34,7 @@ uint16 CCreatureResists::ImmuneScore = 0xffff;
 //--------------------------------------------------------------
 //					serial() 
 //--------------------------------------------------------------
-void CCreatureResists::serial(NLMISC::IStream &f)
+void CCreatureResists::serial(class NLMISC::IStream &f)
 {
 	f.serial(Fear);
 	f.serial(Sleep);

@@ -96,9 +96,11 @@ public:
 	/// get the guild current session
 	uint8 getMembersSession()const;
 	/// spend an amount of XP
-//	void spendXP( uint32 xp );
+	void spendXP( uint32 xp );
 	/// add an amount of XP
-//	void addXP( uint32 xp );
+	void addXP( uint32 xp );
+	/// set an amount of XP
+	void setPoints( uint32 points );
 	/// spend an amount of money
 	void spendMoney(uint64 money);
 	/// add an amount of money

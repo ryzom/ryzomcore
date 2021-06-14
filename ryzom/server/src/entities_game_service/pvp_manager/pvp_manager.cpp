@@ -888,7 +888,7 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 			++it;
 		}
 	}
-	// problem occurred : bail out
+	// problem occured : bail out
 	if ( problem )
 		return;
 	

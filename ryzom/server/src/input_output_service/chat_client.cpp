@@ -510,3 +510,33 @@ void CChatClient::unsubscribeAllChatGroup()
 	}
 }
 
+
+//-----------------------------------------------
+//	disableTranslation
+//-----------------------------------------------
+void CChatClient::disableTranslation( const string &lang )
+{
+	if (find(_DontTranslate.begin(), _DontTranslate.end(), lang) == _DontTranslate.end())
+	{
+		_DontTranslate.push_back(lang);
+	}
+}
+
+//-----------------------------------------------
+//	resetDisabledTranslations
+//-----------------------------------------------
+void CChatClient::resetDisabledTranslations()
+{
+	_DontTranslate.clear();
+}
+
+//-----------------------------------------------
+//	haveDisabledTranslation
+//-----------------------------------------------
+bool CChatClient::haveDisabledTranslation( const string &lang )
+{
+	return find(_DontTranslate.begin(), _DontTranslate.end(), lang) != _DontTranslate.end();
+}
+
+
+

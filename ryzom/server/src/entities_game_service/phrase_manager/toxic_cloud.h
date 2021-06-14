@@ -39,11 +39,12 @@ public:
 	CToxicCloud() {}
 
 	/// Init
-	inline void		init( const NLMISC::CVector& pos, float radius, sint32 dmgPerHit, NLMISC::TGameCycle updateFrequency, NLMISC::TGameCycle lifetime=ToxicCloudDefaultLifetime) 
+	inline void		init( const NLMISC::CVector& pos, float radius, sint32 dmgPerHit, NLMISC::TGameCycle updateFrequency, NLMISC::TGameCycle lifetime=ToxicCloudDefaultLifetime, SCORES::TScores affectedScore=SCORES::hit_points) 
 	{ 
-		CEnvironmentalEffect::init(pos, radius,lifetime);
+		CEnvironmentalEffect::init(pos, radius, lifetime);
 		_DmgPerHit = dmgPerHit;
 		_UpdateFrequency = updateFrequency;
+		_AffectedScore = affectedScore;
 	}
 
 	/**
@@ -82,6 +83,9 @@ private:
 
 	/// Dmg per hit
 	sint32				_DmgPerHit;
+
+	/// Affected score
+	SCORES::TScores _AffectedScore; 
 
 	/// update frequency
 	NLMISC::TGameCycle	_UpdateFrequency;

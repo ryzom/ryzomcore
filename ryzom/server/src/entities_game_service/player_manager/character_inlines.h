@@ -50,9 +50,10 @@ inline const NLMISC::CEntityId& CCharacter::getId() const
 	return CEntityBase::getId(); 
 }
 
+
 //------------------------------------------------------------------------------
 
-inline uint32 CCharacter::getStartupInstance()				
+inline uint32 CCharacter::getStartupInstance()
 {
 	return _StartupInstance; 
 }
@@ -790,10 +791,33 @@ inline uint32 CCharacter::getTpTicketSlot() const
 
 //------------------------------------------------------------------------------
 
+inline NLMISC::CVector CCharacter::getBuildingExitPos() const
+{
+	return _BuildingExitPos;
+}
+
+
+//------------------------------------------------------------------------------
+
 inline uint16 CCharacter::getBuildingExitZone() const
 {
 	return _BuildingExitZone;
 }
+
+//------------------------------------------------------------------------------
+
+inline uint8 CCharacter::getHairColor() const
+{
+	return _HairColor;
+}
+
+//------------------------------------------------------------------------------
+
+inline uint8 CCharacter::getHair() const
+{
+	return _HairType; 
+}
+
 
 //------------------------------------------------------------------------------
 
@@ -858,6 +882,12 @@ inline TAIAlias CCharacter::getCurrentOutpostZone() const
 	return _CurrentOutpostZone; 
 }
 
+inline OUTPOSTENUMS::TOutpostState CCharacter::getCurrentOutpostState() const
+{
+	return _CurrentOutpostState; 
+}
+
+
 //------------------------------------------------------------------------------
 
 inline uint16 CCharacter::getKilledPvPRegion()
@@ -907,7 +937,6 @@ inline uint32 CCharacter::getPlayedTime() const
 	return _PlayedTime; 
 }
 
-#ifdef RYZOM_FORGE
 //------------------------------------------------------------------------------
 inline const std::string& CCharacter::getLangChannel() const
 
@@ -921,9 +950,7 @@ inline const std::string& CCharacter::getNewTitle() const
 {
 	return _NewTitle;
 }
-#endif
 
-#ifdef RYZOM_FORGE
 //------------------------------------------------------------------------------
 inline std::string CCharacter::getTagA() const
 
@@ -960,9 +987,16 @@ inline std::string CCharacter::getTagPvPB() const
 		return "_";
 	return _TagPvPB;
 }
-#endif
 
-#ifdef RYZOM_FORGE
+
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getDontTranslate() const
+
+{
+	return _DontTranslate;
+}
+
+
 //------------------------------------------------------------------------------
 inline std::string CCharacter::getFullTitle() const
 {
@@ -971,9 +1005,7 @@ inline std::string CCharacter::getFullTitle() const
 	else
 		return _NewTitle;
 }
-#endif
 
-#ifdef RYZOM_FORGE
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getOrganization() const
@@ -986,7 +1018,36 @@ inline uint32 CCharacter::getOrganizationStatus() const
 {
 	return _OrganizationStatus; 
 }
-#endif
+
+inline uint32 CCharacter::getLastTpTick() const
+{
+	return _LastTpTick; 
+}
+
+inline uint32 CCharacter::getLastOverSpeedTick() const
+{
+	return _LastOverSpeedTick; 
+}
+
+inline uint32 CCharacter::getLastMountTick() const
+{
+	return _LastMountTick; 
+}
+
+inline uint32 CCharacter::getLastUnMountTick() const
+{
+	return _LastUnMountTick; 
+}
+
+inline uint32 CCharacter::getLastFreeMount() const
+{
+	return _LastFreeMount; 
+}
+
+inline uint32 CCharacter::getLastExchangeMount() const
+{
+	return _LastExchangeMount; 
+}
 
 //------------------------------------------------------------------------------
 

@@ -50,7 +50,8 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 	H_AUTO(cbClientPosition);
 
 	CEntityId			id;
-	msgin.serial(id);
+	NLMISC::TGameCycle	tick;
+	msgin.serial(id, tick);
 
 	TDataSetRow entityIndex = TheDataset.getDataSetRow( id );
 	if ( !entityIndex.isValid() )
@@ -61,10 +62,9 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 	}
 	
 	// entity pos (x, y, z, theta)
-	NLMISC::TGameCycle	tick;
 	sint32				x, y, z;
 	float				heading;
-	msgin.serial(tick, x, y, z, heading);
+	msgin.serial(x, y, z, heading);
 
 	if (IsRingShard)
 	{
@@ -102,7 +102,7 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 		CMirrorPropValue1DS<sint32>( TheDataset, entityIndex, DSPropertyPOSY )= y;
 		CMirrorPropValue1DS<sint32>( TheDataset, entityIndex, DSPropertyPOSZ )= (z&~7) + (local ? 1 : 0) + (interior ? 2 : 0) + (water ? 4 : 0);
 		CMirrorPropValue1DS<float>( TheDataset, entityIndex, DSPropertyORIENTATION )= heading;
-		CMirrorPropValue1DS<NLMISC::TGameCycle>( TheDataset, entityIndex, DSPropertyTICK_POS )= tick + GPMS_LCT_TICKS;
+		CMirrorPropValue1DS<NLMISC::TGameCycle>( TheDataset, entityIndex, DSPropertyTICK_POS )= tick;
 
 		CMirrorPropValue1DS<TYPE_CELL> cell ( TheDataset, entityIndex, DSPropertyCELL );
 		uint32	cx = (uint16) ( + x/CWorldPositionManager::getCellSize() );

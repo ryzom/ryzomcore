@@ -239,6 +239,8 @@ private:
 		{
 			CAIEntityPhysical const* phys = const_cast<T*>(&*it)->getSpawnObj();
 
+			CMirrorPropValueRO<uint32> cell( TheDataset, phys->dataSetRow(), DSPropertyCELL );
+
 			if (phys && phys->aipos().quickDistTo(aiVectorXy) < playerRadiusInMeters)
 			{
 				_players.push_back(const_cast<T*>(&*it));

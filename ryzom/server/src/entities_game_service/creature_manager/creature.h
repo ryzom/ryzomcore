@@ -315,6 +315,9 @@ public:
 	/// get the welcome chat message
 	inline const std::string & getWelcomeMessage() { return _WelcomePhrase; }
 
+	inline const std::string & getUrlForDeathNotification() { return _UrlForDeathNotification; }
+	inline void setUrlForDeathNotification(const std::string &url) { _UrlForDeathNotification = url; }
+
 	/**
 	 * apply the effect of the armor/shield on damage. Update the armor items if necessary
 	 * \return the remaining damages
@@ -357,7 +360,7 @@ public:
 	}
 
 	// tp wanted for an entity
-	void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0);
+	void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0, bool tpWanted = false);
 
 	/// request a despawn after a number of game cycles
 	void requestDespawn(NLMISC::TGameCycle waitCycles = 0);
@@ -378,6 +381,12 @@ public:
 
 	/// enable loot rights for given team
 	void enableLootRights(uint16 teamId);
+
+	inline void lockLoot(uint16 teamId) { _LockedLoot = teamId; }
+
+	inline uint16 getLockLoot() { return _LockedLoot; }
+
+	inline NLMISC::TGameCycle getLockLootTime() { return _LockedLootTime; }
 
 	/// get the resist value associated to effect type
 	uint32 getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily);
@@ -414,6 +423,11 @@ public:
 	bool deathReportHasBeenSent() const { return _DeathReportHasBeenSent; }
 	void deathReportSent() { _DeathReportHasBeenSent = true; }
 //#endif
+
+
+	/// Add guardian killer in list
+	void addGuardianKiller(TDataSetRow PlayerRowId);
+
 
 	/// keep aggressiveness	of a creature against player character
 	void addAggressivenessAgainstPlayerCharacter( TDataSetRow PlayerRowId );
@@ -612,6 +626,8 @@ private:
 	// loot rights management
 	std::vector< TDataSetRow >		_LootRight;					// list of CCharacter have loot right after creature death, if emty all have loot right
 	NLMISC::TGameCycle				_LootRightDuration;			// Duration of loot right before all have loot right
+	uint16							_LockedLoot;				// Loot is locked by the player
+	NLMISC::TGameCycle				_LockedLootTime;		// Time of lock of loot (for bosses)
 
 //#ifdef NL_DEBUG
 	// Looking for a 'Zombie' bug (creature dead on EGS, but not on AIS)
@@ -634,6 +650,12 @@ private:
 	// creature agressiveness against player character
 	std::set< TDataSetRow >			_Agressiveness;
 
+	// players attacking the boss guardians
+	std::set< TDataSetRow >			_GuardiansKillers;
+
+	// keep nb of guardians killers
+	uint16							_NbOfGuardiansKillers;
+	
 	// keep nb of players in creature aggro list (as aggro list also contains npcs or creatures)
 	uint16						_NbOfPlayersInAggroList;
 
@@ -669,6 +691,8 @@ private:
 	std::string						_CustomLootTableId;
 	//if the creature has a user model, this is the alias of the primitive where the model is defined
 	uint32							_PrimAlias;
+
+	std::string						_UrlForDeathNotification;
 };
 
 typedef NLMISC::CSmartPtr<CCreature> CCreaturePtr;

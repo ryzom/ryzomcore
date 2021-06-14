@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -56,7 +53,7 @@
 class CWorldPositionManager;
 class ConstIteratorType;
 
-#define GPMS_LCT_TICKS (10)
+
 
 
 
@@ -140,8 +137,15 @@ public:
 	//friend void				CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8 worldImage);
 	friend void				CWorldEntity::removePrimitive();
 
+	struct CEntityIdHash
+	{
+		enum { bucket_size = 4, min_buckets = 8 };
+		size_t	operator () (const NLMISC::CEntityId &id) const { return (uint32)id.getShortId(); }
+		size_t	operator () (const NLMISC::CEntityId &left, const NLMISC::CEntityId &right) const { return left < right; }
+	};
+
 	/// Container of entities (all entities are referenced by this container
-	typedef CHashMap< NLMISC::CEntityId, CWorldEntity *, NLMISC::CEntityIdHashMapTraits >		TWorldEntityContainerByEId;
+	typedef CHashMap< NLMISC::CEntityId, CWorldEntity *, CEntityIdHash >		TWorldEntityContainerByEId;
 	typedef CHashMap<TDataSetRow, CWorldEntity *, TDataSetRow::CHashCode>		TWorldEntityContainer;
 
 	typedef CCell																	**TWorldCellsMap;
@@ -160,7 +164,7 @@ public:
 
 	typedef std::list< CWorldEntity * >												TRemovedEntityContainer;
 	typedef std::set< NLMISC::CEntityId >											TSetId;
-	typedef CHashMap< NLMISC::CEntityId, CAroundEntityInfo, NLMISC::CEntityIdHashMapTraits >	TEntitiesAroundEntityContainer;
+	typedef CHashMap< NLMISC::CEntityId, CAroundEntityInfo, CEntityIdHash >	TEntitiesAroundEntityContainer;
 
 	//typedef std::hash_map<NLMISC::CEntityId, CPlayerInfos*, CEntityIdHash >			TMapIdToPlayerInfos;
 

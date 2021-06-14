@@ -47,9 +47,9 @@ bool CMagicAiActionToxicCloud::initFromAiAction( const CStaticAiAction *aiAction
 
 	CCreature *creature = CreatureManager.getCreature( phrase->getActor() );
 	if (creature && creature->getForm())
-		_Damage = (uint16)(data.SpellParamValue + data.SpellPowerFactor * creature->getForm()->getAttackLevel());
+		_Damage = (sint32)(data.SpellParamValue + data.SpellPowerFactor * creature->getForm()->getAttackLevel());
 	else
-		_Damage = (uint16)data.SpellParamValue;
+		_Damage = (sint32)data.SpellParamValue;
 	
 	_EffectDuration = data.Duration;
 	_UpdateFrequency = data.UpdateFrequency;
@@ -59,6 +59,8 @@ bool CMagicAiActionToxicCloud::initFromAiAction( const CStaticAiAction *aiAction
 	// get effect radius
 	const TAiArea &areaData = aiAction->getAreaData();
 	_Radius = areaData.AreaRange;
+
+	_Fx = data.Fx;
 
 	return true;
 } // initFromAiAction //
@@ -103,7 +105,7 @@ void CMagicAiActionToxicCloud::apply( CMagicPhrase * phrase, sint deltaLevel, si
 		return;
 	}
 
-	cloud->init(pos, _Radius, _Damage, _UpdateFrequency, _EffectDuration);
+	cloud->init(pos, _Radius, _Damage, _UpdateFrequency, _EffectDuration, _AffectedScore);
 
 	// fx radius
 	uint8 fxRadius; // {0,1,2} for range (1,3,5 m)
@@ -121,7 +123,14 @@ void CMagicAiActionToxicCloud::apply( CMagicPhrase * phrase, sint deltaLevel, si
 	}
 
 	// spawn toxic cloud and add it to manager
-	CSheetId sheet( toString( "toxic_cloud_%d.fx", fxRadius ));
+	CSheetId sheet;
+	if (_Fx == CSheetId::Unknown)
+	{
+		sheet = CSheetId( toString( "toxic_cloud_%d.fx", fxRadius ));
+	}
+	else
+		sheet = _Fx;
+
 	if ( cloud->spawn( sheet ) )
 	{
 		CEnvironmentalEffectManager::getInstance()->addEntity( cloud );

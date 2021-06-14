@@ -1630,11 +1630,13 @@ Arguments: s(actionName),s(url) ->
 // CGroup
 void setUrl_ss_(CStateInstance* entity, CScriptStack& stack)
 {
+	CGroup* group = entity->getGroup();
+	
 	std::string url = (std::string)stack.top();stack.pop();	
 	std::string actionName = (std::string)stack.top();stack.pop();	
 	
 	CCreatureSetUrlMsg msg;
-	FOREACH(botIt, CCont<CBot>,	entity->getGroup()->bots())
+	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
 		CSpawnBot* pbot = botIt->getSpawnObj();
 		if (pbot!=NULL)
@@ -1642,7 +1644,9 @@ void setUrl_ss_(CStateInstance* entity, CScriptStack& stack)
 			msg.Entities.push_back(pbot->dataSetRow());
 		}
 	}
-	
+	CSpawnGroup* spawnGroup = group->getSpawnObj();
+	spawnGroup->setActionName(actionName);
+	spawnGroup->setUrl(url);
 	msg.ActionName = actionName;
 	msg.Url = url;
 	msg.send(egsString);

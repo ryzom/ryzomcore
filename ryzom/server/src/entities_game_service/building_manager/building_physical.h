@@ -64,7 +64,7 @@ public:
 	/// get the cell id of a physical room of this building. Return true if no error. 
 	/// If the room was not already instanciated, this method instanciate it
 	/// ownerIdx is the index of the owner ( player / guild ) in the room owner vector
-	bool addUser(CCharacter * user, uint16 roomIdx,uint16 ownerIdx, sint32 & cellId);
+	bool addUser(CCharacter * user, uint16 roomIdx,uint16 ownerIdx, sint32 & cellId, bool persistant = false, bool send_url = true);
 	/// return false if the user was not present in the building
 	inline bool removeUser(const TDataSetRow & row);
 	/// return true if user is in building

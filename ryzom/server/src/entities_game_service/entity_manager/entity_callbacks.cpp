@@ -42,6 +42,7 @@
 #include "game_share/mainland_summary.h"
 #include "game_share/shard_names.h"
 #include "server_share/testing_tool_structures.h"
+#include "server_share/mongo_wrapper.h"
 
 #include "server_share/r2_vision.h"
 #include "game_share/r2_share_itf.h"
@@ -449,10 +450,8 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	c->initAnimalHungerDb();
 
 	c->initFactionPointDb();
-#ifdef RYZOM_FORGE
 	c->initPvpPointDb();
 	c->initOrganizationInfos();
-#endif
 
 	c->updateOutpostAdminFlagInDB();
 
@@ -524,26 +523,7 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	// ask backup for offline commands file
 	COfflineCharacterCommand::getInstance()->characterOnline( characterId );
 
-#ifdef RYZOM_EPISODE2_REACTIVATE
-	if( CGameEventManager::getInstance().getChannelEventId() != TChanID::Unknown )
-	{
-		if( c->haveAnyPrivilege() )
-		{
-			DynChatEGS.addSession(CGameEventManager::getInstance().getChannelEventId(), entityIndex, true);
-		}
-		else
-		{
-			DynChatEGS.addSession(CGameEventManager::getInstance().getChannelEventId(), entityIndex, false);
-		}
-	}
-#endif
-
 	c->onConnection();
-
-#ifdef RYZOM_EPISODE2_REACTIVATE
-	CPVPManager2::getInstance()->sendFactionWarsToClient( c );
-	CPVPManager2::getInstance()->addOrRemoveFactionChannel( c );
-#endif
 } // cbClientReady //
 
 
@@ -673,12 +653,15 @@ void finalizeClientReady( uint32 userId, uint32 index )
 	c->getEncyclopedia().sendEncycloToClient();
 
 	// update newbieland flag (defailt to 1 if there's aproblem determining the true value)
-	nlinfo("Updating IS_NEWBIE flag for character: %s",c->getId().toString().c_str());
 //	c->_PropertyDatabase.setProp("USER:IS_NEWBIE", c->isNewbie());
 	CBankAccessor_PLR::getUSER().setIS_NEWBIE(c->_PropertyDatabase, c->isNewbie());
 	bool trialPlayer = player->isTrialPlayer();
 //	c->_PropertyDatabase.setProp("USER:IS_TRIAL", trialPlayer);
 	CBankAccessor_PLR::getUSER().setIS_TRIAL(c->_PropertyDatabase, trialPlayer);
+
+	// checks for freetrial
+	if (trialPlayer)
+		c->checksForFreeTrial();
 
 
 	if (IsRingShard)
@@ -989,12 +972,10 @@ void cbCreateChar( CMessage& msgin, const std::string &serviceName, NLNET::TServ
 	createCharMsg.serial( msgin );
 
 	// Yoyo: fix to force new newbieland.
-#ifdef RYZOM_FORGE
 	if(UseNewNewbieLandStartingPoint)
 	{
 		createCharMsg.StartPoint= RYZOM_STARTING_POINT::starting_city;
 	}
-#endif
 
 	// acceptable name if: first char is an upper case, all the name is lower case
 	for (uint i = 0; i < createCharMsg.Name.size(); i++)
@@ -1215,6 +1196,13 @@ void cbDeleteChar( CMessage& msgin, const std::string &serviceName, NLNET::TServ
 	CCharacter *character = player->getCharacter(characterIndex);
 	if (character != NULL)
 		charName = character->getName().toUtf8();
+
+	#ifdef HAVE_MONGO
+		string::size_type pos = charName.find('(');
+		if (pos != string::npos)
+			charName = charName.substr(0, pos);
+		CMongo::remove("ryzom_users", toString("{'name': '%s'}", charName.c_str()));
+	#endif
 
 	PlayerManager.deleteCharacter( userId, index );
 
@@ -3076,7 +3064,6 @@ void cbTeleportPlayer(NLNET::CMessage& msgin, const std::string &serviceName, NL
 	chr->teleportCharacter(x, y, z, true, true, t);
 }
 
-#ifdef RYZOM_FORGE
 //---------------------------------------------------
 // trigger the webig
 //---------------------------------------------------
@@ -3098,10 +3085,10 @@ void cbTriggerWebig(NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 		CCharacter *chr = PlayerManager.getChar(playerId);
 		if (!chr)
 			continue;
-		chr->sendUrl(event, "");
+		chr->sendUrl(event);
 	}
 }
-#endif
+
 
 //---------------------------------------------------
 /// Forage source position validation

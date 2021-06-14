@@ -1,10 +1,5 @@
-
-
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
-//
-// This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -19,12 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#ifndef INCLUDED_database_OUTPOST_H
+#define INCLUDED_database_OUTPOST_H
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
-
-#ifndef INCLUDED_DATABASE__OUTPOST_H
-#define INCLUDED_DATABASE__OUTPOST_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -145,11 +140,11 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 
 		
 	class TOUTPOST_SELECTED
-	{
+	{	
 	public:
 		
 	class TGUILD
-	{
+	{	
 	public:
 		
 
@@ -670,4 +665,4 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 	
 
-#endif // INCLUDED_DATABASE__OUTPOST_H
+#endif // INCLUDED_database_OUTPOST_H

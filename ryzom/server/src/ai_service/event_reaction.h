@@ -85,12 +85,13 @@ public:
 
 	void setEvent	(const std::string &eventName,CStateMachine *container);// this causes the event reaction to be linked to an event manager
 	void setState	(uint32 alias);						// used for events that apply to a specific state
+	uint32 getState	();						// used for events that apply to a specific state
 	void setGroup	(uint32 alias);						// used for events that apply to a specific group
 
 	// the following routine shouldn't be needed it should be superceded by a better alternative
 	// in the event manager
 	template <class TState>
-	bool testCompatibility(CStateInstance	*const	stateInstance, const	TState	*const	state) const;
+	  bool	testCompatibility(CStateInstance	*const	stateInstance, const	TState	*const	state) const;
 
 protected:
 	// protected data ---------------------------------------------------

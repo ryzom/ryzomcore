@@ -387,12 +387,14 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 				Type = MISSION_DESC::Guild;
 			else if ( script[0] == "decl_item" )
 			{
+				/* ULUKYN : Deactivated because not used (i suppose nevrax used named item instead...
+				 *  the code of CMissionItem::buildFromScript are just... no words :D
 				CMissionItem item;
 				string itemName;
 				if ( item.buildFromScript( script, missionData.ChatParams , itemName) )
 					missionData.Items.push_back( make_pair(itemName,item) );
 				else
-					ret = false;
+					ret = false;*/
 			}
 			else if ( script[0] == "decl" )
 				ret = parseScriptVar( i+1, script, missionData.ChatParams ) && ret;
@@ -2444,55 +2446,119 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 
 uint32 CMissionTemplate::sendTitleText( const TDataSetRow & userRow, const TDataSetRow & giver ) const
 {
-TVectorParamCheck params(1 + TitleParams.size() );
-	std::copy( TitleParams.begin(),TitleParams.end(), params.begin() + 1  );
-	params[0].Type = STRING_MANAGER::bot;
-	params[0].setEIdAIAlias( getEntityIdFromRow( giver ), CAIAliasTranslator::getInstance()->getAIAlias(getEntityIdFromRow( giver )) ); 
-	CMissionParser::solveEntitiesNames(params,userRow,params[0].getEId());	
-	return STRING_MANAGER::sendStringToClient( userRow, TitleText,params );
+	if (TitleText.compare(0, 6, "WEBIG_") == 0 || TitleText.compare(0, 4, "ARK_") == 0)
+	{
+		string text = TitleText;
+		CCharacter *user = PlayerManager.getChar(getEntityIdFromRow(userRow));
+		if (user)
+		{
+			uint32 userId = PlayerManager.getPlayerId(user->getId());
+			text = user->getCustomMissionText(TitleText);
+			if (text.empty())
+				text = "<Undefined>";
+		}
+		SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+		params[0].Literal.fromUtf8(text);
+		return STRING_MANAGER::sendStringToClient( userRow, "LITERAL", params );
+	}
+	else
+	{
+		TVectorParamCheck params(1 + TitleParams.size() );
+		std::copy( TitleParams.begin(),TitleParams.end(), params.begin() + 1  );
+		params[0].Type = STRING_MANAGER::bot;
+		params[0].setEIdAIAlias( getEntityIdFromRow( giver ), CAIAliasTranslator::getInstance()->getAIAlias(getEntityIdFromRow( giver )) ); 
+		CMissionParser::solveEntitiesNames(params,userRow,params[0].getEId());	
+		return STRING_MANAGER::sendStringToClient( userRow, TitleText,params );
+	}
 }// CMissionTemplate sendTitleText
 
 uint32 CMissionTemplate::sendAutoText( const TDataSetRow & userRow,const NLMISC::CEntityId & giver) const
 {
-	TVectorParamCheck params = AutoParams;
-	CMissionParser::solveEntitiesNames(params,userRow,giver);	
-	return STRING_MANAGER::sendStringToClient( userRow, AutoText,params );
+	if (AutoText.compare(0, 6, "WEBIG_") == 0 || AutoText.compare(0, 4, "ARK_") == 0)
+	{
+		string text = AutoText;
+		CCharacter *user = PlayerManager.getChar(getEntityIdFromRow(userRow));
+		if (user)
+		{
+			uint32 userId = PlayerManager.getPlayerId(user->getId());
+			text = user->getCustomMissionText(AutoText);
+			if (text.empty())
+				return 0;
+		}
+
+		TVectorParamCheck vect;
+		STRING_MANAGER::TParam param;
+
+		param.Type = STRING_MANAGER::bot;
+		param.setEIdAIAlias(giver, CAIAliasTranslator::getInstance()->getAIAlias(giver));
+		vect.push_back( param );
+
+		param.Type = STRING_MANAGER::literal;
+		param.Literal.fromUtf8(text);
+		vect.push_back(param);
+
+		return STRING_MANAGER::sendStringToClient( userRow, "LITERAL_BOT", vect );
+	}
+	else
+	{
+		TVectorParamCheck params = AutoParams;
+		CMissionParser::solveEntitiesNames(params,userRow,giver);	
+		return STRING_MANAGER::sendStringToClient( userRow, AutoText,params );
+	}
 }// CMissionTemplate::sendAutoText
 
 uint32 CMissionTemplate::sendDescText( const TDataSetRow & userRow, const TDataSetRow & giver, uint32 descIndex) const
 {
-	CEntityId id = getEntityIdFromRow( giver );
-
-	TVectorParamCheck params;
-	const TVectorParamCheck* addParams = NULL;
-	const string * txt = NULL;
-	if ( descIndex == 0xFFFFFFFF )
+	if (DescText.compare(0, 6, "WEBIG_") == 0 || DescText.compare(0, 4, "ARK_") == 0)
 	{
-		txt = &DescText;
-		addParams = &DescParams;
+		string text = DescText;
+		CCharacter *user = PlayerManager.getChar(getEntityIdFromRow(userRow));
+		if (user)
+		{
+			uint32 userId = PlayerManager.getPlayerId(user->getId());
+			text = user->getCustomMissionText(DescText);
+			if (text.empty())
+				text = "<Undefined>";
+		}
+		SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+		params[0].Literal.fromUtf8(text);
+		return STRING_MANAGER::sendStringToClient( userRow, "LITERAL", params );
 	}
 	else
 	{
-		if  ( descIndex >= OverloadedDescs.size() )
+		CEntityId id = getEntityIdFromRow( giver );
+
+		TVectorParamCheck params;
+		const TVectorParamCheck* addParams = NULL;
+		const string * txt = NULL;
+		if ( descIndex == 0xFFFFFFFF )
 		{
-			nlwarning("<MISSIONS> Invalid descIndex %u, size is  %u",descIndex,OverloadedDescs.size() );
 			txt = &DescText;
 			addParams = &DescParams;
 		}
 		else
 		{
-			txt = &(OverloadedDescs[descIndex].Text);
-			addParams = &(OverloadedDescs[descIndex].Params);
+			if  ( descIndex >= OverloadedDescs.size() )
+			{
+				nlwarning("<MISSIONS> Invalid descIndex %u, size is  %u",descIndex,OverloadedDescs.size() );
+				txt = &DescText;
+				addParams = &DescParams;
+			}
+			else
+			{
+				txt = &(OverloadedDescs[descIndex].Text);
+				addParams = &(OverloadedDescs[descIndex].Params);
+			}
 		}
+		params.reserve(1 + (*addParams).size() );		
+		params.push_back(STRING_MANAGER::TParam(STRING_MANAGER::entity));
+		params.back().setEIdAIAlias(id, CAIAliasTranslator::getInstance()->getAIAlias(id));
+		params.insert(params.end(), (*addParams).begin(), (*addParams).end());
+
+
+		CMissionParser::solveEntitiesNames(params,userRow,id);
+		return STRING_MANAGER::sendStringToClient( userRow,*txt,params );
 	}
-	params.reserve(1 + (*addParams).size() );		
-	params.push_back(STRING_MANAGER::TParam(STRING_MANAGER::entity));
-	params.back().setEIdAIAlias(id, CAIAliasTranslator::getInstance()->getAIAlias(id));
-	params.insert(params.end(), (*addParams).begin(), (*addParams).end());
-
-
-	CMissionParser::solveEntitiesNames(params,userRow,id);
-	return STRING_MANAGER::sendStringToClient( userRow,*txt,params );
 }// CMissionTemplate sendDetailsText
 
 /*

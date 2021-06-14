@@ -267,7 +267,7 @@ void CSkills::clear()
 // serial :
 //
 //-----------------------------------------------
-void CSkills::serial( NLMISC::IStream &f )
+void CSkills::serial( NLMISC::IStream &f)
 {
 	uint32 size = SKILLS::NUM_SKILLS;
 	f.serial( size );

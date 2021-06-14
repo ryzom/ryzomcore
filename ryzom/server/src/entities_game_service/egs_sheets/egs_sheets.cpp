@@ -907,6 +907,13 @@ void		CSheets::reloadXPTable(const std::string &wildcardFilter)
 }
 
 // ***************************************************************************
+void		CSheets::reloadAiactions(const std::string &wildcardFilter)
+{
+	reloadCommonSheets(_StaticSheets._AiActions, "aiaction", wildcardFilter);
+}
+
+
+// ***************************************************************************
 std::string	extendWildcard(const std::string &in)
 {
 	string	out;
@@ -937,6 +944,7 @@ CMD_RELOAD_SHEET(reloadSBrick)
 CMD_RELOAD_SHEET(reloadSPhrase)
 CMD_RELOAD_SHEET(reloadSuccessChancesTable)
 CMD_RELOAD_SHEET(reloadXPTable)
+CMD_RELOAD_SHEET(reloadAiactions)
 
 
 

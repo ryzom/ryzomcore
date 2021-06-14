@@ -24,6 +24,7 @@
 #include "game_share/tick_event_handler.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/mode_and_behaviour.h" //TEMP!!!
+#include "game_share/news_types.h"
 #include "game_share/bot_chat_types.h"
 #include "game_share/brick_types.h"
 #include "game_share/loot_harvest_state.h"
@@ -75,11 +76,13 @@ uint8 MaxDistShout = 3;
 bool ShowChat = false;
 
 CVariable<bool>	VerboseNameTranslation("ios","VerboseNameTranslation", "Set verbosity for bot name trnaslation", false, 0, true);
+CVariable<uint32>	MongoDBChatsCheckingDelay("ios","MongoDBChatCheckingDelay", "Set delay in tick before new MongDb chats check", 10, 0, true);
 extern CVariable<bool>	VerboseChatManagement;
 
 
 CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
+uint8 ticks_before_mongodb_check = 0;
 
 void CAIAliasManager::clear()
 { 
@@ -303,6 +306,19 @@ bool CInputOutputService::update()
 		else
 			++first;
 	}
+
+	/// MongoDB Chats Check
+
+	if (ticks_before_mongodb_check > 0)
+	{
+		ticks_before_mongodb_check--;
+	}
+	else
+	{
+		ticks_before_mongodb_check = MongoDBChatsCheckingDelay;
+		IOS->getChatManager().update();
+	}
+
 
 	return true;
 } // update //
@@ -554,10 +570,9 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	}
 	else
 	{
-		// remove previous name association
-//		_NameToInfos.erase(ucname);
+		// remove previous name association (because name have changed)
 		_NameToInfos.erase(charInfos->ShortName.toUtf8());
-		oldname = charInfos->ShortName;
+		oldname = charInfos->ShortName; // save the old name
 
 		if (charInfos->EntityId != eid)
 		{
@@ -605,7 +620,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 			}
 		}
 
-		// See if an existing player was renamed
+		// Check about a rename or get of original name back
 		if (!oldname.empty())
 		{
 			TSessionId sessionid;
@@ -626,17 +641,19 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 				charInfos->ShortName.fromUtf8(name);
 			}
 
-			// Save the old name only if new name is not found (and the player is getting original name back)
+			TIdRealNames::iterator itRealName = _IdToRealName.find(eid);
+			if( itRealName != _IdToRealName.end() ) //Erase if found realname. New name will be added if need
+				_IdToRealName.erase(eid);
+
+			// Lookup on _RenamedCharInfos about realname (if found => the player have a rename )
 			itInfos = _RenamedCharInfos.find( charInfos->ShortName.toUtf8() );
-			if( itInfos != _RenamedCharInfos.end() )
+			if( itInfos != _RenamedCharInfos.end() ) // New name was in the saved list; player is getting original name back
 			{
-				// New name was in the saved list; player is getting original name back. 
-				// Remove the new name
 				_RenamedCharInfos.erase(charInfos->ShortName.toUtf8());
 			}
-			else
+			else // New name was not in the list, save old name (it's the real name)
 			{
-				// New name was not in the list, save old name
+				_IdToRealName.insert(make_pair(eid, oldname.toUtf8()));
 				_RenamedCharInfos.insert( make_pair(oldname.toUtf8(), charInfos) );
 			}
 		}
@@ -749,6 +766,68 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 
 
 //-----------------------------------------------
+//	getRocketName :
+//
+//-----------------------------------------------
+string CInputOutputService::getRocketName(const ucstring& chName)
+{
+	ucstring charname = chName;
+	string realName;
+	string reName;
+	ucstring::size_type pos = charname.find('$');
+	if (pos != string::npos)
+		charname = charname.substr(0, pos);
+		
+	CCharacterInfos * charInfos = NULL;
+	TCharInfoCont::iterator itInfos = _NameToInfos.find(charname.toUtf8());
+	if (itInfos != _NameToInfos.end()) // Char can have a rename, need found it on _IdToRealName
+	{
+		charInfos = itInfos->second;
+		realName = charInfos->Name.toString();
+	}
+	else
+	{
+		itInfos = _RenamedCharInfos.find(charname.toUtf8());
+		if (itInfos != _RenamedCharInfos.end()) // Char is renamed
+		{
+			realName = chName.toString();
+			charInfos = itInfos->second;
+			if (charInfos != NULL) {
+				reName = charInfos->Name.toString();
+			}
+		}
+	}
+
+	if (reName.empty() && charInfos != NULL) // Search for a rename
+	{
+		TIdRealNames::iterator itRealName = _IdToRealName.find(charInfos->EntityId);
+		if (itRealName != _IdToRealName.end())
+		{
+			reName = realName;
+			realName = itRealName->second;
+		}
+	}
+	
+	string::size_type spos = realName.find('(');
+	if (spos != string::npos)
+		realName = realName.substr(0, spos);
+
+	if (!reName.empty())
+	{
+		spos = reName.find('(');
+		if (spos != string::npos)
+			reName = reName.substr(0, spos);
+	}
+
+	if (charInfos != NULL && !reName.empty() && !charInfos->HavePrivilege)
+		realName = reName+"@"+realName;
+
+	return realName;
+
+} // getRocketName //
+
+
+//-----------------------------------------------
 //	getCharInfos :
 //
 //-----------------------------------------------
@@ -789,7 +868,7 @@ CCharacterInfos * CInputOutputService::getCharInfos( const ucstring& chName )
 	
 	// Not found so check any renamed players
 	itInfos = _RenamedCharInfos.find( chName.toUtf8() );
-	if( itInfos != _NameToInfos.end() )
+	if( itInfos != _RenamedCharInfos.end() )
 	{
 		return 	itInfos->second;
 	}
@@ -850,6 +929,12 @@ void CInputOutputService::removeEntity( const TDataSetRow &chId )
 //		index = itInfos->second->OldNameIndex;
 
 		_NameToInfos.erase(itInfos->second->ShortName.toUtf8());
+		TIdRealNames::iterator itRealName = _IdToRealName.find(eid);
+		if( itRealName != _IdToRealName.end() )  //Erase if found rename
+		{
+			_RenamedCharInfos.erase(itRealName->second);
+			_IdToRealName.erase(eid);
+		}
 
 		// erase the entry in _IdToInfos
 		delete itInfos->second;

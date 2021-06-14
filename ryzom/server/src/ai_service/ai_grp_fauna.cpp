@@ -1088,6 +1088,10 @@ void CGrpFauna::setType(TFaunaType type)
 	faction().removeProperties();
 	if (type==AITYPES::FaunaTypePredator)
 		faction().addProperty(AITYPES::CPropertyId("Predator"));
+	else if (type==AITYPES::FaunaTypeHerbivore)
+		faction().addProperty(AITYPES::CPropertyId("Herbivore"));
+	else if (type==AITYPES::FaunaTypePlant)
+		faction().addProperty(AITYPES::CPropertyId("Plant"));
 	_Type = type;
 }
 

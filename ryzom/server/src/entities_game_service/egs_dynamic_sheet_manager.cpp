@@ -51,7 +51,15 @@ void CDynamicSheetManager::release()
 */
 void cbGetUserModels( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
-	CDynamicSheetManager::getInstance()->getUserModelsFromMsg(msgin, serviceId);
+	CDynamicSheetManager::getInstance()->getUserModelsFromMsg(msgin, serviceId, false);
+}
+
+/**
+* callbacks applied when receiving ai messages (user models & custom loot table) from aiscript command (can be updated)
+*/
+void cbGetUserModel( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	CDynamicSheetManager::getInstance()->getUserModelsFromMsg(msgin, serviceId, true);
 }
 
 void cbGetCustomLootTables(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
@@ -77,7 +85,7 @@ bool CDynamicSheetManager::isAlreadyStored(CCustomElementId id)
 /**
 * for each user model, instanciate the matching dynamic sheet
 */
-void CDynamicSheetManager::getUserModelsFromMsg(NLNET::CMessage &msgin, NLNET::TServiceId serviceId)
+void CDynamicSheetManager::getUserModelsFromMsg(NLNET::CMessage &msgin, NLNET::TServiceId serviceId, bool update)
 {
 	nldebug("Receiving UserModels from AIS");
 	CScriptData scriptData;
@@ -87,12 +95,17 @@ void CDynamicSheetManager::getUserModelsFromMsg(NLNET::CMessage &msgin, NLNET::T
 	{
 		if (isAlreadyStored(it->first))
 		{
-			nlwarning("User model '%s' already defined, skipping it.", it->first.Id.c_str());
+			if (update)
+			{
+				removeDynamicSheet(it->first);
+			}
+			else
+			{
+				nlwarning("User model '%s' already defined, skipping it.", it->first.Id.c_str());
+				return;
+			}
 		}
-		else
-		{
-			instanciateDynamicSheet(it->first, it->second, serviceId);
-		}
+		instanciateDynamicSheet(it->first, it->second, serviceId);
 	}
 }
 
@@ -176,6 +189,7 @@ void CDynamicSheetManager::init()
 	NLNET::TUnifiedCallbackItem _cbArray[] =
 	{
 		{ "USER_MODELS", cbGetUserModels },
+		{ "USER_MODEL", cbGetUserModel },
 		{ "CUSTOM_LOOT_TABLES", cbGetCustomLootTables },
 		{ "DELCUSTOM", cbDeleteCustomDataByPrimAlias }
 	};
@@ -229,6 +243,22 @@ void CDynamicSheetManager::instanciateDynamicSheet(CCustomElementId			modelId,
 	//changed from "botName" to "<ERROR>botName"
 	_UserModelLoadingErrors.insert(make_pair(modelId, errors));
 }
+
+/**
+*  remove a dynamic sheet by id
+*/
+void CDynamicSheetManager::removeDynamicSheet(CCustomElementId modelId)
+{
+	TModifiedCreaturesMap::iterator model = _CreaturesMap.find(modelId);
+	
+	if (model == _CreaturesMap.end())
+	{
+		nlwarning("Sheet '%s' not present in manager", modelId.Id.c_str());
+		return;
+	}
+	_CreaturesMap.erase(model);
+}
+
 
 CStaticCreatures *CDynamicSheetManager::getDynamicSheet(uint32 primAlias, const std::string &userModelId)
 {

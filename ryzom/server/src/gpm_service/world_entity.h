@@ -105,6 +105,8 @@ public:
 
 	CMirrorPropValue1DS<TYPE_WHO_SEES_ME>			WhoSeesMe;
 
+	bool											Dead;					// Are player dead or alive
+
 	uint32											PatatEntryIndex;		// The patat entry for the _PatatSubscribeManager
 
 	CCell											*CellPtr;				// pointer on cell where entity is	

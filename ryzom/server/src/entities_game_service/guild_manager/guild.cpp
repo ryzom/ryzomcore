@@ -40,6 +40,7 @@
 /// todo guild remove entity id translator
 #include "nel/misc/eid_translator.h"
 #include "chat_groups_ids.h"
+#include "server_share/mongo_wrapper.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -118,19 +119,37 @@ uint8 CGuild::getMembersSession()const
 } 
 
 //----------------------------------------------------------------------------
-//void CGuild::spendXP( uint32 xp )
-//{
+void CGuild::spendXP( uint32 xp )
+{
 //	nlassert( xp <= _XP );
-//	setXP( _XP - xp );
+	if ( xp > _XP )
+	{
+		nlwarning( "spendXP guild %u : xp = %u, max = %u", _Id, xp, _XP);
+		return;
+	}
+	setXP( _XP - xp );
+	CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
 //	setClientDBProp( "GUILD:XP", _XP );
-//}
+}
 
 //----------------------------------------------------------------------------
-//void CGuild::addXP( uint32 xp )
-//{
-//	setXP( _XP + xp );
+void CGuild::addXP( uint32 xp )
+{
+	if (_XP < 1000) // TEMPORARY LIMIT : must be removed when added more stuff to pay with guild points
+	{
+		setXP( _XP + xp );
+		CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
+	}
 //	setClientDBProp( "GUILD:XP", _XP );
-//}
+}
+
+//----------------------------------------------------------------------------
+void CGuild::setPoints( uint32 points )
+{
+	setXP(points);
+	CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, points);
+}
+
 
 //----------------------------------------------------------------------------
 void CGuild::spendMoney(uint64 money)
@@ -561,7 +580,7 @@ void CGuild::registerGuild()
 //	setClientDBProp( "GUILD:ICON",_Icon );
 	CBankAccessor_GUILD::getGUILD().setICON(_DbGroup, _Icon);
 //	setClientDBProp( "GUILD:XP",_XP );
-//	CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
+	CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
 //	setClientDBProp( "GUILD:VILLAGE",_Village );
 //	CBankAccessor_GUILD::getGUILD().setVILLAGE(_DbGroup, _Village);
 //	setClientDBProp( "GUILD:PEOPLE",_Race );
@@ -911,6 +930,14 @@ bool CGuild::canAccessToGuildInventory( CCharacter * user )
 	if( outpost != NULL )
 		if( outpost->getOwnerGuild() == _Id )
 			return true;
+
+	// or in powo with access to guild inv
+	if (user->getPowoFlag("guild_inv") && user->getPowoCell() != 0)
+		return true;
+
+	// TODO ULU : add here position check of GH on atys
+
+	
 	return false;
 }
 
@@ -1272,6 +1299,10 @@ void CGuild::deleteMember( CGuildMember* member )
 {
 	nlassert(member);
 	nlassert( uint(member->getGrade()) < _GradeCounts.size() );
+
+#ifdef HAVE_MONGO
+		CMongo::update("ryzom_users", toString("{'cid':%" NL_I64 "u}", member->getIngameEId().getShortId()), "{$set:{'guildId':0}}");
+#endif
 
 	if (PlayerManager.getChar(member->getIngameEId()) != NULL)
 		setMemberOffline( member );

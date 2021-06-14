@@ -88,7 +88,8 @@ bool CStringManager::CParameterTraits::eval(CStringManager::TLanguages lang,cons
 	}
 	
 	uint32 stringId = ew.getStringId(rowIndex, colIndex);
-	std::string str = NLMISC::toLowerAscii(SM->getString(stringId).toString());
+	const std::string &str = SM->getString(stringId).toString();
+	NLMISC::strlwr(str);
 
 	LOG("SM : (paramTraits) eval condition for property %s [%s] %s [%s]", cond.Property.c_str(), str.c_str(), OperatorNames[cond.Operator], cond.ReferenceStr.c_str());
 
@@ -586,11 +587,11 @@ public:
 		std::string op1;
 		if (cond.Property == "name")
 		{
-			op1 = NLMISC::toLowerAscii(si.SheetName);
+			op1 = NLMISC::toLower(si.SheetName);
 		}
 		else if (cond.Property == "gender")
 		{
-			op1 = NLMISC::toLowerAscii(GSGENDER::toString(si.Gender));
+			op1 = NLMISC::toLower(GSGENDER::toString(si.Gender));
 		}
 		else
 		{
@@ -987,7 +988,7 @@ public:
 				return false;
 			}
 			const CStringManager::TSheetInfo &si = SM->getSheetInfo(sheetId);
-			op1 = NLMISC::toLowerAscii(si.SheetName);
+			op1 = NLMISC::toLower(si.SheetName);
 		}
 		else if (cond.Property == "gender")
 		{
@@ -997,7 +998,7 @@ public:
 				nlwarning("Could not find character info for EId %s to check property %s", EId.toString().c_str(), cond.Property.c_str());
 				return false;
 			}
-			op1 = NLMISC::toLowerAscii(GSGENDER::toString(charInfo->getGender()));
+			op1 = NLMISC::toLower(GSGENDER::toString(charInfo->getGender()));
 		}
 		else
 		{
@@ -1083,14 +1084,14 @@ public:
 		}
 		else if (cond.Property == "role")
 		{
-			op1 = NLMISC::toLowerAscii(si.ChatProfile);
+			op1 = NLMISC::toLower(si.ChatProfile);
 		}
 		else if (cond.Property == "title")
 		{
 			// we need to retrieve the charInfo
 			CCharacterInfos	*ci = IOS->getCharInfos(EId);
 			if (ci != NULL)
-				op1 = NLMISC::toLowerAscii(ci->Title);
+				op1 = NLMISC::toLower(ci->Title);
 			else
 			{
 				nlwarning("No character info for bot %s, can't test property 'title' !", EId.toString().c_str());
@@ -1456,11 +1457,11 @@ public:
 		// check if checked property is gender or name
 		if (cond.Property == "gender")
 		{
-			value = NLMISC::toLowerAscii(GSGENDER::toString(charInfo->getGender()));
+			value = NLMISC::toLower(GSGENDER::toString(charInfo->getGender()));
 		}
 		else if (cond.Property == "name")
 		{
-			value = NLMISC::toLowerAscii(charInfo->ShortName.toString());
+			value = NLMISC::toLower(charInfo->ShortName.toString());
 		}
 		else
 		{

@@ -39,10 +39,10 @@ file "entities_game_service/guild_pd"
 		uint64								Money;
 //		uint16								Village;
 		uint32								CreationDate;
-//		uint32								XP;
+		uint32								XP;
 //		uint32								Bulk;
 //		uint32								MaxBulk;
-//		uint32								ChargesPoints;
+		uint32								ChargesPoints;
 		TPeople								Race;
 		uint64								Icon;
 		uint32								Building;

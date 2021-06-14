@@ -145,7 +145,7 @@ CQueryParser::TParserResult CQueryParser::parseQuery(const std::string &queryStr
 			return pr;
 		}
 
-		std::shared_ptr<TQueryNode> rootNode(parseExpr(first, queryStr.end()));
+		CUniquePtr<TQueryNode> rootNode(parseExpr(first, queryStr.end()));
 
 		// make sure we have consumed all the stream
 		iterator rew = first;
@@ -153,7 +153,7 @@ CQueryParser::TParserResult CQueryParser::parseQuery(const std::string &queryStr
 		if (tok.TokenType != tt_EOF)
 			throw EInvalidQuery(tok.It, "Not all the query content have been read");
 
-		pr.QueryTree = rootNode;
+		pr.QueryTree = CUniquePtrMove(rootNode);
 
 		return pr;
 	}

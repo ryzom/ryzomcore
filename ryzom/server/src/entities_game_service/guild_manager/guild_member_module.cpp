@@ -40,6 +40,8 @@
 using namespace std;
 using namespace NLMISC;
 
+#define REQUIRED_MARAUDER_FAME 50
+
 NL_INSTANCE_COUNTER_IMPL(CGuildMember);
 NL_INSTANCE_COUNTER_IMPL(CGuildMemberModule);
 
@@ -351,6 +353,61 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 		invitor.sendSystemMessage("GUILD_INCOMPATIBLE_ALLEGIANCE",params);
 		return;
 	}
+	
+	// check marauders case (character is neutral/neutral)
+	if (invitedAllegiance.first == PVP_CLAN::Neutral && invitedAllegiance.second == PVP_CLAN::Neutral)
+	{
+		// get the marauder index
+		uint32 factionIndex	= CStaticFames::getInstance().getFactionIndex("black_kami");
+
+		if (factionIndex != CStaticFames::INVALID_FACTION_INDEX)
+		{
+			// get marauder fame for invited character
+			sint32 characterFactionFame = CFameInterface::getInstance().getFameIndexed(invitedChar->getId(), factionIndex);
+
+			// character is a marauder only if his marauder fame is at least REQUIRED_MARAUDER_FAME
+			if (characterFactionFame >= REQUIRED_MARAUDER_FAME)
+			{
+#if 0
+				// get marauder fame for the guild (only marauder guilds can guild marauders)
+				sint32 guildFactionFame = CFameInterface::getInstance().getFameIndexed(guild->getEId(), factionIndex);
+
+				// check if the guild is marauder
+				if (guildFactionFame < REQUIRED_MARAUDER_FAME)
+				{
+					SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
+					params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
+					params[1].Enum = factionIndex;
+					invitor.sendSystemMessage("GUILD_INCOMPATIBLE_ALLEGIANCE",params);
+					return;
+				}
+#endif
+				// check if the guild is civilization neutral (only neutral guilds can guild marauders)
+				if (guildAllegiance.first != PVP_CLAN::Neutral)
+				{
+					SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
+					params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
+					params[1].Enum = PVP_CLAN::getFactionIndex(invitedAllegiance.first);
+					invitor.sendSystemMessage("GUILD_INCOMPATIBLE_ALLEGIANCE",params);
+					return;
+				}
+
+				// check if the guild is cult neutral (only neutral guilds can guild marauders)
+				if (guildAllegiance.second != PVP_CLAN::Neutral)
+				{
+					SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
+					params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
+					params[1].Enum = PVP_CLAN::getFactionIndex(invitedAllegiance.second);
+					invitor.sendSystemMessage("GUILD_INCOMPATIBLE_ALLEGIANCE",params);
+					return;
+				}
+			}
+		}
+		else
+		{
+			nlwarning("Unable to find faction 'black_kami'");
+		}
+	}
 
 	// build a new invitation
 	MODULE_AST(guild);
@@ -524,6 +581,25 @@ void CGuildMemberModule::clearOnlineGuildProperties()
 				targetProxy.tpWanted(x,y,z,true,heading);
 			}
 		}
+		else if (targetProxy.getPowoCell() == cell && targetProxy.getPowoScope() == "guild")
+		{
+			CVector exitPos = targetProxy.getBuildingExitPos();
+			if (exitPos.x != 0)
+			{
+				targetProxy.tpWanted(exitPos.x, exitPos.y, exitPos.z);
+			}
+			else
+			{
+				const CTpSpawnZone* zone = CZoneManager::getInstance().getTpSpawnZone(targetProxy.getBuildingExitZone());
+				if (zone)
+				{
+					sint32 x, y, z;
+					float heading;
+					zone->getRandomPoint(x, y, z, heading);
+					targetProxy.tpWanted(x, y, z, true, heading);
+				}
+			}
+		}
 	}
 }
 
@@ -567,6 +643,7 @@ void CGuildMemberModule::kickMember( uint16 index,uint8 session )const
 	{
 		module->clearOnlineGuildProperties();
 	}
+
 	// send system message
 	SM_STATIC_PARAMS_2(params,STRING_MANAGER::player,STRING_MANAGER::string_id);
 	params[0].setEIdAIAlias( proxy.getId(), CAIAliasTranslator::getInstance()->getAIAlias(proxy.getId()) );

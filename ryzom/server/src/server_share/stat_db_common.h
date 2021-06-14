@@ -20,7 +20,7 @@
 #define RY_STAT_DB_COMMON_H
 
 
-#include "../../server/src/entities_game_service/common_pd.h"
+#include "../entities_game_service/common_pd.h"
 
 
 #endif // RY_STAT_DB_COMMON_H

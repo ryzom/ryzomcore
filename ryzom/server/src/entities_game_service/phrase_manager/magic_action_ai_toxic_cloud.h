@@ -66,6 +66,8 @@ protected:
 	sint32					_Damage;
 	/// cloud radius in meters
 	float					_Radius;
+	/// cloud .fx sheet
+	NLMISC::CSheetId		_Fx;
 };
 
 

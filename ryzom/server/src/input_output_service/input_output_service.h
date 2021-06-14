@@ -190,6 +190,7 @@ class CInputOutputService : public NLNET::IService
 {
 public:
 	typedef std::map<NLMISC::CEntityId, CCharacterInfos *>	TIdToInfos;
+	typedef std::map<NLMISC::CEntityId, NLMISC::CSString>	TIdRealNames;
 private:
 	/// chat manager
 	CChatManager _ChatManager;
@@ -200,6 +201,8 @@ private:
 	typedef std::map<NLMISC::CSString, CCharacterInfos *, CUnsensitiveSStringLessPred>	TCharInfoCont;
 	/// infos on a character from his name
 	TCharInfoCont	_NameToInfos;
+
+	TIdRealNames _IdToRealName;
 
 	/// Original information about renamed characters
 	TCharInfoCont	_RenamedCharInfos;
@@ -278,6 +281,12 @@ public:
 	 * Get the infos of character from its name
 	 */
 	CCharacterInfos * getCharInfos( const ucstring& name );
+
+	/**
+	 * Get the rocket name of character from its name
+	 */
+	std::string getRocketName( const ucstring& name );
+
 
 	/**
 	 * Remove an entity

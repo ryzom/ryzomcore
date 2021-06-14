@@ -145,7 +145,7 @@ struct CCombatParams
 	}
 
 	/// Serial
-	void serial(NLMISC::IStream &f);
+	void serial(class NLMISC::IStream &f);
 
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -204,10 +204,11 @@ struct CSpellParams
 		Behaviour = MBEHAV::UNKNOWN_BEHAVIOUR;
 		Stackable = false;
 		SpellLevel = 0.0f;
+		Fx = 0;
 	}
 
 	/// Serial
-	void serial(NLMISC::IStream &f);
+	void serial(class NLMISC::IStream &f);
 
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -223,7 +224,7 @@ struct CSpellParams
 	float				SpellPowerFactor;
 	bool				Stackable;
 	float				SpellLevel;
-	
+	uint32				Fx;
 	// dmg spell
 	DMGTYPE::EDamageType	DamageType;
 
@@ -253,7 +254,7 @@ struct COTSpellParams : public CSpellParams
 	}
 
 	/// Serial
-	void serial(NLMISC::IStream &f)
+	void serial(class NLMISC::IStream &f)
 	{
 		CSpellParams::serial(f);
 		f.serial(UpdateFrequency);
@@ -300,7 +301,7 @@ struct CEffectSpellParams : public CSpellParams
 	}
 
 	/// Serial
-	void serial(NLMISC::IStream &f);
+	void serial(class NLMISC::IStream &f);
 
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -329,7 +330,7 @@ struct COTEffectSpellParams : public COTSpellParams
 	}
 
 	/// Serial
-	void serial(NLMISC::IStream &f);
+	void serial(class NLMISC::IStream &f);
 
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -362,7 +363,7 @@ struct TAiArea
 	{}
 
 	/// Serial
-	void serial(NLMISC::IStream &f);
+	void serial(class NLMISC::IStream &f);
 	
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -408,7 +409,9 @@ public:
 	inline static uint getVersion () { return 21; }
 
 	/// Serial
-	void serial(NLMISC::IStream &f);
+	void serial(class NLMISC::IStream &f);
+
+	void reloadSheet(const CStaticAiAction &o);
 
 	/// Removed
 	void removed() {}

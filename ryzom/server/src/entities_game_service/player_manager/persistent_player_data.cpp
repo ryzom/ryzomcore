@@ -230,7 +230,7 @@ public:
 		else
 		{
 			STOP(NLMISC::toString("Failed to fit item loaded from input into inventory! (sheet=%s)",itm->getSheetId().toString().c_str()));
-			itm.deleteItem(); // FIXME: Log
+			itm.deleteItem();
 		}
 	}
 
@@ -276,17 +276,26 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	else
 	{
 		CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, dsr, DSPropertyCELL );
-		cell = mirrorCell;			
+		cell = mirrorCell;
 		if ( CBuildingManager::getInstance()->isRoomCell( cell ) )
 		{
-			const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone( user.getBuildingExitZone() );
-			if ( zone )
+			CVector buildingExitPos = user.getBuildingExitPos();
+			if (buildingExitPos.x != 0 && buildingExitPos.y != 0)
 			{
-				zone->getRandomPoint( state.X, state.Y,state.Z,state.Heading );
+				state.X = buildingExitPos.x;
+				state.Y = buildingExitPos.y;
 			}
 			else
 			{
-				nlwarning("user %s is not found in a room but cell is %d)", user.getId().toString().c_str(), cell );
+				const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone( user.getBuildingExitZone() );
+				if ( zone )
+				{
+					zone->getRandomPoint( state.X, state.Y,state.Z,state.Heading );
+				}
+				else
+				{
+					nlwarning("user %s is not found in a room but cell is %d)", user.getId().toString().c_str(), cell );
+				}
 			}
 		}
 		else if ( cell <= -2 && ( cell & 0x00000001) != 0 && user.getPVPInterface().isValid() )
@@ -417,13 +426,24 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	_FactionPoint[i],\
 	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _FactionPoint[k-PVP_CLAN::BeginClans]=val)\
 \
-	/*PROP(uint32,_PvpPoint)*/\
-	/*PROP2(_LangChannel,string,_LangChannel,_LangChannel=val)*/\
-	/*PROP(uint32,_Organization)*/\
-	/*PROP(uint32,_OrganizationStatus)*/\
-	/*PROP(uint32,_OrganizationPoints)*/\
+	PROP(uint32,_LastTpTick)\
+	PROP(uint32,_LastOverSpeedTick)\
+	PROP(uint32,_LastMountTick)\
+	PROP(uint32,_LastUnMountTick)\
+	PROP(uint32,_LastFreeMount)\
+	PROP(uint32,_LastExchangeMount)\
+	PROP(uint32,_PvpPoint)\
+	PROP(uint32,_GuildPoints)\
+	PROP(uint8,_TodayGuildPoints)\
+	PROP_GAME_CYCLE_COMP(_NextTodayGuildPointsReset)\
+	PROP2(_LangChannel,string,_LangChannel,_LangChannel=val)\
+	PROP(uint32,_Organization)\
+	PROP(uint32,_OrganizationStatus)\
+	PROP(uint32,_OrganizationPoints)\
 	PROP2(DeclaredCult,string,PVP_CLAN::toString(_DeclaredCult),_DeclaredCult=PVP_CLAN::fromString(val))\
 	PROP2(DeclaredCiv,string,PVP_CLAN::toString(_DeclaredCiv),_DeclaredCiv=PVP_CLAN::fromString(val))\
+\
+	PROP(bool,_doPact)\
 \
 	PROP(bool,_PVPFlag)\
 	PROP_GAME_CYCLE_COMP(_PVPFlagLastTimeChange)\
@@ -442,11 +462,11 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP_GAME_CYCLE_COMP(_ForbidAuraUseStartDate)\
 	PROP_GAME_CYCLE_COMP(_ForbidAuraUseEndDate)\
 	PROP2(_Title, string, CHARACTER_TITLE::toString(getTitle()), setTitle(CHARACTER_TITLE::toCharacterTitle(val)))\
-	/*PROP2(_NewTitle, string, _NewTitle, _NewTitle=val)*/\
-	/*PROP2(_TagPvPA, string, _TagPvPA, _TagPvPA=val)*/\
-	/*PROP2(_TagPvPB, string, _TagPvPB, _TagPvPB=val)*/\
-	/*PROP2(_TagA, string, _TagA, _TagA=val)*/\
-	/*PROP2(_TagB, string, _TagB, _TagB=val)*/\
+	PROP2(_NewTitle, string, _NewTitle, _NewTitle=val)\
+	PROP2(_TagPvPA, string, _TagPvPA, _TagPvPA=val)\
+	PROP2(_TagPvPB, string, _TagPvPB, _TagPvPB=val)\
+	PROP2(_TagA, string, _TagA, _TagA=val)\
+	PROP2(_TagB, string, _TagB, _TagB=val)\
 \
 	/* Visual Properties */\
 	PROP2(HairType,				uint8, _VisualPropertyA().PropertySubData.HatModel,			SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.HatModel,val))\
@@ -490,6 +510,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	)\
 	PROP_VECT(CEntityId,_IsFriendOf)\
 	PROP_VECT(CEntityId,_IsIgnoredBy)\
+	STRUCT_VECT(_CheckPos)\
 \
 	STRUCT(_MemorizedPhrases)\
 	STRUCT2(_ForbidPowerDates, _ForbidPowerDates.store(pdr), _ForbidPowerDates.apply(pdr))\
@@ -510,7 +531,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	STRUCT_VECT(_Pact)\
 	STRUCT_VECT(_KnownPhrases)\
 	STRUCT_MAP(TAIAlias,	TMissionHistory,	_MissionHistories)\
-	/*PROP_MAP(string,	string,	_CustomMissionsParams)*/\
+	PROP_MAP(string,	string,	_CustomMissionsParams)\
 	LSTRUCT(_WelcomeMissionDesc, if (_WelcomeMissionDesc.isValid()))\
 	STRUCT_ARRAY(_PlayerPets,_PlayerPets.size())\
 \
@@ -580,7 +601,10 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP2(Invisible, bool, getInvisibility(), setInvisibility(val)) \
 	PROP2(Aggroable, sint8, getAggroableSave(), setAggroableSave(val)) \
 	PROP2(GodMode, bool, getGodModeSave(), setGodModeSave(val)) \
+	PROP2(UseWig, bool, getUseWig(), setUseWig(val)) \
 	PROP2(FriendVisibility, uint8, getFriendVisibilitySave(), setFriendVisibilitySave(val)) \
+	PROP2(_DontTranslate, string, _DontTranslate, _DontTranslate=val) \
+
 
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
@@ -675,12 +699,6 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 			stableAlias = stablePlace->getAlias();\
 	}\
 
-#ifdef RYZOM_FORGE
-#define PROP_PET_ANIMAL_CUSTOM_NAME() PROP2(CustomName, string, CustomName, CustomName = val)
-#else
-#define PROP_PET_ANIMAL_CUSTOM_NAME()
-#endif
-
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clear())\
 	PROP2(TicketPetSheetId,CSheetId,TicketPetSheetId,\
@@ -690,6 +708,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	)\
 	PROP(CSheetId,PetSheetId)\
 	LPROP(uint32,Price,if(Price!=0))\
+	PROP(uint8,Size)\
 	PROP(CEntityId,OwnerId)\
 	PROP2(StableAlias,TAIAlias,stableAlias,\
 		if (val != CAIAliasTranslator::Invalid)\
@@ -709,7 +728,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	LPROP(bool,IsMounted,if(IsMounted))\
 	PROP(bool,IsTpAllowed)\
 	PROP(TSatiety,Satiety)\
-	PROP_PET_ANIMAL_CUSTOM_NAME()\
+	PROP2(CustomName, ucstring, CustomName, CustomName = val)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
@@ -726,6 +745,24 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	FLAG0(CLEAR,clear())\
 	PROP(uint8,PactNature)\
 	PROP(uint8,PactType)\
+
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#include "game_share/persistent_data_template.h"
+
+
+
+//-----------------------------------------------------------------------------
+// Persistent data for SCheckPosCoordinate
+//-----------------------------------------------------------------------------
+
+#define PERSISTENT_CLASS SCheckPosCoordinate
+
+#define PERSISTENT_DATA\
+	FLAG0(CLEAR,clear())\
+	PROP(sint32,X)\
+	PROP(sint32,Y)\
+	PROP(uint32,Radius)\
+	PROP(string,Name)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
@@ -1342,14 +1379,16 @@ private:
 	FLAG0(CLEAR,clear())\
 	PROP2(_ItemId,						uint64,		_ItemId.getRawId(),			_ItemId = INVENTORIES::TItemId(val))\
 	PROP2(_SheetId,						CSheetId,	_SheetId,					_SheetId=val)\
+/*	PROP2(_LocSlot,						uint32,		_InventorySlot,				_InventorySlot=val)*/\
 	PROP2(_LocSlot,						uint32,		_InventorySlot,				applyArgs.InventorySlot=val)\
+	/*PROP2(_ClientInventoryPosition,	sint16,		_ClientInventoryPosition,	_ClientInventoryPosition=val)*/\
 	PROP2(_HP,							uint32,		_HP,						_HP=val)\
 	PROP2(_Recommended,					uint32,		_Recommended,				_Recommended=val)\
 	PROP2(_CreatorId,					CEntityId,	_CreatorId,					_CreatorId=val)\
-	PROP2(_PhraseId,					string,		getPhraseId(),				setPhraseIdInternal(val))\
-	LPROP2(_PhraseLiteral,				bool,		if (_PhraseLiteral),		_PhraseLiteral,						_PhraseLiteral=val)\
-	LSTRUCT2(_CraftParameters,						if (_CraftParameters),		_CraftParameters->store(pdr),		_CraftParameters = new CItemCraftParameters; _CraftParameters->apply(pdr))\
-	LPROP2(_SlotImage,					uint16,		if (0),						0xffff,								slotImage=val) /* Very old version compatibility */ \
+	PROP2(_PhraseId,					string,		_PhraseId,					_PhraseId=val)\
+	PROP2(_RequiredFaction,				string,		_RequiredFaction,			_RequiredFaction=val)\
+	LSTRUCT2(_CraftParameters,						if (_CraftParameters != NULL),	_CraftParameters->store(pdr),	_CraftParameters = new CItemCraftParameters; _CraftParameters->apply(pdr))\
+	LPROP2(_SlotImage,					uint16,		if (0),		0xffff,				slotImage=val)\
 	LPROP2(_SapLoad,					uint32,		if (_SapLoad!=0),			_SapLoad,							_SapLoad=val)\
 	LPROP2(_Dropable,					bool,		if (!_Dropable),			_Dropable,							_Dropable=val)\
 	LPROP2(_Destroyable,				bool,		if (!_Destroyable),			_Destroyable,						_Destroyable=val)\
@@ -1365,13 +1404,12 @@ private:
 	LPROP2(_RequiredCharacLevel,		uint16,		if (_RequiredCharacLevel!=0),_RequiredCharacLevel,				_RequiredCharacLevel=val)\
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
-	PROP2(_CustomText,					string,									getCustomText(),					setCustomText(val))\
-	LPROP2(_CustomName,					string,		if (false),					string(),							setPhraseIdInternal(val, true)) /* Ryzom Forge compatibility, replaced by _PhraseLiteral */ \
-	LPROP(bool, _Movable, if (!_Movable))\
-	LPROP(bool, _UnMovable, if (!_UnMovable))\
-	LPROP(bool, _LockedByOwner, if (!_LockedByOwner))\
-	LPROP2(_AccessGrade,				string,		if (_AccessGrade != DefaultAccessGrade), CGuildGrade::toString(_AccessGrade), _AccessGrade = CGuildGrade::fromString(val); if (_AccessGrade == CGuildGrade::Unknown) _AccessGrade = DefaultAccessGrade)\
-
+	PROP2(_CustomText,					ucstring,	_CustomText,				_CustomText=val)\
+	PROP2(_CustomName,					ucstring,	_CustomName,				_CustomName=val)\
+	PROP(bool, _Movable)\
+	PROP(bool, _UnMovable)\
+	PROP(bool, _LockedByOwner)\
+	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
@@ -1406,7 +1444,7 @@ private:
 	LPROP(float,MaxSlashingProtection,if (MaxSlashingProtection!=0.0f))\
 	LPROP(float,MaxBluntProtection,if (MaxBluntProtection!=0.0f))\
 	LPROP(float,MaxPiercingProtection,if (MaxPiercingProtection!=0.0f))\
-	LPROP(uint8,Color,if (Color!=CGameItem::DefaultColor))\
+	LPROP(uint8,Color,if (Color!=1))\
 	LPROP(sint32,HpBuff,if (HpBuff!=0))\
 	LPROP(sint32,SapBuff,if (SapBuff!=0))\
 	LPROP(sint32,StaBuff,if (StaBuff!=0))\

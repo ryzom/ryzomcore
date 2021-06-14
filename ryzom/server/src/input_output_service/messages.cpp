@@ -45,6 +45,9 @@ extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
 extern CVariable<bool>	VerboseChatManagement;
 
+typedef NLMISC::CTwinMap<TChanID, string> TChanTwinMap;
+extern TChanTwinMap 	_ChanNames;
+
 
 //-----------------------------------------------
 //	cbImpulsionReadyString :
@@ -1584,15 +1587,28 @@ void cbDynChatAddChan(CMessage& msgin, const string &serviceName, TServiceId ser
 	bool noBroadcast;
 	bool forwardInput;
 	bool unify;
+	string name;
 
 	msgin.serial(chanID);
 	msgin.serial(noBroadcast);
 	msgin.serial(forwardInput);
 	msgin.serial(unify);
-	nlinfo("cbDynChatAddChan: add channel");
+	msgin.serial(name);
+
+	nlinfo("cbDynChatAddChan: add channel : %s", name.c_str());
 	bool res = IOS->getChatManager().getDynChat().addChan(chanID, noBroadcast, forwardInput, unify);
-	if (!res) nlwarning("Couldn't add chan %s", chanID.toString().c_str());
-	else nlinfo("cbDynChatAddChan: add channel %s",chanID.toString().c_str());
+	if (!res)
+		nlwarning("Couldn't add chan %s", chanID.toString().c_str());
+	else
+	{
+		if (_ChanNames.getA(name) == NULL && _ChanNames.getB(chanID) == NULL)
+		{
+			_ChanNames.add(chanID, name);
+			nlinfo("cbDynChatAddChan: add channel %s",chanID.toString().c_str());
+		}
+		else
+			nlwarning("Couldn't add chan %s. already added! %p %p", chanID.toString().c_str(), _ChanNames.getA(name), _ChanNames.getB(chanID));
+	}
 }
 
 //-----------------------------------------------
@@ -1604,6 +1620,9 @@ void cbDynChatRemoveChan(CMessage& msgin, const string &serviceName, TServiceId 
 	TChanID chanID;
 	msgin.serial(chanID);
 	bool res = IOS->getChatManager().getDynChat().removeChan(chanID);
+	if (res && _ChanNames.getB(chanID) != NULL)
+		_ChanNames.removeWithA(chanID);
+
 	if (!res) nlwarning("Couldn't remove chan %s", chanID.toString().c_str());
 }
 
@@ -1802,7 +1821,23 @@ void cbDynChatSetHideBubble(CMessage& msgin, const string &serviceName, TService
 	chan->HideBubble = hideBubble;
 }
 
-
+void cbDynChatSetUniversalChannel(CMessage& msgin, const string &serviceName, TServiceId serviceId)
+{
+	TChanID		chanID;
+	bool universalChannel;
+	
+	msgin.serial(chanID);
+	msgin.serial(universalChannel);
+	
+	CChatManager &cm = IOS->getChatManager();
+	CDynChatChan *chan = cm.getDynChat().getChan(chanID);
+	if (!chan)
+	{
+		nlwarning("Unknown chan");
+		return;
+	}
+	chan->UniversalChannel = universalChannel;
+}
 
 void cbDynChatServiceChat(CMessage& msgin, const string &serviceName, TServiceId serviceId)
 {
@@ -1952,6 +1987,48 @@ void cbRequestDsr(CMessage& msgin, const string &serviceName, TServiceId service
 	}
 }
 
+
+void cbUserDontTranslateLanguages( CMessage& msgin, const string &serviceName, TServiceId serviceId )
+{
+	TDataSetRow player;
+	msgin.serial(player);
+
+	string langs;
+	try
+	{
+		msgin.serial(langs);
+	}
+	catch(const Exception &e)
+	{
+		nlwarning("<impulsionTell> %s",e.what());
+		return;
+	}
+
+	if (player == INVALID_DATASET_ROW)
+	{
+		nlwarning("cbUserTranslateLanguage : ignoring chat because Player %s:%x Invalid", 
+			TheDataset.getEntityId(player).toString().c_str(),
+			player.getIndex());
+		return;
+	}
+
+	CChatManager &cm = IOS->getChatManager();
+
+	if (!cm.checkClient(player))
+		IOS->getChatManager().addClient(player);
+
+	CChatClient &client = cm.getClient(player);
+
+	vector<string> vlangs;
+	NLMISC::splitString(langs, "|", vlangs);
+	client.resetDisabledTranslations();
+	for (uint i=0; i<vlangs.size(); i++)
+	{
+		client.disableTranslation(vlangs[i]);
+	}
+}
+
+
 //void cbAddDM(CMessage& msgin, const string &serviceName, TServiceId serviceId)
 //{
 //	uint32 charId;
@@ -2040,6 +2117,7 @@ TUnifiedCallbackItem CbIOSArray[]=
 	{ "RETR_ENTITY_NAMES", cbRetrieveEntityNames },
 	{ "USER_LANGUAGE", cbUserLanguage },	// receive an association between a userId and a language
 	{ "REMOVE_USER_LANGUAGE", cbRemoveUserLanguage },
+	{ "SET_USER_DONT_TRANSLATE_LANGS", cbUserDontTranslateLanguages },
 
 	{ "IGNORE_TELL_MODE", cbIgnoreTellMode }, // receive an ignore tell mode command from EGS
 	{ "IGNORE", cbImpulsionIgnore },
@@ -2072,6 +2150,7 @@ TUnifiedCallbackItem CbIOSArray[]=
 	{ "DYN_CHAT:SERVICE_CHAT", cbDynChatServiceChat },		// a service send a chat message in the channel without sender id
 	{ "DYN_CHAT:SERVICE_TELL", cbDynChatServiceTell },		// a service send a chat message to a specific client in the channel without sender id
 	{ "DYN_CHAT:SET_HIDE_BUBBLE", cbDynChatSetHideBubble },		// a service send a chat message to a specific client in the channel without sender id
+	{ "DYN_CHAT:SET_UNIVERSAL_CHANNEL", cbDynChatSetUniversalChannel },
 	//received from DSS
 	{ "REQUEST_DSR", cbRequestDsr},
 //	{ "ADD_DM",  cbAddDM	},			// A character enter a ring session that he own

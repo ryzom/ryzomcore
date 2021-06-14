@@ -51,6 +51,7 @@ void CForageProgress::reset( const NLMISC::CSheetId& material,  const TDataSetRo
 	_SourceRowId = sourceRowId;
 	_Amount = 0;
 	_Quality = 1.0f;
+	_MaxQuality = 300.0f;
 	_InitialFocus = initialFocus;
 	_ResultCanBeTaken = false;
 	_HasCastedUsefulCare = false;
@@ -60,16 +61,47 @@ void CForageProgress::reset( const NLMISC::CSheetId& material,  const TDataSetRo
 /*
  * Add the result of an action
  */
-void CForageProgress::fillFromExtraction( float quantity, float quality, CCharacter *player )
+void CForageProgress::fillFromExtraction(const CHarvestSource *source, float quantity, float quality, CCharacter *player)
 {
 	_Amount += quantity;
 	_Quality = quality;
 
 	//if ( (_Amount*10.0f >= 65536.0) || (_Quality>=251.0f) )
 	//	nlwarning( "Forage ext. progress out of bounds: %g %g", _Amount, _Quality );
+	
+	CGameItemPtr item = player->getItem(INVENTORIES::handling, INVENTORIES::right);
 
-	player->setExtractionProgressCounters( (uint16)(uint)(_Amount*10.0f), (uint16)(uint)(_Quality*10.0f) );
-
+	// Harvester use a low quality pike
+	if (item != 0)
+	{
+		if (item->recommended() < 50) // For pike with Q less than Q50 => Max quality of mats are 50
+			_MaxQuality = 50;
+		else
+			_MaxQuality = item->recommended(); // for others max Q of mats are same than the Q of pike
+	}
+	
+	/*vector<CCharacter*> usefulCareCasters;
+	const CHarvestSource::CForagers& foragers = source->foragers();
+	CHarvestSource::CForagers::const_iterator itf = foragers.begin();
+	for (++itf; itf!=foragers.end(); ++itf)
+	{
+		const TDataSetRow& ccRowId = (*itf);
+		CCharacter *careCaster = PlayerManager.getChar(ccRowId);
+		if (careCaster && careCaster->forageProgress())
+		{
+			item = careCaster->getItem(INVENTORIES::handling, INVENTORIES::right);
+			if (item->recommended() < 50) // For pike with Q less than Q50 => Max quality of mats are 50
+				_MaxQuality = 50;
+			else
+				_MaxQuality = min(_MaxQuality, (float)item->recommended()); // for others max Q of mats are same than the Q of pike
+		}
+	}
+	*/
+	
+	if (_Quality > _MaxQuality)
+		_Quality = _MaxQuality;
+	
+	player->setExtractionProgressCounters((uint16)(uint)(_Amount*10.0f), (uint16)(uint)(_Quality*10.0f));
 	//nldebug( "Progress #%u: (A %.2f Q %.2f)", (uint)_NbExtActions, _Amount, _Quality );
 }
 
@@ -81,8 +113,10 @@ void CForageProgress::reportXP( CCharacter *extractor, const CHarvestSource *sou
 {
 	H_AUTO(CForageProgress_reportXP);
 	
+#if !FINAL_VERSION
 	nlassert(extractor);
 	nlassert(source);
+#endif
 
 	// Don't earn any XP for anyone if the quantity is 0
 	if ( amount() == 0 )
@@ -123,8 +157,8 @@ void CForageProgress::reportXP( CCharacter *extractor, const CHarvestSource *sou
 					if ( careCaster->forageProgress()->hasCastedUsefulCare() )
 					{
 						usefulCareCasters.push_back( careCaster );
-						if ( careCaster != prospector ) // don't count the prospector twice
-							++nbParticipants;
+						//if ( careCaster != prospector ) // don't count the prospector twice
+						//	++nbParticipants;
 					}
 				}
 				else

@@ -135,22 +135,25 @@ void CGuildInventoryView::onItemStackSizeChanged(uint32 slot, uint32 previousSta
 void CGuildInventoryView::updateClientSlot(uint32 slot)
 {
 	CGameItemPtr item = getInventory()->getItem( slot );
+	const INVENTORIES::TItemId &itemId = item->getItemId();
+
 	INVENTORIES::CItemSlot itemSlot( slot );
 	itemSlot.setItemProp( INVENTORIES::Sheet, item->getSheetId().asInt() );
 	itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );
 	itemSlot.setItemProp( INVENTORIES::Quantity, item->getStackSize() );
 	itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
-	itemSlot.setItemProp( INVENTORIES::CharacBuffs, item->buffFlags() );
+	itemSlot.setItemProp( INVENTORIES::CreateTime, itemId.getCreateTime() );
+	itemSlot.setItemProp( INVENTORIES::Serial, itemId.getSerialNumber() );
 	itemSlot.setItemProp( INVENTORIES::Locked, 0 );
-	itemSlot.setItemProp( INVENTORIES::Access, item->getAccessGrade() );
 	itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );
-	itemSlot.setItemProp( INVENTORIES::NameId, 0 ); // TODO: send name to all guild members (item->sendNameId())
+	itemSlot.setItemProp( INVENTORIES::NameId, 0 ); // TODO: name of guild (item->sendNameId())
 	itemSlot.setItemProp( INVENTORIES::Enchant, item->getClientEnchantValue() );
-	itemSlot.setItemProp( INVENTORIES::ItemClass, item->getItemClass() );
-	itemSlot.setItemProp( INVENTORIES::ItemBestStat, item->getCraftParameters() == 0 ? RM_FABER_STAT_TYPE::Unknown : item->getCraftParameters()->getBestItemStat() );
-	itemSlot.setItemProp( INVENTORIES::PrerequisitValid, 1 ); // TODO: can we send prereq per user?
 	itemSlot.setItemProp( INVENTORIES::Price, 0 );
 	itemSlot.setItemProp( INVENTORIES::ResaleFlag, 0 );
+	itemSlot.setItemProp( INVENTORIES::ItemClass, item->getItemClass() );
+	itemSlot.setItemProp( INVENTORIES::ItemBestStat, item->getCraftParameters() == 0 ? RM_FABER_STAT_TYPE::Unknown : item->getCraftParameters()->getBestItemStat() );
+	itemSlot.setItemProp( INVENTORIES::PrerequisitValid, 1 );
+	itemSlot.setItemProp( INVENTORIES::Worned, (item->getItemWornState() == ITEM_WORN_STATE::Worned));
 	_GuildInvUpdater.setItemProps( INVENTORIES::CInventoryCategoryForGuild::GuildInvId, itemSlot );
 }
 

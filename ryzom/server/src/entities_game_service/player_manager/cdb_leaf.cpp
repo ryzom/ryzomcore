@@ -1,10 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -49,18 +45,6 @@ using namespace std;
 //-----------------------------------------------
 void CCDBStructNodeLeaf::init( xmlNodePtr node, NLMISC::IProgressCallback &progressCallBack ) 
 {
-	// Read nullable
-	CXMLAutoPtr nullable((const char*)xmlGetProp (node, (xmlChar*)"nullable"));
-	if ((const char *) nullable != NULL)
-	{
-		_Nullable = (nullable.getDatas()[0] == '1');
-	}
-	else
-	{
-		_Nullable = false;
-	}
-
-	// Read type
 	CXMLAutoPtr type((const char*)xmlGetProp (node, (xmlChar*)"type"));
 	nlassert((const char *) type != NULL);
 
@@ -95,9 +79,6 @@ void CCDBStructNodeLeaf::init( xmlNodePtr node, NLMISC::IProgressCallback &progr
 		// IF it is a TEXT.
 		if(!strcmp(type, "TEXT"))
 			_Type = ICDBStructNode::TEXT;
-		// IF it is a PACKED.
-		else if(!strcmp(type, "PACKED"))
-			_Type = ICDBStructNode::PACKED;
 		// ELSE type unknown.
 		else
 		{

@@ -39,6 +39,7 @@
 #include "guild_manager/guild_manager.h"
 #include "guild_manager/guild.h"
 #include "guild_manager/guild_member_module.h"
+#include "world_instances.h"
 
 #include "egs_sheets/egs_sheets.h"
 
@@ -63,7 +64,6 @@ void cbLiftIn( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TS
 	TDataSetRow rowId;
 	msgin.serial(triggerId);
 	msgin.serial(rowId);
-
 	CBuildingManager::getInstance()->addTriggerRequest( rowId, triggerId );
 }
 /// a player left a lift
@@ -388,6 +388,7 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 		nlwarning("<BUILDING> row %u is invalid",rowId.getIndex() );
 		return;
 	}
+	
 
 
 	// build a request for our user
@@ -395,56 +396,71 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 	request.Page = 0;
 	request.Session = 0;
 
-	CTriggerRequestEntry entry;
-	const uint destCount = (uint)trigger.Destinations.size();
-	for ( uint i = 0; i < destCount; i++ )
+	// Get the custom trigger (if exists)
+	std::string url = getCustomTrigger(triggerId);
+	
+	if (url.empty()) // No custom trigger, build it from parsed primitives
 	{
-		entry.Destination = trigger.Destinations[i];
-		if (entry.Destination == NULL)
+		CTriggerRequestEntry entry;
+		const uint destCount = (uint)trigger.Destinations.size();
+		for ( uint i = 0; i < destCount; i++ )
 		{
-			nlwarning("<BUILDING> NULL destination in trigger");
+			entry.Destination = trigger.Destinations[i];
+			if (entry.Destination == NULL)
+			{
+				nlwarning("<BUILDING> NULL destination in trigger");
+				return;
+			}
+			const uint16 ownerCount = entry.Destination->getEntryCount();
+			bool addSession = false;
+			for ( uint16 j = 0; j < ownerCount; j++ )
+			{
+				if ( entry.Destination->isUserAllowed(user,j) )
+				{
+					entry.OwnerIndex = j;
+					request.Entries.push_back( entry );
+					addSession = true;
+				}
+			}
+			if ( addSession )
+				request.Session += entry.Destination->getStateCounter();
+		}
+		if ( request.Entries.empty() )
+		{
 			return;
 		}
-		const uint16 ownerCount = entry.Destination->getEntryCount();
-		bool addSession = false;
-		for ( uint16 j = 0; j < ownerCount; j++ )
-		{
-			if ( entry.Destination->isUserAllowed(user,j) )
-			{
-				entry.OwnerIndex = j;
-				request.Entries.push_back( entry );
-				addSession = true;
-			}
-		}
-		if ( addSession )
-			request.Session += entry.Destination->getStateCounter();
 	}
-	if ( request.Entries.empty() )
-	{
-		return;
-	}
-
+	
 	request.Timer = new CTimer;
 	request.Timer->setRemaining( TriggerRequestTimout, new CTriggerRequestTimoutEvent(rowId) );
 	// add the request to our manager
 	_TriggerRequests.insert( make_pair( rowId, request ) );
 
-	// if it is an auto teleport, force entity teleportation
-	if ( trigger.AutoTeleport )
+	// Don't teleport when it's a custom trigger, send url instead
+	if (!url.empty())
 	{
-		triggerTeleport( user , 0);
-		return;
+		user->sendUrl(url);
 	}
+	else
+	{
 
-	// tell client
-	NLNET::CMessage msgout( "IMPULSION_ID" );
-	CEntityId id = user->getId();
-	msgout.serial( id );
-	CBitMemStream bms;
-	nlverify( GenericMsgManager.pushNameToStream( "GUILD:ASCENSOR", bms) );
+		// if it is an auto teleport, force entity teleportation
+		if ( trigger.AutoTeleport )
+		{
+			triggerTeleport( user , 0);
+			return;
+		}
 
-	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
-	sendMessageViaMirror( NLNET::TServiceId(id.getDynamicId()), msgout );
+		// tell client
+		NLNET::CMessage msgout( "IMPULSION_ID" );
+		CEntityId id = user->getId();
+		msgout.serial( id );
+		CBitMemStream bms;
+		nlverify( GenericMsgManager.pushNameToStream( "GUILD:ASCENSOR", bms) );
+
+		msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
+		sendMessageViaMirror( NLNET::TServiceId(id.getDynamicId()), msgout );
+	}
 }
 
 
@@ -615,16 +631,20 @@ void CBuildingManager::registerPlayer( CCharacter * user )
 }
 
 //----------------------------------------------------------------------------
-void CBuildingManager::removePlayerFromRoom( CCharacter * user )
+void CBuildingManager::removePlayerFromRoom( CCharacter * user, bool send_url )
 {
 #ifdef NL_DEBUG
 	nlassert(user);
 #endif
 
+	
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
 	sint32 cell = mirrorCell;
 	if ( !isRoomCell(cell) )
 		return;
+
+	CVector buildingExitPos = user->getBuildingExitPos();
+
 	uint idx = getRoomIdxFromCell( cell );
 	if ( idx >= _RoomInstances.size() )
 	{
@@ -637,19 +657,84 @@ void CBuildingManager::removePlayerFromRoom( CCharacter * user )
 		return;
 	}
 	// remove a reference from the room
-	_RoomInstances[idx].Ptr->removeUser( user );
+	_RoomInstances[idx].Ptr->removeUser( user, send_url, _RoomInstances[idx].Persistant);
+
+	if (!_RoomInstances[idx].Persistant)
+	{
+		nlinfo("remove and delete room");
+		deleteRoom(cell);
+	}
+	else
+	{
+		nlinfo("remove NO delete room");
+	}
+
+	/*// Remove all pets from room
+
+	vector< CPetAnimal > &pets = user->getPlayerPets();
+
+	nlinfo("remove PETS");
+	for (uint16 i = 0; i < (uint16)pets.size(); ++i)
+	{
+		nlinfo("Checking pet %d", i);
+		
+		if (pets[i].PetStatus == CPetAnimal::landscape)
+		{
+			nlinfo("pet in landscape");
+
+			CContinent * cont = CZoneManager::getInstance().getContinent(pets[i].Landscape_X, pets[i].Landscape_Y);
+
+			if (!cont)
+				continue;
+	
+			CONTINENT::TContinent continent = (CONTINENT::TContinent)cont->getId();
+
+			if (continent == CONTINENT::R2_ROOTS ||
+				continent == CONTINENT::R2_FOREST ||
+				continent == CONTINENT::R2_DESERT ||
+				continent == CONTINENT::R2_LAKES ||
+				continent == CONTINENT::R2_JUNGLE ||
+				continent == CONTINENT::INDOORS
+				)
+			{
+				nlinfo("pet in a powo/indoor");
+				pets[i].IsFollowing = true;
+			}
+		}
+	}*/
+}
+
+//----------------------------------------------------------------------------
+void CBuildingManager::deleteRoom(sint32 cell)
+{
+	if ( !isRoomCell(cell) )
+		return;
+
+	uint idx = getRoomIdxFromCell( cell );
+	if ( idx >= _RoomInstances.size() )
+	{
+		nlwarning("<BUILDING>cell %d is not a valid room ( count is  %u)", cell,_RoomInstances.size() );
+		return;
+	}
+	if ( !_RoomInstances[idx].Ptr )
+	{
+		nlwarning("<BUILDING>cell %d is not a valid room!", cell);
+		return;
+	}
+	
 	// if there is nobody in the room, remove it
 	if ( !_RoomInstances[idx].Ptr->isValid() )
 	{
 		delete _RoomInstances[idx].Ptr;
 		_RoomInstances[idx].Ptr = NULL;
 		_RoomInstances[idx].NextFreeId = _FirstFreeRoomId;
+		_RoomInstances[idx].Persistant = false;
 		_FirstFreeRoomId = idx;
 	}
 }
 
 //----------------------------------------------------------------------------
-IRoomInstance *  CBuildingManager::allocateRoom( sint32 & cellRet, BUILDING_TYPES::TBuildingType type)
+IRoomInstance *  CBuildingManager::allocateRoom( sint32 & cellRet, BUILDING_TYPES::TBuildingType type, bool persistant)
 {
 	// update room vector
 	if ( _FirstFreeRoomId >= _RoomInstances.size() )
@@ -668,6 +753,8 @@ IRoomInstance *  CBuildingManager::allocateRoom( sint32 & cellRet, BUILDING_TYPE
 		nlwarning("<BUILDING>invalid room type %d",type);
 		return NULL;
 	}
+	
+	_RoomInstances[idx].Persistant = persistant;
 	return _RoomInstances[idx].Ptr;
 }
 
@@ -689,6 +776,7 @@ inline void  CBuildingManager::reallocRooms()
 			{
 				_RoomInstances[i].NextFreeId =i+1 ;
 				_RoomInstances[i].Ptr = NULL;
+				_RoomInstances[i].Persistant = false;
 				//allocate the cell in GPMS ( here cell values must be > 0 )
 				NLNET::CMessage msgout("CREATE_INDOOR_UNIT");
 				sint32 cellId = -getRoomCellFromIdx(i);
@@ -703,6 +791,7 @@ inline void  CBuildingManager::reallocRooms()
 		{
 			_RoomInstances[i].NextFreeId = i+1;
 			_RoomInstances[i].Ptr = NULL;
+			_RoomInstances[i].Persistant = false;
 		}
 	}
 
@@ -721,8 +810,6 @@ void CBuildingManager::triggerTeleport(CCharacter * user, uint16 index)
 		nlwarning( "<BUILDING> char %s has no valid request",user->getId().toString().c_str() );
 		return;
 	}
-
-
 
 	// check if sessions mactch between user and system
 	uint16 session = 0;
@@ -824,11 +911,13 @@ void CBuildingManager::triggerTeleport(CCharacter * user, uint16 index)
 		if ( cellId )
 		{
 			user->tpWanted(x,y,z,true,heading,0xFF,cellId);
-			if ( dest->isGuildRoomDestination() )
+			if ( dest->isGuildRoomDestination() || (user->getPowoCell() != 0 && user->getPowoFlag("guild_inv")))
 				PlayerManager.sendImpulseToClient(user->getId(), "GUILD:OPEN_INVENTORY");
 		}
 		else
-			user->tpWanted(x,y,z,true,heading);
+		{
+			user->tpWanted(x,y,z,true,heading,0xFF,0,true);
+		}
 	}
 	else
 	{
@@ -838,6 +927,27 @@ void CBuildingManager::triggerTeleport(CCharacter * user, uint16 index)
 		//const sint32 oldCellId = mirrorValue;
 		removePlayerFromRoom( user );
 	}
+}
+
+//----------------------------------------------------------------------------
+void CBuildingManager::setCustomTrigger(sint32 triggerId, const std::string & url)
+{
+	std::map<sint,std::string>::iterator it = _CustomTriggers.find( triggerId );
+	if (it != _CustomTriggers.end())
+		_CustomTriggers.erase(it);
+	
+	if (!url.empty())
+		_CustomTriggers.insert(make_pair(triggerId, url));
+}
+
+//----------------------------------------------------------------------------
+std::string CBuildingManager::getCustomTrigger(sint32 triggerId)
+{
+	std::map<sint,std::string>::iterator it = _CustomTriggers.find( triggerId );
+	if ( it != _CustomTriggers.end() )
+		return (*it).second;
+	
+	return "";
 }
 
 //----------------------------------------------------------------------------
@@ -854,7 +964,7 @@ IBuildingPhysical * CBuildingManager::getBuildingPhysicalsByAlias( TAIAlias alia
 //----------------------------------------------------------------------------
 IBuildingPhysical* CBuildingManager::getBuildingPhysicalsByName( const std::string & name )
 {
-	std::map<std::string,IBuildingPhysical*>::iterator it =  _BuildingPhysicalsName.find( name );
+	std::map<std::string,IBuildingPhysical*>::iterator it = _BuildingPhysicalsName.find( name );
 	if ( it != _BuildingPhysicalsName.end() )
 	{
 		if( (*it).second == NULL )

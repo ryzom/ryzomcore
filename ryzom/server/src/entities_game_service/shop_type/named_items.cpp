@@ -124,6 +124,10 @@ CGameItemPtr CNamedItems::createNamedItem(const std::string & name, uint32 quant
 	if( itemSrc == NULL ) 
 		return NULL;
 	CGameItemPtr item = itemSrc->getItemCopy();
+
+	quantity = min(quantity, item->getMaxStackSize());
+	item->setStackSize(quantity);
+	
 	return item;
 }
 

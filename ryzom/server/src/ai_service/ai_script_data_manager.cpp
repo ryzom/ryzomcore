@@ -128,12 +128,15 @@ string CAIScriptDataManager::makePdrFileName()
 {
 	string aisName;
 	// get the AIS local path
-	CConfigFile::CVar *var = IService::getInstance()->ConfigFile.getVarPtr("AESAliasName");
-	if (var)
-		aisName = var->asString(0);
-	else
+	//CConfigFile::CVar *var = IService::getInstance()->ConfigFile.getVarPtr("AESAliasName");
+	// aisName must be get from getServiceAliasName to manage "-N AIS_NAME" command line arg
+	
+	aisName = IService::getInstance()->getServiceAliasName();
+	
+	if (aisName.empty())
 		aisName = "unamed_ais";
-
+	
+	
 	return string("ai_script_data/")+aisName+"_pdr.bin";
 }
 

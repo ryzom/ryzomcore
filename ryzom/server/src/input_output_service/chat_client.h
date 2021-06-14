@@ -206,6 +206,10 @@ public :
 	// unsubscribe to all chat group
 	void unsubscribeAllChatGroup();
 
+	void disableTranslation( const std::string &lang );
+	void resetDisabledTranslations();
+	bool haveDisabledTranslation( const std::string &lang );
+
 private :
 	
 	/// CLient datasetrow
@@ -232,7 +236,7 @@ private :
 
 	/// current chat mode
 	CChatGroup::TGroupType _ChatMode;
-	TChanID				   _DynChatChan; // if _ChatMode == dyn_chta, gives the unique ID of the channel
+	TChanID				_DynChatChan; // if _ChatMode == dyn_chta, gives the unique ID of the channel
 
 	/// Team chat
 	TGroupId			_TeamChat;
@@ -270,6 +274,8 @@ private :
 
 	/// keep infos about which string has been received by the client
 	std::vector<bool>	_KnownStrings;
+
+	std::vector<std::string>	_DontTranslate;
 
 	/**
 	 * Update the audience of this client

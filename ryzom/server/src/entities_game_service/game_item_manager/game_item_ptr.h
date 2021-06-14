@@ -20,7 +20,7 @@
 #ifndef GAME_ITEM_PTR_H
 #define GAME_ITEM_PTR_H
 
-// #define ITEM_DEBUG
+#define ITEM_DEBUG
 
 
 class CGameItem;
@@ -57,7 +57,7 @@ public:
 	void deleteItem();
 
 	// * operator - returning the item referenced by this pointer
-	CGameItem *operator*() const;
+	CGameItem * operator*() const;
 
 	// -> operator - returning the item referenced by this pointer
 	CGameItem *operator->() const;
@@ -77,23 +77,27 @@ public:
 	bool operator==(const CGameItem *item) const;
 	bool operator!=(const CGameItem *item) const;
 
-	uint32 getUniqueIndex() { return m_Idx; }
+	uint32 getUniqueIndex() { return _idx; }
 
 	// For set and map
 	bool operator < (const CGameItemPtr &other) const;
-
-	// operator bool() { return m_Idx; }
-	// bool operator!() { return !m_Idx; }
-
 private:
 	// link to item
-	void incRef();
+	void linkToItem();
 	// unlink from item
-	void decRef();
+	void unlinkFromItem();
+	// init
+	void reset();
 
 	// index into the CGameItem singleton's _Items vector
-	uint32 m_Idx;
+	uint32 _idx;
 
+	#ifdef ITEM_DEBUG
+		// used for making sure that referenced items haven't been freed or reallocated
+		// contains a copy of a CGameItem's allocation index (which changes at every alloaction and free)
+		sint32 _debug;
+		CGameItem* _debugPtr;
+	#endif
 };
 
 

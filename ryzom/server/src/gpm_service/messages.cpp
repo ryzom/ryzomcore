@@ -542,7 +542,7 @@ void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::T
 
 	if (cell > 0)
 	{
-		nlwarning("cbEntityTeleportation(): cell=%d for %s should be zero or negative, forced to 0", cell, id.toString().c_str());
+		//nlwarning("cbEntityTeleportation(): cell=%d for %s should be zero or negative, forced to 0", cell, id.toString().c_str());
 		cell = 0;
 	}
 
@@ -568,7 +568,7 @@ void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::T
 	{
 		if (move_to_new_cell == 1)
 		{
-			nlinfo("MSG: Sliding entity %d to cell %d) at tick: %d",index.getIndex(),cell,tick);
+			//nlinfo("MSG: Sliding entity %d to cell %d) at tick: %d",index.getIndex(),cell,tick);
 			CWorldPositionManager::updateEntityPosition(CWorldPositionManager::getEntityPtr(index), cell);
 		}
 		else
@@ -661,6 +661,26 @@ void cbDetach( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TS
 	CWorldPositionManager::detach(childIndex);
 }
 
+/****************************************************************\
+			set player dead status
+\****************************************************************/
+void cbSetDeadStatus( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+{
+	CEntityId	player;
+	bool status;
+
+	msgin.serial(player);
+	msgin.serial(status);
+
+	TDataSetRow	index = CWorldPositionManager::getEntityIndex(player);
+	CWorldEntity	*entity = CWorldPositionManager::getEntityPtr(index);
+	entity->Dead = status;
+	if (status)
+		nlinfo("player status changed to dead");
+	else
+		nlinfo("player status changed to alive");
+}
+
 
 /****************************************************************\
 			acquire control
@@ -686,6 +706,8 @@ void cbAcquireControl( NLNET::CMessage& msgin, const std::string &serviceName, N
 
 	nlinfo("MSG: Master %s acquire control of slave %s at (%d, %d, %d)",master.toString().c_str(),slave.toString().c_str(),x,y,z);
 }
+
+
 
 /****************************************************************\
 			leave control
@@ -891,6 +913,7 @@ TUnifiedCallbackItem CbGPMSArray[]=
 
 /*?DEAD?*/	{ "ATTACH",						cbAttach },						// attach an entity (child) to an another (father) using direct local position
 /*?DEAD?*/	{ "DETACH",						cbDetach },						// detach an entity of its father
+	{ "SET_DEAD_STATUS",			cbSetDeadStatus },				// entity acquire control of another entity
 	{ "ACQUIRE_CONTROL",			cbAcquireControl },				// entity acquire control of another entity
 	{ "LEAVE_CONTROL",				cbLeaveControl },				// entity leave control of another entity
 

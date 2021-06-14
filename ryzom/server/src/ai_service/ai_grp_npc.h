@@ -167,6 +167,15 @@ public:
 	bool botsAreNamed() { return _BotsAreNamed; }
 	void setBotsAreNamedFlag() { _BotsAreNamed = true; }
 	void clrBotsAreNamedFlag() { _BotsAreNamed = false; }
+
+	// States to Alias
+	void setStateAlias(const std::string &state, uint32 alias);
+	uint32 getStateAlias(const std::string &state);
+
+	// States Events to Alias
+	void setStateEventAlias(const std::string &stateEvent, uint32 alias);
+	uint32 getStateEventAlias(const std::string &stateEvent);
+
 	
 	// Parameter management -------------------------------------
  	void clearParameters();
@@ -227,11 +236,12 @@ public:
 
 	void setSpawnZone(const CNpcZone *zone) { _SpawnZone = zone; }
 	const CNpcZone *getSpawnZone() const { return _SpawnZone; }
+
 	
 	void setColour(uint8 colour);
 	
 	void setOutpostSide(OUTPOSTENUMS::TPVPSide side);
-	void setOutpostFactions(OUTPOSTENUMS::TPVPSide side);
+	void setOutpostFactions(std::string const& alias, OUTPOSTENUMS::TPVPSide side);
 	bool isRingGrp() const { return _RingGrp;}
 	
 private:
@@ -251,7 +261,7 @@ private:
 	uint32 _RespawnTime;
 	/// Despawn time in ticks
 	uint32 _DespawnTime;
-
+ 
 	
 	
 	AITYPES::CPropertySetWithExtraList<TAllianceId> _faction;
@@ -269,6 +279,9 @@ private:
 	TNamedEntityListenerList _namedEntityListeners;
 	typedef std::multimap<std::pair<std::string, std::string>, std::string> TNamedEntityListenerList2;
 	TNamedEntityListenerList2 _namedEntityListeners2;
+	typedef std::map <std::string, uint32> TStatesToAlias;
+	TStatesToAlias	_StatesToAlias;
+	TStatesToAlias	_StateEventToAlias;
 
 	struct SHandle
 	{

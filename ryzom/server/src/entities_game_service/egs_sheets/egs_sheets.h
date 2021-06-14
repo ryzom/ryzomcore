@@ -94,6 +94,7 @@ public:
 
 	// Get item form map reference
 	static inline const CAllStaticItems& getItemMapForm() { return _StaticSheets._StaticItems; }
+	static inline CAllStaticItems& getItemMapFormNoConst() { return _StaticSheets._StaticItems; }
 	
 	// Get form for brick
 //	static const CStaticGameBrick* getBrickForm( const NLMISC::CSheetId& sheetId );
@@ -200,6 +201,7 @@ public:
 	static void		reloadSPhrase(const std::string &wildcardFilter);
 	static void		reloadSuccessChancesTable(const std::string &wildcardFilter);
 	static void		reloadXPTable(const std::string &wildcardFilter);
+	static void		reloadAiactions(const std::string &wildcardFilter);
 	// @}
 
 public:

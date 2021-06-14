@@ -153,6 +153,13 @@ public:
 	void setAggroMinimumFor(TDataSetRow const& bot, float aggro, bool forceReturnAggro, NLMISC::CSmartPtr<CAIPlace const> place = NLMISC::CSmartPtr<CAIPlace const>(NULL));
 	bool haveAggro() const;
 	bool haveAggroOrReturnPlace() const;
+
+
+	const std::string getActionName() const { return _ActionName; }
+	void setActionName(const std::string &name) { _ActionName = name; }
+
+	const std::string getUrl() const { return _Url; }
+	void setUrl(const std::string &url) { _Url = url; }
 	
 protected:
 	CProfilePtr		_PunctualHoldMovingProfile;
@@ -170,6 +177,9 @@ private:
 	CProfilePtr		_MovingProfile;
 	CProfilePtr		_ActivityProfile;
 	CProfilePtr		_FightProfile;
+
+	std::string _ActionName;
+	std::string _Url;
 };
 
 //////////////////////////////////////////////////////////////////////////////

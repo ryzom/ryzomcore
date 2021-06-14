@@ -32,8 +32,10 @@ class CCharacter;
 class CMissionItem
 {
 public:
-	/// build this class from a script. Return true on success, and add the item chat param to the parameter list
-	bool buildFromScript( const std::vector<std::string> & script, std::vector< std::pair< std::string, STRING_MANAGER::TParamType > > & chatParams, std::string & varName );
+	/// decode a string encoded in Hexadecimal
+	std::string hex_decode(const std::string & str);
+	/// build this class from a script. Return true on success
+	bool buildFromScript( const std::vector<std::string> & script);
 	/// create an ingame item from this class and put it in user temp inventory
 	CGameItemPtr createItemInTempInv(CCharacter * user, uint16 quantity);
 	/// create an item from the mission item data
@@ -59,6 +61,8 @@ private:
 	bool					_NoDrop;
 	/// sheet of the phrase
 	NLMISC::CSheetId		_SPhraseId;
+	ucstring				_CustomText;
+	ucstring				_CustomName;
 };
 
 

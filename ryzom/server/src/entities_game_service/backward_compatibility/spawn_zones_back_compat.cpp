@@ -27,7 +27,7 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-/*
+
 namespace BACK_COMPAT
 {
 
@@ -648,4 +648,4 @@ uint16 oldToNewSpawnZoneId(uint16 oldId)
 }
 
 } // namespace BACK_COMPAT
-*/
+

@@ -3066,6 +3066,8 @@ void CGrpProfileWanderNoPrim::updateProfile(uint ticksSinceLastUpdate)
 					}
 					wbs->setTimer(uint32(waitMin+CAIS::rand32(uint32(waitMax-waitMin))));
 				}
+				pgrp.processStateEvent(pgrp.mgr().EventDestinationReachedFirst);
+				pgrp.processStateEvent(pgrp.mgr().EventDestinationReachedAll);
 			}
 			continue;
 		}
