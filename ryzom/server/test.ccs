@@ -1,0 +1,50 @@
+﻿
+// comment
+title fr le titre
+title en the title
+title de der title
+
+wait 10
+
+say en bob Hi_en
+say fr bob Hi_fr
+say de bob Hi_de
+
+say en "bob the man" A bla bla en
+say fr "bob le man"  A bla é bla fr
+say de "bob der man" A bla ü bla de
+
+wait 10
+
+say en bob F e n
+say fr bob F f r
+say de bob F d e
+
+wait 20
+
+say en bob how long en
+say fr bob how long fr
+say de bob how long de
+
+// first answer
+answer ten feet
+answer dix pié
+wait_answer 10
+
+say en bob how much longer en
+say fr bob how much longer fr
+say de bob how much longer de
+
+// second answer
+answer nine feet
+answer neuf pié
+wait_answer 100
+
+display_winners
+
+say en bob oh yea!
+say fr bob oh yea!
+say de bob oh yea!
+
+// wait for 1/2 hour before closing the chat and ending the contest
+wait 1800

@@ -1,0 +1,236 @@
+ <!--  *************************** 
+  --> 
+ <!--  Ingame keyboard assignation 
+  --> 
+ <!--  *************************** 
+  --> 
+ <interface_config>
+
+ <!-- keys.xml are loaded after user key defs. don't replace its key/action defs -->
+ <define id="key_def_no_replace"	value="1" />
+ <!-- every action bound here must be kept in the Keys interface, even if the key is unbound -->
+ <define id="key_def_force_display"	value="1" />
+
+ <!--  Move 
+  -->
+  <key name="KeyUP" action="forward" /> 
+  <key name="KeyDOWN" action="backward" /> 
+  <key name="KeyLEFT" action="turn_left" /> 
+  <key name="KeyRIGHT" action="turn_right" /> 
+  <key name="KeyLEFT" ctrl="1" action="strafe_left" /> 
+  <key name="KeyRIGHT" ctrl="1" action="strafe_right" /> 
+  <key name="KeyPRIOR" action="look_up" /> 
+  <key name="KeyNEXT" action="look_down" /> 
+  <key name="KeyEND" action="toggle_auto_walk" /> 
+  <key name="KeyINSERT" action="toggle_sit_stand" /> 
+  <!--
+  <key name="KeyDELETE" action="toggle_run_walk" /> 
+  -->
+  <key name="KeyPRIOR" ctrl="1" action="camera_up" /> 
+  <key name="KeyNEXT"  ctrl="1" action="camera_down" /> 
+ <!--  View 
+  --> 
+  <key name="KeyV" action="toggle_camera" /> 
+  <key name="KeyNUMPAD0" action="rear_view" /> 
+  <key name="KeyNUMPAD1" action="camera_turn_left" /> 
+  <key name="KeyNUMPAD2" action="camera_turn_right" /> 
+  <key name="KeyDECIMAL" action="camera_turn_center" /> 
+  
+  <key name="KeyF5" shift="1" action="toggle_chat" /> 
+   
+  <key name="KeyF10" shift="1" action="screen_shot" /> 
+  <key name="KeyF10" ctrl="1" action="screen_shot_jpg" /> 
+  <key name="KeyF10" menu="1" action="screen_shot_png"/>
+  <key name="KeyF4" menu="1" action="enter_modal" params="group=ui:interface:quit_dialog" /> 
+  <key name="KeyF11" shift="1" action="test" /> 
+  <key name="KeyL" ctrl="0" action="toggle_light" /> 
+  <key name="KeyF9" shift="1" action="free_mouse" /> 
+  <!--
+  <key name="KeyR" shift="0" action="reply_teller_once" /> 
+  <key name="KeyR" ctrl="1" action="reply_teller" /> 
+  -->
+  <!-- <key name="KeyO" shift="0" action="toggle_names" />  -->
+ <!--  Movie recorder 
+  -->
+  <key name="KeyF10" ctrl="1" shift="1" menu="1" action="toggle_camera_recorder" /> 
+  <key name="KeyF11" ctrl="1" shift="1" menu="1" action="camera_recorder_playback" /> 
+  <key name="KeyF12" ctrl="1" shift="1" menu="1" action="save_camera_record" /> 
+  <!--  Camera recorder 
+  -->
+  <key name="KeyF3" ctrl="1" action="toggle_movie_recorder" /> 
+  <key name="KeyF4" ctrl="1" shift="1" menu="1" action="replay_movie" /> 
+  <key name="KeyF5" ctrl="1" shift="1" menu="1" action="save_movie" /> 
+ <!--  Debug actions 
+  --> 
+  <key name="Key1" ctrl="1" menu="1" shift="1" action="command" params="mode 0 3" />
+  <key name="Key2" ctrl="1" menu="1" shift="1" action="command" params="mode 0 1" />
+  <key name="Key3" ctrl="1" menu="1" shift="1" action="command" params="a changeMode 3" />
+  <key name="Key4" ctrl="1" menu="1" shift="1" action="command" params="a changeMode 1" />
+  <key name="Key5" ctrl="1" menu="1" shift="1" action="command" params="a execPhrase 1 root_combat_all_weapons.sbrick combat_stamina_2.sbrick" />
+  <key name="Key6" ctrl="1" menu="1" shift="1" action="command" params="a execPhrase 0 root_combat_all_weapons.sbrick melee_add_damage_1.sbrick combat_stamina_10.sbrick" />
+  <key name="KeyF1" shift="1" action="toggle_help" /> 
+  <key name="KeyF2" shift="1" action="display_infos" /> 
+  <key name="KeyF3" shift="1" action="render_mode" /> 
+  <key name="KeyF4" shift="1" action="toggle_render" /> 
+  <key name="KeyF6" shift="1" action="switch_console_display" /> 
+  <key name="KeyF7" shift="1" action="change_compass_mode" /> 
+  <key name="KeyF8" shift="1" action="toggle_fly" /> 
+  <key name="KeyINSERT" ctrl="1" menu="1" action="set_pos" /> 
+  <key name="KeyO" ctrl="1" menu="1" action="pacs_borders" /> 
+  <key name="KeyU" ctrl="1" menu="1" action="debug_clusters" /> 
+  <key name="KeyR" ctrl="1" menu="1" action="reload_landscape_ig" /> 
+  <key name="KeyF2" ctrl="1" action="profile" /> 
+  <key name="KeyF2" ctrl="1" menu="1" action="profile_vblock" /> 
+  <key name="KeyF2" menu="1" action="profile_texture" /> 
+  <key name="KeyF4" ctrl="1" menu="1" action="profile_fillrate" /> 
+  <key name="KeyF6" ctrl="1" shift="1" menu="1" action="memory_report" /> 
+  <key name="KeyF7" ctrl="1" shift="1" menu="1" action="toggle_primitive" /> 
+  <key name="KeyF8" ctrl="1" shift="1" menu="1" action="primitive_up" /> 
+  <key name="KeyF9" ctrl="1" shift="1" menu="1" action="primitive_down" /> 
+  <key name="Key1" ctrl="1" menu="1" action="toggle_3d_filter" params="0" /> 
+  <key name="Key2" ctrl="1" menu="1" action="toggle_3d_filter" params="1" /> 
+  <key name="Key3" ctrl="1" menu="1" action="toggle_3d_filter" params="2" /> 
+  <key name="Key4" ctrl="1" menu="1" action="toggle_3d_filter" params="3" /> 
+  <key name="Key5" ctrl="1" menu="1" action="toggle_3d_filter" params="4" /> 
+  <key name="Key6" ctrl="1" menu="1" action="toggle_3d_filter" params="5" /> 
+  <key name="Key7" ctrl="1" menu="1" action="toggle_3d_filter" params="6" /> 
+  <key name="Key8" ctrl="1" menu="1" action="toggle_3d_filter" params="7" /> 
+  <key name="Key9" ctrl="1" menu="1" action="toggle_3d_filter" params="8" /> 
+  <key name="Key0" ctrl="1" menu="1" action="toggle_3d_filter" params="9" />
+ <!--  Weather debug 
+  --> 
+  <key name="KeyADD" ctrl="1" menu="1" action="inc_time" /> 
+  <key name="KeySUBTRACT" ctrl="1" menu="1" action="dec_time" /> 
+  <key name="KeyS" ctrl="1" menu="1" action="toggle_season" /> 
+  <key name="KeyW" ctrl="1" menu="1" action="reload_season" /> 
+  <key name="KeyP" ctrl="1" menu="1" action="wind_test" /> 
+  <key name="KeyT" ctrl="1" menu="1" action="reel_weather" /> 
+  <key name="KeyC" ctrl="1" menu="1" action="update_clouds" /> 
+  <key name="KeyD" ctrl="1" menu="1" action="toggle_weather_function" /> 
+  <key name="KeyK" ctrl="1" menu="1" action="inc_hour" /> 
+  <key name="KeyL" ctrl="1" menu="1" action="dec_hour" /> 
+  <key name="KeyZ" ctrl="1" menu="1" action="show_timed_fx" /> 
+  <key name="KeyM" ctrl="1" menu="1" action="weather_stats" /> 
+  <key name="KeyB" ctrl="1" menu="1" action="dec_display_factor" /> 
+  <key name="KeyJ" ctrl="1" menu="1" action="inc_display_factor" /> 
+  <key name="KeyG" ctrl="1" menu="1" action="toggle_freeze_graph" /> 
+<!--  UI debug
+  --> 
+  <key name="KeyA" ctrl="1" shift="1" action="debug_ui_prev_element_under_mouse" /> 
+  <key name="KeyQ" ctrl="1" shift="1" action="debug_ui_inspect_element_under_mouse" /> 
+  <key name="KeyW" ctrl="1" shift="1" action="debug_ui_next_element_under_mouse" /> 
+
+ <!--  Sound debug 
+  --> 
+  <key name="KeyNUMPAD0" ctrl="1" menu="1" action="draw_sound" /> 
+  <key name="KeyPRIOR" ctrl="1" menu="1" action="inc_camera_height" /> 
+  <key name="KeyNEXT" ctrl="1" menu="1" action="dec_camera_height" /> 
+ <!--  Text edit 
+  --> 
+  <key name="KeyLEFT" shift="1" action="edit_previous_char" context="edit" /> 
+  <key name="KeyLEFT" shift="1" menu="1" action="edit_select_previous_char" context="edit" /> 
+  <key name="KeyLEFT" shift="1" ctrl="1" action="edit_previous_word" context="edit" /> 
+  <key name="KeyLEFT" shift="1" ctrl="1" menu="1" action="edit_select_previous_word" context="edit" /> 
+  <key name="KeyRIGHT" shift="1" action="edit_next_char" context="edit" /> 
+  <key name="KeyRIGHT" shift="1" menu="1" action="edit_select_next_char" context="edit" /> 
+  <key name="KeyRIGHT" shift="1" ctrl="1" action="edit_next_word" context="edit" /> 
+  <key name="KeyRIGHT" shift="1" ctrl="1" menu="1" action="edit_select_next_word" context="edit" /> 
+  <key name="KeyHOME" shift="1" action="edit_goto_line_begin" context="edit" /> 
+  <key name="KeyHOME" shift="1" menu="1" action="edit_select_to_line_begin" context="edit" /> 
+  <key name="KeyHOME" shift="1" ctrl="1" action="edit_goto_block_begin" context="edit" /> 
+  <key name="KeyHOME" shift="1" ctrl="1" menu="1" action="edit_select_to_block_begin" context="edit" /> 
+  <key name="KeyEND" shift="1" action="edit_goto_line_end" context="edit" /> 
+  <key name="KeyEND" shift="1" menu="1" action="edit_select_to_line_end" context="edit" /> 
+  <key name="KeyEND" shift="1" ctrl="1" action="edit_goto_block_end" context="edit" /> 
+  <key name="KeyEND" shift="1" ctrl="1" menu="1" action="edit_select_to_block_end" context="edit" /> 
+  <key name="KeyUP" shift="1" action="edit_previous_line" context="edit" /> 
+  <key name="KeyDOWN" shift="1" action="edit_next_line" context="edit" /> 
+  <key name="KeyDELETE" action="edit_delete_char" context="edit" /> 
+  <key name="KeyC" ctrl="1" action="edit_copy" context="edit" /> 
+  <!--<key name="KeyINSERT" ctrl="1" action="edit_copy" context="edit" /> -->
+  <key name="KeyV" ctrl="1" action="edit_paste" context="edit" /> 
+  <!--<key name="KeyINSERT" shift="1" action="edit_paste" context="edit" /> -->
+  <key name="KeyX" ctrl="1" action="edit_cut" context="edit" /> 
+  <key name="KeyA" ctrl="1" action="edit_select_all" context="edit" /> 
+ <!-- <key name="KeyTAB" action="edit_expand" context="edit"/>
+
+  --> 
+  <key name="KeyTAB" action="edit_expand_or_cycle_tell" context="edit" /> 
+  <key name="KeyTAB" action="cycle_tell" /> 
+  <key name="KeyBACK" action="edit_back" context="edit" /> 
+ <!--  Interface 
+  --> 
+  <key name="KeyESCAPE" shift="1" action="close_help" /> 
+ 
+  
+  <!--  Map
+  --> 
+  <!--
+  <key name="KeyC" action="show_hide" params="compass" /> 
+  <key name="KeyR" action="show_hide" params="radar" /> 
+  -->
+  
+  <key name="KeyCOMMA" action="show_hide" params="map" />   
+  
+  
+ <!--  Communication 
+  --> 
+  <!--
+	<key name="KeyT" action="show_hide" params="target" />
+	<key name="KeyF" action="show_hide" params="contact_list" />
+	<key name="KeyY" action="show_hide" params="team_list" />
+	-->
+	<key name="KeyX" action="show_hide" params="main_chat" />
+	<!--
+	<key name="KeyW" action="show_hide" params="system_info" />
+	-->
+	<!-- TO DO : to be defined by patrick
+	<key name="" shift="0" action="show_hide" params="guild_chat" />
+	<key name="" shift="0" action="show_hide" params="team_chat" />
+	<key name="" shift="0" action="show_hide" params="tell" />
+	<key name="" shift="0" action="show_hide" params="around_me" />-->
+	<key name="KeyF5" action="talk_untalk" />
+	<key name="KeyG" shift="1" action="show_hide" params="guild_forum" />
+ <!--  Options 
+  --> 
+  <key name="KeyK" shift="0" action="show_hide" params="keys" /> 
+  <!--
+  <key name="KeyK" shift="1" action="show_hide" params="macros" />
+  -->
+  <key name="KeyU" shift="0" action="show_hide" params="game_config" /> 
+  <!--
+  <key name="KeyN" shift="0" action="show_hide" params="connection" /> 
+  -->
+
+  <!-- r2ed windows -->
+
+  <key name="KeyS" action="show_hide" params="r2ed_scenario" /> 
+  <key name="KeyP" action="show_hide" params="r2ed_palette" /> 
+
+  <!-- r2ed contextual commands -->
+  <key name="KeyDELETE" action="r2ed_context_command" params="commandId=delete" /> 
+  <key name="KeyG"		action="r2ed_context_command" params="commandId=group" />
+  <key name="KeyG"	menu="1" action="r2ed_context_command" params="commandId=ungroup" />
+  <key name="KeyL"	action="r2ed_context_command" params="commandId=set_as_leader" />
+  <key name="KeyC"	action="r2ed_context_command" params="commandId=customize_look" />
+  <key name="KeyW"	action="r2ed_context_command" params="commandId=wander_route" />    
+
+  <!-- r2ed misc -->
+  <key name="KeyF8" action="r2ed_try_go_test"/> 
+  <key name="KeyM" action="r2ed_select_move" /> 
+  <key name="KeyR" action="r2ed_select_rotate" />
+  <key name="KeyT" action="r2ed_teleport" />
+  <key name="KeyESCAPE"		action="r2ed_cancel_tool"/>
+  <key name="KeyZ" ctrl="1" action="r2ed_undo" />
+  <key name="KeyZ" ctrl="1" shift="1" action="r2ed_redo" />
+  <key name="KeyF" action="r2ed_freeze_unfreeze_botobjects" />  
+  
+  
+
+ <!-- reset to default -->
+ <define id="key_def_no_replace"	value="0" />
+ <define id="key_def_force_display"	value="0" />
+
+
+
+</interface_config>

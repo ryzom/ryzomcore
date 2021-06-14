@@ -1,0 +1,512 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
+
+<variable entry="UI:TEMP:LOCCLICKINFO"	type="sint64" value="-1"/>
+<variable entry="UI:TEMP:LOCCLICKDEST"		type="sint64" value="-1"/>
+<variable entry="UI:TEMP:CHAR3D:LOC" 	type="sint64" value="-1"/>
+<variable entry="UI:TEMP:LOCATIONBACKHOME"	type="sint64" value="-1"/>
+
+<variable entry="UI:TEMP:CHAR3D:DEST" type="sint64" value="-1"/>
+
+<proc id="location_start">
+	<action handler="reset_pushed" params="dblink=ui:outgame:location" />
+	
+	<action handler="set" params="target_property=ui:outgame:location:next:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:location:next:alpha|value=255" />
+	
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKINFO|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKINFO|value=0" />
+	
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=0" />
+	
+	<action handler="set" params="dblink=UI:TEMP:LOCATIONBACKHOME|value=-2" />
+	<action handler="set" params="dblink=UI:TEMP:LOCATIONBACKHOME|value=-1" />
+	<action handler="set" params="target_property=ui:outgame:location:location_bg:active|value=1" />
+	<action handler="anim_start" params="anim=anim_location_intro" />
+</proc>
+
+
+<proc id="location_finish">
+</proc>
+
+<proc id="location_when_outro_finished">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D:DEST|dbsrc=UI:TEMP:LOCCLICKDEST" />
+	<action handler="set" params="target_property=ui:outgame:location:location_bg:active|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKINFO|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=-1" />
+	<action handler="proc" params="proc_big_buttons_deactive" />
+	<action handler="anim_start"  params="anim=anim_location_outro2" />
+</proc>
+
+<proc id="location_when_outro_finished2">
+	<action handler="set" params="target_property=ui:outgame:location:next:active|value=0" />
+	<action handler="ask_create_char" cond="eq(@UI:TEMP:FROM,1)" params="name=ui:outgame:summary:eb|caracs=UI:TEMP:CARACS|charsum=UI:TEMP:CHAR3D|loc=UI:TEMP:CHAR3D:DEST" />
+</proc>
+
+
+<proc id="location_when_back_finished">
+	<action handler="set" params="target_property=ui:outgame:location:location_bg:active|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKINFO|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=-1" />
+	<action handler="proc" params="proc_big_buttons_deactive" />
+	<action handler="anim_start"  params="anim=anim_location_back2" />
+</proc>
+
+<proc id="location_when_back_finished2">
+	<action handler="set"  cond="eq(@UI:TEMP:LOCATIONBACKHOME,0)" params="dblink=UI:CURRENT_SCREEN|value=%screen_summary" />
+	<action handler="set"  cond="eq(@UI:TEMP:LOCATIONBACKHOME,1)" params="dblink=UI:CURRENT_SCREEN|value=%screen_select" />
+</proc>
+
+
+<proc id="proc_choice_location">
+	<action handler="play_sound" params="name=career_but_click" />
+	<action handler="set" params="target_property=ui:outgame:location:next:active|value=1"/>
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=@0" />
+</proc>
+
+
+<!-- BACK -->
+<proc id="proc_choice_back_screen_location">
+	<action handler="play_sound" params="name=generic_prev_click" />
+	<action handler="anim_start" params="anim=anim_location_back" />
+	<action handler="set" params="dblink=UI:TEMP:LOCATIONBACKHOME|value=0" />
+</proc>
+
+<!-- HOME -->
+<proc id="proc_choice_home_screen_location">
+	<action handler="play_sound" params="name=generic_home_click" />
+
+	<action handler="anim_start" params="anim=anim_location_back" />
+	<action handler="set" params="dblink=UI:TEMP:LOCATIONBACKHOME|value=1" />
+</proc>
+
+<!-- NEXT -->
+<proc id="proc_choice_next_screen_location">
+	<action handler="play_sound" params="name=generic_next_click" />
+
+	<action handler="anim_start" params="anim=anim_location_outro" />
+</proc>
+
+<proc id="proc_loc_next_screen2">
+	<action handler="set" params="dblink=UI:CURRENT_SCREEN|value=%screen_select" />
+</proc>
+
+<!-- SERVER CREATE THE CHARACTER -->
+
+<proc id="proc_loc_server_test">
+	<action handler="proc" params="proc_loc_next_screen2" 
+		cond="and(eq(@UI:CURRENT_SCREEN,%screen_location),eq(@UI:SERVER_RECEIVED_CHARS,1))" />
+</proc>
+
+<link expr="depends(@UI:CURRENT_SCREEN, @UI:SERVER_RECEIVED_CHARS)"
+	action="proc" params="proc_loc_server_test" />
+
+<!-- BIG BUTTONS PROC -->
+
+
+<proc id="proc_big_buttons_active">
+	<action handler="set" params="target_property=ui:outgame:location:bdest_1:active|value=1" />
+	<action handler="set" params="target_property=ui:outgame:location:bdest_2:active|value=1" />
+	<action handler="set" params="target_property=ui:outgame:location:bdest_3:active|value=1" />
+	<action handler="set" params="target_property=ui:outgame:location:bdest_4:active|value=1" />
+	<action handler="set" params="target_property=ui:outgame:location:bdest_5:active|value=1" />
+</proc>
+
+<proc id="proc_big_buttons_deactive">
+	<action handler="set" params="target_property=ui:outgame:location:bdest_1:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:location:bdest_2:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:location:bdest_3:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:location:bdest_4:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:location:bdest_5:active|value=0" />
+</proc>
+
+<proc id="proc_big_location_1">
+	<action handler="set" params="target_property=ui:outgame:location:dest_1:pushed|value=1" />
+	<action handler="proc" params="proc_choice_location|1" />
+</proc>
+
+<proc id="proc_big_location_2">
+	<action handler="set" params="target_property=ui:outgame:location:dest_2:pushed|value=1" />
+	<action handler="proc" params="proc_choice_location|2" />
+</proc>
+
+<proc id="proc_big_location_3">
+	<action handler="set" params="target_property=ui:outgame:location:dest_3:pushed|value=1" />
+	<action handler="proc" params="proc_choice_location|3" />
+</proc>
+
+<proc id="proc_big_location_4">
+	<action handler="set" params="target_property=ui:outgame:location:dest_4:pushed|value=1" />
+	<action handler="proc" params="proc_choice_location|4" />
+</proc>
+
+<proc id="proc_big_location_5">
+	<action handler="set" params="target_property=ui:outgame:location:dest_5:pushed|value=1" />
+	<action handler="proc" params="proc_choice_location|5" />
+</proc>
+
+
+
+<!-- ******************* -->
+<!-- * Select Location * -->
+<!-- ******************* -->
+
+<group id="location" w="800" h="600" posref="MM MM"
+				on_active="proc" on_active_params="location_start">
+
+	<!-- BLACK BACK -->
+	
+	
+	<view type="bitmap" id="bg" posref="TL TL" x="0" y="-32" render_layer="-4" texture="blank.tga" color="0 0 0 255" scale="true" w="800" h="488" global_color="false" active="false" />
+	
+		
+	<!-- LOCATION BACK -->
+	
+	<view type="bitmap" id="location_bg" render_layer="-3" txtoffsetx="0" txtoffsety="0" txtwidth="800" txtheight="488"
+		global_color="false" color="255 255 255 255" posref="TL TL" x="0" y="-32" texture="newbie_map.tga" active="true" />
+	
+	
+	<view type="bitmap" id="dest1_sel" posparent="location_bg" posref="TL TL" x="140" y="-51" 	render_layer="1" 	texture="dest_pushed.tga" global_color="false" />
+	<view type="bitmap" id="dest2_sel" posparent="location_bg" posref="TL TL" x="368" y="-168" 	render_layer="1" 	texture="dest_pushed.tga" global_color="false" />
+	<view type="bitmap" id="dest3_sel" posparent="location_bg" posref="TR TR" x="-105" y="-169"	render_layer="1" 	texture="dest_pushed.tga" global_color="false" />
+	<view type="bitmap" id="dest4_sel" posparent="location_bg" posref="BL BL" x="204" y="155" 	render_layer="1" 	texture="dest_pushed.tga" global_color="false" />
+	<view type="bitmap" id="dest5_sel" posparent="location_bg" posref="BR BR" x="-207" y="99" 	render_layer="1" 	texture="dest_pushed.tga" global_color="false" />
+	<link expr="eq(@UI:TEMP:LOCCLICKDEST,1)" target="dest1_sel:active" />
+	<link expr="eq(@UI:TEMP:LOCCLICKDEST,2)" target="dest2_sel:active" />
+	<link expr="eq(@UI:TEMP:LOCCLICKDEST,3)" target="dest3_sel:active" />
+	<link expr="eq(@UI:TEMP:LOCCLICKDEST,4)" target="dest4_sel:active" />
+	<link expr="eq(@UI:TEMP:LOCCLICKDEST,5)" target="dest5_sel:active" />
+	
+		
+	<!-- BLACK BOX (sert a faire les transition...) -->
+	<view type="bitmap" id="blackbox" posref="TL TL" x="0" y="-32" render_layer="1" texture="blank.tga" color="0 0 0 0" scale="true" w="800" h="488" global_color="false" />
+	
+	
+	<!-- Title -->
+	<view type="text" id="title" posref="TL TL" x="8" y="-6" hardtext="uiLocationTitle" fontsize="20"/>
+	
+	
+	<!-- BIG BUTTONS -->
+	
+	<ctrl type="button" id="bdest_1" button_type="radio_button" posparent="location_bg" posref="TL TL" x="140" y="-51"
+			tx_normal="dest_over.tga" tx_pushed="dest_pushed.tga" tx_over="dest_over.tga"
+			color="255 255 255 0" col_pushed="255 255 255 255" col_over="255 255 255 255"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onover="play_sound" params_over="name=specie_but_over" tooltip="uiLocDest1"
+			onclick_l="proc" params_l="proc_big_location_1" />
+
+	<ctrl type="button" id="bdest_2" button_type="radio_button" posparent="location_bg" posref="TL TL" x="368" y="-168"
+			tx_normal="dest_over.tga" tx_pushed="dest_pushed.tga" tx_over="dest_over.tga"
+			color="255 255 255 0" col_pushed="255 255 255 255" col_over="255 255 255 255"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onover="play_sound" params_over="name=specie_but_over" tooltip="uiLocDest2"
+			onclick_l="proc" params_l="proc_big_location_2" />
+		
+	<ctrl type="button" id="bdest_3" button_type="radio_button" posparent="location_bg" posref="TR TR" x="-105" y="-169"
+			tx_normal="dest_over.tga" tx_pushed="dest_pushed.tga" tx_over="dest_over.tga"
+			color="255 255 255 0" col_pushed="255 255 255 255" col_over="255 255 255 255"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onover="play_sound" params_over="name=specie_but_over" tooltip="uiLocDest3"
+			onclick_l="proc" params_l="proc_big_location_3" />
+			
+	<ctrl type="button" id="bdest_4" button_type="radio_button" posparent="location_bg" posref="BL BL" x="204" y="155"
+			tx_normal="dest_over.tga" tx_pushed="dest_pushed.tga" tx_over="dest_over.tga"
+			color="255 255 255 0" col_pushed="255 255 255 255" col_over="255 255 255 255"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onover="play_sound" params_over="name=specie_but_over" tooltip="uiLocDest4"
+			onclick_l="proc" params_l="proc_big_location_4" />
+			
+	<ctrl type="button" id="bdest_5" button_type="radio_button" posparent="location_bg" posref="BR BR" x="-207" y="99"
+			tx_normal="dest_over.tga" tx_pushed="dest_pushed.tga" tx_over="dest_over.tga"
+			color="255 255 255 0" col_pushed="255 255 255 255" col_over="255 255 255 255"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onover="play_sound" params_over="name=specie_but_over" tooltip="uiLocDest5"
+			onclick_l="proc" params_l="proc_big_location_5" />
+	
+	
+	<!-- TIMELINE -->
+	<group id="timeline" w="784" h="32" posref="BL BL" x="8" y="16" >
+		<view type="bitmap" id="b3" posref="MM MM" x="0" y="0" texture="time_button.tga" global_color="false" />
+		<view type="bitmap" id="b2" posparent="b3" posref="TL TR" x="0" y="0" texture="time_button.tga" global_color="false" />
+		<view type="bitmap" id="b4" posparent="b3" posref="TR TL" x="0" y="0" texture="time_button.tga" global_color="false" />
+		<view type="bitmap" id="b1" posparent="b2" posref="TL TR" x="0" y="0" texture="time_button.tga" global_color="false" />
+		<view type="bitmap" id="b5" posparent="b4" posref="TR TL" x="0" y="0" texture="time_button.tga" global_color="false" />
+		
+		<view type="bitmap" id="back_bg" posref="TL TL" x="0" y="0" texture="time_back.tga" global_color="false" />
+		<view type="bitmap" id="next_bg" posref="TR TR" x="0" y="0" texture="time_next.tga" global_color="false" />
+		<view type="bitmap" id="line" posparent="back_bg" posref="MR ML" x="0" y="0" texture="time_line.tga" scale="true" w="188" h="4" global_color="false" />
+		<view type="bitmap" id="line" posparent="next_bg" posref="ML MR" x="0" y="0" texture="time_line.tga" scale="true" w="188" h="4" global_color="false" />
+	</group>
+
+
+
+	<!-- Buttons timeline -->
+	<ctrl type="button" id="back" button_type="push_button" posref="BL BL" x="8" y="16"
+		tx_normal="button_back.tga" tx_pushed="button_back_over.tga" tx_over="button_back_over.tga" 
+		onover="play_sound" params_over="name=generic_prev_over"
+		onclick_l="proc" params_l="proc_choice_back_screen_location" tooltip="uiPrevStep" />
+
+	<ctrl type="button" id="next" button_type="push_button" posref="BR BR" x="-8" y="16" color="255 255 255 255"
+		tx_normal="button_next.tga" tx_pushed="button_next_over.tga" tx_over="button_next_over.tga" 
+		onover="play_sound" params_over="name=generic_next_over"
+		onclick_l="proc" params_l="proc_choice_next_screen_location" tooltip="uiNextStep" active="false" />
+
+
+
+	<!-- Buttons Home -->
+	<ctrl type="button" id="home" button_type="push_button" posref="TR MM" x="-24" y="-16"
+		tx_normal="button_home.tga" tx_pushed="button_home.tga" tx_over="button_home_over.tga" 
+		onover="play_sound" params_over="name=generic_home_over"
+		onclick_l="proc" params_l="proc_choice_home_screen_location" tooltip="uiReturnCharSel" />
+	
+		
+
+	<!-- Buttons locations -->
+	<ctrl type="button" button_type="radio_button" id="dest_1" posref="BL MM" x="288" y="32"
+									tx_normal="logo_d1.tga" tx_over="button_blank_over.tga" tx_pushed="logo_d1_pushed.tga"
+									onover="play_sound" params_over="name=career_but_over"
+									over_when_pushed="false" onclick_l="proc" params_l="proc_choice_location|1" tooltip="uiLocDest1"/>
+									
+	<ctrl type="button" button_type="radio_button" id="dest_2" posref="BL MM" x="344" y="32"
+									tx_normal="logo_d2.tga" tx_over="button_blank_over.tga" tx_pushed="logo_d2_pushed.tga"
+									onover="play_sound" params_over="name=career_but_over"
+									over_when_pushed="false" onclick_l="proc" params_l="proc_choice_location|2" tooltip="uiLocDest2"/>
+
+	<ctrl type="button" button_type="radio_button" id="dest_3" posref="BL MM" x="400" y="32"
+									tx_normal="logo_d3.tga" tx_over="button_blank_over.tga" tx_pushed="logo_d3_pushed.tga"
+									onover="play_sound" params_over="name=career_but_over"
+									over_when_pushed="false" onclick_l="proc" params_l="proc_choice_location|3" tooltip="uiLocDest3"/>
+									
+	<ctrl type="button" button_type="radio_button" id="dest_4" posref="BL MM" x="456" y="32"
+									tx_normal="logo_d4.tga" tx_over="button_blank_over.tga" tx_pushed="logo_d4_pushed.tga"
+									onover="play_sound" params_over="name=career_but_over"
+									over_when_pushed="false" onclick_l="proc" params_l="proc_choice_location|4" tooltip="uiLocDest4"/>
+									
+	<ctrl type="button" button_type="radio_button" id="dest_5" posref="BL MM" x="512" y="32"
+									tx_normal="logo_d5.tga" tx_over="button_blank_over.tga" tx_pushed="logo_d5_pushed.tga"
+									onover="play_sound" params_over="name=career_but_over"
+									over_when_pushed="false" onclick_l="proc" params_l="proc_choice_location|5" tooltip="uiLocDest5"/>
+	
+	
+
+	<!-- BORDERS -->
+	<view type="bitmap" id="top_line" posref="TL TL" posparent="blackbox" x="0" y="1" texture="border_hor.tga" scale="true" w="800" h="1" global_color="false" />
+	<view type="bitmap" id="bot_line" posref="BL BL" posparent="blackbox" x="0" y="-1" texture="border_hor.tga" scale="true" w="800" h="1" global_color="false" />
+	<view type="bitmap" id="vertical_line" posparent="blackbox" posref="ML ML" x="290" y="0"  render_layer="1" texture="border_ver.tga" scale="true" w="1" sizeref="h" h="0" color="255 255 255 0" global_color="false" />
+
+	
+
+</group>
+
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_location)" target="location:active" />
+
+
+
+<anim id="anim_location_intro" duration="3.0" loop="false" reverse="false" on_finish="proc" on_finish_params="proc_big_buttons_active" >
+	
+	<track type="linear" target="location:bg:h,location:blackbox:h">
+		<key time="0.1" value="0" />
+		<key time="0.35" value="488" />
+	</track>
+
+	<track type="linear" target="location:bg:y,location:blackbox:y">
+		<key time="0.1" value="-276" />
+		<key time="0.35" value="-32" />
+	</track>
+
+	<track type="linear" target="location:location_bg:alpha">
+		<key time="0.5" value="0" />
+		<key time="1.5" value="255" />
+	</track>
+
+	<track type="linear" target="location:title:y">
+		<key time="0.0" value="20" />
+		<key time="1.0" value="-6" />
+	</track>
+	
+	<track type="linear" target="location:timeline:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+	
+	<track type="linear" target="location:dest_1:alpha">
+		<key time="1.5" value="0" />
+		<key time="2.5" value="255" />
+	</track>
+	
+	<track type="linear" target="location:dest_2:alpha">
+		<key time="1.5" value="0" />
+		<key time="2.5" value="255" />
+	</track>
+	
+	<track type="linear" target="location:dest_3:alpha">
+		<key time="1.5" value="0" />
+		<key time="2.5" value="255" />
+	</track>
+	
+	<track type="linear" target="location:dest_4:alpha">
+		<key time="1.5" value="0" />
+		<key time="2.5" value="255" />
+	</track>
+	
+	<track type="linear" target="location:dest_5:alpha">
+		<key time="1.5" value="0" />
+		<key time="2.5" value="255" />
+	</track>
+	
+	<track type="linear" target="location:back:alpha">
+		<key time="1.5" value="0" />
+		<key time="2.5" value="255" />
+	</track>
+	
+	
+	<track type="linear" target="location:blackbox:alpha">
+		<key time="2.5" value="255" />
+		<key time="3.0" value="0" />
+	</track>
+	
+</anim>
+
+
+
+<!-- Outro called when NEXT button pressed -->
+<anim id="anim_location_outro" duration="2.0" on_finish="proc" on_finish_params="location_when_outro_finished" >
+
+	<track type="linear" target="location:back:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="location:next:alpha" dynamic="true">
+		<key time="0.0" value="getprop('ui:outgame:location:next:alpha')" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="location:dest_1:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="location:dest_2:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="location:dest_3:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="location:dest_4:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="location:dest_5:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="location:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.5" value="255" />
+	</track>
+
+	<track type="linear" target="location:title:y">
+		<key time="1.0" value="-6" />
+		<key time="2.0" value="20" />
+	</track>
+	
+	<track type="linear" target="location:timeline:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.5" value="0" />
+	</track>
+
+</anim>
+
+
+<anim id="anim_location_outro2" duration="0.35" on_finish="proc" on_finish_params="location_when_outro_finished2" >
+
+	<track type="linear" target="location:bg:h,location:blackbox:h">
+		<key time="0.1" value="488" />
+		<key time="0.35" value="0" />
+	</track>
+
+	<track type="linear" target="location:bg:y,location:blackbox:y">
+		<key time="0.1" value="-32" />
+		<key time="0.35" value="-276" />
+	</track>
+
+</anim>
+
+
+<!-- Outro called when NEXT button pressed -->
+<anim id="anim_location_back" duration="2.0" on_finish="proc" on_finish_params="location_when_back_finished" >
+
+	<track type="linear" target="location:back:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="location:dest_1:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="location:dest_2:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="location:dest_3:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="location:dest_4:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="location:dest_5:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="location:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.5" value="255" />
+	</track>
+
+	<track type="linear" target="location:title:y">
+		<key time="1.0" value="-6" />
+		<key time="2.0" value="20" />
+	</track>
+	
+	<track type="linear" target="location:timeline:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.5" value="0" />
+	</track>
+
+</anim>
+
+
+<anim id="anim_location_back2" duration="0.35" on_finish="proc" on_finish_params="location_when_back_finished2" >
+
+	<track type="linear" target="location:bg:h,location:blackbox:h">
+		<key time="0.1" value="488" />
+		<key time="0.35" value="0" />
+	</track>
+
+	<track type="linear" target="location:bg:y,location:blackbox:y">
+		<key time="0.1" value="-32" />
+		<key time="0.35" value="-276" />
+	</track>
+
+</anim>
+
+
+</interface_config>

@@ -51,13 +51,11 @@ if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 			$config = str_replace("%privatePhpDirectory%", addslashes($PRIVATE_PHP_PATH), $config);
 			$config = str_replace("%publicPhpDirectory%", addslashes($PUBLIC_PHP_PATH), $config);
 			$config = str_replace("%nelSqlHostname%", addslashes($cfg['db']['shard']['host']), $config);
+			$config = str_replace("%nelSqlPort%", addslashes($cfg['db']['shard']['port']), $config);
 			$config = str_replace("%nelSqlUsername%", addslashes($cfg['db']['shard']['user']), $config);
 			$config = str_replace("%nelSqlPassword%", addslashes($cfg['db']['shard']['pass']), $config);
 			$config = str_replace("%nelDatabase%", addslashes($cfg['db']['shard']['name']), $config);
 			$config = str_replace("%toolDatabase%", addslashes($cfg['db']['tool']['name']), $config);
-			$config = str_replace("%amsSqlHostname%", addslashes($cfg['db']['lib']['host']), $config);
-			$config = str_replace("%amsSqlUsername%", addslashes($cfg['db']['lib']['user']), $config);
-			$config = str_replace("%amsSqlPassword%", addslashes($cfg['db']['lib']['pass']), $config);
 			$config = str_replace("%amsDatabase%", addslashes($cfg['db']['web']['name']), $config);
 			$config = str_replace("%amsLibDatabase%", addslashes($cfg['db']['lib']['name']), $config);
 			$config = str_replace("%nelSetupPassword%", addslashes($NEL_SETUP_PASSWORD), $config);
@@ -66,9 +64,14 @@ if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 			$config = str_replace("%cryptKey%", addslashes($cfg['crypt']['key']), $config);
 			$config = str_replace("%cryptKeyIMAP%", addslashes($SUPPORT_GROUP_IMAP_CRYPTKEY), $config);
 			if ($NEL_SETUP_VERSION_CONFIGURED < 2) {
-				$config = str_replace("%domainDatabase%", "mini01", $config);
+				$config = str_replace("%domainDatabase%", addslashes($NEL_DOMAIN_NAME . "_ring"), $config);
 			} else {
 				$config = str_replace("%domainDatabase%", addslashes($cfg['db']['ring']['name']), $config);
+			}
+			if ($NEL_SETUP_VERSION_CONFIGURED < 9) {
+				$config = str_replace("%domainUsersDir%", addslashes("/home/nevrax/" . $NEL_DOMAIN_NAME . "/www"), $config);
+			} else {
+				$config = str_replace("%domainUsersDir%", addslashes($USERS_DIR), $config);
 			}
 			if (file_put_contents("config.php", $config)) {
 				printalert("success", "Generated <em>config.php</em>");

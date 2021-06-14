@@ -1,0 +1,80 @@
+Values =
+{
+	"noActe",			"storyline.episode2.no_acte",
+// ==== valeur seuil des elements de construction Fyros
+	"maxSoclefyros",		"storyline.episode2.fyros.socle_max",
+	"maxColonnefyros",		"storyline.episode2.fyros.colonne_max",
+	"maxComblefyros",		"storyline.episode2.fyros.comble_max",
+	"maxMuraillefyros",		"storyline.episode2.fyros.muraille_max",
+	"maxRevetementfyros",	"storyline.episode2.fyros.revetement_max",
+	"maxOrnementfyros",		"storyline.episode2.fyros.ornement_max",
+	"maxStatuefyros", 		"storyline.episode2.fyros.statue_max",
+	"maxJusticefyros",		"storyline.episode2.fyros.colonne_justice_max",
+
+	"maxRacinefyros",		"storyline.episode2.fyros.racine_max",
+	"maxTroncfyros", 		"storyline.episode2.fyros.tronc_max",
+	"maxFibrefyros", 		"storyline.episode2.fyros.fibre_max",
+	"maxEcorcefyros",		"storyline.episode2.fyros.ecorce_max",
+	"maxFeuillefyros",		"storyline.episode2.fyros.feuille_max",
+	"maxFleurfyros", 		"storyline.episode2.fyros.fleur_max",
+	"maxSymbolefyros",		"storyline.episode2.fyros.symbole_max",
+	"maxNoyaufyros",		"storyline.episode2.fyros.noyau_max",
+
+// ==== valeur seuil des elements de construction Tryker
+	"maxSocletryker",		"storyline.episode2.tryker.socle_max",
+	"maxColonnetryker",		"storyline.episode2.tryker.colonne_max",
+	"maxCombletryker",		"storyline.episode2.tryker.comble_max",
+	"maxMurailletryker",	"storyline.episode2.tryker.muraille_max",
+	"maxRevetementtryker",	"storyline.episode2.tryker.revetement_max",
+	"maxOrnementtryker",	"storyline.episode2.tryker.ornement_max",
+	"maxStatuetryker", 		"storyline.episode2.tryker.statue_max",
+	"maxJusticetryker",		"storyline.episode2.tryker.colonne_justice_max",
+
+	"maxRacinetryker",		"storyline.episode2.tryker.racine_max",
+	"maxTronctryker", 		"storyline.episode2.tryker.tronc_max",
+	"maxFibretryker", 		"storyline.episode2.tryker.fibre_max",
+	"maxEcorcetryker",		"storyline.episode2.tryker.ecorce_max",
+	"maxFeuilletryker",		"storyline.episode2.tryker.feuille_max",
+	"maxFleurtryker", 		"storyline.episode2.tryker.fleur_max",
+	"maxSymboletryker",	"storyline.episode2.tryker.symbole_max",
+	"maxNoyautryker",		"storyline.episode2.tryker.noyau_max",
+
+// ==== valeur seuil des elements de construction Matis
+	"maxSoclematis",		"storyline.episode2.matis.socle_max",
+	"maxColonnematis",		"storyline.episode2.matis.colonne_max",
+	"maxComblematis",		"storyline.episode2.matis.comble_max",
+	"maxMuraillematis",		"storyline.episode2.matis.muraille_max",
+	"maxRevetementmatis",		"storyline.episode2.matis.revetement_max",
+	"maxOrnementmatis",		"storyline.episode2.matis.ornement_max",
+	"maxStatuematis", 		"storyline.episode2.matis.statue_max",
+	"maxJusticematis",		"storyline.episode2.matis.colonne_justice_max",
+
+	"maxRacinematis",		"storyline.episode2.matis.racine_max",
+	"maxTroncmatis", 		"storyline.episode2.matis.tronc_max",
+	"maxFibrematis", 		"storyline.episode2.matis.fibre_max",
+	"maxEcorcematis",		"storyline.episode2.matis.ecorce_max",
+	"maxFeuillematis",		"storyline.episode2.matis.feuille_max",
+	"maxFleurmatis", 		"storyline.episode2.matis.fleur_max",
+	"maxSymbolematis",		"storyline.episode2.matis.symbole_max",
+	"maxNoyaumatis",		"storyline.episode2.matis.noyau_max",
+
+// ==== valeur seuil des elements de construction Zorai
+	"maxSoclezorai",		"storyline.episode2.zorai.socle_max",
+	"maxColonnezorai",		"storyline.episode2.zorai.colonne_max",
+	"maxComblezorai",		"storyline.episode2.zorai.comble_max",
+	"maxMuraillezorai",		"storyline.episode2.zorai.muraille_max",
+	"maxRevetementzorai",	"storyline.episode2.zorai.revetement_max",
+	"maxOrnementzorai",		"storyline.episode2.zorai.ornement_max",
+	"maxStatuezorai", 		"storyline.episode2.zorai.statue_max",
+	"maxJusticezorai",		"storyline.episode2.zorai.colonne_justice_max",
+
+	"maxRacinezorai",	"storyline.episode2.zorai.racine_max",
+	"maxTronczorai", 	"storyline.episode2.zorai.tronc_max",
+	"maxFibrezorai", 	"storyline.episode2.zorai.fibre_max",
+	"maxEcorcezorai",	"storyline.episode2.zorai.ecorce_max",
+	"maxFeuillezorai",	"storyline.episode2.zorai.feuille_max",
+	"maxFleurzorai", 	"storyline.episode2.zorai.fleur_max",
+	"maxSymbolezorai",	"storyline.episode2.zorai.symbole_max",
+	"maxNoyauzorai",	"storyline.episode2.zorai.noyau_max",
+
+};

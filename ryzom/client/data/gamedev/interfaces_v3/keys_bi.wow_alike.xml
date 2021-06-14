@@ -1,0 +1,201 @@
+<?xml version="1.0"?>
+<interface_config>
+  <key name="KeyTAB" action="front_selection" params="ennemy"/>
+  <key name="KeyTAB" ctrl="1" action="front_selection" params="friend"/>
+  <key name="KeyESCAPE" action="r2ed_cancel_tool"/>
+  <key name="KeyESCAPE" shift="1" action="close_help"/>
+  <key name="KeyPRIOR" ctrl="1" action="camera_up"/>
+  <key name="KeyPRIOR" ctrl="1" menu="1" action="inc_camera_height"/>
+  <key name="KeyNEXT" ctrl="1" action="camera_down"/>
+  <key name="KeyNEXT" ctrl="1" menu="1" action="dec_camera_height"/>
+  <key name="KeyHOME" action="toggle_camera"/>
+  <key name="KeySNAPSHOT" action="screen_shot"/>
+  <key name="KeyINSERT" action="look_up"/>
+  <key name="KeyINSERT" ctrl="1" menu="1" action="set_pos"/>
+  <key name="KeyDELETE" action="look_down"/>
+  <key name="Key0" action="run_shortcut" params="09"/>
+  <key name="Key0" ctrl="1" action="select_shortcut_bar" params="10"/>
+  <key name="Key0" shift="1" action="run_shortcut" params="19"/>
+  <key name="Key0" menu="1" action="talk_message" params="09"/>
+  <key name="Key0" ctrl="1" menu="1" action="toggle_3d_filter" params="9"/>
+  <key name="Key0" shift="1" menu="1" action="talk_message" params="19"/>
+  <key name="Key1" action="run_shortcut" params="00"/>
+  <key name="Key1" ctrl="1" action="select_shortcut_bar" params="1"/>
+  <key name="Key1" shift="1" action="run_shortcut" params="10"/>
+  <key name="Key1" menu="1" action="talk_message" params="00"/>
+  <key name="Key1" ctrl="1" menu="1" action="toggle_3d_filter" params="0"/>
+  <key name="Key1" shift="1" menu="1" action="talk_message" params="10"/>
+  <key name="Key1" shift="1" ctrl="1" menu="1" action="command" params="mode 0 3"/>
+  <key name="Key2" action="run_shortcut" params="01"/>
+  <key name="Key2" ctrl="1" action="select_shortcut_bar" params="2"/>
+  <key name="Key2" shift="1" action="run_shortcut" params="11"/>
+  <key name="Key2" menu="1" action="talk_message" params="01"/>
+  <key name="Key2" ctrl="1" menu="1" action="toggle_3d_filter" params="1"/>
+  <key name="Key2" shift="1" menu="1" action="talk_message" params="11"/>
+  <key name="Key2" shift="1" ctrl="1" menu="1" action="command" params="mode 0 1"/>
+  <key name="Key3" action="run_shortcut" params="02"/>
+  <key name="Key3" ctrl="1" action="select_shortcut_bar" params="3"/>
+  <key name="Key3" shift="1" action="run_shortcut" params="12"/>
+  <key name="Key3" menu="1" action="talk_message" params="02"/>
+  <key name="Key3" ctrl="1" menu="1" action="toggle_3d_filter" params="2"/>
+  <key name="Key3" shift="1" menu="1" action="talk_message" params="12"/>
+  <key name="Key3" shift="1" ctrl="1" menu="1" action="command" params="a changeMode 3"/>
+  <key name="Key4" action="run_shortcut" params="03"/>
+  <key name="Key4" ctrl="1" action="select_shortcut_bar" params="4"/>
+  <key name="Key4" shift="1" action="run_shortcut" params="13"/>
+  <key name="Key4" menu="1" action="talk_message" params="03"/>
+  <key name="Key4" ctrl="1" menu="1" action="toggle_3d_filter" params="3"/>
+  <key name="Key4" shift="1" menu="1" action="talk_message" params="13"/>
+  <key name="Key4" shift="1" ctrl="1" menu="1" action="command" params="a changeMode 1"/>
+  <key name="Key5" action="run_shortcut" params="04"/>
+  <key name="Key5" ctrl="1" action="select_shortcut_bar" params="5"/>
+  <key name="Key5" shift="1" action="run_shortcut" params="14"/>
+  <key name="Key5" menu="1" action="talk_message" params="04"/>
+  <key name="Key5" ctrl="1" menu="1" action="toggle_3d_filter" params="4"/>
+  <key name="Key5" shift="1" menu="1" action="talk_message" params="14"/>
+  <key name="Key5" shift="1" ctrl="1" menu="1" action="command" params="a execPhrase 1 root_combat_all_weapons.sbrick combat_stamina_2.sbrick"/>
+  <key name="Key6" action="run_shortcut" params="05"/>
+  <key name="Key6" ctrl="1" action="select_shortcut_bar" params="6"/>
+  <key name="Key6" shift="1" action="run_shortcut" params="15"/>
+  <key name="Key6" menu="1" action="talk_message" params="05"/>
+  <key name="Key6" ctrl="1" menu="1" action="toggle_3d_filter" params="5"/>
+  <key name="Key6" shift="1" menu="1" action="talk_message" params="15"/>
+  <key name="Key6" shift="1" ctrl="1" menu="1" action="command" params="a execPhrase 0 root_combat_all_weapons.sbrick melee_add_damage_1.sbrick combat_stamina_10.sbrick"/>
+  <key name="Key7" action="run_shortcut" params="06"/>
+  <key name="Key7" ctrl="1" action="select_shortcut_bar" params="7"/>
+  <key name="Key7" shift="1" action="run_shortcut" params="16"/>
+  <key name="Key7" menu="1" action="talk_message" params="06"/>
+  <key name="Key7" ctrl="1" menu="1" action="toggle_3d_filter" params="6"/>
+  <key name="Key7" shift="1" menu="1" action="talk_message" params="16"/>
+  <key name="Key8" action="run_shortcut" params="07"/>
+  <key name="Key8" ctrl="1" action="select_shortcut_bar" params="8"/>
+  <key name="Key8" shift="1" action="run_shortcut" params="17"/>
+  <key name="Key8" menu="1" action="talk_message" params="07"/>
+  <key name="Key8" ctrl="1" menu="1" action="toggle_3d_filter" params="7"/>
+  <key name="Key8" shift="1" menu="1" action="talk_message" params="17"/>
+  <key name="Key9" action="run_shortcut" params="08"/>
+  <key name="Key9" ctrl="1" action="select_shortcut_bar" params="9"/>
+  <key name="Key9" shift="1" action="run_shortcut" params="18"/>
+  <key name="Key9" menu="1" action="talk_message" params="08"/>
+  <key name="Key9" ctrl="1" menu="1" action="toggle_3d_filter" params="8"/>
+  <key name="Key9" shift="1" menu="1" action="talk_message" params="18"/>
+  <key name="KeyA" action="turn_left"/>
+  <key name="KeyA" shift="1" ctrl="1" action="debug_ui_prev_element_under_mouse"/>
+  <key name="KeyB" action="show_hide" params="inventory"/>
+  <key name="KeyB" ctrl="1" menu="1" action="dec_display_factor"/>
+  <key name="KeyC" action="show_hide" params="info_player_skills"/>
+  <key name="KeyC" ctrl="1" menu="1" action="update_clouds"/>
+  <key name="KeyD" action="turn_right"/>
+  <key name="KeyD" shift="1" action="toggle_dodge_parry"/>
+  <key name="KeyD" ctrl="1" menu="1" action="toggle_weather_function"/>
+  <key name="KeyE" action="strafe_right"/>
+  <key name="KeyE" shift="1" action="show_hide" params="encyclopedia"/>
+  <key name="KeyG" action="show_hide" params="guild"/>
+  <key name="KeyG" shift="1" action="show_hide" params="guild_forum"/>
+  <key name="KeyG" ctrl="1" menu="1" action="toggle_freeze_graph"/>
+  <key name="KeyJ" ctrl="1" menu="1" action="inc_display_factor"/>
+  <key name="KeyK" action="show_hide" params="phrase_book"/>
+  <key name="KeyK" ctrl="1" menu="1" action="inc_hour"/>
+  <key name="KeyL" action="show_hide" params="info_player_journal"/>
+  <key name="KeyL" shift="1" action="toggle_light"/>
+  <key name="KeyL" ctrl="1" menu="1" action="dec_hour"/>
+  <key name="KeyM" action="show_hide" params="map"/>
+  <key name="KeyM" shift="1" action="show_hide" params="mailbox"/>
+  <key name="KeyM" ctrl="1" menu="1" action="weather_stats"/>
+  <key name="KeyN" shift="1" action="show_hide" params="connection"/>
+  <key name="KeyO" action="show_hide" params="contact_list"/>
+  <key name="KeyO" ctrl="1" menu="1" action="pacs_borders"/>
+  <key name="KeyP" shift="1" action="show_hide" params="animal_global"/>
+  <key name="KeyP" ctrl="1" menu="1" action="wind_test"/>
+  <key name="KeyQ" action="strafe_left"/>
+  <key name="KeyQ" shift="1" ctrl="1" action="debug_ui_inspect_element_under_mouse"/>
+  <key name="KeyR" action="reply_teller_once"/>
+  <key name="KeyR" ctrl="1" action="reply_teller"/>
+  <key name="KeyR" ctrl="1" menu="1" action="reload_landscape_ig"/>
+  <key name="KeyS" action="backward"/>
+  <key name="KeyS" ctrl="1" action="phrase_cancel_cast"/>
+  <key name="KeyS" ctrl="1" menu="1" action="toggle_season"/>
+  <key name="KeyT" action="toggle_combat"/>
+  <key name="KeyT" ctrl="1" action="r2ed_teleport"/>
+  <key name="KeyT" ctrl="1" menu="1" action="reel_weather"/>
+  <key name="KeyU" action="show_hide" params="fame"/>
+  <key name="KeyU" ctrl="1" menu="1" action="debug_clusters"/>
+  <key name="KeyW" action="forward"/>
+  <key name="KeyW" shift="1" action="show_hide" params="webig"/>
+  <key name="KeyW" shift="1" ctrl="1" action="debug_ui_next_element_under_mouse"/>
+  <key name="KeyW" ctrl="1" menu="1" action="reload_season"/>
+  <key name="KeyX" action="toggle_sit_stand"/>
+  <key name="KeyZ" menu="1" action="toggle_chat"/>
+  <key name="KeyZ" ctrl="1" menu="1" action="show_timed_fx"/>
+  <key name="KeyNUMPAD0" action="rear_view"/>
+  <key name="KeyNUMPAD0" ctrl="1" menu="1" action="draw_sound"/>
+  <key name="KeyNUMPAD1" action="camera_turn_left"/>
+  <key name="KeyNUMPAD2" action="camera_turn_right"/>
+  <key name="KeyADD" ctrl="1" menu="1" action="inc_time"/>
+  <key name="KeySUBTRACT" ctrl="1" menu="1" action="dec_time"/>
+  <key name="KeyDECIMAL" action="camera_turn_center"/>
+  <key name="KeyDIVIDE" action="toggle_run_walk"/>
+  <key name="KeyF1" action="self_target"/>
+  <key name="KeyF1" shift="1" action="toggle_help"/>
+  <key name="KeyF1" shift="1" ctrl="1" action="copy_to_desktop" params="0"/>
+  <key name="KeyF2" action="target_teammate_shortcut" params="indexInTeam=1"/>
+  <key name="KeyF2" shift="1" action="target_teammate_shortcut" params="indexInTeam=5"/>
+  <key name="KeyF2" shift="1" ctrl="1" action="copy_to_desktop" params="1"/>
+  <key name="KeyF2" menu="1" action="profile_texture"/>
+  <key name="KeyF2" ctrl="1" menu="1" action="profile_vblock"/>
+  <key name="KeyF3" action="target_teammate_shortcut" params="indexInTeam=2"/>
+  <key name="KeyF3" shift="1" action="target_teammate_shortcut" params="indexInTeam=6"/>
+  <key name="KeyF3" shift="1" ctrl="1" action="copy_to_desktop" params="indexInTeam=2"/>
+  <key name="KeyF4" action="target_teammate_shortcut" params="indexInTeam=3"/>
+  <key name="KeyF4" shift="1" action="target_teammate_shortcut" params="indexInTeam=7"/>
+  <key name="KeyF4" shift="1" ctrl="1" action="copy_to_desktop" params="indexInTeam=3"/>
+  <key name="KeyF4" menu="1" action="enter_modal" params="group=ui:interface:quit_dialog"/>
+  <key name="KeyF4" ctrl="1" menu="1" action="profile_fillrate"/>
+  <key name="KeyF4" shift="1" ctrl="1" menu="1" action="replay_movie"/>
+  <key name="KeyF5" action="target_teammate_shortcut" params="indexInTeam=4"/>
+  <key name="KeyF5" shift="1" action="target_teammate_shortcut" params="indexInTeam=8"/>
+  <key name="KeyF5" shift="1" ctrl="1" menu="1" action="save_movie"/>
+  <key name="KeyF6" shift="1" action="switch_console_display"/>
+  <key name="KeyF6" shift="1" ctrl="1" menu="1" action="memory_report"/>
+  <key name="KeyF7" action="mount_unmount"/>
+  <key name="KeyF7" shift="1" action="change_compass_mode"/>
+  <key name="KeyF7" shift="1" ctrl="1" menu="1" action="toggle_primitive"/>
+  <key name="KeyF8" action="r2ed_stop_test"/>
+  <key name="KeyF8" shift="1" action="toggle_fly"/>
+  <key name="KeyF8" shift="1" ctrl="1" menu="1" action="primitive_up"/>
+  <key name="KeyF9" shift="1" action="free_mouse"/>
+  <key name="KeyF9" shift="1" ctrl="1" menu="1" action="primitive_down"/>
+  <key name="KeyF10" ctrl="1" action="screen_shot_jpg"/>
+  <key name="KeyF10" menu="1" action="screen_shot_png"/>
+  <key name="KeyF10" shift="1" ctrl="1" menu="1" action="toggle_camera_recorder"/>
+  <key name="KeyF11" shift="1" action="test"/>
+  <key name="KeyF11" shift="1" ctrl="1" menu="1" action="camera_recorder_playback"/>
+  <key name="KeyF12" action="no_target"/>
+  <key name="KeyF12" shift="1" ctrl="1" menu="1" action="save_camera_record"/>
+  <key name="KeyNUMLOCK" action="toggle_auto_walk"/>
+  <key name="KeyBACK" action="edit_back" context="edit"/>
+  <key name="KeyTAB" action="edit_expand_or_cycle_tell" context="edit"/>
+  <key name="KeyEND" shift="1" action="edit_goto_line_end" context="edit"/>
+  <key name="KeyEND" shift="1" ctrl="1" action="edit_goto_block_end" context="edit"/>
+  <key name="KeyEND" shift="1" menu="1" action="edit_select_to_line_end" context="edit"/>
+  <key name="KeyEND" shift="1" ctrl="1" menu="1" action="edit_select_to_block_end" context="edit"/>
+  <key name="KeyHOME" shift="1" action="edit_goto_line_begin" context="edit"/>
+  <key name="KeyHOME" shift="1" ctrl="1" action="edit_goto_block_begin" context="edit"/>
+  <key name="KeyHOME" shift="1" menu="1" action="edit_select_to_line_begin" context="edit"/>
+  <key name="KeyHOME" shift="1" ctrl="1" menu="1" action="edit_select_to_block_begin" context="edit"/>
+  <key name="KeyLEFT" shift="1" action="edit_previous_char" context="edit"/>
+  <key name="KeyLEFT" shift="1" ctrl="1" action="edit_previous_word" context="edit"/>
+  <key name="KeyLEFT" shift="1" menu="1" action="edit_select_previous_char" context="edit"/>
+  <key name="KeyLEFT" shift="1" ctrl="1" menu="1" action="edit_select_previous_word" context="edit"/>
+  <key name="KeyUP" shift="1" action="edit_previous_line" context="edit"/>
+  <key name="KeyRIGHT" shift="1" action="edit_next_char" context="edit"/>
+  <key name="KeyRIGHT" shift="1" ctrl="1" action="edit_next_word" context="edit"/>
+  <key name="KeyRIGHT" shift="1" menu="1" action="edit_select_next_char" context="edit"/>
+  <key name="KeyRIGHT" shift="1" ctrl="1" menu="1" action="edit_select_next_word" context="edit"/>
+  <key name="KeyDOWN" shift="1" action="edit_next_line" context="edit"/>
+  <key name="KeyDELETE" action="edit_delete_char" context="edit"/>
+  <key name="KeyA" ctrl="1" action="edit_select_all" context="edit"/>
+  <key name="KeyC" ctrl="1" action="edit_copy" context="edit"/>
+  <key name="KeyV" ctrl="1" action="edit_paste" context="edit"/>
+  <key name="KeyX" ctrl="1" action="edit_cut" context="edit"/>
+</interface_config>

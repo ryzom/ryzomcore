@@ -1,0 +1,49 @@
+<interface_config>
+
+<!-- *************************** -->
+<!-- * WARNING WARNING WARNING * -->
+<!-- * WARNING WARNING WARNING * -->
+<!-- *************************** -->
+
+<!-- Removed from client_default.cg -->
+
+<!-- *************************** -->
+<!-- * WARNING WARNING WARNING * -->
+<!-- * WARNING WARNING WARNING * -->
+<!-- *************************** -->
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+<!-- ***************** -->
+<!-- * TRACKING MAIN * -->
+<!-- ***************** -->
+
+<proc id="proc_tracking_active">
+	<action handler="close_all_labos_but" params="ui:interface:tracking" />
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:TRACKING|value=1" />
+	<action handler="set" cond="eq(0,getbit(@SERVER:INTERFACES:FLAGS,strToIntFlag('Tracking')))" params="target='ui:interface:tracking:active'|value=0" />
+</proc>
+
+
+<group type="container" id="tracking" w="320" h="512" resizer="false" openable="false" title="uiTrackingTitle" 
+	global_color="false" opened="true" movable="true" active="false" 
+	on_active="proc" on_active_params="proc_tracking_active" header_color="UI:SAVE:WIN:COLORS:LAB"
+	on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:TRACKING|value=0"
+>
+
+	<group id="header_closed" x="0" y="0"  h="16" posref="TL TL" >
+	</group>
+	
+	<group id="header_opened" x="0" y="0" h="16" posref="TL TL"  
+		 group_onclick_r="active_menu"
+		 group_params_r="menu=ui:interface:base_menu_with_color" >
+	</group>
+	
+	<group id="content" x="0" y="0"  h="0" posref="TR TR" >
+	</group>
+
+</group>
+
+
+</interface_config>

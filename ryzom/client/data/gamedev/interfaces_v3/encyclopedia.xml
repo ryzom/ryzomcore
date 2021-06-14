@@ -1,0 +1,272 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+<!--********************-->
+<!--*   Encyclopedia   *-->
+<!--********************-->
+
+<variable entry="UI:VARIABLES:ENCY:STEPS"			type="sint32" value="7" />
+<variable entry="UI:VARIABLES:ENCY:DONE"			type="sint32" value="2" />
+<variable entry="UI:VARIABLES:ENCY:REWARDBRICK:SHEET" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:ENCY:ALBUMBRICK:SHEET" type="sint32" value="0" />
+
+<style style="ency_title" type="text" color="255 255 255 255" fontsize="14" shadow="true" case_mode="%case_normal"/>
+<style style="ency_title2" type="text" color="255 255 255 192" fontsize="12" shadow="true" />
+
+
+<proc id="encyclopedia_init">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA|value=1" />
+</proc>
+
+<proc id="encyclopedia_uninit">
+	<action handler="proc" params="ency_hide_all" />
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA|value=0" />
+</proc>
+
+
+<!-- TEMPLATE DE STEPS & RITE ICONS -->
+<template name="step_icon" id="" posref="" posparent="" w="16" h="16" x="2" y="0" done="" >
+	<group id="#id" posref="#posref" posparent="#posparent" w="#w" h="#h" x="#x" y="#y" done="#done" >
+		<view type="bitmap" id="step_slot" posref="TL TL" texture="ency_step_slot.tga" inherit_gc_alpha="true" />
+		<view type="bitmap" id="step_done" posref="TL TL" texture="ency_step_done.tga" global_color="false" />
+	</group>
+</template>
+
+<template name="rite_icon" id="" posref="" posparent="parent" w="24" h="24" x="0" y="0" done="" >
+	<group id="#id" posref="#posref" posparent="#posparent" w="#w" h="#h" x="#x" y="#y" done="#done" >
+		<view type="bitmap" id="rite_slot" posref="TL TL" texture="ency_rite_slot.tga" inherit_gc_alpha="true" />
+		<view type="bitmap" id="rite_done" posref="TL TL" texture="ency_rite_done.tga" global_color="false" />
+	</group>
+</template>
+
+<template name="rite" id="" posref="TL TL" posparent="parent" sizeref="w" w="0" h="0" x="0" y="0" hardtext="" >
+	<group id="#id" posref="#posref" sizeref="#sizeref" posparent="#posparent" w="#w" h="#h" x="#x" y="#y" child_resize_h="true" child_resize_hmargin="4" >
+	
+		<view type="bitmap" id="slot" posref="TL TL" x="4" y="0" texture="ency_rite_slot.tga" inherit_gc_alpha="true" />
+		<view type="bitmap" id="done" posparent="slot" posref="MM MM" texture="ency_rite_done.tga" global_color="false" />
+
+		<view type="text" id="giver" posref="TL TL" hardtext="uiENGiver" x="36" y="0" sizeref="w" w="-36" color="255 255 255 255" fontsize="10" shadow="true" />
+		<view type="text" id="npc" posparent="giver" posref="BL TL" sizeref="w" color="255 255 255 160" fontsize="12" shadow="true" />
+
+		<view type="text" id="name" posparent="npc" posref="BL TL" hardtext="uiENName" y="-4" sizeref="w" color="255 255 255 255" fontsize="10" shadow="true" />
+		<view type="text_id" id="desc" posparent="name" posref="BL TL" y="0" sizeref="w" color="255 255 255 160" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="#hardtext" />			
+	</group>
+	<!-- <view type="bitmap" id="rite_sep" posparent="#id" posref="BL BL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />-->
+</template>
+
+
+<template name="task" id="" posref="TL TL" posparent="parent" sizeref="w" w="0" h="0" x="0" y="0" hardtext="" >
+	<group id="#id" posref="#posref" sizeref="#sizeref" posparent="#posparent" w="#w" h="#h" x="#x" y="#y" child_resize_h="true" child_resize_hmargin="4" >
+		<view type="bitmap" id="slot" posref="TL TL" x="8" y="0" texture="ency_step_slot.tga" inherit_gc_alpha="true" />
+		<view type="bitmap" id="done" posparent="slot" posref="MM MM" texture="ency_step_done.tga" global_color="false" />
+		
+		<view type="text" id="giver" posref="TL TL" hardtext="uiENGiver" x="36" y="0" sizeref="w" w="-36" color="255 255 255 255" fontsize="10" shadow="true" />
+		<view type="text" id="npc" posparent="giver" posref="BL TL" sizeref="w" color="255 255 255 160" fontsize="12" shadow="true" />
+
+		<view type="text" id="name" posparent="npc" posref="BL TL" hardtext="uiENName" y="-4" sizeref="w" color="255 255 255 255" fontsize="10" shadow="true" />
+		<view type="text_id" id="desc" posparent="name" posref="BL TL" y="0" sizeref="w" color="255 255 255 160" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="#hardtext" />			
+	</group>
+</template>
+
+
+
+<group type="container" id="encyclopedia" w="432" h="400" title="uiEncyclopedia" global_color="false" line_at_bottom="false"
+	movable="true" active="false" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:PLA"
+	on_active="proc" on_active_params="encyclopedia_init" pop_min_w="432" pop_min_h="128" pop_max_w="800" pop_max_h="600"
+	on_deactive="proc" on_deactive_params="encyclopedia_uninit" >
+
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
+	</group>
+	
+	<group id="header_opened" x="0" y="0" child_resize_w="true" h="16" posref="TL TL"
+	 group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
+	</group>
+
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+		
+		<group id="sbtree" posref="TL TL" sizeref="w3h" x="0" w="-14" y="-4" h="-4" >
+
+			<group id="tree_list" type="tree" posref="TL TL" x="14" y="-4" col_over="255 255 255 48" col_select="255 255 255 80"
+				max_sizeparent="parent" max_sizeref="wh" max_w="-10" max_h="-4" >
+<!--				
+				<node id="album" 		name="uiEncyAlbum"		handler="proc" 	params="ency_album"	fontsize="11" y_decal="-1" >
+					<node id="theme" 	name="uiEncyTheme"		handler="proc" 	params="ency_theme"	fontsize="10" y_decal="-1" />
+				</node>
+-->
+			</group>		
+			<ctrl style="skin_scroll" id="scroll_bar" align="T" target="tree_list" />
+		</group>
+
+		<!-- BACKGROUND -->
+		<group id="graph" posref="TR TR" x="0" y="-4" sizeref="w7h" w="-4" h="-4" >
+			<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+		</group>
+
+		<group id="crop" posparent="graph" posref="MM MM" x="0" y="0" sizeref="wh" w="-4" h="-12" />
+
+		<!-- HELP -->
+		<group id="help" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4" >
+			<group id="explanation" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeref="h" max_h="-4" >
+				<view type="text" id="explanation_txt" posref="TL TL" sizeref="w" color="255 255 255 160"
+				fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="uiEncyExplanation" />
+			</group>
+			<ctrl style="skin_scroll" id="scroll_bar_explanation" align="T" target="explanation" posref="TL TR" x="-8" y="0" />
+		</group>
+				
+		<!-- ALBUM -->
+		<group id="album" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4" active="false" >
+				
+				<!-- Title -->
+				<view style="ency_title" type="text_id" id="title" posref="TM TM" x="0" y="0" hardtext="uiEncyAlbum" />
+				
+
+								
+				<!-- Reward - Action -->
+				<group id="reward" posref="TM TM" x="0" y="-16" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="4" >
+					<view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
+					
+					<view type="bitmap" id="back" posref="ML ML" x="0" y="0" texture="W_slot_brick.tga" color="255 255 255 192" />
+					<ctrl type="sheet" id="brick" nature="sbrick" value="UI:VARIABLES:ENCY:ALBUMBRICK" posref="TL TL" posparent="back" x="0" y="0" onclick_r="open_sbrick_help" />
+					<view type="text" id="desc" posref="TL TL" sizeref="w" color="255 255 255 160" x="32" y="-8"
+						fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="WORK IN PROGRESS" />
+				</group>
+
+				<!-- LINK ALBUM OVER -->
+				<link expr="ne(@UI:VARIABLES:ENCY:ALBUMBRICK:SHEET,0)" target="reward:active" />
+				
+				
+				<!-- Reward - Text -->
+				<!--
+				<group id="reward_text" posref="BM TM" posparent="reward" x="0" y="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="4" >
+					<view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
+					
+					<view type="text_id" id="desc" posref="TL TL" sizeref="w" color="255 255 255 160" y="-8"
+						fontsize="12" shadow="true" multi_line="true" multi_line_space="0" />
+				</group>
+				-->
+				<!--
+				<group id="reward" posref="TM TM" x="0" y="-16" sizeref="w" w="0" h="44">
+					<view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
+					
+					<view style="ency_title2" type="text" id="icon" posref="MM MM" x="0" y="0" hardtext="WORK IN PROGRESS" />
+				</group>
+				
+				
+				
+				<group id="reward_text" posref="BM TM" posparent="reward" x="0" y="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="4">
+					<view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
+					
+					<view type="text" id="reward_txt" posref="TL TL" sizeref="w" color="255 255 255 160" y="-8"
+						fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="uiEncyExplanation" />
+				</group>
+				-->
+		</group>
+		<ctrl style="skin_scroll" id="scroll_bar_album" align="T" target="album" posparent="crop" posref="TL TR" x="-8" y="0" />
+		
+		
+		<!-- THEME -->
+		<group id="theme" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4" active="false" >
+
+				<!-- Title -->
+				<view style="ency_title" type="text_id" id="title" posref="TM TM" x="0" y="0" hardtext="uiEncyTheme" />
+				
+				<!-- Progression -->
+				<group id="progression" posref="TM TM" x="-13" y="-16" child_resize_w="true" child_resize_wmargin="4" h="24" >
+					<view style="ency_title2" type="text" id="prog_title" posref="ML ML" x="0" y="-2" hardtext="uiThemeProgression" />
+					
+					<instance template="step_icon" id="step_1" posparent="prog_title" posref="TR TL" x="4" y="2" />
+					<instance template="step_icon" id="step_2" posparent="step_1" posref="TR TL" />
+					<instance template="step_icon" id="step_3" posparent="step_2" posref="TR TL" />
+					<instance template="step_icon" id="step_4" posparent="step_3" posref="TR TL" />
+					<instance template="step_icon" id="step_5" posparent="step_4" posref="TR TL" />
+					<instance template="step_icon" id="step_6" posparent="step_5" posref="TR TL" />
+					<instance template="step_icon" id="step_7" posparent="step_6" posref="TR TL" />
+		
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,0)" target="step_1:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,1)" target="step_2:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,2)" target="step_3:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,3)" target="step_4:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,4)" target="step_5:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,5)" target="step_6:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,6)" target="step_7:active" />
+					
+					<link expr="gt(@UI:VARIABLES:ENCY:DONE,0)" target="step_1:step_done:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:DONE,1)" target="step_2:step_done:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:DONE,2)" target="step_3:step_done:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:DONE,3)" target="step_4:step_done:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:DONE,4)" target="step_5:step_done:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:DONE,5)" target="step_6:step_done:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:DONE,6)" target="step_7:step_done:active" />
+				</group>
+				
+				<view style="ency_title2" type="text" id="sep" posparent="progression" posref="MR ML" x="0" y="-2" hardtext="-" />
+				
+				<instance template="rite_icon" id="rite" posparent="progression" posref="TR TL" x="12" />
+								
+				<!-- Reward - Action -->
+				<group id="reward" posref="TM TM" x="0" y="-48" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="4" >
+					<view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
+					
+					<view type="text" id="desc" posref="TL TL" sizeref="w" color="255 255 255 160" x="48" y="-8"
+						fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="WORK IN PROGRESS" />
+
+					<ctrl type="sheet" id="brick" nature="auto" value="UI:VARIABLES:ENCY:REWARDBRICK" posref="ML ML" posparent="parent" x="0" y="0" />
+				</group>
+				
+				
+				<!-- Reward - Text -->
+				<group id="reward_text" posref="BM TM" posparent="reward" x="0" y="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="4" >
+					<view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
+					
+					<view type="text_id" id="desc" posref="TL TL" sizeref="w" color="255 255 255 160" y="-8"
+						fontsize="12" shadow="true" multi_line="true" multi_line_space="0" />
+				</group>
+				
+				<!-- LINK THEME OVER -->
+				<link expr="gt(@UI:VARIABLES:ENCY:DONE,@UI:VARIABLES:ENCY:STEPS)" target="rite:rite_done:active,reward_text:active" />
+				<link expr="ne(@UI:VARIABLES:ENCY:REWARDBRICK:SHEET,0)" target="reward:active" />
+				
+				
+				<!-- Rite & Tasks -->
+				<group id="todo" posref="BM TM" posparent="reward_text" x="0" y="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="4" >
+          <view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
+          <view type="text" id="required" posparent="sep" posref="BL TL" x="0" y="-4" hardtext="uiENRequired" color="255 255 255 255" global_color="false" fontsize="10" shadow="true" />
+										
+					<instance template="task" id="task1" posparent="sep" posref="BL TL" hardtext="uiTask1" y="-20" />
+					<instance template="task" id="task2" posparent="task1" 	posref="BL TL" hardtext="uiTask2" />
+					<instance template="task" id="task3" posparent="task2" 	posref="BL TL" hardtext="uiTask3" />
+					<instance template="task" id="task4" posparent="task3" 	posref="BL TL" hardtext="uiTask4" />
+					<instance template="task" id="task5" posparent="task4" 	posref="BL TL" hardtext="uiTask5" />
+					<instance template="task" id="task6" posparent="task5" 	posref="BL TL" hardtext="uiTask6" />
+					<instance template="task" id="task7" posparent="task6" 	posref="BL TL" hardtext="uiTask7" />
+					
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,0)" target="task1:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,1)" target="task2:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,2)" target="task3:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,3)" target="task4:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,4)" target="task5:active" />
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,5)" target="task6:active" />  
+					<link expr="gt(@UI:VARIABLES:ENCY:STEPS,6)" target="task7:active" />
+					
+				</group>
+
+        <group id="todo2" posref="BM TM" posparent="todo" x="0" y="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="4" >
+          <view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
+          <view type="text" id="ritual" posparent="sep" posref="BL TL" x="0" y="-4" hardtext="uiENRite" color="255 255 255 255" global_color="false" fontsize="10" shadow="true" />
+
+          <instance template="rite" id="rite" posparent="sep" posref="BL TL" hardtext="uiRite" y="-20" />
+        </group>
+
+		</group>
+		<ctrl style="skin_scroll" id="scroll_bar_theme" align="T" target="theme" posparent="crop" posref="TL TR" x="-8" y="0" />
+
+	</group>
+</group>
+
+<tree node="encyclopedia">
+</tree>
+
+</interface_config>
+

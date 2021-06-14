@@ -6,6 +6,7 @@
 
 	// database information for nel tool
 	define('NELTOOL_DBHOST', $cfg['db']['tool']['host']);
+	define('NELTOOL_DBPORT', $cfg['db']['tool']['port']);
 	define('NELTOOL_DBUSER', $cfg['db']['tool']['user']);
 	define('NELTOOL_DBPASS', $cfg['db']['tool']['pass']);
 	define('NELTOOL_DBNAME', $cfg['db']['tool']['name']);

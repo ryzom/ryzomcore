@@ -1,0 +1,13 @@
+﻿// a set of system messages for sending to the player during gus cc / ce contests
+promptSubmitAnswers	Vous pouvez répondre maintenant
+errorNoQuestion		Votre réponse n'a pas été validée car aucune question n'a été posée
+announceWinners		Le concours est terminé. Voici la liste des gagnants :
+treatedAnswer0		Vous avez répondu : 
+treatedAnswer1		Les gagnants seront annoncés dans quelques minutes
+treatedAnswer2		Restez connecté SVP
+treatedAnswer3		Vous pourrez donner une nouvelle réponse dans une minute
+queuedAnswer0		Vous avez donné une autre réponse : 
+queuedAnswer1		Vous n'êtes autorisé à donner qu'une réponse par minute
+queuedAnswer2		Cette réponse sera traitée dans
+queuedAnswer2b		seconds
+systemName		Kaeru

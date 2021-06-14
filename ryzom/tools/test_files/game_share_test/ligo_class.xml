@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<NEL_LIGO_PRIMITIVE_CLASS>
+	<ALIAS_DYNAMIC_BITS BIT_COUNT="20"/>
+	<ALIAS_STATIC_FILE_ID FILE_NAME="file_index.cfg"/>
+
+	<PRIMITIVE CLASS_NAME="root" TYPE="node" AUTO_INIT="true" DELETABLE="true">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="path" TYPE="string" VISIBLE="true"/>
+		<DYNAMIC_CHILD CLASS_NAME="type1"/>
+	</PRIMITIVE>
+
+	<!-- the alias class, used by all other class that need persistent aliases-->
+	<PRIMITIVE CLASS_NAME="alias" TYPE="alias" AUTO_INIT="true" DELETABLE="false">
+	</PRIMITIVE>
+
+	<PRIMITIVE CLASS_NAME="type1" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="value" TYPE="string" VISIBLE="true"/>
+
+		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
+		<DYNAMIC_CHILD CLASS_NAME="type1"/>
+	</PRIMITIVE>
+
+	<PRIMITIVE CLASS_NAME="type2" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="mode" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="value" TYPE="string" VISIBLE="true"/>
+
+		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
+		<DYNAMIC_CHILD CLASS_NAME="type2"/>
+	</PRIMITIVE>
+
+	<PRIMITIVE CLASS_NAME="poly_type" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="mode" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="value" TYPE="string" VISIBLE="true"/>
+
+		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
+	</PRIMITIVE>
+</NEL_LIGO_PRIMITIVE_CLASS>

@@ -53,8 +53,8 @@ ENDIF()
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
-SET(NL_VERSION_MAJOR 1)
-SET(NL_VERSION_MINOR 1)
+SET(NL_VERSION_MAJOR 4)
+SET(NL_VERSION_MINOR 0)
 SET(NL_VERSION_PATCH 0 CACHE STRING "Patch version")
 SET(YEAR "2001-${CURRENT_YEAR}")
 SET(AUTHOR "Winch Gate and The Ryzom Core Community")
@@ -98,14 +98,14 @@ RYZOM_SETUP_PREFIX_PATHS()
 
 #-----------------------------------------------------------------------------
 # Default values for URL's
-SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL  "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
-SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL    "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
-SET(RYZOM_CLIENT_FORGET_PASSWORD_URL "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
-SET(RYZOM_CLIENT_PATCH_URL           "https://cdn.ryzom.dev/open/patch/" CACHE STRING "Ryzom Client Patch URL")
-SET(RYZOM_CLIENT_APP_NAME            "default")
+SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL     "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
+SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL       "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
+SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
+SET(RYZOM_CLIENT_PATCH_URL              "https://cdn.ryzom.dev/open/patch/" CACHE STRING "Ryzom Client Patch URL")
+SET(RYZOM_CLIENT_APP_NAME               "default")
 
-SET(RYZOM_WEBIG_MAIN_URL             "https://open.ryzom.dev/" CACHE STRING "Ryzom Client WebIG Main URL")
-SET(RYZOM_WEBIG_TRUSTED_DOMAIN       "open.ryzom.dev" CACHE STRING "Ryzom Client WebIG Trusted Domain")
+SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://open.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
+SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://open.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 
 #-----------------------------------------------------------------------------
 # urls when compiling ryzom live client
@@ -119,6 +119,9 @@ IF(WITH_RYZOM_LIVE)
 
   SET(RYZOM_WEBIG_MAIN_URL             "https://app.ryzom.com/")
   SET(RYZOM_WEBIG_TRUSTED_DOMAIN       "app.ryzom.com")
+
+  SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/releasenotes/index.php")
+  SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/releasenotes_ring/index.php")
 ENDIF()
 
 #-----------------------------------------------------------------------------

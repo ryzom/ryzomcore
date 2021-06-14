@@ -262,7 +262,7 @@ void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& roo
 	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
 #else
 	std::string groupControllerPath;
-	root.getValueByName(groupControllerPath, ".GroupControllerPath");
+	root.getValueByName(groupControllerPath, ".GroupController");
 	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(groupControllerPath);
 #endif
 

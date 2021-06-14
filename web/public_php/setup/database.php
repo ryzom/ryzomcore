@@ -1,7 +1,7 @@
 <?php
 
 // Service
-$db_nel = 4;
+$db_nel = 5;
 $db_nel_tool = 2;
 
 // Support
@@ -9,7 +9,7 @@ $db_nel_ams = 2;
 $db_nel_ams_lib = 7;
 
 // Domain
-$db_ring_domain = 1;
+$db_ring_domain = 3;
 
 
 function set_db_version($continue_r, $name, $version) {
@@ -42,7 +42,8 @@ function connect_database($continue, $name) {
 			$cfg['db'][$name]['host'],
 			$cfg['db'][$name]['user'],
 			$cfg['db'][$name]['pass'],
-			$cfg['db'][$name]['name']);
+			$cfg['db'][$name]['name'],
+			$cfg['db'][$name]['port']);
 		if (mysqli_connect_errno()) {
 			printalert("danger", "Failed to connect to the <em>" . $name . "</em> SQL server: " . mysqli_connect_error());
 			$con = null;

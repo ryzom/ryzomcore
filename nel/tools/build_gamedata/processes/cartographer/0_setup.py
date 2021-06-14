@@ -46,6 +46,7 @@ printLog(log, "")
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + CartographerBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + CartographerMapBuildDirectory)
 
 # Setup lookup directories
 printLog(log, ">>> Setup lookup directories <<<")
@@ -65,6 +66,7 @@ for dir in PropertiesExportBuildSearchPaths:
 # Setup client directories
 printLog(log, ">>> Setup install directories <<<")
 mkPath(log, InstallDirectory + "/" + CartographerInstallDirectory)
+mkPath(log, InstallDirectory + "/" + IslandsInstallDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup configuration <<<")
@@ -107,7 +109,7 @@ cfg.write("InverseZTest = true;\n")
 cfg.write("Vegetation = true;\n")
 cfg.write("MeterPixelSize = 2;\n")
 cfg.write("\n")
-cfg.write("CompleteIslandsFile = \"r2_islands.xml\";\n")
+cfg.write("CompleteIslandsFile = \"" + ExportBuildDirectory + "/" + CartographerBuildDirectory + "/" + IslandsXmlFile + "\";\n")
 cfg.write("EntryPointsFile = \"r2_entry_points.txt\";\n")
 cfg.write("\n")
 cfg.close()

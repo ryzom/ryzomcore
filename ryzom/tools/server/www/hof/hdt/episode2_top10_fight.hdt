@@ -1,0 +1,9 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs killers de l'episode 2
+	"nom_Top10_Best_Kill_kami", "storyline.episode2.*.kami.kill.*", "PlayerName", "*", "Sum",
+	"score_Top10_Best_Kill_kami", "storyline.episode2.*.kami.kill.*", "PlayerValue", "*", "Sum",
+
+	"nom_Top10_Best_Kill_karavan", "storyline.episode2.*.karavan.kill.*", "PlayerName", "*", "Sum",
+	"score_Top10_Best_Kill_karavan", "storyline.episode2.*.karavan.kill.*", "PlayerValue", "*", "Sum",
+};

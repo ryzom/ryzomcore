@@ -1,0 +1,9 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs crafteurs de l'episode 2
+	"nom_Top10_Best_Guild_Craft_fyros_kami", "storyline.episode2.fyros.kami.craft.*", "GuildName", "*", "Sum",
+	"nom_Top10_Best_Guild_Craft_fyros_karavan", "storyline.episode2.fyros.karavan.craft.*", "GuildName", "*", "Sum",
+	
+	"score_Top10_Best_Guild_Craft_fyros_kami", "storyline.episode2.fyros.kami.craft.*", "GuildValue", "*", "Sum",
+	"score_Top10_Best_Guild_Craft_fyros_karavan", "storyline.episode2.fyros.karavan.craft.*", "GuildValue", "*", "Sum",	
+};

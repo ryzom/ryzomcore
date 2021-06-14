@@ -1,0 +1,44 @@
+# texts relative to the harvest
+
+BS_HARVEST_BEGIN_S			"&VE&You begin to harvest $0s."
+BS_HARVEST_FUMBLE			"&RG&You have fumbled and all the resources you were harvesting are lost."
+BS_HARVEST_CANCEL			"&RG&Your recovering action has been cancelled."
+BS_HARVEST_INVALID_SOURCE		"&RG&Invalid entity for harvest."
+BS_HARVEST_INVALID_INDEX		"&RG&Invalid raw material index."
+BS_HARVEST_NEED_TOOL			"&RG&You need the right tool in one of your sheaths to harvest."	
+BS_HARVEST_NEED_TOOL_S			"&RG&You need a tool using skill $0s in one of your sheaths."
+BS_HARVEST_INVALID_MODE			"&RG&You cannot harvest in this mode."
+# EGS_HARVEST_CORPSE_TOO_FAR		"&RG&The corpse you are trying to skin is too far away, get closer."
+
+OPS_HARVEST_SUCESS_ISI			"&VE&You obtain $0i $1s of quality $2i."
+OPS_ERROR_NON_HARVESTABLE_E		"&RG&$0e cannot be harvested."
+OPS_HARVEST_ALREADY_IN_PROGRESS_EE	"&RG&$0e is already being harvested by $1e."
+# OPS_HARVEST_MP_IN_PROGRESS_E		"&RG&You are already harvesting raw material on $0e."
+OPS_HARVEST_INTERRUPTED			"&RG&Your harvesting action has been interrupted."
+# EGS_FORAGE_INTERRUPTED			"&RG&Your foraging action has been interrupted."
+# EGS_QUARTER_INTERRUPTED			"&RG&Your quartering action has been interrupted."
+
+OPS_HARVEST_BAG_FULL			"&RG&You don't have a free bag slot inventory, action cancelled."
+
+EGS_HARVEST_WOS_DOWN			"&RG&(Server Debug) The world service is down, cannot harvest any deposit..."
+
+WOS_HARVEST_ALREADY_IN_PROGRESS_E	"&RG&This deposit is already being harvested by $1e."
+WOS_HARVEST_ALREADY_IN_PROGRESS		"&RG&You are already harvesting."
+# WOS_HARVEST_FOUND_NOTHING		"&RG&You found nothing."
+# WOS_HARVEST_FAILED			"&RG&You failed to take the ressources you were trying to harvest."
+# WOS_HARVEST_SEARCHING		"&VE&Looking for resources ..."
+# WOS_HARVEST_FOUND_MP_S		"&VE&You found $0s."
+WOS_HARVEST_FOUND_MP		"&VE&You found resources."
+
+
+# texts relative to loot
+
+EGS_NOTHING_TO_LOOT_E			"&RG&There is nothing to loot on $0e."
+EGS_NOTHING_TO_QUARTER_E		"&RG&There is nothing to quarter on $0e."
+EGS_CREATURE_ALREADY_BEING_LOOTED_EE	"&RG&$0e is already being looted by $1e."
+# EGS_ITEM_ALREADY_BEING_LOOTED_E			"&RG&$This bag is already being looted by $1e."
+
+EGS_LOOT_VBS_I	"&JA&You loot $0i very big seeds."
+EGS_LOOT_BS_I	"&JA&You loot $0i big seeds."
+EGS_LOOT_MS_I	"&JA&You loot $0i medium seeds."
+EGS_LOOT_LS_I	"&JA&You loot $0i little seeds."

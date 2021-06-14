@@ -1,0 +1,79 @@
+WildcardValues =
+{
+// ==== quantite craftee des elements de construction Fyros
+	"Soclefyros",		"storyline.episode2.fyros.socle.*",		"Sum",
+	"Colonnefyros",		"storyline.episode2.fyros.colonne.*",		"Sum",
+	"Comblefyros",		"storyline.episode2.fyros.comble.*",		"Sum",
+	"Muraillefyros",	"storyline.episode2.fyros.muraille.*",		"Sum",
+	"Revetementfyros",	"storyline.episode2.fyros.revetement.*",	"Sum",
+	"Ornementfyros",	"storyline.episode2.fyros.ornement.*",		"Sum",
+	"Statuefyros", 		"storyline.episode2.fyros.statue.*",		"Sum",
+	"Justicefyros",		"storyline.episode2.fyros.colonne_justice.*",	"Sum",
+
+	"Racinefyros",		"storyline.episode2.fyros.racine.*",		"Sum",
+	"Troncfyros", 		"storyline.episode2.fyros.tronc.*",		"Sum",
+	"Fibrefyros", 		"storyline.episode2.fyros.fibre.*",		"Sum",
+	"Ecorcefyros",		"storyline.episode2.fyros.ecorce.*",		"Sum",
+	"Feuillefyros",		"storyline.episode2.fyros.feuille.*",		"Sum",
+	"Fleurfyros", 		"storyline.episode2.fyros.fleur.*",		"Sum",
+	"Symbolefyros",		"storyline.episode2.fyros.symbole.*",		"Sum",
+	"Noyaufyros",		"storyline.episode2.fyros.noyau.*",		"Sum",
+
+// ==== quantite craftee des elements de construction Tryker
+	"Socletryker",		"storyline.episode2.tryker.socle.*",		"Sum",
+	"Colonnetryker",	"storyline.episode2.tryker.colonne.*",		"Sum",
+	"Combletryker",		"storyline.episode2.tryker.comble.*",		"Sum",
+	"Murailletryker",	"storyline.episode2.tryker.muraille.*",		"Sum",
+	"Revetementtryker",	"storyline.episode2.tryker.revetement.*",	"Sum",
+	"Ornementtryker",	"storyline.episode2.tryker.ornement.*",		"Sum",
+	"Statuetryker", 	"storyline.episode2.tryker.statue.*",		"Sum",
+	"Justicetryker",	"storyline.episode2.tryker.colonne_justice.*",	"Sum",
+
+	"Racinetryker",		"storyline.episode2.tryker.racine.*",	"Sum",
+	"Tronctryker",	 	"storyline.episode2.tryker.tronc.*",	"Sum",
+	"Fibretryker", 		"storyline.episode2.tryker.fibre.*",	"Sum",
+	"Ecorcetryker",		"storyline.episode2.tryker.ecorce.*",	"Sum",
+	"Feuilletryker",	"storyline.episode2.tryker.feuille.*",	"Sum",
+	"Fleurtryker", 		"storyline.episode2.tryker.fleur.*",	"Sum",
+	"Symboletryker",	"storyline.episode2.tryker.symbole.*",	"Sum",
+	"Noyautryker",		"storyline.episode2.tryker.noyau.*",	"Sum",
+
+// ==== quantite craftee des elements de construction Matis
+	"Soclematis",		"storyline.episode2.matis.socle.*",		"Sum",
+	"Colonnematis",		"storyline.episode2.matis.colonne.*",		"Sum",
+	"Comblematis",		"storyline.episode2.matis.comble.*",		"Sum",
+	"Muraillematis",	"storyline.episode2.matis.muraille.*",		"Sum",
+	"Revetementmatis",	"storyline.episode2.matis.revetement.*",	"Sum",
+	"Ornementmatis",	"storyline.episode2.matis.ornement.*",		"Sum",
+	"Statuematis", 		"storyline.episode2.matis.statue.*",		"Sum",
+	"Justicematis",		"storyline.episode2.matis.colonne_justice.*",	"Sum",
+
+	"Racinematis",		"storyline.episode2.matis.racine.*",		"Sum",
+	"Troncmatis", 		"storyline.episode2.matis.tronc.*",		"Sum",
+	"Fibrematis", 		"storyline.episode2.matis.fibre.*",		"Sum",
+	"Ecorcematis",		"storyline.episode2.matis.ecorce.*",		"Sum",
+	"Feuillematis",		"storyline.episode2.matis.feuille.*",		"Sum",
+	"Fleurmatis", 		"storyline.episode2.matis.fleur.*",		"Sum",
+	"Symbolematis",		"storyline.episode2.matis.symbole.*",		"Sum",
+	"Noyaumatis",		"storyline.episode2.matis.noyau.*",		"Sum",
+
+// ==== quantite craftee des elements de construction Zorai
+	"Soclezorai",		"storyline.episode2.zorai.socle.*",		"Sum",
+	"Colonnezorai",		"storyline.episode2.zorai.colonne.*",		"Sum",
+	"Comblezorai",		"storyline.episode2.zorai.comble.*",		"Sum",
+	"Muraillezorai",	"storyline.episode2.zorai.muraille.*",		"Sum",
+	"Revetementzorai",	"storyline.episode2.zorai.revetement.*",	"Sum",
+	"Ornementzorai",	"storyline.episode2.zorai.ornement.*",		"Sum",
+	"Statuezorai", 		"storyline.episode2.zorai.statue.*",		"Sum",
+	"Justicezorai",		"storyline.episode2.zorai.colonne_justice.*",	"Sum",
+
+	"Racinezorai",		"storyline.episode2.zorai.racine.*",		"Sum",
+	"Tronczorai",	 	"storyline.episode2.zorai.tronc.*",		"Sum",
+	"Fibrezorai", 		"storyline.episode2.zorai.fibre.*",		"Sum",
+	"Ecorcezorai",		"storyline.episode2.zorai.ecorce.*",		"Sum",
+	"Feuillezorai",		"storyline.episode2.zorai.feuille.*",		"Sum",
+	"Fleurzorai", 		"storyline.episode2.zorai.fleur.*",		"Sum",
+	"Symbolezorai",		"storyline.episode2.zorai.symbole.*",		"Sum",
+	"Noyauzorai",		"storyline.episode2.zorai.noyau.*",		"Sum",
+
+};

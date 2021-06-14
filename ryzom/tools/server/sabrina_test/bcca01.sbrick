@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="SabrinaCost" Value="20"/>
+      <ATOM Name="Property 0" Value="-10"/>
+      <ATOM Name="LearnRequiresOneOfSkills" Value="C 0"/>
+      <ATOM Name="Skill" Value="C"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

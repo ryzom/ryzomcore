@@ -1,0 +1,269 @@
+<generator header_tag="TEST_WEB_INTERFACE_ITF">
+
+	<namespace name="TWI">
+
+
+		<callback_interface name="CTestInterfaceWeb" caller="php">
+			<doc line="Test interface for web to C++ messaging"/>
+
+			<invoke name="beginTest" msg="BT">
+			</invoke>
+
+			<!-- first basic types sended and returned -->
+			<invoke name="sendUInt32" msg="S32">
+				<param type="uint32"		name="i32"/>
+			</invoke>
+				<return name="returnUInt32" msg="R32">
+					<param type="uint32"		name="i32"/>
+				</return>
+
+			<invoke name="sendUInt8" msg="S8">
+				<param type="uint8"		name="i8" php_serial="UInt8"/>
+			</invoke>
+				<return name="returnUInt8" msg="R8">
+					<param type="uint8"		name="i8" php_serial="UInt8"/>
+				</return>
+		
+			<invoke name="sendString" msg="SS">
+				<param type="std::string"	name="str" php_serial="String" byref="true"/>
+			</invoke>
+				<return name="returnString" msg="RS">
+					<param type="std::string"	name="str" byref="true" php_serial="String" byref="true"/>
+				</return>
+
+			<!-- now, some composite request -->
+			<invoke name="composite1" msg="SC1">
+				<param type="uint32"		name="i32"/>
+				<param type="uint8"			name="i8" php_serial="UInt8"/>
+				<param type="std::string"	name="str" php_serial="String" byref="true"/>
+			</invoke>
+				<return name="returnComposite1" msg="RC1">
+					<param type="uint32"		name="i32"/>
+					<param type="uint8"			name="i8" php_serial="UInt8"/>
+					<param type="std::string"	name="str" php_serial="String" byref="true"/>
+				</return>
+
+			<invoke name="composite2" msg="SC2">
+				<param type="std::string"	name="str1" php_serial="String" byref="true"/>
+				<param type="std::string"	name="str2" php_serial="String" byref="true"/>
+				<param type="std::string"	name="str3" php_serial="String" byref="true"/>
+				<param type="std::string"	name="str4" php_serial="String" byref="true"/>
+			</invoke>
+				<return name="returnComposite2" msg="RC2">
+					<param type="std::string"	name="str1" php_serial="String" byref="true"/>
+					<param type="std::string"	name="str2" php_serial="String" byref="true"/>
+					<param type="std::string"	name="str3" php_serial="String" byref="true"/>
+					<param type="std::string"	name="str4" php_serial="String" byref="true"/>
+				</return>
+
+			<invoke name="composite3" msg="SC3">
+				<param type="uint8"			name="i81" php_serial="UInt8"/>
+				<param type="uint32"		name="i321"/>
+				<param type="std::string"	name="str1" php_serial="String" byref="true"/>
+				<param type="uint8"			name="i82" php_serial="UInt8"/>
+				<param type="uint32"		name="i322"/>
+				<param type="std::string"	name="str2" php_serial="String" byref="true"/>
+				<param type="uint8"			name="i83" php_serial="UInt8"/>
+				<param type="uint32"		name="i323"/>
+				<param type="std::string"	name="str3" php_serial="String" byref="true"/>
+				<param type="uint8"			name="i84" php_serial="UInt8"/>
+				<param type="uint32"		name="i324"/>
+				<param type="std::string"	name="str4" php_serial="String" byref="true"/>
+				<param type="uint32"		name="i325"/>
+				<param type="uint8"			name="i85" php_serial="UInt8"/>
+			</invoke>
+				<return name="returnComposite3" msg="RC3">
+					<param type="uint8"			name="i81" php_serial="UInt8"/>
+					<param type="uint32"		name="i321"/>
+					<param type="std::string"	name="str1" php_serial="String" byref="true"/>
+					<param type="uint8"			name="i82" php_serial="UInt8"/>
+					<param type="uint32"		name="i322"/>
+					<param type="std::string"	name="str2" php_serial="String" byref="true"/>
+					<param type="uint8"			name="i83" php_serial="UInt8"/>
+					<param type="uint32"		name="i323"/>
+					<param type="std::string"	name="str3" php_serial="String" byref="true"/>
+					<param type="uint8"			name="i84" php_serial="UInt8"/>
+					<param type="uint32"		name="i324"/>
+					<param type="std::string"	name="str4" php_serial="String" byref="true"/>
+					<param type="uint32"		name="i325"/>
+					<param type="uint8"			name="i85" php_serial="UInt8"/>
+				</return>
+
+		</callback_interface>
+
+		<callback_interface name="CTestInterface2Web" caller="php">
+			<doc line="a second interface to stress the generator"/>
+
+			<invoke name="sendInt32_2" msg="S322">
+				<param type="uint32"		name="i32"/>
+			</invoke>
+				<return name="returnInt32_2" msg="R322">
+					<param type="uint32"		name="i32"/>
+				</return>
+
+		</callback_interface>
+
+		<!--
+		
+		The test must be run as follow (it's web side driven)
+
+		0 - Initialise the test service
+			0.1 - web connect to test service
+			0.2 - send 'beginTest' to test service
+			0.3 - disconnect
+
+		1 - First simple message test and disco/reco	phpstate	Internal server state
+			1.1 - web connect to test service
+			1.2 - send 'sendInt32(0x12345678)'						0++
+			1.3 - wait for returnInt32					0++
+					check i32 = 0x12345678
+			1.4 - disconnect										
+
+			1.5 - web connect to test service
+			1.6 - send 'sendInt8(0xf1)'								1++
+			1.7 - wait for returnInt8					1++
+					check i8 = 0xf1
+			1.8 - disconnect										
+		
+			1.9 - web connect to test service
+			1.10 - send 'sendString("hello world")'					2++
+			1.11 - wait for returnString				2++
+					check str = "hello world"
+			1.12 - disconnect										
+
+		2 - Second, test multiple msg in the same cnx
+			2.1 - connect to test service
+			2.2 - send 'sendInt32(0xFEDCBA98)'						3++
+			2.3 - wait for returnInt32					3++
+					check i32 = 0x12345678
+			2.4 - send 'sendInt8(0xCC)'								4++
+			2.5 - wait for returnInt8					4++
+					check i8 = 0x01
+			2.6 - send 'sendString("hello world")'					5++
+			2.7 - wait for returnString					5++
+					check str = "ok"
+			2.8 - disconnect										
+		
+		3 - Third test composite mesage
+			3.1 - connect to test service
+			3.2 - send 'composite1(0x12345678, 0x9A, "Ibm")'		6++
+			3.3 - wait for returnComposite1				6++
+					check i32 = 0x12345678
+					check i8 = 0x9a
+					checl str = "hal"
+			3.4 - send 'composite2("ABCD","EFGH IJKL","MNO","PQ")'	7++
+			3.5 - wait for returnComposite2				7++
+					check str1 = "ABCD"
+					check str2 = "EFGH IJKL"
+					check str3 = "MNO"
+					check str4 = "PQ"
+			3.6 - send 'composite3(0x9a, 0x12345678, "ABC",			8++
+								   0x34, 0xbcdef012, "DEFGH",
+								   0xcd, 0x567890ab, "I",
+								   0x67, 0xef012345, "",
+								   0x01234567, 0x89)'
+			3.7 - wait for returnComposite3				8++
+					check all value must be like in calling composite3
+			3.8 - disconnect										
+		4 - Test mutiple return message
+			2.1 - connect to test service
+			2.2 - send 'sendInt32(0x12345678)'						9++
+			2.3 - wait for returnInt32					9++
+					check i32 = 0x12345678
+			2.3 - wait for returnInt32					10++
+					check i32 = 0x87654321
+			2.4 - disconnect										
+
+		5 - check support of faulty messages
+			5.1 - connect to test service
+			5.2 - send 'sendInt32(0x12345678)'						10++
+			5.3 - wait for returnInt32					11++
+					you receive returnInt8 instead and must ignore it
+			5.4 - wait for returnInt32					12++
+					check i32 = 0x87654321
+			5.5 - disconnect										
+
+		6 - support of clean timeout ( return a default error page before 
+				being killed by web server)
+			6.1 - connect to test service
+			6.2 - send 'sendInt32(0x12345678)'						11++
+			6.3 - wait for returnInt32					13++
+			6.4 - after 15 second (configurable?) without response, giveup using some language specific exception.
+			6.5	- disconnect										
+
+		-->
+
+		<enum name="TEnum">
+			<item name="enum_a"/>
+			<item name="enum_b"/>
+			<item name="enum_c"/>
+		</enum>
+
+		<!-- vector, two way invoke and structured parameters -->
+
+		<callback_interface name="CTestInterfaceWeb2" caller="php">
+
+			<invoke name="sendVectorUInt32" msg="SV32">
+				<param type="uint32"		name="vi32"	array="true"/>
+			</invoke>
+
+				<return name="returnVectorUInt32" msg="RV32">
+					<param type="uint32"		name="i32"	array="true"/>
+				</return>
+
+			<invoke name="sendVectorString" msg="SVS">
+				<param type="std::string"	name="vstr"	array="true"	php_serial="String"/>
+			</invoke>
+
+				<return name="returnVectorString" msg="RVS">
+					<param type="std::string"	name="vstr"	array="true"	php_serial="String"/>
+				</return>
+
+			<invoke name="twoWayCall" msg="TWC">
+				<return type="std::string"	php_serial="String"/>
+				
+				<param type="std::string"	name="param"	php_serial="String" byref="true"/>
+			</invoke>
+
+			<invoke name="twoWayCallInt" msg="TWCI">
+				<return type="uint32"/>
+				
+				<param type="uint32"	name="param"/>
+			</invoke>
+
+			<invoke name="twoWayCallEnum" msg="TWCE">
+				<return type="TEnum" enum="true"/>
+				
+				<param type="TEnum"	name="param"	enum="true"/>
+			</invoke>
+
+			<invoke name="twoWayCallVector" msg="TWCV">
+				<return type="uint32" array="true"/>
+				
+				<param type="uint32"	name="param"	array="true"/>
+			</invoke>
+
+			<invoke name="mixedVector" msg="MVI">
+				<param type="uint32"		name="param1"/>
+				<param type="std::string"	name="vstr"		array="true"	php_serial="String"/>
+				<param type="uint32"		name="vi32"		array="true"/>
+			</invoke>
+				<return name="returnMixedVector" msg="RMVI">
+					<param type="uint32"		name="param1"/>
+					<param type="std::string"	name="vstr"		array="true"	php_serial="String"/>
+					<param type="uint32"		name="vi32"		array="true"/>
+				</return>
+
+			<invoke name="mixedTwoWayVector" msg="TWMV">
+				<return type="uint32"/>
+
+				<param type="uint32"		name="param1"/>
+				<param type="std::string"	name="vstr"		array="true"	php_serial="String"/>
+				<param type="uint32"		name="vi32"		array="true"/>
+			</invoke>
+
+		</callback_interface>
+
+	</namespace>
+</generator>
+
