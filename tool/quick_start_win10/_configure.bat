@@ -67,9 +67,9 @@ if %errorlevel% neq 0 pause
 if exist %RC_ROOT%\pipeline\install\data_leveldesign\sheet_id.bin goto :skipbuild
 python a1_worldedit_data.py
 if %errorlevel% neq 0 pause
-python 1_export -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll shard/data_language shard/data_leveldesign shard/data_shard
+python 1_export.py -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll shard/data_language shard/data_leveldesign shard/data_shard
 if %errorlevel% neq 0 pause
-python 2_build -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll shard/data_language shard/data_leveldesign shard/data_shard
+python 2_build.py -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll shard/data_language shard/data_leveldesign shard/data_shard
 if %errorlevel% neq 0 pause
 cd /d %RC_ROOT%
 call copy_dds_to_interfaces.bat
