@@ -185,6 +185,9 @@
 		<ctrl style="new_element_header" id="add_button" posref="MR MR" x="-16" y="0" wmargin="8" hardtext="uittNewKeyShortcut"
 				 onclick_l="keys_new" />
 
+		<ctrl style="new_element_header" id="save_button" posparent="add_button" posref="ML MR" x="-4" y="0" wmargin="8" hardtext="uiSaveUI"
+				 onclick_l="save_ui" />
+
 	</group>
 		
 	<group id="content" x="0" y="0" w="0" child_resize_h="true" child_resize_hmargin="0" posref="TL TL" >
