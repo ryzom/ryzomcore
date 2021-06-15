@@ -29,8 +29,6 @@ using namespace NLMISC;
 
 namespace NLGUI
 {
-
-
 	// ----------------------------------------------------------------------------
 	CSSBorderRenderer::CSSBorderRenderer()
 	{
@@ -39,56 +37,39 @@ namespace NLGUI
 		TopStyle = RightStyle = BottomStyle = LeftStyle = CSS_LINE_STYLE_SOLID;
 		CurrentAlpha = 255;
 
-		_RenderLayer = 0;
-		_ModulateGlobalColor = false;
+		m_RenderLayer = 0;
+		m_ModulateGlobalColor = false;
 
-		_Border = true;
-		_Dirty = true;
-		_BorderTop = _BorderRight = _BorderBottom = _BorderLeft = false;
-
-		//
-		_QuadT.Uv0.set(0.f, 0.f);
-		_QuadT.Uv1.set(0.f, 0.f);
-		_QuadT.Uv2.set(1.f, 1.f);
-		_QuadT.Uv3.set(0.f, 1.f);
-		//
-		_QuadR.Uv0.set(0.f, 0.f);
-		_QuadR.Uv1.set(0.f, 0.f);
-		_QuadR.Uv2.set(1.f, 1.f);
-		_QuadR.Uv3.set(0.f, 1.f);
-		//
-		_QuadB.Uv0.set(0.f, 0.f);
-		_QuadB.Uv1.set(0.f, 0.f);
-		_QuadB.Uv2.set(1.f, 1.f);
-		_QuadB.Uv3.set(0.f, 1.f);
-		//
-		_QuadL.Uv0.set(0.f, 0.f);
-		_QuadL.Uv1.set(0.f, 0.f);
-		_QuadL.Uv2.set(1.f, 1.f);
-		_QuadL.Uv3.set(0.f, 1.f);
+		m_Border = true;
+		m_Dirty = true;
+		m_BorderTop = m_BorderRight = m_BorderBottom = m_BorderLeft = false;
+		m_XReal = 0;
+		m_YReal = 0;
+		m_WReal = 0;
+		m_HReal = 0;
 	}
 
 	// ----------------------------------------------------------------------------
 	void CSSBorderRenderer::setRenderLayer(sint layer)
 	{
-		_RenderLayer = layer;
+		m_RenderLayer = layer;
 	}
 
 	// ----------------------------------------------------------------------------
 	void CSSBorderRenderer::setModulateGlobalColor(bool s)
 	{
-		_ModulateGlobalColor = s;
+		m_ModulateGlobalColor = s;
 	}
 
 	// ----------------------------------------------------------------------------
 	void CSSBorderRenderer::setRect(sint32 x, sint32 y, sint32 w, sint32 h)
 	{
-		_XReal = x;
-		_YReal = y;
-		_WReal = w;
-		_HReal = h;
+		m_XReal = x;
+		m_YReal = y;
+		m_WReal = w;
+		m_HReal = h;
 
-		_Dirty = _Border = (w > 0 && h > 0);
+		m_Dirty = m_Border = (w > 0 && h > 0);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -99,7 +80,7 @@ namespace NLGUI
 		BottomWidth = bottom;
 		LeftWidth = left;
 
-		_Dirty = _Border = (top > 0 || right > 0 || bottom > 0 || left > 0);
+		m_Dirty = m_Border = (top > 0 || right > 0 || bottom > 0 || left > 0);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -110,7 +91,7 @@ namespace NLGUI
 		BottomStyle = bottom;
 		LeftStyle = left;
 
-		_Dirty = _Border = true;
+		m_Dirty = m_Border = true;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -121,7 +102,7 @@ namespace NLGUI
 		BottomColor = bottom;
 		LeftColor = left;
 
-		_Dirty = true;
+		m_Dirty = true;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -173,146 +154,232 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+	bool CSSBorderRenderer::hasInnerShape(CSSLineStyle style) const
+	{
+		return style == CSS_LINE_STYLE_DOUBLE ||
+				style == CSS_LINE_STYLE_GROOVE ||
+				style == CSS_LINE_STYLE_RIDGE;
+	}
+
+	// ----------------------------------------------------------------------------
 	void CSSBorderRenderer::updateCoords()
 	{
-		_Dirty = false;
-		if (!_Border) return;
+		m_Dirty = false;
+		m_DrawBorders.clear();
+		if (!m_Border) return;
 
-		sint dTop    = getTopWidth();    _BorderTop    = dTop > 0;
-		sint dRight  = getRightWidth();  _BorderRight  = dRight > 0;
-		sint dBottom = getBottomWidth(); _BorderBottom = dBottom > 0;
-		sint dLeft   = getLeftWidth();   _BorderLeft   = dLeft > 0;
+		sint dTop    = getTopWidth();    m_BorderTop    = dTop > 0;
+		sint dRight  = getRightWidth();  m_BorderRight  = dRight > 0;
+		sint dBottom = getBottomWidth(); m_BorderBottom = dBottom > 0;
+		sint dLeft   = getLeftWidth();   m_BorderLeft   = dLeft > 0;
 
-		_Border = _BorderTop || _BorderRight || _BorderBottom || _BorderLeft;
-		if (!_Border) return;
+		m_Border = m_BorderTop || m_BorderRight || m_BorderBottom || m_BorderLeft;
+		if (!m_Border) return;
 
-		if (_BorderTop)
+		sint xTop = m_YReal + m_HReal;
+		sint xRight = m_XReal + m_WReal;
+
+		sint bLeft = m_XReal + dLeft;
+		sint bRight = xRight - dRight;
+		sint bTop = xTop - dTop;
+		sint bBottom = m_YReal + dBottom;
+
+		SDrawBorder shape;
+		shape.Quad.Uv0.set(0.f, 0.f);
+		shape.Quad.Uv1.set(1.f, 0.f);
+		shape.Quad.Uv2.set(1.f, 1.f);
+		shape.Quad.Uv3.set(0.f, 1.f);
+
+		// V3 - top-left
+		// V2 - top-right
+		// V1 - bottom-right
+		// V0 - bottom-left
+		if (m_BorderTop)
 		{
-			// top-left
-			_QuadT.V3.x = _XReal;
-			_QuadT.V3.y = _YReal + _HReal;
-			// top-right
-			_QuadT.V2.x = _XReal + _WReal;
-			_QuadT.V2.y = _YReal + _HReal;
-			// bottom-right
-			_QuadT.V1.x = _XReal + _WReal - dRight;
-			_QuadT.V1.y = _YReal + _HReal - dTop;
-			// bottom-left
-			_QuadT.V0.x = _XReal + dLeft;
-			_QuadT.V0.y = _YReal + _HReal - dTop;
+			if (TopStyle == CSS_LINE_STYLE_INSET || TopStyle == CSS_LINE_STYLE_GROOVE)
+				shape.Color = blend(TopColor, CRGBA::Black, 0.5f);
+			else
+				shape.Color = TopColor;
+
+			shape.Quad.V3.x = m_XReal; shape.Quad.V3.y = xTop;
+			shape.Quad.V2.x = xRight; shape.Quad.V2.y = xTop;
+			shape.Quad.V1.x = bRight; shape.Quad.V1.y = bTop;
+			shape.Quad.V0.x = bLeft;  shape.Quad.V0.y = bTop;
+			m_DrawBorders.push_back(shape);
+
+			if (hasInnerShape(TopStyle))
+			{
+				float iLeft, iTop, iRight;
+				if (TopStyle == CSS_LINE_STYLE_DOUBLE)
+				{
+					iLeft  = 2*dLeft   / 3.f;
+					iTop   = 2*dBottom / 3.f;
+					iRight = 2*dRight  / 3.f;
+				} else {
+					iLeft  = dLeft  / 2.f;
+					iTop   = dTop   / 2.f;
+					iRight = dRight / 2.f;
+				}
+
+				if (TopStyle == CSS_LINE_STYLE_RIDGE)
+					shape.Color = blend(TopColor, CRGBA::Black, 0.5f);
+				else
+					shape.Color = TopColor;
+
+				// create inner border shape and remove overlapping from outer shape
+				m_DrawBorders.back().Quad.V0.x  -= iLeft; m_DrawBorders.back().Quad.V0.y  += iTop;
+				m_DrawBorders.back().Quad.V1.x  += iRight; m_DrawBorders.back().Quad.V1.y  += iTop;
+				shape.Quad.V3.x += iLeft; shape.Quad.V3.y -= iTop;
+				shape.Quad.V2.x -= iRight; shape.Quad.V2.y -= iTop;
+				m_DrawBorders.push_back(shape);
+			}
 		}
 
-		if (_BorderRight)
+		if (m_BorderBottom)
 		{
-			// top-left
-			_QuadR.V3.x = _XReal + _WReal - dRight;
-			_QuadR.V3.y = _YReal + _HReal - dTop;
-			// top-right
-			_QuadR.V2.x = _XReal + _WReal;
-			_QuadR.V2.y = _YReal + _HReal;
-			// bottom-right
-			_QuadR.V1.x = _XReal + _WReal;
-			_QuadR.V1.y = _YReal;
-			// bottom-left
-			_QuadR.V0.x = _XReal + _WReal - dRight;
-			_QuadR.V0.y = _YReal + dBottom;
+			if (BottomStyle == CSS_LINE_STYLE_OUTSET || BottomStyle == CSS_LINE_STYLE_RIDGE)
+				shape.Color = blend(BottomColor, CRGBA::Black, 0.5f);
+			else
+				shape.Color = BottomColor;
+
+			shape.Quad.V3.x = bLeft; shape.Quad.V3.y = bBottom;
+			shape.Quad.V2.x = bRight; shape.Quad.V2.y = bBottom;
+			shape.Quad.V1.x = xRight; shape.Quad.V1.y = m_YReal;
+			shape.Quad.V0.x = m_XReal; shape.Quad.V0.y = m_YReal;
+			m_DrawBorders.push_back(shape);
+
+			if (hasInnerShape(BottomStyle))
+			{
+				float iLeft, iBottom, iRight;
+				if (BottomStyle == CSS_LINE_STYLE_DOUBLE)
+				{
+					iLeft   = 2*dLeft   / 3.f;
+					iBottom = 2*dBottom / 3.f;
+					iRight  = 2*dRight  / 3.f;
+				}
+				else
+				{
+					iLeft   = dLeft   / 2.f;
+					iBottom = dBottom / 2.f;
+					iRight  = dRight  / 2.f;
+				}
+
+				if (BottomStyle == CSS_LINE_STYLE_GROOVE)
+					shape.Color = blend(shape.Color, CRGBA::Black, 0.5f);
+				else
+					shape.Color = BottomColor;
+
+				m_DrawBorders.back().Quad.V2.x  += iRight;  m_DrawBorders.back().Quad.V2.y -= iBottom;
+				m_DrawBorders.back().Quad.V3.x  -= iLeft;  m_DrawBorders.back().Quad.V3.y -= iBottom;
+				shape.Quad.V1.x -= iRight; shape.Quad.V1.y += iBottom;
+				shape.Quad.V0.x += iLeft; shape.Quad.V0.y += iBottom;
+				m_DrawBorders.push_back(shape);
+			}
 		}
 
-		if (_BorderBottom)
+		if (m_BorderRight)
 		{
-			// top-left
-			_QuadB.V3.x = _XReal + dLeft;
-			_QuadB.V3.y = _YReal + dBottom;
-			// top-right
-			_QuadB.V2.x = _XReal + _WReal - dRight;
-			_QuadB.V2.y = _YReal + dBottom;
-			// bottom-right
-			_QuadB.V1.x = _XReal + _WReal;
-			_QuadB.V1.y = _YReal;
-			// bottom-left
-			_QuadB.V0.x = _XReal;
-			_QuadB.V0.y = _YReal;
+			if (RightStyle == CSS_LINE_STYLE_OUTSET || RightStyle == CSS_LINE_STYLE_RIDGE)
+				shape.Color = blend(RightColor, CRGBA::Black, 0.5f);
+			else
+				shape.Color = RightColor;
+
+			shape.Quad.V3.x = bRight; shape.Quad.V3.y = bTop;
+			shape.Quad.V2.x = xRight; shape.Quad.V2.y = xTop;
+			shape.Quad.V1.x = xRight; shape.Quad.V1.y = m_YReal;
+			shape.Quad.V0.x = bRight; shape.Quad.V0.y = bBottom;
+			m_DrawBorders.push_back(shape);
+
+			if (hasInnerShape(RightStyle))
+			{
+				float iTop, iRight, iBottom;
+				if (RightStyle == CSS_LINE_STYLE_DOUBLE)
+				{
+					iTop = 2*dTop / 3.f;
+					iRight = 2*dRight / 3.f;
+					iBottom = 2*dBottom / 3.f;
+				} else {
+					iTop = dTop / 2.f;
+					iRight = dRight / 2.f;
+					iBottom = dBottom / 2.f;
+				}
+
+				if (RightStyle == CSS_LINE_STYLE_GROOVE)
+					shape.Color = blend(shape.Color, CRGBA::Black, 0.5f);
+				else
+					shape.Color = RightColor;
+
+				m_DrawBorders.back().Quad.V3.x  += iRight;  m_DrawBorders.back().Quad.V3.y += iTop;
+				m_DrawBorders.back().Quad.V0.x  += iRight;  m_DrawBorders.back().Quad.V0.y -= iBottom;
+				shape.Quad.V2.x -= iRight; shape.Quad.V2.y -= iTop;
+				shape.Quad.V1.x -= iRight; shape.Quad.V1.y += iBottom;
+				m_DrawBorders.push_back(shape);
+			}
 		}
 
-		if (_BorderLeft)
+		if (m_BorderLeft)
 		{
-			// top-left
-			_QuadL.V3.x = _XReal;
-			_QuadL.V3.y = _YReal + _HReal;
-			// top-right
-			_QuadL.V2.x = _XReal + dLeft;
-			_QuadL.V2.y = _YReal + _HReal - dTop;
-			// bottom-right
-			_QuadL.V1.x = _XReal + dLeft;
-			_QuadL.V1.y = _YReal + dBottom;
-			// bottom-left
-			_QuadL.V0.x = _XReal;
-			_QuadL.V0.y = _YReal;
+			if (LeftStyle == CSS_LINE_STYLE_INSET || LeftStyle == CSS_LINE_STYLE_GROOVE)
+				shape.Color = blend(LeftColor, CRGBA::Black, 0.5f);
+			else
+				shape.Color = LeftColor;
+
+			shape.Quad.V3.x = m_XReal; shape.Quad.V3.y = xTop;
+			shape.Quad.V2.x = bLeft; shape.Quad.V2.y = bTop;
+			shape.Quad.V1.x = bLeft; shape.Quad.V1.y = bBottom;
+			shape.Quad.V0.x = m_XReal; shape.Quad.V0.y = m_YReal;
+
+			m_DrawBorders.push_back(shape);
+
+			if (hasInnerShape(LeftStyle))
+			{
+				if (LeftStyle == CSS_LINE_STYLE_RIDGE)
+					shape.Color = blend(LeftColor, CRGBA::Black, 0.5f);
+				else
+					shape.Color = LeftColor;
+
+				float iTop, iLeft, iBottom;
+				if (LeftStyle == CSS_LINE_STYLE_DOUBLE)
+				{
+					iTop    = 2*dTop    / 3.f;
+					iLeft   = 2*dLeft   / 3.f;
+					iBottom = 2*dBottom / 3.f;
+				} else {
+					iTop = dTop / 2.f;
+					iLeft = dLeft / 2.f;
+					dBottom = dBottom / 2.f;
+				}
+
+				m_DrawBorders.back().Quad.V2.x  -= iLeft;  m_DrawBorders.back().Quad.V2.y += iTop;
+				m_DrawBorders.back().Quad.V1.x  -= iLeft;  m_DrawBorders.back().Quad.V1.y -= iBottom;
+				shape.Quad.V3.x += iLeft; shape.Quad.V3.y -= iTop;
+				shape.Quad.V0.x += iLeft; shape.Quad.V0.y += iBottom;
+				m_DrawBorders.push_back(shape);
+			}
 		}
 	}
 
 	// ----------------------------------------------------------------------------
 	void CSSBorderRenderer::draw() {
-		if (_Dirty) updateCoords();
-		if (!_Border) return;
+		if (m_Dirty) updateCoords();
+		if (!m_Border) return;
 
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		// TODO: no need for widget manager, if global color is set from parent
 		CRGBA globalColor;
-		if (_ModulateGlobalColor)
+		if (m_ModulateGlobalColor)
 			globalColor = CWidgetManager::getInstance()->getGlobalColor();
 
-		// TODO: monitor ModulateGlobalColor and CurrentAlpha in table checkCoords and recalculate colors on change only
-		// OUTSET - bottom/right darker than normal (default table style)
-		// INSET  - top/left darker than normal
-		if (_BorderTop)
+		sint32 texId = rVR.getBlankTextureId();
+		for(uint i = 0; i < m_DrawBorders.size(); ++i)
 		{
-			CRGBA borderColorT = TopColor;
-			if (TopStyle == CSS_LINE_STYLE_INSET)
-				borderColorT = blend(borderColorT, CRGBA::Black, 0.5f);
+			CRGBA color = m_DrawBorders[i].Color;
+			if (m_ModulateGlobalColor)
+				color.modulateFromColor (color, globalColor);
 
-			if (_ModulateGlobalColor)
-				borderColorT.modulateFromColor (borderColorT, globalColor);
-
-			borderColorT.A = (uint8) (((uint16) CurrentAlpha * (uint16) borderColorT.A) >> 8);
-			rVR.drawQuad(_RenderLayer, _QuadT, rVR.getBlankTextureId(), borderColorT, false);
-		}
-		if (_BorderRight)
-		{
-			CRGBA borderColorR = RightColor;
-			if (RightStyle == CSS_LINE_STYLE_OUTSET)
-				borderColorR = blend(borderColorR, CRGBA::Black, 0.5f);
-
-			if (_ModulateGlobalColor)
-				borderColorR.modulateFromColor (borderColorR, globalColor);
-
-			borderColorR.A = (uint8) (((uint16) CurrentAlpha * (uint16) borderColorR.A) >> 8);
-			rVR.drawQuad(_RenderLayer, _QuadR, rVR.getBlankTextureId(), borderColorR, false);
-		}
-		if (_BorderBottom)
-		{
-			CRGBA borderColorB = BottomColor;
-			if (BottomStyle == CSS_LINE_STYLE_OUTSET)
-				borderColorB = blend(borderColorB, CRGBA::Black, 0.5f);
-
-			if (_ModulateGlobalColor)
-				borderColorB.modulateFromColor (borderColorB, globalColor);
-
-			borderColorB.A = (uint8) (((uint16) CurrentAlpha * (uint16) borderColorB.A) >> 8);
-			rVR.drawQuad(_RenderLayer, _QuadB, rVR.getBlankTextureId(), borderColorB, false);
-		}
-		if (_BorderLeft)
-		{
-			CRGBA borderColorL = LeftColor;
-			if (LeftStyle == CSS_LINE_STYLE_INSET)
-				borderColorL = blend(borderColorL, CRGBA::Black, 0.5f);
-
-			if (_ModulateGlobalColor)
-				borderColorL.modulateFromColor (borderColorL, globalColor);
-
-			borderColorL.A = (uint8) (((uint16) CurrentAlpha * (uint16) borderColorL.A) >> 8);
-			rVR.drawQuad(_RenderLayer, _QuadL, rVR.getBlankTextureId(), borderColorL, false);
+			color.A = (uint8) (((uint16) CurrentAlpha * (uint16) color.A) >> 8);
+			rVR.drawQuad(m_RenderLayer, m_DrawBorders[i].Quad, texId, color, false);
 		}
 	}
 

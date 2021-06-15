@@ -571,12 +571,22 @@ namespace NLGUI
 			*dest = CSS_LINE_STYLE_NONE;
 		else if (value == "hidden")
 			*dest = CSS_LINE_STYLE_HIDDEN;
+		else if (value == "dotted")
+			*dest = CSS_LINE_STYLE_DOTTED;
+		else if (value == "dashed")
+			*dest = CSS_LINE_STYLE_DASHED;
+		else if (value == "solid")
+			*dest = CSS_LINE_STYLE_SOLID;
+		else if (value == "double")
+			*dest = CSS_LINE_STYLE_DOUBLE;
+		else if (value == "groove")
+			*dest = CSS_LINE_STYLE_GROOVE;
+		else if (value == "ridge")
+			*dest = CSS_LINE_STYLE_RIDGE;
 		else if (value == "inset")
 			*dest = CSS_LINE_STYLE_INSET;
 		else if (value == "outset")
 			*dest = CSS_LINE_STYLE_OUTSET;
-		else if (value == "solid")
-			*dest = CSS_LINE_STYLE_SOLID;
 	}
 
 	void CCssStyle::applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const

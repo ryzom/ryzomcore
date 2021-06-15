@@ -35,22 +35,24 @@ namespace NLGUI
 	{
 	private:
 		// parent element screen coordinates
-		sint32 _XReal, _YReal;
-		sint32 _WReal, _HReal;
+		sint32 m_XReal, m_YReal;
+		sint32 m_WReal, m_HReal;
 
-		NLMISC::CQuadUV _QuadT;
-		NLMISC::CQuadUV _QuadR;
-		NLMISC::CQuadUV _QuadB;
-		NLMISC::CQuadUV _QuadL;
+		struct SDrawBorder
+		{
+			NLMISC::CQuadUV Quad;
+			NLMISC::CRGBA Color;
+		};
+		std::vector<SDrawBorder> m_DrawBorders;
 
-		sint8 _RenderLayer;
-		bool _ModulateGlobalColor;
+		sint8 m_RenderLayer;
+		bool m_ModulateGlobalColor;
 
 		// if true, then updateCoords() is called from draw()
-		bool _Dirty;
+		bool m_Dirty;
 		// if true, then at least one border is set
-		bool _Border;
-		bool _BorderTop, _BorderRight, _BorderBottom, _BorderLeft;
+		bool m_Border;
+		bool m_BorderTop, m_BorderRight, m_BorderBottom, m_BorderLeft;
 
 	public:
 		uint32        TopWidth, RightWidth, BottomWidth, LeftWidth;
@@ -73,8 +75,8 @@ namespace NLGUI
 		void setColor(const NLMISC::CRGBA &top, const NLMISC::CRGBA &right, const NLMISC::CRGBA &bottom, const NLMISC::CRGBA &left);
 
 		void updateCoords();
-		void invalidateCoords() { _Dirty = _Border = true; }
-		void invalidateContent() { _Dirty = _Border = true; };
+		void invalidateCoords() { m_Dirty = m_Border = true; }
+		void invalidateContent() { m_Dirty = m_Border = true; };
 
 		uint32 getTopWidth() const;
 		uint32 getRightWidth() const;
@@ -83,6 +85,8 @@ namespace NLGUI
 
 		uint32 getLeftRightWidth() const;
 		uint32 getTopBottomWidth() const;
+
+		bool hasInnerShape(CSSLineStyle style) const;
 
 		void draw();
 	}; // CSSBorderRenderer
