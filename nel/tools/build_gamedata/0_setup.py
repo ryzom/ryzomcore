@@ -250,13 +250,13 @@ if not args.noconf:
 			DummyUnknownName
 		LinuxServiceExecutableDirectory
 	except NameError:
-		LinuxServiceExecutableDirectory = "R:/build/gcc_server/bin"
+		LinuxServiceExecutableDirectory = "R:/build/server_gcc/bin"
 	try:
 		if args.preset:
 			DummyUnknownName
 		LinuxClientExecutableDirectory
 	except NameError:
-		LinuxClientExecutableDirectory = "R:/build/gcc_client/bin"
+		LinuxClientExecutableDirectory = "R:/build/client_gcc/bin"
 	try:
 		if args.preset:
 			DummyUnknownName

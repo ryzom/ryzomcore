@@ -92,8 +92,13 @@ for category in InstallClientData:
 		for package in category["Packages"]:
 			printLog(log, "PACKAGE " + package[0])
 			mkPath(log, InstallDirectory + "/" + package[0])
-			copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + package[0], targetPath)
-			copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + package[0], targetPathLive)
+			if "exedll" in package[0]:
+				if package[0] == "exedll": # or package[0] == platformExeDll # TODO: 64-bit and Linux separation of exedll, only include one
+					copyFileIfNeeded(log, InstallDirectory + "/" + package[0] + "/client_default.cfg", targetPath)
+					copyFileIfNeeded(log, InstallDirectory + "/" + package[0] + "/client_default.cfg", targetPathLive)
+			else:
+				copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + package[0], targetPath)
+				copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + package[0], targetPathLive)
 printLog(log, "")
 
 log.close()
