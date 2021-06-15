@@ -2,6 +2,7 @@
 title NGINX
 echo NGINX on http://localhost:9042/
 if /I "%RC_ROOT%"=="" call ..\path_config.bat
+copy config.inc.php .\phpmyadmin\config.inc.php
 cd nginx
 for /f "usebackq delims=" %%i in (
   `powershell -noprofile -c "\"%RC_ROOT%\" -replace '\\', '/'"`
