@@ -54,7 +54,7 @@ mkPath(log, ShardDevDirectory + "/local")
 printLog(log, ">>> Generate shard dev local.cfg <<<")
 cfg = open(ShardDevDirectory + "/local.cfg", "w")
 cfg.write("WindowStyle = \"WIN\";\n")
-cfg.write("Paths = {\n")
+cfg.write("Paths += {\n")
 cfg.write("	\"" + ShardDevDirectory + "/local\",\n")
 cfg.write("	\"" + DataCommonDirectory + "\",\n")
 cfg.write("	\"" + DataShardDirectory + "\",\n")
@@ -85,6 +85,21 @@ for execDir in InstallShardDataExecutables:
 	printLog(log, "SHARD PACKAGE " + dstDir)
 	copyFileListNoTreeIfNeeded(log, PatchmanCfgDefaultDirectory, ShardDevDirectory + "/live/" + dstDir, execDir[2])
 	copyFileListNoTreeIfNeeded(log, InstallDirectory, ShardDevDirectory + "/live/" + dstDir, execDir[3])
+	for cfgName in execDir[2]:
+		cfgPath = ShardDevDirectory + "/live/" + dstDir + "/" + cfgName
+		found = False
+		with open(cfgPath, "r") as f:
+			for l in f:
+				if "Paths += {" in l:
+					found = True
+		if not found:
+			with open(cfgPath, "a") as cfg:
+				cfg.write("\n")
+				cfg.write("Paths += {\n")
+				cfg.write("	\"" + ShardDevDirectory + "/live/" + dstDir + "\",\n")
+				cfg.write("};\n")
+				cfg.write("\n")
+				cfg.flush()
 printLog(log, "")
 
 
