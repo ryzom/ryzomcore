@@ -60,6 +60,9 @@ cfg.write("	\"" + DataCommonDirectory + "\",\n")
 cfg.write("	\"" + DataShardDirectory + "\",\n")
 cfg.write("	\"" + LeveldesignDirectory + "\",\n")
 cfg.write("	\"" + WorldEditorFilesDirectory + "\",\n")
+for dir in InstallShardDataDirectories:
+	mkPath(log, ShardInstallDirectory + "/" + dir)
+	cfg.write("	\"" + ShardInstallDirectory + "/" + dir + "\",\n")
 for multiDir in InstallShardDataMultiDirectories:
 	dstDir = multiDir[0]
 	mkPath(log, ShardInstallDirectory + "/" + dstDir)
