@@ -42,13 +42,13 @@ echo Mounting %RC_ROOT% as R:
 call _r_init.bat
 cd /d R:\
 echo | set /p=Updating references
-powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\tile_edit.lnk');$s.TargetPath='%RC_ROOT%\distribution\nel_tools_win_x64\tile_edit.exe';$s.Save()"
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\tile_edit.lnk');$s.TargetPath='%RC_ROOT%\distribution\nel_tools_win_x64\tile_edit.exe';$s.WorkingDirectory='%RC_ROOT%\distribution\nel_tools_win_x64\';$s.Save()"
 echo | set /p=.
-powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\object_viewer.lnk');$s.TargetPath='%RC_ROOT%\distribution\nel_tools_win_x64\object_viewer.exe';$s.Save()"
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\object_viewer.lnk');$s.TargetPath='%RC_ROOT%\distribution\nel_tools_win_x64\object_viewer.exe';$s.WorkingDirectory='%RC_ROOT%\distribution\nel_tools_win_x64\';$s.Save()"
 echo | set /p=.
-powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\georges.lnk');$s.TargetPath='%RC_ROOT%\distribution\ryzom_tools_win_x64\georges.exe';$s.Save()"
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\georges.lnk');$s.TargetPath='%RC_ROOT%\distribution\ryzom_tools_win_x64\georges.exe';$s.WorkingDirectory='%RC_ROOT%\distribution\ryzom_tools_win_x64\';$s.Save()"
 echo | set /p=.
-powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\world_editor.lnk');$s.TargetPath='%RC_ROOT%\distribution\ryzom_tools_win_x64\world_editor.exe';$s.Save()"
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\world_editor.lnk');$s.TargetPath='%RC_ROOT%\distribution\ryzom_tools_win_x64\world_editor.exe';$s.WorkingDirectory='%RC_ROOT%\distribution\ryzom_tools_win_x64\';$s.Save()"
 echo | set /p=.
 powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\build_gamedata.lnk');$s.TargetPath='%RC_ROOT%\code\nel\tools\build_gamedata';$s.Save()"
 echo | set /p=.
