@@ -109,7 +109,8 @@ else:
 	mkPath(log, PatchmanDevDirectory)
 	cwDir = os.getcwd().replace("\\", "/")
 	os.chdir(PatchmanDevDirectory)
-	os.remove("log.log")
+	if os.path.isfile("log.log"):
+		os.remove("log.log")
 	subprocess.call([ PatchmanService, "-C.", "-L." ])
 	if os.path.isfile("log.log"):
 		f = open("log.log", "r")
