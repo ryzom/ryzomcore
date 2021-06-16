@@ -1,3 +1,4 @@
+if not exist .\server_x64\CMakeCache.txt goto :no_build
 call ..\path_config.bat
 C:
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvars64.bat"
@@ -13,3 +14,4 @@ rem msbuild RyzomCore.sln /target:ryzom_patchman_service /m:2 /p:Configuration=R
 msbuild RyzomCore.sln /m:2 /p:Configuration=Release %MSBUILDEXTRA%
 if %errorlevel% neq 0 pause
 cd ..
+:no_build
