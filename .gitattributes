@@ -1,0 +1,18 @@
+*.cpp ident
+*.h ident
+
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.c text
+*.h text
+*.cs text
+*.jade text
+*.json text
+*.js text
+*.css text
+*.htm text
+*.txt text
+*.sh text eol=lf
