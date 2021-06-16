@@ -214,8 +214,8 @@ def processWordsDiff(wk, tl):
 					if s[1] in wkMap:
 						h = wkMap[s[1]]
 						l = h + l[len(s[0]):]
-					elif s[0] != "*HASH_VALUE":
-						l = "0000000000000000" + l[len(s[0]):]
+					elif s[0] != "*HASH_VALUE" and len(s[0]) < 16:
+						l = "_0000000000000000" + l[len(s[0]):]
 				fw.write(l)
 	os.replace(tl + ".new", tl)
 
