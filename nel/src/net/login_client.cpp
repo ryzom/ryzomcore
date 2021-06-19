@@ -141,7 +141,7 @@ string CLoginClient::authenticateBegin(const string &loginServiceAddr, const ucs
 
 		string addr = loginServiceAddr;
 		if(addr.find(":") == string::npos)
-			addr += ":49997";
+			addr += ":43997";
 		if(_LSCallbackClient->connected())
 			_LSCallbackClient->disconnect();
 		_LSCallbackClient->connect (CInetAddress(addr));
