@@ -1308,7 +1308,7 @@ void CPlayerService::init()
 	// a little boolean set to true if we are just packing sheets and then exitting, allowing us to skip stuff that we don't really need to do
 	bool packingSheets= haveArg('Q');
 
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 
 	StatPath = "data_shard_local/statistics/egs_stat.log";
 	CFile::createDirectory("data_shard_local");

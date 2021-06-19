@@ -586,7 +586,7 @@ void CTickService::displayGameTime() const
  */
 void CTickService::init()
 {
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 
 	CurrentMode = TickRunning;
 

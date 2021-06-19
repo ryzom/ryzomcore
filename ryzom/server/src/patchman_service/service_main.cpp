@@ -61,7 +61,7 @@ using namespace NLNET;
 
 void CServiceClass::init()
 {
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 	_ExitRequested= false;
 
 //	// run self tests before we begin

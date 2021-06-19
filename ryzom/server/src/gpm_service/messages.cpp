@@ -35,7 +35,6 @@
 //#include "game_share/bot_chat_types.h"
 //#include "game_share/brick_types.h"
 //#include "game_share/loot_harvest_state.h"
-//#include "game_share/ryzom_version.h"
 //#include "game_share/synchronised_message.h"
 
 using namespace std;

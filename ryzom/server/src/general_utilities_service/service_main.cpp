@@ -58,7 +58,7 @@ using namespace NLNET;
 
 void CServiceClass::init()
 {
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 
 	// if we are connecting to a shard then start by initializing the tick interface
 	if (IService::getInstance()->ConfigFile.getVarPtr("DontUseTS")==NULL || IService::getInstance()->ConfigFile.getVarPtr("DontUseTS")->asInt()==0)

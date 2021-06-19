@@ -83,7 +83,6 @@
 #include "game_share/roles.h"
 #include "game_share/ryzom_entity_id.h"
 #include "game_share/ryzom_mirror_properties.h"
-#include "game_share/ryzom_version.h"
 #include "game_share/scores.h"
 #include "game_share/shard_names.h"
 #include "game_share/singleton_registry.h"

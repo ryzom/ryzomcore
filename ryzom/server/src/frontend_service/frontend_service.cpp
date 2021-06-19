@@ -1187,7 +1187,7 @@ inline void	CFrontEndService::onTick()
 
 void CFrontEndService::init()
 {
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 
 	nlinfo( "Initializing front-end service..." );
 

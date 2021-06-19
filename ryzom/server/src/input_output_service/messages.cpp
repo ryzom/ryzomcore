@@ -30,8 +30,7 @@
 #include "game_share/news_types.h"
 #include "game_share/bot_chat_types.h"
 #include "game_share/brick_types.h"
-#include "game_share/loot_harvest_state.h"
-#include "game_share/ryzom_version.h"*/
+#include "game_share/loot_harvest_state.h"*/
 #include "game_share/generic_xml_msg_mngr.h"
 
 /*#include <nel/misc/command.h>*/

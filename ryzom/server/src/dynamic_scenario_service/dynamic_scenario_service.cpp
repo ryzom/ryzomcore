@@ -352,7 +352,7 @@ void CDynamicScenarioService::init()
 		nlwarning("No variable ShardId in config file, this could result in miss registered DSS into SU because of late WS shard id message");
 	}
 
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 
 	// setup the update systems
 	setUpdateTimeout(100);
