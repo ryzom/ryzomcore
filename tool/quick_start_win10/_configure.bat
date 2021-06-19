@@ -9,7 +9,7 @@ echo This script will set up the buildsite configuration, and create needed dire
 echo To use the defaults, simply hit ENTER, else type in the new value.
 echo Use -- if you need to insert an empty value.
 echo(
-echo Requires Python 2.7, Visual Studio 2019, and WSL 1 with GCC 8.
+echo Optionally requires Visual Studio 2019, and WSL 1 with Ubuntu 18.04 LTS and GCC 8.
 echo(
 goto :config
 :baddir
@@ -26,21 +26,26 @@ set RC_ROOT=%RC_ROOT_TEMP%
 for /f "delims=" %%A in ('cd') do (
 set RC_ROOT_NAME=%%~nxA
 )
+if not exist %RC_ROOT%\external\python27\python.exe goto :userpython
+set RC_PYTHON2=%RC_ROOT%\external\python27
+goto :apply
+:userpython
 set RC_PYTHON2_TEMP=
 set /p RC_PYTHON2_TEMP=Python 2.7 (%RC_PYTHON2%): 
 if /I "%RC_PYTHON2_TEMP%"=="" set RC_PYTHON2_TEMP=%RC_PYTHON2%
 if /I "%RC_PYTHON2_TEMP%"=="--" set RC_PYTHON2_TEMP=
 set RC_PYTHON2=%RC_PYTHON2_TEMP%
 if not exist %RC_PYTHON2%\python.exe goto :config
+echo(
+:apply
 set PATH=%RC_PYTHON2%;%PATH%
 (
 echo set RC_PYTHON2=%RC_PYTHON2%
 echo set RC_ROOT=%RC_ROOT%
 )>path_config.bat
-echo(
 echo Mounting %RC_ROOT% as R:
 call _r_init.bat
-cd /d R:\
+rem cd /d R:\
 echo | set /p=Updating references
 powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\tile_edit.lnk');$s.TargetPath='%RC_ROOT%\distribution\nel_tools_win_x64\tile_edit.exe';$s.WorkingDirectory='%RC_ROOT%\distribution\nel_tools_win_x64\';$s.Save()"
 echo | set /p=.
