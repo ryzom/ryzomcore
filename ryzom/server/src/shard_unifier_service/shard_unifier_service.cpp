@@ -61,7 +61,7 @@ NLNET::TUnifiedCallbackItem cbArraySU[] =
 };
 
 // declare the serive
-NLNET_SERVICE_MAIN(CShardUnifier, "SU", "shard_unifier_service", 50505, cbArraySU, "", "");
+NLNET_SERVICE_MAIN(CShardUnifier, "SU", "shard_unifier_service", 43505, cbArraySU, "", "");
 
 
 
