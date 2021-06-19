@@ -77,8 +77,8 @@ NLMISC::CVariable<uint32> NumSPTWatches("spt","NumSPTWatches","number of SPT wat
 NLMISC::CVariable<string> DevConfigDirectory("spt", "DevConfigDirectory", "Directory used to build developer configuration file", "../../pipeline/shard_dev", 0, true);
 NLMISC::CVariable<string> DevWorkingDirectory("spt", "DevWorkingDirectory", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\pipeline\\shard_dev", 0, true);
 NLMISC::CVariable<string> DevSleepCmd("spt", "DevSleepCmd", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\distribution\\ryzom_tools_win_x64\\nircmd.exe wait 1000", 0, true);
-NLMISC::CVariable<string> DevExePrefix("spt", "DevExePrefix", "Executable prefix used in development startup batch", "", 0, true);
-NLMISC::CVariable<string> DevExeSuffix("spt", "DevExeSuffix", "Executable suffix used in development startup batch", ".exe -new_console", 0, true);
+NLMISC::CVariable<string> DevExePrefix("spt", "DevExePrefix", "Executable prefix used in development startup batch", "start ", 0, true);
+NLMISC::CVariable<string> DevExeSuffix("spt", "DevExeSuffix", "Executable suffix used in development startup batch", ".exe", 0, true);
 
 static void addSPTMessage(const CSString& moduleName, const CSString& msgText)
 {
