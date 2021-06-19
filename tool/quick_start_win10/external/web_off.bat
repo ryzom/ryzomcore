@@ -12,7 +12,7 @@ taskkill /f /im mysqld.exe
 goto :mariadbnotfound
 :mariadbfound
 cd mariadb
-.\bin\mysqladmin -u root shutdown
+.\bin\mysqladmin -u root -P 9040 shutdown
 cd ..
 :mariadbwait
 ..\distribution\ryzom_tools_win_x64\nircmd.exe wait 100

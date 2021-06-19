@@ -254,6 +254,7 @@ copy "%RC_ROOT%\distribution\utils\xdelta.exe" "xdelta.exe"
 copy "%RC_ROOT%\distribution\utils\7za.exe" "7za.exe"
 copy "%RC_ROOT%\distribution\utils\nircmd.exe" "nircmd.exe"
 copy "%RC_ROOT%\distribution\utils\msxsl.exe" "msxsl.exe"
+copy "%RC_ROOT%\distribution\utils\servdash.exe" "servdash.exe"
 
 copy C:\2019q4_external_v142_x64\qt5\bin\Qt5Core.dll Qt5Core.dll
 copy C:\2019q4_external_v142_x64\qt5\bin\Qt5Gui.dll Qt5Gui.dll
