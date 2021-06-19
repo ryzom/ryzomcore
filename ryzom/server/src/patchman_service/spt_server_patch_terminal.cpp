@@ -801,6 +801,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 
 #if 1
 	std::map<string, stringstream> batches;
+	std::map<string, stringstream> inis;
 #endif
 
 	for (uint i=0; i<appNames.size(); ++i)
@@ -842,6 +843,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		// hack the cmd line
 		CVectorSString cmdParams;
 		explode(string(appDesc.CmdLine), string(" "), reinterpret_cast<vector<string>&>(cmdParams), true);
+		string launchCmd;
 		for (uint i=0; i<cmdParams.size(); ++i)
 		{
 			string &p = cmdParams[i];
@@ -850,7 +852,8 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 				map<string, string>::iterator it = exeMap.find(toLowerAscii(p));
 				if (it != exeMap.end())
 					p = it->second;
-				p += exeSuffix;
+				launchCmd = p;
+				p = "";
 			}
 			else
 			{
@@ -888,15 +891,45 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			batchIt = batches.insert(pair<string, stringstream>(appDesc.ShardName, stringstream())).first;
 		stringstream &batch = batchIt->second;
 		batch << "cd \"" << DevWorkingDirectory.get() << "\\" << appDesc.AppName << "\"\n";
-		batch << DevExePrefix.get() << cmdLine << "\n";
+		batch << DevExePrefix.get() << launchCmd << exeSuffix << " " << cmdLine << "\n";
 		batch << DevSleepCmd.get() << "\n";
 		batch << "\n";
+		map<string, stringstream>::iterator iniIt = inis.find(appDesc.ShardName);
+		if (iniIt == inis.end())
+		{
+			iniIt = inis.insert(pair<string, stringstream>(appDesc.ShardName, stringstream())).first;
+			string shardTitle;
+			ptrdiff_t ti = 0;
+			NLMISC::appendToTitle(shardTitle, appDesc.ShardName, ti);
+			stringstream &ini = iniIt->second;
+			ini << "[]\n";
+			ini << "Title=" << shardTitle << appDesc.ShardName.substr(ti) << "\n";
+			ini << "\n";
+		}
+		stringstream &ini = iniIt->second;
+		ini << "[" << appDesc.AppName << "]\n";
+		ini << "Title=" << appDesc.AppName << "\n";
+		ini << "ReadyPattern=^[^*].+Service Console\n";
+		ini << "WorkingDirectory=.\\" << appDesc.AppName << "\n";
+		ini << "LaunchCmd=" << launchCmd << "\n";
+		ini << "LaunchArgs=" << cmdLine << "\n";
+		ini << "\n";
 #endif
 	}
 
 	for (map<string, stringstream>::iterator it = batches.begin(), end = batches.end(); it != end; ++it)
 	{
 		fileName = DevConfigDirectory.get() + "/start_" + it->first + ".bat";
+		FILE *fp = nlfopen(fileName, "wt");
+		nlassert(fp != NULL);
+		string s = it->second.str();
+		fwrite(s.c_str(), s.size(), 1, fp);
+		fclose(fp);
+	}
+
+	for (map<string, stringstream>::iterator it = inis.begin(), end = inis.end(); it != end; ++it)
+	{
+		fileName = DevConfigDirectory.get() + "/start_" + it->first + ".ini";
 		FILE *fp = nlfopen(fileName, "wt");
 		nlassert(fp != NULL);
 		string s = it->second.str();
