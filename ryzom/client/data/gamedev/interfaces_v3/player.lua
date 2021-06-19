@@ -377,6 +377,24 @@ function game:bonusMalusSetText(ui, slot, fmt)
 end
 
 ------------------------------------------------------------------------------------------------------------
+-- Called from c++ to format icon regen timer text
+-- timer: number, ie 123, -123
+-- dbPath: UI:VARIABLES:BONUS:0
+--
+-- Activate it in "bonuses" and/or "maluses" xml group.
+-- If using color tags, then also set both colors to white
+-- regen_text_fct="lua:game:formatRegenTimer"
+-- regen_text_color="255 255 255"
+-- regen_text_disabled_color="255 255 255"
+function game:formatRegenTimer(timer, dbPath)
+	if timer > 60 then
+		return string.format("%dm", timer / 60);
+	else
+		return string.format("%ds", timer);
+	end
+end
+
+------------------------------------------------------------------------------------------------------------
 -- From given DB vals, compute the 'Xp Bonus' text info
 function game:updateXpCatQuantity(textSlot, ui)
 	-- get the ui text to fill
@@ -469,7 +487,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 -- update if needed the ActionHandler and text update from DB
 function game:updateBonusMalusTextSetup()
-	local	numLocalBonusMalus= getDefine("num_local_bonus_malus");
+	local	numLocalBonusMalus= tonumber(getDefine("num_local_bonus_malus"));
 	local	uiBonus= getUI('ui:interface:bonus_malus:header_opened:bonus');
 	local	uiMalus= getUI('ui:interface:bonus_malus:header_opened:malus');
 	local	dbXpCat= "@SERVER:CHARACTER_INFO:XP_CATALYSER:Count";
@@ -658,12 +676,14 @@ function game:updatePlayerBonusMalus()
 		-- get
 		local	sheet= getDbProp(dbServerBonusBase .. tostring(i) .. ":SHEET" );
 		local	disabled= getDbProp(dbServerBonusBase .. tostring(i) .. ":DISABLED" );
+		local	timer = getDbProp(dbServerBonusBase .. tostring(i) .. ":DISABLED_TIME" );
 		if(sheet~=0) then
 			mustShowBonus= true;
 		end
 		-- copy (to index shifted if needed)
 		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":SHEET", sheet );
 		setDbProp(dbLocalBonusBase  .. tostring(destIndex) .. ":DISABLED", disabled );
+		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":DISABLED_TIME", timer);
 		destIndex= destIndex+1;
 	end
 	if(mustShowBonus) then
@@ -708,12 +728,14 @@ function game:updatePlayerBonusMalus()
 		-- get
 		local	sheet= getDbProp(dbServerMalusBase .. tostring(i) .. ":SHEET" );
 		local	disabled= getDbProp(dbServerMalusBase .. tostring(i) .. ":DISABLED" );
+		local	timer = getDbProp(dbServerMalusBase .. tostring(i) .. ":DISABLED_TIME" );
 		if(sheet~=0) then
 			mustShowMalus= true;
 		end
 		-- copy
 		setDbProp(dbLocalMalusBase .. tostring(destIndex) .. ":SHEET", sheet );
 		setDbProp(dbLocalMalusBase  .. tostring(destIndex) .. ":DISABLED", disabled );
+		setDbProp(dbLocalMalusBase .. tostring(destIndex) .. ":DISABLED_TIME", timer);
 		destIndex= destIndex+1;
 	end
 	if(mustShowMalus) then
@@ -958,3 +980,27 @@ function game:updateCrystallizedSpellTooltip(crystallizedSpell)
 	updateTooltipCoords()	
 	return text
 end
+
+------------------------------------------------------------------------------------------------------------
+-- update craft window craftplan or item name and description
+-- craftphan
+--   uiCaller == ui:interface:phrase_faber_execution:header_opened
+--   dbPath   == UI:PHRASE:FABER:FABER_PLAN:SHEET
+-- selected item
+--   uiCaller == ui:interface:phrase_faber_execution:header_opened:item_result
+--   dbPath   == UI:PHRASE:FABER:RESULT_ITEM:SHEET
+function game:updatePhraseFaberPreview(dbPath)
+	local ui= getUICaller();
+	local sheet = getSheetName(getDbProp(dbPath))
+
+	local name = ui:find("name")
+	if (name ~= nil) then
+		ui:find("name").hardtext = getSheetLocalizedName(sheet)
+	end
+
+	local desc = ui:find("desc")
+	if (desc ~= nil) then
+		ui:find("desc").hardtext = getSheetLocalizedDesc(sheet)
+	end
+end
+

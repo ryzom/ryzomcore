@@ -231,6 +231,7 @@
 	<action handler="set" params="dblink=UI:SAVE:DAY_COLOR|value=makeRGB(219,254,174)" />
 	<action handler="set" params="dblink=UI:SAVE:NIGHT_COLOR|value=makeRGB(127,190,254)" />
 	<action handler="set" params="dblink=UI:SAVE:SHOW_3D_ITEM_PREVIEW|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:SHOW_ICON_BUFFS|value=1" />
 
 	<action handler="set" params="dblink=UI:SAVE:PLAYER:DISP_SAP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:PLAYER:DISP_STA|value=1" />

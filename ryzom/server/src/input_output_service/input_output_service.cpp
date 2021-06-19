@@ -348,8 +348,8 @@ void CInputOutputService::init()
 	// init string manager parameter traits
 	CStringManager::CParameterTraits::init();
 
-	setVersion (RYZOM_VERSION);
-
+	setVersion (RYZOM_PRODUCT_VERSION);
+	
 	IOS = this;
 	setUpdateTimeout(100);
 

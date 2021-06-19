@@ -17,7 +17,12 @@
 #ifndef RYZOM_VERSION_H
 #define RYZOM_VERSION_H
 
-#define RYZOM_VERSION "3.0.0"
+#ifdef HAVE_CONFIG_H
+#	include "config.h"
+#else
+#	define RYZOM_VERSION "3.0.0.0"
+#	define RYZOM_PRODUCT_VERSION "3.0.0"
+#endif
 
 #endif // RYZOM_VERSION_H
 

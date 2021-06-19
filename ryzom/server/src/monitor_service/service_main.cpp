@@ -502,7 +502,7 @@ static void cbServiceDown( const std::string& serviceName, TServiceId  serviceId
 
 void CMonitorService::init ()
 {
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 
 	// Init the server on port
 	Server = new CCallbackServer();

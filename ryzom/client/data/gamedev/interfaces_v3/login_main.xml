@@ -31,22 +31,31 @@
 
     <!-- BACKGROUND -->
     <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-1" />
-    <!--
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="1024" h="768" color="0 0 0 0"/>
-    -->
-
+    <!--
     <view type="bitmap" posref="MM MM" id="log" texture="launcher_log.tga" global_color="false" render_layer="-1" />
-
+    -->
     <!--
     <view type="bitmap" id="jena" posparent="window" posref="MR MR" x="-64" texture="log_jena.tga" global_color="false" render_layer="-1" />
     -->
 
     <!-- Login Edit_Boxes -->
-    <!--
     <view type="text" id="txt_log" x="0" posref="TM TM" posparent="window" hardtext="uiLogin" fontsize="10" y="-200"  color="255 255 255 255" />
     <view type="text" id="txt_pas" posparent="txt_log" posref="TM TM" hardtext="uiPassword" fontsize="10" y="-48" color="255 255 255 255" />
-    -->
-    
+
+    <instance template="edit_box_log" id="eb_login" posparent="txt_log" posref="BM TM" w="240" h="26" fontsize="12" x="0" y="-4"
+    text_ref="BM BM" text_y="0"
+    reset_focus_on_hide="false"  max_historic="0"
+    onenter="set_keyboard_focus" params="target=ui:login:checkpass:content:submit_gr:eb_password:eb|select_all=false"
+    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
+
+    <instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BM TM" w="240" h="26" fontsize="12" x="0" y="-4"
+    text_ref="BM BM" text_y="0"
+    reset_focus_on_hide="false"  max_historic="0" entry_type="password"
+    onenter="on_login" params=""
+    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="60" color="135 243 28 255" />
+
+    <!--
     <view type="text" id="tit_login" posparent="log" posref="TL BL" hardtext="uiLogin" fontsize="24" x="62" y="-166" color="208 212 182 255" />
 
     <instance template="edit_box_widget_2" id="eb_login" posparent="log" posref="TM BM" w="292" h="48" fontsize="26" x="-4" y="-229"
@@ -62,46 +71,37 @@
     reset_focus_on_hide="false"  max_historic="0" entry_type="password"
     onenter="on_login" params=""
     prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
-
-
-    <!--
-    <ctrl style="log_std_but" id="but_log" posparent="eb_password" posref="TM TM" y="-32" onclick_l="on_login" hardtext="uiOnConnect" />
     -->
+
+    <ctrl style="log_std_but" id="but_log" posparent="eb_password" posref="TM TM" y="-32" onclick_l="on_login" hardtext="uiOnConnect" />
     
+    <!--
     <ctrl type="button" button_type="push_button" id="but_log" posref="BR BR" x="-304" y="157"
 								tx_normal="log_over.tga" tx_over="log_over.tga" tx_pushed="log_over.tga"
 								color="255 255 255 0" col_over="255 255 255 255" col_pushed="255 255 255 0"
 								onclick_l="on_login" render_layer="-1" />
 								
     <view type="text" id="txt_log" posparent="but_log" posref="MM MM" hardtext="uiOnLogin" shadow="true" fontsize="16" y="0" color="208 212 182 255" />
-
-
-
+    -->
 
     <!-- Boxes Web Shortcuts
     <instance template="server_box" id="web_win" posparent="eb_login" posref="BL TL" w="568" h="202" y="-24" /> -->
 
     <!-- Create Account -->
-    <!--
     <ctrl style="log_std_but" id="but_create_account" posparent="but_log" posref="BM TM" y="-28"
     onclick_l="on_create_account" hardtext="uiCreateAccount" />
-    -->
 
 	<!-- Edit Account -->
-    <!--
     <ctrl style="log_std_but" id="but_edit_account" posparent="but_create_account" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiEditAccount" />
-    -->
 
 	<!-- Upgrade Account -->
 <!--    <ctrl style="log_std_but" id="but_upgrade_account" posparent="but_create_account" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiUpgradeAccount" /> -->
 
 	<!-- Forget Password -->
-    <!--
     <ctrl style="log_std_but" id="but_forget_pwd" posparent="but_edit_account" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_ForgetPwdURL" hardtext="uiForgetPwd" />
-    -->
 
     <!-- Free Trial
     <ctrl style="log_spe_but" id="but_free_trial" posparent="but_forget_pwd" posref="BL TL" y="-8"
@@ -109,11 +109,8 @@
 	-->
 
     <!-- Login Support -->
-    <!--
     <ctrl style="log_std_but" id="but_login_support" posparent="but_forget_pwd" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_LoginSupportURL" hardtext="uiLoginSupport" />
-    -->
-
     <!-- Scan Data -->
 <!--
     <ctrl style="log_spe_but" id="but_scan_data" posparent="but_login_support" posref="BL TL" y="-8"
@@ -138,22 +135,25 @@
     <!-- RESOLUTION ET LEVEL OF DETAILS -->
     <instance template="server_box" id="res_win" posparent="window" posref="TL TL" w="276" h="24" y="-733" x="10"/>
     <instance template="server_box" id="lod_win" posparent="res_win" posref="TR TL" w="276" h="24" x="16" />
+    <instance template="server_box" id="ver_win" posparent="lod_win" posref="TR TL" w="276" h="24" x="26" />
 	<!-- Game Configuration -->
 <!--    <ctrl style="log_std_but" id="but_game_configuration" posparent="lod_win" posref="TR TL" x="26"    onclick_l="on_game_configuration" hardtext="uiGameConfiguration" /> -->
 	<!-- EXIT BUTTON -->
-    <!--
     <ctrl style="log_button" id="but_exit" posparent="windows" posref="BR BR" y="6" onclick_l="login_quit" hardtext="uiExitLogin" />
-    -->
+    <!--
     <ctrl type="button" button_type="push_button" id="but_quit" posref="TR TR" x="-30" y="-30"
 								tx_normal="quit_over.tga" tx_over="quit_over.tga" tx_pushed="quit_over.tga"
 								color="255 255 255 0" col_over="255 255 255 255" col_pushed="255 255 255 0"
 								onclick_l="login_quit" />
+    -->
 	<!-- Textes -->
     <view type="text" id="title_res" posparent="res_win" posref="TL BL" y="2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGResolution" />
     <view type="text" id="title_lod" posparent="lod_win" posref="TL BL" y="2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGLod" />
+    <view type="text" id="title_ver" posparent="ver_win" posref="TL BL" y="2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiClientVersion" />
 
     <view type="text" id="res_value" posparent="res_win" posref="MM MM" y="0" color="135 243 28 255" fontsize="10" shadow="true" hardtext="uiResValue" />
     <view type="text" id="lod_value" posparent="lod_win" posref="MM MM" y="0" color="135 243 28 255" fontsize="10" shadow="true" hardtext="uiLodValue" />
+    <view type="text" id="ver_value" posparent="ver_win" posref="MM MM" y="0" color="135 243 28 255" fontsize="10" shadow="true" hardtext="" />
 
 
     <!-- Boutons Res -->
@@ -296,7 +296,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		checkbox_bitmap_pushed=""
 		checkbox_bitmap_over=""
 		background_bitmap_view=""
-		home="release.html"
+		home=""
 		browse_next_time="true"
 		form_text_area_group="edit_box_widget_multiline"
 	>
@@ -512,7 +512,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		checkbox_bitmap_pushed=""
 		checkbox_bitmap_over=""
 		background_bitmap_view=""
-		home="release.html"
+		home=""
 		browse_next_time="true"
 		form_text_area_group="edit_box_widget_multiline"
 	>

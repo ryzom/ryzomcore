@@ -1,5 +1,0 @@
-AuthUserFile /home/nevrax/private/htpasswd
-AuthGroupFile /dev/null
-AuthName Nevrax
-AuthType Basic
-require user stats

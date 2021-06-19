@@ -250,13 +250,19 @@ if not args.noconf:
 			DummyUnknownName
 		LinuxServiceExecutableDirectory
 	except NameError:
-		LinuxServiceExecutableDirectory = "R:/build/gcc_server/bin"
+		LinuxServiceExecutableDirectory = "R:/build/server_gcc/bin"
 	try:
 		if args.preset:
 			DummyUnknownName
 		LinuxClientExecutableDirectory
 	except NameError:
-		LinuxClientExecutableDirectory = "R:/build/gcc_client/bin"
+		LinuxClientExecutableDirectory = "R:/build/client_gcc/bin"
+	try:
+		if args.preset:
+			DummyUnknownName
+		PatchmanDevDirectory
+	except NameError:
+		PatchmanDevDirectory = "R:/patchman/terminal_dev"
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -358,6 +364,7 @@ if not args.noconf:
 		WindowsExeDllCfgDirectories[6] = askVar(log, "[IN] Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
 		LinuxServiceExecutableDirectory = askVar(log, "[IN] Linux Service Executable Directory", LinuxServiceExecutableDirectory).replace("\\", "/")
 		LinuxClientExecutableDirectory = askVar(log, "[IN] Linux Client Executable Directory", LinuxClientExecutableDirectory).replace("\\", "/")
+		PatchmanDevDirectory = askVar(log, "[IN] Patchman Directory", PatchmanDevDirectory).replace("\\", "/")
 		PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
 		PatchmanCfgDefaultDirectory = askVar(log, "[IN] Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
 		PatchmanBridgeServerDirectory = askVar(log, "[OUT] Patchman Bridge Server Patch Directory", PatchmanBridgeServerDirectory).replace("\\", "/")
@@ -453,6 +460,7 @@ if not args.noconf:
 	sf.write("WindowsExeDllCfgDirectories = " + str(WindowsExeDllCfgDirectories) + "\n")
 	sf.write("LinuxServiceExecutableDirectory = \"" + str(LinuxServiceExecutableDirectory) + "\"\n")
 	sf.write("LinuxClientExecutableDirectory = \"" + str(LinuxClientExecutableDirectory) + "\"\n")
+	sf.write("PatchmanDevDirectory = \"" + str(PatchmanDevDirectory) + "\"\n")
 	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
 	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
 	sf.write("PatchmanBridgeServerDirectory = \"" + str(PatchmanBridgeServerDirectory) + "\"\n")
@@ -577,6 +585,7 @@ if not args.noverify:
 	findTool(log, ToolDirectories, TranslationToolsTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildWorldPackedColTool, ToolSuffix)
 	findTool(log, ToolDirectories, R2IslandsTexturesTool, ToolSuffix)
+	findTool(log, ToolDirectories, PatchmanServiceTool, ToolSuffix)
 
 log.close()
 if os.path.isfile("0_setup.log"):

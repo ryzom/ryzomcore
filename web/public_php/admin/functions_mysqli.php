@@ -281,8 +281,16 @@ class sql_db_string extends sql_db
 				$sqluser		= $params[1];
 				$sqlpassword	= $params[2];
 				$database		= $params[4];
+				$sqlport		= 0;
 
-				$ret = parent::__construct($sqlserver, $sqluser, $sqlpassword, $database, $persistency);
+				$s = explode(":", $sqlserver, 2);
+				if (sizeof($s) == 2)
+				{
+					$sqlserver = $s[0];
+					$sqlport = $s[1];
+				}
+
+				$ret = parent::__construct($sqlserver, $sqlport, $sqluser, $sqlpassword, $database, $persistency);
 			}
 		}
 		return $ret;

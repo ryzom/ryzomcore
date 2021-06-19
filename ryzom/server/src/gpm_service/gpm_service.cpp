@@ -263,7 +263,7 @@ void	cbMirrorIsReady( CMirror *mirror )
 // init the service
 void CGlobalPositionManagerService::init()
 {
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 
 	// keep pointer on class
 	pCGPMS = this;

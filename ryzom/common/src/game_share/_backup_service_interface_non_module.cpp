@@ -391,7 +391,7 @@ void CBSIINonModule::activate()
 		return;
 	}
 	if (host.find (":") == string::npos)
-		host+= ":49990";
+		host+= ":43990";
 
 	_BSMasterAddress = CInetAddress(host);
 	CUnifiedNetwork::getInstance()->addService ("BS", _BSMasterAddress);
@@ -401,7 +401,7 @@ void CBSIINonModule::activate()
 	if (!host.empty())
 	{
 		if (host.find (":") == string::npos)
-			host+= ":49990";
+			host+= ":43990";
 
 		_BSSlaveAddress = CInetAddress(host);
 		CUnifiedNetwork::getInstance()->addService ("BS", _BSSlaveAddress);
@@ -413,7 +413,7 @@ void CBSIINonModule::activate()
 //	if (_HaveSeparatePDBS)
 //	{
 //		if (host.find (":") == string::npos)
-//			host+= ":49990";
+//			host+= ":43990";
 //		CUnifiedNetwork::getInstance()->addService ("PDBS", CInetAddress(host));
 //
 //		// connect to the global slave bs if any
@@ -421,7 +421,7 @@ void CBSIINonModule::activate()
 //		if (!host.empty())
 //		{
 //			if (host.find (":") == string::npos)
-//				host+= ":49990";
+//				host+= ":43990";
 //			CUnifiedNetwork::getInstance()->addService ("PDBS", CInetAddress(host));
 //		}
 //	}

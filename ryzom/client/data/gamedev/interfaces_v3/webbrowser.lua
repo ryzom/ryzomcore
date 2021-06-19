@@ -5,6 +5,36 @@ WebBrowser = {
   apps = {}
 }
 
+function WebBrowser:addWindow(id, title, ui)
+  local found_app = nil
+  for k,app in pairs(self.apps) do
+    if app.id == id then
+      found_app = app
+      app.title = title
+      app.uiWindow = ui
+      app.winw = ui.w
+      app.winh = ui.h
+    end
+  end
+  if found_app == nil then
+    local app = {}
+    app.id = id
+    app.title = ""
+    app.url = ""
+    app.uiWindow = ui
+    app.winid = "ui:interface:" .. id
+    app.winw = ui.w
+    app.winh = ui.h
+    app.minimized = true
+    app.activeUrl = ""
+    app.closedw = 150
+    app.closedh = 0
+    table.insert(self.apps, app)
+  end
+  return ui
+end
+
+
 function WebBrowser:openWindow(id, url)
   -- default value if url is not set
   url = url or "http://app.ryzom.com/"
@@ -22,6 +52,8 @@ function WebBrowser:openWindow(id, url)
     app.winid = "ui:interface:" .. id
     app.winw = 780
     app.winh = 500
+    app.closedw = 150
+    app.closedh = 0
     app.minimized = true
     app.activeUrl = ""
 
@@ -109,8 +141,8 @@ function WebBrowser:saveWindow(app)
   app.winw = app.uiWindow.w
   app.winh = app.uiWindow.h
   -- minimize
-  app.uiWindow.w = 150
-  app.uiWindow.h = 0
+  app.uiWindow.w = app.closedw
+  app.uiWindow.h = app.closedh
 end
 
 function WebBrowser:restoreWindow(app)
@@ -120,6 +152,58 @@ function WebBrowser:restoreWindow(app)
     app.minimized = false
   end
 end
+
+
+------------------------------------------------------------------------------------------------------------
+--
+function WebBrowser:saveWindowPop(app)
+	if app == nil then
+		app = self:findAppFromUiCaller()
+	end
+
+	if app then
+		app.minimized = true
+		-- save size
+		app.winw = app.uiWindow.w
+		app.winh = app.uiWindow.h
+		app.pop_min_h = app.uiWindow.pop_min_h
+		app.pop_max_h = app.uiWindow.pop_max_h
+		app.pop_min_w = app.uiWindow.pop_min_w
+		-- minimize
+		app.uiWindow.w = app.closedw
+		app.uiWindow.h =  app.closedh
+		app.uiWindow.pop_min_h = 32
+		app.uiWindow.pop_min_w = app.closedw
+	end
+end
+
+------------------------------------------------------------------------------------------------------------
+--
+function WebBrowser:restoreWindowPop(app)
+	if app == nil then
+		app = self:findAppFromUiCaller()
+	end
+
+	if app and app.minimized then
+		app.uiWindow.w = app.winw
+		app.uiWindow.h = app.winh
+		if app.pop_min_h ~= nil  then
+			app.uiWindow.pop_min_h = app.pop_min_h
+		end
+
+		if app.pop_max_h ~= nil  then
+			app.uiWindow.pop_max_h = app.pop_max_h
+		end
+
+		if app.pop_min_w ~= nil  then
+			app.uiWindow.pop_min_w = app.pop_min_w
+		end
+		app.minimized = false
+	end
+end
+
+
+
 
 function WebBrowser:onClickRedo()
   -- caller is :header_opened:browse_redo

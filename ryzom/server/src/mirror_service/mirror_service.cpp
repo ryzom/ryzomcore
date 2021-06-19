@@ -147,7 +147,7 @@ extern void cbOnMasterSync();
  */
 void	CMirrorService::init()
 {
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 
 	MSInstance = this;
 

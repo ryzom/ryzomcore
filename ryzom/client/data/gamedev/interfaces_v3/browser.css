@@ -1,0 +1,147 @@
+html {
+    background-color: rgba(0, 0, 0, 1.0);
+    color: rgba(210, 210, 210, 1.0);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: normal;
+    text-shadow: none;
+}
+
+address, article, aside, blockquote, details, dialog, dd, div, dl, dt,
+fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6,
+header, hgroup, hr, li, main, nav, ol, p, pre, section, table, ul {
+    display: block;
+}
+
+table {
+    display: table;
+}
+
+input,. table, tr, td, th, textarea {
+    color: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    font-size: inherit;
+    text-shadow: inherit;
+}
+
+input, textarea {
+    text-shadow: 1px 1px #000;
+}
+
+a {
+    color: rgba(240, 155, 100, 1.0);
+    text-decoration: underline;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: rgba(255, 255, 255, 1.0);
+}
+
+h1 {
+    font-size: 2em;
+}
+
+h2 {
+    font-size: 1.5em;
+}
+
+h3 {
+    font-size: 1.17em;
+}
+
+h4 {
+    font-size: 1.0em;
+}
+
+h5 {
+    font-size: 0.83em;
+}
+
+h6 {
+    font-size: 0.67em;
+}
+
+pre {
+    font-family: monospace;
+}
+
+/* th { text-align:center; }      overrides <td align=".."> property */
+th {
+    font-weight: bold;
+}
+
+del {
+    text-decoration: line-through;
+}
+
+u {
+    text-decoration: underline;
+}
+
+em {
+    font-style: italic;
+}
+
+strong {
+    font-weight: bold;
+}
+
+small {
+    font-size: smaller;
+}
+
+dt {
+    font-weight: bold;
+}
+
+hr {
+    color: rgb(120, 120, 120);
+}
+
+/* td { padding: 1px; }           overrides <td cellpadding=".."> attribute */
+/* table { border-spacing: 2px; } overrides <td cellspacing=".."> attribute */
+table {
+    border-collapse: separate;
+}
+
+meter::-webkit-meter-bar,
+meter::-webkit-optimum-value,
+meter::-webkit-suboptimum-value,
+meter::-webkit-even-less-good-value {
+    background: none;
+}
+
+meter::-webkit-meter-bar {
+    background-color: rgb(100, 100, 100);
+    width: 5em;
+    height: 1em;
+}
+
+meter::-webkit-meter-optimum-value {
+    background-color: rgb(80, 220, 80);
+}
+
+meter::-webkit-meter-suboptimum-value {
+    background-color: rgb(220, 220, 80);
+}
+
+meter::-webkit-meter-even-less-good-value {
+    background-color: rgb(220, 80, 80);
+}
+
+progress::-webkit-progress-bar,
+progress::-webkit-progress-value {
+    background: none;
+}
+
+progress::-webkit-progress-bar {
+    background-color: rgb(230, 230, 230);
+    width: 10em;
+    height: 1em;
+}
+
+progress::-webkit-progress-value {
+    background-color: rgb(0, 100, 180);
+}
+

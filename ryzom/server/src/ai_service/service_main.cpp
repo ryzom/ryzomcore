@@ -186,7 +186,7 @@ void CAIService::init (void)
 	// init static fame manager
 	CStaticFames::getInstance();
 
-	setVersion (RYZOM_VERSION);
+	setVersion (RYZOM_PRODUCT_VERSION);
 
 	// Init ligo
 	if (!LigoConfig.readPrimitiveClass ("world_editor_classes.xml", false))
