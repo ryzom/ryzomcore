@@ -799,10 +799,14 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 	vector<CSString> appNames;
 	CDeploymentConfiguration::getInstance().getAppNames(IService::getInstance()->getHostName(), "dev", appNames);
 
-#if 1
 	std::map<string, stringstream> batches;
 	std::map<string, stringstream> inis;
-#endif
+
+	CSString adminExecutorConfig;
+	adminExecutorConfig.readFromFile("..\\admin_install\\patchman\\admin_executor_service_default.dev.cfg");
+	adminExecutorConfig+="\n\nShardName=\"dev\";\n";
+	CSString aesRegisteredServices;
+	CSString aesAddRegisteredServices;
 
 	for (uint i=0; i<appNames.size(); ++i)
 	{
@@ -815,14 +819,21 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			continue;
 		}
 
-#if 0 // Nevrax layout, for reference
-		string configDirectory = DevConfigDirectory.get() + "/" + appDesc.ShardName + "/";
-#else
 		string configDirectory = DevConfigDirectory.get() + "/" + appDesc.AppName + "/";
-#endif
 		// create a directory for each shard configuration files
 		if (!CFile::isExists(configDirectory))
 			CFile::createDirectoryTree(configDirectory);
+
+		// add an entry to the aes cfg file
+		{
+			CSString exePath = appDesc.CmdLine.firstWord().quote();
+			CSString runPath = NLMISC::CSString(".\\" + appDesc.AppName).quote();
+			CSString exeArgs = NLMISC::CSString(appDesc.CmdLine.tailFromFirstWord().strip()).quote();
+			CSString aesEntry = appDesc.AppName + " = { " + runPath + ", " + exePath + ", " + exeArgs + " };\n";
+			adminExecutorConfig << aesEntry;
+			aesRegisteredServices << "\n\t\"" + appDesc.AppName + "\",";
+			aesAddRegisteredServices << "\n\t\"" << "aes.addRegisteredService " << appDesc.AppName << " " << appDesc.ShardName << "\",";
+		}
 
 		// ok, write the configuration file in the config directory
 		string cfgName = appDesc.CmdLine.firstWord();
@@ -857,33 +868,14 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			}
 			else
 			{
-#if 0 // Nevrax layout, for reference
-				if (p == "-C.")
-					p = string("-C")+fullConfigPath;
-				else if (p == "-L."
-					|| p == "--nobreak"
-					|| p == "--writepid")
-					p = "";
-#else
 				if (p == "--nobreak" || p == "--writepid")
 					p = "";
-#endif
 			}
 		}
 
 		CSString cmdLine;
 		cmdLine.join(cmdParams, " ");
-#if 0 // Nevrax layout, for reference
-		CSString batch;
-		batch << "cd \""<<DevWorkingDirectory.get()<<"\"\n";
-		batch << "start " << cmdLine;
 
-		fileName = DevConfigDirectory.get()+"/start_"+appDesc.ShardName+"_"+appDesc.StartOrder+"_"+appDesc.AppName+".bat";
-		fp = nlfopen(fileName, "wt");
-		nlassert(fp != NULL);
-		fwrite(batch.data(), batch.size(), 1, fp);
-		fclose(fp);
-#else
 		// Write a single batch per shard
 		// TODO: Order by appDesc.StartOrder, but appDesc.StartOrder appears to be empty currently
 		map<string, stringstream>::iterator batchIt = batches.find(appDesc.ShardName);
@@ -894,6 +886,8 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		batch << DevExePrefix.get() << launchCmd << exeSuffix << " " << cmdLine << "\n";
 		batch << DevSleepCmd.get() << "\n";
 		batch << "\n";
+
+		// Write service dashboard config
 		map<string, stringstream>::iterator iniIt = inis.find(appDesc.ShardName);
 		if (iniIt == inis.end())
 		{
@@ -914,7 +908,25 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		ini << "LaunchCmd=" << launchCmd << "\n";
 		ini << "LaunchArgs=" << cmdLine << "\n";
 		ini << "\n";
-#endif
+
+		if (launchCmd == "ryzom_admin_service")
+		{
+			// Also include the AES on this shard (we need one per domain per server)
+
+			// Batch
+			batch << "cd \"" << DevWorkingDirectory.get() << "\"\n";
+			batch << DevExePrefix.get() << "ryzom_admin_service" << exeSuffix << " -A. -C. -L. --fulladminname=admin_executor_service --shortadminname=AES\n";
+			batch << DevSleepCmd.get() << "\n";
+			batch << "\n";
+
+			// Service Dashboard
+			ini << "[aes_" << NLMISC::toLowerAscii(IService::getInstance()->getHostName()) << "]\n";
+			ini << "Title=aes_" << NLMISC::toLowerAscii(IService::getInstance()->getHostName()) << "\n";
+			ini << "ReadyPattern=^[^*].+Service Console\n";
+			ini << "LaunchCmd=ryzom_admin_service\n";
+			ini << "LaunchArgs=-A. -C. -L. --fulladminname=admin_executor_service --shortadminname=AES\n";
+			ini << "\n";
+		}
 	}
 
 	for (map<string, stringstream>::iterator it = batches.begin(), end = batches.end(); it != end; ++it)
@@ -937,7 +949,16 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		fclose(fp);
 	}
 
-	// TODO: Development AES configuration
+	// append the registered service list to the aes config file contents
+	adminExecutorConfig << "\nRegisteredServices=\n{" << aesRegisteredServices << "\n};\n";
+	adminExecutorConfig << "\nStartCommands += \n{\n" << aesAddRegisteredServices << "\n};\n";
+
+	// local config
+	adminExecutorConfig << "\nWindowStyle = \"WIN\";\n";
+	adminExecutorConfig << "\nAESAliasName = \"aes_" + NLMISC::toLowerAscii(IService::getInstance()->getHostName()) + "\";\n";
+
+	// write the admin_executor_service.cfg file
+	adminExecutorConfig.writeToFileIfDifferent(DevConfigDirectory.get() + "\\admin_executor_service.cfg");
 
 	return true;
 }
