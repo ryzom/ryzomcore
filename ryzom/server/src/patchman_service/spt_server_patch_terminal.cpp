@@ -787,6 +787,40 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 	}
 	const std::string &exeSuffix = DevExeSuffix.get();
 
+	// TODO: Specify launch priority in patchman configuration
+	static map<string, int> priorityMap;
+	if (priorityMap.empty())
+	{
+		/*
+		1: AS AES
+		2: BS LGS
+		3: SU MFS
+		4: TICKS NS
+		5: MS IOS
+		6: GPMS EGS
+		7: AI
+		8: DSS
+		9: FS SBS
+		10: WS
+		*/
+		priorityMap["ryzom_admin_service"] = 1;
+		priorityMap["ryzom_backup_service"] = 2;
+		priorityMap["ryzom_logger_service"] = 2;
+		priorityMap["ryzom_mail_forum_service"] = 3;
+		priorityMap["ryzom_shard_unifier_service"] = 3;
+		priorityMap["ryzom_naming_service"] = 4;
+		priorityMap["ryzom_tick_service"] = 4;
+		priorityMap["ryzom_mirror_service"] = 5;
+		priorityMap["ryzom_ios_service"] = 5;
+		priorityMap["ryzom_entities_game_service"] = 6;
+		priorityMap["ryzom_gpm_service"] = 6;
+		priorityMap["ryzom_ai_service"] = 7;
+		priorityMap["ryzom_dynamic_scenario_service"] = 8;
+		priorityMap["ryzom_frontend_service"] = 9;
+		priorityMap["ryzom_session_browser_service"] = 9;
+		priorityMap["ryzom_welcome_service"] = 10;
+	}
+
 	// remapping exe names to cfg names
 	// TODO: fix services to be consistent
 	static map<string, string> cfgMap;
@@ -900,6 +934,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			ini << "Title=" << shardTitle << appDesc.ShardName.substr(ti) << "\n";
 			ini << "\n";
 		}
+		map<string, int>::iterator priorityIt = priorityMap.find(launchCmd);
 		stringstream &ini = iniIt->second;
 		ini << "[" << appDesc.AppName << "]\n";
 		ini << "Title=" << appDesc.AppName << "\n";
@@ -907,6 +942,9 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		ini << "WorkingDirectory=.\\" << appDesc.AppName << "\n";
 		ini << "LaunchCmd=" << launchCmd << "\n";
 		ini << "LaunchArgs=" << cmdLine << "\n";
+		ini << "LaunchCtrl=.\\" << appDesc.AppName << ".launch_ctrl,LAUNCH,RUNNING,STOP,STOPPED\n";
+		if (priorityIt != priorityMap.end())
+			ini << "Priority=" << priorityIt->second << "\n";
 		ini << "\n";
 
 		if (launchCmd == "ryzom_admin_service")
@@ -920,11 +958,14 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			batch << "\n";
 
 			// Service Dashboard
+			map<string, int>::iterator priorityIt = priorityMap.find("ryzom_admin_service");
 			ini << "[aes_" << NLMISC::toLowerAscii(IService::getInstance()->getHostName()) << "]\n";
 			ini << "Title=aes_" << NLMISC::toLowerAscii(IService::getInstance()->getHostName()) << "\n";
 			ini << "ReadyPattern=^[^*].+Service Console\n";
 			ini << "LaunchCmd=ryzom_admin_service\n";
 			ini << "LaunchArgs=-A. -C. -L. --fulladminname=admin_executor_service --shortadminname=AES\n";
+			if (priorityIt != priorityMap.end())
+				ini << "Priority=" << priorityIt->second << "\n";
 			ini << "\n";
 		}
 	}
