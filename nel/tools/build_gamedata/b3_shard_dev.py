@@ -68,6 +68,7 @@ for multiDir in InstallShardDataMultiDirectories:
 	mkPath(log, ShardInstallDirectory + "/" + dstDir)
 	cfg.write("	\"" + ShardInstallDirectory + "/" + dstDir + "\",\n")
 cfg.write("};\n")
+cfg.write("RRDToolPath = \"..\\..\\..\\external\\rrdtool\\rrdtool.exe\";\n")
 cfg.write("StartCommands += {\n")
 cfg.write("	// \"gw_aes.transportRemove aes_l3c\",\n")
 cfg.write("};\n")
