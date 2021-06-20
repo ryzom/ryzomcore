@@ -17,7 +17,14 @@
 	define('NELTOOL_LOGBASE', NELTOOL_SYSTEMBASE .'/logs/');
 	define('NELTOOL_IMGBASE', NELTOOL_SYSTEMBASE .'/imgs/');
 
-    define('NELTOOL_RRDTOOL', '/usr/bin/rrdtool');
+	if ((strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'))
+	{
+		define('NELTOOL_RRDTOOL', NELTOOL_SYSTEMBASE . '../../../../external/rrdtool/rrdtool.exe');
+	}
+	else
+	{
+		define('NELTOOL_RRDTOOL', '/usr/bin/rrdtool');
+	}
     define('NELTOOL_RRDSYSBASE', NELTOOL_SYSTEMBASE . 'graphs_output/');
     define('NELTOOL_RRDWEBBASE', NELTOOL_SITEBASE . 'graphs_output/');
 

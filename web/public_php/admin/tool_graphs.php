@@ -159,7 +159,7 @@
 						foreach($graph_list as $graph_item)
 						{
 							$rrd_path	= $AS_RRDPath . $graph_item['rd_file'];
-							$rrd_def	= "DEF:val=". $rrd_path .":var:AVERAGE";
+							$rrd_def	= "DEF:val=". str_replace(":", "\\:", $rrd_path) .":var:AVERAGE";
 							$rrd_draw	= "LINE2:val#0000FF --no-legend";
 							$rrd_output	= NELTOOL_RRDSYSBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
 							$rrd_web	= NELTOOL_RRDWEBBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
@@ -216,7 +216,7 @@
 						foreach($graph_list as $graph_item)
 						{
 							$rrd_path	= $AS_RRDPath . $graph_item['rd_file'];
-							$rrd_def	= "DEF:val=". $rrd_path .":var:AVERAGE";
+							$rrd_def	= "DEF:val=". str_replace(":", "\\:", $rrd_path) .":var:AVERAGE";
 							$rrd_draw	= "LINE2:val#0000FF --no-legend";
 							$rrd_output	= NELTOOL_RRDSYSBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
 							$rrd_web	= NELTOOL_RRDWEBBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
@@ -373,7 +373,7 @@
 							{
 								$rrd_values	= array(1200, 10800, 86400, 604800, 2592000, 7776000); // 20mins, 3h, 24h, 7days, 30 days, 90 days (unit is 1 second)
 								$rrd_path	= $AS_RRDPath . $tool_selected_variable_data['low_file'];
-								$rrd_def	= "DEF:val=". $rrd_path .":var:AVERAGE";
+								$rrd_def	= "DEF:val=". str_replace(":", "\\:", $rrd_path) .":var:AVERAGE";
 								$rrd_draw	= "LINE2:val#0000FF";
 
 								$rrd_webs	= array();
