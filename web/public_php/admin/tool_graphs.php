@@ -314,7 +314,14 @@
 									$high_sys_name = NELTOOL_RRDSYSBASE . $graph_item['rd_file'] ."-". $view_time_highframe .'_0.png';
 									$high_web_name = NELTOOL_RRDWEBBASE . $graph_item['rd_file'] ."-". $view_time_highframe .'_0.png';
 
-									$graph->Stroke($high_sys_name);
+									unlink($high_sys_name);
+									try
+									{
+										$graph->Stroke($high_sys_name);
+									}
+									catch (exception $e)
+									{
+									}
 
 									$file_description = str_replace(array('.rrd','.hrd','.'),
 																	array('',    '',    '&nbsp;-&nbsp;'),
@@ -454,7 +461,14 @@
 											$high_sys_name = NELTOOL_RRDSYSBASE . $tool_selected_variable_data['high_file'] ."-". $rrd_value[0] .'_'. $rrd_value[1] .".png";
 											$high_web_name = NELTOOL_RRDWEBBASE . $tool_selected_variable_data['high_file'] ."-". $rrd_value[0] .'_'. $rrd_value[1] .".png";
 
-											$graph->Stroke($high_sys_name);
+											unlink($high_sys_name);
+											try
+											{
+												$graph->Stroke($high_sys_name);
+											}
+											catch (exception $e)
+											{
+											}
 
 											$rrd_webs[] = array('desc'	=> $tool_selected_variable_data['high_file'] .' over '. ($rrd_value[0] / 1000) .'s. ('. sizeof($mean_values['val']) .' values)',
 																'img'	=> $high_web_name);
