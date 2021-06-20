@@ -19,6 +19,7 @@
 	include_once('utils.php');
 
 	importParam('page');
+	global $page;
 
 	unset($user);
 	$user = $user_login;

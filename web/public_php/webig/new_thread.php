@@ -26,6 +26,7 @@
 	//
 
 	importParam('forum');
+	global $forum;
 
 	check_character_belongs_to_guild($user_login, $forum);
 

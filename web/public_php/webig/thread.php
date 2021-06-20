@@ -30,6 +30,9 @@
 	importParam('forum');
 	importParam('thread');
 	importParam('page');
+	global $forum;
+	global $thread;
+	global $page;
 
 	check_character_belongs_to_guild($user_login, $forum);
 

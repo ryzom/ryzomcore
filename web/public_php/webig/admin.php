@@ -27,6 +27,7 @@ if (true)
 }
 
 importParam('recover_forum');
+global $recover_forum;
 if ($recover_forum)
 {
 	echo "recover forum $recover_forum<br>\n";
@@ -36,6 +37,8 @@ if ($recover_forum)
 
 importParam('recover_thread');
 importParam('recover_threadthread');
+global $recover_thread;
+global $recover_threadthread;
 if ($recover_thread && isset($recover_threadthread))
 {
 	echo "recover forum $recover_thread<br>\n";
@@ -45,6 +48,8 @@ if ($recover_thread && isset($recover_threadthread))
 
 importParam('rename_forum');
 importParam('into_forum');
+global $rename_forum;
+global $into_forum;
 if ($rename_forum)
 {
 	echo "rename forum $rename_forum into $into_forum<br>\n";
@@ -54,9 +59,12 @@ if ($rename_forum)
 
 
 importParam('shard');
+global $shard;
 
 importParam('mailbox');
 importParam('mail');
+global $mailbox;
+global $mail;
 
 if ($mail)
 {
@@ -72,6 +80,8 @@ else if ($mailbox)
 
 importParam('forum');
 importParam('thread');
+global $forum;
+global $thread;
 
 if ($thread)
 {
