@@ -261,6 +261,7 @@
 					$tpl->assign('tool_frame_list',		$tool_hires_frames);
 					$tpl->assign('tool_frame_selected',	$view_time_highframe);
 
+					$rrd_webs	= array();
 					if ($view_shard_id && $view_time_highframe)
 					{
 						$graph_data_tmp = tool_graphs_get_list_v2($AS_RRDPath, strtolower($AS_InternalName), true);
@@ -284,7 +285,6 @@
 						else
 						{
 							$now = time();
-							$rrd_webs	= array();
 
 							reset($graph_list);
 							foreach($graph_list as $graph_item)
