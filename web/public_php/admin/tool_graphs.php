@@ -198,6 +198,7 @@
 					$tpl->assign('tool_frame_list',		$tool_lowres_frames);
 					$tpl->assign('tool_frame_selected',	$view_time_lowframe);
 
+					$rrd_webs = array();
 					if ($view_shard_id && $view_time_lowframe)
 					{
 						$graph_data_tmp = tool_graphs_get_list_v2($AS_RRDPath, strtolower($AS_InternalName), false);
@@ -211,7 +212,6 @@
 						$graph_list = tool_graphs_find($tool_tech_graph_list, $graph_data_tmp['datas']);
 						nt_common_add_debug($graph_list);
 
-						$rrd_webs	= array();
 						reset($graph_list);
 						foreach($graph_list as $graph_item)
 						{

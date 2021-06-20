@@ -73,6 +73,6 @@
 											'level_name'	=>	'Administrator'),
 									);
 
-	$restart_notification_emails = array('support@ryzomcore.org');
+	$restart_notification_emails = array('support@ryzom.dev');
 
 ?>

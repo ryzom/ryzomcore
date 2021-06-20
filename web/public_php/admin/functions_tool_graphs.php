@@ -148,6 +148,7 @@
 		{
 			if ($handle = opendir($dir))
 			{
+				$filelist = array();
 				while (($file = readdir($handle)) !== false)
 				{
 					if (($file != '.') && ($file != '..'))
