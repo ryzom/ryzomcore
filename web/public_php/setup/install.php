@@ -506,13 +506,13 @@ $shardDev = $shardWinDev;
 						<div class="form-group">
 							<label for="nelDomainName" class="col-sm-3 control-label">Name</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="nelDomainName" name="nelDomainName" value="<?php if ($shardDev) { print "dev"; } else { print "prod"; } ?>">
+								<input type="text" class="form-control" id="nelDomainName" name="nelDomainName" value="<?php if ($shardDev) { print "dev"; } else { print gethostname(); } ?>">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="domainDatabase" class="col-sm-3 control-label">Database</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="domainDatabase" name="domainDatabase" value="ring_<?php if ($shardDev) { print "dev"; } else { print "prod"; } ?>">
+								<input type="text" class="form-control" id="domainDatabase" name="domainDatabase" value="ring_<?php if ($shardDev) { print "dev"; } else { print gethostname(); } ?>">
 							</div>
 						</div>
 						<div class="form-group">
@@ -525,11 +525,11 @@ $shardDev = $shardWinDev;
 									}
 									else if ($shardDev)
 									{
-										print "/home/nevrax/dev/www";
+										print str_replace("/code/web/public_php/setup/install.php", "/pipeline/shard_dev/www", __FILE__);
 									}
 									else
 									{
-										print "/home/nevrax/prod/www";
+										print "/home/nevrax/" + gethostname() + "/www";
 									}
 								?>">
 							</div>
