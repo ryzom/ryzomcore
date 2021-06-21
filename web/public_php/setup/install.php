@@ -11,8 +11,8 @@ include('header.php');
 
 require_once('setup/version.php');
 
-$shardWinDev = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
-$shardDev = $shardWinDev;
+$shardDev = isset($_GET['dev']);
+$shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
 ?>
 
@@ -33,6 +33,7 @@ $shardDev = $shardWinDev;
 	$roleService = isset($_POST["roleService"]) && $_POST["roleService"] == "on";
 	$roleSupport = isset($_POST["roleSupport"]) && $_POST["roleSupport"] == "on";
 	$roleDomain = isset($_POST["roleDomain"]) && $_POST["roleDomain"] == "on";
+	$configureShardDev = isset($_POST["configureShardDev"]) && $_POST["configureShardDev"] == "on";
 	
 	$continue = true;
 
@@ -265,8 +266,10 @@ $shardDev = $shardWinDev;
 		}
 	}
 
-	if ($roleDomain) {
-		// TODO: Register the domain with the nel database etc
+	if ($continue && $roleDomain) {
+		if ($configureShardDev) {
+			$continue = configure_shard_dev($continue) && $continue;
+		}
 	}
 
 	if ($continue && $roleService) {
@@ -490,6 +493,7 @@ $shardDev = $shardWinDev;
 						<h2 class="panel-title">Domain <small>(Multiple domains require separate installations, as they may run different versions)</small></h2>
 					</div>
 					<div class="panel-body">
+						<?php if (!$shardDev) { ?>
 						<div class="panel panel-danger">
 							<div class="panel-heading"><span class="glyphicon glyphicon-info-sign"></span> Database Only</div>
 							<div class="panel-body">
@@ -503,6 +507,18 @@ $shardDev = $shardWinDev;
 								<p>There can be multiple instances of the domain role, there can only be one support and one service role setup.</p>
 							</div>
 						</div>
+						<?php } ?>
+						<?php if ($shardDev) { ?>
+						<div class="form-group">
+							<div class="col-sm-offset-3 col-sm-8">
+								<div class="checkbox">
+									<label>
+										<input id="configureShardDev" name="configureShardDev" type="checkbox" checked> Configure Development Shard</small>
+									</label>
+								</div>
+							</div>
+						</div>
+						<?php } ?>
 						<div class="form-group">
 							<label for="nelDomainName" class="col-sm-3 control-label">Name</label>
 							<div class="col-sm-6">
@@ -519,17 +535,17 @@ $shardDev = $shardWinDev;
 							<label for="domainUsersDir" class="col-sm-3 control-label">Users Directory (MFS, etc)</label>
 							<div class="col-sm-6">
 								<input type="text" class="form-control" id="domainUsersDir" name="domainUsersDir" value="<?php
-									if ($shardWinDev)
-									{
+									if ($shardDev && $shardWin) {
 										print str_replace("\\", "/", str_replace("\\code\\web\\public_php\\setup\\install.php", "/pipeline/shard_dev/www", __FILE__));
 									}
-									else if ($shardDev)
-									{
+									else if ($shardDev) {
 										print str_replace("/code/web/public_php/setup/install.php", "/pipeline/shard_dev/www", __FILE__);
 									}
-									else
-									{
-										print "/home/nevrax/" + gethostname() + "/www";
+									else if ($shardWin) {
+										print "C:/nevrax/" . gethostname() . "/www";
+									}
+									else {
+										print "/home/nevrax/" . gethostname() . "/www";
 									}
 								?>">
 							</div>
