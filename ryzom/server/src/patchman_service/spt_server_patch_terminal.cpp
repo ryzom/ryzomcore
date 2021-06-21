@@ -902,7 +902,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			}
 			else
 			{
-				if (p == "--nobreak" || p == "--writepid")
+				if (p == "--nobreak") // || p == "--writepid")
 					p = "";
 			}
 		}
@@ -942,7 +942,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		ini << "WorkingDirectory=.\\" << appDesc.AppName << "\n";
 		ini << "LaunchCmd=" << launchCmd << "\n";
 		ini << "LaunchArgs=" << cmdLine << "\n";
-		ini << "LaunchCtrl=.\\" << appDesc.AppName << ".launch_ctrl,LAUNCH,RUNNING,STOP,STOPPED\n";
+		ini << "LaunchCtrl=.\\" << appDesc.AppName << ".launch_ctrl,.\\" << appDesc.AppName << ".state,LAUNCH,RUNNING,STOP,STOPPED\n";
 		if (priorityIt != priorityMap.end())
 			ini << "Priority=" << priorityIt->second << "\n";
 		ini << "\n";
