@@ -140,4 +140,16 @@ function upgrade_domain_databases($continue_r) {
 	return $continue;
 }
 
+function configure_shard_dev($continue_r) {
+	$continue = $continue_r;
+
+	$con = null;
+	$con = connect_database($continue, "ring");
+	$continue = ($con != null);
+	$continue = update_database_configure($continue, $con, "configure_shard_dev.sql");
+	disconnect_database($con, "ring");
+
+	return $continue;
+}
+
 ?>

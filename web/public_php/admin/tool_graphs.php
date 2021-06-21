@@ -159,7 +159,7 @@
 						foreach($graph_list as $graph_item)
 						{
 							$rrd_path	= $AS_RRDPath . $graph_item['rd_file'];
-							$rrd_def	= "DEF:val=". $rrd_path .":var:AVERAGE";
+							$rrd_def	= "DEF:val=". str_replace(":", "\\:", $rrd_path) .":var:AVERAGE";
 							$rrd_draw	= "LINE2:val#0000FF --no-legend";
 							$rrd_output	= NELTOOL_RRDSYSBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
 							$rrd_web	= NELTOOL_RRDWEBBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
@@ -198,6 +198,7 @@
 					$tpl->assign('tool_frame_list',		$tool_lowres_frames);
 					$tpl->assign('tool_frame_selected',	$view_time_lowframe);
 
+					$rrd_webs = array();
 					if ($view_shard_id && $view_time_lowframe)
 					{
 						$graph_data_tmp = tool_graphs_get_list_v2($AS_RRDPath, strtolower($AS_InternalName), false);
@@ -211,12 +212,11 @@
 						$graph_list = tool_graphs_find($tool_tech_graph_list, $graph_data_tmp['datas']);
 						nt_common_add_debug($graph_list);
 
-						$rrd_webs	= array();
 						reset($graph_list);
 						foreach($graph_list as $graph_item)
 						{
 							$rrd_path	= $AS_RRDPath . $graph_item['rd_file'];
-							$rrd_def	= "DEF:val=". $rrd_path .":var:AVERAGE";
+							$rrd_def	= "DEF:val=". str_replace(":", "\\:", $rrd_path) .":var:AVERAGE";
 							$rrd_draw	= "LINE2:val#0000FF --no-legend";
 							$rrd_output	= NELTOOL_RRDSYSBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
 							$rrd_web	= NELTOOL_RRDWEBBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
@@ -261,6 +261,7 @@
 					$tpl->assign('tool_frame_list',		$tool_hires_frames);
 					$tpl->assign('tool_frame_selected',	$view_time_highframe);
 
+					$rrd_webs	= array();
 					if ($view_shard_id && $view_time_highframe)
 					{
 						$graph_data_tmp = tool_graphs_get_list_v2($AS_RRDPath, strtolower($AS_InternalName), true);
@@ -284,7 +285,6 @@
 						else
 						{
 							$now = time();
-							$rrd_webs	= array();
 
 							reset($graph_list);
 							foreach($graph_list as $graph_item)
@@ -314,7 +314,14 @@
 									$high_sys_name = NELTOOL_RRDSYSBASE . $graph_item['rd_file'] ."-". $view_time_highframe .'_0.png';
 									$high_web_name = NELTOOL_RRDWEBBASE . $graph_item['rd_file'] ."-". $view_time_highframe .'_0.png';
 
-									$graph->Stroke($high_sys_name);
+									unlink($high_sys_name);
+									try
+									{
+										$graph->Stroke($high_sys_name);
+									}
+									catch (exception $e)
+									{
+									}
 
 									$file_description = str_replace(array('.rrd','.hrd','.'),
 																	array('',    '',    '&nbsp;-&nbsp;'),
@@ -373,7 +380,7 @@
 							{
 								$rrd_values	= array(1200, 10800, 86400, 604800, 2592000, 7776000); // 20mins, 3h, 24h, 7days, 30 days, 90 days (unit is 1 second)
 								$rrd_path	= $AS_RRDPath . $tool_selected_variable_data['low_file'];
-								$rrd_def	= "DEF:val=". $rrd_path .":var:AVERAGE";
+								$rrd_def	= "DEF:val=". str_replace(":", "\\:", $rrd_path) .":var:AVERAGE";
 								$rrd_draw	= "LINE2:val#0000FF";
 
 								$rrd_webs	= array();
@@ -454,7 +461,14 @@
 											$high_sys_name = NELTOOL_RRDSYSBASE . $tool_selected_variable_data['high_file'] ."-". $rrd_value[0] .'_'. $rrd_value[1] .".png";
 											$high_web_name = NELTOOL_RRDWEBBASE . $tool_selected_variable_data['high_file'] ."-". $rrd_value[0] .'_'. $rrd_value[1] .".png";
 
-											$graph->Stroke($high_sys_name);
+											unlink($high_sys_name);
+											try
+											{
+												$graph->Stroke($high_sys_name);
+											}
+											catch (exception $e)
+											{
+											}
 
 											$rrd_webs[] = array('desc'	=> $tool_selected_variable_data['high_file'] .' over '. ($rrd_value[0] / 1000) .'s. ('. sizeof($mean_values['val']) .' values)',
 																'img'	=> $high_web_name);

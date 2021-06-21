@@ -1,15 +1,15 @@
 -- Add the domain to the NeL database
 USE `nel`;
 INSERT INTO `domain` (`domain_id`, `domain_name`, `status`, `patch_version`, `backup_patch_url`, `patch_urls`, `login_address`, `session_manager_address`, `ring_db_name`, `web_host`, `web_host_php`, `description`)
-	VALUES ('90', 'dev', 'ds_open', '1', NULL, NULL, 'athena:49998', 'athena:49999', 'ring_dev', 'http://athena:9042', 'http://athena:9042', 'Development Domain');
+	VALUES ('90', 'dev', 'ds_open', '1', NULL, NULL, '%RC_HOSTNAME%:46993', '%RC_HOSTNAME%:46994', 'ring_dev', 'http://%RC_HOSTNAME%:9042', 'http://%RC_HOSTNAME%:9042', 'Development Domain');
 
 -- Add the domain to the NeL Admin Tool database
 USE `nel_tool`;
-INSERT INTO `neltool_domains` (`domain_id`, `domain_name`, `domain_as_host`, `domain_as_port`, `domain_rrd_path`, `domain_las_admin_path`, `domain_las_local_path`, `domain_application`, `domain_sql_string`, `domain_hd_check`, `domain_mfs_web`, `domain_cs_sql_string`) VALUES ('90', 'dev', 'athena', '47690', 'Y:\\ryzomclassic\\pipeline\\shard_dev\\rrd_graphs', '', '', 'dev', 'mysql://root@athena:9040/ring_dev', '0', NULL, NULL);
+INSERT INTO `neltool_domains` (`domain_id`, `domain_name`, `domain_as_host`, `domain_as_port`, `domain_rrd_path`, `domain_las_admin_path`, `domain_las_local_path`, `domain_application`, `domain_sql_string`, `domain_hd_check`, `domain_mfs_web`, `domain_cs_sql_string`) VALUES ('90', 'dev', '%RC_HOSTNAME%', '46999', '%RC_SHARD_DEV%/rrd_graphs', '', '', 'dev', 'mysql://root@%RC_HOSTNAME%:9040/ring_dev', '0', NULL, NULL);
 
 -- Add the mainland shard to the NeL database
 use `nel`;
-INSERT INTO `shard` (`ShardId`, `domain_id`, `WsAddr`, `Name`, `State`, `MOTD`) VALUES ('901', '90', 'athena', 'mainland', 'ds_open', '');
+INSERT INTO `shard` (`ShardId`, `domain_id`, `WsAddr`, `Name`, `State`, `MOTD`) VALUES ('901', '90', '%RC_HOSTNAME%', 'mainland', 'ds_open', '');
 
 -- Add the mainland and ring shards to the Ring database
 use `ring_dev`;

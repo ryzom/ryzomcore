@@ -28,6 +28,8 @@
 
 	importParam('forum');
 	importParam('page');
+	global $forum;
+	global $page;
 
 	check_character_belongs_to_guild($user_login, $forum);
 

@@ -22,6 +22,7 @@
 	$user = $user_login;
 
 	importParam('msg');
+	global $msg;
 
 	$user_dir = get_user_dir($user, $shard);
 	$fname = $user_dir."mail_$msg.html";

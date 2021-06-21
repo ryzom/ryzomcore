@@ -70,6 +70,9 @@ function exportParam($var, $value)
 importParam('user_login');
 importParam('shard');
 importParam('session_cookie');
+global $user_login;
+global $shard;
+global $session_cookie;
 
 if (isset($user_login))
 {
@@ -439,6 +442,7 @@ $remote_addr = $_SERVER['REMOTE_ADDR'];
 if (true)
 {
 	importParam('internal_check');
+	global $internal_check;
 	if ($internal_check)
 	{
 		echo "INTERNAL CHECK\n";
@@ -460,13 +464,14 @@ if (false)
 	//echo $_SERVER['REMOTE_ADDR']; 
 	//die();
 	importParam('translate_user_login');
+	global $translate_user_login;
 	if (isset($translate_user_login))
 		$user_login = $translate_user_login;
 } 
 else 
 {
-    if (!strstr($HTTP_SERVER_VARS['HTTP_USER_AGENT'], 'Ryzom'))
-        die("ERROR: Bad parameters");
+    // if (!strstr($HTTP_SERVER_VARS['HTTP_USER_AGENT'], 'Ryzom'))
+    //     die("ERROR: Bad parameters");
 	$udir = get_user_dir($user_login, $shard); 
 	$ufile = $udir.'session'; 
 	if (is_dir($udir) && file_exists($ufile)) 

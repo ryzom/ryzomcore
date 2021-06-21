@@ -33,6 +33,10 @@
 	importParam('post_to');
 	importParam('post_subject');
 	importParam('post_content');
+	global $post_from;
+	global $post_to;
+	global $post_subject;
+	global $post_content;
 
 	check_character_belongs_to_guild($user_login, $post_to);
 

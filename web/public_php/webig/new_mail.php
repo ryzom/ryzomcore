@@ -30,6 +30,9 @@
 	importParam('mail_to');
 	importParam('mail_subject');
 	importParam('mail_content');
+	global $mail_to;
+	global $mail_subject;
+	global $mail_content;
 
 	read_template('new_mail.html', $new_mail);
 

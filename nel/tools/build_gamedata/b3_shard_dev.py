@@ -68,14 +68,39 @@ for multiDir in InstallShardDataMultiDirectories:
 	mkPath(log, ShardInstallDirectory + "/" + dstDir)
 	cfg.write("	\"" + ShardInstallDirectory + "/" + dstDir + "\",\n")
 cfg.write("};\n")
+cfg.write("RRDToolPath = \"..\\..\\..\\external\\rrdtool\\rrdtool.exe\";\n")
 cfg.write("StartCommands += {\n")
-cfg.write("	// Don't launch AES on development shard for now\n")
-cfg.write("	\"gw_aes.transportRemove aes_l3c\",\n")
+cfg.write("	// \"gw_aes.transportRemove aes_l3c\",\n")
 cfg.write("};\n")
+cfg.write("NegFiltersWarning += {\n")
+cfg.write("	\"already inserted from\",\n")
+cfg.write("};\n")
+cfg.write("// Allow player to stay connected to FS when services go down\n")
 cfg.write("DontNeedBackend = 1;\n")
 cfg.flush()
 cfg.close()
 printLog(log, "")
+
+if not os.path.exists(ShardDevDirectory  + "/aes_state.txt"):
+	printLog(log, ">>> Generate shard dev aes_state.txt <<<")
+	f = open(ShardDevDirectory + "/aes_state.txt", "w")
+	f.write("ShardOrders unifier so_autostart_off\n")
+	f.write("ShardOrders mainland so_autostart_off\n")
+	f.write("ShardOrders ring so_autostart_off\n")
+	f.flush()
+	f.close()
+	printLog(log, "")
+
+mkPath(log, ShardDevDirectory + "/ras")
+if not os.path.exists(ShardDevDirectory  + "/ras/as_state.txt"):
+	printLog(log, ">>> Generate shard dev as_state.txt <<<")
+	f = open(ShardDevDirectory + "/ras/as_state.txt", "w")
+	f.write("ShardOrders unifier so_autostart_off\n")
+	f.write("ShardOrders mainland so_autostart_off\n")
+	f.write("ShardOrders ring so_autostart_off\n")
+	f.flush()
+	f.close()
+	printLog(log, "")
 
 for execDir in InstallShardDataExecutables:
 	dstDir = execDir[0]
