@@ -4,7 +4,7 @@ cd.>.\nginx\logs\error.log
 cd.>.\nginx\conf\nginx.conf
 rmdir /S /Q ..\pipeline\shard_dev\mysql
 mkdir ..\pipeline\shard_dev\mysql
-del ..\code\web/public_php\ams\is_installe
+del ..\code\web\public_php\ams\is_installed
 del ..\code\web\public_php\config.php
 del ..\code\web\public_php\is_installed
 del ..\code\web\public_php\db_version_lib
