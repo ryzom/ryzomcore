@@ -11,7 +11,8 @@ include('header.php');
 
 require_once('setup/version.php');
 
-$shardDev = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
+$shardWinDev = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
+$shardDev = $shardWinDev;
 
 ?>
 
@@ -505,19 +506,32 @@ $shardDev = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 						<div class="form-group">
 							<label for="nelDomainName" class="col-sm-3 control-label">Name</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="nelDomainName" name="nelDomainName" value="<?php if ($shardDev) { print "dev"; } else { print "mini01"; } ?>">
+								<input type="text" class="form-control" id="nelDomainName" name="nelDomainName" value="<?php if ($shardDev) { print "dev"; } else { print "prod"; } ?>">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="domainDatabase" class="col-sm-3 control-label">Database</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="domainDatabase" name="domainDatabase" value="ring_<?php if ($shardDev) { print "dev"; } else { print "mini01"; } ?>">
+								<input type="text" class="form-control" id="domainDatabase" name="domainDatabase" value="ring_<?php if ($shardDev) { print "dev"; } else { print "prod"; } ?>">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="domainUsersDir" class="col-sm-3 control-label">Users Directory (MFS, etc)</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="domainUsersDir" name="domainUsersDir" value="<?php if ($shardDev) { print "Y:/ryzomcore/pipeline/shard_dev/www"; } else { print "/home/nevrax/mini01/www"; } ?>">
+								<input type="text" class="form-control" id="domainUsersDir" name="domainUsersDir" value="<?php
+									if ($shardWinDev)
+									{
+										print str_replace("\\", "/", str_replace("\\code\\web\\public_php\\setup\\install.php", "/pipeline/shard_dev/www", __FILE__));
+									}
+									else if ($shardDev)
+									{
+										print "/home/nevrax/dev/www";
+									}
+									else
+									{
+										print "/home/nevrax/prod/www";
+									}
+								?>">
 							</div>
 						</div>
 					</div>
