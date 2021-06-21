@@ -5,7 +5,7 @@ INSERT INTO `domain` (`domain_id`, `domain_name`, `status`, `patch_version`, `ba
 
 -- Add the domain to the NeL Admin Tool database
 USE `nel_tool`;
-INSERT INTO `neltool_domains` (`domain_id`, `domain_name`, `domain_as_host`, `domain_as_port`, `domain_rrd_path`, `domain_las_admin_path`, `domain_las_local_path`, `domain_application`, `domain_sql_string`, `domain_hd_check`, `domain_mfs_web`, `domain_cs_sql_string`) VALUES ('90', 'dev', '%RC_HOSTNAME%', '46999', '%RC_SHARD_DEV%\\rrd_graphs', '', '', 'dev', 'mysql://root@%RC_HOSTNAME%:9040/ring_dev', '0', NULL, NULL);
+INSERT INTO `neltool_domains` (`domain_id`, `domain_name`, `domain_as_host`, `domain_as_port`, `domain_rrd_path`, `domain_las_admin_path`, `domain_las_local_path`, `domain_application`, `domain_sql_string`, `domain_hd_check`, `domain_mfs_web`, `domain_cs_sql_string`) VALUES ('90', 'dev', '%RC_HOSTNAME%', '46999', '%RC_SHARD_DEV%/rrd_graphs', '', '', 'dev', 'mysql://root@%RC_HOSTNAME%:9040/ring_dev', '0', NULL, NULL);
 
 -- Add the mainland shard to the NeL database
 use `nel`;
