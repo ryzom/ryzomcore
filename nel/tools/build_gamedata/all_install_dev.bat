@@ -6,4 +6,6 @@ title Ryzom Core: b1_client_dev.py
 b1_client_dev.py
 title Ryzom Core: b2_shard_data.py
 b2_shard_data.py
+title Ryzom Core: b3_shard_dev.py
+b3_shard_dev.py
 title Ryzom Core: Ready

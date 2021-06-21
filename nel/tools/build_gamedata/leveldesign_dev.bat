@@ -8,4 +8,6 @@ title Ryzom Core: b1_client_dev.py (LEVELDESIGN)
 b1_client_dev.py
 title Ryzom Core: b2_shard_data.py (LEVELDESIGN)
 b2_shard_data.py
+title Ryzom Core: b3_shard_dev.py
+b3_shard_dev.py
 title Ryzom Core: Ready
