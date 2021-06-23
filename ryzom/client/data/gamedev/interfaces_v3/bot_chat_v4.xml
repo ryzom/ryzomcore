@@ -432,7 +432,6 @@
 <variable entry="UI:TEMP:TRADE_ITEM:QUANTITY" type="sint64" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:SLOT_TYPE" type="sint64" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:USER_COLOR" type="sint32" value="1" />
-<variable entry="UI:TEMP:TRADE_ITEM:CHARAC_BUFFS" type="sint8" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:WEIGHT" type="sint32" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:NAMEID" type="sint32" value="0" />
 <variable entry="UI:TEMP:TRADE_ITEM:INFO_VERSION" type="sint32" value="0" />
@@ -450,7 +449,6 @@
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:QUANTITY" type="sint32" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:SLOT_TYPE" type="sint32" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:USER_COLOR" type="sint32" value="1" size="64" />
-<variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:CHARAC_BUFFS" type="sint8" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:NAMEID" type="sint32" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:INFO_VERSION" type="sint32" value="0" size="64" />
 <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:ENCHANT" type="sint32" value="0" size="64" />
@@ -518,7 +516,7 @@
 	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y">
 		<view type="bitmap" id="icone" posref="TL TL" texture="money_seve.tga" global_color="false" />
 		<instance template="box_widget" id="box1" posref="TL TL" sizeref="w" w="-18" h="16" x="18" />
-		<view type="text" id="val1" posparent="box1" posref="MR MR" x="-3" y="-2" color="135 243 28 255" shadow="true" fontsize="10" hardtext="" global_color="false" />
+		<view type="text" id="val1" posparent="box1" posref="MR MR" x="-3" y="0" color="135 243 28 255" shadow="true" fontsize="10" hardtext="" global_color="false" />
 		<ctrl type="tooltip" id="tt" instant_help="true" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" />
 		<link expr="getPriceWithFame(@#value,@#value_fame)" target="val1:hardtext" />
 		<link expr="ifthenelse(eq(@UI:TEMP:TRADE_ITEM:IS_SELL_DLG,1),ifthenelse(eq(@#value,@#value_fame),localize('uittPriceWithFameEqual'),localize('uittPriceWithFameDiff')),'')" target="tt:tooltip" />
@@ -530,13 +528,13 @@
 	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y">
 		<view type="bitmap" id="icone" posref="TL TL" texture="money_seve.tga" global_color="false" />
 		<instance template="box_widget" id="box1" posref="TL TL" sizeref="w" w="-18" h="16" x="18" />
-		<view type="text" id="val1" posparent="box1" posref="MR MR" x="-3" y="-2" color="135 243 28 255" shadow="true" fontsize="10" hardtext="" global_color="false" />
+		<view type="text" id="val1" posparent="box1" posref="MR MR" x="-3" y="0" color="135 243 28 255" shadow="true" fontsize="10" hardtext="" global_color="false" />
 		<link expr="getBonusOnResale(@#value_high,@#value_low)" target="val1:hardtext" />
 	</group>
 </template>
 
 <!-- the modal -->
-<group id="bot_chat_buy_sell_item" type="container" posref="BL TL" min_w="408" max_w="408" w="408" x="332" y="200" pop_max_h="700" max_h="2000" active="false"
+<group id="bot_chat_buy_sell_item" type="container" posref="BL TL" min_w="450" max_w="450" w="450" x="332" y="200" pop_max_h="700" max_h="2000" title_delta_max_w="-40" active="false"
 	openable="false" opened="true"
 	movable="true"
 	resizer="false"
@@ -570,9 +568,9 @@
 
 			<!-- //QUANTITY EDIT BOX -->
 			<view type="text" id="quantity_header" posref="TL TL" color="255 255 255 255" fontsize="10" x="202" y="0" shadow="true" hardtext="uiQtty" />
-			<group id="quantity" posparent="quantity_header" posref="BL TL" x="0" y="1" w="42" child_resize_h="true">
-				<view type="text" id="cross" posref="ML ML" color="255 255 255 255" fontsize="10" x="1" y="-3" shadow="true" hardtext="X" />
-				<instance template="edit_box_widget" id="edit" posref="MR MR" x="-6" text_x="0" text_ref="BR BR" w="26" prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="3"
+			<group id="quantity" posparent="quantity_header" posref="BL TL" x="0" y="1" w="46" child_resize_h="true">
+				<view type="text" id="cross" posref="ML ML" color="255 255 255 255" fontsize="10" x="0" y="-3" shadow="true" hardtext="X" />
+				<instance template="edit_box_widget" id="edit" posref="MR MR" x="-6" text_x="0" text_ref="BR BR" w="30" prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="3"
 					onenter="confirm_trade" params="resale=2" enter_recover_focus="false" reset_focus_on_hide="true" max_historic="0" entry_type="positive_integer"
 				/>
 			</group>
@@ -625,8 +623,8 @@
 					<view type="text" id="header" posref="TL TL" color="255 255 255 255" fontsize="10" x="64" y="0" shadow="true" hardtext="uiResaleMargin" />
 					<ctrl type="button" id="arrow_up" button_type="push_button" posparent="header" x="6" posref="BL TL" tx_normal="W_arrow_up_1.tga" tx_pushed="W_arrow_up_1.tga" tx_over="W_button_12_over.tga" onclick_l="change_resale_margin" params_l="5" onclick_r="change_resale_margin" params_r="20" />
 					<ctrl type="button" id="arrow_down" button_type="push_button" posparent="arrow_up" posref="BL TL" tx_normal="W_arrow_down_1.tga" tx_pushed="W_arrow_down_1.tga" tx_over="W_button_12_over.tga" onclick_l="change_resale_margin" params_l="-5" onclick_r="change_resale_margin" params_r="-20" />
-					<instance template="edit_box_widget" id="edit" posparent="arrow_down" posref="TR ML" text_x="0" text_ref="BR BR" w="42" prompt="+" enter_loose_focus="true" multi_line="false"
-						onenter="confirm_trade" params="resale=2" enter_recover_focus="false" reset_focus_on_hide="true" max_historic="0" entry_type="positive_integer" max_num_chars="5"
+					<instance template="edit_box_widget" id="edit" posparent="arrow_down" posref="TR ML" text_x="0" text_ref="BR BR" w="44" prompt="+" enter_loose_focus="true" multi_line="false"
+						onenter="confirm_trade" params="resale=2" enter_recover_focus="false" reset_focus_on_hide="true" max_historic="0" entry_type="positive_integer" max_num_chars="4"
 					/>
 					<view type="text" id="pct" posparent="edit" posref="MR ML" color="255 255 255 255" fontsize="10" x="0" y="0" shadow="true" hardtext="%%" />
 
@@ -725,7 +723,7 @@
 
 
 		<!-- // RESELL BUTTON -->
-		<ctrl id="confirm_trade_resell" style="button_ok" tooltip="uittResellButton" x="-4" y="0" posparent="confirm_trade" posref="ML MR" text_y="-2" onclick_l="confirm_trade" params_l="resale=1" hardtext="uiLetResell" />
+		<ctrl id="confirm_trade_resell" style="button_ok" tooltip="uittResellButton" x="-4" y="0" posparent="confirm_trade" posref="ML MR" text_y="0" onclick_l="confirm_trade" params_l="resale=1" hardtext="uiLetResell" />
 
 		<!-- group to say that player can't buy item -->
 		<group id="cant_trade" posref="BR TR" x="0" y="-4" posparent="scroll_text" child_resize_w="true" child_resize_h="true">
@@ -757,7 +755,6 @@
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:QUALITY" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:QUANTITY" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:USER_COLOR" type="sint32" value="1" />
-<variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:CHARAC_BUFFS" type="sint8" value="0" />
 <!-- init beige by default -->
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE:WEIGHT" type="sint32" value="0" />
 <!-- selection of the item type -->
@@ -765,7 +762,6 @@
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:QUALITY" type="sint32" value="0" size="128" />
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:QUANTITY" type="sint32" value="0" size="128" />
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:USER_COLOR" type="sint32" value="1" size="128" />
-<variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:CHARAC_BUFFS" type="sint8" value="0" size="128" />
 <!-- init beige by default -->
 <variable entry="UI:VARIABLES:BOTCHAT:FILTER_ITEM_TYPE_SELECTED:$i:WEIGHT" type="sint32" value="0" size="128" />
 <!-- selection of the item type is automatically modified when the bitfield change -->
@@ -831,11 +827,11 @@
   -->
 	<!-- LIST OF ITEMS TO BUY  -->
 	<!-- The H should be "42+hspace" * Number of rows. Setup list.max_h too below-->
-	<group type="list_sheet_trade" sizeref="w" w="0" x="2" y="0" h="%trade_slot_height" id="#id"
+	<group type="list_sheet_trade" sizeref="w" w="0" x="4" y="0" h="%trade_slot_height" id="#id"
 		posparent="parent"
 		posref="TL TL"
 		xitem="2" yitem="-2"
-		xtext="46" ytext="-2"
+		xtext="46" ytext="2"
 		hspace="4"
 		array="false"
 		value="%trade"

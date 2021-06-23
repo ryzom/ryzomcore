@@ -39,8 +39,8 @@
 		<group id="jauge_bar" posref="TL TL" w="#w" h="16">
 			<view type="bitmap" id="jauge_graph" posref="TL TL" texture="jauge.tga" color="#color" global_color="false" />
 		</group>
-		<view type="text" id="t" posref="TL TL" x="16" y="-3" color="255 255 255 255" global_color="false" fontsize="10" shadow="true" hardtext="#text" />
-		<view type="text_number" id="max" posref="MR MR" x="-12" y="-2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" value="#maxval" positive="true" />
+		<view type="text" id="t" posref="TL TL" x="16" y="-1" color="255 255 255 255" global_color="false" fontsize="10" shadow="true" hardtext="#text" />
+		<view type="text_number" id="max" posref="MR MR" x="-12" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" value="#maxval" positive="true" />
 		<view type="text" id="sep" posparent="max" posref="TL TR" x="-1" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="/" />
 		<view type="text_number" id="val" posparent="max" posref="TL TR" x="-10" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" value="#val" positive="true" />
 		<link expr="div(mul(abs(@#val_bar), #w), %player_percent_max)" target="jauge_bar:w" />
@@ -52,9 +52,9 @@
 <!-- AFFICHAGE DES BARRES -->
 <!-- ******************** -->
 <group type="menu" id="player_jauge_menu" extends="base_menu_with_color">
-	<action id="sap_bardisplay" name="uiSapBarDisplay" handler="set" params="dblink=UI:SAVE:PLAYER:DISP_SAP|value=not(@UI:SAVE:PLAYER:DISP_SAP)" />
-	<action id="sta_bardisplay" name="uiStaBarDisplay" handler="set" params="dblink=UI:SAVE:PLAYER:DISP_STA|value=not(@UI:SAVE:PLAYER:DISP_STA)" />
-	<action id="foc_bardisplay" name="uiFocBarDisplay" handler="set" params="dblink=UI:SAVE:PLAYER:DISP_FOC|value=not(@UI:SAVE:PLAYER:DISP_FOC)" />
+	<action id="sap_bardisplay" name="uiSapBarDisplay" handler="set" params="dblink=UI:SAVE:PLAYER:DISP_SAP|value=not(@UI:SAVE:PLAYER:DISP_SAP)" icon="ico_wisdom.tga" />
+	<action id="sta_bardisplay" name="uiStaBarDisplay" handler="set" params="dblink=UI:SAVE:PLAYER:DISP_STA|value=not(@UI:SAVE:PLAYER:DISP_STA)" icon="ico_wellbalanced.tga" />
+	<action id="foc_bardisplay" name="uiFocBarDisplay" handler="set" params="dblink=UI:SAVE:PLAYER:DISP_FOC|value=not(@UI:SAVE:PLAYER:DISP_FOC)" icon="ico_will.tga" />
 </group>
 <link expr="depends(@UI:SAVE:PLAYER:DISP_SAP, @UI:SAVE:PLAYER:DISP_STA, @UI:SAVE:PLAYER:DISP_FOC)" action="lua" params="game:updatePlayerBars()" />
 <link expr="depends(@SERVER:CHARACTER_INFO:PVP_FACTION_TAG)" action="lua" params="game:updatePvpTag()" />
@@ -164,9 +164,11 @@
 <!-- Temp DB that may contains other static bonus (XPcatalyzer, RingXPcatalyzer, PVP Outpost) -->
 <variable entry="UI:VARIABLES:BONUS:$i:SHEET" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:BONUS:$i:DISABLED" type="sint32" value="0" size="%num_local_bonus_malus" />
+	<variable entry="UI:VARIABLES:BONUS:$i:DISABLED_TIME" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:BONUS:$i:SPECIAL_TOOLTIP" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:MALUS:$i:SHEET" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:MALUS:$i:DISABLED" type="sint32" value="0" size="%num_local_bonus_malus" />
+	<variable entry="UI:VARIABLES:MALUS:$i:DISABLED_TIME" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:MALUS:$i:SPECIAL_TOOLTIP" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:SHOW_BONUS" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:SHOW_MALUS" type="sint32" value="0" />
@@ -185,9 +187,9 @@
 	</group>
 </template>
 <!-- The Bonus Malus Window -->
-<group type="container" id="bonus_malus" w="116" h="80" title="" global_color="false" global_color_over="true" resizer="false" header_active="false" right_button="false" movable="true" active="true" opened="true" openable="false" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:BONUS_MALUS|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:BONUS_MALUS|value=0" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" options="compass">
+<group type="container" id="bonus_malus" w="118" h="80" title="" global_color="false" global_color_over="true" resizer="false" header_active="false" right_button="false" movable="true" active="true" opened="true" openable="false" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:BONUS_MALUS|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:BONUS_MALUS|value=0" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" options="compass">
 	<group id="header_closed" x="0" y="0" h="0" posref="TL TL" />
-	<group id="header_opened" x="0" y="0" w="116" child_resize_h="true" child_resize_hmargin="7" posref="TL TL">
+	<group id="header_opened" x="0" y="0" w="118" child_resize_h="true" child_resize_hmargin="7" posref="TL TL">
 		<!-- WINDOW TOOLTIP -->
 		<!-- display the tooltip only when the window is empty (so players understand what it is) -->
 		<ctrl type="tooltip" id="tt_empty" instant_help="true" posref="TM TM" x="0" y="-3" sizeref="w" w="-6" h="22" tooltip="uittBonusMalusWindow" tooltip_parent="win" />
@@ -195,7 +197,7 @@
 		<!-- BONUS -->
 		<group id="bonus" x="2" y="-4" sizeref="w" w="0" child_resize_h="true" posref="TL TL">
 			<!-- Special list_sheet that display some disable bitmap if needed according to DB -->
-			<group type="list_sheet_bonus_malus" id="bonuses" sizeref="w" w="0" value="UI:VARIABLES:BONUS" posref="TL TL" y="0" wspace="2" hspace="12" maxitem="%num_local_bonus_malus" rowmin="1" rowmax="4" nature="sbrick" array="false" lmargin="0" rmargin="0" tmargin="0" bmargin="1" column_max="4" column_center="false" disable_texture="MG_suppression.tga" onclick_r="open_sbrick_help" params_r="test_aura_disabled=1" onclick_l="lua:game:onLeftClickBonus()" on_tooltip="aura_modifier_tooltip" child_resize_h="true" tooltip_parent="win"></group>
+			<group type="list_sheet_bonus_malus" id="bonuses" sizeref="w" w="0" value="UI:VARIABLES:BONUS" posref="TL TL" y="0" wspace="2" hspace="16" maxitem="%num_local_bonus_malus" rowmin="1" rowmax="4" nature="sbrick" array="false" lmargin="2" rmargin="2" tmargin="0" bmargin="1" column_max="4" column_center="false" disable_texture="MG_suppression.tga" onclick_r="open_sbrick_help" params_r="test_aura_disabled=1" onclick_l="lua:game:onLeftClickBonus()" on_tooltip="aura_modifier_tooltip" child_resize_h="true" tooltip_parent="win" regen_text="true" regen_text_y="-12" regen_text_fontsize="9" regen_text_color="255 255 0" regen_text_disabled_color="200 200 200"></group>
 			<!-- small texts under icons. For now do only the first 4th bonus. Do it later for other if needed -->
 			<instance template="t_text_bonus" id="text0" x="13" y="-26" />
 			<instance template="t_text_bonus" id="text1" x="41" y="-26" />
@@ -211,7 +213,7 @@
 		<!-- MALUS -->
 		<group id="malus" y="-2" sizeparent="parent" sizeref="w" w="0" child_resize_h="true" posparent="dummy_pos" posref="BL TL">
 			<!-- Special list_sheet that display some disable bitmap if needed according to DB -->
-			<group type="list_sheet_bonus_malus" id="maluses" sizeref="w" w="0" value="UI:VARIABLES:MALUS" posref="TL TL" y="0" wspace="2" hspace="12" maxitem="%num_local_bonus_malus" rowmin="1" rowmax="4" nature="sbrick" array="false" lmargin="0" rmargin="0" tmargin="0" bmargin="0" column_max="4" column_center="false" disable_texture="MG_suppression.tga" onclick_r="open_sbrick_help" params_r="test_aura_disabled=1" onclick_l="lua:game:onLeftClickMalus()" on_tooltip="aura_modifier_tooltip" child_resize_h="true" tooltip_parent="win"></group>
+			<group type="list_sheet_bonus_malus" id="maluses" sizeref="w" w="0" value="UI:VARIABLES:MALUS" posref="TL TL" y="0" wspace="2" hspace="16" maxitem="%num_local_bonus_malus" rowmin="1" rowmax="4" nature="sbrick" array="false" lmargin="0" rmargin="0" tmargin="0" bmargin="0" column_max="4" column_center="false" disable_texture="MG_suppression.tga" onclick_r="open_sbrick_help" params_r="test_aura_disabled=1" onclick_l="lua:game:onLeftClickMalus()" on_tooltip="aura_modifier_tooltip" child_resize_h="true" tooltip_parent="win" regen_text="true" regen_text_y="-12" regen_text_fontsize="9" regen_text_color="255 255 0" regen_text_disabled_color="200 200 200"></group>
 			<link expr="@UI:VARIABLES:SHOW_MALUS" target="active" />
 		</group>
 	</group>
@@ -223,22 +225,24 @@
 <!-- Animals MENU -->
 <!-- Each Option is enabled/disabled at open according to the animal selected -->
 <group type="menu" id="animal_menu_all" extends="base_menu_with_color" on_active="animal_menu_option">
-	<action id="follow" name="uimFollowMe" handler="beast_order" params="order=follow|beast_index=@UI:BEAST_SELECTED" />
-	<action id="stop" name="uimStop" handler="beast_order" params="order=stop|beast_index=@UI:BEAST_SELECTED" />
-	<action id="free" name="uimFree" handler="beast_order" params="order=free|beast_index=@UI:BEAST_SELECTED" />
-	<action id="enter_stable" name="uimEnterStable" handler="beast_order" params="order=enter_stable|beast_index=@UI:BEAST_SELECTED" />
-	<action id="leave_stable" name="uimLeaveStable" handler="beast_order" params="order=leave_stable|beast_index=@UI:BEAST_SELECTED" />
+	<action id="follow" name="uimFollowMe" handler="beast_order" params="order=follow|beast_index=@UI:BEAST_SELECTED" icon="lm_target.tga" />
+	<action id="stop" name="uimStop" handler="beast_order" params="order=stop|beast_index=@UI:BEAST_SELECTED" icon="r2ed_icon_stop.tga" />
+	<action id="free" name="uimFree" handler="beast_order" params="order=free|beast_index=@UI:BEAST_SELECTED" icon="r2_icon_despawn.tga" />
+	<action id="enter_stable" name="uimEnterStable" handler="beast_order" params="order=enter_stable|beast_index=@UI:BEAST_SELECTED" icon="stable_enter.tga" />
+	<action id="leave_stable" name="uimLeaveStable" handler="beast_order" params="order=leave_stable|beast_index=@UI:BEAST_SELECTED" icon="stable_leave.tga" />
 	<separator />
 </group>
 <!-- Each Option is enabled/disabled at open according to the animal selected -->
 <group type="menu" id="animal_menu" extends="base_menu" on_active="animal_menu_option">
-	<action id="follow" name="uimFollowMe" handler="beast_order" params="order=follow|beast_index=@UI:BEAST_SELECTED" />
-	<action id="stop" name="uimStop" handler="beast_order" params="order=stop|beast_index=@UI:BEAST_SELECTED" />
-	<action id="free" name="uimFree" handler="beast_order" params="order=free|beast_index=@UI:BEAST_SELECTED" />
-	<action id="enter_stable" name="uimEnterStable" handler="beast_order" params="order=enter_stable|beast_index=@UI:BEAST_SELECTED" />
-	<action id="leave_stable" name="uimLeaveStable" handler="beast_order" params="order=leave_stable|beast_index=@UI:BEAST_SELECTED" />
-	<action id="mount" name="uimMount" handler="beast_order" params="order=mount|beast_index=@UI:BEAST_SELECTED" />
-	<action id="unseat" name="uimUnmount" handler="beast_order" params="order=unmount|beast_index=@UI:BEAST_SELECTED" />
+	<action id="follow" name="uimFollowMe" handler="beast_order" params="order=follow|beast_index=@UI:BEAST_SELECTED" icon="lm_target.tga" />
+	<action id="stop" name="uimStop" handler="beast_order" params="order=stop|beast_index=@UI:BEAST_SELECTED" icon="r2ed_icon_stop.tga" />
+	<action id="free" name="uimFree" handler="beast_order" params="order=free|beast_index=@UI:BEAST_SELECTED" icon="r2_icon_despawn.tga" />
+	<action id="enter_stable" name="uimEnterStable" handler="beast_order" params="order=enter_stable|beast_index=@UI:BEAST_SELECTED" icon="stable_enter.tga" />
+	<action id="leave_stable" name="uimLeaveStable" handler="beast_order" params="order=leave_stable|beast_index=@UI:BEAST_SELECTED" icon="stable_leave.tga" />
+	<action id="enter_bag" name="uimEnterBag" handler="beast_order" params="order=enter_bag|beast_index=@UI:BEAST_SELECTED" icon="bag_enter.tga" />
+	<action id="leave_bag" name="uimLeaveBag" handler="beast_order" params="order=leave_bag|beast_index=@UI:BEAST_SELECTED" icon="bag_leave.tga" />
+	<action id="mount" name="uimMount" handler="beast_order" params="order=mount|beast_index=@UI:BEAST_SELECTED" icon="mektoub_mount.tga" />
+	<action id="unseat" name="uimUnmount" handler="beast_order" params="order=unmount|beast_index=@UI:BEAST_SELECTED" icon="mektoub_unmount.tga" />
 </group>
 <!-- temp variable to store the animal selected 
   0: All animals
@@ -286,13 +290,16 @@
 			<!-- animal status icon -->
 			<view type="bitmap" id="animal_alive_landscape" posref="MR MR" x="-124" w="14" h="14" scale="true" texture="mektoub_map.tga" />
 			<instance template="text_tt" tooltip="uittAliveLandscape" posparent="animal_alive_landscape" tooltip_parent="win" />
-			<link expr="and(isAnimalStatusAlive(@#beast_db_entry:STATUS),not(isAnimalStatusInStable(@#beast_db_entry:STATUS)))" target="animal_alive_landscape:active,tt_animal_alive_landscape:active" />
+			<link expr="and(isAnimalStatusAlive(@#beast_db_entry:STATUS),not(isAnimalStatusInStable(@#beast_db_entry:STATUS)),not(isAnimalStatusInBag(@#beast_db_entry:STATUS)))" target="animal_alive_landscape:active,tt_animal_alive_landscape:active" />
 			<view type="bitmap" id="animal_stable" posref="MR MR" x="-124" w="14" h="14" scale="true" texture="building_state2.tga" />
 			<instance template="text_tt" tooltip="uittStable" posparent="animal_stable" tooltip_parent="win" />
 			<link expr="isAnimalStatusInStable(@#beast_db_entry:STATUS)" target="animal_stable:active,tt_animal_stable:active" />
 			<view type="bitmap" id="animal_dead" posref="MR MR" x="-124" w="14" h="14" scale="true" texture="MP_skull.tga" />
 			<instance template="text_tt" tooltip="uittDead" posparent="animal_dead" tooltip_parent="win" />
 			<link expr="isAnimalStatusDead(@#beast_db_entry:STATUS)" target="animal_dead:active,tt_animal_dead:active" />
+			<view type="bitmap" id="animal_in_bag" posref="MR MR" x="-124" w="14" h="14" scale="true" texture="ico_mission_purse.tga" />
+			<instance template="text_tt" tooltip="uittInBag" posparent="animal_in_bag" tooltip_parent="win" />
+			<link expr="isAnimalStatusInBag(@#beast_db_entry:STATUS)" target="animal_in_bag:active,tt_animal_in_bag:active" />
 			<view type="bitmap" id="weight" posref="MR MR" x="-84" texture="W_weight.tga" />
 			<ctrl type="tooltip" id="tt_weight" posparent="weight" posref="MR MR" x="0" y="0" sizeref="wh" w="28" h="14" tooltip="uittAnimalWeight" tooltip_parent="win" />
 			<view type="text" id="weight_txt" posparent="weight" posref="TL TR" x="-2" y="-2" color="255 255 255 255" shadow="true" fontsize="8" />
@@ -320,6 +327,9 @@
 <instance template="pa_template" index="2" bars_entry="UI:VARIABLES:BARS:ANIMAL:1" beast_db_entry="%pa_beast1" bag_path="%pa_bag1" />
 <instance template="pa_template" index="3" bars_entry="UI:VARIABLES:BARS:ANIMAL:2" beast_db_entry="%pa_beast2" bag_path="%pa_bag2" />
 <instance template="pa_template" index="4" bars_entry="UI:VARIABLES:BARS:ANIMAL:3" beast_db_entry="%pa_beast3" bag_path="%pa_bag3" />
+<instance template="pa_template" index="5" bars_entry="UI:VARIABLES:BARS:ANIMAL:4" beast_db_entry="%pa_beast4" bag_path="%pa_bag4" />
+<instance template="pa_template" index="6" bars_entry="UI:VARIABLES:BARS:ANIMAL:5" beast_db_entry="%pa_beast5" bag_path="%pa_bag5" />
+<instance template="pa_template" index="7" bars_entry="UI:VARIABLES:BARS:ANIMAL:6" beast_db_entry="%pa_beast6" bag_path="%pa_bag6" />
 <!-- ***************************** -->
 <!-- *   ANIMAL(S) DEAD WINDOW   * -->
 <!-- ***************************** -->
@@ -368,11 +378,17 @@
 <instance template="animal_inventory_template" id="inv_pa1" title="1" info_entry="%pa_beast1" bag_entry="%pa_bag1" icon_db="INV_PA1" />
 <instance template="animal_inventory_template" id="inv_pa2" title="2" info_entry="%pa_beast2" bag_entry="%pa_bag2" icon_db="INV_PA2" />
 <instance template="animal_inventory_template" id="inv_pa3" title="3" info_entry="%pa_beast3" bag_entry="%pa_bag3" icon_db="INV_PA3" />
+<instance template="animal_inventory_template" id="inv_pa4" title="4" info_entry="%pa_beast4" bag_entry="%pa_bag4" icon_db="INV_PA4" />
+<instance template="animal_inventory_template" id="inv_pa5" title="5" info_entry="%pa_beast5" bag_entry="%pa_bag5" icon_db="INV_PA5" />
+<instance template="animal_inventory_template" id="inv_pa6" title="6" info_entry="%pa_beast6" bag_entry="%pa_bag6" icon_db="INV_PA6" />
 <tree node="animal_global">
 	<!-- MAX_INVENTORY_ANIMAL -->
 	<tree node="userpa1" />
 	<tree node="userpa2" />
 	<tree node="userpa3" />
 	<tree node="userpa4" />
+	<tree node="userpa5" />
+	<tree node="userpa6" />
+	<tree node="userpa7" />
 </tree>
 </interface_config>

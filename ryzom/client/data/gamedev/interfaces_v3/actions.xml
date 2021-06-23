@@ -31,6 +31,8 @@
 	<value value="inventory"			hardtext="uiInventory" contexts="game, r2ed_anim_test"/>
 	<value value="phrase_book"			hardtext="uiPhraseBook" contexts="game, r2ed_anim_test"/>
 	<value value="mailbox"				hardtext="uiMailBox" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
+	<value value="webig"				hardtext="uiWebIG" contexts="game"/>
+	<value value="appzone"				hardtext="uiAppZone" contexts="game"/>
 
 	<value value="animal_global"		hardtext="uiAnimals" contexts="game"/>
 
@@ -78,10 +80,113 @@
 <action_category name="player" hardtext="uiPlayer" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
 	<action name="toggle_light"         hardtext="uiLightOnOff"/>
 	<action name="toggle_dodge_parry"   hardtext="uiToggleDodgeParry"/>
+	<action name="dodge" 				hardtext="uiMK_Defense_0"/>
+	<action name="parry" 				hardtext="uiMK_Defense_1"/>
 </action_category>
 
-<action_category name="movement" hardtext="uiMovement" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
+<action_category name="animal" hardtext="uiAnimals" contexts="game">
+	<action name="beast_order" hardtext="uimFollowMe">
+		<parameter name="order" value="follow" type="%action_param_hidden" />
+		<parameter hardtext="uiAnimals" name="beast_index" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="beast_order" hardtext="uimStop">
+		<parameter name="order" value="stop" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="do_beast_free" hardtext="uimFree">
+		<parameter hardtext="uiAnimals" type="%action_param_constant" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="beast_order" hardtext="uimEnterStable">
+		<parameter name="order" value="enter_stable" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="beast_order" hardtext="uimLeaveStable">
+		<parameter name="order" value="leave_stable" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+		<action name="beast_order" hardtext="uimEnterBag">
+		<parameter name="order" value="enter_bag" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="5">
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="beast_order" hardtext="uimLeaveBag">
+		<parameter name="order" value="leave_bag" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="5">
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+</action_category>
+
+<action_category name="movement" hardtext="uiMovement" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm, misc">
 	<action name="toggle_sit_stand"	hardtext="uiMoveToggleSitStand" contexts="game, r2ed_anim_test"/>
+	<action name="command" hardtext="uimFollow" contexts="game, misc">
+    	<parameter name="" value="follow" type="%action_param_hidden"/>
+    </action>
 	<action name="forward"			hardtext="uiMoveForward" macroisable="false" />
 	<action name="backward"			hardtext="uiMoveBackward" macroisable="false" />
 	<action name="turn_left"		hardtext="uiMoveTurnLeft" macroisable="false" />
@@ -134,7 +239,11 @@
 	</action>
 	<action name="assist_target"		hardtext="uiAssistTargetCmd" contexts="game, r2ed_anim_test"/>
 	<action name="self_target"			hardtext="uiSelfTarget" contexts="game, r2ed_anim_test"/>
+	<action name="target_landmark"		hardtext="uiTargetLandmarkCmd" >
+		<parameter hardtext="uiTargetLandmarkCmdEntity" type="%action_param_user" name="search"/>
+	</action>
 	<action name="toggle_combat"		hardtext="uiToggleCombat" contexts="game, r2ed_anim_test"/>
+	<action name="open_default_context"		hardtext="uiOpenDefaultContext" contexts="game"/>
 	<action name="front_selection"	hardtext="uiFrontSelection" contexts="game, r2ed_anim_test">
 		<parameter hardtext="uiFrontSelectionType">
 			<value value="friend" hardtext="uiFrontSelectionFriend"/>
@@ -229,6 +338,9 @@
 			<value value="pet_animal2" hardtext="uimMtPaPacker1" />
 			<value value="pet_animal3" hardtext="uimMtPaPacker2" />
 			<value value="pet_animal4" hardtext="uimMtPaPacker3" />
+			<value value="pet_animal5" hardtext="uitabInvPAZig1" />
+			<value value="pet_animal6" hardtext="uitabInvPAZig2" />
+			<value value="pet_animal7" hardtext="uitabInvPAZig3" />
 			<value value="player_room" hardtext="uimMtRoom" />
 			<value value="guild"	   hardtext="uimMtGuild" />
 		</parameter>

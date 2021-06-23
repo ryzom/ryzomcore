@@ -190,11 +190,11 @@
 
 
 <proc id="radar_proc_zoom_in">
-	<action handler="set" cond="ne(@UI:SAVE:RADARZOOM,0)" params="dblink=UI:SAVE:RADARZOOM|value=sub(@UI:SAVE:RADARZOOM,1)" />
+	<action handler="set" cond="ne(@UI:SAVE:RADARZOOM,0)" params="dblink=UI:SAVE:RADARZOOM|value=sub(@UI:SAVE:RADARZOOM,1)" icon="w_button_radar_plus.tga" />
 </proc>
 
 <proc id="radar_proc_zoom_out">
-	<action handler="set" cond="ne(@UI:SAVE:RADARZOOM,3)" params="dblink=UI:SAVE:RADARZOOM|value=add(@UI:SAVE:RADARZOOM,1)" />
+	<action handler="set" cond="ne(@UI:SAVE:RADARZOOM,3)" params="dblink=UI:SAVE:RADARZOOM|value=add(@UI:SAVE:RADARZOOM,1)" icon="w_button_radar_moins.tga" />
 </proc>
 
 <proc id="radar_proc_zoom">
@@ -204,123 +204,124 @@
 		params="target_property=ui:interface:compass:visuel:radar:world_size|value=switch(@0, 50.0, 100.0, 250.0, 500.0)" />
 </proc>
 
+<define id="landmark_menu_max_visible" value="25" />
 <group id="compass_menu" type="menu_compas" extends="base_menu_with_color" posref="TL TL" x="0" y="0"
 	mouse_pos="true" exit_click_b="true" force_inside_screen="true" compass="ui:interface:compass">
 
 
 	<!-- SubMenus. Add dummy entries first -->
-	<action id="mission" name="uimCompassMissions">
+	<action id="mission" name="uimCompassMissions" icon="mission_available.tga">
 		<action id="dummy1" name="DUMMY-ERROR" />
 	</action>
-	<action id="land_mark" name="uimCompassLandMarks">
-		<action id="land_mark_misc" name="uiLMMiscColor">
+	<action id="land_mark" name="uimCompassLandMarks" icon="lm_user.tga">
+		<action id="land_mark_misc" max_visible_line="%landmark_menu_max_visible" name="uiLMMiscColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_tribe" name="uiLMTribeColor">
+		<action id="land_mark_tribe" max_visible_line="%landmark_menu_max_visible" name="uiLMTribeColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_bandit" name="uiLMBanditColor">
+		<action id="land_mark_bandit" max_visible_line="%landmark_menu_max_visible" name="uiLMBanditColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_citizen" name="uiLMCitizenColor">
+		<action id="land_mark_citizen" max_visible_line="%landmark_menu_max_visible" name="uiLMCitizenColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_fauna" name="uiLMFaunaColor">
+		<action id="land_mark_fauna" max_visible_line="%landmark_menu_max_visible" name="uiLMFaunaColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_faunaexcel" name="uiLMFaunaExcelColor">
+		<action id="land_mark_faunaexcel" max_visible_line="%landmark_menu_max_visible" name="uiLMFaunaExcelColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_faunasup" name="uiLMFaunaSupColor">
+		<action id="land_mark_faunasup" max_visible_line="%landmark_menu_max_visible" name="uiLMFaunaSupColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_forage" name="uiLMForageColor">
+		<action id="land_mark_forage" max_visible_line="%landmark_menu_max_visible" name="uiLMForageColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
 		<action id="land_mark_forageexcel" name="uiLMForageExcelColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_foragesup" name="uiLMForageSupColor">
+		<action id="land_mark_foragesup" max_visible_line="%landmark_menu_max_visible" name="uiLMForageSupColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_sap" name="uiLMSapColor">
+		<action id="land_mark_sap" max_visible_line="%landmark_menu_max_visible" name="uiLMSapColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_amber" name="uiLMAmberColor">
+		<action id="land_mark_amber" max_visible_line="%landmark_menu_max_visible" name="uiLMAmberColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_node" name="uiLMNodeColor">
+		<action id="land_mark_node" max_visible_line="%landmark_menu_max_visible" name="uiLMNodeColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_fiber" name="uiLMFiberColor">
+		<action id="land_mark_fiber" max_visible_line="%landmark_menu_max_visible" name="uiLMFiberColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_bark" name="uiLMBarkColor">
+		<action id="land_mark_bark" max_visible_line="%landmark_menu_max_visible" name="uiLMBarkColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_seed" name="uiLMSeedColor">
+		<action id="land_mark_seed" max_visible_line="%landmark_menu_max_visible" name="uiLMSeedColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_shell" name="uiLMShellColor">
+		<action id="land_mark_shell" max_visible_line="%landmark_menu_max_visible" name="uiLMShellColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_resin" name="uiLMResinColor">
+		<action id="land_mark_resin" max_visible_line="%landmark_menu_max_visible" name="uiLMResinColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_wood" name="uiLMWoodColor">
+		<action id="land_mark_wood" max_visible_line="%landmark_menu_max_visible" name="uiLMWoodColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_oil" name="uiLMOilColor">
+		<action id="land_mark_oil" max_visible_line="%landmark_menu_max_visible" name="uiLMOilColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_mission" name="uiLMMissionColor">
+		<action id="land_mark_mission" max_visible_line="%landmark_menu_max_visible" name="uiLMMissionColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_food" name="uiLMFoodColor">
+		<action id="land_mark_food" max_visible_line="%landmark_menu_max_visible" name="uiLMFoodColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_construction" name="uiLMConstructionColor">
+		<action id="land_mark_construction" max_visible_line="%landmark_menu_max_visible" name="uiLMConstructionColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_goo" name="uiLMGooColor">
+		<action id="land_mark_goo" max_visible_line="%landmark_menu_max_visible" name="uiLMGooColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_insect" name="uiLMInsectColor">
+		<action id="land_mark_insect" max_visible_line="%landmark_menu_max_visible" name="uiLMInsectColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_kitin" name="uiLMKitinColor">
+		<action id="land_mark_kitin" max_visible_line="%landmark_menu_max_visible" name="uiLMKitinColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_nocive" name="uiLMNociveColor">
+		<action id="land_mark_nocive" max_visible_line="%landmark_menu_max_visible" name="uiLMNociveColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_preservative" name="uiLMPreservativeColor">
+		<action id="land_mark_preservative" max_visible_line="%landmark_menu_max_visible" name="uiLMPreservativeColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_passage" name="uiLMPassageColor">
+		<action id="land_mark_passage" max_visible_line="%landmark_menu_max_visible" name="uiLMPassageColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
-		<action id="land_mark_teleporter" name="uiLMTeleporterColor">
+		<action id="land_mark_teleporter" max_visible_line="%landmark_menu_max_visible" name="uiLMTeleporterColor">
 			<action id="dummy1" name="DUMMY-ERROR" />
 		</action>
 	</action>
-	<action id="team" name="uimCompassTeam">
+	<action id="team" name="uimCompassTeam" icon="teammate_map.tga">
 		<action id="dummy1" name="DUMMY-ERROR" />
 	</action>
 
-	<action id="animal" name="uimCompassAnimal">
+	<action id="animal" name="uimCompassAnimal" icon="mektoub_map.tga">
 		<action id="dummy1" name="DUMMY-ERROR" />
 	</action>
 
-	<action id="dialogs" name="uimCompassDialogs">
+	<action id="dialogs" name="uimCompassDialogs" icon="r2ed_create_dialog.tga">
 		<action id="dummy1" name="DUMMY-ERROR" />
 	</action>
 
 	<!-- Common Container menu actions -->
 	<separator />
 
-	<action id="zi" name="uimZoomIn" handler="proc" params="radar_proc_zoom_in" />
-	<action id="zo" name="uimZoomOut" handler="proc" params="radar_proc_zoom_out" />
+	<action id="zi" name="uimZoomIn" handler="proc" params="radar_proc_zoom_in" icon="arbo_close_just_one.tga" />
+	<action id="zo" name="uimZoomOut" handler="proc" params="radar_proc_zoom_out" icon="arbo_open_first.tga" />
 
 	<separator />
 	<!--
@@ -357,7 +358,7 @@
 	</group>
 	<link expr="@UI:SAVE:SHOW_CLOCK" target="clock:active" />
 	<!-- new mail message notifier -->
-	<group id="mail" posref="BR BR" group_onclick_l="show_hide" group_params_l="mailbox" tooltip="uiMk_interaction5" w="32" h="24" x="-4" y="42">
+	<group id="mail" posref="BR BR" group_onclick_l="show_hide" group_params_l="mailbox" tooltip="uiMk_interaction5" w="32" h="24" x="-4" y="50">
 		<view id="envelop" type="bitmap" texture="mail.tga" global_color="false" />
 		<view type="text" id="mail_nb" posref="BR BR" x="0" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="" />
 		<!--	<view type="text" id="mail_nb2" posparent="mail_nb" posref="BL BR" x="-2" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="x" /> -->
@@ -365,13 +366,45 @@
 	<link expr="@UI:VARIABLES:MAIL_WAITING" target="mail:active" />
 
 	<!-- new guild forum message notifier -->
-	<group id="forum" posref="BR BR" group_onclick_l="show_hide" group_params_l="guild_forum" tooltip="uiMk_interaction3" w="32" h="24" x="-20" y="22">
+	<group id="forum" posref="BR BR" group_onclick_l="show_hide" group_params_l="guild_forum" tooltip="uiMk_interaction3" w="32" h="24" x="-30" y="20">
 		<view id="envelop" type="bitmap" w="24" scale="true" texture="r2ed_create_dialog.tga" global_color="false" />
 		<view type="text" id="forum_nb" posref="BR BR" x="0" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="" />
 	</group>
 	<link expr="@UI:VARIABLES:FORUM_UPDATED" target="forum:active" />
-
-
+		<!-- show/hide webig calendar -->
+		<group id="calendar" posref="TL TL" group_onclick_l="lua" group_params_l="game:displayCalendar()" tooltip="uiMFDate" w="24" h="24" x="4" y="-30">
+			<view id="envelop" type="bitmap" texture="calendar.tga" global_color="false" />
+			<view type="text" id="date" posref="BM BM" x="0" y="2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="19" />
+		</group>
+		<!-- show/hide map -->
+		<group id="map" posref="BL BL" group_onclick_l="show_hide" group_params_l="map" tooltip="uiMk_window5" w="24" h="24" x="4" y="22">
+			<view id="envelop" type="bitmap" texture="ico_hatred.tga" global_color="false" />
+		</group>
+		<!-- show/hide dynE -->
+		<group id="dyne" posref="BR BR" group_onclick_l="lua" group_params_l="game:displayDynE()" tooltip="uiR2Events" active="false" w="24" h="24" x="-4" y="20">
+			<view id="envelop" type="bitmap" texture="dyn_event_compass.tga" global_color="false" />
+			<view type="text" id="dyne_nb" posref="BR BR" x="-1" y="-2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="" />
+		</group>
+		<!-- show/hide whatsup -->
+		<group id="whatsup" posref="BL BL" group_onclick_l="lua" group_params_l="game:displayWhatsUp()" tooltip="uiTalkMemMsg10" active="false" w="24" h="24" x="4" y="50">
+			<view id="envelop" type="bitmap" texture="whatsup_mini.tga" global_color="false" />
+		</group>
+		<!-- show/hide help -->
+		<group id="help" posref="TR TR" group_onclick_l="show_hide" group_params_l="cs_browser" tooltip="uiMk_window8" w="24" h="24" x="-4" y="-30">
+			<view id="envelop" type="bitmap" texture="tb_help2.tga" global_color="false" />
+		</group>
+		<!-- user icon 1 -->
+		<group id="user1" posref="TL TL" group_onclick_l="lua" group_params_l="game:displayCompassIconUser1()" tooltip="uiMk_interaction5" w="32" h="24" x="4" y="-58">
+			<view id="envelop" type="bitmap" texture="tb_identity.tga" global_color="false" />
+			<view type="text" id="user1_text" posref="BR BR" x="0" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="0" />
+		</group>
+		<link expr="@UI:VARIABLES:COMPASS_ICON_USER1" target="user1:active" />
+		<!-- user icon 2 -->
+		<group id="user2" posref="TR TR" group_onclick_l="show_hide" group_params_l="game:displayCompassIconUser2()" tooltip="uiMk_interaction5" w="32" h="24" x="-4" y="-58">
+			<view id="envelop" type="bitmap" texture="tb_identity.tga" global_color="false" />
+			<view type="text" id="user2_text" posref="BR BR" x="0" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="0" />
+		</group>
+		<link expr="@UI:VARIABLES:COMPASS_ICON_USER2" target="user2:active" />
 	<view type="text" id="dist" posref="BM BM" x="0" y="2" hardtext="uiRadarZoom0" shadow="true" color="255 255 255 255" global_color="false" fontsize="12" line_maxw="164" over_extend_view_text="true" />
 
 	<scene3d id="arrow3d" x="0" y="0" w="142" h="142" posref="TM TM" curcam="cam"
@@ -507,5 +540,7 @@
 <link expr="eq(@UI:VARIABLES:SERVERSTATE,6)" target="connection:content:server6:active" />
 <link expr="eq(@UI:VARIABLES:SERVERSTATE,7)" target="connection:content:server7:active" />
 <link expr="eq(@UI:VARIABLES:SERVERSTATE,8)" target="connection:content:server8:active" />
+
+<lua file="compass.lua" />
 
 </interface_config>

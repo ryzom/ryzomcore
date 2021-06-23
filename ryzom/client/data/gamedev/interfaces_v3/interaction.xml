@@ -148,6 +148,11 @@
                 <instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_bytes="255" entry_type="playername" />
                 <instance template="button_ok_cancel" posparent="add_contact_eb" posref="BR TR" x="0" y="0" onclick_ok="add_contact" onclick_ok_param="" onclick_cancel="leave_modal" onclick_cancel_param="" />
         </group>
+	<group type="modal" id="change_contact_group" exit_click_out="true" posref="MM MR" w="212" child_resize_h="true" child_resize_hmargin="14" options="skin_modal" on_active="set_keyboard_focus" on_active_params="target=ui:interface:change_contact_group:change_contact_group_eb:eb|select_all=false">
+		<view type="text" id="text" posref="TL TL" x="8" y="-8" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="uiPeopleChangeContactGroup" />
+		<instance template="edit_box_widget" id="change_contact_group_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="change_contact_group" max_num_bytes="255" entry_type="text" />
+		<instance template="button_ok_cancel" posparent="change_contact_group_eb" posref="BR TR" x="0" y="0" onclick_ok="change_contact_group" onclick_ok_param="" onclick_cancel="leave_modal" onclick_cancel_param="" />
+	</group>
         <!-- ***************** -->
         <!-- * CHAT TEMPLATE * -->
         <!-- ***************** -->
@@ -242,7 +247,7 @@
         </group>
         <!-- a template of a dynamic chat tab -->
         <template name="temp_tab_dyn_chat" keep="true" nb="" id="" posparent="" posref="TR TL">
-                <ctrl style="tab_button_new" id="#id" group="content:cb:dyn_chat#nb" posparent="#posparent" posref="#posref" textid="SERVER:DYN_CHAT:CHANNEL#nb:NAME" dynamic_string="true" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:DYNAMIC_CHAT#nb|value=1" onclick_l="chat_group_filter" params_l="dyn_chat#nb" />
+                <ctrl style="tab_button_new" id="#id" group="content:cb:dyn_chat#nb" posparent="#posparent" posref="#posref" textid="SERVER:DYN_CHAT:CHANNEL#nb:NAME" dynamic_string="true" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:DYNAMIC_CHAT#nb|value=1" onclick_l="lua" params_l="game:chatWelcomeMsg(#nb)" />
                 <link expr="and(and(ne(@SERVER:DYN_CHAT:CHANNEL#nb:NAME,0), @UI:SAVE:ISENABLED:DYNAMIC_CHAT#nb),
                     not(@UI:SAVE:ISDETACHED:DYNAMIC_CHAT#nb))" target="#id:active" />
         </template>
@@ -266,13 +271,13 @@
                 <group type="container" id="#id" w="#w" h="#h" posparent="#posparent" resizer="true" openable="false" popable="false" open_when_popup="true" header_active="false" right_button="false" pop_min_w="244" pop_min_h="128" pop_max_w="2000" pop_max_h="1600" global_color="false" global_color_over="true" lockable="true" help_page="interf_chat.html" resizer_top_size="5">
                         <group id="header_closed" x="0" y="0" h="0" posref="TL TL"></group>
                         <group id="header_opened" x="0" y="0" w="100" h="28" posref="TL TL" group_onclick_r="select_chat_source">
-                                <group type="tab" id="channel_select" child_resize_w="true" h="24" posref="TL TL" x="10" y="0" max_w="0" max_sizeref="w">
-                                        <ctrl style="tab_button_new" id="tab0" x="0" posref="TL TL" group="content:cb:around" hardtext="uitabChatAround" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:AROUND_ME|value=1" onclick_l="chat_group_filter" params_l="around" tooltip="uittChatAround" tooltip_parent="win" />
-                                        <ctrl style="tab_button_new" id="tab1" posparent="tab0" group="content:cb:region" hardtext="uitabChatRegion" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:REGION_CHAT|value=1" onclick_l="chat_group_filter" params_l="region" tooltip="uittChatRegion" tooltip_parent="win" />
+                                <group type="tab" id="channel_select" child_resize_w="true" h="24" posref="TL TL" x="0" y="-4" max_w="0" max_sizeref="w">
+                                        <ctrl style="tab_button_new" id="tab0" x="0" posref="TL TL" group="content:cb:around" hardtext="uitabChatAround" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:AROUND_ME|value=1" onclick_l="lua" params_l="game:chatWelcomeMsg()" tooltip="uittChatAround" tooltip_parent="win" />
+                                        <ctrl style="tab_button_new" id="tab1" posparent="tab0" group="content:cb:region" hardtext="uitabChatRegion" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:REGION_CHAT|value=1" onclick_l="lua" params_l="game:chatWelcomeMsg()" tooltip="uittChatRegion" tooltip_parent="win" />
                                         <ctrl style="tab_button_new" id="tab2" posparent="tab1" group="content:cb:team" hardtext="uitabChatTeam" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:TEAM_CHAT|value=1" onclick_l="chat_group_filter" params_l="team" tooltip="uittChatTeam" tooltip_parent="win" />
                                         <ctrl style="tab_button_new" id="tab3" posparent="tab2" group="content:cb:guild" hardtext="uitabChatGuild" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:GUILD_CHAT|value=1" onclick_l="chat_group_filter" params_l="guild" tooltip="uittChatGuild" tooltip_parent="win" />
                                         <!-- Yes order is strange, but don't want to modify all the ugly hardcoded code -->
-                                        <ctrl style="tab_button_new" id="tab6" posparent="tab3" group="content:cb:universe" hardtext="uitabChatUniverse" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:UNIVERSE_CHAT|value=1" onclick_l="chat_group_filter" params_l="universe" tooltip="uittChatUniverse" tooltip_parent="win" />
+                                        <ctrl style="tab_button_new" id="tab6" posparent="tab3" group="content:cb:universe" hardtext="uitabChatUniverse" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:UNIVERSE_CHAT|value=1" onclick_l="lua" params_l="game:chatWelcomeMsg()" tooltip="uittChatUniverse" tooltip_parent="win" />
                                         <ctrl style="tab_button_new" id="tab4" posparent="tab6" group="content:cb:sysinfo" hardtext="uitabChatSysInfo" onclick_r="set" params_r="dblink=UI:SAVE:ISDETACHED:SYSTEM_INFO|value=1" onclick_l="chat_group_filter" params_l="sysinfo" tooltip="uittChatSysInfo" tooltip_parent="win" />
                                         <ctrl style="tab_button_new" id="tab5" posparent="tab4" group="content:cb:user" hardtext="uitabChatUser" onclick_l="chat_group_filter" params_l="user" tooltip="uittChatUser" tooltip_parent="win" />
                                         <!-- Fixed number of dynamic chat allowed. force  _firstpos and _nextpos to have correctly aligned tab-->
@@ -306,8 +311,7 @@
                                                                 @UI:SAVE:ISDETACHED:SYSTEM_INFO)" target="ui:interface:system_info:active" />
                                         <link expr="@UI:SAVE:ISDETACHED:USER_CHAT" target="ui:interface:user_chat:active" />
                                 </group>
-                                <view type="bitmap" id="sep0" posparent="channel_select" posref="BL BL" x="-10" w="10" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
-								<view type="bitmap" id="sep1" posparent="channel_select" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
+                                <view type="bitmap" id="sep" posparent="channel_select" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
                         </group>
 
                         <!-- scroll target element will be set from c++ code: it does not exist on template build time -->
@@ -377,8 +381,8 @@
         </proc>
         <!-- When the universe chat is activated, we must display a warning the first time 
         Must do it on the variable manipulation, not when the window is shown (because it is always shown/hid at start of game)
--->
         <link expr="@UI:SAVE:ISDETACHED:UNIVERSE_CHAT" cond="eq(@UI:SAVE:ISDETACHED:UNIVERSE_CHAT,1)" action="set" params="dblink=UI:VARIABLES:UNIVERSE_CHANEL_WARNING_WANTED|value=1" />
+-->
         <!-- *************** -->
         <!-- * SYSTEM INFO * -->
         <!-- *************** -->
@@ -494,14 +498,22 @@
         <template name="contact_id_friend" keep="true" posparent="parent" w="256" h="64" title="">
                 <group type="container" id="#id" w="#w" posparent="#posparent" title="#title" openable="false" popable="false" open_when_popup="true" pop_min_w="216" pop_min_h="96" pop_max_w="2000" pop_max_h="1600" header_color="UI:SAVE:WIN:COLORS:COM" global_color="false" global_color_over="true" lockable="true" movable_in_parent_list="true">
                         <group id="header_closed" x="0" y="0" h="12" posref="TL TL" group_onclick_l="tell_contact">
-                                <ctrl type="button" id="chat_button" button_type="push_button" posref="MR MR" x="-4" tx_normal="contact_chat.tga" tx_pushed="contact_chat.tga" tx_over="W_button_14_over.tga" global_color_normal="false" global_color_over="true" global_color_pushed="false" onclick_l="contact_direct_chat" tooltip="uittTell" tooltip_parent="win" />
-                                <view type="bitmap" id="online" posref="MR MR" x="-20" texture="w_online.tga" global_color="false" />
+                                <view type="bitmap" id="online" posref="MR MR" x="-4" texture="w_online.tga" global_color="false" />
                                 <ctrl type="tooltip" id="tt_online" posparent="online" posref="MR MR" x="0" y="0" sizeref="wh" w="0" h="0" tooltip="uittFriendsOnline" tooltip_parent="win" />
-                                <ctrl type="button" id="profile_button" button_type="push_button" posref="MR MR" x="-36" tx_normal="profile.tga" tx_pushed="profile.tga" tx_over="profile.tga" global_color_normal="false" global_color_over="false" global_color_pushed="false" onclick_l="open_title_help" params_l="from=contact" tooltip="uittContactInfo" tooltip_parent="win" />
-                                <view type="bitmap" id="blocked" posref="MR MR" x="-50" y="0" texture="w_answer_16_cancel.tga" global_color="false" active="false" />
+                                <ctrl type="button" id="profile_button" button_type="push_button" posref="MR MR" x="-20" tx_normal="profile.tga" tx_pushed="profile.tga" tx_over="profile.tga" global_color_normal="false" global_color_over="false" global_color_pushed="false" onclick_l="open_title_help" params_l="from=contact" tooltip="uittContactInfo" tooltip_parent="win" />
+				<ctrl type="button" id="invite_button" button_type="push_button" posref="MR MR" x="-36" tx_normal="team_invite.tga" tx_pushed="team_invite.tga" tx_over="W_button_14_over.tga" global_color_normal="false" global_color_over="false" global_color_pushed="false" onclick_l="lua" params_l="game:teamInvite('#id')" tooltip="uimGcmInvit" tooltip_parent="win" />
+                                <ctrl type="button" id="chat_button" button_type="push_button" posref="MR MR" x="-52" tx_normal="contact_chat.tga" tx_pushed="contact_chat.tga" tx_over="W_button_14_over.tga" global_color_normal="false" global_color_over="true" global_color_pushed="false" onclick_l="contact_direct_chat" tooltip="uittTell" tooltip_parent="win" />
+                                <view type="bitmap" id="blocked" posref="MR MR" x="-64" texture="w_answer_16_cancel.tga" global_color="false" active="false" />
                         </group>
                 </group>
         </template>
+	<!-- group header in friend list -->
+	<template name="people_list_group_header" keep="true" active="true" movable="false" opened="true" id="system">
+		<group type="container" id="#id" w="252" active="#active" movable="#movable" opened="#opened" header_color="UI:SAVE:WIN:COLORS:COM" global_color="false" global_color_over="true">
+			<group id="header_closed" x="0" y="0" h="16" posref="TL TL" />
+			<group id="header_opened" x="0" y="0" h="16" posref="TL TL" />
+		</group>
+	</template>
         <!-- when you want to directly chat with a friend -->
         <template name="contact_chat_friend" keep="true" posparent="parent" w="256" h="64" title="">
                 <group type="container" id="#id" x="64" y="128" w="#w" h="64" posparent="#posparent" title="#title" resizer="true" openable="true" opened="true" popable="false" movable="true" pop_min_w="216" pop_min_h="96" pop_max_w="2000" pop_max_h="1600" header_color="UI:SAVE:WIN:COLORS:COM" global_color="false" global_color_over="true">
@@ -527,7 +539,7 @@
         </group>
         <!-- allow to create a party chat from any chat box & to hide / show the edit box -->
         <group type="menu" id="base_chat_box_menu_with_eb_toggle" extends="base_chat_box_menu">
-                <action id="toggle_chat_eb_vis" name="uimToggleChatEBVis" handler="toggle_chat_eb_vis" params="" />
+                <action id="toggle_chat_eb_vis" name="uimToggleChatEBVis" handler="toggle_chat_eb_vis" params="" icon="r2_icon_chat_small.tga" />
                 <separator />
         </group>
         <!-- MainChat Group menu. Code appends entries for selecting chat source (if tab is user chat) -->
@@ -556,6 +568,7 @@
                         <action id="dyn6" name="6" usergroup_l="chat_menu_button" usergroup_params_l="chat_db=DYNAMIC_CHAT6" />
                         <action id="dyn7" name="7" usergroup_l="chat_menu_button" usergroup_params_l="chat_db=DYNAMIC_CHAT7" />
                 </action>
+		<action id="save" name="uimChanSave" handler="lua:game:saveChannel(true)" icon="r2_icon_save_small.tga" />
                 <separator />
         </group>
         <!-- User Chat menu. Code append entries for selecting chat source -->
@@ -571,8 +584,8 @@
         <!-- ****************** -->
         <!-- Menu to select the target -->
         <group type="menu" id="around_me_target_menu" extends="base_menu">
-                <action id="team_target" name="uiSAY" handler="chat_target_selected" params="say" />
-                <action id="team_target" name="uiSHOUT" handler="chat_target_selected" params="shout" />
+                <action id="team_target" name="uiSAY" handler="chat_target_selected" params="say" icon="r2_icon_dialog_mini.tga" />
+                <action id="team_target" name="uiSHOUT" handler="chat_target_selected" params="shout" icon="r2_icon_dialog_mini_over.tga" />
         </group>
         <template name="around_me_id" keep="true" posparent="parent" w="256" h="64" title="">
                 <group type="container" id="#id" w="#w" posparent="#posparent" title="#title" openable="false" popable="false" open_when_popup="true" pop_min_w="216" pop_min_h="96" pop_max_w="2000" pop_max_h="1600" header_color="UI:SAVE:WIN:COLORS:COM" global_color="false" global_color_over="true" lockable="true">
@@ -593,9 +606,9 @@
         <!-- ************** -->
         <!-- menu on a member of the team for the leader -->
         <group type="menu" id="team_member_menu" extends="base_menu_with_color">
-                <action id="dismiss" name="uimDismiss" handler="dismiss_member" params="" />
-                <action id="leader" name="uimSetTeamLeader" handler="set_team_leader" params=""/>
-                <action id="successor" name="uimSetSuccesor" handler="set_successor" params=""/>
+                <action id="dismiss" name="uimDismiss" handler="dismiss_member" params="" icon="r2ed_kicked_char.tga" />
+                <action id="leader" name="uimSetTeamLeader" handler="set_team_leader" params="" icon="r2_toolbar_group_small.tga" />
+                <action id="successor" name="uimSetSuccesor" handler="set_successor" params="" icon="r2_player_admin.tga" />
                 <!--            <action id="emote" name="uimEmotes" hanlder="" params="">
                         <action id="emote1" name="uimEmote1" handler="emote" params="emote_id=0"/>     
                         <action id="emote2" name="uimEmote2" handler="emote" params="emote_id=1"/>     
@@ -613,8 +626,8 @@
                         <action id="command5" name="uimCommand5" handler="" params=""/>
                         <action id="command6" name="uimCommand6" handler="" params=""/>                        
                 </action>-->
-                <action id="target" name="uimTarget" handler="team_target" params="" />
-                <action id="compass" name="uimTeamCompass" handler="set_team_compas" params="compass=ui:interface:compass" />
+                <action id="target" name="uimTarget" handler="team_target" params="" icon="ico_aim.tga" />
+                <action id="compass" name="uimTeamCompass" handler="set_team_compas" params="compass=ui:interface:compass" icon="lm_user_pushed.tga" />
                 <separator />
         </group>
         <!-- links to enable leader options -->
@@ -637,6 +650,7 @@
         <group type="menu" id="friend_list_menu" extends="base_chat_box_menu_with_eb_toggle">
                 <action id="remove" name="uimRemove" handler="remove_contact" params="" />
                 <action id="move" name="uimMoveToIgnoreList" handler="move_contact" params="list=0" />
+		<action id="group" name="uimChangeGroup" handler="change_contact_group_begin" params="group=ui:interface:change_contact_group" />
                 <separator />
         </group>
         <group type="menu" id="friend_list_menu_offline_unblocked" extends="friend_list_menu">
@@ -947,7 +961,7 @@
         <!-- **************** -->
         <!-- * CONTACT LIST * -->
         <!-- **************** -->
-        <group type="container" id="contact_list" w="260" title="uiContactListTitle" movable="true" active="false" opened="true" resizer="false" pop_min_h="89" openable="false" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:CONTACT_LIST|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:CONTACT_LIST|value=0" header_color="UI:SAVE:WIN:COLORS:COM" global_color="false" global_color_over="true">
+        <group type="container" id="contact_list" w="260" title="uiContactListTitle" movable="true" active="false" opened="true" resizer="false" pop_min_h="89" openable="true" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:CONTACT_LIST|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:CONTACT_LIST|value=0" header_color="UI:SAVE:WIN:COLORS:COM" global_color="false" global_color_over="true">
                 <group id="header_closed" x="0" y="0" h="16" posref="TL TL"></group>
                 <group id="header_opened" x="0" y="0" w="176" h="16" posref="TL TL"></group>
                 <group id="content" x="0" y="0" h="0" posref="TL TL"></group>
@@ -1053,5 +1067,42 @@
         <group type="menu" id="chat_copy_action_menu" extends="base_menu">
                 <action id="copy" name="uiCopy" handler="copy_chat" params="from_modal" />
         </group>
-
+	<proc id="ark_shop_animate_preview_body">
+		<action handler="set" params="target_property=ui:interface:ark_shop_buy_item:content:header_opened:item_preview:scene_item_preview:char:anim|value=0" />
+	</proc>
+	<template name="arkshop_inv_item" sheetdb="UI:TEMP:ARK:ITEM:0" usesheet="false" isvirtual="true" lock="false" render_layer1="1" render_layer2="2" fontsize="8" render_layer3="3" render_layer4="4" w="45" over="grey_0.tga" keep="true" img1scale="false" img2scale="false" img1="token_basic.tga" img2="" img3="" tooltip="" quality="" quantity="" overlay="" text="" text2="" text3="" overlay_active="0" overlay2_active="0" qualquan_active="0" color="255 255 255 255" gc1="false" gc2="false" gc3="true" ctrlcolor="0 0 0 0" color2="255 255 255 255" color3="255 255 255 255" colover="255 255 255 30" bg="w_slot_item.tga" params_l="" params_r="" x="0" y="0">
+		<group id="#id" posref="MM MM" w="#w" h="45" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
+			<ctrl type="sheet" tooltip="#text" onclick_r="open_help_auto" active="#usesheet" id="sheet" value="#sheetdb" posref="ML ML" y="0" x="#x" render_layer="#render_layer2" use_quality="true" use_quantity="true" />
+			<view type="bitmap" id="back" posref="ML ML" h="40" w="40" scale="true" x="#x" y="0" render_layer="#render_layer1" texture="#bg" global_color="false" />
+			<group id="virtual" active="#isvirtual" posref="MM MM" posparent="back">
+				<ctrl type="button" id="tooltip" button_type="push_button" global_color_normal="false" scale="true" posref="ML ML" x="2" y="0" w="40" h="40" tooltip="#tooltip" render_layer="#render_layer1" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r" />
+				<view type="bitmap" id="ref" posref="MM MM" x="0" y="0" scale="true" w="40" h="40" color="0 0 0 0" texture="blank.tga" />
+				<view type="bitmap" id="img1" posref="MM MM" x="0" y="0" scale="#img1scale" w="40" h="40" render_layer="#render_layer2" texture="#img1" global_color="false" />
+				<view type="bitmap" id="img2" posref="MM MM" posparent="img1" scale="#img2scale" w="40" h="40" render_layer="#render_layer2" x="0" y="0" texture="#img2" global_color="false" />
+				<view type="bitmap" id="img3" posref="MM MM" posparent="img1" render_layer="#render_layer2" x="0" y="0" texture="#img3" global_color="false" />
+				<view type="bitmap" id="img4" posref="BM BM" posparent="img1" scale="true" w="38" h="10" render_layer="#render_layer3" x="-2" y="2" active="#qualquan_active" texture="blank.tga" global_color="true" color="0 0 0 150" />
+				<view type="bitmap" id="black" posref="TL TL" posparent="ref" render_layer="#render_layer2" active="#overlay_active" w="40" h="10" x="0" y="0" scale="true" color="0 0 0 255" texture="blank.tga" global_color="false" />
+				<view type="text" id="overlay" posref="TR TR" posparent="ref" render_layer="#render_layer2" x="-3" y="0" hardtext="#overlay" fontsize="7" color="255 255 255 255" shadow="true" global_color="false" />
+				<view type="bitmap" id="black2" posref="BL BL" posparent="ref" render_layer="3" active="#overlay2_active" w="40" h="10" x="0" y="0" scale="true" color="0 0 0 155" texture="blank.tga" global_color="false" />
+				<view type="text" id="quantity" posref="BL BL" posparent="ref" render_layer="#render_layer3" x="0" y="0" hardtext="#quantity" fontsize="8" color="255 255 255 255" shadow="true" global_color="false" />
+				<view type="text" id="quality" posref="BR BR" posparent="ref" render_layer="#render_layer3" x="0" y="0" hardtext="#quality" fontsize="8" color="255 255 255 255" shadow="true" global_color="true" />
+			</group>
+			<view type="bitmap" id="over" posref="ML ML" h="40" w="#w" scale="true" x="#x" y="0" render_layer="#render_layer4" texture="#over" global_color="false" />
+			<view type="bitmap" id="lock" posref="TL TL" h="16" w="16" x="0" y="0" active="#lock" render_layer="#render_layer4" texture="pin_on.tga" global_color="false" />
+			<view type="text" id="text1" posref="TR TL" posparent="back" x="5" y="1" multi_line="true" format_taged="true" fontsize="8" hardtext_format="#text" color="#color1" shadow="true" global_color="#gc1" />
+			<view type="text" id="text2" posref="BL TL" posparent="text1" x="0" y="0" multi_line="true" format_taged="true" fontsize="#fontsize" hardtext_format="#text2" color="#color2" shadow="true" global_color="#gc2" />
+			<view type="text" id="text3" posref="BL TL" posparent="text2" x="0" y="-2" multi_line="true" format_taged="true" fontsize="#fontsize" hardtext_format="#text3" color="#color3" shadow="true" global_color="#gc3" />
+			<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="ML ML" x="#x" y="0" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true" w="#w" h="40" color="#ctrlcolor" col_over="#colover" col_pushed="#colover" render_layer="#render_layer2" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r" />
+		</group>
+	</template>
+	<template name="arkshop_inv_mission" sheetdb="UI:TEMP:ARK:ITEM:0" usesheet="false" usesheet_reward="false" isvirtual="true" render_layer1="1" render_layer2="2" fontsize="8" render_layer3="3" w="45" keep="true" img1="token_basic.tga" img2="" img3="" tooltip="" quality="" quantity="" overlay="" text="" text2="" text3="" color="255 255 255 255" gc1="false" gc2="false" gc3="true" ctrlcolor="0 0 0 0" color2="255 255 255 255" color3="255 255 255 255" colover="255 255 255 30" bg="w_slot_item.tga" params_l="" params_r="" x="0" y="0">
+		<group id="#id" posref="MM MM" w="#w" h="45" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
+			<ctrl type="sheet" tooltip="#text" onclick_r="open_help_auto" active="#usesheet" id="sheet" value="#sheetdb" posref="MR MR" y="0" x="0" render_layer="#render_layer3" use_quality="true" use_quantity="true" />
+			<view type="bitmap" id="back" posref="ML ML" h="40" w="40" scale="true" x="0" y="0" render_layer="#render_layer1" texture="points_atys.tga" global_color="false" />
+			<view type="bitmap" id="back2" posref="MM MM" posparent="back" h="40" w="40" scale="false" x="0" y="0" render_layer="#render_layer2" texture="https://app.ryzom.com/app_arcc/data/app/Scripts//1/5/0/4/assets/mission_elyps.png" global_color="false" />
+			<view type="text" id="text1" posref="TR TL" posparent="back" x="5" y="1" format_taged="true" fontsize="8" hardtext="#text" color="#color1" shadow="true" global_color="#gc1" />
+			<view type="text" id="text2" posref="BL TL" posparent="text1" x="0" y="2" format_taged="true" fontsize="#fontsize" hardtext="#text2" color="#color2" shadow="true" global_color="#gc2" />
+			<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="ML ML" x="1" y="0" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true" w="#w" h="40" color="#ctrlcolor" col_over="#colover" col_pushed="#colover" render_layer="#render_layer2" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r" />
+		</group>
+	</template>
 </interface_config>

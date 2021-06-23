@@ -1090,8 +1090,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
 
 	<param name="text_over_back_color" value="64 64 64 255" />
 
-	<param name="font" value="uiFontSans" />
-	<param name="monospace_font" value="uiFontMonospace" />
+	<param name="font" value="ryzom.ttf" />
+	<param name="monospace_font" value="ryzom_monospace.ttf" />
 
 	<param name="add_coef_font" value="1" />
 	<param name="mul_coef_anim" value="0.8" />
@@ -1403,12 +1403,17 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <define id="pa_beast1" value="%pa:BEAST1" />
 <define id="pa_beast2" value="%pa:BEAST2" />
 <define id="pa_beast3" value="%pa:BEAST3" />
+<define id="pa_beast4" value="%pa:BEAST4" />
+<define id="pa_beast5" value="%pa:BEAST5" />
+<define id="pa_beast6" value="%pa:BEAST6" />
 <!-- MAX_INVENTORY_ANIMAL -->
 <define id="pa_bag0" value="%set_base:PACK_ANIMAL0" />
 <define id="pa_bag1" value="%set_base:PACK_ANIMAL1" />
 <define id="pa_bag2" value="%set_base:PACK_ANIMAL2" />
 <define id="pa_bag3" value="%set_base:PACK_ANIMAL3" />
-
+<define id="pa_bag4" value="%set_base:PACK_ANIMAL4" />
+<define id="pa_bag5" value="%set_base:PACK_ANIMAL5" />
+<define id="pa_bag6" value="%set_base:PACK_ANIMAL6" />
 <define id="money" value="%set_base:MONEY" />
 <define id="skill_points_0" value="LOCAL:USER:SKILL_POINTS_0:VALUE" />
 <define id="skill_points_1" value="LOCAL:USER:SKILL_POINTS_1:VALUE" />
@@ -1421,14 +1426,16 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <define id="faction_index_karavan" value_from_code="getFactionIndex('karavan')" />
 <define id="faction_index_matis" value_from_code="getFactionIndex('matis')" />
 <define id="faction_index_tryker" value_from_code="getFactionIndex('tryker')" />
-
+<define id="faction_index_marauder" value_from_code="getFactionIndex('black_kami')" />
+<define id="faction_index_ranger" value_from_code="getFactionIndex('white_karavan')" />
 <define id="faction_points_kami" value="LOCAL:USER:FACTION_POINTS_%faction_index_kami:VALUE" />
 <define id="faction_points_fyros" value="LOCAL:USER:FACTION_POINTS_%faction_index_fyros:VALUE" />
 <define id="faction_points_zorai" value="LOCAL:USER:FACTION_POINTS_%faction_index_zorai:VALUE" />
 <define id="faction_points_karavan" value="LOCAL:USER:FACTION_POINTS_%faction_index_karavan:VALUE" />
 <define id="faction_points_matis" value="LOCAL:USER:FACTION_POINTS_%faction_index_matis:VALUE" />
 <define id="faction_points_tryker" value="LOCAL:USER:FACTION_POINTS_%faction_index_tryker:VALUE" />
-
+<define id="faction_points_marauder" value="LOCAL:USER:FACTION_POINTS_%faction_index_marauder:VALUE" />
+<define id="faction_points_ranger" value="LOCAL:USER:FACTION_POINTS_%faction_index_ranger:VALUE" />
 <define id="faction_icon_kami" value="faction_Kami.tga" />
 <define id="faction_icon_fyros" value="faction_Fyros.tga" />
 <define id="faction_icon_zorai" value="faction_Zorai.tga" />
@@ -1682,6 +1689,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:SHOW_CLOCK" type="bool" value="false" />
 <variable entry="UI:SAVE:SHOW_CLOCK_12H" type="bool" value="false" />
 <variable entry="UI:SAVE:SHOW_RETICLE" type="bool" value="true" />
+<variable entry="UI:SAVE:SHOW_ICON_BUFFS" type="bool" value="true" />
+<link expr="@UI:SAVE:SHOW_ICON_BUFFS" action="trigger_show_icon_buffs" />
 <variable entry="UI:VARIABLES:MISSION_SELECTED_PREV_SESSION" type="sint32" value="-1" />
 
 <!-- set to true if the current header that called a menu was a popup container -->
@@ -1691,7 +1700,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
 
 <variable entry="UI:VARIABLES:MAIL_WAITING" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:FORUM_UPDATED" type="sint64" value="0" />
-
+<variable entry="UI:VARIABLES:DYNE_UPDATED" type="bool" value="0" />
+<variable entry="UI:VARIABLES:COMPASS_ICON_USER1" type="bool" value="0" />
+<variable entry="UI:VARIABLES:COMPASS_ICON_USER2" type="bool" value="0" />
 <variable entry="UI:VARIABLES:CURRENT_TIME" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:CURRENT_SERVER_TICK" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK" type="sint64" value="0" />
@@ -1782,6 +1793,28 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:CHAT:MULTI_LINE_SPACE" type="sint32" value="0" />
 <variable entry="UI:SAVE:CHAT:SHADOWED_TEXT" type="bool" value="true" />
 
+<variable entry="UI:SAVE:TRANSLATION:EN:INVERSE_DISPLAY" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:EN:HIDE_FLAG" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:FR:INVERSE_DISPLAY" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:FR:HIDE_FLAG" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:DE:INVERSE_DISPLAY" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:DE:HIDE_FLAG" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:RU:INVERSE_DISPLAY" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:RU:HIDE_FLAG" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:ES:INVERSE_DISPLAY" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:ES:HIDE_FLAG" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:SAY:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:SHOUT:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:TEAM:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:GUILD:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:CIVILIZATION:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:TERRITORY:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:UNIVERSE:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:TELL:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:PLAYER:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:ARROUND:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:SYSTEM:DISABLE" type="bool" value="false" />
+<variable entry="UI:SAVE:TRANSLATION:REGION:DISABLE" type="bool" value="false" />
 <!-- ****************************** -->
 <!-- *	  CHAT COLORS	 * -->
 <!-- ****************************** -->
@@ -1805,6 +1838,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:CHAT:COLORS:DYN:6" type="rgba" value="162 255 173 255" />
 <variable entry="UI:SAVE:CHAT:COLORS:DYN:7" type="rgba" value="162 255 173 255" />
 <variable entry="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB" type="bool" value="false" />
+<variable entry="UI:SAVE:CHAT:SAVE_CHANNEL" type="bool" value="false" />
+<variable entry="UI:SAVE:CHAT:AUTO_CHANNEL" type="bool" value="false" />
 <variable entry="UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB" type="bool" value="false" />
 <variable entry="UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB" type="bool" value="false" />
 <variable entry="UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB" type="bool" value="true" />
@@ -1828,6 +1863,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:VARIABLES:ISACTIVE:INV_PA1" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:INV_PA2" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:INV_PA3" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:ISACTIVE:INV_PA4" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:ISACTIVE:INV_PA5" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:ISACTIVE:INV_PA6" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:INV_ROOM" type="sint32" value="0" />
 
 <variable entry="UI:VARIABLES:ISACTIVE:INVENTORY" type="sint32" value="0" />
@@ -1841,6 +1879,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_BAG:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_BAG:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_BAG:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_BAG:FILTER_PET" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_BAG:FILTER_MP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_BAG:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_BAG:FILTER_TP" type="sint32" value="1" />
@@ -1849,6 +1888,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA0:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA0:FILTER_PET" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:FILTER_MP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:FILTER_TP" type="sint32" value="1" />
@@ -1857,6 +1897,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA1:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA1:FILTER_PET" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:FILTER_MP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:FILTER_TP" type="sint32" value="1" />
@@ -1865,6 +1906,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA2:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA2:FILTER_PET" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:FILTER_MP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:FILTER_TP" type="sint32" value="1" />
@@ -1873,15 +1915,44 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA3:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA3:FILTER_PET" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:FILTER_MP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:FILTER_TP" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA4:SORT_TYPE" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA4:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA4:FILTER_ARMOR" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA4:FILTER_WEAPON" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA4:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA4:FILTER_PET" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA4:FILTER_MP" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA4:FILTER_MISSMP" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA4:FILTER_TP" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA5:SORT_TYPE" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA5:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA5:FILTER_ARMOR" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA5:FILTER_WEAPON" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA5:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA5:FILTER_PET" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA5:FILTER_MP" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA5:FILTER_MISSMP" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA5:FILTER_TP" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA6:SORT_TYPE" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA6:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA6:FILTER_ARMOR" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA6:FILTER_WEAPON" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA6:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA6:FILTER_PET" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA6:FILTER_MP" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA6:FILTER_MISSMP" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_PA6:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:SORT_TYPE" type="sint32" value="1" />
 <!-- 1 == SortType -->
 <variable entry="UI:SAVE:INV_GUILD:ICON_LIST" type="sint32" value="0" />
 <variable entry="UI:SAVE:INV_GUILD:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_GUILD:FILTER_PET" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:FILTER_MP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:FILTER_TP" type="sint32" value="1" />
@@ -1891,6 +1962,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_ROOM:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_ROOM:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_ROOM:FILTER_TOOL" type="sint32" value="1" />
+<variable entry="UI:SAVE:INV_ROOM:FILTER_PET" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_ROOM:FILTER_MP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_ROOM:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_ROOM:FILTER_TP" type="sint32" value="1" />
@@ -2146,7 +2218,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <!-- Misc -->
 <define id="item_type_to_item_sheet_MEKTOUB_PACKER_TICKET" value="iapd.sitem" />
 <define id="item_type_to_item_sheet_MEKTOUB_MOUNT_TICKET" value="iasd.sitem" />
-
+<define id="item_type_to_item_sheet_JOB_ELEMENT" value="rpjob_elementary.sitem" />
 
 <!-- ************************ -->
 <!-- *	   DYNAMIC CHAT    * -->

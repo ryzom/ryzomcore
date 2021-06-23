@@ -141,7 +141,8 @@
 
 <define id="game_config_screen_ratio_eb" value="ui:interface:game_config:content:general:screen_ratio:edit:eb" />
 <define id="game_config_screen_ratio_cb" value="ui:interface:game_config:content:general:screen_ratio:combo" />
-
+<define id="game_config_save_channel_cb" value="ui:interface:game_config:content:chat_colors:save_channel_cb:c" />
+<define id="game_config_auto_channel_cb" value="ui:interface:game_config:content:chat_colors:auto_channel_cb:c" />
 <proc id="game_config_init">
 	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:GAME_CONFIG|value=1" />
 	<action handler="ddx_init" params="ui:interface:game_config:content:all" />
@@ -281,7 +282,14 @@
 			<instance template="tgcw_scrollbarfloat" id="lum" text="uiLuminosity" posref="BL TL" posparent="con" x="0" y="-2" />
 			<instance template="tgcw_scrollbarfloat" id="gam" text="uiGamma" posref="BL TL" posparent="lum" x="0" y="-2" />
 			<instance template="tgcw_scrollbarfloat" id="scale" text="uiInterfaceScale" posref="BL TL" posparent="gam" x="0" y="-2" />
-			<instance template="tgcw_checkbox" id="waitvbl" text="uiWaitVBL" posparent="scale" posref="BL TL" x="-20" y="-28" />
+			
+			<!-- window snap -->
+			<view style="sgc_title2" type="text" id="title_win_snap" posref="BL TL" x="-20" y="-28" hardtext="uiWindowSnap" posparent="scale" />
+			<instance template="tgcw_scrollbarint" id="window_snap_distance" text="uiWindowSnapDistance" posref="BL TL" posparent="title_win_snap" x="20" y="-2" />
+			<instance template="tgcw_checkbox" id="window_snap_invert" text="uiWindowSnapInvert" posparent="window_snap_distance" posref="BL TL" x="0" y="-2" />
+			
+			<!-- wait vbl -->
+			<instance template="tgcw_checkbox" id="waitvbl" text="uiWaitVBL" posparent="window_snap_invert" posref="BL TL" x="-20" y="-28" />
 
 			<!-- Special case for video modes -->
 			<group id="fullscreen" posref="TR TR" x="-16" y="-30" child_resize_w="true" h="14">
@@ -291,7 +299,6 @@
 					onclick_l="game_config_change_vid_fullscreen" params_l="" />
 				<view type="text" id="text" posparent="c" posref="MR ML" x="4" y="-2" color="255 255 255 192" fontsize="12" shadow="true" hardtext="uiFullscreen" />
 			</group>
-
 			<group type="combo_box" id="video_modes" w="100" h="20" value="UI:TEMP:VID_MODE" posparent="fullscreen" posref="BL TL" x="0" y="-4">
 				<instance template="combo_box_def1" />
 			</group>
@@ -315,7 +322,7 @@
 			<group id="screen_ratio" posparent="texture_mode" posref="BL TL" x="0" y="-12" w="240" h="52">
 				<view type="text" id="text" posref="TL TL" x="0" y="-4" color="255 255 255 192" fontsize="12" shadow="true" hardtext="uigcScreenRatio" />
 				<instance template="text_tt" posparent="text" tooltip="uigcttScreenRatio" />
-				<instance template="edit_box_widget" id="edit" posparent="text" posref="MR ML" x="4" y="0" text_x="0" text_ref="BR BR" w="100" prompt="" enter_loose_focus="true" multi_line="false"
+				<instance template="edit_box_widget" id="edit" posparent="text" posref="MR ML" x="4" y="0" text_x="0" text_ref="ML ML" w="60" prompt="" enter_loose_focus="true" multi_line="false"
 					onenter="game_config_change_screen_ratio_custom" enter_recover_focus="false" reset_focus_on_hide="true" max_historic="0" entry_type="positive_float" max_float_prec="5"
 					onchange="set"
 					onchange_params="target_property=ui:interface:game_config:content:apply:frozen|value=0"
@@ -406,7 +413,8 @@
 			<instance template="tgcw_checkbox" id="fade" text="uiCharFade" posref="BL TL" posparent="auc" x="0" y="-12" />
 			<instance template="tgcw_scrollbarint" id="opamin" text="uiCharOpacityMin" posref="BL TL" posparent="fade" x="20" y="-2" />
 			<instance template="tgcw_checkbox" id="cao" text="uiCurrentActionOut" tooltip="uittCurrentActionOut" posref="BL TL" posparent="opamin" x="-20" y="-12" />
-			<instance template="tgcw_checkbox" id="show_clock" text="uiShowClock" tooltip="uittShowClock" posref="BL TL" posparent="cao" x="0" y="-12" />
+			<instance template="tgcw_checkbox" id="show_icon_buffs" text="uiShowIconBuffs" tooltip="uittShowIconBuffs" posref="BL TL" posparent="cao" x="0" y="-12" />
+			<instance template="tgcw_checkbox" id="show_clock" text="uiShowClock" tooltip="uittShowClock" posref="BL TL" posparent="show_icon_buffs" x="0" y="-12" />
 			<instance template="tgcw_checkbox" id="show_clock_12h" text="uiShowClock12h" tooltip="uittShowClock12h" posref="BL TL" posparent="show_clock" x="0" y="-12" />
 			<instance template="tgcw_checkbox" id="show_reticle" text="uiShowReticle" tooltip="uittShowReticle" posref="BL TL" posparent="show_clock_12h" x="0" y="-12" />
 			<instance template="tgcw_checkbox" id="radar_use_camera" text="uiRadarUseCamera" tooltip="uittRadarUseCamera" posref="BL TL" posparent="show_reticle" x="0" y="-12" />
@@ -424,12 +432,48 @@
 				<combo_text name="uigcEnglish" />
 				<combo_text name="uigcFrancais" />
 				<combo_text name="uigcDeutch" />
-				<!--
 				<combo_text name="uigcRussian" />
 				<combo_text name="uigcSpanish" />
-				-->
 			</group>
 			<link expr="@UI:TEMP:LANGUAGE" action="game_config_change_language" />
+			<view style="sgc_title" type="text" id="translation_header_text" posref="BL TL" x="0" y="-20" hardtext="uiTranslationHeader" posparent="languages" />
+			<view style="sgc_title2" type="text" id="translation_languages_header" posref="BL TL" x="0" y="-10" hardtext="uiTranslationLanguages" posparent="translation_header_text" />
+			<view style="sgc_title2" type="text" id="translation_inverse_header" posref="TR TL" x="20" y="0" hardtext="uiTranslationInverse" posparent="translation_languages_header" />
+			<view style="sgc_title2" type="text" id="translation_hide_flag_header" posref="TR TL" x="20" y="0" hardtext="uiTranslationHide" posparent="translation_inverse_header" />
+			<view style="sgc_title2" type="text" id="translation_english_text" posref="BL TL" x="0" y="-5" hardtext="uiTranslationEnglish" posparent="translation_languages_header" />
+			<instance template="tgcw_checkbox" id="translation_english_inverse" posref="BM TM" x="0" y="-5" text=" " tooltip="uittTranslationInverse" posparent="translation_inverse_header" />
+			<instance template="tgcw_checkbox" id="translation_english_hide_flag" posref="BM TM" x="0" y="-5" text=" " tooltip="uittTranslationHide" posparent="translation_hide_flag_header" />
+			<view style="sgc_title2" type="text" id="translation_french_text" posref="BL TL" x="0" y="-2" hardtext="uiTranslationFrench" posparent="translation_english_text" />
+			<instance template="tgcw_checkbox" id="translation_french_inverse" posref="BL TL" x="0" y="-2" text=" " tooltip="uittTranslationInverse" posparent="translation_english_inverse" />
+			<instance template="tgcw_checkbox" id="translation_french_hide_flag" posref="BL TL" x="0" y="-2" text=" " tooltip="uittTranslationHide" posparent="translation_english_hide_flag" />
+			<view style="sgc_title2" type="text" id="translation_german_text" posref="BL TL" x="0" y="-2" hardtext="uiTranslationGerman" posparent="translation_french_text" />
+			<instance template="tgcw_checkbox" id="translation_german_inverse" posref="BL TL" x="0" y="-2" text=" " tooltip="uittTranslationInverse" posparent="translation_french_inverse" />
+			<instance template="tgcw_checkbox" id="translation_german_hide_flag" posref="BL TL" x="0" y="-2" text=" " tooltip="uittTranslationHide" posparent="translation_french_hide_flag" />
+			<view style="sgc_title2" type="text" id="translation_russian_text" posref="BL TL" x="0" y="-2" hardtext="uiTranslationRussian" posparent="translation_german_text" />
+			<instance template="tgcw_checkbox" id="translation_russian_inverse" posref="BL TL" x="0" y="-2" text=" " tooltip="uittTranslationInverse" posparent="translation_german_inverse" />
+			<instance template="tgcw_checkbox" id="translation_russian_hide_flag" posref="BL TL" x="0" y="-2" text=" " tooltip="uittTranslationHide" posparent="translation_german_hide_flag" />
+			<view style="sgc_title2" type="text" id="translation_spanish_text" posref="BL TL" x="0" y="-2" hardtext="uiTranslationSpanish" posparent="translation_russian_text" />
+			<instance template="tgcw_checkbox" id="translation_spanish_inverse" posref="BL TL" x="0" y="-2" text=" " tooltip="uittTranslationInverse" posparent="translation_russian_inverse" />
+			<instance template="tgcw_checkbox" id="translation_spanish_hide_flag" posref="BL TL" x="0" y="-2" text=" " tooltip="uittTranslationHide" posparent="translation_russian_hide_flag" />
+			<view style="sgc_title2" type="text" id="disable_translation_text" posref="BL TL" x="0" y="-10" hardtext="uiTranslationDisable" posparent="translation_spanish_text" />
+			<instance template="tgcw_checkbox" id="disable_translation_around" posref="BL TL" x="0" y="-5" text="uiTranslationDisableAround" tooltip="uittTranslationDisableAround" posparent="disable_translation_text" />
+			<instance template="tgcw_checkbox" id="disable_translation_guild" posref="BL TL" x="0" y="-2" text="uiTranslationDisableGuild" tooltip="uittTranslationDisableGuild" posparent="disable_translation_around" />
+			<instance template="tgcw_checkbox" id="disable_translation_universe" posref="BL TL" x="0" y="-2" text="uiTranslationDisableUniverse" tooltip="uittTranslationDisableUniverse" posparent="disable_translation_guild" />
+			<instance template="tgcw_checkbox" id="disable_translation_region" posref="BL TL" x="0" y="-2" text="uiTranslationDisableRegion" tooltip="uittTranslationDisableRegion" posparent="disable_translation_universe" />
+			<link expr="@UI:SAVE:TRANSLATION:EN:INVERSE_DISPLAY" target="translation_english_inverse:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:EN:HIDE_FLAG" target="translation_english_hide_flag:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:FR:INVERSE_DISPLAY" target="translation_french_inverse:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:FR:HIDE_FLAG" target="translation_french_hide_flag:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:DE:INVERSE_DISPLAY" target="translation_german_inverse:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:DE:HIDE_FLAG" target="translation_german_hide_flag:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:RU:INVERSE_DISPLAY" target="translation_russian_inverse:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:RU:HIDE_FLAG" target="translation_russian_hide_flag:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:ES:INVERSE_DISPLAY" target="translation_spanish_inverse:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:ES:HIDE_FLAG" target="translation_spanish_hide_flag:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:ARROUND:DISABLE" target="disable_translation_around:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:GUILD:DISABLE" target="disable_translation_guild:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:UNIVERSE:DISABLE" target="disable_translation_universe:c:pushed" />
+			<link expr="@UI:SAVE:TRANSLATION:REGION:DISABLE" target="disable_translation_region:c:pushed" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_language" align="T" target="language" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -467,7 +511,7 @@
 			<instance template="tgcw_color" id="cc_region" text="uiRegionColor" title="uiCCDRegion" tooltip="uittChooseRegionColor" posref="BL TL" posparent="cc_guild" x="0" y="-4" />
 			<instance template="tgcw_color" id="cc_univ" text="uiUnivColor" title="uiCCDUniv" tooltip="uittChooseUnivColor" posref="BL TL" posparent="cc_region" x="0" y="-4" />
 			<instance template="tgcw_color" id="cc_shout" text="uiShoutColor" title="uiCCDShout" tooltip="uittChooseShoutColor" posref="BL TL" posparent="cc_univ" x="0" y="-4" />
-			<instance template="tgcw_color" id="cc_dyn0" text="uiDynColor0" title="uiCCDDyn0" tooltip="uittChooseDynColor0" posref="BL TL" posparent="cc_shout" x="0" y="-4" />
+			<instance template="tgcw_color" id="cc_dyn0" text="uiDynColor0" title="uiCCDDyn0" tooltip="uittChooseDynColor0" posref="BL TL" posparent="cc_shout" x="0" y="-16" />
 			<instance template="tgcw_color" id="cc_dyn1" text="uiDynColor1" title="uiCCDDyn1" tooltip="uittChooseDynColor1" posref="BL TL" posparent="cc_dyn0" x="0" y="-4" />
 			<instance template="tgcw_color" id="cc_dyn2" text="uiDynColor2" title="uiCCDDyn2" tooltip="uittChooseDynColor2" posref="BL TL" posparent="cc_dyn1" x="0" y="-4" />
 			<instance template="tgcw_color" id="cc_dyn3" text="uiDynColor3" title="uiCCDDyn3" tooltip="uittChooseDynColor3" posref="BL TL" posparent="cc_dyn2" x="0" y="-4" />
@@ -475,13 +519,17 @@
 			<instance template="tgcw_color" id="cc_dyn5" text="uiDynColor5" title="uiCCDDyn5" tooltip="uittChooseDynColor5" posref="BL TL" posparent="cc_dyn4" x="0" y="-4" />
 			<instance template="tgcw_color" id="cc_dyn6" text="uiDynColor6" title="uiCCDDyn6" tooltip="uittChooseDynColor6" posref="BL TL" posparent="cc_dyn5" x="0" y="-4" />
 			<instance template="tgcw_color" id="cc_dyn7" text="uiDynColor7" title="uiCCDDyn7" tooltip="uittChooseDynColor7" posref="BL TL" posparent="cc_dyn6" x="0" y="-4" />
-			<instance template="tgcw_checkbox" id="enter_dontquit_cb" text="uiEnterDontQuitCB" tooltip="uittChatEnter" posparent="cc_dyn7" posref="BL TL" x="0" y="-8" />
-			<instance template="tgcw_checkbox" id="show_times_in_chat_cb" text="uiShowTimesInChatCB" tooltip="uittShowTimesInChat" posparent="enter_dontquit_cb" posref="BL TL" x="0" y="-8" />
+			<instance template="tgcw_checkbox" id="save_channel_cb" text="uiChanSaveCB" tooltip="uittChanSave" posparent="cc_dyn7" posref="BL TL" x="0" y="-16" />
+			<instance template="tgcw_checkbox" id="auto_channel_cb" text="uiChanAutoCB" tooltip="uittChanAuto" posparent="save_channel_cb" posref="BL TL" x="0" y="-8" />
+			<instance template="tgcw_checkbox" id="show_times_in_chat_cb" text="uiShowTimesInChatCB" tooltip="uittShowTimesInChat" posparent="auto_channel_cb" posref="BL TL" x="0" y="-8" />
 			<instance template="tgcw_checkbox" id="show_dyn_channel_name_in_chat_cb" text="uiShowDynChannelNameInChatCB" tooltip="uittShowDynChannelNameInChat" posparent="show_times_in_chat_cb" posref="BL TL" x="0" y="-8" />
 			<instance template="tgcw_checkbox" id="show_online_offline_notifications_cb" text="uiShowOnlineOfflineNotifications" tooltip="uittShowOnlineOfflineNotifications" posparent="show_dyn_channel_name_in_chat_cb" posref="BL TL" x="0" y="-8" />
 			<instance template="tgcw_scrollbarint" id="font_size" text="uiFontSize" posref="BL TL" posparent="show_online_offline_notifications_cb" x="0" y="-8" />
+			<instance template="tgcw_checkbox" id="enter_dontquit_cb" text="uiEnterDontQuitCB" tooltip="uittChatEnter" posparent="font_size" posref="BL TL" x="0" y="-8" />
 
 			<link expr="@UI:SAVE:CHAT:ENTER_DONT_QUIT_CB" target="enter_dontquit_cb:c:pushed" />
+			<link expr="@UI:SAVE:CHAT:SAVE_CHANNEL" target="save_channel_cb:c:pushed" />
+			<link expr="@UI:SAVE:CHAT:AUTO_CHANNEL" target="auto_channel_cb:c:pushed" />
 			<link expr="@UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB" target="show_times_in_chat_cb:c:pushed" />
 			<link expr="@UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB" target="show_dyn_channel_name_in_chat_cb:c:pushed" />
 			<link expr="@UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB" target="show_online_offline_notifications_cb:c:pushed" />
@@ -643,7 +691,7 @@
 			<instance template="tgcw_checkbox" id="hard" text="uiMouseHardware" posref="TM TL" x="0" y="-35" />
 			<instance template="tgcw_checkbox" id="inverted" text="uiMouseInverted" posparent="hard" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_checkbox" id="dbl" text="uiMouseDblClickMode" posparent="inverted" posref="BL TL" x="0" y="-2" />
-			<instance template="tgcw_checkbox" id="tablet" text="uiMouseTablet" posparent="dbl" posref="BL TL" x="0" y="-2" />
+			<instance template="tgcw_checkbox" id="tablet" text="uiFreeViewTablet" posparent="dbl" posref="BL TL" x="0" y="-2" />
 			<view style="sgc_title2" type="text" id="inter" posref="TL TL" x="0" y="-20" hardtext="uiMouseInterface" />
 			<instance template="tgcw_scrollbarint" id="dcspeed" text="uiDoubleClickSpeed" posparent="inter" posref="BL TL" x="20" y="-2" />
 			<instance template="tgcw_scrollbarfloat" id="curspeed" text="uiCursorSpeed" posparent="dcspeed" posref="BL TL" x="0" y="-2" />
@@ -690,6 +738,7 @@
 			<view style="sgc_title2" type="text" id="volume" posparent="maxtrack" posref="BL TL" x="-20" y="-2" hardtext="uiSoundVolume" />
 			<instance template="tgcw_scrollbarfloat" id="sfx_volume" text="uiSoundSFXVolume" posparent="volume" posref="BL TL" x="20" y="-2" />
 			<instance template="tgcw_scrollbarfloat" id="music_volume" text="uiSoundGameMusicVolume" posparent="sfx_volume" posref="BL TL" x="0" y="-2" />
+			<instance template="tgcw_scrollbarint" id="mp3_volume" text="uimwMP3Player" posparent="music_volume" posref="BL TL" x="0" y="-2" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_sound" align="T" target="sound" posparent="crop" posref="TL TR" x="-8" y="0" />
 		<!-- *** -->
@@ -750,7 +799,8 @@
 			<param ui="general:gam:c" type="cfg" realtime="true" widget="sbfloat" link="Gamma" />
 			<param ui="general:scale:c" type="cfg" realtime="false" ui_view="general:scale:c_res" ui_decimal="2" widget="sbfloat" link="InterfaceScale" />
 			<param ui="general:waitvbl:c" type="cfg" realtime="true" widget="boolbut" link="WaitVBL" />
-
+			<param ui="general:window_snap_distance:c" type="cfg" realtime="true" ui_view="general:window_snap_distance:c_res" ui_decimal="2" widget="sbint" link="WindowSnapDistance" />
+			<param ui="general:window_snap_invert:c" type="cfg" realtime="true" widget="boolbut" link="WindowSnapInvert" />
 			<param ui="landscape:lvi:c" type="cfg" widget="sbfloat_round" realtime="end_scroll" ui_view="landscape:lvi:c_res" ui_unit="uigcUnitMeters" link="Vision" preset="UI:TEMP:PRESET_LAND" />
 			<param ui="landscape:ltn:c" type="cfg" widget="sbfloat_round" realtime="true" ui_view="landscape:ltn:c_res" ui_unit="uigcUnitMeters" link="LandscapeTileNear" preset="UI:TEMP:PRESET_LAND" />
 			<param ui="landscape:lth:c" type="cfg" widget="sbfloat" realtime="true" ui_view="landscape:lth:c_res" ui_decimal="4" link="LandscapeThreshold" preset="UI:TEMP:PRESET_LAND" />
@@ -786,6 +836,7 @@
 			<param ui="hud:fade:c" type="db" widget="boolbut" link="UI:SAVE:USER_CHAR_FADE" realtime="true" />
 			<param ui="hud:opamin:c" type="db" widget="sbint" link="UI:SAVE:USER_CHAR_OPA_MIN" min="0" max="255" realtime="true" />
 			<param ui="hud:cao:c" type="db" widget="boolbut" link="UI:SAVE:ACT_BAR_OUT" realtime="true" />
+			<param ui="hud:show_icon_buffs:c" type="db" widget="boolbut" link="UI:SAVE:SHOW_ICON_BUFFS" realtime="true" />
 			<param ui="hud:show_clock:c" type="db" widget="boolbut" link="UI:SAVE:SHOW_CLOCK" realtime="true" />
 			<param ui="hud:show_clock_12h:c" type="db" widget="boolbut" link="UI:SAVE:SHOW_CLOCK_12H" realtime="true" />
 			<param ui="hud:show_reticle:c" type="db" widget="boolbut" link="UI:SAVE:SHOW_RETICLE" realtime="true" />
@@ -798,6 +849,20 @@
 			<param ui="alpha_colors:moa_con:c" type="db" widget="sbint" link="UI:SAVE:CONTENT_ROLLOVER_FACTOR" min="64" max="255" realtime="true" />
 			<param ui="alpha_colors:moa_speed:c" type="db" widget="sbint" link="UI:SAVE:ALPHA_ROLLOVER_SPEED" min="0" max="100" realtime="true" />
 			<param ui="alpha_colors:show_3d_item_preview:c" type="db" widget="boolbut" link="UI:SAVE:SHOW_3D_ITEM_PREVIEW" realtime="true" />
+			<param ui="language:translation_english_inverse:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:EN:INVERSE_DISPLAY" realtime="true" />
+			<param ui="language:translation_english_hide_flag:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:EN:HIDE_FLAG" realtime="true" />
+			<param ui="language:translation_french_inverse:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:FR:INVERSE_DISPLAY" realtime="true" />
+			<param ui="language:translation_french_hide_flag:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:FR:HIDE_FLAG" realtime="true" />
+			<param ui="language:translation_german_inverse:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:DE:INVERSE_DISPLAY" realtime="true" />
+			<param ui="language:translation_german_hide_flag:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:DE:HIDE_FLAG" realtime="true" />
+			<param ui="language:translation_russian_inverse:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:RU:INVERSE_DISPLAY" realtime="true" />
+			<param ui="language:translation_russian_hide_flag:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:RU:HIDE_FLAG" realtime="true" />
+			<param ui="language:translation_spanish_inverse:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:ES:INVERSE_DISPLAY" realtime="true" />
+			<param ui="language:translation_spanish_hide_flag:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:ES:HIDE_FLAG" realtime="true" />
+			<param ui="language:disable_translation_around:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:ARROUND:DISABLE" realtime="true" />
+			<param ui="language:disable_translation_guild:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:GUILD:DISABLE" realtime="true" />
+			<param ui="language:disable_translation_universe:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:UNIVERSE:DISABLE" realtime="true" />
+			<param ui="language:disable_translation_region:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:REGION:DISABLE" realtime="true" />
 			<param ui="chat_colors:cc_say:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:SAY" realtime="true" />
 			<param ui="chat_colors:cc_tell:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:TELL" realtime="true" />
 			<param ui="chat_colors:cc_team:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:GROUP" realtime="true" />
@@ -819,6 +884,8 @@
 		   <param ui="chat_colors:cc_terri:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:TERRITORY" realtime="true" />
 		   -->
 			<param ui="chat_colors:enter_dontquit_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB" realtime="true" />
+			<param ui="chat_colors:save_channel_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SAVE_CHANNEL" realtime="true" />
+			<param ui="chat_colors:auto_channel_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:AUTO_CHANNEL" realtime="true" />
 			<param ui="chat_colors:show_times_in_chat_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB" realtime="true" />
 			<param ui="chat_colors:show_dyn_channel_name_in_chat_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB" realtime="true" />
 			<param ui="chat_colors:show_online_offline_notifications_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB" realtime="true" />
@@ -925,6 +992,7 @@
 			<param ui="sound:maxtrack:c" type="cfg" widget="sbint" link="MaxTrack" realtime="end_scroll" ui_view="sound:maxtrack:c_res" />
 			<param ui="sound:sfx_volume:c" type="cfg" widget="sbfloat" link="SoundSFXVolume" realtime="true" />
 			<param ui="sound:music_volume:c" type="cfg" widget="sbfloat" link="SoundGameMusicVolume" realtime="true" />
+			<param ui="sound:mp3_volume:c" type="db" widget="sbint" link="UI:SAVE:MP3_VOLUME" min="0" max="255" realtime="true" />
 			<param ui="landmark_colors:cc_misc:c" type="db" widget="colbut" link="UI:SAVE:LANDMARK:COLORS:MISC" realtime="true" />
 			<param ui="landmark_colors:cc_tribe:c" type="db" widget="colbut" link="UI:SAVE:LANDMARK:COLORS:TRIBE" realtime="true" />
 			<param ui="landmark_colors:cc_bandit:c" type="db" widget="colbut" link="UI:SAVE:LANDMARK:COLORS:BANDIT" realtime="true" />

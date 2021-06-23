@@ -87,6 +87,9 @@
 	<command name="target" action="no_target" params="" />
 	<command name="tar" action="no_target" params="" />
 
+	<command name="lmtar" action="target_landmark" params="search=+" />
+	<command name="lmtar" action="set_compass_north" params="compass=ui:interface:compass" />
+
 	<command name="assist" action="assist_target" params="" />
 	<command name="as" action="assist_target" params="" />
 
@@ -100,7 +103,8 @@
 	<command name="invite" action="command" params="a teamInvite $" />
 
 	<command name="channel" action="command" params='a connectUserChannel "$"' />
-	<command name="channel" action="command" params='a connectUserChannel "$" +' />
+	<command name="channel" action="lua" params='game:connectUserChannel([[+]])' />
+	<command name="saveChannel" action="lua" params='game:saveChannel()' />
 
 	<command name="leaguekick" action="command" params="a leagueKick $" />
 	<command name="leaguequit" action="command" params="a setLeague" />
@@ -120,5 +124,9 @@
 
 	<command name="mapsearch" action="proc" params="map_search_show_set|+" />
 	<command name="mapsearch" action="proc" params="map_search_show" />
+
+	<!-- WebIG -->
+	<command name="go" action="browse" params="name=ui:interface:webig:content:html|url=home"/>
+	<command name="webdev" action="browse" params="name=ui:interface:webig:content:html|url=http://localhost/index.html"/>
 
 </interface_config>

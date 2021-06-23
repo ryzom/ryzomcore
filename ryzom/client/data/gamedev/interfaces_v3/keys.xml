@@ -296,6 +296,7 @@
 	<key name="N/A" action="dock_undock_chat" params="SYSTEM_INFO" />
 	<key name="KeyM" shift="1" action="show_hide" params="mailbox" />
 	<key name="KeyW" shift="1" action="show_hide" params="webig"/>
+	<key name="N/A" action="show_hide" params="appzone"/>
 	<key name="KeyG" shift="1" action="show_hide" params="guild_forum" />
 	<key name="KeyD" ctrl="1" action="show_hide" params="debug_info" />
 	<key name="KeyF5" action="talk_untalk" />

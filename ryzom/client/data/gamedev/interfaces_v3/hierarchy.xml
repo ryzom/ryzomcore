@@ -111,6 +111,7 @@
 
 <tree node="keys" >
 	<tree node="keys_player"/>
+	<tree node="keys_animals"/>
 	<tree node="keys_movement"/>
 	<tree node="keys_actions"/>
 	<tree node="keys_chat"/>

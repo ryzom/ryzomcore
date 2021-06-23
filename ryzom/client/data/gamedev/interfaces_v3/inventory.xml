@@ -23,6 +23,35 @@
 	<!-- Yoyo: prefer show an empty list when clicking -->
 	<!-- <action handler="leave_modal" cond="eq(getprop('ui:interface:bag_choose:list:nbelt'),0)" /> -->
 </proc>
+<proc id="select_special_items">
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:iil:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:ryzhome:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:webitems:active|value=1" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:artefact_content:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:artefact_bottom:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:artefact_tab:active|value=0" />
+	<action handler="lua" params="artefact:restorePact()" />
+	<action handler="browse_home" params="name=ui:interface:inventory:content:bag:webitems:html" />
+</proc>
+<proc id="select_ryzhome_items">
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:iil:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:webitems:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:ryzhome:active|value=1" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:artefact_content:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:artefact_bottom:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:artefact_tab:active|value=0" />
+	<action handler="lua" params="artefact:restorePact()" />
+	<action handler="browse_home" params="name=ui:interface:inventory:content:bag:ryzhome:html" />
+</proc>
+<proc id="select_bag_items">
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:iil:active|value=1" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:webitems:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:ryzhome:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:artefact_content:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:artefact_bottom:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:inventory:content:bag:artefact_tab:active|value=0" />
+	<action handler="lua" params="artefact:restorePact()" />
+</proc>
 <!-- ************* -->
 <!-- * EQUIPMENT * -->
 <!-- ************* -->
@@ -228,7 +257,7 @@
 <template name="tinv_animal" id="" bag_entry="" info_entry="" icon_db="">
 	<group id="#id" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
 		<instance template="tinv_nbslots_bulk_weight" id="ibw" x="0" inv_branch_nb="%max_animal_invslot" inv_branch="#bag_entry" inv_bulk_max="#info_entry:BULK_MAX" />
-		<instance template="tinv_item_list" id="iil" y="-18" sizeref="wh" h="-16"
+		<instance template="tinv_item_list" id="iil" y="-16" sizeref="wh" h="-16"
 			inv_branch_nb="%max_animal_invslot" inv_branch="#bag_entry" inv_type="#icon_db" animal_status="#info_entry:STATUS" />
 		<view type="text" id="disable_txt" posref="BL BL" x="2" y="2" color="255 255 255 255" shadow="true" fontsize="10" />
 		<link expr="getAnimalInventoryStateText(@#info_entry:STATUS)" target="disable_txt:hardtext" />
@@ -238,7 +267,7 @@
 <!-- FAKE SOLUTION -->
 
 <group type="container" id="inventory" header_active="false"
-	resizer="true" pop_min_w="430" pop_min_h="240" pop_max_w="920" pop_max_h="1600" w="400" h="400"
+	resizer="true" pop_min_w="380" pop_min_h="265" pop_max_w="920" pop_max_h="1600" w="380" h="265"
 	movable="true" active="false" opened="true" openable="false"
 	global_color="false" global_color_over="true"
 	on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:INVENTORY|value=1"
@@ -259,8 +288,11 @@
 			<ctrl style="tab_button_new" id="tab3" posparent="tab2" group="content:pa1" hardtext="uitabInvPAMount1" tooltip="uiTabInfo" onclick_r="show" params_r="inv_pa1" onclick_l="" params_l="" />
 			<ctrl style="tab_button_new" id="tab4" posparent="tab3" group="content:pa2" hardtext="uitabInvPAMount2" tooltip="uiTabInfo" onclick_r="show" params_r="inv_pa2" onclick_l="" params_l="" />
 			<ctrl style="tab_button_new" id="tab5" posparent="tab4" group="content:pa3" hardtext="uitabInvPAMount3" tooltip="uiTabInfo" onclick_r="show" params_r="inv_pa3" onclick_l="" params_l="" />
-			<ctrl style="tab_button_new" id="tab6" posparent="tab5" group="content:guild" hardtext="uitabInvGuild" tooltip="uiTabInfo" onclick_r="set" params_r="dblink=UI:SAVE:INVENTORY_GUILD_WANT_POPUP|value=1" onclick_l="" params_l="" />
-			<ctrl style="tab_button_new" id="tab7" posparent="tab6" group="content:room" hardtext="uitabInvRoom" tooltip="uiTabInfo" onclick_r="show" params_r="inv_room" onclick_l="" params_l="" />
+			<ctrl style="tab_button_new" id="tab6" posparent="tab5" group="content:pa4" hardtext="uitabInvPAZig1" tooltip="uiTabInfo" onclick_r="show" params_r="inv_pa4" onclick_l="" params_l="" />
+			<ctrl style="tab_button_new" id="tab7" posparent="tab6" group="content:pa5" hardtext="uitabInvPAZig2" tooltip="uiTabInfo" onclick_r="show" params_r="inv_pa5" onclick_l="" params_l="" />
+			<ctrl style="tab_button_new" id="tab8" posparent="tab7" group="content:pa6" hardtext="uitabInvPAZig3" tooltip="uiTabInfo" onclick_r="show" params_r="inv_pa6" onclick_l="" params_l="" />
+			<ctrl style="tab_button_new" id="tab9" posparent="tab8" group="content:guild" hardtext="uitabInvGuild" tooltip="uiTabInfo" onclick_r="set" params_r="dblink=UI:SAVE:INVENTORY_GUILD_WANT_POPUP|value=1" onclick_l="" params_l="" />
+			<ctrl style="tab_button_new" id="tab10" posparent="tab9" group="content:room" hardtext="uitabInvRoom" tooltip="uiTabInfo" onclick_r="show" params_r="inv_room" onclick_l="" params_l="" />
 
 			<link expr="not(@UI:VARIABLES:ISACTIVE:INV_BAG)" target="tab0:active" />
 			<link expr="not(@UI:VARIABLES:ISACTIVE:INV_EQUIP)" target="tab1:active" />
@@ -269,14 +301,17 @@
 			<link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA1), isAnimalStatusPresent(@%pa_beast1:STATUS))" target="tab3:active" />
 			<link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA2), isAnimalStatusPresent(@%pa_beast2:STATUS))" target="tab4:active" />
 			<link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA3), isAnimalStatusPresent(@%pa_beast3:STATUS))" target="tab5:active" />
+			<link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA4), isAnimalStatusPresent(@%pa_beast4:STATUS))" target="tab6:active" />
+			<link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA5), isAnimalStatusPresent(@%pa_beast5:STATUS))" target="tab7:active" />
+			<link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA6), isAnimalStatusPresent(@%pa_beast6:STATUS))" target="tab8:active" />
 			<!-- MAX_INVENTORY_ANIMAL -->
 			<link expr="switch(@%pa_beast0:TYPE, 'uitabInvPAMount0', 'uitabInvPAMount0', 'uitabInvPAPacker0', 'uitabInvPADemon0')" target="tab2:hardtext" />
 			<link expr="switch(@%pa_beast1:TYPE, 'uitabInvPAMount1', 'uitabInvPAMount1', 'uitabInvPAPacker1', 'uitabInvPADemon1')" target="tab3:hardtext" />
 			<link expr="switch(@%pa_beast2:TYPE, 'uitabInvPAMount2', 'uitabInvPAMount2', 'uitabInvPAPacker2', 'uitabInvPADemon2')" target="tab4:hardtext" />
 			<link expr="switch(@%pa_beast3:TYPE, 'uitabInvPAMount3', 'uitabInvPAMount3', 'uitabInvPAPacker3', 'uitabInvPADemon3')" target="tab5:hardtext" />
 
-			<link expr="and(%is_guild_present, not(@UI:SAVE:INVENTORY_GUILD_WANT_POPUP), @UI:TEMP:INVENTORY_GUILD_OPENED)" target="tab6:active" />
-			<link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_ROOM), @UI:TEMP:INVENTORY_ROOM_OPENED)" target="tab7:active" />
+			<link expr="and(%is_guild_present, not(@UI:SAVE:INVENTORY_GUILD_WANT_POPUP), @UI:TEMP:INVENTORY_GUILD_OPENED)" target="tab9:active" />
+			<link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_ROOM), @UI:TEMP:INVENTORY_ROOM_OPENED)" target="tab10:active" />
 		</group>
 
 		<view type="bitmap" id="sep" posparent="inv_select" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
@@ -290,9 +325,28 @@
 
 		<!-- bag -->
 		<group id="bag" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
+			<!-- Special Items -->
+			<ctrl style="text_button_16" id="bag_items" posref="TL TL" y="-2" x="10" wmargin="8" hardtext="uitabInvBag" tooltip="uitabInvBag" onclick_l="proc" params_l="select_bag_items" />
+			<ctrl style="text_button_16" id="special_items" posref="TR TL" posparent="bag_items" y="0" x="2" wmargin="8" hardtext="uiSpecialLabo" tooltip="uiSpecialLabo" onclick_l="proc" params_l="select_special_items" />
+			<ctrl style="text_button_16" id="ryzhome_items" posref="TR TL" posparent="special_items" y="0" x="2" wmargin="8" hardtext="RyzHome" tooltip="RyzHome" onclick_l="proc" params_l="select_ryzhome_items" />
+			<ctrl id="artefact_tab" type="button" posref="TR TL" posparent="ryzhome_items" y="0" x="2" active="0" tooltip="Artefact" instant_help="false" tx_normal="r2_palette_act.tga" tx_pushed="r2_palette_act.tga" tx_over="r2_palette_act.tga" />
+			<group id="webitems" posref="TL TL" sizeref="wh" h="-35" w="0" x="-10" y="-15" active="0">
+				<instance id="html" template="webig_html_noborder" x="0" home="http://app.ryzom.com/app_arcc/index.php?action=mItem_DisplayUserItems" browse_redo="" browse_undo="" browse_refresh="" />
+			</group>
+			<group id="ryzhome" posref="TL TL" sizeref="wh" h="-35" w="0" x="-10" y="-15" active="0">
+				<instance id="html" template="webig_html_noborder" x="0" home="http://app.ryzom.com/app_arcc/index.php?action=mRyzhome_DisplayUserItems" browse_redo="" browse_undo="" browse_refresh="" />
+			</group>
+			<group id="artefact_content" posref="TL TL" sizeref="wh" h="-35" w="0" x="-8" y="-15" active="0">
+				<instance id="html" template="webig_html_noborder" x="0" home="" browse_redo="" browse_undo="" browse_refresh="" />
+			</group>
+			<group id="artefact_bottom" posref="BR BR" sizeref="wh" h="0" w="0" x="0" y="0" global_color="false" active="0">
+				<ctrl id="detach" type="button" button_type="push_button" posref="BR MR" y="30" x="-4" tx_normal="W_win_popup.tga" tx_pushed="W_win_popup.tga" tx_over="W_button_16_over.tga" onclick_l="proc" params_l="artefact_win_detach" />
+				<instance template="check_box" id="autopact_cb" posref="BR MR" y="10" x="-1" fontsize="9" tooltip="uiArtefactHelp" instant_help="false" dblink="UI:SAVE:TELEPORT:DO_PACT" />
+				<view type="text" id="autopact_vt" posref="BR MR" x="-23" y="10" hardtext="" />
+			</group>
 			<instance template="tinv_nbslots_bulk_weight" id="ibw" x="0" inv_branch="%bag" inv_bulk_max="%bag_bulk_max" />
 			<instance template="tinv_item_list" id="iil" inv_branch_nb="%max_bag_invslot" y="-18" sizeref="wh" h="-16" inv_branch="%bag" inv_type="INV_BAG" />
-			<instance template="argent" id="money" posref="BL BL" x="4" y="0" value="%money" />
+			<instance template="argent" id="money" posref="BL BL" x="4" y="2" value="%money" />
 		</group>
 
 		<!-- pa0 -->
@@ -307,11 +361,20 @@
 		<!-- pa3 -->
 		<instance template="tinv_animal" id="pa3" info_entry="%pa_beast3" bag_entry="%pa_bag3" icon_db="INV_PA3" />
 
+		<!-- pa4 -->
+		<instance template="tinv_animal" id="pa4" info_entry="%pa_beast4" bag_entry="%pa_bag4" icon_db="INV_PA4" />
+
+		<!-- pa5 -->
+		<instance template="tinv_animal" id="pa5" info_entry="%pa_beast5" bag_entry="%pa_bag5" icon_db="INV_PA5" />
+
+		<!-- pa6 -->
+		<instance template="tinv_animal" id="pa6" info_entry="%pa_beast6" bag_entry="%pa_bag6" icon_db="INV_PA6" />
+
 		<!-- guild -->
 		<group id="guild" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
 			<instance template="tinv_nbslots_bulk_weight" id="ibw" x="0" inv_branch="%guild_inv_dbentry" inv_bulk_max="%guild_inv_bulk_max" />
 			<instance template="tinv_item_list" id="iil" inv_branch_nb="%max_guild_invslot" y="-18" sizeref="wh" h="-16" inv_branch="%guild_inv_dbentry" inv_type="INV_GUILD" />
-			<instance template="argent" id="money" posref="BL BL" x="4" y="0" value="%guild_inv_money" />
+			<instance template="argent" id="money" posref="BL BL" x="4" y="2" value="%guild_inv_money" />
 			<ctrl style="new_element_header" id="getmoney_but" posref="MR ML" posparent="money" x="4" wmargin="8"
 				hardtext="uittGetMoney" onclick_l="proc" params_l="guild_get_money" />
 			<ctrl style="new_element_header" id="putmoney_but" posref="MR ML" posparent="getmoney_but" x="4" wmargin="8"
@@ -322,7 +385,7 @@
 		<group id="room" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
 			<instance template="tinv_nbslots_bulk_weight" id="ibw" x="-4" inv_branch="%room_inv_dbentry" inv_bulk_max="%room_inv_bulk_max" />
 			<instance template="tinv_item_list" id="iil" inv_branch_nb="%max_room_invslot" y="-18" sizeref="wh" h="-16" inv_branch="%room_inv_dbentry" inv_type="INV_ROOM" />
-			<instance template="argent" id="money" posref="BL BL" x="4" y="0" value="%room_inv_money" />
+			<instance template="argent" id="money" posref="BL BL" x="4" y="2" value="%room_inv_money" />
 		</group>
 
 	</group>
@@ -434,26 +497,26 @@
 
 <!-- context menu for memory button -->
 <group type="menu" id="cm_memory_phrase" extends="base_menu" on_active="phrase_check_can_cristalize">
-	<action id="cri" name="uimCristalize" handler="phrase_cristalize" />
+	<action id="cri" name="uimCristalize" handler="phrase_cristalize" icon="cristal_spell.tga" />
 	<!-- The erase phrase on the memory is possible only if the phrase composition is not active, and the current phrase is not executed -->
-	<action id="for" name="uimPhraseDel" handler="delete_phrase_or_forget_macro" cond="and(eq(@UI:VARIABLES:PHRASE_COMPOSITION:ACTIVE,0),isPhraseMenuNotExecuting())" />
+	<action id="for" name="uimPhraseDel" handler="delete_phrase_or_forget_macro" cond="and(eq(@UI:VARIABLES:PHRASE_COMPOSITION:ACTIVE,0),isPhraseMenuNotExecuting())" icon="r2ed_not_current_act.tga" />
 	<!-- The edit direct on the memory is possible only if the phrase composition is not active, and the current phrase is not executed -->
-	<action id="edi" name="uimPhraseEdit" handler="phrase_edit" cond="and(eq(@UI:VARIABLES:PHRASE_COMPOSITION:ACTIVE,0),isPhraseMenuNotExecuting())" />
-	<action id="inf" name="uimInfos" handler="open_phraseid_help" />
-	<action id="cut" name="uiEditCut" handler="phrase_memory_copy" params="mode=cut" />
-	<action id="copy" name="uiEditCopy" handler="phrase_memory_copy" />
+	<action id="edi" name="uimPhraseEdit" handler="phrase_edit" cond="and(eq(@UI:VARIABLES:PHRASE_COMPOSITION:ACTIVE,0),isPhraseMenuNotExecuting())" icon="r2ed_edit_dialog.tga" />
+	<action id="inf" name="uimInfos" handler="open_phraseid_help" icon="brick_default.tga"  />
+	<action id="cut" name="uiEditCut" handler="phrase_memory_copy" params="mode=cut" icon="ico_extracting.tga" />
+	<action id="copy" name="uiEditCopy" handler="phrase_memory_copy" icon="r2ed_tool_copy.tga" />
 </group>
 
 <!-- context menu for memory button, when slot is empty -->
 <group type="menu" id="cm_memory_phrase_empty" extends="base_menu">
 	<!-- The new direct on the memory is possible only if the phrase composition is not active -->
-	<action id="new" name="uimPhraseNew" handler="phrase_new" cond="eq(@UI:VARIABLES:PHRASE_COMPOSITION:ACTIVE,0)" />
-	<action id="paste" name="uiEditPaste" handler="memorize_phrase_or_macro" />
+	<action id="new" name="uimPhraseNew" handler="phrase_new" cond="eq(@UI:VARIABLES:PHRASE_COMPOSITION:ACTIVE,0)" icon="curs_create.tga" />
+	<action id="paste" name="uiEditPaste" handler="memorize_phrase_or_macro" icon="r2ed_tool_paste.tga" />
 </group>
 
 <!-- context menu for memory button when it is a macro-->
 <group type="menu" id="cm_memory_macro" extends="base_menu" on_active="phrase_check_can_cristalize">
-	<action id="for" name="uimForgetMacro" handler="delete_phrase_or_forget_macro" />
+	<action id="for" name="uimForgetMacro" handler="delete_phrase_or_forget_macro" icon="r2ed_not_current_act.tga" />
 </group>
 
 <!-- Defines memory ctrl -->
@@ -469,7 +532,9 @@
 <!-- Defines memory ctrl -->
 <template name="ctrl_alt_memory" index="" posref="TL TL" posparent="parent" x="0" y="0" tx_noitem="">
 	<ctrl type="sheet" id="s#index" value="UI:PHRASE:MEMORY_ALT:#index" nature="sphraseid" brick_over="true" x="#x" y="#y" posref="#posref" posparent="#posparent" tx_noitem="#tx_noitem"
-	dragable="false" is_shortcut="false" 
+	oncandrop="can_memorize_phrase_or_macro" ondrop="memorize_phrase_or_macro" dragable="true" 
+	menu_r="ui:interface:cm_memory_phrase" menu_r_empty_slot="ui:interface:cm_memory_phrase_empty" is_shortcut="false" drag_copy="true" 
+	onclick_r="phrase_memory_before_menu" 
 	onclick_l="cast_phrase_or_create_new"
 	tooltip_parent="win" tooltip_posref="TR TL" tooltip_posref_alt="TL TR" />
 </template>
@@ -556,7 +621,7 @@
 
 	<group type="select_number" id="select_memory" value="UI:PHRASE:SELECT_MEMORY" loop="true" min="1" max="10" x="9" y="0" w="297" h="52" posparent="shortcuts" posref="MM MM" delta="1">
 		<view type="bitmap" id="slot_number" posref="MR MR" texture="W_slot_number.tga" />
-		<view type="text" id="number" posparent="slot_number" posref="MM MM" x="-1" y="-2" color="255 255 255 255" fontsize="12" shadow="true" hardtext="0" global_color="false" />
+		<view type="text" id="number" posparent="slot_number" posref="MM MM" x="0" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="0" global_color="false" />
 		<ctrl type="button" id="arrow_up" button_type="push_button" posref="TR TR" x="-2" y="-6" tx_normal="W_arrow_up_1.tga" tx_pushed="W_arrow_up_1.tga" tx_over="W_button_12_over.tga" tooltip="uittHandSet" tooltip_parent="win" />
 		<ctrl type="button" id="arrow_down" button_type="push_button" posref="BR BR" x="-2" y="6" tx_normal="W_arrow_down_1.tga" tx_pushed="W_arrow_down_1.tga" tx_over="W_button_12_over.tga" tooltip="uittHandSet" tooltip_parent="win" />
 	</group>

@@ -15,6 +15,14 @@ game.PrevSessionMission = - 1
 -- flag set to true when the in game db has been initialized
 game.InGameDbInitialized = false
 
+game.WebMissionLastDesc = {}
+
+game.CapTitle = ""
+game.CapDesc = ""
+game.CapChannel = ""
+game.CapInfosUrl = nil
+game.CapNextUrl = ""
+
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
@@ -243,6 +251,7 @@ function game:initNpcWebPageData()
 		self.NpcWebPage= {};
 		self.NpcWebPage.UrlTextId= 0;
 		self.NpcWebPage.BrowseDone= false;
+		self.NpcWebPage.WaitingDynStr = false
 	end
 end
 
@@ -283,17 +292,14 @@ function game:onDrawNpcWebPage()
 			local utf8Url = ucUrl
 			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil
 			if isRing then
-				-- when in ring mode, add the parameters ourselves. 60 sec timeout because of zope...
-				-- browseNpcWebPage(uiStr, utf8Url .. game.RingAccessPointFilter:getURLParameters(), false, 60)
-				-- Use new window after revamp
-				--RingAccessPoint:getWindow().active = 1
-				--RingAccessPoint:getWindow():center()
-				--RingAccessPoint:getWindow():blink(1)
-				--RingAccessPoint:show()
 				getUI("ui:interface:npc_web_browser").active = false
 				runAH(nil, "context_ring_sessions", "")
 				return
 			else
+				local hideWindow = string.find(utf8Url, "_hideWindow=1") ~= nil
+				if hideWindow then
+					getUI("ui:interface:npc_web_browser").active = false
+				end
 				self.NpcWebPage.BrowseDone= true;
 				browseNpcWebPage(uiStr, utf8Url, true, 10); -- 'true' is for 'add parameters' here. 10 is standard timeout
 			end
@@ -302,14 +308,15 @@ function game:onDrawNpcWebPage()
 			-- if this is a ring window, then only the refresh button to access to filter will be available
 			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil
 			local browser = getUI("ui:interface:npc_web_browser")
-			browser:find("browse_redo").active = not isRing
-			browser:find("browse_undo").active = not isRing
-			browser:find("browse_refresh").active = isRing
+			browser:find("browse_redo").active = true
+			browser:find("browse_undo").active = true
+			browser:find("browse_refresh").active = true
 		end
 	end
 end
 
 ------------------------------------------------------------------------------------------------------------
+-- UNUSED???
 function game:initNpcWebPage()
 	local	ui= getUICaller();
 	if(ui~=nil) then
@@ -318,24 +325,81 @@ function game:initNpcWebPage()
 end
 
 ------------------------------------------------------------------------------------------------------------
+function string:split(Pattern)
+	local Results = {}
+	local Start = 1
+	local SplitStart, SplitEnd = string.find(self, Pattern, Start)
+	while(SplitStart)do
+		table.insert(Results, string.sub(self, Start, SplitStart-1))
+		Start = SplitEnd+1
+		SplitStart, SplitEnd = string.find(self, Pattern, Start)
+	end
+	table.insert(Results, string.sub(self, Start))
+	return Results
+end
+
+function game:getOpenAppPageMessage()
+	local ucUrl = getDynString(self.NpcWebPage.UrlTextId)
+	local url = ucUrl
+	surl = url:split("&")
+	for i=1,#surl do
+		if surl[i]:sub(1, 12) == "open_message" then
+			return base64.decode(surl[i]:sub(14))
+		end
+	end
+	return ""
+end
+
+function game:onDbChangeAppPage()
+	if getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK") > self.NpcWebPage.Timeout then
+		local npcName = getTargetName()
+		local text = game:getOpenAppPageMessage()
+		displaySystemInfo(text, "AMB")
+		removeOnDbChange(getUI("ui:interface:npc_web_browser"),"@UI:VARIABLES:CURRENT_SERVER_TICK")
+	end
+end
+
 function game:startNpcWebPage()
 	self:initNpcWebPageData();
 
 	-- set the new page to explore.
 	-- NB: must backup the Database, because don't want that the page change when clicking an other NPC
-	self.NpcWebPage.UrlTextId= getDbProp('LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_URL');
-	self.NpcWebPage.BrowseDone= false;
-
-	-- reset the page (empty url) and undo / redo
-	runAH(nil, "browse", "name=ui:interface:npc_web_browser:content:html|url=release_wk.html|localize=1");
-	clearHtmlUndoRedo("ui:interface:npc_web_browser:content:html");
-	local ui= getUI("ui:interface:npc_web_browser");
-	if(ui~=nil) then
-		ui.active= true;
+	if not self.NpcWebPage.WaitingDynStr then
+		self.NpcWebPage.UrlTextId = getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_URL");
 	end
-	ui:find("browse_redo").active = false
-	ui:find("browse_undo").active = false
-	ui:find("browse_refresh").active = false
+	self.NpcWebPage.BrowseDone = false;
+
+	available = isDynStringAvailable(self.NpcWebPage.UrlTextId)
+	if available then
+		if self.NpcWebPage.WaitingDynStr then
+			self.NpcWebPage.WaitingDynStr = false
+			removeOnDbChange(getUI("ui:interface:npc_web_browser"),"@UI:VARIABLES:CURRENT_SERVER_TICK")
+		end
+		local ucUrl = getDynString(self.NpcWebPage.UrlTextId)
+		local utf8Url = ucUrl
+
+		if utf8Url:sub(1, 4) == "http" then
+			runAH(nil, "browse", "name=ui:interface:npc_web_browser:content:html|url=release_wk.html|localize=1");
+			clearHtmlUndoRedo("ui:interface:npc_web_browser:content:html");
+			local ui= getUI("ui:interface:npc_web_browser");
+			if(ui~=nil) then
+				ui.active= true;
+			end
+			ui:find("browse_redo").active = false
+			ui:find("browse_undo").active = false
+			ui:find("browse_refresh").active = false
+		else
+			setTargetAsInterlocutor()
+			self.NpcWebPage.Timeout = getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK")+7
+			addOnDbChange(getUI("ui:interface:npc_web_browser"),"@UI:VARIABLES:CURRENT_SERVER_TICK", "game:onDbChangeAppPage()")
+
+			-- App url, need sign it with server
+			runCommand("a", "openTargetApp", utf8Url)
+		end
+	else
+		self.NpcWebPage.WaitingDynStr = true
+		addOnDbChange(getUI("ui:interface:npc_web_browser"),"@UI:VARIABLES:CURRENT_SERVER_TICK", "game:startNpcWebPage()")
+	end
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -378,29 +442,6 @@ end
 ------------------------------------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------------------------------------
-function game:initFamePos()
-	local	ui = getUICaller();
-
-	-- assign good bar with good text
-
-	local	uiList = { 'fyros', 'matis', 'tryker', 'zorai', 'kami', 'karavan' };
-
-	for k,v in pairs(uiList) do
-		-- get ui text
-		local uiTextRef = getUI(getUIId(ui) .. ':' .. v);
-		local fameIdx = getFameDBIndex(getFameIndex(v));
-		-- put bar in front of it
-		if (fameIdx >= 0) and (fameIdx <= 5) then
-			local uiBar = getUI(getUIId(ui) .. ':fb' .. fameIdx);
-			uiBar.y = uiTextRef.y - uiTextRef.h / 2 + uiBar.h / 2;
-		else
-			debugInfo('Error init fame bar pos for ' .. v);
-		end
-	end
-
-end
-
-------------------------------------------------------------------------------------------------------------
 function game:initFameTribe()
 	local	ui = getUICaller();
 
@@ -418,10 +459,28 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 function game:updateFameBar(path)
+	local	ui = getUICaller();
 	local	thresholdKOS = getDbProp('SERVER:FAME:THRESHOLD_KOS');
 	local	thresholdTrade = getDbProp('SERVER:FAME:THRESHOLD_TRADE');
 	local	fameValue = getDbProp(path .. ':VALUE');
 	local	fameMax = getDbProp(path .. ':THRESHOLD');
+
+	-- known/unknown fame
+	local	fameVisible = fameValue ~= -128
+	if fameVisible then
+		-- show unmodified value stored in #path:VALUE
+		ui.t.hardtext = fameValue
+	else
+		ui.t.hardtext = "?"
+	end
+	-- show/hide fame bar components
+	ui.m.active = fameVisible
+	ui.p0.active = fameVisible
+	ui.p1.active = fameVisible
+	ui.p2.active = fameVisible
+	ui.p3.active = fameVisible
+	ui.p4.active = fameVisible
+	ui.bar3d.active = fameVisible
 
 	if (thresholdKOS < -100) then thresholdKOS = -100; end
 	if (thresholdKOS > 100) then thresholdKOS = 100; end
@@ -435,7 +494,6 @@ function game:updateFameBar(path)
 	if (thresholdKOS > thresholdTrade) then thresholdKOS = thresholdTrade; end
 	if (fameValue > fameMax) then fameValue = fameMax; end
 
-	local	ui = getUICaller();
 	local	uiPart0 = ui.p0;
 	local	uiPart1 = ui.p1;
 	local	uiPart2 = ui.p2;
@@ -909,18 +967,18 @@ function RingPlayerInfo:fill(ringPoints)
 --	tooltipUI.tooltip = self:tooltipRingRating(level, progress, "uiR2EDMasterlessRingRatingTooltip")
 
 	-- ecosystem Points
---	local ecosystems = {"Basic", "Desert", "Subtropic", "Forest", "Jungle", "PrimeRoot"}
---	for k, eco in pairs(ecosystems) do
---		local ecoVal = tostring(ringPoints[eco.."RingPoints"])
---		local ecoValMax = tostring(ringPoints["Max" .. eco.."RingPoints"])
---		local ecoUI = ui:find(string.lower(eco))
---		local maxUI = ecoUI:find("max")
---		local valUI = ecoUI:find("val")
---		tooltipUI = ecoUI:find("tt")
---		maxUI.hardtext = ecoValMax
---		valUI.hardtext = ecoVal
---		tooltipUI.tooltip = self:tooltipEcosystemPoints(ecoVal, ecoValMax, "uiR2ED" .. eco .. "PointsTooltip")
---	end
+	local ecosystems = {"Basic", "Desert", "Subtropic", "Forest", "Jungle", "PrimeRoot"}
+	for k, eco in pairs(ecosystems) do
+		local ecoVal = tostring(ringPoints[eco.."RingPoints"])
+		local ecoValMax = tostring(ringPoints["Max" .. eco.."RingPoints"])
+		local ecoUI = ui:find(string.lower(eco))
+		local maxUI = ecoUI:find("max")
+		local valUI = ecoUI:find("val")
+		tooltipUI = ecoUI:find("tt")
+		maxUI.hardtext = ecoValMax
+		valUI.hardtext = ecoVal
+		tooltipUI.tooltip = self:tooltipEcosystemPoints(ecoVal, ecoValMax, "uiR2ED" .. eco .. "PointsTooltip")
+	end
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -1011,6 +1069,27 @@ function RingPlayerInfo:getLevelRatingAndImprovementRate(val)
 	local progress = (val-minRatingInLevel)/(maxRatingInLevel-minRatingInLevel)
 
 	return level, progress
+end
+
+--------------------------------------------------------------------------------------------------------------
+--
+function game:updateOrganization(path, uiOrgText, uiStatusText, uiPointsText)
+
+	local org = getDbProp(path.."1:VALUE")
+	getUICaller()[uiOrgText].hardtext =  i18n.get('uiOrganization_' .. org)
+
+	local status = getDbProp(path.."2:VALUE")
+	getUICaller()[uiStatusText].hardtext= status
+
+	local points = getDbProp(path.."3:VALUE")
+	getUICaller()[uiPointsText].hardtext= points
+
+end
+
+------------------------------------------------------------------------------------------------------------
+function game:organizationTooltip()
+	-- set the tooltip in InterfaceManager
+	setContextHelpText( i18n.get('uittOrganization') );
 end
 
 

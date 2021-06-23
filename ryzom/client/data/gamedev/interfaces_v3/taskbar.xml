@@ -112,10 +112,7 @@
 			color="180 250 180 255" col_over="180 250 180 255" col_pushed="180 250 180 255" text_color_normal="180 250 180 160" />
 		<ctrl style="quit_button" id="return_mainland" posparent="cancel" posref="BL TL" y="%quit_button_delta_y" hardtext="uittReturnToMainland" onclick_l="proc" params_l="quit_dialog_mainland"
 			color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
-		<ctrl style="quit_button" id="launch_editor" posparent="return_mainland" posref="BL TL" y="%quit_button_delta_y" hardtext="uittLaunchEditor" onclick_l="proc" params_l="quit_dialog_launch_editor"
-			color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
-
-		<ctrl style="quit_button" id="reselect_char" posparent="launch_editor" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char"
+		<ctrl style="quit_button" id="reselect_char" posparent="return_mainland" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char"
 			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />
 		<!--<ctrl style="quit_button" id="game" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_game"
 			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />-->
@@ -344,11 +341,11 @@
 </proc>
 
 <group type="menu" id="milko_menu" extends="base_menu_with_color">
-	<action id="quick_help" name="uiQuickhelpTitle" handler="proc" params="quick_help_taskbar"/>
+	<action id="quick_help" name="uiQuickhelpTitle" handler="proc" params="quick_help_taskbar" icon="brick_default.tga" />
 	<!--
 	<action id="reset_ui" name="uiTaskbarResetUI" handler="proc" params="proc_reset_interface"/>
 	-->
-	<action id="reset_ui" name="uiTaskbarResetUI" handler="milko_menu_reset_interface" params=""/>
+	<action id="reset_ui" name="uiTaskbarResetUI" handler="milko_menu_reset_interface" params="" icon="r2ed_edit_events_over_small.tga" />
 </group>
 
 <template name="t_mode_button" id="" x="0" y="0" >
@@ -755,8 +752,13 @@
 		onclick_l="show_hide" params_l="mailbox" tooltip="uiMk_interaction5"
 		tx_normal="tb_mail.tga" tx_pushed="tb_mail.tga" c="%color_yellow" />
 	
+	<!-- WebIG -->
+	<instance template="mk_icon_text" id="sys5b" hardtext="uiMk_interaction5b" posparent="sys5" posref="BL TL"
+		onclick_l="show_hide" params_l="webig" tooltip="uiMk_interaction5b"
+		tx_normal="tb_mail.tga" tx_pushed="tb_mail.tga" c="%color_yellow" />
+
 	<!-- Team -->
-	<instance template="mk_icon_text" id="sys6" hardtext="uiMk_interaction6" posparent="sys5" posref="BL TL"
+	<instance template="mk_icon_text" id="sys6" hardtext="uiMk_interaction6" posparent="sys5b" posref="BL TL"
 		onclick_l="show_hide" params_l="team_list" tooltip="uiMk_interaction6"
 		tx_normal="tb_team.tga" tx_pushed="tb_team.tga" c="%color_yellow" />
 	<link expr="not(%is_team_present)" target="sys6:button:frozen" />
@@ -1072,7 +1074,13 @@
 
 		<instance template="win_button" id="fame"	color="UI:SAVE:WIN:COLORS:COM" text="uimwFame" posparent="mailbox" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:FAME"		win_name="fame" />
-		
+
+		<instance template="win_button" id="webig"	color="UI:SAVE:WIN:COLORS:COM" text="uimwWebIG" posparent="fame" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:WEBIG"		win_name="webig" />
+
+		<instance template="win_button" id="appzone"	color="UI:SAVE:WIN:COLORS:COM" text="uimwAppZone" posparent="webig" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:APPZONE"	win_name="appzone" />
+
 	</group>
 	<view type="bitmap" id="com_ico_back" posparent="communication" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
 	<view type="bitmap" id="com_ico" posparent="com_ico_back" posref="MM MM" x="2" y="-2" texture="spe_com.tga" global_color="false" />
@@ -1205,6 +1213,8 @@
 	<param value="communication:contact_list|contact_list" />
 	<param value="communication:mailbox|mailbox" />
 	<param value="communication:fame|fame" />
+	<param value="communication:webig|webig" />
+	<param value="communication:appzone|appzone" />
 	
 	<param value="options:game_config|game_config" />
 	<param value="options:keys|keys" />

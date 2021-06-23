@@ -1085,6 +1085,7 @@
 
 		<!-- Choice -->
 		<ctrl style="text_button_pvp_outpost" id="neutral" posref="BL TL" posparent="timer_decl" onclick_l="lua:game:outpostPvpJoin('neutral')" hardtext="uiOutpostJoinPVPNeutral" color="128 128 255 255" />
+		<ctrl style="text_button_pvp_outpost" active="false" id="random" posref="BL TL" posparent="timer_decl" onclick_l="lua:game:outpostPvpJoin('neutral')" hardtext="uiCharSel_CreateRan" color="128 128 255 255" /> 
 		<ctrl style="text_button_pvp_outpost" id="attack" posref="BM TM" posparent="timer_decl" onclick_l="lua:game:outpostPvpJoin('attack')" hardtext="uiOutpostJoinPVPAttack" color="255 128 128 255" />
 		<ctrl style="text_button_pvp_outpost" id="defend" posref="BR TR" posparent="timer_decl" onclick_l="lua:game:outpostPvpJoin('defend')" hardtext="uiOutpostJoinPVPDefend" color="128 255 128 255" />
 		<!-- Hide according to possibilities -->

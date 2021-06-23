@@ -24,8 +24,9 @@
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />
 				<leaf name="QUANTITY" type="I10" />
+				<leaf name="CREATE_TIME" type="I32" />
+				<leaf name="SERIAL" type="I32" />
 				<leaf name="USER_COLOR" type="I3" />
-				<leaf name="CHARAC_BUFFS" type="I8" />
 				<leaf name="LOCKED" type="I10" />
 				<leaf name="WEIGHT" type="I16" />
 				<!-- weight. see DB_WEIGHT_SCALE-->
@@ -44,14 +45,15 @@
 			</branch>
 		</branch>
 		<!-- MAX_INVENTORY_ANIMAL -->
-		<branch name="PACK_ANIMAL" count="4">
+		<branch name="PACK_ANIMAL" count="7">
 			<branch name="" count="500">
 				<!-- Common Item Data -->
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />
 				<leaf name="QUANTITY" type="I10" />
+				<leaf name="CREATE_TIME" type="I32" />
+				<leaf name="SERIAL" type="I32" />
 				<leaf name="USER_COLOR" type="I3" />
-				<leaf name="CHARAC_BUFFS" type="I8" />
 				<leaf name="LOCKED" type="I10" />
 				<leaf name="WEIGHT" type="I16" />
 				<!-- weight. see DB_WEIGHT_SCALE-->
@@ -84,8 +86,9 @@
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />
 				<leaf name="QUANTITY" type="I10" />
+				<leaf name="CREATE_TIME" type="I32" />
+				<leaf name="SERIAL" type="I32" />
 				<leaf name="USER_COLOR" type="I3" />
-				<leaf name="CHARAC_BUFFS" type="I8" />
 				<!-- No LOCKED state -->
 				<leaf name="WEIGHT" type="I16" />
 				<!-- weight. see DB_WEIGHT_SCALE-->
@@ -109,8 +112,9 @@
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />
 				<leaf name="QUANTITY" type="I10" />
+				<leaf name="CREATE_TIME" type="I32" />
+				<leaf name="SERIAL" type="I32" />
 				<leaf name="USER_COLOR" type="I3" />
-				<leaf name="CHARAC_BUFFS" type="I8" />
 				<leaf name="WEIGHT" type="I16" />
 				<!-- weight. see DB_WEIGHT_SCALE-->
 				<leaf name="NAMEID" type="I32" />
@@ -144,8 +148,9 @@
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />
 				<leaf name="QUANTITY" type="I10" />
+				<leaf name="CREATE_TIME" type="I32" />
+				<leaf name="SERIAL" type="I32" />
 				<leaf name="USER_COLOR" type="I3" />
-				<leaf name="CHARAC_BUFFS" type="I8" />
 				<leaf name="LOCKED" type="I10" />
 				<leaf name="WEIGHT" type="I16" />
 				<!-- weight. see DB_WEIGHT_SCALE-->
@@ -179,8 +184,9 @@
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />
 				<leaf name="QUANTITY" type="I10" />
+				<leaf name="CREATE_TIME" type="I32" />
+				<leaf name="SERIAL" type="I32" />
 				<leaf name="USER_COLOR" type="I3" />
-				<leaf name="CHARAC_BUFFS" type="I8" />
 				<!-- <leaf name="LOCKED" type="I10"/> No longer needed -->
 				<leaf name="WEIGHT" type="I16" />
 				<!-- weight. see DB_WEIGHT_SCALE-->
@@ -199,8 +205,9 @@
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />
 				<leaf name="QUANTITY" type="I10" />
+				<leaf name="CREATE_TIME" type="I32" />
+				<leaf name="SERIAL" type="I32" />
 				<leaf name="USER_COLOR" type="I3" />
-				<leaf name="CHARAC_BUFFS" type="I8" />
 				<!-- <leaf name="LOCKED" type="I10"/> No longer needed -->
 				<leaf name="WEIGHT" type="I16" />
 				<!-- weight. see DB_WEIGHT_SCALE-->
@@ -228,9 +235,10 @@
 			<leaf name="SHEET" type="I32" />
 			<leaf name="QUALITY" type="I10" />
 			<leaf name="QUANTITY" type="I10" />
+			<leaf name="CREATE_TIME" type="I32" />
+			<leaf name="SERIAL" type="I32" />
 			<!-- No LOCKED state -->
 			<leaf name="USER_COLOR" type="I3" />
-			<leaf name="CHARAC_BUFFS" type="I8" />
 			<leaf name="WEIGHT" type="I16" />
 			<!-- weight. see DB_WEIGHT_SCALE-->
 			<leaf name="NAMEID" type="I32" />

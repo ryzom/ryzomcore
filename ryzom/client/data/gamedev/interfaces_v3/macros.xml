@@ -211,6 +211,7 @@
 <!-- the id must be keys_### where ### is the name of the category -->
 <!-- dont remember if you add / remove a category to update hierarchy.xml -->
 <instance template="t_all_keys" id="keys_player"	title="uiKeysPlayerTitle" />
+<instance template="t_all_keys" id="keys_animals"	title="uiAnimalsTitle" />
 <instance template="t_all_keys" id="keys_movement"	title="uiKeysMovementTitle" />
 <instance template="t_all_keys" id="keys_actions"	title="uiKeysActionsTitle" />
 <instance template="t_all_keys" id="keys_chat"		title="uiKeysChatTitle" />
@@ -235,11 +236,11 @@
 <!-- ++++++++++++++++ -->
 
 <group type="menu" id="options_macro" exit_click_b="true" extends="base_menu" >
-	<action name="uimMacroExec" handler="macros_exec" />
-	<action name="uimMacroEdit" handler="macros_edit" />
-	<action name="uimMacroCopy" handler="macros_copy" />
+	<action name="uimMacroExec" handler="macros_exec"  icon="r2ed_tool_start.tga"/>
+	<action name="uimMacroEdit" handler="macros_edit" icon="r2ed_edit_dialog_small.tga" />
+	<action name="uimMacroCopy" handler="macros_copy" icon="r2ed_tool_copy.tga" />
 	<separator/>
-	<action name="uimMacroDel"	handler="macros_del" />
+	<action name="uimMacroDel"	handler="macros_del" icon="patch_off.tga" />
 </group>
 
 <!-- Template defining one macro in the macros container -->
@@ -304,7 +305,11 @@
 		 
 		 
 		<ctrl style="new_element_header" id="add_button" posref="MR MR" x="-16" y="0" wmargin="8" hardtext="uittNewMacro"
-				 onclick_l="macros_new_macro" />					
+				 onclick_l="macros_new_macro" />
+
+		<ctrl style="new_element_header" id="save_button" posparent="add_button" posref="ML MR" x="-4" y="0" wmargin="8" hardtext="uiSaveUI"
+				 onclick_l="save_ui" />
+
 	</group>
 
 	<group id="content" x="0" y="0" over="true" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" >
@@ -326,12 +331,12 @@
 <!-- +++++++++++++ -->
 
 <group type="menu" id="options_macro_command" exit_click_b="true" extends="base_menu" >
-	<action name="uimMCMoveUp"		handler="new_macro_cmd_move_up" />
-	<action name="uimMCMoveDown"	handler="new_macro_cmd_move_down" />
-	<action name="uimMCEdit"		handler="new_macro_cmd_edit" />
-	<action name="uimMCCopy"		handler="new_macro_cmd_copy" />
+	<action name="uimMCMoveUp"		handler="new_macro_cmd_move_up"  icon="w_arrow_up_0.tga"/>
+	<action name="uimMCMoveDown"	handler="new_macro_cmd_move_down" icon="w_arrow_down_0.tga" />
+	<action name="uimMCEdit"		handler="new_macro_cmd_edit" icon="r2ed_edit_dialog_small.tga" />
+	<action name="uimMCCopy"		handler="new_macro_cmd_copy" icon="r2ed_tool_copy.tga" />
 	<separator/>
-	<action name="uimMCDel"			handler="new_macro_cmd_delete" />
+	<action name="uimMCDel"			handler="new_macro_cmd_delete" icon="patch_off.tga" />
 </group>
 
 <!-- Definition d'une commande dans une macro -->
@@ -656,6 +661,7 @@
 
 <tree node="keys" >
 	<tree node="keys_player"/>
+	<tree node="keys_animals"/>
 	<tree node="keys_movement"/>
 	<tree node="keys_actions"/>
 	<tree node="keys_chat"/>
