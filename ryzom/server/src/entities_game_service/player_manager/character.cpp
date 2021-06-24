@@ -130,6 +130,8 @@
 #include "shop_type/items_for_sale.h"
 #include "player_manager/admin_properties.h"
 #include "admin.h"
+#include "admin_log.h"
+#include "harvest_source.h"
 #include "death_penalties.h"
 #include "player_manager/gear_latency.h"
 #include "primitives_parser.h"
