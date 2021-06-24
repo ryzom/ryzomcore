@@ -1984,7 +1984,7 @@ public:
 	virtual float getActualDamageFromExplosionWithArmor(float dmg) const;
 
 	/// send temp inventory close impulsion to client
-	void sendCloseTempInventoryImpulsion();
+	void sendCloseTempInventoryImpulsion(bool onlyIfEmpty = false);
 
 	/// set a fame value for the player, send info to the client.
 	void setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint32 fameMax, uint16 fameTrend);
