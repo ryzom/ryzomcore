@@ -35,9 +35,9 @@
 
 #include "nel/misc/entity_id.h"
 	
-#include "r2_share/r2_basic_types.h"
+#include "game_share/r2_basic_types.h"
 	
-#include "r2_share/r2_share_itf.h"
+#include "game_share/r2_share_itf.h"
 	
 #include "nel/net/login_cookie.h"
 	
