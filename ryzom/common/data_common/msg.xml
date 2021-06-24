@@ -43,7 +43,7 @@
     <leaf name="INIT_BANK" />
     <leaf name="RESET_BANK" />
   </branch>
-  <leaf name="POSITION" sendto="GPMS" format="u32 s32 s32 s32 f" description="the client moves at $u32 to ($i32,$i32,$i32) with heading $f" />
+  <leaf name="POSITION" sendto="GPMS" format="s32 s32 s32 f" usecycle="yes" description="the client moves to ($i32,$i32,$i32) with heading $f" />
   <branch name="HARVEST">
     <leaf name="DEPOSIT" sendto="EGS" format="u16" description="the client shearch a deposit for harvest/digging (param = skill used)" />
     <leaf name="CORPSE" />
@@ -166,9 +166,6 @@
     <leaf name="CLOSE_ROOM_INVENTORY" sendto="" description="EGS wants to close the user inventory" />
     <leaf name="USE_ITEM" sendto="EGS" format="u16" description="client wants to use teleport in the specified bag slot or consume an item to trigger its effect" />
     <leaf name="STOP_USE_XP_CAT" sendto="EGS" format="b" description="client wants to stop using xp catalyser" />
-    <leaf name="LOCK" sendto="EGS" format="u8 u16 b" description="lock or unlock an item. inventory, slot, lock" />
-    <leaf name="RENAME" sendto="EGS" format="u8 u16 b s" description="change an item name to a phrase or literal. inventory, slot, literal, name" />
-    <leaf name="WRITE" sendto="EGS" format="u8 u16 s" description="wrrite a crafter's message. inventory, slot, text" />
   </branch>
   <branch name="TP">
     <leaf name="RESPAWN" sendto="EGS" format="" description="teleport the player to his respawn point" />
@@ -250,6 +247,7 @@
     <leaf name="AFK" sendto="EGS" format="b" description="AFK command is sent to EGS" />
     <leaf name="RANDOM" sendto="EGS" format="s16 s16" description="client asks EGS to roll a dice and tell result around" />
     <leaf name="GUILDMOTD" sendto="EGS" format="s" description="client asks EGS to set the guild message of the day" />
+    <leaf name="AUTOPACT" sendto="EGS" format="u8" description="client want set AUTOPACT to TRUE or FALSE" />
   </branch>
   <!-- MP Exotic Price Evaluation (discontinued) -->
   <branch name="MP_EVAL">
@@ -349,7 +347,6 @@
     <leaf name="TAKE_MONEY" sendto="EGS" format="u64 u16" description="take money from guild warehouse" />
     <leaf name="OPEN_INVENTORY" sendto="" format="" description="open the guild inventory" />
     <leaf name="CLOSE_INVENTORY" sendto="" format="" description="close the guild inventory" />
-    <leaf name="ITEM_ACCESS" sendto="EGS" format="u16 u8" description="grant a guild access grade to an item in the guild inventory. slot, grade" />
   </branch>
   <branch name="OUTPOST">
     <leaf name="GIVEUP_OUTPOST" sendto="EGS" format="u32" description="Give up an outpost (outpostSHEET)" />
@@ -463,12 +460,10 @@
     <leaf name="BARS" format="u8 s16 s16 s16 s16" description="server update the players Bars (fast message) $msgNumber $hp $sap $sta $focus" />
     <leaf name="POPUP" format="u32 u32" description="server display an important info message on the client (u32 titleDynString u32 textDynString)" />
   </branch>
-  <!--
   <branch name="EVENT">
     <leaf name="SET_ITEM_CUSTOM_TEXT" sendto="EGS" format="u32 u32 uc" description="set the cursom of the item in inventory $inventory in slot $slot to $text" />
     <leaf name="DUMMY" description="stupid server....." />
   </branch>
-  -->
   <branch name="TOTEM">
     <leaf name="BUILD" sendto="EGS" format="" description="client has built a totem" />
     <leaf name="DUMMY" description="stupid server....." />
