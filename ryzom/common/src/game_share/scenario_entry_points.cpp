@@ -61,7 +61,7 @@ void CScenarioEntryPoints::init()
 {
 	_HardIslandsPath = false;
 	_CompleteIslandsFilenames.clear();
-	_CompleteIslandsFilename.push_back("r2_islands.xml");
+	_CompleteIslandsFilenames.push_back("r2_islands.xml");
 	_EntryPointsFilename = "r2_entry_points.txt";
 }
 //-----------------------------------------------------------------------------
