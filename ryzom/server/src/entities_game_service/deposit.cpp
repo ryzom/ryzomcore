@@ -586,7 +586,7 @@ void CDeposit::selectRMsByFilters( std::vector<std::string>& exactRMCodesS, cons
 			if ( ! depositReportCreated )
 			{
 				depositReportCreated = true;
-				depositReportFile = fopen( "deposit_contents.csv", "wt" ); // fclose() auto?
+				depositReportFile = nlfopen( "deposit_contents.csv", "wt" ); // fclose() auto?
 				if ( depositReportFile )
 				{
 					fprintf( depositReportFile, "Deposit;RM;When in year;When in day;Weather;\n" );

@@ -1980,7 +1980,7 @@ void cbClientSendCustomEmote( NLNET::CMessage& msgin, const std::string &service
 		return;
 	}
 
-	if(behaviour >= 140 && behaviour <= 169)
+	if (behaviour >= (MBEHAV::EMOTE_BEGIN + 80) && behaviour <= (MBEHAV::EMOTE_BEGIN + 109))
 	{
 		string name = CEntityIdTranslator::getInstance()->getByEntity(id).toString();
 		nlwarning("HACK: %s %s tries to launch a firework %d", id.toString().c_str(), name.c_str(), behaviour);

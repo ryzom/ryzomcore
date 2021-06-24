@@ -27,7 +27,7 @@ class CStaticWorld
 {
 public:
 	/// Serialisation
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 	
 	/// read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);

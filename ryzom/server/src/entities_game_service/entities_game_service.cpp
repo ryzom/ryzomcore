@@ -1004,6 +1004,10 @@ void CPlayerService::egsAddMonkeyPlayer()
 			}
 			idx++;
 		}
+		else
+		{
+			return;
+		}
 	}
 
 	if( PlayerManager.getPlayer( userId ) != 0 )
@@ -3938,7 +3942,8 @@ NLMISC_COMMAND( db, "Display or set the value of a property in the database", "<
 		{
 			// Set
 			sint64 value;
-			sscanf( args[2].c_str(), "%" NL_I64 "d", &value );
+			fromString(args[2], value);
+
 			if ( (args.size() > 3) && (args[3]!="0") )
 			{
 				res = e->_PropertyDatabase.x_setPropButDontSend( entry, value );

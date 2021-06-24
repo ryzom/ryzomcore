@@ -194,7 +194,7 @@ void		CInventoryUpdaterForCharacter::resetItemIntoClassicDatabase( INVENTORIES::
 				arrayItem.setSHEET(*_PropertyDatabasePt, CSheetId::Unknown);
 				arrayItem.setQUALITY(*_PropertyDatabasePt, 0);
 				arrayItem.setQUANTITY(*_PropertyDatabasePt, 0);
-				arrayItem.setUSER_COLOR(*_PropertyDatabasePt, 0);
+				arrayItem.setUSER_COLOR(*_PropertyDatabasePt, 1);
 	//			arrayItem.setLOCKED(_PropertyDatabasePt, 0);
 				arrayItem.setWEIGHT(*_PropertyDatabasePt, 0);
 				arrayItem.setNAMEID(*_PropertyDatabasePt, 0);

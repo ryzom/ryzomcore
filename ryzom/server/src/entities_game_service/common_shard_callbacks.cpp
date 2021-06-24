@@ -53,7 +53,7 @@ void cbStallShard( NLNET::CMessage& msgin, const std::string &serviceName, NLNET
 	msgin.serial( filename );
 
 	nlwarning("Backup service send Stall order when trying write %s file", filename.c_str() );
-	PlayerManager.broadcastMessage( 2, 0, 5, "Technical problem occured on the server,");
+	PlayerManager.broadcastMessage( 2, 0, 5, "Technical problem occurred on the server,");
 	PlayerManager.broadcastMessage( 2, 0, 5, "All non administrator accounts are disconnected immediately.");
 	PlayerManager.broadcastMessage( 2, 0, 5, "Customer Support is already working on it.");
 	PlayerManager.broadcastMessage( 2, 0, 5, "Sorry for any inconveniences.");

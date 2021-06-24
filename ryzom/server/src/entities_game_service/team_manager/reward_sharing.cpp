@@ -264,7 +264,7 @@ bool CRewardSharing::userValidSelect(const TDataSetRow & userRow, uint8 state)
 					shareItem.setSERIAL(user->_PropertyDatabase, 0);
 					shareItem.setCREATE_TIME(user->_PropertyDatabase, 0);
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:USER_COLOR",j), 0 );
-					shareItem.setUSER_COLOR(user->_PropertyDatabase, 0);
+					shareItem.setUSER_COLOR(user->_PropertyDatabase, 1);
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:WEIGHT",j), 0 );
 					shareItem.setWEIGHT(user->_PropertyDatabase, 0);
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:NAMEID",j), 0 );
@@ -422,7 +422,7 @@ void CRewardSharing::setUsersDb()
 				shareItem.setSERIAL(user->_PropertyDatabase, 0);
 				shareItem.setCREATE_TIME(user->_PropertyDatabase, 0);
 //				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:USER_COLOR",j), 0 );
-				shareItem.setUSER_COLOR(user->_PropertyDatabase, 0);
+				shareItem.setUSER_COLOR(user->_PropertyDatabase, 1);
 //				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:WEIGHT",j), 0 );
 				shareItem.setWEIGHT(user->_PropertyDatabase, 0);
 //				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:NAMEID",j), 0 );

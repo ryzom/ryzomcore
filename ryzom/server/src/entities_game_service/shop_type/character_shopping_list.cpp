@@ -61,6 +61,7 @@ CCharacterShoppingList::CCharacterShoppingList( CSmartPtr<CMerchant>& merchant, 
 //-----------------------------------------------------------------------------
 CCharacterShoppingList::~CCharacterShoppingList()
 {
+	TLogNoContext_Item noLog;
 	_CurrentTradeListNpc.clear();
 	_CurrentTradeListPlayer.clear();
 	_CurrentTradeListYours.clear();
@@ -196,8 +197,11 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 {
 	const CStaticItem * form = CSheets::getForm( itemTrade->getSheetId() );
 
+	if (!_Character)
+		return false;
+
 	// No filter on Faction trade
-	if(_Character && _Character->getBotChatType() == BOTCHATTYPE::TradeFactionFlag)
+	if(_Character->getBotChatType() == BOTCHATTYPE::TradeFactionFlag)
 		return true;
 
 	if( form != 0 )
@@ -650,7 +654,7 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 		tradeElem.setSERIAL(_Character->_PropertyDatabase, 0);
 		tradeElem.setCREATE_TIME(_Character->_PropertyDatabase, 0);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:USER_COLOR",index  ), 1);
-		tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, 0);
+		tradeElem.setUSER_COLOR(_Character->_PropertyDatabase, 1);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:WEIGHT",index  ), 0 );
 		tradeElem.setWEIGHT(_Character->_PropertyDatabase, 0);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:NAMEID",index  ), 0 );

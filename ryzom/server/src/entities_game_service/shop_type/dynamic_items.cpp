@@ -425,6 +425,7 @@ void CDynamicItems::tickUpdate()
 				COfflineCharacterCommand::getInstance()->addOfflineCommand( command );
 			}
 			
+			TLogNoContext_Item noLog;
 			subVec[_NextItemToCheck] = subVec.back();
 			subVec.pop_back();
 			TotalNbItemsForSale = --_TotalNbItemsForSale;

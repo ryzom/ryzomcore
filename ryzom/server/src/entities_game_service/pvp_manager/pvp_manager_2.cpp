@@ -471,10 +471,12 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 	{
 		if (DynChatEGS.addSession(channel, user->getEntityRowId(), writeRight))
 		{
+#ifdef HAVE_MONGO
 			string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
 			string::size_type pos = playerName.find('(');
 			if (pos != string::npos)
 				playerName = playerName.substr(0, pos);
+#endif
 			std::vector<TChanID> currentChannels = getCharacterRegisteredChannels(user);
 			currentChannels.push_back(channel);
 			_CharacterChannels.erase(user->getId());
@@ -502,7 +504,11 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 					(*it).second.push_back(user->getId());
 				}
 
+#ifndef HAVE_MONGO
+				const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+#endif
 				broadcastMessage(channel, string("<INFO>"), "<-- "+playerName);
+
 				sendChannelUsers(channel, user);
 			}
 		}
@@ -512,23 +518,35 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 //----------------------------------------------------------------------------
 void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter * user, bool userChannel)
 {
-	const string channelName = DynChatEGS.getChanNameFromID(channel);
 	std::vector<TChanID> currentChannels;
+#ifdef HAVE_MONGO
+	const string channelName = DynChatEGS.getChanNameFromID(channel);
 	string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
 	string::size_type pos = playerName.find('(');
 	if (pos != string::npos)
 		playerName = playerName.substr(0, pos);
+#endif
 
 
 	if (channel == DYN_CHAT_INVALID_CHAN) // Send leaves message to all user channels
 	{
 		currentChannels = getCharacterUserChannels(user);
 		for (uint i = 0; i < currentChannels.size(); i++)
+		{
+#ifndef HAVE_MONGO
+			const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+#endif
 			broadcastMessage(currentChannels[i], string("<INFO>"), playerName+" -->[]");
+		}
 	}
 
 	if (userChannel)
+	{
+#ifndef HAVE_MONGO
+		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+#endif
 		broadcastMessage(channel, string("<INFO>"), playerName+" -->[]");
+	}
 
 	currentChannels = getCharacterRegisteredChannels(user);
 	for (uint i = 0; i < currentChannels.size(); i++)
@@ -613,19 +631,23 @@ void CPVPManager2::addRemoveFactionChannelToUserWithPriviledge(TChanID channel, 
 //----------------------------------------------------------------------------
 void CPVPManager2::playerConnects(CCharacter * user)
 {
+#ifdef HAVE_MONGO
 	string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
 	string::size_type pos = playerName.find('(');
 	if (pos != string::npos)
 		playerName = playerName.substr(0, pos);
 
-#ifdef HAVE_MONGO
 	CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'online': true} }", user->getId().getShortId(), user->getGuildId()), true);
 #endif
 
 	std::vector<TChanID> currentChannels = getCharacterUserChannels(user);
 	for (uint i = 0; i < currentChannels.size(); i++)
+	{
+#ifndef HAVE_MONGO
+		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+#endif
 		broadcastMessage(currentChannels[i], string("<INFO>"), "<-- "+playerName);
-
+	}
 }
 
 //----------------------------------------------------------------------------
