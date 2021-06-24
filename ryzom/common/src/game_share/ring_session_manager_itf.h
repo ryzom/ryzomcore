@@ -41,7 +41,7 @@
 	
 #include "nel/net/login_cookie.h"
 	
-#include "../../nelns/welcome_service/welcome_service_itf.h"
+#include "game_share/welcome_service_itf.h"
 	
 #include "game_share/character_sync_itf.h"
 	
@@ -2527,7 +2527,7 @@ namespace RSMGR
 		{
 			H_AUTO(invokeResult_invokeResult);
 #ifdef NL_DEBUG
-			nldebug("CRingSessionManagerWeb::invokeResult called");
+			nldebug("CRingSessionManagerWeb::invokeResult called (%s)", resultString.c_str());
 #endif
 			NLNET::CMessage message("RET");
 			nlWrite(message, serial, userId);
