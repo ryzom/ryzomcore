@@ -21,7 +21,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/path.h"
 #include "npc_description_messages.h"
-#include "../../server/src/ai_share/ai_share.h"
+#include "../ai_share/ai_share.h"
 
 using namespace NLMISC;
 using namespace std;

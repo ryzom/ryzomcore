@@ -870,7 +870,7 @@ void CScriptVM::interpretCode(
 				{
 					otherContext = callerContext;
 				}
-				else
+				else if (thisContext != NULL)
 				{
 					otherContext = thisContext->findContext(strId);
 				}

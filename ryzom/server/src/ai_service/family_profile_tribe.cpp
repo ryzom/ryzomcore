@@ -592,8 +592,8 @@ void	CGrpProfileDynHarvest::checkTargetsAround	()
 		if	(!_Grp->calcCenterPos(centerPos))	// true if there's some bots in the group.
 			break;
 
-		const	uint32	playerRadius=	uint(30);	//	_AggroRange);
-		const	uint32	botRadius=uint(0);		//	_AggroRange);
+		const	uint32	playerRadius=30;	//	_AggroRange);
+		const	uint32	botRadius=0;		//	_AggroRange);
 		
 		const	uint32	minRadius=playerRadius>botRadius?botRadius:playerRadius;
 		
