@@ -1725,6 +1725,10 @@ void	CWorldPositionManager::computeCellVision( CCell *cell, CVisionEntry* entiti
 		}
 		while (offsetPtr <= offsetEnd);
 	}
+	else
+	{
+		nlassume(cell->isIndoor());
+	}
 
 
 	// then adds entities

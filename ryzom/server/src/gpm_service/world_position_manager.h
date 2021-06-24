@@ -137,15 +137,8 @@ public:
 	//friend void				CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8 worldImage);
 	friend void				CWorldEntity::removePrimitive();
 
-	struct CEntityIdHash
-	{
-		enum { bucket_size = 4, min_buckets = 8 };
-		size_t	operator () (const NLMISC::CEntityId &id) const { return (uint32)id.getShortId(); }
-		size_t	operator () (const NLMISC::CEntityId &left, const NLMISC::CEntityId &right) const { return left < right; }
-	};
-
 	/// Container of entities (all entities are referenced by this container
-	typedef CHashMap< NLMISC::CEntityId, CWorldEntity *, CEntityIdHash >		TWorldEntityContainerByEId;
+	typedef CHashMap< NLMISC::CEntityId, CWorldEntity *, NLMISC::CEntityIdHashMapTraits >		TWorldEntityContainerByEId;
 	typedef CHashMap<TDataSetRow, CWorldEntity *, TDataSetRow::CHashCode>		TWorldEntityContainer;
 
 	typedef CCell																	**TWorldCellsMap;
@@ -164,7 +157,7 @@ public:
 
 	typedef std::list< CWorldEntity * >												TRemovedEntityContainer;
 	typedef std::set< NLMISC::CEntityId >											TSetId;
-	typedef CHashMap< NLMISC::CEntityId, CAroundEntityInfo, CEntityIdHash >	TEntitiesAroundEntityContainer;
+	typedef CHashMap< NLMISC::CEntityId, CAroundEntityInfo, NLMISC::CEntityIdHashMapTraits >	TEntitiesAroundEntityContainer;
 
 	//typedef std::hash_map<NLMISC::CEntityId, CPlayerInfos*, CEntityIdHash >			TMapIdToPlayerInfos;
 
