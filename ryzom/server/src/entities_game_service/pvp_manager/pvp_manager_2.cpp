@@ -228,34 +228,30 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 		NLMISC::splitString(user->getLangChannel(), " ", langChannels);
 		for ( uint i = 0; i < langChannels.size(); i++ )
 		{
-			TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(langChannels[i]);
-			if (it != _ExtraFactionChannel.end())
+			if (langChannels[i] != "rf")
 			{
-				result.push_back((*it).second);
+				TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("usr_"+langChannels[i]);
+				if (it != _ExtraFactionChannel.end())
+				{
+					result.push_back((*it).second);
+				}
 			}
 		}
 	}
-	else
-	{
-		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("en");
-		if (it != _ExtraFactionChannel.end())
-		{
-			result.push_back((*it).second);
-		}		
-	}
-#endif
 
-#ifdef RYZOM_FORGE
+	TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("rf");
+	if (it != _ExtraFactionChannel.end())
+	{
+		result.push_back((*it).second);
+	}
+
 	PVP_CLAN::TPVPClan faction = user->getAllegiance().first;
 	if( faction != PVP_CLAN::Neutral )
 	{
-		if (isFactionInWar(faction))
+		TMAPFactionChannel::iterator it = _FactionChannel.find(faction);
+		if( it != _FactionChannel.end() )
 		{
-			TMAPFactionChannel::iterator it = _FactionChannel.find(faction);
-			if (it != _FactionChannel.end())
-			{
-				result.push_back((*it).second);
-			}
+			result.push_back((*it).second);
 		}
 	}
 
@@ -264,6 +260,25 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 	{
 		TMAPFactionChannel::iterator it = _FactionChannel.find(faction);
 		if( it != _FactionChannel.end() )
+		{
+			result.push_back((*it).second);
+		}
+	}
+
+	// Organizations
+	if (user->getOrganization() == 5) // marauder
+	{
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("marauders");
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}
+	}
+
+	if (user->getOrganization() == 7) // ranger
+	{
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("ranger");
+		if (it != _ExtraFactionChannel.end())
 		{
 			result.push_back((*it).second);
 		}

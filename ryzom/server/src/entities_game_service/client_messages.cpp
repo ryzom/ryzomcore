@@ -3710,7 +3710,7 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:MISSION:WAKE",					cbClientMissionWake },
 	{ "CLIENT:MISSION:GROUP_WAKE",				cbClientMissionGroupWake },
 
-	// { "CLIENT:EVENT:SET_ITEM_CUSTOM_TEXT",		cbClientEventSetItemCustomText },
+	// { "CLIENT:EVENT:SET_ITEM_CUSTOM_TEXT",		cbClientEventSetItemCustomText }, // Moved to ITEM:WRITE
 
 	{ "CLIENT:TOTEM:BUILD",						cbTotemBuild },
 
