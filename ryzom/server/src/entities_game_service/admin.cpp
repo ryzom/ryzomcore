@@ -42,6 +42,7 @@
 #include "nel/misc/algo.h"
 #include "nel/misc/sstring.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/string_view.h"
 
 #include "nel/net/admin.h"
 #include "nel/net/service.h"
