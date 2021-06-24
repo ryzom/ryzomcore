@@ -2981,7 +2981,7 @@ void CCharacter::postLoadTreatment()
 			if ( animal.Satiety == SatietyNotInit )
 			{
 				const CStaticItem* ticketPetForm = CSheets::getForm( animal.TicketPetSheetId );
-				animal.MaxSatiety = ticketPetForm ? ticketPetForm->PetHungerCount : 0;\
+				animal.MaxSatiety = ticketPetForm ? ticketPetForm->PetHungerCount : 0;
 				animal.Satiety = animal.MaxSatiety;
 			}
 		}
