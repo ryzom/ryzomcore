@@ -90,7 +90,6 @@
 #include "guild_manager/guild_char_proxy.h"
 #include "guild_manager/fame_manager.h"
 #include "mission_manager/mission_solo.h"
-#include "mission_manager/mission_solo.h"
 #include "position_flag_manager.h"
 //#include "name_manager.h"
 #include "zone_manager.h"
