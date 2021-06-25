@@ -2,9 +2,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -514,7 +511,7 @@ void CBankAccessor_GUILD::TGUILD::TOUTPOST::TO::TSQUADS::init(ICDBStructNode *pa
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("SP%u", i)), false );
 		nlassert(node != NULL);
-		C_SP[i].init(node, i);
+		_SP[i].init(node, i);
 	}
 	
 	for (uint i=0; i<24; ++i)

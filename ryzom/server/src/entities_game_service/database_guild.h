@@ -3,9 +3,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -970,7 +967,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	private:
 		ICDBStructNode	*_BranchNode;
 
-		TSP C_SP[24];
+		TSP _SP[24];
 		TT _T[24];
 		
 
@@ -986,7 +983,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		TSP &getSP(uint32 index)
 		{
 			nlassert(index < 24);
-			return C_SP[index];
+			return _SP[index];
 		}
 		TT &getT(uint32 index)
 		{

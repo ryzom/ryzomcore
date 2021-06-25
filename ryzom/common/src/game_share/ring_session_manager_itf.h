@@ -2,9 +2,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -2530,7 +2527,7 @@ namespace RSMGR
 		{
 			H_AUTO(invokeResult_invokeResult);
 #ifdef NL_DEBUG
-			nldebug("CRingSessionManagerWeb::invokeResult called (%s)", resultString.c_str());
+			nldebug("CRingSessionManagerWeb::invokeResult called");
 #endif
 			NLNET::CMessage message("RET");
 			nlWrite(message, serial, userId);
