@@ -387,11 +387,14 @@ AdminCommandsInit[] =
 		"eventSetFaunaBotAggroRange",		true,
 		"eventResetFaunaBotAggroRange",		true,
 		"eventSetBotCanAggro",				true,
-		"eventSetItemCustomText",			true,
-		"eventResetItemCustomText",			true,
 		"eventSetBotSheet",					true,
 		"eventSetBotFaction",				true,
 		"eventSetBotFameByKill",			true,
+
+		"eventSetItemCustomText",			true,
+		"eventResetItemCustomText",			true,
+		"eventSetItemName",					true,
+
 		"dssTarget",						true,	//ring stuff
 		"forceMissionProgress",				true,
 		"eventSetBotURL",					true,
@@ -8419,7 +8422,60 @@ NLMISC_COMMAND(eventResetItemCustomText, "set an item custom text, which replace
 }
 
 //----------------------------------------------------------------------------
+NLMISC_COMMAND(eventSetItemName, "change an item name to a phrase or literal (e.g.: /a eventSetItemName bag 5 1 \"Shield of Destruction\", /a eventSetItemName bag 5 0 shield_ep2_kami250_1)", "<eId> <inventory> <slot in inventory> <literal> <name>")
+{
+	if (args.size() < 5)
+		return false;
 
+	GET_CHARACTER;
+	if (!c)
+	{
+		log.displayNL("Invalid character '%s'", args[0].c_str());
+		return false;
+	}
+
+	INVENTORIES::TInventory	inventory = INVENTORIES::toInventory(args[1]);
+	if (inventory == INVENTORIES::UNDEFINED)
+	{
+		log.displayNL("Inventory is undefined");
+		return false;
+	}
+	uint32 slot;
+	if (!NLMISC::fromString(args[2], slot))
+	{
+		log.displayNL("Slot '%s' is not a valid integer", args[2].c_str());
+		return false;
+	}
+	bool literal = NLMISC::toBool(args[3]);
+	string name = args[4];
+
+	CInventoryPtr invent = c->getInventory(inventory);
+	if (slot >= invent->getSlotCount())
+	{
+		log.displayNL("Invalid slot specified");
+		return false;
+	}
+	CGameItemPtr item = invent->getItem(slot);
+	if (item == NULL)
+	{
+		log.displayNL("Item does not exist");
+		return false;
+	}
+
+	if (literal)
+	{
+		name = capitalizeFirst(name); // Require first character to be capitalized
+
+		if (name.size() >= 255) // Limit literal text length
+			name = name.substr(0, 255);
+	}
+
+	item->setPhraseId(name, literal);
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
 NLMISC_COMMAND(eventSpawnToxic, "Spawn a toxic cloud", "<player eid> <posXm> <posYm> <iRadius{0,1,2}=0> <dmgPerHit=0> <updateFrequency=ToxicCloudUpdateFrequency> <lifetimeInTicks=ToxicCloudDefaultLifetime>" )
 {
 	if ( args.size() < 1 )

@@ -377,55 +377,6 @@ void cbClientItemLock(NLNET::CMessage &msgin, const std::string &serviceName, NL
 	item->setLockedByOwner(lock);
 }
 
-void cbClientItemRename(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
-{
-	CEntityId eid;
-	INVENTORIES::TInventory inventory;
-	uint16 slot;
-	bool literal;
-	string text;
-	msgin.serial(eid);
-	msgin.serialShortEnum(inventory);
-	msgin.serial(slot);
-	msgin.serial(literal);
-	msgin.serial(text);
-
-	CCharacter *character = PlayerManager.getChar(eid);
-	DROP_IF(!character, "Character not found", return);
-	DROP_IF(inventory == INVENTORIES::UNDEFINED, "Inventory is undefined", return);
-
-	CInventoryPtr invent = character->getInventory(inventory);
-	DROP_IF(slot >= invent->getSlotCount(), "Invalid slot specified", return);
-	CGameItemPtr item = invent->getItem(slot);
-	DROP_IF(item == NULL, "Item does not exist", return);
-
-	if (!character->havePriv(":DEV:SGM:GM:EM:"))
-	{
-		// TODO: Some special rights to name items :)
-		const NLMISC::CEntityId &crafterEId = item->getCreator();
-		const NLMISC::CEntityId &userEId = character->getId();
-		DROP_IF(crafterEId != userEId, "Item name can only be set by the crafter", return);
-	}
-
-	/*
-	const CStaticItem *form = item->getStaticForm();
-	DROP_IF(!form, "Item does not have a static form", return);
-	ITEMFAMILY::EItemFamily family = form->Family;
-	DROP_IF(!ITEMFAMILY::isTextCustomizable(family), "Item text cannot be changed", return);
-	*/
-
-	if (literal)
-	{
-		text = capitalizeFirst(text); // Require first character to be capitalized
-
-		if (text.size() >= 255) // Limit literal text length
-			text = text.substr(0, 255);
-	}
-
-	item->setPhraseId(text, literal);
-
-}
-
 /// returns 0 on success, anything else is error:
 /// -1: Invalid inventory
 /// -2: Invalid slot
@@ -3486,7 +3437,6 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:ITEM:USE_ITEM",				cbClientItemUseItem },
 	{ "CLIENT:ITEM:STOP_USE_XP_CAT",		cbClientItemStopUseXpCat },
 	{ "CLIENT:ITEM:LOCK",                   cbClientItemLock },
-	{ "CLIENT:ITEM:RENAME",                 cbClientItemRename },
 	{ "CLIENT:ITEM:WRITE",                  cbClientItemWrite },
 
 

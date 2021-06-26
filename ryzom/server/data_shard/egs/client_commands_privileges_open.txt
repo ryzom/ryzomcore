@@ -165,13 +165,14 @@ eventSetNpcGroupEmote		::			audit		// Set the emote for the NPC group to execute
 eventSetFaunaBotAggroRange	::			audit		// Set the aggro ranges (not hungry, hungry and hunting) of a fauna creature
 eventResetFaunaBotAggroRange	::		audit		// Reset the aggro range of a fauna creature to sheet values
 eventSetBotCanAggro			::			audit		// Define if a creature can take aggro for another entity
-eventSetItemCustomText		::			audit		// Set the custom text of an item. For scroll-like items it's the text displayed in the help window.
-eventResetItemCustomText	::			audit		// Reset the custom text of an item to an empty string.
 eventSetBotSheet			::			audit		// Changes the sheet of a bot: <.creature sheet>
 eventSetBotFaction			::			audit		// Changes the faction of a bot: <faction name>
 eventSetBotFameByKill		::			audit		// Changes the amount of fame earned for bot faction when killing it: <fame value>
 eventSetBotURL				::			audit		// Set the url of a bot
 eventSetBotURLName			::			audit		// Set the url name of a bot
+eventSetItemCustomText		::			audit		// Set the custom text of an item. For scroll-like items it's the text displayed in the help window.
+eventResetItemCustomText	::			audit		// Reset the custom text of an item to an empty string.
+eventSetItemName			::			audit		// Set a name on an item. Can be a literal or a phrase from translation
 eventSpawnToxic				::			audit		// Add toxic cloud
 eventNpcSay					::			audit		// Have an NPC say a text
 eventSetBotFacing			::			audit		// Set the direction in which a bot faces
