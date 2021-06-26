@@ -62,37 +62,46 @@
     reset_focus_on_hide="false"  max_historic="0" entry_type="password"
     onenter="on_login" params=""
     prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
-    -->
 
-    <ctrl style="log_std_but" id="but_log" posparent="eb_password" posref="TM TM" y="-32" onclick_l="on_login" hardtext="uiOnConnect" />
-    
+
     <!--
+    <ctrl style="log_std_but" id="but_log" posparent="eb_password" posref="TM TM" y="-32" onclick_l="on_login" hardtext="uiOnConnect" />
+    -->
+    
     <ctrl type="button" button_type="push_button" id="but_log" posref="BR BR" x="-304" y="157"
 								tx_normal="log_over.tga" tx_over="log_over.tga" tx_pushed="log_over.tga"
 								color="255 255 255 0" col_over="255 255 255 255" col_pushed="255 255 255 0"
 								onclick_l="on_login" render_layer="-1" />
 								
     <view type="text" id="txt_log" posparent="but_log" posref="MM MM" hardtext="uiOnLogin" shadow="true" fontsize="16" y="0" color="208 212 182 255" />
-    -->
+
+
+
 
     <!-- Boxes Web Shortcuts
     <instance template="server_box" id="web_win" posparent="eb_login" posref="BL TL" w="568" h="202" y="-24" /> -->
 
     <!-- Create Account -->
+    <!--
     <ctrl style="log_std_but" id="but_create_account" posparent="but_log" posref="BM TM" y="-28"
     onclick_l="on_create_account" hardtext="uiCreateAccount" />
+    -->
 
 	<!-- Edit Account -->
+    <!--
     <ctrl style="log_std_but" id="but_edit_account" posparent="but_create_account" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiEditAccount" />
+    -->
 
 	<!-- Upgrade Account -->
 <!--    <ctrl style="log_std_but" id="but_upgrade_account" posparent="but_create_account" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiUpgradeAccount" /> -->
 
 	<!-- Forget Password -->
+    <!--
     <ctrl style="log_std_but" id="but_forget_pwd" posparent="but_edit_account" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_ForgetPwdURL" hardtext="uiForgetPwd" />
+    -->
 
     <!-- Free Trial
     <ctrl style="log_spe_but" id="but_free_trial" posparent="but_forget_pwd" posref="BL TL" y="-8"
@@ -100,8 +109,11 @@
 	-->
 
     <!-- Login Support -->
+    <!--
     <ctrl style="log_std_but" id="but_login_support" posparent="but_forget_pwd" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_LoginSupportURL" hardtext="uiLoginSupport" />
+    -->
+
     <!-- Scan Data -->
 <!--
     <ctrl style="log_spe_but" id="but_scan_data" posparent="but_login_support" posref="BL TL" y="-8"
@@ -125,7 +137,8 @@
 
     <!-- RESOLUTION ET LEVEL OF DETAILS -->
     <instance template="server_box" id="res_win" posparent="window" posref="TL TL" w="276" h="24" y="-733" x="10"/>
-    <instance template="server_box" id="lod_win" posparent="res_win" posref="TR TL" w="276" h="24" x="16" />
+    <instance template="server_box" id="lod_win" posparent="res_win" posref="TR TL" w="276" h="24" x="10" />
+    <instance template="server_box" id="ver_win" posparent="lod_win" posref="TR TL" w="276" h="24" x="10" />
 	<!-- Game Configuration -->
 <!--    <ctrl style="log_std_but" id="but_game_configuration" posparent="lod_win" posref="TR TL" x="26"    onclick_l="on_game_configuration" hardtext="uiGameConfiguration" /> -->
 	<!-- EXIT BUTTON -->
