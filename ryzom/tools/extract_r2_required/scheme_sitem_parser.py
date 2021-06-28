@@ -6,6 +6,8 @@ scheme = {
 		{
 			"i": "item",
 			"b": "brick",
+			"_c": "parent craftable",
+			"_g": "parent generic",
 		},
 		{
 			"f": "fyros",
@@ -13,6 +15,7 @@ scheme = {
 			"t": "tryker",
 			"z": "zorai",
 			"c": "common",
+			"_": "unspecified",
 			"r": "refugee",
 			"kam": "kami",
 			"kar": "karavan",
@@ -21,6 +24,11 @@ scheme = {
 		},
 		{
 			"a": "armor",
+			"a_h": "heavy armor base",
+			"a_m": "medium armor base",
+			"a_l": "light armor base",
+			"a_c": "caster armor base",
+			"ar": "refugee armor",
 			"ah": "heavy armor",
 			"am": "medium armor",
 			"al": "light armor",
@@ -265,20 +273,27 @@ with open("missing_sheets.txt", "r") as f:
 	for l in f:
 		missing[l] = True
 
+def process(f, fw):
+	for l in f:
+		if not l in missing:
+			name = l.strip().split(".")[0]
+			tags = parse(name)
+			gen = generate(tags)
+			if gen != name:
+				tags += [ "invalid" ]
+			fw.write(name + "\t" + gen)
+			for t in tags:
+				fw.write("\t" + t)
+			fw.write("\n")
+			# if "incomplete" in tags:
+			# print(name + " -> " + gen)
+			# print(tags)
+	fw.flush()
+
 with open("sitem_list.txt", "r") as f:
 	with open("sitem_parsed.tsv", "w") as fw:
-		for l in f:
-			if not l in missing:
-				name = l.strip().split(".")[0]
-				tags = parse(name)
-				gen = generate(tags)
-				if gen != name:
-					tags += [ "invalid" ]
-				fw.write(name + "\t" + gen)
-				for t in tags:
-					fw.write("\t" + t)
-				fw.write("\n")
-				# if "incomplete" in tags:
-				# print(name + " -> " + gen)
-				# print(tags)
-		fw.flush()
+		process(f, fw)
+
+with open("sitem_parents.txt", "r") as f:
+	with open("sitem_parents.tsv", "w") as fw:
+		process(f, fw)

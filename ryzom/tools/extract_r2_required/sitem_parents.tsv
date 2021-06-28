@@ -1,0 +1,32 @@
+_c_ah	_c_ah	parent	craftable	unspecified	heavy	armor
+_c_al	_c_al	parent	craftable	unspecified	light	armor
+_c_am	_c_am	parent	craftable	unspecified	medium	armor
+_c_ar	_c_ar	parent	craftable	unspecified	refugee	armor
+_c_m1bm	_c_m1bm	parent	craftable	unspecified	melee	one-handed	blunt	mace
+_c_m1pd	_c_m1pd	parent	craftable	unspecified	melee	one-handed	piercing	dagger
+_c_m1ps	_c_m1ps	parent	craftable	unspecified	melee	one-handed	piercing	spear
+_c_m1sa	_c_m1sa	parent	craftable	unspecified	melee	one-handed	slashing	axe
+_c_m1ss	_c_m1ss	parent	craftable	unspecified	melee	one-handed	slashing	sword
+_c_m2bm	_c_m2bm	parent	craftable	unspecified	melee	two-handed	blunt	mace
+_c_m2ms	_c_m2ms	parent	craftable	unspecified	melee	two-handed	magic	amplifier	gloves
+_c_m2pp	_c_m2pp	parent	craftable	unspecified	melee	two-handed	piercing	pike
+_c_m2sa	_c_m2sa	parent	craftable	unspecified	melee	two-handed	slashing	axe
+_c_m2ss	_c_m2ss	parent	craftable	unspecified	melee	two-handed	slashing	sword
+_c_sb	_c_sb	parent	craftable	unspecified	buckler	shield
+_c_ss	_c_ss	parent	craftable	unspecified	large	shield
+_gfa_c	_gfa_c	parent	generic	fyros	caster	armor	base
+_gfa_h	_gfa_h	parent	generic	fyros	heavy	armor	base
+_gfa_l	_gfa_l	parent	generic	fyros	light	armor	base
+_gfa_m	_gfa_m	parent	generic	fyros	medium	armor	base
+_gma_c	_gma_c	parent	generic	matis	caster	armor	base
+_gma_h	_gma_h	parent	generic	matis	heavy	armor	base
+_gma_l	_gma_l	parent	generic	matis	light	armor	base
+_gma_m	_gma_m	parent	generic	matis	medium	armor	base
+_gta_c	_gta_c	parent	generic	tryker	caster	armor	base
+_gta_h	_gta_h	parent	generic	tryker	heavy	armor	base
+_gta_l	_gta_l	parent	generic	tryker	light	armor	base
+_gta_m	_gta_m	parent	generic	tryker	medium	armor	base
+_gza_c	_gza_c	parent	generic	zorai	caster	armor	base
+_gza_h	_gza_h	parent	generic	zorai	heavy	armor	base
+_gza_l	_gza_l	parent	generic	zorai	light	armor	base
+_gza_m	_gza_m	parent	generic	zorai	medium	armor	base
