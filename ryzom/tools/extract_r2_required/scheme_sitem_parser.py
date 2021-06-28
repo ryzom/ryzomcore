@@ -272,12 +272,19 @@ with open("missing_sheets.txt", "r") as f:
 		missing[l] = True
 
 with open("sitem_list.txt", "r") as f:
-	for l in f:
-		if not l in missing:
-			name = l.strip().split(".")[0]
-			tags = parse(name)
-			gen = generate(tags)
-			# if "incomplete" in tags:
-			# if gen != name:
-			print(name + " -> " + gen)
-			print(tags)
+	with open("sitem_parsed.tsv", "w") as fw:
+		for l in f:
+			if not l in missing:
+				name = l.strip().split(".")[0]
+				tags = parse(name)
+				gen = generate(tags)
+				if gen != name:
+					tags += [ "invalid" ]
+				fw.write(name + "\t" + gen)
+				for t in tags:
+					fw.write("\t" + t)
+				fw.write("\n")
+				# if "incomplete" in tags:
+				# print(name + " -> " + gen)
+				# print(tags)
+		fw.flush()
