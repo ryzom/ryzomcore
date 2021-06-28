@@ -37,8 +37,8 @@ scheme = {
 			"ac": "light caster armor",
 			"s": "shield",
 			"m": "melee",
-			"r": "range",
-			"p": "range ammo",
+			"r": "ranged",
+			"p": "ranged ammo",
 			"j": "jewelry",
 			"sb": "buckler shield",
 			"ss": "large shield",
@@ -95,7 +95,7 @@ scheme = {
 		{},
 		{},
 	],
-	"range": [
+	"ranged": [
 		{},
 		{},
 		{},

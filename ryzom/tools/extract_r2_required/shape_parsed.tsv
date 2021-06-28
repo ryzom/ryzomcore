@@ -486,31 +486,31 @@ baton magie		incomplete	_baton magie
 baton magie01		incomplete	_baton magie01
 box01		incomplete	_box01
 candide		incomplete	_candide
-ca_hof_acc_gauntlet		karavan	female	accessory	magic	amplifier
-ca_hom_acc_gauntlet		karavan	male	accessory	magic	amplifier
+ca_hof_acc_gauntlet		karavan	female	accessory	magic	amplifier	gloves
+ca_hom_acc_gauntlet		karavan	male	accessory	magic	amplifier	gloves
 ca_wea_trooper_gun		karavan	weapon	trooper	laser	gun
 fy_acc_baniere		fyros	accessory	event	banner
-fy_hof_acc_gauntlet		fyros	female	accessory	magic	amplifier
-fy_hom_acc_gauntlet		fyros	male	accessory	magic	amplifier
-fy_wea_baton		fyros	weapon	one-handed	blunt	staff
-fy_wea_dague		fyros	weapon	one-handed	piercing	dagger
-fy_wea_epee1m		fyros	weapon	one-handed	slashing	sword
-fy_wea_epee2m		fyros	weapon	two-handed	slashing	sword
-fy_wea_fusarc		fyros	weapon	two-handed	bowrifle
-fy_wea_fusil		fyros	weapon	two-handed	rifle
-fy_wea_gatling		fyros	weapon	two-handed	autolauncher
+fy_hof_acc_gauntlet		fyros	female	accessory	magic	amplifier	gloves
+fy_hom_acc_gauntlet		fyros	male	accessory	magic	amplifier	gloves
+fy_wea_baton		fyros	weapon	melee	one-handed	blunt	staff
+fy_wea_dague		fyros	weapon	melee	one-handed	piercing	dagger
+fy_wea_epee1m		fyros	weapon	melee	one-handed	slashing	sword
+fy_wea_epee2m		fyros	weapon	melee	two-handed	slashing	sword
+fy_wea_fusarc		fyros	weapon	ranged	two-handed	bowrifle
+fy_wea_fusil		fyros	weapon	ranged	two-handed	rifle
+fy_wea_gatling		fyros	weapon	ranged	two-handed	autolauncher
 fy_wea_grand_bouclier		fyros	weapon	large	shield
 fy_wea_grenade		fyros	weapon	grenade
-fy_wea_hache1m		fyros	weapon	one-handed	slashing	axe
-fy_wea_hache2m		fyros	weapon	two-handed	slashing	axe
-fy_wea_lance1m		fyros	weapon	one-handed	piercing	spear
-fy_wea_lance2m		fyros	weapon	two-handed	piercing	pike
-fy_wea_lanceroquette		fyros	weapon	two-handed	launcher
-fy_wea_masse1m		fyros	weapon	one-handed	blunt	mace
-fy_wea_masse2m		fyros	weapon	two-handed	blunt	mace
+fy_wea_hache1m		fyros	weapon	melee	one-handed	slashing	axe
+fy_wea_hache2m		fyros	weapon	melee	two-handed	slashing	axe
+fy_wea_lance1m		fyros	weapon	melee	one-handed	piercing	spear
+fy_wea_lance2m		fyros	weapon	melee	two-handed	piercing	pike
+fy_wea_lanceroquette		fyros	weapon	ranged	two-handed	launcher
+fy_wea_masse1m		fyros	weapon	melee	one-handed	blunt	mace
+fy_wea_masse2m		fyros	weapon	melee	two-handed	blunt	mace
 fy_wea_petit_bouclier		fyros	weapon	buckler	shield
-fy_wea_pistolarc		fyros	weapon	one-handed	bowpistol
-fy_wea_pistolet		fyros	weapon	one-handed	pistol
+fy_wea_pistolarc		fyros	weapon	ranged	one-handed	bowpistol
+fy_wea_pistolet		fyros	weapon	ranged	one-handed	pistol
 ge_acc_balle_01		common	accessory	incomplete	_balle_01
 ge_acc_balle_02		common	accessory	incomplete	_balle_02
 ge_acc_balle_03		common	accessory	incomplete	_balle_03
@@ -530,17 +530,17 @@ ge_acc_pre_order_item		common	accessory	incomplete	_pre_order_item
 ge_acc_winch_a		common	accessory	incomplete	_winch_a
 ge_acc_woodpiece		common	accessory	incomplete	_woodpiece
 ge_feudecamp		common	incomplete	_feudecamp
-ge_fy_wea_trib_gattling		common	fyros	weapon	tribe	two-handed	autolauncher
+ge_fy_wea_trib_gattling		common	fyros	weapon	tribe	ranged	two-handed	autolauncher
 ge_fy_wea_trib_grand_bouclier		common	fyros	weapon	tribe	large	shield
-ge_fy_wea_trib_hache1m		common	fyros	weapon	tribe	one-handed	slashing	axe
-ge_fy_wea_trib_hache2m		common	fyros	weapon	tribe	two-handed	slashing	axe
-ge_fy_wea_trib_launcher		common	fyros	weapon	tribe	two-handed	launcher
-ge_hof_acc_gauntlet		common	female	accessory	magic	amplifier
-ge_hof_acc_gauntlet_gen		common	female	accessory	magic	amplifier	generic
-ge_hof_acc_gauntlet_kami		common	female	accessory	magic	amplifier	kami
-ge_hom_acc_gauntlet		common	male	accessory	magic	amplifier
-ge_hom_acc_gauntlet_gen		common	male	accessory	magic	amplifier	generic
-ge_hom_acc_gauntlet_kami		common	male	accessory	magic	amplifier	kami
+ge_fy_wea_trib_hache1m		common	fyros	weapon	tribe	melee	one-handed	slashing	axe
+ge_fy_wea_trib_hache2m		common	fyros	weapon	tribe	melee	two-handed	slashing	axe
+ge_fy_wea_trib_launcher		common	fyros	weapon	tribe	ranged	two-handed	launcher
+ge_hof_acc_gauntlet		common	female	accessory	magic	amplifier	gloves
+ge_hof_acc_gauntlet_gen		common	female	accessory	magic	amplifier	gloves	generic
+ge_hof_acc_gauntlet_kami		common	female	accessory	magic	amplifier	gloves	kami
+ge_hom_acc_gauntlet		common	male	accessory	magic	amplifier	gloves
+ge_hom_acc_gauntlet_gen		common	male	accessory	magic	amplifier	gloves	generic
+ge_hom_acc_gauntlet_kami		common	male	accessory	magic	amplifier	gloves	kami
 ge_kapo_mortier_a_1		common	incomplete	_kapo_mortier_a_1
 ge_kapo_pilon_a_1		common	incomplete	_kapo_pilon_a_1
 ge_kapo_pilon_o		common	incomplete	_kapo_pilon_o
@@ -562,9 +562,9 @@ ge_kwj_ciseau_a		common	incomplete	_kwj_ciseau_a
 ge_kwj_ciseau_o		common	incomplete	_kwj_ciseau_o
 ge_kwj_tube_a		common	incomplete	_kwj_tube_a
 ge_livre		common	incomplete	_livre
-ge_ma_wea_trib_lance1m		common	matis	weapon	tribe	one-handed	piercing	spear
-ge_ma_wea_trib_lance2m		common	matis	weapon	tribe	two-handed	piercing	pike
-ge_ma_wea_trib_pistolet		common	matis	weapon	tribe	one-handed	pistol
+ge_ma_wea_trib_lance1m		common	matis	weapon	tribe	melee	one-handed	piercing	spear
+ge_ma_wea_trib_lance2m		common	matis	weapon	tribe	melee	two-handed	piercing	pike
+ge_ma_wea_trib_pistolet		common	matis	weapon	tribe	ranged	one-handed	pistol
 ge_pvp_spire_kami		common	incomplete	_pvp_spire_kami
 ge_pvp_spire_karavan		common	incomplete	_pvp_spire_karavan
 ge_pvp_spire_socle		common	incomplete	_pvp_spire_socle
@@ -577,119 +577,119 @@ ge_treasure_box_gen		common	incomplete	_treasure_box_gen
 ge_treasure_box_ma		common	incomplete	_treasure_box_ma
 ge_treasure_box_tr		common	incomplete	_treasure_box_tr
 ge_treasure_box_zo		common	incomplete	_treasure_box_zo
-ge_tr_wea_trib_dague		common	tryker	weapon	tribe	one-handed	piercing	dagger
-ge_tr_wea_trib_epee1m		common	tryker	weapon	tribe	one-handed	slashing	sword
-ge_tr_wea_trib_epee2m		common	tryker	weapon	tribe	two-handed	slashing	sword
-ge_tr_wea_trib_fusil		common	tryker	weapon	tribe	two-handed	rifle
-ge_tr_wea_trib_pistolarc		common	tryker	weapon	tribe	one-handed	bowpistol
-ge_wea_baton		common	weapon	one-handed	blunt	staff
-ge_wea_dague		common	weapon	one-handed	piercing	dagger
-ge_wea_epee1m		common	weapon	one-handed	slashing	sword
-ge_wea_epee2m		common	weapon	two-handed	slashing	sword
-ge_wea_fusarc		common	weapon	two-handed	bowrifle
-ge_wea_fusil		common	weapon	two-handed	rifle
-ge_wea_gatling		common	weapon	two-handed	autolauncher
+ge_tr_wea_trib_dague		common	tryker	weapon	tribe	melee	one-handed	piercing	dagger
+ge_tr_wea_trib_epee1m		common	tryker	weapon	tribe	melee	one-handed	slashing	sword
+ge_tr_wea_trib_epee2m		common	tryker	weapon	tribe	melee	two-handed	slashing	sword
+ge_tr_wea_trib_fusil		common	tryker	weapon	tribe	ranged	two-handed	rifle
+ge_tr_wea_trib_pistolarc		common	tryker	weapon	tribe	ranged	one-handed	bowpistol
+ge_wea_baton		common	weapon	melee	one-handed	blunt	staff
+ge_wea_dague		common	weapon	melee	one-handed	piercing	dagger
+ge_wea_epee1m		common	weapon	melee	one-handed	slashing	sword
+ge_wea_epee2m		common	weapon	melee	two-handed	slashing	sword
+ge_wea_fusarc		common	weapon	ranged	two-handed	bowrifle
+ge_wea_fusil		common	weapon	ranged	two-handed	rifle
+ge_wea_gatling		common	weapon	ranged	two-handed	autolauncher
 ge_wea_grand_bouclier		common	weapon	large	shield
-ge_wea_hache1m		common	weapon	one-handed	slashing	axe
-ge_wea_hache2m		common	weapon	two-handed	slashing	axe
-ge_wea_high_baton1m		common	weapon	high	tribe	one-handed	blunt	staff
-ge_wea_high_dague		common	weapon	high	tribe	one-handed	piercing	dagger
-ge_wea_high_epee1m		common	weapon	high	tribe	one-handed	slashing	sword
-ge_wea_high_epee2m		common	weapon	high	tribe	two-handed	slashing	sword
-ge_wea_high_hache1m		common	weapon	high	tribe	one-handed	slashing	axe
-ge_wea_high_hache1m_b		common	weapon	high	tribe	one-handed	slashing	axe	b
-ge_wea_high_hache2m		common	weapon	high	tribe	two-handed	slashing	axe
-ge_wea_high_hache2m_b		common	weapon	high	tribe	two-handed	slashing	axe	b
-ge_wea_high_lance1m		common	weapon	high	tribe	one-handed	piercing	spear
-ge_wea_high_lance2m		common	weapon	high	tribe	two-handed	piercing	pike
-ge_wea_high_lance2m_b		common	weapon	high	tribe	two-handed	piercing	pike	b
-ge_wea_high_masse1m		common	weapon	high	tribe	one-handed	blunt	mace
-ge_wea_high_masse2m		common	weapon	high	tribe	two-handed	blunt	mace
-ge_wea_lance1m		common	weapon	one-handed	piercing	spear
-ge_wea_lance2m		common	weapon	two-handed	piercing	pike
-ge_wea_lanceroquette		common	weapon	two-handed	launcher
-ge_wea_masse1m		common	weapon	one-handed	blunt	mace
-ge_wea_masse2m		common	weapon	two-handed	blunt	mace
+ge_wea_hache1m		common	weapon	melee	one-handed	slashing	axe
+ge_wea_hache2m		common	weapon	melee	two-handed	slashing	axe
+ge_wea_high_baton1m		common	weapon	high	tribe	melee	one-handed	blunt	staff
+ge_wea_high_dague		common	weapon	high	tribe	melee	one-handed	piercing	dagger
+ge_wea_high_epee1m		common	weapon	high	tribe	melee	one-handed	slashing	sword
+ge_wea_high_epee2m		common	weapon	high	tribe	melee	two-handed	slashing	sword
+ge_wea_high_hache1m		common	weapon	high	tribe	melee	one-handed	slashing	axe
+ge_wea_high_hache1m_b		common	weapon	high	tribe	melee	one-handed	slashing	axe	b
+ge_wea_high_hache2m		common	weapon	high	tribe	melee	two-handed	slashing	axe
+ge_wea_high_hache2m_b		common	weapon	high	tribe	melee	two-handed	slashing	axe	b
+ge_wea_high_lance1m		common	weapon	high	tribe	melee	one-handed	piercing	spear
+ge_wea_high_lance2m		common	weapon	high	tribe	melee	two-handed	piercing	pike
+ge_wea_high_lance2m_b		common	weapon	high	tribe	melee	two-handed	piercing	pike	b
+ge_wea_high_masse1m		common	weapon	high	tribe	melee	one-handed	blunt	mace
+ge_wea_high_masse2m		common	weapon	high	tribe	melee	two-handed	blunt	mace
+ge_wea_lance1m		common	weapon	melee	one-handed	piercing	spear
+ge_wea_lance2m		common	weapon	melee	two-handed	piercing	pike
+ge_wea_lanceroquette		common	weapon	ranged	two-handed	launcher
+ge_wea_masse1m		common	weapon	melee	one-handed	blunt	mace
+ge_wea_masse2m		common	weapon	melee	two-handed	blunt	mace
 ge_wea_petit_bouclier		common	weapon	buckler	shield
-ge_wea_pistolarc		common	weapon	one-handed	bowpistol
-ge_wea_pistolet		common	weapon	one-handed	pistol
+ge_wea_pistolarc		common	weapon	ranged	one-handed	bowpistol
+ge_wea_pistolet		common	weapon	ranged	one-handed	pistol
 ge_xmas_baniere		common	incomplete	_xmas_baniere
-ge_zo_wea_trib_baton		common	zorai	weapon	tribe	one-handed	blunt	staff
-ge_zo_wea_trib_fusarc		common	zorai	weapon	tribe	two-handed	bowrifle
+ge_zo_wea_trib_baton		common	zorai	weapon	tribe	melee	one-handed	blunt	staff
+ge_zo_wea_trib_fusarc		common	zorai	weapon	tribe	ranged	two-handed	bowrifle
 ge_zo_wea_trib_grand_bouclier		common	zorai	weapon	tribe	large	shield
-ge_zo_wea_trib_masse1m		common	zorai	weapon	tribe	one-handed	blunt	mace
-ge_zo_wea_trib_masse2m		common	zorai	weapon	tribe	two-handed	blunt	mace
+ge_zo_wea_trib_masse1m		common	zorai	weapon	tribe	melee	one-handed	blunt	mace
+ge_zo_wea_trib_masse2m		common	zorai	weapon	tribe	melee	two-handed	blunt	mace
 ge_zo_wea_trib_petit_bouclier		common	zorai	weapon	tribe	buckler	shield
 gun01		incomplete	_gun01
 ma_acc_baniere		matis	accessory	event	banner
 ma_baniere		matis	incomplete	_baniere
-ma_hof_acc_gauntlet		matis	female	accessory	magic	amplifier
-ma_hom_acc_gauntlet		matis	male	accessory	magic	amplifier
-ma_wea_baton		matis	weapon	one-handed	blunt	staff
-ma_wea_dague		matis	weapon	one-handed	piercing	dagger
-ma_wea_epee1m		matis	weapon	one-handed	slashing	sword
-ma_wea_epee2m		matis	weapon	two-handed	slashing	sword
-ma_wea_fusarc		matis	weapon	two-handed	bowrifle
-ma_wea_fusil		matis	weapon	two-handed	rifle
-ma_wea_gatling		matis	weapon	two-handed	autolauncher
+ma_hof_acc_gauntlet		matis	female	accessory	magic	amplifier	gloves
+ma_hom_acc_gauntlet		matis	male	accessory	magic	amplifier	gloves
+ma_wea_baton		matis	weapon	melee	one-handed	blunt	staff
+ma_wea_dague		matis	weapon	melee	one-handed	piercing	dagger
+ma_wea_epee1m		matis	weapon	melee	one-handed	slashing	sword
+ma_wea_epee2m		matis	weapon	melee	two-handed	slashing	sword
+ma_wea_fusarc		matis	weapon	ranged	two-handed	bowrifle
+ma_wea_fusil		matis	weapon	ranged	two-handed	rifle
+ma_wea_gatling		matis	weapon	ranged	two-handed	autolauncher
 ma_wea_grand_bouclier		matis	weapon	large	shield
 ma_wea_grenade		matis	weapon	grenade
-ma_wea_hache1m		matis	weapon	one-handed	slashing	axe
-ma_wea_hache2m		matis	weapon	two-handed	slashing	axe
-ma_wea_lance1m		matis	weapon	one-handed	piercing	spear
-ma_wea_lance2m		matis	weapon	two-handed	piercing	pike
-ma_wea_lanceroquette		matis	weapon	two-handed	launcher
-ma_wea_masse1m		matis	weapon	one-handed	blunt	mace
-ma_wea_masse2m		matis	weapon	two-handed	blunt	mace
+ma_wea_hache1m		matis	weapon	melee	one-handed	slashing	axe
+ma_wea_hache2m		matis	weapon	melee	two-handed	slashing	axe
+ma_wea_lance1m		matis	weapon	melee	one-handed	piercing	spear
+ma_wea_lance2m		matis	weapon	melee	two-handed	piercing	pike
+ma_wea_lanceroquette		matis	weapon	ranged	two-handed	launcher
+ma_wea_masse1m		matis	weapon	melee	one-handed	blunt	mace
+ma_wea_masse2m		matis	weapon	melee	two-handed	blunt	mace
 ma_wea_petit_bouclier		matis	weapon	buckler	shield
-ma_wea_pistolarc		matis	weapon	one-handed	bowpistol
-ma_wea_pistolet		matis	weapon	one-handed	pistol
+ma_wea_pistolarc		matis	weapon	ranged	one-handed	bowpistol
+ma_wea_pistolet		matis	weapon	ranged	one-handed	pistol
 object01		incomplete	_object01
 object04		incomplete	_object04
 tr_acc_baniere		tryker	accessory	event	banner
-tr_hof_acc_gauntlet		tryker	female	accessory	magic	amplifier
-tr_hom_acc_gauntlet		tryker	male	accessory	magic	amplifier
-tr_wea_baton		tryker	weapon	one-handed	blunt	staff
+tr_hof_acc_gauntlet		tryker	female	accessory	magic	amplifier	gloves
+tr_hom_acc_gauntlet		tryker	male	accessory	magic	amplifier	gloves
+tr_wea_baton		tryker	weapon	melee	one-handed	blunt	staff
 tr_wea_batonspellcaster		tryker	weapon	magic	amplifier	staff
-tr_wea_dague		tryker	weapon	one-handed	piercing	dagger
-tr_wea_epee1m		tryker	weapon	one-handed	slashing	sword
-tr_wea_epee2m		tryker	weapon	two-handed	slashing	sword
-tr_wea_fusarc		tryker	weapon	two-handed	bowrifle
-tr_wea_fusil		tryker	weapon	two-handed	rifle
-tr_wea_gatling		tryker	weapon	two-handed	autolauncher
+tr_wea_dague		tryker	weapon	melee	one-handed	piercing	dagger
+tr_wea_epee1m		tryker	weapon	melee	one-handed	slashing	sword
+tr_wea_epee2m		tryker	weapon	melee	two-handed	slashing	sword
+tr_wea_fusarc		tryker	weapon	ranged	two-handed	bowrifle
+tr_wea_fusil		tryker	weapon	ranged	two-handed	rifle
+tr_wea_gatling		tryker	weapon	ranged	two-handed	autolauncher
 tr_wea_grandbouclier		tryker	weapon	large	shield
 tr_wea_grenade		tryker	weapon	grenade
-tr_wea_hache1m		tryker	weapon	one-handed	slashing	axe
-tr_wea_hache2m		tryker	weapon	two-handed	slashing	axe
-tr_wea_lance1m		tryker	weapon	one-handed	piercing	spear
-tr_wea_lance2m		tryker	weapon	two-handed	piercing	pike
-tr_wea_lanceroquette		tryker	weapon	two-handed	launcher
-tr_wea_masse1m		tryker	weapon	one-handed	blunt	mace
-tr_wea_masse2m		tryker	weapon	two-handed	blunt	mace
+tr_wea_hache1m		tryker	weapon	melee	one-handed	slashing	axe
+tr_wea_hache2m		tryker	weapon	melee	two-handed	slashing	axe
+tr_wea_lance1m		tryker	weapon	melee	one-handed	piercing	spear
+tr_wea_lance2m		tryker	weapon	melee	two-handed	piercing	pike
+tr_wea_lanceroquette		tryker	weapon	ranged	two-handed	launcher
+tr_wea_masse1m		tryker	weapon	melee	one-handed	blunt	mace
+tr_wea_masse2m		tryker	weapon	melee	two-handed	blunt	mace
 tr_wea_petit_bouclier		tryker	weapon	buckler	shield
-tr_wea_pistolarc		tryker	weapon	one-handed	bowpistol
-tr_wea_pistolet		tryker	weapon	one-handed	pistol
-tr_wea_pistolet_sousmarin		tryker	weapon	one-handed	pistol	underwater
+tr_wea_pistolarc		tryker	weapon	ranged	one-handed	bowpistol
+tr_wea_pistolet		tryker	weapon	ranged	one-handed	pistol
+tr_wea_pistolet_sousmarin		tryker	weapon	ranged	one-handed	pistol	underwater
 zo_acc_baniere		zorai	accessory	event	banner
-zo_hof_acc_gauntlet		zorai	female	accessory	magic	amplifier
-zo_hom_acc_gauntlet		zorai	male	accessory	magic	amplifier
-zo_wea_baton		zorai	weapon	one-handed	blunt	staff
+zo_hof_acc_gauntlet		zorai	female	accessory	magic	amplifier	gloves
+zo_hom_acc_gauntlet		zorai	male	accessory	magic	amplifier	gloves
+zo_wea_baton		zorai	weapon	melee	one-handed	blunt	staff
 zo_wea_batonspellcaster		zorai	weapon	magic	amplifier	staff
-zo_wea_dague		zorai	weapon	one-handed	piercing	dagger
-zo_wea_epee1m		zorai	weapon	one-handed	slashing	sword
-zo_wea_epee2m		zorai	weapon	two-handed	slashing	sword
-zo_wea_fusarc		zorai	weapon	two-handed	bowrifle
-zo_wea_fusil		zorai	weapon	two-handed	rifle
-zo_wea_gatling		zorai	weapon	two-handed	autolauncher
+zo_wea_dague		zorai	weapon	melee	one-handed	piercing	dagger
+zo_wea_epee1m		zorai	weapon	melee	one-handed	slashing	sword
+zo_wea_epee2m		zorai	weapon	melee	two-handed	slashing	sword
+zo_wea_fusarc		zorai	weapon	ranged	two-handed	bowrifle
+zo_wea_fusil		zorai	weapon	ranged	two-handed	rifle
+zo_wea_gatling		zorai	weapon	ranged	two-handed	autolauncher
 zo_wea_grand_bouclier		zorai	weapon	large	shield
 zo_wea_grenade		zorai	weapon	grenade
-zo_wea_hache1m		zorai	weapon	one-handed	slashing	axe
-zo_wea_hache2m		zorai	weapon	two-handed	slashing	axe
-zo_wea_lance1m		zorai	weapon	one-handed	piercing	spear
-zo_wea_lance2m		zorai	weapon	two-handed	piercing	pike
-zo_wea_lanceroquette		zorai	weapon	two-handed	launcher
-zo_wea_masse1m		zorai	weapon	one-handed	blunt	mace
-zo_wea_masse2m		zorai	weapon	two-handed	blunt	mace
+zo_wea_hache1m		zorai	weapon	melee	one-handed	slashing	axe
+zo_wea_hache2m		zorai	weapon	melee	two-handed	slashing	axe
+zo_wea_lance1m		zorai	weapon	melee	one-handed	piercing	spear
+zo_wea_lance2m		zorai	weapon	melee	two-handed	piercing	pike
+zo_wea_lanceroquette		zorai	weapon	ranged	two-handed	launcher
+zo_wea_masse1m		zorai	weapon	melee	one-handed	blunt	mace
+zo_wea_masse2m		zorai	weapon	melee	two-handed	blunt	mace
 zo_wea_petit_bouclier		zorai	weapon	buckler	shield
-zo_wea_pistolarc		zorai	weapon	one-handed	bowpistol
-zo_wea_pistolet		zorai	weapon	one-handed	pistol
+zo_wea_pistolarc		zorai	weapon	ranged	one-handed	bowpistol
+zo_wea_pistolet		zorai	weapon	ranged	one-handed	pistol

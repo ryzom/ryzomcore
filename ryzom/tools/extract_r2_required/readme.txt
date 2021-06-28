@@ -3,3 +3,4 @@
 - Run scheme_sitem_parser.py to generate sitem_parsed.tsv from sitem_list.txt minus missing_sheets.txt
 - Run extract_shapes.py to list all shapes into shape_list.txt
 - Run scheme_shape_parser.py to generate shape_parsed from shape_list.txt excluding _mission_ shapes
+- Run sitem_shape_matcher.py to generate match_sitem_shape.tsv from shape_parsed.tsv and sitem_parsed.tsv
