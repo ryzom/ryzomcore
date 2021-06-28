@@ -18,16 +18,6 @@ scheme = {
 			"kar": "karavan",
 			"b": "tribe",
 			"hb": "high tribe",
-			"cf": "crafted fyros",
-			"cm": "crafted matis",
-			"ct": "crafted tryker",
-			"cz": "crafted zorai",
-			"cc": "crafted common",
-			"cr": "crafted refugee", # i cr a b a	Refugee Boots
-			"ckam": "crafted kami",
-			"ckar": "crafted karavan",
-			"cb": "crafted tribe",
-			"chb": "crafted high tribe",
 		},
 		{
 			"a": "armor",
@@ -165,6 +155,10 @@ scheme = {
 		{},
 	],
 }
+
+# c crafted
+for k in scheme[""][1].copy():
+	scheme[""][1]["c" + k] = "crafted " + scheme[""][1][k]
 
 def addTags(sub, depth, tags):
 	for i in range(len(tags) - 1, -1, -1):
