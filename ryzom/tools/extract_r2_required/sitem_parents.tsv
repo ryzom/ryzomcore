@@ -1,19 +1,19 @@
-_c_ah	_c_ah	parent	craftable	unspecified	heavy	armor
-_c_al	_c_al	parent	craftable	unspecified	light	armor
-_c_am	_c_am	parent	craftable	unspecified	medium	armor
-_c_ar	_c_ar	parent	craftable	unspecified	refugee	armor
-_c_m1bm	_c_m1bm	parent	craftable	unspecified	melee	one-handed	blunt	mace
-_c_m1pd	_c_m1pd	parent	craftable	unspecified	melee	one-handed	piercing	dagger
-_c_m1ps	_c_m1ps	parent	craftable	unspecified	melee	one-handed	piercing	spear
-_c_m1sa	_c_m1sa	parent	craftable	unspecified	melee	one-handed	slashing	axe
-_c_m1ss	_c_m1ss	parent	craftable	unspecified	melee	one-handed	slashing	sword
-_c_m2bm	_c_m2bm	parent	craftable	unspecified	melee	two-handed	blunt	mace
-_c_m2ms	_c_m2ms	parent	craftable	unspecified	melee	two-handed	magic	amplifier	gloves
-_c_m2pp	_c_m2pp	parent	craftable	unspecified	melee	two-handed	piercing	pike
-_c_m2sa	_c_m2sa	parent	craftable	unspecified	melee	two-handed	slashing	axe
-_c_m2ss	_c_m2ss	parent	craftable	unspecified	melee	two-handed	slashing	sword
-_c_sb	_c_sb	parent	craftable	unspecified	buckler	shield
-_c_ss	_c_ss	parent	craftable	unspecified	large	shield
+_c_ah	_c_ah	parent	shared	unspecified	heavy	armor
+_c_al	_c_al	parent	shared	unspecified	light	armor
+_c_am	_c_am	parent	shared	unspecified	medium	armor
+_c_ar	_c_ar	parent	shared	unspecified	refugee	armor
+_c_m1bm	_c_m1bm	parent	shared	unspecified	melee	one-handed	blunt	mace
+_c_m1pd	_c_m1pd	parent	shared	unspecified	melee	one-handed	piercing	dagger
+_c_m1ps	_c_m1ps	parent	shared	unspecified	melee	one-handed	piercing	spear
+_c_m1sa	_c_m1sa	parent	shared	unspecified	melee	one-handed	slashing	axe
+_c_m1ss	_c_m1ss	parent	shared	unspecified	melee	one-handed	slashing	sword
+_c_m2bm	_c_m2bm	parent	shared	unspecified	melee	two-handed	blunt	mace
+_c_m2ms	_c_m2ms	parent	shared	unspecified	melee	two-handed	magic	amplifier	gloves
+_c_m2pp	_c_m2pp	parent	shared	unspecified	melee	two-handed	piercing	pike
+_c_m2sa	_c_m2sa	parent	shared	unspecified	melee	two-handed	slashing	axe
+_c_m2ss	_c_m2ss	parent	shared	unspecified	melee	two-handed	slashing	sword
+_c_sb	_c_sb	parent	shared	unspecified	buckler	shield
+_c_ss	_c_ss	parent	shared	unspecified	large	shield
 _gfa_c	_gfa_c	parent	generic	fyros	caster	armor	base
 _gfa_h	_gfa_h	parent	generic	fyros	heavy	armor	base
 _gfa_l	_gfa_l	parent	generic	fyros	light	armor	base
@@ -30,3 +30,15 @@ _gza_c	_gza_c	parent	generic	zorai	caster	armor	base
 _gza_h	_gza_h	parent	generic	zorai	heavy	armor	base
 _gza_l	_gza_l	parent	generic	zorai	light	armor	base
 _gza_m	_gza_m	parent	generic	zorai	medium	armor	base
+_gca_c	_gca_c	parent	generic	common	caster	armor	base
+_gca_h	_gca_h	parent	generic	common	heavy	armor	base
+_gca_l	_gca_l	parent	generic	common	light	armor	base
+_gca_m	_gca_m	parent	generic	common	medium	armor	base
+_gkara_c	_gkara_c	parent	generic	karavan	caster	armor	base
+_gkara_h	_gkara_h	parent	generic	karavan	heavy	armor	base
+_gkara_l	_gkara_l	parent	generic	karavan	light	armor	base
+_gkara_m	_gkara_m	parent	generic	karavan	medium	armor	base
+_gkama_c	_gkama_c	parent	generic	kami	caster	armor	base
+_gkama_h	_gkama_h	parent	generic	kami	heavy	armor	base
+_gkama_l	_gkama_l	parent	generic	kami	light	armor	base
+_gkama_m	_gkama_m	parent	generic	kami	medium	armor	base

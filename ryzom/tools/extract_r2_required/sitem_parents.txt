@@ -30,3 +30,15 @@ _gza_c.sitem
 _gza_h.sitem
 _gza_l.sitem
 _gza_m.sitem
+_gca_c.sitem
+_gca_h.sitem
+_gca_l.sitem
+_gca_m.sitem
+_gkara_c.sitem
+_gkara_h.sitem
+_gkara_l.sitem
+_gkara_m.sitem
+_gkama_c.sitem
+_gkama_h.sitem
+_gkama_l.sitem
+_gkama_m.sitem

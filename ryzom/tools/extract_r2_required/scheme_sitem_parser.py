@@ -6,7 +6,7 @@ scheme = {
 		{
 			"i": "item",
 			"b": "brick",
-			"_c": "parent craftable",
+			"_c": "parent shared",
 			"_g": "parent generic",
 		},
 		{
