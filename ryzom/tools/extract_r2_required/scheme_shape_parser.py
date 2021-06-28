@@ -28,10 +28,11 @@ scheme = {
 			"armor01": "heavy armor heavy01",
 			"armor04": "heavy armor heavy02",
 			"casque01": "heavy armor helmet heavy01",
-			"caster01": "caster armor caster01",
-			"civil01": "light armor civil01",
+			"caster01": "light caster armor caster01",
+			"civil01": "light armor light01",
 			"cheveux": "hairstyle",
 			"underwear": "underwear armor",
+			"underwear_hand": "underwear armor gloves hands",
 			"refugee": "refugee armor",
 		},
 		{
@@ -46,6 +47,7 @@ scheme = {
 			"_pantabotte": "pants",
 			"_casque": "helmet",
 			"_lead": "lead event",
+			"_fp": "first-person",
 			"_b": "b",
 			"_c": "c",
 			"_d": "d",
@@ -137,7 +139,7 @@ scheme = {
 		{},
 		{},
 		{
-			"caster00": "tribe boss caster armor caster01",
+			"caster00": "tribe boss light caster armor caster01",
 			"armor02": "tribe boss light armor light01",
 			"armor03": "tribe boss medium armor medium01",
 			"armor04": "tribe boss heavy armor heavy01",
@@ -266,6 +268,10 @@ with open("shape_list.txt", "r") as f:
 			if "_mission_" not in l:
 				name = l.strip().split(".")[0]
 				tags = parse(name)
+				if name.startswith("tr_hof_underwear_") and not name.endswith("_gilet") and not name.endswith("_pantabottes"):
+					tags.remove("tryker")
+				if name.startswith("tr_hom_underwear_") and not name.endswith("_pantabottes"):
+					tags.remove("tryker")
 				# gen = generate(tags)
 				# if gen != name:
 				#{ 	tags += [ "invalid" ]

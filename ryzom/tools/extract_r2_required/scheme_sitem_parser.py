@@ -34,7 +34,7 @@ scheme = {
 			"ah": "heavy armor",
 			"am": "medium armor",
 			"al": "light armor",
-			"ac": "caster armor",
+			"ac": "light caster armor",
 			"s": "shield",
 			"m": "melee",
 			"r": "range",
@@ -125,7 +125,7 @@ scheme = {
 		{},
 		{
 			"b": "boots",
-			"g": "gloves",
+			"g": "gloves hands",
 			"p": "pants",
 			"s": "sleeves",
 			"v": "vest",

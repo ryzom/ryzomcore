@@ -2,18 +2,18 @@ iccm1bm	iccm1bm	item	crafted	common	melee	one-handed	blunt	mace
 iccm1pd	iccm1pd	item	crafted	common	melee	one-handed	piercing	dagger
 iccm1sa	iccm1sa	item	crafted	common	melee	one-handed	slashing	axe
 iccm1ss	iccm1ss	item	crafted	common	melee	one-handed	slashing	sword
-icfacb_3	icfacb_3	item	crafted	fyros	caster	armor	boots	hq
-icfacp	icfacp	item	crafted	fyros	caster	armor	pants
-icfacp_2	icfacp_2	item	crafted	fyros	caster	armor	pants	mq
-icfacp_3	icfacp_3	item	crafted	fyros	caster	armor	pants	hq
-icfacs_3	icfacs_3	item	crafted	fyros	caster	armor	sleeves	hq
-icfacv_3	icfacv_3	item	crafted	fyros	caster	armor	vest	hq
+icfacb_3	icfacb_3	item	crafted	fyros	light	caster	armor	boots	hq
+icfacp	icfacp	item	crafted	fyros	light	caster	armor	pants
+icfacp_2	icfacp_2	item	crafted	fyros	light	caster	armor	pants	mq
+icfacp_3	icfacp_3	item	crafted	fyros	light	caster	armor	pants	hq
+icfacs_3	icfacs_3	item	crafted	fyros	light	caster	armor	sleeves	hq
+icfacv_3	icfacv_3	item	crafted	fyros	light	caster	armor	vest	hq
 icfahb	icfahb	item	crafted	fyros	heavy	armor	boots
 icfahb_2	icfahb_2	item	crafted	fyros	heavy	armor	boots	mq
 icfahb_3	icfahb_3	item	crafted	fyros	heavy	armor	boots	hq
-icfahg	icfahg	item	crafted	fyros	heavy	armor	gloves
-icfahg_2	icfahg_2	item	crafted	fyros	heavy	armor	gloves	mq
-icfahg_3	icfahg_3	item	crafted	fyros	heavy	armor	gloves	hq
+icfahg	icfahg	item	crafted	fyros	heavy	armor	gloves	hands
+icfahg_2	icfahg_2	item	crafted	fyros	heavy	armor	gloves	hands	mq
+icfahg_3	icfahg_3	item	crafted	fyros	heavy	armor	gloves	hands	hq
 icfahh	icfahh	item	crafted	fyros	heavy	armor	helmet
 icfahh_2	icfahh_2	item	crafted	fyros	heavy	armor	helmet	mq
 icfahh_3	icfahh_3	item	crafted	fyros	heavy	armor	helmet	hq
@@ -29,9 +29,9 @@ icfahv_3	icfahv_3	item	crafted	fyros	heavy	armor	vest	hq
 icfalb	icfalb	item	crafted	fyros	light	armor	boots
 icfalb_2	icfalb_2	item	crafted	fyros	light	armor	boots	mq
 icfalb_3	icfalb_3	item	crafted	fyros	light	armor	boots	hq
-icfalg	icfalg	item	crafted	fyros	light	armor	gloves
-icfalg_2	icfalg_2	item	crafted	fyros	light	armor	gloves	mq
-icfalg_3	icfalg_3	item	crafted	fyros	light	armor	gloves	hq
+icfalg	icfalg	item	crafted	fyros	light	armor	gloves	hands
+icfalg_2	icfalg_2	item	crafted	fyros	light	armor	gloves	hands	mq
+icfalg_3	icfalg_3	item	crafted	fyros	light	armor	gloves	hands	hq
 icfalp	icfalp	item	crafted	fyros	light	armor	pants
 icfalp_2	icfalp_2	item	crafted	fyros	light	armor	pants	mq
 icfalp_3	icfalp_3	item	crafted	fyros	light	armor	pants	hq
@@ -44,9 +44,9 @@ icfalv_3	icfalv_3	item	crafted	fyros	light	armor	vest	hq
 icfamb	icfamb	item	crafted	fyros	medium	armor	boots
 icfamb_2	icfamb_2	item	crafted	fyros	medium	armor	boots	mq
 icfamb_3	icfamb_3	item	crafted	fyros	medium	armor	boots	hq
-icfamg	icfamg	item	crafted	fyros	medium	armor	gloves
-icfamg_2	icfamg_2	item	crafted	fyros	medium	armor	gloves	mq
-icfamg_3	icfamg_3	item	crafted	fyros	medium	armor	gloves	hq
+icfamg	icfamg	item	crafted	fyros	medium	armor	gloves	hands
+icfamg_2	icfamg_2	item	crafted	fyros	medium	armor	gloves	hands	mq
+icfamg_3	icfamg_3	item	crafted	fyros	medium	armor	gloves	hands	hq
 icfamp	icfamp	item	crafted	fyros	medium	armor	pants
 icfamp_2	icfamp_2	item	crafted	fyros	medium	armor	pants	mq
 icfamp_3	icfamp_3	item	crafted	fyros	medium	armor	pants	hq
@@ -74,9 +74,9 @@ icfm1ss_3	icfm1ss_3	item	crafted	fyros	melee	one-handed	slashing	sword	hq
 icfm2bm	icfm2bm	item	crafted	fyros	melee	two-handed	blunt	mace
 icfm2bm_2	icfm2bm_2	item	crafted	fyros	melee	two-handed	blunt	mace	mq
 icfm2bm_3	icfm2bm_3	item	crafted	fyros	melee	two-handed	blunt	mace	hq
-icfm2ms	icfm2ms	item	crafted	fyros	melee	two-handed	magic	amplifier
-icfm2ms_2	icfm2ms_2	item	crafted	fyros	melee	two-handed	magic	amplifier	mq
-icfm2ms_3	icfm2ms_3	item	crafted	fyros	melee	two-handed	magic	amplifier	hq
+icfm2ms	icfm2ms	item	crafted	fyros	melee	two-handed	magic	amplifier	gloves
+icfm2ms_2	icfm2ms_2	item	crafted	fyros	melee	two-handed	magic	amplifier	gloves	mq
+icfm2ms_3	icfm2ms_3	item	crafted	fyros	melee	two-handed	magic	amplifier	gloves	hq
 icfm2pp	icfm2pp	item	crafted	fyros	melee	two-handed	piercing	pike
 icfm2pp_2	icfm2pp_2	item	crafted	fyros	melee	two-handed	piercing	pike	mq
 icfm2pp_3	icfm2pp_3	item	crafted	fyros	melee	two-handed	piercing	pike	hq
@@ -92,18 +92,18 @@ icfsb_3	icfsb_3	item	crafted	fyros	buckler	shield	hq
 icfss	icfss	item	crafted	fyros	large	shield
 icfss_2	icfss_2	item	crafted	fyros	large	shield	mq
 icfss_3	icfss_3	item	crafted	fyros	large	shield	hq
-icmacb_3	icmacb_3	item	crafted	matis	caster	armor	boots	hq
-icmacp	icmacp	item	crafted	matis	caster	armor	pants
-icmacp_2	icmacp_2	item	crafted	matis	caster	armor	pants	mq
-icmacp_3	icmacp_3	item	crafted	matis	caster	armor	pants	hq
-icmacs_3	icmacs_3	item	crafted	matis	caster	armor	sleeves	hq
-icmacv_3	icmacv_3	item	crafted	matis	caster	armor	vest	hq
+icmacb_3	icmacb_3	item	crafted	matis	light	caster	armor	boots	hq
+icmacp	icmacp	item	crafted	matis	light	caster	armor	pants
+icmacp_2	icmacp_2	item	crafted	matis	light	caster	armor	pants	mq
+icmacp_3	icmacp_3	item	crafted	matis	light	caster	armor	pants	hq
+icmacs_3	icmacs_3	item	crafted	matis	light	caster	armor	sleeves	hq
+icmacv_3	icmacv_3	item	crafted	matis	light	caster	armor	vest	hq
 icmahb	icmahb	item	crafted	matis	heavy	armor	boots
 icmahb_2	icmahb_2	item	crafted	matis	heavy	armor	boots	mq
 icmahb_3	icmahb_3	item	crafted	matis	heavy	armor	boots	hq
-icmahg	icmahg	item	crafted	matis	heavy	armor	gloves
-icmahg_2	icmahg_2	item	crafted	matis	heavy	armor	gloves	mq
-icmahg_3	icmahg_3	item	crafted	matis	heavy	armor	gloves	hq
+icmahg	icmahg	item	crafted	matis	heavy	armor	gloves	hands
+icmahg_2	icmahg_2	item	crafted	matis	heavy	armor	gloves	hands	mq
+icmahg_3	icmahg_3	item	crafted	matis	heavy	armor	gloves	hands	hq
 icmahh	icmahh	item	crafted	matis	heavy	armor	helmet
 icmahh_2	icmahh_2	item	crafted	matis	heavy	armor	helmet	mq
 icmahh_3	icmahh_3	item	crafted	matis	heavy	armor	helmet	hq
@@ -119,9 +119,9 @@ icmahv_3	icmahv_3	item	crafted	matis	heavy	armor	vest	hq
 icmalb	icmalb	item	crafted	matis	light	armor	boots
 icmalb_2	icmalb_2	item	crafted	matis	light	armor	boots	mq
 icmalb_3	icmalb_3	item	crafted	matis	light	armor	boots	hq
-icmalg	icmalg	item	crafted	matis	light	armor	gloves
-icmalg_2	icmalg_2	item	crafted	matis	light	armor	gloves	mq
-icmalg_3	icmalg_3	item	crafted	matis	light	armor	gloves	hq
+icmalg	icmalg	item	crafted	matis	light	armor	gloves	hands
+icmalg_2	icmalg_2	item	crafted	matis	light	armor	gloves	hands	mq
+icmalg_3	icmalg_3	item	crafted	matis	light	armor	gloves	hands	hq
 icmalp	icmalp	item	crafted	matis	light	armor	pants
 icmalp_2	icmalp_2	item	crafted	matis	light	armor	pants	mq
 icmalp_3	icmalp_3	item	crafted	matis	light	armor	pants	hq
@@ -134,9 +134,9 @@ icmalv_3	icmalv_3	item	crafted	matis	light	armor	vest	hq
 icmamb	icmamb	item	crafted	matis	medium	armor	boots
 icmamb_2	icmamb_2	item	crafted	matis	medium	armor	boots	mq
 icmamb_3	icmamb_3	item	crafted	matis	medium	armor	boots	hq
-icmamg	icmamg	item	crafted	matis	medium	armor	gloves
-icmamg_2	icmamg_2	item	crafted	matis	medium	armor	gloves	mq
-icmamg_3	icmamg_3	item	crafted	matis	medium	armor	gloves	hq
+icmamg	icmamg	item	crafted	matis	medium	armor	gloves	hands
+icmamg_2	icmamg_2	item	crafted	matis	medium	armor	gloves	hands	mq
+icmamg_3	icmamg_3	item	crafted	matis	medium	armor	gloves	hands	hq
 icmamp	icmamp	item	crafted	matis	medium	armor	pants
 icmamp_2	icmamp_2	item	crafted	matis	medium	armor	pants	mq
 icmamp_3	icmamp_3	item	crafted	matis	medium	armor	pants	hq
@@ -164,9 +164,9 @@ icmm1ss_3	icmm1ss_3	item	crafted	matis	melee	one-handed	slashing	sword	hq
 icmm2bm	icmm2bm	item	crafted	matis	melee	two-handed	blunt	mace
 icmm2bm_2	icmm2bm_2	item	crafted	matis	melee	two-handed	blunt	mace	mq
 icmm2bm_3	icmm2bm_3	item	crafted	matis	melee	two-handed	blunt	mace	hq
-icmm2ms	icmm2ms	item	crafted	matis	melee	two-handed	magic	amplifier
-icmm2ms_2	icmm2ms_2	item	crafted	matis	melee	two-handed	magic	amplifier	mq
-icmm2ms_3	icmm2ms_3	item	crafted	matis	melee	two-handed	magic	amplifier	hq
+icmm2ms	icmm2ms	item	crafted	matis	melee	two-handed	magic	amplifier	gloves
+icmm2ms_2	icmm2ms_2	item	crafted	matis	melee	two-handed	magic	amplifier	gloves	mq
+icmm2ms_3	icmm2ms_3	item	crafted	matis	melee	two-handed	magic	amplifier	gloves	hq
 icmm2pp	icmm2pp	item	crafted	matis	melee	two-handed	piercing	pike
 icmm2pp_2	icmm2pp_2	item	crafted	matis	melee	two-handed	piercing	pike	mq
 icmm2pp_3	icmm2pp_3	item	crafted	matis	melee	two-handed	piercing	pike	hq
@@ -183,18 +183,18 @@ icmss	icmss	item	crafted	matis	large	shield
 icmss_2	icmss_2	item	crafted	matis	large	shield	mq
 icmss_3	icmss_3	item	crafted	matis	large	shield	hq
 icravr	icravr	item	crafted	refugee	armor	vest	color3
-ictacb_3	ictacb_3	item	crafted	tryker	caster	armor	boots	hq
-ictacp	ictacp	item	crafted	tryker	caster	armor	pants
-ictacp_2	ictacp_2	item	crafted	tryker	caster	armor	pants	mq
-ictacp_3	ictacp_3	item	crafted	tryker	caster	armor	pants	hq
-ictacs_3	ictacs_3	item	crafted	tryker	caster	armor	sleeves	hq
-ictacv_3	ictacv_3	item	crafted	tryker	caster	armor	vest	hq
+ictacb_3	ictacb_3	item	crafted	tryker	light	caster	armor	boots	hq
+ictacp	ictacp	item	crafted	tryker	light	caster	armor	pants
+ictacp_2	ictacp_2	item	crafted	tryker	light	caster	armor	pants	mq
+ictacp_3	ictacp_3	item	crafted	tryker	light	caster	armor	pants	hq
+ictacs_3	ictacs_3	item	crafted	tryker	light	caster	armor	sleeves	hq
+ictacv_3	ictacv_3	item	crafted	tryker	light	caster	armor	vest	hq
 ictahb	ictahb	item	crafted	tryker	heavy	armor	boots
 ictahb_2	ictahb_2	item	crafted	tryker	heavy	armor	boots	mq
 ictahb_3	ictahb_3	item	crafted	tryker	heavy	armor	boots	hq
-ictahg	ictahg	item	crafted	tryker	heavy	armor	gloves
-ictahg_2	ictahg_2	item	crafted	tryker	heavy	armor	gloves	mq
-ictahg_3	ictahg_3	item	crafted	tryker	heavy	armor	gloves	hq
+ictahg	ictahg	item	crafted	tryker	heavy	armor	gloves	hands
+ictahg_2	ictahg_2	item	crafted	tryker	heavy	armor	gloves	hands	mq
+ictahg_3	ictahg_3	item	crafted	tryker	heavy	armor	gloves	hands	hq
 ictahh	ictahh	item	crafted	tryker	heavy	armor	helmet
 ictahh_2	ictahh_2	item	crafted	tryker	heavy	armor	helmet	mq
 ictahh_3	ictahh_3	item	crafted	tryker	heavy	armor	helmet	hq
@@ -210,9 +210,9 @@ ictahv_3	ictahv_3	item	crafted	tryker	heavy	armor	vest	hq
 ictalb	ictalb	item	crafted	tryker	light	armor	boots
 ictalb_2	ictalb_2	item	crafted	tryker	light	armor	boots	mq
 ictalb_3	ictalb_3	item	crafted	tryker	light	armor	boots	hq
-ictalg	ictalg	item	crafted	tryker	light	armor	gloves
-ictalg_2	ictalg_2	item	crafted	tryker	light	armor	gloves	mq
-ictalg_3	ictalg_3	item	crafted	tryker	light	armor	gloves	hq
+ictalg	ictalg	item	crafted	tryker	light	armor	gloves	hands
+ictalg_2	ictalg_2	item	crafted	tryker	light	armor	gloves	hands	mq
+ictalg_3	ictalg_3	item	crafted	tryker	light	armor	gloves	hands	hq
 ictalp	ictalp	item	crafted	tryker	light	armor	pants
 ictalp_2	ictalp_2	item	crafted	tryker	light	armor	pants	mq
 ictalp_3	ictalp_3	item	crafted	tryker	light	armor	pants	hq
@@ -225,9 +225,9 @@ ictalv_3	ictalv_3	item	crafted	tryker	light	armor	vest	hq
 ictamb	ictamb	item	crafted	tryker	medium	armor	boots
 ictamb_2	ictamb_2	item	crafted	tryker	medium	armor	boots	mq
 ictamb_3	ictamb_3	item	crafted	tryker	medium	armor	boots	hq
-ictamg	ictamg	item	crafted	tryker	medium	armor	gloves
-ictamg_2	ictamg_2	item	crafted	tryker	medium	armor	gloves	mq
-ictamg_3	ictamg_3	item	crafted	tryker	medium	armor	gloves	hq
+ictamg	ictamg	item	crafted	tryker	medium	armor	gloves	hands
+ictamg_2	ictamg_2	item	crafted	tryker	medium	armor	gloves	hands	mq
+ictamg_3	ictamg_3	item	crafted	tryker	medium	armor	gloves	hands	hq
 ictamp	ictamp	item	crafted	tryker	medium	armor	pants
 ictamp_2	ictamp_2	item	crafted	tryker	medium	armor	pants	mq
 ictamp_3	ictamp_3	item	crafted	tryker	medium	armor	pants	hq
@@ -255,9 +255,9 @@ ictm1ss_3	ictm1ss_3	item	crafted	tryker	melee	one-handed	slashing	sword	hq
 ictm2bm	ictm2bm	item	crafted	tryker	melee	two-handed	blunt	mace
 ictm2bm_2	ictm2bm_2	item	crafted	tryker	melee	two-handed	blunt	mace	mq
 ictm2bm_3	ictm2bm_3	item	crafted	tryker	melee	two-handed	blunt	mace	hq
-ictm2ms	ictm2ms	item	crafted	tryker	melee	two-handed	magic	amplifier
-ictm2ms_2	ictm2ms_2	item	crafted	tryker	melee	two-handed	magic	amplifier	mq
-ictm2ms_3	ictm2ms_3	item	crafted	tryker	melee	two-handed	magic	amplifier	hq
+ictm2ms	ictm2ms	item	crafted	tryker	melee	two-handed	magic	amplifier	gloves
+ictm2ms_2	ictm2ms_2	item	crafted	tryker	melee	two-handed	magic	amplifier	gloves	mq
+ictm2ms_3	ictm2ms_3	item	crafted	tryker	melee	two-handed	magic	amplifier	gloves	hq
 ictm2pp	ictm2pp	item	crafted	tryker	melee	two-handed	piercing	pike
 ictm2pp_2	ictm2pp_2	item	crafted	tryker	melee	two-handed	piercing	pike	mq
 ictm2pp_3	ictm2pp_3	item	crafted	tryker	melee	two-handed	piercing	pike	hq
@@ -273,15 +273,15 @@ ictsb_3	ictsb_3	item	crafted	tryker	buckler	shield	hq
 ictss	ictss	item	crafted	tryker	large	shield
 ictss_2	ictss_2	item	crafted	tryker	large	shield	mq
 ictss_3	ictss_3	item	crafted	tryker	large	shield	hq
-iczacp	iczacp	item	crafted	zorai	caster	armor	pants
-iczacp_2	iczacp_2	item	crafted	zorai	caster	armor	pants	mq
-iczacp_3	iczacp_3	item	crafted	zorai	caster	armor	pants	hq
+iczacp	iczacp	item	crafted	zorai	light	caster	armor	pants
+iczacp_2	iczacp_2	item	crafted	zorai	light	caster	armor	pants	mq
+iczacp_3	iczacp_3	item	crafted	zorai	light	caster	armor	pants	hq
 iczahb	iczahb	item	crafted	zorai	heavy	armor	boots
 iczahb_2	iczahb_2	item	crafted	zorai	heavy	armor	boots	mq
 iczahb_3	iczahb_3	item	crafted	zorai	heavy	armor	boots	hq
-iczahg	iczahg	item	crafted	zorai	heavy	armor	gloves
-iczahg_2	iczahg_2	item	crafted	zorai	heavy	armor	gloves	mq
-iczahg_3	iczahg_3	item	crafted	zorai	heavy	armor	gloves	hq
+iczahg	iczahg	item	crafted	zorai	heavy	armor	gloves	hands
+iczahg_2	iczahg_2	item	crafted	zorai	heavy	armor	gloves	hands	mq
+iczahg_3	iczahg_3	item	crafted	zorai	heavy	armor	gloves	hands	hq
 iczahh	iczahh	item	crafted	zorai	heavy	armor	helmet
 iczahh_2	iczahh_2	item	crafted	zorai	heavy	armor	helmet	mq
 iczahh_3	iczahh_3	item	crafted	zorai	heavy	armor	helmet	hq
@@ -297,9 +297,9 @@ iczahv_3	iczahv_3	item	crafted	zorai	heavy	armor	vest	hq
 iczalb	iczalb	item	crafted	zorai	light	armor	boots
 iczalb_2	iczalb_2	item	crafted	zorai	light	armor	boots	mq
 iczalb_3	iczalb_3	item	crafted	zorai	light	armor	boots	hq
-iczalg	iczalg	item	crafted	zorai	light	armor	gloves
-iczalg_2	iczalg_2	item	crafted	zorai	light	armor	gloves	mq
-iczalg_3	iczalg_3	item	crafted	zorai	light	armor	gloves	hq
+iczalg	iczalg	item	crafted	zorai	light	armor	gloves	hands
+iczalg_2	iczalg_2	item	crafted	zorai	light	armor	gloves	hands	mq
+iczalg_3	iczalg_3	item	crafted	zorai	light	armor	gloves	hands	hq
 iczalp	iczalp	item	crafted	zorai	light	armor	pants
 iczalp_2	iczalp_2	item	crafted	zorai	light	armor	pants	mq
 iczalp_3	iczalp_3	item	crafted	zorai	light	armor	pants	hq
@@ -312,9 +312,9 @@ iczalv_3	iczalv_3	item	crafted	zorai	light	armor	vest	hq
 iczamb	iczamb	item	crafted	zorai	medium	armor	boots
 iczamb_2	iczamb_2	item	crafted	zorai	medium	armor	boots	mq
 iczamb_3	iczamb_3	item	crafted	zorai	medium	armor	boots	hq
-iczamg	iczamg	item	crafted	zorai	medium	armor	gloves
-iczamg_2	iczamg_2	item	crafted	zorai	medium	armor	gloves	mq
-iczamg_3	iczamg_3	item	crafted	zorai	medium	armor	gloves	hq
+iczamg	iczamg	item	crafted	zorai	medium	armor	gloves	hands
+iczamg_2	iczamg_2	item	crafted	zorai	medium	armor	gloves	hands	mq
+iczamg_3	iczamg_3	item	crafted	zorai	medium	armor	gloves	hands	hq
 iczamp	iczamp	item	crafted	zorai	medium	armor	pants
 iczamp_2	iczamp_2	item	crafted	zorai	medium	armor	pants	mq
 iczamp_3	iczamp_3	item	crafted	zorai	medium	armor	pants	hq
@@ -342,9 +342,9 @@ iczm1ss_3	iczm1ss_3	item	crafted	zorai	melee	one-handed	slashing	sword	hq
 iczm2bm	iczm2bm	item	crafted	zorai	melee	two-handed	blunt	mace
 iczm2bm_2	iczm2bm_2	item	crafted	zorai	melee	two-handed	blunt	mace	mq
 iczm2bm_3	iczm2bm_3	item	crafted	zorai	melee	two-handed	blunt	mace	hq
-iczm2ms	iczm2ms	item	crafted	zorai	melee	two-handed	magic	amplifier
-iczm2ms_2	iczm2ms_2	item	crafted	zorai	melee	two-handed	magic	amplifier	mq
-iczm2ms_3	iczm2ms_3	item	crafted	zorai	melee	two-handed	magic	amplifier	hq
+iczm2ms	iczm2ms	item	crafted	zorai	melee	two-handed	magic	amplifier	gloves
+iczm2ms_2	iczm2ms_2	item	crafted	zorai	melee	two-handed	magic	amplifier	gloves	mq
+iczm2ms_3	iczm2ms_3	item	crafted	zorai	melee	two-handed	magic	amplifier	gloves	hq
 iczm2pp	iczm2pp	item	crafted	zorai	melee	two-handed	piercing	pike
 iczm2pp_2	iczm2pp_2	item	crafted	zorai	melee	two-handed	piercing	pike	mq
 iczm2pp_3	iczm2pp_3	item	crafted	zorai	melee	two-handed	piercing	pike	hq

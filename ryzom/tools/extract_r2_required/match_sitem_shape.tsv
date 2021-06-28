@@ -1,0 +1,362 @@
+iccm1bm	ge_wea_masse1m	ge_wea_masse1m	common	one-handed	blunt	mace
+iccm1pd	ge_wea_dague	ge_wea_dague	common	one-handed	piercing	dagger
+iccm1sa	ge_wea_hache1m	ge_wea_hache1m	common	one-handed	slashing	axe
+iccm1ss	ge_wea_epee1m	ge_wea_epee1m	common	one-handed	slashing	sword
+icfacb_3	fy_hom_caster01_civil01_bottes	fy_hof_caster01_bottes_civil	fyros	light	caster	armor	boots
+icfacp	fy_hom_caster01_pantabottes	fy_hof_caster01_pantabottes	fyros	light	caster	armor	pants
+icfacp_2	fy_hom_caster01_pantabottes	fy_hof_caster01_pantabottes	fyros	light	caster	armor	pants
+icfacp_3	fy_hom_caster01_pantabottes	fy_hof_caster01_pantabottes	fyros	light	caster	armor	pants
+icfacs_3	fy_hom_civil01_armpad	fy_hof_civil01_armpad	fyros	light	armor	sleeves
+icfacv_3	fy_hom_civil01_gilet	fy_hof_civil01_gilet	fyros	light	armor	vest
+icfahb	fy_hom_armor01_bottes	fy_hof_armor01_bottes	fyros	heavy	armor	boots
+icfahb_2	fy_hom_armor01_bottes	fy_hof_armor01_bottes	fyros	heavy	armor	boots
+icfahb_3	fy_hom_armor01_bottes	fy_hof_armor01_bottes	fyros	heavy	armor	boots
+icfahg	fy_hom_armor01_hand	fy_hof_armor01_hand	fyros	heavy	armor	gloves
+icfahg_2	fy_hom_armor01_hand	fy_hof_armor01_hand	fyros	heavy	armor	gloves
+icfahg_3	fy_hom_armor01_hand	fy_hof_armor01_hand	fyros	heavy	armor	gloves
+icfahh	fy_hom_casque01	fy_hof_casque01	fyros	heavy	armor	helmet
+icfahh_2	fy_hom_casque01	fy_hof_casque01	fyros	heavy	armor	helmet
+icfahh_3	fy_hom_casque01	fy_hof_casque01	fyros	heavy	armor	helmet
+icfahp	fy_hom_armor01_pantabottes	fy_hof_armor01_pantabottes	fyros	heavy	armor	pants
+icfahp_2	fy_hom_armor01_pantabottes	fy_hof_armor01_pantabottes	fyros	heavy	armor	pants
+icfahp_3	fy_hom_armor01_pantabottes	fy_hof_armor01_pantabottes	fyros	heavy	armor	pants
+icfahs	fy_hom_armor01_armpad	fy_hof_armor01_armpad	fyros	heavy	armor	sleeves
+icfahs_2	fy_hom_armor01_armpad	fy_hof_armor01_armpad	fyros	heavy	armor	sleeves
+icfahs_3	fy_hom_armor01_armpad	fy_hof_armor01_armpad	fyros	heavy	armor	sleeves
+icfahv	fy_hom_armor01_gilet	fy_hof_armor01_gilet	fyros	heavy	armor	vest
+icfahv_2	fy_hom_armor01_gilet	fy_hof_armor01_gilet	fyros	heavy	armor	vest
+icfahv_3	fy_hom_armor01_gilet	fy_hof_armor01_gilet	fyros	heavy	armor	vest
+icfalb	fy_hom_civil01_bottes	fy_hof_civil01_bottes	fyros	light	armor	boots
+icfalb_2	fy_hom_civil01_bottes	fy_hof_civil01_bottes	fyros	light	armor	boots
+icfalb_3	fy_hom_civil01_bottes	fy_hof_civil01_bottes	fyros	light	armor	boots
+icfalg	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+icfalg_2	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+icfalg_3	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+icfalp	fy_hom_civil01_pantabottes	fy_hof_civil01_pantabottes	fyros	light	armor	pants
+icfalp_2	fy_hom_civil01_pantabottes	fy_hof_civil01_pantabottes	fyros	light	armor	pants
+icfalp_3	fy_hom_civil01_pantabottes	fy_hof_civil01_pantabottes	fyros	light	armor	pants
+icfals	fy_hom_civil01_armpad	fy_hof_civil01_armpad	fyros	light	armor	sleeves
+icfals_2	fy_hom_civil01_armpad	fy_hof_civil01_armpad	fyros	light	armor	sleeves
+icfals_3	fy_hom_civil01_armpad	fy_hof_civil01_armpad	fyros	light	armor	sleeves
+icfalv	fy_hom_civil01_gilet	fy_hof_civil01_gilet	fyros	light	armor	vest
+icfalv_2	fy_hom_civil01_gilet	fy_hof_civil01_gilet	fyros	light	armor	vest
+icfalv_3	fy_hom_civil01_gilet	fy_hof_civil01_gilet	fyros	light	armor	vest
+icfamb	fy_hom_armor00_bottes	fy_hof_armor00_bottes	fyros	medium	armor	boots
+icfamb_2	fy_hom_armor00_bottes	fy_hof_armor00_bottes	fyros	medium	armor	boots
+icfamb_3	fy_hom_armor00_bottes	fy_hof_armor00_bottes	fyros	medium	armor	boots
+icfamg	fy_hom_armor00_hand	fy_hof_armor00_hand	fyros	medium	armor	gloves
+icfamg_2	fy_hom_armor00_hand	fy_hof_armor00_hand	fyros	medium	armor	gloves
+icfamg_3	fy_hom_armor00_hand	fy_hof_armor00_hand	fyros	medium	armor	gloves
+icfamp	fy_hom_armor00_pantabottes	fy_hof_armor00_pantabottes	fyros	medium	armor	pants
+icfamp_2	fy_hom_armor00_pantabottes	fy_hof_armor00_pantabottes	fyros	medium	armor	pants
+icfamp_3	fy_hom_armor00_pantabottes	fy_hof_armor00_pantabottes	fyros	medium	armor	pants
+icfams	fy_hom_armor00_armpad	fy_hof_armor00_armpad	fyros	medium	armor	sleeves
+icfams_2	fy_hom_armor00_armpad	fy_hof_armor00_armpad	fyros	medium	armor	sleeves
+icfams_3	fy_hom_armor00_armpad	fy_hof_armor00_armpad	fyros	medium	armor	sleeves
+icfamv	fy_hom_armor00_gilet	fy_hof_armor00_gilet	fyros	medium	armor	vest
+icfamv_2	fy_hom_armor00_gilet	fy_hof_armor00_gilet	fyros	medium	armor	vest
+icfamv_3	fy_hom_armor00_gilet	fy_hof_armor00_gilet	fyros	medium	armor	vest
+icfm1bm	fy_wea_masse1m	fy_wea_masse1m	fyros	one-handed	blunt	mace
+icfm1bm_2	fy_wea_masse1m	fy_wea_masse1m	fyros	one-handed	blunt	mace
+icfm1bm_3	fy_wea_masse1m	fy_wea_masse1m	fyros	one-handed	blunt	mace
+icfm1pd	fy_wea_dague	fy_wea_dague	fyros	one-handed	piercing	dagger
+icfm1pd_2	fy_wea_dague	fy_wea_dague	fyros	one-handed	piercing	dagger
+icfm1pd_3	fy_wea_dague	fy_wea_dague	fyros	one-handed	piercing	dagger
+icfm1ps	fy_wea_lance1m	fy_wea_lance1m	fyros	one-handed	piercing	spear
+icfm1ps_2	fy_wea_lance1m	fy_wea_lance1m	fyros	one-handed	piercing	spear
+icfm1ps_3	fy_wea_lance1m	fy_wea_lance1m	fyros	one-handed	piercing	spear
+icfm1sa	fy_wea_hache1m	fy_wea_hache1m	fyros	one-handed	slashing	axe
+icfm1sa_2	fy_wea_hache1m	fy_wea_hache1m	fyros	one-handed	slashing	axe
+icfm1sa_3	fy_wea_hache1m	fy_wea_hache1m	fyros	one-handed	slashing	axe
+icfm1ss	fy_wea_epee1m	fy_wea_epee1m	fyros	one-handed	slashing	sword
+icfm1ss_2	fy_wea_epee1m	fy_wea_epee1m	fyros	one-handed	slashing	sword
+icfm1ss_3	fy_wea_epee1m	fy_wea_epee1m	fyros	one-handed	slashing	sword
+icfm2bm	fy_wea_masse2m	fy_wea_masse2m	fyros	two-handed	blunt	mace
+icfm2bm_2	fy_wea_masse2m	fy_wea_masse2m	fyros	two-handed	blunt	mace
+icfm2bm_3	fy_wea_masse2m	fy_wea_masse2m	fyros	two-handed	blunt	mace
+icfm2ms	fy_hom_acc_gauntlet	fy_hof_acc_gauntlet	fyros	magic	amplifier
+icfm2ms_2	fy_hom_acc_gauntlet	fy_hof_acc_gauntlet	fyros	magic	amplifier
+icfm2ms_3	fy_hom_acc_gauntlet	fy_hof_acc_gauntlet	fyros	magic	amplifier
+icfm2pp	fy_wea_lance2m	fy_wea_lance2m	fyros	two-handed	piercing	pike
+icfm2pp_2	fy_wea_lance2m	fy_wea_lance2m	fyros	two-handed	piercing	pike
+icfm2pp_3	fy_wea_lance2m	fy_wea_lance2m	fyros	two-handed	piercing	pike
+icfm2sa	fy_wea_hache2m	fy_wea_hache2m	fyros	two-handed	slashing	axe
+icfm2sa_2	fy_wea_hache2m	fy_wea_hache2m	fyros	two-handed	slashing	axe
+icfm2sa_3	fy_wea_hache2m	fy_wea_hache2m	fyros	two-handed	slashing	axe
+icfm2ss	fy_wea_epee2m	fy_wea_epee2m	fyros	two-handed	slashing	sword
+icfm2ss_2	fy_wea_epee2m	fy_wea_epee2m	fyros	two-handed	slashing	sword
+icfm2ss_3	fy_wea_epee2m	fy_wea_epee2m	fyros	two-handed	slashing	sword
+icfsb	fy_wea_petit_bouclier	fy_wea_petit_bouclier	fyros	buckler	shield
+icfsb_2	fy_wea_petit_bouclier	fy_wea_petit_bouclier	fyros	buckler	shield
+icfsb_3	fy_wea_petit_bouclier	fy_wea_petit_bouclier	fyros	buckler	shield
+icfss	fy_wea_grand_bouclier	fy_wea_grand_bouclier	fyros	large	shield
+icfss_2	fy_wea_grand_bouclier	fy_wea_grand_bouclier	fyros	large	shield
+icfss_3	fy_wea_grand_bouclier	fy_wea_grand_bouclier	fyros	large	shield
+icmacb_3	ma_hom_caster01_bottes_civil01	ma_hof_caster01_bottes_civil01	matis	light	caster	armor	boots
+icmacp	ma_hom_caster01_pantabottes	ma_hof_caster01_pantabottes	matis	light	caster	armor	pants
+icmacp_2	ma_hom_caster01_pantabottes	ma_hof_caster01_pantabottes	matis	light	caster	armor	pants
+icmacp_3	ma_hom_caster01_pantabottes	ma_hof_caster01_pantabottes	matis	light	caster	armor	pants
+icmacs_3	ma_hom_civil01_armpad	ma_hof_civil01_armpad	matis	light	armor	sleeves
+icmacv_3	ma_hom_civil01_gilet	ma_hof_civil01_gilet	matis	light	armor	vest
+icmahb	ma_hom_armor01_bottes	ma_hof_armor01_bottes	matis	heavy	armor	boots
+icmahb_2	ma_hom_armor01_bottes	ma_hof_armor01_bottes	matis	heavy	armor	boots
+icmahb_3	ma_hom_armor01_bottes	ma_hof_armor01_bottes	matis	heavy	armor	boots
+icmahg	ma_hom_armor01_hand	ma_hof_armor01_hand	matis	heavy	armor	gloves
+icmahg_2	ma_hom_armor01_hand	ma_hof_armor01_hand	matis	heavy	armor	gloves
+icmahg_3	ma_hom_armor01_hand	ma_hof_armor01_hand	matis	heavy	armor	gloves
+icmahh	ma_hom_casque01	ma_hof_casque01	matis	heavy	armor	helmet
+icmahh_2	ma_hom_casque01	ma_hof_casque01	matis	heavy	armor	helmet
+icmahh_3	ma_hom_casque01	ma_hof_casque01	matis	heavy	armor	helmet
+icmahp	ma_hom_armor01_pantabottes	ma_hof_armor01_pantabottes	matis	heavy	armor	pants
+icmahp_2	ma_hom_armor01_pantabottes	ma_hof_armor01_pantabottes	matis	heavy	armor	pants
+icmahp_3	ma_hom_armor01_pantabottes	ma_hof_armor01_pantabottes	matis	heavy	armor	pants
+icmahs	ma_hom_armor01_armpad	ma_hof_armor01_armpad	matis	heavy	armor	sleeves
+icmahs_2	ma_hom_armor01_armpad	ma_hof_armor01_armpad	matis	heavy	armor	sleeves
+icmahs_3	ma_hom_armor01_armpad	ma_hof_armor01_armpad	matis	heavy	armor	sleeves
+icmahv	ma_hom_armor01_gilet	ma_hof_armor01_gilet	matis	heavy	armor	vest
+icmahv_2	ma_hom_armor01_gilet	ma_hof_armor01_gilet	matis	heavy	armor	vest
+icmahv_3	ma_hom_armor01_gilet	ma_hof_armor01_gilet	matis	heavy	armor	vest
+icmalb	ma_hom_civil01_bottes	ma_hof_civil01_bottes	matis	light	armor	boots
+icmalb_2	ma_hom_civil01_bottes	ma_hof_civil01_bottes	matis	light	armor	boots
+icmalb_3	ma_hom_civil01_bottes	ma_hof_civil01_bottes	matis	light	armor	boots
+icmalg	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+icmalg_2	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+icmalg_3	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+icmalp	ma_hom_civil01_pantabottes	ma_hof_civil01_pantabottes	matis	light	armor	pants
+icmalp_2	ma_hom_civil01_pantabottes	ma_hof_civil01_pantabottes	matis	light	armor	pants
+icmalp_3	ma_hom_civil01_pantabottes	ma_hof_civil01_pantabottes	matis	light	armor	pants
+icmals	ma_hom_civil01_armpad	ma_hof_civil01_armpad	matis	light	armor	sleeves
+icmals_2	ma_hom_civil01_armpad	ma_hof_civil01_armpad	matis	light	armor	sleeves
+icmals_3	ma_hom_civil01_armpad	ma_hof_civil01_armpad	matis	light	armor	sleeves
+icmalv	ma_hom_civil01_gilet	ma_hof_civil01_gilet	matis	light	armor	vest
+icmalv_2	ma_hom_civil01_gilet	ma_hof_civil01_gilet	matis	light	armor	vest
+icmalv_3	ma_hom_civil01_gilet	ma_hof_civil01_gilet	matis	light	armor	vest
+icmamb	ma_hom_armor00_bottes	ma_hof_armor00_bottes	matis	medium	armor	boots
+icmamb_2	ma_hom_armor00_bottes	ma_hof_armor00_bottes	matis	medium	armor	boots
+icmamb_3	ma_hom_armor00_bottes	ma_hof_armor00_bottes	matis	medium	armor	boots
+icmamg	ma_hom_armor00_hand	ma_hof_armor00_hand	matis	medium	armor	gloves
+icmamg_2	ma_hom_armor00_hand	ma_hof_armor00_hand	matis	medium	armor	gloves
+icmamg_3	ma_hom_armor00_hand	ma_hof_armor00_hand	matis	medium	armor	gloves
+icmamp	ma_hom_armor00_pantabottes	ma_hof_armor00_pantabottes	matis	medium	armor	pants
+icmamp_2	ma_hom_armor00_pantabottes	ma_hof_armor00_pantabottes	matis	medium	armor	pants
+icmamp_3	ma_hom_armor00_pantabottes	ma_hof_armor00_pantabottes	matis	medium	armor	pants
+icmams	ma_hom_armor00_armpad	ma_hof_armor00_armpad	matis	medium	armor	sleeves
+icmams_2	ma_hom_armor00_armpad	ma_hof_armor00_armpad	matis	medium	armor	sleeves
+icmams_3	ma_hom_armor00_armpad	ma_hof_armor00_armpad	matis	medium	armor	sleeves
+icmamv	ma_hom_armor00_gilet	ma_hof_armor00_gilet	matis	medium	armor	vest
+icmamv_2	ma_hom_armor00_gilet	ma_hof_armor00_gilet	matis	medium	armor	vest
+icmamv_3	ma_hom_armor00_gilet	ma_hof_armor00_gilet	matis	medium	armor	vest
+icmm1bm	ma_wea_masse1m	ma_wea_masse1m	matis	one-handed	blunt	mace
+icmm1bm_2	ma_wea_masse1m	ma_wea_masse1m	matis	one-handed	blunt	mace
+icmm1bm_3	ma_wea_masse1m	ma_wea_masse1m	matis	one-handed	blunt	mace
+icmm1pd	ma_wea_dague	ma_wea_dague	matis	one-handed	piercing	dagger
+icmm1pd_2	ma_wea_dague	ma_wea_dague	matis	one-handed	piercing	dagger
+icmm1pd_3	ma_wea_dague	ma_wea_dague	matis	one-handed	piercing	dagger
+icmm1ps	ma_wea_lance1m	ma_wea_lance1m	matis	one-handed	piercing	spear
+icmm1ps_2	ma_wea_lance1m	ma_wea_lance1m	matis	one-handed	piercing	spear
+icmm1ps_3	ma_wea_lance1m	ma_wea_lance1m	matis	one-handed	piercing	spear
+icmm1sa	ma_wea_hache1m	ma_wea_hache1m	matis	one-handed	slashing	axe
+icmm1sa_2	ma_wea_hache1m	ma_wea_hache1m	matis	one-handed	slashing	axe
+icmm1sa_3	ma_wea_hache1m	ma_wea_hache1m	matis	one-handed	slashing	axe
+icmm1ss	ma_wea_epee1m	ma_wea_epee1m	matis	one-handed	slashing	sword
+icmm1ss_2	ma_wea_epee1m	ma_wea_epee1m	matis	one-handed	slashing	sword
+icmm1ss_3	ma_wea_epee1m	ma_wea_epee1m	matis	one-handed	slashing	sword
+icmm2bm	ma_wea_masse2m	ma_wea_masse2m	matis	two-handed	blunt	mace
+icmm2bm_2	ma_wea_masse2m	ma_wea_masse2m	matis	two-handed	blunt	mace
+icmm2bm_3	ma_wea_masse2m	ma_wea_masse2m	matis	two-handed	blunt	mace
+icmm2ms	ma_hom_acc_gauntlet	ma_hof_acc_gauntlet	matis	magic	amplifier
+icmm2ms_2	ma_hom_acc_gauntlet	ma_hof_acc_gauntlet	matis	magic	amplifier
+icmm2ms_3	ma_hom_acc_gauntlet	ma_hof_acc_gauntlet	matis	magic	amplifier
+icmm2pp	ma_wea_lance2m	ma_wea_lance2m	matis	two-handed	piercing	pike
+icmm2pp_2	ma_wea_lance2m	ma_wea_lance2m	matis	two-handed	piercing	pike
+icmm2pp_3	ma_wea_lance2m	ma_wea_lance2m	matis	two-handed	piercing	pike
+icmm2sa	ma_wea_hache2m	ma_wea_hache2m	matis	two-handed	slashing	axe
+icmm2sa_2	ma_wea_hache2m	ma_wea_hache2m	matis	two-handed	slashing	axe
+icmm2sa_3	ma_wea_hache2m	ma_wea_hache2m	matis	two-handed	slashing	axe
+icmm2ss	ma_wea_epee2m	ma_wea_epee2m	matis	two-handed	slashing	sword
+icmm2ss_2	ma_wea_epee2m	ma_wea_epee2m	matis	two-handed	slashing	sword
+icmm2ss_3	ma_wea_epee2m	ma_wea_epee2m	matis	two-handed	slashing	sword
+icmsb	ma_wea_petit_bouclier	ma_wea_petit_bouclier	matis	buckler	shield
+icmsb_2	ma_wea_petit_bouclier	ma_wea_petit_bouclier	matis	buckler	shield
+icmsb_3	ma_wea_petit_bouclier	ma_wea_petit_bouclier	matis	buckler	shield
+icmss	ma_wea_grand_bouclier	ma_wea_grand_bouclier	matis	large	shield
+icmss_2	ma_wea_grand_bouclier	ma_wea_grand_bouclier	matis	large	shield
+icmss_3	ma_wea_grand_bouclier	ma_wea_grand_bouclier	matis	large	shield
+icravr	tr_hom_refugee_gilet	tr_hof_refugee_gilet	refugee	armor	vest
+ictacb_3	tr_hom_caster01_bottes_civil01	tr_hof_caster01_bottes_civil01	tryker	light	caster	armor	boots
+ictacp	tr_hom_caster01_pantabottes	tr_hof_caster01_pantabottes	tryker	light	caster	armor	pants
+ictacp_2	tr_hom_caster01_pantabottes	tr_hof_caster01_pantabottes	tryker	light	caster	armor	pants
+ictacp_3	tr_hom_caster01_pantabottes	tr_hof_caster01_pantabottes	tryker	light	caster	armor	pants
+ictacs_3	tr_hom_civil01_armpad	tr_hof_civil01_armpad	tryker	light	armor	sleeves
+ictacv_3	tr_hom_civil01_gilet	tr_hof_civil01_gilet	tryker	light	armor	vest
+ictahb	tr_hom_armor01_bottes	tr_hof_armor01_bottes	tryker	heavy	armor	boots
+ictahb_2	tr_hom_armor01_bottes	tr_hof_armor01_bottes	tryker	heavy	armor	boots
+ictahb_3	tr_hom_armor01_bottes	tr_hof_armor01_bottes	tryker	heavy	armor	boots
+ictahg	tr_hom_armor01_hand	tr_hof_armor01_hand	tryker	heavy	armor	gloves
+ictahg_2	tr_hom_armor01_hand	tr_hof_armor01_hand	tryker	heavy	armor	gloves
+ictahg_3	tr_hom_armor01_hand	tr_hof_armor01_hand	tryker	heavy	armor	gloves
+ictahh	tr_hom_casque01	tr_hof_casque01	tryker	heavy	armor	helmet
+ictahh_2	tr_hom_casque01	tr_hof_casque01	tryker	heavy	armor	helmet
+ictahh_3	tr_hom_casque01	tr_hof_casque01	tryker	heavy	armor	helmet
+ictahp	tr_hom_armor01_pantabottes	tr_hof_armor01_pantabottes	tryker	heavy	armor	pants
+ictahp_2	tr_hom_armor01_pantabottes	tr_hof_armor01_pantabottes	tryker	heavy	armor	pants
+ictahp_3	tr_hom_armor01_pantabottes	tr_hof_armor01_pantabottes	tryker	heavy	armor	pants
+ictahs	tr_hom_armor01_armpad	tr_hof_armor01_armpad	tryker	heavy	armor	sleeves
+ictahs_2	tr_hom_armor01_armpad	tr_hof_armor01_armpad	tryker	heavy	armor	sleeves
+ictahs_3	tr_hom_armor01_armpad	tr_hof_armor01_armpad	tryker	heavy	armor	sleeves
+ictahv	tr_hom_armor01_gilet	tr_hof_armor01_gilet	tryker	heavy	armor	vest
+ictahv_2	tr_hom_armor01_gilet	tr_hof_armor01_gilet	tryker	heavy	armor	vest
+ictahv_3	tr_hom_armor01_gilet	tr_hof_armor01_gilet	tryker	heavy	armor	vest
+ictalb	tr_hom_civil01_bottes	tr_hof_civil01_bottes	tryker	light	armor	boots
+ictalb_2	tr_hom_civil01_bottes	tr_hof_civil01_bottes	tryker	light	armor	boots
+ictalb_3	tr_hom_civil01_bottes	tr_hof_civil01_bottes	tryker	light	armor	boots
+ictalg	tr_hom_civil01_hand	tr_hof_civil01_hand	tryker	light	armor	gloves
+ictalg_2	tr_hom_civil01_hand	tr_hof_civil01_hand	tryker	light	armor	gloves
+ictalg_3	tr_hom_civil01_hand	tr_hof_civil01_hand	tryker	light	armor	gloves
+ictalp	tr_hom_civil01_pantabottes	tr_hof_civil01_pantabottes	tryker	light	armor	pants
+ictalp_2	tr_hom_civil01_pantabottes	tr_hof_civil01_pantabottes	tryker	light	armor	pants
+ictalp_3	tr_hom_civil01_pantabottes	tr_hof_civil01_pantabottes	tryker	light	armor	pants
+ictals	tr_hom_civil01_armpad	tr_hof_civil01_armpad	tryker	light	armor	sleeves
+ictals_2	tr_hom_civil01_armpad	tr_hof_civil01_armpad	tryker	light	armor	sleeves
+ictals_3	tr_hom_civil01_armpad	tr_hof_civil01_armpad	tryker	light	armor	sleeves
+ictalv	tr_hom_civil01_gilet	tr_hof_civil01_gilet	tryker	light	armor	vest
+ictalv_2	tr_hom_civil01_gilet	tr_hof_civil01_gilet	tryker	light	armor	vest
+ictalv_3	tr_hom_civil01_gilet	tr_hof_civil01_gilet	tryker	light	armor	vest
+ictamb	tr_hom_armor00_bottes	tr_hof_armor00_bottes	tryker	medium	armor	boots
+ictamb_2	tr_hom_armor00_bottes	tr_hof_armor00_bottes	tryker	medium	armor	boots
+ictamb_3	tr_hom_armor00_bottes	tr_hof_armor00_bottes	tryker	medium	armor	boots
+ictamg	tr_hom_armor00_hand	tr_hof_armor00_hand	tryker	medium	armor	gloves
+ictamg_2	tr_hom_armor00_hand	tr_hof_armor00_hand	tryker	medium	armor	gloves
+ictamg_3	tr_hom_armor00_hand	tr_hof_armor00_hand	tryker	medium	armor	gloves
+ictamp	tr_hom_armor00_pantabottes	tr_hof_armor00_pantabottes	tryker	medium	armor	pants
+ictamp_2	tr_hom_armor00_pantabottes	tr_hof_armor00_pantabottes	tryker	medium	armor	pants
+ictamp_3	tr_hom_armor00_pantabottes	tr_hof_armor00_pantabottes	tryker	medium	armor	pants
+ictams	tr_hom_armor00_armpad	tr_hof_armor00_armpad	tryker	medium	armor	sleeves
+ictams_2	tr_hom_armor00_armpad	tr_hof_armor00_armpad	tryker	medium	armor	sleeves
+ictams_3	tr_hom_armor00_armpad	tr_hof_armor00_armpad	tryker	medium	armor	sleeves
+ictamv	tr_hom_armor00_gilet	tr_hof_armor00_gilet	tryker	medium	armor	vest
+ictamv_2	tr_hom_armor00_gilet	tr_hof_armor00_gilet	tryker	medium	armor	vest
+ictamv_3	tr_hom_armor00_gilet	tr_hof_armor00_gilet	tryker	medium	armor	vest
+ictm1bm	tr_wea_masse1m	tr_wea_masse1m	tryker	one-handed	blunt	mace
+ictm1bm_2	tr_wea_masse1m	tr_wea_masse1m	tryker	one-handed	blunt	mace
+ictm1bm_3	tr_wea_masse1m	tr_wea_masse1m	tryker	one-handed	blunt	mace
+ictm1pd	tr_wea_dague	tr_wea_dague	tryker	one-handed	piercing	dagger
+ictm1pd_2	tr_wea_dague	tr_wea_dague	tryker	one-handed	piercing	dagger
+ictm1pd_3	tr_wea_dague	tr_wea_dague	tryker	one-handed	piercing	dagger
+ictm1ps	tr_wea_lance1m	tr_wea_lance1m	tryker	one-handed	piercing	spear
+ictm1ps_2	tr_wea_lance1m	tr_wea_lance1m	tryker	one-handed	piercing	spear
+ictm1ps_3	tr_wea_lance1m	tr_wea_lance1m	tryker	one-handed	piercing	spear
+ictm1sa	tr_wea_hache1m	tr_wea_hache1m	tryker	one-handed	slashing	axe
+ictm1sa_2	tr_wea_hache1m	tr_wea_hache1m	tryker	one-handed	slashing	axe
+ictm1sa_3	tr_wea_hache1m	tr_wea_hache1m	tryker	one-handed	slashing	axe
+ictm1ss	tr_wea_epee1m	tr_wea_epee1m	tryker	one-handed	slashing	sword
+ictm1ss_2	tr_wea_epee1m	tr_wea_epee1m	tryker	one-handed	slashing	sword
+ictm1ss_3	tr_wea_epee1m	tr_wea_epee1m	tryker	one-handed	slashing	sword
+ictm2bm	tr_wea_masse2m	tr_wea_masse2m	tryker	two-handed	blunt	mace
+ictm2bm_2	tr_wea_masse2m	tr_wea_masse2m	tryker	two-handed	blunt	mace
+ictm2bm_3	tr_wea_masse2m	tr_wea_masse2m	tryker	two-handed	blunt	mace
+ictm2ms	tr_hom_acc_gauntlet	tr_hof_acc_gauntlet	tryker	magic	amplifier
+ictm2ms_2	tr_hom_acc_gauntlet	tr_hof_acc_gauntlet	tryker	magic	amplifier
+ictm2ms_3	tr_hom_acc_gauntlet	tr_hof_acc_gauntlet	tryker	magic	amplifier
+ictm2pp	tr_wea_lance2m	tr_wea_lance2m	tryker	two-handed	piercing	pike
+ictm2pp_2	tr_wea_lance2m	tr_wea_lance2m	tryker	two-handed	piercing	pike
+ictm2pp_3	tr_wea_lance2m	tr_wea_lance2m	tryker	two-handed	piercing	pike
+ictm2sa	tr_wea_hache2m	tr_wea_hache2m	tryker	two-handed	slashing	axe
+ictm2sa_2	tr_wea_hache2m	tr_wea_hache2m	tryker	two-handed	slashing	axe
+ictm2sa_3	tr_wea_hache2m	tr_wea_hache2m	tryker	two-handed	slashing	axe
+ictm2ss	tr_wea_epee2m	tr_wea_epee2m	tryker	two-handed	slashing	sword
+ictm2ss_2	tr_wea_epee2m	tr_wea_epee2m	tryker	two-handed	slashing	sword
+ictm2ss_3	tr_wea_epee2m	tr_wea_epee2m	tryker	two-handed	slashing	sword
+ictsb	tr_wea_petit_bouclier	tr_wea_petit_bouclier	tryker	buckler	shield
+ictsb_2	tr_wea_petit_bouclier	tr_wea_petit_bouclier	tryker	buckler	shield
+ictsb_3	tr_wea_petit_bouclier	tr_wea_petit_bouclier	tryker	buckler	shield
+ictss	tr_wea_grandbouclier	tr_wea_grandbouclier	tryker	large	shield
+ictss_2	tr_wea_grandbouclier	tr_wea_grandbouclier	tryker	large	shield
+ictss_3	tr_wea_grandbouclier	tr_wea_grandbouclier	tryker	large	shield
+iczacp	zo_hom_caster01_pantabottes	zo_hof_caster01_pantabottes	zorai	light	caster	armor	pants
+iczacp_2	zo_hom_caster01_pantabottes	zo_hof_caster01_pantabottes	zorai	light	caster	armor	pants
+iczacp_3	zo_hom_caster01_pantabottes	zo_hof_caster01_pantabottes	zorai	light	caster	armor	pants
+iczahb	zo_hom_armor01_bottes	zo_hof_armor01_bottes	zorai	heavy	armor	boots
+iczahb_2	zo_hom_armor01_bottes	zo_hof_armor01_bottes	zorai	heavy	armor	boots
+iczahb_3	zo_hom_armor01_bottes	zo_hof_armor01_bottes	zorai	heavy	armor	boots
+iczahg	zo_hom_armor01_hand	zo_hof_armor01_hand	zorai	heavy	armor	gloves
+iczahg_2	zo_hom_armor01_hand	zo_hof_armor01_hand	zorai	heavy	armor	gloves
+iczahg_3	zo_hom_armor01_hand	zo_hof_armor01_hand	zorai	heavy	armor	gloves
+iczahh	zo_hom_casque01	zo_hof_casque01	zorai	heavy	armor	helmet
+iczahh_2	zo_hom_casque01	zo_hof_casque01	zorai	heavy	armor	helmet
+iczahh_3	zo_hom_casque01	zo_hof_casque01	zorai	heavy	armor	helmet
+iczahp	zo_hom_armor01_pantabottes	zo_hof_armor01_pantabottes	zorai	heavy	armor	pants
+iczahp_2	zo_hom_armor01_pantabottes	zo_hof_armor01_pantabottes	zorai	heavy	armor	pants
+iczahp_3	zo_hom_armor01_pantabottes	zo_hof_armor01_pantabottes	zorai	heavy	armor	pants
+iczahs	zo_hom_armor01_armpad	zo_hof_armor01_armpad	zorai	heavy	armor	sleeves
+iczahs_2	zo_hom_armor01_armpad	zo_hof_armor01_armpad	zorai	heavy	armor	sleeves
+iczahs_3	zo_hom_armor01_armpad	zo_hof_armor01_armpad	zorai	heavy	armor	sleeves
+iczahv	zo_hom_armor01_gilet	zo_hof_armor01_gilet	zorai	heavy	armor	vest
+iczahv_2	zo_hom_armor01_gilet	zo_hof_armor01_gilet	zorai	heavy	armor	vest
+iczahv_3	zo_hom_armor01_gilet	zo_hof_armor01_gilet	zorai	heavy	armor	vest
+iczalb	zo_hom_civil01_bottes	zo_hof_civil01_bottes	zorai	light	armor	boots
+iczalb_2	zo_hom_civil01_bottes	zo_hof_civil01_bottes	zorai	light	armor	boots
+iczalb_3	zo_hom_civil01_bottes	zo_hof_civil01_bottes	zorai	light	armor	boots
+iczalg	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+iczalg_2	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+iczalg_3	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+iczalp	zo_hom_civil01_pantabottes	zo_hof_civil01_pantabottes	zorai	light	armor	pants
+iczalp_2	zo_hom_civil01_pantabottes	zo_hof_civil01_pantabottes	zorai	light	armor	pants
+iczalp_3	zo_hom_civil01_pantabottes	zo_hof_civil01_pantabottes	zorai	light	armor	pants
+iczals	zo_hom_civil01_armpad	zo_hof_civil01_armpad	zorai	light	armor	sleeves
+iczals_2	zo_hom_civil01_armpad	zo_hof_civil01_armpad	zorai	light	armor	sleeves
+iczals_3	zo_hom_civil01_armpad	zo_hof_civil01_armpad	zorai	light	armor	sleeves
+iczalv	zo_hom_civil01_gilet	zo_hof_civil01_gilet	zorai	light	armor	vest
+iczalv_2	zo_hom_civil01_gilet	zo_hof_civil01_gilet	zorai	light	armor	vest
+iczalv_3	zo_hom_civil01_gilet	zo_hof_civil01_gilet	zorai	light	armor	vest
+iczamb	zo_hom_armor00_bottes	zo_hof_armor00_bottes	zorai	medium	armor	boots
+iczamb_2	zo_hom_armor00_bottes	zo_hof_armor00_bottes	zorai	medium	armor	boots
+iczamb_3	zo_hom_armor00_bottes	zo_hof_armor00_bottes	zorai	medium	armor	boots
+iczamg	zo_hom_armor00_hand	zo_hof_armor00_hand	zorai	medium	armor	gloves
+iczamg_2	zo_hom_armor00_hand	zo_hof_armor00_hand	zorai	medium	armor	gloves
+iczamg_3	zo_hom_armor00_hand	zo_hof_armor00_hand	zorai	medium	armor	gloves
+iczamp	zo_hom_armor00_pantabottes	zo_hof_armor00_pantabottes	zorai	medium	armor	pants
+iczamp_2	zo_hom_armor00_pantabottes	zo_hof_armor00_pantabottes	zorai	medium	armor	pants
+iczamp_3	zo_hom_armor00_pantabottes	zo_hof_armor00_pantabottes	zorai	medium	armor	pants
+iczams	zo_hom_armor00_armpad	zo_hof_armor00_armpad	zorai	medium	armor	sleeves
+iczams_2	zo_hom_armor00_armpad	zo_hof_armor00_armpad	zorai	medium	armor	sleeves
+iczams_3	zo_hom_armor00_armpad	zo_hof_armor00_armpad	zorai	medium	armor	sleeves
+iczamv	zo_hom_armor00_gilet	zo_hof_armor00_gilet	zorai	medium	armor	vest
+iczamv_2	zo_hom_armor00_gilet	zo_hof_armor00_gilet	zorai	medium	armor	vest
+iczamv_3	zo_hom_armor00_gilet	zo_hof_armor00_gilet	zorai	medium	armor	vest
+iczm1bm	zo_wea_masse1m	zo_wea_masse1m	zorai	one-handed	blunt	mace
+iczm1bm_2	zo_wea_masse1m	zo_wea_masse1m	zorai	one-handed	blunt	mace
+iczm1bm_3	zo_wea_masse1m	zo_wea_masse1m	zorai	one-handed	blunt	mace
+iczm1pd	zo_wea_dague	zo_wea_dague	zorai	one-handed	piercing	dagger
+iczm1pd_2	zo_wea_dague	zo_wea_dague	zorai	one-handed	piercing	dagger
+iczm1pd_3	zo_wea_dague	zo_wea_dague	zorai	one-handed	piercing	dagger
+iczm1ps	zo_wea_lance1m	zo_wea_lance1m	zorai	one-handed	piercing	spear
+iczm1ps_2	zo_wea_lance1m	zo_wea_lance1m	zorai	one-handed	piercing	spear
+iczm1ps_3	zo_wea_lance1m	zo_wea_lance1m	zorai	one-handed	piercing	spear
+iczm1sa	zo_wea_hache1m	zo_wea_hache1m	zorai	one-handed	slashing	axe
+iczm1sa_2	zo_wea_hache1m	zo_wea_hache1m	zorai	one-handed	slashing	axe
+iczm1sa_3	zo_wea_hache1m	zo_wea_hache1m	zorai	one-handed	slashing	axe
+iczm1ss	zo_wea_epee1m	zo_wea_epee1m	zorai	one-handed	slashing	sword
+iczm1ss_2	zo_wea_epee1m	zo_wea_epee1m	zorai	one-handed	slashing	sword
+iczm1ss_3	zo_wea_epee1m	zo_wea_epee1m	zorai	one-handed	slashing	sword
+iczm2bm	zo_wea_masse2m	zo_wea_masse2m	zorai	two-handed	blunt	mace
+iczm2bm_2	zo_wea_masse2m	zo_wea_masse2m	zorai	two-handed	blunt	mace
+iczm2bm_3	zo_wea_masse2m	zo_wea_masse2m	zorai	two-handed	blunt	mace
+iczm2ms	zo_hom_acc_gauntlet	zo_hof_acc_gauntlet	zorai	magic	amplifier
+iczm2ms_2	zo_hom_acc_gauntlet	zo_hof_acc_gauntlet	zorai	magic	amplifier
+iczm2ms_3	zo_hom_acc_gauntlet	zo_hof_acc_gauntlet	zorai	magic	amplifier
+iczm2pp	zo_wea_lance2m	zo_wea_lance2m	zorai	two-handed	piercing	pike
+iczm2pp_2	zo_wea_lance2m	zo_wea_lance2m	zorai	two-handed	piercing	pike
+iczm2pp_3	zo_wea_lance2m	zo_wea_lance2m	zorai	two-handed	piercing	pike
+iczm2sa	zo_wea_hache2m	zo_wea_hache2m	zorai	two-handed	slashing	axe
+iczm2sa_2	zo_wea_hache2m	zo_wea_hache2m	zorai	two-handed	slashing	axe
+iczm2sa_3	zo_wea_hache2m	zo_wea_hache2m	zorai	two-handed	slashing	axe
+iczm2ss	zo_wea_epee2m	zo_wea_epee2m	zorai	two-handed	slashing	sword
+iczm2ss_2	zo_wea_epee2m	zo_wea_epee2m	zorai	two-handed	slashing	sword
+iczm2ss_3	zo_wea_epee2m	zo_wea_epee2m	zorai	two-handed	slashing	sword
+iczsb	zo_wea_petit_bouclier	zo_wea_petit_bouclier	zorai	buckler	shield
+iczsb_2	zo_wea_petit_bouclier	zo_wea_petit_bouclier	zorai	buckler	shield
+iczsb_3	zo_wea_petit_bouclier	zo_wea_petit_bouclier	zorai	buckler	shield
+iczss	zo_wea_grand_bouclier	zo_wea_grand_bouclier	zorai	large	shield
+iczss_2	zo_wea_grand_bouclier	zo_wea_grand_bouclier	zorai	large	shield
+iczss_3	zo_wea_grand_bouclier	zo_wea_grand_bouclier	zorai	large	shield
