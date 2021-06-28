@@ -1,0 +1,225 @@
+SC	crafted	
+SCA	armor	
+SCAH	heavy	
+SCAHB	boots	
+SCAHBE	*	
+SCAHBEM	*	
+SCAHG	gloves	
+SCAHGE	*	
+SCAHGEM	*	
+SCAHH	helmet	
+SCAHHE	*	
+SCAHHEM	*	
+SCAHP	pants	
+SCAHPE	*	
+SCAHPEM	*	
+SCAHS	sleeves	
+SCAHSE	*	
+SCAHSEM	*	
+SCAHV	vest	
+SCAHVE	*	
+SCAHVEM	*	
+SCAL	light	
+SCALB	boots	
+SCALBE	*	
+SCALBEM	*	
+SCALG	gloves	
+SCALGE	*	
+SCALGEM	*	
+SCALP	pants	
+SCALPE	*	
+SCALPEM	*	
+SCALS	sleeves	
+SCALSE	*	
+SCALSEM	*	
+SCALV	vest	
+SCALVE	*	
+SCALVEM	*	
+SCAM	medium	
+SCAMB	boots	
+SCAMBE	*	
+SCAMBEM	*	
+SCAMG	gloves	
+SCAMGE	*	
+SCAMGEM	*	
+SCAMP	pants	
+SCAMPE	*	
+SCAMPEM	*	
+SCAMS	sleeves	
+SCAMSE	*	
+SCAMSEM	*	
+SCAMV	vest	
+SCAMVE	*	
+SCAMVEM	*	
+SCAS	shield	
+SCASB	buckler	
+SCASBE	*	
+SCASBEM	*	
+SCASS	large	
+SCASSE	*	
+SCASSEM	*	
+SCJ	jewelry	
+SCJA	anklet	
+SCJAA	*	
+SCJAAE	*	
+SCJAAEM	*	
+SCJB	bracelet	
+SCJBA	*	
+SCJBAE	*	
+SCJBAEM	*	
+SCJD	diadem	
+SCJDA	*	
+SCJDAE	*	
+SCJDAEM	*	
+SCJE	earring	
+SCJEA	*	
+SCJEAE	*	
+SCJEAEM	*	
+SCJP	pendant	
+SCJPA	*	
+SCJPAE	*	
+SCJPAEM	*	
+SCJR	ring	
+SCJRA	*	
+SCJRAE	*	
+SCJRAEM	*	
+SCM	melee	magic
+SCM1	one-handed	
+SCM1A	axe	
+SCM1AE	*	
+SCM1AEM	*	
+SCM1D	dagger	
+SCM1DE	*	
+SCM1DEM	*	
+SCM1M	mace	
+SCM1ME	*	
+SCM1MEM	*	
+SCM1P	spear	
+SCM1PE	*	
+SCM1PEM	*	
+SCM1S	sword	
+SCM1SE	*	
+SCM1SEM	*	
+SCM1T	staff	
+SCM1TE	*	
+SCM1TEM	*	
+SCM2	two-handed	
+SCM2A	axe	
+SCM2AE	*	
+SCM2AEM	*	
+SCM2M	mace	
+SCM2ME	*	
+SCM2MEM	*	
+SCM2P	pike	
+SCM2PE	*	
+SCM2PEM	*	
+SCM2S	sword	
+SCM2SE	*	
+SCM2SEM	*	
+SCMC	amplifier	
+SCMCA	gloves	
+SCMCAE	*	
+SCMCAEM	*	
+SCR	ranged	
+SCR1	one-handed	
+SCR1P	*	
+SCR1PE	*	
+SCR1PEM	*	
+SCR2	two-handed	
+SCR2A	autolauncher	
+SCR2AE	*	
+SCR2AEM	*	
+SCR2L	launcher	
+SCR2LE	*	
+SCR2LEM	*	
+SCR2R	rifle	bowrifle
+SCR2RE	*	
+SCR2REM	*	
+SF		
+SFM		
+SFM1		
+SFM1B		
+SFM1BM		
+SFM1BMM		
+SFM1BS		
+SFM1BSM		
+SFM1P		
+SFM1PS		
+SFM1PSM		
+SFM1S		
+SFM1SA		
+SFM1SAM		
+SFM1SS		
+SFM1SSM		
+SFM2		
+SFM2B		
+SFM2BM		
+SFM2BMM		
+SFM2P		
+SFM2PP		
+SFM2PPM		
+SFM2S		
+SFM2SA		
+SFM2SAM		
+SFM2SS		
+SFM2SSM		
+SFMC		
+SFMCA		
+SFMCAD		
+SFMCADM		
+SFMCAH		
+SFMCAHM		
+SFR		
+SFR1		
+SFR1A		
+SFR1AP		
+SFR1APM		
+SFR2		
+SFR2A		
+SFR2AA		
+SFR2AAM		
+SFR2AL		
+SFR2ALM		
+SFR2AR		
+SFR2ARM		
+SH		
+SHF		
+SHFD		
+SHFDA		
+SHFDAE		
+SHFDAEM		
+SHFF		
+SHFFA		
+SHFFAE		
+SHFFAEM		
+SHFJ		
+SHFJA		
+SHFJAE		
+SHFJAEM		
+SHFL		
+SHFLA		
+SHFLAE		
+SHFLAEM		
+SHFP		
+SHFPA		
+SHFPAE		
+SHFPAEM		
+SM		
+SMD		
+SMDA		
+SMDAA		
+SMDAAE		
+SMDAAEM		
+SMDH		
+SMDHA		
+SMDHAE		
+SMDHAEM		
+SMO		
+SMOA		
+SMOAA		
+SMOAAE		
+SMOAAEM		
+SMOE		
+SMOEA		
+SMOEAE		
+SMOEAEM		

@@ -8,10 +8,130 @@ def loadTsv(filename):
 			table += [ l.strip().split("\t") ]
 	return table;
 
+# brick family
+# BC brick craft
+# BCB tribe
+# BCBM melee
+# BCBME effect (item)
+# BCBMEA *
+# BCBR ranged
+# BCBREA *
+# BCCA armor
+# BCCAEA light
+# BCCAEB medium
+# BCCAEC heavy
+# BCCAED caster
+# BCCP ammo
+# BCCPEA *
+# BCCS shield
+# BCCSEA *
+# BCFJ jewelry
+# BCFJC craft
+# BCFJE effect (item)
+# BCFJEA *
+
+# also generate its sphrase under sphrase\craft\melee_weapon etc, 
+# name add 'a' to the start, containing just sbrick and castable false
+
+# brick skill
+# SC skill craft (LearnRequiresOneOfSkills "SC 0")
+# SCJ jewelry
+# SCJR ring
+# SCJRAEM *
+# SCAMBEM skill craft armor medium boots
+# SCAMGEM skill craft armor medium gloves
+# SCAMPEM skill craft armor medium pants
+# SCAMSEM skill craft armor medium sleeves
+# SCAMVEM skill craft armor medium vest
+# SCAH heavy
+# SCAL light (and caster)
+
+
 sitemParents = loadTsv("sitem_parents.tsv")
 sitemParsed = loadTsv("sitem_parsed.tsv")
 shapeParsed = loadTsv("shape_parsed.tsv")
 matchSitemShape = loadTsv("match_sitem_shape.tsv")
+
+skills = loadTsv("skills.tsv")
+skillTree = { "S": { "tags": [ "*" ], "entries": {} } }
+
+brickFamilies = loadTsv("brick_families.tsv")
+brickFamilyTree = { "B": { "tags": [ "*" ], "entries": {} } }
+
+def buildTagTree(tree, table):
+	for entry in table:
+		e = filter(None, entry)
+		name = e[0]
+		print(name)
+		tags = e[1:]
+		nb = 0
+		branch = tree
+		if len(tags) > 0:
+			for c in name:
+				nb += 1
+				if nb >= len(name):
+					break
+				branch = branch[c]["entries"]
+			branch[name[-1]] = { "tags": tags, "entries": {} }
+	print(tree)
+
+buildTagTree(skillTree, skills)
+buildTagTree(brickFamilyTree, brickFamilies)
+
+def findTreeEntry(tree, tags):
+	res = ""
+	branch = tree
+	while True:
+		ok = False
+		if len(branch) == 0:
+			break
+		for entry in branch:
+			#print(entry)
+			for tag in branch[entry]["tags"]:
+				if tag != "*" and tag in tags:
+					ok = True
+					break
+			if ok:
+				res += entry
+				branch = branch[entry]["entries"]
+				break
+		if not ok:
+			for entry in branch:
+				#print(entry)
+				#print(branch[entry]["tags"])
+				for tag in branch[entry]["tags"]:
+					if tag == "*":
+						ok = True
+						break
+				if ok:
+					res += entry
+					branch = branch[entry]["entries"]
+					break
+		if not ok:
+			break
+	return res
+
+def findSkill(tags):
+	t = tags[:]
+	if "ammo" in t and "ranged" in t:
+		t.remove("ranged")
+	if "magic" in t and "two-handed" in t:
+		t.remove("two-handed")
+	res = findTreeEntry(skillTree, t)
+	if len(res) == 7:
+		return res
+	print("Skill: " + res + ", tags: ")
+	print(tags)
+	return ""
+
+def findBrickFamily(tags):
+	t = tags[:]
+	if "ammo" in t and "ranged" in t:
+		t.remove("ranged")
+	if "caster" in t and "light" in t:
+		t.remove("light")
+	res = findTreeEntry(brickFamilyTree, t)
+	return res
 
 sitemTags = {}
 sitemPath = "Y:\\ryzomcore4\\leveldesign\\game_element\\sitem"
@@ -347,6 +467,18 @@ def generateParents():
 		# 		f.write("</FORM>\n")
 		# 		f.flush()
 
+def findSitemParent(tags):
+	for parent in parentTags:
+		pt = parentTags[parent]
+		all = len(pt) > 0
+		for tag in pt:
+			if not tag in tags:
+				all = False
+				break
+		if all:
+			return parent
+	return None
+
 def generateSitems():
 	for match in matchSitemShape:
 		name = match[0]
@@ -471,7 +603,7 @@ def generateSitems():
 			color = "White"
 		
 		subfolder = origin
-		print tags
+		###print tags
 		if "underwear" in tags:
 			subfolder = "underwear"
 		
@@ -483,7 +615,7 @@ def generateSitems():
 		elif "melee" in tags:
 			folder = "melee_weapon\\" + subfolder
 		elif "armor" in tags:
-			print shapeMale
+			###print shapeMale
 			folder = "armor\\" + subfolder
 			if "caster01" in shapeMale or "caster" in tags:
 				folder += "\\caster_armor"
@@ -514,11 +646,16 @@ def generateSitems():
 		if "armor" in tags and "refugee" in tags:
 			continue # No need to generate these for now
 		
+		parent = findSitemParent(tags)
+		if not parent:
+			print("No parent for sitem: " + name + ", tags: " + tags)
+		
 		print(path)
 		with open(path, "w") as f:
 			f.write("<?xml version=\"1.0\"?>\n")
 			f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
-			# f.write("  <PARENT Filename=\"" + parent + ".sitem\"/>\n")
+			if parent:
+				f.write("  <PARENT Filename=\"" + parent + ".sitem\"/>\n")
 			f.write("  <STRUCT>\n")
 			f.write("    <STRUCT Name=\"basics\">\n")
 			f.write("      <ATOM Name=\"name\" Value=\"" + displayName + "\"/>\n")
@@ -530,7 +667,7 @@ def generateSitems():
 				f.write("          <ATOM Value=\"" + armorSlot + "\"/>\n")
 				f.write("        </ARRAY>\n")
 				f.write("      </STRUCT>\n")
-			# f.write("      <ATOM Name=\"CraftPlan\" Value=\"" + name + ".sbrick\"/>\n") # TODO: extract sbrick ids
+			f.write("      <ATOM Name=\"CraftPlan\" Value=\"b" + name[1:] + ".sbrick\"/>\n") # TODO: extract sbrick ids
 			f.write("    </STRUCT>\n")
 			f.write("    <STRUCT Name=\"3d\">\n")
 			f.write("      <ATOM Name=\"shape\" Value=\"" + shapeMale + ".shape\"/>\n")
@@ -548,10 +685,18 @@ def generateSitems():
 			f.write("  </STRUCT>\n")
 			f.write("</FORM>\n")
 			f.flush()
-			
-			# TODO: Find the best parent sheet
-			# TODO: Extract the sbrick identifiers
-			# TODO: Generate the sbrick
+		
+		# TODO: Load the sbrick family index table
+		# TODO: Generate the sbrick
+		
+		skill = findSkill(tags)
+		if "magic" in tags:
+			print("TODO: Double check magic")
+			print(skill)
+			print(tags)
+		
+		brickFamily = findBrickFamily(tags)
+		print(brickFamily)
 
 generateParents()
 generateSitems()
