@@ -511,6 +511,8 @@ def generateSitems():
 		
 		if "armor" in tags and "caster" in tags and not "pants" in tags:
 			continue # Only include caster pants
+		if "armor" in tags and "refugee" in tags:
+			continue # No need to generate these for now
 		
 		print(path)
 		with open(path, "w") as f:
@@ -546,6 +548,10 @@ def generateSitems():
 			f.write("  </STRUCT>\n")
 			f.write("</FORM>\n")
 			f.flush()
+			
+			# TODO: Find the best parent sheet
+			# TODO: Extract the sbrick identifiers
+			# TODO: Generate the sbrick
 
 generateParents()
 generateSitems()

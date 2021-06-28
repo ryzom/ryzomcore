@@ -1,0 +1,79 @@
+
+import os, re
+
+sbrickPath = "R:\\leveldesign\\game_element\\sbrick"
+
+familyExpr = r"\"FamilyId\"[^\"]+\"[^\"]+\""
+indexExpr = r"\"IndexInFamily\"[^\"]+\"[^\"]+\""
+sitemExpr = r"\"[^\"]+.sitem\""
+
+fileMap = {}
+
+def listPathExt(path, ext):
+	for p in os.listdir(path):
+		fp = path + "\\" + p
+		if os.path.isdir(fp):
+			listPathExt(fp, ext)
+		elif os.path.isfile(fp):
+			if fp.lower().endswith(ext):
+				fileMap[p] = fp
+
+listPathExt(sbrickPath, ".sbrick")
+
+sbrickMap = {}
+
+for sbrick in fileMap:
+	contents = ""
+	name = sbrick.split(".")[0].lower()
+	with open(fileMap[sbrick], "r") as f:
+		contents = f.read()
+	familyId = re.findall(familyExpr, contents)[0].split('"')[-2]
+	indexInFamily = re.findall(indexExpr, contents)
+	if len(indexInFamily) > 0:
+		indexInFamily = indexInFamily[0].split('"')[-2]
+	else:
+		indexInFamily = ""
+	indexNumeric = len(indexInFamily) > 0 and indexInFamily.isdigit()
+	if not indexNumeric and len(indexInFamily) > 0 and indexInFamily != "$filename":
+		print(name + ", IndexInFamily: " + indexInFamily)
+	if not indexNumeric and name.startswith(familyId.lower()):
+		indexInFamily = name[len(familyId):]
+		indexNumeric = len(indexInFamily) > 0 and indexInFamily.isdigit()
+	if not indexNumeric:
+		if name[-4:].isdigit():
+			indexInFamily = name[-4:]
+		elif name[-3:].isdigit():
+			indexInFamily = name[-3:]
+		elif name[-2:].isdigit():
+			indexInFamily = name[-2:]
+		indexNumeric = len(indexInFamily) > 0 and indexInFamily.isdigit()
+	if not indexNumeric:
+		print(name + ", IndexInFamily: " + indexInFamily)
+	sitem = re.findall(sitemExpr, contents)
+	if len(sitem) > 0:
+		sitem = sitem[0].split('"')[-2].split(".")[0]
+	else:
+		sitem = ""
+	#print(familyId)
+	#print(indexInFamily)
+	#print(name)
+	#print(sitem)
+	templateName = familyId.lower() + str(int(indexInFamily)).zfill(2)
+	entryName = familyId + str(int(indexInFamily)).zfill(4) + name
+	entry = [ familyId, indexInFamily ]
+	if name != templateName:
+		entry += [ name ]
+	if sitem != templateName and sitem != name:
+		entry += [ sitem ]
+	sbrickMap[entryName] = entry
+
+w = open("sbrick_index.tsv", "w")
+
+sbrickKeys = sbrickMap.keys()
+sbrickKeys.sort()
+
+for k in sbrickKeys:
+	w.write("\t".join(sbrickMap[k]) + "\n")
+
+w.flush()
+w.close()
