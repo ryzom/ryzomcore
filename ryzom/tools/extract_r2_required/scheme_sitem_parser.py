@@ -16,8 +16,8 @@ scheme = {
 			"r": "refugee",
 			"kam": "kami",
 			"kar": "karavan",
-			"b": "boss tribe",
-			"h": "high tribe",
+			"b": "tribe",
+			"hb": "high tribe",
 			"cf": "crafted fyros",
 			"cm": "crafted matis",
 			"ct": "crafted tryker",
@@ -26,8 +26,8 @@ scheme = {
 			"cr": "crafted refugee", # i cr a b a	Refugee Boots
 			"ckam": "crafted kami",
 			"ckar": "crafted karavan",
-			"cb": "crafted boss tribe",
-			"ch": "crafted high tribe",
+			"cb": "crafted tribe",
+			"chb": "crafted high tribe",
 		},
 		{
 			"a": "armor",
@@ -87,7 +87,7 @@ scheme = {
 			"pp": "piercing pike",
 			"sa": "slashing axe",
 			"ss": "slashing sword",
-			"ms": "magic amplifier",
+			"ms": "magic amplifier gloves",
 		},
 		{},
 		{},
@@ -189,7 +189,7 @@ def parse(name):
 	while len(sub) > 0:
 		add = addTags(sub, depth, tags)
 		if len(add) == 0:
-			return tags + [ "incomplete", "_" + sub ]
+			return tags[1:] + [ "incomplete", "_" + sub ]
 		sub = sub[len(add):]
 		depth += 1
 	return tags[1:]

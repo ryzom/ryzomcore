@@ -1,0 +1,695 @@
+ca_hof_armor01_armpad		karavan	female	armor	armor01	sleeves
+ca_hof_armor01_bottes		karavan	female	armor	armor01	boots
+ca_hof_armor01_gilet		karavan	female	armor	armor01	vest
+ca_hof_armor01_hand		karavan	female	armor	armor01	gloves
+ca_hof_armor01_hum_armpad		karavan	female	armor	armor01	human	sleeves
+ca_hof_armor01_hum_bottes		karavan	female	armor	armor01	human	boots
+ca_hof_armor01_hum_gilet		karavan	female	armor	armor01	human	vest
+ca_hof_armor01_hum_hand		karavan	female	armor	armor01	human	gloves
+ca_hof_armor01_hum_pantabottes		karavan	female	armor	armor01	human	pants
+ca_hof_armor01_pantabottes		karavan	female	armor	armor01	pants
+ca_hof_armor02_armpad		karavan	female	armor	armor02	sleeves
+ca_hof_armor02_bottes		karavan	female	armor	armor02	boots
+ca_hof_armor02_gilet		karavan	female	armor	armor02	vest
+ca_hof_armor02_hand		karavan	female	armor	armor02	gloves
+ca_hof_armor02_hum_armpad		karavan	female	armor	armor02	human	sleeves
+ca_hof_armor02_hum_bottes		karavan	female	armor	armor02	human	boots
+ca_hof_armor02_hum_gilet		karavan	female	armor	armor02	human	vest
+ca_hof_armor02_hum_hand		karavan	female	armor	armor02	human	gloves
+ca_hof_armor02_hum_pantabottes		karavan	female	armor	armor02	human	pants
+ca_hof_armor02_pantabottes		karavan	female	armor	armor02	pants
+ca_hof_casque01		karavan	female	armor	helmet01
+ca_hof_casque01_hum		karavan	female	armor	helmet01	human
+ca_hof_casque02		karavan	female	armor	helmet02
+ca_hof_casque02_hum		karavan	female	armor	helmet02	human
+ca_hof_casque03		karavan	female	armor	helmet03
+ca_hof_casque04		karavan	female	armor	helmet04
+ca_hof_commander_armpad		karavan	female	commander	sleeves
+ca_hof_commander_bottes		karavan	female	commander	boots
+ca_hof_commander_casque		karavan	female	commander	helmet
+ca_hof_commander_gilet		karavan	female	commander	vest
+ca_hof_commander_hand		karavan	female	commander	gloves
+ca_hof_commander_pantabottes		karavan	female	commander	pants
+ca_hof_medic_armpad		karavan	female	medic	sleeves
+ca_hof_medic_bottes		karavan	female	medic	boots
+ca_hof_medic_casque		karavan	female	medic	helmet
+ca_hof_medic_gilet		karavan	female	medic	vest
+ca_hof_medic_hand		karavan	female	medic	gloves
+ca_hof_medic_pantabottes		karavan	female	medic	pants
+ca_hom_armor01_armpad		karavan	male	armor	armor01	sleeves
+ca_hom_armor01_bottes		karavan	male	armor	armor01	boots
+ca_hom_armor01_gilet		karavan	male	armor	armor01	vest
+ca_hom_armor01_hand		karavan	male	armor	armor01	gloves
+ca_hom_armor01_hum_armpad		karavan	male	armor	armor01	human	sleeves
+ca_hom_armor01_hum_bottes		karavan	male	armor	armor01	human	boots
+ca_hom_armor01_hum_gilet		karavan	male	armor	armor01	human	vest
+ca_hom_armor01_hum_hand		karavan	male	armor	armor01	human	gloves
+ca_hom_armor01_hum_pantabottes		karavan	male	armor	armor01	human	pants
+ca_hom_armor01_pantabottes		karavan	male	armor	armor01	pants
+ca_hom_armor02_armpad		karavan	male	armor	armor02	sleeves
+ca_hom_armor02_bottes		karavan	male	armor	armor02	boots
+ca_hom_armor02_gilet		karavan	male	armor	armor02	vest
+ca_hom_armor02_hand		karavan	male	armor	armor02	gloves
+ca_hom_armor02_hum_armpad		karavan	male	armor	armor02	human	sleeves
+ca_hom_armor02_hum_bottes		karavan	male	armor	armor02	human	boots
+ca_hom_armor02_hum_gilet		karavan	male	armor	armor02	human	vest
+ca_hom_armor02_hum_hand		karavan	male	armor	armor02	human	gloves
+ca_hom_armor02_hum_pantabottes		karavan	male	armor	armor02	human	pants
+ca_hom_armor02_pantabottes		karavan	male	armor	armor02	pants
+ca_hom_casque01		karavan	male	armor	helmet01
+ca_hom_casque01_hum		karavan	male	armor	helmet01	human
+ca_hom_casque02		karavan	male	armor	helmet02
+ca_hom_casque02_hum		karavan	male	armor	helmet02	human
+ca_hom_casque03		karavan	male	armor	helmet03
+ca_hom_casque04		karavan	male	armor	helmet04
+ca_hom_ingeneer_armpad		karavan	male	engineer	sleeves
+ca_hom_ingeneer_botte		karavan	male	engineer	boots
+ca_hom_ingeneer_casque		karavan	male	engineer	helmet
+ca_hom_ingeneer_hand		karavan	male	engineer	gloves
+ca_hom_ingeneer_pantabotte		karavan	male	engineer	pants
+ca_hom_ingeneer_torse		karavan	male	engineer	vest
+ca_hom_trooper_armpad		karavan	male	trooper	sleeves
+ca_hom_trooper_botte		karavan	male	trooper	boots
+ca_hom_trooper_casque		karavan	male	trooper	helmet
+ca_hom_trooper_hand		karavan	male	trooper	gloves
+ca_hom_trooper_pantabotte		karavan	male	trooper	pants
+ca_hom_trooper_torse		karavan	male	trooper	vest
+ca_ship		karavan	incomplete	_ship
+ca_spaceship2		karavan	incomplete	_spaceship2
+fy_hof_armor00_armpad		fyros	female	medium	armor	medium01	sleeves
+fy_hof_armor00_bottes		fyros	female	medium	armor	medium01	boots
+fy_hof_armor00_gilet		fyros	female	medium	armor	medium01	vest
+fy_hof_armor00_hand		fyros	female	medium	armor	medium01	gloves
+fy_hof_armor00_pantabottes		fyros	female	medium	armor	medium01	pants
+fy_hof_armor01_armpad		fyros	female	heavy	armor	heavy01	sleeves
+fy_hof_armor01_bottes		fyros	female	heavy	armor	heavy01	boots
+fy_hof_armor01_gilet		fyros	female	heavy	armor	heavy01	vest
+fy_hof_armor01_hand		fyros	female	heavy	armor	heavy01	gloves
+fy_hof_armor01_hand_fp		fyros	female	heavy	armor	heavy01	gloves	first-person
+fy_hof_armor01_pantabottes		fyros	female	heavy	armor	heavy01	pants
+fy_hof_casque01		fyros	female	heavy	armor	helmet	heavy01
+fy_hof_caster01_bottes_armor00		fyros	female	caster	armor	caster01	boots	medium	alternative
+fy_hof_caster01_bottes_armor01		fyros	female	caster	armor	caster01	boots	heavy	alternative
+fy_hof_caster01_bottes_civil		fyros	female	caster	armor	caster01	boots	light	alternative
+fy_hof_caster01_pantabottes		fyros	female	caster	armor	caster01	pants
+fy_hof_cheveux_artistic01		fyros	female	hairstyle	artistic	01
+fy_hof_cheveux_artistic02		fyros	female	hairstyle	artistic	02
+fy_hof_cheveux_artistic03		fyros	female	hairstyle	artistic	03
+fy_hof_cheveux_artistic04		fyros	female	hairstyle	artistic	04
+fy_hof_cheveux_basic01		fyros	female	hairstyle	basic	01
+fy_hof_cheveux_basic02		fyros	female	hairstyle	basic	02
+fy_hof_cheveux_long01		fyros	female	hairstyle	long	01
+fy_hof_cheveux_medium01		fyros	female	hairstyle	medium	01
+fy_hof_cheveux_medium02		fyros	female	hairstyle	medium	02
+fy_hof_cheveux_medium03		fyros	female	hairstyle	medium	03
+fy_hof_cheveux_medium04		fyros	female	hairstyle	medium	04
+fy_hof_cheveux_shave01		fyros	female	hairstyle	shave	01
+fy_hof_cheveux_short01		fyros	female	hairstyle	short	01
+fy_hof_cheveux_style01		fyros	female	hairstyle	style	01
+fy_hof_cheveux_style02		fyros	female	hairstyle	style	02
+fy_hof_civil01_armpad		fyros	female	light	armor	civil01	sleeves
+fy_hof_civil01_bottes		fyros	female	light	armor	civil01	boots
+fy_hof_civil01_gilet		fyros	female	light	armor	civil01	vest
+fy_hof_civil01_pantabottes		fyros	female	light	armor	civil01	pants
+fy_hof_underwear_gilet		fyros	female	underwear	armor	vest
+fy_hof_underwear_pantabottes		fyros	female	underwear	armor	pants
+fy_hof_visage		fyros	female	incomplete	_visage
+fy_hom_armor00_armpad		fyros	male	medium	armor	medium01	sleeves
+fy_hom_armor00_bottes		fyros	male	medium	armor	medium01	boots
+fy_hom_armor00_gilet		fyros	male	medium	armor	medium01	vest
+fy_hom_armor00_hand		fyros	male	medium	armor	medium01	gloves
+fy_hom_armor00_pantabottes		fyros	male	medium	armor	medium01	pants
+fy_hom_armor01_armpad		fyros	male	heavy	armor	heavy01	sleeves
+fy_hom_armor01_bottes		fyros	male	heavy	armor	heavy01	boots
+fy_hom_armor01_gilet		fyros	male	heavy	armor	heavy01	vest
+fy_hom_armor01_hand		fyros	male	heavy	armor	heavy01	gloves
+fy_hom_armor01_hand_fp		fyros	male	heavy	armor	heavy01	gloves	first-person
+fy_hom_armor01_lead_armpad		fyros	male	heavy	armor	heavy01	lead	event	sleeves
+fy_hom_armor01_lead_bottes		fyros	male	heavy	armor	heavy01	lead	event	boots
+fy_hom_armor01_lead_gilet		fyros	male	heavy	armor	heavy01	lead	event	vest
+fy_hom_armor01_lead_pantabottes		fyros	male	heavy	armor	heavy01	lead	event	pants
+fy_hom_armor01_pantabottes		fyros	male	heavy	armor	heavy01	pants
+fy_hom_casque01		fyros	male	heavy	armor	helmet	heavy01
+fy_hom_caster01_bottes_armor00		fyros	male	caster	armor	caster01	boots	medium	alternative
+fy_hom_caster01_bottes_armor01		fyros	male	caster	armor	caster01	boots	heavy	alternative
+fy_hom_caster01_civil01_bottes		fyros	male	caster	armor	caster01	light	alternative	boots
+fy_hom_caster01_pantabottes		fyros	male	caster	armor	caster01	pants
+fy_hom_cheveux_artistic01		fyros	male	hairstyle	artistic	01
+fy_hom_cheveux_artistic02		fyros	male	hairstyle	artistic	02
+fy_hom_cheveux_artistic03		fyros	male	hairstyle	artistic	03
+fy_hom_cheveux_artistic04		fyros	male	hairstyle	artistic	04
+fy_hom_cheveux_basic01		fyros	male	hairstyle	basic	01
+fy_hom_cheveux_basic02		fyros	male	hairstyle	basic	02
+fy_hom_cheveux_lead		fyros	male	hairstyle	lead	event
+fy_hom_cheveux_long01		fyros	male	hairstyle	long	01
+fy_hom_cheveux_long02		fyros	male	hairstyle	long	02
+fy_hom_cheveux_medium01		fyros	male	hairstyle	medium	01
+fy_hom_cheveux_medium02		fyros	male	hairstyle	medium	02
+fy_hom_cheveux_shave01		fyros	male	hairstyle	shave	01
+fy_hom_cheveux_short01		fyros	male	hairstyle	short	01
+fy_hom_cheveux_short02		fyros	male	hairstyle	short	02
+fy_hom_cheveux_style01		fyros	male	hairstyle	style	01
+fy_hom_cheveux_style02		fyros	male	hairstyle	style	02
+fy_hom_civil01_armpad		fyros	male	light	armor	civil01	sleeves
+fy_hom_civil01_bottes		fyros	male	light	armor	civil01	boots
+fy_hom_civil01_gilet		fyros	male	light	armor	civil01	vest
+fy_hom_civil01_pantabottes		fyros	male	light	armor	civil01	pants
+fy_hom_interfaces_new		fyros	male	incomplete	_interfaces_new
+fy_hom_underwear_pantabottes		fyros	male	underwear	armor	pants
+fy_hom_visage		fyros	male	incomplete	_visage
+ge_bt_kami_destroyer		common	incomplete	_bt_kami_destroyer
+ge_hof_armor02_armpad		common	female	tribe	boss	light	armor	light01	sleeves
+ge_hof_armor02_bottes		common	female	tribe	boss	light	armor	light01	boots
+ge_hof_armor02_gilet		common	female	tribe	boss	light	armor	light01	vest
+ge_hof_armor02_pantabottes		common	female	tribe	boss	light	armor	light01	pants
+ge_hof_armor03_armpad		common	female	tribe	boss	medium	armor	medium01	sleeves
+ge_hof_armor03_bottes		common	female	tribe	boss	medium	armor	medium01	boots
+ge_hof_armor03_gilet		common	female	tribe	boss	medium	armor	medium01	vest
+ge_hof_armor03_pantabottes		common	female	tribe	boss	medium	armor	medium01	pants
+ge_hof_armor04_armpad		common	female	tribe	boss	heavy	armor	heavy01	sleeves
+ge_hof_armor04_bottes		common	female	tribe	boss	heavy	armor	heavy01	boots
+ge_hof_armor04_gilet		common	female	tribe	boss	heavy	armor	heavy01	vest
+ge_hof_armor04_hand		common	female	tribe	boss	heavy	armor	heavy01	gloves
+ge_hof_armor04_pantabottes		common	female	tribe	boss	heavy	armor	heavy01	pants
+ge_hof_casque00		common	female	tribe	boss	heavy	armor	heavy01	helmet
+ge_hof_casque01		common	female	heavy	armor	helmet	heavy01
+ge_hof_caster00_pantabottes		common	female	tribe	boss	caster	armor	caster01	pants
+ge_hom_armor02_armpad		common	male	tribe	boss	light	armor	light01	sleeves
+ge_hom_armor02_bottes		common	male	tribe	boss	light	armor	light01	boots
+ge_hom_armor02_gilet		common	male	tribe	boss	light	armor	light01	vest
+ge_hom_armor02_pantabottes		common	male	tribe	boss	light	armor	light01	pants
+ge_hom_armor03_armpad		common	male	tribe	boss	medium	armor	medium01	sleeves
+ge_hom_armor03_bottes		common	male	tribe	boss	medium	armor	medium01	boots
+ge_hom_armor03_gilet		common	male	tribe	boss	medium	armor	medium01	vest
+ge_hom_armor03_pantabottes		common	male	tribe	boss	medium	armor	medium01	pants
+ge_hom_armor04_armpad		common	male	tribe	boss	heavy	armor	heavy01	sleeves
+ge_hom_armor04_bottes		common	male	tribe	boss	heavy	armor	heavy01	boots
+ge_hom_armor04_gilet		common	male	tribe	boss	heavy	armor	heavy01	vest
+ge_hom_armor04_hand		common	male	tribe	boss	heavy	armor	heavy01	gloves
+ge_hom_armor04_pantabottes		common	male	tribe	boss	heavy	armor	heavy01	pants
+ge_hom_armor06_armpad		common	male	armor	heavy	heavy03	sleeves
+ge_hom_armor06_bottes		common	male	armor	heavy	heavy03	boots
+ge_hom_armor06_gilet		common	male	armor	heavy	heavy03	vest
+ge_hom_armor06_hand		common	male	armor	heavy	heavy03	gloves
+ge_hom_armor06_pantabottes		common	male	armor	heavy	heavy03	pants
+ge_hom_casque00		common	male	tribe	boss	heavy	armor	heavy01	helmet
+ge_hom_casque01		common	male	heavy	armor	helmet	heavy01
+ge_hom_casque02		common	male	armor	heavy	heavy03	helmet
+ge_hom_caster00_pantabottes		common	male	tribe	boss	caster	armor	caster01	pants
+int_avbradr_maindr		incomplete	_int_avbradr_maindr
+int_avbradr_maindr01		incomplete	_int_avbradr_maindr01
+int_cou_tet		incomplete	_int_cou_tet
+int_molgo_cuissego		incomplete	_int_molgo_cuissego
+int_tail_cuis		incomplete	_int_tail_cuis
+int_tors_bradr		incomplete	_int_tors_bradr
+int_tors_bradr01		incomplete	_int_tors_bradr01
+ma_hof_armor00_armpad		matis	female	medium	armor	medium01	sleeves
+ma_hof_armor00_bottes		matis	female	medium	armor	medium01	boots
+ma_hof_armor00_gilet		matis	female	medium	armor	medium01	vest
+ma_hof_armor00_hand		matis	female	medium	armor	medium01	gloves
+ma_hof_armor00_pantabottes		matis	female	medium	armor	medium01	pants
+ma_hof_armor01_armpad		matis	female	heavy	armor	heavy01	sleeves
+ma_hof_armor01_bottes		matis	female	heavy	armor	heavy01	boots
+ma_hof_armor01_gilet		matis	female	heavy	armor	heavy01	vest
+ma_hof_armor01_hand		matis	female	heavy	armor	heavy01	gloves
+ma_hof_armor01_hand_fp		matis	female	heavy	armor	heavy01	gloves	first-person
+ma_hof_armor01_pantabottes		matis	female	heavy	armor	heavy01	pants
+ma_hof_armor04_armpad		matis	female	heavy	armor	heavy02	sleeves
+ma_hof_armor04_bottes		matis	female	heavy	armor	heavy02	boots
+ma_hof_armor04_gilet		matis	female	heavy	armor	heavy02	vest
+ma_hof_armor04_pantabottes		matis	female	heavy	armor	heavy02	pants
+ma_hof_casque01		matis	female	heavy	armor	helmet	heavy01
+ma_hof_caster01_bottes_armor00		matis	female	caster	armor	caster01	boots	medium	alternative
+ma_hof_caster01_bottes_armor01		matis	female	caster	armor	caster01	boots	heavy	alternative
+ma_hof_caster01_bottes_civil01		matis	female	caster	armor	caster01	boots	light	alternative
+ma_hof_caster01_pantabottes		matis	female	caster	armor	caster01	pants
+ma_hof_cheveux_artistic01		matis	female	hairstyle	artistic	01
+ma_hof_cheveux_artistic02		matis	female	hairstyle	artistic	02
+ma_hof_cheveux_artistic03		matis	female	hairstyle	artistic	03
+ma_hof_cheveux_basic01		matis	female	hairstyle	basic	01
+ma_hof_cheveux_basic02		matis	female	hairstyle	basic	02
+ma_hof_cheveux_basic03		matis	female	hairstyle	basic	03
+ma_hof_cheveux_long01		matis	female	hairstyle	long	01
+ma_hof_cheveux_long02		matis	female	hairstyle	long	02
+ma_hof_cheveux_medium01		matis	female	hairstyle	medium	01
+ma_hof_cheveux_medium02		matis	female	hairstyle	medium	02
+ma_hof_cheveux_shave01		matis	female	hairstyle	shave	01
+ma_hof_cheveux_short01		matis	female	hairstyle	short	01
+ma_hof_cheveux_short02		matis	female	hairstyle	short	02
+ma_hof_cheveux_style01		matis	female	hairstyle	style	01
+ma_hof_cheveux_style02		matis	female	hairstyle	style	02
+ma_hof_civil01_armpad		matis	female	light	armor	civil01	sleeves
+ma_hof_civil01_bottes		matis	female	light	armor	civil01	boots
+ma_hof_civil01_gilet		matis	female	light	armor	civil01	vest
+ma_hof_civil01_pantabottes		matis	female	light	armor	civil01	pants
+ma_hof_underwear_gilet		matis	female	underwear	armor	vest
+ma_hof_underwear_pantabottes		matis	female	underwear	armor	pants
+ma_hof_visage		matis	female	incomplete	_visage
+ma_hom_armor00_armpad		matis	male	medium	armor	medium01	sleeves
+ma_hom_armor00_bottes		matis	male	medium	armor	medium01	boots
+ma_hom_armor00_gilet		matis	male	medium	armor	medium01	vest
+ma_hom_armor00_hand		matis	male	medium	armor	medium01	gloves
+ma_hom_armor00_pantabottes		matis	male	medium	armor	medium01	pants
+ma_hom_armor01_armpad		matis	male	heavy	armor	heavy01	sleeves
+ma_hom_armor01_bottes		matis	male	heavy	armor	heavy01	boots
+ma_hom_armor01_gilet		matis	male	heavy	armor	heavy01	vest
+ma_hom_armor01_hand		matis	male	heavy	armor	heavy01	gloves
+ma_hom_armor01_hand_fp		matis	male	heavy	armor	heavy01	gloves	first-person
+ma_hom_armor01_lead_armpad		matis	male	heavy	armor	heavy01	lead	event	sleeves
+ma_hom_armor01_lead_bottes		matis	male	heavy	armor	heavy01	lead	event	boots
+ma_hom_armor01_lead_gilet		matis	male	heavy	armor	heavy01	lead	event	vest
+ma_hom_armor01_lead_pantabottes		matis	male	heavy	armor	heavy01	lead	event	pants
+ma_hom_armor01_pantabottes		matis	male	heavy	armor	heavy01	pants
+ma_hom_casque01		matis	male	heavy	armor	helmet	heavy01
+ma_hom_caster01_bottes_armor00		matis	male	caster	armor	caster01	boots	medium	alternative
+ma_hom_caster01_bottes_armor01		matis	male	caster	armor	caster01	boots	heavy	alternative
+ma_hom_caster01_bottes_civil01		matis	male	caster	armor	caster01	boots	light	alternative
+ma_hom_caster01_pantabottes		matis	male	caster	armor	caster01	pants
+ma_hom_cheveux_artistic01		matis	male	hairstyle	artistic	01
+ma_hom_cheveux_artistic02		matis	male	hairstyle	artistic	02
+ma_hom_cheveux_artistic03		matis	male	hairstyle	artistic	03
+ma_hom_cheveux_artistic04		matis	male	hairstyle	artistic	04
+ma_hom_cheveux_basic01		matis	male	hairstyle	basic	01
+ma_hom_cheveux_basic02		matis	male	hairstyle	basic	02
+ma_hom_cheveux_basic03		matis	male	hairstyle	basic	03
+ma_hom_cheveux_lead		matis	male	hairstyle	lead	event
+ma_hom_cheveux_long01		matis	male	hairstyle	long	01
+ma_hom_cheveux_long02		matis	male	hairstyle	long	02
+ma_hom_cheveux_medium01		matis	male	hairstyle	medium	01
+ma_hom_cheveux_medium02		matis	male	hairstyle	medium	02
+ma_hom_cheveux_medium03		matis	male	hairstyle	medium	03
+ma_hom_cheveux_shave01		matis	male	hairstyle	shave	01
+ma_hom_cheveux_short01		matis	male	hairstyle	short	01
+ma_hom_cheveux_style01		matis	male	hairstyle	style	01
+ma_hom_civil01_armpad		matis	male	light	armor	civil01	sleeves
+ma_hom_civil01_bottes		matis	male	light	armor	civil01	boots
+ma_hom_civil01_gilet		matis	male	light	armor	civil01	vest
+ma_hom_civil01_pantabottes		matis	male	light	armor	civil01	pants
+ma_hom_underwear_pantabottes		matis	male	underwear	armor	pants
+ma_hom_visage		matis	male	incomplete	_visage
+ma_roadsign_poteau_1		matis	incomplete	_roadsign_poteau_1
+ma_roadsign_poteau_2		matis	incomplete	_roadsign_poteau_2
+mesh01		incomplete	_mesh01
+object01		incomplete	_object01
+rectangle02		incomplete	_rectangle02
+shape01		incomplete	_shape01
+shape02		incomplete	_shape02
+shape03		incomplete	_shape03
+shape04		incomplete	_shape04
+shape05		incomplete	_shape05
+shape06		incomplete	_shape06
+shape07		incomplete	_shape07
+ship_tank_karavan		incomplete	_ship_tank_karavan
+tr_hof_armor00_armpad		tryker	female	medium	armor	medium01	sleeves
+tr_hof_armor00_bottes		tryker	female	medium	armor	medium01	boots
+tr_hof_armor00_gilet		tryker	female	medium	armor	medium01	vest
+tr_hof_armor00_hand		tryker	female	medium	armor	medium01	gloves
+tr_hof_armor00_pantabottes		tryker	female	medium	armor	medium01	pants
+tr_hof_armor01_armpad		tryker	female	heavy	armor	heavy01	sleeves
+tr_hof_armor01_bottes		tryker	female	heavy	armor	heavy01	boots
+tr_hof_armor01_gilet		tryker	female	heavy	armor	heavy01	vest
+tr_hof_armor01_hand		tryker	female	heavy	armor	heavy01	gloves
+tr_hof_armor01_hand_fp		tryker	female	heavy	armor	heavy01	gloves	first-person
+tr_hof_armor01_pantabottes		tryker	female	heavy	armor	heavy01	pants
+tr_hof_casque01		tryker	female	heavy	armor	helmet	heavy01
+tr_hof_caster01_bottes_armor00		tryker	female	caster	armor	caster01	boots	medium	alternative
+tr_hof_caster01_bottes_armor01		tryker	female	caster	armor	caster01	boots	heavy	alternative
+tr_hof_caster01_bottes_civil01		tryker	female	caster	armor	caster01	boots	light	alternative
+tr_hof_caster01_bottes_underwear		tryker	female	caster	armor	caster01	boots	underwear	alternative
+tr_hof_caster01_pantabottes		tryker	female	caster	armor	caster01	pants
+tr_hof_cheveux_artistic01		tryker	female	hairstyle	artistic	01
+tr_hof_cheveux_basic01		tryker	female	hairstyle	basic	01
+tr_hof_cheveux_basic02		tryker	female	hairstyle	basic	02
+tr_hof_cheveux_basic03		tryker	female	hairstyle	basic	03
+tr_hof_cheveux_basic04		tryker	female	hairstyle	basic	04
+tr_hof_cheveux_long01		tryker	female	hairstyle	long	01
+tr_hof_cheveux_medium01		tryker	female	hairstyle	medium	01
+tr_hof_cheveux_medium02		tryker	female	hairstyle	medium	02
+tr_hof_cheveux_shave01		tryker	female	hairstyle	shave	01
+tr_hof_cheveux_short01		tryker	female	hairstyle	short	01
+tr_hof_cheveux_short02		tryker	female	hairstyle	short	02
+tr_hof_cheveux_short03		tryker	female	hairstyle	short	03
+tr_hof_cheveux_style01		tryker	female	hairstyle	style	01
+tr_hof_cheveux_style02		tryker	female	hairstyle	style	02
+tr_hof_cheveux_style03		tryker	female	hairstyle	style	03
+tr_hof_civil01_armpad		tryker	female	light	armor	civil01	sleeves
+tr_hof_civil01_bottes		tryker	female	light	armor	civil01	boots
+tr_hof_civil01_gilet		tryker	female	light	armor	civil01	vest
+tr_hof_civil01_hand		tryker	female	light	armor	civil01	gloves
+tr_hof_civil01_hand_fp		tryker	female	light	armor	civil01	gloves	first-person
+tr_hof_civil01_pantabottes		tryker	female	light	armor	civil01	pants
+tr_hof_refugee_gilet		tryker	female	refugee	armor	vest
+tr_hof_refugee_pantabottes		tryker	female	refugee	armor	pants
+tr_hof_underwear_armpad		tryker	female	underwear	armor	sleeves
+tr_hof_underwear_bottes		tryker	female	underwear	armor	boots
+tr_hof_underwear_gilet		tryker	female	underwear	armor	vest
+tr_hof_underwear_hand		tryker	female	underwear	armor	gloves
+tr_hof_underwear_hand_fp		tryker	female	underwear	armor	gloves	first-person
+tr_hof_underwear_pantabottes		tryker	female	underwear	armor	pants
+tr_hof_visage		tryker	female	incomplete	_visage
+tr_hom_armor00_armpad		tryker	male	medium	armor	medium01	sleeves
+tr_hom_armor00_bottes		tryker	male	medium	armor	medium01	boots
+tr_hom_armor00_gilet		tryker	male	medium	armor	medium01	vest
+tr_hom_armor00_hand		tryker	male	medium	armor	medium01	gloves
+tr_hom_armor00_lead_armpad		tryker	male	medium	armor	medium01	lead	event	sleeves
+tr_hom_armor00_lead_bottes		tryker	male	medium	armor	medium01	lead	event	boots
+tr_hom_armor00_lead_gilet		tryker	male	medium	armor	medium01	lead	event	vest
+tr_hom_armor00_lead_pantabottes		tryker	male	medium	armor	medium01	lead	event	pants
+tr_hom_armor00_pantabottes		tryker	male	medium	armor	medium01	pants
+tr_hom_armor01_armpad		tryker	male	heavy	armor	heavy01	sleeves
+tr_hom_armor01_bottes		tryker	male	heavy	armor	heavy01	boots
+tr_hom_armor01_gilet		tryker	male	heavy	armor	heavy01	vest
+tr_hom_armor01_hand		tryker	male	heavy	armor	heavy01	gloves
+tr_hom_armor01_hand_fp		tryker	male	heavy	armor	heavy01	gloves	first-person
+tr_hom_armor01_pantabottes		tryker	male	heavy	armor	heavy01	pants
+tr_hom_casque01		tryker	male	heavy	armor	helmet	heavy01
+tr_hom_caster01_bottes_armor00		tryker	male	caster	armor	caster01	boots	medium	alternative
+tr_hom_caster01_bottes_armor01		tryker	male	caster	armor	caster01	boots	heavy	alternative
+tr_hom_caster01_bottes_civil01		tryker	male	caster	armor	caster01	boots	light	alternative
+tr_hom_caster01_bottes_underwear		tryker	male	caster	armor	caster01	boots	underwear	alternative
+tr_hom_caster01_pantabottes		tryker	male	caster	armor	caster01	pants
+tr_hom_cheveux_artistic01		tryker	male	hairstyle	artistic	01
+tr_hom_cheveux_artistic02		tryker	male	hairstyle	artistic	02
+tr_hom_cheveux_artistic03		tryker	male	hairstyle	artistic	03
+tr_hom_cheveux_basic01		tryker	male	hairstyle	basic	01
+tr_hom_cheveux_basic02		tryker	male	hairstyle	basic	02
+tr_hom_cheveux_lead		tryker	male	hairstyle	lead	event
+tr_hom_cheveux_long01		tryker	male	hairstyle	long	01
+tr_hom_cheveux_medium01		tryker	male	hairstyle	medium	01
+tr_hom_cheveux_medium02		tryker	male	hairstyle	medium	02
+tr_hom_cheveux_medium03		tryker	male	hairstyle	medium	03
+tr_hom_cheveux_medium04		tryker	male	hairstyle	medium	04
+tr_hom_cheveux_shave01		tryker	male	hairstyle	shave	01
+tr_hom_cheveux_short01		tryker	male	hairstyle	short	01
+tr_hom_cheveux_style01		tryker	male	hairstyle	style	01
+tr_hom_cheveux_style02		tryker	male	hairstyle	style	02
+tr_hom_cheveux_style03		tryker	male	hairstyle	style	03
+tr_hom_civil01_armpad		tryker	male	light	armor	civil01	sleeves
+tr_hom_civil01_bottes		tryker	male	light	armor	civil01	boots
+tr_hom_civil01_gilet		tryker	male	light	armor	civil01	vest
+tr_hom_civil01_hand		tryker	male	light	armor	civil01	gloves
+tr_hom_civil01_hand_fp		tryker	male	light	armor	civil01	gloves	first-person
+tr_hom_civil01_pantabottes		tryker	male	light	armor	civil01	pants
+tr_hom_refugee_armpad		tryker	male	refugee	armor	sleeves
+tr_hom_refugee_gilet		tryker	male	refugee	armor	vest
+tr_hom_refugee_pantabottes		tryker	male	refugee	armor	pants
+tr_hom_refugee_pantabottes_02		tryker	male	refugee	armor	pants	02
+tr_hom_underwear_armpad		tryker	male	underwear	armor	sleeves
+tr_hom_underwear_bottes		tryker	male	underwear	armor	boots
+tr_hom_underwear_gilet		tryker	male	underwear	armor	vest
+tr_hom_underwear_hand		tryker	male	underwear	armor	gloves
+tr_hom_underwear_hand_fp		tryker	male	underwear	armor	gloves	first-person
+tr_hom_underwear_pantabottes		tryker	male	underwear	armor	pants
+tr_hom_visage		tryker	male	incomplete	_visage
+zo_hof_armor00_armpad		zorai	female	medium	armor	medium01	sleeves
+zo_hof_armor00_bottes		zorai	female	medium	armor	medium01	boots
+zo_hof_armor00_gilet		zorai	female	medium	armor	medium01	vest
+zo_hof_armor00_hand		zorai	female	medium	armor	medium01	gloves
+zo_hof_armor00_pantabottes		zorai	female	medium	armor	medium01	pants
+zo_hof_armor01_armpad		zorai	female	heavy	armor	heavy01	sleeves
+zo_hof_armor01_bottes		zorai	female	heavy	armor	heavy01	boots
+zo_hof_armor01_gilet		zorai	female	heavy	armor	heavy01	vest
+zo_hof_armor01_hand		zorai	female	heavy	armor	heavy01	gloves
+zo_hof_armor01_hand_fp		zorai	female	heavy	armor	heavy01	gloves	first-person
+zo_hof_armor01_pantabottes		zorai	female	heavy	armor	heavy01	pants
+zo_hof_casque01		zorai	female	heavy	armor	helmet	heavy01
+zo_hof_caster01_bottes_armor00		zorai	female	caster	armor	caster01	boots	medium	alternative
+zo_hof_caster01_bottes_armor01		zorai	female	caster	armor	caster01	boots	heavy	alternative
+zo_hof_caster01_bottes_civil01		zorai	female	caster	armor	caster01	boots	light	alternative
+zo_hof_caster01_pantabottes		zorai	female	caster	armor	caster01	pants
+zo_hof_cheveux_artistic01		zorai	female	hairstyle	artistic	01
+zo_hof_cheveux_artistic02		zorai	female	hairstyle	artistic	02
+zo_hof_cheveux_artistic03		zorai	female	hairstyle	artistic	03
+zo_hof_cheveux_artistic04		zorai	female	hairstyle	artistic	04
+zo_hof_cheveux_artistic05		zorai	female	hairstyle	artistic	05
+zo_hof_cheveux_basic01		zorai	female	hairstyle	basic	01
+zo_hof_cheveux_basic02		zorai	female	hairstyle	basic	02
+zo_hof_cheveux_long01		zorai	female	hairstyle	long	01
+zo_hof_cheveux_long02		zorai	female	hairstyle	long	02
+zo_hof_cheveux_medium01		zorai	female	hairstyle	medium	01
+zo_hof_cheveux_medium02		zorai	female	hairstyle	medium	02
+zo_hof_cheveux_shave01		zorai	female	hairstyle	shave	01
+zo_hof_cheveux_short01		zorai	female	hairstyle	short	01
+zo_hof_cheveux_short02		zorai	female	hairstyle	short	02
+zo_hof_cheveux_style01		zorai	female	hairstyle	style	01
+zo_hof_civil01_armpad		zorai	female	light	armor	civil01	sleeves
+zo_hof_civil01_bottes		zorai	female	light	armor	civil01	boots
+zo_hof_civil01_gilet		zorai	female	light	armor	civil01	vest
+zo_hof_civil01_pantabottes		zorai	female	light	armor	civil01	pants
+zo_hof_underwear_gilet		zorai	female	underwear	armor	vest
+zo_hof_underwear_pantabottes		zorai	female	underwear	armor	pants
+zo_hof_visage		zorai	female	incomplete	_visage
+zo_hom_armor00_armpad		zorai	male	medium	armor	medium01	sleeves
+zo_hom_armor00_bottes		zorai	male	medium	armor	medium01	boots
+zo_hom_armor00_gilet		zorai	male	medium	armor	medium01	vest
+zo_hom_armor00_hand		zorai	male	medium	armor	medium01	gloves
+zo_hom_armor00_pantabottes		zorai	male	medium	armor	medium01	pants
+zo_hom_armor01_armpad		zorai	male	heavy	armor	heavy01	sleeves
+zo_hom_armor01_bottes		zorai	male	heavy	armor	heavy01	boots
+zo_hom_armor01_gilet		zorai	male	heavy	armor	heavy01	vest
+zo_hom_armor01_hand		zorai	male	heavy	armor	heavy01	gloves
+zo_hom_armor01_hand_fp		zorai	male	heavy	armor	heavy01	gloves	first-person
+zo_hom_armor01_pantabottes		zorai	male	heavy	armor	heavy01	pants
+zo_hom_casque01		zorai	male	heavy	armor	helmet	heavy01
+zo_hom_caster01_bottes_armor00		zorai	male	caster	armor	caster01	boots	medium	alternative
+zo_hom_caster01_bottes_armor01		zorai	male	caster	armor	caster01	boots	heavy	alternative
+zo_hom_caster01_bottes_civil01		zorai	male	caster	armor	caster01	boots	light	alternative
+zo_hom_caster01_lead_pantabottes		zorai	male	caster	armor	caster01	lead	event	pants
+zo_hom_caster01_pantabottes		zorai	male	caster	armor	caster01	pants
+zo_hom_cheveux_artistic01		zorai	male	hairstyle	artistic	01
+zo_hom_cheveux_artistic02		zorai	male	hairstyle	artistic	02
+zo_hom_cheveux_artistic03		zorai	male	hairstyle	artistic	03
+zo_hom_cheveux_artistic04		zorai	male	hairstyle	artistic	04
+zo_hom_cheveux_artistic05		zorai	male	hairstyle	artistic	05
+zo_hom_cheveux_basic01		zorai	male	hairstyle	basic	01
+zo_hom_cheveux_lead		zorai	male	hairstyle	lead	event
+zo_hom_cheveux_long01		zorai	male	hairstyle	long	01
+zo_hom_cheveux_long02		zorai	male	hairstyle	long	02
+zo_hom_cheveux_long03		zorai	male	hairstyle	long	03
+zo_hom_cheveux_medium01		zorai	male	hairstyle	medium	01
+zo_hom_cheveux_medium02		zorai	male	hairstyle	medium	02
+zo_hom_cheveux_shave01		zorai	male	hairstyle	shave	01
+zo_hom_cheveux_short01		zorai	male	hairstyle	short	01
+zo_hom_cheveux_style01		zorai	male	hairstyle	style	01
+zo_hom_cheveux_style02		zorai	male	hairstyle	style	02
+zo_hom_civil01_armpad		zorai	male	light	armor	civil01	sleeves
+zo_hom_civil01_bottes		zorai	male	light	armor	civil01	boots
+zo_hom_civil01_gilet		zorai	male	light	armor	civil01	vest
+zo_hom_civil01_lead_armpad		zorai	male	light	armor	civil01	lead	event	sleeves
+zo_hom_civil01_lead_bottes		zorai	male	light	armor	civil01	lead	event	boots
+zo_hom_civil01_lead_gilet		zorai	male	light	armor	civil01	lead	event	vest
+zo_hom_civil01_pantabottes		zorai	male	light	armor	civil01	pants
+zo_hom_underwear_gilet		zorai	male	underwear	armor	vest
+zo_hom_underwear_pantabottes		zorai	male	underwear	armor	pants
+zo_hom_visage		zorai	male	incomplete	_visage
+baton magie		incomplete	_baton magie
+baton magie01		incomplete	_baton magie01
+box01		incomplete	_box01
+candide		incomplete	_candide
+ca_hof_acc_gauntlet		karavan	female	accessory	magic	amplifier
+ca_hom_acc_gauntlet		karavan	male	accessory	magic	amplifier
+ca_wea_trooper_gun		karavan	weapon	trooper	laser	gun
+fy_acc_baniere		fyros	accessory	event	banner
+fy_hof_acc_gauntlet		fyros	female	accessory	magic	amplifier
+fy_hom_acc_gauntlet		fyros	male	accessory	magic	amplifier
+fy_wea_baton		fyros	weapon	one-handed	blunt	staff
+fy_wea_dague		fyros	weapon	one-handed	piercing	dagger
+fy_wea_epee1m		fyros	weapon	one-handed	slashing	sword
+fy_wea_epee2m		fyros	weapon	two-handed	slashing	sword
+fy_wea_fusarc		fyros	weapon	two-handed	bowrifle
+fy_wea_fusil		fyros	weapon	two-handed	rifle
+fy_wea_gatling		fyros	weapon	two-handed	autolauncher
+fy_wea_grand_bouclier		fyros	weapon	large	shield
+fy_wea_grenade		fyros	weapon	grenade
+fy_wea_hache1m		fyros	weapon	one-handed	slashing	axe
+fy_wea_hache2m		fyros	weapon	two-handed	slashing	axe
+fy_wea_lance1m		fyros	weapon	one-handed	piercing	spear
+fy_wea_lance2m		fyros	weapon	two-handed	piercing	pike
+fy_wea_lanceroquette		fyros	weapon	two-handed	launcher
+fy_wea_masse1m		fyros	weapon	one-handed	blunt	mace
+fy_wea_masse2m		fyros	weapon	two-handed	blunt	mace
+fy_wea_petit_bouclier		fyros	weapon	buckler	shield
+fy_wea_pistolarc		fyros	weapon	one-handed	bowpistol
+fy_wea_pistolet		fyros	weapon	one-handed	pistol
+ge_acc_balle_01		common	accessory	incomplete	_balle_01
+ge_acc_balle_02		common	accessory	incomplete	_balle_02
+ge_acc_balle_03		common	accessory	incomplete	_balle_03
+ge_acc_caravan_objet		common	accessory	incomplete	_caravan_objet
+ge_acc_cattlestick_a		common	accessory	incomplete	_cattlestick_a
+ge_acc_fiole		common	accessory	incomplete	_fiole
+ge_acc_hachoire_a		common	accessory	incomplete	_hachoire_a
+ge_acc_kbij_enclume_a		common	accessory	incomplete	_kbij_enclume_a
+ge_acc_maillet_a_1		common	accessory	incomplete	_maillet_a_1
+ge_acc_mountingstick_a		common	accessory	incomplete	_mountingstick_a
+ge_acc_petstick_a		common	accessory	incomplete	_petstick_a
+ge_acc_pick_a		common	accessory	incomplete	_pick_a
+ge_acc_pick_o		common	accessory	incomplete	_pick_o
+ge_acc_pinceau		common	accessory	incomplete	_pinceau
+ge_acc_pommade		common	accessory	incomplete	_pommade
+ge_acc_pre_order_item		common	accessory	incomplete	_pre_order_item
+ge_acc_winch_a		common	accessory	incomplete	_winch_a
+ge_acc_woodpiece		common	accessory	incomplete	_woodpiece
+ge_feudecamp		common	incomplete	_feudecamp
+ge_fy_wea_trib_gattling		common	fyros	weapon	tribe	two-handed	autolauncher
+ge_fy_wea_trib_grand_bouclier		common	fyros	weapon	tribe	large	shield
+ge_fy_wea_trib_hache1m		common	fyros	weapon	tribe	one-handed	slashing	axe
+ge_fy_wea_trib_hache2m		common	fyros	weapon	tribe	two-handed	slashing	axe
+ge_fy_wea_trib_launcher		common	fyros	weapon	tribe	two-handed	launcher
+ge_hof_acc_gauntlet		common	female	accessory	magic	amplifier
+ge_hof_acc_gauntlet_gen		common	female	accessory	magic	amplifier	generic
+ge_hof_acc_gauntlet_kami		common	female	accessory	magic	amplifier	kami
+ge_hom_acc_gauntlet		common	male	accessory	magic	amplifier
+ge_hom_acc_gauntlet_gen		common	male	accessory	magic	amplifier	generic
+ge_hom_acc_gauntlet_kami		common	male	accessory	magic	amplifier	kami
+ge_kapo_mortier_a_1		common	incomplete	_kapo_mortier_a_1
+ge_kapo_pilon_a_1		common	incomplete	_kapo_pilon_a_1
+ge_kapo_pilon_o		common	incomplete	_kapo_pilon_o
+ge_kbij_marteau_a		common	incomplete	_kbij_marteau_a
+ge_kbij_marteau_o		common	incomplete	_kbij_marteau_o
+ge_kcou_aiguille_a		common	incomplete	_kcou_aiguille_a
+ge_kcou_aiguille_o		common	incomplete	_kcou_aiguille_o
+ge_kcou_etoffe_a		common	incomplete	_kcou_etoffe_a
+ge_kcui_louche_a		common	incomplete	_kcui_louche_a
+ge_kcui_marmite_a		common	incomplete	_kcui_marmite_a
+ge_kmar_roulette_a		common	incomplete	_kmar_roulette_a
+ge_kmar_skin_a		common	incomplete	_kmar_skin_a
+ge_kmec_grip_a		common	incomplete	_kmec_grip_a
+ge_kmec_stick_a		common	incomplete	_kmec_stick_a
+ge_kwc_ciseau_a		common	incomplete	_kwc_ciseau_a
+ge_kwc_ciseau_o		common	incomplete	_kwc_ciseau_o
+ge_kwc_pieu_a		common	incomplete	_kwc_pieu_a
+ge_kwj_ciseau_a		common	incomplete	_kwj_ciseau_a
+ge_kwj_ciseau_o		common	incomplete	_kwj_ciseau_o
+ge_kwj_tube_a		common	incomplete	_kwj_tube_a
+ge_livre		common	incomplete	_livre
+ge_ma_wea_trib_lance1m		common	matis	weapon	tribe	one-handed	piercing	spear
+ge_ma_wea_trib_lance2m		common	matis	weapon	tribe	two-handed	piercing	pike
+ge_ma_wea_trib_pistolet		common	matis	weapon	tribe	one-handed	pistol
+ge_pvp_spire_kami		common	incomplete	_pvp_spire_kami
+ge_pvp_spire_karavan		common	incomplete	_pvp_spire_karavan
+ge_pvp_spire_socle		common	incomplete	_pvp_spire_socle
+ge_racloire_a		common	incomplete	_racloire_a
+ge_secator_a		common	incomplete	_secator_a
+ge_stylet		common	incomplete	_stylet
+ge_training_weight		common	incomplete	_training_weight
+ge_treasure_box_fy		common	incomplete	_treasure_box_fy
+ge_treasure_box_gen		common	incomplete	_treasure_box_gen
+ge_treasure_box_ma		common	incomplete	_treasure_box_ma
+ge_treasure_box_tr		common	incomplete	_treasure_box_tr
+ge_treasure_box_zo		common	incomplete	_treasure_box_zo
+ge_tr_wea_trib_dague		common	tryker	weapon	tribe	one-handed	piercing	dagger
+ge_tr_wea_trib_epee1m		common	tryker	weapon	tribe	one-handed	slashing	sword
+ge_tr_wea_trib_epee2m		common	tryker	weapon	tribe	two-handed	slashing	sword
+ge_tr_wea_trib_fusil		common	tryker	weapon	tribe	two-handed	rifle
+ge_tr_wea_trib_pistolarc		common	tryker	weapon	tribe	one-handed	bowpistol
+ge_wea_baton		common	weapon	one-handed	blunt	staff
+ge_wea_dague		common	weapon	one-handed	piercing	dagger
+ge_wea_epee1m		common	weapon	one-handed	slashing	sword
+ge_wea_epee2m		common	weapon	two-handed	slashing	sword
+ge_wea_fusarc		common	weapon	two-handed	bowrifle
+ge_wea_fusil		common	weapon	two-handed	rifle
+ge_wea_gatling		common	weapon	two-handed	autolauncher
+ge_wea_grand_bouclier		common	weapon	large	shield
+ge_wea_hache1m		common	weapon	one-handed	slashing	axe
+ge_wea_hache2m		common	weapon	two-handed	slashing	axe
+ge_wea_high_baton1m		common	weapon	high	tribe	one-handed	blunt	staff
+ge_wea_high_dague		common	weapon	high	tribe	one-handed	piercing	dagger
+ge_wea_high_epee1m		common	weapon	high	tribe	one-handed	slashing	sword
+ge_wea_high_epee2m		common	weapon	high	tribe	two-handed	slashing	sword
+ge_wea_high_hache1m		common	weapon	high	tribe	one-handed	slashing	axe
+ge_wea_high_hache1m_b		common	weapon	high	tribe	one-handed	slashing	axe	b
+ge_wea_high_hache2m		common	weapon	high	tribe	two-handed	slashing	axe
+ge_wea_high_hache2m_b		common	weapon	high	tribe	two-handed	slashing	axe	b
+ge_wea_high_lance1m		common	weapon	high	tribe	one-handed	piercing	spear
+ge_wea_high_lance2m		common	weapon	high	tribe	two-handed	piercing	pike
+ge_wea_high_lance2m_b		common	weapon	high	tribe	two-handed	piercing	pike	b
+ge_wea_high_masse1m		common	weapon	high	tribe	one-handed	blunt	mace
+ge_wea_high_masse2m		common	weapon	high	tribe	two-handed	blunt	mace
+ge_wea_lance1m		common	weapon	one-handed	piercing	spear
+ge_wea_lance2m		common	weapon	two-handed	piercing	pike
+ge_wea_lanceroquette		common	weapon	two-handed	launcher
+ge_wea_masse1m		common	weapon	one-handed	blunt	mace
+ge_wea_masse2m		common	weapon	two-handed	blunt	mace
+ge_wea_petit_bouclier		common	weapon	buckler	shield
+ge_wea_pistolarc		common	weapon	one-handed	bowpistol
+ge_wea_pistolet		common	weapon	one-handed	pistol
+ge_xmas_baniere		common	incomplete	_xmas_baniere
+ge_zo_wea_trib_baton		common	zorai	weapon	tribe	one-handed	blunt	staff
+ge_zo_wea_trib_fusarc		common	zorai	weapon	tribe	two-handed	bowrifle
+ge_zo_wea_trib_grand_bouclier		common	zorai	weapon	tribe	large	shield
+ge_zo_wea_trib_masse1m		common	zorai	weapon	tribe	one-handed	blunt	mace
+ge_zo_wea_trib_masse2m		common	zorai	weapon	tribe	two-handed	blunt	mace
+ge_zo_wea_trib_petit_bouclier		common	zorai	weapon	tribe	buckler	shield
+gun01		incomplete	_gun01
+ma_acc_baniere		matis	accessory	event	banner
+ma_baniere		matis	incomplete	_baniere
+ma_hof_acc_gauntlet		matis	female	accessory	magic	amplifier
+ma_hom_acc_gauntlet		matis	male	accessory	magic	amplifier
+ma_wea_baton		matis	weapon	one-handed	blunt	staff
+ma_wea_dague		matis	weapon	one-handed	piercing	dagger
+ma_wea_epee1m		matis	weapon	one-handed	slashing	sword
+ma_wea_epee2m		matis	weapon	two-handed	slashing	sword
+ma_wea_fusarc		matis	weapon	two-handed	bowrifle
+ma_wea_fusil		matis	weapon	two-handed	rifle
+ma_wea_gatling		matis	weapon	two-handed	autolauncher
+ma_wea_grand_bouclier		matis	weapon	large	shield
+ma_wea_grenade		matis	weapon	grenade
+ma_wea_hache1m		matis	weapon	one-handed	slashing	axe
+ma_wea_hache2m		matis	weapon	two-handed	slashing	axe
+ma_wea_lance1m		matis	weapon	one-handed	piercing	spear
+ma_wea_lance2m		matis	weapon	two-handed	piercing	pike
+ma_wea_lanceroquette		matis	weapon	two-handed	launcher
+ma_wea_masse1m		matis	weapon	one-handed	blunt	mace
+ma_wea_masse2m		matis	weapon	two-handed	blunt	mace
+ma_wea_petit_bouclier		matis	weapon	buckler	shield
+ma_wea_pistolarc		matis	weapon	one-handed	bowpistol
+ma_wea_pistolet		matis	weapon	one-handed	pistol
+object01		incomplete	_object01
+object04		incomplete	_object04
+tr_acc_baniere		tryker	accessory	event	banner
+tr_hof_acc_gauntlet		tryker	female	accessory	magic	amplifier
+tr_hom_acc_gauntlet		tryker	male	accessory	magic	amplifier
+tr_wea_baton		tryker	weapon	one-handed	blunt	staff
+tr_wea_batonspellcaster		tryker	weapon	magic	amplifier	staff
+tr_wea_dague		tryker	weapon	one-handed	piercing	dagger
+tr_wea_epee1m		tryker	weapon	one-handed	slashing	sword
+tr_wea_epee2m		tryker	weapon	two-handed	slashing	sword
+tr_wea_fusarc		tryker	weapon	two-handed	bowrifle
+tr_wea_fusil		tryker	weapon	two-handed	rifle
+tr_wea_gatling		tryker	weapon	two-handed	autolauncher
+tr_wea_grandbouclier		tryker	weapon	large	shield
+tr_wea_grenade		tryker	weapon	grenade
+tr_wea_hache1m		tryker	weapon	one-handed	slashing	axe
+tr_wea_hache2m		tryker	weapon	two-handed	slashing	axe
+tr_wea_lance1m		tryker	weapon	one-handed	piercing	spear
+tr_wea_lance2m		tryker	weapon	two-handed	piercing	pike
+tr_wea_lanceroquette		tryker	weapon	two-handed	launcher
+tr_wea_masse1m		tryker	weapon	one-handed	blunt	mace
+tr_wea_masse2m		tryker	weapon	two-handed	blunt	mace
+tr_wea_petit_bouclier		tryker	weapon	buckler	shield
+tr_wea_pistolarc		tryker	weapon	one-handed	bowpistol
+tr_wea_pistolet		tryker	weapon	one-handed	pistol
+tr_wea_pistolet_sousmarin		tryker	weapon	one-handed	pistol	underwater
+zo_acc_baniere		zorai	accessory	event	banner
+zo_hof_acc_gauntlet		zorai	female	accessory	magic	amplifier
+zo_hom_acc_gauntlet		zorai	male	accessory	magic	amplifier
+zo_wea_baton		zorai	weapon	one-handed	blunt	staff
+zo_wea_batonspellcaster		zorai	weapon	magic	amplifier	staff
+zo_wea_dague		zorai	weapon	one-handed	piercing	dagger
+zo_wea_epee1m		zorai	weapon	one-handed	slashing	sword
+zo_wea_epee2m		zorai	weapon	two-handed	slashing	sword
+zo_wea_fusarc		zorai	weapon	two-handed	bowrifle
+zo_wea_fusil		zorai	weapon	two-handed	rifle
+zo_wea_gatling		zorai	weapon	two-handed	autolauncher
+zo_wea_grand_bouclier		zorai	weapon	large	shield
+zo_wea_grenade		zorai	weapon	grenade
+zo_wea_hache1m		zorai	weapon	one-handed	slashing	axe
+zo_wea_hache2m		zorai	weapon	two-handed	slashing	axe
+zo_wea_lance1m		zorai	weapon	one-handed	piercing	spear
+zo_wea_lance2m		zorai	weapon	two-handed	piercing	pike
+zo_wea_lanceroquette		zorai	weapon	two-handed	launcher
+zo_wea_masse1m		zorai	weapon	one-handed	blunt	mace
+zo_wea_masse2m		zorai	weapon	two-handed	blunt	mace
+zo_wea_petit_bouclier		zorai	weapon	buckler	shield
+zo_wea_pistolarc		zorai	weapon	one-handed	bowpistol
+zo_wea_pistolet		zorai	weapon	one-handed	pistol

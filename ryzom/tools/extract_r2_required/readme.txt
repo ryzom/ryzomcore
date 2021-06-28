@@ -1,3 +1,4 @@
 - Run extract_palette.py to generate sitem_list.txt and creature_list.txt from the R2 palette
 - Run extract_parents.py to generate the parents txt files from the above, and missing sheets
 - Run scheme_sitem_parser.py to generate sitem_parsed.tsv from sitem_list.txt minus missing_sheets.txt
+- Run extract_shapes.py to list all shapes into shape_list.txt
