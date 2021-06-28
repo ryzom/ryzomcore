@@ -22,6 +22,21 @@ listPathExt(sbrickPath, ".sbrick")
 
 sbrickMap = {}
 
+def loadTsv(filename):
+	table = []
+	with open(filename, "r") as f:
+		for l in f:
+			table += [ l.strip().split("\t") ]
+	return table;
+
+preserveIndex = True
+if preserveIndex:
+	table = loadTsv("sbrick_index.tsv")
+	for entry in table:
+		e = filter(None, entry)
+		entryName = e[0] + str(int(e[1])).zfill(4) # + name
+		sbrickMap[entryName] = e
+
 for sbrick in fileMap:
 	contents = ""
 	name = sbrick.split(".")[0].lower()
@@ -59,7 +74,7 @@ for sbrick in fileMap:
 	#print(name)
 	#print(sitem)
 	templateName = familyId.lower() + str(int(indexInFamily)).zfill(2)
-	entryName = familyId + str(int(indexInFamily)).zfill(4) + name
+	entryName = familyId + str(int(indexInFamily)).zfill(4) # + name
 	entry = [ familyId, indexInFamily ]
 	if name != templateName:
 		entry += [ name ]

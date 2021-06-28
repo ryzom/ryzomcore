@@ -4,4 +4,5 @@
 - Run extract_shapes.py to list all shapes into shape_list.txt
 - Run scheme_shape_parser.py to generate shape_parsed from shape_list.txt excluding _mission_ shapes
 - Run sitem_shape_matcher.py to generate match_sitem_shape.tsv from shape_parsed.tsv and sitem_parsed.tsv
+- Run extract_sbrick.py to generate the sbrick_index.tsv to ensure indices are correctly reused
 - Run generate_sitem.py to generate sitems from the tsv
