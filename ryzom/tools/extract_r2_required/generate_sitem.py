@@ -43,7 +43,8 @@ def generateParents():
 			strippedTags.remove("melee")
 		if "ranged" in strippedTags:
 			strippedTags.remove("ranged")
-		parentTags[name] = strippedTags
+		if "shared" in tags:
+			parentTags[name] = strippedTags
 		displayName = " ".join(strippedTags)
 		
 		family = "undefined" # item_family.typ
@@ -125,11 +126,11 @@ def generateParents():
 					itemType = "Dagger"
 					animSet = "Dagger"
 					icon = "mw_dagger.png"
+					leftHandSlot = "Left Hand"
 				elif "sword" in tags:
 					itemType = "Sword"
 					animSet = "1H Sword"
 					icon = "mw_sword.png"
-					leftHandSlot = "Left Hand"
 				elif "mace" in tags:
 					itemType = "Mace"
 					icon = "mw_mace.png"
@@ -154,7 +155,7 @@ def generateParents():
 					icon = "mw_2h_axe.png"
 				elif "pike" in tags:
 					itemType = "Pike"
-					animSet = "2H Lance"
+					animSet = "2HLance"
 					icon = "mw_2h_lance.png"
 				elif "mace" in tags:
 					itemType = "Two Hand Mace"
@@ -291,10 +292,10 @@ def generateParents():
 					f.write("      <STRUCT Name=\"EquipmentInfo\">\n")
 					if "armor" not in tags:
 						f.write("        <ARRAY Name=\"EquipmentSlots\">\n")
-						if leftHandSlot != "Undefined":
-							f.write("          <ATOM Name=\"left_hand\" Value=\"" + leftHandSlot + "\"/>\n")
 						if rightHandSlot != "Undefined":
-							f.write("          <ATOM Name=\"right hand\" Value=\"" + rightHandSlot + "\"/>\n")
+							f.write("          <ATOM Name=\"" + rightHandSlot.lower().replace(" ", "_") + "\" Value=\"" + rightHandSlot + "\"/>\n")
+						if leftHandSlot != "Undefined":
+							f.write("          <ATOM Name=\"" + leftHandSlot.lower().replace(" ", "_") + "\" Value=\"" + leftHandSlot + "\"/>\n")
 						f.write("        </ARRAY>\n")
 					if malus != 0:
 						f.write("        <ATOM Name=\"WearEquipmentMalus\" Value=\"" + str(malus) + "\"/>\n")
@@ -333,6 +334,18 @@ def generateParents():
 				f.write("  </STRUCT>\n")
 				f.write("</FORM>\n")
 				f.flush()
+		# elif "generic" in tags:
+		# 	dir = sitemPath + "\\" + folder + "\\_parent\\" + origin
+		# 	if not os.path.isdir(dir):
+		# 		os.makedirs(dir)
+		# 	path = dir + "\\" + name + ".sitem"
+		# 	
+		# 	print(path)
+		# 	with open(path, "w") as f:
+		# 		f.write("<?xml version=\"1.0\"?>\n")
+		# 		f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
+		# 		f.write("</FORM>\n")
+		# 		f.flush()
 
 def generateSitems():
 	for match in matchSitemShape:
@@ -340,10 +353,199 @@ def generateSitems():
 		shapeMale = match[1]
 		shapeFemale = match[2]
 		tags = sitemTags[name]
+		strippedTags = tags[:]
+		
+		if "item" in strippedTags:
+			strippedTags.remove("item")
+		if "crafted" in strippedTags:
+			strippedTags.remove("crafted")
+		if "hands" in strippedTags:
+			strippedTags.remove("hands")
+		if "light" in strippedTags and "caster" in strippedTags:
+			strippedTags.remove("light")
+		if "hq" in strippedTags:
+			strippedTags.remove("hq")
+			#strippedTags = [ "high quality" ] + strippedTags
+		if "mq" in strippedTags:
+			strippedTags.remove("mq")
+			#strippedTags = [ "medium quality" ] + strippedTags
+		if "armor" in strippedTags:
+			strippedTags.remove("armor")
+		if "melee" in strippedTags:
+			strippedTags.remove("melee")
+		if "ranged" in strippedTags:
+			strippedTags.remove("ranged")
+		displayName = " ".join(strippedTags)
+		
+		origin = "common" # item_origine.typ
+		iconBackground = ""
+		if "refugee" in tags:
+			origin = "refugee"
+			iconBackground = "bk_generic.png"
+		elif "tribe" in tags:
+			origin = "tribe"
+			iconBackground = "bk_generic.png"
+		elif "karavan" in tags:
+			origin = "karavan"
+			iconBackground = "bk_karavan.png"
+		elif "kami" in tags:
+			origin = "kami"
+			iconBackground = "bk_kami.png"
+		elif "fyros" in tags:
+			origin = "fyros"
+			iconBackground = "bk_fyros.png"
+		elif "matis" in tags:
+			origin = "matis"
+			iconBackground = "bk_matis.png"
+		elif "zorai" in tags:
+			origin = "zorai"
+			iconBackground = "bk_zorai.png"
+		elif "tryker" in tags:
+			origin = "tryker"
+			iconBackground = "bk_tryker.png"
+		elif "common" in tags:
+			origin = "common"
+			iconBackground = "bk_generic.png"
+		
+		mapVariant = "Default"
+		if "mq" in tags:
+			mapVariant = "Medium Quality"
+		elif "hq" in tags:
+			mapVariant = "High Quality"
+		
+		itemType = "undefined"
+		armorSlot = "Undefined" # item_slot_type.typ
+		icon = ""
+		if "armor" in tags:
+			if "refugee" in tags:
+				itemType = "Light "
+			elif "light" in tags:
+				itemType = "Light "
+			elif "medium" in tags:
+				itemType = "Medium "
+			elif "heavy" in tags:
+				itemType = "Heavy "
+			if "boots" in tags:
+				itemType += "boots"
+				armorSlot = "Feet"
+				icon = "ar_botte.png"
+			elif "gloves" in tags:
+				itemType += "gloves"
+				armorSlot = "Hands"
+				icon = "ar_hand.png"
+			elif "pants" in tags:
+				itemType += "pants"
+				armorSlot = "Legs"
+				icon = "ar_pantabotte.png"
+			elif "sleeves" in tags:
+				itemType += "Sleeves"
+				armorSlot = "Arms"
+				icon = "ar_armpad.png"
+			elif "vest" in tags:
+				itemType += "vest"
+				armorSlot = "Chest"
+				icon = "ar_gilet.png"
+			elif "helmet" in tags and "heavy" in tags:
+				itemType += "helmet"
+				armorSlot = "Head"
+				icon = "ar_helmet.png"
+			else:
+				itemType = "undefined"
+		
+		color = ""
+		if "red" in tags:
+			color = "Red"
+		elif "black" in tags:
+			color = "Black"
+		elif "beige" in tags:
+			color = "Beige"
+		elif "green" in tags:
+			color = "Green"
+		elif "turquoise" in tags:
+			color = "Turquoise"
+		elif "blue" in tags:
+			color = "Blue"
+		elif "violet" in tags:
+			color = "Violet"
+		elif "white" in tags:
+			color = "White"
+		
+		subfolder = origin
+		print tags
+		if "underwear" in tags:
+			subfolder = "underwear"
+		
+		folder = "_unspecified"
+		if "ammo" in tags:
+			folder = "ammo\\" + subfolder
+		elif "ranged" in tags:
+			folder = "range_weapon\\" + subfolder
+		elif "melee" in tags:
+			folder = "melee_weapon\\" + subfolder
+		elif "armor" in tags:
+			print shapeMale
+			folder = "armor\\" + subfolder
+			if "caster01" in shapeMale or "caster" in tags:
+				folder += "\\caster_armor"
+			elif ("civil01" in shapeMale or ("underwear" in shapeMale and not "underwear" in tags)) and "light" in tags:
+				folder += "\\light_armor"
+			elif "armor00" in shapeMale and "medium" in tags:
+				folder += "\\medium_armor"
+			elif ("armor01" in shapeMale or "casque01" in shapeMale) and "heavy" in tags:
+				folder += "\\heavy_armor"
+		elif "shield" in tags:
+			folder = "shield\\" + subfolder
+		
+		dir = sitemPath + "\\" + folder
+		if not os.path.isdir(dir):
+			os.makedirs(dir)
+		path = dir + "\\" + name + ".sitem"
+		
 		# print(name)
 		# print(shapeMale)
 		# print(shapeFemale)
 		# print(tags)
+		
+		if not "armor" in tags:
+			continue
+		
+		if "armor" in tags and "caster" in tags and not "pants" in tags:
+			continue # Only include caster pants
+		
+		print(path)
+		with open(path, "w") as f:
+			f.write("<?xml version=\"1.0\"?>\n")
+			f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
+			# f.write("  <PARENT Filename=\"" + parent + ".sitem\"/>\n")
+			f.write("  <STRUCT>\n")
+			f.write("    <STRUCT Name=\"basics\">\n")
+			f.write("      <ATOM Name=\"name\" Value=\"" + displayName + "\"/>\n")
+			if itemType != "undefined":
+				f.write("      <ATOM Name=\"ItemType\" Value=\"" + itemType + "\"/>\n")
+			if armorSlot != "Undefined":
+				f.write("      <STRUCT Name=\"EquipmentInfo\">\n")
+				f.write("        <ARRAY Name=\"EquipmentSlots\">\n")
+				f.write("          <ATOM Value=\"" + armorSlot + "\"/>\n")
+				f.write("        </ARRAY>\n")
+				f.write("      </STRUCT>\n")
+			# f.write("      <ATOM Name=\"CraftPlan\" Value=\"" + name + ".sbrick\"/>\n") # TODO: extract sbrick ids
+			f.write("    </STRUCT>\n")
+			f.write("    <STRUCT Name=\"3d\">\n")
+			f.write("      <ATOM Name=\"shape\" Value=\"" + shapeMale + ".shape\"/>\n")
+			if shapeFemale != shapeMale:
+				f.write("      <ATOM Name=\"shape_female\" Value=\"" + shapeFemale + ".shape\"/>\n")
+			if mapVariant != "Default":
+				f.write("      <ATOM Name=\"map_variant\" Value=\"" + mapVariant + "\"/>\n")
+			if icon != "":
+				f.write("      <ATOM Name=\"icon\" Value=\"" + icon + "\"/>\n")
+			if iconBackground != "":
+				f.write("      <ATOM Name=\"icon background\" Value=\"" + iconBackground + "\"/>\n")
+			if color != "":
+				f.write("      <ATOM Name=\"color\" Value=\"" + color + "\"/>\n")
+			f.write("    </STRUCT>\n")
+			f.write("  </STRUCT>\n")
+			f.write("</FORM>\n")
+			f.flush()
 
 generateParents()
 generateSitems()

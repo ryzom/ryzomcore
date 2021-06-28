@@ -2,7 +2,7 @@ iccm1bm	ge_wea_masse1m	ge_wea_masse1m	common	melee	one-handed	blunt	mace
 iccm1pd	ge_wea_dague	ge_wea_dague	common	melee	one-handed	piercing	dagger
 iccm1sa	ge_wea_hache1m	ge_wea_hache1m	common	melee	one-handed	slashing	axe
 iccm1ss	ge_wea_epee1m	ge_wea_epee1m	common	melee	one-handed	slashing	sword
-icfacb_3	fy_hom_caster01_civil01_bottes	fy_hof_caster01_bottes_civil	fyros	light	caster	armor	boots
+icfacb_3	fy_hom_civil01_bottes	fy_hof_civil01_bottes	fyros	light	armor	boots
 icfacp	fy_hom_caster01_pantabottes	fy_hof_caster01_pantabottes	fyros	light	caster	armor	pants
 icfacp_2	fy_hom_caster01_pantabottes	fy_hof_caster01_pantabottes	fyros	light	caster	armor	pants
 icfacp_3	fy_hom_caster01_pantabottes	fy_hof_caster01_pantabottes	fyros	light	caster	armor	pants
@@ -92,7 +92,7 @@ icfsb_3	fy_wea_petit_bouclier	fy_wea_petit_bouclier	fyros	buckler	shield
 icfss	fy_wea_grand_bouclier	fy_wea_grand_bouclier	fyros	large	shield
 icfss_2	fy_wea_grand_bouclier	fy_wea_grand_bouclier	fyros	large	shield
 icfss_3	fy_wea_grand_bouclier	fy_wea_grand_bouclier	fyros	large	shield
-icmacb_3	ma_hom_caster01_bottes_civil01	ma_hof_caster01_bottes_civil01	matis	light	caster	armor	boots
+icmacb_3	ma_hom_civil01_bottes	ma_hof_civil01_bottes	matis	light	armor	boots
 icmacp	ma_hom_caster01_pantabottes	ma_hof_caster01_pantabottes	matis	light	caster	armor	pants
 icmacp_2	ma_hom_caster01_pantabottes	ma_hof_caster01_pantabottes	matis	light	caster	armor	pants
 icmacp_3	ma_hom_caster01_pantabottes	ma_hof_caster01_pantabottes	matis	light	caster	armor	pants
@@ -183,7 +183,7 @@ icmss	ma_wea_grand_bouclier	ma_wea_grand_bouclier	matis	large	shield
 icmss_2	ma_wea_grand_bouclier	ma_wea_grand_bouclier	matis	large	shield
 icmss_3	ma_wea_grand_bouclier	ma_wea_grand_bouclier	matis	large	shield
 icravr	tr_hom_refugee_gilet	tr_hof_refugee_gilet	refugee	armor	vest
-ictacb_3	tr_hom_caster01_bottes_civil01	tr_hof_caster01_bottes_civil01	tryker	light	caster	armor	boots
+ictacb_3	tr_hom_civil01_bottes	tr_hof_civil01_bottes	tryker	light	armor	boots
 ictacp	tr_hom_caster01_pantabottes	tr_hof_caster01_pantabottes	tryker	light	caster	armor	pants
 ictacp_2	tr_hom_caster01_pantabottes	tr_hof_caster01_pantabottes	tryker	light	caster	armor	pants
 ictacp_3	tr_hom_caster01_pantabottes	tr_hof_caster01_pantabottes	tryker	light	caster	armor	pants

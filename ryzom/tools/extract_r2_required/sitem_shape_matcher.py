@@ -15,6 +15,8 @@ def findMatch(name, sitem):
 	bestMatching = ""
 	bestMatchingTags = []
 	bestUnmatchingTags = []
+	if "caster" in sitem and not "pants" in sitem and "light" in sitem:
+		sitem.remove("caster")
 	for shape in shapeParsed:
 		matches = 0
 		unmatches = 0
