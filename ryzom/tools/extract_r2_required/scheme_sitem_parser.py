@@ -33,6 +33,21 @@ scheme = {
 			"am": "medium armor",
 			"al": "light armor",
 			"ac": "light caster armor",
+			"ar2": "second refugee armor",
+			"ah2": "second heavy armor",
+			"am2": "second medium armor",
+			"al2": "second light armor",
+			"ac2": "second light caster armor",
+			"ar3": "third refugee armor",
+			"ah3": "third heavy armor",
+			"am3": "third medium armor",
+			"al3": "third light armor",
+			"ac3": "third light caster armor",
+			"ar4": "fourth refugee armor",
+			"ah4": "fourth heavy armor",
+			"am4": "fourth medium armor",
+			"al4": "fourth light armor",
+			"ac4": "fourth light caster armor",
 			"s": "shield",
 			"m": "melee",
 			"r": "ranged",
@@ -223,8 +238,10 @@ def generate(tags):
 					for t in st:
 						if t in ref and not t in found:
 							count += 1
-						if t not in ref:
+						if t in ref and t in found:
 							count2 += 1
+						if t not in ref:
+							count2 += 2
 					if count > largest:
 						largest = count
 						least = count2
@@ -238,8 +255,10 @@ def generate(tags):
 						for t in st:
 							if t in ref and not t in found:
 								count += 1
-							if t not in ref:
+							if t in ref and t in found:
 								count2 += 1
+							if t not in ref:
+								count2 += 2
 						if count >= largest and count2 <= least:
 							for t in st:
 								if t in ref and not t in found:

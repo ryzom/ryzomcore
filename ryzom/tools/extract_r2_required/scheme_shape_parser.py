@@ -24,16 +24,28 @@ scheme = {
 		},
 		{
 			"acc": "accessory",
-			"armor00": "medium armor medium01",
-			"armor01": "heavy armor heavy01",
-			"armor04": "heavy armor heavy02",
-			"casque01": "heavy armor helmet heavy01",
+			"armor00": "medium armor armor00",
+			"armor01": "heavy armor armor01",
+			"armor04": "second heavy armor armor04",
+			"casque01": "heavy armor helmet casque01",
 			"caster01": "light caster armor caster01",
-			"civil01": "light armor light01",
+			"civil01": "light armor civil01",
+			"light02": "second light armor",
+			"medium02": "second medium armor",
+			"heavy02": "second heavy armor",
+			"light03": "third light armor",
+			"medium03": "third medium armor",
+			"heavy03": "third heavy armor",
+			"light04": "fourth light armor",
+			"medium04": "fourth medium armor",
+			"heavy04": "fourth heavy armor",
 			"cheveux": "hairstyle",
 			"underwear": "underwear armor",
 			"underwear_hand": "underwear armor gloves hands",
 			"refugee": "refugee armor",
+			"refugee02": "second refugee armor",
+			"refugee03": "third refugee armor",
+			"refugee04": "fourth refugee armor",
 		},
 		{
 			"_gauntlet": "magic amplifier gloves",
@@ -110,12 +122,12 @@ scheme = {
 		{},
 		{},
 		{
-			"armor01": "armor armor01", # todo
-			"armor02": "armor armor02", # todo
-			"casque01": "armor helmet01", # todo
-			"casque02": "armor helmet02", # todo
-			"casque03": "armor helmet03", # todo
-			"casque04": "armor helmet04", # todo
+			"armor01": "armor", # todo
+			"armor02": "second armor", # todo
+			"casque01": "armor", # todo
+			"casque02": "second armor", # todo
+			"casque03": "third armor", # todo
+			"casque04": "fourth armor", # todo
 			"commander": "commander",
 			"medic": "medic",
 			"ingeneer": "engineer",
@@ -139,13 +151,13 @@ scheme = {
 		{},
 		{},
 		{
-			"caster00": "tribe boss light caster armor caster01",
-			"armor02": "tribe boss light armor light01",
-			"armor03": "tribe boss medium armor medium01",
-			"armor04": "tribe boss heavy armor heavy01",
-			"armor06": "armor heavy heavy03",
-			"casque00": "tribe boss heavy armor heavy01 helmet",
-			"casque02": "armor heavy heavy03 helmet",
+			"caster00": "tribe boss light caster armor",
+			"armor02": "tribe boss light armor",
+			"armor03": "tribe boss medium armor",
+			"armor04": "tribe boss heavy armor",
+			"armor06": "tribe boss second heavy armor",
+			"casque00": "tribe boss heavy armor helmet",
+			"casque02": "tribe boss second heavy armor helmet",
 		},
 		{},
 		{},
