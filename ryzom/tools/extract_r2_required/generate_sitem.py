@@ -62,7 +62,7 @@ def buildTagTree(tree, table):
 	for entry in table:
 		e = filter(None, entry)
 		name = e[0]
-		print(name)
+		#print(name)
 		tags = e[1:]
 		nb = 0
 		branch = tree
@@ -73,7 +73,7 @@ def buildTagTree(tree, table):
 					break
 				branch = branch[c]["entries"]
 			branch[name[-1]] = { "tags": tags, "entries": {} }
-	print(tree)
+	#print(tree)
 
 buildTagTree(skillTree, skills)
 buildTagTree(brickFamilyTree, brickFamilies)
@@ -132,6 +132,14 @@ def findBrickFamily(tags):
 		t.remove("light")
 	res = findTreeEntry(brickFamilyTree, t)
 	return res
+
+sbrickIndex = loadTsv("sbrick_index.tsv")
+sbrickLookup = {}
+
+for entry in sbrickIndex:
+	names = entry[2:]
+	for name in names:
+		sbrickLookup[name] = entry
 
 sitemTags = {}
 sitemPath = "Y:\\ryzomcore4\\leveldesign\\game_element\\sitem"
@@ -686,17 +694,117 @@ def generateSitems():
 			f.write("</FORM>\n")
 			f.flush()
 		
-		# TODO: Load the sbrick family index table
-		# TODO: Generate the sbrick
+		# Generate the sbrick
+		sbrickName = "b" + name[1:];
+		sbrickRoot = "Y:\\ryzomcore4\\leveldesign\\game_element\\sbrick\\craft\\effect"
+		sbrickFolder = sbrickRoot + "\\" + folder
+		sbrickFile = sbrickFolder + "\\" + sbrickName + ".sbrick"
+		print(sbrickFile)
 		
 		skill = findSkill(tags)
-		if "magic" in tags:
-			print("TODO: Double check magic")
-			print(skill)
-			print(tags)
+		# if "magic" in tags:
+		# 	print("TODO: Double check magic")
+		# 	print(skill)
+		# 	print(tags)
 		
 		brickFamily = findBrickFamily(tags)
-		print(brickFamily)
+		#print(brickFamily)
+		
+		sbrickIcon = icon # ar_botte
+		sbrickIconBack = "bk_generic_brick.png" # bk_zorai_brick
+		if "fyros" in tags:
+			sbrickIconBack = "bk_fyros_brick.png"
+		elif "matis" in tags:
+			sbrickIconBack = "bk_matis_brick.png"
+		elif "tryker" in tags:
+			sbrickIconBack = "bk_tryker_brick.png"
+		elif "zorai" in tags:
+			sbrickIconBack = "bk_zorai_brick.png"
+		
+		sbrickEntry = None
+		if sbrickName in sbrickLookup:
+			sbrickEntry = sbrickLookup[sbrickName]
+		elif name in sbrickLookup:
+			sbrickEntry = sbrickLookup[name]
+		else:
+			print("New sbrick entry: " + sbrickName + ", Family: " + brickFamily)
+		if sbrickEntry[0] != brickFamily:
+			print("Brick family changed: " + sbrickName + ", New: " + brickFamily + ", Old: " + sbrickEntry[0])
+			sbrickEntry = None
+		sbrickIndex = None
+		if sbrickEntry:
+			sbrickIndex = int(sbrickEntry[1])
+		else:
+			exit("TODO: Find unused sbrick index for the family")
+		if not os.path.isdir(sbrickFolder):
+			os.makedirs(sbrickFolder)
+		with open(sbrickFile, "w") as f:
+			f.write("<?xml version=\"1.0\"?>\n")
+			f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
+			f.write("  <STRUCT>\n")
+			f.write("    <STRUCT Name=\"Basics\">\n")
+			f.write("      <ATOM Name=\"FamilyId\" Value=\"" + brickFamily + "\"/>\n")
+			f.write("      <ATOM Name=\"IndexInFamily\" Value=\"" + str(sbrickIndex) + "\"/>\n")
+			f.write("      <ATOM Name=\"SPCost\" Value=\"5\"/>\n")
+			f.write("      <ATOM Name=\"LearnRequiresOneOfSkills\" Value=\"SC 0\"/>\n")
+			f.write("      <ATOM Name=\"Action Nature\" Value=\"CRAFT\"/>\n")
+			f.write("      <ATOM Name=\"Skill\" Value=\"" + skill + "\"/>\n")
+			# f.write("      <ATOM Name=\"LearnRequiresBricks\" Value=\"bcpa01.sbrick\"/>\n") # TODO: Craft actions
+			f.write("      <ATOM Name=\"CivRestriction\" Value=\"common\"/>\n")
+			f.write("    </STRUCT>\n")
+			f.write("    <STRUCT Name=\"Client\">\n")
+			if sbrickIcon != "":
+				f.write("      <ATOM Name=\"Icon\" Value=\"" + sbrickIcon + "\"/>\n")
+			if sbrickIconBack != "":
+				f.write("      <ATOM Name=\"IconBack\" Value=\"" + sbrickIconBack + "\"/>\n")
+			f.write("      <ATOM Name=\"IconOver\" Value=\"fp_over.png\"/>\n")
+			f.write("      <ATOM Name=\"IconOver2\"/>\n")
+			f.write("    </STRUCT>\n")
+			if "armor" in tags:
+				f.write("    <STRUCT Name=\"faber\">\n")
+				f.write("      <ATOM Name=\"Tool type\" Value=\"ArmorTool\"/>\n")
+				# f.write("      <ATOM Name=\"Durability Factor\" Value=\"1\"/>\n")
+				f.write("      <STRUCT Name=\"Create\">\n")
+				f.write("        <ATOM Name=\"Crafted Item\" Value=\"" + name + ".sitem\"/>\n")
+				f.write("        <ATOM Name=\"Nb built items\" Value=\"1\"/>\n")
+				if "light" in tags:
+					f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Clothes\"/>\n")
+				else:
+					f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Armor shell\"/>\n")
+				f.write("        <ATOM Name=\"Quantity 1\" Value=\"3\"/>\n") # TODO: Calibrate
+				f.write("        <ATOM Name=\"MP 2\" Value=\"Raw Material for Armor interior coating\"/>\n")
+				f.write("        <ATOM Name=\"Quantity 2\" Value=\"3\"/>\n") # TODO: Calibrate
+				f.write("        <ATOM Name=\"MP 3\" Value=\"Raw Material for Armor interior stuffing\"/>\n")
+				f.write("        <ATOM Name=\"Quantity 3\" Value=\"3\"/>\n") # TODO: Calibrate
+				f.write("        <ATOM Name=\"MP 4\" Value=\"Raw Material for Armor clip\"/>\n")
+				f.write("        <ATOM Name=\"Quantity 4\" Value=\"3\"/>\n") # TODO: Calibrate
+				f.write("        <ATOM Name=\"MP 5\"/>\n")
+				f.write("        <ATOM Name=\"Quantity 5\" Value=\"0\"/>\n")
+				f.write("      </STRUCT>\n")
+				f.write("    </STRUCT>\n")
+			f.write("  </STRUCT>\n")
+			f.write("</FORM>\n")
+			f.flush()
+			
+		sphraseName = "a" + sbrickName;
+		sphraseRoot = "Y:\\ryzomcore4\\leveldesign\\game_element\\sphrase\\craft\\effect"
+		sphraseFolder = sphraseRoot + "\\" + folder
+		sphraseFile = sphraseFolder + "\\" + sphraseName + ".sphrase"
+		print(sphraseFile)
+		
+		if not os.path.isdir(sphraseFolder):
+			os.makedirs(sphraseFolder)
+		with open(sphraseFile, "w") as f:
+			f.write("<?xml version=\"1.0\"?>\n")
+			f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
+			f.write("  <STRUCT>\n")
+			f.write("    <ATOM Name=\"brick 0\" Value=\"" + sbrickName + ".sbrick\"/>\n")
+			f.write("    <ATOM Name=\"castable\" Value=\"false\"/>\n")
+			if "fyros" not in tags and "matis" not in tags and "zorai" not in tags and "tryker" not in tags:
+				f.write("    <ATOM Name=\"ShowInAPOnlyIfLearnt\" Value=\"true\"/>\n")
+			f.write("  </STRUCT>\n")
+			f.write("</FORM>\n")
+			f.flush()
 
 generateParents()
 generateSitems()

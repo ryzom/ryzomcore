@@ -35,7 +35,7 @@ if preserveIndex:
 	for entry in table:
 		e = filter(None, entry)
 		entryName = e[0] + str(int(e[1])).zfill(4) # + name
-		sbrickMap[entryName] = e
+		sbrickMap[entryName] = e + [ "_unused" ]
 
 for sbrick in fileMap:
 	contents = ""
