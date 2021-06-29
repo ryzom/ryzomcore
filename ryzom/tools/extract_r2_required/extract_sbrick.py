@@ -35,7 +35,9 @@ if preserveIndex:
 	for entry in table:
 		e = filter(None, entry)
 		entryName = e[0] + str(int(e[1])).zfill(4) # + name
-		sbrickMap[entryName] = e + [ "_unused" ]
+		if "__missing" in e:
+			e.remove("__missing")
+		sbrickMap[entryName] = e + [ "__missing" ]
 
 for sbrick in fileMap:
 	contents = ""
@@ -80,6 +82,14 @@ for sbrick in fileMap:
 		entry += [ name ]
 	if sitem != templateName and sitem != name:
 		entry += [ sitem ]
+	if entryName in sbrickMap:
+		if not "__missing" in sbrickMap[entryName][2:]:
+			print("Duplicate sbrick")
+			print(entry)
+			print(sbrickMap[entryName])
+		for name in sbrickMap[entryName][2:]:
+			if name != "__missing" and not name in entry:
+				entry += [ name ]
 	sbrickMap[entryName] = entry
 
 w = open("sbrick_index.tsv", "w")
