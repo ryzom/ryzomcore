@@ -1,3 +1,4 @@
+# Generate sitem, sbrick, and sphrase
 - Run extract_palette.py to generate sitem_list.txt and creature_list.txt from the R2 palette
 - Run extract_parents.py to generate the parents txt files from the above, and missing sheets
 - Run scheme_sitem_parser.py to generate sitem_parsed.tsv from sitem_list.txt minus missing_sheets.txt
@@ -6,3 +7,7 @@
 - Run sitem_shape_matcher.py to generate match_sitem_shape.tsv from shape_parsed.tsv and sitem_parsed.tsv
 - Run extract_sbrick.py to generate the sbrick_index.tsv to ensure indices are correctly reused
 - Run generate_sitem.py to generate sitems from the tsv
+
+# Fix renamed sbrick
+- Run extract_sbrick.py to update sbrick_index.tsv with the current bricks
+- Run fix_rename_sbrick.py to rename sbrick and sphrase in leveldesign if their name changed
