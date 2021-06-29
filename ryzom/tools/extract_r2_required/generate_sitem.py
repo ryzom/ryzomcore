@@ -1,5 +1,5 @@
 
-import os
+import os, zlib
 
 def loadTsv(filename):
 	table = []
@@ -736,6 +736,50 @@ def generateSitems():
 			sbrickIndex = int(sbrickEntry[1])
 		else:
 			exit("TODO: Find unused sbrick index for the family")
+		
+		minMat = 2
+		randMat = 4
+		if "one-handed" in tags:
+			minMat += 1
+			randMat += 2
+		if "two-handed" in tags:
+			minMat += 2
+			randMat += 4
+		if "medium" in tags:
+			minMat += 2
+			randMat += 4
+		if "heavy" in tags:
+			minMat += 4
+			randMat += 8
+		if "buckler" in tags:
+			minMat += 1
+			randMat += 3
+		if "large" in tags:
+			minMat += 2
+			randMat += 6
+		if "magic" in tags:
+			minMat += 3
+			randMat += 6
+		if "mq" in tags:
+			minMat += 1
+			randMat += 2
+		if "hq" in tags:
+			minMat += 2
+			randMat += 4
+		minMat *= 3
+		randMat *= 3
+		# rand0 = zlib.crc32(name + brickFamily + skill) & 0xffffffff
+		rand1 = zlib.crc32(name + skill + brickFamily) & 0xffffffff
+		rand2 = zlib.crc32(skill + name + brickFamily) & 0xffffffff
+		rand3 = zlib.crc32(skill + brickFamily + name) & 0xffffffff
+		rand4 = zlib.crc32(brickFamily + name + skill) & 0xffffffff
+		rand5 = zlib.crc32(brickFamily + skill + name) & 0xffffffff
+		mp1 = minMat + (rand1 % randMat)
+		mp2 = minMat + (rand2 % randMat)
+		mp3 = minMat + (rand3 % randMat)
+		mp4 = minMat + (rand4 % randMat)
+		mp5 = minMat + (rand5 % randMat)
+		
 		if not os.path.isdir(sbrickFolder):
 			os.makedirs(sbrickFolder)
 		with open(sbrickFile, "w") as f:
@@ -771,13 +815,13 @@ def generateSitems():
 					f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Clothes\"/>\n")
 				else:
 					f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Armor shell\"/>\n")
-				f.write("        <ATOM Name=\"Quantity 1\" Value=\"3\"/>\n") # TODO: Calibrate
+				f.write("        <ATOM Name=\"Quantity 1\" Value=\"" + str(int(mp1 / 4)) + "\"/>\n") # TODO: Calibrate
 				f.write("        <ATOM Name=\"MP 2\" Value=\"Raw Material for Armor interior coating\"/>\n")
-				f.write("        <ATOM Name=\"Quantity 2\" Value=\"3\"/>\n") # TODO: Calibrate
+				f.write("        <ATOM Name=\"Quantity 2\" Value=\"" + str(int(mp2 / 4)) + "\"/>\n") # TODO: Calibrate
 				f.write("        <ATOM Name=\"MP 3\" Value=\"Raw Material for Armor interior stuffing\"/>\n")
-				f.write("        <ATOM Name=\"Quantity 3\" Value=\"3\"/>\n") # TODO: Calibrate
+				f.write("        <ATOM Name=\"Quantity 3\" Value=\"" + str(int(mp3 / 4)) + "\"/>\n") # TODO: Calibrate
 				f.write("        <ATOM Name=\"MP 4\" Value=\"Raw Material for Armor clip\"/>\n")
-				f.write("        <ATOM Name=\"Quantity 4\" Value=\"3\"/>\n") # TODO: Calibrate
+				f.write("        <ATOM Name=\"Quantity 4\" Value=\"" + str(int(mp4 / 4)) + "\"/>\n") # TODO: Calibrate
 				f.write("        <ATOM Name=\"MP 5\"/>\n")
 				f.write("        <ATOM Name=\"Quantity 5\" Value=\"0\"/>\n")
 				f.write("      </STRUCT>\n")
