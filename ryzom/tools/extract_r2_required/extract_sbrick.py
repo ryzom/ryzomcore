@@ -30,7 +30,7 @@ def loadTsv(filename):
 	return table;
 
 preserveIndex = True
-if preserveIndex:
+if preserveIndex and os.path.isfile("sbrick_index.tsv"):
 	table = loadTsv("sbrick_index.tsv")
 	for entry in table:
 		e = filter(None, entry)
@@ -78,7 +78,7 @@ for sbrick in fileMap:
 	templateName = familyId.lower() + str(int(indexInFamily)).zfill(2)
 	entryName = familyId + str(int(indexInFamily)).zfill(4) # + name
 	entry = [ familyId, indexInFamily ]
-	if name != templateName:
+	if name:
 		entry += [ name ]
 	if sitem != templateName and sitem != name:
 		entry += [ sitem ]
