@@ -378,3 +378,11 @@ iccalg	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
 iccalp	ge_hom_armor02_pantabottes	ge_hof_armor02_pantabottes	common	light	armor	pants
 iccals	ge_hom_armor02_armpad	ge_hof_armor02_armpad	common	light	armor	sleeves
 iccalv	ge_hom_armor02_gilet	ge_hof_armor02_gilet	common	light	armor	vest
+icfauwv	tr_hom_underwear_gilet	fy_hof_underwear_gilet	underwear	armor	vest
+icfauwp	fy_hom_underwear_pantabottes	fy_hof_underwear_pantabottes	fyros	underwear	armor	pants
+icmauwv	tr_hom_underwear_gilet	ma_hof_underwear_gilet	underwear	armor	vest
+icmauwp	ma_hom_underwear_pantabottes	ma_hof_underwear_pantabottes	matis	underwear	armor	pants
+ictauwv	tr_hom_underwear_gilet	tr_hof_underwear_gilet	underwear	armor	vest
+ictauwp	tr_hom_underwear_pantabottes	tr_hof_underwear_pantabottes	tryker	underwear	armor	pants
+iczauwv	tr_hom_underwear_gilet	zo_hof_underwear_gilet	underwear	armor	vest
+iczauwp	zo_hom_underwear_pantabottes	zo_hof_underwear_pantabottes	zorai	underwear	armor	pants

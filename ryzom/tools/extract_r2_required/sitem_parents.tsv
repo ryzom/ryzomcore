@@ -1,7 +1,7 @@
 _c_ah	_c_ah	parent	shared	unspecified	heavy	armor
 _c_al	_c_al	parent	shared	unspecified	light	armor
 _c_am	_c_am	parent	shared	unspecified	medium	armor
-_c_ar	_c_ar	parent	shared	unspecified	refugee	armor
+_c_ar	_c_ar	parent	shared	unspecified	light	refugee	armor
 _c_m1bm	_c_m1bm	parent	shared	unspecified	melee	one-handed	blunt	mace
 _c_m1pd	_c_m1pd	parent	shared	unspecified	melee	one-handed	piercing	dagger
 _c_m1ps	_c_m1ps	parent	shared	unspecified	melee	one-handed	piercing	spear

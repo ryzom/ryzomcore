@@ -130,16 +130,31 @@ def findBrickFamily(tags):
 		t.remove("ranged")
 	if "caster" in t and "light" in t:
 		t.remove("light")
+	if "refugee" in t and "light" in t:
+		t.remove("light")
 	res = findTreeEntry(brickFamilyTree, t)
 	return res
 
 sbrickIndex = loadTsv("sbrick_index.tsv")
 sbrickLookup = {}
+sbrickAlloc = {}
 
 for entry in sbrickIndex:
 	names = entry[2:]
 	for name in names:
 		sbrickLookup[name] = entry
+	family = entry[0]
+	index = int(entry[1], 10)
+	if not family in sbrickAlloc:
+		sbrickAlloc[family] = {}
+	sbrickAlloc[family][index] = True
+
+def allocFamilyIndex(family):
+	for i in range(1, 64):
+		if not i in sbrickAlloc[family]:
+			sbrickAlloc[family][i] = True
+			return i
+	return None
 
 sitemTags = {}
 sitemPath = "Y:\\ryzomcore4\\leveldesign\\game_element\\sitem"
@@ -171,6 +186,10 @@ def generateParents():
 			strippedTags.remove("melee")
 		if "ranged" in strippedTags:
 			strippedTags.remove("ranged")
+		if "light" in strippedTags and "caster" in strippedTags:
+			strippedTags.remove("light")
+		if "light" in strippedTags and "refugee" in strippedTags:
+			strippedTags.remove("light")
 		if "shared" in tags:
 			parentTags[name] = strippedTags
 		displayName = " ".join(strippedTags)
@@ -503,6 +522,10 @@ def generateSitems():
 			strippedTags.remove("hands")
 		if "light" in strippedTags and "caster" in strippedTags:
 			strippedTags.remove("light")
+		if "light" in strippedTags and "refugee" in strippedTags:
+			strippedTags.remove("light")
+		if "light" in strippedTags and "underwear" in strippedTags:
+			strippedTags.remove("light")
 		if "hq" in strippedTags:
 			strippedTags.remove("hq")
 			#strippedTags = [ "high quality" ] + strippedTags
@@ -728,14 +751,17 @@ def generateSitems():
 			sbrickEntry = sbrickLookup[name]
 		else:
 			print("New sbrick entry: " + sbrickName + ", Family: " + brickFamily)
-		if sbrickEntry[0] != brickFamily:
+		if sbrickEntry and sbrickEntry[0] != brickFamily:
 			print("Brick family changed: " + sbrickName + ", New: " + brickFamily + ", Old: " + sbrickEntry[0])
 			sbrickEntry = None
 		sbrickIndex = None
 		if sbrickEntry:
-			sbrickIndex = int(sbrickEntry[1])
+			sbrickIndex = int(sbrickEntry[1], 10)
 		else:
-			exit("TODO: Find unused sbrick index for the family")
+			sbrickIndex = allocFamilyIndex(brickFamily)
+			if sbrickIndex:
+				sbrickEntry = [ brickFamily, str(sbrickIndex) ]
+				print(sbrickEntry)
 		
 		minMat = 2
 		randMat = 4

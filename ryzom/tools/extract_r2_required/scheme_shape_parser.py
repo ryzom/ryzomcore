@@ -282,8 +282,12 @@ with open("shape_list.txt", "r") as f:
 				tags = parse(name)
 				if name.startswith("tr_hof_underwear_") and not name.endswith("_gilet") and not name.endswith("_pantabottes"):
 					tags.remove("tryker")
+				if name.startswith("zo_hof_underwear_") and not name.endswith("_gilet") and not name.endswith("_pantabottes"):
+					tags.remove("zorai")
 				if name.startswith("tr_hom_underwear_") and not name.endswith("_pantabottes"):
 					tags.remove("tryker")
+				if name.startswith("zo_hom_underwear_") and not name.endswith("_pantabottes"):
+					tags.remove("zorai")
 				# gen = generate(tags)
 				# if gen != name:
 				#{ 	tags += [ "invalid" ]

@@ -479,7 +479,7 @@ zo_hom_civil01_lead_armpad		zorai	male	light	armor	civil01	lead	event	sleeves
 zo_hom_civil01_lead_bottes		zorai	male	light	armor	civil01	lead	event	boots
 zo_hom_civil01_lead_gilet		zorai	male	light	armor	civil01	lead	event	vest
 zo_hom_civil01_pantabottes		zorai	male	light	armor	civil01	pants
-zo_hom_underwear_gilet		zorai	male	underwear	armor	vest
+zo_hom_underwear_gilet		male	underwear	armor	vest
 zo_hom_underwear_pantabottes		zorai	male	underwear	armor	pants
 zo_hom_visage		zorai	male	incomplete	_visage
 baton magie		incomplete	_baton magie

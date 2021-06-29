@@ -34,7 +34,7 @@ if preserveIndex and os.path.isfile("sbrick_index.tsv"):
 	table = loadTsv("sbrick_index.tsv")
 	for entry in table:
 		e = filter(None, entry)
-		entryName = e[0] + str(int(e[1])).zfill(4) # + name
+		entryName = e[0] + str(int(e[1], 10)).zfill(4) # + name
 		if "__missing" in e:
 			e.remove("__missing")
 		sbrickMap[entryName] = e + [ "__missing" ]
@@ -75,8 +75,8 @@ for sbrick in fileMap:
 	#print(indexInFamily)
 	#print(name)
 	#print(sitem)
-	templateName = familyId.lower() + str(int(indexInFamily)).zfill(2)
-	entryName = familyId + str(int(indexInFamily)).zfill(4) # + name
+	templateName = familyId.lower() + str(int(indexInFamily, 10)).zfill(2)
+	entryName = familyId + str(int(indexInFamily, 10)).zfill(4) # + name
 	entry = [ familyId, indexInFamily ]
 	if name:
 		entry += [ name ]

@@ -9,6 +9,26 @@ def loadTsv(filename):
 shapeParsed = loadTsv("shape_parsed.tsv")
 sitemParsed = loadTsv("sitem_parsed.tsv")
 
+boostTags = {
+	"underwear": 4,
+	"vest": 2,
+	"gloves": 2,
+	"pants": 2,
+	"sleeves": 2,
+	"helmet": 2,
+	"boots": 2,
+#	"hands": 2,
+}
+
+unmatchTags = {
+#	"tryker": 2,
+#	"matis": 2,
+#	"zorai": 2,
+#	"fyros": 2,
+#	"karavan": 2,
+#	"kami": 2,
+}
+
 def findMatch(name, sitem):
 	mostMatches = 0
 	leastUnmatches = 0
@@ -27,14 +47,23 @@ def findMatch(name, sitem):
 			if tag not in matched:
 				matched[tag] = True
 				if tag in sitem:
-					matches += 1
+					if tag in boostTags:
+						matches += boostTags[tag]
+					else:
+						matches += 1
 					matching += [ tag ]
 				else:
-					unmatches += 1
+					if tag in unmatchTags:
+						unmatches += unmatchTags[tag]
+					else:
+						unmatches += 1
 					unmatching += [ tag ]
 		for tag in sitem:
 			if tag not in matched:
-				unmatches += 1
+				if tag in unmatchTags:
+					unmatches += unmatchTags[tag]
+				else:
+					unmatches += 1
 				unmatching += [ tag ]
 		if matches > mostMatches:
 			mostMatches = matches
@@ -70,6 +99,8 @@ with open("match_sitem_shape.tsv", "w") as f:
 			if not tag in femaleTags and tag != "male":
 				matches = False
 				# print(tag)
+		if not matches and femaleShape[0].endswith("_hof_underwear_gilet") and maleShape[0] == "tr_hom_underwear_gilet":
+			matches = True
 		if matches:
 			f.write(sitem[0] + "\t" + maleShape[0] + "\t" + femaleShape[0])
 			for tag in maleShape[1:]:

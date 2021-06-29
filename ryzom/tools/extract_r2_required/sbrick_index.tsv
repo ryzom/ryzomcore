@@ -172,6 +172,8 @@ BCFAEA	12	bcfals_3	icfals_3	bcfaea10_3
 BCFAEA	13	bcfalv	icfalv	bcfaea11
 BCFAEA	14	bcfalv_2	icfalv_2	bcfaea11_2
 BCFAEA	15	bcfalv_3	icfalv_3	bcfaea11_3
+BCFAEA	16	bcfauwv	icfauwv
+BCFAEA	17	bcfauwp	icfauwp
 BCFAEB	16	bcfamb	icfamb	bcfaea12
 BCFAEB	17	bcfamb_2	icfamb_2	bcfaea12_2
 BCFAEB	18	bcfamb_3	icfamb_3	bcfaea12_3
@@ -591,6 +593,8 @@ BCMAEA	12	bcmals_3	icmals_3	bcmaea10_3
 BCMAEA	13	bcmalv	icmalv	bcmaea11
 BCMAEA	14	bcmalv_2	icmalv_2	bcmaea11_2
 BCMAEA	15	bcmalv_3	icmalv_3	bcmaea11_3
+BCMAEA	16	bcmauwv	icmauwv
+BCMAEA	17	bcmauwp	icmauwp
 BCMAEB	1	bcmamb	icmamb	bcmaea12
 BCMAEB	2	bcmamb_2	icmamb_2	bcmaea12_2
 BCMAEB	3	bcmamb_3	icmamb_3	bcmaea12_3
@@ -1197,6 +1201,8 @@ BCTAEA	12	bctals_3	ictals_3	bctaea10_3
 BCTAEA	13	bctalv	ictalv	bctaea11
 BCTAEA	14	bctalv_2	ictalv_2	bctaea11_2
 BCTAEA	15	bctalv_3	ictalv_3	bctaea11_3
+BCTAEA	16	bctauwv	ictauwv
+BCTAEA	17	bctauwp	ictauwp
 BCTAEB	1	bctamb	ictamb	bctaea12
 BCTAEB	2	bctamb_2	ictamb_2	bctaea12_2
 BCTAEB	3	bctamb_3	ictamb_3	bctaea12_3
@@ -1536,6 +1542,8 @@ BCZAEA	12	bczals_3	iczals_3	bczaea10_3
 BCZAEA	13	bczalv	iczalv	bczaea11
 BCZAEA	14	bczalv_2	iczalv_2	bczaea11_2
 BCZAEA	15	bczalv_3	iczalv_3	bczaea11_3
+BCZAEA	16	bczauwv	iczauwv
+BCZAEA	17	bczauwp	iczauwp
 BCZAEB	1	bczamb	iczamb	bczaea12
 BCZAEB	2	bczamb_2	iczamb_2	bczaea12_2
 BCZAEB	3	bczamb_3	iczamb_3	bczaea12_3
