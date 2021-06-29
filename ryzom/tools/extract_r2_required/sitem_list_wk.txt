@@ -1,0 +1,26 @@
+
+; boss caster pants
+iccacp.sitem
+
+; boss heavy armor
+iccahb.sitem
+iccahg.sitem
+iccahh.sitem
+iccahp.sitem
+iccahs.sitem
+
+; boss medium armor
+iccamv.sitem
+iccamb.sitem
+iccamg.sitem
+iccamp.sitem
+iccams.sitem
+iccamv.sitem
+
+; boss light armor
+iccalv.sitem
+iccalb.sitem
+iccalg.sitem
+iccalp.sitem
+iccals.sitem
+iccalv.sitem

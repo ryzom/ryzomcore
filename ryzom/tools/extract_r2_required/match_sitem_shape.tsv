@@ -360,3 +360,21 @@ iczsb_3	zo_wea_petit_bouclier	zo_wea_petit_bouclier	zorai	buckler	shield
 iczss	zo_wea_grand_bouclier	zo_wea_grand_bouclier	zorai	large	shield
 iczss_2	zo_wea_grand_bouclier	zo_wea_grand_bouclier	zorai	large	shield
 iczss_3	zo_wea_grand_bouclier	zo_wea_grand_bouclier	zorai	large	shield
+iccacp	ge_hom_caster00_pantabottes	ge_hof_caster00_pantabottes	common	light	caster	armor	pants
+iccahb	ge_hom_armor04_bottes	ge_hof_armor04_bottes	common	heavy	armor	boots
+iccahg	ge_hom_armor04_hand	ge_hof_armor04_hand	common	heavy	armor	gloves
+iccahh	ge_hom_casque00	ge_hof_casque00	common	heavy	armor	helmet
+iccahp	ge_hom_armor04_pantabottes	ge_hof_armor04_pantabottes	common	heavy	armor	pants
+iccahs	ge_hom_armor04_armpad	ge_hof_armor04_armpad	common	heavy	armor	sleeves
+iccamv	ge_hom_armor03_gilet	ge_hof_armor03_gilet	common	medium	armor	vest
+iccamb	ge_hom_armor03_bottes	ge_hof_armor03_bottes	common	medium	armor	boots
+iccamg	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+iccamp	ge_hom_armor03_pantabottes	ge_hof_armor03_pantabottes	common	medium	armor	pants
+iccams	ge_hom_armor03_armpad	ge_hof_armor03_armpad	common	medium	armor	sleeves
+iccamv	ge_hom_armor03_gilet	ge_hof_armor03_gilet	common	medium	armor	vest
+iccalv	ge_hom_armor02_gilet	ge_hof_armor02_gilet	common	light	armor	vest
+iccalb	ge_hom_armor02_bottes	ge_hof_armor02_bottes	common	light	armor	boots
+iccalg	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
+iccalp	ge_hom_armor02_pantabottes	ge_hof_armor02_pantabottes	common	light	armor	pants
+iccals	ge_hom_armor02_armpad	ge_hof_armor02_armpad	common	light	armor	sleeves
+iccalv	ge_hom_armor02_gilet	ge_hof_armor02_gilet	common	light	armor	vest

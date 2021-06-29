@@ -14,31 +14,3 @@ _c_m2sa	_c_m2sa	parent	shared	unspecified	melee	two-handed	slashing	axe
 _c_m2ss	_c_m2ss	parent	shared	unspecified	melee	two-handed	slashing	sword
 _c_sb	_c_sb	parent	shared	unspecified	buckler	shield
 _c_ss	_c_ss	parent	shared	unspecified	large	shield
-_gfa_c	_gfa_c	parent	generic	fyros	caster	armor	base
-_gfa_h	_gfa_h	parent	generic	fyros	heavy	armor	base
-_gfa_l	_gfa_l	parent	generic	fyros	light	armor	base
-_gfa_m	_gfa_m	parent	generic	fyros	medium	armor	base
-_gma_c	_gma_c	parent	generic	matis	caster	armor	base
-_gma_h	_gma_h	parent	generic	matis	heavy	armor	base
-_gma_l	_gma_l	parent	generic	matis	light	armor	base
-_gma_m	_gma_m	parent	generic	matis	medium	armor	base
-_gta_c	_gta_c	parent	generic	tryker	caster	armor	base
-_gta_h	_gta_h	parent	generic	tryker	heavy	armor	base
-_gta_l	_gta_l	parent	generic	tryker	light	armor	base
-_gta_m	_gta_m	parent	generic	tryker	medium	armor	base
-_gza_c	_gza_c	parent	generic	zorai	caster	armor	base
-_gza_h	_gza_h	parent	generic	zorai	heavy	armor	base
-_gza_l	_gza_l	parent	generic	zorai	light	armor	base
-_gza_m	_gza_m	parent	generic	zorai	medium	armor	base
-_gca_c	_gca_c	parent	generic	common	caster	armor	base
-_gca_h	_gca_h	parent	generic	common	heavy	armor	base
-_gca_l	_gca_l	parent	generic	common	light	armor	base
-_gca_m	_gca_m	parent	generic	common	medium	armor	base
-_gkara_c	_gkara_c	parent	generic	karavan	caster	armor	base
-_gkara_h	_gkara_h	parent	generic	karavan	heavy	armor	base
-_gkara_l	_gkara_l	parent	generic	karavan	light	armor	base
-_gkara_m	_gkara_m	parent	generic	karavan	medium	armor	base
-_gkama_c	_gkama_c	parent	generic	kami	caster	armor	base
-_gkama_h	_gkama_h	parent	generic	kami	heavy	armor	base
-_gkama_l	_gkama_l	parent	generic	kami	light	armor	base
-_gkama_m	_gkama_m	parent	generic	kami	medium	armor	base

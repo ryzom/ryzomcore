@@ -158,44 +158,44 @@ fy_hom_interfaces_new		fyros	male	incomplete	_interfaces_new
 fy_hom_underwear_pantabottes		fyros	male	underwear	armor	pants
 fy_hom_visage		fyros	male	incomplete	_visage
 ge_bt_kami_destroyer		common	incomplete	_bt_kami_destroyer
-ge_hof_armor02_armpad		common	female	tribe	boss	light	armor	sleeves
-ge_hof_armor02_bottes		common	female	tribe	boss	light	armor	boots
-ge_hof_armor02_gilet		common	female	tribe	boss	light	armor	vest
-ge_hof_armor02_pantabottes		common	female	tribe	boss	light	armor	pants
-ge_hof_armor03_armpad		common	female	tribe	boss	medium	armor	sleeves
-ge_hof_armor03_bottes		common	female	tribe	boss	medium	armor	boots
-ge_hof_armor03_gilet		common	female	tribe	boss	medium	armor	vest
-ge_hof_armor03_pantabottes		common	female	tribe	boss	medium	armor	pants
-ge_hof_armor04_armpad		common	female	tribe	boss	heavy	armor	sleeves
-ge_hof_armor04_bottes		common	female	tribe	boss	heavy	armor	boots
-ge_hof_armor04_gilet		common	female	tribe	boss	heavy	armor	vest
-ge_hof_armor04_hand		common	female	tribe	boss	heavy	armor	gloves
-ge_hof_armor04_pantabottes		common	female	tribe	boss	heavy	armor	pants
-ge_hof_casque00		common	female	tribe	boss	heavy	armor	helmet
+ge_hof_armor02_armpad		common	female	boss	light	armor	sleeves
+ge_hof_armor02_bottes		common	female	boss	light	armor	boots
+ge_hof_armor02_gilet		common	female	boss	light	armor	vest
+ge_hof_armor02_pantabottes		common	female	boss	light	armor	pants
+ge_hof_armor03_armpad		common	female	boss	medium	armor	sleeves
+ge_hof_armor03_bottes		common	female	boss	medium	armor	boots
+ge_hof_armor03_gilet		common	female	boss	medium	armor	vest
+ge_hof_armor03_pantabottes		common	female	boss	medium	armor	pants
+ge_hof_armor04_armpad		common	female	boss	heavy	armor	sleeves
+ge_hof_armor04_bottes		common	female	boss	heavy	armor	boots
+ge_hof_armor04_gilet		common	female	boss	heavy	armor	vest
+ge_hof_armor04_hand		common	female	boss	heavy	armor	gloves
+ge_hof_armor04_pantabottes		common	female	boss	heavy	armor	pants
+ge_hof_casque00		common	female	boss	heavy	armor	helmet
 ge_hof_casque01		common	female	heavy	armor	helmet	casque01
-ge_hof_caster00_pantabottes		common	female	tribe	boss	light	caster	armor	pants
-ge_hom_armor02_armpad		common	male	tribe	boss	light	armor	sleeves
-ge_hom_armor02_bottes		common	male	tribe	boss	light	armor	boots
-ge_hom_armor02_gilet		common	male	tribe	boss	light	armor	vest
-ge_hom_armor02_pantabottes		common	male	tribe	boss	light	armor	pants
-ge_hom_armor03_armpad		common	male	tribe	boss	medium	armor	sleeves
-ge_hom_armor03_bottes		common	male	tribe	boss	medium	armor	boots
-ge_hom_armor03_gilet		common	male	tribe	boss	medium	armor	vest
-ge_hom_armor03_pantabottes		common	male	tribe	boss	medium	armor	pants
-ge_hom_armor04_armpad		common	male	tribe	boss	heavy	armor	sleeves
-ge_hom_armor04_bottes		common	male	tribe	boss	heavy	armor	boots
-ge_hom_armor04_gilet		common	male	tribe	boss	heavy	armor	vest
-ge_hom_armor04_hand		common	male	tribe	boss	heavy	armor	gloves
-ge_hom_armor04_pantabottes		common	male	tribe	boss	heavy	armor	pants
-ge_hom_armor06_armpad		common	male	tribe	boss	second	heavy	armor	sleeves
-ge_hom_armor06_bottes		common	male	tribe	boss	second	heavy	armor	boots
-ge_hom_armor06_gilet		common	male	tribe	boss	second	heavy	armor	vest
-ge_hom_armor06_hand		common	male	tribe	boss	second	heavy	armor	gloves
-ge_hom_armor06_pantabottes		common	male	tribe	boss	second	heavy	armor	pants
-ge_hom_casque00		common	male	tribe	boss	heavy	armor	helmet
+ge_hof_caster00_pantabottes		common	female	boss	light	caster	armor	pants
+ge_hom_armor02_armpad		common	male	boss	light	armor	sleeves
+ge_hom_armor02_bottes		common	male	boss	light	armor	boots
+ge_hom_armor02_gilet		common	male	boss	light	armor	vest
+ge_hom_armor02_pantabottes		common	male	boss	light	armor	pants
+ge_hom_armor03_armpad		common	male	boss	medium	armor	sleeves
+ge_hom_armor03_bottes		common	male	boss	medium	armor	boots
+ge_hom_armor03_gilet		common	male	boss	medium	armor	vest
+ge_hom_armor03_pantabottes		common	male	boss	medium	armor	pants
+ge_hom_armor04_armpad		common	male	boss	heavy	armor	sleeves
+ge_hom_armor04_bottes		common	male	boss	heavy	armor	boots
+ge_hom_armor04_gilet		common	male	boss	heavy	armor	vest
+ge_hom_armor04_hand		common	male	boss	heavy	armor	gloves
+ge_hom_armor04_pantabottes		common	male	boss	heavy	armor	pants
+ge_hom_armor06_armpad		common	male	second	heavy	armor	sleeves
+ge_hom_armor06_bottes		common	male	second	heavy	armor	boots
+ge_hom_armor06_gilet		common	male	second	heavy	armor	vest
+ge_hom_armor06_hand		common	male	second	heavy	armor	gloves
+ge_hom_armor06_pantabottes		common	male	second	heavy	armor	pants
+ge_hom_casque00		common	male	boss	heavy	armor	helmet
 ge_hom_casque01		common	male	heavy	armor	helmet	casque01
-ge_hom_casque02		common	male	tribe	boss	second	heavy	armor	helmet
-ge_hom_caster00_pantabottes		common	male	tribe	boss	light	caster	armor	pants
+ge_hom_casque02		common	male	second	heavy	armor	helmet
+ge_hom_caster00_pantabottes		common	male	boss	light	caster	armor	pants
 int_avbradr_maindr		incomplete	_int_avbradr_maindr
 int_avbradr_maindr01		incomplete	_int_avbradr_maindr01
 int_cou_tet		incomplete	_int_cou_tet

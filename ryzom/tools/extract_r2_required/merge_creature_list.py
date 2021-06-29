@@ -5,4 +5,5 @@ with open("creature_list.txt", "w") as w:
 			w.write(l)
 	with open("creature_list_wk.txt", "r") as r:
 		for l in r:
-			w.write(l)
+			if len(l.strip()) > 0 and not l.startswith(";"):
+				w.write(l)
