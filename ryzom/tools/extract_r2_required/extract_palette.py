@@ -19,11 +19,13 @@ sitemMatches = list(dict.fromkeys(sitemMap))
 sitemMatches.sort()
 # print(sitemMatches)
 
-lf = open("sitem_list.txt", "w")
+lf = open("sitem_list_r2.txt", "w")
 lf.flush()
 for k in sitemMatches:
 	lf.write(k + "\n")
 lf.close()
+
+import merge_sitem_list
 
 creatureMatches = re.findall(creatureExpr, paletteLua)
 creatureMap = {}
@@ -36,8 +38,10 @@ creatureMatches = list(dict.fromkeys(creatureMap))
 creatureMatches.sort()
 # print(creatureMatches)
 
-lf = open("creature_list.txt", "w")
+lf = open("creature_list_r2.txt", "w")
 lf.flush()
 for k in creatureMatches:
 	lf.write(k + "\n")
 lf.close()
+
+import merge_creature_list
