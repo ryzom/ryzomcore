@@ -677,6 +677,26 @@ def generateSitems():
 		if "armor" in tags and "refugee" in tags and len(name) > 5:
 			continue # No need to generate these for now
 		
+		brickFamily = findBrickFamily(tags)
+		
+		sbrickEntry = None
+		if name in sbrickLookup:
+			sbrickEntry = sbrickLookup[name]
+		else:
+			print("New sbrick entry: " + name + ", Family: " + brickFamily)
+		if sbrickEntry and sbrickEntry[0] != brickFamily:
+			print("Brick family changed: " + name + ", New: " + brickFamily + ", Old: " + sbrickEntry[0])
+			sbrickEntry = None
+		sbrickIndex = None
+		if sbrickEntry:
+			sbrickIndex = int(sbrickEntry[1], 10)
+		else:
+			sbrickIndex = allocFamilyIndex(brickFamily)
+			if sbrickIndex:
+				sbrickEntry = [ brickFamily, str(sbrickIndex) ]
+				print(sbrickEntry)
+		sbrickName = brickFamily.lower() + str(sbrickIndex).zfill(2) + "_" + name[2:];
+		
 		parent = findSitemParent(tags)
 		if not parent:
 			print("No parent for sitem: " + name + ", tags: " + tags)
@@ -698,7 +718,7 @@ def generateSitems():
 				f.write("          <ATOM Value=\"" + armorSlot + "\"/>\n")
 				f.write("        </ARRAY>\n")
 				f.write("      </STRUCT>\n")
-			f.write("      <ATOM Name=\"CraftPlan\" Value=\"b" + name[1:] + ".sbrick\"/>\n") # TODO: extract sbrick ids
+			f.write("      <ATOM Name=\"CraftPlan\" Value=\"" + sbrickName + ".sbrick\"/>\n") # TODO: extract sbrick ids
 			f.write("    </STRUCT>\n")
 			f.write("    <STRUCT Name=\"3d\">\n")
 			f.write("      <ATOM Name=\"shape\" Value=\"" + shapeMale + ".shape\"/>\n")
@@ -716,9 +736,9 @@ def generateSitems():
 			f.write("  </STRUCT>\n")
 			f.write("</FORM>\n")
 			f.flush()
+		#print(brickFamily)
 		
 		# Generate the sbrick
-		sbrickName = "b" + name[1:];
 		sbrickRoot = "Y:\\ryzomcore4\\leveldesign\\game_element\\sbrick\\craft\\effect"
 		sbrickFolder = sbrickRoot + "\\" + folder
 		sbrickFile = sbrickFolder + "\\" + sbrickName + ".sbrick"
@@ -730,9 +750,6 @@ def generateSitems():
 		# 	print(skill)
 		# 	print(tags)
 		
-		brickFamily = findBrickFamily(tags)
-		#print(brickFamily)
-		
 		sbrickIcon = icon # ar_botte
 		sbrickIconBack = "bk_generic_brick.png" # bk_zorai_brick
 		if "fyros" in tags:
@@ -743,25 +760,6 @@ def generateSitems():
 			sbrickIconBack = "bk_tryker_brick.png"
 		elif "zorai" in tags:
 			sbrickIconBack = "bk_zorai_brick.png"
-		
-		sbrickEntry = None
-		if sbrickName in sbrickLookup:
-			sbrickEntry = sbrickLookup[sbrickName]
-		elif name in sbrickLookup:
-			sbrickEntry = sbrickLookup[name]
-		else:
-			print("New sbrick entry: " + sbrickName + ", Family: " + brickFamily)
-		if sbrickEntry and sbrickEntry[0] != brickFamily:
-			print("Brick family changed: " + sbrickName + ", New: " + brickFamily + ", Old: " + sbrickEntry[0])
-			sbrickEntry = None
-		sbrickIndex = None
-		if sbrickEntry:
-			sbrickIndex = int(sbrickEntry[1], 10)
-		else:
-			sbrickIndex = allocFamilyIndex(brickFamily)
-			if sbrickIndex:
-				sbrickEntry = [ brickFamily, str(sbrickIndex) ]
-				print(sbrickEntry)
 		
 		minMat = 2
 		randMat = 4
