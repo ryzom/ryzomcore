@@ -366,6 +366,7 @@ iccahg	ge_hom_armor04_hand	ge_hof_armor04_hand	common	heavy	armor	gloves
 iccahh	ge_hom_casque00	ge_hof_casque00	common	heavy	armor	helmet
 iccahp	ge_hom_armor04_pantabottes	ge_hof_armor04_pantabottes	common	heavy	armor	pants
 iccahs	ge_hom_armor04_armpad	ge_hof_armor04_armpad	common	heavy	armor	sleeves
+iccahv	ge_hom_armor04_gilet	ge_hof_armor04_gilet	common	heavy	armor	vest
 iccamv	ge_hom_armor03_gilet	ge_hof_armor03_gilet	common	medium	armor	vest
 iccamb	ge_hom_armor03_bottes	ge_hof_armor03_bottes	common	medium	armor	boots
 iccamg	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
@@ -378,13 +379,13 @@ iccalg	tr_hom_underwear_hand	tr_hof_underwear_hand	armor	gloves	hands
 iccalp	ge_hom_armor02_pantabottes	ge_hof_armor02_pantabottes	common	light	armor	pants
 iccals	ge_hom_armor02_armpad	ge_hof_armor02_armpad	common	light	armor	sleeves
 iccalv	ge_hom_armor02_gilet	ge_hof_armor02_gilet	common	light	armor	vest
-icfauwv	tr_hom_underwear_gilet	fy_hof_underwear_gilet	underwear	armor	vest
+icfauwv	tr_hom_underwear_gilet	fy_hof_underwear_gilet	fyros	underwear	armor	vest
 icfauwp	fy_hom_underwear_pantabottes	fy_hof_underwear_pantabottes	fyros	underwear	armor	pants
-icmauwv	tr_hom_underwear_gilet	ma_hof_underwear_gilet	underwear	armor	vest
+icmauwv	tr_hom_underwear_gilet	ma_hof_underwear_gilet	matis	underwear	armor	vest
 icmauwp	ma_hom_underwear_pantabottes	ma_hof_underwear_pantabottes	matis	underwear	armor	pants
-ictauwv	tr_hom_underwear_gilet	tr_hof_underwear_gilet	underwear	armor	vest
+ictauwv	tr_hom_underwear_gilet	tr_hof_underwear_gilet	tryker	underwear	armor	vest
 ictauwp	tr_hom_underwear_pantabottes	tr_hof_underwear_pantabottes	tryker	underwear	armor	pants
-iczauwv	tr_hom_underwear_gilet	zo_hof_underwear_gilet	underwear	armor	vest
+iczauwv	tr_hom_underwear_gilet	zo_hof_underwear_gilet	zorai	underwear	armor	vest
 iczauwp	zo_hom_underwear_pantabottes	zo_hof_underwear_pantabottes	zorai	underwear	armor	pants
 icrav	tr_hom_refugee_gilet	tr_hof_refugee_gilet	refugee	armor	vest
 icrap	tr_hom_refugee_pantabottes	tr_hof_refugee_pantabottes	refugee	armor	pants

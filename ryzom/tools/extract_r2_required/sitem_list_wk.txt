@@ -8,6 +8,7 @@ iccahg.sitem
 iccahh.sitem
 iccahp.sitem
 iccahs.sitem
+iccahv.sitem
 
 ; boss medium armor
 iccamv.sitem
@@ -38,3 +39,11 @@ iczauwp.sitem
 ; refugee
 icrav.sitem
 icrap.sitam
+
+; second heavy matis armor
+;icmah2b.sitem
+;; icmah2g.sitem
+;; icmah2h.sitem
+;icmah2p.sitem
+;icmah2s.sitem
+;icmah2v.sitem

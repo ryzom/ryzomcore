@@ -72,7 +72,7 @@ BCCAEC	2	bccahg	iccahg	bccaea02
 BCCAEC	3	bccahh	iccahh	bccaea03
 BCCAEC	4	bccahp	iccahp	bccaea04
 BCCAEC	5	bccahs	iccahs	bccaea05
-BCCAEC	06	bccaea06	iccahv	__missing
+BCCAEC	6	bccahv	iccahv	bccaea06
 BCCAEC	7	bcbahb_m	__missing
 BCCAEC	8	bcbahg_m	__missing
 BCCAEC	9	bcbahh_m	__missing
@@ -1158,6 +1158,8 @@ BCRAEA	37	bcraea37	icravr
 BCRAEA	38	bcraea38	icravt
 BCRAEA	39	bcraea39	icravv
 BCRAEA	40	bcraea40	icravw
+BCRAEA	41	bcrav	icrav
+BCRAEA	42	bcrap	icrap
 BCRMEA	12	bcrmea06	icrm1pd
 BCRMEA	13	bcrmea10	icrm1ss	__missing
 BCRMEA	14	bcrmea15	icrm2ms

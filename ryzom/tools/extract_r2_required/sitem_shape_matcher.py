@@ -102,10 +102,14 @@ with open("match_sitem_shape.tsv", "w") as f:
 				# print(tag)
 		if not matches and femaleShape[0].endswith("_hof_underwear_gilet") and maleShape[0] == "tr_hom_underwear_gilet":
 			matches = True
+		if "ma_hof_armor04_" in femaleShape[0]:
+			print(femaleShape[0])
+			maleShape[0] = femaleShape[0].replace("ma_hof_armor04_", "ge_hom_armor06_")
+			matches = True # Temporary
 		if matches:
 			f.write(sitem[0] + "\t" + maleShape[0] + "\t" + femaleShape[0])
-			for tag in maleShape[1:]:
-				if tag != "male":
+			for tag in femaleShape[1:]:
+				if tag != "female":
 					f.write("\t" + tag)
 			f.write("\n")
 		else:
