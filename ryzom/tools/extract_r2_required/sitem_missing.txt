@@ -2,9 +2,6 @@ iccm1bm.sitem
 iccm1pd.sitem
 iccm1sa.sitem
 iccm1ss.sitem
-icf.sitem
-icf_2.sitem
-icf_3.sitem
 icfacb_3.sitem
 icfacs_3.sitem
 icfacv_3.sitem
@@ -44,9 +41,6 @@ icfsb_3.sitem
 icfss.sitem
 icfss_2.sitem
 icfss_3.sitem
-icm.sitem
-icm_2.sitem
-icm_3.sitem
 icmacb_3.sitem
 icmacs_3.sitem
 icmacv_3.sitem
@@ -86,9 +80,6 @@ icmsb_3.sitem
 icmss.sitem
 icmss_2.sitem
 icmss_3.sitem
-ict.sitem
-ict_2.sitem
-ict_3.sitem
 ictacb_3.sitem
 ictacs_3.sitem
 ictacv_3.sitem
@@ -128,9 +119,6 @@ ictsb_3.sitem
 ictss.sitem
 ictss_2.sitem
 ictss_3.sitem
-icz.sitem
-icz_2.sitem
-icz_3.sitem
 iczm1bm.sitem
 iczm1bm_2.sitem
 iczm1bm_3.sitem
