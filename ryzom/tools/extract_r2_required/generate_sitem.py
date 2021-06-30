@@ -423,7 +423,7 @@ def generateParents():
 			print(path)
 			with open(path, "w") as f:
 				f.write("<?xml version=\"1.0\"?>\n")
-				f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
+				f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
 				f.write("  <STRUCT>\n")
 				f.write("    <STRUCT Name=\"basics\">\n")
 				f.write("      <ATOM Name=\"name\" Value=\"" + displayName + "\"/>\n")
@@ -490,7 +490,7 @@ def generateParents():
 		# 	print(path)
 		# 	with open(path, "w") as f:
 		# 		f.write("<?xml version=\"1.0\"?>\n")
-		# 		f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
+		# 		f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
 		# 		f.write("</FORM>\n")
 		# 		f.flush()
 
@@ -704,7 +704,7 @@ def generateSitems():
 		print(path)
 		with open(path, "w") as f:
 			f.write("<?xml version=\"1.0\"?>\n")
-			f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
+			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
 			if parent:
 				f.write("  <PARENT Filename=\"" + parent + ".sitem\"/>\n")
 			f.write("  <STRUCT>\n")
@@ -808,7 +808,7 @@ def generateSitems():
 			os.makedirs(sbrickFolder)
 		with open(sbrickFile, "w") as f:
 			f.write("<?xml version=\"1.0\"?>\n")
-			f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
+			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
 			f.write("  <STRUCT>\n")
 			f.write("    <STRUCT Name=\"Basics\">\n")
 			f.write("      <ATOM Name=\"FamilyId\" Value=\"" + brickFamily + "\"/>\n")
@@ -864,7 +864,7 @@ def generateSitems():
 			os.makedirs(sphraseFolder)
 		with open(sphraseFile, "w") as f:
 			f.write("<?xml version=\"1.0\"?>\n")
-			f.write("<FORM Revision=\"4.0\" State=\"modified\">\n")
+			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
 			f.write("  <STRUCT>\n")
 			f.write("    <ATOM Name=\"brick 0\" Value=\"" + sbrickName + ".sbrick\"/>\n")
 			f.write("    <ATOM Name=\"castable\" Value=\"false\"/>\n")
