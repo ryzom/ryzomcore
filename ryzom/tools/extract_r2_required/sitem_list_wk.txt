@@ -34,3 +34,7 @@ ictauwv.sitem
 ictauwp.sitem
 iczauwv.sitem
 iczauwp.sitem
+
+; refugee
+icrav.sitem
+icrap.sitam

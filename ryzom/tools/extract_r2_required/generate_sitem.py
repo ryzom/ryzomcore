@@ -117,6 +117,8 @@ def findSkill(tags):
 		t.remove("ranged")
 	if "magic" in t and "two-handed" in t:
 		t.remove("two-handed")
+	if "refugee" in t and not "heavy" in t and not "medium" in t and not "light" in t:
+		t += [ "light" ]
 	res = findTreeEntry(skillTree, t)
 	if len(res) == 7:
 		return res
@@ -129,8 +131,6 @@ def findBrickFamily(tags):
 	if "ammo" in t and "ranged" in t:
 		t.remove("ranged")
 	if "caster" in t and "light" in t:
-		t.remove("light")
-	if "refugee" in t and "light" in t:
 		t.remove("light")
 	res = findTreeEntry(brickFamilyTree, t)
 	return res
@@ -674,7 +674,7 @@ def generateSitems():
 		
 		if "armor" in tags and "caster" in tags and not "pants" in tags:
 			continue # Only include caster pants
-		if "armor" in tags and "refugee" in tags:
+		if "armor" in tags and "refugee" in tags and len(name) > 5:
 			continue # No need to generate these for now
 		
 		parent = findSitemParent(tags)
