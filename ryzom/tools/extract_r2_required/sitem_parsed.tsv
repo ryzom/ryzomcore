@@ -2,12 +2,9 @@ iccm1bm	iccm1bm	item	crafted	common	melee	one-handed	blunt	mace
 iccm1pd	iccm1pd	item	crafted	common	melee	one-handed	piercing	dagger
 iccm1sa	iccm1sa	item	crafted	common	melee	one-handed	slashing	axe
 iccm1ss	iccm1ss	item	crafted	common	melee	one-handed	slashing	sword
-icfacb_3	icfacb_3	item	crafted	fyros	light	caster	armor	boots	hq
 icfacp	icfacp	item	crafted	fyros	light	caster	armor	pants
 icfacp_2	icfacp_2	item	crafted	fyros	light	caster	armor	pants	mq
 icfacp_3	icfacp_3	item	crafted	fyros	light	caster	armor	pants	hq
-icfacs_3	icfacs_3	item	crafted	fyros	light	caster	armor	sleeves	hq
-icfacv_3	icfacv_3	item	crafted	fyros	light	caster	armor	vest	hq
 icfahb	icfahb	item	crafted	fyros	heavy	armor	boots
 icfahb_2	icfahb_2	item	crafted	fyros	heavy	armor	boots	mq
 icfahb_3	icfahb_3	item	crafted	fyros	heavy	armor	boots	hq
@@ -92,12 +89,9 @@ icfsb_3	icfsb_3	item	crafted	fyros	buckler	shield	hq
 icfss	icfss	item	crafted	fyros	large	shield
 icfss_2	icfss_2	item	crafted	fyros	large	shield	mq
 icfss_3	icfss_3	item	crafted	fyros	large	shield	hq
-icmacb_3	icmacb_3	item	crafted	matis	light	caster	armor	boots	hq
 icmacp	icmacp	item	crafted	matis	light	caster	armor	pants
 icmacp_2	icmacp_2	item	crafted	matis	light	caster	armor	pants	mq
 icmacp_3	icmacp_3	item	crafted	matis	light	caster	armor	pants	hq
-icmacs_3	icmacs_3	item	crafted	matis	light	caster	armor	sleeves	hq
-icmacv_3	icmacv_3	item	crafted	matis	light	caster	armor	vest	hq
 icmahb	icmahb	item	crafted	matis	heavy	armor	boots
 icmahb_2	icmahb_2	item	crafted	matis	heavy	armor	boots	mq
 icmahb_3	icmahb_3	item	crafted	matis	heavy	armor	boots	hq
@@ -183,12 +177,9 @@ icmss	icmss	item	crafted	matis	large	shield
 icmss_2	icmss_2	item	crafted	matis	large	shield	mq
 icmss_3	icmss_3	item	crafted	matis	large	shield	hq
 icravr	icravr	item	crafted	refugee	armor	vest	red
-ictacb_3	ictacb_3	item	crafted	tryker	light	caster	armor	boots	hq
 ictacp	ictacp	item	crafted	tryker	light	caster	armor	pants
 ictacp_2	ictacp_2	item	crafted	tryker	light	caster	armor	pants	mq
 ictacp_3	ictacp_3	item	crafted	tryker	light	caster	armor	pants	hq
-ictacs_3	ictacs_3	item	crafted	tryker	light	caster	armor	sleeves	hq
-ictacv_3	ictacv_3	item	crafted	tryker	light	caster	armor	vest	hq
 ictahb	ictahb	item	crafted	tryker	heavy	armor	boots
 ictahb_2	ictahb_2	item	crafted	tryker	heavy	armor	boots	mq
 ictahb_3	ictahb_3	item	crafted	tryker	heavy	armor	boots	hq
@@ -387,5 +378,5 @@ ictauwv	ictauwv	item	crafted	tryker	light	underwear	armor	vest
 ictauwp	ictauwp	item	crafted	tryker	light	underwear	armor	pants
 iczauwv	iczauwv	item	crafted	zorai	light	underwear	armor	vest
 iczauwp	iczauwp	item	crafted	zorai	light	underwear	armor	pants
-icrav	icrav	item	crafted	refugee	armor	vest
-icrap	icrap	item	crafted	refugee	armor	pants
+icralv	icralv	item	crafted	refugee	light	armor	vest
+icralp	icralp	item	crafted	refugee	light	armor	pants

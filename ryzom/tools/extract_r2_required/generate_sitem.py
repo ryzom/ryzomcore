@@ -650,13 +650,15 @@ def generateSitems():
 		elif "armor" in tags:
 			###print shapeMale
 			folder = "armor\\" + subfolder
-			if "caster01" in shapeMale or "caster" in tags:
+			if "refugee" in tags:
+				pass
+			elif "caster" in tags:
 				folder += "\\caster_armor"
-			elif ("civil01" in shapeMale or ("underwear" in shapeMale and not "underwear" in tags)) and "light" in tags:
+			elif "light" in tags:
 				folder += "\\light_armor"
-			elif "armor00" in shapeMale and "medium" in tags:
+			elif "medium" in tags:
 				folder += "\\medium_armor"
-			elif ("armor01" in shapeMale or "casque01" in shapeMale) and "heavy" in tags:
+			elif "heavy" in tags:
 				folder += "\\heavy_armor"
 		elif "shield" in tags:
 			folder = "shield\\" + subfolder

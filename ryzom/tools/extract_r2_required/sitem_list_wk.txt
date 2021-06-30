@@ -37,8 +37,8 @@ iczauwv.sitem
 iczauwp.sitem
 
 ; refugee
-icrav.sitem
-icrap.sitem
+icralv.sitem
+icralp.sitem
 
 ; second heavy matis armor
 ;icmah2b.sitem
