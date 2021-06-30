@@ -46,8 +46,8 @@ namespace NLGUI
 		{
 			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
 			if (groupHtml) {
-				_HtmlDownload = false;
-				groupHtml->removeImageDownload(dynamic_cast<CViewBase*>(this));
+				groupHtml->removeImageDownload(_HtmlDownload, dynamic_cast<CViewBase*>(this));
+				_HtmlDownload = NULL;
 			}
 		}
 	}
@@ -476,12 +476,14 @@ namespace NLGUI
 				if (!CFile::fileExists(localname))
 					localname = "web_del.tga";
 				_TextureId.setTexture (localname.c_str(), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
-				_HtmlDownload = true;
-				groupHtml->addImageDownload(TxName, dynamic_cast<CViewBase*>(this));
+				_HtmlDownload = groupHtml->addImageDownload(TxName, dynamic_cast<CViewBase*>(this));
 			}
 		}
 		else
+		{
+			_HtmlDownload = NULL;
 			_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
+		}
 	}
 
 	// ----------------------------------------------------------------------------

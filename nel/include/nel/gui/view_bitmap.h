@@ -28,6 +28,7 @@
 
 namespace NLGUI
 {
+	class ICurlDownloadCB;
 
 	/**
 	 * class implementing a bitmap view
@@ -61,7 +62,7 @@ namespace NLGUI
 			_TxtHeight = -1;
 
 			// Support for https://.. textures
-			_HtmlDownload = false;
+			_HtmlDownload = NULL;
 		}
 
 		/// Destructor
@@ -141,7 +142,9 @@ namespace NLGUI
 		bool	_Flip           : 1;
 		bool	_Tile           : 1;
 		bool	_InheritGCAlpha : 1;
-		bool	_HtmlDownload   : 1;
+
+		// pointer to active curl download object
+		ICurlDownloadCB *_HtmlDownload;
 
 		// For single texture
 

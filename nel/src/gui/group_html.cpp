@@ -266,6 +266,120 @@ namespace NLGUI
 		data = NULL;
 	}
 
+	void CGroupHTML::StylesheetDownloadCB::finish()
+	{
+		if (CFile::fileExists(tmpdest))
+		{
+			if (CFile::fileExists(dest))
+			{
+				CFile::deleteFile(dest);
+			}
+			CFile::moveFile(dest, tmpdest);
+		}
+		Parent->cssDownloadFinished(url, dest);
+	}
+
+	void CGroupHTML::ImageDownloadCB::addImage(CViewBase *img, const CStyleParams &style, TImageType type)
+	{
+		Images.push_back(SImageInfo(img, style, type));
+	}
+
+	void CGroupHTML::ImageDownloadCB::removeImage(CViewBase *img)
+	{
+		for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
+		{
+			if (it->Image == img)
+			{
+				Images.erase(it);
+				break;
+			}
+		}
+	}
+
+	void CGroupHTML::ImageDownloadCB::finish()
+	{
+		// tmpdest file does not exist if download skipped (ie cache was used)
+		if (CFile::fileExists(tmpdest) || CFile::getFileSize(tmpdest) == 0)
+		{
+			try {
+				// verify that image is not corrupted
+				uint32 w, h;
+				CBitmap::loadSize(tmpdest, w, h);
+				if (w != 0 && h != 0)
+				{
+					if (CFile::fileExists(dest))
+						CFile::deleteFile(dest);
+				}
+			}
+			catch(const NLMISC::Exception &e)
+			{
+				// exception message has .tmp file name, so keep it for further analysis
+				nlwarning("Invalid image (%s) from url (%s): %s", tmpdest.c_str(), url.c_str(), e.what());
+			}
+
+			// to reload image on page, the easiest seems to be changing texture
+			// to temp file temporarily. that forces driver to reload texture from disk
+			// ITexture::touch() seem not to do this.
+			// cache was updated, first set texture as temp file
+			for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
+			{
+				SImageInfo &img = *it;
+				Parent->setImage(img.Image, tmpdest, img.Type);
+				Parent->setImageSize(img.Image, img.Style);
+			}
+
+			CFile::moveFile(dest, tmpdest);
+		}
+
+		if (!CFile::fileExists(dest) || CFile::getFileSize(dest) == 0)
+		{
+			// placeholder if cached image failed
+			dest = "web_del.tga";
+		}
+
+		// even if image was cached, incase there was 'http://' image set to CViewBitmap
+		for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
+		{
+			SImageInfo &img = *it;
+			Parent->setImage(img.Image, dest, img.Type);
+			Parent->setImageSize(img.Image, img.Style);
+		}
+	}
+
+	void CGroupHTML::BnpDownloadCB::finish()
+	{
+		bool verified = false;
+		// no tmpfile if file was already in cache
+		if (CFile::fileExists(tmpdest))
+		{
+			verified = m_md5sum.empty() || (m_md5sum != getMD5(tmpdest).toString());
+			if (verified)
+			{
+				if (CFile::fileExists(dest))
+				{
+					CFile::deleteFile(dest);
+				}
+				CFile::moveFile(dest, tmpdest);
+			}
+			else
+			{
+				CFile::deleteFile(tmpdest);
+			}
+		}
+		else if (CFile::fileExists(dest))
+		{
+			verified = m_md5sum.empty() || (m_md5sum != getMD5(dest).toString());
+		}
+
+		if (!m_lua.empty())
+		{
+			std::string script = "\nlocal __CURRENT_WINDOW__ = \""+Parent->getId()+"\"";
+			script += toString("\nlocal __DOWNLOAD_STATUS__ = %s\n", verified ? "true" : "false");
+			script += m_lua;
+			CLuaManager::getInstance().executeLuaScript(script, true );
+		}
+	}
+
 	// Check if domain is on TrustedDomain
 	bool CGroupHTML::isTrustedDomain(const string &domain)
 	{
@@ -479,17 +593,17 @@ namespace NLGUI
 	{
 		if (RunningCurls < options.curlMaxConnections)
 		{
-			std::list<CDataDownload>::iterator it=Curls.begin();
-			uint c = 0;
+			std::list<CDataDownload*>::iterator it=Curls.begin();
 			while(it != Curls.end() && RunningCurls < options.curlMaxConnections)
 			{
-				if (it->data == NULL)
+				if ((*it)->data == NULL)
 				{
 					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
 					if (!startCurlDownload(*it))
 					{
 						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), it->url.c_str());
 						finishCurlDownload(*it);
+
 						it = Curls.erase(it);
 						continue;
 					}
@@ -504,11 +618,11 @@ namespace NLGUI
 	}
 
 	// Add url to MultiCurl queue and return cURL handle
-	bool CGroupHTML::startCurlDownload(CDataDownload &download)
+	bool CGroupHTML::startCurlDownload(CDataDownload *download)
 	{
 		if (!MultiCurl)
 		{
-			nlwarning("Invalid MultiCurl handle, unable to download '%s'", download.url.c_str());
+			nlwarning("Invalid MultiCurl handle, unable to download '%s'", download->url.c_str());
 			return false;
 		}
 
@@ -516,28 +630,28 @@ namespace NLGUI
 		time(&currentTime);
 
 		CHttpCacheObject cache;
-		if (CFile::fileExists(download.dest))
-			cache = CHttpCache::getInstance()->lookup(download.dest);
+		if (CFile::fileExists(download->dest))
+			cache = CHttpCache::getInstance()->lookup(download->dest);
 
 		if (cache.Expires > currentTime)
 		{
-			LOG_DL("Cache for (%s) is not expired (%s, expires:%d)", download.url.c_str(), download.dest.c_str(), cache.Expires - currentTime);
+			LOG_DL("Cache for (%s) is not expired (%s, expires:%d)", download->url.c_str(), download->dest.c_str(), cache.Expires - currentTime);
 			return false;
 		}
 
 		// use browser Id so that two browsers would not use same temp file
-		download.tmpdest = localImageName(_Id + download.dest) + ".tmp";
+		download->tmpdest = localImageName(_Id + download->dest) + ".tmp";
 
 		// erase the tmp file if exists
-		if (CFile::fileExists(download.tmpdest))
+		if (CFile::fileExists(download->tmpdest))
 		{
-			CFile::deleteFile(download.tmpdest);
+			CFile::deleteFile(download->tmpdest);
 		}
 
-		FILE *fp = nlfopen (download.tmpdest, "wb");
+		FILE *fp = nlfopen (download->tmpdest, "wb");
 		if (fp == NULL)
 		{
-			nlwarning("Can't open file '%s' for writing: code=%d '%s'", download.tmpdest.c_str (), errno, strerror(errno));
+			nlwarning("Can't open file '%s' for writing: code=%d '%s'", download->tmpdest.c_str (), errno, strerror(errno));
 			return false;
 		}
 
@@ -545,28 +659,28 @@ namespace NLGUI
 		if (!curl)
 		{
 			fclose(fp);
-			CFile::deleteFile(download.tmpdest);
+			CFile::deleteFile(download->tmpdest);
 
-			nlwarning("Creating cURL handle failed, unable to download '%s'", download.url.c_str());
+			nlwarning("Creating cURL handle failed, unable to download '%s'", download->url.c_str());
 			return false;
 		}
-		LOG_DL("curl easy handle %p created for '%s'", curl, download.url.c_str());
+		LOG_DL("curl easy handle %p created for '%s'", curl, download->url.c_str());
 
 		// https://
-		if (toLowerAscii(download.url.substr(0, 8)) == "https://")
+		if (toLowerAscii(download->url.substr(0, 8)) == "https://")
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
 		}
 
-		download.data = new CCurlWWWData(curl, download.url);
-		download.fp = fp;
+		download->data = new CCurlWWWData(curl, download->url);
+		download->fp = fp;
 
 		// initial connection timeout, curl default is 300sec
-		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, download.ConnectionTimeout);
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, download->ConnectionTimeout);
 
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-		curl_easy_setopt(curl, CURLOPT_URL, download.url.c_str());
+		curl_easy_setopt(curl, CURLOPT_URL, download->url.c_str());
 
 		// limit curl to HTTP and HTTPS protocols only
 		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
@@ -580,16 +694,16 @@ namespace NLGUI
 			headers.push_back("If-Modified-Since: " + cache.LastModified);
 
 		if (headers.size() > 0)
-			download.data->sendHeaders(headers);
+			download->data->sendHeaders(headers);
 
 		// catch headers
 		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NLGUI::curlHeaderCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, download.data);
+		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, download->data);
 
 		std::string userAgent = options.appName + "/" + options.appVersion;
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
 
-		CUrlParser uri(download.url);
+		CUrlParser uri(download->url);
 		if (!uri.host.empty())
 			sendCookies(curl, uri.host, isTrustedDomain(uri.host));
 
@@ -599,7 +713,7 @@ namespace NLGUI
 		CURLMcode ret = curl_multi_add_handle(MultiCurl, curl);
 		if (ret != CURLM_OK)
 		{
-			nlwarning("cURL multi handle %p error %d on '%s'", curl, ret, download.url.c_str());
+			nlwarning("cURL multi handle %p error %d on '%s'", curl, ret, download->url.c_str());
 			return false;
 		}
 
@@ -607,118 +721,21 @@ namespace NLGUI
 		return true;
 	}
 
-	void CGroupHTML::finishCurlDownload(const CDataDownload &download)
+	void CGroupHTML::finishCurlDownload(CDataDownload *download)
 	{
-		if (download.type == ImgType)
+		if (download)
 		{
-			if (CFile::fileExists(download.tmpdest) && CFile::getFileSize(download.tmpdest) > 0)
-			{
-				try
-				{
-					// verify that image is not corrupted
-					uint32 w, h;
-					CBitmap::loadSize(download.tmpdest, w, h);
-					if (w != 0 && h != 0)
-					{
-						if (CFile::fileExists(download.dest))
-							CFile::deleteFile(download.dest);
-
-						// to reload image on page, the easiest seems to be changing texture
-						// to temp file temporarily. that forces driver to reload texture from disk
-						// ITexture::touch() seem not to do this.
-						// cache was updated, first set texture as temp file
-						for(uint i = 0; i < download.imgs.size(); i++)
-						{
-							setImage(download.imgs[i].Image, download.tmpdest, download.imgs[i].Type);
-							setImageSize(download.imgs[i].Image, download.imgs[i].Style);
-						}
-
-						CFile::moveFile(download.dest, download.tmpdest);
-					}
-				}
-				catch(const NLMISC::Exception &e)
-				{
-					// exception message has .tmp file name, so keep it for further analysis
-					nlwarning("Invalid image (%s) from url (%s): %s", download.tmpdest.c_str(), download.url.c_str(), e.what());
-				}
-			}
-
-			if (CFile::fileExists(download.dest) && CFile::getFileSize(download.dest) > 0)
-			{
-				try
-				{
-					// verify that image is not corrupted
-					uint32 w, h;
-					CBitmap::loadSize(download.dest, w, h);
-					if (w != 0 && h != 0)
-					for(uint i = 0; i < download.imgs.size(); i++)
-					{
-						setImage(download.imgs[i].Image, download.dest, download.imgs[i].Type);
-						setImageSize(download.imgs[i].Image, download.imgs[i].Style);
-					}
-				}
-				catch(const NLMISC::Exception &e)
-				{
-					nlwarning("Invalid image (%s) from url (%s): %s", download.dest.c_str(), download.url.c_str(), e.what());
-				}
-			}
-
-			return;
+			download->finish();
+			delete download;
 		}
-
-		if (download.type == StylesheetType)
+		else
 		{
-			if (CFile::fileExists(download.tmpdest))
-			{
-				if (CFile::fileExists(download.dest))
-				{
-					CFile::deleteFile(download.dest);
-				}
-				CFile::moveFile(download.dest, download.tmpdest);
-			}
-			cssDownloadFinished(download.url, download.dest);
-
-			return;
+			nlwarning("Unknown CURL download (nullptr)");
 		}
-
-		if (download.type == BnpType)
-		{
-			bool verified = false;
-			// no tmpfile if file was already in cache
-			if (CFile::fileExists(download.tmpdest))
-			{
-				verified = download.md5sum.empty() || (download.md5sum != getMD5(download.tmpdest).toString());
-				if (verified)
-				{
-					if (CFile::fileExists(download.dest))
-					{
-						CFile::deleteFile(download.dest);
-					}
-					CFile::moveFile(download.dest, download.tmpdest);
-				}
-				else
-				{
-					CFile::deleteFile(download.tmpdest);
-				}
-			}
-			else if (CFile::fileExists(download.dest))
-			{
-				verified = download.md5sum.empty() || (download.md5sum != getMD5(download.dest).toString());
-			}
-
-			std::string script = "\nlocal __CURRENT_WINDOW__ = \""+this->_Id+"\"";
-			script += toString("\nlocal __DOWNLOAD_STATUS__ = %s\n", verified ? "true" : "false");
-			script += download.luaScript;
-			CLuaManager::getInstance().executeLuaScript(script, true );
-
-			return;
-		}
-
-		nlwarning("Unknown CURL download type (%d) finished '%s'", download.type, download.url.c_str());
 	}
 
 	// Add a image download request in the multi_curl
-	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type, const std::string &placeholder)
+	ICurlDownloadCB *CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type, const std::string &placeholder)
 	{
 		std::string finalUrl;
 		img->setModulateGlobalColor(style.GlobalColor);
@@ -728,7 +745,7 @@ namespace NLGUI
 		{
 			setImage(img, decodeURIComponent(url), type);
 			setImageSize(img, style);
-			return;
+			return NULL;
 		}
 
 		// load the image from local files/bnp
@@ -737,7 +754,7 @@ namespace NLGUI
 		{
 			setImage(img, image, type);
 			setImageSize(img, style);
-			return;
+			return NULL;
 		}
 
 		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
@@ -759,36 +776,40 @@ namespace NLGUI
 		}
 
 		// Search if we are not already downloading this url.
-		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		for(std::list<CDataDownload*>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if(it->url == finalUrl)
+			if((*it)->url == finalUrl)
 			{
 				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), img);
-				it->imgs.push_back(CDataImageDownload(img, style, type));
-				return;
+				ImageDownloadCB *cb = dynamic_cast<ImageDownloadCB*>(*it);
+				if (cb)
+				{
+					cb->addImage(img, style, type);
+					// return pointer to shared ImageDownloadCB
+					return cb;
+				}
+				else
+				{
+					nlwarning("Found image download '%s', but casting to ImageDownloadCB failed", finalUrl.c_str());
+				}
 			}
 		}
 
-		Curls.push_back(CDataDownload(finalUrl, dest, ImgType, img, "", "", style, type));
-		pumpCurlQueue();
+		Curls.push_back(new ImageDownloadCB(finalUrl, dest, img, style, type, this));
+		// as we return pointer to callback, skip starting downloads just now
+		//pumpCurlQueue();
+		return Curls.back();
 	}
 
-	void CGroupHTML::removeImageDownload(CViewBase *img)
+	void CGroupHTML::removeImageDownload(ICurlDownloadCB *handle, CViewBase *img)
 	{
-		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
-		{
-			// check all active downloads because image does not keep url around
-			std::vector<CDataImageDownload>::iterator imgIter = it->imgs.begin();
-			while(imgIter != it->imgs.end())
-			{
-				if (imgIter->Image == img)
-				{
-					it->imgs.erase(imgIter);
-					break;
-				}
-				++imgIter;
-			}
+		ImageDownloadCB *cb = dynamic_cast<ImageDownloadCB*>(handle);
+		if (!cb) {
+			nlwarning("Trying to remove image from downloads, but ICurlDownloadCB pointer did not cast to ImageDownloadCB");
+			return;
 		}
+		// image will be removed from handle, but handle is kept and image will be downloaded
+		cb->removeImage(img);
 	}
 
 	void CGroupHTML::initImageDownload()
@@ -815,9 +836,9 @@ namespace NLGUI
 		url = upgradeInsecureUrl(getAbsoluteUrl(url));
 
 		// Search if we are not already downloading this url.
-		for(std::list<CDataDownload>::const_iterator it = Curls.begin(); it != Curls.end(); ++it)
+		for(std::list<CDataDownload*>::const_iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if(it->url == url)
+			if((*it)->url == url)
 			{
 				LOG_DL("already downloading '%s'", url.c_str());
 				return false;
@@ -842,7 +863,7 @@ namespace NLGUI
 		}
 		if (action != "delete")
 		{
-			Curls.push_back(CDataDownload(url, dest, BnpType, NULL, script, md5sum));
+			Curls.push_back(new BnpDownloadCB(url, dest, md5sum, script, this));
 			pumpCurlQueue();
 		}
 		else
@@ -871,7 +892,7 @@ namespace NLGUI
 			_StylesheetQueue.back().Url = url;
 
 			// push to the front of the queue
-			Curls.push_front(CDataDownload(url, localImageName(url), StylesheetType, NULL, "", ""));
+			Curls.push_front(new StylesheetDownloadCB(url, localImageName(url), this));
 		}
 		pumpCurlQueue();
 	}
@@ -915,9 +936,9 @@ namespace NLGUI
 				}
 				else
 				{
-					for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+					for(std::list<CDataDownload*>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 					{
-						if(it->data && it->data->Request == msg->easy_handle)
+						if((*it)->data && (*it)->data->Request == msg->easy_handle)
 						{
 							std::string error;
 							bool success = msg->data.result == CURLE_OK;
@@ -956,27 +977,30 @@ namespace NLGUI
 		}
 
 		// remove all queued and already started downloads
-		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		for(std::list<CDataDownload*>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if (it->data)
+			CDataDownload &dl = *(*it);
+			if (dl.data)
 			{
-				LOG_DL("(%s) stop data url '%s'", _Id.c_str(), it->url.c_str());
+				LOG_DL("(%s) stop data url '%s'", _Id.c_str(), dl.url.c_str());
 				if (MultiCurl)
 				{
-					curl_multi_remove_handle(MultiCurl, it->data->Request);
+					curl_multi_remove_handle(MultiCurl, dl.data->Request);
 				}
 
 				// close and remove temp file
-				if (it->fp)
+				if (dl.fp)
 				{
-					fclose(it->fp);
+					fclose(dl.fp);
 
-					if (CFile::fileExists(it->tmpdest))
+					if (CFile::fileExists(dl.tmpdest))
 					{
-						CFile::deleteFile(it->tmpdest);
+						CFile::deleteFile(dl.tmpdest);
 					}
 				}
 			}
+			// release CDataDownload
+			delete *it;
 		}
 		Curls.clear();
 
@@ -2935,10 +2959,10 @@ namespace NLGUI
 		LOG_DL("Clear pointers to %d curls", Curls.size());
 
 		// remove image refs from downloads
-		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		/*for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
 			it->imgs.clear();
-		}
+		}*/
 	}
 
 	// ***************************************************************************
@@ -3691,96 +3715,98 @@ namespace NLGUI
 		updateRefreshButton();
 	}
 
-	void CGroupHTML::dataDownloadFinished(bool success, const std::string &error, CDataDownload &data)
+	void CGroupHTML::dataDownloadFinished(bool success, const std::string &error, CDataDownload *data)
 	{
-		fclose(data.fp);
+		fclose(data->fp);
 
-		CUrlParser uri(data.url);
+		CUrlParser uri(data->url);
 		if (!uri.host.empty())
 		{
-			receiveCookies(data.data->Request, uri.host, isTrustedDomain(uri.host));
+			receiveCookies(data->data->Request, uri.host, isTrustedDomain(uri.host));
 		}
 
 		long code = -1;
-		curl_easy_getinfo(data.data->Request, CURLINFO_RESPONSE_CODE, &code);
+		curl_easy_getinfo(data->data->Request, CURLINFO_RESPONSE_CODE, &code);
 
-		LOG_DL("(%s) transfer '%p' completed with http code %d, url (len %d) '%s'", _Id.c_str(), data.data->Request, code, data.url.size(), data.url.c_str());
-		curl_multi_remove_handle(MultiCurl, data.data->Request);
+		LOG_DL("(%s) transfer '%p' completed with http code %d, url (len %d) '%s'", _Id.c_str(), data->data->Request, code, data->url.size(), data->url.c_str());
+		curl_multi_remove_handle(MultiCurl, data->data->Request);
 
 		// save HSTS header from all requests regardless of HTTP code
 		if (success)
 		{
-			if (data.data->hasHSTSHeader())
+			if (data->data->hasHSTSHeader())
 			{
-				CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, data.data->getHSTSHeader());
+				CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, data->data->getHSTSHeader());
 			}
 
 			// 2XX success, 304 Not Modified
 			if ((code >= 200 && code <= 204) || code == 304)
 			{
 				CHttpCacheObject obj;
-				obj.Expires = data.data->getExpires();
-				obj.Etag = data.data->getEtag();
-				obj.LastModified = data.data->getLastModified();
+				obj.Expires = data->data->getExpires();
+				obj.Etag = data->data->getEtag();
+				obj.LastModified = data->data->getLastModified();
 
-				CHttpCache::getInstance()->store(data.dest, obj);
-				if (code == 304 && CFile::fileExists(data.tmpdest))
+				CHttpCache::getInstance()->store(data->dest, obj);
+				if (code == 304 && CFile::fileExists(data->tmpdest))
 				{
-					CFile::deleteFile(data.tmpdest);
+					CFile::deleteFile(data->tmpdest);
 				}
 			}
 			else if ((code >= 301 && code <= 303) || code == 307 || code == 308)
 			{
-				if (data.redirects < DEFAULT_RYZOM_REDIRECT_LIMIT)
+				if (data->redirects < DEFAULT_RYZOM_REDIRECT_LIMIT)
 				{
-					std::string location(data.data->getLocationHeader());
+					std::string location(data->data->getLocationHeader());
 					if (!location.empty())
 					{
 						CUrlParser uri(location);
 						if (!uri.isAbsolute())
 						{
-							uri.inherit(data.url);
+							uri.inherit(data->url);
 							location = uri.toString();
 						}
+
+						// clear old request state, and curl easy handle
+						delete data->data;
+						data->data = NULL;
+						data->fp = NULL;
+						data->url = location;
+						data->redirects++;
 
 						// push same request in the front of the queue
 						// cache filename is based of original url
 						Curls.push_front(data);
-						// clear old request state
-						Curls.front().data = NULL;
-						Curls.front().fp = NULL;
-						Curls.front().url = location;
-						Curls.front().redirects++;
 
 						LOG_DL("Redirect '%s'", location.c_str());
 						// no finished callback called, so cleanup old temp
-						if (CFile::fileExists(data.tmpdest))
+						if (CFile::fileExists(data->tmpdest))
 						{
-							CFile::deleteFile(data.tmpdest);
+							CFile::deleteFile(data->tmpdest);
 						}
 						return;
 					}
 
-					nlwarning("Redirected to empty url '%s'", data.url.c_str());
+					nlwarning("Redirected to empty url '%s'", data->url.c_str());
 				}
 				else
 				{
-					nlwarning("Redirect limit reached for '%s'", data.url.c_str());
+					nlwarning("Redirect limit reached for '%s'", data->url.c_str());
 				}
 			}
 			else
 			{
-				nlwarning("HTTP request failed with code [%d] for '%s'\n",code, data.url.c_str());
+				nlwarning("HTTP request failed with code [%d] for '%s'\n",code, data->url.c_str());
 				// 404, 500, etc
-				if (CFile::fileExists(data.dest))
+				if (CFile::fileExists(data->dest))
 				{
-					CFile::deleteFile(data.dest);
+					CFile::deleteFile(data->dest);
 				}
 			}
 		}
 		else
 		{
-			nlwarning("DATA download failed '%s', error '%s'", data.url.c_str(), error.c_str());
+			nlwarning("DATA download failed '%s', error '%s'", data->url.c_str(), error.c_str());
 		}
 
 		finishCurlDownload(data);

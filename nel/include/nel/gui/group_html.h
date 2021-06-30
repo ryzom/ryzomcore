@@ -47,6 +47,20 @@ namespace NLGUI
 
 	extern std::string CurrentCookie;
 
+	class ICurlDownloadCB
+	{
+	public:
+		ICurlDownloadCB(const std::string &url)
+		: url(url)
+		{}
+
+		virtual ~ICurlDownloadCB() {};
+
+		virtual void finish() = 0;
+
+		std::string url;
+	};
+
 	// HTML group
 	/**
 	 * Widget to have a resizable scrolltext and its scrollbar
@@ -133,9 +147,8 @@ namespace NLGUI
 		void endParagraph();
 
 		// add image download (used by view_bitmap.cpp to load web images)
-		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage, const std::string &placeholder = "web_del.tga");
-		// remove image from download list if present
-		void removeImageDownload(CViewBase *img);
+		ICurlDownloadCB *addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage, const std::string &placeholder = "web_del.tga");
+		void removeImageDownload(ICurlDownloadCB *handle, CViewBase *img);
 		std::string localImageName(const std::string &url);
 
 		// Timeout
@@ -817,48 +830,89 @@ namespace NLGUI
 		// decode all HTML entities
 		static std::string decodeHTMLEntities(const std::string &str);
 
-		struct CDataImageDownload
+		class CDataDownload : public ICurlDownloadCB
 		{
 		public:
-			CDataImageDownload(CViewBase *img, CStyleParams style, TImageType type): Image(img), Style(style), Type(type)
-			{
-			}
+			CDataDownload(const std::string &u, const std::string &d)
+				: ICurlDownloadCB(u), data(NULL), fp(NULL), dest(d), redirects(0), ConnectionTimeout(60)
+			{}
+			virtual ~CDataDownload();
+
 		public:
-			CViewBase * Image;
+			CCurlWWWData *data;
+			std::string dest;
+			std::string tmpdest;
+			uint32 redirects;
+			FILE *fp;
+			uint32 ConnectionTimeout;
+		};
+
+		class StylesheetDownloadCB : public CDataDownload
+		{
+		public:
+			StylesheetDownloadCB(const std::string &url, const std::string &dest, CGroupHTML *parent)
+				: CDataDownload(url, dest), Parent(parent)
+			{}
+
+			virtual void finish() NL_OVERRIDE;
+
+		private:
+			CGroupHTML *Parent;
+		};
+
+		class ImageDownloadCB : public CDataDownload
+		{
+		public:
+			struct SImageInfo
+			{
+				SImageInfo(CViewBase *img, const CStyleParams &style, TImageType type)
+				: Image(img), Style(style), Type(type)
+				{}
+
+				CViewBase *Image;
+				CStyleParams Style;
+				TImageType Type;
+			};
+
+			ImageDownloadCB(const std::string &url, const std::string &dest, CViewBase *img, const CStyleParams &style, TImageType type, CGroupHTML *parent)
+			: CDataDownload(url, dest), Parent(parent)
+			{
+				addImage(img, style, type);
+			}
+
+			virtual void finish() NL_OVERRIDE;
+
+			void addImage(CViewBase *img, const CStyleParams &style, TImageType type);
+			void removeImage(CViewBase *img);
+
+		private:
+			std::vector<SImageInfo> Images;
+			CGroupHTML *Parent;
 			CStyleParams Style;
 			TImageType Type;
 		};
 
-		struct CDataDownload
+		class BnpDownloadCB : public CDataDownload
 		{
 		public:
-			CDataDownload(const std::string &u, const std::string &d, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams(), const TImageType imagetype = NormalImage)
-				: data(NULL), fp(NULL), url(u), dest(d), type(t), luaScript(s), md5sum(m), redirects(0), ConnectionTimeout(60)
-			{
-				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style, imagetype));
-			}
-			~CDataDownload();
+			BnpDownloadCB(const std::string &url, const std::string &dest, const std::string md5sum, const std::string lua, CGroupHTML *parent)
+			: CDataDownload(url, dest), Parent(parent), m_md5sum(md5sum), m_lua(lua)
+			{}
 
-		public:
-			CCurlWWWData *data;
-			std::string url;
-			std::string dest;
-			std::string tmpdest;
-			std::string luaScript;
-			std::string md5sum;
-			TDataType type;
-			uint32 redirects;
-			FILE *fp;
-			std::vector<CDataImageDownload> imgs;
-			uint32 ConnectionTimeout;
+			virtual void finish() NL_OVERRIDE;
+
+		private:
+			CGroupHTML *Parent;
+			std::string m_md5sum;
+			std::string m_lua;
 		};
 
-		std::list<CDataDownload> Curls;
+		std::list<CDataDownload*> Curls;
 		CURLM *MultiCurl;
 		int RunningCurls;
 
-		bool startCurlDownload(CDataDownload &download);
-		void finishCurlDownload(const CDataDownload &download);
+		bool startCurlDownload(CDataDownload *download);
+		void finishCurlDownload(CDataDownload *download);
 		void pumpCurlQueue();
 
 		void initImageDownload();
@@ -888,7 +942,7 @@ namespace NLGUI
 		// _CurlWWW download finished
 		void htmlDownloadFinished(bool success, const std::string &error);
 		// images, stylesheets, etc finished downloading
-		void dataDownloadFinished(bool success, const std::string &error, CDataDownload &data);
+		void dataDownloadFinished(bool success, const std::string &error, CDataDownload *data);
 
 		// HtmlType download finished
 		void htmlDownloadFinished(const std::string &content, const std::string &type, long code);
