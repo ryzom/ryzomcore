@@ -119,6 +119,8 @@ def findSkill(tags):
 		t.remove("two-handed")
 	if "refugee" in t and not "heavy" in t and not "medium" in t and not "light" in t:
 		t += [ "light" ]
+	if "shield" in t:
+		t += [ "armor" ]
 	res = findTreeEntry(skillTree, t)
 	if len(res) == 7:
 		return res
@@ -669,7 +671,7 @@ def generateSitems():
 		# print(shapeFemale)
 		# print(tags)
 		
-		if not "armor" in tags:
+		if not "armor" in tags and not "shield" in tags:
 			continue
 		
 		if "armor" in tags and "caster" in tags and not "pants" in tags:
@@ -710,6 +712,8 @@ def generateSitems():
 			f.write("  <STRUCT>\n")
 			f.write("    <STRUCT Name=\"basics\">\n")
 			f.write("      <ATOM Name=\"name\" Value=\"" + displayName + "\"/>\n")
+			if origin != "common":
+				f.write("      <ATOM Name=\"origin\" Value=\"" + origin + "\"/>\n")
 			if itemType != "undefined":
 				f.write("      <ATOM Name=\"ItemType\" Value=\"" + itemType + "\"/>\n")
 			if armorSlot != "Undefined":
@@ -722,8 +726,7 @@ def generateSitems():
 			f.write("    </STRUCT>\n")
 			f.write("    <STRUCT Name=\"3d\">\n")
 			f.write("      <ATOM Name=\"shape\" Value=\"" + shapeMale + ".shape\"/>\n")
-			if shapeFemale != shapeMale:
-				f.write("      <ATOM Name=\"shape_female\" Value=\"" + shapeFemale + ".shape\"/>\n")
+			f.write("      <ATOM Name=\"shape_female\" Value=\"" + shapeFemale + ".shape\"/>\n")
 			if mapVariant != "Default":
 				f.write("      <ATOM Name=\"map_variant\" Value=\"" + mapVariant + "\"/>\n")
 			if icon != "":
@@ -828,24 +831,34 @@ def generateSitems():
 			f.write("      <ATOM Name=\"IconOver\" Value=\"fp_over.png\"/>\n")
 			f.write("      <ATOM Name=\"IconOver2\"/>\n")
 			f.write("    </STRUCT>\n")
-			if "armor" in tags:
+			if "armor" in tags or "shield" in tags:
 				f.write("    <STRUCT Name=\"faber\">\n")
 				f.write("      <ATOM Name=\"Tool type\" Value=\"ArmorTool\"/>\n")
 				# f.write("      <ATOM Name=\"Durability Factor\" Value=\"1\"/>\n")
 				f.write("      <STRUCT Name=\"Create\">\n")
 				f.write("        <ATOM Name=\"Crafted Item\" Value=\"" + name + ".sitem\"/>\n")
 				f.write("        <ATOM Name=\"Nb built items\" Value=\"1\"/>\n")
-				if "light" in tags:
-					f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Clothes\"/>\n")
-				else:
+				if "armor" in tags:
+					if "light" in tags:
+						f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Clothes\"/>\n")
+					else:
+						f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Armor shell\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 1\" Value=\"" + str(int(mp1 / 4)) + "\"/>\n")
+					f.write("        <ATOM Name=\"MP 2\" Value=\"Raw Material for Armor interior coating\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 2\" Value=\"" + str(int(mp2 / 4)) + "\"/>\n")
+					f.write("        <ATOM Name=\"MP 3\" Value=\"Raw Material for Armor interior stuffing\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 3\" Value=\"" + str(int(mp3 / 4)) + "\"/>\n")
+					f.write("        <ATOM Name=\"MP 4\" Value=\"Raw Material for Armor clip\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 4\" Value=\"" + str(int(mp4 / 4)) + "\"/>\n")
+				if "shield" in tags:
 					f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Armor shell\"/>\n")
-				f.write("        <ATOM Name=\"Quantity 1\" Value=\"" + str(int(mp1 / 4)) + "\"/>\n") # TODO: Calibrate
-				f.write("        <ATOM Name=\"MP 2\" Value=\"Raw Material for Armor interior coating\"/>\n")
-				f.write("        <ATOM Name=\"Quantity 2\" Value=\"" + str(int(mp2 / 4)) + "\"/>\n") # TODO: Calibrate
-				f.write("        <ATOM Name=\"MP 3\" Value=\"Raw Material for Armor interior stuffing\"/>\n")
-				f.write("        <ATOM Name=\"Quantity 3\" Value=\"" + str(int(mp3 / 4)) + "\"/>\n") # TODO: Calibrate
-				f.write("        <ATOM Name=\"MP 4\" Value=\"Raw Material for Armor clip\"/>\n")
-				f.write("        <ATOM Name=\"Quantity 4\" Value=\"" + str(int(mp4 / 4)) + "\"/>\n") # TODO: Calibrate
+					f.write("        <ATOM Name=\"Quantity 1\" Value=\"" + str(int(mp1 / 2)) + "\"/>\n")
+					f.write("        <ATOM Name=\"MP 2\" Value=\"Raw Material for Armor clip\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 2\" Value=\"" + str(int(mp2 / 2)) + "\"/>\n")
+					f.write("        <ATOM Name=\"MP 3\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 3\" Value=\"0\"/>\n")
+					f.write("        <ATOM Name=\"MP 4\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 4\" Value=\"0\"/>\n")
 				f.write("        <ATOM Name=\"MP 5\"/>\n")
 				f.write("        <ATOM Name=\"Quantity 5\" Value=\"0\"/>\n")
 				f.write("      </STRUCT>\n")
