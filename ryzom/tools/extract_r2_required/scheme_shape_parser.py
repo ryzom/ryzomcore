@@ -237,8 +237,14 @@ scheme = {
 		},
 		{
 			"_sousmarin": "underwater",
+			"_trail": "trail",
 		},
-		{},
+		{
+			"_00": "default",
+			"_gen": "generic",
+			"_car": "karavan",
+			"_kam": "kami",
+		},
 		{},
 		{},
 		{},
@@ -298,4 +304,33 @@ with open("shape_list.txt", "r") as f:
 				if "incomplete" in tags:
 					print(name)
 					print(tags)
+		fw.flush()
+
+with open("sfx_shape_list.txt", "r") as f:
+	with open("sfx_shape_parsed.tsv", "w") as fw:
+		for l in f:
+			name = l.strip().split(".")[0]
+			tags = parse(name)
+			fw.write(name + "\t")
+			for t in tags:
+				fw.write("\t" + t)
+			fw.write("\n")
+			if "incomplete" in tags:
+				print(name)
+				print(tags)
+		fw.flush()
+		fw.flush()
+
+with open("sfx_ps_list.txt", "r") as f:
+	with open("sfx_ps_parsed.tsv", "w") as fw:
+		for l in f:
+			name = l.strip().split(".")[0]
+			tags = parse(name)
+			fw.write(name + "\t")
+			for t in tags:
+				fw.write("\t" + t)
+			fw.write("\n")
+			if "incomplete" in tags:
+				print(name)
+				print(tags)
 		fw.flush()

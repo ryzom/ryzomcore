@@ -1,0 +1,301 @@
+bata01		incomplete	_bata01
+bata02		incomplete	_bata02
+bata03		incomplete	_bata03
+beam3da		incomplete	_beam3da
+beam3db		incomplete	_beam3db
+beam3dc		incomplete	_beam3dc
+beama01		incomplete	_beama01
+beama02		incomplete	_beama02
+beamgroundcircle		incomplete	_beamgroundcircle
+birda02		incomplete	_birda02
+birda03		incomplete	_birda03
+buga		incomplete	_buga
+bugballa01		incomplete	_bugballa01
+bugballa02		incomplete	_bugballa02
+bugballa03		incomplete	_bugballa03
+bugballaemit01		incomplete	_bugballaemit01
+bugballaemit02		incomplete	_bugballaemit02
+bugballaemit03		incomplete	_bugballaemit03
+bugballb01		incomplete	_bugballb01
+bugballb02		incomplete	_bugballb02
+bugballb03		incomplete	_bugballb03
+colibrisa		incomplete	_colibrisa
+colibrisb		incomplete	_colibrisb
+cone_stun		incomplete	_cone_stun
+cricketa		incomplete	_cricketa
+de_flower01		incomplete	_de_flower01
+de_flower02		incomplete	_de_flower02
+de_flower03		incomplete	_de_flower03
+de_flower04		incomplete	_de_flower04
+de_flower05		incomplete	_de_flower05
+de_flower06		incomplete	_de_flower06
+dragonflya		incomplete	_dragonflya
+flare_preoder_item		incomplete	_flare_preoder_item
+flashmask01		incomplete	_flashmask01
+flashmask02		incomplete	_flashmask02
+flashmask03		incomplete	_flashmask03
+flymesh		incomplete	_flymesh
+fo_flower01		incomplete	_fo_flower01
+fo_flower02		incomplete	_fo_flower02
+fo_flower03		incomplete	_fo_flower03
+fo_flower04		incomplete	_fo_flower04
+fo_flower05		incomplete	_fo_flower05
+fo_flower06		incomplete	_fo_flower06
+fungusa01		incomplete	_fungusa01
+fungusa02		incomplete	_fungusa02
+fungusa03		incomplete	_fungusa03
+fungusa04		incomplete	_fungusa04
+fungusa05		incomplete	_fungusa05
+fungusa06		incomplete	_fungusa06
+fx_telepod01		incomplete	_fx_telepod01
+fx_telepodadd01		incomplete	_fx_telepodadd01
+fx_telepodroof01		incomplete	_fx_telepodroof01
+fx_telepodroofadd01		incomplete	_fx_telepodroofadd01
+fy_wea_baton_trail_00		fyros	weapon	melee	one-handed	blunt	staff	trail	default
+fy_wea_dague_trail_00		fyros	weapon	melee	one-handed	piercing	dagger	trail	default
+fy_wea_epee1m_trail_00		fyros	weapon	melee	one-handed	slashing	sword	trail	default
+fy_wea_epee2m_trail_00		fyros	weapon	melee	two-handed	slashing	sword	trail	default
+fy_wea_hache1m_trail_00		fyros	weapon	melee	one-handed	slashing	axe	trail	default
+fy_wea_hache2m_trail_00		fyros	weapon	melee	two-handed	slashing	axe	trail	default
+fy_wea_lance1m_trail_00		fyros	weapon	melee	one-handed	piercing	spear	trail	default
+fy_wea_lance2m_trail_00		fyros	weapon	melee	two-handed	piercing	pike	trail	default
+fy_wea_masse1m_trail_00		fyros	weapon	melee	one-handed	blunt	mace	trail	default
+fy_wea_masse2m_trail_00		fyros	weapon	melee	two-handed	blunt	mace	trail	default
+ge_acc_pick_a_trail_00		common	accessory	incomplete	_pick_a_trail_00
+ge_acc_pick_o_trail_car		common	accessory	incomplete	_pick_o_trail_car
+ge_acc_pick_o_trail_kam		common	accessory	incomplete	_pick_o_trail_kam
+ge_feudecamp		common	incomplete	_feudecamp
+ge_fy_wea_trib_hache1m_trail_car		common	fyros	weapon	tribe	melee	one-handed	slashing	axe	trail	karavan
+ge_fy_wea_trib_hache1m_trail_gen		common	fyros	weapon	tribe	melee	one-handed	slashing	axe	trail	generic
+ge_fy_wea_trib_hache1m_trail_kam		common	fyros	weapon	tribe	melee	one-handed	slashing	axe	trail	kami
+ge_fy_wea_trib_hache2m_trail_car		common	fyros	weapon	tribe	melee	two-handed	slashing	axe	trail	karavan
+ge_fy_wea_trib_hache2m_trail_gen		common	fyros	weapon	tribe	melee	two-handed	slashing	axe	trail	generic
+ge_fy_wea_trib_hache2m_trail_kam		common	fyros	weapon	tribe	melee	two-handed	slashing	axe	trail	kami
+ge_ma_wea_trib_lance1m_trail_car		common	matis	weapon	tribe	melee	one-handed	piercing	spear	trail	karavan
+ge_ma_wea_trib_lance1m_trail_gen		common	matis	weapon	tribe	melee	one-handed	piercing	spear	trail	generic
+ge_ma_wea_trib_lance1m_trail_kam		common	matis	weapon	tribe	melee	one-handed	piercing	spear	trail	kami
+ge_ma_wea_trib_lance2m_trail_car		common	matis	weapon	tribe	melee	two-handed	piercing	pike	trail	karavan
+ge_ma_wea_trib_lance2m_trail_gen		common	matis	weapon	tribe	melee	two-handed	piercing	pike	trail	generic
+ge_ma_wea_trib_lance2m_trail_kam		common	matis	weapon	tribe	melee	two-handed	piercing	pike	trail	kami
+ge_tr_wea_trib_dague_trail_car		common	tryker	weapon	tribe	melee	one-handed	piercing	dagger	trail	karavan
+ge_tr_wea_trib_dague_trail_gen		common	tryker	weapon	tribe	melee	one-handed	piercing	dagger	trail	generic
+ge_tr_wea_trib_dague_trail_kam		common	tryker	weapon	tribe	melee	one-handed	piercing	dagger	trail	kami
+ge_tr_wea_trib_epee1m_trail_car		common	tryker	weapon	tribe	melee	one-handed	slashing	sword	trail	karavan
+ge_tr_wea_trib_epee1m_trail_gen		common	tryker	weapon	tribe	melee	one-handed	slashing	sword	trail	generic
+ge_tr_wea_trib_epee1m_trail_kam		common	tryker	weapon	tribe	melee	one-handed	slashing	sword	trail	kami
+ge_tr_wea_trib_epee2m_trail_car		common	tryker	weapon	tribe	melee	two-handed	slashing	sword	trail	karavan
+ge_tr_wea_trib_epee2m_trail_gen		common	tryker	weapon	tribe	melee	two-handed	slashing	sword	trail	generic
+ge_tr_wea_trib_epee2m_trail_kam		common	tryker	weapon	tribe	melee	two-handed	slashing	sword	trail	kami
+ge_wea_baton_trail_00		common	weapon	melee	one-handed	blunt	staff	trail	default
+ge_wea_dague_trail_00		common	weapon	melee	one-handed	piercing	dagger	trail	default
+ge_wea_epee1m_trail_00		common	weapon	melee	one-handed	slashing	sword	trail	default
+ge_wea_epee2m_trail_00		common	weapon	melee	two-handed	slashing	sword	trail	default
+ge_wea_hache1m_trail_00		common	weapon	melee	one-handed	slashing	axe	trail	default
+ge_wea_hache2m_trail_00		common	weapon	melee	two-handed	slashing	axe	trail	default
+ge_wea_lance1m_trail_00		common	weapon	melee	one-handed	piercing	spear	trail	default
+ge_wea_lance2m_trail_00		common	weapon	melee	two-handed	piercing	pike	trail	default
+ge_wea_masse1m_trail_00		common	weapon	melee	one-handed	blunt	mace	trail	default
+ge_wea_masse2m_trail_00		common	weapon	melee	two-handed	blunt	mace	trail	default
+ge_zo_wea_trib_baton_trail_car		common	zorai	weapon	tribe	melee	one-handed	blunt	staff	trail	karavan
+ge_zo_wea_trib_baton_trail_gen		common	zorai	weapon	tribe	melee	one-handed	blunt	staff	trail	generic
+ge_zo_wea_trib_baton_trail_kam		common	zorai	weapon	tribe	melee	one-handed	blunt	staff	trail	kami
+ge_zo_wea_trib_masse1m_trail_car		common	zorai	weapon	tribe	melee	one-handed	blunt	mace	trail	karavan
+ge_zo_wea_trib_masse1m_trail_gen		common	zorai	weapon	tribe	melee	one-handed	blunt	mace	trail	generic
+ge_zo_wea_trib_masse1m_trail_kam		common	zorai	weapon	tribe	melee	one-handed	blunt	mace	trail	kami
+ge_zo_wea_trib_masse2m_trail_car		common	zorai	weapon	tribe	melee	two-handed	blunt	mace	trail	karavan
+ge_zo_wea_trib_masse2m_trail_gen		common	zorai	weapon	tribe	melee	two-handed	blunt	mace	trail	generic
+ge_zo_wea_trib_masse2m_trail_kam		common	zorai	weapon	tribe	melee	two-handed	blunt	mace	trail	kami
+healingcreature01		incomplete	_healingcreature01
+healingcreature02		incomplete	_healingcreature02
+healingcreature03		incomplete	_healingcreature03
+hostilecreature01		incomplete	_hostilecreature01
+hostilecreature02		incomplete	_hostilecreature02
+hostilecreature03		incomplete	_hostilecreature03
+kamidebrita		incomplete	_kamidebrita
+kamidebritb		incomplete	_kamidebritb
+kamidebritc		incomplete	_kamidebritc
+knowlege_book01		incomplete	_knowlege_book01
+knowlege_book02		incomplete	_knowlege_book02
+knowlege_box		incomplete	_knowlege_box
+knowlege_box_fy		incomplete	_knowlege_box_fy
+knowlege_box_ma		incomplete	_knowlege_box_ma
+knowlege_box_tr		incomplete	_knowlege_box_tr
+knowlege_box_zo		incomplete	_knowlege_box_zo
+knowlege_topbox		incomplete	_knowlege_topbox
+knowlege_topbox_fy		incomplete	_knowlege_topbox_fy
+knowlege_topbox_ma		incomplete	_knowlege_topbox_ma
+knowlege_topbox_tr		incomplete	_knowlege_topbox_tr
+knowlege_topbox_zo		incomplete	_knowlege_topbox_zo
+lightning		incomplete	_lightning
+lightning01		incomplete	_lightning01
+lightning02		incomplete	_lightning02
+mag_impact_blunt		incomplete	_mag_impact_blunt
+mag_impact_cold01		incomplete	_mag_impact_cold01
+mag_impact_cold02		incomplete	_mag_impact_cold02
+mag_impact_cold03		incomplete	_mag_impact_cold03
+mag_impact_cold_fragment		incomplete	_mag_impact_cold_fragment
+mag_impact_fear01		incomplete	_mag_impact_fear01
+mag_impact_fear02		incomplete	_mag_impact_fear02
+mag_impact_pierce		incomplete	_mag_impact_pierce
+mag_impact_slash		incomplete	_mag_impact_slash
+ma_fx_bird01		matis	incomplete	_fx_bird01
+ma_fx_bird02		matis	incomplete	_fx_bird02
+ma_fx_bird03		matis	incomplete	_fx_bird03
+ma_fx_bird04		matis	incomplete	_fx_bird04
+ma_fx_frog_01		matis	incomplete	_fx_frog_01
+ma_fx_frog_02		matis	incomplete	_fx_frog_02
+ma_fx_frog_03		matis	incomplete	_fx_frog_03
+ma_fx_paradisiacbird01		matis	incomplete	_fx_paradisiacbird01
+ma_fx_paradisiacbird02		matis	incomplete	_fx_paradisiacbird02
+ma_fx_paradisiacbird03		matis	incomplete	_fx_paradisiacbird03
+ma_fx_paradisiacbird04		matis	incomplete	_fx_paradisiacbird04
+ma_fx_rat00		matis	incomplete	_fx_rat00
+ma_fx_rat01		matis	incomplete	_fx_rat01
+ma_fx_rat02		matis	incomplete	_fx_rat02
+ma_fx_rat03		matis	incomplete	_fx_rat03
+ma_fx_rat04		matis	incomplete	_fx_rat04
+ma_fx_scorpion_01		matis	incomplete	_fx_scorpion_01
+ma_fx_scorpion_02		matis	incomplete	_fx_scorpion_02
+ma_fx_scorpion_03		matis	incomplete	_fx_scorpion_03
+ma_fx_scorpion_04		matis	incomplete	_fx_scorpion_04
+ma_wea_baton_trail_00		matis	weapon	melee	one-handed	blunt	staff	trail	default
+ma_wea_dague_trail_00		matis	weapon	melee	one-handed	piercing	dagger	trail	default
+ma_wea_epee1m_trail_00		matis	weapon	melee	one-handed	slashing	sword	trail	default
+ma_wea_epee2m_trail_00		matis	weapon	melee	two-handed	slashing	sword	trail	default
+ma_wea_hache1m_trail_00		matis	weapon	melee	one-handed	slashing	axe	trail	default
+ma_wea_hache2m_trail_00		matis	weapon	melee	two-handed	slashing	axe	trail	default
+ma_wea_lance1m_trail_00		matis	weapon	melee	one-handed	piercing	spear	trail	default
+ma_wea_lance2m_trail_00		matis	weapon	melee	two-handed	piercing	pike	trail	default
+ma_wea_masse1m_trail_00		matis	weapon	melee	one-handed	blunt	mace	trail	default
+ma_wea_masse2m_trail_00		matis	weapon	melee	two-handed	blunt	mace	trail	default
+medusea		incomplete	_medusea
+medusea01		incomplete	_medusea01
+medusea02		incomplete	_medusea02
+medusea03		incomplete	_medusea03
+medusea04		incomplete	_medusea04
+medusea05		incomplete	_medusea05
+medusea06		incomplete	_medusea06
+mixtecreature01		incomplete	_mixtecreature01
+mixtecreature02		incomplete	_mixtecreature02
+mixtecreature03		incomplete	_mixtecreature03
+mo_swarmplant_stingbug		incomplete	_mo_swarmplant_stingbug
+mp_ressources_gen		incomplete	_mp_ressources_gen
+neutrecreature		incomplete	_neutrecreature
+neutrecreature02		incomplete	_neutrecreature02
+neutrecreature03		incomplete	_neutrecreature03
+neutrecreature04		incomplete	_neutrecreature04
+nrgcircle01		incomplete	_nrgcircle01
+nrgcircle02		incomplete	_nrgcircle02
+papillona01		incomplete	_papillona01
+papillona02		incomplete	_papillona02
+papillonb01		incomplete	_papillonb01
+papillonb02		incomplete	_papillonb02
+papillonc01		incomplete	_papillonc01
+papillonc02		incomplete	_papillonc02
+papillond01		incomplete	_papillond01
+papillond02		incomplete	_papillond02
+pr_fx_crevette_a		incomplete	_pr_fx_crevette_a
+pr_fx_crevette_b		incomplete	_pr_fx_crevette_b
+pr_fx_crevette_c		incomplete	_pr_fx_crevette_c
+pr_fx_frog_01		incomplete	_pr_fx_frog_01
+pr_fx_frog_02		incomplete	_pr_fx_frog_02
+pr_fx_frog_03		incomplete	_pr_fx_frog_03
+pr_fx_lombriquea		incomplete	_pr_fx_lombriquea
+pr_fx_lombriqueb		incomplete	_pr_fx_lombriqueb
+pr_fx_lombriquec		incomplete	_pr_fx_lombriquec
+pr_fx_rat00		incomplete	_pr_fx_rat00
+pr_fx_rat01		incomplete	_pr_fx_rat01
+pr_fx_rat02		incomplete	_pr_fx_rat02
+pr_fx_rat03		incomplete	_pr_fx_rat03
+pr_fx_rat04		incomplete	_pr_fx_rat04
+pr_fx_sakapatate		incomplete	_pr_fx_sakapatate
+rayon		incomplete	_rayon
+rectangle01		incomplete	_rectangle01
+resistmesh		incomplete	_resistmesh
+ringrune01		incomplete	_ringrune01
+ringrune02		incomplete	_ringrune02
+rippleshocka00		incomplete	_rippleshocka00
+rippleshocka01		incomplete	_rippleshocka01
+root01		incomplete	_root01
+root02		incomplete	_root02
+root03		incomplete	_root03
+root04		incomplete	_root04
+root05		incomplete	_root05
+root06		incomplete	_root06
+root07		incomplete	_root07
+sfx_acidball01		incomplete	_sfx_acidball01
+sfx_acidball02		incomplete	_sfx_acidball02
+sfx_acidball03		incomplete	_sfx_acidball03
+sfx_acidball04		incomplete	_sfx_acidball04
+sfx_boule		incomplete	_sfx_boule
+sfx_cold_fragment01		incomplete	_sfx_cold_fragment01
+sfx_echarde		incomplete	_sfx_echarde
+sfx_glueweb01		incomplete	_sfx_glueweb01
+sfx_glueweb02		incomplete	_sfx_glueweb02
+sfx_glueweb03		incomplete	_sfx_glueweb03
+sfx_glueweb04		incomplete	_sfx_glueweb04
+sfx_iceprism_a		incomplete	_sfx_iceprism_a
+sfx_iceprism_b		incomplete	_sfx_iceprism_b
+sfx_iceprism_c		incomplete	_sfx_iceprism_c
+sfx_kitinegg_a		incomplete	_sfx_kitinegg_a
+sfx_kitinegg_b		incomplete	_sfx_kitinegg_b
+sfx_kitinegg_c		incomplete	_sfx_kitinegg_c
+sfx_kitinegg_d		incomplete	_sfx_kitinegg_d
+sfx_kitinegg_e		incomplete	_sfx_kitinegg_e
+sfx_lightning00		incomplete	_sfx_lightning00
+sfx_lightning01		incomplete	_sfx_lightning01
+sfx_lightning02		incomplete	_sfx_lightning02
+sfx_lightning03		incomplete	_sfx_lightning03
+sfx_lightning_b_01		incomplete	_sfx_lightning_b_01
+sfx_lightning_b_02		incomplete	_sfx_lightning_b_02
+sfx_lightning_b_03		incomplete	_sfx_lightning_b_03
+sfx_mo_charogneinsect		incomplete	_sfx_mo_charogneinsect
+sfx_mo_charognemammal		incomplete	_sfx_mo_charognemammal
+sfx_mo_goocharogneinsect		incomplete	_sfx_mo_goocharogneinsect
+sfx_mo_goocharognemammal		incomplete	_sfx_mo_goocharognemammal
+sfx_snake00		incomplete	_sfx_snake00
+sfx_snake01		incomplete	_sfx_snake01
+sfx_snake02		incomplete	_sfx_snake02
+sfx_spheremirror		incomplete	_sfx_spheremirror
+sfx_sphereshield		incomplete	_sfx_sphereshield
+shockcone01		incomplete	_shockcone01
+shockcone02		incomplete	_shockcone02
+shockwave01		incomplete	_shockwave01
+shockwave02		incomplete	_shockwave02
+shockwave03		incomplete	_shockwave03
+shockwave04		incomplete	_shockwave04
+splashcouronea01		incomplete	_splashcouronea01
+splashcouronea02		incomplete	_splashcouronea02
+splashcouronea03		incomplete	_splashcouronea03
+splashcouronea04		incomplete	_splashcouronea04
+tr_blur1		tryker	incomplete	_blur1
+tr_blur2		tryker	incomplete	_blur2
+tr_fx_bigbird_01		tryker	incomplete	_fx_bigbird_01
+tr_fx_bigbird_02		tryker	incomplete	_fx_bigbird_02
+tr_fx_bigbird_03		tryker	incomplete	_fx_bigbird_03
+tr_fx_bigbird_04		tryker	incomplete	_fx_bigbird_04
+tr_fx_bigbird_05		tryker	incomplete	_fx_bigbird_05
+tr_fx_bird01		tryker	incomplete	_fx_bird01
+tr_fx_bird02		tryker	incomplete	_fx_bird02
+tr_fx_bird03		tryker	incomplete	_fx_bird03
+tr_fx_bird04		tryker	incomplete	_fx_bird04
+tr_wea_baton_trail_00		tryker	weapon	melee	one-handed	blunt	staff	trail	default
+tr_wea_dague_trail_00		tryker	weapon	melee	one-handed	piercing	dagger	trail	default
+tr_wea_epee1m_trail_00		tryker	weapon	melee	one-handed	slashing	sword	trail	default
+tr_wea_epee2m_trail_00		tryker	weapon	melee	two-handed	slashing	sword	trail	default
+tr_wea_hache1m_trail_00		tryker	weapon	melee	one-handed	slashing	axe	trail	default
+tr_wea_hache2m_trail_00		tryker	weapon	melee	two-handed	slashing	axe	trail	default
+tr_wea_lance1m_trail_00		tryker	weapon	melee	one-handed	piercing	spear	trail	default
+tr_wea_lance2m_trail_00		tryker	weapon	melee	two-handed	piercing	pike	trail	default
+tr_wea_masse1m_trail_00		tryker	weapon	melee	one-handed	blunt	mace	trail	default
+tr_wea_masse2m_trail_00		tryker	weapon	melee	two-handed	blunt	mace	trail	default
+zo_wea_baton_trail_00		zorai	weapon	melee	one-handed	blunt	staff	trail	default
+zo_wea_dague_trail_00		zorai	weapon	melee	one-handed	piercing	dagger	trail	default
+zo_wea_epee1m_trail_00		zorai	weapon	melee	one-handed	slashing	sword	trail	default
+zo_wea_epee2m_trail_00		zorai	weapon	melee	two-handed	slashing	sword	trail	default
+zo_wea_hache1m_trail_00		zorai	weapon	melee	one-handed	slashing	axe	trail	default
+zo_wea_hache2m_trail_00		zorai	weapon	melee	two-handed	slashing	axe	trail	default
+zo_wea_lance1m_trail_00		zorai	weapon	melee	one-handed	piercing	spear	trail	default
+zo_wea_lance2m_trail_00		zorai	weapon	melee	two-handed	piercing	pike	trail	default
+zo_wea_masse1m_trail_00		zorai	weapon	melee	one-handed	blunt	mace	trail	default
+zo_wea_masse2m_trail_00		zorai	weapon	melee	two-handed	blunt	mace	trail	default

@@ -51,6 +51,15 @@ sitemParents = loadTsv("sitem_parents.tsv")
 sitemParsed = loadTsv("sitem_parsed.tsv")
 shapeParsed = loadTsv("shape_parsed.tsv")
 matchSitemShape = loadTsv("match_sitem_shape.tsv")
+sfxPsParsed = loadTsv("sfx_ps_parsed.tsv")
+sfxShapeParsed = loadTsv("sfx_shape_parsed.tsv")
+
+sfxPs = {}
+sfxShape = {}
+for entry in sfxPsParsed:
+	sfxPs[entry[0]] = filter(None, entry[1:])
+for entry in sfxShapeParsed:
+	sfxShape[entry[0]] = filter(None, entry[1:])
 
 skills = loadTsv("skills.tsv")
 skillTree = { "S": { "tags": [ "*" ], "entries": {} } }
@@ -540,6 +549,10 @@ def generateSitems():
 			strippedTags.remove("melee")
 		if "ranged" in strippedTags:
 			strippedTags.remove("ranged")
+		if "color" in strippedTags:
+			strippedTags.remove("color")
+		if "advantage" in strippedTags:
+			strippedTags.remove("advantage")
 		displayName = " ".join(strippedTags)
 		
 		origin = "common" # item_origine.typ
@@ -673,12 +686,12 @@ def generateSitems():
 		# print(shapeFemale)
 		# print(tags)
 		
-		if not "armor" in tags and not "shield" in tags:
+		if not "armor" in tags and not "shield" in tags and not "melee" in tags:
 			continue
 		
 		if "armor" in tags and "caster" in tags and not "pants" in tags:
 			continue # Only include caster pants
-		if "armor" in tags and "refugee" in tags and len(name) > 5:
+		if "armor" in tags and "refugee" in tags and "color" in tags:
 			continue # No need to generate these for now
 		
 		brickFamily = findBrickFamily(tags)
@@ -704,6 +717,20 @@ def generateSitems():
 		parent = findSitemParent(tags)
 		if not parent:
 			print("No parent for sitem: " + name + ", tags: " + tags)
+		
+		fxTrail = None
+		if "kami" in tags and shapeMale + "_trail_kam" in sfxShape:
+			fxTrail = shapeMale + "_trail_kam"
+		elif "karavan" in tags and shapeMale + "_trail_car" in sfxShape:
+			fxTrail = shapeMale + "_trail_car"
+		elif shapeMale + "_trail_00" in sfxShape:
+			fxTrail = shapeMale + "_trail_00"
+		elif shapeMale + "_trail_gen" in sfxShape:
+			fxTrail = shapeMale + "_trail_gen"
+
+		fxAdvantage = None
+		if "advantage" in tags and shapeMale in sfxPs:
+			fxAdvantage = shapeMale
 		
 		print(path)
 		with open(path, "w") as f:
@@ -737,6 +764,15 @@ def generateSitems():
 				f.write("      <ATOM Name=\"icon background\" Value=\"" + iconBackground + "\"/>\n")
 			if color != "":
 				f.write("      <ATOM Name=\"color\" Value=\"" + color + "\"/>\n")
+			if fxTrail or fxAdvantage:
+				f.write("      <STRUCT Name=\"fx\">\n")
+				if fxTrail:
+					f.write("        <ATOM Name=\"Trail\" Value=\"" + fxTrail + ".shape\"/>\n")
+				if fxAdvantage:
+					f.write("        <ATOM Name=\"AdvantageFX\" Value=\"" + fxAdvantage + ".ps\"/>\n")
+				f.write("      </STRUCT>\n")
+				if fxAdvantage:
+					f.write("      <ATOM Name=\"has_fx\" Value=\"true\"/>")
 			f.write("    </STRUCT>\n")
 			f.write("  </STRUCT>\n")
 			f.write("</FORM>\n")
@@ -833,9 +869,12 @@ def generateSitems():
 			f.write("      <ATOM Name=\"IconOver\" Value=\"fp_over.png\"/>\n")
 			f.write("      <ATOM Name=\"IconOver2\"/>\n")
 			f.write("    </STRUCT>\n")
-			if "armor" in tags or "shield" in tags:
+			if "armor" in tags or "shield" in tags or "melee" in tags or "magic" in tags:
 				f.write("    <STRUCT Name=\"faber\">\n")
-				f.write("      <ATOM Name=\"Tool type\" Value=\"ArmorTool\"/>\n")
+				if "armor" in tags or "shield" in tags:
+					f.write("      <ATOM Name=\"Tool type\" Value=\"ArmorTool\"/>\n")
+				elif "melee" in tags or "magic" in tags:
+					f.write("      <ATOM Name=\"Tool type\" Value=\"MeleeWeaponTool\"/>\n")
 				# f.write("      <ATOM Name=\"Durability Factor\" Value=\"1\"/>\n")
 				f.write("      <STRUCT Name=\"Create\">\n")
 				f.write("        <ATOM Name=\"Crafted Item\" Value=\"" + name + ".sitem\"/>\n")
@@ -852,7 +891,7 @@ def generateSitems():
 					f.write("        <ATOM Name=\"Quantity 3\" Value=\"" + str(int(mp3 / 4)) + "\"/>\n")
 					f.write("        <ATOM Name=\"MP 4\" Value=\"Raw Material for Armor clip\"/>\n")
 					f.write("        <ATOM Name=\"Quantity 4\" Value=\"" + str(int(mp4 / 4)) + "\"/>\n")
-				if "shield" in tags:
+				elif "shield" in tags:
 					f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Armor shell\"/>\n")
 					f.write("        <ATOM Name=\"Quantity 1\" Value=\"" + str(int(mp1 / 2)) + "\"/>\n")
 					f.write("        <ATOM Name=\"MP 2\" Value=\"Raw Material for Armor clip\"/>\n")
@@ -861,6 +900,45 @@ def generateSitems():
 					f.write("        <ATOM Name=\"Quantity 3\" Value=\"0\"/>\n")
 					f.write("        <ATOM Name=\"MP 4\"/>\n")
 					f.write("        <ATOM Name=\"Quantity 4\" Value=\"0\"/>\n")
+				elif "magic" in tags:
+					f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Shaft\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 1\" Value=\"" + str(int(mp1 / 3)) + "\"/>\n")
+					f.write("        <ATOM Name=\"MP 2\" Value=\"Raw Material for Grip\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 2\" Value=\"" + str(int(mp2 / 3)) + "\"/>\n")
+					f.write("        <ATOM Name=\"MP 3\" Value=\"Raw Material for Magic Focus\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 3\" Value=\"" + str(int(mp3 / 3)) + "\"/>\n")
+					f.write("        <ATOM Name=\"MP 4\"/>\n")
+					f.write("        <ATOM Name=\"Quantity 4\" Value=\"0\"/>\n")
+				elif "melee" in tags:
+					if "staff" in tags:
+						f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Shaft\"/>\n")
+						f.write("        <ATOM Name=\"Quantity 1\" Value=\"" + str(int(mp1 / 2)) + "\"/>\n")
+						f.write("        <ATOM Name=\"MP 2\" Value=\"Raw Material for Grip\"/>\n")
+						f.write("        <ATOM Name=\"Quantity 2\" Value=\"" + str(int(mp2 / 2)) + "\"/>\n")
+						f.write("        <ATOM Name=\"MP 3\"/>\n")
+						f.write("        <ATOM Name=\"Quantity 3\" Value=\"0\"/>\n")
+						f.write("        <ATOM Name=\"MP 4\"/>\n")
+						f.write("        <ATOM Name=\"Quantity 4\" Value=\"0\"/>\n")
+					else:
+						divider = 4
+						if "mace" in tags:
+							f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Hammer\"/>\n")
+						elif "pike" or "spear" in tags:
+							f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Point\"/>\n")
+							divider = 3
+						else:
+							f.write("        <ATOM Name=\"MP 1\" Value=\"Raw Material for Blade\"/>\n")
+						f.write("        <ATOM Name=\"Quantity 1\" Value=\"" + str(int(mp1 / divider)) + "\"/>\n")
+						f.write("        <ATOM Name=\"MP 2\" Value=\"Raw Material for Shaft\"/>\n")
+						f.write("        <ATOM Name=\"Quantity 2\" Value=\"" + str(int(mp2 / divider)) + "\"/>\n")
+						f.write("        <ATOM Name=\"MP 3\" Value=\"Raw Material for Grip\"/>\n")
+						f.write("        <ATOM Name=\"Quantity 3\" Value=\"" + str(int(mp3 / divider)) + "\"/>\n")
+						if "pike" or "spear" in tags:
+							f.write("        <ATOM Name=\"MP 4\"/>\n")
+							f.write("        <ATOM Name=\"Quantity 4\" Value=\"0\"/>\n")
+						else:
+							f.write("        <ATOM Name=\"MP 4\" Value=\"Raw Material for Counterweight\"/>\n")
+							f.write("        <ATOM Name=\"Quantity 4\" Value=\"" + str(int(mp4 / divider)) + "\"/>\n")
 				f.write("        <ATOM Name=\"MP 5\"/>\n")
 				f.write("        <ATOM Name=\"Quantity 5\" Value=\"0\"/>\n")
 				f.write("      </STRUCT>\n")
@@ -891,4 +969,3 @@ def generateSitems():
 
 generateParents()
 generateSitems()
-
