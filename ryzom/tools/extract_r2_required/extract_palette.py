@@ -27,13 +27,38 @@ lf.close()
 
 import merge_sitem_list
 
+meleeSpec = [ "blunt", "pierce", "slash" ]
+curserSpec = [ "blind", "fear", "madness", "root", "sleep", "slow", "snare", "stun" ]
+magicSpec = [ "acid", "cold", "electricity", "fire", "poison", "rot", "shockwave" ]
+
 creatureMatches = re.findall(creatureExpr, paletteLua)
 creatureMap = {}
 for k in creatureMatches:
 	ka = k.split("\"")
 	for kk in ka:
 		if kk != "":
-			creatureMap[kk] = True
+			if "$level" in kk:
+				for i in range(1, 5):
+					k2 = kk.replace("$level", str(i))
+					if "$hands" in k2:
+						if "_melee_" in k2:
+							for s in meleeSpec:
+								k3 = k2.replace("$hands", s)
+								creatureMap[k3] = True
+						elif "_curser_" in k2:
+							for s in curserSpec:
+								k3 = k2.replace("$hands", s)
+								creatureMap[k3] = True
+						elif "_magic_" in k2:
+							for s in magicSpec:
+								k3 = k2.replace("$hands", s)
+								creatureMap[k3] = True
+						else:
+							creatureMap[k2] = True
+					else:
+						creatureMap[k2] = True
+			else:
+				creatureMap[kk] = True
 creatureMatches = list(dict.fromkeys(creatureMap))
 creatureMatches.sort()
 # print(creatureMatches)

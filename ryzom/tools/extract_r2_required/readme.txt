@@ -11,3 +11,9 @@
 # Fix renamed sbrick
 - Run extract_sbrick.py to update sbrick_index.tsv with the current bricks
 - Run fix_rename_sbrick.py to rename sbrick and sphrase in leveldesign if their name changed
+
+# Notes
+ring melee hands: blunt pierce slash
+ring magic hands: acid cold electricity fire poison rot shockwave
+ring magic curser hands: blind fear madness root sleep slow snare stun
+ring level: 1 2 3 4
