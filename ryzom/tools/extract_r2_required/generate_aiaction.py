@@ -5,6 +5,11 @@ meleeSpec = [ "slashing", "piercing", "blunt" ]
 curseSpec = [ "blind", "fear", "madness", "root", "sleep", "slow", "snare", "stun" ]
 magicSpec = [ "acid", "cold", "rot", "fire", "poison", "electricity", "shockwave" ]
 
+#specialSpec = [ "_weak", "", "_strong" ]
+
+# Cannon fodder invasion kitins and newbie creatures use the "a" variant
+# Most creatures use "b" and "c". The "d", "e", and "f" variants are for bosses
+# Goo infected creatures should use "c" and "d"
 variantSpec = [ "a", "b", "c", "d", "e", "f" ] # Newbie, Basic, Fine, Choice, Excellent, Supreme
 
 aiActionFolder = "R:\\leveldesign\\game_elem\\creature\\npc\\bestiary\\aiaction\\generic"
@@ -17,7 +22,7 @@ base = {
 		"melee": meleeSpec,
 		"range": meleeSpec,
 	},
-	# "hybrid": {
+	# "enchanted": { # These 1.5x the damage (regular melee plus 0.5x magic damage)
 		# "melee": meleeSpec * magicSpec,
 		# "range": meleeSpec * magicSpec,
 	# },
@@ -40,27 +45,38 @@ base = {
 # Let's say 10k average total HP for homins and creatures at lvl 250
 # Linear increase of 40 HP per level, so 400 HP per 10 levels, or 200 HP every 5 levels
 maxLevel = 250
-averageMaxHP = 10000
+averageMaxHP = 10000.0
 
 # Settle a fight in 10 seconds, that's an attack of 1000 at lvl 250 for a 1 second attack
 # Add a base boost of 10 levels, that's 40 base attack
-combatTime = 10
+combatTime = 8.0 # 10
 
 # Magic may do double the damage of melee
-magicDamageBoost = 2
+# Range is most powerful but requires ammo of course.
+# Perhaps allow range without ammo at melee damage levels. Or hybrid range and magic for ammo-less range
+# For NPCs, range should have melee-like damage
+meleeDamageBoost = 1.0
+magicDamageBoost = 2.0
+rangeDamageBoost = 1.0 # 4
+
+# Boosts for special attack variants
+#meleeSpecialBoost = [ 0.5, 1.0, 1.5 ]
+#rangeSpecialBoost = [ 0.5, 0.25, 1.0 ]
 
 # Different boosts for each variant
 variantBoost = { "a": 0.1, "b": 1.0, "c": 1.25, "d": 1.75, "e": 2.5, "f": 4.0 }
 variantBaseLevel = { "a": 5, "b": 5, "c": 10, "d": 15, "e": 20, "f": 25 }
+# variantBaseLevel = { "a": 25, "b": 25, "c": 30, "d": 35, "e": 40, "f": 45 }
 randomVariance = 0.1 # Random variance on the generated sheets
 
 # Spell time
-spellBaseTime = 1
-spellRandomBaseTime = 2
+spellBaseTime = 1.0
+spellRandomBaseTime = 2.0
 spellPostTime = 0.5
-spellRandomPostTime = 1
+spellRandomPostTime = 1.0
 
 # magic_damage
+# egs_static_ai_action.cpp
 for spec in magicSpec:
 	for variant in variantSpec:
 		name = "magic_damage_" + spec + "_" + variant
@@ -72,8 +88,8 @@ for spec in magicSpec:
 		randBaseTime = ((randBaseTime % 1000) * spellRandomBaseTime) / 1000.0
 		randPostTime = zlib.crc32("PostActionTime" + name) & 0xffffffff
 		randPostTime = ((randPostTime % 1000) * spellRandomPostTime) / 1000.0
-		baseTime = int((spellBaseTime + randBaseTime) * 10) * 0.1
-		postTime = int((spellPostTime + randPostTime) * 10) * 0.1
+		baseTime = int((spellBaseTime + randBaseTime) * 10.0) * 0.1
+		postTime = int((spellPostTime + randPostTime) * 10.0) * 0.1
 		totalTime = baseTime + postTime
 		maxLevelDamage = (averageMaxHP * totalTime * magicDamageBoost) / combatTime
 		damagePerLevel = maxLevelDamage / maxLevel
@@ -101,3 +117,62 @@ for spec in magicSpec:
 			f.write("    <ATOM Name=\"PostActionTime\" Value=\"" + str(postTime) + "\"/>\n")
 			f.write("  </STRUCT>\n")
 			f.write("</FORM>\n")
+
+# player melee boosts
+# skill -> 10x
+# item speed -> 2x
+# item dmg -> 2x
+# increase damage -> 2x
+
+# player magic boosts
+# glove speed -> 2x
+# glove dmg -> 2x
+# double spell -> 2x
+
+meleeReferenceHitRate = 2.5 # 2h long sword, hits per 10s
+meleeReferenceDmg = 1.0 # 2h long sword
+
+characteristicsBaseBoost = 2.0
+regenTimeMin = 25.0 # in seconds, at lowest level
+regenTimeMax = 100.0 # in seconds, at max level
+regenTimeSittingMax = 25.0
+
+egsMinDamage = None
+egsDamageStep = None
+def printEgsConfiguration():
+	totalTime = 1.0 / (meleeReferenceHitRate / 10.0)
+	maxLevelDamage = (averageMaxHP * totalTime * meleeDamageBoost) / combatTime
+	damagePerLevel = (maxLevelDamage / maxLevel)
+	damagePerLevelFactor = damagePerLevel * variantBoost["b"]
+	damageAdd = damagePerLevel * variantBaseLevel["b"]
+	print("entities_game_service.cfg:")
+	print("MinDamage = " + str(round(damageAdd, 3)) + ";")
+	print("DamageStep = " + str(round(damagePerLevelFactor, 3)) + ";")
+	egsMinDamage = round(damageAdd, 3)
+	egsDamageStep = round(damagePerLevelFactor, 3)
+	print("// (MaxDamage = " + str(egsMinDamage + egsDamageStep * maxLevel) + ")")
+	print("")
+	# print("PhysicalCharacteristicsBaseValue = " + str(variantBaseLevel["b"] * characteristicsBaseBoost) + ";")
+	print("PhysicalCharacteristicsBaseValue = 0;")
+	print("PhysicalCharacteristicsFactor = " + str(averageMaxHP / maxLevel) + ";")
+	startingCharacteristic = (variantBaseLevel["b"] * characteristicsBaseBoost)
+	maxCharacteristic = maxLevel + startingCharacteristic
+	startingHP = startingCharacteristic * (averageMaxHP / maxLevel)
+	realMaxHP = averageMaxHP + startingHP
+	print("// (MaxPlayerBaseHP = " + str(realMaxHP) + ")")
+	print("")
+	regenTimePerHpMin = regenTimeMin * startingCharacteristic / startingHP
+	regenTimePerHpMax = regenTimeMax * maxCharacteristic / realMaxHP
+	print("RegenDivisor = " + str(regenTimePerHpMax) + "; // Seconds per characteristic to regen a point. (Regen per second is the characteristic divided by this value plus offset)")
+	regenTimePerHpSpeedup = (regenTimePerHpMax)
+	hpPerSecSpeedup = startingCharacteristic / regenTimePerHpSpeedup
+	print("RegenReposFactor = " + str(regenTimeMax / regenTimeSittingMax) + "; // Multiplier sitting down, offset not multiplied")
+	print("RegenOffset = " + str(hpPerSecSpeedup) + ";  // Additional regen per second")
+printEgsConfiguration()
+
+# combat_melee
+# egs_static_ai_action.cpp
+# CWeaponDamageTable::getInstance().getRefenceDamage(itemQuality, attackerLevel)
+#for spec in meleeSpec:
+#	for variant in variantSpec:
+#		
