@@ -2884,6 +2884,9 @@ void CCharacter::postLoadTreatment()
 {
 	H_AUTO(CCharacterPostLoadTreatment);
 
+	TLogNoContext_Character noContextCharacter;
+	TLogNoContext_Item noContextItem;
+
 	// Check if the name is correct, otherwise set name to default (in case of corrupted name)
 	uint8 charIndex = PlayerManager.getCharIndex( getId() );
 	uint32 userId = PlayerManager.getPlayerId( getId() );
