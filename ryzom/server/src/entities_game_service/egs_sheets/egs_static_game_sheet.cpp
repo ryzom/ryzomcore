@@ -38,10 +38,12 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLGEORGES;
 
+/*
 const float MinDamage = 25;
 const float DamageStep = 1.0f;
 const float MeanSuccessFactor = 0.65f;
 const float Offset = -0.5f;
+*/
 
 extern CRandom RandomGenerator;
 
