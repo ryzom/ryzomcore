@@ -17,3 +17,6 @@ ring melee hands: blunt pierce slash
 ring magic hands: acid cold electricity fire poison rot shockwave
 ring magic curser hands: blind fear madness root sleep slow snare stun
 ring level: 1 2 3 4
+creature levels: a(0-20) b(20-50) c(50-100) d(100-150) e(150-200) f(200-250)
+creature levels: b1 b2 b3 b4 (b5 b6 b7) - variants within the level range
+
