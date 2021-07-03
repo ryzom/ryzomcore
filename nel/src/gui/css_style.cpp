@@ -1075,7 +1075,6 @@ namespace NLGUI
 						// first loop -> true
 						// second loop -> false && break
 						loop = !loop;
-
 						if (next < parts.size())
 						{
 							val = toLowerAscii(parts[next]);
@@ -1086,29 +1085,56 @@ namespace NLGUI
 								// consume 'center'
 								next++;
 							}
-							else if (val == "left" || val == "right")
+							else if ((bgPositionX.empty() || bgPositionX == "center") && (val == "left" || val == "right"))
 							{
 								bgPositionX = val;
 								// consume 'left|right'
 								next++;
 								if (next < parts.size() && getCssLength(fval, unit, parts[next]))
 								{
-									bgPositionX += " " + toString("%.0f%s", fval, unit.c_str());
+									bgPositionX += " " + parts[next];
 									// consume css length
 									next++;
 								}
 							}
-							else if (val == "top" || val == "bottom")
+							else if ((bgPositionY.empty() || bgPositionY == "center") && (val == "top" || val == "bottom"))
 							{
 								bgPositionY = val;
 								// consume top|bottom
 								next++;
 								if (next < parts.size() && getCssLength(fval, unit, parts[next]))
 								{
-									bgPositionY += " " + toString("%.0f%s", fval, unit.c_str());
+									bgPositionY += " " + parts[next];
 									// consume css length
 									next++;
 								}
+							}
+							else if (getCssLength(fval, unit, parts[next]))
+							{
+								// override X only on first loop
+								if (next == index)
+								{
+									bgPositionX = parts[next];
+								}
+								else if (bgPositionY.empty())
+								{
+									bgPositionY = parts[next];
+								}
+								else
+								{
+									// invalid
+									bgPositionX.clear();
+									bgPositionY.clear();
+									break;
+								}
+								next++;
+							}
+							else
+							{
+								// invalid value
+								bgPositionX.clear();
+								bgPositionY.clear();
+								break;
 							}
 						}
 					} while (loop);
@@ -1152,7 +1178,7 @@ namespace NLGUI
 									if (val == "auto")
 										h = v = "auto";
 									else
-										h = v = toString("%.0f%s", fval, unit.c_str());
+										h = v = val;
 
 									next++;
 									if (next < parts.size())
@@ -1161,7 +1187,7 @@ namespace NLGUI
 										if (val == "auto")
 											v = "auto";
 										else if (getCssLength(fval, unit, val))
-											v = toString("%.0f%s", fval, unit.c_str());
+											v = val;
 										else
 											next--; // not size token
 									}
@@ -1244,7 +1270,10 @@ namespace NLGUI
 
 						// first time background-origin is set, also set background-clip
 						if (!bgClipFound)
+						{
 							bgClipValue = val;
+							bgClipFound = true;
+						}
 					}
 				}
 				else if (props[i] == "background-clip")
@@ -1294,6 +1323,7 @@ namespace NLGUI
 			{
 				if (props[i] == "background-position")
 				{
+					style["background-position"] = bgPositionX + " " + bgPositionY;
 					style["background-position-x"] = bgPositionX;
 					style["background-position-y"] = bgPositionY;
 				}
