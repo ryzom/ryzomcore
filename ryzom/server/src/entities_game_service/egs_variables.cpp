@@ -307,6 +307,8 @@ CVariable<uint16>			MaxCharacteristicValue("egs","MaxCharacteristicValue", "Max 
 // factor on creature and npc damage
 CVariable<float>			BotDamageFactor("egs","BotDamageFactor", "Factor applied on all Bots (creature and npcs) damage", 1.0f, 0, true );
 
+CVariable<bool>				ApplyAverageDodgeFactor("egs","ApplyAverageDodgeFactor", "Whether to use the average dodge factor in calculating mob damage ", true, 0, true );
+
 CVariable<float>			HitChestStaLossFactor("egs","HitChestStaLossFactor", "factor of damage also lost in sta when hit to chest", 0.5f, 0, true );
 CVariable<float>			HitHeadStunDuration("egs","HitHeadStunDuration", "duration (in seconds) of a stun when hit to head", 2.5f, 0, true );
 CVariable<float>			HitArmsSlowDuration("egs","HitArmsSlowDuration", "duration (in seconds) of a slow attack when hit to arms", 5.0f, 0, true );
