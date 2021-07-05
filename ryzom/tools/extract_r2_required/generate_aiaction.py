@@ -12,7 +12,7 @@ if not os.path.isdir(aiActionFolder):
 base = {
 	"combat": {
 		"fauna": meleeSpec,
-		"melee": meleeSpec,
+		"melee": [ "" ],
 		"range": meleeSpec,
 	},
 	# "enchanted": { # These 1.5x the damage (regular melee plus 0.5x magic damage)
@@ -187,6 +187,8 @@ printEgsConfiguration()
 for skill in base["combat"]:
 	for spec in base["combat"][skill]:
 		name = "combat_" + skill + "_" + spec
+		if spec == "":
+			name = "combat_" + skill
 		type = "Melee"
 		if skill == "range":
 			type = "Range"
@@ -206,7 +208,8 @@ for skill in base["combat"]:
 			f.write("    <ATOM Name=\"CombatDamageType\" Value=\"" + combatDamageType + "\"/>\n")
 			f.write("    <ATOM Name=\"Critic\" Value=\"0.1\"/>\n")
 			f.write("    <ATOM Name=\"AimingType\" Value=\"Random\"/>\n")
-			f.write("    <ATOM Name=\"Behaviour\" Value=\"" + behaviour + "\"/>\n")
+			if behaviour != "UNKNOWN_BEHAVIOUR":
+				f.write("    <ATOM Name=\"Behaviour\" Value=\"" + behaviour + "\"/>\n")
 			f.write("  </STRUCT>\n")
 			f.write("</FORM>\n")
 
