@@ -5,13 +5,6 @@ meleeSpec = [ "slashing", "piercing", "blunt" ]
 curseSpec = [ "blind", "fear", "madness", "root", "sleep", "slow", "snare", "stun" ]
 magicSpec = [ "acid", "cold", "rot", "fire", "poison", "electricity", "shockwave" ]
 
-#specialSpec = [ "_weak", "", "_strong" ]
-
-# Cannon fodder invasion kitins and newbie creatures use the "a" variant
-# Most creatures use "b" and "c". The "d", "e", and "f" variants are for bosses
-# Goo infected creatures should use "c" and "d"
-#variantSpec = [ "a", "b", "c", "d", "e", "f" ] # Newbie, Basic, Fine, Choice, Excellent, Supreme
-
 aiActionFolder = "R:\\leveldesign\\game_elem\\creature\\npc\\bestiary\\aiaction\\generic"
 if not os.path.isdir(aiActionFolder):
 	os.makedirs(aiActionFolder)
@@ -38,40 +31,29 @@ base = {
 	# },
 }
 
-# Damage
-# ------
-# Total Magic Damage = DamageValue + (SpellPowerFactor * creature.AttackLevel)
-
-# Let's say 10k average total HP for homins and creatures at lvl 250
-# Linear increase of 40 HP per level, so 400 HP per 10 levels, or 200 HP every 5 levels
 maxLevel = 250.0
-# averageMaxHP = 10000.0
 minCharacteristic = 10.0
 maxCharacteristic = minCharacteristic + maxLevel
 minScore = minCharacteristic * 60.0
 maxScore = maxCharacteristic * 60.0
 
-# Settle a fight in 10 seconds, that's an attack of 1000 at lvl 250 for a 1 second attack
-# Add a base boost of 10 levels, that's 40 base attack
+# Time to settle a fight, for base damage and HP, assuming all hits are perfectly successful
 combatTime = 8.0 # 10
 
 # Magic may do double the damage of melee
 # Range is most powerful but requires ammo of course.
 # Perhaps allow range without ammo at melee damage levels. Or hybrid range and magic for ammo-less range
-# For NPCs, range should have melee-like damage
-meleeDamageBoost = 1.0
-magicDamageBoost = 2.0
-rangeDamageBoost = 1.0 # 4
+# For NPCs, range should have melee-like damage, since there is no special protection...
+# Can we turn melee/magic/range into a rock/paper/scissors?
+boosts = {
+	"fauna": 1.0,
+	"melee": 1.0,
+	"magic": 2.0,
+	"range": 1.0, # 4.0?
+}
 
-# Boosts for special attack variants
-#meleeSpecialBoost = [ 0.5, 1.0, 1.5 ]
-#rangeSpecialBoost = [ 0.5, 0.25, 1.0 ]
-
-# Different boosts for each variant
-#variantBoost = { "a": 0.1, "b": 1.0, "c": 1.25, "d": 1.75, "e": 2.5, "f": 4.0 }
-#variantBaseLevel = { "a": 5, "b": 5, "c": 10, "d": 15, "e": 20, "f": 25 }
-# variantBaseLevel = { "a": 25, "b": 25, "c": 30, "d": 35, "e": 40, "f": 45 }
-randomVariance = 0.1 # Random variance on the generated sheets
+# Random variance on the generated sheets
+randomVariance = 0.1
 
 # Spell time
 spellBaseTime = 1.0
@@ -81,13 +63,16 @@ spellRandomPostTime = 1.0
 
 # magic_damage
 # egs_static_ai_action.cpp
+# Total Magic Damage = DamageValue + (SpellPowerFactor * creature.AttackLevel)
 for spec in magicSpec:
 	# for variant in variantSpec:
 	name = "magic_damage_" + spec
-	randBoostFactor = zlib.crc32("SpellPowerFactor" + name) & 0xffffffff
-	randBoostFactor = (((randBoostFactor % 2000) - 1000) * randomVariance) / 1000.0
-	randBoostAdd = zlib.crc32("DamageValue" + name) & 0xffffffff
-	randBoostAdd = (((randBoostAdd % 2000) - 1000) * randomVariance) / 1000.0
+	# randBoostFactor = zlib.crc32("SpellPowerFactor" + name) & 0xffffffff
+	# randBoostFactor = (((randBoostFactor % 2000) - 1000) * randomVariance) / 1000.0
+	randBoostFactor = 0.0
+	# randBoostAdd = zlib.crc32("DamageValue" + name) & 0xffffffff
+	# randBoostAdd = (((randBoostAdd % 2000) - 1000) * randomVariance) / 1000.0
+	randBoostAdd = 0.0
 	randBaseTime = zlib.crc32("CastingTime" + name) & 0xffffffff
 	randBaseTime = ((randBaseTime % 1000) * spellRandomBaseTime) / 1000.0
 	randPostTime = zlib.crc32("PostActionTime" + name) & 0xffffffff
@@ -95,7 +80,7 @@ for spec in magicSpec:
 	baseTime = int((spellBaseTime + randBaseTime) * 10.0) * 0.1
 	postTime = int((spellPostTime + randPostTime) * 10.0) * 0.1
 	totalTime = baseTime + postTime
-	maxLevelDamage = (maxScore * totalTime * magicDamageBoost) / combatTime
+	maxLevelDamage = (maxScore * totalTime * boosts["magic"]) / combatTime
 	damagePerLevel = maxLevelDamage / maxCharacteristic
 	damagePerLevelFactor = (damagePerLevel + (damagePerLevel * randBoostFactor)) # * variantBoost[variant]
 	damageAdd = (damagePerLevel + (damagePerLevel * randBoostAdd)) * minCharacteristic # * variantBaseLevel[variant]
@@ -144,7 +129,7 @@ egsMinDamage = None
 egsDamageStep = None
 def printEgsConfiguration():
 	totalTime = 1.0 / (meleeReferenceHitRate / 10.0)
-	maxLevelDamage = (maxScore * totalTime * meleeDamageBoost) / combatTime
+	maxLevelDamage = (maxScore * totalTime * boosts["melee"]) / combatTime
 	damagePerLevel = (maxLevelDamage / maxCharacteristic)
 	damagePerLevelFactor = damagePerLevel # * variantBoost["b"]
 	damageAdd = damagePerLevel * minCharacteristic
@@ -173,6 +158,32 @@ printEgsConfiguration()
 # combat_melee
 # egs_static_ai_action.cpp
 # CWeaponDamageTable::getInstance().getRefenceDamage(itemQuality, attackerLevel)
+for skill in base["combat"]:
+	for spec in base["combat"][skill]:
+		name = "combat_" + skill + "_" + spec
+		type = "Melee"
+		if skill == "range":
+			type = "Range"
+		combatDamageType = spec.upper()
+		behaviour = "UNKNOWN_BEHAVIOUR"
+		if skill == "fauna":
+			behaviour = "CREATURE_ATTACK_0"
+		with open(aiActionFolder + "\\" + name + ".aiaction", "w") as f:
+			f.write("<?xml version=\"1.0\"?>\n")
+			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
+			f.write("  <STRUCT>\n")
+			f.write("    <ATOM Name=\"type\" Value=\"" + type + "\"/>\n")
+			f.write("    <ATOM Name=\"SpeedFactor\" Value=\"0\"/>\n")
+			f.write("    <ATOM Name=\"DamageFactor\" Value=\"0\"/>\n")
+			f.write("    <ATOM Name=\"DamageAdd\" Value=\"0\"/>\n")
+			f.write("    <ATOM Name=\"ArmorAbsorptionFactor\" Value=\"1.0\"/>\n")
+			f.write("    <ATOM Name=\"CombatDamageType\" Value=\"" + combatDamageType + "\"/>\n")
+			f.write("    <ATOM Name=\"Critic\" Value=\"0.1\"/>\n")
+			f.write("    <ATOM Name=\"AimingType\" Value=\"Random\"/>\n")
+			f.write("    <ATOM Name=\"Behaviour\" Value=\"" + behaviour + "\"/>\n")
+			f.write("  </STRUCT>\n")
+			f.write("</FORM>\n")
+
 #for spec in meleeSpec:
 #	for variant in variantSpec:
 #		
