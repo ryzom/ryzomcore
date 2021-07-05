@@ -21,8 +21,9 @@ base = {
 	# },
 	"magic": {
 		"damage": magicSpec,
-		"dot": magicSpec,
-		"heal": [ "hp", "sap", "stamina", "focus" ],
+		"aoe": magicSpec,
+		# "dot": magicSpec,
+		# "heal": [ "hp", "sap", "stamina", "focus" ],
 		"curse": curseSpec,
 	},
 	# "debuff": {
@@ -64,48 +65,73 @@ spellRandomPostTime = 1.0
 # magic_damage
 # egs_static_ai_action.cpp
 # Total Magic Damage = DamageValue + (SpellPowerFactor * creature.AttackLevel)
-for spec in magicSpec:
-	# for variant in variantSpec:
-	name = "magic_damage_" + spec
-	# randBoostFactor = zlib.crc32("SpellPowerFactor" + name) & 0xffffffff
-	# randBoostFactor = (((randBoostFactor % 2000) - 1000) * randomVariance) / 1000.0
-	randBoostFactor = 0.0
-	# randBoostAdd = zlib.crc32("DamageValue" + name) & 0xffffffff
-	# randBoostAdd = (((randBoostAdd % 2000) - 1000) * randomVariance) / 1000.0
-	randBoostAdd = 0.0
-	randBaseTime = zlib.crc32("CastingTime" + name) & 0xffffffff
-	randBaseTime = ((randBaseTime % 1000) * spellRandomBaseTime) / 1000.0
-	randPostTime = zlib.crc32("PostActionTime" + name) & 0xffffffff
-	randPostTime = ((randPostTime % 1000) * spellRandomPostTime) / 1000.0
-	baseTime = int((spellBaseTime + randBaseTime) * 10.0) * 0.1
-	postTime = int((spellPostTime + randPostTime) * 10.0) * 0.1
-	totalTime = baseTime + postTime
-	maxLevelDamage = (maxScore * totalTime * boosts["magic"]) / combatTime
-	damagePerLevel = maxLevelDamage / maxCharacteristic
-	damagePerLevelFactor = (damagePerLevel + (damagePerLevel * randBoostFactor)) # * variantBoost[variant]
-	damageAdd = (damagePerLevel + (damagePerLevel * randBoostAdd)) * minCharacteristic # * variantBaseLevel[variant]
-	behaviour = "CAST_" + spec.upper()
-	if behaviour == "CAST_ELECTRICITY":
-		behaviour = "CAST_ELEC"
-	if behaviour == "CAST_SHOCKWAVE":
-		behaviour = "CAST_SHOCK"
-	damageType = spec.upper()
-	if damageType == "SHOCKWAVE":
-		damageType = "SHOCK"
-	with open(aiActionFolder + "\\" + name + ".aiaction", "w") as f:
-		f.write("<?xml version=\"1.0\"?>\n")
-		f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
-		f.write("  <STRUCT>\n")
-		f.write("    <ATOM Name=\"type\" Value=\"DamageSpell\"/>\n")
-		f.write("    <ATOM Name=\"Behaviour\" Value=\"" + behaviour + "\"/>\n")
-		f.write("    <ATOM Name=\"SpellPowerFactor\" Value=\"" + str(round(damagePerLevelFactor, 3))+ "\"/>\n")
-		f.write("    <ATOM Name=\"DamageScore\" Value=\"HitPoints\"/>\n")
-		f.write("    <ATOM Name=\"DamageType\" Value=\"" + damageType + "\"/>\n")
-		f.write("    <ATOM Name=\"DamageValue\" Value=\"" + str(int(damageAdd)) + "\"/>\n")
-		f.write("    <ATOM Name=\"CastingTime\" Value=\"" + str(baseTime) + "\"/>\n")
-		f.write("    <ATOM Name=\"PostActionTime\" Value=\"" + str(postTime) + "\"/>\n")
-		f.write("  </STRUCT>\n")
-		f.write("</FORM>\n")
+for skill in base["magic"]:
+	for spec in base["magic"][skill]:
+		# for variant in variantSpec:
+		name = "magic_" + skill + "_" + spec
+		# randBoostFactor = zlib.crc32("SpellPowerFactor" + name) & 0xffffffff
+		# randBoostFactor = (((randBoostFactor % 2000) - 1000) * randomVariance) / 1000.0
+		randBoostFactor = 0.0
+		# randBoostAdd = zlib.crc32("DamageValue" + name) & 0xffffffff
+		# randBoostAdd = (((randBoostAdd % 2000) - 1000) * randomVariance) / 1000.0
+		randBoostAdd = 0.0
+		randBaseTime = zlib.crc32("CastingTime" + name) & 0xffffffff
+		randBaseTime = ((randBaseTime % 1000) * spellRandomBaseTime) / 1000.0
+		randPostTime = zlib.crc32("PostActionTime" + name) & 0xffffffff
+		randPostTime = ((randPostTime % 1000) * spellRandomPostTime) / 1000.0
+		baseTime = int((spellBaseTime + randBaseTime) * 10.0) * 0.1
+		postTime = int((spellPostTime + randPostTime) * 10.0) * 0.1
+		totalTime = baseTime + postTime
+		maxLevelDamage = (maxScore * totalTime * boosts["magic"]) / combatTime
+		damagePerLevel = maxLevelDamage / maxCharacteristic
+		damagePerLevelFactor = (damagePerLevel + (damagePerLevel * randBoostFactor)) # * variantBoost[variant]
+		damageAdd = (damagePerLevel + (damagePerLevel * randBoostAdd)) * minCharacteristic # * variantBaseLevel[variant]
+		behaviour = "CAST_" + spec.upper()
+		if behaviour == "CAST_ELECTRICITY":
+			behaviour = "CAST_ELEC"
+		elif behaviour == "CAST_SHOCKWAVE":
+			behaviour = "CAST_SHOCK"
+		elif behaviour == "CAST_MADNESS":
+			behaviour = "CAST_MAD"
+		elif behaviour == "CAST_SNARE":
+			behaviour = "CAST_SLOW"
+		damageType = spec.upper()
+		if damageType == "SHOCKWAVE":
+			damageType = "SHOCK"
+		with open(aiActionFolder + "\\" + name + ".aiaction", "w") as f:
+			f.write("<?xml version=\"1.0\"?>\n")
+			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
+			f.write("  <STRUCT>\n")
+			f.write("    <ATOM Name=\"type\" Value=\"DamageSpell\"/>\n")
+			if skill == "aoe":
+				f.write("    <ATOM Name=\"AreaType\" Value=\"Bomb\"/>\n")
+				f.write("    <ATOM Name=\"BombRadius\" Value=\"4\"/>\n")
+			f.write("    <ATOM Name=\"Behaviour\" Value=\"" + behaviour + "\"/>\n")
+			if skill == "curse":
+				effectType = spec[0].upper() + spec[1:]
+				if effectType == "Sleep":
+					effectType = "Mezz"
+				elif effectType == "Madness":
+					effectType = "MeleeMadness"
+				elif effectType == "Slow":
+					effectType = "SlowMelee"
+				elif effectType == "Snare":
+					effectType = "SlowMove"
+				referenceTime = spellBaseTime + spellRandomBaseTime / 2.0 + spellPostTime + spellRandomPostTime / 2.0
+				effectDuration = 10.0 * totalTime / referenceTime
+				f.write("    <ATOM Name=\"EffectType\" Value=\"" + effectType + "\"/>\n")
+				f.write("    <ATOM Name=\"EffectValue\" Value=\"75\"/>\n")
+				f.write("    <ATOM Name=\"EffectDuration\" Value=\"" + str(round(effectDuration, 1)) + "\"/>\n")
+				f.write("    <ATOM Name=\"EffectDurationType\" Value=\"Normal\"/>\n")
+			else:
+				f.write("    <ATOM Name=\"SpellPowerFactor\" Value=\"" + str(round(damagePerLevelFactor, 3))+ "\"/>\n")
+				f.write("    <ATOM Name=\"DamageScore\" Value=\"HitPoints\"/>\n")
+				f.write("    <ATOM Name=\"DamageType\" Value=\"" + damageType + "\"/>\n")
+				f.write("    <ATOM Name=\"DamageValue\" Value=\"" + str(int(damageAdd)) + "\"/>\n")
+			f.write("    <ATOM Name=\"CastingTime\" Value=\"" + str(baseTime) + "\"/>\n")
+			f.write("    <ATOM Name=\"PostActionTime\" Value=\"" + str(postTime) + "\"/>\n")
+			f.write("  </STRUCT>\n")
+			f.write("</FORM>\n")
 
 # player melee boosts
 # skill -> 10x
