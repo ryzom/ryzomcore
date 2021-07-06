@@ -191,10 +191,6 @@ for curse in curseSpec:
 meleeReferenceHitRate = 2.5 # 2h long sword, hits per 10s
 meleeReferenceDmg = 1.0 # 2h long sword
 
-regenTimeMin = 25.0 # in seconds, at lowest level
-regenTimeMax = 100.0 # in seconds, at max level
-regenTimeSittingMax = 25.0
-
 egsMinDamage = None
 egsDamageStep = None
 def printEgsConfiguration():
