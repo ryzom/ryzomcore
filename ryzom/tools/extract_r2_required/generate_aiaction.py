@@ -14,6 +14,17 @@ faunaActionFolder = "R:\\leveldesign\\game_elem\\creature\\fauna\\aiaction\\gene
 if not os.path.isdir(faunaActionFolder):
 	os.makedirs(faunaActionFolder)
 
+npcActionListFolder = "R:\\leveldesign\\game_elem\\creature\\npc\\actionlist\\generic"
+if not os.path.isdir(npcActionListFolder):
+	os.makedirs(npcActionListFolder)
+faunaActionListFolder = "R:\\leveldesign\\game_elem\\creature\\fauna\\actionlist\\generic"
+if not os.path.isdir(faunaActionListFolder):
+	os.makedirs(faunaActionListFolder)
+
+npcActionListComboFolder = "R:\\leveldesign\\game_elem\\creature\\npc\\actionlist\\combo"
+if not os.path.isdir(npcActionListComboFolder):
+	os.makedirs(npcActionListComboFolder)
+
 base = {
 	"combat": {
 		"fauna": meleeSpec,
@@ -140,6 +151,31 @@ for skill in base["magic"]:
 			f.write("    <ATOM Name=\"PostActionTime\" Value=\"" + str(postTime) + "\"/>\n")
 			f.write("  </STRUCT>\n")
 			f.write("</FORM>\n")
+		with open(npcActionListFolder + "\\" + name + ".actionlist", "w") as f:
+			f.write("<?xml version=\"1.0\"?>\n")
+			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
+			f.write("  <STRUCT>\n")
+			f.write("    <ARRAY Name=\"actions\">\n")
+			f.write("      <ATOM Value=\"" + name + ".aiaction\"/>\n")
+			f.write("    </ARRAY>\n")
+			f.write("  </STRUCT>\n")
+			f.write("</FORM>\n")
+
+for curse in curseSpec:
+	for dot in magicSpec:
+		name = "magic_affliction_" + curse + "_" + dot
+		curseName = "magic_curse_" + curse
+		dotName = "magic_dot_" + dot
+		with open(npcActionListComboFolder + "\\" + name + ".actionlist", "w") as f:
+			f.write("<?xml version=\"1.0\"?>\n")
+			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
+			f.write("  <STRUCT>\n")
+			f.write("    <ARRAY Name=\"actions\">\n")
+			f.write("      <ATOM Value=\"" + curseName + ".aiaction\"/>\n")
+			f.write("      <ATOM Value=\"" + dotName + ".aiaction\"/>\n")
+			f.write("    </ARRAY>\n")
+			f.write("  </STRUCT>\n")
+			f.write("</FORM>\n")
 
 # player melee boosts
 # skill -> 10x
@@ -221,6 +257,18 @@ for skill in base["combat"]:
 			f.write("    <ATOM Name=\"AimingType\" Value=\"Random\"/>\n")
 			if behaviour != "UNKNOWN_BEHAVIOUR":
 				f.write("    <ATOM Name=\"Behaviour\" Value=\"" + behaviour + "\"/>\n")
+			f.write("  </STRUCT>\n")
+			f.write("</FORM>\n")
+		folder = npcActionListFolder
+		if skill == "fauna":
+			folder = faunaActionListFolder
+		with open(folder + "\\" + name + ".actionlist", "w") as f:
+			f.write("<?xml version=\"1.0\"?>\n")
+			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
+			f.write("  <STRUCT>\n")
+			f.write("    <ARRAY Name=\"actions\">\n")
+			f.write("      <ATOM Value=\"" + name + ".aiaction\"/>\n")
+			f.write("    </ARRAY>\n")
 			f.write("  </STRUCT>\n")
 			f.write("</FORM>\n")
 
