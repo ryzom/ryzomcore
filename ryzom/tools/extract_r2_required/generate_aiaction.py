@@ -1,9 +1,11 @@
 
 import os, zlib
 
-meleeSpec = [ "slashing", "piercing", "blunt" ]
-curseSpec = [ "blind", "fear", "madness", "root", "sleep", "slow", "snare", "stun" ]
-magicSpec = [ "acid", "cold", "rot", "fire", "poison", "electricity", "shockwave" ]
+from balancing_config import *
+
+meleeSpec = specialization["melee"]
+curseSpec = specialization["curse"]
+magicSpec = specialization["magic"]
 
 aiActionFolder = "R:\\leveldesign\\game_elem\\creature\\npc\\bestiary\\aiaction\\generic"
 if not os.path.isdir(aiActionFolder):
@@ -16,41 +18,21 @@ base = {
 		"range": meleeSpec,
 	},
 	# "enchanted": { # These 1.5x the damage (regular melee plus 0.5x magic damage)
-		# "melee": meleeSpec * magicSpec,
-		# "range": meleeSpec * magicSpec,
+		# "melee": meleeSpec * magicSpec + curseSpec,
+		# "range": meleeSpec * magicSpec + curseSpec,
 	# },
 	"magic": {
 		"damage": magicSpec,
 		"aoe": magicSpec,
-		# "dot": magicSpec,
+		"dot": magicSpec,
 		# "heal": [ "hp", "sap", "stamina", "focus" ],
 		"curse": curseSpec,
+		# affliction: curseSpec * magicSpec
 	},
 	# "debuff": {
 		# "skill": [ "melee", "range", "magic" ],
 		# "resist": magicSpec,
 	# },
-}
-
-maxLevel = 250.0
-minCharacteristic = 10.0
-maxCharacteristic = minCharacteristic + maxLevel
-minScore = minCharacteristic * 60.0
-maxScore = maxCharacteristic * 60.0
-
-# Time to settle a fight, for base damage and HP, assuming all hits are perfectly successful
-combatTime = 8.0 # 10
-
-# Magic may do double the damage of melee
-# Range is most powerful but requires ammo of course.
-# Perhaps allow range without ammo at melee damage levels. Or hybrid range and magic for ammo-less range
-# For NPCs, range should have melee-like damage, since there is no special protection...
-# Can we turn melee/magic/range into a rock/paper/scissors?
-boosts = {
-	"fauna": 1.0,
-	"melee": 1.0,
-	"magic": 2.0,
-	"range": 1.0, # 4.0?
 }
 
 # Random variance on the generated sheets
@@ -61,6 +43,10 @@ spellBaseTime = 1.0
 spellRandomBaseTime = 2.0
 spellPostTime = 0.5
 spellRandomPostTime = 1.0
+dotDuration = 8.0
+dotRandomDuration = 8.0
+dotFrequency = 2.0
+dotRandomFrequency = 2.0
 
 # magic_damage
 # egs_static_ai_action.cpp
@@ -82,7 +68,10 @@ for skill in base["magic"]:
 		baseTime = int((spellBaseTime + randBaseTime) * 10.0) * 0.1
 		postTime = int((spellPostTime + randPostTime) * 10.0) * 0.1
 		totalTime = baseTime + postTime
-		maxLevelDamage = (maxScore * totalTime * boosts["magic"]) / combatTime
+		boost = boosts["magic"]
+		if "magic_" + skill in boosts:
+			boost = boosts["magic_" + skill]
+		maxLevelDamage = (maxScore * totalTime * boost) / combatTime
 		damagePerLevel = maxLevelDamage / maxCharacteristic
 		damagePerLevelFactor = (damagePerLevel + (damagePerLevel * randBoostFactor)) # * variantBoost[variant]
 		damageAdd = (damagePerLevel + (damagePerLevel * randBoostAdd)) * minCharacteristic # * variantBaseLevel[variant]
@@ -102,11 +91,27 @@ for skill in base["magic"]:
 			f.write("<?xml version=\"1.0\"?>\n")
 			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
 			f.write("  <STRUCT>\n")
-			f.write("    <ATOM Name=\"type\" Value=\"DamageSpell\"/>\n")
+			if skill == "dot":
+				f.write("    <ATOM Name=\"type\" Value=\"DoTSpell\"/>\n")
+			else:
+				f.write("    <ATOM Name=\"type\" Value=\"DamageSpell\"/>\n")
 			if skill == "aoe":
 				f.write("    <ATOM Name=\"AreaType\" Value=\"Bomb\"/>\n")
 				f.write("    <ATOM Name=\"BombRadius\" Value=\"4\"/>\n")
 			f.write("    <ATOM Name=\"Behaviour\" Value=\"" + behaviour + "\"/>\n")
+			if skill == "dot":
+				randDuration = zlib.crc32("Duration" + name) & 0xffffffff
+				randDuration = ((randDuration % 1000) * dotRandomDuration) / 1000.0
+				duration = round(dotDuration + randDuration, 1)
+				randFrequency = zlib.crc32("UpdateFrequency" + name) & 0xffffffff
+				randFrequency = ((randFrequency % 1000) * dotRandomFrequency) / 1000.0
+				frequency = round(dotFrequency + randFrequency, 1)
+				f.write("    <ATOM Name=\"Duration\" Value=\"" + str(duration) + "\"/>\n")
+				f.write("    <ATOM Name=\"DurationType\" Value=\"Normal\"/>\n")
+				f.write("    <ATOM Name=\"UpdateFrequency\" Value=\"" + str(frequency) + "\"/>\n")
+				nbImpacts = int(duration / frequency) * 1.0
+				damagePerLevelFactor /= nbImpacts
+				damageAdd /= nbImpacts
 			if skill == "curse":
 				effectType = spec[0].upper() + spec[1:]
 				if effectType == "Sleep":
