@@ -7,9 +7,12 @@ meleeSpec = specialization["melee"]
 curseSpec = specialization["curse"]
 magicSpec = specialization["magic"]
 
-aiActionFolder = "R:\\leveldesign\\game_elem\\creature\\npc\\bestiary\\aiaction\\generic"
-if not os.path.isdir(aiActionFolder):
-	os.makedirs(aiActionFolder)
+npcActionFolder = "R:\\leveldesign\\game_elem\\creature\\npc\\aiaction\\generic"
+if not os.path.isdir(npcActionFolder):
+	os.makedirs(npcActionFolder)
+faunaActionFolder = "R:\\leveldesign\\game_elem\\creature\\fauna\\aiaction\\generic"
+if not os.path.isdir(faunaActionFolder):
+	os.makedirs(faunaActionFolder)
 
 base = {
 	"combat": {
@@ -87,7 +90,7 @@ for skill in base["magic"]:
 		damageType = spec.upper()
 		if damageType == "SHOCKWAVE":
 			damageType = "SHOCK"
-		with open(aiActionFolder + "\\" + name + ".aiaction", "w") as f:
+		with open(npcActionFolder + "\\" + name + ".aiaction", "w") as f:
 			f.write("<?xml version=\"1.0\"?>\n")
 			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
 			f.write("  <STRUCT>\n")
@@ -201,7 +204,10 @@ for skill in base["combat"]:
 		behaviour = "UNKNOWN_BEHAVIOUR"
 		if skill == "fauna":
 			behaviour = "CREATURE_ATTACK_0"
-		with open(aiActionFolder + "\\" + name + ".aiaction", "w") as f:
+		folder = npcActionFolder
+		if skill == "fauna":
+			folder = faunaActionFolder
+		with open(folder + "\\" + name + ".aiaction", "w") as f:
 			f.write("<?xml version=\"1.0\"?>\n")
 			f.write("<FORM Version=\"4.0\" State=\"modified\">\n")
 			f.write("  <STRUCT>\n")
