@@ -7,7 +7,7 @@ if not os.path.isdir(folder):
 
 matrix = [
 	{ "fy": "fyros", "ma": "matis", "tr": "tryker", "zo": "zorai" },
-	{ "f": "female", "h": "female" },
+	{ "f": "female", "h": "male" },
 	{ "a": "ah", "b": "am", "c": "al", "d": "ac" },
 	{ 1: "", 2: "_2", 3: "_3" },
 	{ "": 0, "mid": 1, "old": 2 },
