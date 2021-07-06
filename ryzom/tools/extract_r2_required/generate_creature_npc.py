@@ -102,6 +102,7 @@ def writeNpcCreature(name, type, level, spec, actionlist):
 	attackLevel = varyLevel(baseLevel + types[type]["attackOffset"], "Attack_" + name)
 	defenseLevel = varyLevel(baseLevel + types[type]["defenseOffset"], "Defense_" + name)
 	avgLevel = int(round((attackLevel + defenseLevel) / 2, 0))
+	xpLevel = int(round((baseLevel + attackLevel + defenseLevel) / 3, 0))
 	playerHpLevel = int(getScore(baseLevel) / 100.0)
 	hp = round(varyFloat(getScore(baseLevel), hpVariance, "life" + name) * types[type]["hpFactor"], 0)
 	regen = varyFloat(hp / regenTimeAi, hpVariance, "LifeRegen" + name)
@@ -158,7 +159,7 @@ def writeNpcCreature(name, type, level, spec, actionlist):
 		f.write("      <ATOM Name=\"LifeRegen\" Value=\"" + str(regen) + "\"/>\n")
 		f.write("      <ATOM Name=\"AttackLevel\" Value=\"" + str(attackLevel) + "\"/>\n")
 		f.write("      <ATOM Name=\"DefenseLevel\" Value=\"" + str(defenseLevel) + "\"/>\n")
-		f.write("      <ATOM Name=\"XPLevel\" Value=\"" + str(baseLevel) + "\"/>\n")
+		f.write("      <ATOM Name=\"XPLevel\" Value=\"" + str(xpLevel) + "\"/>\n")
 		f.write("      <ATOM Name=\"TauntLevel\" Value=\"" + str(varyLevel(baseLevel, "TauntLevel" + name)) + "\"/>\n")
 		f.write("      <ATOM Name=\"RegionForce\" Value=\"" + str(getRegionForce(level)) + "\"/>\n")
 		f.write("      <ATOM Name=\"ForceLevel\" Value=\"" + str(getForceLevel(level)) + "\"/>\n") # TODO
