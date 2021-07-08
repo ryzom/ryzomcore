@@ -19610,11 +19610,7 @@ void CCharacter::setOutpostAlias( uint32 id )
 	else
 	{
 		if( _OutpostAlias != 0 )
-		{
 			sendDynamicSystemMessage( _Id, "OUTPOST_NO_MORE_IN_CONFLICT");
-			if (getCurrentPVPZone() != CAIAliasTranslator::Invalid)
-				CPVPManager::getInstance()->enterPVPZone( this, getCurrentPVPZone() );
-		}
 //		_PropertyDatabase.setProp("CHARACTER_INFO:PVP_OUTPOST:ROUND_LVL_CUR", 0 );
 		CBankAccessor_PLR::getCHARACTER_INFO().getPVP_OUTPOST().setROUND_LVL_CUR(_PropertyDatabase, 0 );
 //		_PropertyDatabase.setProp("CHARACTER_INFO:PVP_OUTPOST:ROUND_END_DATE", 0 );
@@ -19834,7 +19830,10 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 
 	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(_GuildId);
 
-	if (!neutral || outpostInFire)
+	if (neutral)
+		nlinfo("Player %s choose neutral", getName().toString().c_str());
+
+	if (!neutral)
 	{
 		// validate outpost alias
 		setOutpostAlias( _OutpostIdBeforeUserValidation );
@@ -19844,14 +19843,16 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 			// he his guild owns the outpost he can only help his guild
 			if (_GuildId == outpost->getOwnerGuild())
 			{
+				nlinfo("Guildmate %s choose side Owner at OP %s", getName().toString().c_str(), CPrimitivesParser::aliasToString(_OutpostIdBeforeUserValidation).c_str());
 				setOutpostSide( OUTPOSTENUMS::OutpostOwner );
 				_OutpostIdBeforeUserValidation = 0;
 				return;
 			}
 			// he his guild attacks the outpost he can only help his guild
-			if( _GuildId == COutpostManager::getInstance().getOutpostFromAlias( _OutpostIdBeforeUserValidation )->getAttackerGuild() )
+			if (_GuildId == COutpostManager::getInstance().getOutpostFromAlias(_OutpostIdBeforeUserValidation)->getAttackerGuild())
 			{
 				setOutpostSide( OUTPOSTENUMS::OutpostAttacker );
+				nlinfo("Guildmate %s choose side Attacker at OP %s", getName().toString().c_str(), CPrimitivesParser::aliasToString(_OutpostIdBeforeUserValidation).c_str());
 				_OutpostIdBeforeUserValidation = 0;
 				return;
 			}
@@ -19865,27 +19866,32 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 				side = OUTPOSTENUMS::OutpostAttacker;
 			}
 		}
-
-		// his guild doesn't participate in outpost conflict but player don't made a choice when op is under attack => random
-		if (neutral && outpostInFire)
+		else
 		{
+			// his guild doesn't participate in outpost conflict so he can choose the side he wants
+			if (side == OUTPOSTENUMS::OutpostOwner)
+				nlinfo("Player %s choose side Owner at OP %s", getName().toString().c_str(), CPrimitivesParser::aliasToString(_OutpostIdBeforeUserValidation).c_str());
+			if (side == OUTPOSTENUMS::OutpostAttacker)
+				nlinfo("Player %s choose side Attacker at OP %s", getName().toString().c_str(), CPrimitivesParser::aliasToString(_OutpostIdBeforeUserValidation).c_str());
+			setOutpostSide(side);
+		}
 
-			if (outpost->getName().substr(0, 14) == "outpost_nexus_")
-			{
-				nlinfo("Player are neutral in %s in fire : ", outpost->getName().c_str());
-				//setOutpostSide(OUTPOSTENUMS::UnknownPVPSide);
-			}
-			else
-			{
-				if (uint32(RandomGenerator.rand(1)) == 0)
-					setOutpostSide(OUTPOSTENUMS::OutpostOwner);
-				else
-					setOutpostSide(OUTPOSTENUMS::OutpostAttacker);
-			}
+	}
+	else if (outpostInFire)
+	{
+		if (outpost->getName().substr(0, 14) == "outpost_nexus_")
+		{
+			nlinfo("Player are neutral in %s in fire", outpost->getName().c_str());
+			setOutpostSide(OUTPOSTENUMS::UnknownPVPSide);
 		}
 		else
-			// his guild doesn't participate in outpost conflict so he can choose the side he wants
-			setOutpostSide(side);
+		{
+			setOutpostAlias(_OutpostIdBeforeUserValidation);
+			if (uint32(RandomGenerator.rand(1)) == 0)
+				setOutpostSide(OUTPOSTENUMS::OutpostOwner);
+			else
+				setOutpostSide(OUTPOSTENUMS::OutpostAttacker);
+		}
 	}
 
 	_OutpostIdBeforeUserValidation = 0;

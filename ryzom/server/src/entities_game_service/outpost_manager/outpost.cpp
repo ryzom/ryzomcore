@@ -2436,7 +2436,7 @@ uint32 COutpost::computeSquadCountA(uint32 roundLevel) const
 		return (uint32)ceil((float)(roundLevel+1)/OutpostInTestFightSquadCount.get());
 	//////
 
-	return (uint32)ceil((float)(roundLevel+1)/1.5f);
+	return (uint32)ceil((float)(roundLevel+1)/2.0f);
 }
 
 //----------------------------------------------------------------------------
@@ -2447,7 +2447,7 @@ uint32 COutpost::computeSquadCountB(uint32 roundLevel) const
 		return (uint32)floor((float)(roundLevel+1)/OutpostInTestFightSquadCount.get());
 	//////
 
-	return (uint32)floor((float)(roundLevel+1)/1.5f);
+	return (uint32)floor((float)(roundLevel+1)/2.0f);
 }
 
 //----------------------------------------------------------------------------
