@@ -93,6 +93,7 @@ extern float						MaxHarvestDistance;
 extern SKILLS::ESkills				BarehandCombatSkill;
 
 CVariable<uint32>			DefaultWeightHands("egs", "DefaultWeightHands", "Weight of hands for calculate STA consumed by action for handed fight", 500,0,true);
+extern CVariable<bool> RingLootEnabled;
 
 // ****************************************************************************
 void CCharacter::initInventories()
@@ -564,7 +565,7 @@ bool CCharacter::pickUpItem(const CEntityId& entity)
 				_LootContainer = pCreature->getLootInventory();
 
 				// give money for loot (nb : only first loot table is used for money)
-				if ( (pCreature->getForm() != NULL) && !pCreature->moneyHasBeenLooted() && !IsRingShard)
+				if ( (pCreature->getForm() != NULL) && !pCreature->moneyHasBeenLooted() && (!IsRingShard || RingLootEnabled.get()))
 				{
 					const CStaticLootTable * lootTable;
 					if (!pCreature->getCustomLootTableId().empty())
