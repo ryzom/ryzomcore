@@ -1578,6 +1578,13 @@ void setLoadingContinent (CContinent *continent)
 
 void initWelcomeWindow()
 {
+	CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
+	if (sb.CurrentJoinMode!=CFarTP::LaunchEditor && NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:WELCOME")->getValueBool())
+	{
+		std::vector<string> v;
+		CWidgetManager::getInstance()->runProcedure ("welcome_opened", NULL, v);
+	}
+	/*
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterfaceGroup* welcomeWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:welcome_info"));
 	if(welcomeWnd)
@@ -1585,7 +1592,7 @@ void initWelcomeWindow()
 		bool welcomeDbProp  = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:WELCOME")->getValueBool();
 		CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 		welcomeWnd->setActive((sb.CurrentJoinMode!=CFarTP::LaunchEditor) && welcomeDbProp);
-	}
+	}*/
 }
 
 // ***************************************************************************
