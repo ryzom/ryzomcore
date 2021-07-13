@@ -58,6 +58,7 @@
 #include "nel/gui/css_style.h"
 #include "nel/gui/css_parser.h"
 #include "nel/gui/css_border_renderer.h"
+#include "nel/gui/css_background_renderer.h"
 
 #include <curl/curl.h>
 
@@ -343,6 +344,25 @@ namespace NLGUI
 			SImageInfo &img = *it;
 			Parent->setImage(img.Image, dest, img.Type);
 			Parent->setImageSize(img.Image, img.Style);
+		}
+	}
+
+	void CGroupHTML::TextureDownloadCB::finish()
+	{
+		// tmpdest file does not exist if download skipped (ie cache was used)
+		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) == 0)
+		{
+			if (CFile::fileExists(dest))
+				CFile::deleteFile(dest);
+
+			CFile::moveFile(dest, tmpdest);
+		}
+
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		for(uint i = 0; i < TextureIds.size(); i++)
+		{
+			rVR.reloadTexture(TextureIds[i].first, dest);
+			TextureIds[i].second->invalidateCoords();
 		}
 	}
 
@@ -732,6 +752,63 @@ namespace NLGUI
 		{
 			nlwarning("Unknown CURL download (nullptr)");
 		}
+	}
+
+	// Add a image download request in the multi_curl
+	// return new textureId and download callback
+	ICurlDownloadCB *CGroupHTML::addTextureDownload(const string &url, sint32 &texId, CViewBase *view)
+	{
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		// data:image/png;base64,AA...==
+		if (startsWith(url, "data:image/"))
+		{
+			texId = rVR.createTextureFromDataURL(url);
+			return NULL;
+		}
+
+		std::string finalUrl;
+		// load the image from local files/bnp
+		if (lookupLocalFile(finalUrl, std::string(CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga").c_str(), false))
+		{
+			texId = rVR.createTexture(finalUrl);
+			return NULL;
+		}
+
+		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
+
+		// use requested url for local name (cache)
+		string dest = localImageName(url);
+		LOG_DL("add to download '%s' dest '%s'", finalUrl.c_str(), dest.c_str());
+
+		if (CFile::fileExists(dest) && CFile::getFileSize(dest) > 0)
+			texId = rVR.createTexture(dest);
+		else
+			texId = rVR.newTextureId(dest);
+
+		// Search if we are not already downloading this url.
+		for(std::list<CDataDownload*>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		{
+			if((*it)->url == finalUrl)
+			{
+				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), img);
+				TextureDownloadCB *cb = dynamic_cast<TextureDownloadCB*>(*it);
+				if (cb)
+				{
+					cb->addTexture(texId, view);
+					// return pointer to shared ImageDownloadCB
+					return cb;
+				}
+				else
+				{
+					nlwarning("Found texture download '%s', but casting to TextureDownloadCB failed", finalUrl.c_str());
+				}
+			}
+		}
+
+		Curls.push_back(new TextureDownloadCB(finalUrl, dest, texId, this));
+		// as we return pointer to callback, skip starting downloads just now
+		//pumpCurlQueue();
+		return Curls.back();
 	}
 
 	// Add a image download request in the multi_curl
@@ -2331,6 +2408,38 @@ namespace NLGUI
 			doBrowseAnchor(_UrlFragment);
 			_UrlFragment.clear();
 		}
+
+		if (!m_HtmlBackground.isEmpty() || !m_BodyBackground.isEmpty())
+		{
+			// get scroll offset from list
+			CGroupList	*list = getList();
+			if (list)
+			{
+				CInterfaceElement* vp = list->getParentPos() ? list->getParentPos() : this;
+				sint htmlW = std::max(vp->getWReal(), list->getWReal());
+				sint htmlH = list->getHReal();
+				sint htmlX = list->getXReal() + list->getOfsX();
+				sint htmlY = list->getYReal() + list->getOfsY();
+
+				if (!m_HtmlBackground.isEmpty())
+				{
+					m_HtmlBackground.setFillViewport(true);
+					m_HtmlBackground.setBorderArea(htmlX, htmlY, htmlW, htmlH);
+					m_HtmlBackground.setPaddingArea(htmlX, htmlY, htmlW, htmlH);
+					m_HtmlBackground.setContentArea(htmlX, htmlY, htmlW, htmlH);
+				}
+
+				if (!m_BodyBackground.isEmpty())
+				{
+					// TODO: html padding + html border
+					m_BodyBackground.setBorderArea(htmlX, htmlY, htmlW, htmlH);
+					// TODO: html padding + html border + body border
+					m_BodyBackground.setPaddingArea(htmlX, htmlY, htmlW, htmlH);
+					// TODO: html padding + html_border + body padding
+					m_BodyBackground.setContentArea(htmlX, htmlY, htmlW, htmlH);
+				}
+			}
+		}
 	}
 
 	// ***************************************************************************
@@ -3185,52 +3294,47 @@ namespace NLGUI
 
 	// ***************************************************************************
 
+	void CGroupHTML::setupBackground(CSSBackgroundRenderer *bg)
+	{
+		if (!bg) return;
+
+		bg->setModulateGlobalColor(_Style.Current.GlobalColor);
+		bg->setBackground(_Style.Current.Background);
+		bg->setFontSize(_Style.Root.FontSize, _Style.Current.FontSize);
+
+		bg->setViewport(getList()->getParentPos() ? getList()->getParentPos() : this);
+
+		if (!_Style.Current.Background.image.empty())
+			addTextureDownload(_Style.Current.Background.image, bg->TextureId, this);
+	}
+
+	// ***************************************************************************
+
 	void CGroupHTML::setBackgroundColor (const CRGBA &bgcolor)
 	{
-		// Should have a child named bg
+		// TODO: DefaultBackgroundBitmapView should be removed from interface xml
 		CViewBase *view = getView (DefaultBackgroundBitmapView);
 		if (view)
-		{
-			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*> (view);
-			if (bitmap)
-			{
-				// TODO: background color should have separate bitmap from background texture
-				// Change the background color
-				bitmap->setColor (bgcolor);
-				bitmap->setModulateGlobalColor(false);
-			}
-		}
+			view->setActive(false);
+
+		m_HtmlBackground.setColor(bgcolor);
 	}
 
 	// ***************************************************************************
 
 	void CGroupHTML::setBackground (const string &bgtex, bool scale, bool tile)
 	{
-		// Should have a child named bg
+		// TODO: DefaultBackgroundBitmapView should be removed from interface xml
 		CViewBase *view = getView (DefaultBackgroundBitmapView);
 		if (view)
-		{
-			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*> (view);
-			if (bitmap)
-			{
-				bitmap->setParentPosRef(Hotspot_TL);
-				bitmap->setPosRef(Hotspot_TL);
-				bitmap->setX(0);
-				bitmap->setY(0);
-				// FIXME: renders behind container background
-				bitmap->setRenderLayer(-2);
-				bitmap->setScale(scale);
-				bitmap->setTile(tile);
+			view->setActive(false);
 
-				// clear size ref for non-scaled image or it does not show up
-				if (scale || tile)
-					bitmap->setSizeRef("wh");
-				else
-					bitmap->setSizeRef("");
+		m_HtmlBackground.setImage(bgtex);
+		m_HtmlBackground.setImageRepeat(tile);
+		m_HtmlBackground.setImageCover(scale);
 
-				addImageDownload(bgtex, view, CStyleParams(), NormalImage, "");
-			}
-		}
+		if (!bgtex.empty())
+			addTextureDownload(bgtex, m_HtmlBackground.TextureId, this);
 	}
 
 
@@ -4013,6 +4117,8 @@ namespace NLGUI
 
 	void CGroupHTML::draw ()
 	{
+		m_HtmlBackground.draw();
+		m_BodyBackground.draw();
 		CGroupScrollText::draw ();
 	}
 
@@ -4081,9 +4187,14 @@ namespace NLGUI
 		// Clear all the context
 		clearContext();
 
-		// Reset default background color
-		setBackgroundColor (_BrowserStyle.Current.Background.color);
-		setBackground ("blank.tga", true, false);
+		// Reset default background
+		m_HtmlBackground.clear();
+		m_BodyBackground.clear();
+
+		// TODO: DefaultBackgroundBitmapView should be removed from interface xml
+		CViewBase *view = getView (DefaultBackgroundBitmapView);
+		if (view)
+			view->setActive(false);
 
 		paragraphChange ();
 	}
@@ -5092,46 +5203,6 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CGroupHTML::applyBackground(const CHtmlElement &elm)
-	{
-		bool root = elm.Value == "html" || elm.Value == "body";
-
-		// non-empty image
-		if (_Style.hasStyle("background-image"))
-		{
-			bool repeat = _Style.checkStyle("background-repeat", "repeat");
-			bool scale = _Style.checkStyle("background-size", "100%");
-			std::string image = _Style.getStyle("background-image");
-			if (!image.empty())
-			{
-				if (root)
-				{
-					setBackground (image, scale, repeat);
-				}
-				// TODO: else
-
-				// default background color is transparent, so image does not show
-				if (!_Style.hasStyle("background-color") || _Style.checkStyle("background-color", "transparent"))
-				{
-					_Style.applyStyle("background-color: #fff;");
-				}
-			}
-		}
-
-		if (_Style.hasStyle("background-color"))
-		{
-			CRGBA bgColor = _Style.Current.Background.color;
-			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), bgColor);
-			if (root)
-			{
-				setBackgroundColor(bgColor);
-			}
-			// TODO: else
-		}
-
-	}
-
-	// ***************************************************************************
 	void CGroupHTML::insertFormImageButton(const std::string &name, const std::string &tooltip, const std::string &src, const std::string &over, const std::string &formId, const std::string &action, uint32 minWidth, const std::string &templateName)
 	{
 		_FormSubmit.push_back(SFormSubmitButton(formId, name, "", "image", action));
@@ -5261,11 +5332,12 @@ namespace NLGUI
 	{
 		// override <body> (or <html>) css style attribute
 		if (elm.hasNonEmptyAttribute("bgcolor"))
-		{
 			_Style.applyStyle("background-color: " + elm.getAttribute("bgcolor"));
-		}
 
-		applyBackground(elm);
+		if (m_HtmlBackground.isEmpty())
+			setupBackground(&m_HtmlBackground);
+		else
+			setupBackground(&m_BodyBackground);
 
 		renderPseudoElement(":before", elm);
 	}
@@ -5659,11 +5731,11 @@ namespace NLGUI
 	void CGroupHTML::htmlHTML(const CHtmlElement &elm)
 	{
 		if (elm.hasNonEmptyAttribute("style"))
-		{
 			_Style.applyStyle(elm.getAttribute("style"));
-		}
+
 		_Style.Root = _Style.Current;
-		applyBackground(elm);
+
+		setupBackground(&m_HtmlBackground);
 	}
 
 	// ***************************************************************************

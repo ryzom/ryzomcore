@@ -30,6 +30,7 @@
 #include "nel/gui/html_element.h"
 #include "nel/gui/html_parser.h"
 #include "nel/gui/css_style.h"
+#include "nel/gui/css_background_renderer.h"
 
 // forward declaration
 typedef void CURLM;
@@ -148,6 +149,7 @@ namespace NLGUI
 
 		// add image download (used by view_bitmap.cpp to load web images)
 		ICurlDownloadCB *addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage, const std::string &placeholder = "web_del.tga");
+		ICurlDownloadCB *addTextureDownload(const std::string &url, sint32 &texId, CViewBase *view);
 		void removeImageDownload(ICurlDownloadCB *handle, CViewBase *img);
 		std::string localImageName(const std::string &url);
 
@@ -178,6 +180,7 @@ namespace NLGUI
 		std::string		DefaultRadioButtonBitmapNormal;
 		std::string		DefaultRadioButtonBitmapPushed;
 		std::string		DefaultRadioButtonBitmapOver;
+		// TODO: remove from interface xml and code
 		std::string		DefaultBackgroundBitmapView;
 
 		struct TFormField {
@@ -343,6 +346,9 @@ namespace NLGUI
 			const CStyleParams &style = CStyleParams());
 
 		// Set the background color
+		void setupBackground(CSSBackgroundRenderer *bg);
+
+		// Set the background color
 		void setBackgroundColor (const NLMISC::CRGBA &bgcolor);
 
 		// Set the background
@@ -380,6 +386,10 @@ namespace NLGUI
 		std::vector<CHtmlParser::StyleLink> _StylesheetQueue;
 		// <style> and downloaded <link rel=stylesheet> elements
 		std::vector<std::string> _HtmlStyles;
+
+		// background from <html> or <body> element
+		CSSBackgroundRenderer m_HtmlBackground;
+		CSSBackgroundRenderer m_BodyBackground;
 
 		// Valid base href was found
 		bool            _IgnoreBaseUrlTag;
@@ -892,6 +902,25 @@ namespace NLGUI
 			TImageType Type;
 		};
 
+		class TextureDownloadCB : public CDataDownload
+		{
+		public:
+			TextureDownloadCB(const std::string &url, const std::string &dest, sint32 texId, CViewBase *view)
+			: CDataDownload(url, dest)
+			{
+				addTexture(texId, view);
+			}
+
+			virtual void finish() NL_OVERRIDE;
+
+			void addTexture(sint32 texId, CViewBase *view) {
+				TextureIds.push_back(std::make_pair(texId, view));
+			}
+
+		private:
+			std::vector<std::pair<sint32, CViewBase *> > TextureIds;
+		};
+
 		class BnpDownloadCB : public CDataDownload
 		{
 		public:
@@ -958,9 +987,6 @@ namespace NLGUI
 
 		// :before, :after rendering
 		void renderPseudoElement(const std::string &pseudo, const CHtmlElement &elm);
-
-		// apply background from current style (for html, body)
-		void applyBackground(const CHtmlElement &elm);
 
 		void insertFormImageButton(const std::string &name,
 			const std::string &tooltip,
