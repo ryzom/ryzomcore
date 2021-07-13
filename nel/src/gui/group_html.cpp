@@ -538,14 +538,14 @@ namespace NLGUI
 
 		if (style.hasStyle("background-color"))
 		{
-			ctrlButton->setColor(style.BackgroundColor);
+			ctrlButton->setColor(style.Background.color);
 			if (style.hasStyle("-ryzom-background-color-over"))
 			{
 				ctrlButton->setColorOver(style.BackgroundColorOver);
 			}
 			else
 			{
-				ctrlButton->setColorOver(style.BackgroundColor);
+				ctrlButton->setColorOver(style.Background.color);
 			}
 			ctrlButton->setTexture("", "blank.tga", "", false);
 			ctrlButton->setTextureOver("", "blank.tga", "");
@@ -2706,7 +2706,7 @@ namespace NLGUI
 						if (bg)
 						{
 							bg->setTexture("blank.tga");
-							bg->setColor(style.BackgroundColor);
+							bg->setColor(style.Background.color);
 						}
 					}
 				}
@@ -4082,7 +4082,7 @@ namespace NLGUI
 		clearContext();
 
 		// Reset default background color
-		setBackgroundColor (_BrowserStyle.Current.BackgroundColor);
+		setBackgroundColor (_BrowserStyle.Current.Background.color);
 		setBackground ("blank.tga", true, false);
 
 		paragraphChange ();
@@ -4940,7 +4940,7 @@ namespace NLGUI
 		style.pushStyle();
 		style.applyStyle(elm.getPseudo(":-webkit-meter-bar"));
 		if(style.hasStyle("background-color"))
-			color = style.Current.BackgroundColor;
+			color = style.Current.Background.color;
 		style.popStyle();
 
 		return color;
@@ -4957,14 +4957,14 @@ namespace NLGUI
 			{
 				style.applyStyle(elm.getPseudo(":-webkit-meter-optimum-value"));
 				if (style.hasStyle("background-color"))
-					color = style.Current.BackgroundColor;
+					color = style.Current.Background.color;
 				break;
 			}
 		case VALUE_SUB_OPTIMAL:
 			{
 				style.applyStyle(elm.getPseudo(":-webkit-meter-suboptimum-value"));
 				if (style.hasStyle("background-color"))
-					color = style.Current.BackgroundColor;
+					color = style.Current.Background.color;
 				break;
 			}
 		case VALUE_EVEN_LESS_GOOD: // fall through
@@ -4972,7 +4972,7 @@ namespace NLGUI
 			{
 				style.applyStyle(elm.getPseudo(":-webkit-meter-even-less-good-value"));
 				if (style.hasStyle("background-color"))
-					color = style.Current.BackgroundColor;
+					color = style.Current.Background.color;
 				break;
 			}
 		}//switch
@@ -5009,7 +5009,7 @@ namespace NLGUI
 		style.pushStyle();
 		style.applyStyle(elm.getPseudo(":-webkit-progress-bar"));
 		if (style.hasStyle("background-color"))
-			color = style.Current.BackgroundColor;
+			color = style.Current.Background.color;
 		style.popStyle();
 
 		return color;
@@ -5023,7 +5023,7 @@ namespace NLGUI
 		style.pushStyle();
 		style.applyStyle(elm.getPseudo(":-webkit-progress-value"));
 		if (style.hasStyle("background-color"))
-			color = style.Current.BackgroundColor;
+			color = style.Current.Background.color;
 		style.popStyle();
 
 		return color;
@@ -5037,7 +5037,7 @@ namespace NLGUI
 			cellParams = _CellParams.back();
 
 		if (_Style.hasStyle("background-color"))
-			cellParams.BgColor = _Style.Current.BackgroundColor;
+			cellParams.BgColor = _Style.Current.Background.color;
 		else if (elm.hasNonEmptyAttribute("bgcolor"))
 			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), cellParams.BgColor);
 
@@ -5120,7 +5120,7 @@ namespace NLGUI
 
 		if (_Style.hasStyle("background-color"))
 		{
-			CRGBA bgColor = _Style.Current.BackgroundColor;
+			CRGBA bgColor = _Style.Current.Background.color;
 			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), bgColor);
 			if (root)
 			{

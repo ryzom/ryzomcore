@@ -21,6 +21,8 @@
 #include "nel/misc/rgba.h"
 #include "nel/gui/css_selector.h"
 #include "nel/gui/css_types.h"
+#include "nel/gui/css_length.h"
+#include "nel/gui/css_background.h"
 
 namespace NLGUI
 {
@@ -70,7 +72,6 @@ namespace NLGUI
 			BorderTopStyle = BorderRightStyle = BorderBottomStyle = BorderLeftStyle = CSS_LINE_STYLE_NONE;
 			BorderTopColor = BorderRightColor = BorderBottomColor = BorderLeftColor = NLMISC::CRGBA::Transparent;
 			// background
-			BackgroundColor=NLMISC::CRGBA::Black;
 			BackgroundColorOver=NLMISC::CRGBA::Black;
 			MarginTop = MarginRight = MarginBottom = MarginLeft = 0;
 			PaddingTop = PaddingRight = PaddingBottom = PaddingLeft = 0;
@@ -105,7 +106,7 @@ namespace NLGUI
 		uint32 BorderTopWidth, BorderRightWidth, BorderBottomWidth, BorderLeftWidth;
 		CSSLineStyle BorderTopStyle, BorderRightStyle, BorderBottomStyle, BorderLeftStyle;
 		NLMISC::CRGBA BorderTopColor, BorderRightColor, BorderBottomColor, BorderLeftColor;
-		NLMISC::CRGBA BackgroundColor;
+		CSSBackground Background;
 		NLMISC::CRGBA BackgroundColorOver;
 		uint32 MarginTop, MarginRight, MarginBottom, MarginLeft;
 		uint32 PaddingTop, PaddingRight, PaddingBottom, PaddingLeft;
@@ -229,7 +230,7 @@ namespace NLGUI
 			Current.BorderTopStyle = Current.BorderRightStyle = Current.BorderBottomStyle = Current.BorderLeftStyle = CSS_LINE_STYLE_NONE;
 			Current.BorderTopColor = Current.BorderRightColor = Current.BorderBottomColor = Current.BorderLeftColor = Current.TextColor;
 
-			Current.BackgroundColor = NLMISC::CRGBA::Transparent;
+			Current.Background = CSSBackground();
 			Current.BackgroundColorOver = NLMISC::CRGBA::Transparent;
 
 			Current.MarginTop = Current.MarginRight = Current.MarginBottom = Current.MarginLeft = 0;

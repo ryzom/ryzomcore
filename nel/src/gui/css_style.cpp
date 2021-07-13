@@ -957,13 +957,13 @@ namespace NLGUI
 			if (it->first == "background-color")
 			{
 				if (it->second == "inherit")
-					style.BackgroundColor = current.BackgroundColor;
+					style.Background.color = current.Background.color;
 				else if (it->second == "transparent")
-					style.BackgroundColor = CRGBA(0, 0, 0, 0);
+					style.Background.color = CRGBA(0, 0, 0, 0);
 				else if (it->second == "currentcolor")
-					style.BackgroundColorOver = style.TextColor;
+					style.Background.color = style.TextColor;
 				else
-					scanHTMLColor(it->second.c_str(), style.BackgroundColor);
+					scanHTMLColor(it->second.c_str(), style.Background.color);
 			}
 			else
 			if (it->first == "-ryzom-background-color-over")
@@ -987,10 +987,13 @@ namespace NLGUI
 					image = image.substr(4, image.size()-5);
 				}
 				style.StyleRules[it->first] = trimQuotes(image);
+				style.Background.setImage(style.StyleRules[it->first]);
 			}
 			else
 			if (it->first == "background-repeat")
 			{
+				style.Background.setRepeat(it->second);
+				// TODO: remove after removing old code that depends on this
 				// normalize
 				std::string val = toLowerAscii(trim(it->second));
 				std::vector<std::string> parts;
@@ -1004,6 +1007,8 @@ namespace NLGUI
 			else
 			if (it->first == "background-size")
 			{
+				style.Background.setSize(it->second);
+				// TODO: remove after removing old code that depends on this
 				// normalize
 				std::string val = toLowerAscii(trim(it->second));
 				std::vector<std::string> parts;
@@ -1012,6 +1017,27 @@ namespace NLGUI
 					val = parts[0];
 
 				style.StyleRules[it->first] = val;
+			}
+			else
+			if (it->first == "background-position")
+			{
+				// TODO: background-position-x, background-position-y
+				style.Background.setPosition(it->second);
+			}
+			else
+			if (it->first == "background-origin")
+			{
+				style.Background.setOrigin(it->second);
+			}
+			else
+			if (it->first == "background-clip")
+			{
+				style.Background.setClip(it->second);
+			}
+			else
+			if (it->first == "background-attachment")
+			{
+				style.Background.setAttachment(it->second);
 			}
 		}
 
@@ -1348,10 +1374,10 @@ namespace NLGUI
 			}
 			else
 			{
-				// fill in default if one is set
+				// fill in default if one is not set
 				if (props[i] == "background-image")
 				{
-					style[props[i]] = "none";
+					style[props[i]] = "";
 				}
 				else if (props[i] == "background-position")
 				{

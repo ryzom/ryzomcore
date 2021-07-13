@@ -46,7 +46,7 @@ void checkRuleset(CHtmlElement &elm, CCssStyle &style, TStyleVec testset, bool e
 			}
 			else if (it.first == "background-color")
 			{
-				printf("[%s]: background-color: '%s'; expected '%s'\n", existsMessage.c_str(), style.Current.BackgroundColor.toString().c_str(), it.second.c_str());
+				printf("[%s]: background-color: '%s'; expected '%s'\n", existsMessage.c_str(), style.Current.Background.color.toString().c_str(), it.second.c_str());
 				printf("     (%s)\n", elm.toString().c_str());
 				failed2 = false;
 			}
