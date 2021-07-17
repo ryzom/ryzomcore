@@ -267,10 +267,18 @@ namespace NLGUI
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(ite->Texture);
-			if (tf)
+			if (ite->Texture)
 			{
-				driver->deleteTextureFile (tf);
+				UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(ite->Texture);
+				if (tf)
+				{
+					driver->deleteTextureFile (tf);
+				}
+				else
+				{
+					UTextureMem *tf = dynamic_cast<NL3D::UTextureMem *>(ite->Texture);
+					if (tf) driver->deleteTextureMem(tf);
+				}
 			}
 			ite++;
 		}
@@ -1067,6 +1075,139 @@ namespace NLGUI
 
 		return true;
 	}
+
+	sint32 CViewRenderer::newTextureId(const std::string &name)
+	{
+		SImage iTmp;
+		iTmp.Name = toLowerAscii(name);
+		iTmp.UVMin = CUV(0,0);
+		iTmp.UVMax = CUV(1,1);
+
+		// lookup global texture with same name
+		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
+		while (ite != _GlobalTextures.end())
+		{
+			std::string sText = toLowerAscii(ite->Name);
+			if (sText == iTmp.Name)
+				break;
+			ite++;
+		}
+
+		if (ite == _GlobalTextures.end())
+		{
+			SGlobalTexture gtTmp;
+			gtTmp.Name = iTmp.Name;
+			gtTmp.FromGlobaleTexture = false;
+			gtTmp.DefaultWidth = gtTmp.Width = 0;
+			gtTmp.DefaultHeight = gtTmp.Height = 0;
+			gtTmp.Texture = NULL;
+			_GlobalTextures.push_back(gtTmp);
+			ite = _GlobalTextures.end();
+			ite--;
+		}
+		iTmp.GlobalTexturePtr = &(*ite);
+
+		// allocate new texture id
+		return addSImage(iTmp);
+	}
+
+	void CViewRenderer::reloadTexture(sint32 texId, const std::string &name, bool uploadDXTC, bool bReleasable)
+	{
+		if ((uint)texId >= _SImageIterators.size())
+		{
+			nlwarning("Invalid texture id %d, maximum is %u", texId, _SImageIterators.size());
+			return;
+		}
+
+		SImage *sImage = getSImage(texId);
+		SGlobalTexture *gt = sImage->GlobalTexturePtr;
+		if (!gt)
+		{
+			nlwarning("Unknown texture id %d (file %s)", texId, name.c_str());
+			return;
+		}
+
+		// create new global texture if previous is atlas
+		if (gt->FromGlobaleTexture)
+		{
+			uint count = 0;
+			TSImageList::iterator ite = _SImages.begin();
+			while (ite != _SImages.end() && count != 2)
+			{
+				// Same global texture ?
+				if (ite->GlobalTexturePtr == gt)
+					count++;
+
+				ite++;
+			}
+
+			// create new only when atlas is used by 2+ textures
+			if (count == 2)
+			{
+				SGlobalTexture gtTmp;
+				gtTmp.Name = toLowerAscii(name);
+				gtTmp.FromGlobaleTexture = false;
+				gtTmp.DefaultWidth = gtTmp.Width = 0;
+				gtTmp.DefaultHeight = gtTmp.Height = 0;
+				gtTmp.Texture = NULL;
+				_GlobalTextures.push_back(gtTmp);
+
+				TGlobalTextureList::iterator ite = _GlobalTextures.end();
+				ite--;
+
+				sImage->GlobalTexturePtr = &(*ite);
+				gt = sImage->GlobalTexturePtr;
+			}
+		}
+
+		NL3D::UTexture *oldTexture = gt->Texture;
+
+		std::string sLwrGTName;
+		if (startsWith(name, "data:image/"))
+		{
+			if (!loadTextureFromString(gt, name))
+				return;
+
+			sLwrGTName = getMD5((uint8 *)name.c_str(), (uint32)name.size()).toString();
+		}
+		else
+		{
+			sLwrGTName = toLowerAscii(name);
+			std::string filename = CPath::lookup(sLwrGTName, false);
+			if (filename.empty())
+			{
+				nlwarning("Unable to find file '%s for texture %d", name.c_str(), texId);
+				return;
+			}
+
+			if (!loadTextureFromFile(gt, filename))
+			{
+				nlwarning("Unable to load texture from file '%s'", filename.c_str());
+				return;
+			}
+		}
+
+		gt->Name = sLwrGTName;
+		gt->Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
+		gt->Texture->setUploadFormat(uploadDXTC ? UTexture::DXTC5 : UTexture::Auto);
+		gt->Texture->setReleasable(bReleasable);
+
+		// release previous only after successfully loading new one
+		if (oldTexture)
+		{
+			UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(oldTexture);
+			if (tf)
+			{
+				driver->deleteTextureFile (tf);
+			}
+			else
+			{
+				UTextureMem *tf = dynamic_cast<NL3D::UTextureMem *>(oldTexture);
+				if (tf) driver->deleteTextureMem(tf);
+			}
+		}
+	}
+
 	/*
 	 * createTexture
 	 */
@@ -1285,6 +1426,8 @@ namespace NLGUI
 					// This one ?
 					if (&(*iteGT) == gt)
 					{
+						if (iteGT->Texture == NULL)
+							return;
 						// Remove this global texture
 						UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(iteGT->Texture);
 						if (tf)
@@ -1466,6 +1609,13 @@ namespace NLGUI
 			TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 			while (ite != _GlobalTextures.end())
 			{
+				// texture not loaded yet
+				if (ite->Texture == NULL)
+				{
+					++ite;
+					continue;
+				}
+
 				// TMP TMP
 	//			volatile SGlobalTexture *sg = &(*ite);
 				CLayer	&layer= ite->Layers[layerId];
