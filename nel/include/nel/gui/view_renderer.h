@@ -479,6 +479,9 @@ namespace NLGUI
 		// \name Texture management
 		// ***************************************************************************
 
+		bool loadTextureFromString(SGlobalTexture *gt, const std::string &data);
+		bool loadTextureFromFile(SGlobalTexture *gt, const std::string &filename);
+
 		// SImage accessors
 		SImage	*getSImage(sint32 textureId)
 		{

@@ -999,6 +999,74 @@ namespace NLGUI
 		ite->Texture = externalTexture;
 	}
 
+	bool CViewRenderer::loadTextureFromString(CViewRenderer::SGlobalTexture *gt, const std::string &data)
+	{
+		size_t pos = data.find(";base64,");
+		if (pos == std::string::npos)
+		{
+			nlwarning("Data does not have 'data:image/...;base64,...' format '%s'", data.c_str());
+			return false;
+		}
+
+		std::string decoded = base64::decode(data.substr(pos + 8));
+		if (decoded.empty())
+		{
+			nlwarning("base64 decoding failed '%s", data.substr(pos + 8).c_str());
+			return false;
+		}
+
+		CMemStream buf;
+		if (buf.isReading()) buf.invert();
+		buf.serialBuffer((uint8 *)(decoded.data()), decoded.size());
+		buf.invert();
+
+		CBitmap btm;
+		btm.load(buf);
+
+		gt->Width = gt->DefaultWidth = btm.getWidth();;
+		gt->Height = gt->DefaultHeight = btm.getHeight();
+
+		if (gt->Width == 0 || gt->Height == 0)
+		{
+			nlwarning("Decoded image has width==0 || height==0, check image format. '%s'", data.c_str());
+			return false;
+		}
+
+		UTextureMem *texture = driver->createTextureMem(btm.getWidth(), btm.getHeight(), CBitmap::RGBA);
+		if (!texture)
+		{
+			nlwarning("Failed to create mem texture (%d,%d)", btm.getWidth(), btm.getHeight());
+			return false;
+		}
+
+		memcpy(texture->getPointer(), btm.getPixels().getPtr(), btm.getSize() * 4);
+		gt->Texture = texture;
+		gt->FromGlobaleTexture = false;
+
+		return true;
+	}
+
+	bool CViewRenderer::loadTextureFromFile(CViewRenderer::SGlobalTexture *gt, const std::string &filename)
+	{
+		// load new file
+		CIFile ifTmp;
+		if (ifTmp.open(filename))
+		{
+			CBitmap::loadSize (ifTmp, gt->Width, gt->Height);
+			gt->DefaultWidth = gt->Width;
+			gt->DefaultHeight = gt->Height;
+			if (gt->Width == 0 || gt->Height == 0)
+			{
+				nlwarning("Failed to load the texture '%s', please check image format", filename.c_str());
+				return false;
+			}
+		}
+
+		gt->Texture = driver->createTextureFile(filename);
+		gt->FromGlobaleTexture = false;
+
+		return true;
+	}
 	/*
 	 * createTexture
 	 */
@@ -1030,27 +1098,20 @@ namespace NLGUI
 		// If global texture not exists create it
 		if (ite == _GlobalTextures.end())
 		{
-			SGlobalTexture gtTmp;
-			gtTmp.FromGlobaleTexture = false;
 			string filename = CPath::lookup (sLwrGTName, false);
 			if (filename.empty() ) return -1;
-			CIFile ifTmp;
-			if (ifTmp.open(filename))
-			{
-				CBitmap::loadSize (ifTmp, gtTmp.Width, gtTmp.Height);
-				gtTmp.DefaultWidth = gtTmp.Width;
-				gtTmp.DefaultHeight = gtTmp.Height;
-				if (gtTmp.Width == 0 || gtTmp.Height == 0)
-				{
-					nlwarning("Failed to load the texture '%s', please check image format", filename.c_str());
-				}
-			}
-			gtTmp.Texture = driver->createTextureFile (sLwrGTName);
+
+			SGlobalTexture gtTmp;
 			gtTmp.Name = sLwrGTName;
+
+			if (!loadTextureFromFile(&gtTmp, filename))
+				return -1;
+
 			gtTmp.Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
 			if(uploadDXTC)
 				gtTmp.Texture->setUploadFormat(UTexture::DXTC5);
 			gtTmp.Texture->setReleasable(bReleasable);
+
 			_GlobalTextures.push_back(gtTmp);
 			ite = _GlobalTextures.end();
 			ite--;
@@ -1105,44 +1166,10 @@ namespace NLGUI
 		// If global texture not exists create it
 		if (ite == _GlobalTextures.end())
 		{
-			std::string decoded = base64::decode(data.substr(pos + 8));
-			if (decoded.empty())
-			{
-				nlwarning("base64 decode failed '%s'", data.substr(pos + 8).c_str());
-				return -1;
-			}
-
-			//
-			CMemStream buf;
-			if (buf.isReading()) buf.invert();
-			buf.serialBuffer((uint8 *)(decoded.data()), decoded.size());
-			buf.invert();
-
-			CBitmap btm;
-			btm.load(buf);
-
 			SGlobalTexture gtTmp;
-			gtTmp.FromGlobaleTexture = false;
-
-			gtTmp.Width = gtTmp.DefaultWidth = btm.getWidth();;
-			gtTmp.Height = gtTmp.DefaultHeight = btm.getHeight();
-
-			if (gtTmp.Width == 0 || gtTmp.Height == 0)
-			{
-				nlwarning("Failed to load the texture '%s', please check image format", data.c_str());
+			if (!loadTextureFromString(&gtTmp, data))
 				return -1;
-			}
 
-			UTextureMem *texture = driver->createTextureMem(btm.getWidth(), btm.getHeight(), CBitmap::RGBA);
-			if (!texture)
-			{
-				nlwarning("Failed to create mem texture (%d,%d)", btm.getWidth(), btm.getHeight());
-				return -1;
-			}
-
-			memcpy(texture->getPointer(), btm.getPixels().getPtr(), btm.getSize() * 4);
-
-			gtTmp.Texture = texture;
 			gtTmp.Name = md5hash;
 			gtTmp.Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
 			gtTmp.Texture->setReleasable(bReleasable);
