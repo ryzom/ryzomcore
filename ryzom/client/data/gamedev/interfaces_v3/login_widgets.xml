@@ -34,7 +34,7 @@
 </template>
 
 <template name="server_box" posref="TL TL" x="0" y="0" w="64" h="16"  id="" posparent="parent" sizeref="" keep="true" >
-	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref" >
+	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref">
 		<group id="bg" sizeref="hw" h="0" w="0" />
 		<view type="bitmap" id="bk" scale="true" posparent="bg" posref="MM MM" sizeref="hw" w="-16" h="-16" texture="log_eb_m.tga" />
 		<view type="bitmap" id="tl" texture="log_eb_tl.tga" posref="TL TL" />
@@ -210,7 +210,7 @@
 <style style="log_std_but" type="text_button" button_type="push_button" 
 		tx_normal="but" tx_pushed="but" tx_over="but_over" wmargin="16" 
 		color="255 255 255 160" col_over="255 255 255 255" col_pushed="255 255 255 255"
-		text_y="-1" fontsize="10" shadow="true"
+		text_y="0" fontsize="10" shadow="true"
 		text_color_normal="135 243 28 160" 
 	    text_color_pushed="135 243 28 255" 
 	    text_color_over="135 243 28 255" 
@@ -222,7 +222,7 @@
 <style style="log_spe_but" type="text_button" button_type="push_button" 
 		tx_normal="but" tx_pushed="but" tx_over="but_over" wmargin="16" wmin="552"
 		color="255 255 255 160" col_over="255 255 255 255" col_pushed="255 255 255 255"
-		text_y="-3" fontsize="10" shadow="true"
+		text_y="0" fontsize="10" shadow="true"
 		text_color_normal="135 243 28 160" 
 	    text_color_pushed="135 243 28 255" 
 	    text_color_over="135 243 28 255" 
@@ -235,7 +235,7 @@
 <style style="server_note" type="text_button" button_type="push_button" 
 		tx_normal="serv_note" tx_pushed="serv_note" tx_over="serv_note_over" wmargin="16"
 		color="255 255 255 160" col_over="255 255 255 255" col_pushed="255 255 255 255"
-		text_y="-3" fontsize="10" shadow="true"
+		text_y="0" fontsize="10" shadow="true"
 		text_color_normal="135 243 28 160" 
 	    text_color_pushed="135 243 28 255" 
 	    text_color_over="135 243 28 255" 
@@ -607,7 +607,7 @@
 <style style="button_ok" type="text_button" id="ok" button_type="push_button" 		
 		tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 		global_color_normal="true" global_color_over="true" global_color_pushed="true" 
-		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" />
+		text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" />
 
 <!-- Common Style for a Cancel Button. By default positioned according to the "ok" button. User should define:
 	- "onclick_l" and "params_l"
@@ -615,7 +615,7 @@
 <style style="button_cancel" type="text_button" id="cancel" button_type="push_button"
 		tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 		global_color_normal="true" global_color_over="true" global_color_pushed="true" 
-		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper"	wmargin="8" />
+		text_y="0" fontsize="10" shadow="true" case_mode="%case_upper"	wmargin="8" />
 
 
 <!-- Group of two ok, cancel buttons
@@ -686,14 +686,14 @@
 <style style="text_button_16" type="text_button" button_type="push_button"
 		tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 		global_color_normal="true" global_color_over="true" global_color_pushed="true" 
-		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+		text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
 		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
 
 
 <style style="new_element_header" type="text_button" button_type="push_button" 
 		tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
-		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+		text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
 		text_global_color_normal="false" text_global_color_pushed="false" text_global_color_over="false"
 		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" 
 		text_header_color="true" />
@@ -701,7 +701,7 @@
 
 <style style="new_element_content" type="text_button" button_type="push_button" 
 		tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
-		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+		text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
 		global_color_normal="true" global_color_over="true" global_color_pushed="true" 
 		text_global_color_normal="true" text_global_color_pushed="true" text_global_color_over="true"
 		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
@@ -711,7 +711,7 @@
 		tx_normal="qh_off" tx_pushed="qh_on" tx_over="qh_off" wmin="208" wmargin="8"
 		global_color_normal="true" global_color_over="true" global_color_pushed="false" 
 		color="255 255 255 128" col_over="255 255 255 0" col_pushed="255 128 0 192"
-		text_y="-2" fontsize="12" shadow="true"
+		text_y="0" fontsize="12" shadow="true"
 		text_color_normal="255 255 255 255" 
 	    text_color_pushed="255 255 255 255" 
 	    text_color_over="255 255 255 255" 
@@ -726,7 +726,7 @@
 		tx_normal="qh_off" tx_pushed="qh_on" tx_over="qh_off" wmin="104" wmargin="8"
 		global_color_normal="true" global_color_over="true" global_color_pushed="false" 
 		color="255 255 255 128" col_over="255 255 255 0" col_pushed="255 128 0 192"
-		text_y="-2" fontsize="12" shadow="true"
+		text_y="0" fontsize="12" shadow="true"
 		text_color_normal="255 255 255 255" 
 	    text_color_pushed="255 255 255 255" 
 	    text_color_over="255 255 255 255" 
@@ -742,7 +742,7 @@
 		tx_normal="qh_off" tx_pushed="qh_off" tx_over="qh_off" wmin="104" wmargin="8"
 		global_color_normal="true" global_color_over="true" global_color_pushed="true" 
 		color="255 255 255 128" col_over="255 255 255 0" col_pushed="255 255 255 128"
-		text_y="-2" fontsize="12" shadow="true"
+		text_y="0" fontsize="12" shadow="true"
 		text_color_normal="255 255 255 255" 
 	    text_color_pushed="255 255 255 255" 
 	    text_color_over="255 255 255 255" 
@@ -757,7 +757,7 @@
 		tx_normal="qh_off" tx_pushed="qh_on" tx_over="qh_off" wmin="86" wmargin="8"
 		global_color_normal="true" global_color_over="true" global_color_pushed="false" 
 		color="255 255 255 128" col_over="255 255 255 0" col_pushed="255 190 0 192"
-		text_y="-3" fontsize="12" shadow="true"
+		text_y="0" fontsize="12" shadow="true"
 		text_color_normal="255 255 255 160" 
 	    text_color_pushed="255 255 255 255" 
 	    text_color_over="255 255 255 255" 
@@ -779,7 +779,7 @@
 		tx_normal="Quit_button_normal" tx_pushed="Quit_button_pushed" tx_over="Quit_button_over" wmargin="12"
 		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
 		color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
-		text_y="-3" fontsize="14" shadow="true"
+		text_y="0" fontsize="14" shadow="true"
 		text_color_pushed="255 255 255 255" 
 	    text_color_over="255 255 255 255"
 		text_shadow_color_normal="0 0 0 255" 
@@ -800,7 +800,7 @@
 		x="-2" posref="TR TL"
 		tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 		global_color_normal="true" global_color_over="true" global_color_pushed="true" 
-		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+		text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
 		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
 		
 <style style="tab_button_new" type="tab_button" button_type="radio_button"
@@ -808,7 +808,7 @@
 		tx_normal="w_tab_normal" tx_pushed="w_tab_pushed" tx_over="w_tab_over"
 		global_color_normal="true" global_color_over="true" global_color_pushed="true"
 		color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
-		text_y="-4" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+		text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
 		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255"
 		text_global_color_normal="true" 
 	    text_global_color_pushed="false" 

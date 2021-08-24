@@ -1289,9 +1289,7 @@
 	<!-- NamingPolicy -->
 	<ctrl style="opt_button" id="name_policy" posref="BM BM" posparent="text" x="0" y="-40" hardtext="uiCP_Name_Policy"
 		text_color_over="208 258 16 255" text_color_normal="255 255 46 255" text_color_pushed="108 158 16 255"
-		onover="play_sound" params_over="name=specie_but_over"
-		onclick_l="open_url" params_l="cfg_ConditionsTermsURL" />
-		<!-- onclick_l="open_url" params_l="cfg_NamingPolicyURL" /> -->
+		onclick_l="open_url" params_l="cfg_NamingPolicyURL" />
 
 	<group type="edit_box" id="eb" posparent="name_policy" posref="BM TM" x="0" y="-8"  w="300" h="52" render_layer="4" child_resize_h="true"
 									onenter="proc" params="proc_appear_name_enter"
