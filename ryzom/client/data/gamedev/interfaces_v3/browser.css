@@ -1,10 +1,13 @@
 html {
-    background-color: rgba(0, 0, 0, 1.0);
     color: rgba(210, 210, 210, 1.0);
     font-size: 12px;
     font-style: normal;
     font-weight: normal;
     text-shadow: none;
+}
+
+body {
+    background-color: rgba(0, 0, 0, 1.0);
 }
 
 address, article, aside, blockquote, details, dialog, dd, div, dl, dt,
