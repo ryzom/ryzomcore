@@ -628,6 +628,12 @@ namespace NLGUI
 			return false;
 		}
 
+		if (nlstricmp(src, "transparent") == 0)
+		{
+			dest = CRGBA::Transparent;
+			return true;
+		}
+
 		{
 			// slow but should suffice for now
 			for(uint k = 0; k < sizeofarray(htmlColorNameToRGBA); ++k)
