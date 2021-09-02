@@ -1907,9 +1907,17 @@ void getItemText (CDBCtrlSheet *item, ucstring &itemText, const CItemSheet*pIS)
 	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(getInventory().getItemSlotId(item) );
 	if (!itemInfo.CustomText.empty())
 	{
-		strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText + "\n");
-		ucstring itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
-		strFindReplace(itemText, "%mfc", itemMFC);
+		std::string text = itemInfo.CustomText.toUtf8();
+		if (text.size() > 3 && text[0]=='@' && ((text[1]=='W' && text[2]=='E' && text[3]=='B') || (text[1]=='L' && text[2]=='U' && text[3]=='A')))
+		{
+			strFindReplace(itemText, "%custom_text", string() );
+		}
+		else
+		{
+			strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText.toUtf8() + "\n");
+			string itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
+			strFindReplace(itemText, "%mfc", itemMFC);
+		}
 	}
 	else
 		strFindReplace(itemText, "%custom_text", ucstring() );
