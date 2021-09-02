@@ -1028,6 +1028,9 @@ namespace NLGUI
 						// second loop -> false && break
 						loop = !loop;
 
+						if (next >= parts.size())
+							break;
+
 						val = toLower(parts[next]);
 						if (val == "center")
 						{

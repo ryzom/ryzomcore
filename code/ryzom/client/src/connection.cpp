@@ -1113,7 +1113,7 @@ TInterfaceState globalMenu()
 						charSelect = LoginCharsel;
 
 					WaitServerAnswer = false;
-					if (charSelect == -1)
+					if (charSelect == -1 || FarTP.isReselectingChar())
 					{
 						CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
 						if (pNL != NULL)
