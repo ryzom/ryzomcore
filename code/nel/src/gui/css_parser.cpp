@@ -38,21 +38,57 @@ namespace NLGUI
 	TStyleVec CCssParser::parseDecls(const std::string &styleString)
 	{
 		TStyleVec styles;
-		std::vector<std::string> elements;
-		NLMISC::splitString(styleString, ";", elements);
-
-		for(uint i = 0; i < elements.size(); ++i)
+		size_t pos = 0;
+		size_t end = styleString.size();
+		while(pos < end)
 		{
-			std::string::size_type pos;
-			pos = elements[i].find_first_of(':');
-			if (pos != std::string::npos)
-			{
-				std::string key = trim(toLower(elements[i].substr(0, pos)));
-				std::string value = trim(elements[i].substr(pos+1));
-				styles.push_back(TStylePair(key, value));
-			}
-		}
+			size_t sep = styleString.find(':', pos);
+			if (sep == std::string::npos)
+				break;
 
+			size_t keyIndex = pos;
+			size_t keyLength = sep - pos;
+
+			sep++;
+			pos = sep;
+			while(sep < end)
+			{
+				sep = styleString.find_first_of(";'\"(", sep);
+				if (sep == std::string::npos || styleString[sep] == ';')
+					break;
+
+				if (styleString[sep] == '\'' || styleString[sep] == '"')
+				{
+					char ch = styleString[sep];
+					// skip open quote
+					sep++;
+					while(sep < end && styleString[sep] != ch)
+					{
+						if (styleString[sep] == '\\')
+							sep++;
+						sep++;
+					}
+					// skip close quote
+					sep++;
+				}
+				else if (styleString[sep] == '(')
+				{
+					while(sep < end && styleString[sep] != ')')
+					{
+						sep++;
+					}
+					// skip close parenthesis
+					sep++;
+				}
+			}
+
+			styles.push_back(TStylePair(trim(styleString.substr(keyIndex, keyLength)), trim(styleString.substr(pos, sep - pos))));
+
+			if (sep >= end)
+				break;
+
+			pos = sep + 1;
+		}
 		return styles;
 	}
 
