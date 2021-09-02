@@ -6668,8 +6668,7 @@ namespace NLGUI
 
 		_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
 
-		std::string content = strFindReplaceAll(elm.serializeChilds(), std::string("\t"), std::string(" "));
-		content = strFindReplaceAll(content, std::string("\n"), std::string(" "));
+		std::string content = strFindReplaceAll(elm.serializeChilds(), std::string("\r"), std::string(""));
 
 		CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, content, _TextAreaMaxLength);
 		if (textArea)
