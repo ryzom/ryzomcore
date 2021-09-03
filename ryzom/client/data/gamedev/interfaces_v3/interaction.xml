@@ -352,6 +352,7 @@
                         <group id="header_opened" x="0" y="0" w="176" h="16" posref="TL TL"></group>
                         <group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
                                 <instance template="chat_box" chat="true" id="cb" posref="TL TL" sizeref="wh" y="0" w="0" h="0" />
+                                <ctrl style="text_button_16" id="clear_sys_info" posref="TR TR" active="false" posparent="chat_box" x="-6" y="-18" wmargin="0" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="runCommand('clear', getUICaller().id)" hardtext="clear" />
                         </group>
                 </group>
         </template>
