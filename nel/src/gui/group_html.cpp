@@ -1296,6 +1296,7 @@ namespace NLGUI
 		}
 
 		std::string::size_type pos = 0;
+		// TODO: tokenize by whitespace
 		while(pos < content.size())
 		{
 			std::string::size_type start;
@@ -1328,6 +1329,9 @@ namespace NLGUI
 				start = pos + 4;
 				// fails if url contains ')'
 				pos = content.find(")", start);
+				if (pos == std::string::npos)
+					break;
+
 				token = trim(content.substr(start, pos - start));
 				// skip ')'
 				pos++;
@@ -1390,14 +1394,22 @@ namespace NLGUI
 			{
 				// attr(title)
 				start = pos + 5;
-				pos = content.find(")", start);
-				token = content.substr(start, pos - start);
-				// skip ')'
-				pos++;
-
-				if (elm.hasAttribute(token))
+				std::string::size_type end = 0;
+				end = content.find(")", start);
+				if (end != std::string::npos)
 				{
-					addString(elm.getAttribute(token));
+					token = content.substr(start, end - start);
+					// skip ')'
+					pos = end + 1;
+					if (elm.hasAttribute(token))
+					{
+						addString(elm.getAttribute(token));
+					}
+				}
+				else
+				{
+					// skip over 'a'
+					pos++;
 				}
 			}
 			else
