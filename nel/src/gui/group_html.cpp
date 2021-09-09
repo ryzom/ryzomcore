@@ -5147,10 +5147,13 @@ namespace NLGUI
 		if (!_CellParams.empty() && inherit)
 			cellParams = _CellParams.back();
 
-		if (_Style.hasStyle("background-color"))
-			cellParams.BgColor = _Style.Current.Background.color;
-		else if (elm.hasNonEmptyAttribute("bgcolor"))
-			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), cellParams.BgColor);
+		if (!_Style.hasStyle("background-color") && elm.hasNonEmptyAttribute("bgcolor"))
+		{
+			CRGBA c;
+			if (scanHTMLColor(elm.getAttribute("bgcolor").c_str(), c))
+				_Style.Current.Background.color = c;
+		}
+		cellParams.BgColor = _Style.Current.Background.color;
 
 		if (elm.hasAttribute("nowrap") || _Style.Current.WhiteSpace == "nowrap")
 			cellParams.NoWrap = true;
@@ -6109,7 +6112,7 @@ namespace NLGUI
 		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 5;
 		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
 		// FIXME: only using border-top
-		uint32 border = _Style.Current.BorderTopWidth > -1 ? _Style.Current.BorderTopWidth : 0;
+		uint32 border = _Style.Current.Border.Top.Width.getValue() > -1 ? _Style.Current.Border.Top.Width.getValue() : 0;
 
 		uint barw = (uint) (width * meter.getValueRatio());
 		CRGBA bgColor = meter.getBarColor(elm, _Style);
@@ -6331,7 +6334,7 @@ namespace NLGUI
 		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 10;
 		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
 		// FIXME: only using border-top
-		uint32 border = _Style.Current.BorderTopWidth > -1 ? _Style.Current.BorderTopWidth : 0;
+		uint32 border = _Style.Current.Border.Top.Width.getValue() > -1 ? _Style.Current.Border.Top.Width.getValue() : 0;
 
 		uint barw = (uint) (width * progress.getValueRatio());
 		CRGBA bgColor = progress.getBarColor(elm, _Style);
@@ -6459,7 +6462,7 @@ namespace NLGUI
 		getCellsParameters(elm, false);
 
 		CGroupTable *table = new CGroupTable(TCtorParam());
-		table->BgColor = _CellParams.back().BgColor;
+
 		if (elm.hasNonEmptyAttribute("id"))
 			table->setId(getCurrentGroup()->getId() + ":" + elm.getAttribute("id"));
 		else
@@ -6502,11 +6505,17 @@ namespace NLGUI
 
 		// border from css or from attribute
 		{
-			uint32 borderWidth = 0;
-			CRGBA borderColor = CRGBA::Transparent;
+			CSSRect<CSSBorder> border;
+			border.Top.Color = _Style.Current.TextColor;
+			border.Right.Color = _Style.Current.TextColor;
+			border.Bottom.Color = _Style.Current.TextColor;
+			border.Left.Color = _Style.Current.TextColor;
 
 			if (elm.hasAttribute("border"))
 			{
+				uint32 borderWidth = 0;
+				CRGBA borderColor = CRGBA::Transparent;
+
 				std::string s = elm.getAttribute("border");
 				if (s.empty())
 					borderWidth = 1;
@@ -6519,47 +6528,35 @@ namespace NLGUI
 					borderColor = CRGBA(128, 128, 128, 255);
 
 				table->CellBorder = (borderWidth > 0);
-				table->Border->setWidth(borderWidth, borderWidth, borderWidth, borderWidth);
-				table->Border->setColor(borderColor, borderColor, borderColor, borderColor);
-				table->Border->setStyle(CSS_LINE_STYLE_OUTSET, CSS_LINE_STYLE_OUTSET, CSS_LINE_STYLE_OUTSET, CSS_LINE_STYLE_OUTSET);
-			}
-			else
-			{
-				table->CellBorder = false;
+
+				border.Top.set(borderWidth, CSS_LINE_STYLE_OUTSET, borderColor);
+				border.Right.set(borderWidth, CSS_LINE_STYLE_OUTSET, borderColor);
+				border.Bottom.set(borderWidth, CSS_LINE_STYLE_OUTSET, borderColor);
+				border.Left.set(borderWidth, CSS_LINE_STYLE_OUTSET, borderColor);
 			}
 
-			if (_Style.hasStyle("border-top-width"))	table->Border->TopWidth = _Style.Current.BorderTopWidth;
-			if (_Style.hasStyle("border-right-width"))	table->Border->RightWidth = _Style.Current.BorderRightWidth;
-			if (_Style.hasStyle("border-bottom-width"))	table->Border->BottomWidth = _Style.Current.BorderBottomWidth;
-			if (_Style.hasStyle("border-left-width"))	table->Border->LeftWidth = _Style.Current.BorderLeftWidth;
+			if (_Style.hasStyle("border-top-width"))	border.Top.Width = _Style.Current.Border.Top.Width;
+			if (_Style.hasStyle("border-right-width"))	border.Right.Width = _Style.Current.Border.Right.Width;
+			if (_Style.hasStyle("border-bottom-width"))	border.Bottom.Width = _Style.Current.Border.Bottom.Width;
+			if (_Style.hasStyle("border-left-width"))	border.Left.Width = _Style.Current.Border.Left.Width;
 
-			if (_Style.hasStyle("border-top-color"))	table->Border->TopColor = _Style.Current.BorderTopColor;
-			if (_Style.hasStyle("border-right-color"))	table->Border->RightColor = _Style.Current.BorderRightColor;
-			if (_Style.hasStyle("border-bottom-color"))	table->Border->BottomColor = _Style.Current.BorderBottomColor;
-			if (_Style.hasStyle("border-left-color"))	table->Border->LeftColor = _Style.Current.BorderLeftColor;
+			if (_Style.hasStyle("border-top-color"))	border.Top.Color = _Style.Current.Border.Top.Color;
+			if (_Style.hasStyle("border-right-color"))	border.Right.Color = _Style.Current.Border.Right.Color;
+			if (_Style.hasStyle("border-bottom-color"))	border.Bottom.Color = _Style.Current.Border.Bottom.Color;
+			if (_Style.hasStyle("border-left-color"))	border.Left.Color = _Style.Current.Border.Left.Color;
 
-			if (_Style.hasStyle("border-top-style"))	table->Border->TopStyle = _Style.Current.BorderTopStyle;
-			if (_Style.hasStyle("border-right-style"))	table->Border->RightStyle = _Style.Current.BorderRightStyle;
-			if (_Style.hasStyle("border-bottom-style"))	table->Border->BottomStyle = _Style.Current.BorderBottomStyle;
-			if (_Style.hasStyle("border-left-style"))	table->Border->LeftStyle = _Style.Current.BorderLeftStyle;
+			if (_Style.hasStyle("border-top-style"))	border.Top.Style = _Style.Current.Border.Top.Style;
+			if (_Style.hasStyle("border-right-style"))	border.Right.Style = _Style.Current.Border.Right.Style;
+			if (_Style.hasStyle("border-bottom-style"))	border.Bottom.Style = _Style.Current.Border.Bottom.Style;
+			if (_Style.hasStyle("border-left-style"))	border.Left.Style = _Style.Current.Border.Left.Style;
+
+			table->Border->setBorder(border);
+			table->Border->setFontSize(_Style.Root.FontSize, _Style.Current.FontSize);
+			table->Border->setViewport(getList()->getParentPos() ? getList()->getParentPos() : this);
 		}
 
-		if (_Style.hasStyle("background-image"))
-		{
-			if (_Style.checkStyle("background-repeat", "repeat"))
-				table->setTextureTile(true);
-
-			if (_Style.checkStyle("background-size", "100%"))
-				table->setTextureScale(true);
-
-			string image = _Style.getStyle("background-image");
-			addImageDownload(image, table, CStyleParams(), NormalImage, "");
-		}
-		else
-		{
-			// will be set in addImageDownload if background-image exists
-			table->setModulateGlobalColor(_Style.Current.GlobalColor);
-		}
+		setupBackground(table->Background);
+		table->setModulateGlobalColor(_Style.Current.GlobalColor);
 
 		table->setMarginLeft(getIndent());
 		addHtmlGroup (table, 0);
@@ -6597,10 +6594,10 @@ namespace NLGUI
 		getCellsParameters(elm, true);
 
 		// if cell has own background,then it must be blended with row
-		if (rowColor.A > 0 && (elm.hasNonEmptyAttribute("bgcolor") || _Style.hasStyle("background-color")))
+		if (rowColor.A > 0 && _Style.Current.Background.color.A < 255)
 		{
-			if (_CellParams.back().BgColor.A < 255)
-				_CellParams.back().BgColor.blendFromui(rowColor, _CellParams.back().BgColor, _CellParams.back().BgColor.A);
+			_Style.Current.Background.color.blendFromui(rowColor,
+				_Style.Current.Background.color, _Style.Current.Background.color.A);
 		}
 
 		if (elm.ID == HTML_TH)
@@ -6633,29 +6630,14 @@ namespace NLGUI
 		// inner cell content
 		_Cells.back()->Group->setId(_Cells.back()->getId() + ":CELL");
 
-		if (_Style.checkStyle("background-repeat", "repeat"))
-			_Cells.back()->setTextureTile(true);
-
-		if (_Style.checkStyle("background-size", "100%"))
-			_Cells.back()->setTextureScale(true);
-
-		if (_Style.hasStyle("background-image"))
-		{
-			string image = _Style.getStyle("background-image");
-			addImageDownload(image, _Cells.back(), CStyleParams(), NormalImage, "");
-		}
-		else
-		{
-			// will be set in addImageDownload if background-image is set
-			_Cells.back()->setModulateGlobalColor(_Style.Current.GlobalColor);
-		}
+		setupBackground(_Cells.back()->Background);
+		_Cells.back()->setModulateGlobalColor(_Style.Current.GlobalColor);
 
 		if (elm.hasNonEmptyAttribute("colspan"))
 			fromString(elm.getAttribute("colspan"), _Cells.back()->ColSpan);
 		if (elm.hasNonEmptyAttribute("rowspan"))
 			fromString(elm.getAttribute("rowspan"), _Cells.back()->RowSpan);
 
-		_Cells.back()->BgColor = _CellParams.back().BgColor;
 		_Cells.back()->Align = _CellParams.back().Align;
 		_Cells.back()->VAlign = _CellParams.back().VAlign;
 		_Cells.back()->LeftMargin = _CellParams.back().LeftMargin;
@@ -6685,32 +6667,35 @@ namespace NLGUI
 
 		_Cells.back()->NewLine = getTR();
 
-		// border from <table border="1">
-		if (table->CellBorder)
-		{
-			_Cells.back()->Border->setWidth(1, 1, 1, 1);
-			_Cells.back()->Border->setColor(table->Border->TopColor, table->Border->RightColor, table->Border->BottomColor, table->Border->LeftColor);
-			_Cells.back()->Border->setStyle(CSS_LINE_STYLE_INSET, CSS_LINE_STYLE_INSET, CSS_LINE_STYLE_INSET, CSS_LINE_STYLE_INSET);
-		}
+		CSSRect<CSSBorder> border;
+		border.Top.set(   table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		border.Right.set( table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		border.Bottom.set(table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		border.Left.set(  table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
 
-		if (_Style.hasStyle("border-top-width"))	_Cells.back()->Border->TopWidth = _Style.Current.BorderTopWidth;
-		if (_Style.hasStyle("border-right-width"))	_Cells.back()->Border->RightWidth = _Style.Current.BorderRightWidth;
-		if (_Style.hasStyle("border-bottom-width"))	_Cells.back()->Border->BottomWidth = _Style.Current.BorderBottomWidth;
-		if (_Style.hasStyle("border-left-width"))	_Cells.back()->Border->LeftWidth = _Style.Current.BorderLeftWidth;
+		if (_Style.hasStyle("border-top-width"))	border.Top.Width = _Style.Current.Border.Top.Width;
+		if (_Style.hasStyle("border-right-width"))	border.Right.Width = _Style.Current.Border.Right.Width;
+		if (_Style.hasStyle("border-bottom-width"))	border.Bottom.Width = _Style.Current.Border.Bottom.Width;
+		if (_Style.hasStyle("border-left-width"))	border.Left.Width = _Style.Current.Border.Left.Width;
 
-		if (_Style.hasStyle("border-top-color"))	_Cells.back()->Border->TopColor = _Style.Current.BorderTopColor;
-		if (_Style.hasStyle("border-right-color"))	_Cells.back()->Border->RightColor = _Style.Current.BorderRightColor;
-		if (_Style.hasStyle("border-bottom-color"))	_Cells.back()->Border->BottomColor = _Style.Current.BorderBottomColor;
-		if (_Style.hasStyle("border-left-color"))	_Cells.back()->Border->LeftColor = _Style.Current.BorderLeftColor;
+		if (_Style.hasStyle("border-top-color"))	border.Top.Color = _Style.Current.Border.Top.Color;
+		if (_Style.hasStyle("border-right-color"))	border.Right.Color = _Style.Current.Border.Right.Color;
+		if (_Style.hasStyle("border-bottom-color"))	border.Bottom.Color = _Style.Current.Border.Bottom.Color;
+		if (_Style.hasStyle("border-left-color"))	border.Left.Color = _Style.Current.Border.Left.Color;
 
-		if (_Style.hasStyle("border-top-style"))	_Cells.back()->Border->TopStyle = _Style.Current.BorderTopStyle;
-		if (_Style.hasStyle("border-right-style"))	_Cells.back()->Border->RightStyle = _Style.Current.BorderRightStyle;
-		if (_Style.hasStyle("border-bottom-style"))	_Cells.back()->Border->BottomStyle = _Style.Current.BorderBottomStyle;
-		if (_Style.hasStyle("border-left-style"))	_Cells.back()->Border->LeftStyle = _Style.Current.BorderLeftStyle;
+		if (_Style.hasStyle("border-top-style"))	border.Top.Style = _Style.Current.Border.Top.Style;
+		if (_Style.hasStyle("border-right-style"))	border.Right.Style = _Style.Current.Border.Right.Style;
+		if (_Style.hasStyle("border-bottom-style"))	border.Bottom.Style = _Style.Current.Border.Bottom.Style;
+		if (_Style.hasStyle("border-left-style"))	border.Left.Style = _Style.Current.Border.Left.Style;
+
+		_Cells.back()->Border->setBorder(border);
+		_Cells.back()->Border->setFontSize(_Style.Root.FontSize, _Style.Current.FontSize);
+		_Cells.back()->Border->setViewport(getList()->getParentPos() ? getList()->getParentPos() : this);
 
 		// padding from <table cellpadding="1">
 		if (table->CellPadding)
 		{
+			// FIXME: padding is ignored by vertical align
 			_Cells.back()->PaddingTop = table->CellPadding;
 			_Cells.back()->PaddingRight = table->CellPadding;
 			_Cells.back()->PaddingBottom = table->CellPadding;
