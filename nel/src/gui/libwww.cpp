@@ -206,14 +206,31 @@ namespace NLGUI
 	// ***************************************************************************
 
 	// ***************************************************************************
-	bool getCssLength (float &value, std::string &unit, const std::string &str)
+	bool getCssLength (float &value, std::string &unit, const std::string &str, bool neg)
 	{
+		static const std::set<std::string> knownUnits = {
+			"%", "rem", "em", "px", "pt", "vw", "vh", "vi", "vb", "vmin", "vmax"
+		};
+
 		std::string::size_type pos = 0;
 		std::string::size_type len = str.size();
-		if (len == 1 && str[0] == '.')
+		if (len == 0)
 		{
 			return false;
 		}
+
+		if (len == 1 && str[0] == '0')
+		{
+			value = 0;
+			unit.clear();
+			return true;
+		}
+
+		// +100px; -100px
+		if (str[0] == '+')
+			pos++;
+		else if (neg && str[0] == '-')
+			pos++;
 
 		while(pos < len)
 		{
@@ -229,7 +246,7 @@ namespace NLGUI
 		}
 
 		unit = toLowerAscii(str.substr(pos));
-		if (unit == "%" || unit == "rem" || unit == "em" || unit == "px" || unit == "pt")
+		if (knownUnits.count(unit))
 		{
 			std::string tmpstr = str.substr(0, pos);
 			return fromString(tmpstr, value);
@@ -609,6 +626,12 @@ namespace NLGUI
 			}
 
 			return false;
+		}
+
+		if (nlstricmp(src, "transparent") == 0)
+		{
+			dest = CRGBA::Transparent;
+			return true;
 		}
 
 		{
