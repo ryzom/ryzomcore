@@ -85,6 +85,15 @@ namespace NLGUI
 		CSS_VALUE_CONTAIN
 	};
 
+	template<typename T>
+	struct CSSRect
+	{
+		T Top;
+		T Right;
+		T Bottom;
+		T Left;
+	};
+
 }//namespace
 
 #endif // CL_CSS_TYPES_H

@@ -504,7 +504,7 @@ namespace NLGUI
 		}
 	}
 
-	void CCssStyle::applyBorderWidth(const std::string &value, uint32 *dest, const uint32 currentWidth, const uint32 fontSize) const
+	void CCssStyle::applyBorderWidth(const std::string &value, CSSLength *dest, const CSSLength &currentWidth) const
 	{
 		if (!dest) return;
 		if (value == "inherit")
@@ -513,37 +513,19 @@ namespace NLGUI
 		}
 		else if (value == "thin")
 		{
-			*dest = 1;
+			dest->setFloatValue(1, "px");
 		}
 		else if (value == "medium")
 		{
-			*dest = 3;
+			dest->setFloatValue(3, "px");
 		}
 		else if (value == "thick")
 		{
-			*dest = 5;
-		}
-		else if (value == "0")
-		{
-			*dest = 0;
+			dest->setFloatValue(5, "px");
 		}
 		else
 		{
-			float tmpf;
-			std::string unit;
-			if (getCssLength(tmpf, unit, value.c_str()))
-			{
-				if (unit == "rem")
-					*dest = fontSize * tmpf;
-				else if (unit == "em")
-					*dest = fontSize * tmpf;
-				else if (unit == "pt")
-					*dest = tmpf / 0.75f;
-				else if (unit == "%")
-					*dest = 0; // no support for % in border width
-				else
-					*dest = tmpf;
-			}
+			dest->parseValue(value, false, false);
 		}
 	}
 
@@ -656,18 +638,18 @@ namespace NLGUI
 		TStyle::const_iterator it;
 		for (it=style.StyleRules.begin(); it != style.StyleRules.end(); ++it)
 		{
-			     if (it->first == "border-top-width")	 applyBorderWidth(it->second, &style.BorderTopWidth, current.BorderTopWidth, current.FontSize);
-			else if (it->first == "border-top-color")	 applyBorderColor(it->second, &style.BorderTopColor, current.BorderTopColor, current.TextColor);
-			else if (it->first == "border-top-style")	 applyLineStyle(it->second, &style.BorderTopStyle, current.BorderTopStyle);
-			else if (it->first == "border-right-width")	 applyBorderWidth(it->second, &style.BorderRightWidth, current.BorderRightWidth, current.FontSize);
-			else if (it->first == "border-right-color")	 applyBorderColor(it->second, &style.BorderRightColor, current.BorderRightColor, current.TextColor);
-			else if (it->first == "border-right-style")	 applyLineStyle(it->second, &style.BorderRightStyle, current.BorderRightStyle);
-			else if (it->first == "border-bottom-width") applyBorderWidth(it->second, &style.BorderBottomWidth, current.BorderBottomWidth, current.FontSize);
-			else if (it->first == "border-bottom-color") applyBorderColor(it->second, &style.BorderBottomColor, current.BorderBottomColor, current.TextColor);
-			else if (it->first == "border-bottom-style") applyLineStyle(it->second, &style.BorderBottomStyle, current.BorderBottomStyle);
-			else if (it->first == "border-left-width")	 applyBorderWidth(it->second, &style.BorderLeftWidth, current.BorderLeftWidth, current.FontSize);
-			else if (it->first == "border-left-color")	 applyBorderColor(it->second, &style.BorderLeftColor, current.BorderLeftColor, current.TextColor);
-			else if (it->first == "border-left-style")	 applyLineStyle(it->second, &style.BorderLeftStyle, current.BorderLeftStyle);
+			     if (it->first == "border-top-width")	 applyBorderWidth(it->second, &style.Border.Top.Width, current.Border.Top.Width);
+			else if (it->first == "border-top-color")	 applyBorderColor(it->second, &style.Border.Top.Color, current.Border.Top.Color, current.TextColor);
+			else if (it->first == "border-top-style")	 applyLineStyle(it->second,   &style.Border.Top.Style, current.Border.Top.Style);
+			else if (it->first == "border-right-width")	 applyBorderWidth(it->second, &style.Border.Right.Width,  current.Border.Right.Width);
+			else if (it->first == "border-right-color")	 applyBorderColor(it->second, &style.Border.Right.Color,  current.Border.Right.Color, current.TextColor);
+			else if (it->first == "border-right-style")	 applyLineStyle(it->second,   &style.Border.Right.Style,  current.Border.Right.Style);
+			else if (it->first == "border-bottom-width") applyBorderWidth(it->second, &style.Border.Bottom.Width, current.Border.Bottom.Width);
+			else if (it->first == "border-bottom-color") applyBorderColor(it->second, &style.Border.Bottom.Color, current.Border.Bottom.Color, current.TextColor);
+			else if (it->first == "border-bottom-style") applyLineStyle(it->second,   &style.Border.Bottom.Style, current.Border.Bottom.Style);
+			else if (it->first == "border-left-width")	 applyBorderWidth(it->second, &style.Border.Left.Width,   current.Border.Left.Width);
+			else if (it->first == "border-left-color")	 applyBorderColor(it->second, &style.Border.Left.Color,   current.Border.Left.Color, current.TextColor);
+			else if (it->first == "border-left-style")	 applyLineStyle(it->second,   &style.Border.Left.Style,   current.Border.Left.Style);
 			else if (it->first == "margin-top")			 applyMarginWidth(it->second, &style.MarginTop, current.MarginTop, current.FontSize);
 			else if (it->first == "margin-right")		 applyMarginWidth(it->second, &style.MarginRight, current.MarginRight, current.FontSize);
 			else if (it->first == "margin-bottom")		 applyMarginWidth(it->second, &style.MarginBottom, current.MarginBottom, current.FontSize);

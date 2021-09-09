@@ -23,6 +23,7 @@
 #include "nel/gui/css_types.h"
 #include "nel/gui/css_length.h"
 #include "nel/gui/css_background.h"
+#include "nel/gui/css_border.h"
 
 namespace NLGUI
 {
@@ -67,10 +68,6 @@ namespace NLGUI
 			Height=-1;
 			MaxWidth=-1;
 			MaxHeight=-1;
-			// border style
-			BorderTopWidth = BorderRightWidth = BorderBottomWidth = BorderLeftWidth = CSS_LINE_WIDTH_MEDIUM;
-			BorderTopStyle = BorderRightStyle = BorderBottomStyle = BorderLeftStyle = CSS_LINE_STYLE_NONE;
-			BorderTopColor = BorderRightColor = BorderBottomColor = BorderLeftColor = NLMISC::CRGBA::Transparent;
 			// background
 			BackgroundColorOver=NLMISC::CRGBA::Black;
 			MarginTop = MarginRight = MarginBottom = MarginLeft = 0;
@@ -103,9 +100,7 @@ namespace NLGUI
 		sint32 Height;
 		sint32 MaxWidth;
 		sint32 MaxHeight;
-		uint32 BorderTopWidth, BorderRightWidth, BorderBottomWidth, BorderLeftWidth;
-		CSSLineStyle BorderTopStyle, BorderRightStyle, BorderBottomStyle, BorderLeftStyle;
-		NLMISC::CRGBA BorderTopColor, BorderRightColor, BorderBottomColor, BorderLeftColor;
+		CSSRect<CSSBorder> Border;
 		CSSBackground Background;
 		NLMISC::CRGBA BackgroundColorOver;
 		uint32 MarginTop, MarginRight, MarginBottom, MarginLeft;
@@ -187,7 +182,7 @@ namespace NLGUI
 		void expandShorthand(const std::string &prop, const std::string &value, TStyle &style) const;
 
 		// parse string value into corresponding value
-		void applyBorderWidth(const std::string &value, uint32 *dest, const uint32 currentWidth, const uint32 fontSize) const;
+		void applyBorderWidth(const std::string &value, CSSLength *dest, const CSSLength &currentWidth) const;
 		void applyBorderColor(const std::string &value, NLMISC::CRGBA *dest, const NLMISC::CRGBA &currentColor, const NLMISC::CRGBA &textColor) const;
 		void applyLineStyle(const std::string &value, CSSLineStyle *dest, const CSSLineStyle &currentStyle) const;
 		void applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const;
@@ -226,9 +221,10 @@ namespace NLGUI
 			Current.MaxWidth=-1;
 			Current.MaxHeight=-1;
 
-			Current.BorderTopWidth = Current.BorderRightWidth = Current.BorderBottomWidth = Current.BorderLeftWidth = CSS_LINE_WIDTH_MEDIUM;
-			Current.BorderTopStyle = Current.BorderRightStyle = Current.BorderBottomStyle = Current.BorderLeftStyle = CSS_LINE_STYLE_NONE;
-			Current.BorderTopColor = Current.BorderRightColor = Current.BorderBottomColor = Current.BorderLeftColor = Current.TextColor;
+			Current.Border.Top.reset();
+			Current.Border.Right.reset();
+			Current.Border.Bottom.reset();
+			Current.Border.Left.reset();
 
 			Current.Background = CSSBackground();
 			Current.BackgroundColorOver = NLMISC::CRGBA::Transparent;
