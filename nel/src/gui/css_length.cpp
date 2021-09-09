@@ -152,6 +152,9 @@ void CSSLength::setUnit(const std::string &unit)
 
 float CSSLength::calculate(uint32 relValue, uint32 emSize, uint32 remSize, uint32 vwSize, uint32 vhSize = 0) const
 {
+	if (m_Kind == Auto)
+		return 0;
+
 	float value = getValue();
 	switch(m_Unit)
 	{
