@@ -35,7 +35,7 @@ if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
 from scripts import *
-from buildsite import *
+from buildsite_local import *
 from tools import *
 
 sys.path.append(WorkspaceDirectory)
@@ -48,6 +48,9 @@ printLog(log, "--- Create a new patch for the patchman bridge")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
+
+# Find tools
+SevenZip = findTool(log, ToolDirectories, SevenZipTool, ToolSuffix)
 
 # List the directories that will be used
 archiveDirectories = [ ]
@@ -89,23 +92,29 @@ else:
 printLog(log, "")
 
 if not args.admininstall:
-	printLog(log, ">>> Create new version <<<")
-	newVersion = 1
-	vstr = str(newVersion).zfill(6)
-	vpath = PatchmanBridgeServerDirectory + "/" + vstr
-	while os.path.exists(vpath):
-		newVersion = newVersion + 1
+	if SevenZip == "":
+		toolLogFail(log, SevenZipTool, ToolSuffix)
+	else:
+		printLog(log, ">>> Create new version <<<")
+		newVersion = 1
 		vstr = str(newVersion).zfill(6)
 		vpath = PatchmanBridgeServerDirectory + "/" + vstr
-	mkPath(log, vpath)
-	for dir in archiveDirectories:
-		mkPath(log, ShardInstallDirectory + "/" + dir)
-		tgzPath = vpath + "/" + dir + ".tgz"
-		printLog(log, "WRITE " + tgzPath)
-		tar = tarfile.open(tgzPath, "w:gz")
-		tar.add(ShardInstallDirectory + "/" + dir, arcname = dir)
-		tar.close()
-	printLog(log, "")
+		while os.path.exists(vpath):
+			newVersion = newVersion + 1
+			vstr = str(newVersion).zfill(6)
+			vpath = PatchmanBridgeServerDirectory + "/" + vstr
+		mkPath(log, vpath)
+		for dir in archiveDirectories:
+			mkPath(log, ShardInstallDirectory + "/" + dir)
+			# tgzPath = vpath + "/" + dir + ".tgz"
+			# printLog(log, "WRITE " + tgzPath)
+			# tar = tarfile.open(tgzPath, "w:gz")
+			# tar.add(ShardInstallDirectory + "/" + dir, arcname = dir)
+			# tar.close()
+			sevenZipPath = vpath + "/" + dir + ".7z"
+			printLog(log, "WRITE " + sevenZipPath)
+			subprocess.call([ SevenZip, "a", sevenZipPath, ShardInstallDirectory + "/" + dir ])
+		printLog(log, "")
 
 log.close()
 if os.path.isfile("c1_shard_patch.log"):

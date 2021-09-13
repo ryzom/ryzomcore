@@ -74,6 +74,13 @@ else:
 	printLog(log, ">>> Copy Shape <<<")
 	copyFilesExtNoTreeIfNeeded(log, shapeDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory, ".shape")
 
+printLog(log, ">>> Copy non-ShadowSkin non-CLodTex Shape <<<")
+shapeDirectory = ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory
+mkPath(log, shapeDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory)
+copyFilesExtNoTreeIfNeeded(log, shapeDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory, ".shape")
+shapeDirectory = ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory
+
 # copy lightmap_not_optimized to lightmap
 printLog(log, ">>> Optimize lightmaps <<<")
 loPathLightmapsOriginal = ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory

@@ -31,7 +31,7 @@ if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
 from scripts import *
-from buildsite import *
+from buildsite_local import *
 from process import *
 from tools import *
 from directories import *
@@ -50,6 +50,7 @@ mkPath(log, fontExportDir)
 
 printLog(log, ">>> Install font <<<")
 copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".ttf")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".otf")
 copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".afm")
 copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".pfb")
 copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".pfm")
