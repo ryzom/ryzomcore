@@ -207,8 +207,8 @@ private:
 	static bool	isDynStringAvailable(sint32 dynStringId);
 	static bool	isFullyPatched();
 	static std::string getSheetType(const std::string &sheet);
-	static float getCharacterSheetScale(const std::string &sheet);
 	static std::string getSheetShape(const std::string &sheet);
+	static float getCharacterSheetScale(const std::string &sheet);
 	static std::string getSheetFamily(const std::string &sheet);
 	static std::string getSheetName(uint32 sheetId);
 	static sint32 getFameIndex(const std::string &factionName);
