@@ -40,6 +40,7 @@ extern CCreatureManager CreatureManager;
 // skill used when no weapon in hand (hand to hand combat)
 extern SKILLS::ESkills	BarehandCombatSkill;
 extern CVariable<uint16> HandToHandReachValue;
+extern CVariable<bool> ApplyAverageDodgeFactor;
 
 
 //--------------------------------------------------------------
@@ -295,7 +296,8 @@ void CCombatAttackerAI::initFromRowId( const TDataSetRow &rowId )
 		_SkillValue = form->getAttackLevel();
 		
 		_RightHandWeapon.Quality = (uint16)_SkillValue;
-		_RightHandWeapon.Damage = (float)form->getCreatureDamagePerHit() * BotDamageFactor;
+		uint32 creatureDph = ApplyAverageDodgeFactor ? form->getCreatureDamagePerHit() : form->getCreatureDamagePerHitWithoutAverageDodge();
+		_RightHandWeapon.Damage = (float)creatureDph * BotDamageFactor;
 		
 		_RightHandWeapon.DmgType = DMGTYPE::SLASHING;
 		_RightHandWeapon.LatencyInTicks = (double)form->getAttackLatency();
@@ -440,7 +442,8 @@ void CCombatAttackerNpc::initFromRowId( const TDataSetRow &rowId )
 		_RightHandWeapon.LatencyInTicks = HandToHandLatency;
 
 	_RightHandWeapon.Quality = (uint16)_SkillValue;
-	_RightHandWeapon.Damage = (float)form->getCreatureDamagePerHit() * BotDamageFactor;
+	uint32 creatureDph = ApplyAverageDodgeFactor ? form->getCreatureDamagePerHit() : form->getCreatureDamagePerHitWithoutAverageDodge();
+	_RightHandWeapon.Damage = (float)creatureDph * BotDamageFactor;
 	_RightHandWeapon.SabrinaCost = (uint16)_SkillValue;
 	_RightHandWeapon.ReachValue = form->getMeleeReachValue();
 

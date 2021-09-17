@@ -4363,14 +4363,14 @@ void CMainFrame::OnMissionCompiler()
 	ExecuteInfo.fMask        = 0;
 	ExecuteInfo.hwnd         = 0;
 	ExecuteInfo.lpVerb       = _T("open");
-	ExecuteInfo.lpFile       = _T("mission_compiler_fe_r.exe");
+	ExecuteInfo.lpFile       = _T("ryzom_mission_compiler_fe.exe");
 	ExecuteInfo.lpParameters = 0;
 	ExecuteInfo.lpDirectory  = path;
 	ExecuteInfo.nShow        = SW_SHOW;
 	ExecuteInfo.hInstApp     = 0;
 
 	if(ShellExecuteEx(&ExecuteInfo) == FALSE)
-		errorMessage("File not found : mission_compiler_fe_r.exe !");
+		errorMessage("File not found : ryzom_mission_compiler_fe.exe !");
 }
 
 // ***************************************************************************

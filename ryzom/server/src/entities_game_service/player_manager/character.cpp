@@ -211,6 +211,8 @@ extern CVariable<string> NoValueCheckingPriv;
 extern CVariable<uint32> OutpostJoinPvpTimer;
 extern CVariable<uint32> DefaultWeightHands;
 
+extern CVariable<bool> RingXpEnabled;
+
 extern vector<CMainlandSummary> Mainlands;
 
 CVariable<uint32> SpawnedDeadMektoubDelay("egs", "SpawnedDeadMektoubDelay", "nb tick before a dead mektoub despawn)", 2592000, 0, true);
@@ -3021,6 +3023,9 @@ void CCharacter::prepareToLoad()
 void CCharacter::postLoadTreatment()
 {
 	H_AUTO(CCharacterPostLoadTreatment);
+
+	TLogNoContext_Character noContextCharacter;
+	TLogNoContext_Item noContextItem;
 
 	// Check if the name is correct, otherwise set name to default (in case of corrupted name)
 	uint8 charIndex = PlayerManager.getCharIndex( getId() );
@@ -7598,7 +7603,7 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 	////
 
 	// treat ring scenarios as a special case...
-	if(IsRingShard)
+	if (IsRingShard && !RingXpEnabled.get())
 	{
 		// don't gain reward points for crafting in the ring
 		DROP_IF(reinterpret_cast<CSString*>(&skillName)->left(2).toUpper()=="SC","No XP gain for using crafting skill "<<skillName<<"("<<ContSkill<<") for character "<<getId().toString(),return 0.0);

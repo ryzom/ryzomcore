@@ -436,6 +436,11 @@
 	<action handler="proc" params="proc_change_armor_color" />
 </proc>
 
+<proc id="anim_perso_armor">
+	<action handler="set" params="dblink=UI:TEMP:PANOPLY|value=add(@UI:TEMP:PANOPLY,1)" />
+	<action handler="proc" params="proc_change_armor" />
+</proc>
+
 
 
 <!-- Test & Loop Cam Rotate -->
@@ -2442,12 +2447,20 @@
 		onover="play_sound" params_over="name=specie_but_over"
 		onclick_l="proc" params_l="proc_appear_infos"/>
 	<link expr="eq(@UI:TEMP:CP_MENU,0)" target="infos_but:active" />
+
 	<!--
 	<ctrl type="button" id="panoply_color" button_type="toggle_button" posparent="play_anim" posref="TL TR" x="8" y="0"
 				tx_normal="play_on.tga" tx_pushed="play_off.tga" tx_over="blank.tga"
 				color="255 255 255 255" col_pushed="255 255 255 255" col_over="0 0 0 0"
 				onover="play_sound" params_over="name=specie_but_over"
 				onclick_l="proc" params_l="anim_perso_color"/>
+	-->
+
+	<!--
+	<ctrl style="valid_txt_button" id="panoply_armor" posparent="play_anim" posref="TL TR" x="8" y="0"
+				 hardtext="uiCP_Armor"
+				onover="play_sound" params_over="name=specie_but_over"
+				onclick_l="proc" params_l="anim_perso_armor"/>
 	-->
 
 	<ctrl style="valid_txt_button" id="finish_but" posref="BR BM" x="-112" y="36" hardtext="uiCP_Finish"

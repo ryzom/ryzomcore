@@ -31,6 +31,7 @@
 namespace NLGUI
 {
 	class CSSBorderRenderer;
+	class CSSBackgroundRenderer;
 
 	/**
 	  * This group is used to simulate HTML cells.
@@ -94,21 +95,9 @@ namespace NLGUI
 		// Memorize max width
 		sint32	WidthMax;
 
-		// The cell color
-		NLMISC::CRGBA	BgColor;
-
 		CSSBorderRenderer* Border;
+		CSSBackgroundRenderer *Background;
 		uint32 PaddingTop, PaddingRight, PaddingBottom, PaddingLeft;
-
-		// Texture
-		CViewRenderer::CTextureId	_TextureId;
-		bool _TextureTiled;
-		bool _TextureScaled;
-		// cached absolute coords for background texture
-		sint32 _TextureXReal;
-		sint32 _TextureYReal;
-		sint32 _TextureWReal;
-		sint32 _TextureHReal;
 
 		// Alignment
 		TAlign	Align;
@@ -121,6 +110,7 @@ namespace NLGUI
 		// The cell is nowrap
 		bool	NoWrap;
 
+		// deprecated background image
 		void setTexture(const std::string & TxName);
 		void setTextureTile(bool tiled);
 		void setTextureScale(bool scaled);
@@ -134,8 +124,6 @@ namespace NLGUI
 		static bool getDebugUICell(){ return DebugUICell; }
 
 	private:
-		void updateTextureCoords();
-
 		void setEnclosedGroupDefaultParams();
 		static bool DebugUICell;
 	};
@@ -164,18 +152,18 @@ namespace NLGUI
 		sint32	ForceWidthMin;
 
 		CSSBorderRenderer* Border;
+		CSSBackgroundRenderer *Background;
 
 		// Cell has 1px solid border when <table> has 'border' attribute with width > 0
 		bool	CellBorder;
 		sint32	CellPadding;
 		sint32	CellSpacing;
 
-		// The table color
-		NLMISC::CRGBA	BgColor;
 		uint8	CurrentAlpha;
 
 		bool    ContinuousUpdate;
 
+		// deprecated background image
 		void setTexture(const std::string & TxName);
 		void setTextureTile(bool tiled);
 		void setTextureScale(bool scaled);
@@ -200,18 +188,6 @@ namespace NLGUI
 		virtual void checkCoords();
 
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-
-		// Texture
-		CViewRenderer::CTextureId _TextureId;
-		bool _TextureTiled;
-		bool _TextureScaled;
-		// cached absolute coords for background texture
-		sint32 _TextureXReal;
-		sint32 _TextureYReal;
-		sint32 _TextureWReal;
-		sint32 _TextureHReal;
-
-		void updateTextureCoords();
 
 		// Content validated
 		bool	_ContentValidated;

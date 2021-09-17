@@ -95,6 +95,12 @@ bool						CStaticSuccessTable::_Init = false;
 float						CStaticSuccessTable::_AverageDodgeFactor = 0.0f;
 const CStaticSuccessTable*	CStaticSuccessTable::_Tables[SUCCESS_TABLE_TYPE::NB_TABLE_TYPES];
 
+NLMISC_DYNVARIABLE( float, AverageDodgeFactor, "Average dodge factor used in creature damage calculation" )
+{
+	if (get)
+		*pointer = CStaticSuccessTable::getAverageDodgeFactor();
+}
+
 //--------------------------------------------------------------
 // initTables
 //--------------------------------------------------------------
