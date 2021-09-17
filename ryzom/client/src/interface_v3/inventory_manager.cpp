@@ -3665,6 +3665,15 @@ void			CInventoryManager::updateItemInfoQueue()
 	TItemInfoWaiters::iterator	it;
 	for(it= _ItemInfoWaiters.begin();it!=_ItemInfoWaiters.end();it++)
 	{
+		/* yoyo remove: temp patch to be sure that the client does not send messages before the
+			CONNECTION:READY is sent
+			Ulukyn: this only happens if player ask to reselect a char before end of update items.
+			On this case, skip it...
+		*/
+
+		if (!ConnectionReadySent)
+			continue;
+
 		IItemInfoWaiter *waiter=*it;
 		uint	itemSlotId= waiter->ItemSlotId;
 		TItemInfoMap::iterator	it= _ItemInfoMap.find(itemSlotId);
