@@ -38,10 +38,12 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLGEORGES;
 
+/*
 const float MinDamage = 25;
 const float DamageStep = 1.0f;
 const float MeanSuccessFactor = 0.65f;
 const float Offset = -0.5f;
+*/
 
 extern CRandom RandomGenerator;
 
@@ -598,11 +600,6 @@ void CStaticCreatures::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 		///////////////////////////////////////////////////////
 		// Derivated Scores
 		///////////////////////////////////////////////////////
-		uint32 playerSkillLevel = 1;
-		if ( !root.getValueByName( playerSkillLevel, "Basics.PlayerSkillLevel" ) )
-		{
-			nlwarning("ERROR For creature sheet %s, cannot read Basics.PlayerSkillLevel, creature HP may be inacurate !", sheetId.toString().c_str() );
-		}
 		_NbPlayers = 1;
 		if ( !root.getValueByName( _NbPlayers, "Basics.NbPlayers" ) )
 		{
@@ -1024,7 +1021,6 @@ CAttributeMapping::CAttributeMapping()
 	_StaticAttributeMap.insert(make_pair(std::string("basics.gender"),				at_gender));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.size"),				at_size));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.level"),				at_level));
-	_StaticAttributeMap.insert(make_pair(std::string("basics.playerskilllevel"),	at_player_skill_level));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.nbplayers"),			at_nb_players));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.playerhplevel"),		at_player_hp_level));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.nbhittokillplayer"),	at_nb_hit_to_kill_player));

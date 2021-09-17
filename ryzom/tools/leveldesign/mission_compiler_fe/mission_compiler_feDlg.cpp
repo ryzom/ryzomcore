@@ -696,7 +696,7 @@ void CMissionCompilerFeDlg::OnSpecialRuncompilertest()
 		::fwrite(script.data(), script.size(), 1, fp);
 		::fclose(fp);
 
-		system((string("\"C:\\Program Files\\Beyond Compare 2\\bc2.exe\" ")+string(tmp)+"/compiled_mission.script "+ReferenceScript).c_str());
+		system((string("\"C:\\Program Files (x86)\\Beyond Compare 3\\BCompare.exe\" ") + string(tmp) + "/compiled_mission.script " + ReferenceScript).c_str());
 	}
 	catch(const EParseException &e)
 	{

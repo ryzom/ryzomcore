@@ -58,6 +58,7 @@
 #include "nel/gui/css_style.h"
 #include "nel/gui/css_parser.h"
 #include "nel/gui/css_border_renderer.h"
+#include "nel/gui/css_background_renderer.h"
 
 #include <curl/curl.h>
 
@@ -266,6 +267,139 @@ namespace NLGUI
 		data = NULL;
 	}
 
+	void CGroupHTML::StylesheetDownloadCB::finish()
+	{
+		if (CFile::fileExists(tmpdest))
+		{
+			if (CFile::fileExists(dest))
+			{
+				CFile::deleteFile(dest);
+			}
+			CFile::moveFile(dest, tmpdest);
+		}
+		Parent->cssDownloadFinished(url, dest);
+	}
+
+	void CGroupHTML::ImageDownloadCB::addImage(CViewBase *img, const CStyleParams &style, TImageType type)
+	{
+		Images.push_back(SImageInfo(img, style, type));
+	}
+
+	void CGroupHTML::ImageDownloadCB::removeImage(CViewBase *img)
+	{
+		for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
+		{
+			if (it->Image == img)
+			{
+				Images.erase(it);
+				break;
+			}
+		}
+	}
+
+	void CGroupHTML::ImageDownloadCB::finish()
+	{
+		// tmpdest file does not exist if download skipped (ie cache was used)
+		if (CFile::fileExists(tmpdest) || CFile::getFileSize(tmpdest) == 0)
+		{
+			try {
+				// verify that image is not corrupted
+				uint32 w, h;
+				CBitmap::loadSize(tmpdest, w, h);
+				if (w != 0 && h != 0)
+				{
+					if (CFile::fileExists(dest))
+						CFile::deleteFile(dest);
+				}
+			}
+			catch(const NLMISC::Exception &e)
+			{
+				// exception message has .tmp file name, so keep it for further analysis
+				nlwarning("Invalid image (%s) from url (%s): %s", tmpdest.c_str(), url.c_str(), e.what());
+			}
+
+			// to reload image on page, the easiest seems to be changing texture
+			// to temp file temporarily. that forces driver to reload texture from disk
+			// ITexture::touch() seem not to do this.
+			// cache was updated, first set texture as temp file
+			for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
+			{
+				SImageInfo &img = *it;
+				Parent->setImage(img.Image, tmpdest, img.Type);
+				Parent->setImageSize(img.Image, img.Style);
+			}
+
+			CFile::moveFile(dest, tmpdest);
+		}
+
+		if (!CFile::fileExists(dest) || CFile::getFileSize(dest) == 0)
+		{
+			// placeholder if cached image failed
+			dest = "web_del.tga";
+		}
+
+		// even if image was cached, incase there was 'http://' image set to CViewBitmap
+		for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
+		{
+			SImageInfo &img = *it;
+			Parent->setImage(img.Image, dest, img.Type);
+			Parent->setImageSize(img.Image, img.Style);
+		}
+	}
+
+	void CGroupHTML::TextureDownloadCB::finish()
+	{
+		// tmpdest file does not exist if download skipped (ie cache was used)
+		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) == 0)
+		{
+			if (CFile::fileExists(dest))
+				CFile::deleteFile(dest);
+
+			CFile::moveFile(dest, tmpdest);
+		}
+
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		for(uint i = 0; i < TextureIds.size(); i++)
+		{
+			rVR.reloadTexture(TextureIds[i].first, dest);
+			TextureIds[i].second->invalidateCoords();
+		}
+	}
+
+	void CGroupHTML::BnpDownloadCB::finish()
+	{
+		bool verified = false;
+		// no tmpfile if file was already in cache
+		if (CFile::fileExists(tmpdest))
+		{
+			verified = m_md5sum.empty() || (m_md5sum != getMD5(tmpdest).toString());
+			if (verified)
+			{
+				if (CFile::fileExists(dest))
+				{
+					CFile::deleteFile(dest);
+				}
+				CFile::moveFile(dest, tmpdest);
+			}
+			else
+			{
+				CFile::deleteFile(tmpdest);
+			}
+		}
+		else if (CFile::fileExists(dest))
+		{
+			verified = m_md5sum.empty() || (m_md5sum != getMD5(dest).toString());
+		}
+
+		if (!m_lua.empty())
+		{
+			std::string script = "\nlocal __CURRENT_WINDOW__ = \""+Parent->getId()+"\"";
+			script += toString("\nlocal __DOWNLOAD_STATUS__ = %s\n", verified ? "true" : "false");
+			script += m_lua;
+			CLuaManager::getInstance().executeLuaScript(script, true );
+		}
+	}
+
 	// Check if domain is on TrustedDomain
 	bool CGroupHTML::isTrustedDomain(const string &domain)
 	{
@@ -427,14 +561,14 @@ namespace NLGUI
 
 		if (style.hasStyle("background-color"))
 		{
-			ctrlButton->setColor(style.BackgroundColor);
+			ctrlButton->setColor(style.Background.color);
 			if (style.hasStyle("-ryzom-background-color-over"))
 			{
 				ctrlButton->setColorOver(style.BackgroundColorOver);
 			}
 			else
 			{
-				ctrlButton->setColorOver(style.BackgroundColor);
+				ctrlButton->setColorOver(style.Background.color);
 			}
 			ctrlButton->setTexture("", "blank.tga", "", false);
 			ctrlButton->setTextureOver("", "blank.tga", "");
@@ -482,17 +616,17 @@ namespace NLGUI
 	{
 		if (RunningCurls < options.curlMaxConnections)
 		{
-			std::list<CDataDownload>::iterator it=Curls.begin();
-			uint c = 0;
+			std::list<CDataDownload*>::iterator it=Curls.begin();
 			while(it != Curls.end() && RunningCurls < options.curlMaxConnections)
 			{
-				if (it->data == NULL)
+				if ((*it)->data == NULL)
 				{
 					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
 					if (!startCurlDownload(*it))
 					{
 						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), it->url.c_str());
 						finishCurlDownload(*it);
+
 						it = Curls.erase(it);
 						continue;
 					}
@@ -507,11 +641,11 @@ namespace NLGUI
 	}
 
 	// Add url to MultiCurl queue and return cURL handle
-	bool CGroupHTML::startCurlDownload(CDataDownload &download)
+	bool CGroupHTML::startCurlDownload(CDataDownload *download)
 	{
 		if (!MultiCurl)
 		{
-			nlwarning("Invalid MultiCurl handle, unable to download '%s'", download.url.c_str());
+			nlwarning("Invalid MultiCurl handle, unable to download '%s'", download->url.c_str());
 			return false;
 		}
 
@@ -519,28 +653,28 @@ namespace NLGUI
 		time(&currentTime);
 
 		CHttpCacheObject cache;
-		if (CFile::fileExists(download.dest))
-			cache = CHttpCache::getInstance()->lookup(download.dest);
+		if (CFile::fileExists(download->dest))
+			cache = CHttpCache::getInstance()->lookup(download->dest);
 
 		if (cache.Expires > currentTime)
 		{
-			LOG_DL("Cache for (%s) is not expired (%s, expires:%d)", download.url.c_str(), download.dest.c_str(), cache.Expires - currentTime);
+			LOG_DL("Cache for (%s) is not expired (%s, expires:%d)", download->url.c_str(), download->dest.c_str(), cache.Expires - currentTime);
 			return false;
 		}
 
 		// use browser Id so that two browsers would not use same temp file
-		download.tmpdest = localImageName(_Id + download.dest) + ".tmp";
+		download->tmpdest = localImageName(_Id + download->dest) + ".tmp";
 
 		// erase the tmp file if exists
-		if (CFile::fileExists(download.tmpdest))
+		if (CFile::fileExists(download->tmpdest))
 		{
-			CFile::deleteFile(download.tmpdest);
+			CFile::deleteFile(download->tmpdest);
 		}
 
-		FILE *fp = nlfopen (download.tmpdest, "wb");
+		FILE *fp = nlfopen (download->tmpdest, "wb");
 		if (fp == NULL)
 		{
-			nlwarning("Can't open file '%s' for writing: code=%d '%s'", download.tmpdest.c_str (), errno, strerror(errno));
+			nlwarning("Can't open file '%s' for writing: code=%d '%s'", download->tmpdest.c_str (), errno, strerror(errno));
 			return false;
 		}
 
@@ -548,28 +682,28 @@ namespace NLGUI
 		if (!curl)
 		{
 			fclose(fp);
-			CFile::deleteFile(download.tmpdest);
+			CFile::deleteFile(download->tmpdest);
 
-			nlwarning("Creating cURL handle failed, unable to download '%s'", download.url.c_str());
+			nlwarning("Creating cURL handle failed, unable to download '%s'", download->url.c_str());
 			return false;
 		}
-		LOG_DL("curl easy handle %p created for '%s'", curl, download.url.c_str());
+		LOG_DL("curl easy handle %p created for '%s'", curl, download->url.c_str());
 
 		// https://
-		if (toLowerAscii(download.url.substr(0, 8)) == "https://")
+		if (toLowerAscii(download->url.substr(0, 8)) == "https://")
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
 		}
 
-		download.data = new CCurlWWWData(curl, download.url);
-		download.fp = fp;
+		download->data = new CCurlWWWData(curl, download->url);
+		download->fp = fp;
 
 		// initial connection timeout, curl default is 300sec
-		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, download.ConnectionTimeout);
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, download->ConnectionTimeout);
 
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-		curl_easy_setopt(curl, CURLOPT_URL, download.url.c_str());
+		curl_easy_setopt(curl, CURLOPT_URL, download->url.c_str());
 
 		// limit curl to HTTP and HTTPS protocols only
 		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
@@ -583,16 +717,16 @@ namespace NLGUI
 			headers.push_back("If-Modified-Since: " + cache.LastModified);
 
 		if (headers.size() > 0)
-			download.data->sendHeaders(headers);
+			download->data->sendHeaders(headers);
 
 		// catch headers
 		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NLGUI::curlHeaderCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, download.data);
+		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, download->data);
 
 		std::string userAgent = options.appName + "/" + options.appVersion;
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
 
-		CUrlParser uri(download.url);
+		CUrlParser uri(download->url);
 		if (!uri.host.empty())
 			sendCookies(curl, uri.host, isTrustedDomain(uri.host));
 
@@ -602,7 +736,7 @@ namespace NLGUI
 		CURLMcode ret = curl_multi_add_handle(MultiCurl, curl);
 		if (ret != CURLM_OK)
 		{
-			nlwarning("cURL multi handle %p error %d on '%s'", curl, ret, download.url.c_str());
+			nlwarning("cURL multi handle %p error %d on '%s'", curl, ret, download->url.c_str());
 			return false;
 		}
 
@@ -610,118 +744,78 @@ namespace NLGUI
 		return true;
 	}
 
-	void CGroupHTML::finishCurlDownload(const CDataDownload &download)
+	void CGroupHTML::finishCurlDownload(CDataDownload *download)
 	{
-		if (download.type == ImgType)
+		if (download)
 		{
-			if (CFile::fileExists(download.tmpdest) && CFile::getFileSize(download.tmpdest) > 0)
-			{
-				try
-				{
-					// verify that image is not corrupted
-					uint32 w, h;
-					CBitmap::loadSize(download.tmpdest, w, h);
-					if (w != 0 && h != 0)
-					{
-						if (CFile::fileExists(download.dest))
-							CFile::deleteFile(download.dest);
-
-						// to reload image on page, the easiest seems to be changing texture
-						// to temp file temporarily. that forces driver to reload texture from disk
-						// ITexture::touch() seem not to do this.
-						// cache was updated, first set texture as temp file
-						for(uint i = 0; i < download.imgs.size(); i++)
-						{
-							setImage(download.imgs[i].Image, download.tmpdest, download.imgs[i].Type);
-							setImageSize(download.imgs[i].Image, download.imgs[i].Style);
-						}
-
-						CFile::moveFile(download.dest, download.tmpdest);
-					}
-				}
-				catch(const NLMISC::Exception &e)
-				{
-					// exception message has .tmp file name, so keep it for further analysis
-					nlwarning("Invalid image (%s) from url (%s): %s", download.tmpdest.c_str(), download.url.c_str(), e.what());
-				}
-			}
-
-			if (CFile::fileExists(download.dest) && CFile::getFileSize(download.dest) > 0)
-			{
-				try
-				{
-					// verify that image is not corrupted
-					uint32 w, h;
-					CBitmap::loadSize(download.dest, w, h);
-					if (w != 0 && h != 0)
-					for(uint i = 0; i < download.imgs.size(); i++)
-					{
-						setImage(download.imgs[i].Image, download.dest, download.imgs[i].Type);
-						setImageSize(download.imgs[i].Image, download.imgs[i].Style);
-					}
-				}
-				catch(const NLMISC::Exception &e)
-				{
-					nlwarning("Invalid image (%s) from url (%s): %s", download.dest.c_str(), download.url.c_str(), e.what());
-				}
-			}
-
-			return;
+			download->finish();
+			delete download;
 		}
-
-		if (download.type == StylesheetType)
+		else
 		{
-			if (CFile::fileExists(download.tmpdest))
-			{
-				if (CFile::fileExists(download.dest))
-				{
-					CFile::deleteFile(download.dest);
-				}
-				CFile::moveFile(download.dest, download.tmpdest);
-			}
-			cssDownloadFinished(download.url, download.dest);
-
-			return;
+			nlwarning("Unknown CURL download (nullptr)");
 		}
-
-		if (download.type == BnpType)
-		{
-			bool verified = false;
-			// no tmpfile if file was already in cache
-			if (CFile::fileExists(download.tmpdest))
-			{
-				verified = download.md5sum.empty() || (download.md5sum != getMD5(download.tmpdest).toString());
-				if (verified)
-				{
-					if (CFile::fileExists(download.dest))
-					{
-						CFile::deleteFile(download.dest);
-					}
-					CFile::moveFile(download.dest, download.tmpdest);
-				}
-				else
-				{
-					CFile::deleteFile(download.tmpdest);
-				}
-			}
-			else if (CFile::fileExists(download.dest))
-			{
-				verified = download.md5sum.empty() || (download.md5sum != getMD5(download.dest).toString());
-			}
-
-			std::string script = "\nlocal __CURRENT_WINDOW__ = \""+this->_Id+"\"";
-			script += toString("\nlocal __DOWNLOAD_STATUS__ = %s\n", verified ? "true" : "false");
-			script += download.luaScript;
-			CLuaManager::getInstance().executeLuaScript(script, true );
-
-			return;
-		}
-
-		nlwarning("Unknown CURL download type (%d) finished '%s'", download.type, download.url.c_str());
 	}
 
 	// Add a image download request in the multi_curl
-	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type, const std::string &placeholder)
+	// return new textureId and download callback
+	ICurlDownloadCB *CGroupHTML::addTextureDownload(const string &url, sint32 &texId, CViewBase *view)
+	{
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		// data:image/png;base64,AA...==
+		if (startsWith(url, "data:image/"))
+		{
+			texId = rVR.createTextureFromDataURL(url);
+			return NULL;
+		}
+
+		std::string finalUrl;
+		// load the image from local files/bnp
+		if (lookupLocalFile(finalUrl, std::string(CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga").c_str(), false))
+		{
+			texId = rVR.createTexture(finalUrl);
+			return NULL;
+		}
+
+		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
+
+		// use requested url for local name (cache)
+		string dest = localImageName(url);
+		LOG_DL("add to download '%s' dest '%s'", finalUrl.c_str(), dest.c_str());
+
+		if (CFile::fileExists(dest) && CFile::getFileSize(dest) > 0)
+			texId = rVR.createTexture(dest);
+		else
+			texId = rVR.newTextureId(dest);
+
+		// Search if we are not already downloading this url.
+		for(std::list<CDataDownload*>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		{
+			if((*it)->url == finalUrl)
+			{
+				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), img);
+				TextureDownloadCB *cb = dynamic_cast<TextureDownloadCB*>(*it);
+				if (cb)
+				{
+					cb->addTexture(texId, view);
+					// return pointer to shared ImageDownloadCB
+					return cb;
+				}
+				else
+				{
+					nlwarning("Found texture download '%s', but casting to TextureDownloadCB failed", finalUrl.c_str());
+				}
+			}
+		}
+
+		Curls.push_back(new TextureDownloadCB(finalUrl, dest, texId, this));
+		// as we return pointer to callback, skip starting downloads just now
+		//pumpCurlQueue();
+		return Curls.back();
+	}
+
+	// Add a image download request in the multi_curl
+	ICurlDownloadCB *CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type, const std::string &placeholder)
 	{
 		std::string finalUrl;
 		img->setModulateGlobalColor(style.GlobalColor);
@@ -731,7 +825,7 @@ namespace NLGUI
 		{
 			setImage(img, decodeURIComponent(url), type);
 			setImageSize(img, style);
-			return;
+			return NULL;
 		}
 
 		// load the image from local files/bnp
@@ -740,7 +834,7 @@ namespace NLGUI
 		{
 			setImage(img, image, type);
 			setImageSize(img, style);
-			return;
+			return NULL;
 		}
 
 		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
@@ -762,36 +856,40 @@ namespace NLGUI
 		}
 
 		// Search if we are not already downloading this url.
-		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		for(std::list<CDataDownload*>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if(it->url == finalUrl)
+			if((*it)->url == finalUrl)
 			{
 				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), img);
-				it->imgs.push_back(CDataImageDownload(img, style, type));
-				return;
+				ImageDownloadCB *cb = dynamic_cast<ImageDownloadCB*>(*it);
+				if (cb)
+				{
+					cb->addImage(img, style, type);
+					// return pointer to shared ImageDownloadCB
+					return cb;
+				}
+				else
+				{
+					nlwarning("Found image download '%s', but casting to ImageDownloadCB failed", finalUrl.c_str());
+				}
 			}
 		}
 
-		Curls.push_back(CDataDownload(finalUrl, dest, ImgType, img, "", "", style, type));
-		pumpCurlQueue();
+		Curls.push_back(new ImageDownloadCB(finalUrl, dest, img, style, type, this));
+		// as we return pointer to callback, skip starting downloads just now
+		//pumpCurlQueue();
+		return Curls.back();
 	}
 
-	void CGroupHTML::removeImageDownload(CViewBase *img)
+	void CGroupHTML::removeImageDownload(ICurlDownloadCB *handle, CViewBase *img)
 	{
-		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
-		{
-			// check all active downloads because image does not keep url around
-			std::vector<CDataImageDownload>::iterator imgIter = it->imgs.begin();
-			while(imgIter != it->imgs.end())
-			{
-				if (imgIter->Image == img)
-				{
-					it->imgs.erase(imgIter);
-					break;
-				}
-				++imgIter;
-			}
+		ImageDownloadCB *cb = dynamic_cast<ImageDownloadCB*>(handle);
+		if (!cb) {
+			nlwarning("Trying to remove image from downloads, but ICurlDownloadCB pointer did not cast to ImageDownloadCB");
+			return;
 		}
+		// image will be removed from handle, but handle is kept and image will be downloaded
+		cb->removeImage(img);
 	}
 
 	void CGroupHTML::initImageDownload()
@@ -818,9 +916,9 @@ namespace NLGUI
 		url = upgradeInsecureUrl(getAbsoluteUrl(url));
 
 		// Search if we are not already downloading this url.
-		for(std::list<CDataDownload>::const_iterator it = Curls.begin(); it != Curls.end(); ++it)
+		for(std::list<CDataDownload*>::const_iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if(it->url == url)
+			if((*it)->url == url)
 			{
 				LOG_DL("already downloading '%s'", url.c_str());
 				return false;
@@ -845,7 +943,7 @@ namespace NLGUI
 		}
 		if (action != "delete")
 		{
-			Curls.push_back(CDataDownload(url, dest, BnpType, NULL, script, md5sum));
+			Curls.push_back(new BnpDownloadCB(url, dest, md5sum, script, this));
 			pumpCurlQueue();
 		}
 		else
@@ -874,7 +972,7 @@ namespace NLGUI
 			_StylesheetQueue.back().Url = url;
 
 			// push to the front of the queue
-			Curls.push_front(CDataDownload(url, localImageName(url), StylesheetType, NULL, "", ""));
+			Curls.push_front(new StylesheetDownloadCB(url, localImageName(url), this));
 		}
 		pumpCurlQueue();
 	}
@@ -918,9 +1016,9 @@ namespace NLGUI
 				}
 				else
 				{
-					for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+					for(std::list<CDataDownload*>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 					{
-						if(it->data && it->data->Request == msg->easy_handle)
+						if((*it)->data && (*it)->data->Request == msg->easy_handle)
 						{
 							std::string error;
 							bool success = msg->data.result == CURLE_OK;
@@ -959,27 +1057,30 @@ namespace NLGUI
 		}
 
 		// remove all queued and already started downloads
-		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		for(std::list<CDataDownload*>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if (it->data)
+			CDataDownload &dl = *(*it);
+			if (dl.data)
 			{
-				LOG_DL("(%s) stop data url '%s'", _Id.c_str(), it->url.c_str());
+				LOG_DL("(%s) stop data url '%s'", _Id.c_str(), dl.url.c_str());
 				if (MultiCurl)
 				{
-					curl_multi_remove_handle(MultiCurl, it->data->Request);
+					curl_multi_remove_handle(MultiCurl, dl.data->Request);
 				}
 
 				// close and remove temp file
-				if (it->fp)
+				if (dl.fp)
 				{
-					fclose(it->fp);
+					fclose(dl.fp);
 
-					if (CFile::fileExists(it->tmpdest))
+					if (CFile::fileExists(dl.tmpdest))
 					{
-						CFile::deleteFile(it->tmpdest);
+						CFile::deleteFile(dl.tmpdest);
 					}
 				}
 			}
+			// release CDataDownload
+			delete *it;
 		}
 		Curls.clear();
 
@@ -1275,6 +1376,7 @@ namespace NLGUI
 		}
 
 		std::string::size_type pos = 0;
+		// TODO: tokenize by whitespace
 		while(pos < content.size())
 		{
 			std::string::size_type start;
@@ -1307,6 +1409,9 @@ namespace NLGUI
 				start = pos + 4;
 				// fails if url contains ')'
 				pos = content.find(")", start);
+				if (pos == std::string::npos)
+					break;
+
 				token = trim(content.substr(start, pos - start));
 				// skip ')'
 				pos++;
@@ -1369,14 +1474,22 @@ namespace NLGUI
 			{
 				// attr(title)
 				start = pos + 5;
-				pos = content.find(")", start);
-				token = content.substr(start, pos - start);
-				// skip ')'
-				pos++;
-
-				if (elm.hasAttribute(token))
+				std::string::size_type end = 0;
+				end = content.find(")", start);
+				if (end != std::string::npos)
 				{
-					addString(elm.getAttribute(token));
+					token = content.substr(start, end - start);
+					// skip ')'
+					pos = end + 1;
+					if (elm.hasAttribute(token))
+					{
+						addString(elm.getAttribute(token));
+					}
+				}
+				else
+				{
+					// skip over 'a'
+					pos++;
 				}
 			}
 			else
@@ -2298,6 +2411,38 @@ namespace NLGUI
 			doBrowseAnchor(_UrlFragment);
 			_UrlFragment.clear();
 		}
+
+		if (!m_HtmlBackground.isEmpty() || !m_BodyBackground.isEmpty())
+		{
+			// get scroll offset from list
+			CGroupList	*list = getList();
+			if (list)
+			{
+				CInterfaceElement* vp = list->getParentPos() ? list->getParentPos() : this;
+				sint htmlW = std::max(vp->getWReal(), list->getWReal());
+				sint htmlH = list->getHReal();
+				sint htmlX = list->getXReal() + list->getOfsX();
+				sint htmlY = list->getYReal() + list->getOfsY();
+
+				if (!m_HtmlBackground.isEmpty())
+				{
+					m_HtmlBackground.setFillViewport(true);
+					m_HtmlBackground.setBorderArea(htmlX, htmlY, htmlW, htmlH);
+					m_HtmlBackground.setPaddingArea(htmlX, htmlY, htmlW, htmlH);
+					m_HtmlBackground.setContentArea(htmlX, htmlY, htmlW, htmlH);
+				}
+
+				if (!m_BodyBackground.isEmpty())
+				{
+					// TODO: html padding + html border
+					m_BodyBackground.setBorderArea(htmlX, htmlY, htmlW, htmlH);
+					// TODO: html padding + html border + body border
+					m_BodyBackground.setPaddingArea(htmlX, htmlY, htmlW, htmlH);
+					// TODO: html padding + html_border + body padding
+					m_BodyBackground.setContentArea(htmlX, htmlY, htmlW, htmlH);
+				}
+			}
+		}
 	}
 
 	// ***************************************************************************
@@ -2673,7 +2818,7 @@ namespace NLGUI
 						if (bg)
 						{
 							bg->setTexture("blank.tga");
-							bg->setColor(style.BackgroundColor);
+							bg->setColor(style.Background.color);
 						}
 					}
 				}
@@ -2938,10 +3083,10 @@ namespace NLGUI
 		LOG_DL("Clear pointers to %d curls", Curls.size());
 
 		// remove image refs from downloads
-		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		/*for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
 			it->imgs.clear();
-		}
+		}*/
 	}
 
 	// ***************************************************************************
@@ -3152,52 +3297,47 @@ namespace NLGUI
 
 	// ***************************************************************************
 
+	void CGroupHTML::setupBackground(CSSBackgroundRenderer *bg)
+	{
+		if (!bg) return;
+
+		bg->setModulateGlobalColor(_Style.Current.GlobalColor);
+		bg->setBackground(_Style.Current.Background);
+		bg->setFontSize(_Style.Root.FontSize, _Style.Current.FontSize);
+
+		bg->setViewport(getList()->getParentPos() ? getList()->getParentPos() : this);
+
+		if (!_Style.Current.Background.image.empty())
+			addTextureDownload(_Style.Current.Background.image, bg->TextureId, this);
+	}
+
+	// ***************************************************************************
+
 	void CGroupHTML::setBackgroundColor (const CRGBA &bgcolor)
 	{
-		// Should have a child named bg
+		// TODO: DefaultBackgroundBitmapView should be removed from interface xml
 		CViewBase *view = getView (DefaultBackgroundBitmapView);
 		if (view)
-		{
-			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*> (view);
-			if (bitmap)
-			{
-				// TODO: background color should have separate bitmap from background texture
-				// Change the background color
-				bitmap->setColor (bgcolor);
-				bitmap->setModulateGlobalColor(false);
-			}
-		}
+			view->setActive(false);
+
+		m_HtmlBackground.setColor(bgcolor);
 	}
 
 	// ***************************************************************************
 
 	void CGroupHTML::setBackground (const string &bgtex, bool scale, bool tile)
 	{
-		// Should have a child named bg
+		// TODO: DefaultBackgroundBitmapView should be removed from interface xml
 		CViewBase *view = getView (DefaultBackgroundBitmapView);
 		if (view)
-		{
-			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*> (view);
-			if (bitmap)
-			{
-				bitmap->setParentPosRef(Hotspot_TL);
-				bitmap->setPosRef(Hotspot_TL);
-				bitmap->setX(0);
-				bitmap->setY(0);
-				// FIXME: renders behind container background
-				bitmap->setRenderLayer(-2);
-				bitmap->setScale(scale);
-				bitmap->setTile(tile);
+			view->setActive(false);
 
-				// clear size ref for non-scaled image or it does not show up
-				if (scale || tile)
-					bitmap->setSizeRef("wh");
-				else
-					bitmap->setSizeRef("");
+		m_HtmlBackground.setImage(bgtex);
+		m_HtmlBackground.setImageRepeat(tile);
+		m_HtmlBackground.setImageCover(scale);
 
-				addImageDownload(bgtex, view, CStyleParams(), NormalImage, "");
-			}
-		}
+		if (!bgtex.empty())
+			addTextureDownload(bgtex, m_HtmlBackground.TextureId, this);
 	}
 
 
@@ -3704,96 +3844,98 @@ namespace NLGUI
 		updateRefreshButton();
 	}
 
-	void CGroupHTML::dataDownloadFinished(bool success, const std::string &error, CDataDownload &data)
+	void CGroupHTML::dataDownloadFinished(bool success, const std::string &error, CDataDownload *data)
 	{
-		fclose(data.fp);
+		fclose(data->fp);
 
-		CUrlParser uri(data.url);
+		CUrlParser uri(data->url);
 		if (!uri.host.empty())
 		{
-			receiveCookies(data.data->Request, uri.host, isTrustedDomain(uri.host));
+			receiveCookies(data->data->Request, uri.host, isTrustedDomain(uri.host));
 		}
 
 		long code = -1;
-		curl_easy_getinfo(data.data->Request, CURLINFO_RESPONSE_CODE, &code);
+		curl_easy_getinfo(data->data->Request, CURLINFO_RESPONSE_CODE, &code);
 
-		LOG_DL("(%s) transfer '%p' completed with http code %d, url (len %d) '%s'", _Id.c_str(), data.data->Request, code, data.url.size(), data.url.c_str());
-		curl_multi_remove_handle(MultiCurl, data.data->Request);
+		LOG_DL("(%s) transfer '%p' completed with http code %d, url (len %d) '%s'", _Id.c_str(), data->data->Request, code, data->url.size(), data->url.c_str());
+		curl_multi_remove_handle(MultiCurl, data->data->Request);
 
 		// save HSTS header from all requests regardless of HTTP code
 		if (success)
 		{
-			if (data.data->hasHSTSHeader())
+			if (data->data->hasHSTSHeader())
 			{
-				CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, data.data->getHSTSHeader());
+				CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, data->data->getHSTSHeader());
 			}
 
 			// 2XX success, 304 Not Modified
 			if ((code >= 200 && code <= 204) || code == 304)
 			{
 				CHttpCacheObject obj;
-				obj.Expires = data.data->getExpires();
-				obj.Etag = data.data->getEtag();
-				obj.LastModified = data.data->getLastModified();
+				obj.Expires = data->data->getExpires();
+				obj.Etag = data->data->getEtag();
+				obj.LastModified = data->data->getLastModified();
 
-				CHttpCache::getInstance()->store(data.dest, obj);
-				if (code == 304 && CFile::fileExists(data.tmpdest))
+				CHttpCache::getInstance()->store(data->dest, obj);
+				if (code == 304 && CFile::fileExists(data->tmpdest))
 				{
-					CFile::deleteFile(data.tmpdest);
+					CFile::deleteFile(data->tmpdest);
 				}
 			}
 			else if ((code >= 301 && code <= 303) || code == 307 || code == 308)
 			{
-				if (data.redirects < DEFAULT_RYZOM_REDIRECT_LIMIT)
+				if (data->redirects < DEFAULT_RYZOM_REDIRECT_LIMIT)
 				{
-					std::string location(data.data->getLocationHeader());
+					std::string location(data->data->getLocationHeader());
 					if (!location.empty())
 					{
 						CUrlParser uri(location);
 						if (!uri.isAbsolute())
 						{
-							uri.inherit(data.url);
+							uri.inherit(data->url);
 							location = uri.toString();
 						}
+
+						// clear old request state, and curl easy handle
+						delete data->data;
+						data->data = NULL;
+						data->fp = NULL;
+						data->url = location;
+						data->redirects++;
 
 						// push same request in the front of the queue
 						// cache filename is based of original url
 						Curls.push_front(data);
-						// clear old request state
-						Curls.front().data = NULL;
-						Curls.front().fp = NULL;
-						Curls.front().url = location;
-						Curls.front().redirects++;
 
 						LOG_DL("Redirect '%s'", location.c_str());
 						// no finished callback called, so cleanup old temp
-						if (CFile::fileExists(data.tmpdest))
+						if (CFile::fileExists(data->tmpdest))
 						{
-							CFile::deleteFile(data.tmpdest);
+							CFile::deleteFile(data->tmpdest);
 						}
 						return;
 					}
 
-					nlwarning("Redirected to empty url '%s'", data.url.c_str());
+					nlwarning("Redirected to empty url '%s'", data->url.c_str());
 				}
 				else
 				{
-					nlwarning("Redirect limit reached for '%s'", data.url.c_str());
+					nlwarning("Redirect limit reached for '%s'", data->url.c_str());
 				}
 			}
 			else
 			{
-				nlwarning("HTTP request failed with code [%d] for '%s'\n",code, data.url.c_str());
+				nlwarning("HTTP request failed with code [%d] for '%s'\n",code, data->url.c_str());
 				// 404, 500, etc
-				if (CFile::fileExists(data.dest))
+				if (CFile::fileExists(data->dest))
 				{
-					CFile::deleteFile(data.dest);
+					CFile::deleteFile(data->dest);
 				}
 			}
 		}
 		else
 		{
-			nlwarning("DATA download failed '%s', error '%s'", data.url.c_str(), error.c_str());
+			nlwarning("DATA download failed '%s', error '%s'", data->url.c_str(), error.c_str());
 		}
 
 		finishCurlDownload(data);
@@ -3988,6 +4130,8 @@ namespace NLGUI
 
 	void CGroupHTML::draw ()
 	{
+		m_HtmlBackground.draw();
+		m_BodyBackground.draw();
 		CGroupScrollText::draw ();
 	}
 
@@ -4056,9 +4200,14 @@ namespace NLGUI
 		// Clear all the context
 		clearContext();
 
-		// Reset default background color
-		setBackgroundColor (_BrowserStyle.Current.BackgroundColor);
-		setBackground ("blank.tga", true, false);
+		// Reset default background
+		m_HtmlBackground.clear();
+		m_BodyBackground.clear();
+
+		// TODO: DefaultBackgroundBitmapView should be removed from interface xml
+		CViewBase *view = getView (DefaultBackgroundBitmapView);
+		if (view)
+			view->setActive(false);
 
 		paragraphChange ();
 	}
@@ -4915,7 +5064,7 @@ namespace NLGUI
 		style.pushStyle();
 		style.applyStyle(elm.getPseudo(":-webkit-meter-bar"));
 		if(style.hasStyle("background-color"))
-			color = style.Current.BackgroundColor;
+			color = style.Current.Background.color;
 		style.popStyle();
 
 		return color;
@@ -4932,14 +5081,14 @@ namespace NLGUI
 			{
 				style.applyStyle(elm.getPseudo(":-webkit-meter-optimum-value"));
 				if (style.hasStyle("background-color"))
-					color = style.Current.BackgroundColor;
+					color = style.Current.Background.color;
 				break;
 			}
 		case VALUE_SUB_OPTIMAL:
 			{
 				style.applyStyle(elm.getPseudo(":-webkit-meter-suboptimum-value"));
 				if (style.hasStyle("background-color"))
-					color = style.Current.BackgroundColor;
+					color = style.Current.Background.color;
 				break;
 			}
 		case VALUE_EVEN_LESS_GOOD: // fall through
@@ -4947,7 +5096,7 @@ namespace NLGUI
 			{
 				style.applyStyle(elm.getPseudo(":-webkit-meter-even-less-good-value"));
 				if (style.hasStyle("background-color"))
-					color = style.Current.BackgroundColor;
+					color = style.Current.Background.color;
 				break;
 			}
 		}//switch
@@ -4984,7 +5133,7 @@ namespace NLGUI
 		style.pushStyle();
 		style.applyStyle(elm.getPseudo(":-webkit-progress-bar"));
 		if (style.hasStyle("background-color"))
-			color = style.Current.BackgroundColor;
+			color = style.Current.Background.color;
 		style.popStyle();
 
 		return color;
@@ -4998,7 +5147,7 @@ namespace NLGUI
 		style.pushStyle();
 		style.applyStyle(elm.getPseudo(":-webkit-progress-value"));
 		if (style.hasStyle("background-color"))
-			color = style.Current.BackgroundColor;
+			color = style.Current.Background.color;
 		style.popStyle();
 
 		return color;
@@ -5011,10 +5160,13 @@ namespace NLGUI
 		if (!_CellParams.empty() && inherit)
 			cellParams = _CellParams.back();
 
-		if (_Style.hasStyle("background-color"))
-			cellParams.BgColor = _Style.Current.BackgroundColor;
-		else if (elm.hasNonEmptyAttribute("bgcolor"))
-			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), cellParams.BgColor);
+		if (!_Style.hasStyle("background-color") && elm.hasNonEmptyAttribute("bgcolor"))
+		{
+			CRGBA c;
+			if (scanHTMLColor(elm.getAttribute("bgcolor").c_str(), c))
+				_Style.Current.Background.color = c;
+		}
+		cellParams.BgColor = _Style.Current.Background.color;
 
 		if (elm.hasAttribute("nowrap") || _Style.Current.WhiteSpace == "nowrap")
 			cellParams.NoWrap = true;
@@ -5064,46 +5216,6 @@ namespace NLGUI
 		}
 
 		_CellParams.push_back (cellParams);
-	}
-
-	// ***************************************************************************
-	void CGroupHTML::applyBackground(const CHtmlElement &elm)
-	{
-		bool root = elm.Value == "html" || elm.Value == "body";
-
-		// non-empty image
-		if (_Style.hasStyle("background-image"))
-		{
-			bool repeat = _Style.checkStyle("background-repeat", "repeat");
-			bool scale = _Style.checkStyle("background-size", "100%");
-			std::string image = _Style.getStyle("background-image");
-			if (!image.empty())
-			{
-				if (root)
-				{
-					setBackground (image, scale, repeat);
-				}
-				// TODO: else
-
-				// default background color is transparent, so image does not show
-				if (!_Style.hasStyle("background-color") || _Style.checkStyle("background-color", "transparent"))
-				{
-					_Style.applyStyle("background-color: #fff;");
-				}
-			}
-		}
-
-		if (_Style.hasStyle("background-color"))
-		{
-			CRGBA bgColor = _Style.Current.BackgroundColor;
-			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), bgColor);
-			if (root)
-			{
-				setBackgroundColor(bgColor);
-			}
-			// TODO: else
-		}
-
 	}
 
 	// ***************************************************************************
@@ -5236,11 +5348,12 @@ namespace NLGUI
 	{
 		// override <body> (or <html>) css style attribute
 		if (elm.hasNonEmptyAttribute("bgcolor"))
-		{
 			_Style.applyStyle("background-color: " + elm.getAttribute("bgcolor"));
-		}
 
-		applyBackground(elm);
+		if (m_HtmlBackground.isEmpty())
+			setupBackground(&m_HtmlBackground);
+		else
+			setupBackground(&m_BodyBackground);
 
 		renderPseudoElement(":before", elm);
 	}
@@ -5634,11 +5747,11 @@ namespace NLGUI
 	void CGroupHTML::htmlHTML(const CHtmlElement &elm)
 	{
 		if (elm.hasNonEmptyAttribute("style"))
-		{
 			_Style.applyStyle(elm.getAttribute("style"));
-		}
+
 		_Style.Root = _Style.Current;
-		applyBackground(elm);
+
+		setupBackground(&m_HtmlBackground);
 	}
 
 	// ***************************************************************************
@@ -6012,7 +6125,7 @@ namespace NLGUI
 		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 5;
 		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
 		// FIXME: only using border-top
-		uint32 border = _Style.Current.BorderTopWidth > -1 ? _Style.Current.BorderTopWidth : 0;
+		uint32 border = _Style.Current.Border.Top.Width.getValue() > -1 ? _Style.Current.Border.Top.Width.getValue() : 0;
 
 		uint barw = (uint) (width * meter.getValueRatio());
 		CRGBA bgColor = meter.getBarColor(elm, _Style);
@@ -6234,7 +6347,7 @@ namespace NLGUI
 		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 10;
 		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
 		// FIXME: only using border-top
-		uint32 border = _Style.Current.BorderTopWidth > -1 ? _Style.Current.BorderTopWidth : 0;
+		uint32 border = _Style.Current.Border.Top.Width.getValue() > -1 ? _Style.Current.Border.Top.Width.getValue() : 0;
 
 		uint barw = (uint) (width * progress.getValueRatio());
 		CRGBA bgColor = progress.getBarColor(elm, _Style);
@@ -6362,7 +6475,7 @@ namespace NLGUI
 		getCellsParameters(elm, false);
 
 		CGroupTable *table = new CGroupTable(TCtorParam());
-		table->BgColor = _CellParams.back().BgColor;
+
 		if (elm.hasNonEmptyAttribute("id"))
 			table->setId(getCurrentGroup()->getId() + ":" + elm.getAttribute("id"));
 		else
@@ -6405,11 +6518,17 @@ namespace NLGUI
 
 		// border from css or from attribute
 		{
-			uint32 borderWidth = 0;
-			CRGBA borderColor = CRGBA::Transparent;
+			CSSRect<CSSBorder> border;
+			border.Top.Color = _Style.Current.TextColor;
+			border.Right.Color = _Style.Current.TextColor;
+			border.Bottom.Color = _Style.Current.TextColor;
+			border.Left.Color = _Style.Current.TextColor;
 
 			if (elm.hasAttribute("border"))
 			{
+				uint32 borderWidth = 0;
+				CRGBA borderColor = CRGBA::Transparent;
+
 				std::string s = elm.getAttribute("border");
 				if (s.empty())
 					borderWidth = 1;
@@ -6422,47 +6541,35 @@ namespace NLGUI
 					borderColor = CRGBA(128, 128, 128, 255);
 
 				table->CellBorder = (borderWidth > 0);
-				table->Border->setWidth(borderWidth, borderWidth, borderWidth, borderWidth);
-				table->Border->setColor(borderColor, borderColor, borderColor, borderColor);
-				table->Border->setStyle(CSS_LINE_STYLE_OUTSET, CSS_LINE_STYLE_OUTSET, CSS_LINE_STYLE_OUTSET, CSS_LINE_STYLE_OUTSET);
-			}
-			else
-			{
-				table->CellBorder = false;
+
+				border.Top.set(borderWidth, CSS_LINE_STYLE_OUTSET, borderColor);
+				border.Right.set(borderWidth, CSS_LINE_STYLE_OUTSET, borderColor);
+				border.Bottom.set(borderWidth, CSS_LINE_STYLE_OUTSET, borderColor);
+				border.Left.set(borderWidth, CSS_LINE_STYLE_OUTSET, borderColor);
 			}
 
-			if (_Style.hasStyle("border-top-width"))	table->Border->TopWidth = _Style.Current.BorderTopWidth;
-			if (_Style.hasStyle("border-right-width"))	table->Border->RightWidth = _Style.Current.BorderRightWidth;
-			if (_Style.hasStyle("border-bottom-width"))	table->Border->BottomWidth = _Style.Current.BorderBottomWidth;
-			if (_Style.hasStyle("border-left-width"))	table->Border->LeftWidth = _Style.Current.BorderLeftWidth;
+			if (_Style.hasStyle("border-top-width"))	border.Top.Width = _Style.Current.Border.Top.Width;
+			if (_Style.hasStyle("border-right-width"))	border.Right.Width = _Style.Current.Border.Right.Width;
+			if (_Style.hasStyle("border-bottom-width"))	border.Bottom.Width = _Style.Current.Border.Bottom.Width;
+			if (_Style.hasStyle("border-left-width"))	border.Left.Width = _Style.Current.Border.Left.Width;
 
-			if (_Style.hasStyle("border-top-color"))	table->Border->TopColor = _Style.Current.BorderTopColor;
-			if (_Style.hasStyle("border-right-color"))	table->Border->RightColor = _Style.Current.BorderRightColor;
-			if (_Style.hasStyle("border-bottom-color"))	table->Border->BottomColor = _Style.Current.BorderBottomColor;
-			if (_Style.hasStyle("border-left-color"))	table->Border->LeftColor = _Style.Current.BorderLeftColor;
+			if (_Style.hasStyle("border-top-color"))	border.Top.Color = _Style.Current.Border.Top.Color;
+			if (_Style.hasStyle("border-right-color"))	border.Right.Color = _Style.Current.Border.Right.Color;
+			if (_Style.hasStyle("border-bottom-color"))	border.Bottom.Color = _Style.Current.Border.Bottom.Color;
+			if (_Style.hasStyle("border-left-color"))	border.Left.Color = _Style.Current.Border.Left.Color;
 
-			if (_Style.hasStyle("border-top-style"))	table->Border->TopStyle = _Style.Current.BorderTopStyle;
-			if (_Style.hasStyle("border-right-style"))	table->Border->RightStyle = _Style.Current.BorderRightStyle;
-			if (_Style.hasStyle("border-bottom-style"))	table->Border->BottomStyle = _Style.Current.BorderBottomStyle;
-			if (_Style.hasStyle("border-left-style"))	table->Border->LeftStyle = _Style.Current.BorderLeftStyle;
+			if (_Style.hasStyle("border-top-style"))	border.Top.Style = _Style.Current.Border.Top.Style;
+			if (_Style.hasStyle("border-right-style"))	border.Right.Style = _Style.Current.Border.Right.Style;
+			if (_Style.hasStyle("border-bottom-style"))	border.Bottom.Style = _Style.Current.Border.Bottom.Style;
+			if (_Style.hasStyle("border-left-style"))	border.Left.Style = _Style.Current.Border.Left.Style;
+
+			table->Border->setBorder(border);
+			table->Border->setFontSize(_Style.Root.FontSize, _Style.Current.FontSize);
+			table->Border->setViewport(getList()->getParentPos() ? getList()->getParentPos() : this);
 		}
 
-		if (_Style.hasStyle("background-image"))
-		{
-			if (_Style.checkStyle("background-repeat", "repeat"))
-				table->setTextureTile(true);
-
-			if (_Style.checkStyle("background-size", "100%"))
-				table->setTextureScale(true);
-
-			string image = _Style.getStyle("background-image");
-			addImageDownload(image, table, CStyleParams(), NormalImage, "");
-		}
-		else
-		{
-			// will be set in addImageDownload if background-image exists
-			table->setModulateGlobalColor(_Style.Current.GlobalColor);
-		}
+		setupBackground(table->Background);
+		table->setModulateGlobalColor(_Style.Current.GlobalColor);
 
 		table->setMarginLeft(getIndent());
 		addHtmlGroup (table, 0);
@@ -6500,10 +6607,10 @@ namespace NLGUI
 		getCellsParameters(elm, true);
 
 		// if cell has own background,then it must be blended with row
-		if (rowColor.A > 0 && (elm.hasNonEmptyAttribute("bgcolor") || _Style.hasStyle("background-color")))
+		if (rowColor.A > 0 && _Style.Current.Background.color.A < 255)
 		{
-			if (_CellParams.back().BgColor.A < 255)
-				_CellParams.back().BgColor.blendFromui(rowColor, _CellParams.back().BgColor, _CellParams.back().BgColor.A);
+			_Style.Current.Background.color.blendFromui(rowColor,
+				_Style.Current.Background.color, _Style.Current.Background.color.A);
 		}
 
 		if (elm.ID == HTML_TH)
@@ -6536,29 +6643,14 @@ namespace NLGUI
 		// inner cell content
 		_Cells.back()->Group->setId(_Cells.back()->getId() + ":CELL");
 
-		if (_Style.checkStyle("background-repeat", "repeat"))
-			_Cells.back()->setTextureTile(true);
-
-		if (_Style.checkStyle("background-size", "100%"))
-			_Cells.back()->setTextureScale(true);
-
-		if (_Style.hasStyle("background-image"))
-		{
-			string image = _Style.getStyle("background-image");
-			addImageDownload(image, _Cells.back(), CStyleParams(), NormalImage, "");
-		}
-		else
-		{
-			// will be set in addImageDownload if background-image is set
-			_Cells.back()->setModulateGlobalColor(_Style.Current.GlobalColor);
-		}
+		setupBackground(_Cells.back()->Background);
+		_Cells.back()->setModulateGlobalColor(_Style.Current.GlobalColor);
 
 		if (elm.hasNonEmptyAttribute("colspan"))
 			fromString(elm.getAttribute("colspan"), _Cells.back()->ColSpan);
 		if (elm.hasNonEmptyAttribute("rowspan"))
 			fromString(elm.getAttribute("rowspan"), _Cells.back()->RowSpan);
 
-		_Cells.back()->BgColor = _CellParams.back().BgColor;
 		_Cells.back()->Align = _CellParams.back().Align;
 		_Cells.back()->VAlign = _CellParams.back().VAlign;
 		_Cells.back()->LeftMargin = _CellParams.back().LeftMargin;
@@ -6588,32 +6680,35 @@ namespace NLGUI
 
 		_Cells.back()->NewLine = getTR();
 
-		// border from <table border="1">
-		if (table->CellBorder)
-		{
-			_Cells.back()->Border->setWidth(1, 1, 1, 1);
-			_Cells.back()->Border->setColor(table->Border->TopColor, table->Border->RightColor, table->Border->BottomColor, table->Border->LeftColor);
-			_Cells.back()->Border->setStyle(CSS_LINE_STYLE_INSET, CSS_LINE_STYLE_INSET, CSS_LINE_STYLE_INSET, CSS_LINE_STYLE_INSET);
-		}
+		CSSRect<CSSBorder> border;
+		border.Top.set(   table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		border.Right.set( table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		border.Bottom.set(table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		border.Left.set(  table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
 
-		if (_Style.hasStyle("border-top-width"))	_Cells.back()->Border->TopWidth = _Style.Current.BorderTopWidth;
-		if (_Style.hasStyle("border-right-width"))	_Cells.back()->Border->RightWidth = _Style.Current.BorderRightWidth;
-		if (_Style.hasStyle("border-bottom-width"))	_Cells.back()->Border->BottomWidth = _Style.Current.BorderBottomWidth;
-		if (_Style.hasStyle("border-left-width"))	_Cells.back()->Border->LeftWidth = _Style.Current.BorderLeftWidth;
+		if (_Style.hasStyle("border-top-width"))	border.Top.Width = _Style.Current.Border.Top.Width;
+		if (_Style.hasStyle("border-right-width"))	border.Right.Width = _Style.Current.Border.Right.Width;
+		if (_Style.hasStyle("border-bottom-width"))	border.Bottom.Width = _Style.Current.Border.Bottom.Width;
+		if (_Style.hasStyle("border-left-width"))	border.Left.Width = _Style.Current.Border.Left.Width;
 
-		if (_Style.hasStyle("border-top-color"))	_Cells.back()->Border->TopColor = _Style.Current.BorderTopColor;
-		if (_Style.hasStyle("border-right-color"))	_Cells.back()->Border->RightColor = _Style.Current.BorderRightColor;
-		if (_Style.hasStyle("border-bottom-color"))	_Cells.back()->Border->BottomColor = _Style.Current.BorderBottomColor;
-		if (_Style.hasStyle("border-left-color"))	_Cells.back()->Border->LeftColor = _Style.Current.BorderLeftColor;
+		if (_Style.hasStyle("border-top-color"))	border.Top.Color = _Style.Current.Border.Top.Color;
+		if (_Style.hasStyle("border-right-color"))	border.Right.Color = _Style.Current.Border.Right.Color;
+		if (_Style.hasStyle("border-bottom-color"))	border.Bottom.Color = _Style.Current.Border.Bottom.Color;
+		if (_Style.hasStyle("border-left-color"))	border.Left.Color = _Style.Current.Border.Left.Color;
 
-		if (_Style.hasStyle("border-top-style"))	_Cells.back()->Border->TopStyle = _Style.Current.BorderTopStyle;
-		if (_Style.hasStyle("border-right-style"))	_Cells.back()->Border->RightStyle = _Style.Current.BorderRightStyle;
-		if (_Style.hasStyle("border-bottom-style"))	_Cells.back()->Border->BottomStyle = _Style.Current.BorderBottomStyle;
-		if (_Style.hasStyle("border-left-style"))	_Cells.back()->Border->LeftStyle = _Style.Current.BorderLeftStyle;
+		if (_Style.hasStyle("border-top-style"))	border.Top.Style = _Style.Current.Border.Top.Style;
+		if (_Style.hasStyle("border-right-style"))	border.Right.Style = _Style.Current.Border.Right.Style;
+		if (_Style.hasStyle("border-bottom-style"))	border.Bottom.Style = _Style.Current.Border.Bottom.Style;
+		if (_Style.hasStyle("border-left-style"))	border.Left.Style = _Style.Current.Border.Left.Style;
+
+		_Cells.back()->Border->setBorder(border);
+		_Cells.back()->Border->setFontSize(_Style.Root.FontSize, _Style.Current.FontSize);
+		_Cells.back()->Border->setViewport(getList()->getParentPos() ? getList()->getParentPos() : this);
 
 		// padding from <table cellpadding="1">
 		if (table->CellPadding)
 		{
+			// FIXME: padding is ignored by vertical align
 			_Cells.back()->PaddingTop = table->CellPadding;
 			_Cells.back()->PaddingRight = table->CellPadding;
 			_Cells.back()->PaddingBottom = table->CellPadding;
@@ -6681,8 +6776,7 @@ namespace NLGUI
 
 		_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
 
-		std::string content = strFindReplaceAll(elm.serializeChilds(), std::string("\t"), std::string(" "));
-		content = strFindReplaceAll(content, std::string("\n"), std::string(" "));
+		std::string content = strFindReplaceAll(elm.serializeChilds(), std::string("\r"), std::string(""));
 
 		CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, content, _TextAreaMaxLength);
 		if (textArea)

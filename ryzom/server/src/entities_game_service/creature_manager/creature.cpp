@@ -83,6 +83,8 @@ extern CCreatureDespawnMsg	CreatureDespawnMsg;
 extern CVariable<bool> VerboseQuartering;
 extern std::string CurrentCreatureSpawningDebug;
 
+extern CVariable<bool> RingLootEnabled;
+
 NL_INSTANCE_COUNTER_IMPL(CCreature);
 
 //-----------------------------------------------
@@ -804,7 +806,7 @@ void CCreature::deathOccurs()
 
 		if( _LootInventory != NULL )
 		{
-			if( _LootRight.size() > 0 && !IsRingShard ) // some PJ have loot right
+			if (_LootRight.size() > 0 && (!IsRingShard || RingLootEnabled.get())) // some PJ have loot right
 			{
 				if (!_CustomLootTableId.empty())
 				{

@@ -156,7 +156,7 @@ void CRingAccess::init()
 			CXMLAutoPtr sheetClientPtr( (const char*) xmlGetProp(entityAccess, (xmlChar*) "sheetClient") );
 			CXMLAutoPtr sheetPtr( (const char*) xmlGetProp(entityAccess, (xmlChar*) "sheetServer") );
 
-			if (!namePtr.getDatas()|| !packagePtr.getDatas() || !sheetPtr.getDatas() || !sheetPtr.getDatas())
+			if (!namePtr.getDatas()|| !packagePtr.getDatas() || !sheetClientPtr.getDatas() || !sheetPtr.getDatas())
 			{
 				nlerror( "Syntax error in %s", pathFileName.c_str());
 				return;
