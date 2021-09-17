@@ -1915,7 +1915,7 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 		else
 		{
 			strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText.toUtf8() + "\n");
-			ucstring itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
+			string itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
 			strFindReplace(itemText, "%mfc", itemMFC);
 		}
 	}
