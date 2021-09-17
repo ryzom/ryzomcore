@@ -438,7 +438,7 @@ namespace NLGUI
 
 		if (bg.repeatX == CSS_VALUE_ROUND)
 		{
-			sint numTiles = std::max(1, (sint)std::round((float)areaW / texW));
+			sint numTiles = std::max(1, (sint)std::ceil(((float)areaW / texW) - 0.5f));
 			texW = areaW / numTiles;
 			if (bg.height.isAuto() && bg.repeatY != CSS_VALUE_ROUND)
 			{
@@ -449,7 +449,7 @@ namespace NLGUI
 
 		if (bg.repeatY == CSS_VALUE_ROUND)
 		{
-			sint numTiles = std::max(1, (sint)std::round((float)areaH / texH));
+			sint numTiles = std::max(1, (sint)std::ceil(((float)areaH / texH) - 0.5f));
 			texH = areaH / numTiles;
 			if (bg.width.isAuto() && bg.repeatX != CSS_VALUE_ROUND)
 			{
