@@ -427,8 +427,8 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TRANSLATION_ONLY_AS_TOOLTIP_CB", false);
 	bool originalFirst = node ? node->getValueBool() : true;
 
-	string::size_type startTr = msg.find(ucstring("{:"));
-	string::size_type endOfOriginal = msg.find(ucstring("}@{"));
+	string::size_type startTr = msg.find("{:");
+	string::size_type endOfOriginal = msg.find("}@{");
 
 	// Original/Translated case, example: {:enHello the world!}@{ Bonjour le monde !
 	if (startTr != string::npos && endOfOriginal != string::npos)
