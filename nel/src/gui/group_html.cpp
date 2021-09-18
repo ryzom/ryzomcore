@@ -4120,6 +4120,22 @@ namespace NLGUI
 
 	void CGroupHTML::draw ()
 	{
+		uint8 CurrentAlpha = 255;
+		// search a parent container
+		CInterfaceGroup *gr = getParent();
+		while (gr)
+		{
+			if (gr->isGroupContainer())
+			{
+				CGroupContainer *gc = static_cast<CGroupContainer *>(gr);
+				CurrentAlpha = gc->getCurrentContainerAlpha();
+				break;
+			}
+			gr = gr->getParent();
+		}
+		m_HtmlBackground.CurrentAlpha = CurrentAlpha;
+		m_BodyBackground.CurrentAlpha = CurrentAlpha;
+
 		m_HtmlBackground.draw();
 		m_BodyBackground.draw();
 		CGroupScrollText::draw ();
