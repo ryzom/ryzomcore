@@ -174,7 +174,7 @@
 #	define NL_COMP_GCC
 #endif
 
-#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110)
+#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(__GNUG__) && __cplusplus >= 201103L) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110)
 #	define NL_ISO_CPP0X_AVAILABLE
 #endif
 
@@ -515,7 +515,12 @@ extern void operator delete[](void *p) throw();
 #	define CHashMap ::__gnu_cxx::hash_map
 #	define CHashSet ::__gnu_cxx::hash_set
 #	define CHashMultiMap ::__gnu_cxx::hash_multimap
-#	define CUniquePtr ::std::auto_ptr
+// From GCC 4.4 onward std:unique_ptr should be available in std library. It's deprectated later on
+#	if GCC_VERSION > 40400
+#		define CUniquePtr ::std::unique_ptr
+#	else
+#		define CUniquePtr ::std::auto_ptr
+#	endif
 #	define CUniquePtrMove
 
 namespace __gnu_cxx {
