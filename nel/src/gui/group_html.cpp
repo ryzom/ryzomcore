@@ -2551,7 +2551,7 @@ namespace NLGUI
 			(embolden == text->getEmbolden()) &&
 			(style.FontOblique == text->getOblique()) &&
 			(getLink() == text->Link) &&
-			(style.GlobalColor == text->getModulateGlobalColor());
+			(style.GlobalColorText == text->getModulateGlobalColor());
 	}
 
 	// ***************************************************************************
@@ -2588,7 +2588,10 @@ namespace NLGUI
 			nlinfo("Text button template '%s' is missing :button or :b text element", tpl.c_str());
 			return;
 		}
-		ctrlButton->setModulateGlobalColorAll(false);
+		ctrlButton->setModulateGlobalColorAll(_Style.Current.GlobalColor);
+		ctrlButton->setTextModulateGlobalColorNormal(_Style.Current.GlobalColorText);
+		ctrlButton->setTextModulateGlobalColorOver(_Style.Current.GlobalColorText);
+		ctrlButton->setTextModulateGlobalColorPushed(_Style.Current.GlobalColorText);
 
 		// Translate the tooltip
 		ctrlButton->setText(text);
@@ -2619,7 +2622,7 @@ namespace NLGUI
 		newLink->setText(text);
 		newLink->setMultiLineSpace((uint)((float)(_Style.Current.FontSize)*LineSpaceFontFactor));
 		newLink->setMultiLine(true);
-		newLink->setModulateGlobalColor(_Style.Current.GlobalColor);
+		newLink->setModulateGlobalColor(_Style.Current.GlobalColorText);
 		setTextStyle(newLink, _Style.Current);
 
 		registerAnchor(newLink);
@@ -5247,6 +5250,9 @@ namespace NLGUI
 			if (ctrlButton)
 			{
 				ctrlButton->setModulateGlobalColorAll (_Style.Current.GlobalColor);
+				ctrlButton->setTextModulateGlobalColorNormal(_Style.Current.GlobalColorText);
+				ctrlButton->setTextModulateGlobalColorOver(_Style.Current.GlobalColorText);
+				ctrlButton->setTextModulateGlobalColorPushed(_Style.Current.GlobalColorText);
 
 				// Translate the tooltip
 				if (!tooltip.empty())
