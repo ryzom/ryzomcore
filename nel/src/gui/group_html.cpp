@@ -350,7 +350,7 @@ namespace NLGUI
 	void CGroupHTML::TextureDownloadCB::finish()
 	{
 		// tmpdest file does not exist if download skipped (ie cache was used)
-		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) == 0)
+		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0)
 		{
 			if (CFile::fileExists(dest))
 				CFile::deleteFile(dest);
