@@ -63,6 +63,7 @@ namespace NLGUI
 			Underlined=false;
 			StrikeThrough=false;
 			GlobalColor=false;
+			GlobalColorText=false;
 			DisplayBlock=false;
 			Width=-1;
 			Height=-1;
@@ -93,6 +94,7 @@ namespace NLGUI
 		NLMISC::CRGBA TextColor;
 		STextShadow TextShadow;
 		bool GlobalColor;
+		bool GlobalColorText;
 		bool Underlined;
 		bool StrikeThrough;
 		bool DisplayBlock;
@@ -215,6 +217,7 @@ namespace NLGUI
 			_StyleStack.push_back(Current);
 
 			Current.GlobalColor = false;
+			// inherit GlobalColorText
 			Current.DisplayBlock = false;
 			Current.Width=-1;
 			Current.Height=-1;
