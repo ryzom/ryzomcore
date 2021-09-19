@@ -3076,6 +3076,7 @@ namespace NLGUI
 		_IgnoreHeadTag = false;
 		_IgnoreBaseUrlTag = false;
 		_AutoIdSeq = 0;
+		m_TableRowBackgroundColor.clear();
 
 		paragraphChange ();
 
@@ -6607,20 +6608,11 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTD(const CHtmlElement &elm)
 	{
-		CRGBA rowColor = CRGBA::Transparent;
-		// remember row color so we can blend it with cell color
-		if (!_CellParams.empty())
-			rowColor = _CellParams.back().BgColor;
-
 		// Get cells parameters
 		getCellsParameters(elm, true);
 
-		// if cell has own background,then it must be blended with row
-		if (rowColor.A > 0 && _Style.Current.Background.color.A < 255)
-		{
-			_Style.Current.Background.color.blendFromui(rowColor,
-				_Style.Current.Background.color, _Style.Current.Background.color.A);
-		}
+		if (!m_TableRowBackgroundColor.empty() && m_TableRowBackgroundColor.back().A > 0)
+			_Style.Current.Background.color.blendFromui(m_TableRowBackgroundColor.back(), _Style.Current.Background.color, _Style.Current.Background.color.A);
 
 		if (elm.ID == HTML_TH)
 		{
@@ -6836,6 +6828,9 @@ namespace NLGUI
 		// Get cells parameters
 		getCellsParameters(elm, true);
 
+		m_TableRowBackgroundColor.push_back(_CellParams.back().BgColor);
+		_CellParams.back().BgColor = CRGBA::Transparent;
+
 		// TODO: this probably ends up in first cell
 		renderPseudoElement(":before", elm);
 
@@ -6850,6 +6845,7 @@ namespace NLGUI
 		renderPseudoElement(":after", elm);
 
 		popIfNotEmpty(_CellParams);
+		popIfNotEmpty(m_TableRowBackgroundColor);
 	}
 
 	// ***************************************************************************
