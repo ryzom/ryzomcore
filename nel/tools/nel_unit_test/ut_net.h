@@ -24,6 +24,9 @@
 #include "ut_net_module.h"
 // Add a line here when adding a new test CLASS
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 struct CUTNet : public Test::Suite
 {
 	CUTNet()
@@ -34,5 +37,7 @@ struct CUTNet : public Test::Suite
 		// Add a line here when adding a new test CLASS
 	}
 };
+
+#pragma GCC diagnostic pop
 
 #endif

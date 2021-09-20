@@ -21,6 +21,9 @@
 
 #include <nel/misc/debug.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 using namespace std;
 
 #ifdef NL_OS_WINDOWS
@@ -160,3 +163,5 @@ int main(int argc, char *argv[])
 		nlwarning("Errors during unit testing");
 	return noerrors?EXIT_SUCCESS:EXIT_FAILURE;
 }
+
+#pragma GCC diagnostic pop
