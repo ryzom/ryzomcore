@@ -391,6 +391,9 @@ namespace NLGUI
 		CSSBackgroundRenderer m_HtmlBackground;
 		CSSBackgroundRenderer m_BodyBackground;
 
+		// active table.tr background color from css or from bgcolor attribute
+		std::vector<NLMISC::CRGBA> m_TableRowBackgroundColor;
+
 		// Valid base href was found
 		bool            _IgnoreBaseUrlTag;
 		// Fragment from loading url
