@@ -1289,7 +1289,7 @@ void CBotChatPageTrade::confirmTrade( bool enableResale )
 						uint16 u16Index = (uint16) _CurrItemIndex;
 						uint32 u32resalePrice = (uint32)max((sint32)0, resalePrice);
 						out.serial(u8Inv);
-						out.serial(u8Index);
+						out.serial(u16Index);
 						out.serial(u16Quantity);
 						out.serial(u32resalePrice);
 						NetMngr.push(out);
