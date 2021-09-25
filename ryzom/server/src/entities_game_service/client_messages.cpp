@@ -1858,7 +1858,7 @@ void cbClientBotChatTradeSell( NLNET::CMessage& msgin, const std::string &servic
 	H_AUTO(cbClientBotChatTradeSell);
 
 	uint8 inv;
-	uint8 idx;
+	uint16 idx;
 	uint16 quantity;
 	uint32 price;
 	CEntityId userId;
@@ -2645,7 +2645,7 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 			return;
 		}
 		CPlayer *p = PlayerManager.getPlayer(PlayerManager.getPlayerId(user->getId()));
-		
+
 		if (NLMISC::nlstricmp( opt.c_str(), "league" ) == 0)
 		{
 			chanID = user->getLeagueId();
@@ -3402,7 +3402,7 @@ void cbGetNpcIconDesc( NLNET::CMessage& msgin, const std::string & serviceName, 
 {
 	CEntityId eid;
 	vector<uint32> npcKeys;
-	
+
 	msgin.serial( eid );
 	msgin.serialCont( npcKeys );
 
@@ -3670,7 +3670,7 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:RING_MISSION:MISSION_RING_SELECT",cbRingMissionSelectAction },
 
 	{ "CLIENT:NPC_ICON:GET_DESC",				cbGetNpcIconDesc },
-}; 
+};
 
 
 
