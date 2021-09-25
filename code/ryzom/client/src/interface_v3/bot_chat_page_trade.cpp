@@ -508,15 +508,15 @@ uint32 CBotChatPageTrade::getUserFactionPoints(PVP_CLAN::TPVPClan clan) const
 
 // ***************************************************************************************
 void CBotChatPageTrade::notifyDownloadComplete(bool completed)
-{	
+{
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
 	if (!gc) return;
 	class CDBListVisitor : public CInterfaceElementVisitor
 	{
-	public:		
+	public:
 		bool DownloadComplete;
-		virtual void visitGroup(CInterfaceGroup *group) 
+		virtual void visitGroup(CInterfaceGroup *group)
 		{
 			CDBGroupListSheetText *dbGroup = dynamic_cast<CDBGroupListSheetText *>(group);
 			if (dbGroup)
@@ -1284,15 +1284,15 @@ void CBotChatPageTrade::confirmTrade( bool enableResale )
 					NLMISC::CBitMemStream out;
 					if(GenericMsgHeaderMngr.pushNameToStream(msg, out))
 					{
-						uint8	u8Inv		 = (uint8) _CurrItemInventory;
-						uint8	u8Index    = (uint8) _CurrItemIndex;
-						uint32	u32resalePrice = (uint32)max((sint32)0, resalePrice);
+						uint8 u8Inv = (uint8) _CurrItemInventory;
+						uint16 u16Index = (uint16) _CurrItemIndex;
+						uint32 u32resalePrice = (uint32)max((sint32)0, resalePrice);
 						out.serial(u8Inv);
-						out.serial(u8Index);
+						out.serial(u16Index);
 						out.serial(u16Quantity);
 						out.serial(u32resalePrice);
 						NetMngr.push(out);
-						//nlinfo("impulseCallBack sent: %s %d %d %d %d", msg, u8Inv, u8Index, u16Quantity, u32resalePrice);
+						//nlinfo("impulseCallBack sent: %s %d %d %d %d", msg, u8Inv, u16Index, u16Quantity, u32resalePrice);
 					}
 					else
 						nlwarning(" unknown message name '%s'", msg);
