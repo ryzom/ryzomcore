@@ -155,7 +155,7 @@ namespace NLGUI
 			switch(val[pos])
 			{
 				case '"': ret.append("&quot;"); break;
-				case '\'': ret.append("&apos;"); break;
+				case '\'': ret.append("&#39;"); break;
 				case '&': ret.append("&amp;"); break;
 				case '<': ret.append("&lt;"); break;
 				case '>': ret.append("&gt;"); break;
@@ -168,7 +168,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	std::string CHtmlElement::serializeAttributes() const
+	std::string CHtmlElement::serializeAttributes(bool escape) const
 	{
 		std::string result;
 		for(std::map<std::string, std::string>::const_iterator it = Attributes.begin(); it != Attributes.end(); ++it)
@@ -182,30 +182,30 @@ namespace NLGUI
 					{
 						result += " ";
 					}
-					result += htmlEscape(*it2);
+					result += (escape ? htmlEscape(*it2) : *it2);
 				}
 				result += "\"";
 			}
 			else
 			{
-				result += " " + it->first + "=\"" + htmlEscape(it->second) + "\"";
+				result += " " + it->first + "=\"" + (escape ? htmlEscape(it->second) : it->second) + "\"";
 			}
 		}
 		return result;
 	}
 
 	// ***************************************************************************
-	std::string CHtmlElement::serializeChilds() const
+	std::string CHtmlElement::serializeChilds(bool escape) const
 	{
 		std::string result;
 		for(std::list<CHtmlElement>::const_iterator it = Children.begin(); it != Children.end(); ++it)
-			result += it->serialize();
+			result += it->serialize(escape);
 
 		return result;
 	}
 
 	// ***************************************************************************
-	std::string CHtmlElement::serialize() const
+	std::string CHtmlElement::serialize(bool escape) const
 	{
 		if (Type == TEXT_NODE)
 		{
@@ -214,12 +214,14 @@ namespace NLGUI
 				parent->ID == HTML_NOSCRIPT))
 			{
 				return Value;
-			} else {
+			} else if (escape) {
 				return htmlEscape(Value);
+			} else {
+				return Value;
 			}
 		}
 
-		std::string result = "<" + Value + serializeAttributes() + ">";
+		std::string result = "<" + Value + serializeAttributes(escape) + ">";
 
 		if (ID == HTML_AREA || ID == HTML_BASE || ID == HTML_BR ||
 			ID == HTML_COL || ID == HTML_EMBED || ID == HTML_HR ||
@@ -234,7 +236,7 @@ namespace NLGUI
 			result += "\n";
 
 		if (!Children.empty())
-			result += serializeChilds();
+			result += serializeChilds(escape);
 
 		result += "</" + Value + ">";
 
