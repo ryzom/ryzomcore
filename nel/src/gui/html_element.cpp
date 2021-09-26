@@ -142,26 +142,29 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	std::string CHtmlElement::htmlEscape(std::string val, bool isAttribute) const
+	std::string CHtmlElement::htmlEscape(const std::string &val) const
 	{
-		static const std::string searchReplace[] = {
-			"&", "&amp;",
-			"<", "&lt;",
-			">", "&gt;",
-			"\xA0", "&nbsp;",
-		};
-		
-		for(uint i = 0; i < (sizeof(searchReplace) / sizeof(searchReplace[0])); i+=2)
-			val = strFindReplaceAll(val, searchReplace[i], searchReplace[i+1]);
+		if (val.find_first_of("\"'&<>\xA0") == std::string::npos)
+			return val;
 
-		if (isAttribute)
+		std::string ret;
+		// resize is quaranteed, make room for some free replacements
+		ret.reserve(val.size() + 24);
+		for(size_t pos = 0; pos != val.size(); pos++)
 		{
-			static const std::string q = "\"";
-			static const std::string quot = "&quot;";
-			val = strFindReplaceAll(val, q, quot);
+			switch(val[pos])
+			{
+				case '"': ret.append("&quot;"); break;
+				case '\'': ret.append("&apos;"); break;
+				case '&': ret.append("&amp;"); break;
+				case '<': ret.append("&lt;"); break;
+				case '>': ret.append("&gt;"); break;
+				case '\xA0': ret.append("&nbsp;"); break;
+				default : ret.append(&val[pos],1); break;
+			}
 		}
 
-		return val;
+		return ret;
 	}
 
 	// ***************************************************************************
@@ -179,13 +182,13 @@ namespace NLGUI
 					{
 						result += " ";
 					}
-					result += htmlEscape(*it2, true);
+					result += htmlEscape(*it2);
 				}
 				result += "\"";
 			}
 			else
 			{
-				result += " " + it->first + "=\"" + htmlEscape(it->second, true) + "\"";
+				result += " " + it->first + "=\"" + htmlEscape(it->second) + "\"";
 			}
 		}
 		return result;

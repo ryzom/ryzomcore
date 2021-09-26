@@ -76,7 +76,7 @@ namespace NLGUI
 		void reindexChilds();
 
 		// escape text tag or attribute value
-		std::string htmlEscape(std::string val, bool isAttribute = false) const;
+		std::string htmlEscape(const std::string &val) const;
 
 		// serialize element attributes as string
 		std::string serializeAttributes() const;
