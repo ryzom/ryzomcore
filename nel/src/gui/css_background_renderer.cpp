@@ -140,13 +140,6 @@ namespace NLGUI
 		// flush draw cache to ensure correct draw order
 		rVR.flush();
 
-		sint32 clipX, clipY, clipW, clipH;
-		if (m_Viewport)
-		{
-			rVR.getClipWindow(clipX, clipY, clipW, clipH);
-			rVR.setClipWindow(m_Viewport->getXReal(), m_Viewport->getYReal(), m_Viewport->getWReal(), m_Viewport->getHReal());
-		}
-
 		// TODO: no need for widget manager, if global color is set from parent
 		CRGBA globalColor;
 		if (m_ModulateGlobalColor)
@@ -166,9 +159,6 @@ namespace NLGUI
 
 		// flush draw cache to ensure correct draw order
 		rVR.flush();
-
-		if (m_Viewport)
-			rVR.setClipWindow(clipX, clipY, clipW, clipH);
 	}
 
 	// ----------------------------------------------------------------------------
