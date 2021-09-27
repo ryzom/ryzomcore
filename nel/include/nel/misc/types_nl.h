@@ -174,7 +174,7 @@
 #	define NL_COMP_GCC
 #endif
 
-#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110)
+#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110) || (defined(__GNUC__) && (GCC_VERSION >= 40400) && (__cplusplus >= 201103L))
 #	define NL_ISO_CPP0X_AVAILABLE
 #endif
 
