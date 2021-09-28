@@ -57,7 +57,6 @@
 
 #include "game_share/bg_downloader_msg.h"
 
-#include "global.h"
 #include "login_patch.h"
 #include "login.h"
 #include "user_agent.h"
@@ -2593,7 +2592,7 @@ public:
 	}
 };
 
-
+void stopSoundMngr();
 
 // ****************************************************************************
 void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
@@ -2606,11 +2605,10 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 	// Destination File Name (in writable directory)
 	string DestinationName;
 
-	if (NLMISC::startsWith(rFTP.FileName, "sound") && SoundMngr)
+	if (NLMISC::startsWith(rFTP.FileName, "sound"))
 	{
 		// Stop sound playback
-		delete SoundMngr;
-		SoundMngr = NULL;
+		stopSoundMngr();
 	}
 
 	if (rFTP.ExtractPath.empty())

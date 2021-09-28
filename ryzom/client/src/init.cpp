@@ -1457,6 +1457,15 @@ void prelogInit()
 	}
 }
 
+void stopSoundMngr()
+{
+	if (SoundMngr)
+	{
+		delete SoundMngr;
+		SoundMngr = NULL;
+	}
+}
+
 
 // ***************************************************************************
 void	initBotObjectSelection()
