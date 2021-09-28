@@ -1590,6 +1590,40 @@ void postlogInit()
 		CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
 
 		{
+			H_AUTO(InitRZSound)
+
+			if (!SoundMngr)
+			{
+				// Init the sound manager
+				nmsg = "Initializing sound manager...";
+				ProgressBar.newMessage(ClientCfg.buildLoadingString(nmsg));
+				if (ClientCfg.SoundOn)
+				{
+					SoundMngr = new CSoundManager(&ProgressBar);
+					try
+					{
+						SoundMngr->init(&ProgressBar);
+					}
+					catch (const Exception &e)
+					{
+						nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
+						delete SoundMngr;
+						SoundMngr = NULL;
+					}
+
+					if (SoundMngr)
+					{
+						// init the SoundMngr with backuped volume
+						SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
+						SoundMngr->setGameMusicVolume(ClientCfg.SoundGameMusicVolume);
+					}
+				}
+
+				CPath::memoryCompress(); // Because sound calls addSearchPath
+			}
+		}
+
+		{
 			H_AUTO(InitRZShIdI)
 
 			nmsg = "Initializing sheets...";
