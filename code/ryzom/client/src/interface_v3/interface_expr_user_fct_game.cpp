@@ -798,7 +798,11 @@ static DECLARE_INTERFACE_USER_FCT(getAnimalInventoryStateText)
 
 	// According to server status, change the inventory text
 	uint	status= (uint)args[0].getInteger();
-	if(ANIMAL_STATUS::isInStable((ANIMAL_STATUS::EAnimalStatus)status))
+	if(ANIMAL_STATUS::isInBag((ANIMAL_STATUS::EAnimalStatus)status))
+	{
+		result.setString("uiAnimalInBag");
+	}
+	else if(ANIMAL_STATUS::isInStable((ANIMAL_STATUS::EAnimalStatus)status))
 	{
 		result.setString("uiAnimalInStable");
 	}
