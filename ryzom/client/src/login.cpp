@@ -2832,7 +2832,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 	{
 		// ask server for salt
 		if(!HttpClient.sendGet(url + "?cmd=ask&cp=2&login=" + login + "&lg=" + ClientCfg.LanguageCode, "", pPM->isVerboseLog()))
-			return "Can't send (error code 60)";
+			return std::string("Can't send (error code 60) ") + HttpClient.lastError();
 
 		if(pPM->isVerboseLog()) nlinfo("Sent request for password salt");
 

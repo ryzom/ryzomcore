@@ -124,15 +124,17 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	curl_easy_setopt(_Curl, CURLOPT_WRITEFUNCTION, CCurlHttpClient::writeDataFromCurl);
 	curl_easy_setopt(_Curl, CURLOPT_WRITEDATA, this);
 
-	char errorbuf [CURL_ERROR_SIZE+1];
-	curl_easy_setopt(_Curl, CURLOPT_ERRORBUFFER, errorbuf);
+	if (!m_ErrorBuf.size())
+		m_ErrorBuf.resize(CURL_ERROR_SIZE + 1);
+	m_ErrorBuf[0] = '\0';
+	curl_easy_setopt(_Curl, CURLOPT_ERRORBUFFER, &m_ErrorBuf[0]);
 
 	// Send
 	CURLcode res = curl_easy_perform(_Curl);
 	if (res != 0)
 	{
 		if (verbose)
-			nlwarning(errorbuf);
+			nlwarning(&m_ErrorBuf[0]);
 		return false;
 	}
 
