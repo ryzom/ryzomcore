@@ -133,9 +133,11 @@ namespace NLWEB
 			{
 #ifdef NL_OS_WINDOWS
 				// load native Windows CA Certs
+				/*
 				addCertificatesFrom("CA");
 				addCertificatesFrom("AuthRoot");
 				addCertificatesFrom("ROOT");
+				*/
 #endif
 
 				isUsingOpenSSLBackend = true;
