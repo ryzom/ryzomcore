@@ -2906,13 +2906,13 @@ string checkLogin(const string &login, const string &password, const string &cli
 			std::string	cryptedPassword = CCrypt::crypt(password, Salt);
 
 			if(!HttpClient.sendGet(url + "?cmd=login&login=" + login + "&password=" + cryptedPassword + "&clientApplication=" + clientApp + "&cp=2" + "&lg=" + ClientCfg.LanguageCode + customParameters))
-				return "Can't send (error code 2)";
+				return std::string("Can't send (error code 2) ") + HttpClient.lastError();
 		}
 		else
 		{
 			// don't send login and password if empty
 			if(!HttpClient.sendGet(url + "?cmd=login&clientApplication=" + clientApp + "&cp=2" + "&lg=" + ClientCfg.LanguageCode + customParameters))
-				return "Can't send (error code 2)";
+				return std::string("Can't send (error code 2) ") + HttpClient.lastError();
 		}
 
 		// the response should contains the result code and the cookie value
@@ -3022,7 +3022,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 		std::string	cryptedPassword = CCrypt::crypt(password, Salt);
 
 		if(!HttpClient.sendGet(url + "?login=" + login + "&password=" + cryptedPassword + "&clientApplication=" + clientApp + "&cp=2"))
-			return "Can't send (error code 2)";
+			return std::string("Can't send (error code 2) ") + HttpClient.lastError();
 	/*
 		if(!send(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?login="+login+"&password="+password+"&clientApplication="+clientApp))
 			return "Can't send (error code 2)";
