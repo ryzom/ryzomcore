@@ -2480,3 +2480,185 @@ class CHandlerItemGroupEquip : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerItemGroupEquip, "item_group_equip");
+
+
+// ***************************************************************************
+class CHandlerUseItem : public IActionHandler
+{
+	void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		std::string itemType = getParam(sParams, "item_type");
+		std::string searchTermInput = getParam(sParams, "search_term");
+		std::vector<std::string> searchTerms; //vector of terms to match (there can be more than one if user uses "&&" keyword)
+
+		std::map<std::string, ITEMFAMILY::EItemFamily> itemTypeDictionnary = {
+			{ "sap_crystal", ITEMFAMILY::ITEM_SAP_RECHARGE },
+			{ "crystallized_spell", ITEMFAMILY::CRYSTALLIZED_SPELL },
+			{ "consumable", ITEMFAMILY::CONSUMABLE },
+			{ "xp_catalyser", ITEMFAMILY::XP_CATALYSER },
+			{ "teleport", ITEMFAMILY::TELEPORT }
+		};
+
+		if (itemType.empty())
+		{
+			nlinfo("Trying to use item without defining type.");
+			return;
+		}
+
+		if (searchTermInput.length() > MAX_SEARCH_TERM_INPUT_LENGTH)
+		{
+			nlinfo("Search term is too long. Max is %d", MAX_SEARCH_TERM_INPUT_LENGTH);
+			pIM->displaySystemInfo(toString("Search term is too long. Max is %d.", MAX_SEARCH_TERM_INPUT_LENGTH));
+			return;
+		}
+
+		//split searchTerms
+
+		std::string delimiter = "&&";
+
+		size_t pos = 0;
+		std::string searchTerm;
+
+		while ((pos = searchTermInput.find(delimiter)) != std::string::npos)
+		{
+			searchTerm = searchTermInput.substr(0, pos);
+			searchTerms.push_back(searchTerm);
+			searchTermInput.erase(0, pos + delimiter.length());
+		}
+
+		searchTerms.push_back(searchTermInput);
+
+		IListSheetBase *pList = dynamic_cast<IListSheetBase *>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_TEXT));
+
+		//iterate every item in bag
+		for (uint i = 0; i < MAX_BAGINV_ENTRIES; ++i)
+		{
+			bool itemPassedTest = false;
+
+			CDBCtrlSheet *pCS = pList->getSheet(i);
+			const CEntitySheet *pES = pCS->asItemSheet();
+			if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+			{
+				CItemSheet *pIS = (CItemSheet *)pES;
+				if (!pIS)
+				{
+					return;
+				}
+				//check if item is of the type we are looking for
+				if (pIS->Family == itemTypeDictionnary[itemType])
+				{
+					//test for searchTerm, if present
+					if (searchTerms.size() > 0)
+					{
+						int nMatches = 0;
+						//if crystallized spell, we will search the enchantment instead of the title of the item
+						if (itemType == "crystallized_spell")
+						{
+
+							CClientItemInfo itemInfo = getInventory().getItemInfo(getInventory().getItemSlotId(pCS));
+
+							//iterate over all needed test, and leave the loop if not enough matches
+							for (std::size_t currentTest = 0; currentTest < searchTerms.size() && currentTest <= nMatches; currentTest++)
+							{
+								bool foundSomething = false;
+
+								//iterate over all enchant bricks and leave the loop if you valid the test
+								for (std::size_t currentBrick = 0; currentBrick < itemInfo.Enchantment.Bricks.size() && !foundSomething; currentBrick++)
+								{
+
+									std::string localizedName = ucstring(STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(itemInfo.Enchantment.Bricks[currentBrick])).toUtf8();
+
+									std::size_t posLocalizedName = localizedName.find(searchTerms[currentTest]);
+									//verify that the name contains the search term
+									if (posLocalizedName != std::string::npos)
+									{
+										localizedName.replace(posLocalizedName, (searchTerms[currentTest]).length(), "");
+										foundSomething = true;
+										nMatches++;
+									}
+								}
+							}
+						}
+						else
+						{
+							//get localized name of the item (for translations)
+							std::string localizedName = ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(pIS->Id)).toUtf8();
+							for (std::size_t currentTest = 0; currentTest < searchTerms.size() && currentTest <= nMatches; currentTest++)
+							{
+								std::size_t posLocalizedName = localizedName.find(searchTerms[currentTest]);
+								//verify that the name contains the search term
+								if (posLocalizedName != std::string::npos)
+								{
+									localizedName.replace(posLocalizedName, (searchTerms[currentTest]).length(), "");
+									nMatches++;
+								}
+							}
+						}
+
+						// if all search terms found match, the item pass the tests
+						if (nMatches == searchTerms.size())
+						{
+							itemPassedTest = true;
+						}
+					}
+					else // no test needed
+					{
+						itemPassedTest = true;
+					}
+
+					if (itemPassedTest)
+					{
+						//run lua attached to item if needed
+						if (pIS && pIS->Scroll.Label.empty())
+							checkItemCommand(pIS);
+
+						//use or consume the found item
+						switch (pIS->Family)
+						{
+						case ITEMFAMILY::ITEM_SAP_RECHARGE:
+						case ITEMFAMILY::CRYSTALLIZED_SPELL:
+							//sap_reload or crystallized spell
+							sendToServerEnchantMessage((uint8)pCS->getInventoryIndex(), (uint16)pCS->getIndexInDB());
+							break;
+
+						case ITEMFAMILY::CONSUMABLE:
+						case ITEMFAMILY::XP_CATALYSER:
+							//consumable or catalyser
+							sendMsgUseItem(uint16(pCS->getIndexInDB()));
+							break;
+
+						case ITEMFAMILY::TELEPORT:
+							//teleport
+							sendMsgUseItem(uint16(pCS->getIndexInDB()));
+
+							// Last loading is a teleport
+							LoadingBackground = TeleportKamiBackground;
+							const CItemSheet *pIS = pCS->asItemSheet();
+							if ((pIS != NULL) && (pIS->Family == ITEMFAMILY::TELEPORT))
+							{
+								switch (pIS->Teleport.Type)
+								{
+								case TELEPORT_TYPES::NONE:
+								case TELEPORT_TYPES::KAMI:
+									LoadingBackground = TeleportKamiBackground;
+									break;
+								case TELEPORT_TYPES::KARAVAN:
+									LoadingBackground = TeleportKaravanBackground;
+									break;
+								}
+								if (pIS->Scroll.Label.empty())
+									checkItemCommand(pIS);
+							}
+							break;
+						}
+
+						return;
+					}
+				}
+			}
+		}
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerUseItem, "use_item");
