@@ -1408,6 +1408,7 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	// **** Init Video Modes
 	Driver->getModes(videoModes);
 
+	// TODO: for resolutions below 1024x768, could use automatic UI scaling like in login/outgame
 	// Remove modes under 1024x768 (outgame ui limitation) and get the unique strings
 	sint i, j;
 	for (i = 0; i < (sint)videoModes.size(); ++i)
@@ -1423,6 +1424,9 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 
 			// create string format with width and height
 			string res = toString(videoModes[i].Width)+" x "+toString(videoModes[i].Height);
+
+			if (!videoModes[i].DisplayDevice.empty())
+				res += toString(" (%s)", videoModes[i].DisplayDevice.c_str());
 
 			// check if video mode already found in list
 			for (j = 0; j < (sint)stringModeList.size(); ++j)

@@ -2208,6 +2208,7 @@ class CAHLessLod : public IActionHandler
 REGISTER_ACTION_HANDLER (CAHLessLod, "less_lod");
 
 // ***************************************************************************
+// TODO: remove resolution change from login screen
 class CAHUninitResLod : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)

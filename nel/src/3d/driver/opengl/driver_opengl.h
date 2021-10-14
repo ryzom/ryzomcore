@@ -999,6 +999,9 @@ private:
 	bool					createWindow(const GfxMode& mode);
 	bool					destroyWindow();
 
+	// Return monitor info and positon in multi monitor setup or false if monitor not found.
+	bool					getMonitorByName(const std::string &name, sint32 &x, sint32 &y, uint32 &w, uint32 &h) const;
+
 	enum EWindowStyle { EWSWindowed, EWSFullscreen };
 
 	void					setWindowSize(uint32 width, uint32 height);

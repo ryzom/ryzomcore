@@ -1070,6 +1070,7 @@ void prelogInit()
 				// fullscreen, using monitor resolution
 				mode.Windowed = false;
 
+				ClientCfg.MonitorName = mode.DisplayDevice;
 				ClientCfg.Windowed = mode.Windowed;
 				ClientCfg.Width = mode.Width;
 				ClientCfg.Height = mode.Height;
@@ -1086,6 +1087,7 @@ void prelogInit()
 
 			// update client.cfg with detected resolution
 			ClientCfg.writeBool("FullScreen", !ClientCfg.Windowed, true);
+			ClientCfg.writeString("MonitorName", ClientCfg.MonitorName, true);
 			ClientCfg.writeInt("Width", ClientCfg.Width, true);
 			ClientCfg.writeInt("Height", ClientCfg.Height, true);
 			ClientCfg.writeInt("Depth", ClientCfg.Depth, true);
@@ -1095,6 +1097,7 @@ void prelogInit()
 		}
 		else
 		{
+			mode.DisplayDevice = ClientCfg.MonitorName;
 			mode.Windowed = ClientCfg.Windowed;
 			mode.Width = ClientCfg.Width;
 			mode.Height = ClientCfg.Height;
