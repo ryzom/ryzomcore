@@ -19,6 +19,11 @@
 
 #include "inventory_manager.h"
 
+///////////////////////////////////////
+
+#define LIST_BAG_TEXT "ui:interface:inventory:content:bag:iil:bag_list"
+#define MAX_SEARCH_TERM_INPUT_LENGTH 50
+
 class CInterfaceItemEdition
 {
 private:
