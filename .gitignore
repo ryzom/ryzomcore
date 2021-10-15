@@ -90,6 +90,7 @@ ylwrap
 *.mk
 
 # Visual Studio garbage
+.vscode/
 *.opensdf
 UpgradeLog*.XML
 _UpgradeReport_Files
@@ -159,6 +160,7 @@ code/build/*
 code/build-2010/*
 build/*
 install/*
+win-build/
 build_*
 code/nel/tools/build_gamedata/configuration/buildsite.py
 
