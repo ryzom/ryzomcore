@@ -1888,16 +1888,15 @@ class CHandlerItemMenuCheck : public IActionHandler
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if (pMoveToPa[i])
-					pMoveToPa[i]->setActive(invId!=INVENTORIES::guild &&
-											(uint)invId!=INVENTORIES::pet_animal+i &&
+					pMoveToPa[i]->setActive((uint)invId!=INVENTORIES::pet_animal+i &&
 											 invMngr.isInventoryPresent((INVENTORIES::TInventory)(INVENTORIES::pet_animal+i)) );
 			}
 
 			if (pMoveToGuild)
-				pMoveToGuild->setActive(invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::guild));
+				pMoveToGuild->setActive(invId!=INVENTORIES::guild && invMngr.isInventoryPresent(INVENTORIES::guild));
 
 			if (pMoveToRoom)
-				pMoveToRoom->setActive(invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::player_room));
+				pMoveToRoom->setActive(invId!=INVENTORIES::player_room && invMngr.isInventoryPresent(INVENTORIES::player_room));
 
 			// std case: can drop / destroy
 			if(pDrop)		pDrop->setActive(invId!=INVENTORIES::guild);
