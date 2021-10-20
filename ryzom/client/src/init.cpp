@@ -1061,43 +1061,45 @@ void prelogInit()
 			return;
 		}
 
-		// used to determine screen default resolution
-		if (ClientCfg.Width < 800 || ClientCfg.Height < 600)
+		UDriver::CMode mode;
+		// first run (no client.cfg)
+		if (ClientCfg.Width == 0  || ClientCfg.Height == 0)
 		{
-			UDriver::CMode mode;
-
-			CConfigFile::CVar *varPtr = NULL;
-
-			if (!ClientCfg.Windowed && Driver->getCurrentScreenMode(mode))
+			if (Driver->getCurrentScreenMode(mode))
 			{
+				// fullscreen, using monitor resolution
+				mode.Windowed = false;
+
+				ClientCfg.Windowed = mode.Windowed;
 				ClientCfg.Width = mode.Width;
 				ClientCfg.Height = mode.Height;
 				ClientCfg.Depth = mode.Depth;
 				ClientCfg.Frequency = mode.Frequency;
-
-				// update client.cfg with detected depth and frequency
-				varPtr = ClientCfg.ConfigFile.getVarPtr("Depth");
-				if(varPtr)
-					varPtr->forceAsInt(ClientCfg.Depth);
-
-				varPtr = ClientCfg.ConfigFile.getVarPtr("Frequency");
-				if(varPtr)
-					varPtr->forceAsInt(ClientCfg.Frequency);
 			}
 			else
 			{
+				// fallback
+				ClientCfg.Windowed = true;
 				ClientCfg.Width = 1024;
 				ClientCfg.Height = 768;
 			}
 
 			// update client.cfg with detected resolution
-			varPtr = ClientCfg.ConfigFile.getVarPtr("Width");
-			if(varPtr)
-				varPtr->forceAsInt(ClientCfg.Width);
+			ClientCfg.writeBool("FullScreen", !ClientCfg.Windowed, true);
+			ClientCfg.writeInt("Width", ClientCfg.Width, true);
+			ClientCfg.writeInt("Height", ClientCfg.Height, true);
+			ClientCfg.writeInt("Depth", ClientCfg.Depth, true);
+			ClientCfg.writeInt("Frequency", ClientCfg.Frequency, true);
 
-			varPtr = ClientCfg.ConfigFile.getVarPtr("Height");
-			if(varPtr)
-				varPtr->forceAsInt(ClientCfg.Height);
+			ClientCfg.ConfigFile.save();
+		}
+		else
+		{
+			mode.Windowed = ClientCfg.Windowed;
+			mode.Width = ClientCfg.Width;
+			mode.Height = ClientCfg.Height;
+			mode.Depth = ClientCfg.Depth;
+			mode.Frequency = ClientCfg.Frequency;
 		}
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetup, "login_step_video_mode_setup"));
@@ -1106,25 +1108,6 @@ void prelogInit()
 
 		// Check the driver is not is 16 bits
 		checkDriverDepth ();
-
-		UDriver::CMode mode;
-
-		if (Driver->getCurrentScreenMode(mode))
-		{
-			// use current mode if its smaller than 1024x768
-			// mode should be windowed already, but incase its not, use the mode as is
-			if (mode.Windowed && (mode.Width > 1024 && mode.Height > 768))
-			{
-				mode.Width		= 1024;
-				mode.Height		= 768;
-			}
-		}
-		else
-		{
-			mode.Width = 1024;
-			mode.Height = 768;
-			mode.Windowed = true;
-		}
 
 		// Disable Hardware Vertex Program.
 		if(ClientCfg.DisableVtxProgram)
@@ -1260,10 +1243,11 @@ void prelogInit()
 		else
 		{
 			// position is not saved in config so center the window
-			if (Driver->getCurrentScreenMode(mode))
+			UDriver::CMode tmp;
+			if (Driver->getCurrentScreenMode(tmp))
 			{
-				posX = (mode.Width - Driver->getWindowWidth())/2;
-				posY = (mode.Height - Driver->getWindowHeight())/2;
+				posX = (tmp.Width - Driver->getWindowWidth())/2;
+				posY = (tmp.Height - Driver->getWindowHeight())/2;
 			}
 		}
 
