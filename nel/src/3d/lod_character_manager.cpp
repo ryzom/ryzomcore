@@ -981,9 +981,10 @@ void			CLodCharacterManager::addTextureCompute(CLodCharacterInstance &instance, 
 		return;
 
 	// get lookup ptr.
-	nlassert(lodTexture.Texture.size()==NL3D_CLOD_TEXT_SIZE);
 	if (lodTexture.Texture.size() < NL3D_CLOD_TEXT_SIZE)
 		return;
+	
+	nlassert(lodTexture.Texture.size()==NL3D_CLOD_TEXT_SIZE);
 
 	const CLodCharacterTexture::CTUVQ		*lookUpPtr= &lodTexture.Texture[0];
 
