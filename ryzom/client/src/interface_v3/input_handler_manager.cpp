@@ -271,16 +271,16 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 	{
 
 
-		CViewPointer &rIP = *static_cast<CViewPointer *>(CWidgetManager::getInstance()->getPointer());
+		CViewPointer &rIP = *static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 
 		NLGUI::CEventDescriptorMouse eventDesc;
 
-		sint32 x, y;
-		rIP.getPointerDispPos(x, y);
-		eventDesc.setX(x);
-		eventDesc.setY(y);
+		sint32	x,y;
+		rIP.getPointerDispPos (x, y);
+		eventDesc.setX (x);
+		eventDesc.setY (y);
 
-		bool handled = false;
+		bool	handled= false;
 
 		// button down ?
 		static volatile bool doTest = false;
@@ -291,7 +291,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			{
 				if (_RecoverFocusLost)
 				{
-					handled |= updateMousePos((CEventMouse&)event); // must update mouse pos here,
+					handled |= updateMousePos((CEventMouse&)event, eventDesc); // must update mouse pos here,
 																			 // because when app window focus is gained by a mouse click, this is
 																			 // the only place where we can retrieve mouse pos before a mouse move
 					_RecoverFocusLost = false;
@@ -299,19 +299,10 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				if (!handled)
 				{
 					if (R2::getEditor().isInitialized()
-					    && (R2::isEditionCurrent() || R2::getEditor().getCurrentTool()))
+						&& (R2::isEditionCurrent() || R2::getEditor().getCurrentTool())
+					   )
 					{
-						const NLMISC::CEventMouseDown *mouseDownEvent = static_cast<const NLMISC::CEventMouseDown *>(&event);
-						if (mouseDownEvent->Button & NLMISC::leftButton)
-						{
-							eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouseleftdown);
-							handled |= R2::getEditor().handleEvent(eventDesc);
-						}
-						if (mouseDownEvent->Button & NLMISC::rightButton)
-						{
-							eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouserightdown);
-							handled |= R2::getEditor().handleEvent(eventDesc);
-						}
+						handled |= R2::getEditor().handleEvent(eventDesc);
 					}
 				}
 				handled |= inputHandler.handleMouseButtonDownEvent( event );
@@ -330,7 +321,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			// mouse move?
 			else if(event == EventMouseMoveId)
 			{
-				handled |= updateMousePos((CEventMouse&)event);
+				handled |= updateMousePos((CEventMouse&)event, eventDesc);
 			}
 			else if (event == EventMouseWheelId)
 			{
@@ -339,77 +330,19 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		}
 
 		// if Event not handled, post to Action Manager
-		if (!handled)
+		if( !handled )
 		{
+			bool handled = false;
 			if (R2::getEditor().isInitialized()
-			    && (R2::isEditionCurrent() || R2::getEditor().getCurrentTool()))
+			    && (R2::isEditionCurrent() || R2::getEditor().getCurrentTool())
+			   )
 			{
-				if (event == EventMouseDownId)
-				{
-					const NLMISC::CEventMouseDown *mouseDownEvent = static_cast<const NLMISC::CEventMouseDown *>(&event);
-					if (mouseDownEvent->Button & NLMISC::leftButton)
-					{
-						eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouseleftdown);
-						handled |= R2::getEditor().handleEvent(eventDesc);
-					}
-					if (mouseDownEvent->Button & NLMISC::rightButton)
-					{
-						eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouserightdown);
-						handled |= R2::getEditor().handleEvent(eventDesc);
-					}
-				}
-				else if (event == EventMouseUpId)
-				{
-					const NLMISC::CEventMouseUp *mouseUpEvent = static_cast<const NLMISC::CEventMouseUp *>(&event);
-					if (mouseUpEvent->Button & NLMISC::leftButton)
-					{
-						eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouseleftup);
-						handled |= R2::getEditor().handleEvent(eventDesc);
-					}
-					if (mouseUpEvent->Button & NLMISC::rightButton)
-					{
-						eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouserightup);
-						handled |= R2::getEditor().handleEvent(eventDesc);
-					}
-				}
-				else if (event == EventMouseDblClkId)
-				{
-					const NLMISC::CEventMouseDblClk *mouseDblClkEvent = static_cast<const NLMISC::CEventMouseDblClk *>(&event);
-					if (mouseDblClkEvent->Button & NLMISC::leftButton)
-					{
-						eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouseleftdblclk);
-						handled |= R2::getEditor().handleEvent(eventDesc);
-					}
-					if (mouseDblClkEvent->Button & NLMISC::rightButton)
-					{
-						eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouserightdblclk);
-						handled |= R2::getEditor().handleEvent(eventDesc);
-					}
-				}
-				else
-				{
-					if (event == EventMouseWheelId)
-					{
-						const NLMISC::CEventMouseWheel *wheelEvent = static_cast<const NLMISC::CEventMouseWheel *>(&event);
-						eventDesc.setEventTypeExtended(CEventDescriptorMouse::mousewheel);
-						eventDesc.setWheel(wheelEvent->Direction ? 1 : -1);
-						handled = R2::getEditor().handleEvent(eventDesc);
-					}
-					else if (event == EventMouseMoveId)
-					{
-						eventDesc.setEventTypeExtended(CEventDescriptorMouse::mousemove);
-						handled = R2::getEditor().handleEvent(eventDesc);
-					}
-					else
-					{
-						nlwarning("R2 unknown mouse event '%s'", event.toString().c_str());
-					}
-				}
+				handled = R2::getEditor().handleEvent(eventDesc);
 			}
 			if (!handled)
 			{
 				// post to Action Manager
-				FilteredEventServer.postEvent(event.clone());
+				FilteredEventServer.postEvent( event.clone() );
 			}
 		}
 	}
@@ -422,7 +355,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 
 
 // ***************************************************************************
-bool		CInputHandlerManager::updateMousePos(NLMISC::CEventMouse &event)
+bool		CInputHandlerManager::updateMousePos(NLMISC::CEventMouse &event, NLGUI::CEventDescriptorMouse &eventDesc)
 {
 	if (!IsMouseFreeLook())
 		return inputHandler.handleMouseMoveEvent( event );

@@ -3830,15 +3830,9 @@ void CDriverD3D::CLightState::apply(CDriverD3D *driver)
 void CDriverD3D::CRenderTargetState::apply(CDriverD3D *driver)
 {
 	H_AUTO_D3D(CDriverD3D_CRenderTargetState);
-	nlassert(TargetOwned); // Can only apply once!
-	driver->_DeviceInterface->SetRenderTarget(0, Target);
+	driver->_DeviceInterface->SetRenderTarget (0, Target);
 	driver->setupViewport(driver->_Viewport);
 	driver->setupScissor(driver->_Scissor);
-	if (TargetOwned)
-	{
-		Target->Release();
-		TargetOwned = false;
-	}
 }
 
 // ***************************************************************************

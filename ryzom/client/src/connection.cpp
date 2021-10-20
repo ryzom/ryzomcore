@@ -193,6 +193,7 @@ bool hasPrivilegeG() { return (UserPrivileges.find(":G:") != std::string::npos);
 bool hasPrivilegeEM() { return (UserPrivileges.find(":EM:") != std::string::npos); }
 bool hasPrivilegeEG() { return (UserPrivileges.find(":EG:") != std::string::npos); }
 bool hasPrivilegeOBSERVER() { return (UserPrivileges.find(":OBSERVER:") != std::string::npos); }
+bool hasPrivilegeTESTER() { return (UserPrivileges.find(":TESTER:") != std::string::npos); }
 
 
 // Restore the video mode (fullscreen for example) after the connection (done in a window)
@@ -277,73 +278,6 @@ void	setOutGameFullScreen()
 	// Enable auto scaling in login window
 	CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
 }
-
-// ------------------------------------------------------------------------------------------------
-class CSoundGlobalMenu
-{
-public:
-	CSoundGlobalMenu()
-	{
-		_MusicWantedAsync= false;
-		_NbFrameBeforeChange= NbFrameBeforeChangeMax;
-	}
-	void    reset();
-	void	setMusic(const string &music, bool async);
-	void	updateSound();
-private:
-	string		_MusicPlayed;
-	string		_MusicWanted;
-	bool		_MusicWantedAsync;
-	sint		_NbFrameBeforeChange;
-	enum	{NbFrameBeforeChangeMax= 10};
-};
-
-void	CSoundGlobalMenu::reset()
-{
-	_MusicPlayed.clear();
-	_MusicWanted.clear();
-}
-
-void	CSoundGlobalMenu::updateSound()
-{
-	// **** update the music played
-	// The first music played is the music played at loading, before select char
-	if (_MusicPlayed.empty())
-		_MusicPlayed = toLower(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
-	if (_MusicWanted.empty())
-		_MusicWanted = toLower(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
-
-	// because music is changed when the player select other race for instance,
-	// wait the 3D to load (stall some secs)
-
-	// if the wanted music is the same as the one currently playing, just continue playing
-	if(_MusicPlayed!=_MusicWanted)
-	{
-		// wait nbFrameBeforeChangeMax before actually changing the music
-		_NbFrameBeforeChange--;
-		if(_NbFrameBeforeChange<=0)
-		{
-			_MusicPlayed= _MusicWanted;
-			// play the music
-			if (SoundMngr != NULL)
-				SoundMngr->playMusic(_MusicPlayed, 500, _MusicWantedAsync, true, true);
-		}
-	}
-
-
-	// **** update mngr
-	if (SoundMngr != NULL)
-		SoundMngr->update();
-}
-
-void	CSoundGlobalMenu::setMusic(const string &music, bool async)
-{
-	_MusicWanted= toLower(music);
-	_MusicWantedAsync= async;
-	// reset the counter
-	_NbFrameBeforeChange= NbFrameBeforeChangeMax;
-}
-static	CSoundGlobalMenu	SoundGlobalMenu;
 
 
 // New version of the menu after the server connection
@@ -477,8 +411,6 @@ bool connection (const string &cookie, const string &fsaddr)
 		InterfaceState = GLOBAL_MENU;
 	}
 
-	// No loading music here, this is right before character selection, using the existing music
-
 	// Create the loading texture. We can't do that before because we need to add search path first.
 	beginLoading (LoadBackground);
 	UseEscapeDuringLoading = USE_ESCAPE_DURING_LOADING;
@@ -581,7 +513,6 @@ bool reconnection()
 	ProgressBar.setFontFactor(1.0f);
 
 	// Init out game
-	SoundGlobalMenu.reset();
 	pIM->initOutGame();
 
 	// Hide cursor for interface
@@ -596,9 +527,6 @@ bool reconnection()
 	WaitServerAnswer= false;
 
 	FarTP.setOutgame();
-
-	if (SoundMngr)
-		SoundMngr->setupFadeSound(1.0f, 1.0f);
 
 	// these two globals sequence GlobalMenu to display the character select dialog
 	WaitServerAnswer = true;
@@ -633,8 +561,6 @@ bool reconnection()
 	// we want the teleport graphics to display (not like in Server Hop mode)
 	//	this also kicks the state machine to sendReady() so we stop spinning in farTPmainLoop
 	FarTP.setIngame();
-
-	// Not loading music here, this is before character selection, keep existing music
 
 	// Create the loading texture. We can't do that before because we need to add search path first.
 	beginLoading (LoadBackground);
@@ -810,6 +736,66 @@ std::string	buildPlayerNameForSaveFile(const ucstring &playerNameIn)
 	}
 	return ret;
 }
+
+// ------------------------------------------------------------------------------------------------
+class CSoundGlobalMenu
+{
+public:
+	CSoundGlobalMenu()
+	{
+		_MusicWantedAsync= false;
+		_NbFrameBeforeChange= NbFrameBeforeChangeMax;
+	}
+	void	setMusic(const string &music, bool async);
+	void	updateSound();
+private:
+	string		_MusicPlayed;
+	string		_MusicWanted;
+	bool		_MusicWantedAsync;
+	sint		_NbFrameBeforeChange;
+	enum	{NbFrameBeforeChangeMax= 10};
+};
+
+void	CSoundGlobalMenu::updateSound()
+{
+	// **** update the music played
+	// The first music played is the music played at loading, before select char
+	if(_MusicPlayed.empty())
+		_MusicPlayed= toLower(ClientCfg.SoundOutGameMusic);
+	if(_MusicWanted.empty())
+		_MusicWanted= toLower(ClientCfg.SoundOutGameMusic);
+
+	// because music is changed when the player select other race for instance,
+	// wait the 3D to load (stall some secs)
+
+	// if the wanted music is the same as the one currently playing, just continue playing
+	if(_MusicPlayed!=_MusicWanted)
+	{
+		// wait nbFrameBeforeChangeMax before actually changing the music
+		_NbFrameBeforeChange--;
+		if(_NbFrameBeforeChange<=0)
+		{
+			_MusicPlayed= _MusicWanted;
+			// play the music
+			if (SoundMngr != NULL)
+				SoundMngr->playMusic(_MusicPlayed, 500, _MusicWantedAsync, true, true);
+		}
+	}
+
+
+	// **** update mngr
+	if (SoundMngr != NULL)
+		SoundMngr->update();
+}
+
+void	CSoundGlobalMenu::setMusic(const string &music, bool async)
+{
+	_MusicWanted= toLower(music);
+	_MusicWantedAsync= async;
+	// reset the counter
+	_NbFrameBeforeChange= NbFrameBeforeChangeMax;
+}
+static	CSoundGlobalMenu	SoundGlobalMenu;
 
 
 static bool LuaBGDSuccessFlag = true; // tmp, for debug
@@ -1127,7 +1113,7 @@ TInterfaceState globalMenu()
 						charSelect = LoginCharsel;
 
 					WaitServerAnswer = false;
-					if (charSelect == -1)
+					if (charSelect == -1 || FarTP.isReselectingChar())
 					{
 						CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
 						if (pNL != NULL)
@@ -2061,8 +2047,8 @@ public:
 		fromString(getParam(Params, "async"), async);
 
 		// if empty name, return to default mode
-		if (sName.empty())
-			sName = ClientCfg.EmptySlotMusic;
+		if(sName.empty())
+			sName= ClientCfg.SoundOutGameMusic;
 
 		// change the music
 		SoundGlobalMenu.setMusic(sName, async);

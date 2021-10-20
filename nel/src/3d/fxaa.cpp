@@ -246,7 +246,6 @@ void CFXAA::applyEffect()
 
 	// create render target
 	CTextureUser *otherRenderTarget = m_Driver->getRenderTargetManager().getRenderTarget(width, height, mode2D);
-	nlassert(otherRenderTarget);
 
 	// swap render target
 	CTextureUser texNull;

@@ -2674,17 +2674,6 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 		{
 			playerGiftNeeded->setValue32(0);
 		}
-		//
-		missionOption = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k), false);
-		if (missionOption)
-		{
-			missionOption->setValue32(0);
-		}
-		playerGiftNeeded = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:PLAYER_GIFT_NEEDED", (int) k), false);
-		if (playerGiftNeeded)
-		{
-			playerGiftNeeded->setValue32(0);
-		}
 	}
 /* TODO ULU : Add RP tags */
 
@@ -4313,19 +4302,20 @@ void	CUserEntity::updatePreCollision(const NLMISC::TTime &time, CEntityCL *targe
 	// test each frame if the mode has changed
 	if(SoundMngr)
 	{
+		string	deadMusic= "death.ogg";
 		// Play/stop music if comes from or goes to dead
-		bool isDead = _Mode == MBEHAV::DEATH || _Mode == MBEHAV::SWIM_DEATH;
+		bool	isDead= _Mode==MBEHAV::DEATH || _Mode==MBEHAV::SWIM_DEATH;
 
 		// must start music?
-		if (isDead && SoundMngr->getEventMusicPlayed() != ClientCfg.DeathMusic)
+		if( isDead && SoundMngr->getEventMusicPlayed()!=deadMusic )
 		{
-			SoundMngr->playEventMusic(ClientCfg.DeathMusic, 0, true);
+			SoundMngr->playEventMusic(deadMusic, 0, true);
 		}
 
 		// must end music?
-		if (!isDead && SoundMngr->getEventMusicPlayed() == ClientCfg.DeathMusic)
+		if( !isDead && SoundMngr->getEventMusicPlayed()==deadMusic )
 		{
-			SoundMngr->stopEventMusic(ClientCfg.DeathMusic, CSoundManager::LoadingMusicXFade);
+			SoundMngr->stopEventMusic(deadMusic, CSoundManager::LoadingMusicXFade);
 		}
 	}
 }

@@ -96,8 +96,6 @@ private:
 
 	IAudioDecoder *m_AudioDecoder;
 
-	std::string m_LookupPath;
-
 	bool m_Paused;
 	bool m_DecodingEnded;
 

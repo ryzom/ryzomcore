@@ -1157,15 +1157,6 @@ void destroyDebug()
 	}
 }
 
-void attachExceptionHandler()
-{
-#ifndef NL_COMP_MINGW
-#	ifdef NL_OS_WINDOWS
-	_set_se_translator(exceptionTranslator);
-#	endif // NL_OS_WINDOWS
-#endif //!NL_COMP_MINGW
-}
-
 void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 {
 	// Do some basic compiler time check on type size

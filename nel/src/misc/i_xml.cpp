@@ -171,16 +171,15 @@ bool CIXml::init (IStream &stream)
 		// Try binary mode
 		if (_TryBinaryMode)
 		{
-			char header[5];
+			char header[4];
 			header[0] = buffer[0];
 			header[1] = buffer[1];
 			header[2] = buffer[2];
 			header[3] = buffer[3];
-			header[4] = '\0';
 			toLower(header);
 
 			// Does it a xml stream ?
-			if (strcmp(header, "<?xm"))
+			if (!strcmp(header, "<?xm"))
 			{
 				// NO ! Go in binary mode
 				_BinaryStream = &stream;

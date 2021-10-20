@@ -108,13 +108,6 @@ void CStreamFileSource::play()
 		//{
 		//	nlwarning("Already waiting for play");
 		//}
-		std::string filepath = getStreamFileSound()->getFilePath();
-		m_LookupPath = NLMISC::CPath::lookup(filepath, false, false);
-		if (m_LookupPath.empty())
-		{
-			nlwarning("Music file %s does not exist!", filepath.c_str());
-			return;
-		}
 		if (!getStreamFileSound()->getAsync())
 		{
 			if (!prepareDecoder())
@@ -279,8 +272,7 @@ bool CStreamFileSource::prepareDecoder()
 	if (!m_AudioDecoder)
 	{
 		// load the file
-		nlassert(!m_LookupPath.empty());
-		m_AudioDecoder = IAudioDecoder::createAudioDecoder(m_LookupPath, getStreamFileSound()->getAsync(), getStreamFileSound()->getLooping());
+		m_AudioDecoder = IAudioDecoder::createAudioDecoder(getStreamFileSound()->getFilePath(), getStreamFileSound()->getAsync(), getStreamFileSound()->getLooping());
 		if (!m_AudioDecoder)
 		{
 			nlwarning("Failed to create IAudioDecoder, likely invalid format");

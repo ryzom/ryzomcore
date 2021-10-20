@@ -143,9 +143,6 @@ namespace NLMISC
 
 			NL_CT_DEBUG("CoTask : task %p start func called", task);
 
-			// Attach exception handler
-			attachExceptionHandler();
-
 			try
 			{
 				// run the task
@@ -154,7 +151,6 @@ namespace NLMISC
 			catch(...)
 			{
 				nlwarning("CCoTask::startFunc : the task has generated an unhandled exeption and will terminate");
-				NLMISC_BREAKPOINT;
 			}
 
 			task->_Finished = true;

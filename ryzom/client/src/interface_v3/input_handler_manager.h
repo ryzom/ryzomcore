@@ -181,7 +181,7 @@ private:
 	void parseKey(xmlNodePtr cur, std::vector<CComboKey> &out);
 
 	// return true if handled
-	bool updateMousePos(NLMISC::CEventMouse &event);
+	bool updateMousePos(NLMISC::CEventMouse &event, NLGUI::CEventDescriptorMouse &eventDesc);
 
 	NLGUI::CInputHandler inputHandler;
 

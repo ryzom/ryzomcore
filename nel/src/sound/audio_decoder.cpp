@@ -56,12 +56,18 @@ IAudioDecoder::~IAudioDecoder()
 
 IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &filepath, bool async, bool loop)
 {
+	std::string lookup = CPath::lookup(filepath, false);
+	if (lookup.empty())
+	{ 
+		nlwarning("Music file %s does not exist!", filepath.c_str());
+		return NULL; 
+	}
 	std::string type = CFile::getExtension(filepath);
 
 	CIFile *ifile = new CIFile();
 	ifile->setCacheFileOnOpen(!async);
 	ifile->allowBNPCacheFileOnOpen(!async);
-	ifile->open(filepath);
+	ifile->open(lookup);
 
 	IAudioDecoder *mb = createAudioDecoder(type, ifile, loop);
 
