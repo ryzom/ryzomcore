@@ -1,10 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -378,6 +378,8 @@ void CEntityCL::SInstanceCL::updateCurrentFromLoading(NL3D::USkeleton Skeleton)
 			sint stickID = Skeleton.getBoneIdByName(StickPoint);
 			if(stickID != -1)
 				Skeleton.stickObject(Current, stickID);
+			else
+				nlwarning("Skeleton '%s' is missing bone '%s' for object attachment.", Skeleton.getShapeName().c_str(), StickPoint.c_str());
 		}
 	}
 
@@ -2095,7 +2097,7 @@ bool CEntityCL::clipped (const std::vector<NLMISC::CPlane> &clippingPlanes, cons
 // Set the name of the entity. Handle replacement tag if any
 // to insert NPC task translated.
 //---------------------------------------------------
-void CEntityCL::setEntityName(const ucstring &name)
+void CEntityCL::setEntityName(const std::string &name)
 {
 	_EntityName = name;
 }
@@ -2260,7 +2262,7 @@ void CEntityCL::load()	// virtual
 // onStringAvailable :
 // Callback when the name is arrived.
 //-----------------------------------------------
-void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
+void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 {
 	_EntityName = value;
 
@@ -2268,24 +2270,24 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 	_EntityName= removeShardFromName(_EntityName);
 
 	// New title
-	ucstring newtitle;
+	string newtitle;
 
 	_HasReservedTitle = false;
 
 	// check if there is any replacement tag in the string
-	ucstring::size_type p1 = _EntityName.find('$');
-	if (p1 != ucstring::npos)
+	string::size_type p1 = _EntityName.find('$');
+	if (p1 != string::npos)
 	{
 		// we found a replacement point begin tag
-		ucstring::size_type p2 = _EntityName.find('$', p1+1);
-		if (p2 != ucstring::npos)
+		string::size_type p2 = _EntityName.find('$', p1+1);
+		if (p2 != string::npos)
 		{
 			// ok, we have the second replacement point!
 			// extract the replacement id
-			ucstring id = _EntityName.substr(p1+1, p2-p1-1);
+			string id = _EntityName.substr(p1+1, p2-p1-1);
 			// retrieve the translated string
-			_TitleRaw = id.toString();
-//			ucstring replacement = CI18N::get(strNewTitle);
+			_TitleRaw = id;
+//			string replacement = CI18N::get(strNewTitle);
 			bool womanTitle = false;
 			CCharacterCL * c = dynamic_cast<CCharacterCL*>(this);
 			if(c)
@@ -2293,17 +2295,16 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 				womanTitle = ( c->getGender() == GSGENDER::female );
 			}
 			
-			ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle));
+			string replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
 
 			// Sometimes translation contains another title
 			{
-				ucstring::size_type pos = replacement.find('$');
-				if (pos != ucstring::npos)
+				string::size_type pos = replacement.find('$');
+				if (pos != string::npos)
 				{
-					ucstring sn = replacement;
-					_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(sn.substr(0, pos));
-					ucstring::size_type pos2 = sn.find('$', pos + 1);
-					_TitleRaw = sn.substr(pos+1, pos2 - pos - 1);
+					_EntityName = _EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(replacement.substr(0, pos));
+					string::size_type pos2 = replacement.find('$', pos + 1);
+					_TitleRaw = replacement.substr(pos+1, pos2 - pos - 1);
 					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
 				}
 			}
@@ -2319,7 +2320,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 				_NameEx = replacement;
 				newtitle = _NameEx;
 			}
-			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw.toString() );
+			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw );
 			if ( titleEnum >= CHARACTER_TITLE::BeginGmTitle && titleEnum <= CHARACTER_TITLE::EndGmTitle )
 			{
 				_GMTitle = titleEnum - CHARACTER_TITLE::BeginGmTitle;
@@ -2354,10 +2355,10 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 		if (pVT != NULL) pVT->setText(_Title);
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player"));
-		if (pGC != NULL) pGC->setUCTitle(_EntityName);
+		if (pGC != NULL) pGC->setTitle(_EntityName);
 
 		CSkillManager *pSM = CSkillManager::getInstance();
-		pSM->setPlayerTitle(_TitleRaw.toString());
+		pSM->setPlayerTitle(_TitleRaw);
 	}
 
 	// Must rebuild the in scene interface 'cause name has changed
@@ -2368,33 +2369,33 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 //-----------------------------------------------
 // getTitleFromName
 //-----------------------------------------------
-ucstring CEntityCL::getTitleFromName(const ucstring &name)
+std::string CEntityCL::getTitleFromName(const std::string &name)
 {
-	ucstring::size_type p1 = name.find('$');
-	if (p1 != ucstring::npos)
+	std::string::size_type p1 = name.find('$');
+	if (p1 != string::npos)
 	{
-		ucstring::size_type p2 = name.find('$', p1 + 1);
-		if (p2 != ucstring::npos)
+		std::string::size_type p2 = name.find('$', p1 + 1);
+		if (p2 != std::string::npos)
 			return name.substr(p1+1, p2-p1-1);
 	}
 
-	return ucstring("");
+	return std::string();
 }// getTitleFromName //
 
 //-----------------------------------------------
 // removeTitleFromName
 //-----------------------------------------------
-ucstring CEntityCL::removeTitleFromName(const ucstring &name)
+std::string CEntityCL::removeTitleFromName(const std::string &name)
 {
-	ucstring::size_type p1 = name.find('$');
-	if (p1 == ucstring::npos)
+	std::string::size_type p1 = name.find('$');
+	if (p1 == string::npos)
 	{
 		return name;
 	}
 	else
 	{
-		ucstring::size_type p2 = name.find('$', p1 + 1);
-		if (p2 != ucstring::npos)
+		std::string::size_type p2 = name.find('$', p1 + 1);
+		if (p2 != string::npos)
 		{
 			return name.substr(0, p1) + name.substr(p2 + 1);
 		}
@@ -2408,16 +2409,16 @@ ucstring CEntityCL::removeTitleFromName(const ucstring &name)
 //-----------------------------------------------
 // removeShardFromName
 //-----------------------------------------------
-ucstring CEntityCL::removeShardFromName(const ucstring &name)
+std::string CEntityCL::removeShardFromName(const std::string &name)
 {
 	// The string must contains a '(' and a ')'
-	ucstring::size_type	p0= name.find('(');
-	ucstring::size_type	p1= name.find(')');
-	if(p0==ucstring::npos || p1==ucstring::npos || p1<=p0)
+	std::string::size_type	p0= name.find('(');
+	std::string::size_type	p1= name.find(')');
+	if(p0==std::string::npos || p1==std::string::npos || p1<=p0)
 		return name;
 
 	// if it is the same as the shard name of the user, remove it
-	if(ucstrnicmp(name, (uint)p0+1, (uint)(p1-p0-1), PlayerSelectedHomeShardName)==0)
+	if (!NLMISC::compareCaseInsensitive(name.c_str() + p0 + 1, p1-p0-1, PlayerSelectedHomeShardName.c_str(), PlayerSelectedHomeShardName.size()))
 		return name.substr(0,p0) + name.substr(p1+1);
 	// else don't modify
 	else
@@ -2427,7 +2428,7 @@ ucstring CEntityCL::removeShardFromName(const ucstring &name)
 //-----------------------------------------------
 // removeTitleAndShardFromName
 //-----------------------------------------------
-ucstring CEntityCL::removeTitleAndShardFromName(const ucstring &name)
+std::string CEntityCL::removeTitleAndShardFromName(const std::string &name)
 {
 	return removeTitleFromName(removeShardFromName(name));
 }

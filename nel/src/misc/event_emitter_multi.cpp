@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -98,13 +101,13 @@ const IEventEmitter *CEventEmitterMulti::getEmitter(uint index) const
 	return _Emitters[index].first;
 }
 
-bool CEventEmitterMulti::copyTextToClipboard(const ucstring &text)
+bool CEventEmitterMulti::copyTextToClipboard(const std::string &text)
 {
 	// Naush: wrapped to old API to avoid duplicate code
 	return CSystemUtils::copyTextToClipboard(text);
 }
 
-bool CEventEmitterMulti::pasteTextFromClipboard(ucstring &text)
+bool CEventEmitterMulti::pasteTextFromClipboard(std::string &text)
 {
 	// Naush: wrapped to old API to avoid duplicate code
 	return CSystemUtils::pasteTextFromClipboard(text);

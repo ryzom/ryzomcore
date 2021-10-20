@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -169,7 +169,7 @@ sint main(int argc, char **argv)
 			if (filenames[i].find(".max") == std::string::npos)
 				continue;
 
-			std::string baseFilename = toLower(CFile::getFilenameWithoutExtension(filenames[i]));
+			std::string baseFilename = toLowerAscii(CFile::getFilenameWithoutExtension(filenames[i]));
 
 			// compute the md5 of .max file
 			std::string md5 = getNewMD5(filenames[i]).toString();

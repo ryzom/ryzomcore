@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -40,11 +41,12 @@ namespace R2
 {
 
 // *********************************************************************************************************
-void CInstanceMapDeco::CCtrlButtonEntity::getContextHelp(ucstring &help) const
+void CInstanceMapDeco::CCtrlButtonEntity::getContextHelp(std::string &help) const
 {
 	//H_AUTO(R2_CCtrlButtonEntity_getContextHelp)
-	help = _Instance.getDisplayName();
-	if (help == NLMISC::CI18N::get("uiR2EDNoName")) help.clear();
+	help = _Instance.getDisplayName().toUtf8();
+	if (help == NLMISC::CI18N::get("uiR2EDNoName"))
+		help.clear();
 }
 
 // *********************************************************************************************************

@@ -7,7 +7,7 @@
  */
 
 // NeL - MMORPG Framework <https://wiki.ryzom.dev/>
-// Copyright (C) 2012  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -90,7 +90,7 @@ bool CGroupControllerRoot::isReservedName(const std::string &nodeName)
 CGroupController *CGroupControllerRoot::getGroupController(const std::string &path)
 {
 	std::vector<std::string> pathNodes;
-	NLMISC::splitString(NLMISC::toLower(path), ":", pathNodes);
+	NLMISC::splitString(NLMISC::toLowerAscii(path), ":", pathNodes);
 	CGroupController *active = this;
 	if (pathNodes[0] != NLSOUND_GROUP_CONTROLLER_ROOT_PATH)
 	{

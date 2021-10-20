@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -146,7 +149,7 @@ UInstanceGroup *getCluster(const UGlobalPosition &gp)
 	if(strPos.empty())
 		return 0;
 	// try to find the ig in the loaded ig map
-	std::map<std::string, UInstanceGroup *>::const_iterator igIt = IGLoaded.find(toLower(strPos));
+	std::map<std::string, UInstanceGroup *>::const_iterator igIt = IGLoaded.find(toLowerAscii(strPos));
 	if (igIt != IGLoaded.end())
 	{
 		return igIt->second;
@@ -192,7 +195,7 @@ void releaseLandscapeIGCallbacks()
 
 void addPacsPrim(const std::string &fileName)
 {
-	std::string ppName = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fileName));
+	std::string ppName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(fileName));
 	if (PacsPrims.find(ppName) != PacsPrims.end())
 	{
 		nlwarning(("Pacs primitive " + ppName + " already has been inserted").c_str());

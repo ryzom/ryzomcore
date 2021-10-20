@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -312,16 +313,16 @@ static DECLARE_INTERFACE_USER_FCT(getSheetName)
 	// if from ctrlSheet, then take the correct ACTUAL name (ie from NAMEID if not 0)
 	if(ctrlSheet)
 	{
-		result.setUCString(ctrlSheet->getItemActualName());
+		result.setString(ctrlSheet->getItemActualName());
 		return true;
 	}
 	// Standard (but less accurate) way
 	else
 	{
 		const CItemSheet *itemSheet = getItemSheet(args);
-		ucstring tmp;
+		const char *tmp = "";
 		if (itemSheet != NULL) tmp = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(itemSheet->Id);
-		result.setUCString(tmp);
+		result.setString(tmp);
 		return true;
 	}
 }
@@ -345,9 +346,9 @@ static DECLARE_INTERFACE_USER_FCT(getItemTranslatedName)
 		return false;
 	}
 
-	ucstring tmp;
+	const char *tmp = "";
 	tmp = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(sheet);
-	result.setUCString(tmp);
+	result.setString(tmp);
 	return true;
 }
 REGISTER_INTERFACE_USER_FCT("getItemTranslatedName", getItemTranslatedName)

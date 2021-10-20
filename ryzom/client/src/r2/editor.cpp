@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2016  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -212,14 +212,24 @@ CDynamicMapClient(eid, clientGateway, luaState)
 void CDynamicMapClientEventForwarder::nodeErased(const std::string& instanceId, const std::string& attrName, sint32 position)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeErased)
-	if (getEditor().getMode() != CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode)
+	{
+		nlassert(getEditor().getMode() != CEditor::AnimationModeLoading); /* Probably should not happen */
+		nldebug("Node erased, but not in edition mode");
+		return;
+	}
 	getEditor().nodeErased(instanceId, attrName, position);
 }
 
 void CDynamicMapClientEventForwarder::nodeSet(const std::string& instanceId, const std::string& attrName, CObject* value)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeSet)
-	if (getEditor().getMode() != CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode
+		&& getEditor().getMode() != CEditor::AnimationModeLoading /* Loading animation scenario from terminal, ghost nodes created by translator */)
+	{
+		nldebug("Node set, but not in edition mode");
+		return;
+	}
 	getEditor().nodeSet(instanceId, attrName, value);
 }
 
@@ -227,7 +237,12 @@ void CDynamicMapClientEventForwarder::nodeInserted(const std::string& instanceId
 							  const std::string& key, CObject* value)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeInserted)
-	if (getEditor().getMode() != CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode
+		&& getEditor().getMode() != CEditor::AnimationModeLoading /* Loading animation scenario from terminal, ghost nodes created by translator */)
+	{
+		nldebug("Node inserted, but not in edition mode");
+		return;
+	}
 	getEditor().nodeInserted(instanceId, attrName, position, key, value);
 }
 
@@ -236,7 +251,12 @@ void CDynamicMapClientEventForwarder::nodeMoved(
 				const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeMoved)
-	if (getEditor().getMode() != CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode)
+	{
+		nlassert(getEditor().getMode() != CEditor::AnimationModeLoading); /* Probably should not happen */
+		nldebug("Node moved, but not in edition mode");
+		return;
+	}
 	getEditor().nodeMoved(instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
 }
 
@@ -1171,10 +1191,15 @@ int CEditor::luaGenInstanceName(CLuaState &ls)
 	CHECK_EDITOR
 	const char *funcName = "genInstanceName";
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 2); // name
 	ucstring baseName;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 2, baseName));
 	CLuaIHM::push(ls, getEditor().genInstanceName(baseName));
+#else
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+	ls.push(getEditor().genInstanceName(ucstring::makeFromUtf8(ls.toString(2))).toUtf8()); // FIXME: Ring UTF-8
+#endif
 	return 1;
 }
 
@@ -1185,10 +1210,15 @@ int CEditor::luaIsPostFixedByNumber(CLuaState &ls)
 	CHECK_EDITOR
 	const char *funcName = "isPostFixedByNumber";
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 2); // name
 	ucstring baseName;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 2, baseName));
 	ls.push(getEditor().isPostFixedByNumber(baseName));
+#else
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+	ls.push(getEditor().isPostFixedByNumber(ucstring::makeFromUtf8(ls.toString(2)))); // FIXME: Ring UTF-8
+#endif
 	return 1;
 }
 
@@ -1306,9 +1336,15 @@ int CEditor::luaSetPlotItemInfos(CLuaState &ls)
 	const char *funcName = "setPlotItemInfos";
 	CLuaIHM::checkArgCount(ls, funcName, 5); // a method with 4 args
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 3);
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 4);
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 5);
+#else
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
+#endif
 	CItemSheet *item = dynamic_cast<CItemSheet *>(SheetMngr.get(CSheetId((uint32) ls.toInteger(2))));
 	if (!item || item->Family != ITEMFAMILY::SCROLL_R2)
 	{
@@ -1316,9 +1352,15 @@ int CEditor::luaSetPlotItemInfos(CLuaState &ls)
 	}
 	R2::TMissionItem mi;
 	mi.SheetId = (uint32) ls.toInteger(2);
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::getUCStringOnStack(ls, 3, mi.Name);
 	CLuaIHM::getUCStringOnStack(ls, 4, mi.Description);
 	CLuaIHM::getUCStringOnStack(ls, 5, mi.Comment);
+#else
+	mi.Name = ucstring::makeFromUtf8(ls.toString(3));
+	mi.Description = ucstring::makeFromUtf8(ls.toString(4));
+	mi.Comment = ucstring::makeFromUtf8(ls.toString(5));
+#endif
 	getEditor().setPlotItemInfos(mi);
 	return 0;
 }
@@ -1551,12 +1593,12 @@ int CEditor::luaGetUserEntityName(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 1); // this is a method
 	if (UserEntity)
 	{
-		ucstring name = UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis;
-		ls.push( name.toUtf8() );
+		string name = UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis;
+		ls.push( name );
 	}
 	else
 	{
-		ls.push(std::string(""));
+		ls.push(std::string());
 	}
 
 	return 1;
@@ -1741,7 +1783,7 @@ void CEditor::waitScenarioScreen()
 				// Display the firewall alert string
 				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting:title"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiFirewallAlert")+ucstring("..."));
+					pVT->setText(CI18N::get("uiFirewallAlert")+"...");
 
 				// The mouse and fullscreen mode should be unlocked for the user to set the firewall permission
 				nlSleep( 30 ); // 'nice' the client, and prevent to make too many send attempts
@@ -1833,8 +1875,8 @@ void CEditor::waitScenarioScreen()
 				if (pVT != NULL)
 				{
 					pVT->setMultiLine( true );
-					pVT->setText(CI18N::get("uiFirewallFail")+ucstring(".\n")+
-								  CI18N::get("uiFirewallAlert")+ucstring("."));
+					pVT->setText(CI18N::get("uiFirewallFail")+".\n"+
+								  CI18N::get("uiFirewallAlert")+".");
 				}
 			}
 		}
@@ -4224,7 +4266,7 @@ sint CEditor::getGeneratedNameIndex(const std::string &nameUtf8, const std::stri
 			{
 				++ strIt;
 				const char *numberStart = &*strIt;
-				for (; strIt != endStrIt && isdigit(*strIt); ++strIt) {}
+				for (; strIt != endStrIt && (uint8)(*strIt) < (uint8)'\x80' && isdigit(*strIt); ++strIt) {}
 				if (strIt == endStrIt)
 				{
 					sint ret;
@@ -4246,7 +4288,7 @@ bool CEditor::isPostFixedByNumber(const ucstring &baseName)
 	while (lastIndex > 0)
 	{
 		int currChar = (int) baseName[lastIndex];
-		if (!isdigit(currChar) &&
+		if (((uint8)currChar >= (uint8)'\x80' || !isdigit(currChar)) &&
 			currChar != ' ' &&
 			currChar != '\t')
 		{
@@ -4269,7 +4311,7 @@ ucstring CEditor::genInstanceName(const ucstring &baseName)
 	while (lastIndex > 0)
 	{
 		int currChar = (int) strippedName[lastIndex];
-		if (!isdigit(currChar) &&
+		if (((uint8)currChar >= (uint8)'\x80' || !isdigit(currChar)) &&
 			currChar != ' ' &&
 			currChar != '\t')
 		{
@@ -5785,7 +5827,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 	}
 	//
 	projectInLua(_Scenario); // push on the lua stack
-	getLua().push(float(initialActIndex)); // example reconnect after test in act4
+	getLua().push(initialActIndex); // example reconnect after test in act4
 	// update value in the framework
 	callEnvFunc("onScenarioUpdated", 2);
 	//nlwarning("Instance list now is :");
@@ -6302,7 +6344,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 			objectSelected= precInstanceUnderPos->getDisplayerVisual();
 	}
 
-	if (objectSelected->getSelectionType() == ISelectableObject::GroundProjected)
+	if (objectSelected && objectSelected->getSelectionType() == ISelectableObject::GroundProjected)
 	{
 		if (borderSelected && borderSelected != objectSelected)
 		{
@@ -7464,7 +7506,7 @@ class CAHInviteCharacter : public IActionHandler
 				CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(fatherGC->getGroup("add_contact_eb:eb"));
 				if (geb && !geb->getInputString().empty())
 				{
-					string charName = geb->getInputString().toString();
+					string charName = geb->getInputString();
 					CSessionBrowserImpl & sessionBrowser = CSessionBrowserImpl::getInstance();
 					sessionBrowser.inviteCharacterByName(sessionBrowser.getCharId(), charName);
 
@@ -7486,7 +7528,7 @@ class CAHInviteCharacter : public IActionHandler
 						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_newcomer");
 					}
 
-					geb->setInputString(ucstring(""));
+					geb->setInputString(std::string());
 				}
 			}
 		}
@@ -7602,7 +7644,11 @@ class CAHR2Undo : public IActionHandler
 			getEditor().setCurrentTool(NULL);
 			const ucstring *actionName = historic.getPreviousActionName();
 			nlassert(actionName);
+#ifdef RYZOM_LUA_UCSTRING
 			CLuaIHM::push(getEditor().getLua(), *actionName);
+#else
+			getEditor().getLua().push((*actionName).toUtf8());
+#endif
 			historic.undo();
 			getEditor().callEnvMethod("onUndo", 1, 0);
 		}
@@ -7631,7 +7677,11 @@ class CAHR2Redo : public IActionHandler
 			getEditor().setCurrentTool(NULL);
 			const ucstring *actionName = historic.getNextActionName();
 			nlassert(actionName);
+#ifdef RYZOM_LUA_UCSTRING
 			CLuaIHM::push(getEditor().getLua(), *actionName);
+#else
+			getEditor().getLua().push((*actionName).toUtf8());
+#endif
 			historic.redo();
 			getEditor().callEnvMethod("onRedo", 1, 0);
 		}

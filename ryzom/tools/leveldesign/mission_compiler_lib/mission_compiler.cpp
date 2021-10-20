@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2011  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -189,7 +189,7 @@ GenderExtractor::GenderExtractor(const std::string & literal, const std::string&
 	const char * f = fs[level];
 	const char * h = hs[level];
 
-	_Identifier = toLower(identifier);
+	_Identifier = toLowerAscii(identifier);
 
 	std::string newPhrase;
 
@@ -657,7 +657,7 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 				// use mission primitive instead
 				fileName = primFileName;
 			}
-			if (loadedPrimitives.find(toLower(fileName)) == loadedPrimitives.end())
+			if (loadedPrimitives.find(toLowerAscii(fileName)) == loadedPrimitives.end())
 			{
 				string fullFileName = CPath::lookup(fileName, false);
 				if (fullFileName.empty())
@@ -670,7 +670,7 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 				if (loadXmlPrimitiveFile(*primDoc, fullFileName, ligoConfig))
 				{
 					// the primitive file is loaded correctly
-					loadedPrimitives.insert(make_pair(toLower(fileName), TLoadedPrimitive(primDoc, fullFileName)));
+					loadedPrimitives.insert(make_pair(toLowerAscii(fileName), TLoadedPrimitive(primDoc, fullFileName)));
 					CPrimitiveContext::instance().CurrentPrimitive = NULL;
 				}
 				else
@@ -679,7 +679,7 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 					throw EParseException(NULL, toString("Can't read primitive file '%s'", fullFileName.c_str()).c_str());
 				}
 			}
-			TLoadedPrimitive &loadedPrim = loadedPrimitives[toLower(fileName)];
+			TLoadedPrimitive &loadedPrim = loadedPrimitives[toLowerAscii(fileName)];
 			CPrimitives *primDoc = loadedPrim.PrimDoc;
 
 			TPrimitiveSet scripts;
@@ -744,7 +744,7 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 				fileName = primFileName;
 			}
 
-			TLoadedPrimitive &loadedPrim = loadedPrimitives[toLower(fileName)];
+			TLoadedPrimitive &loadedPrim = loadedPrimitives[toLowerAscii(fileName)];
 			CPrimitives *primDoc = loadedPrim.PrimDoc;
 			CPrimitiveContext::instance().CurrentPrimitive = primDoc;
 
@@ -1304,7 +1304,7 @@ retry:
 		_Suffixe = tokens.back();
 
 		// generate identifier
-		_PhraseId = toUpper(md.getMissionName()+"_"+_Suffixe);
+		_PhraseId = toUpperAscii(md.getMissionName()+"_"+_Suffixe);
 
 		set<string>	ps;
 		// select only unique params
@@ -1857,11 +1857,11 @@ void CMissionData::parseMissionHeader(NLLIGO::IPrimitive *prim)
 //	_MissionTitle.init(*this, prim, vs); 
 	_MissionDescriptionRaw = getPropertyArray(prim, "mission_description", false, false);
 //	_MissionDescription.init(*this, prim, vs);
-	_MonoInstance = toLower(getProperty(prim, "mono_instance", true, false)) == "true";
-	_RunOnce = toLower(getProperty(prim, "run_only_once", true, false)) == "true";
-	_Replayable = toLower(getProperty(prim, "replayable", true, false)) == "true";
+	_MonoInstance = toBool(getProperty(prim, "mono_instance", true, false));
+	_RunOnce = toBool(getProperty(prim, "run_only_once", true, false));
+	_Replayable = toBool(getProperty(prim, "replayable", true, false));
 	
-	_NeedValidation = toLower(getProperty(prim, "need_validation", true, false)) == "true";
+	_NeedValidation = toBool(getProperty(prim, "need_validation", true, false));
 	
 	_MissionAutoMenuRaw = getPropertyArray(prim, "phrase_auto_menu", false, false);
 
@@ -1872,15 +1872,15 @@ void CMissionData::parseMissionHeader(NLLIGO::IPrimitive *prim)
 	else if (s == "guild")
 		_Guild = true;
 	
-	_NotInJournal = NLMISC::toLower(getProperty(prim, "not_in_journal", false, false)) == "true";
-	_AutoRemoveFromJournal = NLMISC::toLower(getProperty(prim, "auto_remove_from_journal", false, false)) == "true";
+	_NotInJournal = NLMISC::toBool(getProperty(prim, "not_in_journal", false, false));
+	_AutoRemoveFromJournal = NLMISC::toBool(getProperty(prim, "auto_remove_from_journal", false, false));
 	_MissionCategory = getProperty(prim, "mission_category", false, false);
 	NLMISC::fromString(getProperty(prim, "player_replay_timer", true, false), _PlayerReplayTimer);
 	NLMISC::fromString(getProperty(prim, "global_replay_timer", true, false), _GlobalReplayTimer);
-	_NotProposed = NLMISC::toLower(getProperty(prim, "not_proposed", false, false)) == "true";
-	_MissionAuto = NLMISC::toLower(getProperty(prim, "automatic", false, false)) == "true";
-	_NonAbandonnable = NLMISC::toLower(getProperty(prim, "non_abandonnable", false, false)) == "true";
-	_FailIfInventoryIsFull = NLMISC::toLower(getProperty(prim, "fail_if_inventory_is_full", false, false)) == "true";
+	_NotProposed = NLMISC::toBool(getProperty(prim, "not_proposed", false, false));
+	_MissionAuto = NLMISC::toBool(getProperty(prim, "automatic", false, false));
+	_NonAbandonnable = NLMISC::toBool(getProperty(prim, "non_abandonnable", false, false));
+	_FailIfInventoryIsFull = NLMISC::toBool(getProperty(prim, "fail_if_inventory_is_full", false, false));
 	_MissionIcon = getProperty(prim, "mission_icon", false, false);
 
 	if (_MissionAuto)

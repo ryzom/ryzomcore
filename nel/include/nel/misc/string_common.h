@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2016-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -193,6 +193,10 @@ inline std::string toString(const sint32 &val) { return toString("%d", val); }
 inline std::string toString(const uint64 &val) { return toString("%" NL_I64 "u", val); }
 inline std::string toString(const sint64 &val) { return toString("%" NL_I64 "d", val); }
 
+#ifdef NL_OS_WINDOWS
+inline std::string toString(const wchar_t &val) { return toString(reinterpret_cast<const uint16 &>(val)); }
+#endif
+
 #ifdef NL_COMP_GCC
 #	if GCC_VERSION == 40102
 
@@ -246,9 +250,14 @@ inline bool fromString(const std::string &str, sint64 &val) { bool ret = sscanf(
 inline bool fromString(const std::string &str, float &val) { bool ret = sscanf(str.c_str(), "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
 inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(str.c_str(), "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
 
-// Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, anything else is undefined.
-// (str[0] == '1' || (str[0] & 0xD2) == 0x50)
-//  - Kaetemi
+#ifdef NL_OS_WINDOWS
+inline bool fromString(const std::string &str, wchar_t &val) { return fromString(str, reinterpret_cast<uint16 &>(val)); }
+#endif
+
+/// Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, and empty strings, anything else is undefined.
+///  - Kaetemi
+inline bool toBool(const char *str) { return str[0] == '1' || (str[0] & 0xD2) == 0x50; }
+inline bool toBool(const std::string &str) { return toBool(str.c_str()); } // Safe because first byte may be null
 
 bool fromString(const std::string &str, bool &val);
 

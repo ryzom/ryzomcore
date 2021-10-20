@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -84,7 +84,12 @@ namespace NLGUI
 
 		/// Set
 
-		void setText (const ucstring &text);
+		void setText(const std::string &text);
+		void setTextLocalized(const std::string &text, bool localized);
+#ifdef RYZOM_LUA_UCSTRING
+		void setTextAsUtf16 (const ucstring &text); // Compatibility
+#endif
+		void setLocalized(bool localized);
 		void setFontName (const std::string &name);
 		void setFontSize (sint nFontSize, bool coef = true);
 		void setEmbolden (bool nEmbolden);
@@ -95,7 +100,10 @@ namespace NLGUI
 		void setShadowColor (const NLMISC::CRGBA &color);
 		void setShadowOffset (sint x, sint y);
 		void setLineMaxW (sint nMaxW, bool invalidate=true);
-		void setOverflowText(const ucstring &text) { _OverflowText = text; }
+		void setOverflowText(const std::string &text) { _OverflowText = text; }
+#ifdef RYZOM_LUA_UCSTRING
+		void setOverflowTextAsUtf16(const ucstring &text) { _OverflowText = text.toUtf8(); } // Compatibility
+#endif
 		void setMultiLine (bool bMultiLine);
 		void setMultiLineSpace (sint nMultiLineSpace);
 		void setMultiLineMaxWOnly (bool state);
@@ -112,8 +120,12 @@ namespace NLGUI
 		void disableStringSelection();
 
 		/// Get
-
-		ucstring		getText() const		{ return _Text; }
+		std::string		getText() const { return _HardText.empty() ? _Text : _HardText; }
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring		getTextAsUtf16() const; // Compatibility
+		ucstring		getHardTextAsUtf16() const; // Compatibility
+#endif
+		bool			isLocalized() const { return _Localized;  }
 		sint			getFontSize() const;
 		std::string		getFontName() const { return _FontName; }
 		bool			getEmbolden() 		{ return _Embolden; }
@@ -124,7 +136,9 @@ namespace NLGUI
 		NLMISC::CRGBA	getShadowColor()	{ return _ShadowColor; }
 		void			getShadowOffset(sint &x, sint &y) { x = _ShadowX; y = _ShadowY; }
 		sint			getLineMaxW()		const { return _LineMaxW; }
-		ucstring		getOverflowText()	const { return _OverflowText; }
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring		getOverflowTextAsUtf16()	const { return _OverflowText; } // Compatibility
+#endif
 		bool			getMultiLine() const		{ return _MultiLine; }
 		sint			getMultiLineSpace()	const	{ return _MultiLineSpace; }
 		bool			getMultiLineMaxWOnly()	const	{ return _MultiLineMaxWOnly; }
@@ -174,8 +188,11 @@ namespace NLGUI
 		/// From a line number, get the character at which it ends (not including any '\n' ), or -1 if invalid
 		void getLineEndIndex(uint line, sint &index, bool &endOfPreviousLine) const;
 
-		std::string getHardText() const { std::string result; _Text.toString (result); return result; }
-		void        setHardText (const std::string &ht);
+		std::string getHardText() const { return _HardText.empty() ? _Text : _HardText; }
+		void        setHardText (const std::string &ht); //< Localizes strings starting with "ui"
+#ifdef RYZOM_LUA_UCSTRING
+		void		setHardTextAsUtf16(const ucstring &ht); // Compatibility
+#endif
 
 		std::string getColorAsString() const;
 		void        setColorAsString(const std::string &ht);
@@ -188,9 +205,15 @@ namespace NLGUI
 
 		/** Setup a Text with Format Tags. Text is store without color/format tags, and special array is allocated for Format association
 		 */
-		void	setTextFormatTaged(const ucstring &text);
+		void	setTextFormatTaged(const std::string &text);
+#ifdef RYZOM_LUA_UCSTRING
+		void	setTextFormatTagedAsUtf16(const ucstring &text); // Compatibility
+#endif
 
-		void	setSingleLineTextFormatTaged(const ucstring &text);
+		void	setSingleLineTextFormatTaged(const std::string &text);
+#ifdef RYZOM_LUA_UCSTRING
+		void	setSingleLineTextFormatTagedAsUtf16(const ucstring &text); // Compatibility
+#endif
 
 		// Remove end space
 		void removeEndSpaces();
@@ -216,10 +239,17 @@ namespace NLGUI
 		int luaSetLineMaxW(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CViewText, CViewBase)
-			REFLECT_STRING("hardtext", getHardText, setHardText);
-			REFLECT_UCSTRING("uc_hardtext", getText, setText);
-			REFLECT_UCSTRING("uc_hardtext_format", getText, setTextFormatTaged);
-			REFLECT_UCSTRING("uc_hardtext_single_line_format", getText, setSingleLineTextFormatTaged);
+			REFLECT_BOOL("localize", isLocalized, setLocalized);
+			REFLECT_STRING("hardtext", getHardText, setHardText); // Same as text, but localize is implicitly set true
+			REFLECT_STRING("text", getText, setText);
+			REFLECT_STRING("text_format", getText, setTextFormatTaged);
+			REFLECT_STRING("text_single_line_format", getText, setSingleLineTextFormatTaged);
+#ifdef RYZOM_LUA_UCSTRING
+			// REFLECT_UCSTRING("uc_text", getTextAsUtf16, setTextAsUtf16); // Deprecate uc_ functions
+			REFLECT_UCSTRING("uc_hardtext", getHardTextAsUtf16, setHardTextAsUtf16); // Compatibility
+			REFLECT_UCSTRING("uc_hardtext_format", getTextAsUtf16, setTextFormatTagedAsUtf16); // Compatibility
+			REFLECT_UCSTRING("uc_hardtext_single_line_format", getTextAsUtf16, setSingleLineTextFormatTagedAsUtf16); // Compatibility
+#endif
 			REFLECT_STRING ("color", getColorAsString, setColorAsString);
 			REFLECT_RGBA ("color_rgba", getColorRGBA, setColorRGBA);
 			REFLECT_SINT32 ("alpha", getAlpha, setAlpha);
@@ -228,7 +258,6 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("setLineMaxW", luaSetLineMaxW);
 		REFLECT_EXPORT_END
 
-
 		virtual void serial(NLMISC::IStream &f);
 
 		// Sets the parent element
@@ -236,9 +265,12 @@ namespace NLGUI
 		void setParentElm( CInterfaceElement *parent ){ _ParentElm = parent; }
 
 	protected:
-		std::string _HardtextFormat;
 		/// Text to display.
-		ucstring _Text;
+		std::string _HardTextFormat;
+		std::string _HardText;
+		std::string _Text;
+		mutable sint _TextLength;
+		bool _Localized;
 		/// index of the computed String associated to this text control
 		uint _Index;
 		/// info on the computed String associated to this text control
@@ -253,8 +285,8 @@ namespace NLGUI
 		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
 		float	_FontWidth;
 		// strings to use when computing font size
-		ucstring _FontSizingChars;
-		ucstring _FontSizingFallback;
+		std::string _FontSizingChars;
+		std::string _FontSizingFallback;
 		// height of the font in pixel.
 		// use getFontHeight
 		float	_FontHeight;
@@ -278,7 +310,7 @@ namespace NLGUI
 		sint32		_LineMaxW;
 		/// For single line, true if the text is clamped (ie displayed with "...")
 		bool		_SingleLineTextClamped;
-		ucstring	_OverflowText;
+		std::string	_OverflowText;
 
 		/// Multiple lines handling
 		bool		 _MultiLine;
@@ -339,7 +371,7 @@ namespace NLGUI
 			public:
 				// default ctor
 				CWord(uint numSpaces = 0) : Index(0), NumSpaces(numSpaces) {}
-				ucstring							Text;
+				std::string							Text;
 				uint								Index; // index of the info for this word
 				NL3D::UTextContext::CStringInfo		Info;
 				uint								NumSpaces; // number of spaces before this word
@@ -347,7 +379,7 @@ namespace NLGUI
 				CFormatInfo							Format;
 			public:
 				// build from a string, using the current text context
-				void build(const ucstring &text, NL3D::UTextContext &textContext, uint numSpaces= 0);
+				void build(const std::string &text, NL3D::UTextContext &textContext, uint numSpaces= 0);
 		};
 		typedef std::vector<CWord> TWordVect;
 
@@ -360,7 +392,7 @@ namespace NLGUI
 				// Clear the line & remove text contexts
 				void clear(NL3D::UTextContext &textContext);
 				// Add a new word (and its context) in the line + a number of spaces to append at the end of the line
-				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext);
+				void	addWord(const std::string &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext);
 				void    addWord(const CWord &word, float fontWidth);
 				uint	getNumWords() const { return (uint)_Words.size(); }
 				CWord   &getWord(uint index) { return _Words[index]; }
@@ -434,15 +466,17 @@ namespace NLGUI
 		void setup ();
 		void setupDefault ();
 
-		void setStringSelectionSkipingSpace(uint stringId, const ucstring &text, sint charStart, sint charEnd);
+		void setTextLocalized(const std::string &text);
 
-	//	void pushString(const ucstring &str, bool deleteSpaceAtStart = false);
+		void setStringSelectionSkipingSpace(uint stringId, const std::string &text, sint charStart, sint charEnd);
+
+	//	void pushString(const ucstring &str, bool deleteSpaceAtStart = false); // OLD
 
 		/// \from CInterfaceElement
 		void onInvalidateContent();
 
 		// may append a new line, and append a word to the last line (no spaces)
-		void flushWordInLine(ucstring &ucCurrentWord, bool &linePushed, const CFormatInfo &wordFormat);
+		void flushWordInLine(std::string &ucCurrentWord, bool &linePushed, const CFormatInfo &wordFormat);
 		// Clear all the lines and free their datas
 		void clearLines();
 		// Update in the case of a multiline text
@@ -456,7 +490,7 @@ namespace NLGUI
 		void	addDontClipWordLine(std::vector<CWord> &currLine);
 
 		// FormatTag build.
-		static void		buildFormatTagText(const ucstring &text, ucstring &textBuild, std::vector<CFormatTag> &formatTags, std::vector<ucstring> &tooltips);
+		static void		buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CFormatTag> &formatTags, std::vector<std::string> &tooltips);
 		// FormatTag parsing.
 		bool			isFormatTagChange(uint textIndex, uint ctIndex) const;
 		void			getFormatTagChange(uint textIndex, uint &ctIndex, CFormatInfo &wordFormat) const;

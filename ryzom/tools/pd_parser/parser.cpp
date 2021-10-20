@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -99,16 +99,16 @@ string	xmlSpecialChars(string str)
 
 string	getFullStdPathNoExt(const string &path)
 {
-	string	dir = NLMISC::toLower(NLMISC::CFile::getPath(path));
-	string	file = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(path));
+	string	dir = NLMISC::toLowerAscii(NLMISC::CFile::getPath(path));
+	string	file = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(path));
 
 	return dir.empty() ? file : NLMISC::CPath::standardizePath(dir)+file;
 }
 
 string	getFullStdPath(const string &path)
 {
-	string	dir = NLMISC::toLower(NLMISC::CFile::getPath(path));
-	string	file = NLMISC::toLower(NLMISC::CFile::getFilename(path));
+	string	dir = NLMISC::toLowerAscii(NLMISC::CFile::getPath(path));
+	string	file = NLMISC::toLowerAscii(NLMISC::CFile::getFilename(path));
 
 	return dir.empty() ? file : NLMISC::CPath::standardizePath(dir)+file;
 }
@@ -258,7 +258,7 @@ bool	CDbNode::epilog()
 	setEnv("db", Name);
 
 	string	fullfile = getFullStdPathNoExt(MainFile.empty() ? Name : MainFile);
-	string	filename = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fullfile));
+	string	filename = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(fullfile));
 
 	setEnv("filename", filename);
 	setEnv("fullfilename", fullfile);
@@ -788,14 +788,14 @@ void	CDbNode::generateLogContent()
 // get file path from this file
 string	CDbNode::getFileNoExtPath(const std::string& file)
 {
-	string	thisPath = NLMISC::CFile::getPath(NLMISC::toLower(getDbFile()));
-	string	filePath = NLMISC::CFile::getPath(NLMISC::toLower(file));
-	string	fileName = NLMISC::CFile::getFilename(NLMISC::toLower(file));
+	string	thisPath = NLMISC::CFile::getPath(NLMISC::toLowerAscii(getDbFile()));
+	string	filePath = NLMISC::CFile::getPath(NLMISC::toLowerAscii(file));
+	string	fileName = NLMISC::CFile::getFilename(NLMISC::toLowerAscii(file));
 
 	if (thisPath == filePath)
 		return CFile::getFilenameWithoutExtension(fileName);
 	else
-		return CPath::standardizePath(filePath)+CFile::getFilenameWithoutExtension(NLMISC::toLower(file));
+		return CPath::standardizePath(filePath)+CFile::getFilenameWithoutExtension(NLMISC::toLowerAscii(file));
 }
 
 
@@ -825,7 +825,7 @@ bool	CFileNode::generateProlog()
 	if (!db->Description.empty())
 		Hpp << db->Description << "\n";
 
-	string	filename = NLMISC::toLower(CFile::getFilenameWithoutExtension(Name));
+	string	filename = NLMISC::toLowerAscii(CFile::getFilenameWithoutExtension(Name));
 
 	setEnv("fullfilename", getFullStdPathNoExt(Name));
 	setEnv("filename", filename);
@@ -870,7 +870,7 @@ bool	CFileNode::generateProlog()
 	if (SeparatedFlag)
 	{
 		string	fullfile = getFullStdPathNoExt(db->MainFile.empty() ? db->Name : db->MainFile);
-		string	filename = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fullfile));
+		string	filename = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(fullfile));
 		Hpp << "#include \"" << filename << ".h\"\n";
 		Hpp << "\n";
 	}
@@ -920,7 +920,7 @@ bool	CFileNode::generateEpilog()
 	CDbNode*	db = getDbNode();
 
 	string	fullfile = getFullStdPathNoExt(Name);
-	string	filename = NLMISC::toLower(CFile::getFilenameWithoutExtension(Name));
+	string	filename = NLMISC::toLowerAscii(CFile::getFilenameWithoutExtension(Name));
 
 	Hpp.indent();
 	Hpp << "\n} // End of " << db->Name <<"\n";
@@ -948,14 +948,14 @@ bool	CFileNode::generateEpilog()
 
 string	CFileNode::getFileNoExtPath(const string& file)
 {
-	string	thisPath = NLMISC::CFile::getPath(NLMISC::toLower(Name));
-	string	filePath = NLMISC::CFile::getPath(NLMISC::toLower(file));
-	string	fileName = NLMISC::CFile::getFilename(NLMISC::toLower(file));
+	string	thisPath = NLMISC::CFile::getPath(NLMISC::toLowerAscii(Name));
+	string	filePath = NLMISC::CFile::getPath(NLMISC::toLowerAscii(file));
+	string	fileName = NLMISC::CFile::getFilename(NLMISC::toLowerAscii(file));
 
 	if (thisPath == filePath)
 		return CFile::getFilenameWithoutExtension(fileName);
 	else
-		return CFile::getFilenameWithoutExtension(NLMISC::toLower(file));
+		return CFile::getFilenameWithoutExtension(NLMISC::toLowerAscii(file));
 }
 
 void	CFileNode::writeFile()
@@ -1301,7 +1301,7 @@ bool	CEnumNode::generateContent()
 	gen.add("{");
 	gen.add("return Unknown;");
 	gen.add("}");
-	gen.add("const std::map<std::string, "+Name+">::const_iterator\tit = _ValueMap.find(NLMISC::toLower(v));");
+	gen.add("const std::map<std::string, "+Name+">::const_iterator\tit = _ValueMap.find(NLMISC::toLowerAscii(v));");
 	gen.add("if (it == _ValueMap.end())");
 	gen.add("{");
 	gen.add("nlwarning(\""+Name+"::toString(): string '%s' is not matched, 'Unknown' enum value returned\", v.c_str());");
@@ -1318,7 +1318,7 @@ bool	CEnumNode::generateContent()
 	gen.add("for (i=0; i<"+toString(Values.size())+"; ++i)");
 	gen.add("{");
 	gen.add("_StrTable["+Name+"Convert[i].Value] = "+Name+"Convert[i].Name;");
-	gen.add("_ValueMap[NLMISC::toLower(std::string("+Name+"Convert[i].Name))] = "+Name+"Convert[i].Value;");
+	gen.add("_ValueMap[NLMISC::toLowerAscii(std::string("+Name+"Convert[i].Name))] = "+Name+"Convert[i].Value;");
 	gen.add("}");
 
 	gen.add("_Initialised = true;");

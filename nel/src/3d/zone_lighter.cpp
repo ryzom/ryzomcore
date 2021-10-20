@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -350,7 +350,7 @@ void setCPUMask (IThread *thread, uint process)
 		}
 
 		// Set the CPU mask
-		thread->setCPUMask (1<<i);
+		// thread->setCPUMask (1<<i);
 	}
 }
 
@@ -379,7 +379,7 @@ public:
 	void run()
 	{
 		// Set the CPU mask
-		setCPUMask (Thread, _Process);
+		// setCPUMask (Thread, _Process);
 
 		_ZoneLighter->processCalc (_Process, *_Description);
 		_ZoneLighter->_ProcessExitedMutex.enter();
@@ -624,7 +624,7 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 void NL3D::CRenderZBuffer::run()
 {
 	// Set the CPU mask
-	setCPUMask (Thread, _Process);
+	// setCPUMask (Thread, _Process);
 
 	// Span array
 	CPolygon2D::TRasterVect borders;
@@ -927,7 +927,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	// Backup thread mask
 	IThread *currentThread = IThread::getCurrentThread ();
 	uint64 threadMask = currentThread->getCPUMask();
-	currentThread->setCPUMask (1);
+	// currentThread->setCPUMask (1);
 
 	// Calc the ray basis
 	_SunDirection=description.SunDirection;
@@ -1219,7 +1219,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	}
 
 	// Reset old thread mask
-	currentThread->setCPUMask (threadMask);
+	// currentThread->setCPUMask (threadMask);
 
 	// overflow ?
 	if (_ZBufferOverflow)

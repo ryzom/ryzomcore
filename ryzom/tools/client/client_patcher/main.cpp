@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
 	INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
 
 	// check if console supports colors
-	std::string term = toLower(std::string(getenv("TERM") ? getenv("TERM"):""));
+	std::string term = toLowerAscii(std::string(getenv("TERM") ? getenv("TERM"):""));
 	useEsc = (term.find("xterm") != string::npos || term.find("linux") != string::npos);
 
 #ifdef NL_OS_WINDOWS
@@ -293,15 +293,15 @@ int main(int argc, char *argv[])
 	printf("\n");
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
 	printf("Using '%s/%s.version'\n", ClientCfg.ConfigFile.getVar("PatchUrl").asString().c_str(),
-		ClientCfg.ConfigFile.getVar("Application").asString().c_str());
+	ClientCfg.ConfigFile.getVar("Application").asString().c_str());
 
 	// use PatchUrl
 	vector<string> patchURLs;
 	pPM->init(patchURLs, ClientCfg.ConfigFile.getVar("PatchUrl").asString(), "");
 	pPM->startCheckThread(true /* include background patchs */);
 
-	ucstring state;
-	vector<ucstring> log;
+	string state;
+	vector<string> log;
 	bool res = false;
 	bool finished = false;
 
@@ -377,6 +377,7 @@ int main(int argc, char *argv[])
 		try
 		{
 			// move downloaded files to final location
+			// batch file will not be created
 			pPM->createBatchFile(pPM->getDescFile(), false, false);
 			CFile::createEmptyFile("show_eula");
 
@@ -407,17 +408,20 @@ int main(int argc, char *argv[])
 			printError(convert(CI18N::get("uiErrPatchApply")) + " " + error);
 			return 1;
 		}
-
-		pPM->executeBatchFile();
 	}
 
-/*
-	// Start Scanning
-	pPM->startScanDataThread();
-
-	// request to stop the thread
-	pPM->askForStopScanDataThread();
-*/
+	// upgd_nl.sh will normally take care of the permissions
+	//
+	// for linux/macOS (no-op on windows)
+	// Set for current executable (might be 'dev' version),
+	// and also 'ryzom_client_patcher' directly (from patched files)
+	CFile::setExecutable(Args.getProgramPath() + Args.getProgramName());
+	CFile::setExecutable("ryzom_client_patcher");
+	// other
+	CFile::setExecutable("crash_report");
+	CFile::setExecutable("ryzom_client");
+	CFile::setExecutable("ryzom_installer_qt");
+	CFile::setExecutable("ryzom_configuration_qt");
 
 	return 0;
 }

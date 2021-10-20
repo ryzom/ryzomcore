@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -104,7 +104,7 @@ bool getXYFromZoneName(sint32 &x, sint32 &y, const string &zoneName)
 	}
 	if (xStr.size() != 2)
 		goto Fail;
-	xStr = NLMISC::toUpper(xStr);
+	xStr = NLMISC::toUpperAscii(xStr);
 	x = ((xStr[0] - 'A') * 26 + (xStr[1] - 'A'));
 	return true;
 Fail:

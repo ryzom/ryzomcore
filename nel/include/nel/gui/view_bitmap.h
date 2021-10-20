@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -28,6 +28,7 @@
 
 namespace NLGUI
 {
+	class ICurlDownloadCB;
 
 	/**
 	 * class implementing a bitmap view
@@ -61,7 +62,7 @@ namespace NLGUI
 			_TxtHeight = -1;
 
 			// Support for https://.. textures
-			_HtmlDownload = false;
+			_HtmlDownload = NULL;
 		}
 
 		/// Destructor
@@ -141,7 +142,9 @@ namespace NLGUI
 		bool	_Flip           : 1;
 		bool	_Tile           : 1;
 		bool	_InheritGCAlpha : 1;
-		bool	_HtmlDownload   : 1;
+
+		// pointer to active curl download object
+		ICurlDownloadCB *_HtmlDownload;
 
 		// For single texture
 

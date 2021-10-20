@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -56,7 +57,7 @@ CViewText *CDBGroupListSheetMission::CSheetChildMission::createViewText() const
 	CViewTextIDFormated *vti = new CViewTextIDFormated(CViewBase::TCtorParam());
 	if (Ctrl) vti->setDBLeaf(dynamic_cast<CCDBNodeLeaf *>(Ctrl->getRootBranch()->getNode(ICDBNode::CTextId("TEXT"))));
 	else vti->setDBLeaf(NULL);
-	vti->setFormatString(ucstring("$t"));
+	vti->setFormatString("$t");
 	return vti;
 }
 

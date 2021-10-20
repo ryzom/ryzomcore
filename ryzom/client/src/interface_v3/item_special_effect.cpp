@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -51,8 +54,8 @@ void CItemSpecialEffectHelper::registerItemSpecialEffect(const string &name)
 	vector<string> params;
 
 	// get ui string
-	ucstring ucs = CI18N::get("uiItemFX_" + name);
-	CSString p, s = ucs.toString();
+	string ucs = CI18N::get("uiItemFX_" + name);
+	CSString p, s = ucs;
 
 	// locate and store parameters
 	// %p : percent
@@ -66,7 +69,7 @@ void CItemSpecialEffectHelper::registerItemSpecialEffect(const string &name)
 		{
 			string tmp = "%";
 			tmp += s[0];
-			if (s.size() >=2 && isdigit(s[1]))
+			if (s.size() >=2 && (uint8)s[1] < (uint8)'\x80' && isdigit(s[1]))
 				tmp += s[1];
 			params.push_back(tmp);
 		}
@@ -76,11 +79,11 @@ void CItemSpecialEffectHelper::registerItemSpecialEffect(const string &name)
 	effectMap.insert(make_pair(name, params));
 }
 
-void CItemSpecialEffectHelper::getItemSpecialEffectText(const CItemSheet *pIS, ucstring &itemText)
+void CItemSpecialEffectHelper::getItemSpecialEffectText(const CItemSheet *pIS, string &itemText)
 {
 	// check if some effects are present on this item
 	bool firstEffect = false;
-	ucstring effects;
+	string effects;
 	effects += getEffect(pIS->getEffect1(), firstEffect);
 	effects += getEffect(pIS->getEffect2(), firstEffect);
 	effects += getEffect(pIS->getEffect3(), firstEffect);
@@ -92,16 +95,16 @@ void CItemSpecialEffectHelper::getItemSpecialEffectText(const CItemSheet *pIS, u
 	strFindReplace(itemText, "%special_effects", effects);
 }
 
-ucstring CItemSpecialEffectHelper::getEffect(const std::string &effect, bool &first)
+string CItemSpecialEffectHelper::getEffect(const std::string &effect, bool &first)
 {
-	ucstring result;
+	string result;
 	CSString eff = effect;
 
 	if (eff.empty())
 		return result;
 
 	// Get name id of effect
-	CSString name = toUpper(eff.splitTo(':', true));
+	CSString name = toUpperAscii(eff.splitTo(':', true));
 
 	// Extract parameters from sheet
 	vector<CSString> params;

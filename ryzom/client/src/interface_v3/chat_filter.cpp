@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -170,7 +171,7 @@ void CChatInputFilter::chatWindowRemoved(CChatWindow *cw)
 }
 
 //=============================================================================================================
-void CChatInputFilter::displayMessage(const ucstring &msg, NLMISC::CRGBA col, uint numBlinks /*=0*/, bool *windowVisible)
+void CChatInputFilter::displayMessage(const string &msg, NLMISC::CRGBA col, uint numBlinks /*=0*/, bool *windowVisible)
 {
 	bool windowVisibleTmp = false;
 	std::vector<CChatWindow *>::iterator it;
@@ -187,10 +188,9 @@ void CChatInputFilter::displayMessage(const ucstring &msg, NLMISC::CRGBA col, ui
 }
 
 //=============================================================================================================
-void CChatInputFilter::displayTellMessage(/*TDataSetIndex &receiverIndex, */const ucstring &msg, const ucstring &sender, NLMISC::CRGBA col, uint numBlinks /*=0*/,bool *windowVisible /*=NULL*/)
+void CChatInputFilter::displayTellMessage(/*TDataSetIndex &receiverIndex, */const string &msg, const string &sender, NLMISC::CRGBA col, uint numBlinks /*=0*/,bool *windowVisible /*=NULL*/)
 {
-	ucstring senderLwr;
-	senderLwr.fromUtf8(NLMISC::toLower(sender.toUtf8()));
+	string senderLwr = NLMISC::toLower(sender);
 
 	// look in people lists
 	std::vector<CPeopleList *>::iterator peopleListIt;
@@ -290,7 +290,7 @@ void CChatTargetFilter::setChat(CChatWindow *w)
 }
 
 //=============================================================================================================
-void CChatTargetFilter::msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+void CChatTargetFilter::msgEntered(const string &msg, CChatWindow *chatWindow)
 {
 	// Common Target case
 	if (ClientCfg.Local)
@@ -307,9 +307,9 @@ void CChatTargetFilter::msgEntered(const ucstring &msg, CChatWindow *chatWindow)
 	else if (!_TargetPlayer.empty())
 	{
 		// the target must be a player, make a tell on him
-		ChatMngr.tell(_TargetPlayer.toString(), msg);
+		ChatMngr.tell(_TargetPlayer, msg);
 		// direct output in the chat
-		chatWindow->displayLocalPlayerTell(_TargetPlayer.toString(), msg);
+		chatWindow->displayLocalPlayerTell(_TargetPlayer, msg);
 	}
 	else
 	{
@@ -334,7 +334,7 @@ void CChatTargetFilter::setTargetPartyChat(CChatWindow *w)
 }
 
 //=============================================================================================================
-void CChatTargetFilter::setTargetPlayer(const ucstring &targetPlayer)
+void CChatTargetFilter::setTargetPlayer(const string &targetPlayer)
 {
 	_TargetPlayer = targetPlayer;
 	if (_TargetPartyChat)
@@ -345,7 +345,7 @@ void CChatTargetFilter::setTargetPlayer(const ucstring &targetPlayer)
 	// set the prompt
 	if (_Chat)
 	{
-		_Chat->setPrompt(targetPlayer + (ucchar) '>');
+		_Chat->setPrompt(targetPlayer + '>');
 	}
 }
 
@@ -364,8 +364,7 @@ void CChatTargetFilter::setTargetGroup(CChatGroup::TGroupType groupType, uint32 
 	if (_Chat)
 	{
 		// set the prompt
-		const ucstring prompt("");
-		_Chat->setPrompt(prompt + (ucchar) '>');
+		_Chat->setPrompt(">");
 
 		// set the color
 		string entry="UI:SAVE:CHAT:COLORS:";

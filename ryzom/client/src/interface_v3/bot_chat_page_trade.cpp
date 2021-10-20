@@ -1,9 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -249,7 +250,7 @@ void CBotChatPageTrade::begin()
 	if (gc)
 	{
 		// set the title
-		gc->setUCTitle(_Title);
+		gc->setTitle(_Title);
 		// show the buy mean
 		CInterfaceGroup *money = dynamic_cast<CInterfaceGroup *>(gc->getGroup("money"));
 		if (money) money->setActive((_BuyMean == Money) || (_BuyMean == MoneyFactionPoints));
@@ -333,7 +334,7 @@ uint32 CBotChatPageTrade::getCurrItemQuantity() const
 			CGroupEditBox *ed = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:standard_price:quantity:edit:eb"));
 			if (!ed) return std::numeric_limits<uint32>::max();
 			uint32 intQuantity;
-			if (fromString(ed->getInputString().toString(), intQuantity))
+			if (fromString(ed->getInputString(), intQuantity))
 			{
 				return intQuantity;
 			}
@@ -894,7 +895,7 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 	{
 		confirmButton->setActive( true );
 		// no need any context help because too simple
-		confirmButton->setDefaultContextHelp(ucstring());
+		confirmButton->setDefaultContextHelp(std::string());
 		if(isItem)
 		{
 			CItemSheet * itemSheet = dynamic_cast<CItemSheet*> ( SheetMngr.get( CSheetId( sheet->getSheetId() ) ) );
@@ -1011,7 +1012,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	CViewText *itemNameView = dynamic_cast<CViewText *>(ig->getView("object_name"));
 	if (itemNameView)
 	{
-		ucstring itemName;
+		string itemName;
 		itemName = sheet->getItemActualName();
 		itemNameView->setText(itemName);
 	}
@@ -1678,21 +1679,21 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 		CViewText	*vt= dynamic_cast<CViewText*>(fpGroup->getView("unit_price_header"));
 		if(vt)
 		{
-			ucstring	fmt= CI18N::get("uiUnitFPPrice");
+			string	fmt= CI18N::get("uiUnitFPPrice");
 			strFindReplace(fmt, "%fac", factionName);
 			vt->setText(fmt);
 		}
 		vt= dynamic_cast<CViewText*>(fpGroup->getView("total_price_header"));
 		if(vt)
 		{
-			ucstring	fmt= CI18N::get("uiTotalFPPrice");
+			string	fmt= CI18N::get("uiTotalFPPrice");
 			strFindReplace(fmt, "%fac", factionName);
 			vt->setText(fmt);
 		}
 
 		// setup icon according to pvp clan
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		factionName = NLMISC::toLower(factionName);
+		factionName = NLMISC::toLowerAscii(factionName);
 		string	factionIcon= CWidgetManager::getInstance()->getParser()->getDefine(toString("faction_icon_%s", factionName.c_str()));
 		CViewBitmap		*vBmp= dynamic_cast<CViewBitmap*>(fpGroup->getView("unit_price:item_price:icone"));
 		if(vBmp)	vBmp->setTexture(factionIcon);
@@ -2429,7 +2430,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		// \todo yoyo: for now disable tooltip
-		CWidgetManager::getInstance()->setContextHelpText(ucstring());
+		CWidgetManager::getInstance()->setContextHelpText(std::string());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerBotChatTTItemType, "botchat_tt_item_type");
@@ -2576,11 +2577,11 @@ static DECLARE_INTERFACE_USER_FCT(getPriceWithFame)
 	sint	value= (sint)args[0].getInteger();
 	sint	valueFame= (sint)args[1].getInteger();
 	if(value==-1)
-		result.setUCString(CI18N::get("uiBadPrice"));
+		result.setString(CI18N::get("uiBadPrice"));
 	else if(value==valueFame)
-		result.setUCString(NLMISC::formatThousands(toString(value)));
+		result.setString(NLMISC::formatThousands(toString(value)));
 	else
-		result.setUCString(NLMISC::formatThousands(toString(valueFame)) + " (" + NLMISC::formatThousands(toString(value)) + ")");
+		result.setString(NLMISC::formatThousands(toString(valueFame)) + " (" + NLMISC::formatThousands(toString(value)) + ")");
 
 	return true;
 }
@@ -2596,7 +2597,7 @@ static DECLARE_INTERFACE_USER_FCT(getBonusOnResale)
 	sint	valueHigh= (sint)args[0].getInteger();
 	sint	valueLow= (sint)args[1].getInteger();
 	sint	diff = valueHigh - valueLow;
-	result.setUCString("+" + NLMISC::formatThousands(toString(diff)));
+	result.setString("+" + NLMISC::formatThousands(toString(diff)));
 
 	return true;
 }

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -343,7 +346,7 @@ void		CReqSkillFormula::log(const char *prefix) const
 }
 
 // ***************************************************************************
-void		CReqSkillFormula::getInfoText(ucstring &info) const
+void		CReqSkillFormula::getInfoText(string &info) const
 {
 	info.clear();
 
@@ -363,7 +366,7 @@ void		CReqSkillFormula::getInfoText(ucstring &info) const
 			{
 				const CSkillValue	&sv= *itSv;
 				// get the colored line if the skill don't reach the req level
-				ucstring	line;
+				string	line;
 				if(!isSkillValueTrained(sv))
 					line= CI18N::get("uihelpPhraseRequirementNotMetLine");
 				else

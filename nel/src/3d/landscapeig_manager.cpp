@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -115,7 +118,7 @@ void	CLandscapeIGManager::initIG(UScene *scene, const std::string &igDesc, UDriv
 					if (ig)
 					{
 						// add it to the map.
-						string	tokId= toUpper(string(token));
+						string	tokId= toUpperAscii(string(token));
 						_ZoneInstanceGroupMap[tokId]= CInstanceGroupElement(ig, token);
 
 						// Add a reference on the shapes
@@ -129,7 +132,7 @@ void	CLandscapeIGManager::initIG(UScene *scene, const std::string &igDesc, UDriv
 							_ig.getShapeName(i, shapeName);
 							if (!shapeName.empty ())
 							{
-								if (toLower(CFile::getExtension(shapeName)) != "pacs_prim")
+								if (toLowerAscii(CFile::getExtension(shapeName)) != "pacs_prim")
 								{
 									// Insert a new shape ?
 									if (_ShapeAdded.find(shapeName) == _ShapeAdded.end())
@@ -295,7 +298,7 @@ UInstanceGroup	*CLandscapeIGManager::getIG(const std::string &name) const
 std::string		CLandscapeIGManager::translateName(const std::string &name) const
 {
 	std::string		ret;
-	ret= toUpper(name + ".ig");
+	ret= toUpperAscii(name + ".ig");
 	return ret;
 }
 
@@ -364,7 +367,7 @@ void	CLandscapeIGManager::reloadAllIgs()
 		const	char	*token= bkupIgFileNameList[i].c_str();
 		UInstanceGroup	*ig = UInstanceGroup::createInstanceGroup(token);
 		// add it to the map.
-		string	tokId= toUpper(token);
+		string	tokId= toUpperAscii(token);
 		_ZoneInstanceGroupMap[tokId]= CInstanceGroupElement(ig, token);
 
 		// If was addedToScene before, re-add to scene now.

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -74,7 +77,7 @@ void CPlayerSheet::build(const NLGEORGES::UFormElm &item)
 		debug("Key 'AnimSetBaseName' not found.");
 	// Force the CASE in UPPER to not be CASE SENSITIVE.
 	else
-		AnimSetBaseName = NLMISC::toLower(AnimSetBaseName);
+		AnimSetBaseName = NLMISC::toLowerAscii(AnimSetBaseName);
 
 	// Load Lod character name
 	if(!item.getValueByName(LodCharacterName, "LodCharacterName"))
@@ -240,7 +243,7 @@ void CPlayerSheet::CEquipment::build(const std::string &key,const NLGEORGES::UFo
 	if(!item.getValueByName(itemName, string(key + ".Item").c_str() ))
 		debug(NLMISC::toString("Key '%s.Item' not found.", key.c_str()));
 	else
-		Item = NLMISC::toLower(itemName);
+		Item = NLMISC::toLowerAscii(itemName);
 
 	// Get the color.
 	if(!item.getValueByName(Color, string(key + ".Color").c_str() ))

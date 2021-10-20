@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -176,6 +176,7 @@ struct SOptions : public SExportOptions
 			this->ZFactor = getFloat ("ZFactor1");
 			this->HeightMapFile2 = getStr ("HeightMapFile2");
 			this->ZFactor2 = getFloat ("ZFactor2");
+			this->ExtendCoords = getFloat ("ExtendCoords");
 			this->Light = (uint8)getInt ("ZoneLight");
 			this->CellSize = getFloat ("CellSize");
 			this->Threshold = getFloat ("Threshold");

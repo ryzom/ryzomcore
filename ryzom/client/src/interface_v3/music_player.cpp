@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -326,9 +327,7 @@ void CMusicPlayer::rebuildPlaylist()
 				CViewText *pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_TITLE));
 				if (pVT)
 				{
-					ucstring title;
-					title.fromUtf8(_Songs[i].Title);
-					pVT->setText(title);
+					pVT->setText(_Songs[i].Title);
 				}
 
 				pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_DURATION));
@@ -483,7 +482,7 @@ void CMusicPlayer::updatePlayingInfo(const std::string info)
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
 	if (pVT)
 	{
-		pVT->setText(ucstring::makeFromUtf8(info));
+		pVT->setText(info);
 	}
 }
 
@@ -492,7 +491,7 @@ void CMusicPlayer::clearPlayingInfo()
 {
 	if (_Songs.empty())
 	{
-		updatePlayingInfo(CI18N::get("uiNoFiles").toUtf8());
+		updatePlayingInfo(CI18N::get("uiNoFiles"));
 	}
 	else
 	{
@@ -583,19 +582,26 @@ static void addFromPlaylist(const std::string &playlist, const std::vector<std::
 
 			// id a UTF-8 BOM header is present, parse as UTF-8
 			if (!useUtf8 && lineStr.length() >= 3 && memcmp(line, utf8Header, 3) == 0)
+			{
 				useUtf8 = true;
+				lineStr = trim(std::string(line + 3));
+			}
 
 			if (!useUtf8)
 			{
-				lineStr = ucstring(line).toUtf8();
+				lineStr = NLMISC::mbcsToUtf8(line); // Attempt local codepage first
+				if (lineStr.empty())
+					lineStr = CUtfStringView::fromAscii(std::string(line)); // Fallback
 				lineStr = trim(lineStr);
 			}
+
+			lineStr = CUtfStringView(lineStr).toUtf8(true); // Re-encode external string
 
 			// Not a comment line
 			if (lineStr[0] != '#')
 			{
 				std::string filename = CPath::makePathAbsolute(CFile::getPath(lineStr), basePlaylist) + CFile::getFilename(lineStr);
-				std::string ext = toLower(CFile::getExtension(filename));
+				std::string ext = toLowerAscii(CFile::getExtension(filename));
 				if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 				{
 					if (CFile::fileExists(filename))
@@ -622,9 +628,9 @@ void CMusicPlayer::createPlaylistFromMusic()
 	if (extensions.empty())
 	{
 		// in the very unlikely scenario
-		const ucstring message("Sound driver has no support for music.");
+		static const string message("Sound driver has no support for music.");
 		CInterfaceManager::getInstance()->displaySystemInfo(message, "SYS");
-		nlinfo("%s", message.toUtf8().c_str());
+		nlinfo("%s", message.c_str());
 		return;
 	}
 	std::string newPath = CPath::makePathAbsolute(CPath::standardizePath(ClientCfg.MediaPlayerDirectory), CPath::getCurrentPath(), true);
@@ -632,9 +638,9 @@ void CMusicPlayer::createPlaylistFromMusic()
 	join(extensions, ", ", extlist);
 	extlist += ", m3u, m3u8";
 
-	std::string msg(CI18N::get("uiMk_system6").toUtf8());
+	std::string msg(CI18N::get("uiMk_system6"));
 	msg += ": " + newPath + " (" + extlist + ")";
-	CInterfaceManager::getInstance()->displaySystemInfo(ucstring::makeFromUtf8(msg), "SYS");
+	CInterfaceManager::getInstance()->displaySystemInfo(msg, "SYS");
 	nlinfo("%s", msg.c_str());
 
 	// Recursive scan for files from media directory
@@ -647,7 +653,7 @@ void CMusicPlayer::createPlaylistFromMusic()
 
 	for (i = 0; i < filesToProcess.size(); ++i)
 	{
-		std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
+		std::string ext = toLowerAscii(CFile::getExtension(filesToProcess[i]));
 		if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 		{
 			filenames.push_back(filesToProcess[i]);

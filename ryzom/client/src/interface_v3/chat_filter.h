@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -42,10 +45,10 @@ public:
 	  * Listening windows will blick only if there isnt a single visible listening window, so that the player can know if there's a message
 	  * \param windowVisible is not NULL, points a bool that will be filled with true if one of the window on the which the msg was displayed is visible.
 	  */
-	void displayMessage(const ucstring &msg, NLMISC::CRGBA col, uint numBlinks = 0, bool *windowVisible = NULL);
+	void displayMessage(const std::string &msg, NLMISC::CRGBA col, uint numBlinks = 0, bool *windowVisible = NULL);
 	/** The same as displayMessage, but with sender name, so that the msg will be displayed in attached people lists as well
 	  */
-	void displayTellMessage(/*TDataSetIndex &senderIndex, */const ucstring &msg, const ucstring &sender, NLMISC::CRGBA col, uint numBlinks = 0, bool *windowVisible = NULL);
+	void displayTellMessage(/*TDataSetIndex &senderIndex, */const std::string &msg, const std::string &sender, NLMISC::CRGBA col, uint numBlinks = 0, bool *windowVisible = NULL);
 	/** Clear the messages in all registered chat windows
 	 */
 	void clearMessages();
@@ -134,8 +137,8 @@ public:
 			/** Set a player as the target. This remove any previous window target
 			  * NB : this replace any previous party chat or target group or player
 			  */
-			void			   setTargetPlayer(const ucstring &targetPlayer);
-			const ucstring     &getTargetPlayer() const { return _TargetPlayer; }
+			void			   setTargetPlayer(const std::string &targetPlayer);
+			const std::string     &getTargetPlayer() const { return _TargetPlayer; }
 	//@}
 private:
 
@@ -148,14 +151,14 @@ private:
 	// @{
 		CChatWindow				   *_TargetPartyChat; // the target party chat
 		CChatGroup::TGroupType      _TargetGroup;
-		ucstring					_TargetPlayer;
+		std::string					_TargetPlayer;
 		// relevant only if _TargetGroup==dyn_chat
 		uint32						_TargetDynamicChannelDbIndex;
 	// @}
 private:
 	// from IChatWindowListener
 	void chatWindowRemoved(CChatWindow *cw);
-	void msgEntered(const ucstring &msg, CChatWindow *chatWindow);
+	void msgEntered(const std::string &msg, CChatWindow *chatWindow);
 	// copy not supported
 	CChatTargetFilter(const CChatTargetFilter &/* other */):NLMISC::CRefCount() { nlassert(0); }
 	CChatTargetFilter& operator=(const CChatTargetFilter &/* other */) { nlassert(0); return *this; }

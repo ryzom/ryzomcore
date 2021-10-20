@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -148,7 +148,7 @@ extern bool CharNameValidArrived;
 extern bool CharNameValid;
 bool IsInRingSession = false;
 TSessionId HighestMainlandSessionId; // highest in the position stack
-ucstring lastUniversMessage;
+std::string lastUniversMessage;
 
 extern const char *CDBBankNames[INVALID_CDB_BANK+1];
 
@@ -406,7 +406,7 @@ void impulseUserChars(NLMISC::CBitMemStream &impulse)
 		// if there's a new char for which a key set was wanted, create it now
 		for (uint k = 0; k < CharacterSummaries.size(); ++k)
 		{
-			if (toLower(CharacterSummaries[k].Name) == toLower(NewKeysCharNameValidated))
+			if (toLower(CharacterSummaries[k].Name.toUtf8()) == toLower(NewKeysCharNameValidated))
 			{
 				// first, stripes server name
 				copyKeySet(lookupSrcKeyFile(GameKeySet), "save/keys_" + buildPlayerNameForSaveFile(NewKeysCharNameValidated) + ".xml");
@@ -602,24 +602,24 @@ void impulsePermanentUnban(NLMISC::CBitMemStream &impulse)
 class CInterfaceChatDisplayer : public CClientChatManager::IChatDisplayer
 {
 public:
-	virtual void displayChat(TDataSetIndex compressedSenderIndex, const ucstring &ucstr, const ucstring &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, ucstring &senderName, uint bubbleTimer=0);
-	virtual void displayTell(/*TDataSetIndex senderIndex, */const ucstring &ucstr, const ucstring &senderName);
+	virtual void displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer=0);
+	virtual void displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName);
 	virtual void clearChannel(CChatGroup::TGroupType mode, uint32 dynChatDbIndex);
 
 private:
 	// Add colorization tag for sender name
-	void colorizeSender(ucstring &text, const ucstring &senderName, CRGBA baseColor);
+	void colorizeSender(string &text, const string &senderName, CRGBA baseColor);
 
 };
 static CInterfaceChatDisplayer	InterfaceChatDisplayer;
 
-void CInterfaceChatDisplayer::colorizeSender(ucstring &text, const ucstring &senderName, CRGBA baseColor)
+void CInterfaceChatDisplayer::colorizeSender(string &text, const string &senderName, CRGBA baseColor)
 {
 	// find the sender/text separator to put color tags
-	ucstring::size_type pos = senderName.length() - 1;
-	if (pos != ucstring::npos)
+	string::size_type pos = senderName.length() - 1;
+	if (pos != string::npos)
 	{
-		ucstring str;
+		string str;
 
 		CInterfaceProperty prop;
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
@@ -632,30 +632,30 @@ void CInterfaceChatDisplayer::colorizeSender(ucstring &text, const ucstring &sen
 
 		str += text.substr(pos+1);
 
-		text.swap(str);
+		text = str;
 	}
 }
 
 // display a chat from network to interface
-void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, const ucstring &ucstr, const ucstring &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, ucstring &senderName, uint bubbleTimer)
+void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	ucstring finalString;
+	string finalString;
 	string stringCategory = getStringCategory(ucstr, finalString);
 
 	bool bubbleWanted = true;
 
 	// Subtract rawMessage from ucstr so that the 'sender' part remains.
-	ucstring senderPart = ucstr.luabind_substr(0, ucstr.length() - rawMessage.length());
+	string senderPart = ucstr.substr(0, ucstr.length() - rawMessage.length());
 
 	// search a "{no_bubble}" tag
 	{
-		ucstring::size_type index = finalString.find(ucstring("{no_bubble}"));
+		string::size_type index = finalString.find("{no_bubble}");
 		const size_t tokenSize= 11; // length of "{no_bubble}"
-		if (index != ucstring::npos)
+		if (index != string::npos)
 		{
 			bubbleWanted = false;
-			finalString = finalString.luabind_substr(0, index) + finalString.substr(index+tokenSize,finalString.size());
+			finalString = finalString.substr(0, index) + finalString.substr(index+tokenSize,finalString.size());
 		}
 	}
 
@@ -667,9 +667,9 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		// Remove all {break}
 		for(;;)
 		{
-			ucstring::size_type index = finalString.find(ucstring("{break}"));
-			if (index == ucstring::npos) break;
-			finalString = finalString.luabind_substr(0, index) + finalString.luabind_substr(index+7,finalString.size());
+			string::size_type index = finalString.find("{break}");
+			if (index == string::npos) break;
+			finalString = finalString.substr(0, index) + finalString.substr(index+7,finalString.size());
 		}
 
 		// select DB
@@ -700,7 +700,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		if (!stringCategory.empty() && stringCategory != "SYS")
 		{
 			map<string, CClientConfig::SSysInfoParam>::const_iterator it;
-			it = ClientCfg.SystemInfoParams.find(toLower(stringCategory));
+			it = ClientCfg.SystemInfoParams.find(toLowerAscii(stringCategory));
 			if (it != ClientCfg.SystemInfoParams.end())
 			{
 				col = it->second.Color;
@@ -718,10 +718,10 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		// find the sender/text separator to put color tags
 		if (senderPart.empty() && stringCategory == "emt")
 		{
-			size_t pos = finalString.find(ucstring(": "), 0);
-			if (pos != ucstring::npos)
+			size_t pos = finalString.find(": ", 0);
+			if (pos != string::npos)
 			{
-				senderPart = finalString.luabind_substr(0, pos + 2);
+				senderPart = finalString.substr(0, pos + 2);
 			}
 		}
 		colorizeSender(finalString, senderPart, col);
@@ -731,7 +731,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 	if( !stringCategory.empty() )
 	{
 		map<string, CClientConfig::SSysInfoParam>::const_iterator it;
-		it = ClientCfg.SystemInfoParams.find( toLower(stringCategory) );
+		it = ClientCfg.SystemInfoParams.find( toLowerAscii(stringCategory) );
 		if( it != ClientCfg.SystemInfoParams.end() )
 		{
 			if( !(*it).second.SysInfoFxName.empty() )
@@ -792,16 +792,16 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 				if (pIM->getLogState())
 				{
 					// Add dyn chan number before string
-					ucstring prefix("[" + NLMISC::toString(dbIndex) + "]");
+					string prefix = "[" + NLMISC::toString(dbIndex) + "]";
 					// Find position to put the new string
 					// After timestamp?
-					size_t pos = finalString.find(ucstring("]"));
-					size_t colonpos = finalString.find(ucstring(": @{"));
+					size_t pos = finalString.find("]");
+					size_t colonpos = finalString.find(": @{");
 					// If no ] found or if found but after the colon (so part of the user chat)
-					if (pos == ucstring::npos || (colonpos < pos))
+					if (pos == string::npos || (colonpos < pos))
 					{
 						// No timestamp, so put it right after the color and add a space
-						pos = finalString.find(ucstring("}"));;
+						pos = finalString.find("}");;
 						prefix += " ";
 					}
 					finalString = finalString.substr(0, pos + 1) + prefix + finalString.substr(pos + 1);
@@ -809,28 +809,28 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 					if (node && node->getValueBool())
 					{
 						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dbIndex);
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						prefix = title.empty() ? ucstring("") : ucstring(" ") + title;
-						pos = finalString.find(ucstring("] "));
+						prefix = (title.empty() ? "" : " ") + title;
+						pos = finalString.find("] ");
 						finalString = finalString.substr(0, pos) + prefix + finalString.substr(pos);
 					}
 				}
 			}
 			else
 			{
-				nlwarning("Dynamic chat %s not found for message: %s", dynChatId.toString().c_str(), finalString.toString().c_str());
+				nlwarning("Dynamic chat %s not found for message: %s", dynChatId.toString().c_str(), finalString.c_str());
 			}
 		}
 		else
 		{
-			ucstring::size_type index = finalString.find(ucstring("<BPFX>"));
-			if (index != ucstring::npos)
+			string::size_type index = finalString.find("<BPFX>");
+			if (index != string::npos)
 			{
 				bubbleWanted = false;
 				finalString = finalString.substr(index+6,finalString.size());
-				ucstring::size_type index2 = finalString.find(ucstring(" "));
-				ucstring playerName;
+				string::size_type index2 = finalString.find(string(" "));
+				string playerName;
 				if (index2 < (finalString.size()-3))
 				{
 					playerName = finalString.substr(0,index2);
@@ -846,7 +846,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 							if (playerName.empty())
 							{
 								senderEntity->removeStateFx();
-								senderEntity->setStateFx(finalString.toString());
+								senderEntity->setStateFx(finalString);
 								nlinfo("empty");
 							}
 							else
@@ -855,7 +855,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 								if (destEntity)
 								{
 									destEntity->removeStateFx();
-									destEntity->setStateFx(finalString.toString());
+									destEntity->setStateFx(finalString);
 									nlinfo("no empty");
 								}
 							}
@@ -882,7 +882,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 
 	// **** Process chat entry for the bubbles
 	// todo hulud : registering a chat callback would be better than calling this hardcoded action handler
-	ucstring finalRawMessage;
+	string finalRawMessage;
 	// remove color qualifier from raw string
 	getStringCategory(rawMessage, finalRawMessage);
 	if (bubbleWanted)
@@ -908,7 +908,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 			channel = "#" + toString((uint32)mode);
 		}
 	}
-	if (!stringCategory.empty() && NLMISC::toUpper(stringCategory) != "SYS")
+	if (!stringCategory.empty() && NLMISC::compareCaseInsensitive(stringCategory.c_str(), "SYS")) // Not empty and not 'SYS'
 	{
 		channel = channel + "/" + stringCategory;
 	}
@@ -918,13 +918,13 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 
 
 // display a tell from network to interface
-void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const ucstring &ucstr, const ucstring &senderName)
+void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName)
 {
 
-	ucstring finalString = ucstr;
+	string finalString = ucstr;
 
 	// for now, '&' are removed by server so use another format	until a special msg is made
-	if (strFindReplace(finalString, ucstring("<R2_INVITE>"), ucstring()))
+	if (strFindReplace(finalString, "<R2_INVITE>", string()))
 	{
 		CLuaManager::getInstance().executeLuaScript("RingAccessPoint:forceRefresh()");
 	}
@@ -934,13 +934,13 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const u
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	bool windowVisible;
 
-	ucstring goodSenderName = CEntityCL::removeTitleAndShardFromName(senderName);
+	string goodSenderName = CEntityCL::removeTitleAndShardFromName(senderName);
 
 	// The sender part is up to and including the first ":" after the goodSenderName
-	ucstring::size_type pos = finalString.find(goodSenderName);
+	string::size_type pos = finalString.find(goodSenderName);
 	pos = finalString.find(':', pos);
 	pos = finalString.find(' ', pos);
-	ucstring senderPart = finalString.substr(0, pos+1);
+	string senderPart = finalString.substr(0, pos+1);
  	colorizeSender(finalString, senderPart, prop.getRGBA());
 
 	PeopleInterraction.ChatInput.Tell.displayTellMessage(/*senderIndex, */finalString, goodSenderName, prop.getRGBA(), 2, &windowVisible);
@@ -1021,7 +1021,7 @@ void inpulseDynStringInChatGroup(NLMISC::CBitMemStream &impulse)
 //	impulse.serialBit(huff);
 //
 //	uint32 index;
-//	ucstring ucstr;
+//	ucstring ucstr; // OLD
 //
 //	impulse.serial( index );
 //	impulse.serial( ucstr );
@@ -1115,15 +1115,15 @@ void setFakeNews ()
 
 			CViewText *inter2 = (CViewText *)inter->getView("title0");
 			nlassert (inter2 != NULL);
-			inter2->setText(ucstring(shortNews[rnd*3]));
+			inter2->setText(ucstring(shortNews[rnd*3])); // OLD
 
 			CViewText *inter3 = (CViewText *)inter->getView("title1");
 			nlassert (inter3 != NULL);
-			inter3->setText(ucstring(shortNews[rnd*3+1]));
+			inter3->setText(ucstring(shortNews[rnd*3+1])); // OLD
 
 			CViewText *inter4 = (CViewText *)inter->getView("title2");
 			nlassert (inter4 != NULL);
-			inter4->setText(ucstring(shortNews[rnd*3+2]));
+			inter4->setText(ucstring(shortNews[rnd*3+2])); // OLD
 		}
 		{ // set test for the neutral main
 			string iname;
@@ -1140,11 +1140,11 @@ void setFakeNews ()
 
 			CViewText *inter2 = (CViewText *)inter->getView("title0");
 			nlassert (inter2 != NULL);
-			inter2->setText(ucstring(shortNews[rnd*3]));
+			inter2->setText(ucstring(shortNews[rnd*3])); // OLD
 
 			CViewText *inter3 = (CViewText *)inter->getView("title1");
 			nlassert (inter3 != NULL);
-			inter3->setText(ucstring(shortNews[rnd*3+1]));
+			inter3->setText(ucstring(shortNews[rnd*3+1])); // OLD
 		}
 		{ // set test for the more news
 			string iname;
@@ -1161,15 +1161,15 @@ void setFakeNews ()
 
 			CViewText *inter2 = (CViewText *)inter->getView("title0");
 			nlassert (inter2 != NULL);
-			inter2->setText(ucstring(longNews[rnd*3]));
+			inter2->setText(ucstring(longNews[rnd*3])); // OLD
 
 			CViewText *inter3 = (CViewText *)inter->getView("title1");
 			nlassert (inter3 != NULL);
-			inter3->setText(ucstring(longNews[rnd*3+1]));
+			inter3->setText(ucstring(longNews[rnd*3+1])); // OLD
 
 			CViewText *inter4 = (CViewText *)inter->getView("title2");
 			nlassert (inter4 != NULL);
-			inter4->setText(ucstring(longNews[rnd*3+2]));
+			inter4->setText(ucstring(longNews[rnd*3+2])); // OLD
 		}
 	}
 }
@@ -1186,7 +1186,7 @@ void setFakeNews ()
 static void setupBotChatChoiceList(CInterfaceGroup *botChatGroup)
 {
 	// Temp for test. Should then be read from server msg
-	std::vector<ucstring> choices;
+	std::vector<string> choices;
 	for(uint k = 0; k < 90; ++k)
 	{
 		choices.push_back("Choice " + toString(k));
@@ -1201,7 +1201,7 @@ static void setupBotChatChoiceList(CInterfaceGroup *botChatGroup)
 /*
 static void setupBotChatDescription(CInterfaceGroup *botChatGroup)
 {
-	ucstring desc;
+	string desc;
 	for(uint k = 0; k < 90; ++k)
 	{
 		desc += "This is a multi line description. ";
@@ -1222,7 +1222,7 @@ static void setupBotChatBotGift(CInterfaceGroup *botChatGroup)
 	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:0:QUALITY")->setValue32(0);
 	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:1:SHEET")->setValue32(CSheetId("fyros_sword_lvl_01_05.item").asInt());
 	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:1:QUALITY")->setValue32(2);
-	CBotChat::setBotGift(botChatGroup, ucstring("Thanks to have succeeded the mission"), ucstring("Here's your reward"), ucstring("The bot has taken the object quest from your inventory"));
+	CBotChat::setBotGift(botChatGroup, "Thanks to have succeeded the mission", "Here's your reward", "The bot has taken the object quest from your inventory");
 }
 */
 
@@ -1533,7 +1533,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 
 	// start progress bar and display background
 	ProgressBar.reset (BAR_STEP_TP);
-	ucstring nmsg("Loading...");
+	string nmsg("Loading...");
 	ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
 
@@ -1588,8 +1588,8 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 
 	R2::TTeleportContext tpContext = R2::TPContext_Unknown;
 
-	ucstring tpReason;
-	ucstring tpCancelText;
+	string tpReason;
+	string tpCancelText;
 
 	try
 	{
@@ -1603,14 +1603,14 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 
 			uint32 size = (uint32)tpInfos.TpReasonParams.size();
 			uint32 first = 0;
-			CSString  str(tpReason.toString());
+			CSString  str(tpReason);
 			for (;first != size ; ++first)
 			{
 				std::string value = tpInfos.TpReasonParams[first];
 				std::string key = NLMISC::toString("%%%u", first +1);
 				str = str.replace( key.c_str(), value.c_str());
 			}
-			tpReason = ucstring(str);
+			tpReason = string(str);
 			tpCancelText = CI18N::get(tpInfos.TpCancelTextId);
 			tpContext = tpInfos.TpContext;
 		}
@@ -1618,16 +1618,16 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 	}
 	catch (const EStream &)
 	{
-		tpReason = ucstring("TP Reason");
-		tpCancelText = ucstring("Cancel TP"); // for test
+		tpReason = "TP Reason";
+		tpCancelText = "Cancel TP"; // for test
 		// try to deduce tp context from current editor mode
 		switch (R2::getEditor().getMode())
 		{
 			case R2::CEditor::EditionMode:
 			case R2::CEditor::NotInitialized:
 				tpContext = R2::TPContext_Unknown;
-				tpReason = ucstring();
-				tpCancelText = ucstring();
+				tpReason = string();
+				tpCancelText = string();
 			break;
 			case R2::CEditor::GoingToDMMode:
 			case R2::CEditor::TestMode:
@@ -1673,7 +1673,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 	//InitMouseWithCursor(oldHardwareCursor);
 
 	// reset 'cancel' button
-	ProgressBar.setTPMessages(ucstring(), ucstring(), "");
+	ProgressBar.setTPMessages(string(), string(), "");
 
 
 	// ProgressBar.enableQuitButton(false); // TMP TMP
@@ -1804,7 +1804,7 @@ void impulseTeamContactInit(NLMISC::CBitMemStream &impulse)
 {
 	vector<uint32> vFriendListName;
 	vector<TCharConnectionState> vFriendListOnline;
-	vector<ucstring> vIgnoreListName;
+	vector<ucstring> vIgnoreListName; // TODO: UTF-8 (serial)
 
 	impulse.serialCont(vFriendListName);
 	uint32 nbState;
@@ -2131,7 +2131,7 @@ void impulseWhere(NLMISC::CBitMemStream &impulse)
 
 	sprintf(buf,"Your server position is : X= %g   Y= %g   Z= %g",xf,yf,zf);
 	nlinfo(buf);
-	CInterfaceManager::getInstance()->displaySystemInfo(ucstring(buf));
+	CInterfaceManager::getInstance()->displaySystemInfo(buf);
 }// impulseWhere //
 
 //-----------------------------------------------
@@ -2142,9 +2142,9 @@ void impulseWhere(NLMISC::CBitMemStream &impulse)
 void impulseWho(NLMISC::CBitMemStream &impulse)
 {
 	nlinfo("impulseWho Received");
-	CInterfaceManager::getInstance()->displaySystemInfo(ucstring("Players currently in the game :"));
+	CInterfaceManager::getInstance()->displaySystemInfo("Players currently in the game :");
 
-	ucstring name;
+	ucstring name; // OLD
 	uint32 loginId;
 	uint16 dist;
 	uint8 dirshort;
@@ -2182,7 +2182,7 @@ void impulseWho(NLMISC::CBitMemStream &impulse)
 		};
 
 		str = toString (" - uid %d - distance %hu meters - direction ", loginId, dist);
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring(name + ucstring(str) + CI18N::get(txts[direction])));
+		CInterfaceManager::getInstance()->displaySystemInfo(name + str + CI18N::get(txts[direction]));
 	}
 }// impulseWho //
 */
@@ -2191,9 +2191,9 @@ void impulseWho(NLMISC::CBitMemStream &impulse)
 void impulseWhoGM(NLMISC::CBitMemStream &impulse)
 {
 	nlinfo("impulseWhoGM Received");
-	CInterfaceManager::getInstance()->displaySystemInfo(ucstring("Players currently in the game :"));
+	CInterfaceManager::getInstance()->displaySystemInfo("Players currently in the game :");
 
-	ucstring name;
+	ucstring name; // OLD
 	uint32 loginId;
 	uint16 dist;
 	uint8 dirshort;
@@ -2231,7 +2231,7 @@ void impulseWhoGM(NLMISC::CBitMemStream &impulse)
 		};
 
 		str = toString (" - uid %d - distance %hu meters - direction ", loginId, dist);
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring(name + ucstring(str) + CI18N::get(txts[direction])));
+		CInterfaceManager::getInstance()->displaySystemInfo(name + str + CI18N::get(txts[direction]));
 	}
 }// impulseWho //
 */
@@ -2305,11 +2305,9 @@ void impulsePhraseSend(NLMISC::CBitMemStream &impulse)
 void impulseStringResp(NLMISC::CBitMemStream &impulse)
 {
 	uint32 stringId;
-	string	strUtf8;
+	string	str;
 	impulse.serial(stringId);
-	impulse.serial(strUtf8);
-	ucstring str;
-	str.fromUtf8(strUtf8);
+	impulse.serial(str);
 
 	if (PermanentlyBanned) return;
 
@@ -2502,7 +2500,7 @@ void impulseRemoteAdmin (NLMISC::CBitMemStream &impulse)
 	impulse.serial (cmd);
 
 	// remove the 2 first rc character if exists, only there to say to the EGS that is a remote command
-	if (cmd.size()>2 && tolower(cmd[0])=='r' && tolower(cmd[1])=='c')
+	if (cmd.size()>2 && tolower(cmd[0])=='r' && tolower(cmd[1])=='c') // FIXME: toLowerAscii
 		cmd = cmd.substr(2);
 
 	mdDisplayVars.clear ();
@@ -3123,12 +3121,12 @@ void impulsePVPChooseClan(NLMISC::CBitMemStream &impulse)
 	CCtrlTextButton * butClan1 = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_clan_proposal:content:clan1"));
 	if( butClan1 == NULL )
 		return;
-	butClan1->setText( ucstring(EGSPD::CPeople::toString( clan1 )) );
+	butClan1->setText( EGSPD::CPeople::toString( clan1 ) );
 
 	CCtrlTextButton * butClan2 = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_clan_proposal:content:clan2"));
 	if( butClan2 == NULL )
 		return;
-	butClan2->setText( ucstring(EGSPD::CPeople::toString( clan2 )) );
+	butClan2->setText( EGSPD::CPeople::toString( clan2 ) );
 }
 */
 
@@ -3276,8 +3274,8 @@ private:
 		STRING_MANAGER::CStringManagerClient		*pSMC= STRING_MANAGER::CStringManagerClient::instance();
 
 		// get the content string (should have been received!)
-		ucstring	contentStr;
-		ucstring	titleStr;
+		string	contentStr;
+		string	titleStr;
 		if(!pSMC->getDynString(_TextId[ContentType], contentStr))
 			return;
 
@@ -3304,8 +3302,8 @@ private:
 			}
 			if(i != digitMaxEnd)
 			{
-				ucstring web_app = contentStr.substr(digitStart, i-digitStart);
-				contentStr = ucstring(ClientCfg.WebIgMainDomain + "/") + web_app + ucstring("/index.php?") + contentStr.substr((size_t)i + 1);
+				string web_app = contentStr.substr(digitStart, i-digitStart);
+				contentStr = string(ClientCfg.WebIgMainDomain + "/") + web_app + string("/index.php?") + contentStr.substr((size_t)i + 1);
 			}
 			else
 			{
@@ -3326,8 +3324,8 @@ private:
 			if(i!=digitMaxEnd)
 			{
 				// get the width
-				ucstring	digitStr= contentStr.substr(digitStart, i-digitStart);
-				fromString(digitStr.toString(), w);
+				string	digitStr= contentStr.substr(digitStart, i-digitStart);
+				fromString(digitStr, w);
 				// remove the first tag
 				contentStr= contentStr.substr(i+1);
 			}
@@ -3339,7 +3337,7 @@ private:
 		if (is_webig)
 		{
 			CGroupHTML *groupHtml;
-			string group = titleStr.toString();
+			string group = titleStr;
 			// <missing:XXX>
 			group = group.substr(9, group.size()-10);
 			groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:"+group+":content:html"));
@@ -3362,7 +3360,7 @@ private:
 					{
 						if (group == "webig")
 							pGC->setActive(true);
-						string url = contentStr.toString();
+						string url = contentStr;
 						addWebIGParams(url, true);
 						groupHtml->browse(url.c_str());
 						CWidgetManager::getInstance()->setTopWindow(pGC);
@@ -3398,7 +3396,7 @@ private:
 
 public:
 	// called when the string is available
-	virtual void onDynStringAvailable(uint stringId, const ucstring &value)
+	virtual void onDynStringAvailable(uint stringId, const std::string &value)
 	{
 		// don't care if already displayed
 		if(_AlreadyDisplayed)
@@ -3473,7 +3471,7 @@ void impulseCombatFlyingHpDelta(NLMISC::CBitMemStream &impulse)
 	CRGBA color((uint8)(rgba>>24&255), (uint8)(rgba>>16&255), (uint8)(rgba>>8&255), (uint8)(rgba&255));
 	CEntityCL *entity = EntitiesMngr.getEntityByCompressedIndex(entityID);
 	if (entity)
-		entity->addHPOutput(ucstring(toString("%d", hpDelta)), color);
+		entity->addHPOutput(toString("%d", hpDelta), color);
 }
 
 void impulseCombatFlyingTextItemSpecialEffectProc(NLMISC::CBitMemStream &impulse)
@@ -3487,7 +3485,7 @@ void impulseCombatFlyingTextItemSpecialEffectProc(NLMISC::CBitMemStream &impulse
 	impulse.serial(effect);
 	impulse.serial(param);
 	CRGBA color((uint8)(rgba>>24&255), (uint8)(rgba>>16&255), (uint8)(rgba>>8&255), (uint8)(rgba&255));
-	ucstring text = CI18N::get(toString("uiItemSpecialEffectFlyingText%s", ITEM_SPECIAL_EFFECT::toString((ITEM_SPECIAL_EFFECT::TItemSpecialEffect)effect).c_str()));
+	string text = CI18N::get(toString("uiItemSpecialEffectFlyingText%s", ITEM_SPECIAL_EFFECT::toString((ITEM_SPECIAL_EFFECT::TItemSpecialEffect)effect).c_str()));
 	strFindReplace(text, "%param", toString("%d", param));
 	CEntityCL *entity = EntitiesMngr.getEntityByCompressedIndex(entityID);
 	if (entity)
@@ -3503,7 +3501,7 @@ void impulseCombatFlyingText(NLMISC::CBitMemStream &impulse)
 	COMBAT_FLYING_TEXT::TCombatFlyingText type = (COMBAT_FLYING_TEXT::TCombatFlyingText)tmp;
 
 	CRGBA color(255, 255, 255);
-	ucstring text("");
+	string text("");
 	float dt = 0.0f;
 
 	switch (type)
@@ -4214,7 +4212,7 @@ std::string				WebServer;
 NLMISC_COMMAND(localTellTeam, "Temp : simulate a tell in local mode", "<people_name> <msg>")
 {
 	if (args.empty()) return false;
-	ucstring player = args[0];
+	string player = args[0];
 	std::string msg;
 	if (args.size() >= 2)
 	{
@@ -4225,7 +4223,7 @@ NLMISC_COMMAND(localTellTeam, "Temp : simulate a tell in local mode", "<people_n
 		}
 	}
 	TDataSetIndex dsi = INVALID_DATASET_INDEX;
-	InterfaceChatDisplayer.displayChat(dsi, ucstring(msg), ucstring(msg), CChatGroup::team, NLMISC::CEntityId::Unknown, player);
+	InterfaceChatDisplayer.displayChat(dsi, msg, msg, CChatGroup::team, NLMISC::CEntityId::Unknown, player);
 	return true;
 }
 
@@ -4233,7 +4231,7 @@ NLMISC_COMMAND(localTellTeam, "Temp : simulate a tell in local mode", "<people_n
 NLMISC_COMMAND(localTell, "Temp : simulate a tell in local mode", "<people_name> <msg>")
 {
 	if (args.empty()) return false;
-	ucstring player = args[0];
+	string player = args[0];
 	std::string msg;
 	if (args.size() >= 2)
 	{
@@ -4244,7 +4242,7 @@ NLMISC_COMMAND(localTell, "Temp : simulate a tell in local mode", "<people_name>
 		}
 	}
 //	TDataSetIndex dsi = INVALID_DATASET_ROW;
-	InterfaceChatDisplayer.displayTell(/*dsi, */ucstring(msg), player);
+	InterfaceChatDisplayer.displayTell(/*dsi, */msg, player);
 	return true;
 }
 
@@ -4350,7 +4348,7 @@ NLMISC_COMMAND(testDuelInvite, "","")
 //{
 //	uint32 index;
 //	fromString(args[0], index);
-//	ucstring ucstr = args[1];
+//	ucstring ucstr = args[1]; // OLD
 //
 //	vector<bool> code;
 //

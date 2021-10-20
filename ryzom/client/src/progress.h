@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -64,7 +67,7 @@ public:
 	void			finish ();
 
 	// New message
-	void			newMessage (const ucstring& message);
+	void			newMessage (const std::string& message);
 
 	void			setFontFactor(float f);
 
@@ -72,7 +75,7 @@ public:
 	bool			ApplyTextCommands;
 
 	// Set teleport specific message
-	void			setTPMessages(const ucstring &tpReason, const ucstring &tpCancelText, const std::string &iconName);
+	void			setTPMessages(const std::string &tpReason, const std::string &tpCancelText, const std::string &iconName);
 
 	bool			getTPCancelFlag(bool clearFlag = true);
 
@@ -83,7 +86,7 @@ private:
 
 	// Display a text to describe what is the application going to do.
 	// this function can be call even if texture is NULL, driver or textcontext not initialised
-	ucstring		_ProgressMessage;
+	std::string		_ProgressMessage;
 
 	// Time since last update
 	sint64			_LastUpdate;
@@ -92,8 +95,8 @@ private:
 	uint			_CurrentRootStep;
 	uint			_RootStepCount;
 
-	ucstring		_TPReason;
-	ucstring		_TPCancelText;
+	std::string		_TPReason;
+	std::string		_TPCancelText;
 
 	bool			_TPCancelFlag;
 

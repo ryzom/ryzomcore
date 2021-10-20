@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -458,7 +458,7 @@ void CSnapshotToolDlg::OnGo()
 			CString wildCard;
 			m_Filters.GetText(l, wildCard);
 			wildCard.MakeLower();
-			if (testWildCard(toLower(NLMISC::CFile::getFilename(files[k])).c_str(), tStrToUtf8(wildCard).c_str()))
+			if (testWildCard(toLowerAscii(NLMISC::CFile::getFilename(files[k])).c_str(), tStrToUtf8(wildCard).c_str()))
 			{
 				_FilteredFiles.push_back(files[k]);
 				break;

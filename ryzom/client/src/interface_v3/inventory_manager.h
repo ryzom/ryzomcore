@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -520,7 +521,7 @@ struct SSortStruct
 {
 	CDBGroupListSheetText::CSheetChild	*SheetText;
 	CDBGroupListSheet::CSheetChild		*SheetIcon;
-	ucstring Pos;
+	std::string Pos;
 	bool operator < (const SSortStruct &o) const { return Pos < o.Pos; }
 };
 
@@ -558,7 +559,7 @@ struct SBagOptions
 	bool SearchFilterChanged;
 	uint16 SearchQualityMin;
 	uint16 SearchQualityMax;
-	std::vector<ucstring> SearchFilter;
+	std::vector<std::string> SearchFilter;
 
 	// -----------------------
 	SBagOptions()
@@ -576,7 +577,7 @@ struct SBagOptions
 	bool isSomethingChanged(); // From last call ?
 
 	bool isSearchFilterChanged() const { return SearchFilterChanged; }
-	void setSearchFilter(const ucstring &s);
+	void setSearchFilter(const std::string &s);
 
 	bool getFilterArmor() const
 	{
@@ -674,7 +675,7 @@ public:
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) { return _BO.canDisplay(pCS); }
 
-	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
+	void setSearchFilter(const std::string &s) { _BO.setSearchFilter(s); }
 
 private:
 
@@ -707,7 +708,7 @@ public:
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) const { return _BO.canDisplay(pCS); }
 
-	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
+	void setSearchFilter(const std::string &s) { _BO.setSearchFilter(s); }
 
 	//////////////////////////////////////////////////////////////////////////
 

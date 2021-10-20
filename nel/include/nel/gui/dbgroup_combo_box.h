@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -60,13 +60,19 @@ namespace NLGUI
 
 		// Combo Texts
 		void			resetTexts();
-		void			addText(const ucstring &text);
-		void			setText(uint i, const ucstring &text);
-		void			insertText(uint i, const ucstring &text);
-		const ucstring	&getText(uint i) const;
+		void			addText(const std::string &text);
+		void			setText(uint i, const std::string &text);
+		void			insertText(uint i, const std::string &text);
+		const std::string	&getText(uint i) const;
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring	getTextAsUtf16(uint i) const; // Compatibility
+#endif
 		uint			getTextId(uint i) const;
 		uint			getTextPos(uint nId) const;
-		const ucstring	&getTexture(uint i) const;
+		const std::string	&getTexture(uint i) const;
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring	getTextureAsUtf16(uint i) const; // Compatibility
+#endif
 		void			setGrayed(uint i, bool g);
 		bool			getGrayed(uint i) const;
 		void			removeText(uint nPos);
@@ -87,11 +93,15 @@ namespace NLGUI
 		std::string		getSelectionText() const;
 
 		// view text
-		void			setViewText(const ucstring & text);
-		ucstring		getViewText() const;
+		void			setViewText(const std::string & text);
+		std::string		getViewText() const;
+#ifdef RYZOM_LUA_UCSTRING
+		void			setViewTextAsUtf16(const ucstring &text) { setViewText(text.toUtf8()); } // Compatibility
+		ucstring		getViewTextAsUtf16() const; // Compatibility
+#endif
 		CViewText		*getViewText();
 
-		void			setTexture(uint i, const ucstring &texture);
+		void			setTexture(uint i, const std::string &texture);
 
 		sint32	evalContentWidth() const;
 
@@ -122,7 +132,11 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("resetTexts", luaResetTexts)
 			REFLECT_SINT32 ("selectionNb", getSelectionNb, setSelectionNb)
 			REFLECT_STRING ("selection_text", getSelectionText, setSelectionText)
-			REFLECT_UCSTRING ("view_text", getViewText, setViewText)
+#ifdef RYZOM_LUA_UCSTRING
+			REFLECT_UCSTRING ("view_text", getViewTextAsUtf16, setViewTextAsUtf16) // Compatibility
+#else
+			REFLECT_STRING ("view_text", getViewText, setViewText)
+#endif
 		REFLECT_EXPORT_END
 
 
@@ -137,8 +151,8 @@ namespace NLGUI
 		// sint32
 		CInterfaceProperty		_Selection;
 		sint32					_NotLinkedToDBSelection;
-		std::vector<std::pair<uint, ucstring> >	_Texts;
-		std::vector<ucstring>	_Textures;
+		std::vector<std::pair<uint, std::string> >	_Texts;
+		std::vector<std::string>	_Textures;
 		std::vector<bool>	_Grayed;
 
 		// Action Handler called on combo click
@@ -155,7 +169,7 @@ namespace NLGUI
 		CCtrlBaseButton			*_SelectButton;
 
 		bool					_IsExternViewText;
-		ucstring				_ExternViewText;
+		std::string				_ExternViewText;
 
 
 	private:

@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -30,6 +30,7 @@
 #include "nel/misc/async_file_manager.h"
 #include "nel/misc/system_utils.h"
 #include "nel/misc/streamed_package_manager.h"
+#include "nel/web/http_package_provider.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/fxaa.h"
@@ -42,6 +43,7 @@
 #include "nel/3d/u_visual_collision_manager.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/stereo_hmd.h"
+#include "nel/3d/async_file_manager_3d.h"
 // Client
 #include "global.h"
 #include "release.h"
@@ -488,7 +490,9 @@ void releaseMainLoop(bool closeConnection)
 // Called when Quit from OutGame
 void releaseOutGame()
 {
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
+#endif
 
 	ProgressBar.release();
 
@@ -569,8 +573,12 @@ void release()
 	{
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_GameExit, "login_step_game_exit&play_time=" + toString((NLMISC::CTime::getLocalTime() - StartPlayTime) / 1000)));
 	}
+	
+	setCrashCallback(NULL);
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
+#endif
 
 	ProgressBar.release();
 
@@ -623,6 +631,9 @@ void release()
 		// Release effects
 		delete FXAA; FXAA = NULL;
 		CBloomEffect::releaseInstance();
+
+		// Release texture
+		endLoading();
 
 		// Release Scene, textcontexts, materials, ...
 		Driver->release();
@@ -696,6 +707,7 @@ void release()
 	CIXml::releaseLibXml();
 	CHttpCache::release();
 	CStrictTransportSecurity::release();
+	CAsyncFileManager3D::releaseInstance();
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");

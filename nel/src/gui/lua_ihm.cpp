@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -100,11 +100,13 @@ using namespace NLMISC;
 #define new DEBUG_NEW
 #endif
 
+#ifdef RYZOM_LUA_UCSTRING
 // declare ostream << operator for ucstring -> registration of ucstring iin luabind will build a 'tostring' function from it
 std::ostream &operator<<(std::ostream &str, const ucstring &value)
 {
 	return str << value.toString();
 }
+#endif
 
 namespace NLGUI
 {
@@ -172,6 +174,7 @@ namespace NLGUI
 		return true;
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	bool CLuaIHM::pop(CLuaState &ls,   ucstring &dest)
 	{
@@ -224,6 +227,7 @@ namespace NLGUI
 		obj.pushvalue();
 	#endif
 	}
+#endif
 
 	// ***************************************************************************
 	// ***************************************************************************
@@ -689,6 +693,7 @@ namespace NLGUI
 				.def_readwrite("A",    &NLMISC::CRGBA::A)
 		];
 
+#ifdef RYZOM_LUA_UCSTRING
 		// ucstring
 		module(L)
 		[
@@ -709,6 +714,7 @@ namespace NLGUI
 				.def("toString",   (std::string(ucstring::*)()const)&ucstring::toString)
 				//.def(self + other<ucstring>())
 		];
+#endif
 
 		// CVector2f
 		module(L)
@@ -1145,34 +1151,8 @@ namespace NLGUI
 				ls.push(value.getDouble());
 				break;
 			case CInterfaceExprValue::String:
-				{
-					ucstring	ucstr= value.getUCString();
-					// Yoyo: dynamically decide whether must return a string or a ucstring
-					bool	mustUseUCString= false;
-					for (uint i = 0; i < ucstr.size (); i++)
-					{
-						if (ucstr[i] > 255)
-						{
-							mustUseUCString= true;
-							break;
-						}
-					}
-					// push a ucstring?
-					if(mustUseUCString)
-					{
-	#if LUABIND_VERSION > 600
-						luabind::detail::push(ls.getStatePointer(), ucstr);
-	#else
-						luabind::object obj(ls.getStatePointer(), ucstr);
-						obj.pushvalue();
-	#endif
-					}
-					else
-					{
-						ls.push(ucstr.toString());
-					}
-					break;
-				}
+				ls.push(value.getString());
+				break;
 			case CInterfaceExprValue::RGBA:
 				{
 					CRGBA color = value.getRGBA();
@@ -1305,6 +1285,7 @@ namespace NLGUI
 		return 1;
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	int CLuaIHM::isUCString(CLuaState &ls)
 	{
@@ -1339,6 +1320,7 @@ namespace NLGUI
 		CLuaIHM::push(ls, result);
 		return 1;
 	}
+#endif
 
 	// ***************************************************************************
 	int CLuaIHM::concatString(CLuaState &ls)
@@ -1430,6 +1412,7 @@ namespace NLGUI
 			case CReflectedProperty::String:
 				ls.push( (reflectedObject.*(property.GetMethod.GetString))() );
 			break;
+#ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCString:
 			{
 				ucstring str = (reflectedObject.*(property.GetMethod.GetUCString))();
@@ -1452,6 +1435,7 @@ namespace NLGUI
 	#endif
 			}
 			break;
+#endif
 			case CReflectedProperty::StringRef:
 				ls.push( (reflectedObject.*(property.GetMethod.GetStringRef))() );
 			break;
@@ -1526,6 +1510,7 @@ namespace NLGUI
 					(target.*(property.SetMethod.SetString))(val);
 					return;
 				}
+#ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCString:
 			case CReflectedProperty::UCStringRef:
 				{
@@ -1537,6 +1522,7 @@ namespace NLGUI
 						ls.toString(stackIndex,    str);
 						val= str;
 					}
+#ifdef RYZOM_LUA_UCSTRING
 					else
 					{
 						// else this should be a ucstring
@@ -1545,9 +1531,11 @@ namespace NLGUI
 							throw ELuaIHMException("You must set a string,    number or ucstring to UI property '%s'",    property.Name.c_str());
 						}
 					}
+#endif
 					(target.*(property.SetMethod.SetUCString))(val);
 					return;
 				}
+#endif
 			case CReflectedProperty::RGBA:
 				{
 					CRGBA color;
@@ -1657,8 +1645,10 @@ namespace NLGUI
 		ls.registerFunc("getWindowSize",    getWindowSize);
 		ls.registerFunc("getTextureSize", getTextureSize);
 		ls.registerFunc("disableModalWindow", disableModalWindow);
+#ifdef RYZOM_LUA_UCSTRING
 		ls.registerFunc("isUCString", isUCString);
 		ls.registerFunc("concatUCString", concatUCString);
+#endif
 		ls.registerFunc("concatString", concatString);
 		ls.registerFunc("tableToString", tableToString);
 		ls.registerFunc("getCurrentWindowUnder", getCurrentWindowUnder);
@@ -1691,7 +1681,11 @@ namespace NLGUI
 		// inside i18n table
 		luabind::module(L, "i18n")
 		[
+#ifdef RYZOM_LUA_UCSTRING
+			luabind::def("get", &CI18N::getAsUtf16), // Compatibility
+#else
 			luabind::def("get", &CI18N::get),
+#endif
 			luabind::def("hasTranslation", &CI18N::hasTranslation)
 		];
 		// inside 'nlfile' table
@@ -1869,6 +1863,7 @@ namespace NLGUI
 		return ret;
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const ucstring &search,   const ucstring &replace)
 	{
@@ -1880,23 +1875,23 @@ namespace NLGUI
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const std::string &search,   const std::string &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring(search),   ucstring(replace));
+		return findReplaceAll(str,   ucstring::makeFromUtf8(search),   ucstring::makeFromUtf8(replace));
 	}
 
 	// ***************************************************************************
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const std::string &search,   const ucstring &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring(search),   ucstring(replace));
+		return findReplaceAll(str,   ucstring::makeFromUtf8(search),  replace);
 	}
 
 	// ***************************************************************************
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const ucstring &search,   const std::string &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring(search),   ucstring(replace));
+		return findReplaceAll(str,   search,   ucstring::makeFromUtf8(replace));
 	}
-
+#endif
 
 	// ***************************************************************************
 	void CLuaIHM::fails(CLuaState &ls, const char *format, ...)
@@ -1983,6 +1978,7 @@ namespace NLGUI
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void CLuaIHM::checkArgTypeUCString(CLuaState &ls, const char *funcName, uint index)
 	{
@@ -1999,7 +1995,7 @@ namespace NLGUI
 			fails(ls, "%s : argument %d of expected type ucstring has bad type : %s",   funcName,   index,   ls.getTypename(ls.type(index)),   ls.type(index));
 		}
 	}
-
+#endif
 
 
 	// ***************************************************************************

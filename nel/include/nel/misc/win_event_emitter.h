@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -36,7 +37,7 @@ namespace NLMISC {
 class CWinEventEmitter : public IEventEmitter
 {
 public:
-	CWinEventEmitter () : _MouseEventsEnabled(true), _KeyboardEventsEnabled(true), _IMEEventsEnabled(true)
+	CWinEventEmitter () : _Utf16Pair(0), _MouseEventsEnabled(true), _KeyboardEventsEnabled(true), _IMEEventsEnabled(true)
 	{
 		_HWnd=NULL;
 		resetButtonFlagState ();
@@ -106,6 +107,7 @@ public:
 private:
 	CWinEventServer		_InternalServer;
 	HWND				_HWnd;
+	wchar_t				_Utf16Pair;
 public:
 	// private: may need to be in sync with direct input flags however...
 	bool				_CtrlButton;

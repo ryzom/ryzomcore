@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -204,7 +205,7 @@ namespace NLGUI
 		if (!_Initialized)
 		{
 			// String result
-			ucstring result;
+			string result;
 
 			if( textProvider != NULL )
 			{
@@ -218,8 +219,8 @@ namespace NLGUI
 			// Remove all {break}
 			for(;;)
 			{
-				ucstring::size_type index = result.find (ucstring("{break}"));
-				if (index == ucstring::npos) break;
+				string::size_type index = result.find("{break}");
+				if (index == string::npos) break;
 				result = result.substr (0, index) + result.substr(index+7, result.size());
 			}
 
@@ -228,14 +229,16 @@ namespace NLGUI
 			while(NLMISC::strFindReplace(result,   "{ros_exit}",   ""));
 
 			// Modify the text?
-			if(_StringModifier)
+			if (_StringModifier)
+			{
 				_StringModifier->onReceiveTextId(result);
+			}
 
 			// Set the Text
 			if(_IsTextFormatTaged)
 				setTextFormatTaged(result);
 			else
-				setText (result);
+				setText(result);
 		}
 		CViewText::checkCoords();
 	}

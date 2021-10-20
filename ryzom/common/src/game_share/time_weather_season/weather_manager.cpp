@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -35,7 +38,7 @@ void CWeatherManager::init(const std::vector<const CWeatherSetupSheetBase *> &sh
 	{
 		if (sheets[k])
 		{
-			std::string id = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(sheetNames[k]));
+			std::string id = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(sheetNames[k]));
 			CWeatherSetup *ws = newWeatherSetup();
 			if (ws)
 			{
@@ -70,7 +73,7 @@ void CWeatherManager::release()
 //================================================================================================
 const CWeatherSetup *CWeatherManager::getSetup(const char *name) const
 {
-	std::string id = NLMISC::toLower(CFile::getFilenameWithoutExtension(name));
+	std::string id = NLMISC::toLowerAscii(CFile::getFilenameWithoutExtension(name));
 	TWeatherSetupMap::const_iterator it = _WeatherSetupMap.find(id);
 	if (it == _WeatherSetupMap.end()) return NULL;
 	return it->second;

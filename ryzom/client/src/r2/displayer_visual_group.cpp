@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -73,10 +74,10 @@ public:
 		return CCtrlPolygon::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
 	}
 	// tooltip
-	virtual void		getContextHelp(::ucstring &help) const
+	virtual void		getContextHelp(std::string &help) const
 	{
-		help = Instance.getDisplayName();
-		if (std::operator==(help, NLMISC::CI18N::get("uiR2EDNoName") ))
+		help = Instance.getDisplayName().toUtf8();
+		if (help == NLMISC::CI18N::get("uiR2EDNoName"))
 			help.clear();
 	}
 	bool				emptyContextHelp() const { return true; }
@@ -98,7 +99,7 @@ protected:
 	{
 		CGroupMap *gm = CTool::getWorldMap();
 		if (!gm) dest = CVector::Null;
-		gm->worldToWindow(dest, src);
+		else gm->worldToWindow(dest, src);
 	}
 };
 
@@ -122,10 +123,10 @@ public:
 		return CCtrlQuad::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
 	}
 	// tooltip
-	virtual void		getContextHelp(ucstring &help) const
+	virtual void		getContextHelp(std::string &help) const
 	{
-		help = Instance.getDisplayName();
-		if (std::operator==(help, NLMISC::CI18N::get("uiR2EDNoName")))
+		help = Instance.getDisplayName().toUtf8();
+		if (help == NLMISC::CI18N::get("uiR2EDNoName"))
 			help.clear();
 	}
 	bool				emptyContextHelp() const { return true; }

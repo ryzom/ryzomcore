@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -33,32 +34,31 @@ NLMISC_REGISTER_OBJECT(CViewBase, CViewTextIDFormated, std::string, "text_id_for
 namespace NLGUI
 {
 
-	std::string CViewTextIDFormated::getProperty( const std::string &name ) const
+	std::string CViewTextIDFormated::getProperty(const std::string &name) const
 	{
-		if( name == "format" )
+		if (name == "format")
 		{
-			return getFormatString().toString();
+			return getFormatString();
 		}
 		else
-		return CViewTextID::getProperty( name );
+			return CViewTextID::getProperty(name);
 	}
 
-
-	void CViewTextIDFormated::setProperty( const std::string &name, const std::string &value )
+	void CViewTextIDFormated::setProperty(const std::string &name, const std::string &value)
 	{
-		if( name == "format" )
+		if (name == "format")
 		{
-			setFormatString( value );
+			setFormatString(value);
 			return;
 		}
 		else
-			CViewTextID::setProperty( name, value );
+			CViewTextID::setProperty(name, value);
 	}
 
-	xmlNodePtr CViewTextIDFormated::serialize( xmlNodePtr parentNode, const char *type ) const
+	xmlNodePtr CViewTextIDFormated::serialize(xmlNodePtr parentNode, const char *type) const
 	{
-		xmlNodePtr node = CViewTextID::serialize( parentNode, type );
-		if( node == NULL )
+		xmlNodePtr node = CViewTextID::serialize(parentNode, type);
+		if (node == NULL)
 			return NULL;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_id_formated" );
@@ -73,9 +73,9 @@ namespace NLGUI
 		if (!CViewTextID::parse(cur, parentGroup)) return false;
 		CXMLAutoPtr prop((const char*) xmlGetProp( cur, (xmlChar*)"format" ));
 		if (prop)
-			setFormatString(ucstring((const char *) prop));
+			setFormatString((const char *)prop);
 		else
-			setFormatString(ucstring("$t"));
+			setFormatString("$t");
 		return true;
 	}
 
@@ -90,15 +90,15 @@ namespace NLGUI
 
 		if (!_Initialized)
 		{
-			ucstring result, formatedResult;
+			std::string result, formatedResult;
 			bool bValid;
 
 			if( CViewTextID::getTextProvider() == NULL )
 			{
 				if(!_DBPath.empty())
-					result = ucstring(_DBPath);
+					result = _DBPath;
 				else
-					result = ucstring("Text ID = " + NLMISC::toString(_TextId));
+					result = "Text ID = " + NLMISC::toString(_TextId);
 				bValid = true;
 			}
 			else
@@ -118,12 +118,13 @@ namespace NLGUI
 	}
 
 	// ****************************************************************************
-	void CViewTextIDFormated::setFormatString(const ucstring &format)
+	void CViewTextIDFormated::setFormatString(const std::string &format)
 	{
 		_Initialized = false;
-		_FormatString = format;
-		if ( (_FormatString.size()>2) && (_FormatString[0] == 'u') && (_FormatString[1] == 'i'))
-			_FormatString = NLMISC::CI18N::get (format.toString());
+		if (NLMISC::startsWith(format, "ui"))
+			_FormatString = NLMISC::CI18N::get(format);
+		else
+			_FormatString = format;
 	}
 
 }

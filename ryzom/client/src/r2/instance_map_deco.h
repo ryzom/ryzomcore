@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -91,7 +92,7 @@ private:
 	private:
 		CInstance			&_Instance;
 	protected:
-		virtual void		getContextHelp(ucstring &help) const;
+		virtual void		getContextHelp(std::string &help) const;
 		bool				emptyContextHelp() const { return true; }
 		bool				wantInstantContextHelp() const { return true; }
 		virtual	bool		isCapturable() const { return false; }

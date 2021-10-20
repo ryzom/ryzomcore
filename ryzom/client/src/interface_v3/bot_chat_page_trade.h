@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -72,7 +73,7 @@ public:
 	// set the buy mean (must be called before 'begin' is called)
 	void		 setBuyMean(TBuyMean buyMean) { _BuyMean = buyMean; }
 	// set the title of the window (actually applied when 'begin' is called)
-	void		 setTitle(const ucstring &title) { _Title = title; }
+	void		 setTitle(const std::string &title) { _Title = title; }
 	// update the 'buy' dialog window for the given sphrase sheet (the player has changed an equipped weapon => action stats change)
 	void		 updateSPhraseBuyDialog();
 	// invalidate window coords
@@ -134,7 +135,7 @@ private:
 	uint32						_CurrItemInventory;
 	bool						_BuyOnly;
 	TBuyMean					_BuyMean;
-	ucstring					_Title;
+	std::string					_Title;
 	bool						_ResaleEdit;
 	bool						_QuantityEdit;
 	sint32						_QuantityCheck;

@@ -1,5 +1,8 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -56,7 +59,7 @@ bool keepFile (const std::string &fileName)
 	uint i;
 	bool ifPresent = false;
 	bool ifTrue = false;
-	string file = toLower(CFile::getFilename (fileName));
+	string file = toLowerAscii(CFile::getFilename (fileName));
 	for (i=0; i<WildCards.size(); i++)
 	{
 		if (WildCards[i].Not)
@@ -100,7 +103,7 @@ bool packSubRecurse(const std::string &srcDirectory)
 	// check for files with same name
 	for(uint i = 1, len = pathContent.size(); i < len; ++i)
 	{
-		if (toLower(CFile::getFilename(pathContent[i-1])) == toLower(CFile::getFilename(pathContent[i])))
+		if (toLowerAscii(CFile::getFilename(pathContent[i-1])) == toLowerAscii(CFile::getFilename(pathContent[i])))
 		{
 			nlwarning("File %s is not unique in BNP!", CFile::getFilename(pathContent[i]).c_str());
 			return false;
@@ -138,6 +141,8 @@ int main(int argc, char **argv)
 	args.addArg("o", "output", "destination", "Output directory or file");
 	args.addArg("i", "if", "wildcard", "Add the file if it matches the wilcard (at least one 'if' conditions must be met for a file to be adding)", false);
 	args.addArg("n", "ifnot", "wildcard", "Add the file if it doesn't match the wilcard (all the 'ifnot' conditions must be met for a file to be adding)", false);
+	args.addArg("", "list-verbose", "", "List files using 'pos size name' format");
+	args.addArg("", "extract", "name", "Extract file(s) from BNP into --output");
 	args.addAdditionalArg("input", "Input directory or BNP file depending on command");
 
 	if (!args.parse(argc, argv)) return 1;
@@ -152,7 +157,7 @@ int main(int argc, char **argv)
 		for (uint i = 0; i < filters.size(); ++i)
 		{
 			CWildCard card;
-			card.Expression = toLower(filters[i]);
+			card.Expression = toLowerAscii(filters[i]);
 			card.Not = false;
 			WildCards.push_back(card);
 		}
@@ -163,7 +168,7 @@ int main(int argc, char **argv)
 		for (uint i = 0; i < filters.size(); ++i)
 		{
 			CWildCard card;
-			card.Expression = toLower(filters[i]);
+			card.Expression = toLowerAscii(filters[i]);
 			card.Not = true;
 			WildCards.push_back(card);
 		}
@@ -232,6 +237,60 @@ int main(int argc, char **argv)
 		{
 			printf("%s\n", gBNPHeader.SFiles[i].Name.c_str());
 		}
+
+		return 0;
+	}
+
+	if (args.haveLongArg("list-verbose"))
+	{
+		gBNPHeader.BigFileName = args.getAdditionalArg("input").front();
+
+		// Read header of BNP file
+		if (!gBNPHeader.readHeader()) return -1;
+
+		for (uint i = 0; i < gBNPHeader.SFiles.size(); ++i)
+		{
+			printf("%u %u %s\n", gBNPHeader.SFiles[i].Pos, gBNPHeader.SFiles[i].Size, gBNPHeader.SFiles[i].Name.c_str());
+		}
+
+		return 0;
+	}
+
+	// --extract <name>
+	if (args.haveLongArg("extract") && !args.getLongArg("extract").empty())
+	{
+		std::string bnpName = args.getAdditionalArg("input").front();
+		CBigFile::getInstance().add(bnpName, BF_ALWAYS_OPENED);
+
+		// Output directory or filename
+		if (!args.haveArg("o") || args.getArg("o").empty())
+		{
+			nlerror("Output file or directory not set");
+		}
+
+		std::string srcName = args.getLongArg("extract").front();
+		std::string dstName = args.getArg("o").front();
+		if (CFile::fileExists(dstName) && CFile::isDirectory(dstName))
+		{
+			dstName += "/" + srcName;
+		}
+
+		CIFile inFile;
+		// bnpName without path
+		if (!inFile.open(CFile::getFilename(bnpName) + "@" + srcName))
+		{
+			nlerror("Unable to open '%s' for reading", inFile.getStreamName().c_str());
+		}
+
+		COFile outFile;
+		if (!outFile.open(dstName))
+		{
+			nlerror("Unable to open '%s' for writing", outFile.getStreamName().c_str());
+		}
+
+		std::string buf;
+		inFile.readAll(buf);
+		outFile.serialBuffer((uint8 *)&buf[0], buf.size());
 
 		return 0;
 	}

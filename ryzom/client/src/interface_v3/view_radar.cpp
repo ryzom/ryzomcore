@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2015  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -104,7 +105,7 @@ bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		prop = (char*) xmlGetProp( cur, (xmlChar*)spotTextureNames[i] );
 		if (prop)
 		{
-			txName = toLower((const char *) prop);
+			txName = toLowerAscii((const char *) prop);
 		}
 		_SpotDescriptions[i].TextureId.setTexture(txName.c_str());
 		rVR.getTextureSizeFromId (_SpotDescriptions[i].TextureId, _SpotDescriptions[i].TxW, _SpotDescriptions[i].TxH);
@@ -113,7 +114,7 @@ bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		prop = (char*) xmlGetProp( cur, (xmlChar*)spotMiniTextureNames[i] );
 		if (prop)
 		{
-			txName = toLower((const char *) prop);
+			txName = toLowerAscii((const char *) prop);
 		}
 		_SpotDescriptions[i].MiniTextureId.setTexture(txName.c_str());
 		rVR.getTextureSizeFromId (_SpotDescriptions[i].MiniTextureId, _SpotDescriptions[i].MTxW, _SpotDescriptions[i].MTxH);

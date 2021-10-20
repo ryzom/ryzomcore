@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -43,7 +44,11 @@ inline std::string capitalize(const std::string & s)
 	if ( s.empty() )
 		return s;
 
-	return NLMISC::toUpper( s.substr(0,1) ) + NLMISC::toLower( s.substr(1,std::string::npos) );
+	std::string res;
+	res.reserve(4);
+	ptrdiff_t i = 0;
+	NLMISC::appendToUpper(res, s, i);
+	return res + NLMISC::toLower(s.substr(i));
 }
 
 inline ucstring capitalize(const ucstring & s)
@@ -51,7 +56,8 @@ inline ucstring capitalize(const ucstring & s)
 	if ( s.empty() )
 		return s;
 
-	return NLMISC::toUpper( s.substr(0,1) ) + NLMISC::toLower( s.substr(1,std::string::npos) );
+	// return NLMISC::toUpper( s.substr(0,1) ) + NLMISC::toLower( s.substr(1,std::string::npos) );
+	return ucstring::makeFromUtf8(capitalize(s.toUtf8()));
 }
 
 

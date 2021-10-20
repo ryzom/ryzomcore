@@ -57,13 +57,15 @@ CBufNetBase::CBufNetBase() :
 #ifdef MUTEX_DEBUG
 	initAcquireTimeMap();
 #endif
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	_IsDataAvailablePipeSelfManaged = isDataAvailablePipeSelfManaged;
 	if ( _IsDataAvailablePipeSelfManaged )
 	{
 		if ( ::pipe( _DataAvailablePipeHandle ) != 0 )
 			nlwarning( "Unable to create D.A. pipe" );
 	}
+#elif defined(NL_OS_WINDOWS)
+	_DataAvailableHandle = NULL;
 #endif
 }
 
@@ -99,7 +101,7 @@ void	CBufNetBase::pushMessageIntoReceiveQueue( const std::vector<uint8>& buffer 
 		//mbsize = recvfifo.value().size() / 1048576;
 		setDataAvailableFlag( true );
 	}
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	// Wake-up main thread (outside the critical section of CFifoAccessor, to allow main thread to be
 	// read the fifo; if the main thread sees the Data Available flag is true but the pipe not written
 	// yet, it will block on read()).
@@ -109,6 +111,9 @@ void	CBufNetBase::pushMessageIntoReceiveQueue( const std::vector<uint8>& buffer 
 		nlwarning( "LNETL1: Write pipe failed in pushMessageIntoReceiveQueue" );
 	}
 	//nldebug( "Pipe: 1 byte written (%p)", this );
+#elif defined(NL_OS_WINDOWS)
+	if (_DataAvailableHandle)
+		SetEvent(_DataAvailableHandle);
 #endif
 	//nldebug( "BNB: Released." );
 	//if ( mbsize > 1 )
@@ -131,7 +136,7 @@ void	CBufNetBase::pushMessageIntoReceiveQueue( const uint8 *buffer, uint32 size 
 		//nldebug( "BNB: Pushed, releasing the receive queue..." );
 		//mbsize = recvfifo.value().size() / 1048576;
 		setDataAvailableFlag( true );
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 		// Wake-up main thread
 		uint8 b=0;
 		if ( write( _DataAvailablePipeHandle[PipeWrite], &b, 1 ) == -1 )
@@ -139,6 +144,9 @@ void	CBufNetBase::pushMessageIntoReceiveQueue( const uint8 *buffer, uint32 size 
 			nlwarning( "LNETL1: Write pipe failed in pushMessageIntoReceiveQueue" );
 		}
 		nldebug( "Pipe: 1 byte written" );
+#elif defined(NL_OS_WINDOWS)
+		if (_DataAvailableHandle)
+			SetEvent(_DataAvailableHandle);
 #endif
 	}
 	//nldebug( "BNB: Released." );

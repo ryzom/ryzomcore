@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -14,11 +17,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifdef RYZOM_BG_DOWNLOADER
 #ifndef CL_BG_DOWNLOADER_ACCESS
 #define CL_BG_DOWNLOADER_ACCESS
 
 #include "nel/misc/singleton.h"
-#include "nel/misc/ucstring.h"
+#include "nel/misc/ucstring.h" // OLD
 #include "nel/misc/inter_window_msg_queue.h"
 #include "nel/misc/co_task.h"
 //
@@ -36,7 +40,7 @@ public:
 	void release();
 	// jobs
 	void						startTask(const BGDownloader::CTaskDesc &taskDesc, const std::string &commandLine, bool showDownloader);
-	bool						isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const;
+	bool						isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const; // OLD
 	// The following flag will be true after a 'patch' task has been completed successfully
 	bool						getPatchCompletionFlag(bool clearFlag);
 	//
@@ -50,7 +54,7 @@ public:
 	//
 	void update(); // call this at each frame to update the download process
 	// Get last displayed message by the background downloader
-	const ucstring				&getCurrentMessage() const { return _CurrentMessage; }
+	const ucstring				&getCurrentMessage() const { return _CurrentMessage; } // OLD
 	uint32						getCurrentFilesToGet() const { return _CurrentFilesToGet; }
 	uint32						getTotalFilesToGet() const { return _TotalFilesToGet; }
 	//
@@ -66,17 +70,17 @@ public:
 	bool						isDownloaderUIFrozen() const { return _FrozenUI; }
 	void						requestDownloadThreadPriority(BGDownloader::TThreadPriority newPriority, bool freezeUI);
 
-	const ucstring			    &getLastErrorMessage() const { return _ErrorMsg; }
+	const ucstring			    &getLastErrorMessage() const { return _ErrorMsg; } // OLD
 
 private:
 	enum TState { State_Idle, State_Patching, State_Finished };
 	TState							_State;
 
-	ucstring						_CurrentMessage;
+	ucstring						_CurrentMessage; // OLD
 #ifdef NL_OS_WINDOWS
 	NLMISC::CInterWindowMsgQueue	_DownloaderMsgQueue;
 #endif
-	ucstring						_ErrorMsg;
+	ucstring						_ErrorMsg; // OLD
 	std::string						_CommandLine;
 	BGDownloader::TTaskResult		_TaskResult;
 	uint32							_AvailablePatchs;
@@ -122,7 +126,7 @@ private:
 		void getTaskResult(BGDownloader::TTaskResult &result,
 						   uint32 &availablePatchs,
 						   bool &mustLaunchBatFile,
-						   ucstring &errorMsg
+						   ucstring &errorMsg // OLD
 						  );
 		void getDescFile();
 		BGDownloader::TDownloaderMode getDownloaderMode();
@@ -145,4 +149,5 @@ void pauseBGDownloader();
 void unpauseBGDownloader();
 
 
+#endif
 #endif

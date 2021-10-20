@@ -2,8 +2,8 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -938,7 +938,11 @@ void CTool::setContextHelp(const ucstring &contextHelp)
 	// forward the call to lua (all ui handling done bye lua)
 	CLuaState &ls = getEditor().getLua();
 	CLuaStackChecker lsc(&ls);
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::push(ls, contextHelp);
+#else
+	ls.push(contextHelp.toUtf8());
+#endif
 	getEditor().callEnvMethod("setToolContextHelp", 1, 0);
 }
 

@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -165,11 +165,11 @@ bool setVect(NLMISC::CVector &vectToChange, const NLMISC::CVector &vect, bool co
 
 
 // read color from client cfg system info colors
-NLMISC::CRGBA interpClientCfgColor(const ucstring &src, ucstring &dest);
+NLMISC::CRGBA interpClientCfgColor(const std::string &src, std::string &dest);
 // Get the category from the string (src="&SYS&Who are you?" and dest="Who are you?" and return "SYS"), if no category, return "SYS"
-std::string getStringCategory(const ucstring &src, ucstring &dest, bool alwaysAddSysByDefault = true);
+std::string getStringCategory(const std::string &src, std::string &dest, bool alwaysAddSysByDefault = true);
 // Get the category from the string (src="&SYS&Who are you?" and dest="Who are you?" and return "SYS"), if no category, return ""
-std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest);
+std::string getStringCategoryIfAny(const std::string &src, std::string &dest);
 
 bool getRelativeFloatFromString(const std::string src, float &dst);
 void updateVector(const std::string part, NLMISC::CVector &dst, float value, bool add = false);
@@ -193,8 +193,8 @@ enum TFilter3d
 	RYZOM_MAX_FILTER_3D,
 };
 
-// compare 2 ucstring s0 and s1, without regard to case. give start and size for sequence p0
-sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1);
+// compare 2 ucstring s0 and s1, without regard to case. give start and size for sequence p0 // OLD
+sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1); // OLD
 
 /** Compute a non-continuous noise with uniform repartition in [0, 1], with the given noise object
   * By default repartition is not uniform for noise

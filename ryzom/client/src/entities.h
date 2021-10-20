@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -308,13 +308,13 @@ public:
 	  * \param caseSensitive type of test to perform
 	  * \param complete : if true, the name must match the full name of the entity.
 	  */
-	CEntityCL *getEntityByName (const ucstring &name, bool caseSensitive, bool complete) const;
+	CEntityCL *getEntityByName (const std::string &name, bool caseSensitive, bool complete) const;
 	/**
 	 * Case insensitive match against entity name. All listed keywords must match.
 	 * \param keywords to match
 	 * \param onlySelectable : if true, match only entity that can be selected
 	 */
-	CEntityCL *getEntityByKeywords (const std::vector<ucstring> &keywords, bool onlySelectable) const;
+	CEntityCL *getEntityByKeywords (const std::vector<std::string> &keywords, bool onlySelectable) const;
 	CEntityCL *getEntityBySheetName (const std::string &sheet) const;
 	/// Get an entity by dataset index. Returns NULL if the entity is not found.
 	CEntityCL *getEntityByCompressedIndex(TDataSetIndex compressedIndex) const;

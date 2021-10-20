@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2016-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -708,7 +708,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			// we create the log with service name filename ("test_service_ALIAS.log" for example)
 			string logname = LogDirectory.toString() + _LongName;
 			if (haveArg('N'))
-				logname += "_" + toLower(getArg('N'));
+				logname += "_" + toLowerAscii(getArg('N'));
 			logname += ".log";
 			fd.setParam (logname, false);
 
@@ -956,7 +956,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Load the recording state from the config file
 		if ((var = ConfigFile.getVarPtr ("Rec")) != NULL)
 		{
-			string srecstate = toUpper(var->asString());
+			string srecstate = toUpperAscii(var->asString());
 			if ( srecstate == "RECORD" )
 			{
 				_RecordingState = CCallbackNetBase::Record;

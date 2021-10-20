@@ -1,10 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
 // Copyright (C) 2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -182,6 +182,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		}
 		return 0;
 	}
+
+#ifdef WM_UNICHAR
+	// https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-unichar
+	if (message == WM_UNICHAR)
+		return (wParam == UNICODE_NOCHAR);
+#endif
 
 	return trapMessage ? 0 : DefWindowProcW(hWnd, message, wParam, lParam);
 }
@@ -1074,7 +1080,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	// Set context as thread context
 	CGLSetCurrentContext((CGLContextObj)[_ctx CGLContextObj]);
-	
+
 	_EventEmitter.init(this, _glView, _DestroyWindow);
 
 #elif defined(NL_OS_UNIX)
@@ -3014,12 +3020,12 @@ void CDriverGL::setupApplicationMenu()
 }
 #endif
 
-bool CDriverGL::copyTextToClipboard(const ucstring &text)
+bool CDriverGL::copyTextToClipboard(const std::string &text)
 {
 	return _EventEmitter.copyTextToClipboard(text);
 }
 
-bool CDriverGL::pasteTextFromClipboard(ucstring &text)
+bool CDriverGL::pasteTextFromClipboard(std::string &text)
 {
 	return _EventEmitter.pasteTextFromClipboard(text);
 }

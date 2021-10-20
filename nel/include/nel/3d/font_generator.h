@@ -1,5 +1,8 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -33,7 +36,7 @@ typedef struct FT_FaceRec_* FT_Face;
 
 #include "nel/misc/types_nl.h"
 #include <string>
-
+#include <vector>
 
 namespace NL3D {
 
@@ -64,17 +67,17 @@ public:
 	 * \param height height of the generated bitmap, this value is set by this function
 	 * \param pitch pitch of the generated bitmap (+ or - the number of bytes per row), this value is set by this function
 	 */
-	uint8	*getBitmap (ucchar c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex);
+	uint8	*getBitmap (u32char c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex);
 
 	/** returns the width and height of a character using a specific size and
 	 *
 	 * \warning this function is not very fast (but faster than getBitmap()) because it has to load the char before.
 	 */
-	void	getSizes (ucchar c, uint32 size, uint32 &width, uint32 &height);
+	void	getSizes (u32char c, uint32 size, uint32 &width, uint32 &height);
 
-	void	getKerning (ucchar left, ucchar right, sint32 &kernx);
+	void	getKerning (u32char left, u32char right, sint32 &kernx);
 
-	uint32	getCharIndex (ucchar c);
+	uint32	getCharIndex (u32char c);
 
 	uint32	getUID() { return _UID; }
 
@@ -85,6 +88,7 @@ private:
 	static uint32 _FontGeneratorCounterUID;
 	uint32			_UID;
 	std::string		_FontFileName;
+	std::vector<std::string> _FontFileNames;
 
 #ifndef NL_DONT_USE_EXTERNAL_CODE
 	const char			*getFT2Error(FT_Error fte);
@@ -92,7 +96,7 @@ private:
 	static FT_Library	_Library;
 	static uint			_LibraryInit;
 
-	FT_Face				_Face;
+	std::vector<FT_Face> _Faces;
 #else // NL_DONT_USE_EXTERNAL_CODE
 
 #endif // NL_DONT_USE_EXTERNAL_CODE

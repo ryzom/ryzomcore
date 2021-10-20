@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -761,17 +762,17 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 				uint32 textID = (uint32) _MissionOption[k]->getValue32();
 				if (textID)
 				{
-					ucstring result;
+					string result;
 					bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 					if (!res)
 					{
 						result = NLMISC::CI18N::get("uiMissionOptionNotReceived");
 					}
-					if (result == ucstring("Qui etes-vous ?")
-						|| result == ucstring("Wer bist Du?")
-						|| result == ucstring("Who are you?")
-						|| result == ucstring("Quién eres tú?")
-						|| result == ucstring("Кто ты?"))
+					if (result == string("Qui etes-vous ?")
+						|| result == string("Wer bist Du?")
+						|| result == string("Who are you?")
+						|| result == string("Quién eres tú?")
+						|| result == string("Кто ты?"))
 					{
 						pVTM->setActive(false);
 					}
@@ -783,13 +784,13 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 				}
 				else
 				{
-					pVTM->setText(ucstring(""));
+					pVTM->setText("");
 					pVTM->setActive(false);
 				}
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 				pVTM->setActive(false);
 			}
 		}
@@ -813,7 +814,7 @@ void CGameContextMenu::updateContextMenuWebPage(uint options)
 			uint32 textID = (uint32) _WebPageTitle->getValue32();
 			if (textID)
 			{
-				ucstring result;
+				string result;
 				bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 				if (!res)
 				{
@@ -823,12 +824,12 @@ void CGameContextMenu::updateContextMenuWebPage(uint options)
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 			}
 		}
 		else
 		{
-			pVTM->setText(ucstring(""));
+			pVTM->setText("");
 		}
 	}
 
@@ -857,7 +858,7 @@ void CGameContextMenu::updateContextMenuOutpostState(uint options)
 	{
 		CViewTextMenu *pVTM = _TextOutpostState;
 		if (pVTM)
-			pVTM->setText(ucstring(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet)));
+			pVTM->setText(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet));
 	}
 
 	// apply the active
@@ -893,7 +894,7 @@ void CGameContextMenu::updateContextMenuMissionRing()
 			// if the textId is ok and Flag is set.
 			if ( textId )
 			{
-				ucstring result;
+				string result;
 				bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, result);
 				if (!res)
 				{
@@ -904,7 +905,7 @@ void CGameContextMenu::updateContextMenuMissionRing()
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 				pVTM->setActive(false);
 			}
 		}

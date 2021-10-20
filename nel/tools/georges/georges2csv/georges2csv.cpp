@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -738,7 +738,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 			}
 			else if ( nlstricmp( fields[i], "parent" ) == 0 )
 			{
-				fields[i] = toLower( fields[i] );
+				fields[i] = toLowerAscii( fields[i] );
 			}
 			else
 			{
@@ -883,7 +883,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 		{
 			filebase += "." + sheetType;
 		}
-		filebase = toLower(filebase);
+		filebase = toLowerAscii(filebase);
 		string	filename, dirbase;
 		bool	isNewSheet=true;
 
@@ -905,7 +905,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 			else
 			{
 				// Load template sheet
-				filename = toLower(filebase);
+				filename = toLowerAscii(filebase);
 				form = (CForm*)formLoader->loadForm( (string("_empty.") + sheetType).c_str() );
 				if (form == NULL)
 				{

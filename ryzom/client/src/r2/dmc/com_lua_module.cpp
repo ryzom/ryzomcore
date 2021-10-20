@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -903,6 +903,7 @@ int CComLuaModule::luaRequestNewAction(lua_State* state, bool pending, uint coun
 		}
 		else
 		{
+#ifdef RYZOM_LUA_UCSTRING
 			// try with ucstring
 			CLuaState &ls = getEditor().getLua();
 			nlassert(ls.getStatePointer() == state);
@@ -911,6 +912,9 @@ int CComLuaModule::luaRequestNewAction(lua_State* state, bool pending, uint coun
 				nlwarning("<r2.%s> : ucstring or string expected as action name", funcName);
 				return 0;
 			}
+#else
+			return 0;
+#endif
 		}
 	}
 	else

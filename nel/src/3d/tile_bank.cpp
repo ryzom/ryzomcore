@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2010  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -275,7 +275,7 @@ sint CTileBank::getNumBitmap (CTile::TBitmap bitmap) const
 			{
 				std::vector<char> vect (str.length()+1);
 				memcpy (&*vect.begin(), str.c_str(), str.length()+1);
-				toLower(&*vect.begin());
+				toLowerAscii(&*vect.begin());
 				setString.insert (std::string (&*vect.begin()));
 			}
 		}
@@ -600,7 +600,7 @@ void CTileBank::removeDisplacementMap (uint mapId)
 uint CTileBank::getDisplacementMap (const string &fileName)
 {
 	// Lower string
-	string lower=toLower(fileName);
+	string lower=toLowerAscii(fileName);
 
 	// Look for this texture filename
 	uint noiseTile;

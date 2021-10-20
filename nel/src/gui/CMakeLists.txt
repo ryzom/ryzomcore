@@ -1,8 +1,7 @@
 FILE(GLOB SRC *.cpp *.h)
 FILE(GLOB HEADERS ../../include/nel/gui/*.h)
 
-SOURCE_GROUP("include" FILES ${HEADERS})
-SOURCE_GROUP("src" FILES ${SRC})
+SOURCE_GROUP("" FILES ${HEADERS} ${SRC})
 
 NL_TARGET_LIB(nelgui ${SRC} ${HEADERS})
 

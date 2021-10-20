@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -39,19 +40,19 @@ public:
 	void update ();
 
 	// Get a CGroupBubble
-	class CGroupInSceneBubble *newBubble (const ucstring &text);
+	class CGroupInSceneBubble *newBubble (const std::string &text);
 
 	// Add a message popup. if 0, get the OptionTimeoutMessages
-	void addMessagePopup (const ucstring &message, NLMISC::CRGBA col = CRGBA::White, uint time = 0);
+	void addMessagePopup (const std::string &message, NLMISC::CRGBA col = CRGBA::White, uint time = 0);
 
 	// The same as previous but centered in the screen. if 0, get the OptionTimeoutMessages
-	void addMessagePopupCenter (const ucstring &message, NLMISC::CRGBA col = CRGBA::White, uint time = 0);
+	void addMessagePopupCenter (const std::string &message, NLMISC::CRGBA col = CRGBA::White, uint time = 0);
 
 	// Add a skill popup
 	void addSkillPopup (uint skillId, sint delta, uint time);
 
 	// Add a context help with a string
-	void addContextHelp (const ucstring &message, const std::string &target, uint time);
+	void addContextHelp (const std::string &message, const std::string &target, uint time);
 
 	// Add a context help
 	void addContextHelpHTML (const std::string &filename, const std::string &target, uint time);
@@ -60,7 +61,7 @@ public:
 	void ignoreContextHelp (CInterfaceGroup *groupToRemove);
 
 	// Open a bubble chat (with next and skip button)
-	void chatOpen (uint32 nUID, const ucstring &ucsText, uint bubbleTimer = 0);
+	void chatOpen (uint32 nUID, const std::string &ucsText, uint bubbleTimer = 0);
 
 	// Dynamic Chat
 
@@ -199,7 +200,7 @@ public:
 	void unlink ();
 
 	// Set text
-	void setText (const ucstring &text);
+	void setText (const std::string &text);
 
 	// Called from action handler
 	void next();
@@ -217,7 +218,7 @@ public:
 
 private:
 
-	void setRawText (const ucstring &text);
+	void setRawText (const std::string &text);
 	void displayNextAndSkip (bool show);
 
 private:
@@ -233,7 +234,7 @@ private:
 	CCharacterCL	*_Character;
 
 	// Multi part bubble
-	std::vector<ucstring>	_TextParts;
+	std::vector<std::string>	_TextParts;
 	uint32					_CurrentPart;
 };
 

@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -30,14 +33,14 @@ extern std::vector<CMainlandSummary>	Mainlands;
 extern uint8 PlayerSelectedSlot;
 extern std::string	PlayerSelectedFileName;
 extern TSessionId	PlayerSelectedMainland;							// This is the mainland selected at the SELECT perso!!
-extern ucstring		PlayerSelectedHomeShardName;					// The home shard name (aniro, leanon etc....)
-extern ucstring		PlayerSelectedHomeShardNameWithParenthesis;		// Same with parenthesis
+extern std::string	PlayerSelectedHomeShardName;					// The home shard name (aniro, leanon etc....)
+extern std::string	PlayerSelectedHomeShardNameWithParenthesis;		// Same with parenthesis
 extern std::vector<CCharacterSummary>	CharacterSummaries;
 extern std::string UserPrivileges;
 extern sint LoginCharsel;
 
-extern ucstring NewKeysCharNameWanted;
-extern ucstring NewKeysCharNameValidated;
+extern std::string NewKeysCharNameWanted;
+extern std::string NewKeysCharNameValidated;
 extern std::string GameKeySet;
 extern std::string RingEditorKeySet;
 
@@ -73,12 +76,14 @@ enum TInterfaceState
 TInterfaceState autoLogin (const std::string &cookie, const std::string &fsaddr, bool firstConnection);
 
 
-std::string buildPlayerNameForSaveFile(const ucstring &playerNameIn);
+std::string buildPlayerNameForSaveFile(const std::string &playerNameIn);
 
 
 void globalMenuMovieShooter();
 
+#ifdef RYZOM_BG_DOWNLOADER
 void updateBGDownloaderUI();
+#endif
 
 // compute patcher priority, depending on the presence of one or more mainland characters : in this case, give the patch a boost
 void updatePatcherPriorityBasedOnCharacters();

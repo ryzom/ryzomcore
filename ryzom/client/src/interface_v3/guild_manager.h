@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -37,7 +38,7 @@ struct SGuildMember
 {
 	uint32		Index;	// Index in the DB
 	uint32		NameID;
-	ucstring	Name;
+	std::string	Name;
 	EGSPD::CGuildGrade::TGuildGrade Grade;
 	TCharConnectionState			Online;
 	uint32		EnterDate;
@@ -54,7 +55,7 @@ struct SGuildMember
 struct SGuild
 {
 	uint32		NameID;
-	ucstring	Name;
+	std::string	Name;
 	uint64		Icon;
 	bool		QuitGuildAvailable;
 
@@ -131,7 +132,7 @@ public:
 	bool isLeaderOfTheGuild();
 
 	/// If the player is in a guild get the guild name else return empty
-	ucstring getGuildName();
+	std::string getGuildName();
 
 	/// If the player is in a guild get the amount of money the guild owns else return zero
 	uint64 getMoney();
@@ -270,7 +271,7 @@ private:
 
 	// Join Proposal handling
 	uint32		_JoinPropPhraseID;
-	ucstring	_JoinPropPhrase;
+	std::string	_JoinPropPhrase;
 	bool		_JoinPropUpdate;
 };
 

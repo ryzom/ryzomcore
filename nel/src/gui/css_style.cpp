@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -386,27 +389,35 @@ namespace NLGUI
 	// - normalize values
 	void CCssStyle::normalize(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const
 	{
+		std::set<std::string> seenProperties;
+
 		TStyle::const_iterator it;
 		for (it=styleRules.begin(); it != styleRules.end(); ++it)
 		{
+			std::string value = it->second;
+
+			// replace possible custom properties, ignore property if var() fails
+			if (!cssFuncVar(value, styleRules, seenProperties))
+				continue;
+
 			// update local copy of applied style
-			style.StyleRules[it->first] = it->second;
+			style.StyleRules[it->first] = value;
 
 			if (it->first == "color")
 			{
-				if (it->second == "inherit")
+				if (value == "inherit")
 				{
 					style.TextColor = current.TextColor;
 				}
 				else
 				{
-					scanHTMLColor(it->second.c_str(), style.TextColor);
+					scanHTMLColor(value.c_str(), style.TextColor);
 				}
 			}
 			else
 			if (it->first == "font")
 			{
-				if (it->second == "inherit")
+				if (value == "inherit")
 				{
 					style.FontSize = current.FontSize;
 					style.FontFamily = current.FontFamily;
@@ -417,42 +428,42 @@ namespace NLGUI
 			else
 			if (it->first == "font-size")
 			{
-				if (it->second == "inherit")
+				if (value == "inherit")
 				{
 					style.FontSize = current.FontSize;
 				}
-				else if (it->second == "x-small")
+				else if (value == "x-small")
 				{
 					style.FontSize = 10; // 62.5%
 				}
-				else if (it->second == "small")
+				else if (value == "small")
 				{
 					style.FontSize = 13; // 80%;
 				}
-				else if (it->second == "medium")
+				else if (value == "medium")
 				{
 					style.FontSize = 16; // 100%;
 				}
-				else if (it->second == "large")
+				else if (value == "large")
 				{
 					style.FontSize = 18; // 112.5%
 				}
-				else if (it->second == "x-large")
+				else if (value == "x-large")
 				{
 					style.FontSize = 24; // 150%
 				}
-				else if (it->second == "xx-large")
+				else if (value == "xx-large")
 				{
 					style.FontSize = 32; // 200%;
 				}
-				else if (it->second == "smaller")
+				else if (value == "smaller")
 				{
 					if (style.FontSize < 5)
 						style.FontSize = 3;
 					else
 						style.FontSize -= 2;
 				}
-				else if (it->second == "larger")
+				else if (value == "larger")
 				{
 					style.FontSize += 2;
 				}
@@ -460,7 +471,7 @@ namespace NLGUI
 				{
 					float tmpf;
 					std::string unit;
-					if (getCssLength(tmpf, unit, it->second.c_str()))
+					if (getCssLength(tmpf, unit, value.c_str()))
 					{
 						if (unit == "rem")
 							style.FontSize = Root.FontSize * tmpf;
@@ -479,21 +490,21 @@ namespace NLGUI
 			if (it->first == "background-repeat")
 			{
 				// old ryzom specific value
-				if (it->second == "1")
+				if (value == "1")
 					style.StyleRules[it->first] = "repeat";
 			}
 			else
 			if (it->first == "display")
 			{
-				if (it->second == "inherit")
+				if (value == "inherit")
 					style.DisplayBlock = current.DisplayBlock;
 				else
-					style.DisplayBlock = (it->second == "block" || it->second == "table");
+					style.DisplayBlock = (value == "block" || value == "table");
 			}
 		}
 	}
 
-	void CCssStyle::applyBorderWidth(const std::string &value, uint32 *dest, const uint32 currentWidth, const uint32 fontSize) const
+	void CCssStyle::applyBorderWidth(const std::string &value, CSSLength *dest, const CSSLength &currentWidth) const
 	{
 		if (!dest) return;
 		if (value == "inherit")
@@ -502,37 +513,19 @@ namespace NLGUI
 		}
 		else if (value == "thin")
 		{
-			*dest = 1;
+			dest->setFloatValue(1, "px");
 		}
 		else if (value == "medium")
 		{
-			*dest = 3;
+			dest->setFloatValue(3, "px");
 		}
 		else if (value == "thick")
 		{
-			*dest = 5;
-		}
-		else if (value == "0")
-		{
-			*dest = 0;
+			dest->setFloatValue(5, "px");
 		}
 		else
 		{
-			float tmpf;
-			std::string unit;
-			if (getCssLength(tmpf, unit, value.c_str()))
-			{
-				if (unit == "rem")
-					*dest = fontSize * tmpf;
-				else if (unit == "em")
-					*dest = fontSize * tmpf;
-				else if (unit == "pt")
-					*dest = tmpf / 0.75f;
-				else if (unit == "%")
-					*dest = 0; // no support for % in border width
-				else
-					*dest = tmpf;
-			}
+			dest->parseValue(value, false, false);
 		}
 	}
 
@@ -560,12 +553,22 @@ namespace NLGUI
 			*dest = CSS_LINE_STYLE_NONE;
 		else if (value == "hidden")
 			*dest = CSS_LINE_STYLE_HIDDEN;
+		else if (value == "dotted")
+			*dest = CSS_LINE_STYLE_DOTTED;
+		else if (value == "dashed")
+			*dest = CSS_LINE_STYLE_DASHED;
+		else if (value == "solid")
+			*dest = CSS_LINE_STYLE_SOLID;
+		else if (value == "double")
+			*dest = CSS_LINE_STYLE_DOUBLE;
+		else if (value == "groove")
+			*dest = CSS_LINE_STYLE_GROOVE;
+		else if (value == "ridge")
+			*dest = CSS_LINE_STYLE_RIDGE;
 		else if (value == "inset")
 			*dest = CSS_LINE_STYLE_INSET;
 		else if (value == "outset")
 			*dest = CSS_LINE_STYLE_OUTSET;
-		else if (value == "solid")
-			*dest = CSS_LINE_STYLE_SOLID;
 	}
 
 	void CCssStyle::applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const
@@ -595,6 +598,39 @@ namespace NLGUI
 		}
 	}
 
+	void CCssStyle::applyMarginWidth(const std::string &value, uint32 *dest, const uint32 current, uint32 fontSize) const
+	{
+		if (!dest) return;
+
+		if (value == "inherit")
+		{
+			*dest = current;
+			return;
+		}
+		else if (value == "auto")
+		{
+			// TODO: requires content width;
+			*dest = 0;
+			return;
+		}
+
+		float tmpf;
+		std::string unit;
+		if (getCssLength(tmpf, unit, value.c_str()))
+		{
+			if (unit == "rem")
+				*dest = fontSize * tmpf;
+			else if (unit == "em")
+				*dest = fontSize * tmpf;
+			else if (unit == "pt")
+				*dest = tmpf / 0.75f;
+			else if (unit == "%")
+				*dest = 0; // TODO: requires content width, must remember 'unit' type
+			else
+				*dest = tmpf;
+		}
+	}
+
 	// apply style rules
 	void CCssStyle::apply(CStyleParams &style, const CStyleParams &current) const
 	{
@@ -602,18 +638,22 @@ namespace NLGUI
 		TStyle::const_iterator it;
 		for (it=style.StyleRules.begin(); it != style.StyleRules.end(); ++it)
 		{
-			     if (it->first == "border-top-width")	 applyBorderWidth(it->second, &style.BorderTopWidth, current.BorderTopWidth, current.FontSize);
-			else if (it->first == "border-top-color")	 applyBorderColor(it->second, &style.BorderTopColor, current.BorderTopColor, current.TextColor);
-			else if (it->first == "border-top-style")	 applyLineStyle(it->second, &style.BorderTopStyle, current.BorderTopStyle);
-			else if (it->first == "border-right-width")	 applyBorderWidth(it->second, &style.BorderRightWidth, current.BorderRightWidth, current.FontSize);
-			else if (it->first == "border-right-color")	 applyBorderColor(it->second, &style.BorderRightColor, current.BorderRightColor, current.TextColor);
-			else if (it->first == "border-right-style")	 applyLineStyle(it->second, &style.BorderRightStyle, current.BorderRightStyle);
-			else if (it->first == "border-bottom-width") applyBorderWidth(it->second, &style.BorderBottomWidth, current.BorderBottomWidth, current.FontSize);
-			else if (it->first == "border-bottom-color") applyBorderColor(it->second, &style.BorderBottomColor, current.BorderBottomColor, current.TextColor);
-			else if (it->first == "border-bottom-style") applyLineStyle(it->second, &style.BorderBottomStyle, current.BorderBottomStyle);
-			else if (it->first == "border-left-width")	 applyBorderWidth(it->second, &style.BorderLeftWidth, current.BorderLeftWidth, current.FontSize);
-			else if (it->first == "border-left-color")	 applyBorderColor(it->second, &style.BorderLeftColor, current.BorderLeftColor, current.TextColor);
-			else if (it->first == "border-left-style")	 applyLineStyle(it->second, &style.BorderLeftStyle, current.BorderLeftStyle);
+			     if (it->first == "border-top-width")	 applyBorderWidth(it->second, &style.Border.Top.Width, current.Border.Top.Width);
+			else if (it->first == "border-top-color")	 applyBorderColor(it->second, &style.Border.Top.Color, current.Border.Top.Color, current.TextColor);
+			else if (it->first == "border-top-style")	 applyLineStyle(it->second,   &style.Border.Top.Style, current.Border.Top.Style);
+			else if (it->first == "border-right-width")	 applyBorderWidth(it->second, &style.Border.Right.Width,  current.Border.Right.Width);
+			else if (it->first == "border-right-color")	 applyBorderColor(it->second, &style.Border.Right.Color,  current.Border.Right.Color, current.TextColor);
+			else if (it->first == "border-right-style")	 applyLineStyle(it->second,   &style.Border.Right.Style,  current.Border.Right.Style);
+			else if (it->first == "border-bottom-width") applyBorderWidth(it->second, &style.Border.Bottom.Width, current.Border.Bottom.Width);
+			else if (it->first == "border-bottom-color") applyBorderColor(it->second, &style.Border.Bottom.Color, current.Border.Bottom.Color, current.TextColor);
+			else if (it->first == "border-bottom-style") applyLineStyle(it->second,   &style.Border.Bottom.Style, current.Border.Bottom.Style);
+			else if (it->first == "border-left-width")	 applyBorderWidth(it->second, &style.Border.Left.Width,   current.Border.Left.Width);
+			else if (it->first == "border-left-color")	 applyBorderColor(it->second, &style.Border.Left.Color,   current.Border.Left.Color, current.TextColor);
+			else if (it->first == "border-left-style")	 applyLineStyle(it->second,   &style.Border.Left.Style,   current.Border.Left.Style);
+			else if (it->first == "margin-top")			 applyMarginWidth(it->second, &style.MarginTop, current.MarginTop, current.FontSize);
+			else if (it->first == "margin-right")		 applyMarginWidth(it->second, &style.MarginRight, current.MarginRight, current.FontSize);
+			else if (it->first == "margin-bottom")		 applyMarginWidth(it->second, &style.MarginBottom, current.MarginBottom, current.FontSize);
+			else if (it->first == "margin-left")		 applyMarginWidth(it->second, &style.MarginLeft, current.MarginLeft, current.FontSize);
 			else if (it->first == "padding-top")		 applyPaddingWidth(it->second, &style.PaddingTop, current.PaddingTop, current.FontSize);
 			else if (it->first == "padding-right")		 applyPaddingWidth(it->second, &style.PaddingRight, current.PaddingRight, current.FontSize);
 			else if (it->first == "padding-bottom")		 applyPaddingWidth(it->second, &style.PaddingBottom, current.PaddingBottom, current.FontSize);
@@ -676,7 +716,7 @@ namespace NLGUI
 			else
 			if (it->first == "text-decoration" || it->first == "text-decoration-line")
 			{
-				std::string prop(toLower(it->second));
+				std::string prop(toLowerAscii(it->second));
 				style.Underlined = (prop.find("underline") != std::string::npos);
 				style.StrikeThrough = (prop.find("line-through") != std::string::npos);
 			}
@@ -896,16 +936,26 @@ namespace NLGUI
 					style.GlobalColor = b;
 			}
 			else
+			if (it->first == "-ryzom-modulate-text-color")
+			{
+				bool b;
+				if (it->second == "inherit")
+					style.GlobalColorText = current.GlobalColorText;
+				else
+				if (fromString(it->second, b))
+					style.GlobalColorText = b;
+			}
+			else
 			if (it->first == "background-color")
 			{
 				if (it->second == "inherit")
-					style.BackgroundColor = current.BackgroundColor;
+					style.Background.color = current.Background.color;
 				else if (it->second == "transparent")
-					style.BackgroundColor = CRGBA(0, 0, 0, 0);
+					style.Background.color = CRGBA(0, 0, 0, 0);
 				else if (it->second == "currentcolor")
-					style.BackgroundColorOver = style.TextColor;
+					style.Background.color = style.TextColor;
 				else
-					scanHTMLColor(it->second.c_str(), style.BackgroundColor);
+					scanHTMLColor(it->second.c_str(), style.Background.color);
 			}
 			else
 			if (it->first == "-ryzom-background-color-over")
@@ -924,17 +974,20 @@ namespace NLGUI
 			{
 				// normalize
 				std::string image = trim(it->second);
-				if (toLower(image.substr(0, 4)) == "url(")
+				if (toLowerAscii(image.substr(0, 4)) == "url(")
 				{
 					image = image.substr(4, image.size()-5);
 				}
 				style.StyleRules[it->first] = trimQuotes(image);
+				style.Background.setImage(style.StyleRules[it->first]);
 			}
 			else
 			if (it->first == "background-repeat")
 			{
+				style.Background.setRepeat(it->second);
+				// TODO: remove after removing old code that depends on this
 				// normalize
-				std::string val = toLower(trim(it->second));
+				std::string val = toLowerAscii(trim(it->second));
 				std::vector<std::string> parts;
 				splitParams(val, ' ', parts);
 				// check for "repeat repeat"
@@ -946,14 +999,37 @@ namespace NLGUI
 			else
 			if (it->first == "background-size")
 			{
+				style.Background.setSize(it->second);
+				// TODO: remove after removing old code that depends on this
 				// normalize
-				std::string val = toLower(trim(it->second));
+				std::string val = toLowerAscii(trim(it->second));
 				std::vector<std::string> parts;
 				splitParams(val, ' ', parts);
 				if (parts.size() == 2 && parts[0] == parts[1])
 					val = parts[0];
 
 				style.StyleRules[it->first] = val;
+			}
+			else
+			if (it->first == "background-position")
+			{
+				// TODO: background-position-x, background-position-y
+				style.Background.setPosition(it->second);
+			}
+			else
+			if (it->first == "background-origin")
+			{
+				style.Background.setOrigin(it->second);
+			}
+			else
+			if (it->first == "background-clip")
+			{
+				style.Background.setClip(it->second);
+			}
+			else
+			if (it->first == "background-attachment")
+			{
+				style.Background.setAttachment(it->second);
 			}
 		}
 
@@ -999,7 +1075,7 @@ namespace NLGUI
 		uint index = 0;
 		while(!failed && index < parts.size())
 		{
-			std::string val = toLower(parts[index]);
+			std::string val = toLowerAscii(parts[index]);
 			bool matches = false;
 			for(uint i = 0; i < nbProps; i++)
 			{
@@ -1041,26 +1117,64 @@ namespace NLGUI
 						}
 						else if (val == "left" || val == "right")
 						{
-							bgPositionX = val;
-							// consume 'left|right'
-							next++;
-							if(next < parts.size() && getCssLength(fval, unit, parts[next]))
+							val = toLowerAscii(parts[next]);
+							if (val == "center")
 							{
-								bgPositionX += " " + toString("%.0f%s", fval, unit.c_str());
-								// consume css length
+								if (bgPositionX.empty()) bgPositionX = "center";
+								if (bgPositionY.empty()) bgPositionY = "center";
+								// consume 'center'
 								next++;
 							}
-						}
-						else if (val == "top" || val == "bottom")
-						{
-							bgPositionY = val;
-							// consume top|bottom
-							next++;
-							if (next < parts.size() && getCssLength(fval, unit, parts[next]))
+							else if ((bgPositionX.empty() || bgPositionX == "center") && (val == "left" || val == "right"))
 							{
-								bgPositionY += " " + toString("%.0f%s", fval, unit.c_str());
-								// consume css length
+								bgPositionX = val;
+								// consume 'left|right'
 								next++;
+								if (next < parts.size() && getCssLength(fval, unit, parts[next]))
+								{
+									bgPositionX += " " + parts[next];
+									// consume css length
+									next++;
+								}
+							}
+							else if ((bgPositionY.empty() || bgPositionY == "center") && (val == "top" || val == "bottom"))
+							{
+								bgPositionY = val;
+								// consume top|bottom
+								next++;
+								if (next < parts.size() && getCssLength(fval, unit, parts[next]))
+								{
+									bgPositionY += " " + parts[next];
+									// consume css length
+									next++;
+								}
+							}
+							else if (getCssLength(fval, unit, parts[next]))
+							{
+								// override X only on first loop
+								if (next == index)
+								{
+									bgPositionX = parts[next];
+								}
+								else if (bgPositionY.empty())
+								{
+									bgPositionY = parts[next];
+								}
+								else
+								{
+									// invalid
+									bgPositionX.clear();
+									bgPositionY.clear();
+									break;
+								}
+								next++;
+							}
+							else
+							{
+								// invalid value
+								bgPositionX.clear();
+								bgPositionY.clear();
+								break;
 							}
 						}
 					} while (loop);
@@ -1085,7 +1199,7 @@ namespace NLGUI
 						uint next = index + 1;
 						if (next < parts.size())
 						{
-							val = toLower(parts[next]);
+							val = toLowerAscii(parts[next]);
 							if (val == "cover" || val == "contain")
 							{
 								matches = true;
@@ -1104,16 +1218,16 @@ namespace NLGUI
 									if (val == "auto")
 										h = v = "auto";
 									else
-										h = v = toString("%.0f%s", fval, unit.c_str());
+										h = v = val;
 
 									next++;
 									if (next < parts.size())
 									{
-										val = toLower(parts[next]);
+										val = toLowerAscii(parts[next]);
 										if (val == "auto")
 											v = "auto";
 										else if (getCssLength(fval, unit, val))
-											v = toString("%.0f%s", fval, unit.c_str());
+											v = val;
 										else
 											next--; // not size token
 									}
@@ -1163,7 +1277,7 @@ namespace NLGUI
 							uint next = index + 1;
 							if (next < parts.size())
 							{
-								val = toLower(parts[next]);
+								val = toLowerAscii(parts[next]);
 								if (val == "repeat" || val == "space" || val == "round" || val == "no-repeat")
 								{
 									vert = val;
@@ -1196,7 +1310,10 @@ namespace NLGUI
 
 						// first time background-origin is set, also set background-clip
 						if (!bgClipFound)
+						{
 							bgClipValue = val;
+							bgClipFound = true;
+						}
 					}
 				}
 				else if (props[i] == "background-clip")
@@ -1246,6 +1363,7 @@ namespace NLGUI
 			{
 				if (props[i] == "background-position")
 				{
+					style["background-position"] = bgPositionX + " " + bgPositionY;
 					style["background-position-x"] = bgPositionX;
 					style["background-position-y"] = bgPositionY;
 				}
@@ -1260,10 +1378,10 @@ namespace NLGUI
 			}
 			else
 			{
-				// fill in default if one is set
+				// fill in default if one is not set
 				if (props[i] == "background-image")
 				{
-					style[props[i]] = "none";
+					style[props[i]] = "";
 				}
 				else if (props[i] == "background-position")
 				{
@@ -1337,7 +1455,7 @@ namespace NLGUI
 	bool CCssStyle::tryBorderWidthShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 		float tmpf;
 		std::string unit;
 
@@ -1374,7 +1492,7 @@ namespace NLGUI
 	bool CCssStyle::tryBorderStyleShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 
 		// verify that parts are valid
 		uint8 maxSize  = (prop == "border" || prop == "border-style") ? 4 : 1;
@@ -1423,7 +1541,7 @@ namespace NLGUI
 	bool CCssStyle::tryBorderColorShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 		CRGBA color;
 
 		// verify that parts are valid
@@ -1468,7 +1586,7 @@ namespace NLGUI
 
 		TStyle borderStyle;
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 
 		for(uint index = 0; index < parts.size(); ++index)
 		{
@@ -1533,7 +1651,7 @@ namespace NLGUI
 	void CCssStyle::expandPaddingShorthand(const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 
 		uint8 t, r, b, l;
 		if (!getShorthandIndices(parts.size(), t, r, b, l))
@@ -1543,6 +1661,22 @@ namespace NLGUI
 		style["padding-right"] = parts[r];
 		style["padding-bottom"] = parts[b];
 		style["padding-left"] = parts[l];
+	}
+
+	// ***************************************************************************
+	void CCssStyle::expandMarginShorthand(const std::string &value, TStyle &style) const
+	{
+		std::vector<std::string> parts;
+		splitParams(toLowerAscii(value), ' ', parts);
+
+		uint8 t, r, b, l;
+		if (!getShorthandIndices(parts.size(), t, r, b, l))
+			return;
+
+		style["margin-top"] = parts[t];
+		style["margin-right"] = parts[r];
+		style["margin-bottom"] = parts[b];
+		style["margin-left"] = parts[l];
 	}
 
 	// ***************************************************************************
@@ -1669,6 +1803,182 @@ namespace NLGUI
 			width = maxw;
 			height = minh;
 		}
+	}
+
+	// ***************************************************************************
+	static void skipString(const std::string &value, std::string::size_type &pos)
+	{
+		char quote = value[pos];
+		while(pos < value.size() && value[pos] != quote)
+		{
+			if (value[pos] == '\\')
+				pos++;
+
+			pos++;
+		}
+	}
+	static void skipBlock(const std::string &value, std::string::size_type &pos, bool isString)
+	{
+		char openChar = value[pos];
+		char closeChar = value[pos];
+		if (openChar == '(') closeChar = ')';
+		else if (openChar == '[') closeChar = ']';
+		else if (openChar == '{') closeChar = '}';
+		pos++;
+
+		while(pos < value.size())
+		{
+			char c = value[pos];
+			if (c == '\\')
+				pos++;
+			else if (!isString && (c == '(' || c == '[' || c == '{'))
+				skipBlock(value, pos, false);
+			else if (c == closeChar)
+				break;
+			else if (c == '"' || c == '\'')
+			{
+				if (isString)
+					break;
+
+				skipBlock(value, pos, true);
+			}
+
+			pos++;
+		}
+	}
+
+	static void skipWhitespace(const std::string &value, std::string::size_type &pos)
+	{
+		while(pos < value.size() && (value[pos] == ' ' || value[pos] == '\t' || value[pos] == '\r'))
+			pos++;
+	}
+
+	// ***************************************************************************
+	bool CCssStyle::cssFuncVar(std::string &func, const TStyle &styleRules, const std::set<std::string> &seenProperties) const
+	{
+		// TODO: fails if var() is inside string, ie '--text: ".. var(...) .."';
+
+		// start of 'var('
+		std::string::size_type pos = func.find("var(");
+		if (pos == std::string::npos)
+			return true;
+
+		// simple test to make sure 'var' is not substring
+		if (pos > 0 && (func[pos-1] != '_') && ((func[pos-1] >= 'a' && func[pos-1] <= 'z') || (func[pos-1] >= 'A' && func[pos-1] <='Z')))
+			return true;
+
+		// find closing ')'
+		std::string::size_type funcStart = pos;
+		std::string::size_type funcEnd = funcStart + 3;
+		skipBlock(func, funcEnd, false);
+
+		pos += 4;
+
+		// ',' separator
+		std::string::size_type sep = func.find_first_of(",)", pos);
+		if (sep > funcEnd)
+		{
+			// unlikely
+			sep = funcEnd;
+		}
+		else if (sep + 1 == funcEnd)
+		{
+			// no whitespace between ',' and ')', ie 'var(--name,)'
+			return false;
+		}
+
+		// extract name
+		std::string name = func.substr(funcStart + 4, sep - pos);
+		if (seenProperties.count(name) > 0)
+			return false;
+
+		std::string value;
+		// if name is not defined or resolves to 'initial', use fallback
+		bool found = lookupPropertyValue(name, value, styleRules);
+		if (found) {
+			// check if substituted value has 'var()'
+			std::set<std::string> newSeen = seenProperties;
+			newSeen.insert(name);
+			found = cssFuncVar(value, styleRules, newSeen);
+			if (value == "initial")
+				found = false;
+		}
+
+		// --name failed and we have fallback
+		if (!found && func[sep] == ',')
+		{
+			sep++;
+			skipWhitespace(func, sep);
+
+			value = func.substr(sep, funcEnd - sep);
+			if (value.empty())
+			{
+				found = true;
+			}
+			else
+			{
+				// check if substituted fallback has 'var()'
+				std::set<std::string> newSeen = seenProperties;
+				newSeen.insert(name);
+				found = cssFuncVar(value, styleRules, newSeen);
+				if (value == "initial")
+					found = false;
+			}
+		}
+
+		// invalidate property as both name and fallback failed
+		if (!found)
+			return false;
+
+		// everything before 'var(' and after ')'
+		std::string result;
+		if (funcStart > 0)
+			result = trim(func.substr(0, funcStart)) + " ";
+
+		result += trim(value);
+		if ((funcEnd+1) < func.size())
+			result += " " + trim(func.substr(funcEnd+1));
+
+		// check replaced string for var()
+		std::set<std::string> newSeen = seenProperties;
+		newSeen.insert(name);
+		bool success = cssFuncVar(result, styleRules, newSeen);
+		if (result == "initial")
+			success = false;
+
+		func = result;
+		return success;
+	}
+
+	// ***************************************************************************
+	bool CCssStyle::lookupPropertyValue(const std::string &name, std::string &value, const TStyle &styleRules) const
+	{
+		bool success = true;
+		TStyle::const_iterator it = styleRules.find(name);
+		if (it != styleRules.end())
+			value = it->second;
+		else if (Current.hasStyle(name))
+			value = Current.getStyle(name);
+		else
+			success = false;
+
+		if (success && value != "inherit")
+			return true;
+
+		std::vector<CStyleParams>::const_reverse_iterator rit = _StyleStack.rbegin();
+		for(; rit != _StyleStack.rend(); ++rit)
+		{
+			if (rit->hasStyle(name))
+			{
+				value = rit->getStyle(name);
+				if (value != "inherit")
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 } // namespace

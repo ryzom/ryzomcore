@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -110,21 +113,21 @@ void COutpostBuildingSheet::build(const NLGEORGES::UFormElm &root)
 	string IconMain;
 	if(!root.getValueByName (IconMain, "icon"))
 		debug("key 'icon' not found.");
-	IconMain = toLower(IconMain);
+	IconMain = toLowerAscii(IconMain);
 	IdIconMain = ClientSheetsStrings.add(IconMain);
 
 	// Get the icon associated.
 	string IconBack;
 	if(!root.getValueByName (IconBack, "icon background"))
 		debug("key 'icon background' not found.");
-	IconBack = toLower(IconBack);
+	IconBack = toLowerAscii(IconBack);
 	IdIconBack = ClientSheetsStrings.add(IconBack);
 
 	// Get the icon associated.
 	string IconOver;
 	if(!root.getValueByName (IconOver, "icon overlay"))
 		debug("key 'icon overlay' not found.");
-	IconOver = toLower(IconOver);
+	IconOver = toLowerAscii(IconOver);
 	IdIconOver = ClientSheetsStrings.add(IconOver);
 
 	// Get the icon text associated.

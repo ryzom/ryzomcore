@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -55,7 +55,10 @@ bool CCurlHttpClient::connect(const std::string &/* server */)
 	curl_global_init(CURL_GLOBAL_ALL);
 	_CurlStruct = curl_easy_init();
 	if(_Curl == NULL)
+	{
+		curl_global_cleanup();
 		return false;
+	}
 
 	return true;
 }
@@ -191,9 +194,12 @@ bool CCurlHttpClient::receive(string &res, bool verbose)
 // ***************************************************************************
 void CCurlHttpClient::disconnect()
 {
-	curl_easy_cleanup(_Curl);
-	_CurlStruct = NULL;
-	curl_global_cleanup();
+	if (_CurlStruct)
+	{
+		curl_easy_cleanup(_Curl);
+		_CurlStruct = NULL;
+		curl_global_cleanup();
+	}
 }
 
 CCurlHttpClient CurlHttpClient;

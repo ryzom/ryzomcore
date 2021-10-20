@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2018  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -46,8 +46,8 @@ namespace NLGUI
 		{
 			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
 			if (groupHtml) {
-				_HtmlDownload = false;
-				groupHtml->removeImageDownload(dynamic_cast<CViewBase*>(this));
+				groupHtml->removeImageDownload(_HtmlDownload, dynamic_cast<CViewBase*>(this));
+				_HtmlDownload = NULL;
 			}
 		}
 	}
@@ -476,12 +476,14 @@ namespace NLGUI
 				if (!CFile::fileExists(localname))
 					localname = "web_del.tga";
 				_TextureId.setTexture (localname.c_str(), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
-				_HtmlDownload = true;
-				groupHtml->addImageDownload(TxName, dynamic_cast<CViewBase*>(this));
+				_HtmlDownload = groupHtml->addImageDownload(TxName, dynamic_cast<CViewBase*>(this));
 			}
 		}
 		else
+		{
+			_HtmlDownload = NULL;
 			_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
+		}
 	}
 
 	// ----------------------------------------------------------------------------

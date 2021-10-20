@@ -7,7 +7,10 @@
  */
 
 // NeL - MMORPG Framework <https://wiki.ryzom.dev/>
-// Copyright (C) 2008-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2008-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2016-2020  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -89,7 +92,7 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 		return NULL;
 	}
 #else
-	std::string type_lower = toLower(type);
+	std::string type_lower = toLowerAscii(type);
 	if (type_lower == "ogg")
 	{
 		return new CAudioDecoderVorbis(stream, loop);
@@ -124,7 +127,7 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 		return CAudioDecoderFfmpeg::getInfo(&ifile, artist, title, length);
 #else
 	std::string type = CFile::getExtension(filepath);
-	std::string type_lower = NLMISC::toLower(type);
+	std::string type_lower = NLMISC::toLowerAscii(type);
 
 	if (type_lower == "ogg")
 	{

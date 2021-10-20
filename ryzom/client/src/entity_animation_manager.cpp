@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -205,7 +208,7 @@ void CEntityAnimationManager::load(NLMISC::IProgressCallback &/* progress */, bo
 	for (uint32 i = 0; i < pASLS->AnimSetList.size(); ++i)
 	{
 		CAnimationSet as;
-		string sTmp = toLower(pASLS->AnimSetList[i].Name);
+		string sTmp = toLowerAscii(pASLS->AnimSetList[i].Name);
 		sTmp = sTmp.substr(0,sTmp.rfind('.'));
 		pair<map<string,CAnimationSet>::iterator, bool> it;
 		it = _AnimSet.insert(pair<string,CAnimationSet>(sTmp,as));

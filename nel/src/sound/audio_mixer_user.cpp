@@ -1,9 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -371,7 +371,7 @@ void CAudioMixerUser::init(uint maxTrack, bool useEax, bool useADPCM, IProgressC
 /// Initialize the NeL Sound Driver with given driverName.
 void CAudioMixerUser::initDriver(const std::string &driverName)
 {
-	std::string dn = NLMISC::toLower(driverName);
+	std::string dn = NLMISC::toLowerAscii(driverName);
 	nldebug("AM: Init Driver '%s' ('%s')...", driverName.c_str(), dn.c_str());
 
 	ISoundDriver::TDriver driverType;
@@ -695,6 +695,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 				setBackgroundFlags(flags);
 			}
 
+			form = NULL;
 			NLGEORGES::UFormLoader::releaseLoader(formLoader);
 		}
 	}

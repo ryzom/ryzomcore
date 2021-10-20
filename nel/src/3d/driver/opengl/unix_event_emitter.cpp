@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -29,6 +29,7 @@
 #include <X11/Xutil.h>
 #include <X11/XKBlib.h>
 #include "nel/misc/debug.h"
+#include "nel/misc/utf_string_view.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -537,8 +538,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		if (c > 0)
 		{
 #ifdef X_HAVE_UTF8_STRING
-			ucstring ucstr;
-			ucstr.fromUtf8(Text);
+			::u32string ucstr = NLMISC::CUtfStringView(Text).toUtf32();
 
 			CEventChar *charEvent = new CEventChar (ucstr[0], getKeyButton(event.xbutton.state), this);
 
@@ -547,9 +547,10 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 
 			server->postEvent (charEvent);
 #else
+			// FIXME: Convert locale to UTF-32
 			for (int i = 0; i < c; i++)
 			{
-				CEventChar *charEvent = new CEventChar ((ucchar)(unsigned char)Text[i], getKeyButton(event.xbutton.state), this);
+				CEventChar *charEvent = new CEventChar ((u32char)(unsigned char)Text[i], getKeyButton(event.xbutton.state), this);
 
 				// raw if not processed by IME
 				charEvent->setRaw(keyCode != 0);
@@ -610,14 +611,13 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		else if (req.target == XA_STRING)
 		{
 			respond.xselection.property = req.property;
-			std::string str = _CopiedString.toString();
+			std::string str = _CopiedString; // NLMISC::CUtfStringView(_CopiedString).toAscii(); // FIXME: Convert UTF-8 to local
 			XChangeProperty(req.display, req.requestor, req.property, XA_STRING, 8, PropModeReplace, (const unsigned char*)str.c_str(), str.length());
 		}
 		else if (req.target == XA_UTF8_STRING)
 		{
 			respond.xselection.property = req.property;
-			std::string str = _CopiedString.toUtf8();
-			XChangeProperty(req.display, req.requestor, respond.xselection.property, XA_UTF8_STRING, 8, PropModeReplace, (const unsigned char*)str.c_str(), str.length());
+			XChangeProperty(req.display, req.requestor, respond.xselection.property, XA_UTF8_STRING, 8, PropModeReplace, (const unsigned char*)_CopiedString.c_str(), _CopiedString.length());
 		}
 		else
 		{
@@ -699,22 +699,22 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			if (XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, (unsigned char**)&data) != Success)
 				return false;
 
-			ucstring text;
-			std::string tmpData = (const char*)data;
+			std::string text = (const char*)data;
 			XFree(data);
 
 			// convert buffer to ucstring
 			if (target == XA_UTF8_STRING)
 			{
-				text = ucstring::makeFromUtf8(tmpData);
+				// OK
 			}
 			else if (target == XA_STRING)
 			{
-				text = tmpData;
+				// FIXME: Convert local to UTF-8
+				// text = NLMISC::CUtfStringView(text).toAscii();
 			}
 			else
 			{
-				nlwarning("Unknow format %u", (uint)target);
+				nlwarning("Unknown format %u", (uint)target);
 			}
 
 			// sent string event to event server
@@ -768,7 +768,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	return true;
 }
 
-bool CUnixEventEmitter::copyTextToClipboard(const ucstring &text)
+bool CUnixEventEmitter::copyTextToClipboard(const std::string &text)
 {
 	_CopiedString = text;
 
@@ -787,7 +787,7 @@ bool CUnixEventEmitter::copyTextToClipboard(const ucstring &text)
 	return true;
 }
 
-bool CUnixEventEmitter::pasteTextFromClipboard(ucstring &text)
+bool CUnixEventEmitter::pasteTextFromClipboard(std::string &text)
 {
 	// check if we own the selection
 	if (_SelectionOwned)

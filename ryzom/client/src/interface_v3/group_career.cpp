@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -63,13 +64,13 @@ bool CGroupCareer::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (Career >= ROLES::NB_ROLES)
 		Career = ROLES::fighter;
 
-	ucstring sTmp = ROLES::roleToUCString(Career);
+	string sTmp = ROLES::roleToUCString(Career);
 	for (uint32 i= 0; i < sTmp.size(); ++i)
 		if (sTmp[i] < 128)
 			if ( (sTmp[i] >= 'a') && (sTmp[i] <= 'z') )
 				sTmp[i] = sTmp[i] - 'a' + 'A';
 
-	setUCTitle (sTmp);
+	setTitle (sTmp);
 
 	return true;
 }
@@ -128,12 +129,12 @@ bool CGroupJob::parse (xmlNodePtr /* cur */, CInterfaceGroup * /* parentGroup */
 //		return false;
 //	}
 //
-//	ucstring sTmp = JOBS::jobToUCString(Job);
+//	string sTmp = JOBS::jobToUCString(Job);
 //	for (uint32 i= 0; i < sTmp.size(); ++i)
 //		if (sTmp[i] < 128)
 //			if ( (sTmp[i] >= 'a') && (sTmp[i] <= 'z') )
 //				sTmp[i] = sTmp[i] - 'a' + 'A';
-//	setUCTitle (sTmp);
+//	seUCTitle (sTmp);
 //
 //	return true;
 }

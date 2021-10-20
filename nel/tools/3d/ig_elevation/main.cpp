@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -65,6 +65,7 @@ struct SExportOptions
 	float	ZFactor1;
 	string	HeightMapFile2;
 	float	ZFactor2;
+	bool	ExtendCoords;
 	string	LandFile;
 
 	// -----------------------------------------------------------------------
@@ -104,6 +105,9 @@ struct SExportOptions
 
 			CConfigFile::CVar &cvZFactor2 = cf.getVar("ZFactor2");
 			ZFactor2 = cvZFactor2.asFloat();
+
+			CConfigFile::CVar &cvExtendCoords = cf.getVar("ExtendCoords");
+			ExtendCoords = cvExtendCoords.asFloat();
 
 			CConfigFile::CVar &cvLandFile = cf.getVar("LandFile");
 			LandFile = cvLandFile.asString();
@@ -214,13 +218,19 @@ static float  getHeightMapZ(float x, float y, const CZoneLimits &zl, const SExpo
 	sint32 SizeX = zl._ZoneMaxX - zl._ZoneMinX + 1;
 	sint32 SizeY = zl._ZoneMaxY - zl._ZoneMinY + 1;
 
-	clamp (x, options.CellSize * zl._ZoneMinX, options.CellSize * (zl._ZoneMaxX + 1));
-	clamp (y, options.CellSize * zl._ZoneMinY, options.CellSize * (zl._ZoneMaxY + 1));
-
 	if (heightMap1 != NULL)
 	{
-		color = heightMap1->getColor (	(x - options.CellSize * zl._ZoneMinX) / (options.CellSize * SizeX), 
-										1.0f - ((y - options.CellSize * zl._ZoneMinY) / (options.CellSize * SizeY)));
+		float xc = (x - options.CellSize * zl._ZoneMinX) / (options.CellSize * SizeX);
+		float yc = 1.0f - ((y - options.CellSize * zl._ZoneMinY) / (options.CellSize * SizeY));
+		if (options.ExtendCoords)
+		{
+			uint32 w = heightMap1->getWidth(), h = heightMap1->getHeight();
+			xc -= .5f / (float)w;
+			yc -= .5f / (float)h;
+			xc = xc * (float)(w + 1) / (float)w;
+			yc = yc * (float)(h + 1) / (float)h;
+		}
+		color = heightMap1->getColor(xc, yc);
 		color *= 255.f;
 		deltaZ = color.A;
 		deltaZ = deltaZ - 127.0f; // Median intensity is 127
@@ -229,8 +239,17 @@ static float  getHeightMapZ(float x, float y, const CZoneLimits &zl, const SExpo
 
 	if (heightMap2 != NULL)
 	{
-		color = heightMap2->getColor (	(x - options.CellSize * zl._ZoneMinX) / (options.CellSize * SizeX), 
-										1.0f - ((y - options.CellSize * zl._ZoneMinY) / (options.CellSize * SizeY)));
+		float xc = (x - options.CellSize * zl._ZoneMinX) / (options.CellSize * SizeX);
+		float yc = 1.0f - ((y - options.CellSize * zl._ZoneMinY) / (options.CellSize * SizeY));
+		if (options.ExtendCoords)
+		{
+			uint32 w = heightMap2->getWidth(), h = heightMap2->getHeight();
+			xc -= .5f / (float)w;
+			yc -= .5f / (float)h;
+			xc = xc * (float)(w + 1) / (float)w;
+			yc = yc * (float)(h + 1) / (float)h;
+		}
+		color = heightMap2->getColor(xc, yc);
 		color *= 255.f;
 		deltaZ2 = color.A;
 		deltaZ2 = deltaZ2 - 127.0f; // Median intensity is 127
@@ -260,6 +279,7 @@ int main(int nNbArg, char**ppArgs)
 		printf ("ZFactor1 = 1.0;\n");
 		printf ("HeightMapFile2 = \"R:/graphics/landscape/ligo/jungle/noise.tga\";\n");
 		printf ("ZFactor2 = 0.5;\n");
+		printf ("ExtendCoords = 0;\n");
 		printf ("LandFile = \"w:/matis.land\";\n");
 
 		return EXIT_FAILURE;
@@ -353,7 +373,7 @@ int main(int nNbArg, char**ppArgs)
 	vector<string> vAllFiles;
 	for(uint i = 0, len = (uint)vAllFilesUnfiltered.size(); i < len; ++i)
 	{
-		if (toLower(CFile::getExtension(vAllFilesUnfiltered[i])) == "ig")
+		if (toLowerAscii(CFile::getExtension(vAllFilesUnfiltered[i])) == "ig")
 		{
 			vAllFiles.push_back(vAllFilesUnfiltered[i]);
 		}

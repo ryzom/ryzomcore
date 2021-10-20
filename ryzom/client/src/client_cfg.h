@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -391,6 +391,8 @@ struct CClientConfig
 	std::vector<string>			DataPath;
 	/// Data Path no recurse.
 	std::vector<string>			DataPathNoRecurse;
+	/// Pre-load path
+	std::string					PreLoadPath;
 	/// Streamed package path
 	std::string					StreamedPackagePath;
 	/// Streamed package hosts
@@ -891,10 +893,10 @@ public:
 	float	getActualLandscapeThreshold() const;
 
 	// Return LanguageCode but if "wk", then return "en"
-	string	getHtmlLanguageCode() const;
+	std::string	getHtmlLanguageCode() const;
 
 	// return a random loading tip or, if there are not, return the string in argument
-	ucstring buildLoadingString( const ucstring& ucstr ) const;
+	std::string buildLoadingString(const std::string &ucstr) const;
 
 	/// get the path to client_default.cfg including the filename itself.
 	bool getDefaultConfigLocation(std::string& fileLocation) const;

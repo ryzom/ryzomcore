@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -194,7 +197,7 @@ void							CPeople::init()
 	for (i=0; i<159; ++i)
 	{
 		_StrTable[TPeopleConvert[i].Value] = TPeopleConvert[i].Name;
-		_ValueMap[NLMISC::toLower(std::string(TPeopleConvert[i].Name))] = TPeopleConvert[i].Value;
+		_ValueMap[NLMISC::toLowerAscii(std::string(TPeopleConvert[i].Name))] = TPeopleConvert[i].Value;
 	}
 	_Initialised = true;
 }
@@ -239,7 +242,7 @@ void							CClassificationType::init()
 	for (i=0; i<20; ++i)
 	{
 		_StrTable[TClassificationTypeConvert[i].Value] = TClassificationTypeConvert[i].Name;
-		_ValueMap[NLMISC::toLower(std::string(TClassificationTypeConvert[i].Name))] = TClassificationTypeConvert[i].Value;
+		_ValueMap[NLMISC::toLowerAscii(std::string(TClassificationTypeConvert[i].Name))] = TClassificationTypeConvert[i].Value;
 	}
 	_Initialised = true;
 }

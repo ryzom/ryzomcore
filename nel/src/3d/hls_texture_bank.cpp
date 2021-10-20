@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2010  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -59,7 +59,7 @@ uint32			CHLSTextureBank::addColorTexture(const CHLSColorTexture &tex)
 // ***************************************************************************
 void			CHLSTextureBank::addTextureInstance(const std::string &name, uint32 colorTextureId, const vector<CHLSColorDelta> &cols)
 {
-	string	nameLwr= toLower(name);
+	string	nameLwr= toLowerAscii(name);
 
 	// checks
 	nlassert(colorTextureId<_ColorTextures.size());

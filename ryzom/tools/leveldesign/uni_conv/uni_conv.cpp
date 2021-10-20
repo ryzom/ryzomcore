@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -17,6 +20,7 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/ucstring.h>
+#include <nel/misc/utf_string_view.h>
 #include <nel/misc/common.h>
 #include <nel/misc/sstring.h>
 #include <nel/misc/i18n.h>
@@ -76,21 +80,10 @@ int main(int argc, char *argv[])
 	ucstring	str;
 	CI18N::readTextFile(inputFile, str, false, false);
 
-	if (outMode == ASCII)
-	{
-		// remove any outof ascii char
-		ucstring temp;
-		for (uint i=0; i<str.size(); ++i)
-		{
-			if (str[i] < 256)
-				temp += str[i];
-		}
-		str = temp;
-	}
-
 	if (xmlSupport)
 	{
 		ucstring temp;
+		temp.reserve(str.size());
 		for (uint i=0; i<str.size(); ++i)
 		{
 			switch(str[i])
@@ -121,9 +114,16 @@ int main(int argc, char *argv[])
 		break;
 	case ASCII:
 		{
-			string s = str.toString();
+			std::string res;
+			res.reserve(str.size());
+			for (ucstring::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+			{
+				ucchar c = *it;
+				if (c < 0x80)
+					res += (char)c;
+			}
 			FILE *fp = nlfopen(outputFile, "wt");
-			fwrite(s.data(), s.size(), 1, fp);
+			fwrite(res.data(), res.size(), 1, fp);
 			fclose(fp);
 		}
 		break;

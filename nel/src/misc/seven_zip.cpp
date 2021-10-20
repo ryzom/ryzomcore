@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -172,8 +172,8 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	filename.resize(nameLen);
 
 	// write filename into ucstring
-	SzArEx_GetFileNameUtf16(&db, 0, &filename[0]);
-
+	SzArEx_GetFileNameUtf16(&db, 0, reinterpret_cast<UInt16 *>(&filename[0]));
+	
 	// write the extracted file
 	FILE *outputHandle = nlfopen(destFileName, "wb+");
 

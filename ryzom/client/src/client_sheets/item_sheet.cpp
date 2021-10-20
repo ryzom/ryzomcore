@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -237,28 +240,28 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	string IconMain;
 	if(!item.getValueByName (IconMain, "3d.icon"))
 		debug("key '3d.icon' not found.");
-	IconMain = toLower(IconMain);
+	IconMain = toLowerAscii(IconMain);
 	IdIconMain = ClientSheetsStrings.add(IconMain);
 
 	// Get the icon associated.
 	string IconBack;
 	if(!item.getValueByName (IconBack, "3d.icon background"))
 		debug("key '3d.icon background' not found.");
-	IconBack = toLower(IconBack);
+	IconBack = toLowerAscii(IconBack);
 	IdIconBack = ClientSheetsStrings.add(IconBack);
 
 	// Get the icon associated.
 	string IconOver;
 	if(!item.getValueByName (IconOver, "3d.icon overlay"))
 		debug("key '3d.icon overlay' not found.");
-	IconOver = toLower(IconOver);
+	IconOver = toLowerAscii(IconOver);
 	IdIconOver = ClientSheetsStrings.add(IconOver);
 
 	// Get the icon associated.
 	string IconOver2;
 	if(!item.getValueByName (IconOver2, "3d.icon overlay2"))
 		debug("key '3d.icon overlay2' not found.");
-	IconOver2 = toLower(IconOver2);
+	IconOver2 = toLowerAscii(IconOver2);
 	IdIconOver2 = ClientSheetsStrings.add(IconOver2);
 
 	// Get Special modulate colors
@@ -298,7 +301,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 						debug(toString("The slot name %d is Empty.", i));
 
 					// Push the possible slots for the item in the list.
-					SlotBF|= SINT64_CONSTANT(1)<< (SLOTTYPE::stringToSlotType(NLMISC::toUpper(slotName)));
+					SlotBF|= SINT64_CONSTANT(1)<< (SLOTTYPE::stringToSlotType(NLMISC::toUpperAscii(slotName)));
 				}
 			}
 		}
@@ -317,7 +320,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	}
 	else
 	{
-		Family = (ITEMFAMILY::EItemFamily) ITEMFAMILY::stringToItemFamily(NLMISC::toUpper( family) );
+		Family = (ITEMFAMILY::EItemFamily) ITEMFAMILY::stringToItemFamily(NLMISC::toUpperAscii( family) );
 		if(Family == ITEMFAMILY::UNDEFINED)
 			debug("Item Family Undefined.");
 	}
@@ -331,7 +334,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	}
 	else
 	{
-		ItemType = (ITEM_TYPE::TItemType) ITEM_TYPE::stringToItemType(NLMISC::toUpper(itemtype) );
+		ItemType = (ITEM_TYPE::TItemType) ITEM_TYPE::stringToItemType(NLMISC::toUpperAscii(itemtype) );
 		if (ItemType == ITEM_TYPE::UNDEFINED)
 			debug("Item Type Undefined.");
 	}
@@ -362,7 +365,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 		debug("key '3d.anim_set' not found.");
 	// Force the CASE in UPPER to not be CASE SENSITIVE.
 	else
-		AnimSet = NLMISC::toLower(AnimSet);
+		AnimSet = NLMISC::toLowerAscii(AnimSet);
 	IdAnimSet = ClientSheetsStrings.add(AnimSet);
 
 	// Get the Trail Shape
@@ -377,28 +380,28 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	string Effect1;
 	if(!item.getValueByName(Effect1, "Effects.Effect1"))
 		debug("key 'Effects.Effect1' not found.");
-	Effect1 = toLower(Effect1);
+	Effect1 = toLowerAscii(Effect1);
 	IdEffect1 = ClientSheetsStrings.add(Effect1);
 
 	// Get special Effect2
 	string Effect2;
 	if(!item.getValueByName(Effect2, "Effects.Effect2"))
 		debug("key 'Effects.Effect2' not found.");
-	Effect2 = toLower(Effect2);
+	Effect2 = toLowerAscii(Effect2);
 	IdEffect2 = ClientSheetsStrings.add(Effect2);
 
 	// Get special Effect3
 	string Effect3;
 	if(!item.getValueByName(Effect3, "Effects.Effect3"))
 		debug("key 'Effects.Effect3' not found.");
-	Effect3 = toLower(Effect3);
+	Effect3 = toLowerAscii(Effect3);
 	IdEffect3 = ClientSheetsStrings.add(Effect3);
 
 	// Get special Effect4
 	string Effect4;
 	if(!item.getValueByName(Effect4, "Effects.Effect4"))
 		debug("key 'Effects.Effect4' not found.");
-	Effect4 = toLower(Effect4);
+	Effect4 = toLowerAscii(Effect4);
 	IdEffect4 = ClientSheetsStrings.add(Effect4);
 
 	// Get its bulk
@@ -982,7 +985,7 @@ bool	CItemSheet::canExchangeOrGive(bool botChatGift) const
 }
 
 // ***************************************************************************
-void	CItemSheet::getItemPartListAsText(ucstring &ipList) const
+void	CItemSheet::getItemPartListAsText(std::string &ipList) const
 {
 	bool	all= true;
 	for(uint i=0;i<RM_FABER_TYPE::NUM_FABER_TYPE;i++)

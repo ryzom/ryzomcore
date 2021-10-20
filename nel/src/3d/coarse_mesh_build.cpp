@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -117,7 +120,7 @@ bool CCoarseMeshBuild::buildBitmap (const std::vector<CCoarseMeshDesc>& coarseMe
 						if (texture->supportSharing())
 						{
 							// Get sharing name
-							name+=toLower(texture->getShareName());
+							name+=toLowerAscii(texture->getShareName());
 						}
 						else
 						{
@@ -477,7 +480,7 @@ void CCoarseMeshBuild::remapCoordinates (const std::vector<CCoarseMeshDesc>& coa
 						if (texture->supportSharing())
 						{
 							// Get sharing name
-							name+=toLower(texture->getShareName());
+							name+=toLowerAscii(texture->getShareName());
 						}
 						else
 						{

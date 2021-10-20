@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -162,7 +162,9 @@ CDecal::CDecal()
 	{
 		DecalAttenuationVertexProgram = new CVertexProgramDecalAttenuation();
 	}
-	_ShadowMap = new CShadowMap(&(((CSceneUser *) Scene)->getScene().getRenderTrav().getShadowMapManager()));
+
+	// initialized in render() as depends on scene
+	_ShadowMap = NULL;
 	_Material.initUnlit();
 	_Diffuse = CRGBA::White;
 	_Emissive = CRGBA::Black;
@@ -251,7 +253,11 @@ CRGBA CDecal::getDiffuse() const
 // ****************************************************************************
 CDecal::~CDecal()
 {
-	delete _ShadowMap;
+	if (_ShadowMap)
+	{
+		delete _ShadowMap;
+		_ShadowMap = NULL;
+	}
 }
 
 // ****************************************************************************
@@ -527,7 +533,12 @@ void CDecal::render(NL3D::UDriver &/* drv */,
 	//
 	float tileNear = Landscape->getTileNear();
 	//
-	nlassert(_ShadowMap);
+	if (!_ShadowMap)
+	{
+		_ShadowMap = new CShadowMap(&(((CSceneUser *) Scene)->getScene().getRenderTrav().getShadowMapManager()));
+		nlassert(_ShadowMap);
+	}
+
 	_ShadowMap->LocalClipPlanes.resize(4);
 	CVector corners[4] =
 	{

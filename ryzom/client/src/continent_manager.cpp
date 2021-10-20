@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -187,7 +187,7 @@ void CContinentManager::preloadSheets()
 	for (i = 0; i < ws->ContLocs.size(); ++i)
 	{
 		const SContLoc &clTmp = ws->ContLocs[i];
-		std::string continentSheetName = NLMISC::toLower(clTmp.ContinentName);
+		std::string continentSheetName = NLMISC::toLowerAscii(clTmp.ContinentName);
 		if (continentSheetName.find(".continent") == std::string::npos)
 		{
 			continentSheetName += ".continent";
@@ -564,7 +564,7 @@ void CContinentManager::readFrom(xmlNodePtr node)
 		nlwarning("Ignore landmarks group without 'type' attribute.");
 		return;
 	}
-	lmtype = toLower((const char*)prop);
+	lmtype = toLowerAscii((const char*)prop);
 	if (lmtype != "user")
 	{
 		nlwarning("Ignore landmarks group with type '%s', expected 'user'.", lmtype.c_str());

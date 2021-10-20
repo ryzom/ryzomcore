@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,7 +29,6 @@
 #include "chat_window.h"
 #include "interface_pointer.h"
 // NeL
-#include "nel/misc/ucstring.h"
 #include "nel/misc/rgba.h"
 
 
@@ -40,7 +40,7 @@
 struct CPeopleListDesc
 {
 	enum TContactType { Team, Contact, Ignore, Unknown };
-	ucstring     PeopleListTitle;    // title of the people list
+	std::string     PeopleListTitle;    // title of the people list
 	TContactType ContactType;
 	std::string  FatherContainer;           // name of the father container
 	std::string  BaseContainerTemplateName; // name of the template for the base container
@@ -75,13 +75,13 @@ public:
 	  */
 	bool create(const CPeopleListDesc &desc, const CChatWindowDesc *chat = NULL);
 	// Get index from the name of a people, or -1 if not found
-	sint getIndexFromName(const ucstring &name) const;
+	sint getIndexFromName(const std::string &name) const;
 	// Get index from the id of the container that represent the people
 	sint getIndexFromContainerID(const std::string &id) const;
 	// Get the number of people in this list
 	uint getNumPeople() const { return (uint)_Peoples.size(); }
 	// Get name of a people
-	ucstring getName(uint index) const;
+	std::string getName(uint index) const;
 	// Sort people alphabetically
 	void sort();
 
@@ -99,7 +99,7 @@ public:
 	/** Add a people to the list, and returns its index or -1 if the creation failed
 	  * If this is a team mate, tells its index so that ic can be bound to the database in the right location
 	  */
-	sint addPeople(const ucstring &name, uint teamMateIndex = 0);
+	sint addPeople(const std::string &name, uint teamMateIndex = 0);
 	// swap people position between the 2 given indexs
 	void swapPeople(uint index1, uint index2);
 	// Remove the people at the given index
@@ -111,15 +111,15 @@ public:
 	sint	getIndexFromContactId(uint32 contactId);
 
 	// For Friend Groups management
-	void changeGroup(uint index, const ucstring &groupName);
+	void changeGroup(uint index, const std::string &groupName);
 	void readContactGroups();
 	void saveContactGroups();
 
 	/** Display a message for the given people
 	  * If the window is closed, it causes it to blink (and also the parent window)
 	  */
-	void displayMessage(uint index, const ucstring &msg, NLMISC::CRGBA col, uint numBlinks = 0);
-	void displayLocalPlayerTell(const ucstring &receiver, uint index, const ucstring &msg, uint numBlinks = 0);
+	void displayMessage(uint index, const std::string &msg, NLMISC::CRGBA col, uint numBlinks = 0);
+	void displayLocalPlayerTell(const std::string &receiver, uint index, const std::string &msg, uint numBlinks = 0);
 	// Is the given people window visible ?
 	bool isPeopleChatVisible(uint index) const;
 	// reset remove everything from the interface
@@ -163,9 +163,9 @@ private:
 		TCharConnectionState			Online;
 		bool							Blocked;
 		uint32							ContactId;
-		ucstring						Group;
+		std::string						Group;
 		bool operator < (const CPeople &other) const { return getName() < other.getName(); }
-		ucstring		getName() const { return Container->getUCTitle(); }
+		std::string getName() const { return Container->getTitle(); }
 	};
 	typedef std::vector<CPeople> TPeopleVect;
 private:

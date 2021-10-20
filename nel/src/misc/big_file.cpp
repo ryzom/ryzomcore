@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -75,7 +78,7 @@ CBigFile::CHandleFile		&CBigFile::CThreadFileArray::get(uint32 index)
 	// if the vector is not allocated, allocate it (empty entries filled with NULL => not opened FILE* in this thread)
 	if(index>=ptr->size())
 	{
-		ptr->resize(index+1);
+		ptr->resize((ptrdiff_t)index + 1);
 	}
 
 	return (*ptr)[index];
@@ -125,7 +128,7 @@ void CBigFile::CThreadFileArray::currentThreadFinished()
 bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 {
 	// Is already the same bigfile name ?
-	string bigfilenamealone = toLower(CFile::getFilename (sBigFileName));
+	string bigfilenamealone = toLowerAscii(CFile::getFilename (sBigFileName));
 	if (_BNPs.find(bigfilenamealone) != _BNPs.end())
 	{
 		nlwarning ("CBigFile::add : bigfile %s already added.", bigfilenamealone.c_str());
@@ -278,11 +281,13 @@ bool CBigFile::BNP::readHeader(FILE *file)
 		}
 
 		char sFileName[256];
-		if (fread (sFileName, 1, nStringSize, file) != nStringSize)
+		if (nStringSize)
 		{
-			return false;
+			if (fread(sFileName, 1, nStringSize, file) != nStringSize)
+			{
+				return false;
+			}
 		}
-
 		sFileName[nStringSize] = 0;
 
 		uint32 nFileSize2;
@@ -310,7 +315,7 @@ bool CBigFile::BNP::readHeader(FILE *file)
 			BNPFile bnpfTmp;
 			bnpfTmp.Pos = nFilePos;
 			bnpfTmp.Size = nFileSize2;
-			tempMap.insert (make_pair(toLower(string(sFileName)), bnpfTmp));
+			tempMap.insert (make_pair(toLowerAscii(string(sFileName)), bnpfTmp));
 		}
 		else
 		{
@@ -601,7 +606,7 @@ std::string CBigFile::getBigFileName(const std::string &sBigFileName) const
 // ***************************************************************************
 void CBigFile::list (const std::string &sBigFileName, std::vector<std::string> &vAllFiles)
 {
-	string lwrFileName = toLower(sBigFileName);
+	string lwrFileName = toLowerAscii(sBigFileName);
 	if (_BNPs.find (lwrFileName) == _BNPs.end())
 		return;
 	vAllFiles.clear ();
@@ -634,7 +639,7 @@ struct CBNPFileComp
 // ***************************************************************************
 bool CBigFile::getFileInternal (const std::string &sFileName, BNP *&zeBnp, BNPFile *&zeBnpFile)
 {
-	string zeFileName, zeBigFileName, lwrFileName = toLower(sFileName);
+	string zeFileName, zeBigFileName, lwrFileName = toLowerAscii(sFileName);
 	string::size_type i, nPos = sFileName.find ('@');
 	if (nPos == string::npos)
 	{
@@ -748,7 +753,7 @@ char *CBigFile::getFileNamePtr(const std::string &sFileName, const std::string &
 		vector<BNPFile>::iterator itNBPFile;
 		if (rbnp.Files.empty())
 			return NULL;
-		string lwrFileName = toLower(sFileName);
+		string lwrFileName = toLowerAscii(sFileName);
 
 		BNPFile temp_bnp_file;
 		temp_bnp_file.Name = (char*)lwrFileName.c_str();

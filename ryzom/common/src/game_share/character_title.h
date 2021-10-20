@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -301,9 +304,9 @@ inline ECharacterTitle getGMTitleFromPriv (const std::string& priv)
 
 
 //----------------------------------------------------------------------
-inline bool isCsrTitle(const ucstring& title)
+inline bool isCsrTitle(const std::string& title)
 {
-	ECharacterTitle titleEnum = toCharacterTitle( title.toUtf8() );
+	ECharacterTitle titleEnum = toCharacterTitle( title );
 	bool bIsCsrTitle = (titleEnum >= SGM && titleEnum <= CM);
 
 	return bIsCsrTitle;

@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -960,7 +960,7 @@ bool CSPhraseManager::isPhraseKnown(const CSPhraseCom &phrase) const
 }
 
 // ***************************************************************************
-ucstring	CSPhraseManager::formatMalus(sint base, sint malus)
+string	CSPhraseManager::formatMalus(sint base, sint malus)
 {
 	if(malus)
 		return toString("@{F80F}%d@{FFFF}  (%d)", base+malus, base);
@@ -969,7 +969,7 @@ ucstring	CSPhraseManager::formatMalus(sint base, sint malus)
 }
 
 // ***************************************************************************
-ucstring	CSPhraseManager::formatMalus(float base, float malus)
+string	CSPhraseManager::formatMalus(float base, float malus)
 {
 	if(malus)
 		return toString("@{F80F}%.1f@{FFFF}  (%.1f)", base+malus, base);
@@ -1008,7 +1008,7 @@ string	CSPhraseManager::formatBonusMalus(sint32 base, sint32 mod)
 }
 
 // ***************************************************************************
-void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase, uint32 phraseSheetId, bool wantRequirement, const std::string &specialPhraseFormat)
+void CSPhraseManager::buildPhraseDesc(string &text, const CSPhraseCom &phrase, uint32 phraseSheetId, bool wantRequirement, const std::string &specialPhraseFormat)
 {
 	CSBrickManager	*pBM= CSBrickManager::getInstance();
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
@@ -1029,7 +1029,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 		if(rootBrick)
 		{
 			static const string		compoId= "composition";
-			static const ucstring	compoTag("%compostart");
+			static const string	compoTag("%compostart");
 			bool	isComposition= specialPhraseFormat==compoId;
 
 			// if format not given by user, auto select it.
@@ -1053,14 +1053,14 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 				// if composition, cut the text before the tag (including)
 				if(isComposition)
 				{
-					ucstring::size_type	pos= text.find(compoTag);
-					if(pos!=ucstring::npos)
+					string::size_type	pos= text.find(compoTag);
+					if(pos!=string::npos)
 						text.erase(0, pos+compoTag.size());
 				}
 				// else just clear the tag
 				else
 				{
-					strFindReplace(text, compoTag, ucstring() );
+					strFindReplace(text, compoTag, string() );
 				}
 			}
 			else
@@ -1071,7 +1071,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 
 		// **** Phrase info basics
 		// replace name
-		strFindReplace(text, "%name", phrase.Name);
+		strFindReplace(text, "%name", phrase.Name.toUtf8());
 		// replace Sabrina Cost and credit.
 		uint32	cost, credit;
 		pBM->getSabrinaCom().getPhraseCost(phrase.Bricks, cost, credit);
@@ -1079,7 +1079,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 		strFindReplace(text, "%credit", toString(credit));
 
 		// for combat, fill weapon compatibility
-		ucstring	weaponRestriction;
+		string	weaponRestriction;
 		bool		usableWithMelee;
 		bool		usableWithRange;
 		if(rootBrick && rootBrick->isCombat())
@@ -1099,7 +1099,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 			bool		resistMagic[RESISTANCE_TYPE::NB_RESISTANCE_TYPE];
 			getResistMagic(resistMagic, phrase.Bricks);
 			bool		first= true;
-			ucstring	resList;
+			string	resList;
 			for(uint i=0;i<RESISTANCE_TYPE::NB_RESISTANCE_TYPE;i++)
 			{
 				if(resistMagic[i])
@@ -1114,13 +1114,13 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 			// If have some resist
 			if(!resList.empty())
 			{
-				ucstring	fmt= CI18N::get("uihelpPhraseMagicResist");
+				string	fmt= CI18N::get("uihelpPhraseMagicResist");
 				strFindReplace(fmt, "%t", resList);
 				strFindReplace(text, "%magicresist", fmt);
 			}
 			else
 			{
-				strFindReplace(text, "%magicresist", ucstring());
+				strFindReplace(text, "%magicresist", string());
 			}
 
 		}
@@ -1208,7 +1208,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 			strFindReplace(text, "%range", CI18N::get("uihelpPhraseRangeSelf"));
 		else
 		{
-			ucstring	fmt= CI18N::get("uihelpPhraseRangeMeters");
+			string	fmt= CI18N::get("uihelpPhraseRangeMeters");
 			strFindReplace(fmt, "%dist", formatMalus(range, rangeMalus));
 			strFindReplace(text, "%range", fmt);
 		}
@@ -1217,7 +1217,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 		if(rootBrick->isForageExtraction())
 		{
 			// Choose the fmt text
-			ucstring	fmt= getForageExtractionPhraseEcotypeFmt(phrase);
+			string	fmt= getForageExtractionPhraseEcotypeFmt(phrase);
 
 			// Replace forage success rate in any ecotype
 			successModifier = 0;
@@ -1292,16 +1292,16 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 	}
 
 	// **** Special .sphrase description
-	if(phraseSheetId)
+	if (phraseSheetId)
 	{
 		// get the text
-		ucstring	desc(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(CSheetId(phraseSheetId)));
-		if(desc.empty())
-			strFindReplace(text, "%desc", ucstring());
+		string desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(CSheetId(phraseSheetId));
+		if (desc.empty())
+			strFindReplace(text, "%desc", string());
 		else
 		{
 			// append an \n before, for clearness
-			desc= ucstring("\n") + desc;
+			desc= string("\n") + desc;
 			// append \n at end if not done
 			if(desc[desc.size()-1]!='\n')
 				desc+= '\n';
@@ -1311,13 +1311,13 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 	}
 	else
 	{
-		strFindReplace(text, "%desc", ucstring());
+		strFindReplace(text, "%desc", string());
 	}
 
 	// **** Special .sphrase requirement
 	if(phraseSheetId && wantRequirement)
 	{
-		ucstring	reqText;
+		string	reqText;
 		reqText= CI18N::get("uihelpPhraseRequirementHeader");
 
 		// replace the skill point cost
@@ -1331,7 +1331,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 			const CReqSkillFormula	&formula= it->second;
 
 			// from this formula, build the requirement tex
-			ucstring	textForm;
+			string	textForm;
 			formula.getInfoText(textForm);
 			reqText+= textForm;
 		}
@@ -3576,13 +3576,12 @@ void				CSPhraseManager::updatePhraseProgressionDB()
 					break;
 				}
 			}
-		}
 
-
-		// if show, but only if full learnt, skip it if not fully learnt
-		if(phrase->ShowInAPOnlyIfLearnt && !known)
-		{
-			continue;
+			// if show, but only if full learnt, skip it if not fully learnt
+			if (phrase->ShowInAPOnlyIfLearnt && !known)
+			{
+				continue;
+			}
 		}
 
 
@@ -3633,7 +3632,7 @@ public:
 	bool		Castable;
 	uint32		Type;
 	uint32		Icon;
-	ucstring	Text;
+	string	Text;
 
 	bool	operator<(const CPhraseSortEntry &pse) const
 	{
@@ -3849,20 +3848,20 @@ void				CSPhraseManager::computePhraseProgression()
 			// replace each number with 001 format. toLower
 			for(uint k=0;k<pse.Text.size();k++)
 			{
-				if(pse.Text[k] < 256 && isalpha(pse.Text[k]))
-					pse.Text[k]= tolower(pse.Text[k]);
-				else if(pse.Text[k] < 256 && isdigit(pse.Text[k]))
+				if((uint8)pse.Text[k] < (uint8)'\x80' && isalpha(pse.Text[k]))
+					pse.Text[k]= tolower(pse.Text[k]); // FIXME: toLowerAscii
+				else if((uint8)pse.Text[k] < (uint8)'\x80' && isdigit(pse.Text[k]))
 				{
 					uint32	number= 0;
 					uint32	start= k;
 					// get the whole number
-					for(;k<pse.Text.size() && isdigit(pse.Text[k]);k++)
+					for(;k<pse.Text.size() && (uint8)pse.Text[k] < (uint8)'\x80' && isdigit(pse.Text[k]);k++)
 					{
 						number*=10;
 						number+= pse.Text[k] - '0';
 					}
 					// format, and replace in string
-					ucstring	newNumber= toString("%3d", number);
+					string	newNumber= toString("%3d", number);
 					pse.Text.replace(start, k-start, newNumber);
 					// and skip this number
 					k= start + (uint)newNumber.size();
@@ -4098,7 +4097,7 @@ bool				CSPhraseManager::allowListBrickInHelp(const CSPhraseCom &phrase) const
 }
 
 // ***************************************************************************
-void				CSPhraseManager::getCombatWeaponRestriction(ucstring &text, const CSPhraseCom &phrase, bool& usableWithMelee, bool& usableWithRange)
+void				CSPhraseManager::getCombatWeaponRestriction(string &text, const CSPhraseCom &phrase, bool& usableWithMelee, bool& usableWithRange)
 {
 	text.clear();
 
@@ -4174,7 +4173,7 @@ void				CSPhraseManager::getCombatWeaponRestriction(ucstring &text, const CSPhra
 }
 
 // ***************************************************************************
-void				CSPhraseManager::getCombatWeaponRestriction(ucstring &text, sint32 phraseSheetId, bool& usableWithMelee, bool& usableWithRange)
+void				CSPhraseManager::getCombatWeaponRestriction(string &text, sint32 phraseSheetId, bool& usableWithMelee, bool& usableWithRange)
 {
 	CSPhraseCom	phrase;
 	buildPhraseFromSheet(phrase, phraseSheetId);
@@ -4288,7 +4287,7 @@ void		CSPhraseManager::fullDeletePhraseIfLast(uint32 memoryLine, uint32 memorySl
 
 
 // ***************************************************************************
-ucstring	CSPhraseManager::getForageExtractionPhraseEcotypeFmt(const CSPhraseCom &phrase)
+string	CSPhraseManager::getForageExtractionPhraseEcotypeFmt(const CSPhraseCom &phrase)
 {
 	CSBrickManager	*pBM= CSBrickManager::getInstance();
 
@@ -4684,7 +4683,11 @@ int CSPhraseComAdpater::luaGetStaCost(CLuaState &ls)
 // ***************************************************************************
 int CSPhraseComAdpater::luaGetName(CLuaState &ls)
 {
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::push(ls, this->Phrase.Name);
+#else
+	ls.push(this->Phrase.Name.toUtf8());
+#endif
 	return 1;
 }
 
@@ -4697,10 +4700,15 @@ int CSPhraseComAdpater::luaGetDesc(CLuaState &ls)
 	if (phraseSheetID != 0)
 	{
 		// is it a built-in phrase?
-		ucstring desc(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID)));
-		if (!desc.empty())
+		const char *desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
+		if (*desc)
 		{
-			CLuaIHM::push(ls, desc);
+#ifdef RYZOM_LUA_UCSTRING
+			ucstring uc = ucstring::makeFromUtf8(desc); // Compatibility
+			CLuaIHM::push(ls, uc);
+#else
+			ls.push(desc);
+#endif
 			return 1;
 		}
 	}

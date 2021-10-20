@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -169,8 +170,8 @@ void CGroupQuickHelp::setGroupTextSize (CInterfaceGroup *group, bool selected)
 {
 	bool globalColor = selected ? TextColorGlobalColor : _NonSelectedGlobalColor;
 	bool linkGlobalColor = selected ? LinkColorGlobalColor : _NonSelectedGlobalColor;
-	uint fontSize = selected ? TextFontSize : _NonSelectedSize;
-	NLMISC::CRGBA color = selected ? TextColor : _NonSelectedColor;
+	uint fontSize = selected ? _BrowserStyle.Current.FontSize : _NonSelectedSize;
+	NLMISC::CRGBA color = selected ? _BrowserStyle.Current.TextColor : _NonSelectedColor;
 	NLMISC::CRGBA linkColor = selected ? LinkColor : _NonSelectedLinkColor;
 
 	// Look for text in this group
@@ -246,7 +247,7 @@ void CGroupQuickHelp::beginElement(CHtmlElement &elm)
 					CActionsManager::TActionComboMap::const_iterator ite = actionCombo.find (CAction::CName (elm.getAttribute("z_action_shortcut").c_str(), params.c_str()));
 					if (ite != actionCombo.end())
 					{
-						addString (ite->second.toUCString());
+						addString (ite->second.toString());
 					}
 				}
 			}

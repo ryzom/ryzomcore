@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -3485,7 +3485,7 @@ BOOL CMyComboBox::PreTranslateMessage( MSG* pMsg )
 			_LastString.clear();
 
 		// Add this char
-		_LastString.push_back (tolower((TCHAR) pMsg->wParam));
+		_LastString.push_back((wchar_t)NLMISC::toLower((ucchar)pMsg->wParam));
 		search = true;
 
 		// New stroke time
@@ -3518,7 +3518,7 @@ BOOL CMyComboBox::PreTranslateMessage( MSG* pMsg )
 		{
 			// 0 final
 			text[511] = 0;
-			_LastString = tStrToUtf8(text);
+			_LastString = CUtfStringView(tStrToUtf8(text)).toWide();
 			search = true;
 		}
 	}
@@ -3538,11 +3538,11 @@ BOOL CMyComboBox::PreTranslateMessage( MSG* pMsg )
 		{
 			CString rString;
 			GetLBText (i, rString);
-			string tmp = toLower(tStrToUtf8(rString));
+			wstring tmp = CUtfStringView(toLower(tStrToUtf8(rString))).toWide();
 			uint size = std::min (_LastString.size(), tmp.size());
 			if (size > matchSize)
 			{
-				if (strncmp(tmp.c_str(), _LastString.c_str(), size) == 0)
+				if (wcsncmp(tmp.c_str(), _LastString.c_str(), size) == 0)
 				{
 					matchItem = i;
 					matchSize = size;

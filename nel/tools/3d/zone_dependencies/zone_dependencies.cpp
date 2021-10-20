@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -525,7 +525,7 @@ int main (int argc, char* argv[])
 
 							// Write the dependencies file
 							FILE *outputFile;
-							if ((outputFile = nlfopen (toLower (outputFileName), "w")))
+							if ((outputFile = nlfopen (toLowerAscii (outputFileName), "w")))
 							{
 								// Add a dependency entry
 								fprintf (outputFile, "dependencies =\n{\n");
@@ -540,7 +540,7 @@ int main (int argc, char* argv[])
 
 									// Write it
 									string message="\t\""+zoneName+"\"";
-									fprintf (outputFile, "%s", toLower (message).c_str());
+									fprintf (outputFile, "%s", toLowerAscii (message).c_str());
 
 									// Next ite;
 									ite++;
@@ -615,7 +615,7 @@ static void computeIGBBox(const NL3D::CInstanceGroup &ig, CLightingBBox &result,
 			{
 				nlwarning("Unable to find shape '%s'", it->Name.c_str());				
 			}
-			else if (toLower (CFile::getExtension (shapePathName)) == "pacs_prim")
+			else if (toLowerAscii (CFile::getExtension (shapePathName)) == "pacs_prim")
 			{
 				nlwarning("EXPORT BUG: Can't read %s (not a shape), should not be part of .ig!", shapePathName.c_str());
 			}
@@ -711,7 +711,7 @@ static void computeIGBBox(const NL3D::CInstanceGroup &ig, CLightingBBox &result,
 static void computeZoneIGBBox(const char *zoneName, CLightingBBox &result, TShapeMap &shapeMap, const TString2LightingBBox &additionnalIG)
 {
 	result = CLightingBBox(); // starts with a void box	
-	std::string lcZoneName = NLMISC::toLower(std::string(zoneName));
+	std::string lcZoneName = NLMISC::toLowerAscii(std::string(zoneName));
 	TString2LightingBBox::const_iterator zoneIt = additionnalIG.find(lcZoneName);
 	if (zoneIt != additionnalIG.end())
 	{		
@@ -901,7 +901,7 @@ static void computeIGBBoxFromContinent(NLMISC::CConfigFile &parameter,
 					nlwarning("Couldn't get zone name of village %d in continent %s", continentName.c_str(), k);
 					continue;
 				}
-				zoneName = NLMISC::toLower(CFile::getFilenameWithoutExtension(zoneName));				
+				zoneName = NLMISC::toLowerAscii(CFile::getFilenameWithoutExtension(zoneName));				
 				CLightingBBox result;				
 				// ok, it is in the dependant zones
 				computeBBoxFromVillage(currVillage, continentName, k, shapeMap, result);

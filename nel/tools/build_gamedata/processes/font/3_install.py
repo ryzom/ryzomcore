@@ -31,7 +31,7 @@ if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
 from scripts import *
-from buildsite_local import *
+from buildsite import *
 from process import *
 from tools import *
 from directories import *

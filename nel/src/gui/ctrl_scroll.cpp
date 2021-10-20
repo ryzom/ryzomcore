@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -561,17 +561,17 @@ namespace NLGUI
 
 		// Read Action handlers
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onscroll" );
-		if (prop)	_AHOnScroll = NLMISC::toLower(prop.str());
+		if (prop)	_AHOnScroll = NLMISC::toLowerAscii(prop.str());
 		prop = (char*) xmlGetProp( node, (xmlChar*)"params" );
 		if (prop)	_AHOnScrollParams = string((const char*)prop);
 		//
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onscrollend" );
-		if (prop)	_AHOnScrollEnd = NLMISC::toLower(prop.str());
+		if (prop)	_AHOnScrollEnd = NLMISC::toLowerAscii(prop.str());
 		prop = (char*) xmlGetProp( node, (xmlChar*)"end_params" );
 		if (prop)	_AHOnScrollEndParams = string((const char*)prop);
 		//
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onscrollcancel" );
-		if (prop)	_AHOnScrollCancel = NLMISC::toLower(prop.str());
+		if (prop)	_AHOnScrollCancel = NLMISC::toLowerAscii(prop.str());
 		prop = (char*) xmlGetProp( node, (xmlChar*)"cancel_params" );
 		if (prop)	_AHOnScrollCancelParams = string((const char*)prop);
 

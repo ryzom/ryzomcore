@@ -1,8 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -103,9 +103,13 @@ void CControlSheetInfoWaiter::infoReceived()
 }
 
 
-ucstring CControlSheetInfoWaiter::infoValidated() const
+string CControlSheetInfoWaiter::infoValidated() const
 {
-	ucstring help;
+#ifdef RYZOM_LUA_UCSTRING
+	ucstring help; // Compatibility
+#else
+	string help;
+#endif
 	if (CtrlSheet && !LuaMethodName.empty())
 	{
 		// delegate setup of context he help ( & window ) to lua
@@ -123,7 +127,12 @@ ucstring CControlSheetInfoWaiter::infoValidated() const
 			// retrieve result from stack
 			if (!ls->empty())
 			{
+#ifdef RYZOM_LUA_UCSTRING
 				CLuaIHM::pop(*ls, help);
+#else
+				help = ls->toString(-1);
+				ls->pop();
+#endif
 			}
 			else
 			{
@@ -132,7 +141,11 @@ ucstring CControlSheetInfoWaiter::infoValidated() const
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
+	return help.toUtf8();
+#else
 	return help;
+#endif
 }
 
 // ***************************************************************************
@@ -180,7 +193,11 @@ int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
 // ***************************************************************************
 int CDBCtrlSheet::luaGetName(CLuaState &ls)
 {
-	CLuaIHM::push(ls, getItemActualName());
+#ifdef RYZOM_LUA_UCSTRING
+	CLuaIHM::push(ls, ucstring::makeFromUtf8(getItemActualName()));
+#else
+	ls.push(getItemActualName());
+#endif
 	return 1;
 }
 
@@ -208,9 +225,13 @@ int CDBCtrlSheet::luaGetCreatorName(CLuaState &ls)
 {
 	uint32	itemSlotId = getInventory().getItemSlotId(this);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-	ucstring creatorName;
+	string creatorName;
 	STRING_MANAGER::CStringManagerClient::instance()->getString(itemInfo.CreatorName, creatorName);
-	CLuaIHM::push(ls, creatorName);
+#ifdef RYZOM_LUA_UCSTRING
+	CLuaIHM::push(ls, ucstring::makeFromUtf8(creatorName)); // FIXME: Lua UTF-8
+#else
+	ls.push(creatorName);
+#endif
 
 	return 1;
 }
@@ -326,29 +347,30 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"nature" );
 	if (prop)
 	{
-		if (NLMISC::toLower(prop.str()) == "item")
+		std::string lwrProp = NLMISC::toLower(prop.str());
+		if (lwrProp == "item")
 			_Type = CCtrlSheetInfo::SheetType_Item;
-		else if (NLMISC::toLower(prop.str()) == "pact")
+		else if (lwrProp == "pact")
 			_Type = CCtrlSheetInfo::SheetType_Pact;
-		else if (NLMISC::toLower(prop.str()) == "skill")
+		else if (lwrProp == "skill")
 			_Type = CCtrlSheetInfo::SheetType_Skill;
-		else if (NLMISC::toLower(prop.str()) == "auto")
+		else if (lwrProp == "auto")
 			_Type = CCtrlSheetInfo::SheetType_Auto;
-		else if (NLMISC::toLower(prop.str()) == "macro")
+		else if (lwrProp == "macro")
 			_Type = CCtrlSheetInfo::SheetType_Macro;
-		else if (NLMISC::toLower(prop.str()) == "guild_flag")
+		else if (lwrProp == "guild_flag")
 			_Type = CCtrlSheetInfo::SheetType_GuildFlag;
-		else if (NLMISC::toLower(prop.str()) == "mission")
+		else if (lwrProp == "mission")
 			_Type = CCtrlSheetInfo::SheetType_Mission;
-		else if (NLMISC::toLower(prop.str()) == "sbrick")
+		else if (lwrProp == "sbrick")
 			_Type = CCtrlSheetInfo::SheetType_SBrick;
-		else if (NLMISC::toLower(prop.str()) == "sphraseid")
+		else if (lwrProp == "sphraseid")
 			_Type = CCtrlSheetInfo::SheetType_SPhraseId;
-		else if (NLMISC::toLower(prop.str()) == "sphrase")
+		else if (lwrProp == "sphrase")
 			_Type = CCtrlSheetInfo::SheetType_SPhrase;
-		else if (NLMISC::toLower(prop.str()) == "elevator_destination")
+		else if (lwrProp == "elevator_destination")
 			_Type = CCtrlSheetInfo::SheetType_ElevatorDestination;
-		else if (NLMISC::toLower(prop.str()) == "outpost_building")
+		else if (lwrProp == "outpost_building")
 			_Type = CCtrlSheetInfo::SheetType_OutpostBuilding;
 	}
 
@@ -356,7 +378,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_noitem" );
 	if (prop)
 	{
-		string TxName = toLower((const char *) prop);
+		string TxName = toLowerAscii((const char *) prop);
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_DispNoSheetBmpId = rVR.getTextureIdFromName (TxName);
 	}
@@ -402,23 +424,23 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );
 	if (prop)
 	{
-		_ListMenuLeft = toLower((const char *) prop);
+		_ListMenuLeft = toLowerAscii((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
 	if (prop)
 	{
-		_ListMenuRight = toLower((const char *) prop);
+		_ListMenuRight = toLowerAscii((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r_empty_slot" );
 	if (prop)
 	{
-		_ListMenuRightEmptySlot = toLower((const char *) prop);
+		_ListMenuRightEmptySlot = toLowerAscii((const char *) prop);
 	}
 	// list menu on both clicks
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_b" );
 	if (prop)
 	{
-		setListMenuBoth(toLower((const char *) prop));
+		setListMenuBoth(toLowerAscii((const char *) prop));
 	}
 
 	// _BrickTypeBitField
@@ -431,7 +453,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 		// The string may have multiple brick type separated by |
 		string	brickTypeArray= (const char*)prop;
 		vector<string>	strList;
-		NLMISC::splitString(NLMISC::toUpper(brickTypeArray), "|", strList);
+		NLMISC::splitString(NLMISC::toUpperAscii(brickTypeArray), "|", strList);
 
 		// Test All words
 		for(uint i=0;i<strList.size();i++)
@@ -457,7 +479,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	if(prop)
 	{
 		string str= prop.str();
-		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpper(str));
+		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpperAscii(str));
 	}
 
 	// _AutoGrayed
@@ -1504,7 +1526,7 @@ void CDBCtrlSheet::setupMission()
 void CDBCtrlSheet::setupGuildFlag ()
 {
 	// Find the guild name
-	ucstring usGuildName;
+	string usGuildName;
 	sint32 nGuildName = _SheetId.getSInt32();
 	if (_LastSheetId != nGuildName || _NeedSetup)
 	{
@@ -1709,7 +1731,7 @@ void CDBCtrlSheet::setupSBrick ()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const ucstring &phraseName)
+void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const string &phraseName)
 {
 	CSBrickManager		*pBM = CSBrickManager::getInstance();
 
@@ -1762,7 +1784,7 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 	{
 		// Compute the text from the phrase only if needed
 //		string	iconName= phraseName.toString();
-		string	iconName= phraseName.toUtf8();
+		const string &iconName = phraseName;
 		if( _NeedSetup || iconName != _OptString )
 		{
 			// recompute text
@@ -1785,7 +1807,7 @@ void CDBCtrlSheet::setupSPhrase()
 		CSPhraseSheet *pSPS = dynamic_cast<CSPhraseSheet*>(SheetMngr.get(CSheetId(sheet)));
 		if (pSPS && !pSPS->Bricks.empty())
 		{
-			const ucstring phraseName(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheet)));
+			const char *phraseName = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheet));
 			setupDisplayAsPhrase(pSPS->Bricks, phraseName);
 		}
 		else
@@ -1843,7 +1865,7 @@ void CDBCtrlSheet::setupSPhraseId ()
 			}
 			else
 			{
-				setupDisplayAsPhrase(phrase.Bricks, phrase.Name);
+				setupDisplayAsPhrase(phrase.Bricks, phrase.Name.toUtf8()); // FIXME: UTF-8 (serial)
 			}
 		}
 
@@ -1950,9 +1972,9 @@ void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown)
 	if (text.size() > 4 && text[0] == 'u' && text[1] == 'i' && text[2] == 'i' && text[3] == 't' && CI18N::hasTranslation(text))
 	{
 		// NOTE: translated text is expected to be us-ascii only
-		text = CI18N::get(text).toUtf8();
+		text = CI18N::get(text);
 	}
-	text = toLower(text);
+	text = toLowerAscii(text);
 
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
@@ -2215,7 +2237,7 @@ void CDBCtrlSheet::drawRegenText()
 			}
 			else
 			{
-				_RegenText->setText(ucstring());
+				_RegenText->setText("");
 			}
 		}
 		else
@@ -3519,7 +3541,7 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 }
 
 // ***************************************************************************
-void	CDBCtrlSheet::getContextHelp(ucstring &help) const
+void	CDBCtrlSheet::getContextHelp(std::string &help) const
 {
 	if (getType() == CCtrlSheetInfo::SheetType_Skill)
 	{
@@ -3534,22 +3556,22 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		if (!macro)
 			return;
 
-		ucstring macroName = macro->Name;
+		string macroName = macro->Name;
 		if (macroName.empty())
 			macroName = CI18N::get("uiNotAssigned");
 
-		ucstring assignedTo = macro->Combo.toUCString();
+		string assignedTo = macro->Combo.toString();
 		if (assignedTo.empty())
 			assignedTo = CI18N::get("uiNotAssigned");
 
-		ucstring dispText;
-		ucstring dispCommands;
+		string dispText;
+		string dispCommands;
 		const CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
 		uint nb = 0;
 		for (uint i = 0; i < macro->Commands.size(); ++i)
 		{
-			ucstring commandName;
+			string commandName;
 			for (uint j = 0; j < pMCM->ActionManagers.size(); ++j)
 			{
 				CAction::CName c(macro->Commands[i].Name.c_str(), macro->Commands[i].Params.c_str());
@@ -3565,13 +3587,13 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 			}
 		}
 		// formats
-		dispText = ucstring("%n (@{6F6F}%k@{FFFF})\n%c");
+		dispText = "%n (@{6F6F}%k@{FFFF})\n%c";
 		if (nb > 5) // more?
 			dispCommands += toString(" ... @{6F6F}%i@{FFFF}+", nb-5);
 
-		strFindReplace(dispText, ucstring("%n"), macroName);
-		strFindReplace(dispText, ucstring("%k"), assignedTo);
-		strFindReplace(dispText, ucstring("%c"), dispCommands);
+		strFindReplace(dispText, "%n", macroName);
+		strFindReplace(dispText, "%k", assignedTo);
+		strFindReplace(dispText, "%c", dispCommands);
 		help = dispText;
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
@@ -3594,7 +3616,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 			}
 			else
 			{
-				help = getItemActualName();
+				help = getItemActualName();;
 			}
 		}
 		else
@@ -3634,7 +3656,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		sint32	phraseId= getSheetId();
 		if (phraseId == 0)
 		{
-			help = ucstring();
+			help = std::string();
 		}
 		else
 		{
@@ -3652,10 +3674,16 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 				game = game["game"];
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
 				// retrieve result from stack
-				help = ucstring();
 				if (!ls->empty())
 				{
-					CLuaIHM::pop(*ls, help);
+#ifdef RYZOM_LUA_UCSTRING
+					ucstring tmpHelp; // Compatibility
+					CLuaIHM::pop(*ls, tmpHelp);
+					help = tmpHelp.toUtf8();
+#else
+					help = ls->toString();
+					ls->pop();
+#endif
 				}
 				else
 				{
@@ -3676,10 +3704,10 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		if (phraseSheetID != 0)
 		{
 			// is it a built-in phrase?
-			ucstring desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
+			string desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
 			if (!desc.empty())
 			{
-				help += ucstring("\n\n@{CCCF}") + desc;
+				help += "\n\n@{CCCF}" + desc;
 			}
 		}
 		*/
@@ -3703,7 +3731,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 }
 
 // ***************************************************************************
-void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
+void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 {
 	// Special case for buff items and spell crystals, only for tooltips
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
@@ -4703,14 +4731,14 @@ void CDBCtrlSheet::initArmourColors()
 
 
 // ***************************************************************************
-ucstring CDBCtrlSheet::getItemActualName() const
+string CDBCtrlSheet::getItemActualName() const
 {
 	const CItemSheet *pIS= asItemSheet();
 	if(!pIS)
-		return ucstring();
+		return string();
 	else
 	{
-		ucstring ret;
+		string ret;
 		// If NameId not 0, get from StringManager
 		uint32	nameId= getItemNameId();
 		if(nameId)
@@ -4727,7 +4755,7 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		if (pIS->Family == ITEMFAMILY::SCROLL_R2)
 		{
 			const R2::TMissionItem *mi = R2::getEditor().getPlotItemInfos(getSheetId());
-			if (mi) return mi->Name;
+			if (mi) return mi->Name.toUtf8();
 		}
 		// if item is not a mp, append faber_quality & faber_stat_type
 		// Don't append quality and stat type for Named Items!!!
@@ -4742,21 +4770,21 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		{
 			// get description string for item format
 			std::string formatID = getItemRMFaberStatType() != RM_FABER_STAT_TYPE::Unknown ? "uihelpItemFaberPrefixAndSuffix" : "uihelpItemFaberPrefix";
-			ucstring format;
+			string format;
 			if (!CI18N::hasTranslation(formatID))
 			{
-				format = ucstring("%p %n %s"); // not found, uses default string
+				format = "%p %n %s"; // not found, uses default string
 			}
 			else
 			{
 				format = CI18N::get(formatID);
 			}
 			// suffix
-			strFindReplace(format, ucstring("%p"), RM_CLASS_TYPE::toLocalString(getItemRMClassType()));
+			strFindReplace(format, "%p", RM_CLASS_TYPE::toLocalString(getItemRMClassType()));
 			// name
-			strFindReplace(format, ucstring("%n"), ret);
+			strFindReplace(format, "%n", ret);
 			// prefix
-			strFindReplace(format, ucstring("%s"), CI18N::get(toString("mpstatItemQualifier%d", (int) getItemRMFaberStatType()).c_str()));
+			strFindReplace(format, "%s", CI18N::get(toString("mpstatItemQualifier%d", (int) getItemRMFaberStatType()).c_str()));
 
 
 			ret = format;

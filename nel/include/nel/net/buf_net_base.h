@@ -56,6 +56,10 @@ extern uint32 	NbNetworkTask;
 enum TPipeWay { PipeRead, PipeWrite };
 #endif
 
+#ifdef NL_OS_WINDOWS
+typedef void *HANDLE;
+#endif
+
 
 /**
  * Layer 1
@@ -78,7 +82,7 @@ public:
 	/// Destructor
 	virtual ~CBufNetBase();
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	/** Init the pipe for data available with an external pipe.
 	 * Call it only if you set initPipeForDataAvailable to false in the constructor.
 	 * Then don't call sleepUntilDataAvailable() but use select() on the pipe.
@@ -88,6 +92,11 @@ public:
 	{
 		_DataAvailablePipeHandle[PipeRead] = twoPipeHandles[PipeRead];
 		_DataAvailablePipeHandle[PipeWrite] = twoPipeHandles[PipeWrite];
+	}
+#elif defined(NL_OS_WINDOWS)
+	void setExternalPipeForDataAvailable(HANDLE eventHandle)
+	{
+		_DataAvailableHandle = eventHandle;
 	}
 #endif
 
@@ -201,9 +210,11 @@ protected:
 	/// Return _DataAvailable
 	bool				dataAvailableFlag() const { return _DataAvailable; }
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	/// Pipe to select() on data available
 	int					_DataAvailablePipeHandle [2];
+#elif defined(NL_OS_WINDOWS)
+	HANDLE				_DataAvailableHandle;
 #endif
 
 private:

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -42,13 +45,13 @@ void CGeneralSettingsWidget::load()
 	CSystem &s = CSystem::GetInstance();
 
 	std::vector<std::string> codes = NLMISC::CI18N::getLanguageCodes();
-	std::vector<ucstring> names = NLMISC::CI18N::getLanguageNames();
+	std::vector<std::string> names = NLMISC::CI18N::getLanguageNames();
 
 	languageComboBox->clear();
 
 	for(uint i = 0; i < codes.size(); ++i)
 	{
-		languageComboBox->addItem(QString::fromUtf16(names[i].c_str()), QString::fromUtf8(codes[i].c_str()));
+		languageComboBox->addItem(QString::fromUtf8(names[i].c_str()), QString::fromUtf8(codes[i].c_str()));
 	}
 
 	sint32 cbIndex = getIndexForLanguageCode( QString::fromUtf8( s.config.getString( "LanguageCode" ).c_str() ) );

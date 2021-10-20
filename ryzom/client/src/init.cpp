@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2011  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -168,7 +168,7 @@ extern NLMISC::CCmdArgs Args;
 
 // Tips of the day count
 #define RZ_NUM_TIPS 17
-ucstring				TipsOfTheDay;
+std::string				TipsOfTheDay;
 uint					TipsOfTheDayIndex;
 
 // includes for following register classes
@@ -262,7 +262,7 @@ char *XmlStrdup4NeL (const char *str)
 #ifdef NL_OS_WINDOWS
 
 
-static ucstring CurrentErrorMessage;
+static std::wstring CurrentErrorMessage;
 
 static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM /* lParam */)
 {
@@ -272,19 +272,19 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 		{
 			if (CI18N::hasTranslation("TheSagaOfRyzom"))
 			{
-				if (!SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ()))
+				if (!SetWindowTextW(hwndDlg, nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str())))
 				{
 					nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
 				}
 			}
-			SetDlgItemTextW(hwndDlg, IDC_ERROR_MSG_TEXT, (WCHAR*) CurrentErrorMessage.c_str ());
+			SetDlgItemTextW(hwndDlg, IDC_ERROR_MSG_TEXT, (WCHAR*)CurrentErrorMessage.c_str());
 			if (CI18N::hasTranslation("uiRyzomErrorMsgBoxExit"))
 			{
-				SetDlgItemTextW(hwndDlg, IDOK, (WCHAR*)CI18N::get ("uiRyzomErrorMsgBoxExit").c_str ());
+				SetDlgItemTextW(hwndDlg, IDOK, nlUtf8ToWide(CI18N::get("uiRyzomErrorMsgBoxExit").c_str()));
 			}
 			if (CI18N::hasTranslation("uiRyzomErrorMsgBoxHelp"))
 			{
-				SetDlgItemTextW(hwndDlg, IDC_RYZOM_ERROR_HELP, (WCHAR*)CI18N::get ("uiRyzomErrorMsgBoxHelp").c_str ());
+				SetDlgItemTextW(hwndDlg, IDC_RYZOM_ERROR_HELP, nlUtf8ToWide(CI18N::get("uiRyzomErrorMsgBoxHelp").c_str()));
 			}
 			RECT rect;
 			RECT rectDesktop;
@@ -338,12 +338,10 @@ void ExitClientError (const char *format, ...)
 	}
 
 #ifdef NL_OS_WINDOWS
-	CurrentErrorMessage.fromUtf8(str);
+	CurrentErrorMessage = NLMISC::utf8ToWide(str);
 	DialogBox(HInstance, MAKEINTRESOURCE(IDD_ERROR_HELP_MESSAGE_BOX), NULL, ExitClientErrorDialogProc);
 	/*
-		ucstring ucstr;
-		ucstr.fromUtf8 (str);
-		MessageBoxW (NULL, (WCHAR*)ucstr.c_str(), (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str (), MB_OK|MB_ICONERROR);
+		MessageBoxW (NULL, nlUtf8ToWide(str.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONERROR);
 	*/
 #else
 	fprintf (stderr, "%s\n", str);
@@ -357,18 +355,18 @@ void ExitClientError (const char *format, ...)
 }
 
 // Use this function to return an information to the final user
-void ClientInfo (const ucstring &message)
+void ClientInfo (const std::string &message)
 {
 #ifdef NL_OS_WINDOWS
-	MessageBoxW (NULL, (WCHAR*)message.c_str(), (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str (), MB_OK|MB_ICONINFORMATION);
+	MessageBoxW(NULL, nlUtf8ToWide(message.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONINFORMATION);
 #endif
 }
 
 // Use this function to ask a question to the final user
-bool ClientQuestion (const ucstring &message)
+bool ClientQuestion (const std::string &message)
 {
 #ifdef NL_OS_WINDOWS
-	return MessageBoxW (NULL, (WCHAR*)message.c_str(), (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str (), MB_YESNO|MB_ICONQUESTION) != IDNO;
+	return MessageBoxW(NULL, nlUtf8ToWide(message.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_YESNO|MB_ICONQUESTION) != IDNO;
 #else
 	return false;
 #endif
@@ -379,7 +377,7 @@ void selectTipsOfTheDay (uint /* tips */)
 	/* todo tips of the day uncomment
 	tips %= RZ_NUM_TIPS;
 	TipsOfTheDayIndex = tips;
-	ucstring title = CI18N::get ("uiTipsTitle");
+	string title = CI18N::get ("uiTipsTitle");
 	title += toString (tips+1);
 	title += " : ";
 	TipsOfTheDay = title+CI18N::get ("uiTips"+toString (tips));*/
@@ -536,12 +534,12 @@ void checkDriverVersion()
 		uint i;
 		for (i=0; i< sizeofarray(driversVersion); i++)
 		{
-			string lwr = toLower(deviceName);
+			string lwr = toLowerAscii(deviceName);
 			if ((lwr.find (driversTest[i])!=string::npos) && (driversNTest[i]==NULL || lwr.find (driversNTest[i])==string::npos))
 			{
 				if (driverVersion < driversVersion[i])
 				{
-					ucstring message = CI18N::get ("uiUpdateDisplayDriversNotUpToDate") + "\n\n";
+					string message = CI18N::get ("uiUpdateDisplayDriversNotUpToDate") + "\n\n";
 					// message += CI18N::get ("uiUpdateDisplayDriversVendor") + driversVendor[i] + "\n";
 					message += CI18N::get ("uiUpdateDisplayDriversCard") + deviceName + "\n";
 					message += CI18N::get ("uiUpdateDisplayDriversCurrent") + getVersionString (driverVersion) + "\n";
@@ -578,7 +576,7 @@ void checkDriverDepth ()
 #else
 		if (mode.Depth != 16 && mode.Depth != 24 && mode.Depth != 32)
 #endif
-			ExitClientError (CI18N::get ("uiDesktopNotIn32").toUtf8().c_str ());
+			ExitClientError (CI18N::get ("uiDesktopNotIn32").c_str ());
 	}
 }
 
@@ -937,7 +935,7 @@ void prelogInit()
 		initDebugMemory();
 
 		// Load the application configuration.
-		ucstring nmsg("Loading config file...");
+		string nmsg("Loading config file...");
 		ProgressBar.newMessage (nmsg);
 
 		ClientCfg.init(ConfigFileName);
@@ -999,7 +997,7 @@ void prelogInit()
 
 			FPU_CHECKER_ONCE
 			// Set the data path for the localisation.
-			const ucstring nmsg("Loading I18N...");
+			const string nmsg("Loading I18N...");
 			ProgressBar.newMessage ( nmsg );
 
 			FPU_CHECKER_ONCE
@@ -1058,7 +1056,7 @@ void prelogInit()
 
 		if(Driver == NULL)
 		{
-			ExitClientError (CI18N::get ("Can_t_load_the_display_driver").toUtf8().c_str ());
+			ExitClientError (CI18N::get ("Can_t_load_the_display_driver").c_str ());
 			// ExitClientError() call exit() so the code after is never called
 			return;
 		}
@@ -1149,14 +1147,14 @@ void prelogInit()
 			string msg;
 			if (mode.Windowed)
 			{
-				msg = CI18N::get ("can_t_create_a_window_display").toUtf8();
+				msg = CI18N::get ("can_t_create_a_window_display");
 			}
 			else
 			{
-				msg = CI18N::get ("can_t_create_a_fullscreen_display").toUtf8();
+				msg = CI18N::get ("can_t_create_a_fullscreen_display");
 			}
 			msg += " (%dx%d %d ";
-			msg += CI18N::get ("bits").toUtf8 ();
+			msg += CI18N::get ("bits");
 			msg += ")";
 			ExitClientError (msg.c_str (), mode.Width, mode.Height, mode.Depth);
 			// ExitClientError() call exit() so the code after is never called
@@ -1177,7 +1175,9 @@ void prelogInit()
 
 #ifdef NL_OS_WINDOWS
 
+#ifdef RYZOM_BG_DOWNLOADER
 		CBGDownloaderAccess::getInstance().init();
+#endif
 
 		if (SlashScreen)
 			DestroyWindow (SlashScreen);
@@ -1283,7 +1283,7 @@ void prelogInit()
 			std::string deviceName;
 			uint64 driverVersion;
 			CSystemInfo::getVideoInfo(deviceName, driverVersion);
-			deviceName = NLMISC::toLower(deviceName);
+			deviceName = NLMISC::toLowerAscii(deviceName);
 			// for radeon 7200, patch because agp crash with agp with OpenGL -> don't display the message
 			if (!(Driver->getNbTextureStages() <= 3 && strstr(deviceName.c_str(), "radeon")))
 			{*/
@@ -1495,7 +1495,7 @@ void	initBotObjectSelection()
 						{
 							// IS the item a valid one ?
 							CSheetId itemId;
-							if(itemId.buildSheetId(NLMISC::toLower(strShape)))
+							if(itemId.buildSheetId(NLMISC::toLowerAscii(strShape)))
 							{
 								// Get this item sheet ?
 								CItemSheet		*itemSheet= dynamic_cast<CItemSheet *>(SheetMngr.get(itemId));
@@ -1532,7 +1532,7 @@ void postlogInit()
 	Driver->clearBuffers(CRGBA::Black);
 	Driver->swapBuffers();
 	CNiceInputAuto niceInputs;
-	ucstring nmsg;
+	string nmsg;
 
 	try
 	{

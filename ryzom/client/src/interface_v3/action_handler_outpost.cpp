@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -471,7 +472,7 @@ public:
 			startAttackTime= node->getValue32();
 
 		// send a DECLARE_WAR_VALIDATE message to server
-		string	sMsg= "OUTPOST:DECLARE_WAR_VALIDATE";
+		const char *sMsg= "OUTPOST:DECLARE_WAR_VALIDATE";
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
@@ -483,7 +484,7 @@ public:
 		}
 		else
 		{
-			nlwarning("command : unknown message name : '%s'.", sMsg.c_str());
+			nlwarning("command : unknown message name : '%s'.", sMsg);
 		}
 
 	}
@@ -508,7 +509,7 @@ public:
 		// Send a msg to server
 		if(outpostSheet)
 		{
-			string	sMsg= "OUTPOST:SELECT";
+			const char *sMsg= "OUTPOST:SELECT";
 			CBitMemStream out;
 			if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 			{
@@ -518,7 +519,7 @@ public:
 			}
 			else
 			{
-				nlwarning("command : unknown message name : '%s'.", sMsg.c_str());
+				nlwarning("command : unknown message name : '%s'.", sMsg);
 			}
 		}
 	}

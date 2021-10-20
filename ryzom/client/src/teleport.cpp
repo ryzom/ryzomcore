@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -107,7 +110,7 @@ void CTeleport::load(const std::string &/* filename */)
 					&& tpElmt->getValueByName(pos.z, "position.Z"))
 					{
 						// All in UPPER CASE to not be CASE SENSITIVE.
-						_Destinations.insert(make_pair(NLMISC::toLower(destName), pos));
+						_Destinations.insert(make_pair(NLMISC::toLowerAscii(destName), pos));
 					}
 					else
 						nlwarning("CTeleport::load: Cannot find the one of the key 'position.X or Y or Z' for the element %d.", i);

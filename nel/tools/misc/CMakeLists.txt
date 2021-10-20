@@ -12,6 +12,7 @@ IF(WITH_NEL_TOOLS)
     lock
     make_sheet_id
     xml_packer
+    utf_generator
   )
 
   IF(WITH_QT OR WITH_QT5)

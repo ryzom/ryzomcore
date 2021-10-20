@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -85,7 +88,7 @@ void CWeatherStateSheet::build(const NLGEORGES::UFormElm &item)
 	GetWeatherFormValue(item, fxName, "FXName");
 	if (!fxName.empty())
 	{
-		fxName = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fxName));
+		fxName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(fxName));
 		if (!fxName.empty())
 		{
 			FXInfos.resize(1);
@@ -192,7 +195,7 @@ void CWeatherSetupSheetBase::build(const NLGEORGES::UFormElm &item)
 	CloudState.build(item);
 	std::string setupName;
 	GetWeatherFormValue(item, setupName, "SetupName");
-	SetupName = NLMISC::CStringMapper::map(NLMISC::toLower(setupName));
+	SetupName = NLMISC::CStringMapper::map(NLMISC::toLowerAscii(setupName));
 }
 
 //==================================================================================
@@ -203,7 +206,7 @@ void CWeatherSetupSheetBase::serial(NLMISC::IStream &f)
 	{
 		std::string setupName;
 		f.serial(setupName);
-		SetupName = NLMISC::CStringMapper::map(NLMISC::toLower(setupName));
+		SetupName = NLMISC::CStringMapper::map(NLMISC::toLowerAscii(setupName));
 	}
 	else
 	{

@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -320,10 +320,10 @@ void addId( string fileName )
 	if( itFI == FormToId.end() )
 	{
 		// double check : if file not found we check with lower case version of filename
-		map<string,TFormId>::iterator itFILwr = FormToId.find( toLower(fileName) );
+		map<string,TFormId>::iterator itFILwr = FormToId.find( toLowerAscii(fileName) );
 		if( itFILwr != FormToId.end() )
 		{
-			nlwarning("Trying to add %s but the file %s is already known ! becareful with lower case and upper case.", fileName.c_str(), toLower(fileName).c_str());
+			nlwarning("Trying to add %s but the file %s is already known ! becareful with lower case and upper case.", fileName.c_str(), toLowerAscii(fileName).c_str());
 			NbFilesDiscarded++;
 			return;
 		}

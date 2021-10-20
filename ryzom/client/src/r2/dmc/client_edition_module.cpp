@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2015-2018  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1154,6 +1154,15 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			{
 				ok = true;
 				connectionState = "uiR2EDUploadScenario";
+
+#if !FINAL_VERSION
+				string filename = CFile::findNewFile("scenario.rt.txt");
+				COFile output(filename);
+				std::string ss;
+				rtDataPtr->serialize(ss);
+				output.serialBuffer((uint8*)ss.c_str(),(uint)ss.size());
+				output.flush();
+#endif
 			}
 			else
 			{
@@ -1859,7 +1868,7 @@ void CClientEditionModule::onTpPositionSimulated(NLNET::IModuleProxy * /* sender
 	beginLoading (LoadingBackground);
 	#define BAR_STEP_TP 2 // fixme : this define is duplicated....
 	ProgressBar.reset (BAR_STEP_TP);
-	ucstring nmsg("Loading...");
+	string nmsg("Loading...");
 	ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 	ProgressBar.progress(0);
 	ContinentMngr.select(dest, ProgressBar);
@@ -2227,6 +2236,7 @@ void CClientEditionModule::addToSaveList(const std::string& filename, const std:
 	if (!ok)
 	{
 		delete sv;
+		return;
 	}
 	else
 	{

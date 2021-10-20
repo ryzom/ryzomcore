@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1100,6 +1100,7 @@ bool mainLoop()
 		// Start Bench
 		H_AUTO_USE ( RZ_Client_Main_Loop )
 
+#ifdef RYZOM_BG_DOWNLOADER
 		if (isBGDownloadEnabled())
 		{
 			CBGDownloaderAccess &bgDownloader = CBGDownloaderAccess::getInstance();
@@ -1110,6 +1111,7 @@ bool mainLoop()
 				unpauseBGDownloader();
 			}
 		}
+#endif
 
 		FPU_CHECKER_ONCE
 
@@ -1124,7 +1126,7 @@ bool mainLoop()
 			//
 			#define BAR_STEP_TP 2
 			ProgressBar.reset (BAR_STEP_TP);
-			ucstring nmsg("Loading...");
+			string nmsg("Loading...");
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 			ProgressBar.progress(0);
 			ContinentMngr.select(UserEntity->pos(), ProgressBar);
@@ -1165,7 +1167,7 @@ bool mainLoop()
 			if (BanMsgCountdown < 0.f)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				ucstring msg = CI18N::get("msgPermanentlyBanned");
+				string msg = CI18N::get("msgPermanentlyBanned");
 				string cat = getStringCategory(msg, msg);
 				pIM->displaySystemInfo(msg, cat);
 				BanMsgCountdown	 = BanMsgRepeatTime;
@@ -1281,7 +1283,9 @@ bool mainLoop()
 			// Get Mouse Position.
 			OldMouseX = MouseX; OldMouseY = MouseY;
 
+#ifdef RYZOM_BG_DOWNLOADER
 			updateBGDownloaderUI();
+#endif
 		}
 
 		// Get the pointer pos
@@ -2532,9 +2536,6 @@ bool mainLoop()
 				Actions.enable(true);
 				EditActions.enable(true);
 
-				// For stoping the outgame music, start after 30 frames, and duration of 3 seconds
-				outgameFader = CMusicFader(60, 3);
-
 				// check for banned player
 				if (testPermanentBanMarkers())
 				{
@@ -2543,6 +2544,9 @@ bool mainLoop()
 					PermanentlyBanned = true;
 				}
 			}
+
+			// For stoping the outgame music, start after 30 frames, and duration of 3 seconds
+			outgameFader = CMusicFader(60, 3);
 
 			// Short reinit of the main loop after farTP or character reselection
 			Ping.init();
@@ -3463,11 +3467,11 @@ NLMISC_COMMAND(dumpFontTexture, "Write font texture to file", "")
 	{
 		std::string fname = CFile::findNewFile("font-texture.tga");
 		TextContext->dumpCacheTexture(fname.c_str());
-		im->displaySystemInfo(ucstring(fname + " created"), "SYS");
+		im->displaySystemInfo(fname + " created", "SYS");
 	}
 	else
 	{
-		im->displaySystemInfo(ucstring("Error: TextContext == NULL"), "SYS");
+		im->displaySystemInfo("Error: TextContext == NULL", "SYS");
 	}
 	return true;
 }

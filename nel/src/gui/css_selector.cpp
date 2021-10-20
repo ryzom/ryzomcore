@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -59,7 +62,7 @@ namespace NLGUI
 	void CCssSelector::setClass(const std::string &cls)
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(cls), ".", parts);
+		NLMISC::splitString(toLowerAscii(cls), ".", parts);
 
 		for(uint i = 0; i< parts.size(); i++)
 		{
@@ -80,7 +83,7 @@ namespace NLGUI
 		}
 		else
 		{
-			Attr.push_back(SAttribute(key, toLower(val), op, cs));
+			Attr.push_back(SAttribute(key, toLowerAscii(val), op, cs));
 		}
 	}
 
@@ -146,7 +149,7 @@ namespace NLGUI
 			// case-insensitive compare, Attr.value is already lowercased
 			if (!Attr[i].caseSensitive)
 			{
-				value = toLower(value);
+				value = toLowerAscii(value);
 			}
 
 			switch(Attr[i].op)
@@ -235,6 +238,11 @@ namespace NLGUI
 					// 1st child should be '1' and not '0'
 					if (!matchNth(elm.childIndex+1, a, b)) return false;
 				}
+				else if (startsWith(PseudoClass[i], "lang("))
+				{
+					std::string lang = PseudoClass[i].substr(5, PseudoClass[i].size() - 6);
+					if (lang.empty() || !matchLang(elm, lang)) return false;
+				}
 				else
 				{
 					return false;
@@ -255,7 +263,7 @@ namespace NLGUI
 
 		if (start == std::string::npos) return;
 
-		std::string expr = toLower(pseudo.substr(start, end - start));
+		std::string expr = toLowerAscii(pseudo.substr(start, end - start));
 
 		if (expr.empty()) return;
 
@@ -322,6 +330,29 @@ namespace NLGUI
 			// a is negative from '-An+B'
 			return childNr <= b && (b - childNr) % (-a) == 0;
 		}
+	}
+
+	bool CCssSelector::matchLang(const CHtmlElement &elm, const std::string &pseudo) const
+	{
+		// TODO: does not support comma separated, or escaped/quoted/wildcard tags
+		std::string lang = toLowerAscii(elm.getInheritedLanguage());
+		if (lang.empty() || pseudo.empty())
+			return false;
+
+		// lang = 'en', pseudo = 'en-US'
+		if (lang.size() < pseudo.size())
+			return false;
+
+		std::string selector = toLowerAscii(pseudo);
+		bool selectorHasRegion = selector.find("-") != std::string::npos;
+		bool langHasRegion = lang.find("-") != std::string::npos;
+
+		// both are 'en', or 'en-US' type
+		if (langHasRegion == selectorHasRegion)
+			return lang == selector;
+
+		// lang = 'en-US', selector = 'en'
+		return lang[selector.size()] == '-' && startsWith(lang, selector);
 	}
 
 	std::string CCssSelector::toString() const

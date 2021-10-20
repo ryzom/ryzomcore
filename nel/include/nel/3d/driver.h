@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -262,10 +262,10 @@ public:
 	virtual NLMISC::IEventEmitter *getEventEmitter() = 0;
 
 	/// Copy a string to system clipboard.
-	virtual bool			copyTextToClipboard(const ucstring &text) = 0;
+	virtual bool			copyTextToClipboard(const std::string &text) = 0;
 
 	/// Paste a string from system clipboard.
-	virtual bool			pasteTextFromClipboard(ucstring &text) = 0;/// Return the depth of the driver after init().
+	virtual bool			pasteTextFromClipboard(std::string &text) = 0;/// Return the depth of the driver after init().
 
 	virtual uint8			getBitPerPixel() = 0;
 

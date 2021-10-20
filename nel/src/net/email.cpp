@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -225,7 +228,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 			formatedBody += "--Multipart_nel\r\n";
 			formatedBody += "Content-Disposition: attachment;\r\n";
 
-			string lext = toLower(ext);
+			string lext = toLowerAscii(ext);
 			if(lext == "tga")
 			{
 				formatedBody += "Content-Type: image/x-targa;\r\n";

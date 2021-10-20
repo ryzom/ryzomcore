@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -107,7 +107,7 @@ void CImageListEx::addResourceIcon (const char *filename)
 		
 			// Add in the map
 			std::string name = NLMISC::CFile::getFilenameWithoutExtension(filename);
-			_IconMapString.insert (std::map<string, int>::value_type (toLower(name), index));
+			_IconMapString.insert (std::map<string, int>::value_type (toLowerAscii(name), index));
 
 			// Release the icon
 			DestroyIcon (handle);
@@ -132,7 +132,7 @@ int CImageListEx::getImage (int resource) const
 
 int CImageListEx::getImage (const char *filename) const
 {
-	std::string name = toLower(NLMISC::CFile::getFilenameWithoutExtension(filename));
+	std::string name = toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(filename));
 	std::map<string, int>::const_iterator ite = _IconMapString.find (name);
 	if (ite == _IconMapString.end())
 		return -1;

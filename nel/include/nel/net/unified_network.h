@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -635,7 +638,7 @@ protected:
 	/// Auto-reconnect
 	void				autoReconnect( CUnifiedConnection &uc, uint connectionIndex );
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) || defined(NL_OS_WINDOWS)
 	/// Sleep (implemented by select())
 	void				sleepUntilDataAvailable( NLMISC::TTime msecMax );
 #endif
@@ -662,6 +665,7 @@ private:
 	std::vector<TCallbackArgItem>				_UpUniCallback;
 	TNameMappedCallback							_DownCallbacks;
 	std::vector<TCallbackArgItem>				_DownUniCallback;
+	std::set<std::pair<std::string, TServiceId>>	_NotifiedUpCallbacks;
 
 	/// Recording state
 	CCallbackNetBase::TRecordingState			_RecordingState;
@@ -696,9 +700,11 @@ private:
 	/// for each services, which network to take
 	std::vector<std::string>					_DefaultNetwork;
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	/// Pipe to select() on data available (shared among all connections)
 	int											_MainDataAvailablePipe [2];
+#elif defined(NL_OS_WINDOWS)
+	HANDLE										_MainDataAvailableHandle;
 #endif
 
 	/// Service id of the running service

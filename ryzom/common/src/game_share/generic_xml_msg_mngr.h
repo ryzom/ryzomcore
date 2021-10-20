@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -230,6 +233,14 @@ public:
 	 * \return bool : 'false' if the method cannot write the message Name into the stream (probably because de message name is wrong).
 	 */
 	bool	pushNameToStream(const std::string &msgName, NLMISC::CBitMemStream &strm);
+
+	/**
+	* Convert and write a Message Name into a stream.
+	* \param string msgName : Message Name to convert and write into the stream.
+	* \param CBitMemStream strm : the stream to receive the Message Name.
+	* \return bool : 'false' if the method cannot write the message Name into the stream (probably because de message name is wrong).
+	*/
+	bool	pushNameToStream(const char *msgName, NLMISC::CBitMemStream &strm);
 
 	/**
 	 * Convert and return the Message Name from a stream.

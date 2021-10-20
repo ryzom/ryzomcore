@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -60,7 +61,7 @@ public:
 		keydown = 0, // a key has been press down. The key value is stored as a TKey
 		keyup,   // a key has been released. The key value is stored as a TKey
 		keychar,  // a key has been stroke. The key is a ucchar
-		keystring, // a string has been sent. The string is a ucstring
+		keystring, // a string has been sent. The string is a utf-8 string
 		unknown, // uninitialized event
 	};
 	CEventDescriptorKey() : _KeyEvent(unknown), _CtrlState(false), _ShiftState(false), _AltState(false), _Char(0)
@@ -82,13 +83,13 @@ public:
 		return _Key;
 	}
 	// return the char that has been pressed. The key event type MUST be 'keychar', else => assert
-	ucchar getChar() const
+	u32char getChar() const
 	{
 		nlassert(_KeyEvent == keychar);
 		return _Char;
 	}
 	// return the string that has been sent. The key event type MUST be 'keystring', else => assert
-	ucstring getString() const
+	std::string getString() const
 	{
 		nlassert(_KeyEvent == keystring);
 		return _String;
@@ -141,9 +142,9 @@ private:
 	union
 	{
 		NLMISC::TKey	_Key;
-		ucchar			_Char;
+		u32char			_Char;
 	};
-	ucstring		_String;
+	std::string			_String;
 };
 
 // ----------------------------------------------------------------------------

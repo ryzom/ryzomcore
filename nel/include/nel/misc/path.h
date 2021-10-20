@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2014-2015  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -731,10 +731,17 @@ struct CFile
 	static bool	createDirectoryTree(const std::string &dirname);
 
 	/** Try to set the file access to read/write if not already set.
+	 * On linux/macOS also set +x on directory.
 	 * return true if the file doesn't exist or if the file already have RW access.
 	 * \return true if RW access is granted
 	 */
 	static bool	setRWAccess(const std::string &filename);
+
+	/** Try to set +x bit on linux/macOS to make file executable. no-op on Windows
+	 * On Windows, always returns true, even if file does not exist.
+	 * \return true if file exists and +x was set, false if operation failed.
+	 */
+	static bool setExecutable(const std::string &filename);
 
 	/** Delete a file if possible (change the write access if possible)
 	* \return true if the delete occurs.

@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -91,7 +91,7 @@ static const sint PARTY_CHAT_SPAWN_DELTA = 20; // to avoid that all party chat a
 
 /** Display an error msg in the system info window, and also in the last window that triggered the command (so that the user is sure to see it)
  */
-static void displayVisibleSystemMsg(const ucstring &msg, const string &cat = "CHK");
+static void displayVisibleSystemMsg(const std::string &msg, const string &cat = "CHK");
 
 
 //////////////////////////////
@@ -102,7 +102,7 @@ static void displayVisibleSystemMsg(const ucstring &msg, const string &cat = "CH
 
 struct CPartyChatEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -120,7 +120,7 @@ struct CPartyChatEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'around me' window
 struct CAroundMeEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -138,7 +138,7 @@ struct CAroundMeEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'region' window
 struct CRegionEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -156,7 +156,7 @@ struct CRegionEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'universe' window
 struct CUniverseEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -174,7 +174,7 @@ struct CUniverseEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'guild chat' window
 struct CGuildChatEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -191,7 +191,7 @@ struct CGuildChatEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'team chat' window
 struct CTeamChatEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -208,7 +208,7 @@ struct CTeamChatEntryHandler : public IChatWindowListener
 // handler to manage user entry in a 'talk with friend' window
 struct CFriendTalkEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -225,10 +225,9 @@ struct CFriendTalkEntryHandler : public IChatWindowListener
 // handler to manage user entry in a debug console window
 struct CDebugConsoleEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow * /* chatWindow */)
+	virtual void msgEntered(const string &msg, CChatWindow * /* chatWindow */)
 	{
-		std::string str = msg.toString();
-		NLMISC::ICommand::execute( str, g_log );
+		NLMISC::ICommand::execute( msg, g_log );
 	}
 };
 
@@ -242,7 +241,7 @@ public:
 		DbIndex= 0;
 	}
 
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -358,7 +357,7 @@ void CPeopleInterraction::release()
 		uint numCW = cwm.getNumChatWindow();
 		for(uint k = 0; k < numCW; ++k)
 		{
-			nlwarning("Window %d : %s", (int) k, (cwm.getChatWindowByIndex(k)->getTitle().toString()).c_str());
+			nlwarning("Window %d : %s", (int) k, (cwm.getChatWindowByIndex(k)->getTitle()).c_str());
 		}
 	}
 }
@@ -937,7 +936,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 				case CChatGroup::dyn_chat:
 					uint32 index = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
 					uint32 textId = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
-					ucstring title;
+					string title;
 					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 					if (title.empty())
 					{
@@ -947,7 +946,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 					}
 					else
 					{
-						pUserBut->setHardText(title.toUtf8());
+						pUserBut->setHardText(title);
 					}
 					break;
 				}
@@ -1092,7 +1091,7 @@ CFilteredChat *CPeopleInterraction::getFilteredChatFromChatWindow(CChatWindow *c
 }
 
 //===========================================================================================================
-void CPeopleInterraction::askAddContact(const ucstring &contactName, CPeopleList *pl)
+void CPeopleInterraction::askAddContact(const string &contactName, CPeopleList *pl)
 {
 	if (pl == NULL)
 		return;
@@ -1112,7 +1111,7 @@ void CPeopleInterraction::askAddContact(const ucstring &contactName, CPeopleList
 	}
 
 	// add into server (NB: will be added by the server response later)
-	const std::string sMsg = "TEAM:CONTACT_ADD";
+	const char *sMsg = "TEAM:CONTACT_ADD";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 	{
@@ -1124,14 +1123,14 @@ void CPeopleInterraction::askAddContact(const ucstring &contactName, CPeopleList
 		if (pl == &FriendList)
 			list = 0;
 
-		ucstring temp = contactName;
+		ucstring temp = ucstring::makeFromUtf8(contactName); // TODO: UTF-8 (serial)
 		out.serial(temp);
 		out.serial(list);
 		NetMngr.push(out);
 		//nlinfo("impulseCallBack : %s %s %d sent", sMsg.c_str(), contactName.toString().c_str(), list);
 	}
 	else
-		nlwarning("impulseCallBack : unknown message name : '%s'.", sMsg.c_str());
+		nlwarning("impulseCallBack : unknown message name : '%s'.", sMsg);
 
 	// NB: no client prediction, will be added by server later
 
@@ -1195,7 +1194,7 @@ void CPeopleInterraction::askMoveContact(uint peopleIndexInSrc, CPeopleList *plS
 	// Fake Local simulation
 	if (ClientCfg.Local)
 	{
-		ucstring peopleName= plSRC->getName(peopleIndexInSrc);
+		string peopleName= plSRC->getName(peopleIndexInSrc);
 		plSRC->removePeople(peopleIndexInSrc);
 		sint dstIndex = plDST->addPeople(peopleName);
 		plDST->setOnline(dstIndex, ccs_online);
@@ -1254,8 +1253,8 @@ void CPeopleInterraction::askRemoveContact(uint peopleIndex, CPeopleList *pl)
 
 //=================================================================================================================
 void CPeopleInterraction::initContactLists( const std::vector<uint32> &vFriendListName,
-					    const std::vector<TCharConnectionState> &vFriendListOnline,
-					    const std::vector<ucstring> &vIgnoreListName	)
+											const std::vector<TCharConnectionState> &vFriendListOnline,
+											const std::vector<ucstring> &vIgnoreListName	) // TODO: UTF-8 (serial)
 
 {
 	// clear the current lists if any
@@ -1267,7 +1266,7 @@ void CPeopleInterraction::initContactLists( const std::vector<uint32> &vFriendLi
 	for (uint i = 0; i < vFriendListName.size(); ++i)
 		addContactInList(contactIdPool++, vFriendListName[i], vFriendListOnline[i], 0);
 	for (uint i = 0; i < vIgnoreListName.size(); ++i)
-		addContactInList(contactIdPool++, vIgnoreListName[i], ccs_offline, 1);
+		addContactInList(contactIdPool++, vIgnoreListName[i].toUtf8(), ccs_offline, 1);
 	FriendList.readContactGroups();
 	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 	FriendList.sortEx(order);
@@ -1275,13 +1274,13 @@ void CPeopleInterraction::initContactLists( const std::vector<uint32> &vFriendLi
 }
 
 //=================================================================================================================
-void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nameIn, TCharConnectionState online, uint8 nList)
+void CPeopleInterraction::addContactInList(uint32 contactId, const string &nameIn, TCharConnectionState online, uint8 nList)
 {
 	// select correct people list
 	CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 
 	// remove the shard name if possible
-	ucstring	name= CEntityCL::removeShardFromName(nameIn);
+	string	name= CEntityCL::removeShardFromName(nameIn);
 
 	
 
@@ -1305,7 +1304,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 //=================================================================================================================
 void CPeopleInterraction::addContactInList(uint32 contactId, uint32 nameID, TCharConnectionState online, uint8 nList)
 {
-	ucstring name;
+	string name;
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 	if (pSMC->getString(nameID, name))
 	{
@@ -1329,12 +1328,12 @@ void CPeopleInterraction::addContactInList(uint32 contactId, uint32 nameID, TCha
 }
 
 //=================================================================================================================
-bool CPeopleInterraction::isContactInList(const ucstring &nameIn, uint8 nList) const
+bool CPeopleInterraction::isContactInList(const string &nameIn, uint8 nList) const
 {
 	// select correct people list
 	const CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 	// remove the shard name if possible
-	ucstring	name= CEntityCL::removeShardFromName(nameIn);
+	string	name= CEntityCL::removeShardFromName(nameIn);
 	return pl.getIndexFromName(name) != -1;
 }
 
@@ -1365,7 +1364,7 @@ void CPeopleInterraction::updateWaitingContacts()
 	for (uint32 i = 0; i < WaitingContacts.size();)
 	{
 		SWaitingContact &w = WaitingContacts[i];
-		ucstring name;
+		string name;
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 		if (pSMC->getString(w.NameId, name))
 		{
@@ -1401,7 +1400,7 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 					// Only show the message if this player is not in my guild (because then the guild manager will show a message)
 					std::vector<SGuildMember> GuildMembers = CGuildManager::getInstance()->getGuildMembers();
 					bool bOnlyFriend = true;
-					ucstring name = toLower(FriendList.getName(index));
+					string name = toLower(FriendList.getName(index));
 					for (uint i = 0; i < GuildMembers.size(); ++i)
 					{
 						if (toLower(GuildMembers[i].Name) == name)
@@ -1417,12 +1416,12 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 					// Player is not in my guild, and the status change is from offline to online/abroad online or vice versa. 
 					if (showMsg)
 					{
-						ucstring msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
+						string msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
 						strFindReplace(msg, "%s", FriendList.getName(index));
 						string cat = getStringCategory(msg, msg);
 						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
 						NLMISC::CRGBA col = CRGBA::Yellow;
-						it = ClientCfg.SystemInfoParams.find(toLower(cat));
+						it = ClientCfg.SystemInfoParams.find(toLowerAscii(cat));
 						if (it != ClientCfg.SystemInfoParams.end())
 						{
 							col = it->second.Color;
@@ -1463,12 +1462,14 @@ void CPeopleInterraction::removeContactFromList(uint32 contactId, uint8 nList)
 }
 
 //=================================================================================================================
-bool CPeopleInterraction::testValidPartyChatName(const ucstring &title)
+bool CPeopleInterraction::testValidPartyChatName(const string &title)
 {
 	if (title.empty()) return false;
 	// shouldn't begin like 'user chat 1-5'
-	ucstring userChatStr = CI18N::get("uiUserChat");
-	if (title.substr(0, userChatStr.length()) == userChatStr) return false;
+	const string &userChatStr = CI18N::get("uiUserChat");
+	if (NLMISC::startsWith(title, userChatStr)) return false;
+	// can't match a translation identifier
+	if (CI18N::hasTranslation(title)) return false;
 	for(uint k = 0; k < PartyChats.size(); ++k) // there shouldn't be that much party chat simultaneously so a linear search is ok
 	{
 		if (PartyChats[k].Window->getTitle() == title) return false;
@@ -1534,7 +1535,7 @@ void CPeopleInterraction::assignPartyChatMenu(CChatWindow *partyChat)
 }
 
 //=================================================================================================================
-bool CPeopleInterraction::createNewPartyChat(const ucstring &title)
+bool CPeopleInterraction::createNewPartyChat(const string &title)
 {
 	// now there are no party chat windows, party chat phrases must be filtered from the main chat
 
@@ -1683,7 +1684,10 @@ bool CPeopleInterraction::saveUserChatsInfos(NLMISC::IStream &f)
 		if (ver>=2)
 		{
 			CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
-			pCGW->saveFreeTeller(f);
+			if (pCGW)
+			{
+				pCGW->saveFreeTeller(f);
+			}
 		}
 	}
 	catch(const NLMISC::EStream &e)
@@ -1859,8 +1863,8 @@ void CPeopleInterraction::createUserChat(uint index)
 		return;
 	}
 	CChatWindowDesc chatDesc;
-	ucstring userChatStr = CI18N::get("uiUserChat");
-	userChatStr += ucchar(' ') + ucstring(toString(index + 1));
+	string userChatStr = CI18N::get("uiUserChat");
+	userChatStr += ' ' + toString(index + 1);
 	//chatDesc.FatherContainer = "ui:interface:communication";
 	chatDesc.FatherContainer = "ui:interface:contact_list";
 	chatDesc.Title = userChatStr;
@@ -1890,7 +1894,7 @@ void CPeopleInterraction::refreshActiveUserChats()
 }
 
 //=================================================================================================================
-void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,ucstring sentence)
+void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,string sentence)
 {
 	if(channelNb<CChatGroup::MaxDynChanPerPlayer)
 	{
@@ -1899,7 +1903,7 @@ void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,ucstring sentenc
 }
 
 //=================================================================================================================
-void CPeopleInterraction::displayTellInMainChat(const ucstring &playerName)
+void CPeopleInterraction::displayTellInMainChat(const string &playerName)
 {
 	//CChatWindow *chat = PeopleInterraction.MainChat.Window;
 	CChatWindow *chat = PeopleInterraction.ChatGroup.Window;
@@ -2206,7 +2210,7 @@ public:
 						if (gc)
 						{
 							CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(gc->getGroup("add_contact_eb:eb"));
-							geb->setInputString(ucstring(""));
+							geb->setInputString(std::string());
 						}
 						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, sParams);
 					}
@@ -2264,11 +2268,11 @@ public:
 							else
 							{
 								PeopleInterraction.askAddContact(geb->getInputString(), peopleList);
-								geb->setInputString(ucstring(""));
+								geb->setInputString(std::string());
 							}
 						}
 					}
-					geb->setInputString(ucstring(""));
+					geb->setInputString(std::string());
 				}
 			}
 		}
@@ -2330,7 +2334,7 @@ public:
 			if (gc)
 			{
 				CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(gc->getGroup("change_contact_group_eb:eb"));
-				geb->setInputString(ucstring(""));
+				geb->setInputString(std::string(""));
 			}
 			CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, sParams);
 		}
@@ -2355,7 +2359,7 @@ public:
 			{
 				
 				PeopleInterraction.FriendList.changeGroup(lastPeopleIndexChangeGroup, geb->getInputString());
-				geb->setInputString(ucstring(""));
+				geb->setInputString(std::string(""));
 				CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 				PeopleInterraction.FriendList.sortEx(order);
 			}
@@ -2446,7 +2450,7 @@ public:
 		if (eb)
 		{
 			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
-			eb->setInputString(ucstring(""));
+			eb->setInputString(std::string());
 		}
 		//
 		if (gc->getActive())
@@ -2473,7 +2477,7 @@ class CHandlerValidatePartyChatName : public IActionHandler
 		if (!gc) return;
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
 		if (!eb) return;
-		ucstring title = eb->getInputString();
+		string title = eb->getInputString();
 
 		// TODO GAMEDEV : create (or join ?) a new channel. Each channel (party chat) should have a unique name in the game
 		// moreover, it should not have the name of another available chat window (for example, it shouldn't be named 'Around Me')
@@ -2482,7 +2486,7 @@ class CHandlerValidatePartyChatName : public IActionHandler
 
 		if (!PeopleInterraction.testValidPartyChatName(title))
 		{
-			displayVisibleSystemMsg(title + ucstring(" : ") +  CI18N::get("uiInvalidPartyChatName"));
+			displayVisibleSystemMsg(title + " : " +  CI18N::get("uiInvalidPartyChatName"));
 			return;
 		}
 
@@ -2693,11 +2697,11 @@ public:
 					uint32 canWrite = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":WRITE_RIGHT")->getValue32();
 					if (canWrite != 0)
 					{
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 
 						// replace dynamic channel name and shortcut
-						ucstring res = CI18N::get("uiFilterMenuDynamic");
+						string res = CI18N::get("uiFilterMenuDynamic");
 						strFindReplace(res, "%channel", title);
 						strFindReplace(res, "%shortcut", s);
 
@@ -2886,7 +2890,7 @@ class CHandlerSelectChatSource : public IActionHandler
 					pVTM->setActive(active);
 					if (active)
 					{
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 						pVTM->setText("["+s+"] " + title);
 					}
@@ -3011,7 +3015,7 @@ class CHandlerSelectChatSource : public IActionHandler
 				bool active = (textId != 0);
 				if (active)
 				{
-					ucstring title;
+					string title;
 					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title, FILTER_TOGGLE, "dyn"+s);
 					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, "dyn"+s, pi.ChatInput.DynamicChat[i].isListeningWindow(cw)));
@@ -3234,7 +3238,7 @@ NLMISC_COMMAND(ignore, "add or remove a player from the ignore list", "<player n
 	}
 
 	// NB: playernames cannot have special characters
-	ucstring playerName = ucstring(args[0]);
+	const string &playerName = args[0];
 
 	// add to the ignore list
 	PeopleInterraction.askAddContact(playerName, &PeopleInterraction.IgnoreList);
@@ -3251,13 +3255,13 @@ they made the client crash (cf createNewPartyChat)...
 // create a new party chat with the given name
 NLMISC_COMMAND(party_chat, "Create a new party chat", "<party_chat_name>")
 {
-if (args.size() != 1)
-{
-displayVisibleSystemMsg(CI18N::get("uiPartyChatCmd"));
-return true;
-}
-CPeopleInterraction &pi = PeopleInterraction;
-ucstring title = args[0];
+	if (args.size() != 1)
+	{
+		displayVisibleSystemMsg(CI18N::get("uiPartyChatCmd"));
+		return true;
+	}
+	CPeopleInterraction &pi = PeopleInterraction;
+	string title = args[0];
 
 if (!pi.testValidPartyChatName(title))
 {
@@ -3272,24 +3276,24 @@ return true;
 // Remove the party chat with the given name
 NLMISC_COMMAND(remove_party_chat, "Remove a party chat", "<party_chat_name>")
 {
-if (args.size() != 1)
-{
-displayVisibleSystemMsg(CI18N::get("uiRemovePartyChatCmd"));
-return true;
-}
-ucstring title = ucstring(args[0]);
-CChatWindow *chat = getChatWndMgr().getChatWindow(title);
-if (!chat)
-{
-displayVisibleSystemMsg(title + ucstring(" : ") + CI18N::get("uiBadPartyChatName"));
-return true;
-}
-if (!PeopleInterraction.removePartyChat(chat))
-{
-displayVisibleSystemMsg(title + ucstring(" : ") + CI18N::get("uiCantRemovePartyChat"));
-return true;
-}
-return true;
+	if (args.size() != 1)
+	{
+		displayVisibleSystemMsg(CI18N::get("uiRemovePartyChatCmd"));
+		return true;
+	}
+	string title = ucstring(args[0]);
+	CChatWindow *chat = getChatWndMgr().getChatWindow(title);
+	if (!chat)
+	{
+		displayVisibleSystemMsg(title + " : " + CI18N::get("uiBadPartyChatName"));
+		return true;
+	}
+	if (!PeopleInterraction.removePartyChat(chat))
+	{
+		displayVisibleSystemMsg(title + " : " + CI18N::get("uiCantRemovePartyChat"));
+		return true;
+	}
+	return true;
 }
 
 
@@ -3372,7 +3376,7 @@ REGISTER_INTERFACE_USER_FCT("getNumUserChatLeft", getNumUserChatLeft)
 // STATIC FUNCTIONS IMPLEMENTATIONS //
 //////////////////////////////////////
 
-static void displayVisibleSystemMsg(const ucstring &msg, const string &cat)
+static void displayVisibleSystemMsg(const string &msg, const string &cat)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->displaySystemInfo(msg, cat);
@@ -3385,7 +3389,7 @@ static void displayVisibleSystemMsg(const ucstring &msg, const string &cat)
 #if !FINAL_VERSION
 NLMISC_COMMAND(testSI, "tmp", "tmp")
 {
-	PeopleInterraction.ChatInput.DebugInfo.displayMessage(ucstring("test"), CRGBA::Red);
+	PeopleInterraction.ChatInput.DebugInfo.displayMessage("test", CRGBA::Red);
 	return true;
 }
 #endif

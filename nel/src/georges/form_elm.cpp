@@ -2,8 +2,8 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1707,6 +1707,7 @@ CFormElmStruct::CFormElmStruct (CForm *form, CFormElm *parentNode, const CFormDf
 CFormElmStruct::~CFormElmStruct ()
 {
 	// Job done in clean()
+	clean();
 }
 
 // ***************************************************************************
@@ -1717,10 +1718,10 @@ void CFormElmStruct::clean ()
 	uint elm;
 	for (elm =0; elm<Elements.size(); elm++)
 	{
-		if (Elements[elm].Element)
-			delete Elements[elm].Element;
+		delete Elements[elm].Element;
 		Elements[elm].Element = NULL;
 	}
+	Elements.clear();
 }
 
 // ***************************************************************************
@@ -2270,6 +2271,7 @@ CFormElmArray::CFormElmArray (CForm *form, const CFormDfn *formDfn, const CType 
 CFormElmArray::~CFormElmArray ()
 {
 	// Job done in clean()
+	clean();
 }
 
 // ***************************************************************************
@@ -2280,8 +2282,8 @@ void CFormElmArray::clean ()
 	uint elm;
 	for (elm =0; elm<Elements.size(); elm++)
 	{
-		if (Elements[elm].Element)
-			delete Elements[elm].Element;
+		delete Elements[elm].Element;
+		Elements[elm].Element = NULL;
 	}
 	Elements.clear ();
 }

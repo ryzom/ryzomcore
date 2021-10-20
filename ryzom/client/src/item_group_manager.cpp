@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2017  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -93,7 +96,7 @@ void CItemGroup::addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlot
 
 void CItemGroup::addRemove(std::string slotName)
 {
-	SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpper(slotName));
+	SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpperAscii(slotName));
 	if(slot != SLOT_EQUIPMENT::UNDEFINED)
 		addRemove(slot);
 }
@@ -158,7 +161,7 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
 			std::string slot;
 			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
-			item.slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpper(slot));
+			item.slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpperAscii(slot));
 			// Old read, keep for compatibility reasons
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"sheetName");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.sheetName);
@@ -301,10 +304,18 @@ bool CItemGroupManager::loadGroups()
 	NLMISC::CIFile f;
 	f.open(userGroupFileName);
 	NLMISC::CIXml xmlStream;
-	xmlStream.init(f);
-	// Actual loading
 	xmlNodePtr globalEnclosing;
-	globalEnclosing = xmlStream.getRootNode();
+	try
+	{
+		xmlStream.init(f);
+		// Actual loading
+		globalEnclosing = xmlStream.getRootNode();
+	}
+	catch (const NLMISC::EXmlParsingError &ex)
+	{
+		nlwarning("Failed to parse '%s', skip", userGroupFileName.c_str());
+		return false;
+	}
 	if(!globalEnclosing)
 	{
 		nlwarning("no root element in item_group xml, skipping xml parsing");
@@ -686,10 +697,9 @@ void CItemGroupManager::listGroup()
 	for(int i=0;i<_Groups.size();i++)
 	{
 		CItemGroup group = _Groups[i];
-		ucstring msg = NLMISC::CI18N::get("cmdListGroupLine");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(group.name);
+		string msg = NLMISC::CI18N::get("cmdListGroupLine");
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
+		string nameUC = group.name;
 		NLMISC::strFindReplace(msg, "%name", nameUC);
 		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.Items.size()));
 		pIM->displaySystemInfo(msg);

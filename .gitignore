@@ -128,6 +128,9 @@ aes_state.txt
 # intellij project folder
 .idea/
 
+# VSCode project folder
+.vscode/
+
 # Python cache
 *.pyd
 *.pyc
@@ -243,6 +246,9 @@ external
 external_stlport
 nel_tools*
 ryzom_tools*
+
+#personal projects
+personal/
 
 # Dumps
 *.dmp

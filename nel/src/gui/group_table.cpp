@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -29,6 +29,7 @@
 #include "nel/misc/i18n.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/css_border_renderer.h"
+#include "nel/gui/css_background_renderer.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -44,9 +45,7 @@ namespace NLGUI
 
 	// ----------------------------------------------------------------------------
 	CGroupCell::CGroupCell(const TCtorParam &param)
-	: CInterfaceGroup(param),
-		BgColor (0,0,0,0)
-
+	: CInterfaceGroup(param)
 	{
 		NewLine = false;
 		TableRatio = 0.f;
@@ -58,6 +57,7 @@ namespace NLGUI
 		Group = new CInterfaceGroup(CViewBase::TCtorParam());
 		// TODO: only initialize if border is set
 		Border = new CSSBorderRenderer();
+		Background = new CSSBackgroundRenderer();
 		PaddingTop = PaddingRight = PaddingBottom = PaddingLeft = 0;
 		Align = Left;
 		VAlign = Middle;
@@ -66,12 +66,6 @@ namespace NLGUI
 		IgnoreMaxWidth = false;
 		IgnoreMinWidth = false;
 		AddChildW = false;
-		_TextureTiled = false;
-		_TextureScaled = false;
-		_TextureXReal = 0;
-		_TextureYReal = 0;
-		_TextureWReal = 0;
-		_TextureHReal = 0;
 		setEnclosedGroupDefaultParams();
 		addGroup (Group);
 	}
@@ -83,6 +77,11 @@ namespace NLGUI
 		{
 			delete Border;
 			Border = NULL;
+		}
+		if (Background)
+		{
+			delete Background;
+			Background = NULL;
 		}
 	}
 
@@ -151,7 +150,9 @@ namespace NLGUI
 		else
 		if( name == "bgcolor" )
 		{
-			return toString( BgColor );
+			if (Background)
+				return toString( Background->getColor() );
+			return toString(CRGBA::Transparent);
 		}
 		else
 		if( name == "width" )
@@ -233,9 +234,12 @@ namespace NLGUI
 		else
 		if( name == "bgcolor" )
 		{
+			if (!Background)
+				Background = new CSSBackgroundRenderer();
+
 			CRGBA c;
 			if( fromString( value, c ) )
-				BgColor = c;
+				Background->setColor(c);
 			return;
 		}
 		else
@@ -342,7 +346,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "valign", BAD_CAST "" );
 		xmlSetProp( node, BAD_CAST "left_margin", BAD_CAST toString( LeftMargin ).c_str() );
 		xmlSetProp( node, BAD_CAST "nowrap", BAD_CAST toString( NoWrap ).c_str() );
-		xmlSetProp( node, BAD_CAST "bgcolor", BAD_CAST toString( BgColor ).c_str() );
+		if (Background)
+			xmlSetProp( node, BAD_CAST "bgcolor", BAD_CAST toString( Background->getColor() ).c_str() );
 
 		if( WidthWanted != 0 )
 			xmlSetProp( node, BAD_CAST "width", BAD_CAST toString( WidthWanted ).c_str() );
@@ -435,7 +440,9 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"bgcolor" );
 		if (ptr)
 		{
-			BgColor = convertColor(ptr);
+			if (!Background)
+				Background = new CSSBackgroundRenderer();
+			Background->setColor(convertColor(ptr));
 		}
 		//
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"width" );
@@ -501,72 +508,39 @@ namespace NLGUI
 			rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal-1, _YReal, 1, _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(0,255,255,255) );
 		}
 
-		uint8 CurrentAlpha = 255;
-		CGroupTable *table = NULL;
-		if (getParent ())
-		{
-			table = static_cast<CGroupTable*> (getParent ());
-			CurrentAlpha = table->CurrentAlpha;
-		}
-
-		// Draw the background
-		if (BgColor.A > 0 || !_TextureId.empty())
 		{
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
+			// flush draw queue to force correct draw order
+			rVR.flush();
 
-			bool flush = false;
-			if (CurrentAlpha > 0 && !_TextureId.empty())
+			if (Background)
 			{
-				CRGBA col = CRGBA::White;
-				col.A = CurrentAlpha;
-
-				sint32 oldSciX, oldSciY, oldSciW, oldSciH;
-				makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
-
-				if (_TextureScaled && !_TextureTiled)
+				uint8 CurrentAlpha = 255;
+				CGroupTable *table = NULL;
+				if (getParent ())
 				{
-					rVR.drawRotFlipBitmap(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _HReal, 0, false, _TextureId, col);
+					table = static_cast<CGroupTable*> (getParent ());
+					CurrentAlpha = table->CurrentAlpha;
 				}
-				else
+				if (CurrentAlpha > 0)
 				{
-					if (!_TextureTiled)
-						rVR.drawRotFlipBitmap(_RenderLayer, _TextureXReal, _TextureYReal, _TextureWReal, _TextureHReal, 0, false, _TextureId, col);
-					else
-						rVR.drawRotFlipBitmapTiled(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _TextureHReal, 0, false, _TextureId, 0, col);
+					Background->CurrentAlpha = CurrentAlpha;
+					Background->setModulateGlobalColor(_ModulateGlobalColor);
+					Background->draw();
+					rVR.flush();
 				}
-
-				restoreClip (oldSciX, oldSciY, oldSciW, oldSciH);
-
-				flush = true;
 			}
 
-			if (BgColor.A > 0)
+			if (Border)
 			{
-				CRGBA finalColor = BgColor;
-				if (_ModulateGlobalColor)
-					finalColor.modulateFromColor (finalColor, CWidgetManager::getInstance()->getGlobalColor());
-				finalColor.A = (uint8) (((uint16) CurrentAlpha * (uint16) finalColor.A) >> 8);
-
-				if (finalColor.A > 0)
-					rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
-
-				flush = true;
-			}
-
-			if (flush)
-				rVR.flush();
-		}
-
-		if (Border)
-		{
-			// TODO: monitor these in checkCoords and update when changed
-			uint8 contentAlpha = CWidgetManager::getInstance()->getGlobalColorForContent().A;
-			if (contentAlpha > 0)
-			{
-				Border->CurrentAlpha = contentAlpha;
-				Border->setRenderLayer(_RenderLayer);
-				Border->setModulateGlobalColor(_ModulateGlobalColor);
-				Border->draw();
+				Border->CurrentAlpha = CWidgetManager::getInstance()->getGlobalColorForContent().A;
+				if (Border->CurrentAlpha > 0)
+				{
+					Border->setRenderLayer(_RenderLayer);
+					Border->setModulateGlobalColor(_ModulateGlobalColor);
+					Border->draw();
+					rVR.flush();
+				}
 			}
 		}
 
@@ -595,62 +569,35 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupCell::setTexture(const std::string & TxName)
 	{
-		if (TxName.empty() || TxName == "none")
-		{
-			_TextureId.clear();
-		}
-		else
-		{
-			_TextureId.setTexture (TxName.c_str (), 0, 0, -1, -1, false);
-
-			updateTextureCoords();
-		}
+		if (Background)
+			Background->setImage(TxName);
 	}
 
 	// ----------------------------------------------------------------------------
 	void CGroupCell::setTextureTile(bool tiled)
 	{
-		_TextureTiled = tiled;
+		if (Background)
+			Background->setImageRepeat(tiled);
 	}
 
 	// ----------------------------------------------------------------------------
 	void CGroupCell::setTextureScale(bool scaled)
 	{
-		_TextureScaled = scaled;
-	}
-
-	// ----------------------------------------------------------------------------
-	void CGroupCell::updateTextureCoords()
-	{
-		if (_TextureId.empty()) return;
-
-		CViewRenderer &rVR = *CViewRenderer::getInstance();
-		rVR.getTextureSizeFromId (_TextureId, _TextureWReal, _TextureHReal);
-
-		_TextureXReal = _XReal;
-		_TextureYReal = _YReal + _HReal - _TextureHReal;
-		if (_TextureTiled && _TextureHReal > 0)
-		{
-			sint diff = (_HReal / _TextureHReal) * _TextureHReal;
-			_TextureYReal -= diff;
-			_TextureHReal += diff;
-		}
+		if (Background)
+			Background->setImageCover(scaled);
 	}
 
 	// ----------------------------------------------------------------------------
 	void CGroupCell::updateCoords()
 	{
 		CInterfaceGroup::updateCoords();
-
-		updateTextureCoords();
 	}
 
 	// ----------------------------------------------------------------------------
 	NLMISC_REGISTER_OBJECT(CViewBase, CGroupTable, std::string, "table");
 
 	CGroupTable::CGroupTable(const TCtorParam &param)
-	:	CInterfaceGroup(param),
-		BgColor(0,0,0,255)
+	:	CInterfaceGroup(param)
 	{
 		_ContentValidated = false;
 		TableRatio = 0.f;
@@ -658,18 +605,12 @@ namespace NLGUI
 
 		// TODO: only initialize when needed
 		Border = new CSSBorderRenderer();
+		Background = new CSSBackgroundRenderer();
 
 		CellBorder = false;
 		CellPadding=1;
 		CellSpacing=2;
 		ContinuousUpdate = false;
-
-		_TextureTiled = false;
-		_TextureScaled = false;
-		_TextureXReal = 0;
-		_TextureYReal = 0;
-		_TextureWReal = 0;
-		_TextureHReal = 0;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -737,6 +678,12 @@ namespace NLGUI
 			Border = NULL;
 		}
 
+		if (Background)
+		{
+			delete Background;
+			Background = NULL;
+		}
+
 	/*	uint i;
 		for (i=0; i<_Cells.size(); i++)
 			delete _Cells[i];
@@ -746,46 +693,22 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupTable::setTexture(const std::string & TxName)
 	{
-		if (TxName.empty() || TxName == "none")
-		{
-			_TextureId.clear();
-		}
-		else
-		{
-			_TextureId.setTexture (TxName.c_str (), 0, 0, -1, -1, false);
-
-			updateTextureCoords();
-		}
+		if (Background)
+			Background->setImage(TxName);
 	}
 
 	// ----------------------------------------------------------------------------
 	void CGroupTable::setTextureTile(bool tiled)
 	{
-		_TextureTiled = tiled;
+		if (Background)
+			Background->setImageRepeat(tiled);
 	}
 
 	// ----------------------------------------------------------------------------
 	void CGroupTable::setTextureScale(bool scaled)
 	{
-		_TextureScaled = scaled;
-	}
-
-	// ----------------------------------------------------------------------------
-	void CGroupTable::updateTextureCoords()
-	{
-		if (_TextureId.empty()) return;
-
-		CViewRenderer &rVR = *CViewRenderer::getInstance();
-		rVR.getTextureSizeFromId (_TextureId, _TextureWReal, _TextureHReal);
-
-		_TextureXReal = _XReal;
-		_TextureYReal = _YReal + _HReal - _TextureHReal;
-		if (_TextureTiled && _TextureHReal > 0)
-		{
-			sint diff = (_HReal / _TextureHReal) * _TextureHReal;
-			_TextureYReal -= diff;
-			_TextureHReal += diff;
-		}
+		if (Background)
+			Background->setImageCover(scaled);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1299,12 +1222,33 @@ namespace NLGUI
 
 		CInterfaceGroup::updateCoords();
 
-		updateTextureCoords();
-
 		// update borders if present
 		if (Border)
 		{
 			Border->setRect(_XReal + _MarginLeft, _YReal, _WReal, _HReal);
+		}
+
+		if (Background)
+		{
+			sint32 l = _XReal + _MarginLeft;
+			sint32 b = _YReal;
+			sint32 w = _WReal;
+			sint32 h = _HReal;
+			Background->setBorderArea(l, b, w, h);
+			if (Border) {
+				l += Border->getLeftWidth();
+				b += Border->getBottomWidth();
+				w -= Border->getLeftRightWidth();
+				h -= Border->getTopBottomWidth();
+			}
+			Background->setPaddingArea(l, b, w, h);
+			// TODO: padding
+			//CSSRect<sint32> Padding;
+			//l += Padding.Left;
+			//b += Padding.Bottom;
+			//w -= Padding.Left - Padding.Right;
+			//h -= Padding.Top - Padding.Bottom;
+			Background->setContentArea(l, b, w, h);
 		}
 
 		// update cell borders if present
@@ -1313,6 +1257,28 @@ namespace NLGUI
 			if (_Cells[i]->Border)
 			{
 				_Cells[i]->Border->setRect(_Cells[i]->_XReal, _Cells[i]->_YReal, _Cells[i]->_WReal, _Cells[i]->_HReal);
+			}
+			if (_Cells[i]->Background)
+			{
+				sint32 l = _Cells[i]->_XReal;
+				sint32 b = _Cells[i]->_YReal;
+				sint32 w = _Cells[i]->_WReal;
+				sint32 h = _Cells[i]->_HReal;
+				_Cells[i]->Background->setBorderArea(l, b, w, h);
+				if (_Cells[i]->Border) {
+					l += Border->getLeftWidth();
+					b += Border->getBottomWidth();
+					w -= Border->getLeftRightWidth();
+					h -= Border->getTopBottomWidth();
+				}
+				_Cells[i]->Background->setPaddingArea(l, b, w, h);
+				// TODO: padding
+				//CSSRect<sint32> Padding;
+				//l += Padding.Left;
+				//b += Padding.Bottom;
+				//w -= Padding.Left - Padding.Right;
+				//h -= Padding.Top - Padding.Bottom;
+				_Cells[i]->Background->setContentArea(l, b, w, h);
 			}
 		}
 
@@ -1502,57 +1468,24 @@ namespace NLGUI
 			bool flush = false;
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 
-			if (BgColor.A > 0)
+			// TODO: monitor these in checkCoords and update when changed
+			uint8 contentAlpha = CWidgetManager::getInstance()->getGlobalColorForContent().A;
+			if (contentAlpha > 0)
 			{
-				CRGBA finalColor = BgColor;
-				if (_ModulateGlobalColor)
-					finalColor.modulateFromColor (finalColor, CWidgetManager::getInstance()->getGlobalColor());
-				finalColor.A = (uint8) (((uint16) CurrentAlpha * (uint16) finalColor.A) >> 8);
-
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
-
-				flush = true;
-			}
-
-			// Draw the background
-			if (CurrentAlpha > 0 && !_TextureId.empty())
-			{
-				sint32 oldSciX, oldSciY, oldSciW, oldSciH;
-				makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
-
-				CRGBA col = CRGBA::White;
-				col.A = CurrentAlpha;
-
-				if (_TextureScaled && !_TextureTiled)
+				if (Background)
 				{
-					rVR.drawRotFlipBitmap(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _HReal, 0, false, _TextureId, col);
+					Background->CurrentAlpha = CurrentAlpha;
+					Background->setModulateGlobalColor(_ModulateGlobalColor);
+					Background->draw();
+					rVR.flush();
 				}
-				else
-				{
-					if (!_TextureTiled)
-						rVR.drawRotFlipBitmap(_RenderLayer, _TextureXReal, _TextureYReal, _TextureWReal, _TextureHReal, 0, false, _TextureId, col);
-					else
-						rVR.drawRotFlipBitmapTiled(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _TextureHReal, 0, false, _TextureId, 0, col);
-				}
-
-				restoreClip (oldSciX, oldSciY, oldSciW, oldSciH);
-				flush = true;
-			}
-
-			// flush background color and image
-			if (flush)
-				rVR.flush();
-
-			if (Border)
-			{
-				// TODO: monitor these in checkCoords and update when changed
-				uint8 contentAlpha = CWidgetManager::getInstance()->getGlobalColorForContent().A;
-				if (contentAlpha > 0)
+				if (Border)
 				{
 					Border->CurrentAlpha = CurrentAlpha;
 					Border->setRenderLayer(_RenderLayer);
 					Border->setModulateGlobalColor(_ModulateGlobalColor);
 					Border->draw();
+					rVR.flush();
 				}
 			}
 		}
@@ -1568,14 +1501,14 @@ namespace NLGUI
 		if( name == "border" )
 		{
 			if (Border)
-				return toString( Border->TopWidth );
+				return toString( Border->getTopWidth() );
 			return "0";
 		}
 		else
 		if( name == "bordercolor" )
 		{
 			if (Border)
-				return toString( Border->TopColor );
+				return toString( Border->getTopColor() );
 			return toString(CRGBA::Transparent);
 		}
 		else
@@ -1591,7 +1524,9 @@ namespace NLGUI
 		else
 		if( name == "bgcolor" )
 		{
-			return toString( BgColor );
+			if (Background)
+				return toString( Background->getColor() );
+			return toString( CRGBA::Transparent );
 		}
 		else
 		if( name == "width" )
@@ -1614,10 +1549,7 @@ namespace NLGUI
 			{
 				if (!Border)
 					Border = new CSSBorderRenderer();
-				Border->TopWidth = i;
-				Border->RightWidth = i;
-				Border->BottomWidth = i;
-				Border->LeftWidth = i;
+				Border->setWidth(i);
 			}
 			return;
 		}
@@ -1629,10 +1561,7 @@ namespace NLGUI
 			{
 				if (!Border)
 					Border = new CSSBorderRenderer();
-				Border->TopColor = c;
-				Border->RightColor = c;
-				Border->BottomColor = c;
-				Border->LeftColor = c;
+				Border->setColor(c);
 			}
 			return;
 		}
@@ -1655,9 +1584,12 @@ namespace NLGUI
 		else
 		if( name == "bgcolor" )
 		{
+			if (!Background)
+				Background = new CSSBackgroundRenderer();
+
 			CRGBA c;
 			if( fromString( value, c ) )
-				BgColor = c;
+				Background->setColor(c);
 			return;
 		}
 		else
@@ -1680,12 +1612,16 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "table" );
 		if (Border)
 		{
-			xmlSetProp( node, BAD_CAST "border", BAD_CAST toString( Border->TopWidth ).c_str() );
-			xmlSetProp( node, BAD_CAST "bordercolor", BAD_CAST toString( Border->TopColor ).c_str() );
+			xmlSetProp( node, BAD_CAST "border", BAD_CAST toString( Border->getTopWidth() ).c_str() );
+			xmlSetProp( node, BAD_CAST "bordercolor", BAD_CAST toString( Border->getTopColor() ).c_str() );
 		}
 		xmlSetProp( node, BAD_CAST "cellpadding", BAD_CAST toString( CellPadding ).c_str() );
 		xmlSetProp( node, BAD_CAST "cellspacing", BAD_CAST toString( CellSpacing ).c_str() );
-		xmlSetProp( node, BAD_CAST "bgcolor", BAD_CAST toString( BgColor ).c_str() );
+		if (Background)
+		{
+			xmlSetProp( node, BAD_CAST "bgcolor", BAD_CAST toString( Background->getColor() ).c_str() );
+			// TODO: Texture
+		}
 
 		if( ForceWidthMin != 0 )
 			xmlSetProp( node, BAD_CAST "width", BAD_CAST toString( ForceWidthMin ).c_str() );
@@ -1708,7 +1644,7 @@ namespace NLGUI
 			fromString((const char*)ptr, w);
 			if (!Border)
 				Border = new CSSBorderRenderer();
-			Border->setWidth(w, w, w, w);
+			Border->setWidth(w);
 		}
 		//
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"bordercolor" );
@@ -1717,7 +1653,7 @@ namespace NLGUI
 			CRGBA c = convertColor((const char*)ptr);
 			if (!Border)
 				Border = new CSSBorderRenderer();
-			Border->setColor(c, c, c, c);
+			Border->setColor(c);
 		}
 		//
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"cellpadding" );
@@ -1735,7 +1671,10 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"bgcolor" );
 		if (ptr)
 		{
-			BgColor = convertColor((const char *) ptr);
+			if (!Background)
+				Background = new CSSBackgroundRenderer();
+
+			Background->setColor(convertColor((const char *) ptr));
 		}
 		//
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"width" );
