@@ -1546,11 +1546,13 @@ public:
 			Texture = NULL;
 			Level = 0;
 			CubeFace = 0;
+			TargetOwned = false;
 		}
 		IDirect3DSurface9	*Target;
 		ITexture			*Texture;
 		uint8				Level;
 		uint8				CubeFace;
+		bool				TargetOwned;
 		virtual void apply(CDriverD3D *driver);
 	};
 
@@ -2076,10 +2078,17 @@ public:
 		NL_D3D_CACHE_TEST(CacheTest_RenderTarget, _RenderTarget.Target != target)
 #endif // NL_D3D_USE_RENDER_STATE_CACHE
 		{
+			if (_RenderTarget.TargetOwned)
+			{
+				nlassert(_RenderTarget.Target);
+				_RenderTarget.Target->Release();
+			}
 			_RenderTarget.Target = target;
 			_RenderTarget.Texture = texture;
 			_RenderTarget.Level = level;
 			_RenderTarget.CubeFace = cubeFace;
+			_RenderTarget.TargetOwned = target;
+			target->AddRef();
 
 			touchRenderVariable (&_RenderTarget);
 

@@ -49,11 +49,11 @@
 #include "login_progress_post_thread.h"
 #include "interface_v3/action_handler_base.h"
 #include "item_group_manager.h"
-#include "nel/misc/cmd_args.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
 #endif
+
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -210,7 +210,6 @@ extern bool IsInRingSession;
 extern void selectTipsOfTheDay (uint tips);
 #define BAR_STEP_TP 2
 
-extern NLMISC::CCmdArgs Args;
 
 CLoginStateMachine::TEvent CLoginStateMachine::waitEvent()
 {
@@ -463,14 +462,12 @@ void CLoginStateMachine::run()
 		case st_check_patch:
 			/// check the data to check if patch needed
 			CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_PostLogin, "login_step_post_login"));
-
-			if (!ClientCfg.PatchWanted || (Args.haveArg("n") && Args.getLongArg("nopatch").front() == "1"))
+			if (!ClientCfg.PatchWanted)
 			{
 				// client don't want to be patched !
 				_CurrentState = st_display_eula;
 				break;
 			}
-
 			initPatchCheck();
 			SM_BEGIN_EVENT_TABLE
 				if (isBGDownloadEnabled())
@@ -1115,15 +1112,6 @@ void CFarTP::disconnectFromPreviousShard()
 		beginLoading (StartBackground);
 		UseEscapeDuringLoading = false;
 
-		// Play music and fade out the Game Sound
-		if (SoundMngr)
-		{
-			// Loading Music Loop.ogg
-			LoadingMusic = ClientCfg.SoundOutGameMusic;
-			SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
-			SoundMngr->fadeOutGameSound(ClientCfg.SoundTPFade);
-		}
-
 		// Change the tips
 		selectTipsOfTheDay (rand());
 
@@ -1132,6 +1120,21 @@ void CFarTP::disconnectFromPreviousShard()
 		ucstring nmsg("Loading...");
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		ProgressBar.progress(0);
+
+		// Play music and fade out the Game Sound
+		if (SoundMngr)
+		{
+			SoundMngr->fadeOutGameSound(ClientCfg.SoundTPFade);
+
+			// Stop and enable music
+			SoundMngr->stopMusic(0);
+			SoundMngr->setupFadeSound(0.0f, 1.0f);
+
+			// Loading Music Loop.ogg
+			LoadingMusic = ClientCfg.LoadingMusic;
+			// SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
+			SoundMngr->playMusic(LoadingMusic, 0, false, true, true);
+		}
 	}
 
 	// Disconnect from the FS
@@ -1520,3 +1523,4 @@ void CFarTP::farTPmainLoop()
 	if(welcomeWindow)
 		initWelcomeWindow();
 }
+

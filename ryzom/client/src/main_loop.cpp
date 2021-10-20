@@ -2255,19 +2255,21 @@ bool mainLoop()
 			{
 				StartPlayTime = NLMISC::CTime::getLocalTime();
 			}
+
 			// Start background sound play now !  (nb: restarted if load just ended, or if sound re-enabled)
 			if (SoundMngr)
 			{
 				H_AUTO_USE ( RZ_Client_Main_Loop_Sound )
-				SoundMngr->playBackgroundSound();
-			}
 
-			// Fade in Game Sound now (before endLoading)
-			if(SoundMngr)
-			{
 				// fade out loading music
-				if(LoadingMusic==SoundMngr->getEventMusicPlayed())
+				if (SoundMngr->getEventMusicPlayed() == LoadingMusic)
+				{
 					SoundMngr->stopEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade);
+				}
+
+				SoundMngr->playBackgroundSound();
+
+				// Fade in Game Sound now (before endLoading)
 				// fade in game sound
 				SoundMngr->fadeInGameSound(ClientCfg.SoundTPFade);
 			}
@@ -2531,7 +2533,7 @@ bool mainLoop()
 				EditActions.enable(true);
 
 				// For stoping the outgame music, start after 30 frames, and duration of 3 seconds
-//				CMusicFader	outgameFader(60, 3);
+				outgameFader = CMusicFader(60, 3);
 
 				// check for banned player
 				if (testPermanentBanMarkers())

@@ -89,6 +89,9 @@ void createDebug (const char *logPath = NULL, bool logInFile = true, bool eraseL
 /// Do not call this, unless you know what you're trying to do (it kills debug)!
 void destroyDebug();
 
+/// Attach exception handler, for new threads and fibers
+void attachExceptionHandler();
+
 // call this if you want to change the dir of the log.log file
 void changeLogDirectory(const std::string &dir);
 
@@ -352,13 +355,16 @@ void	setCrashAlreadyReported(bool state);
  * Same as nlassertex(false,exp);
  */
 
-// removed because we always check assert (even in release mode) #if defined (NL_OS_WINDOWS) && defined (NL_DEBUG)
+#if defined(NL_DEBUG) /* Debug break is only useful in debug builds */
 #if defined(NL_OS_WINDOWS)
 #define NLMISC_BREAKPOINT __debugbreak()
 #elif defined(NL_OS_UNIX) && defined(NL_COMP_GCC)
 #define NLMISC_BREAKPOINT __builtin_trap()
 #else
 #define NLMISC_BREAKPOINT abort()
+#endif
+#else
+#define NLMISC_BREAKPOINT do { } while (0)
 #endif
 
 // Internal, don't use it (make smaller assert code)

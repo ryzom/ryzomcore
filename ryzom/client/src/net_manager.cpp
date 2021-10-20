@@ -33,7 +33,6 @@
 #include "game_share/chat_group.h"
 #include "game_share/character_summary.h"
 #include "game_share/sphrase_com.h"
-#include "game_share/outpost.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/ryzom_database_banks.h"
 #include "game_share/msg_encyclopedia.h"
@@ -1489,32 +1488,33 @@ void impulseTPCommon(NLMISC::CBitMemStream &impulse, bool hasSeason)
 void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 {
 	// choose a default screen if not setuped
-	if( LoadingBackground!=ResurectKamiBackground && LoadingBackground!=ResurectKaravanBackground &&
-		LoadingBackground!=TeleportKamiBackground && LoadingBackground!=TeleportKaravanBackground)
-		LoadingBackground= TeleportKaravanBackground;
+	if (LoadingBackground != ResurectKamiBackground && LoadingBackground != ResurectKaravanBackground
+	    && LoadingBackground != TeleportKamiBackground && LoadingBackground != TeleportKaravanBackground)
+		LoadingBackground = ElevatorBackground;
 	// if resurect but user not dead, choose default. NB: this is a bug, the tp impulse should tell
 	// which background to choose. \todo yoyo: this is a temp fix
-	if( UserEntity && !UserEntity->isDead() &&
-		(LoadingBackground==ResurectKamiBackground || LoadingBackground==ResurectKaravanBackground) )
-		LoadingBackground= TeleportKaravanBackground;
+	if (UserEntity && !UserEntity->isDead() && (LoadingBackground == ResurectKamiBackground || LoadingBackground == ResurectKaravanBackground))
+		LoadingBackground = ElevatorBackground;
 
 	// Play music according to the background
-	if(SoundMngr)
+	if (SoundMngr)
 	{
 		LoadingMusic.clear();
-		if(LoadingBackground==TeleportKamiBackground)
-			LoadingMusic= "Kami Teleport.ogg";
-		else if(LoadingBackground==TeleportKaravanBackground)
-			LoadingMusic= "Karavan Teleport.ogg";
-		// if resurection, continue to play death music
-		else if(LoadingBackground==ResurectKamiBackground || LoadingBackground==ResurectKaravanBackground)
+		switch (LoadingBackground)
 		{
-			// noop
-		}
-		// default: loading music
-		else
-		{
-			LoadingMusic= "Loading Music Loop.ogg";
+		case TeleportKamiBackground:
+			LoadingMusic = ClientCfg.KamiTeleportMusic;
+			break;
+		case TeleportKaravanBackground:
+			LoadingMusic = ClientCfg.KaravanTeleportMusic;
+			break;
+		case ResurectKamiBackground:
+		case ResurectKaravanBackground:
+			// TODO: Resurrect music
+			break;
+		default:
+			LoadingMusic = ClientCfg.TeleportLoadingMusic;
+			break;
 		}
 
 		// start to play
@@ -3206,11 +3206,9 @@ void impulseUserBars(NLMISC::CBitMemStream &impulse)
 void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 {
 	// read message
-	uint8 type;
 	bool outpostInFire;
 	bool playerGuildInConflict;
 	bool playerGuildIsAttacker;
-	impulse.serial(type);
 	impulse.serial(outpostInFire);
 	impulse.serial(playerGuildInConflict);
 	impulse.serial(playerGuildIsAttacker);
@@ -3222,7 +3220,7 @@ void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 	impulse.serial( declTimer );
 
 	// start
-	OutpostManager.startPvpJoinProposal((OUTPOSTENUMS::TPVPType)type, outpostInFire, playerGuildInConflict, playerGuildIsAttacker,
+	OutpostManager.startPvpJoinProposal(outpostInFire, playerGuildInConflict, playerGuildIsAttacker,
 		ownerGuildNameId, attackerGuildNameId, declTimer);
 }
 
