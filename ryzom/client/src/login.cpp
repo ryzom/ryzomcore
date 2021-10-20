@@ -3300,7 +3300,6 @@ bool loginIntroSkip;
 void loginIntro()
 {
 	// Display of nevrax logo is done at init time (see init.cpp) just before addSearchPath (second one)
-#if 0
 	for (uint i = 0; i < 1; i++) // previously display nevrax then nvidia
 	{
 		if (i != 0)
@@ -3338,7 +3337,6 @@ void loginIntro()
 			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		}
 	}
-#endif
 	beginLoading(StartBackground);
 	ProgressBar.finish();
 }
