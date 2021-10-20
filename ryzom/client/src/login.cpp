@@ -1932,8 +1932,11 @@ class CAHOpenURL : public IActionHandler
 #else
 		// TODO: for Linux and Mac OS
 #endif
-
-		if (sParams == "cfg_EditAccountURL")
+		if (sParams == "cfg_CreateAccountURL")
+		{
+			url = ClientCfg.CreateAccountURL;
+		}
+		else if (sParams == "cfg_EditAccountURL")
 		{
 			url = ClientCfg.EditAccountURL;
 		}
@@ -1971,32 +1974,35 @@ class CAHOpenURL : public IActionHandler
 			nlwarning("no URL found");
 			return;
 		}
-
-		// modify existing languages
-
-		// old site
-		string::size_type pos_lang = url.find("/en/");
-
-		// or new forums
-		if (pos_lang == string::npos)
-			pos_lang = url.find("=en#");
-
-		if (pos_lang != string::npos)
+		
+		if(sParams != "cfg_ConditionsTermsURL" && sParams != "cfg_NamingPolicyURL")
 		{
-			url.replace(pos_lang + 1, 2, ClientCfg.getHtmlLanguageCode());
-		}
-		else
-		{
-			// append language
-			if (url.find('?') != string::npos)
-				url += "&";
+			// modify existing languages
+
+			// old site
+			string::size_type pos_lang = url.find("/en/");
+
+			// or new forums
+			if (pos_lang == string::npos)
+				pos_lang = url.find("=en#");
+
+			if (pos_lang != string::npos)
+			{
+				url.replace(pos_lang + 1, 2, ClientCfg.getHtmlLanguageCode());
+			}
 			else
-				url += "?";
+			{
+				// append language
+				if (url.find('?') != string::npos)
+					url += "&";
+				else
+					url += "?";
 
-			url += "language=" + ClientCfg.LanguageCode;
+				url += "language=" + ClientCfg.LanguageCode;
 
-			if (!LoginCustomParameters.empty())
-				url += LoginCustomParameters;
+				if (!LoginCustomParameters.empty())
+					url += LoginCustomParameters;
+			}
 		}
 
 		openURL(url);
@@ -3283,7 +3289,6 @@ bool loginIntroSkip;
 void loginIntro()
 {
 	// Display of nevrax logo is done at init time (see init.cpp) just before addSearchPath (second one)
-#if 0
 	for (uint i = 0; i < 1; i++) // previously display nevrax then nvidia
 	{
 		if (i != 0)
@@ -3321,7 +3326,6 @@ void loginIntro()
 			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		}
 	}
-#endif
 	beginLoading(StartBackground);
 	ProgressBar.finish();
 }

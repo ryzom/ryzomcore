@@ -3658,9 +3658,6 @@ void			CInventoryManager::updateItemInfoQueue()
 		return;
 	}
 
-	// CONNECTION:READY not yet sent, so we cannot send requests yet!
-	nlassert(ConnectionReadySent || !_ItemInfoWaiters.size());
-
 	// For All waiters, look if one need update.
 	TItemInfoWaiters::iterator	it;
 	for(it= _ItemInfoWaiters.begin();it!=_ItemInfoWaiters.end();it++)

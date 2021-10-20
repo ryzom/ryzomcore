@@ -33,6 +33,7 @@
 #include "game_share/chat_group.h"
 #include "game_share/character_summary.h"
 #include "game_share/sphrase_com.h"
+#include "game_share/outpost.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/ryzom_database_banks.h"
 #include "game_share/msg_encyclopedia.h"
@@ -3206,9 +3207,11 @@ void impulseUserBars(NLMISC::CBitMemStream &impulse)
 void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 {
 	// read message
+	uint8 type;
 	bool outpostInFire;
 	bool playerGuildInConflict;
 	bool playerGuildIsAttacker;
+	impulse.serial(type);
 	impulse.serial(outpostInFire);
 	impulse.serial(playerGuildInConflict);
 	impulse.serial(playerGuildIsAttacker);
@@ -3220,7 +3223,7 @@ void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 	impulse.serial( declTimer );
 
 	// start
-	OutpostManager.startPvpJoinProposal(outpostInFire, playerGuildInConflict, playerGuildIsAttacker,
+	OutpostManager.startPvpJoinProposal((OUTPOSTENUMS::TPVPType)type, outpostInFire, playerGuildInConflict, playerGuildIsAttacker,
 		ownerGuildNameId, attackerGuildNameId, declTimer);
 }
 

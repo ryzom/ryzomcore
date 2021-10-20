@@ -193,6 +193,7 @@ bool hasPrivilegeG() { return (UserPrivileges.find(":G:") != std::string::npos);
 bool hasPrivilegeEM() { return (UserPrivileges.find(":EM:") != std::string::npos); }
 bool hasPrivilegeEG() { return (UserPrivileges.find(":EG:") != std::string::npos); }
 bool hasPrivilegeOBSERVER() { return (UserPrivileges.find(":OBSERVER:") != std::string::npos); }
+bool hasPrivilegeTESTER() { return (UserPrivileges.find(":TESTER:") != std::string::npos); }
 
 
 // Restore the video mode (fullscreen for example) after the connection (done in a window)
@@ -1127,7 +1128,7 @@ TInterfaceState globalMenu()
 						charSelect = LoginCharsel;
 
 					WaitServerAnswer = false;
-					if (charSelect == -1)
+					if (charSelect == -1 || FarTP.isReselectingChar())
 					{
 						CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
 						if (pNL != NULL)
