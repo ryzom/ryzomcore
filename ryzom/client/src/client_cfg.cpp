@@ -302,6 +302,7 @@ CClientConfig::CClientConfig()
 	SelectedSlot		= 0;						// Default is slot 0
 
 	Windowed			= false;					// Default is windowed mode.
+	MonitorName			= "";
 	Width				= 0;						// Default Width for the window (0 = current screen resolution).
 	Height				= 0;						// Default Height for the window (0 = current screen resolution).
 	Depth				= 32;						// Default Bit per Pixel.
@@ -847,6 +848,8 @@ void CClientConfig::setValues()
 	}
 	else
 		cfgWarning("Default value used for 'Fullscreen'");
+
+	READ_STRING_FV(MonitorName);
 	// Width
 	READ_INT_FV(Width)
 	// Height
@@ -1991,6 +1994,11 @@ void CClientConfig::serial(NLMISC::IStream &f)
 		f.xmlPushBegin("Light");
 		f.xmlPushEnd();
 		f.serial(Light);
+		f.xmlPop();
+
+		f.xmlPushBegin("MonitorName");
+		f.xmlPushEnd();
+		f.serial(MonitorName);
 		f.xmlPop();
 
 		f.xmlPushBegin("Windowed");

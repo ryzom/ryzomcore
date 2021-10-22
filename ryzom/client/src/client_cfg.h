@@ -137,6 +137,8 @@ struct CClientConfig
 	TDriver3D		Driver3D;
 	/// Application start in a window or in fullscreen.
 	bool			Windowed;
+	/// Monitor to use for fullscreen
+	std::string		MonitorName;
 	/// Width for the Application.
 	uint16			Width;
 	/// Height for the Application.
