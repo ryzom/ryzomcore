@@ -144,3 +144,6 @@ progress::-webkit-progress-value {
     background-color: rgb(0, 100, 180);
 }
 
+* {
+    background-repeat: no-repeat;
+}
