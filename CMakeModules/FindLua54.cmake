@@ -75,7 +75,7 @@ if(LUA_LIBRARY)
   else()
     if (LUA_LIBRARY_DEBUG)
       set( LUA_LIBRARIES optimized ${LUA_LIBRARY} debug ${LUA_LIBRARY_DEBUG} CACHE STRING "Lua Libraries")
-    else
+    else()
       set( LUA_LIBRARIES "${LUA_LIBRARY}" CACHE STRING "Lua Libraries")
     endif()
   endif()
