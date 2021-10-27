@@ -38,11 +38,25 @@ find_path(LUA_INCLUDE_DIR lua.h
   /opt
 )
 
-find_library(LUA_LIBRARY
+FIND_LIBRARY(LUA_LIBRARY
   NAMES lua54 lua5.4 lua-5.4 lua
   HINTS
-    ENV LUA_DIR
-  PATH_SUFFIXES lib
+    $ENV{LUA_DIR}
+  PATH_SUFFIXES lib64 lib
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /sw
+  /opt/local
+  /opt/csw
+  /opt
+)
+
+FIND_LIBRARY(LUA_LIBRARY_DEBUG
+  NAMES lua54-d lua5.4-d lua-5.4-d lua-d lua54d lua5.4d lua-5.4d luad
+  HINTS
+    $ENV{LUA_DIR}
+  PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -59,7 +73,11 @@ if(LUA_LIBRARY)
     set( LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}" CACHE STRING "Lua Libraries")
   # For Windows and Mac, don't need to explicitly include the math library
   else()
-    set( LUA_LIBRARIES "${LUA_LIBRARY}" CACHE STRING "Lua Libraries")
+    if (LUA_LIBRARY_DEBUG)
+      set( LUA_LIBRARIES optimized ${LUA_LIBRARY} debug ${LUA_LIBRARY_DEBUG} CACHE STRING "Lua Libraries")
+    else
+      set( LUA_LIBRARIES "${LUA_LIBRARY}" CACHE STRING "Lua Libraries")
+    endif()
   endif()
 endif()
 
@@ -77,5 +95,5 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua54
                                   REQUIRED_VARS LUA_LIBRARIES LUA_INCLUDE_DIR
                                   VERSION_VAR LUA_VERSION_STRING)
 
-mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY)
+mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_LIBRARY_DEBUG LUA_MATH_LIBRARY)
 
