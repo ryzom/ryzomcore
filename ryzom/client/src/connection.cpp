@@ -195,37 +195,8 @@ bool hasPrivilegeEG() { return (UserPrivileges.find(":EG:") != std::string::npos
 // Restore the video mode (fullscreen for example) after the connection (done in a window)
 void connectionRestoreVideoMode ()
 {
-	// Setup full screen if we have to
-	UDriver::CMode mode;
-	Driver->getCurrentScreenMode(mode);
-
-	if (mode.Windowed)
-	{
-		uint32 width, height;
-		Driver->getWindowSize(width, height);
-		mode.Width = width;
-		mode.Height = height;
-	}
-
-	// don't allow sizes smaller than 1024x768
-	if (ClientCfg.Width < 1024) ClientCfg.Width = 1024;
-	if (ClientCfg.Height < 768) ClientCfg.Height = 768;
-
 	if (StereoDisplay)
 		StereoDisplayAttached = StereoDisplay->attachToDisplay();
-
-	if (!StereoDisplayAttached && (
-		(ClientCfg.Windowed != mode.Windowed) ||
-		(ClientCfg.Width != mode.Width) ||
-		(ClientCfg.Height != mode.Height)))
-	{
-		mode.Windowed	= ClientCfg.Windowed;
-		mode.Depth		= uint8(ClientCfg.Depth);
-		mode.Width		= ClientCfg.Width;
-		mode.Height		= ClientCfg.Height;
-		mode.Frequency	= ClientCfg.Frequency;
-		setVideoMode(mode);
-	}
 
 	// And setup hardware mouse if we have to
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
@@ -1288,19 +1259,7 @@ TInterfaceState globalMenu()
 
 	// Restore video mode
 	if (ClientCfg.SelectCharacter == -1)
-	{
-		if (ClientCfg.Windowed)
-		{
-			// if used changed window resolution in char select
-			// if we don't update ClientCfg, then UI from icfg is restored wrong
-			uint32 width, height;
-			Driver->getWindowSize(width, height);
-			ClientCfg.Width = width;
-			ClientCfg.Height = height;
-		}
-
 		connectionRestoreVideoMode ();
-	}
 
 	// Skip intro next time
 	ClientCfg.writeBool("SkipIntro", true);

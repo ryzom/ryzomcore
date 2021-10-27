@@ -131,15 +131,6 @@ namespace NLWEB
 			// only use OpenSSL callback if not using Windows SSPI and using OpenSSL backend
 			if (useOpenSSLBackend && !(data && data->features & CURL_VERSION_SSPI))
 			{
-#ifdef NL_OS_WINDOWS
-				// load native Windows CA Certs
-				/*
-				addCertificatesFrom("CA");
-				addCertificatesFrom("AuthRoot");
-				addCertificatesFrom("ROOT");
-				*/
-#endif
-
 				isUsingOpenSSLBackend = true;
 			}
 			else
@@ -180,40 +171,6 @@ namespace NLWEB
 
 			return name;
 		}
-
-#ifdef NL_OS_WINDOWS
-		void addCertificatesFrom(LPCSTR root)
-		{
-			HCERTSTORE hStore;
-			PCCERT_CONTEXT pContext = NULL;
-			X509 *x509;
-			hStore = CertOpenSystemStore(NULL, root);
-			if (hStore)
-			{
-				while (pContext = CertEnumCertificatesInStore(hStore, pContext))
-				{
-					x509 = NULL;
-					x509 = d2i_X509(NULL, (const unsigned char **)&pContext->pbCertEncoded, pContext->cbCertEncoded);
-
-					if (x509)
-					{
-						CertEntry entry;
-						entry.cert = x509;
-						entry.file = root;
-						entry.name = getCertName(x509);
-
-						CertList.push_back(entry);
-					}
-				}
-
-				CertFreeCertificateContext(pContext);
-				CertCloseStore(hStore, 0);
-			}
-
-			// this is called before debug context is set and log ends up in log.log
-			//nlinfo("Loaded %d certificates from '%s' certificate store", (int)CertList.size(), root);
-		}
-#endif
 
 		void addCertificatesFromFile(const std::string &cert)
 		{
