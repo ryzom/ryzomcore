@@ -916,7 +916,10 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 			if( pGuild != 0 )
 			{
 				if( pGuild->getMemberCount() > 0 ) // guild with zero members must never occurs
-					addFameIndexed( pGuild->getEId(), faction, deltaFame / pGuild->getMemberCount(), serviceName, propagate, propagationType );
+				{
+					if (deltaFame > 0) // Ulukyn: Only increase guild fame, never decrease it for now (btw guild fame are useless lol)
+						addFameIndexed( pGuild->getEId(), faction, deltaFame / pGuild->getMemberCount(), serviceName, propagate, propagationType );
+				}
 				else
 					nlwarning("Guild %d have no member (getMemberCount() return 0)", c->getGuildId());
 			}
