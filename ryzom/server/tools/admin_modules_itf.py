@@ -1,6 +1,4 @@
 import logging
-import socket
-
 from nel_message import *
 
 
@@ -45,7 +43,7 @@ class CAdminServiceWeb(CCallbackClient):
 		if not retMsg:
 			print("getShardOrders: Error in 'waitMessage'")
 			return False
-
+		
 		if not retMsg.MsgName == "R_GSO":
 			print("getShardOrders: Invalid response, awaited 'R_GSO', received: "+retMsg.MsgName)
 			return False
@@ -93,7 +91,7 @@ def queryShard(service_name, fullcmd, waitCallback=True, is_control=False):
 
 	adminService = CAdminServiceWeb()
 
-	if adminService.connect("yubo.ryzom.com", 46700, res):
+	if adminService.connect("gingo.ryzom.com", 46700, res):
 		command_return_data = ""
 
 		if isinstance(fullcmd, str):
@@ -115,29 +113,3 @@ def queryShard(service_name, fullcmd, waitCallback=True, is_control=False):
 		adminService.close()
 
 	return {"status": nel_status, "query": service_name+":"+fullcmd, "raw": nel_result.split("\n")[1:]}
-
-def serveShard():
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.bind(('', 15555))
-
-	adminService = CAdminServiceWeb()
-	res = ""
-	i = 1
-	if adminService.connect("yubo.ryzom.com", 46700, res):
-		print("Connected")
-		while True:
-				sock.listen(5)
-				client, address = sock.accept()
-				response = client.recv(255)
-				if response != "":
-					print(i, response)
-					i = i + 1
-					adminService.serviceCmd("egs", response)
-					if adminService.waitCallback():
-						pass
-
-		print("Close")
-		client.close()
-		sock.close()
-
-	
