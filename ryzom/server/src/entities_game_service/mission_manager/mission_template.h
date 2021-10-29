@@ -234,6 +234,8 @@ public:
 		std::vector< NLMISC::CSheetId >		Wear;
 		/// item that must be owned
 		std::vector< NLMISC::CSheetId >		Own;
+		/// item quality that must be owned
+		std::vector< float >			OwnQuality;
 		/// title that must be displayed by the player
 		CHARACTER_TITLE::ECharacterTitle	Title;
 		/// fame prerequisits
@@ -398,6 +400,7 @@ private:
 //	bool parseChatParamList( const std::string & separator, const std::vector< std::string > & preparsedParams, TVectorParamCheck & ret );
 	/// parse a list of items
 	bool parseItemList(uint32 line,  const std::string & separator, const std::vector< std::string > & preparsedParams, std::vector< NLMISC::CSheetId > & ret, std::vector< std::pair< std::string, STRING_MANAGER::TParamType > > & chatParams );
+	bool parseQualityList(uint32 line,  const std::string & separator, const std::vector< std::string > & script, std::vector< float > & ret, std::vector< std::pair< std::string, STRING_MANAGER::TParamType > > & chatParams );
 	/// parse player title prereq
 	bool parseTitlePrereq(uint32 line,  const std::vector< std::string > & preparsedParams );
 	/// parse the minimum fame

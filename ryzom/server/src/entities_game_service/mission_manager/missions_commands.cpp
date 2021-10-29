@@ -801,6 +801,7 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 				inventories.push_back(selectedInv);
 		}
 	} else {
+		inventories.push_back(INVENTORIES::temporary);
 		inventories.push_back(INVENTORIES::handling);
 		inventories.push_back(INVENTORIES::equipment);
 		inventories.push_back(INVENTORIES::bag);
@@ -2962,11 +2963,13 @@ NLMISC_COMMAND(spawnArkMission,"spawn Mission","<uid> <bot_name> <mission_name>"
 	uint8 result = CMissionManager::getInstance()->instanciateMission(c, missionAlias, giverAlias, eventList);
 	if (!result)
 	{
-	c->processMissionEventList(eventList,true, CAIAliasTranslator::Invalid);
+		c->processMissionEventList(eventList,true, CAIAliasTranslator::Invalid);
 		log.displayNL("OK");
 	}
 	else
+	{
 		log.displayNL("ERR: %d", result);
+	}
 
 	return true;
 }

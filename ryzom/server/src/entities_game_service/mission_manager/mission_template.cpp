@@ -476,6 +476,8 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 				ret = parseItemList( i+1, ";",script, Prerequisits.Wear , missionData.ChatParams) && ret;
 			else if ( script[0] == "req_item" )
 				ret = parseItemList( i+1, ";",script, Prerequisits.Own , missionData.ChatParams) && ret;
+			else if ( script[0] == "req_item_quality" )
+				ret = parseQualityList( i+1, ";",script, Prerequisits.OwnQuality , missionData.ChatParams) && ret;
 			else if ( script[0] == "req_guild" )
 				Prerequisits.Guild = true;
 			else if ( script[0] == "req_title" )
@@ -1886,13 +1888,21 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 	//			if(  equip[j] != NULL && equip[j]->getSheetId() == Prerequisits.Own[i] )
 				if(  equip->getItem(j) != NULL && equip->getItem(j)->getSheetId() == Prerequisits.Own[i] )
-					break;
+				{
+					if (Prerequisits.OwnQuality.size() > i)
+					{
+						if (equip->getItem(j)->quality() >= Prerequisits.OwnQuality[i])
+							break;
+					}
+					else
+						break;
+				}
 			}
 			if ( j == equip->getSlotCount() )
 			{
 				if (logOnFail)
 					MISDBG("%s Require bag item at %uth req_item line", sDebugPrefix.c_str(), i);
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -2689,6 +2699,29 @@ bool CMissionTemplate::parseItemList(uint32 line,  const std::string & separator
 		return true;
 	}
 }// CMissionTemplate parseItemList
+
+
+bool CMissionTemplate::parseQualityList(uint32 line,  const std::string & separator, const std::vector< std::string > & script, std::vector< float > & ret, std::vector< std::pair< std::string, STRING_MANAGER::TParamType > > & chatParams )
+{
+	if ( script.size() != 2 )
+	{
+		MISLOGSYNTAXERROR1("<quality>*[%s<quality>]", separator.c_str());
+		return false;
+	}
+	else
+	{
+		std::vector< std::string > args;
+		NLMISC::splitString(script[1],separator,args);
+		for ( uint j = 0; j < args.size(); j++ )
+		{
+			float value;
+			NLMISC::fromString(args[j], value);
+			ret.push_back( value );
+		}
+		return true;
+	}
+}// CMissionTemplate parseQualityList
+
 
 bool CMissionTemplate::parseTitlePrereq(uint32 line,  const std::vector< std::string > & script )
 {
