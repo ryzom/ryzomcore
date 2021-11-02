@@ -324,8 +324,19 @@ void updateFromClientCfg()
 	bool	mustReloadSoundMngrContinent= false;
 
 	// disable/enable sound?
-	if (ClientCfg.SoundOn != LastClientCfg.SoundOn)
+	if (ClientCfg.SoundOn != LastClientCfg.SoundOn || ClientCfg.DriverSound != LastClientCfg.DriverSound)
 	{
+		// changing sound driver
+		if (ClientCfg.DriverSound != LastClientCfg.DriverSound)
+		{
+			if (SoundMngr)
+			{
+				nlwarning("Changing sound driver...");
+				delete SoundMngr;
+				SoundMngr = NULL;
+			}
+		}
+
 		if (SoundMngr && !ClientCfg.SoundOn)
 		{
 			nlwarning("Deleting sound manager...");
