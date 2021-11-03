@@ -90,6 +90,13 @@ public:
 		NumDrivers
 	};
 
+	struct TDriverInfo
+	{
+		TDriver ID;
+		const char *Name;
+		TDriverInfo(TDriver id, const char *name) : ID(id), Name(name)
+		{}
+	};
 
 	/** Structure that contain the background flags.*/
 	struct TBackgroundFlags
@@ -162,7 +169,10 @@ public:
 		/// I forgot what this does, but it's fairly important.
 		bool AutoLoadSample;
 	};
-	
+
+	/// Return list of available sound drivers
+	static std::vector<TDriverInfo> getDrivers();
+
 	//@{
 	//@name Init methods
 	/// Create the audio mixer singleton and return a pointer to its instance
@@ -212,7 +222,7 @@ public:
 	 *	\param forceSoftware: to force the driver to load in software buffer, not hardware
 	 */
 	virtual void		init(uint maxTrack = 32, bool useEax = true, bool useADPCM = true, NLMISC::IProgressCallback *progressCallBack = NULL, bool autoLoadSample = false, TDriver driverType = DriverAuto, bool forceSoftware = false, bool manualRolloff = true) = 0;
-	
+
 	/// Initialize the NeL Sound Driver with given driverName.
 	virtual void		initDriver(const std::string &driverName) = 0;
 	/// Get the available devices on the loaded driver.
