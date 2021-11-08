@@ -368,7 +368,7 @@
           type="I64" />
     <branch name="GIVE">
       <branch name=""
-              count="8">
+              count="10">
         <!-- Common Item Data -->
         <leaf name="SHEET"
               type="I32"
@@ -404,7 +404,7 @@
     </branch>
     <branch name="RECEIVE">
       <branch name=""
-              count="8">
+              count="10">
         <!-- Common Item Data -->
         <leaf name="SHEET"
               type="I32"
