@@ -1899,9 +1899,12 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		// NB: we are typically InGame here (even though the _InGame flag is not yet set)
 		// Use the screen size of the config file. Don't update current UI, just _Modes
 		//
-		// ClientCfg has W/H set to screen size, but interface expects scaled size
-		sint32 scaledW = ClientCfg.Width / ClientCfg.InterfaceScale;
-		sint32 scaledH = ClientCfg.Height / ClientCfg.InterfaceScale;
+		uint32 width, height;
+		// get non-scaled width/height
+		Driver->getWindowSize(width, height);
+		// convert to scaled width/height for ui
+		sint32 scaledW = width / ClientCfg.InterfaceScale;
+		sint32 scaledH = height / ClientCfg.InterfaceScale;
 		CWidgetManager::getInstance()->moveAllWindowsToNewScreenSize(scaledW, scaledH, false);
 		updateDesktops(scaledW, scaledH);
 	}

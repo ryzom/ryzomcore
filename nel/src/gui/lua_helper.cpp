@@ -42,6 +42,12 @@
 	#define assert(x)
 #endif
 
+// Always use unique_ptr with ValyriaTear/luabind on Ubuntu 20,
+// since the setting is not stored in build_information.hpp
+#ifndef LUABIND_USE_CXX11
+#define LUABIND_USE_CXX11
+#endif
+
 #include <luabind/luabind.hpp>
 #include <nel/misc/algo.h>
 #include <nel/misc/path.h>

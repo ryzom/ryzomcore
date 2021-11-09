@@ -331,6 +331,7 @@ bool CDriverUser::getCurrentScreenMode(CMode &mode)
 	GfxMode		gfxMode;
 	bool		res= _Driver->getCurrentScreenMode(gfxMode);
 	mode.Windowed= gfxMode.Windowed;
+	mode.DisplayDevice= gfxMode.DisplayDevice;
 	mode.Width= gfxMode.Width;
 	mode.Height= gfxMode.Height;
 	mode.Depth= gfxMode.Depth;

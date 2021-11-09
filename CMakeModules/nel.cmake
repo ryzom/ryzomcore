@@ -249,6 +249,8 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_ASSIMP              "Use assimp exporter"                           OFF)
   OPTION(WITH_LIBGSF              "Use libgsf for max file library"               OFF)
 
+  OPTION(WITH_FFMPEG              "Use ffmpeg for audio decoder"                  OFF)
+
   ###
   # GUI toolkits
   ###

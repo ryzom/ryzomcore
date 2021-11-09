@@ -76,7 +76,7 @@ void updateFromClientCfg()
 		// set latest config display mode if not attached
 		if (!StereoDisplayAttached)
 			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
-				ClientCfg.Windowed, ClientCfg.Frequency));
+				ClientCfg.Windowed, ClientCfg.Frequency, -1, ClientCfg.MonitorName));
 		// force software cursor when attached
 		InitMouseWithCursor(ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	}
@@ -87,12 +87,13 @@ void updateFromClientCfg()
 		(ClientCfg.Width != LastClientCfg.Width)		||
 		(ClientCfg.Height != LastClientCfg.Height)		||
 		(ClientCfg.Depth != LastClientCfg.Depth)		||
-		(ClientCfg.Frequency != LastClientCfg.Frequency))
+		(ClientCfg.Frequency != LastClientCfg.Frequency)||
+		(ClientCfg.MonitorName != LastClientCfg.MonitorName))
 	{
 		if (!StereoDisplayAttached)
 		{
 			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
-				ClientCfg.Windowed, ClientCfg.Frequency));
+				ClientCfg.Windowed, ClientCfg.Frequency, -1, ClientCfg.MonitorName));
 		}
 	}
 
