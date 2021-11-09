@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+:root { --color: blue; }
+div { --color: green; }
+#alert { --color: red; }
+* { color: var(--color); }
+		</style>
+		<p data-ruleset="color: blue;">I inherited blue from the root element!</p>
+		<div data-ruleset="color: green;">I got green set directly on me!</div>
+		<div id='alert' data-ruleset="color: red;">
+			While I got red set directly on me!
+			<p data-ruleset="color: red;">I’m red too, because of inheritance!</p>
+		</div>
+	</body>
+</html>

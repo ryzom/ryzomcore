@@ -128,6 +128,9 @@ aes_state.txt
 # intellij project folder
 .idea/
 
+# VSCode project folder
+.vscode/
+
 # Python cache
 *.pyd
 *.pyc
@@ -152,89 +155,89 @@ Thumbs.db
 .SyncArchive
 
 # build
-code/nel/build/*
-code/nelns/build/*
-code/snowballs/build/*
-code/ryzom/build/*
-code/build/*
-code/build-2010/*
+nel/build/*
+nelns/build/*
+snowballs/build/*
+ryzom/build/*
+build/*
+build-2010/*
 build/*
 install/*
 win-build/
 build_*
-code/nel/tools/build_gamedata/configuration/buildsite.py
+nel/tools/build_gamedata/configuration/buildsite.py
 
 # Linux nel compile
-code/nel/build/nel-config
-code/nel/config.status
-code/nel/include/nelconfig.h
-code/nel/include/stamp-h1
-code/nel/libtool
-code/nel/nel-config
-code/nel/samples/3d/cluster_viewer/cluster_viewer
-code/nel/samples/3d/font/font
-code/nel/samples/georges/georges
-code/nel/samples/misc/command/command
-code/nel/samples/misc/configfile/configfile
-code/nel/samples/misc/debug/debug
-code/nel/samples/misc/i18n/i18n
-code/nel/samples/misc/log/log
-code/nel/samples/misc/strings/strings
-code/nel/samples/net/chat/chatclient
-code/nel/samples/net/chat/chatserver
-code/nel/samples/net/login_system/nls_frontend_service
-code/nel/samples/net/login_system/nls_login_client
-code/nel/samples/net/udp/udp_bench_client
-code/nel/samples/net/udp/udp_bench_service
-code/nel/samples/pacs/pacs_sample
-code/nel/tools/3d/build_coarse_mesh/build_coarse_mesh
-code/nel/tools/3d/build_far_bank/build_far_bank
-code/nel/tools/3d/build_smallbank/build_smallbank
-code/nel/tools/3d/ig_lighter/ig_lighter
-code/nel/tools/3d/zone_dependencies/zone_dependencies
-code/nel/tools/3d/zone_ig_lighter/zone_ig_lighter
-code/nel/tools/3d/zone_lighter/zone_lighter
-code/nel/tools/3d/zone_welder/zone_welder
-code/nel/tools/misc/bnp_make/bnp_make
-code/nel/tools/misc/disp_sheet_id/disp_sheet_id
-code/nel/tools/misc/make_sheet_id/make_sheet_id
-code/nel/tools/misc/xml_packer/xml_packer
-code/nel/tools/pacs/build_ig_boxes/build_ig_boxes
-code/nel/tools/pacs/build_indoor_rbank/build_indoor_rbank
-code/nel/tools/pacs/build_rbank/build_rbank
-code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/skills.skill_tree
-code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/xptable.xp_table
-code/ryzom/tools/server/sql/ryzom_admin_default_data.sql
+nel/build/nel-config
+nel/config.status
+nel/include/nelconfig.h
+nel/include/stamp-h1
+nel/libtool
+nel/nel-config
+nel/samples/3d/cluster_viewer/cluster_viewer
+nel/samples/3d/font/font
+nel/samples/georges/georges
+nel/samples/misc/command/command
+nel/samples/misc/configfile/configfile
+nel/samples/misc/debug/debug
+nel/samples/misc/i18n/i18n
+nel/samples/misc/log/log
+nel/samples/misc/strings/strings
+nel/samples/net/chat/chatclient
+nel/samples/net/chat/chatserver
+nel/samples/net/login_system/nls_frontend_service
+nel/samples/net/login_system/nls_login_client
+nel/samples/net/udp/udp_bench_client
+nel/samples/net/udp/udp_bench_service
+nel/samples/pacs/pacs_sample
+nel/tools/3d/build_coarse_mesh/build_coarse_mesh
+nel/tools/3d/build_far_bank/build_far_bank
+nel/tools/3d/build_smallbank/build_smallbank
+nel/tools/3d/ig_lighter/ig_lighter
+nel/tools/3d/zone_dependencies/zone_dependencies
+nel/tools/3d/zone_ig_lighter/zone_ig_lighter
+nel/tools/3d/zone_lighter/zone_lighter
+nel/tools/3d/zone_welder/zone_welder
+nel/tools/misc/bnp_make/bnp_make
+nel/tools/misc/disp_sheet_id/disp_sheet_id
+nel/tools/misc/make_sheet_id/make_sheet_id
+nel/tools/misc/xml_packer/xml_packer
+nel/tools/pacs/build_ig_boxes/build_ig_boxes
+nel/tools/pacs/build_indoor_rbank/build_indoor_rbank
+nel/tools/pacs/build_rbank/build_rbank
+ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/skills.skill_tree
+ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/xptable.xp_table
+ryzom/tools/server/sql/ryzom_admin_default_data.sql
 
 
 # Linux server compile
-code/ryzom/server/src/entities_game_service/entities_game_service
-code/ryzom/server/src/frontend_service/frontend_service
-code/ryzom/server/src/gpm_service/gpm_service
-code/ryzom/server/src/input_output_service/input_output_service
-code/ryzom/server/src/mirror_service/mirror_service
-code/ryzom/server/src/ryzom_admin_service/ryzom_admin_service
-code/ryzom/server/src/ryzom_naming_service/ryzom_naming_service
-code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
-code/ryzom/server/src/tick_service/tick_service
+ryzom/server/src/entities_game_service/entities_game_service
+ryzom/server/src/frontend_service/frontend_service
+ryzom/server/src/gpm_service/gpm_service
+ryzom/server/src/input_output_service/input_output_service
+ryzom/server/src/mirror_service/mirror_service
+ryzom/server/src/ryzom_admin_service/ryzom_admin_service
+ryzom/server/src/ryzom_naming_service/ryzom_naming_service
+ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
+ryzom/server/src/tick_service/tick_service
 
 # WebTT temp dir
-code/ryzom/tools/server/www/webtt/app/tmp
+ryzom/tools/server/www/webtt/app/tmp
 
 # AMS ignore
-code/web/public_php/ams/is_installed
-code/web/docs/ams/html
-code/web/public_php/ams/templates_c
-code/ryzom/tools/server/ryzom_ams/drupal
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/autoload
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/configs
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/cron
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/img
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/plugins
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/smarty
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/translations
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/libinclude.php
-code/ryzom/tools/server/ryzom_ams/old
+web/public_php/ams/is_installed
+web/docs/ams/html
+web/public_php/ams/templates_c
+ryzom/tools/server/ryzom_ams/drupal
+ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/autoload
+ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/configs
+ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/cron
+ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/img
+ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/plugins
+ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/smarty
+ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/translations
+ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/libinclude.php
+ryzom/tools/server/ryzom_ams/old
 
 
 
@@ -244,24 +247,27 @@ external_stlport
 nel_tools*
 ryzom_tools*
 
+#personal projects
+personal/
+
 # Dumps
 *.dmp
 
-code/nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg
-code/nel/tools/build_gamedata/processes/sheets/sheets_packer.cfg
-code/nel/tools/build_gamedata/processes/rbank/build_rbank.cfg
-code/nel/tools/build_gamedata/processes/zone/debug_zone_dependencies.cfg
-code/web/public_php/config.php
-code/web/public_php/is_installed
-code/web/public_php/ams/files
-code/web/public_php/db_version_lib
-code/web/public_php/db_version_shard
-code/web/public_php/db_version_tool
-code/web/public_php/db_version_web
-code/web/public_php/role_service
-code/web/public_php/role_support
-code/web/public_php/role_domain
-code/web/public_php/db_version_ring
-code/web/public_php/config_user.php
-code/nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
-code/nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
+nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg
+nel/tools/build_gamedata/processes/sheets/sheets_packer.cfg
+nel/tools/build_gamedata/processes/rbank/build_rbank.cfg
+nel/tools/build_gamedata/processes/zone/debug_zone_dependencies.cfg
+web/public_php/config.php
+web/public_php/is_installed
+web/public_php/ams/files
+web/public_php/db_version_lib
+web/public_php/db_version_shard
+web/public_php/db_version_tool
+web/public_php/db_version_web
+web/public_php/role_service
+web/public_php/role_support
+web/public_php/role_domain
+web/public_php/db_version_ring
+web/public_php/config_user.php
+nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
+nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
