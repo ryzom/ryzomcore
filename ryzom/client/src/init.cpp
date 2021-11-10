@@ -1614,7 +1614,6 @@ void postlogInit()
 					}
 				}
 
-				CPath::memoryCompress(); // Because sound calls addSearchPath
 			}
 		}
 
