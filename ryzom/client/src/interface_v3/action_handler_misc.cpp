@@ -62,9 +62,6 @@ extern NLMISC::CLog				g_log;
 ////////////
 //static CCDBNodeLeaf *MenuColorWidgetValue = NULL; // db entry for the color menu widget (Red)
 
-
-static const string ScreenshotsDirectory("screenshots/");	// don't forget the final /
-
 void preRenderNewSky ();
 
 // ***************************************************************************
@@ -602,11 +599,6 @@ void displayScreenShotSavedInfo(const string &filename)
 	pIM->displaySystemInfo(msg);
 }
 
-void initScreenshot()
-{
-	if (!CFile::isExists(ScreenshotsDirectory)) CFile::createDirectory(ScreenshotsDirectory);
-}
-
 bool screenshotZBuffer(const std::string &filename)
 {
 	std::string::size_type pos = filename.find(".");
@@ -672,6 +664,11 @@ bool screenshotZBuffer(const std::string &filename)
 
 static std::string findNewScreenShotFileName(std::string filename)
 {
+	// make screenshot directory if it does not exist
+	if (!CFile::isExists(ClientCfg.ScreenShotDirectory))
+		CFile::createDirectory(ClientCfg.ScreenShotDirectory);
+
+	filename = CPath::standardizePath(ClientCfg.ScreenShotDirectory) + filename;
 	static char cstime[25];
 	time_t dtime;
 	time(&dtime);
@@ -698,7 +695,7 @@ void screenShotTGA()
 	CBitmap btm;
 	getBuffer (btm);
 
-	string filename = findNewScreenShotFileName(ScreenshotsDirectory+"screenshot.tga");
+	string filename = findNewScreenShotFileName("screenshot.tga");
 	COFile fs(filename);
 
 	if (!btm.writeTGA(fs, 24, false))
@@ -720,7 +717,7 @@ void screenShotPNG()
 	CBitmap btm;
 	getBuffer (btm);
 
-	string filename = findNewScreenShotFileName(ScreenshotsDirectory+"screenshot.png");
+	string filename = findNewScreenShotFileName("screenshot.png");
 	COFile fs(filename);
 
 	if (!btm.writePNG(fs, 24))
@@ -742,7 +739,7 @@ void screenShotJPG()
 	CBitmap btm;
 	getBuffer (btm);
 
-	string filename = findNewScreenShotFileName(ScreenshotsDirectory+"screenshot.jpg");
+	string filename = findNewScreenShotFileName("screenshot.jpg");
 	COFile fs(filename);
 
 	if (!btm.writeJPG(fs))
