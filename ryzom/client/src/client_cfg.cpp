@@ -413,6 +413,7 @@ CClientConfig::CClientConfig()
 	CameraRecorderPrefix = "cam_rec";
 	CameraRecorderBlend  = true;
 
+	ScreenShotDirectory = "screenshots";
 	ScreenShotWidth		= 0;
 	ScreenShotHeight	= 0;
 	ScreenShotFullDetail = true;
@@ -1082,6 +1083,7 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(CameraRecorderBlend)
 
 	// Screenshot
+	READ_STRING_FV(ScreenShotDirectory)
 	READ_INT_FV(ScreenShotWidth)
 	READ_INT_FV(ScreenShotHeight)
 	READ_BOOL_FV(ScreenShotFullDetail)
