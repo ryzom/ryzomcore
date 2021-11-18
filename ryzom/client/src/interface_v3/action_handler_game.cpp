@@ -3458,6 +3458,7 @@ class CHandlerGameConfigApply : public IActionHandler
 			{
 				// Get W, H
 				sint w = 1024, h = 768;
+				string name;
 				{
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 					if( pCB != NULL )
@@ -3467,6 +3468,11 @@ class CHandlerGameConfigApply : public IActionHandler
 						fromString(tmp, w);
 						tmp = vidModeStr.substr(vidModeStr.find('x')+2,vidModeStr.size());
 						fromString(tmp, h);
+
+						// extract monitor "1024x768 (VGA-1)"
+						string::size_type pos = vidModeStr.find('(');
+						if (pos != std::string::npos)
+							name = vidModeStr.substr(pos + 1, vidModeStr.find(")") - pos - 1);
 					}
 				}
 
@@ -3509,6 +3515,7 @@ class CHandlerGameConfigApply : public IActionHandler
 
 				ClientCfg.Width = w;
 				ClientCfg.Height = h;
+				ClientCfg.MonitorName = name;
 
 				// Write the modified client.cfg
 				ClientCfg.writeBool("FullScreen", bFullscreen);
@@ -3517,6 +3524,7 @@ class CHandlerGameConfigApply : public IActionHandler
 
 				if (bFullscreen)
 				{
+					ClientCfg.writeString("MonitorName", name, true);
 					ClientCfg.writeInt("Depth", screenMode.Depth);
 					ClientCfg.writeInt("Frequency", freq);
 				}

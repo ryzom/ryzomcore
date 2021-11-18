@@ -37,6 +37,10 @@ void quitCrashReport()
 {
 }
 
+void stopSoundMngr()
+{
+}
+
 /// domain server version for patch
 string	R2ServerVersion;
 /// name of the version (used to alias many version under the same name),

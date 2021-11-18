@@ -2605,7 +2605,7 @@ public:
 	}
 };
 
-
+void stopSoundMngr();
 
 // ****************************************************************************
 void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
@@ -2617,6 +2617,12 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 	// Destination File Name (in writable directory)
 	string DestinationName;
+
+	if (NLMISC::startsWith(rFTP.FileName, "sound"))
+	{
+		// Stop sound playback
+		stopSoundMngr();
+	}
 
 	if (rFTP.ExtractPath.empty())
 	{

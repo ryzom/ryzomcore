@@ -629,7 +629,11 @@ void sqlInit ()
 		nlerror ("mysql_init() failed");
 	}
 
+#if LIBMYSQL_VERSION_ID < 80000
 	my_bool opt = true;
+#else
+	bool opt = true;
+#endif
 	if (mysql_options (db, MYSQL_OPT_RECONNECT, &opt))
 	{
 		mysql_close(db);

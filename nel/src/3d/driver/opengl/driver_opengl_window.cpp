@@ -650,8 +650,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	_win = EmptyWindow;
 
-	_CurrentMode = mode;
-
 	_WindowVisible = false;
 	_Resizable = resizeable;
 	_DestroyWindow = false;
@@ -1194,6 +1192,8 @@ bool CDriverGL::saveScreenMode()
 
 #ifdef HAVE_XRANDR
 
+	// TODO: if using mode switching, save current xrandr mode to _OldSizeID
+	res = true;
 	if (!res && _xrandr_version > 0)
 	{
 		XRRScreenConfiguration *screen_config = XRRGetScreenInfo(_dpy, RootWindow(_dpy, screen));
@@ -1254,6 +1254,8 @@ bool CDriverGL::restoreScreenMode()
 
 #ifdef HAVE_XRANDR
 
+	// TODO: if using mode switching, then restore mode from _OldSizeID
+	res = true;
 	if (!res && _xrandr_version > 0)
 	{
 		Window root = RootWindow(_dpy, screen);
@@ -1348,7 +1350,8 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 		&& mode.Width == previousMode.Width
 		&& mode.Height == previousMode.Height
 		&& mode.Depth == previousMode.Depth
-		&& mode.Frequency == previousMode.Frequency)
+		&& mode.Frequency == previousMode.Frequency
+		&& mode.DisplayDevice == previousMode.DisplayDevice)
 		return true;
 
 #if defined(NL_OS_WINDOWS)
@@ -1388,6 +1391,8 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 	bool found = false;
 
 #ifdef HAVE_XRANDR
+	// TODO: implement mode switching using xrandr crts
+	found = true;
 
 	if (!found && _xrandr_version > 0)
 	{
@@ -1911,14 +1916,102 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	return true;
 }
 
+bool CDriverGL::getMonitorByName(const std::string &name, sint32 &x, sint32 &y, uint32 &w, uint32 &h) const
+{
+	bool found = false;
+
+#if HAVE_XRANDR
+	int screen = DefaultScreen(_dpy);
+
+	// xrandr 1.5+
+	if (_xrandr_version >= 105)
+	{
+		int nmonitors = 0;
+		XRRMonitorInfo *monitor = XRRGetMonitors(_dpy, RootWindow(_dpy, screen), 1, &nmonitors);
+		if (!monitor)
+			return false;
+
+		for(sint i = 0; i< nmonitors; ++i)
+		{
+			char* pname = XGetAtomName(_dpy, monitor[i].name);
+			found = (nlstricmp(pname, name) == 0);
+			XFree(pname);
+
+			if (found)
+			{
+				x = monitor[i].x;
+				y = monitor[i].y;
+				w = monitor[i].width;
+				h = monitor[i].height;
+				
+				break;
+			}
+		}
+
+		XRRFreeMonitors(monitor);
+	}
+	else
+	{
+		XRRScreenResources *resources = XRRGetScreenResourcesCurrent(_dpy, RootWindow(_dpy, screen));
+		if (!resources)
+			resources = XRRGetScreenResources(_dpy, RootWindow(_dpy, screen));
+
+		for(uint i = 0; i < resources->noutput; ++i)
+		{
+			XRROutputInfo *output = XRRGetOutputInfo(_dpy, resources, resources->outputs[i]);
+			if (!output)
+				continue;
+
+			if (output->crtc && output->connection == RR_Connected && nlstricmp(name, output->name) == 0)
+			{
+				// physical monitor
+				XRRCrtcInfo *crtc = XRRGetCrtcInfo(_dpy, resources, output->crtc);
+				if (crtc)
+				{
+					found = true;
+					x = crtc->x;
+					y = crtc->y;
+
+					// TODO: test rotation
+					if (crtc->rotation == RR_Rotate_0 || crtc->rotation == RR_Rotate_180)
+					{
+						w = crtc->width;
+						h = crtc->height;
+					}
+					else
+					{
+						w = crtc->height;
+						h = crtc->width;
+					}
+
+					XRRFreeCrtcInfo(crtc);
+				}
+			}
+
+			XRRFreeOutputInfo(output);
+
+			if (found)
+				break;
+		}
+
+		XRRFreeScreenResources(resources);
+	}
+#endif
+	return found;
+}
+
 // --------------------------------------------------
-bool CDriverGL::setMode(const GfxMode& mode)
+bool CDriverGL::setMode(const GfxMode& amode)
 {
 	H_AUTO_OGL(CDriverGL_setMode);
 
 	// don't modify window or screen if managed by a 3rd party library
 	if (!_DestroyWindow)
 		return true;
+
+#if !(HAVE_XRANDR)
+	const GfxMode &mode = amode;
+#endif
 
 #if defined(NL_OS_WINDOWS)
 	// save relative cursor
@@ -1929,21 +2022,89 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	BOOL cursorPosOk = isSystemCursorInClientArea()
 		&& GetCursorPos(&cursorPos)
 		&& ScreenToClient(_win, &cursorPos);
+
+	// FIXME: this probably needs to use _CurrentMode instead of mode
 	sint curX = (sint)cursorPos.x * (sint)mode.Width;
 	sint curY = (sint)cursorPos.y * (sint)mode.Height;
+#endif
+
+#if HAVE_XRANDR
+	GfxMode mode = amode;
+
+	if (!mode.Windowed)
+	{
+		GfxMode current;
+		if (!getCurrentScreenMode(current))
+			nlinfo("3D: XrandR: Reading active monitor info failed");
+
+		sint newX = _WindowX;
+		sint newY = _WindowY;
+
+		// make sure resolution matches requested or currently active monitor's resolution
+		mode.Width = current.Width;
+		mode.Height = current.Height;
+		if (!mode.DisplayDevice.empty())
+		{
+			uint newW = current.Width;
+			uint newH = current.Height;
+			if (getMonitorByName(mode.DisplayDevice, newX, newY, newW, newH))
+			{
+				mode.Width = newW;
+				mode.Height = newH;
+			}
+			else
+			{
+				nlinfo("3D: XrandR: Reading requested monitor '%s' info failed, using '%s'", mode.DisplayDevice.c_str(), current.DisplayDevice.c_str());
+				mode.DisplayDevice = current.DisplayDevice;
+			}
+		}
+
+		// switching monitors.
+		// first move mouse pointer to target monitor and then move window.
+		// if window is visible, then also restore mouse relative position.
+		if (!mode.DisplayDevice.empty() && mode.DisplayDevice != current.DisplayDevice)
+		{
+			int screen = DefaultScreen(_dpy);
+			Window root = RootWindow(_dpy, screen);
+			uint mouseX = mode.Width / 2;
+			uint mouseY = mode.Height / 2;
+
+			XWindowAttributes xwa;
+			XGetWindowAttributes(_dpy, _win, &xwa);
+			if (xwa.map_state != IsUnmapped)
+			{
+				Window root_win;
+				Window child_win;
+				sint root_x, root_y, win_x, win_y;
+				uint mask;
+
+				Bool res = XQueryPointer(_dpy, _win, &root_win, &child_win, &root_x, &root_y, &win_x, &win_y, &mask);
+				if (res)
+				{
+					mouseX = (uint)((float)win_x * mode.Width / current.Width);
+					mouseY = (uint)((float)win_y * mode.Height / current.Height);
+				}
+			}
+
+			XWarpPointer(_dpy, None, root, None, None, None, None, newX + mouseX, newY + mouseY);
+			XMoveWindow(_dpy, _win, newX, newY);
+			_WindowX = newX;
+			_WindowY = newY;
+		}
+	}
 #endif
 
 	if (!setScreenMode(mode))
 		return false;
 
+	_CurrentMode.Depth = mode.Depth;
+	_CurrentMode.Frequency = mode.Frequency;
+	_CurrentMode.DisplayDevice = mode.DisplayDevice;
+
 	// when changing window style, it's possible system change window size too
 	setWindowStyle(mode.Windowed ? EWSWindowed : EWSFullscreen);
-
-	if (!mode.Windowed)
-		_CurrentMode.Depth = mode.Depth;
-
-	setWindowSize(mode.Width, mode.Height);
 	setWindowPos(_WindowX, _WindowY);
+	setWindowSize(mode.Width, mode.Height);
 
 	switch (_CurrentMode.Depth)
 	{
@@ -2120,6 +2281,66 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 	int screen = DefaultScreen(_dpy);
 
 #if defined(HAVE_XRANDR)
+	if (_xrandr_version >= 105)
+	{
+		int nmonitors = 0;
+		// virtual monitors
+		XRRMonitorInfo *monitor = XRRGetMonitors(_dpy, RootWindow(_dpy, screen), 1, &nmonitors);
+		for(sint i = 0; i < nmonitors; ++i)
+		{
+			char * name = XGetAtomName(_dpy, monitor[i].name);
+			GfxMode mode;
+			mode.DisplayDevice = name;
+			mode.Width = monitor[i].width;
+			mode.Height = monitor[i].height;
+			mode.Frequency = 0;
+			modes.push_back(mode);
+			XFree(name);
+		}
+		XRRFreeMonitors(monitor);
+	}
+	else
+	{
+		XRRScreenResources *resources = XRRGetScreenResourcesCurrent(_dpy, RootWindow(_dpy, screen));
+		if (!resources)
+			resources = XRRGetScreenResources(_dpy, RootWindow(_dpy, screen));
+
+		std::map<int, int> resourceModeMap;
+		for(sint i = 0; i< resources->nmode; ++i)
+			resourceModeMap.insert(std::make_pair(resources->modes[i].id, i));
+
+		for(sint i = 0; i < resources->noutput; ++i)
+		{
+			XRROutputInfo *output = XRRGetOutputInfo(_dpy, resources, resources->outputs[i]);
+			if (!output)
+				continue;
+
+			if (output->crtc && output->connection == RR_Connected)
+			{
+				// physical monitor
+				XRRCrtcInfo *crtc = XRRGetCrtcInfo(_dpy, resources, output->crtc);
+				if (crtc)
+				{
+					std::map<int,int>::const_iterator it = resourceModeMap.find(crtc->mode);
+					if (it != resourceModeMap.end())
+					{
+						GfxMode mode;
+						mode.DisplayDevice = output->name;
+						mode.Width = resources->modes[it->second].width;
+						mode.Height = resources->modes[it->second].height;
+						mode.Frequency = 0;
+
+						modes.push_back(mode);
+					}
+					XRRFreeCrtcInfo(crtc);
+				}
+			}
+			XRRFreeOutputInfo(output);
+		}
+
+		XRRFreeScreenResources(resources);
+	}
+	found = modes.size() > 0;
 	if (!found && _xrandr_version >= 100)
 	{
 		XRRScreenConfiguration *screen_config = XRRGetScreenInfo(_dpy, RootWindow(_dpy, screen));
@@ -2255,6 +2476,120 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	int screen = DefaultScreen(_dpy);
 
 #ifdef HAVE_XRANDR
+	int x = 0;
+	int y = 0;
+	Window child;
+
+	// get window position so we can compare monitors (or mouse position if window not visible yet) 
+	XWindowAttributes xwa;
+	XGetWindowAttributes(_dpy, _win, &xwa);
+	if (xwa.map_state != IsUnmapped)
+	{
+		XTranslateCoordinates(_dpy, _win, xwa.root, xwa.x, xwa.y, &x, &y, &child);
+	}
+	else
+	{
+		sint rx, ry, wx, wy;
+		uint mask;
+		Bool res = XQueryPointer(_dpy, RootWindow(_dpy, screen), &child, &child, &rx, &ry, &wx, &wy, &mask);
+		if (res)
+		{
+			x = rx;
+			y = ry;
+		}
+	}
+
+	if (_xrandr_version >= 105)
+	{
+		int nmonitors = 0;
+		XRRMonitorInfo *monitor = XRRGetMonitors(_dpy, RootWindow(_dpy, screen), 1, &nmonitors);
+		if (monitor)
+		{
+			sint bestMatch = -1;
+			for(sint i = 0; i< nmonitors; ++i)
+			{
+				if ((x >= monitor[i].x && x < (monitor[i].x + monitor[i].width) &&
+					y >= monitor[i].y && y < (monitor[i].y + monitor[i].height)) ||
+					(monitor[i].primary && bestMatch == -1))
+				{
+					bestMatch = i;
+				}
+			}
+
+			// best match or primary monitor
+			if (bestMatch != -1)
+			{
+				found = true;
+				char* pname = XGetAtomName(_dpy, monitor[bestMatch].name);
+				mode.DisplayDevice = pname;
+				mode.Width = monitor[bestMatch].width;
+				mode.Height = monitor[bestMatch].height;
+				mode.Windowed = _CurrentMode.Windowed;
+				mode.OffScreen = false;
+				mode.Depth = (uint) DefaultDepth(_dpy, screen);
+				mode.Frequency = 0;
+				XFree(pname);
+			}
+
+			XRRFreeMonitors(monitor);
+		}
+	}
+	else
+	{
+		XRRScreenResources *resources = XRRGetScreenResourcesCurrent(_dpy, RootWindow(_dpy, screen));
+		if (!resources)
+			resources = XRRGetScreenResources(_dpy, RootWindow(_dpy, screen));
+
+		for(uint i = 0; i < resources->noutput; ++i)
+		{
+			XRROutputInfo *output = XRRGetOutputInfo(_dpy, resources, resources->outputs[i]);
+			if (!output)
+				continue;
+
+			if (output->crtc && output->connection == RR_Connected)
+			{
+				XRRCrtcInfo *crtc = XRRGetCrtcInfo(_dpy, resources, output->crtc);
+				if (crtc)
+				{
+					sint width, height;
+					bool match = false;
+
+					// TODO: test rotation
+					if (crtc->rotation == RR_Rotate_0 || crtc->rotation == RR_Rotate_180)
+					{
+						width = crtc->width;
+						height = crtc->height;
+					}
+					else
+					{
+						width = crtc->height;
+						height = crtc->width;
+					}
+
+					if (x >= crtc->x && y >= crtc->y && x < (crtc->x + width) && y < (crtc->y + height))
+					{
+						found = true;
+						mode.DisplayDevice = output->name;
+						mode.Width = width;
+						mode.Height = height;
+						mode.Windowed = _CurrentMode.Windowed;
+						mode.OffScreen = false;
+						mode.Depth = (uint) DefaultDepth(_dpy, screen);
+						mode.Frequency = 0;
+					}
+
+					XRRFreeCrtcInfo(crtc);
+				}
+			}
+
+			XRRFreeOutputInfo(output);
+
+			if (found)
+				break;
+		}
+
+		XRRFreeScreenResources(resources);
+	}
 
 	if (!found && _xrandr_version > 0)
 	{
@@ -2432,7 +2767,6 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 			_DecorationWidth = -1;
 			_DecorationHeight = -1;
 		}
-
 		XMoveWindow(_dpy, _win, x, y);
 	}
 
