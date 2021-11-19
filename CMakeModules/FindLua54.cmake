@@ -1,6 +1,6 @@
 # Locate Lua library
 # This module defines
-#  LUA53_FOUND, if false, do not try to link to Lua
+#  LUA54_FOUND, if false, do not try to link to Lua
 #  LUA_LIBRARIES
 #  LUA_INCLUDE_DIR, where to find lua.h
 #  LUA_VERSION_STRING, the version of Lua found (since CMake 2.8.8)
@@ -28,7 +28,7 @@
 find_path(LUA_INCLUDE_DIR lua.h
   HINTS
     ENV LUA_DIR
-  PATH_SUFFIXES include/lua53 include/lua5.3 include/lua-5.3 include/lua include
+  PATH_SUFFIXES include/lua54 include/lua5.4 include/lua-5.4 include/lua include
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -39,7 +39,7 @@ find_path(LUA_INCLUDE_DIR lua.h
 )
 
 FIND_LIBRARY(LUA_LIBRARY
-  NAMES lua53 lua5.3 lua-5.3 lua
+  NAMES lua54 lua5.4 lua-5.4 lua
   HINTS
     $ENV{LUA_DIR}
   PATH_SUFFIXES lib64 lib
@@ -53,7 +53,7 @@ FIND_LIBRARY(LUA_LIBRARY
 )
 
 FIND_LIBRARY(LUA_LIBRARY_DEBUG
-  NAMES lua53-d lua5.3-d lua-5.3-d lua-d lua53d lua5.3d lua-5.3d luad
+  NAMES lua54-d lua5.4-d lua-5.4-d lua-d lua54d lua5.4d lua-5.4d luad
   HINTS
     $ENV{LUA_DIR}
   PATH_SUFFIXES lib64 lib
@@ -91,7 +91,7 @@ endif()
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if
 # all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua53
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua54
                                   REQUIRED_VARS LUA_LIBRARIES LUA_INCLUDE_DIR
                                   VERSION_VAR LUA_VERSION_STRING)
 

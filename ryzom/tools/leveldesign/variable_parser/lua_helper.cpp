@@ -30,6 +30,13 @@ extern "C"
 #include <cassert>
 #undef assert
 #define assert nlassert
+
+// Always use unique_ptr with ValyriaTear/luabind on Ubuntu 20,
+// since the setting is not stored in build_information.hpp
+#ifndef LUABIND_USE_CXX11
+#define LUABIND_USE_CXX11
+#endif
+
 #include <luabind/luabind.hpp>
 
 using namespace std;

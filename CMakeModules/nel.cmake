@@ -249,6 +249,8 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_ASSIMP              "Use assimp exporter"                           OFF)
   OPTION(WITH_LIBGSF              "Use libgsf for max file library"               OFF)
 
+  OPTION(WITH_FFMPEG              "Use ffmpeg for audio decoder"                  OFF)
+
   ###
   # GUI toolkits
   ###
@@ -354,6 +356,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_LUA51               "Build Ryzom Core using Lua 5.1"                ON )
   OPTION(WITH_LUA52               "Build Ryzom Core using Lua 5.2"                OFF)
   OPTION(WITH_LUA53               "Build Ryzom Core using Lua 5.3"                OFF)
+  OPTION(WITH_LUA54               "Build Ryzom Core using Lua 5.4"                OFF)
   OPTION(WITH_RYZOM_CLIENT_UAC    "Ask to run as Administrator"                   OFF)
   OPTION(WITH_RYZOM_PATCH         "Enable Ryzom in-game patch support"            OFF)
   OPTION(WITH_RYZOM_CUSTOM_PATCH_SERVER "Only use patch server from CFG file"     OFF)

@@ -302,6 +302,7 @@ CClientConfig::CClientConfig()
 	SelectedSlot		= 0;						// Default is slot 0
 
 	Windowed			= false;					// Default is windowed mode.
+	MonitorName			= "";
 	Width				= 0;						// Default Width for the window (0 = current screen resolution).
 	Height				= 0;						// Default Height for the window (0 = current screen resolution).
 	Depth				= 32;						// Default Bit per Pixel.
@@ -412,6 +413,7 @@ CClientConfig::CClientConfig()
 	CameraRecorderPrefix = "cam_rec";
 	CameraRecorderBlend  = true;
 
+	ScreenShotDirectory = "screenshots";
 	ScreenShotWidth		= 0;
 	ScreenShotHeight	= 0;
 	ScreenShotFullDetail = true;
@@ -847,6 +849,8 @@ void CClientConfig::setValues()
 	}
 	else
 		cfgWarning("Default value used for 'Fullscreen'");
+
+	READ_STRING_FV(MonitorName);
 	// Width
 	READ_INT_FV(Width)
 	// Height
@@ -1139,6 +1143,7 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(CameraRecorderBlend)
 
 	// Screenshot
+	READ_STRING_FV(ScreenShotDirectory)
 	READ_INT_FV(ScreenShotWidth)
 	READ_INT_FV(ScreenShotHeight)
 	READ_BOOL_FV(ScreenShotFullDetail)
@@ -1991,6 +1996,11 @@ void CClientConfig::serial(NLMISC::IStream &f)
 		f.xmlPushBegin("Light");
 		f.xmlPushEnd();
 		f.serial(Light);
+		f.xmlPop();
+
+		f.xmlPushBegin("MonitorName");
+		f.xmlPushEnd();
+		f.serial(MonitorName);
 		f.xmlPop();
 
 		f.xmlPushBegin("Windowed");

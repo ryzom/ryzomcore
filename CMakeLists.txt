@@ -98,14 +98,14 @@ RYZOM_SETUP_PREFIX_PATHS()
 
 #-----------------------------------------------------------------------------
 # Default values for URL's
-SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL     "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
-SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL       "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
-SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
-SET(RYZOM_CLIENT_PATCH_URL              "https://cdn.ryzom.dev/open/patch/" CACHE STRING "Ryzom Client Patch URL")
-SET(RYZOM_CLIENT_APP_NAME               "default")
+SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL     "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
+SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL       "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
+SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
+SET(RYZOM_CLIENT_PATCH_URL              "https://cdn.ryzom.dev/core4/patch/" CACHE STRING "Ryzom Client Patch URL")
+SET(RYZOM_CLIENT_APP_NAME               "core4")
 
-SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://open.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
-SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://open.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
+SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://core4.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
+SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 
 #-----------------------------------------------------------------------------
 # urls when compiling ryzom live client

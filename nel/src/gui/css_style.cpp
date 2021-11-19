@@ -936,6 +936,16 @@ namespace NLGUI
 					style.GlobalColor = b;
 			}
 			else
+			if (it->first == "-ryzom-modulate-text-color")
+			{
+				bool b;
+				if (it->second == "inherit")
+					style.GlobalColorText = current.GlobalColorText;
+				else
+				if (fromString(it->second, b))
+					style.GlobalColorText = b;
+			}
+			else
 			if (it->first == "background-color")
 			{
 				if (it->second == "inherit")
