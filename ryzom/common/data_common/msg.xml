@@ -269,7 +269,7 @@
     <leaf name="START_TRADE_PACT" sendto="EGS" format="u16" description="start bot chat pacts  with the given session id" />
     <leaf name="START_TRADE_ACTION" sendto="EGS" format="u16" description="start bot chat actions  with the given session id" />
     <leaf name="BUY" sendto="EGS" format="u16 u16" description="Client buy object. param1: index in list. Param2: quantity" />
-    <leaf name="SELL" sendto="EGS" format="u8 u8 u16 u32" description="Client sell item in: 1/ inventory id INVENTORIES::EInventory 2/ index 3/ quantity 4/ resale price" />
+    <leaf name="SELL" sendto="EGS" format="u8 u16 u16 u32" description="Client sell item in: 1/ inventory id INVENTORIES::EInventory 2/ index 3/ quantity 4/ resale price" />
     <leaf name="DESTROY_ITEM" sendto="EGS" format="u16 u16" description="Client destroy an item in sell store. param1: index in list. Param2: quantity" />
     <leaf name="REFRESH_TRADE_LIST" sendto="EGS" format="" description="Client want refresh trade list from current Bot" />
     <!-- trade filters -->
