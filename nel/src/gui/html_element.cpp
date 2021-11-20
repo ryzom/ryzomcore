@@ -142,30 +142,33 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	std::string CHtmlElement::htmlEscape(std::string val, bool isAttribute) const
+	std::string CHtmlElement::htmlEscape(const std::string &val) const
 	{
-		static const std::string searchReplace[] = {
-			"&", "&amp;",
-			"<", "&lt;",
-			">", "&gt;",
-			"\xA0", "&nbsp;",
-		};
-		
-		for(uint i = 0; i < (sizeof(searchReplace) / sizeof(searchReplace[0])); i+=2)
-			val = strFindReplaceAll(val, searchReplace[i], searchReplace[i+1]);
+		if (val.find_first_of("\"'&<>\xA0") == std::string::npos)
+			return val;
 
-		if (isAttribute)
+		std::string ret;
+		// resize is quaranteed, make room for some free replacements
+		ret.reserve(val.size() + 24);
+		for(size_t pos = 0; pos != val.size(); pos++)
 		{
-			static const std::string q = "\"";
-			static const std::string quot = "&quot;";
-			val = strFindReplaceAll(val, q, quot);
+			switch(val[pos])
+			{
+				case '"': ret.append("&quot;"); break;
+				case '\'': ret.append("&#39;"); break;
+				case '&': ret.append("&amp;"); break;
+				case '<': ret.append("&lt;"); break;
+				case '>': ret.append("&gt;"); break;
+				case '\xA0': ret.append("&nbsp;"); break;
+				default : ret.append(&val[pos],1); break;
+			}
 		}
 
-		return val;
+		return ret;
 	}
 
 	// ***************************************************************************
-	std::string CHtmlElement::serializeAttributes() const
+	std::string CHtmlElement::serializeAttributes(bool escape) const
 	{
 		std::string result;
 		for(std::map<std::string, std::string>::const_iterator it = Attributes.begin(); it != Attributes.end(); ++it)
@@ -179,30 +182,30 @@ namespace NLGUI
 					{
 						result += " ";
 					}
-					result += htmlEscape(*it2, true);
+					result += (escape ? htmlEscape(*it2) : *it2);
 				}
 				result += "\"";
 			}
 			else
 			{
-				result += " " + it->first + "=\"" + htmlEscape(it->second, true) + "\"";
+				result += " " + it->first + "=\"" + (escape ? htmlEscape(it->second) : it->second) + "\"";
 			}
 		}
 		return result;
 	}
 
 	// ***************************************************************************
-	std::string CHtmlElement::serializeChilds() const
+	std::string CHtmlElement::serializeChilds(bool escape) const
 	{
 		std::string result;
 		for(std::list<CHtmlElement>::const_iterator it = Children.begin(); it != Children.end(); ++it)
-			result += it->serialize();
+			result += it->serialize(escape);
 
 		return result;
 	}
 
 	// ***************************************************************************
-	std::string CHtmlElement::serialize() const
+	std::string CHtmlElement::serialize(bool escape) const
 	{
 		if (Type == TEXT_NODE)
 		{
@@ -211,12 +214,14 @@ namespace NLGUI
 				parent->ID == HTML_NOSCRIPT))
 			{
 				return Value;
-			} else {
+			} else if (escape) {
 				return htmlEscape(Value);
+			} else {
+				return Value;
 			}
 		}
 
-		std::string result = "<" + Value + serializeAttributes() + ">";
+		std::string result = "<" + Value + serializeAttributes(escape) + ">";
 
 		if (ID == HTML_AREA || ID == HTML_BASE || ID == HTML_BR ||
 			ID == HTML_COL || ID == HTML_EMBED || ID == HTML_HR ||
@@ -231,7 +236,7 @@ namespace NLGUI
 			result += "\n";
 
 		if (!Children.empty())
-			result += serializeChilds();
+			result += serializeChilds(escape);
 
 		result += "</" + Value + ">";
 

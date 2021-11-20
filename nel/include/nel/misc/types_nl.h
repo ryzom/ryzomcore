@@ -174,10 +174,6 @@
 #	define NL_COMP_GCC
 #endif
 
-#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110)
-#	define NL_ISO_CPP0X_AVAILABLE
-#endif
-
 #if defined(NL_COMP_GCC) && (__cplusplus >= 201103L)
 #	define NL_NO_EXCEPTION_SPECS
 #endif
@@ -231,6 +227,10 @@
 #	ifdef __clang__
 #		define CLANG_VERSION (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 #	endif
+#endif
+
+#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110) || (defined(NL_COMP_GCC) && (GCC_VERSION >= 40400) && (__cplusplus >= 201103L))
+#	define NL_ISO_CPP0X_AVAILABLE
 #endif
 
 // Remove stupid Visual C++ warnings

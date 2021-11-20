@@ -48,6 +48,12 @@
 #	define assert(x)
 #endif
 
+// Always use unique_ptr with ValyriaTear/luabind on Ubuntu 20,
+// since the setting is not stored in build_information.hpp
+#ifndef LUABIND_USE_CXX11
+#define LUABIND_USE_CXX11
+#endif
+
 #include <luabind/luabind.hpp>
 // in luabind > 0.6, LUABIND_MAX_ARITY is set to 10
 #if LUABIND_MAX_ARITY == 10
@@ -220,7 +226,9 @@ namespace NLGUI
 	void CLuaIHM::push(CLuaState &ls, const ucstring &value)
 	{
 		//H_AUTO(Lua_CLuaIHM_push)
-	#if LUABIND_VERSION > 600
+	#if defined(LUABIND_STACK_HPP_INCLUDED)
+		luabind::push(ls.getStatePointer(), value);
+	#elif (LUABIND_VERSION > 600)
 		luabind::detail::push(ls.getStatePointer(), value);
 	#else
 		luabind::object obj(ls.getStatePointer(), value);
@@ -1156,7 +1164,9 @@ namespace NLGUI
 			case CInterfaceExprValue::RGBA:
 				{
 					CRGBA color = value.getRGBA();
-	#if LUABIND_VERSION > 600
+	#if defined(LUABIND_STACK_HPP_INCLUDED)
+					luabind::push(ls.getStatePointer(), color);
+	#elif (LUABIND_VERSION > 600)
 					luabind::detail::push(ls.getStatePointer(), color);
 	#else
 					luabind::object obj(ls.getStatePointer(), color);
@@ -1416,7 +1426,9 @@ namespace NLGUI
 			case CReflectedProperty::UCString:
 			{
 				ucstring str = (reflectedObject.*(property.GetMethod.GetUCString))();
-	#if LUABIND_VERSION > 600
+	#if defined(LUABIND_STACK_HPP_INCLUDED)
+				luabind::push(ls.getStatePointer(), str);
+	#elif (LUABIND_VERSION > 600)
 				luabind::detail::push(ls.getStatePointer(), str);
 	#else
 				luabind::object obj(ls.getStatePointer(), str);
@@ -1427,7 +1439,9 @@ namespace NLGUI
 			case CReflectedProperty::UCStringRef:
 			{
 				ucstring str = (reflectedObject.*(property.GetMethod.GetUCStringRef))();
-	#if LUABIND_VERSION > 600
+	#if defined(LUABIND_STACK_HPP_INCLUDED)
+				luabind::push(ls.getStatePointer(), str);
+	#elif (LUABIND_VERSION > 600)
 				luabind::detail::push(ls.getStatePointer(), str);
 	#else
 				luabind::object obj(ls.getStatePointer(), str);
@@ -1442,7 +1456,9 @@ namespace NLGUI
 			case CReflectedProperty::RGBA:
 			{
 				CRGBA color = (reflectedObject.*(property.GetMethod.GetRGBA))();
-	#if LUABIND_VERSION > 600
+	#if defined(LUABIND_STACK_HPP_INCLUDED)
+				luabind::push(ls.getStatePointer(), color);
+	#elif (LUABIND_VERSION > 600)
 				luabind::detail::push(ls.getStatePointer(), color);
 	#else
 				luabind::object obj(ls.getStatePointer(), color);

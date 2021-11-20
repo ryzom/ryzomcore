@@ -75,8 +75,9 @@ static const std::string CAFilename = "cacert.pem"; // https://curl.haxx.se/docs
 // ***************************************************************************
 bool CCurlHttpClient::verifyServer(bool verify)
 {
-	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, verify ? 2 : 0);
+	m_Verify = verify;
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
+	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, verify ? 2 : 0);
 
 	// specify custom CA certs
 	CCurlCertificates::addCertificateFile(CAFilename);
@@ -97,8 +98,8 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	curl_easy_setopt(_Curl, CURLOPT_URL, url.c_str());
 	if (url.length() > 8 && (url[4] == 's' || url[4] == 'S')) // 01234 https
 	{
-		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, 1L);
-		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, 2L);
+		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, m_Verify ? 1L : 0);
+		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, m_Verify ? 2L : 0);
 	}
 
 	// Authentication
@@ -124,15 +125,17 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	curl_easy_setopt(_Curl, CURLOPT_WRITEFUNCTION, CCurlHttpClient::writeDataFromCurl);
 	curl_easy_setopt(_Curl, CURLOPT_WRITEDATA, this);
 
-	char errorbuf [CURL_ERROR_SIZE+1];
-	curl_easy_setopt(_Curl, CURLOPT_ERRORBUFFER, errorbuf);
+	if (!m_ErrorBuf.size())
+		m_ErrorBuf.resize(CURL_ERROR_SIZE + 1);
+	m_ErrorBuf[0] = '\0';
+	curl_easy_setopt(_Curl, CURLOPT_ERRORBUFFER, &m_ErrorBuf[0]);
 
 	// Send
 	CURLcode res = curl_easy_perform(_Curl);
 	if (res != 0)
 	{
 		if (verbose)
-			nlwarning(errorbuf);
+			nlwarning(&m_ErrorBuf[0]);
 		return false;
 	}
 

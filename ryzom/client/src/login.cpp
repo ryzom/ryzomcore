@@ -2218,6 +2218,7 @@ class CAHLessLod : public IActionHandler
 REGISTER_ACTION_HANDLER (CAHLessLod, "less_lod");
 
 // ***************************************************************************
+// TODO: remove resolution change from login screen
 class CAHUninitResLod : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
@@ -2842,7 +2843,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 	{
 		// ask server for salt
 		if(!HttpClient.sendGet(url + "?cmd=ask&cp=2&login=" + login + "&lg=" + ClientCfg.LanguageCode, "", pPM->isVerboseLog()))
-			return "Can't send (error code 60)";
+			return std::string("Can't send (error code 60) ") + HttpClient.lastError();
 
 		if(pPM->isVerboseLog()) nlinfo("Sent request for password salt");
 
@@ -2916,13 +2917,13 @@ string checkLogin(const string &login, const string &password, const string &cli
 			std::string	cryptedPassword = CCrypt::crypt(password, Salt);
 
 			if(!HttpClient.sendGet(url + "?cmd=login&login=" + login + "&password=" + cryptedPassword + "&clientApplication=" + clientApp + "&cp=2" + "&lg=" + ClientCfg.LanguageCode + customParameters))
-				return "Can't send (error code 2)";
+				return std::string("Can't send (error code 2) ") + HttpClient.lastError();
 		}
 		else
 		{
 			// don't send login and password if empty
 			if(!HttpClient.sendGet(url + "?cmd=login&clientApplication=" + clientApp + "&cp=2" + "&lg=" + ClientCfg.LanguageCode + customParameters))
-				return "Can't send (error code 2)";
+				return std::string("Can't send (error code 2) ") + HttpClient.lastError();
 		}
 
 		// the response should contains the result code and the cookie value
@@ -3032,7 +3033,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 		std::string	cryptedPassword = CCrypt::crypt(password, Salt);
 
 		if(!HttpClient.sendGet(url + "?login=" + login + "&password=" + cryptedPassword + "&clientApplication=" + clientApp + "&cp=2"))
-			return "Can't send (error code 2)";
+			return std::string("Can't send (error code 2) ") + HttpClient.lastError();
 	/*
 		if(!send(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?login="+login+"&password="+password+"&clientApplication="+clientApp))
 			return "Can't send (error code 2)";

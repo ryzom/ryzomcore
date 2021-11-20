@@ -34,7 +34,7 @@ class CCurlHttpClient
 public:
 
 	/// Constructor
-	CCurlHttpClient() : _CurlStruct(NULL) {}
+	CCurlHttpClient() : _CurlStruct(NULL), m_Verify(true) {}
 
 	/// Connect to an http server (string by val is intended). If you specify a whole URL, an attempt will be made to determine the server.
 	bool connect(const std::string &server);
@@ -63,6 +63,8 @@ public:
 	/// Disconnect if connected (otherwise does nothing)
 	void disconnect();
 
+	const char *lastError() { return &m_ErrorBuf[0]; }
+
 protected:
 
 	/// Helper
@@ -78,6 +80,10 @@ private:
 
 	std::vector<uint8>	_ReceiveBuffer;
 	std::string			_Auth; // must be kept here because curl only stores the char pointer
+
+	std::vector<char> m_ErrorBuf;
+	bool m_Verify;
+
 };
 
 extern CCurlHttpClient CurlHttpClient;
