@@ -1026,6 +1026,8 @@ void CChatGroupWindow::loadFreeTeller(NLMISC::IStream &f)
 			f.serial(sTitle);
 			title = sTitle.toUtf8();
 		}
+		else
+			f.serial(title);
 
 		CGroupContainer *pGC = createFreeTeller(title, "");
 
