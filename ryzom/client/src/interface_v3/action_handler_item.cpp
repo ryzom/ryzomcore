@@ -562,7 +562,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 
 
 //=====================================================================================================================
-	static void sendExchangeAddToServer(uint16 srcSlotIndex, uint16 destSlotIndex, uint16 quantitySrc)
+	static void sendExchangeAddToServer(uint16 srcInvIndex, uint16 srcSlotIndex, uint16 destSlotIndex, uint16 quantitySrc)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -571,6 +571,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
 			// Swap all the Src (quantity= quantitySrc) to dest
+			out.serial(srcInvIndex);
 			out.serial(srcSlotIndex);
 			out.serial(destSlotIndex);
 			out.serial(quantitySrc);
@@ -615,7 +616,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 			NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 			// send msg to server
-			sendExchangeAddToServer((uint16)src->getIndexInDB(), (uint8)dest->getIndexInDB(), (uint16)quantitySrc);
+			sendExchangeAddToServer((uint16) src->getSecondIndexInDB(), (uint16)src->getIndexInDB(), (uint8)dest->getIndexInDB(), (uint16)quantitySrc);
 		}
 		else
 		{
@@ -725,7 +726,7 @@ static void validateStackItem(CDBCtrlSheet *pCSSrc, CDBCtrlSheet *pCSDst, sint32
 				NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 				// send msg to server
-				sendExchangeAddToServer((uint16)pCSSrc->getIndexInDB(), (uint8)pCSDst->getIndexInDB(), (uint16)val);
+				sendExchangeAddToServer((uint16)pCSSrc->getSecondIndexInDB(), (uint16)pCSSrc->getIndexInDB(), (uint8)pCSDst->getIndexInDB(), (uint16)val);
 			}
 		}
 	}
@@ -1049,9 +1050,21 @@ class CCanDropToExchange : public IActionHandler
 		if (!pCSSrc || !pCSDst) return;
 
 		// Exchange can only be done from bag to exchange inventories
-
-		if (pCSSrc->getSecondIndexInDB() == INVENTORIES::bag &&
-			pCSDst->getSecondIndexInDB() == INVENTORIES::exchange)
+		uint32 srcInventory = pCSSrc->getSecondIndexInDB();
+		if (
+			(srcInventory == INVENTORIES::bag ||
+				srcInventory == INVENTORIES::pet_animal1 ||
+				srcInventory == INVENTORIES::pet_animal2 ||
+				srcInventory == INVENTORIES::pet_animal3 ||
+				srcInventory == INVENTORIES::pet_animal4 ||
+				srcInventory == INVENTORIES::pet_animal5 ||
+				srcInventory == INVENTORIES::pet_animal6 ||
+				srcInventory == INVENTORIES::pet_animal7 ||
+				srcInventory == INVENTORIES::guild ||
+				srcInventory == INVENTORIES::player_room)
+			&& getInventory().isInventoryAvailable((INVENTORIES::TInventory) pCSSrc->getSecondIndexInDB())
+			&& pCSDst->getSecondIndexInDB() == INVENTORIES::exchange
+		)
 		{
 			if (checkCanExchangeItem(pCSSrc))
 			{
