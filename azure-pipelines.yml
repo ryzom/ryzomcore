@@ -77,3 +77,24 @@ jobs:
         cd build
         make -j`nproc`
       displayName: 'Make'
+  - job: windows2019
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+    - checkout: self
+      fetchDepth: 1
+    - task: Cache@2
+      inputs:
+        key: 'hunter-win2019-x64-rel'
+        path: "c:/.hunter/_Base/Cache"
+    - task: CMake@1
+      inputs:
+        workingDirectory: build.release
+        cmakeArgs: '-DCMAKE_CONFIGURATION_TYPES=Release -DHUNTER_ENABLED=ON -DHUNTER_CONFIGURATION_TYPES=Release -DFINAL_VERSION=OFF -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_NEL_TOOLS=OFF -DWITH_RYZOM_TOOLS=OFF -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_DRIVER_DIRECT3D=OFF -DWITH_DRIVER_XAUDIO2=OFF ..'
+    - task: MSBuild@1
+      inputs:
+        solution: build.release/ALL_BUILD.vcxproj
+        maximumCpuCount: true
+        configuration: release
+        platform: 'x64'
