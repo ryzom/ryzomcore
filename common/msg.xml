@@ -553,10 +553,6 @@
           sendto="EGS"
           format="b"
           description="AFK command is sent to EGS" />
-      <leaf name="SELFKILL"
-          sendto="EGS"
-          format=""
-          description="client asks EGS to kill self" />
     <leaf name="RANDOM"
           sendto="EGS"
           format="s16 s16"

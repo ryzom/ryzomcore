@@ -368,7 +368,7 @@
           type="I64" />
     <branch name="GIVE">
       <branch name=""
-              count="10">
+              count="8">
         <!-- Common Item Data -->
         <leaf name="SHEET"
               type="I32"
@@ -404,7 +404,7 @@
     </branch>
     <branch name="RECEIVE">
       <branch name=""
-              count="10">
+              count="8">
         <!-- Common Item Data -->
         <leaf name="SHEET"
               type="I32"
@@ -704,8 +704,6 @@
               type="I6" />
         <leaf name="PREREQUISIT_VALID"
               type="I1" />
-        <leaf name="RESALE_FLAG"
-              type="I2" />
       </branch>
     </branch>
     <leaf name="MONEY"
@@ -1194,8 +1192,6 @@
               type="I6" />
         <leaf name="PREREQUISIT_VALID"
               type="I1" />
-        <leaf name="RESALE_FLAG"
-              type="I2" />
       </branch>
     </branch>
     <branch name="OUTPOST">
