@@ -1,7 +1,7 @@
 /** \file impulse_decoder.cpp
  * <File description>
  *
- * $Id: impulse_decoder.cpp,v 1.1 2005/07/11 15:22:33 cado Exp $
+ * $Id$
  */
 
 

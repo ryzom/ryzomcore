@@ -1,7 +1,7 @@
 /** \file net_manager.cpp
  * Manage the network connection on the client.
  *
- * $Id: net_manager.cpp,v 1.6 2007/05/22 13:42:53 boucher Exp $
+ * $Id$
  */
 
 

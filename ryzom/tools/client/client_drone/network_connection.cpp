@@ -1,7 +1,7 @@
 /** \file network_connection.cpp
  * CNetworkConnection
  *
- * $Id: network_connection.cpp,v 1.5 2007/07/27 17:56:10 cado Exp $
+ * $Id$
  */
 
 

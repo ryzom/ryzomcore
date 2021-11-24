@@ -1,6 +1,6 @@
 /** \file login_patch.h
  *
- * $Id: login_patch2.h,v 1.2 2007/05/09 15:33:55 boucher Exp $
+ * $Id$
  */
 
 /* Copyright, 2004 Nevrax Ltd.
