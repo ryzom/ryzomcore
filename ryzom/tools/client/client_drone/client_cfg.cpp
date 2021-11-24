@@ -1,7 +1,7 @@
 /** \file client_cfg.cpp
  * <File description>
  *
- * $Id: client_cfg.cpp,v 1.4 2007/07/27 15:14:50 cado Exp $
+ * $Id$
  */
 
 

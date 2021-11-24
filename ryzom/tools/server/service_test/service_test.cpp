@@ -1,7 +1,7 @@
 /** \file service_test.cpp
  * <File description>
  *
- * $Id: service_test.cpp,v 1.20 2004/03/01 19:22:19 lecroart Exp $
+ * $Id$
  */
 
 

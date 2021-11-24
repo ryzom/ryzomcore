@@ -1,7 +1,7 @@
 /** \file net_manager.h
  * Manage the network connection on the client.
  *
- * $Id: net_manager.h,v 1.2 2004/03/01 19:20:42 lecroart Exp $
+ * $Id$
  */
 
 

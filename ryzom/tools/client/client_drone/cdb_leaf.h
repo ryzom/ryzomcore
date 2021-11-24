@@ -1,6 +1,6 @@
 /** \file cdb_leaf.h
  *
- * $Id: cdb_leaf.h,v 1.3 2007/07/27 15:14:50 cado Exp $
+ * $Id$
  */
 
 

@@ -1,7 +1,7 @@
 /** \file commands.cpp
  * File with all the commands for the console.
  *
- * $Id: commands.cpp,v 1.8 2004/06/23 15:03:04 lecroart Exp $
+ * $Id$
  */
 
 
