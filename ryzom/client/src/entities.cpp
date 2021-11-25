@@ -945,6 +945,8 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			float height = primitive->getHeight();
 
 			CVector size = CVector(width, depth, height);
+			if (primitive->getTriggerType() == UMovePrimitive::OverlapStairsTrigger)
+				size.z -= 10.0f;
 			float v;
 			if (getRelativeFloatFromString(values[i], v))
 			{
@@ -954,6 +956,8 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			{
 				updateVector(param, size, v, false);
 			}
+			if (primitive->getTriggerType() == UMovePrimitive::OverlapStairsTrigger)
+				size.z += 10.0f;
 			primitive->setSize(size.x, size.y);
 			primitive->setHeight(size.z);
 		}
@@ -1028,12 +1032,12 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		{
 			bool active;
 			fromString(values[i], active);
-			primitive->setObstacle(active);
+			primitive->setObstacle(!active);
 			if (active)
 			{
 				primitive->setReactionType(UMovePrimitive::DoNothing);
 				primitive->setTriggerType(UMovePrimitive::OverlapStairsTrigger);
-				primitive->setGlobalPosition(instance.getPos()+CVector(0, 0, 0.5f), dynamicWI);
+				primitive->setGlobalPosition(instance.getPos(), dynamicWI);
 			}
 			else
 			{

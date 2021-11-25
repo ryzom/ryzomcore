@@ -3080,9 +3080,9 @@ void displayPACSPrimitive()
 				// Static collision
 				if (prim->getTriggerType() == UMovePrimitive::OverlapStairsTrigger)
 				{
-					line.Color0 = CRGBA::Blue;
+					line.Color0 = CRGBA::Green;
 					isStairs = true;
-					position.z -= 1.0f;
+					position.z -= 10.0f;
 				}
 				else if (prim->getReactionType() == UMovePrimitive::DoNothing)
  				{

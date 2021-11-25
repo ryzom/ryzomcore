@@ -1676,7 +1676,7 @@ void CMoveContainer::reaction (const CCollisionOTInfo& first)
 						CVectorD first_pos = dynInfo->getFirstPrimitive()->getFinalPosition(dynInfo->getFirstWorldImage());
 						CVectorD second_pos = dynInfo->getSecondPrimitive()->getFinalPosition(dynInfo->getSecondWorldImage());
 						nlinfo("P = %f, C = %f, H = %f, D = %f", first_pos.z, second_pos.z, dynInfo->getSecondPrimitive()->getHeight(), second_pos.z-first_pos.z);
-						dynInfo->getFirstPrimitive()->setZOffset(second_pos.z+dynInfo->getSecondPrimitive()->getHeight()-1.0f);
+						dynInfo->getFirstPrimitive()->setZOffset(second_pos.z+dynInfo->getSecondPrimitive()->getHeight()-10.0f);
 					}
 				}
 				if (dynInfo->isExit())
