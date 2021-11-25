@@ -918,8 +918,10 @@ bool CMoveContainer::evalPrimAgainstPrimCollision (double beginTime, CMovePrimit
 			|| (otherPrimitive->getTriggerType()&UMovePrimitive::EnterTrigger));
 		bool exit = (beginTime<=lastTime) && (lastTime<_DeltaTime) && ((primitive->getTriggerType()&UMovePrimitive::ExitTrigger)
 			|| (otherPrimitive->getTriggerType()&UMovePrimitive::ExitTrigger));
-		bool overlap = (firstTime<=beginTime) && (lastTime>_DeltaTime) && ((primitive->getTriggerType()&UMovePrimitive::OverlapTrigger)
-			|| (otherPrimitive->getTriggerType()&UMovePrimitive::OverlapTrigger));
+		bool overlap = ((firstTime<=beginTime) && (lastTime>_DeltaTime) && ((primitive->getTriggerType()&UMovePrimitive::OverlapTrigger)
+			|| (otherPrimitive->getTriggerType()&UMovePrimitive::OverlapTrigger)) ||
+		(firstTime<=beginTime) && (lastTime>_DeltaTime) && ((primitive->getTriggerType()&UMovePrimitive::OverlapStairsTrigger)
+			|| (otherPrimitive->getTriggerType()&UMovePrimitive::OverlapStairsTrigger)));
 		bool contact = ( beginTime<((firstTime+lastTime)/2) ) && (firstTime<=_DeltaTime);
 		bool collision = contact && (primitive->isObstacle() && otherPrimitive->isObstacle ());
 
@@ -1211,7 +1213,7 @@ void CMoveContainer::newCollision (CMovePrimitive* first, const CCollisionSurfac
 
 // ***************************************************************************
 
-void CMoveContainer::newTrigger (CMovePrimitive* first, CMovePrimitive* second, const CCollisionDesc& desc, uint triggerType)
+bool CMoveContainer::newTrigger (CMovePrimitive* first, CMovePrimitive* second, const CCollisionDesc& desc, uint triggerType)
 {
 	// Element index
 	uint index=(uint)_Triggers.size();
@@ -1224,6 +1226,14 @@ void CMoveContainer::newTrigger (CMovePrimitive* first, CMovePrimitive* second, 
 	_Triggers[index].Object1=second->UserData;
 	_Triggers[index].CollisionDesc=desc;
 	_Triggers[index].CollisionType = uint8(triggerType);
+
+
+	if (second->_StaticFlags&UMovePrimitive::OverlapStairsTrigger) {
+		nlinfo("Col Stairs height %f", second->getHeight());
+		return true;
+	}
+
+	return false;
 }
 
 // ***************************************************************************
@@ -1659,8 +1669,18 @@ void CMoveContainer::reaction (const CCollisionOTInfo& first)
 					newTrigger (dynInfo->getFirstPrimitive (), dynInfo->getSecondPrimitive (), dynInfo->getCollisionDesc (), UTriggerInfo::In);
 				if (dynInfo->isExit())
 					newTrigger (dynInfo->getFirstPrimitive (), dynInfo->getSecondPrimitive (), dynInfo->getCollisionDesc (), UTriggerInfo::Out);
-				if (dynInfo->isInside())
-					newTrigger (dynInfo->getFirstPrimitive (), dynInfo->getSecondPrimitive (), dynInfo->getCollisionDesc (), UTriggerInfo::Inside);
+				if (dynInfo->isInside()) {
+					if (newTrigger (dynInfo->getFirstPrimitive (), dynInfo->getSecondPrimitive (), dynInfo->getCollisionDesc (), UTriggerInfo::Inside))
+					{
+						dynInfo->getFirstPrimitive()->enableZOffset(true);
+						CVectorD first_pos = dynInfo->getFirstPrimitive()->getFinalPosition(dynInfo->getFirstWorldImage());
+						CVectorD second_pos = dynInfo->getSecondPrimitive()->getFinalPosition(dynInfo->getSecondWorldImage());
+						nlinfo("P = %f, C = %f, H = %f, D = %f", first_pos.z, second_pos.z, dynInfo->getSecondPrimitive()->getHeight(), second_pos.z-first_pos.z);
+						dynInfo->getFirstPrimitive()->setZOffset(second_pos.z+dynInfo->getSecondPrimitive()->getHeight()-1.0f);
+					}
+				}
+				if (dynInfo->isExit())
+					newTrigger (dynInfo->getFirstPrimitive (), dynInfo->getSecondPrimitive (), dynInfo->getCollisionDesc (), UTriggerInfo::Out);
 			}
 		}
 	}

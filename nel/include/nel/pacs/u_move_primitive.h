@@ -114,6 +114,12 @@ public:
 		  * This is an overlap trigger. This trigger is actived each time the object overlap the trigger.
 		  */
 		OverlapTrigger=0x400,
+
+		/**
+		  * This is an stairs trigger. This trigger is actived each time the object overlap the trigger and change Z position.
+		  */
+		OverlapStairsTrigger=0x800,
+
 	};
 
 	/**
@@ -273,6 +279,14 @@ public:
 	  * \param height is the new height size of the box. It the size of the sides aligned on OZ.
 	  */
 	virtual float			getHeight () const =0;
+
+	virtual void setZOffset(float offset) =0;
+
+	virtual float getZOffset() =0;
+
+	virtual bool haveZOffset() =0;
+
+	virtual void enableZOffset(bool enabled) =0;
 
 	/**
 	  * Set the cylinder size. Only for cylinder.

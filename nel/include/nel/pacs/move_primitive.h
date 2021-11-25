@@ -251,6 +251,27 @@ public:
 		_Height=height;
 	}
 
+	void setZOffset(float offset)
+	{
+		_ZOffset = offset;
+	}
+
+	float getZOffset()
+	{
+		return _ZOffset;
+	}
+
+	bool haveZOffset()
+	{
+		return _HaveZOffset;
+	}
+
+	void enableZOffset(bool enabled)
+	{
+		_HaveZOffset = enabled;
+	}
+
+
 	/**
 	  * Set the cylinder size. Only for cylinder.
 	  *
@@ -466,6 +487,10 @@ private:
 
 	// Iteration count
 	sint32				_IterationCount;
+
+	float 				_ZOffset;
+	bool				_HaveZOffset;
+
 };
 
 } // NLPACS

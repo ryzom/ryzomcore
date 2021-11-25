@@ -1478,6 +1478,7 @@ void CEntityCL::pacsMove(const CVectorD &vect)
 		if ((fabs (deltaPos.x) > 0.05) || (fabs (deltaPos.y) > 0.05))
 		{
 			_HasMoved = true;
+			_Primitive->enableZOffset(false);
 			_Primitive->move (deltaPos, dynamicWI);
 		}
 	}
@@ -1657,7 +1658,7 @@ void CEntityCL::snapToGround()
 				{
 					if ( isUser() || isPlayer() || isNPC())
 					{
-						
+
 						float waterOffset = ClientCfg.WaterOffset;
 						switch(people())
 						{
@@ -1712,6 +1713,12 @@ void CEntityCL::snapToGround()
 		// Change the entity position.
 		pos().z = vect.z;
 	}
+
+	if (_Primitive->haveZOffset()) {
+		//CVectorD prim_pos = _Primitive->getFinalPosition(dynamicWI);
+		pos().z = _Primitive->getZOffset();
+	}
+
 
 	// Set the box position.
 	posBox(pos());
@@ -2294,7 +2301,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 			{
 				womanTitle = ( c->getGender() == GSGENDER::female );
 			}
-			
+
 			string replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
 
 			// Sometimes translation contains another title
@@ -2792,7 +2799,7 @@ void CEntityCL::setOpacityMin(uint32 value)
 bool CEntityCL::mustShowInsceneInterface( bool enabledInSheet ) const
 {
 	return 	(
-				(enabledInSheet /*&& !CNPCIconCache::getInstance().getNPCIcon(this).getTextureMain().empty()*/) && 
+				(enabledInSheet /*&& !CNPCIconCache::getInstance().getNPCIcon(this).getTextureMain().empty()*/) &&
 				(_InSceneInterfaceEnabled) &&
 				(	ClientCfg.Names ||
 					isUser () ||
@@ -3137,7 +3144,7 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 		if (skeleton())
 			_StateFX.setClusterSystem(skeleton()->getClusterSystem());
 	}
-	
+
 	if (!_SelectionFX.empty() || !_MouseOverFX.empty())
 	{
 		// Build a matrix for the fx
