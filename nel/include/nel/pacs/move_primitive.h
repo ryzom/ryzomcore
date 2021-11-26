@@ -251,15 +251,16 @@ public:
 		_Height=height;
 	}
 
-	void setZOffset(float offset)
+	void setZFinalPosition(float pos)
 	{
-		_ZOffset = offset;
+		_ZFinalPosition = pos;
 	}
 
-	float getZOffset()
+	float getZFinalPosition()
 	{
-		return _ZOffset;
+		return _ZFinalPosition;
 	}
+
 
 	bool haveZOffset()
 	{
@@ -489,6 +490,7 @@ private:
 	sint32				_IterationCount;
 
 	float 				_ZOffset;
+	float 				_ZFinalPosition;
 	bool				_HaveZOffset;
 
 };

@@ -280,9 +280,9 @@ public:
 	  */
 	virtual float			getHeight () const =0;
 
-	virtual void setZOffset(float offset) =0;
+	virtual void setZFinalPosition(float pos) =0;
 
-	virtual float getZOffset() =0;
+	virtual float getZFinalPosition() =0;
 
 	virtual bool haveZOffset() =0;
 
