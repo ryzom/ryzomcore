@@ -426,7 +426,7 @@ void CCharacterCL::computePrimitive()
 	// Initialize the primitive.
 	if (_Sheet)
 	{
-		initPrimitive(_Sheet->ColRadius*getScale(), _Sheet->ColHeight*getScale(), _Sheet->ColLength, _Sheet->ColWidth, UMovePrimitive::DoNothing, UMovePrimitive::NotATrigger, MaskColNpc, MaskColNone, _Sheet->ClipRadius, _Sheet->ClipHeight);
+		initPrimitive(_Sheet->ColRadius*getScale(), _Sheet->ColHeight*getScale(), _Sheet->ColLength, _Sheet->ColWidth, UMovePrimitive::DoNothing, (UMovePrimitive::TTrigger)(UMovePrimitive::OverlapTrigger | UMovePrimitive::EnterTrigger), MaskColNpc, MaskColDoor, _Sheet->ClipRadius, _Sheet->ClipHeight);
 	}
 	else
 	{
@@ -976,7 +976,7 @@ bool CCharacterCL::build(const CEntitySheet *sheet)	// virtual
 	_CustomScalePos *= getScale();
 
 	// Create PACS Primitive.
-	initPrimitive(_Sheet->ColRadius*getScale(), _Sheet->ColHeight*getScale(), _Sheet->ColLength, _Sheet->ColWidth, UMovePrimitive::DoNothing, UMovePrimitive::NotATrigger, MaskColNpc, MaskColNone, _Sheet->ClipRadius, _Sheet->ClipHeight);
+	initPrimitive(_Sheet->ColRadius*getScale(), _Sheet->ColHeight*getScale(), _Sheet->ColLength, _Sheet->ColWidth, UMovePrimitive::DoNothing, (UMovePrimitive::TTrigger)(UMovePrimitive::OverlapTrigger | UMovePrimitive::EnterTrigger), MaskColNpc, MaskColDoor, _Sheet->ClipRadius, _Sheet->ClipHeight);
 
 	// Compute the element to be able to snap the entity to the ground.
 	computeCollisionEntity();
@@ -6678,7 +6678,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 			updatePosCombatFloat(frameTimeRemaining, target);
 		}
 		// Compute the average speed to the destination.
-		// double spd = 
+		// double spd =
 		computeSpeed();
 
 
@@ -8232,14 +8232,14 @@ float CCharacterCL::getSheetScale() const	// virtual
 // getColRadius :
 // Return the entity collision radius. (return 0.5 if there is any problem).
 //---------------------------------------------------
-float CCharacterCL::getSheetColRadius() const 
+float CCharacterCL::getSheetColRadius() const
 {
-	if(!_Sheet) 
+	if(!_Sheet)
 		return 0.5f;
 	else
 		return _Sheet->ColRadius;
 }
-	
+
 
 //---------------------------------------------------
 // getScale :
@@ -8358,7 +8358,7 @@ std::string CCharacterCL::shapeFromItem(const CItemSheet &itemSheet) const
 		sheet = itemSheet.getShape();
 
 	return sheet;
-		
+
 }// shapeFromItem //
 
 
@@ -9146,7 +9146,7 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 			bi.DelayBeforeStart = 11.5f;
 			_AttachedFXListToStart.push_front(bi);
 		}
-		else 
+		else
 		{
 			CAttachedFX::TSmartPtr fx = new CAttachedFX;
 			fx->create(*this, bi, CAttachedFX::CTargeterInfo());
