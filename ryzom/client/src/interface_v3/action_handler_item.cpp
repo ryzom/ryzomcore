@@ -208,7 +208,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 {
 	if(_CurrItemSheet && !WindowName.empty())
 	{
-	
+
 		const CItemSheet *pIS = _CurrItemSheet->asItemSheet();
 		if ((pIS != NULL) && ITEMFAMILY::isTextCustomizable(pIS->Family) )
 		{
@@ -342,7 +342,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 // ********************************************************************************************
 void CInterfaceItemEdition::CItemEditionWindow::end()
 {
-	
+
 	CDBCtrlSheet *pCSItem = _CurrItemSheet;
 	std::string windowName = WindowName;
 	if(pCSItem && !windowName.empty())
@@ -371,7 +371,7 @@ void CInterfaceItemEdition::CItemEditionWindow::end()
 			editBoxShort->setActive(false);
 			editShort->setActive(false);
 			editBoxLarge->setActive(false);
-			editLarge->setActive(false);				
+			editLarge->setActive(false);
 			display->setActive(false);
 			editButtons->setActive(false);
 			closeButton->setActive(false);
@@ -413,7 +413,7 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 				textValid = editLarge->getActive();
 				text = editBoxLarge->getInputString();
 			}
-			 
+
 			if (textValid)
 			{
 				CBitMemStream out;
@@ -1735,7 +1735,7 @@ void CItemMenuInBagInfoWaiter::infoReceived()
 void CItemMenuInBagInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	
+
 	// get the dialog stack
 	CInterfaceGroup* pMenu = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId("ui:interface:item_menu_in_bag") );
 	if(!pMenu)	return;
@@ -2049,7 +2049,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if (pMoveSubMenu) pMoveSubMenu->setActive(false);
 		}
 
-		if (bIsLockedByOwner) 
+		if (bIsLockedByOwner)
 		{
 			if (pLockUnlock) pLockUnlock->setHardText("uimUnlockItem");
 			// Cannot drop/destroy if locked by owner
@@ -2062,7 +2062,8 @@ class CHandlerItemMenuCheck : public IActionHandler
 		}
 
 		// Only show lock menu item if inventory contains the info
-		if (pLockUnlock) pLockUnlock->setActive(pCS->canOwnerLock());
+		if (invId!=INVENTORIES::guild)
+			if (pLockUnlock) pLockUnlock->setActive(pCS->canOwnerLock());
 
 
 		// **** Gray Entries
@@ -2219,7 +2220,7 @@ class CHandlerItemMenuBaseCheck : public IActionHandler
 		CViewTextMenu	*pDestroy = dynamic_cast<CViewTextMenu*>(pMenu->getView("destroy"));
 		CViewTextMenu	*pLockUnlock = dynamic_cast<CViewTextMenu*>(pMenu->getView("lockunlock"));
 
-		if (pCS->getLockedByOwner()) 
+		if (pCS->getLockedByOwner())
 		{
 			pLockUnlock->setHardText("uimUnlockItem");
 			// Cannot destroy if locked by owner
@@ -2376,7 +2377,7 @@ class CHandlerItemTextDisplay : public IActionHandler
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-		if (pCSItem == NULL || windowName.empty()) 
+		if (pCSItem == NULL || windowName.empty())
 			return;
 
 		const CItemSheet *pIS = pCSItem->asItemSheet();
@@ -2397,7 +2398,7 @@ class CHandlerItemTextEdition : public IActionHandler
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-		if (pCSItem == NULL || windowName.empty()) 
+		if (pCSItem == NULL || windowName.empty())
 			return;
 
 		CInterfaceItemEdition::getInstance()->setCurrWindow(pCSItem, windowName, true);
