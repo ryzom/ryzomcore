@@ -35,7 +35,6 @@
 #include "../net_manager.h"
 #include "../user_entity.h"
 #include "../global.h"
-#include <typeinfo>
 
 #include "nel/misc/algo.h"
 
@@ -865,7 +864,7 @@ void CInventoryManager::wearBagItem(sint32 bagEntryIndex)
 		BagItemEquipped[bagEntryIndex]= true;
 		grayItem (LIST_BAG_TEXT, bagEntryIndex, true);
 		grayItem (LIST_BAG_ICONS, bagEntryIndex, true);
-		sortAll();
+		sortBag();
 	}
 }
 
@@ -877,7 +876,7 @@ void CInventoryManager::unwearBagItem(sint32 bagEntryIndex)
 		BagItemEquipped[bagEntryIndex]= false;
 		grayItem (LIST_BAG_TEXT, bagEntryIndex, false);
 		grayItem (LIST_BAG_ICONS, bagEntryIndex, false);
-		sortAll();
+		sortBag();
 	}
 }
 
@@ -2115,12 +2114,11 @@ bool CTempInvManager::isOpened()
 // ***************************************************************************
 #define BAG_ITEM_NOT_SORTED 1000000
 // Used for sorting
-void initStructForItemSort(vector<SSortStruct>&vTemp, CDBCtrlSheet *ctrl, sint32 sortBy, sint32 indexInList)
+void initStructForItemSort(vector<SSortStruct>&vTemp, sint32 sheetId, sint32 quality, sint32 indexInList, sint32 indexInDB)
 {
 	// Default value is the linear pos in the db (in case its not an item)
-	vTemp[indexInList].Pos = toString("%08d", ctrl->getIndexInDB());
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	sint32 sheetId = ctrl->getSheetId();
+	vTemp[indexInList].Pos = toString("%08d", indexInDB);
+
 	// if not empty
 	if (sheetId != 0)
 	{
@@ -2128,18 +2126,7 @@ void initStructForItemSort(vector<SSortStruct>&vTemp, CDBCtrlSheet *ctrl, sint32
 		if ((pItem != NULL) && (pItem->Type == CEntitySheet::ITEM))
 		{
 			CItemSheet *pIS = safe_cast<CItemSheet*>(pItem);
-			std::map<sint32, sint32> primarySort = {
-				{0, pIS->Family},
-				{1, ctrl->getQuantity()},
-				{2, ctrl->getQuality()},
-				{3, (pIS->Bulk*100)*(ctrl->getQuantity())},
-				{4, (ctrl->getItemWeight())*(ctrl->getQuantity())}
-			};
-			// Sort by
-			vTemp[indexInList].Pos = toString("%08d", primarySort[sortBy]);
-
-			// Secondary sort
-			vTemp[indexInList].Pos += toString("%02d", pIS->Family);
+			vTemp[indexInList].Pos = toString("%02d", pIS->Family);
 			vTemp[indexInList].Pos += toString("%03d", pIS->ItemType);
 
 			// add some specific sort for raw material
@@ -2155,14 +2142,14 @@ void initStructForItemSort(vector<SSortStruct>&vTemp, CDBCtrlSheet *ctrl, sint32
 				vTemp[indexInList].Pos += toString("%02d%02d", 0, 0);
 
 
-			vTemp[indexInList].Pos += toString("%03d", ctrl->getQuality());
+			vTemp[indexInList].Pos += toString("%03d", quality);
 
             // add sort by name
             vTemp[indexInList].Pos += CSheetId(sheetId).toString();
 
 
 			// add at last the index in DB. to avoid resort for items that are exaclty the same
-			vTemp[indexInList].Pos += toString("%03d", ctrl->getIndexInDB());
+			vTemp[indexInList].Pos += toString("%03d", indexInDB);
 		}
 	}
 }
@@ -2497,32 +2484,22 @@ void CDBGroupListSheetBag::onSwap (sint /* nDraggedSheet */, sint /* nDroppedShe
 void CDBGroupListSheetBag::sort()
 {
 	vector<SSortStruct> vTemp;
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->displaySystemInfo("CDBGroupListSheetBag");
+
 	vTemp.resize (_MaxItems);
 
 	uint i;
 	for (i = 0; i < _MaxItems; ++i)
 	{
 		vTemp[i].SheetText = _SheetChildren[i];
-		//pIM->displaySystemInfo(to_string((int) _SortBy));
-		initStructForItemSort (vTemp, _SheetChildren[i]->Ctrl, _SortBy, i);
+
+		CDBCtrlSheet	*ctrl= _SheetChildren[i]->Ctrl;
+		initStructForItemSort (vTemp, ctrl->getSheetId(), ctrl->getQuality(), i, ctrl->getIndexInDB());
 	}
 
-	pIM->displaySystemInfo("CDBGroupListSheetBag sort_dir "+to_string(_SortDir)+typeid(_SortDir).name());
-	if (_SortDir == 0) {
-		// sort ASC
-		std::sort(vTemp.begin(), vTemp.end());
-	} else if (_SortDir == 1) {
-		// sort DESC
-		std::sort(vTemp.rbegin(), vTemp.rend());
-	}
+	std::sort(vTemp.begin(), vTemp.end());
 
 	for (i = 0; i < _MaxItems; ++i)
-	{	
-		if (vTemp[i].Pos.find('e') != std::string::npos)
-			pIM->displaySystemInfo(vTemp[i].Pos);
-
+	{
 		_SheetChildren[i] = vTemp[i].SheetText;
 	}
 }
@@ -2548,24 +2525,19 @@ bool CDBGroupIconListBag::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 void CDBGroupIconListBag::sort()
 {
 	vector<SSortStruct> vTemp;
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->displaySystemInfo("CDBGroupIconListBag");
+
 	vTemp.resize (_MaxItems);
 
 	uint i;
 	for (i = 0; i < _MaxItems; ++i)
 	{
 		vTemp[i].SheetIcon = _SheetChildren[i];
-		initStructForItemSort (vTemp, _SheetChildren[i]->Ctrl, _SortBy, i);
+
+		CDBCtrlSheet	*ctrl= _SheetChildren[i]->Ctrl;
+		initStructForItemSort (vTemp, ctrl->getSheetId(), ctrl->getQuality(), i, ctrl->getIndexInDB());
 	}
 
-	if (_SortDir == 0) {
-		// sort ASC
-		std::sort(vTemp.begin(), vTemp.end());
-	} else {
-		// sort DESC
-		std::sort(vTemp.rbegin(), vTemp.rend());
-	}
+	std::sort(vTemp.begin(), vTemp.end());
 
 	for (i = 0; i < _MaxItems; ++i)
 	{
@@ -2664,7 +2636,9 @@ void CDBGroupListSheetFilterExchangeable::sort()
 	for (i = 0; i < _MaxItems; ++i)
 	{
 		vTemp[i].SheetIcon = _SheetChildren[i];
-		initStructForItemSort (vTemp, _SheetChildren[i]->Ctrl, 0, i);	
+
+		CDBCtrlSheet	*ctrl= _SheetChildren[i]->Ctrl;
+		initStructForItemSort (vTemp, ctrl->getSheetId(), ctrl->getQuality(), i, ctrl->getIndexInDB());
 	}
 
 	std::sort(vTemp.begin(), vTemp.end());
@@ -3769,59 +3743,61 @@ void			CInventoryManager::debugItemInfoCache() const
 }
 
 // ***************************************************************************
-void CInventoryManager::sortAll()
+void CInventoryManager::sortBag()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->displaySystemInfo("sortAll");
-	sortInv(INVENTORIES::bag);
-	sortInv(INVENTORIES::player_room);
-	sortInv(INVENTORIES::guild);
-	sortInv(INVENTORIES::pet_animal1);
-	sortInv(INVENTORIES::pet_animal2);
-	sortInv(INVENTORIES::pet_animal3);
-	sortInv(INVENTORIES::pet_animal4);
-	sortInv(INVENTORIES::pet_animal5);
-	sortInv(INVENTORIES::pet_animal6);
-	sortInv(INVENTORIES::pet_animal7);
-}
-
-void CInventoryManager::sortInv(INVENTORIES::TInventory inv)
-{
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CDBManager *pDM = NLGUI::CDBManager::getInstance();
-	CWidgetManager *pWM = CWidgetManager::getInstance();
 	CDBGroupIconListBag *pIconList;
 	CDBGroupListSheetBag *pList;
 
-	pIM->displaySystemInfo("sortInv " + INVENTORIES::toString(inv));
-	std::map<INVENTORIES::TInventory, vector<string>> invToProp = {
-		{ INVENTORIES::bag, {LIST_BAG_ICONS, LIST_BAG_TEXT, BAG_SORT} },
-		{ INVENTORIES::player_room, {LIST_ROOM_ICONS, LIST_ROOM_TEXT, ROOM_SORT} },
-		{ INVENTORIES::guild, {LIST_GUILD_ICONS, LIST_GUILD_TEXT, GUILD_SORT} },
-		{ INVENTORIES::pet_animal1, {LIST_PA0_ICONS, LIST_PA0_TEXT, PA0_SORT} },
-		{ INVENTORIES::pet_animal2, {LIST_PA1_ICONS, LIST_PA1_TEXT, PA1_SORT} },
-		{ INVENTORIES::pet_animal3, {LIST_PA2_ICONS, LIST_PA2_TEXT, PA2_SORT} },
-		{ INVENTORIES::pet_animal4, {LIST_PA3_ICONS, LIST_PA3_TEXT, PA3_SORT} },
-		{ INVENTORIES::pet_animal5, {LIST_PA4_ICONS, LIST_PA4_TEXT, PA4_SORT} },
-		{ INVENTORIES::pet_animal6, {LIST_PA5_ICONS, LIST_PA5_TEXT, PA5_SORT} },
-		{ INVENTORIES::pet_animal7, {LIST_PA6_ICONS, LIST_PA6_TEXT, PA6_SORT} }
-	};
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_TEXT));
+	if (pList != NULL) pList->needToSort();
 
-	sint32 sortBy = pDM->getDbProp(invToProp[inv][2]+":SORT_BY")->getValue32();
-	sint32 sortDir = pDM->getDbProp(invToProp[inv][2]+":SORT_DIR")->getValue32();
-	pIM->displaySystemInfo("sortInv " + INVENTORIES::toString(inv) + " sortBy: " + toString(sortBy) + " sortDir: " + toString(sortDir) + " debug "+invToProp[inv][2]);
-	pIconList = dynamic_cast<CDBGroupIconListBag*>(pWM->getElementFromId(invToProp[inv][0]));
-	if (pIconList != NULL) {
-		pIconList->needToSort();
-		pIconList->setSortBy(sortBy);
-		pIconList->setSortDir(sortDir);
-	}
-	pList = dynamic_cast<CDBGroupListSheetBag*>(pWM->getElementFromId(invToProp[inv][1]));
-	if (pList != NULL) {
-		pList->needToSort();
-		pList->setSortBy(sortBy);
-		pList->setSortDir(sortDir);
-	}
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_ROOM_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_ROOM_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA0_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA0_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA1_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA1_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA2_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA2_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA3_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA3_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA4_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA4_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA5_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA5_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA6_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA6_TEXT));
+	if (pList != NULL) pList->needToSort();
 }
 
 // ***************************************************************************

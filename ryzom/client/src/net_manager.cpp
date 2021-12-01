@@ -2865,7 +2865,7 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 			}
 		}
 
-		CInventoryManager::getInstance()->sortAll();
+		CInventoryManager::getInstance()->sortBag();
 	}
 	catch (const Exception &e)
 	{

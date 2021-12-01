@@ -78,8 +78,6 @@ public:
 	// Called when the list changed for a reason or another and should be reconstructed to possibly sort items
 	virtual void			sort() { }
 	void					needToSort() { _NeedToSort = true; invalidateCoords(); }
-	void					setSortBy(sint32 sortBy) { _SortBy = sortBy; }
-	void					setSortDir(sint32 sortDir) { _SortDir = sortDir; }
 
 	/** (useful for list only) Force the validity of an element, even if its sheetId==0
 	 *	(empty slot displayed instead)
@@ -175,8 +173,6 @@ protected:
 	bool						_Array              : 1;
 	bool						_Squarify           : 1;
 
-	sint32						_SortBy;
-	sint32						_SortDir;
 	bool						_CanDrop			: 1;
 	bool						_Draggable          : 1;
 

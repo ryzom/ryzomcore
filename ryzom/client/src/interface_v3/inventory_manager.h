@@ -309,8 +309,7 @@ public:
 		void				debugItemInfoWaiters();
 		void				debugItemInfoCache() const;
 
-		void				sortInv(INVENTORIES::TInventory invId);
-		void				sortAll();
+		void				sortBag();
 
 	// Animal Inventories
 		// Is the inventory present? if true, it may still not be available for modification (eg: animal too far)
@@ -527,7 +526,7 @@ struct SSortStruct
 };
 
 // Helper to sort with only one way for bag and trade
-void initStructForItemSort(std::vector<SSortStruct>&vTemp, CDBCtrlSheet *ctrl, sint32 sortBy, sint32 indexInList);
+void initStructForItemSort(std::vector<SSortStruct>&vTemp, sint32 sheetId, sint32 quality, sint32 indexInList, sint32 indexInDB);
 
 
 // ***************************************************************************
@@ -832,17 +831,6 @@ private:
 
 #define LIST_PA6_TEXT				"ui:interface:inv_pa6:content:iil:bag_list"
 #define LIST_PA6_ICONS				"ui:interface:inv_pa6:content:iil:bag_icons"
-
-#define BAG_SORT					"UI:SAVE:INV_BAG"
-#define ROOM_SORT					"UI:SAVE:INV_ROOM"
-#define GUILD_SORT					"UI:SAVE:INV_GUILD"
-#define PA0_SORT					"UI:SAVE:INV_PA0"
-#define PA1_SORT					"UI:SAVE:INV_PA1"
-#define PA2_SORT					"UI:SAVE:INV_PA2"
-#define PA3_SORT					"UI:SAVE:INV_PA3"
-#define PA4_SORT					"UI:SAVE:INV_PA4"
-#define PA5_SORT					"UI:SAVE:INV_PA5"
-#define PA6_SORT					"UI:SAVE:INV_PA6"
 
 // Theorically never used
 #define LIST_BAG2_TEXT				"ui:interface:inv_bag:content:iil:bag_list"

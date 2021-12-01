@@ -58,8 +58,6 @@ CDBGroupListSheet::CDBGroupListSheet(const TCtorParam &param)
 	_MinRows= 1;
 	_MaxRows= INT_MAX;
 	_MaxItems= INT_MAX;
-	_SortBy = 0;
-	_SortDir = 0;
 	_NbColumns= 2;
 	_WSlot= 24;
 	_WSpace= 0;

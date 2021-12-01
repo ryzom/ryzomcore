@@ -1666,19 +1666,6 @@ class CHandlerDragNDrop : public IActionHandler
 };
 REGISTER_ACTION_HANDLER( CHandlerDragNDrop, "drag_n_drop" );
 
-// **********************************************************************************************************
-class CHandlerSortInv : public IActionHandler
-{
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
-	{
-		std::string inv = getParam(sParams, "inv");
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->displaySystemInfo("CHandlerSortInv "+inv);
-		CInventoryManager *pInv = CInventoryManager::getInstance();
-		pInv->sortInv(INVENTORIES::toInventory(inv));
-	}
-};
-REGISTER_ACTION_HANDLER( CHandlerSortInv, "sort_inv" );
 
 // **********************************************************************************************************
 static void sendToServerEnchantMessage(uint8 invent, uint16 slot)

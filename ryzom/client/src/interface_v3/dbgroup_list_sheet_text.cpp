@@ -44,8 +44,6 @@ CDBGroupListSheetText::CDBGroupListSheetText(const TCtorParam &param)
 	_TextTemplate(TCtorParam())
 {
 	_MaxItems = INT_MAX;
-	_SortBy = 0;
-	_SortDir = 0;
 	_WSlot= 24;
 	_HSlot= 24;
 	_HSpace = 0;

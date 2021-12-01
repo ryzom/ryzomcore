@@ -184,8 +184,6 @@ public:
 	// Called when the list changed for a reason or another and should be reconstructed to possibly sort items
 	virtual void			sort() { }
 	void					needToSort() { _NeedToSort = true; invalidateCoords(); }
-	void					setSortBy(sint32 sortBy) { _SortBy = sortBy; }
-	void					setSortDir(sint32 sortDir) { _SortDir = sortDir; }
 
 	/// Gets.
 	sint32					getWSlot() const {return _WSlot;}
@@ -255,8 +253,6 @@ protected:
 	std::vector<CSheetChild*>	_SheetChildren;
 
 	bool						_NeedToSort;
-	sint32						_SortBy;
-	sint32						_SortDir;
 	// Drag'n'Drop
 	sint32						_Scrolling;
 	sint64						_LastTimeScrolled;
