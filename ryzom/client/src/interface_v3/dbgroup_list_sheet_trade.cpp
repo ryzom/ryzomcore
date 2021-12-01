@@ -720,9 +720,7 @@ void CDBGroupListSheetTrade::sort()
 	for (i = 0; i < _SheetChildren.size(); ++i)
 	{
 		vTemp[i].SheetText = _SheetChildren[i];
-
-		CDBCtrlSheet	*ctrl= _SheetChildren[i]->Ctrl;
-		initStructForItemSort (vTemp, ctrl->getSheetId(), ctrl->getQuality(), i, ctrl->getIndexInDB());
+		initStructForItemSort (vTemp, _SheetChildren[i]->Ctrl, 0, i);
 	}
 
 	std::sort(vTemp.begin(), vTemp.end());
