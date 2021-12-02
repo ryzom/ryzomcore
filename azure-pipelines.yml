@@ -135,3 +135,30 @@ jobs:
     #  inputs:
     #    targetPath: build.release/bin
     #    artifactName: RyzomUbuntu18Release
+  - job: macOS11
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'macOS-11'
+    steps:
+    - checkout: self
+      fetchDepth: 0
+    - task: Cache@2
+      inputs:
+        key: 'hunter317-macOS11-rel"'
+        path: "$(Pipeline.Workspace)/.hunter/_Base/Cache"
+    - task: CMake@1
+      inputs:
+        workingDirectory: build.release
+        cmakeArgs: '-GXcode -DCMAKE_CONFIGURATION_TYPES=Release -DHUNTER_ENABLED=ON -DHUNTER_STATUS_DEBUG=ON -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_ROOT="$(Pipeline.Workspace)/.hunter" -DWITH_LIBXML2_ICONV=OFF -DFINAL_VERSION=OFF -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_NEL_TOOLS=OFF -DWITH_RYZOM_TOOLS=OFF -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_DRIVER_DIRECT3D=OFF -DWITH_DRIVER_XAUDIO2=OFF ..'
+    - task: Xcode@5
+      inputs:
+        actions: 'build'
+        configuration: Release
+        sdk: macosx12.0
+        xcWorkspacePath: 'build.release/RyzomCore.xcodeproj'
+        scheme: 'ALL_BUILD'
+        packageApp: false
+    #- task: PublishPipelineArtifact@1
+    #  inputs:
+    #    targetPath: build.release/bin/
+    #    artifactName: RyzomClientMacOS11Release
