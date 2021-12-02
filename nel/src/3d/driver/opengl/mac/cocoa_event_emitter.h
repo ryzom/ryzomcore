@@ -21,6 +21,7 @@
 #ifndef NL_COCOA_EVENT_EMITTER_H
 #define NL_COCOA_EVENT_EMITTER_H
 
+#include <string.h>
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/event_server.h"
 #include "nel/misc/events.h"
@@ -53,8 +54,8 @@ public:
 	virtual void submitEvents(CEventServer& server, bool allWindows);
 	bool         handleQuitRequest();
 
-	virtual bool copyTextToClipboard(const ucstring &text);
-	virtual bool pasteTextFromClipboard(ucstring &text);
+	virtual bool copyTextToClipboard(const std::string &text);
+	virtual bool pasteTextFromClipboard(std::string &text);
 };
 
 }
