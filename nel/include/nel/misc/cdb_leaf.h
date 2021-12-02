@@ -97,7 +97,7 @@ public:
 		_Property = 0;
 		_oldProperty = 0;
 		_Type = UNKNOWN;
-		_Nullable = false;
+		m_Nullable = false;
 		_Changed = false;
 		_LastChangeGC = 0;
 	}
@@ -238,7 +238,7 @@ private:
 	EPropType			_Type;
 
 	/// nullable
-	bool				_Nullable;
+	bool				m_Nullable;
 
 	/// true if this value has changed
 	bool				_Changed;

@@ -55,11 +55,11 @@ void CCDBNodeLeaf::init(  xmlNodePtr node, IProgressCallback &/* progressCallBac
 	CXMLAutoPtr nullable((const char*)xmlGetProp (node, (xmlChar*)"nullable"));
 	if ((const char *) nullable != NULL)
 	{
-		_Nullable = (nullable.getDatas()[0] == '1');
+		m_Nullable = (nullable.getDatas()[0] == '1');
 	}
 	else
 	{
-		_Nullable = false;
+		m_Nullable = false;
 	}
 
 	// Read type
@@ -167,7 +167,7 @@ void CCDBNodeLeaf::readDelta(TGameCycle gc, CBitMemStream & f )
 		uint64 recvd = 0;
 
 		uint64 isNull = 0;
-		if (_Nullable)
+		if (m_Nullable)
 		{
 			f.serial(isNull, 1);
 		}
