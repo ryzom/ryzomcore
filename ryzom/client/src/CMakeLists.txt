@@ -68,7 +68,8 @@ IF(WITH_RYZOM_CLIENT)
     SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${RYZOM_VERSION_SHORT})
     SET(MACOSX_BUNDLE_BUNDLE_VERSION ${RYZOM_BUILD})
     SET(MACOSX_BUNDLE_COPYRIGHT ${COPYRIGHT})
-    SET(RYZOM_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${MACOSX_BUNDLE_BUNDLE_NAME}.app)
+    # RYZOM_OUTPUT_DIR == build.xcode/Debug/Ryzom Core4.app/Contents/MacOS
+    SET(RYZOM_OUTPUT_DIR $<TARGET_FILE_DIR:ryzom_client>/../..)
     SET(RYZOM_CONTENTS_DIR ${RYZOM_OUTPUT_DIR}/Contents)
     SET(RYZOM_RESOURCES_DIR ${RYZOM_CONTENTS_DIR}/Resources)
     SET(MAC_RESOURCES_DIR ${CMAKE_SOURCE_DIR}/ryzom/client/macosx)
@@ -101,7 +102,7 @@ IF(WITH_RYZOM_CLIENT)
       ADD_DEPENDENCIES(ryzom_client crash_report)
 
       # copy crash_report to bundle
-      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/crash_report ${RYZOM_CONTENTS_DIR}/MacOS/CrashReport)
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p $<TARGET_FILE:crash_report> ${RYZOM_CONTENTS_DIR}/MacOS/CrashReport)
 
       IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
         ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign ${ENTITLEMENTS} -fs "${APPLE_CERTIFICATE}" "${RYZOM_CONTENTS_DIR}/MacOS/CrashReport" COMMENT "Signing CrashReport executable...")
@@ -112,7 +113,7 @@ IF(WITH_RYZOM_CLIENT)
       ADD_DEPENDENCIES(ryzom_client ryzom_client_patcher)
 
       # copy ryzom_client_patcher to bundle
-      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ryzom_client_patcher ${RYZOM_CONTENTS_DIR}/MacOS/RyzomClientPatcher)
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p $<TARGET_FILE:ryzom_client_patcher> ${RYZOM_CONTENTS_DIR}/MacOS/RyzomClientPatcher)
 
       IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
         ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign ${ENTITLEMENTS} -fs "${APPLE_CERTIFICATE}" "${RYZOM_CONTENTS_DIR}/MacOS/RyzomClientPatcher" COMMENT "Signing RyzomClientPatcher executable...")
@@ -123,7 +124,7 @@ IF(WITH_RYZOM_CLIENT)
       ADD_DEPENDENCIES(ryzom_client ryzom_configuration_qt)
 
       # copy ryzom_configuration_qt to bundle
-      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ryzom_configuration_qt ${RYZOM_CONTENTS_DIR}/MacOS/RyzomConfiguration)
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p $<TARGET_FILE:ryzom_configuration_qt> ${RYZOM_CONTENTS_DIR}/MacOS/RyzomConfiguration)
 
       IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
         ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign ${ENTITLEMENTS} -fs "${APPLE_CERTIFICATE}" "${RYZOM_CONTENTS_DIR}/MacOS/RyzomConfiguration" COMMENT "Signing RyzomConfiguration executable...")
