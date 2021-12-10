@@ -299,6 +299,11 @@ namespace NLGUI
 
 	void CGroupHTML::ImageDownloadCB::finish()
 	{
+		// Image setTexture will remove itself from Images while iterating over it.
+		// Do the swap to keep iterator safe.
+		std::vector<SImageInfo> vec;
+		vec.swap(Images);
+
 		// tmpdest file does not exist if download skipped (ie cache was used)
 		if (CFile::fileExists(tmpdest) || CFile::getFileSize(tmpdest) == 0)
 		{
@@ -322,7 +327,7 @@ namespace NLGUI
 			// to temp file temporarily. that forces driver to reload texture from disk
 			// ITexture::touch() seem not to do this.
 			// cache was updated, first set texture as temp file
-			for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
+			for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 			{
 				SImageInfo &img = *it;
 				Parent->setImage(img.Image, tmpdest, img.Type);
@@ -339,7 +344,7 @@ namespace NLGUI
 		}
 
 		// even if image was cached, incase there was 'http://' image set to CViewBitmap
-		for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
+		for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 		{
 			SImageInfo &img = *it;
 			Parent->setImage(img.Image, dest, img.Type);
@@ -1055,6 +1060,13 @@ namespace NLGUI
 			delete _CurlWWW;
 			_CurlWWW = NULL;
 		}
+
+		releaseDataDownloads();
+	}
+
+	void CGroupHTML::releaseDataDownloads()
+	{
+		LOG_DL("Clear pointers to %d curls", Curls.size());
 
 		// remove all queued and already started downloads
 		for(std::list<CDataDownload*>::iterator it = Curls.begin(); it != Curls.end(); ++it)
@@ -3083,14 +3095,7 @@ namespace NLGUI
 
 		paragraphChange ();
 
-		// clear the pointer to the current image download since all the button are deleted
-		LOG_DL("Clear pointers to %d curls", Curls.size());
-
-		// remove image refs from downloads
-		/*for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
-		{
-			it->imgs.clear();
-		}*/
+		releaseDataDownloads();
 	}
 
 	// ***************************************************************************
