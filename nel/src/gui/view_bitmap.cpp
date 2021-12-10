@@ -481,7 +481,13 @@ namespace NLGUI
 		}
 		else
 		{
-			_HtmlDownload = NULL;
+			if (_HtmlDownload)
+			{
+				CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
+				if (groupHtml)
+					groupHtml->removeImageDownload(_HtmlDownload, dynamic_cast<CViewBase*>(this));
+				_HtmlDownload = NULL;
+			}
 			_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 		}
 	}
