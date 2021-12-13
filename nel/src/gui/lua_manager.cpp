@@ -70,7 +70,17 @@ namespace NLGUI
 		}
 		catch( const ELuaError &e )
 		{
-			nlwarning( e.luaWhat().c_str() );
+			#if !FINAL_VERSION
+			nlwarning("--- LUA ERROR ---");
+			nlwarning(e.luaWhat().c_str());
+			std::vector<std::string> res;
+			NLMISC::explode(luaScript, std::string("\n"), res);
+			for(uint k = 0; k < res.size(); ++k)
+			{
+				nlwarning("%.05u %s", k, res[k].c_str());
+			}
+			nlwarning("--- ********* ---");
+			#endif
 			return false;
 		}
 
