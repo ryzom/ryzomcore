@@ -6,12 +6,14 @@ ADD_EXECUTABLE(nl_sample_udpserver WIN32 bench_service.cpp receive_task.cpp rece
 
 ADD_DEFINITIONS(-DUDP_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_udp/\\"")
 
+TARGET_LINK_LIBRARIES(nl_sample_udpclient nelmisc nelnet)
+TARGET_LINK_LIBRARIES(nl_sample_udpserver nelmisc nelnet)
+
 IF(WITH_3D)
   ADD_DEFINITIONS(-DUSE_3D)
+  TARGET_LINK_LIBRARIES(nl_sample_udpclient nel3d)
 ENDIF()
 
-TARGET_LINK_LIBRARIES(nl_sample_udpclient nelmisc nelnet nel3d)
-TARGET_LINK_LIBRARIES(nl_sample_udpserver nelmisc nelnet)
 NL_DEFAULT_PROPS(nl_sample_udpclient "NeL, Samples, Net, UDP: UDP Client")
 NL_DEFAULT_PROPS(nl_sample_udpserver "NeL, Samples, Net, UDP: UDP Server")
 NL_ADD_RUNTIME_FLAGS(nl_sample_udpclient)
