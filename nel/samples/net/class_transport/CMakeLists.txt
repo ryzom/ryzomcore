@@ -2,7 +2,9 @@ ADD_EXECUTABLE(nl_sample_ct_ai_service WIN32 ai_service.cpp)
 
 ADD_EXECUTABLE(nl_sample_ct_gd_service WIN32 gd_service.cpp)
 
-ADD_DEFINITIONS(-DNL_CT_CFG="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_class_transport/\\"")
+SET(NL_CT_CFG "NL_CT_CFG=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_class_transport/\"")
+TARGET_COMPILE_DEFINITIONS(nl_sample_ct_ai_service PRIVATE ${NL_CT_CFG})
+TARGET_COMPILE_DEFINITIONS(nl_sample_ct_gd_service PRIVATE ${NL_CT_CFG})
 
 TARGET_LINK_LIBRARIES(nl_sample_ct_ai_service nelmisc nelnet)
 NL_DEFAULT_PROPS(nl_sample_ct_ai_service "NeL, Samples, Net, Class Transport: AI Service")

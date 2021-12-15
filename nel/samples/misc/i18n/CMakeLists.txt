@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp)
 
 ADD_EXECUTABLE(nl_sample_i18n ${SRC})
 
-ADD_DEFINITIONS(-DNL_LANG_DATA="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_i18n/\\"")
+TARGET_COMPILE_DEFINITIONS(nl_sample_i18n PRIVATE "NL_LANG_DATA=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_i18n/\"")
 
 TARGET_LINK_LIBRARIES(nl_sample_i18n nelmisc)
 NL_DEFAULT_PROPS(nl_sample_i18n "NeL, Samples, Misc: I18N")
