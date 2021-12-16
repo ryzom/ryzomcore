@@ -118,6 +118,8 @@ namespace NLGUI
 		// Force only a subset of letter to be displayed. Default is 0/0xFFFFFFFF
 		void enableStringSelection(uint start, uint end);
 		void disableStringSelection();
+		void setShadowInSelection(bool s) { m_DisableShadowInSelection = !s; }
+		bool getShadowInSelection() const { return !m_DisableShadowInSelection; }
 
 		/// Get
 		std::string		getText() const { return _HardText.empty() ? _Text : _HardText; }
@@ -448,6 +450,7 @@ namespace NLGUI
 		bool	_StrikeThrough : 1;
 		bool    _ContinuousUpdate : 1;
 		bool	_Setuped : 1;
+		bool	m_DisableShadowInSelection : 1;
 
 		uint	_TextSelectionStart;
 		uint	_TextSelectionEnd;

@@ -755,6 +755,9 @@ namespace NLGUI
 		// Display the selection if needed
 		if (_CurrSelection == this && _SelectCursorPos!=_CursorPos)
 		{
+			// flush so that selection quad is covering text
+			rVR.flush();
+
 			sint32	blankTextId= rVR.getBlankTextureId();
 			CRGBA	col= _BackSelectColor;
 			col.A= CWidgetManager::getInstance()->getGlobalColorForContent().A;
