@@ -668,8 +668,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// Retrieve the WGL extensions before init the driver.
 
 	// Offscreen mode ?
-	if (_CurrentMode.OffScreen)
+	if (mode.Offscreen)
 	{
+		_CurrentMode.OffScreen = true;
 		if (!createWindow(mode)) return false;
 
 		HWND tmpHWND = _win;
