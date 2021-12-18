@@ -3106,13 +3106,24 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	SetWindowPos(_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
 
 	// init window width and height
-	RECT clientRect;
-	GetClientRect(_win, &clientRect);
-	_CurrentMode.Width = uint16(clientRect.right-clientRect.left);
-	_CurrentMode.Height = uint16(clientRect.bottom-clientRect.top);
-	GetWindowRect(_win, &clientRect);
-	_WindowX = clientRect.left;
-	_WindowY = clientRect.top;
+	if (_CurrentMode.Windowed)
+	{
+		// TODO: this gives wrong info for initial fullscreen window so limit for windowed only for now
+		RECT clientRect;
+		GetClientRect(_win, &clientRect);
+		_CurrentMode.Width = uint16(clientRect.right-clientRect.left);
+		_CurrentMode.Height = uint16(clientRect.bottom-clientRect.top);
+		GetWindowRect(_win, &clientRect);
+		_WindowX = clientRect.left;
+		_WindowY = clientRect.top;
+	}
+	else
+	{
+		_CurrentMode.Width = width;
+		_CurrentMode.Height = height;
+		_WindowX = 0;
+		_WindowY = 0;
+	}
 
 #elif defined(NL_OS_MAC)
 
