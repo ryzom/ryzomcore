@@ -19,7 +19,22 @@
 	<!-- #####         Root template matcher               ####### -->
 	<!-- ######################################################### -->
 	<xsl:template match="generator">
-<xsl:if test="$output != 'php'">
+<xsl:if test="$output != 'php'">// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
+// Copyright (C) 2010-2021  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
@@ -1676,13 +1691,14 @@ namespace <xsl:value-of select="@name"/>
 <xsl:for-each select="child_class[@on-delete = 'cascade' and @cont='vector']">
 				{
 					// cascading deletion for vector child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
-
-					while (!childs.empty())
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
 					{
-						get<xsl:value-of select="@name"/>ByIndex(childs.size()-1)->remove(connection);
+						const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
+
+						while (!childs.empty())
+						{
+							get<xsl:value-of select="@name"/>ByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
@@ -1690,72 +1706,77 @@ namespace <xsl:value-of select="@name"/>
 <xsl:for-each select="child_class[@on-delete = 'cascade' and @cont='map']">
 				{
 					// cascading deletion for map child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
-
-					while (!childs.empty())
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
 					{
-						get<xsl:value-of select="@name"/>ById(childs.begin()->first)->remove(connection);
+						const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
+
+						while (!childs.empty())
+						{
+							get<xsl:value-of select="@name"/>ById(childs.begin()->first)->remove(connection);
+						}
 					}
 				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'cascade' and @relation='one-to-one']">
 				{
 					// cascading deletion for single child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					if (get<xsl:value-of select="@name"/>() != NULL)
-						get<xsl:value-of select="@name"/>()->remove(connection);
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
+					{
+						if (get<xsl:value-of select="@name"/>() != NULL)
+							get<xsl:value-of select="@name"/>()->remove(connection);
+					}
 				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'update' and @cont='vector']">
 				{
 					// unreference (and update) for vector child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
-
-					for (uint i=0; i &lt; childs.size(); ++i)
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
 					{
-						<xsl:variable name="type" select="@type"/>
-						<xsl:variable name="child_name" select="@name"/>
-						<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
-						get<xsl:value-of select="@name"/>ByIndex(i)->set<xsl:value-of select="$parent_prop"/>(0);
-						get<xsl:value-of select="@name"/>ByIndex(i)->update(connection);
+						const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
+
+						for (uint i=0; i &lt; childs.size(); ++i)
+						{
+							<xsl:variable name="type" select="@type"/>
+							<xsl:variable name="child_name" select="@name"/>
+							<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
+							get<xsl:value-of select="@name"/>ByIndex(i)->set<xsl:value-of select="$parent_prop"/>(0);
+							get<xsl:value-of select="@name"/>ByIndex(i)->update(connection);
+						}
 					}
 				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'update' and @cont='map']">
 				{
 					// unreference (and update) for map child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__)) {
 
-					const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
-					std::map&lt; uint32, <xsl:value-of select="@type"/>Ptr &gt;::const_iterator first(childs.begin()), last(childs.end());
+						const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
+						std::map&lt; uint32, <xsl:value-of select="@type"/>Ptr &gt;::const_iterator first(childs.begin()), last(childs.end());
 
-					for (; first != last; ++first)
-					{
-						<xsl:variable name="type" select="@type"/>
-						<xsl:variable name="child_name" select="@name"/>
-						<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
-						get<xsl:value-of select="@name"/>ById(it->first)->set<xsl:value-of select="$parent_prop"/>(0);
-						get<xsl:value-of select="@name"/>ById(it->first)->update(connection);
+						for (; first != last; ++first)
+						{
+							<xsl:variable name="type" select="@type"/>
+							<xsl:variable name="child_name" select="@name"/>
+							<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
+							get<xsl:value-of select="@name"/>ById(it->first)->set<xsl:value-of select="$parent_prop"/>(0);
+							get<xsl:value-of select="@name"/>ById(it->first)->update(connection);
+						}
 					}
 				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'update' and @relation='one-to-one']">
 				{
 					// unreference (and update) for single child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					<xsl:variable name="type" select="@type"/>
-					<xsl:variable name="child_name" select="@name"/>
-					<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
-					if (get<xsl:value-of select="@name"/>() != NULL)
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
 					{
-						get<xsl:value-of select="@name"/>()->set<xsl:value-of select="parent_prop"/>(0);
-						get<xsl:value-of select="@name"/>()->update(connection);
+						<xsl:variable name="type" select="@type"/>
+						<xsl:variable name="child_name" select="@name"/>
+						<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
+						if (get<xsl:value-of select="@name"/>() != NULL)
+						{
+							get<xsl:value-of select="@name"/>()->set<xsl:value-of select="parent_prop"/>(0);
+							get<xsl:value-of select="@name"/>()->update(connection);
+						}
 					}
 				}
 </xsl:for-each>
@@ -1886,7 +1907,7 @@ namespace <xsl:value-of select="@name"/>
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -1904,7 +1925,7 @@ namespace <xsl:value-of select="@name"/>
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -2117,7 +2138,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			return false;
 		}
 
-		std::auto_ptr&lt;MSW::CStoreResult&gt; result = connection.storeResult();
+		CUniquePtr&lt;MSW::CStoreResult&gt; result(connection.storeResult());
 
 		for (uint i=0; i&lt;result->getNumRows(); ++i)
 		{
@@ -2195,7 +2216,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			return false;
 		}
 
-		std::auto_ptr&lt;MSW::CStoreResult&gt; result = connection.storeResult();
+		CUniquePtr&lt;MSW::CStoreResult&gt; result(connection.storeResult());
 
 		// check that the data description is consistent with database content
 		nlassert(result->getNumRows() &lt;= 1);
@@ -2300,9 +2321,9 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		}
 
 		// no object with this id, return a null pointer
-		static <xsl:value-of select="@type"/>Ptr nil;
+		static <xsl:value-of select="@type"/>Ptr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	</xsl:when>
@@ -2321,8 +2342,8 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		if (it == _<xsl:value-of select="@name"/>->end())
 		{
 			// no object with this id, return a null pointer
-			static <xsl:value-of select="@type"/>Ptr nil;
-			return nil;
+			static <xsl:value-of select="@type"/>Ptr nilPtr;
+			return nilPtr;
 		}
 
 		return const_cast&lt; <xsl:value-of select="@type"/>Ptr &amp; &gt;(it->second);
