@@ -90,6 +90,23 @@ SOURCE_GROUP("user_classes" FILES ${USER_CLASSES})
 
 NL_TARGET_LIB(nelsound ${HEADERS} ${SRC})
 
+IF(HUNTER_ENABLED)
+  HUNTER_ADD_PACKAGE(libogg)
+  FIND_PACKAGE(libogg CONFIG REQUIRED)
+  SET(OGG_LIBRARY libogg::ogg)
+  SET(OGG_LIBRARIES libogg::ogg)
+
+  HUNTER_ADD_PACKAGE(vorbis)
+  FIND_PACKAGE(vorbis CONFIG REQUIRED)
+  SET(VORBIS_LIBRARY vorbis::vorbis)
+  SET(VORBISFILE_LIBRARY vorbis::vorbisfile)
+
+  IF(WITH_FFMPEG)
+    HUNTER_ADD_PACKAGE(ffmpeg)
+    FIND_PACKAGE(ffmpeg CONFIG REQUIRED)
+    SET(FFMPEG_LIBRARIES ffmpeg::avcodec ffmpeg::avformat ffmpeg::avutil ffmpeg::swresample)
+  ENDIF()
+ENDIF()
 
 INCLUDE_DIRECTORIES(${VORBIS_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OGG_INCLUDE_DIR})
