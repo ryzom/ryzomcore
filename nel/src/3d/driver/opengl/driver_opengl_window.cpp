@@ -2064,6 +2064,8 @@ bool CDriverGL::setMode(const GfxMode& amode)
 		// if window is visible, then also restore mouse relative position.
 		if (!mode.DisplayDevice.empty() && mode.DisplayDevice != current.DisplayDevice)
 		{
+			setWindowStyle(EWSWindowed);
+
 			int screen = DefaultScreen(_dpy);
 			Window root = RootWindow(_dpy, screen);
 			uint mouseX = mode.Width / 2;
@@ -2090,6 +2092,7 @@ bool CDriverGL::setMode(const GfxMode& amode)
 			XMoveWindow(_dpy, _win, newX, newY);
 			_WindowX = newX;
 			_WindowY = newY;
+			setWindowStyle(EWSFullscreen);
 		}
 	}
 #endif
