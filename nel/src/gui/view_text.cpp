@@ -3146,7 +3146,8 @@ namespace NLGUI
 		_SpaceWidth = si.StringWidth;
 
 		// Font Width (used for <tab>)
-		si = TextContext->getStringInfo("O");
+		// if not set to "_", breaks item help window
+		si = TextContext->getStringInfo("_");
 		_FontWidth = si.StringWidth;
 
 #else
