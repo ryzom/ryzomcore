@@ -3120,8 +3120,6 @@ namespace NLGUI
 		TextContext->setEmbolden (_Embolden);
 		TextContext->setOblique (_Oblique);
 
-#if 1
-
 		UTextContext::CStringInfo si = TextContext->getStringInfo("XO");
 		float xoHeight = si.StringHeight;
 
@@ -3160,36 +3158,6 @@ namespace NLGUI
 		// if not set to "_", breaks item help window
 		si = TextContext->getStringInfo("_");
 		_TabWidth = si.StringWidth;
-
-#else
-
-		// Letter size
-		UTextContext::CStringInfo si = TextContext->getStringInfo(_FontSizingChars);
-
-		// font generator changes unknown glyphs to dot '.'. use fallback if it looks odd
-		if (_FontSize > (si.StringHeight + si.StringLine))
-		{
-			si = TextContext->getStringInfo(_FontSizingFallback);
-		}
-
-		// add a padding of 1 pixel else the top will be truncated
-		_FontHeight = si.StringHeight + 1;
-		_FontLegHeight = si.StringLine;
-
-		// Space width
-		si = TextContext->getStringInfo(" ");
-		_SpaceWidth = si.StringWidth;
-
-		// Font Width
-		si = TextContext->getStringInfo("_");
-		_FontWidth = si.StringWidth;
-
-		//  Tab Width (used for {Txx})
-		// if not set to "_", breaks item help window
-		si = TextContext->getStringInfo("_");
-		_TabWidth = si.StringWidth;
-
-#endif
 	}
 
 
