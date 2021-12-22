@@ -95,6 +95,7 @@ namespace NLGUI
 		_FontWidth= 0;
 		_FontHeight = 0;
 		_FontLegHeight = 0;
+		_TabWidth= 0;
 
 		_TextSelection= false;
 		_TextSelectionStart= 0;
@@ -1284,7 +1285,7 @@ namespace NLGUI
 					px += firstSpace;
 					// skip tabulation before current word
 					if(currWord.Format.TabX)
-						px= max(px, (float)(_XReal * _Scale + currWord.Format.TabX*_FontWidth));
+						px= max(px, (float)(_XReal * _Scale + currWord.Format.TabX*_TabWidth));
 
 					// draw. We take floorf px to avoid filtering of letters that are not located on a pixel boundary
 					float fx = px / _Scale;
@@ -1767,7 +1768,7 @@ namespace NLGUI
 				getFormatTagChange(i, formatTagIndex, wordFormat);
 
 				// Ensure the line witdh count the tab
-				rWidthCurrentLine= max(rWidthCurrentLine, (float)wordFormat.TabX*_FontWidth);
+				rWidthCurrentLine= max(rWidthCurrentLine, (float)wordFormat.TabX*_TabWidth);
 			}
 
 			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
@@ -1951,7 +1952,7 @@ namespace NLGUI
 
 				// compute size of spaces/Tab + word
 				newLineWidth = lineWidth + numSpaces * _SpaceWidth;
-				newLineWidth = max(newLineWidth, (float)wordFormat.TabX*_FontWidth);
+				newLineWidth = max(newLineWidth, (float)wordFormat.TabX*_TabWidth);
 				newLineWidth+= si.StringWidth;
 			}
 			//
@@ -3113,8 +3114,6 @@ namespace NLGUI
 		TextContext->setEmbolden (_Embolden);
 		TextContext->setOblique (_Oblique);
 
-#if 1
-
 		UTextContext::CStringInfo si = TextContext->getStringInfo("XO");
 		float xoHeight = si.StringHeight;
 
@@ -3145,34 +3144,14 @@ namespace NLGUI
 		si = TextContext->getStringInfo(" ");
 		_SpaceWidth = si.StringWidth;
 
-		// Font Width (used for <tab>)
+		// Font Width
 		si = TextContext->getStringInfo("O");
 		_FontWidth = si.StringWidth;
 
-#else
-
-		// Letter size
-		UTextContext::CStringInfo si = TextContext->getStringInfo(_FontSizingChars);
-
-		// font generator changes unknown glyphs to dot '.'. use fallback if it looks odd
-		if (_FontSize > (si.StringHeight + si.StringLine))
-		{
-			si = TextContext->getStringInfo(_FontSizingFallback);
-		}
-
-		// add a padding of 1 pixel else the top will be truncated
-		_FontHeight = si.StringHeight + 1;
-		_FontLegHeight = si.StringLine;
-
-		// Space width
-		si = TextContext->getStringInfo(" ");
-		_SpaceWidth = si.StringWidth;
-
-		// Font Width (used for <tab>)
+		//  Tab Width (used for {Txx})
+		// if not set to "_", breaks item help window
 		si = TextContext->getStringInfo("_");
-		_FontWidth = si.StringWidth;
-
-#endif
+		_TabWidth = si.StringWidth;
 	}
 
 
@@ -3641,6 +3620,7 @@ namespace NLGUI
 		f.serial(_Localized);
 		SERIAL_SINT(_FontSize);
 		SERIAL_UINT(_FontWidth);
+		SERIAL_UINT(_TabWidth);
 		SERIAL_UINT(_FontHeight);
 		SERIAL_UINT(_FontLegHeight);
 		f.serial(_SpaceWidth);
