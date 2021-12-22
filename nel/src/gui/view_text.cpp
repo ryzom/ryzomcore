@@ -1689,12 +1689,6 @@ namespace NLGUI
 		return _FontWidth / _Scale;
 	}
 
-		// ***************************************************************************
-	uint CViewText::getTabWidth() const
-	{
-		return _TabWidth / _Scale;
-	}
-
 	// ***************************************************************************
 	uint CViewText::getFontHeight() const
 	{
