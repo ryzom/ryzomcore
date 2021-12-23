@@ -119,8 +119,8 @@ namespace NLGUI
 		void enableStringSelection(uint start, uint end);
 		void disableStringSelection();
 
-		/// Get
-		std::string		getText() const { return _HardText.empty() ? _Text : _HardText; }
+		/// Get displayed text
+		std::string		getText() const { return _Text; }
 #ifdef RYZOM_LUA_UCSTRING
 		ucstring		getTextAsUtf16() const; // Compatibility
 		ucstring		getHardTextAsUtf16() const; // Compatibility
@@ -188,6 +188,7 @@ namespace NLGUI
 		/// From a line number, get the character at which it ends (not including any '\n' ), or -1 if invalid
 		void getLineEndIndex(uint line, sint &index, bool &endOfPreviousLine) const;
 
+		/// If localized, return localization key (ie "uiLanguage"), else return displayed text.
 		std::string getHardText() const { return _HardText.empty() ? _Text : _HardText; }
 		void        setHardText (const std::string &ht); //< Localizes strings starting with "ui"
 #ifdef RYZOM_LUA_UCSTRING

@@ -1469,7 +1469,7 @@ namespace NLGUI
 			}
 		}
 
-		nlassert(_Text.empty() || ((_Localized && (NLMISC::startsWith(getText(), "ui"))) == (_HardText.empty() == _Text.empty())));
+		nlassert(_Text.empty() || ((_Localized && (NLMISC::startsWith(getHardText(), "ui"))) == (_HardText.empty() == _Text.empty())));
 	}
 
 	// ***************************************************************************
