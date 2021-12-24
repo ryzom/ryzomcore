@@ -266,9 +266,14 @@ void	uncbServiceIdentification(CMessage &msgin, TSockId from, CCallbackNetBase &
 
 	nlinfo ("HNETL5: + connect ident '%s' %s-%hu pos %hu ext %d", from->asString().c_str(), inSName.c_str(), inSid.get(), (uint16)pos, (uint8)isExternal);
 
-	if(isExternal)
+	if (isExternal)
 	{
-		nlassert (pos == 0);
+
+#ifdef NL_OS_WINDOWS
+		pos = 0;
+#else
+		nlassert(pos == 0);
+#endif
 	}
 
 	if (inSid.get() == 0)

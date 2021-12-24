@@ -1,0 +1,445 @@
+<interface_config>
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+ <lua file="ryzhome_toolbar.lua" />
+
+ <style style="button_over"
+	type="button"
+	id="button_over"
+	button_type="push_button"
+	posref="TR TR"
+	x="0"
+	y="0"
+	h="39"
+	w="44"
+	scale="true"
+	tx_over="W_button_32_over.tga"
+	global_color_normal="false"
+	global_color_pushed="false" />
+
+<group type="container"
+	id="webig_ryzhome_toolbar"
+	x="0" y="0" w="200" h="56" posref="MM MM"
+	max_w="1600" pop_max_w="1600"
+	max_h="1600" pop_max_h="1600"
+	min_w="26" pop_min_w="26"
+	min_h="26" pop_min_h="26"
+	title=""
+	global_color="true"
+	global_color_over="true"
+	header_active="false"
+	right_button="false"
+	options="layer0_pad"
+	movable="true"
+	active="true"
+	opened="true"
+	openable="false"
+	resizer="false">
+	
+	<group id="header_closed" x="0" y="0" w="0" h="0" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="0" wmin="5" sizeref="w" posref="TL TL"></group>
+
+	<group id="content" x="0#" y="0#" w="200" h="56" posref="TL TL">
+
+		<view id="action_title"
+			type="text"
+			posref="TL TL"
+			x="2"
+			y="-2"
+			color="255 255 255 255"
+			fontsize="12"
+			shadow="true"
+			global_color="false"
+			hardtext="Ryzhome" />
+		
+		<ctrl id="close"
+			type="button"
+			style="button_close"
+			button_type="push_button"
+			posref="TR TR"
+			x="1"
+			y="1"
+			tx_normal="w_win_close.tga"
+			tx_pushed="w_win_close.tga"
+			tooltip="uiNoteClose"
+			onclick_l="lua"
+			params_l="RyzhomeBar:close()"/>
+
+		<ctrl id="config"
+			type="button"
+			style="button_close"
+			button_type="push_button"
+			posref="TL TR"
+			posparent="close"
+			x="-2"
+			y="-1"
+			tx_normal="r2ed_permanent_pins.tga"
+			tx_pushed="r2ed_permanent_pins.tga"
+			tooltip="uiCreateUserLM"
+			onclick_l="lua"
+			params_l="RyzhomeBar:saveConfig()"/>
+
+		<ctrl id="add"
+			type="button"
+			style="button_over"
+			button_type="toggle_button"
+			posref="BL BL"
+			x="3"
+			y="0"
+			tx_normal="ryzhome_add_item.png"
+			tx_pushed="ryzhome_add_item.png"
+			tx_over="W_button_32_over.tga"
+			tooltip="uiPeopleAdd"
+			onclick_l="lua"
+			params_l="RyzhomeBar:addItems()"/>
+
+		<view id="new_items_quantity"
+			type="text"
+			posref="BL BL"
+			posparent="add"
+			x="-1"
+			y="-1"
+			color="255 200 0 255"
+			global_color="false"
+			fontsize="16"
+			shadow="true"
+			hardtext="" />
+
+		<ctrl id="move"
+			type="button"
+			style="button_over"
+			button_type="toggle_button"
+			posref="BR BL"
+			posparent="add"
+			x="3"
+			y="0"
+			tx_normal="ryzhome_move_item.png"
+			tx_pushed="ryzhome_move_item.png"
+			tx_over="W_button_32_over.tga"
+			tooltip="uimMoveTo"
+			onclick_l="lua"
+			params_l="RyzhomeBar:moveItems()"/>
+
+		<ctrl id="remove"
+			type="button"
+			style="button_over"
+			posref="BR BL"
+			posparent="move"
+			x="3"
+			tx_normal="ryzhome_remove_item.png"
+			tx_pushed="ryzhome_remove_item.png"
+			tx_over="W_button_32_over.tga"
+			tooltip="uimRemove"
+			onclick_l="lua"
+			params_l="RyzhomeBar:removeItems()"/>
+
+		<ctrl id="invite"
+			type="button"
+			style="button_over"
+			posref="BR BL"
+			posparent="remove"
+			x="3"
+			tx_normal="ryzhome_invite.png"
+			tx_pushed="ryzhome_invite.png"
+			tx_over="W_button_32_over.tga"
+			tooltip="uiRAP_Invite"
+			onclick_l="lua"
+			params_l="RyzhomeBar:inviteFriend()"/>
+
+	</group>
+</group>
+
+<tree node="webig_ryzhome_toolbar"></tree>
+
+
+<style style="button_over"
+	id="over"
+	posref="TL TL"
+	render_layer="-1" 
+	y="1" w="600" h="44" scale="true"
+	button_type="push_button"
+	tx_normal="blank.tga"
+	tx_pushed="blank.tga"
+	tx_over="blank.tga"
+	color="255 255 255 0"
+	col_over="255 255 255 64"
+	col_pushed="255 255 255 128"
+	global_color_over="false" />
+
+<group id="webig_ryzhome_list_item"
+	style="bot_chat_window"
+	posref="MM MM"
+	min_w="316"
+	max_w="316"
+	max_h="420"
+	min_h="420"
+	w="316"
+	h="420"
+	x="0"
+	y="0"
+	pop_max_h="700"
+	active="false"
+	title=""
+	modal_parent="gestionsets">
+
+	<group id="header_opened"
+		child_resize_hmargin="24"
+		w="600"
+		h="420"
+		x="0"
+		y="0"
+		posref="TL TL">
+
+		<view id="action_title"
+			type="text"
+			posref="TL TL"
+			x="2"
+			y="-25"
+			color="255 255 255 255"
+			fontsize="12"
+			shadow="true"
+			hardtext="uiSelectMission" />
+
+		<ctrl id="page_next"
+			type="button"
+			posref="TR TR"
+			x="-2"
+			y="-20"
+			tx_normal="W_arrow_right_0.tga"
+			tx_pushed="W_arrow_right_0.tga"
+			tooltip="uiKeyNEXT"
+			onclick_l="lua"
+			params_l="RyzhomeBar:movePage(1)" />
+
+		<view id="page"
+			type="text"
+			posref="TL TR"
+			posparent="page_next"
+			x="-2"
+			y="0"
+			color="255 255 255 255"
+			fontsize="12"
+			shadow="true"
+			hardtext="1/1" />
+
+		<ctrl id="page_previous"
+			type="button"
+			posref="TL TR"
+			posparent="page"
+			x="-2"
+			y="0"
+			tx_normal="w_arrow_left_0.tga"
+			tx_pushed="w_arrow_left_0.tga"
+			tooltip="uiKeyPRIOR"
+			onclick_l="lua"
+			params_l="RyzhomeBar:movePage(-1)" />
+
+		<group id="scroll_text"
+			sizeref="w"
+			posref="TL TL"
+			w="0"
+			y="-40"
+			child_resize_h="false"
+			child_resize_hmargin="8">
+
+		<instance template="inner_thin_border_group" />
+
+		<group id="text_list"
+			posref="TL TL"
+			x="12"
+			y="-4"
+			sizeref="w"
+			max_h="380"
+			child_resize_h="true" >
+
+			<view type="bitmap" id="icon1" posref="TL TL" texture="r2ed_toolbar_freeze.tga" global_color="false" />
+			<view type="text" id="text1" posref="TR TL" posparent="icon1" fontsize="10" x="5" y="-5" hardtext="" />
+			<view type="text" id="info1" posref="BL TL" color="55 205 55 205" posparent="text1" fontsize="10" x="10" y="-5" hardtext="" />
+			<ctrl type="button" id="but1" posparent="icon1" style="button_over" onover="lua" params_over="RyzhomeBar:highlightItem(1)" onclick_l="lua" params_l="RyzhomeBar:useItem(1)" />
+
+			<view type="bitmap" id="icon2" posparent="but1" posref="BL TL" y="-4" texture="r2ed_toolbar_freeze.tga" global_color="false" />
+			<view type="text" id="text2" posref="TR TL" posparent="icon2" fontsize="10" x="5" y="-5" hardtext="" />
+			<view type="text" id="info2" posref="BL TL" color="55 205 55 205" posparent="text2" fontsize="10" x="10" y="-5" hardtext="" />
+			<ctrl type="button" id="but2" posparent="icon2" style="button_over" onover="lua" params_over="RyzhomeBar:highlightItem(2)" onclick_l="lua" params_l="RyzhomeBar:useItem(2)" />
+
+			<view type="bitmap" id="icon3" posparent="but2" posref="BL TL" y="-4" texture="r2ed_toolbar_freeze.tga" global_color="false" />
+			<view type="text" id="text3" posref="TR TL" posparent="icon3" fontsize="10" x="5" y="-5" hardtext="" />
+			<view type="text" id="info3" posref="BL TL" color="55 205 55 205" posparent="text3" fontsize="10" x="10" y="-5" hardtext="" />
+			<ctrl type="button" id="but3" posparent="icon3" style="button_over" onover="lua" params_over="RyzhomeBar:highlightItem(3)" onclick_l="lua" params_l="RyzhomeBar:useItem(3)" />
+
+			<view type="bitmap" id="icon4" posparent="but3" posref="BL TL" y="-4" texture="r2ed_toolbar_freeze.tga" global_color="false" />
+			<view type="text" id="text4" posref="TR TL" posparent="icon4" fontsize="10" x="5" y="-5" hardtext="" />
+			<view type="text" id="info4" posref="BL TL" color="55 205 55 205" posparent="text4" fontsize="10" x="10" y="-5" hardtext="" />
+			<ctrl type="button" id="but4" posparent="icon4" style="button_over" onover="lua" params_over="RyzhomeBar:highlightItem(4)" onclick_l="lua" params_l="RyzhomeBar:useItem(4)" />
+
+			<view type="bitmap" id="icon5" posparent="but4" posref="BL TL" y="-4" texture="r2ed_toolbar_freeze.tga" global_color="false" />
+			<view type="text" id="text5" posref="TR TL" posparent="icon5" fontsize="10" x="5" y="-5" hardtext="" />
+			<view type="text" id="info5" posref="BL TL" color="55 205 55 205" posparent="text5" fontsize="10" x="10" y="-5" hardtext="" />
+			<ctrl type="button" id="but5" posparent="icon5" style="button_over" onover="lua" params_over="RyzhomeBar:highlightItem(5)" onclick_l="lua" params_l="RyzhomeBar:useItem(5)" />
+
+			<view type="bitmap" id="icon6" posparent="but5" posref="BL TL" y="-4" texture="r2ed_toolbar_freeze.tga" global_color="false" />
+			<view type="text" id="text6" posref="TR TL" posparent="icon6" fontsize="10" x="5" y="-5" hardtext="" />
+			<view type="text" id="info6" posref="BL TL" color="55 205 55 205" posparent="text6" fontsize="10" x="10" y="-5" hardtext="" />
+			<ctrl type="button" id="but6" posparent="icon6" style="button_over" onover="lua" params_over="RyzhomeBar:highlightItem(6)" onclick_l="lua" params_l="RyzhomeBar:useItem(6)" />
+
+			<view type="bitmap" id="icon7" posparent="but6" posref="BL TL" y="-4" texture="r2ed_toolbar_freeze.tga" global_color="false" />
+			<view type="text" id="text7" posref="TR TL" posparent="icon7" fontsize="10" x="5" y="-5" hardtext="" />
+			<view type="text" id="info7" posref="BL TL" color="55 205 55 205" posparent="text7" fontsize="10" x="10" y="-5" hardtext="" />
+			<ctrl type="button" id="but7" posparent="icon7" style="button_over" onover="lua" params_over="RyzhomeBar:highlightItem(7)" onclick_l="lua" params_l="RyzhomeBar:useItem(7)" />
+
+			<view type="bitmap" id="icon8" posparent="but7" posref="BL TL" y="-4" texture="r2ed_toolbar_freeze.tga" global_color="false" />
+			<view type="text" id="text8" posref="TR TL" posparent="icon8" fontsize="10" x="5" y="-5" hardtext="" />
+			<view type="text" id="info8" posref="BL TL" color="55 205 55 205" posparent="text8" fontsize="10" x="10" y="-5" hardtext="" />
+			<ctrl type="button" id="but8" posparent="icon8" style="button_over" onover="lua" params_over="RyzhomeBar:highlightItem(8)" onclick_l="lua" params_l="RyzhomeBar:useItem(8)" />
+
+
+		</group>
+
+		<ctrl style="skin_scroll"
+			id="scroll_row"
+			posref="TL TL"
+			target_stepy="44"
+			target="text_list" />
+
+		<group id="list"
+			max_sizeref="h"
+			max_sizeparent="parent"
+			max_h="0"
+			sizeref="w"
+			posref="TL TL"
+			x="8"
+			y="0"
+			w="-16" />
+		</group>
+	</group>
+</group>
+
+<tree node="webig_ryzhome_list_item"></tree>
+
+<template name="t_webig_ryzhome_button">
+	<ctrl type="button"
+		  button_type="push_button"
+		  id="#id"
+		  posref="TL TL"
+		  x="#x"
+		  y="#y"
+		  tx_normal="#tx_normal"
+		  global_color="false"
+		  tooltip="#tooltip"
+		  onclick_l="lua"
+		  params_l="#params_l"/>
+	<view type="bitmap"
+		  id="i_#id"
+		  posref="TL TL"
+		  x="#x"
+		  y="#y"
+		  rot="#rot"
+		  texture="#texture"
+		  global_color="false"/>
+</template>
+
+<group type="container"
+       id="webig_ryzhome_place_item"
+       x="0" y="0" w="200" h="140" posref="TL TL"
+       title=""
+       global_color="true"
+       global_color_over="true"
+       header_active="false"
+       right_button="false"
+       options="layer0_pad"
+       movable="true"
+       active="true"
+       opened="true"
+       openable="false"
+       resizer="false">
+       
+    <group id="header_closed" x="0" y="0" w="0" h="0" posref="TL TL"></group>
+    <group id="header_opened" x="0" y="0" w="0" h="0" wmin="5" sizeref="w" posref="TL TL"></group>
+
+    <group id="content" x="0" y="0" w="400" h="140" posref="TL TL">
+		<view type="text"
+			id="item"
+			posref="TL TL"
+			x="2"
+			y="-4"
+			color="255 255 255 255"
+			shadow="true"
+			global_color="false"
+			fontsize="10"
+			hardtext="" />
+			
+		<ctrl style="text_button_16"
+			id="quit"
+			posref="TR TR"
+			x="-2"
+			y="-2"
+			hardtext="uiClose"
+			onclick_l="lua"
+			params_l="RyzhomePlace:close()" />
+		<!--	
+		<view type="bitmap" id="black" x="2" y="0" w="200" h="150" posref="ML ML" inherit_gc_alpha="true" scale="true" texture="blank.tga" color="0 0 0 240"/>
+		<scene3d id="scene3d" x="2" y="0" w="200" h="150" posref="ML ML" curcam="cam" curcs="env" render_layer="-2" active="false"
+			user_interaction="true" rotz_factor="0.017"
+			roty_factor="0.005" roty_limit_min="-80" roty_limit_max="90"
+			dist_factor="0.05" dist_limit_min="1" dist_limit_max="20.0"
+			ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+
+
+			<camera id="cam" fov="80" pos="0.0 20.0 0" target="0.0 26.5 2" roll="0" />
+
+			<light id="back" pos="0.0 28.2 1.6" color="255 255 255" near="2.5" far="4.0" />
+			<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
+
+			<shape id="shape" name="" pos="0.0 26.5 0.0" rot="0.0 0.0 0.0" />
+		</scene3d>
+		-->
+		<group id="movers" x="0" y="-4" w="182" h="140" posref="MM MM">
+			<instance template="t_webig_ryzhome_button" id="previous_x2" rot="2" x="2" y="-16" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(-0.1, 0, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="previous_x" rot="2" x="32" y="-16" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(-0.01, 0, 0)"	/>		
+			<view type="text" id="x" posref="TL TL"	x="76" y="-20" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="Axe X" />
+			<instance template="t_webig_ryzhome_button" id="next_x" rot="0" x="130" y="-16" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0.01, 0, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="next_x2" rot="0" x="160" y="-16" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0.1, 0, 0)"	/>		
+		
+			<instance template="t_webig_ryzhome_button" id="previous_y2" rot="2" x="2" y="-34" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, -0.1, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="previous_y" rot="2" x="32" y="-34" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, -0.01, 0)"	/>		
+			<view type="text" id="y" posref="TL TL"	x="76" y="-38" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="Axe Y" />
+			<instance template="t_webig_ryzhome_button" id="next_y" rot="0" x="130" y="-34" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0.01, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="next_y2" rot="0" x="160" y="-34" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0.1, 0)"	/>		
+
+			<instance template="t_webig_ryzhome_button" id="previous_z2" rot="2" x="2" y="-52" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, -0.1, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="previous_z" rot="2" x="32" y="-52" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, -0.01, 0)"	/>		
+			<view type="text" id="z"  posref="TL TL"	x="76" y="-58" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="Axe Z" />
+			<instance template="t_webig_ryzhome_button" id="next_z" rot="0" x="130" y="-52" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, 0.01, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="next_z2" rot="0" x="160" y="-52" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, 0.1, 0)"	/>		
+
+			<instance template="t_webig_ryzhome_button" id="previous_a2" rot="2" x="2" y="-70" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(-0.1)"	/>		
+			<instance template="t_webig_ryzhome_button" id="previous_a" rot="2" x="32" y="-70" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(-0.01)"	/>		
+			<view type="text" id="a"  posref="TL TL"	x="76" y="-76" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="Angle" />
+			<instance template="t_webig_ryzhome_button" id="next_a" rot="0" x="130" y="-70" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(0.01)"	/>		
+			<instance template="t_webig_ryzhome_button" id="next_a2" rot="0" x="160" y="-70" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(0.1)"	/>		
+		</group>
+		
+		<ctrl style="text_button_16"
+			id="validate"
+			posref="BR BR"
+			x="-2"
+			y="2"
+			hardtext="reset"
+			onclick_l="lua"
+			params_l="RyzhomePlace:apply()" />
+			
+		<ctrl style="text_button_16"
+			id="reset"
+			posref="ML MR"
+			posparent="validate"
+			x="-2"
+			y="0"
+			hardtext="reset"
+			onclick_l="lua"
+			params_l="RyzhomePlace:reset()" />		
+	</group>
+</group>
+
+<tree node="webig_ryzhome_place_item"></tree>
+
+</interface_config>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerWorkingDirectory>Y:\ryzomclassic\pipeline\client_dev</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment>PATH=C:\2019q4_external_v142_x64\zlib\bin;C:\2019q4_external_v142_x64\curl\bin;C:\2019q4_external_v142_x64\openssl\bin;C:\2019q4_external_v142_x64\libjpeg\bin;C:\2019q4_external_v142_x64\libpng\bin;C:\2019q4_external_v142_x64\libiconv\bin;C:\2019q4_external_v142_x64\libxml2\bin;C:\2019q4_external_v142_x64\freetype\bin;C:\2019q4_external_v142_x64\squish\bin;C:\2019q4_external_v142_x64\ogg;C:\2019q4_external_v142_x64\vorbis\bin;C:\2019q4_external_v142_x64\openal-soft\bin;C:\2019q4_external_v142_x64\lua\bin;C:\2019q4_external_v142_x64\luabind\bin;C:\2019q4_external_v142_x64\mariadb-connector-c\bin;C:\2019q4_external_v142_x64\assimp\bin;C:\2019q4_external_v142_x64\qt5\bin;C:\2019q4_external_v142_x64\qt5\plugins;%PATH%
+QT_PLUGIN_PATH=C:\2019q4_external_v142_x64\qt5\plugins
+$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerWorkingDirectory>Y:\ryzomclassic\pipeline\client_dev</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment>PATH=C:\2019q4_external_v142_x64\zlib\bin;C:\2019q4_external_v142_x64\curl\bin;C:\2019q4_external_v142_x64\openssl\bin;C:\2019q4_external_v142_x64\libjpeg\bin;C:\2019q4_external_v142_x64\libpng\bin;C:\2019q4_external_v142_x64\libiconv\bin;C:\2019q4_external_v142_x64\libxml2\bin;C:\2019q4_external_v142_x64\freetype\bin;C:\2019q4_external_v142_x64\squish\bin;C:\2019q4_external_v142_x64\ogg;C:\2019q4_external_v142_x64\vorbis\bin;C:\2019q4_external_v142_x64\openal-soft\bin;C:\2019q4_external_v142_x64\lua\bin;C:\2019q4_external_v142_x64\luabind\bin;C:\2019q4_external_v142_x64\mariadb-connector-c\bin;C:\2019q4_external_v142_x64\assimp\bin;C:\2019q4_external_v142_x64\qt5\bin;C:\2019q4_external_v142_x64\qt5\plugins;%PATH%
+QT_PLUGIN_PATH=C:\2019q4_external_v142_x64\qt5\plugins
+$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+</Project>

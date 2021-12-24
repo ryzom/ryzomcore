@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1289,7 +1289,7 @@ struct CViewerConfig
 		ShapePath = "./";
 		MapsPath = "./";
 		Bank = "bank.bank";
-		FontPath = "\\\\server\\code\\fonts\\arialuni.ttf";
+		FontPath = "R:\\graphics\\fonts\\noto_sans.ttf";
 		ZFar = 1000;
 		LandscapeTileNear = 50.0f;
 		LandscapeThreshold = 0.001f;
@@ -4363,14 +4363,14 @@ void CMainFrame::OnMissionCompiler()
 	ExecuteInfo.fMask        = 0;
 	ExecuteInfo.hwnd         = 0;
 	ExecuteInfo.lpVerb       = _T("open");
-	ExecuteInfo.lpFile       = _T("mission_compiler_fe_r.exe");
+	ExecuteInfo.lpFile       = _T("ryzom_mission_compiler_fe.exe");
 	ExecuteInfo.lpParameters = 0;
 	ExecuteInfo.lpDirectory  = path;
 	ExecuteInfo.nShow        = SW_SHOW;
 	ExecuteInfo.hInstApp     = 0;
 
 	if(ShellExecuteEx(&ExecuteInfo) == FALSE)
-		errorMessage("File not found : mission_compiler_fe_r.exe !");
+		errorMessage("File not found : ryzom_mission_compiler_fe.exe !");
 }
 
 // ***************************************************************************

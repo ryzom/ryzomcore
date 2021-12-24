@@ -1,0 +1,50 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+<proc id="r2ed_proc_con_quit" >
+	<action handler="play_sound" params="name=charsel_quit_click" />
+	<action handler="quit_ryzom" />
+</proc>
+
+
+<proc id="r2ed_proc_startall_connect" >
+	<action handler="anim_start" params="anim=r2ed_anim_connection_intro" />
+</proc>
+
+
+<group id="r2ed_connecting" posref="TL TL" w="0" h="0" sizeref="wh" on_active="proc" on_active_params="r2ed_proc_startall_connect" >
+	
+
+	
+	<!-- Quit Button -->
+	<ctrl style="valid_txt_button" id="finish_but" posref="BR BR" x="-40" y="130" hardtext="uiQuit"
+					onover="play_sound" params_over="name=charsel_quit_over"
+					onclick_l="quit_ryzom_now" params_l=""/>
+
+	<view type="text" id="title" global_color="false" posref="MM MM" y="24" hardtext="uiConnecting" fontsize="20"/>
+
+	
+	<!-- BLACK SCREEN FADE -->	
+	<view type="bitmap" id="black_screen" posref="TL TL" x="0" y="0" render_layer="4" texture="blank.tga"
+		color="0 0 0 255" sizeref="wh" scale="true" global_color="false" />		
+</group>
+
+<tree node="r2ed_connecting">
+</tree>
+
+
+
+<!-- ANIMATIONS -->
+<anim id="r2ed_anim_connection_intro" duration="1.0"  disable_buttons="true" on_finish="" on_finish_params="" >
+	<track type="linear" target="ui:interface:r2ed_connecting:black_screen:alpha" >
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+</anim>
+
+
+
+</interface_config>
+

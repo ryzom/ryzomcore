@@ -25,7 +25,7 @@
 	require_once(NELTOOL_SYSTEMBASE. 'nel/admin_modules_itf.php');
 
 	// lets set up the database
-	$db = new sql_db(NELTOOL_DBHOST, NELTOOL_DBUSER, NELTOOL_DBPASS, NELTOOL_DBNAME);
+	$db = new sql_db(NELTOOL_DBHOST, NELTOOL_DBPORT, NELTOOL_DBUSER, NELTOOL_DBPASS, NELTOOL_DBNAME);
 	if (!is_object($db)) die("error on db init");
 
 	// lets set up the smarty template engine

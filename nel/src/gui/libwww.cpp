@@ -208,9 +208,10 @@ namespace NLGUI
 	// ***************************************************************************
 	bool getCssLength (float &value, std::string &unit, const std::string &str, bool neg)
 	{
-		static const std::set<std::string> knownUnits = {
+		static const std::string knownUnitsArr[] = {
 			"%", "rem", "em", "px", "pt", "vw", "vh", "vi", "vb", "vmin", "vmax"
 		};
+		static const std::set<std::string> knownUnits(knownUnitsArr, &knownUnitsArr[sizeof(knownUnitsArr) / sizeof(knownUnitsArr[0])]);
 
 		std::string::size_type pos = 0;
 		std::string::size_type len = str.size();

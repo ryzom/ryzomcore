@@ -65,158 +65,220 @@ if not args.noconf:
 	except NameError:
 		BuildQuality = 1
 	try:
-		if not args.preset:
-			ToolDirectories
+		if args.preset:
+			DummyUnknownName
+		RemapLocalFrom
 	except NameError:
-		ToolDirectories = [ 'R:/distribution/nel_tools_win_x64-distribution', 'R:/distribution/ryzom_tools_win_x64-distribution' ]
+		RemapLocalFrom = 'R:'
+	try:
+		if args.preset:
+			DummyUnknownName
+		RemapLocalTo
+	except NameError:
+		RemapLocalTo = os.getenv('RC_ROOT').replace('\\', '/')
+		if (not RemapLocalTo) or (not ':' in RemapLocalTo):
+			RemapLocalTo = 'R:'
+	try:
+		if args.preset:
+			DummyUnknownName
+		ToolDirectories
+	except NameError:
+		ToolDirectories = [ 'R:/distribution/nel_tools_win_x64', 'R:/distribution/ryzom_tools_win_x64' ]
 	try:
 		ToolSuffix
 	except NameError:
 		ToolSuffix = ".exe"
 	try:
-		if not args.preset:
-			ScriptDirectory
+		if args.preset:
+			DummyUnknownName
+		ScriptDirectory
 	except NameError:
 		ScriptDirectory = "R:/code/nel/tools/build_gamedata"
 	try:
-		if not args.preset:
-			WorkspaceDirectory
+		if args.preset:
+			DummyUnknownName
+		WorkspaceDirectory
 	except NameError:
 		WorkspaceDirectory = "R:/leveldesign/workspace"
 	try:
-		if not args.preset:
-			DatabaseDirectory
+		if args.preset:
+			DummyUnknownName
+		DatabaseDirectory
 	except NameError:
 		DatabaseDirectory = "R:/graphics"
 	try:
-		if not args.preset:
-			SoundDirectory
+		if args.preset:
+			DummyUnknownName
+		SoundDirectory
 	except NameError:
 		SoundDirectory = "R:/sound"
 	try:
-		if not args.preset:
-			SoundDfnDirectory
+		if args.preset:
+			DummyUnknownName
+		SoundDfnDirectory
 	except NameError:
 		SoundDfnDirectory = "R:/sound/DFN"
 	try:
-		if not args.preset:
-			ExportBuildDirectory
+		if args.preset:
+			DummyUnknownName
+		ExportBuildDirectory
 	except NameError:
 		ExportBuildDirectory = "R:/pipeline/export"
 	try:
-		if not args.preset:
-			InstallDirectory
+		if args.preset:
+			DummyUnknownName
+		InstallDirectory
 	except NameError:
 		InstallDirectory = "R:/pipeline/install"
 	try:
-		if not args.preset:
-			ClientDevDirectory
+		if args.preset:
+			DummyUnknownName
+		ClientDevDirectory
 	except NameError:
 		ClientDevDirectory = "R:/pipeline/client_dev"
 	try:
-		if not args.preset:
-			ClientPatchDirectory
+		if args.preset:
+			DummyUnknownName
+		ClientDevLiveDirectory
+	except NameError:
+		ClientDevLiveDirectory = "R:/pipeline/client_dev_live"
+	try:
+		if args.preset:
+			DummyUnknownName
+		ClientPatchDirectory
 	except NameError:
 		ClientPatchDirectory = "R:/pipeline/client_patch"
 	try:
-		if not args.preset:
-			ClientInstallDirectory
+		if args.preset:
+			DummyUnknownName
+		ClientInstallDirectory
 	except NameError:
 		ClientInstallDirectory = "R:/pipeline/client_install"
 	try:
-		if not args.preset:
-			ShardInstallDirectory
+		if args.preset:
+			DummyUnknownName
+		ShardInstallDirectory
 	except NameError:
 		ShardInstallDirectory = "R:/pipeline/shard"
 	try:
-		if not args.preset:
-			WorldEditInstallDirectory
+		if args.preset:
+			DummyUnknownName
+		ShardDevDirectory
+	except NameError:
+		ShardDevDirectory = "R:/pipeline/shard_dev"
+	try:
+		if args.preset:
+			DummyUnknownName
+		WorldEditInstallDirectory
 	except NameError:
 		WorldEditInstallDirectory = "R:/pipeline/worldedit"
 	try:
-		if not args.preset:
-			WorldEditorFilesDirectory
+		if args.preset:
+			DummyUnknownName
+		WorldEditorFilesDirectory
 	except NameError:
 		WorldEditorFilesDirectory = "R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files"
 	try:
-		if not args.preset:
-			LeveldesignDirectory
+		if args.preset:
+			DummyUnknownName
+		LeveldesignDirectory
 	except NameError:
 		LeveldesignDirectory = "R:/leveldesign"
 	try:
-		if not args.preset:
-			LeveldesignDfnDirectory
+		if args.preset:
+			DummyUnknownName
+		LeveldesignDfnDirectory
 	except NameError:
 		LeveldesignDfnDirectory = "R:/leveldesign/DFN"
 	try:
-		if not args.preset:
-			LeveldesignWorldDirectory
+		if args.preset:
+			DummyUnknownName
+		LeveldesignWorldDirectory
 	except NameError:
 		LeveldesignWorldDirectory = "R:/leveldesign/world"
 	try:
-		if not args.preset:
-			PrimitivesDirectory
+		if args.preset:
+			DummyUnknownName
+		PrimitivesDirectory
 	except NameError:
 		PrimitivesDirectory = "R:/leveldesign/primitives"
 	try:
-		if not args.preset:
-			LeveldesignDataCommonDirectory
+		if args.preset:
+			DummyUnknownName
+		LeveldesignDataCommonDirectory
 	except NameError:
 		LeveldesignDataCommonDirectory = "R:/leveldesign/common"
 	try:
-		if not args.preset:
-			LeveldesignDataShardDirectory
+		if args.preset:
+			DummyUnknownName
+		LeveldesignDataShardDirectory
 	except NameError:
 		LeveldesignDataShardDirectory = "R:/leveldesign/shard"
 	try:
-		if not args.preset:
-			TranslationDirectory
+		if args.preset:
+			DummyUnknownName
+		TranslationDirectory
 	except NameError:
 		TranslationDirectory = "R:/leveldesign/translation"
 	try:
-		if not args.preset:
-			GamedevDirectory
+		if args.preset:
+			DummyUnknownName
+		GamedevDirectory
 	except NameError:
 		GamedevDirectory = "R:/code/ryzom/client/data/gamedev"
 	try:
-		if not args.preset:
-			DataCommonDirectory
+		if args.preset:
+			DummyUnknownName
+		DataCommonDirectory
 	except NameError:
 		DataCommonDirectory = "R:/code/ryzom/common/data_common"
 	try:
-		if not args.preset:
-			DataShardDirectory
+		if args.preset:
+			DummyUnknownName
+		DataShardDirectory
 	except NameError:
 		DataShardDirectory = "R:/code/ryzom/server/data_shard"
 	try:
-		if not args.preset:
-			WindowsExeDllCfgDirectories
+		if args.preset:
+			DummyUnknownName
+		WindowsExeDllCfgDirectories
 	except NameError:
 		# TODO: Separate 64bit and 32bit
 		WindowsExeDllCfgDirectories = [ '', 'R:/build/fv_x64/bin/Release', 'R:/distribution/external_x64', 'R:/code/ryzom/client', '', '', '' ]
 	try:
-		if not args.preset:
-			LinuxServiceExecutableDirectory
+		if args.preset:
+			DummyUnknownName
+		LinuxServiceExecutableDirectory
 	except NameError:
-		LinuxServiceExecutableDirectory = "R:/build/gcc_server/bin"
+		LinuxServiceExecutableDirectory = "R:/build/server_gcc/bin"
 	try:
-		if not args.preset:
-			LinuxClientExecutableDirectory
+		if args.preset:
+			DummyUnknownName
+		LinuxClientExecutableDirectory
 	except NameError:
-		LinuxClientExecutableDirectory = "R:/build/gcc_client/bin"
+		LinuxClientExecutableDirectory = "R:/build/client_gcc/bin"
 	try:
-		if not args.preset:
-			PatchmanCfgAdminDirectory
+		if args.preset:
+			DummyUnknownName
+		PatchmanDevDirectory
+	except NameError:
+		PatchmanDevDirectory = "R:/patchman/terminal_dev"
+	try:
+		if args.preset:
+			DummyUnknownName
+		PatchmanCfgAdminDirectory
 	except NameError:
 		PatchmanCfgAdminDirectory = "R:/patchman/admin_install"
 	try:
-		if not args.preset:
-			PatchmanCfgDefaultDirectory
+		if args.preset:
+			DummyUnknownName
+		PatchmanCfgDefaultDirectory
 	except NameError:
 		PatchmanCfgDefaultDirectory = "R:/patchman/default"
 	try:
-		if not args.preset:
-			PatchmanBridgeServerDirectory
+		if args.preset:
+			DummyUnknownName
+		PatchmanBridgeServerDirectory
 	except NameError:
 		PatchmanBridgeServerDirectory = "R:/pipeline/bridge_server"
 	try:
@@ -276,9 +338,11 @@ if not args.noconf:
 		ExportBuildDirectory = askVar(log, "[OUT] Export Build Directory", ExportBuildDirectory).replace("\\", "/")
 		InstallDirectory = askVar(log, "[OUT] Install Directory", InstallDirectory).replace("\\", "/")
 		ClientDevDirectory = askVar(log, "[OUT] Client Dev Directory", ClientDevDirectory).replace("\\", "/")
+		ClientDevLiveDirectory = askVar(log, "[OUT] Client Dev Live Directory", ClientDevLiveDirectory).replace("\\", "/")
 		ClientPatchDirectory = askVar(log, "[OUT] Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
 		ClientInstallDirectory = askVar(log, "[OUT] Client Install Directory", ClientInstallDirectory).replace("\\", "/")
 		ShardInstallDirectory = askVar(log, "[OUT] Shard Data Install Directory", ShardInstallDirectory).replace("\\", "/")
+		ShardDevDirectory = askVar(log, "[OUT] Shard Dev Directory", ShardDevDirectory).replace("\\", "/")
 		WorldEditInstallDirectory = askVar(log, "[OUT] World Edit Data Install Directory", WorldEditInstallDirectory).replace("\\", "/")
 		LeveldesignDirectory = askVar(log, "[IN] Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
 		LeveldesignDfnDirectory = askVar(log, "[IN] Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
@@ -300,6 +364,7 @@ if not args.noconf:
 		WindowsExeDllCfgDirectories[6] = askVar(log, "[IN] Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
 		LinuxServiceExecutableDirectory = askVar(log, "[IN] Linux Service Executable Directory", LinuxServiceExecutableDirectory).replace("\\", "/")
 		LinuxClientExecutableDirectory = askVar(log, "[IN] Linux Client Executable Directory", LinuxClientExecutableDirectory).replace("\\", "/")
+		PatchmanDevDirectory = askVar(log, "[IN] Patchman Directory", PatchmanDevDirectory).replace("\\", "/")
 		PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
 		PatchmanCfgDefaultDirectory = askVar(log, "[IN] Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
 		PatchmanBridgeServerDirectory = askVar(log, "[OUT] Patchman Bridge Server Patch Directory", PatchmanBridgeServerDirectory).replace("\\", "/")
@@ -350,6 +415,9 @@ if not args.noconf:
 	sf.write("# Quality option for this site (1 for BEST, 0 for DRAFT)\n")
 	sf.write("BuildQuality = " + str(BuildQuality) + "\n")
 	sf.write("\n")
+	sf.write("RemapLocalFrom = \"" + str(RemapLocalFrom) + "\"\n")
+	sf.write("RemapLocalTo = \"" + str(RemapLocalTo) + "\"\n")
+	sf.write("\n")
 	sf.write("ToolDirectories = " + str(ToolDirectories) + "\n")
 	sf.write("ToolSuffix = \"" + str(ToolSuffix) + "\"\n")
 	sf.write("\n")
@@ -366,9 +434,11 @@ if not args.noconf:
 	sf.write("# Install directories\n")
 	sf.write("InstallDirectory = \"" + str(InstallDirectory) + "\"\n")
 	sf.write("ClientDevDirectory = \"" + str(ClientDevDirectory) + "\"\n")
+	sf.write("ClientDevLiveDirectory = \"" + str(ClientDevLiveDirectory) + "\"\n")
 	sf.write("ClientPatchDirectory = \"" + str(ClientPatchDirectory) + "\"\n")
 	sf.write("ClientInstallDirectory = \"" + str(ClientInstallDirectory) + "\"\n")
 	sf.write("ShardInstallDirectory = \"" + str(ShardInstallDirectory) + "\"\n")
+	sf.write("ShardDevDirectory = \"" + str(ShardDevDirectory) + "\"\n")
 	sf.write("WorldEditInstallDirectory = \"" + str(WorldEditInstallDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Utility directories\n")
@@ -390,6 +460,7 @@ if not args.noconf:
 	sf.write("WindowsExeDllCfgDirectories = " + str(WindowsExeDllCfgDirectories) + "\n")
 	sf.write("LinuxServiceExecutableDirectory = \"" + str(LinuxServiceExecutableDirectory) + "\"\n")
 	sf.write("LinuxClientExecutableDirectory = \"" + str(LinuxClientExecutableDirectory) + "\"\n")
+	sf.write("PatchmanDevDirectory = \"" + str(PatchmanDevDirectory) + "\"\n")
 	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
 	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
 	sf.write("PatchmanBridgeServerDirectory = \"" + str(PatchmanBridgeServerDirectory) + "\"\n")
@@ -407,7 +478,17 @@ if not args.noconf:
 	sf.write("\n")
 	sf.write("\n")
 	sf.write("# end of file\n")
+	sf.flush()
 	sf.close()
+	sf = open("configuration/buildsite_local.py", "w")
+	sfr = open("configuration/buildsite.py", "r")
+	for l in sfr:
+		sf.write(l.replace(RemapLocalFrom + '/', RemapLocalTo + '/'))
+	sf.flush()
+	sfr.close()
+	sf.close()
+
+from buildsite_local import *
 
 sys.path.append(WorkspaceDirectory)
 from projects import *
@@ -448,6 +529,7 @@ printLog(log, "")
 # Additional directories
 printLog(log, ">>> Setup additional directories <<<")
 mkPath(log, ClientDevDirectory)
+mkPath(log, ClientDevLiveDirectory)
 mkPath(log, ClientPatchDirectory)
 mkPath(log, ClientInstallDirectory)
 
@@ -503,6 +585,7 @@ if not args.noverify:
 	findTool(log, ToolDirectories, TranslationToolsTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildWorldPackedColTool, ToolSuffix)
 	findTool(log, ToolDirectories, R2IslandsTexturesTool, ToolSuffix)
+	findTool(log, ToolDirectories, PatchmanServiceTool, ToolSuffix)
 
 log.close()
 if os.path.isfile("0_setup.log"):

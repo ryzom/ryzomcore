@@ -59,7 +59,9 @@ CScenarioEntryPoints::CScenarioEntryPoints()
 
 void CScenarioEntryPoints::init()
 {
-	_CompleteIslandsFilename = "r2_islands.xml";
+	_HardIslandsPath = false;
+	_CompleteIslandsFilenames.clear();
+	_CompleteIslandsFilenames.push_back("r2_islands.xml");
 	_EntryPointsFilename = "r2_entry_points.txt";
 }
 //-----------------------------------------------------------------------------
@@ -96,6 +98,26 @@ const CScenarioEntryPoints::TEntryPoints& CScenarioEntryPoints::getEntryPoints()
 
 	// return the entry points vector
 	return _EntryPoints;
+}
+
+
+void CScenarioEntryPoints::setFiles(const std::string &completeIslandsFilename, const std::string &entryPointsFilename)
+{
+	if (_CompleteIslandsFilenames.size() != 1
+		|| _CompleteIslandsFilenames[0] != completeIslandsFilename 
+		|| _EntryPointsFilename != entryPointsFilename)
+	{
+		_HardIslandsPath = completeIslandsFilename.find('/') != std::string::npos
+			|| completeIslandsFilename.find('\\') != std::string::npos;
+		_CompleteIslandsFilenames.clear();
+		_CompleteIslandsFilenames.push_back(completeIslandsFilename);
+		_EntryPointsFilename = entryPointsFilename;
+		_CompleteIslands.clear();
+		_CompleteIslandsLoaded = false;
+		_EntryPoints.clear();
+		_IsLoaded = false;
+		_LastFoundIsland = NULL;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -224,7 +246,18 @@ void CScenarioEntryPoints::loadFromFile()
 CScenarioEntryPoints::CCompleteIsland *CScenarioEntryPoints::getCompleteIslandFromCoords(const NLMISC::CVector2f &pos)
 {
 	loadCompleteIslands();
-	if (fabs((double) pos.x - _LastTestedCoords.x) > 20.f ||
+	if (_LastFoundIsland)
+	{
+		if (pos.x >= (float) _LastFoundIsland->XMin &&
+			pos.x <= (float) _LastFoundIsland->XMax &&
+			pos.y >= (float) _LastFoundIsland->YMin &&
+			pos.y <= (float) _LastFoundIsland->YMax)
+		{
+			return _LastFoundIsland;
+		}
+	}
+	if (!_LastFoundIsland || 
+		fabs((double) pos.x - _LastTestedCoords.x) > 20.f ||
 		fabs((double) pos.y - _LastTestedCoords.y) > 20.f)
 	{
 		_LastTestedCoords = pos;
@@ -293,153 +326,160 @@ void CScenarioEntryPoints::loadFromXMLFile()
 
 	// clear out the entry point vector before we begin
 	_CompleteIslands.clear();
+	_LastFoundIsland = NULL;
 
-	// File stream
-	CIFile file;
-
-	// setup the file name
-	std::string pathFileName = CPath::lookup(_CompleteIslandsFilename.c_str());
-
-	// Open the file
-	if (!file.open(pathFileName.c_str()))
+	for (size_t i = 0; i < _CompleteIslandsFilenames.size(); ++i)
 	{
-		nlinfo("Can't open the file for reading : %s", pathFileName.c_str());
-	}
+		// File stream
+		CIFile file;
 
-	// Create the XML stream
-	CIXml input;
+		// setup the file name
+		std::string pathFileName = _HardIslandsPath 
+			? _CompleteIslandsFilenames[i]
+			: CPath::lookup(_CompleteIslandsFilenames[i]);
 
-	// Init
-	if(input.init(file))
-	{
-		xmlNodePtr islands = input.getRootNode();
-		xmlNodePtr islandNode = input.getFirstChildNode(islands, "complete_island");
-
-		while (islandNode != 0)
+		// Open the file
+		if (!file.open(pathFileName.c_str()))
 		{
-			CCompleteIsland completeIsland;
-
-			// island name
-			const char *island = (const char*) xmlGetProp(islandNode, (xmlChar*) "island");
-			if(island == 0)
-			{
-				nlinfo("no 'island' tag in %s", _CompleteIslandsFilename.c_str());
+			nlinfo("Can't open the file for reading : %s", pathFileName.c_str());
+			if (_HardIslandsPath)
 				continue;
-			}
-			else
-				completeIsland.Island = CSString(island);
+		}
 
-			// package
-			/*
-			const char *package = (const char*) xmlGetProp(islandNode, (xmlChar*) "package");
-			if(package == 0)
-				nlinfo("no 'package' tag in %s island", island);
-			else
-				completeIsland.Package = CSString(package);
-			*/
+		// Create the XML stream
+		CIXml input;
 
-			// continent
-			const char *continent = (const char*) xmlGetProp(islandNode, (xmlChar*) "continent");
-			if(continent == 0)
-				nlinfo("no 'continent' tag in %s island", island);
-			else
-				completeIsland.Continent = CSString(continent);
+		// Init
+		if (input.init(file))
+		{
+			xmlNodePtr islands = input.getRootNode();
+			xmlNodePtr islandNode = input.getFirstChildNode(islands, "complete_island");
 
-			// xmin
-			const char *xmin = (const char*) xmlGetProp(islandNode, (xmlChar*) "xmin");
-			if(xmin == 0)
-				nlinfo("no 'xmin' tag in %s island", island);
-			else
-				fromString(xmin, completeIsland.XMin);
-
-			// ymin
-			const char *ymin = (const char*) xmlGetProp(islandNode, (xmlChar*) "ymin");
-			if(ymin == 0)
-				nlinfo("no 'ymin' tag in %s island", island);
-			else
-				fromString(ymin, completeIsland.YMin);
-
-			// xmax
-			const char *xmax = (const char*) xmlGetProp(islandNode, (xmlChar*) "xmax");
-			if(xmax == 0)
-				nlinfo("no 'xmax' tag in %s island", island);
-			else
-				fromString(xmax, completeIsland.XMax);
-
-			// ymax
-			const char *ymax = (const char*) xmlGetProp(islandNode, (xmlChar*) "ymax");
-			if(ymax == 0)
-				nlinfo("no 'ymax' tag in %s island", island);
-			else
-				fromString(ymax, completeIsland.YMax);
-
-			//entry points and package
-			TShortEntryPoints entryPoints;
-			std::string package;
-			for(uint e=0; e<_EntryPoints.size(); e++)
+			while (islandNode != 0)
 			{
-				const CEntryPoint & entryPoint = _EntryPoints[e];
-				CShortEntryPoint shortEntryPoint;
+				CCompleteIsland completeIsland;
 
-				if(entryPoint.Island == island)
-				{
-					shortEntryPoint.Location = entryPoint.Location;
-					shortEntryPoint.X = entryPoint.X;
-					shortEntryPoint.Y = entryPoint.Y;
-					entryPoints.push_back(shortEntryPoint);
-
-					if(package.empty())
-						package=entryPoint.Package;
-					else if(package!=entryPoint.Package)
-						nlinfo("Different packages for island '%s' in file %s", island, _EntryPointsFilename.c_str());
-				}
-			}
-			if(package.empty())
-				nlinfo("no 'package' tag in %s island", island);
-			else
-				completeIsland.Package = CSString(package);
-
-
-			// zones
-			xmlNodePtr zoneNode = input.getFirstChildNode(islandNode, "zone");
-
-			while(zoneNode != 0)
-			{
 				// island name
-				const char *zoneName = (const char*) xmlGetProp(zoneNode, (xmlChar*) "name");
-				if(zoneName == 0)
+				const char *island = (const char *)xmlGetProp(islandNode, (xmlChar *)"island");
+				if (island == 0)
 				{
-					nlinfo("no 'zone name' tag in %s", _CompleteIslandsFilename.c_str());
+					nlinfo("no 'island' tag in %s", _CompleteIslandsFilenames[i].c_str());
+					continue;
 				}
 				else
-					completeIsland.Zones.push_back(std::string(zoneName));
+					completeIsland.Island = CSString(island);
 
-				zoneNode = input.getNextChildNode(zoneNode, "zone");
-			}
+				// package
+				/*
+				const char *package = (const char*) xmlGetProp(islandNode, (xmlChar*) "package");
+				if(package == 0)
+					nlinfo("no 'package' tag in %s island", island);
+				else
+					completeIsland.Package = CSString(package);
+				*/
 
-			// compute zones ids from zone names
-			for(std::list<std::string>::iterator it = completeIsland.Zones.begin(); it != completeIsland.Zones.end(); ++it)
-			{
-				sint x, y;
-				if (getZonePosFromZoneName(*it, x, y))
+				// continent
+				const char *continent = (const char *)xmlGetProp(islandNode, (xmlChar *)"continent");
+				if (continent == 0)
+					nlinfo("no 'continent' tag in %s island", island);
+				else
+					completeIsland.Continent = CSString(continent);
+
+				// xmin
+				const char *xmin = (const char *)xmlGetProp(islandNode, (xmlChar *)"xmin");
+				if (xmin == 0)
+					nlinfo("no 'xmin' tag in %s island", island);
+				else
+					fromString(xmin, completeIsland.XMin);
+
+				// ymin
+				const char *ymin = (const char *)xmlGetProp(islandNode, (xmlChar *)"ymin");
+				if (ymin == 0)
+					nlinfo("no 'ymin' tag in %s island", island);
+				else
+					fromString(ymin, completeIsland.YMin);
+
+				// xmax
+				const char *xmax = (const char *)xmlGetProp(islandNode, (xmlChar *)"xmax");
+				if (xmax == 0)
+					nlinfo("no 'xmax' tag in %s island", island);
+				else
+					fromString(xmax, completeIsland.XMax);
+
+				// ymax
+				const char *ymax = (const char *)xmlGetProp(islandNode, (xmlChar *)"ymax");
+				if (ymax == 0)
+					nlinfo("no 'ymax' tag in %s island", island);
+				else
+					fromString(ymax, completeIsland.YMax);
+
+				//entry points and package
+				TShortEntryPoints entryPoints;
+				std::string package;
+				for (uint e = 0; e < _EntryPoints.size(); e++)
 				{
-					completeIsland.ZoneIDs.push_back(((uint16) x&255)+((uint16) (-y - 1)<<8));
+					const CEntryPoint &entryPoint = _EntryPoints[e];
+					CShortEntryPoint shortEntryPoint;
+
+					if (entryPoint.Island == island)
+					{
+						shortEntryPoint.Location = entryPoint.Location;
+						shortEntryPoint.X = entryPoint.X;
+						shortEntryPoint.Y = entryPoint.Y;
+						entryPoints.push_back(shortEntryPoint);
+
+						if (package.empty())
+							package = entryPoint.Package;
+						else if (package != entryPoint.Package)
+							nlinfo("Different packages for island '%s' in file %s", island, _EntryPointsFilename.c_str());
+					}
 				}
+				if (package.empty())
+					nlinfo("no 'package' tag in %s island", island);
+				else
+					completeIsland.Package = CSString(package);
+
+				// zones
+				xmlNodePtr zoneNode = input.getFirstChildNode(islandNode, "zone");
+
+				while (zoneNode != 0)
+				{
+					// island name
+					const char *zoneName = (const char *)xmlGetProp(zoneNode, (xmlChar *)"name");
+					if (zoneName == 0)
+					{
+						nlinfo("no 'zone name' tag in %s", _CompleteIslandsFilenames[i].c_str());
+					}
+					else
+						completeIsland.Zones.push_back(std::string(zoneName));
+
+					zoneNode = input.getNextChildNode(zoneNode, "zone");
+				}
+
+				// compute zones ids from zone names
+				for (std::list<std::string>::iterator it = completeIsland.Zones.begin(); it != completeIsland.Zones.end(); ++it)
+				{
+					sint x, y;
+					if (getZonePosFromZoneName(*it, x, y))
+					{
+						completeIsland.ZoneIDs.push_back(((uint16)x & 255) + ((uint16)(-y - 1) << 8));
+					}
+				}
+
+				if (!entryPoints.empty())
+				{
+					completeIsland.EntryPoints = entryPoints;
+					_CompleteIslands.push_back(completeIsland);
+					_LastFoundIsland = NULL;
+				}
+
+				islandNode = input.getNextChildNode(islandNode, "complete_island");
 			}
-
-
-			if(!entryPoints.empty())
-			{
-				completeIsland.EntryPoints = entryPoints;
-				_CompleteIslands.push_back(completeIsland);
-			}
-
-			islandNode = input.getNextChildNode(islandNode, "complete_island");
 		}
-	}
 
-	// Close the file
-	file.close ();
+		// Close the file
+		file.close();
+	}
 
 	_CompleteIslandsLoaded = true;
 }
@@ -470,7 +510,8 @@ void CScenarioEntryPoints::saveXMLFile(const TCompleteIslands & completeIslands,
 	COFile file;
 
 	// setup the file name
-	std::string pathFilename = CPath::lookup(fileName.c_str());
+	std::string pathFilename = (fileName.find('/') != std::string::npos || fileName.find('\\') != std::string::npos) 
+		? fileName : CPath::lookup(fileName.c_str());
 
 	// Open the file
 	if (!file.open(pathFilename.c_str()))

@@ -29,7 +29,7 @@
  * @package Smarty
  */
 
-/* $Id: Config_File.class.php 3149 2009-05-23 20:59:25Z monte.ohrt $ */
+/* $Id$ */
 
 /**
  * Config file reading class
@@ -73,7 +73,7 @@ class Config_File {
      *
      * @param string $config_path (optional) path to the config files
      */
-    function Config_File($config_path = NULL)
+    public function __construct($config_path = NULL)
     {
         if (isset($config_path))
             $this->set_path($config_path);

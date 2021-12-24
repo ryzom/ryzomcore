@@ -1,0 +1,18 @@
+#------------------------------------------------------------------------------
+#   nebulacore.cfg
+#
+#   Doxygen config file for the Nebula Device Core
+#
+#   (C) 2001 RadonLabs GmbH -- A.Weissflog
+#------------------------------------------------------------------------------
+
+@INCLUDE         = commondoc.cfg
+RECURSIVE        = YES
+PROJECT_NAME     = "Ryzom AI service"
+OUTPUT_DIRECTORY = ../doxydoc/ryzom-ais
+GENERATE_TAGFILE = ../doxydoc/ryzom-ais/ryzom-ais.tag
+EXCLUDE_PATTERNS = 
+FILE_PATTERNS    = *.h *.cc *.cpp *.java *.dox
+HAVE_DOT         = YES
+ALIASES          += "KLUDGE=\note KLUDGE\n"
+ALIASES          += "TODO=\todo"

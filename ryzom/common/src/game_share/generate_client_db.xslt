@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:output method="text" indent="no"/>
+	<xsl:output method="text" encoding="UTF-8" indent="no"/>
 
 	<!-- Output : can be 'header', 'cpp' or 'php' -->
 	<xsl:param name="output"/>		<!-- select="'header' -->
@@ -75,18 +75,7 @@
 // along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 /////////////////////////////////////////////////////////////////
-//
-//
-//
-//
-//
-//		WARNING : this is a generated file, don't change it !
-//
-//
-//
-//
-//
-//
+// WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
@@ -151,8 +140,6 @@ void CBankAccessor_<xsl:value-of select="@name"/>::init()
 	<!-- ######################################################### -->
 	<xsl:template match="database_description" mode="header-server">
 
-#ifndef INCLUDED_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
-#define INCLUDED_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
 // Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -170,19 +157,11 @@ void CBankAccessor_<xsl:value-of select="@name"/>::init()
 // along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 /////////////////////////////////////////////////////////////////
-//
-//
-//
-//
-//
-//		WARNING : this is a generated file, don't change it !
-//
-//
-//
-//
-//
-//
+// WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
+
+#ifndef INCLUDED_DATABASE_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
+#define INCLUDED_DATABASE_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -343,7 +322,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	</xsl:for-each>
 <xsl:call-template name="myApplyTemplate"/>
 
-#endif // INCLUDED_<xsl:value-of select="concat($filename, '_', $bank)"/><xsl:text>_H
+#endif // INCLUDED_DATABASE_<xsl:value-of select="concat($filename, '_', $bank)"/><xsl:text>_H
 </xsl:text>
 
 	</xsl:template>
@@ -743,7 +722,8 @@ void <xsl:call-template name="makeFullClassName"/>::init(ICDBStructNode *parent<
 				<xsl:when test="$leafType = 'S63'">		<xsl:text>sint64</xsl:text>	</xsl:when>
 				<xsl:when test="$leafType = 'S64'">		<xsl:text>sint64</xsl:text>	</xsl:when>
 
-				<xsl:when test="$leafType = 'TEXT'">	<xsl:text>ucstring</xsl:text>		</xsl:when>
+				<xsl:when test="$leafType = 'TEXT'">	<xsl:text>ucstring</xsl:text>	</xsl:when>
+				<xsl:when test="$leafType = 'PACKED'">	<xsl:text>uint64</xsl:text>		</xsl:when>
 				<xsl:otherwise>	<xsl:message terminate="yes">Unsupported leaf type <xsl:value-of select="$leafType"/></xsl:message></xsl:otherwise>
 			</xsl:choose>
 		</xsl:if>

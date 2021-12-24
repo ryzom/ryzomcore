@@ -9,39 +9,39 @@
 // config_user.php file.
 
 // Variables for database access to the www/CMS database (only if support role)
-$cfg['db']['web']['host']    = '%amsSqlHostname%';
-$cfg['db']['web']['port']    = '3306';
+$cfg['db']['web']['host']    = '%nelSqlHostname%';
+$cfg['db']['web']['port']    = '%nelSqlPort%';
+$cfg['db']['web']['user']    = '%nelSqlUsername%';
+$cfg['db']['web']['pass']    = '%nelSqlPassword%';
 $cfg['db']['web']['name']    = '%amsDatabase%';
-$cfg['db']['web']['user']    = '%amsSqlUsername%';
-$cfg['db']['web']['pass']    = '%amsSqlPassword%';
 
 // Variables for database access to the lib database (only if support role)
-$cfg['db']['lib']['host']    = '%amsSqlHostname%';
-$cfg['db']['lib']['port']    = '3306';
+$cfg['db']['lib']['host']    = '%nelSqlHostname%';
+$cfg['db']['lib']['port']    = '%nelSqlPort%';
+$cfg['db']['lib']['user']    = '%nelSqlUsername%';
+$cfg['db']['lib']['pass']    = '%nelSqlPassword%';
 $cfg['db']['lib']['name']    = '%amsLibDatabase%';
-$cfg['db']['lib']['user']    = '%amsSqlUsername%';
-$cfg['db']['lib']['pass']    = '%amsSqlPassword%';
 
 // Variables for database access to the shard database
 $cfg['db']['shard']['host']  = '%nelSqlHostname%';
-$cfg['db']['shard']['port']  = '3306';
-$cfg['db']['shard']['name']  = '%nelDatabase%';
+$cfg['db']['shard']['port']  = '%nelSqlPort%';
 $cfg['db']['shard']['user']  = '%nelSqlUsername%';
 $cfg['db']['shard']['pass']  = '%nelSqlPassword%';
+$cfg['db']['shard']['name']  = '%nelDatabase%';
 
 // Variables for database access to the ring_open database (only if domain role)
 $cfg['db']['ring']['host']   = '%nelSqlHostname%';
-$cfg['db']['ring']['port']   = '3306';
-$cfg['db']['ring']['name']   = '%domainDatabase%';
+$cfg['db']['ring']['port']   = '%nelSqlPort%';
 $cfg['db']['ring']['user']   = '%nelSqlUsername%';
 $cfg['db']['ring']['pass']   = '%nelSqlPassword%';
+$cfg['db']['ring']['name']   = '%domainDatabase%';
 
 // Variables for database access to the nel_tool database (only if service role)
 $cfg['db']['tool']['host']   = '%nelSqlHostname%';
-$cfg['db']['tool']['port']   = '3306';
-$cfg['db']['tool']['name']   = '%toolDatabase%';
+$cfg['db']['tool']['port']   = '%nelSqlPort%';
 $cfg['db']['tool']['user']   = '%nelSqlUsername%';
 $cfg['db']['tool']['pass']   = '%nelSqlPassword%';
+$cfg['db']['tool']['name']   = '%toolDatabase%';
 
 // To connect to an IMAP server running on port 143 on the local machine,
 // do the following: $mbox = imap_open("{localhost:143}INBOX", "user_id", "password");
@@ -129,6 +129,9 @@ $FORCE_INGAME = false;
 // File storage path (must be a publicly accessible url)
 $FILE_STORAGE_PATH = $PUBLIC_PHP_PATH . '/ams/files/';
 $FILE_WEB_PATH = $BASE_WEBPATH . 'files/';
+
+// Shard web storage (without final /)
+$USERS_DIR = '%domainUsersDir%';
 
 // Setup password
 $NEL_SETUP_PASSWORD = '%nelSetupPassword%';

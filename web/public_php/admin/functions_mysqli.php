@@ -41,13 +41,14 @@ class sql_db
 	//
 	// Constructor
 	//
-	function __construct($sqlserver, $sqluser, $sqlpassword, $database, $persistency = true)
+	function __construct($sqlserver, $sqlport, $sqluser, $sqlpassword, $database, $persistency = true)
 	{
 
 		$this->persistency = $persistency;
 		$this->user = $sqluser;
 		$this->password = $sqlpassword;
 		$this->server = $sqlserver;
+		$this->port = $sqlport;
 		$this->dbname = $database;
 
 		if($this->persistency)
@@ -55,7 +56,7 @@ class sql_db
 			$this->server = 'p:'.$this->server;
 		}
 
-		$this->db_connect_id = mysqli_connect($this->server, $this->user, $this->password);
+		$this->db_connect_id = mysqli_connect($this->server, $this->user, $this->password, NULL, $this->port);
 		if($this->db_connect_id)
 		{
 			if($database != "")
@@ -280,8 +281,16 @@ class sql_db_string extends sql_db
 				$sqluser		= $params[1];
 				$sqlpassword	= $params[2];
 				$database		= $params[4];
+				$sqlport		= 0;
 
-				$ret = parent::__construct($sqlserver, $sqluser, $sqlpassword, $database, $persistency);
+				$s = explode(":", $sqlserver, 2);
+				if (sizeof($s) == 2)
+				{
+					$sqlserver = $s[0];
+					$sqlport = $s[1];
+				}
+
+				$ret = parent::__construct($sqlserver, $sqlport, $sqluser, $sqlpassword, $database, $persistency);
 			}
 		}
 		return $ret;

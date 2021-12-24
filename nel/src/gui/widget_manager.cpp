@@ -435,7 +435,22 @@ namespace NLGUI
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 			CInterfaceElement *pIEL = rMG.Group->getElement (sEltId);
 			if (pIEL != NULL)
+			{
+#if !FINAL_VERSION
+				if (m_LoggedMissingElement.find(sEltId) != m_LoggedMissingElement.end())
+				{
+					m_LoggedMissingElement.erase(sEltId);
+					nlwarning("Previously missing UI element with Id '%s' was now found!", sEltId.c_str());
+				}
+#endif
 				return pIEL;
+			}
+		}
+
+		if (m_LoggedMissingElement.find(sEltId) == m_LoggedMissingElement.end())
+		{
+			m_LoggedMissingElement.insert(sEltId);
+			nlwarning("Could not find UI element from Id '%s'...", sEltId.c_str());
 		}
 		return NULL;
 	}

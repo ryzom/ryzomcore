@@ -30,9 +30,10 @@ namespace NLGUI
 
 bool CSSLength::parseValue(const std::string &value, bool allowPercent, bool allowNegative)
 {
-	static const std::set<std::string> knownUnits = {
+	static const std::string knownUnitsArr[] = {
 		"%", "rem", "em", "px", "pt", "vw", "vh", "vi", "vb", "vmin", "vmax"
 	};
+	static const std::set<std::string> knownUnits(knownUnitsArr, &knownUnitsArr[sizeof(knownUnitsArr) / sizeof(knownUnitsArr[0])]);
 
 	std::string::size_type pos = 0;
 	std::string::size_type len = value.size();

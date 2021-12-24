@@ -1,0 +1,4 @@
+<generator header_tag="SPA_MODULE_ITF_H">
+	<include file="nel/misc/sstring.h"/>
+
+</generator>

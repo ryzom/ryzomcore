@@ -1,0 +1,175 @@
+<?xml version="1.0"?>
+<PRIMITIVES VERSION="1">
+  <ROOT_PRIMITIVE TYPE="CPrimNode">
+    <ALIAS LAST_GENERATED="1"/>
+    <CHILD TYPE="CPrimNode">
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>type1</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>object1_type1</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>value</NAME>
+        <STRING>initial_value</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimAlias">
+        <ALIAS VALUE="1"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+      </CHILD>
+
+      <CHILD TYPE="CPrimNode">
+	    <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+		  <STRING>type2</STRING>
+		</PROPERTY>
+		<PROPERTY TYPE="string">
+		   <NAME>name</NAME>
+		   <STRING>object6_type2_mode1</STRING>
+		</PROPERTY>
+		<PROPERTY TYPE="string">
+		   <NAME>mode</NAME>
+		   <STRING>mode1</STRING>
+		</PROPERTY>
+        <PROPERTY TYPE="string">
+		  <NAME>value</NAME>
+		  <STRING>initial_value</STRING>
+	    </PROPERTY>
+		<CHILD TYPE="CPrimAlias">
+		  <ALIAS VALUE="6"/>
+		  <PROPERTY TYPE="string">
+		    <NAME>class</NAME>
+			<STRING>alias</STRING>
+		  </PROPERTY>
+		  <PROPERTY TYPE="string">
+		    <NAME>name</NAME>
+		    <STRING>alias</STRING>
+		  </PROPERTY>
+		</CHILD>
+  	  </CHILD>
+
+    </CHILD>
+
+    <CHILD TYPE="CPrimNode">
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>type1</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>object2_type1</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>value</NAME>
+        <STRING>changed_value_1</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimAlias">
+        <ALIAS VALUE="2"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+      </CHILD>
+    </CHILD>
+    <CHILD TYPE="CPrimNode">
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>type1</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>object3_type1</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>value</NAME>
+        <STRING>initial_value</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimAlias">
+        <ALIAS VALUE="3"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+      </CHILD>
+
+<!--
+      <CHILD TYPE="CPrimNode">
+	    <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+		  <STRING>type2</STRING>
+		</PROPERTY>
+		<PROPERTY TYPE="string">
+		   <NAME>name</NAME>
+		   <STRING>object4_type2_mode1</STRING>
+		</PROPERTY>
+		<PROPERTY TYPE="string">
+		   <NAME>mode</NAME>
+		   <STRING>mode1</STRING>
+		</PROPERTY>
+        <PROPERTY TYPE="string">
+		  <NAME>value</NAME>
+		  <STRING>changed_value_1</STRING>
+	    </PROPERTY>
+		<CHILD TYPE="CPrimAlias">
+		  <ALIAS VALUE="4"/>
+		  <PROPERTY TYPE="string">
+		    <NAME>class</NAME>
+			<STRING>alias</STRING>
+		  </PROPERTY>
+		  <PROPERTY TYPE="string">
+		    <NAME>name</NAME>
+		    <STRING>alias</STRING>
+		  </PROPERTY>
+		</CHILD>
+  	  </CHILD>
+-->
+      <CHILD TYPE="CPrimNode">
+	    <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+		  <STRING>type2</STRING>
+		</PROPERTY>
+		<PROPERTY TYPE="string">
+		   <NAME>name</NAME>
+		   <STRING>object7_type2_mode1</STRING>
+		</PROPERTY>
+		<PROPERTY TYPE="string">
+		   <NAME>mode</NAME>
+		   <STRING>mode1</STRING>
+		</PROPERTY>
+        <PROPERTY TYPE="string">
+		  <NAME>value</NAME>
+		  <STRING>initial_value</STRING>
+	    </PROPERTY>
+		<CHILD TYPE="CPrimAlias">
+		  <ALIAS VALUE="5"/>
+		  <PROPERTY TYPE="string">
+		    <NAME>class</NAME>
+			<STRING>alias</STRING>
+		  </PROPERTY>
+		  <PROPERTY TYPE="string">
+		    <NAME>name</NAME>
+		    <STRING>alias</STRING>
+		  </PROPERTY>
+		</CHILD>
+  	  </CHILD>
+
+    </CHILD>
+  </ROOT_PRIMITIVE>
+</PRIMITIVES>

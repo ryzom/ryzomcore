@@ -630,11 +630,17 @@ namespace DEPCFG
 		NLMISC::CVectorSString lines;
 		fileContents.splitLines(lines);
 
+		// get hostname
+		std::string hostName = NLNET::IService::getInstance()->getHostName();
+
 		// process the lines one by one
 		for (uint32 i=0;i<lines.size();++i)
 		{
 			// setup a context string to pre-pend to error messages
 			NLMISC::CSString context= NLMISC::toString("%s:%u: ",fileName.c_str(),i);
+
+			// replace hostname macro
+			lines[i] = lines[i].replace("NL_HOSTNAME", hostName.c_str());
 
 			// remove comments and encapsulating blanks
 			NLMISC::CSString line= lines[i].splitToLineComment().strip();

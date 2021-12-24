@@ -26,6 +26,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/net/unified_network.h"
+#include "nel/misc/wang_hash.h"
 
 #include <limits>
 
@@ -300,7 +301,7 @@ private:
 	/// Get Hash code
 	uint32		getHashCode() const
 	{
-		return (uint32)(getIndex());
+		return NLMISC::wangHash((uint32)(getIndex()));
 	}
 
 	union

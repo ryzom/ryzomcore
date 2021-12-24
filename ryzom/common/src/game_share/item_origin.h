@@ -26,6 +26,9 @@
 namespace ITEM_ORIGIN
 {
 	enum EItemOrigin
+#ifdef NL_CPP14
+		: uint8
+#endif
 	{
 		COMMON = 0,
 		FYROS,

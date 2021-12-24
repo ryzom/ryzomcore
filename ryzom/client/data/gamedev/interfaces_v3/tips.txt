@@ -1,0 +1,2 @@
+Please add your "tips of the day" directly in translation/work/en.uxt.
+Don't forget to change the RZ_NUM_TIPS variable in src_v2/client/init.cpp

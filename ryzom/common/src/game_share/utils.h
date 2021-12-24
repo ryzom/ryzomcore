@@ -60,6 +60,17 @@ inline ucstring capitalize(const ucstring & s)
 	return ucstring::makeFromUtf8(capitalize(s.toUtf8()));
 }
 
+inline std::string capitalizeFirst(const std::string &s)
+{
+	if (s.empty())
+		return s;
+
+	std::string res;
+	res.reserve(4);
+	ptrdiff_t i = 0;
+	NLMISC::appendToUpper(res, s, i);
+	return res + s.substr(i);
+}
 
 //-------------------------------------------------------------------------------------------------
 // HANDY MACROS - For forcing the pre-preprocessor to evaluate concatenation operations nicely

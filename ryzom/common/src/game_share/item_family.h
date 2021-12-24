@@ -25,6 +25,9 @@ namespace ITEMFAMILY
 {
 	// Mode
 	enum EItemFamily
+#ifdef NL_CPP14
+		: uint8
+#endif
 	{
 		UNDEFINED = 0,
 		SERVICE,

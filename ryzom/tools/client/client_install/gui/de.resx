@@ -1,0 +1,310 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="de" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>f:\R_RING_ALPHA\code\ryzom\src_v2\client_install\gui\data\de.uxt;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="String" xml:space="preserve">
+    <value>uiContentStartProcessFullVersion Du hast Dich entschieden, nur die unbedingt notwendigen Dateien zu laden. Die restlichen Dateien werden während Du spielst geladen und installiert.</value>
+  </data>
+  <data name="uiAllocating" xml:space="preserve">
+    <value>Allocating</value>
+  </data>
+  <data name="uiAskForInstall" xml:space="preserve">
+    <value>Download abgeschlossen - Beginne Installation</value>
+  </data>
+  <data name="uiCancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="uiCanNotDownload" xml:space="preserve">
+    <value>Fehler beim Laden einer Ryzom Installationsdatei.\nBitte prüfe Deinen verfügbaren Speicherplatz und Deine Internetverbindung. </value>
+  </data>
+  <data name="uiCanNotInstall" xml:space="preserve">
+    <value>Fehler beim Installieren einer Ryzom Installationsdatei.\nBitte prüfe Deinen verfügbaren Speicherplatz.</value>
+  </data>
+  <data name="uiCategoryDownload" xml:space="preserve">
+    <value>Download (1/2)</value>
+  </data>
+  <data name="uiCategoryInstall" xml:space="preserve">
+    <value>Installiere (2/2)</value>
+  </data>
+  <data name="uiCheckBoxUseTorrentLabel" xml:space="preserve">
+    <value>Turbo Mode</value>
+  </data>
+  <data name="uiCheckData" xml:space="preserve">
+    <value>Überprüfe Daten</value>
+  </data>
+  <data name="uiChecking" xml:space="preserve">
+    <value>Prüfe</value>
+  </data>
+  <data name="uiConnecting" xml:space="preserve">
+    <value>Verbinde</value>
+  </data>
+  <data name="uiContentInstallSuccess" xml:space="preserve">
+    <value>Ryzom wurde erfolgreich installiert.</value>
+  </data>
+  <data name="uiContentStartProcessInstall" xml:space="preserve">
+    <value>Du stehst kurz davor, Ryzom herunterzuladen.\nDie Vollinstallation von Ryzom benötigt: {0} Festplattenspeicher.</value>
+  </data>
+  <data name="uiContentStartProcessRepair" xml:space="preserve">
+    <value>Du stehst kurz davor, Ryzom zu updaten.\n Dieser Vorgang wird ebenfalls fehlende oder beschädigte Dateien ersetzen.\nNach dem Update werden alle Konfigurationseinstellungen auf die Standardwerte zurückgesetzt..</value>
+  </data>
+  <data name="uiContentStartProcessTorrent" xml:space="preserve">
+    <value>'Turbo Download' verwendet das BitTorent Protokoll, um Dateien gleichzeitig von mehreren Server zu laden. Solltest Du Probleme beim Download haben, deaktiviere diese Funktion.</value>
+  </data>
+  <data name="uiContinue" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="uiDownload" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="uiDownloadingMetadata" xml:space="preserve">
+    <value>Metadaten herunterladen</value>
+  </data>
+  <data name="uiDownloadListUpdated" xml:space="preserve">
+    <value>Die Downloadliste wurde aktualisiert.</value>
+  </data>
+  <data name="uiErrorSupportFormat" xml:space="preserve">
+    <value>FAQ für bekannte Probleme bei der Ryzom Installation: www.ryzom.com/support</value>
+  </data>
+  <data name="uiErrorSupportUrl" xml:space="preserve">
+    <value>http://forums.ryzom.com/forum/showthread.php?t=29131</value>
+  </data>
+  <data name="uiFilenameFormat" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="uiFinished" xml:space="preserve">
+    <value>Abschliessen</value>
+  </data>
+  <data name="uiFullVersion" xml:space="preserve">
+    <value>Vollversion</value>
+  </data>
+  <data name="uiHour" xml:space="preserve">
+    <value>{0} hour</value>
+  </data>
+  <data name="uiHours" xml:space="preserve">
+    <value>{0} hours</value>
+  </data>
+  <data name="uiInstall" xml:space="preserve">
+    <value>Installation &gt;</value>
+  </data>
+  <data name="uiInstallFinished" xml:space="preserve">
+    <value>Installation abgeschlossen.\n\nDu kannst nun Ryzom spielen.</value>
+  </data>
+  <data name="uiInstallFormat" xml:space="preserve">
+    <value>Installieren {0} ( {1} von {2})</value>
+  </data>
+  <data name="uiInstalling" xml:space="preserve">
+    <value>Installieren</value>
+  </data>
+  <data name="uiLaunchAtEnd" xml:space="preserve">
+    <value>Starte Ryzom nach abgeschlossener Installation</value>
+  </data>
+  <data name="uiLoadDownloadList" xml:space="preserve">
+    <value>Aktualisiere Download Liste</value>
+  </data>
+  <data name="uiLoadPackageList" xml:space="preserve">
+    <value>Lade die Liste d verfügbaren Pakete</value>
+  </data>
+  <data name="uiLoadTorrent" xml:space="preserve">
+    <value>Laden Hash Informationen</value>
+  </data>
+  <data name="uiLoadVersionError" xml:space="preserve">
+    <value>Fehler beim Laden der Versionsinformationen. Bitte prüfe Deine Internetverbindung.</value>
+  </data>
+  <data name="uiLoadVersionInfo" xml:space="preserve">
+    <value>Lade Version Infos</value>
+  </data>
+  <data name="uiMinute" xml:space="preserve">
+    <value>{0} Minute</value>
+  </data>
+  <data name="uiMinutes" xml:space="preserve">
+    <value>{0} Minuten</value>
+  </data>
+  <data name="uiNoUpdateNeeded" xml:space="preserve">
+    <value>Kein Update erforderlich</value>
+  </data>
+  <data name="uiPatch" xml:space="preserve">
+    <value>Downloading</value>
+  </data>
+  <data name="uiQueued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="uiQuitInstallContent" xml:space="preserve">
+    <value>Willst Du das Installationsprogramm wirklich abbrechen?</value>
+  </data>
+  <data name="uiQuitInstallRestart" xml:space="preserve">
+    <value>Um das Installieren fortzusetzen, klicke das Ryzom Icon auf Deinem Desktop.</value>
+  </data>
+  <data name="uiQuitInstallTitle" xml:space="preserve">
+    <value>Quit?</value>
+  </data>
+  <data name="uiRateFormat" xml:space="preserve">
+    <value> at {0}/s</value>
+  </data>
+  <data name="uiRepair" xml:space="preserve">
+    <value>reparieren</value>
+  </data>
+  <data name="uiRequiredSize" xml:space="preserve">
+    <value>Notwendige Grösse: {0}</value>
+  </data>
+  <data name="uiRestarting" xml:space="preserve">
+    <value>Das Programm wird neu gestarted</value>
+  </data>
+  <data name="uiRyzomInstall" xml:space="preserve">
+    <value>Ryzom Install</value>
+  </data>
+  <data name="uiRyzomUpdateRepair" xml:space="preserve">
+    <value>Ryzom installieren oder reparieren</value>
+  </data>
+  <data name="uiScanData" xml:space="preserve">
+    <value>Überprüfe die Integrität</value>
+  </data>
+  <data name="uiSeconde" xml:space="preserve">
+    <value>{0} Sekunde</value>
+  </data>
+  <data name="uiSecondes" xml:space="preserve">
+    <value>{0} Sekunden</value>
+  </data>
+  <data name="uiSeeding" xml:space="preserve">
+    <value>Seeding</value>
+  </data>
+  <data name="uiSelectPackage" xml:space="preserve">
+    <value>Packet Auswahl</value>
+  </data>
+  <data name="uiTimeLeft" xml:space="preserve">
+    <value>({0} verbleibend)</value>
+  </data>
+  <data name="uiTitleInstallSuccess" xml:space="preserve">
+    <value>Glückwunsch!</value>
+  </data>
+  <data name="uiTitleStartProcessInstall" xml:space="preserve">
+    <value>Willkommen beim Ryzom Installationsprogram</value>
+  </data>
+  <data name="uiTitleStartProcessRepair" xml:space="preserve">
+    <value>Ryzom installieren oder reparieren</value>
+  </data>
+  <data name="uiUpdateFormat" xml:space="preserve">
+    <value>{2} ({0} von {1})</value>
+  </data>
+  <data name="uiUpdateLauncher" xml:space="preserve">
+    <value>Aktualisiere das Installationsprogramm</value>
+  </data>
+</root>

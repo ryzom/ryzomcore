@@ -4,9 +4,9 @@
 
 	function getDomainInfo($domainId)
 	{
-		global $DBHost, $DBUserName, $DBPassword, $DBName;
+		global $DBHost, $DBPort, $DBUserName, $DBPassword, $DBName;
 		
-		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die("can't connect to nel db");
+		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die("can't connect to nel db");
 		mysqli_select_db ($link, $DBName) or die("can't select nel db");
 
 		$domainId = (int)$domainId;

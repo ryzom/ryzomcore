@@ -1,0 +1,14 @@
+call _check_r.bat
+
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\common\data_common\database.xml R:\code\ryzom\common\src\game_share\generate_client_db.xslt -o R:\code\ryzom\server\src\entities_game_service\database_plr.h output=header side=server bank=PLR
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\common\data_common\database.xml R:\code\ryzom\common\src\game_share\generate_client_db.xslt -o R:\code\ryzom\server\src\entities_game_service\database_plr.cpp output=cpp side=server bank=PLR
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\common\data_common\database.xml R:\code\ryzom\common\src\game_share\generate_client_db.xslt -o R:\code\ryzom\server\src\entities_game_service\database_guild.h output=header side=server bank=GUILD
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\common\data_common\database.xml R:\code\ryzom\common\src\game_share\generate_client_db.xslt -o R:\code\ryzom\server\src\entities_game_service\database_guild.cpp output=cpp side=server bank=GUILD
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\common\data_common\database.xml R:\code\ryzom\common\src\game_share\generate_client_db.xslt -o R:\code\ryzom\server\src\entities_game_service\database_outpost.h output=header side=server bank=OUTPOST
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\common\data_common\database.xml R:\code\ryzom\common\src\game_share\generate_client_db.xslt -o R:\code\ryzom\server\src\entities_game_service\database_outpost.cpp output=cpp side=server bank=OUTPOST
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\server\src\shard_unifier_service\database_mapping.xml R:\code\ryzom\common\src\game_share\generate_module_interface.xslt -o R:\code\ryzom\server\src\shard_unifier_service\database_mapping.cpp output=cpp filename=database_mapping
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\server\src\shard_unifier_service\database_mapping.xml R:\code\ryzom\common\src\game_share\generate_module_interface.xslt -o R:\code\ryzom\server\src\shard_unifier_service\database_mapping.h output=header filename=database_mapping
+
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\common\src\game_share\ring_session_manager_itf.xml R:\code\ryzom\common\src\game_share\generate_module_interface.xslt -o R:\code\ryzom\common\src\game_share\ring_session_manager_itf.cpp output=cpp filename=ring_session_manager_itf
+%RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\common\src\game_share\ring_session_manager_itf.xml R:\code\ryzom\common\src\game_share\generate_module_interface.xslt -o R:\code\ryzom\common\src\game_share\ring_session_manager_itf.h output=header filename=ring_session_manager_itf
+rem %RC_ROOT%\distribution\utils\msxsl R:\code\ryzom\common\src\game_share\ring_session_manager_itf.xml R:\code\ryzom\common\src\game_share\generate_module_interface.xslt -o R:\code\ryzom\common\src\game_share\ring_session_manager_itf.php output=php filename=ring_session_manager_itf

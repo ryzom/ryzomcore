@@ -1,0 +1,377 @@
+Module name:		Event Chat
+Short name:			EC
+Associated modules:	None
+Requires:			Naming Service
+
+Description
+-----------
+
+todo
+----
+- implement methods for CEventChatModule
+	NLMISC::CSString getState() const
+	void displayModule() const
+
+- implement commands for CCtrlChannel
+	help
+	txtSay
+	txtLoad
+	txtList
+	txtShow
+	spy
+	ctrlMembers
+	ctrlOfficers
+	ctrlArchs
+	faction
+	factionsOpen
+	factionsClose
+
+- make sure all of the commands redirect nlinfo, nldebug and nlwarning correctly
+
+- make sure chat channel titles are unique
+- make sure infolog and warning log are rediected properly for all channels
+
+x test addClient and removeClient gus chat operations
+x test and remove commented SET_PHRASE stuff
+
+x clean unused CIOSMsgSetPhrase
+
+(- implement voting system + other groovy utils????)
+
+
+** Specs **
+-----------
+
+* Module instantiation
+----------------------
+Module instantiation: modulesAdd ec <id>[ <id>[ ...]]
+
+* Basic concepts
+----------------
+- An EC module contains 1 'control' chat channel that operates as a console for EMs - the control channel is always open
+- An EC module contains 1 'faction' chat channel per event faction - the faction channels may be opened and closed dynamically 
+- An EC module contains 0 or more 'party chat' channels per event faction - these may be created dynamically
+- <id> can be either a characetr name or an account number
+
+
+* The control channel
+---------------------
+- There is only one control channel associated with an ec module
+- The control channel is created at module instantiation time
+- The args passed to the module at instantiation time list the ids to be added to the control channel automatically
+- When characters log in they are added to the control channel if they are in the channel's id list
+
+- A list of 'public' commands work in the control channel. These commands are echoed back to the channel allowing all control 
+channel memebers to follow control channel actions.
+- A list of 'private' commands also works in the control channel. These commands are not broadcast to the channel but
+echoed back to the player/ EM only.
+- There are 3 levels of user: basic user (event guides, etc), officer (event managers, etc), arch user (ravna, etc)
+
+Public commands available to all users:
+- /say <channel> <pseudo> <txt>	- say something in a party or faction channel using a given pseudo
+- /txtSay <channel> <txt_id>	- add a pre-prepared event text to the event chat channel
+- /txtLoad <fileSpec>			- load one or more event text files
+- /spy <channel>				- add self as an invisible member to a given party chat / faction chat
+
+Public commands avaiable to super users (officers):
+- /ctrlMembers [...]	- Display, add or remove members for the channel 
+						  /ctrlMembers				- display a list of all members
+						  /ctrlMembers +ravna +jo	- add 'ravna' and 'jo' to the members list
+						  /ctrlMembers -ravna -jo	- remove 'ravna' and 'jo' from the member list
+- /ctrlOfficers [...]	- Display, add or remove officers for the channel
+						  /ctrlOfficers				- display a list of all officers
+						  /ctrlOfficers +ravna +jo	- add 'ravna' and 'jo' to the officers list (promote from mmember or add from 0)
+						  /ctrlOfficers -ravna -jo	- remove 'ravna' and 'jo' from the officers list (demote to members)
+- /faction <name> [...]	- Perform an operation on a faction channel:
+						  /faction +bob +frank		- add a faction called bob and another called frank
+						  /faction -bob -frank		- remove a facion called bob and another called frank
+						  /faction bob				- display arch user list for the 'bob' faction
+						  /faction bob +dude +bert	- add 'dude' and 'bert' players to arch list for 'bob' faction
+						  /faction bob -dude -bert	- remove 'dude' and 'bert' from 'bob' arch player list
+- /factionsOpen			- open the faction channels on all player screens
+- /factionsClose		- close all faction and party channels associated with the module
+
+Private commands available to all users:
+- /help							- list the commands available
+- /info							- show control channel memeber list & faction list with archs and associated party chats
+- /info <channel>				- show arch user, officer and member list for a given chat channel
+- /txtList						- list the event texts that have been pre-prepared
+- /txtShow <faction> <txt_id>	- show the event text corresponding to the given text id
+
+
+* The faction channel
+---------------------
+- there are 3 levels of user - basic user and arch user
+- The commands in this channel are not echoed to the channel (they are private)
+
+The following commands are available to all users:
+- /help				- list the commands available
+
+The following commands are available to arch users only:
+- /say				- say something in the fation chat channel eg for saying 'group xxx regrouping at yyy'
+- /party <name>		- open a party chat and set its name (or rename the party chat if already open)
+
+
+* The party chat channel
+------------------------
+- There are 3 levels of user: basic user, officer & arch user - the arch user is a single individual
+- The commands in this channel are not echoed to the channel (they are private)
+
+The following commands are avaiable to all members of the party channel:
+- /help				- list the commands available
+
+The following commands are avaiable to party channel officers only:
+- /members [...]	- Display, add or remove members for the channel 
+					  /members					- display a list of all members
+					  /members +ravna +jo		- add 'ravna' and 'jo' to the members list
+					  /members -ravna -jo		- remove 'ravna' and 'jo' from the member list
+
+The following command are avaialble to the arch user only
+- /officers [...]	- Display, add or remove officers for the channel
+					  /officers					- display a list of all officers
+					  /officers +ravna +jo		- add 'ravna' and 'jo' to the officers list (promote from mmember or add from 0)
+					  /officers -ravna -jo		- remove 'ravna' and 'jo' from the officers list (demote to members)
+- /mode				- toggle channel mode between 'all can post' and 'only super users can post'
+					  /mode						- display the current mode
+					  /mode all					- allow all members to post
+					  /mode officers			- allow officers and archs to post but not members
+					  /mode arch				- allow only archs to post
+
+
+
+
+***********************************************************************************************
+***********************************************************************************************
+***********************************************************************************************
+
+	void CFactionChannel::cbChatText(TChannelRank rank,const TCharacterId& id,GUS::TClientId clientId,const NLMISC::CSString& txt)
+	{
+		if (txt.leftStrip().left(1)=="/")
+		{
+			// execute a command
+			CSString s= txt.leftStrip().leftCrop(1);
+			ECFCCommandSet->execute(CFactionChannelContext(this,rank,id,clientId),txt);
+
+			CSString keyword= s.firstWord(true);
+			s=s.strip();
+
+			if (keyword=="help" && rank>=MEMBER)
+			{
+				getChannel().sendMessage(clientId,"help","/help     - display this help");
+				getChannel().sendMessage(clientId,"help","/officers - list the channel officers");
+				getChannel().sendMessage(clientId,"help","/archs    - list the channel arch users");
+
+				if (rank<OFFICER) return;
+
+				getChannel().sendMessage(clientId,"help","/party - kick a player from the channel");
+
+				if (rank<ARCH) return;
+
+				getChannel().sendMessage(clientId,"help","/officers +bob +frank -bert - add or remove officers for the channel");
+				return;
+			}
+
+			if (keyword=="party" && rank>=OFFICER)
+			{
+				CSString chatChannelName= "ce_party_"+id;
+
+				// if no explicit title is specified for the channel then use the character's name
+				if (s.empty()) s= id;
+
+				// get hold of the channel pointer in the _Parties map
+				TPartyChannelPtr& channel= _Parties[id];
+				if (channel!=NULL)
+				{
+					// in this case we are just renaming the channel and getting out....
+					// send a message to the IOS to set the name of the chat window
+					CIOSMsgSetPhrase(chatChannelName,s).send();
+					return;
+				}
+
+				// create a new chat channel for the party and add the the owner as an arch
+				channel= new CPartyChannel(chatChannelName,s);
+				channel->addArch(id);
+
+				// add all archs from the faction channel as archs for the party chat too
+				CSString s= getArchs().processCommand("").strip();
+				while(!s.empty())
+				{
+					channel->addArch(s.firstWord(true));
+				}
+				return;
+			}
+
+			if (keyword=="officers")
+			{
+				// only archs have the right to modify the officers list but all users are allowed to view it
+				if (rank<ARCH) s.clear();
+				// if we're viewing the officers list then display the arch list too
+				if (s.empty())
+				{
+					CSString archs= getArchs().processCommand("");
+					getChannel().sendMessage(clientId,"archs",archs);
+				}
+
+				// have the _Officers object process our command (either query or modify) and display the results
+				CSString officers= getOfficers().processCommand(s);
+				getChannel().sendMessage(clientId,"officers",officers);
+
+				// run through any officers that have just been removed...
+				for(officers=officers.splitFrom('-');!officers.empty();officers=officers.splitFrom('-'))
+				{
+					// extract the name of the officer who's been removed...
+					CSString name= officers.firstWord();
+					// if the officer had started a party chat then get rid of it
+					_Parties.erase(name);
+					// add the chap to the 'members' list to avoid unwanted closing of chat channel on his screen
+					getMembers().processCommand("+"+name);
+				}
+				return;
+			}
+
+			if (keyword=="archs")
+			{
+				// display the arch list
+				CSString archs= getArchs().processCommand("");
+				getChannel().sendMessage(clientId,"archs",archs);
+			}
+
+			// display an error mesage because command not recognised
+			getChannel().sendMessage(clientId,"system","Bad command - try '/help' to see the valid command list");
+			return;
+		}
+
+		// make sure the use has the right to chat in the channel at the moment
+		if (rank<_MinChatRank)
+		{
+			getChannel().sendMessage(clientId,"system","Players of your rank are currently not able to chat in this channel");
+			return;
+		}
+
+		// broadcast the message back to the chat
+		getChannel().broadcastMessage(id,txt);
+	}
+
+
+
+***********************************************************************************************
+***********************************************************************************************
+***********************************************************************************************
+
+
+	void CPartyChannel::cbChatText(TChannelRank rank,const TCharacterId& id,GUS::TClientId clientId,const NLMISC::CSString& txt)
+	{
+		if (txt.leftStrip().left(1)=="/")
+		{
+			// execute a command
+			CSString s= txt.leftStrip().leftCrop(1);
+			CSString keyword= s.firstWord(true);
+			s=s.strip();
+
+			if (keyword=="help")
+			{
+			}
+
+			if (keyword=="kick")
+			{
+				if (rank<OFFICER)
+				{
+					getChannel().sendMessage(clientId,"system","You don't have the right to kick other players from this channel");
+					return;
+				}
+				CVectorSString names;
+				s.splitWords(names);
+				for (uint32 i=0;i<names.size();++i)
+				{
+					TChannelRank targetRank= getRank(names[i]);
+					if (targetRank>= rank)
+					{
+						getChannel().sendMessage(clientId,"system",names[i]+" - player is too high rank for you to kick from this this channel");
+						continue;
+					}
+					switch(targetRank)
+					{
+						case OFFICER:	getOfficers().processCommand("-"+names[i]); break;
+						case MEMBER:	getMembers().processCommand("-"+names[i]); break;
+						default: BOMB("ERROR: Don't know how to kick player: "+names[i],return);
+					}
+				}
+				return;
+			}
+
+			if (keyword=="members")
+			{
+				if (rank<OFFICER) s.clear();
+				if (s.empty())
+				{
+					CSString archs= getArchs().processCommand("");
+					getChannel().sendMessage(clientId,"archs",archs);
+					CSString officers= getOfficers().processCommand("");
+					getChannel().sendMessage(clientId,"officers",officers);
+				}
+				CSString members= getMembers().processCommand(s);
+				getChannel().sendMessage(clientId,"members",members);
+				return;
+			}
+
+			if (keyword=="officers")
+			{
+				if (rank<ARCH) s.clear();
+				if (s.empty())
+				{
+					CSString archs= getArchs().processCommand("");
+					getChannel().sendMessage(clientId,"archs",archs);
+				}
+				CSString officers= getOfficers().processCommand((rank>=ARCH)?s:"");
+				getChannel().sendMessage(clientId,"officers",officers);
+				return;
+			}
+
+			if (keyword=="archs")
+			{
+				CSString archs= getArchs().processCommand("");
+				getChannel().sendMessage(clientId,"archs",archs);
+				return;
+			}
+
+			if (keyword=="mode")
+			{
+				if (s.empty() || rank!=ARCH)
+				{
+					switch (_MinChatRank)
+					{
+						case ARCH:		getChannel().sendMessage(clientId,"system","Chat mode: ARCH");
+						case OFFICER:	getChannel().sendMessage(clientId,"system","Chat mode: OFFICERS");
+						case MEMBER:	getChannel().sendMessage(clientId,"system","Chat mode: ALL");
+						default:		getChannel().sendMessage(clientId,"system","Chat mode: UNKNOWN");
+					}
+				}
+				else if (s=="all")		{ if (_MinChatRank== MEMBER)	return; _MinChatRank= MEMBER;	getChannel().broadcastMessage("system","Chat mode changed to 'ALL' by "+id); }
+				else if (s=="officers")	{ if (_MinChatRank== OFFICER)	return; _MinChatRank= OFFICER;	getChannel().broadcastMessage("system","Chat mode changed to 'OFFICERS' by "+id); }
+				else if (s=="arch")		{ if (_MinChatRank== ARCH)		return; _MinChatRank= ARCH;		getChannel().broadcastMessage("system","Chat mode changed to 'ARCH' by "+id); }
+				else
+				{
+					getChannel().sendMessage(clientId,"system","Bad command syntax: expected 'mode', 'mode all', 'mode officers' or 'mode arch' but found: "+txt);
+				}
+				return;
+			}
+
+			getChannel().sendMessage(clientId,"system","Bad command - try '/help' to see the valid command list");
+			return;
+		}
+
+		// make sure the user has the right to chat in the channel at the moment
+		if (rank<_MinChatRank)
+		{
+			getChannel().sendMessage(clientId,"system","Players of your rank are currently not able to chat in this channel");
+			return;
+		}
+
+		// broadcast the message back to the chat
+		getChannel().broadcastMessage(id,txt);
+	}
+
+
+***********************************************************************************************
+***********************************************************************************************
+***********************************************************************************************

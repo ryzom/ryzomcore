@@ -96,6 +96,20 @@ def needUpdateLogRemoveDest(log, source, dest):
 	printLog(log, "SKIP " + dest)
 	return 0
 
+def needUpdateLogRemoveDestSilentSkip(log, source, dest):
+	if (os.path.isfile(source)):
+		if (os.path.isfile(dest)):
+			if (os.stat(source).st_mtime > os.stat(dest).st_mtime):
+				os.remove(dest)
+				printLog(log, source + " -> " + dest)
+				return 1
+			else:
+				return 0
+		printLog(log, source + " -> " + dest)
+		return 1
+	printLog(log, "MISSING " + source)
+	return 0
+
 def copyFileList(log, dir_source, dir_target, files):
 	for fileName in files:
 		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":

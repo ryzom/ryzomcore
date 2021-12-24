@@ -11,6 +11,9 @@ include('header.php');
 
 require_once('setup/version.php');
 
+$shardDev = isset($_GET['dev']);
+$shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
+
 ?>
 
 <?php if (file_exists('config.php')) { ?>
@@ -30,6 +33,9 @@ require_once('setup/version.php');
 	$roleService = isset($_POST["roleService"]) && $_POST["roleService"] == "on";
 	$roleSupport = isset($_POST["roleSupport"]) && $_POST["roleSupport"] == "on";
 	$roleDomain = isset($_POST["roleDomain"]) && $_POST["roleDomain"] == "on";
+	$configureShardDev = isset($_POST["configureShardDev"]) && $_POST["configureShardDev"] == "on";
+	
+	$continue = true;
 
 	if (!$roleService && !$roleSupport && !$roleDomain) {
 		printalert("danger", "No server roles selected");
@@ -61,13 +67,13 @@ require_once('setup/version.php');
 	}
 	if ($continue) {
 		if ($roleService) {
-			$continue = validate_writable($continue, "login/logs/");
-			$continue = validate_writable($continue, "admin/graphs_output/");
-			$continue = validate_writable($continue, "admin/templates/default_c/");
+			$continue = validate_writable($continue, "login/logs/") && $continue;
+			$continue = validate_writable($continue, "admin/graphs_output/") && $continue;
+			$continue = validate_writable($continue, "admin/templates/default_c/") && $continue;
 		}
 		if ($roleSupport) {
-			$continue = validate_writable($continue, "ams/cache/");
-			$continue = validate_writable($continue, "ams/templates_c/");
+			$continue = validate_writable($continue, "ams/cache/") && $continue;
+			$continue = validate_writable($continue, "ams/templates_c/") && $continue;
 		}
 		$continue = validate_writable($continue, "./");
 		if ($continue) {
@@ -77,7 +83,7 @@ require_once('setup/version.php');
 
 	$con = null;
 	if ($continue) { // NOTE: Also test if this is reachable when not Service role
-		$con = mysqli_connect($_POST["nelSqlHostname"], $_POST["nelSqlUsername"], $_POST["nelSqlPassword"]);
+		$con = mysqli_connect($_POST["nelSqlHostname"], $_POST["nelSqlUsername"], $_POST["nelSqlPassword"], NULL, $_POST["nelSqlPort"]);
 		if (mysqli_connect_errno()) {
 			printalert("danger", "Failed to connect to Service SQL: " . mysqli_connect_error());
 			$continue = false;
@@ -89,44 +95,28 @@ require_once('setup/version.php');
 
 	if ($roleService) {
 		// Create NeL database
-		$continue = create_use_database($continue, $con, $_POST["nelDatabase"]);
+		$continue = create_use_database($continue, $con, $_POST["nelDatabase"]) && $continue;
 
 		// Create NeL Tools database
-		$continue = create_use_database($continue, $con, $_POST["toolDatabase"]);
+		$continue = create_use_database($continue, $con, $_POST["toolDatabase"]) && $continue;
 	}
 
 	if ($roleDomain) {
 		// Create Ring database
-		$continue = create_use_database($continue, $con, $_POST["domainDatabase"]);
+		$continue = create_use_database($continue, $con, $_POST["domainDatabase"]) && $continue;
+	}
+
+	if ($roleSupport) {
+		// Create AMS database
+		$continue = create_use_database($continue, $con, $_POST["amsDatabase"]) && $continue;
+
+		// Create AMS Library database
+		$continue = create_use_database($continue, $con, $_POST["amsLibDatabase"]) && $continue;
 	}
 
 	if ($con) {
 		mysqli_close($con);
 		printalert("info", "Disconnected from the Service SQL server");
-	}
-
-	if ($roleSupport) {
-		if ($continue) {
-			$con = mysqli_connect($_POST["amsSqlHostname"], $_POST["amsSqlUsername"], $_POST["amsSqlPassword"]);
-			if (mysqli_connect_errno()) {
-				printalert("danger", "Failed to connect to Support SQL: " . mysqli_connect_error());
-				$continue = false;
-				$con = null;
-			} else {
-				printalert("success", "Connected to the Support SQL server");
-			}
-		}
-
-		// Create AMS database
-		$continue = create_use_database($continue, $con, $_POST["amsDatabase"]);
-
-		// Create AMS Library database
-		$continue = create_use_database($continue, $con, $_POST["amsLibDatabase"]);
-
-		if ($con) {
-			mysqli_close($con);
-			printalert("info", "Disconnected from the Support SQL server");
-		}
 	}
 
 	// Write config.php
@@ -140,17 +130,16 @@ require_once('setup/version.php');
 			$config = str_replace("%privatePhpDirectory%", addslashes(realpath($cwd . "/" . $_POST["privatePhpDirectory"])), $config);
 			$config = str_replace("%publicPhpDirectory%", addslashes(realpath($cwd)), $config);
 			$config = str_replace("%nelSqlHostname%", addslashes($_POST["nelSqlHostname"]), $config);
+			$config = str_replace("%nelSqlPort%", addslashes($_POST["nelSqlPort"]), $config);
 			$config = str_replace("%nelSqlUsername%", addslashes($_POST["nelSqlUsername"]), $config);
 			$config = str_replace("%nelSqlPassword%", addslashes($_POST["nelSqlPassword"]), $config);
 			$config = str_replace("%nelDatabase%", addslashes($_POST["nelDatabase"]), $config);
 			$config = str_replace("%toolDatabase%", addslashes($_POST["toolDatabase"]), $config);
-			$config = str_replace("%amsSqlHostname%", addslashes($_POST["amsSqlHostname"]), $config);
-			$config = str_replace("%amsSqlUsername%", addslashes($_POST["amsSqlUsername"]), $config);
-			$config = str_replace("%amsSqlPassword%", addslashes($_POST["amsSqlPassword"]), $config);
 			$config = str_replace("%amsDatabase%", addslashes($_POST["amsDatabase"]), $config);
 			$config = str_replace("%amsLibDatabase%", addslashes($_POST["amsLibDatabase"]), $config);
 			$config = str_replace("%nelSetupPassword%", addslashes($_POST["nelSetupPassword"]), $config);
 			$config = str_replace("%domainDatabase%", addslashes($_POST["domainDatabase"]), $config);
+			$config = str_replace("%domainUsersDir%", addslashes($_POST["domainUsersDir"]), $config);
 			$config = str_replace("%nelDomainName%", addslashes($_POST["nelDomainName"]), $config);
 			$config = str_replace("%nelSetupVersion%", addslashes($NEL_SETUP_VERSION), $config);
 			$cryptKeyLength = 16;
@@ -195,15 +184,15 @@ require_once('setup/version.php');
 	require_once('database.php');
 
 	if ($roleSupport) {
-		$continue = upgrade_support_databases($continue);
+		$continue = upgrade_support_databases($continue) && $continue;
 	}
 
 	if ($roleService) {
-		$continue = upgrade_service_databases($continue);
+		$continue = upgrade_service_databases($continue) && $continue;
 	}
 
 	if ($roleDomain) {
-		$continue = upgrade_domain_databases($continue);
+		$continue = upgrade_domain_databases($continue) && $continue;
 	}
 
 	if ($roleService) {
@@ -277,8 +266,10 @@ require_once('setup/version.php');
 		}
 	}
 
-	if ($roleDomain) {
-		// TODO: Register the domain with the nel database etc
+	if ($continue && $roleDomain) {
+		if ($configureShardDev) {
+			$continue = configure_shard_dev($continue) && $continue;
+		}
 	}
 
 	if ($continue && $roleService) {
@@ -399,13 +390,19 @@ require_once('setup/version.php');
 				</div>
 				<div class="panel panel-default">
 					<div class="panel-heading">
-						<h2 class="panel-title">Service Database <small>(Used for NeL login, admin tools and domain databases)</small></h2>
+						<h2 class="panel-title">SQL Database</h2>
 					</div>
 					<div class="panel-body">
 						<div class="form-group">
 							<label for="nelSqlHostname" class="col-sm-3 control-label">SQL Hostname</label>
 							<div class="col-sm-6">
 								<input type="text" class="form-control" id="nelSqlHostname" name="nelSqlHostname" value="localhost">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="nelSqlPort" class="col-sm-3 control-label">SQL Port</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="nelSqlPort" name="nelSqlPort" value="<?php if ($shardDev) { print 9040; } else { print 3306; } ?>">
 							</div>
 						</div>
 						<div class="form-group">
@@ -420,6 +417,13 @@ require_once('setup/version.php');
 								<input type="password" class="form-control" id="nelSqlPassword" name="nelSqlPassword" value="">
 							</div>
 						</div>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">Login Service</h2>
+					</div>
+					<div class="panel-body">
 						<div class="form-group">
 							<label for="nelDatabase" class="col-sm-3 control-label">NeL Database</label>
 							<div class="col-sm-6">
@@ -459,25 +463,7 @@ require_once('setup/version.php');
 					</div>
 					<div class="panel-body">
 						<div class="form-group">
-							<label for="amsSqlHostname" class="col-sm-3 control-label">SQL Hostname</label>
-							<div class="col-sm-6">
-								<input type="text" class="form-control" id="amsSqlHostname" name="amsSqlHostname" value="localhost">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="amsSqlUsername" class="col-sm-3 control-label">SQL Username</label>
-							<div class="col-sm-6">
-								<input type="text" class="form-control" id="amsSqlUsername" name="amsSqlUsername" value="root">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="amsSqlPassword" class="col-sm-3 control-label">SQL Password</label>
-							<div class="col-sm-6">
-								<input type="password" class="form-control" id="amsSqlPassword" name="amsSqlPassword" value="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="amsDatabase" class="col-sm-3 control-label">CMS Database</label>
+							<label for="amsDatabase" class="col-sm-3 control-label">AMS Database</label>
 							<div class="col-sm-6">
 								<input type="text" class="form-control" id="amsDatabase" name="amsDatabase" value="nel_ams">
 							</div>
@@ -507,6 +493,7 @@ require_once('setup/version.php');
 						<h2 class="panel-title">Domain <small>(Multiple domains require separate installations, as they may run different versions)</small></h2>
 					</div>
 					<div class="panel-body">
+						<?php if (!$shardDev) { ?>
 						<div class="panel panel-danger">
 							<div class="panel-heading"><span class="glyphicon glyphicon-info-sign"></span> Database Only</div>
 							<div class="panel-body">
@@ -520,16 +507,47 @@ require_once('setup/version.php');
 								<p>There can be multiple instances of the domain role, there can only be one support and one service role setup.</p>
 							</div>
 						</div>
+						<?php } ?>
+						<?php if ($shardDev) { ?>
+						<div class="form-group">
+							<div class="col-sm-offset-3 col-sm-8">
+								<div class="checkbox">
+									<label>
+										<input id="configureShardDev" name="configureShardDev" type="checkbox" checked> Configure Development Shard</small>
+									</label>
+								</div>
+							</div>
+						</div>
+						<?php } ?>
 						<div class="form-group">
 							<label for="nelDomainName" class="col-sm-3 control-label">Name</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="nelDomainName" name="nelDomainName" value="mini01">
+								<input type="text" class="form-control" id="nelDomainName" name="nelDomainName" value="<?php if ($shardDev) { print "dev"; } else { print gethostname(); } ?>">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="domainDatabase" class="col-sm-3 control-label">Database</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="domainDatabase" name="domainDatabase" value="ring_mini01">
+								<input type="text" class="form-control" id="domainDatabase" name="domainDatabase" value="ring_<?php if ($shardDev) { print "dev"; } else { print gethostname(); } ?>">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="domainUsersDir" class="col-sm-3 control-label">Users Directory (MFS, etc)</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="domainUsersDir" name="domainUsersDir" value="<?php
+									if ($shardDev && $shardWin) {
+										print str_replace("\\", "/", str_replace("\\code\\web\\public_php\\setup\\install.php", "/pipeline/shard_dev/www", __FILE__));
+									}
+									else if ($shardDev) {
+										print str_replace("/code/web/public_php/setup/install.php", "/pipeline/shard_dev/www", __FILE__);
+									}
+									else if ($shardWin) {
+										print "C:/nevrax/" . gethostname() . "/www";
+									}
+									else {
+										print "/home/nevrax/" . gethostname() . "/www";
+									}
+								?>">
 							</div>
 						</div>
 					</div>

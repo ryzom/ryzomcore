@@ -85,7 +85,10 @@ namespace NLGUI
 			/// Language code of the browser( e.g.: en, hu )
 			std::string languageCode;
 			/// List of domains the widget can consider secure.
-			std::vector< std::string > trustedDomains;
+			std::vector<std::string> trustedDomains;
+			/// Web server
+			std::string webServer;
+			std::string webServerDomain;
 			/// Maximum concurrent MultiCurl connections per CGroupHTML instance
 			sint32 curlMaxConnections;
 

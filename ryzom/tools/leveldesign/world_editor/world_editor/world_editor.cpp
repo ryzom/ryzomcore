@@ -823,21 +823,18 @@ void setEditTextMultiLine (CListBox &listBox, const std::vector<std::string> &ve
 
 bool setWindowTextUTF8 (HWND hwnd, const std::string &textUtf8)
 {
-	ucstring str;
-
-	str.fromUtf8 (textUtf8);
-	return SetWindowTextW (hwnd, (WCHAR*)str.c_str()) != FALSE;
+	return SetWindowTextW(hwnd, nlUtf8ToWide(textUtf8)) != FALSE;
 }
 
 // ***************************************************************************
 
 bool getWindowTextUTF8 (HWND hwnd, std::string &textUtf8)
 {
-	ucstring text;
-	text.resize (GetWindowTextLengthW (hwnd));
-	if (GetWindowTextW (hwnd, (WCHAR*)text.c_str(), text.size()))
+	wstring text;
+	text.resize(GetWindowTextLengthW(hwnd));
+	if (GetWindowTextW(hwnd, &text[0], text.size() + 1))
 	{
-		textUtf8 = text.toUtf8 ().c_str();
+		textUtf8 = NLMISC::wideToUtf8(text);
 		return true;
 	}
 	else
