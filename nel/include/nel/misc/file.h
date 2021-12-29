@@ -41,7 +41,7 @@ struct EFile : public EStream
 	EFile (const std::string& filename) : EStream( "Unknown file error in '"+filename+"'" ), Filename(filename) {}
 	EFile (const std::string& filename, const std::string& text, bool ) : EStream( text ), Filename(filename) {}
 
-	virtual ~EFile() NL_OVERRIDE {}
+	virtual ~EFile() throw() {}
 
 	std::string Filename;
 };

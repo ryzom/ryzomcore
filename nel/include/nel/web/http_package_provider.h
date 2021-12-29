@@ -52,8 +52,8 @@ public:
 	/// filePath: [out] ex. /games/nel/stream/00/00/000000000..
 	/// hash: [in]
 	/// name: [in] name for debugging purposes
-	virtual bool getFile(std::string &filePath, const NLMISC::CHashKey &hash, const std::string &name) NL_OVERRIDE;
-	
+	virtual bool getFile(std::string &filePath, const NLMISC::CHashKey &hash, const std::string &name);
+
 public:
 	/// Set storage path (ex. stream/)
 	std::string Path;
@@ -61,7 +61,7 @@ public:
 	/// Loads a package into the package manager (ex. http://cdn.ryzom.dev/open/stream/)
 	typedef std::vector<std::string> THosts;
 	THosts Hosts;
-	
+
 }; /* class CHttpPackageProvider */
 
 } /* namespace NLMISC */
