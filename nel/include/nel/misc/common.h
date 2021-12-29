@@ -412,8 +412,8 @@ public:
 	Exception();
 	Exception(const std::string &reason);
 	Exception(const char *format, ...);
-	virtual ~Exception() NL_OVERRIDE {}
-	virtual const char	*what() const throw() NL_OVERRIDE;
+	virtual ~Exception() throw() {}
+	virtual const char      *what() const throw();
 };
 
 
