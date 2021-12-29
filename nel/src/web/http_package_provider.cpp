@@ -41,7 +41,7 @@ CHttpPackageProvider::~CHttpPackageProvider()
 	// release
 }
 
-bool CHttpPackageProvider::getFile(std::string &filePath, const CHashKey &hash, const std::string &name)
+ bool CHttpPackageProvider::getFile(std::string &filePath, const CHashKey &hash, const std::string &name)
 {
 	CStreamedPackage::makePath(filePath, hash);
 	std::string downloadUrlFile = filePath + ".lzma";
