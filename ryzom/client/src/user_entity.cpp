@@ -491,8 +491,8 @@ void CUserEntity::updateVisualPropertyBehaviour(const NLMISC::TGameCycle &/* gam
 	}
 	CCDBNodeLeaf *targetList0 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_0));
 	CCDBNodeLeaf *targetList1 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_1));
-	CCDBNodeLeaf *targetList2 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_1));
-	CCDBNodeLeaf *targetList3 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_1));
+	CCDBNodeLeaf *targetList2 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_2));
+	CCDBNodeLeaf *targetList3 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_3));
 	if (targetList0 && targetList1 && targetList2 && targetList3)
 	{
 		uint64 vp[4] =

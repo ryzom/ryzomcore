@@ -4553,13 +4553,20 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 {
 	nlassert(targetHitDates.size()==bc.Targets.Targets.size());
 
-	if(!bc.Targets.Targets.empty())
+	if (behaviour.DeltaHP == 0 || bc.Targets.Targets.empty())
+		return;
+
+	CRGBA deltaHPColor(0, 0, 0);
+	for (size_t i=0; i<bc.Targets.Targets.size(); ++i)
 	{
-		if(behaviour.DeltaHP != 0)
+		if(bc.Targets.Targets[i].DeltaHP == 0)
+			continue;
+
+		CEntityCL *target2 = EntitiesMngr.entity(bc.Targets.Targets[i].TargetSlot);
+		if(target2)
 		{
-			CRGBA deltaHPColor(0, 0, 0);
 			// if it's a hit
-			if( behaviour.DeltaHP < 0 )
+			if(bc.Targets.Targets[i].DeltaHP < 0)
 			{
 				// if the behaviour is casted by the user
 				if( slot() == 0 )
@@ -4590,13 +4597,7 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 				deltaHPColor = CRGBA(0,220,0);
 			}
 
-			// Set the delta HP
-			for (size_t i=0; i<bc.Targets.Targets.size(); ++i)
-			{
-				CEntityCL *target2 = EntitiesMngr.entity(bc.Targets.Targets[i].TargetSlot);
-				if(target2)
-					target2->addHPOutput(behaviour.DeltaHP, deltaHPColor, float(targetHitDates[i]-TimeInSec));
-			}
+			target2->addHPOutput(bc.Targets.Targets[i].DeltaHP, deltaHPColor, float(targetHitDates[i]-TimeInSec));
 		}
 	}
 }
@@ -9705,7 +9706,7 @@ NLMISC_COMMAND(projectile, "Cast a projectile on another entity", "<spellID> <st
 		double dist = (target->pos() - ch->pos()).norm();
 		bool resist = false;
 		if (args.size() > 4) fromString(args[4], resist);
-		bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, resist, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+		bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, resist, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), -11));
 	}
 	bc.BehavTime = TimeInSec;
 	ch->applyBehaviour(bc);
@@ -9743,7 +9744,7 @@ NLMISC_COMMAND(mtProjectile, "Cast a projectile on one or several entities", "<c
 			if (mainTarget)
 			{
 				double dist = (mainTarget->pos() - ch->pos()).norm();
-				bc.Targets.Targets.push_back(CMultiTarget::CTarget(mainTargetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+				bc.Targets.Targets.push_back(CMultiTarget::CTarget(mainTargetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), 1));
 				for(sint k = 1; k < (sint) (args.size() - 4); ++k)
 				{
 					uint secondaryTargetSlot;
@@ -9753,7 +9754,7 @@ NLMISC_COMMAND(mtProjectile, "Cast a projectile on one or several entities", "<c
 					if (secondaryTarget)
 					{
 						dist = (secondaryTarget->pos() - mainTarget->pos()).norm();
-						bc.Targets.Targets.push_back(CMultiTarget::CTarget(secondaryTargetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+						bc.Targets.Targets.push_back(CMultiTarget::CTarget(secondaryTargetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), k+1));
 					}
 				}
 			}
@@ -9770,7 +9771,7 @@ NLMISC_COMMAND(mtProjectile, "Cast a projectile on one or several entities", "<c
 				if (target)
 				{
 					double dist = (target->pos() - ch->pos()).norm();
-					bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+					bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), k+1));
 				}
 			}
 		}
@@ -9787,7 +9788,7 @@ NLMISC_COMMAND(mtProjectile, "Cast a projectile on one or several entities", "<c
 				if (target)
 				{
 					double dist = (target->pos() - startSlot->pos()).norm();
-					bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+					bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), k+1));
 					startSlot = target;
 				}
 			}
@@ -10100,6 +10101,7 @@ NLMISC_COMMAND(attack, "simulate an attack", "<slot> <intensity> <hit_type> <loc
 	CMultiTarget::CTarget target;
 	target.TargetSlot = UserEntity->selection();
 	target.Info = dsPower | (dsType << 3);
+	target.DeltaHP = -20;
 	bc.Targets.Targets.push_back(target);
 	bc.BehavTime = TimeInSec;
 	bc.Behav.DeltaHP = -20;
@@ -10154,7 +10156,7 @@ NLMISC_COMMAND(rangeAttack, "simulate a range attack", "<slot> [intensity] [loca
 	CEntityCL *target = EntitiesMngr.entity(targetSlot);
 	if (!target) return false;
 	double dist = (target->pos() - entity->pos()).norm();
-	bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+	bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), -10));
 	bc.Behav.DeltaHP = -10;
 	entity->applyBehaviour(bc);
 	return true;
@@ -10188,7 +10190,7 @@ NLMISC_COMMAND(creatureAttack, "simulate a creature attack (2 attaques per creat
 	{
 		fromString(args[8], resist);
 	}
-	bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+	bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), -15));
 	bc.Behav.CreatureAttack.ActionDuration = 0;
 	uint magicImpactIntensity = 1;
 	if (args.size() > 3)
