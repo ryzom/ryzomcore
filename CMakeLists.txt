@@ -63,8 +63,6 @@ INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
 INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
-MESSAGE("EXTERNAL ${WITH_EXTERNAL}")
-
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
 
