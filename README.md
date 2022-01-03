@@ -1,4 +1,4 @@
-# Ryzom Core [![Build Status](https://travis-ci.org/ryzom/ryzomcore.svg)](https://travis-ci.org/ryzom/ryzomcore)
+# Ryzom Core [![Build Status](https://dev.azure.com/ryzom/ryzomcore/_apis/build/status/ryzom.ryzomcore?branchName=core4)](https://dev.azure.com/ryzom/ryzomcore/_build)
 
 Ryzom Core is the open-source project related to Ryzom Game. Written in C++, Ryzom Core contains the whole code (client, server, tools) used to make the commercial MMORPG Ryzom. Ryzom Core is a toolkit for the development of massively multiplayer online universes. It provides the base technologies and a set of development methodologies for the development of both client and server code.
 
