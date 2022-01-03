@@ -1211,7 +1211,7 @@ namespace NLGUI
 
 					// Copy all aspects to the view
 					vtDst->setLocalized (vtSrc->isLocalized());
-					vtDst->setText (vtSrc->getText());
+					vtDst->setText (vtSrc->getHardText());
 					vtDst->setFontSize (vtSrc->getFontSize());
 					vtDst->setColor (vtSrc->getColor());
 					vtDst->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
