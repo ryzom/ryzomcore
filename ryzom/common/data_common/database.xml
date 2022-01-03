@@ -234,7 +234,8 @@
         <leaf name="ACCEPTED" type="I1" />
         <leaf name="MONEY" type="I64" />
         <branch name="GIVE">
-            <branch name="" count="8">
+            <branch name="" count="10">
+                <!-- Change in local_database.xml, player_trade.lua and NbExchangeSlots on server-->
                 <!-- Common Item Data -->
                 <leaf name="SHEET" type="I32" cppType="NLMISC::CSheetId" />
                 <leaf name="QUALITY" type="I10" />
@@ -265,7 +266,8 @@
             </branch>
         </branch>
         <branch name="RECEIVE">
-            <branch name="" count="8">
+            <branch name="" count="10">
+                <!-- Change in local_database.xml, player_trade.lua and NbExchangeSlots on server-->
                 <!-- Common Item Data -->
                 <leaf name="SHEET" type="I32" cppType="NLMISC::CSheetId" />
                 <leaf name="QUALITY" type="I10" />
@@ -410,7 +412,7 @@
             <leaf name="ENABLE_TAKE" type="I1" />
             <!-- Used only in forage -->
         </branch>
-        <!-- used to share items between team members (up to 8 players) 
+        <!-- used to share items between team members (up to 8 players)
                         DO NOT FORGET if you modify this to do the the same modification in local database file -->
         <branch name="SHARE">
             <leaf name="SESSION" type="I8" />
@@ -558,8 +560,8 @@
         <leaf name="HAS_NEXT" type="I1" />
         <!-- are there pages left ? -->
         <branch name="" count="8">
-            <!-- 
-                        if high order bit == 0 : guild icon : 58 low order bits - back:3 bits, symbol:6 bits, Invert:1 bit, color1&2:24 bits each 
+            <!--
+                        if high order bit == 0 : guild icon : 58 low order bits - back:3 bits, symbol:6 bits, Invert:1 bit, color1&2:24 bits each
                         if high order bit == 1 : low order bits = entry in the LIFT_ICONS::TLiftIcon enum
                         -->
             <leaf name="ICON" type="I64" />
@@ -884,7 +886,7 @@
                 </branch>
                 <branch name="SQUADS">
                     <!-- Squad -->
-                    <!-- 24 max squads: The First 12th are the squads that spawn at start 
+                    <!-- 24 max squads: The First 12th are the squads that spawn at start
                                                 The second 12th are the one that spawn after
                                         -->
                     <branch name="SP" count="24">

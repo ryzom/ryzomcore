@@ -207,7 +207,7 @@
         <leaf name="INVALIDATE" sendto="EGS" />
         <leaf name="END" sendto="EGS" format="" />
         <leaf name="SEEDS" sendto="EGS" format="u64" />
-        <leaf name="ADD" sendto="EGS" format="u16 u16 u16" description="add an item from the bag(index_in_bag index_in_exchange quantity)" />
+        <leaf name="ADD" sendto="EGS" format="u16 u16 u16 u16" description="add an item from the bag(inventory_src index_in_bag index_in_exchange quantity)" />
         <leaf name="REMOVE" sendto="EGS" format="u16" description="remove an item from the exchange" />
     </branch>
     <branch name="DEBUG">
@@ -245,6 +245,7 @@
         <leaf name="REMOTE_ADMIN_ANSWER" sendto="EGS" format="u32 s s" description="client send the answer of the remote command" />
         <leaf name="SIT" sendto="EGS" format="b" description="client send to the server the sitting state" />
         <leaf name="AFK" sendto="EGS" format="b" description="AFK command is sent to EGS" />
+        <leaf name="SELFKILL" sendto="EGS" format="" description="client asks EGS to kill self" />
         <leaf name="RANDOM" sendto="EGS" format="s16 s16" description="client asks EGS to roll a dice and tell result around" />
         <leaf name="GUILDMOTD" sendto="EGS" format="s" description="client asks EGS to set the guild message of the day" />
         <leaf name="AUTOPACT" sendto="EGS" format="u8" description="client want set AUTOPACT to TRUE or FALSE" />
