@@ -155,6 +155,14 @@ IF(WIN32)
 ENDIF()
 
 IF(HUNTER_ENABLED)
+  # This fix is for compiling OpenSSL in Azure Pipeline linux agent where ENV{SYSTEM} == "build"
+  IF(DEFINED ENV{SYSTEM} AND UNIX AND NOT APPLE)
+    STRING(TOUPPER "$ENV{SYSTEM}" _tmp)
+    IF (_tmp STREQUAL "BUILD")
+      UNSET(ENV{SYSTEM})
+    ENDIF()
+    UNSET(_tmp)
+  ENDIF()
   ## TODO: hack for freetype hunter package
   SET(ON 1)
   ##
