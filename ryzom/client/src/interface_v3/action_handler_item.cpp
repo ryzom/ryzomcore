@@ -1881,7 +1881,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			}
 			if (pItemTextDisplay && pIS->Family == ITEMFAMILY::SCROLL)
 			{
-				if (pCS->getInventoryIndex()==INVENTORIES::bag)
+				if (pCS->getInventoryIndex()==INVENTORIES::bag && pIS->Scroll.Label.empty())
 					pItemTextDisplay->setActive(true);
 				pItemInfos->setActive(false);
 			}
