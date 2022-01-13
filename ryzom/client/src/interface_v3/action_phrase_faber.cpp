@@ -50,6 +50,10 @@ using namespace NLMISC;
 
 // ***************************************************************************
 const std::string	FaberPlanDB= "UI:PHRASE:FABER:FABER_PLAN:SHEET";
+const std::string	FaberPlanHpBuffDB= "UI:PHRASE:FABER:FABER_PLAN:HP_BUFF";
+const std::string	FaberPlanSapBuffDB= "UI:PHRASE:FABER:FABER_PLAN:SAP_BUFF";
+const std::string	FaberPlanStaBuffDB= "UI:PHRASE:FABER:FABER_PLAN:STA_BUFF";
+const std::string	FaberPlanFocusBuffDB= "UI:PHRASE:FABER:FABER_PLAN:FOCUS_BUFF";
 const std::string	MPFaberDB= "UI:PHRASE:FABER:MP_BUILD";
 const std::string	MPSelectionDB= "UI:PHRASE:FABER:MP_SELECT";
 const std::string	MPQuantityDb= "UI:PHRASE:FABER:MP_QUANTITY";
@@ -169,6 +173,16 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanDB, false);
 	if(node)
 		node->setValue32(0);
+
+	// Reset buff values
+	node = NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanHpBuffDB, false);
+	if (node) node->setValue32(0);
+	node = NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanSapBuffDB, false);
+	if (node) node->setValue32(0);
+	node = NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanStaBuffDB, false);
+	if (node) node->setValue32(0);
+	node = NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanFocusBuffDB, false);
+	if (node) node->setValue32(0);
 
 	// Reset the result item
 	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetDB, false);
@@ -1565,6 +1579,14 @@ void	CActionPhraseFaber::updateItemResult()
 	uint		phraseSlot= pPM->getMemorizedPhrase(_ExecuteFromMemoryLine, _ExecuteFromMemoryIndex);
 	const CSPhraseCom	&phrase= pPM->getPhrase(phraseSlot);
 	uint32		recommendedPropId= pBM->getBrickPropId("cr_recommended");
+	uint32 crHp = pBM->getBrickPropId("cr_hp");
+	uint32 crSap = pBM->getBrickPropId("cr_sap");
+	uint32 crSta = pBM->getBrickPropId("cr_sta");
+	uint32 crFocus = pBM->getBrickPropId("cr_focus");
+	sint32 hpBuff = 0;
+	sint32 sapBuff = 0;
+	sint32 staBuff = 0;
+	sint32 focusBuff = 0;
 	for(i=0;i<phrase.Bricks.size();i++)
 	{
 		CSBrickSheet	*brick= pBM->getBrick(phrase.Bricks[i]);
@@ -1578,10 +1600,30 @@ void	CActionPhraseFaber::updateItemResult()
 					// minimze the level
 					minLevel= min(minLevel, sint32(brick->Properties[j].Value));
 				}
+
+				if (brick->Properties[j].PropId == crHp)
+					hpBuff = sint32(brick->Properties[j].Value);
+				if (brick->Properties[j].PropId == crSap)
+					sapBuff = sint32(brick->Properties[j].Value);
+				if (brick->Properties[j].PropId == crSta)
+					staBuff = sint32(brick->Properties[j].Value);
+				if (brick->Properties[j].PropId == crFocus)
+					focusBuff = sint32(brick->Properties[j].Value);
 			}
 		}
 	}
 
+	{
+		NLGUI::CDBManager *cdb = NLGUI::CDBManager::getInstance();
+		NLMISC::CCDBNodeLeaf *node = cdb->getDbProp(FaberPlanHpBuffDB, false);
+		if (node) node->setValue32(hpBuff);
+		node = cdb->getDbProp(FaberPlanSapBuffDB, false);
+		if (node) node->setValue32(sapBuff);
+		node = cdb->getDbProp(FaberPlanStaBuffDB, false);
+		if (node) node->setValue32(staBuff);
+		node = cdb->getDbProp(FaberPlanFocusBuffDB, false);
+		if (node) node->setValue32(focusBuff);
+	}
 
 	// **** Parse all MPs setuped, to compute level and stats
 	uint	totalItemPartMPReq= 0;
