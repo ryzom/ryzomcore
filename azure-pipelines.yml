@@ -77,3 +77,88 @@ jobs:
         cd build
         make -j`nproc`
       displayName: 'Make'
+  - job: windows2019
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+    - checkout: self
+      fetchDepth: 1
+    - task: Cache@2
+      inputs:
+        key: 'hunter-win2019-x64-rel'
+        path: "c:/.hunter/_Base/Cache"
+    - task: CmdLine@2
+      inputs:
+        script: |
+          aria2c https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
+          7z x DXSDK_Jun10.exe -oC:\ -r -y
+          del DXSDK_Jun10.exe
+    - task: CMake@1
+      inputs:
+        workingDirectory: build.release
+        cmakeArgs: '-DCMAKE_CONFIGURATION_TYPES=Release -DHUNTER_ENABLED=ON -DHUNTER_CONFIGURATION_TYPES=Release -DFINAL_VERSION=OFF -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_NEL_TOOLS=OFF -DWITH_RYZOM_TOOLS=OFF -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_XAUDIO2=ON -DDXSDK_DIR=C:/DXSDK ..'
+    - task: MSBuild@1
+      inputs:
+        solution: build.release/ALL_BUILD.vcxproj
+        maximumCpuCount: true
+        configuration: release
+        platform: 'x64'
+  - job: ubuntu18hunter
+    timeoutInMinutes: 120
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+    - checkout: self
+      fetchDepth: 0
+    - script: |
+        sudo apt-get update
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libasound2-dev libgl1-mesa-dev libjack-dev libpulse-dev libxrandr-dev libxrender-dev libxxf86vm-dev
+      displayName: 'Dependencies'
+    - task: Cache@2
+      inputs:
+        key: 'hunter317-ubuntu18-rel"'
+        path: "$(Pipeline.Workspace)/.hunter/_Base/Cache"
+    - script: |
+        mkdir build.release
+        cmake --version
+        cd build.release
+        unset SYSTEM
+        export MAKEFLAGS=-j`nproc`
+        cmake -DCMAKE_BUILD_TYPE=Release -DHUNTER_ENABLED=ON -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_ROOT="$(Pipeline.Workspace)/.hunter" -DFINAL_VERSION=OFF -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_NEL_TOOLS=OFF -DWITH_RYZOM_TOOLS=OFF -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON ..
+      displayName: 'CMake, release'
+    - script: |
+        cd build.release
+        make -j`nproc`
+      displayName: 'Make, release'
+    #- task: PublishPipelineArtifact@1
+    #  inputs:
+    #    targetPath: build.release/bin
+    #    artifactName: RyzomUbuntu18Release
+  - job: macOS11
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'macOS-11'
+    steps:
+    - checkout: self
+      fetchDepth: 0
+    - task: Cache@2
+      inputs:
+        key: 'hunter317-macOS11-rel"'
+        path: "$(Pipeline.Workspace)/.hunter/_Base/Cache"
+    - task: CMake@1
+      inputs:
+        workingDirectory: build.release
+        cmakeArgs: '-GXcode -DCMAKE_CONFIGURATION_TYPES=Release -DHUNTER_ENABLED=ON -DHUNTER_STATUS_DEBUG=ON -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_ROOT="$(Pipeline.Workspace)/.hunter" -DWITH_LIBXML2_ICONV=OFF -DFINAL_VERSION=OFF -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_NEL_TOOLS=OFF -DWITH_RYZOM_TOOLS=OFF -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_DRIVER_DIRECT3D=OFF -DWITH_DRIVER_XAUDIO2=OFF ..'
+    - task: Xcode@5
+      inputs:
+        actions: 'build'
+        configuration: Release
+        sdk: macosx12.0
+        xcWorkspacePath: 'build.release/RyzomCore.xcodeproj'
+        scheme: 'ALL_BUILD'
+        packageApp: false
+    #- task: PublishPipelineArtifact@1
+    #  inputs:
+    #    targetPath: build.release/bin/
+    #    artifactName: RyzomClientMacOS11Release

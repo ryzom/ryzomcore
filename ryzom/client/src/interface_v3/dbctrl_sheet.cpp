@@ -2534,8 +2534,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					// there is max 4 icons
 					sint32 hArea = (hSheet / 4);
 					sint32 xIcon = x;
-					// move buff icons up a row, quantity text is displayed on bottom-left corner
-					sint32 yIcon = y + hArea;
+					sint32 yIcon = y;
 					for (uint i = 0; i < _BuffIcons.size(); ++i)
 					{
 						sint32 wIcon = _BuffIcons[i].IconW;

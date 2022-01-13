@@ -34,10 +34,36 @@ IF(COMMAND cmake_policy)
   ENDIF()
 ENDIF()
 
+
+#-----------------------------------------------------------------------------
+# Downloads and install Hunger into HUNTER_ROOT directory.
+OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
+IF(HUNTER_ENABLED)
+  INCLUDE("CMakeModules/HunterGate.cmake")
+  HunterGate(
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.317.tar.gz"
+    SHA1 "fbdd94b1966d351384e27b02c8d134915b1131d6"
+    FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
+  )
+
+  # default options for hunterized build
+  SET(WITH_STATIC         ON CACHE BOOL "static" FORCE)
+  SET(WITH_STATIC_DRIVERS ON CACHE BOOL "static drivers" FORCE)
+  SET(WITH_STATIC_CURL    ON CACHE BOOL "static curl" FORCE)
+  SET(WITH_STATIC_LIBXML2 ON CACHE BOOL "static libxml2" FORCE)
+  SET(WITH_STATIC_EXTERNAL ON CACHE BOOL "static external" FORCE)
+  SET(WITH_EXTERNAL       OFF CACHE BOOL "external libs" FORCE)
+ENDIF()
+
+
+#-----------------------------------------------------------------------------
+
 INCLUDE(nel)
 INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
 INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
+
+MESSAGE("EXTERNAL ${WITH_EXTERNAL}")
 
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
@@ -137,6 +163,28 @@ IF(WIN32)
   ENDIF()
 ENDIF()
 
+IF(HUNTER_ENABLED)
+  ## TODO: hack for freetype hunter package
+  SET(ON 1)
+  ##
+  HUNTER_ADD_PACKAGE(ZLIB)
+
+  FIND_PACKAGE(ZLIB CONFIG REQUIRED)
+  SET(ZLIB_LIBRARY ZLIB::zlib)
+
+  HUNTER_ADD_PACKAGE(libxml2)
+  FIND_PACKAGE(libxml2 CONFIG REQUIRED)
+  SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
+
+  HUNTER_ADD_PACKAGE(OpenSSL)
+  FIND_PACKAGE(OpenSSL REQUIRED)
+  # TODO: is OpenSSL::Crypto only needed for WIN32?
+  SET(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+
+  # for precompiled headers, not needed if using TARGET_PRECOMPILE_HEADERS() from cmake 3.16+
+  SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
+  SET(LIBXML2_INCLUDE_DIR ${LIBXML2_ROOT}/include/libxml2)
+ELSE()
 FIND_PACKAGE(ZLIB REQUIRED)
 FIND_PACKAGE(LibXml2 REQUIRED)
 FIND_PACKAGE(PNG REQUIRED)
@@ -147,6 +195,7 @@ FIND_PACKAGE(Jpeg)
 IF(WIN32)
   SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
 ENDIF()
+ENDIF() #hunter
 
 IF(WITH_LIBOVR)
   FIND_PACKAGE(LibOVR)
@@ -240,6 +289,7 @@ ENDIF()
 
 INCLUDE(FindHelpers)
 
+#TODO: hunter qt package
 IF(WITH_QT5)
   FIND_QT5()
 ENDIF()
@@ -251,6 +301,7 @@ IF(WITH_QT)
   FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED)
 ENDIF()
 
+#TODO: hunter assimp package
 IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)
 ENDIF()
@@ -260,9 +311,20 @@ IF(WITH_NEL)
     FIND_PACKAGE(CppTest)
   ENDIF()
 
-  IF(WITH_GUI)
-    FIND_PACKAGE(Luabind REQUIRED)
-  ENDIF()
+  IF(HUNTER_ENABLED)
+    IF(WITH_GUI)
+      HUNTER_ADD_PACKAGE(luabind)
+      FIND_PACKAGE(Luabind REQUIRED)
+    ENDIF()
+
+    HUNTER_ADD_PACKAGE(CURL)
+    FIND_PACKAGE(CURL CONFIG REQUIRED)
+    # TODO: for nelgui
+    SET(CURL_LIBRARIES CURL::libcurl libxml2::libxml2)
+  ELSE()
+    IF(WITH_GUI)
+      FIND_PACKAGE(Luabind REQUIRED)
+    ENDIF()
 
     FIND_PACKAGE(CURL REQUIRED)
 
@@ -313,6 +375,7 @@ IF(WITH_NEL)
         ENDIF()
       ENDIF()
     ENDIF()
+  ENDIF() #hunter
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)
