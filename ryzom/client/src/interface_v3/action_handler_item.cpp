@@ -747,6 +747,10 @@ public:
 		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
+
+		// end drag
+		getInventory().endDrag();
+
 		if ((pCSSrc == NULL) || (pCSDst == NULL)) return;
 
 		if (pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
