@@ -280,7 +280,7 @@ namespace NLGUI
 		std::vector<CGroupSubMenu*>		_SubMenus;
 
 		CGroupMenu						*_GroupMenu; // Master parent
-		sint32							_Selected;
+		sint32							_MouseOver;
 
 		sint32							_MaxVisibleLine; // -1 == no limit
 

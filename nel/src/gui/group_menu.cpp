@@ -129,7 +129,7 @@ namespace NLGUI
 		_SelectionView = NULL;
 		_GroupList = NULL;
 		_GroupMenu = NULL;
-		_Selected = -1;
+		_MouseOver = -1;
 		_MaxVisibleLine = -1;
 		_ScrollBar = NULL;
 	}
@@ -883,7 +883,7 @@ namespace NLGUI
 		_SelectionView->setY (4);
 
 
-		if (_Selected != -1 && _Lines[_Selected].ViewText != NULL)
+		if (_MouseOver != -1 && _Lines[_MouseOver].ViewText != NULL)
 		{
 			CRGBA col= _GroupMenu->_HighLightOver;
 
@@ -891,7 +891,7 @@ namespace NLGUI
 			_SelectionView->setModulateGlobalColor(getModulateGlobalColor());
 
 			// get refElm and refElmYReal
-			GET_REF_ELM(_Selected)
+			GET_REF_ELM(_MouseOver)
 
 			_SelectionView->setH (refElmHReal);
 			_SelectionView->setY (refElmYReal - this->getYReal());
@@ -911,12 +911,12 @@ namespace NLGUI
 			(xMouse < (_XReal + _WReal))&&
 			(yMouse > _YReal) &&
 			(yMouse <= (_YReal+ _HReal))))
-			_Selected= -1;
+			_MouseOver = -1;
 
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		// Highlight (background under the selection)
-		if (_Selected != -1)
+		if (_MouseOver != -1)
 		{
 			// display hightlight
 			if(_GroupMenu->_HighLightOver.A > 0)
@@ -946,7 +946,7 @@ namespace NLGUI
 				}
 				else
 				{
-					if (i == _Selected) // Colors when the text is selected
+					if (i == _MouseOver) // Colors when the text is selected
 					{
 						_Lines[i].ViewText->Over = true;
 						_Lines[i].ViewText->setColor (_Lines[i].ViewText->OldColorOver);
@@ -984,7 +984,7 @@ namespace NLGUI
 		if (event.getType() == NLGUI::CEventDescriptor::mouse)
 		{
 			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
-			_Selected = -1;
+			_MouseOver = -1;
 
 			// TODO First check sub menus that can be not in the area of this menu
 
@@ -1008,7 +1008,7 @@ namespace NLGUI
 						if ((eventDesc.getY() > refElmYReal) &&
 							(eventDesc.getY() <= (refElmYReal + refElmHReal + _GroupList->getSpace())))
 						{
-							_Selected = i;
+							_MouseOver = i;
 							break;
 						}
 					}
@@ -1018,16 +1018,16 @@ namespace NLGUI
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 			{
 				// If a line is selected and the line is not grayed
-				if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()))
+				if ((_MouseOver != -1) && (!_Lines[i].ViewText->getGrayed()))
 				{
 
-					CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHName,
+					CAHManager::getInstance()->runActionHandler (	_Lines[_MouseOver].AHName,
 											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
-											_Lines[_Selected].AHParams );
+											_Lines[_MouseOver].AHParams );
 
-					if (_SubMenus[_Selected] != NULL)
+					if (_SubMenus[_MouseOver] != NULL)
 					{
-						openSubMenu (_Selected);
+						openSubMenu (_MouseOver);
 					}
 					else
 					{
@@ -1046,11 +1046,11 @@ namespace NLGUI
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 			{
 				// If a line is selected and the line is not grayed and has right click action handler
-				if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()) && !_Lines[_Selected].AHRightClick.empty())
+				if ((_MouseOver != -1) && (!_Lines[i].ViewText->getGrayed()) && !_Lines[_MouseOver].AHRightClick.empty())
 				{
-					CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHRightClick,
+					CAHManager::getInstance()->runActionHandler (	_Lines[_MouseOver].AHRightClick,
 											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
-											_Lines[_Selected].AHRightClickParams );
+											_Lines[_MouseOver].AHRightClickParams );
 					return true;
 				}
 			}
@@ -1408,7 +1408,7 @@ namespace NLGUI
 		_Lines.erase(_Lines.begin() + index);
 
 		//invalidate selection
-		_Selected = -1;
+		_MouseOver = -1;
 
 		if(_SubMenus[index])
 		{
