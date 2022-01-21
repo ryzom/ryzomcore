@@ -133,6 +133,7 @@ namespace NLGUI
 		_Selected = -1;
 		_MaxVisibleLine = -1;
 		_ScrollBar = NULL;
+		_ScrollToView = false;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -590,6 +591,7 @@ namespace NLGUI
 				_GroupList->setMaxH(widgetMaxH*_MaxVisibleLine+_GroupList->getSpace()*(_MaxVisibleLine-1));
 				if (_ScrollBar == NULL)
 				{
+					_ScrollToView = true;
 					_ScrollBar = new CCtrlScroll(CViewBase::TCtorParam());
 					_ScrollBar->setParent (this);
 					_ScrollBar->setParentPos (_GroupList);
@@ -896,6 +898,16 @@ namespace NLGUI
 
 			_SelectionView->setH (refElmHReal);
 			_SelectionView->setY (refElmYReal - this->getYReal());
+		}
+
+		// initial scroll after becoming active
+		if (_ScrollBar && _ScrollToView)
+		{
+			_ScrollToView = false;
+			if (_Selected != -1 && _Lines[_Selected].ViewText != NULL)
+				_ScrollBar->ensureVisible(_Lines[_Selected].ViewText, Hotspot_Tx, Hotspot_Mx);
+			else
+				_ScrollBar->setTrackPos(_GroupList->getHReal());
 		}
 	}
 
@@ -1664,10 +1676,10 @@ namespace NLGUI
 			}
 		}
 
-		if(_ScrollBar && _GroupList)
-			_ScrollBar->setTrackPos(_GroupList->getHReal());
-
 		CGroupFrame::setActive(state);
+
+		// handle scrolling in next updateCoords() call
+		_ScrollToView = true;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2537,6 +2549,10 @@ namespace NLGUI
 		}
 
 		CGroupFrame::setActive (state);
+
+		// skip rest if being hidden
+		if (!state)
+			return;
 
 		// must recompute now the pos of the menu
 		uint32 i;

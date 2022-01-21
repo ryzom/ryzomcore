@@ -289,6 +289,8 @@ namespace NLGUI
 
 		sint32							_MaxVisibleLine; // -1 == no limit
 
+		bool							_ScrollToView;
+
 		friend class CGroupMenu;
 	private:
 		/** Clone this menu, and set its new father
