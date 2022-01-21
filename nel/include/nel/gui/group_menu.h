@@ -188,6 +188,10 @@ namespace NLGUI
 		// Hide a line.
 		void setHiddenLine(uint line,  bool h);
 
+		// Highlight single line
+		void setSelected(uint line) { _Selected = line < _Lines.size() ? line : -1; }
+		void clearSelected() { _Selected = -1; }
+
 		// Max Visible Line (-1 == no limit)
 		void setMaxVisibleLine(sint32 mvl);
 		sint32 getMaxVisibleLine() { return _MaxVisibleLine; }
@@ -281,6 +285,7 @@ namespace NLGUI
 
 		CGroupMenu						*_GroupMenu; // Master parent
 		sint32							_MouseOver;
+		sint32							_Selected;
 
 		sint32							_MaxVisibleLine; // -1 == no limit
 
@@ -370,6 +375,10 @@ namespace NLGUI
 
 		// Gray a line on the RootMenu
 		void	setGrayedLine(uint line, bool g);
+
+		// Highlight single line
+		void setSelected(uint line) { if (_RootMenu) _RootMenu->setSelected(line); }
+		void clearSelected() { if(_RootMenu) _RootMenu->clearSelected(); }
 
 		CGroupSubMenu	*getRootMenu() const { return _RootMenu; }
 

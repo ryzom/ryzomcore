@@ -745,6 +745,10 @@ namespace NLGUI
 			groupMenu->setY(pCB->getYReal());
 			groupMenu->setBaseY(pCB->getYReal());
 
+			sint selected = pCB->getSelection();
+			if (selected >= 0)
+				groupMenu->setSelected((uint)selected);
+
 			// Must ensure the combo menu has same windows priority than the combo box window
 			CInterfaceGroup		*rootWin= pCB->getRootWindow();
 			if(rootWin)

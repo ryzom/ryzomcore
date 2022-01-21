@@ -130,6 +130,7 @@ namespace NLGUI
 		_GroupList = NULL;
 		_GroupMenu = NULL;
 		_MouseOver = -1;
+		_Selected = -1;
 		_MaxVisibleLine = -1;
 		_ScrollBar = NULL;
 	}
@@ -882,8 +883,8 @@ namespace NLGUI
 		_SelectionView->setH (8);
 		_SelectionView->setY (4);
 
-
-		if (_MouseOver != -1 && _Lines[_MouseOver].ViewText != NULL)
+		sint highlight = _MouseOver != -1 ? _MouseOver : _Selected;
+		if (highlight != -1 && _Lines[highlight].ViewText != NULL)
 		{
 			CRGBA col= _GroupMenu->_HighLightOver;
 
@@ -891,7 +892,7 @@ namespace NLGUI
 			_SelectionView->setModulateGlobalColor(getModulateGlobalColor());
 
 			// get refElm and refElmYReal
-			GET_REF_ELM(_MouseOver)
+			GET_REF_ELM(highlight)
 
 			_SelectionView->setH (refElmHReal);
 			_SelectionView->setY (refElmYReal - this->getYReal());
@@ -916,7 +917,7 @@ namespace NLGUI
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		// Highlight (background under the selection)
-		if (_MouseOver != -1)
+		if (_MouseOver != -1 || _Selected != -1)
 		{
 			// display hightlight
 			if(_GroupMenu->_HighLightOver.A > 0)
@@ -992,6 +993,9 @@ namespace NLGUI
 				(eventDesc.getX() < (_XReal + _WReal))&&
 				(eventDesc.getY() > _YReal) &&
 				(eventDesc.getY() <= (_YReal+ _HReal))))
+				return false;
+
+			if (_ScrollBar && _ScrollBar->isIn(eventDesc.getX(), eventDesc.getY()))
 				return false;
 
 			uint32 i = 0;
@@ -1409,6 +1413,13 @@ namespace NLGUI
 
 		//invalidate selection
 		_MouseOver = -1;
+		if (_Selected != -1)
+		{
+			if (_Selected == index)
+				_Selected = -1;
+			else if (_Selected > index)
+				_Selected--;
+		}
 
 		if(_SubMenus[index])
 		{
@@ -1442,6 +1453,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void	CGroupSubMenu::reset()
 	{
+		_Selected = -1;
 		uint lineCount = (uint)_Lines.size();
 		for(sint k = lineCount - 1; k >= 0; --k)
 		{
