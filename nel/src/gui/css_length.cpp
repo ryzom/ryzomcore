@@ -66,6 +66,9 @@ bool CSSLength::parseValue(const std::string &value, bool allowPercent, bool all
 	}
 
 	std::string unit = toLowerAscii(value.substr(pos));
+	if (!allowPercent && unit == "%")
+		return false;
+
 	if (knownUnits.count(unit))
 	{
 		std::string tmpstr = value.substr(0, pos);
