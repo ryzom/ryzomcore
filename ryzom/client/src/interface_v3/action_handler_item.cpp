@@ -208,7 +208,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 {
 	if(_CurrItemSheet && !WindowName.empty())
 	{
-	
+
 		const CItemSheet *pIS = _CurrItemSheet->asItemSheet();
 		if ((pIS != NULL) && ITEMFAMILY::isTextCustomizable(pIS->Family) )
 		{
@@ -342,7 +342,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 // ********************************************************************************************
 void CInterfaceItemEdition::CItemEditionWindow::end()
 {
-	
+
 	CDBCtrlSheet *pCSItem = _CurrItemSheet;
 	std::string windowName = WindowName;
 	if(pCSItem && !windowName.empty())
@@ -371,7 +371,7 @@ void CInterfaceItemEdition::CItemEditionWindow::end()
 			editBoxShort->setActive(false);
 			editShort->setActive(false);
 			editBoxLarge->setActive(false);
-			editLarge->setActive(false);				
+			editLarge->setActive(false);
 			display->setActive(false);
 			editButtons->setActive(false);
 			closeButton->setActive(false);
@@ -413,7 +413,7 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 				textValid = editLarge->getActive();
 				text = editBoxLarge->getInputString();
 			}
-			 
+
 			if (textValid)
 			{
 				CBitMemStream out;
@@ -562,7 +562,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 
 
 //=====================================================================================================================
-	static void sendExchangeAddToServer(uint16 srcSlotIndex, uint16 destSlotIndex, uint16 quantitySrc)
+	static void sendExchangeAddToServer(uint16 srcInvIndex, uint16 srcSlotIndex, uint16 destSlotIndex, uint16 quantitySrc)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -571,6 +571,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
 			// Swap all the Src (quantity= quantitySrc) to dest
+			out.serial(srcInvIndex);
 			out.serial(srcSlotIndex);
 			out.serial(destSlotIndex);
 			out.serial(quantitySrc);
@@ -615,7 +616,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 			NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 			// send msg to server
-			sendExchangeAddToServer((uint16)src->getIndexInDB(), (uint8)dest->getIndexInDB(), (uint16)quantitySrc);
+			sendExchangeAddToServer((uint16) src->getSecondIndexInDB(), (uint16)src->getIndexInDB(), (uint8)dest->getIndexInDB(), (uint16)quantitySrc);
 		}
 		else
 		{
@@ -725,7 +726,7 @@ static void validateStackItem(CDBCtrlSheet *pCSSrc, CDBCtrlSheet *pCSDst, sint32
 				NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 				// send msg to server
-				sendExchangeAddToServer((uint16)pCSSrc->getIndexInDB(), (uint8)pCSDst->getIndexInDB(), (uint16)val);
+				sendExchangeAddToServer((uint16)pCSSrc->getSecondIndexInDB(), (uint16)pCSSrc->getIndexInDB(), (uint8)pCSDst->getIndexInDB(), (uint16)val);
 			}
 		}
 	}
@@ -746,6 +747,10 @@ public:
 		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
+
+		// end drag
+		getInventory().endDrag();
+
 		if ((pCSSrc == NULL) || (pCSDst == NULL)) return;
 
 		if (pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
@@ -1049,9 +1054,21 @@ class CCanDropToExchange : public IActionHandler
 		if (!pCSSrc || !pCSDst) return;
 
 		// Exchange can only be done from bag to exchange inventories
-
-		if (pCSSrc->getSecondIndexInDB() == INVENTORIES::bag &&
-			pCSDst->getSecondIndexInDB() == INVENTORIES::exchange)
+		uint32 srcInventory = pCSSrc->getSecondIndexInDB();
+		if (
+			(srcInventory == INVENTORIES::bag ||
+				srcInventory == INVENTORIES::pet_animal1 ||
+				srcInventory == INVENTORIES::pet_animal2 ||
+				srcInventory == INVENTORIES::pet_animal3 ||
+				srcInventory == INVENTORIES::pet_animal4 ||
+				srcInventory == INVENTORIES::pet_animal5 ||
+				srcInventory == INVENTORIES::pet_animal6 ||
+				srcInventory == INVENTORIES::pet_animal7 ||
+				srcInventory == INVENTORIES::guild ||
+				srcInventory == INVENTORIES::player_room)
+			&& getInventory().isInventoryAvailable((INVENTORIES::TInventory) pCSSrc->getSecondIndexInDB())
+			&& pCSDst->getSecondIndexInDB() == INVENTORIES::exchange
+		)
 		{
 			if (checkCanExchangeItem(pCSSrc))
 			{
@@ -1722,7 +1739,7 @@ void CItemMenuInBagInfoWaiter::infoReceived()
 void CItemMenuInBagInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	
+
 	// get the dialog stack
 	CInterfaceGroup* pMenu = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId("ui:interface:item_menu_in_bag") );
 	if(!pMenu)	return;
@@ -1868,7 +1885,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			}
 			if (pItemTextDisplay && pIS->Family == ITEMFAMILY::SCROLL)
 			{
-				if (pCS->getInventoryIndex()==INVENTORIES::bag)
+				if (pCS->getInventoryIndex()==INVENTORIES::bag && pIS->Scroll.Label.empty())
 					pItemTextDisplay->setActive(true);
 				pItemInfos->setActive(false);
 			}
@@ -1960,16 +1977,15 @@ class CHandlerItemMenuCheck : public IActionHandler
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if (pMoveToPa[i])
-					pMoveToPa[i]->setActive(invId!=INVENTORIES::guild &&
-											(uint)invId!=INVENTORIES::pet_animal+i &&
+					pMoveToPa[i]->setActive((uint)invId!=INVENTORIES::pet_animal+i &&
 											 invMngr.isInventoryPresent((INVENTORIES::TInventory)(INVENTORIES::pet_animal+i)) );
 			}
 
 			if (pMoveToGuild)
-				pMoveToGuild->setActive(invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::guild));
+				pMoveToGuild->setActive(invId!=INVENTORIES::guild && invMngr.isInventoryPresent(INVENTORIES::guild));
 
 			if (pMoveToRoom)
-				pMoveToRoom->setActive(invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::player_room));
+				pMoveToRoom->setActive(invId!=INVENTORIES::player_room && invMngr.isInventoryPresent(INVENTORIES::player_room));
 
 			// std case: can drop / destroy
 			if(pDrop)		pDrop->setActive(invId!=INVENTORIES::guild);
@@ -2037,7 +2053,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if (pMoveSubMenu) pMoveSubMenu->setActive(false);
 		}
 
-		if (bIsLockedByOwner) 
+		if (bIsLockedByOwner)
 		{
 			if (pLockUnlock) pLockUnlock->setHardText("uimUnlockItem");
 			// Cannot drop/destroy if locked by owner
@@ -2050,7 +2066,8 @@ class CHandlerItemMenuCheck : public IActionHandler
 		}
 
 		// Only show lock menu item if inventory contains the info
-		if (pLockUnlock) pLockUnlock->setActive(pCS->canOwnerLock());
+		if (invId!=INVENTORIES::guild)
+			if (pLockUnlock) pLockUnlock->setActive(pCS->canOwnerLock());
 
 
 		// **** Gray Entries
@@ -2207,7 +2224,7 @@ class CHandlerItemMenuBaseCheck : public IActionHandler
 		CViewTextMenu	*pDestroy = dynamic_cast<CViewTextMenu*>(pMenu->getView("destroy"));
 		CViewTextMenu	*pLockUnlock = dynamic_cast<CViewTextMenu*>(pMenu->getView("lockunlock"));
 
-		if (pCS->getLockedByOwner()) 
+		if (pCS->getLockedByOwner())
 		{
 			pLockUnlock->setHardText("uimUnlockItem");
 			// Cannot destroy if locked by owner
@@ -2364,7 +2381,7 @@ class CHandlerItemTextDisplay : public IActionHandler
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-		if (pCSItem == NULL || windowName.empty()) 
+		if (pCSItem == NULL || windowName.empty())
 			return;
 
 		const CItemSheet *pIS = pCSItem->asItemSheet();
@@ -2385,7 +2402,7 @@ class CHandlerItemTextEdition : public IActionHandler
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-		if (pCSItem == NULL || windowName.empty()) 
+		if (pCSItem == NULL || windowName.empty())
 			return;
 
 		CInterfaceItemEdition::getInstance()->setCurrWindow(pCSItem, windowName, true);
