@@ -1,0 +1,23 @@
+{
+	"Domain": "default",
+	"Paths": {
+		"Code": "code",
+		"Leveldesign": "leveldesign",
+		"Graphics": "graphics",
+		"Sound": "sound",
+		"Build": "build",
+		"Pipeline": "pipeline",
+		"External": "external",
+		"Tools": {
+			"Python27": "external/python27",
+			"RRDtool": "external/rrdtool",
+			"MariaDB": "external/mariadb",
+			"Nginx": "external/nginx",
+			"PHP": "external/php",
+			"phpMyAdmin": "external/phpmyadmin",
+			"3dsMax": "C:\\Program Files\\Autodesk\\3ds Max 2022",
+			"VisualStudio32": "C:\\Program Files (x86)\\Microsoft Visual Studio 9.0",
+			"VisualStudio64": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional",
+		}
+	}
+}
