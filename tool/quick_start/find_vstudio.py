@@ -126,6 +126,8 @@ def FindVCVars64(path):
 		return [ allVars, "x64" ]
 	return
 
+# TODO: FindDirectX SDK optimized per version. If prefered SDK not available, just return blank
+
 del ProcessYearPath
 del VSVersions
 del VSMajor

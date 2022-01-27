@@ -26,8 +26,9 @@ for ts in SortedToolsets:
 		toolchain["Platform"] = platform
 		toolchain["Toolset"] = ts
 		toolchain["Prefix"] = FindVSPrefixPaths(ts, platform)
-		if not len(toolchain["Prefix"]):
-			toolchain["Hunter"] = True
+		if not len(toolchain["Prefix"]) and vs["Version"] >= 14:
+			toolchain["Hunter"] = vs["Version"] >= 14
+		toolchain["EnvPath"] = FindBinPaths(toolchain["Prefix"])
 		toolchain["Version"] = vs["Version"]
 		if platform == "x64":
 			toolchain["OS"] = "Win64"
@@ -35,7 +36,8 @@ for ts in SortedToolsets:
 		else:
 			toolchain["OS"] = "Win32"
 			toolchain["VCVars"] = FindVCVars32(vs["Path"])
-		Toolchains["MSVC/" + ts + "/" + platform] = toolchain
+		if toolchain["VCVars"] and (len(toolchain["Prefix"]) or "Hunter" in toolchain):
+			Toolchains["MSVC/" + ts + "/" + platform] = toolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_default.json"), 'w') as fo:
 	json.dump(Toolchains, fo, indent=2)

@@ -50,7 +50,6 @@ def FindPrefixPaths(externalDir):
 		return False
 	
 	tempExternal = {}
-	tempExternalBinaries = {}
 	
 	# Headers to include
 	includeSearch = [
@@ -97,6 +96,7 @@ def FindPrefixPaths(externalDir):
 
 # The list of folders to potentially pass into the Visual Studio debug PATH env var
 def FindBinPaths(prefixPaths):
+	tempExternalBinaries = {}
 	for dir in prefixPaths:
 		for subDir in os.listdir(dir):
 			if subDir.startswith("."):

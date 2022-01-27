@@ -26,6 +26,7 @@
 			"MSVC/v90/x86",
 			"MSVC/v100/x86",
 			"MSVC/v80/x86"
-		]
+		],
+		"Server": { "OS": "Ubuntu20" }
 	}
 }
