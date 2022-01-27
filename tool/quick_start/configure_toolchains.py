@@ -31,8 +31,10 @@ for ts in SortedToolsets:
 		toolchain["Version"] = vs["Version"]
 		if platform == "x64":
 			toolchain["OS"] = "Win64"
+			toolchain["VCVars"] = FindVCVars64(vs["Path"])
 		else:
 			toolchain["OS"] = "Win32"
+			toolchain["VCVars"] = FindVCVars32(vs["Path"])
 		Toolchains["MSVC/" + ts + "/" + platform] = toolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_default.json"), 'w') as fo:

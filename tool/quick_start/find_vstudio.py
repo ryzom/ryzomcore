@@ -108,6 +108,24 @@ for yearVersion in os.listdir("C:\\Program Files\\Microsoft Visual Studio"):
 	ProcessYearPath(yearVersion, yearPath)
 	del yearPath
 
+def FindVCVars32(path):
+	auxVars = os.path.join(path, "VC\\Auxiliary\\Build\\vcvars32.bat")
+	if os.path.isfile(auxVars):
+		return [ auxVars ]
+	allVars = os.path.join(path, "VC\\vcvarsall.bat")
+	if os.path.isfile(allVars):
+		return [ allVars, "x86" ]
+	return
+
+def FindVCVars64(path):
+	auxVars = os.path.join(path, "VC\\Auxiliary\\Build\\vcvars64.bat")
+	if os.path.isfile(auxVars):
+		return [ auxVars ]
+	allVars = os.path.join(path, "VC\\vcvarsall.bat")
+	if os.path.isfile(allVars):
+		return [ allVars, "x64" ]
+	return
+
 del ProcessYearPath
 del VSVersions
 del VSMajor
