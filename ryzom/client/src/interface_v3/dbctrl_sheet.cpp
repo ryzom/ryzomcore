@@ -1428,6 +1428,23 @@ void CDBCtrlSheet::setupItem ()
 		}
 	}
 
+	// hide x1 on equipable items to show BuffIcons on bottom-left corner
+	if (_DispQuantity == 1)
+	{
+		switch(_ItemSheet->Family)
+		{
+			case ITEMFAMILY::ARMOR:
+			case ITEMFAMILY::MELEE_WEAPON:
+			case ITEMFAMILY::RANGE_WEAPON:
+			case ITEMFAMILY::SHIELD:
+			case ITEMFAMILY::JEWELRY:
+				_DispQuantity = -1;
+				break;
+			default:
+				break;
+		}
+	}
+
 	// at each frame, must test for grayed.
 	if(_AutoGrayed)
 	{
@@ -2535,7 +2552,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					sint32 hArea = (hSheet / 4);
 					sint32 xIcon = x;
 					// move buff icons up a row, quantity text is displayed on bottom-left corner
-					sint32 yIcon = y + hArea;
+					sint32 yIcon = y + (_DispQuantity > 0 ? hArea : 0);
 					for (uint i = 0; i < _BuffIcons.size(); ++i)
 					{
 						sint32 wIcon = _BuffIcons[i].IconW;
