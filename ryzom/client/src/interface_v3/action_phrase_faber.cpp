@@ -502,6 +502,10 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 				// Bkup original quantity from inventory
 				_InventoryMirror[i].OriginalQuantity= _InventoryMirror[i].Quantity;
 				_InventoryMirror[i].LockedByOwner= bLockedByOwner;
+				// remember these for sorting
+				_InventoryMirror[i].MpFamily = mpSheet->Mp.Family;
+				_InventoryMirror[i].Ecosystem = mpSheet->Mp.Ecosystem;
+				_InventoryMirror[i].StatEnergy = mpSheet->Mp.StatEnergy;
 			}
 		}
 	}
@@ -696,6 +700,63 @@ void			CActionPhraseFaber::filterSelectionItemSpecific(std::vector<uint> &mps, N
 	mps= res;
 }
 
+// ***************************************************************************
+struct SItemSortData
+{
+	uint Index;
+	RM_FAMILY::TRMFamily MpFamily;
+	ECOSYSTEM::EECosystem Ecosystem;
+	uint16 StatEnergy;
+	uint16 Quality;
+	uint16 Quantity;
+
+	SItemSortData(uint i, RM_FAMILY::TRMFamily mpfam, ECOSYSTEM::EECosystem eco, uint16 stat, uint16 quality, uint16 quantity)
+	: Index(i), MpFamily(mpfam), Ecosystem(eco), StatEnergy(stat), Quality(quality), Quantity(quantity)
+	{}
+
+	bool operator<(const SItemSortData &other) const
+	{
+		// anete, shu
+		if (MpFamily < other.MpFamily) return true;
+		if (MpFamily > other.MpFamily) return false;
+
+		// desert, lake
+		if (Ecosystem < other.Ecosystem) return true;
+		if (Ecosystem > other.Ecosystem) return false;
+
+		// basic, choice
+		if (StatEnergy < other.StatEnergy) return true;
+		if (StatEnergy > other.StatEnergy) return false;
+
+		// q10, q200
+		if (Quality < other.Quality) return true;
+		if (Quality > other.Quality) return false;
+
+		// x10, x200
+		if (Quantity < other.Quantity) return true;
+		if (Quantity > other.Quantity) return false;
+
+		return false;
+	}
+};
+
+// ***************************************************************************
+void CActionPhraseFaber::sortSelection(std::vector<uint> &mps) const
+{
+	std::vector<SItemSortData> items;
+	items.reserve(mps.size());
+	for(uint i = 0; i < mps.size(); i++)
+	{
+		const CItem &item = _InventoryMirror[mps[i]];
+		items.push_back(SItemSortData(mps[i], item.MpFamily, item.Ecosystem, item.StatEnergy, item.Quality, item.Quantity));
+	}
+
+	std::sort(items.begin(), items.end());
+
+	// overwrite previous values
+	for(uint i = 0; i< items.size(); i++)
+		mps[i] = items[i].Index;
+}
 
 // ***************************************************************************
 void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
@@ -784,6 +845,9 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 		{
 			nlstop;
 		}
+
+		// Sort before displaying
+		sortSelection(selectMps);
 
 		// Reset the DB selection
 		resetSelection();
@@ -1415,6 +1479,10 @@ void		CActionPhraseFaber::onInventoryChange()
 				newInvItem.Weight= itemImage->getWeight();
 				newInvItem.OriginalQuantity= newInvItem.Quantity;
 				newInvItem.LockedByOwner = bLockedByOwner;
+				// remember these for sorting
+				newInvItem.MpFamily = mpSheet->Mp.Family;
+				newInvItem.Ecosystem = mpSheet->Mp.Ecosystem;
+				newInvItem.StatEnergy = mpSheet->Mp.StatEnergy;
 			}
 
 			/* There is 5 cases:
