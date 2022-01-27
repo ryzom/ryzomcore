@@ -26,6 +26,13 @@ for ts in SortedToolsets:
 		toolchain["Platform"] = platform
 		toolchain["Toolset"] = ts
 		toolchain["Prefix"] = FindVSPrefixPaths(ts, platform)
+		if not len(toolchain["Prefix"]):
+			toolchain["Hunter"] = True
+		toolchain["Version"] = vs["Version"]
+		if platform == "x64":
+			toolchain["OS"] = "Win64"
+		else:
+			toolchain["OS"] = "Win32"
 		Toolchains["MSVC/" + ts + "/" + platform] = toolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_default.json"), 'w') as fo:

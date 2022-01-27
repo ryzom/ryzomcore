@@ -16,5 +16,16 @@
 			"phpMyAdmin": "external/phpmyadmin",
 			"3dsMax": "C:\\Program Files\\Autodesk\\3ds Max 2022"
 		}
+	},
+	"Toolchain": {
+		"Preference": [
+			"MSVC/v143/x64",
+			"MSVC/v142/x64",
+			"MSVC/v141/x64",
+			"MSVC/v140/x64",
+			"MSVC/v90/x86",
+			"MSVC/v100/x86",
+			"MSVC/v80/x86"
+		]
 	}
 }
