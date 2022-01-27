@@ -64,13 +64,13 @@ for majorVersion in range(8, 15):
 	folderA = "C:\\Program Files (x86)\\Microsoft Visual Studio " + str(majorVersion)
 	folderB = folderA + ".0"
 	if os.path.isfile(os.path.join(folderA, "Common7\\IDE\\VCExpress.exe")):
-		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual C++ " + str(VSVersions[majorVersion]) + " Express", "Path": folderA, "Version": majorVersion, "Toolchain": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
+		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual C++ " + str(VSVersions[majorVersion]) + " Express", "Path": folderA, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
 	if os.path.isfile(os.path.join(folderB, "Common7\\IDE\VCExpress.exe")):
-		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual C++ " + str(VSVersions[majorVersion]) + " Express", "Path": folderB, "Version": majorVersion, "Toolchain": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
+		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual C++ " + str(VSVersions[majorVersion]) + " Express", "Path": folderB, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
 	if os.path.isfile(os.path.join(folderA, "Common7\\IDE\\devenv.exe")):
-		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual Studio " + str(VSVersions[majorVersion]), "Path": folderA, "Version": majorVersion, "Toolchain": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
+		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual Studio " + str(VSVersions[majorVersion]), "Path": folderA, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
 	if os.path.isfile(os.path.join(folderB, "Common7\\IDE\\devenv.exe")):
-		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual Studio " + str(VSVersions[majorVersion]), "Path": folderB, "Version": majorVersion, "Toolchain": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
+		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual Studio " + str(VSVersions[majorVersion]), "Path": folderB, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
 	del folderA
 	del folderB
 
@@ -94,7 +94,7 @@ def ProcessYearPath(yearVersion, yearPath):
 							del fi
 							mfcPath = os.path.join(editionPath, "VC\\Tools\\MSVC\\" + toolsVersion + "\\atlmfc\\include\\afx.h")
 							hasMFC = os.path.isfile(mfcPath)
-							FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolchain": toolchain, "HasMFC": hasMFC } ]
+							FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolset": toolchain, "HasMFC": hasMFC } ]
 for yearVersion in os.listdir("C:\\Program Files (x86)\\Microsoft Visual Studio"):
 	if yearVersion.startswith("."):
 		continue
@@ -109,5 +109,8 @@ for yearVersion in os.listdir("C:\\Program Files\\Microsoft Visual Studio"):
 	del yearPath
 
 del ProcessYearPath
+del VSVersions
+del VSMajor
 
-print(FoundVisualStudio)
+#print(FoundVisualStudio)
+

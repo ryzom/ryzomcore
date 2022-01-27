@@ -1,1 +1,1 @@
-..\..\..\external\python27\python.exe find_vstudio.py
+..\..\..\external\python27\python.exe configure_toolchains.py
