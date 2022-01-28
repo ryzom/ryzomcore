@@ -23,7 +23,12 @@ for ts in SortedToolsets:
 	for platform in VSPlatforms:
 		toolchain = {}
 		toolchain["Compiler"] = "MSVC"
-		toolchain["Generator"] = vs["Name"]
+		if vs["Version"] >= 9:
+			toolchain["Generator"] = vs["Name"]
+		else:
+			# https://cmake.org/cmake/help/latest/generator/Visual%20Studio%208%202005.html
+			# Must set VCVars ahead of compiling!
+			toolchain["Generator"] = "NMake Makefiles"
 		toolchain["Platform"] = platform
 		toolchain["Toolset"] = ts
 		toolchain["Prefix"] = FindVSPrefixPaths(ts, platform)
