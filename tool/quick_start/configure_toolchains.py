@@ -29,6 +29,7 @@ for ts in SortedToolsets:
 			# https://cmake.org/cmake/help/latest/generator/Visual%20Studio%208%202005.html
 			# Must set VCVars ahead of compiling!
 			toolchain["Generator"] = "NMake Makefiles"
+		toolchain["DisplayName"] = vs["DisplayName"]
 		toolchain["Platform"] = platform
 		toolchain["Toolset"] = ts
 		toolchain["Prefix"] = FindVSPrefixPaths(ts, platform)
@@ -50,13 +51,24 @@ for ts in SortedToolsets:
 		if luaVersion:
 			toolchain["LuaVersion"] = luaVersion
 		if platform == "x64":
-			toolchain["OS"] = "Win64"
 			toolchain["VCVars"] = FindVCVars64(vs["Path"])
 		else:
-			toolchain["OS"] = "Win32"
 			toolchain["VCVars"] = FindVCVars32(vs["Path"])
+		if vs["Version"] >= 11:
+			if toolchain["Toolset"].endswith("_xp"):
+				toolchain["OS"] = "WinXP"
+			else:
+				toolchain["OS"] = "Win7"
+		elif vs["Version"] >= 10:
+			toolchain["OS"] = "WinXP"
+		elif vs["Version"] >= 9:
+			toolchain["OS"] = "Win2k"
+		elif vs["Version"] >= 8:
+			toolchain["OS"] = "Win98"
+		else:
+			continue
 		if toolchain["VCVars"] and (len(toolchain["Prefix"]) or "Hunter" in toolchain):
-			Toolchains["MSVC/" + ts + "/" + platform] = toolchain
+			Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform] = toolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_default.json"), 'w') as fo:
 	json.dump(Toolchains, fo, indent=2)

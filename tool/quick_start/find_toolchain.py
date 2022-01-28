@@ -26,8 +26,16 @@ def FindToolchain(filter):
 			res = tsn
 	return res
 
-NeLToolchainWin32 = FindToolchain({ "OS": "Win32" })
-NeLToolchainWin64 = FindToolchain({ "OS": "Win64" })
+NeLToolchainWin32 = FindToolchain({ "OS": "Win98", "Platform": "x86" })
+if not NeLToolchainWin32:
+	NeLToolchainWin32 = FindToolchain({ "OS": "Win2k", "Platform": "x86" })
+if not NeLToolchainWin32:
+	NeLToolchainWin32 = FindToolchain({ "OS": "WinXP", "Platform": "x86" })
+if not NeLToolchainWin32:
+	NeLToolchainWin32 = FindToolchain({ "OS": "Win7", "Platform": "x86" })
+NeLToolchainWin64 = FindToolchain({ "OS": "WinXP", "Platform": "x64" })
+if not NeLToolchainWin64:
+	NeLToolchainWin64 = FindToolchain({ "OS": "Win7", "Platform": "x64" })
 NeLToolchainServer = FindToolchain(NeLConfig["Toolchain"]["Server"])
 
 print("Win32:")

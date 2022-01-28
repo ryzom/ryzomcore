@@ -19,13 +19,19 @@
 	},
 	"Toolchain": {
 		"Preference": [
-			"MSVC/v143/x64",
-			"MSVC/v142/x64",
-			"MSVC/v141/x64",
-			"MSVC/v140/x64",
-			"MSVC/v90/x86",
-			"MSVC/v100/x86",
-			"MSVC/v80/x86"
+			"Win7/VS/v143/x64",
+			"Win7/VS/v142/x64",
+			"Win7/VS/v141/x64",
+			"Win7/VS/v140/x64",
+			"Win7/VS/v120/x64",
+			"Win7/VS/v110/x64",
+			"Win2k/VS/v90/x86",
+			"WinXP/VS/v141_xp/x86",
+			"WinXP/VS/v140_xp/x86",
+			"WinXP/VS/v120_xp/x86",
+			"WinXP/VS/v110_xp/x86",
+			"WinXP/VS/v100/x86",
+			"Win98/VS/v80/x86"
 		],
 		"Server": { "OS": "Ubuntu20" },
 		"Options": [

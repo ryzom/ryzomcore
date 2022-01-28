@@ -140,6 +140,8 @@ def FindLuaVersion(prefixPaths):
 					return int(vers)
 				line = fi.readline()
 			fi.close()
+	# TODO: For linux, if hunter, don't care,
+	# otherwise, detect which lua version the system luabind depends on!
 	return
 
 # end of file
