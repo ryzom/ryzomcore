@@ -64,11 +64,11 @@ for majorVersion in range(8, 15):
 	folderA = "C:\\Program Files (x86)\\Microsoft Visual Studio " + str(majorVersion)
 	folderB = folderA + ".0"
 	if os.path.isfile(os.path.join(folderA, "Common7\\IDE\\VCExpress.exe")):
-		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual C++ " + str(VSVersions[majorVersion]) + " Express", "Path": folderA, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
+		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual C++ " + str(VSVersions[majorVersion]) + " Express", "Path": folderA, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderA) } ]
 	if os.path.isfile(os.path.join(folderB, "Common7\\IDE\VCExpress.exe")):
 		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual C++ " + str(VSVersions[majorVersion]) + " Express", "Path": folderB, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
 	if os.path.isfile(os.path.join(folderA, "Common7\\IDE\\devenv.exe")):
-		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual Studio " + str(VSVersions[majorVersion]), "Path": folderA, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
+		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual Studio " + str(VSVersions[majorVersion]), "Path": folderA, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderA) } ]
 	if os.path.isfile(os.path.join(folderB, "Common7\\IDE\\devenv.exe")):
 		FoundVisualStudio += [ { "Name": "Visual Studio " + str(majorVersion) + " " + str(VSVersions[majorVersion]), "DisplayName": "Visual Studio " + str(VSVersions[majorVersion]), "Path": folderB, "Version": majorVersion, "Toolset": "v" + str(majorVersion) + "0", "HasMFC": HasMFC(folderB) } ]
 	del folderA
@@ -126,7 +126,25 @@ def FindVCVars64(path):
 		return [ allVars, "x64" ]
 	return
 
-# TODO: FindDirectX SDK optimized per version. If prefered SDK not available, just return blank
+# FindDirectX SDK, optimized for compatibility per version. If prefered SDK not available, just return blank
+# https://archive.org/details/directxsdks
+def FindDirectXSDK(version):
+	if version == 8: # 2005, Windows 98 compatibility, DirectX 9.0c (October 2006)
+		if os.path.isfile("C:\\Program Files (x86)\\Microsoft DirectX SDK (October 2006)\\Include\\d3d9.h"):
+			return "C:\\Program Files (x86)\\Microsoft DirectX SDK (October 2006)"
+	elif version == 9: # 2008, Windows 2000 compatibility, DirectX 9.0c (June 2008) and unofficially (February 2010)
+		if os.path.isfile("C:\\Program Files (x86)\\Microsoft DirectX SDK (February 2010)\\Include\\d3d9.h"):
+			return "C:\\Program Files (x86)\\Microsoft DirectX SDK (February 2010)"
+		elif os.path.isfile("C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2008)\\Include\\d3d9.h"):
+			return "C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2008)"
+	if os.path.isfile("C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Include\\d3d9.h"):
+		return "C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)"
+	return
+
+def HasXAudio2(path):
+	if not path:
+		return False
+	return os.path.isfile(os.path.join(path, "Include\\XAudio2.h"))
 
 del ProcessYearPath
 del VSVersions

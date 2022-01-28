@@ -14,7 +14,7 @@
 			"Nginx": "external/nginx",
 			"PHP": "external/php",
 			"phpMyAdmin": "external/phpmyadmin",
-			"3dsMax": "C:\\Program Files\\Autodesk\\3ds Max 2022"
+			"3dsMax": ""
 		}
 	},
 	"Toolchain": {
@@ -27,6 +27,13 @@
 			"MSVC/v100/x86",
 			"MSVC/v80/x86"
 		],
-		"Server": { "OS": "Ubuntu20" }
+		"Server": { "OS": "Ubuntu20" },
+		"Options": [
+			{
+				"Filter": { "Compiler": "MSVC" },
+				"CMake": [ "-DCUSTOM_FLAGS=/MP3" ],
+				"MSBuild": [ "/m:2" ]
+			}
+		]
 	}
 }

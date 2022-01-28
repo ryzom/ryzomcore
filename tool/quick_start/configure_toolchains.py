@@ -22,14 +22,25 @@ for ts in SortedToolsets:
 	vs = ByToolset[ts]
 	for platform in VSPlatforms:
 		toolchain = {}
+		toolchain["Compiler"] = "MSVC"
 		toolchain["Generator"] = vs["Name"]
 		toolchain["Platform"] = platform
 		toolchain["Toolset"] = ts
 		toolchain["Prefix"] = FindVSPrefixPaths(ts, platform)
 		if not len(toolchain["Prefix"]) and vs["Version"] >= 14:
 			toolchain["Hunter"] = vs["Version"] >= 14
+		toolchain["CMake"] = []
+		if vs["Version"] < 14:
+			toolchain["CMake"] += [ "-DWINSDK_VERSION=6.0A" ]
 		toolchain["EnvPath"] = FindBinPaths(toolchain["Prefix"])
 		toolchain["Version"] = vs["Version"]
+		directXSdk = FindDirectXSDK(vs["Version"])
+		if directXSdk:
+			toolchain["DirectXSDK"] = directXSdk
+		if HasXAudio2(directXSdk):
+			toolchain["HasXAudio2"] = True
+		if vs["HasMFC"]:
+			toolchain["HasMFC"] = True
 		if platform == "x64":
 			toolchain["OS"] = "Win64"
 			toolchain["VCVars"] = FindVCVars64(vs["Path"])
