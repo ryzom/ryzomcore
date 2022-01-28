@@ -46,6 +46,9 @@ for ts in SortedToolsets:
 			toolchain["HasXAudio2"] = True
 		if vs["HasMFC"]:
 			toolchain["HasMFC"] = True
+		luaVersion = FindLuaVersion(toolchain["Prefix"])
+		if luaVersion:
+			toolchain["LuaVersion"] = luaVersion
 		if platform == "x64":
 			toolchain["OS"] = "Win64"
 			toolchain["VCVars"] = FindVCVars64(vs["Path"])

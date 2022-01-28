@@ -125,4 +125,21 @@ def FindVSPrefixPaths(toolset, platform):
 		return FindPrefixPaths(os.path.join("C:\\", found[0]))
 	return []
 
+def FindLuaVersion(prefixPaths):
+	for dir in prefixPaths:
+		luaHeader = os.path.join(dir, "include/lua.h")
+		if os.path.isfile(luaHeader):
+			fi = open(luaHeader)
+			line = fi.readline()
+			while line:
+				if "LUA_VERSION_NUM" in line:
+					fi.close()
+					line = line.strip()
+					syms = line.split()
+					vers = syms[len(syms) - 1]
+					return int(vers)
+				line = fi.readline()
+			fi.close()
+	return
+
 # end of file
