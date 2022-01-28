@@ -33,6 +33,14 @@ VSMajor["2017"] = 15
 VSMajor["2019"] = 16
 VSMajor["2022"] = 17
 
+VSPlatform = {}
+VSPlatform["v110"] = "v110"
+VSPlatform["v120"] = "v120"
+VSPlatform["v140"] = "v140"
+VSPlatform["v141"] = "v150"
+VSPlatform["v142"] = "v160"
+VSPlatform["v143"] = "v170"
+
 # "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\atlmfc\include\afx.h"
 # "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.16.27023\atlmfc\include\afx.h"
 # "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\*\atlmfc\include\afx.h"
@@ -108,6 +116,15 @@ for yearVersion in os.listdir("C:\\Program Files\\Microsoft Visual Studio"):
 	ProcessYearPath(yearVersion, yearPath)
 	del yearPath
 
+# Check for any available XP toolsets
+for vs in list(FoundVisualStudio):
+	if (vs["Version"] >= 11):
+		platform = VSPlatform[vs["Toolset"]]
+		# C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Microsoft\VC\v150\Platforms\Win32\PlatformToolsets\v141_xp
+		checkPath = os.path.join(vs["Path"], "MSBuild\\Microsoft\\VC\\" + platform + "\\Platforms\\Win32\\PlatformToolsets\\" + vs["Toolset"] + "_xp")
+		if os.path.isdir(checkPath):
+			FoundVisualStudio += [ { "Name": vs["Name"], "DisplayName": vs["DisplayName"] + " (Windows XP Support)", "Path": vs["Path"], "Version": vs["Version"], "Toolset": vs["Toolset"] + "_xp", "HasMFC": vs["HasMFC"] } ]
+
 def FindVCVars32(path):
 	auxVars = os.path.join(path, "VC\\Auxiliary\\Build\\vcvars32.bat")
 	if os.path.isfile(auxVars):
@@ -149,6 +166,7 @@ def HasXAudio2(path):
 del ProcessYearPath
 del VSVersions
 del VSMajor
+del VSPlatform
 
 #print(FoundVisualStudio)
 

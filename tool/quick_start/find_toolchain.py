@@ -9,7 +9,7 @@ def FindToolchain(filter):
 		ts = NeLToolchains[tsn]
 		okay = True
 		for k in filter:
-			if ts[k] != filter[k]:
+			if not ((not k in ts and not filter[k]) or ts[k] == filter[k]):
 				okay = False
 				break
 		if okay:
@@ -26,17 +26,16 @@ def FindToolchain(filter):
 			res = tsn
 	return res
 
-NeLToolchainWin32 = FindToolchain({ "OS": "Win98", "Platform": "x86" })
-if not NeLToolchainWin32:
-	NeLToolchainWin32 = FindToolchain({ "OS": "Win2k", "Platform": "x86" })
-if not NeLToolchainWin32:
-	NeLToolchainWin32 = FindToolchain({ "OS": "WinXP", "Platform": "x86" })
-if not NeLToolchainWin32:
-	NeLToolchainWin32 = FindToolchain({ "OS": "Win7", "Platform": "x86" })
-NeLToolchainWin64 = FindToolchain({ "OS": "WinXP", "Platform": "x64" })
-if not NeLToolchainWin64:
-	NeLToolchainWin64 = FindToolchain({ "OS": "Win7", "Platform": "x64" })
-NeLToolchainServer = FindToolchain(NeLConfig["Toolchain"]["Server"])
+def FindToolchainEx(filters):
+	for filter in filters:
+		res = FindToolchain(filter)
+		if res:
+			return res
+	return
+
+NeLToolchainWin32 = FindToolchainEx(NeLConfig["Toolchain"]["Win32"])
+NeLToolchainWin64 = FindToolchainEx(NeLConfig["Toolchain"]["Win64"])
+NeLToolchainServer = FindToolchainEx(NeLConfig["Toolchain"]["Server"])
 
 print("Win32:")
 print(NeLToolchainWin32)
