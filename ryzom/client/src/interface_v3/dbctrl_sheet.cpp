@@ -1418,6 +1418,10 @@ void CDBCtrlSheet::setupItem ()
 			case ITEMFAMILY::RANGE_WEAPON:
 			case ITEMFAMILY::SHIELD:
 			case ITEMFAMILY::JEWELRY:
+			case ITEMFAMILY::CRAFTING_TOOL:
+			case ITEMFAMILY::HARVEST_TOOL:
+			case ITEMFAMILY::TAMING_TOOL:
+			case ITEMFAMILY::TRAINING_TOOL:
 				// hide 'x0' and 'x1' stack count for equipable items
 				if (_DispQuantity < 2)
 					_DispQuantity = -1;
