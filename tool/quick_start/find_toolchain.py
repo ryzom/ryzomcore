@@ -34,7 +34,7 @@ def FindToolchainEx(filters):
 	return
 
 NeLToolchainNative = [
-	{ "Native": True }, # G++ on Linux
+	{ "Native": True, "Hunter": False }, # G++ on Linux with system packages
 	{ "OS": "Win7", "Platform": "x64", "Hunter": False }, # Fallback, VS on Windows
 	{ "OS": "Win7", "Platform": "x64" }
 ]

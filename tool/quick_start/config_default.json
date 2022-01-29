@@ -7,10 +7,10 @@
 			"MariaDB": "external/mariadb",
 			"Nginx": "external/nginx",
 			"PHP": "external/php",
-			"phpMyAdmin": "external/phpmyadmin",
-			"3dsMax": "",
-			"3dsMaxLocal": ""
-		}
+			"phpMyAdmin": "external/phpmyadmin"
+		},
+		"3dsMax": "",
+		"3dsMaxLocal": ""
 	},
 	"Toolchain": {
 		"Preference": [

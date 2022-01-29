@@ -5,7 +5,10 @@ def printBuildTarget(name, filters):
 	tn = FindToolchainEx(filters)
 	if tn:
 		tc = NeLToolchains[tn]
-		print("  " + name + ": " + tc["DisplayName"] + " (" + tc["Generator"] + ", " + tc["Toolset"] + ", " + tc["Platform"] + ")")
+		withHunter = ""
+		if "Hunter" in tc and tc["Hunter"]:
+			withHunter = ", Hunter"
+		print("  " + name + ": " + tc["DisplayName"] + " (" + tc["Generator"] + ", " + tc["Toolset"] + ", " + tc["Platform"] + ")" + withHunter)
 	else:
 		print("  " + name + ": NOT FOUND")
 
