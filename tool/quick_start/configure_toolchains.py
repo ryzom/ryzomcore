@@ -14,7 +14,7 @@ SortedToolsets = []
 for vs in FoundVisualStudio:
 	if not vs["Toolset"] in ByToolset:
 		SortedToolsets += [ vs["Toolset"] ]
-	if not vs["Toolset"] in ByToolset or ByToolset[vs["Toolset"]]["Version"] < vs["Version"]:
+	if not vs["Toolset"] in ByToolset or (ByToolset[vs["Toolset"]]["Version"] < vs["Version"] and (not ByToolset[vs["Toolset"]]["HasMFC"] or vs["HasMFC"])):
 		ByToolset[vs["Toolset"]] = vs;
 
 VSPlatforms = [ "x86", "x64" ]

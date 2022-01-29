@@ -92,6 +92,7 @@ def ProcessYearPath(yearVersion, yearPath):
 			editionPath = os.path.join(yearPath, edition)
 			if os.path.isdir(editionPath) and os.path.isfile(os.path.join(editionPath, "Common7\\IDE\\devenv.exe")):
 				auxBuildPath = os.path.join(editionPath, "VC\\Auxiliary\\Build")
+				# v141 Toolset and up
 				for buildProps in os.listdir(auxBuildPath):
 					if buildProps.startswith("Microsoft.VCToolsVersion.") and buildProps.endswith(".default.txt"):
 						toolchain = buildProps.split(".")[2]
@@ -103,6 +104,9 @@ def ProcessYearPath(yearVersion, yearPath):
 							mfcPath = os.path.join(editionPath, "VC\\Tools\\MSVC\\" + toolsVersion + "\\atlmfc\\include\\afx.h")
 							hasMFC = os.path.isfile(mfcPath)
 							FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolset": toolchain, "HasMFC": hasMFC } ]
+				# v140 Toolset
+				if os.path.isfile("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"):
+					FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolset": "v140", "HasMFC": os.path.isfile("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\atlmfc\\include\\afx.h") } ]
 for yearVersion in os.listdir("C:\\Program Files (x86)\\Microsoft Visual Studio"):
 	if yearVersion.startswith("."):
 		continue
@@ -122,7 +126,7 @@ for vs in list(FoundVisualStudio):
 		platform = VSPlatform[vs["Toolset"]]
 		# C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Microsoft\VC\v150\Platforms\Win32\PlatformToolsets\v141_xp
 		checkPath = os.path.join(vs["Path"], "MSBuild\\Microsoft\\VC\\" + platform + "\\Platforms\\Win32\\PlatformToolsets\\" + vs["Toolset"] + "_xp")
-		if os.path.isdir(checkPath):
+		if vs["Toolset"] == "v140" or os.path.isdir(checkPath):
 			FoundVisualStudio += [ { "Name": vs["Name"], "DisplayName": vs["DisplayName"], "Path": vs["Path"], "Version": vs["Version"], "Toolset": vs["Toolset"] + "_xp", "HasMFC": vs["HasMFC"] } ]
 
 def FindVCVars32(path):
