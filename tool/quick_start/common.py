@@ -3,32 +3,21 @@ from common_config import *
 
 import os
 
-NeLCodeDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Code"])
-if not os.path.isdir(NeLCodeDir):
-	exit("NeL Code directory (" + NeLCodeDir + ") does not exist.")
-NeLLeveldesignDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Leveldesign"])
-if not os.path.isdir(NeLLeveldesignDir):
-	exit("NeL Leveldesign directory (" + NeLLeveldesignDir + ") does not exist.")
-NeLGraphicsDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Graphics"])
-if not os.path.isdir(NeLGraphicsDir):
-	exit("NeL Graphics directory (" + NeLGraphicsDir + ") does not exist.")
-NeLSoundDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Sound"])
-if not os.path.isdir(NeLSoundDir):
-	exit("NeL Sound directory (" + NeLSoundDir + ") does not exist.")
-NeLBuildDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Build"])
-if not os.path.isdir(NeLBuildDir):
-	exit("NeL Build directory (" + NeLBuildDir + ") does not exist.")
-NeLPipelineDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Pipeline"])
-if not os.path.isdir(NeLPipelineDir):
-	exit("NeL Pipeline directory (" + NeLPipelineDir + ") does not exist.")
+NeLCodeDir = os.path.join(NeLRootDir, "code")
+NeLLeveldesignDir = os.path.join(NeLRootDir, "leveldesign")
+NeLGraphicsDir = os.path.join(NeLRootDir, "graphics")
+NeLSoundDir = os.path.join(NeLRootDir, "sound")
+NeLBuildDir = os.path.join(NeLRootDir, "build_" + NeLHostId)
+NeLPipelineDir = os.path.join(NeLRootDir, "pipeline")
 
-NeLPython27Dir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Tools"]["Python27"])
-NeLRRDtoolDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Tools"]["RRDtool"])
-NeLMariaDBDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Tools"]["MariaDB"])
-NeLNginxDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Tools"]["Nginx"])
-NeLPHPDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Tools"]["PHP"])
-NeLphpMyAdminDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Tools"]["phpMyAdmin"])
-NeL3dsMaxDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Tools"]["3dsMax"])
+# TODO: OS
+NeLPython27Dir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Win64"]["Python27"])
+NeLRRDtoolDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Win64"]["RRDtool"])
+NeLMariaDBDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Win64"]["MariaDB"])
+NeLNginxDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Win64"]["Nginx"])
+NeLPHPDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Win64"]["PHP"])
+NeLphpMyAdminDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Win64"]["phpMyAdmin"])
+NeL3dsMaxDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Win64"]["3dsMax"])
 
 #print(NeLRootDir)
 #print(NeLConfigDir)
@@ -36,3 +25,5 @@ NeL3dsMaxDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Tools"]["3dsMax"])
 #print(NeLConfig["Paths"]["Code"])
 
 #print(NeLExternalDir)
+
+print(NeLBuildDir)

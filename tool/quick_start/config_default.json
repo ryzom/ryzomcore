@@ -1,23 +1,16 @@
 {
-	"Domain": "default",
+	"Domains": [ "default" ],
 	"Paths": {
-		"Code": "code",
-		"Leveldesign": "leveldesign",
-		"Graphics": "graphics",
-		"Sound": "sound",
-		"Build": "build",
-		"Pipeline": "pipeline",
-		"Tools": {
+		"Win64": {
 			"Python27": "external/python27",
 			"RRDtool": "external/rrdtool",
 			"MariaDB": "external/mariadb",
 			"Nginx": "external/nginx",
 			"PHP": "external/php",
-			"phpMyAdmin": "external/phpmyadmin"
-		},
-		"3dsMax": "",
-		"3dsMaxLocal": "",
-		"WinePrefix": ""
+			"phpMyAdmin": "external/phpmyadmin",
+			"3dsMax": "",
+			"3dsMaxLocal": ""
+		}
 	},
 	"Toolchain": {
 		"Preference": [

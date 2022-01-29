@@ -70,7 +70,11 @@ for ts in SortedToolsets:
 		if toolchain["VCVars"] and (len(toolchain["Prefix"]) or "Hunter" in toolchain):
 			Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform] = toolchain
 
-with open(os.path.join(NeLConfigDir, "toolchains_default.json"), 'w') as fo:
+with open(os.path.join(NeLConfigDir, "toolchains_" + socket.gethostname().lower() + "_default.json"), 'w') as fo:
 	json.dump(Toolchains, fo, indent=2)
+
+if not os.path.isfile("toolchains_" + socket.gethostname().lower() + ".json"):
+	with open(os.path.join(NeLConfigDir, "toolchains_" + socket.gethostname().lower() + ".json"), 'w') as fo:
+		json.dump({}, fo, indent=2)
 
 # end of file
