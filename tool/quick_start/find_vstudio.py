@@ -106,7 +106,7 @@ def ProcessYearPath(yearVersion, yearPath):
 							FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolset": toolchain, "HasMFC": hasMFC } ]
 				# v140 Toolset
 				if os.path.isfile("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"):
-					FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolset": "v140", "HasMFC": os.path.isfile("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\atlmfc\\include\\afx.h") } ]
+					FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0", "Version": VSMajor[yearVersion], "Toolset": "v140", "HasMFC": os.path.isfile("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\atlmfc\\include\\afx.h") } ]
 for yearVersion in os.listdir("C:\\Program Files (x86)\\Microsoft Visual Studio"):
 	if yearVersion.startswith("."):
 		continue
