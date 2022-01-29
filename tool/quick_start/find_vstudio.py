@@ -106,7 +106,7 @@ def ProcessYearPath(yearVersion, yearPath):
 							FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolset": toolchain, "HasMFC": hasMFC } ]
 				# v140 Toolset
 				if os.path.isfile("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"):
-					FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0", "Version": VSMajor[yearVersion], "Toolset": "v140", "HasMFC": os.path.isfile("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\atlmfc\\include\\afx.h") } ]
+					FoundVisualStudio += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolset": "v140", "HasMFC": os.path.isfile("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\atlmfc\\include\\afx.h") } ]
 for yearVersion in os.listdir("C:\\Program Files (x86)\\Microsoft Visual Studio"):
 	if yearVersion.startswith("."):
 		continue
@@ -129,22 +129,21 @@ for vs in list(FoundVisualStudio):
 		if vs["Toolset"] == "v140" or os.path.isdir(checkPath):
 			FoundVisualStudio += [ { "Name": vs["Name"], "DisplayName": vs["DisplayName"], "Path": vs["Path"], "Version": vs["Version"], "Toolset": vs["Toolset"] + "_xp", "HasMFC": vs["HasMFC"] } ]
 
-def FindVCVars32(path):
-	auxVars = os.path.join(path, "VC\\Auxiliary\\Build\\vcvars32.bat")
+def FindVCVars(path, toolset, platform):
+	toolsetMap = {
+		"v140": "14.0",
+		"v140_xp": "14.0",
+		"v141": "14.16",
+		"v141_xp": "14.16",
+		"v142": "14.29",
+		"v143": "14.30",
+	}
+	auxVars = os.path.join(path, "VC\\Auxiliary\\Build\\vcvarsall.bat")
 	if os.path.isfile(auxVars):
-		return [ auxVars ]
+		return [ auxVars, platform, "-vcvars_ver=" + toolsetMap[toolset] ]
 	allVars = os.path.join(path, "VC\\vcvarsall.bat")
 	if os.path.isfile(allVars):
-		return [ allVars, "x86" ]
-	return
-
-def FindVCVars64(path):
-	auxVars = os.path.join(path, "VC\\Auxiliary\\Build\\vcvars64.bat")
-	if os.path.isfile(auxVars):
-		return [ auxVars ]
-	allVars = os.path.join(path, "VC\\vcvarsall.bat")
-	if os.path.isfile(allVars):
-		return [ allVars, "x64" ]
+		return [ allVars, platform ]
 	return
 
 # FindDirectX SDK, optimized for compatibility per version. If prefered SDK not available, just return blank

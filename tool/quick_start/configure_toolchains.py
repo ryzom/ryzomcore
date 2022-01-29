@@ -50,10 +50,7 @@ for ts in SortedToolsets:
 		luaVersion = FindLuaVersion(toolchain["Prefix"])
 		if luaVersion:
 			toolchain["LuaVersion"] = luaVersion
-		if platform == "x64":
-			toolchain["VCVars"] = FindVCVars64(vs["Path"])
-		else:
-			toolchain["VCVars"] = FindVCVars32(vs["Path"])
+		toolchain["VCVars"] = FindVCVars(vs["Path"], vs["Toolset"], platform)
 		if vs["Version"] >= 11:
 			if toolchain["Toolset"].endswith("_xp"):
 				toolchain["OS"] = "WinXP"
