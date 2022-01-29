@@ -9,7 +9,7 @@ def FindToolchain(filter):
 		ts = NeLToolchains[tsn]
 		okay = True
 		for k in filter:
-			if not ((not k in ts and not filter[k]) or ts[k] == filter[k]):
+			if not ((not k in ts and not filter[k]) or (k in ts and ts[k] == filter[k])):
 				okay = False
 				break
 		if okay:
@@ -33,15 +33,10 @@ def FindToolchainEx(filters):
 			return res
 	return
 
-NeLToolchainWin32 = FindToolchainEx(NeLConfig["Toolchain"]["Win32"])
-NeLToolchainWin64 = FindToolchainEx(NeLConfig["Toolchain"]["Win64"])
-NeLToolchainServer = FindToolchainEx(NeLConfig["Toolchain"]["Server"])
-
-print("Win32:")
-print(NeLToolchainWin32)
-print("Win64:")
-print(NeLToolchainWin64)
-print("Server:")
-print(NeLToolchainServer)
+NeLToolchainNative = [
+	{ "Native": True }, # G++ on Linux
+	{ "OS": "Win7", "Platform": "x64", "Hunter": False }, # Fallback, VS on Windows
+	{ "OS": "Win7", "Platform": "x64" }
+]
 
 # end of file

@@ -30,22 +30,20 @@
 		],
 		"Server": [{ "OS": "Ubuntu20", "Hunter": false }],
 		"Client": {
-			"exedll_32": "Win32",
-			"exedll_64": "Win64"
+			"exedll_32": [
+				{ "OS": "Win98", "Platform": "x86", "Hunter": false },
+				{ "OS": "Win2k", "Platform": "x86", "Hunter": false },
+				{ "OS": "WinXP", "Platform": "x86", "Hunter": false },
+				{ "OS": "Win7", "Platform": "x86", "Hunter": false },
+				{ "OS": "WinXP", "Platform": "x86" },
+				{ "OS": "Win7", "Platform": "x86" }
+			],
+			"exedll_64": [
+				{ "OS": "WinXP", "Platform": "x64", "Hunter": false },
+				{ "OS": "Win7", "Platform": "x64", "Hunter": false },
+				{ "OS": "Win7", "Platform": "x64" }
+			]
 		},
-		"Win32": [
-			{ "OS": "Win98", "Platform": "x86", "Hunter": false },
-			{ "OS": "Win2k", "Platform": "x86", "Hunter": false },
-			{ "OS": "WinXP", "Platform": "x86", "Hunter": false },
-			{ "OS": "Win7", "Platform": "x86", "Hunter": false },
-			{ "OS": "WinXP", "Platform": "x86" },
-			{ "OS": "Win7", "Platform": "x86" }
-		],
-		"Win64": [
-			{ "OS": "WinXP", "Platform": "x64", "Hunter": false },
-			{ "OS": "Win7", "Platform": "x64", "Hunter": false },
-			{ "OS": "Win7", "Platform": "x64" }
-		],
 		"Options": [
 			{
 				"Filter": { "Compiler": "MSVC" },

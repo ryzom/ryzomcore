@@ -15,10 +15,14 @@ if not "Win64" in NeLUserConfig["Paths"]:
 	NeLUserConfig["Paths"]["Win64"] = {}
 if not "Toolchain" in NeLUserConfig:
 	NeLUserConfig["Toolchain"] = {}
+if not "Client" in NeLUserConfig["Toolchain"]:
+	NeLUserConfig["Toolchain"]["Client"] = {}
 NeLConfig["Paths"]["Win64"].update(NeLUserConfig["Paths"]["Win64"])
 NeLUserConfig["Paths"]["Win64"] = NeLConfig["Paths"]["Win64"]
 NeLConfig["Paths"].update(NeLUserConfig["Paths"])
 NeLUserConfig["Paths"] = NeLConfig["Paths"]
+NeLConfig["Toolchain"]["Client"].update(NeLUserConfig["Toolchain"]["Client"])
+NeLUserConfig["Toolchain"]["Client"] = NeLConfig["Toolchain"]["Client"]
 NeLConfig["Toolchain"].update(NeLUserConfig["Toolchain"])
 NeLUserConfig["Toolchain"] = NeLConfig["Toolchain"]
 NeLConfig.update(NeLUserConfig)

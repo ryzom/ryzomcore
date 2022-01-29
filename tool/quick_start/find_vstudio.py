@@ -123,7 +123,7 @@ for vs in list(FoundVisualStudio):
 		# C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Microsoft\VC\v150\Platforms\Win32\PlatformToolsets\v141_xp
 		checkPath = os.path.join(vs["Path"], "MSBuild\\Microsoft\\VC\\" + platform + "\\Platforms\\Win32\\PlatformToolsets\\" + vs["Toolset"] + "_xp")
 		if os.path.isdir(checkPath):
-			FoundVisualStudio += [ { "Name": vs["Name"], "DisplayName": vs["DisplayName"] + " (Windows XP Support)", "Path": vs["Path"], "Version": vs["Version"], "Toolset": vs["Toolset"] + "_xp", "HasMFC": vs["HasMFC"] } ]
+			FoundVisualStudio += [ { "Name": vs["Name"], "DisplayName": vs["DisplayName"], "Path": vs["Path"], "Version": vs["Version"], "Toolset": vs["Toolset"] + "_xp", "HasMFC": vs["HasMFC"] } ]
 
 def FindVCVars32(path):
 	auxVars = os.path.join(path, "VC\\Auxiliary\\Build\\vcvars32.bat")
