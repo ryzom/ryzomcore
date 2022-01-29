@@ -21,8 +21,19 @@ for client in NeLConfig["Toolchain"]["Client"]:
 printBuildTarget("server", NeLConfig["Toolchain"]["Server"])
 printBuildTarget("tools", NeLToolchainNative)
 printBuildTarget("samples", NeLToolchainNative)
+remapMaxCompatible = {}
+foundMax = {}
 for maxSdk in FoundMaxSDKs:
-	printBuildTarget("plugin_max/" + str(maxSdk["Version"]) + "_" + maxSdk["Platform"], [ { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True, "Hunter": True }, { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True } ])
+	if "Compatible" in maxSdk:
+		# Skip unnecessary builds
+		if maxSdk["Compatible"] in foundMax:
+			continue
+	filters = [ { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True, "Hunter": True }, { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True } ]
+	if FindToolchainEx(filters):
+		foundMax[maxSdk["Version"]] = True
+		if "Compatible" in maxSdk:
+			foundMax[maxSdk["Compatible"]] = True
+	printBuildTarget("plugin_max/" + str(maxSdk["Version"]) + "_" + maxSdk["Platform"], filters)
 # plugin_max
 
 # end of file
