@@ -156,7 +156,10 @@ def FindDirectXSDK(version):
 			return "C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2008)"
 	if os.path.isfile("C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Include\\d3d9.h"):
 		return "C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)"
-	return
+	dxSdkDir = os.getenv('DXSDK_DIR')
+	if dxSdkDir and os.path.isfile(os.path.join(dxSdkDir, "Include\\d3d9.h")):
+		return dxSdkDir
+	return 
 
 def HasXAudio2(path):
 	if not path:
