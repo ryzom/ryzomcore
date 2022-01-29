@@ -123,6 +123,12 @@ def FindVSPrefixPaths(toolset, platform):
 	found.sort(reverse = True)
 	if len(found):
 		return FindPrefixPaths(os.path.join("C:\\", found[0]))
+	if toolset == "v143":
+		return FindVSPrefixPaths("v142", platform)
+	if toolset == "v142":
+		return FindVSPrefixPaths("v141", platform)
+	if toolset == "v141":
+		return FindVSPrefixPaths("v140", platform)
 	return []
 
 def FindLuaVersion(prefixPaths):
