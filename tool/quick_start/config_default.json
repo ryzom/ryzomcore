@@ -13,9 +13,11 @@
 			"MariaDB": "external/mariadb",
 			"Nginx": "external/nginx",
 			"PHP": "external/php",
-			"phpMyAdmin": "external/phpmyadmin",
-			"3dsMax": ""
-		}
+			"phpMyAdmin": "external/phpmyadmin"
+		},
+		"3dsMax": "",
+		"3dsMaxLocal": "",
+		"WinePrefix": ""
 	},
 	"Toolchain": {
 		"Preference": [
