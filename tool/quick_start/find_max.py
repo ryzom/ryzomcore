@@ -68,7 +68,7 @@ def FindMaxSDKs():
 		2022: "v141",
 		2021: "v141",
 		2020: "v141",
-		2219: "v140",
+		2019: "v140",
 		2018: "v140",
 		2017: "v140",
 		2016: "v110",
@@ -117,6 +117,10 @@ def FindMaxSDKs():
 			rv = { "Path": found, "Version": i, "Toolset": t }
 			if c:
 				rv["Compatible"] = c
+			if i >= 2015:
+				rv["Platform"] = "x64"
+			else:
+				rv["Platform"] = "x86"
 			res += [ rv ]
 	return res
 

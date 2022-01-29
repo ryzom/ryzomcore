@@ -68,7 +68,18 @@ for ts in SortedToolsets:
 		else:
 			continue
 		if toolchain["VCVars"] and (len(toolchain["Prefix"]) or "Hunter" in toolchain):
-			Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform] = toolchain
+			addHunter = ""
+			if "Hunter" in toolchain:
+				addHunter = "/H"
+			Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + addHunter] = toolchain
+			if not "Hunter" in toolchain and vs["Version"] >= 14:
+				# Duplicate toolchain with Hunter externals for all newer VS versions
+				copyToolchain = {}
+				for k in toolchain:
+					copyToolchain[k] = toolchain[k]
+				copyToolchain["Hunter"] = True
+				copyToolchain["Prefix"] = []
+				Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + "/H"] = copyToolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_" + socket.gethostname().lower() + "_default.json"), 'w') as fo:
 	json.dump(Toolchains, fo, indent=2)
