@@ -129,9 +129,9 @@ FoundPluginMaxLocal = FindMaxLocal(FindPluginMax())
 FoundLatestMax = FindLatestMax()
 FoundMaxSDKs = FindMaxSDKs()
 
-print FoundPluginMax
-print FoundPluginMaxLocal
-print FoundLatestMax
-print FoundMaxSDKs
+#print FoundPluginMax
+#print FoundPluginMaxLocal
+#print FoundLatestMax
+#print FoundMaxSDKs
 
 # end of file

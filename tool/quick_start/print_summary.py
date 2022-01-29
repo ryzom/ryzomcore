@@ -22,7 +22,7 @@ printBuildTarget("server", NeLConfig["Toolchain"]["Server"])
 printBuildTarget("tools", NeLToolchainNative)
 printBuildTarget("samples", NeLToolchainNative)
 for maxSdk in FoundMaxSDKs:
-	printBuildTarget("plugin_max/" + str(maxSdk["Version"]) + "_" + maxSdk["Platform"], [ { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "Hunter": True }, { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"] } ])
+	printBuildTarget("plugin_max/" + str(maxSdk["Version"]) + "_" + maxSdk["Platform"], [ { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True, "Hunter": True }, { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True } ])
 # plugin_max
 
 # end of file
