@@ -39,6 +39,12 @@ for ts in SortedToolsets:
 		if vs["Version"] < 14:
 			toolchain["CMake"] += [ "-DWINSDK_VERSION=6.0A" ]
 		toolchain["EnvPath"] = FindBinPaths(toolchain["Prefix"])
+		toolchain["EnvSet"] = []
+		if ts.endswith("_xp"):
+			toolchain["EnvSet"] += [ "INCLUDE=%ProgramFiles(x86)%\\Microsoft SDKs\\Windows\\7.1A\\Include;%INCLUDE%" ]
+			toolchain["EnvSet"] += [ "PATH=%ProgramFiles(x86)%\\Microsoft SDKs\\Windows\\7.1A\\Bin;%PATH%" ]
+			toolchain["EnvSet"] += [ "LIB=%ProgramFiles(x86)%\\Microsoft SDKs\\Windows\\7.1A\\Lib;%LIB%" ]
+			toolchain["EnvSet"] += [ "CL=/D_USING_V110_SDK71_;%CL%" ]
 		toolchain["Version"] = vs["Version"]
 		directXSdk = FindDirectXSDK(vs["Version"])
 		if directXSdk:
@@ -76,6 +82,7 @@ for ts in SortedToolsets:
 					copyToolchain[k] = toolchain[k]
 				copyToolchain["Hunter"] = True
 				copyToolchain["Prefix"] = []
+				copyToolchain["EnvPath"] = []
 				Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + "/H"] = copyToolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_" + socket.gethostname().lower() + "_default.json"), 'w') as fo:
