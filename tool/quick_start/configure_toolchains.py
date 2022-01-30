@@ -49,9 +49,7 @@ for ts in SortedToolsets:
 			toolchain["EnvSet"] += [ "CL=/D_USING_V110_SDK71_;%CL%" ]
 		# Hunter looks for this variable based on the toolset version, rather than the VS version
 		# It must return the VS path, however, not the toolchain path
-		if (vs["Toolset"] == "v140" or vs["Toolset"] == "v140_xp") and vs["Version"] > 14:
-			toolchain["EnvSet"] += [ "VS140COMNTOOLS=" + os.path.normpath(os.path.join(vs["Path"], "Common7/Tools")) ]
-		elif (vs["Toolset"] == "v141" or vs["Toolset"] == "v141_xp") and vs["Version"] > 15:
+		if (vs["Toolset"] == "v141" or vs["Toolset"] == "v141_xp") and vs["Version"] > 15:
 			toolchain["EnvSet"] += [ "VS150COMNTOOLS=" + os.path.normpath(os.path.join(vs["Path"], "Common7/Tools")) ]
 		elif vs["Toolset"] == "v142" and vs["Version"] > 16:
 			toolchain["EnvSet"] += [ "VS160COMNTOOLS=" + os.path.normpath(os.path.join(vs["Path"], "Common7/Tools")) ]
