@@ -34,7 +34,7 @@ for ts in SortedToolsets:
 		toolchain["Toolset"] = ts
 		toolchain["Prefix"] = FindVSPrefixPaths(ts, platform)
 		if not len(toolchain["Prefix"]) and vs["Version"] >= 14:
-			toolchain["Hunter"] = vs["Version"] >= 14
+			toolchain["Hunter"] = True
 		toolchain["CMake"] = []
 		if vs["Version"] < 14:
 			toolchain["CMake"] += [ "-DWINSDK_VERSION=6.0A" ]
@@ -57,6 +57,9 @@ for ts in SortedToolsets:
 			toolchain["EnvSet"] += [ "VS160COMNTOOLS=" + os.path.normpath(os.path.join(vs["Path"], "Common7/Tools")) ]
 		elif vs["Toolset"] == "v143" and vs["Version"] > 17:
 			toolchain["EnvSet"] += [ "VS170COMNTOOLS=" + os.path.normpath(os.path.join(vs["Path"], "Common7/Tools")) ]
+		# Hunter doesn't build the libxml2 dependency correctly in static build mode
+		if "Hunter" in toolchain:
+			toolchain["EnvSet"] += [ "CL=/DLIBXML_STATIC;%CL%" ]
 		toolchain["Version"] = vs["Version"]
 		directXSdk = FindDirectXSDK(vs["Version"])
 		if directXSdk:
@@ -95,6 +98,7 @@ for ts in SortedToolsets:
 				copyToolchain["Hunter"] = True
 				copyToolchain["Prefix"] = []
 				copyToolchain["EnvPath"] = []
+				copyToolchain["EnvSet"] += [ "CL=/DLIBXML_STATIC;%CL%" ]
 				Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + "/H"] = copyToolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_" + socket.gethostname().lower() + "_default.json"), 'w') as fo:
