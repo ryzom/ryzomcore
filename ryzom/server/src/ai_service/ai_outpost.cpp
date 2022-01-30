@@ -883,7 +883,6 @@ void COutpost::createSquad(CGroupDesc<COutpostSquadFamily> const* groupDesc, COu
 	grp->_UpdateNbTicks = 10;
 	grp->respawnTime() = respawTimeGC;
 	
-	grp->getDebugHistory()->setRecording(true); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
 	grp->updateStateInstance();	// Directly call his first state (to retrieve associated params).
 	
 	if (createOrder!=0)
