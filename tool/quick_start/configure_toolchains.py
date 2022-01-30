@@ -40,11 +40,23 @@ for ts in SortedToolsets:
 			toolchain["CMake"] += [ "-DWINSDK_VERSION=6.0A" ]
 		toolchain["EnvPath"] = FindBinPaths(toolchain["Prefix"])
 		toolchain["EnvSet"] = []
+		# For XP support, simply target SDK 7.1A
 		if ts.endswith("_xp"):
+			toolchain["CMake"] += [ "-DWINSDK_VERSION=7.1A" ]
 			toolchain["EnvSet"] += [ "INCLUDE=%ProgramFiles(x86)%\\Microsoft SDKs\\Windows\\7.1A\\Include;%INCLUDE%" ]
 			toolchain["EnvSet"] += [ "PATH=%ProgramFiles(x86)%\\Microsoft SDKs\\Windows\\7.1A\\Bin;%PATH%" ]
 			toolchain["EnvSet"] += [ "LIB=%ProgramFiles(x86)%\\Microsoft SDKs\\Windows\\7.1A\\Lib;%LIB%" ]
 			toolchain["EnvSet"] += [ "CL=/D_USING_V110_SDK71_;%CL%" ]
+		# Hunter looks for this variable based on the toolset version, rather than the VS version
+		# It must return the VS path, however, not the toolchain path
+		if (vs["Toolset"] == "v140" or vs["Toolset"] == "v140_xp") and vs["Version"] > 14:
+			toolchain["EnvSet"] += [ "VS140COMNTOOLS=" + os.path.normpath(os.path.join(vs["Path"], "Common7/Tools")) ]
+		elif (vs["Toolset"] == "v141" or vs["Toolset"] == "v141_xp") and vs["Version"] > 15:
+			toolchain["EnvSet"] += [ "VS150COMNTOOLS=" + os.path.normpath(os.path.join(vs["Path"], "Common7/Tools")) ]
+		elif vs["Toolset"] == "v142" and vs["Version"] > 16:
+			toolchain["EnvSet"] += [ "VS160COMNTOOLS=" + os.path.normpath(os.path.join(vs["Path"], "Common7/Tools")) ]
+		elif vs["Toolset"] == "v143" and vs["Version"] > 17:
+			toolchain["EnvSet"] += [ "VS170COMNTOOLS=" + os.path.normpath(os.path.join(vs["Path"], "Common7/Tools")) ]
 		toolchain["Version"] = vs["Version"]
 		directXSdk = FindDirectXSDK(vs["Version"])
 		if directXSdk:
