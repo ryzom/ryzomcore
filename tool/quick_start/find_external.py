@@ -2,7 +2,7 @@
 # This script detects all external library paths
 # Useful for locating all dynamic libraries
 
-from common_config import *
+from .common_config import *
 
 import os
 

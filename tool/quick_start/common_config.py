@@ -1,5 +1,5 @@
 
-from common_root import *
+from .common_root import *
 
 import os, json, socket
 

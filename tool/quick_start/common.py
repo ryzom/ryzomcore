@@ -1,5 +1,5 @@
 
-from common_config import *
+from . common_config import *
 
 import os
 

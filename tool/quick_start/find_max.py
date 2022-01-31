@@ -2,12 +2,13 @@
 # Script finds latest max installation, user directory, and max SDKs
 
 import os
+from itertools import chain
 
 def HasPluginMax(path):
 	return os.path.isfile(os.path.join(path, "3dsmax.exe")) and (os.path.isfile(os.path.join(path, "plugins/nelexport_r.dlu")) or os.path.isfile(os.path.join(path, "plugins/nelexport_d.dlu")) or os.path.isfile(os.path.join(path, "plugins/nelexport.dlu")))
 
 def FindPluginMax():
-	for i in range(2038, 2007, -1) + range(9, 2, -1):
+	for i in chain(range(2038, 2007, -1), range(9, 2, -1)):
 		path = os.getenv('ADSK_3DSMAX_x64_' + str(i))
 		if path and HasPluginMax(path):
 			return os.path.normpath(path)
@@ -19,7 +20,7 @@ def FindPluginMax():
 			return os.path.normpath(path)
 
 def FindLatestMax():
-	for i in range(2038, 2007, -1) + range(9, 2, -1):
+	for i in chain(range(2038, 2007, -1), range(9, 2, -1)):
 		path = os.getenv('ADSK_3DSMAX_x64_' + str(i))
 		if path and os.path.isfile(os.path.join(path, "3dsmax.exe")):
 			return os.path.normpath(path)
@@ -101,7 +102,7 @@ def FindMaxSDKs():
 	res = []
 	set = {}
 	remap = {}
-	for i in range(3, 10) + range(2008, 2039):
+	for i in chain(range(3, 10), range(2008, 2039)):
 		found = FindMaxSDK(i)
 		if found:
 			set[i] = True

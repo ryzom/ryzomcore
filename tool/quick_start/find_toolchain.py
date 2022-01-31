@@ -1,7 +1,7 @@
 
 # This script finds the best toolchains for each purpose
 
-from common import *
+from .common import *
 
 def FindToolchain(filter):
 	toolchains = {}

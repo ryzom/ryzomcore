@@ -1,9 +1,12 @@
 
 # This script generates a configuration file listing all the available toolchains
 
-from common import *
-from find_vstudio import *
-from find_external import *
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+from quick_start.common import *
+from quick_start.find_vstudio import *
+from quick_start.find_external import *
 
 Toolchains = {}
 
@@ -36,8 +39,26 @@ for ts in SortedToolsets:
 		if not len(toolchain["Prefix"]) and vs["Version"] >= 14:
 			toolchain["Hunter"] = True
 		toolchain["CMake"] = []
-		if vs["Version"] < 14:
-			toolchain["CMake"] += [ "-DWINSDK_VERSION=6.0A" ]
+		# Set the SDK version
+		# https://en.wikipedia.org/wiki/Microsoft_Windows_SDK
+		# C:\Program Files (x86)\Windows Kits\10
+		if vs["Version"] < 14 and not ts.endswith("_xp"):
+			if vs["Version"] >= 12: # 2013
+				toolchain["CMake"] += [ "-DWINSDK_VERSION=8.1A" ]
+			elif vs["Version"] >= 11:  # 2012
+				toolchain["CMake"] += [ "-DWINSDK_VERSION=8.0A" ]
+			elif vs["Version"] >= 10:  # 2010
+				toolchain["CMake"] += [ "-DWINSDK_VERSION=7.0A" ]
+			elif vs["Version"] >= 9:
+				# C:\Program Files\Microsoft SDKs\Windows\v6.0A
+				if os.path.isfile("C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Include\\Msi.h"):
+					toolchain["CMake"] += [ "-DWINSDK_DIR=C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A" ]
+				toolchain["CMake"] += [ "-DWINSDK_VERSION=6.0A" ]
+			else:
+				# C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2
+				if os.path.isfile("C:\\Program Files\\Microsoft Platform SDK for Windows Server 2003 R2\\Include\\Msi.h"):
+					toolchain["CMake"] += [ "-DWINSDK_DIR=C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2" ]
+				toolchain["CMake"] += [ "-DWINSDK_VERSION=5.2" ]
 		toolchain["EnvPath"] = FindBinPaths(toolchain["Prefix"])
 		toolchain["EnvSet"] = []
 		# For XP support, simply target SDK 7.1A
@@ -97,6 +118,8 @@ for ts in SortedToolsets:
 				copyToolchain["Prefix"] = []
 				copyToolchain["EnvPath"] = []
 				copyToolchain["EnvSet"] += [ "CL=/DLIBXML_STATIC;%CL%" ]
+				if "LuaVersion" in copyToolchain:
+					del copyToolchain["LuaVersion"]
 				Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + "/H"] = copyToolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_" + socket.gethostname().lower() + "_default.json"), 'w') as fo:

@@ -1,9 +1,10 @@
 
-from find_toolchain import *
-from find_max import *
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-def printBuildTarget(name, filters):
-	tn = FindToolchainEx(filters)
+from quick_start.find_targets import *
+
+def printBuildTarget(name, tn):
 	if tn:
 		tc = NeLToolchains[tn]
 		withHunter = ""
@@ -14,26 +15,14 @@ def printBuildTarget(name, filters):
 		print("  " + name + ": NOT FOUND")
 
 print("Build targets:")
-printBuildTarget("client_dev", NeLToolchainNative)
-printBuildTarget("server_dev", NeLToolchainNative)
-for client in NeLConfig["Toolchain"]["Client"]:
-	printBuildTarget(client, NeLConfig["Toolchain"]["Client"][client])
-printBuildTarget("server", NeLConfig["Toolchain"]["Server"])
-printBuildTarget("tools", NeLToolchainNative)
-printBuildTarget("samples", NeLToolchainNative)
-remapMaxCompatible = {}
-foundMax = {}
-for maxSdk in FoundMaxSDKs:
-	if "Compatible" in maxSdk:
-		# Skip unnecessary builds
-		if maxSdk["Compatible"] in foundMax:
-			continue
-	filters = [ { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True, "Hunter": True }, { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True } ]
-	if FindToolchainEx(filters):
-		foundMax[maxSdk["Version"]] = True
-		if "Compatible" in maxSdk:
-			foundMax[maxSdk["Compatible"]] = True
-	printBuildTarget("plugin_max/" + str(maxSdk["Version"]) + "_" + maxSdk["Platform"], filters)
-# plugin_max
+printBuildTarget("client_dev", NeLTargetClientDev)
+printBuildTarget("server_dev", NeLTargetServerDev)
+for client in NeLTargetClient:
+	printBuildTarget(client, NeLTargetClient[client])
+printBuildTarget("server", NeLTargetServer)
+printBuildTarget("tools", NeLTargetTools)
+printBuildTarget("samples", NeLTargetSamples)
+for pluginMax in NelTargetPluginMax:
+	printBuildTarget("plugin_max/" + pluginMax, NelTargetPluginMax[pluginMax])
 
 # end of file
