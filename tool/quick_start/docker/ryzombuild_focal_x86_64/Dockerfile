@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:bionic
+FROM --platform=linux/amd64 ubuntu:focal
 MAINTAINER Ryzom Core <https://wiki.ryzom.dev/>
 
 RUN apt-get update && apt-get install -y \
@@ -8,11 +8,13 @@ RUN apt-get update && apt-get install -y \
 # RUN add-apt-repository ppa:ubuntu-toolchain-r/test
 
 RUN apt-get update && apt-get install -y \
-  cmake build-essential \
-  gcc-8 g++-8 \
-  && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 \
-  && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60 \
+  cmake ninja-build build-essential \
   && rm -rf /var/lib/apt/lists/*
+
+# Ubuntu 16.04 LTS and Ubuntu 18.04 LTS:
+# sudo apt install gcc-8 g++-8 -y
+# sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
+# sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
 
 RUN apt-get update && apt-get install -y \
   bison autoconf automake \
@@ -31,6 +33,18 @@ RUN apt-get update && apt-get install -y \
   libgsf-1-dev \
   qtbase5-dev qttools5-dev qttools5-dev-tools \
   && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p hunter_dependencies/cmake
+
+COPY tool/quick_start/docker/hunter_dependencies/CMakeLists.txt hunter_dependencies/CMakeLists.txt
+COPY CMakeModules/HunterGate.cmake hunter_dependencies/cmake/HunterGate.cmake
+COPY CMakeModules/HunterConfig.cmake hunter_dependencies/cmake/HunterConfig.cmake
+
+RUN mkdir -p hunter_dependencies/build \
+  && cd hunter_dependencies/build \
+  && cmake -DHUNTER_JOBS_NUMBER=$((`nproc` * 3 / 4)) .. \
+  && cd ../.. \
+  && rm -rf hunter_dependencies
 
 RUN mkdir -p /mnt/nel
 
