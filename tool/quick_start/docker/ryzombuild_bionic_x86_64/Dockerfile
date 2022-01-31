@@ -1,20 +1,10 @@
 FROM --platform=linux/amd64 ubuntu:bionic
 MAINTAINER Ryzom Core <https://wiki.ryzom.dev/>
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   software-properties-common \
-  && rm -rf /var/lib/apt/lists/*
-
-# RUN add-apt-repository ppa:ubuntu-toolchain-r/test
-
-RUN apt-get update && apt-get install -y \
-  cmake ninja-build build-essential \
+  ninja-build curl wget build-essential \
   gcc-8 g++-8 \
-  && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 \
-  && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60 \
-  && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install -y \
   bison autoconf automake \
   libpng-dev \
   libjpeg-dev \
@@ -30,6 +20,10 @@ RUN apt-get update && apt-get install -y \
   liblzma-dev \
   libgsf-1-dev \
   qtbase5-dev qttools5-dev qttools5-dev-tools \
+  && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 \
+  && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60 \
+  && curl -sSL https://apt.kitware.com/kitware-archive.sh | bash \
+  && apt-get install -y cmake \
   && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p hunter_dependencies/cmake
@@ -40,7 +34,7 @@ COPY CMakeModules/HunterConfig.cmake hunter_dependencies/cmake/HunterConfig.cmak
 
 RUN mkdir -p hunter_dependencies/build \
   && cd hunter_dependencies/build \
-  && cmake -DHUNTER_JOBS_NUMBER=$((`nproc` * 3 / 4)) .. \
+  && cmake -G "Ninja" -DHUNTER_JOBS_NUMBER=$((`nproc` * 3 / 4)) .. \
   && cd ../.. \
   && rm -rf hunter_dependencies
 

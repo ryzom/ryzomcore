@@ -1,22 +1,9 @@
 FROM --platform=linux/amd64 ubuntu:focal
 MAINTAINER Ryzom Core <https://wiki.ryzom.dev/>
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   software-properties-common \
-  && rm -rf /var/lib/apt/lists/*
-
-# RUN add-apt-repository ppa:ubuntu-toolchain-r/test
-
-RUN apt-get update && apt-get install -y \
-  cmake ninja-build build-essential \
-  && rm -rf /var/lib/apt/lists/*
-
-# Ubuntu 16.04 LTS and Ubuntu 18.04 LTS:
-# sudo apt install gcc-8 g++-8 -y
-# sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
-# sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
-
-RUN apt-get update && apt-get install -y \
+  cmake ninja-build curl wget build-essential \
   bison autoconf automake \
   libpng-dev \
   libjpeg-dev \
@@ -42,7 +29,7 @@ COPY CMakeModules/HunterConfig.cmake hunter_dependencies/cmake/HunterConfig.cmak
 
 RUN mkdir -p hunter_dependencies/build \
   && cd hunter_dependencies/build \
-  && cmake -DHUNTER_JOBS_NUMBER=$((`nproc` * 3 / 4)) .. \
+  && cmake -G "Ninja" -DHUNTER_JOBS_NUMBER=$((`nproc` * 3 / 4)) .. \
   && cd ../.. \
   && rm -rf hunter_dependencies
 
