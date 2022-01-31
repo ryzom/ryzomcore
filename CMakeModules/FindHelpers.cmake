@@ -696,7 +696,7 @@ MACRO(FIND_LIBXML2)
         IF(CRYPT32_LIB)
           LIST(APPEND LIBXML2_LIBRARIES ${CRYPT32_LIB})
         ENDIF()
-      ELSE()
+      ELSEIF(NOT HUNTER_ENABLED)
         # under Linux and OS X, recent libxml2 versions are linked against liblzma
         FIND_PACKAGE(LibLZMA)
 
