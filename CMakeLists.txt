@@ -222,7 +222,7 @@ IF(WITH_STATIC)
     SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${WINSOCK2_LIB})
   ENDIF()
 
-  IF(UNIX)
+  IF(UNIX AND NOT HUNTER_ENABLED)
     # under Linux and OS X, recent libxml2 versions are linked against liblzma
     FIND_PACKAGE(LibLZMA)
     IF(LIBLZMA_LIBRARIES)
