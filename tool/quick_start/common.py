@@ -7,7 +7,8 @@ NeLCodeDir = os.path.join(NeLRootDir, "code")
 NeLLeveldesignDir = os.path.join(NeLRootDir, "leveldesign")
 NeLGraphicsDir = os.path.join(NeLRootDir, "graphics")
 NeLSoundDir = os.path.join(NeLRootDir, "sound")
-NeLBuildDir = os.path.join(NeLRootDir, "build_" + NeLHostId)
+NeLBuildDirName = "build_" + NeLHostId
+NeLBuildDir = os.path.join(NeLRootDir, NeLBuildDirName)
 NeLPipelineDir = os.path.join(NeLRootDir, "pipeline")
 NeLDistributionDir = os.path.join(NeLRootDir, "distribution")
 
