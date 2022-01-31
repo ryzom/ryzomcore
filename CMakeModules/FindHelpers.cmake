@@ -176,6 +176,17 @@ MACRO(FIND_PACKAGE_HELPER NAME INCLUDE)
 
   SET(_INCLUDE_PATHS)
   SET(_LIBRARY_PATHS)
+  # Check for root directories passed to CMake with -DXXX_ROOT=...
+  IF(DEFINED ENV{${_UPNAME_FIXED}_ROOT})
+    SET(_TMP ${${_UPNAME_FIXED}_ROOT})
+    GET_FILENAME_COMPONENT(_TMP ${_TMP} ABSOLUTE)
+    LIST(APPEND _INCLUDE_PATHS ${_TMP}/include ${_TMP})
+    LIST(APPEND _LIBRARY_PATHS ${_TMP}/lib${LIB_SUFFIX})
+
+    IF(_IS_VERBOSE)
+      MESSAGE(STATUS "Using ${_UPNAME_FIXED}_ROOT as root directory ${_TMP}")
+    ENDIF()
+  ENDIF()
 
   # Check for root directories passed to CMake with -DXXX_DIR=...
   IF(DEFINED ${_UPNAME_FIXED}_DIR)
@@ -212,7 +223,7 @@ MACRO(FIND_PACKAGE_HELPER NAME INCLUDE)
     ENDFOREACH()
   ENDIF()
 
-  IF(UNIX)
+  IF(UNIX AND NOT DEFINED ENV{${_UPNAME_FIXED}_ROOT})
     # Append UNIX standard include paths
     SET(_UNIX_INCLUDE_PATHS)
 
@@ -266,7 +277,7 @@ MACRO(FIND_PACKAGE_HELPER NAME INCLUDE)
     $ENV{${_UPNAME}_DIR}/lib${LIB_SUFFIX}
     $ENV{${_UPNAME_FIXED}_DIR}/lib${LIB_SUFFIX})
 
-  IF(UNIX)
+  IF(UNIX AND NOT DEFINED ENV{${_UPNAME_FIXED}_ROOT})
     SET(_UNIX_LIBRARY_PATHS)
 
     # Append multiarch libraries paths
