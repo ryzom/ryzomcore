@@ -53,6 +53,9 @@ IF(HUNTER_ENABLED)
   SET(WITH_STATIC_LIBXML2 ON CACHE BOOL "static libxml2" FORCE)
   SET(WITH_STATIC_EXTERNAL ON CACHE BOOL "static external" FORCE)
   SET(WITH_EXTERNAL       OFF CACHE BOOL "external libs" FORCE)
+ 
+ # Workaround for PCH compilation issue, from curl intsizeof depencency
+  ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
 ENDIF()
 
 
