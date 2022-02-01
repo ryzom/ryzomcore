@@ -380,7 +380,7 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 #define nlassume(exp) do { } while (0)
 #endif
 
-#ifdef NL_NO_DEBUG
+#ifdef NL_NO_ASSERT
 #	define nlassert(exp) nlassume(exp)
 #	define nlassertonce(exp) nlassume(exp)
 #	define nlassertex(exp, str) nlassume(exp)
