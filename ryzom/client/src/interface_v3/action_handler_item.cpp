@@ -747,6 +747,10 @@ public:
 		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
+
+		// end drag
+		getInventory().endDrag();
+
 		if ((pCSSrc == NULL) || (pCSDst == NULL)) return;
 
 		if (pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
@@ -1881,7 +1885,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			}
 			if (pItemTextDisplay && pIS->Family == ITEMFAMILY::SCROLL)
 			{
-				if (pCS->getInventoryIndex()==INVENTORIES::bag)
+				if (pCS->getInventoryIndex()==INVENTORIES::bag && pIS->Scroll.Label.empty())
 					pItemTextDisplay->setActive(true);
 				pItemInfos->setActive(false);
 			}
