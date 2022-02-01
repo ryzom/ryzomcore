@@ -2,7 +2,7 @@
 
 hunter_config(luabind
   VERSION 0.9.1
-  URL  "https://github.com/nimetu/luabind/tarball/2fa4606"
-  SHA1 "3b4646bab9f0b2362d7b8d71d78e40deaf3cc747"
+  URL  "https://github.com/ryzom/luabind/tarball/3dd7c545034219eaea322feb15903524085e94df"
+  SHA1 "27a08c61b5eab3fed78115288bcca3be9aae581d"
   )
 

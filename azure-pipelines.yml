@@ -127,7 +127,7 @@ jobs:
       condition: contains(variables['cmakeExtra'], 'DIRECT3D=ON')
     - task: Cache@2
       inputs:
-        key: 'hunter321-$(releaseName)'
+        key: 'hunter321b-$(releaseName)'
         path: '$(Pipeline.Workspace)/.hunter/_Base/Cache'
     - task: CMake@1
       displayName: 'Configure'
