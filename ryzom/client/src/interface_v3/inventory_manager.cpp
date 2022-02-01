@@ -2903,32 +2903,6 @@ class CHandlerInvCanDropTo : public IActionHandler
 		if ((pListDstText != NULL) || (pListDstIcon != NULL))
 		{
 			bool bCanDrop = true;
-			// WE CANT DND if we want to dnd from other bag than BAG to guild bag
-			if (pListDstIcon != NULL)
-			{
-				if (pListDstIcon->getInvType() == CInventoryManager::InvGuild)
-					if (strnicmp(pCSSrc->getSheet().c_str(),"LOCAL:INVENTORY:BAG", 19) != 0)
-						bCanDrop = false;
-			}
-			if (pListDstText != NULL)
-			{
-				if (pListDstText->getInvType() == CInventoryManager::InvGuild)
-					if (strnicmp(pCSSrc->getSheet().c_str(),"LOCAL:INVENTORY:BAG", 19) != 0)
-						bCanDrop = false;
-			}
-			// WE CANT DND if we want to dnd from guild bag to other bag than BAG
-			if (pListDstIcon != NULL)
-			{
-				if (pListDstIcon->getInvType() != CInventoryManager::InvBag)
-					if (strnicmp(pCSSrc->getSheet().c_str(),"SERVER:GUILD:INVENTORY", 19) == 0)
-						bCanDrop = false;
-			}
-			if (pListDstText != NULL)
-			{
-				if (pListDstText->getInvType() != CInventoryManager::InvBag)
-					if (strnicmp(pCSSrc->getSheet().c_str(),"SERVER:GUILD:INVENTORY", 19) == 0)
-						bCanDrop = false;
-			}
 
 			// WE CANT DND when packer/mount is too far
 			if (pListDstIcon != NULL)
@@ -3100,7 +3074,6 @@ class CHandlerInvDropTo : public IActionHandler
 					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvGuild)) ||
 							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvGuild)))
 					{
-						if (strnicmp(pCSSrc->getSheet().c_str(), "LOCAL:INVENTORY:BAG", 19) == 0)
 							CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_guild");
 					}
 					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvRoom)) ||

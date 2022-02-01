@@ -1630,7 +1630,7 @@ const char *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetI
 const char *CStringManagerClient::getTitleLocalizedName(const string &titleId, bool women)
 {
 	vector<string> listInfos = getTitleInfos(titleId, women);
-	
+
 	if (!listInfos.empty())
 	{
 		_TitleWords.push_back(listInfos[0]);
@@ -1681,7 +1681,19 @@ vector<string> CStringManagerClient::getTitleInfos(const string &titleId, bool w
 	{
 		if (titleId[0] != '#')
 		{
-			listInfos[0] = getSpecialWord(listInfos[0], women);
+			// Check special case like SON_OF|jane|joe (with SON_OF = "Son of {1} and {2}")
+			vector<string> titleReps;
+			splitString(listInfos[0], string("|"), titleReps);
+			if (titleReps.size() > 1)
+			{
+				listInfos[0] = getSpecialWord(titleReps[0], women);
+				for(uint i=1; i < titleReps.size(); ++i )
+				{
+					while(strFindReplace(listInfos[0], toString("{%d}", i), titleReps[i]));
+				}
+			}
+			else
+				listInfos[0] = getSpecialWord(listInfos[0], women);
 		}
 	}
 
