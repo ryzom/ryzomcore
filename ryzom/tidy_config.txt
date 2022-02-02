@@ -1,0 +1,8 @@
+indent: yes
+indent-spaces: 4
+markup: yes
+output-xml: yes
+input-xml: yes
+wrap: 0
+
+
