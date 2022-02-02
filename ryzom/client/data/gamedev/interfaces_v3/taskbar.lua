@@ -6,10 +6,10 @@ if (game==nil) then
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:getMilkoTooltipWithKey(prop, tooltip, tooltip_pushed, name, param)
 	local tt
-	
+
 	-- Check if button is toggled and choose the good tooltip
 	if (prop ~= '' and tooltip_pushed ~= '') then
 		local db = getDbProp(prop)
@@ -21,16 +21,16 @@ function game:getMilkoTooltipWithKey(prop, tooltip, tooltip_pushed, name, param)
 	else
 		tt = tooltip;
 	end
-	
+
 	-- Get key shortcut
 	local text = i18n.get(tt)
 	local key = runExpr('getKey(\'' .. name .. '\',\'' .. param .. '\',1)')
-	
+
 	if (key ~= nil and key  ~= '') then
 		key = ' @{2F2F}(' .. key .. ')'
-		text = concatString(text, key)
+		text = concatUCString(text, key)
 	end
-	
+
 	setContextHelpText(text)
 end
 

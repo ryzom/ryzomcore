@@ -226,4 +226,12 @@
             <view type="text" id="text" color="#color_text" global_color="false" fontsize="#fontsize" shadow="#shadow" posref="MM MM" hardtext="#text" />
         </group>
     </template>
+    <template name="title_template" keep="true" color="255 0 0 200" icon="" text="" tooltip="" titleid="" enable="true">
+        <group id="#id" posref="MM MM" w="500" h="25">
+            <view type="bitmap" id="check" overlay="3" active="true" x="9" posref="ML ML" texture="ency_step_slot.tga" color="255 255 255 255" global_color="false" />
+            <view type="bitmap" id="finished" active="true" x="9" posref="ML ML" texture="#icon" color="255 255 255 255" global_color="false" />
+            <ctrl type="button" id="ctrl" button_type="push_button" tooltip="#tooltip" global_color_normal="false" global_color_over="false" global_color_pushed="false" posref="MM MM" x="0" y="0" w="510" h="60" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true" color="0 0 0 0" col_over="255 120 0 #enable" col_pushed="255 255 255 #enable" onclick_l="lua" params_l="activeTitle([[#titleid]])" />
+            <view type="text" id="text" x="30" color="#color" global_color="true" fontsize="12" shadow="true" posref="ML ML" hardtext="#text" />
+        </group>
+    </template>
 </interface_config>

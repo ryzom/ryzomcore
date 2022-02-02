@@ -43,6 +43,7 @@
         <value value="game_config" hardtext="uiGlobalSettings" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
         <value value="connection" hardtext="uiConnection" contexts="game" />
         <value value="mp3_player" hardtext="uimwMP3Player" contexts="game" />
+        <value value="bg_downloader" hardtext="uimwBGDownloader" contexts="game" />
         <value value="links" hardtext="uiLinks" contexts="game" />
         <value value="debug_info" hardtext="uiDebug" contexts="game" />
         <!-- r2ed specifics -->
@@ -461,6 +462,7 @@
                 <instance template="container_window_list" />
             </parameter>
         </action>
+        <action name="fullmap" hardtext="uiShowFullMap" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed" />
         <!-- in r2 virtual desktop are used for the different mode (edition, dm, test) -->
         <action name="set_desktop" hardtext="uiSetDesktop" repeat="1" keyup="1" contexts="game">
             <parameter hardtext="uiDesktopNumber">

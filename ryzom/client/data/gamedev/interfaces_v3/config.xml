@@ -1,13 +1,13 @@
 <interface_config>
     <root id="interface" x="0" y="0" w="800" h="600" active="true" />
-    <!-- This value is saved/loaded in the .icfg (default: 0). 
- It is used in combination with RESET_VER_* defines, to avoid loading old DB parts of .icfg 
- Increment it each time you want to force to reset some db vars, and add/replace the RESET_VER_* defines
- of the variables you want to force
+    <!-- This value is saved/loaded in the .icfg (default: 0).
+        It is used in combination with RESET_VER_* defines, to avoid loading old DB parts of .icfg
+        Increment it each time you want to force to reset some db vars, and add/replace the RESET_VER_* defines
+        of the variables you want to force
 -->
     <define id="UI_DB_SAVE_VERSION" value="1" />
     <!-- ****************************** -->
-    <!-- *  WINDOWS COLORS  * -->
+    <!-- *       WINDOWS COLORS       * -->
     <!-- ****************************** -->
     <variable entry="UI:SAVE:WIN:COLORS:PLA" type="rgba" value="167 205 107 255" />
     <variable entry="UI:SAVE:WIN:COLORS:ANI" type="rgba" value="189 154 123 255" />
@@ -62,11 +62,11 @@
     <variable entry="UI:SAVE:R2_FORM:ROLLOVER_CONTAINER_ALPHA" type="sint32" value="0" />
     <variable entry="UI:SAVE:R2_FORM:USE_GLOBAL_ALPHA_SETTINGS" type="bool" value="true" />
     <!-- ****************************** -->
-    <!-- *  ENTITIES COLORS      * -->
+    <!-- *       ENTITIES COLORS      * -->
     <!-- ****************************** -->
     <variable entry="UI:SAVE:ENTITY:CONTEXT_HELP" type="bool" value="true" />
     <!-- ****************************** -->
-    <!-- *  ENTITIES COLORS      * -->
+    <!-- *       ENTITIES COLORS      * -->
     <!-- ****************************** -->
     <variable entry="UI:SAVE:ENTITY:COLORS:DEAD" type="rgba" value="255 255 0 255" />
     <variable entry="UI:SAVE:ENTITY:COLORS:USER" type="rgba" value="255 112 249 255" />
@@ -94,13 +94,13 @@
     <variable entry="UI:INTERFACE:ENTITY:COLORS:EG" type="rgba" value="98 225 240 255" />
     <variable entry="UI:INTERFACE:ENTITY:COLORS:OBSERVER" type="rgba" value="248 68 7 255" />
     <link expr="depends(@UI:SAVE:ENTITY:COLORS)" action="update_entities_color" params="" />
-    <!-- at .icfg load: don't load those variables if the define value is < UI_DB_SAVE_VERSION that is in the old .icfg 
- NB: replace the ':' of the db name with '_'
+    <!-- at .icfg load: don't load those variables if the define value is < UI_DB_SAVE_VERSION that is in the old .icfg
+        NB: replace the ':' of the db name with '_'
 -->
     <define id="RESET_VER_UI_SAVE_ENTITY_COLORS_TARGET" value="1" />
     <define id="RESET_VER_UI_SAVE_ENTITY_COLORS_NPC" value="1" />
     <!-- ****************************** -->
-    <!-- *  INSCENE INTERFACE    * -->
+    <!-- *       INSCENE INTERFACE    * -->
     <!-- ****************************** -->
     <variable entry="UI:SAVE:INSCENE:USER:GUILD_SYMBOL" type="bool" value="false" />
     <variable entry="UI:SAVE:INSCENE:USER:NAME" type="bool" value="false" />
@@ -169,7 +169,7 @@
     <define id="armour_color_6" value="250 250 250 255" />
     <define id="armour_color_7" value="80 80 120 255" />
     <!-- ****************************** -->
-    <!-- *  LANDMARK COLORS      * -->
+    <!-- *       LANDMARK COLORS      * -->
     <!-- ****************************** -->
     <variable entry="UI:SAVE:LANDMARK:COLORS:MISC" type="rgba" value="255 0 255 255" />
     <variable entry="UI:SAVE:LANDMARK:COLORS:TRIBE" type="rgba" value="180 180 180 255" />
@@ -919,6 +919,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
         <param name="ctrl_sheet_greenify_color" value="140 255 140 150" />
         <param name="ctrl_text_greenify_color" value="140 255 140 150" />
         <param name="text_over_back_color" value="64 64 64 255" />
+        <!--    <param name="font"
+           value="basic.ttf" /> -->
         <param name="font" value="ryzom.ttf" />
         <param name="monospace_font" value="ryzom_monospace.ttf" />
         <param name="add_coef_font" value="1" />
@@ -1116,28 +1118,28 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <!-- index of the selected trade item in the vendor list-->
     <define id="num_stackable_item_to_trade" value="%bot_chat_base:NUM_STACKABLE" />
     <define id="max_num_stackable_item_to_trade" value="%bot_chat_base:MAX_NUM_STACKABLE" />
-    <!--<define id="bag1_touched" value="UI:BAG_TOUCHED:1"/>
-<define id="bag2_touched" value="UI:BAG_TOUCHED:2"/>
-<define id="bag3_touched" value="UI:BAG_TOUCHED:3"/>
-<define id="bag4_touched" value="UI:BAG_TOUCHED:4"/>
-<define id="bag5_touched" value="UI:BAG_TOUCHED:5"/>
-<define id="bag6_touched" value="UI:BAG_TOUCHED:6"/>-->
+    <!--<define id="bag1_touched"                   value="UI:BAG_TOUCHED:1"/>
+<define id="bag2_touched"                   value="UI:BAG_TOUCHED:2"/>
+<define id="bag3_touched"                   value="UI:BAG_TOUCHED:3"/>
+<define id="bag4_touched"                   value="UI:BAG_TOUCHED:4"/>
+<define id="bag5_touched"                   value="UI:BAG_TOUCHED:5"/>
+<define id="bag6_touched"                   value="UI:BAG_TOUCHED:6"/>-->
     <define id="inventory_touched" value="UI:INVENTORY_TOUCHED" />
-    <!--<define id="bags_touched" value="UI:PLAYER_TOUCHED"/>
-<define id="player_touched" value="UI:PLAYER_TOUCHED"/>
-<define id="money_touched" value="UI:MONEY_TOUCHED"/>
-<define id="bag1_open_value" value="UI:BAG_OPEN_VALUE:1"/>
-<define id="bag2_open_value" value="UI:BAG_OPEN_VALUE:2"/>
-<define id="bag3_open_value" value="UI:BAG_OPEN_VALUE:3"/>
-<define id="bag4_open_value" value="UI:BAG_OPEN_VALUE:4"/>-->
+    <!--<define id="bags_touched"                   value="UI:PLAYER_TOUCHED"/>
+<define id="player_touched"                 value="UI:PLAYER_TOUCHED"/>
+<define id="money_touched"                  value="UI:MONEY_TOUCHED"/>
+<define id="bag1_open_value"                value="UI:BAG_OPEN_VALUE:1"/>
+<define id="bag2_open_value"                value="UI:BAG_OPEN_VALUE:2"/>
+<define id="bag3_open_value"                value="UI:BAG_OPEN_VALUE:3"/>
+<define id="bag4_open_value"                value="UI:BAG_OPEN_VALUE:4"/>-->
     <define id="inventory_open_value" value="UI:INVENTORY_OPEN_VALUE" />
-    <!--<define id="bags_open_value" value="UI:PLAYER_OPEN_VALUE"/>
-<define id="player_open_value" value="UI:PLAYER_OPEN_VALUE"/>
-<define id="money_open_value" value="UI:MONEY_OPEN_VALUE"/>-->
+    <!--<define id="bags_open_value"                value="UI:PLAYER_OPEN_VALUE"/>
+<define id="player_open_value"              value="UI:PLAYER_OPEN_VALUE"/>
+<define id="money_open_value"               value="UI:MONEY_OPEN_VALUE"/>-->
     <!--
-<define id="trade_item" value="UI:SELECTED_ITEM_SELECTION_GROUP"/>
-<define id="selected_item_sheet_id" value="UI:SELECTED_ITEM_SHEET_ID" />
-<define id="price_of_item_to_trade" value="%bot_chat_base:PRICE_OF_ITEM_TO_TRADE" />-->
+<define id="trade_item"  value="UI:SELECTED_ITEM_SELECTION_GROUP"/>
+<define id="selected_item_sheet_id"         value="UI:SELECTED_ITEM_SHEET_ID" />
+<define id="price_of_item_to_trade"         value="%bot_chat_base:PRICE_OF_ITEM_TO_TRADE" />-->
     <!-- price of the item to sell, or -1 if it hasn't been received from server -->
     <define id="money_proposal" value="UI:MONEY_PROPOSAL" />
     <define id="can_valid_player_trade" value="UI:CAN_VALID_PLAYER_TRADE" />
@@ -1148,33 +1150,33 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <!-- ********************** -->
     <define id="set_base" value="LOCAL:INVENTORY" />
     <!-- Sheathes -->
-    <!-- mgt of active sheath is special: must write in %ui_set_active but must read in %set_active 
- It's because Server Replication will write in %set_active. Since we need to put observers on %ui_set_active
- to send msg to servers when the value change, %ui_set_active and %set_active MUST NOT be the same variable.
- Else it will loops: receive SERVER:INVENTORY:ACTIVE_SHEAT, copies to LOCAL:INVENTORY:ACTIVE_SHEAT, and if different
- from last time (possible due to lag!!) then activate observers and resend a msg to server!
+    <!-- mgt of active sheath is special: must write in %ui_set_active but must read in %set_active
+        It's because Server Replication will write in %set_active. Since we need to put observers on %ui_set_active
+        to send msg to servers when the value change, %ui_set_active and %set_active MUST NOT be the same variable.
+        Else it will loops: receive SERVER:INVENTORY:ACTIVE_SHEAT, copies to LOCAL:INVENTORY:ACTIVE_SHEAT, and if different
+        from last time (possible due to lag!!) then activate observers and resend a msg to server!
 -->
     <!--
-<define id="ui_set_active" value="UI:INVENTORY:ACTIVE_SHEATH" />
-<define id="set_active" value="%set_base:ACTIVE_SHEATH" />
-<define id="set_nb" value="%set_base:NB_SHEATH" />
-<define id="from_code_set0" value_from_code="getInventorySlot('sheath1')" />
-<define id="from_code_set1" value_from_code="getInventorySlot('sheath2')" />
-<define id="from_code_set2" value_from_code="getInventorySlot('sheath3')" />
-<define id="from_code_set3" value_from_code="getInventorySlot('sheath4')" />
-<define id="from_code_set4" value_from_code="getInventorySlot('sheath5')" />
-<define id="from_code_set5" value_from_code="getInventorySlot('sheath6')" />
-<define id="set0" value="%set_base:%from_code_set0" />
-<define id="set1" value="%set_base:%from_code_set1" />
-<define id="set2" value="%set_base:%from_code_set2" />
-<define id="set3" value="%set_base:%from_code_set3" />
-<define id="set4" value="%set_base:%from_code_set4" />
-<define id="set5" value="%set_base:%from_code_set5" />
+<define id="ui_set_active"      value="UI:INVENTORY:ACTIVE_SHEATH" />
+<define id="set_active"         value="%set_base:ACTIVE_SHEATH" />
+<define id="set_nb"             value="%set_base:NB_SHEATH" />
+<define id="from_code_set0"     value_from_code="getInventorySlot('sheath1')" />
+<define id="from_code_set1"     value_from_code="getInventorySlot('sheath2')" />
+<define id="from_code_set2"     value_from_code="getInventorySlot('sheath3')" />
+<define id="from_code_set3"     value_from_code="getInventorySlot('sheath4')" />
+<define id="from_code_set4"     value_from_code="getInventorySlot('sheath5')" />
+<define id="from_code_set5"     value_from_code="getInventorySlot('sheath6')" />
+<define id="set0"                       value="%set_base:%from_code_set0" />
+<define id="set1"                       value="%set_base:%from_code_set1" />
+<define id="set2"                       value="%set_base:%from_code_set2" />
+<define id="set3"                       value="%set_base:%from_code_set3" />
+<define id="set4"                       value="%set_base:%from_code_set4" />
+<define id="set5"                       value="%set_base:%from_code_set5" />
 -->
     <define id="hand_r" value="%set_base:HAND:0" />
     <define id="hand_l" value="%set_base:HAND:1" />
     <define id="bag" value="%set_base:BAG" />
-    <!--<define id="bag_nb" value="%set_base:NB_BAG" />-->
+    <!--<define id="bag_nb"                 value="%set_base:NB_BAG" />-->
     <define id="bag_bulk_max" value="SERVER:STATIC_DATA:BAG_BULK_MAX" />
     <!-- Animals -->
     <define id="pa" value="SERVER:PACK_ANIMAL" />
@@ -1267,10 +1269,10 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <define id="max_room_invslot" value_from_code="getMaxRoomInvSlot()" />
     <define id="max_guild_invslot" value_from_code="getMaxGuildInvSlot()" />
     <define id="max_temp_invslot" value_from_code="getMaxTempInvSlot()" />
-    <!--<define id="from_code_harvest" value_from_code="getInventorySlot('harvest')"/>
-<define id="harvest_inventory" value="%set_base:%from_code_harvest"/>
-<define id="from_code_pickup" value_from_code="getInventorySlot('pickup')"/>
-<define id="pickup_inventory" value="%set_base:%from_code_pickup"/>-->
+    <!--<define id="from_code_harvest"      value_from_code="getInventorySlot('harvest')"/>
+<define id="harvest_inventory"  value="%set_base:%from_code_harvest"/>
+<define id="from_code_pickup"   value_from_code="getInventorySlot('pickup')"/>
+<define id="pickup_inventory"   value="%set_base:%from_code_pickup"/>-->
     <!-- TEMP TEMP TEMP : we have to found an entry with gamedev for the temp inventory -->
     <define id="temp_inv_dbentry" value="%set_base:TEMP" />
     <define id="guild_inv_dbentry" value="SERVER:GUILD:INVENTORY" />
@@ -1409,12 +1411,12 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <sheet_selection name="teleport_selection" texture="item_selection.tga" color="255 255 255 255" global_color="true" />
     <sheet_selection name="mission_selection" texture="item_selection.tga" color="255 255 255 255" global_color="true" />
     <!-- ****************************** -->
-    <!-- *     CODE FILTERS     * -->
+    <!-- *     CODE FILTERS           * -->
     <!-- ****************************** -->
     <!-- dummy for sheets not linked -->
     <variable entry="UI:EMPTY:SHEET" type="sint64" value="0" />
     <!-- ****************************** -->
-    <!-- *        MISC          * -->
+    <!-- *             MISC           * -->
     <!-- ****************************** -->
     <variable entry="UI:SAVE:SHOW_CLOCK" type="bool" value="false" />
     <variable entry="UI:SAVE:SHOW_CLOCK_12H" type="bool" value="false" />
@@ -1469,7 +1471,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <link expr="identity(ilinear(getLightLevel(), getRed(intToColor(@UI:SAVE:DAY_COLOR)), getRed(intToColor(@UI:SAVE:NIGHT_COLOR))), @UI:VARIABLES:CURRENT_TIME)" target="@UI:SAVE:COLOR:R" />
     <link expr="identity(ilinear(getLightLevel(), getGreen(intToColor(@UI:SAVE:DAY_COLOR)), getGreen(intToColor(@UI:SAVE:NIGHT_COLOR))), @UI:VARIABLES:CURRENT_TIME)" target="@UI:SAVE:COLOR:G" />
     <link expr="identity(ilinear(getLightLevel(), getBlue(intToColor(@UI:SAVE:DAY_COLOR)), getBlue(intToColor(@UI:SAVE:NIGHT_COLOR))), @UI:VARIABLES:CURRENT_TIME)" target="@UI:SAVE:COLOR:B" />
-    <!--<link expr="depends(@UI:VARIABLES:CURRENT_TIME)" action="set" params="dblink=UI:SAVE:COLOR:A|value=ilinear(getLightLevel(), @UI:SAVE:DAY_COLOR:A, @UI:SAVE:NIGHT_COLOR:A)" />-->
+    <!--<link expr="depends(@UI:VARIABLES:CURRENT_TIME)" action="set"
+                params="dblink=UI:SAVE:COLOR:A|value=ilinear(getLightLevel(), @UI:SAVE:DAY_COLOR:A, @UI:SAVE:NIGHT_COLOR:A)" />-->
     <!-- The User Target Slot and UID -->
     <variable entry="UI:VARIABLES:TARGET:UID" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:TARGET:SLOT" type="sint64" value="-1" />
@@ -1497,6 +1500,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <variable entry="UI:SAVE:CHAT:FONT_SIZE" type="sint32" value="10" />
     <variable entry="UI:SAVE:CHAT:MULTI_LINE_SPACE" type="sint32" value="0" />
     <variable entry="UI:SAVE:CHAT:SHADOWED_TEXT" type="bool" value="true" />
+    <!-- ******************************* -->
+    <!-- * CHAT TRANSLATION PARAMETERS * -->
+    <!-- ******************************* -->
     <variable entry="UI:SAVE:TRANSLATION:EN:INVERSE_DISPLAY" type="bool" value="false" />
     <variable entry="UI:SAVE:TRANSLATION:EN:HIDE_FLAG" type="bool" value="false" />
     <variable entry="UI:SAVE:TRANSLATION:FR:INVERSE_DISPLAY" type="bool" value="false" />
@@ -1520,7 +1526,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <variable entry="UI:SAVE:TRANSLATION:SYSTEM:DISABLE" type="bool" value="false" />
     <variable entry="UI:SAVE:TRANSLATION:REGION:DISABLE" type="bool" value="false" />
     <!-- ****************************** -->
-    <!-- *    CHAT COLORS    * -->
+    <!-- *         CHAT COLORS        * -->
     <!-- ****************************** -->
     <variable entry="UI:SAVE:CHAT:COLORS:SPEAKER" type="rgba" value="220 220 50 255" />
     <variable entry="UI:SAVE:CHAT:COLORS:SAY" type="rgba" value="255 255 255 255" />
@@ -1715,6 +1721,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <variable entry="UI:VARIABLES:ISACTIVE:MACROS" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:ISACTIVE:MP3PLAYER" type="sint32" value="0" />
+    <variable entry="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:ISACTIVE:COSMETICS" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:ISACTIVE:MILKO_PAD" type="sint32" value="0" />
     <!-- ***************************** -->
@@ -1734,7 +1741,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <variable entry="UI:SAVE:BOTCHAT_FILTER:ITEM_TYPE" type="sint32" value="%item_type_unknown" />
     <variable entry="UI:SAVE:BOTCHAT_FILTER:RESET_ON_OPEN" type="sint32" value="1" />
     <!-- ***************************** -->
-    <!-- *  STRING CASE OPTION      * -->
+    <!-- *  STRING CASE OPTION       * -->
     <!-- ***************************** -->
     <define id="case_normal" value="0" />
     <define id="case_lower" value="1" />
@@ -1761,7 +1768,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <define id="focus_color" value="0 128 255 255" />
     <define id="bulk_color" value="215 185 75 255" />
     <!-- ***************************** -->
-    <!-- *     ITEM PART ICONS         * -->
+    <!-- *          ITEM PART ICONS          * -->
     <!-- ***************************** -->
     <define id="item_part_icon_MpL" value="ICO_Blade.tga" />
     <define id="item_part_icon_MpH" value="ICO_hammer.tga" />
@@ -1792,7 +1799,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <!-- None, for item part selection -->
     <define id="item_part_icon_" value="No_Action.tga" />
     <!-- ***************************** -->
-    <!-- *     PVP FACTION ICONS     * -->
+    <!-- *          PVP FACTION ICONS        * -->
     <!-- ***************************** -->
     <define id="pvp_faction_icon_None" value="" />
     <define id="pvp_faction_icon_Neutral" value="" />
@@ -1803,13 +1810,13 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <define id="pvp_faction_icon_Tryker" value="faction_Tryker.tga" />
     <define id="pvp_faction_icon_Zorai" value="faction_Zorai.tga" />
     <!-- ******************************** -->
-    <!-- *     BRICK FALGS        * -->
+    <!-- *          BRICK FALGS             * -->
     <!-- ******************************** -->
     <define id="brick_flags_critical_hit" value="8" />
     <define id="brick_flags_parry" value="16" />
     <define id="brick_flags_dodge" value="32" />
     <!-- ******************************** -->
-    <!-- *     ITEM TYPE TO ITEM SHEET * -->
+    <!-- *          ITEM TYPE TO ITEM SHEET * -->
     <!-- ******************************** -->
     <!-- Melee weapons -->
     <define id="item_type_to_item_sheet_DAGGER" value="iccm1pd.sitem" />
@@ -1865,14 +1872,14 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <define id="item_type_to_item_sheet_PENDANT" value="icfjp.sitem" />
     <define id="item_type_to_item_sheet_RING" value="icfjr.sitem" />
     <!--
-<define id="item_type_to_item_sheet_CLEAVER" value="" />
-<define id="item_type_to_item_sheet_SHEARS" value="" />
-<define id="item_type_to_item_sheet_FISHINGPROD" value="" />
-<define id="item_type_to_item_sheet_SEARAKE" value="" />
-<define id="item_type_to_item_sheet_SPADE" value="" />
-<define id="item_type_to_item_sheet_CATLEPROD" value="" />
-<define id="item_type_to_item_sheet_STICK" value="" />
-<define id="item_type_to_item_sheet_WHIP" value="" />
+<define id="item_type_to_item_sheet_CLEAVER"            value="" />
+<define id="item_type_to_item_sheet_SHEARS"             value="" />
+<define id="item_type_to_item_sheet_FISHINGPROD"                value="" />
+<define id="item_type_to_item_sheet_SEARAKE"            value="" />
+<define id="item_type_to_item_sheet_SPADE"              value="" />
+<define id="item_type_to_item_sheet_CATLEPROD"          value="" />
+<define id="item_type_to_item_sheet_STICK"              value="" />
+<define id="item_type_to_item_sheet_WHIP"               value="" />
 -->
     <!-- Tools -->
     <define id="item_type_to_item_sheet_ArmorTool" value="itarmor.sitem" />
@@ -1882,20 +1889,20 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <define id="item_type_to_item_sheet_JewelryTool" value="itjewel.sitem" />
     <define id="item_type_to_item_sheet_ToolMaker" value="ittool.sitem" />
     <!--
-<define id="item_type_to_item_sheet_CAMPSFIRE" value="" />
+<define id="item_type_to_item_sheet_CAMPSFIRE"          value="" />
 -->
     <!-- Misc -->
     <define id="item_type_to_item_sheet_MEKTOUB_PACKER_TICKET" value="iapd.sitem" />
     <define id="item_type_to_item_sheet_MEKTOUB_MOUNT_TICKET" value="iasd.sitem" />
     <define id="item_type_to_item_sheet_JOB_ELEMENT" value="rpjob_elementary.sitem" />
     <!-- ************************ -->
-    <!-- *     DYNAMIC CHAT    * -->
+    <!-- *          DYNAMIC CHAT    * -->
     <!-- ************************ -->
     <define id="max_dyn_chan_per_player" value_from_code="getMaxDynChanPerPlayer()" />
     <variable entry="UI:SAVE:ISDETACHED:DYNAMIC_CHAT$i" type="sint32" value="0" size="%max_dyn_chan_per_player" />
     <variable entry="UI:SAVE:ISENABLED:DYNAMIC_CHAT$i" type="sint32" value="1" size="%max_dyn_chan_per_player" />
     <!-- ************************ -->
-    <!-- *     MUSIC from DB   * -->
+    <!-- *          MUSIC from DB   * -->
     <!-- ************************ -->
     <!-- Mission musics -->
     <define id="max_num_missions" value_from_code="getMaxNumMissions()" />
@@ -1907,7 +1914,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
     </template>
     <vector template="temp_music_for_mission" index="$i" _size="%max_num_missions" />
     <!-- ************************ -->
-    <!-- *     BAR MANAGER     * -->
+    <!-- *          BAR MANAGER     * -->
     <!-- ************************ -->
     <!-- Bars Variables -->
     <define id="max_animal" value_from_code="getMaxAnimal()" />

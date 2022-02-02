@@ -84,11 +84,11 @@
         <action handler="set" params="dblink=UI:SELECTED_SLOT|@0" />
     </proc>
     <proc id="proc_select_init_right_screen">
-        <action handler="get_slot" params="prop=title |target=ui:outgame:character_selection:titles:title_txt:hardtext|slot=@UI:NEW_SELECTED_SLOT" />
-        <!--    <action handler="get_slot"      params="prop=job        |target=ui:outgame:character_selection:titles:job_txt:hardtext|slot=@UI:NEW_SELECTED_SLOT" /> 
-        <action handler="get_slot"      params="prop=level      |target=ui:outgame:character_selection:titles:level_txt:hardtext|slot=@UI:NEW_SELECTED_SLOT" />-->
+        <action handler="get_slot" params="prop=title |target=ui:outgame:character_selection:titles:title_txt:uc_hardtext|slot=@UI:NEW_SELECTED_SLOT" />
+        <!--    <action handler="get_slot"      params="prop=job        |target=ui:outgame:character_selection:titles:job_txt:uc_hardtext|slot=@UI:NEW_SELECTED_SLOT" /> 
+        <action handler="get_slot"      params="prop=level      |target=ui:outgame:character_selection:titles:level_txt:uc_hardtext|slot=@UI:NEW_SELECTED_SLOT" />-->
         <action handler="get_slot" params="prop=pos |target=ui:outgame:character_selection:titles:pos_txt:textid|slot=@UI:NEW_SELECTED_SLOT" />
-        <action handler="get_slot" params="prop=name |target=ui:outgame:character_selection:titles:name_txt:hardtext|slot=@UI:NEW_SELECTED_SLOT" />
+        <action handler="get_slot" params="prop=name |target=ui:outgame:character_selection:titles:name_txt:uc_hardtext|slot=@UI:NEW_SELECTED_SLOT" />
         <action handler="reset_camera" params="target=ui:outgame:character_selection:char3d:cam" />
         <action handler="set_db_from_slot" params="dblink=UI:TEMP:CHAR3D|slot=@UI:NEW_SELECTED_SLOT" />
         <action handler="proc" params="proc_charsel_init3d" />
@@ -121,11 +121,11 @@
         used to change at the end of full_to_full_1 anim the 3D view of the character and launch the second part
         -->
     <proc id="proc_click_slot2">
-        <action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=title |target=ui:outgame:character_selection:titles:title_txt:hardtext|dbslot=UI:NEW_SELECTED_SLOT" />
-        <!--    <action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=job       |target=ui:outgame:character_selection:titles:job_txt:hardtext|dbslot=UI:NEW_SELECTED_SLOT" />
-        <action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=level     |target=ui:outgame:character_selection:titles:level_txt:hardtext|dbslot=UI:NEW_SELECTED_SLOT" />-->
+        <action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=title |target=ui:outgame:character_selection:titles:title_txt:uc_hardtext|dbslot=UI:NEW_SELECTED_SLOT" />
+        <!--    <action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=job       |target=ui:outgame:character_selection:titles:job_txt:uc_hardtext|dbslot=UI:NEW_SELECTED_SLOT" />
+        <action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=level     |target=ui:outgame:character_selection:titles:level_txt:uc_hardtext|dbslot=UI:NEW_SELECTED_SLOT" />-->
         <action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=pos |target=ui:outgame:character_selection:titles:pos_txt:textid|dbslot=UI:NEW_SELECTED_SLOT" />
-        <action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=name |target=ui:outgame:character_selection:titles:name_txt:hardtext|dbslot=UI:NEW_SELECTED_SLOT" />
+        <action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=name |target=ui:outgame:character_selection:titles:name_txt:uc_hardtext|dbslot=UI:NEW_SELECTED_SLOT" />
         <action handler="reset_camera" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="target=ui:outgame:character_selection:char3d:cam" />
         <action handler="set_db_from_slot" params="dblink=UI:TEMP:CHAR3D|slot=@UI:SELECTED_SLOT" />
         <action handler="proc" params="proc_charsel_init3d" />

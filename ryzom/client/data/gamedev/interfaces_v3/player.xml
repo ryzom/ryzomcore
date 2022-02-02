@@ -23,11 +23,11 @@
     <proc id="player_active">
         <action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:PLAYER|value=1" />
         <!--  
-<action handler="set" params="target_property=ui:interface:player:char3d:char:anim|value=0" />
-<action handler="set" params="target_property=ui:interface:player:char3d:cam:posz|value=add(0.15,getprop('ui:interface:player:char3d:char:headz'))" />
-<action handler="set" params="target_property=ui:interface:player:char3d:cam:tgtz|value=add(0.15,getprop('ui:interface:player:char3d:char:headz'))" />
-<action handler="anim_start" params="anim=anim_refresh_player" />
--->
+      <action handler="set" params="target_property=ui:interface:player:char3d:char:anim|value=0" />
+      <action handler="set" params="target_property=ui:interface:player:char3d:cam:posz|value=add(0.15,getprop('ui:interface:player:char3d:char:headz'))" />
+      <action handler="set" params="target_property=ui:interface:player:char3d:cam:tgtz|value=add(0.15,getprop('ui:interface:player:char3d:char:headz'))" />
+      <action handler="anim_start" params="anim=anim_refresh_player" />
+    -->
     </proc>
     <proc id="player_cam_position">
         <action handler="set" params="target_property=ui:interface:player:char3d:cam:posz|value=add(0.12,getprop('ui:interface:player:char3d:char:headz'))" />
@@ -240,8 +240,8 @@
         <action id="unseat" name="uimUnmount" handler="beast_order" params="order=unmount|beast_index=@UI:BEAST_SELECTED" icon="mektoub_unmount.tga" />
     </group>
     <!-- temp variable to store the animal selected 
-  0: All animals
-  1 to 5: Pack animals
+        0: All animals
+        1 to 5: Pack animals
 -->
     <variable entry="UI:BEAST_SELECTED" type="sint64" value="0" />
     <group type="container" id="animal_global" w="236" h="96" title="uiAnimalsTitle" opened="true" openable="false" resizer="false" movable="true" active="false" pop_min_h="62" pop_max_h="512" min_w="236" max_w="236" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL|value=0" global_color="false" global_color_over="true" header_color="UI:SAVE:WIN:COLORS:ANI" help_page="interf_animals.html">
@@ -261,7 +261,7 @@
         <action handler="set" params="dblink=UI:BEAST_SELECTED|value=@0" />
         <!-- If ALL MENU, display the menu. Only if some animal present -->
         <!-- MAX_INVENTORY_ANIMAL -->
-        <action cond="and(eq(@0,0), or( isAnimalStatusPresent(@%pa_beast0:STATUS), isAnimalStatusPresent(@%pa_beast1:STATUS), isAnimalStatusPresent(@%pa_beast2:STATUS), isAnimalStatusPresent(@%pa_beast3:STATUS) ) )" handler="active_menu" params="menu=ui:interface:animal_menu_all" />
+        <action cond="and(eq(@0,0), or( isAnimalStatusPresent(@%pa_beast0:STATUS), isAnimalStatusPresent(@%pa_beast1:STATUS), isAnimalStatusPresent(@%pa_beast2:STATUS), isAnimalStatusPresent(@%pa_beast3:STATUS), isAnimalStatusPresent(@%pa_beast4:STATUS), isAnimalStatusPresent(@%pa_beast5:STATUS), isAnimalStatusPresent(@%pa_beast6:STATUS) ) )" handler="active_menu" params="menu=ui:interface:animal_menu_all" />
         <!-- If SINGLE MENU, display the menu -->
         <action cond="ne(@0,0)" handler="active_menu" params="menu=ui:interface:animal_menu" />
     </proc>

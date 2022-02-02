@@ -4,6 +4,31 @@
 <interface_config>
     <root id="interface" x="0" y="0" w="800" h="600" active="true" />
     <proc id="proc_nothing"></proc>
+    <!-- a text with border -->
+    <template name="bc_border_text" keep="true" posref="TM TM" posparent="parent" x="0" y="-20" w="-4">
+        <group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="true" sizeref="w" w="#w">
+            <!--
+                <group id="text" posref="TL TL" x="4" y="-4" child_resize_h="true" sizeref="w" w="-8">
+                        <view type="bitmap" id="bg" sizeref="hw" h="0" w="0" scale="true" texture="W_box_blank.tga"/>
+                        <view type="text_id_formated" format="$t" id="text" textid="#text_id" multi_line="true" fontsize="12" shadow="true" global_color="false"/>
+                </group>
+        -->
+            <!-- the border -->
+            <!--
+                <instance template="thin_bc_border" posparent="text"/>
+                -->
+        </group>
+    </template>
+    <template name="bc_border_text2" keep="true" posref="TM TM" posparent="parent" x="0" y="0" w="-4">
+        <group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="true" w="#w">
+            <group id="text" posref="TL TL" x="4" y="-4" child_resize_h="true" sizeref="w" w="-8">
+                <view type="bitmap" id="bg" sizeref="hw" h="0" w="0" scale="true" texture="W_box_blank.tga" />
+                <view type="text_id_formated" format="$t" id="text" textid="#text_id" multi_line="true" fontsize="12" shadow="true" global_color="false" />
+            </group>
+            <!-- the border -->
+            <instance template="thin_bc_border" posparent="text" />
+        </group>
+    </template>
     <!-- template for border inside of a group -->
     <template name="inner_thin_border_group" posparent="parent" keep="true" inherit_gc_alpha="false" posref="BL BL" w="0" h="0">
         <group id="itb" posparent="#posparent" sizeref="hw" w="#w" h="#h" posref="#posref">
@@ -320,16 +345,16 @@
     <!-- *  ITEM MENU * -->
     <!-- ************** -->
     <proc id="move_to_bag">
-        <action handler="move_item" params="to=lists|nblist=1| listsheet0=ui:interface:inventory:content:bag:iil:bag_icons" />
+        <action handler="move_item" params="to=lists|nblist=1|listsheet0=ui:interface:inventory:content:bag:iil:bag_icons" />
     </proc>
     <proc id="move_to_pa">
-        <action handler="move_item" params="to=lists|nblist=1| listsheet0=ui:interface:inventory:content:pa@0:iil:bag_icons" />
+        <action handler="move_item" params="to=lists|nblist=1|listsheet0=ui:interface:inventory:content:pa@0:iil:bag_icons" />
     </proc>
     <proc id="move_to_room">
-        <action handler="move_item" params="to=lists|nblist=1| listsheet0=ui:interface:inventory:content:room:iil:bag_icons" />
+        <action handler="move_item" params="to=lists|nblist=1|listsheet0=ui:interface:inventory:content:room:iil:bag_icons" />
     </proc>
     <proc id="move_to_guild">
-        <action handler="move_item" params="to=lists|nblist=1| listsheet0=ui:interface:inventory:content:guild:iil:bag_icons" />
+        <action handler="move_item" params="to=lists|nblist=1|listsheet0=ui:interface:inventory:content:guild:iil:bag_icons" />
     </proc>
     <!-- item menu when we are in bags (do not modify hierarchy or ids if you do not modify the code) -->
     <group type="menu" id="item_menu_in_bag" extends="base_menu" on_deactive="item_menu_deactivate" on_active="item_menu_check">
@@ -363,7 +388,7 @@
         <separator />
         <action id="destroy" name="uimDestroy" handler="proc" params="destroy_item_proc" icon="r2_toolbar_kill_small.tga" />
         <separator />
-        <action id="item_group" name="uimGroup" />
+        <action id="item_group" name="uimGroup" icon="r2_toolbar_customize_look_small.tga" />
         <!-- Will be activated and populated in code -->
         <group type="menu" id="item_group_menu" extends="base_menu"></group>
     </group>
@@ -641,9 +666,9 @@
     <!-- ********************* -->
     <!-- *  EDIT BOX WIDGET  * -->
     <!-- ********************* -->
-    <template name="edit_box_widget" active="true" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" child_resize_hmargin="0" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_bytes="0" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="40" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" clear_on_escape="false" color="255 255 255 255" continuous_text_update="false" bg_texture="W_box_blank.tga" on_focus_lost="" on_focus_lost_params="" max_float_prec="5" tooltip="" tooltip_parent="" negative_filter="" render_layer="0">
+    <template name="edit_box_widget" active="true" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" child_resize_hmargin="0" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="40" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" clear_on_escape="false" color="255 255 255 255" continuous_text_update="false" bg_texture="W_box_blank.tga" on_focus_lost="" on_focus_lost_params="" max_float_prec="5" tooltip="" tooltip_parent="" negative_filter="" render_layer="0">
         <group id="#id" active="#active" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="#child_resize_h" child_resize_hmargin="#child_resize_hmargin" sizeref="#sizeref" w="#w" h="#h" render_layer="#render_layer">
-            <group type="edit_box" sizeref="w" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_bytes="#max_num_bytes" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" clear_on_escape="#clear_on_escape" backup_father_container_pos="#backup_father_container_pos" on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" max_float_prec="#max_float_prec" tooltip="#tooltip" tooltip_parent="#tooltip_parent" negative_filter="#negative_filter" render_layer="#render_layer">
+            <group type="edit_box" sizeref="w" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" clear_on_escape="#clear_on_escape" backup_father_container_pos="#backup_father_container_pos" on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" max_float_prec="#max_float_prec" tooltip="#tooltip" tooltip_parent="#tooltip_parent" negative_filter="#negative_filter" render_layer="#render_layer">
                 <view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="#bg_texture" inherit_gc_alpha="true" render_layer="#render_layer" />
                 <view id="edit_text" type="text" continuous_update="#continuous_text_update" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false" render_layer="#render_layer" />
             </group>
@@ -689,7 +714,7 @@
     <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:SHEET" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:QUANTITY" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:QUALITY" type="sint32" value="0" />
-    <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:USER_COLOR" type="sint32" value="1" />
+    <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:USER_COLOR" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:WEIGHT" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:NAMEID" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:INFOVERSION" type="sint32" value="0" />
@@ -698,7 +723,7 @@
     <variable entry="UI:VARIABLES:STACK_SELECTED:DSPSLOT:RM_FABER_STAT_TYPE" type="sint32" value="0" />
     <!-- the modal -->
     <group type="modal" id="stack_dialog" exit_click_out="true" posref="TL TL" w="155" h="80" options="skin_modal" on_enter="proc" on_enter_params="stack_dialog_ok">
-        <view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="SELECT QUANTITY" />
+        <view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="uiSelectQuantity" />
         <ctrl type="sheet" id="sheet" onclick_r="open_help_auto" value="UI:VARIABLES:STACK_SELECTED:DSPSLOT" posref="MM MM" x="-26" y="0" use_quantity="false" />
         <view type="text" id="x" posparent="sheet" posref="MR MM" x="8" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="X" />
         <instance template="edit_box_widget" id="edit" entry_type="positive_integer" text_ref="TR TR" text_y="0" fontsize="12" posparent="sheet" posref="MR ML" x="16" y="0" text_x="-2" w="32" prompt="" enter_loose_focus="false" multi_line="false" max_num_chars="3" onchange="editbox_number" onchange_params="value=UI:VARIABLES:STACK_SELECTED:CUR_QUANTITY|update_text=false" onenter="proc" params="stack_dialog_ok" max_historic="0" />
@@ -959,7 +984,7 @@
     <variable entry="UI:DROP_DESTROY_ITEM:ITEM:SHEET" type="sint64" value="0" />
     <variable entry="UI:DROP_DESTROY_ITEM:ITEM:QUANTITY" type="sint64" value="0" />
     <variable entry="UI:DROP_DESTROY_ITEM:ITEM:QUALITY" type="sint64" value="0" />
-    <variable entry="UI:DROP_DESTROY_ITEM:ITEM:USER_COLOR" type="sint64" value="1" />
+    <variable entry="UI:DROP_DESTROY_ITEM:ITEM:USER_COLOR" type="sint64" value="0" />
     <variable entry="UI:DROP_DESTROY_ITEM:ITEM:LOCKED" type="sint64" value="0" />
     <variable entry="UI:DROP_DESTROY_ITEM:ITEM:WEIGHT" type="sint64" value="0" />
     <variable entry="UI:DROP_DESTROY_ITEM:ITEM:NAMEID" type="sint64" value="0" />
@@ -1203,7 +1228,7 @@
     <variable entry="UI:glob_var:help:$i:QUALITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
     <variable entry="UI:glob_var:help:$i:QUANTITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
     <variable entry="UI:glob_var:help:$i:SLOT_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
-    <variable entry="UI:glob_var:help:$i:USER_COLOR" type="sint32" value="1" size="%MAX_HELP_WINDOW" />
+    <variable entry="UI:glob_var:help:$i:USER_COLOR" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
     <variable entry="UI:glob_var:help:$i:NAMEID" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
     <variable entry="UI:glob_var:help:$i:INFO_VERSION" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
     <variable entry="UI:glob_var:help:$i:ENCHANT" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
@@ -1227,7 +1252,7 @@
         <variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:QUALITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
         <variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:QUANTITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
         <variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:SLOT_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
-        <variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:USER_COLOR" type="sint32" value="1" size="%MAX_HELP_WINDOW" />
+        <variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:USER_COLOR" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
         <variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:NAMEID" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
         <variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:INFO_VERSION" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
         <variable entry="UI:glob_var:help:$i:BUILD_ITEMS:#index:ENCHANT" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
@@ -1309,7 +1334,6 @@
                 <!-- Item is in auto mode -->
                 <ctrl type="sheet" id="ctrl_slot" use_slot_type_db_entry="true" nature="auto" value="UI:glob_var:help:#index" posref="TR TR" x="-4" y="-10" use_quantity="true" />
                 <view type="text_id" id="creator" posparent="ctrl_slot" posref="BR TR" y="-2" dynamic_string="false" fontsize="12" />
-                <view type="text" id="creator_header" posparent="creator" posref="ML MR" fontsize="12" hardtext="uiCreatorHeader" active="false" />
                 <!-- the scroll text (with only one text) -->
                 <group id="scroll_text" sizeref="w" posref="TL TL" w="0" y="-6" child_resize_h="true" child_resize_hmargin="8">
                     <instance template="inner_thin_border_group" />

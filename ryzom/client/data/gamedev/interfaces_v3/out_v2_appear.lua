@@ -353,7 +353,7 @@ end
 --	local text = self:getProgressGroup():find("text")
 --	local ellipsisTxt = self:getProgressGroup():find("ellipsis")
 --	text.color = color
---	text.text = ucstr
+--	text.uc_hardtext = ucstr
 --	if ellipsis then
 --		ellipsisTxt.hardtext = ellipsis
 --	else
@@ -378,7 +378,7 @@ end
 --	local progressDate = nltime.getLocalTime() / 500
 --	local colValue = math.floor(230 + 24 * math.sin(progressDate))
 --	local color = string.format("%d %d 	%d %d", colValue, colValue, colValue, 255)
---	self:setProgressText(concatString(i18n.get("uiBGD_Progress"), progressPercentText), color, progress, progressSymbol[progressPostfix + 1])
+--	self:setProgressText(concatUCString(i18n.get("uiBGD_Progress"), ucstring(progressPercentText)), color, progress, progressSymbol[progressPostfix + 1])
 --end
 --
 --function outgame:setPatchSuccess()

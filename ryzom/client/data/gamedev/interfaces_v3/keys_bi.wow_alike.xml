@@ -100,6 +100,7 @@
     <key name="KeyL" shift="1" action="toggle_light" />
     <key name="KeyL" ctrl="1" menu="1" action="dec_hour" />
     <key name="KeyM" action="show_hide" params="map" />
+    <key name="KeyM" ctrl="1" action="fullmap" params="" />
     <key name="KeyM" shift="1" action="show_hide" params="mailbox" />
     <key name="KeyM" ctrl="1" menu="1" action="weather_stats" />
     <key name="KeyN" shift="1" action="show_hide" params="connection" />

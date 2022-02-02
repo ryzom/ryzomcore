@@ -89,30 +89,30 @@
             </group>
             <view type="text" id="armTitle" posref="TL BL" posparent="armors" hardtext="uiArmorTitle" fontsize="10" y="2" shadow="true" />
             <!--
-                <group id="hands" posparent="armors" x="8" y="0" w="86" h="42" posref="TR TL">
+                <group id="hands" posparent="armors" x="8" y="0" w="86" h="42" posref="TR TL" >
 
-                <ctrl type="sheet" id="handr" posref="TR TR" x="0" tx_noitem="hand_right.tga" selection_group="inventory_selection"
-                                                                onclick_l="proc" params_l="inv_left_click_on_slot" tooltip="uittHandR"
-                                                                menu_r="%self_item_modal_menu"
+                <ctrl type="sheet" id="handr" posref="TR TR" x="0" tx_noitem="hand_right.tga" selection_group="inventory_selection" 
+                                                                onclick_l="proc" params_l="inv_left_click_on_slot" tooltip="uittHandR" 
+                                                                menu_r="%self_item_modal_menu" 
                                                                 dragable="true"
                                                                 ondrag="inv_drag" params_drag="from_slot" oncannotdrop="inv_cannot_drop"
                                                                 oncandrop="inv_can_drop" ondrop="inv_drop"
                                                                 item_slot="RIGHT_HAND" value="%hand_r" other_hand_slot="handl" auto_grayed="false" />
-  
-                        <ctrl type="sheet" id="handl" posref="TL TL" x="0" tx_noitem="hand_left.tga" selection_group="inventory_selection"
-                                                                onclick_l="proc" params_l="inv_left_click_on_slot" tooltip="uittHandL"
-                                                                menu_r="%self_item_modal_menu"
+        
+                        <ctrl type="sheet" id="handl" posref="TL TL" x="0" tx_noitem="hand_left.tga" selection_group="inventory_selection" 
+                                                                onclick_l="proc" params_l="inv_left_click_on_slot" tooltip="uittHandL" 
+                                                                menu_r="%self_item_modal_menu" 
                                                                 dragable="true"
                                                                 ondrag="inv_drag" params_drag="from_slot" oncannotdrop="inv_cannot_drop"
                                                                 oncandrop="inv_can_drop" ondrop="inv_drop"
                                                                 item_slot="LEFT_HAND" value="%hand_l" other_hand_slot="handr" auto_grayed="false" />
-  
+        
                         <! - Must update some things when the item equipped change - >
                         <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:SHEET)" action="phrase_update_from_hand" />
                         <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:QUALITY)" action="phrase_update_from_hand" />
                         <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:ENCHANT)" action="phrase_update_from_hand" />
 
-  </group>
+        </group>
                 <view type="text" id="handTitle" posref="TL BL" posparent="hands" hardtext="uiHandsTitle" fontsize="10" shadow="true" />
 -->
         </group>
@@ -225,6 +225,7 @@
                     <view type="text" id="autopact_vt" posref="BR MR" x="-23" y="10" hardtext="" />
                 </group>
                 <instance template="tinv_nbslots_bulk_weight" id="ibw" x="0" inv_branch="%bag" inv_bulk_max="%bag_bulk_max" />
+                <!-- y="-18" (because of webig buttons) messes filter icon placement (y should be "-16") -->
                 <instance template="tinv_item_list" id="iil" inv_branch_nb="%max_bag_invslot" y="-18" sizeref="wh" h="-16" inv_branch="%bag" inv_type="INV_BAG" />
                 <instance template="argent" id="money" posref="BL BL" x="4" y="2" value="%money" />
             </group>
@@ -260,11 +261,11 @@
     </group>
     <tree node="inventory" />
     <!--
-<anim id="anim_inventory_char_rotate" duration="30" disable_buttons="false" on_finish="proc" on_finish_params="inventory_char_rotate">
-  <track type="linear" target="inventory:content:char3d:char:rotz">
+<anim id="anim_inventory_char_rotate" duration="30"  disable_buttons="false" on_finish="proc" on_finish_params="inventory_char_rotate" >
+        <track type="linear" target="inventory:content:char3d:char:rotz">
                 <key time="0.0" value="0" />
                 <key time="30.0" value="360" />
-  </track>
+        </track>
 </anim>
 -->
     <!-- *********************** -->
@@ -275,7 +276,7 @@
         <action handler="context_help_html" params="inventory" />
     </proc>
     <!-- Make the temp inventory modal parent on faber execution, so the faber can not be done if temp inventory opened 
-  Same For Missions selection or Mission selection validation
+        Same For Missions selection or Mission selection validation
 -->
     <group id="temp_inventory" type="container" posref="MM MM" w="242" h="136" openable="false" opened="true" resizer="true" savable="true" right_button="false" movable="true" pop_min_w="243" pop_min_h="136" pop_max_w="242" pop_max_h="418" win_priority="%win_priority_high" on_active="proc" on_active_params="temp_inventory_activated" on_deactive="proc" on_deactive_params="restore_inventory_state" modal_parent="phrase_faber_execution|bot_chat_missions|bot_chat_accept_mission">
         <group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
@@ -683,7 +684,7 @@
     </group>
     <tree node="defense" />
     <!-- ********************************************************************* -->
-    <!-- ** CUSTOM TEXT EDITION AND DISPLAY                                           ** -->
+    <!-- ** CUSTOM TEXT EDITION AND DISPLAY                                      ** -->
     <!-- ********************************************************************* -->
     <!-- :NOTE: ids are groupName+"_suffix", change them with group name -->
     <!-- element/type -->
@@ -712,7 +713,7 @@
         <action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM|value=0" />
         <action handler="on_close_edit_custom" />
     </proc>
-    <group type="container" id="edit_custom" w="432" h="400" title="uiItemTextEdition" global_color="false" line_at_bottom="false" movable="true" active="false" opened="true" openable="false" resizer="true" savable="false" eader_color="UI:SAVE:WIN:COLORS:INFOS" on_active="proc" on_active_params="proc_phrase_edit_custom_opened" on_deactive="proc" on_deactive_params="proc_phrase_edit_custom_closed" pop_min_w="432" pop_min_h="128" pop_max_w="800" pop_max_h="600">
+    <group type="container" id="edit_custom" w="432" h="400" title="uiItemTextEdition" global_color="false" line_at_bottom="false" movable="true" active="false" opened="true" openable="false" resizer="true" savable="false" header_color="UI:SAVE:WIN:COLORS:INFOS" on_active="proc" on_active_params="proc_phrase_edit_custom_opened" on_deactive="proc" on_deactive_params="proc_phrase_edit_custom_closed" pop_min_w="432" pop_min_h="128" pop_max_w="800" pop_max_h="600">
         <group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" />
         <group id="header_opened" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" />
         <group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL">
@@ -721,8 +722,8 @@
             <group id="scroll_text" posparent="crop" posref="TM TM" x="0" y="-4" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4" active="true">
                 <view type="bitmap" id="background" posref="TL TL" sizeref="w" x="0" y="-8" txtwidth="300" txtheight="360" texture="" global_color="false" render_layer="0" />
                 <view type="text" id="display" posref="TL TL" sizeref="w" color="255 255 255 160" x="2" y="-4" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" />
-                <instance template="edit_box_widget_multiline" max_num_chars="1023" max_num_bytes="1023" max_num_return="50" id="edit_large" posref="TL TL" x="4" y="-8" sizeref="w" sizeref_eb="w" child_resize_h="true" w="-8" h="-30" text_x="0" text_y="0" text_ref="TL TL" fontsize="12" multi_line="true" enter_loose_focus="true" enter_recover_focus="false" prompt="" reset_focus_on_hide="true" want_return="true" active="false" render_layer="1" scale="false" />
-                <instance template="edit_box_widget_multiline" max_num_chars="255" max_num_bytes="255" max_num_return="16" id="edit_short" posref="TL TL" x="4" y="-8" sizeref="w" sizeref_eb="w" child_resize_h="true" w="-8" h="-30" text_x="0" text_y="0" text_ref="TL TL" fontsize="12" multi_line="true" enter_loose_focus="true" enter_recover_focus="false" prompt="" reset_focus_on_hide="true" want_return="true" active="false" render_layer="1" scale="false" />
+                <instance template="edit_box_widget_multiline" max_num_chars="1024" max_num_return="50" id="edit_large" posref="TL TL" x="4" y="-8" sizeref="w" sizeref_eb="w" child_resize_h="true" w="-8" h="-30" text_x="0" text_y="0" text_ref="TL TL" fontsize="12" multi_line="true" enter_loose_focus="true" enter_recover_focus="false" prompt="" reset_focus_on_hide="true" want_return="true" active="false" render_layer="1" scale="false" />
+                <instance template="edit_box_widget_multiline" max_num_chars="256" max_num_return="16" id="edit_short" posref="TL TL" x="4" y="-8" sizeref="w" sizeref_eb="w" child_resize_h="true" w="-8" h="-30" text_x="0" text_y="0" text_ref="TL TL" fontsize="12" multi_line="true" enter_loose_focus="true" enter_recover_focus="false" prompt="" reset_focus_on_hide="true" want_return="true" active="false" render_layer="1" scale="false" />
             </group>
             <ctrl style="skin_scroll" id="scroll_bar_theme" align="T" target="scroll_text" posparent="crop" posref="TL TR" x="-8" y="0" />
             <view type="bitmap" id="sep" x="0" y="-2" posparent="crop" posref="BR TR" scale="true" h="2" sizeparent="parent" sizeref="w" texture="W_line_hor.tga" />

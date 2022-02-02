@@ -307,7 +307,7 @@
     <tree node="ring_chars_tracking" />
     <group type="modal" id="invite_character" exit_click_out="true" posref="MM MR" w="212" child_resize_h="true" child_resize_hmargin="8" options="skin_modal" on_active="" on_active_params="">
         <view type="text" id="text" case_mode="%case_first_word_letter_up" posref="TL TL" x="6" y="-4" color="255 255 255 255" global_color="false" fontsize="14" shadow="true" hardtext="uiPeopleAddContact" />
-        <instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_bytes="255" entry_type="playername" />
+        <instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_chars="255" entry_type="playername" />
         <instance template="button_ok_cancel" posparent="add_contact_eb" posref="BR TR" x="0" y="-4" onclick_ok="r2ed_invite_character" onclick_ok_param="" onclick_cancel="leave_modal" onclick_cancel_param="" />
     </group>
     <!-- **************************************************************************************************************** -->
@@ -411,7 +411,7 @@
                                 <instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
                             </group>
                             <group id="crop_desc" posparent="back_small_description" posref="TL TL" x="4" y="-4" sizeref="wh" w="-20" h="-12" />
-                            <group type="edit_box" id="edit_small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" child_resize_h="true" w="0" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" max_h="-4" want_return="true" onenter="" params="" on_focus_lost="" on_focus_lost_params="" reset_focus_on_hide="true" max_num_bytes="255">
+                            <group type="edit_box" id="edit_small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" child_resize_h="true" w="0" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" max_h="-4" want_return="true" onenter="" params="" on_focus_lost="" on_focus_lost_params="" reset_focus_on_hide="true" max_num_chars="256">
                                 <view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" fontsize="12" shadow="true" hardtext="" global_color="false" />
                             </group>
                             <ctrl style="skin_scroll" id="small_description_scroll" align="B" target="edit_small_description" posparent="crop_desc" posref="TR TL" x="5" y="0" />

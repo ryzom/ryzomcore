@@ -428,6 +428,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
         <param name="ctrl_sheet_gray_color" value="255 255 255 100" />
         <param name="ctrl_sheet_redify_color" value="255 100 100 100" />
         <param name="ctrl_text_redify_color" value="255 32 32 160" />
+        <!--    <param name="font"
+           value="basic.ttf" /> -->
         <param name="font" value="ryzom.ttf" />
         <param name="monospace_font" value="ryzom_monospace.ttf" />
         <param name="add_coef_font" value="3" />
@@ -486,12 +488,12 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <sheet_selection name="teleport_selection" texture="item_selection.tga" color="255 255 255 255" global_color="true" />
     <sheet_selection name="mission_selection" texture="item_selection.tga" color="255 255 255 255" global_color="true" />
     <!-- ****************************** -->
-    <!-- *     CODE FILTERS     * -->
+    <!-- *     CODE FILTERS           * -->
     <!-- ****************************** -->
     <!-- dummy for sheets not linked -->
     <variable entry="UI:EMPTY:SHEET" type="sint64" value="0" />
     <!-- ****************************** -->
-    <!-- *        MISC          * -->
+    <!-- *             MISC           * -->
     <!-- ****************************** -->
     <!-- set to true if the current header that called a menu was a popup container -->
     <variable entry="UI:VARIABLES:GC_POPUP" type="sint64" value="0" />
@@ -520,7 +522,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
     <variable entry="UI:SAVE:NIGHT_COLOR" type="rgba" value="255 255 255 255" />
     <variable entry="UI:VARIABLES:FPS" type="sint64" value="30" />
     <!-- ***************************** -->
-    <!-- *  STRING CASE OPTION      * -->
+    <!-- *  STRING CASE OPTION       * -->
     <!-- ***************************** -->
     <define id="case_normal" value="0" />
     <define id="case_lower" value="1" />

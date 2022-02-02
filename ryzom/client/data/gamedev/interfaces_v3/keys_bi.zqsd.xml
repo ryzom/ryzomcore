@@ -1,15 +1,15 @@
-<!--  *************************** 
+<!--  ***************************
   -->
-<!--  Ingame keyboard assignation 
+<!--  Ingame keyboard assignation
   -->
-<!--  *************************** 
+<!--  ***************************
   -->
 <interface_config>
     <!-- keys.xml are loaded after user key defs. don't replace its key/action defs -->
     <define id="key_def_no_replace" value="1" />
     <!-- every action bound here must be kept in the Keys interface, even if the key is unbound -->
     <define id="key_def_force_display" value="1" />
-    <!--  Move 
+    <!--  Move
   -->
     <key name="KeyZ" action="forward" />
     <key name="KeyS" action="backward" />
@@ -24,7 +24,7 @@
     <key name="KeyDELETE" action="toggle_run_walk" />
     <key name="KeyPRIOR" ctrl="1" action="camera_up" />
     <key name="KeyNEXT" ctrl="1" action="camera_down" />
-    <!--  View 
+    <!--  View
   -->
     <key name="KeyV" action="toggle_camera" />
     <key name="KeyNUMPAD0" action="rear_view" />
@@ -32,7 +32,7 @@
     <key name="KeyNUMPAD2" action="camera_turn_right" />
     <key name="KeyDECIMAL" action="camera_turn_center" />
     <key name="KeyF5" shift="1" action="toggle_chat" />
-    <!--  Target 
+    <!--  Target
   -->
     <key name="KeyF12" ctrl="0" action="no_target" />
     <key name="KeyF10" ctrl="0" action="self_target" />
@@ -47,7 +47,7 @@
     <key name="KeyF6" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=6" />
     <key name="KeyF7" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=7" />
     <key name="KeyF8" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=8" />
-    <!--  Desktop 
+    <!--  Desktop
   -->
     <key name="KeyF1" action="set_desktop" params="0" />
     <key name="KeyF2" action="set_desktop" params="1" />
@@ -57,7 +57,7 @@
     <key name="KeyF2" ctrl="1" shift="1" action="copy_to_desktop" params="1" />
     <key name="KeyF3" ctrl="1" shift="1" action="copy_to_desktop" params="2" />
     <key name="KeyF4" ctrl="1" shift="1" action="copy_to_desktop" params="3" />
-    <!--  Shortcuts 
+    <!--  Shortcuts
   -->
     <key name="Key1" action="run_shortcut" params="00" />
     <key name="Key2" action="run_shortcut" params="01" />
@@ -112,7 +112,7 @@
     <key name="Key8" menu="1" shift="1" action="talk_message" params="17" />
     <key name="Key9" menu="1" shift="1" action="talk_message" params="18" />
     <key name="Key0" menu="1" shift="1" action="talk_message" params="19" />
-    <!--  Misc 
+    <!--  Misc
   -->
     <key name="KeyF7" shift="0" action="mount_unmount" />
     <key name="KeyF10" shift="1" action="screen_shot" />
@@ -126,17 +126,17 @@
     <key name="KeyR" ctrl="1" action="reply_teller" />
     <key name="KeyD" shift="1" action="toggle_dodge_parry" />
     <!-- <key name="KeyO" shift="0" action="toggle_names" />  -->
-    <!--  Movie recorder 
+    <!--  Movie recorder
   -->
     <key name="KeyF10" ctrl="1" shift="1" menu="1" action="toggle_camera_recorder" />
     <key name="KeyF11" ctrl="1" shift="1" menu="1" action="camera_recorder_playback" />
     <key name="KeyF12" ctrl="1" shift="1" menu="1" action="save_camera_record" />
-    <!--  Camera recorder 
+    <!--  Camera recorder
   -->
     <key name="KeyF3" ctrl="1" action="toggle_movie_recorder" />
     <key name="KeyF4" ctrl="1" shift="1" menu="1" action="replay_movie" />
     <key name="KeyF5" ctrl="1" shift="1" menu="1" action="save_movie" />
-    <!--  Debug actions 
+    <!--  Debug actions
   -->
     <key name="Key1" ctrl="1" menu="1" shift="1" action="command" params="mode 0 3" />
     <key name="Key2" ctrl="1" menu="1" shift="1" action="command" params="mode 0 1" />
@@ -173,7 +173,7 @@
     <key name="Key8" ctrl="1" menu="1" action="toggle_3d_filter" params="7" />
     <key name="Key9" ctrl="1" menu="1" action="toggle_3d_filter" params="8" />
     <key name="Key0" ctrl="1" menu="1" action="toggle_3d_filter" params="9" />
-    <!--  Weather debug 
+    <!--  Weather debug
   -->
     <key name="KeyADD" ctrl="1" menu="1" action="inc_time" />
     <key name="KeySUBTRACT" ctrl="1" menu="1" action="dec_time" />
@@ -195,12 +195,12 @@
     <key name="KeyA" ctrl="1" shift="1" action="debug_ui_prev_element_under_mouse" />
     <key name="KeyQ" ctrl="1" shift="1" action="debug_ui_inspect_element_under_mouse" />
     <key name="KeyW" ctrl="1" shift="1" action="debug_ui_next_element_under_mouse" />
-    <!--  Sound debug 
+    <!--  Sound debug
   -->
     <key name="KeyNUMPAD0" ctrl="1" menu="1" action="draw_sound" />
     <key name="KeyPRIOR" ctrl="1" menu="1" action="inc_camera_height" />
     <key name="KeyNEXT" ctrl="1" menu="1" action="dec_camera_height" />
-    <!--  Text edit 
+    <!--  Text edit
   -->
     <key name="KeyLEFT" shift="1" action="edit_previous_char" context="edit" />
     <key name="KeyLEFT" shift="1" menu="1" action="edit_select_previous_char" context="edit" />
@@ -233,10 +233,10 @@
     <key name="KeyTAB" action="edit_expand_or_cycle_tell" context="edit" />
     <key name="KeyTAB" action="cycle_tell" />
     <key name="KeyBACK" action="edit_back" context="edit" />
-    <!--  Interface 
+    <!--  Interface
   -->
     <key name="KeyESCAPE" shift="1" action="close_help" />
-    <!--  Status 
+    <!--  Status
   -->
     <key name="N/A" action="show_hide" params="player" />
     <key name="N/A" action="show_hide" params="bonus_malus" />
@@ -245,7 +245,7 @@
     <key name="KeyG" action="show_hide" params="guild" />
     <key name="KeyF" shift="1" action="show_hide" params="fame" />
     <key name="KeyE" shift="1" action="show_hide" params="encyclopedia" />
-    <!--  Inventory 
+    <!--  Inventory
   -->
     <key name="KeyI" action="show_hide" params="inventory" />
     <key name="KeyB" action="show_hide" params="phrase_book" />
@@ -256,7 +256,8 @@
     <key name="N/A" action="show_hide" params="compass" />
     <key name="KeyR" action="show_hide" params="radar" />
     <key name="KeyM" action="show_hide" params="map" />
-    <!--  Communication 
+    <key name="KeyM" ctrl="1" action="fullmap" params="" />
+    <!--  Communication
   -->
     <key name="N/A" action="show_hide" params="target" />
     <key name="KeyF" action="show_hide" params="contact_list" />
@@ -272,7 +273,7 @@
     <!--
         <key name="KeyS" shift="1" action="show_hide" params="r2ed_scenario_scores" />
         -->
-    <!--  Options 
+    <!--  Options
   -->
     <key name="N/A" action="show_hide" params="keys" />
     <key name="N/A" action="show_hide" params="macros" />

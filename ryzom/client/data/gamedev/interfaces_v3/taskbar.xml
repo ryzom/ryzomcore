@@ -28,7 +28,7 @@
         <!-- the big button is used to restore the current specific mode -->
         <ctrl type="button" id="#id" button_type="radio_button" posparent="#posparent" x="#x" y="#y" posref="#posref" tx_normal="#texture" tx_pushed="#texture" tx_over="W_button_28_over.tga" color="255 255 255 128" col_pushed="255 255 255 255" click_when_pushed="true" onclick_l="proc" params_l="tb_setdesktop|#desk_value" global_color_pushed="false" onlongclick_l="proc" params_longclick_l="tb_open_gestion_windows" />
         <!-- the arrow button open a modal to select the new specific mode -->
-        <!--<ctrl type="button" id="arrow_up#id" button_type="push_button" posparent="#id" posref="TR TL" y="0" 
+        <!--<ctrl type="button" id="arrow_up#id" button_type="push_button" posparent="#id" posref="TR TL" y="0"
                                                                                 tx_normal="W_mode_choice.tga" tx_pushed="W_mode_choice.tga" tx_over="W_button_mode_over.tga"
                                                                                 color="255 255 255 128" col_pushed="255 255 255 255"
                                                                                 onclick_l="enter_modal" params_l="group=#onlist_modal" />-->
@@ -60,11 +60,6 @@
     <proc id="quit_dialog_reselect_char">
         <action handler="reselect_character" />
         <action handler="leave_modal" />
-    </proc>
-    <proc id="quit_dialog_launch_editor">
-        <action handler="leave_modal" />
-        <!-- must leave modal first because 'launch game' may pop a message box in some cases if patching was uncomplete -->
-        <action handler="launch_game" params="slot=ingame_auto|edit_mode=1" />
     </proc>
     <!-- the modal (formerly: h="60") -->
     <define id="quit_button_delta_y" value="-4" />
@@ -403,7 +398,7 @@
         <!-- Ring -->
         <!--
         <instance template="mk_icon_text" id="sys8" hardtext="uiMk_interaction8" posparent="sys7" posref="BL TL"
-                onclick_l="show_hide" params_l="r2ed_ring_window" tooltip="uiMk_interaction8" 
+                onclick_l="show_hide" params_l="r2ed_ring_window" tooltip="uiMk_interaction8"
                 tx_normal="tb_ring_window.tga" tx_pushed="tb_ring_window.tga" c="%color_yellow"/>
                 -->
     </group>
@@ -420,6 +415,11 @@
         <instance template="mk_icon_text" id="sys5" hardtext="uiMk_system5" posparent="sys4" posref="BL TL" onclick_l="show_hide" params_l="connection" tooltip="uiMk_system5" tx_normal="tb_connection.tga" tx_pushed="tb_connection.tga" c="%color_beige" />
         <!-- Mp3 player -->
         <instance template="mk_icon_text" id="sys6" hardtext="uiMk_system6" posparent="sys5" posref="BL TL" onclick_l="show_hide" params_l="mp3_player" tooltip="uiMk_system6" tx_normal="mp3.tga" tx_pushed="mp3.tga" c="%color_beige" />
+        <!-- Background downloader
+        <instance template="mk_icon_text" id="sys7" hardtext="uiMk_system8" posparent="sys6" posref="BL TL"
+                onclick_l="show_hide" params_l="bg_downloader" tooltip="uiMk_system8"
+                tx_normal="bg_downloader.tga" tx_pushed="bg_downloader.tga" c="%color_beige" />
+         -->
     </group>
     <group style="mk_sub_menu" id="milko_help" modal_parent="milko_pad" child_resize_h="true" child_resize_hmargin="8">
         <!-- Help -->
@@ -444,8 +444,8 @@
         <view type="bitmap" id="#id" posparent="#posparent" x="#x" y="#y" posref="#posref" texture="w_slot_win_menu.tga" />
         <view type="bitmap" id="back#id" posparent="#id" x="1" y="0" posref="ML ML" texture="M_back.tga" global_color="false" />
         <!--
-                <ctrl type="button" id="icon#id" button_type="toggle_button" posparent="#id" x="1" y="0" posref="ML ML" 
-                                                                                tx_normal="none.tga" tx_pushed="none.tga" tx_over="W_button_32_over.tga" 
+                <ctrl type="button" id="icon#id" button_type="toggle_button" posparent="#id" x="1" y="0" posref="ML ML"
+                                                                                tx_normal="none.tga" tx_pushed="none.tga" tx_over="W_button_32_over.tga"
                                                                                 color="255 255 255 128" col_pushed="255 255 255 255" col_over="255 255 255 255"
                                                                                 global_color_normal="false" global_color_over="true" global_color_pushed="false"
                                                                                 click_when_pushed="true" onclick_l="proc" params_l="wlm_active#nb" />
@@ -469,7 +469,7 @@
     <template name="win_button" id="" posparent="parent" posref="TL TL" x="0" y="0" sizeref="w" w="0" h="14" pushflag="" win_name="">
         <group id="#id" sizeref="w" w="0" h="14" x="#x" y="#y" posref="#posref" posparent="#posparent">
             <ctrl type="button" id="but" button_type="toggle_button" x="8" y="0" posref="ML ML" tx_normal="W_slot_on.tga" tx_pushed="W_opacity_on.tga" color="#color" col_pushed="#color" col_over="#color" global_color_normal="false" global_color_over="false" global_color_pushed="false" click_when_pushed="true" onclick_l="show_hide" params_l="#win_name" />
-            <view type="text_formated" id="text" posparent="but" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color" shadow="true" format="#text" />
+            <view type="text" id="text" posparent="but" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color" shadow="true" hardtext="#text" />
             <view type="text" id="key" posref="MR MR" x="-8" y="-2" fontsize="8" global_color="false" color="#color" shadow="true" hardtext="uiNotAssigned" />
             <link expr="@#pushflag" target="but:pushed" />
             <link expr="ifthenelse(eq(@#pushflag,1), makeRGB(255,255,255), intToColor(@#color))" target="text:color_rgba,key:color_rgba" />
@@ -480,7 +480,7 @@
         <group id="#id" sizeref="w" w="0" h="14" x="#x" y="#y" posref="#posref" posparent="#posparent">
             <view type="bitmap" id="back" x="8" texture="W_slot_on.tga" color="#color_grayed" posref="ML ML" global_color="false" />
             <ctrl type="button" id="but" button_type="toggle_button" x="8" y="0" posref="ML ML" active="false" tx_normal="W_slot_on.tga" tx_pushed="W_opacity_on.tga" color="#color" col_pushed="#color" col_over="#color" global_color_normal="false" global_color_over="false" global_color_pushed="false" click_when_pushed="true" onclick_l="show_hide" params_l="#win_name" />
-            <view type="text_formated" id="text" posparent="back" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color_grayed" shadow="true" format="#text" />
+            <view type="text" id="text" posparent="back" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color_grayed" shadow="true" hardtext="#text" />
             <view type="text" id="key" posref="MR MR" x="-8" y="0" fontsize="8" global_color="false" color="#color_grayed" shadow="true" hardtext="CTRL+SHIFT+ALT+NUMPADD" />
             <link expr="@#pushflag" target="but:pushed" />
             <link expr="not(#test_grayed)" target="but:active" />
@@ -519,7 +519,7 @@
             <instance template="win_button" id="invent" color="UI:SAVE:WIN:COLORS:INV" text="uimwInventory" posparent="hands2" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:INVENTORY" win_name="inventory" />
             <instance template="win_button" id="action_book" color="UI:SAVE:WIN:COLORS:INV" text="uiPhraseBookTitle" posparent="invent" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:ACTIONS" win_name="phrase_book" />
             <instance template="win_button" id="links" color="UI:SAVE:WIN:COLORS:INV" text="uiLinksTitle" posparent="action_book" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:LINKS" win_name="links" />
-            <!--    
+            <!--
                 <instance template="win_button" id="defense" color="UI:SAVE:WIN:COLORS:INV" text="uiDefenseTitle" posparent="links" posref="BL TL" x="0" y="-4"
                         pushflag="UI:VARIABLES:ISACTIVE:DEFENSE" win_name="defense" />
                 -->
@@ -537,7 +537,7 @@
                 -->
             <instance template="win_button_grayed" id="guild_forum" color="UI:SAVE:WIN:COLORS:MEM" text="uimwGuildForum" posparent="guild" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:GUILD_FORUM" win_name="guild_forum" color_grayed="UI:SAVE:WIN:COLORS:MEM_GRAYED" test_grayed="not(%is_guild_present)" />
             <instance template="win_button_grayed" id="team_list" color="UI:SAVE:WIN:COLORS:MEM" text="uimwTeamList" posparent="guild_forum" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:TEAM_LIST" win_name="team_list" color_grayed="UI:SAVE:WIN:COLORS:MEM_GRAYED" test_grayed="not(%is_team_present)" />
-            <!--    
+            <!--
                 <instance template="win_button" id="team_chat" color="UI:SAVE:WIN:COLORS:MEM" text="uimwTeamChat" posparent="team_list" posref="BL TL" x="0" y="-4"
                         pushflag="UI:VARIABLES:ISACTIVE:TEAM_CHAT"              win_name="team_chat" />
                 -->
@@ -584,6 +584,8 @@
             <instance template="win_button" id="connection" color="UI:SAVE:WIN:COLORS:OPT" text="uimwConnection" posparent="macros" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:CONNECTION" win_name="connection" />
             <instance template="win_button" id="mp3" color="UI:SAVE:WIN:COLORS:OPT" text="uimwMP3Player" posparent="connection" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:MP3PLAYER" win_name="mp3_player" />
             <instance template="win_button" id="mp" color="UI:SAVE:WIN:COLORS:OPT" text="uimwTaskBar" posparent="mp3" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:MILKO_PAD" win_name="milko_pad" />
+            <!--            <instance template="win_button" id="bg_downloader" color="UI:SAVE:WIN:COLORS:OPT" text="uimwBGDownloader" posparent="mp3" posref="BL TL" x="0" y="-4"
+                        pushflag="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" win_name="bg_downloader" /> -->
             <!--<instance template="win_button" id="cosm" color="UI:SAVE:WIN:COLORS:OPT" text="uimwCosmetics" posparent="mp3" posref="BL TL" x="0" y="-4"
                         pushflag="UI:VARIABLES:ISACTIVE:COSMETICS" win_name="cosmetics" />-->
         </group>

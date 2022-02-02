@@ -56,7 +56,7 @@
         <group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL">
             <group id="sbtree" posref="TL TL" sizeref="w3h" x="0" w="-14" y="-4" h="-4">
                 <group id="tree_list" type="tree" posref="TL TL" x="14" y="-4" col_over="255 255 255 48" col_select="255 255 255 80" max_sizeparent="parent" max_sizeref="wh" max_w="-10" max_h="-4">
-                    <!--                            
+                    <!--
                                 <node id="album"                name="uiEncyAlbum"              handler="proc"  params="ency_album"     fontsize="11" y_decal="-1" >
                                         <node id="theme"        name="uiEncyTheme"              handler="proc"  params="ency_theme"     fontsize="10" y_decal="-1" />
                                 </node>
@@ -93,7 +93,7 @@
                 <!--
                                 <group id="reward_text" posref="BM TM" posparent="reward" x="0" y="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="4" >
                                         <view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
-                                        
+
                                         <view type="text_id" id="desc" posref="TL TL" sizeref="w" color="255 255 255 160" y="-8"
                                                 fontsize="12" shadow="true" multi_line="true" multi_line_space="0" />
                                 </group>
@@ -101,15 +101,15 @@
                 <!--
                                 <group id="reward" posref="TM TM" x="0" y="-16" sizeref="w" w="0" h="44">
                                         <view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
-                                        
+
                                         <view style="ency_title2" type="text" id="icon" posref="MM MM" x="0" y="0" hardtext="WORK IN PROGRESS" />
                                 </group>
-                                
-                                
-                                
+
+
+
                                 <group id="reward_text" posref="BM TM" posparent="reward" x="0" y="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="4">
                                         <view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" texture="W_line_hor.tga" />
-                                        
+
                                         <view type="text" id="reward_txt" posref="TL TL" sizeref="w" color="255 255 255 160" y="-8"
                                                 fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="uiEncyExplanation" />
                                 </group>
@@ -189,21 +189,27 @@
             <ctrl style="skin_scroll" id="scroll_bar_theme" align="T" target="theme" posparent="crop" posref="TL TR" x="-8" y="0" />
         </group>
     </group>
-    <group type="container" id="encyclopedia" active="false" w="950" h="700" pop_max_w="950" pop_max_h="700" pop_min_w="585" pop_min_h="120" header_color="UI:SAVE:WIN:COLORS:PLA" posref="TL TL" title="Mission Catalog" global_color="true" global_color_over="true" right_button="true" movable="true" lockable="true" openable="true" opened="true" resizer="true" active_savable="false">
+    <group type="container" id="encyclopedia" active="false" w="950" h="700" pop_max_w="950" pop_max_h="700" pop_min_w="621" pop_min_h="120" header_color="UI:SAVE:WIN:COLORS:PLA" posref="TL TL" title="Mission Catalog" global_color="true" global_color_over="true" right_button="true" movable="true" lockable="true" openable="true" opened="true" resizer="true" active_savable="false">
         <group id="header_closed" x="0" y="0" w="120" h="16" posref="TL TL" on_active="lua" on_active_params="game:closeWindowHeader()"></group>
-        <group id="header_opened" x="0" y="0" w="950" h="16" posref="TL TL" on_active="lua" on_active_params="game:openWindowHeader()" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">&gt;</group>
+        <group id="header_opened" x="0" y="0" w="950" h="16" posref="TL TL" on_active="lua" on_active_params="game:openWindowHeader()" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color"></group>
         <group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
-            <group id="htmlA" type="html" posref="ML ML" url="http://app.ryzom.com" title_prefix="" sizeref="h" x="-16" y="0" w="220" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline">
+            <group id="htmlA" type="html" posref="TL TL" url="http://app.ryzom.com" title_prefix="" sizeref="h" x="-16" y="0" w="220" h="49" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline">
                 <group id="black" posref="BR BR" sizeref="hw" w="-16" h="0" inherit_gc_alpha="true" />
                 <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" color="255 255 255 0" />
                 <group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
                 <ctrl style="skin_scroll" id="scroll_bar" x="8" />
             </group>
-            <group id="htmlB" type="html" posref="ML ML" url="http://app.ryzom.com" title_prefix="" sizeref="h" x="190" y="0" w="740" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline">
+            <group id="htmlB" type="html" posref="TL TL" url="http://app.ryzom.com" title_prefix="" sizeref="h" x="190" y="0" w="740" h="49" background_color="0 0 0 255" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline">
                 <group id="black" posref="BR BR" sizeref="hw" w="-16" h="0" inherit_gc_alpha="true" />
                 <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" color="255 255 255 0" />
                 <group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
-                <ctrl style="skin_scroll" id="scroll_bar" x="8" />
+                <ctrl style="skin_scroll" id="scroll_bar" posref="TR TL" posparent="text_list" x="-8" />
+            </group>
+            <group id="htmlC" type="html" posref="TL TL" url="http://app.ryzom.com" title_prefix="" sizeref="h" x="190" y="0" w="740" h="49" background_color="0 0 0 255" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline">
+                <group id="black" posref="BR BR" sizeref="hw" w="-16" h="0" inherit_gc_alpha="true" />
+                <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" color="255 255 255 0" />
+                <group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
+                <ctrl style="skin_scroll" id="scroll_bar" posref="TR TL" posparent="text_list" x="-8" />
             </group>
         </group>
     </group>

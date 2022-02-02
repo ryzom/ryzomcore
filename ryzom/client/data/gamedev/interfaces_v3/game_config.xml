@@ -289,8 +289,8 @@
             <group id="hud" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
                 <!-- Entities Names -->
                 <view style="sgc_title" type="text" id="en" posref="TM TM" x="0" y="0" hardtext="uiHud" />
-                <!--<instance template="tgcw_checkbox" id="suc" text="uiShowUnderCursor" posref="TL TL" x="0" y="-20" />
-                   <instance template="tgcw_checkbox" id="sta" text="uiShowTargeted" posref="BL TL" posparent="suc" x="0" y="-12" />-->
+                <!--<instance template="tgcw_checkbox" id="suc"  text="uiShowUnderCursor"               posref="TL TL" x="0" y="-20" />
+                        <instance template="tgcw_checkbox" id="sta"  text="uiShowTargeted"                      posref="BL TL" posparent="suc"  x="0" y="-12" />-->
                 <instance template="tgcw_checkbox" id="swrc" text="uiSelectWithRClick" posref="TL TL" x="0" y="-20" />
                 <instance template="tgcw_checkbox" id="foa" text="uiFollowOnAtk" posref="BL TL" posparent="swrc" x="0" y="-12" />
                 <instance template="tgcw_checkbox" id="aos" text="uiAtkOnSelect" posref="BL TL" posparent="foa" x="0" y="-12" />
@@ -653,8 +653,8 @@
                 <param ui="fx:bloom_gr:square_bloom:c" type="cfg" widget="boolbut" realtime="true" link="SquareBloom" preset="UI:TEMP:PRESET_FX" />
                 <param ui="fx:bloom_gr:density_bloom:c" type="cfg" widget="sbfloat_round" realtime="true" ui_view="fx:bloom_gr:density_bloom:c_res" link="DensityBloom" preset="UI:TEMP:PRESET_FX" />
                 <!--
-                   <param ui="hud:suc:c" type="cfg" widget="boolbut" link="ShowNameUnderCursor" realtime="true"/>
-                   <param ui="hud:sta:c" type="cfg" widget="boolbut" link="ShowNameSelected" realtime="true"/>
+                        <param ui="hud:suc:c"  type="cfg" widget="boolbut" link="ShowNameUnderCursor" realtime="true"/>
+                        <param ui="hud:sta:c"  type="cfg" widget="boolbut" link="ShowNameSelected"    realtime="true"/>
 -->
                 <param ui="hud:swrc:c" type="cfg" widget="boolbut" link="SelectWithRClick" realtime="true" />
                 <param ui="hud:foa:c" type="cfg" widget="boolbut" link="FollowOnAtk" realtime="true" />
@@ -707,10 +707,10 @@
                 <param ui="chat_colors:cc_dyn6:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:DYN:6" realtime="true" />
                 <param ui="chat_colors:cc_dyn7:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:DYN:7" realtime="true" />
                 <!--
-                   <param ui="chat_colors:cc_shout:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:SHOUT" realtime="true" />
-                   <param ui="chat_colors:cc_civi:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:CIVILIZATION" realtime="true" />
-                   <param ui="chat_colors:cc_terri:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:TERRITORY" realtime="true" />
-                   -->
+                        <param ui="chat_colors:cc_shout:c"              type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:SHOUT" realtime="true" />
+                        <param ui="chat_colors:cc_civi:c"               type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:CIVILIZATION" realtime="true" />
+                        <param ui="chat_colors:cc_terri:c"              type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:TERRITORY"  realtime="true" />
+                        -->
                 <param ui="chat_colors:enter_dontquit_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB" realtime="true" />
                 <param ui="chat_colors:save_channel_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SAVE_CHANNEL" realtime="true" />
                 <param ui="chat_colors:auto_channel_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:AUTO_CHANNEL" realtime="true" />

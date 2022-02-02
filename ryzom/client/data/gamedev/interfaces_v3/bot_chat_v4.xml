@@ -22,31 +22,6 @@
         <view type="bitmap" id="sep4" posref="BL BL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="-1" />
         <view type="bitmap" id="sep4" posref="BL BL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="-1" />
     </template>
-    <!-- a text with border -->
-    <template name="bc_border_text" posref="TM TM" posparent="parent" x="0" y="-20" w="-4">
-        <group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="true" sizeref="w" w="#w">
-            <!--
-                <group id="text" posref="TL TL" x="4" y="-4" child_resize_h="true" sizeref="w" w="-8">
-                        <view type="bitmap" id="bg" sizeref="hw" h="0" w="0" scale="true" texture="W_box_blank.tga"/>
-                        <view type="text_id_formated" format="$t" id="text" textid="#text_id" multi_line="true" fontsize="12" shadow="true" global_color="false"/>
-                </group>
-  -->
-            <!-- the border -->
-            <!--
-                <instance template="thin_bc_border" posparent="text"/>
-                -->
-        </group>
-    </template>
-    <template name="bc_border_text2" posref="TM TM" posparent="parent" x="0" y="0" w="-4">
-        <group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="true" w="#w">
-            <group id="text" posref="TL TL" x="4" y="-4" child_resize_h="true" sizeref="w" w="-8">
-                <view type="bitmap" id="bg" sizeref="hw" h="0" w="0" scale="true" texture="W_box_blank.tga" />
-                <view type="text_id_formated" format="$t" id="text" textid="#text_id" multi_line="true" fontsize="12" shadow="true" global_color="false" />
-            </group>
-            <!-- the border -->
-            <instance template="thin_bc_border" posparent="text" />
-        </group>
-    </template>
     <!-- EXCHANGE slot -->
     <style style="xchg_slot" type="sheet" onclick_r="open_help_auto" dragable="true" oncandrop="can_drop_to_exchange" ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot" />
     <!-- Basic container style -->
@@ -135,14 +110,14 @@
             <instance template="edit_box_widget" id="edit" posparent="intro" posref="TL TL" x="0" w="380" y="-24" h="12" text_x="0" text_y="0" text_ref="ML ML" fontsize="12" prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="32" onenter="" params="" enter_recover_focus="false" reset_focus_on_hide="true" max_historic="0" title="uiGuildNameWarning" tooltip="uiGuildNameWarning" entry_type="text" />
             <view type="text" id="guild_name" posparent="edit" posref="TL BL" x="0" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiGuildName" />
             <!-- DESCRIPTION -->
-            <instance template="edit_box_widget" id="desc" posref="BL TL" y="-24" posparent="edit" child_resize_h="true" w="380" multi_line="true" max_num_chars="200" onenter="" title="uiGuildDescWarning" tooltip="uiGuildDescWarning" />
+            <instance template="edit_box_widget" id="desc" posref="BL TL" multi_line="true" max_num_chars="200" y="-24" posparent="edit" child_resize_h="true" w="380" onenter="" title="uiGuildDescWarning" tooltip="uiGuildDescWarning" />
             <view type="text" id="guild_desc" posparent="desc" posref="TL BL" x="0" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiGuildDescription" />
             <!-- BLASON DESIGN -->
             <instance template="box_widget" id="back" posparent="desc" posref="BM TM" w="300" h="120" x="0" y="-24" />
             <!-- GUILD ICON -->
             <ctrl type="sheet" id="blason" posref="TL TL" x="5" y="-18" posparent="back" nature="guild_flag" value="UI:TEMP:GUILD_CREATION" dragable="false" color="255 255 255 255" />
             <view type="text" id="guild_blason" posref="TL BL" posparent="blason" x="0" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiGuildBlason" />
-            <!-- GUILD ICON DESIGNER -->
+            <!-- GUILD ICON Desinger -->
             <view type="text" id="guild_blason_design" posref="TL BL" posparent="back" x="0" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiGuildBlasonDesign" />
             <ctrl type="sheet" id="back_layer" posref="TL TL" x="100" y="-18" posparent="back" nature="guild_flag" value="UI:TEMP:GUILD:BACK" global_color="false" onclick_l="enter_modal" params_l="group=ui:interface:guild_flag_back" />
             <view type="text" id="blason_back" posref="TL BL" posparent="back_layer" x="0" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiGuildBlasonBack" />
@@ -298,7 +273,7 @@
     <variable entry="UI:TEMP:TRADE_ITEM:QUALITY" type="sint64" value="0" />
     <variable entry="UI:TEMP:TRADE_ITEM:QUANTITY" type="sint64" value="0" />
     <variable entry="UI:TEMP:TRADE_ITEM:SLOT_TYPE" type="sint64" value="0" />
-    <variable entry="UI:TEMP:TRADE_ITEM:USER_COLOR" type="sint32" value="1" />
+    <variable entry="UI:TEMP:TRADE_ITEM:USER_COLOR" type="sint32" value="0" />
     <variable entry="UI:TEMP:TRADE_ITEM:WEIGHT" type="sint32" value="0" />
     <variable entry="UI:TEMP:TRADE_ITEM:NAMEID" type="sint32" value="0" />
     <variable entry="UI:TEMP:TRADE_ITEM:INFO_VERSION" type="sint32" value="0" />
@@ -313,7 +288,7 @@
     <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:QUALITY" type="sint32" value="0" size="64" />
     <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:QUANTITY" type="sint32" value="0" size="64" />
     <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:SLOT_TYPE" type="sint32" value="0" size="64" />
-    <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:USER_COLOR" type="sint32" value="1" size="64" />
+    <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:USER_COLOR" type="sint32" value="0" size="64" />
     <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:NAMEID" type="sint32" value="0" size="64" />
     <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:INFO_VERSION" type="sint32" value="0" size="64" />
     <variable entry="UI:TEMP:TRADE_ITEM:BUILD_ITEMS:$i:ENCHANT" type="sint32" value="0" size="64" />
@@ -329,22 +304,22 @@
     </template>
     <!-- Enable/disable resale -->
     <!--
-  <proc id="click_resale_button">
+        <proc id="click_resale_button" >
                 <action handler="set" params="dblink=UI:TEMP:TRADE_ITEM:ENABLE_RESALE|value=not(@@UI:TEMP:TRADE_ITEM:ENABLE_RESALE)" />
                 <action handler="set_focus_margin" />
-  </proc>
-  <template name="resale_button" id="" posparent="parent" posref="TL TL" x="0" y="0" sizeref="w" w="0" h="14" text="">
+        </proc>
+        <template name="resale_button" id="" posparent="parent" posref="TL TL" x="0" y="0" sizeref="w" w="0" h="14" text="" >
                 <group id="#id" sizeref="w" w="0" h="20" x="#x" y="#y" posref="#posref" posparent="#posparent">
                         <ctrl type="button" id="but" button_type="toggle_button" x="8" y="0" posref="ML ML"
-                                tx_normal="W_slot_on.tga" tx_pushed="W_opacity_on.tga"
-                                global_color_normal="false" global_color_over="false" global_color_pushed="false"
-                                click_when_pushed="true" onclick_l="proc" params_l="click_resale_button" />
+                                                                                        tx_normal="W_slot_on.tga" tx_pushed="W_opacity_on.tga"
+                                                                                        global_color_normal="false" global_color_over="false" global_color_pushed="false"
+                                                                                        click_when_pushed="true" onclick_l="proc" params_l="click_resale_button" />
 
                         <view type="text" id="text" posparent="but" posref="MR ML" x="4" y="-3" fontsize="11" global_color="true" shadow="true" hardtext="#text" />
 
                         <link expr="@UI:TEMP:TRADE_ITEM:ENABLE_RESALE" target="but:pushed" />
                 </group>
-  </template>
+        </template>
 -->
     <!-- modal box to confirm destruction of the item -->
     <group type="modal" id="bot_chat_destroy_confirm_modal" exit_click_out="true" posref="TL TL" x="-8" y="8" w="104" h="96" on_enter="botchat_confirm_destroy" options="skin_modal">
@@ -368,7 +343,7 @@
             <instance template="box_widget" id="box1" posref="TL TL" sizeref="w" w="-18" h="16" x="18" />
             <view type="text" id="val1" posparent="box1" posref="MR MR" x="-3" y="0" color="135 243 28 255" shadow="true" fontsize="10" hardtext="" global_color="false" />
             <ctrl type="tooltip" id="tt" instant_help="true" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" />
-            <link expr="getPriceWithFame(@#value,@#value_fame)" target="val1:hardtext" />
+            <link expr="getPriceWithFame(@#value,@#value_fame)" target="val1:uc_hardtext" />
             <link expr="ifthenelse(eq(@UI:TEMP:TRADE_ITEM:IS_SELL_DLG,1),ifthenelse(eq(@#value,@#value_fame),localize('uittPriceWithFameEqual'),localize('uittPriceWithFameDiff')),'')" target="tt:tooltip" />
         </group>
     </template>
@@ -378,7 +353,7 @@
             <view type="bitmap" id="icone" posref="TL TL" texture="money_seve.tga" global_color="false" />
             <instance template="box_widget" id="box1" posref="TL TL" sizeref="w" w="-18" h="16" x="18" />
             <view type="text" id="val1" posparent="box1" posref="MR MR" x="-3" y="0" color="135 243 28 255" shadow="true" fontsize="10" hardtext="" global_color="false" />
-            <link expr="getBonusOnResale(@#value_high,@#value_low)" target="val1:hardtext" />
+            <link expr="getBonusOnResale(@#value_high,@#value_low)" target="val1:uc_hardtext" />
         </group>
     </template>
     <!-- the modal -->
@@ -550,8 +525,8 @@
     <template name="temp_list_sell" id="" dbentry="" db_animal_status="">
         <!-- PLAYER NAME -->
         <!--
-  <view type="text_formated" id="player_name" posref="TL TL" x="4" y="-8" color="255 255 255 255" fontsize="14" shadow="true" format="$p"/>
-  -->
+        <view type="text_formated" id="player_name" posref="TL TL" x="4" y="-8" color="255 255 255 255" fontsize="14" shadow="true" format="$p"/>
+        -->
         <!-- LIST OF ITEMS TO SELL  -->
         <!-- The H should be "42+hspace" * Number of rows. Setup list.max_h too below-->
         <group type="list_sheet_trade" sizeref="w" x="2" y="0" w="0" h="%trade_slot_height" id="#id" posparent="parent" posref="TL TL" xitem="2" yitem="-2" xtext="46" ytext="-2" hspace="4" array="false" value="#dbentry" want_price="true" use_quantity="true" use_quality="true" dragable="false" use_slot_type_db_entry="false" nature="auto" onclick_l="sell_item" onclick_r="open_help_auto" over_color="%bot_chat_sheet_selection_normal" over_col_pushed="%bot_chat_sheet_selection_pushed" over_col_over="%bot_chat_sheet_selection_over" click_when_pushed="true" color="255 255 255 255" fontsize="8" shadow="true" multi_line="true" multi_line_space="0" multiply_price_by_quantity="true" db_animal_status="#db_animal_status" test_drop_or_sell="true" apply_fame_price_factor="true">
@@ -565,8 +540,8 @@
     <template name="temp_list_buy" id="" use_quantity="" filter_seller_type="none">
         <!-- VENDOR NAME -->
         <!--
-  <view type="text_formated" id="vendor_name" posref="TL TL" x="4" y="-8" color="255 255 255 255" fontsize="14" shadow="true" format="$b"/>
-  -->
+        <view type="text_formated" id="vendor_name" posref="TL TL" x="4" y="-8" color="255 255 255 255" fontsize="14" shadow="true" format="$b"/>
+        -->
         <!-- LIST OF ITEMS TO BUY  -->
         <!-- The H should be "42+hspace" * Number of rows. Setup list.max_h too below-->
         <group type="list_sheet_trade" sizeref="w" w="0" x="4" y="0" h="%trade_slot_height" id="#id" posparent="parent" posref="TL TL" xitem="2" yitem="-2" xtext="46" ytext="2" hspace="4" array="false" value="%trade" want_price="true" use_quantity="#use_quantity" use_quality="true" dragable="false" use_slot_type_db_entry="false" nature="auto" onclick_l="buy_item" onclick_r="open_help_auto" over_color="%bot_chat_sheet_selection_normal" over_col_pushed="%bot_chat_sheet_selection_pushed" over_col_over="%bot_chat_sheet_selection_over" click_when_pushed="true" color="255 255 255 255" fontsize="8" shadow="true" multi_line="true" multi_line_space="0" multiply_price_by_quantity="#use_quantity" filter_seller_type="#filter_seller_type">
@@ -686,11 +661,11 @@
     <define id="trade_slot_back_w" value="346" />
     <define id="trade_slot_w" value="342" />
     <!-- The Trade Page -->
-    <group id="bot_chat_trade" style="bot_chat_window" posref="BL TL" min_w="708" max_w="708" w="708" x="302" y="200" pop_max_h="700" max_h="2000" active="false" title="uiBotChatTrade" help_page="interf_bot_trade.html">
-        <group id="header_opened" child_resize_h="true" w="700" x="0" y="0" posref="TL TL">
+    <group id="bot_chat_trade" style="bot_chat_window" posref="BL TL" min_w="828" max_w="828" w="828" x="302" y="200" pop_max_h="700" max_h="2000" active="false" title="uiBotChatTrade" help_page="interf_bot_trade.html">
+        <group id="header_opened" child_resize_h="true" w="1000" x="0" y="0" posref="TL TL">
             <instance template="bc_border_text" id="intro" text_id="SERVER:BOTCHAT:TRADE" />
             <group id="trade_content" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="32" posref="BL TL" posparent="intro" y="0">
-                <instance template="box_widget" id="sell_back" posref="TL TL" w="%trade_slot_back_w" h="%trade_slot_back_h" x="0" y="-52" />
+                <instance template="box_widget" id="sell_back" posref="TL TL" w="464" h="%trade_slot_back_h" x="0" y="-52" />
                 <instance template="box_widget" id="buy_back" posref="TR TR" w="%trade_slot_back_w" h="%trade_slot_back_h" x="0" y="-52" />
                 <view type="text" id="sell_title" posparent="sell_back" posref="TL BL" x="0" y="32" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiSellTo" />
                 <view type="text" id="buy_title" posparent="buy_back" posref="TL BL" x="0" y="32" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiBuyFrom" />
@@ -698,7 +673,7 @@
                 <view type="text_formated" id="vendor_name2" posparent="buy_title" posref="TR TL" x="0" y="0" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" format="$s" />
                 <!-- **** SELL **** -->
                 <!-- GroupTab for SELL Inventory Selection -->
-                <group id="inventory_select_sell" w="%trade_slot_w" h="24" posref="TL TL" x="0" y="-24">
+                <group id="inventory_select_sell" w="460" h="24" posref="TL TL" x="0" y="-24">
                     <group type="tab" id="tab" child_resize_w="true" h="24" posref="TL TL">
                         <ctrl style="tab_button_new" id="tab0" x="0" posref="TL TL" hardtext="uitabBag" group="sell:bag_sell" />
                         <!-- MAX_INVENTORY_ANIMAL -->
@@ -706,12 +681,18 @@
                         <ctrl style="tab_button_new" id="tab2" posparent="tab1" hardtext="uitabPacker1" group="sell:beast1_sell" />
                         <ctrl style="tab_button_new" id="tab3" posparent="tab2" hardtext="uitabPacker2" group="sell:beast2_sell" />
                         <ctrl style="tab_button_new" id="tab4" posparent="tab3" hardtext="uitabPacker3" group="sell:beast3_sell" />
+                        <ctrl style="tab_button_new" id="tab5" posparent="tab4" hardtext="uiPATitleMount5" group="sell:beast4_sell" />
+                        <ctrl style="tab_button_new" id="tab6" posparent="tab5" hardtext="uiPATitleMount6" group="sell:beast5_sell" />
+                        <ctrl style="tab_button_new" id="tab7" posparent="tab6" hardtext="uiPATitleMount7" group="sell:beast6_sell" />
                         <!-- Hide the buttons if we don't own the associated animal -->
                         <!-- MAX_INVENTORY_ANIMAL -->
                         <link expr="isAnimalStatusPresent(@%pa_beast0:STATUS)" target="tab1:active" />
                         <link expr="isAnimalStatusPresent(@%pa_beast1:STATUS)" target="tab2:active" />
                         <link expr="isAnimalStatusPresent(@%pa_beast2:STATUS)" target="tab3:active" />
                         <link expr="isAnimalStatusPresent(@%pa_beast3:STATUS)" target="tab4:active" />
+                        <link expr="isAnimalStatusPresent(@%pa_beast4:STATUS)" target="tab5:active" />
+                        <link expr="isAnimalStatusPresent(@%pa_beast5:STATUS)" target="tab6:active" />
+                        <link expr="isAnimalStatusPresent(@%pa_beast6:STATUS)" target="tab7:active" />
                         <!-- MAX_INVENTORY_ANIMAL -->
                         <link expr="switch(@%pa_beast0:TYPE, 'uitabPacker0', 'uitabInvPAMount0', 'uitabInvPAPacker0', 'uitabInvPADemon0')" target="tab1:hardtext" />
                         <link expr="switch(@%pa_beast1:TYPE, 'uitabPacker1', 'uitabInvPAMount1', 'uitabInvPAPacker1', 'uitabInvPADemon1')" target="tab2:hardtext" />
@@ -721,7 +702,7 @@
                     <view type="bitmap" id="sep" posparent="tab" posref="BR BL" w="1000" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
                 </group>
                 <!-- SELL -->
-                <group id="sell" x="4" y="-54" child_resize_h="true" w="%trade_slot_w" posref="TL TL">
+                <group id="sell" x="4" y="-54" child_resize_h="true" w="460" posref="TL TL">
                     <!-- Those groups are show/hide according to GroupTab -->
                     <instance template="temp_list_sell" id="bag_sell" dbentry="%bag" db_animal_status="" />
                     <!-- MAX_INVENTORY_ANIMAL -->
@@ -729,10 +710,13 @@
                     <instance template="temp_list_sell" id="beast1_sell" dbentry="%pa_bag1" db_animal_status="%pa_beast1:STATUS" />
                     <instance template="temp_list_sell" id="beast2_sell" dbentry="%pa_bag2" db_animal_status="%pa_beast2:STATUS" />
                     <instance template="temp_list_sell" id="beast3_sell" dbentry="%pa_bag3" db_animal_status="%pa_beast3:STATUS" />
+                    <instance template="temp_list_sell" id="beast4_sell" dbentry="%pa_bag4" db_animal_status="%pa_beast4:STATUS" />
+                    <instance template="temp_list_sell" id="beast5_sell" dbentry="%pa_bag5" db_animal_status="%pa_beast5:STATUS" />
+                    <instance template="temp_list_sell" id="beast6_sell" dbentry="%pa_bag6" db_animal_status="%pa_beast6:STATUS" />
                 </group>
                 <!-- **** BUY **** -->
                 <!-- GroupTab for BUY Inventory Selection -->
-                <group id="inventory_select_buy" w="%trade_slot_w" h="24" posref="TM TL" x="0" y="-24">
+                <group id="inventory_select_buy" w="%trade_slot_w" h="24" posref="TM TL" x="60" y="-24">
                     <group type="tab" id="tab" child_resize_w="true" h="24" posref="TL TL">
                         <ctrl style="tab_button_new" id="tab0" x="0" posref="TL TL" hardtext="uitabBuyNpc" group="buy:general_buy" onclick_l="set" params_l="dblink=UI:VARIABLES:BOTCHAT:BUY_LIST_SELECTED|value=0" />
                         <ctrl style="tab_button_new" id="tab1" posparent="tab0" hardtext="uitabBuyResale" group="buy:resale_buy" onclick_l="set" params_l="dblink=UI:VARIABLES:BOTCHAT:BUY_LIST_SELECTED|value=0" />
@@ -744,8 +728,8 @@
                 <group id="buy" child_resize_h="true" x="-4" y="-54" w="%trade_slot_w" posref="TR TR">
                     <!-- Those groups are show/hide according to GroupTab -->
                     <!--
-                                  <instance template="temp_list_buy" id="general_buy" use_quantity="true" filter_seller_type="npc_and_resale" />
-                                  -->
+                                <instance template="temp_list_buy" id="general_buy" use_quantity="true" filter_seller_type="npc_and_resale" />
+                                -->
                     <instance template="temp_list_buy" id="general_buy" use_quantity="true" filter_seller_type="npc" />
                     <instance template="temp_list_buy" id="resale_buy" use_quantity="true" filter_seller_type="resale" />
                     <instance template="temp_list_buy" id="player_buy" use_quantity="true" filter_seller_type="user" />
@@ -856,7 +840,7 @@
         </group>
     </group>
     <!-- ************************************** -->
-    <!-- *     BOT CHAT PAGE FOR NEWS          * -->
+    <!-- *     BOT CHAT PAGE FOR NEWS         * -->
     <!-- ************************************** -->
     <group id="bot_chat_news" style="bot_chat_window" posref="BL TL" min_w="320" max_w="320" w="320" x="352" y="200" pop_max_h="700" max_h="2000" active="false" title="uiBotChatNews">
         <group id="header_opened" child_resize_h="true" w="288" x="16" y="0" posref="TL TL">
@@ -887,8 +871,8 @@
             <!-- accept next step -->
             <!--
                 <group id="accept" posref="BR TR" posparent="mission_end_text" child_resize_h="true" child_resize_w="true">
-                        <ctrl type="button" id="confirm_button" posref="TR TR" x="0" y="0" button_type="push_button" onclick_l="accept_next_step" tx_normal="w_answer_16_valid.tga" tx_pushed="w_answer_16_valid.tga" tx_over="W_button_16_over.tga" global_color_normal="false" global_color_pushed="false"/>
-                        <view type="text" id="sell_text" posref="ML MR" posparent="confirm_button" x="-8" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiSell" active="false" global_color="false" />
+                        <ctrl type="button" id="confirm_button"                  posref="TR TR" x="0" y="0" button_type="push_button" onclick_l="accept_next_step" tx_normal="w_answer_16_valid.tga" tx_pushed="w_answer_16_valid.tga" tx_over="W_button_16_over.tga" global_color_normal="false" global_color_pushed="false"/>
+                        <view type="text"   id="sell_text"                               posref="ML MR" posparent="confirm_button" x="-8" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiSell"           active="false" global_color="false" />
                 </group>
                 -->
         </group>
@@ -949,11 +933,11 @@
     <!-- *   BOT CHAT PAGE FOR MISSIONS * -->
     <!-- ******************************** -->
     <!-- Mission Page is used for :
-  - Mission
-  - ZC Charge acquiring
-  - Building acquiring
-  - BotMaster Buy
-  - BotMaster Upgrade
+        - Mission
+        - ZC Charge acquiring
+        - Building acquiring
+        - BotMaster Buy
+        - BotMaster Upgrade
 -->
     <variable entry="UI:TEMP:MISSION:ICON" type="sint32" value="0" />
     <variable entry="UI:TEMP:MISSION:MISSION_TYPE" type="sint32" value="0" />

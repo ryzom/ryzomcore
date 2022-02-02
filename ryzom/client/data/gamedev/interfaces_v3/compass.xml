@@ -37,7 +37,7 @@
         <action handler="music_player" params="pause" cond="eq(@UI:TEMP:MP3_PLAYING,0)" />
     </proc>
     <group type="modal" id="playlist" posparent="mp3_player" posref="BM TM" w="234" max_h="250" child_resize_h="true" child_resize_hmargin="10" options="layer0" mouse_pos="false" escapable="true" exit_click_out="true" on_active="" on_active_params="">
-        <view type="text" id="title" posref="TL TL" x="8" y="-8" hardtext="uiPlaylistTitle" shadow="true" color="255 255 255 255" fontsize="12" />
+        <view type="text" id="title" posref="TL TL" x="8" y="-8" hardtext="" shadow="true" color="255 255 255 255" fontsize="12" />
         <ctrl type="button" id="close" button_type="push_button" posref="TR TR" x="-8" y="-8" tx_normal="w_win_close.tga" tx_pushed="w_win_close.tga" tx_over="W_button_14_over.tga" onclick_l="leave_modal" params_l="" />
         <ctrl style="text_button_header" button_type="push_button" id="refresh" posparent="close" posref="ML MR" x="-4" y="0" hardtext="uiPlaylistRefresh" onclick_l="music_player" params_l="play_songs" />
         <ctrl style="text_button_header" button_type="toggle_button" id="shuffle" posparent="refresh" posref="ML MR" x="-4" y="0" hardtext="S" onclick_l="proc" params_l="proc_mp3_toggle_shuffle" />
@@ -78,13 +78,13 @@
             <!-- Slots of Open/Playlist buttons -->
             <view id="slot5" type="bitmap" posref="MR ML" posparent="volume_control" x="4" y="3" texture="mp3_button_slot.tga" />
             <!--
-<view id="slot6" type="bitmap" posref="TR TL" posparent="slot5" x="2" y="0" texture="mp3_button_slot.tga" />
+    <view id="slot6" type="bitmap" posref="TR TL" posparent="slot5" x="2" y="0" texture="mp3_button_slot.tga" />
                 -->
             <!-- Open/Playlist buttons -->
             <ctrl type="button" id="but_open" button_type="push_button" posref="MM MM" posparent="slot5" tx_normal="mp3_button_list.tga" tx_pushed="mp3_button_list.tga" tx_over="mp3_button_over.tga" onclick_l="enter_modal" params_l="group=ui:interface:playlist" tooltip="uiMP3Playlist" />
             <!--
                 <ctrl type="button" id="but_list" button_type="push_button" posref="MM MM" posparent="slot6"
-                        tx_normal="mp3_button_list.tga" tx_pushed="mp3_button_list.tga" tx_over="mp3_button_over.tga"
+      tx_normal="mp3_button_list.tga" tx_pushed="mp3_button_list.tga" tx_over="mp3_button_over.tga"
                         onclick_l="enter_modal" params_l="group=ui:interface:playlist" tooltip="uiMP3Playlist" />
                 -->
             <!-- TOOLTIPS -->
@@ -123,8 +123,8 @@
         <action handler="set" cond="ne(@UI:SAVE:RADARZOOM,3)" params="dblink=UI:SAVE:RADARZOOM|value=add(@UI:SAVE:RADARZOOM,1)" icon="w_button_radar_moins.tga" />
     </proc>
     <proc id="radar_proc_zoom">
-        <action handler="set" params="target_property=ui:interface:compass:visuel:range:hardtext|value=switch(@0, 'uiRadarZoom0', 'uiRadarZoom1', 'uiRadarZoom2', 'uiRadarZoom3')" />
-        <action handler="set" params="target_property=ui:interface:compass:visuel:radar:world_size|value=switch(@0, 50.0, 100.0, 250.0, 500.0)" />
+        <action handler="set" params="target_property=ui:interface:compass:visuel:range:hardtext| value=switch(@0, 'uiRadarZoom0', 'uiRadarZoom1', 'uiRadarZoom2', 'uiRadarZoom3')" />
+        <action handler="set" params="target_property=ui:interface:compass:visuel:radar:world_size| value=switch(@0, 50.0, 100.0, 250.0, 500.0)" />
     </proc>
     <define id="landmark_menu_max_visible" value="25" />
     <group id="compass_menu" type="menu_compas" extends="base_menu_with_color" posref="TL TL" x="0" y="0" mouse_pos="true" exit_click_b="true" force_inside_screen="true" compass="ui:interface:compass">
@@ -239,9 +239,9 @@
         <action id="zo" name="uimZoomOut" handler="proc" params="radar_proc_zoom_out" icon="arbo_open_first.tga" />
         <separator />
         <!--
-  <action id="lock_unlock" name="uimLockUnlock" handler="lock_unlock" cond="eq(@UI:VARIABLES:GC_POPUP, 1)"/>    
-  <action id="help" name="uimHelp" handler="ic_help" cond="eq(@UI:VARIABLES:GC_HAS_HELP, 1)"/>
-  -->
+        <action id="lock_unlock" name="uimLockUnlock" handler="lock_unlock" cond="eq(@UI:VARIABLES:GC_POPUP, 1)"/>
+        <action id="help" name="uimHelp" handler="ic_help" cond="eq(@UI:VARIABLES:GC_HAS_HELP, 1)"/>
+        -->
     </group>
     <group id="compass" type="compas" movable="true" w="182" h="150" openable="false" resizer="false" header_active="false" right_button="false" group_onclick_r="active_menu" opened="false" options="compass" on_active="proc" on_active_params="compass_proc_active" on_deactive="proc" on_deactive_params="compas_proc_deactive" group_params_r="menu=ui:interface:compass_menu" north_color="255 255 255 255" selection_color="0 0 255 255" respawn_color="66 66 77 255" home_color="255 0 255 255" continent_landmark_color="0 255 0 255" mission_landmark_color="255 0 255 255" user_landmark_color="255 255 0 255" new_target_selected_color="255 0 0 255" help_page="interf_compass.html">
         <group id="header_closed" x="0" y="0" w="166" h="156" posref="TL TL">
@@ -258,7 +258,7 @@
         <group id="mail" posref="BR BR" group_onclick_l="show_hide" group_params_l="mailbox" tooltip="uiMk_interaction5" w="32" h="24" x="-4" y="50">
             <view id="envelop" type="bitmap" texture="mail.tga" global_color="false" />
             <view type="text" id="mail_nb" posref="BR BR" x="0" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="" />
-            <!--    <view type="text" id="mail_nb2" posparent="mail_nb" posref="BL BR" x="-2" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="x" /> -->
+            <!--      <view type="text" id="mail_nb2" posparent="mail_nb" posref="BL BR" x="-2" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="x" /> -->
         </group>
         <link expr="@UI:VARIABLES:MAIL_WAITING" target="mail:active" />
         <!-- new guild forum message notifier -->
@@ -320,10 +320,10 @@
                 <ctrl type="button" id="zoom_out" button_type="push_button" posref="BL BL" x="9" y="9"
                         tx_normal="w_button_radar_moins.tga" tx_pushed="w_button_radar_moins.tga" tx_over="W_button_14_over.tga"
                         color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 255"
-                        onclick_l="proc" params_l="radar_proc_zoom_out" render_layer="4" />
+                        onclick_l="proc" params_l="radar_proc_zoom_out" render_layer="4"  />
                 -->
             <view id="radar" type="radar" texture_std="w_radar_point.tga" texture_missionlist="radar_mission_16.tga" texture_missionauto="radar_mission3_16.tga" texture_missionstep="radar_mission2_16.tga" mini_texture_missionlist="radar_mission_mini_16.tga" mini_texture_missionauto="radar_mission3_mini_16.tga" mini_texture_missionstep="radar_mission2_mini_16.tga" world_size="50.0" posparent="back" posref="MM MM" w="108" h="108" y="8" global_color="false" />
-            <!--    
+            <!--
                 <link expr="ne(@UI:SAVE:RADARZOOM,0)" target="zoom_in:active" />
                 <link expr="ne(@UI:SAVE:RADARZOOM,3)" target="zoom_out:active" />
                 -->
@@ -344,7 +344,7 @@
     <group id="connection" type="container" title="uiConnectionTitle_short" title_opened="uiConnectionTitle" w="192" global_color="false" movable="true" active="false" openable="true" opened="true" resizer="false" header_color="UI:SAVE:WIN:COLORS:OPT" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:CONNECTION|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:CONNECTION|value=0" on_open="set" on_open_params="target_property=ui:interface:connection:w|value=192" on_close="set" on_close_params="target_property=ui:interface:connection:w|value=64">
         <group id="header_closed" x="0" y="0" h="74" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
             <!--
-                <group id="server_state" posref="TM TM" w="28" h="16" x="0">
+                <group id="server_state" posref="TM TM" w="28" h="16" x="0" >
                         <view type="text" id="server0" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState0" />
                         <view type="text" id="server1" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState1" />
                         <view type="text" id="server2" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState2" />

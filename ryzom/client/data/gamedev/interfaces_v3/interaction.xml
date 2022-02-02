@@ -28,7 +28,7 @@
     <define id="force_level_8" value="consider_7.tga" />
     <proc id="proc_target_changed">
         <!-- Name -->
-        <action handler="set_target_name" params="slot=@@UI:VARIABLES:TARGET:SLOT|target=ui:interface:target:title| title=ui:interface:target:header_opened:target_title:hardtext" />
+        <action handler="set_target_name" params="slot=@@UI:VARIABLES:TARGET:SLOT|target=ui:interface:target:uc_title| title=ui:interface:target:header_opened:target_title:uc_hardtext" />
         <!-- Region force & Force level of the creature/player -->
         <!-- old consider system -->
         <!--
@@ -140,12 +140,12 @@
     </template>
     <group type="modal" id="add_contact" exit_click_out="true" posref="MM MR" w="212" child_resize_h="true" child_resize_hmargin="14" options="skin_modal" on_active="set_keyboard_focus" on_active_params="target=ui:interface:add_contact:add_contact_eb:eb|select_all=false">
         <view type="text" id="text" posref="TL TL" x="8" y="-8" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="uiPeopleAddContact" />
-        <instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_bytes="255" entry_type="playername" />
+        <instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_chars="255" entry_type="playername" />
         <instance template="button_ok_cancel" posparent="add_contact_eb" posref="BR TR" x="0" y="0" onclick_ok="add_contact" onclick_ok_param="" onclick_cancel="leave_modal" onclick_cancel_param="" />
     </group>
     <group type="modal" id="change_contact_group" exit_click_out="true" posref="MM MR" w="212" child_resize_h="true" child_resize_hmargin="14" options="skin_modal" on_active="set_keyboard_focus" on_active_params="target=ui:interface:change_contact_group:change_contact_group_eb:eb|select_all=false">
         <view type="text" id="text" posref="TL TL" x="8" y="-8" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="uiPeopleChangeContactGroup" />
-        <instance template="edit_box_widget" id="change_contact_group_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="change_contact_group" max_num_bytes="255" entry_type="text" />
+        <instance template="edit_box_widget" id="change_contact_group_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="change_contact_group" max_num_chars="255" entry_type="text" />
         <instance template="button_ok_cancel" posparent="change_contact_group_eb" posref="BR TR" x="0" y="0" onclick_ok="change_contact_group" onclick_ok_param="" onclick_cancel="leave_modal" onclick_cancel_param="" />
     </group>
     <!-- ***************** -->
@@ -300,6 +300,7 @@
             <group id="content" x="0" y="0" h="100" posref="TL TL">
                 <group id="cb" posref="TL TL" sizeref="wh" y="-4" w="0" h="-32">
                     <instance template="chat_box_mainchat" id="around" posref="TL TL" sizeref="wh" y="0" w="0" h="0" />
+                    <ctrl style="text_button_16" id="clear_arround_info" posref="TR TR" active="false" posparent="around" x="-6" y="-9" wmargin="0" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="runCommand('clear', getUICaller().id)" hardtext="clear around" />
                     <instance template="chat_box_mainchat" id="region" posref="TL TL" sizeref="wh" y="0" w="0" h="0" />
                     <instance template="chat_box_mainchat" id="team" posref="TL TL" sizeref="wh" y="0" w="0" h="0" />
                     <instance template="chat_box_mainchat" id="guild" posref="TL TL" sizeref="wh" y="0" w="0" h="0" />
@@ -360,10 +361,13 @@
     <proc id="universe_chat_proc_close">
         <action handler="set" params="dblink=UI:SAVE:ISDETACHED:UNIVERSE_CHAT|value=0" />
     </proc>
-    <!-- When the universe chat is activated, we must display a warning the first time 
+    <!-- When the universe chat is activated, we must display a warning the first time
         Must do it on the variable manipulation, not when the window is shown (because it is always shown/hid at start of game)
-        <link expr="@UI:SAVE:ISDETACHED:UNIVERSE_CHAT" cond="eq(@UI:SAVE:ISDETACHED:UNIVERSE_CHAT,1)" action="set" params="dblink=UI:VARIABLES:UNIVERSE_CHANEL_WARNING_WANTED|value=1" />
--->
+
+  <link expr="@UI:SAVE:ISDETACHED:UNIVERSE_CHAT"
+        cond="eq(@UI:SAVE:ISDETACHED:UNIVERSE_CHAT,1)"
+        action="set"
+        params="dblink=UI:VARIABLES:UNIVERSE_CHANEL_WARNING_WANTED|value=1" /> -->
     <!-- *************** -->
     <!-- * SYSTEM INFO * -->
     <!-- *************** -->
@@ -430,32 +434,35 @@
                 <link expr="eq(@SERVER:GROUP:LEADER_INDEX, #team_mate_index)" target="ttlead:active" />
                 <link expr="eq(@SERVER:GROUP:SUCCESSOR_INDEX, #team_mate_index)" target="ttsucc:active" />
             </group>
-            <!--            
-                <group id="header_opened" x="0" y="0" w="160" child_resize_h="true" child_resize_hmargin="4" posref="TL TL">
-                        <view type="bar3" id="jauges" posref="TR TR" y="0" mini="true" x="-16" color1="%sta_color" value1="UI:VARIABLES:BARS:TEAM:#team_mate_index:STA" range1="UI:CONST:127" color2="%sap_color" value2="UI:VARIABLES:BARS:TEAM:#team_mate_index:SAP" range2="UI:CONST:127" color3="%hp_color" color3_negative="%hp_color_neg" value3="UI:VARIABLES:BARS:TEAM:#team_mate_index:HP" range3="UI:CONST:127" />
+            <!--
+                <group id="header_opened" x="0" y="0" w="160" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" >
+                        <view type="bar3" id="jauges" posref="TR TR" y="0" mini="true" x="-16"
+                                                                color1="%sta_color" value1="UI:VARIABLES:BARS:TEAM:#team_mate_index:STA"        range1="UI:CONST:127"
+                                                                color2="%sap_color"     value2="UI:VARIABLES:BARS:TEAM:#team_mate_index:SAP"            range2="UI:CONST:127"
+                                                                color3="%hp_color" color3_negative="%hp_color_neg" value3="UI:VARIABLES:BARS:TEAM:#team_mate_index:HP"  range3="UI:CONST:127" />
                         <view type="bitmap" id="lead" posparent="jauges" posref="ML MR" x="-4" y="1" texture="w_leader.tga" global_color="false" />
                         <view type="bitmap" id="successor" posparent="jauges" posref="ML MR" x="-4" y="1" texture="w_leader.tga" global_color="false" color="255 255 255 128" active="false"/>
-                        
+
                         <ctrl type="tooltip" id="ttlead" tooltip="uittLead" instant_help="true" posparent="lead" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" />
                         <ctrl type="tooltip" id="ttsucc" tooltip="uittSuccessor" instant_help="true" posparent="successor" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" />
-                                                
+
                         <! - chat box - >
                         <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-8" w="0" h="64" min_height="64" max_height="1600"/>
                         <instance template="edit_box_widget" id="ebw" posref="BR TR" y="0" posparent="cb" child_resize_h="true" sizeref="w" w="-10" onenter="contact_entry" backup_father_container_pos="true"/>
-                                                
+
                         <! - links to display lead or successor - >
                         <link expr="eq(@SERVER:GROUP:LEADER_INDEX, #team_mate_index)" target="lead:active"/>
                         <link expr="eq(@SERVER:GROUP:SUCCESSOR_INDEX, #team_mate_index)" target="successor:active"/>
-                        
+
                         <link expr="eq(@SERVER:GROUP:LEADER_INDEX, #team_mate_index)" target="ttlead:active"/>
                         <link expr="eq(@SERVER:GROUP:SUCCESSOR_INDEX, #team_mate_index)" target="ttsucc:active"/>
-                        
-                </group>                                        
+
+                </group>
                 -->
             <!-- link to display the group when the team member is present -->
             <link expr="ne(@SERVER:GROUP:#team_mate_index:NAME, 0)" target="active" />
             <!-- links to display the name of the team mate -->
-            <link expr="depends(@SERVER:GROUP:#team_mate_index:NAME)" action="set_server_id" params="value=@SERVER:GROUP:#team_mate_index:NAME|target=title|remove_title=1" />
+            <link expr="depends(@SERVER:GROUP:#team_mate_index:NAME)" action="set_server_id" params="value=@SERVER:GROUP:#team_mate_index:NAME|target=uc_title|remove_title=1" />
             <!-- links to change the name color if it is the target -->
             <link expr="ifthenelse(eq(@SERVER:GROUP:#team_mate_index:UID,@UI:VARIABLES:TARGET:UID), '255 0 0 255', '255 255 255 255')" target="title_color" />
             <!-- links to Open a Quick Help when a new team member comes. Only if the team_list window is not opeded -->
@@ -480,6 +487,7 @@
                 <view type="bitmap" id="online" posref="MR MR" x="-4" texture="w_online.tga" global_color="false" />
                 <ctrl type="tooltip" id="tt_online" posparent="online" posref="MR MR" x="0" y="0" sizeref="wh" w="0" h="0" tooltip="uittFriendsOnline" tooltip_parent="win" />
                 <ctrl type="button" id="profile_button" button_type="push_button" posref="MR MR" x="-20" tx_normal="profile.tga" tx_pushed="profile.tga" tx_over="profile.tga" global_color_normal="false" global_color_over="false" global_color_pushed="false" onclick_l="open_title_help" params_l="from=contact" tooltip="uittContactInfo" tooltip_parent="win" />
+                <!-- add team invite button -->
                 <ctrl type="button" id="invite_button" button_type="push_button" posref="MR MR" x="-36" tx_normal="team_invite.tga" tx_pushed="team_invite.tga" tx_over="W_button_14_over.tga" global_color_normal="false" global_color_over="false" global_color_pushed="false" onclick_l="lua" params_l="game:teamInvite('#id')" tooltip="uimGcmInvit" tooltip_parent="win" />
                 <ctrl type="button" id="chat_button" button_type="push_button" posref="MR MR" x="-52" tx_normal="contact_chat.tga" tx_pushed="contact_chat.tga" tx_over="W_button_14_over.tga" global_color_normal="false" global_color_over="true" global_color_pushed="false" onclick_l="contact_direct_chat" tooltip="uittTell" tooltip_parent="win" />
                 <view type="bitmap" id="blocked" posref="MR MR" x="-64" texture="w_answer_16_cancel.tga" global_color="false" active="false" />
@@ -489,8 +497,8 @@
     <!-- group header in friend list -->
     <template name="people_list_group_header" keep="true" active="true" movable="false" opened="true" id="system">
         <group type="container" id="#id" w="252" active="#active" movable="#movable" opened="#opened" header_color="UI:SAVE:WIN:COLORS:COM" global_color="false" global_color_over="true">
-            <group id="header_closed" x="0" y="0" h="16" posref="TL TL" />
-            <group id="header_opened" x="0" y="0" h="16" posref="TL TL" />
+            <group id="header_closed" x="0" y="0" h="16" posref="TL TL"></group>
+            <group id="header_opened" x="0" y="0" h="16" posref="TL TL"></group>
         </group>
     </template>
     <!-- when you want to directly chat with a friend -->
@@ -586,21 +594,21 @@
         <action id="leader" name="uimSetTeamLeader" handler="set_team_leader" params="" icon="r2_toolbar_group_small.tga" />
         <action id="successor" name="uimSetSuccesor" handler="set_successor" params="" icon="r2_player_admin.tga" />
         <!--            <action id="emote" name="uimEmotes" hanlder="" params="">
-                        <action id="emote1" name="uimEmote1" handler="emote" params="emote_id=0"/>     
-                        <action id="emote2" name="uimEmote2" handler="emote" params="emote_id=1"/>     
-                        <action id="emote3" name="uimEmote3" handler="emote" params="emote_id=2"/>     
-                        <action id="emote4" name="uimEmote4" handler="emote" params="emote_id=3"/>     
-                        <action id="emote5" name="uimEmote5" handler="emote" params="emote_id=4"/>
-                        <action id="emote6" name="uimEmote6" handler="emote" params="emote_id=5"/>
-                        <action id="emote7" name="uimEmote7" handler="emote" params="emote_id=6"/>
+                        <action id="emote1"  name="uimEmote1" handler="emote" params="emote_id=0"/>
+                        <action id="emote2"  name="uimEmote2" handler="emote" params="emote_id=1"/>
+                        <action id="emote3"  name="uimEmote3" handler="emote" params="emote_id=2"/>
+                        <action id="emote4"  name="uimEmote4" handler="emote" params="emote_id=3"/>
+                        <action id="emote5"  name="uimEmote5" handler="emote" params="emote_id=4"/>
+                        <action id="emote6"  name="uimEmote6" handler="emote" params="emote_id=5"/>
+                        <action id="emote7"  name="uimEmote7" handler="emote" params="emote_id=6"/>
                 </action>-->
         <!--            <action id="commands" name="uimCommands" hanlder="" params="">
-                        <action id="command1" name="uimCommand1" handler="" params=""/>        
-                        <action id="command2" name="uimCommand2" handler="" params=""/>        
-                        <action id="command3" name="uimCommand3" handler="" params=""/>        
-                        <action id="command4" name="uimCommand4" handler="" params=""/>        
-                        <action id="command5" name="uimCommand5" handler="" params=""/>
-                        <action id="command6" name="uimCommand6" handler="" params=""/>                        
+                        <action id="command1"  name="uimCommand1" handler="" params=""/>
+                        <action id="command2"  name="uimCommand2" handler="" params=""/>
+                        <action id="command3"  name="uimCommand3" handler="" params=""/>
+                        <action id="command4"  name="uimCommand4" handler="" params=""/>
+                        <action id="command5"  name="uimCommand5" handler="" params=""/>
+                        <action id="command6"  name="uimCommand6" handler="" params=""/>
                 </action>-->
         <action id="target" name="uimTarget" handler="team_target" params="" icon="ico_aim.tga" />
         <action id="compass" name="uimTeamCompass" handler="set_team_compas" params="compass=ui:interface:compass" icon="lm_user_pushed.tga" />
@@ -630,26 +638,26 @@
         <separator />
     </group>
     <group type="menu" id="friend_list_menu_offline_unblocked" extends="friend_list_menu">
-        <!-- <action id="block" name="uimBlock" handler="block_contact" params=""/> -->
+        <!-- <action id="block"   name="uimBlock"        handler="block_contact" params=""/> -->
     </group>
     <group type="menu" id="friend_list_menu_online_unblocked" extends="friend_list_menu">
         <action id="remove" name="uimTell" handler="menu_tell_contact" params="" />
-        <!-- <action id="block" name="uimBlock" handler="block_contact" params=""/> -->
+        <!-- <action id="block"   name="uimBlock"        handler="block_contact" params=""/> -->
     </group>
     <group type="menu" id="friend_list_menu_online_abroad_unblocked" extends="friend_list_menu">
         <action id="remove" name="uimTell" handler="menu_tell_contact" params="" />
-        <!-- <action id="block" name="uimBlock" handler="block_contact" params=""/> -->
+        <!-- <action id="block"   name="uimBlock"        handler="block_contact" params=""/> -->
     </group>
     <group type="menu" id="friend_list_menu_offline_blocked" extends="friend_list_menu">
-        <!-- <action id="block" name="uimUnBlock" handler="block_contact" params=""/> -->
+        <!-- <action id="block"   name="uimUnBlock"      handler="block_contact" params=""/> -->
     </group>
     <group type="menu" id="friend_list_menu_online_blocked" extends="friend_list_menu">
         <action id="remove" name="uimTell" handler="tell_contact" params="" />
-        <!-- <action id="block" name="uimUnBlock" handler="block_contact" params=""/> -->
+        <!-- <action id="block"   name="uimUnBlock"      handler="block_contact" params=""/> -->
     </group>
     <group type="menu" id="friend_list_menu_online_abroad_blocked" extends="friend_list_menu">
         <action id="remove" name="uimTell" handler="tell_contact" params="" />
-        <!-- <action id="block" name="uimUnBlock" handler="block_contact" params=""/> -->
+        <!-- <action id="block"   name="uimUnBlock"      handler="block_contact" params=""/> -->
     </group>
     <group type="menu" id="ignore_list_menu" extends="base_menu_with_color">
         <action id="remove" name="uimRemove" handler="remove_contact" params="" />
@@ -839,20 +847,20 @@
     <!-- *  SYSTEM INFOS   * -->
     <!-- ******************* -->
     <!--
-<group type="container" id="system_info" x="0" y="0" w="176" posref="TL TL" title="" title_opened="uiSystemInfoTitle"> 
+<group type="container" id="system_info" x="0" y="0" w="176" posref="TL TL" title="" title_opened="uiSystemInfoTitle" >
 
-        <group id="header_closed" x="0" y="0" w="176" h="16" posref="TL TL">
-                <group id="pipo" posref="MR MR" sizeref="w" w="-24" h="16">
+        <group id="header_closed" x="0" y="0" w="176" h="16" posref="TL TL" >
+                <group id="pipo" posref="MR MR"  sizeref="w" w="-24" h="16" >
                         <instance template="chat_box" id="cb" posref="BR BR" sizeref="w" w="12" h="28" min_height="28" max_height="28"/>
                 </group>
                 <view type="bitmap" id="logo" posparent="pipo" posref="TL TR" x="-2" texture="W_user_info.tga" />
         </group>
-        
-        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8">
+
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
                 <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
         </group>
-        
-        <group id="content" x="0" y="0" w="168" h="0" posref="TL TL">
+
+        <group id="content" x="0" y="0" w="168" h="0" posref="TL TL"  >
         </group>
 
 </group>
@@ -861,17 +869,17 @@
     <!-- * GUILD * -->
     <!-- ********* -->
     <!--
-<group type="container" id="guild" x="" y="" w="176" posref="TR TR" title="uiGuildChat" title_opened="uiGuildChat">
+<group type="container" id="guild" x="" y="" w="176" posref="TR TR" title="uiGuildChat" title_opened="uiGuildChat" >
 
-        <group id="header_closed" x="0" y="0" h="16" posref="TL TL">
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
         </group>
-        
-        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8">
+
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
                 <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
                 <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-4" posparent="cb" child_resize_h="true" sizeref="w" w="-12" onenter="chat_box_entry" backup_father_container_pos="true"/>
         </group>
 
-        <group id="content" x="0" y="0" h="0" posref="TL TL">
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
         </group>
 
 </group>
@@ -880,19 +888,19 @@
     <!-- * TEAM * -->
     <!-- ******** -->
     <!--
-<group type="container" id="team" x="" y="" w="176" posref="TR TR" title="uiTeamChatTitle" title_opened="uiTeamChatTitle">
+<group type="container" id="team" x="" y="" w="176" posref="TR TR" title="uiTeamChatTitle" title_opened="uiTeamChatTitle" >
 
-        <group id="header_closed" x="0" y="0" h="16" posref="TL TL">
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
                 <view type="bitmap" id="lead" posref="TL TL" x="48" texture="w_leader.tga" global_color="false" />
         </group>
-        
-        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8">
+
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
                 <view type="bitmap" id="lead" posref="TL TL" x="48" texture="w_leader.tga" global_color="false" />
                 <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
                 <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-4" posparent="cb" child_resize_h="true" sizeref="w" w="-12" onenter="chat_box_entry" backup_father_container_pos="true"/>
         </group>
 
-        <group id="content" x="0" y="0" h="0" posref="TL TL">
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
         </group>
 
 </group>
@@ -901,17 +909,17 @@
     <!-- * PARTY CHAT * -->
     <!-- ************** -->
     <!--
-<group type="container" id="party" x="" y="" w="176" posref="TR TR" title="PARTY CHAT" title_opened="PARTY CHAT">
+<group type="container" id="party" x="" y="" w="176" posref="TR TR" title="PARTY CHAT" title_opened="PARTY CHAT" >
 
-        <group id="header_closed" x="0" y="0" h="16" posref="TL TL">
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
         </group>
-        
-        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8">
+
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
                 <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
                 <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-4" posparent="cb" child_resize_h="true" sizeref="w" w="-12" onenter="chat_box_entry" backup_father_container_pos="true"/>
         </group>
 
-        <group id="content" x="0" y="0" h="0" posref="TL TL">
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
         </group>
 
 </group>
@@ -920,16 +928,16 @@
     <!-- * AROUND ME * -->
     <!-- ************* -->
     <!--
-<group type="container" id="around" x="" y="" w="176" posref="TR TR" title="uiAroundMeTitle" title_opened="uiAroundMeTitle">
+<group type="container" id="around" x="" y="" w="176" posref="TR TR" title="uiAroundMeTitle" title_opened="uiAroundMeTitle" >
 
-        <group id="header_closed" x="0" y="0" h="16" posref="TL TL">
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
         </group>
-        
-        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8">
+
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
                 <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
         </group>
 
-        <group id="content" x="0" y="0" h="0" posref="TL TL">
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
         </group>
 
 </group>
@@ -950,15 +958,15 @@
     <!-- * IGNORE LIST * -->
     <!-- *************** -->
     <!--
-<group type="container" id="ignore" x="" y="" w="176" posref="TR TR" title="uiIgnoreList" title_opened="uiIgnoreList">
+<group type="container" id="ignore" x="" y="" w="176" posref="TR TR" title="uiIgnoreList" title_opened="uiIgnoreList" >
 
-        <group id="header_closed" x="0" y="0" h="16" posref="TL TL">
-        </group>
-        
-        <group id="header_opened" x="0" y="0" w="176" h="20" posref="TL TL" child_resize_h="true" child_resize_hmargin="8">
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
         </group>
 
-        <group id="content" x="0" y="0" h="0" posref="TL TL">
+        <group id="header_opened" x="0" y="0" w="176" h="20" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
+        </group>
+
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
         </group>
 
 </group>
@@ -988,18 +996,20 @@
     <!-- * DEBUG CONSOLE * -->
     <!-- ***************** -->
     <!--
-<group type="container" id="debug_console" w="320" title="uiDebugConsole" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:HELP" title_bar_open="false" min_w="216" min_h="64" max_w="2000" max_h="1600" pop_max_w="2000" pop_max_h="1600" lockable="true" openable="false" opened="true" movable="true" resizer="true" active="true">
-        <group id="header_closed" x="0" y="0" h="12" posref="TL TL">
+<group type="container" id="debug_console" w="320" title="uiDebugConsole" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:HELP"
+ title_bar_open="false" min_w="216" min_h="64" max_w="2000"
+ max_h="1600" pop_max_w="2000" pop_max_h="1600" lockable="true" openable="false" opened="true" movable="true" resizer="true" active="true">
+        <group id="header_closed" x="0" y="0" h="12" posref="TL TL" >
         </group>
 
-        <group id="header_opened" x="0" y="0" w="160" h="13" posref="TL TL" child_resize_h="true" child_resize_hmargin="8">
+        <group id="header_opened" x="0" y="0" w="160" h="13" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
                 <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-8" w="0" h="64" min_height="64" max_height="1600"/>
                 <instance template="edit_box_widget" id="ebw" posref="BR TR" y="0" posparent="cb" child_resize_h="true" sizeref="w" w="-10" onenter="debug_console_entry" backup_father_container_pos="true"/>
         </group>
 
-        <group id="content" x="0" y="0" h="0" posref="TL TL">
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
         </group>
-</group>        
+</group>
 
 <tree node="debug_console">
 </tree>

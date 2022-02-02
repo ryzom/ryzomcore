@@ -350,7 +350,7 @@
                         <group id="title_label" h="20" w="70" x="0" y="0" posref="TL TL" posparent="parent">
                             <view type="text" id="type_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioTitle" />
                         </group>
-                        <instance template="edit_box_widget" id="title_eb" posref="MR ML" x="0" posparent="title_label" w="200" onenter="lua" negative_filter='' fontsize="12" params="r2.ScenarioWindow:onTitleChanged()" on_focus_lost="lua" on_focus_lost_params="r2.ScenarioWindow:onTitleChanged()" reset_focus_on_hide="true" max_num_chars="32" tooltip="uiR2EDScenarioTitleTooltip" tooltip_parent="win" />
+                        <instance template="edit_box_widget" id="title_eb" posref="MR ML" x="0" posparent="title_label" w="200" onenter="lua" negative_filter='"{}[]' fontsize="12" params="r2.ScenarioWindow:onTitleChanged()" on_focus_lost="lua" on_focus_lost_params="r2.ScenarioWindow:onTitleChanged()" reset_focus_on_hide="true" max_num_chars="32" tooltip="uiR2EDScenarioTitleTooltip" tooltip_parent="win" />
                     </group>
                     <!-- SCENARIO NOTES  -->
                     <group id="scenario_notes" x="0" y="-15" sizeparent="parent" sizeref="wh" w="0" h="-270" posparent="title" posref="BL TL">
@@ -361,7 +361,7 @@
                             <instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
                         </group>
                         <group id="crop_desc" posparent="back_small_description" posref="TL TL" x="4" y="-4" sizeref="wh" w="-4" h="-12" />
-                        <group type="edit_box" id="small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" negative_filter='' child_resize_h="true" w="-15" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" max_h="-4" want_return="true" on_focus_lost="lua" on_focus_lost_params="r2.ScenarioWindow:setScenarioNotes() r2.ScenarioWindow:cancelFocusOnText()" max_num_bytes="255" max_num_return="20">
+                        <group type="edit_box" id="small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" negative_filter='"{}[]' child_resize_h="true" w="-15" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" max_h="-4" want_return="true" on_focus_lost="lua" on_focus_lost_params="r2.ScenarioWindow:setScenarioNotes() r2.ScenarioWindow:cancelFocusOnText()" max_num_chars="256" max_num_return="20">
                             <view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" fontsize="12" shadow="true" hardtext="" global_color="false" />
                         </group>
                         <ctrl style="skin_scroll" id="small_description_scroll" align="B" target="small_description" posparent="crop_desc" posref="TR TL" x="-12" y="0" />
@@ -445,7 +445,7 @@
                                 <instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
                             </group>
                             <group id="crop_desc" posparent="back_small_description" posref="TL TL" x="4" y="-4" sizeref="wh" w="-4" h="-12" />
-                            <group type="edit_box" id="small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" child_resize_h="true" w="-15" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" max_h="-4" want_return="true" max_num_bytes="255" max_num_return="20" onenter="" params="" on_focus_lost="lua" on_focus_lost_params="r2.ScenarioWindow:setActNotes() r2.ScenarioWindow:cancelFocusOnText()">
+                            <group type="edit_box" id="small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" child_resize_h="true" w="-15" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" max_h="-4" want_return="true" max_num_chars="256" max_num_return="20" onenter="" params="" on_focus_lost="lua" on_focus_lost_params="r2.ScenarioWindow:setActNotes() r2.ScenarioWindow:cancelFocusOnText()">
                                 <view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" fontsize="12" shadow="true" hardtext="" global_color="false" />
                             </group>
                             <ctrl style="skin_scroll" id="small_description_scroll" align="B" target="small_description" posparent="crop_desc" posref="TR TL" x="-12" y="0" />
@@ -467,7 +467,7 @@
     </group>
     <!-- modal to choose quantity for plot items -->
     <group type="modal" id="r2ed_choose_plot_item_quantity" exit_click_out="true" posref="TL TL" w="155" h="80" options="skin_modal" on_enter="lua" on_enter_params="r2.DMGift:onValidateQuantity()">
-        <view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="SELECT QUANTITY" />
+        <view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="uiSelectQuantity" />
         <ctrl type="sheet" id="sheet" onclick_r="open_help_auto" value="LOCAL:R2:CURR_PLOT_ITEM" posref="MM MM" x="-26" y="0" use_quantity="false" use_quality="false" />
         <view type="text" id="x" posparent="sheet" posref="MR MM" x="8" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="X" />
         <instance template="edit_box_widget" id="edit" entry_type="positive_integer" text_ref="TR TR" text_y="-1" fontsize="12" posparent="sheet" posref="MR ML" x="16" y="0" text_x="-2" w="32" prompt="" enter_loose_focus="false" multi_line="false" max_num_chars="3" onenter="lua" params="r2.DMGift:onValidateQuantity()" max_historic="0" />
@@ -499,7 +499,7 @@
         </group>
     </group>
     <!-- title update -->
-    <link expr="depends(@%dm_gift_text)" action="set_server_string" params="value=@%dm_gift_text|target=ui:interface:r2ed_dm_gift:title" />
+    <link expr="depends(@%dm_gift_text)" action="set_server_string" params="value=@%dm_gift_text|target=ui:interface:r2ed_dm_gift:uc_title" />
     <tree node="r2ed_dm_gift"></tree>
     <group type="container" id="r2ed_scenario_filter" title="uiR2EDScenarioFilters" global_color="false" line_at_bottom="false" movable="true" active="false" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_SCENARIO_FILTER" on_close="" on_close_params="" on_deactive="" on_deactive_params="" pop_min_w="300" pop_min_h="270" w="300" h="270" pop_max_w="300" pop_max_h="270">
         <group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL">

@@ -162,6 +162,7 @@
                 <leaf name="RM_CLASS_TYPE" type="I3" />
                 <leaf name="RM_FABER_STAT_TYPE" type="I5" />
                 <leaf name="PREREQUISIT_VALID" type="I1" />
+                <leaf name="RESALE_FLAG" type="I2" />
             </branch>
         </branch>
         <leaf name="MONEY" type="I64" />
@@ -179,7 +180,8 @@
         <leaf name="ACCEPTED" type="I1" />
         <leaf name="MONEY" type="I64" />
         <branch name="GIVE">
-            <branch name="" count="8">
+            <branch name="" count="10">
+                <!-- Change in database.xml, player_trade.lua and NbExchangeSlots on server-->
                 <!-- Common Item Data -->
                 <leaf name="SHEET" type="I32" />
                 <leaf name="QUALITY" type="I10" />
@@ -187,7 +189,7 @@
                 <leaf name="CREATE_TIME" type="I32" />
                 <leaf name="SERIAL" type="I32" />
                 <leaf name="USER_COLOR" type="I3" />
-                <!-- <leaf name="LOCKED" type="I10"/> No longer needed -->
+                <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
                 <leaf name="WEIGHT" type="I16" />
                 <!-- weight. see DB_WEIGHT_SCALE-->
                 <leaf name="NAMEID" type="I32" />
@@ -200,7 +202,8 @@
             </branch>
         </branch>
         <branch name="RECEIVE">
-            <branch name="" count="8">
+            <branch name="" count="10">
+                <!-- Change in database.xml, player_trade.lua and NbExchangeSlots on server-->
                 <!-- Common Item Data -->
                 <leaf name="SHEET" type="I32" />
                 <leaf name="QUALITY" type="I10" />
@@ -208,7 +211,7 @@
                 <leaf name="CREATE_TIME" type="I32" />
                 <leaf name="SERIAL" type="I32" />
                 <leaf name="USER_COLOR" type="I3" />
-                <!-- <leaf name="LOCKED" type="I10"/> No longer needed -->
+                <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
                 <leaf name="WEIGHT" type="I16" />
                 <!-- weight. see DB_WEIGHT_SCALE-->
                 <leaf name="NAMEID" type="I32" />
@@ -268,22 +271,22 @@
     </branch>
     <!-- NB this is not a copy of the server db, but the concatenation of all items pages -->
     <!--
-          <branch name="ITEMS_FOR_MISSIONS">
-                    <branch name="" count="512">
-                                -->
-    <!--<leaf name="SHEET" type="I32"/>
-                                <leaf name="QUALITY" type="I16"/>
-                                <leaf name="WEIGHT" type="I16"/>
-                                <leaf name="NAMEID" type="I32"/>
-                                <leaf name="INFO_VERSION" type="I8"/>
-                                -->
+        <branch name="ITEMS_FOR_MISSIONS">
+                <branch name="" count="512">
+                        -->
+    <!--<leaf name="SHEET"                  type="I32"/>
+                        <leaf name="QUALITY"            type="I16"/>
+                        <leaf name="WEIGHT"                     type="I16"/>
+                        <leaf name="NAMEID"                     type="I32"/>
+                        <leaf name="INFO_VERSION"       type="I8"/>
+                        -->
     <!-- the same than for TRADING:x:SLOT_type -->
     <!--
-                                <leaf name="SLOT_TYPE" type="I2"/>
-                                <leaf name="LOGIC_TEXT_ID" type="I32"/>
-                                <leaf name="DESC_TEXT_ID" type="I32"/>
-                    </branch>
-          </branch>-->
+                        <leaf name="SLOT_TYPE"                  type="I2"/>
+                        <leaf name="LOGIC_TEXT_ID"      type="I32"/>
+                        <leaf name="DESC_TEXT_ID"      type="I32"/>
+                </branch>
+        </branch>-->
     <!-- NB this is not a copy of the server db, but the concatenation of all mission -->
     <branch name="CHOOSE_MISSIONS">
         <branch name="" count="512">

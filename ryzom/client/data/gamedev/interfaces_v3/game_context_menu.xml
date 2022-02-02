@@ -49,13 +49,12 @@
         <action id="upgrade_rm" name="uimGcmUpgradeRM" handler="context_upgrade_rm" params="" />
         <action id="outpost_bannish_player" name="uimGcmOutpostBanishPlayer" handler="outpost_ban_player" params="" />
         <action id="outpost_bannish_guild" name="uimGcmOutpostBanishGuild" handler="outpost_ban_guild" params="" />
-        <!-- talk : engage conversation with player or ask news to a npc -->
+        <!-- interaction -->
         <action id="talk" name="uimGcmTalk" handler="context_talk" params="" icon="r2_mini_activity_empty_chat.tga" />
         <action id="news" name="uimGcmChat" handler="lua" params="game:TalkWithNpc(0)" icon="radar_mission3_16.tga" />
         <action id="news_aggressive" name="uimGcmBullying" handler="lua" params="game:TalkWithNpc(1)" icon="bullying.tga" />
         <action id="attack" name="uimGcmAttack" handler="context_attack" params="" icon="ico_blade.tga" />
         <action id="info" name="uimGcmInfo" handler="open_title_help" params="from=target" icon="spe_status.tga" />
-        <!-- Action misc with selection -->
         <action id="duel" name="uimGcmDuel" handler="context_duel" params="" icon="pvp_duel.tga" />
         <action id="unduel" name="uimGcmUnDuel" handler="context_unduel" params="" icon="pvp_neutral.tga" />
         <!-- <action id="pvp_challenge"                 name="uimGcmPvpChallenge"               handler="context_pvp_challenge"                 params="" /> -->

@@ -1,9 +1,7 @@
 <interface_config>
     <root id="outgame" x="0" y="0" w="800" h="600" active="false" />
     <lua file="out_v2_select.lua" />
-    <!--
-<lua file="bg_downloader.lua" />
--->
+    <!-- <lua file="bg_downloader.lua" /> -->
     <!-- *********************** -->
     <!-- * CHARACTER SELECTION * -->
     <!-- *********************** -->
@@ -57,8 +55,7 @@
         <!-- Continue or Restart Default Outgame Music
                 MUST PLAY IT NOT ASYNCLY, else it don't works well during loading 
         -->
-        <!-- Play character selection music -->
-        <!-- <action handler="play_music_outgame"  params="async=0" /> -->
+        <action handler="play_music_outgame" params="async=0" />
     </proc>
     <proc id="charsel_disable_buttons">
         <action handler="set" params="target_property=ui:outgame:charsel:but_slot0:active|value=0" />
@@ -109,7 +106,7 @@
         <action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:fov | value=switch(@UI:TEMP:CHARSLOT@0:PEOPLE, 21, 22, 20, 23)" />
         <action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:posz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
         <action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:tgtz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
-        <action handler="get_slot" cond="not(isCharSelSlotEmpty(@0))" params="prop=name|target=ui:outgame:charsel:but_slot@0:hardtext|slot=@0" />
+        <action handler="get_slot" cond="not(isCharSelSlotEmpty(@0))" params="prop=name|target=ui:outgame:charsel:but_slot@0:uc_hardtext|slot=@0" />
     </proc>
     <proc id="proc_charsel_initslot_empty">
         <action handler="set" params="target_property=ui:outgame:charsel:slot@0:active|value=0" />
@@ -139,12 +136,6 @@
         <action handler="set" params="target_property=ui:outgame:charsel:char3d:env:name | value=switch(@UI:TEMP:CHAR3D:PEOPLE, 'outgame_fyros.ig', 'outgame_matis.ig', 'outgame_tryker.ig', 'outgame_zorai.ig')" />
         <action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:fov | value=switch(@UI:TEMP:CHAR3D:PEOPLE, 60, 60, 60, 60)" />
         <action handler="set" params="target_property=ui:outgame:charsel:3d_select:y | value=switch(@0, 0, -153, -306, -459, -612)" />
-        <!-- Play character selection music -->
-        <action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),not(isCharSelSlotEmpty(@0)))" params="name=character creation fyros.ogg|async=1" />
-        <action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),not(isCharSelSlotEmpty(@0)))" params="name=character creation matis.ogg|async=1" />
-        <action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),not(isCharSelSlotEmpty(@0)))" params="name=character creation trykers.ogg|async=1" />
-        <action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),not(isCharSelSlotEmpty(@0)))" params="name=character creation zorai.ogg|async=1" />
-        <action handler="play_music_outgame" cond="isCharSelSlotEmpty(@0)" params="async=1" />
         <action handler="proc" params="proc_charsel_infos2" />
     </proc>
     <proc id="proc_charsel_play">
@@ -343,10 +334,9 @@
         <ctrl style="menu_button" id="but_slot2" posref="BL TL" posparent="but_slot1" y="-3" onover="play_sound" params_over="name=specie_but_over" onclick_l="proc" params_l="proc_charsel_clickslot|2" />
         <ctrl style="menu_button" id="but_slot3" posref="BL TL" posparent="but_slot2" y="-3" onover="play_sound" params_over="name=specie_but_over" onclick_l="proc" params_l="proc_charsel_clickslot|3" />
         <ctrl style="menu_button" id="but_slot4" posref="BL TL" posparent="but_slot3" y="-3" onover="play_sound" params_over="name=specie_but_over" onclick_l="proc" params_l="proc_charsel_clickslot|4" />
-        <!-- UI 'commented out' for future purpose -->
         <!--
-        <group id="bgd_progress" posref="BM BM" w="430" h="75" x="85" y="65" active="true">             
-                <instance template="outgame_black_back" id="border"/>           
+        <group id="bgd_progress" posref="BM BM" w="430" h="75" x="85" y="65" active="true">
+                <instance template="outgame_black_back" id="border"/>
                 <view type="text" id="text"     active="true" y="-10" posref="TM TM"    hardtext="" fontsize="13" color="255 255 255 255"/>
                 <view type="bitmap" id="bm" active="false" y="1" x="-1" texture="W_answer_16_valid.tga" posparent="text" posref="ML MR"/>
                 <view type="text" id="ellipsis" active="true" y="0" posref="BR BL"      posparent="text" hardtext="" fontsize="13" color="255 255 255 255"/>
@@ -354,17 +344,16 @@
 
                 <group type="combo_box" id="prio" sizeref="w" w="64" x="0" y="-8" child_resize_h="true" child_resize_hmargin="6" linked_to_db="false" 
                  posparent="progress"
-                 posref="BM TM"          
+                 posref="BM TM" 
                  on_change="lua:bgdownloader:onChangePriority()" on_change_params=""
                  tooltip="uiBGD_PriorityTooltip"
                  global_color="false"
-                >               
-                        <instance template="combo_box_def1" tooltip="uiBGD_PriorityTooltip"/>                                           
+                >
+                        <instance template="combo_box_def1" tooltip="uiBGD_PriorityTooltip"/>
                         <combo_text name="uiBGD_Paused" />
                         <combo_text name="uiBGD_LowPriority" />
-                        <combo_text name="uiBGD_NormalPriority" />                      
+                        <combo_text name="uiBGD_NormalPriority" />
                 </group>
-
         </group>
 -->
         <!--***************-->
@@ -388,11 +377,6 @@
                                         onclick_l="proc" params_l="proc_charsel_play"/>
         -->
         <ctrl style="valid_txt_button" id="play_but" posref="BR BM" x="-112" y="56" hardtext="uiCharSel_Play" onover="play_sound" params_over="name=specie_but_over" onclick_l="lua" params_l="outgame:launchGame()" />
-        <!--
-        <ctrl style="valid_txt_button" id="edit_session_but" posref="BR BM" x="-112" y="36" hardtext="uiLaunchEditor"
-                                        onover="play_sound" params_over="name=specie_but_over"
-                                        onclick_l="proc" params_l="proc_charsel_edit_menu"/>
-        -->
         <ctrl style="valid_txt_button" id="del_but" posref="BR BL" x="-794" y="56" hardtext="uiCharSel_Del" onover="play_sound" params_over="name=specie_but_over" onclick_l="proc" params_l="proc_charsel_del" />
         <link expr="and(not(isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)), not(isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT)))" target="play_but:active,edit_session_but:active,del_but:active" />
         <ctrl style="valid_txt_button" id="create_new_but" posref="BR BM" x="-112" y="56" hardtext="uiCharSel_CreateNew" onover="play_sound" params_over="name=specie_but_over" onclick_l="proc" params_l="proc_charsel_create_new" />
@@ -463,17 +447,17 @@
         <ctrl style="valid_txt_button" id="cancel" posref="TM BM" posparent="submit" x="0" y="4" hardtext="uiCP_Delete_no" onover="play_sound" params_over="name=specie_but_over" onclick_l="proc" params_l="proc_charsel_new_scenario_warning_cancel" />
     </group>
     <options name="menu_back">
-        <param name="tx_tl" value="w_modal_tl.tga" />
-        <param name="tx_t" value="w_modal_t.tga" />
-        <param name="tx_tr" value="w_modal_tr.tga" />
-        <param name="tx_l" value="w_modal_l.tga" />
-        <param name="tx_r" value="w_modal_r.tga" />
-        <param name="tx_blank" value="w_modal_blank.tga" />
-        <param name="tx_bl" value="w_modal_bl.tga" />
-        <param name="tx_b" value="w_modal_b.tga" />
-        <param name="tx_br" value="w_modal_br.tga" />
+        <param name="tx_tl" value="CM_TL.tga" />
+        <param name="tx_t" value="CM_T.tga" />
+        <param name="tx_tr" value="CM_TR.tga" />
+        <param name="tx_l" value="CM_L.tga" />
+        <param name="tx_r" value="CM_R.tga" />
+        <param name="tx_blank" value="CM_M.tga" />
+        <param name="tx_bl" value="CM_BL.tga" />
+        <param name="tx_b" value="CM_B.tga" />
+        <param name="tx_br" value="CM_BR.tga" />
     </options>
-    <group type="menu" id="r2ed_editor_menu" options="menu_back" space="0" color="255 255 255 255" fontsize="16" shadow="true" shadow_color="0 0 0 255" shadow_color_over="0 0 0 255" color_over="0 0 0 255" color_grayed="255 255 255 128" shadow_color_grayed="0 0 0 255" highlight_over="255 255 255 128" mouse_pos="false">
+    <group type="menu" id="r2ed_editor_menu" options="menu_back" text_y="0" color="255 255 255 255" fontsize="16" shadow="true" shadow_color="0 0 0 255" shadow_color_over="0 0 0 255" color_over="0 0 0 255" color_grayed="255 255 255 128" shadow_color_grayed="0 0 0 255" highlight_over="255 255 255 128" mouse_pos="false">
         <action id="new_scenario" name="uiR2EDNewScenario" handler="proc" params="proc_charsel_new_scenario_warning" />
         <action id="new_scenario" name="uiR2EDEditScenario" handler="proc" params="proc_charsel_edit_scenario" />
     </group>

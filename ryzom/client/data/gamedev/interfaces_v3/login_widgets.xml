@@ -51,7 +51,7 @@
         <view type="bitmap" id="r" texture="log_mod_r.tga" posref="MR MR" scale="true" sizeref="h" h="-16" w="8" render_layer="-1" />
     </group>
 </template>
-<template name="edit_box_log" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" multi_line="false" x="0" y="0" w="0" h="0" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" on_focus="" on_focus_params="" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="0" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" color="255 255 255 255">
+<template name="edit_box_log" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" multi_line="false" x="0" y="0" w="0" h="0" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" on_focus="" on_focus_params="" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="256" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="0" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" color="255 255 255 255">
     <group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" w="#w" h="#h">
         <!-- frame -->
         <view type="bitmap" id="bg" posref="MM MM" scale="true" sizeref="hw" w="-16" h="-16" texture="log_eb_m.tga" />
@@ -197,7 +197,7 @@
 <!-- ********************* -->
 <!-- *  EDIT BOX WIDGET  * -->
 <!-- ********************* -->
-<template name="edit_box_widget" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="40" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" color="255 255 255 255" render_layer="0" sizeref_eb="w">
+<template name="edit_box_widget" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="256" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="40" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" color="255 255 255 255" render_layer="0" sizeref_eb="w">
     <group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="#child_resize_h" sizeref="#sizeref" w="#w" h="#h" render_layer="#render_layer">
         <group type="edit_box" sizeref="#sizeref_eb" w="-16" id="eb" posref="TL TL" x="8" y="-8" child_resize_h="#child_resize_h" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" backup_father_container_pos="#backup_father_container_pos" render_layer="#render_layer">
             <view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="log_eb_m.tga" inherit_gc_alpha="false" render_layer="#render_layer" />
@@ -215,7 +215,7 @@
     </group>
 </template>
 <!-- alternate look for edit box -->
-<template name="edit_box_widget_2" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="40" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" color="255 255 255 255">
+<template name="edit_box_widget_2" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="256" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="40" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" color="255 255 255 255">
     <group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="#child_resize_h" sizeref="#sizeref" w="#w" h="#h">
         <group type="edit_box" sizeref="w" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" backup_father_container_pos="#backup_father_container_pos">
             <view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="blank.tga" color="255 255 255 0" />
@@ -439,7 +439,7 @@
 <variable entry="UI:glob_var:help:$i:QUALITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:QUANTITY" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:SLOT_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
-<variable entry="UI:glob_var:help:$i:USER_COLOR" type="sint32" value="1" size="%MAX_HELP_WINDOW" />
+<variable entry="UI:glob_var:help:$i:USER_COLOR" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:ENCHANT" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:RM_CLASS_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
 <variable entry="UI:glob_var:help:$i:RM_FABER_STAT_TYPE" type="sint32" value="0" size="%MAX_HELP_WINDOW" />
