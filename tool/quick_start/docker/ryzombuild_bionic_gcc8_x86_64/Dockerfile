@@ -23,6 +23,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   && apt-get install -y cmake \
   && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  gcc-8 g++-8 \
+  && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 \
+  && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60 \
+  && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /mnt/nel
 
 WORKDIR /mnt/nel
