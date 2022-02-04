@@ -169,6 +169,7 @@ public:
 	                                             // and another in the source slot. Useful for items to buy that are in infinite quantity.
 	bool				_AutoGrayed            : 1; // if true then gray the ctrlSheeet if: 1/ Items: Is the Item Locked. 2/ Bricks: is the brick Latent.
 	bool                _HasTradeSlotType      : 1; // true is the SLOT_TYPE DB field should be taken in account
+	bool                _IsHotbarSlot      	   : 1; // true if the slot is part of the hotbar
 
 	bool				_BrickOverable         : 1;	// if Type is Brick, display like a button (because LeftClickable).
 
@@ -273,6 +274,7 @@ public:
 	uint32	getItemNameId() const { return (uint32)_NameId.getSInt32();}
 	// New Stack Size
 	sint32	getStackable() const { return (_Stackable>1) ? 999 : 1; }
+	bool    isHotbarSlot() const { return _IsHotbarSlot; }
 
 	// get non locked quantity (can be zero)
 	sint32 getNonLockedQuantity() const;
