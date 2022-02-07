@@ -19,7 +19,6 @@ The Ryzom Core repository is maintained by the community independently. It is no
 We are happy to work on this project in our free time. If you would like to contribute to the project financially, you can support us and our loved ones through any of the following links.
 
 * [![Sponsor](https://img.shields.io/github/sponsors/kaetemi?style=social)]( https://github.com/sponsors/kaetemi) Jan Boon (Kaetemi), Polyverse OÜ. — Goes towards the Ryzom Core servers, and open-source development.
-* [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)]( https://me.ryzom.com/billing/donate) Nuno Gonçalves (Ulukyn), et al., Winch Gate Ltd. — Supports the commercial game operations.
 
 If you're a regular source code or game asset contributor to the open-source project, feel free to add yourself to this list.
 
