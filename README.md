@@ -19,7 +19,6 @@ The Ryzom Core repository is maintained by the community independently. It is no
 We are happy to work on this project in our free time. If you would like to contribute to the project financially, you can support us and our loved ones through any of the following links.
 
 * [![Sponsor](https://img.shields.io/github/sponsors/kaetemi?style=social)]( https://github.com/sponsors/kaetemi) Jan Boon (Kaetemi), Polyverse OÜ. — Goes towards the Ryzom Core servers, and open-source development.
-* [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)]( https://me.ryzom.com/billing/donate) Nuno Gonçalves (Ulukyn), et al., Winch Gate Ltd. — Supports the commercial game operations.
 
 If you're a regular source code or game asset contributor to the open-source project, feel free to add yourself to this list.
 
@@ -55,7 +54,7 @@ Other community contributions and modifications are copyright their respective a
 
 The source code in this repository is licensed under the AGPLv3, unless specified otherwise. Likewise, by committing to this repository, you agree to license your modifications under the AGPLv3. You retain all copyright over your work (\*). As such, you have the option to additionally dual-license your fully-owned contributions under any other license. Configuration files are implied to be public domain samples, as they may contain sensitive data in a production environment.
 
-(\*) If you have signed a CTA (the "NDA") with Winch Gate Ltd., your contributions, along with any other creations related to Ryzom, fall under that contract and will be copyright Winch Gate Ltd. instead (\*\*). You retain the moral rights to your work. These are non-transferable rights, which permit you to assert your authorship and be credited for your contributions. You should exercise this right.
+(\*) If, and only if, you have signed a CTA (part of the NDA, copyright and ownership - your contract may vary) with Winch Gate Ltd., your contributions, along with any other creations related to Ryzom, fall under that contract and will be copyright Winch Gate Ltd. instead (\*\*). As per your contract, your contributions are licensed back to you under the AGPLv3. You retain the moral rights to your work. These are non-transferable rights, which permit you to assert your authorship and be credited for your contributions. You should exercise this right.
 
 (\*\*) If you live in a legislation where contractual copyright assignments without employment or commercial transaction are unenforceable (e.g. Belgium), and you are not being paid by Winch Gate Ltd. for your current work, the CTA is null and void, and you retain full copyright ownership over your contributions. Consult a lawyer to assert your rights. Don't give them away.
 
