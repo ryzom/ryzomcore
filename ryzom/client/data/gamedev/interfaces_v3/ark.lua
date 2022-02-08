@@ -22,31 +22,55 @@ if ArkMissionCatalog == nil then
 	}
 end
 
-function ArkMissionCatalog:OpenWindow(urlA, urlB)
-	local winframe = WebBrowser:addWindow("ark_mission_catalog", "Mission Catalog", getUI(ArkMissionCatalog.window_id))
+function ArkMissionCatalog:OpenWindow(urlA, urlB, dont_active)
+	ArkMissionCatalog.window_id = "ui:interface:encyclopedia"
+	local winframe = getUI(ArkMissionCatalog.window_id)
 	winframe.opened=true
-	winframe.active=true
-	winframe.w = 950
+	if dont_active ~= true then
+		winframe.active=true
+	end
 
 	ArkMissionCatalog.window = winframe
 
-	getUI(ArkMissionCatalog.window_id..":content:htmlA"):browse(urlA)
+	getUI("ui:interface:encyclopedia:content:htmlA"):browse(urlA)
 
+	local htmlb = getUI("ui:interface:encyclopedia:content:htmlB")
+	htmlb.home = urlB
+	htmlb:browse("home")
+end
+
+function ArkMissionCatalog:OpenCat(cat, url)
+	local ency = getUI("ui:interface:encyclopedia")
+	setOnDraw(ency, "")
+	ArkMissionCatalog.cat = cat
 	local htmlb = getUI(ArkMissionCatalog.window_id..":content:htmlB")
-	if htmlb.home == "" then
-		htmlb.home = urlB
+	local htmlc = getUI(ArkMissionCatalog.window_id..":content:htmlC")
+	if cat == "title" then
+		ArkMissionCatalog.posxB = 180
+		ArkMissionCatalog.widthB = 240
+		ArkMissionCatalog.widthC = 530
+		ArkMissionCatalog.posxC = 405
+
+		local htmlB = getUI(ArkMissionCatalog.window_id..":content:htmlB")
+		local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
+		htmlB.x = ArkMissionCatalog.posxB
+		htmlB.w = ArkMissionCatalog.widthB
+		htmlC.w = ArkMissionCatalog.widthC
+		htmlC.x = ArkMissionCatalog.posxC
+		htmlC.active = true
+	else
+		ArkMissionCatalog.widthB = 740
+		htmlb.w = ArkMissionCatalog.widthB
+		if htmlc then
+			htmlc.active = false
+		end
 	end
+	htmlb.home = url.."&continent="..getContinentSheet()
 	htmlb:browse("home")
-
+	setOnDraw(ency, "ArkMissionCatalog:autoResize()")
 end
 
-
-function ArkMissionCatalog:OpenCat(url)
-	local htmlb = getUI(ArkMissionCatalog.window_id..":content:htmlB")
-	htmlb.home = url+"&continent="+getContinentSheet()
-	htmlb:browse("home")
-end
-
+-- TODO: check removing fromUTF8
 function ArkMissionCatalog:UpdateMissionTexts(win, id, text1, text2)
 	local w = win:find("ark_mission_"..id)
 	local text = ucstring()
@@ -72,36 +96,59 @@ function ArkMissionCatalog:autoResize()
 	local ui = getUI(ArkMissionCatalog.window_id)
 	local htmlA = getUI(ArkMissionCatalog.window_id..":content:htmlA")
 	local htmlB = getUI(ArkMissionCatalog.window_id..":content:htmlB")
+	local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
 
-	if ArkMissionCatalog.cat == "storyline" then
-		if ui.w < 784 then
-			if ArkMissionCatalog.cat == "storyline" then
+	if htmlC.active == false then
+		if ArkMissionCatalog.cat == "storyline" then
+			if ui.w < 784 then
 				local td30 = htmlB:find("storyline_content")
 				if td30 ~= nil then
 					td30.x = math.max(0, 200-784+ui.w)
 					ArkMissionCatalog.need_restore_td30 = true
 				end
-			end
-		else
-			if ArkMissionCatalog.need_restore_td30 then
-				local td30 = htmlB:find("storyline_content")
-				if td30 ~= nil then
-					td30.x = 200
-					ArkMissionCatalog.need_restore_td30 = false
+			else
+				if ArkMissionCatalog.need_restore_td30 then
+					local td30 = htmlB:find("storyline_content")
+					if td30 ~= nil then
+						td30.x = 200
+						ArkMissionCatalog.need_restore_td30 = false
+					end
 				end
 			end
 		end
-	end
 
-	if ui.w < 950 then
-		htmlA.w = math.max(60, 220-950+ui.w)
-		htmlB.x = math.max(35, 190-950+ui.w)
-		ArkMissionCatalog.need_restore = true
+		if ui.w < 950 then
+			htmlA.w = math.max(60, 220-950+ui.w)
+			htmlB.x = math.max(35, 190-950+ui.w)
+			ArkMissionCatalog.need_restore = true
+		else
+			if ArkMissionCatalog.need_restore then
+				htmlA.w = 220
+				htmlB.x = 190
+				ArkMissionCatalog.need_restore = false
+			end
+		end
 	else
-		if ArkMissionCatalog.need_restore then
-			htmlA.w = 220
-			htmlB.x = 190
-			ArkMissionCatalog.need_restore = false
+		if ui.w < 950 then
+			htmlA.w = math.max(68, 220-950+ui.w)
+			htmlB.x = math.max(35, ArkMissionCatalog.posxB-950+ui.w)
+			if htmlB:find("scroll_bar").h > 0 then
+				htmlC.x = math.max(80, ui.w-htmlC.w)
+				htmlB.w = math.max(62, ui.w-htmlA.w-htmlC.x+16)
+			else
+				htmlC.x = math.max(75, ui.w-htmlC.w-16)
+				htmlB.w = math.max(55, htmlC.x-htmlB.x+16)
+			end
+			ArkMissionCatalog.need_restore = true
+		else
+			if ArkMissionCatalog.need_restore then
+				htmlA.w = 220
+				htmlB.w = ArkMissionCatalog.widthB
+				htmlB.x = ArkMissionCatalog.posxB
+				htmlC.w = ArkMissionCatalog.widthC
+				htmlC.x = ArkMissionCatalog.posxC
+				ArkMissionCatalog.need_restore = false
+			end
 		end
 	end
 end

@@ -115,6 +115,32 @@ function game:onLoadMap(map)
 
 end
 
+function game:openFullMap()
+	local ui = getUI("ui:interface:map")
+	if ui.active == false then
+		ui.active = true
+	end
+
+	if game.saveMapFull then
+		game.saveMapFull = false
+		ui.x = game.saveMapX
+		ui.y = game.saveMapY
+		ui.w = game.saveMapW
+		ui.h = game.saveMapH
+	else
+		game.saveMapFull = true
+		game.saveMapX = ui.x
+		game.saveMapY = ui.y
+		game.saveMapW = ui.w
+		game.saveMapH = ui.h
+		ui.x = 0
+		ui.y = 0
+		ui.w = getUI("ui:interface").w
+		ui.h = getUI("ui:interface").h
+		setTopWindow(ui)
+	end
+end
+
 
 -- register map overrride
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")

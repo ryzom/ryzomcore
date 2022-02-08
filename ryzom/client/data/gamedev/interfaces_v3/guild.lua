@@ -61,13 +61,13 @@ function game:guildBuildInterface()
 			uiMember.name.hardtext = getGuildMemberName(i);
 			local memberGrade = getGuildMemberGrade(i);
 			if (memberGrade == 'Leader') then
-				uiMember.grade.text = i18n.get('uiGuildLeader');
+				uiMember.grade.uc_hardtext = i18n.get('uiGuildLeader');
 			elseif (memberGrade == 'HighOfficer') then
-				uiMember.grade.text = i18n.get('uiGuildHighOfficer');
+				uiMember.grade.uc_hardtext = i18n.get('uiGuildHighOfficer');
 			elseif (memberGrade == 'Officer') then
-				uiMember.grade.text = i18n.get('uiGuildOfficer');
+				uiMember.grade.uc_hardtext = i18n.get('uiGuildOfficer');
 			else
-				uiMember.grade.text = i18n.get('uiGuildMember');
+				uiMember.grade.uc_hardtext = i18n.get('uiGuildMember');
 			end
 			uiMemberList:addChild(uiMember);
 		end

@@ -309,12 +309,12 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 	_InterfaceColor= true;
 	_SheetSelectionGroup = -1;
 	_UseQuality = true;
-	_DisplayItemQuality = true;
 	_UseQuantity = true;
 	_DuplicateOnDrag = false;
 	_ItemSlot= SLOTTYPE::UNDEFINED;
 	_AutoGrayed= false;
 	_HasTradeSlotType = false;
+	_IsHotbarSlot = false;
 	_BrickOverable= false;
 	_ReadQuantityFromSheet = false;
 	_AHOnLeftClick = NULL;
@@ -390,6 +390,10 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"use_slot_type_db_entry" );
 	if (prop)
 		_HasTradeSlotType= CInterfaceElement::convertBool(prop);
+	
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"hotbar_slot" );
+	if (prop)
+		_IsHotbarSlot= CInterfaceElement::convertBool(prop);
 
 	// Read Action handlers
 	CAHManager::getInstance()->parseAH(cur, "onclick_l", "params_l", _AHOnLeftClick, _AHLeftClickParams);
@@ -1277,6 +1281,9 @@ void CDBCtrlSheet::setupItem ()
 
 	sint32 sheet = _SheetId.getSInt32();
 
+	_DispQuality = -1;
+	_DispQuantity = -1;
+
 	// If this is the same sheet, need to resetup
 	if (_LastSheetId != sheet || _NeedSetup)
 	{
@@ -1289,13 +1296,6 @@ void CDBCtrlSheet::setupItem ()
 		if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
 		{
 			_ItemSheet = (CItemSheet*)pES;
-
-			// Display the item quality?
-			_DisplayItemQuality= _UseQuality &&
-				_ItemSheet->Family != ITEMFAMILY::COSMETIC &&
-				_ItemSheet->Family != ITEMFAMILY::TELEPORT &&
-				_ItemSheet->Family != ITEMFAMILY::SERVICE
-				;
 
 			_DispSheetBmpId = rVR.getTextureIdFromName (_ItemSheet->getIconMain());
 			// if file not found or empty, replace by default icon
@@ -1350,21 +1350,11 @@ void CDBCtrlSheet::setupItem ()
 						_DispQuantity = _Quantity.getSInt32();
 					}
 				}
-				else
-					// do not display any number
-					_DispQuantity = -1;
 			}
-			else _DispQuantity = -1;
 
 			// Setup quality
-			if(_DisplayItemQuality)
-			{
+			if(_UseQuality)
 				_DispQuality= _Quality.getSInt32();
-			}
-			else
-			{
-				_DispQuality= -1;
-			}
 
 			// special icon text
 			if( _NeedSetup || _ItemSheet->getIconText() != _OptString )
@@ -1403,7 +1393,7 @@ void CDBCtrlSheet::setupItem ()
 		}
 
 		// update quality. NB: if quality change, the must updateItemCharacRequirement
-		if(_DisplayItemQuality)
+		if(_UseQuality)
 		{
 			sint32	newQuality= _Quality.getSInt32();
 			if(newQuality!=_DispQuality)
@@ -1411,10 +1401,6 @@ void CDBCtrlSheet::setupItem ()
 				_DispQuality= newQuality;
 				updateItemCharacRequirement(_LastSheetId);
 			}
-		}
-		else
-		{
-			_DispQuality= -1;
 		}
 
 		// update armour color (if USER_COLOR db change comes after SHEET change)
@@ -1425,6 +1411,31 @@ void CDBCtrlSheet::setupItem ()
 			{
 				updateArmourColor((sint8)_UserColor->getValue32());
 			}
+		}
+	}
+
+	if (_ItemSheet != NULL)
+	{
+		switch(_ItemSheet->Family)
+		{
+			case ITEMFAMILY::ARMOR:
+			case ITEMFAMILY::MELEE_WEAPON:
+			case ITEMFAMILY::RANGE_WEAPON:
+			case ITEMFAMILY::SHIELD:
+			case ITEMFAMILY::JEWELRY:
+			case ITEMFAMILY::CRAFTING_TOOL:
+			case ITEMFAMILY::HARVEST_TOOL:
+			case ITEMFAMILY::TAMING_TOOL:
+			case ITEMFAMILY::TRAINING_TOOL:
+				// hide 'x0' and 'x1' stack count for equipable items
+				if (_DispQuantity < 2)
+					_DispQuantity = -1;
+				break;
+			default:
+				// hide 'q0'and 'q1' quality for every other item
+				if (_DispQuality < 2)
+					_DispQuality = -1;
+				break;
 		}
 	}
 
@@ -1892,8 +1903,6 @@ void CDBCtrlSheet::setupOutpostBuilding()
 		if ((pES != NULL) && (pES->type() == CEntitySheet::OUTPOST_BUILDING))
 		{
 			COutpostBuildingSheet *pOBSheet = (COutpostBuildingSheet*)pES;
-
-			_DisplayItemQuality = false;
 
 			_DispSheetBmpId = rVR.getTextureIdFromName (pOBSheet->getIconMain());
 			// if file not found or empty, replace by default icon
@@ -2535,7 +2544,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					sint32 hArea = (hSheet / 4);
 					sint32 xIcon = x;
 					// move buff icons up a row, quantity text is displayed on bottom-left corner
-					sint32 yIcon = y + hArea;
+					sint32 yIcon = y + (_DispQuantity > 0 ? hArea : 0);
 					for (uint i = 0; i < _BuffIcons.size(); ++i)
 					{
 						sint32 wIcon = _BuffIcons[i].IconW;
@@ -3789,6 +3798,11 @@ bool	CDBCtrlSheet::canDropItem(CDBCtrlSheet *src) const
 			bf|= 1<<SLOTTYPE::RIGHT_HAND_EXCLUSIVE;
 		}
 
+		if ( _IsHotbarSlot && getInventory().isUsableItem(src->getSheetId()) )
+		{
+			return true;
+		}
+		
 		// Look if one slot solution match.
 		if( pIS->SlotBF & bf )
 		{

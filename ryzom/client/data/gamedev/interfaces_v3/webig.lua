@@ -216,8 +216,6 @@ function webig:openUrl(url)
 	getUI("ui:interface:web_transactions"):find("html"):browse(url)
 end
 
---assert(nil, "RELOADABLE SCRIPT")
-
 
 
 

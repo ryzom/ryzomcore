@@ -178,6 +178,7 @@ namespace INVENTORIES
 			reward_sharing,					// 15 fake inventory, not in database.xml. Used by the item info protocol only
 			guild,							// 16 (warning: number stored in guild saved file)
 			player_room,					// 17
+			hotbar,							// 18	
 			NUM_ALL_INVENTORY				// warning: distinct from NUM_INVENTORY
 	};
 
@@ -262,6 +263,7 @@ namespace INVENTORIES
 	const uint NbRoomSlots = 1000;
 	const uint NbGuildSlots = 1000;
 	const uint NbTempInvSlots = 16;
+	const uint NbHotbarSlots = 5;
 
 	enum TItemPropId
 	{

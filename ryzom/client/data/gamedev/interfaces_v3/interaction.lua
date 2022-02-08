@@ -3,8 +3,8 @@
 
 ------------------------------------------------------------------------------------------------------------
 -- create the game namespace without reseting if already created in an other file.
-if (game==nil) then
-	game= {};
+if (game == nil) then
+	game={}
 end
 
 if (game.ui_props == nil) then
@@ -34,30 +34,30 @@ end
 -- called when server send an invitaion we receive a text id containing the string to display (invitor name)
 function game:onTeamInvation(textID)
 
-	local ui = getUI('ui:interface:join_team_proposal');
-	ui.content.inside.invitor_name.textid = textID;
-	ui.active = true;
-	setTopWindow(ui);
-	ui:center();
-	ui:blink(2);
+	local ui = getUI('ui:interface:join_team_proposal')
+	ui.content.inside.invitor_name.textid = textID
+	ui.active = true
+	setTopWindow(ui)
+	ui:center()
+	ui:blink(2)
 end
 
 ------------------------------------------------------------------------------------------------------------
 --
 function game:teamInvitationAccept()
 
-	local ui = getUI('ui:interface:join_team_proposal');
-	ui.active = false;
-	sendMsgToServer('TEAM:JOIN');
+	local ui = getUI('ui:interface:join_team_proposal')
+	ui.active = false
+	sendMsgToServer('TEAM:JOIN')
 end
 
 ------------------------------------------------------------------------------------------------------------
 --
 function game:teamInvitationRefuse()
 
-	local ui = getUI('ui:interface:join_team_proposal');
-	ui.active = false;
-	sendMsgToServer('TEAM:JOIN_PROPOSAL_DECLINE');
+	local ui = getUI('ui:interface:join_team_proposal')
+	ui.active = false
+	sendMsgToServer('TEAM:JOIN_PROPOSAL_DECLINE')
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -105,13 +105,13 @@ end
 ------------------------------------------------------------------------------------------------------------
 --
 function game:switchChatTab(dbEntry)
-	local	db= 'UI:SAVE:ISENABLED:' .. dbEntry;
-	local	val= getDbProp(db);
+	local	db= 'UI:SAVE:ISENABLED:' .. dbEntry
+	local	val= getDbProp(db)
 	-- switch value
 	if(val==0)	then
-		setDbProp(db, 1);
+		setDbProp(db, 1)
 	else
-		setDbProp(db, 0);
+		setDbProp(db, 0)
 	end
 end
 
@@ -125,12 +125,12 @@ function game:updateEmoteMenu(prop, tooltip, tooltip_pushed, name, param)
 
 		if (key ~= nil and key  ~= '') then
 			key = ' @{T25}@{2F2F}(' .. key .. ')';
-			text = concatString(text, key);
+			text = concatUCString(text, key);
 		end
 
 		-- if we don't do the full getUI, it doesn't work (don't understand why)
 		local	uiQC= getUI("ui:interface:user_chat_emote_menu:quick_chat:" .. "qc" .. i);
-		uiQC.text_format= text;
+		uiQC.uc_hardtext_format= text;
 	end
 
 end
@@ -423,7 +423,7 @@ function game:updateTargetConsiderUI()
 	end
 
 	if impossible then
-		wgToolTip.tooltip = concatString(wgToolTip.tooltip, "\n", i18n.get("uittConsiderUnknownLevel"))
+		wgToolTip.tooltip = concatUCString(wgToolTip.tooltip, ucstring("\n"), i18n.get("uittConsiderUnknownLevel"))
 	end
 end
 
@@ -593,16 +593,16 @@ end
 ------------------------------------------------------------------------------------------------------------
 --
 function game:closeWebIGBrowserHeader()
-	local ui = getUI('ui:interface:webig');
+	local ui = getUI('ui:interface:webig')
 
 	-- save size
-	ui_webig_browser_h = ui.h;
-	ui_webig_browser_w = ui.w;
+	ui_webig_browser_h = ui.h
+	ui_webig_browser_w = ui.w
 
 	-- reduce window size
-	ui.pop_min_h = 32;
-	ui.h = 0;
-	ui.w = 150;
+	ui.pop_min_h = 32
+	ui.h = 0
+	ui.w = 150
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -685,7 +685,7 @@ end
 local SavedUrl = "";
 function game:chatUrl(url)
 	SavedUrl = url
-	runAH(nil, "active_menu", "menu=ui:interface:chat_uri_action_menu");
+	runAH(nil, "active_menu", "menu=ui:interface:chat_uri_action_menu")
 end
 function game:chatUrlCopy()
 	runAH(nil, "copy_to_clipboard", SavedUrl)
