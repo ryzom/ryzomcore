@@ -49,6 +49,7 @@ namespace INVENTORIES
 		NL_STRING_CONVERSION_TABLE_ENTRY(reward_sharing)
 		NL_STRING_CONVERSION_TABLE_ENTRY(guild)
 		NL_STRING_CONVERSION_TABLE_ENTRY(player_room)
+		NL_STRING_CONVERSION_TABLE_ENTRY(hotbar)
 		NL_END_STRING_CONVERSION_TABLE(TInventory, InventoryToString, UNDEFINED)
 
 
@@ -108,6 +109,7 @@ namespace INVENTORIES
 			//	"",				// exchange_proposition
 			"",				// guild
 			"",				// player_room
+			"HOTBAR",		// hotbar	
 			""				// unknown
 	};
 	

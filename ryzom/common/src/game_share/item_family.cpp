@@ -130,8 +130,7 @@ namespace ITEMFAMILY
 			fam == ITEM_SAP_RECHARGE ||
 			fam == CRYSTALLIZED_SPELL ||
 			fam == CONSUMABLE ||
-			fam == XP_CATALYSER ||
-			fam == TELEPORT;
+			fam == XP_CATALYSER;
 	
 	}
 	

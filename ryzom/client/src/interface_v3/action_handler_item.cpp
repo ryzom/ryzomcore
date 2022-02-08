@@ -2496,6 +2496,58 @@ class CHandlerRingXpCatalyserStopUse : public IActionHandler
 };
 REGISTER_ACTION_HANDLER( CHandlerRingXpCatalyserStopUse, "ring_xp_catalyser_stop_use" );
 
+// ***************************************************************************
+class CHandlerUseHotbarItem : public IActionHandler
+{
+	void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		pIM->displaySystemInfo("use item: " + getParam(sParams, "slot") + " " + sParams);
+		sint64 slot;
+		if (!CInterfaceExpr::evalAsInt(getParam(sParams, "slot"), slot))
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Can't retrieve counter.");
+			return;
+		}
+
+		if (slot > INVENTORIES::NbHotbarSlots) {
+			nlwarning("<CHandlerUseHotbarItem::execute> Slot out of range.");
+			return;
+		}
+
+		CDBCtrlSheet *pCS = getInventory().getHotbarSheet(slot);
+		if (!pCS)
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Can't retrieve sheet.");
+			return;
+		}
+
+		const CItemSheet *pIS = pCS->asItemSheet();
+		if (!pIS)
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Can't retrieve item.");
+			return;
+		}
+
+		ITEMFAMILY::EItemFamily fam = pIS->Family;
+
+		if (!getInventory().isUsableItem(pCS->getSheetId())) {
+			nlwarning("<CHandlerUseHotbarItem::execute> Item is not usable.");
+			return;
+		}
+
+		if (fam == ITEMFAMILY::ITEM_SAP_RECHARGE || fam == ITEMFAMILY::CRYSTALLIZED_SPELL) 
+		{
+			sendToServerEnchantMessage((uint8)pCS->getInventoryIndex(), (uint16)pCS->getIndexInDB());
+		} 
+		else if (fam == ITEMFAMILY::CONSUMABLE || fam == ITEMFAMILY::XP_CATALYSER) 
+		{
+			sendMsgUseItem(uint16(pCS->getIndexInDB()));
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerUseHotbarItem, "use_hotbar_item" );
 
 // ***************************************************************************
 // item groups

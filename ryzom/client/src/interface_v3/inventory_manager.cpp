@@ -324,6 +324,14 @@ CInventoryManager::CInventoryManager()
 		UIEquip2[i] = NULL;
 	}
 
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+	{
+		Hotbar[i] = ServerHotbar[i] = 0;
+		UIHotbar[i] = NULL;
+		UIHotbar2[i] = NULL;
+		UIHotbar3[i] = NULL;
+	}
+
 	for (i = 0; i < MAX_BAGINV_ENTRIES; i++)
 	{
 		BagItemEquipped[i]= false;
@@ -392,6 +400,16 @@ CItemImage *CInventoryManager::getEquipItem(uint index)
 }
 
 // *************************************************************************************************
+CItemImage *CInventoryManager::getHotbarItem(uint index)
+{
+	nlassert(index < MAX_HOTBARINV_ENTRIES);
+	if (Hotbar[index] != 0)
+		return &Bag[Hotbar[index]];
+	else
+		return NULL;
+}
+
+// *************************************************************************************************
 CDBCtrlSheet *CInventoryManager::getHandSheet(uint index)
 {
 	return UIHands[index];
@@ -403,6 +421,11 @@ CDBCtrlSheet *CInventoryManager::getEquipSheet(uint index)
 	return UIEquip[index];
 }
 
+// *************************************************************************************************
+CDBCtrlSheet *CInventoryManager::getHotbarSheet(uint index)
+{
+	return UIHotbar[index];
+}
 
 // *************************************************************************************************
 CItemImage &CInventoryManager::getServerBagItem(uint index)
@@ -481,6 +504,7 @@ void CInventoryManager::init()
 	Money = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":MONEY");
 	initIndirection (LOCAL_INVENTORY ":HAND:", Hands, MAX_HANDINV_ENTRIES, true);
 	initIndirection (LOCAL_INVENTORY ":EQUIP:", Equip, MAX_EQUIPINV_ENTRIES, true);
+	initIndirection (LOCAL_INVENTORY ":HOTBAR:", Hotbar, MAX_HOTBARINV_ENTRIES, true);
 	// Init observers for auto equipment
 	{
 		for (uint i = 0; i < MAX_BAGINV_ENTRIES; ++i)
@@ -528,11 +552,11 @@ void CInventoryManager::init()
 	UIEquip[SLOT_EQUIPMENT::LEGS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_LEGS));
 	UIEquip[SLOT_EQUIPMENT::HANDS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_HANDS));
 
-	UIEquip[19] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_1));
-	UIEquip[20] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_2));
-	UIEquip[21] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_3));
-	UIEquip[22] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_4));
-	UIEquip[23] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_5));
+	UIHotbar[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_1));
+	UIHotbar[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_2));
+	UIHotbar[2] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_3));
+	UIHotbar[3] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_4));
+	UIHotbar[4] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_5));
 
 	UIEquip2[SLOT_EQUIPMENT::HEADDRESS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_HEADDRESS));
 	UIEquip2[SLOT_EQUIPMENT::EARL]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_EARING_LEFT));
@@ -552,11 +576,17 @@ void CInventoryManager::init()
 	UIEquip2[SLOT_EQUIPMENT::LEGS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_LEGS));
 	UIEquip2[SLOT_EQUIPMENT::HANDS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_HANDS));
 
-	UIEquip2[19] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_1));
-	UIEquip2[20] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_2));
-	UIEquip2[21] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_3));
-	UIEquip2[22] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_4));
-	UIEquip2[23] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_5));
+	UIHotbar2[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_1));
+	UIHotbar2[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_2));
+	UIHotbar2[2] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_3));
+	UIHotbar2[3] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_4));
+	UIHotbar2[4] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_5));
+
+	UIHotbar3[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_1));
+	UIHotbar3[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_2));
+	UIHotbar3[2] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_3));
+	UIHotbar3[3] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_4));
+	UIHotbar3[4] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_5));
 
 	// Init ItemInfoObservers
 	{
@@ -681,6 +711,23 @@ std::string CInventoryManager::getDBIndexPath(CDBCtrlSheet *pCS)
 		if (UIEquip2[i] == pCS)
 		{
 			return string(LOCAL_INVENTORY) + ":EQUIP:" + toString(i);
+		}
+	}
+
+	
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+	{
+		if (UIHotbar[i] == pCS)
+		{
+			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
+		}
+		if (UIHotbar2[i] == pCS)
+		{
+			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
+		}
+		if (UIHotbar3[i] == pCS)
+		{
+			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
 		}
 	}
 	return "";
@@ -1202,7 +1249,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	string sTmp = node->getFullName();
-	string sIE, sIE2; // Interface Element
+	string sIE, sIE2, sIE3; // Interface Element
 	CCDBNodeLeaf *pNL = dynamic_cast<CCDBNodeLeaf*>(node);
 	if (pNL == NULL) return;
 	if (strnicmp(sTmp.c_str(),"LOCAL:INVENTORY:HAND",20) == 0)
@@ -1271,20 +1318,61 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 		// update Equips.
 		getInventory().Equip[index]= pNL->getValue16();
 	}
+	else if (strnicmp(sTmp.c_str(),"LOCAL:INVENTORY:HOTBAR",22) == 0)
+	{
+		// Coming from hand
+		sTmp = sTmp.substr(23,sTmp.size());
+		sTmp = sTmp.substr(0,sTmp.rfind(':'));
+		sint index;
+		fromString(sTmp, index);
+		switch (index) {
+			case 0:
+				sIE = CTRL_HOTBAR_1;
+				sIE2 = CTRL_HOTBAR2_1;
+				sIE3 = CTRL_HOTBAR3_1;
+				break;
+			case 1:
+				sIE = CTRL_HOTBAR_2;
+				sIE2 = CTRL_HOTBAR2_2;
+				sIE3 = CTRL_HOTBAR3_2;
+				break;
+			case 2:
+				sIE = CTRL_HOTBAR_3;
+				sIE2 = CTRL_HOTBAR2_3;
+				sIE3 = CTRL_HOTBAR3_3;
+				break;
+			case 3:
+				sIE = CTRL_HOTBAR_4;
+				sIE2 = CTRL_HOTBAR2_4;
+				sIE3 = CTRL_HOTBAR3_4;
+				break;
+			case 4:
+				sIE = CTRL_HOTBAR_5;
+				sIE2 = CTRL_HOTBAR2_5;
+				sIE3 = CTRL_HOTBAR3_5;
+				break;
+		}
+		// update Hotbar.
+		getInventory().Hotbar[index]= pNL->getValue16();
+	}
 	else return;
 
 	// Set database for wearing the right item
 	CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sIE));
 	CDBCtrlSheet *pCS2 = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sIE2));
+	CDBCtrlSheet *pCS3 = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sIE3));
 
 	// Remove Last reference and update database
 	sint16 oldVal = pNL->getOldValue16();
 	sint16 newVal = pNL->getValue16();
-	if (oldVal != 0)
-		getInventory().unwearBagItem (oldVal-1);
+	if (sIE != CTRL_HOTBAR_1 && sIE != CTRL_HOTBAR_2 && sIE != CTRL_HOTBAR_3 && sIE != CTRL_HOTBAR_4 && sIE != CTRL_HOTBAR_5)
+	{
+		if (oldVal != 0)
+			getInventory().unwearBagItem (oldVal-1);
 
-	if (newVal != 0)
-		getInventory().wearBagItem (newVal-1);
+		if (newVal != 0)
+			getInventory().wearBagItem (newVal-1);
+	}
 
 	// Update Display
 	if (newVal == 0)
@@ -1294,12 +1382,14 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 		{
 			if (pCS  != NULL) pCS->setSheet("");
 			if (pCS2 != NULL) pCS2->setSheet("");
+			if (pCS3 != NULL) pCS3->setSheet("");
 		}
 	}
 	else
 	{
 		if (pCS  != NULL) pCS->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
 		if (pCS2 != NULL) pCS2->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
+		if (pCS3 != NULL) pCS3->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
 	}
 
 	// Hands management
@@ -1431,6 +1521,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 				{
 					if (pCS  != NULL) pCS->setSheet("");
 					if (pCS2 != NULL) pCS2->setSheet("");
+					if (pCS3 != NULL) pCS3->setSheet("");
 				}
 			}
 		}
@@ -3211,143 +3302,143 @@ class CHandlerHotbarDropTo : public IActionHandler
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		CAHManager::getInstance()->runActionHandler("swap_item", pCSDst, "src="+toString(pCSSrc->getId()));
 		getInventory().endDrag();
-		if (!getInventory().isDragging())
-		{
-			CInterfaceGroup *pIG = CWidgetManager::getInstance()->getModalWindow();
-			if (pIG == NULL) return;
-			if (pIG->getId() != "ui:interface:bag_choose") return;
-			getInventory().beginDrag(NULL, CInventoryManager::TextList);
+		// if (!getInventory().isDragging())
+		// {
+		// 	CInterfaceGroup *pIG = CWidgetManager::getInstance()->getModalWindow();
+		// 	if (pIG == NULL) return;
+		// 	if (pIG->getId() != "ui:interface:bag_choose") return;
+		// 	getInventory().beginDrag(NULL, CInventoryManager::TextList);
 
-			// Special case for choose in bag dialog
-			string	src = getParam(Params, "src");
-			CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
-			CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
-			CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
+		// 	// Special case for choose in bag dialog
+		// 	string	src = getParam(Params, "src");
+		// 	CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
+		// 	CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
+		// 	CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
 
-			string invPath = getInventory().getDBIndexPath(pCSSrc);
-			string bagPath = pCSDst->getSheet();
+		// 	string invPath = getInventory().getDBIndexPath(pCSSrc);
+		// 	string bagPath = pCSDst->getSheet();
 
-			if (bagPath == "UI:EMPTY")
-				CAHManager::getInstance()->runActionHandler("swap_item", pCSDst, "src="+toString(pCSSrc->getId()));
-			else
-				getInventory().equip (bagPath, invPath);
+		// 	if (bagPath == "UI:EMPTY")
+		// 		CAHManager::getInstance()->runActionHandler("swap_item", pCSDst, "src="+toString(pCSSrc->getId()));
+		// 	else
+		// 		getInventory().equip (bagPath, invPath);
 
-			getInventory().endDrag();
-			return;
-		}
+		// 	getInventory().endDrag();
+		// 	return;
+		// }
 
-		string	src = getParam(Params, "src");
-		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
-		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
-		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSSrc == NULL) return;
+		// string	src = getParam(Params, "src");
+		// CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
+		// CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
+		// CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
+		// if (pCSSrc == NULL) return;
 
-		// Is the dragged sheet comes from an inventory list
-		if (getInventory().isDraggingFromTextList() || getInventory().isDraggingFromIconList())
-		{
-			// If the destination is an equipment slot ?
-			if (pCSDst != NULL)
-			{
-				string invPath = getInventory().getDBIndexPath(pCSDst); // Get the index in the equipment
-				if (!invPath.empty())
-				{
-					// Drop to the slot ie write the database with the index of the slot
-					string bagPath = pCSSrc->getSheet(); // Get the database branch of the dragged sheet
+		// // Is the dragged sheet comes from an inventory list
+		// if (getInventory().isDraggingFromTextList() || getInventory().isDraggingFromIconList())
+		// {
+		// 	// If the destination is an equipment slot ?
+		// 	if (pCSDst != NULL)
+		// 	{
+		// 		string invPath = getInventory().getDBIndexPath(pCSDst); // Get the index in the equipment
+		// 		if (!invPath.empty())
+		// 		{
+		// 			// Drop to the slot ie write the database with the index of the slot
+		// 			string bagPath = pCSSrc->getSheet(); // Get the database branch of the dragged sheet
 
-					if (pCSSrc && pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
-					if (pCSDst && pCSDst->getType() == CCtrlSheetInfo::SheetType_Item)
-					{
-						// If the destination slot match with the type of incoming item
-						if (pCSDst->canDropItem(pCSSrc))
-						{
-							// So directly equip
-							getInventory().equip(bagPath, invPath);
-						}
-						else
-						{
-							// Else try to auto equip the player with the incoming item
-							const string sTmp = bagPath.substr(bagPath.rfind(':')+1,bagPath.size());
-							sint index;
-							fromString(sTmp, index);
-							if (!getInventory().autoEquip(index, false))
-								getInventory().autoEquip(index, true);
-						}
-					}
-					getInventory().endDrag();
-					return;
-				}
-			}
+		// 			if (pCSSrc && pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
+		// 			if (pCSDst && pCSDst->getType() == CCtrlSheetInfo::SheetType_Item)
+		// 			{
+		// 				// If the destination slot match with the type of incoming item
+		// 				if (pCSDst->canDropItem(pCSSrc))
+		// 				{
+		// 					// So directly equip
+		// 					getInventory().equip(bagPath, invPath);
+		// 				}
+		// 				else
+		// 				{
+		// 					// Else try to auto equip the player with the incoming item
+		// 					const string sTmp = bagPath.substr(bagPath.rfind(':')+1,bagPath.size());
+		// 					sint index;
+		// 					fromString(sTmp, index);
+		// 					if (!getInventory().autoEquip(index, false))
+		// 						getInventory().autoEquip(index, true);
+		// 				}
+		// 			}
+		// 			getInventory().endDrag();
+		// 			return;
+		// 		}
+		// 	}
 
-			// If the destination is a list sheet
-			IListSheetBase *pListDst = dynamic_cast<IListSheetBase*>(pCaller);
-			if ((pListDst == NULL) && (pCSDst != NULL))
-				pListDst = IListSheetBase::getListContaining(pCSDst);
-			IListSheetBase *pListSrc = IListSheetBase::getListContaining(pCSSrc);
-			if ((pListDst != NULL) && (pListSrc != NULL))
-			{
-				// If the source list and destination list are the same
-				if (pListDst == pListSrc)
-				{
-					// no op
-					getInventory().endDrag();
-					return;
-				}
-				else // Source list and destination list are not the same
-				{
-					// Move the item to the destination list using the procedure move_to_xxx
-					CDBGroupListSheetBag *pListDstText = dynamic_cast<CDBGroupListSheetBag*>(pListDst);
-					CDBGroupIconListBag *pListDstIcon = dynamic_cast<CDBGroupIconListBag*>(pListDst);
+		// 	// If the destination is a list sheet
+		// 	IListSheetBase *pListDst = dynamic_cast<IListSheetBase*>(pCaller);
+		// 	if ((pListDst == NULL) && (pCSDst != NULL))
+		// 		pListDst = IListSheetBase::getListContaining(pCSDst);
+		// 	IListSheetBase *pListSrc = IListSheetBase::getListContaining(pCSSrc);
+		// 	if ((pListDst != NULL) && (pListSrc != NULL))
+		// 	{
+		// 		// If the source list and destination list are the same
+		// 		if (pListDst == pListSrc)
+		// 		{
+		// 			// no op
+		// 			getInventory().endDrag();
+		// 			return;
+		// 		}
+		// 		else // Source list and destination list are not the same
+		// 		{
+		// 			// Move the item to the destination list using the procedure move_to_xxx
+		// 			CDBGroupListSheetBag *pListDstText = dynamic_cast<CDBGroupListSheetBag*>(pListDst);
+		// 			CDBGroupIconListBag *pListDstIcon = dynamic_cast<CDBGroupIconListBag*>(pListDst);
 
-					if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvBag)) ||
-						((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvBag)))
-					{
-						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_bag");
-					}
-					else if (((pListDstText != NULL) && ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA1) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA2) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA3) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA4) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA5) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA6)
-														)) ||
-							((pListDstIcon != NULL) && ((pListDstIcon->getInvType() == CInventoryManager::InvPA0) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA1) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA2) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA3) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA4) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA5) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA6)
-														)))
-					{
-						string sTmp;
-						if (pListDstText != NULL) sTmp = toString("%d",pListDstText->getInvType()-CInventoryManager::InvPA0);
-						if (pListDstIcon != NULL) sTmp = toString("%d",pListDstIcon->getInvType()-CInventoryManager::InvPA0);
-							nlinfo("ici :%s", sTmp.c_str());
-						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_pa|"+sTmp);
-					}
-					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvGuild)) ||
-							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvGuild)))
-					{
-							CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_guild");
-					}
-					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvRoom)) ||
-							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvRoom)))
-					{
-						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_room");
-					}
-				}
-			}
-		}
+		// 			if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvBag)) ||
+		// 				((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvBag)))
+		// 			{
+		// 				CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_bag");
+		// 			}
+		// 			else if (((pListDstText != NULL) && ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
+		// 												 (pListDstText->getInvType() == CInventoryManager::InvPA1) ||
+		// 												 (pListDstText->getInvType() == CInventoryManager::InvPA2) ||
+		// 												 (pListDstText->getInvType() == CInventoryManager::InvPA3) ||
+		// 												 (pListDstText->getInvType() == CInventoryManager::InvPA4) ||
+		// 												 (pListDstText->getInvType() == CInventoryManager::InvPA5) ||
+		// 												 (pListDstText->getInvType() == CInventoryManager::InvPA6)
+		// 												)) ||
+		// 					((pListDstIcon != NULL) && ((pListDstIcon->getInvType() == CInventoryManager::InvPA0) ||
+		// 												(pListDstIcon->getInvType() == CInventoryManager::InvPA1) ||
+		// 												(pListDstIcon->getInvType() == CInventoryManager::InvPA2) ||
+		// 												(pListDstIcon->getInvType() == CInventoryManager::InvPA3) ||
+		// 												(pListDstIcon->getInvType() == CInventoryManager::InvPA4) ||
+		// 												(pListDstIcon->getInvType() == CInventoryManager::InvPA5) ||
+		// 												(pListDstIcon->getInvType() == CInventoryManager::InvPA6)
+		// 												)))
+		// 			{
+		// 				string sTmp;
+		// 				if (pListDstText != NULL) sTmp = toString("%d",pListDstText->getInvType()-CInventoryManager::InvPA0);
+		// 				if (pListDstIcon != NULL) sTmp = toString("%d",pListDstIcon->getInvType()-CInventoryManager::InvPA0);
+		// 					nlinfo("ici :%s", sTmp.c_str());
+		// 				CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_pa|"+sTmp);
+		// 			}
+		// 			else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvGuild)) ||
+		// 					 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvGuild)))
+		// 			{
+		// 					CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_guild");
+		// 			}
+		// 			else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvRoom)) ||
+		// 					 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvRoom)))
+		// 			{
+		// 				CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_room");
+		// 			}
+		// 		}
+		// 	}
+		// }
 
-		// Is the dragged sheet comes from another slot
-		if (pCSDst != NULL)
-		if (getInventory().isDraggingFromSlot())
-		{
-			CAHManager::getInstance()->runActionHandler("swap_item", pCSDst, "src="+toString(pCSSrc->getId()));
-		}
+		// // Is the dragged sheet comes from another slot
+		// if (pCSDst != NULL)
+		// if (getInventory().isDraggingFromSlot())
+		// {
+		// 	CAHManager::getInstance()->runActionHandler("swap_item", pCSDst, "src="+toString(pCSSrc->getId()));
+		// }
 
-		CAHManager::getInstance()->runActionHandler("inv_cannot_drop", pCSSrc);
+		// CAHManager::getInstance()->runActionHandler("inv_cannot_drop", pCSSrc);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerHotbarDropTo, "hotbar_drop" );
