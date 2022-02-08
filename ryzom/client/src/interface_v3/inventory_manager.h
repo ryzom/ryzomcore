@@ -41,6 +41,7 @@ const uint MAX_TEMPINV_ENTRIES = INVENTORIES::NbTempInvSlots;
 const uint MAX_BAGINV_ENTRIES = INVENTORIES::NbBagSlots;
 const uint MAX_HANDINV_ENTRIES = 2;
 const uint MAX_EQUIPINV_ENTRIES = 19;
+const uint MAX_HOTBARINV_ENTRIES = INVENTORIES::NbHotbarSlots;
 const uint MAX_ANIMALINV_ENTRIES = INVENTORIES::NbPackerSlots;
 const uint MAX_GUILDINV_ENTRIES = INVENTORIES::NbGuildSlots;
 const uint MAX_ROOMINV_ENTRIES = INVENTORIES::NbRoomSlots;
@@ -193,10 +194,14 @@ public:
 		CItemImage *getHandItem(uint index);
 		// get equip item (local inventory)
 		CItemImage *getEquipItem(uint index);
+		// get hotbar item (local inventory)
+		CItemImage *getHotbarItem(uint index);
 		// get hand item (local inventory)
 		CDBCtrlSheet *getHandSheet(uint index);
 		// get equip item (local inventory)
 		CDBCtrlSheet *getEquipSheet(uint index);
+		// get hotbar item (local inventory)
+		CDBCtrlSheet *getHotbarSheet(uint index);
 		// get/set money
 		uint64		getMoney() const;
 		void		setMoney(uint64 value);
@@ -250,6 +255,8 @@ public:
 	bool isSword(uint32 sheetID);
 	// Check if an item is a forage tool
 	bool isForageToolItem(uint32 sheetID);
+	// Check if an item is usable
+	bool isUsableItem(uint32 sheetID);
 	// Get the Hand item sheet
 	uint32 getRightHandItemSheet() const { return getHandItemSheet(true); }
 	uint32 getLeftHandItemSheet() const { return getHandItemSheet(false); }
@@ -336,6 +343,10 @@ private:
 		sint32 Equip[MAX_EQUIPINV_ENTRIES];
 		CDBCtrlSheet *UIEquip[MAX_EQUIPINV_ENTRIES];
 		CDBCtrlSheet *UIEquip2[MAX_EQUIPINV_ENTRIES];
+		sint32 Hotbar[MAX_HOTBARINV_ENTRIES];
+		CDBCtrlSheet *UIHotbar[MAX_HOTBARINV_ENTRIES];
+		CDBCtrlSheet *UIHotbar2[MAX_HOTBARINV_ENTRIES];
+		CDBCtrlSheet *UIHotbar3[MAX_HOTBARINV_ENTRIES];
 		NLMISC::CCDBNodeLeaf *Money;
 		CItemImage PAInv[MAX_INVENTORY_ANIMAL][MAX_ANIMALINV_ENTRIES];
 	// SERVER INVENTORY
@@ -343,6 +354,7 @@ private:
 		CItemImage ServerTempInv[MAX_TEMPINV_ENTRIES];
 		sint32 ServerHands[MAX_HANDINV_ENTRIES];
 		sint32 ServerEquip[MAX_EQUIPINV_ENTRIES];
+		sint32 ServerHotbar[MAX_EQUIPINV_ENTRIES];
 		NLMISC::CCDBNodeLeaf *ServerMoney;
 		CItemImage ServerPAInv[MAX_INVENTORY_ANIMAL][MAX_ANIMALINV_ENTRIES];
 	// Drag'n'Drop
@@ -745,6 +757,25 @@ public:
 	};
 };
 
+// ***************************************************************************
+/**
+ * Special list for filtering items which are usable
+ */
+class CDBGroupListSheetFilterHotbarSlot : public CDBGroupListSheet
+{
+public:
+	CDBGroupListSheetFilterHotbarSlot (const TCtorParam &param)
+		: CDBGroupListSheet(param)
+	{}
+
+	virtual CSheetChild *createSheetChild() { return new CSheetChildFilter; }
+
+	// A child node
+	struct	CSheetChildFilter : public CDBGroupListSheet::CSheetChild
+	{
+		virtual bool isSheetValid(CDBGroupListSheet *pFather);
+	};
+};
 
 // ***************************************************************************
 /**
@@ -861,6 +892,12 @@ private:
 #define CTRL_ARMOR_ARMS				"ui:interface:inv_equip:content:equip:armors:arms"
 #define CTRL_ARMOR_HANDS			"ui:interface:inv_equip:content:equip:armors:hands"
 
+#define CTRL_HOTBAR_1				"ui:interface:inv_equip:content:equip:hotbar_c:hotbar:hotbar1"
+#define CTRL_HOTBAR_2				"ui:interface:inv_equip:content:equip:hotbar_c:hotbar:hotbar2"
+#define CTRL_HOTBAR_3				"ui:interface:inv_equip:content:equip:hotbar_c:hotbar:hotbar3"
+#define CTRL_HOTBAR_4				"ui:interface:inv_equip:content:equip:hotbar_c:hotbar:hotbar4"
+#define CTRL_HOTBAR_5				"ui:interface:inv_equip:content:equip:hotbar_c:hotbar:hotbar5"
+
 #define CTRL_JEWL2_EARING_LEFT		"ui:interface:inventory:content:equip:jewelry:earing_l"
 #define CTRL_JEWL2_BRACELET_LEFT	"ui:interface:inventory:content:equip:jewelry:bracelet_l"
 #define CTRL_JEWL2_RING_LEFT		"ui:interface:inventory:content:equip:jewelry:ring_l"
@@ -878,6 +915,18 @@ private:
 #define CTRL_ARMR2_FEET				"ui:interface:inventory:content:equip:armors:feet"
 #define CTRL_ARMR2_ARMS				"ui:interface:inventory:content:equip:armors:arms"
 #define CTRL_ARMR2_HANDS			"ui:interface:inventory:content:equip:armors:hands"
+
+#define CTRL_HOTBAR2_1				"ui:interface:inventory:content:equip:hotbar_c:hotbar:hotbar1"
+#define CTRL_HOTBAR2_2				"ui:interface:inventory:content:equip:hotbar_c:hotbar:hotbar2"
+#define CTRL_HOTBAR2_3				"ui:interface:inventory:content:equip:hotbar_c:hotbar:hotbar3"
+#define CTRL_HOTBAR2_4				"ui:interface:inventory:content:equip:hotbar_c:hotbar:hotbar4"
+#define CTRL_HOTBAR2_5				"ui:interface:inventory:content:equip:hotbar_c:hotbar:hotbar5"
+
+#define CTRL_HOTBAR3_1				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar1"
+#define CTRL_HOTBAR3_2				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar2"
+#define CTRL_HOTBAR3_3				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar3"
+#define CTRL_HOTBAR3_4				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar4"
+#define CTRL_HOTBAR3_5				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar5"
 
 #endif // RY_INVENTORY_MANAGER_H
 
