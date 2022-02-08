@@ -6306,6 +6306,11 @@ void CCharacterCL::updateVisiblePostPos(const NLMISC::TTime &currentTimeInMs, CE
 					pos = (box().getMin() + box().getMax())/2;
 					pos.z = box().getMax().z;
 				}
+
+				CRaceStatsSheet *sheet = const_cast<CRaceStatsSheet*>(UserEntity->playerSheet());
+				float namePosZ = sheet->GenderInfos[UserEntity->getGender()].NamePosZNormal;
+				if (pos.z > box().getMin().z + namePosZ)
+					pos.z = box().getMin().z + namePosZ;
 				nlassert(isValidDouble(pos.x) && isValidDouble(pos.y) && isValidDouble(pos.z));
 				_CurrentBubble->Position = pos;
 			}
