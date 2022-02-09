@@ -1080,6 +1080,41 @@ class CCanDropToExchange : public IActionHandler
 REGISTER_ACTION_HANDLER (CCanDropToExchange, "can_drop_to_exchange");
 
 // **********************************************************************************************************
+class CCanDropToHotbar : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		nlinfo("hey");
+		string	src = getParam(Params, "src");
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
+		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
+		CDBCtrlSheet *pCSDst =    dynamic_cast<CDBCtrlSheet*>(pCaller);
+		if (!pCSSrc || !pCSDst) return;
+
+		// Exchange can only be done from bag to exchange inventories
+		uint32 srcInventory = pCSSrc->getSecondIndexInDB();
+		if (
+			(srcInventory == INVENTORIES::bag ||
+				srcInventory == INVENTORIES::pet_animal1 ||
+				srcInventory == INVENTORIES::pet_animal2 ||
+				srcInventory == INVENTORIES::pet_animal3 ||
+				srcInventory == INVENTORIES::pet_animal4 ||
+				srcInventory == INVENTORIES::pet_animal5 ||
+				srcInventory == INVENTORIES::pet_animal6 ||
+				srcInventory == INVENTORIES::pet_animal7 ||
+				srcInventory == INVENTORIES::player_room)
+			&& getInventory().isInventoryAvailable((INVENTORIES::TInventory) pCSSrc->getSecondIndexInDB())
+			&& getInventory().isUsableItem(pCSSrc->getSheetId())
+		)
+		{
+			pCSDst->setCanDrop ( true );
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CCanDropToHotbar, "can_drop_to_hotbar");
+
+// **********************************************************************************************************
 
 /** Clear the selected sheet
   */

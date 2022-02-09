@@ -158,9 +158,8 @@ namespace INVENTORIES
 		handling = 0,
 			temporary,						// 1
 			equipment,						// 2
-			hotbar,							// 3	
-			bag,							// 4
-			pet_animal,						// 5 Character can have 7 pack animal
+			bag,							// 3
+			pet_animal,						// 4 Character can have 7 pack animal
 			pet_animal1 = pet_animal,	// for toString => TInventory convertion
 			pet_animal2,
 			pet_animal3,
@@ -168,17 +167,18 @@ namespace INVENTORIES
 			pet_animal5,
 			pet_animal6,
 			pet_animal7,
-			max_pet_animal,					// 12
-			NUM_INVENTORY = max_pet_animal,	// 12
-			UNDEFINED = NUM_INVENTORY,		// 12
+			max_pet_animal,					// 11
+			NUM_INVENTORY = max_pet_animal,	// 11
+			UNDEFINED = NUM_INVENTORY,		// 11
 
-			exchange,						// 13  This is not a bug : exchange is a fake inventory
-			exchange_proposition,			// 14  and should not count in the number of inventory
+			exchange,						// 12  This is not a bug : exchange is a fake inventory
+			exchange_proposition,			// 13  and should not count in the number of inventory
 			// same for botChat trading.
-			trading,						// 15
-			reward_sharing,					// 16 fake inventory, not in database.xml. Used by the item info protocol only
-			guild,							// 17 (warning: number stored in guild saved file)
-			player_room,					// 18
+			trading,						// 14
+			reward_sharing,					// 15 fake inventory, not in database.xml. Used by the item info protocol only
+			guild,							// 16 (warning: number stored in guild saved file)
+			player_room,					// 17
+			hotbar,							// 18	
 			NUM_ALL_INVENTORY				// warning: distinct from NUM_INVENTORY
 	};
 

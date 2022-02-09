@@ -314,6 +314,7 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 	_ItemSlot= SLOTTYPE::UNDEFINED;
 	_AutoGrayed= false;
 	_HasTradeSlotType = false;
+	_IsHotbarSlot = false;
 	_BrickOverable= false;
 	_ReadQuantityFromSheet = false;
 	_AHOnLeftClick = NULL;
@@ -389,6 +390,10 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"use_slot_type_db_entry" );
 	if (prop)
 		_HasTradeSlotType= CInterfaceElement::convertBool(prop);
+	
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"hotbar_slot" );
+	if (prop)
+		_IsHotbarSlot= CInterfaceElement::convertBool(prop);
 
 	// Read Action handlers
 	CAHManager::getInstance()->parseAH(cur, "onclick_l", "params_l", _AHOnLeftClick, _AHLeftClickParams);
@@ -3793,6 +3798,11 @@ bool	CDBCtrlSheet::canDropItem(CDBCtrlSheet *src) const
 			bf|= 1<<SLOTTYPE::RIGHT_HAND_EXCLUSIVE;
 		}
 
+		if ( _IsHotbarSlot && getInventory().isUsableItem(src->getSheetId()) )
+		{
+			return true;
+		}
+		
 		// Look if one slot solution match.
 		if( pIS->SlotBF & bf )
 		{

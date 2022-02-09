@@ -33,7 +33,6 @@ namespace INVENTORIES
 		NL_STRING_CONVERSION_TABLE_ENTRY(handling)
 		NL_STRING_CONVERSION_TABLE_ENTRY(temporary)
 		NL_STRING_CONVERSION_TABLE_ENTRY(equipment)
-		NL_STRING_CONVERSION_TABLE_ENTRY(hotbar)
 		NL_STRING_CONVERSION_TABLE_ENTRY(bag)
 		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal1)
 		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal2)
@@ -50,6 +49,7 @@ namespace INVENTORIES
 		NL_STRING_CONVERSION_TABLE_ENTRY(reward_sharing)
 		NL_STRING_CONVERSION_TABLE_ENTRY(guild)
 		NL_STRING_CONVERSION_TABLE_ENTRY(player_room)
+		NL_STRING_CONVERSION_TABLE_ENTRY(hotbar)
 		NL_END_STRING_CONVERSION_TABLE(TInventory, InventoryToString, UNDEFINED)
 
 
@@ -95,7 +95,6 @@ namespace INVENTORIES
 			"TEMP",			// temporary
 			//	"",				// pick-up
 			"EQUIP",		// equipment
-			"HOTBAR",		// hotbar	
 			"",				// bag
 			"",				// pack_animal1
 			"",				// pack_animal2
@@ -110,6 +109,7 @@ namespace INVENTORIES
 			//	"",				// exchange_proposition
 			"",				// guild
 			"",				// player_room
+			"HOTBAR",		// hotbar	
 			""				// unknown
 	};
 	
