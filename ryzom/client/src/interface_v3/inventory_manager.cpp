@@ -1030,6 +1030,11 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 		inventory = INVENTORIES::equipment;
 		fromString(invPath.substr(22,invPath.size()), invSlot);
 	}
+	else if (strnicmp(invPath.c_str(),"LOCAL:INVENTORY:HOTBAR",22) == 0)
+	{
+		inventory = INVENTORIES::hotbar;
+		fromString(invPath.substr(23,invPath.size()), invSlot);
+	}
 
 	// Hands management : check if we have to unequip left hand because of incompatibility with right hand item
 	sint16 oldRightIndexInBag = NLGUI::CDBManager::getInstance()->getDbProp(invPath + ":INDEX_IN_BAG")->getValue16();
@@ -1162,6 +1167,11 @@ void CInventoryManager::unequip(const std::string &invPath)
 	{
 		inventory = INVENTORIES::equipment;
 		fromString(invPath.substr(22,invPath.size()), invSlot);
+	}
+	else if (strnicmp(invPath.c_str(),"LOCAL:INVENTORY:HOTBAR",22) == 0)
+	{
+		inventory = INVENTORIES::hotbar;
+		fromString(invPath.substr(23,invPath.size()), invSlot);
 	}
 
 	// Hands management : check if we have to unequip left hand because of incompatibility with right hand item
@@ -3113,7 +3123,7 @@ class CHandlerInvDropTo : public IActionHandler
 		{
 			CInterfaceGroup *pIG = CWidgetManager::getInstance()->getModalWindow();
 			if (pIG == NULL) return;
-			if (pIG->getId() != "ui:interface:bag_choose") return;
+			if (pIG->getId() != "ui:interface:bag_choose" || pIG->getId() != "ui:interface:hotbar_choose") return;
 			getInventory().beginDrag(NULL, CInventoryManager::TextList);
 
 			// Special case for choose in bag dialog
@@ -3275,8 +3285,8 @@ class CHandlerInvCannotDrop : public IActionHandler
 		if (!getInventory().isDraggingFromTextList())
 		{
 			CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-			if (!pCSDst->isHotbarSlot()) {
-				string invPath = getInventory().getDBIndexPath(pCSDst);
+			string invPath = getInventory().getDBIndexPath(pCSDst);
+			if (strnicmp(invPath.c_str(),"LOCAL:INVENTORY:HOTBAR",22) != 0) {
 				getInventory().unequip(invPath);
 			}
 		}
