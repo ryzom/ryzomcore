@@ -291,40 +291,40 @@ public:
 	explicit CObjectNumber(double value);
 	explicit CObjectNumber(sint64 value);
 
-	virtual const char *getTypeAsString() const;
+	virtual const char *getTypeAsString() const NL_OVERRIDE;
 
-	virtual bool set(const std::string& key, sint64 value);
-	virtual bool set(const std::string& key, double value);
-	virtual bool set(const std::string& key, const std::string&value);
+	virtual bool set(const std::string& key, sint64 value) NL_OVERRIDE;
+	virtual bool set(const std::string& key, double value) NL_OVERRIDE;
+	virtual bool set(const std::string& key, const std::string&value) NL_OVERRIDE;
 
-	virtual bool setObject(const std::string& key, CObject* value);
+	virtual bool setObject(const std::string& key, CObject* value) NL_OVERRIDE;
 
-	virtual CObject* clone() const;
+	virtual CObject* clone() const NL_OVERRIDE;
 
 	double getNumberValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
 	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
 
-	virtual void dump(const std::string prefix = "", uint depth = 0) const;
+	virtual void dump(const std::string prefix = "", uint depth = 0) const NL_OVERRIDE;
 
-	virtual bool equal(const CObject* other) const;
+	virtual bool equal(const CObject* other) const NL_OVERRIDE;
 
 protected:
-	virtual void doSerialize(std::string& out, CSerializeContext& context) const;
+	virtual void doSerialize(std::string& out, CSerializeContext& context) const NL_OVERRIDE;
 
-	virtual bool doIsNumber() const;
+	virtual bool doIsNumber() const NL_OVERRIDE;
 
-	virtual double doToNumber() const;
+	virtual double doToNumber() const NL_OVERRIDE;
 
-	virtual bool doIsInteger() const;
+	virtual bool doIsInteger() const NL_OVERRIDE;
 
-	virtual sint64 doToInteger() const;
+	virtual sint64 doToInteger() const NL_OVERRIDE;
 
-	virtual std::string doToString() const;
+	virtual std::string doToString() const NL_OVERRIDE;
 
-	virtual void inPlaceCopyTo(CObject &dest) const;
-	virtual void inPlaceCopy(const CObjectNumber &src);
+	virtual void inPlaceCopyTo(CObject &dest) const NL_OVERRIDE;
+	virtual void inPlaceCopy(const CObjectNumber &src) NL_OVERRIDE;
 
-	virtual void visitInternal(IObjectVisitor &visitor);
+	virtual void visitInternal(IObjectVisitor &visitor) NL_OVERRIDE;
 
 private:
 	bool m_IsInteger;
