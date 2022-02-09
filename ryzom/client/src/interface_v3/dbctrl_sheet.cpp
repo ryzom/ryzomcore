@@ -3793,12 +3793,6 @@ bool	CDBCtrlSheet::canDropItem(CDBCtrlSheet *src) const
 			bf|= 1<<SLOTTYPE::RIGHT_HAND_EXCLUSIVE;
 		}
 
-		string invPath = getInventory().getDBIndexPath(src);
-		if ( strnicmp(invPath.c_str(),"LOCAL:INVENTORY:HOTBAR",22) == 0 && getInventory().isUsableItem(src->getSheetId()) )
-		{
-			return true;
-		}
-		
 		// Look if one slot solution match.
 		if( pIS->SlotBF & bf )
 		{
