@@ -290,7 +290,24 @@ class CObjectNumber : public CObject
 public:
 	explicit CObjectNumber(double value);
 	explicit CObjectNumber(sint64 value);
+	double getNumberValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
+	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
 
+#if defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
+	virtual const char *getTypeAsString() const;
+
+	virtual bool set(const std::string& key, sint64 value) NL_OVERRIDE;
+	virtual bool set(const std::string& key, double value) NL_OVERRIDE;
+	virtual bool set(const std::string& key, const std::string&value) NL_OVERRIDE;
+
+	virtual bool setObject(const std::string& key, CObject* value) NL_OVERRIDE;
+
+	virtual CObject* clone() const NL_OVERRIDE;
+
+	virtual void dump(const std::string prefix = "", uint depth = 0) const;
+
+	virtual bool equal(const CObject* other) const;
+#else
 	virtual const char *getTypeAsString() const NL_OVERRIDE;
 
 	virtual bool set(const std::string& key, sint64 value) NL_OVERRIDE;
@@ -301,14 +318,30 @@ public:
 
 	virtual CObject* clone() const NL_OVERRIDE;
 
-	double getNumberValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
-	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
-
 	virtual void dump(const std::string prefix = "", uint depth = 0) const NL_OVERRIDE;
 
 	virtual bool equal(const CObject* other) const NL_OVERRIDE;
+#endif
 
 protected:
+#if defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
+	virtual void doSerialize(std::string& out, CSerializeContext& context) const;
+
+	virtual bool doIsNumber() const NL_OVERRIDE;
+
+	virtual double doToNumber() const NL_OVERRIDE;
+
+	virtual bool doIsInteger() const NL_OVERRIDE;
+
+	virtual sint64 doToInteger() const NL_OVERRIDE;
+
+	virtual std::string doToString() const NL_OVERRIDE;
+
+	virtual void inPlaceCopyTo(CObject &dest) const NL_OVERRIDE;
+	virtual void inPlaceCopy(const CObjectNumber &src) NL_OVERRIDE;
+
+	virtual void visitInternal(IObjectVisitor &visitor);
+#else
 	virtual void doSerialize(std::string& out, CSerializeContext& context) const NL_OVERRIDE;
 
 	virtual bool doIsNumber() const NL_OVERRIDE;
@@ -325,6 +358,7 @@ protected:
 	virtual void inPlaceCopy(const CObjectNumber &src) NL_OVERRIDE;
 
 	virtual void visitInternal(IObjectVisitor &visitor) NL_OVERRIDE;
+#endif
 
 private:
 	bool m_IsInteger;
