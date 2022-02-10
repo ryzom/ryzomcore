@@ -3296,7 +3296,6 @@ class CCanDropToHotbar : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		nlinfo("hey");
 		string	src = getParam(Params, "src");
 		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
