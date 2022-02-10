@@ -2468,7 +2468,6 @@ class CHandlerUseHotbarItem : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		pIM->displaySystemInfo("use item: " + getParam(sParams, "slot") + " " + sParams);
 		sint64 slot;
 		if (!CInterfaceExpr::evalAsInt(getParam(sParams, "slot"), slot))
 		{
