@@ -403,17 +403,6 @@ public:
 	float getTgtY()	const	{ return _Target.y; }
 	float getTgtZ()	const	{ return _Target.z; }
 
-	REFLECT_EXPORT_START(CInterface3DCamera, CInterfaceElement)
-		REFLECT_FLOAT ("posx", getPosX, setPosX);
-		REFLECT_FLOAT ("posy", getPosY, setPosY);
-		REFLECT_FLOAT ("posz", getPosZ, setPosZ);
-		REFLECT_FLOAT ("tgtx", getTgtX, setTgtX);
-		REFLECT_FLOAT ("tgty", getTgtY, setTgtY);
-		REFLECT_FLOAT ("tgtz", getTgtZ, setTgtZ);
-		REFLECT_FLOAT ("fov", getFOV, setFOV);
-		REFLECT_FLOAT ("roll", getRoll, setRoll);
-	REFLECT_EXPORT_END
-
 	float getRotZ()	const	{ return _Rot.z; }
 	void setRotZ(float f)	{ _Rot.z = f; }
 
@@ -422,6 +411,20 @@ public:
 
 	float getDist()	const	{ return _Dist; }
 	void setDist(float f)	{ _Dist = f; }
+
+	REFLECT_EXPORT_START(CInterface3DCamera, CInterfaceElement)
+		REFLECT_FLOAT ("posx", getPosX, setPosX);
+		REFLECT_FLOAT ("posy", getPosY, setPosY);
+		REFLECT_FLOAT ("posz", getPosZ, setPosZ);
+		REFLECT_FLOAT ("tgtx", getTgtX, setTgtX);
+		REFLECT_FLOAT ("tgty", getTgtY, setTgtY);
+		REFLECT_FLOAT ("tgtz", getTgtZ, setTgtZ);
+		REFLECT_FLOAT ("rotz", getRotZ, setRotZ);
+		REFLECT_FLOAT ("roty", getRotY, setRotY);
+		REFLECT_FLOAT ("dist", getDist, setDist);
+		REFLECT_FLOAT ("fov", getFOV, setFOV);
+		REFLECT_FLOAT ("roll", getRoll, setRoll);
+	REFLECT_EXPORT_END
 
 	void reset(); // Reset user interaction
 
