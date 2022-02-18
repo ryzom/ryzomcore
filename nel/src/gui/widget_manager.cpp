@@ -2304,16 +2304,16 @@ namespace NLGUI
 				SModalWndInfo mwi = getModal();
 				if (mwi.ModalExitKeyPushed)
 					disableModalWindow();
-			}
-		}
 
-		// Manage "quit window" If the Key is ESCAPE, no captureKeyboard
-		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE )
-		{
-			// Get the last escapable active top window. NB: this is ergonomically better.
+				handled= true;
+			}
+			
 			CInterfaceGroup	*win= getLastEscapableTopWindow();
-			if( win )
+			if ( win )
 			{
+				// Manage "quit window" If the Key is ESCAPE, no captureKeyboard
+				// Get the last escapable active top window. NB: this is ergonomically better.
+
 				// If the window is a modal, must pop it.
 				if( dynamic_cast<CGroupModal*>(win) )
 				{
@@ -2399,7 +2399,13 @@ namespace NLGUI
 			}
 		}
 
-		// General case: handle it in the Captured keyboard
+	    if (eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE && !handled && !isKeyboardCaptured())
+	    {
+		    CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:quit_dialog");
+		    handled = true;
+	    }
+
+	    // General case: handle it in the Captured keyboard
 		if ( getCaptureKeyboard() != NULL && !handled)
 		{
 			bool result = getCaptureKeyboard()->handleEvent(evnt);
