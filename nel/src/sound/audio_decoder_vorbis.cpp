@@ -180,13 +180,17 @@ uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 				nlwarning("ov_read returned OV_HOLE");
 				break;
 			case OV_EINVAL:
+				_IsMusicEnded = true;
 				nlwarning("ov_read returned OV_EINVAL");
 				break;
 			case OV_EBADLINK:
+				_IsMusicEnded = true;
 				nlwarning("ov_read returned OV_EBADLINK");
 				break;
 			default:
+				_IsMusicEnded = true;
 				nlwarning("ov_read returned %d", br);
+				break;
 			}
 		}
 	} while (bytes_read < minimum);
