@@ -86,15 +86,15 @@ bool CDBCtrlSheet::_ShowIconBuffs = true;
 
 void CControlSheetInfoWaiter::sendRequest()
 {
+	if (Requesting) return;
+
 	Requesting = true;
 	getInventory().addItemInfoWaiter(this);
 }
 
 void CControlSheetInfoWaiter::infoReceived()
 {
-	if (!Requesting) {
-		return;
-	}
+	if (!Requesting) return;
 
 	getInventory().removeItemInfoWaiter(this);
 	infoValidated();
@@ -510,6 +510,9 @@ CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param) :
 CCtrlDraggable(param)
 {
 	_LastSheetId = 0;
+	_LastItemInfoVersion = 0;
+	_LastItemCreateTime = 0;
+	_LastItemSerial = 0;
 	_DispSlotBmpId= -1;
 	_DispBackBmpId = -1;
 	_DispSheetBmpId = -1;
@@ -1211,6 +1214,8 @@ void CDBCtrlSheet::infoReceived()
 			rVR.getTextureSizeFromId(_BuffIcons[i].TextureId, _BuffIcons[i].IconW, _BuffIcons[i].IconH);
 		}
 	}
+
+	_LastItemInfoVersion = getItemInfoVersion();
 }
 
 // ***************************************************************************
@@ -1275,17 +1280,24 @@ void CDBCtrlSheet::setupItem ()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	sint32 sheet = _SheetId.getSInt32();
+	sint32 itemCreateTime = getItemCreateTime();
+	sint32 itemSerial = getItemSerial();
+
+	bool isItemChanged = _LastSheetId != sheet || _LastItemCreateTime != itemCreateTime || _LastItemSerial != itemSerial;
 
 	_DispQuality = -1;
 	_DispQuantity = -1;
 
 	// If this is the same sheet, need to resetup
-	if (_LastSheetId != sheet || _NeedSetup)
+	if (isItemChanged || _NeedSetup)
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_NeedSetup= false;
 		_LastSheetId = sheet;
+		_LastItemCreateTime = itemCreateTime;
+		_LastItemSerial = itemSerial;
+
 		CSheetId sheetId(sheet);
 		CEntitySheet *pES = SheetMngr.get (sheetId);
 		if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
@@ -1462,7 +1474,9 @@ void CDBCtrlSheet::setupItem ()
 */
 
 	// at each frame, update item info icon if changed
-	if (_ItemInfoChanged)
+	// This will not trigger on slots where client has not asked info version yet
+	// (enchanting weapon right after login)
+	if (_ItemInfoChanged || _LastItemInfoVersion != getItemInfoVersion())
 	{
 		_ItemInfoChanged = false;
 		setupItemInfoWaiter();
@@ -3521,9 +3535,11 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 	_ItemInfoWaiter.ItemSlotId= itemSlotId;
 	_ItemInfoWaiter.CtrlSheet = ctrlSheet;
 
-	// send out request only if cache is not set
+	// Use cache on first load or when server updates info version.
+	// This will show wrong info if item is in cache, but modified server side.
 	const CClientItemInfo *itemInfo = getInventory().getItemInfoCache(getItemSerial(), getItemCreateTime());
-	if (itemInfo)
+	sint32 itemInfoVersion = getItemInfoVersion();
+	if (itemInfo && (_LastItemInfoVersion == 0 || itemInfoVersion == _LastItemInfoVersion))
 	{
 		infoReceived();
 	}
@@ -3609,7 +3625,8 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			if (useItemInfoForFamily(item->Family))
 			{
 				// call lua function to update tooltip window
-				_ItemInfoWaiter.sendRequest();
+				if (!getInventory().isItemInfoUpToDate(_ItemInfoWaiter.ItemSlotId))
+					_ItemInfoWaiter.sendRequest();
 				help = _ItemInfoWaiter.infoValidated();
 				// its expected to get at least item name back
 				if (help.empty())
@@ -3746,7 +3763,8 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 		{
 			if (useItemInfoForFamily(item->Family))
 			{
-				_ItemInfoWaiter.sendRequest();
+				if (!getInventory().isItemInfoUpToDate(_ItemInfoWaiter.ItemSlotId))
+					_ItemInfoWaiter.sendRequest();
 				help = _ItemInfoWaiter.infoValidated();
 				return;
 			}

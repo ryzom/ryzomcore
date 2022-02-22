@@ -670,6 +670,9 @@ protected:
 	NLMISC::CCDBNodeLeaf		*_ItemRMFaberStatType;
 
 	mutable sint32		_LastSheetId;
+	sint32				_LastItemInfoVersion;
+	sint32				_LastItemCreateTime;
+	sint32				_LastItemSerial;
 	bool				_ItemInfoChanged;
 
 	/// Display
