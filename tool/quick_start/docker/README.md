@@ -98,6 +98,16 @@ docker run --rm -v ryzombuild_scout_gcc9_x86_64_hunter:/root/.hunter --mount "ty
 ## Test Steam Runtime with GCC 9 x86
 
 ```
-docker run --platform linux/386 --rm -v ryzombuild_scout_gcc9_x86_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_scout_gcc9_32" ryzombuild_scout_gcc9_x86 setarch i386 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DHUNTER_ENABLED=ON -DHUNTER_STATUS_DEBUG=ON -DHUNTER_JOBS_NUMBER=9 -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_PATCH=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=OFF -DWITH_NELNS=OFF -DWITH_QT5=OFF -DWITH_LIBGSF=OFF -DFINAL_VERSION=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_SSE3=OFF ../code
+docker run --platform linux/386 --rm -v ryzombuild_scout_gcc9_x86_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_scout_gcc9_32" ryzombuild_scout_gcc9_x86 setarch i386 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DHUNTER_ENABLED=ON -DHUNTER_STATUS_DEBUG=ON -DHUNTER_JOBS_NUMBER=9 -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_PATCH=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=OFF -DWITH_NELNS=OFF -DWITH_QT5=OFF -DWITH_LIBGSF=OFF -DFINAL_VERSION=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_SSE2=OFF -DWITH_SSE3=OFF ../code
 docker run --platform linux/386 --rm -v ryzombuild_scout_gcc9_x86_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_scout_gcc9_32" ryzombuild_scout_gcc9_x86 setarch i386 ninja -j9
+```
+
+## Check Docker multi-arch platforms
+```
+>docker buildx ls
+NAME/NODE       DRIVER/ENDPOINT STATUS  PLATFORMS
+desktop-linux   docker
+  desktop-linux desktop-linux   running linux/amd64, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/arm/v7, linux/arm/v6
+default *       docker
+  default       default         running linux/amd64, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/arm/v7, linux/arm/v6
 ```
