@@ -1803,13 +1803,41 @@ namespace NLGUI
 					// apply opacity settings
 					const std::vector< CViewBase* > &vs = groupContextHelp->getViews();
 					// content opacity: only target views or else breaks
-					for( std::vector< CViewBase* >::const_iterator itr = vs.begin(); itr != vs.end(); ++itr )
+					for( uint i = 0; i < vs.size(); ++i)
 					{
-						CViewBase *pVB = *itr;
+						CViewBase *pVB = vs[i];
 						pVB->setAlpha(_ContextHelpContentAlpha);
 					}
+					// go into sub groups and apply opacity to views and controls (this is mainly for crystallized_spell_context_help)
+					const std::vector<CInterfaceGroup*> &rG = groupContextHelp->getGroups();
+					if (!rG.empty()) {
+						for(uint i = 0; i < rG.size(); ++i) {
+							const std::vector< CInterfaceGroup* > &vs = rG[i]->getGroups();
+							if (!vs.empty()) {
+								for( uint j = 0; j < vs.size(); ++j)
+								{
+									const std::vector< CViewBase* > &vb = vs[j]->getViews();
+									if (!vb.empty()) {
+										for( uint k = 0; k < vb.size(); ++k)
+										{
+											CViewBase *pVB = vb[k];
+											pVB->setAlpha(_ContextHelpContentAlpha);
+										}
+									}
+								}
+							}
+							const std::vector< CViewBase* > &vb = rG[i]->getViews();
+							if (!vb.empty()) {
+								for( uint k = 0; k < vb.size(); ++k)
+								{
+									CViewBase *pVB = vb[k];
+									pVB->setAlpha(_ContextHelpContentAlpha);
+								}
+							}
+						}
+					}
 					// container opacity
-					CInterfaceGroup* container = dynamic_cast<CInterfaceGroup*>(groupContextHelp->findFromShortId("border"))
+					CInterfaceGroup* container = dynamic_cast<CInterfaceGroup*>(groupContextHelp->findFromShortId("border"));
 					if (container)
 						container->setAlpha(_ContextHelpContainerAlpha);
 
