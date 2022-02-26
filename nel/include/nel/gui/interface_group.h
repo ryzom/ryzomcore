@@ -271,7 +271,6 @@ namespace NLGUI
 
 		virtual sint32 getAlpha() const;
 		virtual void setAlpha (sint32 a);
-		virtual void setContainerAlpha (sint32 a);
 
 		/// Eval current clip coords. This is not incremental as with makeNewClip, and thus more slow. This also doesn't change the current clip window.
 		void getClip(sint32 &x, sint32 &y, sint32 &w, sint32 &h) const;
