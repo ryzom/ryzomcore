@@ -543,7 +543,7 @@ void	CBitMemStream::serial(std::string &b)
 /*
  * Serial string
  */
-inline	void		CBitMemStream::serial(ucstring &b)
+void		CBitMemStream::serial(ucstring &b)
 {
 #ifdef LOG_ALL_TRAFFIC
 	sint32 bitpos = getPosInBit();
