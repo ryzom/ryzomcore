@@ -2485,13 +2485,19 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	Window child;
 
 	// get window position so we can compare monitors (or mouse position if window not visible yet) 
-	XWindowAttributes xwa;
-	XGetWindowAttributes(_dpy, _win, &xwa);
-	if (xwa.map_state != IsUnmapped)
+	bool useMouseForPosition = true;
+	if (_win != EmptyWindow)
 	{
-		XTranslateCoordinates(_dpy, _win, xwa.root, xwa.x, xwa.y, &x, &y, &child);
+		XWindowAttributes xwa;
+		XGetWindowAttributes(_dpy, _win, &xwa);
+		if (xwa.map_state != IsUnmapped)
+		{
+			XTranslateCoordinates(_dpy, _win, xwa.root, xwa.x, xwa.y, &x, &y, &child);
+			useMouseForPosition = false;
+		}
 	}
-	else
+
+	if (useMouseForPosition)
 	{
 		sint rx, ry, wx, wy;
 		uint mask;
