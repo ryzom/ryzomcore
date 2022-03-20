@@ -158,8 +158,21 @@ bool CMusicPlayer::isShuffleEnabled() const
 // ***************************************************************************
 void CMusicPlayer::playSongs (const std::vector<std::string> &filenames)
 {
+	CGroupList *pList = dynamic_cast<CGroupList *>(CWidgetManager::getInstance()->getElementFromId(MP3_PLAYER_PLAYLIST_LIST));
+	if (!pList)
+	{
+		nlwarning("MusicPlayer UI not found (%s)", MP3_PLAYER_PLAYLIST_LIST);
+		return;
+	}
+
+	uint limit = pList->getMaxElements();
+	if (filenames.size() > limit)
+	{
+		CInterfaceManager::getInstance()->displaySystemInfo(toString("Found %u, limit %u", filenames.size(), limit), "SYS");
+	}
+
 	_Songs.clear();
-	for (uint i=0; i<filenames.size(); i++)
+	for (uint i = 0; (i < limit) && (i < filenames.size()); i++)
 	{
 		_Songs.push_back(CSongs(filenames[i], CFile::getFilename(filenames[i]), 0.f));
 	}
