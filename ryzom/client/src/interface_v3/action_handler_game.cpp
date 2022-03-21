@@ -845,6 +845,20 @@ protected:
 REGISTER_ACTION_HANDLER( CHandlerContextFreeLook, "context_free_look");
 
 // ***************************************************************************
+class CHandlerToggleFreeLook : public IActionHandler
+{
+public:
+	void execute(CCtrlBase * /* pCaller */, const std::string & /* sParams */)
+	{
+		if (UserControls.getFreeLook())
+			UserControls.stopFreeLook();
+		else
+			UserControls.startFreeLook();
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerToggleFreeLook, "toggle_free_look");
+
+// ***************************************************************************
 // GCM Move
 // ***************************************************************************
 class CHandlerMove : public IActionHandler
