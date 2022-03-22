@@ -177,6 +177,8 @@ public:
 	/// Stop Free Look (can be called multiple times if needed). Additionaly, the mouse/pointer is restored
 	void stopFreeLook();
 
+	bool getFreeLook() const { return _FreeLook; }
+
 	/// Is the camera inside the character.
 	bool isInternalView() {return _InternalView;}
 
