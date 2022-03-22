@@ -641,6 +641,9 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 }
 
 // --------------------------------------------------
+static Bool WaitForNotify( Display *dpy, XEvent *event, XPointer arg ) {
+	return (event->type == MapNotify) && (event->xmap.window == reinterpret_cast<Window>(arg));
+}
 bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool resizeable)
 {
 	H_AUTO_OGL(CDriverGL_setDisplay)
@@ -1145,14 +1148,17 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	}
 
 	glXMakeCurrent (_dpy, _win, _ctx);
-//	XMapRaised (_dpy, _win);
-
-//	XMapWindow(_dpy, _win);
 
 	_EventEmitter.init (_dpy, _win, this);
 
-//	XEvent event;
-//	XIfEvent(dpy, &event, WaitForNotify, (char *)this);
+	// KDE/GNOME has issues selecting correct fullscreen monitor if window is not visible before setMode()
+	if (!mode.Windowed)
+	{
+		XMapRaised(_dpy, _win);
+		XEvent event;
+		nlctassert(sizeof(XPointer) >= sizeof(_win));
+		XPeekIfEvent(_dpy, &event, WaitForNotify, reinterpret_cast<XPointer>(_win));
+	}
 
 #endif // NL_OS_UNIX
 
@@ -2805,7 +2811,17 @@ void CDriverGL::showWindow(bool show)
 
 	if (show)
 	{
-		XMapRaised(_dpy, _win);
+		// if window is mapped, then MapNotify event will not trigger and XPeekIfEvent deadlocks
+		XWindowAttributes attr;
+		XGetWindowAttributes(_dpy, _win, &attr);
+		if (attr.map_state == IsUnmapped)
+		{
+			XMapRaised(_dpy, _win);
+			// sync to MapNotify event or setWindowSize() in GNOME might resize window to wrong size
+			XEvent event;
+			nlctassert(sizeof(XPointer) >= sizeof(_win));
+			XPeekIfEvent(_dpy, &event, WaitForNotify, reinterpret_cast<XPointer>(_win));
+		}
 
 		// fix window position if windows manager want to impose them
 		setWindowPos(_WindowX, _WindowY);
