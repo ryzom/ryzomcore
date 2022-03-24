@@ -265,10 +265,9 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 
 		case ConfigureNotify:
 
-		if (driver->_CurrentMode.Windowed && driver->_WndActive)
+		if (driver->_WndActive)
 		{
-			// first time setting decoration sizes
-			if ((driver->_DecorationWidth == -1) || (driver->_DecorationWidth == 0))
+			if (driver->_CurrentMode.Windowed)
 			{
 				Atom type_return = 0;
 				int format_return = 0;
@@ -294,12 +293,19 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 				// don't allow negative decoration sizes
 				if (driver->_DecorationWidth < 0) driver->_DecorationWidth = 0;
 				if (driver->_DecorationHeight < 0) driver->_DecorationHeight = 0;
+
+				driver->_WindowX = e.xconfigure.x - driver->_DecorationWidth;
+				driver->_WindowY = e.xconfigure.y - driver->_DecorationHeight;
+			}
+			else
+			{
+				// fullscreen
+				driver->_WindowX = e.xconfigure.x;
+				driver->_WindowY = e.xconfigure.y;
 			}
 
 			driver->_CurrentMode.Width = e.xconfigure.width;
 			driver->_CurrentMode.Height = e.xconfigure.height;
-			driver->_WindowX = e.xconfigure.x - driver->_DecorationWidth;
-			driver->_WindowY = e.xconfigure.y - driver->_DecorationHeight;
 		}
 
 		break;
@@ -2775,15 +2781,7 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 #elif defined (NL_OS_UNIX)
 
 	if (_CurrentMode.Windowed)
-	{
-		// first time requesting decoration sizes
-		if (_WindowX && _WindowY && !_DecorationWidth && !_DecorationHeight && _WndActive)
-		{
-			_DecorationWidth = -1;
-			_DecorationHeight = -1;
-		}
 		XMoveWindow(_dpy, _win, x, y);
-	}
 
 #endif // NL_OS_WINDOWS
 }
