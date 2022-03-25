@@ -647,9 +647,11 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 }
 
 // --------------------------------------------------
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 static Bool WaitForNotify( Display *dpy, XEvent *event, XPointer arg ) {
 	return (event->type == MapNotify) && (event->xmap.window == reinterpret_cast<Window>(arg));
 }
+#endif
 bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool resizeable)
 {
 	H_AUTO_OGL(CDriverGL_setDisplay)
