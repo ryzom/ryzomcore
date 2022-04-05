@@ -91,6 +91,8 @@ jobs:
             libxrandr-dev
             libxrender-dev
             libxxf86vm-dev
+          cmakeExtra: >-
+            -DCMAKE_INSTALL_LIBDIR=lib
         win2019:
           vmImage: 'windows-2019'
           releaseName: 'Win64'
