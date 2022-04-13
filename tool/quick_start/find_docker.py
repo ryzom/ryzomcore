@@ -59,5 +59,13 @@ def FindDockerImages():
 FoundDocker = FindDocker()
 FoundDockerImages = FindDockerImages()
 
+def NeedConfigureDocker():
+	if FoundDocker:
+		for image in FoundDockerImages:
+			if not image in FoundDocker:
+				return True
+		return False
+	return False
+
 # if (FoundDocker):
 # 	print(FoundDocker)

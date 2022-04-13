@@ -2,6 +2,19 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
+# Docker images
+
+from quick_start.find_docker import *
+
+print("Docker images:")
+for image in FoundDockerImages:
+	if not FoundDocker or not image in FoundDocker:
+		print("  " + image + ": NOT FOUND")
+	else:
+		print("  " + image + ": " + FoundDocker[image]["IMAGE"] + " (" + FoundDocker[image]["CREATED"] + ", " + FoundDocker[image]["SIZE"] + ")")
+
+# Build targets
+
 from quick_start.find_targets import *
 
 def printBuildTarget(name, tn):
@@ -14,6 +27,7 @@ def printBuildTarget(name, tn):
 	else:
 		print("  " + name + ": NOT FOUND")
 
+print()
 print("Build targets:")
 printBuildTarget("client_dev", NeLTargetClientDev)
 printBuildTarget("server_dev", NeLTargetServerDev)
@@ -24,5 +38,14 @@ printBuildTarget("tools", NeLTargetTools)
 printBuildTarget("samples", NeLTargetSamples)
 for pluginMax in NelTargetPluginMax:
 	printBuildTarget("plugin_max/" + pluginMax, NelTargetPluginMax[pluginMax])
+
+# Notifications
+
+if not FoundDocker:
+	print()
+	print("NOTIFICATION: Docker Desktop is not running. It is recommended to install Docker Desktop, which is required to build server and client binaries for Linux targets.")
+elif NeedConfigureDocker():
+	print()
+	print("NOTIFICATION: There are build environment images available for Ryzom Core which have not yet been built. Run the `configure_docker` script to build all available Docker images.")
 
 # end of file
