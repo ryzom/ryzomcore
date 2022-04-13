@@ -510,6 +510,7 @@ CInterfaceManager::CInterfaceManager()
 	_LastInGameScreenW = _LastInGameScreenH = 0;
 	_InterfaceScaleChanged = false;
 	_InterfaceScale = 1.0f;
+	_InterfaceScaleAuto = false;
 	_DescTextTarget = NULL;
 	_ConfigLoaded = false;
 	_LogState = false;
@@ -1910,9 +1911,10 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		uint32 width, height;
 		// get non-scaled width/height
 		Driver->getWindowSize(width, height);
-		// convert to scaled width/height for ui
-		sint32 scaledW = width / ClientCfg.InterfaceScale;
-		sint32 scaledH = height / ClientCfg.InterfaceScale;
+		// convert to (auto)scaled width/height for ui
+		float scale = CViewRenderer::getInstance()->getInterfaceScale();
+		sint32 scaledW = width / scale;
+		sint32 scaledH = height / scale;
 		CWidgetManager::getInstance()->moveAllWindowsToNewScreenSize(scaledW, scaledH, false);
 		updateDesktops(scaledW, scaledH);
 	}
@@ -2223,7 +2225,11 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	// scale must be updated right before widget manager checks it
 	if (_InterfaceScaleChanged)
 	{
-		CViewRenderer::getInstance()->setInterfaceScale(_InterfaceScale);
+		if (_InterfaceScaleAuto)
+			CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+		else
+			CViewRenderer::getInstance()->setInterfaceScale(_InterfaceScale);
+
 		_InterfaceScaleChanged = false;
 	}
 
