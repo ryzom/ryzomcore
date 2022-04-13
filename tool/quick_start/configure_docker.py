@@ -10,6 +10,7 @@ from quick_start.find_docker import *
 # Prepare temp directory
 pathlib.Path(NeLTempDir).mkdir(parents=True, exist_ok=True)
 prevCwd = os.getcwd()
+dockerDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "docker")
 
 def NeedBuild(image):
 	if image not in FoundDocker:
@@ -39,7 +40,8 @@ def BuildImage(image):
 		print("SKIP " + image)
 		return
 	print("DOCKER BUILD " + image)
-	pass
+	dockerFile = os.path.join(os.path.join(dockerDir, image), "Dockerfile")
+	subprocess.run(["docker", "build",  "-t", image, "-f", dockerFile, NeLCodeDir])
 
 def BuildImages():
 	for image in FoundDockerImages:

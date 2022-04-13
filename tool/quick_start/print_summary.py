@@ -50,6 +50,6 @@ if not FoundDocker:
 	print("NOTIFICATION: Docker Desktop is not running. It is recommended to install Docker Desktop, which is required to build server and client binaries for Linux targets.")
 elif NeedConfigureDocker():
 	print()
-	print("NOTIFICATION: There are build environment images available for Ryzom Core which have not yet been built. Run the `configure_docker` script to build all available Docker images.")
+	print("NOTIFICATION: There are Docker build environment images available for Ryzom Core which have not yet been built. Run the `configure_docker` script to build all available Docker images.")
 
 # end of file

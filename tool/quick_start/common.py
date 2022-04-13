@@ -4,7 +4,7 @@ from .common_config import *
 import os
 
 # Known folders
-NeLCodeDir = os.path.join(NeLRootDir, "code")
+NeLCodeDir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))) # os.path.join(NeLRootDir, "code")
 NeLLeveldesignDir = os.path.join(NeLRootDir, "leveldesign")
 NeLGraphicsDir = os.path.join(NeLRootDir, "graphics")
 NeLSoundDir = os.path.join(NeLRootDir, "sound")
