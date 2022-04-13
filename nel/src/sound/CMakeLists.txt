@@ -113,7 +113,7 @@ INCLUDE_DIRECTORIES(${OGG_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nelsound ${VORBISFILE_LIBRARY} ${VORBIS_LIBRARY})
 
-IF(WITH_STATIC)
+IF(WITH_STATIC OR ${VORBISFILE_LIBRARY} MATCHES "\\.a")
   # Add libogg dependency only if target is static because to libvorbisfile
   TARGET_LINK_LIBRARIES(nelsound ${OGG_LIBRARY})
 ENDIF()

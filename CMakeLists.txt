@@ -329,6 +329,10 @@ IF(WITH_NEL)
     ENDIF()
 
     FIND_PACKAGE(CURL REQUIRED)
+    # if cmake finds config-file package, ie FIND_PACKAGE(CURL CONFIG), then CURL_LIBRARIES is not defined
+    IF(TARGET CURL::libcurl)
+      SET(CURL_LIBRARIES CURL::libcurl)
+    ENDIF()
 
     IF((WIN32 OR CURL_LIBRARIES MATCHES "\\.a") AND WITH_STATIC_CURL)
       SET(CURL_STATIC ON)
