@@ -5,6 +5,7 @@
 # (Pre-check script will check the toolchain configuration if any Docker toolchains were previously detected and break if docker is not running)
 
 import subprocess
+import os
 
 def FindDocker():
 	output = None
@@ -43,7 +44,20 @@ def FindDocker():
 	# 	return None
 	return entries
 
+def FindDockerImages():
+	res = []
+	qsDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "docker")
+	for di in os.listdir(qsDir):
+		if di.startswith("."):
+			continue
+		sdi = os.path.join(qsDir, di)
+		if not os.path.isdir(sdi):
+			continue
+		res += [ di ]
+	return res
+
 FoundDocker = FindDocker()
+FoundDockerImages = FindDockerImages()
 
 # if (FoundDocker):
 # 	print(FoundDocker)
