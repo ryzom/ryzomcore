@@ -10,7 +10,7 @@ import os
 def FindDocker():
 	output = None
 	try:
-		output = subprocess.check_output(['docker', 'images'], stderr = subprocess.DEVNULL, text = True)
+		output = subprocess.check_output(['docker', 'images'], stderr=subprocess.DEVNULL, text=True)
 	except subprocess.CalledProcessError as e:
 		# print(e.output)
 		return None

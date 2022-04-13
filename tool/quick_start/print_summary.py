@@ -7,11 +7,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from quick_start.find_docker import *
 
 print("Docker images:")
-for image in FoundDockerImages:
+def printDockerImage(image):
 	if not FoundDocker or not image in FoundDocker:
 		print("  " + image + ": NOT FOUND")
 	else:
 		print("  " + image + ": " + FoundDocker[image]["IMAGE"] + " (" + FoundDocker[image]["CREATED"] + ", " + FoundDocker[image]["SIZE"] + ")")
+printDockerImage("steamrt_scout_amd64")
+printDockerImage("steamrt_scout_i386")
+for image in FoundDockerImages:
+	printDockerImage(image)
 
 # Build targets
 
