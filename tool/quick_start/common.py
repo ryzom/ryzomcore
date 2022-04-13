@@ -1,5 +1,5 @@
 
-from . common_config import *
+from .common_config import *
 
 import os
 
@@ -28,4 +28,4 @@ NeLDistributionDir = os.path.join(NeLRootDir, "distribution")
 
 #print(NeLExternalDir)
 
-print(NeLBuildDir)
+#print(NeLBuildDir)
