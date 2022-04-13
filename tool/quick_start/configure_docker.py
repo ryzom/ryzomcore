@@ -1,5 +1,6 @@
 
 # Installs all the available docker images
+# Manually run `docker system prune` afterwards to remove unused build caches
 
 import sys, os, pathlib, subprocess
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -42,6 +43,7 @@ def BuildImage(image):
 	print("DOCKER BUILD " + image)
 	dockerFile = os.path.join(os.path.join(dockerDir, image), "Dockerfile")
 	subprocess.run(["docker", "build",  "-t", image, "-f", dockerFile, NeLCodeDir])
+	subprocess.run(["docker", "volume",  "rm", image + "_hunter"], stderr=subprocess.DEVNULL)
 
 def BuildImages():
 	for image in FoundDockerImages:
