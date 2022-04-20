@@ -4,6 +4,8 @@
 
 import os
 
+print("Detect all Visual Studio installations")
+
 FoundVisualStudio = []
 
 # C:\Program Files (x86)\Microsoft Visual Studio\VC98

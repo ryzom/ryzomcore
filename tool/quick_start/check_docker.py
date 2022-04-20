@@ -15,7 +15,7 @@ def HadDocker():
 if HadDocker():
 	from quick_start.find_docker import *
 	if not FoundDocker:
-		print("ABORT: Docker is not running")
+		print("ERROR: Docker Desktop is not running")
 		exit(1)
 
 # end of file

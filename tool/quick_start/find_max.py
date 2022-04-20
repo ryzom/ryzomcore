@@ -32,6 +32,8 @@ def FindLatestMax():
 			return os.path.normpath(path)
 
 def FindMaxLocal(maxPath):
+	if not maxPath:
+		return None
 	maxPathSplit = maxPath.split()
 	version = maxPathSplit[len(maxPathSplit) - 1]
 	if "x86" in maxPath:
@@ -126,7 +128,7 @@ def FindMaxSDKs():
 	return res
 
 FoundPluginMax = FindPluginMax()
-FoundPluginMaxLocal = FindMaxLocal(FindPluginMax())
+FoundPluginMaxLocal = FindMaxLocal(FoundPluginMax)
 FoundLatestMax = FindLatestMax()
 FoundMaxSDKs = FindMaxSDKs()
 
