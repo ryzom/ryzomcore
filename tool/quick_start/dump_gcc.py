@@ -1,5 +1,5 @@
 
-import subprocess, os, json, csv, io
+import subprocess, os, json, csv, io, sys
 
 output = None
 cmd = [ "gcc", "-dumpfullversion", "-dumpversion" ]
@@ -8,10 +8,10 @@ try:
 except subprocess.CalledProcessError as e:
 	# print(e.output)
 	print(json.dumps({"Failed": cmd}))
-	exit(1)
+	sys.exit(1)
 except OSError as e:
 	print(json.dumps({"Failed": cmd}))
-	exit(1)
+	sys.exit(1)
 version = output.strip()
 
 cmd = [ "cat", "/etc/os-release" ]
@@ -20,10 +20,10 @@ try:
 except subprocess.CalledProcessError as e:
 	# print(e.output)
 	print(json.dumps({"Failed": cmd}))
-	exit(1)
+	sys.exit(1)
 except OSError as e:
 	print(json.dumps({"Failed": cmd}))
-	exit(1)
+	sys.exit(1)
 os = dict(csv.reader(io.StringIO(output.strip()), delimiter='='))
 
 cmd = [ "find", "/usr/lib", "-name", "libluabind.so" ]

@@ -4,7 +4,7 @@
 
 import os
 
-print("Detect all Visual Studio installations")
+print("Find all Visual Studio installations")
 
 FoundVisualStudio = []
 
