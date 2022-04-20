@@ -8,7 +8,8 @@
 		"Nginx": "external/nginx",
 		"PHP": "external/php",
 		"phpMyAdmin": "external/phpmyadmin",
-		"Aria2": "distribution/utils",
+		"Aria2": "external/utils",
+		"Ninja": "external/utils",
 		"3dsMax": "",
 		"3dsMaxLocal": ""
 	},

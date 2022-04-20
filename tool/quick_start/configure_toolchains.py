@@ -123,6 +123,9 @@ for ts in SortedToolsets:
 					del copyToolchain["LuaVersion"]
 				Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + "/H"] = copyToolchain
 
+for gcc in FoundGCC:
+	print(gcc)
+
 with open(os.path.join(NeLConfigDir, "toolchains_" + socket.gethostname().lower() + "_default.json"), 'w') as fo:
 	json.dump(Toolchains, fo, indent=2)
 

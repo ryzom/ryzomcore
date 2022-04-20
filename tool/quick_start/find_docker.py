@@ -53,6 +53,8 @@ def FindDockerImages():
 		sdi = os.path.join(qsDir, di)
 		if not os.path.isdir(sdi):
 			continue
+		if not os.path.isfile(os.path.join(sdi, "Dockerfile")):
+			continue
 		res += [ di ]
 	return res
 

@@ -106,7 +106,8 @@ print("Find native GCC installation")
 FindLocalGCC()
 
 for image in FoundDocker:
-	print("Find GCC installation in Docker image \"" + image + "\"")
-	FindDockerGCC(image)
+	if image in FoundDockerImages:
+		print("Find GCC installation in Docker image \"" + image + "\"")
+		FindDockerGCC(image)
 
 # end of file

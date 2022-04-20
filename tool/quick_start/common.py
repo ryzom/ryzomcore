@@ -16,8 +16,9 @@ NeLDistributionDir = os.path.join(NeLRootDir, "distribution")
 # Special folders
 NeLTempDir = os.path.join(NeLRootDir, os.path.normcase(".nel/temp"))
 
-# Tools
+# Tools for Windows only
 NeLPython27Dir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Python27"])
+NeLPython3Dir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Python3"])
 NeLRRDtoolDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["RRDtool"])
 NeLMariaDBDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["MariaDB"])
 NeLNginxDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Nginx"])
@@ -25,11 +26,15 @@ NeLPHPDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["PHP"])
 NeLphpMyAdminDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["phpMyAdmin"])
 NeL3dsMaxDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["3dsMax"])
 
-# Tools added to system path
+# Tools added to system path, for any platform
+# If these paths are wrong, tools from the system path may be used, which is okay
 NeLAria2Dir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Aria2"]))
+NeLNinjaDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Ninja"]))
 
+# Deduplicate any paths, and add them to the system path variable
 NeLEnvPaths = {}
 NeLEnvPaths[NeLAria2Dir] = True
+NeLEnvPaths[NeLNinjaDir] = True
 for path in NeLEnvPaths:
 	os.environ["PATH"] = path + os.pathsep + os.environ["PATH"]
 # print(os.environ["PATH"])
