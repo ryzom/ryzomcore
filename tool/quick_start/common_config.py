@@ -16,9 +16,10 @@ fi.close()
 
 def MergeConfig(file):
 	global NeLConfig
-	if not os.path.isfile(file):
+	fn = os.path.join(NeLConfigDir, file)
+	if not os.path.isfile(fn):
 		return
-	fi = open(os.path.join(NeLConfigDir, file), "r")
+	fi = open(fn, "r")
 	config = json.load(fi)
 	if not "Paths" in config:
 		config["Paths"] = {}
@@ -43,6 +44,8 @@ if "HostId" in NeLConfig:
 
 MergeConfig("config_" + NeLHostId + "_default.json")
 MergeConfig("config_" + NeLHostId + ".json")
+
+#print(str(NeLConfig))
 
 if os.path.isfile(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_default.json")):
 	fi = open(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_default.json"), "r")

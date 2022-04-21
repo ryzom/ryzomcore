@@ -2,14 +2,16 @@
 from .find_toolchain import *
 from .find_max import *
 
-NeLTargetClientDev = FindToolchainEx(NeLToolchainNative)
-NeLTargetServerDev = FindToolchainEx(NeLToolchainNative)
+NeLToolchainNative = NeLConfig["Toolchain"]["Native"]
+
+NeLTargetClientDev = FindToolchainEx(NeLToolchainNative["Filter"])
+NeLTargetServerDev = FindToolchainEx(NeLToolchainNative["Filter"])
 NeLTargetClient = {}
 for client in NeLConfig["Toolchain"]["Client"]:
-	NeLTargetClient[client] = FindToolchainEx(NeLConfig["Toolchain"]["Client"][client])
-NeLTargetServer = FindToolchainEx(NeLConfig["Toolchain"]["Server"])
-NeLTargetTools = FindToolchainEx(NeLToolchainNative)
-NeLTargetSamples = FindToolchainEx(NeLToolchainNative)
+	NeLTargetClient[client] = FindToolchainEx(NeLConfig["Toolchain"]["Client"][client]["Filter"])
+NeLTargetServer = FindToolchainEx(NeLConfig["Toolchain"]["Server"]["Filter"])
+NeLTargetTools = FindToolchainEx(NeLToolchainNative["Filter"])
+NeLTargetSamples = FindToolchainEx(NeLToolchainNative["Filter"])
 NelTargetPluginMax = {}
 remapMaxCompatible = {}
 foundMax = {}
