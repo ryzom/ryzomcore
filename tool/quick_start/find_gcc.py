@@ -28,9 +28,9 @@ def FindLocalGCC():
 	res["Architecture"] = "amd64"
 	res["Native"] = True
 	
-	name = "GCC " + res["GCCVersion"] + " " + arch + " (" + res["OSRelease"]["PRETTY_NAME"]
-	if "LuaVersion" in res:
-		name += ", Lua " + res["LuaVersion"]
+	name = "GCC " + res["GCCVersion"] + " amd64 (" + res["OSRelease"]["PRETTY_NAME"]
+	# if "LuaVersion" in res:
+	# 	name += ", Lua " + res["LuaVersion"]
 	name += ")"
 	# print(name)
 	
@@ -74,8 +74,8 @@ def FindDockerGCC(image):
 	res["Docker"] = True
 	
 	name = "GCC " + res["GCCVersion"] + " " + arch + " (" + res["OSRelease"]["PRETTY_NAME"]
-	if "LuaVersion" in res:
-		name += ", Lua " + res["LuaVersion"]
+	#if "LuaVersion" in res:
+	#	name += ", Lua " + res["LuaVersion"]
 	name += ")"
 	# print(name)
 	

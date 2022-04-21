@@ -24,10 +24,15 @@ from quick_start.find_targets import *
 def printBuildTarget(name, tn):
 	if tn:
 		tc = NeLToolchains[tn]
-		withHunter = ""
+		addtl = ""
 		if "Hunter" in tc and tc["Hunter"]:
-			withHunter = ", Hunter"
-		print("  " + name + ": " + tc["DisplayName"] + " (" + tc["Generator"] + ", " + tc["Toolset"] + ", " + tc["Platform"] + ")" + withHunter)
+			addtl += ", Hunter"
+		if "LuaVersion" in tc:
+			addtl += ", Lua " + str(tc["LuaVersion"])[0:1] + "." + str(int(str(tc["LuaVersion"])[1:], 10))
+		if "Generator" in tc:
+			print("  " + name + ": " + tc["DisplayName"] + " (" + tc["Generator"] + ", " + tc["Toolset"] + ", " + tc["Platform"] + ")" + addtl)
+		else:
+			print("  " + name + ": " + tc["DisplayName"] + addtl)
 	else:
 		print("  " + name + ": NOT FOUND")
 

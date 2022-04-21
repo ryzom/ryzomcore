@@ -124,7 +124,45 @@ for ts in SortedToolsets:
 				Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + "/H"] = copyToolchain
 
 for gcc in FoundGCC:
-	print(gcc)
+	#print(gcc)
+	toolchain = {}
+	toolchain["Compiler"] = "GCC"
+	toolchain["DisplayName"] = gcc["DisplayName"]
+	toolchain["GCCVersion"] = gcc["GCCVersion"]
+	toolchain["Version"] = int(gcc["GCCVersion"].split(".")[0])
+	if "LuaVersion" in gcc:
+		luaVer = gcc["LuaVersion"]
+		if luaVer == "50":
+			toolchain["LuaVersion"] = 500
+		elif luaVer == "5.1":
+			toolchain["LuaVersion"] = 501
+		elif luaVer == "5.2":
+			toolchain["LuaVersion"] = 502
+		elif luaVer == "5.3":
+			toolchain["LuaVersion"] = 503
+		elif luaVer == "5.4":
+			toolchain["LuaVersion"] = 504
+	toolchain["CMake"] = []
+	toolchain["OSId"] = gcc["OSRelease"]["ID"]
+	toolchain["OSCodename"] = gcc["OSRelease"]["VERSION_CODENAME"]
+	if "Native" in gcc and gcc["Native"]:
+		toolchain["Native"] = True
+	if "Docker" in gcc and gcc["Docker"]:
+		toolchain["Docker"] = True
+		toolchain["Image"] = gcc["Image"]
+	toolchain["Platform"] = gcc["Architecture"]
+	name = toolchain["OSId"] + "/" + toolchain["OSCodename"] + "/" + toolchain["Compiler"] + "/" + toolchain["Platform"]
+	if "Docker" in toolchain:
+		name += "/D"
+	if "LuaVersion" in toolchain:
+		Toolchains[name] = toolchain
+	copyToolchain = {}
+	for k in toolchain:
+		copyToolchain[k] = toolchain[k]
+	copyToolchain["Hunter"] = True
+	if "LuaVersion" in copyToolchain:
+		del copyToolchain["LuaVersion"]
+	Toolchains[name + "/H"] = copyToolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_" + socket.gethostname().lower() + "_default.json"), 'w') as fo:
 	json.dump(Toolchains, fo, indent=2)

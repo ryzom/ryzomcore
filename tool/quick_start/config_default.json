@@ -36,7 +36,7 @@
 			"WinXP/VS/v100/x86",
 			"Win98/VS/v80/x86"
 		],
-		"Server": [{ "OS": "Ubuntu-20.04", "Hunter": false }],
+		"Server": [{ "OSId": "ubuntu", "OSCodename": "focal", "Platform": "amd64", "Hunter": false }],
 		"Client": {
 			"exedll_win32": [
 				{ "OS": "Win98", "Platform": "x86", "Hunter": false },
@@ -51,14 +51,11 @@
 				{ "OS": "Win7", "Platform": "x64", "Hunter": false },
 				{ "OS": "Win7", "Platform": "x64" }
 			],
-			"exedll_focal_x86_64": [
-				{ "OS": "Ubuntu-20.04", "Platform": "x86_64", "Hunter": false }
+			"exedll_linux32": [
+				{ "OSId": "steamrt", "OSCodename": "scout", "Platform": "386", "Hunter": true }
 			],
-			"exedll_bionic_x86_64": [
-				{ "OS": "Ubuntu-18.04", "Platform": "x86_64", "Hunter": false }
-			],
-			"exedll_glibc2_27_x86_64": [
-				{ "Toolset": "GLIBC 2.27", "Platform": "x86_64", "Hunter": true }
+			"exedll_linux64": [
+				{ "OSId": "steamrt", "OSCodename": "scout", "Platform": "amd64", "Hunter": true }
 			]
 		},
 		"Options": [
