@@ -133,4 +133,6 @@ if not os.path.isfile("toolchains_" + socket.gethostname().lower() + ".json"):
 	with open(os.path.join(NeLConfigDir, "toolchains_" + socket.gethostname().lower() + ".json"), 'w') as fo:
 		json.dump({}, fo, indent=2)
 
+print("Generated " + str(len(Toolchains)) + " valid toolchain configurations")
+
 # end of file

@@ -6,26 +6,6 @@ from .find_docker import *
 
 FoundGCC = []
 
-def DockerBaseCommand(image, arch, workdir, hunter):
-	res = [ "docker", "run" ]
-	if arch == "386":
-		res += [ "--platform", "linux/386" ]
-	res += [ "--rm" ]
-	if hunter:
-		res += [ "-v", image + "_hunter:/root/.hunter" ]
-	res += [ "--mount", "type=bind,source=" + NeLRootDir + ",target=/mnt/nel" ]
-	if workdir:
-		res += [ "--workdir", "/mnt/nel/" + workdir ]
-	else:
-		res += [ "--workdir", "/mnt/nel/.nel/temp" ]
-	res += [ image ]
-	if arch == "386":
-		res += [ "setarch", "i686" ]
-	return res
-
-def DockerRootPath(path):
-	return "/mnt/nel/" + path
-
 def FindLocalGCC():
 	global FoundGCC
 	
@@ -105,9 +85,10 @@ def FindDockerGCC(image):
 print("Find native GCC installation")
 FindLocalGCC()
 
-for image in FoundDocker:
-	if image in FoundDockerImages:
-		print("Find GCC installation in Docker image \"" + image + "\"")
-		FindDockerGCC(image)
+if FoundDocker:
+	for image in FoundDocker:
+		if image in FoundDockerImages:
+			print("Find GCC installation in Docker image \"" + image + "\"")
+			FindDockerGCC(image)
 
 # end of file
