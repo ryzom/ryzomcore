@@ -25,6 +25,8 @@ def printBuildTarget(name, tn):
 	if tn:
 		tc = NeLToolchains[tn]
 		addtl = ""
+		if "Docker" in tc and tc["Docker"]:
+			addtl += ", Docker"
 		if "Hunter" in tc and tc["Hunter"]:
 			addtl += ", Hunter"
 		if "LuaVersion" in tc:
