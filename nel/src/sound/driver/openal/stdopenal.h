@@ -45,13 +45,8 @@
 
 #include "nel/misc/types_nl.h"
 
-#ifdef NL_OS_MAC
-#	include <al.h>
-#	include <alc.h>
-#else
-#	include <AL/al.h>
-#	include <AL/alc.h>
-#endif
+#include <al.h>
+#include <alc.h>
 
 #include "nel/misc/common.h"
 #include "nel/misc/debug.h"
