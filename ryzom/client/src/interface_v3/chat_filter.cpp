@@ -339,8 +339,8 @@ void CChatTargetFilter::setTargetPlayer(const string &targetPlayer)
 	_TargetPlayer = targetPlayer;
 	if (_TargetPartyChat)
 	{
-		_TargetPartyChat = NULL;
 		_TargetPartyChat->removeObserver(this);
+		_TargetPartyChat = NULL;
 	}
 	// set the prompt
 	if (_Chat)
