@@ -380,6 +380,13 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 #define nlassume(exp) do { } while (0)
 #endif
 
+#if defined(NL_COMP_GCC) && (GCC_VERSION >= 40500)
+// This may evaluate the expression at runtime if it has side effects, so it is not a desirable nlassume implementation in release mode
+#define nlassumeex(exp) do { if (!(exp)) __builtin_unreachable(); } while (0)
+#else
+#define nlassumeex(exp) nlassume(exp)
+#endif
+
 #ifdef NL_NO_DEBUG
 #	define nlassert(exp) nlassume(exp)
 #	define nlassertonce(exp) nlassume(exp)

@@ -130,6 +130,8 @@ SMART_INLINE void	CRefPtr<T>::unRef() const
 		}
 		else
 		{
+			// Guarantueed by !pinfo->IsNullPtrInfo
+			nlassumeex(pinfo != &CRefCount::NullPtrInfo);
 			// If the CRefPtr still point to a valid object.
 			if(pinfo->Ptr)
 			{
