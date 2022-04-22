@@ -61,7 +61,8 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 				opts += [ "-A", "Win32" ]
 			else:
 				opts += [ "-A", "x64" ]
-		opts += [ "-T", tc["Toolset"] ]
+		if tc["Version"] > 9:
+			opts += [ "-T", tc["Toolset"] ]
 	
 	# This is annoying in VS. And we run CMake ahead anyway
 	opts += [ "-DCMAKE_SUPPRESS_REGENERATION=ON" ]
@@ -271,6 +272,18 @@ def GenerateMsvcCmd(file, envScript):
 	#fo.write("cls\n")
 	fo.write("cmd\n")
 	fo.close()
+	
+def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
+	opts = GenerateCMakeOptions(spec, generator, fv, target, buildDir)
+	fo = open(file, 'w')
+	fo.write("call %~dp0" + envScript + "\n")
+	fo.write("title %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
+	fo.write("cmake")
+	for opt in opts:
+		fo.write(" " + EscapeArgOpt(opt))
+	fo.write("\n")
+	fo.write("if %errorlevel% neq 0 pause\n")
+	fo.close()
 
 def ConfigureTarget(spec, name, fv, target):
 	global NeLSpecClient
@@ -300,10 +313,13 @@ def ConfigureTarget(spec, name, fv, target):
 	os.makedirs(buildDir, exist_ok=True)
 	res["RelPath"] = relPath.replace("\\", "/")
 	res["Toolchain"] = target["Toolchain"]
+	gen = None
+	if fv or spec == NeLSpecPluginMax:
+		gen = "Ninja"
 	if tc["Compiler"] == "MSVC":
 		GenerateMsvcEnv(os.path.join(buildRootDir, safeName + "_env." + NeLScriptExt), buildDir, tc)
 		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_cmd." + NeLScriptExt), safeName + "_env." + NeLScriptExt)
-		print(GenerateCMakeOptions(spec, None, fv, target, buildDir))
+		GenerateCMakeCreate(os.path.join(buildRootDir, safeName + "_create." + NeLScriptExt), safeName + "_env." + NeLScriptExt, spec, gen, fv, target, buildDir)
 		pass
 	elif tc["Compiler"] == "GCC":
 		if "Docker" in tc and tc["Docker"]:
