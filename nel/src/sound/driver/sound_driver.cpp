@@ -195,13 +195,6 @@ std::vector<ISoundDriver::TDriver> ISoundDriver::getAvailableDrivers()
 
 #else // NL_STATIC
 
-	const std::vector<TDriver> vec = {
-		DriverFMod,
-		DriverOpenAl,
-		DriverDSound,
-		DriverXAudio2,
-	};
-
 #if 0
 	// if platform has dynamic driver name set, consider it as available
 	for(uint i = 0; i < vec.size(); i++)
@@ -216,15 +209,15 @@ std::vector<ISoundDriver::TDriver> ISoundDriver::getAvailableDrivers()
 	driverLib.addLibPath(NL_DRIVER_PREFIX);
 #endif
 	nlinfo("Detecting available sound drivers");
-	for(uint i = 0; i < vec.size(); i++)
+	for(uint i = (uint)TDriver::DriverAuto + 1; i < (uint)TDriver::NumDrivers; i++)
 	{
-		std::string dllName = getDriverFileName(vec[i]);
+		std::string dllName = getDriverFileName((TDriver)i);
 		if(!dllName.empty())
 		{
 			// Load it (adding standard nel pre/suffix, looking in library path and taking ownership)
 			if (driverLib.loadLibrary(dllName, true, true, true))
 			{
-				m_AvailableDrivers.push_back(vec[i]);
+				m_AvailableDrivers.push_back((TDriver)i);
 				driverLib.freeLibrary();
 			}
 		}
