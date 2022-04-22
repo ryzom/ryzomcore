@@ -4,14 +4,14 @@ from .find_max import *
 
 NeLToolchainNative = NeLConfig["Toolchain"]["Native"]
 
-NeLTargetClientDev = FindToolchainEx(NeLToolchainNative["Filter"])
-NeLTargetServerDev = FindToolchainEx(NeLToolchainNative["Filter"])
+NeLTargetClientDev = { "Toolchain": FindToolchainEx(NeLToolchainNative["Filter"]), "Config": NeLToolchainNative }
+NeLTargetServerDev = { "Toolchain": FindToolchainEx(NeLToolchainNative["Filter"]), "Config": NeLToolchainNative }
 NeLTargetClient = {}
 for client in NeLConfig["Toolchain"]["Client"]:
-	NeLTargetClient[client] = FindToolchainEx(NeLConfig["Toolchain"]["Client"][client]["Filter"])
-NeLTargetServer = FindToolchainEx(NeLConfig["Toolchain"]["Server"]["Filter"])
-NeLTargetTools = FindToolchainEx(NeLToolchainNative["Filter"])
-NeLTargetSamples = FindToolchainEx(NeLToolchainNative["Filter"])
+	NeLTargetClient[client] = { "Toolchain": FindToolchainEx(NeLConfig["Toolchain"]["Client"][client]["Filter"]), "Config": NeLConfig["Toolchain"]["Client"][client] }
+NeLTargetServer = { "Toolchain": FindToolchainEx(NeLConfig["Toolchain"]["Server"]["Filter"]), "Config": NeLConfig["Toolchain"]["Server"] }
+NeLTargetTools = { "Toolchain": FindToolchainEx(NeLToolchainNative["Filter"]), "Config": NeLToolchainNative }
+NeLTargetSamples = { "Toolchain": FindToolchainEx(NeLToolchainNative["Filter"]), "Config": NeLToolchainNative }
 NelTargetPluginMax = {}
 remapMaxCompatible = {}
 foundMax = {}
@@ -21,7 +21,7 @@ for maxSdk in FoundMaxSDKs:
 		if maxSdk["Compatible"] in foundMax:
 			continue
 	filters = [ { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True, "Hunter": True }, { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True } ]
-	foundTs = FindToolchainEx(filters)
+	foundTs = { "Toolchain": FindToolchainEx(filters), "Config": NeLConfig["Toolchain"]["PluginMax"] }
 	if foundTs:
 		foundMax[maxSdk["Version"]] = True
 		if "Compatible" in maxSdk:

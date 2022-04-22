@@ -22,8 +22,8 @@ for image in FoundDockerImages:
 from quick_start.find_targets import *
 
 def printBuildTarget(name, tn):
-	if tn:
-		tc = NeLToolchains[tn]
+	if tn["Toolchain"]:
+		tc = NeLToolchains[tn["Toolchain"]]
 		addtl = ""
 		if "Docker" in tc and tc["Docker"]:
 			addtl += ", Docker"
@@ -43,7 +43,7 @@ print("Build targets:")
 printBuildTarget("client_dev", NeLTargetClientDev)
 printBuildTarget("server_dev", NeLTargetServerDev)
 for client in NeLTargetClient:
-	printBuildTarget(client, NeLTargetClient[client])
+	printBuildTarget("client/" + client, NeLTargetClient[client])
 printBuildTarget("server", NeLTargetServer)
 printBuildTarget("tools", NeLTargetTools)
 printBuildTarget("samples", NeLTargetSamples)
