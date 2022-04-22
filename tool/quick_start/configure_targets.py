@@ -47,14 +47,14 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 	isHunter = "Hunter" in tc and tc["Hunter"]
 	opts = []
 	
-	# -G "Visual Studio 9 2008" -A Win32
-	
+	# Generator
 	gen = generator
 	if not gen and "Generator" in tc:
 		gen = tc["Generator"]
 	if gen:
 		opts += [ "-G", gen ]
 	
+	# Visual Studio Toolset and Platform
 	if gen.startswith("Visual Studio") and "Toolset" in tc and tc["Toolset"].startswith("v"):
 		if "Platform" in tc:
 			if tc["Platform"] == "x86" or tc["Platform"] == "386":
@@ -63,6 +63,11 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 				opts += [ "-A", "x64" ]
 		if tc["Version"] > 9:
 			opts += [ "-T", tc["Toolset"] ]
+	
+	# SSE2 and SSE3 of on 32-bit x86 platform
+	if tc["Platform"] == "x86" or tc["Platform"] == "386":
+		opts += [ "-DWITH_SSE2=OFF" ]
+		opts += [ "-DWITH_SSE3=OFF" ]
 	
 	# This is annoying in VS. And we run CMake ahead anyway
 	opts += [ "-DCMAKE_SUPPRESS_REGENERATION=ON" ]
@@ -278,6 +283,8 @@ def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
 	fo = open(file, 'w')
 	fo.write("call %~dp0" + envScript + "\n")
 	fo.write("title %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
+	fo.write("rmdir /s /q %RC_BUILD_DIR% > nul 2> nul\n")
+	fo.write("mkdir /s /q %RC_BUILD_DIR% > nul 2> nul\n")
 	fo.write("cmake")
 	for opt in opts:
 		fo.write(" " + EscapeArgOpt(opt))
