@@ -96,7 +96,8 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 		opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL_FILES%" ]
 	
 	if isHunter:
-		opts += [ "-DWITH_HUNTER=ON" ]
+		opts += [ "-DHUNTER_ENABLED=ON" ]
+		opts += [ "-DHUNTER_JOBS_NUMBER=%RC_PARALLEL%" ]
 	
 	if tc["Compiler"] == "GCC" or isHunter:
 		opts += [ "-DWITH_STATIC_DRIVERS=ON" ]
@@ -219,6 +220,9 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 def GeneratePathScript():
 	fo = open(NeLPathScript, 'w')
 	fo.write("set " + EscapeArg("RC_CODE_DIR=" + NeLCodeDir) + "\n")
+	fo.write("set " + EscapeArg("RC_PYTHON27_DIR=" + NeLPython27Dir) + "\n")
+	fo.write("set " + EscapeArg("RC_PYTHON3_DIR=" + NeLPython3Dir) + "\n")
+	fo.write("set " + EscapeArg("RC_PERL_DIRS=" + os.path.join(NeLPerlDir, os.path.normcase("perl/site/bin")) + os.pathsep + os.path.join(NeLPerlDir, os.path.normcase("perl/bin")) + os.pathsep + NeLPerlDir) + "\n")
 	envPath = ""
 	for path in NeLEnvPaths:
 		envPath += path + os.pathsep
@@ -246,6 +250,8 @@ def GenerateMsvcEnv(file, buildDir, tc):
 	fo.write("\n")
 	fo.write("cd /d " + EscapeArg(buildDir) + "\n")
 	fo.write("call " + EscapeArg(NeLPathScript) + "\n")
+	if "Hunter" in tc and tc["Hunter"]:
+		fo.write("set PATH=%RC_PERL_DIRS%;%PATH%\n")
 	fo.write("set PATH=%RC_PATH%;%PATH%\n")
 	for envSet in tc["EnvSet"]:
 		varName = envSet.split("=")[0]
@@ -307,7 +313,9 @@ def ConfigureTarget(spec, name, fv, target):
 	safeName = name.replace("/", "_")
 	relPath = os.path.normcase(name)
 	buildRootDir = None
-	if "Docker" in tc and tc["Docker"]:
+	isDocker = "Docker" in tc and tc["Docker"]
+	isHunter = "Hunter" in tc and tc["Hunter"]
+	if isDocker:
 		relPath = os.path.join(NeLBuildDockerDirName, relPath)
 		buildRootDir = NeLBuildDockerDir
 	elif "Remote" in tc and tc["Remote"]:
@@ -321,7 +329,7 @@ def ConfigureTarget(spec, name, fv, target):
 	res["RelPath"] = relPath.replace("\\", "/")
 	res["Toolchain"] = target["Toolchain"]
 	gen = None
-	if fv or spec == NeLSpecPluginMax:
+	if (fv or spec == NeLSpecPluginMax) and not (isHunter and tc["Compiler"] == "MSVC"): # OpenSSL build fails with Hunter and Ninja using MSVC
 		gen = "Ninja"
 	if tc["Compiler"] == "MSVC":
 		GenerateMsvcEnv(os.path.join(buildRootDir, safeName + "_env." + NeLScriptExt), buildDir, tc)

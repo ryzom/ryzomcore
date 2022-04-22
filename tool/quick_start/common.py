@@ -24,14 +24,15 @@ NeLBuildRemoteDir = os.path.join(NeLRootDir, NeLBuildRemoteDirName)
 NeLTempDir = os.path.join(NeLRootDir, os.path.normcase(".nel/temp"))
 
 # Tools for Windows only
-NeLPython27Dir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Python27"])
-NeLPython3Dir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Python3"])
-NeLRRDtoolDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["RRDtool"])
-NeLMariaDBDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["MariaDB"])
-NeLNginxDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["Nginx"])
-NeLPHPDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["PHP"])
-NeLphpMyAdminDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["phpMyAdmin"])
-NeL3dsMaxDir = os.path.join(NeLRootDir, NeLConfig["Paths"]["3dsMax"])
+NeLPython27Dir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Python27"]))
+NeLPython3Dir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Python3"]))
+NeLPerlDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Perl"])) # Only need this to build OpenSSH with Hunter...
+NeLRRDtoolDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["RRDtool"]))
+NeLMariaDBDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["MariaDB"]))
+NeLNginxDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Nginx"]))
+NeLPHPDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["PHP"]))
+NeLphpMyAdminDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["phpMyAdmin"]))
+NeL3dsMaxDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["3dsMax"]))
 NeLDependenciesDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Dependencies"])) # Detect all dependencies of the build output and get them from externals
 
 # Tools added to system path, for any platform

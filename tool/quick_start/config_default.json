@@ -12,6 +12,7 @@
   "Paths": {
     "Python27": "external/python27",
     "Python3": "external/python3",
+    "Perl": "external/perl",
     "RRDtool": "external/rrdtool",
     "MariaDB": "external/mariadb",
     "Nginx": "external/nginx",
