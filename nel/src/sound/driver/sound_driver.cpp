@@ -209,7 +209,7 @@ std::vector<ISoundDriver::TDriver> ISoundDriver::getAvailableDrivers()
 	driverLib.addLibPath(NL_DRIVER_PREFIX);
 #endif
 	nlinfo("Detecting available sound drivers");
-	for(uint i = (uint)TDriver::DriverAuto + 1; i < (uint)TDriver::NumDrivers; i++)
+	for(uint i = (uint)DriverAuto + 1; i < (uint)NumDrivers; i++)
 	{
 		std::string dllName = getDriverFileName((TDriver)i);
 		if(!dllName.empty())
