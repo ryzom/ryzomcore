@@ -689,7 +689,7 @@ namespace NLNET
 		/** Send a command to the security plug-in */
 		virtual void sendSecurityCommand(const TParsedCommandLine &command)
 		{
-			if (_SecurityPlugin != NULL)
+			if (_SecurityPlugin == NULL)
 			{
 				nlwarning("NLNETL5 : CStandardGateway::sendSecurityCommand : plug-in NOT created ");
 				return;
