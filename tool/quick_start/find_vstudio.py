@@ -131,18 +131,38 @@ for vs in list(FoundVisualStudio):
 		if vs["Toolset"] == "v140" or os.path.isdir(checkPath):
 			FoundVisualStudio += [ { "Name": vs["Name"], "DisplayName": vs["DisplayName"], "Path": vs["Path"], "Version": vs["Version"], "Toolset": vs["Toolset"] + "_xp", "HasMFC": vs["HasMFC"] } ]
 
+NeLVSToolsetMap = {
+}
+
+for vs in list(FoundVisualStudio):
+	versions = {}
+	toolsPath = os.path.join(vs["Path"], "VC\\Tools\\MSVC")
+	if os.path.isdir(toolsPath):
+		for dir in os.listdir(toolsPath):
+			if "." in dir and not dir.startswith("."):
+				versions[dir] = True
+	highest = [ 0, 0, 0, 0 ]
+	found = [ "14.0", "14.16", "14.29", "14.30" ]
+	for v in versions:
+		spl = v.split(".")
+		if spl[0] == "14":
+			bv = int(spl[1][0])
+			sub = int(spl[1])
+			if sub > highest[bv]:
+				highest[bv] = sub
+				found[bv] = spl[0] + "." + spl[1]
+	NeLVSToolsetMap["v140"] = found[0]
+	NeLVSToolsetMap["v140_xp"] = found[0]
+	NeLVSToolsetMap["v141"] = found[1]
+	NeLVSToolsetMap["v141_xp"] = found[1]
+	NeLVSToolsetMap["v142"] = found[2]
+	NeLVSToolsetMap["v143"] = found[3]
+
 def FindVCVars(path, toolset, platform):
-	toolsetMap = {
-		"v140": "14.0",
-		"v140_xp": "14.0",
-		"v141": "14.16",
-		"v141_xp": "14.16",
-		"v142": "14.29",
-		"v143": "14.30",
-	}
+	global NeLVSToolsetMap
 	auxVars = os.path.join(path, "VC\\Auxiliary\\Build\\vcvarsall.bat")
 	if os.path.isfile(auxVars):
-		return [ auxVars, platform, "-vcvars_ver=" + toolsetMap[toolset] ]
+		return [ auxVars, platform, "-vcvars_ver=" + NeLVSToolsetMap[toolset] ]
 	allVars = os.path.join(path, "VC\\vcvarsall.bat")
 	if os.path.isfile(allVars):
 		return [ allVars, platform ]

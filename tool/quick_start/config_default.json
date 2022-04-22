@@ -69,6 +69,9 @@
       "linux32": {
         "Filter": [
           { "OSId": "steamrt", "OSCodename": "scout", "Platform": "386", "Hunter": true }
+        ],
+        "CMake": [
+          "-DCUSTOM_FLAGS=-march=i686"
         ]
       },
       "linux64": {

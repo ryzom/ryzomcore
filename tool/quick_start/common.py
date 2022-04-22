@@ -9,10 +9,16 @@ NeLCodeDir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__
 NeLLeveldesignDir = os.path.join(NeLRootDir, "leveldesign")
 NeLGraphicsDir = os.path.join(NeLRootDir, "graphics")
 NeLSoundDir = os.path.join(NeLRootDir, "sound")
-NeLBuildDirName = "build_" + NeLHostId
-NeLBuildDir = os.path.join(NeLRootDir, NeLBuildDirName)
 NeLPipelineDir = os.path.join(NeLRootDir, "pipeline")
 NeLDistributionDir = os.path.join(NeLRootDir, "distribution")
+
+# Separate builds by host platform (not target platform) for quick switching in case of dual boot
+NeLBuildDirName = "build_" + NeLPlatformId
+NeLBuildDir = os.path.join(NeLRootDir, NeLBuildDirName)
+NeLBuildDockerDirName = "build_docker"
+NeLBuildDockerDir = os.path.join(NeLRootDir, NeLBuildDockerDirName)
+NeLBuildRemoteDirName = "build_remote"
+NeLBuildRemoteDir = os.path.join(NeLRootDir, NeLBuildRemoteDirName)
 
 # Special folders
 NeLTempDir = os.path.join(NeLRootDir, os.path.normcase(".nel/temp"))
@@ -40,7 +46,12 @@ NeLEnvPaths[NeLNinjaDir] = True
 for path in NeLEnvPaths:
 	os.environ["PATH"] = path + os.pathsep + os.environ["PATH"]
 # print(os.environ["PATH"])
-del NeLEnvPaths
+
+NeLScriptExt = 'sh'
+if os.name == 'nt':
+	NeLScriptExt = 'bat'
+
+NeLPathScript = os.path.join(NeLRootDir, os.path.normcase(".nel/path_config." + NeLScriptExt))
 
 #print(NeLRootDir)
 #print(NeLConfigDir)

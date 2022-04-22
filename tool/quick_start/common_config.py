@@ -1,7 +1,7 @@
 
 from .common_root import *
 
-import os, json, socket
+import os, json, socket, sys
 
 NeLHostName = socket.gethostname()
 
@@ -9,6 +9,7 @@ NeLHostName = socket.gethostname()
 # Used for separating build directories in multiboot development scenario
 # Release builds should always be done from the same box, ideally
 NeLHostId = NeLHostName.lower()
+NeLPlatformId = sys.platform.lower()
 
 fi = open(os.path.join(NeLQuickStartDir, "config_default.json"), "r")
 NeLConfig = json.load(fi)

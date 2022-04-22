@@ -9,3 +9,8 @@ Run the scripts in this order to configure the toolchains:
 - configure_targets.py
 - configure_pipeline.py
 - configure_launchers.py
+
+To optimize your server build, check your native compiler options. Copy the -march and -mtune options, and add them to the CUSTOM_FLAGS option in CMake
+```
+gcc -march=native -E -v - </dev/null 2>&1 | grep cc1
+```

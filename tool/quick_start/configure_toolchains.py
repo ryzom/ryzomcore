@@ -27,6 +27,7 @@ for ts in SortedToolsets:
 	for platform in VSPlatforms:
 		toolchain = {}
 		toolchain["Compiler"] = "MSVC"
+		toolchain["VSPath"] = vs["Path"]
 		if vs["Version"] >= 9:
 			toolchain["Generator"] = vs["Name"]
 		else:
@@ -118,7 +119,10 @@ for ts in SortedToolsets:
 				copyToolchain["Hunter"] = True
 				copyToolchain["Prefix"] = []
 				copyToolchain["EnvPath"] = []
-				copyToolchain["EnvSet"] += [ "CL=/DLIBXML_STATIC;%CL%" ]
+				copyEnvSet = []
+				copyEnvSet += copyToolchain["EnvSet"]
+				copyEnvSet += [ "CL=/DLIBXML_STATIC;%CL%" ]
+				copyToolchain["EnvSet"] = copyEnvSet
 				if "LuaVersion" in copyToolchain:
 					del copyToolchain["LuaVersion"]
 				Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + "/H"] = copyToolchain
