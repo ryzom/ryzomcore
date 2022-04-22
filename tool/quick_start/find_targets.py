@@ -21,7 +21,7 @@ for maxSdk in FoundMaxSDKs:
 		if maxSdk["Compatible"] in foundMax:
 			continue
 	filters = [ { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True, "Hunter": True }, { "Toolset": maxSdk["Toolset"], "Platform": maxSdk["Platform"], "HasMFC": True } ]
-	foundTs = { "Toolchain": FindToolchainEx(filters), "Config": NeLConfig["Toolchain"]["PluginMax"] }
+	foundTs = { "Toolchain": FindToolchainEx(filters), "Config": NeLConfig["Toolchain"]["PluginMax"], "MaxSDK": maxSdk }
 	if foundTs:
 		foundMax[maxSdk["Version"]] = True
 		if "Compatible" in maxSdk:

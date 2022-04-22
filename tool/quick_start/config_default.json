@@ -1,5 +1,14 @@
 {
   "Domains": { "default": {} },
+  "Defaults": {
+    "ClientCreateAccountUrl": "https://core.ryzom.dev/ams/",
+    "ClientEditAccountUrl": "https://core.ryzom.dev/ams/",
+    "ClientForgetPasswordUrl": "https://core.ryzom.dev/ams/",
+    "ClientPatchUrl": "https://cdn.ryzom.dev/default/patch/",
+    "ClientReleaseNotesUrl": "https://default.ryzom.dev/releasenotes/index.php",
+    "ClientReleaseNotesRingUrl": "https://default.ryzom.dev/releasenotes_ring/index.php",
+    "ClientDomain": "default"
+  },
   "Paths": {
     "Python27": "external/python27",
     "Python3": "external/python3",
@@ -39,6 +48,7 @@
     "Native": {
       "Filter": [
         { "Native": true, "Hunter": false },
+        { "OS": "Win7", "Platform": "x64", "HasMFC": true, "Hunter": false },
         { "OS": "Win7", "Platform": "x64", "Hunter": false },
         { "OS": "Win7", "Platform": "x64" }
       ]
