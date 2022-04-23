@@ -351,7 +351,7 @@ def GenerateMsvcCmd(file, envScript, target):
 	fo = open(file, 'w')
 	fo.write("@echo off\n")
 	fo.write("call " + EscapeArg(envScript) + "\n")
-	fo.write("title Terminal - " + target["DisplayName"] +" - \n")
+	fo.write("title Terminal - " + target["DisplayName"] +" - %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
 	#fo.write("cls\n")
 	fo.write("cmd\n")
 	fo.close()
