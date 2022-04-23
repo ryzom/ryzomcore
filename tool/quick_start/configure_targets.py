@@ -257,6 +257,7 @@ def GeneratePatchVersionScript():
 
 def GenerateDockerEnv(file, relBuildDir, buildDir, tc):
 	fo = open(file, 'w')
+	fo.write("@echo off\n")
 	fo.write("rem " + tc["DisplayName"] + "\n")
 	fo.write("cd /d " + EscapeArg(buildDir) + "\n")
 	fo.write("call " + EscapeArg(NeLPathScript) + "\n")
@@ -284,6 +285,7 @@ def GenerateDockerEnv(file, relBuildDir, buildDir, tc):
 
 def GenerateMsvcEnv(file, buildDir, tc):
 	fo = open(file, 'w')
+	fo.write("@echo off\n")
 	fo.write("rem " + tc["DisplayName"] + "\n")
 	fo.write("cd /d " + EscapeArg(tc["VSPath"]) + "\n")
 	fo.write("call")
@@ -325,6 +327,7 @@ def GenerateMsvcEnv(file, buildDir, tc):
 
 def GenerateMsvcCmd(file, envScript, target):
 	fo = open(file, 'w')
+	fo.write("@echo off\n")
 	fo.write("call " + EscapeArg(envScript) + "\n")
 	fo.write("title Terminal - " + target["DisplayName"] +" - \n")
 	#fo.write("cls\n")
@@ -334,25 +337,36 @@ def GenerateMsvcCmd(file, envScript, target):
 def GenerateDockerCmd(file, envScript, target):
 	tc = NeLToolchains[target["Toolchain"]]
 	fo = open(file, 'w')
+	fo.write("@echo off\n")
 	fo.write("call " + EscapeArg(envScript) + "\n")
 	fo.write("title Terminal - " + target["DisplayName"] +" - " + tc["DisplayName"] + "\n")
 	#fo.write("cls\n")
 	fo.write("%RC_DOCKER_IT% bash\n")
 	fo.close()
 
+def WritePauseGoto(fo, go):
+	fo.write("if %errorlevel% neq 0 (\n")
+	fo.write("pause\n")
+	fo.write("goto " + go + "\n")
+	fo.write(")\n")
+
 def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
 	tc = NeLToolchains[target["Toolchain"]]
 	isDocker = "Docker" in tc and tc["Docker"]
 	opts = GenerateCMakeOptions(spec, generator, fv, target, buildDir)
 	fo = open(file, 'w')
+	fo.write("@echo off\n")
 	fo.write("call " + EscapeArg(envScript) + "\n")
 	tcTitle = "%RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%"
 	if tc["Compiler"] != "MSVC":
 		tcTitle = tc["DisplayName"]
 	fo.write("title Configure - " + target["DisplayName"] +" - " + tcTitle + "\n")
 	fo.write("mkdir /s /q %RC_BUILD_DIR% > nul 2> nul\n")
+	fo.write(":erasedir\n")
 	fo.write("powershell -Command \"Remove-Item '" + os.path.join("%RC_BUILD_DIR%", "*") + "' -Recurse -Force\"\n")
-	fo.write("if %errorlevel% neq 0 pause\n")
+	WritePauseGoto(fo, ":erasedir")
+	fo.write(":configure\n")
+	fo.write("@echo on\n")
 	if isDocker:
 		fo.write("%RC_DOCKER% ")
 	fo.write("cmake")
@@ -364,7 +378,8 @@ def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
 			fo.write(" " + EscapeArgOpt(opt))
 		lastOpt = (len(opt) == 2)
 	fo.write("\n")
-	fo.write("if %errorlevel% neq 0 pause\n")
+	fo.write("@echo off\n")
+	WritePauseGoto(fo, ":configure")
 	# TODO: If gen is VS, generate all the appropriate .vcxproj.user files for easy debugging (call a Python script for this)
 	fo.close()
 
@@ -379,6 +394,7 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 		gen = tc["Generator"]
 	
 	fo = open(file, 'w')
+	fo.write("@echo off\n")
 	fo.write("call " + EscapeArg(envScript) + "\n")
 	tcTitle = "%RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%"
 	if tc["Compiler"] != "MSVC":
@@ -386,8 +402,9 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 	fo.write("title Build - " + target["DisplayName"] +" - " + tcTitle + "\n")
 	
 	# Update patch version, may be done ahead by calling build script as well
+	fo.write(":patchversion\n")
 	fo.write("call " + EscapeArg(NeLPatchVersionScript) + "\n")
-	fo.write("if %errorlevel% neq 0 pause\n")
+	WritePauseGoto(fo, ":patchversion")
 	
 	# Ensure it's configured
 	fo.write("if not exist CMakeCache.txt (\n")
@@ -398,18 +415,23 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 	
 	# Update patch version
 	# TODO: Update build number (increment a meaningless number locally anytime the git sha1 `git rev-parse HEAD` changes, set the minimum to `git rev-list --count HEAD`)
+	fo.write(":reconfigure\n")
+	fo.write("@echo on\n")
 	if isDocker:
 		fo.write("%RC_DOCKER% ")
 	fo.write("cmake -DNL_VERSION_PATCH=%CLIENT_PATCH_VERSION% .\n")
-	fo.write("if %errorlevel% neq 0 pause\n")
+	fo.write("@echo off\n")
+	WritePauseGoto(fo, ":reconfigure")
 	
 	# Build
+	fo.write(":build\n")
+	fo.write("@echo on\n")
 	if isDocker:
 		fo.write("%RC_DOCKER% ")
 	if gen.startswith("Visual Studio"):
 		if not fv:
 			fo.write("msbuild RyzomCore.sln /m:%RC_PARALLEL_PROJECTS% /p:Configuration=Debug\n")
-			fo.write("if %errorlevel% neq 0 pause\n")
+			WritePauseGoto(fo, ":build")
 		fo.write("msbuild RyzomCore.sln /m:%RC_PARALLEL_PROJECTS% /p:Configuration=Release\n")
 	elif "Ninja" in gen:
 		fo.write("ninja -j%RC_PARALLEL%\n")
@@ -419,7 +441,8 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 		fo.write("nmake\n")
 	else:
 		fo.write("make -j%RC_PARALLEL%\n")
-	fo.write("if %errorlevel% neq 0 pause\n")
+	fo.write("@echo off\n")
+	WritePauseGoto(fo, ":build")
 	
 	fo.write(":done\n")
 	fo.close()
