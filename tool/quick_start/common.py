@@ -39,11 +39,13 @@ NeLDependenciesDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"
 # If these paths are wrong, tools from the system path may be used, which is okay
 NeLAria2Dir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Aria2"])) # Used for downloading SteamRT
 NeLNinjaDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Ninja"])) # Used to build faster
+NeLJomDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Jom"])) # Used to build faster if Ninja doesn't work
 
 # Deduplicate any paths, and add them to the system path variable
 NeLEnvPaths = {}
 NeLEnvPaths[NeLAria2Dir] = True
 NeLEnvPaths[NeLNinjaDir] = True
+NeLEnvPaths[NeLJomDir] = True
 for path in NeLEnvPaths:
 	os.environ["PATH"] = path + os.pathsep + os.environ["PATH"]
 # print(os.environ["PATH"])

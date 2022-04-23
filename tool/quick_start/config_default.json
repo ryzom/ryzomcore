@@ -9,6 +9,7 @@
     "ClientReleaseNotesRingUrl": "https://default.ryzom.dev/releasenotes_ring/index.php",
     "ClientDomain": "default"
   },
+  "UseNinja": true,
   "Paths": {
     "Python27": "external/python27",
     "Python3": "external/python3",
@@ -21,6 +22,7 @@
     "Dependencies": "external/dependencies",
     "Aria2": "external/utils",
     "Ninja": "external/utils",
+    "Jom": "external/utils",
     "3dsMax": "",
     "3dsMaxLocal": ""
   },

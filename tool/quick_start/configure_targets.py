@@ -52,17 +52,17 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 	if not gen and "Generator" in tc:
 		gen = tc["Generator"]
 	if gen:
-		opts += [ "-G", gen ]
+		if gen == tc["Generator"]:
+			opts += [ "-G", "%RC_GENERATOR%" ]
+		else:
+			opts += [ "-G", gen ]
 	
 	# Visual Studio Toolset and Platform
 	if gen.startswith("Visual Studio") and "Toolset" in tc and tc["Toolset"].startswith("v"):
 		if "Platform" in tc:
-			if tc["Platform"] == "x86" or tc["Platform"] == "386":
-				opts += [ "-A", "Win32" ]
-			else:
-				opts += [ "-A", "x64" ]
+			opts += [ "-A", "%RC_PLATFORM%" ]
 		if tc["Version"] > 9:
-			opts += [ "-T", tc["Toolset"] ]
+			opts += [ "-T", "%RC_TOOLSET%" ]
 	
 	# SSE2 and SSE3 of on 32-bit x86 platform
 	if tc["Platform"] == "x86" or tc["Platform"] == "386":
@@ -266,7 +266,12 @@ def GenerateMsvcEnv(file, buildDir, tc):
 		else:
 			fo.write("set " + EscapeArg(envSet) + "\n")
 	fo.write("set " + EscapeArg("RC_GENERATOR=" + tc["Generator"]) + "\n")
-	fo.write("set " + EscapeArg("RC_PLATFORM=" + tc["Platform"]) + "\n")
+	platform = tc["Platform"]
+	if platform == "x86" or platform == "386":
+		platform = "Win32"
+	else:
+		platform = "x64"
+	fo.write("set " + EscapeArg("RC_PLATFORM=" + platform) + "\n")
 	fo.write("set " + EscapeArg("RC_TOOLSET=" + tc["Toolset"]) + "\n")
 	fo.write("set " + EscapeArg("RC_BUILD_DIR=" + buildDir) + "\n")
 	if "Prefix" in tc and len(tc["Prefix"]) > 0:
@@ -333,8 +338,12 @@ def ConfigureTarget(spec, name, fv, target):
 	res["RelPath"] = relPath.replace("\\", "/")
 	res["Toolchain"] = target["Toolchain"]
 	gen = None
-	if (fv or spec == NeLSpecPluginMax) and not (isHunter and tc["Compiler"] == "MSVC"): # OpenSSL build fails with Hunter and Ninja using MSVC
-		gen = "Ninja"
+	if (fv or spec == NeLSpecPluginMax or isDocker) and NeLConfig["UseNinja"]:
+		if (isHunter and tc["Compiler"] == "MSVC"):
+			 # OpenSSL build fails with Hunter and Ninja using MSVC, JOM works
+			gen = "NMake Makefiles JOM"
+		else:
+			gen = "Ninja"
 	if tc["Compiler"] == "MSVC":
 		GenerateMsvcEnv(os.path.join(buildRootDir, safeName + "_env." + NeLScriptExt), buildDir, tc)
 		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_cmd." + NeLScriptExt), safeName + "_env." + NeLScriptExt)
