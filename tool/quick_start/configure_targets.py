@@ -52,7 +52,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 	if not gen and "Generator" in tc:
 		gen = tc["Generator"]
 	if gen:
-		if gen == tc["Generator"]:
+		if "Generator" in tc and gen == tc["Generator"]:
 			opts += [ "-G", "%RC_GENERATOR%" ]
 		else:
 			opts += [ "-G", gen ]
@@ -341,13 +341,20 @@ def GenerateDockerCmd(file, envScript, target):
 	fo.close()
 
 def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
+	tc = NeLToolchains[target["Toolchain"]]
+	isDocker = "Docker" in tc and tc["Docker"]
 	opts = GenerateCMakeOptions(spec, generator, fv, target, buildDir)
 	fo = open(file, 'w')
 	fo.write("call " + EscapeArg(envScript) + "\n")
-	fo.write("title Configure - " + target["DisplayName"] +" - %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
+	tcTitle = "%RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%"
+	if tc["Compiler"] != "MSVC":
+		tcTitle = tc["DisplayName"]
+	fo.write("title Configure - " + target["DisplayName"] +" - " + tcTitle + "\n")
 	fo.write("mkdir /s /q %RC_BUILD_DIR% > nul 2> nul\n")
 	fo.write("powershell -Command \"Remove-Item '" + os.path.join("%RC_BUILD_DIR%", "*") + "' -Recurse -Force\"\n")
 	fo.write("if %errorlevel% neq 0 pause\n")
+	if isDocker:
+		fo.write("%RC_DOCKER% ")
 	fo.write("cmake")
 	lastOpt = False
 	for opt in opts:
@@ -373,7 +380,10 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 	
 	fo = open(file, 'w')
 	fo.write("call " + EscapeArg(envScript) + "\n")
-	fo.write("title Build - " + target["DisplayName"] +" - %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
+	tcTitle = "%RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%"
+	if tc["Compiler"] != "MSVC":
+		tcTitle = tc["DisplayName"]
+	fo.write("title Build - " + target["DisplayName"] +" - " + tcTitle + "\n")
 	
 	# Update patch version, may be done ahead by calling build script as well
 	fo.write("call " + EscapeArg(NeLPatchVersionScript) + "\n")
@@ -388,10 +398,14 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 	
 	# Update patch version
 	# TODO: Update build number (increment a meaningless number locally anytime the git sha1 `git rev-parse HEAD` changes, set the minimum to `git rev-list --count HEAD`)
+	if isDocker:
+		fo.write("%RC_DOCKER% ")
 	fo.write("cmake -DNL_VERSION_PATCH=%CLIENT_PATCH_VERSION% .\n")
 	fo.write("if %errorlevel% neq 0 pause\n")
 	
 	# Build
+	if isDocker:
+		fo.write("%RC_DOCKER% ")
 	if gen.startswith("Visual Studio"):
 		if not fv:
 			fo.write("msbuild RyzomCore.sln /m:%RC_PARALLEL_PROJECTS% /p:Configuration=Debug\n")
@@ -463,6 +477,8 @@ def ConfigureTarget(spec, name, fv, target):
 		if "Docker" in tc and tc["Docker"]:
 			GenerateDockerEnv(envScript, relPath, buildDir, tc)
 			GenerateDockerCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
+			GenerateCMakeCreate(os.path.join(buildRootDir, safeName + "_configure." + NeLScriptExt), envScript, spec, gen, fv, target, buildDir)
+			GenerateBuild(os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt), envScript, spec, gen, fv, target, buildDir)
 		else:
 			pass
 	return res
