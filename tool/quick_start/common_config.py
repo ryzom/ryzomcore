@@ -43,20 +43,20 @@ if "HostId" in NeLConfig:
 	# Override if specified
 	NeLHostId = NeLConfig["HostId"]
 
-MergeConfig("config_" + NeLHostId + "_default.json")
-MergeConfig("config_" + NeLHostId + ".json")
+MergeConfig("config_" + NeLHostId + "_" + NeLPlatformId + "_default.json")
+MergeConfig("config_" + NeLHostId + "_" + NeLPlatformId + ".json")
 
 #print(str(NeLConfig))
 
-if os.path.isfile(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_default.json")):
-	fi = open(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_default.json"), "r")
+if os.path.isfile(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_" + NeLPlatformId + "_default.json")):
+	fi = open(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_" + NeLPlatformId + "_default.json"), "r")
 	NeLToolchains = json.load(fi)
 	fi.close()
 else:
 	NeLToolchains = {}
 
-if os.path.isfile(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + ".json")):
-	fi = open(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + ".json"), "r")
+if os.path.isfile(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_" + NeLPlatformId + ".json")):
+	fi = open(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_" + NeLPlatformId + ".json"), "r")
 	NeLToolchains.update(json.load(fi))
 	fi.close()
 

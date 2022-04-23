@@ -255,6 +255,33 @@ def GeneratePatchVersionScript():
 	fo.write(":done\n")
 	fo.close()
 
+def GenerateDockerEnv(file, relBuildDir, buildDir, tc):
+	fo = open(file, 'w')
+	fo.write("rem " + tc["DisplayName"] + "\n")
+	fo.write("cd /d " + EscapeArg(buildDir) + "\n")
+	fo.write("call " + EscapeArg(NeLPathScript) + "\n")
+	if "Hunter" in tc and tc["Hunter"]:
+		fo.write("set PATH=%RC_PERL_DIRS%;%PATH%\n")
+	fo.write("set PATH=%RC_PATH%;%PATH%\n")
+	fo.write("set " + EscapeArg("RC_BUILD_DIR=" + buildDir) + "\n")
+	fo.write("set RC_DOCKER=")
+	dockerCmd = DockerBaseCommand(tc["Image"], tc["Platform"], relBuildDir, "Hunter" in tc and tc["Hunter"])
+	dockerCmdStr = ""
+	for cmd in dockerCmd:
+		dockerCmdStr += EscapeArgOpt(cmd) + " "
+	if len(dockerCmdStr) > 0:
+		fo.write(dockerCmdStr[:-1])
+	fo.write("\n")
+	fo.write("set RC_DOCKER_IT=")
+	dockerCmd = DockerBaseCommand(tc["Image"], tc["Platform"], relBuildDir, "Hunter" in tc and tc["Hunter"], interactive=True)
+	dockerCmdStr = ""
+	for cmd in dockerCmd:
+		dockerCmdStr += EscapeArgOpt(cmd) + " "
+	if len(dockerCmdStr) > 0:
+		fo.write(dockerCmdStr[:-1])
+	fo.write("\n")
+	fo.close()
+
 def GenerateMsvcEnv(file, buildDir, tc):
 	fo = open(file, 'w')
 	fo.write("rem " + tc["DisplayName"] + "\n")
@@ -298,16 +325,25 @@ def GenerateMsvcEnv(file, buildDir, tc):
 
 def GenerateMsvcCmd(file, envScript, target):
 	fo = open(file, 'w')
-	fo.write("call %~dp0" + envScript + "\n")
-	fo.write("title Terminal - " + target["DisplayName"] +" - %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
+	fo.write("call " + EscapeArg(envScript) + "\n")
+	fo.write("title Terminal - " + target["DisplayName"] +" - \n")
 	#fo.write("cls\n")
 	fo.write("cmd\n")
 	fo.close()
-	
+
+def GenerateDockerCmd(file, envScript, target):
+	tc = NeLToolchains[target["Toolchain"]]
+	fo = open(file, 'w')
+	fo.write("call " + EscapeArg(envScript) + "\n")
+	fo.write("title Terminal - " + target["DisplayName"] +" - " + tc["DisplayName"] + "\n")
+	#fo.write("cls\n")
+	fo.write("%RC_DOCKER_IT% bash\n")
+	fo.close()
+
 def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
 	opts = GenerateCMakeOptions(spec, generator, fv, target, buildDir)
 	fo = open(file, 'w')
-	fo.write("call %~dp0" + envScript + "\n")
+	fo.write("call " + EscapeArg(envScript) + "\n")
 	fo.write("title Configure - " + target["DisplayName"] +" - %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
 	fo.write("mkdir /s /q %RC_BUILD_DIR% > nul 2> nul\n")
 	fo.write("powershell -Command \"Remove-Item '" + os.path.join("%RC_BUILD_DIR%", "*") + "' -Recurse -Force\"\n")
@@ -336,7 +372,7 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 		gen = tc["Generator"]
 	
 	fo = open(file, 'w')
-	fo.write("call %~dp0" + envScript + "\n")
+	fo.write("call " + EscapeArg(envScript) + "\n")
 	fo.write("title Build - " + target["DisplayName"] +" - %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
 	
 	# Update patch version, may be done ahead by calling build script as well
@@ -388,21 +424,26 @@ def ConfigureTarget(spec, name, fv, target):
 	cfg = target["Config"]
 	safeName = name.replace("/", "_")
 	relPath = os.path.normcase(name)
+	relBuildRootDir = None
 	buildRootDir = None
 	isDocker = "Docker" in tc and tc["Docker"]
 	isHunter = "Hunter" in tc and tc["Hunter"]
 	if isDocker:
 		relPath = os.path.join(NeLBuildDockerDirName, relPath)
+		relBuildRootDir = NeLBuildDockerDirName
 		buildRootDir = NeLBuildDockerDir
 	elif "Remote" in tc and tc["Remote"]:
 		relPath = os.path.join(NeLBuildRemoteDirName, relPath)
+		relBuildRootDir = NeLBuildRemoteDirName
 		buildRootDir = NeLBuildRemoteDir
 	else:
 		relPath = os.path.join(NeLBuildDirName, relPath)
+		relBuildRootDir = NeLBuildDirName
 		buildRootDir = NeLBuildDir
 	buildDir = os.path.join(NeLRootDir, relPath)
 	os.makedirs(buildDir, exist_ok=True)
-	res["RelPath"] = relPath.replace("\\", "/")
+	res["BuildScriptDir"] = relBuildRootDir
+	res["BuildDir"] = relPath.replace("\\", "/")
 	res["Toolchain"] = target["Toolchain"]
 	gen = None
 	if (fv or spec == NeLSpecPluginMax or isDocker) and NeLConfig["UseNinja"]:
@@ -411,15 +452,17 @@ def ConfigureTarget(spec, name, fv, target):
 			gen = "NMake Makefiles JOM"
 		else:
 			gen = "Ninja"
+	envScript = os.path.join(buildRootDir, safeName + "_env." + NeLScriptExt)
 	if tc["Compiler"] == "MSVC":
-		GenerateMsvcEnv(os.path.join(buildRootDir, safeName + "_env." + NeLScriptExt), buildDir, tc)
-		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), safeName + "_env." + NeLScriptExt, target)
-		GenerateCMakeCreate(os.path.join(buildRootDir, safeName + "_configure." + NeLScriptExt), safeName + "_env." + NeLScriptExt, spec, gen, fv, target, buildDir)
-		GenerateBuild(os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt), safeName + "_env." + NeLScriptExt, spec, gen, fv, target, buildDir)
+		GenerateMsvcEnv(envScript, buildDir, tc)
+		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
+		GenerateCMakeCreate(os.path.join(buildRootDir, safeName + "_configure." + NeLScriptExt), envScript, spec, gen, fv, target, buildDir)
+		GenerateBuild(os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt), envScript, spec, gen, fv, target, buildDir)
 		pass
 	elif tc["Compiler"] == "GCC":
 		if "Docker" in tc and tc["Docker"]:
-			pass
+			GenerateDockerEnv(envScript, relPath, buildDir, tc)
+			GenerateDockerCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
 		else:
 			pass
 	return res
@@ -437,7 +480,7 @@ Targets["Native"]["samples"] = ConfigureTarget(NeLSpecSamples, "samples", False,
 for pluginMax in NelTargetPluginMax:
 	Targets["PluginMax"][pluginMax] = ConfigureTarget(NeLSpecPluginMax, "plugin_max/" + pluginMax, False, NelTargetPluginMax[pluginMax])
 
-with open(os.path.join(NeLConfigDir, "targets_" + socket.gethostname().lower() + ".json"), 'w') as fo:
+with open(os.path.join(NeLConfigDir, "targets_" + NeLHostId + "_" + NeLPlatformId + ".json"), 'w') as fo:
 	json.dump(Targets, fo, indent=2)
 
 # end of file
