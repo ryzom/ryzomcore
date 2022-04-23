@@ -37,7 +37,7 @@
 #	pragma warning( push )
 #	pragma warning( disable : 4244 )
 #endif
-#include <vorbisfile.h>
+#include <vorbis/vorbisfile.h>
 #ifdef NL_OS_WINDOWS
 #	pragma warning( pop )
 #endif
