@@ -94,7 +94,10 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 	
 	if gen:
 		if gen.startswith("Visual Studio"):
-			opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL_FILES%" ]
+			if tc["Version"] > 15:
+				opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL%" ]
+			else:
+				opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL_FILES%" ]
 		elif gen == "NMake Makefiles":
 			opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL%" ]
 	
@@ -443,9 +446,15 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 		fo.write("%RC_DOCKER% ")
 	if gen.startswith("Visual Studio"):
 		if not fv:
-			fo.write("msbuild RyzomCore.sln /m:%RC_PARALLEL_PROJECTS% /p:Configuration=Debug\n")
+			if tc["Version"] > 15:
+				fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL% /p:Configuration=Debug\n")
+			else:
+				fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL_PROJECTS% /p:Configuration=Debug\n")
 			WritePauseGoto(fo, ":build")
-		fo.write("msbuild RyzomCore.sln /m:%RC_PARALLEL_PROJECTS% /p:Configuration=Release\n")
+		if tc["Version"] > 15:
+			fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL% /p:Configuration=Release\n")
+		else:
+			fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL_PROJECTS% /p:Configuration=Release\n")
 	elif "Ninja" in gen:
 		fo.write("ninja -j%RC_PARALLEL%\n")
 	elif "JOM" in gen:
