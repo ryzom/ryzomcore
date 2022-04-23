@@ -246,7 +246,7 @@ def GeneratePathScript():
 
 def GeneratePatchVersionScript():
 	fo = open(NeLPatchVersionScript, 'w')
-	fo.write("if /I \"%RC_PYTHON3_DIR%\"==\"\" call ..\\path_config.bat\n")
+	fo.write("if /I \"%RC_PYTHON3_DIR%\"==\"\" call " + EscapeArg(NeLPathScript) + "\n")
 	fo.write("if /I \"%CLIENT_PATCH_VERSION%\"==\"\" goto :update\n")
 	fo.write("goto :done\n")
 	fo.write(":update\n")
@@ -282,6 +282,25 @@ def GenerateDockerEnv(file, relBuildDir, buildDir, tc):
 		fo.write(dockerCmdStr[:-1])
 	fo.write("\n")
 	fo.close()
+
+def WritePauseGoto(fo, go):
+	fo.write("if %errorlevel% neq 0 (\n")
+	fo.write("pause\n")
+	fo.write("goto " + go + "\n")
+	fo.write(")\n")
+
+def WriteHeader(fo):
+	fo.write("@echo off\n")
+	fo.write("title Ryzom Core\n")
+	fo.write("cd /d " + EscapeArg(NeLRootDir) + "\n")
+	fo.write(":patchversion\n")
+	fo.write("call " + EscapeArg(NeLPatchVersionScript) + "\n")
+	WritePauseGoto(fo, ":patchversion")
+
+def WriteFooter(fo, title):
+	fo.write("title " + title + ": Ready\n")
+	fo.write("echo Ready\n")
+	fo.write("pause\n")
 
 def GenerateMsvcEnv(file, buildDir, tc):
 	fo = open(file, 'w')
@@ -343,12 +362,6 @@ def GenerateDockerCmd(file, envScript, target):
 	#fo.write("cls\n")
 	fo.write("%RC_DOCKER_IT% bash\n")
 	fo.close()
-
-def WritePauseGoto(fo, go):
-	fo.write("if %errorlevel% neq 0 (\n")
-	fo.write("pause\n")
-	fo.write("goto " + go + "\n")
-	fo.write(")\n")
 
 def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
 	tc = NeLToolchains[target["Toolchain"]]
@@ -447,6 +460,18 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 	fo.write(":done\n")
 	fo.close()
 
+fo_configure = open(os.path.join(NeLRootDir, "code_configure." + NeLScriptExt), "w")
+fo_configure_rebuild_all = open(os.path.join(NeLRootDir, "code_configure_rebuild_all." + NeLScriptExt), "w")
+fo_build_all = open(os.path.join(NeLRootDir, "code_build_all." + NeLScriptExt), "w")
+fo_build_game = open(os.path.join(NeLRootDir, "code_build_game." + NeLScriptExt), "w")
+fo_build_game_dev = open(os.path.join(NeLRootDir, "code_build_game_dev." + NeLScriptExt), "w")
+
+WriteHeader(fo_configure)
+WriteHeader(fo_configure_rebuild_all)
+WriteHeader(fo_build_all)
+WriteHeader(fo_build_game)
+WriteHeader(fo_build_game_dev)
+
 def ConfigureTarget(spec, name, fv, target):
 	global NeLSpecClient
 	global NeLSpecServer
@@ -490,20 +515,33 @@ def ConfigureTarget(spec, name, fv, target):
 		else:
 			gen = "Ninja"
 	envScript = os.path.join(buildRootDir, safeName + "_env." + NeLScriptExt)
+	configureScript = os.path.join(buildRootDir, safeName + "_configure." + NeLScriptExt)
+	buildScript = os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt)
+	scriptOk = False
 	if tc["Compiler"] == "MSVC":
 		GenerateMsvcEnv(envScript, buildDir, tc)
 		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
-		GenerateCMakeCreate(os.path.join(buildRootDir, safeName + "_configure." + NeLScriptExt), envScript, spec, gen, fv, target, buildDir)
-		GenerateBuild(os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt), envScript, spec, gen, fv, target, buildDir)
-		pass
+		GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir)
+		GenerateBuild(buildScript, envScript, spec, gen, fv, target, buildDir)
+		scriptOk = True
 	elif tc["Compiler"] == "GCC":
 		if "Docker" in tc and tc["Docker"]:
 			GenerateDockerEnv(envScript, relPath, buildDir, tc)
 			GenerateDockerCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
-			GenerateCMakeCreate(os.path.join(buildRootDir, safeName + "_configure." + NeLScriptExt), envScript, spec, gen, fv, target, buildDir)
-			GenerateBuild(os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt), envScript, spec, gen, fv, target, buildDir)
+			GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir)
+			GenerateBuild(buildScript, envScript, spec, gen, fv, target, buildDir)
+			scriptOk = True
 		else:
 			pass
+	if scriptOk:
+		fo_configure.write("cmd /C " + EscapeArg("call " + configureScript) + "\n")
+		fo_configure_rebuild_all.write("cmd /C " + EscapeArg("call " + configureScript) + "\n")
+		fo_configure_rebuild_all.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
+		fo_build_all.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
+		if spec == NeLSpecServer or spec == NeLSpecClient:
+			fo_build_game.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
+			if not fv:
+				fo_build_game_dev.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
 	return res
 
 GeneratePathScript()
@@ -518,6 +556,18 @@ Targets["Native"]["tools"] = ConfigureTarget(NeLSpecTools, "tools", False, NeLTa
 Targets["Native"]["samples"] = ConfigureTarget(NeLSpecSamples, "samples", False, NeLTargetSamples)
 for pluginMax in NelTargetPluginMax:
 	Targets["PluginMax"][pluginMax] = ConfigureTarget(NeLSpecPluginMax, "plugin_max/" + pluginMax, False, NelTargetPluginMax[pluginMax])
+
+WriteFooter(fo_configure, "Ryzom Core: Code Configure")
+WriteFooter(fo_configure_rebuild_all, "Ryzom Core: Code Configure Rebuild All")
+WriteFooter(fo_build_all, "Ryzom Core: Build All")
+WriteFooter(fo_build_game, "Ryzom Core: Build Game")
+WriteFooter(fo_build_game_dev, "Ryzom Core: Build Game Dev")
+
+fo_configure.close()
+fo_configure_rebuild_all.close()
+fo_build_all.close()
+fo_build_game.close()
+fo_build_game_dev.close()
 
 with open(os.path.join(NeLConfigDir, "targets_" + NeLHostId + "_" + NeLPlatformId + ".json"), 'w') as fo:
 	json.dump(Targets, fo, indent=2)
