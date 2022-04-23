@@ -14,9 +14,9 @@ NeLSpecSamples = 4
 NeLSpecPluginMax = 5
 
 NeLCPUCount = os.cpu_count()
-NeLParallel = (NeLCPUCount * 3) // 4
-NeLParallelProjects = int(math.floor(math.sqrt(NeLParallel)))
-NeLParallelFiles = NeLParallel // NeLParallelProjects
+NeLParallel = int(max(math.ceil((NeLCPUCount * 3) / 4.0), 1))
+NeLParallelProjects = int(max(math.floor(math.sqrt(NeLParallel)), 1))
+NeLParallelFiles = int(max(NeLParallel // NeLParallelProjects, 1))
 
 Targets = {
 	"Native": { },
@@ -289,11 +289,15 @@ def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
 	fo = open(file, 'w')
 	fo.write("call %~dp0" + envScript + "\n")
 	fo.write("title %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
-	fo.write("rmdir /s /q %RC_BUILD_DIR% > nul 2> nul\n")
 	fo.write("mkdir /s /q %RC_BUILD_DIR% > nul 2> nul\n")
+	fo.write("powershell -Command \"Remove-Item '" + os.path.join("%RC_BUILD_DIR%", "*") + "' -Recurse -Force\"\n")
+	fo.write("if %errorlevel% neq 0 pause\n")
 	fo.write("cmake")
 	for opt in opts:
-		fo.write(" " + EscapeArgOpt(opt))
+		if opt.startswith("-") and ("%" in opt or "$" in opt):
+			fo.write(" " + EscapeArg(opt))
+		else:
+			fo.write(" " + EscapeArgOpt(opt))
 	fo.write("\n")
 	fo.write("if %errorlevel% neq 0 pause\n")
 	fo.close()
