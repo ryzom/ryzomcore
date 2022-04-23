@@ -55,6 +55,8 @@ if os.name == 'nt':
 	NeLScriptExt = 'bat'
 
 NeLPathScript = os.path.join(NeLRootDir, os.path.normcase(".nel/path_config." + NeLScriptExt))
+NeLPatchVersionScript = os.path.join(NeLRootDir, os.path.normcase(".nel/patch_version." + NeLScriptExt))
+NeLPatchVersionSetScript = os.path.join(NeLRootDir, os.path.normcase(".nel/patch_version_set." + NeLScriptExt))
 
 #print(NeLRootDir)
 #print(NeLConfigDir)

@@ -64,7 +64,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 		if tc["Version"] > 9:
 			opts += [ "-T", "%RC_TOOLSET%" ]
 	
-	# SSE2 and SSE3 of on 32-bit x86 platform
+	# SSE2 and SSE3 off on 32-bit x86 platform
 	if tc["Platform"] == "x86" or tc["Platform"] == "386":
 		opts += [ "-DWITH_SSE2=OFF" ]
 		opts += [ "-DWITH_SSE3=OFF" ]
@@ -92,8 +92,11 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 		opts += [ "-DWITH_STATIC_CURL=OFF" ]
 		opts += [ "-DCURL_NO_CURL_CMAKE=ON" ]
 	
-	if gen and gen.startswith("Visual Studio"):
-		opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL_FILES%" ]
+	if gen:
+		if gen.startswith("Visual Studio"):
+			opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL_FILES%" ]
+		elif gen == "NMake Makefiles":
+			opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL%" ]
 	
 	if isHunter:
 		opts += [ "-DHUNTER_ENABLED=ON" ]
@@ -219,6 +222,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 
 def GeneratePathScript():
 	fo = open(NeLPathScript, 'w')
+	fo.write("set " + EscapeArg("RC_ROOT=" + NeLRootDir) + "\n")
 	fo.write("set " + EscapeArg("RC_CODE_DIR=" + NeLCodeDir) + "\n")
 	fo.write("set " + EscapeArg("RC_PYTHON27_DIR=" + NeLPython27Dir) + "\n")
 	fo.write("set " + EscapeArg("RC_PYTHON3_DIR=" + NeLPython3Dir) + "\n")
@@ -238,6 +242,17 @@ def GeneratePathScript():
 	fo.write("set RC_PARALLEL=" + str(NeLParallel) + "\n")
 	fo.write("set RC_PARALLEL_PROJECTS=" + str(NeLParallelProjects) + "\n")
 	fo.write("set RC_PARALLEL_FILES=" + str(NeLParallelFiles) + "\n")
+	fo.close()
+
+def GeneratePatchVersionScript():
+	fo = open(NeLPatchVersionScript, 'w')
+	fo.write("if /I \"%RC_PYTHON3_DIR%\"==\"\" call ..\\path_config.bat\n")
+	fo.write("if /I \"%CLIENT_PATCH_VERSION%\"==\"\" goto :update\n")
+	fo.write("goto :done\n")
+	fo.write(":update\n")
+	fo.write("%RC_PYTHON3_DIR%\\python %RC_CODE_DIR%\\tool\\quick_start\\patch_version.py\n")
+	fo.write("call " + EscapeArg(NeLPatchVersionSetScript) + "\n")
+	fo.write(":done\n")
 	fo.close()
 
 def GenerateMsvcEnv(file, buildDir, tc):
@@ -281,10 +296,10 @@ def GenerateMsvcEnv(file, buildDir, tc):
 		fo.write("set " + EscapeArg("RC_PREFIX_PATH=" + prefixPath[:-1]) + "\n")
 	fo.close()
 
-def GenerateMsvcCmd(file, envScript):
+def GenerateMsvcCmd(file, envScript, target):
 	fo = open(file, 'w')
 	fo.write("call %~dp0" + envScript + "\n")
-	fo.write("title %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
+	fo.write("title Terminal - " + target["DisplayName"] +" - %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
 	#fo.write("cls\n")
 	fo.write("cmd\n")
 	fo.close()
@@ -293,18 +308,70 @@ def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
 	opts = GenerateCMakeOptions(spec, generator, fv, target, buildDir)
 	fo = open(file, 'w')
 	fo.write("call %~dp0" + envScript + "\n")
-	fo.write("title %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
+	fo.write("title Configure - " + target["DisplayName"] +" - %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
 	fo.write("mkdir /s /q %RC_BUILD_DIR% > nul 2> nul\n")
 	fo.write("powershell -Command \"Remove-Item '" + os.path.join("%RC_BUILD_DIR%", "*") + "' -Recurse -Force\"\n")
 	fo.write("if %errorlevel% neq 0 pause\n")
 	fo.write("cmake")
+	lastOpt = False
 	for opt in opts:
-		if opt.startswith("-") and ("%" in opt or "$" in opt):
+		if lastOpt or (opt.startswith("-") and ("%" in opt or "$" in opt)):
 			fo.write(" " + EscapeArg(opt))
 		else:
 			fo.write(" " + EscapeArgOpt(opt))
+		lastOpt = (len(opt) == 2)
 	fo.write("\n")
 	fo.write("if %errorlevel% neq 0 pause\n")
+	# TODO: If gen is VS, generate all the appropriate .vcxproj.user files for easy debugging (call a Python script for this)
+	fo.close()
+
+def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
+	tc = NeLToolchains[target["Toolchain"]]
+	cfg = target["Config"]
+	isDocker = "Docker" in tc and tc["Docker"]
+	
+	# Generator
+	gen = generator
+	if not gen and "Generator" in tc:
+		gen = tc["Generator"]
+	
+	fo = open(file, 'w')
+	fo.write("call %~dp0" + envScript + "\n")
+	fo.write("title Build - " + target["DisplayName"] +" - %RC_GENERATOR% %RC_PLATFORM% %RC_TOOLSET%\n")
+	
+	# Update patch version, may be done ahead by calling build script as well
+	fo.write("call " + EscapeArg(NeLPatchVersionScript) + "\n")
+	fo.write("if %errorlevel% neq 0 pause\n")
+	
+	# Ensure it's configured
+	fo.write("if not exist CMakeCache.txt (\n")
+	fo.write("echo ERROR: This build project has not been configured yet\n")
+	fo.write("pause\n")
+	fo.write("goto :done\n")
+	fo.write(")\n")
+	
+	# Update patch version
+	# TODO: Update build number (increment a meaningless number locally anytime the git sha1 `git rev-parse HEAD` changes, set the minimum to `git rev-list --count HEAD`)
+	fo.write("cmake -DNL_VERSION_PATCH=%CLIENT_PATCH_VERSION% .\n")
+	fo.write("if %errorlevel% neq 0 pause\n")
+	
+	# Build
+	if gen.startswith("Visual Studio"):
+		if not fv:
+			fo.write("msbuild RyzomCore.sln /m:%RC_PARALLEL_PROJECTS% /p:Configuration=Debug\n")
+			fo.write("if %errorlevel% neq 0 pause\n")
+		fo.write("msbuild RyzomCore.sln /m:%RC_PARALLEL_PROJECTS% /p:Configuration=Release\n")
+	elif "Ninja" in gen:
+		fo.write("ninja -j%RC_PARALLEL%\n")
+	elif "JOM" in gen:
+		fo.write("jom -j%RC_PARALLEL%\n")
+	elif "NMake" in gen:
+		fo.write("nmake\n")
+	else:
+		fo.write("make -j%RC_PARALLEL%\n")
+	fo.write("if %errorlevel% neq 0 pause\n")
+	
+	fo.write(":done\n")
 	fo.close()
 
 def ConfigureTarget(spec, name, fv, target):
@@ -346,8 +413,9 @@ def ConfigureTarget(spec, name, fv, target):
 			gen = "Ninja"
 	if tc["Compiler"] == "MSVC":
 		GenerateMsvcEnv(os.path.join(buildRootDir, safeName + "_env." + NeLScriptExt), buildDir, tc)
-		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_cmd." + NeLScriptExt), safeName + "_env." + NeLScriptExt)
-		GenerateCMakeCreate(os.path.join(buildRootDir, safeName + "_create." + NeLScriptExt), safeName + "_env." + NeLScriptExt, spec, gen, fv, target, buildDir)
+		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), safeName + "_env." + NeLScriptExt, target)
+		GenerateCMakeCreate(os.path.join(buildRootDir, safeName + "_configure." + NeLScriptExt), safeName + "_env." + NeLScriptExt, spec, gen, fv, target, buildDir)
+		GenerateBuild(os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt), safeName + "_env." + NeLScriptExt, spec, gen, fv, target, buildDir)
 		pass
 	elif tc["Compiler"] == "GCC":
 		if "Docker" in tc and tc["Docker"]:
@@ -357,6 +425,7 @@ def ConfigureTarget(spec, name, fv, target):
 	return res
 
 GeneratePathScript()
+GeneratePatchVersionScript()
 
 Targets["Native"]["client_dev"] = ConfigureTarget(NeLSpecClient, "client_dev", False, NeLTargetClientDev)
 Targets["Native"]["server_dev"] = ConfigureTarget(NeLSpecServer, "server_dev", False, NeLTargetServerDev)
