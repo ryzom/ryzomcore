@@ -94,8 +94,10 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 	
 	if gen:
 		if gen.startswith("Visual Studio"):
-			# opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL_FILES%" ]
-			pass
+			if tc["Version"] > 16:
+				opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL%" ]
+			else:
+				opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL_FILES%" ]
 		elif gen == "NMake Makefiles":
 			opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL%" ]
 	
