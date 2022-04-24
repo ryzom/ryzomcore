@@ -58,7 +58,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 			opts += [ "-G", gen ]
 	
 	# Visual Studio Toolset and Platform
-	if gen.startswith("Visual Studio") and "Toolset" in tc and tc["Toolset"].startswith("v"):
+	if gen and gen.startswith("Visual Studio") and "Toolset" in tc and tc["Toolset"].startswith("v"):
 		if "Platform" in tc:
 			opts += [ "-A", "%RC_PLATFORM%" ]
 		if tc["Version"] > 9:
@@ -94,10 +94,8 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 	
 	if gen:
 		if gen.startswith("Visual Studio"):
-			if tc["Version"] > 15:
-				opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL%" ]
-			else:
-				opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL_FILES%" ]
+			# opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL_FILES%" ]
+			pass
 		elif gen == "NMake Makefiles":
 			opts += [ "-DCUSTOM_FLAGS=/MP%RC_PARALLEL%" ]
 	
@@ -305,7 +303,7 @@ def WriteFooter(fo, title):
 	fo.write("echo Ready\n")
 	fo.write("pause\n")
 
-def GenerateMsvcEnv(file, buildDir, tc):
+def GenerateMsvcEnv(file, buildDir, generator, tc):
 	fo = open(file, 'w')
 	fo.write("@echo off\n")
 	fo.write("rem " + tc["DisplayName"] + "\n")
@@ -345,6 +343,19 @@ def GenerateMsvcEnv(file, buildDir, tc):
 		for path in tc["Prefix"]:
 			prefixPath += path + os.pathsep
 		fo.write("set " + EscapeArg("RC_PREFIX_PATH=" + prefixPath[:-1]) + "\n")
+	gen = generator
+	if not gen and "Generator" in tc:
+		gen = tc["Generator"]
+	if gen.startswith("Visual Studio"):
+		fo.write("set CL_MP=true\n")
+		if tc["Version"] > 16:
+			fo.write("set UseMSBuildResourceManager=true\n")
+			fo.write("set UseMultiToolTask=false\n")
+			fo.write("set EnforceProcessCountAcrossBuilds=true\n")
+			fo.write("set EnableClServerMode=true\n")
+		elif tc["Version"] > 15:
+			fo.write("set UseMultiToolTask=false\n")
+			fo.write("set EnforceProcessCountAcrossBuilds=false\n")
 	fo.close()
 
 def GenerateMsvcCmd(file, envScript, target):
@@ -444,22 +455,22 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 	fo.write("@echo on\n")
 	if isDocker:
 		fo.write("%RC_DOCKER% ")
-	if gen.startswith("Visual Studio"):
+	if gen and gen.startswith("Visual Studio"):
 		if not fv:
-			if tc["Version"] > 15:
-				fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /p:EnforceProcessCountAcrossBuilds=false /m:%RC_PARALLEL_PROJECTS% /p:CL_MPCount=%RC_PARALLEL_FILES% /p:Configuration=Debug\n")
+			if tc["Version"] > 16:
+				fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL% /p:CL_MPCount=%RC_PARALLEL% /p:Configuration=Debug\n")
 			else:
 				fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL_PROJECTS% /p:CL_MPCount=%RC_PARALLEL_FILES% /p:Configuration=Debug\n")
 			WritePauseGoto(fo, ":build")
-		if tc["Version"] > 15:
-			fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /p:EnforceProcessCountAcrossBuilds=false /m:%RC_PARALLEL_PROJECTS% /p:CL_MPCount=%RC_PARALLEL_FILES% /p:Configuration=Release\n")
+		if tc["Version"] > 16:
+			fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL% /p:CL_MPCount=%RC_PARALLEL% /p:Configuration=Release\n")
 		else:
 			fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL_PROJECTS% /p:CL_MPCount=%RC_PARALLEL_FILES% /p:Configuration=Release\n")
-	elif "Ninja" in gen:
+	elif gen and "Ninja" in gen:
 		fo.write("ninja -j%RC_PARALLEL%\n")
-	elif "JOM" in gen:
+	elif gen and "JOM" in gen:
 		fo.write("jom -j%RC_PARALLEL%\n")
-	elif "NMake" in gen:
+	elif gen and "NMake" in gen:
 		fo.write("nmake\n")
 	else:
 		fo.write("make -j%RC_PARALLEL%\n")
@@ -528,7 +539,7 @@ def ConfigureTarget(spec, name, fv, target):
 	buildScript = os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt)
 	scriptOk = False
 	if tc["Compiler"] == "MSVC":
-		GenerateMsvcEnv(envScript, buildDir, tc)
+		GenerateMsvcEnv(envScript, buildDir, gen, tc)
 		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
 		GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir)
 		GenerateBuild(buildScript, envScript, spec, gen, fv, target, buildDir)
