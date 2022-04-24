@@ -129,10 +129,18 @@ public:
 
 		// From Animatable
 		void DeleteThis() { delete this; }
+#if (MAX_VERSION_MAJOR < 24)
 		void GetClassName(TSTR& s) { s= TSTR(GetString(IDS_CLASS_NAME)); }  
+#else
+		void GetClassName(TSTR& s, bool localized) const { if (localized) s = GetString(IDS_CLASS_NAME); else s = _T("Nel VertexTreePaint"); }
+#endif
 		virtual Class_ID ClassID() { return VERTEX_TREE_PAINT_CLASS_ID;}		
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
+#if (MAX_VERSION_MAJOR < 24)
 		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
+#else
+		const MCHAR *GetObjectName(bool localized) const { if (localized) return GetString(IDS_CLASS_NAME); else return _T("Nel VertexTreePaint"); }
+#endif
 		IOResult Load(ILoad *iload);
 		IOResult Save(ISave *isave);
 		IOResult LoadLocalData(ILoad *iload, LocalModData **pld);
@@ -160,7 +168,11 @@ public:
 		
 		int NumSubs();
 		Animatable* SubAnim(int i);
+#if (MAX_VERSION_MAJOR < 24)
 		TSTR SubAnimName(int i);
+#else
+		virtual TSTR SubAnimName(int i, bool localized) NL_OVERRIDE;
+#endif
 
 		RefResult NotifyRefChanged(NOTIFY_REF_PARAMS);
 		

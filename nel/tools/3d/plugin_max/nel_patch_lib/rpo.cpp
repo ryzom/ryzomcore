@@ -35,30 +35,36 @@ using namespace NL3D;
 #endif // USE_CACHE
 
 
-class RPOClassDesc:public ClassDesc 
+class RPOClassDesc : public ClassDesc
 {
-	public:
-	int 			IsPublic() 
+public:
+	virtual int IsPublic() NL_OVERRIDE
 	{
 		return 0;
 	}
-	void *			Create(BOOL loading = FALSE) 
+	virtual void *Create(BOOL loading = FALSE) NL_OVERRIDE
 	{
 		return new RPO;
 	}
-	const MCHAR *	ClassName() 
+	virtual const MCHAR *ClassName() NL_OVERRIDE
 	{
 		return _M("RklPatch");
 	}
-	SClass_ID		SuperClassID() 
+#if (MAX_VERSION_MAJOR >= 24)
+	virtual const TCHAR *NonLocalizedClassName() NL_OVERRIDE
+	{
+		return _M("RklPatch");
+	}
+#endif
+	virtual SClass_ID SuperClassID() NL_OVERRIDE
 	{
 		return GEOMOBJECT_CLASS_ID;
 	}
-	Class_ID		ClassID() 
+	virtual Class_ID ClassID() NL_OVERRIDE
 	{
 		return RYKOLPATCHOBJ_CLASS_ID;
 	}
-	const MCHAR* 	Category() 
+	virtual const MCHAR *Category() NL_OVERRIDE
 	{
 		return _M("Rykol Tools");
 	}

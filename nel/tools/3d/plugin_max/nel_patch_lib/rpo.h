@@ -81,37 +81,37 @@ class RPO : public PatchObject
 		static IObjParam *ip;			//Access to the interface
 		BOOL suspendSnap;				//A flag for setting snapping on/off
 		// From BaseObject
-		CreateMouseCallBack* GetCreateMouseCallBack();
-		int Display(TimeValue t, INode* inode, ViewExp *vpt, int flags);
-		int HitTest(TimeValue t, INode* inode, int type, int crossing, int flags, IPoint2 *p, ViewExp *vpt);
-		void Snap(TimeValue t, INode* inode, SnapInfo *snap, IPoint2 *p, ViewExp *vpt);
+		virtual CreateMouseCallBack* GetCreateMouseCallBack() NL_OVERRIDE;
+		virtual int Display(TimeValue t, INode* inode, ViewExp *vpt, int flags) NL_OVERRIDE;
+		virtual int HitTest(TimeValue t, INode* inode, int type, int crossing, int flags, IPoint2 *p, ViewExp *vpt) NL_OVERRIDE;
+		virtual void Snap(TimeValue t, INode* inode, SnapInfo *snap, IPoint2 *p, ViewExp *vpt) NL_OVERRIDE;
 		//TODO: Return the name that will appear in the history browser (modifier stack)
-		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return _M("Rykol Patch Object");}
+		virtual GET_OBJECT_NAME_CONST MCHAR *GetObjectName(NL_GET_OBJECT_NAME_PARAMS) NL_GET_CLASS_NAME_CONST NL_OVERRIDE { return _M("Rykol Patch Object");}
 		
-		void GetWorldBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
-		void GetLocalBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
+		virtual void GetWorldBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box ) NL_OVERRIDE;
+		virtual void GetLocalBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box ) NL_OVERRIDE;
 
-		void GetDeformBBox(TimeValue t, Box3& box, Matrix3 *tm, BOOL useSel );
+		virtual void GetDeformBBox(TimeValue t, Box3& box, Matrix3 *tm, BOOL useSel ) NL_OVERRIDE;
 		//TODO: Return the default name of the node when it is created.
-		void InitNodeName(TSTR& s) { s = _M("Rykol Patch Object"); }
+		virtual void InitNodeName(TSTR& s) NL_OVERRIDE { s = _M("Rykol Patch Object"); }
 		
 		// From Object
-		BOOL HasUVW();
-		void SetGenUVW(BOOL sw);
-		int CanConvertToType(Class_ID obtype);
-		Object* ConvertToType(TimeValue t, Class_ID obtype);
-		void GetCollapseTypes(Tab<Class_ID> &clist,Tab<TSTR*> &nlist);
-		int IntersectRay(TimeValue t, Ray& ray, float& at, Point3& norm);
-		void PointsWereChanged();
+		virtual BOOL HasUVW() NL_OVERRIDE;
+		virtual void SetGenUVW(BOOL sw) NL_OVERRIDE;
+		virtual int CanConvertToType(Class_ID obtype) NL_OVERRIDE;
+		virtual Object* ConvertToType(TimeValue t, Class_ID obtype) NL_OVERRIDE;
+		virtual void GetCollapseTypes(Tab<Class_ID> &clist,Tab<TSTR*> &nlist) NL_OVERRIDE;
+		virtual int IntersectRay(TimeValue t, Ray& ray, float& at, Point3& norm) NL_OVERRIDE;
+		virtual void PointsWereChanged() NL_OVERRIDE;
 		
 		//TODO: Evaluate the object and return the ObjectState
-		ObjectState Eval(TimeValue t) 
+		virtual ObjectState Eval(TimeValue t) NL_OVERRIDE
 		{
 			return ObjectState(this); 
 		};		
 		
 		//TODO: Return the validity interval of the object as a whole
-		Interval ObjectValidity(TimeValue t) 
+		virtual Interval ObjectValidity(TimeValue t) NL_OVERRIDE
 		{ 
 			Interval iv;
 			iv.SetInfinite();
@@ -127,7 +127,7 @@ class RPO : public PatchObject
 			return iv;
 		}
 		
-		Interval ChannelValidity(TimeValue t, int nchan)
+		virtual Interval ChannelValidity(TimeValue t, int nchan) NL_OVERRIDE
 		{
 			switch(nchan) 
 			{
@@ -140,7 +140,7 @@ class RPO : public PatchObject
 			}
 		}
 		
-		void SetChannelValidity(int nchan, Interval v)
+		virtual void SetChannelValidity(int nchan, Interval v) NL_OVERRIDE
 		{
 			switch(nchan) 
 			{
@@ -182,58 +182,58 @@ class RPO : public PatchObject
 			copyFlags(validBits, fromOb->validBits,channels);
 		}
 
-		void InvalidateChannels(ChannelMask channels);
+		virtual void InvalidateChannels(ChannelMask channels) NL_OVERRIDE;
 
 		// From Animatable
-		void BeginEditParams( IObjParam  *ip, ULONG flags,Animatable *prev);
-		void EndEditParams( IObjParam *ip, ULONG flags,Animatable *next);
+		virtual void BeginEditParams( IObjParam  *ip, ULONG flags,Animatable *prev) NL_OVERRIDE;
+		virtual void EndEditParams( IObjParam *ip, ULONG flags,Animatable *next) NL_OVERRIDE;
 
 		// From GeomObject
-		Mesh* GetRenderMesh(TimeValue t, INode *inode, View& view, BOOL& needDelete);
+		virtual Mesh* GetRenderMesh(TimeValue t, INode *inode, View& view, BOOL& needDelete) NL_OVERRIDE;
 		
 		// Loading/Saving
-		IOResult Load(ILoad *iload);
-		IOResult Save(ISave *isave);
+		virtual IOResult Load(ILoad *iload) NL_OVERRIDE;
+		virtual IOResult Save(ISave *isave) NL_OVERRIDE;
 
 		//From Animatable
-		Class_ID ClassID() 
+		virtual Class_ID ClassID() NL_OVERRIDE
 		{
 			if (bBigHack)
 				return Class_ID(PATCHOBJ_CLASS_ID,0);
 			else
 				return RYKOLPATCHOBJ_CLASS_ID;
 		}
-		BOOL IsSubClassOf(Class_ID classID) 
+		virtual BOOL IsSubClassOf(Class_ID classID) NL_OVERRIDE
 		{
 			return classID == ClassID() 
 				? true : PatchObject::IsSubClassOf(classID);
 		}
-		SClass_ID SuperClassID() { return GEOMOBJECT_CLASS_ID; }
-		void GetClassName(TSTR& s) { s = _T("Rykol Patch Object");}
+		virtual SClass_ID SuperClassID() NL_OVERRIDE { return GEOMOBJECT_CLASS_ID; }
+		virtual void GetClassName(NL_GET_CLASS_NAME_PARAMS) NL_GET_CLASS_NAME_CONST NL_OVERRIDE { s = _T("Rykol Patch Object");}
 		
-		RefTargetHandle Clone ( RemapDir &remap );
-		RefResult NotifyRefChanged (NOTIFY_REF_PARAMS);
+		virtual RefTargetHandle Clone ( RemapDir &remap ) NL_OVERRIDE;
+		virtual RefResult NotifyRefChanged (NOTIFY_REF_PARAMS) NL_OVERRIDE;
 
-		int NumSubs() 
+		virtual int NumSubs() NL_OVERRIDE
 		{ 
 			return PatchObject::NumSubs ();
 		}
 		//TSTR SubAnimName(int i) { return NULL; }
-		Animatable* SubAnim(int i) 
+		virtual Animatable* SubAnim(int i) NL_OVERRIDE 
 		{ 
 			return PatchObject::SubAnim(i);
 			// return pblock; 
 		}
-		int NumRefs() 
+		virtual int NumRefs() NL_OVERRIDE
 		{ 
 			return PatchObject::NumRefs();
 		}
-		RefTargetHandle GetReference(int i) 
+		virtual RefTargetHandle GetReference(int i) NL_OVERRIDE
 		{ 
 			return PatchObject::GetReference(i);
 			//return pblock; 
 		}
-		void SetReference(int i, RefTargetHandle rtarg) 
+		virtual void SetReference(int i, RefTargetHandle rtarg) NL_OVERRIDE
 		{ 
 			PatchObject::SetReference(i, rtarg);
 			//pblock=(IParamBlock2*)rtarg; 
@@ -254,11 +254,11 @@ class RPO : public PatchObject
 			return PatchObject::GetParamBlockByID(id);
 			//return (pblock->ID() == id) ? pblock : NULL; 
 		} // return id'd ParamBlock*/
-		void DeleteThis() { delete this; }
-		Object *MakeShallowCopy(ChannelMask channels);
-		void ShallowCopy(Object* fromOb, ChannelMask channels);
-		void NewAndCopyChannels(ChannelMask channels);
-		void FreeChannels(ChannelMask channels);
+		virtual void DeleteThis() NL_OVERRIDE { delete this; }
+		virtual Object *MakeShallowCopy(ChannelMask channels) NL_OVERRIDE;
+		virtual void ShallowCopy(Object* fromOb, ChannelMask channels) NL_OVERRIDE;
+		virtual void NewAndCopyChannels(ChannelMask channels) NL_OVERRIDE;
+		virtual void FreeChannels(ChannelMask channels) NL_OVERRIDE;
 
 
 		//Constructor/Destructor
@@ -266,7 +266,7 @@ class RPO : public PatchObject
 		RPO(PatchObject& pPO);
 		virtual ~RPO();
 
-		void SetPoint(int i, const Point3& p)
+		virtual void SetPoint(int i, const Point3& p) NL_OVERRIDE
 		{
 			PatchObject::SetPoint(i, p);
 		}
