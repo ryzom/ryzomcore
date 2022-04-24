@@ -47,6 +47,10 @@
 #include <bipexp.h>
 #include <phyexp.h>
 
+#ifdef BIPDRIVEN_CONTROL_CLASS_ID
+#define BIPSLAVE_CONTROL_CLASS_ID BIPDRIVEN_CONTROL_CLASS_ID
+#endif
+
 #undef min
 #undef max
 

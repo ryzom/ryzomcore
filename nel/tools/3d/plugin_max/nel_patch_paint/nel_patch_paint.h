@@ -446,7 +446,7 @@ class PaintPatchMod : public Modifier
 
 		// From Animatable
 		void DeleteThis() { delete this; }
-		void GetClassName(TSTR& s) { s= TSTR(_T("NeLPatchPaintMod")); }
+		virtual void GetClassName(NL_GET_CLASS_NAME_PARAMS) NL_GET_CLASS_NAME_CONST NL_OVERRIDE { s= TSTR(_T("NeLPatchPaintMod")); }
 		Class_ID ClassID() { return Class_ID(0xc49560f, 0x3c3d68e7); }
 		void* GetInterface(ULONG id);
 
@@ -481,7 +481,7 @@ class PaintPatchMod : public Modifier
 		void BeginEditParams( IObjParam  *ip, ULONG flags, Animatable *prev );
 		void EndEditParams( IObjParam *ip, ULONG flags, Animatable *next );
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
-		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return _M("NeL Patch Painter"); }
+		virtual GET_OBJECT_NAME_CONST MCHAR *GetObjectName(NL_GET_OBJECT_NAME_PARAMS) NL_GET_CLASS_NAME_CONST NL_OVERRIDE { return _M("NeL Patch Painter"); }
 		
 		void RescaleWorldUnits(float f);
 
@@ -500,6 +500,9 @@ class EditPatchClassDesc:public ClassDesc {
 		return new PaintPatchMod; 
 	}
 	const MCHAR *	ClassName() { return _M("NeL Painter"); }
+#if (MAX_VERSION_MAJOR >= 24)
+	virtual const TCHAR *NonLocalizedClassName() NL_OVERRIDE { return _M("NeL Painter"); }
+#endif
 	SClass_ID		SuperClassID() { return OSM_CLASS_ID; }
 	Class_ID		ClassID() { return Class_ID(0xc49560f, 0x3c3d68e7); }
 	const MCHAR* 	Category() { return _M("NeL Tools");}
