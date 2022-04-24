@@ -7,6 +7,6 @@ hunter_config(luabind
   )
 
 hunter_config(OpenAL
-  VERSION "1.21.1"
-  URL "https://github.com/kcat/openal-soft/archive/refs/tags/1.21.1.tar.gz"
-  SHA1 "57acf4fa55180eeb16721ac5ec0df541f586df40")
+  VERSION "1.20.1"
+  URL "https://github.com/kcat/openal-soft/archive/openal-soft-1.20.1.tar.gz"
+  SHA1 "5bd59eaf9268af8c758895c4cd02de25603313e7")
