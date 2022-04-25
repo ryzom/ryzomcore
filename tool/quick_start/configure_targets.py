@@ -253,7 +253,7 @@ def GeneratePatchVersionScript():
 	fo.write("if /I \"%RC_CLIENT_PATCH_VERSION%\"==\"\" goto :update\n")
 	fo.write("goto :done\n")
 	fo.write(":update\n")
-	fo.write("%RC_PYTHON3_DIR%\\python %RC_CODE_DIR%\\tool\\quick_start\\patch_version.py\n")
+	fo.write("\"%RC_PYTHON3_DIR%\\python\" \"%RC_CODE_DIR%\\tool\\quick_start\\patch_version.py\"\n")
 	fo.write("call " + EscapeArg(NeLPatchVersionSetScript) + "\n")
 	fo.write(":done\n")
 	fo.close()
@@ -409,7 +409,14 @@ def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
 	fo.write("\n")
 	fo.write("@echo off\n")
 	WritePauseGoto(fo, ":configure")
-	# TODO: If gen is VS, generate all the appropriate .vcxproj.user files for easy debugging (call a Python script for this)
+	# If gen is VS, generate all the appropriate .vcxproj.user files for easy debugging (call a Python script for this)
+	gen = generator
+	if not gen and "Generator" in tc:
+		gen = tc["Generator"]
+	if gen and gen.startswith("Visual Studio"):
+		fo.write(":vcxprojuser\n")
+		fo.write("\"%RC_PYTHON3_DIR%\\python\" \"%RC_CODE_DIR%\\tool\\quick_start\\vcxproj_user.py\" " + EscapeArgOpt(buildDir) + " " + EscapeArgOpt(target["Toolchain"]) + "\n")
+		WritePauseGoto(fo, ":vcxprojuser")
 	fo.close()
 
 def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):

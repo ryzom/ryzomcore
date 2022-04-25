@@ -26,6 +26,33 @@
     "3dsMax": "",
     "3dsMaxLocal": ""
   },
+  "WorkingDirs": {
+    "ryzom_client": "pipeline/client_dev",
+    "ryzom_client_patcher": "pipeline/client_install",
+    "ryzom_ai_service": "pipeline/shard_dev/ais_fyros",
+    "ryzom_backup_service": "pipeline/shard_dev/bms_master",
+    "ryzom_dynamic_scenario_service": "pipeline/shard_dev/dss",
+    "ryzom_entities_game_service": "pipeline/shard_dev/egs_mainland",
+    "ryzom_frontend_service": "pipeline/shard_dev/fes_mainland_01",
+    "ryzom_general_utilities_service": "pipeline/shard_dev/gus",
+    "ryzom_gpm_service": "pipeline/shard_dev/gpms_mainland",
+    "ryzom_ios_service": "pipeline/shard_dev/ios_mainland",
+    "ryzom_logger_service": "pipeline/shard_dev/lgs_unifier_01",
+    "ryzom_log_analyser_service": "pipeline/shard_dev/las",
+    "ryzom_mail_forum_service": "pipeline/shard_dev/mfs",
+    "ryzom_mirror_service": "pipeline/shard_dev/ms_mainland",
+    "ryzom_monitor_service": "pipeline/shard_dev/mos",
+    "ryzom_patchman_service": "patchman/terminal_dev",
+    "ryzom_reference_builder_service": "pipeline/shard_dev/rbs",
+    "ryzom_pd_support_service": "pipeline/shard_dev/pdss",
+    "ryzom_persistant_data_service": "pipeline/shard_dev/pds",
+    "ryzom_admin_service": "pipeline/shard_dev/ras",
+    "ryzom_naming_service": "pipeline/shard_dev/rns_mainland",
+    "ryzom_welcome_service": "pipeline/shard_dev/rws_mainland",
+    "ryzom_session_browser_service": "pipeline/shard_dev/sbs_mainland_01",
+    "ryzom_shard_unifier_service": "pipeline/shard_dev/su",
+    "ryzom_tick_service": "pipeline/shard_dev/ts_mainland"
+  },
   "Toolchain": {
     "Preference": [
       "Win7/VS/v143/x64",

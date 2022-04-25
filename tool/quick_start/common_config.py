@@ -24,12 +24,16 @@ def MergeConfig(file):
 	config = json.load(fi)
 	if not "Paths" in config:
 		config["Paths"] = {}
+	if not "WorkingDirs" in config:
+		config["WorkingDirs"] = {}
 	if not "Toolchain" in config:
 		config["Toolchain"] = {}
 	if not "Client" in config["Toolchain"]:
 		config["Toolchain"]["Client"] = {}
 	NeLConfig["Paths"].update(config["Paths"])
 	config["Paths"] = NeLConfig["Paths"]
+	NeLConfig["WorkingDirs"].update(config["WorkingDirs"])
+	config["WorkingDirs"] = NeLConfig["WorkingDirs"]
 	NeLConfig["Toolchain"]["Client"].update(config["Toolchain"]["Client"])
 	config["Toolchain"]["Client"] = NeLConfig["Toolchain"]["Client"]
 	NeLConfig["Toolchain"].update(config["Toolchain"])
