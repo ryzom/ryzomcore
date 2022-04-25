@@ -13,7 +13,7 @@ envPath = ""
 if "EnvPath" in tc and len(tc["EnvPath"]) > 0:
 	for ep in tc["EnvPath"]:
 		envPath = ep + os.pathsep + envPath
-	envPath = "PATH=" + envPath[:-1]
+	envPath = "PATH=" + envPath + "%PATH%"
 # \nQT_PLUGIN_PATH=C:\2021q4_external_v143_x64\qt5\plugins
 
 def RecurseDir(dir):
