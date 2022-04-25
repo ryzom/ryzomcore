@@ -250,7 +250,7 @@ def GeneratePathScript():
 def GeneratePatchVersionScript():
 	fo = open(NeLPatchVersionScript, 'w')
 	fo.write("if /I \"%RC_PYTHON3_DIR%\"==\"\" call " + EscapeArg(NeLPathScript) + "\n")
-	fo.write("if /I \"%CLIENT_PATCH_VERSION%\"==\"\" goto :update\n")
+	fo.write("if /I \"%RC_CLIENT_PATCH_VERSION%\"==\"\" goto :update\n")
 	fo.write("goto :done\n")
 	fo.write(":update\n")
 	fo.write("%RC_PYTHON3_DIR%\\python %RC_CODE_DIR%\\tool\\quick_start\\patch_version.py\n")
@@ -448,7 +448,7 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 	fo.write("@echo on\n")
 	if isDocker:
 		fo.write("%RC_DOCKER% ")
-	fo.write("cmake -DNL_VERSION_PATCH=%CLIENT_PATCH_VERSION% .\n")
+	fo.write("cmake -DNL_VERSION_PATCH=%RC_CLIENT_PATCH_VERSION% -DNL_VERSION_BUILD=%RC_BUILD_NUMBER% .\n")
 	fo.write("@echo off\n")
 	WritePauseGoto(fo, ":reconfigure")
 	
