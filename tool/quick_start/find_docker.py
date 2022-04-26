@@ -67,7 +67,6 @@ def NeedConfigureDocker():
 			if not image in FoundDocker:
 				return True
 		return False
+	if not FoundDocker == None:
+		return True
 	return False
-
-# if (FoundDocker):
-# 	print(FoundDocker)

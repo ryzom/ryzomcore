@@ -49,7 +49,7 @@ def BuildImages():
 	for image in FoundDockerImages:
 		BuildImage(image)
 
-if FoundDocker:
+if not FoundDocker == None:
 	try:
 		BuildSteamRuntime("steamrt_scout_amd64", "com.valvesoftware.SteamRuntime.Sdk-amd64,i386-scout-sysroot", "linux/amd64")
 		BuildSteamRuntime("steamrt_scout_i386", "com.valvesoftware.SteamRuntime.Sdk-i386-scout-sysroot", "linux/386")
