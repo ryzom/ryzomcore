@@ -9,12 +9,16 @@ from quick_start.common import *
 dir = sys.argv[1]
 tc = NeLToolchains[sys.argv[2]]
 
-envPath = ""
-if "EnvPath" in tc and len(tc["EnvPath"]) > 0:
-	for ep in tc["EnvPath"]:
-		envPath = ep + os.pathsep + envPath
-	envPath = "PATH=" + envPath + "%PATH%"
-# \nQT_PLUGIN_PATH=C:\2021q4_external_v143_x64\qt5\plugins
+envPath = os.getenv("RC_PREFIX_BIN")
+if envPath:
+	envPath = "PATH=" + envPath + ";%PATH%"
+else:
+	envPath = ""
+qtPluginDir = os.getenv("RC_QT_PLUGIN_DIR")
+if qtPluginDir and len(qtPluginDir) > 0:
+	if len(envPath) > 0:
+		envPath = envPath + "\n"
+	envPath = envPath + "QT_PLUGIN_PATH=" + qtPluginDir
 
 def RecurseDir(dir):
 	for di in os.listdir(dir):

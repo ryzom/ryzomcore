@@ -81,7 +81,8 @@
         { "OS": "Win7", "Platform": "x64", "HasMFC": true, "Hunter": false },
         { "OS": "Win7", "Platform": "x64", "Hunter": false },
         { "OS": "Win7", "Platform": "x64" }
-      ]
+      ],
+      "Qt": [ "qt5", "qt4", "qt6" ]
     },
     "Server": {
       "Filter": [
@@ -97,14 +98,16 @@
           { "OS": "Win7", "Platform": "x86", "Hunter": false },
           { "OS": "WinXP", "Platform": "x86" },
           { "OS": "Win7", "Platform": "x86" }
-        ]
+        ],
+        "Qt": [ "qt4_static", "qt5_static", "qt6_static" ]
       },
       "win64": {
         "Filter": [
           { "OS": "WinXP", "Platform": "x64", "Hunter": false },
           { "OS": "Win7", "Platform": "x64", "Hunter": false },
           { "OS": "Win7", "Platform": "x64" }
-        ]
+        ],
+        "Qt": [ "qt5_static", "qt4_static", "qt6_static" ]
       },
       "linux32": {
         "Filter": [

@@ -5,6 +5,7 @@ import sys, os, math
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from quick_start.common import *
+from quick_start.find_external import *
 from quick_start.find_targets import *
 
 NeLSpecClient = 1
@@ -32,7 +33,7 @@ def EscapeArgOpt(arg):
 		return '"' + arg.replace('"', r'\"') + '"'
 	return arg
 
-def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
+def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 	global NeLSpecClient
 	global NeLSpecServer
 	global NeLSpecTools
@@ -83,9 +84,26 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 	opts += [ "-DWITH_STLPORT=OFF" ]
 	opts += [ "-DWITH_NEL_TESTS=OFF" ]
 	opts += [ "-DWITH_STATIC=ON" ]
-	opts += [ "-DWITH_QT4=OFF" ]
-	opts += [ "-DWITH_QT5=OFF" ] # TODO
-	opts += [ "-DWITH_FFMPEG=OFF" ]
+	
+	if len(FilterExternalDirs([ "ffmpeg", "ffmpeg" ], filteredPrefix)) > 0:
+		opts += [ "-DWITH_FFMPEG=ON" ]
+	else:
+		opts += [ "-DWITH_FFMPEG=OFF" ]
+	
+	if len(FilterExternalDirs([ "qt4", "qt4_static" ], filteredPrefix)) > 0:
+		opts += [ "-DWITH_QT=ON" ]
+	else:
+		opts += [ "-DWITH_QT=OFF" ]
+	
+	if len(FilterExternalDirs([ "qt5", "qt5_static" ], filteredPrefix)) > 0:
+		opts += [ "-DWITH_QT5=ON" ]
+	else:
+		opts += [ "-DWITH_QT5=OFF" ]
+	
+	if len(FilterExternalDirs([ "qt6", "qt6_static" ], filteredPrefix)) > 0:
+		opts += [ "-DWITH_QT6=ON" ]
+	else:
+		opts += [ "-DWITH_QT6=OFF" ]
 	
 	if tc["Compiler"] == "MSVC" and not isHunter:
 		opts += [ "-DWITH_STATIC_LIBXML2=OFF" ]
@@ -223,6 +241,34 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir):
 		res += [ os.path.relpath(NeLCodeDir, buildDir) ]
 	return res
 
+def FilterPrefix(target, spec):
+	global NeLSpecClient
+	global NeLSpecServer
+	global NeLSpecTools
+	global NeLSpecSamples
+	global NeLSpecPluginMax
+	nelDirs = [ "zlib", "openssl", "curl", "libjpeg", "libpng", "iconv", "libxml2", "freetype2", "ogg", "vorbis", "openal", "gl", "gles", "lua" , "mariadb" ]
+	toolsDirs = [ "squish", "assimp" ]
+	clientDirs = [ "boost", "luabind" ]
+	tc = NeLToolchains[target["Toolchain"]]
+	cfg = target["Config"]
+	qt = None
+	if "Qt" in cfg:
+		qt = cfg["Qt"]
+	dirs = [] + nelDirs
+	if spec == NeLSpecTools or spec == NeLSpecSamples or spec == NeLSpecPluginMax:
+		dirs = dirs + toolsDirs
+	if spec == NeLSpecClient:
+		dirs = dirs + clientDirs
+	res = FilterExternalDirs(dirs, tc["Prefix"])
+	if qt:
+		for qtVer in qt:
+			qtRes = FilterExternalDirs([ qtVer ], tc["Prefix"])
+			if len(qtRes):
+				res = res + qtRes
+				break
+	return res
+
 def GeneratePathScript():
 	fo = open(NeLPathScript, 'w')
 	fo.write("set " + EscapeArg("RC_ROOT=" + NeLRootDir) + "\n")
@@ -305,7 +351,7 @@ def WriteFooter(fo, title):
 	fo.write("echo Ready\n")
 	fo.write("pause\n")
 
-def GenerateMsvcEnv(file, buildDir, generator, tc):
+def GenerateMsvcEnv(file, buildDir, generator, tc, filteredPrefix):
 	fo = open(file, 'w')
 	fo.write("@echo off\n")
 	fo.write("rem " + tc["DisplayName"] + "\n")
@@ -342,9 +388,17 @@ def GenerateMsvcEnv(file, buildDir, generator, tc):
 	fo.write("set " + EscapeArg("RC_BUILD_DIR=" + buildDir) + "\n")
 	if "Prefix" in tc and len(tc["Prefix"]) > 0:
 		prefixPath = ""
-		for path in tc["Prefix"]:
+		for path in filteredPrefix:
 			prefixPath += path + os.pathsep
 		fo.write("set " + EscapeArg("RC_PREFIX_PATH=" + prefixPath[:-1]) + "\n")
+		binPrefix = FindBinPaths(filteredPrefix)
+		prefixBin = ""
+		for path in binPrefix:
+			prefixBin += path + os.pathsep
+		fo.write("set " + EscapeArg("RC_PREFIX_BIN=" + prefixBin[:-1]) + "\n")
+		qtPluginBin = FindQtPluginPath(filteredPrefix)
+		if qtPluginBin:
+			fo.write("set " + EscapeArg("RC_QT_PLUGIN_DIR=" + qtPluginBin) + "\n")
 	gen = generator
 	if not gen and "Generator" in tc:
 		gen = tc["Generator"]
@@ -379,10 +433,10 @@ def GenerateDockerCmd(file, envScript, target):
 	fo.write("%RC_DOCKER_IT% bash\n")
 	fo.close()
 
-def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir):
+def GenerateCMakeCreate(file, envScript, spec, generator, fv, target, buildDir, filteredPrefix):
 	tc = NeLToolchains[target["Toolchain"]]
 	isDocker = "Docker" in tc and tc["Docker"]
-	opts = GenerateCMakeOptions(spec, generator, fv, target, buildDir)
+	opts = GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix)
 	fo = open(file, 'w')
 	fo.write("@echo off\n")
 	fo.write("call " + EscapeArg(envScript) + "\n")
@@ -548,16 +602,17 @@ def ConfigureTarget(spec, name, fv, target):
 	buildScript = os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt)
 	scriptOk = False
 	if tc["Compiler"] == "MSVC":
-		GenerateMsvcEnv(envScript, buildDir, gen, tc)
+		filteredPrefix = FilterPrefix(target, spec)
+		GenerateMsvcEnv(envScript, buildDir, gen, tc, filteredPrefix)
 		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
-		GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir)
+		GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir, filteredPrefix)
 		GenerateBuild(buildScript, envScript, spec, gen, fv, target, buildDir)
 		scriptOk = True
 	elif tc["Compiler"] == "GCC":
 		if "Docker" in tc and tc["Docker"]:
 			GenerateDockerEnv(envScript, relPath, buildDir, tc)
 			GenerateDockerCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
-			GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir)
+			GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir, [])
 			GenerateBuild(buildScript, envScript, spec, gen, fv, target, buildDir)
 			scriptOk = True
 		else:

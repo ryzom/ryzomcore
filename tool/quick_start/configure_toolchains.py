@@ -61,7 +61,7 @@ for ts in SortedToolsets:
 				if os.path.isfile("C:\\Program Files\\Microsoft Platform SDK for Windows Server 2003 R2\\Include\\Msi.h"):
 					toolchain["CMake"] += [ "-DWINSDK_DIR=C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2" ]
 				toolchain["CMake"] += [ "-DWINSDK_VERSION=5.2" ]
-		toolchain["EnvPath"] = FindBinPaths(toolchain["Prefix"])
+		#toolchain["EnvPath"] = FindBinPaths(toolchain["Prefix"])
 		toolchain["EnvSet"] = []
 		# For XP support, simply target SDK 7.1A
 		if ts.endswith("_xp"):
@@ -118,7 +118,7 @@ for ts in SortedToolsets:
 					copyToolchain[k] = toolchain[k]
 				copyToolchain["Hunter"] = True
 				copyToolchain["Prefix"] = []
-				copyToolchain["EnvPath"] = []
+				#copyToolchain["EnvPath"] = []
 				copyEnvSet = []
 				copyEnvSet += copyToolchain["EnvSet"]
 				copyEnvSet += [ "CL=/DLIBXML_STATIC;%CL%" ]

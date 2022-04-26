@@ -6,7 +6,7 @@ from .common_config import *
 
 import os
 
-def FilterExternalDirs(libs):
+def FilterExternalDirs(libs, prefixPaths):
 	filterMap = {
 		"assimp": "include/assimp/mesh.h",
 		"boost": "include/boost/algorithm/algorithm.hpp",
@@ -27,19 +27,29 @@ def FilterExternalDirs(libs):
 		"openal": "include/AL/al.h",
 		"openssl": "include/openssl/opensslconf.h",
 		"protobuf": "include/google/protobuf/message.h",
-		"qt5": "include/QtCore/QBuffer",
+		"qt5": "bin/Qt5Core.dll",
+		"qt5_static": "lib/cmake/Qt5Widgets/Qt5Widgets_QWindowsVistaStylePlugin_Import.cpp",
+		"qt6": "bin/Qt6Core.dll",
+		"qt6_static": "lib/cmake/Qt6Widgets/Qt6WidgetsPlugins.cmake",
 		"squish": "include/squish.h",
 		"vorbis": "include/vorbis/codec.h",
 		"zlib": "include/zlib.h"
 	}
 	res = []
-	for dir in FoundExternalDirs:
-		for lib in libs:
-			file = os.path.join(dir, filterMap[lib])
-			if os.path.isfile(file):
-				res += [ dir ]
-				break
+	for lib in libs:
+		if lib in filterMap:
+			for dir in prefixPaths:
+				file = os.path.join(dir, filterMap[lib])
+				if os.path.isfile(file):
+					res += [ dir ]
+					break
 	return res
+
+def FindQtPluginPath(prefixPaths):
+	for dir in prefixPaths:
+		if os.path.isfile(os.path.join(dir, "plugins/platforms/qminimal.dll")):
+			return os.path.join(dir, "plugins")
+	return None
 
 # The list of folders to potentially pass to CMake as PREFIX
 def FindPrefixPaths(externalDir):
@@ -72,7 +82,10 @@ def FindPrefixPaths(externalDir):
 		"include/AL/al.h",
 		"include/openssl/opensslconf.h",
 		"include/google/protobuf/message.h",
-		"include/QtCore/QBuffer",
+		"bin/Qt5Core.dll",
+		"lib/cmake/Qt5Widgets/Qt5Widgets_QWindowsVistaStylePlugin_Import.cpp",
+		"bin/Qt6Core.dll",
+		"lib/cmake/Qt6Widgets/Qt6WidgetsPlugins.cmake",
 		"include/squish.h",
 		"include/vorbis/codec.h",
 		"include/zlib.h"
