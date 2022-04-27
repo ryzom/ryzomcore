@@ -247,9 +247,8 @@ def FilterPrefix(target, spec):
 	global NeLSpecTools
 	global NeLSpecSamples
 	global NeLSpecPluginMax
-	nelDirs = [ "zlib", "openssl", "curl", "libjpeg", "libpng", "iconv", "libxml2", "freetype2", "ogg", "vorbis", "openal", "gl", "gles", "lua" , "mariadb" ]
+	nelDirs = [ "zlib", "openssl", "curl", "libjpeg", "libpng", "iconv", "libxml2", "freetype2", "ogg", "vorbis", "openal", "gl", "gles", "lua", "boost", "luabind" , "mariadb" ]
 	toolsDirs = [ "squish", "assimp" ]
-	clientDirs = [ "boost", "luabind" ]
 	tc = NeLToolchains[target["Toolchain"]]
 	cfg = target["Config"]
 	qt = None
@@ -258,8 +257,6 @@ def FilterPrefix(target, spec):
 	dirs = [] + nelDirs
 	if spec == NeLSpecTools or spec == NeLSpecSamples or spec == NeLSpecPluginMax:
 		dirs = dirs + toolsDirs
-	if spec == NeLSpecClient:
-		dirs = dirs + clientDirs
 	res = FilterExternalDirs(dirs, tc["Prefix"])
 	if qt:
 		for qtVer in qt:
