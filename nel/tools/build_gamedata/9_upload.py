@@ -7,7 +7,7 @@
 # Game data build pipeline.
 # Upload data to servers
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2011  Kaetemi
 #
 # This program is free software: you can redistribute it and/or modify
