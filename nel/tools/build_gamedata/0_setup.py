@@ -7,8 +7,8 @@
 # Python port of game data build pipeline.
 # Run all setup processes
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2009-2014  by authors
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
+# Copyright (C) 2009-2022  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -61,6 +61,8 @@ from tools import *
 
 if not args.noconf:
 	try:
+		if args.preset:
+			DummyUnknownName
 		BuildQuality
 	except NameError:
 		BuildQuality = 1
@@ -75,7 +77,9 @@ if not args.noconf:
 			DummyUnknownName
 		RemapLocalTo
 	except NameError:
-		RemapLocalTo = os.getenv('RC_ROOT').replace('\\', '/')
+		RemapLocalTo = None
+		if NeLRootDir:
+			RemapLocalTo = NeLRootDir.replace('\\', '/')
 		if (not RemapLocalTo) or (not ':' in RemapLocalTo):
 			RemapLocalTo = 'R:'
 	try:
@@ -83,7 +87,7 @@ if not args.noconf:
 			DummyUnknownName
 		ToolDirectories
 	except NameError:
-		ToolDirectories = [ 'R:/distribution/nel_tools_win_x64', 'R:/distribution/ryzom_tools_win_x64' ]
+		ToolDirectories = [ 'R:/stock/nel_tools', 'R:/stock/ryzom_tools' ]
 	try:
 		ToolSuffix
 	except NameError:
@@ -243,20 +247,22 @@ if not args.noconf:
 			DummyUnknownName
 		WindowsExeDllCfgDirectories
 	except NameError:
-		# TODO: Separate 64bit and 32bit
-		WindowsExeDllCfgDirectories = [ '', 'R:/build/fv_x64/bin/Release', 'R:/distribution/external_x64', 'R:/code/ryzom/client', '', '', '' ]
+		# TODO: Remove this
+		WindowsExeDllCfgDirectories = [ '', '', '', '', '', '', '' ]
 	try:
 		if args.preset:
 			DummyUnknownName
 		LinuxServiceExecutableDirectory
 	except NameError:
-		LinuxServiceExecutableDirectory = "R:/build/server_gcc/bin"
+		# TODO: Remove this
+		LinuxServiceExecutableDirectory = "R:/build_docker/server/bin"
 	try:
 		if args.preset:
 			DummyUnknownName
 		LinuxClientExecutableDirectory
 	except NameError:
-		LinuxClientExecutableDirectory = "R:/build/client_gcc/bin"
+		# TODO: Remove this
+		LinuxClientExecutableDirectory = ""
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -282,26 +288,38 @@ if not args.noconf:
 	except NameError:
 		PatchmanBridgeServerDirectory = "R:/pipeline/bridge_server"
 	try:
+		if args.preset:
+			DummyUnknownName
 		SignToolExecutable
 	except NameError:
 		SignToolExecutable = "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Bin/signtool.exe"
 	try:
+		if args.preset:
+			DummyUnknownName
 		SignToolSha1
 	except NameError:
 		SignToolSha1 = ""
 	try:
+		if args.preset:
+			DummyUnknownName
 		SignToolTimestamp
 	except NameError:
 		SignToolTimestamp = "http://timestamp.comodoca.com/authenticode"
 	try:
+		if args.preset:
+			DummyUnknownName
 		MaxAvailable
 	except NameError:
-		MaxAvailable = 1
+		MaxAvailable = 0
 	try:
+		if args.preset:
+			DummyUnknownName
 		MaxDirectory
 	except NameError:
 		MaxDirectory = "C:/Program Files (x86)/Autodesk/3ds Max 2010"
 	try:
+		if args.preset:
+			DummyUnknownName
 		MaxUserDirectory
 	except NameError:
 		import os
@@ -311,6 +329,8 @@ if not args.noconf:
 			MaxAvailable = 0
 			MaxUserDirectory = "C:/Users/Kaetemi/AppData/Local/Autodesk/3dsMax/2010 - 32bit/enu"
 	try:
+		if args.preset:
+			DummyUnknownName
 		MaxExecutable
 	except NameError:
 		MaxExecutable = "3dsmax.exe"
@@ -321,12 +341,12 @@ if not args.noconf:
 	printLog(log, "-------")
 	printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 	printLog(log, "")
-	printLog(log, "This script will set up the buildsite configuration, and create needed directories.")
-	printLog(log, "To use the defaults, simply hit ENTER, else type in the new value.")
-	printLog(log, "Use -- if you need to insert an empty value.")
-	printLog(log, "")
-	BuildQuality = int(askVar(log, "Build Quality", str(BuildQuality)))
 	if not args.preset:
+		printLog(log, "This script will set up the buildsite configuration, and create needed directories.")
+		printLog(log, "To use the defaults, simply hit ENTER, else type in the new value.")
+		printLog(log, "Use -- if you need to insert an empty value.")
+		printLog(log, "")
+		BuildQuality = int(askVar(log, "Build Quality", str(BuildQuality)))
 		ToolDirectories[0] = askVar(log, "[IN] Primary Tool Directory", ToolDirectories[0]).replace("\\", "/")
 		ToolDirectories[1] = askVar(log, "[IN] Secondary Tool Directory", ToolDirectories[1]).replace("\\", "/")
 		ToolSuffix = askVar(log, "Tool Suffix", ToolSuffix)
@@ -368,41 +388,68 @@ if not args.noconf:
 		PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
 		PatchmanCfgDefaultDirectory = askVar(log, "[IN] Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
 		PatchmanBridgeServerDirectory = askVar(log, "[OUT] Patchman Bridge Server Patch Directory", PatchmanBridgeServerDirectory).replace("\\", "/")
-	SignToolExecutable = askVar(log, "Sign Tool Executable", SignToolExecutable).replace("\\", "/")
-	SignToolSha1 = askVar(log, "Sign Tool Signature SHA1", SignToolSha1)
-	SignToolTimestamp = askVar(log, "Sign Tool Timestamp Authority", SignToolTimestamp)
-	MaxAvailable = int(askVar(log, "3dsMax Available", str(MaxAvailable)))
-	if MaxAvailable:
-		MaxDirectory = askVar(log, "3dsMax Directory", MaxDirectory).replace("\\", "/")
-		MaxUserDirectory = askVar(log, "3dsMax User Directory", MaxUserDirectory).replace("\\", "/")
-		MaxExecutable = askVar(log, "3dsMax Executable", MaxExecutable)
-	if os.path.isfile("configuration/buildsite.py"):
-		os.remove("configuration/buildsite.py")
-	sf = open("configuration/buildsite.py", "w")
+		SignToolExecutable = askVar(log, "Sign Tool Executable", SignToolExecutable).replace("\\", "/")
+		SignToolSha1 = askVar(log, "Sign Tool Signature SHA1", SignToolSha1)
+		SignToolTimestamp = askVar(log, "Sign Tool Timestamp Authority", SignToolTimestamp)
+		MaxAvailable = int(askVar(log, "3dsMax Available", str(MaxAvailable)))
+		if MaxAvailable:
+			MaxDirectory = askVar(log, "3dsMax Directory", MaxDirectory).replace("\\", "/")
+			MaxUserDirectory = askVar(log, "3dsMax User Directory", MaxUserDirectory).replace("\\", "/")
+			MaxExecutable = askVar(log, "3dsMax Executable", MaxExecutable)
+	buildsiteFileName = "configuration/buildsite.py"
+	localBuildsiteFileName = "configuration/buildsite_local.py"
+	if NeLConfigDir:
+		buildsiteFileName = os.path.join(NeLConfigDir, "buildsite_" + NeLHostId + "_" + NeLPlatformId + ".py")
+		localBuildsiteFileName = os.path.join(NeLConfigDir, "buildsite_" + NeLHostId + "_" + NeLPlatformId + "_local.py")
+		fo = open(os.path.join(NeLConfigDir, "buildsite.py"), "w")
+		fo.write("import importlib, socket, sys\n")
+		fo.write("NeLHostId = socket.gethostname().lower()\n")
+		fo.write("NeLPlatformId = sys.platform.lower()\n")
+		fo.write("globals().update(importlib.import_module(\"buildsite_\" + NeLHostId + \"_\" + NeLPlatformId).__dict__)\n")
+		fo.close()
+		fo = open(os.path.join(NeLConfigDir, "buildsite_local.py"), "w")
+		fo.write("import importlib, socket, sys\n")
+		fo.write("NeLHostId = socket.gethostname().lower()\n")
+		fo.write("NeLPlatformId = sys.platform.lower()\n")
+		fo.write("globals().update(importlib.import_module(\"buildsite_\" + NeLHostId + \"_\" + NeLPlatformId + \"_local\").__dict__)\n")
+		fo.close()
+	if os.path.isfile(buildsiteFileName):
+		os.remove(buildsiteFileName)
+	sf = open(buildsiteFileName, "w")
 	sf.write("#!/usr/bin/python\n")
 	sf.write("# \n")
-	sf.write("# \\file site.py\n")
+	sf.write("# \\file buildsite.py\n")
 	sf.write("# \\brief Site configuration\n")
 	sf.write("# \\date " + time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + "\n")
 	sf.write("# \\author Jan Boon (Kaetemi)\n")
 	sf.write("# Python port of game data build pipeline.\n")
 	sf.write("# Site configuration.\n")
 	sf.write("# \n")
-	sf.write("# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>\n")
-	sf.write("# Copyright (C) 2009-2014  by authors\n")
+	sf.write("# NeL - MMORPG Framework <https://wiki.ryzom.dev/>\n")
+	sf.write("# Copyright (C) 2009-2022  by authors\n")
 	sf.write("# \n")
-	sf.write("# This program is free software: you can redistribute it and/or modify\n")
-	sf.write("# it under the terms of the GNU Affero General Public License as\n")
-	sf.write("# published by the Free Software Foundation, either version 3 of the\n")
-	sf.write("# License, or (at your option) any later version.\n")
+	sf.write("# This is free and unencumbered software released into the public domain.\n")
 	sf.write("# \n")
-	sf.write("# This program is distributed in the hope that it will be useful,\n")
-	sf.write("# but WITHOUT ANY WARRANTY; without even the implied warranty of\n")
-	sf.write("# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n")
-	sf.write("# GNU Affero General Public License for more details.\n")
+	sf.write("# Anyone is free to copy, modify, publish, use, compile, sell, or\n")
+	sf.write("# distribute this software, either in source code form or as a compiled\n")
+	sf.write("# binary, for any purpose, commercial or non-commercial, and by any\n")
+	sf.write("# means.\n")
 	sf.write("# \n")
-	sf.write("# You should have received a copy of the GNU Affero General Public License\n")
-	sf.write("# along with this program.  If not, see <http://www.gnu.org/licenses/>.\n")
+	sf.write("# In jurisdictions that recognize copyright laws, the author or authors\n")
+	sf.write("# of this software dedicate any and all copyright interest in the\n")
+	sf.write("# software to the public domain. We make this dedication for the benefit\n")
+	sf.write("# of the public at large and to the detriment of our heirs and\n")
+	sf.write("# successors. We intend this dedication to be an overt act of\n")
+	sf.write("# relinquishment in perpetuity of all present and future rights to this\n")
+	sf.write("# software under copyright law.\n")
+	sf.write("# \n")
+	sf.write("# THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n")
+	sf.write("# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\n")
+	sf.write("# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\n")
+	sf.write("# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR\n")
+	sf.write("# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,\n")
+	sf.write("# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\n")
+	sf.write("# OTHER DEALINGS IN THE SOFTWARE.\n")
 	sf.write("# \n")
 	sf.write("\n")
 	sf.write("\n")
@@ -480,8 +527,8 @@ if not args.noconf:
 	sf.write("# end of file\n")
 	sf.flush()
 	sf.close()
-	sf = open("configuration/buildsite_local.py", "w")
-	sfr = open("configuration/buildsite.py", "r")
+	sf = open(localBuildsiteFileName, "w")
+	sfr = open(buildsiteFileName, "r")
 	for l in sfr:
 		sf.write(l.replace(RemapLocalFrom + '/', RemapLocalTo + '/'))
 	sf.flush()
