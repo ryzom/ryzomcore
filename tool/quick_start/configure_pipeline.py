@@ -15,10 +15,9 @@ def isWindows(client):
 	tc = NeLToolchains[tcn]
 	return "OS" in tc and tc["OS"].startswith("Win")
 
-def isMSVC(client):
-	tcn = NeLTargets["Client"][client]["Toolchain"]
-	tc = NeLToolchains[tcn]
-	return "Compiler" in tc and tc["Compiler"] == "MSVC"
+def isVisualStudio(client):
+	target = NeLTargets["Client"][client]
+	return "Generator" in target and target["Generator"].startswith("Visual Studio")
 
 # Generate the projects file, this is imported after the user's projects.py
 fo = open(os.path.join(workspaceDir, "projects_exedll.py"), "w")
@@ -49,8 +48,9 @@ fo.close()
 
 # Generate the individual projects
 for client in NeLTargets["Client"]:
+	target = NeLTargets["Client"][client]
 	clientWindows = isWindows(client)
-	clientMSVC = isMSVC(client)
+	clientVisualStudio = isVisualStudio(client)
 	projectDir = os.path.join(commonDir, "exedll_" + client)
 	pathlib.Path(projectDir).mkdir(parents=True, exist_ok=True)
 	fo = open(os.path.join(projectDir, "process.py"), "w")
@@ -76,7 +76,7 @@ for client in NeLTargets["Client"]:
 	buildDir = NeLTargets["Client"][client]["BuildDir"]
 	absBuildDir = os.path.join(NeLRootDir, buildDir)
 	buildDirs = [ os.path.join(absBuildDir, "bin").replace("\\", "/"), os.path.join(NeLCodeDir, "ryzom/client").replace("\\", "/") ]
-	if clientMSVC:
+	if clientVisualStudio:
 		buildDirs = [ os.path.join(absBuildDir, "bin/Release").replace("\\", "/") ] + buildDirs
 	fo.write("ExeDllCfgDirectories = " + str(buildDirs) + "\n")
 	fo.write("# COPY\n")
@@ -109,6 +109,10 @@ for client in NeLTargets["Client"]:
 		fo.write("ExeDllFiles += [ \"ryzom_client_patcher.exe\" ]\n")
 		fo.write("ExeDllFiles += [ \"ryzom_configuration_qt_r.exe\" ]\n")
 		fo.write("ExeDllFiles += [ \"crash_report.exe\" ]\n")
+		fo.write("LibSourceDirectories = [ ]\n")
+		if "PrefixBin" in target:
+			for dir in target["PrefixBin"]:
+				fo.write("LibSourceDirectories += " + str([ dir ]) + "\n")
 		fo.write("# EXPORT\n")
 		fo.write("UnsignedExeDllDirectory = CommonPath + \"/unsigned_exe_dll\"\n")
 		fo.write("LibExeDllDirectory = CommonPath + \"/lib_exe_dll\"\n")

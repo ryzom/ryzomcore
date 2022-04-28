@@ -45,7 +45,7 @@ printLog(log, "")
 
 mkPath(log, ExportBuildDirectory + "/" + UnsignedExeDllDirectory)
 for file in ExeDllFiles:
-	printLog(log, str(ExeDllCfgDirectories))
+	# printLog(log, str(ExeDllCfgDirectories))
 	printLog(log, file)
 	filePath = findFileMultiDir(log, ExeDllCfgDirectories, file)
 	if (filePath != ""):
