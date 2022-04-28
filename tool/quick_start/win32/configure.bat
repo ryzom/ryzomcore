@@ -60,6 +60,10 @@ if %errorlevel% neq 0 pause
 python print_summary.py
 if %errorlevel% neq 0 pause
 cd /d %RC_ROOT%
+echo(
+xcopy %RC_ROOT%\code\tool\quick_start\win32\install\*.bat %RC_ROOT%\ /Y
+if %errorlevel% neq 0 pause
+echo(
 call .nel\path_config.bat
 echo Mounting %RC_ROOT% as R:
 call _r_check.bat
@@ -122,12 +126,12 @@ rem python 1_export.py -ipj common/gamedev common/data_common common/sound commo
 rem if %errorlevel% neq 0 pause
 rem python 2_build.py -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll shard/data_language shard/data_leveldesign shard/data_shard
 rem if %errorlevel% neq 0 pause
-rem cd /d %RC_ROOT%
-rem call copy_dds_to_interfaces.bat
-rem cd /d %RC_ROOT%\code\nel\tools\build_gamedata
 rem python 3_install.py
 rem if %errorlevel% neq 0 pause
 rem :skipbuild
+rem cd /d %RC_ROOT%
+rem call copy_dds_to_interfaces.bat
+rem cd /d %RC_ROOT%\code\nel\tools\build_gamedata
 rem python b1_client_dev.py
 rem if %errorlevel% neq 0 pause
 rem python b2_shard_data.py
