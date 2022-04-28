@@ -637,6 +637,8 @@ def ConfigureTarget(spec, name, fv, target):
 			fo_build_game.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
 			if not fv:
 				fo_build_game_dev.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
+		if spec == NeLSpecTools:
+			fo_build_game_dev.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
 	return res
 
 Targets["Native"]["client_dev"] = ConfigureTarget(NeLSpecClient, "client_dev", False, NeLTargetClientDev)
