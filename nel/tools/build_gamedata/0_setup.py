@@ -62,6 +62,9 @@ from tools import *
 NeLToolsDirsStock = os.getenv("RC_TOOLS_DIRS_STOCK")
 if NeLToolsDirsStock:
 	NeLToolsDirsStock = NeLToolsDirsStock.split(os.pathsep)
+NeLPath = os.getenv("RC_PATH")
+if NeLPath:
+	NeLToolsDirsStock = NeLToolsDirsStock + NeLPath.split(os.pathsep)
 
 NeLServerDirsFv = os.getenv("RC_SERVER_DIRS_FV")
 if NeLServerDirsFv:
@@ -472,6 +475,9 @@ if not args.noconf:
 	sf.write("NeLToolsDirs = os.getenv(\"RC_TOOLS_DIRS\")\n")
 	sf.write("if NeLToolsDirs:\n")
 	sf.write("	NeLToolsDirs = NeLToolsDirs.split(os.pathsep)\n")
+	sf.write("NeLPath = os.getenv(\"RC_PATH\")\n")
+	sf.write("if NeLPath:\n")
+	sf.write("	NeLToolsDirs = NeLToolsDirs + NeLPath.split(os.pathsep)\n")
 	sf.write("\n")
 	sf.write("NeLServerDirsFv = os.getenv(\"RC_SERVER_DIRS_FV\")\n")
 	sf.write("if NeLServerDirsFv:\n")

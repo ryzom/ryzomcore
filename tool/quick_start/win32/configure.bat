@@ -53,6 +53,8 @@ echo(
 set RC_ORIG_PATH=%PATH%
 set PATH=%RC_PYTHON3_DIR%;%RC_ORIG_PATH%
 cd /d %RC_ROOT%\code\tool\quick_start
+python check_docker.py
+if %errorlevel% neq 0 pause
 python configure_toolchains.py
 if %errorlevel% neq 0 pause
 python configure_targets.py
