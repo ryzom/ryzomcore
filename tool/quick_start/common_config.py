@@ -64,5 +64,12 @@ if os.path.isfile(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_" + N
 	NeLToolchains.update(json.load(fi))
 	fi.close()
 
+if os.path.isfile(os.path.join(NeLConfigDir, "targets_" + NeLHostId + "_" + NeLPlatformId + ".json")):
+	fi = open(os.path.join(NeLConfigDir, "targets_" + NeLHostId + "_" + NeLPlatformId + ".json"), "r")
+	NeLTargets = json.load(fi)
+	fi.close()
+else:
+	NeLTargets = {}
+
 del MergeConfig
 del fi

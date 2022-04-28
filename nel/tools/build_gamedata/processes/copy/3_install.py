@@ -69,10 +69,10 @@ for file in CopyDatabaseSourceFiles:
 	copyFileIfNeeded(log, DatabaseDirectory + "/" + file, installPath + "/" + os.path.basename(file))
 
 try:
-	CopyWindowsExeDllCfgSourceFiles
+	CopyExeDllCfgSourceFiles
 except NameError:
-	CopyWindowsExeDllCfgSourceFiles = [ ]
-for file in CopyWindowsExeDllCfgSourceFiles:
+	CopyExeDllCfgSourceFiles = [ ]
+for file in CopyExeDllCfgSourceFiles:
 	filePath = findFileMultiDir(log, WindowsExeDllCfgDirectories, file)
 	if (filePath != ""):
 		copyFileIfNeeded(log, filePath, installPath + "/" + os.path.basename(file))

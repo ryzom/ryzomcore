@@ -302,6 +302,10 @@ def GeneratePathScript():
 	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/nel_tools")) + os.pathsep + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_tools"))) + "\n")
 	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_RELEASE=" + os.path.join(toolsDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%") + "\n")
 	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_DEBUG=" + os.path.join(toolsDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%") + "\n")
+	exedll = []
+	for client in NeLTargetClient:
+		exedll += [ "common/exedll_" + client ]
+	fo.write("set " + EscapeArg("RC_EXEDLL_PROJECTS=" + " ".join(exedll)) + "\n")
 	fo.close()
 
 def GeneratePatchVersionScript():

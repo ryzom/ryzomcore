@@ -44,7 +44,7 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 mkPath(log, ExportBuildDirectory + "/" + UnsignedExeDllDirectory)
-for file in SignExeDllFiles:
+for file in ExeDllFiles:
 	printLog(log, str(WindowsExeDllCfgDirectories))
 	printLog(log, file)
 	filePath = findFileMultiDir(log, WindowsExeDllCfgDirectories, file)
