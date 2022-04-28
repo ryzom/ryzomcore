@@ -59,8 +59,6 @@ python configure_toolchains.py
 if %errorlevel% neq 0 pause
 python configure_targets.py
 if %errorlevel% neq 0 pause
-python print_summary.py
-if %errorlevel% neq 0 pause
 cd /d %RC_ROOT%
 echo(
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\*.bat %RC_ROOT%\ /Y
@@ -141,6 +139,14 @@ rem if %errorlevel% neq 0 pause
 rem python b3_shard_dev.py
 rem if %errorlevel% neq 0 pause
 echo(
+set PATH=%RC_PYTHON3_DIR%;%RC_ORIG_PATH%
+cd /d %RC_ROOT%\code\tool\quick_start
+python print_summary.py
+if %errorlevel% neq 0 pause
+cd /d %RC_ROOT%
+echo(
 title Ryzom Core Configuration: Ready
+echo To rebuild the client, server and tools from source with the current configuration, run the code_configure_rebuild_all script.
+echo(
 echo Ready
 pause
