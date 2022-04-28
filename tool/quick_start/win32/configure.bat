@@ -64,6 +64,35 @@ call .nel\path_config.bat
 echo Mounting %RC_ROOT% as R:
 call _r_check.bat
 cd /d R:\
+:lookfortoolsstock
+set PATH=%RC_TOOLS_DIRS_STOCK%;%RC_ORIG_PATH%
+where /q ryzom_patchman_service
+if %errorlevel% neq 0 goto :notoolsstock
+where /q sheets_packer_shard
+if %errorlevel% neq 0 goto :notoolsstock
+where /q panoply_maker
+if %errorlevel% neq 0 goto :notoolsstock
+:hastoolsstock
+set RC_TOOLS_DIRS=%RC_TOOLS_DIRS_STOCK%
+goto :lookfortoolsbuild
+:notoolsstock
+:lookfortoolsbuild
+set PATH=%RC_TOOLS_DIRS_RELEASE%;%RC_ORIG_PATH%
+where /q ryzom_patchman_service
+if %errorlevel% neq 0 goto :notoolsbuild
+where /q sheets_packer_shard
+if %errorlevel% neq 0 goto :notoolsbuild
+where /q panoply_maker
+if %errorlevel% neq 0 goto :notoolsbuild
+:hastoolsbuild
+echo Using locally built tools
+set RC_TOOLS_DIRS=%RC_TOOLS_DIRS_RELEASE%
+:notoolsbuild
+if not defined RC_TOOLS_DIRS (
+echo ERROR: Tools not found. Run `code_configure_rebuild_all` to build everything, and re-run the configuration script.
+pause
+exit
+)
 echo | set /p=Updating references
 rem powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\tile_edit.lnk');$s.TargetPath='%RC_ROOT%\distribution\nel_tools_win_x64\tile_edit.exe';$s.WorkingDirectory='%RC_ROOT%\distribution\nel_tools_win_x64\';$s.Save()"
 rem echo | set /p=.

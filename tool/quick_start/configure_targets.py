@@ -288,6 +288,18 @@ def GeneratePathScript():
 	fo.write("set RC_PARALLEL=" + str(NeLParallel) + "\n")
 	fo.write("set RC_PARALLEL_PROJECTS=" + str(NeLParallelProjects) + "\n")
 	fo.write("set RC_PARALLEL_FILES=" + str(NeLParallelFiles) + "\n")
+	clientDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["client_dev"]["BuildDir"]))
+	fo.write("set " + EscapeArg("RC_CLIENT_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_client"))) + "\n")
+	fo.write("set " + EscapeArg("RC_CLIENT_DIRS_RELEASE=" + os.path.join(clientDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(clientDir, "bin")) + "\n")
+	fo.write("set " + EscapeArg("RC_CLIENT_DIRS_DEBUG=" + os.path.join(clientDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(clientDir, "bin")) + "\n")
+	serverDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["server_dev"]["BuildDir"]))
+	fo.write("set " + EscapeArg("RC_SERVER_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_server"))) + "\n")
+	fo.write("set " + EscapeArg("RC_SERVER_DIRS_RELEASE=" + os.path.join(serverDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(serverDir, "bin")) + "\n")
+	fo.write("set " + EscapeArg("RC_SERVER_DIRS_DEBUG=" + os.path.join(serverDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(serverDir, "bin")) + "\n")
+	toolsDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["tools"]["BuildDir"]))
+	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/nel_tools")) + os.pathsep + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_tools"))) + "\n")
+	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_RELEASE=" + os.path.join(toolsDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%") + "\n")
+	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_DEBUG=" + os.path.join(toolsDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%") + "\n")
 	fo.close()
 
 def GeneratePatchVersionScript():
@@ -625,9 +637,6 @@ def ConfigureTarget(spec, name, fv, target):
 				fo_build_game_dev.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
 	return res
 
-GeneratePathScript()
-GeneratePatchVersionScript()
-
 Targets["Native"]["client_dev"] = ConfigureTarget(NeLSpecClient, "client_dev", False, NeLTargetClientDev)
 Targets["Native"]["server_dev"] = ConfigureTarget(NeLSpecServer, "server_dev", False, NeLTargetServerDev)
 for client in NeLTargetClient:
@@ -637,6 +646,9 @@ Targets["Native"]["tools"] = ConfigureTarget(NeLSpecTools, "tools", False, NeLTa
 Targets["Native"]["samples"] = ConfigureTarget(NeLSpecSamples, "samples", False, NeLTargetSamples)
 for pluginMax in NelTargetPluginMax:
 	Targets["PluginMax"][pluginMax] = ConfigureTarget(NeLSpecPluginMax, "plugin_max/" + pluginMax, False, NelTargetPluginMax[pluginMax])
+
+GeneratePathScript()
+GeneratePatchVersionScript()
 
 WriteFooter(fo_configure_clean_all, "Ryzom Core: Code Configure")
 WriteFooter(fo_configure_rebuild_all, "Ryzom Core: Code Configure Rebuild All")
