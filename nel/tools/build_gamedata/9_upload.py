@@ -54,7 +54,7 @@ printLog(log, "")
 
 # Find tools
 # Not documenting this. Because we can.
-Psftp = findFileMultiDir(log, ToolDirectories + WindowsExeDllCfgDirectories, UploadPsftpTool)
+Psftp = findFileMultiDir(log, ToolDirectories + ExeDllCfgDirectories, UploadPsftpTool)
 printLog(log, "PSFTP " + Psftp)
 
 def downloadVersionTag(server, user, sshkey, dir):

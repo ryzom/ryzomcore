@@ -56,9 +56,9 @@ PatchGen = findTool(log, ToolDirectories, PatchGenTool, ToolSuffix)
 printLog(log, "")
 
 # Find **** HARDCODED **** WINDOWS **** tools ... TODO: fix patch_gen tool !!!
-Lzma = findFileMultiDir(log, ToolDirectories + WindowsExeDllCfgDirectories, "lzma.exe")
+Lzma = findFileMultiDir(log, ToolDirectories + ExeDllCfgDirectories, "lzma.exe")
 printLog(log, "LZMA " + Lzma)
-XDelta = findFileMultiDir(log, ToolDirectories + WindowsExeDllCfgDirectories, "xdelta.exe")
+XDelta = findFileMultiDir(log, ToolDirectories + ExeDllCfgDirectories, "xdelta.exe")
 printLog(log, "XDELTA " + XDelta)
 printLog(log, "")
 

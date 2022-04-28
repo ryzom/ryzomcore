@@ -146,7 +146,7 @@ if %errorlevel% neq 0 pause
 cd /d %RC_ROOT%
 echo(
 title Ryzom Core Configuration: Ready
-echo To rebuild the client, server and tools from source with the current configuration, run the code_configure_rebuild_all script.
+echo To rebuild the client, server and tools from source with the current configuration, run the `code_configure_rebuild_all` script.
 echo(
 echo Ready
 pause

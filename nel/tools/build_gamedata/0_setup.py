@@ -261,10 +261,10 @@ if not args.noconf:
 	try:
 		if args.preset:
 			DummyUnknownName
-		WindowsExeDllCfgDirectories
+		ExeDllCfgDirectories
 	except NameError:
 		# For legacy exedll bnp only
-		WindowsExeDllCfgDirectories = [ '', '', '', '', '', '', '' ]
+		ExeDllCfgDirectories = [ '', '', '', 'R:/code/ryzom/client', '', '', '' ]
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -388,13 +388,13 @@ if not args.noconf:
 		LeveldesignDataShardDirectory = askVar(log, "[IN] Leveldesign Data Shard Directory", LeveldesignDataShardDirectory).replace("\\", "/")
 		LeveldesignDataCommonDirectory = askVar(log, "[IN] Leveldesign Data Common Directory", LeveldesignDataCommonDirectory).replace("\\", "/")
 		WorldEditorFilesDirectory = askVar(log, "[IN] World Editor Files Directory", WorldEditorFilesDirectory).replace("\\", "/")
-		WindowsExeDllCfgDirectories[0] = askVar(log, "[IN] Primary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[0]).replace("\\", "/")
-		WindowsExeDllCfgDirectories[1] = askVar(log, "[IN] Secondary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[1]).replace("\\", "/")
-		WindowsExeDllCfgDirectories[2] = askVar(log, "[IN] Tertiary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[2]).replace("\\", "/")
-		WindowsExeDllCfgDirectories[3] = askVar(log, "[IN] Quaternary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[3]).replace("\\", "/")
-		WindowsExeDllCfgDirectories[4] = askVar(log, "[IN] Quinary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[4]).replace("\\", "/")
-		WindowsExeDllCfgDirectories[5] = askVar(log, "[IN] Senary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[5]).replace("\\", "/")
-		WindowsExeDllCfgDirectories[6] = askVar(log, "[IN] Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
+		ExeDllCfgDirectories[0] = askVar(log, "[IN] Primary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[0]).replace("\\", "/")
+		ExeDllCfgDirectories[1] = askVar(log, "[IN] Secondary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[1]).replace("\\", "/")
+		ExeDllCfgDirectories[2] = askVar(log, "[IN] Tertiary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[2]).replace("\\", "/")
+		ExeDllCfgDirectories[3] = askVar(log, "[IN] Quaternary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[3]).replace("\\", "/")
+		ExeDllCfgDirectories[4] = askVar(log, "[IN] Quinary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[4]).replace("\\", "/")
+		ExeDllCfgDirectories[5] = askVar(log, "[IN] Senary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[5]).replace("\\", "/")
+		ExeDllCfgDirectories[6] = askVar(log, "[IN] Septenary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[6]).replace("\\", "/")
 		LinuxServiceExecutableDirectories[0] = askVar(log, "[IN] Linux Service Executable Directory", LinuxServiceExecutableDirectories[0]).replace("\\", "/")
 		PatchmanDevDirectory = askVar(log, "[IN] Patchman Directory", PatchmanDevDirectory).replace("\\", "/")
 		PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
@@ -533,7 +533,7 @@ if not args.noconf:
 	sf.write("GamedevDirectory = \"" + str(GamedevDirectory) + "\"\n")
 	sf.write("DataCommonDirectory = \"" + str(DataCommonDirectory) + "\"\n")
 	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
-	sf.write("WindowsExeDllCfgDirectories = " + str(WindowsExeDllCfgDirectories) + "\n")
+	sf.write("ExeDllCfgDirectories = " + str(ExeDllCfgDirectories) + "\n")
 	sf.write("LinuxServiceExecutableDirectories = " + str(LinuxServiceExecutableDirectories) + "\n")
 	sf.write("PatchmanDevDirectory = \"" + str(PatchmanDevDirectory) + "\"\n")
 	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
@@ -573,6 +573,10 @@ from buildsite_local import *
 sys.path.append(WorkspaceDirectory)
 from projects import *
 
+NeLWorkspaceDir = None
+if NeLConfigDir:
+	NeLWorkspaceDir = os.path.join(NeLConfigDir, "workspace")
+
 printLog(log, "")
 printLog(log, "-------")
 printLog(log, "--- Run the setup projects")
@@ -583,7 +587,10 @@ printLog(log, "")
 for projectName in ProjectsToProcess:
 	if ((args.includeproject == None or projectName in args.includeproject) and (args.excludeproject == None or not projectName in args.excludeproject)):
 		printLog(log, "PROJECT " + projectName)
-		os.putenv("NELBUILDACTIVEPROJECT", os.path.abspath(WorkspaceDirectory + "/" + projectName))
+		if os.path.isfile(os.path.join(os.path.join(NeLWorkspaceDir, projectName), "process.py")):
+			os.putenv("NELBUILDACTIVEPROJECT", os.path.abspath(os.path.join(NeLWorkspaceDir, projectName).replace("\\", "/")))
+		else:
+			os.putenv("NELBUILDACTIVEPROJECT", os.path.abspath(WorkspaceDirectory + "/" + projectName))
 		os.chdir("processes")
 		try:
 			if not args.includeprocess == None:

@@ -73,7 +73,7 @@ try:
 except NameError:
 	CopyExeDllCfgSourceFiles = [ ]
 for file in CopyExeDllCfgSourceFiles:
-	filePath = findFileMultiDir(log, WindowsExeDllCfgDirectories, file)
+	filePath = findFileMultiDir(log, ExeDllCfgDirectories, file)
 	if (filePath != ""):
 		copyFileIfNeeded(log, filePath, installPath + "/" + os.path.basename(file))
 

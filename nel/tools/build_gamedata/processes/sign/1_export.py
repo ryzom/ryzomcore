@@ -45,9 +45,9 @@ printLog(log, "")
 
 mkPath(log, ExportBuildDirectory + "/" + UnsignedExeDllDirectory)
 for file in ExeDllFiles:
-	printLog(log, str(WindowsExeDllCfgDirectories))
+	printLog(log, str(ExeDllCfgDirectories))
 	printLog(log, file)
-	filePath = findFileMultiDir(log, WindowsExeDllCfgDirectories, file)
+	filePath = findFileMultiDir(log, ExeDllCfgDirectories, file)
 	if (filePath != ""):
 		copyFileIfNeeded(log, filePath, ExportBuildDirectory + "/" + UnsignedExeDllDirectory + "/" + os.path.basename(file))
 
