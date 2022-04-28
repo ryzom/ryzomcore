@@ -59,13 +59,13 @@ except ImportError:
 		exit()
 from tools import *
 
-NeLToolsDirs = os.getenv("RC_TOOLS_DIRS")
-if NeLToolsDirs:
-	NeLToolsDirs = NeLToolsDirs.split(os.pathsep)
+NeLToolsDirsStock = os.getenv("RC_TOOLS_DIRS_STOCK")
+if NeLToolsDirsStock:
+	NeLToolsDirsStock = NeLToolsDirsStock.split(os.pathsep)
 
-NeLServerDirs = os.getenv("RC_SERVER_FV_DIRS")
-if NeLServerDirs:
-	NeLServerDirs = NeLServerDirs.split(os.pathsep)
+NeLServerDirsFv = os.getenv("RC_SERVER_DIRS_FV")
+if NeLServerDirsFv:
+	NeLServerDirsFv = NeLServerDirsFv.split(os.pathsep)
 
 if not args.noconf:
 	try:
@@ -95,8 +95,8 @@ if not args.noconf:
 			DummyUnknownName
 		ToolDirectories
 	except NameError:
-		if NeLToolsDirs:
-			ToolDirectories = [] + NeLToolsDirs
+		if NeLToolsDirsStock:
+			ToolDirectories = [] + NeLToolsDirsStock
 			for i in range(len(ToolDirectories)):
 				ToolDirectories[i] = ToolDirectories[i].replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom)
 		else:
@@ -267,8 +267,8 @@ if not args.noconf:
 			DummyUnknownName
 		LinuxServiceExecutableDirectories
 	except NameError:
-		if NeLServerDirs:
-			LinuxServiceExecutableDirectories = [] + NeLServerDirs
+		if NeLServerDirsFv:
+			LinuxServiceExecutableDirectories = [] + NeLServerDirsFv
 			for i in range(len(LinuxServiceExecutableDirectories)):
 				LinuxServiceExecutableDirectories[i] = LinuxServiceExecutableDirectories[i].replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom)
 		else:
@@ -473,9 +473,9 @@ if not args.noconf:
 	sf.write("if NeLToolsDirs:\n")
 	sf.write("	NeLToolsDirs = NeLToolsDirs.split(os.pathsep)\n")
 	sf.write("\n")
-	sf.write("NeLServerDirs = os.getenv(\"RC_SERVER_FV_DIRS\")\n")
-	sf.write("if NeLServerDirs:\n")
-	sf.write("	NeLServerDirs = NeLServerDirs.split(os.pathsep)\n")
+	sf.write("NeLServerDirsFv = os.getenv(\"RC_SERVER_DIRS_FV\")\n")
+	sf.write("if NeLServerDirsFv:\n")
+	sf.write("	NeLServerDirsFv = NeLServerDirsFv.split(os.pathsep)\n")
 	sf.write("\n")
 	sf.write("# Quality option for this site (1 for BEST, 0 for DRAFT)\n")
 	sf.write("BuildQuality = " + str(BuildQuality) + "\n")
@@ -534,8 +534,8 @@ if not args.noconf:
 	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
 	sf.write("PatchmanBridgeServerDirectory = \"" + str(PatchmanBridgeServerDirectory) + "\"\n")
 	sf.write("\n")
-	sf.write("if NeLServerDirs:\n")
-	sf.write("	LinuxServiceExecutableDirectories = [] + NeLServerDirs\n")
+	sf.write("if NeLServerDirsFv:\n")
+	sf.write("	LinuxServiceExecutableDirectories = [] + NeLServerDirsFv\n")
 	sf.write("	for i in range(len(LinuxServiceExecutableDirectories)):\n")
 	sf.write("		LinuxServiceExecutableDirectories[i] = LinuxServiceExecutableDirectories[i].replace('\\\\', '/')\n")
 	sf.write("\n")

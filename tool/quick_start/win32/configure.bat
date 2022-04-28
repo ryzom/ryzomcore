@@ -134,5 +134,7 @@ rem python b2_shard_data.py
 rem if %errorlevel% neq 0 pause
 rem python b3_shard_dev.py
 rem if %errorlevel% neq 0 pause
-rem echo(
+echo(
+title Ryzom Core Configuration: Ready
+echo Ready
 pause
