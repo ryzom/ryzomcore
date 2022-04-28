@@ -59,6 +59,14 @@ except ImportError:
 		exit()
 from tools import *
 
+NeLToolsDirs = os.getenv("RC_TOOLS_DIRS")
+if NeLToolsDirs:
+	NeLToolsDirs = NeLToolsDirs.split(os.pathsep)
+
+NeLServerDirs = os.getenv("RC_SERVER_FV_DIRS")
+if NeLServerDirs:
+	NeLServerDirs = NeLServerDirs.split(os.pathsep)
+
 if not args.noconf:
 	try:
 		if args.preset:
@@ -87,7 +95,12 @@ if not args.noconf:
 			DummyUnknownName
 		ToolDirectories
 	except NameError:
-		ToolDirectories = [ 'R:/stock/nel_tools', 'R:/stock/ryzom_tools' ]
+		if NeLToolsDirs:
+			ToolDirectories = [] + NeLToolsDirs
+			for i in range(len(ToolDirectories)):
+				ToolDirectories[i] = ToolDirectories[i].replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom)
+		else:
+			ToolDirectories = [ 'R:/stock/nel_tools', 'R:/stock/ryzom_tools' ]
 	try:
 		ToolSuffix
 	except NameError:
@@ -252,10 +265,14 @@ if not args.noconf:
 	try:
 		if args.preset:
 			DummyUnknownName
-		LinuxServiceExecutableDirectory
+		LinuxServiceExecutableDirectories
 	except NameError:
-		# TODO: Remove this
-		LinuxServiceExecutableDirectory = "R:/build_docker/server/bin"
+		if NeLServerDirs:
+			LinuxServiceExecutableDirectories = [] + NeLServerDirs
+			for i in range(len(LinuxServiceExecutableDirectories)):
+				LinuxServiceExecutableDirectories[i] = LinuxServiceExecutableDirectories[i].replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom)
+		else:
+			LinuxServiceExecutableDirectories = [ "R:/build_docker/server/bin" ]
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -382,7 +399,7 @@ if not args.noconf:
 		WindowsExeDllCfgDirectories[4] = askVar(log, "[IN] Quinary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[4]).replace("\\", "/")
 		WindowsExeDllCfgDirectories[5] = askVar(log, "[IN] Senary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[5]).replace("\\", "/")
 		WindowsExeDllCfgDirectories[6] = askVar(log, "[IN] Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
-		LinuxServiceExecutableDirectory = askVar(log, "[IN] Linux Service Executable Directory", LinuxServiceExecutableDirectory).replace("\\", "/")
+		LinuxServiceExecutableDirectories[0] = askVar(log, "[IN] Linux Service Executable Directory", LinuxServiceExecutableDirectories[0]).replace("\\", "/")
 		LinuxClientExecutableDirectory = askVar(log, "[IN] Linux Client Executable Directory", LinuxClientExecutableDirectory).replace("\\", "/")
 		PatchmanDevDirectory = askVar(log, "[IN] Patchman Directory", PatchmanDevDirectory).replace("\\", "/")
 		PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
@@ -458,6 +475,15 @@ if not args.noconf:
 	sf.write("# Use '/' in path name, not '\'\n")
 	sf.write("# Don't put '/' at the end of a directory name\n")
 	sf.write("\n")
+	sf.write("import os\n")
+	sf.write("\n")
+	sf.write("NeLToolsDirs = os.getenv(\"RC_TOOLS_DIRS\")\n")
+	sf.write("if NeLToolsDirs:\n")
+	sf.write("	NeLToolsDirs = NeLToolsDirs.split(os.pathsep)\n")
+	sf.write("\n")
+	sf.write("NeLServerDirs = os.getenv(\"RC_SERVER_FV_DIRS\")\n")
+	sf.write("if NeLServerDirs:\n")
+	sf.write("	NeLServerDirs = NeLServerDirs.split(os.pathsep)\n")
 	sf.write("\n")
 	sf.write("# Quality option for this site (1 for BEST, 0 for DRAFT)\n")
 	sf.write("BuildQuality = " + str(BuildQuality) + "\n")
@@ -467,6 +493,11 @@ if not args.noconf:
 	sf.write("\n")
 	sf.write("ToolDirectories = " + str(ToolDirectories) + "\n")
 	sf.write("ToolSuffix = \"" + str(ToolSuffix) + "\"\n")
+	sf.write("\n")
+	sf.write("if NeLToolsDirs:\n")
+	sf.write("	ToolDirectories = [] + NeLToolsDirs\n")
+	sf.write("	for i in range(len(ToolDirectories)):\n")
+	sf.write("		ToolDirectories[i] = ToolDirectories[i].replace('\\\\', '/')\n")
 	sf.write("\n")
 	sf.write("# Build script directory\n")
 	sf.write("ScriptDirectory = \"" + str(ScriptDirectory) + "\"\n")
@@ -505,12 +536,17 @@ if not args.noconf:
 	sf.write("DataCommonDirectory = \"" + str(DataCommonDirectory) + "\"\n")
 	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("WindowsExeDllCfgDirectories = " + str(WindowsExeDllCfgDirectories) + "\n")
-	sf.write("LinuxServiceExecutableDirectory = \"" + str(LinuxServiceExecutableDirectory) + "\"\n")
+	sf.write("LinuxServiceExecutableDirectories = " + str(LinuxServiceExecutableDirectories) + "\n")
 	sf.write("LinuxClientExecutableDirectory = \"" + str(LinuxClientExecutableDirectory) + "\"\n")
 	sf.write("PatchmanDevDirectory = \"" + str(PatchmanDevDirectory) + "\"\n")
 	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
 	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
 	sf.write("PatchmanBridgeServerDirectory = \"" + str(PatchmanBridgeServerDirectory) + "\"\n")
+	sf.write("\n")
+	sf.write("if NeLServerDirs:\n")
+	sf.write("	LinuxServiceExecutableDirectories = [] + NeLServerDirs\n")
+	sf.write("	for i in range(len(LinuxServiceExecutableDirectories)):\n")
+	sf.write("		LinuxServiceExecutableDirectories[i] = LinuxServiceExecutableDirectories[i].replace('\\\\', '/')\n")
 	sf.write("\n")
 	sf.write("# Sign tool\n")
 	sf.write("SignToolExecutable = \"" + str(SignToolExecutable) + "\"\n")

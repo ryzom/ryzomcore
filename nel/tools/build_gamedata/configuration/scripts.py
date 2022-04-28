@@ -53,10 +53,6 @@ del findNeLRoot
 NeLHostId = socket.gethostname().lower()
 NeLPlatformId = sys.platform.lower()
 
-NeLToolsDirs = os.getenv("RC_TOOLS_DIRS")
-if NeLToolsDirs:
-	NeLToolsDirs = NeLToolsDirs.split(os.pathsep)
-
 ActiveProjectDirectory = os.getenv("NELBUILDACTIVEPROJECT", "configuration/project")
 sys.path.append(ActiveProjectDirectory)
 
@@ -618,11 +614,8 @@ def findFileMultiDir(log, dirs_where, file_name):
 	return ""
 
 def findTool(log, dirs_where, file_name, suffix):
-	dw = dirs_where
-	if NeLToolsDirs:
-		dw = NeLToolsDirs
 	try:
-		for dir in dw:
+		for dir in dirs_where:
 			if dir != "":
 				tool = findFile(log, dir, file_name + suffix)
 				if tool != "":

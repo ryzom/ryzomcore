@@ -296,6 +296,8 @@ def GeneratePathScript():
 	fo.write("set " + EscapeArg("RC_SERVER_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_server"))) + "\n")
 	fo.write("set " + EscapeArg("RC_SERVER_DIRS_RELEASE=" + os.path.join(serverDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(serverDir, "bin")) + "\n")
 	fo.write("set " + EscapeArg("RC_SERVER_DIRS_DEBUG=" + os.path.join(serverDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(serverDir, "bin")) + "\n")
+	serverFvDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Server"]["BuildDir"]))
+	fo.write("set " + EscapeArg("RC_SERVER_DIRS_FV=" + os.path.join(serverFvDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(serverFvDir, "bin")) + "\n")
 	toolsDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["tools"]["BuildDir"]))
 	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/nel_tools")) + os.pathsep + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_tools"))) + "\n")
 	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_RELEASE=" + os.path.join(toolsDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%") + "\n")
