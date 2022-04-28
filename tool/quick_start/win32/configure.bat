@@ -119,19 +119,19 @@ set PATH=%RC_PYTHON27_DIR%;%RC_ORIG_PATH%
 cd /d %RC_ROOT%\code\nel\tools\build_gamedata
 python 0_setup.py -p
 if %errorlevel% neq 0 pause
-rem if exist %RC_ROOT%\pipeline\install\data_leveldesign\sheet_id.bin goto :skipbuild
-rem python a1_worldedit_data.py
-rem if %errorlevel% neq 0 pause
-rem python 1_export.py -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll shard/data_language shard/data_leveldesign shard/data_shard
-rem if %errorlevel% neq 0 pause
-rem python 2_build.py -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll shard/data_language shard/data_leveldesign shard/data_shard
-rem if %errorlevel% neq 0 pause
-rem python 3_install.py
-rem if %errorlevel% neq 0 pause
-rem :skipbuild
-rem cd /d %RC_ROOT%
-rem call copy_dds_to_interfaces.bat
-rem cd /d %RC_ROOT%\code\nel\tools\build_gamedata
+if exist %RC_ROOT%\pipeline\install\data_leveldesign\sheet_id.bin goto :skipbuild
+python a1_worldedit_data.py
+if %errorlevel% neq 0 pause
+python 1_export.py -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll shard/data_language shard/data_leveldesign shard/data_shard
+if %errorlevel% neq 0 pause
+python 2_build.py -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll shard/data_language shard/data_leveldesign shard/data_shard
+if %errorlevel% neq 0 pause
+python 3_install.py
+if %errorlevel% neq 0 pause
+:skipbuild
+cd /d %RC_ROOT%
+call copy_dds_to_interfaces.bat
+cd /d %RC_ROOT%\code\nel\tools\build_gamedata
 rem python b1_client_dev.py
 rem if %errorlevel% neq 0 pause
 rem python b2_shard_data.py
