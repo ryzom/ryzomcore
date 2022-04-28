@@ -260,7 +260,7 @@ if not args.noconf:
 			DummyUnknownName
 		WindowsExeDllCfgDirectories
 	except NameError:
-		# TODO: Remove this
+		# For legacy exedll bnp only
 		WindowsExeDllCfgDirectories = [ '', '', '', '', '', '', '' ]
 	try:
 		if args.preset:
@@ -273,13 +273,6 @@ if not args.noconf:
 				LinuxServiceExecutableDirectories[i] = LinuxServiceExecutableDirectories[i].replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom)
 		else:
 			LinuxServiceExecutableDirectories = [ "R:/build_docker/server/bin" ]
-	try:
-		if args.preset:
-			DummyUnknownName
-		LinuxClientExecutableDirectory
-	except NameError:
-		# TODO: Remove this
-		LinuxClientExecutableDirectory = ""
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -400,7 +393,6 @@ if not args.noconf:
 		WindowsExeDllCfgDirectories[5] = askVar(log, "[IN] Senary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[5]).replace("\\", "/")
 		WindowsExeDllCfgDirectories[6] = askVar(log, "[IN] Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
 		LinuxServiceExecutableDirectories[0] = askVar(log, "[IN] Linux Service Executable Directory", LinuxServiceExecutableDirectories[0]).replace("\\", "/")
-		LinuxClientExecutableDirectory = askVar(log, "[IN] Linux Client Executable Directory", LinuxClientExecutableDirectory).replace("\\", "/")
 		PatchmanDevDirectory = askVar(log, "[IN] Patchman Directory", PatchmanDevDirectory).replace("\\", "/")
 		PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
 		PatchmanCfgDefaultDirectory = askVar(log, "[IN] Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
@@ -537,7 +529,6 @@ if not args.noconf:
 	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("WindowsExeDllCfgDirectories = " + str(WindowsExeDllCfgDirectories) + "\n")
 	sf.write("LinuxServiceExecutableDirectories = " + str(LinuxServiceExecutableDirectories) + "\n")
-	sf.write("LinuxClientExecutableDirectory = \"" + str(LinuxClientExecutableDirectory) + "\"\n")
 	sf.write("PatchmanDevDirectory = \"" + str(PatchmanDevDirectory) + "\"\n")
 	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
 	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
