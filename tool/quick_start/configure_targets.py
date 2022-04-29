@@ -302,6 +302,28 @@ def GeneratePathScript():
 	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/nel_tools")) + os.pathsep + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_tools")) + os.pathsep + NeLDependenciesDir) + "\n")
 	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_RELEASE=" + os.path.join(toolsDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%" + os.pathsep + NeLDependenciesDir) + "\n")
 	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_DEBUG=" + os.path.join(toolsDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%" + os.pathsep + NeLDependenciesDir) + "\n")
+	externalBinDirs = {}
+	if Targets["Native"]["client_dev"]:
+		if "PrefixBin" in Targets["Native"]["client_dev"]:
+			for dir in Targets["Native"]["client_dev"]["PrefixBin"]:
+				if not dir in externalBinDirs:
+					externalBinDirs[dir] = True
+	if Targets["Native"]["server_dev"]:
+		if "PrefixBin" in Targets["Native"]["server_dev"]:
+			for dir in Targets["Native"]["server_dev"]["PrefixBin"]:
+				if not dir in externalBinDirs:
+					externalBinDirs[dir] = True
+	if Targets["Native"]["tools"]:
+		if "PrefixBin" in Targets["Native"]["tools"]:
+			for dir in Targets["Native"]["tools"]["PrefixBin"]:
+				if not dir in externalBinDirs:
+					externalBinDirs[dir] = True
+	if Targets["Native"]["samples"]:
+		if "PrefixBin" in Targets["Native"]["samples"]:
+			for dir in Targets["Native"]["samples"]["PrefixBin"]:
+				if not dir in externalBinDirs:
+					externalBinDirs[dir] = True
+	fo.write("set " + EscapeArg("RC_EXTERNAL_BIN_DIRS=" + os.pathsep.join(externalBinDirs.keys())) + "\n")
 	exedll = []
 	for client in NeLTargetClient:
 		exedll += [ "common/exedll_" + client ]

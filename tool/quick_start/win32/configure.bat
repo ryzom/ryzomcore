@@ -91,6 +91,7 @@ if %errorlevel% neq 0 goto :notoolsbuild
 :hastoolsbuild
 echo Using locally built tools
 set RC_TOOLS_DIRS=%RC_TOOLS_DIRS_RELEASE%
+set RC_ORIG_PATH=%RC_EXTERNAL_BIN_DIRS%;%RC_ORIG_PATH%
 :notoolsbuild
 if not defined RC_TOOLS_DIRS (
 echo ERROR: Tools not found. Run `code_configure_rebuild_all` to build everything, and re-run the configuration script.
@@ -132,12 +133,12 @@ if %errorlevel% neq 0 pause
 cd /d %RC_ROOT%
 call copy_dds_to_interfaces.bat
 cd /d %RC_ROOT%\code\nel\tools\build_gamedata
-rem python b1_client_dev.py
-rem if %errorlevel% neq 0 pause
-rem python b2_shard_data.py
-rem if %errorlevel% neq 0 pause
-rem python b3_shard_dev.py
-rem if %errorlevel% neq 0 pause
+python b1_client_dev.py
+if %errorlevel% neq 0 pause
+python b2_shard_data.py
+if %errorlevel% neq 0 pause
+python b3_shard_dev.py
+if %errorlevel% neq 0 pause
 echo(
 set PATH=%RC_PYTHON3_DIR%;%RC_ORIG_PATH%
 cd /d %RC_ROOT%\code\tool\quick_start

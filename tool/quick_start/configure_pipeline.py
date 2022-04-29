@@ -26,6 +26,8 @@ fo.write("\n")
 fo.write("from projects import *\n")
 fo.write("\n")
 for client in NeLTargets["Client"]:
+	if not NeLTargets["Client"][client]:
+		continue
 	clientWindows = isWindows(client)
 	fo.write("ProjectsToProcess += [ \"common/exedll_" + client + "\" ]\n")
 	fo.write("\n")
@@ -48,6 +50,8 @@ fo.close()
 
 # Generate the individual projects
 for client in NeLTargets["Client"]:
+	if not NeLTargets["Client"][client]:
+		continue
 	target = NeLTargets["Client"][client]
 	clientWindows = isWindows(client)
 	clientVisualStudio = isVisualStudio(client)
