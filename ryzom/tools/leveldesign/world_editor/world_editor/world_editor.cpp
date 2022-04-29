@@ -96,7 +96,7 @@ static std::string getProjectRoot()
 	// Check project
 	std::string cwd = NLMISC::CPath::standardizePath(NLMISC::wideToUtf8(buf, len), false);
 	std::vector<std::string> cwdv;
-	NLMISC::explode(cwd, std::string("/"), cwdv, true);
+	NLMISC::explode(cwd, std::string("/"), cwdv, false);
 	std::vector<std::string> paths;
 	paths.reserve(cwdv.size());
 	std::string path = "";
@@ -111,6 +111,13 @@ static std::string getProjectRoot()
 			return paths[i];
 	}
 	return std::string();
+}
+
+std::string CWorldEditorApp::transformProjectPath(const std::string &path)
+{
+	if (ProjectRoot.size() && (NLMISC::startsWith(path, "R:") || NLMISC::startsWith(path, "r:")))
+		return ProjectRoot + path.substr(3);
+	return path;
 }
 
 
@@ -593,7 +600,7 @@ bool CWorldEditorApp::initPath (const std::string &filename, CSplashScreen &spla
 							}
 
 							// Add the search path
-							CPath::addSearchPath (path, recurse, true, &splashScreen);
+							CPath::addSearchPath(transformProjectPath(path), recurse, true, &splashScreen);
 						}
 						else
 							goto failed;
@@ -608,7 +615,7 @@ bool CWorldEditorApp::initPath (const std::string &filename, CSplashScreen &spla
 					std::string path;
 					if (getPropertyString (path, filename, doc_path, "PATH"))
 					{
-						string fullPath = CPath::getFullPath(path);
+						string fullPath = transformProjectPath(CPath::getFullPath(path));
 						// Store the doc path
 						DocPath = fullPath;
 					}

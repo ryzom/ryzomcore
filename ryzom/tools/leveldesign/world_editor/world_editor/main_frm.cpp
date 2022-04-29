@@ -457,6 +457,11 @@ NLMISC::CConfigFile &CMainFrame::getConfigFile()
 	return wea->PluginConfig;
 }
 
+std::string CMainFrame::transformProjectPath(const std::string &path)
+{
+	return theApp.transformProjectPath(path);
+}
+
 void CMainFrame::onLogicChanged(const std::vector<NLLIGO::CPrimRegion*> &regions)
 {
 	/* const std::vector<IPluginCallback*> &plugins = IWorldEditor::getInterface()->getPlugins();	
@@ -1370,10 +1375,10 @@ struct CViewerConfig
 			this->LandscapeThreshold = cvLandscapeThreshold.asFloat();
 
 			CConfigFile::CVar &cvBanksPath = cf.getVar("BanksPath");
-			this->BanksPath = cvBanksPath.asString();
+			this->BanksPath = theApp.transformProjectPath(cvBanksPath.asString());
 
 			CConfigFile::CVar &cvTilesPath = cf.getVar("TilesPath");
-			this->TilesPath = cvTilesPath.asString();
+			this->TilesPath = theApp.transformProjectPath(cvTilesPath.asString());
 
 			CConfigFile::CVar &cvUseDDS = cf.getVar("UseDDS");
 			this->UseDDS = cvUseDDS.asInt() ? true : false;
@@ -1385,16 +1390,16 @@ struct CViewerConfig
 			this->Bank = cvBank.asString();
 			
 			CConfigFile::CVar &cvZonesPath = cf.getVar("ZonesPath");
-			this->ZonesPath = cvZonesPath.asString();
+			this->ZonesPath = theApp.transformProjectPath(cvZonesPath.asString());
 
 			CConfigFile::CVar &cvIgPath = cf.getVar("IgPath");
-			this->IgPath = cvIgPath.asString();
+			this->IgPath = theApp.transformProjectPath(cvIgPath.asString());
 
 			CConfigFile::CVar &cvShapePath = cf.getVar("ShapePath");
-			this->ShapePath = cvShapePath.asString();
+			this->ShapePath = theApp.transformProjectPath(cvShapePath.asString());
 
 			CConfigFile::CVar &cvMapsPath = cf.getVar("MapsPath");
-			this->MapsPath = cvMapsPath.asString();
+			this->MapsPath = theApp.transformProjectPath(cvMapsPath.asString());
 
 			CConfigFile::CVar &cvHeightFieldName = cf.getVar("HeightFieldName");
 			this->HeightFieldName = cvHeightFieldName.asString();
@@ -4353,8 +4358,8 @@ void CMainFrame::OnMissionCompiler()
 		return;
 	}
 	
-	TCHAR path[MAX_PATH];
-	_tcscpy(path, nlUtf8ToTStr(var->asString()));
+	std::string spath = theApp.transformProjectPath(var->asString());
+	tstring path = utf8ToTStr(spath);
 
 	SHELLEXECUTEINFO ExecuteInfo;    
 	memset(&ExecuteInfo, 0, sizeof(ExecuteInfo));
@@ -4365,7 +4370,7 @@ void CMainFrame::OnMissionCompiler()
 	ExecuteInfo.lpVerb       = _T("open");
 	ExecuteInfo.lpFile       = _T("ryzom_mission_compiler_fe.exe");
 	ExecuteInfo.lpParameters = 0;
-	ExecuteInfo.lpDirectory  = path;
+	ExecuteInfo.lpDirectory  = path.c_str();
 	ExecuteInfo.nShow        = SW_SHOW;
 	ExecuteInfo.hInstApp     = 0;
 

@@ -284,6 +284,7 @@ public:
 	// void viewLand(bool withIgs);
 
 	NLMISC::CConfigFile &getConfigFile();
+	std::string transformProjectPath(const std::string &path);
 	CWnd *getMainWindow()					{ return this; }
 
 	// from IPluginAccess
