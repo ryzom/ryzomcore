@@ -64,6 +64,8 @@ echo(
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\*.bat %RC_ROOT%\ /Y
 if %errorlevel% neq 0 pause
 mkdir %RC_ROOT%\.nel\tools > nul 2> nul
+xcopy %RC_ROOT%\code\nel\tools\3d\object_viewer\*.cfg %RC_ROOT%\.nel\tools\ /Y
+xcopy %RC_ROOT%\code\nel\tools\3d\zviewer\*.cfg %RC_ROOT%\.nel\tools\ /Y
 xcopy %RC_ROOT%\code\ryzom\tools\leveldesign\install\*.cfg %RC_ROOT%\.nel\tools\ /Y
 xcopy %RC_ROOT%\code\ryzom\tools\leveldesign\install\*.xml %RC_ROOT%\.nel\tools\ /Y
 if %errorlevel% neq 0 pause
