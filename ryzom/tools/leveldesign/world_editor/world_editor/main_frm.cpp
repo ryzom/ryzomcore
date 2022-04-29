@@ -3386,7 +3386,7 @@ void CMainFrame::OnHelpFinder()
 	}
 	else
 	{
-		openDoc((theApp.ExePath+"world_editor.html"));
+		openDoc((theApp.ProjectRoot.size() ? theApp.ProjectRoot + "code/ryzom/tools/leveldesign/install/" : theApp.ExePath) + "world_editor.html");
 	}
 }
 
@@ -3982,7 +3982,7 @@ void CMainFrame::getWindowCoordinates(NLMISC::CVector &vmin, NLMISC::CVector &vm
 
 void CMainFrame::OnHelpHistory() 
 {
-	string filename = theApp.ExePath+"history.txt";
+	string filename = (theApp.ProjectRoot.size() ? theApp.ProjectRoot + "code/ryzom/tools/leveldesign/install/" : theApp.ExePath) + "history.txt";
 	if (!openDoc(filename))
 	{
 		theApp.errorMessage ("Can't open the file %s", filename.c_str ());

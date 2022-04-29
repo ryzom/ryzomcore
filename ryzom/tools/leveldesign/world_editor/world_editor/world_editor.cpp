@@ -84,6 +84,35 @@ void CWorldEditorApp::deletePlugins()
 }
 
 
+static std::string getProjectRoot()
+{
+	// Check environment
+	wchar_t buf[MAX_PATH];
+	buf[0] = L'\0';
+	DWORD len = GetEnvironmentVariableW(L"%RC_ROOT%", buf, _countof(buf));
+	if (len)
+		return NLMISC::wideToUtf8(buf, len);
+	len = GetCurrentDirectoryW(_countof(buf), buf);
+	// Check project
+	std::string cwd = NLMISC::CPath::standardizePath(NLMISC::wideToUtf8(buf, len), false);
+	std::vector<std::string> cwdv;
+	NLMISC::explode(cwd, std::string("/"), cwdv, true);
+	std::vector<std::string> paths;
+	paths.reserve(cwdv.size());
+	std::string path = "";
+	for (size_t i = 0; i < cwdv.size(); ++i)
+	{
+		path += cwdv[i] + "/";
+		paths.push_back(path);
+	}
+	for (ptrdiff_t i = (ptrdiff_t)paths.size() - 1; i >= 0; --i)
+	{
+		if (NLMISC::CFile::isDirectory(paths[i] + ".nel"))
+			return paths[i];
+	}
+	return std::string();
+}
+
 
 // ***************************************************************************
 // The one and only CWorldEditorApp object
@@ -122,7 +151,8 @@ BOOL CWorldEditorApp::InitInstance()
 	NLMISC_REGISTER_CLASS(CPrimBitmap);
 
 	splashScreen.addLine(string("Init primitive class manager"));
-	
+
+	ProjectRoot = getProjectRoot();
 
 	// Init primitive class manager
 	if (!initPath ("world_editor_script.xml", splashScreen))
@@ -159,7 +189,7 @@ BOOL CWorldEditorApp::InitInstance()
 	// Load the Ligoscape.cfg
 	try
 	{
-		string sConfigFileName = ExePath;
+		string sConfigFileName = ProjectRoot.size() ? ProjectRoot + ".nel/tools/" : ExePath;
 		sConfigFileName += "ligoscape.cfg";
 
 		splashScreen.addLine(string("Load the config file"));
@@ -265,13 +295,15 @@ BOOL CWorldEditorApp::InitInstance()
 
 	// Get icones 
 	vector<string> result;
-	CPath::getPathContent ("ui", true, false, true, result);
+	std::string iconPath = ProjectRoot.size() ? ProjectRoot + "code/ryzom/tools/leveldesign/install/ui": "ui";
+	CPath::getPathContent (iconPath, true, false, true, result);
 	for (uint i=0; i<result.size (); i++)
 	{
 		// This is an icon ?
 		if (strlwr (NLMISC::CFile::getExtension (result[i])) == "ico")
 			ImageList.addResourceIcon (result[i].c_str ());
 	}
+
 
 	splashScreen.addLine(string("Load the plugins"));
 	
@@ -316,7 +348,7 @@ void CWorldEditorApp::loadPlugins()
 //	char curDir[MAX_PATH];
 //	GetCurrentDirectory (MAX_PATH, curDir);
 
-	PluginConfig.load((ExePath+"/world_editor_plugin.cfg").c_str());
+	PluginConfig.load((theApp.ProjectRoot.size() ? theApp.ProjectRoot + ".nel/tools/" : theApp.ExePath) + "world_editor_plugin.cfg");
 
 	// enumerate the plugin variable.
 	CConfigFile::CVar *plugins = PluginConfig.getVarPtr("PluginsLibrary");
@@ -526,7 +558,8 @@ bool CWorldEditorApp::initPath (const std::string &filename, CSplashScreen &spla
 
 	// Read the document
 	CIFile file;
-	if (file.open (filename))
+	std::string filepath = ProjectRoot.size() ? ProjectRoot + ".nel/tools/" + filename : filename;
+	if (file.open(filepath))
 	{
 		try
 		{

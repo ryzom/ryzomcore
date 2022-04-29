@@ -68,6 +68,9 @@ public:
 	// Exe path
 	std::string		ExePath;
 
+	// Project root
+	std::string		ProjectRoot;
+
 	// Doc path (for node class html help file)
 	std::string		DocPath;
 
