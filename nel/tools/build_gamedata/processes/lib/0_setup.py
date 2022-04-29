@@ -49,6 +49,7 @@ printLog(log, "")
 # Setup build directories
 printLog(log, ">>> Setup export directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + LibExeDllDirectory)
+mkPath(log, ExportBuildDirectory + "/" + LibTagDirectory)
 
 # Setup build directories
 # printLog(log, ">>> Setup build directories <<<")
