@@ -261,8 +261,7 @@ BOOL CDialogFlags::OnInitDialog()
 		ShardCtrl.setCurSel(0);		
 	}	
 
-	CConfigFile ConfigFile;	
-	ConfigFile.load ("world_editor_plugin.cfg");
+	CConfigFile &ConfigFile = _Plugin->getPluginAccess()->getConfigFile();	
 	CConfigFile::CVar *var = ConfigFile.getVarPtr("MOSHost");
 	if (var)
 	{

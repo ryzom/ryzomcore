@@ -1,4 +1,4 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc)
 
 ADD_LIBRARY(world_editor_shard_monitor_plugin SHARED ${SRC})
 
