@@ -43,18 +43,6 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-# if SignToolSha1 != "":
-# 	unsignedDirectory = ExportBuildDirectory + "/" + UnsignedExeDllDirectory
-# 	signedDirectory = ExportBuildDirectory + "/" + SignedExeDllDirectory
-# 	mkPath(log, unsignedDirectory)
-# 	mkPath(log, signedDirectory)
-# 	unsignedFiles = os.listdir(unsignedDirectory)
-# 	for fileName in unsignedFiles:
-# 		if (fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*"):
-# 			if needUpdateLogRemoveDest(log, unsignedDirectory + "/" + fileName, signedDirectory + "/" + fileName):
-# 				shutil.copy(unsignedDirectory + "/" + fileName, signedDirectory + "/" + fileName)
-# 				subprocess.call([ SignToolExecutable, "lib", "/sha1", SignToolSha1, "/t", SignToolTimestamp, signedDirectory + "/" + fileName ])
-
 log.close()
 
 

@@ -61,41 +61,65 @@ def findDependencies(moduleNames):
 				break
 	return res
 
+ProcessedModules = {}
+
+def processModule(file, filePath):
+	global ProcessedModules
+	# print(file)
+	# print(filePath)
+	if file in ProcessedModules:
+		return
+	ProcessedModules[file] = True
+	tagPath = ExportBuildDirectory + "/" + LibTagDirectory + "/" + file + ".tag"
+	if not needUpdate(log, filePath, tagPath):
+		printLog(log, "SKIP " + filePath)
+		return
+	printLog(log, "DEPENDENCIES " + filePath)
+	output = None
+	cmd = [ "Dependencies.exe", "-json", "-chain", "-depth", "1", filePath ]
+	try:
+		output = bytes.decode(subprocess.check_output(cmd))
+	except subprocess.CalledProcessError as e:
+		printLog(log, "FAILED")
+		printLog(log, str(e))
+	except OSError as e:
+		printLog(log, "FAILED")
+		printLog(log, str(e))
+	# print(output)
+	deps = json.loads(output)
+	# print(deps)
+	moduleNames = {}
+	listModuleNames(moduleNames, deps["Root"])
+	# print(moduleNames)
+	depPaths = findDependencies(moduleNames)
+	# print(depPaths)
+	for name in moduleNames:
+		srcPath = moduleNames[name]
+		if not srcPath in depPaths:
+			continue
+		dstPath = ExportBuildDirectory + "/" + LibExeDllDirectory + "/" + name
+		# print(srcPath)
+		# print(dstPath)
+		copyFileIfNeeded(log, srcPath, dstPath)
+		processModule(name, srcPath)
+	tagFile = open(tagPath, "w")
+	tagFile.write(time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())) + "\n")
+	tagFile.close()
+
 Dependencies = findFileMultiDir(log, ToolDirectories, "Dependencies.exe")
 printLog(log, "DEPENDENCIES " + Dependencies)
 if Dependencies == "":
 	toolLogFail(log, "Dependencies", ToolSuffix)
 else:
 	mkPath(log, ExportBuildDirectory + "/" + LibExeDllDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + LibTagDirectory)
 	origPath = os.getenv('PATH')
 	os.putenv('PATH', os.pathsep.join(LibSourceDirectories) + os.pathsep + origPath)
 	for file in ExeDllFiles:
 		# printLog(log, file)
 		filePath = findFileMultiDir(log, ExeDllCfgDirectories, file)
 		if (filePath != ""):
-			# TODO: Tag to skip
-			# TEST
-			printLog(log, "DEPENDENCIES " + filePath)
-			output = None
-			cmd = [ "Dependencies.exe", "-json", "-chain", "-depth", "2", filePath ]
-			try:
-				output = bytes.decode(subprocess.check_output(cmd))
-			except subprocess.CalledProcessError as e:
-				printLog(log, "FAILED")
-				printLog(log, str(e))
-			except OSError as e:
-				printLog(log, "FAILED")
-				printLog(log, str(e))
-			deps = json.loads(output)
-			moduleNames = {}
-			listModuleNames(moduleNames, deps["Root"])
-			# print(moduleNames)
-			depPaths = findDependencies(moduleNames)
-			# print(depPaths)
-			for name in moduleNames:
-				srcPath = moduleNames[name]
-				dstPath = ExportBuildDirectory + "/" + LibExeDllDirectory + "/" + name
-				copyFileIfNeeded(log, srcPath, dstPath)
+			processModule(file, filePath)
 	os.putenv('PATH', origPath)
 
 log.close()

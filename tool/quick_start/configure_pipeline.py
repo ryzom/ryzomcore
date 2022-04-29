@@ -116,6 +116,7 @@ for client in NeLTargets["Client"]:
 		fo.write("# EXPORT\n")
 		fo.write("UnsignedExeDllDirectory = CommonPath + \"/unsigned_exe_dll\"\n")
 		fo.write("LibExeDllDirectory = CommonPath + \"/lib_exe_dll\"\n")
+		fo.write("LibTagDirectory = CommonPath + \"/lib_tag\"\n")
 		fo.write("# BUILD\n")
 		fo.write("SignedExeDllDirectory = CommonPath + \"/signed_exe_dll\"\n")
 	fo.write("# INSTALL\n")
