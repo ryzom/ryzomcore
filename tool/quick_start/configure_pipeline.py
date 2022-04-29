@@ -25,6 +25,8 @@ fo.write("#!/usr/bin/python\n")
 fo.write("\n")
 fo.write("from projects import *\n")
 fo.write("\n")
+fo.write("ClientInstalls = []\n")
+fo.write("\n")
 for client in NeLTargets["Client"]:
 	if not NeLTargets["Client"][client]:
 		continue
@@ -44,6 +46,8 @@ for client in NeLTargets["Client"]:
 	fo.write("ICMainExedllPlatform[\"Refs\"] = [ ]\n")
 	fo.write("InstallClientData += [ ICMainExedllPlatform ]\n")
 	fo.write("del ICMainExedllPlatform\n")
+	fo.write("\n")
+	fo.write("ClientInstalls += [ { \"Directory\": \"" + client + "\", \"Category\": \"main_exedll_" + client + "\" } ]\n")
 	fo.write("\n")
 fo.write("# end of file\n")
 fo.close()
