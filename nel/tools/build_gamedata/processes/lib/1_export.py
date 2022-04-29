@@ -46,7 +46,8 @@ printLog(log, "")
 def listModuleNames(res, deps):
 	for dep in deps["Dependencies"]:
 		moduleName = dep["ModuleName"]
-		if not moduleName.startswith("api-ms") and not "system32" in dep["Filepath"].lower() and not "qt" in moduleName.lower():
+		moduleNameLower = moduleName.lower()
+		if not moduleName.startswith("api-ms") and not "system32" in dep["Filepath"].lower() and not moduleNameLower.startswith("qt") and not moduleNameLower.startswith("msvc"):
 			res[dep["ModuleName"]] = True
 			listModuleNames(res, dep)
 
