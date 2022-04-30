@@ -323,7 +323,7 @@ std::string CObjectViewer::getModulePath() const
 		int res = GetModuleFileNameW(hModule, buf, MAX_PATH); nlassert(res);
 		SPath = NLMISC::CFile::getPath(wideToUtf8(buf));
 	}
-	nldebug("Object viewer module path is '%s'", SPath.c_str());
+	nldebug("Object viewer configuration path is '%s'", SPath.c_str());
 	return SPath + "object_viewer.cfg";
 }
 
