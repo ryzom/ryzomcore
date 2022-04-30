@@ -56,6 +56,7 @@ MaxShapeExportTimeout = 600000 # 10min
 TgaToDdsTool = "tga2dds"
 BuildInterfaceTool = "build_interface"
 ExecTimeoutTool = "exec_timeout"
+MeshExportTool = "mesh_export"
 BuildSmallbankTool = "build_smallbank"
 BuildFarbankTool = "build_far_bank"
 ZoneDependenciesTool = "zone_dependencies"

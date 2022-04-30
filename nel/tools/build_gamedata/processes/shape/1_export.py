@@ -55,7 +55,34 @@ if BuildQuality == 0:
 
 
 # Find tools
-# ...
+MeshExport = findTool(log, ToolDirectories, MeshExportTool, ToolSuffix)
+printLog(log, "")
+
+AssimpFormats = [ ".blend", ".obj", ".dae", ".gltf", ".glb" ]
+
+# Export assimp shapes
+if MeshExport != "":
+	printLog(log, ">>> Export shape assimp <<<")
+	tagDirectory = ExportBuildDirectory + "/" + ShapeTagExportDirectory
+	mkPath(log, tagDirectory)
+	outDirWithoutCoarse = ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory
+	mkPath(log, outDirWithoutCoarse)
+	for dir in ShapeSourceDirectories:
+		srcDirectory = DatabaseDirectory + "/" + dir
+		mkPath(log, srcDirectory)
+		for format in AssimpFormats:
+			files = findFilesNoSubdir(log, srcDirectory, format)
+			for file in files:
+				srcFile = srcDirectory + "/" + file
+				tagFile = tagDirectory + "/" + file + ".tag"
+				if not needUpdate(log, srcFile, tagFile):
+					printLog(log, "SKIP " + srcFile)
+					continue
+				printLog(log, "MESH EXPORT " + srcFile)
+				subprocess.call([ MeshExport, "-d", outDirWithoutCoarse, srcFile ])
+				tagFile = open(tagPath, "w")
+				tagFile.write(time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())) + "\n")
+				tagFile.close()
 
 # Export shape 3dsmax
 if MaxAvailable:
@@ -75,8 +102,9 @@ if MaxAvailable:
 	outDirAnim = ExportBuildDirectory + "/" + ShapeAnimExportDirectory
 	mkPath(log, outDirAnim)
 	for dir in ShapeSourceDirectories:
-		mkPath(log, DatabaseDirectory + "/" + dir)
-		if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + ShapeTagExportDirectory, ".max.tag")):
+		srcDirectory = DatabaseDirectory + "/" + dir
+		mkPath(log, srcDirectory)
+		if (needUpdateDirByTagLog(log, srcDirectory, ".max", tagDirectory, ".max.tag")):
 			scriptSrc = "maxscript/shape_export.ms"
 			scriptDst = MaxUserDirectory + "/scripts/shape_export.ms"
 			outputLogfile = ScriptDirectory + "/processes/shape/log.log"
