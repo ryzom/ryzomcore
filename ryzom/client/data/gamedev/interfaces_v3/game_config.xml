@@ -281,7 +281,8 @@
 			<instance template="tgcw_scrollbarfloat" id="con" text="uiContrast" posref="BL TL" posparent="screen" x="20" y="-2" />
 			<instance template="tgcw_scrollbarfloat" id="lum" text="uiLuminosity" posref="BL TL" posparent="con" x="0" y="-2" />
 			<instance template="tgcw_scrollbarfloat" id="gam" text="uiGamma" posref="BL TL" posparent="lum" x="0" y="-2" />
-			<instance template="tgcw_scrollbarfloat" id="scale" text="uiInterfaceScale" posref="BL TL" posparent="gam" x="0" y="-2" />
+			<instance template="tgcw_checkbox" id="scale_auto" text="uiInterfaceScaleAuto" posref="BL TL" posparent="gam" x="-20" y="-28" />
+			<instance template="tgcw_scrollbarfloat" id="scale" text="uiInterfaceScale" posref="BL TL" posparent="scale_auto" x="20" y="-2" />
 			<instance template="tgcw_checkbox" id="waitvbl" text="uiWaitVBL" posparent="scale" posref="BL TL" x="-20" y="-28" />
 
 			<!-- Special case for video modes -->
@@ -756,6 +757,7 @@
 			<param ui="general:con:c" type="cfg" realtime="true" widget="sbfloat" link="Contrast" />
 			<param ui="general:lum:c" type="cfg" realtime="true" widget="sbfloat" link="Luminosity" />
 			<param ui="general:gam:c" type="cfg" realtime="true" widget="sbfloat" link="Gamma" />
+			<param ui="general:scale_auto:c" type="cfg" realtime="true" widget="boolbut" link="InterfaceScaleAuto" />
 			<param ui="general:scale:c" type="cfg" realtime="false" ui_view="general:scale:c_res" ui_decimal="2" widget="sbfloat" link="InterfaceScale" />
 			<param ui="general:waitvbl:c" type="cfg" realtime="true" widget="boolbut" link="WaitVBL" />
 

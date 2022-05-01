@@ -105,8 +105,8 @@ void updateFromClientCfg()
 			Driver->forceTextureResize(1);
 	}
 
-	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale)
-		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale || ClientCfg.InterfaceScaleAuto != LastClientCfg.InterfaceScaleAuto)
+		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
 
 	if (ClientCfg.BilinearUI != LastClientCfg.BilinearUI)
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
