@@ -396,6 +396,9 @@ def WriteHeader(fo):
 	fo.write(":patchversion\n")
 	fo.write("call " + EscapeArg(NeLPatchVersionScript) + "\n")
 	WritePauseGoto(fo, ":patchversion")
+	fo.write(":checkdocker\n")
+	fo.write("\"%RC_PYTHON3_DIR%\\python\" \"%RC_ROOT%\\code\\tool\\quick_start\\check_docker.py\"\n")
+	WritePauseGoto(fo, ":checkdocker")
 
 def WriteFooter(fo, title):
 	fo.write("title " + title + ": Ready\n")
