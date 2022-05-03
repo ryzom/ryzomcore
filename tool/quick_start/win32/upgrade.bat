@@ -25,3 +25,4 @@ if %errorlevel% neq 0 pause
 
 rem Removing this file causes configure.bat to run the build pipeline
 del %RC_ROOT%\pipeline\install\data_leveldesign\sheet_id.bin
+set RC_UPGRADE_CONFIGURE=BUILD

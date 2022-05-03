@@ -79,6 +79,20 @@ xcopy %RC_ROOT%\code\ryzom\tools\leveldesign\install\*.xml %RC_ROOT%\.nel\tools\
 if %errorlevel% neq 0 pause
 echo(
 call .nel\path_config.bat
+if not defined RC_UPGRADE_CONFIGURE goto :dontbuildcode
+if not exist .nel\code_build.tag goto :dontbuildcode
+where /q git
+if %errorlevel% neq 0 goto :dontbuildcode
+where /q cmake
+if %errorlevel% neq 0 goto :dontbuildcode
+cmd /C "call %RC_ROOT%\build_win32\client_dev_build.bat"
+if %errorlevel% neq 0 pause
+cmd /C "call %RC_ROOT%\build_win32\server_dev_build.bat"
+if %errorlevel% neq 0 pause
+cmd /C "call %RC_ROOT%\build_win32\tools_build.bat"
+if %errorlevel% neq 0 pause
+:dontbuildcode
+title Ryzom Core Configuration
 echo Mounting %RC_ROOT% as R:
 call _r_check.bat
 cd /d R:\
@@ -139,25 +153,34 @@ echo .
 echo(
 set PATH=%RC_PYTHON27_DIR%;%RC_ORIG_PATH%
 cd /d %RC_ROOT%\code\nel\tools\build_gamedata
+title Ryzom Core Configuration: Build Pipeline Setup
 python 0_setup.py -p
 if %errorlevel% neq 0 pause
 if exist %RC_ROOT%\pipeline\install\data_leveldesign\sheet_id.bin goto :skipbuild
-python a1_worldedit_data.py
-if %errorlevel% neq 0 pause
+title Ryzom Core Configuration: Build Pipeline: Export
 python 1_export.py -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll %RC_EXEDLL_PROJECTS% shard/data_language shard/data_leveldesign shard/data_shard
 if %errorlevel% neq 0 pause
+title Ryzom Core Configuration: Build Pipeline: Build
 python 2_build.py -ipj common/gamedev common/data_common common/sound common/leveldesign common/exedll %RC_EXEDLL_PROJECTS% shard/data_language shard/data_leveldesign shard/data_shard
 if %errorlevel% neq 0 pause
+title Ryzom Core Configuration: Build Pipeline: Install
 python 3_install.py
+if %errorlevel% neq 0 pause
+title Ryzom Core Configuration: Build Pipeline: World Editor Data
+python a1_worldedit_data.py
 if %errorlevel% neq 0 pause
 :skipbuild
 cd /d %RC_ROOT%
 call copy_dds_to_interfaces.bat
+title Ryzom Core Configuration
 cd /d %RC_ROOT%\code\nel\tools\build_gamedata
+title Ryzom Core Configuration: Build Pipeline: Client DEV
 python b1_client_dev.py
 if %errorlevel% neq 0 pause
+title Ryzom Core Configuration: Build Pipeline: Shard Data
 python b2_shard_data.py
 if %errorlevel% neq 0 pause
+title Ryzom Core Configuration: Build Pipeline: Shard DEV
 python b3_shard_dev.py
 if %errorlevel% neq 0 pause
 echo(

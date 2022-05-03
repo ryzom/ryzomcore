@@ -428,6 +428,7 @@ def WriteHeader(fo):
 def WriteFooter(fo, title):
 	fo.write("title " + title + ": Ready\n")
 	fo.write("echo Ready\n")
+	fo.write("echo OK > " + EscapeArg("%RC_ROOT%\.nel\code_build.tag") + "\n")
 	fo.write("pause\n")
 
 def GenerateMsvcEnv(file, buildDir, generator, tc, filteredPrefix):
