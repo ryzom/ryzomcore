@@ -126,6 +126,13 @@ rem echo | set /p=.
 powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\%RC_ROOT_NAME%.lnk');$s.TargetPath='%RC_ROOT%\';$s.Save()"
 echo | set /p=.
 powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\R.lnk');$s.TargetPath='R:\';$s.Save()"
+echo | set /p=.
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\localhost_phpmyadmin.lnk');$s.TargetPath='http://localhost:9042/phpmyadmin/';$s.Save()"
+echo | set /p=.
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\localhost_admin.lnk');$s.TargetPath='http://localhost:9042/admin/';$s.Save()"
+echo | set /p=.
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\localhost_ams.lnk');$s.TargetPath='http://localhost:9042/ams/';$s.Save()"
+echo | set /p=.
 echo .
 echo(
 set PATH=%RC_PYTHON27_DIR%;%RC_ORIG_PATH%
