@@ -347,6 +347,11 @@ def GeneratePathScript():
 	for client in NeLTargetClient:
 		exedll += [ "common/exedll_" + client ]
 	fo.write("set " + EscapeArg("RC_EXEDLL_PROJECTS=" + " ".join(exedll)) + "\n")
+	fo.write("set " + EscapeArg("RC_3DSMAX_EXE=" + NeLConfig["3dsMax"]["Executable"]) + "\n")
+	fo.write("set " + EscapeArg("RC_3DSMAX_USER_DIR=" + NeLConfig["3dsMax"]["UserDirectory"]) + "\n")
+	fo.write("set " + EscapeArg("RC_SIGNTOOL_EXE=" + NeLConfig["SignTool"]["Executable"]) + "\n")
+	fo.write("set " + EscapeArg("RC_SIGNTOOL_SHA1=" + NeLConfig["SignTool"]["Sha1"]) + "\n")
+	fo.write("set " + EscapeArg("RC_SIGNTOOL_TIMESTAMP=" + NeLConfig["SignTool"]["Timestamp"]) + "\n")
 	fo.write("call " + EscapeArg(os.path.join(NeLRootDir, os.path.normcase(".nel/web_config.bat"))))
 	fo.close()
 

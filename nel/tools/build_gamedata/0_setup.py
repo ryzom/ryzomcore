@@ -70,6 +70,9 @@ NeLServerDirsFv = os.getenv("RC_SERVER_DIRS_FV")
 if NeLServerDirsFv:
 	NeLServerDirsFv = NeLServerDirsFv.split(os.pathsep)
 
+NeL3dsMaxExe = os.getenv('RC_3DSMAX_EXE')
+NeL3dsMaxUserDir = os.getenv('RC_3DSMAX_USER_DIR')
+
 if not args.noconf:
 	try:
 		if args.preset:
@@ -305,48 +308,66 @@ if not args.noconf:
 			DummyUnknownName
 		SignToolExecutable
 	except NameError:
-		SignToolExecutable = "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Bin/signtool.exe"
+		SignToolExecutable = os.getenv('RC_SIGNTOOL_EXE')
+		if SignToolExecutable:
+			SignToolExecutable = SignToolExecutable.replace("\\", "/")
+		else:
+			SignToolExecutable = "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Bin/signtool.exe"
 	try:
 		if args.preset:
 			DummyUnknownName
 		SignToolSha1
 	except NameError:
-		SignToolSha1 = ""
+		SignToolSha1 = os.getenv('RC_SIGNTOOL_SHA1')
+		if not SignToolSha1:
+			SignToolSha1 = ""
 	try:
 		if args.preset:
 			DummyUnknownName
 		SignToolTimestamp
 	except NameError:
-		SignToolTimestamp = "http://timestamp.comodoca.com/authenticode"
+		SignToolTimestamp = os.getenv('RC_SIGNTOOL_TIMESTAMP')
+		if not SignToolTimestamp:
+			SignToolTimestamp = "http://timestamp.comodoca.com/authenticode"
 	try:
 		if args.preset:
 			DummyUnknownName
 		MaxAvailable
 	except NameError:
 		MaxAvailable = 0
+		if NeL3dsMaxExe:
+			MaxDirectory = os.path.dirname(NeL3dsMaxExe)
+			if os.path.isfile(os.path.join(MaxDirectory, "3dsmax.exe")) and (os.path.isfile(os.path.join(MaxDirectory, "plugins/nelexport_r.dlu")) or os.path.isfile(os.path.join(MaxDirectory, "plugins/nelexport_d.dlu")) or os.path.isfile(os.path.join(MaxDirectory, "plugins/nelexport.dlu"))):
+				MaxAvailable = 1
 	try:
 		if args.preset:
 			DummyUnknownName
 		MaxDirectory
 	except NameError:
 		MaxDirectory = "C:/Program Files (x86)/Autodesk/3ds Max 2010"
+		if NeL3dsMaxExe:
+			MaxDirectory = os.path.dirname(NeL3dsMaxExe).replace("\\", "/")
 	try:
 		if args.preset:
 			DummyUnknownName
 		MaxUserDirectory
 	except NameError:
-		import os
-		try:
-			MaxUserDirectory = os.path.normpath(os.environ["LOCALAPPDATA"] + "/Autodesk/3dsMax/2010 - 32bit/enu")
-		except KeyError:
-			MaxAvailable = 0
-			MaxUserDirectory = "C:/Users/Kaetemi/AppData/Local/Autodesk/3dsMax/2010 - 32bit/enu"
+		if NeL3dsMaxUserDir:
+			MaxUserDirectory = NeL3dsMaxUserDir.replace("\\", "/")
+		else:
+			try:
+				MaxUserDirectory = os.path.normpath(os.environ["LOCALAPPDATA"] + "/Autodesk/3dsMax/2010 - 32bit/enu")
+			except KeyError:
+				MaxAvailable = 0
+				MaxUserDirectory = "C:/Users/Kaetemi/AppData/Local/Autodesk/3dsMax/2010 - 32bit/enu"
 	try:
 		if args.preset:
 			DummyUnknownName
 		MaxExecutable
 	except NameError:
 		MaxExecutable = "3dsmax.exe"
+		if NeL3dsMaxExe:
+			MaxExecutable = os.path.basename(NeL3dsMaxExe)
 
 	printLog(log, "")
 	printLog(log, "-------")
