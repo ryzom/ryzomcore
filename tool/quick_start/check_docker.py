@@ -8,7 +8,7 @@ from quick_start.common import *
 
 def HadDocker():
 	for toolchain in NeLToolchains:
-		if "Docker" in toolchain:
+		if "Docker" in NeLToolchains[toolchain]:
 			return True
 	return False
 
