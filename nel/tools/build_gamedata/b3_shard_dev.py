@@ -51,6 +51,17 @@ printLog(log, "")
 
 mkPath(log, ShardDevDirectory)
 mkPath(log, ShardDevDirectory + "/local")
+mysqlDirectory = os.path.join(ShardDevDirectory, "mysql")
+mkPath(log, mysqlDirectory)
+
+printLog(log, ">>> Read development MySQL password from rc_password.txt <<<")
+password = "shard"
+passwordFile = os.path.join(mysqlDirectory, "rc_password.txt")
+if os.path.isfile(passwordFile):
+	fi = open(passwordFile, 'r')
+	password = fi.readline().strip()
+	fi.close()
+
 printLog(log, ">>> Generate shard dev local.cfg <<<")
 cfg = open(ShardDevDirectory + "/local.cfg", "w")
 cfg.write("WindowStyle = \"WIN\";\n")
@@ -69,6 +80,10 @@ for multiDir in InstallShardDataMultiDirectories:
 	cfg.write("	\"" + ShardInstallDirectory + "/" + dstDir + "\",\n")
 cfg.write("};\n")
 cfg.write("RRDToolPath = \"..\\..\\..\\external\\rrdtool\\rrdtool.exe\";\n")
+cfg.write("DBNelUser = \"shard_dev\";\n");
+cfg.write("DBNelPass = \"" + password + "\";\n");
+cfg.write("DBRingUser = \"shard_dev\";\n");
+cfg.write("DBRingPass = \"" + password + "\";\n");
 cfg.write("StartCommands += {\n")
 cfg.write("	// \"gw_aes.transportRemove aes_l3c\",\n")
 cfg.write("};\n")
