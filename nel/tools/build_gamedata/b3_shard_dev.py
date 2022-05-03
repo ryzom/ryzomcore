@@ -80,10 +80,10 @@ for multiDir in InstallShardDataMultiDirectories:
 	cfg.write("	\"" + ShardInstallDirectory + "/" + dstDir + "\",\n")
 cfg.write("};\n")
 cfg.write("RRDToolPath = \"..\\..\\..\\external\\rrdtool\\rrdtool.exe\";\n")
-cfg.write("DBNelUser = \"shard_dev\";\n");
-cfg.write("DBNelPass = \"" + password + "\";\n");
-cfg.write("DBRingUser = \"shard_dev\";\n");
-cfg.write("DBRingPass = \"" + password + "\";\n");
+cfg.write("DBNelUser = \"shard_dev\";\n")
+cfg.write("DBNelPass = \"" + password + "\";\n")
+cfg.write("DBRingUser = \"shard_dev\";\n")
+cfg.write("DBRingPass = \"" + password + "\";\n")
 cfg.write("StartCommands += {\n")
 cfg.write("	// \"gw_aes.transportRemove aes_l3c\",\n")
 cfg.write("};\n")
