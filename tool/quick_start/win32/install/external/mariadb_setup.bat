@@ -14,6 +14,12 @@ start .\bin\mysqld --no-defaults --port=9040 --datadir=..\..\pipeline\shard_dev\
 if %errorlevel% neq 0 pause
 .\bin\mysql -P 9040 -u root < ..\phpmyadmin.sql
 if %errorlevel% neq 0 pause
+.\bin\mysql -P 9040 -u root -e "DROP USER ''"
+if %errorlevel% neq 0 pause
+.\bin\mysql -P 9040 -u root -e "SELECT GROUP_CONCAT(QUOTE(user),'@',QUOTE(host)) INTO @accounts FROM mysql.user WHERE user = ''; EXECUTE IMMEDIATE CONCAT('DROP USER ', @accounts);"
+if %errorlevel% neq 0 pause
+.\bin\mysql -P 9040 -u root -e "CREATE USER 'shard_dev'@'%' IDENTIFIED BY '%RC_MYSQL_PASSWORD%'; GRANT SELECT, INSERT, UPDATE, DELETE, FILE ON *.* TO 'shard_dev'@'%';"
+if %errorlevel% neq 0 pause
 .\bin\mysqladmin -u root -P 9040 shutdown
 if %errorlevel% neq 0 pause
 :done
