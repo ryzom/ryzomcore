@@ -9,6 +9,15 @@
     "ClientReleaseNotesRingUrl": "https://default.ryzom.dev/releasenotes_ring/index.php",
     "ClientDomain": "default"
   },
+  "3dsMax": {
+    "Executable": "",
+    "UserDirectory": ""
+  },
+  "SignTool": {
+    "Executable": "C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Bin\\signtool.exe",
+    "Sha1": "",
+    "Timestamp": "http://timestamp.comodoca.com/authenticode"
+  },
   "UseNinja": true,
   "Paths": {
     "Python27": "external/python27",
@@ -22,13 +31,13 @@
     "Dependencies": "external/dependencies",
     "Aria2": "external/utils",
     "Ninja": "external/utils",
-    "Jom": "external/utils",
-    "3dsMax": "",
-    "3dsMaxLocal": ""
+    "Jom": "external/utils"
   },
   "WorkingDirs": {
+    "crash_report": "pipeline/client_dev",
     "ryzom_client": "pipeline/client_dev",
-    "ryzom_client_patcher": "pipeline/client_install",
+    "ryzom_configuration_qt": "pipeline/client_dev",
+    "ryzom_client_patcher": "pipeline/client_install/win64",
     "ryzom_ai_service": "pipeline/shard_dev/ais_fyros",
     "ryzom_backup_service": "pipeline/shard_dev/bms_master",
     "ryzom_dynamic_scenario_service": "pipeline/shard_dev/dss",
@@ -124,5 +133,12 @@
       }
     },
     "PluginMax": { }
+  },
+  "Fallback": {
+    "PrefixBin": [ ],
+    "QtPluginBin": "",
+    "Client": "",
+    "Server": "",
+    "Tools": ""
   }
 }

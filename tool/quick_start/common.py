@@ -32,7 +32,6 @@ NeLMariaDBDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Ma
 NeLNginxDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Nginx"]))
 NeLPHPDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["PHP"]))
 NeLphpMyAdminDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["phpMyAdmin"]))
-NeL3dsMaxDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["3dsMax"]))
 NeLDependenciesDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Dependencies"])) # Detect all dependencies of the build output and get them from externals
 
 # Tools added to system path, for any platform
