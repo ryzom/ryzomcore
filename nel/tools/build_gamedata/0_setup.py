@@ -59,12 +59,12 @@ except ImportError:
 		exit()
 from tools import *
 
-NeLToolsDirsStock = os.getenv("RC_TOOLS_DIRS_STOCK")
-if NeLToolsDirsStock:
-	NeLToolsDirsStock = NeLToolsDirsStock.split(os.pathsep)
+NeLToolsDirsRelease = os.getenv("RC_TOOLS_DIRS_RELEASE")
+if NeLToolsDirsRelease:
+	NeLToolsDirsRelease = NeLToolsDirsRelease.split(os.pathsep)
 NeLPath = os.getenv("RC_PATH")
 if NeLPath:
-	NeLToolsDirsStock = NeLToolsDirsStock + NeLPath.split(os.pathsep)
+	NeLToolsDirsRelease = NeLToolsDirsRelease + NeLPath.split(os.pathsep)
 
 NeLServerDirsFv = os.getenv("RC_SERVER_DIRS_FV")
 if NeLServerDirsFv:
@@ -101,12 +101,12 @@ if not args.noconf:
 			DummyUnknownName
 		ToolDirectories
 	except NameError:
-		if NeLToolsDirsStock:
-			ToolDirectories = [] + NeLToolsDirsStock
+		if NeLToolsDirsRelease:
+			ToolDirectories = [] + NeLToolsDirsRelease
 			for i in range(len(ToolDirectories)):
 				ToolDirectories[i] = ToolDirectories[i].replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom)
 		else:
-			ToolDirectories = [ 'R:/stock/nel_tools', 'R:/stock/ryzom_tools' ]
+			ToolDirectories = [ "R:/build_win32/tools/bin/Release", "R:/build_win32/tools/bin", "R:/build_win32/server_dev/bin/Release", "R:/build_win32/server_dev/bin", "R:/external/dependencies" ]
 	try:
 		ToolSuffix
 	except NameError:

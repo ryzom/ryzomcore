@@ -68,8 +68,8 @@ if %errorlevel% neq 0 pause
 mkdir %RC_ROOT%\external > nul 2> nul
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\external\* %RC_ROOT%\external\ /Y
 if %errorlevel% neq 0 pause
-mkdir %RC_ROOT%\stock > nul 2> nul
-xcopy %RC_ROOT%\code\tool\quick_start\win32\install\stock\*.bat %RC_ROOT%\stock\ /Y
+mkdir %RC_ROOT%\redist > nul 2> nul
+xcopy %RC_ROOT%\code\tool\quick_start\win32\install\redist\*.bat %RC_ROOT%\redist\ /Y
 if %errorlevel% neq 0 pause
 mkdir %RC_ROOT%\.nel\tools > nul 2> nul
 xcopy %RC_ROOT%\code\nel\tools\3d\object_viewer\*.cfg %RC_ROOT%\.nel\tools\ /Y
@@ -96,18 +96,6 @@ title Ryzom Core Configuration
 echo Mounting %RC_ROOT% as R:
 call _r_check.bat
 cd /d R:\
-:lookfortoolsstock
-set PATH=%RC_TOOLS_DIRS_STOCK%;%RC_ORIG_PATH%
-where /q ryzom_patchman_service
-if %errorlevel% neq 0 goto :notoolsstock
-where /q sheets_packer_shard
-if %errorlevel% neq 0 goto :notoolsstock
-where /q panoply_maker
-if %errorlevel% neq 0 goto :notoolsstock
-:hastoolsstock
-set RC_TOOLS_DIRS=%RC_TOOLS_DIRS_STOCK%
-goto :lookfortoolsbuild
-:notoolsstock
 :lookfortoolsbuild
 set PATH=%RC_TOOLS_DIRS_RELEASE%;%RC_ORIG_PATH%
 where /q ryzom_patchman_service
