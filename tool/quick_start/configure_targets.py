@@ -324,6 +324,9 @@ def GeneratePathScript():
 				if not dir in externalBinDirs:
 					externalBinDirs[dir] = True
 	fo.write("set " + EscapeArg("RC_EXTERNAL_BIN_DIRS=" + os.pathsep.join(externalBinDirs.keys())) + "\n")
+	if Targets["Native"]["tools"]:
+		if "QtPluginBin" in Targets["Native"]["client_dev"]:
+			fo.write("set " + EscapeArg("RC_QT_PLUGIN_DIR=" + Targets["Native"]["client_dev"]["QtPluginBin"]) + "\n")
 	exedll = []
 	for client in NeLTargetClient:
 		exedll += [ "common/exedll_" + client ]
@@ -661,7 +664,11 @@ def ConfigureTarget(spec, name, fv, target):
 	scriptOk = False
 	if tc["Compiler"] == "MSVC":
 		filteredPrefix = FilterPrefix(target, spec)
+		res["PrefixPath"] = filteredPrefix
 		res["PrefixBin"] = FindBinPaths(filteredPrefix)
+		qtPluginBin = FindQtPluginPath(filteredPrefix)
+		if qtPluginBin:
+			res["QtPluginBin"] = qtPluginBin
 		GenerateMsvcEnv(envScript, buildDir, gen, tc, filteredPrefix)
 		GenerateMsvcCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
 		GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir, filteredPrefix)
