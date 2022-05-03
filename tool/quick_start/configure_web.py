@@ -9,11 +9,11 @@ from quick_start.common import *
 def EscapeArg(arg):
 	return '"' + arg.replace('"', r'\"') + '"'
 
-mysqlDir = os.path.join(NeLRootDir, os.path.normcase("pipeline/shard_dev/mysql"))
-pathlib.Path(mysqlDir).mkdir(parents=True, exist_ok=True)
+shardDevDir = os.path.join(NeLRootDir, os.path.normcase("pipeline/shard_dev"))
+pathlib.Path(shardDevDir).mkdir(parents=True, exist_ok=True)
 
 # This is the master file for the password
-passwordFile = os.path.join(mysqlDir, "rc_password.txt")
+passwordFile = os.path.join(shardDevDir, "rc_mysql_password.txt")
 password = os.getenv('RC_MYSQL_PASSWORD')
 if password:
 	password = password.strip()

@@ -51,12 +51,10 @@ printLog(log, "")
 
 mkPath(log, ShardDevDirectory)
 mkPath(log, ShardDevDirectory + "/local")
-mysqlDirectory = os.path.join(ShardDevDirectory, "mysql")
-mkPath(log, mysqlDirectory)
 
-printLog(log, ">>> Read development MySQL password from rc_password.txt <<<")
+printLog(log, ">>> Read development MySQL password from rc_mysql_password.txt <<<")
 password = "shard"
-passwordFile = os.path.join(mysqlDirectory, "rc_password.txt")
+passwordFile = os.path.join(ShardDevDirectory, "rc_mysql_password.txt")
 if os.path.isfile(passwordFile):
 	fi = open(passwordFile, 'r')
 	password = fi.readline().strip()
