@@ -269,6 +269,7 @@ def FilterPrefix(target, spec):
 def GeneratePathScript():
 	fo = open(NeLPathScript, 'w')
 	fo.write("set " + EscapeArg("RC_ROOT=" + NeLRootDir) + "\n")
+	fo.write("set " + EscapeArg("RC_ROOT_FW=" + NeLRootDir.replace("\\", "/")) + "\n")
 	fo.write("set " + EscapeArg("RC_CODE_DIR=" + NeLCodeDir) + "\n")
 	fo.write("set " + EscapeArg("RC_PYTHON27_DIR=" + NeLPython27Dir) + "\n")
 	fo.write("set " + EscapeArg("RC_PYTHON3_DIR=" + NeLPython3Dir) + "\n")

@@ -4,9 +4,6 @@ echo NGINX on http://localhost:9042/
 if /I "%RC_ROOT%"=="" call ..\.nel\path_config.bat
 copy config.inc.php .\phpmyadmin\config.inc.php
 cd nginx
-for /f "usebackq delims=" %%i in (
-  `powershell -noprofile -c "\"%RC_ROOT%\" -replace '\\', '/'"`
-) do set "RC_ROOT_FW=%%i"
 (
 echo worker_processes  1;
 echo events {
