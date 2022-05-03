@@ -59,6 +59,8 @@ python configure_toolchains.py
 if %errorlevel% neq 0 pause
 python configure_targets.py
 if %errorlevel% neq 0 pause
+python configure_web.py
+if %errorlevel% neq 0 pause
 cd /d %RC_ROOT%
 echo(
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\*.bat %RC_ROOT%\ /Y

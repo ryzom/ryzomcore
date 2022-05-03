@@ -336,6 +336,7 @@ def GeneratePathScript():
 	for client in NeLTargetClient:
 		exedll += [ "common/exedll_" + client ]
 	fo.write("set " + EscapeArg("RC_EXEDLL_PROJECTS=" + " ".join(exedll)) + "\n")
+	fo.write("call " + EscapeArg(os.path.join(NeLRootDir, os.path.normcase(".nel/web_config.bat"))))
 	fo.close()
 
 def GeneratePatchVersionScript():
