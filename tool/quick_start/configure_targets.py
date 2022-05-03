@@ -288,20 +288,24 @@ def GeneratePathScript():
 	fo.write("set RC_PARALLEL=" + str(NeLParallel) + "\n")
 	fo.write("set RC_PARALLEL_PROJECTS=" + str(NeLParallelProjects) + "\n")
 	fo.write("set RC_PARALLEL_FILES=" + str(NeLParallelFiles) + "\n")
-	clientDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["client_dev"]["BuildDir"]))
-	fo.write("set " + EscapeArg("RC_CLIENT_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_client_win_x64"))) + "\n")
-	fo.write("set " + EscapeArg("RC_CLIENT_DIRS_RELEASE=" + os.path.join(clientDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(clientDir, "bin")) + "\n")
-	fo.write("set " + EscapeArg("RC_CLIENT_DIRS_DEBUG=" + os.path.join(clientDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(clientDir, "bin")) + "\n")
-	serverDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["server_dev"]["BuildDir"]))
-	fo.write("set " + EscapeArg("RC_SERVER_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_server_win_x64"))) + "\n")
-	fo.write("set " + EscapeArg("RC_SERVER_DIRS_RELEASE=" + os.path.join(serverDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(serverDir, "bin")) + "\n")
-	fo.write("set " + EscapeArg("RC_SERVER_DIRS_DEBUG=" + os.path.join(serverDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(serverDir, "bin")) + "\n")
-	serverFvDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Server"]["BuildDir"]))
-	fo.write("set " + EscapeArg("RC_SERVER_DIRS_FV=" + os.path.join(serverFvDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(serverFvDir, "bin")) + "\n")
-	toolsDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["tools"]["BuildDir"]))
-	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/nel_tools_win_x64")) + os.pathsep + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_tools_win_x64")) + os.pathsep + NeLDependenciesDir) + "\n")
-	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_RELEASE=" + os.path.join(toolsDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%" + os.pathsep + NeLDependenciesDir) + "\n")
-	fo.write("set " + EscapeArg("RC_TOOLS_DIRS_DEBUG=" + os.path.join(toolsDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%" + os.pathsep + NeLDependenciesDir) + "\n")
+	if Targets["Native"]["client_dev"]:
+		clientDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["client_dev"]["BuildDir"]))
+		fo.write("set " + EscapeArg("RC_CLIENT_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_client_win_x64"))) + "\n")
+		fo.write("set " + EscapeArg("RC_CLIENT_DIRS_RELEASE=" + os.path.join(clientDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(clientDir, "bin")) + "\n")
+		fo.write("set " + EscapeArg("RC_CLIENT_DIRS_DEBUG=" + os.path.join(clientDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(clientDir, "bin")) + "\n")
+	if Targets["Native"]["server_dev"]:
+		serverDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["server_dev"]["BuildDir"]))
+		fo.write("set " + EscapeArg("RC_SERVER_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_server_win_x64"))) + "\n")
+		fo.write("set " + EscapeArg("RC_SERVER_DIRS_RELEASE=" + os.path.join(serverDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(serverDir, "bin")) + "\n")
+		fo.write("set " + EscapeArg("RC_SERVER_DIRS_DEBUG=" + os.path.join(serverDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(serverDir, "bin")) + "\n")
+	if Targets["Server"]:
+		serverFvDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Server"]["BuildDir"]))
+		fo.write("set " + EscapeArg("RC_SERVER_DIRS_FV=" + os.path.join(serverFvDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(serverFvDir, "bin")) + "\n")
+	if Targets["Native"]["tools"]:
+		toolsDir = os.path.join(NeLRootDir, os.path.normcase(Targets["Native"]["tools"]["BuildDir"]))
+		fo.write("set " + EscapeArg("RC_TOOLS_DIRS_STOCK=" + os.path.join(NeLRootDir, os.path.normcase("stock/nel_tools_win_x64")) + os.pathsep + os.path.join(NeLRootDir, os.path.normcase("stock/ryzom_tools_win_x64")) + os.pathsep + NeLDependenciesDir) + "\n")
+		fo.write("set " + EscapeArg("RC_TOOLS_DIRS_RELEASE=" + os.path.join(toolsDir, os.path.normcase("bin/Release").replace("release", "Release")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%" + os.pathsep + NeLDependenciesDir) + "\n")
+		fo.write("set " + EscapeArg("RC_TOOLS_DIRS_DEBUG=" + os.path.join(toolsDir, os.path.normcase("bin/Debug").replace("debug", "Debug")) + os.pathsep + os.path.join(toolsDir, "bin") + os.pathsep + "%RC_SERVER_DIRS_RELEASE%" + os.pathsep + NeLDependenciesDir) + "\n")
 	externalBinDirs = {}
 	if Targets["Native"]["client_dev"]:
 		if "PrefixBin" in Targets["Native"]["client_dev"]:
