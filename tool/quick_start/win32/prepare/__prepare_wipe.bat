@@ -1,43 +1,63 @@
+
+echo WIPE
+echo WIPE
+echo WIPE
+pause
+
 cd external
 cmd /C "call web_wipe"
 cd ..
+
+del external\*.*
+del redist\*.bat
+
+rmdir /S /Q .\pipeline\client
 rmdir /S /Q .\pipeline\shard_dev
 rmdir /S /Q .\pipeline\export\shard
 rmdir /S /Q .\pipeline\export\common\data_common
 rmdir /S /Q .\pipeline\export\common\exedll
+rmdir /S /Q .\pipeline\export\common\exedll_win32
+rmdir /S /Q .\pipeline\export\common\exedll_win64
+rmdir /S /Q .\pipeline\export\common\exedll_linux32
+rmdir /S /Q .\pipeline\export\common\exedll_linux64
 rmdir /S /Q .\pipeline\export\common\leveldesign
 rmdir /S /Q .\pipeline\export\common\sound
-rmdir /S /Q .\build\3dsmax
-rmdir /S /Q .\build\samples_x64
-rmdir /S /Q .\build\tools_x64
-rmdir /S /Q .\build\dev_x64\CMakeFiles
-rmdir /S /Q .\build\dev_x64\lib
-rmdir /S /Q .\build\dev_x64\nel
-rmdir /S /Q .\build\dev_x64\ryzom
-rmdir /S /Q .\build\dev_x64\x64
-del build\dev_x64\*.*
-rmdir /S /Q .\build\fv_x64\CMakeFiles
-rmdir /S /Q .\build\fv_x64\lib
-rmdir /S /Q .\build\fv_x64\nel
-rmdir /S /Q .\build\fv_x64\ryzom
-rmdir /S /Q .\build\fv_x64\x64
-del build\fv_x64\*.*
-rmdir /S /Q .\build\fv_x86\CMakeFiles
-rmdir /S /Q .\build\fv_x86\lib
-rmdir /S /Q .\build\fv_x86\nel
-rmdir /S /Q .\build\fv_x86\ryzom
-rmdir /S /Q .\build\fv_x86\ALL_BUILD.dir
-del build\fv_x86\*.*
-rmdir /S /Q .\build\server_gcc\CMakeFiles
-rmdir /S /Q .\build\server_gcc\lib
-rmdir /S /Q .\build\server_gcc\nel
-rmdir /S /Q .\build\server_gcc\ryzom
-del build\server_gcc\*.*
-rmdir /S /Q .\build\server_x64\CMakeFiles
-rmdir /S /Q .\build\server_x64\lib
-rmdir /S /Q .\build\server_x64\nel
-rmdir /S /Q .\build\server_x64\ryzom
-rmdir /S /Q .\build\server_x64\x64
-del build\server_x64\*.*
-del .\path_config.bat
-del *.lnk
+
+rmdir /S /Q .\build_docker
+rmdir /S /Q .\build_win32\plugin_max
+rmdir /S /Q .\build_win32\samples
+
+rmdir /S /Q .\build_win32\client_dev\.vs
+rmdir /S /Q .\build_win32\client_dev\CMakeFiles
+rmdir /S /Q .\build_win32\client_dev\lib
+rmdir /S /Q .\build_win32\client_dev\nel
+rmdir /S /Q .\build_win32\client_dev\ryzom
+rmdir /S /Q .\build_win32\client_dev\x64
+rmdir /S /Q .\build_win32\client_dev\bin\Debug
+del build_win32\client_dev\*.*
+
+rmdir /S /Q .\build_win32\server_dev\.vs
+rmdir /S /Q .\build_win32\server_dev\CMakeFiles
+rmdir /S /Q .\build_win32\server_dev\lib
+rmdir /S /Q .\build_win32\server_dev\nel
+rmdir /S /Q .\build_win32\server_dev\ryzom
+rmdir /S /Q .\build_win32\server_dev\x64
+rmdir /S /Q .\build_win32\server_dev\bin\Debug
+del build_win32\server_dev\*.*
+
+rmdir /S /Q .\build_win32\tools\.vs
+rmdir /S /Q .\build_win32\tools\CMakeFiles
+rmdir /S /Q .\build_win32\tools\lib
+rmdir /S /Q .\build_win32\tools\nel
+rmdir /S /Q .\build_win32\tools\ryzom
+rmdir /S /Q .\build_win32\tools\x64
+rmdir /S /Q .\build_win32\tools\bin\Debug
+del build_win32\tools\*.*
+
+del build_win32\*.*
+
+rmdir /S /Q .\.nel
+del *.*
+
+echo Ready
+pause
