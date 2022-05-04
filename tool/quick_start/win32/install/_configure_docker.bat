@@ -9,6 +9,8 @@ python configure_toolchains.py
 if %errorlevel% neq 0 pause
 python configure_targets.py
 if %errorlevel% neq 0 pause
+python configure_pipeline.py
+if %errorlevel% neq 0 pause
 python print_summary.py
 if %errorlevel% neq 0 pause
 echo(
