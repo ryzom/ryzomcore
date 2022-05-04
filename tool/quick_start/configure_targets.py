@@ -185,6 +185,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 	
 	if spec == NeLSpecClient:
 		opts += [ "-DWITH_RYZOM_CLIENT=ON" ]
+		opts += [ "-DWITH_RYZOM_PATCH=ON" ]
 		opts += [ "%RC_CLIENT_DEFAULTS%" ]
 	else:
 		opts += [ "-DWITH_RYZOM_CLIENT=OFF" ]
