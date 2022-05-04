@@ -15,4 +15,25 @@
 *.css text
 *.htm text
 *.txt text
+*.py text
+*.lua text
+
 *.sh text eol=lf
+
+*.layout text
+*.looknfeel text
+*.imageset text
+*.font text
+*.scheme text
+
+*.tpl text
+
+*.xsd text
+*.dox text
+
+*.pkg text
+
+# Special case
+database.xml text eol=lf
+msg.xml text eol=lf
+ninja-lfs.diff text eol=lf

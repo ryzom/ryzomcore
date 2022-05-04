@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Install copy
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -69,11 +69,11 @@ for file in CopyDatabaseSourceFiles:
 	copyFileIfNeeded(log, DatabaseDirectory + "/" + file, installPath + "/" + os.path.basename(file))
 
 try:
-	CopyWindowsExeDllCfgSourceFiles
+	CopyExeDllCfgSourceFiles
 except NameError:
-	CopyWindowsExeDllCfgSourceFiles = [ ]
-for file in CopyWindowsExeDllCfgSourceFiles:
-	filePath = findFileMultiDir(log, WindowsExeDllCfgDirectories, file)
+	CopyExeDllCfgSourceFiles = [ ]
+for file in CopyExeDllCfgSourceFiles:
+	filePath = findFileMultiDir(log, ExeDllCfgDirectories, file)
 	if (filePath != ""):
 		copyFileIfNeeded(log, filePath, installPath + "/" + os.path.basename(file))
 

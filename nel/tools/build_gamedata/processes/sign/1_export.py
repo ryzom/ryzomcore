@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Export sign
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -44,10 +44,10 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 mkPath(log, ExportBuildDirectory + "/" + UnsignedExeDllDirectory)
-for file in SignExeDllFiles:
-	printLog(log, str(WindowsExeDllCfgDirectories))
+for file in ExeDllFiles:
+	# printLog(log, str(ExeDllCfgDirectories))
 	printLog(log, file)
-	filePath = findFileMultiDir(log, WindowsExeDllCfgDirectories, file)
+	filePath = findFileMultiDir(log, ExeDllCfgDirectories, file)
 	if (filePath != ""):
 		copyFileIfNeeded(log, filePath, ExportBuildDirectory + "/" + UnsignedExeDllDirectory + "/" + os.path.basename(file))
 

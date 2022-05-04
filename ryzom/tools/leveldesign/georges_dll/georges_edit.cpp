@@ -162,7 +162,7 @@ BOOL CGeorgesEditApp::initInstance (int nCmdShow, bool exeStandalone, int x, int
 	if (!isInitialized && exeStandalone)
 	{
 		m_nCmdShow = nCmdShow;
-		ExePath = tStrToUtf8(GetCommandLine ());
+		ExePath = wideToUtf8(GetCommandLineW());
 		if (ExePath.size()>0)
 		{
 			if (ExePath[0] == '\"')

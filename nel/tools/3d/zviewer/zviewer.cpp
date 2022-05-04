@@ -388,7 +388,7 @@ void displayZones()
 
 	string::size_type idx = ViewerCfg.Bank.find(".");
 	string farBank = ViewerCfg.Bank.substr(0,idx);
-	farBank += ".farbank";
+	farBank += "_su.farbank";
 
 	try
 	{

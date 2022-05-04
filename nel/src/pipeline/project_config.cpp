@@ -67,7 +67,8 @@ bool CProjectConfig::init(const std::string &asset, Flags flags, bool partial)
 {
 	TPathString rootPath = NLMISC::CPath::standardizePath(asset, false);
 	TPathString configPath = rootPath + "/nel.cfg";
-	while (!CFile::fileExists(configPath))
+	TPathString projectPath = rootPath + "/.nel";
+	while (!CFile::fileExists(configPath) && !CFile::isDirectory(projectPath))
 	{
 		std::string::size_type sep = CFile::getLastSeparator(rootPath);
 		if (sep == string::npos)
@@ -78,9 +79,20 @@ bool CProjectConfig::init(const std::string &asset, Flags flags, bool partial)
 			return false;
 
 		configPath = rootPath + "/nel.cfg";
+		projectPath = rootPath + "/.nel";
 	}
-
-	rootPath += "/";
+	if (CFile::fileExists(configPath))
+	{
+		rootPath += "/";
+		projectPath = TPathString();
+	}
+	else
+	{
+		rootPath += "/graphics/";
+		configPath = rootPath + "nel.cfg";
+		if (!CFile::fileExists(configPath))
+			return false;
+	}
 	uint32 configFileModification = CFile::getFileModificationDate(configPath);
 	bool assetConfigSame = configPath == s_AssetConfigPath && s_AssetConfigModification == configFileModification && s_InitFlags == flags;
 	

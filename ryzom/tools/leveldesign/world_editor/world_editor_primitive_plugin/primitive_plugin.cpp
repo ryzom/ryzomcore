@@ -128,11 +128,11 @@ void		CPrimitivePlugin::init(IPluginAccess *pluginAccess)
 	if (pv)
 	{
 		for (uint i=0; i<pv->size(); ++i)
-			paths.push_back(pv->asString(i));
+			paths.push_back(_PluginAccess->transformProjectPath(pv->asString(i)));
 	}
 	// add the sheetId file
 	pv = cf.getVarPtr("PrimitivePluginSheetId");
-	sheetIdPath = pv->asString();
+	sheetIdPath = _PluginAccess->transformProjectPath(pv->asString());
 
 	// Init the sheet id
 	CPath::addSearchFile(sheetIdPath);

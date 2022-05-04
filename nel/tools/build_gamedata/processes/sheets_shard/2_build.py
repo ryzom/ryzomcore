@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Build shard sheets
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2010-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify

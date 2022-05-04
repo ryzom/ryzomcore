@@ -246,10 +246,13 @@ CDriverD3D::CDriverD3D()
 		nlwarning ("Can't create the direct 3d 9 object.");
 
 #ifdef NL_OS_WINDOWS
-		sint val = MessageBoxA(NULL, "Your DirectX version is too old. You need to install the latest one.\r\n\r\nPressing OK will quit the game and automatically open your browser to download the latest version of DirectX.\r\nPress Cancel will just quit the game.\r\n", "Mtp Target Error", MB_OKCANCEL);
-		if(val == IDOK)
+		sint val = MessageBoxA(NULL,
+			"Your DirectX version is too old. You need to install the latest one.\r\n\r\n"
+			"Pressing OK will quit the game and automatically open your browser to download the latest version of DirectX.\r\n"
+			"Press Cancel will just quit the game.\r\n", "NeL Error", MB_OKCANCEL);
+		if (val == IDOK)
 		{
-			openURL("http://www.microsoft.com/downloads/details.aspx?FamilyID=4b1f5d0c-5e44-4864-93cd-464ef59da050");
+			openURL("https://www.microsoft.com/en-us/download/details.aspx?id=35");
 		}
 #endif
 		exit(EXIT_FAILURE);

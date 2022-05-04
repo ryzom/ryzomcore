@@ -500,7 +500,7 @@ void CCmdArgs::displayVersion()
 {
 	// display a verbose version string
 #ifdef BUILD_DATE
-	printf("%s %s (built on %s)\nCopyright (C) %s\n", _ProgramName.c_str(), _Version.c_str(), BUILD_DATE, COPYRIGHT);
+	printf("%s %s (built on %s)\n%s\n", _ProgramName.c_str(), _Version.c_str(), BUILD_DATE, COPYRIGHT);
 #endif
 }
 
