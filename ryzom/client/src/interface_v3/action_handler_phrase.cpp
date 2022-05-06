@@ -1579,6 +1579,8 @@ public:
 				pPM->setBookFilter(BRICK_TYPE::UNKNOWN, (SKILLS::ESkills)index);
 			else
 				pPM->setBookFilter(BRICK_TYPE::UNKNOWN, SKILLS::unknown);
+
+			CLuaManager::getInstance().executeLuaScript(toString("game:updatePhraseBookProgression(%i)", index));
 		}
 	}
 };
