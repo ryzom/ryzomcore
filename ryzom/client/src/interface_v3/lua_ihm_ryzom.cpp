@@ -2420,15 +2420,13 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 			texture = "";
 		}
 
+		std::vector<string>texList;
+		if (!texture.empty())
+			splitString(texture, " ", texList);
+
 		for(uint j=0;j<instance.getNumMaterials();j++)
 		{
-			if (!highlight)
-			{
-				/*instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
-				instance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
-				instance.getMaterial(j).setShininess(10.0f);*/
-			}
-			else
+			if (highlight)
 			{
 				instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
 				instance.getMaterial(j).setEmissive(CRGBA(255,0,0,255));
@@ -2441,9 +2439,7 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 				for(sint l = 0; l < numStages; l++)
 				{
 					if (instance.getMaterial(j).isTextureFile((uint) l))
-					{
-						instance.getMaterial(j).setTextureFileName(texture, (uint) l);
-					}
+						instance.getMaterial(j).setTextureFileName(texList[std::min((int)j, (int)texList.size()-1)], (uint) l);
 				}
 			}
 		}

@@ -2064,6 +2064,8 @@ bool CDriverGL::setMode(const GfxMode& amode)
 		// if window is visible, then also restore mouse relative position.
 		if (!mode.DisplayDevice.empty() && mode.DisplayDevice != current.DisplayDevice)
 		{
+			setWindowStyle(EWSWindowed);
+
 			int screen = DefaultScreen(_dpy);
 			Window root = RootWindow(_dpy, screen);
 			uint mouseX = mode.Width / 2;
@@ -2090,6 +2092,7 @@ bool CDriverGL::setMode(const GfxMode& amode)
 			XMoveWindow(_dpy, _win, newX, newY);
 			_WindowX = newX;
 			_WindowY = newY;
+			setWindowStyle(EWSFullscreen);
 		}
 	}
 #endif
@@ -3105,13 +3108,24 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	SetWindowPos(_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
 
 	// init window width and height
-	RECT clientRect;
-	GetClientRect(_win, &clientRect);
-	_CurrentMode.Width = uint16(clientRect.right-clientRect.left);
-	_CurrentMode.Height = uint16(clientRect.bottom-clientRect.top);
-	GetWindowRect(_win, &clientRect);
-	_WindowX = clientRect.left;
-	_WindowY = clientRect.top;
+	if (_CurrentMode.Windowed)
+	{
+		// TODO: this gives wrong info for initial fullscreen window so limit for windowed only for now
+		RECT clientRect;
+		GetClientRect(_win, &clientRect);
+		_CurrentMode.Width = uint16(clientRect.right-clientRect.left);
+		_CurrentMode.Height = uint16(clientRect.bottom-clientRect.top);
+		GetWindowRect(_win, &clientRect);
+		_WindowX = clientRect.left;
+		_WindowY = clientRect.top;
+	}
+	else
+	{
+		_CurrentMode.Width = width;
+		_CurrentMode.Height = height;
+		_WindowX = 0;
+		_WindowY = 0;
+	}
 
 #elif defined(NL_OS_MAC)
 

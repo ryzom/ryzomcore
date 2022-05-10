@@ -87,7 +87,7 @@ public:
 	void  setDistLimitMax(float limitMax) { _DistLimitMax = limitMax;}
 
 	int luaGetElement(CLuaState &ls);
-	
+
 	REFLECT_EXPORT_START(CInterface3DScene, CInterfaceGroup)
 		REFLECT_LUA_METHOD ("getElement", luaGetElement);
 		REFLECT_STRING ("curcam", getCurrentCamera, setCurrentCamera);
@@ -265,9 +265,13 @@ public:
 	std::string getName() const;
 	void        setName (const std::string &ht);
 
+	std::string getTextures() const;
+	void        setTextures (const std::string &textures);
+
 	float getBBoxSizeX () const;
 	float getBBoxSizeY () const;
 	float getBBoxSizeZ () const;
+
 
 
 	REFLECT_EXPORT_START(CInterface3DShape, CInterfaceElement)
@@ -281,6 +285,7 @@ public:
 		REFLECT_FLOAT ("roty", getRotY, setRotY);
 		REFLECT_FLOAT ("rotz", getRotZ, setRotZ);
 		REFLECT_STRING ("name", getName, setName);
+		REFLECT_STRING("textures", getTextures, setTextures);
 	REFLECT_EXPORT_END
 
 protected:
@@ -289,6 +294,7 @@ protected:
 	NLMISC::CVector _Pos;
 	NLMISC::CVector _Rot;
 	std::string _Name;
+	std::string _Textures;
 };
 
 /**
@@ -397,17 +403,6 @@ public:
 	float getTgtY()	const	{ return _Target.y; }
 	float getTgtZ()	const	{ return _Target.z; }
 
-	REFLECT_EXPORT_START(CInterface3DCamera, CInterfaceElement)
-		REFLECT_FLOAT ("posx", getPosX, setPosX);
-		REFLECT_FLOAT ("posy", getPosY, setPosY);
-		REFLECT_FLOAT ("posz", getPosZ, setPosZ);
-		REFLECT_FLOAT ("tgtx", getTgtX, setTgtX);
-		REFLECT_FLOAT ("tgty", getTgtY, setTgtY);
-		REFLECT_FLOAT ("tgtz", getTgtZ, setTgtZ);
-		REFLECT_FLOAT ("fov", getFOV, setFOV);
-		REFLECT_FLOAT ("roll", getRoll, setRoll);
-	REFLECT_EXPORT_END
-
 	float getRotZ()	const	{ return _Rot.z; }
 	void setRotZ(float f)	{ _Rot.z = f; }
 
@@ -416,6 +411,20 @@ public:
 
 	float getDist()	const	{ return _Dist; }
 	void setDist(float f)	{ _Dist = f; }
+
+	REFLECT_EXPORT_START(CInterface3DCamera, CInterfaceElement)
+		REFLECT_FLOAT ("posx", getPosX, setPosX);
+		REFLECT_FLOAT ("posy", getPosY, setPosY);
+		REFLECT_FLOAT ("posz", getPosZ, setPosZ);
+		REFLECT_FLOAT ("tgtx", getTgtX, setTgtX);
+		REFLECT_FLOAT ("tgty", getTgtY, setTgtY);
+		REFLECT_FLOAT ("tgtz", getTgtZ, setTgtZ);
+		REFLECT_FLOAT ("rotz", getRotZ, setRotZ);
+		REFLECT_FLOAT ("roty", getRotY, setRotY);
+		REFLECT_FLOAT ("dist", getDist, setDist);
+		REFLECT_FLOAT ("fov", getFOV, setFOV);
+		REFLECT_FLOAT ("roll", getRoll, setRoll);
+	REFLECT_EXPORT_END
 
 	void reset(); // Reset user interaction
 

@@ -274,7 +274,7 @@
 
 //#define NL_NO_DEBUG
 #undef NL_NO_DEBUG
-
+#define NL_NO_ASSERT
 
 // Standard types
 

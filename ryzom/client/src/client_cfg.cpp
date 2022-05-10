@@ -413,6 +413,7 @@ CClientConfig::CClientConfig()
 	CameraRecorderPrefix = "cam_rec";
 	CameraRecorderBlend  = true;
 
+	ScreenShotDirectory = "screenshots";
 	ScreenShotWidth		= 0;
 	ScreenShotHeight	= 0;
 	ScreenShotFullDetail = true;
@@ -1142,6 +1143,7 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(CameraRecorderBlend)
 
 	// Screenshot
+	READ_STRING_FV(ScreenShotDirectory)
 	READ_INT_FV(ScreenShotWidth)
 	READ_INT_FV(ScreenShotHeight)
 	READ_BOOL_FV(ScreenShotFullDetail)
@@ -1297,7 +1299,6 @@ void CClientConfig::setValues()
 	if (varPtr)
 	{
 		if (nlstricmp(varPtr->asString(), "Auto") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvAuto;
-		else if (nlstricmp(varPtr->asString(), "FMod") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvFMod;
 		else if (nlstricmp(varPtr->asString(), "OpenAL") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvOpenAL;
 		else if (nlstricmp(varPtr->asString(), "DirectSound") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvDirectSound;
 		else if (nlstricmp(varPtr->asString(), "XAudio2") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvXAudio2;

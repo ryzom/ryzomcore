@@ -1000,9 +1000,6 @@ bool mainLoop()
 	// initialize the structure for the ping.
 	Ping.init();
 
-	// initialize screenshots directory
-	initScreenshot();
-
 	// Call a function for a demo to init.
 
 	if (ClientCfg.Local)

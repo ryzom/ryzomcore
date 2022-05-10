@@ -51,6 +51,18 @@ namespace NLMISC{
 //-----------------------------------------------
 void CCDBNodeLeaf::init(  xmlNodePtr node, IProgressCallback &/* progressCallBack */, bool /* mapBanks */, CCDBBankHandler * /* bankHandler */ )
 {
+	// Read nullable
+	CXMLAutoPtr nullable((const char*)xmlGetProp (node, (xmlChar*)"nullable"));
+	if ((const char *) nullable != NULL)
+	{
+		m_Nullable = (nullable.getDatas()[0] == '1');
+	}
+	else
+	{
+		m_Nullable = false;
+	}
+
+	// Read type
 	CXMLAutoPtr type((const char*)xmlGetProp (node, (xmlChar*)"type"));
 	nlassert((const char *) type != NULL);
 
@@ -141,6 +153,13 @@ void CCDBNodeLeaf::readDelta(TGameCycle gc, CBitMemStream & f )
 	{
 		// Read the Property Value according to the Property Type.
 		uint64 recvd = 0;
+
+		uint64 isNull = 0;
+		if (m_Nullable)
+		{
+			f.serial(isNull, 1);
+		}
+
 		uint bits;
 		if (_Type == TEXT)
 			bits = 32;
