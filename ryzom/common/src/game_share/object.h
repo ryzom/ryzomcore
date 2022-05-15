@@ -293,7 +293,7 @@ public:
 	double getNumberValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
 	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
 
-#if defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
+#if !defined(CLANG_VERSION) && defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
 	virtual const char *getTypeAsString() const;
 
 	virtual bool set(const std::string& key, sint64 value);
@@ -324,7 +324,7 @@ public:
 #endif
 
 protected:
-#if defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
+#if !defined(CLANG_VERSION) && defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
 	virtual void doSerialize(std::string& out, CSerializeContext& context) const;
 
 	virtual bool doIsNumber() const;
