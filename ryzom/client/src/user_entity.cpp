@@ -1402,18 +1402,6 @@ void CUserEntity::moveToCheckStartDist(CLFECOMMON::TCLEntityId slot, double dist
 
 		// disable afk mode
 		setAFK(false);
-
-		// if sufficiently near, launch the action
-		CEntityCL *target = EntitiesMngr.entity(slot);
-		if(target)
-		{
-			CVectorD dir2targ = target->pos() - pos();
-			dir2targ.z = 0.0;
-			if((dir2targ==CVectorD::Null) || (dir2targ.norm() < dist))
-			{
-				moveToAction(target);
-			}
-		}
 	}
 }// moveToCheckStartDist //
 
@@ -3664,7 +3652,7 @@ bool CUserEntity::CMountHunger::canRun() const
 			return (hungerLeaf->getValue32() != (sint)ANIMAL_TYPE::DbHungryValue);
 		}
 	}
-	return true;
+	return false;
 }
 
 
