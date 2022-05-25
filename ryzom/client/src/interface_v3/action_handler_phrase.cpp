@@ -1250,12 +1250,11 @@ public:
 							// Move to targetted source
 							if (target)
 								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
-
-							// start client execution
-							pPM->clientExecute(memoryLine, memoryIndex, cyclic);
-
-							if (!target)
+							else
 							{
+								// start client execution
+								pPM->clientExecute(memoryLine, memoryIndex, cyclic);
+
 								// inform Server of phrase cast
 								pPM->sendExecuteToServer(memoryLine, memoryIndex, cyclic);
 							}
@@ -1450,22 +1449,6 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPhraseCancelCast, "phrase_cancel_cast");
-
-// ***************************************************************************
-/** Called to cancel a Phrase link
- */
-class CHandlerPhraseCancelCastNext: public IActionHandler
-{
-public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
-	{
-		CSPhraseManager	*pPM= CSPhraseManager::getInstance();
-		UserEntity->cancelAllPhrases();
-		pPM->cancelClientExecute(true);
-	}
-};
-REGISTER_ACTION_HANDLER(CHandlerPhraseCancelCastNext, "phrase_cancel_cast_next");
-
 
 
 // ***************************************************************************
