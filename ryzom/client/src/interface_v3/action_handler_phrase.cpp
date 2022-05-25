@@ -1245,8 +1245,6 @@ public:
 							// VERY important if previous MoveTo was a SPhrase MoveTo (because cancelClientExecute() must be called)
 							UserEntity->resetAnyMoveTo();
 
-							pPM->cancelClientExecute(cyclic);
-
 							// Move to targetted source
 							if (target)
 								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
