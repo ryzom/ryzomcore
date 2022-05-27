@@ -1245,18 +1245,16 @@ public:
 							// VERY important if previous MoveTo was a SPhrase MoveTo (because cancelClientExecute() must be called)
 							UserEntity->resetAnyMoveTo();
 
-							// Move to targetted source
-							if (target)
-								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
-
 							// start client execution
 							pPM->clientExecute(memoryLine, memoryIndex, cyclic);
 
-							if (!target)
-							{
-								// inform Server of phrase cast
+							// Move to targetted source or inform Server of phrase cast
+							// If target is close, then sendExecuteToServer is called from extractRM()
+							// If target is far, then client executes move-to-target first, and then calls extractRM()
+							if (target)
+								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
+							else
 								pPM->sendExecuteToServer(memoryLine, memoryIndex, cyclic);
-							}
 						}
 					}
 					else
