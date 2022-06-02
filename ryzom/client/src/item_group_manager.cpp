@@ -333,6 +333,8 @@ void CItemGroupManager::linkInterface()
 		pMenu->setSubMenu(pMenu->getNumLine() - 1, pGroupSubMenu);
 	else
 		nlwarning("Couldn't link group submenu to item_menu_in_bag, check your widgets.xml file");
+
+	drawGroupsList();
 }
 
 void CItemGroupManager::uninit()
@@ -351,6 +353,7 @@ void CItemGroupManager::unlinkInterface()
 	if (pGroupMenu) pGroupSubMenu = pGroupMenu->getRootMenu();
 	if (pGroupMenu) pGroupMenu->reset();
 	if (pGroupMenu && pGroupSubMenu) pGroupMenu->delGroup(pGroupSubMenu, true);
+	undrawGroupsList();
 }
 
 // Inspired from macro parsing
@@ -446,6 +449,60 @@ bool CItemGroupManager::loadGroups()
 	f.close();
 
 	return true;
+}
+
+void CItemGroupManager::undrawGroupsList()
+{
+	CGroupList *pParent = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(LIST_ITEMGROUPS));
+	if (pParent == NULL) return;
+	pParent->clearGroups();
+	pParent->setDynamicDisplaySize(false);
+	CGroupList *pParent2 = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(LIST_ITEMGROUPS_2));
+	if (pParent2 == NULL) return;
+	pParent2->clearGroups();
+	pParent2->setDynamicDisplaySize(false);
+}
+
+void CItemGroupManager::drawGroupsList()
+{
+	// rebuild groups list
+	undrawGroupsList();
+	CGroupList *pParent = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(LIST_ITEMGROUPS));
+	if (pParent == NULL) return;
+	CGroupList *pParent2 = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(LIST_ITEMGROUPS_2));
+	if (pParent2 == NULL) return;
+	for (uint i = 0; i < _Groups.size(); i++)
+	{
+		CInterfaceGroup *pLine = generateGroupsListLine(LIST_ITEMGROUPS, i);
+		CInterfaceGroup *pLine2 = generateGroupsListLine(LIST_ITEMGROUPS_2, i);
+
+		// Add to the list
+		pLine->setParent(pParent);
+		pParent->addChild(pLine);
+		pLine2->setParent(pParent2);
+		pParent2->addChild(pLine2);
+	}
+}
+
+CInterfaceGroup CItemGroupManager::generateGroupsListLine(std::string parent, uint i) {
+	// create the group line
+	string templateId = parent ":g" + toString(i);
+	vector< pair<string, string> > vParams;
+	vParams.push_back(vector< pair<string, string> >::value_type("id", templateId));
+	CInterfaceGroup *pLine = NULL;
+	pLine = CWidgetManager::getInstance()->getParser()->createGroupInstance (TEMPLATE_ITEMGROUP_ITEM, parent, vParams);
+	if (pLine == NULL) continue;
+
+	// Set name
+	CViewText *pViewName = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_ITEMGROUP_ITEM_NAME));
+	if (pViewName != NULL)
+		pViewName->setText (_Groups[i].name);
+	
+	CCtrlBase *inviteButton = pLine->getCtrl(TEMPLATE_ITEMGROUP_ITEM_EQUIP);
+	if (inviteButton != NULL)
+		inviteButton->setActive(true);
+	
+	return *pLine;
 }
 
 void CItemGroupManager::update()
@@ -797,6 +854,10 @@ bool CItemGroupManager::createGroup(std::string name, bool removeUnequiped)
 	}
 
 	_Groups.push_back(group);
+
+	//must redraw the list
+	drawGroupsList();
+
 	return true;
 
 
@@ -813,6 +874,10 @@ bool CItemGroupManager::deleteGroup(std::string name)
 	// Nothing removed, error
 	if(tmp.size() == _Groups.size()) return false;
 	_Groups = tmp;
+
+	//must redraw the list
+	drawGroupsList();
+
 	return true;
 }
 

@@ -23,6 +23,12 @@
 #include "game_share/inventories.h"
 #include "game_share/slot_equipment.h"
 
+#define LIST_ITEMGROUPS					"ui:interface:inventory:content:equip:midsection:content:itemgroups:itemgroups_list"
+#define LIST_ITEMGROUPS_2				"ui:interface:inv_equip:content:equip:midsection:content:itemgroups:itemgroups_list"
+#define TEMPLATE_ITEMGROUP_ITEM			"itemgroups_item"
+#define TEMPLATE_ITEMGROUP_ITEM_NAME	"name"
+#define TEMPLATE_ITEMGROUP_ITEM_EQUIP	"equip_button"
+
 struct CInventoryItem {
 public:
 	CDBCtrlSheet* pCS;
@@ -110,6 +116,8 @@ public:
 	bool loadGroups();
 	void linkInterface();
 	void unlinkInterface();
+	void undrawGroupsList();
+	void drawGroupsList();
 	//Return NULL if no group was found
 	//Return false if no group was found
 	bool moveGroup(std::string name, INVENTORIES::TInventory dst);
