@@ -46,43 +46,14 @@ CItemGroup::CItemGroup()
 bool CItemGroup::contains(CDBCtrlSheet *other)
 {
 	SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED;
-	return contains(other, slot) || contains(other, -1);
+	return contains(other, slot);
 }
-
-// TODO: review redundancy of slot parameter
 bool CItemGroup::contains(CDBCtrlSheet *other, SLOT_EQUIPMENT::TSlotEquipment &slot)
 {
 	slot = SLOT_EQUIPMENT::UNDEFINED;
-	for(int i=0;i<EquipItems.size();i++)
+	for(int i=0;i<Items.size();i++)
 	{
-		CItem item = EquipItems[i];
-		if(item.useCreateTime() && item.createTime == other->getItemCreateTime() && item.serial == other->getItemSerial())
-		{
-			slot = item.slot;
-			return true;
-		}
-		// Present for compatibility reasons
-		NLMISC::CSheetId sheet = NLMISC::CSheetId(other->getSheetId());
-		if (sheet.toString()  == item.sheetName  && other->getQuality()   == item.quality &&
-				other->getItemWeight() == item.weight     && other->getItemColor() == item.color &&
-				(!item.usePrice || (other->getItemPrice()  >= item.minPrice && other->getItemPrice() <= item.maxPrice))
-				)
-		{
-			slot = item.slot;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-// TODO: review redundancy of slot parameter
-bool CItemGroup::contains(CDBCtrlSheet *other, uint16 &slot)
-{
-	slot = -1;
-	for(int i=0;i<HotbarItems.size();i++)
-	{
-		CItem item = HotbarItems[i];
+		CItem item = Items[i];
 		if(item.useCreateTime() && item.createTime == other->getItemCreateTime() && item.serial == other->getItemSerial())
 		{
 			slot = item.slot;
@@ -108,25 +79,19 @@ void CItemGroup::addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlot
 	//Don't add an item if it already exists, this could cause issue
 	// It's happening either if we are creating a group with a 2 hands items (and the item is found both in handR and handL)
 	// Or if an user incorrectly edit his group file
-	for(int i=0; i<EquipItems.size(); i++)
+	for(int i=0; i<Items.size(); i++)
 	{
-		if( EquipItems[i].createTime == createTime &&  EquipItems[i].serial == serial)
+		if( Items[i].createTime == createTime &&  Items[i].serial == serial)
 		{
 			nldebug("Not adding duplicate item, createTime: %d, serial: %d", createTime, serial);
 			//In this case, we are adding the duplicate item for a 2 hands item
 			//If it's saved as a left hand item, save it as a right hand item instead (so we have only 1 correct item)
-			if(EquipItems[i].slot == SLOT_EQUIPMENT::HANDL && slot == SLOT_EQUIPMENT::HANDR)
-				EquipItems[i].slot = SLOT_EQUIPMENT::HANDR;
+			if(Items[i].slot == SLOT_EQUIPMENT::HANDL && slot == SLOT_EQUIPMENT::HANDR)
+				Items[i].slot = SLOT_EQUIPMENT::HANDR;
 			return;
 		}
 	}
-	EquipItems.push_back(CEquipItem(createTime, serial, slot));
-}
-
-// used for hotbar
-void CItemGroup::addItem(sint32 createTime, sint32 serial, uint16 slot)
-{
-	HotbarItems.push_back(CHotbarItem(createTime, serial, slot));
+	Items.push_back(CItem(createTime, serial, slot));
 }
 
 void CItemGroup::addRemove(std::string slotName)
@@ -141,19 +106,13 @@ void CItemGroup::addRemove(SLOT_EQUIPMENT::TSlotEquipment slot)
 	removeBeforeEquip.push_back(slot);
 }
 
-// used for hotbar
-void CItemGroup::addRemove(uint16 slot)
-{
-	removeHotbar.push_back(slot);
-}
-
 void CItemGroup::writeTo(xmlNodePtr node)
 {
 	xmlNodePtr groupNode = xmlNewChild (node, NULL, (const xmlChar*)"group", NULL );
 	xmlSetProp(groupNode, (const xmlChar*)"name", (const xmlChar*)name.c_str());
-	for(int i=0;i<EquipItems.size();i++)
+	for(int i=0;i<Items.size();i++)
 	{
-		CItem item = EquipItems[i];
+		CItem item = Items[i];
 		xmlNodePtr itemNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"item", NULL);
 		if(item.useCreateTime())
 		{
@@ -174,36 +133,10 @@ void CItemGroup::writeTo(xmlNodePtr node)
 		//if(item.slot == SLOT_EQUIPMENT::HANDL || item.slot == SLOT_EQUIPMENT::HANDR)
 		xmlSetProp(itemNode, (const xmlChar*)"slot", (const xmlChar*)SLOT_EQUIPMENT::toString(item.slot).c_str());
 	}
-	for(int i=0;i<HotbarItems.size();i++)
-	{
-		CItem item = HotbarItems[i];
-		xmlNodePtr itemNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"hotbar_item", NULL);
-		if(item.useCreateTime())
-		{
-			xmlSetProp (itemNode, (const xmlChar*)"createTime", (const xmlChar*)NLMISC::toString(item.createTime).c_str());
-			xmlSetProp (itemNode, (const xmlChar*)"serial", (const xmlChar*)NLMISC::toString(item.serial).c_str());
-		}
-		// Present for compatibility reasons
-		else
-		{
-			xmlSetProp (itemNode, (const xmlChar*)"sheetName", (const xmlChar*)item.sheetName.c_str());
-			xmlSetProp (itemNode, (const xmlChar*)"quality", (const xmlChar*)NLMISC::toString(item.quality).c_str());
-			xmlSetProp (itemNode, (const xmlChar*)"weight", (const xmlChar*)NLMISC::toString(item.weight).c_str());
-			xmlSetProp (itemNode, (const xmlChar*)"color", (const xmlChar*)NLMISC::toString(item.color).c_str());
-			xmlSetProp (itemNode, (const xmlChar*)"minPrice", (const xmlChar*)NLMISC::toString(item.minPrice).c_str());
-			xmlSetProp (itemNode, (const xmlChar*)"maxPrice", (const xmlChar*)NLMISC::toString(item.maxPrice).c_str());
-		}
-		xmlSetProp(itemNode, (const xmlChar*)"slot", (const xmlChar*)NLMISC::toString(item.slot).c_str());
-	}
 	for(int i=0;i<removeBeforeEquip.size();i++)
 	{
 		xmlNodePtr removeNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"remove", NULL);
 		xmlSetProp(removeNode, (const xmlChar*)"slot", (xmlChar*)SLOT_EQUIPMENT::toString(removeBeforeEquip[i]).c_str());
-	}
-	for(int i=0;i<removeHotbar.size();i++)
-	{
-		xmlNodePtr removeNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"hotbar_remove", NULL);
-		xmlSetProp(removeNode, (const xmlChar*)"slot", (xmlChar*)NLMISC::toString(removeHotbar[i]).c_str());
 	}
 }
 
@@ -219,7 +152,8 @@ void CItemGroup::readFrom(xmlNodePtr node)
 	{
 		if (strcmp((char*)curNode->name, "item") == 0)
 		{
-			CEquipItem item;
+
+			CItem item;
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"createTime");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.createTime);
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"serial");
@@ -249,52 +183,12 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			// Old load : keep for compatibility / migration reasons
 			else
 			{
-				EquipItems.push_back(item);
-			}
-		}
-		if (strcmp((char*)curNode->name, "hotbar_item") == 0)
-		{
-			CHotbarItem item;
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"createTime");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.createTime);
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"serial");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.serial);
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.slot);
-			// Old read, keep for compatibility reasons
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"sheetName");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.sheetName);
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"quality");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.quality);
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"weight");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.weight);
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"color");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.color);
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"minPrice");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.minPrice);
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"maxPrice");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.maxPrice);
-			item.usePrice = (item.minPrice != 0 || item.maxPrice != std::numeric_limits<uint32>::max());
-			if(item.createTime != 0)
-			{
-				addItem(item.createTime, item.serial, item.slot);
-			}
-			// Old load : keep for compatibility / migration reasons
-			else
-			{
-				HotbarItems.push_back(item);
+				Items.push_back(item);
 			}
 		}
 		if (strcmp((char*)curNode->name, "remove") == 0)
 		{
 			std::string slot;
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
-			addRemove(slot);
-		}
-		if (strcmp((char*)curNode->name, "hotbar_remove") == 0)
-		{
-			uint16 slot;
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
 			addRemove(slot);
@@ -544,7 +438,7 @@ bool CItemGroupManager::migrateGroups()
 	{
 		CItemGroup group = _Groups[i];
 		//Migrate the group only if there is items inside, and the first one hasn't been migrated
-		bool needMigration = group.EquipItems.size() > 0 && !group.EquipItems[0].useCreateTime();
+		bool needMigration = group.Items.size() > 0 && !group.Items[0].useCreateTime();
 		if(!needMigration)
 		{
 			newGroups.push_back(group);
@@ -718,13 +612,6 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 			dbPath = "LOCAL:INVENTORY:EQUIP:" + NLMISC::toString((uint32)slot);
 		CInventoryManager::getInstance()->unequip(dbPath);
 	}
-	// unequip hotbar
-	for(int i=0; i < group->removeHotbar.size(); i++)
-	{
-		uint16 slot = group->removeHotbar[i];
-		std::string dbPath = "LOCAL:INVENTORY:HOTBAR:" + NLMISC::toString(slot);
-		CInventoryManager::getInstance()->unequip(dbPath);
-	}
 
 	uint32 maxEquipTime = 0;
 
@@ -839,19 +726,6 @@ bool CItemGroupManager::createGroup(std::string name, bool removeUnequiped)
 				group.addRemove(slot);
 		}
 	}
-	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
-	{
-		pCS = CInventoryManager::getInstance()->getHotbarSheet(i);
-		if(!pCS) continue;
-		if(pCS->isSheetValid())
-		{
-			group.addItem(pCS->getItemCreateTime(), pCS->getItemSerial(), (uint16) i);
-		}
-		else if(removeUnequiped)
-		{
-			group.addRemove(i);
-		}
-	}
 
 	_Groups.push_back(group);
 
@@ -892,7 +766,7 @@ void CItemGroupManager::listGroup()
 		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = group.name;
 		NLMISC::strFindReplace(msg, "%name", nameUC);
-		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.EquipItems.size() + group.HotbarItems.size()));
+		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.Items.size()));
 		pIM->displaySystemInfo(msg);
 	}
 }
@@ -970,22 +844,12 @@ bool CItemGroupManager::isItemReallyEquipped(CDBCtrlSheet* item)
 		{
 			return true;
 		}
-	}
-	for (uint32 i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
-	{
-		pCS = CInventoryManager::getInstance()->getHotbarSheet(i);
-		if(!pCS) continue;
-		if((pCS->getInventoryIndex() == item->getInventoryIndex())
-		&& (pCS->getIndexInDB() == item->getIndexInDB()))
-		{
-			return true;
-		}
+
 	}
 
 	return false;
 }
 
-// TODO: review this function
 std::vector<CInventoryItem> CItemGroupManager::matchingItems(CItemGroup *group, INVENTORIES::TInventory inventory)
 {
 	//Not very clean, but no choice, it's ugly time

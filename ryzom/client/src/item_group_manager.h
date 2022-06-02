@@ -43,40 +43,25 @@ public:
 class CItemGroup {
 public:
 	struct CItem {
-		sint32 createTime;
-		sint32 serial;
-		// Old variables, present for compatibility reasons
-		std::string sheetName;
-		uint16 quality;
-		uint32 weight;
-		uint8 color;
-		uint32 minPrice;
-		uint32 maxPrice;
-		bool usePrice;
-		CItem(sint32 createTime, sint32 serial) :
-			createTime(createTime), serial(serial), slot(slot) {}
-		//Old constructor, present for compatibility reasons
-		CItem(std::string sheetName = "", uint16 quality = 0, uint32 weight = 0, uint8 color = 0, sint32 createTime = 0, sint32 serial = 0, uint32 minPrice = 0, uint32 maxPrice = std::numeric_limits<uint32>::max(), bool usePrice = false) :
-			sheetName(sheetName), quality(quality), weight(weight), color(color), createTime(createTime), serial(serial), slot(slot), minPrice(minPrice), maxPrice(maxPrice), usePrice(usePrice) {}
-		//present for compatibility reasons
-		bool useCreateTime() const { return createTime != 0 && serial != 0;}
-	};
-
-	struct CEquipItem : CItem {
-		SLOT_EQUIPMENT::TSlotEquipment slot; // Used only for dagger (right/left hand slot)
-		CEquipItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED) :
-			CItem(createTime, serial), slot(slot) {}
-		CEquipItem(std::string sheetName = "", uint16 quality = 0, uint32 weight = 0, uint8 color = 0, sint32 createTime = 0, sint32 serial = 0, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED, uint32 minPrice = 0, uint32 maxPrice = std::numeric_limits<uint32>::max(), bool usePrice = false) :
-			CItem(sheetName, quality, weight, color, createTime, slot, minPrice, maxPrice, usePrice), slot(slot) {}
-	};
-
-	struct CHotbarItem : CItem {
-		SLOT_EQUIPMENT::TSlotEquipment slot; // Used only for dagger (right/left hand slot)
-		CHotbarItem(sint32 createTime, sint32 serial, uint16 slot) :
-			CItem(createTime, serial), slot(slot) {}
-		CHotbarItem(std::string sheetName = "", uint16 quality = 0, uint32 weight = 0, uint8 color = 0, sint32 createTime = 0, sint32 serial = 0, uint16 slot, uint32 minPrice = 0, uint32 maxPrice = std::numeric_limits<uint32>::max(), bool usePrice = false) :
-			CItem(sheetName, quality, weight, color, createTime, slot, minPrice, maxPrice, usePrice), slot(slot) {}
-	};
+	SLOT_EQUIPMENT::TSlotEquipment slot; // Used only for dagger (right/left hand slot)
+	sint32 createTime;
+	sint32 serial;
+	// Old variables, present for compatibility reasons
+	std::string sheetName;
+	uint16 quality;
+	uint32 weight;
+	uint8 color;
+	uint32 minPrice;
+	uint32 maxPrice;
+	bool usePrice;
+	CItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED) :
+		createTime(createTime), serial(serial), slot(slot) {}
+	//Old constructor, present for compatibility reasons
+	CItem(std::string sheetName = "", uint16 quality = 0, uint32 weight = 0, uint8 color = 0, sint32 createTime = 0, sint32 serial = 0, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED, uint32 minPrice = 0, uint32 maxPrice = std::numeric_limits<uint32>::max(), bool usePrice = false) :
+		sheetName(sheetName), quality(quality), weight(weight), color(color), createTime(createTime), serial(serial), slot(slot), minPrice(minPrice), maxPrice(maxPrice), usePrice(usePrice) {}
+	//present for compatibility reasons
+	bool useCreateTime() const { return createTime != 0 && serial != 0;}
+};
 
 public:
 	CItemGroup();
@@ -84,22 +69,17 @@ public:
 	// return true if any item in the group match the parameter ; slot is UNDEFINED unless the item has been found in the group
 	bool contains(CDBCtrlSheet *other);
 	bool contains(CDBCtrlSheet* other, SLOT_EQUIPMENT::TSlotEquipment &slot);
-	bool contains(CDBCtrlSheet* other, uint16 &slot);
 	void addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot);
-	void addItem(sint32 createTime, sint32 serial, uint16 slot);
 	void addRemove(std::string slotName);
 	void addRemove(SLOT_EQUIPMENT::TSlotEquipment slot);
-	void addRemove(uint16 slot);
 	void writeTo(xmlNodePtr node);
 	void readFrom(xmlNodePtr node);
 
 	// return true if no item inside
-	bool empty() const { return EquipItems.size() == 0 && HotbarItems.size() == 0;}
+	bool empty() const { return Items.size() == 0;}
 	std::string name;
-	std::vector<CEquipItem> EquipItems;
-	std::vector<CHotbarItem> HotbarItems;
+	std::vector<CItem> Items;
 	std::vector<SLOT_EQUIPMENT::TSlotEquipment> removeBeforeEquip;
-	std::vector<uint16> removeHotbar;
 };
 
 class CItemGroupManager {
