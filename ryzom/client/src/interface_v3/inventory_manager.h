@@ -898,8 +898,8 @@ private:
 #define CTRL_HOTBAR_4				"ui:interface:inv_equip:content:equip:hotbar_c:hotbar:hotbar4"
 #define CTRL_HOTBAR_5				"ui:interface:inv_equip:content:equip:hotbar_c:hotbar:hotbar5"
 
-#define CTRL_HAND2_RIGHT			"ui:interface:inv_equip:content:equip:hands:handr"
-#define CTRL_HAND2_LEFT				"ui:interface:inv_equip:content:equip:hands:handl"
+#define CTRL_HAND2_RIGHT			"ui:interface:inv_equip:content:equip:handr"
+#define CTRL_HAND2_LEFT				"ui:interface:inv_equip:content:equip:handl"
 
 #define CTRL_JEWL2_EARING_LEFT		"ui:interface:inventory:content:equip:jewelry:earing_l"
 #define CTRL_JEWL2_BRACELET_LEFT	"ui:interface:inventory:content:equip:jewelry:bracelet_l"
@@ -925,8 +925,8 @@ private:
 #define CTRL_HOTBAR2_4				"ui:interface:inventory:content:equip:hotbar_c:hotbar:hotbar4"
 #define CTRL_HOTBAR2_5				"ui:interface:inventory:content:equip:hotbar_c:hotbar:hotbar5"
 
-#define CTRL_HAND3_RIGHT			"ui:interface:inventory:content:equip:hands:handr"
-#define CTRL_HAND3_LEFT				"ui:interface:inventory:content:equip:hands:handl"
+#define CTRL_HAND3_RIGHT			"ui:interface:inventory:content:equip:handr"
+#define CTRL_HAND3_LEFT				"ui:interface:inventory:content:equip:handl"
 
 #define CTRL_HOTBAR3_1				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar1"
 #define CTRL_HOTBAR3_2				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar2"
