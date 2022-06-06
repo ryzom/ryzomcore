@@ -3338,50 +3338,6 @@ class CCanDropToHotbar : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CCanDropToHotbar, "can_drop_to_hotbar");
 
-// **********************************************************************************************************
-class CHotbarLeftClickOnSlotHandler : public IActionHandler
-{
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
-	{	
-		CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(pCaller);
-		if (!sheet) return;
-		if (sheet->getSheetId() == 0)
-		{
-			// is there's no item that is not worn, can't choose any item)
-			bool isThereObjectNotWorn = false;
-			for(uint k = 0; k < MAX_BAGINV_ENTRIES; ++k)
-			{
-				uint32 sheetid = getInventory().getBagItem(k).getSheetID();
-				if (sheetid != 0)
-				{
-					if (!getInventory().isBagItemWeared(k))
-					{
-						CEntitySheet *pES = SheetMngr.get(CSheetId(sheetid));
-						if (pES && pES->type()== CEntitySheet::ITEM)
-						{
-							CItemSheet *pIS = (CItemSheet*)pES;
-							if (getInventory().isUsableItem(sheetid))
-							{
-								isThereObjectNotWorn = true;
-								break;
-							}
-						}
-					}
-				}
-			}
-
-			if (!isThereObjectNotWorn)
-			{
-				// every object are worn, so there's no use to display an empty list -> no-op
-				return;
-			}
-		}
-		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CWidgetManager::getInstance()->pushModalWindow(pCaller, "ui:interface:hotbar_choose");
-	}
-};
-REGISTER_ACTION_HANDLER(CHotbarLeftClickOnSlotHandler, "hotbar_left_click_on_slot");
-
 // ***************************************************************************
 class CHandlerInvAutoEquip : public IActionHandler
 {
