@@ -365,10 +365,22 @@ void CItemGroupManager::drawGroupsList()
 	if (pParent == NULL) return;
 	CGroupList *pParent2 = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(LIST_ITEMGROUPS_2));
 	if (pParent2 == NULL) return;
+	CViewBase *pView = pParent->getParent()->getView(LIST_EMPTY_TEXT);
+	CViewBase *pView2 = pParent2->getParent()->getView(LIST_EMPTY_TEXT);
+	if (_Groups.empty()) {
+		pView->setActive(true);
+		pView2->setActive(true);
+		return;
+	} else {
+		pView->setActive(false);
+		pView2->setActive(false);
+	}
 	for (uint i = 0; i < _Groups.size(); i++)
 	{
 		CInterfaceGroup *pLine = generateGroupsListLine(LIST_ITEMGROUPS, i);
+		if (pLine == NULL) continue;
 		CInterfaceGroup *pLine2 = generateGroupsListLine(LIST_ITEMGROUPS_2, i);
+		if (pLine2 == NULL) continue;
 
 		// Add to the list
 		pLine->setParent(pParent);
@@ -378,25 +390,23 @@ void CItemGroupManager::drawGroupsList()
 	}
 }
 
-CInterfaceGroup CItemGroupManager::generateGroupsListLine(std::string parent, uint i) {
+CInterfaceGroup* CItemGroupManager::generateGroupsListLine(std::string parent, uint i) 
+{
 	// create the group line
-	string templateId = parent ":g" + toString(i);
-	vector< pair<string, string> > vParams;
-	vParams.push_back(vector< pair<string, string> >::value_type("id", templateId));
+	std::string templateId = parent + ":g" + NLMISC::toString(i).c_str();
+	std::vector< std::pair<string, string> > vParams;
+	vParams.push_back(std::pair<string,string>("id", templateId));
+	vParams.push_back(std::pair<string,string>("name", _Groups[i].name));
 	CInterfaceGroup *pLine = NULL;
 	pLine = CWidgetManager::getInstance()->getParser()->createGroupInstance (TEMPLATE_ITEMGROUP_ITEM, parent, vParams);
-	if (pLine == NULL) continue;
+	if (pLine == NULL) return NULL;
 
 	// Set name
 	CViewText *pViewName = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_ITEMGROUP_ITEM_NAME));
 	if (pViewName != NULL)
 		pViewName->setText (_Groups[i].name);
-	
-	CCtrlBase *inviteButton = pLine->getCtrl(TEMPLATE_ITEMGROUP_ITEM_EQUIP);
-	if (inviteButton != NULL)
-		inviteButton->setActive(true);
-	
-	return *pLine;
+
+	return pLine;
 }
 
 void CItemGroupManager::update()
