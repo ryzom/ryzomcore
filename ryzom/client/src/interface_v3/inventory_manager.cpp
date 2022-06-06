@@ -704,15 +704,7 @@ std::string CInventoryManager::getDBIndexPath(CDBCtrlSheet *pCS)
 	uint i;
 	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
-		if (UIHands[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
-		}
-		if (UIHands2[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
-		}
-		if (UIHands3[i] == pCS)
+		if (UIHands[i] == pCS || UIHands2[i] == pCS || UIHands3[i] == pCS)
 		{
 			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
 		}
@@ -720,11 +712,7 @@ std::string CInventoryManager::getDBIndexPath(CDBCtrlSheet *pCS)
 
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 	{
-		if (UIEquip[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":EQUIP:" + toString(i);
-		}
-		if (UIEquip2[i] == pCS)
+		if (UIEquip[i] == pCS || UIEquip2[i] == pCS)
 		{
 			return string(LOCAL_INVENTORY) + ":EQUIP:" + toString(i);
 		}
@@ -733,15 +721,7 @@ std::string CInventoryManager::getDBIndexPath(CDBCtrlSheet *pCS)
 	
 	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
 	{
-		if (UIHotbar[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
-		}
-		if (UIHotbar2[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
-		}
-		if (UIHotbar3[i] == pCS)
+		if (UIHotbar[i] == pCS || UIHotbar2[i] == pCS || UIHotbar3[i] == pCS)
 		{
 			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
 		}
@@ -1431,12 +1411,26 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 			return;
 		}
 
+		CDBCtrlSheet *pCSLeftHand2 = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND2_LEFT));
+		CDBCtrlSheet *pCSLeftHand3 = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND3_LEFT));
+
+
 		// reset display of left hand
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
 		pCSLeftHand->setGrayed(false);
 		pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
 		pCSLeftHand->setActionOnLeftClick("proc");
+
+		pCSLeftHand2->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
+		pCSLeftHand2->setGrayed(false);
+		pCSLeftHand2->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
+		pCSLeftHand2->setActionOnLeftClick("proc");
+
+		pCSLeftHand3->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
+		pCSLeftHand3->setGrayed(false);
+		pCSLeftHand3->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
+		pCSLeftHand3->setActionOnLeftClick("proc");
 
 		// If something in left hand check if we have to remove
 		{
@@ -1470,11 +1464,15 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 			if (!getInventory().isLeftHandItemCompatibleWithRightHandItem(leftSheet, rightSheet, lastRightSheet))
 			{
 				pCSLeftHand->setSheet("");
+				pCSLeftHand2->setSheet("");
+				pCSLeftHand3->setSheet("");
 			}
 			// WORKAROUND: useful when an item is destroyed before it is unequipped (clean the left hand)
 			if ((leftSheet == 0) && (rightSheet == 0))
 			{
 				pCSLeftHand->setSheet("");
+				pCSLeftHand2->setSheet("");
+				pCSLeftHand3->setSheet("");
 			}
 		}
 
@@ -1490,12 +1488,26 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 				{
 					pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
 					pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
+
+					pCSLeftHand2->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
+					pCSLeftHand2->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
+
+					pCSLeftHand3->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
+					pCSLeftHand3->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
 				}
 				else
 				{
 					pCSLeftHand->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
 					pCSLeftHand->setGrayed(true);
 					pCSLeftHand->setActionOnLeftClick("");
+
+					pCSLeftHand2->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
+					pCSLeftHand2->setGrayed(true);
+					pCSLeftHand2->setActionOnLeftClick("");
+
+					pCSLeftHand3->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
+					pCSLeftHand3->setGrayed(true);
+					pCSLeftHand3->setActionOnLeftClick("");
 				}
 			}
 		}
@@ -1507,9 +1519,19 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
 		if ( pCSLeftHand )
 		{
+			CDBCtrlSheet *pCSLeftHand2 = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND2_LEFT));
+			CDBCtrlSheet *pCSLeftHand3 = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND3_LEFT));
+
+
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			pCSLeftHand->setActionOnLeftClick("proc");
 			pCSLeftHand->setGrayed(false);
+
+			pCSLeftHand2->setActionOnLeftClick("proc");
+			pCSLeftHand2->setGrayed(false);
+
+			pCSLeftHand3->setActionOnLeftClick("proc");
+			pCSLeftHand3->setGrayed(false);
 
 			// if now there is nothing in left hand
 			if (newVal == 0)
@@ -1534,11 +1556,23 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 									{
 										pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
 										pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
+										
+										pCSLeftHand2->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
+										pCSLeftHand2->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
+
+										pCSLeftHand3->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
+										pCSLeftHand3->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
 									}
 									else
 									{
 										pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
 										pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
+
+										pCSLeftHand2->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
+										pCSLeftHand2->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
+
+										pCSLeftHand3->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
+										pCSLeftHand3->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
 										clearLeftHandDisplay = false;
 									}
 								}
