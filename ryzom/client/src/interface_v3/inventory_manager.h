@@ -928,11 +928,11 @@ private:
 #define CTRL_HAND3_RIGHT			"ui:interface:inventory:content:equip:handr"
 #define CTRL_HAND3_LEFT				"ui:interface:inventory:content:equip:handl"
 
-#define CTRL_HOTBAR3_1				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar1"
-#define CTRL_HOTBAR3_2				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar2"
-#define CTRL_HOTBAR3_3				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar3"
-#define CTRL_HOTBAR3_4				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar4"
-#define CTRL_HOTBAR3_5				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar5"
+#define CTRL_HOTBAR3_1				"ui:interface:inv_hotbar:content:hotbar:hotbar1"
+#define CTRL_HOTBAR3_2				"ui:interface:inv_hotbar:content:hotbar:hotbar2"
+#define CTRL_HOTBAR3_3				"ui:interface:inv_hotbar:content:hotbar:hotbar3"
+#define CTRL_HOTBAR3_4				"ui:interface:inv_hotbar:content:hotbar:hotbar4"
+#define CTRL_HOTBAR3_5				"ui:interface:inv_hotbar:content:hotbar:hotbar5"
 
 #endif // RY_INVENTORY_MANAGER_H
 
