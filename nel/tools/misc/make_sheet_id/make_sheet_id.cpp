@@ -64,6 +64,7 @@ map<string,uint8> FileTypeToId;
 map<uint8,string> IdToFileType;
 map<uint8,uint32> TypeToLastId;
 set<string>	ExtensionsAllowed;
+map<string,string> FormDupCheck;
 
 // stat
 
@@ -148,17 +149,24 @@ void readFormId( string& outputFileName )
 	map<TFormId,string>::iterator itIF;
 	for( itIF = IdToForm.begin(); itIF != IdToForm.end();  )
 	{
+		string lcname = toLowerAscii((*itIF).second);
+		bool isDuplicate = FormDupCheck.find(lcname) != FormDupCheck.end();
 		// get the file type from form name
 		TFormId fid = (*itIF).first;
 
-		if ((*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || (*itIF).second[0]=='_' || (*itIF).second.find(".#")==0)
+		if (isDuplicate || (*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || (*itIF).second[0]=='_' || (*itIF).second.find(".#")==0)
 		{
+			if (isDuplicate)
+				nlwarning("Removed duplicate (id:%d; name:'%s')", (*itIF).first, (*itIF).second.c_str());
+
 			map<TFormId,string>::iterator itErase = itIF;
 			++itIF;
 			IdToForm.erase(itErase);
 		}
 		else
 		{
+			FormDupCheck.insert( make_pair(lcname, (*itIF).second) );
+
 			string fileType;
 			if (getFileType((*itIF).second, fileType))
 			{	
@@ -317,6 +325,35 @@ void addId( string fileName )
 
 	// if the file is new
 	map<string,TFormId>::iterator itFI = FormToId.find( fileName );
+
+	if( itFI == FormToId.end() )
+	{
+		// check if we have mixed-case entry which should be renamed
+		map<string,string>::iterator itDupCheck = FormDupCheck.find(fileName);
+		if (itDupCheck != FormDupCheck.end())
+		{
+			// get mixed-case entry
+			itFI = FormToId.find(itDupCheck->second);
+			if (itFI != FormToId.end())
+			{
+				TFormId formId = itFI->second;
+				nlinfo("File renamed %d '%s' to '%s'", formId.Id, itDupCheck->second.c_str(), fileName.c_str());
+
+				FormToId.erase(itFI);
+				FormToId.insert( make_pair(fileName, formId) );
+				itFI = FormToId.find(fileName);
+
+				// write proper fileName back to sheet_id
+				map<TFormId,string>::iterator itIdToForm = IdToForm.find(formId);
+				if (itIdToForm != IdToForm.end())
+				{
+					itIdToForm->second = fileName;
+				}
+				itDupCheck->second = fileName;
+			}
+		}
+	}
+
 	if( itFI == FormToId.end() )
 	{
 		// double check : if file not found we check with lower case version of filename
