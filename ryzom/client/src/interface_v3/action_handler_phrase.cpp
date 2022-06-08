@@ -1447,6 +1447,22 @@ public:
 };
 REGISTER_ACTION_HANDLER(CHandlerPhraseCancelCast, "phrase_cancel_cast");
 
+// ***************************************************************************
+/** Called to cancel a Phrase link
+ */
+class CHandlerPhraseCancelCastNext: public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		CSPhraseManager	*pPM= CSPhraseManager::getInstance();
+		UserEntity->cancelAllPhrases();
+		pPM->cancelClientExecute(true);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerPhraseCancelCastNext, "phrase_cancel_cast_next");
+
+
 
 // ***************************************************************************
 /// Called when one of the BRICK_TICK_RANGE has changed
