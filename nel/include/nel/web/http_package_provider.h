@@ -52,7 +52,7 @@ public:
 	/// filePath: [out] ex. /games/nel/stream/00/00/000000000..
 	/// hash: [in]
 	/// name: [in] name for debugging purposes
-	#if defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
+	#if !defined(CLANG_VERSION) && defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
 		virtual bool getFile(std::string &filePath, const NLMISC::CHashKey &hash, const std::string &name);
 	#else
 		virtual bool getFile(std::string &filePath, const NLMISC::CHashKey &hash, const std::string &name) NL_OVERRIDE;
