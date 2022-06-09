@@ -65,6 +65,7 @@ map<uint8,string> IdToFileType;
 map<uint8,uint32> TypeToLastId;
 set<string>	ExtensionsAllowed;
 map<string,string> FormDupCheck;
+bool keepDuplicates = true;
 
 // stat
 
@@ -104,6 +105,7 @@ void displayHelp()
 	printf("Usage: make_sheet_id -c<config file> -o<input/output file> [-k] [-e] [<start directory>] [<directory2>] ...\n");
 	printf("-k : clean unwanted types from input\n");
 	printf("-e : dump the list of extensions\n");
+	printf("--remove-duplicates : WARNING! remove duplicate sheets, keep first on the list\n");
 
 } // displayHelp //
 
@@ -153,6 +155,12 @@ void readFormId( string& outputFileName )
 		bool isDuplicate = FormDupCheck.find(lcname) != FormDupCheck.end();
 		// get the file type from form name
 		TFormId fid = (*itIF).first;
+
+		if (isDuplicate && keepDuplicates)
+		{
+			nlwarning("Duplicate sheet (id:%d; name:'%s')", (*itIF).first, (*itIF).second.c_str());
+			isDuplicate = false;
+		}
 
 		if (isDuplicate || (*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || (*itIF).second[0]=='_' || (*itIF).second.find(".#")==0)
 		{
@@ -524,6 +532,12 @@ int main( int argc, char ** argv )
 						break;
 					case 'e':
 						dumpExtensions = true;
+						break;
+					case '-':
+						if (nlstricmp(argv[i], "--remove-duplicates") == 0)
+						{
+							keepDuplicates = false;
+						}
 						break;
 					default:
 						break;
