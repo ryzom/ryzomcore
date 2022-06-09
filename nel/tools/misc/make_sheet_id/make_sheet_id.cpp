@@ -329,7 +329,7 @@ void addId( string fileName )
 	if( itFI == FormToId.end() )
 	{
 		// check if we have mixed-case entry which should be renamed
-		map<string,string>::iterator itDupCheck = FormDupCheck.find(fileName);
+		map<string,string>::iterator itDupCheck = FormDupCheck.find( toLowerAscii(fileName) );
 		if (itDupCheck != FormDupCheck.end())
 		{
 			// get mixed-case entry
