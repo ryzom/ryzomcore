@@ -598,7 +598,7 @@ void CItemGroupManager::update()
 
 void CItemGroupManager::fakeInvalidActions(NLMISC::TGameCycle time)
 {
-	// We cannot directly ivnalidate action or our invalidate will be overriden by the server
+	// We cannot directly invalidate action or our invalidate will be overriden by the server
 	// (and that means we won't actually have one because it's buggy with multiple equip in a short time)
 	// So we wait a bit (currently 6 ticks is enough) to do it
 	_StartInvalidAction = NetMngr.getCurrentServerTick() + 6;
@@ -841,6 +841,8 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 			std::string srcPath = item.pCS->getSheet();
 			std::string dstPath = string(LOCAL_INVENTORY) + ":HOTBAR:" + NLMISC::toString(hotbarItem.slot);
 			CInventoryManager::getInstance()->equip(srcPath, dstPath);
+			// here we hardcode a maxEquipTime of 10 for the hotbar to simulate equipment, this variable mirrors the EGS variable "EquipTimeHotbar"
+			maxEquipTime = std::max(maxEquipTime, 10);
 		}
 	}
 
