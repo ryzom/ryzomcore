@@ -4264,6 +4264,36 @@ CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &s
 }
 
 // ***************************************************************************
+std::string CInventoryManager::invToDbPath(INVENTORIES::TInventory inventory)
+{
+	switch(inventory)
+	{
+		case INVENTORIES::bag:
+			return LIST_BAG_TEXT; break;
+		case INVENTORIES::pet_animal1:
+			return LIST_PA0_TEXT; break;
+		case INVENTORIES::pet_animal2:
+			return LIST_PA1_TEXT; break;
+		case INVENTORIES::pet_animal3:
+			return LIST_PA2_TEXT; break;
+		case INVENTORIES::pet_animal4:
+			return LIST_PA3_TEXT; break;
+		case INVENTORIES::pet_animal5:
+			return LIST_PA4_TEXT; break;
+		case INVENTORIES::pet_animal6:
+			return LIST_PA5_TEXT; break;
+		case INVENTORIES::pet_animal7:
+			return LIST_PA6_TEXT; break;
+		case INVENTORIES::player_room:
+			return LIST_ROOM_TEXT;break;
+		case INVENTORIES::guild:
+			return LIST_GUILD_TEXT; break;
+		default:
+			return "";
+	}
+}
+
+// ***************************************************************************
 void CInventoryManager::getSlotInvIndex(uint slotId, uint &inv, uint &index) const
 {
 	inv = slotId >> CItemInfos::SlotIdIndexBitSize;

@@ -330,6 +330,8 @@ public:
 		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvPA4, InvPA5, InvPA6, InvGuild, InvRoom, InvUnknown };
 		static TInvType invTypeFromString(const std::string &str);
 
+		static std::string invToDbPath(INVENTORIES::TInventory inventory);
+
 		// inventory and slot from slotId
 		void				getSlotInvIndex(uint slotId, uint &inv, uint &index) const;
 
