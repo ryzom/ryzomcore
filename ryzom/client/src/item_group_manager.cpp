@@ -842,7 +842,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 			std::string dstPath = string(LOCAL_INVENTORY) + ":HOTBAR:" + NLMISC::toString(hotbarItem.slot);
 			CInventoryManager::getInstance()->equip(srcPath, dstPath);
 			// here we hardcode a maxEquipTime of 10 for the hotbar to simulate equipment, this variable mirrors the EGS variable "EquipTimeHotbar"
-			maxEquipTime = std::max(maxEquipTime, 10);
+			maxEquipTime = std::max(maxEquipTime, (uint32) 10);
 		}
 	}
 
