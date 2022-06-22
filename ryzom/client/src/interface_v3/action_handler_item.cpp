@@ -2571,7 +2571,14 @@ class CHandlerItemGroupCreate : public IActionHandler
 			}
 		}
 
-		CItemGroupManager::getInstance()->createGroup(name);
+		bool removeEmpty = false;
+		std::string firstChar = name.substr(0, 1);
+		if (firstChar == "*") {
+			removeEmpty = true;
+			name = name.substr(1);
+		}
+
+		CItemGroupManager::getInstance()->createGroup(name, removeEmpty);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerItemGroupCreate, "item_group_create");
