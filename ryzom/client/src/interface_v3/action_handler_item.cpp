@@ -2571,9 +2571,13 @@ class CHandlerItemGroupCreate : public IActionHandler
 			}
 		}
 
+		if (name.find_first_not_of(' ') == name.npos) {
+			nlinfo("Trying to create a group with whitespace as name");
+			return;
+		}
+
 		bool removeEmpty = false;
-		std::string firstChar = name.substr(0, 1);
-		if (firstChar == "*") {
+		if (name.substr(0, 1) == "!") {
 			removeEmpty = true;
 			name = name.substr(1);
 		}
