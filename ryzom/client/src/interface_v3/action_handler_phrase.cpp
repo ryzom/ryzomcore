@@ -524,6 +524,46 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerPhraseChangeName, "phrase_change_name");
 
+// ***************************************************************************
+class CHandlerPhraseSelectIcon : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
+	{
+		// pCaller == ui:interface:phrase_composition:header_opened:spell_view
+		CDBGroupBuildPhrase	*buildGroup= dynamic_cast<CDBGroupBuildPhrase*>(pCaller->getParent());
+		if(!buildGroup)
+			return;
+
+		CHandlerPhraseValidateBrick::BuildPhraseGroup = buildGroup;
+
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId( CDBGroupBuildPhrase::BrickIconSelectionModal ) );
+		if(group)
+			CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerPhraseSelectIcon, "phrase_select_icon");
+
+// ***************************************************************************
+class CHandlerPhraseSetIcon : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &sParams)
+	{
+		if (!CHandlerPhraseValidateBrick::BuildPhraseGroup)
+			return;
+
+		string s = getParam(sParams, "index");
+		uint8 index;
+		if (fromString(s, index))
+		{
+			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:ICON:%d:INDEX", index));
+			if (node)
+				CHandlerPhraseValidateBrick::BuildPhraseGroup->setPhraseIcon(node->getValue32());
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerPhraseSetIcon, "phrase_set_icon");
 
 // ***************************************************************************
 /*

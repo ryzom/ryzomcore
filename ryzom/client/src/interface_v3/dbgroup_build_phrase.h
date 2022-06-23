@@ -58,6 +58,7 @@ public:
 	static const std::string	BrickSelectionViewNotUsed;
 	static const std::string	BrickSelectionDB;
 	static const std::string	BrickOptionalMenu;
+	static const std::string	BrickIconSelectionModal;
 	static const std::string	BrickMandatoryAHRightClick;
 	static const std::string	BrickBuildDB;
 	enum	{MaxSelection= 256};
@@ -171,6 +172,8 @@ public:
 	void			validateNewOpCredit(const CSBrickSheet *sheet);
 	// NB: the index is the index of the brick
 	void			deleteOpCredit(uint index);
+	// select which icon phrase is using
+	void			setPhraseIcon(uint8 index);
 	// @}
 
 	/// Call this when the name or the root brick change, to update the view of the spell edited only.
@@ -191,6 +194,8 @@ protected:
 	uint32						_NumOptionals;
 	// The number of activated credit
 	uint32						_NumCredits;
+	// Selected icon
+	uint8						m_IconIndex;
 
 	bool						_Setuped;
 
