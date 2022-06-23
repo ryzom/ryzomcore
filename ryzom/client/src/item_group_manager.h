@@ -38,6 +38,11 @@ public:
 	    origin(origin),
 	    indexInBag(indexInBag)	
 		{}
+	CInventoryItem():
+	    pCS(NULL),
+	    origin(INVENTORIES::UNDEFINED),
+	    indexInBag(0)	
+		{}
 };
 
 class CItemGroup
@@ -51,7 +56,7 @@ public:
 		    createTime(createTime),
 		    serial(serial),
 			pItem(NULL, INVENTORIES::UNDEFINED, 0)
-		{}
+			{}
 	};
 	
 	struct CEquipItem : CItem {
