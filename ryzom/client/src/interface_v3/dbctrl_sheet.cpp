@@ -1641,7 +1641,7 @@ void CDBCtrlSheet::setupGuildFlag ()
 
 
 // ***************************************************************************
-void CDBCtrlSheet::setupDisplayAsSBrick(sint32 sheet, sint32 optSheet)
+void CDBCtrlSheet::setupDisplayAsSBrick(sint32 sheet, sint32 optSheet, bool force)
 {
 	// Setup with the param sheet
 	CSBrickManager *pBM = CSBrickManager::getInstance();
@@ -1658,7 +1658,17 @@ void CDBCtrlSheet::setupDisplayAsSBrick(sint32 sheet, sint32 optSheet)
 		_IconOverColor = pBR->IconOverColor;
 
 		// For phrase display, replace icon and over2 with optional brick
-		if(pBROpt)
+		if (pBROpt && force)
+		{
+			// force all icons from optSheet except background
+			_DispSheetBmpId = rVR.getTextureIdFromName(pBROpt->getIcon());
+			_DispOverBmpId = rVR.getTextureIdFromName(pBROpt->getIconOver());
+			_DispOver2BmpId = rVR.getTextureIdFromName(pBROpt->getIconOver2());
+			_IconColor = pBROpt->IconColor;
+			_IconOverColor = pBROpt->IconOverColor;
+			_IconOver2Color = pBROpt->IconOver2Color;
+		}
+		else if(pBROpt)
 		{
 			// get the correct icon
 			bool iconOver2NotSuitableForActionDisplay;
@@ -1737,15 +1747,16 @@ void CDBCtrlSheet::setupSBrick ()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const string &phraseName)
+void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const string &phraseName, uint8 phraseIconIndex)
 {
 	CSBrickManager		*pBM = CSBrickManager::getInstance();
 
 	// Get the best SBrick to display.
 	CSheetId	rootBrickSheetId= bricks[0];
 	{
-		CSheetId	bestBrickSheetId= pBM->getSabrinaCom().getPhraseBestDisplayBrick(bricks);
-		setupDisplayAsSBrick (rootBrickSheetId.asInt(), bestBrickSheetId.asInt() );
+		bool forceIcon = phraseIconIndex < bricks.size();
+		CSheetId	bestBrickSheetId = forceIcon ? bricks[phraseIconIndex] : pBM->getSabrinaCom().getPhraseBestDisplayBrick(bricks);
+		setupDisplayAsSBrick (rootBrickSheetId.asInt(), bestBrickSheetId.asInt(), forceIcon );
 	}
 
 	// Override background if type is forace extraction/prospection and ecosystem brick is used
@@ -1871,7 +1882,7 @@ void CDBCtrlSheet::setupSPhraseId ()
 			}
 			else
 			{
-				setupDisplayAsPhrase(phrase.Bricks, phrase.Name.toUtf8()); // FIXME: UTF-8 (serial)
+				setupDisplayAsPhrase(phrase.Bricks, phrase.Name.toUtf8(), phrase.IconIndex); // FIXME: UTF-8 (serial)
 			}
 		}
 
