@@ -172,9 +172,9 @@ void CItemGroup::updateItemsLocation()
 	for (uint i = 0; i < getItems().size(); i++)
 	{
 		CItem *item = getItems()[i];
+		bool found = false;
 		for (int i = 0; i < INVENTORIES::NUM_ALL_INVENTORY; i++)
 		{
-			bool next = false;
 			INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)i;
 			if (pIM->isInventoryAvailable(inventory))
 			{
@@ -192,8 +192,7 @@ void CItemGroup::updateItemsLocation()
 					{
 						// Sometimes, index in the list differ from the index in DB, and we need the index in DB, not the one from the list
 						std::string dbPath = pCS->getSheet();
-						std::size_t found = dbPath.find_last_of(":");
-						std::string indexS = dbPath.substr(found + 1);
+						std::string indexS = dbPath.substr(dbPath.find_last_of(":") + 1);
 						uint32 index;
 						NLMISC::fromString(indexS, index);
 						if (i != index)
@@ -201,14 +200,19 @@ void CItemGroup::updateItemsLocation()
 							nldebug("Index from list is %d, where index from DB is %d", i, index);
 						}
 
-						next = true;
+						found = true;
 						item->pItem = CInventoryItem(pCS, inventory, index);
 						break;
 					}
 				}
-				if (next)
+				if (found)
 					break;
 			}
+		}
+		if (!found)
+		{
+			nlinfo("Item not found in inventory: createTime: %d, serial: %d", item->createTime, item->serial);
+			item->pItem = CInventoryItem();
 		}
 	}
 }
@@ -638,7 +642,7 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 		// Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even though they aren't really
 		// Because of a synchronisation error between client and server
 		// Also, if the item is already in dst inventory, we don't want to move it again.
-		if (isItemReallyEquipped(item.pCS) || item.origin == dst)
+		if (item.pCS == NULL || item.origin == INVENTORIES::UNDEFINED || item.origin == dst || isItemReallyEquipped(item.pCS))
 			continue;
 		CAHManager::getInstance()->runActionHandler("move_item", item.pCS, moveParams);
 	}
@@ -704,6 +708,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	{
 		CItemGroup::CEquipItem equipItem = group->equipItems[i];
 		CInventoryItem item = equipItem.pItem;
+
 		if (item.origin == INVENTORIES::UNDEFINED)
 		{
 			nlwarning("<CItemGroupManager::equipGroup> equip item origin is null");
