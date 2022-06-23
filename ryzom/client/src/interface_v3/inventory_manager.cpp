@@ -1001,6 +1001,7 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 {
 	if (isSwimming() || isStunned() || isDead() || isRiding()) return;
 
+	nlinfo("equip %s %s", bagPath.c_str(), invPath.c_str());
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	if (bagPath.empty() || invPath.empty())
@@ -1625,7 +1626,7 @@ void CInventoryManager::CDBBagObs::update(ICDBNode* /* node */)
 bool CInventoryManager::autoEquip(sint bagEntryIndex, bool allowReplace)
 {
 	uint i;
-
+	nlinfo("CInventoryManager::autoEquip %d %s", bagEntryIndex, allowReplace?"true":"false");
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	IListSheetBase *pList = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_TEXT));
 	CDBCtrlSheet *pCSSrc = NULL;

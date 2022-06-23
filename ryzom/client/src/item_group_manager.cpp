@@ -671,9 +671,10 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 	for (uint i = 0; i < group->equipItems.size(); i++)
 	{
 		CInventoryItem item = group->equipItems[i].pItem;
-		// Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even tho they aren't really
+		// Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even though they aren't really
 		// Because of a synchronisation error between client and server
-		if (isItemReallyEquipped(item.pCS))
+		// Also, if the item is already in dst inventory, we don't want to move it again.
+		if (isItemReallyEquipped(item.pCS) || item.origin == dst)
 			continue;
 		CAHManager::getInstance()->runActionHandler("move_item", item.pCS, moveParams);
 	}
