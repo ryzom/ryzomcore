@@ -45,17 +45,9 @@ CItemGroup::CItemGroup()
 
 bool CItemGroup::contains(CDBCtrlSheet *other)
 {
-	for (int i = 0; i < equipItems.size(); i++)
+	for (int i = 0; i < getItems().size(); i++)
 	{
-		CEquipItem item = equipItems[i];
-		if (item.createTime == other->getItemCreateTime() && item.serial == other->getItemSerial())
-		{
-			return true;
-		}
-	}
-	for (int i = 0; i < hotbarItems.size(); i++)
-	{
-		CHotbarItem item = hotbarItems[i];
+		CItem item = *getItems()[i];
 		if (item.createTime == other->getItemCreateTime() && item.serial == other->getItemSerial())
 		{
 			return true;
@@ -96,6 +88,21 @@ bool CItemGroup::contains(CDBCtrlSheet *other, uint16 &slot)
 	}
 
 	return false;
+}
+
+// get all items of equip and hotbar as a vector of the base CItem class (allows us to use the same code for all items)
+std::vector<CItemGroup::CItem*> CItemGroup::getItems()
+{
+	std::vector<CItem*> items;
+	for (int i = 0; i < equipItems.size(); i++)
+	{
+		items.push_back(&equipItems[i]);
+	}
+	for (int i = 0; i < hotbarItems.size(); i++)
+	{
+		items.push_back(&hotbarItems[i]);
+	}
+	return items;
 }
 
 // equip
@@ -162,9 +169,9 @@ void CItemGroup::addRemove(uint16 slot)
 void CItemGroup::updateItemsLocation()
 {
 	CInventoryManager *pIM = CInventoryManager::getInstance();
-	for (uint i = 0; i < equipItems.size(); i++)
+	for (uint i = 0; i < getItems().size(); i++)
 	{
-		CItem &item = equipItems[i];
+		CItem *item = getItems()[i];
 		for (int i = 0; i < INVENTORIES::NUM_ALL_INVENTORY; i++)
 		{
 			bool next = false;
@@ -181,7 +188,7 @@ void CItemGroup::updateItemsLocation()
 				for (int i = 0; i < pList->getNbSheet(); i++)
 				{
 					CDBCtrlSheet *pCS = pList->getSheet(i);
-					if (item.createTime == pCS->getItemCreateTime() && item.serial == pCS->getItemSerial())
+					if (item->createTime == pCS->getItemCreateTime() && item->serial == pCS->getItemSerial())
 					{
 						// Sometimes, index in the list differ from the index in DB, and we need the index in DB, not the one from the list
 						std::string dbPath = pCS->getSheet();
@@ -195,50 +202,7 @@ void CItemGroup::updateItemsLocation()
 						}
 
 						next = true;
-						item.pItem = CInventoryItem(pCS, inventory, index);
-						break;
-					}
-				}
-				if (next)
-					break;
-			}
-		}
-	}
-	// TODO: this is quite redundant, difficult to cast vector of CHotbarItem to vector of CItem however
-	for (uint i = 0; i < hotbarItems.size(); i++)
-	{
-		CItem &item = hotbarItems[i];
-		for (int i = 0; i < INVENTORIES::NUM_ALL_INVENTORY; i++)
-		{
-			bool next = false;
-			INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)i;
-			if (pIM->isInventoryAvailable(inventory))
-			{
-				std::string dbPath = CInventoryManager::invToDbPath(inventory);
-				if (dbPath.empty() || (inventory == INVENTORIES::guild && !ClientCfg.ItemGroupAllowGuild))
-				{
-					nldebug("Inventory type %s not supported", INVENTORIES::toString(inventory).c_str());
-					continue;
-				}
-				IListSheetBase *pList = dynamic_cast<IListSheetBase *>(CWidgetManager::getInstance()->getElementFromId(dbPath));
-				for (int i = 0; i < pList->getNbSheet(); i++)
-				{
-					CDBCtrlSheet *pCS = pList->getSheet(i);
-					if (item.createTime == pCS->getItemCreateTime() && item.serial == pCS->getItemSerial())
-					{
-						// Sometimes, index in the list differ from the index in DB, and we need the index in DB, not the one from the list
-						std::string dbPath = pCS->getSheet();
-						std::size_t found = dbPath.find_last_of(":");
-						std::string indexS = dbPath.substr(found + 1);
-						uint32 index;
-						NLMISC::fromString(indexS, index);
-						if (i != index)
-						{
-							nldebug("Index from list is %d, where index from DB is %d", i, index);
-						}
-
-						next = true;
-						item.pItem = CInventoryItem(pCS, inventory, index);
+						item->pItem = CInventoryItem(pCS, inventory, index);
 						break;
 					}
 				}
@@ -668,9 +632,9 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 
 	std::string moveParams = "to=lists|nblist=1|listsheet0=" + CInventoryManager::invToDbPath(dst);
 	group->updateItemsLocation(); // update location of items in the inventory
-	for (uint i = 0; i < group->equipItems.size(); i++)
+	for (uint i = 0; i < group->getItems().size(); i++)
 	{
-		CInventoryItem item = group->equipItems[i].pItem;
+		CInventoryItem item = group->getItems()[i]->pItem;
 		// Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even though they aren't really
 		// Because of a synchronisation error between client and server
 		// Also, if the item is already in dst inventory, we don't want to move it again.
@@ -936,7 +900,7 @@ void CItemGroupManager::listGroup()
 		// Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = group.name;
 		NLMISC::strFindReplace(msg, "%name", nameUC);
-		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.equipItems.size() + group.hotbarItems.size()));
+		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.getItems().size()));
 		pIM->displaySystemInfo(msg);
 	}
 }

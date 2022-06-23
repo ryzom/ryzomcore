@@ -73,6 +73,7 @@ public:
 	bool contains(CDBCtrlSheet *other);
 	bool contains(CDBCtrlSheet *other, SLOT_EQUIPMENT::TSlotEquipment &slot);
 	bool contains(CDBCtrlSheet *other, uint16 &slot);
+	std::vector<CItem*> getItems();
 	void addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot);
 	void addItem(sint32 createTime, sint32 serial, uint16 slot);
 	void addRemove(std::string slotName);
