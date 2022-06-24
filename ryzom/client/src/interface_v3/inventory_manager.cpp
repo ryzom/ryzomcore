@@ -1738,9 +1738,37 @@ static void checkEquipmentIntegrity(const string &equipVal)
 					// else update the reference
 					if (pNLBag->getOldValue32() == 0)
 					{
+						for (uint32 i = 0; i < MAX_HANDINV_ENTRIES; ++i)
+						{
+							CDBCtrlSheet *pCSDst = getInventory().getHandSheet(i);
+							if (pCSDst == NULL) continue;
+							string dstPath = getInventory().getDBIndexPath(pCSDst);
+							sint32 indexDstPath = NLGUI::CDBManager::getInstance()->getDbProp(dstPath+":INDEX_IN_BAG")->getValue16();
+
+							// Update the sheet id of the control sheet
+							if (indexDstPath == (sint32)indexInBag)
+							{
+								pCSDst->setSheetId(pNLBag->getValue32());
+							}
+						}
+
 						for (uint32 i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 						{
 							CDBCtrlSheet *pCSDst = getInventory().getEquipSheet(i);
+							if (pCSDst == NULL) continue;
+							string dstPath = getInventory().getDBIndexPath(pCSDst);
+							sint32 indexDstPath = NLGUI::CDBManager::getInstance()->getDbProp(dstPath+":INDEX_IN_BAG")->getValue16();
+
+							// Update the sheet id of the control sheet
+							if (indexDstPath == (sint32)indexInBag)
+							{
+								pCSDst->setSheetId(pNLBag->getValue32());
+							}
+						}
+
+						for (uint32 i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+						{
+							CDBCtrlSheet *pCSDst = getInventory().getHotbarSheet(i);
 							if (pCSDst == NULL) continue;
 							string dstPath = getInventory().getDBIndexPath(pCSDst);
 							sint32 indexDstPath = NLGUI::CDBManager::getInstance()->getDbProp(dstPath+":INDEX_IN_BAG")->getValue16();
@@ -1773,6 +1801,12 @@ void CInventoryManager::checkIndexInBagIntegrity()
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 	{
 		sTmp = string(LOCAL_INVENTORY) + ":EQUIP:" + toString(i);
+		checkEquipmentIntegrity(sTmp);
+	}
+
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+	{
+		sTmp = string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
 		checkEquipmentIntegrity(sTmp);
 	}
 }
