@@ -639,11 +639,18 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 	for (uint i = 0; i < group->getItems().size(); i++)
 	{
 		CInventoryItem item = group->getItems()[i]->pItem;
-		// Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even though they aren't really
-		// Because of a synchronisation error between client and server
-		// Also, if the item is already in dst inventory, we don't want to move it again.
-		if (item.pCS == NULL || item.origin == INVENTORIES::UNDEFINED || item.origin == dst || isItemReallyEquipped(item.pCS))
+		
+		if (item.pCS == NULL || item.origin == INVENTORIES::UNDEFINED)
 			continue;
+		
+		// TODO: if the item is equipped, and not already in correct slot, we need to unequip it first
+		if (isItemReallyEquipped(item.pCS))
+			continue;
+
+		// If the item is already in dst inventory, we don't want to move it again.
+		if (item.origin == dst)
+			continue;
+
 		CAHManager::getInstance()->runActionHandler("move_item", item.pCS, moveParams);
 	}
 
@@ -811,6 +818,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 			std::string srcPath = item.pCS->getSheet();
 			std::string dstPath = string(LOCAL_INVENTORY) + ":HOTBAR:" + NLMISC::toString(hotbarItem.slot);
 			CInventoryManager::getInstance()->equip(srcPath, dstPath);
+			// TODO: fake equip time for hotbar items
 		}
 	}
 
@@ -934,6 +942,8 @@ CItemGroup *CItemGroupManager::findGroup(std::string name)
 	return NULL;
 }
 
+// Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even though they aren't really
+// Because of a synchronisation error between client and server
 bool CItemGroupManager::isItemReallyEquipped(CDBCtrlSheet *item)
 {
 	if (item == NULL)
