@@ -4327,6 +4327,15 @@ bool CDBCtrlSheet::isSheetValid() const
 }
 
 // ***************************************************************************
+bool CDBCtrlSheet::isSheetEqual(CDBCtrlSheet *pCS) const 
+{
+	if (!pCS)
+		return false;
+	
+	return getInventoryIndex() == pCS->getInventoryIndex() && getIndexInDB() == pCS->getIndexInDB();
+}
+
+// ***************************************************************************
 // GUILD_FLAG
 // ***************************************************************************
 

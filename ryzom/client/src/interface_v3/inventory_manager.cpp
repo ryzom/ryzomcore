@@ -3391,7 +3391,6 @@ class CCanDropToHotbar : public IActionHandler
 		CDBCtrlSheet *pCSDst =    dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (!pCSSrc || !pCSDst) return;
 
-		// Exchange can only be done from bag to exchange inventories
 		uint32 srcInventory = pCSSrc->getSecondIndexInDB();
 		if (
 			srcInventory == INVENTORIES::bag

@@ -22,79 +22,76 @@
 #include "game_share/inventories.h"
 #include "game_share/slot_equipment.h"
 
+#define ITEMGROUPS_CURRENT_VERSION      "2" // versioning for migrations
+#define MENU_IN_BAG                     "ui:interface:item_menu_in_bag"
+#define ITEMGROUP_MENU                  "ui:interface:item_menu_in_bag:item_group_menu"
 #define LIST_ITEMGROUPS					"ui:interface:inventory:content:equip:midsection:content:itemgroups:list_container:itemgroups_list"
 #define LIST_ITEMGROUPS_2				"ui:interface:inv_equip:content:equip:midsection:content:itemgroups:list_container:itemgroups_list"
 #define LIST_EMPTY_TEXT					"empty_text"	
 #define TEMPLATE_ITEMGROUP_ITEM			"itemgroups_item"
 #define TEMPLATE_ITEMGROUP_ITEM_NAME	"name"
 
-struct CInventoryItem {
-public:
-	CDBCtrlSheet *pCS;
-	INVENTORIES::TInventory origin;
-	uint32 indexInBag;
-	CInventoryItem(CDBCtrlSheet *pCS, INVENTORIES::TInventory origin, uint32 indexInBag):
-	    pCS(pCS),
-	    origin(origin),
-	    indexInBag(indexInBag)	
-		{}
-	CInventoryItem():
-	    pCS(NULL),
-	    origin(INVENTORIES::UNDEFINED),
-	    indexInBag(0)	
-		{}
-};
-
 class CItemGroup
 {
 public:
-	struct CItem {
-		sint32 createTime;
-		sint32 serial;
-		CInventoryItem pItem;
-		CItem(sint32 createTime, sint32 serial):
-		    createTime(createTime),
-		    serial(serial),
-			pItem(NULL, INVENTORIES::UNDEFINED, 0)
+	// designates a given slot in the inventory
+	struct CSlot {
+		INVENTORIES::TInventory branch; // the local inventory branch (e.g. INVENTORIES::handling or INVENTORIES::equipment)
+		uint16 index; // the index in the branch
+		CSlot(INVENTORIES::TInventory branch, uint16 index):
+			branch(branch),
+			index(index)
 			{}
-	};
-	
-	struct CEquipItem : CItem {
-		SLOT_EQUIPMENT::TSlotEquipment slot; // Really only necessary for right/left hand slot, but used for clarity in the xml file
-		CEquipItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED) :
-			CItem(createTime, serial), slot(slot) {}
+		CSlot():
+			branch(INVENTORIES::UNDEFINED),
+			index(0)
+			{}
+
+		bool operator==(const CSlot &other) const {return (branch == other.branch) && (index == other.index);}
+		void writeTo(xmlNodePtr node);
+		bool isValid();
+		const std::string toDbPath();
+		CDBCtrlSheet* getSheet();
+		static CSlot readFrom(xmlNodePtr node);
+		static CSlot handSlot(uint16 index) { return CSlot(INVENTORIES::handling, index); }
+		static CSlot equipSlot(uint16 index) { return CSlot(INVENTORIES::equipment, index); }
+		static CSlot hotbarSlot(uint16 index) { return CSlot(INVENTORIES::hotbar, index); }
 	};
 
-	struct CHotbarItem : CItem {
-		uint16 slot; // designates the index of the slot of the hotbar
-		CHotbarItem(sint32 createTime, sint32 serial, uint16 slot) :
-			CItem(createTime, serial), slot(slot) {}
+	// an item group item
+	struct CItem {
+		sint32 createTime; // serial of the item in the inventory (used to find the item in the inventory)
+		sint32 serial; // serial of the item in the inventory (used to find the item in the inventory)
+		CItemGroup::CSlot dstSlot; // the slot where we want to put the item
+		CDBCtrlSheet *pCS; // references an item in the current inventory
+		CItem(sint32 createTime, sint32 serial, CSlot dstSlot):
+		    createTime(createTime),
+		    serial(serial),
+			dstSlot(dstSlot),
+			pCS(NULL)
+			{}
+		
+		void equip(uint32 &equipTime);
+		bool isInDestinationSlot();
+		void writeTo(xmlNodePtr node);
+		static CItem readFrom(xmlNodePtr node);
 	};
 
 public:
 	CItemGroup();
 
-	// return true if any item in the group match the parameter ; slot is UNDEFINED unless the item has been found in the group
-	bool contains(CDBCtrlSheet *other);
-	bool contains(CDBCtrlSheet *other, SLOT_EQUIPMENT::TSlotEquipment &slot);
-	bool contains(CDBCtrlSheet *other, uint16 &slot);
-	std::vector<CItem*> getItems();
-	void addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot);
-	void addItem(sint32 createTime, sint32 serial, uint16 slot);
-	void addRemove(std::string slotName);
-	void addRemove(SLOT_EQUIPMENT::TSlotEquipment slot);
-	void addRemove(uint16 slot);
-	void updateItemsLocation(); // update the CInventoryItem in the each CItem
+	bool contains(CDBCtrlSheet *pCS);
+	void addSheet(CDBCtrlSheet *pCS, CSlot slot, bool removeEmpty);
+	void addItem(CItem item);
+	void addRemoveSlot(CSlot slot);
+	void updateSheets();
 	void writeTo(xmlNodePtr node);
 	void readFrom(xmlNodePtr node);
+	bool empty() const { return items.size() == 0;} 
 
-	// return true if no item inside
-	bool empty() const { return equipItems.size() == 0 && hotbarItems.size() == 0;}
 	std::string name;
-	std::vector<CEquipItem> equipItems;
-	std::vector<CHotbarItem> hotbarItems;
-	std::vector<SLOT_EQUIPMENT::TSlotEquipment> equipRemoves;
-	std::vector<uint16> hotbarRemoves;
+	std::vector<CItemGroup::CItem> items;
+	std::vector<CItemGroup::CSlot> removeSlots;
 };
 
 class CItemGroupManager
@@ -122,7 +119,6 @@ public:
 	bool createGroup(std::string name, bool removeUnequiped = false);
 	bool deleteGroup(std::string name);
 	void listGroup();
-	static std::string toDbPath(INVENTORIES::TInventory inventory);
 	std::vector<std::string> getGroupNames(CDBCtrlSheet *pCS);
 	// Used to fake invalid actions
 	void update();
@@ -140,7 +136,7 @@ private:
 	NLMISC::TGameCycle _StartInvalidAction;
 	// Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even tho they aren't really
 	// Because of a synchronisation error between client and server
-	bool isItemReallyEquipped(CDBCtrlSheet *item);
+	bool isItemEquipped(CDBCtrlSheet *item, CItemGroup::CSlot &equipSlot);
 };
 
 #endif // RY_ITEM_GROUP_MANAGER_H
