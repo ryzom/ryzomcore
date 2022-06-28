@@ -117,7 +117,15 @@ void CItemGroup::CItem::equip(uint32 &equipTime)
 		return;
 	}
 
+	// if item is already equipped, and in the good slot, no need to equip
+	if (dstSlot.getSheet()->isSheetEqual(pCS))
+	{
+		nlinfo("noequip");
+		return;
+	}
+
 	// TODO: timing issue, sometimes you can equip even though you shouldn't
+	// make sure the item can go into the slot (for example left-hand item can't always in left-hand slot)
 	if (!dstSlot.getSheet()->canDropItem(pCS))
 	{
 		nlwarning("<CItemGroup::CItem::equip> item can't be dropped in slot, most likely a left hand item issue");
@@ -234,7 +242,7 @@ void CItemGroup::readFrom(xmlNodePtr node)
 	}
 }
 
-// Updates the CDBCtrlSheet in the each CItem
+// Updates the CDBCtrlSheet in each CItem
 // ! This function must be called before every interaction with items of a CItemGroup
 //
 // Explanation: We must link the CItem (which just represents identifiers of an item) of the CItemGroup
@@ -666,7 +674,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	if (pullBefore)
 		moveGroup(name, INVENTORIES::bag);
 
-	// we must update the location of items after they were moved
+	// we must update the location of items, even after they were moved
 	pGroup->updateSheets();
 
 	// first, unequip all remove slots
@@ -683,12 +691,6 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	for (int i = 0; i < pGroup->items.size(); i++)
 	{
 		CItemGroup::CItem item = pGroup->items[i];
-		// if item is already equipped, and in the good slot, no need to do anything
-		if (item.dstSlot.getSheet()->isSheetEqual(item.pCS))
-		{
-			nlinfo("noequip");
-			continue;
-		}
 
 		item.equip(equipTime);
 	}
