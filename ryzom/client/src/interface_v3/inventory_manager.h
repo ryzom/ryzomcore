@@ -260,7 +260,7 @@ public:
 	// Get the Hand item sheet
 	uint32 getRightHandItemSheet() const { return getHandItemSheet(true); }
 	uint32 getLeftHandItemSheet() const { return getHandItemSheet(false); }
-	bool isLeftHandItemCompatibleWithRightHandItem(uint32 leftHandSheet, uint32 rightHandSheet, uint32 lastRightHandSheet);
+	bool isLeftHandItemCompatible(uint32 leftHandSheet, uint32 rightHandSheet, uint32 lastRightHandSheet);
 
 
 	// Bag wearing
@@ -301,6 +301,8 @@ public:
 		// get item info from cache
 		const	CClientItemInfo *getItemInfoCache(uint32 serial, uint32 createTime) const;
 		uint				getItemSheetForSlotId(uint slotId) const;
+		// get item in bag from cache
+		uint32 getBagItemSheet(sint32 bagId) const;
 		// Returns true if the item info is already in slot cache
 		bool				isItemInfoAvailable(uint slotId) const;
 		// Returns true if the item info version already matches
