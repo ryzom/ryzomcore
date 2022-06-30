@@ -120,7 +120,6 @@ void CItemGroup::CItem::equip(uint32 &equipTime)
 	// if item is already equipped, and in the good slot, no need to equip
 	if (dstSlot.getSheet()->isSheetEqual(pCS))
 	{
-		nlinfo("noequip");
 		return;
 	}
 
