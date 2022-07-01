@@ -51,6 +51,7 @@ public:
 		void writeTo(xmlNodePtr node);
 		bool isValid();
 		const std::string toDbPath();
+		const std::string toString();
 		CDBCtrlSheet* getSheet();
 		static CSlot readFrom(xmlNodePtr node);
 		static CSlot handSlot(uint16 index) { return CSlot(INVENTORIES::handling, index); }
@@ -137,6 +138,7 @@ private:
 	// Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even tho they aren't really
 	// Because of a synchronisation error between client and server
 	bool isItemEquipped(CDBCtrlSheet *item, CItemGroup::CSlot &equipSlot);
+	std::string generateDocumentation();
 };
 
 #endif // RY_ITEM_GROUP_MANAGER_H

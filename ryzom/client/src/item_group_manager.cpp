@@ -301,6 +301,20 @@ const std::string CItemGroup::CSlot::toDbPath()
 	return dbPath;
 }
 
+const std::string CItemGroup::CSlot::toString()
+{
+	std::string commonName;
+	if (branch == INVENTORIES::handling)
+		commonName = "Hand" + string(index == 0 ? "R" : "L");
+	else if (branch == INVENTORIES::equipment)
+		commonName = SLOT_EQUIPMENT::toString((SLOT_EQUIPMENT::TSlotEquipment) index);
+	else if (branch == INVENTORIES::hotbar)
+		commonName = "Pocket #"+NLMISC::toString(index+1);
+	else
+		commonName = "unknown";
+	return NLMISC::toString("%s:%sindex=\"%d\"", commonName.c_str(), string(10-commonName.length(),' ').c_str(), index);
+}
+
 bool CItemGroup::CSlot::isValid()
 {
 	return ((branch == INVENTORIES::handling && index < MAX_HANDINV_ENTRIES)
@@ -392,8 +406,7 @@ void CItemGroupManager::saveGroups()
 			NLMISC::COXml xmlStream;
 			xmlStream.init(&f);
 			xmlDocPtr doc = xmlStream.getDocument();
-			// TODO: add documentation
-			xmlNodePtr comment = xmlNewDocComment(doc, (const xmlChar *)"Placeholder for future use");
+			xmlNodePtr comment = xmlNewDocComment(doc, (const xmlChar *)generateDocumentation().c_str());
 			xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar *)"item_groups", NULL);
 			xmlSetProp(node, (const xmlChar *)"version", (const xmlChar *)ITEMGROUPS_CURRENT_VERSION);
 			xmlDocSetRootElement(doc, comment);
@@ -826,6 +839,22 @@ bool CItemGroupManager::isItemEquipped(CDBCtrlSheet *pItem, CItemGroup::CSlot &e
 			return true;
 	}
 	return false;
+}
+
+std::string CItemGroupManager::generateDocumentation()
+{
+	std::string out;
+	uint16 i;
+	out += "\r\nItem Groups - Version "+string(ITEMGROUPS_CURRENT_VERSION)+"\r\n\r\n/// branch=\"handling\" ///\r\n";
+	for (i = 0; i < MAX_HANDINV_ENTRIES; i++)
+		out += CItemGroup::CSlot::handSlot(i).toString()+"\r\n";
+	out += "\r\n/// branch=\"hotbar\" ///\r\n";
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+		out += CItemGroup::CSlot::hotbarSlot(i).toString()+"\r\n";
+	out += "\r\n/// branch=\"equipment\" ///\r\n";
+	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
+		if (i != SLOT_EQUIPMENT::HANDL && i != SLOT_EQUIPMENT::HANDR) out += CItemGroup::CSlot::equipSlot(i).toString()+"\r\n";
+	return out;
 }
 
 // Singleton management
