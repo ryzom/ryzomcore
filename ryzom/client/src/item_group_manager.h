@@ -34,7 +34,7 @@
 class CItemGroup
 {
 public:
-	// designates a given slot in the inventory
+	// designates a given slot in the local inventory
 	struct CSlot {
 		INVENTORIES::TInventory branch; // the local inventory branch (e.g. INVENTORIES::handling or INVENTORIES::equipment)
 		uint16 index; // the index in the branch
@@ -53,15 +53,17 @@ public:
 		const std::string toDbPath();
 		const std::string toString();
 		CDBCtrlSheet* getSheet();
-		static CSlot readFrom(xmlNodePtr node);
+		static CSlot readFromV1(xmlNodePtr node);
+		static CSlot readFromV2(xmlNodePtr node);	
 		static CSlot handSlot(uint16 index) { return CSlot(INVENTORIES::handling, index); }
 		static CSlot equipSlot(uint16 index) { return CSlot(INVENTORIES::equipment, index); }
 		static CSlot hotbarSlot(uint16 index) { return CSlot(INVENTORIES::hotbar, index); }
+		static CSlot fromSlotEquipment(SLOT_EQUIPMENT::TSlotEquipment slotEquipment);
 	};
 
 	// an item group item
 	struct CItem {
-		sint32 createTime; // serial of the item in the inventory (used to find the item in the inventory)
+		sint32 createTime; // create time of the item in the inventory (used to find the item in the inventory)
 		sint32 serial; // serial of the item in the inventory (used to find the item in the inventory)
 		CItemGroup::CSlot dstSlot; // the slot where we want to put the item
 		CDBCtrlSheet *pCS; // references an item in the current inventory
@@ -87,7 +89,7 @@ public:
 	void addRemoveSlot(CSlot slot);
 	void updateSheets();
 	void writeTo(xmlNodePtr node);
-	void readFrom(xmlNodePtr node);
+	void deserialize(xmlNodePtr node, std::string version);
 	bool empty() const { return items.size() == 0;} 
 
 	std::string name;
@@ -106,6 +108,7 @@ public:
 	// Regular function
 	void init();
 	void uninit();
+	std::string getFilePath(std::string playerName);
 	void saveGroups();
 	bool loadGroups();
 	void linkInterface();

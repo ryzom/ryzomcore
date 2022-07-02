@@ -171,10 +171,19 @@ void CItemGroup::writeTo(xmlNodePtr node)
 	}
 }
 
-CItemGroup::CSlot CItemGroup::CSlot::readFrom(xmlNodePtr node)
+CItemGroup::CSlot CItemGroup::CSlot::readFromV1(xmlNodePtr node)
+{
+	CXMLAutoPtr prop = (char *)xmlGetProp(node, (xmlChar *)"slot");
+	std::string equipSlot;
+	if (prop) 
+		NLMISC::fromString((const char*)prop, equipSlot);
+
+	return CItemGroup::CSlot::fromSlotEquipment(SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpperAscii(equipSlot)));
+}
+
+CItemGroup::CSlot CItemGroup::CSlot::readFromV2(xmlNodePtr node)
 {
 	CXMLAutoPtr prop;
-
 	INVENTORIES::TInventory branch = INVENTORIES::UNDEFINED;
 	prop = xmlGetProp(node, (xmlChar *)"branch");
 	if (prop)
@@ -197,17 +206,20 @@ CItemGroup::CItem CItemGroup::CItem::readFrom(xmlNodePtr node)
 	if (prop)
 		NLMISC::fromString((const char *)prop, createTime);
 
+	// Version 0 does not use createTime, version 0 is not supported for migrations
+	if (createTime == 0)
+		nlwarning("<CItemGroup::CItem::readFrom> Possibly on unsupported item group version, please remake the item group or contact support.");
+
 	sint32 serial = 0;
 	prop = (char *)xmlGetProp(node, (xmlChar *)"serial");
 	if (prop)
 		NLMISC::fromString((const char *)prop, serial);
 
-	return CItem(createTime, serial, CSlot::readFrom(node));
+	return CItem(createTime, serial, CSlot());
 }
 
-void CItemGroup::readFrom(xmlNodePtr node)
+void CItemGroup::deserialize(xmlNodePtr node, std::string version)
 {
-	// TODO version system
 	CXMLAutoPtr prop;
 
 	prop = (char *)xmlGetProp(node, (xmlChar *)"name");
@@ -217,25 +229,25 @@ void CItemGroup::readFrom(xmlNodePtr node)
 	xmlNodePtr curNode = node->children;
 	while (curNode)
 	{
+		CSlot slot;
+		if (version == "1") 
+			slot = CSlot::readFromV1(curNode);
+		else if (version == "2") 
+			slot = CSlot::readFromV2(curNode);
+		else
+		{
+			nlwarning("<CItemGroup::deserialize> unknown version, can't deserialize group");
+			return;
+		}
+
 		if (strcmp((char *)curNode->name, "item") == 0)
 		{
 			CItem item = CItem::readFrom(curNode);
-
-			// Old load : version 0 does not use createTime, version 0 is not supported for migrations
-			if (item.createTime == 0)
-			{
-				nlwarning("<CItemGroup::readFrom> Possibly on unsupported item group version, please remake the item group or contact support.");
-				curNode = curNode->next;
-				continue;
-			}
-
+			item.dstSlot = slot;
 			addItem(item);
 		}
-		if (strcmp((char *)curNode->name, "remove") == 0)
-		{
-			CSlot slot = CSlot::readFrom(curNode);
+		else if (strcmp((char *)curNode->name, "remove") == 0)
 			addRemoveSlot(slot);
-		}
 
 		curNode = curNode->next;
 	}
@@ -335,6 +347,18 @@ CDBCtrlSheet *CItemGroup::CSlot::getSheet()
 	return pCS;
 }
 
+CItemGroup::CSlot CItemGroup::CSlot::fromSlotEquipment(SLOT_EQUIPMENT::TSlotEquipment slotEquipment)
+{
+	CSlot slot;
+	if (slotEquipment == SLOT_EQUIPMENT::HANDR)
+		slot = handSlot(0);
+	else if (slotEquipment == SLOT_EQUIPMENT::HANDL)
+		slot = handSlot(1);
+	else 
+		slot = equipSlot(slotEquipment);
+	return slot;
+}
+
 CItemGroupManager::CItemGroupManager()
 {
 	_EndInvalidAction = 0;
@@ -389,15 +413,21 @@ void CItemGroupManager::unlinkInterface()
 	undrawGroupsList();
 }
 
+std::string CItemGroupManager::getFilePath(std::string playerName) 
+{
+	return "save/groups_" + playerName + ".xml";
+}
+
 // Inspired from macro parsing
 void CItemGroupManager::saveGroups()
 {
-	std::string userGroupFileName = "save/groups_" + PlayerSelectedFileName + ".xml";
 	if (PlayerSelectedFileName.empty())
 	{
 		nlwarning("<CItemGroupManager::saveGroups> Trying to save group with an empty PlayerSelectedFileName, aborting");
 		return;
 	}
+
+	std::string userGroupFileName = getFilePath(PlayerSelectedFileName);
 	try
 	{
 		NLMISC::COFile f;
@@ -430,12 +460,13 @@ void CItemGroupManager::saveGroups()
 
 bool CItemGroupManager::loadGroups()
 {
-	std::string userGroupFileName = "save/groups_" + PlayerSelectedFileName + ".xml";
 	if (PlayerSelectedFileName.empty())
 	{
 		nlwarning("<CItemGroupManager::loadGroups> Trying to load group with an empty PlayerSelectedFileName, aborting");
 		return false;
 	}
+
+	std::string userGroupFileName = getFilePath(PlayerSelectedFileName);
 	if (!NLMISC::CFile::fileExists(userGroupFileName) || NLMISC::CFile::getFileSize(userGroupFileName) == 0)
 	{
 		nlinfo("<CItemGroupManager::loadGroups> No item groups file found !");
@@ -467,13 +498,30 @@ bool CItemGroupManager::loadGroups()
 		nlwarning("<CItemGroupManager::loadGroups> wrong root element in item_group xml, skipping xml parsing");
 		return false;
 	}
+
+	// get version of the item groups file
+	std::string version;
+	CXMLAutoPtr prop = (char *) xmlGetProp(globalEnclosing, (xmlChar *)"version");
+	if (prop)
+		NLMISC::fromString((const char *) prop, version);
+	else // if version prop not found, assume version 1, as versioning system was introduced in version 2
+		version = "1";
+
+	// check if we need to migrate item groups save file
+	if (version != ITEMGROUPS_CURRENT_VERSION) 
+	{
+		nlinfo("<CItemGroupManager::loadGroups> item group version mismatch, performing migration if possible");
+		// backup current file
+		NLMISC::CFile::copyFile(getFilePath(PlayerSelectedFileName+"_backup"), getFilePath(PlayerSelectedFileName));
+	}
+
 	xmlNodePtr curNode = globalEnclosing->children;
 	while (curNode)
 	{
 		if (strcmp((char *)curNode->name, "group") == 0)
 		{
 			CItemGroup group;
-			group.readFrom(curNode);
+			group.deserialize(curNode, version);
 			if (group.empty())
 				nlwarning("<CItemGroupManager::loadGroups> Item group '%s' loaded empty. Possibly on unsupported item group version, please remake the item group or contact support.", group.name.c_str());
 			_Groups.push_back(group);
