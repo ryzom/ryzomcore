@@ -3756,132 +3756,99 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 // ***************************************************************************
 bool	CDBCtrlSheet::canDropItem(CDBCtrlSheet *src) const
 {
-	if( src->getSheetId()==0 )
+	if (src->getSheetId() == 0)
 		return true;
 
 	// If the dest or src is Grayed, cannot drop it
-	if( src->getInventoryIndex() != INVENTORIES::exchange)
+	if (src->getInventoryIndex() != INVENTORIES::exchange)
 	{
-		if (src->getGrayed() || getGrayed()) return false;
-		if (src->getItemWeared() || getItemWeared()) return false;
+		if (src->getGrayed() || getGrayed())
+			return false;
+		if (src->getItemWeared() || getItemWeared())
+			return false;
 	}
 
 	// if no filter defined => OK.
-	if( _ItemSlot== SLOTTYPE::UNDEFINED )
+	if (_ItemSlot == SLOTTYPE::UNDEFINED)
 		return true;
 
-
 	// Verify the item slot of the src
-	CSheetId		sheetId(src->getSheetId());
-	CEntitySheet	*pES = SheetMngr.get (sheetId);
-	if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+	CSheetId sheetId(src->getSheetId());
+	CEntitySheet *pES = SheetMngr.get(sheetId);
+	if (pES == NULL || pES->type() != CEntitySheet::ITEM)
+		return false;
+
+	CItemSheet *pIS = (CItemSheet *)pES;
+
+	// build the bitField for test.
+	uint32 bf;
+	bf = 1 << _ItemSlot;
+	// special for right hand
+	if (_ItemSlot == SLOTTYPE::RIGHT_HAND)
 	{
-		CItemSheet *pIS = (CItemSheet*)pES;
-
-		// build the bitField for test.
-		uint32	bf;
-		bf= 1<<_ItemSlot;
-		// special for right hand
-		if( _ItemSlot== SLOTTYPE::RIGHT_HAND )
-		{
-			// Can put an object in right hand also if it is TWO_HANDS, or RIGHT_HAND_EXCLUSIVE
-			bf|= 1<<SLOTTYPE::TWO_HANDS;
-			bf|= 1<<SLOTTYPE::RIGHT_HAND_EXCLUSIVE;
-		}
-
-		// Look if one slot solution match.
-		if( pIS->SlotBF & bf )
-		{
-			// Ok the object is compatible with the dest
-
-			// Can put an object in left or right hand is dependent of other hand content
-			if( _OtherHandItemFilter && (_ItemSlot == SLOTTYPE::LEFT_HAND || _ItemSlot == SLOTTYPE::RIGHT_HAND) )
-			{
-				// special for left hand
-				if( _ItemSlot == SLOTTYPE::LEFT_HAND )
-				{
-					// If the item comes from right hand cant drop
-					if (src->_ItemSlot == SLOTTYPE::RIGHT_HAND)
-						return false;
-					// get the item in the right hand
-					CSheetId		sheetId(_OtherHandItemFilter->getSheetId());
-					CEntitySheet	*pRightHandES = SheetMngr.get (sheetId);
-					// if item present: must check if the right has a TWO_HANDS or RIGHT_HAND_EXCLUSIVE
-					if ( pRightHandES != NULL && pRightHandES->type() == CEntitySheet::ITEM )
-					{
-						CItemSheet *pRightHandIS = (CItemSheet*)pRightHandES;
-						if( pRightHandIS->hasSlot(SLOTTYPE::TWO_HANDS) ||
-							pRightHandIS->hasSlot(SLOTTYPE::RIGHT_HAND_EXCLUSIVE) )
-							return false;
-
-						// if the current item we wants to drop is a dagger, check if right hand is a sword or a dagger
-						if (pIS->ItemType == ITEM_TYPE::DAGGER)
-						{
-							if ((pRightHandIS->ItemType != ITEM_TYPE::DAGGER) &&
-								(pRightHandIS->ItemType != ITEM_TYPE::SWORD))
-								return false;
-						}
-					}
-					else
-					{
-						// If nothing valid in right hand cant drop a dagger
-						if (pIS->ItemType == ITEM_TYPE::DAGGER)
-							return false;
-					}
-				}
-				// special for right hand
-				else
-				{
-					/*
-					// If the right hand do not contains a two hand item
-					bool bRightHandContainsTwoHandItem = false;
-					CSheetId		sheetId(getSheetId());
-					CEntitySheet	*pOwnES = SheetMngr.get (sheetId);
-					// if item present: must check if the right has a TWO_HANDS or RIGHT_HAND_EXCLUSIVE
-					if ( pOwnES != NULL && pOwnES->type() == CEntitySheet::ITEM )
-					{
-						CItemSheet *pOwnIS = (CItemSheet*)pOwnES;
-						if( pOwnIS->hasSlot( SLOTTYPE::TWO_HANDS ) || pOwnIS->hasSlot( SLOTTYPE::RIGHT_HAND_EXCLUSIVE ) )
-							bRightHandContainsTwoHandItem = true;
-					}
-
-					// if the LeftHand is not empty, and If the item we want to drop is a 2Hands item, CANNOT drop
-					if (!bRightHandContainsTwoHandItem)
-					if( _OtherHandItemFilter->getSheetId()!=0 )
-					if( pIS->hasSlot( SLOTTYPE::TWO_HANDS ) || pIS->hasSlot( SLOTTYPE::RIGHT_HAND_EXCLUSIVE ) )
-					{
-						return false;
-					}
-					*/
-				}
-			}
-
-			// Check if the ammo has the same type as the hand containing the weapon
-			if( _OtherHandItemFilter && (_ItemSlot== SLOTTYPE::AMMO))
-			{
-				CSheetId		sheetId(_OtherHandItemFilter->getSheetId());
-				CEntitySheet	*pESWeapon = SheetMngr.get (sheetId);
-				if ( pESWeapon == NULL || pESWeapon->type() != CEntitySheet::ITEM )
-					return false;
-				CItemSheet *pISWeapon = (CItemSheet*)pESWeapon;
-				if (pISWeapon->Family != ITEMFAMILY::RANGE_WEAPON)
-					return false;
-				if(pIS->Family != ITEMFAMILY::AMMO)
-					return false;
-				if (pISWeapon->RangeWeapon.Skill != pIS->Ammo.Skill)
-					return false;
-			}
-
-			// ok, can drop!
-			return true;
-		}
-		else
-			return false;
-
+		// Can put an object in right hand also if it is TWO_HANDS, or RIGHT_HAND_EXCLUSIVE
+		bf |= 1 << SLOTTYPE::TWO_HANDS;
+		bf |= 1 << SLOTTYPE::RIGHT_HAND_EXCLUSIVE;
 	}
 
-	// Default: OK
-	return true;
+	// Look if one slot solution match.
+	if (pIS->SlotBF & bf)
+	{
+		// Ok the object is compatible with the dest
+
+		// Can put an object in left or right hand is dependent of other hand content
+		if (_OtherHandItemFilter && _ItemSlot == SLOTTYPE::LEFT_HAND)
+		{
+			// If the item comes from right hand cant drop
+			if (src->_ItemSlot == SLOTTYPE::RIGHT_HAND)
+				return false;
+			// get the item in the right hand
+			CSheetId sheetId(_OtherHandItemFilter->getSheetId());
+			CEntitySheet *pRightHandES = SheetMngr.get(sheetId);
+			// if item present: must check if the right has a TWO_HANDS or RIGHT_HAND_EXCLUSIVE
+			if (pRightHandES != NULL && pRightHandES->type() == CEntitySheet::ITEM)
+			{
+				CItemSheet *pRightHandIS = (CItemSheet *)pRightHandES;
+				if (pRightHandIS->hasSlot(SLOTTYPE::TWO_HANDS) || pRightHandIS->hasSlot(SLOTTYPE::RIGHT_HAND_EXCLUSIVE))
+					return false;
+
+				// if the current item we wants to drop is a dagger, check if right hand is a sword or a dagger
+				if (pIS->ItemType == ITEM_TYPE::DAGGER)
+				{
+					if (pRightHandIS->ItemType != ITEM_TYPE::DAGGER && pRightHandIS->ItemType != ITEM_TYPE::SWORD)
+						return false;
+				}
+			}
+			else
+			{
+				// If nothing valid in right hand cant drop a dagger
+				if (pIS->ItemType == ITEM_TYPE::DAGGER)
+					return false;
+			}
+		}
+
+		// Check if the ammo has the same type as the hand containing the weapon
+		if (_OtherHandItemFilter && _ItemSlot == SLOTTYPE::AMMO)
+		{
+			CSheetId sheetId(_OtherHandItemFilter->getSheetId());
+			CEntitySheet *pESWeapon = SheetMngr.get(sheetId);
+			if (pESWeapon == NULL || pESWeapon->type() != CEntitySheet::ITEM)
+				return false;
+			CItemSheet *pISWeapon = (CItemSheet *)pESWeapon;
+			if (pISWeapon->Family != ITEMFAMILY::RANGE_WEAPON)
+				return false;
+			if (pIS->Family != ITEMFAMILY::AMMO)
+				return false;
+			if (pISWeapon->RangeWeapon.Skill != pIS->Ammo.Skill)
+				return false;
+		}
+
+		// ok, can drop!
+		return true;
+	}
+
+	// default: cannot drop
+	return false;
 }
 
 // ***************************************************************************
