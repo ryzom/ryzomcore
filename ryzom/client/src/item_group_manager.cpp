@@ -175,8 +175,8 @@ CItemGroup::CSlot CItemGroup::CSlot::readFromV1(xmlNodePtr node)
 {
 	CXMLAutoPtr prop = (char *)xmlGetProp(node, (xmlChar *)"slot");
 	std::string equipSlot;
-	if (prop) 
-		NLMISC::fromString((const char*)prop, equipSlot);
+	if (prop)
+		NLMISC::fromString((const char *)prop, equipSlot);
 
 	return CItemGroup::CSlot::fromSlotEquipment(SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpperAscii(equipSlot)));
 }
@@ -230,9 +230,9 @@ void CItemGroup::deserialize(xmlNodePtr node, std::string version)
 	while (curNode)
 	{
 		CSlot slot;
-		if (version == "1") 
+		if (version == "1")
 			slot = CSlot::readFromV1(curNode);
-		else if (version == "2") 
+		else if (version == "2")
 			slot = CSlot::readFromV2(curNode);
 		else
 		{
@@ -319,12 +319,12 @@ const std::string CItemGroup::CSlot::toString()
 	if (branch == INVENTORIES::handling)
 		commonName = "Hand" + string(index == 0 ? "R" : "L");
 	else if (branch == INVENTORIES::equipment)
-		commonName = SLOT_EQUIPMENT::toString((SLOT_EQUIPMENT::TSlotEquipment) index);
+		commonName = SLOT_EQUIPMENT::toString((SLOT_EQUIPMENT::TSlotEquipment)index);
 	else if (branch == INVENTORIES::hotbar)
-		commonName = "Pocket #"+NLMISC::toString(index+1);
+		commonName = "Pocket #" + NLMISC::toString(index + 1);
 	else
 		commonName = "unknown";
-	return NLMISC::toString("%s:%sindex=\"%d\"", commonName.c_str(), string(10-commonName.length(),' ').c_str(), index);
+	return NLMISC::toString("%s:%sindex=\"%d\"", commonName.c_str(), string(10 - commonName.length(), ' ').c_str(), index);
 }
 
 bool CItemGroup::CSlot::isValid()
@@ -354,7 +354,7 @@ CItemGroup::CSlot CItemGroup::CSlot::fromSlotEquipment(SLOT_EQUIPMENT::TSlotEqui
 		slot = handSlot(0);
 	else if (slotEquipment == SLOT_EQUIPMENT::HANDL)
 		slot = handSlot(1);
-	else 
+	else
 		slot = equipSlot(slotEquipment);
 	return slot;
 }
@@ -413,7 +413,7 @@ void CItemGroupManager::unlinkInterface()
 	undrawGroupsList();
 }
 
-std::string CItemGroupManager::getFilePath(std::string playerName) 
+std::string CItemGroupManager::getFilePath(std::string playerName)
 {
 	return "save/groups_" + playerName + ".xml";
 }
@@ -501,18 +501,18 @@ bool CItemGroupManager::loadGroups()
 
 	// get version of the item groups file
 	std::string version;
-	CXMLAutoPtr prop = (char *) xmlGetProp(globalEnclosing, (xmlChar *)"version");
+	CXMLAutoPtr prop = (char *)xmlGetProp(globalEnclosing, (xmlChar *)"version");
 	if (prop)
-		NLMISC::fromString((const char *) prop, version);
+		NLMISC::fromString((const char *)prop, version);
 	else // if version prop not found, assume version 1, as versioning system was introduced in version 2
 		version = "1";
 
 	// check if we need to migrate item groups save file
-	if (version != ITEMGROUPS_CURRENT_VERSION) 
+	if (version != ITEMGROUPS_CURRENT_VERSION)
 	{
 		nlinfo("<CItemGroupManager::loadGroups> item group version mismatch, performing migration if possible");
 		// backup current file
-		NLMISC::CFile::copyFile(getFilePath(PlayerSelectedFileName+"_backup"), getFilePath(PlayerSelectedFileName));
+		NLMISC::CFile::copyFile(getFilePath(PlayerSelectedFileName + "_backup"), getFilePath(PlayerSelectedFileName));
 	}
 
 	xmlNodePtr curNode = globalEnclosing->children;
@@ -691,9 +691,9 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 		return false;
 	}
 
- 	// update location of items in the inventory
+	// update location of items in the inventory
 	group->updateSheets();
-	
+
 	CInventoryManager *pIM = CInventoryManager::getInstance();
 	for (uint i = 0; i < group->items.size(); i++)
 	{
@@ -893,15 +893,16 @@ std::string CItemGroupManager::generateDocumentation()
 {
 	std::string out;
 	uint16 i;
-	out += "\r\nItem Groups - Version "+string(ITEMGROUPS_CURRENT_VERSION)+"\r\n\r\n/// branch=\"handling\" ///\r\n";
+	out += "\r\nItem Groups - Version " + string(ITEMGROUPS_CURRENT_VERSION) + "\r\n\r\n/// branch=\"handling\" ///\r\n";
 	for (i = 0; i < MAX_HANDINV_ENTRIES; i++)
-		out += CItemGroup::CSlot::handSlot(i).toString()+"\r\n";
+		out += CItemGroup::CSlot::handSlot(i).toString() + "\r\n";
 	out += "\r\n/// branch=\"hotbar\" ///\r\n";
 	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
-		out += CItemGroup::CSlot::hotbarSlot(i).toString()+"\r\n";
+		out += CItemGroup::CSlot::hotbarSlot(i).toString() + "\r\n";
 	out += "\r\n/// branch=\"equipment\" ///\r\n";
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
-		if (i != SLOT_EQUIPMENT::HANDL && i != SLOT_EQUIPMENT::HANDR) out += CItemGroup::CSlot::equipSlot(i).toString()+"\r\n";
+		if (i != SLOT_EQUIPMENT::HANDL && i != SLOT_EQUIPMENT::HANDR)
+			out += CItemGroup::CSlot::equipSlot(i).toString() + "\r\n";
 	return out;
 }
 
