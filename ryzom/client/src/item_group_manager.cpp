@@ -123,11 +123,11 @@ void CItemGroup::CItem::equip(uint32 &equipTime)
 		return;
 	}
 
-	// TODO: timing issue, sometimes you can equip even though you shouldn't
 	// make sure the item can go into the slot (for example left-hand item can't always in left-hand slot)
+	// this is also checked on the server, but avoids visual glitch if checked on client too
 	if (!dstSlot.getSheet()->canDropItem(pCS))
 	{
-		nlwarning("<CItemGroup::CItem::equip> item can't be dropped in slot, most likely a left hand item issue");
+		nlwarning("<CItemGroup::CItem::equip> item %d can't be dropped in slot %s", pCS->getSheetId(), dstSlot.toDbPath().c_str());
 		return;
 	}
 
