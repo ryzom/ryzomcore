@@ -74,6 +74,7 @@ public:
 			pCS(NULL)
 			{}
 		
+		bool operator<(const CItem &item) const { return (dstSlot.branch != item.dstSlot.branch) ? (dstSlot.branch < item.dstSlot.branch) : (dstSlot.index < item.dstSlot.index); } 
 		void equip(uint32 &equipTime);
 		bool isInDestinationSlot();
 		void writeTo(xmlNodePtr node);

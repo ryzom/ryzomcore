@@ -251,6 +251,9 @@ void CItemGroup::deserialize(xmlNodePtr node, std::string version)
 
 		curNode = curNode->next;
 	}
+
+	// sort the items by slot (important so that left hand is equipped after right hand)
+	std::sort(items.begin(), items.end());
 }
 
 // Updates the CDBCtrlSheet in each CItem
@@ -896,13 +899,13 @@ std::string CItemGroupManager::generateDocumentation()
 	out += "\r\nItem Groups - Version " + string(ITEMGROUPS_CURRENT_VERSION) + "\r\n\r\n/// branch=\"handling\" ///\r\n";
 	for (i = 0; i < MAX_HANDINV_ENTRIES; i++)
 		out += CItemGroup::CSlot::handSlot(i).toString() + "\r\n";
-	out += "\r\n/// branch=\"hotbar\" ///\r\n";
-	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
-		out += CItemGroup::CSlot::hotbarSlot(i).toString() + "\r\n";
 	out += "\r\n/// branch=\"equipment\" ///\r\n";
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 		if (i != SLOT_EQUIPMENT::HANDL && i != SLOT_EQUIPMENT::HANDR)
 			out += CItemGroup::CSlot::equipSlot(i).toString() + "\r\n";
+	out += "\r\n/// branch=\"hotbar\" ///\r\n";
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+		out += CItemGroup::CSlot::hotbarSlot(i).toString() + "\r\n";
 	return out;
 }
 
