@@ -3611,10 +3611,6 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 				if (help.empty())
 					help = getItemActualName();
 			}
-			else if (!_ContextHelp.empty())
-			{
-				help = _ContextHelp;
-			}
 			else
 			{
 				help = getItemActualName();;
