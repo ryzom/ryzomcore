@@ -259,7 +259,7 @@ void CAuthSessionTicketListener::OnAuthSessionTicketResponse(GetAuthSessionTicke
 	{
 		_AuthSessionTicketCallbackError = true;
 	}
-}        
+}
 
 CSteamClient::CSteamClient():_Handle(NULL), _Initialized(false)
 {
@@ -385,7 +385,7 @@ bool CSteamClient::init()
 
 	if (lang && strlen(lang) > 0)
 	{
-		this->lang = GameLanguage;
+		this->GameLanguage = lang;
 		nlinfo("Steam language: %s", lang);
 		NLMISC::CI18N::setSystemLanguageCode(lang);
 	}
