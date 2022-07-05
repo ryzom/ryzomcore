@@ -320,7 +320,10 @@ int main(int argc, char **argv)
 
 	if (steamClient.init()){
 		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
-		const char *steamLanguage = steamClient.GameLanguage;
+		const char *steamLanguage = steamClient.GameLanguageWebApiFormat();
+
+		//change language full to right format
+
 		if (steamLanguage != ClientCfg.LanguageCode)
 		{
 			ClientCfg.ForceLanguage= true;
