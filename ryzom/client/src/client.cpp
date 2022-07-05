@@ -318,8 +318,15 @@ int main(int argc, char **argv)
 #ifdef RZ_USE_STEAM
 	CSteamClient steamClient;
 
-	if (steamClient.init())
+	if (steamClient.init()){
 		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
+		const char *steamLanguage = steamClient.GameLanguage;
+		if (steamLanguage != ClientCfg.LanguageCode)
+		{
+			ClientCfg.ForceLanguage= true;
+			ClientCfg.LanguageCode = steamLanguage;
+		}
+	}
 #endif
 
 #if !FINAL_VERSION
