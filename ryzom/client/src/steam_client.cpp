@@ -259,7 +259,7 @@ void CAuthSessionTicketListener::OnAuthSessionTicketResponse(GetAuthSessionTicke
 	{
 		_AuthSessionTicketCallbackError = true;
 	}
-}
+}        
 
 CSteamClient::CSteamClient():_Handle(NULL), _Initialized(false)
 {
@@ -429,6 +429,21 @@ bool CSteamClient::release()
 	_Handle = NULL;
 
 	return res;
+}
+
+const char *CSteamClient::GameLanguageWebApiFormat()
+{
+	//get the right API Code from https://partner.steamgames.com/doc/store/localization#supported_languages
+	if (this->GameLanguage == "french")
+		return "fr";
+	else if (this->GameLanguage == "german")
+		return "de";
+	else if (this->GameLanguage == "spanish")
+		return "es";
+	else if (this->GameLanguage == "russian")
+		return "ru";
+	else
+		return "en";
 }
 
 

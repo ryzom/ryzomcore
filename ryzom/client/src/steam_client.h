@@ -51,6 +51,8 @@ public:
 	 */
 	const char *GameLanguage;
 
+	const char *GameLanguageWebApiFormat();
+
 	/**
 	 *	Return the authentication session ticket if available.
 	 */
