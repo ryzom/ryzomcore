@@ -81,7 +81,12 @@ struct EStream : public Exception
 
 	EStream( const IStream &f, const std::string& str );
 
+#if !defined(CLANG_VERSION) && defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
+	virtual ~EStream() throw() {}
+#else
 	virtual ~EStream() NL_OVERRIDE {}
+#endif
+
 
 	// May Not be Filled...
 	std::string	StreamName;
