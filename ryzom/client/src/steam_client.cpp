@@ -259,7 +259,7 @@ void CAuthSessionTicketListener::OnAuthSessionTicketResponse(GetAuthSessionTicke
 	{
 		_AuthSessionTicketCallbackError = true;
 	}
-}
+}        
 
 CSteamClient::CSteamClient():_Handle(NULL), _Initialized(false)
 {
@@ -381,6 +381,16 @@ bool CSteamClient::init()
 	nlinfo("Steam login: %s", s_SteamFriends->GetPersonaName());
 	nlinfo("Steam user logged: %s", loggedOn ? "yes":"no");
 
+	const char *lang = s_SteamApps->GetCurrentGameLanguage();
+	GameLanguage = string(lang);
+
+	if (!lang.empty())
+	{
+		nlinfo("Steam language full: %s", lang);
+		nlinfo("Steam language WebApiFormat: %s", GameLanguageWebApiFormat().c_str());
+		NLMISC::CI18N::setSystemLanguageCode(GameLanguage);
+	}
+
 	// don't need to continue, if not connected
 	if (!loggedOn) return false;
 
@@ -421,5 +431,22 @@ bool CSteamClient::release()
 
 	return res;
 }
+
+std::string CSteamClient::GameLanguageWebApiFormat()
+{
+	//get the right API Code from https://partner.steamgames.com/doc/store/localization#supported_languages
+
+	if (GameLanguage == "french")
+		return "fr";
+	else if (GameLanguage == "german")
+		return "de";
+	else if (GameLanguage == "spanish")
+		return "es";
+	else if (GameLanguage == "russian")
+		return "ru";
+	else
+		return "en";
+}
+
 
 #endif
