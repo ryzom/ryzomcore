@@ -385,7 +385,9 @@ bool CSteamClient::init()
 
 	if (lang && strlen(lang) > 0)
 	{
-		nlinfo("Steam language: %s", lang);
+		this->GameLanguage = lang;
+		nlinfo("Steam language full: %s", lang);
+		nlinfo("Steam language WebApiFormat: %s", GameLanguageWebApiFormat());
 		NLMISC::CI18N::setSystemLanguageCode(lang);
 	}
 
@@ -428,6 +430,21 @@ bool CSteamClient::release()
 	_Handle = NULL;
 
 	return res;
+}
+
+const char *CSteamClient::GameLanguageWebApiFormat()
+{
+	//get the right API Code from https://partner.steamgames.com/doc/store/localization#supported_languages
+	if (this->GameLanguage == "french")
+		return "fr";
+	else if (this->GameLanguage == "german")
+		return "de";
+	else if (this->GameLanguage == "spanish")
+		return "es";
+	else if (this->GameLanguage == "russian")
+		return "ru";
+	else
+		return "en";
 }
 
 
