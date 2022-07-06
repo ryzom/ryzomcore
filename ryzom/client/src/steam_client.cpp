@@ -382,11 +382,11 @@ bool CSteamClient::init()
 	nlinfo("Steam user logged: %s", loggedOn ? "yes":"no");
 
 	const char *lang = s_SteamApps->GetCurrentGameLanguage();
-	GameLanguage = string(lang);
+	GameLanguage = std::string(lang);
 
-	if (!lang.empty())
+	if (!GameLanguage.empty())
 	{
-		nlinfo("Steam language full: %s", lang);
+		nlinfo("Steam language full: %s", GameLanguage.c_str());
 		nlinfo("Steam language WebApiFormat: %s", GameLanguageWebApiFormat().c_str());
 		NLMISC::CI18N::setSystemLanguageCode(GameLanguage);
 	}
