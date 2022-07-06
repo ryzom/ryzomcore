@@ -324,7 +324,7 @@ int main(int argc, char **argv)
 		std::string steamLanguageCompare(steamLanguage);
 		//change language full to right format
 
-		if (!strcmp(steamLanguageCompare, ClientCfg.LanguageCode))
+		if (steamLanguageCompare != ClientCfg.LanguageCode)
 		{
 			nlinfo("Force Applay Steam Laguage: %s, current CFG Language %s", steamLanguageCompare, ClientCfg.LanguageCode);
 			ClientCfg.ForceLanguage= true;
