@@ -317,18 +317,19 @@ int main(int argc, char **argv)
 
 #ifdef RZ_USE_STEAM
 	CSteamClient steamClient;
-
-	if (steamClient.init()){
+	if (steamClient.init())
+	{
+		const char* steamLang = steamClient.GameLanguageWebApiFormat();
+		string steamLanguage(steamLang);
+		nlinfo("Steam language: %s", steamLang);
+		NLMISC::CI18N::setSystemLanguageCode(steamLanguage);
 		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
-		const char *steamLanguage = steamClient.GameLanguageWebApiFormat();
-		std::string steamLanguageCompare(steamLanguage);
 		//change language full to right format
-
-		if (steamLanguageCompare != ClientCfg.LanguageCode)
+		if (steamLanguage != ClientCfg.LanguageCode)
 		{
-			nlinfo("Force Apply Steam Laguage: %s, current CFG Language %s", steamLanguageCompare.c_str(), ClientCfg.LanguageCode.c_str());
+			nlinfo("Force Apply Steam Laguage: %s, current CFG Language %s", steamLang, ClientCfg.LanguageCode.c_str());
 			ClientCfg.ForceLanguage= true;
-			ClientCfg.LanguageCode = steamLanguageCompare;
+			ClientCfg.LanguageCode = steamLanguage;
 		}
 	}
 #endif
