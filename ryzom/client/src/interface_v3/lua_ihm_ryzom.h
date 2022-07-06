@@ -265,7 +265,7 @@ private:
 	static sint32 getSheetId(const std::string &itemName);
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
-	static float setChar3dDBfromVPX(const std::string &branch, const std::string &people, const std::string &vpa, const std::string &vpb, const std::string &vpc);
+	static float setChar3dDBfromVPX(const std::string &branch);
 	static float getRefHeightScale(const std::string &people, const std::string &vpa);
 	static std::string getRegionByAlias(uint32 alias);
 	static float getGroundZ(float x, float y);
