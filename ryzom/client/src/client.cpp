@@ -324,7 +324,7 @@ int main(int argc, char **argv)
 
 		//change language full to right format
 
-		if (steamLanguage != ClientCfg.LanguageCode)
+		if (!strcmp(steamLanguage, ClientCfg.LanguageCode))
 		{
 			nlinfo("Force Applay Steam Laguage: %s, current CFG Language %s", steamLanguage, ClientCfg.LanguageCode);
 			ClientCfg.ForceLanguage= true;
