@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 
 		if (steamLanguageCompare != ClientCfg.LanguageCode)
 		{
-			nlinfo("Force Applay Steam Laguage: %s, current CFG Language %s", steamLanguageCompare, ClientCfg.LanguageCode);
+			nlinfo("Force Apply Steam Laguage: %s, current CFG Language %s", steamLanguageCompare.c_str(), ClientCfg.LanguageCode.c_str());
 			ClientCfg.ForceLanguage= true;
 			ClientCfg.LanguageCode = steamLanguageCompare;
 		}
