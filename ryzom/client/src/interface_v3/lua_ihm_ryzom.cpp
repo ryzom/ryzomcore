@@ -3933,7 +3933,7 @@ sint CLuaIHMRyzom::getCharacterSheetRegionLevel(const std::string &sheet)
 }
 
 
-float CLuaIHMRyzom::setChar3dDBfromVPX(const std::string &branch, const std::string &people, const std::string &vpa, const std::string &vpb, const std::string &vpc)
+float CLuaIHMRyzom::setChar3dDBfromVPX(const std::string &branch)
 {
 	CCharacterSummary cs;
 	SCharacter3DSetup::setupCharacterSummaryFromSERVERDB(cs);
