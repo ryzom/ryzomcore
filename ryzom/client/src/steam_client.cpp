@@ -386,7 +386,8 @@ bool CSteamClient::init()
 	if (lang && strlen(lang) > 0)
 	{
 		this->GameLanguage = lang;
-		nlinfo("Steam language: %s", lang);
+		nlinfo("Steam language full: %s", lang);
+		nlinfo("Steam language WebApiFormat: %s", GameLanguageWebApiFormat());
 		NLMISC::CI18N::setSystemLanguageCode(lang);
 	}
 
