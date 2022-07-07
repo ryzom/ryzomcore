@@ -3936,8 +3936,12 @@ sint CLuaIHMRyzom::getCharacterSheetRegionLevel(const std::string &sheet)
 float CLuaIHMRyzom::setChar3dDBfromVPX(const std::string &branch)
 {
 	CCharacterSummary cs;
-	SCharacter3DSetup::setupCharacterSummaryFromSERVERDB(cs);
+	cs.VisualPropA.fromString(vpa);
+	cs.VisualPropB.fromString(vpb);
+	cs.VisualPropC.fromString(vpc);
+	cs.People = EGSPD::CPeople::fromString(people);
 	SCharacter3DSetup::setupDBFromCharacterSummary(branch, cs);
+
 
 	return cs.VisualPropC.PropertySubData.CharacterHeight;
 }
