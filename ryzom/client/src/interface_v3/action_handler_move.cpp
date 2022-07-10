@@ -118,6 +118,15 @@ public:
 	{
 		// Moving Break the Follow Mode
 		UserEntity->disableFollow();
+
+		// check if speed factor is zero, and if yes, notify the player
+		if (!Actions.valide("turn_left") && !Actions.valide("turn_right"))
+		{
+			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
+			if (pNodeLeaf && pNodeLeaf->getValue64() == 0)
+				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiSpeedFactorZero"), "CHK");
+		}
+		
 		UserEntity->moveTo(CLFECOMMON::INVALID_SLOT, 0.0, CUserEntity::None);
 	}
 };
