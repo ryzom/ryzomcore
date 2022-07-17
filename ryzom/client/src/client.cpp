@@ -320,15 +320,14 @@ int main(int argc, char **argv)
 
 	if (steamClient.init()){
 		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
-		const char *steamLanguage = steamClient.GameLanguageWebApiFormat();
-		std::string steamLanguageCompare(steamLanguage);
+		string steamLanguage = steamClient.GameLanguageWebApiFormat();
 		//change language full to right format
 
-		if (steamLanguageCompare != ClientCfg.LanguageCode)
+		if (steamLanguage != ClientCfg.LanguageCode)
 		{
-			nlinfo("Force Apply Steam Laguage: %s, current CFG Language %s", steamLanguageCompare.c_str(), ClientCfg.LanguageCode.c_str());
+			nlinfo("Force Apply Steam Laguage: %s, current CFG Language %s", steamLanguage.c_str(), ClientCfg.LanguageCode.c_str());
 			ClientCfg.ForceLanguage= true;
-			ClientCfg.LanguageCode = steamLanguageCompare;
+			ClientCfg.LanguageCode = steamLanguage;
 		}
 	}
 #endif

@@ -382,13 +382,13 @@ bool CSteamClient::init()
 	nlinfo("Steam user logged: %s", loggedOn ? "yes":"no");
 
 	const char *lang = s_SteamApps->GetCurrentGameLanguage();
+	GameLanguage = std::string(lang);
 
-	if (lang && strlen(lang) > 0)
+	if (!GameLanguage.empty())
 	{
-		this->GameLanguage = lang;
-		nlinfo("Steam language full: %s", lang);
-		nlinfo("Steam language WebApiFormat: %s", GameLanguageWebApiFormat());
-		NLMISC::CI18N::setSystemLanguageCode(lang);
+		nlinfo("Steam language full: %s", GameLanguage.c_str());
+		nlinfo("Steam language WebApiFormat: %s", GameLanguageWebApiFormat().c_str());
+		NLMISC::CI18N::setSystemLanguageCode(GameLanguage);
 	}
 
 	// don't need to continue, if not connected
@@ -432,16 +432,17 @@ bool CSteamClient::release()
 	return res;
 }
 
-const char *CSteamClient::GameLanguageWebApiFormat()
+std::string CSteamClient::GameLanguageWebApiFormat()
 {
 	//get the right API Code from https://partner.steamgames.com/doc/store/localization#supported_languages
-	if (this->GameLanguage == "french")
+
+	if (GameLanguage == "french")
 		return "fr";
-	else if (this->GameLanguage == "german")
+	else if (GameLanguage == "german")
 		return "de";
-	else if (this->GameLanguage == "spanish")
+	else if (GameLanguage == "spanish")
 		return "es";
-	else if (this->GameLanguage == "russian")
+	else if (GameLanguage == "russian")
 		return "ru";
 	else
 		return "en";

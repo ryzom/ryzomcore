@@ -49,9 +49,9 @@ public:
 	/**
 	 *	Save current Language from Steam Settings
 	 */
-	const char *GameLanguage;
+	std::string GameLanguage;
 
-	const char *GameLanguageWebApiFormat();
+	std::string GameLanguageWebApiFormat();
 
 	/**
 	 *	Return the authentication session ticket if available.

@@ -2470,8 +2470,7 @@ void CGroupMap::updateMatchedLandmarks()
 		std::vector<std::pair<string,string> > params;
 		params.clear();
 		params.push_back(std::pair<string,string>("id", toString("lm%d", k)));
-		// ctrl base expects utf8 string to start with "u:"
-		params.push_back(std::pair<string,string>("tooltip", "u:" + _MatchedLandmarks[k].Title.toUtf8()));
+		params.push_back(std::pair<string,string>("tooltip", _MatchedLandmarks[k].Title.toUtf8()));
 		params.push_back(std::pair<string,string>("index", toString(k)));
 
 		CInterfaceGroup *g = CWidgetManager::getInstance()->getParser()->createGroupInstance("lm_search_result", pL->getId(), params);
