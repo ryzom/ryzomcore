@@ -4255,8 +4255,8 @@ std::string CLuaIHMRyzom::getTargetVpcHex()
 // ***************************************************************************
 void CLuaIHMRyzom::updateVpa()
 {
-	uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
-	UserEntity->updateVisualPropertyA(prop);
+	//uint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	//UserEntity->updateVisualPropertyA(prop);
 }
 
 // ***************************************************************************
