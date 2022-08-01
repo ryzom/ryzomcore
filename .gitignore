@@ -163,7 +163,6 @@ build/*
 build-2010/*
 build/*
 install/*
-win-build/
 build_*
 install_*
 nel/tools/build_gamedata/configuration/buildsite.py
