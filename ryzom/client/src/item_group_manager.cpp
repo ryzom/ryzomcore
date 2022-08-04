@@ -27,6 +27,7 @@
 #include "nel/misc/o_xml.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/file.h"
+#include "nel/misc/xml_macros.h"
 #include "libxml/tree.h"
 #include "game_share/item_type.h"
 #include "client_sheets/item_sheet.h"
@@ -173,11 +174,9 @@ void CItemGroup::writeTo(xmlNodePtr node)
 
 CItemGroup::CSlot CItemGroup::CSlot::readFromV1(xmlNodePtr node)
 {
-	CXMLAutoPtr prop = (char *)xmlGetProp(node, (xmlChar *)"slot");
-	std::string equipSlot;
-	if (prop)
-		NLMISC::fromString((const char *)prop, equipSlot);
-
+	CXMLAutoPtr prop;
+	string equipSlot;
+	XML_READ_STRING(node, "slot", equipSlot, "");
 	return CItemGroup::CSlot::fromSlotEquipment(SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpperAscii(equipSlot)));
 }
 
@@ -503,12 +502,9 @@ bool CItemGroupManager::loadGroups()
 	}
 
 	// get version of the item groups file
-	std::string version;
-	CXMLAutoPtr prop = (char *)xmlGetProp(globalEnclosing, (xmlChar *)"version");
-	if (prop)
-		NLMISC::fromString((const char *)prop, version);
-	else // if version prop not found, assume version 1, as versioning system was introduced in version 2
-		version = "1";
+	CXMLAutoPtr prop;
+	string version;
+	XML_READ_STRING(globalEnclosing, "version", version, "1");
 
 	// check if we need to migrate item groups save file
 	if (version != ITEMGROUPS_CURRENT_VERSION)
