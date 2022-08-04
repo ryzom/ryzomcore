@@ -260,7 +260,7 @@ public:
 	// Get the Hand item sheet
 	uint32 getRightHandItemSheet() const { return getHandItemSheet(true); }
 	uint32 getLeftHandItemSheet() const { return getHandItemSheet(false); }
-	bool isLeftHandItemCompatibleWithRightHandItem(uint32 leftHandSheet, uint32 rightHandSheet, uint32 lastRightHandSheet);
+	bool isLeftHandItemCompatible(uint32 leftHandSheet, uint32 rightHandSheet, uint32 lastRightHandSheet);
 
 
 	// Bag wearing
@@ -301,6 +301,8 @@ public:
 		// get item info from cache
 		const	CClientItemInfo *getItemInfoCache(uint32 serial, uint32 createTime) const;
 		uint				getItemSheetForSlotId(uint slotId) const;
+		// get item in bag from cache
+		uint32 getBagItemSheet(sint32 bagId) const;
 		// Returns true if the item info is already in slot cache
 		bool				isItemInfoAvailable(uint slotId) const;
 		// Returns true if the item info version already matches
@@ -331,6 +333,8 @@ public:
 		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvPA4, InvPA5, InvPA6, InvGuild, InvRoom, InvUnknown };
 		static TInvType invTypeFromString(const std::string &str);
 
+		static std::string invToDbPath(INVENTORIES::TInventory inventory);
+
 		// inventory and slot from slotId
 		void				getSlotInvIndex(uint slotId, uint &inv, uint &index) const;
 
@@ -341,6 +345,8 @@ private:
 		CItemImage TempInv[MAX_TEMPINV_ENTRIES];
 		sint32 Hands[MAX_HANDINV_ENTRIES];
 		CDBCtrlSheet *UIHands[MAX_HANDINV_ENTRIES];
+		CDBCtrlSheet *UIHands2[MAX_HANDINV_ENTRIES];
+		CDBCtrlSheet *UIHands3[MAX_HANDINV_ENTRIES];
 		sint32 Equip[MAX_EQUIPINV_ENTRIES];
 		CDBCtrlSheet *UIEquip[MAX_EQUIPINV_ENTRIES];
 		CDBCtrlSheet *UIEquip2[MAX_EQUIPINV_ENTRIES];
@@ -872,8 +878,6 @@ private:
 
 #define CTRL_HAND_RIGHT				"ui:interface:gestionsets:hands:handr"
 #define CTRL_HAND_LEFT				"ui:interface:gestionsets:hands:handl"
-#define CTRL_HAND_LEFT_2HAND		"ui:interface:gestionsets:hands:handl_2h"
-#define CTRL_HAND_LEFT_AMMO			"ui:interface:gestionsets:hands:handl_ammo"
 
 #define CTRL_JEWEL_EARING_LEFT		"ui:interface:inv_equip:content:equip:jewelry:earing_l"
 #define CTRL_JEWEL_BRACELET_LEFT	"ui:interface:inv_equip:content:equip:jewelry:bracelet_l"
@@ -899,6 +903,9 @@ private:
 #define CTRL_HOTBAR_4				"ui:interface:inv_equip:content:equip:hotbar_c:hotbar:hotbar4"
 #define CTRL_HOTBAR_5				"ui:interface:inv_equip:content:equip:hotbar_c:hotbar:hotbar5"
 
+#define CTRL_HAND2_RIGHT			"ui:interface:inv_equip:content:equip:handr"
+#define CTRL_HAND2_LEFT				"ui:interface:inv_equip:content:equip:handl"
+
 #define CTRL_JEWL2_EARING_LEFT		"ui:interface:inventory:content:equip:jewelry:earing_l"
 #define CTRL_JEWL2_BRACELET_LEFT	"ui:interface:inventory:content:equip:jewelry:bracelet_l"
 #define CTRL_JEWL2_RING_LEFT		"ui:interface:inventory:content:equip:jewelry:ring_l"
@@ -923,11 +930,14 @@ private:
 #define CTRL_HOTBAR2_4				"ui:interface:inventory:content:equip:hotbar_c:hotbar:hotbar4"
 #define CTRL_HOTBAR2_5				"ui:interface:inventory:content:equip:hotbar_c:hotbar:hotbar5"
 
-#define CTRL_HOTBAR3_1				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar1"
-#define CTRL_HOTBAR3_2				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar2"
-#define CTRL_HOTBAR3_3				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar3"
-#define CTRL_HOTBAR3_4				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar4"
-#define CTRL_HOTBAR3_5				"ui:interface:inv_hotbar:content:hot:hotbar:hotbar5"
+#define CTRL_HAND3_RIGHT			"ui:interface:inventory:content:equip:handr"
+#define CTRL_HAND3_LEFT				"ui:interface:inventory:content:equip:handl"
+
+#define CTRL_HOTBAR3_1				"ui:interface:inv_hotbar:content:hotbar:hotbar1"
+#define CTRL_HOTBAR3_2				"ui:interface:inv_hotbar:content:hotbar:hotbar2"
+#define CTRL_HOTBAR3_3				"ui:interface:inv_hotbar:content:hotbar:hotbar3"
+#define CTRL_HOTBAR3_4				"ui:interface:inv_hotbar:content:hotbar:hotbar4"
+#define CTRL_HOTBAR3_5				"ui:interface:inv_hotbar:content:hotbar:hotbar5"
 
 #endif // RY_INVENTORY_MANAGER_H
 

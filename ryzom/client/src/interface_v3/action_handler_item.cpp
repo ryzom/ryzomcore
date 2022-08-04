@@ -2468,7 +2468,6 @@ class CHandlerUseHotbarItem : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		pIM->displaySystemInfo("use item: " + getParam(sParams, "slot") + " " + sParams);
 		sint64 slot;
 		if (!CInterfaceExpr::evalAsInt(getParam(sParams, "slot"), slot))
 		{
@@ -2542,7 +2541,7 @@ class CHandlerItemGroupEquip : public IActionHandler
 		std::string name = getParam(sParams, "name");
 		if(name.empty())
 		{
-			nlinfo("Trying to move a group with a caller not part of any group");
+			nlinfo("Trying to equip a group with a caller not part of any group");
 			return;
 		}
 
@@ -2550,3 +2549,66 @@ class CHandlerItemGroupEquip : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerItemGroupEquip, "item_group_equip");
+
+// ***************************************************************************
+class CHandlerItemGroupCreate : public IActionHandler
+{
+	void execute (CCtrlBase *pCaller, const std::string & sParams)
+	{
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(pCaller->getParent()->findFromShortId("edit_name:eb"));
+			if (!eb) {
+				nlwarning("<CHandlerItemGroupCreate::execute> Can't retrieve edit box.");
+				return;
+			}
+			name = eb->getInputString();
+			CWidgetManager::getInstance()->resetCaptureKeyboard();
+			if (name.empty()) {
+				nlinfo("Trying to create a group with a caller not part of any group");
+				return;
+			}
+		}
+
+		if (name.find_first_not_of(' ') == name.npos) {
+			nlinfo("Trying to create a group with whitespace as name");
+			return;
+		}
+
+		bool removeEmpty = false;
+		if (name.substr(0, 1) == "!") {
+			removeEmpty = true;
+			name = name.substr(1);
+		}
+
+		CItemGroupManager::getInstance()->createGroup(name, removeEmpty);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupCreate, "item_group_create");
+
+// ***************************************************************************
+class CHandlerItemGroupDelete : public IActionHandler
+{
+	void execute (CCtrlBase * /* pCaller */, const std::string & sParams)
+	{
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			CCtrlButton *button = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+			if (!button) {
+				nlwarning("<CHandlerItemGroupDelete::execute> Can't retrieve button.");
+				return;
+			}
+			CAHManager::getInstance()->runActionHandler("leave_modal", NULL);
+			name = dynamic_cast<CViewText*>(button->getParent()->getView("name"))->getText();
+			if (name.empty()) {
+				nlinfo("Trying to delete a group with a caller not part of any group");
+				return;
+			}
+		}
+
+		CItemGroupManager::getInstance()->deleteGroup(name);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupDelete, "item_group_delete");

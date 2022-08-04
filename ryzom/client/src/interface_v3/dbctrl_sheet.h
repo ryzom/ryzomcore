@@ -626,6 +626,9 @@ public:
 	// callback from info waiter
 	void infoReceived();
 
+	// do the sheets point to the same item in the DB ?
+	bool isSheetEqual(CDBCtrlSheet *pCS) const;
+
 	// set enchant/buff marker visiblility
 	static void setShowIconBuffs(bool b) { _ShowIconBuffs = b; }
 

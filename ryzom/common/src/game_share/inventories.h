@@ -197,6 +197,13 @@ namespace INVENTORIES
 	const std::string& toString( TInventory inv );
 
 	/**
+	* Return local db branch name
+	* \param inv TInventory identify
+	* \return local db branch of inventory (or unknown if nit exist )
+	*/
+	const std::string toLocalDbBranch( TInventory inv );
+
+	/**
 	* get the name of an inventory in the data base. Use this API to fill the user database
 	* \return if the specified inventory is supported
 	* \param inventory : the inventory enum
