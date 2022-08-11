@@ -460,14 +460,11 @@ void		CGameContextMenu::update()
 			fameValue = pLeafFame->getValue8();
 	}
 
-
-	bool enable_rumors = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENABLE_RUMORS")->getValueBool();
-
 	if (_TextNews)
-		_TextNews->setActive(enable_rumors && !UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue >= -30);
+		_TextNews->setActive(!UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue >= -30);
 
 	if (_TextNewsAgressive)
-		_TextNewsAgressive->setActive(enable_rumors && !UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue < -30);
+		_TextNewsAgressive->setActive(!UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue < -30);
 
 
 	if (_TextDuel && _TextUnDuel)

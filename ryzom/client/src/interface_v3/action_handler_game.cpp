@@ -497,7 +497,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextCreateGuild, "context_create_guild");
 // ***************************************************************************
 // GCM Mission option
 // ***************************************************************************
-class CHandlerContextOpenMissionOption : public IActionHandler
+class CHandlerContextMissionOption : public IActionHandler
 {
 public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
@@ -524,23 +524,7 @@ public:
 		}
 	}
 };
-REGISTER_ACTION_HANDLER(CHandlerContextOpenMissionOption, "open_mission_option");
-
-
-class CHandlerContextMissionOption : public IActionHandler
-{
-public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
-	{
-		std::string id = getParam(sParams, "id");
-		sint intId;
-		if (!fromString(id, intId)) return;
-		UserEntity->moveToMission(UserEntity->targetSlot(), 3.0, intId);
-	}
-};
 REGISTER_ACTION_HANDLER(CHandlerContextMissionOption, "mission_option");
-
-
 
 
 // ***************************************************************************
@@ -949,7 +933,7 @@ public:
 			CEntityCL *pSel = EntitiesMngr.entity(UserEntity->selection());
 			if (pSel != NULL)
 				if (pSel->isForageSource())
-					UserEntity->moveToExtractionPhrase(UserEntity->selection(), MaxExtractionDistance, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
+					UserEntity->moveToExtractionPhrase(UserEntity->selection(), 2.0f, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
 		}
 	}
 };

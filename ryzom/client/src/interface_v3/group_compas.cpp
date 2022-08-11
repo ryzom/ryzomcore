@@ -431,11 +431,11 @@ void CGroupCompas::draw()
 		}
 	}
 
-	CCtrlBase *toolTip = getCtrl("open_menu");
+	CCtrlBase *toolTip = getCtrl("tt");
 	if (toolTip)
 	{
 		if (displayedTarget.getType() != CCompassTarget::North)
-			toolTip->setDefaultContextHelp(displayedTarget.Name);
+			toolTip->setDefaultContextHelp(CI18N::get("uittCompassDistance"));
 		else
 			toolTip->setDefaultContextHelp(std::string());
 	}

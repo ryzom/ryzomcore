@@ -712,9 +712,6 @@ protected:
 	sint64										_LastSelectBoxComputeTime;
 
 	float										_CustomScale;
-	float										_OldCustomScale;
-	float										_StepCustomScale;
-	NLMISC::TTime								_StartCustomScale;
 
 	/// Pointer on the Sheet with basic parameters.
 	const CCharacterSheet						*_Sheet;
@@ -874,8 +871,6 @@ protected:
 	virtual void setDead();
 	/// Method to Flag the character as alive and do everything needed.
 	virtual void setAlive();
-
-	void scale(bool calculate = true);
 
 	///
 	double computeTimeStep(const double &currentTime);
