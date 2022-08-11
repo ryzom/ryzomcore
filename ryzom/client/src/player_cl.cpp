@@ -192,7 +192,7 @@ bool CPlayerCL::isEnemy () const
 	{
 		return false;
 	}
-
+	
 	// if one of 2 players is safe they can't be enemies
 	if( UserEntity->getPvpMode()&PVP_MODE::PvpSafe ||
 		getPvpMode()&PVP_MODE::PvpSafe )
@@ -449,7 +449,7 @@ void CPlayerCL::initProperties()
 // equip :
 // Set the equipmenent worn.
 //-----------------------------------------------
-void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, const CItemSheet *item, sint color)
+void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, const CItemSheet *item)
 {
 	// Check slot.
 	if(slot == SLOTTYPE::HIDDEN_SLOT || slot >= SLOTTYPE::NB_SLOT)
@@ -506,13 +506,8 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 		_Instances[s].createLoading(string(), stickPoint);
 
 	// Create the instance.
-	if (item)
-	{
-		if (color != -1) {
-			_Instances[s].createLoading(shapeName, stickPoint, color);
-		} else
-			_Instances[s].createLoading(shapeName, stickPoint, item->MapVariant);
-	}
+	if(item)
+		_Instances[s].createLoading(shapeName, stickPoint, item->MapVariant);
 	else
 		_Instances[s].createLoading(shapeName, stickPoint);
 
@@ -840,33 +835,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		else
 		{
 			// No Valid item in the right hand.
-
-			SLOTTYPE::EVisualSlot slot = SLOTTYPE::RIGHT_HAND_SLOT;
-			string rightHandTag = getTag(5);
-			if (!rightHandTag.empty() && rightHandTag != "_")
-			{
-				sint idx = SheetMngr.getVSIndex("stake.sitem", slot);
-				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)idx);
-				vector<string> tagInfos;
-				splitString(rightHandTag, string("|"), tagInfos);
-				UInstance instance;
-				if (tagInfos.size() == 2)
-				{
-					sint instTexture;
-					fromString(tagInfos[1], instTexture);
-					equip(slot, tagInfos[0], itemSheet, instTexture);
-					_Instances[slot].TextureSet = instTexture;
-				}
-				else
-				{
-					equip(slot, tagInfos[0], itemSheet);
-				}
-				return;
-			}
-			else
-			{
-				equip(slot, "");
-			}
+			equip(SLOTTYPE::RIGHT_HAND_SLOT, "");
 		}
 
 		// OBJECT in the LEFT HAND

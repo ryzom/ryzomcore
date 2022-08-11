@@ -156,7 +156,7 @@ protected:
 	virtual void initProperties();
 
 	/// Set the equipmenent worn.
-	void equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, const CItemSheet *item = 0, sint color = -1);
+	void equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, const CItemSheet *item = 0);
 	/// Compute the equipmenent worn.
 	void equip(SLOTTYPE::EVisualSlot slot, uint index, uint color);
 

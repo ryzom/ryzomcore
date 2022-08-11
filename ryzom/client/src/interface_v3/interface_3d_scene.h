@@ -25,7 +25,6 @@
 #include "nel/gui/interface_group.h"
 #include "nel/3d/u_point_light.h"
 #include "nel/3d/u_particle_system_instance.h"
-#include "nel/3d/u_skeleton.h"
 
 class CCharacter3D;
 
@@ -40,7 +39,6 @@ namespace NL3D
 {
 	class UParticleSystemInstance;
 	class UAnimationSet;
-	class USkeleton;
 }
 
 /**
@@ -238,9 +236,6 @@ public:
 	CInterface3DShape()
 	{
 		_Instance = NULL;
-		_PlayListManager = NULL;
-		_AnimationSet = NULL;
-		_PlayList = NULL;
 		_Pos = NLMISC::CVector(0,0,0);
 		_Rot = NLMISC::CVector(0,0,0);
 	}
@@ -248,7 +243,6 @@ public:
 	virtual ~CInterface3DShape();
 
 	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-	virtual void checkCoords();
 
 	NL3D::UInstance getShape() { return _Instance; }
 
@@ -274,12 +268,6 @@ public:
 	std::string getTextures() const;
 	void        setTextures (const std::string &textures);
 
-	std::string getSkeleton() const;
-	void        setSkeleton (const std::string &skeleton);
-
-	std::string getAnim() const;
-	void        setAnim (const std::string &anim);
-
 	float getBBoxSizeX () const;
 	float getBBoxSizeY () const;
 	float getBBoxSizeZ () const;
@@ -298,8 +286,6 @@ public:
 		REFLECT_FLOAT ("rotz", getRotZ, setRotZ);
 		REFLECT_STRING ("name", getName, setName);
 		REFLECT_STRING("textures", getTextures, setTextures);
-		REFLECT_STRING("skeleton", getSkeleton, setSkeleton);
-		REFLECT_STRING("anim", getAnim, setAnim);
 	REFLECT_EXPORT_END
 
 protected:
@@ -309,12 +295,6 @@ protected:
 	NLMISC::CVector _Rot;
 	std::string _Name;
 	std::string _Textures;
-	std::string _SkeletonName;
-	std::string _Anim;
-	NL3D::USkeleton _Skeleton;
-	NL3D::UPlayListManager *_PlayListManager;
-	NL3D::UAnimationSet *_AnimationSet;
-	NL3D::UPlayList *_PlayList;
 };
 
 /**
