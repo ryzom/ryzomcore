@@ -116,6 +116,8 @@ private:
 	static int	dumpUI(CLuaState &ls);			// params: CInterfaceElement*.... return: none
 	static int	setKeyboardContext(CLuaState &ls);
 
+	static int setRpItems(CLuaState &ls);
+
 	static int getCompleteIslands(CLuaState &ls);
 	static int getIslandId(CLuaState &ls);//TEMP
 

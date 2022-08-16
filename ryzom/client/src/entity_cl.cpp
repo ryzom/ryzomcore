@@ -2415,6 +2415,9 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 	// Must rebuild the in scene interface 'cause name has changed
 	buildInSceneInterface ();
 
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	updateVisualPropertyVpa(0, prop);
+
 }// onStringAvailable //
 
 //-----------------------------------------------
