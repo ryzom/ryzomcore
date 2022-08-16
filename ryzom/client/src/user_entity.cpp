@@ -3664,7 +3664,7 @@ bool CUserEntity::CMountHunger::canRun() const
 			return (hungerLeaf->getValue32() != (sint)ANIMAL_TYPE::DbHungryValue);
 		}
 	}
-	return false;
+	return true;
 }
 
 

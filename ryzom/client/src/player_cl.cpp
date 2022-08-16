@@ -192,7 +192,7 @@ bool CPlayerCL::isEnemy () const
 	{
 		return false;
 	}
-	
+
 	// if one of 2 players is safe they can't be enemies
 	if( UserEntity->getPvpMode()&PVP_MODE::PvpSafe ||
 		getPvpMode()&PVP_MODE::PvpSafe )
@@ -449,7 +449,7 @@ void CPlayerCL::initProperties()
 // equip :
 // Set the equipmenent worn.
 //-----------------------------------------------
-void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, const CItemSheet *item)
+void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, const CItemSheet *item, sint color)
 {
 	// Check slot.
 	if(slot == SLOTTYPE::HIDDEN_SLOT || slot >= SLOTTYPE::NB_SLOT)
@@ -506,8 +506,13 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 		_Instances[s].createLoading(string(), stickPoint);
 
 	// Create the instance.
-	if(item)
-		_Instances[s].createLoading(shapeName, stickPoint, item->MapVariant);
+	if (item)
+	{
+		if (color != -1) {
+			_Instances[s].createLoading(shapeName, stickPoint, color);
+		} else
+			_Instances[s].createLoading(shapeName, stickPoint, item->MapVariant);
+	}
 	else
 		_Instances[s].createLoading(shapeName, stickPoint);
 
