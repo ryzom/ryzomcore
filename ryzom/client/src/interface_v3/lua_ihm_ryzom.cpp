@@ -2209,6 +2209,34 @@ int CLuaIHMRyzom::getTimestampHuman(CLuaState &ls)
 
 
 
+// ***************************************************************************
+int CLuaIHMRyzom::setRpItems(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_createUIElement)
+	const char *funcName = "setRpItems";
+	CLuaIHM::checkArgCount(ls, funcName, 1);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TTABLE);
+	CLuaObject params;
+	params.pop(ls);
+	ENUM_LUA_TABLE(params, it)
+	{
+		if (!it.nextKey().isInteger())
+		{
+			nlwarning("%s : bad key encountered with type %s, int expected.", funcName, it.nextKey().getTypename());
+			continue;
+		}
+
+		if (!it.nextValue().isString())
+		{
+			nlwarning("%s : bad value encountered with type %s for key %s, string expected.", funcName, it.nextValue().getTypename(), it.nextKey().toString().c_str());
+			continue;
+		}
+
+		SheetMngr.addRpItem(it.nextValue().toString());
+	}
+
+	return 1;
+}
 
 
 // ***************************************************************************
