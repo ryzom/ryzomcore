@@ -757,8 +757,8 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	// For some reason, there is no (visual) invalidation (server still blocks any action), force one
 	// Unfortunately, there is no clean way to do this, so we'll simulate one
 	// TODO review invalid actions
-	if (equipTime > 0)
-		fakeInvalidActions((NLMISC::TGameCycle)equipTime);
+	//if (equipTime > 0)
+	//	fakeInvalidActions((NLMISC::TGameCycle)equipTime);
 	return true;
 }
 
