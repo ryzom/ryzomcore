@@ -2154,6 +2154,18 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::setContainerAlpha (sint32 a)
+	{
+		vector<CViewBase*>::const_iterator itv;
+		for (itv = _Views.begin(); itv != _Views.end(); itv++)
+		{
+			CViewBase *pVB = *itv;
+			nlwarning("setContainerAlpha: %s %s", pVB->getShortID().c_str(), std::to_string(pVB->getRenderLayer()).c_str());
+			pVB->setAlpha(a);
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void	CInterfaceGroup::setLeftClickHandler(const std::string &handler)
 	{
 		_AHOnLeftClick = CAHManager::getInstance()->getAH(handler, _AHOnLeftClickParams);
