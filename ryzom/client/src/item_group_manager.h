@@ -125,20 +125,12 @@ public:
 	bool deleteGroup(std::string name);
 	void listGroup();
 	std::vector<std::string> getGroupNames(CDBCtrlSheet *pCS);
-	// Used to fake invalid actions
-	void update();
 
 private:
 	CItemGroup *findGroup(std::string name);
 	std::vector<CItemGroup> _Groups;
 	// Singleton's instance
 	static CItemGroupManager *_Instance;
-	//
-	void fakeInvalidActions(NLMISC::TGameCycle time);
-	void invalidActions(NLMISC::TGameCycle begin, NLMISC::TGameCycle end);
-	void validActions();
-	NLMISC::TGameCycle _EndInvalidAction;
-	NLMISC::TGameCycle _StartInvalidAction;
 	// Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even tho they aren't really
 	// Because of a synchronisation error between client and server
 	bool isItemEquipped(CDBCtrlSheet *item, CItemGroup::CSlot &equipSlot);
