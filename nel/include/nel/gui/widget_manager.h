@@ -328,6 +328,7 @@ namespace NLGUI
 									sint32 wParent, sint32 hParent );
 		
 		void updateTooltipCoords();
+		void updateContextHelpColors();
 		
 		// Update tooltip coordinate if they need to be (getInvalidCoords() returns a value != 0)
 		void updateTooltipCoords(CCtrlBase *newCtrl);
@@ -614,6 +615,12 @@ namespace NLGUI
 		uint8 _GlobalContainerAlpha;
 		uint8 _GlobalRolloverFactorContent;
 		uint8 _GlobalRolloverFactorContainer;
+
+		NLMISC::CCDBNodeLeaf *_ContextHelpContentAlphaDB;
+		NLMISC::CCDBNodeLeaf *_ContextHelpContainerColorDB;
+		NLMISC::CCDBNodeLeaf *_ContextHelpContainerAlphaDB;
+		NLMISC::CRGBA _ContextHelpContainerColor;
+		uint8 _ContextHelpContentAlpha;
 
 		bool _MouseHandlingEnabled;
 		
