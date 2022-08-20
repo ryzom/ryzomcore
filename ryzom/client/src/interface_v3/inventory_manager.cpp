@@ -1199,6 +1199,19 @@ void CInventoryManager::unequip(const std::string &invPath)
 	}
 }
 
+void CInventoryManager::onUpdateEquipHands()
+{
+	// update hands slots after initial BAG inventory has received
+	CCDBNodeLeaf *pNL;
+	pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:0:INDEX_IN_BAG", false);
+	if (pNL && pNL->getValue32() != 0)
+		_DBEquipObs.update(pNL);
+
+	pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:1:INDEX_IN_BAG", false);
+	if (pNL && pNL->getValue32() != 0)
+		_DBEquipObs.update(pNL);
+}
+
 
 // ***************************************************************************
 // Observer on DB equipment branch
