@@ -366,6 +366,7 @@ NLMISC_COMMAND(naked, "get naked !", "")
 {
 	std::string handPath = "LOCAL:INVENTORY:HAND:";
 	std::string equipPath = "LOCAL:INVENTORY:EQUIP:";
+	std::string hotbarPath = "LOCAL:INVENTORY:HOTBAR:";
 	uint32 i;
 	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
@@ -376,6 +377,12 @@ NLMISC_COMMAND(naked, "get naked !", "")
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 	{
 		CInventoryManager::getInstance()->unequip(equipPath + NLMISC::toString(i));
+
+	}
+
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(hotbarPath + NLMISC::toString(i));
 
 	}
 	return true;
