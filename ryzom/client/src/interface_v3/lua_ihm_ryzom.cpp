@@ -626,6 +626,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getCharacterSheetRegionForce),
 		LUABIND_FUNC(getCharacterSheetRegionLevel),
 		LUABIND_FUNC(setChar3dDBfromVPX),
+		LUABIND_FUNC(setChar3dDBfromServerDB),
 		LUABIND_FUNC(getRefHeightScale),
 		LUABIND_FUNC(getRegionByAlias),
 		LUABIND_FUNC(getGroundZ),
@@ -3969,6 +3970,13 @@ float CLuaIHMRyzom::setChar3dDBfromVPX(const std::string &branch, const std::str
 
 
 	return cs.VisualPropC.PropertySubData.CharacterHeight;
+}
+
+void CLuaIHMRyzom::setChar3dDBfromServerDB(const std::string &branch)
+{
+	CCharacterSummary cs;
+	SCharacter3DSetup::setupCharacterSummaryFromSERVERDB(cs);
+	SCharacter3DSetup::setupDBFromCharacterSummary(branch, cs);
 }
 
 float CLuaIHMRyzom::getRefHeightScale(const std::string &people, const std::string &vpa)
