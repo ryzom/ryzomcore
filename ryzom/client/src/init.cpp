@@ -1238,27 +1238,9 @@ void prelogInit()
 		Driver->setWindowIcon(bitmaps);
 #endif
 
-		sint32 posX = 0, posY = 0;
-
+		// use position saved in config
 		if (ClientCfg.Windowed)
-		{
-			// use position saved in config
-			posX = ClientCfg.PositionX;
-			posY = ClientCfg.PositionY;
-		}
-		else
-		{
-			// position is not saved in config so center the window
-			UDriver::CMode tmp;
-			if (Driver->getCurrentScreenMode(tmp))
-			{
-				posX = (tmp.Width - Driver->getWindowWidth())/2;
-				posY = (tmp.Height - Driver->getWindowHeight())/2;
-			}
-		}
-
-		// Set the window position
-		Driver->setWindowPos(posX, posY);
+			Driver->setWindowPos(ClientCfg.PositionX, ClientCfg.PositionY);
 
 		// Show the window
 		Driver->showWindow();
