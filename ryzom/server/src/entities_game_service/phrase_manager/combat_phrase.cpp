@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1747,8 +1750,6 @@ bool CCombatPhrase::launch()
 	_Behaviour.Data = 0;
 	_Behaviour.Data2 = 0;
 	_Behaviour.DeltaHP = 0;
-	// delta per-target
-	std::vector<sint16> targetDeltaHp;
 
 	// spend stamina, hp
 	if (_TotalStaminaCost != 0)
@@ -2053,17 +2054,14 @@ bool CCombatPhrase::launch()
 		_RightApplyActions.reserve(nbTargets);
 		_LeftApplyActions.reserve(nbTargets);
 
-		// prefill target info
-		targetDeltaHp = std::vector<sint16>(nbTargets, 0);
-
 		// launch right hand attack
-		success = launchAttack(actingEntity, true, _IsMad, madnessCaster, targetDeltaHp);
+		success = launchAttack(actingEntity, true, _IsMad, madnessCaster);
 
 		// launch left hand attack if a weapon is in left hand and right attack isn't a miss
 		successLeft = false;
 		if (_LeftWeapon.Family == ITEMFAMILY::MELEE_WEAPON)
 		{
-			successLeft = launchAttack(actingEntity, false, _IsMad, madnessCaster, targetDeltaHp);
+			successLeft = launchAttack(actingEntity, false, _IsMad, madnessCaster);
 		}
 
 		if (!success && !successLeft)
@@ -2101,17 +2099,9 @@ bool CCombatPhrase::launch()
 	targetList.clear();
 
 	const sint size = (sint)_Targets.size();
-	// make sure there is enough delta info
-	if (targetDeltaHp.size() < size)
-	{
-		for (uint i = targetDeltaHp.size(); i < size; ++i)
-		{
-			targetDeltaHp.push_back(0);
-		}
-	}
 	for (sint i = size-1 ; i >= 0 ; --i)
 	{
-		PHRASE_UTILITIES::updateMirrorTargetList(targetList, _Targets[i].Target->getEntityRowId(), _Targets[i].Distance, false, targetDeltaHp[i]);
+		PHRASE_UTILITIES::updateMirrorTargetList(targetList, _Targets[i].Target->getEntityRowId(), _Targets[i].Distance, false);
 	}
 
 	// compute latency end date
@@ -2323,7 +2313,7 @@ bool CCombatPhrase::launch()
 //--------------------------------------------------------------
 //					launchAttack()  
 //--------------------------------------------------------------
-bool CCombatPhrase::launchAttack(CEntityBase * actingEntity, bool rightHand, bool isMad, TDataSetRow madnessCaster, std::vector<sint16> &targetDeltaHp)
+bool CCombatPhrase::launchAttack(CEntityBase * actingEntity, bool rightHand, bool isMad, TDataSetRow madnessCaster)
 {
 	H_AUTO(CCombatPhrase_launchAttack);
 	
@@ -2420,13 +2410,10 @@ bool CCombatPhrase::launchAttack(CEntityBase * actingEntity, bool rightHand, boo
 			}
 		}
 
-		// targetDeltaHp must be prefilled
-		nlassertex( nbTargets == targetDeltaHp.size(), ("%d %d", nbTargets, targetDeltaHp.size() ) );
-
 		// launch on all targets
 		for (uint i = 0 ; i < nbTargets ; ++i)
 		{
-			launchAttackOnTarget(i, rightHand, isMad, needComputeBaseDamage, targetDeltaHp[i]);
+			launchAttackOnTarget(i, rightHand, isMad, needComputeBaseDamage);
 		}
 	}
 
@@ -2441,7 +2428,7 @@ bool CCombatPhrase::launchAttack(CEntityBase * actingEntity, bool rightHand, boo
 //  Added code to end (after all positive checks concluded and actions processed)
 //  to enable mission tracking on combat phrases and stanzas
 //--------------------------------------------------------------
-void CCombatPhrase::launchAttackOnTarget(uint8 targetIndex, bool rightHand, bool isMad, bool needComputeBaseDamage, sint16 &deltaHP)
+void CCombatPhrase::launchAttackOnTarget(uint8 targetIndex, bool rightHand, bool isMad, bool needComputeBaseDamage)
 {
 	H_AUTO(CCombatPhrase_launchAttackOnTarget);
 	
@@ -2799,7 +2786,6 @@ void CCombatPhrase::launchAttackOnTarget(uint8 targetIndex, bool rightHand, bool
 				}
 			}
 		}
-		deltaHP -= (sint16)damage;
 
 		TApplyAction action;
 		action.Target						= combatDefender;
@@ -3293,10 +3279,9 @@ void CCombatPhrase::applyAction(TApplyAction & action, std::vector<TReportAction
 						PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport(targetInfos.ReportAction);
 						PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->reportAction(targetInfos.ReportAction);
 					}
-					// TODO: flying hp from enchant damage?
 					_Behaviour.DeltaHP -= (sint16)targetInfos.DmgHp;
 					if ( _Behaviour.Behaviour != MBEHAV::UNKNOWN_BEHAVIOUR )
-						PHRASE_UTILITIES::sendUpdateBehaviour(actingEntity->getEntityRowId(), _Behaviour);
+						PHRASE_UTILITIES::sendUpdateBehaviour( actingEntity->getEntityRowId(), _Behaviour );
 				}
 			}
 		}

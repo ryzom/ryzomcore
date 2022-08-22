@@ -16,18 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
-//
-//
-//
-//
-//
-//		WARNING : this is a generated file, don't change it !
-//
-//
-//
-//
-//
-//
+// WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
@@ -1181,7 +1170,7 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<10; ++i)
+	for (uint i=0; i<8; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
 		nlassert(node != NULL);
@@ -1268,7 +1257,7 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<10; ++i)
+	for (uint i=0; i<8; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
 		nlassert(node != NULL);
@@ -1367,10 +1356,6 @@ void CBankAccessor_PLR::TINVENTORY::init(ICDBStructNode *parent)
 	nlassert(node != NULL);
 	_HAND.init(node);
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("HOTBAR"), false );
-	nlassert(node != NULL);
-	_HOTBAR.init(node);
-
 	node  = parent->getNode( ICDBStructNode::CTextId("EQUIP"), false );
 	nlassert(node != NULL);
 	_EQUIP.init(node);
@@ -1428,43 +1413,6 @@ void CBankAccessor_PLR::TINVENTORY::THAND::TArray::init(ICDBStructNode *parent, 
 	
 }
 
-void CBankAccessor_PLR::TINVENTORY::THOTBAR::init(ICDBStructNode *parent)
-{
-	ICDBStructNode *node = parent;
-
-	_BranchNode = node;
-
-	// leaf init
-	
-
-	// branch init
-	
-	for (uint i=0; i<5; ++i)
-	{
-		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
-		nlassert(node != NULL);
-		_Array[i].init(node, i);
-	}
-	
-}
-
-
-void CBankAccessor_PLR::TINVENTORY::THOTBAR::TArray::init(ICDBStructNode *parent, uint index)
-{
-	ICDBStructNode *node = parent;
-
-	_BranchNode = node;
-
-	// leaf init
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INDEX_IN_BAG"), false );
-	nlassert(node != NULL);
-	_INDEX_IN_BAG = node;
-	
-
-	// branch init
-	
-}
 
 void CBankAccessor_PLR::TINVENTORY::TEQUIP::init(ICDBStructNode *parent)
 {

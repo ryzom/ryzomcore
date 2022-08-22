@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -558,19 +561,10 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 				if (it != _PassChannels.end())
 					_PassChannels.erase(it);
 
-				TMAPExtraFactionChannel::iterator it2 = _UserChannel.begin();
-				while (it2 != _UserChannel.end())
+				for (TMAPExtraFactionChannel::iterator it2 = _UserChannel.begin(); it2 != _UserChannel.end(); ++it2)
 				{
 					if ((*it2).second == currentChannels[i])
-					{
-						TMAPExtraFactionChannel::iterator itErase = it2;
-						++it2;
-						_UserChannel.erase(itErase);
-					}
-					else
-					{
-						++it2;
-					}
+						_UserChannel.erase(it2);
 				}
 			}
 

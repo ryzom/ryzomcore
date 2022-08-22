@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -406,15 +409,6 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	\
 	PROP(uint8,	_HairType)\
 	PROP(uint8,	_HairColor)\
-	PROP(uint8,	_DefaultHairType)\
-	PROP(uint8,	_DefaultHairColor)\
-	PROP(uint8,	_WigHairType)\
-	PROP(uint8,	_WigHairColor)\
-	PROP(uint32,_MainTattoo)\
-	PROP(string,_UnderwearChest)\
-	PROP(string,_UnderwearLegs)\
-	PROP(uint8,_UnderwearChestColor)\
-	PROP(uint8,_UnderwearLegsColor)\
 	PROP(uint8,	_HatColor)\
 	PROP(uint8,	_JacketColor)\
 	PROP(uint8,	_ArmsColor)\
@@ -464,8 +458,6 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 \
 	LPROP(string, _SDBPvPPath, if (!_SDBPvPPath.empty()))\
 	PROP(uint32,_GuildId)\
-	PROP(uint32,_LastGuildId)\
-	PROP_GAME_CYCLE_COMP(_GuildEnterTime)\
 	PROP(uint8, _CreationPointsRepartition)\
 	PROP_GAME_CYCLE_COMP(_ForbidAuraUseStartDate)\
 	PROP_GAME_CYCLE_COMP(_ForbidAuraUseEndDate)\
@@ -473,21 +465,12 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP2(_NewTitle, string, _NewTitle, _NewTitle=val)\
 	PROP2(_TagPvPA, string, _TagPvPA, _TagPvPA=val)\
 	PROP2(_TagPvPB, string, _TagPvPB, _TagPvPB=val)\
-	PROP2(_DefaultTagA, string, _DefaultTagA, _DefaultTagA=val)\
-	PROP2(_DefaultTagB, string, _DefaultTagB, _DefaultTagB=val)\
 	PROP2(_TagA, string, _TagA, _TagA=val)\
 	PROP2(_TagB, string, _TagB, _TagB=val)\
-	PROP2(_TagRightHand, string, _TagRightHand, _TagRightHand=val)\
-	PROP2(_TagLeftHand, string, _TagLeftHand, _TagLeftHand=val)\
-	PROP2(_TagHat, string, _TagHat, _TagHat=val)\
 \
 	/* Visual Properties */\
 	PROP2(HairType,				uint8, _VisualPropertyA().PropertySubData.HatModel,			SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.HatModel,val))\
 	PROP2(HairColor,			uint8, _VisualPropertyA().PropertySubData.HatColor,			SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.HatColor,val))\
-	PROP2(ChestType,			uint8, _VisualPropertyA().PropertySubData.JacketModel,			SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.JacketModel,val))\
-	PROP2(ChestColor,			uint8, _VisualPropertyA().PropertySubData.JacketColor,			SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.JacketColor,val))\
-	PROP2(LegsType,				uint8, _VisualPropertyA().PropertySubData.TrouserModel,			SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.TrouserModel,val))\
-	PROP2(LegsColor,			uint8, _VisualPropertyA().PropertySubData.TrouserColor,			SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.TrouserColor,val))\
 	PROP2(GabaritHeight,		uint8, _VisualPropertyC().PropertySubData.CharacterHeight,	SET_STRUCT_MEMBER(_VisualPropertyC,PropertySubData.CharacterHeight,val))\
 	PROP2(GabaritTorsoWidth,	uint8, _VisualPropertyC().PropertySubData.TorsoWidth,		SET_STRUCT_MEMBER(_VisualPropertyC,PropertySubData.TorsoWidth,val))\
 	PROP2(GabaritArmsWidth,		uint8, _VisualPropertyC().PropertySubData.ArmsWidth,		SET_STRUCT_MEMBER(_VisualPropertyC,PropertySubData.ArmsWidth,val))\
@@ -583,7 +566,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 \
 	LSTRUCT_MAP2(Inventory,string,\
 		for(uint32 i=0; i<INVENTORIES::NUM_INVENTORY; ++i) \
-			if (i!=INVENTORIES::handling && i!=INVENTORIES::equipment && i!=INVENTORIES::hotbar) \
+			if (i!=INVENTORIES::handling && i!=INVENTORIES::equipment) \
 				if (_Inventory[i]!=NULL && _Inventory[i]->getSlotCount() != 0),\
 		INVENTORIES::toString((INVENTORIES::TInventory)i),\
 		CInventoryProxy(const_cast<CCharacter *>(this), _Inventory[i]).store(pdr),\
@@ -1204,7 +1187,6 @@ static void displayWarning(const std::string& s)
 	FLAG0(CLEAR,clear())\
 	PROP2(Name,string,Name.toUtf8(),Name.fromUtf8(val))\
 	PROP_VECT(CSheetId,Bricks)\
-	PROP2(IconIndex,uint8,IconIndex,IconIndex=val)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
@@ -1374,7 +1356,7 @@ private:
 	uint32 RefInventoryId = INVENTORIES::NUM_INVENTORY;\
 	uint16 slotImage = 0xffff;\
 
-// TODO: add hotbar 
+
 #define PERSISTENT_POST_APPLY\
 	if ( slotImage != 0xFFFF )\
 	{\
@@ -1425,10 +1407,10 @@ private:
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
 	PROP2(_CustomText,					ucstring,	_CustomText,				_CustomText=val)\
+	PROP2(_CustomName,					ucstring,	_CustomName,				_CustomName=val)\
 	PROP(bool, _Movable)\
 	PROP(bool, _UnMovable)\
 	PROP(bool, _LockedByOwner)\
-	PROP(bool, _DisableStacking)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

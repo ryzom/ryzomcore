@@ -62,6 +62,7 @@ private:
 	/// sheet of the phrase
 	NLMISC::CSheetId		_SPhraseId;
 	ucstring				_CustomText;
+	ucstring				_CustomName;
 	std::string				_RequiredFaction;
 	std::string				_RequiredPowo;
 };

@@ -45,7 +45,7 @@ void CMissionSolo::updateUsersJournalEntry()
 }
 
 void CMissionSolo::clearUsersJournalEntry()
-{
+{	
 	CCharacter * user = PlayerManager.getChar( _Taker );
 	if ( user )
 	{
@@ -77,7 +77,7 @@ void CMissionSolo::clearUsersJournalEntry()
 		{
 //			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:GOALS:%u:TEXT",_ClientIndex,i), 0);
 			missionItem.getGOALS().getArray(i).setTEXT(user->_PropertyDatabase, 0);
-		}
+		}	
 	}
 }
 
@@ -104,7 +104,7 @@ void CMissionSolo::setupEscort(const std::vector<TAIAlias> & aliases)
 	if ( !team )
 		TeamManager.addFakeTeam( user );
 	msg.TeamId = user->getTeamId();
-
+	
 	CMirrorPropValueRO<uint32>	in(TheDataset, row, DSPropertyAI_INSTANCE);
 	msg.InstanceNumber = in;
 	CWorldInstances::instance().msgToAIInstance(in, msg);
@@ -121,8 +121,7 @@ void CMissionSolo::getEntities(std::vector<TDataSetRow>& entities)
 void CMissionSolo::stopChildren()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	for ( uint i = 0; i < templ->ChildrenMissions.size(); i++ )
 	{
 		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
@@ -144,8 +143,7 @@ void CMissionSolo::stopChildren()
 void CMissionSolo::onFailure(bool ignoreJumps, bool sendMessage)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	CMission::onFailure(ignoreJumps);
 
 	if ( getProcessingState() == CMissionBaseBehaviour::Normal  )
@@ -179,8 +177,7 @@ void CMissionSolo::onFailure(bool ignoreJumps, bool sendMessage)
 void CMissionSolo::forceSuccess()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	CCharacter * user = PlayerManager.getChar( _Taker );
 	if ( user )
 	{
@@ -192,7 +189,7 @@ void CMissionSolo::forceSuccess()
 		CMissionManager::getInstance()->missionDoneOnce(templ);
 		stopChildren();
 		user->processMissionEvent( event );
-
+		
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || isChained() || templ->Tags.AutoRemove )
 		{

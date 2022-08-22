@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -17,7 +20,7 @@
 
 
 /////////////
-// INCLUDE
+// INCLUDE 
 /////////////
 #include "stdpch.h"
 
@@ -55,7 +58,7 @@ CVariable<sint32> DeltaTickMustBeApplyForWindermeerCommunityMerge("egs","DeltaTi
 NL_INSTANCE_COUNTER_IMPL(CCharacterVersionAdapter);
 
 /////////////
-// GLOBALS
+// GLOBALS 
 /////////////
 CCharacterVersionAdapter	*CCharacterVersionAdapter::_Instance = NULL;
 
@@ -68,7 +71,7 @@ uint32 CCharacterVersionAdapter::currentVersionNumber() const
 {
 	////////////////////////////////////
 	// VERSION History
-	// 0 :
+	// 0 : 
 	// 1 : (04/10/2004) patch bad timers (effects and missions, after a problem with tick save)
 	// 2 : (21/10/2004) clear all bricks and phrases and give back skill points
 	// 3 : (28/10/2004) clear all missions but the welcome mission
@@ -97,9 +100,8 @@ uint32 CCharacterVersionAdapter::currentVersionNumber() const
 	// 26 : (23/04/2015) fix foragetool HP
 	// 27 : (10/10/2017) fix /learnAllBrick exploit
 	// 28 : (21/07/2018) fix amps HP reset
-	// 29 : (16/06/2022) set setDefaultHair and setDefaultHairColor to current Hair and HairColor
 	////////////////////////////////////
-	return 29;
+	return 28;
 }
 
 
@@ -137,7 +139,6 @@ void CCharacterVersionAdapter::adaptCharacterFromVersion( CCharacter &character,
 	case 25: adaptToVersion26(character);
 	case 26: adaptToVersion27(character);
 	case 27: adaptToVersion28(character);
-	case 28: adaptToVersion29(character);
 	default:;
 	}
 }
@@ -154,7 +155,7 @@ void CCharacterVersionAdapter::adaptToVersion1(CCharacter &character) const
 	for ( ; itH != character._MissionHistories.end() ; ++itH)
 	{
 		TMissionHistory &history = (*itH).second;
-		history.LastSuccessDate = 0;
+		history.LastSuccessDate = 0;		
 	}
 
 	const TGameCycle time = CTickEventHandler::getGameCycle();
@@ -177,7 +178,7 @@ void CCharacterVersionAdapter::adaptToVersion1(CCharacter &character) const
 void CCharacterVersionAdapter::adaptToVersion2(CCharacter &character) const
 {
 	/****************************************************************/
-	/* reset all bricks and actions, set charcateristics to their
+	/* reset all bricks and actions, set charcateristics to their 
 	/* starting values and recompute scores
 	/****************************************************************/
 
@@ -190,8 +191,8 @@ void CCharacterVersionAdapter::adaptToVersion2(CCharacter &character) const
 	character._SpType[EGSPD::CSPType::Harvest] = 10 * skillsTree->getPlayerSkillPointsUnderSkill(&character._Skills, SKILLS::SH);
 
 	character._Skills._Sp = 0;
-
-	// clear all memories...
+	
+	// clear all memories... 
 	character._MemorizedPhrases.forgetAll();
 
 	// clear bricks and phrases
@@ -202,8 +203,8 @@ void CCharacterVersionAdapter::adaptToVersion2(CCharacter &character) const
 	for( uint i = 0; i < CHARACTERISTICS::NUM_CHARACTERISTICS; ++i )
 	{
 		// at level 1 for formula dependency with regenerate value
-		character._PhysCharacs._PhysicalCharacteristics[ i ].Base = 10;
-
+		character._PhysCharacs._PhysicalCharacteristics[ i ].Base = 10; 
+	
 		character._PhysCharacs._PhysicalCharacteristics[ i ].Max = character._PhysCharacs._PhysicalCharacteristics[ i ].Base + character._PhysCharacs._PhysicalCharacteristics[ i ].Modifier;
 		character._PhysCharacs._PhysicalCharacteristics[ i ].Current = character._PhysCharacs._PhysicalCharacteristics[ i ].Max;
 	}
@@ -353,7 +354,7 @@ void CCharacterVersionAdapter::updateInventoryToVersion6 ( CInventoryBase *inven
 			if ( inventory->getItem(j) != NULL )
 			{
 				uint quantity = inventory->getItem(j)->getStackSize();
-				CSheetId sheet( inventory->getItem(j)->getSheetId() );
+				CSheetId sheet( inventory->getItem(j)->getSheetId() ); 
 				if ( sheet == bad1 || sheet == bad2 || sheet == bad3 || sheet == bad4 )
 				{
 					inventory->deleteItem(j);
@@ -373,7 +374,7 @@ void CCharacterVersionAdapter::updateInventoryToVersion6 ( CInventoryBase *inven
 //---------------------------------------------------
 void CCharacterVersionAdapter::adaptToVersion6(CCharacter &character) const
 {
-
+	
 //	const uint size1 = character._Inventory.size();
 	const uint size1 = INVENTORIES::NUM_INVENTORY;
 	for ( uint i = 0; i < size1; ++i )
@@ -450,7 +451,7 @@ void initCharacterAdapterToVersion7(std::map<uint,std::string> & assocMale, std:
 }
 
 
-
+			
 //---------------------------------------------------
 void CCharacterVersionAdapter::adaptToVersion7(CCharacter &character) const
 {
@@ -462,7 +463,7 @@ void CCharacterVersionAdapter::adaptToVersion7(CCharacter &character) const
 
 	map<uint,string>::iterator it;
 	if ( character.getGender() == GSGENDER::female )
-	{
+	{		
 		it = femaleSheets.find( character._HairType );
 		if ( it == femaleSheets.end() )
 		{
@@ -471,7 +472,7 @@ void CCharacterVersionAdapter::adaptToVersion7(CCharacter &character) const
 		}
 	}
 	else
-	{
+	{		
 		it = maleSheets.find( character._HairType );
 		if ( it == maleSheets.end() )
 		{
@@ -492,7 +493,7 @@ void CCharacterVersionAdapter::adaptToVersion7(CCharacter &character) const
 		return;
 	}
 	character._HairType = idx;
-
+	
 		/*
 		 Below is the association between former visual slot id / old sheet / new shhet
 
@@ -513,8 +514,8 @@ void CCharacterVersionAdapter::adaptToVersion7(CCharacter &character) const
 		36 : tr_cheveux_medium02.sitem : tr_hom_hair_style02.sitem
 		37 : tr_cheveux_short02.sitem : tr_hom_hair_basic02.sitem
 		38 : tr_cheveux_short03.sitem : tr_hom_hair_artistic02.sitem
-
-
+		
+		
 		10 : ma_cheveux_long01.sitem : ma_hom_hair_style04.sitem
 		11 : ma_cheveux_medium01.sitem : ma_hom_hair_basic02.sitem
 		12 : ma_cheveux_shave01.sitem : ma_hom_hair_basic01.sitem
@@ -523,9 +524,9 @@ void CCharacterVersionAdapter::adaptToVersion7(CCharacter &character) const
 		33 : ma_cheveux_long02.sitem : ma_hom_hair_artistic01.sitem
 		34 : ma_cheveux_medium02.sitem : ma_hom_hair_style02.sitem
 		35 : ma_cheveux_short02.sitem : ma_hom_hair_style03.sitem
-
-
-
+		
+		
+		
 		21 : zo_cheveux_long01.sitem : zo_hom_hair_basic02.sitem
 		22 : zo_cheveux_medium01.sitem : zo_hom_hair_style01.sitem
 		23 : zo_cheveux_shave01.sitem : zo_hom_hair_basic01.sitem
@@ -549,16 +550,16 @@ void CCharacterVersionAdapter::adaptToVersion7(CCharacter &character) const
 		30 : fy_cheveux_medium02.sitem : fy_hof_hair_style02.sitem
 		31 : fy_cheveux_medium03.sitem : fy_hof_hair_artistic01.sitem
 		32 : fy_cheveux_short02.sitem : fy_hof_hair_basic03.sitem
-
-		16 : tr_cheveux_long01.sitem : tr_hof_hair_style01.sitem
-		17 : tr_cheveux_medium01.sitem : tr_hof_hair_style02.sitem
+		
+		16 : tr_cheveux_long01.sitem : tr_hof_hair_style01.sitem  
+		17 : tr_cheveux_medium01.sitem : tr_hof_hair_style02.sitem  
 		18 : tr_cheveux_shave01.sitem : tr_hof_hair_basic01.sitem
 		19 : tr_cheveux_short01.sitem : tr_hof_hair_artistic03.sitem
 		36 : tr_cheveux_medium02.sitem : tr_hof_hair_artistic04.sitem
 		37 : tr_cheveux_short02.sitem : tr_hof_hair_artistic01.sitem
 		38 : tr_cheveux_short03.sitem : tr_hof_hair_artistic02.sitem
-
-
+		  
+			
 		10 : ma_cheveux_long01.sitem : ma_hof_hair_style01.sitem
 		11 : ma_cheveux_medium01.sitem : ma_hof_hair_artistic_01.sitem
 		12 : ma_cheveux_shave01.sitem : ma_hof_hair_basic_01.sitem
@@ -567,9 +568,9 @@ void CCharacterVersionAdapter::adaptToVersion7(CCharacter &character) const
 		33 : ma_cheveux_long02.sitem : ma_hof_hair_style02.sitem
 		34 : ma_cheveux_medium02.sitem : ma_hof_hair_artistic_02.sitem
 		35 : ma_cheveux_short02.sitem : ma_hof_hair_style03.sitem
-
-
-
+			  
+				
+				  
 		21 : zo_cheveux_long01.sitem : zo_hof_hair_style_04.sitem
 		22 : zo_cheveux_medium01.sitem : zo_hof_hair_style_02.sitem
 		23 : zo_cheveux_shave01.sitem : zo_hof_hair_basic_01.sitem
@@ -579,7 +580,7 @@ void CCharacterVersionAdapter::adaptToVersion7(CCharacter &character) const
 		41 : zo_cheveux_medium03.sitem : zo_hof_hair_style_03.sitem
 
   */
-
+		
 }
 
 //---------------------------------------------------
@@ -637,7 +638,7 @@ void CCharacterVersionAdapter::adaptToVersion11(CCharacter &character) const
 			break;
 		character._Missions->deleteFromMissions( (*it).first );
 	}
-
+	
 	// get the region where the user is
 	CRegion * region = dynamic_cast<CRegion*> (	CZoneManager::getInstance().getPlaceFromId( character.getCurrentRegion() ) );
 	if ( !region )
@@ -645,7 +646,7 @@ void CCharacterVersionAdapter::adaptToVersion11(CCharacter &character) const
 		nlwarning("<adaptToVersion11> user%s is on invalid region %u",character.getId().toString().c_str(), character.getCurrentRegion()  );
 		return;
 	}
-
+	
 	vector<TAIAlias> bots;
 	TAIAlias mission = CAIAliasTranslator::Invalid;
 	// if the user is in newbie land, give him the appropriate newbie mission
@@ -693,7 +694,7 @@ void CCharacterVersionAdapter::adaptToVersion11(CCharacter &character) const
 		case EGSPD::CPeople::Zorai :
 			mission = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName( "ZORAI_ENCYCLO_TUTORIAL" );
 			CAIAliasTranslator::getInstance()->getNPCAliasesFromName("zora_barman", bots);
-			break;
+			break;	
 		}
 	}
 	if ( mission == CAIAliasTranslator::Invalid || bots.empty() )
@@ -769,10 +770,10 @@ void CCharacterVersionAdapter::adaptToVersion13(CCharacter &c) const
 						c._MissionHistories.insert(pair<TAIAlias, TMissionHistory>(aRite01, mh));
 						if (pMTRite01->EncycloAlbum != -1)
 						{
-							c._EncycloChar->updateTask(	pMTRite01->EncycloAlbum,
-														pMTRite01->EncycloThema,
-														pMTRite01->EncycloTask,
-														2,
+							c._EncycloChar->updateTask(	pMTRite01->EncycloAlbum, 
+														pMTRite01->EncycloThema, 
+														pMTRite01->EncycloTask, 
+														2, 
 														false);
 						}
 					}
@@ -801,7 +802,7 @@ void CCharacterVersionAdapter::adaptToVersion14(CCharacter &character) const
 				{
 					if (item->durability() == 0 && item->maxDurability() > 0)
 					{
-						nlinfo("player %s, patching item %s HP, new value= %u",
+						nlinfo("player %s, patching item %s HP, new value= %u", 
 							character.getId().toString().c_str(), item->getSheetId().toString().c_str(), item->maxDurability());
 						item->addHp(item->maxDurability());
 					}
@@ -825,7 +826,7 @@ void CCharacterVersionAdapter::adaptToVersion15(CCharacter &character) const
 				const_cast<NLMISC::TGameCycle&> (character.getPlayerPets()[ i ].DeathTick) += DeltaTickMustBeApplyForWindermeerCommunityMerge;
 			}
 		}
-
+		
 		// update start sale cycle for item in sale store
 		for( uint32 i = 0; i < character.getItemInShop().getContent().size(); ++i )
 		{
@@ -921,7 +922,7 @@ void CCharacterVersionAdapter::adaptToVersion18(CCharacter &character) const
 						{
 							if (item->maxDurability() > 0)
 							{
-								nlinfo("player %s, patching tool %s HP, new value= %u",
+								nlinfo("player %s, patching tool %s HP, new value= %u", 
 									character.getId().toString().c_str(), item->getSheetId().toString().c_str(), item->maxDurability());
 								item->addHp(item->maxDurability());
 							}
@@ -991,7 +992,7 @@ void CCharacterVersionAdapter::adaptToVersion20(CCharacter &character) const
 	{
 		setToolsToMaxHP( character._PlayerRoom->getInventory() );
 	}
-
+	
 }
 
 //---------------------------------------------------
@@ -1041,13 +1042,13 @@ void CCharacterVersionAdapter::adaptToVersion23(CCharacter &character) const
 	parts.push_back("s");
 	parts.push_back("v");
 	vector<uint> deletePhrases;
-	// Check each part
+	// Check each part 
 	for (uint i = 0; i < parts.size(); i++)
 	{
 		CSheetId phraseSId = CSheetId("abcbah"+parts[i]+".sphrase");
 		CSheetId brickMSid = CSheetId("bcbah"+parts[i]+"_m.sbrick");
 		CSheetId brickSid = CSheetId("bcbah"+parts[i]+".sbrick");
-
+		
 		if (character._BoughtPhrases.find(phraseSId)  != character._BoughtPhrases.end())
 		{
 			if (character._KnownBricks.find(brickMSid) != character._KnownBricks.end()
@@ -1061,7 +1062,7 @@ void CCharacterVersionAdapter::adaptToVersion23(CCharacter &character) const
 			}
 		}
 	}
-
+	
 	if (sp > 0)
 	{
 		nlinfo("Adding %d SP Craft !", sp);
@@ -1086,7 +1087,7 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 	bricks.push_back("bthp17");
 	bricks.push_back("bthp18");
 	bricks.push_back("bthp20");
-
+	
 	bonus = 0;
 	for (uint i = 0; i < bricks.size(); i++)
 	{
@@ -1096,13 +1097,13 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 			bonus += 50;
 		}
 	}
-
+	
 	if (character.getScorePermanentModifiers(SCORES::hit_points) < bonus)
 	{
 		nlinfo("RITE BONUS FIX: Player %s need %d (hp) but have %d !", character.getName().toString().c_str(), bonus, character.getScorePermanentModifiers(SCORES::hit_points));
 		character.setScorePermanentModifiers(SCORES::hit_points, bonus);
 	}
-
+	
 	// SAP
 	bricks.clear();
 	bricks.push_back("btsap03");
@@ -1110,7 +1111,7 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 	bricks.push_back("btsap12");
 	bricks.push_back("btsap16");
 	bricks.push_back("btsap18");
-
+	
 	bonus = 0;
 	for (uint i = 0; i < bricks.size(); i++)
 	{
@@ -1120,13 +1121,13 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 			bonus += 50;
 		}
 	}
-
+	
 	if (character.getScorePermanentModifiers(SCORES::sap) < bonus)
 	{
 		nlinfo("RITE BONUS FIX: Player %s need %d (sap) but have %d !", character.getName().toString().c_str(),bonus, character.getScorePermanentModifiers(SCORES::sap));
 		character.setScorePermanentModifiers(SCORES::sap, bonus);
 	}
-
+	
 	// FOCUS
 	bricks.clear();
 	bricks.push_back("btfoc01");
@@ -1137,7 +1138,7 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 	bricks.push_back("btfoc17");
 	bricks.push_back("btfoc19");
 	bricks.push_back("btfoc20");
-
+	
 	bonus = 0;
 	for (uint i = 0; i < bricks.size(); i++)
 	{
@@ -1147,13 +1148,13 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 			bonus += 50;
 		}
 	}
-
+	
 	if (character.getScorePermanentModifiers(SCORES::focus) < bonus)
 	{
 		nlinfo("RITE BONUS FIX: Player %s need %d (focus) but have %d !", character.getName().toString().c_str(),bonus, character.getScorePermanentModifiers(SCORES::focus));
 		character.setScorePermanentModifiers(SCORES::focus, bonus);
 	}
-
+	
 	// STA
 	bricks.clear();
 	bricks.push_back("btsta13");
@@ -1162,7 +1163,7 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 	bricks.push_back("btsta16");
 	bricks.push_back("btsta17");
 	bricks.push_back("btsta20");
-
+	
 	bonus = 0;
 	for (uint i = 0; i < bricks.size(); i++)
 	{
@@ -1172,7 +1173,7 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 			bonus += 50;
 		}
 	}
-
+	
 	if (character.getScorePermanentModifiers(SCORES::stamina) < bonus)
 	{
 		nlinfo("RITE BONUS FIX: Player %s need %d (stamina) but have %d !", character.getName().toString().c_str(),bonus, character.getScorePermanentModifiers(SCORES::stamina));
@@ -1426,7 +1427,7 @@ void CCharacterVersionAdapter::adaptToVersion27(CCharacter &character) const
 			}
 			else if (item->getSheetId() == CSheetId("crystalized_spell.sitem"))
 			{
-
+					
 			}
 		}
 	}
@@ -1454,7 +1455,7 @@ void CCharacterVersionAdapter::adaptToVersion28(CCharacter &character) const
 						{
 							if (item->maxDurability() > 0)
 							{
-								nlinfo("player %s, patching ampli %s HP, new value= %u",
+								nlinfo("player %s, patching ampli %s HP, new value= %u", 
 									character.getId().toString().c_str(), item->getSheetId().toString().c_str(), item->maxDurability());
 								item->addHp(item->maxDurability());
 							}
@@ -1463,18 +1464,6 @@ void CCharacterVersionAdapter::adaptToVersion28(CCharacter &character) const
 				}
 			}
 		}
-	}
-}
-
-//---------------------------------------------------
-void CCharacterVersionAdapter::adaptToVersion29(CCharacter &character) const
-{
-	character.setDefaultHair(character.getHair());
-	character.setDefaultHairColor(character.getHairColor());
-	if (character.getUseWig())
-	{
-		character.setUseWig(false);
-		character.giveMoney(35000);
 	}
 }
 

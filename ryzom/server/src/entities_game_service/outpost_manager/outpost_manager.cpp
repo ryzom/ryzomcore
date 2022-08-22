@@ -127,12 +127,12 @@ static void cbOutpostSquadLeaderDied( NLNET::CMessage& msgin, const std::string 
 //----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
-COutpostManager::COutpostManager():
-	_NextOutpostToSave(0),
-	_OutpostUpdateCursor(0),
-	_OutpostPrimitivesLoaded(false),
-	_OutpostSaveFilesLoaded(false)
+COutpostManager::COutpostManager()
 {
+	_NextOutpostToSave = 0;
+	_OutpostUpdateCursor = 0;
+	_OutpostPrimitivesLoaded = false;
+	_OutpostSaveFilesLoaded = false;
 
 	OutpostDbgLog.addDisplayer( &OutpostDisplayer );
 	OutpostInfLog.addDisplayer( &OutpostDisplayer );
@@ -391,7 +391,7 @@ void COutpostManager::loadOutpostSaveFiles()
 
 	OUTPOST_DBG("Applying outpost save files...");
 	// all outposts where parsed. Let's try to load their saved files to init the dynamic data.
-	//string path = /*Bsi.getLocalPath() +*/ string("outposts");
+	string path = /*Bsi.getLocalPath() +*/ string("outposts");
 	// create the saved file directory, if needed
 //	CFile::createDirectory(path);
 
@@ -680,7 +680,8 @@ void COutpostManager::tickUpdate()
 				_Outposts[i]->updateOutpost(currentTime);
 			}
 
-			_OutpostUpdateCursor = 0;
+			if (_OutpostUpdateCursor != 0)
+				_OutpostUpdateCursor = 0;
 		}
 		else
 		{
@@ -742,11 +743,11 @@ void COutpostManager::saveAll()
 
 	if (!_OutpostSaveFilesLoaded)
 	{
-		nlinfo("No need to save outposts, they are not loaded yet!");
+		nldebug("No need to save outposts, they are not loaded yet!");
 		return;
 	}
 
-	nlinfo("Saving all outposts...");
+	nldebug("Saving all outposts...");
 	TTime startTime = NLMISC::CTime::getLocalTime();
 
 	std::vector<NLMISC::CSmartPtr<COutpost> >::const_iterator it;
@@ -758,7 +759,7 @@ void COutpostManager::saveAll()
 	}
 
 	TTime endTime = NLMISC::CTime::getLocalTime();
-	nlinfo("Saved all outposts in %" NL_I64 "d ms.", (endTime-startTime));
+	nldebug("Saved all outposts in %" NL_I64 "d ms.", (endTime-startTime));
 }
 
 //----------------------------------------------------------------------------
@@ -924,7 +925,7 @@ TAIAlias COutpostManager::getOutpostFromUserPosition( CCharacter *user ) const
 			{
 				OUTPOSTENUMS::TOutpostState state = outpost->getState();
 				bool outpostInFire = state == OUTPOSTENUMS::AttackBefore || state == OUTPOSTENUMS::AttackRound || state == OUTPOSTENUMS::DefenseBefore || state == OUTPOSTENUMS::DefenseRound;
-				if (outpost->getPvpType() == OUTPOSTENUMS::toPVPType("GVE") && outpostInFire)
+				if (outpost->getName().substr(0, 14) == "outpost_nexus_" && outpostInFire)
 				{
 					nlinfo("DISTANCE TO OUTPOST = %f", distance);
 					if (distance > 20.f && user->getOutpostSide() == OUTPOSTENUMS::UnknownPVPSide)

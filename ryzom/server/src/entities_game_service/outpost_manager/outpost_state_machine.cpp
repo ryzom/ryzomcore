@@ -56,9 +56,6 @@ static uint32 const hours = 60*minutes;
 static uint32 const days = 24*hours;
 
 CVariable<uint32> OutpostRangeForCancelOnReset("egs", "OutpostRangeForCancelOnReset", "Time range before next attack period in which a service reboot will cancel the challenge", true, 3*hours, true );
-CVariable<uint8> OutpostLevelAfterWinOnGvGE("egs", "OutpostLevelAfterWinOnGvGE", "Level of GvE/GvG OP when a player guild win", 19, 0, true );
-CVariable<uint8> OutpostLevelAfterLoseOnGvE("egs", "OutpostLevelAfterLoseOnGvE", "Level of GvE OP when a player guild lose", 12, 0, true );
-CVariable<uint8> OutpostLevelAfterLoseOnGvG("egs", "OutpostLevelAfterLoseOnGvG", "Level of GvG OP when a player guild lose", 15, 0, true );
 CVariable<bool> UseOutpostExploitFix("egs", "UseOutpostExploitFix", "set true to enable outpost exploit fix", true, false, true );
 
 //----------------------------------------------------------------------------
@@ -95,8 +92,12 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 			// Clean attacker
 			setAttackerGuild(0);
 			resetDefaultDefenseSquads();
-			if (_CurrentOutpostLevel>computeGuildMinimumOutpostLevel())
-				actionSetTimer0(computeLevelDecrementTime());
+			if (isBelongingToAGuild())
+			{
+				if (_CurrentOutpostLevel>computeGuildMinimumOutpostLevel())
+					actionSetTimer0(computeLevelDecrementTime());
+			} else
+				_CurrentOutpostLevel = computeTribeOutpostLevel();
 		} break;
 		case Challenged:
 		{
@@ -123,13 +124,16 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 		} break;
 		case Timer0End:
 		{
-			if (_CurrentOutpostLevel>computeGuildMinimumOutpostLevel())
+			if (isBelongingToAGuild())
 			{
-				--_CurrentOutpostLevel;
-				OUTPOST_INF("Outpost %s: outpost level is now %d", _Name.c_str(), _CurrentOutpostLevel+1);
+				if (_CurrentOutpostLevel>computeGuildMinimumOutpostLevel())
+				{
+					--_CurrentOutpostLevel;
+					OUTPOST_INF("Outpost %s: outpost level is now %d", _Name.c_str(), _CurrentOutpostLevel+1);
+				}
+				if (_CurrentOutpostLevel>computeGuildMinimumOutpostLevel())
+					actionSetTimer0(computeLevelDecrementTime());
 			}
-			if (_CurrentOutpostLevel>computeGuildMinimumOutpostLevel())
-				actionSetTimer0(computeLevelDecrementTime());
 		} break;
 		case EndOfState:
 		{
@@ -298,59 +302,26 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 		{
 			OUTPOST_INF("Outpost %s: Continuing attack phase (after fight)", _Name.c_str());
 			// Here we may shorten the delay if _MaxAttackLevel<=_CurrentOutpostLevel
-
-			// On GvG/GVE/PVE win, set OutpostLevelAfterWinOnGvE and instant peace
-			if (_FightData._MaxAttackLevel > _CurrentOutpostLevel)
-			{
-				if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE || _PVPType == OUTPOSTENUMS::GVG)
-				{
-					_CurrentOutpostLevel = OutpostLevelAfterWinOnGvGE.get();
-					actionChangeOwner();
-					if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
-						_PVPType = OUTPOSTENUMS::Full;
-					actionPostNextState(Peace);
-				}
-				else
-				{
-					if (OutpostStateTimeOverride>(uint32)0)
-						actionSetTimer0(OutpostStateTimeOverride);
-					else
-						actionSetTimer0(computeTimeAfterAttack());
-				}
-			}
+			if (OutpostStateTimeOverride>(uint32)0)
+				actionSetTimer0(OutpostStateTimeOverride);
 			else
-			{
-				// On GVE/PVE lose, set OutpostLevelAfterLoseOnGvE and instant peace
-				if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
-				{
-					_CurrentOutpostLevel = OutpostLevelAfterLoseOnGvE.get();
-					if (_PVPType == OUTPOSTENUMS::GVE)
-						_PVPType = OUTPOSTENUMS::PVE;
-					actionPostNextState(Peace);
-				}
-				else
-				{
-					if (OutpostStateTimeOverride>(uint32)0)
-						actionSetTimer0(OutpostStateTimeOverride);
-					else
-						actionSetTimer0(computeTimeAfterAttack());
-				}
-			}
+				actionSetTimer0(computeTimeAfterAttack());
 		} break;
 		case Timer0End:
 		{
-			// Only Full need defenseBefore
-			if (_PVPType == OUTPOSTENUMS::Full)
+			if (_FightData._MaxAttackLevel > _CurrentOutpostLevel)
 			{
-				if (_FightData._MaxAttackLevel > _CurrentOutpostLevel)
-					actionPostNextState(DefenseBefore);
-				else
+				if (!isBelongingToAGuild())
+				{
+					_CurrentOutpostLevel = _FightData._MaxAttackLevel;
+					actionChangeOwner();
 					actionPostNextState(Peace);
+				}
+				else
+					actionPostNextState(DefenseBefore);
 			}
-
-			if (_PVPType == OUTPOSTENUMS::GVG)
+			else
 				actionPostNextState(Peace);
-
 		//	tellEventState(event, _State);
 		} break;
 		case EndOfState:
@@ -519,7 +490,7 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 	default:
 		eventException(event, eventParams);
 	}
-
+	
 	// update the main outpost properties in client database
 	askOutpostDBUpdate();
 	askGuildDBUpdate(COutpostGuildDBUpdater::OUTPOST_PROPERTIES);

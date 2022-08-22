@@ -221,9 +221,9 @@ public:
 	///\name inventory management
 	//@{
 	/// take an item from guild inventory (set quantity to UINT_MAX for 'all stack')
-	void	takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session );
+	void	takeItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 session );
 	/// put an item in guild inventory (set quantity to UINT_MAX for 'all stack')
-	void	putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session );
+	void	putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 session );
 	/// user wanna take money
 	void	takeMoney( CCharacter * user, uint64 money, uint16 session );
 	/// user wanna put money

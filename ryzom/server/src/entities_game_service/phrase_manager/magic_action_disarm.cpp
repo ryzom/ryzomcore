@@ -50,7 +50,7 @@ bool CMagicActionDisarm::initFromAiAction( const CStaticAiAction *aiAction, CMag
 //					launch
 //--------------------------------------------------------------
 void CMagicActionDisarm::launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-								 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, std::vector<sint16> &targetDeltaHp, const NLMISC::CBitSet & invulnerabilityOffensive,
+								 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
 								 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
 {
 	H_AUTO(CMagicActionDisarm_launch);
@@ -64,10 +64,6 @@ void CMagicActionDisarm::launch( CMagicPhrase * phrase, sint deltaLevel, sint sk
 
 	const vector<CSpellTarget> &targets = phrase->getTargets();
 	const uint nbTargets = (uint)targets.size();
-
-	// targetDeltaHp must be prefilled
-	nlassertex( nbTargets == targetDeltaHp.size(), ("%d %d", nbTargets, targetDeltaHp.size() ) );
-
 	for (uint i = 0 ; i < nbTargets ; ++i)
 	{
 		if (!TheDataset.isAccessible(targets[i].getId()))

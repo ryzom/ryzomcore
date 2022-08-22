@@ -1,4 +1,0 @@
-inputFileRule AddFilesFromFdcCache
-inputFileRule Since 04/05/2007
-inputFileRule LargestFile
-inputFileRule FileAge 7

@@ -38,7 +38,7 @@ using namespace NLMISC;
 using namespace std;
 
 //----------------------------------------------------------------------------
-CVariable<float>	OutpostDrillerCostTime("egs", "OutpostDrillerCostTime", "Cost time to build driller (in seconds, 0 means use sheet value)", 0.0f, 0, true );
+
 CVariable<float>	OutpostDrillerTimeUnit("egs", "OutpostDrillerTimeUnit", "Production time of mp in the driller (in seconds)", 3600.0f, 0, true );
 CVariable<bool>		EnableOutpostDrillerMPGeneration("egs", "EnableOutpostDrillerMPGeneration", "Set if the outpost drillers generate mps or not", true, 0, true );
 extern NLMISC::CRandom RandomGenerator;
@@ -76,7 +76,7 @@ bool COutpostBuilding::construct(NLMISC::CSheetId sheetid)
 	_StaticData = CSheets::getOutpostBuildingForm(_CurrentSheet);
 	if (!_StaticData)
 		return false;
-
+	
 	_BuiltDate = CTime::getSecondsSince1970();
 
 	_Constructing = true;
@@ -122,13 +122,7 @@ void COutpostBuilding::update(uint32 nCurrentTime)
 	// Check if the building is constructed
 	if (_Constructing)
 	{
-		uint32 endDate = _BuiltDate;
-		if (OutpostDrillerCostTime.get() == 0)
-			endDate += _StaticData->CostTime;
-		else
-			endDate += OutpostDrillerCostTime.get();
-
-		if (nCurrentTime > endDate)
+		if (nCurrentTime > (_BuiltDate + _StaticData->CostTime))
 		{
 			_Constructing = false;
 
@@ -160,7 +154,7 @@ void COutpostBuilding::update(uint32 nCurrentTime)
 		{
 			if (!EnableOutpostDrillerMPGeneration.get())
 				break;
-			if (!_Parent->isBelongingToAGuild())
+			if (!_Parent->isBelongingToAGuild()) 
 				break;
 			if (nCurrentTime <= _MPLastTime)
 				break;
@@ -174,30 +168,43 @@ void COutpostBuilding::update(uint32 nCurrentTime)
 				elapsedTime = maxTime;
 
 			// speed of production in mp / second
-			float fSpeed = _StaticData->Driller.MPQuantities[0] / OutpostDrillerTimeUnit.get();
+			float fSpeed = _StaticData->Driller.TotalMP / OutpostDrillerTimeUnit.get();
 			_MPLeft += elapsedTime * fSpeed;
-
-			EGSPD::TGuildId gid = _Parent->getOwnerGuild();
-			CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(gid);
-
 			while (_MPLeft > 1.0f)
 			{
-				// Produce 1 MP of each
-				for (uint i = 0; i < _StaticData->Driller.MPQuantities.size(); ++i)
+				// Produce 1 MP
+				uint i, j;
+				float pos = RandomGenerator.frand(_StaticData->Driller.TotalMP);
+				float curpos = 0.0f;
+
+				for (i = 0; i < _StaticData->Driller.MPQuantities.size(); ++i)
 				{
-					for (uint j = 0; j < DRILLER_NB_LEVEL; ++j)
+					for (j = 0; j < DRILLER_NB_LEVEL; ++j)
 					{
-						if (_StaticData->Driller.QualityFactor[j])
-						{
-							TLogContext_Item_OutpostDriller outpostContext(CEntityId::Unknown);
-							if (pGuild != NULL)
-							{
-								CGameItemPtr item;
-								item = GameItemManager.createItem(_StaticData->Driller.MPs[i], (j+1)*(250/DRILLER_NB_LEVEL), true, false);
-								if (item != NULL)
-									pGuild->putItem(item);
-							}
-						}
+						curpos += _StaticData->Driller.QualityFactor[j] * _StaticData->Driller.MPQuantities[i];
+						if (pos <= curpos)
+							break;
+					}
+					if (pos <= curpos)
+						break;
+				}
+
+				nlassert(_StaticData->Driller.MPs.size() == _StaticData->Driller.MPQuantities.size());
+
+				if ((i < _StaticData->Driller.MPQuantities.size()) && (j < DRILLER_NB_LEVEL))
+				{
+					TLogContext_Item_OutpostDriller outpostContext(CEntityId::Unknown);
+					// 1 mp of type i and quality j is generated
+					EGSPD::TGuildId gid = _Parent->getOwnerGuild();
+					CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(gid);
+					if (pGuild != NULL)
+					{
+						CGameItemPtr item;
+						item = GameItemManager.createItem(	_StaticData->Driller.MPs[i], 
+															(j+1)*(250/DRILLER_NB_LEVEL), 
+															true, false);
+						if (item != NULL)
+							pGuild->putItem(item);
 					}
 				}
 
@@ -318,10 +325,10 @@ void COutpostBuilding::postLoad()
 #define PERSISTENT_PRE_APPLY\
 	H_AUTO(COutpostBuildingApply);\
 	/*preApply();*/\
-
+	
 #define PERSISTENT_POST_APPLY\
 	postLoad();\
-
+	
 //#define PERSISTENT_POST_STORE\
 //	postStore();
 
@@ -333,7 +340,7 @@ void COutpostBuilding::postLoad()
 	PROP(CSheetId, _CurrentSheet)\
 	PROP(float, _MPLeft)\
 	PROP(uint32, _MPLastTime)\
-
+	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

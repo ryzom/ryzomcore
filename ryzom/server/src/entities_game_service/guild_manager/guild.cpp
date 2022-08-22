@@ -928,7 +928,7 @@ bool CGuild::canAccessToGuildInventory( CCharacter * user )
 	// or in zone of the guild's outpost
 	CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromAlias(user->getCurrentOutpostZone());
 	if( outpost != NULL )
-		if( outpost->getOwnerGuild() == _Id && (user->getOutpostAlias() == 0 || user->getOutpostAlias() != user->getCurrentOutpostZone()))
+		if( outpost->getOwnerGuild() == _Id )
 			return true;
 
 	// or in powo with access to guild inv
@@ -936,6 +936,7 @@ bool CGuild::canAccessToGuildInventory( CCharacter * user )
 		return true;
 
 	// TODO ULU : add here position check of GH on atys
+
 
 	return false;
 }
@@ -950,7 +951,7 @@ bool CGuild::putItem( CGameItemPtr item )
 }
 
 //----------------------------------------------------------------------------
-void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session )
+void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 session )
 {
 	// the session system works that way :
 	// As player can share this inventory, we manage a per item session value
@@ -966,7 +967,7 @@ void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 
 	}
 
 	// get the item
-	CInventoryPtr srcItems = user->getInventory(srcInv);
+	CInventoryPtr srcItems = user->getInventory(INVENTORIES::bag);
 	if ( slot >= srcItems->getSlotCount() )
 	{
 		nlwarning( "<GUILD> user %s Invalid bag slot %u, count = %u",user->getId().toString().c_str(), slot, srcItems->getSlotCount() );
@@ -1011,7 +1012,7 @@ void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 
 
 	// try to move the required quantity of the item
 	if ( CInventoryBase::moveItem(
-		user->getInventory(srcInv), slot,
+		user->getInventory(INVENTORIES::bag), slot,
 		_Inventory,	INVENTORIES::INSERT_IN_FIRST_FREE_SLOT,
 		quantity ) != CInventoryBase::ior_ok )
 	{
@@ -1021,7 +1022,7 @@ void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 
 }
 
 //----------------------------------------------------------------------------
-void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session )
+void CGuild::takeItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 session )
 {
 	// the session system works that way :
 	// As player can share this inventory, we manage a per item session value
@@ -1078,7 +1079,7 @@ void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32
 	// try to move the required quantity of the item
 	if ( CInventoryBase::moveItem(
 		_Inventory,	slot,
-		user->getInventory(srcInv), INVENTORIES::INSERT_IN_FIRST_FREE_SLOT,
+		user->getInventory(INVENTORIES::bag), INVENTORIES::INSERT_IN_FIRST_FREE_SLOT,
 		quantity ) != CInventoryBase::ior_ok )
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_PLAYER_BAG_FULL" );

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -689,10 +692,10 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 	TGroupId groupId = CEntityId::Unknown;
 
 	CChatGroup::TGroupType mode;
-	if (args[1].substr(0, 8)  == "FACTION_" || args[1].substr(0, 7)  == "league_") // The current only translated dynamic chat
+	if (args[1] == "FACTION_RF") // The current only translated dynamic chat
 	{
+		chanId = IOS->getChatManager().getChanId("FACTION_RF");
 		mode = CChatGroup::dyn_chat;
-		chanId = IOS->getChatManager().getChanId(args[1]);
 	}
 	else if (args[1].substr(0, 7) == "region:")
 	{
@@ -703,11 +706,6 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 	{
 		mode = CChatGroup::guild;
 		groupId.fromString(args[1].substr(6).c_str());
-	}
-	else if (args[1].substr(0, 5) == "team:")
-	{
-		mode = CChatGroup::team;
-		groupId.fromString(args[1].substr(5).c_str());
 	}
 	else
 	{
@@ -732,9 +730,6 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 
 		if (mode == CChatGroup::guild)
 			IOS->getChatManager().getClient(rowId).setGuildChatGroup(groupId);
-
-		if (mode == CChatGroup::team)
-			IOS->getChatManager().getClient(rowId).setTeamChatGroup(groupId);
 
 
 		IOS->getChatManager().getClient(rowId).updateAudience();

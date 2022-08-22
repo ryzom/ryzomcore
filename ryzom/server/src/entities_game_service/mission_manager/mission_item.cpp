@@ -75,7 +75,9 @@ bool CMissionItem::buildFromScript(const std::vector<std::string> & script) {
 			if (args.size() == 2)
 			{
 				// 2 params means that it is an item property
-				if(!nlstricmp(args[0], "CustomText"))
+				if(!nlstricmp(args[0], "CustomName"))
+					_CustomName.fromUtf8(hex_decode(args[1]));
+				else if(!nlstricmp(args[0], "CustomText"))
 					_CustomText.fromUtf8(hex_decode(args[1]));
 				else if(!nlstricmp(args[0], "RequiredFaction"))
 					_RequiredFaction = args[1];
@@ -144,22 +146,6 @@ bool CMissionItem::buildFromScript(const std::vector<std::string> & script) {
 						_Params.PoisonProtectionFactor = value;
 					else if(!nlstricmp(args[0], "ElectricityProtection"))
 						_Params.ElectricityProtectionFactor = value;
-					else if(!nlstricmp(args[0], "ElementalCastingTimeFactor"))
-						_Params.ElementalCastingTimeFactor = value;
-					else if(!nlstricmp(args[0], "ElementalPowerFactor"))
-						_Params.ElementalPowerFactor = value;
-					else if(!nlstricmp(args[0], "OffensiveAfflictionCastingTimeFactor"))
-						_Params.OffensiveAfflictionCastingTimeFactor = value;
-					else if(!nlstricmp(args[0], "OffensiveAfflictionPowerFactor"))
-						_Params.OffensiveAfflictionPowerFactor = value;
-					else if(!nlstricmp(args[0], "HealCastingTimeFactor"))
-						_Params.HealCastingTimeFactor = value;
-					else if(!nlstricmp(args[0], "HealPowerFactor"))
-						_Params.HealPowerFactor = value;
-					else if(!nlstricmp(args[0], "DefensiveAfflictionCastingTimeFactor"))
-						_Params.DefensiveAfflictionCastingTimeFactor = value;
-					else if(!nlstricmp(args[0], "DefensiveAfflictionPowerFactor"))
-						_Params.DefensiveAfflictionPowerFactor = value;
 					else if (!nlstricmp(args[0], "Phrase"))
 					{
 						_SPhraseId = CSheetId (args[0] + ".sphrase");
@@ -289,6 +275,9 @@ void CMissionItem::setItemParam(CGameItemPtr item)
 
 		if (!_CustomText.empty())
 			item->setCustomText(_CustomText);
+
+		if (!_CustomName.empty())
+			item->setCustomName(_CustomName);
 
 		if (!_RequiredFaction.empty())
 			item->setRequiredFaction(_RequiredFaction);

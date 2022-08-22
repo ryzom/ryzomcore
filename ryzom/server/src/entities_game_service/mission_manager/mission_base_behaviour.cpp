@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -52,8 +55,7 @@ void CMissionBaseBehaviour::onCreation( TAIAlias giver)
 
 
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 
 	_ProcessingState = Normal;
 
@@ -136,8 +138,7 @@ void CMissionBaseBehaviour::putInGame()
 void CMissionBaseBehaviour::sendContextTexts(const TDataSetRow& user, const TDataSetRow& interlocutor, std::vector< std::pair<bool,uint32> >& textInfos)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 
 	const NLMISC::CEntityId & giver = CAIAliasTranslator::getInstance()->getEntityId( _Mission->getGiver() );
 	// send mission progress context
@@ -181,8 +182,7 @@ void CMissionBaseBehaviour::getBotChatOptions(const TDataSetRow& interlocutor, s
 // "gift" is a bool, as in.. "true, there is a gift" or "false, no gift".
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	for ( map<uint32, EGSPD::CActiveStepPD>::const_iterator it = _Mission->getStepsBegin(); it != _Mission->getStepsEnd(); ++it )
 	{
 		bool gift = false;
@@ -208,8 +208,7 @@ void CMissionBaseBehaviour::overrideDesc(uint32 descIndex)
 uint32 CMissionBaseBehaviour::sendDesc( const TDataSetRow & user )
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return 0;
+	nlassert(templ);
 	TDataSetRow row = TheDataset.getDataSetRow( CAIAliasTranslator::getInstance()->getEntityId( _Mission->getGiver() ) );
 	return templ->sendDescText( user,row, _Mission->getDescIndex() );
 }
@@ -252,8 +251,7 @@ void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot, bool 
 	}
 
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 
 	// get a free compass index
 	uint32 freeIdx = 1;
@@ -410,8 +408,7 @@ void CMissionBaseBehaviour::removeCompassBot( TAIAlias bot )
 	}
 
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	std::vector<TDataSetRow> entities;
 	getEntities(entities);
 	if ( templ->Tags.NoList )
@@ -450,8 +447,7 @@ void CMissionBaseBehaviour::removeCompassPlace( uint16 placeId )
 		}
 	}
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	std::vector<TDataSetRow> entities;
 	getEntities(entities);
 	if ( templ->Tags.NoList )
@@ -477,8 +473,7 @@ void CMissionBaseBehaviour::removeCompassPlace( uint16 placeId )
 CMissionEvent::TResult CMissionBaseBehaviour::processEventForStep( const TDataSetRow & userRow, EGSPD::CActiveStepPD & step, CMissionEvent & event )
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return CMissionEvent::Nothing;
+	nlassert(templ);
 	nlassert( uint(step.getIndexInTemplate() - 1) < templ->Steps.size() );
 	IMissionStepTemplate * stepTempl = templ->Steps[ step.getIndexInTemplate() - 1 ];
 	//let's test all the substeps of the step we are testing
@@ -562,8 +557,7 @@ bool CMissionBaseBehaviour::checkConstraints( bool logForProcessingEvent, const 
 CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & userRow, std::list< CMissionEvent* > & eventList,uint32 stepIndex )
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return CMissionEvent::Nothing;
+	nlassert(templ);
 
 	CCharacter *user = PlayerManager.getChar(userRow);
 	string sDebugPrefix;
@@ -739,8 +733,7 @@ CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & 
 void CMissionBaseBehaviour::jump( uint32 step, uint32 action,std::list< CMissionEvent * > & eventList)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 
 	// if we jump before first step
 	if ( step == 0xFFFFFFFF )
@@ -843,8 +836,7 @@ void CMissionBaseBehaviour::setTimer( NLMISC::TGameCycle cycle )
 void CMissionBaseBehaviour::activateInitialSteps(std::list< CMissionEvent * > & eventList)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	for ( map<uint32, EGSPD::CActiveStepPD>::const_iterator it = _Mission->getStepsBegin(); it != _Mission->getStepsEnd(); ++it )
 	{
 		const uint32 idx = (*it).second.getIndexInTemplate()-1;
@@ -858,8 +850,7 @@ void CMissionBaseBehaviour::activateInitialSteps(std::list< CMissionEvent * > & 
 void CMissionBaseBehaviour::setSuccessFlag()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	_Mission->setFinished(true);
 	_Mission->setMissionSuccess(true);
 	while( _Mission->getStepsBegin() != _Mission->getStepsEnd() )
@@ -879,8 +870,7 @@ void CMissionBaseBehaviour::setSuccessFlag()
 void CMissionBaseBehaviour::setFailureFlag()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	_Mission->setFinished(true);
 	_Mission->setMissionSuccess(false);
 	while( _Mission->getStepsBegin() != _Mission->getStepsEnd() )
@@ -895,8 +885,7 @@ void CMissionBaseBehaviour::setFailureFlag()
 void CMissionBaseBehaviour::onFailure(bool ignoreJumps,bool sendMessage)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 
 	// if mission was in a waiting queue, removed player from queue manager
 	if (_Mission->getWaitingQueueId() != 0)
@@ -1042,8 +1031,7 @@ void CMissionBaseBehaviour::teleport(CCharacter * user,uint tpIndex)
 		return;
 	}
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		return;
+	nlassert(templ);
 	nlassert( tpIndex - 1 < templ->Teleports.size() );
 	nlassert( templ->Teleports[tpIndex - 1] );
 
@@ -1072,8 +1060,7 @@ TAIAlias CMissionBaseBehaviour::getTeleportBot(uint32 tpIndex)
 		return CAIAliasTranslator::Invalid;
 	}
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	if (templ == NULL)
-		CAIAliasTranslator::Invalid;
+	nlassert(templ);
 	nlassert( uint( tpIndex - 1 ) < templ->Teleports.size() );
 	nlassert( templ->Teleports[tpIndex - 1] );
 	if ( templ->Teleports[tpIndex -1]->Bot != CAIAliasTranslator::Invalid )

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2014  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -673,33 +676,12 @@ bool CGameItem::areStackable(const CGameItemPtr item1, const CGameItemPtr item2)
 	if (item1 == NULL || item2 == NULL)
 		return false;
 
-	if (item1->getLockedByOwner() != item2->getLockedByOwner())
-		return false;
-
-	if (item1->isStackingDisabled() || item2->isStackingDisabled())
-		return false;
-
 	// test sheet
 	if (item1->_SheetId != item2->_SheetId)
 		return false;
 
 	// test quality/recommanded level
 	if (item1->_Recommended != item2->_Recommended)
-		return false;
-
-	if (item1->_LockCount > 0 || item2->_LockCount > 0)
-		return false;
-
-	if (item1->_HP != item2->_HP)
-		return false;
-
-	if (item1->_SapLoad != item2->_SapLoad)
-		return false;
-
-	if (item1->_CreatorId != item2->_CreatorId)
-		return false;
-
-	if (item1->_CustomText != item2->_CustomText)
 		return false;
 
 	// for craftable items test craft params
@@ -718,16 +700,6 @@ bool CGameItem::areStackable(const CGameItemPtr item1, const CGameItemPtr item2)
 		else
 			if( item2->_CraftParameters != 0 )
 				return false;
-	}
-
-	// enchantments, check for same bricks in same order
-	if (item1->_Enchantment.size() != item2->_Enchantment.size())
-		return false;
-
-	for (uint i = 0; i < item1->_Enchantment.size(); i++)
-	{
-		if (item1->_Enchantment[i] != item2->_Enchantment[i])
-			return false;
 	}
 
 	return true;
@@ -1453,7 +1425,6 @@ void CGameItem::clear()
 	_LockedByOwner = false;
 	_Movable = false;
 	_UnMovable = false;
-	_DisableStacking = false;
 
 	_TypeSkillMods.clear();
 	_PhraseId.clear();
@@ -2606,7 +2577,6 @@ void CGameItem::deleteItem(CGameItem *item)
 //			_RefInventorySlot = slotImage;
 //			nlinfo("Convert item %s, had slot image %u, is now in HAND, slot %u", _SheetId.toString().c_str(),slotImage,_RefInventorySlot);
 //		}
-		// TODO : add hotbar
 //		else
 //		{
 //			refInventoryId = INVENTORIES::equipment;
@@ -4450,13 +4420,6 @@ bool CGameItem::getStats(const std::string &stats, std::string &final )
 			final += NLMISC::toString("%u|", _Form->Bulk);
 		else if (part == "We")
 			final += NLMISC::toString("%u|", _Form->Weight);
-		else if (part == "Lk")
-		{
-			if (getLockedByOwner())
-				final += NLMISC::toString("%u|", 1);
-			else
-				final += NLMISC::toString("%u|", 0);
-		}
 		else
 			return false;
 	}
@@ -4720,8 +4683,6 @@ void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * o
 			{
 				CGameItemPtr itemPtr(this);
 				inv->insertItem(itemPtr, slot);
-
-				_DisableStacking = (_Form && _Form->Family != ITEMFAMILY::AMMO && refInventoryId != INVENTORIES::hotbar);
 			}
 
 			//owner->equipCharacter(refInventoryId, slot,getInventorySlot());

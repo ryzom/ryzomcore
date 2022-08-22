@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -111,19 +114,10 @@ void cbClientItemEquip( NLNET::CMessage& msgin, const std::string &serviceName, 
 	uint16 equippedInventory, equippedSlot, bagSlot;
 	CEntityId id;
 
-	try
-	{
-		msgin.serial( id );
-		msgin.serial( equippedInventory );
-		msgin.serial( equippedSlot );
-		msgin.serial( bagSlot );
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Bad cbClientItemEquip serialisation '%s'", e.what());
-		return;
-	}
-
+	msgin.serial( id );
+	msgin.serial( equippedInventory );
+	msgin.serial( equippedSlot );
+	msgin.serial( bagSlot );
 
 	CCharacter *c = (CCharacter * ) CEntityBaseManager::getEntityBasePtr( id );
 	if( c )
@@ -145,17 +139,10 @@ void cbClientItemUnequip( NLNET::CMessage& msgin, const std::string &serviceName
 
 	uint16 equippedInventory, equippedSlot;
 	CEntityId id;
-	try
-	{
-		msgin.serial( id );
-		msgin.serial( equippedInventory );
-		msgin.serial( equippedSlot );
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Bad cbClientItemUnequip serialisation '%s'", e.what());
-		return;
-	}
+
+	msgin.serial( id );
+	msgin.serial( equippedInventory );
+	msgin.serial( equippedSlot );
 
 	CCharacter *c = (CCharacter * ) CEntityBaseManager::getEntityBasePtr( id );
 	if( c )
@@ -182,18 +169,10 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 	CEntityId user;
 	uint16 inventory,slot,quantity;
 
-	try
-		{
-		msgin.serial(user);
-		msgin.serial(inventory);
-		msgin.serial(slot);
-		msgin.serial(quantity);
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Bad cbClientItemDestroy serialisation '%s'", e.what());
-		return;
-	}
+	msgin.serial(user);
+	msgin.serial(inventory);
+	msgin.serial(slot);
+	msgin.serial(quantity);
 
 	CCharacter *character = PlayerManager.getChar( user );
 	if (character == NULL)
@@ -221,16 +200,8 @@ void cbClientItemTempToBag( CMessage& msgin, const std::string &serviceName, NLN
 	CEntityId user;
 	uint16 slot;
 
-	try
-	{
-		msgin.serial(user);
-		msgin.serial(slot);
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Bad cbClientItemTempToBag serialisation '%s'", e.what());
-		return;
-	}
+	msgin.serial(user);
+	msgin.serial(slot);
 
 	CCharacter *character = PlayerManager.getChar( user );
 	if (character == NULL)
@@ -248,12 +219,6 @@ void cbClientItemTempToBag( CMessage& msgin, const std::string &serviceName, NLN
 
 	character->setAfkState(false);
 	character->itemTempInventoryToBag( slot );
-	vector<string> params = character->getCustomMissionParams("__TAKE_TEMP_INV__");
-	if (params.size() >= 2)
-	{
-		character->validateDynamicMissionStep(params[0]+"&take_items=one");
-		character->setCustomMissionParams("__TAKE_TEMP_INV__", "");
-	}
 }
 
 // get all item from temp inventory
@@ -262,15 +227,7 @@ void cbClientItemAllTemp( CMessage& msgin, const std::string &serviceName, NLNET
 	H_AUTO(cbClientItemAllTemp);
 
 	CEntityId user;
-	try
-	{
-		msgin.serial(user);
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Bad cbClientItemAllTemp serialisation '%s'", e.what());
-		return;
-	}
+	msgin.serial(user);
 
 	CCharacter *character = PlayerManager.getChar( user );
 	if (character == NULL)
@@ -287,12 +244,6 @@ void cbClientItemAllTemp( CMessage& msgin, const std::string &serviceName, NLNET
 
 	character->setAfkState(false);
 	character->sendCloseTempInventoryImpulsion();
-	vector<string> params = character->getCustomMissionParams("__TAKE_TEMP_INV__");
-	if (params.size() >= 2)
-	{
-		character->validateDynamicMissionStep(params[0]+"&take_items=all");
-		character->setCustomMissionParams("__TAKE_TEMP_INV__", "");
-	}
 }
 
 // clear temp inventory
@@ -301,15 +252,7 @@ void cbClientItemNoTemp( CMessage& msgin, const std::string &serviceName, NLNET:
 	H_AUTO(cbClientItemNoTemp);
 
 	CEntityId user;
-	try
-	{
-		msgin.serial(user);
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Bad cbClientItemNoTemp serialisation '%s'", e.what());
-		return;
-	}
+	msgin.serial(user);
 
 	CCharacter *character = PlayerManager.getChar( user );
 	if (character == NULL)
@@ -328,12 +271,6 @@ void cbClientItemNoTemp( CMessage& msgin, const std::string &serviceName, NLNET:
 
 	character->setAfkState(false);
 	character->clearTempInventory();
-	vector<string> params = character->getCustomMissionParams("__TAKE_TEMP_INV__");
-	if (params.size() >= 2)
-	{
-		character->validateDynamicMissionStep(params[0]+"&take_items=none");
-		character->setCustomMissionParams("__TAKE_TEMP_INV__", "");
-	}
 }
 
 // Enchant or recharge an item
@@ -342,19 +279,11 @@ void cbClientItemEnchant( CMessage& msgin, const std::string &serviceName, NLNET
 	H_AUTO(cbClientItemEnchant);
 
 	CEntityId user;
+	msgin.serial(user);
+
 	uint8 inv;
 	uint16 slot;
-
-	try
-	{
-		msgin.serial(user);
-		msgin.serial(inv, slot);
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Bad cbClientItemEnchant serialisation '%s'", e.what());
-		return;
-	}
+	msgin.serial(inv, slot);
 
 	CCharacter *character = PlayerManager.getChar( user );
 	if (character == NULL)
@@ -368,11 +297,6 @@ void cbClientItemEnchant( CMessage& msgin, const std::string &serviceName, NLNET
 		nlwarning("<cbClientItemEnchant> player Id %s not yet ready", user.toString().c_str() );
 		return;
 	}
-
-	// if player is dead or stunned don't reload or enchant
-	if (character->isDead() || character->isStunned())
-		return;
-
 	character->enchantOrRechargeItem( (INVENTORIES::TInventory) inv, slot );
 	character->setAfkState(false);
 }
@@ -671,7 +595,7 @@ void cbClientPhraseLearn( NLNET::CMessage& msgin, const std::string &serviceName
 		return;
 	}
 
-	ch->learnPhrase( phrase.Bricks, phraseId, phrase.Name, phrase.IconIndex );
+	ch->learnPhrase( phrase.Bricks, phraseId, phrase.Name );
 	ch->setAfkState(false);
 }
 
@@ -1519,10 +1443,9 @@ void cbClientExchangeAdd( NLNET::CMessage& msgin, const std::string &serviceName
 	CEntityId id;
 	msgin.serial(id);
 
-	uint16 invSrc, slotSrc, slotDest;
+	uint16 slotSrc, slotDest;
 	uint16 quantity;
 
-	msgin.serial(invSrc);
 	msgin.serial(slotSrc);
 	msgin.serial(slotDest);
 	msgin.serial(quantity);
@@ -1532,7 +1455,7 @@ void cbClientExchangeAdd( NLNET::CMessage& msgin, const std::string &serviceName
 	{
 		c->setAfkState(false);
 		c->incInterfaceCounter();
-		c->itemInvToExchange(invSrc, slotSrc, slotDest, quantity);
+		c->itemBagToExchange(slotSrc, slotDest, quantity);
 	}
 	else
 		nlwarning("<cbClientExchangeAdd : invalid char %s>",id.toString().c_str());
@@ -1816,15 +1739,7 @@ void cbClientBotChatTradeDestroy( NLNET::CMessage& msgin, const std::string &ser
 	uint16 idx;
 	uint16 quantity;
 	CEntityId userId;
-	try
-	{
-		msgin.serial(userId,idx,quantity);
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Bad cbClientBotChatTradeDestroy serialisation '%s'", e.what());
-		return;
-	}
+	msgin.serial(userId,idx,quantity);
 	CCharacter * user = PlayerManager.getChar(userId);
 
 	if ( !user )
@@ -1852,17 +1767,7 @@ void cbClientBotChatTradeSell( NLNET::CMessage& msgin, const std::string &servic
 	uint16 quantity;
 	uint32 price;
 	CEntityId userId;
-
-	try
-	{
-		msgin.serial(userId,inv,idx,quantity,price);
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Bad cbClientBotChatTradeSell serialisation '%s'", e.what());
-		return;
-	}
-
+	msgin.serial(userId,inv,idx,quantity,price);
 	CCharacter * user = PlayerManager.getChar(userId);
 	if ( !user )
 	{
@@ -2022,6 +1927,7 @@ void cbClientSendEmote( NLNET::CMessage& msgin, const std::string &serviceName, 
 		msgin.serial( id );
 		msgin.serialEnum( behaviour );
 		msgin.serial( emoteTextId );
+
 	}
 	catch(const Exception &e)
 	{
@@ -2066,6 +1972,7 @@ void cbClientSendCustomEmote( NLNET::CMessage& msgin, const std::string &service
 		msgin.serial( id );
 		msgin.serialEnum( behaviour );
 		msgin.serial( emoteCustomText );
+
 	}
 	catch(const Exception &e)
 	{
@@ -2117,41 +2024,6 @@ void cbClientSendAfk( NLNET::CMessage& msgin, const std::string &serviceName, NL
 		return;
 	}
 	user->setAfkState( afk );
-}
-
-// client send a command to kill its player
-void cbClientSelfKill( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
-{
-	H_AUTO(cbClientSelfKill);
-
-	CEntityId id;
-	msgin.serial( id );
-	CCharacter * user = PlayerManager.getChar( id );
-
-	if ( !user )
-	{
-		nlwarning("<cbClientSelfKill> Invalid char %s", id.toString().c_str());
-		return;
-	}
-	// check character is ready
-	if (!user->getEnterFlag())
-	{
-		nlwarning("<cbClientSelfKill> player Id %s not yet ready", id.toString().c_str() );
-		return;
-	}
-
-	if (!user->havePriv(":DEV:SGM:GM:VG:SG:G:EM:EG:"))
-		return;
-
-	// disable command if pvp flagged recent (red flag)
-	if (user->getPvPRecentActionFlag())
-	{
-		CCharacter::sendDynamicSystemMessage(id, "PVP_COMMAND_FORBIDDEN");
-		return;
-	}
-
-	user->setAfkState(false);
-	user->killMe();
 }
 
 // client send a command to roll a dice
@@ -3213,7 +3085,7 @@ void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & servic
 
 		if (IsRingShard)
 			bypassDisconnectionTimer = true;
-		/*else
+		else
 		{
 			msgin.serial(bypassDisconnectionTimer);
 			if (bypassDisconnectionTimer)
@@ -3227,9 +3099,9 @@ void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & servic
 
 				securityCheck.check("QtXp1o1t?");
 			}
-		}*/
+		}
 
-		if (IsDevShard || (player != NULL && player->havePriv( ":DEV:SGM:GM:" )))
+		if (player != NULL && player->havePriv( ":DEV:SGM:GM:" ))
 			bypassDisconnectionTimer = true;
 	}
 	catch (const Exception &e) // will catch any serialization/security exception
@@ -3665,7 +3537,6 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:COMMAND:REMOTE_ADMIN_ANSWER",	cbClientRemoteAdmin },
 	{ "CLIENT:COMMAND:SIT",					cbClientSit },
 	{ "CLIENT:COMMAND:AFK",					cbClientSendAfk },
-	{ "CLIENT:COMMAND:SELFKILL",			cbClientSelfKill },
 	{ "CLIENT:COMMAND:RANDOM",				cbClientRollDice },
 	{ "CLIENT:COMMAND:GUILDMOTD",			cbClientGuildMotd },
 	{ "CLIENT:COMMAND:AUTOPACT",			cbClientAutoPact },

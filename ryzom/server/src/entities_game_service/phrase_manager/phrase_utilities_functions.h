@@ -579,14 +579,13 @@ void sendScoreModifierSpellMessage( const NLMISC::CEntityId &aggressorId, const 
 // send resist message
 
 
-inline void updateMirrorTargetList(CMirrorPropValueList<uint32>& targetList, const TDataSetRow & target, float distance, bool resist, sint16 dmg)
+inline void updateMirrorTargetList(CMirrorPropValueList<uint32>& targetList, const TDataSetRow & target, float distance,bool resist)
 {
 	static float maxDistance = 100.0f;
 	uint8 byte = (distance >= maxDistance) ? 127 : uint8(127 * distance / maxDistance);
 	if ( resist )
 		byte |= 0x80;
 	 
-	targetList.push_front((uint32)dmg);
 	targetList.push_front(TDataSetIndex(byte)); // distance!
 	uint32 utarget = *((uint32*)(&target));
 	targetList.push_front(utarget);

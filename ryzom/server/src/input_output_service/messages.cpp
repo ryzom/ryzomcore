@@ -224,14 +224,7 @@ void cbImpulsionTell( CMessage& msgin, const string &serviceName, TServiceId ser
 
 	if( ShowChat )
 	{
-		string senderName;
-		CCharacterInfos *ci = IOS->getCharInfos(sender);
-		if (ci == NULL)
-			senderName = sender.toString();
-		else
-			senderName = IOS->getRocketName(ci->Name);
-
-		nlinfo("<impulsionTell> TELL %s to %s: '%s'", senderName.c_str(), receiver.c_str(), str.toString().c_str());
+		nlinfo("<impulsionTell> TELL received for char %s: '%s'",receiver.c_str(),str.toString().c_str());
 	}
 	TDataSetRow senderRow = TheDataset.getDataSetRow(sender);
 
@@ -1607,12 +1600,13 @@ void cbDynChatAddChan(CMessage& msgin, const string &serviceName, TServiceId ser
 		nlwarning("Couldn't add chan %s", chanID.toString().c_str());
 	else
 	{
-		if (_ChanNames.getA(name) != NULL)
-			_ChanNames.removeWithB(name);
-		if (_ChanNames.getB(chanID) != NULL)
-			_ChanNames.removeWithA(chanID);
-		_ChanNames.add(chanID, name);
-		nlinfo("cbDynChatAddChan: add channel %s",chanID.toString().c_str());
+		if (_ChanNames.getA(name) == NULL && _ChanNames.getB(chanID) == NULL)
+		{
+			_ChanNames.add(chanID, name);
+			nlinfo("cbDynChatAddChan: add channel %s",chanID.toString().c_str());
+		}
+		else
+			nlwarning("Couldn't add chan %s. already added! %p %p", chanID.toString().c_str(), _ChanNames.getA(name), _ChanNames.getB(chanID));
 	}
 }
 
