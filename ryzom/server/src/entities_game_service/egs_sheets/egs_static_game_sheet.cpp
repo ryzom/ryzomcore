@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -72,22 +69,22 @@ void CStaticGameBrick::readGeorges( const CSmartPtr<UForm> &form, const CSheetId
 	// FamilyId
 	if( root.getValueByName (value, "Basics.FamilyId") )
 	{
-		FamilyId = BRICK_FAMILIES::toSBrickFamily( value );	
+		FamilyId = BRICK_FAMILIES::toSBrickFamily( value );
 	}
 	else
-	{		
+	{
 		nlwarning("<CStaticGameBrick::readGeorges> can't get the value 'FamilyId' for sheet %s", sheetId.toString().c_str() );
 	}
-	
+
 
 	// IndexInFamily
-	if( ! root.getValueByName (IndexInFamily, "Basics.IndexInFamily") )	
+	if( ! root.getValueByName (IndexInFamily, "Basics.IndexInFamily") )
 	{
 		nlwarning("<CStaticGameBrick::readGeorges> can't get the value 'IndexInFamily' for sheet %s", sheetId.toString().c_str() );
 	}
 
 	// Type
-	if( root.getValueByName (value, "Basics.Type") )	
+	if( root.getValueByName (value, "Basics.Type") )
 	{
 		Type = BRICK_TYPE::toBrickType( value );
 	}
@@ -97,13 +94,13 @@ void CStaticGameBrick::readGeorges( const CSmartPtr<UForm> &form, const CSheetId
 	}
 
 	// Level
-	if( ! root.getValueByName (Level, "Basics.Level") )	
+	if( ! root.getValueByName (Level, "Basics.Level") )
 	{
 		nlwarning("<CStaticGameBrick::readGeorges> can't get the value 'Level' for sheet %s", sheetId.toString().c_str() );
 	}
 
 	// race
-	if( root.getValueByName (value, "Learning.Race") )	
+	if( root.getValueByName (value, "Learning.Race") )
 	{
 		Race = EGSPD::CPeople::fromString( value );
 	}
@@ -132,7 +129,7 @@ void CStaticGameBrick::readGeorges( const CSmartPtr<UForm> &form, const CSheetId
 		nlwarning("<CStaticGameBrick::readGeorges> can't get the value 'Basic.Skill' for sheet %s", sheetId.toString().c_str() );
 		Skill = SKILLS::unknown;
 	}
-	
+
 	const UFormElm *array = NULL;
 	// mandatory families
 	if (root.getNodeByName (&array, "MandatoryFamilies") && array)
@@ -151,7 +148,7 @@ void CStaticGameBrick::readGeorges( const CSmartPtr<UForm> &form, const CSheetId
 			MandatoryFamilies.push_back( code );
 		}
 	}
-	
+
 	// optional families
 	array = NULL;
 	if (root.getNodeByName (&array, "OptionalFamilies") && array)
@@ -204,7 +201,7 @@ void CStaticGameBrick::serial( NLMISC::IStream &f)
 {
 	f.serial( FamilyId );
 	f.serial( IndexInFamily );
-	f.serial( SheetId );	
+	f.serial( SheetId );
 	f.serialEnum( Type );
 	f.serialEnum( Race );
 	f.serial( Level );
@@ -215,7 +212,7 @@ void CStaticGameBrick::serial( NLMISC::IStream &f)
 	NLMISC::CSheetId		SheetId;
 	f.serialCont( MandatoryFamilies );
 	f.serialCont( OptionalFamilies );
-	
+
 	if (f.isReading() )
 	{
 		if ( _Bricks.find( make_pair(FamilyId,IndexInFamily) ) != _Bricks.end() )
@@ -268,7 +265,7 @@ void CStaticXpStagesTable::readGeorges( const CSmartPtr<UForm> &form, const CShe
 
 				for( uint i = 0; i < size; ++i )
 				{
-					// for each Type of stage xp table 
+					// for each Type of stage xp table
 					UFormElm* TypeElt = 0;
 					if( ! ( arrayTypeStageTable->getArrayNode( &TypeElt, i ) && TypeElt ) )
 					{
@@ -276,7 +273,7 @@ void CStaticXpStagesTable::readGeorges( const CSmartPtr<UForm> &form, const CShe
 					}
 					else
 					{
-						// for each Type of stage xp table 
+						// for each Type of stage xp table
 						UFormElm* TypeStageElt = 0;
 						if( ! ( TypeElt->getNodeByName( &TypeStageElt, "Type" ) && TypeStageElt ) )
 						{
@@ -292,14 +289,14 @@ void CStaticXpStagesTable::readGeorges( const CSmartPtr<UForm> &form, const CShe
 							{
 								uint size2;
 								TypeStageElt->getArraySize(size2);
-								
+
 								XpStagesTables [ i ].StageTable.resize( size2);
-								
+
 								for( uint j = 0; j < size2; ++j )
 								{
-									// for each Type of stage xp table 
+									// for each Type of stage xp table
 									UFormElm* StageElt;
-									
+
 									if( ! ( TypeStageElt->getArrayNode( &StageElt, j ) && StageElt ) )
 									{
 										nlwarning("<CStaticXpStagesTable::readGeorges> node Element of stage is not in sheet %s", sheetId.toString().c_str() );
@@ -405,13 +402,13 @@ void CStaticStagesTypeSkillTable::readGeorges( const CSmartPtr<UForm> &form, con
 				arraySkillStageType->getArraySize(size);
 
 				string SkillName;
-				
+
 				SSkillStageTypeAndCoeff sstc;
 
 				for( uint i = 0; i < size; ++i )
 				{
 					UFormElm* Elt;
-					
+
 					if( ! ( arraySkillStageType->getArrayNode( &Elt, i ) && Elt ) )
 					{
 						nlwarning("<CStaticStagesTypeSkillTable::readGeorges> array node is not in sheet %s", sheetId.toString().c_str() );
@@ -468,7 +465,7 @@ void CStaticPacts::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &form,
 
 				NLMISC::TGameCycle CumulDuration = 0;
 				float duration;
-					
+
 				// variable is used for calculate pact effect in differential between pacts type
 				sint16 LoseHitPoints = 0;
 				sint16 LoseStamina = 0;
@@ -476,12 +473,12 @@ void CStaticPacts::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &form,
 				sint16 LoseSkills = 0;
 
 				sint16 value;
-				
+
 				for( uint i = 0; i < size; ++i )
 				{
 					node = NULL;
 					arrayDeathImpact->getArrayNode( &node, i );
-					
+
 					if( node )
 					{
 						node->getValueByName( value, "HitPoints" );
@@ -595,11 +592,16 @@ void CStaticCreatures::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 			_XPGainOnCreature = 10;
 			nlwarning("ERROR For creature sheet %s, cannot read Basics.XPGainOnCreature, XP may be inacurate !", sheetId.toString().c_str() );
 		}
-	
+
 
 		///////////////////////////////////////////////////////
 		// Derivated Scores
 		///////////////////////////////////////////////////////
+		uint32 playerSkillLevel = 1;
+		if ( !root.getValueByName( playerSkillLevel, "Basics.PlayerSkillLevel" ) )
+		{
+			nlwarning("ERROR For creature sheet %s, cannot read Basics.PlayerSkillLevel, creature HP may be inacurate !", sheetId.toString().c_str() );
+		}
 		_NbPlayers = 1;
 		if ( !root.getValueByName( _NbPlayers, "Basics.NbPlayers" ) )
 		{
@@ -642,7 +644,7 @@ void CStaticCreatures::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 			nlwarning("ERROR For creature sheet %s, Basics.NbHitToKillPlayer == 0, creature damage may be inacurate !", sheetId.toString().c_str() );
 			_NbHitToKillPlayer = 3.0f;
 		}
-		
+
 		_CreatureDamagePerHitWithoutAverageDodge = uint32( (100*_PlayerHpLevel) / _NbHitToKillPlayer );
 		compileCreatureDamagePerHit();
 
@@ -712,21 +714,21 @@ void CStaticCreatures::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 			lootTableArray->getArraySize (size);
 
 			_LootTables.resize(size);
-			
+
 			// Get a array value
 			for (uint i=0; i<size; ++i)
 			{
 				lootTableArray->getArrayValue( _LootTables[i], i );
 			}
 		}
-				
+
 		///////////////////////////////////////////////////////
 		// bag of animal if have pack animal capabilities
 		///////////////////////////////////////////////////////
 		root.getValueByName( _BagInventorySheet, "animal_bag.bag" );
 
 		///////////////////////////////////////////////////////
-		// Movement speed 
+		// Movement speed
 		///////////////////////////////////////////////////////
 		root.getValueByName( _WalkSpeed, "Basics.MovementSpeeds.WalkSpeed" );
 		root.getValueByName( _RunSpeed, "Basics.MovementSpeeds.RunSpeed" );
@@ -857,7 +859,7 @@ void CStaticCreatures::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 			_Resists.Rot = CCreatureResists::ImmuneScore;
 		if ( _Resists.Shockwave >= 10000)
 			_Resists.Shockwave = CCreatureResists::ImmuneScore;
-		
+
 		// damage shield
 		_DamageShieldDamage = 0;
 		root.getValueByName( _DamageShieldDamage, "Damage Shield.Damage");
@@ -913,7 +915,7 @@ uint CStaticCreatures::getVersion()
 void CStaticCreatures::serial(class NLMISC::IStream &f)
 {
 	CStaticHarvestable::serial(f);
-	
+
 	f.serialEnum( _Race );
 	f.serial( _Gender );
 	f.serial( _Size );
@@ -941,7 +943,7 @@ void CStaticCreatures::serial(class NLMISC::IStream &f)
 	{
 		f.serial( _Items[ e ] );
 	}
-	
+
 	f.serialCont( _LootTables );
 	f.serial( _MeleeReachValue );
 	f.serial( _WalkSpeed );
@@ -962,7 +964,7 @@ void CStaticCreatures::serial(class NLMISC::IStream &f)
 	f.serial(_Resists);
 	f.serial(_ActionOnDeath);
 	f.serial(_DodgeAsDefense);
-	
+
 	if (f.isReading())
 	{
 		std::string eco;
@@ -974,9 +976,9 @@ void CStaticCreatures::serial(class NLMISC::IStream &f)
 		std::string eco = ECOSYSTEM::toString(_Ecosystem);
 		f.serial(eco);
 	}
-	
+
 	f.serial( _BagInventorySheet );
-	
+
 	f.serial(_DamageShieldDamage);
 	f.serial(_DamageShieldHpDrain);
 }
@@ -1008,19 +1010,20 @@ class CAttributeMapping
 {
 public:
 	CAttributeMapping();
-	
+
 	TAttributeType find(const std::string &key) const;
 
 	TStaticAttributeMap _StaticAttributeMap;
 };
 
 CAttributeMapping::CAttributeMapping()
-{	
+{
 	//BASICS
 	_StaticAttributeMap.insert(make_pair(std::string("basics.race"),				at_race));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.gender"),				at_gender));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.size"),				at_size));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.level"),				at_level));
+	_StaticAttributeMap.insert(make_pair(std::string("basics.playerskilllevel"),	at_player_skill_level));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.nbplayers"),			at_nb_players));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.playerhplevel"),		at_player_hp_level));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.nbhittokillplayer"),	at_nb_hit_to_kill_player));
@@ -1044,7 +1047,7 @@ CAttributeMapping::CAttributeMapping()
 	_StaticAttributeMap.insert(make_pair(std::string("basics.attackable"),			at_attackable));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.selectable"),			at_selectable));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.lhstate"),				at_lhstate));
-	
+
 	//PROTECTIONS
 	_StaticAttributeMap.insert(make_pair(std::string("protections.piercing"),			at_protect_piercing));
 	_StaticAttributeMap.insert(make_pair(std::string("protections.slashing"),			at_protect_slashing));
@@ -1056,7 +1059,7 @@ CAttributeMapping::CAttributeMapping()
 	_StaticAttributeMap.insert(make_pair(std::string("protections.poison"),				at_protect_poison));
 	_StaticAttributeMap.insert(make_pair(std::string("protections.electricity"),		at_protect_electricity));
 	_StaticAttributeMap.insert(make_pair(std::string("protections.shock"),				at_protect_shock));
-	
+
 	//RESISTS
 	_StaticAttributeMap.insert(make_pair(std::string("resists.fear"),			at_resists_fear));
 	_StaticAttributeMap.insert(make_pair(std::string("resists.sleep"),			at_resists_sleep));
@@ -1084,7 +1087,7 @@ TAttributeType CAttributeMapping::find(const std::string &key) const
 		return at_unknown;
 
 	return it->second;
-}	
+}
 
 bool CStaticCreatures::applyProtectModification(uint index, const std::string &attr, const std::string &newValue)
 {
@@ -1113,7 +1116,7 @@ bool CStaticCreatures::applyProtectModification(uint index, const std::string &a
 		return false;
 	}
 	return true;
-	
+
 }
 /************************************************************************/
 /* Apply attributes customization  defined in a UserModel				*/
@@ -1129,9 +1132,9 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 	CAttributeMapping attributeMap = CAttributeMapping();
 	for (uint32 i = 1; i < scriptData.size(); ++i)
 	{
-		scriptLine.clear();	
+		scriptLine.clear();
 		splitString(scriptData[i], " ", scriptLine);
-		
+
 		if (scriptLine.size() < 2
 			|| toLower(scriptLine[0]) == "protect" && scriptLine.size() < 3)
 		{
@@ -1151,7 +1154,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			/*					         BASICS                                     */
 			/************************************************************************/
 			case at_race :
-			{		 
+			{
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting race to '%s'", modelId.c_str(), scriptLine[1].c_str());
 				_Race = EGSPD::CPeople::fromString( scriptLine[1] );
 				if (EGSPD::CPeople::toString(_Race) != scriptLine[1])
@@ -1159,7 +1162,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 					nlwarning("<CStaticCreatures::applyUserModel>Error while applying user model '%s' : cannot read race '%s', the race is set to '%s'",
 						modelId.c_str(), scriptLine[1].c_str(), EGSPD::CPeople::toString(_Race).c_str());
 					errors = true;
-				}				
+				}
 				break;
 			}
 			case at_gender :
@@ -1175,16 +1178,20 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 				_Size = CREATURE_SIZE::stringToCreatureSize( scriptLine[1] );
 				break;
 			}
+
 			case at_level :
-				//FIXME
+			{
+				NLMISC::fromString(scriptLine[1], _Level);
+				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting Level to %u", modelId.c_str(), _Level);
 				break;
+			}
 
 			case at_player_skill_level :
 				//FIXME
 				break;
 
 			case at_nb_players :
-			{	
+			{
 				sint n;
 				NLMISC::fromString(scriptLine[1], n);
 				if (n > 255 || n < 0)
@@ -1196,7 +1203,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting NbPlayers to '%s'", modelId.c_str(), scriptLine[1].c_str());
 				_NbPlayers = static_cast<uint8>(n);
 				break;
-			}			
+			}
 
 			case at_player_hp_level:
 			{
@@ -1207,7 +1214,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 				break;
 			}
 			case at_nb_hit_to_kill_player :
-			{	
+			{
 				char *ptr = NULL;
 				float nbHits = static_cast<float>(strtod(scriptLine[1].c_str(), &ptr));
 				if (ptr != NULL && *ptr == '\0' && errno != ERANGE)
@@ -1221,14 +1228,14 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 					_NbHitToKillPlayer = 3.0f;
 					errors = true;
 				}
-								
+
 				_CreatureDamagePerHitWithoutAverageDodge = uint32( (100*_PlayerHpLevel) / _NbHitToKillPlayer );
 				compileCreatureDamagePerHit();
 				break;
 			}
 
 			case at_ecosystem :
-			{	
+			{
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting Ecosystem to'%s'", modelId.c_str(), scriptLine[1].c_str());
 				_Ecosystem = ECOSYSTEM::stringToEcosystem(scriptLine[1]);
 				break;
@@ -1247,7 +1254,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 				//_Faction = CStaticFames::INVALID_FACTION_INDEX;
 				break;
 			}
-			
+
 			case at_fame_by_kill:
 			{
 				_FameByKill = 0;
@@ -1261,7 +1268,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			{
 				sint32 hp;
 				NLMISC::fromString(scriptLine[1], hp);
-				
+
 				if (hp == 0)
 				{
 					nlwarning("<CStaticCreatures::applyUserModel>Error while applying user model '%s' : spawning a creature with 0 Hit Points ! set the hp to 100", modelId.c_str());
@@ -1280,7 +1287,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			{
 				char *ptr = NULL;
 				float lifeRegen = static_cast<float>(strtod(scriptLine[1].c_str(), &ptr));
-				
+
 				if (ptr != NULL && *ptr == '\0' && errno != ERANGE)
 				{
 					_Regen[SCORES::hit_points] = lifeRegen;
@@ -1295,7 +1302,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 				break;
 
 			}
-			
+
 			case at_attack_speed:
 			{
 				char *ptr = NULL;
@@ -1354,7 +1361,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			}
 
 			case at_xp_gain_on_creature:
-			{	
+			{
 				char *ptr = NULL;
 				float xpGain = static_cast<float>(strtod(scriptLine[1].c_str(), &ptr));
 				if (ptr != NULL && *ptr == '\0' && errno != ERANGE)
@@ -1370,7 +1377,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 				}
 				break;
 			}
-			
+
 			case at_local_code:
 			{
 				//used but directly from the georgesheet?
@@ -1378,7 +1385,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			}
 
 			case at_dodge_as_defense:
-			{	
+			{
 				if (scriptLine[1] == "true" || scriptLine[1] == "1" || scriptLine[1] == "on")
 				{
 					_DodgeAsDefense = true;
@@ -1398,7 +1405,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting DodgeAsDefense to %s", modelId.c_str(), scriptLine[1].c_str());
 				break;
 			}
-			
+
 			case at_walk_speed :
 			{
 				char *ptr = NULL;
@@ -1436,7 +1443,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			}
 
 			case at_attackable:
-			{	
+			{
 				if (scriptLine[1] == "true" || scriptLine[1] == "1" || scriptLine[1] == "on")
 				{
 					_Properties.attackable( true );
@@ -1456,9 +1463,9 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting Attackable to %s", modelId.c_str(), scriptLine[1].c_str());
 				break;
 			}
-			
+
 			case at_selectable:
-			{	
+			{
 				if (scriptLine[1] == "true" || scriptLine[1] == "1" || scriptLine[1] == "on")
 				{
 					_Properties.selectable( true );
@@ -1500,13 +1507,13 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 						_Properties.lootable( false );
 						_Properties.harvestable( false );
 						break;
-				}	
+				}
 			}
 
 			/************************************************************************/
 			/*                           PROTECT                                    */
 			/************************************************************************/
-			
+
 			case at_protect_piercing :
 			{
 				errors = applyProtectModification((uint)DMGTYPE::PIERCING, scriptLine[1], scriptLine[2]);
@@ -1514,171 +1521,171 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			}
 
 			case at_protect_slashing :
-			{ 
+			{
 				errors = applyProtectModification((uint)DMGTYPE::SLASHING, scriptLine[1], scriptLine[2] );
-				break; 
+				break;
 			}
 
 			case at_protect_blunt :
-			{ 
+			{
 				errors = applyProtectModification((uint)DMGTYPE::BLUNT, scriptLine[1], scriptLine[2] );
-				break; 
+				break;
 			}
 
 			case at_protect_rot :
-			{ 
+			{
 				errors = applyProtectModification((uint)DMGTYPE::ROT, scriptLine[1], scriptLine[2] );
-				break; 
+				break;
 			}
 
 			case at_protect_acid :
-			{ 
+			{
 				errors = applyProtectModification((uint)DMGTYPE::ACID, scriptLine[1], scriptLine[2] );
-				break; 
+				break;
 			}
 
 			case at_protect_cold :
-			{ 
+			{
 				errors = applyProtectModification((uint)DMGTYPE::COLD, scriptLine[1], scriptLine[2] );
-				break; 
+				break;
 			}
 
 			case at_protect_fire :
-			{ 
+			{
 				errors = applyProtectModification((uint)DMGTYPE::FIRE, scriptLine[1], scriptLine[2] );
-				break; 
+				break;
 			}
 
 			case at_protect_poison :
-			{ 
+			{
 				errors = applyProtectModification((uint)DMGTYPE::POISON, scriptLine[1], scriptLine[2] );
-				break; 
+				break;
 			}
 
 			case at_protect_electricity :
-			{ 
+			{
 				errors = applyProtectModification((uint)DMGTYPE::ELECTRICITY, scriptLine[1], scriptLine[2] );
-				break; 
+				break;
 			}
 
 			case at_protect_shock :
-			{ 
+			{
 				errors = applyProtectModification((uint)DMGTYPE::SHOCK, scriptLine[1], scriptLine[2] );
-				break; 
+				break;
 			}
 
 			/************************************************************************/
 			/*                          RESIST                                      */
 			/************************************************************************/
-			
+
 			case at_resists_fear :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Fear = value;
-				break; 
+				break;
 			}
 			case at_resists_sleep :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Sleep = value;
-				break; 
+				break;
 			}
 			case at_resists_stun :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Stun = value;
-				break; 
+				break;
 			}
 			case at_resists_root :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Root = value;
-				break; 
+				break;
 			}
 			case at_resists_snare :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Snare = value;
-				break; 
+				break;
 			}
 			case at_resists_slow :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Slow = value;
-				break; 
+				break;
 			}
 			case at_resists_madness :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Madness = value;
-				break; 
+				break;
 			}
 			case at_resists_blind :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Blind = value;
-				break; 
+				break;
 			}
 			case at_resists_acid :
 			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Acid = value;
-				break; 
+				break;
 			}
 			case at_resists_cold :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Cold = value;
-				break; 
+				break;
 			}
 			case at_resists_electricity :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Electricity = value;
-				break; 
+				break;
 			}
 			case at_resists_fire :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Fire = value;
-				break; 
+				break;
 			}
 			case at_resists_poison :
 			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Poison = value;
-				break; 
+				break;
 			}
 			case at_resists_rot :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Rot = value;
-				break; 
+				break;
 			}
 			case at_resists_shockwave :
-			{ 
+			{
 				uint16 value;
 				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Shockwave = value;
-				break; 
+				break;
 			}
 
 			case at_unknown:
-			{	
+			{
 				nlwarning("<CStaticCreatures::applyUserModel>Error while applying user model '%s': unknown token '%s', ignoring it.", modelId.c_str(), scriptLine[0].c_str());
 				errors = true;
 				break;
@@ -1707,7 +1714,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 
 	if( form )
 	{
-		UFormElm& root = form->getRootNode();		
+		UFormElm& root = form->getRootNode();
 
 		string value;
 
@@ -1732,7 +1739,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 		// Level
 		///////////////////////////////////////////////////////
 		root.getValueByName( Level, "Basics.Level" );
-		
+
 		///////////////////////////////////////////////////////
 		// First name
 		///////////////////////////////////////////////////////
@@ -1760,7 +1767,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 		{
 			root.getValueByName( Scores[ i ], ( string("Basics.Scores.") + SCORES::toString( i ) ).c_str(), UFormElm::Formula );
 		}
-		
+
 		///////////////////////////////////////////////////////
 		// Items
 		///////////////////////////////////////////////////////
@@ -1813,7 +1820,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 				Sheaths[ i ].Right.IdSheet = 0;
 				Sheaths[ i ].Right.Quality = 0;
 			}
-		
+
 			root.getValueByName( sheetName, (string("Basics.Equipment.Sheath") + toString( i ) + string("Ammo0.Item" )).c_str() );
 			if( sheetName != string("") )
 			{
@@ -1826,7 +1833,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 				Sheaths[ i ].Ammo0.IdSheet = 0;
 				Sheaths[ i ].Ammo0.Quality = 0;
 			}
-		
+
 			root.getValueByName( sheetName, (string("Basics.Equipment.Sheath") + toString( i ) + string("Ammo1.Item" )).c_str() );
 			if( sheetName != string("") )
 			{
@@ -1839,7 +1846,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 				Sheaths[ i ].Ammo1.IdSheet = 0;
 				Sheaths[ i ].Ammo1.Quality = 0;
 			}
-		
+
 			root.getValueByName( sheetName, (string("Basics.Equipment.Sheath") + toString( i ) + string("Ammo2.Item" )).c_str() );
 			if( sheetName != string("") )
 			{
@@ -1904,7 +1911,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 			uint size;
 			sentenceArray->getArraySize (size);
 			MemorizedSentences.resize( size );
-			
+
 //			nlinfo("<CStaticCharacters::readGeorges> static char role %d", Role);
 			// Get a array value
 			for (uint i=0; i<size; ++i)
@@ -1934,7 +1941,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 							MemorizedSentences[ i ].BricksIds.push_back( brickSheetId );
 						}
 						//nlinfo("			add sentence %s with %d bricks", MemorizedSentences[ i ].Name.c_str(), nbBricks );
-					}					
+					}
 				}
 			}
 		}
@@ -1957,7 +1964,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 		}
 
 		///////////////////////////////////////////////////////
-		// Movement speed 
+		// Movement speed
 		///////////////////////////////////////////////////////
 		root.getValueByName( WalkSpeed, "Basics.MovementSpeeds.WalkSpeed" );
 		root.getValueByName( RunSpeed, "Basics.MovementSpeeds.RunSpeed" );
@@ -1985,7 +1992,7 @@ void CStaticLootSet::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &for
 			uint size;
 			LootArray->getArraySize (size);
 			ItemLoot.resize( size );
-			
+
 			// Get a array value
 			for (uint i = 0; i < size; ++i)
 			{
@@ -2002,7 +2009,7 @@ void CStaticLootSet::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &for
 					// Level
 					///////////////////////////////////////////////////////
 					LootElt->getValueByName( ItemLoot[ i ].Level, "Quality" );
-					
+
 					///////////////////////////////////////////////////////
 					// Quantity
 					///////////////////////////////////////////////////////
@@ -2010,8 +2017,8 @@ void CStaticLootSet::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &for
 				}
 			}
 		}
-	}	
-	
+	}
+
 } // CStaticLootSet::readGeorges //
 
 
@@ -2035,7 +2042,7 @@ void CStaticLootTable::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 			// Get array size
 			uint size;
 			LootArray->getArraySize (size);
-						
+
 			// Get a array value
 			for (uint i = 0; i < size; ++i)
 			{
@@ -2047,7 +2054,7 @@ void CStaticLootTable::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 					///////////////////////////////////////////////////////
 					sint32 proba;
 					LootElt->getValueByName( proba, "Probability" );
-					
+
 					if( proba <= 0 )
 					{
 						nlwarning("<CStaticLootTable::readGeorges> Negative probability or null for loot_set %s : %d",value.c_str(),proba);
@@ -2075,7 +2082,7 @@ void CStaticLootTable::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 			{
 				nlwarning("<CStaticLootTable::readGeorges> Bad value for 'Lvl_Factor' in sheet %s: %d",sheetId.toString().c_str(), MoneyLvlFactor);
 			}
-		
+
 			LootMoney->getValueByName( MoneyBase, "Base" );
 			if( MoneyBase < 0 )
 			{
@@ -2089,7 +2096,7 @@ void CStaticLootTable::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 			}
 		}
 	}
-	
+
 } // CStaticLootTable::readGeorges //
 
 #ifndef NO_EGS_VARS
@@ -2145,14 +2152,14 @@ const CStaticLootSet *CStaticLootTable::selectRandomCustomLootSet() const
 	{
 		probabilitySum += (*it).first;
 	}
-	
+
 	// choose a random number between and probabilitySum
 	uint32 randWeight;
 	if( probabilitySum == 0 )
 		randWeight = 0;
 	else
 		randWeight = RandomGenerator.rand(probabilitySum-1) + 1;
-	
+
 	// "concatenate" weights of each index, when the random value is reached we'll have the index to use
 	uint16 w = 0;
 	for (it = CustomLootSets.begin(); it != CustomLootSets.end(); ++it )
@@ -2185,7 +2192,7 @@ void CStaticRaceStats::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 
 	if( form )
 	{
-		UFormElm& root = form->getRootNode();		
+		UFormElm& root = form->getRootNode();
 
 
 		///////////////////////////////////////////////////////
@@ -2258,7 +2265,7 @@ void CStaticRole::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 	if( form )
 	{
 		string value;
-		UFormElm& root = form->getRootNode();		
+		UFormElm& root = form->getRootNode();
 
 		///////////////////////////////////////////////////////
 		// Role
@@ -2288,7 +2295,7 @@ void CStaticRole::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 		s1 = string( "PreMemorizedSentences2");
 		s2 = string( "StartEquipment2");
 		readGeorgesSentenceAndEquipment( root, sheetId, s1, MemorizedSentences2, s2, Items2 );
-		
+
 		///////////////////////////////////////////////////////
 		// Three points action and equipment
 		///////////////////////////////////////////////////////
@@ -2310,7 +2317,7 @@ void CStaticRole::readGeorgesSentenceAndEquipment( UFormElm& root, const NLMISC:
 		// Get array size
 		uint size;
 		sentenceArray->getArraySize (size);
-		
+
 		// Get a array value
 		for (uint i=0; i<size; ++i)
 		{
@@ -2320,13 +2327,13 @@ void CStaticRole::readGeorgesSentenceAndEquipment( UFormElm& root, const NLMISC:
 				sentenceElt->getValueByName( value, "Sabrina Phrase" );
 //				string value2;
 //				sentenceElt->getValueByName( value2, "Memory Type" );
-				
+
 				CSheetId sheet(value);
 				if( sheet != CSheetId::Unknown )
 				{
 					TMemorizedSentence sentence;
 					sentence.sentence = sheet;
-					
+
 //					sentence.memory = MEM_SET_TYPES::toMemSetType( value2 );
 /*					if( sentence.memory == MEM_SET_TYPES::Unknown )
 					{
@@ -2380,7 +2387,7 @@ void CStaticSkillsTree::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 	if( form )
 	{
 		UFormElm& root = form->getRootNode();
-		
+
 		UFormElm *arraySkillElt = NULL;
 		if( root.getNodeByName( &arraySkillElt, "SkillData" ) )
 		{
@@ -2392,7 +2399,7 @@ void CStaticSkillsTree::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 				nlassertex( NbSkills == SKILLS::NUM_SKILLS, ("(%u != %u) Please synchronise game_share/skill.* with leveldesign/game_element/xp_table/skills.skill_tree (use skill_extractor.exe)", NbSkills, SKILLS::NUM_SKILLS));
 
 				SkillsTree.resize( NbSkills );
-				
+
 				for( uint i = 0; i < NbSkills; ++i )
 				{
 					UFormElm* SkillElt = NULL;
@@ -2442,7 +2449,7 @@ void CStaticSkillsTree::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 							nlwarning("<CStaticSkillsTree::readGeorges> can't get node ParentSkills in sheet %s", sheetId.toString().c_str() );
 						}
 						else
-						{	
+						{
 							SkillsTree[ skill ].ParentSkill = SKILLS::toSkill( SkillName );
 						}
 
@@ -2454,9 +2461,9 @@ void CStaticSkillsTree::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 							{
 								uint NbChildSkills;
 								nlverify( arrayChildSkillElt->getArraySize( NbChildSkills ) );
-								
+
 								SkillsTree[ skill ].ChildSkills.resize( NbChildSkills );
-								
+
 								for( uint i = 0; i < NbChildSkills; ++i )
 								{
 									string childSkillName;
@@ -2486,7 +2493,7 @@ uint32 CStaticSkillsTree::getTreeSkillPointsUnderSkill(SKILLS::ESkills skill) co
 	if (skill >= 0 && skill < (sint32)SkillsTree.size())
 	{
 		CStaticSkillsTree::SSkillData skillData = SkillsTree[ skill ];
-		
+
 		const vector<SKILLS::ESkills> &childSkills = skillData.ChildSkills;
 		uint16 ref = 0;
 		if (skillData.ParentSkill != SKILLS::unknown)
@@ -2495,9 +2502,9 @@ uint32 CStaticSkillsTree::getTreeSkillPointsUnderSkill(SKILLS::ESkills skill) co
 		}
 		else
 			ref = 1; // min top skill value is 1
-		
+
 		uint32 ret = skillData.MaxSkillValue - ref;
-		
+
 		for (uint i = 0 ; i < childSkills.size() ; ++i)
 		{
 			ret += getTreeSkillPointsUnderSkill(childSkills[i]);
@@ -2506,7 +2513,7 @@ uint32 CStaticSkillsTree::getTreeSkillPointsUnderSkill(SKILLS::ESkills skill) co
 		// if skill has childs, add 1 to total SP
 		if (!childSkills.empty())
 			++ret;
-		
+
 		return ret;
 	}
 	else
@@ -2521,13 +2528,13 @@ uint32 CStaticSkillsTree::getPlayerSkillPointsUnderSkill(const	CSkills *skills, 
 {
 	if(!skills)
 		return 0;
-	
+
 	if (skill >= 0 && skill < (sint32)SkillsTree.size())
 	{
 		// if skill is locked returns 0
 		if ( skills->_Skills[skill].Base == 0)
 			return 0;
-		
+
 		// skill unlocked, check children values
 		CStaticSkillsTree::SSkillData skillData = SkillsTree[ skill ];
 		const vector<SKILLS::ESkills> &childSkills = skillData.ChildSkills;
@@ -2538,7 +2545,7 @@ uint32 CStaticSkillsTree::getPlayerSkillPointsUnderSkill(const	CSkills *skills, 
 		}
 		else
 			ref = 1; // min top skill value is 1
-		
+
 		uint32 ret = skills->_Skills[skill].Base - ref;
 
 		bool childUnlocked = false;

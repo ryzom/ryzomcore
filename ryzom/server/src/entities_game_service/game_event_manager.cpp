@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -166,7 +163,7 @@ void CGameEventManager::createEventChannel()
 	{
 		ucstring title;
 		title.fromUtf8(_Name);
-		_ChannelEventId = DynChatEGS.addChan(_Name, title );
+		_ChannelEventId = DynChatEGS.addChan("FACTION_"+_Name, title );
 		// set historic size of the newly created channel
 		DynChatEGS.setHistoricSize( _ChannelEventId, EventChannelHistoricSize );
 	}

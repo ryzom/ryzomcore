@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1119,12 +1116,19 @@ void		fillTARGET_LIST( TOutBox& outbox, TPropIndex )
 		// distance to target (in 1/127 of 100m)
 		uint32	dt = *(&((*it)()));
 
+		++it;
+		if (it == targets.end())
+			break;
+		uint32	damage = (*it)();
+
 		// translate slot
 		TCLEntityId		slot = client->IdTranslator.getCEId(index);
 		if (slot != INVALID_SLOT)
 		{
 			TargetSlotsList.push_back(slot);
 			TargetSlotsList.push_back((uint8)dt);
+			TargetSlotsList.push_back(uint8(damage));
+			TargetSlotsList.push_back(uint8(damage >> 8));
 		}
 
 		++it;

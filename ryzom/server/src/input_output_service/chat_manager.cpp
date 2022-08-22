@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2016  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -918,9 +915,14 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 			{
 				TGroupId grpId = itCl->second->getTeamChatGroup();
 				_DestUsers.push_back(grpId);
-
-				_Log.displayNL("'%s' (%s) : %s", fullName.c_str(), groupNames[itCl->second->getChatMode()], ucstr.toString().c_str() );
-				chatInGroup( grpId, ucstr, sender );
+				string langs;
+				uint nbrReceivers;
+				checkNeedDeeplize(sender, ucstr, senderLang, langs, nbrReceivers, grpId);
+				if (nbrReceivers > 0)
+				{
+					_Log.displayNL("team:%s|%s|%d|%s|%s", grpId.toString().c_str(), fullName.c_str(), nbrReceivers, langs.c_str(), ucstr.toUtf8().c_str() );
+					//chatInGroup( grpId, ucstr, sender );
+				}
 			}
 			break;
 
@@ -1051,7 +1053,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 
 						}
 						// Send for translation
-						else if (chatId == "FACTION_RF" || chatId == "FACTION_EN" || chatId == "FACTION_DE" || chatId == "FACTION_FR" || chatId == "FACTION_ES" || chatId == "FACTION_RU")
+						else if (chatId.substr(0, 8) == "FACTION_" || chatId.substr(0, 7) == "league_")
 						{
 							_Log.displayNL("%s|%s|*|%s-*|%s", string("#"+chatId).c_str(), fullName.c_str(), senderLang.c_str(), ucstr.toUtf8().c_str());
 							sendMessages = false; // We need translated it before
@@ -2824,8 +2826,8 @@ void CChatManager::displayChatGroup(NLMISC::CLog &log, TGroupId gid, CChatGroup 
 		{
 			CCharacterInfos *ci = IOS->getCharInfos(TheDataset.getEntityId(*first));
 			if (ci != NULL)
-				log.displayNL("  '%s' %s:%x",
-					ci->Name.toString().c_str(),
+				log.displayNL(" - '%s' %s:%x",
+					ci->Name.toUtf8().c_str(),
 					ci->EntityId.toString().c_str(),
 					first->getIndex());
 			else
@@ -2908,7 +2910,7 @@ void CChatManager::displayChatAudience(NLMISC::CLog &log, const CEntityId &eid, 
 				CCharacterInfos *ci = IOS->getCharInfos(TheDataset.getEntityId(*first));
 				if (ci != NULL)
 					log.displayNL("  '%s' %s:%x",
-						ci->Name.toString().c_str(),
+						ci->Name.toUtf8().c_str(),
 						TheDataset.getEntityId(*first).toString().c_str(),
 						first->getIndex());
 
@@ -3111,7 +3113,7 @@ void CChatManager::update()
 			}
 			else if (chatType == "dynamic")
 			{
-				if (EnableDeepL && chatId.size() >= 10 && (chatId.substr(0, 11) == "FACTION_RF-" || chatId == "FACTION_EN" || chatId == "FACTION_DE" || chatId == "FACTION_FR" || chatId == "FACTION_ES" || chatId == "FACTION_RU"))
+				if (EnableDeepL && chatId.substr(0, 8) == "FACTION_")
 				{
 					string usedlang;
 					if (chatId.substr(0, 11) == "FACTION_RF-")
@@ -3123,21 +3125,27 @@ void CChatManager::update()
 				}
 				else
 				{
-
 					// broadcast to other client in the channel
 					const TChanID *chanId = _ChanNames.getA(chatId);
 					if (chanId)
 					{
-						CDynChatSession *dcc = _DynChat.getChan(*chanId)->getFirstSession();
-						while (dcc)
+						CDynChatChan *dccChan = _DynChat.getChan(*chanId);
+						if (dccChan)
 						{
-							sendFarChat((CChatGroup::TGroupType)12, dcc->getClient()->getID(), text, ucstring("~")+ucstring(name), *chanId);
-							dcc = dcc->getNextChannelSession(); // next session in this channel
+							CDynChatSession *dcc = dccChan->getFirstSession();
+							while (dcc)
+							{
+								CDynChatClient *dccClient = dcc->getClient();
+								if (dccClient)
+									sendFarChat((CChatGroup::TGroupType)12, dccClient->getID(), text, ucstring("~")+ucstring(name), *chanId);
+
+								dcc = dcc->getNextChannelSession(); // next session in this channel
+							}
 						}
 					}
 				}
-					// void CChatManager::sendFarChat( C const ucstring& ucstr, const ucstring &senderName, TChanID chanID)
-					continue;
+				// void CChatManager::sendFarChat( C const ucstring& ucstr, const ucstring &senderName, TChanID chanID)
+				continue;
 			}
 			else if (chatType == "univers") {
 				// Send to Deepl
@@ -3162,11 +3170,14 @@ void CChatManager::update()
 	}
 	catch(const DBException& e)
 	{
-		cout << "caught DBException " << e.toString() << endl;
+		nlwarning("CChatManager::update Exception: %s", e.toString().c_str());
 	}
 #endif
 }
 
 TChanID CChatManager::getChanId(const string name) {
-	return *_ChanNames.getA(name);
+	const TChanID *chanid = _ChanNames.getA(name);
+	if (chanid)
+		return *chanid;
+	return DYN_CHAT_INVALID_CHAN;
 }

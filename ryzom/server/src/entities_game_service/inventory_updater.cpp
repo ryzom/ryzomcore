@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -38,6 +35,7 @@ const CInventoryUpdaterForCharacter::TInventoryId CInventoryUpdaterForCharacter:
 	CInventoryCategoryForCharacter::InvalidInvId, //temporary,					
 //	CInventoryCategoryForCharacter::InvalidInvId, //pickup,						
 	CInventoryCategoryForCharacter::InvalidInvId, //equipment,					
+	CInventoryCategoryForCharacter::InvalidInvId, //hotbar,			
 	CInventoryCategoryForCharacter::Bag,						
 	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+0),
 	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+1),
@@ -209,6 +207,9 @@ void		CInventoryUpdaterForCharacter::resetItemIntoClassicDatabase( INVENTORIES::
 		}
 		break;
 	case INVENTORIES::equipment:
+		// nothing to do
+		break;
+	case INVENTORIES::hotbar:
 		// nothing to do
 		break;
 	}

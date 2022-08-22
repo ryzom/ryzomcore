@@ -1328,7 +1328,7 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 		if( c )
 		{
 			CContinent * cont = CZoneManager::getInstance().getContinent(x,y);
-			if(c->getCurrentContinent() == CONTINENT::NEWBIELAND )
+			/*if(c->getCurrentContinent() == CONTINENT::NEWBIELAND )
 			{
 				if( cont == 0 || cont->getId() != CONTINENT::NEWBIELAND )
 				{
@@ -1336,6 +1336,7 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 //					nlwarning("Position %s player outside NEWBIELAND, this is logged.", c->getId().toString().c_str());
 				}
 			}
+			*/
 
 			c->allowNearPetTp();
 			if (res.size() >= 4)
@@ -3437,7 +3438,7 @@ NLMISC_COMMAND( summon, "summon a player in front of the CSR", "<CSR eId><player
 	}
 	CHECK_RIGHT( c,target );
 
-	if(target->getCurrentContinent() == CONTINENT::NEWBIELAND )
+/*	if(target->getCurrentContinent() == CONTINENT::NEWBIELAND )
 	{
 		if( c->getCurrentContinent() != CONTINENT::NEWBIELAND )
 		{
@@ -3446,7 +3447,7 @@ NLMISC_COMMAND( summon, "summon a player in front of the CSR", "<CSR eId><player
 			return true;
 		}
 	}
-
+*/
 	COfflineEntityState state;
 	state.X = target->getState().X;
 	state.Y = target->getState().Y;
@@ -3941,7 +3942,7 @@ NLMISC_COMMAND (changeVar, "change a variable of a player", "<eid> <var> <val>")
 	string var = args[1];
 	string value = args[2];
 
-	CCharacter *e = PlayerManager.getChar(eid);
+	CEntityBase *e = CEntityBaseManager::getEntityBasePtr(eid);
 	if(e != 0)
 	{
 		if (e->setValue (var, value))
@@ -4531,7 +4532,13 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 		pass = args[2];
 
 	if ( (channel == DYN_CHAT_INVALID_CHAN) && (pass != nlstr("*")) && (pass != nlstr("***")) )
-		channel = inst->createUserChannel(nameLwr, pass);
+	{
+		// Don't allow channels starting with "FACTION_" (to not clash with the faction channels)
+		if (!c->havePriv(":DEV:") && !c->havePriv(":SGM:") && !c->havePriv(":EM:") && nameLwr.substr(0, 8) == toCaseInsensitive("FACTION_"))
+			channel =  DYN_CHAT_INVALID_CHAN;
+		else
+			channel = inst->createUserChannel(nameLwr, pass);
+	}
 
 	if (channel != DYN_CHAT_INVALID_CHAN)
 	{
@@ -4635,7 +4642,7 @@ NLMISC_COMMAND (setDontTranslateLangs, "Set langs that a player dont want to see
 	msgout.serial(langs);
 	CUnifiedNetwork::getInstance()->send("IOS", msgout);
 	c->setDontTranslate(langs);
-
+	return true;
 }
 
 
@@ -4698,6 +4705,9 @@ CInventoryPtr getInv(CCharacter *c, const string &inv)
 			case INVENTORIES::pet_animal2:
 			case INVENTORIES::pet_animal3:
 			case INVENTORIES::pet_animal4:
+			case INVENTORIES::pet_animal5:
+			case INVENTORIES::pet_animal6:
+			case INVENTORIES::pet_animal7:
 			case INVENTORIES::guild:
 			case INVENTORIES::player_room:
 				inventoryPtr = c->getInventory(selectedInv);
@@ -4955,6 +4965,9 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 				case INVENTORIES::pet_animal2:
 				case INVENTORIES::pet_animal3:
 				case INVENTORIES::pet_animal4:
+				case INVENTORIES::pet_animal5:
+				case INVENTORIES::pet_animal6:
+				case INVENTORIES::pet_animal7:
 				case INVENTORIES::guild:
 				case INVENTORIES::player_room:
 					inventory = inv;
@@ -5016,8 +5029,9 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 			if (command_args.size() >= 6 && command_args[5] != "*")
 			{
-				customValue.fromUtf8(command_args[5]);
-				new_item->setCustomName(customValue);
+				//deprecated
+				//customValue.fromUtf8(command_args[5]);
+				//new_item->setCustomName(customValue);
 			}
 
 			if (command_args.size() >= 7 && command_args[6] != "*")
@@ -5344,10 +5358,11 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 				{
 					if (!crafted || itemPtr->getCreator() == c->getId())
 					{
-						if (needCustomName.empty() || itemPtr->getCustomName() == needCustomName)
-						{
+						// deprecated
+						//if (needCustomName.empty() || itemPtr->getCustomName() == needCustomName)
+						//{
 							numberItem += itemPtr->getStackSize();
-						}
+						//}
 					}
 				}
 			}
@@ -7711,11 +7726,9 @@ ENTITY_VARIABLE (Aggro, "Aggroable by creatures")
 			c->setAggroableOverride(aggroable);
 			c->setAggroableSave(aggroable);
 
-			aggroable = c->getAggroableOverride();
-			nlinfo ("%s aggroable = %d", entity.toString().c_str(), aggroable);
-			if (aggroable>0)
+			if (aggroable > 0)
 				nlinfo ("%s is now aggroable", entity.toString().c_str());
-			else if (aggroable<0)
+			else if (aggroable < 0)
 				nlinfo ("%s aggroable is defined by privilege", entity.toString().c_str());
 			else
 				nlinfo ("%s is now non aggroable", entity.toString().c_str());
@@ -9398,8 +9411,9 @@ NLMISC_COMMAND (lockItem, "Lock/unlock item in inventory", "<user id> <inventory
 	sint32 slot = -1;
 	fromString(args[2], slot);
 
-	CInventoryPtr inventory = getInv(c, selected_inv);
+	if (selected_inv == "guild") return false;
 
+	CInventoryPtr inventory = getInv(c, selected_inv);
 	if (inventory == NULL) return false;
 
 	if (slot < 0 || slot >= INVENTORIES::NbBagSlots) return false;
@@ -9521,10 +9535,13 @@ NLMISC_COMMAND(setSimplePhrase, "Set an IOS phrase", "<id> <phrase> [<language c
 		return false;
 
 	string phraseName = args[0];
-	ucstring phraseContent = phraseName;
-	phraseContent += "(){[";
-	phraseContent += args[1];
-	phraseContent += "]}";
+	ucstring phraseContent;
+	ucstring phraseText;
+	phraseContent.fromUtf8(phraseName);
+	phraseText.fromUtf8(args[1]);
+	phraseContent += ucstring("(){[");
+	phraseContent += phraseText;
+	phraseContent += ucstring("]}");
 
 	string msgname = "SET_PHRASE";
 	bool withLang = false;

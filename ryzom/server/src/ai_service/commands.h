@@ -604,6 +604,7 @@ void spawnList(NLMISC::CLog& log, TContainer const& container, std::string filte
 			continue;
 		spawn(*value);
 	}
+	nlinfo("[ARK] AIS UP");
 }
 
 template <class TContainer>

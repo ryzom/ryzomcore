@@ -6,11 +6,11 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_log_analyser_service
 						ryzom_adminmodules
-						ryzom_gameshare
+						${RYZOM_GAMESHARE_LIBRARIES}
 						ryzom_pd
-						nelmisc
-						nelnet
-						nelgeorges)
+						${NELMISC_LIBRARIES}
+						${NELNET_LIBRARIES}
+						${NELGEORGES_LIBRARIES})
 
 NL_DEFAULT_PROPS(ryzom_log_analyser_service "Ryzom, Services: Log Analyzer Service (LAS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_log_analyser_service)

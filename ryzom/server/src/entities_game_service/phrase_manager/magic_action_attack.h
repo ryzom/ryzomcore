@@ -63,6 +63,7 @@ protected:
 		MBEHAV::CBehaviour&			behav,
 		std::vector<float> const&	powerFactors,
 		NLMISC::CBitSet&			affectedTargets,
+		std::vector<sint16>&		targetDeltaHp,
 		NLMISC::CBitSet const&		invulnerabilityOffensive,
 		NLMISC::CBitSet const&		invulnerabilityAll,
 		bool						isMad,
@@ -98,10 +99,10 @@ private:
 		bool				mainTarget,
 		uint32				casterSkillvalue,
 		uint32				casterSkillBaseValue,
-		MBEHAV::CBehaviour&	behav,
 		bool				isMad,
 		float				rangeFactor,
-		CTargetInfos&		targetInfos);
+		CTargetInfos&		targetInfos,
+		sint16&				deltaHP);
 	
 public:
 	/// returns true if target resists

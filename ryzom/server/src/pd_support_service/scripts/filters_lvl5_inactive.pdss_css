@@ -1,0 +1,7 @@
+inputFileRule AddFilesFromFdcCache
+inputFileRule Since 01/01/2007
+inputFileRule FileAge 7
+inputFileRule LargestFile
+
+filter BestSkill 2 5
+filter NoGuild

@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -380,7 +377,7 @@ CMissionManager::CMissionManager()
 		std::map<TAIAlias,std::string>::iterator itName = globalData.NameMap.find( (*it).first );
 		if ( itName != globalData.NameMap.end() )
 		{
-			MISLOG("'%s' alias = %u giver = %u",(*itName).second.c_str(), (*it).first, (*it).second->getDefaultNpcGiver());
+			MISLOG("'%s' alias = %s",(*itName).second.c_str(), CPrimitivesParser::aliasToString((*it).first).c_str());
 			count++;
 		}
 		else
@@ -582,8 +579,8 @@ void CMissionManager::checkVisitPlaceMissions()
 					if (! (step && missionInstance))
 					{
 						++its;
-						continue;	
-					} 
+						continue;
+					}
 
 					// Test if the iterated "visit place" steps match the current places with contraints
 					bool placeProcessed = false;
@@ -862,7 +859,7 @@ uint8 CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIA
 			MISDBG("%s user not in a guild", sDebugPrefix.c_str());
 			return 8;
 		}
-		/* /// This is already checked in the prerequisites 
+		/* /// This is already checked in the prerequisites
 		if (!module->pickMission( templ->Alias ))
 		{
 			/// Todo : error message for the member
@@ -949,6 +946,13 @@ uint8 CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIA
 		MISDBG("%s unimplemented mission type %u", sDebugPrefix.c_str(), templ->Type);
 		return 12;
 	}
+
+	if ( !inst )
+	{
+		MISDBG("%s invalid mission instance", sDebugPrefix.c_str());
+		return 13;
+	}
+
 	inst->setGiver( giver );
 	inst->setMainMissionTemplateId(mainMission);
 
@@ -1517,52 +1521,22 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
             uint i = 0;
             uint nbJumpPoints = (uint)templ->JumpPoints.size();
             bool updateJournal = false;
-            nlinfo("nbJumpPoints = %d", nbJumpPoints);
             for (; i < nbJumpPoints; i++ )
             {
                 if ( templ->JumpPoints[i].Name == jump )
                 {
                     // inform client
                     closeDynChat( user, botRow );
+					_DynChats.erase(it);
+					it = _DynChats.end();
+					reStart = true;
 
 					std::list< CMissionEvent * > eventList;
-					nlinfo("Jump to %d", i);
                     inst->jump( templ->JumpPoints[i].Step,templ->JumpPoints[i].Action,eventList );
 
 					// Send to AIS (to stop the bot). Important: there must be the same number of items pushed in DynChatEnd that in DynChatStart for the bot to resume.
 					CharacterDynChatBeginEnd.DynChatEnd.push_back( botRow );
 
-// HERE "it" IS INVALID, NEED TO FIND IT AGAIN TO ERASE IT
-
-					it = _DynChats.end(); // to be sure
-
-					{
-						/* We need to find the mission that we are working on as we invalidated the iterator
-						 * in the jump()
-						 */
-						CHashMultiMap<TDataSetRow,CDynChat,TDataSetRow::CHashCode>::iterator itToLookForMission = _DynChats.find( user->getEntityRowId() );
-						while (itToLookForMission != _DynChats.end() && (*itToLookForMission).first == user->getEntityRowId())
-						{
-							if ( (*itToLookForMission).second.Bot == botRow )
-							{
-								CMission * missionIterated = (*itToLookForMission).second.Mission;
-								if (missionIterated && inst  == missionIterated)
-								{
-									_DynChats.erase(itToLookForMission);
-									break;
-								}
-							}
-							++itToLookForMission;
-						}
-					}
-
-//            _DynChats.erase(it);
-
-// END PATCH
-
-
-
-                    reStart = true;
                     switch ( inst->getProcessingState() )
                     {
 	                    case CMission::Failed:

@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -110,7 +107,7 @@ void CAIAliasManager::add(uint32 alias, const std::string &name)
 		// extract $title$ spec in the title
 		ucstring::size_type pos2 = ucname.find('$', pos+1);
 		title = ucname.substr(pos+1, pos2-pos-1);
-		cInfo.Title = title.toString();
+		cInfo.Title = title.toUtf8();
 		cInfo.TitleIndex = SM->storeString(title);
 	}
 	else
@@ -140,7 +137,7 @@ void CAIAliasManager::add(uint32 alias, const std::string &name)
 			// extract $title$ spec in the title
 			ucstring::size_type pos2 = sn.find('$', pos+1);
 			title = sn.substr(pos+1, pos2-pos-1);
-			cInfo.Title = title.toString();
+			cInfo.Title = title.toUtf8();
 			cInfo.TitleIndex = SM->storeString(title);
 		}
 	}
@@ -349,7 +346,7 @@ void CInputOutputService::init()
 	CStringManager::CParameterTraits::init();
 
 	setVersion (RYZOM_PRODUCT_VERSION);
-	
+
 	IOS = this;
 	setUpdateTimeout(100);
 
@@ -550,7 +547,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	{
 		nlwarning("addCharacterName: receiveing char info with an invalid dataset row (datasetRow = %u, name = '%s'). IGNORING.",
 			chId.getIndex(),
-			ucname.toString().c_str());
+			ucname.toUtf8().c_str());
 		return;
 	}
 	// Add player in the chat manager (note: not done when chId added in the mirror, because callback called earlier)
@@ -599,7 +596,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 		// extract $title$ spec in the title
 		ucstring::size_type pos2 = ucname.find('$', pos+1);
 		title = ucname.substr(pos+1, pos2-pos-1);
-		charInfos->Title = title.toString();
+		charInfos->Title = title.toUtf8();
 		charInfos->TitleIndex = SM->storeString(title);
 	}
 	else
@@ -670,14 +667,16 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 			// extract $title$ spec in the title
 			ucstring::size_type pos2 = sn.find('$', pos+1);
 			title = sn.substr(pos+1, pos2-pos-1);
-			charInfos->Title = title.toString();
+			charInfos->Title = title.toUtf8();
 			charInfos->TitleIndex = SM->storeString(title);
 		}
 	}
 
 	// build the translated name
+	ucstring uc_title;
+	uc_title.fromUtf8(charInfos->Title);
 	if (!charInfos->Title.empty())
-		charInfos->Name = charInfos->ShortName + "$" + charInfos->Title+"$";
+		charInfos->Name = charInfos->ShortName + ucstring("$") + uc_title + ucstring("$");
 	else
 		charInfos->Name = charInfos->ShortName;
 
@@ -685,13 +684,13 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	{
 		if (charInfos->ShortNameIndex != charInfos->UntranslatedShortNameIndex)
 		{
-			string sn = charInfos->ShortName.toString();
-			string usn = SM->getString(charInfos->UntranslatedShortNameIndex).toString();
+			string sn = charInfos->ShortName.toUtf8();
+			string usn = SM->getString(charInfos->UntranslatedShortNameIndex).toUtf8();
 			nlinfo(" Translated short name for this character : '%s' (index %u) (untranslated : '%s')", sn.c_str(), charInfos->ShortNameIndex, usn.c_str());
 		}
 		else
 		{
-			string sn = charInfos->ShortName.toString();
+			string sn = charInfos->ShortName.toUtf8();
 			nlinfo(" Short name for this character : '%s' (index %u)", sn.c_str(), charInfos->ShortNameIndex);
 		}
 	}
@@ -722,13 +721,13 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	{
 		if (charInfos->NameIndex == charInfos->UntranslatedNameIndex)
 			nldebug("IOS: addCharacterName Adding name '%s' for entity %s:%x",
-				ucname.toString().c_str(),
+				ucname.toUtf8().c_str(),
 				TheDataset.getEntityId(chId).toString().c_str(),
 				chId.getIndex());
 		else
 			nldebug("IOS: addCharacterName Adding name '%s' translated as '%s' for entity %s:%x",
-				ucname.toString().c_str(),
-				charInfos->Name.toString().c_str(),
+				ucname.toUtf8().c_str(),
+				charInfos->Name.toUtf8().c_str(),
 				TheDataset.getEntityId(chId).toString().c_str(),
 				chId.getIndex());
 	}
@@ -947,7 +946,7 @@ void CInputOutputService::display(NLMISC::CLog &log)
 			itInfos->first.c_str(),
 			itInfos->second->EntityId.toString().c_str()
 			/*, infos->Index,
-			infos->Str.toString().c_str()*/);
+			infos->Str.toUtf8().c_str()*/);
 	}
 	log.displayNL("CHAT GROUPS : ");
 	IOS->getChatManager().displayChatGroups(log, true, false);

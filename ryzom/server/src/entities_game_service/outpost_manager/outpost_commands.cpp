@@ -110,11 +110,45 @@ NLMISC_COMMAND(outpostChallengeByGuild, "Challenges an outpost", "<outpost_id> <
 }
 
 //----------------------------------------------------------------------------
+NLMISC_COMMAND(outpostSetPvPType, "Set PvP Type of OP", "<outpost_id> <type>")
+{
+	if (args.size() != 2)
+		return false;
+
+	CSmartPtr<COutpost> outpost = getOutpostFromString(args[0], log);
+	if (outpost == NULL)
+		return true;
+
+	outpost->setPvpType(OUTPOSTENUMS::toPVPType(args[1]));
+	log.displayNL("OK");
+	return true;
+}
+
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(outpostSaveAll, "outpostSaveAll", "")
+{
+	COutpostManager::getInstance().saveAll();
+	return true;
+}
+
+
+//----------------------------------------------------------------------------
 NLMISC_COMMAND(outpostGetCurrentTime, "", "")
 {
 	log.displayNL("Current time is %d", CTime::getSecondsSince1970());
 	return true;
 }
+
+//outpostSetAttackDefenseDate primes_outpost_01.outpost -1
+//outpostSetState primes_outpost_01.outpost Attackbefore
+
+
+//outpostSetAttackTimestamp primes_outpost_01.outpost 1619630000
+//outpostSetAttackDefenseHour primes_outpost_01.outpost 0 0
+//outpostSimulateTimer0End primes_outpost_01.outpost 1620316800
+//outpostSetFightData primes_outpost_01.outpost 1 6
+
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(outpostSimulateTimer0End, "", "<outpost_id> [<absolute end time> | +<time to end>]")
@@ -252,6 +286,8 @@ NLMISC_COMMAND(outpostSetFightData, "", "<outpost_id> <current_round> [<current_
 	return true;
 }
 
+//setOutpostLevel (A:664:3) 20
+//outpostSimulateTimer0End (A:664:3)
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setOutpostLevel, "Set the outpost level", "<outpost id><level>" )
 {
@@ -265,6 +301,7 @@ NLMISC_COMMAND(setOutpostLevel, "Set the outpost level", "<outpost id><level>" )
 	uint32 level;
 	NLMISC::fromString(args[1], level);
 	outpost->setOutpostCurrentLevel(level);
+	outpost->askOutpostDBUpdate();
 	return true;
 }
 
@@ -646,6 +683,7 @@ NLMISC_COMMAND(outpostSetAttackDefenseHour, "Set attack and defense time of an o
 	return true;
 }
 
+//outpostSetAttackDefenseDate primes_outpost_01.outpost -1
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(outpostSetAttackDefenseDate, "Set attack and defense date of an outpost", "<outpost_id> <Nb days to add at attack/defense date>")
 {
@@ -656,10 +694,29 @@ NLMISC_COMMAND(outpostSetAttackDefenseDate, "Set attack and defense date of an o
 	if (outpost == NULL)
 		return true;
 
-	uint32 nbDaysAdd;
+	sint32 nbDaysAdd;
 	NLMISC::fromString(args[1], nbDaysAdd);
 
 	outpost->setRealChallengeTime( outpost->getRealChallengeTime() + nbDaysAdd*days );
+	outpost->setChallengeTime( (outpost->getRealChallengeTime()/hours + 1)*hours );
+	outpost->setChallengeHour( (outpost->getChallengeTime()%days)/hours );
+
+	return true;
+}
+
+NLMISC_COMMAND(outpostSetAttackTimestamp, "Set attack and defense date of an outpost", "<outpost_id> <timestamp>")
+{
+	if (args.size() != 2) return false;
+
+	// select the wanted outpost
+	CSmartPtr<COutpost> outpost = getOutpostFromString(args[0], log);
+	if (outpost == NULL)
+		return true;
+
+	uint32 timestamp;
+	NLMISC::fromString(args[1], timestamp);
+
+	outpost->setRealChallengeTime( timestamp );
 	outpost->setChallengeTime( (outpost->getRealChallengeTime()/hours + 1)*hours );
 	outpost->setChallengeHour( (outpost->getChallengeTime()%days)/hours );
 
@@ -688,14 +745,30 @@ NLMISC_COMMAND(outpostSetState, "Set outpost state (Peace/WarDeclaration/AttackB
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryCycle>")
+NLMISC_COMMAND(outpostSetTimer0, "Set outpost timer0", "<outpost_id> <Seconds>")
 {
 	if (args.size() != 2) return false;
+
+	// select the wanted outpost
+	CSmartPtr<COutpost> outpost = getOutpostFromString(args[0], log);
+	if (outpost == NULL)
+		return false;
+
+	uint32 seconds;
+	NLMISC::fromString(args[1], seconds);
+	outpost->actionSetTimer0(seconds);
+	return true;
+}
+
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryCycle>")
+{
+	if (args.size() < 1) return false;
 
 	GET_CHARACTER
 
 	uint32 cycleEntryDate;
-	NLMISC::fromString(args[1], cycleEntryDate);
 
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( c->getGuildId() );
 	if (guild == NULL)
@@ -710,6 +783,13 @@ NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryC
 		return true;
 	}
 
+	if (args.size() == 1)
+	{
+		log.displayNL("%u", guild->getMemberFromEId(eid)->getEnterTime());
+		return true;
+	}
+
+	NLMISC::fromString(args[1], cycleEntryDate);
 	guild->getMemberFromEId(eid)->setEnterTime(cycleEntryDate);
 
 	return true;

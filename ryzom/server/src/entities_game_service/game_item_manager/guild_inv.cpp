@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -69,7 +66,7 @@ void CGuildInventoryView::init( CGuildInventory *inventory, CCDBGroup *guildInvD
 	bindToInventory( inventory );
 	{
 		H_AUTO(resizeGuildInventoryInit);
-		_ItemsSessions.resize( getInventory()->getSlotCount(), 0 );	
+		_ItemsSessions.resize( getInventory()->getSlotCount(), 0 );
 	}
 	nlassert( INVENTORIES::NbGuildSlots == getInventory()->getSlotCount() );
 	_GuildInvDb = guildInvDb;
@@ -93,13 +90,13 @@ void CGuildInventoryView::onInventoryChanged(INVENTORIES::TInventoryChangeFlags 
 //-----------------------------------------------------------------------------
 void CGuildInventoryView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags)
 {
-	if ( changeFlags.checkEnumValue( INVENTORIES::itc_inserted ) )
+	if ( changeFlags.checkEnumValue(INVENTORIES::itc_inserted) || changeFlags.checkEnumValue(INVENTORIES::itc_lock_state) )
 	{
 		updateClientSlot( slot );
 		updateInfoVersion( slot );
 		updateSession( slot );
 	}
-	else if ( changeFlags.checkEnumValue( INVENTORIES::itc_removed ) )
+	else if ( changeFlags.checkEnumValue(INVENTORIES::itc_removed) )
 	{
 		resetClientSlot( slot );
 		updateSession( slot );
@@ -137,6 +134,13 @@ void CGuildInventoryView::updateClientSlot(uint32 slot)
 	CGameItemPtr item = getInventory()->getItem( slot );
 	const INVENTORIES::TItemId &itemId = item->getItemId();
 
+	BOTCHATTYPE::TBotChatResaleFlag resaleFlag = (item->durability() == item->maxDurability() ? BOTCHATTYPE::ResaleOk : BOTCHATTYPE::ResaleKOBroken);
+	if (item->getLockedByOwner())
+	{
+		resaleFlag = BOTCHATTYPE::ResaleKOLockedByOwner;
+	}
+
+
 	INVENTORIES::CItemSlot itemSlot( slot );
 	itemSlot.setItemProp( INVENTORIES::Sheet, item->getSheetId().asInt() );
 	itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );
@@ -144,12 +148,12 @@ void CGuildInventoryView::updateClientSlot(uint32 slot)
 	itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
 	itemSlot.setItemProp( INVENTORIES::CreateTime, itemId.getCreateTime() );
 	itemSlot.setItemProp( INVENTORIES::Serial, itemId.getSerialNumber() );
-	itemSlot.setItemProp( INVENTORIES::Locked, 0 );
+	itemSlot.setItemProp( INVENTORIES::Locked, item->getLockCount()>0?1:0 );
 	itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );
 	itemSlot.setItemProp( INVENTORIES::NameId, 0 ); // TODO: name of guild (item->sendNameId())
 	itemSlot.setItemProp( INVENTORIES::Enchant, item->getClientEnchantValue() );
 	itemSlot.setItemProp( INVENTORIES::Price, 0 );
-	itemSlot.setItemProp( INVENTORIES::ResaleFlag, 0 );
+	itemSlot.setItemProp( INVENTORIES::ResaleFlag, resaleFlag );
 	itemSlot.setItemProp( INVENTORIES::ItemClass, item->getItemClass() );
 	itemSlot.setItemProp( INVENTORIES::ItemBestStat, item->getCraftParameters() == 0 ? RM_FABER_STAT_TYPE::Unknown : item->getCraftParameters()->getBestItemStat() );
 	itemSlot.setItemProp( INVENTORIES::PrerequisitValid, 1 );
@@ -232,7 +236,7 @@ void CGuildInventoryView::updateInfoVersion(uint32 slot)
 		bms.serial( slotId );
 		bms.serial( currentVersion );
 		msgout.serialBufferWithSize( (uint8*)bms.buffer(), bms.length() );
-		sendMessageViaMirror( NLNET::TServiceId(destCharacterId.getDynamicId()), msgout );	
+		sendMessageViaMirror( NLNET::TServiceId(destCharacterId.getDynamicId()), msgout );
 	}
 }
 

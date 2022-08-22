@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -735,8 +732,11 @@ public :
 	uint8 getPetIndex() const { return _PetIndex; }
 	void setPetIndex(uint8 val) { _PetIndex = val; }
 
-	ucstring getCustomName() const { return _CustomName; }
-	void setCustomName(ucstring val) { _CustomName = val; }
+	// for equipable items
+	void disableStacking() { _DisableStacking = true; }
+	// called when item is put into merchant or traded with players
+	void allowStacking() { _DisableStacking = false; }
+	bool isStackingDisabled() const { return _DisableStacking; }
 
 
 protected:
@@ -838,6 +838,7 @@ public:	// I've had to make these public for now 'cos I can't work out how to ma
 			_RefInventorySlot(INVENTORIES::INVALID_INVENTORY_SLOT)
 	{
 		_CraftParameters= 0;
+		_DisableStacking = false;
 	}
 
 	/**
@@ -985,8 +986,9 @@ private:
 	bool                _LockedByOwner;
 	bool                _UnMovable;
 	bool                _Movable;
+	// if item is ever equiped, then this is set to true
+	bool                _DisableStacking;
 	uint8               _PetIndex;
-	ucstring            _CustomName;
 };
 
 /**
