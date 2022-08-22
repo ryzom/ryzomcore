@@ -74,7 +74,7 @@ CMissionTemplate::CMissionTemplate()
 
 CMissionTemplate::~CMissionTemplate()
 {
-	for ( uint i = 0; i < Steps.size(); i++ ) 
+	for ( uint i = 0; i < Steps.size(); i++ )
 	{
 		delete Steps[i];
 	}
@@ -177,7 +177,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 	Tags.NeedValidation = false;
 	Tags.FailIfInventoryIsFull = false;
 	Tags.HideIconOnGiverNPC = false;
-	
+
 	Prerequisits.FameId = (TStringId)0;
 	Prerequisits.Title = CHARACTER_TITLE::NB_CHARACTER_TITLE;
 	Prerequisits.Guild = false;
@@ -185,8 +185,8 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 	Prerequisits.TeamSize = 0;
 	Prerequisits.Season = EGSPD::CSeason::Invalid;
 	Prerequisits.CharacterMinAge = 0;
-	Prerequisits.MaxPlayerID = 0;  
-	
+	Prerequisits.MaxPlayerID = 0;
+
 	// init parsing vars
 	bool ret = true;
 	string value;
@@ -208,7 +208,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 		Icon = CSheetId(var->asString() + ".mission_icon");
 	else
 		Icon = CSheetId::Unknown;
-	
+
 	std::string overridenText;
 	TVectorParamCheck overridenParams;
 	std::string roleplayText;
@@ -216,8 +216,8 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 	std::string roleplayTextOOO;
 	TVectorParamCheck roleplayParamsOOO;
 	string openTag;
-	
-	
+
+
 	bool afterOOO = false;
 	uint32 oooIndex = 0xFFFFFFFF;
 
@@ -229,13 +229,13 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 
 	bool playerReconnectHandler = false;
 	uint32 playerReconnectHandlerIndex = 0xFFFFFFFF;
-	
+
 	bool oooDisplayed = true;
 
 	bool rewardTag = false;
 	bool displayNextStep = true;
 	bool displayNextIconOnStepNPC = true;
-		
+
 	//get the alias
 	if ( !CPrimitivesParser::getAlias(prim, Alias))
 	{
@@ -249,14 +249,14 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 		MISLOG("ERROR : invalid alias %s in  mission", value.c_str());
 		return false;
 	}
-	
+
 	// get the mission script
 	if ( !prim->getPropertyByName("script",params) || !params)
 	{
 		MISLOG("ERROR : cant find mission script!!!!!!");
 		return false;
 	}
-	
+
 	// make a checksum
 	// Temporarily save script in hashKey
 	HashKey = "";
@@ -264,7 +264,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 	for (itParam=params->begin(); itParam!=itParamEnd; ++itParam)
 		HashKey += *itParam + "\n";
 	HashKey = buildHashKey(HashKey);
-	
+
 	// remove comments
 	for (uint i = 0; i < params->size();i++)
 	{
@@ -281,10 +281,10 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 			}
 		}
 	}
-	
+
 	// add an end param at the end of the script
 	params->push_back("end");
-	
+
 	// parse them
 	vector<string>::iterator itParams = params->begin();
 	for (uint i = 0; i < params->size();++i,++itParams)
@@ -323,7 +323,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 						action = FailureActions[failureIndex].back();
 					else if ( crashHandler )
 						action = CrashHandlers[crashHandlerIndex].Actions.back();
-					else 
+					else
 					{
 						if (afterOOO)
 						{
@@ -602,7 +602,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 					}
 				}
 			}
-			
+
 
 			// check if it is an out of order begin markup
 			else if ( script[0] == "ooo" )
@@ -645,7 +645,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 				openTag.clear();
 				oooDisplayed = true;
 			}
-			
+
 			else if ( script[0] == "any" )
 			{
 				oooIndex++;
@@ -778,7 +778,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 						}
 						roleplayText.clear();
 					}
-					
+
 					if ( displayNextStep == false )
 						step->setDisplayed( false );
 					if ( displayNextIconOnStepNPC == false )
@@ -789,7 +789,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 					*/
 					if ( oooDisplayed == false )
 						step->setAsInOverridenOOO();
-					
+
 					currentAction = 0;
 					currentStep++;
 					Steps.push_back(step);
@@ -798,7 +798,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 					setObjInOOO = false;
 					continue;
 				}
-				
+
 				// do special operations for reward blocks before parsing them as action
 				else if ( script[0] == "reward" )
 				{
@@ -810,7 +810,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 					rewardTag = true;
 					openTag = "reward";
 				}
-			
+
 				// try to build an action
 				IMissionAction * action = IMissionActionFactory::buildAction(i+1, script, globalData, missionData );
 				if ( action )
@@ -831,7 +831,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 						nlassert ( playerReconnectHandlerIndex < PlayerReconnectHandlers.size()	);
 						PlayerReconnectHandlers[playerReconnectHandlerIndex].Actions.push_back(action);
 					}
-					else 
+					else
 					{
 						if (afterOOO)
 						{
@@ -958,7 +958,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 			ret = false;
 		}
 	}
-	
+
 	if ( TitleText.empty() && AutoText.empty() && !Tags.NotProposed )
 	{
 		MISLOG("ERROR : empty title");
@@ -1071,7 +1071,7 @@ void	CMissionTemplate::addMissionPrerequisitInfo(CPrerequisitInfos &prereqInfos,
 		return;
 
 	CPrerequisitDesc prereqDesc;
-	
+
 	// Must test for auto-forbidden mission?
 	if(testAutoForbidden)
 	{
@@ -1091,7 +1091,7 @@ void	CMissionTemplate::addMissionPrerequisitInfo(CPrerequisitInfos &prereqInfos,
 					prereqInfos.Prerequisits.push_back(prereqDesc);
 					addedPrereqTexts.insert("MISSION_PREREQ_CAN_NO_LONGER_TAKE");
 				}
-				
+
 				// and do nothing else
 				return;
 			}
@@ -1107,7 +1107,7 @@ void	CMissionTemplate::addMissionPrerequisitInfo(CPrerequisitInfos &prereqInfos,
 		// just skip line in case of error (btw should not be here)
 		if ( !templ )
 			continue;
-			
+
 		// Get the mission title
 		TDataSetRow giverRow = TDataSetRow();
 		// try to get the giver id
@@ -1118,7 +1118,7 @@ void	CMissionTemplate::addMissionPrerequisitInfo(CPrerequisitInfos &prereqInfos,
 		}
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::dyn_string_id);
 		params[0].StringId = templ->sendTitleText(user->getEntityRowId(), giverRow);
-		
+
 		// Add the prerequesit string
 		prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), reqText, params);
 		prereqDesc.IsMandatory = mandatory;	// First is mandatory, other are OR
@@ -1146,7 +1146,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 	TAIAlias alias = mt->Alias;
 
 	string sDebugPrefix = "user:" + user->getId().toString() + " miss:" + CPrimitivesParser::aliasToString(alias);
-	sDebugPrefix += ",'" + mt->getMissionName() + "' testPrerequisits :";	
+	sDebugPrefix += ",'" + mt->getMissionName() + "' testPrerequisits :";
 
 	/// todo guild mission
 	//CGuild * guild = user->getGuild();
@@ -1167,7 +1167,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 
 			addedPrereqTexts.insert("MISSION_PREREQ_ALREADY_DONE");
 		}
-			
+
 		// always stop tests here
 		return MISSION_DESC::PreReqFailAlreadyDone;
 	}
@@ -1177,7 +1177,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 	{
 		if (logOnFail)
 			MISDBG("%s Global replay timer not elapsed", sDebugPrefix.c_str());
-		
+
 		if (!fillPrereqInfos)
 			return MISSION_DESC::PreReqFail;
 
@@ -1204,7 +1204,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 	{
 		if (logOnFail)
 			MISDBG("%s Player replay timer not elapsed", sDebugPrefix.c_str());
-		
+
 		if (!fillPrereqInfos)
 			return MISSION_DESC::PreReqFail;
 
@@ -1233,7 +1233,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 		{
 			if (logOnFail)
 				MISDBG("%s No team", sDebugPrefix.c_str());
-			
+
 			if (!fillPrereqInfos)
 				return MISSION_DESC::PreReqFail;
 
@@ -1253,7 +1253,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Team size < 2");
-				
+
 				if (!fillPrereqInfos)
 					return MISSION_DESC::PreReqFail;
 
@@ -1272,7 +1272,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Not leader", sDebugPrefix.c_str());
-				
+
 				if (!fillPrereqInfos)
 					return MISSION_DESC::PreReqFail;
 
@@ -1287,12 +1287,12 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			// check if the mission is already picked
 			for ( uint j  = 0 ; j < team->getMissions().size(); j++ )
 			{
-				if  ((team->getMissions()[j]->getTemplateId() == alias) || 
+				if  ((team->getMissions()[j]->getTemplateId() == alias) ||
 					 (team->getMissions()[j]->getMainMissionTemplateId() == alias))
 				{
 					if (logOnFail)
 						MISDBG("%s The team already own this mission", sDebugPrefix.c_str());
-					
+
 					if (!fillPrereqInfos)
 						return MISSION_DESC::PreReqFail;
 
@@ -1304,7 +1304,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 						prereqInfos.Prerequisits.push_back(prereqDesc);
 						addedPrereqTexts.insert("MISSION_PREREQ_ALREADY_DONE");
 					}
-					
+
 					returnValue = MISSION_DESC::PreReqFail;
 					logOnFail = false;
 				}
@@ -1314,7 +1314,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 	else if ( Type == MISSION_DESC::Guild )
 	{
 		/// todo guild mission
-		
+
 		CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 		if ( guild == NULL )
 		{
@@ -1400,16 +1400,16 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 		for ( map<TAIAlias, CMission*>::iterator it = user->getMissionsBegin(); it != user->getMissionsEnd(); ++it )
 		{
 			CMission *pMission = it->second;
-			// If the mission is the same or if the main mission (in case of a chain) is the same 
+			// If the mission is the same or if the main mission (in case of a chain) is the same
 			// dont let player get this mission twice
 			if  ((pMission->getTemplateId() == alias) || (pMission->getMainMissionTemplateId() == alias))
 			{
 				if (logOnFail)
 					MISDBG("%s The player already own this mission", sDebugPrefix.c_str());
-				
+
 				if (!fillPrereqInfos)
 					return MISSION_DESC::PreReqFailRunning;
-				
+
 				if (addedPrereqTexts.find("MISSION_PREREQ_ALREADY_DONE") == addedPrereqTexts.end())
 				{
 					prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_ALREADY_DONE", TVectorParamCheck());
@@ -1418,7 +1418,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 					prereqInfos.Prerequisits.push_back(prereqDesc);
 					addedPrereqTexts.insert("MISSION_PREREQ_ALREADY_DONE");
 				}
-				
+
 				returnValue = MISSION_DESC::PreReqFailRunning;
 				logOnFail = false;
 			}
@@ -1433,7 +1433,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 
 				if (!fillPrereqInfos)
 					return MISSION_DESC::PreReqFailAlreadyDone;
-				
+
 				if (addedPrereqTexts.find("MISSION_PREREQ_ALREADY_DONE") == addedPrereqTexts.end())
 				{
 					prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_ALREADY_DONE", TVectorParamCheck());
@@ -1442,7 +1442,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 					prereqInfos.Prerequisits.push_back(prereqDesc);
 					addedPrereqTexts.insert("MISSION_PREREQ_ALREADY_DONE");
 				}
-				
+
 				returnValue = MISSION_DESC::PreReqFailAlreadyDone;
 				logOnFail = false;
 			}
@@ -1464,7 +1464,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				{
 					if (logOnFail)
 						MISDBG("%s ERROR invalid mission alias %u", sDebugPrefix.c_str(), alias2);
-					
+
 					// always stop tests here
 					return MISSION_DESC::PreReqFail;
 				}
@@ -1490,13 +1490,13 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require needed mission at line %u", sDebugPrefix.c_str(), Prerequisits.NeededMissions[i].Line);
-				
+
 				if (fillPrereqInfos)
 				{
 					// Add all mission requirement to the info
-					addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_DONE", 
+					addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_DONE",
 						user, Prerequisits.NeededMissions[i].Missions, false, addedPrereqTexts);
-					
+
 					if (returnValue == MISSION_DESC::PreReqSuccess)
 						returnValue = MISSION_DESC::PreReqFail;
 					logOnFail = false;
@@ -1505,7 +1505,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 					return MISSION_DESC::PreReqFail;
 			}
 		}
-			
+
 		// check forbidden missions
 		for (uint i = 0; i < Prerequisits.ForbiddenMissions.size(); i++ )
 		{
@@ -1518,7 +1518,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				{
 					if (logOnFail)
 						MISDBG("%s Cant Find Alias %s", sDebugPrefix.c_str(), CPrimitivesParser::aliasToString(alias2).c_str());
-					
+
 					if (returnValue == MISSION_DESC::PreReqSuccess)
 					{
 						if (!fillPrereqInfos)
@@ -1549,14 +1549,14 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require forbidden mission at line %u", sDebugPrefix.c_str(), Prerequisits.ForbiddenMissions[i].Line);
-				
+
 				if (fillPrereqInfos)
 				{
 					// Add all mission requirement to the info. If there is a mission requirement that is the current one,
 					// display a single message "MISSION_PREREQ_CAN_NO_LONGER_TAKE" only one time
-					addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_NOTDONE", 
+					addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_NOTDONE",
 						user, Prerequisits.ForbiddenMissions[i].Missions, true, addedPrereqTexts);
-					
+
 					if (returnValue == MISSION_DESC::PreReqSuccess)
 						returnValue = MISSION_DESC::PreReqFail;
 					logOnFail = false;
@@ -1565,8 +1565,8 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 					return MISSION_DESC::PreReqFail;
 			}
 		}
-	}			
-	
+	}
+
 	// check needed running missions
 	for (uint i = 0; i < Prerequisits.RunningMissions.size(); i++ )
 	{
@@ -1579,7 +1579,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Cant Find Alias %s", sDebugPrefix.c_str(), CPrimitivesParser::aliasToString(alias2).c_str());
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -1626,7 +1626,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				{
 					if (logOnFail)
 						MISDBG("%s Require running mission at line %u (team mission but player has no team)", sDebugPrefix.c_str(), Prerequisits.RunningMissions[i].Line );
-					
+
 					if (returnValue == MISSION_DESC::PreReqSuccess)
 					{
 						if (!fillPrereqInfos)
@@ -1654,13 +1654,13 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 		{
 			if (logOnFail)
 				MISDBG("%s Require running mission at line %u", sDebugPrefix.c_str(), Prerequisits.RunningMissions[i].Line );
-			
+
 			if (fillPrereqInfos)
 			{
 				// Add all mission requirement to the info
-				addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_RUNNING", 
+				addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_RUNNING",
 					user, Prerequisits.RunningMissions[i].Missions, false, addedPrereqTexts);
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 					returnValue = MISSION_DESC::PreReqFail;
 				logOnFail = false;
@@ -1669,12 +1669,12 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				return MISSION_DESC::PreReqFail;
 		}
 	}
-	
+
 	// check forbidden running missions
 	for (uint i = 0; i < Prerequisits.ForbiddenRunningMissions.size(); i++ )
 	{
 		prereqDesc.Validated = true;
-		
+
 		uint j = 0;
 		bool ok = true;
 		for (; j < Prerequisits.ForbiddenRunningMissions[i].Missions.size(); j++ )
@@ -1685,14 +1685,14 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Cant Find Alias %s", sDebugPrefix.c_str(), CPrimitivesParser::aliasToString(alias2).c_str());
-				
+
 				if (fillPrereqInfos)
 				{
 					// Add all mission requirement to the info. If there is a mission requirement that is the current one,
 					// display a single message "MISSION_PREREQ_CAN_NO_LONGER_TAKE" only one time
-					addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_NOTRUNNING", 
+					addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_NOTRUNNING",
 						user, Prerequisits.ForbiddenRunningMissions[i].Missions, true, addedPrereqTexts);
-					
+
 					if (returnValue == MISSION_DESC::PreReqSuccess)
 						returnValue = MISSION_DESC::PreReqFail;
 					logOnFail = false;
@@ -1747,14 +1747,14 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 		{
 			if (logOnFail)
 				MISDBG("%s Require forbidden running mission at line %u", sDebugPrefix.c_str(), Prerequisits.ForbiddenRunningMissions[i].Line);
-						
+
 			if (fillPrereqInfos)
 			{
 				// Add all mission requirement to the info. If there is a mission requirement that is the current one,
 				// display a single message "MISSION_PREREQ_CAN_NO_LONGER_TAKE" only one time
-				addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_NOTRUNNING", 
+				addMissionPrerequisitInfo(prereqInfos, "MISSION_PREREQ_MISSION_NOTRUNNING",
 					user, Prerequisits.ForbiddenRunningMissions[i].Missions, true, addedPrereqTexts);
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 					returnValue = MISSION_DESC::PreReqFail;
 				logOnFail = false;
@@ -1763,7 +1763,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				return MISSION_DESC::PreReqFail;
 		}
 	}
-	
+
 	if (MissionPrerequisitsEnabled)
 	{
 		// check mission unique instance ("mono")
@@ -1771,23 +1771,23 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 		{
 			if (logOnFail)
 				MISDBG("%s This mission is mono instance and already running somewhere", sDebugPrefix.c_str());
-			
+
 			if (fillPrereqInfos)
 			{
 				prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_MONO",TVectorParamCheck());
 				prereqDesc.IsMandatory = true;
 				prereqDesc.Validated = false;
 				prereqInfos.Prerequisits.push_back(prereqDesc);
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 					returnValue = MISSION_DESC::PreReqFail;
 				logOnFail = false;
 			}
 			else
-				return MISSION_DESC::PreReqFail;		
+				return MISSION_DESC::PreReqFail;
 		}
-		
-		
+
+
 		// test skills
 		for ( uint i = 0; i < Prerequisits.Skills.size(); i++ )
 		{
@@ -1831,7 +1831,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require skill at %uth skill line", sDebugPrefix.c_str(), i+1);
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -1842,8 +1842,8 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				}
 			}
 		}
-		
-		
+
+
 		// check worn items
 		for ( uint i = 0; i < Prerequisits.Wear.size(); i++ )
 		{
@@ -1851,7 +1851,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require wear item at %uth wear line", sDebugPrefix.c_str(), i+1);
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -1918,14 +1918,14 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				prereqDesc.Validated = true;
 			}
-			
+
 			if (fillPrereqInfos)
 			{
 				SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
 				params[0].SheetId = Prerequisits.Own[i];
 				prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_NEED_ITEM_BAG", params);
 				prereqDesc.IsMandatory = true;
-				
+
 				prereqInfos.Prerequisits.push_back(prereqDesc);
 			}
 		}
@@ -1936,7 +1936,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require title '%s' and user is '%s'", sDebugPrefix.c_str(), CHARACTER_TITLE::toString(Prerequisits.Title).c_str(), CHARACTER_TITLE::toString(user->getTitle()).c_str());
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -1958,11 +1958,11 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				params[0].Identifier = CHARACTER_TITLE::toString(Prerequisits.Title);
 				prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_TITLE", params);
 				prereqDesc.IsMandatory = true;
-				
+
 				prereqInfos.Prerequisits.push_back(prereqDesc);
 			}
 		}
-		
+
 		// check fame
 		if ( Prerequisits.FameId )
 		{
@@ -1971,7 +1971,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require fame '%s' of %d and user has %d", sDebugPrefix.c_str(), CStringMapper::unmap(Prerequisits.FameId).c_str(), Prerequisits.FameMin, fame);
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -1999,7 +1999,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 
 				prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_FAME_FACTION", params);
 				prereqDesc.IsMandatory = true;
-				
+
 				prereqInfos.Prerequisits.push_back(prereqDesc);
 			}
 		}
@@ -2019,7 +2019,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require Kami", sDebugPrefix.c_str());
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -2034,7 +2034,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require Karavan", sDebugPrefix.c_str());
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -2045,7 +2045,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				}
 				prereqDesc.Validated = false;
 			}
-			
+
 			if (fillPrereqInfos)
 			{
 				if (Prerequisits.KamiKaravan == CPrerequisits::Karavan)
@@ -2138,7 +2138,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require team size of %d and player has no team", sDebugPrefix.c_str(), Prerequisits.TeamSize);
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -2150,14 +2150,14 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 
 				prereqDesc.Validated = false;
 			}
-			else 
+			else
 			{
 				if (team->getTeamSize() < (uint16) Prerequisits.TeamSize )
 				{
 					if (logOnFail)
-						MISDBG("%s Require team size of %d and player of team %d has team size of %d", sDebugPrefix.c_str(), 
+						MISDBG("%s Require team size of %d and player of team %d has team size of %d", sDebugPrefix.c_str(),
 							Prerequisits.TeamSize, user->getTeamId(), team->getTeamSize());
-					
+
 					if (returnValue == MISSION_DESC::PreReqSuccess)
 					{
 						if (!fillPrereqInfos)
@@ -2191,10 +2191,10 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			if (Prerequisits.Season != season)
 			{
 				if (logOnFail)
-					MISDBG("%s Require season %s and ryzom season is %s", sDebugPrefix.c_str(), 
+					MISDBG("%s Require season %s and ryzom season is %s", sDebugPrefix.c_str(),
 						EGSPD::CSeason::toString(Prerequisits.Season).c_str(),
 						EGSPD::CSeason::toString(season).c_str());
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -2240,7 +2240,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 				if (logOnFail)
 					MISDBG("%s Require bricks, player do not have %s", sDebugPrefix.c_str(), Prerequisits.KnownActions[i].toString().c_str());
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -2274,9 +2274,9 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				if (! rEncy.isAllTaskDone(Prerequisits.EncycloReqAlbum, Prerequisits.EncycloReqThema))
 				{
 					if (logOnFail)
-						MISDBG("%s Require Encyclopedia all task done album %d thema %d", sDebugPrefix.c_str(), 
+						MISDBG("%s Require Encyclopedia all task done album %d thema %d", sDebugPrefix.c_str(),
 							Prerequisits.EncycloReqAlbum, Prerequisits.EncycloReqThema);
-					
+
 					if (returnValue == MISSION_DESC::PreReqSuccess)
 					{
 						if (!fillPrereqInfos)
@@ -2308,9 +2308,9 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				if (! rEncy.isAtLeastOneTaskNotDone(Prerequisits.EncycloReqAlbum, Prerequisits.EncycloReqThema))
 				{
 					if (logOnFail)
-						MISDBG("%s Require Encyclopedia all at least one task not done album %d thema %d", sDebugPrefix.c_str(), 
+						MISDBG("%s Require Encyclopedia all at least one task not done album %d thema %d", sDebugPrefix.c_str(),
 							Prerequisits.EncycloReqAlbum, Prerequisits.EncycloReqThema);
-					
+
 					if (returnValue == MISSION_DESC::PreReqSuccess)
 					{
 						if (!fillPrereqInfos)
@@ -2319,7 +2319,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 						returnValue = MISSION_DESC::PreReqFail;
 						logOnFail = false;
 					}
-					
+
 					if (fillPrereqInfos)
 					{
 						if (addedPrereqTexts.find("MISSION_PREREQ_CAN_NO_LONGER_TAKE") == addedPrereqTexts.end())
@@ -2339,12 +2339,12 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 		if ( !Prerequisits.EventFaction.empty() )
 		{
 			prereqDesc.Validated = true;
-			
+
 			if (user->getGameEvent().getEventFaction() != Prerequisits.EventFaction)
 			{
 				if (logOnFail)
 					MISDBG("%s Require event faction %s", sDebugPrefix.c_str(), Prerequisits.EventFaction.c_str());
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -2375,15 +2375,15 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 
 			uint32 minimumAge   = Prerequisits.CharacterMinAge * 24 * 3600; // oldness required is given in days
 			uint32 characterAge = NLMISC::CTime::getSecondsSince1970() - user->getFirstConnectedTime();
-			nlwarning("%s Require character age of %d days (%ds) and current character age is %d", sDebugPrefix.c_str(), 
+			nlwarning("%s Require character age of %d days (%ds) and current character age is %d", sDebugPrefix.c_str(),
 						Prerequisits.CharacterMinAge, minimumAge, characterAge);
 
 			if (characterAge < minimumAge)
 			{
 				if (logOnFail)
-					MISDBG("%s Require character age of %d days (%ds) and current character age is %d", sDebugPrefix.c_str(), 
+					MISDBG("%s Require character age of %d days (%ds) and current character age is %d", sDebugPrefix.c_str(),
 						Prerequisits.CharacterMinAge, minimumAge, characterAge);
-					
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -2414,15 +2414,15 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			prereqDesc.Validated = true;
 
 			uint32 playerId = PlayerManager.getPlayerId(user->getId());
-			nlwarning("%s Require player ID of %d and player's ID is %d", sDebugPrefix.c_str(), 
+			nlwarning("%s Require player ID of %d and player's ID is %d", sDebugPrefix.c_str(),
 						Prerequisits.MaxPlayerID, playerId);
 
 			if (playerId > Prerequisits.MaxPlayerID )
 			{
 				if (logOnFail)
-					MISDBG("%s Require player ID of %d and player's ID is %d", sDebugPrefix.c_str(), 
+					MISDBG("%s Require player ID of %d and player's ID is %d", sDebugPrefix.c_str(),
 						Prerequisits.MaxPlayerID, playerId);
-				
+
 				if (returnValue == MISSION_DESC::PreReqSuccess)
 				{
 					if (!fillPrereqInfos)
@@ -2444,12 +2444,12 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			}
 		}
 	}
-	
+
 	if (returnValue == MISSION_DESC::PreReqSuccess)
 	{
 		MISDBG("%s ok", sDebugPrefix.c_str());
 	}
-	
+
 	return returnValue;
 }// CMissionTemplate testPrerequisits
 
@@ -2476,8 +2476,8 @@ uint32 CMissionTemplate::sendTitleText( const TDataSetRow & userRow, const TData
 		TVectorParamCheck params(1 + TitleParams.size() );
 		std::copy( TitleParams.begin(),TitleParams.end(), params.begin() + 1  );
 		params[0].Type = STRING_MANAGER::bot;
-		params[0].setEIdAIAlias( getEntityIdFromRow( giver ), CAIAliasTranslator::getInstance()->getAIAlias(getEntityIdFromRow( giver )) ); 
-		CMissionParser::solveEntitiesNames(params,userRow,params[0].getEId());	
+		params[0].setEIdAIAlias( getEntityIdFromRow( giver ), CAIAliasTranslator::getInstance()->getAIAlias(getEntityIdFromRow( giver )) );
+		CMissionParser::solveEntitiesNames(params,userRow,params[0].getEId());
 		return STRING_MANAGER::sendStringToClient( userRow, TitleText,params );
 	}
 }// CMissionTemplate sendTitleText
@@ -2512,7 +2512,7 @@ uint32 CMissionTemplate::sendAutoText( const TDataSetRow & userRow,const NLMISC:
 	else
 	{
 		TVectorParamCheck params = AutoParams;
-		CMissionParser::solveEntitiesNames(params,userRow,giver);	
+		CMissionParser::solveEntitiesNames(params,userRow,giver);
 		return STRING_MANAGER::sendStringToClient( userRow, AutoText,params );
 	}
 }// CMissionTemplate::sendAutoText
@@ -2560,7 +2560,7 @@ uint32 CMissionTemplate::sendDescText( const TDataSetRow & userRow, const TDataS
 				addParams = &(OverloadedDescs[descIndex].Params);
 			}
 		}
-		params.reserve(1 + (*addParams).size() );		
+		params.reserve(1 + (*addParams).size() );
 		params.push_back(STRING_MANAGER::TParam(STRING_MANAGER::entity));
 		params.back().setEIdAIAlias(id, CAIAliasTranslator::getInstance()->getAIAlias(id));
 		params.insert(params.end(), (*addParams).begin(), (*addParams).end());
@@ -2638,7 +2638,7 @@ bool CMissionTemplate::addSkillToList( uint32 line, const std::vector< std::stri
 	{
 		std::vector< std::string > args;
 		CMissionParser::tokenizeString( entries[i]," \t",args );
-	
+
 		if (args.empty())
 		{
 			MISLOGERROR("empty skill list !");
@@ -2652,7 +2652,7 @@ bool CMissionTemplate::addSkillToList( uint32 line, const std::vector< std::stri
 			MISLOGERROR1("invalid skill '%s'", args[0].c_str());
 			ret = false;
 		}
-	
+
 		chatParams.push_back( std::make_pair( args[0],STRING_MANAGER::skill )  );
 		skill.Min = 1;
 		skill.Max = 0x7FFFFFFF;
@@ -2897,7 +2897,7 @@ TAIAlias CMissionTemplate::parseMissionParam(uint32 line,  const std::vector< st
 		MISLOGERROR1("invalid mission name '%s'", script[1].c_str());
 		return CAIAliasTranslator::Invalid;
 	}
-	return alias;	
+	return alias;
 }// CMissionTemplate::parseMissionParam
 
 bool CMissionTemplate::parsePrice(uint32 line,  const std::vector< std::string > & script, CMissionSpecificParsingData& data )

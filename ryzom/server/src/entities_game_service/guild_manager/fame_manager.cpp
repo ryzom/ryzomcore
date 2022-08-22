@@ -979,15 +979,16 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 	// Propagate fame
 	if (propagate)
 	{
-		// Kami/Karavan special case:
-		// When gaining kami/karavan fame, this fame do not propagate to
+		// Kami/Karavan/Marauder special case:
+		// When gaining kami/karavan/marauder fame, this fame do not propagate to
 		// tribes/races, whereas when gaining tribe/race fame character gains
-		// kami/karavan fame. This is a normal case in asymmetric fame.
+		// kami/karavan/marauder fame. This is a normal case in asymmetric fame.
 		NLMISC::TStringId factionKaravan = NLMISC::CStringMapper::map("karavan");
 		NLMISC::TStringId factionKami = NLMISC::CStringMapper::map("kami");
-		if (UseAsymmetricStaticFames || (faction!=CStaticFames::getInstance().getFactionIndex(factionKaravan) && faction!=CStaticFames::getInstance().getFactionIndex(factionKami)))
+		NLMISC::TStringId factionMarauder = NLMISC::CStringMapper::map("black_kami");
+		if (UseAsymmetricStaticFames || (faction!=CStaticFames::getInstance().getFactionIndex(factionKaravan) && faction!=CStaticFames::getInstance().getFactionIndex(factionKami) && faction!=CStaticFames::getInstance().getFactionIndex(factionMarauder)))
 		{
-			// Propagate to each fame
+				// Propagate to each fame
 			int nbFame = CStaticFames::getInstance().getNbFame();
 			for (int iFaction=0; iFaction<nbFame; ++iFaction)
 			{
@@ -1484,10 +1485,26 @@ void CFameManager::enforceFameCaps(const NLMISC::CEntityId &entityId, uint32 org
 		}
 	}
 
+	PVP_CLAN::TPVPClan theCult = allegiance.first;
+	PVP_CLAN::TPVPClan theCiv = allegiance.second;
+
 	// Use the fame variable as an intermediary in order to get proper conversions.
 	uint32 theFactionIndex;
 	sint32 fame;
 	sint32 maxFame;
+
+	if (ch)
+	{
+		if (organization)
+		{
+		if (theCult != PVP_CLAN::Neutral)
+			if (theCult != PVP_CLAN::Neutral || theCiv != PVP_CLAN::Neutral)
+			{
+				ch->setOrganization(0, false);
+				organization = 0;
+			}
+		}
+	}
 
 	if (organization == 5) // marauder
 	{
@@ -1535,7 +1552,6 @@ void CFameManager::enforceFameCaps(const NLMISC::CEntityId &entityId, uint32 org
 	}
 
 	// Check cults, first member of allegiance
-	PVP_CLAN::TPVPClan theCult = allegiance.first;
 	if (theCult != PVP_CLAN::None)
 	{
 		for (int looper = PVP_CLAN::BeginCults; looper <= PVP_CLAN::EndCults; looper++)
@@ -1559,7 +1575,6 @@ void CFameManager::enforceFameCaps(const NLMISC::CEntityId &entityId, uint32 org
 		}
 	}
 	// Check civs, second member of allegiance
-	PVP_CLAN::TPVPClan theCiv = allegiance.second;
 	if (theCiv != PVP_CLAN::None)
 	{
 		for (int looper = PVP_CLAN::BeginCivs; looper <= PVP_CLAN::EndCivs; looper++)

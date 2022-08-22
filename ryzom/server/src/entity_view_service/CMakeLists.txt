@@ -8,13 +8,13 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${NEL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_entity_view_service
 						ryzom_adminmodules
-						ryzom_gameshare
+						${RYZOM_GAMESHARE_LIBRARIES}
 						ryzom_servershare
 						ryzom_aishare
-						nelmisc
-						nelnet
-						nelgeorges
-						nelligo)
+						${NELMISC_LIBRARIES}
+						${NELNET_LIBRARIES}
+						${NELGEORGES_LIBRARIES}
+						${NELLIGO_LIBRARIES})
 
 NL_DEFAULT_PROPS(ryzom_entity_view_service "Ryzom, Services: Entity View Service (EVS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_entity_view_service)

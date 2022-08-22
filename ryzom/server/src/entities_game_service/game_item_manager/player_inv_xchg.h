@@ -58,8 +58,8 @@ public:
 	virtual void forceSlotUpdate(uint32 slot) {}
 
 	/// put an item in exchange
-	bool putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint32 quantity);
-	bool putItemInFirstEmptyExchangeSlot(uint32 bagSlot, uint32 quantity);
+	bool putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exchangeSlot, uint32 quantity);
+	bool putItemInFirstEmptyExchangeSlot(uint32 invSrc, uint32 invSlot, uint32 quantity);
 
 	/// remove an item from exchange
 	bool removeItemFromExchange(uint32 exchangeSlot, uint32 quantity = INVENTORIES::REMOVE_MAX_STACK_QUANTITY);
@@ -75,6 +75,10 @@ public:
 	/// \param exchangeSlot : slot in the exchange view
 	/// \param exchangeQuantity : if not NULL, returns the quantity of the item offered in the exchange
 	CGameItemPtr getExchangeItem(uint32 exchangeSlot, uint32 * exchangeQuantity = NULL) const;
+
+	/// helper: get the source inventory of the item in the given exchange slot
+	/// \param exchangeSlot : slot # in the exchange view
+	INVENTORIES::TInventory getSlotInvSrc(uint32 exchangeSlot) const;
 
 	/// return true if there is no item in the exchange view
 	bool isEmpty() const;
@@ -98,7 +102,8 @@ private:
 		CExchangeSlot();
 		void reset();
 
-		uint32 BagSlot;
+		INVENTORIES::TInventory InvSrc;
+		uint32 InvSlot;
 		uint32 Quantity;
 	};
 
@@ -113,6 +118,9 @@ private:
 
 	/// nb of mount tickets in the exchange view
 	uint32 _MountTicketCount;
+
+	/// nb of zig tickets in the exchange view
+	uint32 _ZigTicketCount;
 };
 
 

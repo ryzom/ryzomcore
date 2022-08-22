@@ -735,8 +735,11 @@ public :
 	uint8 getPetIndex() const { return _PetIndex; }
 	void setPetIndex(uint8 val) { _PetIndex = val; }
 
-	ucstring getCustomName() const { return _CustomName; }
-	void setCustomName(ucstring val) { _CustomName = val; }
+	// for equipable items
+	void disableStacking() { _DisableStacking = true; }
+	// called when item is put into merchant or traded with players
+	void allowStacking() { _DisableStacking = false; }
+	bool isStackingDisabled() const { return _DisableStacking; }
 
 
 protected:
@@ -838,6 +841,7 @@ public:	// I've had to make these public for now 'cos I can't work out how to ma
 			_RefInventorySlot(INVENTORIES::INVALID_INVENTORY_SLOT)
 	{
 		_CraftParameters= 0;
+		_DisableStacking = false;
 	}
 
 	/**
@@ -985,8 +989,9 @@ private:
 	bool                _LockedByOwner;
 	bool                _UnMovable;
 	bool                _Movable;
+	// if item is ever equiped, then this is set to true
+	bool                _DisableStacking;
 	uint8               _PetIndex;
-	ucstring            _CustomName;
 };
 
 /**

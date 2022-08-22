@@ -794,6 +794,29 @@ inline uint32 CCharacter::getGuildId() const
 	return _GuildId;
 }
 
+inline uint32 CCharacter::getLastGuildId() const
+{
+	return _LastGuildId;
+}
+
+inline void CCharacter::setLastGuildId(uint32 guildid)
+{
+	_LastGuildId = guildid;
+}
+
+
+inline NLMISC::TGameCycle CCharacter::getGuildEnterTime() const
+{
+	return _GuildEnterTime;
+}
+
+inline void CCharacter::setGuildEnterTime(NLMISC::TGameCycle time)
+{
+	_GuildEnterTime = time;
+}
+
+
+
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getTpTicketSlot() const
@@ -815,13 +838,20 @@ inline NLMISC::CVector CCharacter::getOutOutpostPos() const
 	return _OutOutpostPos;
 }
 
-
-
 //------------------------------------------------------------------------------
 
 inline uint16 CCharacter::getBuildingExitZone() const
 {
 	return _BuildingExitZone;
+}
+
+//------------------------------------------------------------------------------
+
+inline uint32 CCharacter::getDefaultTattoo()
+{
+	if (_MainTattoo)
+		return _MainTattoo;
+	return _VisualPropertyC.directAccessForStructMembers().PropertySubData.Tattoo;
 }
 
 //------------------------------------------------------------------------------
@@ -838,6 +868,33 @@ inline uint8 CCharacter::getHair() const
 	return _HairType;
 }
 
+//------------------------------------------------------------------------------
+
+inline uint8 CCharacter::getDefaultHairColor() const
+{
+	return _DefaultHairColor;
+}
+
+//------------------------------------------------------------------------------
+
+inline uint8 CCharacter::getDefaultHair() const
+{
+	return _DefaultHairType;
+}
+
+//------------------------------------------------------------------------------
+
+inline uint8 CCharacter::getWigHairColor() const
+{
+	return _DefaultHairColor;
+}
+
+//------------------------------------------------------------------------------
+
+inline uint8 CCharacter::getWigHair() const
+{
+	return _DefaultHairType;
+}
 
 //------------------------------------------------------------------------------
 
@@ -845,6 +902,35 @@ inline bool CCharacter::getHairCutDiscount() const
 {
 	return _HairCuteDiscount;
 }
+
+//------------------------------------------------------------------------------
+
+inline std::string CCharacter::getUnderwearChest() const
+{
+	return _UnderwearChest;
+}
+
+//------------------------------------------------------------------------------
+
+inline std::string CCharacter::getUnderwearLegs() const
+{
+	return _UnderwearLegs;
+}
+
+//------------------------------------------------------------------------------
+
+inline uint8 CCharacter::getUnderwearChestColor() const
+{
+	return _UnderwearChestColor;
+}
+
+//------------------------------------------------------------------------------
+
+inline uint8 CCharacter::getUnderwearLegsColor() const
+{
+	return _UnderwearLegsColor;
+}
+
 
 //------------------------------------------------------------------------------
 
@@ -972,6 +1058,25 @@ inline const std::string& CCharacter::getNewTitle() const
 }
 
 //------------------------------------------------------------------------------
+inline std::string CCharacter::getDefaultTagA() const
+
+{
+	if (_DefaultTagA.empty())
+		return "";
+	return _DefaultTagA;
+}
+
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getDefaultTagB() const
+
+{
+	if (_DefaultTagB.empty())
+		return "";
+	return _DefaultTagB;
+}
+
+
+//------------------------------------------------------------------------------
 inline std::string CCharacter::getTagA() const
 
 {
@@ -1008,6 +1113,33 @@ inline std::string CCharacter::getTagPvPB() const
 	return _TagPvPB;
 }
 
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getTagRightHand() const
+
+{
+	if (_TagRightHand.empty())
+		return "_";
+	return _TagRightHand;
+}
+
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getTagLeftHand() const
+
+{
+	if (_TagLeftHand.empty())
+		return "_";
+	return _TagLeftHand;
+}
+
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getTagHat() const
+
+{
+	if (_TagHat.empty())
+		return "_";
+	return _TagHat;
+}
+
 
 //------------------------------------------------------------------------------
 inline std::string CCharacter::getDontTranslate() const
@@ -1020,8 +1152,8 @@ inline std::string CCharacter::getDontTranslate() const
 //------------------------------------------------------------------------------
 inline std::string CCharacter::getFullTitle() const
 {
-	if (!_TagA.empty() || !_TagB.empty() || !_TagPvPA.empty() || !_TagPvPB.empty())
-		return _NewTitle+"#"+getTagPvPA()+"#"+getTagPvPB()+"#"+getTagA()+"#"+getTagB();
+	if (!_TagA.empty() || !_TagB.empty() || !_TagPvPA.empty() || !_TagPvPB.empty() || !_TagRightHand.empty() || !_TagLeftHand.empty() || !_TagHat.empty())
+		return _NewTitle+"#"+getTagPvPA()+"#"+getTagPvPB()+"#"+getTagA()+"#"+getTagB()+"#"+getTagRightHand()+"#"+getTagLeftHand()+"#"+getTagHat();
 	else
 		return _NewTitle;
 }
@@ -1053,8 +1185,17 @@ inline bool CCharacter::checkRequiredFame(std::string faction, sint32 fame) cons
 	if (faction == "" || faction == "*")
 		return true;
 
-	uint32 fameIdx = PVP_CLAN::getFactionIndex(PVP_CLAN::fromString(faction));
+	if (faction == "ranger" )
+	{
+		if (checkRequiredFame("fyros", fame) &&
+			checkRequiredFame("matis", fame) &&
+			checkRequiredFame("tryker", fame) &&
+			checkRequiredFame("zorai", fame))
+			return true;
+		return false;
+	}
 
+	uint32 fameIdx = PVP_CLAN::getFactionIndex(PVP_CLAN::fromString(faction));
 	sint32 playerFame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
 
 	if (fame == NO_FAME)

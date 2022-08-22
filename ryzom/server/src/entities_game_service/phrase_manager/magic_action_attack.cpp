@@ -158,10 +158,10 @@ bool CMagicActionBasicDamage::launchOnEntity(
 	bool				mainTarget,
 	uint32				casterSkillvalue,
 	uint32				casterSkillBaseValue,
-	MBEHAV::CBehaviour&	behav,
 	bool				isMad,
 	float				rangeFactor,
-	CTargetInfos&		targetInfos)
+	CTargetInfos&		targetInfos,
+	sint16&				deltaHP)
 {
 	// for main target only, check reflect damage effects
 	if (mainTarget)
@@ -282,7 +282,7 @@ bool CMagicActionBasicDamage::launchOnEntity(
 		
 		sint32 maxDmgHp =  sint32 ( _DmgHp * dmgFactor );
 		sint32 realDmgHp = target->applyDamageOnArmor( _DmgType, maxDmgHp );
-		
+
 		// update behaviour for lost Hp
 		CCreature * npc = dynamic_cast<CCreature*>(target);
 		CCharacter * c = dynamic_cast<CCharacter*>(actor);
@@ -290,11 +290,11 @@ bool CMagicActionBasicDamage::launchOnEntity(
 		{
 			if(PHRASE_UTILITIES::testRange(*actor, *target, (uint32)npc->getMaxHitRangeForPC()*1000))
 			{
-				behav.DeltaHP -= (sint16)realDmgHp;
+				deltaHP -= (sint16)realDmgHp;
 			}
 			else
 			{
-				behav.DeltaHP = 0;
+				deltaHP = 0;
 			}
 		}
 		
@@ -302,7 +302,6 @@ bool CMagicActionBasicDamage::launchOnEntity(
 		targetInfos.DmgHp			= maxDmgHp;
 		targetInfos.ResistFactor	= resistFactor;
 		targetInfos.DmgFactor		= dmgFactor;
-		
 		return false;
 	}
 	else
@@ -612,6 +611,7 @@ void CMagicActionBasicDamage::launch(
 	MBEHAV::CBehaviour&			behav,
 	std::vector<float> const&	powerFactors,
 	NLMISC::CBitSet&			affectedTargets,
+	std::vector<sint16>&		targetDeltaHp,
 	NLMISC::CBitSet const&		invulnerabilityOffensive,
 	NLMISC::CBitSet const&		invulnerabilityAll,
 	bool						isMad,
@@ -665,6 +665,9 @@ void CMagicActionBasicDamage::launch(
 	bool targetChanged = false;
 
 	const uint nbTargets = (uint)targets.size();
+
+	// targetDeltaHp must be prefilled
+	nlassertex( nbTargets == targetDeltaHp.size(), ("%d %d", nbTargets, targetDeltaHp.size() ) );
 
 	for ( uint i = 0; i < nbTargets ; ++i )
 	{
@@ -732,11 +735,14 @@ void CMagicActionBasicDamage::launch(
 					targetInfos.ReportAction = actionReport;
 					targetInfos.ReportAction.DeltaLvl = deltaLevel;
 					targetInfos.ReportAction.Skill = _Skill;
-					launchOnEntity(phrase, actor, bounceTarget,false, skillValue, skillBaseValue, behav, isMad, 1.0f, targetInfos);
+					sint16 deltaHP = 0;
+					launchOnEntity(phrase, actor, bounceTarget,false, skillValue, skillBaseValue, isMad, 1.0f, targetInfos, deltaHP);
 
 					if ( _DmgSap || _DmgSta || targetInfos.needsApply() )
 					{
 						_ApplyTargets.push_back(targetInfos);
+						// TODO: this counts twice?
+						//targetDeltaHp[i] -= deltaHP;
 					}
 				}
 			}
@@ -787,13 +793,14 @@ void CMagicActionBasicDamage::launch(
 		targetInfos.ReportAction = actionReport;
 		targetInfos.ReportAction.DeltaLvl = deltaLevel;
 		targetInfos.ReportAction.Skill = _Skill;
-		if (launchOnEntity(phrase, actor, target, (i==0), skillValue, skillBaseValue, behav, isMad, powerFactors[i] * phrase->getAreaSpellPowerFactor(), targetInfos))
+		if (launchOnEntity(phrase, actor, target, (i==0), skillValue, skillBaseValue, isMad, powerFactors[i] * phrase->getAreaSpellPowerFactor(), targetInfos, targetDeltaHp[i]))
 		{
 			resists.set(i);
 		}
 		else
 		{
 			resists.clear(i);
+			behav.DeltaHP -= targetDeltaHp[i];
 		}
 
 		if ( _DmgSap || _DmgSta || targetInfos.needsApply() )

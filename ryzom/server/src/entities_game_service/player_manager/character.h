@@ -1322,7 +1322,7 @@ public:
 	void initPvpPointDb();
 
 	void initOrganizationInfos();
-	void setOrganization(uint32 org);
+	void setOrganization(uint32 org, bool enforceFameCaps=true);
 	void setOrganizationStatus(uint32 status);
 	void changeOrganizationStatus(sint32 status);
 	void changeOrganizationPoints(sint32 points);
@@ -1627,7 +1627,7 @@ public:
 	std::string getEquipementInfos(INVENTORIES::TInventory invId);
 
 	/// Mount a mount
-	void mount(TDataSetRow PetRowId);
+	void mount(TDataSetRow PetRowId, bool fromArk = false);
 
 	/**
 	 * Unmount a mount.
@@ -1735,7 +1735,7 @@ public:
 	void forgetPhrase(uint8 memSet, uint8 i);
 
 	/// learn a new phrase
-	void learnPhrase(const std::vector<NLMISC::CSheetId> &bricks, uint16 phraseId, const ucstring &name);
+	void learnPhrase(const std::vector<NLMISC::CSheetId> &bricks, uint16 phraseId, const ucstring &name, uint8 iconIndex);
 
 	/// delete a known phrase
 	void deleteKnownPhrase(uint16 phraseId);
@@ -2345,6 +2345,14 @@ public:
 	/// get the guild id of the player
 	uint32 getGuildId() const;
 
+	/// get/set the last guild id of the player
+	uint32 getLastGuildId() const;
+	void setLastGuildId(uint32 guildid);
+
+	/// get/set the last guild enter time
+	NLMISC::TGameCycle getGuildEnterTime() const;
+	void setGuildEnterTime(NLMISC::TGameCycle time);
+
 	/// updates the guild flag field in the mirror, according to character clan and preferences
 	void updateGuildFlag() const;
 
@@ -2390,11 +2398,30 @@ public:
 	void checkSkillTreeForLockedSkill();
 
 	// set the character hair. return true on success
-	bool setHair(uint32 hairValue, bool isWig = false, bool sendMessage = true);
-	// set the character tatoo return true on success
-	bool setTatoo(uint32 tatooValue, bool sendMessage = true);
+	void setDefaultHair(uint32 hairValue);
 	// set the hair color of the user return true on success
-	bool setHairColor(uint32 colorValue, bool sendMessage = true);
+	void setDefaultHairColor(uint32 colorValue);
+
+
+	// set the character wig hair. return true on success
+	void setWigHair(uint32 hairValue);
+	// set the wig hair color of the user return true on success
+	void setWigHairColor(uint32 colorValue);
+
+	// set the character hair. return true on success
+	bool setHair(uint32 hairValue, bool isWig = false, bool sendMessage = true);
+	// set the hair color of the user return true on success
+	bool setHairColor(uint32 colorValue, bool isWig = false, bool sendMessage = true);
+
+	void setUnderwearChest(std::string item);
+	void setUnderwearLegs(std::string item);
+
+
+	void setUnderwearChestColor(uint8 color);
+	void setUnderwearLegsColor(uint8 color);
+
+	// set the character tatoo return true on success
+	bool setTattoo(uint32 tatooValue, bool isFake = false, bool sendMessage = true);
 
 	typedef std::vector<TBrickParam::IIdPtr> CBrickPropertyValues;
 	typedef std::map<TBrickParam::TValueType, CBrickPropertyValues> CBrickProperties;
@@ -2409,9 +2436,23 @@ public:
 
 	void setSpawnPetFlag(uint32 index);
 
-	uint8 getHairColor() const;
+	uint32 getDefaultTattoo();
 
+	uint8 getHairColor() const;
 	uint8 getHair() const;
+
+	uint8 getDefaultHairColor() const;
+	uint8 getDefaultHair() const;
+
+	uint8 getWigHairColor() const;
+	uint8 getWigHair() const;
+
+
+	std::string getUnderwearChest() const;
+	std::string getUnderwearLegs() const;
+
+	uint8 getUnderwearChestColor() const;
+	uint8 getUnderwearLegsColor() const;
 
 	// return if hair cute price discount apply
 	bool getHairCutDiscount() const;
@@ -2617,6 +2658,13 @@ public:
 	bool checkRequiredFaction(std::string faction) const;
 	bool checkRequiredFame(std::string faction, sint32 fame) const;
 
+	std::string getDefaultTagA() const;
+	void setDefaultTagA(const std::string &tag);
+
+	std::string getDefaultTagB() const;
+	void setDefaultTagB(const std::string &tag);
+
+
 	std::string getTagA() const;
 	void setTagA(const std::string &tag);
 
@@ -2628,6 +2676,17 @@ public:
 
 	std::string getTagPvPB() const;
 	void setTagPvPB(const std::string &tag);
+
+	std::string getTagRightHand() const;
+	void setTagRightHand(const std::string &tag);
+
+	std::string getTagLeftHand() const;
+	void setTagLeftHand(const std::string &tag);
+
+	std::string getTagHat() const;
+	void setTagHat(const std::string &tag);
+
+
 
 	std::string getDontTranslate() const;
 	void setDontTranslate(const std::string &langs);
@@ -2807,7 +2866,7 @@ public:
 	bool checkExchangeActors(bool* exchangeWithBot = NULL) const;
 
 	/// add an item from bag to exchange
-	void itemBagToExchange(uint32 bagSlot, uint32 exchangeSlot, uint32 quantity);
+	void itemInvToExchange(uint32 invSrc, uint32 invSlot, uint32 exchangeSlot, uint32 quantity);
 
 	/// remove an item from exchange to bag
 	void itemExchangeToBag(uint32 exchangeSlot);
@@ -3347,6 +3406,13 @@ private:
 	std::string _NewTitle;
 	std::string _TagPvPA;
 	std::string _TagPvPB;
+	std::string _TagRightHand;
+	std::string _TagLeftHand;
+	std::string _TagHat;
+
+	std::string _DefaultTagA;
+	std::string _DefaultTagB;
+
 	std::string _TagA;
 	std::string _TagB;
 
@@ -3745,6 +3811,13 @@ private:
 
 	/// guild id of the player
 	uint32 _GuildId;
+
+	/// last guild id of the player (if player are in guild since 21 days)
+	uint32 _LastGuildId;
+
+	/// last guild enter time  (if player are in guild since 21 days)
+	NLMISC::TGameCycle _GuildEnterTime;
+
 	/// guild id of the player
 	bool _UseFactionSymbol;
 
@@ -3790,6 +3863,12 @@ private:
 
 	/// backup last used weight malus
 	sint32 _LastAppliedWeightMalus;
+
+	/// Regenerte factor
+	float _CurrentRegenerateReposBonus;
+	NLMISC::TGameCycle	_CurrentRegenerateReposBonusTickUpdate;
+
+
 
 	std::vector<TDataSetRow> _TargetingChars;
 
@@ -4103,6 +4182,16 @@ private:
 
 	bool _UseWig;
 
+	uint8 _DefaultHairType;
+	uint8 _DefaultHairColor;
+	uint8 _WigHairType;
+	uint8 _WigHairColor;
+	uint32 _MainTattoo;
+
+	std::string _UnderwearChest;
+	std::string _UnderwearLegs;
+	uint8 _UnderwearChestColor;
+	uint8 _UnderwearLegsColor;
 
 	/// General flags for powos
 	bool _PowoCanXP;

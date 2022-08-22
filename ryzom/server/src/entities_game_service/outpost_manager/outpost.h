@@ -307,6 +307,7 @@ public:
 	/// Time
 	void timeSetAttackHour(uint32 val);
 	void timeSetDefenseHour(uint32 val);
+	void actionSetTimer0(uint32 seconds);
 
 	/// return false if the given editing access has been rejected (concurrency issue)
 	/// NOTE: this method sends a message to the player if the access is rejected
@@ -348,13 +349,11 @@ private:
 	uint32 computeTimeRangeLengthForClient() const;
 	uint32 computeTribeOutpostLevel() const;
 	uint32 computeGuildMinimumOutpostLevel() const;
-
 public:
 	static uint32 s_computeEstimatedAttackTimeForClient(uint32 hour);
 private:
 	// Actions
 	void actionPostNextState(OUTPOSTENUMS::TOutpostState state);
-	void actionSetTimer0(uint32 seconds);
 	void actionSetTimer0End(uint32 seconds);
 	void actionSetTimer1(uint32 seconds);
 	void actionSetTimer2(uint32 seconds);

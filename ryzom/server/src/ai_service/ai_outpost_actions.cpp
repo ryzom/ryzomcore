@@ -501,14 +501,9 @@ DEFINE_ACTION(ContextSquadTemplateVariant,GRPTMPL)
 	if (!groupDesc)
 		return;
 
-	FOREACH(itAIInstance, CCont<CAIInstance>, CAIS::instance().AIList())
-	{
-		CAIInstance* aiinstance = *itAIInstance;
-		aiinstance->registerSquadVariant( CWorkPtr::squadVariantName(), groupDesc );
-	}
-
+	aii->registerSquadVariant( CWorkPtr::squadVariantName(), groupDesc );
 	CWorkPtr::groupDesc( groupDesc );
-
+	
 	groupDesc->setBaseBotCount(botCount);
 	groupDesc->setCountMultiplierFlag(countMultipliedBySheet);
 	groupDesc->setMultiLevel(multiLevel);

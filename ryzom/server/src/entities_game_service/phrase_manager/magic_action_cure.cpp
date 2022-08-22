@@ -107,7 +107,7 @@ protected:
 	}
 
 	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
+						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, std::vector<sint16> &targetDeltaHp, const NLMISC::CBitSet & invulnerabilityOffensive,
 						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
 	{
 		TReportAction reportAction = actionReport;
@@ -126,6 +126,10 @@ protected:
 			return;
 		}
 		const std::vector< CSpellTarget > & targets = phrase->getTargets();
+
+		// targetDeltaHp must be prefilled
+		nlassertex( targets.size() == targetDeltaHp.size(), ("%d %d", targets.size(), targetDeltaHp.size() ) );
+
 		for ( uint i = 0; i < targets.size(); i++ )
 		{
 			TReportAction reportAction = actionReport;

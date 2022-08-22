@@ -51,9 +51,13 @@ public:
 
 		bool inHand = false;
 		if (inventory == INVENTORIES::handling)
+		{
 			inHand = true;
-		else
-			nlassert(inventory == INVENTORIES::equipment);
+		}
+		else if (inventory != INVENTORIES::hotbar && inventory != INVENTORIES::equipment) {
+			nlerror("isSlotLatent : Invalid inventory %u ('%s') : must be handling or hotbar or equipment ",inventory,INVENTORIES::toString(inventory).c_str() );
+			return false;
+		}
 			
 		std::list<CGearSlot>::const_iterator it = _GearLatencies.begin();
 		for (; it != _GearLatencies.end(); ++it)

@@ -1,5 +1,7 @@
 
 
+#ifndef INCLUDED_database_PLR_H
+#define INCLUDED_database_PLR_H
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -17,11 +19,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
-
-#ifndef INCLUDED_DATABASE__PLR_H
-#define INCLUDED_DATABASE__PLR_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -3090,7 +3100,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	private:
 		ICDBStructNode	*_BranchNode;
 
-		TArray _Array[8];
+		TArray _Array[10];
 		
 
 	public:
@@ -3104,7 +3114,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 
 		TArray &getArray(uint32 index)
 		{
-			nlassert(index < 8);
+			nlassert(index < 10);
 			return _Array[index];
 		}
 		
@@ -3431,7 +3441,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	private:
 		ICDBStructNode	*_BranchNode;
 
-		TArray _Array[8];
+		TArray _Array[10];
 		
 
 	public:
@@ -3445,7 +3455,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 
 		TArray &getArray(uint32 index)
 		{
-			nlassert(index < 8);
+			nlassert(index < 10);
 			return _Array[index];
 		}
 		
@@ -3710,6 +3720,80 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		
 	};
 		
+	class THOTBAR
+	{
+	public:
+		
+	class TArray
+	{
+	public:
+		
+
+	private:
+		ICDBStructNode	*_BranchNode;
+
+		ICDBStructNode	*_INDEX_IN_BAG;
+		
+
+	public:
+		void init(ICDBStructNode *parent, uint index);
+
+		// accessor to branch node
+		ICDBStructNode *getCDBNode()
+		{
+			return _BranchNode;
+		}
+
+		
+		void setINDEX_IN_BAG(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
+		{
+			
+			// Check that the value is not out of database precision
+			STOP_IF(value > (1<<9)-1, "setINDEX_IN_BAG : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 9 bits");
+				
+
+			_setProp(dbGroup, _INDEX_IN_BAG, value, forceSending);
+		}
+
+		uint16 getINDEX_IN_BAG(const CCDBSynchronised &dbGroup)
+		{
+			uint16 value;
+			_getProp(dbGroup, _INDEX_IN_BAG, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getINDEX_IN_BAGCDBNode()
+		{
+			return _INDEX_IN_BAG;
+		}
+	
+	};
+		
+
+	private:
+		ICDBStructNode	*_BranchNode;
+
+		TArray _Array[5];
+		
+
+	public:
+		void init(ICDBStructNode *parent);
+
+		// accessor to branch node
+		ICDBStructNode *getCDBNode()
+		{
+			return _BranchNode;
+		}
+
+		TArray &getArray(uint32 index)
+		{
+			nlassert(index < 5);
+			return _Array[index];
+		}
+		
+	};
+
 	class TEQUIP
 	{
 	public:
@@ -4772,6 +4856,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_MONEY;
 		ICDBStructNode	*_COUNTER;
 		THAND	_HAND;
+		THOTBAR	_HOTBAR;
 		TEQUIP	_EQUIP;
 		TTEMP	_TEMP;
 		TSHARE	_SHARE;
@@ -4830,9 +4915,13 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		{
 			return _COUNTER;
 		}
-	THAND &getHAND()
+		THAND &getHAND()
 		{
 			return _HAND;
+		}
+		THOTBAR &getHOTBAR()
+		{
+			return _HOTBAR;
 		}
 		TEQUIP &getEQUIP()
 		{
@@ -10716,4 +10805,4 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 	
 
-#endif // INCLUDED_DATABASE__PLR_H
+#endif // INCLUDED_database_PLR_H
