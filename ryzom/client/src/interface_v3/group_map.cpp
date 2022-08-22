@@ -880,6 +880,12 @@ bool CGroupMap::getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, s
 inline void CGroupMap::updateButtonPos(CLandMarkButton &dest) const
 {
 	sint32 x, y;
+	CVector2f pos;
+	mapToWorld(pos, dest.Pos);
+
+	if (pos.x < _MapMinCorner.x || pos.x > _MapMaxCorner.x || pos.y < _MapMinCorner.y || pos.y > _MapMaxCorner.y)
+		dest.setActive(false);
+
 	mapToWindowSnapped(x, y, dest.Pos);
 	dest.setX(x);
 	dest.setY(y);
@@ -1709,27 +1715,33 @@ void CGroupMap::draw()
 			// compute corners
 			sint32 spx, spy;
 			mapToScreen(spx, spy, _PlayerPos);
-			NLMISC::CVector center;
-			center.set((float) spx, (float) spy, 0.f);
-			NLMISC::CQuadColorUV quv;
-			quv.V0 = center - 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
-			quv.V1 = center + 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
-			quv.V2 = center + 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
-			quv.V3 = center - 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
-			quv.Uv0.set(0.f, 1.f);
-			quv.Uv1.set(1.f, 1.f);
-			quv.Uv2.set(1.f, 0.f);
-			quv.Uv3.set(0.f, 0.f);
-			quv.Color0 = quv.Color1 = quv.Color2 = quv.Color3 = CRGBA(255, 255, 255, alpha);
-			quv.V0.x /= (float) sw;
-			quv.V0.y /= (float) sh;
-			quv.V1.x /= (float) sw;
-			quv.V1.y /= (float) sh;
-			quv.V2.x /= (float) sw;
-			quv.V2.y /= (float) sh;
-			quv.V3.x /= (float) sw;
-			quv.V3.y /= (float) sh;
-			Driver->drawQuads(&quv, 1, _PlayerPosMaterial);
+
+			CVector2f pos;
+			mapToWorld(pos, _PlayerPos);
+			if (pos.x >= _MapMinCorner.x && pos.x <= _MapMaxCorner.x && pos.y >= _MapMinCorner.y && pos.y <= _MapMaxCorner.y)
+			{
+				NLMISC::CVector center;
+				center.set((float) spx, (float) spy, 0.f);
+				NLMISC::CQuadColorUV quv;
+				quv.V0 = center - 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
+				quv.V1 = center + 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
+				quv.V2 = center + 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
+				quv.V3 = center - 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
+				quv.Uv0.set(0.f, 1.f);
+				quv.Uv1.set(1.f, 1.f);
+				quv.Uv2.set(1.f, 0.f);
+				quv.Uv3.set(0.f, 0.f);
+				quv.Color0 = quv.Color1 = quv.Color2 = quv.Color3 = CRGBA(255, 255, 255, alpha);
+				quv.V0.x /= (float) sw;
+				quv.V0.y /= (float) sh;
+				quv.V1.x /= (float) sw;
+				quv.V1.y /= (float) sh;
+				quv.V2.x /= (float) sw;
+				quv.V2.y /= (float) sh;
+				quv.V3.x /= (float) sw;
+				quv.V3.y /= (float) sh;
+				Driver->drawQuads(&quv, 1, _PlayerPosMaterial);
+			}
 		}
 	}
 
