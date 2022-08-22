@@ -535,6 +535,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("delArkPoints",  delArkPoints);
 	ls.registerFunc("addRespawnPoint",  addRespawnPoint);
 	ls.registerFunc("setArkPowoOptions",  setArkPowoOptions);
+	ls.registerFunc("getActualMapZoom",  getActualMapZoom);
+	ls.registerFunc("setActualMapZoom",  setActualMapZoom);
 	ls.registerFunc("saveUserChannels", saveUserChannels);
 	ls.registerFunc("readUserChannels", readUserChannels);
 	ls.registerFunc("getMaxDynChan", getMaxDynChan);
@@ -4537,6 +4539,35 @@ int CLuaIHMRyzom::setArkPowoOptions(CLuaState &ls)
 	if (pMap != NULL) {
 		pMap->setArkPowoMode(ls.toString(1));
 		pMap->setArkPowoMapMenu(ls.toString(2));
+	}
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getActualMapZoom(CLuaState &ls)
+{
+	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (gm != NULL)
+		ls.push(gm->getScale());
+	else
+		ls.push(0);
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::setActualMapZoom(CLuaState &ls)
+{
+
+	const char* funcName = "setActualMapZoom";
+	CLuaIHM::checkArgMin(ls, funcName, 1);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+	CInterfaceManager *im = CInterfaceManager::getInstance();
+	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (gm != NULL)
+	{
+		CVector2f center;
+		gm->windowToMap(center, gm->getWReal() / 2, gm->getHReal() / 2);
+		gm->setScale(ls.toNumber(1), center);
 	}
 	return 0;
 }
