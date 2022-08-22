@@ -74,6 +74,7 @@ CInventoryManager	*CInventoryManager::_Instance = NULL;
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListSheetBag, std::string, "list_sheet_bag");
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupIconListBag, std::string, "list_icon_bag");
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListSheetFilterCLMSlot, std::string, "list_sheet_filter_clm_slot");
+NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListSheetFilterHotbarSlot, std::string, "list_sheet_filter_hotbar_slot");
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListSheetFilterExchangeable, std::string, "list_sheet_filter_exchangeable");
 
 // ***************************************************************************
@@ -314,6 +315,8 @@ CInventoryManager::CInventoryManager()
 	{
 		Hands[i] = ServerHands[i] = 0;
 		UIHands[i] = NULL;
+		UIHands2[i] = NULL;
+		UIHands3[i] = NULL;
 	}
 
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
@@ -321,6 +324,14 @@ CInventoryManager::CInventoryManager()
 		Equip[i] = ServerEquip[i] = 0;
 		UIEquip[i] = NULL;
 		UIEquip2[i] = NULL;
+	}
+
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+	{
+		Hotbar[i] = ServerHotbar[i] = 0;
+		UIHotbar[i] = NULL;
+		UIHotbar2[i] = NULL;
+		UIHotbar3[i] = NULL;
 	}
 
 	for (i = 0; i < MAX_BAGINV_ENTRIES; i++)
@@ -391,6 +402,16 @@ CItemImage *CInventoryManager::getEquipItem(uint index)
 }
 
 // *************************************************************************************************
+CItemImage *CInventoryManager::getHotbarItem(uint index)
+{
+	nlassert(index < MAX_HOTBARINV_ENTRIES);
+	if (Hotbar[index] != 0)
+		return &Bag[Hotbar[index]];
+	else
+		return NULL;
+}
+
+// *************************************************************************************************
 CDBCtrlSheet *CInventoryManager::getHandSheet(uint index)
 {
 	return UIHands[index];
@@ -402,6 +423,11 @@ CDBCtrlSheet *CInventoryManager::getEquipSheet(uint index)
 	return UIEquip[index];
 }
 
+// *************************************************************************************************
+CDBCtrlSheet *CInventoryManager::getHotbarSheet(uint index)
+{
+	return UIHotbar[index];
+}
 
 // *************************************************************************************************
 CItemImage &CInventoryManager::getServerBagItem(uint index)
@@ -480,6 +506,7 @@ void CInventoryManager::init()
 	Money = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":MONEY");
 	initIndirection (LOCAL_INVENTORY ":HAND:", Hands, MAX_HANDINV_ENTRIES, true);
 	initIndirection (LOCAL_INVENTORY ":EQUIP:", Equip, MAX_EQUIPINV_ENTRIES, true);
+	initIndirection (LOCAL_INVENTORY ":HOTBAR:", Hotbar, MAX_HOTBARINV_ENTRIES, true);
 	// Init observers for auto equipment
 	{
 		for (uint i = 0; i < MAX_BAGINV_ENTRIES; ++i)
@@ -527,6 +554,15 @@ void CInventoryManager::init()
 	UIEquip[SLOT_EQUIPMENT::LEGS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_LEGS));
 	UIEquip[SLOT_EQUIPMENT::HANDS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_HANDS));
 
+	UIHotbar[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_1));
+	UIHotbar[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_2));
+	UIHotbar[2] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_3));
+	UIHotbar[3] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_4));
+	UIHotbar[4] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_5));
+
+	UIHands2[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND2_RIGHT));
+	UIHands2[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND2_LEFT));
+
 	UIEquip2[SLOT_EQUIPMENT::HEADDRESS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_HEADDRESS));
 	UIEquip2[SLOT_EQUIPMENT::EARL]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_EARING_LEFT));
 	UIEquip2[SLOT_EQUIPMENT::EARR]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_EARING_RIGHT));
@@ -545,6 +581,20 @@ void CInventoryManager::init()
 	UIEquip2[SLOT_EQUIPMENT::LEGS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_LEGS));
 	UIEquip2[SLOT_EQUIPMENT::HANDS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_HANDS));
 
+	UIHotbar2[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_1));
+	UIHotbar2[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_2));
+	UIHotbar2[2] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_3));
+	UIHotbar2[3] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_4));
+	UIHotbar2[4] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_5));
+
+	UIHands3[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND3_RIGHT));
+	UIHands3[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND3_LEFT));
+
+	UIHotbar3[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_1));
+	UIHotbar3[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_2));
+	UIHotbar3[2] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_3));
+	UIHotbar3[3] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_4));
+	UIHotbar3[4] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_5));
 
 	// Init ItemInfoObservers
 	{
@@ -654,7 +704,7 @@ std::string CInventoryManager::getDBIndexPath(CDBCtrlSheet *pCS)
 	uint i;
 	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
-		if (UIHands[i] == pCS)
+		if (UIHands[i] == pCS || UIHands2[i] == pCS || UIHands3[i] == pCS)
 		{
 			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
 		}
@@ -662,13 +712,18 @@ std::string CInventoryManager::getDBIndexPath(CDBCtrlSheet *pCS)
 
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 	{
-		if (UIEquip[i] == pCS)
+		if (UIEquip[i] == pCS || UIEquip2[i] == pCS)
 		{
 			return string(LOCAL_INVENTORY) + ":EQUIP:" + toString(i);
 		}
-		if (UIEquip2[i] == pCS)
+	}
+
+	
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+	{
+		if (UIHotbar[i] == pCS || UIHotbar2[i] == pCS || UIHotbar3[i] == pCS)
 		{
-			return string(LOCAL_INVENTORY) + ":EQUIP:" + toString(i);
+			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
 		}
 	}
 	return "";
@@ -759,6 +814,20 @@ bool CInventoryManager::isForageToolItem(uint32 sheetID)
 }
 
 // ***************************************************************************
+bool CInventoryManager::isUsableItem(uint32 sheetID)
+{
+	bool result = false;
+	CEntitySheet	*sheet= SheetMngr.get(CSheetId(sheetID));
+	if(sheet && sheet->type()== CEntitySheet::ITEM)
+	{
+		CItemSheet	*item= (CItemSheet*)sheet;
+		if( ITEMFAMILY::isUsable(item->Family) )
+			result = true;
+	}
+	return result;
+}
+
+// ***************************************************************************
 uint32 CInventoryManager::getHandItemSheet( bool rightHand ) const
 {
 	CSheetId item;
@@ -776,9 +845,8 @@ uint32 CInventoryManager::getHandItemSheet( bool rightHand ) const
 	return item.asInt();
 }
 
-
 // ***************************************************************************
-bool CInventoryManager::isLeftHandItemCompatibleWithRightHandItem(uint32 leftHandSheet, uint32 rightHandSheet, uint32 lastRightHandSheet)
+bool CInventoryManager::isLeftHandItemCompatible(uint32 leftHandSheet, uint32 rightHandSheet, uint32 lastRightHandSheet)
 {
 	CEntitySheet *pLastRight = SheetMngr.get (CSheetId(lastRightHandSheet));
 	if (pLastRight != NULL)
@@ -957,6 +1025,11 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 		inventory = INVENTORIES::equipment;
 		fromString(invPath.substr(22,invPath.size()), invSlot);
 	}
+	else if (strnicmp(invPath.c_str(),"LOCAL:INVENTORY:HOTBAR",22) == 0)
+	{
+		inventory = INVENTORIES::hotbar;
+		fromString(invPath.substr(23,invPath.size()), invSlot);
+	}
 
 	// Hands management : check if we have to unequip left hand because of incompatibility with right hand item
 	sint16 oldRightIndexInBag = NLGUI::CDBManager::getInstance()->getDbProp(invPath + ":INDEX_IN_BAG")->getValue16();
@@ -968,49 +1041,21 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 			return;
 		}
 
-		// get sheet of left item
-		uint32 leftSheet = 0;
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:1:INDEX_IN_BAG", false);
-		if (pNL == NULL)
-		{
+		if (!pNL)
 			return;
-		}
-		if (pNL->getValue32() > 0)
-		{
-			CCDBNodeLeaf *pNL2 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(pNL->getValue32()-1) + ":SHEET", false);
-			if (pNL2 == NULL)
-			{
-				return;
-			}
-			leftSheet = pNL2->getValue32();
-		}
+
+		// get sheet of left item
+		uint32 leftSheet = getInventory().getBagItemSheet(pNL->getValue32()-1);
 
 		// get sheet of previous right hand item
-		uint32 lastRightSheet = 0;
-		if (oldRightIndexInBag > 0)
-		{
-			pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(oldRightIndexInBag-1) + ":SHEET", false);
-			if (pNL == NULL)
-			{
-				return;
-			}
-			lastRightSheet = pNL->getValue32();
-		}
+		uint32 lastRightSheet = getInventory().getBagItemSheet(oldRightIndexInBag-1);
 
 		// get sheet of new right hand item
-		uint32 rightSheet = 0;
-		if (indexInBag+1 > 0)
-		{
-			pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(indexInBag) + ":SHEET", false);
-			if (pNL == NULL)
-			{
-				return;
-			}
-			rightSheet = pNL->getValue32();
-		}
+		uint32 rightSheet = getInventory().getBagItemSheet(indexInBag);
 
 		// If incompatible -> remove
-		if (!getInventory().isLeftHandItemCompatibleWithRightHandItem(leftSheet, rightSheet, lastRightSheet))
+		if (!getInventory().isLeftHandItemCompatible(leftSheet, rightSheet, lastRightSheet))
 		{
 			getInventory().unequip(LOCAL_INVENTORY ":HAND:1");
 		}
@@ -1090,6 +1135,11 @@ void CInventoryManager::unequip(const std::string &invPath)
 		inventory = INVENTORIES::equipment;
 		fromString(invPath.substr(22,invPath.size()), invSlot);
 	}
+	else if (strnicmp(invPath.c_str(),"LOCAL:INVENTORY:HOTBAR",22) == 0)
+	{
+		inventory = INVENTORIES::hotbar;
+		fromString(invPath.substr(23,invPath.size()), invSlot);
+	}
 
 	// Hands management : check if we have to unequip left hand because of incompatibility with right hand item
 	if (inventory == INVENTORIES::handling && invSlot == 0)
@@ -1100,40 +1150,21 @@ void CInventoryManager::unequip(const std::string &invPath)
 			return;
 		}
 
-		// get sheet of left item
-		uint32 leftSheet = 0;
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:1:INDEX_IN_BAG", false);
-		if (pNL == NULL)
-		{
+		if (!pNL)
 			return;
-		}
-		if (pNL->getValue32() > 0)
-		{
-			CCDBNodeLeaf *pNL2 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(pNL->getValue32()-1) + ":SHEET", false);
-			if (pNL2 == NULL)
-			{
-				return;
-			}
-			leftSheet = pNL2->getValue32();
-		}
+
+		// get sheet of left item
+		uint32 leftSheet = getInventory().getBagItemSheet(pNL->getValue32()-1);
 
 		// get sheet of previous right hand item
-		uint32 lastRightSheet = 0;
-		if (oldIndexInBag > 0)
-		{
-			pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(oldIndexInBag-1) + ":SHEET", false);
-			if (pNL == NULL)
-			{
-				return;
-			}
-			lastRightSheet = pNL->getValue32();
-		}
+		uint32 lastRightSheet = getInventory().getBagItemSheet(oldIndexInBag-1);
 
 		// sheet of new right hand item
 		uint32 rightSheet = 0;
 
 		// If incompatible -> remove
-		if (!getInventory().isLeftHandItemCompatibleWithRightHandItem(leftSheet, rightSheet, lastRightSheet))
+		if (!getInventory().isLeftHandItemCompatible(leftSheet, rightSheet, lastRightSheet))
 		{
 			getInventory().unequip(LOCAL_INVENTORY ":HAND:1");
 		}
@@ -1168,6 +1199,19 @@ void CInventoryManager::unequip(const std::string &invPath)
 	}
 }
 
+void CInventoryManager::onUpdateEquipHands()
+{
+	// update hands slots after initial BAG inventory has received
+	CCDBNodeLeaf *pNL;
+	pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:0:INDEX_IN_BAG", false);
+	if (pNL && pNL->getValue32() != 0)
+		_DBEquipObs.update(pNL);
+
+	pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:1:INDEX_IN_BAG", false);
+	if (pNL && pNL->getValue32() != 0)
+		_DBEquipObs.update(pNL);
+}
+
 
 // ***************************************************************************
 // Observer on DB equipment branch
@@ -1176,238 +1220,191 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	string sTmp = node->getFullName();
-	string sIE, sIE2; // Interface Element
-	CCDBNodeLeaf *pNL = dynamic_cast<CCDBNodeLeaf*>(node);
-	if (pNL == NULL) return;
-	if (strnicmp(sTmp.c_str(),"LOCAL:INVENTORY:HAND",20) == 0)
-	{
-		// Coming from hand
-		sTmp = sTmp.substr(21,sTmp.size());
-		sTmp = sTmp.substr(0,sTmp.rfind(':'));
-		sint index;
-		fromString(sTmp, index);
-		if (index == 0)
-			sIE = CTRL_HAND_RIGHT;
-		else
-			sIE = CTRL_HAND_LEFT;
-		// update Hands.
-		getInventory().Hands[index]= pNL->getValue16();
-	}
-	else if (strnicmp(sTmp.c_str(),"LOCAL:INVENTORY:EQUIP",21) == 0)
-	{
-		// Coming from equipement
-		sTmp = sTmp.substr(22,sTmp.size());
-		sTmp = sTmp.substr(0,sTmp.rfind(':'));
-		sint32 nTmp;
-		fromString(sTmp, nTmp);
-		SLOT_EQUIPMENT::TSlotEquipment index = (SLOT_EQUIPMENT::TSlotEquipment)nTmp;
-		switch(index)
-		{
-			case SLOT_EQUIPMENT::HEADDRESS:	sIE = CTRL_JEWEL_HEADDRESS;
-											sIE2= CTRL_JEWL2_HEADDRESS;			break;
-			case SLOT_EQUIPMENT::EARL:		sIE = CTRL_JEWEL_EARING_LEFT;
-											sIE2= CTRL_JEWL2_EARING_LEFT;		break;
-			case SLOT_EQUIPMENT::EARR:		sIE = CTRL_JEWEL_EARING_RIGHT;
-											sIE2= CTRL_JEWL2_EARING_RIGHT;		break;
-			case SLOT_EQUIPMENT::NECKLACE:	sIE = CTRL_JEWEL_NECK;
-											sIE2= CTRL_JEWL2_NECK;				break;
-			case SLOT_EQUIPMENT::WRISTL:	sIE = CTRL_JEWEL_BRACELET_LEFT;
-											sIE2= CTRL_JEWL2_BRACELET_LEFT;		break;
-			case SLOT_EQUIPMENT::WRISTR:	sIE = CTRL_JEWEL_BRACELET_RIGHT;
-											sIE2= CTRL_JEWL2_BRACELET_RIGHT;	break;
-			case SLOT_EQUIPMENT::FINGERL:	sIE = CTRL_JEWEL_RING_LEFT;
-											sIE2= CTRL_JEWL2_RING_LEFT;			break;
-			case SLOT_EQUIPMENT::FINGERR:	sIE = CTRL_JEWEL_RING_RIGHT;
-											sIE2= CTRL_JEWL2_RING_RIGHT;		break;
-			case SLOT_EQUIPMENT::ANKLEL:	sIE = CTRL_JEWEL_ANKLET_LEFT;
-											sIE2= CTRL_JEWL2_ANKLET_LEFT;		break;
-			case SLOT_EQUIPMENT::ANKLER:	sIE = CTRL_JEWEL_ANKLET_RIGHT;
-											sIE2= CTRL_JEWL2_ANKLET_RIGHT;		break;
-
-			case SLOT_EQUIPMENT::HEAD:		sIE = CTRL_ARMOR_HEAD;
-											sIE2= CTRL_ARMR2_HEAD;		break;
-			case SLOT_EQUIPMENT::CHEST:		sIE = CTRL_ARMOR_CHEST;
-											sIE2= CTRL_ARMR2_CHEST;		break;
-			case SLOT_EQUIPMENT::ARMS:		sIE = CTRL_ARMOR_ARMS;
-											sIE2= CTRL_ARMR2_ARMS;		break;
-			case SLOT_EQUIPMENT::FEET:		sIE = CTRL_ARMOR_FEET;
-											sIE2= CTRL_ARMR2_FEET;		break;
-			case SLOT_EQUIPMENT::LEGS:		sIE = CTRL_ARMOR_LEGS;
-											sIE2= CTRL_ARMR2_LEGS;		break;
-			case SLOT_EQUIPMENT::HANDS:		sIE = CTRL_ARMOR_HANDS;
-											sIE2= CTRL_ARMR2_HANDS;		break;
-
-			default:
-				nlwarning("entry not handled");
-				return;
-			break;
-		}
-		// update Equips.
-		getInventory().Equip[index]= pNL->getValue16();
-	}
-	else return;
+	CCDBNodeLeaf *pNL = dynamic_cast<CCDBNodeLeaf *>(node);
+	if (!pNL)
+		return;
 
 	// Set database for wearing the right item
-	CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sIE));
-	CDBCtrlSheet *pCS2 = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sIE2));
+	std::vector<CDBCtrlSheet *> vCS;
+
+	if (strnicmp(sTmp.c_str(), "LOCAL:INVENTORY:HAND", 20) == 0)
+	{
+		// Coming from hand
+		sTmp = sTmp.substr(21, sTmp.size());
+		sTmp = sTmp.substr(0, sTmp.rfind(':'));
+		uint32 index;
+		fromString(sTmp, index);
+		vCS.push_back(getInventory().UIHands[index]);
+		vCS.push_back(getInventory().UIHands2[index]);
+		vCS.push_back(getInventory().UIHands3[index]);
+		// update Hands.
+		getInventory().Hands[index] = pNL->getValue16();
+	}
+	else if (strnicmp(sTmp.c_str(), "LOCAL:INVENTORY:EQUIP", 21) == 0)
+	{
+		// Coming from equipement
+		sTmp = sTmp.substr(22, sTmp.size());
+		sTmp = sTmp.substr(0, sTmp.rfind(':'));
+		uint32 index;
+		fromString(sTmp, index);
+		vCS.push_back(getInventory().UIEquip[index]);
+		vCS.push_back(getInventory().UIEquip2[index]);
+		// update Equips.
+		getInventory().Equip[index] = pNL->getValue16();
+	}
+	else if (strnicmp(sTmp.c_str(), "LOCAL:INVENTORY:HOTBAR", 22) == 0)
+	{
+		// Coming from hand
+		sTmp = sTmp.substr(23, sTmp.size());
+		sTmp = sTmp.substr(0, sTmp.rfind(':'));
+		uint32 index;
+		fromString(sTmp, index);
+		vCS.push_back(getInventory().UIHotbar[index]);
+		vCS.push_back(getInventory().UIHotbar2[index]);
+		vCS.push_back(getInventory().UIHotbar3[index]);
+		// update Hotbar.
+		getInventory().Hotbar[index] = pNL->getValue16();
+	}
+
+	if (vCS.empty())
+		return;
 
 	// Remove Last reference and update database
-	sint16 oldVal = pNL->getOldValue16();
-	sint16 newVal = pNL->getValue16();
-	if (oldVal != 0)
-		getInventory().unwearBagItem (oldVal-1);
+	sint16 oldVal = pNL->getOldValue16()-1;
+	sint16 newVal = pNL->getValue16()-1;
+	if (oldVal != -1)
+		getInventory().unwearBagItem(oldVal);
 
-	if (newVal != 0)
-		getInventory().wearBagItem (newVal-1);
-
-	// Update Display
-	if (newVal == 0)
+	if (newVal != -1)
 	{
-		// in some case left sheet is same than right sheet so don't clear it now (ex: 2 hands item, right hand exclusive)
-		if (sIE != CTRL_HAND_LEFT)
-		{
-			if (pCS  != NULL) pCS->setSheet("");
-			if (pCS2 != NULL) pCS2->setSheet("");
-		}
+		getInventory().wearBagItem(newVal);
+		for(uint i = 0; i < vCS.size(); i++)
+			vCS[i]->setSheet(LOCAL_INVENTORY ":BAG:" + toString(newVal));
 	}
 	else
 	{
-		if (pCS  != NULL) pCS->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
-		if (pCS2 != NULL) pCS2->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
+		// in some case left sheet is same than right sheet so don't clear it now (ex: 2 hands item, right hand exclusive)
+		if (vCS[0] != getInventory().UIHands[1]) 
+		{
+			for(uint i = 0; i < vCS.size(); i++)
+				vCS[i]->setSheet("");
+		}
 	}
 
 	// Hands management
-	if (sIE == CTRL_HAND_RIGHT)
+	if (vCS[0] == getInventory().UIHands[0]) // if right hand 
 	{
-		// if nothing in left hand -> return
-		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
-		if (pCSLeftHand == NULL)
-		{
+		std::vector<CDBCtrlSheet *> vCSLeftHand = {getInventory().UIHands[1], getInventory().UIHands2[1], getInventory().UIHands3[1]};
+
+		if (!vCSLeftHand[0])
 			return;
-		}
 
 		// reset display of left hand
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
-		pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
-		pCSLeftHand->setGrayed(false);
-		pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
-		pCSLeftHand->setActionOnLeftClick("proc");
-
-		// If something in left hand check if we have to remove
+		for(uint i = 0; i < vCSLeftHand.size(); ++i)
 		{
-			uint32 leftSheet = 0;
-			CCDBNodeLeaf *pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:1:INDEX_IN_BAG", false);
-			if (pNL3 == NULL) return;
-			if (pNL3->getValue32() > 0)
-			{
-				CCDBNodeLeaf *pNL4 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(pNL3->getValue32()-1) + ":SHEET", false);
-				if (pNL4 == NULL) return;
-				leftSheet = pNL4->getValue32();
-			}
-
-			uint32 rightSheet = 0;
-			if (newVal > 0)
-			{
-				pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(newVal-1) + ":SHEET", false);
-				if (pNL3 == NULL) return;
-				rightSheet = pNL3->getValue32();
-			}
-
-			uint32 lastRightSheet = 0;
-			if (oldVal > 0)
-			{
-				pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(oldVal-1) + ":SHEET", false);
-				if (pNL3 == NULL) return;
-				lastRightSheet = pNL3->getValue32();
-			}
-
-			// If incompatible -> remove
-			if (!getInventory().isLeftHandItemCompatibleWithRightHandItem(leftSheet, rightSheet, lastRightSheet))
-			{
-				pCSLeftHand->setSheet("");
-			}
-			// WORKAROUND: useful when an item is destroyed before it is unequipped (clean the left hand)
-			if ((leftSheet == 0) && (rightSheet == 0))
-			{
-				pCSLeftHand->setSheet("");
-			}
+			CDBCtrlSheet * pCSLeftHand = vCSLeftHand[i];
+			pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
+			pCSLeftHand->setGrayed(false);
+			pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
+			pCSLeftHand->setActionOnLeftClick("proc");
 		}
 
-		// update display of left hand according to new right hand item
-		if (newVal > 0)
-		{
-			CCDBNodeLeaf *pNL2 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(newVal-1) + ":SHEET", false);
-			if (pNL2 == NULL) return;
+		// If something in left hand check if we have to remove
+		CCDBNodeLeaf *pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:1:INDEX_IN_BAG", false);
+		if (!pNL3) 
+			return;
 
-			if (getInventory().is2HandItem(pNL2->getValue32()))
+		uint32 leftSheet = getInventory().getBagItemSheet(pNL3->getValue32()-1);
+		uint32 rightSheet = getInventory().getBagItemSheet(newVal);
+		uint32 lastRightSheet = getInventory().getBagItemSheet(oldVal);
+
+		// If incompatible -> remove
+		if (!getInventory().isLeftHandItemCompatible(leftSheet, rightSheet, lastRightSheet) || (leftSheet == 0 && rightSheet == 0))
+		{
+			for(uint i = 0; i < vCSLeftHand.size(); ++i)
+				vCSLeftHand[i]->setSheet("");
+		}
+		
+		// update display of left hand according to new right hand item
+		if (newVal >= 0)
+		{
+			if (getInventory().is2HandItem(rightSheet))
 			{
-				if (getInventory().isRangeWeaponItem(pNL2->getValue32()))
+				if (getInventory().isRangeWeaponItem(rightSheet))
 				{
-					pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
-					pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
+					for(uint i = 0; i < vCSLeftHand.size(); ++i)
+					{
+						CDBCtrlSheet * pCSLeftHand = vCSLeftHand[i];
+						pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
+						pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
+					}
 				}
 				else
 				{
-					pCSLeftHand->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
-					pCSLeftHand->setGrayed(true);
-					pCSLeftHand->setActionOnLeftClick("");
+					for(uint i = 0; i < vCSLeftHand.size(); ++i)
+					{
+						CDBCtrlSheet * pCSLeftHand = vCSLeftHand[i];
+						pCSLeftHand->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal));
+						pCSLeftHand->setGrayed(true);
+						pCSLeftHand->setActionOnLeftClick("");
+					}
 				}
 			}
 		}
 	}
-
-	// left hand item is changing
-	if (sIE == CTRL_HAND_LEFT)
+	else if (vCS[0] == getInventory().UIHands[1]) // if left hand
 	{
-		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
-		if ( pCSLeftHand )
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		for(uint i = 0; i < vCS.size(); ++i)
 		{
-			CViewRenderer &rVR = *CViewRenderer::getInstance();
-			pCSLeftHand->setActionOnLeftClick("proc");
-			pCSLeftHand->setGrayed(false);
+			CDBCtrlSheet * pCS = vCS[i];
+			pCS->setActionOnLeftClick("proc");
+			pCS->setGrayed(false);
+		}
 
-			// if now there is nothing in left hand
-			if (newVal == 0)
+		// now there should be nothing in left hand
+		if (newVal != -1)
+			return;
+
+		CDBCtrlSheet * pCSRightHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_RIGHT));
+		if ( pCSRightHand && pCSRightHand->getSheetId() )
+		{
+			CCDBNodeLeaf *pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:0:INDEX_IN_BAG", false);
+			if (!pNL3)
+				return;
+
+			if (pNL3->getValue32() > 0)
 			{
-				// check if we clear display (have to manage 2 hands weapons for instance)
-				bool clearLeftHandDisplay = true;
-				CDBCtrlSheet * pCSRightHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_RIGHT));
-				if ( pCSRightHand && pCSRightHand->getSheetId() )
+				uint32 rightSheet = getInventory().getBagItemSheet(pNL3->getValue32()-1);
+				if (getInventory().is2HandItem(rightSheet))
 				{
-					CCDBNodeLeaf *pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:0:INDEX_IN_BAG", false);
-					if (pNL3)
+					if (getInventory().isRangeWeaponItem(rightSheet))
 					{
-						if (pNL3->getValue32() > 0)
+						for(uint i = 0; i < vCS.size(); ++i)
 						{
-							CCDBNodeLeaf *pNL4 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(pNL3->getValue32()-1) + ":SHEET", false);
-							if (pNL4)
-							{
-								uint32 rightSheet = pNL4->getValue32();
-								if (getInventory().is2HandItem(rightSheet))
-								{
-									if (getInventory().isRangeWeaponItem(rightSheet))
-									{
-										pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
-										pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
-									}
-									else
-									{
-										pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
-										pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
-										clearLeftHandDisplay = false;
-									}
-								}
-							}
+							CDBCtrlSheet * pCS = vCS[i];
+							pCS->setItemSlot(SLOTTYPE::stringToSlotType("AMMO"));
+							pCS->setTextureNoItem(rVR.getTextureIdFromName("W_AM_logo.tga"));
 						}
 					}
-				}
-				if(clearLeftHandDisplay)
-				{
-					if (pCS  != NULL) pCS->setSheet("");
-					if (pCS2 != NULL) pCS2->setSheet("");
+					else
+					{
+						for(uint i = 0; i < vCS.size(); ++i)
+						{
+							CDBCtrlSheet * pCS = vCS[i];
+							pCS->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
+							pCS->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
+						}
+						return;
+					}
 				}
 			}
 		}
+
+		// clear left hand
+		for(uint i = 0; i < vCS.size(); ++i)
+			vCS[i]->setSheet("");
 	}
 }
 
@@ -1445,7 +1442,6 @@ void CInventoryManager::CDBBagObs::update(ICDBNode* /* node */)
 bool CInventoryManager::autoEquip(sint bagEntryIndex, bool allowReplace)
 {
 	uint i;
-
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	IListSheetBase *pList = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_TEXT));
 	CDBCtrlSheet *pCSSrc = NULL;
@@ -1559,9 +1555,37 @@ static void checkEquipmentIntegrity(const string &equipVal)
 					// else update the reference
 					if (pNLBag->getOldValue32() == 0)
 					{
+						for (uint32 i = 0; i < MAX_HANDINV_ENTRIES; ++i)
+						{
+							CDBCtrlSheet *pCSDst = getInventory().getHandSheet(i);
+							if (pCSDst == NULL) continue;
+							string dstPath = getInventory().getDBIndexPath(pCSDst);
+							sint32 indexDstPath = NLGUI::CDBManager::getInstance()->getDbProp(dstPath+":INDEX_IN_BAG")->getValue16();
+
+							// Update the sheet id of the control sheet
+							if (indexDstPath == (sint32)indexInBag)
+							{
+								pCSDst->setSheetId(pNLBag->getValue32());
+							}
+						}
+
 						for (uint32 i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 						{
 							CDBCtrlSheet *pCSDst = getInventory().getEquipSheet(i);
+							if (pCSDst == NULL) continue;
+							string dstPath = getInventory().getDBIndexPath(pCSDst);
+							sint32 indexDstPath = NLGUI::CDBManager::getInstance()->getDbProp(dstPath+":INDEX_IN_BAG")->getValue16();
+
+							// Update the sheet id of the control sheet
+							if (indexDstPath == (sint32)indexInBag)
+							{
+								pCSDst->setSheetId(pNLBag->getValue32());
+							}
+						}
+
+						for (uint32 i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+						{
+							CDBCtrlSheet *pCSDst = getInventory().getHotbarSheet(i);
 							if (pCSDst == NULL) continue;
 							string dstPath = getInventory().getDBIndexPath(pCSDst);
 							sint32 indexDstPath = NLGUI::CDBManager::getInstance()->getDbProp(dstPath+":INDEX_IN_BAG")->getValue16();
@@ -1594,6 +1618,12 @@ void CInventoryManager::checkIndexInBagIntegrity()
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 	{
 		sTmp = string(LOCAL_INVENTORY) + ":EQUIP:" + toString(i);
+		checkEquipmentIntegrity(sTmp);
+	}
+
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+	{
+		sTmp = string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
 		checkEquipmentIntegrity(sTmp);
 	}
 }
@@ -2609,6 +2639,42 @@ bool CDBGroupListSheetFilterCLMSlot::CSheetChildFilter::isSheetValid(CDBGroupLis
 }
 
 // ***************************************************************************
+// CDBGroupListSheetFilterHotbarSlot
+// ***************************************************************************
+
+// ***************************************************************************
+bool CDBGroupListSheetFilterHotbarSlot::CSheetChildFilter::isSheetValid(CDBGroupListSheet *pFather)
+{	
+	if (CSheetChild::isSheetValid(pFather))
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		CDBCtrlSheet *clmCtrl = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+		if (!clmCtrl || !Ctrl) return false;
+		if (clmCtrl->getInventoryIndex() == INVENTORIES::exchange &&
+			Ctrl->getInventoryIndex() == INVENTORIES::exchange)
+		{
+			return false;
+		}
+		if ((clmCtrl->getType() == CCtrlSheetInfo::SheetType_Item) &&
+			(Ctrl->getType() == CCtrlSheetInfo::SheetType_Item) )
+		{
+			// Ok if we can put in the slot Ctrl in clmCtrl
+			if ( clmCtrl->canDropItem(Ctrl))
+			{
+				string sTmp = Ctrl->getSheet();
+				// Look if the source is locked
+				sTmp = sTmp.substr(sTmp.rfind(':')+1,sTmp.size());
+				sint32 nTmp;
+				fromString(sTmp, nTmp);
+				if (!getInventory().isBagItemWeared(nTmp) && getInventory().isUsableItem(Ctrl->getSheetId()) && Ctrl->getLockedByOwner() == 0)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+// ***************************************************************************
 // CDBGroupListSheetFilterExchangeable
 // ***************************************************************************
 
@@ -2960,7 +3026,7 @@ class CHandlerInvDropTo : public IActionHandler
 		{
 			CInterfaceGroup *pIG = CWidgetManager::getInstance()->getModalWindow();
 			if (pIG == NULL) return;
-			if (pIG->getId() != "ui:interface:bag_choose") return;
+			if (pIG->getId() != "ui:interface:bag_choose" && pIG->getId() != "ui:interface:hotbar_choose") return;
 			getInventory().beginDrag(NULL, CInventoryManager::TextList);
 
 			// Special case for choose in bag dialog
@@ -3121,7 +3187,6 @@ class CHandlerInvCannotDrop : public IActionHandler
 		// Is the dragged sheet comes from a slot
 		if (!getInventory().isDraggingFromTextList())
 		{
-			// Unequip
 			CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
 			string invPath = getInventory().getDBIndexPath(pCSDst);
 			getInventory().unequip(invPath);
@@ -3131,6 +3196,30 @@ class CHandlerInvCannotDrop : public IActionHandler
 };
 REGISTER_ACTION_HANDLER( CHandlerInvCannotDrop, "inv_cannot_drop" );
 
+// **********************************************************************************************************
+class CCanDropToHotbar : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		string	src = getParam(Params, "src");
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
+		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
+		CDBCtrlSheet *pCSDst =    dynamic_cast<CDBCtrlSheet*>(pCaller);
+		if (!pCSSrc || !pCSDst) return;
+
+		uint32 srcInventory = pCSSrc->getSecondIndexInDB();
+		if (
+			srcInventory == INVENTORIES::bag
+			&& getInventory().isInventoryAvailable((INVENTORIES::TInventory) pCSSrc->getSecondIndexInDB())
+			&& getInventory().isUsableItem(pCSSrc->getSheetId())
+		)
+		{
+			pCSDst->setCanDrop ( true );
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CCanDropToHotbar, "can_drop_to_hotbar");
 
 // ***************************************************************************
 class CHandlerInvAutoEquip : public IActionHandler
@@ -3374,6 +3463,19 @@ uint16				CInventoryManager::getItemSlotId(const std::string &itemDb, uint slotI
 
 	// and compress the slotId
 	return (inventoryIndex<<CItemInfos::SlotIdIndexBitSize) + slotIndex;
+}
+
+// ***************************************************************************
+uint32 CInventoryManager::getBagItemSheet(sint32 bagId) const
+{
+	if (bagId < 0)
+		return 0;
+
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(bagId) + ":SHEET", false);
+	if (!pNL) 
+		return 0;
+
+	return pNL->getValue32();
 }
 
 // ***************************************************************************
@@ -4021,6 +4123,36 @@ CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &s
 	if (sTmp == "inv_guild")	return InvGuild;
 	if (sTmp == "inv_room")		return InvRoom;
 	return InvUnknown;
+}
+
+// ***************************************************************************
+std::string CInventoryManager::invToDbPath(INVENTORIES::TInventory inventory)
+{
+	switch(inventory)
+	{
+		case INVENTORIES::bag:
+			return LIST_BAG_TEXT; break;
+		case INVENTORIES::pet_animal1:
+			return LIST_PA0_TEXT; break;
+		case INVENTORIES::pet_animal2:
+			return LIST_PA1_TEXT; break;
+		case INVENTORIES::pet_animal3:
+			return LIST_PA2_TEXT; break;
+		case INVENTORIES::pet_animal4:
+			return LIST_PA3_TEXT; break;
+		case INVENTORIES::pet_animal5:
+			return LIST_PA4_TEXT; break;
+		case INVENTORIES::pet_animal6:
+			return LIST_PA5_TEXT; break;
+		case INVENTORIES::pet_animal7:
+			return LIST_PA6_TEXT; break;
+		case INVENTORIES::player_room:
+			return LIST_ROOM_TEXT;break;
+		case INVENTORIES::guild:
+			return LIST_GUILD_TEXT; break;
+		default:
+			return "";
+	}
 }
 
 // ***************************************************************************
