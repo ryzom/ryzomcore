@@ -328,6 +328,7 @@ namespace NLGUI
 									sint32 wParent, sint32 hParent );
 		
 		void updateTooltipCoords();
+		void updateContextHelpColors();
 		
 		// Update tooltip coordinate if they need to be (getInvalidCoords() returns a value != 0)
 		void updateTooltipCoords(CCtrlBase *newCtrl);
@@ -489,8 +490,6 @@ namespace NLGUI
 		uint8 getGlobalContainerAlpha() const { return _GlobalContainerAlpha; }
 		uint8 getGlobalRolloverFactorContent() const { return _GlobalRolloverFactorContent; }
 		uint8 getGlobalRolloverFactorContainer() const { return _GlobalRolloverFactorContainer; }
-		uint8 getContextHelpContentAlpha() const { return _ContextHelpContentAlpha; }
-		uint8 getContextHelpContainerAlpha() const { return _ContextHelpContainerAlpha; }
 
 		void updateGlobalAlphas();
 		void resetGlobalAlphasProps();
@@ -610,16 +609,18 @@ namespace NLGUI
 		NLMISC::CCDBNodeLeaf *_GlobalContainerAlphaDB;
 		NLMISC::CCDBNodeLeaf *_GlobalContentRolloverFactorDB;
 		NLMISC::CCDBNodeLeaf *_GlobalContainerRolloverFactorDB;
-		NLMISC::CCDBNodeLeaf * _ContextHelpContentAlphaDB;
-		NLMISC::CCDBNodeLeaf * _ContextHelpContainerAlphaDB;
 		
 		uint8 _ContainerAlpha;
 		uint8 _GlobalContentAlpha;
 		uint8 _GlobalContainerAlpha;
 		uint8 _GlobalRolloverFactorContent;
 		uint8 _GlobalRolloverFactorContainer;
+
+		NLMISC::CCDBNodeLeaf *_ContextHelpContentAlphaDB;
+		NLMISC::CCDBNodeLeaf *_ContextHelpContainerColorDB;
+		NLMISC::CCDBNodeLeaf *_ContextHelpContainerAlphaDB;
+		NLMISC::CRGBA _ContextHelpContainerColor;
 		uint8 _ContextHelpContentAlpha;
-		uint8 _ContextHelpContainerAlpha;
 
 		bool _MouseHandlingEnabled;
 		
