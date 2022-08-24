@@ -25,29 +25,49 @@ if [[ "$COMMAND" == "ServiceStarted" ]]
 then
 	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
 	then
-		echo "nofitiy $(hostname -s):$2 started"
+		echo "Nofitiy $(hostname -s):$2 started"
 		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=started&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY&service=$2" & 2> /dev/null
+		echo $COMMAND > $SHARD_PATH/states/$2.txt
+	fi
+elif [[ "$COMMAND" == "ServiceStarting" ]]
+then
+	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
+	then
+		echo "Nofitiy $(hostname -s):$2 starting"
+		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=starting&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY&service=$2" & 2> /dev/null
+		echo $COMMAND > $SHARD_PATH/states/$2.txt
 	fi
 elif [[ "$COMMAND" == "ServiceStopped" ]]
 then
 	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
 	then
-		echo "nofitiy $(hostname -s):$2 stopped"
+		echo "Nofitiy $(hostname -s):$2 stopped"
 		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=stopped&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY&service=$2" & 2> /dev/null
+		echo $COMMAND > $SHARD_PATH/states/$2.txt
 	fi
 elif [[ "$COMMAND" == "ShardStopped" ]]
 then
 	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
 	then
-		echo "nofitiy $(hostname -s):$2 shard stopped"
+		echo "Nofitiy $(hostname -s):$2 shard stopped"
 		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=shard_stopped&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY" & 2> /dev/null
+		echo $COMMAND > $SHARD_PATH/states/shard.txt
 	fi
 elif [[ "$COMMAND" == "ShardStarted" ]]
 then
 	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
 	then
-		echo "nofitiy $(hostname -s):$2 shard started"
+		echo "Nofitiy $(hostname -s):$2 shard started"
 		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=shard_started&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY" & 2> /dev/null
+		echo $COMMAND > $SHARD_PATH/states/shard.txt
+	fi
+elif [[ "$COMMAND" == "ShardStarting" ]]
+then
+	if [[ ! -z "$NOTIFY_URL_SERVICE_RESTARTED" ]]
+	then
+		echo "Nofitiy $(hostname -s):$2 shard starting"
+		curl "$NOTIFY_URL_SERVICE_RESTARTED?command=shard_starting&shard=$(hostname -s)&apikey=$NOTIFY_URL_KEY" & 2> /dev/null
+		echo $COMMAND > $SHARD_PATH/states/shard.txt
 	fi
 fi
 

@@ -76,22 +76,48 @@ do
 
 
 			#notify start
-			if [ "$NAME" = "egs" ] || [ "$NAME" = "ios" ] || [ "$NAME" = "gpms" ]
+			if [[ "$NAME" == "ais_fyros" ]] || [[ "$NAME" == "ais_matis" ]] || [[ "$NAME" == "ais_tryker" ]] || [[ "$NAME" == "ais_roots" ]] || [[ "$NAME" == "ais_zorai" ]] || [[ "$NAME" == "ais_ark" ]]
 			then
+				touch "$SHARD_PATH/logs/ai_service_${NAME}.log"
+				"$CWD/wait_and_notify.sh" "$SHARD_PATH/logs/ai_service_${NAME}.log" "[[ARK]] AIS UP" $NAME 0 &
 				sleep 2
-			elif [ "$NAME" = "ais_fyros" ] || [ "$NAME" = "ais_matis" ] || [ "$NAME" = "ais_tryker" ] || [ "$NAME" = "ais_roots" ] || [ "$NAME" = "ais_zorai" ] || [ "$NAME" = "ais_ark" ]
+			elif [[ "$NAME" == "egs" ]]
 			then
-				sleep 4
+				touch "$SHARD_PATH/logs/entities_game_service.log"
+				"$CWD/wait_and_notify.sh" "$SHARD_PATH/logs/entities_game_service.log" "onAiInstanceReady :  AI Instance 1 is up" $NAME 0 &
+			elif [[ "$NAME" == "ios" ]]
+			then
+				touch "$SHARD_PATH/logs/input_output_service.log"
+				"$CWD/wait_and_notify.sh" "$SHARD_PATH/logs/input_output_service.log" "cbDynChatAddChan: add channel : FACTION_MARAUDER" $NAME 0 &
+			elif [[ "$NAME" == "gpms" ]]
+			then
+				touch "$SHARD_PATH/logs/gpm_service.log"
+				"$CWD/wait_and_notify.sh" "$SHARD_PATH/logs/gpm_service.log" "cbCreateIndoorUnit : MSG: Creating indoor unit 256" $NAME 0 &
+			else
+				declare -A ServiceLogs
+				ServiceLogs[aes] = "admin_executor_service.log"
+				ServiceLogs[bms_master] = "backup_service.log"
+				ServiceLogs[fes] = "frontend_service.log"
+				ServiceLogs[las] = "log_analyser_service.log"
+				ServiceLogs[lgs] = "logger_service.log"
+				ServiceLogs[mos] = "monitor_service.log"
+				ServiceLogs[ms] = "mirror_service.log"
+				ServiceLogs[ras] = "admin_service.log"
+				ServiceLogs[rns] = "naming_service.log"
+				ServiceLogs[rws] = "welcome_service.log"
+				ServiceLogs[sbs] = "session_browser_server.log"
+				ServiceLogs[su] = "shard_unifier_service.log"
+				ServiceLogs[ts] = "tick_service.log"
+
+				touch "$SHARD_PATH/logs/${ServiceLogs[$NAME]}"
+				"$CWD/wait_and_notify.sh" "$SHARD_PATH/logs/${ServiceLogs[$NAME]}" "SERVICE: Service ready" $NAME 2 &
 			fi
-
-			echo "notifying $CWD/notify.sh ServiceStarted $NAME"
-			"$CWD/notify.sh" ServiceStarted $NAME
-
+			
 			export LC_ALL=C; unset LANGUAGE
 
 			if [[ "$USE_GDB" == "1" ]]
 			then
-				if [ "$NAME" = "egs" ] || [ "$NAME" = "ios" ] || [ "$NAME" = "ais_fyros" ] || [ "$NAME" = "ais_matis" ] || [ "$NAME" = "ais_tryker" ] || [ "$NAME" = "ais_roots" ] || [ "$NAME" = "ais_zorai" ] || [ "$NAME" = "ais_ark" ] || [ "$NAME" = "gpms" ]
+				if [[ "$NAME" == "egs" ]] || [[ "$NAME" == "ios" ]] || [[ "$NAME" == "ais_fyros" ]] || [[ "$NAME" == "ais_matis" ]] || [[ "$NAME" == "ais_tryker" ]] || [[ "$NAME" == "ais_roots" ]] || [[ "$NAME" == "ais_zorai" ]] || [[ "$NAME" == "ais_ark" ]] || [[ "$NAME" == "gpms" ]]
 				then
 					echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SHARD_PATH/lib gdb -batch -ex 'set logging file $NAME/gdb_dump.txt' -ex 'set logging on' -ex 'run $CTRL_CMDLINE' -ex 'bt' $EXECUTABLE" > /tmp/run_$NAME
 				else
