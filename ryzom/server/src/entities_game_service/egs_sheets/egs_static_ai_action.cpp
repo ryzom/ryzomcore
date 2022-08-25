@@ -206,7 +206,7 @@ namespace DURATION_TYPE
 //--------------------------------------------------------------
 //					CCombatParams::serial
 //--------------------------------------------------------------
-void CCombatParams::serial(NLMISC::IStream &f)
+void CCombatParams::serial(class NLMISC::IStream &f)
 {
 	f.serial(Melee);
 	f.serial(SpeedFactor);
@@ -325,7 +325,7 @@ void CCombatParams::readForm (const UFormElm &root, const NLMISC::CSheetId &shee
 //--------------------------------------------------------------
 //					CSpellParams::serial
 //--------------------------------------------------------------
-void CSpellParams::serial(NLMISC::IStream &f)
+void CSpellParams::serial(class NLMISC::IStream &f)
 {
 	f.serial(CastingTime);
 	f.serial(PostActionTime);
@@ -336,6 +336,7 @@ void CSpellParams::serial(NLMISC::IStream &f)
 	f.serial(SpellParamValue2);
 	f.serial(SpellPowerFactor);
 	f.serial(SpellLevel);
+	f.serial(Fx);
 	if (f.isReading())
 	{
 		string val;
@@ -396,13 +397,22 @@ void CSpellParams::readForm (const UFormElm &root, const NLMISC::CSheetId &sheet
 	if (root.getValueByName( value, "Behaviour" ))
 		Behaviour = MBEHAV::stringToBehaviour(value);
 
+	string fx = ""; 
+	CSheetId fxSheet;
+	root.getValueByName( fx, "FX" );
+	if (!fx.empty())
+		fxSheet = CSheetId(fx);
+	Fx = fxSheet.asInt();
+	
 	// type specialization
 	switch(type)
 	{
+	
 	case AI_ACTION::DamageSpell:
 	case AI_ACTION::DoTSpell:
 		root.getValueByName( SpellParamValue2, "DamageVampirismValue" );
 	case AI_ACTION::ToxicCloud:
+		
 		root.getValueByName( SpellParamValue, "DamageValue" );
 		root.getValueByName( SpellPowerFactor, "SpellPowerFactor" );
 		if ( root.getValueByName( value, "DamageType" ) )
@@ -454,7 +464,7 @@ void COTSpellParams::readForm (const UFormElm &root, const NLMISC::CSheetId &she
 //--------------------------------------------------------------
 //					CEffectSpellParams::serial
 //--------------------------------------------------------------
-void CEffectSpellParams::serial(NLMISC::IStream &f)
+void CEffectSpellParams::serial(class NLMISC::IStream &f)
 {
 	CSpellParams::serial(f);
 
@@ -500,7 +510,7 @@ void CEffectSpellParams::readForm (const UFormElm &root, const NLMISC::CSheetId 
 //--------------------------------------------------------------
 //					COTEffectSpellParams::serial
 //--------------------------------------------------------------
-void COTEffectSpellParams::serial(NLMISC::IStream &f)
+void COTEffectSpellParams::serial(class NLMISC::IStream &f)
 {
 	COTSpellParams::serial(f);
 		
@@ -534,7 +544,7 @@ void COTEffectSpellParams::readForm (const UFormElm &root, const NLMISC::CSheetI
 //--------------------------------------------------------------
 //				TAiArea::serial
 //--------------------------------------------------------------
-void TAiArea::serial(NLMISC::IStream &f)
+void TAiArea::serial(class NLMISC::IStream &f)
 {		
 	if (f.isReading() )
 	{
@@ -674,7 +684,7 @@ void CStaticAiAction::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &fo
 //--------------------------------------------------------------
 //					CStaticAiAction::readGeorges
 //--------------------------------------------------------------
-void CStaticAiAction::serial(NLMISC::IStream &f)
+void CStaticAiAction::serial(class NLMISC::IStream &f)
 {
 	f.serial(_SheetId);
 	
@@ -723,3 +733,13 @@ void CStaticAiAction::serial(NLMISC::IStream &f)
 	_Area.serial(f);	
 	
 } // CStaticAiAction::serial //
+
+
+//--------------------------------------------------------------
+//						reloadSheet
+//--------------------------------------------------------------
+void CStaticAiAction::reloadSheet(const CStaticAiAction &o)
+{
+	// nothing special
+	*this= o;
+}

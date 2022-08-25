@@ -166,7 +166,7 @@ void CGameEventManager::createEventChannel()
 	{
 		ucstring title;
 		title.fromUtf8(_Name);
-		_ChannelEventId = DynChatEGS.addChan(_Name, title );
+		_ChannelEventId = DynChatEGS.addChan("FACTION_"+_Name, title );
 		// set historic size of the newly created channel
 		DynChatEGS.setHistoricSize( _ChannelEventId, EventChannelHistoricSize );
 	}

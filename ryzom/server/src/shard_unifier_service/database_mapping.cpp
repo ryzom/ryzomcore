@@ -1,6 +1,6 @@
 
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-	
+
 #include "database_mapping.h"
 
 namespace RSMGR
@@ -150,10 +150,10 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "INSERT INTO known_users (";
-		
+
 		qs += "owner, targer_user, targer_character, relation_type, comments";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_OwnerId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_TargetUser), connection)+"'";
@@ -187,7 +187,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_KnownUsers->begin(), parent->_KnownUsers->end(), CKnownUserPtr(this, __FILE__, __LINE__)) == parent->_KnownUsers->end());
 						parent->_KnownUsers->push_back(CKnownUserPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -200,7 +200,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_KnownBy->begin(), parent->_KnownBy->end(), CKnownUserPtr(this, __FILE__, __LINE__)) == parent->_KnownBy->end());
 						parent->_KnownBy->push_back(CKnownUserPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -220,7 +220,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE known_users SET ";
-		
+
 		qs += "owner = '"+MSW::escapeString(NLMISC::toString(_OwnerId), connection)+"'";
 		qs += ", ";
 		qs += "targer_user = '"+MSW::escapeString(NLMISC::toString(_TargetUser), connection)+"'";
@@ -234,7 +234,7 @@ namespace RSMGR
 		qs += "comments = '"+MSW::escapeString(NLMISC::toString(_Comments), connection)+"'";
 
 		qs += " WHERE Id = '"+NLMISC::toString(_RelationId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -254,9 +254,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM known_users ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(_RelationId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -268,7 +268,7 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CRingUserPtr parent(CRingUser::loadFromCache(_OwnerId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_KnownUsers != NULL)
@@ -279,10 +279,10 @@ namespace RSMGR
 						{
 							parent->_KnownUsers->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				{
 					CCharacterPtr parent(CCharacter::loadFromCache(_TargetUser, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_KnownBy != NULL)
@@ -293,12 +293,12 @@ namespace RSMGR
 						{
 							parent->_KnownBy->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -316,9 +316,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM known_users ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -525,11 +525,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "Id, owner, targer_user, targer_character, relation_type, comments";
 
 		qs += " FROM known_users";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
 	CKnownUserPtr ret;
 		if (!connection.query(qs))
@@ -590,21 +590,21 @@ namespace RSMGR
 			CKnownUser *ret = new CKnownUser();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_RelationId);
-					
+
 			result->getField(1, ret->_OwnerId);
-					
+
 			result->getField(2, ret->_TargetUser);
-					
+
 			result->getField(3, ret->_TargetCharacter);
-					
+
 			{
 				std::string s;
 				result->getField(4, s);
 				ret->_Relation = TKnownUserRelation(s);
 			}
-					
+
 			result->getField(5, ret->_Comments);
 					CKnownUser *inCache = loadFromCache(ret->_RelationId, true);
 			if (inCache != NULL)
@@ -650,21 +650,21 @@ namespace RSMGR
 			CKnownUser *ret = new CKnownUser();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_RelationId);
-					
+
 			result->getField(1, ret->_OwnerId);
-					
+
 			result->getField(2, ret->_TargetUser);
-					
+
 			result->getField(3, ret->_TargetCharacter);
-					
+
 			{
 				std::string s;
 				result->getField(4, s);
 				ret->_Relation = TKnownUserRelation(s);
 			}
-					
+
 			result->getField(5, ret->_Comments);
 					CKnownUser *inCache = loadFromCache(ret->_RelationId, true);
 			if (inCache != NULL)
@@ -811,10 +811,10 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "INSERT INTO session_participant (";
-		
+
 		qs += "session_id, char_id, status, kicked";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_SessionId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_CharId), connection)+"'";
@@ -846,7 +846,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_SessionParticipants->begin(), parent->_SessionParticipants->end(), CSessionParticipantPtr(this, __FILE__, __LINE__)) == parent->_SessionParticipants->end());
 						parent->_SessionParticipants->push_back(CSessionParticipantPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -859,7 +859,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_SessionParticipants->begin(), parent->_SessionParticipants->end(), CSessionParticipantPtr(this, __FILE__, __LINE__)) == parent->_SessionParticipants->end());
 						parent->_SessionParticipants->push_back(CSessionParticipantPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -879,7 +879,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE session_participant SET ";
-		
+
 		qs += "session_id = '"+MSW::escapeString(NLMISC::toString(_SessionId), connection)+"'";
 		qs += ", ";
 		qs += "char_id = '"+MSW::escapeString(NLMISC::toString(_CharId), connection)+"'";
@@ -891,7 +891,7 @@ namespace RSMGR
 		qs += "kicked = '"+MSW::escapeString(NLMISC::toString(_Kicked), connection)+"'";
 
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -911,9 +911,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM session_participant ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -925,7 +925,7 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CCharacterPtr parent(CCharacter::loadFromCache(_CharId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_SessionParticipants != NULL)
@@ -936,10 +936,10 @@ namespace RSMGR
 						{
 							parent->_SessionParticipants->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				{
 					CSessionPtr parent(CSession::loadFromCache(_SessionId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_SessionParticipants != NULL)
@@ -950,12 +950,12 @@ namespace RSMGR
 						{
 							parent->_SessionParticipants->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -973,9 +973,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM session_participant ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -1182,11 +1182,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "Id, session_id, char_id, status, kicked";
 
 		qs += " FROM session_participant";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
 	CSessionParticipantPtr ret;
 		if (!connection.query(qs))
@@ -1246,19 +1246,19 @@ namespace RSMGR
 			CSessionParticipant *ret = new CSessionParticipant();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_SessionId);
-					
+
 			result->getField(2, ret->_CharId);
-					
+
 			{
 				std::string s;
 				result->getField(3, s);
 				ret->_Status = TSessionPartStatus(s);
 			}
-					
+
 			result->getField(4, ret->_Kicked);
 					CSessionParticipant *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -1304,19 +1304,19 @@ namespace RSMGR
 			CSessionParticipant *ret = new CSessionParticipant();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_SessionId);
-					
+
 			result->getField(2, ret->_CharId);
-					
+
 			{
 				std::string s;
 				result->getField(3, s);
 				ret->_Status = TSessionPartStatus(s);
 			}
-					
+
 			result->getField(4, ret->_Kicked);
 					CSessionParticipant *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -1472,10 +1472,10 @@ namespace RSMGR
 		nlassert(_CharId != 0);
 		std::string qs;
 		qs = "INSERT INTO characters (";
-		
+
 		qs += "char_id, char_name, user_id, guild_id, best_combat_level, home_mainland_session_id, ring_access, race, civilisation, cult, current_session, rrp_am, rrp_masterless, rrp_author, newcomer, creation_date, last_played_date";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_CharId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_CharName), connection)+"'";
@@ -1534,7 +1534,7 @@ namespace RSMGR
 				{
 
 						nlverify(parent->_Characters->insert(std::make_pair(getObjectId(), CCharacterPtr(this, __FILE__, __LINE__))).second);
- 
+
 				}
 			}
 
@@ -1547,7 +1547,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_Characters->begin(), parent->_Characters->end(), CCharacterPtr(this, __FILE__, __LINE__)) == parent->_Characters->end());
 						parent->_Characters->push_back(CCharacterPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -1567,7 +1567,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE characters SET ";
-		
+
 		qs += "char_id = '"+MSW::escapeString(NLMISC::toString(_CharId), connection)+"'";
 		qs += ", ";
 		qs += "char_name = '"+MSW::escapeString(NLMISC::toString(_CharName), connection)+"'";
@@ -1609,7 +1609,7 @@ namespace RSMGR
 		qs += "last_played_date = '"+MSW::encodeDate(_LastPlayedDate)+"'";
 
 		qs += " WHERE char_id = '"+NLMISC::toString(_CharId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -1629,9 +1629,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM characters ";
-		
+
 		qs += " WHERE char_id = '"+NLMISC::toString(_CharId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -1640,41 +1640,44 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionParticipants
-					nlassert(loadSessionParticipants(connection, __FILE__, __LINE__));
-
-					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
-
-					while (!childs.empty())
+					if (loadSessionParticipants(connection, __FILE__, __LINE__))
 					{
-						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
+
+						while (!childs.empty())
+						{
+							getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
 
 				{
 					// cascading deletion for vector child KnownBy
-					nlassert(loadKnownBy(connection, __FILE__, __LINE__));
-
-					const std::vector < CKnownUserPtr > & childs = getKnownBy();
-
-					while (!childs.empty())
+					if (loadKnownBy(connection, __FILE__, __LINE__))
 					{
-						getKnownByByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CKnownUserPtr > & childs = getKnownBy();
+
+						while (!childs.empty())
+						{
+							getKnownByByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
 
 				{
 					// unreference (and update) for vector child PlayerRatings
-					nlassert(loadPlayerRatings(connection, __FILE__, __LINE__));
-
-					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
-
-					for (uint i=0; i < childs.size(); ++i)
+					if (loadPlayerRatings(connection, __FILE__, __LINE__))
 					{
-						
-						getPlayerRatingsByIndex(i)->setAuthor(0);
-						getPlayerRatingsByIndex(i)->update(connection);
+						const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
+
+						for (uint i=0; i < childs.size(); ++i)
+						{
+							
+							getPlayerRatingsByIndex(i)->setAuthor(0);
+							getPlayerRatingsByIndex(i)->update(connection);
+						}
 					}
 				}
 
@@ -1683,17 +1686,17 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CRingUserPtr parent(CRingUser::loadFromCache(_UserId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_Characters != NULL)
 					{
 
 						parent->_Characters->erase(getObjectId());
- 
+
 					}
 				}
-				
+
 				{
 					CGuildPtr parent(CGuild::loadFromCache(_GuildId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_Characters != NULL)
@@ -1704,12 +1707,12 @@ namespace RSMGR
 						{
 							parent->_Characters->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -1727,9 +1730,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM characters ";
-		
+
 		qs += " WHERE char_id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -1936,11 +1939,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "char_id, char_name, user_id, guild_id, best_combat_level, home_mainland_session_id, ring_access, race, civilisation, cult, current_session, rrp_am, rrp_masterless, rrp_author, newcomer, creation_date, last_played_date";
 
 		qs += " FROM characters";
-		
+
 		qs += " WHERE char_id = '"+NLMISC::toString(id)+"'";
 	CCharacterPtr ret;
 		if (!connection.query(qs))
@@ -2020,51 +2023,51 @@ namespace RSMGR
 			CCharacter *ret = new CCharacter();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_CharId);
-					
+
 			result->getField(1, ret->_CharName);
-					
+
 			result->getField(2, ret->_UserId);
-					
+
 			result->getField(3, ret->_GuildId);
-					
+
 			result->getField(4, ret->_BestCombatLevel);
-					
+
 			result->getField(5, ret->_HomeMainlandSessionId);
-					
+
 			result->getField(6, ret->_RingAccess);
-					
+
 			{
 				std::string s;
 				result->getField(7, s);
 				ret->_Race = CHARSYNC::TRace(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(8, s);
 				ret->_Civilisation = CHARSYNC::TCivilisation(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(9, s);
 				ret->_Cult = CHARSYNC::TCult(s);
 			}
-					
+
 			result->getField(10, ret->_CurrentSession);
-					
+
 			result->getField(11, ret->_RRPAM);
-					
+
 			result->getField(12, ret->_RRPMasterless);
-					
+
 			result->getField(13, ret->_RRPAuthor);
-					
+
 			result->getField(14, ret->_Newcomer);
-					
+
 			result->getDateField(15, ret->_CreationDate);
-					
+
 			result->getDateField(16, ret->_LastPlayedDate);
 					CCharacter *inCache = loadFromCache(ret->_CharId, true);
 			if (inCache != NULL)
@@ -2110,51 +2113,51 @@ namespace RSMGR
 			CCharacter *ret = new CCharacter();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_CharId);
-					
+
 			result->getField(1, ret->_CharName);
-					
+
 			result->getField(2, ret->_UserId);
-					
+
 			result->getField(3, ret->_GuildId);
-					
+
 			result->getField(4, ret->_BestCombatLevel);
-					
+
 			result->getField(5, ret->_HomeMainlandSessionId);
-					
+
 			result->getField(6, ret->_RingAccess);
-					
+
 			{
 				std::string s;
 				result->getField(7, s);
 				ret->_Race = CHARSYNC::TRace(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(8, s);
 				ret->_Civilisation = CHARSYNC::TCivilisation(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(9, s);
 				ret->_Cult = CHARSYNC::TCult(s);
 			}
-					
+
 			result->getField(10, ret->_CurrentSession);
-					
+
 			result->getField(11, ret->_RRPAM);
-					
+
 			result->getField(12, ret->_RRPMasterless);
-					
+
 			result->getField(13, ret->_RRPAuthor);
-					
+
 			result->getField(14, ret->_Newcomer);
-					
+
 			result->getDateField(15, ret->_CreationDate);
-					
+
 			result->getDateField(16, ret->_LastPlayedDate);
 					CCharacter *inCache = loadFromCache(ret->_CharId, true);
 			if (inCache != NULL)
@@ -2227,7 +2230,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CCharacter::loadSessionParticipants(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -2278,7 +2281,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CCharacter::loadKnownBy(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -2329,7 +2332,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CCharacter::loadPlayerRatings(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -2380,7 +2383,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	void CRingUserPtr::linkPtr()
 	{
 		nlassert(_NextPtr == NULL);
@@ -2514,10 +2517,10 @@ namespace RSMGR
 		nlassert(_UserId != 0);
 		std::string qs;
 		qs = "INSERT INTO ring_users (";
-		
+
 		qs += "user_id, user_name, current_char, current_session, current_activity, current_status, public_level, account_type, content_access_level, description, lang, cookie, current_domain_id, add_privileges";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_UserId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_UserName), connection)+"'";
@@ -2582,7 +2585,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE ring_users SET ";
-		
+
 		qs += "user_id = '"+MSW::escapeString(NLMISC::toString(_UserId), connection)+"'";
 		qs += ", ";
 		qs += "user_name = '"+MSW::escapeString(NLMISC::toString(_UserName), connection)+"'";
@@ -2622,7 +2625,7 @@ namespace RSMGR
 		qs += "add_privileges = '"+MSW::escapeString(NLMISC::toString(_AddedPrivileges), connection)+"'";
 
 		qs += " WHERE user_id = '"+NLMISC::toString(_UserId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -2642,9 +2645,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM ring_users ";
-		
+
 		qs += " WHERE user_id = '"+NLMISC::toString(_UserId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -2653,62 +2656,67 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child KnownUsers
-					nlassert(loadKnownUsers(connection, __FILE__, __LINE__));
-
-					const std::vector < CKnownUserPtr > & childs = getKnownUsers();
-
-					while (!childs.empty())
+					if (loadKnownUsers(connection, __FILE__, __LINE__))
 					{
-						getKnownUsersByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CKnownUserPtr > & childs = getKnownUsers();
+
+						while (!childs.empty())
+						{
+							getKnownUsersByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
 
 				{
 					// cascading deletion for map child Characters
-					nlassert(loadCharacters(connection, __FILE__, __LINE__));
-
-					const std::map < uint32, CCharacterPtr > & childs = getCharacters();
-
-					while (!childs.empty())
+					if (loadCharacters(connection, __FILE__, __LINE__))
 					{
-						getCharactersById(childs.begin()->first)->remove(connection);
+						const std::map < uint32, CCharacterPtr > & childs = getCharacters();
+
+						while (!childs.empty())
+						{
+							getCharactersById(childs.begin()->first)->remove(connection);
+						}
 					}
 				}
 
 				{
 					// cascading deletion for single child GMStatus
-					nlassert(loadGMStatus(connection, __FILE__, __LINE__));
-
-					if (getGMStatus() != NULL)
-						getGMStatus()->remove(connection);
+					if (loadGMStatus(connection, __FILE__, __LINE__))
+					{
+						if (getGMStatus() != NULL)
+							getGMStatus()->remove(connection);
+					}
 				}
 
 				{
 					// unreference (and update) for vector child Folders
-					nlassert(loadFolders(connection, __FILE__, __LINE__));
-
-					const std::vector < CFolderPtr > & childs = getFolders();
-
-					for (uint i=0; i < childs.size(); ++i)
+					if (loadFolders(connection, __FILE__, __LINE__))
 					{
-						
-						getFoldersByIndex(i)->setAuthor(0);
-						getFoldersByIndex(i)->update(connection);
+						const std::vector < CFolderPtr > & childs = getFolders();
+
+						for (uint i=0; i < childs.size(); ++i)
+						{
+							
+							getFoldersByIndex(i)->setAuthor(0);
+							getFoldersByIndex(i)->update(connection);
+						}
 					}
 				}
 
 				{
 					// unreference (and update) for vector child FolderAccess
-					nlassert(loadFolderAccess(connection, __FILE__, __LINE__));
-
-					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
-
-					for (uint i=0; i < childs.size(); ++i)
+					if (loadFolderAccess(connection, __FILE__, __LINE__))
 					{
-						
-						getFolderAccessByIndex(i)->setUserId(0);
-						getFolderAccessByIndex(i)->update(connection);
+						const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
+
+						for (uint i=0; i < childs.size(); ++i)
+						{
+							
+							getFolderAccessByIndex(i)->setUserId(0);
+							getFolderAccessByIndex(i)->update(connection);
+						}
 					}
 				}
 
@@ -2717,9 +2725,9 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -2737,9 +2745,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM ring_users ";
-		
+
 		qs += " WHERE user_id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -2946,11 +2954,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "user_id, user_name, current_char, current_session, current_activity, current_status, public_level, account_type, content_access_level, description, lang, cookie, current_domain_id, add_privileges";
 
 		qs += " FROM ring_users";
-		
+
 		qs += " WHERE user_id = '"+NLMISC::toString(id)+"'";
 	CRingUserPtr ret;
 		if (!connection.query(qs))
@@ -3062,7 +3070,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CRingUser::loadCharacters(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -3102,7 +3110,7 @@ namespace RSMGR
 		return const_cast< CCharacterPtr & >(it->second);
 	}
 
-	
+
 	bool CRingUser::loadFolders(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -3153,7 +3161,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CRingUser::loadFolderAccess(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -3204,7 +3212,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CRingUser::loadGMStatus(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		if (_GMStatusLoaded)
@@ -3355,13 +3363,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "INSERT INTO sessions (";
-		
+
 		qs += "session_type, title, owner, plan_date, start_date, description, orientation, level, rule_type, access_type, state, host_shard_id, subscription_slots, reserved_slots, estimated_duration, final_duration, folder_id, lang, icone, anim_mode, race_filter, religion_filter, guild_filter, shard_filter, level_filter, subscription_closed, newcomer";
 		qs += ") VALUES (";
-		
-		qs += _SessionType.isValid()
-			? "'"+_SessionType.toString()+"'"
-			: "DEFAULT(session_type)";
+
+		qs += "'"+_SessionType.toString()+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3452,7 +3458,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_Sessions->begin(), parent->_Sessions->end(), CSessionPtr(this, __FILE__, __LINE__)) == parent->_Sessions->end());
 						parent->_Sessions->push_back(CSessionPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -3465,7 +3471,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_Sessions->begin(), parent->_Sessions->end(), CSessionPtr(this, __FILE__, __LINE__)) == parent->_Sessions->end());
 						parent->_Sessions->push_back(CSessionPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -3485,10 +3491,8 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE sessions SET ";
-		
-		qs += "session_type = " + (_SessionType.isValid()
-			? "'"+_SessionType.toString()+"'"
-			: "DEFAULT(session_type)");
+
+		qs += "session_type = '"+_SessionType.toString()+"'";
 		qs += ", ";
 		qs += "title = '"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3559,7 +3563,7 @@ namespace RSMGR
 		qs += "newcomer = '"+MSW::escapeString(NLMISC::toString(_Newcomer), connection)+"'";
 
 		qs += " WHERE session_id = '"+NLMISC::toString(_SessionId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -3579,9 +3583,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM sessions ";
-		
+
 		qs += " WHERE session_id = '"+NLMISC::toString(_SessionId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -3590,39 +3594,42 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionParticipants
-					nlassert(loadSessionParticipants(connection, __FILE__, __LINE__));
-
-					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
-
-					while (!childs.empty())
+					if (loadSessionParticipants(connection, __FILE__, __LINE__))
 					{
-						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
+
+						while (!childs.empty())
+						{
+							getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
 
 				{
 					// cascading deletion for vector child GuildInvites
-					nlassert(loadGuildInvites(connection, __FILE__, __LINE__));
-
-					const std::vector < CGuildInvitePtr > & childs = getGuildInvites();
-
-					while (!childs.empty())
+					if (loadGuildInvites(connection, __FILE__, __LINE__))
 					{
-						getGuildInvitesByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CGuildInvitePtr > & childs = getGuildInvites();
+
+						while (!childs.empty())
+						{
+							getGuildInvitesByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
 
 				{
 					// cascading deletion for vector child JournalEntries
-					nlassert(loadJournalEntries(connection, __FILE__, __LINE__));
-
-					const std::vector < CJournalEntryPtr > & childs = getJournalEntries();
-
-					while (!childs.empty())
+					if (loadJournalEntries(connection, __FILE__, __LINE__))
 					{
-						getJournalEntriesByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CJournalEntryPtr > & childs = getJournalEntries();
+
+						while (!childs.empty())
+						{
+							getJournalEntriesByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
@@ -3632,7 +3639,7 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CCharacterPtr parent(CCharacter::loadFromCache(_OwnerId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_Sessions != NULL)
@@ -3643,10 +3650,10 @@ namespace RSMGR
 						{
 							parent->_Sessions->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				{
 					CFolderPtr parent(CFolder::loadFromCache(_FolderId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_Sessions != NULL)
@@ -3657,12 +3664,12 @@ namespace RSMGR
 						{
 							parent->_Sessions->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -3680,9 +3687,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM sessions ";
-		
+
 		qs += " WHERE session_id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -3889,11 +3896,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "session_id, session_type, title, owner, plan_date, start_date, description, orientation, level, rule_type, access_type, state, host_shard_id, subscription_slots, reserved_slots, estimated_duration, final_duration, folder_id, lang, icone, anim_mode, race_filter, religion_filter, guild_filter, shard_filter, level_filter, subscription_closed, newcomer";
 
 		qs += " FROM sessions";
-		
+
 		qs += " WHERE session_id = '"+NLMISC::toString(id)+"'";
 	CSessionPtr ret;
 		if (!connection.query(qs))
@@ -4024,113 +4031,113 @@ namespace RSMGR
 			CSession *ret = new CSession();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_SessionId);
-					
+
 			{
 				std::string s;
 				result->getField(1, s);
 				ret->_SessionType = TSessionType(s);
 			}
-					
+
 			result->getField(2, ret->_Title);
-					
+
 			result->getField(3, ret->_OwnerId);
-					
+
 			result->getDateField(4, ret->_PlanDate);
-					
+
 			result->getDateField(5, ret->_StartDate);
-					
+
 			result->getField(6, ret->_Description);
-					
+
 			{
 				std::string s;
 				result->getField(7, s);
 				ret->_Orientation = TSessionOrientation(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(8, s);
 				ret->_Level = R2::TSessionLevel(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(9, s);
 				ret->_RuleType = TRuleType(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(10, s);
 				ret->_AccessType = TAccessType(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(11, s);
 				ret->_State = TSessionState(s);
 			}
-					
+
 			result->getField(12, ret->_HostShardId);
-					
+
 			result->getField(13, ret->_SubscriptionSlots);
-					
+
 			result->getField(14, ret->_ReservedSlots);
-					
+
 			{
 				std::string s;
 				result->getField(15, s);
 				ret->_EstimatedDuration = TEstimatedDuration(s);
 			}
-					
+
 			result->getField(16, ret->_FinalDuration);
-					
+
 			result->getField(17, ret->_FolderId);
-					
+
 			result->getField(18, ret->_Lang);
-					
+
 			result->getField(19, ret->_Icone);
-					
+
 			{
 				std::string s;
 				result->getField(20, s);
 				ret->_AnimMode = TAnimMode(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(21, s);
 				ret->_RaceFilter = TRaceFilter(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(22, s);
 				ret->_ReligionFilter = TReligionFilter(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(23, s);
 				ret->_GuildFilter = TGuildFilter(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(24, s);
 				ret->_ShardFilter = TShardFilter(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(25, s);
 				ret->_LevelFilter = TLevelFilter(s);
 			}
-					
+
 			result->getField(26, ret->_SubscriptionClosed);
-					
+
 			result->getField(27, ret->_Newcomer);
 					CSession *inCache = loadFromCache(ret->_SessionId, true);
 			if (inCache != NULL)
@@ -4176,113 +4183,113 @@ namespace RSMGR
 			CSession *ret = new CSession();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_SessionId);
-					
+
 			{
 				std::string s;
 				result->getField(1, s);
 				ret->_SessionType = TSessionType(s);
 			}
-					
+
 			result->getField(2, ret->_Title);
-					
+
 			result->getField(3, ret->_OwnerId);
-					
+
 			result->getDateField(4, ret->_PlanDate);
-					
+
 			result->getDateField(5, ret->_StartDate);
-					
+
 			result->getField(6, ret->_Description);
-					
+
 			{
 				std::string s;
 				result->getField(7, s);
 				ret->_Orientation = TSessionOrientation(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(8, s);
 				ret->_Level = R2::TSessionLevel(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(9, s);
 				ret->_RuleType = TRuleType(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(10, s);
 				ret->_AccessType = TAccessType(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(11, s);
 				ret->_State = TSessionState(s);
 			}
-					
+
 			result->getField(12, ret->_HostShardId);
-					
+
 			result->getField(13, ret->_SubscriptionSlots);
-					
+
 			result->getField(14, ret->_ReservedSlots);
-					
+
 			{
 				std::string s;
 				result->getField(15, s);
 				ret->_EstimatedDuration = TEstimatedDuration(s);
 			}
-					
+
 			result->getField(16, ret->_FinalDuration);
-					
+
 			result->getField(17, ret->_FolderId);
-					
+
 			result->getField(18, ret->_Lang);
-					
+
 			result->getField(19, ret->_Icone);
-					
+
 			{
 				std::string s;
 				result->getField(20, s);
 				ret->_AnimMode = TAnimMode(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(21, s);
 				ret->_RaceFilter = TRaceFilter(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(22, s);
 				ret->_ReligionFilter = TReligionFilter(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(23, s);
 				ret->_GuildFilter = TGuildFilter(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(24, s);
 				ret->_ShardFilter = TShardFilter(s);
 			}
-					
+
 			{
 				std::string s;
 				result->getField(25, s);
 				ret->_LevelFilter = TLevelFilter(s);
 			}
-					
+
 			result->getField(26, ret->_SubscriptionClosed);
-					
+
 			result->getField(27, ret->_Newcomer);
 					CSession *inCache = loadFromCache(ret->_SessionId, true);
 			if (inCache != NULL)
@@ -4355,7 +4362,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CSession::loadGuildInvites(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -4406,7 +4413,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CSession::loadJournalEntries(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -4457,7 +4464,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	void CShardPtr::linkPtr()
 	{
 		nlassert(_NextPtr == NULL);
@@ -4585,10 +4592,10 @@ namespace RSMGR
 		nlassert(_ShardId != 0);
 		std::string qs;
 		qs = "INSERT INTO shard (";
-		
+
 		qs += "shard_id, WSOnline, RequiredState, MOTD";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_ShardId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_WSOnline), connection)+"'";
@@ -4625,7 +4632,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE shard SET ";
-		
+
 		qs += "shard_id = '"+MSW::escapeString(NLMISC::toString(_ShardId), connection)+"'";
 		qs += ", ";
 		qs += "WSOnline = '"+MSW::escapeString(NLMISC::toString(_WSOnline), connection)+"'";
@@ -4637,7 +4644,7 @@ namespace RSMGR
 		qs += "MOTD = '"+MSW::escapeString(NLMISC::toString(_MOTD), connection)+"'";
 
 		qs += " WHERE shard_id = '"+NLMISC::toString(_ShardId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -4657,9 +4664,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM shard ";
-		
+
 		qs += " WHERE shard_id = '"+NLMISC::toString(_ShardId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -4671,9 +4678,9 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -4691,9 +4698,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM shard ";
-		
+
 		qs += " WHERE shard_id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -4900,11 +4907,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "shard_id, WSOnline, RequiredState, MOTD";
 
 		qs += " FROM shard";
-		
+
 		qs += " WHERE shard_id = '"+NLMISC::toString(id)+"'";
 	CShardPtr ret;
 		if (!connection.query(qs))
@@ -4979,7 +4986,7 @@ namespace RSMGR
 		return const_cast< CGuildPtr & >(it->second);
 	}
 
-	
+
 	void CGuildPtr::linkPtr()
 	{
 		nlassert(_NextPtr == NULL);
@@ -5109,10 +5116,10 @@ namespace RSMGR
 		nlassert(_GuildId != 0);
 		std::string qs;
 		qs = "INSERT INTO guilds (";
-		
+
 		qs += "guild_id, guild_name, shard_id";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_GuildId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_GuildName), connection)+"'";
@@ -5137,7 +5144,7 @@ namespace RSMGR
 				{
 
 						nlverify(parent->_Guilds->insert(std::make_pair(getObjectId(), CGuildPtr(this, __FILE__, __LINE__))).second);
- 
+
 				}
 			}
 
@@ -5157,7 +5164,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE guilds SET ";
-		
+
 		qs += "guild_id = '"+MSW::escapeString(NLMISC::toString(_GuildId), connection)+"'";
 		qs += ", ";
 		qs += "guild_name = '"+MSW::escapeString(NLMISC::toString(_GuildName), connection)+"'";
@@ -5165,7 +5172,7 @@ namespace RSMGR
 		qs += "shard_id = '"+MSW::escapeString(NLMISC::toString(_ShardId), connection)+"'";
 
 		qs += " WHERE guild_id = '"+NLMISC::toString(_GuildId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -5185,9 +5192,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM guilds ";
-		
+
 		qs += " WHERE guild_id = '"+NLMISC::toString(_GuildId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -5196,28 +5203,30 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child Invites
-					nlassert(loadInvites(connection, __FILE__, __LINE__));
-
-					const std::vector < CGuildInvitePtr > & childs = getInvites();
-
-					while (!childs.empty())
+					if (loadInvites(connection, __FILE__, __LINE__))
 					{
-						getInvitesByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CGuildInvitePtr > & childs = getInvites();
+
+						while (!childs.empty())
+						{
+							getInvitesByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
 
 				{
 					// unreference (and update) for vector child Characters
-					nlassert(loadCharacters(connection, __FILE__, __LINE__));
-
-					const std::vector < CCharacterPtr > & childs = getCharacters();
-
-					for (uint i=0; i < childs.size(); ++i)
+					if (loadCharacters(connection, __FILE__, __LINE__))
 					{
-						
-						getCharactersByIndex(i)->setGuildId(0);
-						getCharactersByIndex(i)->update(connection);
+						const std::vector < CCharacterPtr > & childs = getCharacters();
+
+						for (uint i=0; i < childs.size(); ++i)
+						{
+							
+							getCharactersByIndex(i)->setGuildId(0);
+							getCharactersByIndex(i)->update(connection);
+						}
 					}
 				}
 
@@ -5226,19 +5235,19 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CShardPtr parent(CShard::loadFromCache(_ShardId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_Guilds != NULL)
 					{
 
 						parent->_Guilds->erase(getObjectId());
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -5256,9 +5265,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM guilds ";
-		
+
 		qs += " WHERE guild_id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -5465,11 +5474,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "guild_id, guild_name, shard_id";
 
 		qs += " FROM guilds";
-		
+
 		qs += " WHERE guild_id = '"+NLMISC::toString(id)+"'";
 	CGuildPtr ret;
 		if (!connection.query(qs))
@@ -5523,11 +5532,11 @@ namespace RSMGR
 			CGuild *ret = new CGuild();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_GuildId);
-					
+
 			result->getField(1, ret->_GuildName);
-					
+
 			result->getField(2, ret->_ShardId);
 					CGuild *inCache = loadFromCache(ret->_GuildId, true);
 			if (inCache != NULL)
@@ -5600,7 +5609,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CGuild::loadInvites(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -5651,7 +5660,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	void CGuildInvitePtr::linkPtr()
 	{
 		nlassert(_NextPtr == NULL);
@@ -5776,10 +5785,10 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "INSERT INTO guild_invites (";
-		
+
 		qs += "guild_id, session_id";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_GuildId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_SessionId), connection)+"'";
@@ -5805,7 +5814,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_Invites->begin(), parent->_Invites->end(), CGuildInvitePtr(this, __FILE__, __LINE__)) == parent->_Invites->end());
 						parent->_Invites->push_back(CGuildInvitePtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -5818,7 +5827,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_GuildInvites->begin(), parent->_GuildInvites->end(), CGuildInvitePtr(this, __FILE__, __LINE__)) == parent->_GuildInvites->end());
 						parent->_GuildInvites->push_back(CGuildInvitePtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -5838,13 +5847,13 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE guild_invites SET ";
-		
+
 		qs += "guild_id = '"+MSW::escapeString(NLMISC::toString(_GuildId), connection)+"'";
 		qs += ", ";
 		qs += "session_id = '"+MSW::escapeString(NLMISC::toString(_SessionId), connection)+"'";
 
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -5864,9 +5873,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM guild_invites ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -5878,7 +5887,7 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CGuildPtr parent(CGuild::loadFromCache(_GuildId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_Invites != NULL)
@@ -5889,10 +5898,10 @@ namespace RSMGR
 						{
 							parent->_Invites->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				{
 					CSessionPtr parent(CSession::loadFromCache(_SessionId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_GuildInvites != NULL)
@@ -5903,12 +5912,12 @@ namespace RSMGR
 						{
 							parent->_GuildInvites->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -5926,9 +5935,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM guild_invites ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -6135,11 +6144,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "Id, guild_id, session_id";
 
 		qs += " FROM guild_invites";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
 	CGuildInvitePtr ret;
 		if (!connection.query(qs))
@@ -6193,11 +6202,11 @@ namespace RSMGR
 			CGuildInvite *ret = new CGuildInvite();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_GuildId);
-					
+
 			result->getField(2, ret->_SessionId);
 					CGuildInvite *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -6243,11 +6252,11 @@ namespace RSMGR
 			CGuildInvite *ret = new CGuildInvite();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_GuildId);
-					
+
 			result->getField(2, ret->_SessionId);
 					CGuildInvite *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -6394,10 +6403,10 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "INSERT INTO player_rating (";
-		
+
 		qs += "scenario_id, author, rate_fun, rate_difficulty, rate_accessibility, rate_originality, rate_direction";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_ScenarioId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
@@ -6433,7 +6442,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_PlayerRatings->begin(), parent->_PlayerRatings->end(), CPlayerRatingPtr(this, __FILE__, __LINE__)) == parent->_PlayerRatings->end());
 						parent->_PlayerRatings->push_back(CPlayerRatingPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -6446,7 +6455,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_PlayerRatings->begin(), parent->_PlayerRatings->end(), CPlayerRatingPtr(this, __FILE__, __LINE__)) == parent->_PlayerRatings->end());
 						parent->_PlayerRatings->push_back(CPlayerRatingPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -6466,7 +6475,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE player_rating SET ";
-		
+
 		qs += "scenario_id = '"+MSW::escapeString(NLMISC::toString(_ScenarioId), connection)+"'";
 		qs += ", ";
 		qs += "author = '"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
@@ -6482,7 +6491,7 @@ namespace RSMGR
 		qs += "rate_direction = '"+MSW::escapeString(NLMISC::toString(_RateDirection), connection)+"'";
 
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -6502,9 +6511,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM player_rating ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -6516,7 +6525,7 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CScenarioPtr parent(CScenario::loadFromCache(_ScenarioId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_PlayerRatings != NULL)
@@ -6527,10 +6536,10 @@ namespace RSMGR
 						{
 							parent->_PlayerRatings->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				{
 					CCharacterPtr parent(CCharacter::loadFromCache(_Author, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_PlayerRatings != NULL)
@@ -6541,12 +6550,12 @@ namespace RSMGR
 						{
 							parent->_PlayerRatings->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -6564,9 +6573,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM player_rating ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -6773,11 +6782,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "Id, scenario_id, author, rate_fun, rate_difficulty, rate_accessibility, rate_originality, rate_direction";
 
 		qs += " FROM player_rating";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
 	CPlayerRatingPtr ret;
 		if (!connection.query(qs))
@@ -6836,21 +6845,21 @@ namespace RSMGR
 			CPlayerRating *ret = new CPlayerRating();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_ScenarioId);
-					
+
 			result->getField(2, ret->_Author);
-					
+
 			result->getField(3, ret->_RateFun);
-					
+
 			result->getField(4, ret->_RateDifficulty);
-					
+
 			result->getField(5, ret->_RateAccessibility);
-					
+
 			result->getField(6, ret->_RateOriginality);
-					
+
 			result->getField(7, ret->_RateDirection);
 					CPlayerRating *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -6896,21 +6905,21 @@ namespace RSMGR
 			CPlayerRating *ret = new CPlayerRating();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_ScenarioId);
-					
+
 			result->getField(2, ret->_Author);
-					
+
 			result->getField(3, ret->_RateFun);
-					
+
 			result->getField(4, ret->_RateDifficulty);
-					
+
 			result->getField(5, ret->_RateAccessibility);
-					
+
 			result->getField(6, ret->_RateOriginality);
-					
+
 			result->getField(7, ret->_RateDirection);
 					CPlayerRating *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -7057,10 +7066,10 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "INSERT INTO journal_entry (";
-		
+
 		qs += "session_id, author, type, text, time_stamp";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_SessionId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
@@ -7094,7 +7103,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_JournalEntries->begin(), parent->_JournalEntries->end(), CJournalEntryPtr(this, __FILE__, __LINE__)) == parent->_JournalEntries->end());
 						parent->_JournalEntries->push_back(CJournalEntryPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -7114,7 +7123,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE journal_entry SET ";
-		
+
 		qs += "session_id = '"+MSW::escapeString(NLMISC::toString(_SessionId), connection)+"'";
 		qs += ", ";
 		qs += "author = '"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
@@ -7128,7 +7137,7 @@ namespace RSMGR
 		qs += "time_stamp = '"+MSW::encodeDate(_TimeStamp)+"'";
 
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -7148,9 +7157,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM journal_entry ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -7162,7 +7171,7 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CSessionPtr parent(CSession::loadFromCache(_SessionId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_JournalEntries != NULL)
@@ -7173,12 +7182,12 @@ namespace RSMGR
 						{
 							parent->_JournalEntries->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -7196,9 +7205,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM journal_entry ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -7405,11 +7414,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "Id, session_id, author, type, text, time_stamp";
 
 		qs += " FROM journal_entry";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
 	CJournalEntryPtr ret;
 		if (!connection.query(qs))
@@ -7470,21 +7479,21 @@ namespace RSMGR
 			CJournalEntry *ret = new CJournalEntry();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_SessionId);
-					
+
 			result->getField(2, ret->_Author);
-					
+
 			{
 				std::string s;
 				result->getField(3, s);
 				ret->_Type = TJournalEntryType(s);
 			}
-					
+
 			result->getField(4, ret->_Text);
-					
+
 			result->getDateField(5, ret->_TimeStamp);
 					CJournalEntry *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -7635,10 +7644,10 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "INSERT INTO folder (";
-		
+
 		qs += "author, title, comments";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
@@ -7666,7 +7675,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_Folders->begin(), parent->_Folders->end(), CFolderPtr(this, __FILE__, __LINE__)) == parent->_Folders->end());
 						parent->_Folders->push_back(CFolderPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -7686,7 +7695,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE folder SET ";
-		
+
 		qs += "author = '"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
 		qs += ", ";
 		qs += "title = '"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
@@ -7694,7 +7703,7 @@ namespace RSMGR
 		qs += "comments = '"+MSW::escapeString(NLMISC::toString(_Comments), connection)+"'";
 
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -7714,9 +7723,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM folder ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -7725,28 +7734,30 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child FolderAccess
-					nlassert(loadFolderAccess(connection, __FILE__, __LINE__));
-
-					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
-
-					while (!childs.empty())
+					if (loadFolderAccess(connection, __FILE__, __LINE__))
 					{
-						getFolderAccessByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
+
+						while (!childs.empty())
+						{
+							getFolderAccessByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
 
 				{
 					// unreference (and update) for vector child Sessions
-					nlassert(loadSessions(connection, __FILE__, __LINE__));
-
-					const std::vector < CSessionPtr > & childs = getSessions();
-
-					for (uint i=0; i < childs.size(); ++i)
+					if (loadSessions(connection, __FILE__, __LINE__))
 					{
-						
-						getSessionsByIndex(i)->setFolderId(0);
-						getSessionsByIndex(i)->update(connection);
+						const std::vector < CSessionPtr > & childs = getSessions();
+
+						for (uint i=0; i < childs.size(); ++i)
+						{
+							
+							getSessionsByIndex(i)->setFolderId(0);
+							getSessionsByIndex(i)->update(connection);
+						}
 					}
 				}
 
@@ -7755,7 +7766,7 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CRingUserPtr parent(CRingUser::loadFromCache(_Author, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_Folders != NULL)
@@ -7766,12 +7777,12 @@ namespace RSMGR
 						{
 							parent->_Folders->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -7789,9 +7800,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM folder ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -7998,11 +8009,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "Id, author, title, comments";
 
 		qs += " FROM folder";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
 	CFolderPtr ret;
 		if (!connection.query(qs))
@@ -8057,13 +8068,13 @@ namespace RSMGR
 			CFolder *ret = new CFolder();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_Author);
-					
+
 			result->getField(2, ret->_Title);
-					
+
 			result->getField(3, ret->_Comments);
 					CFolder *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -8136,7 +8147,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CFolder::loadSessions(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -8187,7 +8198,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	void CFolderAccessPtr::linkPtr()
 	{
 		nlassert(_NextPtr == NULL);
@@ -8312,10 +8323,10 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "INSERT INTO folder_access (";
-		
+
 		qs += "folder_id, user_id";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_FolderId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_UserId), connection)+"'";
@@ -8341,7 +8352,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_FolderAccess->begin(), parent->_FolderAccess->end(), CFolderAccessPtr(this, __FILE__, __LINE__)) == parent->_FolderAccess->end());
 						parent->_FolderAccess->push_back(CFolderAccessPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -8354,7 +8365,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_FolderAccess->begin(), parent->_FolderAccess->end(), CFolderAccessPtr(this, __FILE__, __LINE__)) == parent->_FolderAccess->end());
 						parent->_FolderAccess->push_back(CFolderAccessPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -8374,13 +8385,13 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE folder_access SET ";
-		
+
 		qs += "folder_id = '"+MSW::escapeString(NLMISC::toString(_FolderId), connection)+"'";
 		qs += ", ";
 		qs += "user_id = '"+MSW::escapeString(NLMISC::toString(_UserId), connection)+"'";
 
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -8400,9 +8411,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM folder_access ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -8414,7 +8425,7 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CRingUserPtr parent(CRingUser::loadFromCache(_UserId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_FolderAccess != NULL)
@@ -8425,10 +8436,10 @@ namespace RSMGR
 						{
 							parent->_FolderAccess->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				{
 					CFolderPtr parent(CFolder::loadFromCache(_FolderId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_FolderAccess != NULL)
@@ -8439,12 +8450,12 @@ namespace RSMGR
 						{
 							parent->_FolderAccess->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -8462,9 +8473,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM folder_access ";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -8671,11 +8682,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "Id, folder_id, user_id";
 
 		qs += " FROM folder_access";
-		
+
 		qs += " WHERE Id = '"+NLMISC::toString(id)+"'";
 	CFolderAccessPtr ret;
 		if (!connection.query(qs))
@@ -8729,11 +8740,11 @@ namespace RSMGR
 			CFolderAccess *ret = new CFolderAccess();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_FolderId);
-					
+
 			result->getField(2, ret->_UserId);
 					CFolderAccess *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -8779,11 +8790,11 @@ namespace RSMGR
 			CFolderAccess *ret = new CFolderAccess();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_FolderId);
-					
+
 			result->getField(2, ret->_UserId);
 					CFolderAccess *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -8934,10 +8945,10 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "INSERT INTO scenario (";
-		
+
 		qs += "md5, title, description, author, rrp_total, anim_mode, language, orientation, level, allow_free_trial";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(_MD5.toString(), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
@@ -8992,7 +9003,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE scenario SET ";
-		
+
 		qs += "md5 = '"+MSW::escapeString(_MD5.toString(), connection)+"'";
 		qs += ", ";
 		qs += "title = '"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
@@ -9020,7 +9031,7 @@ namespace RSMGR
 		qs += "allow_free_trial = '"+MSW::escapeString(NLMISC::toString(_AllowFreeTrial), connection)+"'";
 
 		qs += " WHERE id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -9040,9 +9051,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM scenario ";
-		
+
 		qs += " WHERE id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -9051,26 +9062,28 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionLogs
-					nlassert(loadSessionLogs(connection, __FILE__, __LINE__));
-
-					const std::vector < CSessionLogPtr > & childs = getSessionLogs();
-
-					while (!childs.empty())
+					if (loadSessionLogs(connection, __FILE__, __LINE__))
 					{
-						getSessionLogsByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CSessionLogPtr > & childs = getSessionLogs();
+
+						while (!childs.empty())
+						{
+							getSessionLogsByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
 
 				{
 					// cascading deletion for vector child PlayerRatings
-					nlassert(loadPlayerRatings(connection, __FILE__, __LINE__));
-
-					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
-
-					while (!childs.empty())
+					if (loadPlayerRatings(connection, __FILE__, __LINE__))
 					{
-						getPlayerRatingsByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
+
+						while (!childs.empty())
+						{
+							getPlayerRatingsByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
@@ -9080,9 +9093,9 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -9100,9 +9113,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM scenario ";
-		
+
 		qs += " WHERE id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -9309,11 +9322,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "id, md5, title, description, author, rrp_total, anim_mode, language, orientation, level, allow_free_trial";
 
 		qs += " FROM scenario";
-		
+
 		qs += " WHERE id = '"+NLMISC::toString(id)+"'";
 	CScenarioPtr ret;
 		if (!connection.query(qs))
@@ -9414,7 +9427,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	bool CScenario::loadPlayerRatings(MSW::CConnection &connection, const char *filename, uint32 lineNum)
 	{
 		bool ret = true;
@@ -9465,7 +9478,7 @@ namespace RSMGR
 		return nilPtr;
 	}
 
-	
+
 	void CSessionLogPtr::linkPtr()
 	{
 		nlassert(_NextPtr == NULL);
@@ -9591,10 +9604,10 @@ namespace RSMGR
 		nlassert(_Id != 0);
 		std::string qs;
 		qs = "INSERT INTO session_log (";
-		
+
 		qs += "id, scenario_id, rrp_scored, scenario_point_scored, time_taken, participants, launch_date, owner, guild_name";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Id), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_ScenarioId), connection)+"'";
@@ -9632,7 +9645,7 @@ namespace RSMGR
 
 						nlassert(std::find(parent->_SessionLogs->begin(), parent->_SessionLogs->end(), CSessionLogPtr(this, __FILE__, __LINE__)) == parent->_SessionLogs->end());
 						parent->_SessionLogs->push_back(CSessionLogPtr(this, __FILE__, __LINE__));
- 
+
 				}
 			}
 
@@ -9652,7 +9665,7 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE session_log SET ";
-		
+
 		qs += "id = '"+MSW::escapeString(NLMISC::toString(_Id), connection)+"'";
 		qs += ", ";
 		qs += "scenario_id = '"+MSW::escapeString(NLMISC::toString(_ScenarioId), connection)+"'";
@@ -9672,7 +9685,7 @@ namespace RSMGR
 		qs += "guild_name = '"+MSW::escapeString(NLMISC::toString(_GuildName), connection)+"'";
 
 		qs += " WHERE id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -9692,9 +9705,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM session_log ";
-		
+
 		qs += " WHERE id = '"+NLMISC::toString(_Id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -9706,7 +9719,7 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				{
 					CScenarioPtr parent(CScenario::loadFromCache(_ScenarioId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_SessionLogs != NULL)
@@ -9717,12 +9730,12 @@ namespace RSMGR
 						{
 							parent->_SessionLogs->erase(it);
 						}
- 
+
 					}
 				}
-				
+
 				// need to remove ref from parent (if any)
-				
+
 
 				return true;
 			}
@@ -9740,9 +9753,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM session_log ";
-		
+
 		qs += " WHERE id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -9949,11 +9962,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "id, scenario_id, rrp_scored, scenario_point_scored, time_taken, participants, launch_date, owner, guild_name";
 
 		qs += " FROM session_log";
-		
+
 		qs += " WHERE id = '"+NLMISC::toString(id)+"'";
 	CSessionLogPtr ret;
 		if (!connection.query(qs))
@@ -10013,23 +10026,23 @@ namespace RSMGR
 			CSessionLog *ret = new CSessionLog();
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, ret->_Id);
-					
+
 			result->getField(1, ret->_ScenarioId);
-					
+
 			result->getField(2, ret->_RRPScored);
-					
+
 			result->getField(3, ret->_ScenarioPointScored);
-					
+
 			result->getField(4, ret->_TimeTaken);
-					
+
 			result->getField(5, ret->_Participants);
-					
+
 			result->getDateField(6, ret->_LaunchDate);
-					
+
 			result->getField(7, ret->_Owner);
-					
+
 			result->getField(8, ret->_GuildName);
 					CSessionLog *inCache = loadFromCache(ret->_Id, true);
 			if (inCache != NULL)
@@ -10177,10 +10190,10 @@ namespace RSMGR
 		nlassert(_UserId != 0);
 		std::string qs;
 		qs = "INSERT INTO gm_status (";
-		
+
 		qs += "user_id, available";
 		qs += ") VALUES (";
-		
+
 		qs += "'"+MSW::escapeString(NLMISC::toString(_UserId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Available), connection)+"'";
@@ -10222,13 +10235,13 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "UPDATE gm_status SET ";
-		
+
 		qs += "user_id = '"+MSW::escapeString(NLMISC::toString(_UserId), connection)+"'";
 		qs += ", ";
 		qs += "available = '"+MSW::escapeString(NLMISC::toString(_Available), connection)+"'";
 
 		qs += " WHERE user_id = '"+NLMISC::toString(_UserId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -10248,9 +10261,9 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "DELETE FROM gm_status ";
-		
+
 		qs += " WHERE user_id = '"+NLMISC::toString(_UserId)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -10262,9 +10275,9 @@ namespace RSMGR
 				setPersistentState(NOPE::os_removed);
 
 				// need to remove ref from parent class container (if any)
-				
+
 				// need to remove ref from parent (if any)
-				
+
 				{
 					CRingUserPtr parent(CRingUser::loadFromCache(_UserId, true), __FILE__, __LINE__);
 					if (parent != NULL && parent->_GMStatusLoaded)
@@ -10273,7 +10286,7 @@ namespace RSMGR
 						parent->_GMStatus.assign(CGmStatusPtr(), __FILE__, __LINE__);
 					}
 				}
-				
+
 
 				return true;
 			}
@@ -10291,9 +10304,9 @@ namespace RSMGR
 		// not in cache, run a SQL query
 		std::string qs;
 		qs = "DELETE FROM gm_status ";
-		
+
 		qs += " WHERE user_id = '"+NLMISC::toString(id)+"'";
-	
+
 
 		if (connection.query(qs))
 		{
@@ -10500,11 +10513,11 @@ namespace RSMGR
 
 		std::string qs;
 		qs = "SELECT ";
-		
+
 		qs += "user_id, available";
 
 		qs += " FROM gm_status";
-		
+
 		qs += " WHERE user_id = '"+NLMISC::toString(id)+"'";
 	CGmStatusPtr ret;
 		if (!connection.query(qs))
@@ -10560,9 +10573,9 @@ namespace RSMGR
 			CGmStatus *object = new CGmStatus;
 			// ok, we have an object
 			result->fetchRow();
-			
+
 			result->getField(0, object->_UserId);
-					
+
 			result->getField(1, object->_Available);
 					CGmStatus *inCache = loadFromCache(object->_UserId, true);
 			if (inCache != NULL)

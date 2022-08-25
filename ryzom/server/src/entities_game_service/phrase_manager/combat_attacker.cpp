@@ -131,7 +131,7 @@ CCombatWeapon::CCombatWeapon(CGameItemPtr itemPtr)
 	// weapon hit rate is in hit/10s and we use ticks/hits....
 	if (itemPtr->hitRate() != 0)
 	{
-		LatencyInTicks = (10.0 / itemPtr->hitRate())  / CTickEventHandler::getGameTimeStep();
+		LatencyInTicks =  (10.0 / itemPtr->hitRate() )  / CTickEventHandler::getGameTimeStep();
 	}
 	
 	Quality = (uint16)itemPtr->recommended();
@@ -203,6 +203,7 @@ bool CCombatAttackerPlayer::getItem( TAttackerItem item, CCombatWeapon &weaponIt
 		if (weaponItem.Family == ITEMFAMILY::MELEE_WEAPON || weaponItem.Family == ITEMFAMILY::RANGE_WEAPON)
 		{
 			nlwarning("<CCombatAttackerPlayer::getItem> Error while building item, found an hit rate = 0 for item %s!", itemPtr->getSheetId().toString().c_str());
+			return false;
 		}
 	}
 

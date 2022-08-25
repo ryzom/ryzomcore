@@ -41,7 +41,7 @@ void CStaticRolemasterPhrase::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UF
 	uint i = 0;
 	while ( i < 100 )
 	{
-		bool res = form->getRootNode().getValueByName( sbrickSheetName, toString( "brick %u", i ) );
+		bool res = form->getRootNode().getValueByName( sbrickSheetName, toString( "brick %u", i ).c_str() );
 		if ( (! res) || sbrickSheetName.empty() )
 		{
 			++i;

@@ -144,6 +144,9 @@ protected: // because CSearchPhrase is a common trunc
 
 	/// Locator enabled
 	bool						_IsLocateDepositProspection;
+
+	/// True if terrain specialization or Atys specialization is used
+	bool						_EcotypeSpecBonus;
 };
 
 

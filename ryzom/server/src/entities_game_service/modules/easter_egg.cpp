@@ -76,7 +76,8 @@ void CR2EasterEgg::dropMissionItem(std::vector< CGameItemPtr > items, TSessionId
 	if( c != 0 )
 	{
 		CEntityState &pos = c->getState();
-		_SpawnEasterEgg( egg.EasterEggId, CSheetId(EaterEggBagSheet.get()), aiInstanceId, pos.X, pos.Y, pos.Z, pos.Heading );
+		CSheetId bagSheet = CSheetId(EaterEggBagSheet.get());
+		_SpawnEasterEgg( egg.EasterEggId, bagSheet, aiInstanceId, pos.X, pos.Y, pos.Z, pos.Heading );
 	}
 }
 

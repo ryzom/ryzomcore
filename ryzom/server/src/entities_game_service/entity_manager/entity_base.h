@@ -143,7 +143,7 @@ public:
 			_ExceptionString = std::string("<CEntityBase> : Invalid stat name ") + var;
 			return _ExceptionString.c_str();
 		}
-		virtual ~EInvalidStat() NL_OVERRIDE {}
+		virtual ~EInvalidStat() throw() {}
 	private:
 		mutable std::string _ExceptionString;
 	};
@@ -356,7 +356,7 @@ public:
 	 *	Set the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the new value for the variable
-	 * \return true if the value has been set, false if an error occurred
+	 * \return true if the value has been set, false if an error occured
 	 */
 	bool setValue( const std::string& var, const std::string& value );
 
@@ -364,7 +364,7 @@ public:
 	 *	Modify the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the modification value
-	 * \return true if the value has been changed, false if an error occurred
+	 * \return true if the value has been changed, false if an error occured
 	 */
 	bool modifyValue( const std::string& var, const std::string& value );
 
@@ -524,7 +524,7 @@ public:
 	 * \param var is the name of the variable
 	 * \return ref on the stat value
 	 */
-	sint32& lookupStat( const std::string& stat);
+	sint32& lookupStat(const std::string& stat);
 
 	/**
 	 *	get a reference on a characterristics value
@@ -848,7 +848,7 @@ public:
 	inline void decPreventEntityMove() { if (_PreventEntityMoves>0) --_PreventEntityMoves; }
 
 	// tp wanted for an entity
-	virtual void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0) = 0;
+	virtual void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0, bool fromVortex = false) = 0;
 
 // memorize xp gain per agressor for offensive action
 //	void addAgressorXp( const NLMISC::CEntityId& agressor, double xp, const std::string& Skill );
@@ -918,6 +918,21 @@ public:
 
 	void setEventSpeedVariationModifier(float value) { _EventSpeedVariationModifier = value; }
 	float getEventSpeedVariationModifier() { return _EventSpeedVariationModifier; }
+
+	void setBonusMalusName(const std::string& name, sint8 id)
+	{
+		if (id == -1)
+			_BonusMalusNames.erase(name);
+		else
+			_BonusMalusNames[name] = id;
+	}
+	
+	sint8 getBonusMalusName(const std::string& name)
+	{
+		if (_BonusMalusNames.find(name) != _BonusMalusNames.end())
+			return _BonusMalusNames[name];
+		return -1;
+	}
 
 	/// change the outpost alias
 	virtual void setOutpostAlias( uint32 id );
@@ -1072,6 +1087,8 @@ protected:
 		} IdAndSide;
 	};
 	CMirrorPropValueAlice< uint16, CPropLocationPacked<2> >	_OutpostInfos;
+
+	std::map<std::string, uint16> _BonusMalusNames;
 };	
 
 

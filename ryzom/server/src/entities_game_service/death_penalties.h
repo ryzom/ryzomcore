@@ -62,6 +62,13 @@ public:
 		updataDb(user);
 	}
 
+	double getDeathXPToGain() { return _DeathXPToGain - _CurrentDeathXP; }
+	void addDeathXP(CCharacter *user, double xp)
+	{
+		_CurrentDeathXP += xp;
+		updataDb(*user);
+	}
+
 	void addDeath(CCharacter& user, float deathPenaltyFactor);
 	
 	uint32 updateResorption( CCharacter& user );

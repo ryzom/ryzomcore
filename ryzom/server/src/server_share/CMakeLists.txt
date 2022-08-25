@@ -13,13 +13,18 @@ NL_TARGET_LIB(ryzom_servershare ${SRC} ${R2})
 INCLUDE_DIRECTORIES(${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_servershare
-						nelmisc
-						nelpacs
-						nelgeorges
-						nelnet
-						ryzom_gameshare
+						${NELMISC_LIBRARIES}
+						${NELPACS_LIBRARIES}
+						${NELGEORGES_LIBRARIES}
+						${NELNET_LIBRARIES}
+						${RYZOM_GAMESHARE_LIBRARIES}
 						${MYSQL_LIBRARIES}
 						${ZLIB_LIBRARIES})
+
+IF(MONGO_FOUND)
+  TARGET_LINK_LIBRARIES(ryzom_servershare ${MONGO_LIBRARIES})
+  ADD_DEFINITIONS(${MONGO_DEFINITIONS})
+ENDIF()
 
 NL_DEFAULT_PROPS(ryzom_servershare "Ryzom, Library: Service Shared")
 NL_ADD_RUNTIME_FLAGS(ryzom_servershare)

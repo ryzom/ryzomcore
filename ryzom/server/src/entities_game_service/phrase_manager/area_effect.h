@@ -114,7 +114,7 @@ public:
 			str = NLMISC::toString("Chain, max target %d, factor %f range %f", Chain.MaxTargets, Chain.Factor, Chain.Range);
 			break;
 		default:
-			str = "unknown area type";
+			str = "unkown area type";
 		};
 
 		return str;

@@ -167,7 +167,7 @@ public:
 
 	// update the statictic data
 //	void				updateMissionStats(TMissionResult result);
-		
+
 	/// descriptor of a skill prerequisit
 	struct CSkillPrereq
 	{
@@ -234,6 +234,8 @@ public:
 		std::vector< NLMISC::CSheetId >		Wear;
 		/// item that must be owned
 		std::vector< NLMISC::CSheetId >		Own;
+		/// item quality that must be owned
+		std::vector< float >			OwnQuality;
 		/// title that must be displayed by the player
 		CHARACTER_TITLE::ECharacterTitle	Title;
 		/// fame prerequisits
@@ -378,9 +380,9 @@ public:
 	TAIAlias EncycloNPC;
 
 private:
-	
+
 	// This is the default NPC giver of this mission template (as parsed from the primitive).
-	// Yoyo: I'm not sure I understand the whole system but it seems that a same Mission Template 
+	// Yoyo: I'm not sure I understand the whole system but it seems that a same Mission Template
 	// may be proposed by only one NPC. Hence the paradigm Mission = (MissionTemplate, Player, Giver) seems strange
 	// The giver should be always hard bound to the mission template?
 	// Btw, this Alias may be NULL if I didn't understand, and is used for Mission Title translation purpose only.
@@ -398,6 +400,7 @@ private:
 //	bool parseChatParamList( const std::string & separator, const std::vector< std::string > & preparsedParams, TVectorParamCheck & ret );
 	/// parse a list of items
 	bool parseItemList(uint32 line,  const std::string & separator, const std::vector< std::string > & preparsedParams, std::vector< NLMISC::CSheetId > & ret, std::vector< std::pair< std::string, STRING_MANAGER::TParamType > > & chatParams );
+	bool parseQualityList(uint32 line,  const std::string & separator, const std::vector< std::string > & script, std::vector< float > & ret, std::vector< std::pair< std::string, STRING_MANAGER::TParamType > > & chatParams );
 	/// parse player title prereq
 	bool parseTitlePrereq(uint32 line,  const std::vector< std::string > & preparsedParams );
 	/// parse the minimum fame
@@ -407,7 +410,7 @@ private:
 	/// parse an int param
 	bool parseInt(uint32 line,  const std::vector< std::string > & preparsedParams, int & ret );
 	/// parse a action
-	bool parseBrickList(uint32 line,  const std::vector< std::string > & preparsedParams, std::vector< NLMISC::CSheetId > & ret, std::vector< std::pair< std::string, STRING_MANAGER::TParamType > > & chatParams );	
+	bool parseBrickList(uint32 line,  const std::vector< std::string > & preparsedParams, std::vector< NLMISC::CSheetId > & ret, std::vector< std::pair< std::string, STRING_MANAGER::TParamType > > & chatParams );
 	/// add the mission to the mission list
 	bool addMissionsToList(uint32 line,  const std::vector< std::string  > & preparsedParams, std::vector< CPrerequisits::TMissionReq  > & ret );
 //	bool addMissionsToList(uint32 line,  const std::vector< std::string > & preparsedParams, std::vector< std::vector< std::string > > & ret );

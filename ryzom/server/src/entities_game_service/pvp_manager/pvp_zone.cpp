@@ -162,7 +162,7 @@ NLMISC::CSmartPtr<IPVPZone> IPVPZone::build(const NLLIGO::CPrimZone * zone)
 
 	PRIM_VERIFY( CPrimitivesParser::getAlias(zone, pvpZone->_Alias) );
 	PRIM_ASSERT( pvpZone->_Alias != CAIAliasTranslator::Invalid );
- 
+
 	// get the bounding box
 	float minX = zone->VPoints[0].x;
 	float minY = zone->VPoints[0].y;
@@ -206,7 +206,7 @@ NLMISC::CSmartPtr<IPVPZone> IPVPZone::buildOutpostZone(const NLLIGO::CPrimZone *
 
 	PRIM_VERIFY( CPrimitivesParser::getAlias(zone, pvpZone->_Alias) );
 	PRIM_ASSERT( pvpZone->_Alias != CAIAliasTranslator::Invalid );
- 
+
 	// get the bounding box
 	float minX = zone->VPoints[0].x;
 	float minY = zone->VPoints[0].y;
@@ -296,11 +296,27 @@ void IPVPZone::dumpZone(NLMISC::CLog * log, bool dumpUsers) const
 }
 
 //----------------------------------------------------------------------------
+bool IPVPZone::contains(const NLMISC::CVector & v, float &distance, NLMISC::CVector &nearPos) const
+{
+
+	if ( !CPrimZone::contains(v, VPoints, distance, nearPos, false))
+		return false;
+
+	return true;
+}
+
+
+//----------------------------------------------------------------------------
 bool IPVPZone::contains(const NLMISC::CVector & v, bool excludeSafeZones) const
 {
+
+	CVector nearPos;
+	float distance;
+	CPrimZone::contains (v, VPoints, distance, nearPos, true);
+
 	if ( !CPrimZone::contains(v) )
 		return false;
-	
+
 	// safe zones are excluded from the PVP zone
 	if (excludeSafeZones)
 	{
@@ -310,7 +326,7 @@ bool IPVPZone::contains(const NLMISC::CVector & v, bool excludeSafeZones) const
 				return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -546,7 +562,7 @@ void CPVPVersusZone::addPlayer(CCharacter * user)
 
 		// ask player to choose his clan
 		//user->openPVPVersusDialog();
-		
+
 		// set player clan depending on it's fames
 		setPlayerClan( user );
 	}
@@ -627,7 +643,7 @@ PVP_CLAN::TPVPClan CPVPVersusZone::getPlayerClan(CCharacter * user, PVP_CLAN::TP
 	// get fame of player in each clan
 	const sint32 fame1 = CFameInterface::getInstance().getFameIndexed( user->getId(), PVP_CLAN::getFactionIndex(clan1), false, true );
 	sint32 fame2 = CFameInterface::getInstance().getFameIndexed( user->getId(), PVP_CLAN::getFactionIndex(clan2), false, true );
-	
+
 	// find his clan
 	PVP_CLAN::TPVPClan clan = determinatePlayerClan( user, clan1, fame1, clan2, fame2 );
 
@@ -637,12 +653,12 @@ PVP_CLAN::TPVPClan CPVPVersusZone::getPlayerClan(CCharacter * user, PVP_CLAN::TP
 //----------------------------------------------------------------------------
 bool CPVPVersusZone::isOverridedByARunningEvent( CCharacter * user )
 {
-	
+
 	bool event = CGameEventManager::getInstance().isGameEventRunning();
 	PVP_CLAN::TPVPClan eventClan1 = PVP_CLAN::fromString( CGameEventManager::getInstance().getFaction1() );
 	PVP_CLAN::TPVPClan eventClan2 = PVP_CLAN::fromString( CGameEventManager::getInstance().getFaction2() );
 	bool zoneOnly = CGameEventManager::getInstance().isFactionChanelInZoneOnly();
-	
+
 	if( event && eventClan1==_Clan1 && eventClan2==_Clan2 && !zoneOnly )
 	{
 		if( user->isChannelAdded() )
@@ -708,7 +724,7 @@ bool CPVPVersusZone::setPlayerClan(CCharacter * user/*, PVP_CLAN::TPVPClan clan*
 	if (clan != PVP_CLAN::Neutral)
 	{
 		const PVP_CLAN::TPVPClan rivalClan = (clan == _Clan1) ? _Clan2 : _Clan1;
-		
+
 		// if player is not neutral anymore, clear his aggressors
 		_AggressedNeutralUsers.erase( user->getEntityRowId() );
 
@@ -768,15 +784,15 @@ PVP_CLAN::TPVPClan CPVPVersusZone::determinatePlayerClan( CCharacter *user, PVP_
 void CPVPVersusZone::setPlayerClanInMirror(CCharacter * user, PVP_CLAN::TPVPClan clan) const
 {
 	BOMB_IF( clan >= PVP_CLAN::NbClans, "invalid clan!", return );
-	
+
 	if (!user)
 		return;
-	
+
 	const TDataSetRow & rowId = user->getEntityRowId();
-	
+
 	if ( !TheDataset.isAccessible(rowId) )
 		return;
-	
+
 	CMirrorPropValue<TYPE_PVP_CLAN> propPvpClan( TheDataset, rowId, DSPropertyPVP_CLAN );
 	propPvpClan = (uint8) clan;
 	user->updateGuildFlag();
@@ -790,7 +806,7 @@ PVP_CLAN::TPVPClan CPVPVersusZone::getCharacterClan( const NLMISC::CEntityId& ch
 	{
 		return (*it).second;
 	}
-	return PVP_CLAN::Neutral;		
+	return PVP_CLAN::Neutral;
 }
 
 //----------------------------------------------------------------------------
@@ -811,7 +827,7 @@ bool CPVPVersusZone::leavePVP(CCharacter * user, IPVP::TEndType type)
 				if( user->haveAnyPrivilege() == false )
 				{
 					if( ! isOverridedByARunningEvent( user ) )
-					{	
+					{
 						if( (*it).second == _Clan1 )
 						{
 							CGameEventManager::getInstance().removeCharacterToChannelFactionEvent( user, 1 );
@@ -823,7 +839,7 @@ bool CPVPVersusZone::leavePVP(CCharacter * user, IPVP::TEndType type)
 					}
 				}
 			}
-			
+
 			_UsersClan.erase( it );
 
 			// update mirror
@@ -893,7 +909,7 @@ void CPVPVersusZone::userHurtsTarget(CCharacter * user, CCharacter * target)
 		// Update neutral bot chat programme
 		target->setTargetBotchatProgramm( user, user->getId() );
 	}
-	
+
 #ifdef PVP_DEBUG
 	map<NLMISC::CEntityId,PVP_CLAN::TPVPClan>::const_iterator userClanIt = _UsersClan.find( user->getId() );
 	BOMB_IF( userClanIt == _UsersClan.end(), "PVP: player must have a clan!", return );
@@ -921,7 +937,7 @@ PVP_RELATION::TPVPRelation CPVPVersusZone::getPVPRelation( CCharacter * user, CE
 
 	map<NLMISC::CEntityId,PVP_CLAN::TPVPClan>::const_iterator userClanIt = _UsersClan.find( user->getId() );
 	BOMB_IF( userClanIt == _UsersClan.end(), "PVP: player must have a clan!", return PVP_RELATION::Neutral );
-	
+
 	// check that target is in the same zone than user (discards bots)
 	if ( _Users.find( target->getEntityRowId() ) != _Users.end() )
 	{
@@ -930,7 +946,7 @@ PVP_RELATION::TPVPRelation CPVPVersusZone::getPVPRelation( CCharacter * user, CE
 
 		const PVP_CLAN::TPVPClan userClan = (*userClanIt).second;
 		const PVP_CLAN::TPVPClan targetClan = (*targetClanIt).second;
-	
+
 		if (userClan == PVP_CLAN::Neutral)
 		{
 			// neutral players can only attack their aggressors
@@ -1182,7 +1198,7 @@ PVP_RELATION::TPVPRelation CPVPGuildZone::getPVPRelation( CCharacter * user, CEn
 		return PVP_RELATION::NeutralPVP;
 	}
 
-	// if target is in same zone then he's an ennemy or ally 
+	// if target is in same zone then he's an ennemy or ally
 	if ( _Users.find( target->getEntityRowId() ) != _Users.end() )
 	{
 		// In Same Team or League => Ally
@@ -1190,8 +1206,8 @@ PVP_RELATION::TPVPRelation CPVPGuildZone::getPVPRelation( CCharacter * user, CEn
 		{
 			return PVP_RELATION::Ally;
 		}
-		
-		// in same Guild and not in Leagues => Ally 
+
+		// in same Guild and not in Leagues => Ally
 		if (inSameGuild( user, pTarget ) && user->getLeagueId() == DYN_CHAT_INVALID_CHAN && pTarget->getLeagueId() == DYN_CHAT_INVALID_CHAN)
 		{
 			return PVP_RELATION::Ally;
@@ -1204,7 +1220,7 @@ PVP_RELATION::TPVPRelation CPVPGuildZone::getPVPRelation( CCharacter * user, CEn
 
 	return PVP_RELATION::NeutralPVP;
 }
-	
+
 /*
 //----------------------------------------------------------------------------
 bool CPVPGuildZone::canUserHurtTarget(CCharacter * user, CEntityBase * target) const

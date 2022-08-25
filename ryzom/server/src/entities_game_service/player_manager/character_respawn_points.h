@@ -70,8 +70,14 @@ public:
 	/// return true if ring adventure re-spawn point are changed
 	bool setRingAdventureRespawnpoint(const CFarPosition &farPos);
 
+	void setArkRespawnpoint(sint32 x, sint32 y, uint32 cell);
+
+
 	/// remove Ring adventure respawn point
 	void clearRingRespawnpoint();
+
+	/// return True if player are in a R2Island
+	bool inR2Island() const;
 
 	/// return true and fill coordinate if r-spawn point is a ring adventure re-spawn point, else return false
 	bool getRingAdventuresRespawnPoint( sint32 &x, sint32 &y ) const;
@@ -100,7 +106,7 @@ public:
 //	void legacyLoad(NLMISC::IStream & f);
 
 	/// reset user db (resend all respawn points of the current continent to the client)
-	void resetUserDb() const;
+	void resetUserDb(bool checkInR2Island=true) const;
 
 private:
 	/// vector of mission respawn points

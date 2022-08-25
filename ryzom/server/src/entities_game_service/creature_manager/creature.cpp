@@ -97,6 +97,7 @@ CCreature::CCreature() : CEntityBase(true)
 
 	_AIGroupAlias = CAIAliasTranslator::Invalid;
 	_AIAlias = CAIAliasTranslator::Invalid;
+	_PrimAlias = 0;
 	_LootInventory = 0;
 //	harvestable( false );
 	_EntityLooter = CEntityId::Unknown;
@@ -121,6 +122,7 @@ CCreature::CCreature() : CEntityBase(true)
 	_FilterExplicitActionTradeByBotRace= true;
 
 	_NbOfPlayersInAggroList = 0;
+	_NbOfGuardiansKillers = 0;
 
 	_Form = 0;
 
@@ -148,6 +150,10 @@ CCreature::CCreature() : CEntityBase(true)
 	_MaxHitRangeForPC = -1.f;
 
 	_Organization = 0;
+
+	_LockedLoot = CTEAM::InvalidTeamId;
+	_LockedLootTime = 0;
+
 //	_MissionIconFlags.IsMissionStepIconDisplayable = true;
 //	_MissionIconFlags.IsMissionGiverIconDisplayable = true;
 }
@@ -206,6 +212,10 @@ CCreature::~CCreature()
 	PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->removeCreature(this);
 
 	CAIAliasTranslator::getInstance()->removeAssociation(_Id);
+	if (_PrimAlias >= 900 && _PrimAlias <= 999) // Spawned Bots
+	{
+		CAIAliasTranslator::getInstance()->removeNPCAlias(_AIAlias);
+	}
 
 	if(_Merchant)
 	{
@@ -1463,8 +1473,16 @@ void CCreature::setBotDescription( const CGenNpcDescMsgImp& description )
 						nlwarning("parseBotOption -> invalid parameter '%s' for 'altar' command in bot %u", result[i].c_str(), _AIAlias );
 				}
 			}
-		}
-		else
+		} 
+		else if ( NLMISC::strlwr(result[0]) == "name" )
+		{
+			if ( result.size() != 2 )
+				nlwarning("parseBotOption -> invalid number of params in command '%s' for bot %u", result[0].c_str(), _AIAlias );
+			else
+			{
+				CAIAliasTranslator::getInstance()->setNameForNPCAliases(result[1], _AIAlias);
+			}
+		} else
 			nlwarning("parseBotOption -> invalid command '%s' in bot %u", result[0].c_str(), _AIAlias );
 	}
 	// if the bot has a special trade list, it can trade
@@ -1799,7 +1817,7 @@ void CCreature::kill(TDataSetRow killerRowId)
 //-----------------------------------------------
 // CCreature::::tpWanted a tp wanted, check if tp is regular and send a server tp command
 //-----------------------------------------------
-void CCreature::tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading , float heading , uint8 continent , sint32 cell )
+void CCreature::tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading , float heading , uint8 continent , sint32 cell, bool tpWanted )
 { 
 	CPhraseManager::getInstance().removeEntity(TheDataset.getDataSetRow(_Id), false);
 
@@ -1829,33 +1847,46 @@ uint32 CCreature::getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily
 {
 	nlassert(_Form);
 
+	uint32 value;
 	switch(effectFamily)
 	{
 	case EFFECT_FAMILIES::Root:
-		return _Form->getResists().Root + _ResistModifiers.Root;
+		value = _Form->getResists().Root + _ResistModifiers.Root;
+		break;
 	case EFFECT_FAMILIES::Mezz:
-		return _Form->getResists().Sleep + _ResistModifiers.Sleep;
+		value = _Form->getResists().Sleep + _ResistModifiers.Sleep;
+		break;
 	case EFFECT_FAMILIES::Stun:
-		return _Form->getResists().Stun + _ResistModifiers.Stun;
+		value = _Form->getResists().Stun + _ResistModifiers.Stun;
+		break;
 	case EFFECT_FAMILIES::Blind:
-		return _Form->getResists().Blind + _ResistModifiers.Blind;
+		value = _Form->getResists().Blind + _ResistModifiers.Blind;
+		break;
 	case EFFECT_FAMILIES::SlowMove:
-		return _Form->getResists().Snare + _ResistModifiers.Snare;
+		value = _Form->getResists().Snare + _ResistModifiers.Snare;
+		break;
 	case EFFECT_FAMILIES::SlowMelee:
 	case EFFECT_FAMILIES::SlowRange:
 	case EFFECT_FAMILIES::SlowMagic:
 	case EFFECT_FAMILIES::SlowAttack:
-		return _Form->getResists().Slow + _ResistModifiers.Slow;
+		value = _Form->getResists().Slow + _ResistModifiers.Slow;
+		break;
 	case EFFECT_FAMILIES::Fear:
-		return _Form->getResists().Fear + _ResistModifiers.Fear;
+		value = _Form->getResists().Fear + _ResistModifiers.Fear;
+		break;
 	case EFFECT_FAMILIES::MadnessMelee:
 	case EFFECT_FAMILIES::MadnessMagic:
 	case EFFECT_FAMILIES::MadnessRange:
 	case EFFECT_FAMILIES::Madness:
-		return _Form->getResists().Madness + _ResistModifiers.Madness;
+		value = _Form->getResists().Madness + _ResistModifiers.Madness;
+		break;
 	default:
-		return 0;
+		value = 0;
 	};
+
+	if (value >= 10000)
+		value = CCreatureResists::ImmuneScore;
+	return value;
 } // getResistScore //
 
 //--------------------------------------------------------------
@@ -1865,25 +1896,37 @@ uint32 CCreature::getMagicResistance(DMGTYPE::EDamageType dmgType)
 {
 	nlassert(_Form);
 
+	uint32 value;
 	switch(dmgType) 
 	{
 	case DMGTYPE::ACID:
-		return _Form->getResists().Acid + _ResistModifiers.Acid;
+		value = _Form->getResists().Acid + _ResistModifiers.Acid;
+		break;
 	case DMGTYPE::COLD:
-		return _Form->getResists().Cold + _ResistModifiers.Cold;
+		value = _Form->getResists().Cold + _ResistModifiers.Cold;
+		break;
 	case DMGTYPE::ELECTRICITY:
-		return _Form->getResists().Electricity + _ResistModifiers.Electricity;
+		value = _Form->getResists().Electricity + _ResistModifiers.Electricity;
+		break;
 	case DMGTYPE::FIRE:
-		return _Form->getResists().Fire + _ResistModifiers.Fire;
+		value = _Form->getResists().Fire + _ResistModifiers.Fire;
+		break;
 	case DMGTYPE::POISON:
-		return _Form->getResists().Poison + _ResistModifiers.Poison;
+		value = _Form->getResists().Poison + _ResistModifiers.Poison;
+		break;
 	case DMGTYPE::ROT:
-		return _Form->getResists().Rot + _ResistModifiers.Rot;
+		value = _Form->getResists().Rot + _ResistModifiers.Rot;
+		break;
 	case DMGTYPE::SHOCK:
-		return _Form->getResists().Shockwave + _ResistModifiers.Shockwave;
+		value = _Form->getResists().Shockwave + _ResistModifiers.Shockwave;
+		break;
 	default:
 		return 0;
 	};
+	if (value >=10000)
+		value = CCreatureResists::ImmuneScore;
+
+	return value;
 } // getResistScore //
 
 
@@ -1994,6 +2037,24 @@ void CCreature::setOutpostBuilding(COutpostBuilding *pOB)
 }
 
 //--------------------------------------------------------------
+//	Add guardian killer in list
+//--------------------------------------------------------------
+void CCreature::addGuardianKiller( TDataSetRow PlayerRowId )
+{
+	CCharacter * pChar = PlayerManager.getChar(PlayerRowId);
+	if ( pChar != NULL )
+	{
+		// Update _LockedLootTime each time a player is aggro by a boss guardian (increase the end of the lock)
+		_LockedLootTime = CTickEventHandler::getGameCycle();
+		if( _GuardiansKillers.find( PlayerRowId ) == _GuardiansKillers.end() )
+		{
+			_GuardiansKillers.insert( PlayerRowId );
+			++_NbOfGuardiansKillers;
+		}
+	}
+}
+
+//--------------------------------------------------------------
 //	keep aggressiveness	of a creature against player character
 //--------------------------------------------------------------
 void CCreature::addAggressivenessAgainstPlayerCharacter( TDataSetRow PlayerRowId )
@@ -2081,8 +2142,99 @@ uint32 CCreature::tickUpdate()
 		}
 	}
 
+	if (_LockedLootTime != 0 && _LockedLootTime + 900 < CTickEventHandler::getGameCycle())
+	{
+		_LockedLootTime = 0;
+		_NbOfGuardiansKillers = 0;
+		_GuardiansKillers.clear();
+	}
+
+
+	if (!isDead() && (_NbOfGuardiansKillers || _NbOfPlayersInAggroList || _LockedLoot != CTEAM::InvalidTeamId))
+	{
+		if (_LockedLoot != CTEAM::InvalidTeamId)
+		{
+			if (_LockedLootTime == 0)
+			{
+				bool keepLock = false;
+				for ( set<TDataSetRow>::iterator it = _Agressiveness.begin(); it != _Agressiveness.end(); ++it )
+				{
+					CCharacter * pChar = PlayerManager.getChar( *it );
+					if (pChar && pChar->getTeamId() == _LockedLoot)
+					{
+						keepLock = true;
+						break;
+					}
+				}
+
+				if (!keepLock)
+				{
+					_LockedLoot = CTEAM::InvalidTeamId;
+				}
+			}
+		}
+		else
+		{
+			vector< uint16 > teams;
+
+			// It's a Boss creature with Guardians killers
+			if (_LockedLootTime != 0) 
+			{
+				// Check if 2 guardians killers are in same team and so lock the loot
+				for ( set<TDataSetRow>::iterator it = _GuardiansKillers.begin(); it != _GuardiansKillers.end(); ++it )
+				{
+					CCharacter * pChar = PlayerManager.getChar( *it );
+					if (pChar && pChar->getTeamId() != CTEAM::InvalidTeamId)
+					{
+						uint16 pTeam = pChar->getTeamId();
+						for( vector< uint16 >::const_iterator itTeam = teams.begin(); itTeam != teams.end(); ++itTeam )
+						{
+							if (pTeam == *itTeam)
+							{
+								_LockedLoot = *itTeam;
+								break;
+							}
+						}
+						teams.push_back(pTeam);
+					}
+
+					if (_LockedLoot != CTEAM::InvalidTeamId) {
+						break;
+					}
+				}
+			}
+
+			// If not locked with guardians killers, check with players in aggro list
+			if (_LockedLoot == CTEAM::InvalidTeamId)
+			{
+				for ( set<TDataSetRow>::iterator it = _Agressiveness.begin(); it != _Agressiveness.end(); ++it )
+				{
+					CCharacter * pChar = PlayerManager.getChar( *it );
+					if (pChar && pChar->getTeamId() != CTEAM::InvalidTeamId)
+					{
+						uint16 pTeam = pChar->getTeamId();
+						for( vector< uint16 >::const_iterator itTeam = teams.begin(); itTeam != teams.end(); ++itTeam )
+						{
+							if (pTeam == *itTeam)
+							{
+								_LockedLoot = *itTeam;
+								break;
+							}
+						}
+						teams.push_back(pTeam);
+					}
+
+					if (_LockedLoot != CTEAM::InvalidTeamId) {
+						break;
+					}
+				}
+			}
+		}
+	}
+
+
 	if (currentHp()!=maxHp() && !isDead()) return 12;
-	return 24;		
+	return 24;
 } // tickUpdate //
 
 //---------------------------------------------------

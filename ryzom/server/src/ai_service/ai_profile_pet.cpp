@@ -88,7 +88,8 @@ void CAIPetProfileFollowPlayer::updateProfile(uint ticksSinceLastUpdate)
 		return;
 	
 	CPathCont& pathCont = _Bot->spawnGrp().getPathCont();
-	if ((pathCont.getDestination()-_Bot->wpos().toAIVector()).quickNorm()>6.f) // follow only if > 6 meters.
+
+	if (_Bot->getPersistent().getSheet()->Scale() <= .5f || (pathCont.getDestination()-_Bot->wpos().toAIVector()).quickNorm() > 6.f) // follow only if > 6 meters or it's a tiny creature.
 	{
 		// Handle the hunger of the animal
 		CSpeedLimit speedLimit( TheDataset, _Bot->dataSetRow() );

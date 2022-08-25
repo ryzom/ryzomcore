@@ -85,7 +85,8 @@ void CSpawnBot::setVisualPropertiesName()
 	
 	
 	// In ringshard we use npc with fauna sheet but we want to be enable to change theire name
-	if (! botRef.getFaunaBotUseBotName()) //false by default
+	// Ulu : Ring is dead but i keep this code below to prevent side effects. Just add a condition : always set the custom name if exists
+	if (! botRef.getFaunaBotUseBotName() && botRef.getCustomName().empty()) //getFaunaBotUseBotName is false by default
 	{
 		if (botRef.getSheet()->ForceDisplayCreatureName())
 			return;

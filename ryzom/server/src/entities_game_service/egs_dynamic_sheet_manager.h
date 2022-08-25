@@ -36,6 +36,9 @@ struct CCustomLootTables
 /** callback called when receiving USR_MDL msg sent by AIS */
 void cbGetUserModels( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
+/** callback called when receiving ARK_USR_MDL msg sent by AIS */
+void cbGetUserModel( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+
 /** callback called when receiving CUSTOMLT msg sent by AIS */
 void cbGetCustomLootTables(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
@@ -58,8 +61,9 @@ public:
 	/** Add user models into manager's structures upon reception of the AIS msg
 	* @param msgin the AIS CMessage containing custom loot table info
 	* @param serviceId id of the AIS that sent the msg
+	* @param update update an existing user_model
 	*/
-	void getUserModelsFromMsg(NLNET::CMessage &f, NLNET::TServiceId serviceId);
+	void getUserModelsFromMsg(NLNET::CMessage &f, NLNET::TServiceId serviceId, bool update = false);
 
 	/** Add custom loot tables into manager's structures upon reception of the AIS msg
 	* @param msgin the AIS CMessage containing custom loot table info
@@ -73,7 +77,8 @@ public:
 	* @param serviceId id of the AIS that sent the datas
 	*/
 	void instanciateDynamicSheet(CCustomElementId modelId, std::vector<std::string> scriptData, NLNET::TServiceId serviceId);
-
+	void removeDynamicSheet(CCustomElementId modelId);
+	
 	/** Returns the modified CStaticCreature associated to a UserModel
 	* @param userModelId the id of the user model
 	*/

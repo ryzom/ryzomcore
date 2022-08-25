@@ -24,13 +24,13 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR} ${NEL_INCLUDE_DIR}
 
 TARGET_LINK_LIBRARIES(ryzom_patchman_service
 					ryzom_adminmodules
-					ryzom_gameshare
+					${RYZOM_GAMESHARE_LIBRARIES}
 					ryzom_servershare
-					nelmisc
-					nelnet
-					nelpacs
-					nelgeorges
-					nelligo)
+					${NELMISC_LIBRARIES}
+					${NELNET_LIBRARIES}
+					${NELPACS_LIBRARIES}
+					${NELGEORGES_LIBRARIES}
+					${NELLIGO_LIBRARIES})
 
 NL_DEFAULT_PROPS(ryzom_patchman_service "Ryzom, Services: Patch Manager Service (PMS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_patchman_service)

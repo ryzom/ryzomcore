@@ -129,11 +129,34 @@ bool CToxicCloud::update()
 
 				if ( !entity->isDead())
 				{
-					bool killed = entity->changeCurrentHp( -_DmgPerHit ); // is not blocked by any armor
-					PHRASE_UTILITIES::sendNaturalEventHitMessages( RYZOMID::fx_entity, entity->getEntityRowId(), _DmgPerHit, _DmgPerHit );
-					if ( killed )
+					if (_DmgPerHit > 0)
+						PHRASE_UTILITIES::sendNaturalEventHitMessages( RYZOMID::fx_entity, entity->getEntityRowId(), _DmgPerHit, _DmgPerHit );
+					else if (_DmgPerHit < 0)
+						PHRASE_UTILITIES::sendNaturalEventHealMessages( RYZOMID::fx_entity, entity->getEntityRowId(), _DmgPerHit, _AffectedScore);
+					
+					if (_AffectedScore == SCORES::hit_points)
 					{
-						PHRASE_UTILITIES::sendDeathMessages( TDataSetRow(), entity->getEntityRowId() );
+						bool killed = entity->changeCurrentHp( -_DmgPerHit ); // is not blocked by any armor
+						if ( killed )
+							PHRASE_UTILITIES::sendDeathMessages( TDataSetRow(), entity->getEntityRowId() );
+					}
+					else if (_AffectedScore == SCORES::sap)
+					{
+						sint32 v = entity->getScores()._PhysicalScores[SCORES::sap].Current;
+						v -= _DmgPerHit;
+						entity->getScores()._PhysicalScores[SCORES::sap].Current = v;
+					}
+					else if (_AffectedScore == SCORES::stamina)
+					{
+						sint32 v = entity->getScores()._PhysicalScores[SCORES::stamina].Current;
+						v -= _DmgPerHit;
+						entity->getScores()._PhysicalScores[SCORES::stamina].Current = v;
+					}
+					else if (_AffectedScore == SCORES::focus)
+					{
+						sint32 v = entity->getScores()._PhysicalScores[SCORES::focus].Current;
+						v -= _DmgPerHit;
+						entity->getScores()._PhysicalScores[SCORES::focus].Current = v;
 					}
 				}
 			}

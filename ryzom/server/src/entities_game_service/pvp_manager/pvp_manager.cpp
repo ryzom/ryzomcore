@@ -84,13 +84,13 @@ void CPVPManager::tickUpdate()
 {
 	// remove expired PVP propositions
 	while( !_PVPChallengesAsked.empty() &&  _PVPChallengesAsked.front().ExpirationDate <= CTickEventHandler::getGameCycle() )
-	{		
+	{
 		_PVPChallengesAsked.erase(_PVPChallengesAsked.begin() );
 	}
 
 	// remove expired PVP zone leave time buffer
 	while( !_UsersLeavingPVPZone.empty() &&  _UsersLeavingPVPZone.front().first <= CTickEventHandler::getGameCycle() )
-	{	
+	{
 		// remove from PVP zone
 		CCharacter * user = PlayerManager.getChar( _UsersLeavingPVPZone.front().second );
 
@@ -453,7 +453,7 @@ void CPVPManager::leavePVPZone( CCharacter * user )
 			// add user to leaving PVP zone users
 			NLMISC::TGameCycle endDate = CTickEventHandler::getGameCycle() + PVPZoneLeaveBufferTime;
 			_UsersLeavingPVPZone.push_back( make_pair( endDate, user->getEntityRowId() ) );
-			
+
 #ifdef PVP_DEBUG
 			egs_pvpinfo("PVP_DEBUG: player %s has been added to _UsersLeavingPVPZone", user->getName().toString().c_str() );
 			BOMB_IF( zone == NULL, "PVP_DEBUG: user was not in a PVP zone!", return );
@@ -553,7 +553,9 @@ void CPVPManager::enterPVPZone( CCharacter * user, TAIAlias pvpZoneAlias )
 			// check if he's re-entering into the same outpost
 			if( pvpZoneAlias == oldZone->getAlias() )
 			{
+#ifdef PVP_DEBUG
 				egs_pvpinfo("<CPVPManager::enterPVPZone> re-entering outpost %s",CPrimitivesParser::aliasToString(pvpZoneAlias).c_str());
+#endif // PVP_DEBUG
 				user->stopOutpostLeavingTimer();
 				CCharacter::sendDynamicSystemMessage( user->getEntityRowId(), "PVP_ZONE_ENTER_BACK" );
 			}
@@ -600,7 +602,9 @@ void CPVPManager::enterPVPZone( CCharacter * user, TAIAlias pvpZoneAlias )
 	else if( user->getEnterFlag() )
 	{
 		// entering into an outpost zone
+#ifdef PVP_DEBUG
 		egs_pvpinfo("<CPVPManager::enterPVPZone> entering outpost %s",CPrimitivesParser::aliasToString(pvpZoneAlias).c_str());
+#endif // PVP_DEBUG
 		user->outpostOpenChooseSideDialog( pvpZoneAlias );
 		user->setOutpostAliasBeforeUserValidation( pvpZoneAlias );
 	}
@@ -697,7 +701,7 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 
 	// global chat parameters
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
-	
+
 	// get protagonists
 	CCharacter * user = PlayerManager.getChar( userId );
 	if ( !user )
@@ -713,9 +717,9 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 	}
 
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
-	sint32 cell1 = mirrorCell;	
+	sint32 cell1 = mirrorCell;
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell2( TheDataset, target->getEntityRowId(), DSPropertyCELL );
-	sint32 cell2 = mirrorCell2;	
+	sint32 cell2 = mirrorCell2;
 
 	if  (cell1 <= -2 || cell2 <= -2 )
 	{
@@ -728,7 +732,7 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 	CPVPChallengeAsked entry;
 	entry.InvitedTeam = CTEAM::InvalidTeamId;
 	entry.Invitor = user->getEntityRowId();
-	
+
 	// user must not be in PVP
 	if ( user->getPVPInterface().isValid() )
 	{
@@ -755,7 +759,7 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 			params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()) );
 			CCharacter::sendDynamicSystemMessage( userId, "CHALLENGE_SAME_TEAM",params);
 			return;
-		}		
+		}
 		for ( list<CEntityId>::const_iterator it = teamUser->getTeamMembers().begin(); it != teamUser->getTeamMembers().end(); ++it )
 		{
 		 	CCharacter * c = PlayerManager.getChar( *it );
@@ -820,11 +824,11 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 		msgTargetEId = user->getTarget();
 		entry.InvitedUser = target->getEntityRowId();
 	}
-	
+
 
 	// remove previous invitation, and check that user and target are not invited
 	bool problem = false;
-	
+
 	TDataSetRow userRow = TheDataset.getDataSetRow( userId );
 	for ( std::list< CPVPChallengeAsked >::iterator it = _PVPChallengesAsked.begin(); it != _PVPChallengesAsked.end(); )
 	{
@@ -834,7 +838,7 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 			// ignore same invitation
 			if ( (*it).InvitedUser == target->getEntityRowId() )
 				return;
-			
+
 			// send cancel message to the previous invited
 			CMessage msgout( "IMPULSION_ID" );
 			CEntityId receiverId;
@@ -851,34 +855,34 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 			}
 			else
 				receiverId = getEntityIdFromRow( (*it).InvitedUser );
-			
+
 			msgout.serial( receiverId );
 			CBitMemStream bms;
 			nlverify ( GenericMsgManager.pushNameToStream( "PVP_CHALLENGE:CANCEL_INVITATION", bms) );
 			msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 			sendMessageViaMirror( NLNET::TServiceId(receiverId.getDynamicId()), msgout );
-			
+
 			//send chat infos
 			params[0].setEIdAIAlias( receiverId, CAIAliasTranslator::getInstance()->getAIAlias(receiverId) );
 			CCharacter::sendDynamicSystemMessage( userRow, "DUEL_YOU_CANCEL_INVITATION",params);
-			
+
 			// remove this proposition
 			std::list< CPVPChallengeAsked >::iterator itErase = it;
 			++it;
 			_PVPChallengesAsked.erase(itErase);
-			
+
 		}
 		else
 		{
 			if ( (*it).InvitedUser == user->getEntityRowId() || ( user->getTeamId() != CTEAM::InvalidTeamId && (*it).InvitedTeam == user->getTeamId() ) )
-			{	
+			{
 				// user is already invited : he has to accept or refuse first
 				CCharacter::sendDynamicSystemMessage( userId, "DUEL_ALREADY_INVITED",params);
 				// dont bail out as we can enter in case "if ( (*it).Invitor == userId )"
 				problem = true;
 			}
 			if ( (*it).InvitedUser == target->getEntityRowId() || ( target->getTeamId() != CTEAM::InvalidTeamId && (*it).InvitedTeam == target->getTeamId() ) )
-			{	
+			{
 				// user is already invited : he has to accept or refuse first
 				params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()) );
 				CCharacter::sendDynamicSystemMessage( userId, "DUEL_TARGET_ALREADY_INVITED",params);
@@ -888,13 +892,13 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 			++it;
 		}
 	}
-	// problem occurred : bail out
+	// problem occured : bail out
 	if ( problem )
 		return;
-	
+
 	entry.ExpirationDate = CTickEventHandler::getGameCycle() + DuelQueryDuration;
 	_PVPChallengesAsked.push_front( entry );
-	
+
 	// tell invited player
 	params[0].setEIdAIAlias( userId, CAIAliasTranslator::getInstance()->getAIAlias(userId) );
 	uint32 txt = STRING_MANAGER::sendStringToClient( target->getEntityRowId(), "PVP_CHALLENGE_INVITATION", params );
@@ -909,11 +913,11 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 
 //----------------------------------------------------------------------------
 void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
-{	
+{
 	BOMB_IF(IsRingShard,"acceptPVPChallenge() - not allowed on Ring shards because PVP Challenge requires non-ring GPMS",return);
 
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
-	CCharacter * invited = PlayerManager.getChar(userId ); 
+	CCharacter * invited = PlayerManager.getChar(userId );
 	if ( !invited )
 	{
 		nlwarning("<PVP>invalid user %s", userId.toString().c_str() );
@@ -945,7 +949,7 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 
 
 				CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, c->getEntityRowId(), DSPropertyCELL );
-				sint32 cell = mirrorCell;		
+				sint32 cell = mirrorCell;
 				if  (cell <= -2  )
 				{
 					CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
@@ -962,7 +966,7 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 			return;
 		}
 		CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, invited->getEntityRowId(), DSPropertyCELL );
-		sint32 cell = mirrorCell;		
+		sint32 cell = mirrorCell;
 		if  (cell <= -2  )
 		{
 			CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
@@ -985,7 +989,7 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 				_PVPChallengesAsked.erase(it);
 				return;
 			}
-			
+
 
 			// ignore deprecated invitation
 			if ( invited->getPVPInterface().isValid() || invitor->getPVPInterface().isValid() )
@@ -1029,7 +1033,7 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 					}
 				}
 				CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, c->getEntityRowId(), DSPropertyCELL );
-				sint32 cell = mirrorCell;		
+				sint32 cell = mirrorCell;
 				if  (cell <= -2  )
 				{
 					CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
@@ -1047,7 +1051,7 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 				return;
 			}
 			CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, invitor->getEntityRowId(), DSPropertyCELL );
-			sint32 cell = mirrorCell;		
+			sint32 cell = mirrorCell;
 			if  (cell <= -2  )
 			{
 				CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
@@ -1078,7 +1082,7 @@ void CPVPManager::refusePVPChallenge( const NLMISC::CEntityId & userId )
 	params[0].setEIdAIAlias( userId, CAIAliasTranslator::getInstance()->getAIAlias(userId) );
 
 	CTeam * team = TeamManager.getTeam( user->getTeamId() );
-	
+
 	// find the proposition
 	for ( std::list< CPVPChallengeAsked >::iterator it = _PVPChallengesAsked.begin(); it != _PVPChallengesAsked.end();++it )
 	{
@@ -1101,7 +1105,7 @@ void CPVPManager::removePVPChallengeInvitor( const NLMISC::CEntityId & userId )
 	for ( std::list< CPVPChallengeAsked >::iterator it = _PVPChallengesAsked.begin(); it != _PVPChallengesAsked.end();++it )
 	{
 		if ( (*it).Invitor == row )
-		{	
+		{
 			CEntityId msgId;
 			if ( (*it).InvitedTeam != CTEAM::InvalidTeamId )
 			{

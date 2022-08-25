@@ -129,7 +129,7 @@ public :
 	}
 
 	/// serial
-	void serial( NLMISC::IStream &f );
+	void serial( NLMISC::IStream &f);
 
 	/// called when the sheet is removed
 	void removed() {}
@@ -160,13 +160,13 @@ public :
 		uint32	XpForPointSkill;
 		float	SpPointMultiplier;
 		
-		void serial(NLMISC::IStream &f);
+		void serial(class NLMISC::IStream &f);
 	};
 
 	struct SStageTable
 	{
 		std::vector< SXpStage > StageTable;
-		void serial(NLMISC::IStream &f);
+		void serial(class NLMISC::IStream &f);
 	};
 
 
@@ -177,7 +177,7 @@ public :
 	static uint getVersion () { return 2; }
 
 	/// serialize
-	void serial(NLMISC::IStream &f);
+	void serial(class NLMISC::IStream &f);
 
 	// return a reference on Xp stage corresponding to level and stage table
 	const SXpStage* getXpStage( uint32 level, uint16 stage ) const;
@@ -209,7 +209,7 @@ public :
 		uint16	StageType;
 		float	Coeff;
 
-		void serial(NLMISC::IStream &f) { f.serial( StageType); f.serial( Coeff ); }
+		void serial(class NLMISC::IStream &f) { f.serial( StageType); f.serial( Coeff ); }
 	};
 
 	/// read sheet
@@ -219,7 +219,7 @@ public :
 	static uint getVersion () { return 2 + ( SKILLS::NUM_SKILLS << 16 ); }
 
 	/// serialize
-	void serial(NLMISC::IStream &f) { f.serialCont( SkillToStageType ); }
+	void serial(class NLMISC::IStream &f) { f.serialCont( SkillToStageType ); }
 
 	/// destructor
 	virtual ~CStaticStagesTypeSkillTable() {}
@@ -248,7 +248,7 @@ public:
 		uint16	LoseSkillsLevel;
 		NLMISC::TGameCycle	Duration;
 
-		void serial(NLMISC::IStream &f) 
+		void serial(class NLMISC::IStream &f) 
 		{
 			f.serial( LoseHitPointsLevel); 
 			f.serial( LoseStaminaLevel ); 
@@ -265,7 +265,7 @@ public:
 	static uint getVersion () { return 2; }
 
 	/// serialize
-	void serial(NLMISC::IStream &f) { f.serialCont( PactLose ); }
+	void serial(class NLMISC::IStream &f) { f.serialCont( PactLose ); }
 
 	/// destructor
 	virtual ~CStaticPacts() {}
@@ -645,7 +645,7 @@ public:
 	static uint getVersion ();
 	
 	/// serialize
-	void serial(NLMISC::IStream &f);
+	void serial(class NLMISC::IStream &f);
 	
 	/// called when the sheet is removed
 	void removed() { }
@@ -676,7 +676,7 @@ public:
 	std::vector<NLMISC::CSheetId>	BricksIds;
 	
 	/// Serialisation
-	void serial(NLMISC::IStream &f)
+	void serial(class NLMISC::IStream &f)
 	{
 		f.serial( Name );
 		f.serialCont( BricksIds );
@@ -701,7 +701,7 @@ public:
 		SMirrorEquipment Ammo1;
 		SMirrorEquipment Ammo2;
 
-		void serial(NLMISC::IStream &f) 
+		void serial(class NLMISC::IStream &f)
 		{
 			f.serial( Right );
 			f.serial( Left );
@@ -733,7 +733,7 @@ public:
 	float RunSpeed;
 
 	/// serialize
-	void serial(NLMISC::IStream &f) 
+	void serial(class NLMISC::IStream &f)
 	{
 		f.serialEnum( Race );
 		f.serial( Gender );
@@ -803,7 +803,7 @@ public:
 		uint16		Quantity;
 		
 		/// serialize
-		void serial(NLMISC::IStream &f) 
+		void serial(class NLMISC::IStream &f)
 		{
 			f.serial( Item );
 			f.serial( Level );
@@ -814,7 +814,7 @@ public:
 	std::vector< SItemLoot > ItemLoot;
 
 	/// serialize
-	void serial(NLMISC::IStream &f) 
+	void serial(class NLMISC::IStream &f)
 	{
 		f.serialCont( ItemLoot );
 	}
@@ -860,7 +860,7 @@ public:
 	float	MoneyDropProbability;
 
 	/// serialize
-	void serial(NLMISC::IStream &f) 
+	void serial(class NLMISC::IStream &f)
 	{
 		f.serialCont( LootSets );
 		f.serial( MoneyLvlFactor );
@@ -911,7 +911,7 @@ public:
 		uint16		QuantityMax;
 
 		/// serialize
-		void serial(NLMISC::IStream &f) 
+		void serial(class NLMISC::IStream &f)
 		{
 			f.serial( Item );
 			f.serial( Probability );
@@ -926,7 +926,7 @@ public:
 	std::vector< SItemLoot > ItemLoot;
 
 	/// serialize
-	void serial(NLMISC::IStream &f) 
+	void serial(class NLMISC::IStream &f)
 	{
 		f.serialCont( ItemLoot );
 	}
@@ -965,7 +965,7 @@ public:
 		std::string DefaultFeet;
 		std::string DefaultHair;
 
-		void serial(NLMISC::IStream &f) 
+		void serial(class NLMISC::IStream &f)
 		{
 			f.serial( DefaultFace );
 			f.serial( DefaultChest );
@@ -993,7 +993,7 @@ public:
 	SDefaultEquipment FemaleDefaultEquipment;
 
 	/// serialize
-	void serial(NLMISC::IStream &f) 
+	void serial(class NLMISC::IStream &f)
 	{
 		f.serialEnum( Race );
 		for( int c = 0; c < CHARACTERISTICS::NUM_CHARACTERISTICS; ++c )
@@ -1051,7 +1051,7 @@ public:
 		NLMISC::CSheetId sentence;
 //		MEM_SET_TYPES::TMemorizationSetType memory;
 
-		void serial(NLMISC::IStream &f) 
+		void serial(class NLMISC::IStream &f)
 		{
 			f.serial( sentence );
 //			f.serialEnum( memory );
@@ -1070,7 +1070,7 @@ public:
 
 	
 	/// serialize
-	void serial(NLMISC::IStream &f) 
+	void serial(class NLMISC::IStream &f)
 	{
 		f.serial( Role );
 		f.serialEnum( Race );
@@ -1130,7 +1130,7 @@ public :
 		SKILLS::ESkills	ParentSkill;
 		std::vector<SKILLS::ESkills> ChildSkills;
 
-		void serial(NLMISC::IStream &f)
+		void serial(class NLMISC::IStream &f)
 		{
 			f.serialEnum( Skill );
 			f.serial( SkillCode );
@@ -1167,7 +1167,7 @@ public :
 	static uint getVersion () { return 1 + ( SKILLS::NUM_SKILLS << 16 ); }
 
 	/// serialize
-	void serial(NLMISC::IStream &f) { f.serialCont( SkillsTree ); }
+	void serial(class NLMISC::IStream &f) { f.serialCont( SkillsTree ); }
 
 	/// destructor
 	virtual ~CStaticSkillsTree() {}

@@ -68,22 +68,24 @@ using namespace std;
 
 CInputOutputService * IOS = NULL;
 
-uint8 MaxDistSay = 1; 
+uint8 MaxDistSay = 1;
 uint8 MaxDistShout = 3;
 
 // true if we display all chat received
 bool ShowChat = false;
 
 CVariable<bool>	VerboseNameTranslation("ios","VerboseNameTranslation", "Set verbosity for bot name trnaslation", false, 0, true);
+CVariable<uint32>	MongoDBChatsCheckingDelay("ios","MongoDBChatCheckingDelay", "Set delay in tick before new MongDb chats check", 10, 0, true);
 extern CVariable<bool>	VerboseChatManagement;
 
 
 CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
+uint8 ticks_before_mongodb_check = 0;
 
 void CAIAliasManager::clear()
-{ 
-	_Translation.clear(); 
+{
+	_Translation.clear();
 }
 
 void CAIAliasManager::add(uint32 alias, const std::string &name)
@@ -91,13 +93,13 @@ void CAIAliasManager::add(uint32 alias, const std::string &name)
 //	_Translation[alias].first = name;
 	//_Translation[alias].second = 0; //undef
 	CCharacterInfos cInfo;
-	
+
 
 	std::string botName = name;
 	ucstring ucname  = botName;
 
 		//addCharacterName
-	
+
 	ucstring title;
 
 	// remove any $title$ specification in the short name
@@ -108,7 +110,7 @@ void CAIAliasManager::add(uint32 alias, const std::string &name)
 		// extract $title$ spec in the title
 		ucstring::size_type pos2 = ucname.find('$', pos+1);
 		title = ucname.substr(pos+1, pos2-pos-1);
-		cInfo.Title = title.toString();
+		cInfo.Title = title.toUtf8();
 		cInfo.TitleIndex = SM->storeString(title);
 	}
 	else
@@ -120,10 +122,10 @@ void CAIAliasManager::add(uint32 alias, const std::string &name)
 	// try to map a translated bot name on the short name
 	cInfo.UntranslatedNameIndex = SM->storeString(ucname);
 	cInfo.UntranslatedShortNameIndex = SM->storeString(cInfo.ShortName);
-	
+
 
 	cInfo.ShortNameIndex = SM->translateShortName(cInfo.UntranslatedShortNameIndex);
-	
+
 	cInfo.ShortName = SM->getString(cInfo.ShortNameIndex);
 
 	// extract title from the translated bot name (if needed)
@@ -138,14 +140,14 @@ void CAIAliasManager::add(uint32 alias, const std::string &name)
 			// extract $title$ spec in the title
 			ucstring::size_type pos2 = sn.find('$', pos+1);
 			title = sn.substr(pos+1, pos2-pos-1);
-			cInfo.Title = title.toString();
+			cInfo.Title = title.toUtf8();
 			cInfo.TitleIndex = SM->storeString(title);
 		}
 	}
 
 
 
-	
+
 
 //	_Translation[alias].UntranslatedShortNameIndex = cInfo.ShortNameIndex;
 	if (!cInfo.ShortName.empty())
@@ -160,19 +162,19 @@ void CAIAliasManager::add(uint32 alias, const std::string &name)
 			_Translation[alias].ShortNameIndex = 0;
 		}
 	}
-	else 
+	else
 	{
 		_Translation[alias].ShortNameIndex = 0;
 	}
 
-	
+
 	if (!cInfo.Title.empty())
 	{
 	//	_Translation[alias].UntranslatedTitleIndex = cInfo.TitleIndex;
 		unsigned int first = 0;
 		unsigned int last = static_cast<unsigned int>( CStringManager::NB_LANGUAGES );
 		for  ( ;first != last; ++first)
-		{	
+		{
 			uint32 index = SM->translateTitle(cInfo.Title, static_cast<CStringManager::TLanguages>(first));;
 			if (index == cInfo.TitleIndex)
 			{
@@ -191,7 +193,7 @@ void CAIAliasManager::add(uint32 alias, const std::string &name)
 		unsigned int first = 0;
 		unsigned int last = static_cast<unsigned int>( CStringManager::NB_LANGUAGES );
 		for  ( ;first != last; ++first)
-		{	
+		{
 			_Translation[alias].TitleIndex[first] =  0;
 		}
 	}
@@ -201,23 +203,23 @@ void CAIAliasManager::add(uint32 alias, const std::string &name)
 
 bool CAIAliasManager::is(uint32 alias) const
 {
-	return _Translation.find(alias) != _Translation.end(); 
+	return _Translation.find(alias) != _Translation.end();
 }
 /*
-std::string CAIAliasManager::getShortName(uint32 alias) const 
-{ 
-	return _Translation.find(alias)->second.ShortName; 
+std::string CAIAliasManager::getShortName(uint32 alias) const
+{
+	return _Translation.find(alias)->second.ShortName;
 }*/
 
-uint32 CAIAliasManager::getShortNameIndex(uint32 alias) const 
-{ 
-	return _Translation.find(alias)->second.ShortNameIndex; 
+uint32 CAIAliasManager::getShortNameIndex(uint32 alias) const
+{
+	return _Translation.find(alias)->second.ShortNameIndex;
 }
 
-uint32 CAIAliasManager::getTitleIndex(uint32 alias, CStringManager::TLanguages lang) const 
+uint32 CAIAliasManager::getTitleIndex(uint32 alias, CStringManager::TLanguages lang) const
 {
 	nlassert( lang < CStringManager::NB_LANGUAGES );
-	return _Translation.find(alias)->second.TitleIndex[lang]; 
+	return _Translation.find(alias)->second.TitleIndex[lang];
 }
 
 
@@ -242,7 +244,7 @@ static void cbDisconnection( const string &serviceName, TServiceId serviceId, vo
 
 	// warn the chat manager
 	IOS->getChatManager().onServiceDown(serviceName);
-	
+
 } // cbDisconnection //
 
 
@@ -250,7 +252,7 @@ static void cbDisconnection( const string &serviceName, TServiceId serviceId, vo
 
 //---------------------------------------------------
 // iosUpdate :
-// 
+//
 //---------------------------------------------------
 void iosUpdate()
 {
@@ -268,7 +270,7 @@ void iosUpdate()
 
 //---------------------------------------------------
 // iosSync :
-// 
+//
 //---------------------------------------------------
 void iosSync()
 {
@@ -293,7 +295,7 @@ bool CInputOutputService::update()
 		{
 			// need to erase this one
 			delete first->second.second;
-		
+
 			CEntityId	id = first->first;
 			_RemovedCharInfos.erase(first);
 
@@ -303,6 +305,19 @@ bool CInputOutputService::update()
 		else
 			++first;
 	}
+
+	/// MongoDB Chats Check
+
+	if (ticks_before_mongodb_check > 0)
+	{
+		ticks_before_mongodb_check--;
+	}
+	else
+	{
+		ticks_before_mongodb_check = MongoDBChatsCheckingDelay;
+		IOS->getChatManager().update();
+	}
+
 
 	return true;
 } // update //
@@ -334,7 +349,7 @@ void CInputOutputService::init()
 	CStringManager::CParameterTraits::init();
 
 	setVersion (RYZOM_PRODUCT_VERSION);
-	
+
 	IOS = this;
 	setUpdateTimeout(100);
 
@@ -349,7 +364,7 @@ void CInputOutputService::init()
 //		CConfigFile::CVar& cvDynamicDB = ConfigFile.getVar("DynamicDB");
 //		dynamicDBFileName = cvDynamicDB.asString();
 //	}
-//	catch(const EUnknownVar &) 
+//	catch(const EUnknownVar &)
 //	{
 //		nlwarning("<CInputOutputService::init> using default chat files");
 //	}
@@ -361,7 +376,7 @@ void CInputOutputService::init()
 		CConfigFile::CVar& cvMaxDistShout = ConfigFile.getVar("MaxDistShout");
 		MaxDistShout = cvMaxDistShout.asInt();
 	}
-	catch(const EUnknownVar &) 
+	catch(const EUnknownVar &)
 	{
 		nlinfo("<CInputOutputService::init> using default chat max distance values");
 	}
@@ -370,7 +385,7 @@ void CInputOutputService::init()
 		SM->setTestOnly();
 
 	// init mission string manager.
-	SM->init(); 
+	SM->init();
 
 	if (IService::getInstance()->haveArg('Q'))
 	{
@@ -395,7 +410,7 @@ void CInputOutputService::init()
 	Mirror.init( datasetNames, cbMirrorIsReady, iosUpdate, iosSync );
 
 	CUnifiedNetwork::getInstance()->setServiceUpCallback( string("*"), cbConnection, 0);
-	CUnifiedNetwork::getInstance()->setServiceDownCallback( string("*"), cbDisconnection, 0);		
+	CUnifiedNetwork::getInstance()->setServiceDownCallback( string("*"), cbDisconnection, 0);
 
 	CShardNames::getInstance().init(ConfigFile);
 
@@ -414,7 +429,7 @@ void CInputOutputService::init()
 //			sn.DisplayName = sessionNames->asString(i*3+1);
 //			sn.ShortName = sessionNames->asString(i*3+2);
 //			sn.DisplayNameId = CStringMapper::map(sn.DisplayName);
-//			
+//
 //
 //			_SessionNames.push_back(sn);
 //		}
@@ -535,7 +550,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	{
 		nlwarning("addCharacterName: receiveing char info with an invalid dataset row (datasetRow = %u, name = '%s'). IGNORING.",
 			chId.getIndex(),
-			ucname.toString().c_str());
+			ucname.toUtf8().c_str());
 		return;
 	}
 	// Add player in the chat manager (note: not done when chId added in the mirror, because callback called earlier)
@@ -550,14 +565,15 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	{
 		charInfos = new CCharacterInfos();
 		// store association
-		_IdToInfos.insert( make_pair(eid,charInfos) );
+		_IdToInfos.insert( make_pair(eid, charInfos) );
 	}
 	else
 	{
-		// remove previous name association
-//		_NameToInfos.erase(ucname);
-		_NameToInfos.erase(charInfos->ShortName.toUtf8());
-		oldname = charInfos->ShortName;
+		// remove previous name only if it's different than real name (Real Name association can't be deleted)
+		if (charInfos->ShortName != charInfos->ShortRealName)
+			_NameToInfos.erase(charInfos->ShortName.toUtf8());
+
+		oldname = charInfos->ShortName; // save the old name
 
 		if (charInfos->EntityId != eid)
 		{
@@ -574,7 +590,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	ucstring title;
 	charInfos->EntityId = eid;
 	charInfos->DataSetIndex = chId;
-		
+
 	// remove any $title$ specification in the short name
 	ucstring::size_type pos = ucname.find('$');
 	if (pos != ucstring::npos)
@@ -583,7 +599,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 		// extract $title$ spec in the title
 		ucstring::size_type pos2 = ucname.find('$', pos+1);
 		title = ucname.substr(pos+1, pos2-pos-1);
-		charInfos->Title = title.toString();
+		charInfos->Title = title.toUtf8();
 		charInfos->TitleIndex = SM->storeString(title);
 	}
 	else
@@ -605,7 +621,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 			}
 		}
 
-		// See if an existing player was renamed
+		// Check about a rename or get of original name back
 		if (!oldname.empty())
 		{
 			TSessionId sessionid;
@@ -615,29 +631,13 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 			// it will try to match it as a homeland name
 			string::size_type pos = name.find('(');
 			if (pos == string::npos)
-			{
 				name = CShardNames::getInstance().makeFullName(name, charInfos->HomeSessionId);
-			}
 
 			TCharInfoCont::iterator itInfos = _NameToInfos.find( name );
-			if( itInfos == _NameToInfos.end() )
+			if( itInfos == _NameToInfos.end() || name == charInfos->ShortRealName.toUtf8() )
 			{
-				// New name does not exist
+				// New name does not exist or is the real name
 				charInfos->ShortName.fromUtf8(name);
-			}
-
-			// Save the old name only if new name is not found (and the player is getting original name back)
-			itInfos = _RenamedCharInfos.find( charInfos->ShortName.toUtf8() );
-			if( itInfos != _RenamedCharInfos.end() )
-			{
-				// New name was in the saved list; player is getting original name back. 
-				// Remove the new name
-				_RenamedCharInfos.erase(charInfos->ShortName.toUtf8());
-			}
-			else
-			{
-				// New name was not in the list, save old name
-				_RenamedCharInfos.insert( make_pair(oldname.toUtf8(), charInfos) );
 			}
 		}
 	}
@@ -645,7 +645,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	// try to map a translated bot name on the short name
 	charInfos->UntranslatedNameIndex = SM->storeString(ucname);
 	charInfos->UntranslatedShortNameIndex = SM->storeString(charInfos->ShortName);
-	
+
 	// don't translate players names
 	if (eid.getType() != RYZOMID::player)
 	{
@@ -653,7 +653,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	}
 	else
 	{
-		charInfos->ShortNameIndex = charInfos->UntranslatedShortNameIndex; 
+		charInfos->ShortNameIndex = charInfos->UntranslatedShortNameIndex;
 	}
 
 	charInfos->ShortName = SM->getString(charInfos->ShortNameIndex);
@@ -670,14 +670,16 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 			// extract $title$ spec in the title
 			ucstring::size_type pos2 = sn.find('$', pos+1);
 			title = sn.substr(pos+1, pos2-pos-1);
-			charInfos->Title = title.toString();
+			charInfos->Title = title.toUtf8();
 			charInfos->TitleIndex = SM->storeString(title);
 		}
 	}
-	
+
 	// build the translated name
+	ucstring uc_title;
+	uc_title.fromUtf8(charInfos->Title);
 	if (!charInfos->Title.empty())
-		charInfos->Name = charInfos->ShortName + "$" + charInfos->Title+"$";
+		charInfos->Name = charInfos->ShortName + ucstring("$") + uc_title + ucstring("$");
 	else
 		charInfos->Name = charInfos->ShortName;
 
@@ -685,13 +687,13 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	{
 		if (charInfos->ShortNameIndex != charInfos->UntranslatedShortNameIndex)
 		{
-			string sn = charInfos->ShortName.toString();
-			string usn = SM->getString(charInfos->UntranslatedShortNameIndex).toString();
+			string sn = charInfos->ShortName.toUtf8();
+			string usn = SM->getString(charInfos->UntranslatedShortNameIndex).toUtf8();
 			nlinfo(" Translated short name for this character : '%s' (index %u) (untranslated : '%s')", sn.c_str(), charInfos->ShortNameIndex, usn.c_str());
 		}
 		else
 		{
-			string sn = charInfos->ShortName.toString();
+			string sn = charInfos->ShortName.toUtf8();
 			nlinfo(" Short name for this character : '%s' (index %u)", sn.c_str(), charInfos->ShortNameIndex);
 		}
 	}
@@ -717,35 +719,80 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 	else
 	{
 		nlwarning( "ERROR: Received CHARACTER_NAME with null row!" );
-		// Previously: not yet in the mirror
-		/*if ( ! charInfos->NameIndex.isReadable() )
-			charInfos->NameIndex.tempAllocate();
-		charInfos->NameIndex.tempReassign(SM->storeString(charInfos->Name));*/
 	}
 	if (VerboseNameTranslation)
 	{
 		if (charInfos->NameIndex == charInfos->UntranslatedNameIndex)
 			nldebug("IOS: addCharacterName Adding name '%s' for entity %s:%x",
-				ucname.toString().c_str(),
+				ucname.toUtf8().c_str(),
 				TheDataset.getEntityId(chId).toString().c_str(),
 				chId.getIndex());
 		else
 			nldebug("IOS: addCharacterName Adding name '%s' translated as '%s' for entity %s:%x",
-				ucname.toString().c_str(), 
-				charInfos->Name.toString().c_str(), 
+				ucname.toUtf8().c_str(),
+				charInfos->Name.toUtf8().c_str(),
 				TheDataset.getEntityId(chId).toString().c_str(),
 				chId.getIndex());
 	}
 
-	// store name assoc
-//	_NameToInfos.insert( make_pair(ucname,charInfos) );
+	// Store realname only the first time (so never change)
+	if (charInfos->ShortRealName.empty())
+		charInfos->ShortRealName = charInfos->ShortName;
+
 	// store the short name assoc.
 	_NameToInfos.insert( make_pair(charInfos->ShortName.toUtf8(), charInfos) );
-	// TODO : remove when dynDB removed
-//	charInfos->OldNameIndex = IOS->getChatManager().getDynamicDB().add(charInfos->ShortName, false);
 
 } // addCharacterName //
 
+
+
+//-----------------------------------------------
+//	getRocketName :
+//
+//-----------------------------------------------
+string CInputOutputService::getRocketName(const ucstring& chName)
+{
+	string realName;
+	string name;
+	TCharInfoCont::iterator itInfos;
+	CCharacterInfos * charInfos = NULL;
+
+	ucstring::size_type pos = chName.find('$');
+	if (pos != string::npos)
+		itInfos = _NameToInfos.find(chName.substr(0, pos).toUtf8());
+	else
+		itInfos = _NameToInfos.find(chName.toUtf8());
+
+	// Get informations about a player.
+	if (itInfos != _NameToInfos.end())
+	{
+		charInfos = itInfos->second;
+		realName = charInfos->ShortRealName.toUtf8();
+		name = charInfos->ShortName.toUtf8();
+	}
+	else
+	{
+		nlwarning("Name not found : %s", chName.toUtf8().c_str());
+		return "unknown";
+	}
+
+	string::size_type spos = realName.find('(');
+	if (spos != string::npos)
+		realName = realName.substr(0, spos);
+
+	if (!name.empty())
+	{
+		spos = name.find('(');
+		if (spos != string::npos)
+			name = name.substr(0, spos);
+	}
+
+	if (charInfos != NULL && !name.empty() && !charInfos->HavePrivilege)
+		realName = name+"@"+realName;
+
+	return realName;
+
+} // getRocketName //
 
 
 //-----------------------------------------------
@@ -786,13 +833,6 @@ CCharacterInfos * CInputOutputService::getCharInfos( const ucstring& chName )
 	{
 		return 	itInfos->second;
 	}
-	
-	// Not found so check any renamed players
-	itInfos = _RenamedCharInfos.find( chName.toUtf8() );
-	if( itInfos != _NameToInfos.end() )
-	{
-		return 	itInfos->second;
-	}
 	else
 	{
 		return NULL;
@@ -810,7 +850,7 @@ void CInputOutputService::removeEntity( const TDataSetRow &chId )
 	if (_ChatManager.checkClient(chId))
 	{
 		if (VerboseChatManagement)
-			nldebug("IOSCU: removeEntity : removing the client %s:%x from chat manager !", 
+			nldebug("IOSCU: removeEntity : removing the client %s:%x from chat manager !",
 				TheDataset.getEntityId(chId).toString().c_str(),
 				chId.getIndex());
 		_ChatManager.removeClient( chId );
@@ -850,33 +890,14 @@ void CInputOutputService::removeEntity( const TDataSetRow &chId )
 //		index = itInfos->second->OldNameIndex;
 
 		_NameToInfos.erase(itInfos->second->ShortName.toUtf8());
+		if (!itInfos->second->ShortRealName.empty() && itInfos->second->ShortRealName.toUtf8() != itInfos->second->ShortName.toUtf8())
+			_NameToInfos.erase(itInfos->second->ShortRealName.toUtf8());
 
 		// erase the entry in _IdToInfos
 		delete itInfos->second;
 		itInfos->second = NULL;
 		_IdToInfos.erase( itInfos );
 
-		// erase the entry in _NameToInfos		
-/*		CDynamicStringInfos * infos = _ChatManager.getDynamicDB().getInfos( index );
-		if( infos )
-		{
-			name = infos->Str;
-			map<ucstring,CCharacterInfos *>::iterator itInfos2 = _NameToInfos.find( name );
-			if( itInfos2 != _NameToInfos.end() )
-			{
-				_NameToInfos.erase( itInfos2 );
-			}
-*/
-/*			else
-			{
-				nlwarning("<CInputOutputService::removeEntity> Unknown entity : %s",name.toString().c_str());
-			}
-*//*		}
-		else
-		{
-			nlwarning("<CInputOutputService::removeEntity> Dynamic string %d unknown",index);
-		}
-*/
 	}
 	else
 	{
@@ -924,14 +945,14 @@ void CInputOutputService::display(NLMISC::CLog &log)
 	{
 //		uint32 nameIndex = itInfos->second->OldNameIndex;
 //		CDynamicStringInfos * infos = IOS->getChatManager().getDynamicDB().getInfos( nameIndex );
-		log.displayNL("Name: %s \tentity: %s" /* \tindex: %d \tstr: %s"*/, 
-			itInfos->first.c_str(), 
-			itInfos->second->EntityId.toString().c_str() 
-			/*, infos->Index, 
-			infos->Str.toString().c_str()*/);	
+		log.displayNL("Name: %s \tentity: %s" /* \tindex: %d \tstr: %s"*/,
+			itInfos->first.c_str(),
+			itInfos->second->EntityId.toString().c_str()
+			/*, infos->Index,
+			infos->Str.toUtf8().c_str()*/);
 	}
 	log.displayNL("CHAT GROUPS : ");
-	IOS->getChatManager().displayChatGroups(log, false, false);
+	IOS->getChatManager().displayChatGroups(log, true, false);
 
 } // display //
 
@@ -978,7 +999,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdline,
 
 	IOS->init();
 	return 1;
-	
+
 }
 
 #endif
@@ -987,6 +1008,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdline,
 
 
 
- 
+
 
 

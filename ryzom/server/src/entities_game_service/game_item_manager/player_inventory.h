@@ -122,7 +122,7 @@ public:
 	uint32 getInventoryWeight() const;
 	/// Return the total bulk of the inventory
 	uint32 getInventoryBulk() const;
-	
+
 	//@{
 	//@name Item list manipulation
 	/** Insert an item in the inventory
@@ -142,6 +142,8 @@ public:
 	virtual void deleteItem(uint32 slot);
 	/// Remove the nth item from this inventory
 	virtual CGameItemPtr removeItem(uint32 slot, uint32 quantity = INVENTORIES::REMOVE_MAX_STACK_QUANTITY, TInventoryOpResult * res = NULL);
+	/// Split item stack into two stacks.
+	virtual CGameItemPtr splitStackItem(CGameItemPtr &item, uint32 quantity, TInventoryOpResult * res = NULL);
 	/** Move an item from one slot to another slot
 	 *	If the destination slot already contains an item,
 	 *	the two items are swaped.
@@ -153,7 +155,7 @@ public:
 	 */
 	virtual uint32 deleteStackItem(uint32 slot, uint32 quantity = INVENTORIES::REMOVE_MAX_STACK_QUANTITY, TInventoryOpResult * res = NULL);
 
-	// Return the item at the nth slot 
+	// Return the item at the nth slot
 	CGameItemPtr getItem(uint32 slot) const;
 
 	/// NEVER use this method. ONLY used when loading inventory from save files.
@@ -195,11 +197,11 @@ public:
 	/// Get the maximum slot accepted, default is almost unlimited
 	virtual uint32 getMaxSlot() const { return UINT_MAX;};
 	//@}
-	
+
 	//@{
 	//@name Static inter inventory operation
 	/** Move an item from one inventory to another.
-	 *	If the destination slot is specified and the destination slot is not 
+	 *	If the destination slot is specified and the destination slot is not
 	 *	empty, then a stacking operation is attempted.
 	 *	If the quantity is not specified or greater than the actual size of the stack
 	 *	(default is UINT_MAX), then all the item stack is moved.
@@ -207,7 +209,7 @@ public:
 	 *	size, then only a part of the source stack is moved.
 	 *	If any error occur during transfer, the method return the error
 	 *	code and the two inventory are left unchanged.
-	 *	The boolean bestEffort will try to move as many stack elements as possible 
+	 *	The boolean bestEffort will try to move as many stack elements as possible
 	 *	is accordance with the inventory constraint (mostly bulk constraint) [NOT IMPLEMENTED YET]
 	 *
 	 *	Warning: As in insertItem with autostacking, there can be several destination slots filled.
@@ -293,7 +295,7 @@ protected:
  *	of item, they don't 'own' the item.
  *
  *	When deleting item in the reference inventory,
- *	they are only dereferenced. 
+ *	they are only dereferenced.
  *
  *	An item is own by one inventory and can be
  *	reference by one reference inventory.
@@ -363,7 +365,7 @@ public:
 	 *	of the inventory
 	 */
 	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize) =0;
-	/** Force an update of the information related to an item 
+	/** Force an update of the information related to an item
 	 *	In case of client operation canceled by the server, this method is
 	 *	use to reset the client information to normal.
 	 */
@@ -395,6 +397,7 @@ public:
 	void setCharacter(CCharacter *character);
 	/// get the character
 	CCharacter *getCharacter();
+	CCharacter *getConstCharacter() const;
 
 	// info version mechanism
 	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
@@ -405,7 +408,7 @@ public:
 	 */
 	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize);
 
-	/** Force an update of the information related to an item 
+	/** Force an update of the information related to an item
 	 *	In case of client operation canceled by the server, this method is
 	 *	use to reset the client information to normal.
 	 */

@@ -5,11 +5,11 @@ ADD_EXECUTABLE(ryzom_monitor_service WIN32 ${SRC})
 INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_monitor_service
-						ryzom_gameshare
+						${RYZOM_GAMESHARE_LIBRARIES}
 						${MYSQL_LIBRARIES}
-						nelmisc 
-						nelnet
-						nelgeorges)
+						${NELMISC_LIBRARIES} 
+						${NELNET_LIBRARIES}
+						${NELGEORGES_LIBRARIES})
 
 NL_DEFAULT_PROPS(ryzom_monitor_service "Ryzom, Services: Monitor Service (MOS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_monitor_service)

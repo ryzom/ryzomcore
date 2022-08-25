@@ -219,6 +219,7 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 			case TBrickParam::FG_ECT_SPC:
 				INFOLOG("FG_ECT_SPC: %s",((CSBrickParamForageEcotypeSpec *)param)->Ecotype.c_str());
 				_Props.Extraction.EcotypeSpec = ECOSYSTEM::stringToEcosystem( ((CSBrickParamForageEcotypeSpec *)param)->Ecotype );
+				_Props.Extraction.EcotypeSpecBonus = true;
 				break;
 			case TBrickParam::FG_RMGRP_FILT:
 				INFOLOG("FG_RMGRP_FILT: %i",((CSBrickParamForageRMGroupFilter *)param)->Value);
@@ -261,6 +262,19 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 						PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, "FORAGE_NO_CARE_FIRST" );
 						player->sendCloseTempInventoryImpulsion(); // close the item window that was auto-opened by the client
 						return false;
+					} else {
+						CPlayer* p = PlayerManager.getPlayer(PlayerManager.getPlayerId(player->getId()));
+						if (p != NULL)
+						{
+							if (p->isTrialPlayer()) {
+								//Check if it's a f2p and in same time than forager
+								CCharacter *foragerPlayer = (CCharacter *) CEntityBaseManager::getEntityBasePtr( _Source->foragers().front() );
+								 if (foragerPlayer != player && (foragerPlayer->getTeamId() == CTEAM::InvalidTeamId || foragerPlayer->getTeamId() != player->getTeamId())) {
+									PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, "FORAGE_NO_CARE_FIRST" );
+									return false;
+								}
+							}
+						}
 					}
 				}
 				else
@@ -281,7 +295,7 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 			// else the phrase will be rejected in validate()
 		}
 
-		// Bonus: when using ecosystem specialization, decrease impact on some risks (TODO: linearly dependant on specialized skill value).
+		// when using ecosystem specialization
 		if ( _Props.Extraction.EcotypeSpec != ECOSYSTEM::common_ecosystem )
 		{
 			// Check if the ecotype specialization matches
@@ -290,6 +304,11 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 				PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, "FORAGE_ECOTYPE_SPEC_NOT_MATCHING" );
 				return false;
 			}
+		}
+
+		// Bonus: when using ecosystem/atys specialization, decrease impact on some risks (TODO: linearly dependant on specialized skill value).
+		if ( _Props.Extraction.EcotypeSpecBonus )
+		{
 			if ( _RequestedProps[CHarvestSource::A] != 0 )
 			{
 				// Extraction
@@ -547,16 +566,14 @@ bool CFgExtractionPhrase::validate()
 		return false; // has disappeared
 	}
 
-#ifdef RYZOM_FORGE_CRAFT_TOOL
 	// test if tool have enough quality
-	sint depositQ = (sint)harvestSource->forageSite()->deposit()->maxQuality();
+	/* OLD CHECK sint depositQ = (sint)harvestSource->forageSite()->deposit()->maxQuality();
 
-	if ((depositQ > 0) && (item->recommended()+49  < depositQ))
+	 if ((depositQ > 0) && (item->recommended()+49  < depositQ))
 	{
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "FORAGE_TOOL_QUALITY_TOO_LOW");
 		return false;
-	}
-#endif
+	} */
 
 	// Check the distance from the player to the source (ignoring Z because for tunnel case, player couldn't target the source)
 	const CEntityState& state = player->getState();
@@ -812,7 +829,7 @@ void CFgExtractionPhrase::applyExtraction( CCharacter *player, float successFact
 		nldebug( "FG: Player requests (dA %.2f Q %.1f), gets (dA %.2f Q %.1f) of %s", _RequestedProps[CHarvestSource::A], _RequestedProps[CHarvestSource::Q], _Props.Extraction.ObtainedProps[CHarvestSource::A], _Props.Extraction.ObtainedProps[CHarvestSource::Q], _Source->materialSheet().toString().c_str() );
 #endif
 		if ( player->forageProgress() ) // can have been reset if extractMaterial() killed the player
-			player->forageProgress()->fillFromExtraction( _Props.Extraction.ObtainedProps[CHarvestSource::A], _Props.Extraction.ObtainedProps[CHarvestSource::Q], player );
+			player->forageProgress()->fillFromExtraction(_Source, _Props.Extraction.ObtainedProps[CHarvestSource::A], _Props.Extraction.ObtainedProps[CHarvestSource::Q], player );
 		else
 			return;
 

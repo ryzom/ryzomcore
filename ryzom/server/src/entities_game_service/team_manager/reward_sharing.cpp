@@ -261,10 +261,10 @@ bool CRewardSharing::userValidSelect(const TDataSetRow & userRow, uint8 state)
 					shareItem.setQUALITY(user->_PropertyDatabase, 0);
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:QUANTITY",j), 0 );
 					shareItem.setQUANTITY(user->_PropertyDatabase, 0);
-//					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:USER_COLOR",j), 1 );
+					shareItem.setSERIAL(user->_PropertyDatabase, 0);
+					shareItem.setCREATE_TIME(user->_PropertyDatabase, 0);
+//					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:USER_COLOR",j), 0 );
 					shareItem.setUSER_COLOR(user->_PropertyDatabase, 1);
-//					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:CHARAC_BUFFS",j), 0 );
-					shareItem.setCHARAC_BUFFS(user->_PropertyDatabase, 0);
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:WEIGHT",j), 0 );
 					shareItem.setWEIGHT(user->_PropertyDatabase, 0);
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:NAMEID",j), 0 );
@@ -343,6 +343,7 @@ void CRewardSharing::setUsersDb()
 				else
 				{
 					CGameItemPtr item = _Rewards[j].Item;
+					const INVENTORIES::TItemId &itemId = item->getItemId();
 					static CSheetId stackId ("stack.sitem");
 //					if ( item->getSheetId() == stackId )
 //					{
@@ -364,10 +365,10 @@ void CRewardSharing::setUsersDb()
 //						quantity = 1;
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:QUANTITY",j), quantity );
 					shareItem.setQUANTITY(user->_PropertyDatabase, checkedCast<uint16>(quantity));
+					shareItem.setSERIAL(user->_PropertyDatabase, checkedCast<uint32>(itemId.getSerialNumber()));
+					shareItem.setCREATE_TIME(user->_PropertyDatabase, checkedCast<uint32>(itemId.getCreateTime()));
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:USER_COLOR",j), item->color() );
 					shareItem.setUSER_COLOR(user->_PropertyDatabase, item->color());
-//					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:CHARAC_BUFFS",j), item->buffFlags() );
-					shareItem.setCHARAC_BUFFS(user->_PropertyDatabase, item->buffFlags());
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:WEIGHT",j), (uint16)(item->weight() / 10 ) );
 					shareItem.setWEIGHT(user->_PropertyDatabase, checkedCast<uint16>(item->weight() / 10 ));
 //					user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:NAMEID",j), item->sendNameId(user) );
@@ -418,10 +419,10 @@ void CRewardSharing::setUsersDb()
 				shareItem.setQUALITY(user->_PropertyDatabase, 0);
 //				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:QUANTITY",j), 0 );
 				shareItem.setQUANTITY(user->_PropertyDatabase, 0);
-//				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:USER_COLOR",j), 1 );
+				shareItem.setSERIAL(user->_PropertyDatabase, 0);
+				shareItem.setCREATE_TIME(user->_PropertyDatabase, 0);
+//				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:USER_COLOR",j), 0 );
 				shareItem.setUSER_COLOR(user->_PropertyDatabase, 1);
-//				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:CHARAC_BUFFS",j), 0 );
-				shareItem.setCHARAC_BUFFS(user->_PropertyDatabase, 0);
 //				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:WEIGHT",j), 0 );
 				shareItem.setWEIGHT(user->_PropertyDatabase, 0);
 //				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:NAMEID",j), 0 );

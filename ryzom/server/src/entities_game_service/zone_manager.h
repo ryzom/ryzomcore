@@ -31,7 +31,6 @@
 #include "game_share/string_manager_sender.h"
 #include "mission_manager/ai_alias_translator.h"
 #include "deposit.h"
-#include "game_share/backup_service_interface.h"
 
 class CCharacter;
 extern NLMISC::CRandom RandomGenerator;
@@ -40,7 +39,6 @@ static const uint16 InvalidSpawnZoneId = 0xFFFF;
 static const uint16 InvalidPlaceId = 0xFFFF;
 
 
-static const std::string DepositStateFileName = "deposits_state";
 /**
  * A teleport destination zone
  * \author Nicolas Brigand
@@ -140,18 +138,28 @@ public:
 	 * \return true on success
 	 */
 	bool build(const NLLIGO::CPrimZone * zone,uint16 id, bool reportAutorised = true);
-	bool build(const NLLIGO::CPrimPath * zone,uint16 id);
+	bool build(const NLLIGO::CPrimPath * zone,uint16 id, bool isPrim = true);
 
 	///\return the name of the place
 	inline const std::string &  getName() const{ return _Name; }
+	inline void setName(const std::string & name) { _Name = name; }
+
+	///\return the damagename of the place
+	inline const std::string &  getDamageName() const{ return _DamageName; }
+	inline void setDamageName(const std::string & name) { _DamageName = name; }
+
 	///\return the id of the place
 	inline uint16 getId() const{ return _Id; }
+
+	inline void setAlias(TAIAlias alias) { _Alias = alias;}
 
 	///\return center coords
 	inline sint32 getCenterX(){ return _CenterX;}
 	inline sint32 getCenterY(){ return _CenterY;}
 	inline void setGooActive(bool state) { _GooActive = state; }
 
+	void updateCenter();
+	
 	bool getReported() const	{ return _Reported; }
 	bool isGooPath() const { return _GooPath; }
 	bool isGooActive() const { return _GooActive; }
@@ -167,6 +175,7 @@ protected:
 private:
 	/// Name of the place
 	std::string _Name;
+	std::string _DamageName;
 	/// center coords
 	sint32		_CenterX;
 	sint32		_CenterY;
@@ -323,7 +332,7 @@ public:
 	};
 
 	// default constructor
-	CZoneManager() 	: DepositSearchTime(50) {}
+	CZoneManager() 	: DepositSearchTime(50) {maxGooBorderAlias = 0;}
 
 	~CZoneManager();
 
@@ -367,7 +376,7 @@ public:
 	 * \param continent: pointer to be filled with the appropriate value ( must be allocated if not NULL )
 	 * \return a pointer on the continent
 	 */
-	inline bool getPlace( CEntityBase * entity, float& gooDistance, const CPlace ** stable, std::vector<const CPlace *>& places, const CRegion ** region = NULL, const CContinent ** continent = NULL );
+	inline bool getPlace( CEntityBase * entity, float& gooDistance, const CPlace ** stable, std::vector<const CPlace *>& places, const CRegion ** region = NULL, const CContinent ** continent = NULL, bool withGooActive = false);
 
 	/**
 	 * get the continent containing the given position
@@ -403,7 +412,7 @@ public:
 	 * \param continent: pointer to be filled with the appropriate value ( must be allocated if not NULL )
 	 * \return a pointer on the continent
 	 */
-	bool getPlace( sint32 x, sint32 y, float& gooDistance, const CPlace ** stable, std::vector<const CPlace *>& places, const CRegion ** region = NULL, const CContinent ** continent = NULL );
+	bool getPlace( sint32 x, sint32 y, float& gooDistance, const CPlace ** stable, std::vector<const CPlace *>& places, const CRegion ** region = NULL, const CContinent ** continent = NULL, bool withGooActive = false);
 
 	/**
 	 * get the deposits under the position
@@ -515,6 +524,24 @@ public:
 		return getTpSpawnZone( _StartPoints[startPointIdx][idx].SpawnZoneId );
 	}
 
+	// Global Triggers for zones
+	std::map<std::string, std::string>	_RegionTriggers;
+	void addRegionTrigger(const std::string region, const std::string url)
+	{
+		_RegionTriggers[region] = url;
+	}
+
+	std::string getRegionTrigger(const std::string region)
+	{
+		std::string regionName;
+		std::map<std::string, std::string>::const_iterator it = _RegionTriggers.find(region);
+		if ( it != _RegionTriggers.end() )
+		{
+			regionName = _RegionTriggers[region];
+		}
+		return regionName;
+	}
+
 	/// get start point vector, slow because it makes a copy
 	/// warning: this should only be used by CCharacterVersionAdapter::adaptToVersion3()
 	std::vector<CStartPoint> getStartPointVector( uint16 startPointIdx ) const;
@@ -541,10 +568,8 @@ public:
 	 */
 	void clearEcotypes();
 
-	// Save deposit to primitive file, if needed
-	void saveDeposits();
-	/// Callback for deposit state
-	void receivedDepositState(CFileDescription const &fileDescription, NLMISC::IStream &dataStream);
+	TAIAlias maxGooBorderAlias;
+	bool parseGooBorder(  const std::string &name, const std::string &params, const std::string &damages );
 
 private:
 
@@ -600,7 +625,7 @@ private:
 	 * \param prim : the root node of the primitive
 	 */
 	bool parseGooBorder( const NLLIGO::IPrimitive* prim );
-
+	bool parsePath( const std::string &params, NLLIGO::CPrimPath* path );
 	/**
 	 * CZoneManager parseStartPoints
 	 * \param prim : the root node of the primitive
@@ -647,24 +672,6 @@ private:
 
 	/// The ecotype zones
 	static CEcotypeZones			_EcotypeZones;
-
-	/// Next cycle where we'll save deposits
-	NLMISC::TGameCycle _NextDepositSave;
-};
-
-class CDepositCallback : public IBackupFileReceiveCallback
-{
-public:
-	CDepositCallback() : processed(false)	{}
-	bool processed;
-	void				callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
-	{
-		if (!processed)
-		{
-			CZoneManager::getInstance().receivedDepositState(fileDescription, dataStream);
-			processed = true;
-		}
-	}
 };
 
 
@@ -700,9 +707,9 @@ inline bool CZoneManager::getRegion( CEntityBase * entity, const CRegion ** regi
 //-----------------------------------------------
 // CZoneManager getPlace
 //-----------------------------------------------
-inline bool CZoneManager::getPlace( CEntityBase * entity, float& gooDistance, const CPlace ** stable, std::vector<const CPlace *>& places, const CRegion ** region, const CContinent ** continent )
+inline bool CZoneManager::getPlace( CEntityBase * entity, float& gooDistance, const CPlace ** stable, std::vector<const CPlace *>& places, const CRegion ** region, const CContinent ** continent, bool withGooActive )
 {
-	return getPlace(entity->getState().X, entity->getState().Y,gooDistance, stable,places,region,continent);
+	return getPlace(entity->getState().X, entity->getState().Y,gooDistance, stable,places,region,continent,withGooActive);
 }// CZoneManager getPlace
 
 //-----------------------------------------------

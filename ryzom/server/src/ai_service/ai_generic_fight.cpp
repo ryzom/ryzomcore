@@ -290,20 +290,20 @@ void CBotProfileFlee::updateProfile(uint ticksSinceLastUpdate)
 	if	(fleeVector.isNull())
 		fleeVector.setX(1+fleeVector.x());	// hum ..
 	RYAI_MAP_CRUNCH::CDirection	startDir(fleeVector.x(), fleeVector.y(), true);
-	
+
 	// if we need to change our destination.
 	if	(	startDir!=_LastDir
 		||	!_LastStartPos.hasSameFullCellId(_Bot->wpos()))
 	{
 		const	RYAI_MAP_CRUNCH::CWorldMap	&worldMap=CWorldContainer::getWorldMap();
 		calcDone=false;
-		
+
 		for	(sint nbStep=0;nbStep<8;nbStep++)
 		{
 			// try to find a direction around startDir.
 			RYAI_MAP_CRUNCH::CDirection	dir(startDir);
 			dir.addStep((RYAI_MAP_CRUNCH::CDirection::TDeltaDirection)	((nbStep&1)?(nbStep>>1):(-(nbStep>>1))));
-			
+
 			const	RYAI_MAP_CRUNCH::CRootCell	*rootCell=worldMap.getRootCellCst(_Bot->wpos().stepCell(dir.dx(),dir.dy()));
 			if	(rootCell)
 			{
@@ -318,13 +318,13 @@ void CBotProfileFlee::updateProfile(uint ticksSinceLastUpdate)
 					_fightFleePathContainer.setDestination(/*AITYPES::vp_auto, */wpos);
 					break;
 				}
-				
+
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	//	if we found somewhere to go, then go there ..
 	if	(calcDone)
 	{
@@ -368,7 +368,7 @@ NLMISC_COMMAND(fleeGiveUpDistanceUnreachable, "Generic flee give up distance whe
 CFightOrganizer::CFightOrganizer()
 : _HaveEnnemy(true)
 {
-}	
+}
 
 bool CFightOrganizer::healIteration(CBot* bot, CBot* otherBot)
 {
@@ -407,7 +407,7 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 
 	IAIProfile	*profile=spawnBot->getAIProfile();
 	AITYPES::TProfiles	profileType=profile?profile->getAIProfileType():AITYPES::BAD_TYPE;
-	
+
 	//	special comp if feared bypass every other comp .. (panic mode !)
 	if	(spawnBot->isFeared())
 	{
@@ -420,9 +420,9 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 			fleeVect += delta;
 			aggroer = aggroer->nextTargeter();
 		}
-		
+
 		CAIS& inst = CAIS::instance();
-		
+
 		FOREACHC(itEntry, CBotAggroOwner::TBotAggroList, spawnBot->getBotAggroList())
 		{
 			CAIEntityPhysical* const phys = inst.getEntityPhysical(itEntry->second->getBot());
@@ -432,7 +432,7 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 			delta -= phys->aipos();
 			fleeVect += delta;
 		}
-		
+
 		fleeVect.normalize(1000);
 		CAIVector toGroup = spawnBot->spawnGrp().getCenterPos();
 		toGroup -= spawnBot->aipos();
@@ -473,19 +473,33 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 					if (healIteration(bot, *itBot))
 						return true;
 			}
-		}
+
 		// Heal others
-		if (spawnBot->canHeal())
-		{
 			FOREACH(itBot, CCont<CBot>, group->bots())
 			{
 				if (*itBot && bot!=*itBot)
 					if (healIteration(bot, *itBot))
 						return true;
 			}
+
+		// Heal others groups
+			CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
+			if (npcGroup) {
+				std::vector<CGroupNpc*> grps = npcGroup->getHealGroups();
+				for (uint i=0; i<grps.size(); ++i)
+				{
+					FOREACH(itBot, CCont<CBot>, grps[i]->bots())
+					{
+						if (*itBot && bot!=*itBot)
+							if (healIteration(bot, *itBot))  {
+								return true;
+							}
+					}
+				}
+			}
 		}
 	}
-	
+
 	if	(profileType==AITYPES::BOT_FIGHT)
 	{
 		CBotProfileFight	*fightProfile=NLMISC::safe_cast<CBotProfileFight*>(profile);
@@ -496,21 +510,21 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 		}
 
 	}
-	
+
 	std::vector<CAIEntityPhysical*>	botList;
 	AISHEETS::ICreatureCPtr botSheet = bot->getSheet();
-	
+
 	float grpAggroCoef = 0.5f*botSheet->GroupCohesionModulator();
-	
+
 	spawnBot->updateListAndMarkBot(botList, 1.f-grpAggroCoef);
-	
+
 	// unmarkBot list and choose target.
 	double	BestChooseScore=0;	//botSheet.ScoreModulator;
-	
+
 	CAIEntityPhysical *       ennemy = NULL;
 	CAIEntityPhysical const * fleeEnnemy = NULL;
 	double	BestFleeScore=0;	//botSheet.FearModulator;
-	
+
 	CAIVector	movingVector;
 	double		fear=1.0f;
 
@@ -519,7 +533,7 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 	FOREACH(it, std::vector<CAIEntityPhysical*>, botList)
 	{
 		CAIEntityPhysical	*const	entity=(*it);
-		
+
 		if (!entity->isAlive())
 		{
 			if (ai_profile_npc_VerboseLog)
@@ -540,18 +554,18 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 			spawnBot->forgetAggroFor(entity->dataSetRow());
 			continue;
 		}
-		
+
 		// is there a problem.
 		if	(entity->_AggroScore>0)
 		{
 			CAIVector targetToPos(spawnBot->aipos());
 			targetToPos -= entity->aipos();
-			
+
 			double slotCoef;
 			{
 				// 1 near - 0 far.
 				slotCoef = 1.f/(1.f+targetToPos.quickNorm()*botSheet->DistModulator());	// melee consideration. (don't know correct dist for caster or range may be in munition sheet !?).
-				
+
 				if	(((CAIEntityPhysical*)entity->getTarget())!=spawnBot)
 				{
 					int	nbOtherTargeter = entity->targeterCount();
@@ -562,11 +576,11 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 				}
 				slotCoef *= entity->getFreeFightSpaceRatio();
 			}
-			
+
 //////////////////////////////////////////////////////////////////////////////
-			
+
 			float score = (float)(entity->_AggroScore*slotCoef);
-			
+
 			if (target && target->getRyzomType() == RYZOMID::player)
 			{
 				if (entity != target)
@@ -596,12 +610,12 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 		}
 		entity->_ChooseLastTime = std::numeric_limits<uint32>::max();
 	}
-	
+
 	if (fleeEnnemy==NULL && !spawnBot->getUnreachableTarget().isNULL())
 	{
 		fleeEnnemy = spawnBot->getUnreachableTarget();
 	}
-	
+
 	if (ennemy)
 	{
 		_HaveEnnemy=true;
@@ -610,7 +624,7 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 		{
 			return true;
 		}
-		
+
 		// set the correct profile, if its not the case, otherwise, just change the target.
 		if	(profileType!=AITYPES::BOT_FIGHT)
 		{

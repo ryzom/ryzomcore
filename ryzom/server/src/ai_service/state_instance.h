@@ -653,4 +653,5 @@ void CPersistentStateInstance::setStartState(CAIState* state)
 	CStateInstance::init(_StartState);
 }
 
+#include "event_reaction_include.h"
 #endif

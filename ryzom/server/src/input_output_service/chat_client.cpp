@@ -46,7 +46,7 @@ CChatClient::CChatClient( const TDataSetRow& index )
 	cm.addGroup(_SayAudienceId, CChatGroup::say, "");
 	cm.addGroup(_ShoutAudienceId, CChatGroup::shout, "");
 
-	_Muted = false; 
+	_Muted = false;
 	_ChatMode = CChatGroup::say;
 	_SayLastAudienceUpdateTime = CTime::getLocalTime();
 	_ShoutLastAudienceUpdateTime = _SayLastAudienceUpdateTime;
@@ -64,9 +64,9 @@ CChatClient::~CChatClient()
 }
 
 
-void CChatClient::setChatMode( CChatGroup::TGroupType mode, TChanID dynChatChan) 
-{ 
-	_ChatMode = mode; 
+void CChatClient::setChatMode( CChatGroup::TGroupType mode, TChanID dynChatChan)
+{
+	_ChatMode = mode;
 	_DynChatChan = dynChatChan;
 }
 
@@ -126,7 +126,7 @@ bool CChatClient::isMuted()
 				return false;
 			}
 		}
-		return true;		
+		return true;
 	}
 
 } // isMuted //
@@ -143,10 +143,10 @@ void CChatClient::setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored)
 	if (ignored)
 	{
 		if( itIgnore == _IgnoreList.end() )
-		{		
+		{
 			_IgnoreList.insert( id );
 		}
-		
+
 	}
 	else
 	{
@@ -223,11 +223,11 @@ void CChatClient::filter( TFilter filterId )
 //
 //-----------------------------------------------
 CChatGroup& CChatClient::getAudience()
-{ 
+{
 	CChatManager &cm = IOS->getChatManager();
-	if(_ChatMode == CChatGroup::shout) 
-		return cm.getGroup(_ShoutAudienceId); 
-	else 
+	if(_ChatMode == CChatGroup::shout)
+		return cm.getGroup(_ShoutAudienceId);
+	else
 		return cm.getGroup(_SayAudienceId);
 
 } // getAudience //
@@ -239,7 +239,7 @@ CChatGroup& CChatClient::getAudience()
 //
 //-----------------------------------------------
 CChatGroup& CChatClient::getSayAudience( bool update )
-{ 
+{
 	CChatManager &cm = IOS->getChatManager();
 	if( update )
 	{
@@ -256,7 +256,7 @@ CChatGroup& CChatClient::getSayAudience( bool update )
 //
 //-----------------------------------------------
 CChatGroup& CChatClient::getShoutAudience( bool update )
-{ 
+{
 	CChatManager &cm = IOS->getChatManager();
 	if( update )
 	{
@@ -339,8 +339,8 @@ void CChatClient::updateAudience( CEntityId &audienceId, sint maxDist, TTime& la
 						// first of all, check the instance id
 						if (instanceId == charInstanceId)
 						{
-							CMirrorPropValueRO<sint32> charCell( TheDataset, entityIndex, DSPropertyCELL ); 
-								
+							CMirrorPropValueRO<sint32> charCell( TheDataset, entityIndex, DSPropertyCELL );
+
 							// if the player is NOT in an appartment
 							if( cellS > 0 )
 							{
@@ -349,7 +349,7 @@ void CChatClient::updateAudience( CEntityId &audienceId, sint maxDist, TTime& la
 
 								uint16 charCellX = (uint16)(charCell>>16);
 								uint16 charCellY = (uint16)(charCell&0xffff);
-								
+
 								sint32 distX = (sint32)(charCellX) - (sint32)(senderCellX);
 								sint32 distY = (sint32)(charCellY) - (sint32)(senderCellY);
 
@@ -409,7 +409,7 @@ void CChatClient::updateAudience( CEntityId &audienceId, sint maxDist, TTime& la
 		}
 		lastAudienceUpdateTime = currentTime;
 	}
-	
+
 } // updateAudience //
 
 
@@ -509,4 +509,54 @@ void CChatClient::unsubscribeAllChatGroup()
 		}
 	}
 }
+
+
+//-----------------------------------------------
+//	disableSendTranslation
+//-----------------------------------------------
+void CChatClient::disableSendTranslation( const string &lang )
+{
+	if (find(_DontSendTranslation.begin(), _DontSendTranslation.end(), lang) == _DontSendTranslation.end())
+	{
+		_DontSendTranslation.push_back(lang);
+	}
+}
+
+//-----------------------------------------------
+//	disableReceiveTranslation
+//-----------------------------------------------
+void CChatClient::disableReceiveTranslation( const string &lang )
+{
+	if (find(_DontReceiveTranslation.begin(), _DontReceiveTranslation.end(), lang) == _DontReceiveTranslation.end())
+	{
+		_DontReceiveTranslation.push_back(lang);
+	}
+}
+
+//-----------------------------------------------
+//	resetDisabledTranslations
+//-----------------------------------------------
+void CChatClient::resetDisabledTranslations()
+{
+	_DontReceiveTranslation.clear();
+	_DontSendTranslation.clear();
+}
+
+//-----------------------------------------------
+//	dontReceiveTranslation
+//-----------------------------------------------
+bool CChatClient::dontReceiveTranslation( const string &lang )
+{
+	return find(_DontReceiveTranslation.begin(), _DontReceiveTranslation.end(), lang) != _DontReceiveTranslation.end();
+}
+
+
+//-----------------------------------------------
+//	dontSendTranslation
+//-----------------------------------------------
+bool CChatClient::dontSendTranslation( const string &lang )
+{
+	return find(_DontSendTranslation.begin(), _DontSendTranslation.end(), lang) != _DontSendTranslation.end();
+}
+
 

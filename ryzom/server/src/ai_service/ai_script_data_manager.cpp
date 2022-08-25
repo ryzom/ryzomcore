@@ -135,8 +135,8 @@ string CAIScriptDataManager::makePdrFileName()
 	
 	if (aisName.empty())
 		aisName = "unamed_ais";
-
-
+	
+	
 	return string("ai_script_data/")+aisName+"_pdr.bin";
 }
 

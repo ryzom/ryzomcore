@@ -355,6 +355,7 @@ namespace LS
 				// real user status.
 			}
 
+			/* commented by Ulukyn
 			// Now prevent from logging-in at the same time with a free GM's player account and a GM CS account
 			CNelUserPtr nelUser = CNelUser::load(_NelDb, userId, __FILE__, __LINE__);
 			BOMB_IF(nelUser == NULL, "on_login : invalid nel user %u" << userId, loginResult(from, userId, "", 5, "Invalid user"); return);
@@ -407,7 +408,7 @@ namespace LS
 					}
 				}
 			}
-
+			*/
 
 			NLNET::CInetAddress addr(ipAddress);
 			//2 generate a cookie and set the player status and cookie in database

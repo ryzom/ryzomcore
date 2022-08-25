@@ -240,33 +240,6 @@ void cbClientGuildTakeMoney( NLNET::CMessage& msgin, const std::string & service
 	guild->takeMoney( character, money ,session );
 }
 
-void cbClientGuildItemAccess(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
-{
-	CEntityId eid;
-	// INVENTORIES::TInventory inventory;
-	uint16 slot;
-	EGSPD::CGuildGrade::TGuildGrade grade;
-	msgin.serial(eid);
-	// msgin.serialShortEnum(inventory);
-	msgin.serial(slot);
-	msgin.serialShortEnum(grade);
-
-	CCharacter *character = PlayerManager.getChar(eid);
-	DROP_IF(!character, "Character not found", return);
-	// DROP_IF(inventory == INVENTORIES::UNDEFINED, "Inventory is undefined", return);
-
-	CInventoryPtr invent = character->getInventory(INVENTORIES::guild);
-	DROP_IF(slot >= invent->getSlotCount(), "Invalid slot specified", return);
-	CGameItemPtr item = invent->getItem(slot);
-	DROP_IF(item == NULL, "Item does not exist", return);
-
-	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(character->getGuildId());
-	bool hasAccess = guild->getMemberFromEId(eid)->getGrade() <= item->getAccessGrade();
-	DROP_IF(!hasAccess, "Character does not have the right grade to change access rights on this item", return);
-
-	item->setAccessGrade(grade);
-}
-
 
 #undef GET_CHAR
 #undef GET_GUILD_MODULE

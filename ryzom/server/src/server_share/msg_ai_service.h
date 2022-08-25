@@ -377,7 +377,7 @@ public:
 	CAIGainAggroMsg	()
 	{	}
 
-	CAIGainAggroMsg	(const TDataSetRow &targetRowId, const TDataSetRow &playerRowId) : PlayerRowId(playerRowId), TargetRowId(targetRowId)
+	CAIGainAggroMsg	(const TDataSetRow &targetRowId, const TDataSetRow &playerRowId, bool isBoss) : PlayerRowId(playerRowId), TargetRowId(targetRowId), IsBoss(isBoss)
 	{
 #ifdef NL_DEBUG
 		nlassert(playerRowId.isValid());
@@ -387,15 +387,37 @@ public:
 
 	TDataSetRow		PlayerRowId;
 	TDataSetRow		TargetRowId;
+	bool			IsBoss;
 	
 	virtual void description ()
 	{
 		className ("CAIGainAggroMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("TargetRowId", PropDataSetRow, TDataSetRow(), TargetRowId);
+		property ("IsBoss", PropBool, false, IsBoss);
 	}
 	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
+
+//----------------------------------------------------------------------------
+// AIS -> EGS Message used to indicate an aggro lost
+//----------------------------------------------------------------------------
+class CAINotifyDeathMsg : public CMirrorTransportClass
+{
+public:
+	std::string		Url;
+	TDataSetRow		TargetRowId;
+	
+	virtual void description ()
+	{
+		className ("CAINotifyDeathMsg");
+		property ("Url", PropString, std::string() ,Url);
+		property ("TargetRowId", PropDataSetRow, TDataSetRow(), TargetRowId);
+	}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+};
+
+//---
 
 //----------------------------------------------------------------------------
 // EGS -> AIS Message used to indicate a player has respawned

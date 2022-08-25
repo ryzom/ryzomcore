@@ -69,6 +69,7 @@
 #include "player_manager/player.h"
 #include "team_manager/team_manager.h"
 #include "pvp_manager/pvp.h"
+#include "shop_type/named_items.h"
 #include "pvp_manager/pvp_faction_reward_manager/pvp_faction_reward_manager.h"
 #include "server_share/r2_variables.h"
 
@@ -101,6 +102,19 @@ void CAILostAggroMsgImp::callback (const std::string &name, NLNET::TServiceId id
 		creature->removeAggressivenessAgainstPlayerCharacter( PlayerRowId );
 	}
 }
+
+//----------------------------------------------------------------------------
+// CAINotifyDeathMsgImp::callback creature lost agro
+//----------------------------------------------------------------------------
+void CAINotifyDeathMsgImp::callback (const std::string &name, NLNET::TServiceId id)
+{
+	CCreature *creature = CreatureManager.getCreature( TargetRowId );
+	if( creature )
+	{
+		creature->setUrlForDeathNotification(Url);
+	}
+}
+
 
 
 namespace PROGRESSIONPVE
@@ -326,12 +340,111 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 	// get most effective team or single player
 	const sint16 index = creatureTakenDmg.getMaxInflictedDamageTeamIndex();
 
+	CCreature *creaturePtr = CreatureManager.getCreature(creature);
 	// max damage have been done by players
 	if (index != -1)
 	{
-		CCreature *creaturePtr = CreatureManager.getCreature(creature);
+
 		if (creaturePtr && creaturePtr->getForm())
 		{
+			string url = creaturePtr->getUrlForDeathNotification();
+			if (!url.empty())
+			{
+				std::set<CEntityId> players(creatureTakenDmg.getAllPlayers());
+				std::set<CEntityId>::iterator itPlayer;
+				for (itPlayer=players.begin(); itPlayer!=players.end(); ++itPlayer)
+				{
+					CCharacter* player = PlayerManager.getChar(*itPlayer);
+					if (player)
+					{
+						if (url.substr(0, 6) == "#item:")
+						{
+							nlinfo("item");
+							vector<string> items_infos;
+							NLMISC::splitString(url, ":", items_infos);
+							if (items_infos.size() == 5)
+							{ // item sheet:quality:quantity
+								nlinfo("item sheet");
+								INVENTORIES::TInventory selected_inv = INVENTORIES::toInventory(items_infos[1].c_str());
+								if (selected_inv != INVENTORIES::temporary && selected_inv !=INVENTORIES::temporary)
+									selected_inv = INVENTORIES::bag;
+
+								string sheetname = items_infos[2]+".sitem";
+								CSheetId sheet = CSheetId(sheetname.c_str());
+								if (sheet != CSheetId::Unknown)
+								{
+									
+									uint16 quality;
+									NLMISC::fromString(items_infos[3], quality);
+									uint16 quantity;
+									NLMISC::fromString(items_infos[4], quantity);
+
+									CGameItemPtr item;
+									if (quantity == 0)
+										item = GameItemManager.createItem(sheet, quality, false, false);
+									else
+									{
+										CMissionItem mItem;
+										items_infos[0] = items_infos[2];
+										items_infos[1] = items_infos[3];
+										items_infos[2] = "0";
+										items_infos.resize(3);
+										mItem.buildFromScript(items_infos);
+										item = mItem.createItem(quantity);
+									}
+									
+									if (item != NULL)
+									{
+										if (player->addItemToInventory(selected_inv, item))
+										{
+											SM_STATIC_PARAMS_3(params, STRING_MANAGER::integer, STRING_MANAGER::item, STRING_MANAGER::integer);
+											params[0].Int = quantity;
+											params[1].SheetId = sheet;
+											params[2].Int = quality;
+											PHRASE_UTILITIES::sendDynamicSystemMessage(player->getEntityRowId(), "AUTO_LOOT_SUCCESS", params);
+										}
+										else
+										{
+											item.deleteItem();
+										}
+									}
+								}
+							}
+							else if (items_infos.size() == 4)
+							{ // named item id:quantity
+								nlinfo("named item");
+								INVENTORIES::TInventory selected_inv = INVENTORIES::toInventory(items_infos[1].c_str());
+								if (selected_inv != INVENTORIES::temporary && selected_inv !=INVENTORIES::temporary)
+									selected_inv = INVENTORIES::bag;
+								string name = items_infos[2];
+								
+								uint16 quantity;
+								NLMISC::fromString(items_infos[3], quantity);
+
+								CGameItemPtr item = CNamedItems::getInstance().createNamedItem(name, quantity);
+								if (item != NULL)
+								{
+									if (player->addItemToInventory(selected_inv, item)) {
+										SM_STATIC_PARAMS_2(params, STRING_MANAGER::dyn_string_id, STRING_MANAGER::integer);
+										params[0].StringId = item->sendNameId(player);
+										params[1].Int = quantity;
+										PHRASE_UTILITIES::sendDynamicSystemMessage(player->getEntityRowId(),"MIS_RECV_NAMED_ITEM", params);
+									}
+									else
+									{
+										item.deleteItem();
+									}
+								}
+							}
+						}
+						else
+						{
+							player->sendUrl(url);
+						}
+					}
+				}
+			}
+			
 			// Auto-quartering of mission items
 			uint16 itemLevel = creaturePtr->getForm()->getXPLevel();
 			vector<CAutoQuarterItemDescription> matchingItemsForMissions; // point to creaturePtr->getForm()->getItemsForMission()
@@ -342,11 +455,18 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 
 			float factor = CStaticSuccessTable::getXPGain(SUCCESS_TABLE_TYPE::FightPhrase, deltaLevel);
 
+			uint16 teamLooter;
+
+			if (creaturePtr->getLockLoot() != CTEAM::InvalidTeamId)
+				teamLooter = creaturePtr->getLockLoot();
+			else
+				teamLooter = creatureTakenDmg.PlayerInflictedDamage[index].TeamId;
+
 			// dispatch Xp for all validated team members
-			if (creatureTakenDmg.PlayerInflictedDamage[index].TeamId != CTEAM::InvalidTeamId)
+			if (teamLooter != CTEAM::InvalidTeamId)
 			{
 				// validate loot right for team on this creature
-				creaturePtr->enableLootRights(creatureTakenDmg.PlayerInflictedDamage[index].TeamId);
+				creaturePtr->enableLootRights(teamLooter);
 
 				// get team members list
 				CTeam *team = TeamManager.getTeam(creatureTakenDmg.PlayerInflictedDamage[index].TeamId);
@@ -483,7 +603,6 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 			// Get players list
 			std::set<NLMISC::CEntityId> players(creatureTakenDmg.getAllPlayers());
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::entity);
-			CCreature* creaturePtr = CreatureManager.getCreature(creature);
 			if (creaturePtr)
 			{
 				params[0].setEIdAIAlias( creaturePtr->getId(), CAIAliasTranslator::getInstance()->getAIAlias(creaturePtr->getId()) );
@@ -497,7 +616,6 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 			}
 		}
 
-		CCreature *creaturePtr = CreatureManager.getCreature(creature);
 		if (creaturePtr)
 		{
 			// disable loot for players by validating it for creature itself

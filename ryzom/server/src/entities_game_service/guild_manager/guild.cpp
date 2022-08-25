@@ -40,6 +40,7 @@
 /// todo guild remove entity id translator
 #include "nel/misc/eid_translator.h"
 #include "chat_groups_ids.h"
+#include "server_share/mongo_wrapper.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -114,23 +115,41 @@ const ucstring & CGuild::getDescription()const
 //----------------------------------------------------------------------------
 uint8 CGuild::getMembersSession()const
 {
-	return _MembersSession; 
-} 
+	return _MembersSession;
+}
 
 //----------------------------------------------------------------------------
-//void CGuild::spendXP( uint32 xp )
-//{
+void CGuild::spendXP( uint32 xp )
+{
 //	nlassert( xp <= _XP );
-//	setXP( _XP - xp );
+	if ( xp > _XP )
+	{
+		nlwarning( "spendXP guild %u : xp = %u, max = %u", _Id, xp, _XP);
+		return;
+	}
+	setXP( _XP - xp );
+	CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
 //	setClientDBProp( "GUILD:XP", _XP );
-//}
+}
 
 //----------------------------------------------------------------------------
-//void CGuild::addXP( uint32 xp )
-//{
-//	setXP( _XP + xp );
+void CGuild::addXP( uint32 xp )
+{
+	if (_XP < 1000) // TEMPORARY LIMIT : must be removed when added more stuff to pay with guild points
+	{
+		setXP( _XP + xp );
+		CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
+	}
 //	setClientDBProp( "GUILD:XP", _XP );
-//}
+}
+
+//----------------------------------------------------------------------------
+void CGuild::setPoints( uint32 points )
+{
+	setXP(points);
+	CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, points);
+}
+
 
 //----------------------------------------------------------------------------
 void CGuild::spendMoney(uint64 money)
@@ -287,7 +306,7 @@ void CGuild::onGuildStringUpdated(ICDBStructNode *node)
 	{
 		CGuildMember * member = EGS_PD_CAST<CGuildMember*>( (*it).second );
 		EGS_PD_AST( member );
-		
+
 		// continue if the player is offline
 		CGuildMemberModule * module = NULL;
 		if ( member->getReferencingModule(module) )
@@ -402,7 +421,7 @@ void CGuild::initNonPDMembers()
 	// build entity id
 	_EId = CEntityId( RYZOMID::guild, _Id );
 	_EId.setCreatorId(0);
-	
+
 	{
 		H_AUTO(resizeInitNonPDMembers);
 		_GradeCounts.resize(EGSPD::CGuildGrade::EndGuildGrade);
@@ -458,8 +477,8 @@ void CGuild::setDescription(const ucstring & str)
 //----------------------------------------------------------------------------
 void CGuild::dumpGuildInfos( NLMISC::CLog & log )
 {
-	log.displayNL("<GUILD_DUMP> Guild id: %s %s, name: '%s', eid: %s", 
-		guildIdToString(getId()).c_str(), 
+	log.displayNL("<GUILD_DUMP> Guild id: %s %s, name: '%s', eid: %s",
+		guildIdToString(getId()).c_str(),
 		getId()>>20 == IService::getInstance()->getShardId() ? "(Local)" : "(Foreign)",
 		getName().toUtf8().c_str(), getEId().toString().c_str() );
 	log.displayNL("\tDescription: '%s'", getDescription().toUtf8().c_str() );
@@ -561,7 +580,7 @@ void CGuild::registerGuild()
 //	setClientDBProp( "GUILD:ICON",_Icon );
 	CBankAccessor_GUILD::getGUILD().setICON(_DbGroup, _Icon);
 //	setClientDBProp( "GUILD:XP",_XP );
-//	CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
+	CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
 //	setClientDBProp( "GUILD:VILLAGE",_Village );
 //	CBankAccessor_GUILD::getGUILD().setVILLAGE(_DbGroup, _Village);
 //	setClientDBProp( "GUILD:PEOPLE",_Race );
@@ -602,7 +621,7 @@ void CGuild::registerGuild()
 
 	/// todo guild : name
 	//CEntityIdTranslator::getInstance()->registerEntity(_EId,guild->getGuildName(),0,0,"");
-	
+
 	if ( _Building != CAIAliasTranslator::Invalid )
 		CBuildingManager::getInstance()->registerGuild( _Id, _Building );
 
@@ -618,7 +637,7 @@ void CGuild::registerGuild()
 void CGuild::openGuildChatGroup()
 {
 	H_AUTO(openGuildChatGroup);
-	// we need to wait for IOS up message before openning 
+	// we need to wait for IOS up message before openning
 	if (!IOSIsUp)
 		return;
 
@@ -895,7 +914,7 @@ bool CGuild::isInGuildBuilding( const TDataSetRow & user )
 	IBuildingPhysical * guildBuilding = CBuildingManager::getInstance()->getBuildingPhysicalsByAlias(CGuildPD::getBuilding());
 	if (guildBuilding == NULL)
 		return false;
-	
+
 	return guildBuilding->isUserInsideBuilding(user);
 }
 
@@ -909,8 +928,15 @@ bool CGuild::canAccessToGuildInventory( CCharacter * user )
 	// or in zone of the guild's outpost
 	CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromAlias(user->getCurrentOutpostZone());
 	if( outpost != NULL )
-		if( outpost->getOwnerGuild() == _Id )
+		if( outpost->getOwnerGuild() == _Id && (user->getOutpostAlias() == 0 || user->getOutpostAlias() != user->getCurrentOutpostZone()))
 			return true;
+
+	// or in powo with access to guild inv
+	if (user->getPowoFlag("guild_inv") && user->getPowoCell() != 0)
+		return true;
+
+	// TODO ULU : add here position check of GH on atys
+
 	return false;
 }
 
@@ -924,7 +950,7 @@ bool CGuild::putItem( CGameItemPtr item )
 }
 
 //----------------------------------------------------------------------------
-void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 session )
+void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session )
 {
 	// the session system works that way :
 	// As player can share this inventory, we manage a per item session value
@@ -932,7 +958,7 @@ void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 se
 	// The item session is incremented and the highest session value is then sent to the clients
 	// sessions are reseted when nobody uses the inventory
 	nlassert( user );
-	
+
 	if( canAccessToGuildInventory( user ) == false )
 	{
 		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
@@ -940,7 +966,7 @@ void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 se
 	}
 
 	// get the item
-	CInventoryPtr srcItems = user->getInventory(INVENTORIES::bag);
+	CInventoryPtr srcItems = user->getInventory(srcInv);
 	if ( slot >= srcItems->getSlotCount() )
 	{
 		nlwarning( "<GUILD> user %s Invalid bag slot %u, count = %u",user->getId().toString().c_str(), slot, srcItems->getSlotCount() );
@@ -974,9 +1000,18 @@ void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 se
 		return;
 	}
 
+	// you cannot exchange jewels with non tags allegories
+	std::vector<CSheetId> sheets;
+	item->getJewelNonTagsEnchantments(sheets);
+	if (sheets.size() > 0)
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_CANT_BE_PUT" );
+		return;
+	}
+
 	// try to move the required quantity of the item
 	if ( CInventoryBase::moveItem(
-		user->getInventory(INVENTORIES::bag), slot,
+		user->getInventory(srcInv), slot,
 		_Inventory,	INVENTORIES::INSERT_IN_FIRST_FREE_SLOT,
 		quantity ) != CInventoryBase::ior_ok )
 	{
@@ -986,7 +1021,7 @@ void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 se
 }
 
 //----------------------------------------------------------------------------
-void CGuild::takeItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 session )
+void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session )
 {
 	// the session system works that way :
 	// As player can share this inventory, we manage a per item session value
@@ -1043,7 +1078,7 @@ void CGuild::takeItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 s
 	// try to move the required quantity of the item
 	if ( CInventoryBase::moveItem(
 		_Inventory,	slot,
-		user->getInventory(INVENTORIES::bag), INVENTORIES::INSERT_IN_FIRST_FREE_SLOT,
+		user->getInventory(srcInv), INVENTORIES::INSERT_IN_FIRST_FREE_SLOT,
 		quantity ) != CInventoryBase::ior_ok )
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_PLAYER_BAG_FULL" );
@@ -1137,13 +1172,13 @@ uint CGuild::destroyItems(const std::vector<CItemSlotId> &itemSlotIns, uint32 ma
 void	CGuild::takeMoney( CCharacter * user, uint64 money, uint16 session )
 {
 	nlassert(user);
-	
+
 	if( canAccessToGuildInventory( user ) == false )
 	{
 		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
 		return;
 	}
-	
+
 	if ( money > _Money )
 	{
 		nlwarning( "takeMoney guild %u user %s : money = %" NL_I64 "u, max = %" NL_I64 "u",_Id,user->getId().toString().c_str(),money,_Money);
@@ -1164,7 +1199,7 @@ void	CGuild::takeMoney( CCharacter * user, uint64 money, uint16 session )
 	_GuildInventoryView->updateSessionForMoneyTransaction();
 	user->giveMoney( money );
 	_Money -= money;
-	
+
 //	setClientDBProp( "GUILD:INVENTORY:MONEY",  _Money );
 	CBankAccessor_GUILD::getGUILD().getINVENTORY().setMONEY(_DbGroup, _Money);
 
@@ -1174,13 +1209,13 @@ void	CGuild::takeMoney( CCharacter * user, uint64 money, uint16 session )
 void CGuild::putMoney( CCharacter * user, uint64 money, uint16 session )
 {
 	nlassert(user);
-	
+
 	if( canAccessToGuildInventory( user ) == false )
 	{
 		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
 		return;
 	}
-	
+
 	if ( money > user->getMoney() )
 	{
 		nlwarning( "putMoney guild %u user %s : money = %" NL_I64 "u, max = %" NL_I64 "u",_Id,user->getId().toString().c_str(),money,_Money);
@@ -1242,8 +1277,8 @@ void CGuild::removeMember(const EGSPD::TCharacterId &id)
 	CGuildMemberModule * module = NULL;
 	if (character != NULL && character->getEnterFlag() && character->getModuleParentWrap().getModule( module ))
 	{
-		nlinfo("CGuild::removeMember : remove online member %s from guild %s", 
-			guildMember->getId().toString().c_str(), 
+		nlinfo("CGuild::removeMember : remove online member %s from guild %s",
+			guildMember->getId().toString().c_str(),
 			guildIdToString(getId()).c_str());
 
 		// online character, let the module do the job
@@ -1252,8 +1287,8 @@ void CGuild::removeMember(const EGSPD::TCharacterId &id)
 	}
 	else
 	{
-		nlinfo("CGuild::removeMember : remove offline member %s from guild %s", 
-			guildMember->getId().toString().c_str(), 
+		nlinfo("CGuild::removeMember : remove offline member %s from guild %s",
+			guildMember->getId().toString().c_str(),
 			guildIdToString(getId()).c_str());
 
 		// offline character, do it the raw way
@@ -1273,20 +1308,24 @@ void CGuild::deleteMember( CGuildMember* member )
 	nlassert(member);
 	nlassert( uint(member->getGrade()) < _GradeCounts.size() );
 
+#ifdef HAVE_MONGO
+		CMongo::update("ryzom_users", toString("{'cid':%" NL_I64 "u}", member->getIngameEId().getShortId()), "{$set:{'guildId':0}}");
+#endif
+
 	if (PlayerManager.getChar(member->getIngameEId()) != NULL)
 		setMemberOffline( member );
 	incMemberSession();
 	uint16 idx = member->getMemberIndex();
-	
+
 	// update grade counts
 	_GradeCounts[member->getGrade()]--;
-	
+
 	TDataSetRow row = TheDataset.getDataSetRow( member->getIngameEId() );
 	CGuildManager::getInstance()->removeCharToGuildAssoc(member->getIngameEId(), getId());
 	deleteFromMembers( member->getIngameEId() );
-	
+
 	_FreeMemberIndexes.insert( idx );
-	
+
 	// clear database entry
 //	std::string dbBase = NLMISC::toString( "GUILD:MEMBERS:%u:",idx );
 	CBankAccessor_GUILD::TGUILD::TMEMBERS::TArray &memberElem = CBankAccessor_GUILD::getGUILD().getMEMBERS().getArray(idx);
@@ -1318,7 +1357,7 @@ uint16 CGuild::getMaxGradeCount(EGSPD::CGuildGrade::TGuildGrade grade)const
 	uint16 count = 0;
 	for ( uint i = 0; i < size; ++i )
 		count+=_GradeCounts[i];
-	
+
 	switch (grade)
 	{
 		case EGSPD::CGuildGrade::Leader:
@@ -1383,7 +1422,7 @@ void CGuild::setMemberOnline( CGuildMember * member, uint8 dynamicId )
 			module->getProxy(proxy);
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 			params[0].Literal= _MessageOfTheDay;
-			proxy.sendDynamicMessageToChatGroup("GMOTD", CChatGroup::guild, params);			
+			proxy.sendDynamicMessageToChatGroup("GMOTD", CChatGroup::guild, params);
 		}
 	}
 	// Link guild inventory in CCharacter to the shared inventory
@@ -1406,7 +1445,7 @@ void CGuild::sendMessageToGuildMembers( const std::string &  msg, const TVectorP
 	{
 		CGuildMember * member = EGS_PD_CAST<CGuildMember*>( (*it).second );
 		EGS_PD_AST( member );
-		
+
 		// continue if the player is offline
 		CGuildMemberModule * module = NULL;
 		if ( member->getReferencingModule(module) )
@@ -1445,10 +1484,10 @@ void CGuild::setMemberClientDB( CGuildMember* member )
 {
 	// get a module pointing on the member
 	nlassert( member );
-	
+
 	//const ucstring memberName = NLMISC::CEntityIdTranslator::getInstance()->getByEntity(member->getIngameEId() );
 	const uint32 nameId = NLMISC::CEntityIdTranslator::getInstance()->getEntityNameStringId( member->getIngameEId() );
-	
+
 //	std::string dbBase = NLMISC::toString( "GUILD:MEMBERS:%u:",member->getMemberIndex() );
 	CBankAccessor_GUILD::TGUILD::TMEMBERS::TArray &memberElem = CBankAccessor_GUILD::getGUILD().getMEMBERS().getArray(member->getMemberIndex());
 
@@ -1485,7 +1524,7 @@ void CGuild::setMemberClientDB( CGuildMember* member )
 		// even if it still returned by PlayerManager.getChar()
 		return;
 	}
-	
+
 	// Set guild-related mirror and client database properties of the character
 	TDataSetRow row = TheDataset.getDataSetRow( member->getIngameEId() );
 	if ( TheDataset.isAccessible( row ) )
@@ -1509,7 +1548,7 @@ void CGuild::setMemberClientDB( CGuildMember* member )
 //----------------------------------------------------------------------------
 const EGSPD::TCharacterId CGuild::getHighestGradeOnlineUser() const
 {
-	// best successor is the member with best grade. If more than 1 user fits, take the older in the guild 
+	// best successor is the member with best grade. If more than 1 user fits, take the older in the guild
 	const CGuildMember * best = NULL;
 	for (std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::const_iterator it = getMembersBegin();
 	it != getMembersEnd();
@@ -1517,7 +1556,7 @@ const EGSPD::TCharacterId CGuild::getHighestGradeOnlineUser() const
 	{
 		const CGuildMember * member = EGS_PD_CAST<CGuildMember*>( (*it).second );
 		EGS_PD_AST( member );
-		
+
 		// check if the current member is the successor
 		if ( best == NULL ||
 			member->getGrade() < best->getGrade() ||
@@ -1687,7 +1726,7 @@ uint8 CGuild::getAndSyncItemInfoVersion( uint32 slot, const NLMISC::CEntityId& c
 	CGuildMemberModule *onlineMember = NULL;
 	if ( member->getReferencingModule( onlineMember ) ) // contains slow dynamic cast :(
 		onlineMember->setLastSentInfoVersion( slot, infoVersion );
-	
+
 	return infoVersion;
 }
 
@@ -1776,7 +1815,7 @@ void CGuild::removeOwnedOutpost(TAIAlias outpostAlias)
 				PlayerManager.sendImpulseToClient(user->getId(), "GUILD:CLOSE_INVENTORY");
 		}
 	}
-	
+
 	uint i = 0;
 	while (i < _OwnedOutposts.size())
 	{
@@ -2016,8 +2055,8 @@ bool CGuild::updateOutpostDB(uint32 outpostIndex)
 
 //-----------------------------------------------------------------------------
 CGuild::TAllegiances CGuild::getAllegiance() const
-{ 
-	return std::make_pair( _DeclaredCult, _DeclaredCiv ); 
+{
+	return std::make_pair( _DeclaredCult, _DeclaredCiv );
 }
 
 //-----------------------------------------------------------------------------
@@ -2025,13 +2064,13 @@ bool CGuild::setDeclaredCult(PVP_CLAN::TPVPClan newClan, bool noCheck)
 {
 	if (newClan == PVP_CLAN::None || newClan == PVP_CLAN::Neutral
 		|| ((newClan >= PVP_CLAN::BeginCults && newClan <= PVP_CLAN::EndCults)
-		&& (noCheck 
-			|| (CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)) >= FameMinToDeclare) 
+		&& (noCheck
+			|| (CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)) >= FameMinToDeclare)
 			|| _DeclaredCult == PVP_CLAN::None) ))
 	{
-		if( newClan != PVP_CLAN::None 
-			&& newClan != PVP_CLAN::Neutral 
-			&& CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)) < FameMinToDeclare 
+		if( newClan != PVP_CLAN::None
+			&& newClan != PVP_CLAN::Neutral
+			&& CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)) < FameMinToDeclare
 			&& _DeclaredCult == PVP_CLAN::None)
 		{
 			CFameInterface::getInstance().addFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan), FameMinToDeclare - CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)));
@@ -2040,7 +2079,7 @@ bool CGuild::setDeclaredCult(PVP_CLAN::TPVPClan newClan, bool noCheck)
 			//character->sendEventForMissionAvailabilityCheck();
 		}
 		_DeclaredCult = newClan;
-		CFameManager::getInstance().enforceFameCaps(getEId(), getAllegiance());
+		CFameManager::getInstance().enforceFameCaps(getEId(), 0, getAllegiance());
 		// Go through membership list, change anyone who doesn't fit in guild to "None".
 		verifyGuildmembersAllegiance();
 
@@ -2059,13 +2098,13 @@ bool CGuild::setDeclaredCiv(PVP_CLAN::TPVPClan newClan, bool noCheck)
 {
 	if (newClan == PVP_CLAN::None || newClan == PVP_CLAN::Neutral
 		|| ((newClan >= PVP_CLAN::BeginCivs && newClan <= PVP_CLAN::EndCivs)
-		&& (noCheck 
-			|| (CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)) >= FameMinToDeclare) 
+		&& (noCheck
+			|| (CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)) >= FameMinToDeclare)
 			|| _DeclaredCiv == PVP_CLAN::None) ))
 	{
-		if( newClan != PVP_CLAN::None 
-			&& newClan != PVP_CLAN::Neutral 
-			&& CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)) < FameMinToDeclare 
+		if( newClan != PVP_CLAN::None
+			&& newClan != PVP_CLAN::Neutral
+			&& CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)) < FameMinToDeclare
 			&& _DeclaredCiv == PVP_CLAN::None)
 		{
 			CFameInterface::getInstance().addFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan), FameMinToDeclare - CFameInterface::getInstance().getFameIndexed(getEId(),PVP_CLAN::getFactionIndex(newClan)));
@@ -2074,7 +2113,7 @@ bool CGuild::setDeclaredCiv(PVP_CLAN::TPVPClan newClan, bool noCheck)
 			//character->sendEventForMissionAvailabilityCheck();
 		}
 		_DeclaredCiv = newClan;
-		CFameManager::getInstance().enforceFameCaps(getEId(), getAllegiance());
+		CFameManager::getInstance().enforceFameCaps(getEId(), 0, getAllegiance());
 		// Go through membership list, change anyone who doesn't fit in guild to "None".
 		verifyGuildmembersAllegiance();
 
@@ -2113,7 +2152,7 @@ void CGuild::setAllegianceFromIndeterminedStatus(PVP_CLAN::TPVPClan allegiance)
 		}
 		nlwarning("Only guild with indefinined status in there civ allegiance can do that for become neutral, check the client code !");
 		return;
-		
+
 	default:
 		nlwarning("Received wrong allegiance '%s'", PVP_CLAN::toString(allegiance).c_str());
 		return;
@@ -2145,7 +2184,7 @@ bool CGuild::verifyClanAllegiance(PVP_CLAN::TPVPClan theClan, sint32 newFameValu
 			}
 		}
 	}
-	
+
 	return true;
 }
 
@@ -2196,12 +2235,12 @@ void CGuild::resetFameDatabase()
 {
 	H_AUTO(resetFameDatabase);
 	CFameInterface &fi = CFameInterface::getInstance();
-	
+
 	for (uint i=0; i< CStaticFames::getInstance().getNbFame(); ++i)
 	{
 		// update player fame info
 		sint32 fame = fi.getFameIndexed(getEId(), i);
-		sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), i);
+		sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), 0, i);
 		setFameValueGuild(i, fame, maxFame, 0);
 	}
 }
@@ -2234,7 +2273,7 @@ void CGuild::setStartFameAndAllegiance( const CEntityId& guildCreator )
 			CFameManager::getInstance().setEntityFame(getEId(), i, 0);
 		}
 	}
-	CFameManager::getInstance().enforceFameCaps( getEId(), allegiance ); 
+	CFameManager::getInstance().enforceFameCaps( getEId(), 0, allegiance );
 }
 
 

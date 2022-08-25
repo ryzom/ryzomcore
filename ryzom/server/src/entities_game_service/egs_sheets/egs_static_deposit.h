@@ -39,7 +39,7 @@ public:
 	NLMISC::CSheetId	MaterialSheet;
 	//uint16				MaxAmount;
 
-	void serial(NLMISC::IStream &f)
+	void serial(class NLMISC::IStream &f)
 	{
 		f.serial( MaterialSheet );
 		//f.serial( MaxAmount );
@@ -71,7 +71,7 @@ public :
 	void removed() {}
 	
 	/// Serialize deposit
-	void serial(NLMISC::IStream &f)
+	void serial(class NLMISC::IStream &f)
 	{}		
 };*/
 

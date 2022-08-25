@@ -99,7 +99,7 @@ public:
 	/// get zone type
 	PVP_ZONE_TYPE::TPVPZoneType getPVPZoneType() const { return _PVPZoneType; }
 
-	/** 
+	/**
 	 * Return true if a character killed by 'killer' must use deathPenaltyFactor().
 	 * Precondition: kill not null.
 	 * By default, it's true only when killed by a player character.
@@ -111,6 +111,7 @@ public:
 
 	/// returns true if the PVP zone contains the given position
 	bool contains(const NLMISC::CVector & v, bool excludeSafeZones = true) const;
+	bool contains(const NLMISC::CVector & v, float &distance, NLMISC::CVector &nearPos) const;
 	bool contains(CCharacter* user, bool excludeSafeZones = true) const;
 
 	/**
@@ -216,13 +217,13 @@ public:
 
 	/// return pvp relation between the two players
 	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
-	
+
 private:
 
 	bool isOverridedByARunningEvent( CCharacter * user );
 
 	bool setPlayerClan(CCharacter * user/*, PVP_CLAN::TPVPClan clan*/);
-	
+
 	static PVP_CLAN::TPVPClan determinatePlayerClan( CCharacter *user, PVP_CLAN::TPVPClan clan1, sint32 fame1, PVP_CLAN::TPVPClan clan2, sint32 fame2 );
 
 	void setPlayerClanInMirror(CCharacter * user, PVP_CLAN::TPVPClan clan) const;
@@ -269,7 +270,7 @@ public:
 
 	/// return pvp relation between the two players
 	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
-	
+
 private:
 	bool leavePVP(CCharacter * user, IPVP::TEndType type);
 
@@ -295,8 +296,8 @@ private:
 class CPVPOutpostZone : public IPVPZone
 {
 public:
-	
-	/** 
+
+	/**
 	 * Return true if a character killed by 'killer' must use deathPenaltyFactor().
 	 * Precondition: kill not null.
 	 * For outpost zones, it's true whether the killer is a player character or a bot.

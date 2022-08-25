@@ -32,7 +32,7 @@ extern NLMISC::CLog OutpostDbgLog, OutpostInfLog, OutpostWrnLog, OutpostErrLog;
 
 #ifdef RY_OUTPOST_TEMP_LOG
 
-#define OUTPOST_DBG nldebug
+#define OUTPOST_DBG nlinfo
 //#define OUTPOST_INF nlinfo
 #define OUTPOST_INF nldebug
 #define OUTPOST_WRN nlwarning

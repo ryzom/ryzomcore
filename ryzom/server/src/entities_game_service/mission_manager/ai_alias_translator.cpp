@@ -55,7 +55,7 @@ CAIAliasTranslator::CAIAliasTranslator()
 	{
 		_KeepNames = false;
 	}
-	
+
 	// get the loaded primitives
 	const CPrimitivesParser::TPrimitivesList & primsList = CPrimitivesParser::getInstance().getPrimitives();
 	nlinfo("loading bot names and mission names");
@@ -86,7 +86,7 @@ CAIAliasTranslator::~CAIAliasTranslator()
 	_AIGroupNamesToIds.clear();
 	_HashTableAiId.clear();
 	_HashTableEntityId.clear();
-	
+
 }// CAIAliasTranslator destructor
 
 //-----------------------------------------------
@@ -95,7 +95,7 @@ CAIAliasTranslator::~CAIAliasTranslator()
 void CAIAliasTranslator::buildBotTree(const NLLIGO::IPrimitive* prim)
 {
 	// look for bot nodes in the primitives
-	std::string value,name,aiClass;
+	std::string value, name, realName, aiClass;
 	if (prim->getPropertyByName("class",aiClass)  )
 	{
 		if ( !nlstricmp(aiClass.c_str(),"npc_bot") ||!nlstricmp(aiClass.c_str(),"group_fauna") ||!nlstricmp(aiClass.c_str(),"npc_group") )
@@ -117,6 +117,7 @@ void CAIAliasTranslator::buildBotTree(const NLLIGO::IPrimitive* prim)
 				nlwarning("<CAIAliasTranslator buildBotTree> errors : name='%s' alias='%s' in '%s'",name.c_str(),value.c_str(), buildPrimPath(prim).c_str());
 			}
 
+			realName = name;
 			NLMISC::strlwr(name);
 			//remove AI name parameters
 			string::size_type trash = name.find('$');
@@ -128,7 +129,7 @@ void CAIAliasTranslator::buildBotTree(const NLLIGO::IPrimitive* prim)
 			{
 				if ( !nlstricmp(aiClass.c_str(),"npc_bot") )
 				{
-					_BotIdsToNames.insert( make_pair(id,name) );
+					_BotIdsToNames.insert( make_pair(id,realName) );
 					_BotNamesToIds.insert( make_pair(name,id) );
 				}
 				else
@@ -169,7 +170,7 @@ void CAIAliasTranslator::buildBotTree(const NLLIGO::IPrimitive* prim)
 		}
 	}
 	//this is not a mission node, so lookup recursively in the children
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -211,11 +212,11 @@ void CAIAliasTranslator::buildMissionTree(const NLLIGO::IPrimitive* prim)
 			{
 				nlwarning("<CAIAliasTranslator buildMissionTree> The name %s is already assigned, we overwrite it",name.c_str());
 			}
-			
+
 		}
 	}
 	//this is not a mission node, so lookup recursively in the children
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -224,16 +225,16 @@ void CAIAliasTranslator::buildMissionTree(const NLLIGO::IPrimitive* prim)
 }// CAIAliasTranslator buildMissionTree
 
 
-void CAIAliasTranslator::sendAliasToIOS() const		
+void CAIAliasTranslator::sendAliasToIOS() const
 {
 
-	NLNET::CMessage msg("UPDATE_AIALIAS");	
+	NLNET::CMessage msg("UPDATE_AIALIAS");
 	enum {Set=0, Add = 1, Delete=2  };
 	uint32 subcommand = static_cast<uint32>(Set);
 	msg.serial( subcommand );
 	typedef CHashMap< uint, std::string > TContainer;
 	TContainer::const_iterator first(_BotIdsToNames.begin());
-	TContainer::const_iterator last(_BotIdsToNames.end());		
+	TContainer::const_iterator last(_BotIdsToNames.end());
 	uint32 size = static_cast<uint32>(_BotIdsToNames.size());
 	msg.serial(size);
 	for (; first != last; ++first)
@@ -250,7 +251,7 @@ TAIAlias CAIAliasTranslator::getAIAlias(const NLMISC::CEntityId & entityId) cons
 {
 
 	typedef CHashMap< NLMISC::CEntityId, TAIAlias,NLMISC::CEntityIdHashMapTraits> TContainer;
-	TContainer::const_iterator it(_HashTableEntityId.find(entityId));	
+	TContainer::const_iterator it(_HashTableEntityId.find(entityId));
 	if(  it != _HashTableEntityId.end() )
 		return (*it).second;
 	return Invalid;

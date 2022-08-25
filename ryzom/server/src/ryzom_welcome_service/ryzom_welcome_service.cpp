@@ -1291,7 +1291,7 @@ public:
 
 		// add default port if not set by the config file
 		if (LSAddr.find (":") == string::npos)
-			LSAddr += ":43999";
+			LSAddr += ":49999";
 
 		AllowDispatchMsgToLS = true;
 

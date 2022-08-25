@@ -719,7 +719,17 @@ bool	CNpcChatProfileImp::parseChatArgs(CAIInstance	*aiInstance, const std::strin
 		// split to webpage name and the true webpage
 		_WebPageName.clear();
 		AI_SHARE::stringToWordAndTail(tail, _WebPageName, tail);
+
 		_WebPage = tail;
+
+		//replace &nbsp& by space (hack for Ark)
+		size_t pos = 0;
+		while((pos = _WebPage.find("&nbsp&", pos)) != string::npos)
+		{
+			_WebPage.replace(pos, 6, " ");
+			pos++;
+		}
+		
 	}
 	
 	// guild creator

@@ -16,7 +16,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
@@ -43,6 +54,7 @@ CBankAccessor_PLR::TASCENSOR	CBankAccessor_PLR::_ASCENSOR;
 CBankAccessor_PLR::TCHOOSE_MISSIONS	CBankAccessor_PLR::_CHOOSE_MISSIONS;
 CBankAccessor_PLR::TTRADING	CBankAccessor_PLR::_TRADING;
 CBankAccessor_PLR::TBRICK_FAMILY	CBankAccessor_PLR::_BRICK_FAMILY;
+CBankAccessor_PLR::TFABER_PLANS	CBankAccessor_PLR::_FABER_PLANS;
 CBankAccessor_PLR::TMISSIONS	CBankAccessor_PLR::_MISSIONS;
 CBankAccessor_PLR::TEXECUTE_PHRASE	CBankAccessor_PLR::_EXECUTE_PHRASE;
 CBankAccessor_PLR::TCHARACTER_INFO	CBankAccessor_PLR::_CHARACTER_INFO;
@@ -153,6 +165,11 @@ void CBankAccessor_PLR::init()
 		nlassert(node != NULL);
 		// call sub branch init
 		_BRICK_FAMILY.init(node);
+		
+		node  = bank->getICDBStructNodeFromName( BankTag, "FABER_PLANS" );
+		nlassert(node != NULL);
+		// call sub branch init
+		_FABER_PLANS.init(node);
 		
 		node  = bank->getICDBStructNodeFromName( BankTag, "MISSIONS" );
 		nlassert(node != NULL);
@@ -373,7 +390,7 @@ void CBankAccessor_PLR::TUSER::init(ICDBStructNode *parent)
 		_SKILL_POINTS_[i].init(node, i);
 	}
 	
-	for (uint i=0; i<6; ++i)
+	for (uint i=0; i<7; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("FACTION_POINTS_%u", i)), false );
 		nlassert(node != NULL);
@@ -1164,7 +1181,7 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<8; ++i)
+	for (uint i=0; i<10; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
 		nlassert(node != NULL);
@@ -1194,13 +1211,17 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray::init(ICDBStructNode *parent, u
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("CHARAC_BUFFS"), false );
-	nlassert(node != NULL);
-	_CHARAC_BUFFS = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("WEIGHT"), false );
 	nlassert(node != NULL);
@@ -1209,6 +1230,10 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray::init(ICDBStructNode *parent, u
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -1225,14 +1250,6 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray::init(ICDBStructNode *parent, u
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("WORNED"), false );
-	nlassert(node != NULL);
-	_WORNED = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 
 	// branch init
@@ -1251,7 +1268,7 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<8; ++i)
+	for (uint i=0; i<10; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
 		nlassert(node != NULL);
@@ -1281,13 +1298,17 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::TArray::init(ICDBStructNode *parent
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("CHARAC_BUFFS"), false );
-	nlassert(node != NULL);
-	_CHARAC_BUFFS = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("WEIGHT"), false );
 	nlassert(node != NULL);
@@ -1296,6 +1317,10 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::TArray::init(ICDBStructNode *parent
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -1312,14 +1337,6 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::TArray::init(ICDBStructNode *parent
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("WORNED"), false );
-	nlassert(node != NULL);
-	_WORNED = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 
 	// branch init
@@ -1496,13 +1513,17 @@ void CBankAccessor_PLR::TINVENTORY::TTEMP::TArray::init(ICDBStructNode *parent, 
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("CHARAC_BUFFS"), false );
-	nlassert(node != NULL);
-	_CHARAC_BUFFS = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("WEIGHT"), false );
 	nlassert(node != NULL);
@@ -1511,6 +1532,10 @@ void CBankAccessor_PLR::TINVENTORY::TTEMP::TArray::init(ICDBStructNode *parent, 
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -1527,14 +1552,6 @@ void CBankAccessor_PLR::TINVENTORY::TTEMP::TArray::init(ICDBStructNode *parent, 
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("WORNED"), false );
-	nlassert(node != NULL);
-	_WORNED = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 
 	// branch init
@@ -1594,13 +1611,17 @@ void CBankAccessor_PLR::TINVENTORY::TSHARE::TArray::init(ICDBStructNode *parent,
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("CHARAC_BUFFS"), false );
-	nlassert(node != NULL);
-	_CHARAC_BUFFS = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("WEIGHT"), false );
 	nlassert(node != NULL);
@@ -1609,6 +1630,10 @@ void CBankAccessor_PLR::TINVENTORY::TSHARE::TArray::init(ICDBStructNode *parent,
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -1625,10 +1650,6 @@ void CBankAccessor_PLR::TINVENTORY::TSHARE::TArray::init(ICDBStructNode *parent,
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("NB_MEMBER"), false );
 	nlassert(node != NULL);
@@ -2150,13 +2171,17 @@ void CBankAccessor_PLR::TTRADING::TArray::init(ICDBStructNode *parent, uint inde
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("CHARAC_BUFFS"), false );
-	nlassert(node != NULL);
-	_CHARAC_BUFFS = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("WEIGHT"), false );
 	nlassert(node != NULL);
@@ -2165,6 +2190,10 @@ void CBankAccessor_PLR::TTRADING::TArray::init(ICDBStructNode *parent, uint inde
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -2181,10 +2210,6 @@ void CBankAccessor_PLR::TTRADING::TArray::init(ICDBStructNode *parent, uint inde
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("CURRENCY"), false );
 	nlassert(node != NULL);
@@ -2272,6 +2297,45 @@ void CBankAccessor_PLR::TBRICK_FAMILY::TArray::init(ICDBStructNode *parent, uint
 	node  = parent->getNode( ICDBStructNode::CTextId("BRICKS"), false );
 	nlassert(node != NULL);
 	_BRICKS = node;
+	
+
+	// branch init
+	
+}
+
+
+void CBankAccessor_PLR::TFABER_PLANS::init(ICDBStructNode *parent)
+{
+	ICDBStructNode *node = parent;
+
+	_BranchNode = node;
+
+	// leaf init
+	
+
+	// branch init
+	
+	for (uint i=0; i<64; ++i)
+	{
+		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
+		nlassert(node != NULL);
+		_Array[i].init(node, i);
+	}
+	
+}
+
+
+void CBankAccessor_PLR::TFABER_PLANS::TArray::init(ICDBStructNode *parent, uint index)
+{
+	ICDBStructNode *node = parent;
+
+	_BranchNode = node;
+
+	// leaf init
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("KNOWN"), false );
+	nlassert(node != NULL);
+	_KNOWN = node;
 	
 
 	// branch init
@@ -2544,6 +2608,10 @@ void CBankAccessor_PLR::TEXECUTE_PHRASE::TLINK::TArray::init(ICDBStructNode *par
 	nlassert(node != NULL);
 	_PHRASE = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("COUNTER"), false );
+	nlassert(node != NULL);
+	_COUNTER = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("HP_COST"), false );
 	nlassert(node != NULL);
 	_HP_COST = node;
@@ -2571,10 +2639,6 @@ void CBankAccessor_PLR::TEXECUTE_PHRASE::TLINK::TArray::init(ICDBStructNode *par
 	node  = parent->getNode( ICDBStructNode::CTextId("TARGET_STA"), false );
 	nlassert(node != NULL);
 	_TARGET_STA = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("COUNTER"), false );
-	nlassert(node != NULL);
-	_COUNTER = node;
 	
 
 	// branch init
@@ -3079,7 +3143,7 @@ void CBankAccessor_PLR::TPACK_ANIMAL::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<4; ++i)
+	for (uint i=0; i<7; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("BEAST%u", i)), false );
 		nlassert(node != NULL);
@@ -3312,7 +3376,7 @@ void CBankAccessor_PLR::TFAME::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<6; ++i)
+	for (uint i=0; i<7; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("PLAYER%u", i)), false );
 		nlassert(node != NULL);

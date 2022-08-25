@@ -54,7 +54,7 @@ using namespace ENTITYLOC;
 
 extern NLMISC::CVariable<uint32> FixedSessionId;
 
-extern CVariable<bool> DontUseSU;
+CVariable<bool> DontUseSU( "su", "DontUseSU", "If 1, allow running a shard with no Shard Unifier Service", 0, 0, 1 ); 
 CVariable<bool> SimulateCharacterHasEditSession( "su", "SimulateCharacterHasEditSession", "If 1 simulate that character have alreay an edition sessiion", 0, 0, 1 ); 
 
 

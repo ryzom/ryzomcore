@@ -41,6 +41,7 @@ public:
 	/** send user models to EGS for script parsing and modified CStaticCreatures instanciation
 	 */
 	void sendUserModels();
+	void sendUserModel(uint32 primAlias, const std::string &userModelId);
 	
 	/** send custom loot table script and info to EGS for script parsing and custom CStaticLootTable instanciation
 	 */

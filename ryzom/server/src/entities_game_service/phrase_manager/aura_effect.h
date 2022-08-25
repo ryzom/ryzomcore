@@ -50,6 +50,7 @@ public:
 	{
 		_AffectGuild = affectGuild;
 		_IsFromConsumable = false;
+		_ActivationDate = CTickEventHandler::getGameCycle();
 #ifdef NL_DEBUG
 		_LastUpdateDate = CTickEventHandler::getGameCycle();
 #endif
@@ -96,6 +97,8 @@ private:
 	bool					_AffectGuild;
 
 	bool					_IsFromConsumable;
+
+	NLMISC::TGameCycle		_ActivationDate;
 
 #ifdef NL_DEBUG
 	NLMISC::TGameCycle		_LastUpdateDate;

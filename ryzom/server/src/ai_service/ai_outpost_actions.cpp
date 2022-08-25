@@ -42,7 +42,7 @@ DEFINE_ACTION(ContextGlobal,SQD_TMPL)
 	nlassertex(currentInstance != NULL, ("No AIInstance created !"));
 	CWorkPtr::aiInstance(currentInstance);
 	CAIInstance *aii = CWorkPtr::aiInstance();
-	
+
 	CAIAliasDescriptionNode *aliasTree;
 	string filename;
 	if	(!getArgs(args, name(), aliasTree, filename))
@@ -100,11 +100,11 @@ DEFINE_ACTION(ContextOutpostGroupDesc,IDTREE_F)
 	{
 		CAliasTreeOwner* childOwner = NULL;
 		IAliasCont* cont = NULL;
-			
+
 		// we try to get a valid IAliasCont for this type
 		if ( ! owner->getCont( childOwner, cont, AITYPES::AITypeSquadTemplateMember ) )
 			break;
-		
+
 		// create a bot desc object (with alias 0)
 		CAliasTreeOwner* child = NULL;
 		CSmartPtr<CAIAliasDescriptionNode> fakeNode = new CAIAliasDescriptionNode( /*NLMISC::toString( "tm%u", j )*/botSheets[j], 0, AITYPES::AITypeSquadTemplateMember, NULL );
@@ -129,23 +129,23 @@ DEFINE_ACTION(ContextGlobal,OUTPOST)
 	nlassertex(currentInstance != NULL, ("No AIInstance created !"));
 	CWorkPtr::aiInstance(currentInstance);
 	CAIInstance *aii = CWorkPtr::aiInstance();
-	
+
 	CAIAliasDescriptionNode *aliasTree;
 	string contName, mapName, filename, familyName;
 	if	(!getArgs(args, name(), aliasTree, contName, filename, familyName))
 		return;
-	
+
 	if (!CWorkPtr::continent())
 		return;
-		
+
 	// see whether the region is already created
 	COutpost *outpost = CWorkPtr::continent()->outposts().getChildByAlias(aliasTree->getAlias());
-	
+
 	// not found so create it
 	if (!outpost)
 	{
 		outpost = new COutpost(CWorkPtr::continent(), aliasTree->getAlias(), aliasTree->getName(), filename);
-		
+
 		CWorkPtr::continent()->outposts().addAliasChild(outpost);
 		CWorkPtr::outpost(outpost);
 	}
@@ -153,10 +153,10 @@ DEFINE_ACTION(ContextGlobal,OUTPOST)
 	{
 		outpost->registerForFile(filename);
 	}
-	
+
 	// set the owner tribe
 	CWorkPtr::outpost()->setTribe(familyName);
-	
+
 	CContextStack::setContext(ContextOutpost);
 
 }
@@ -210,15 +210,15 @@ DEFINE_ACTION(ContextOutpost,IDTREE)
 	if (!getArgs(args, name(),aliasTree))
 		return;
 
-		
+
 	// have the manager update it's structure from the id tree
-	nlinfo("ACTION IDTREE: Applying new tree to outpost[%u]: '%s'%s in continent '%s'", 
-		CWorkPtr::outpost()->getChildIndex(), 
+	nlinfo("ACTION IDTREE: Applying new tree to outpost[%u]: '%s'%s in continent '%s'",
+		CWorkPtr::outpost()->getChildIndex(),
 		CWorkPtr::outpost()->getName().c_str(),
-		CWorkPtr::outpost()->getAliasString().c_str(), 
+		CWorkPtr::outpost()->getAliasString().c_str(),
 		CWorkPtr::outpost()->getOwner()->getName().c_str()
 		);
-	
+
 	if (aliasTree && CWorkPtr::outpost())
 		CWorkPtr::outpost()->updateAliasTree(*aliasTree);
 }
@@ -228,7 +228,7 @@ DEFINE_ACTION(ContextOutpost,OUTPOGEO)
 	COutpost* outpost = CWorkPtr::outpost();
 	if (!outpost)
 		return;
-	
+
 	std::vector <CAIVector> points;
 	for (uint i=0; i<(args.size()-1); i+=2)
 	{
@@ -248,19 +248,19 @@ DEFINE_ACTION(ContextOutpost,SPWNZONE)
 	COutpost* outpost = CWorkPtr::outpost();
 	if (!outpost)
 		return;
-	
+
 	float x, y, r;
 	uint32 verticalPos;
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode* aliasTree;
 	if (!getArgs(args, name(), aliasTree, x, y, r, verticalPos))
 		return;
-	
+
 	// see whether the region is already loaded
 	COutpostSpawnZone* spawnZone = outpost->spawnZones().getChildByAlias(aliasTree->getAlias());
 	if (!spawnZone)
 		return;
-	
+
 	spawnZone->setPosAndRadius((AITYPES::TVerticalPos)verticalPos, CAIPos(x, y, 0, 0.f), uint32(r*1000));
 }
 
@@ -271,19 +271,19 @@ DEFINE_ACTION(ContextOutpost,BUILDING)
 	COutpost* outpost = CWorkPtr::outpost();
 	if (!outpost)
 		return;
-	
+
 	float x, y, theta;
 	uint32 verticalPos;
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode* aliasTree;
 	if (!getArgs(args, name(), aliasTree, x, y, theta, verticalPos))
 		return;
-	
+
 	// see whether the region is already loaded
 	COutpostSpawnZone* spawnZone = outpost->spawnZones().getChildByAlias(aliasTree->getAlias());
 	if (!spawnZone)
 		return;
-	
+
 	spawnZone->setPosAndRadius((AITYPES::TVerticalPos)verticalPos, CAIPos(x, y, 0, 0.f), uint32(r*1000));
 	*/
 /****************************************************************************/
@@ -291,15 +291,15 @@ DEFINE_ACTION(ContextOutpost,BUILDING)
 	if (!outpost)
 		return;
 	CGroup* grp = outpost->getBuildingGroup();
-	if (!grp) 
+	if (!grp)
 		return;
-	
+
 	uint32 alias;
 	if (!getArgs(args, name(), alias))
 		return;
-	
+
 //	LOG("Outpost Building: group: %s, bot: %u", grp->getFullName().c_str(), alias);
-	
+
 	// set workptr::bot to this bot
 	CWorkPtr::bot(grp->bots().getChildByAlias(alias));	//lookupBotInGrpNpc(alias));
 	if (!CWorkPtr::botNpc())
@@ -380,15 +380,15 @@ DEFINE_ACTION(ContextOutpost,CHGPARM)
 	COutpost *outpost = CWorkPtr::outpost();
 	if (!outpost)
 		return;
-	
+
 	CAIAliasDescriptionNode *aliasTree;
 	if (!getArgs(args, name(), aliasTree))
 		return;
-	
+
 	COutpostSquadFamily* squadFamily = outpost->squadFamilies().getChildByAlias(aliasTree->getAlias());
 	if (!squadFamily)
 		return;
-	
+
 	CWorkPtr::outpostSquadFamily(squadFamily);
 	CContextStack::setContext(ContextOutpostSquadFamily);
 }*/
@@ -402,7 +402,7 @@ static void DoMgrAction(
 //	CAIInstance* aiInstance = currentInstance;
 //	CWorkPtr::aiInstance(aiInstance);	// set the current AIInstance.
 	COutpost* outpost = CWorkPtr::outpost();
-	
+
 	// get hold of the manager's slot id - note that managers are identified by slot and not by alias!
 	uint32 alias;
 	std::string name, mapName, filename;
@@ -417,25 +417,25 @@ static void DoMgrAction(
 		if (!getArgs(args, "MANAGER", alias, name, mapName, filename))
 			return;
 	}
-	
+
 	// see whether the manager is already loaded
 	COutpostManager* mgr = static_cast<COutpostManager*>(outpost->managers().getChildByAlias(alias));
-	
+
 	// not found so look for a free slot
 	nlassert(mgr);
 //	outpost->newMgr(type, alias, name, mapName, filename);
 	mgr->registerForFile(filename);
 	mgr->setAutoSpawn(!manualSpawn);
-	
+
 	mgr = outpost->managers().getChildByAlias(alias);
-	
+
 	// setup the working manager pointer and exit
 	CWorkPtr::mgr(mgr);
 	if (mgr)
 		CWorkPtr::eventReactionContainer(mgr->getStateMachine());
 	else
-		CWorkPtr::eventReactionContainer(NULL);	
-	
+		CWorkPtr::eventReactionContainer(NULL);
+
 	// push the manager context onto the context stack
 	CContextStack::setContext(context);
 }
@@ -456,24 +456,24 @@ DEFINE_ACTION(ContextOutpostSquadFamily,IDTREE)
 {
 	// set the id tree for the region (results in creation or update of region's object tree)
 	// args: aliasTree
-	
+
 	if (!CWorkPtr::outpostSquadFamily())
 		return;
-	
+
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
 	if (!getArgs(args, name(),aliasTree))
 		return;
-	
-	
+
+
 	// have the manager update it's structure from the id tree
-	nlinfo("ACTION IDTREE: Applying new tree to outpost[%u]: '%s'%s in continent '%s'", 
-		CWorkPtr::outpostSquadFamily()->getChildIndex(), 
+	nlinfo("ACTION IDTREE: Applying new tree to outpost[%u]: '%s'%s in continent '%s'",
+		CWorkPtr::outpostSquadFamily()->getChildIndex(),
 		CWorkPtr::outpostSquadFamily()->getName().c_str(),
-		CWorkPtr::outpostSquadFamily()->getAliasString().c_str(), 
+		CWorkPtr::outpostSquadFamily()->getAliasString().c_str(),
 		CWorkPtr::outpostSquadFamily()->getOwner()->getName().c_str()
 		);
-	
+
 	if (aliasTree && CWorkPtr::outpostSquadFamily())
 		CWorkPtr::outpostSquadFamily()->updateAliasTree(*aliasTree);
 }
@@ -484,17 +484,17 @@ DEFINE_ACTION(ContextSquadTemplateVariant,GRPTMPL)
 	COutpostSquadFamily* const squadFamily = aii->getSquadFamily();
 	if (!squadFamily)
 		return;
-	
+
 	string grpFamily; // Ignored
 	uint32 botCount;
 	bool countMultipliedBySheet;
 	bool multiLevel;
-	
+
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode* aliasTree;
 	if (!getArgs(args, name(), aliasTree, grpFamily, botCount, countMultipliedBySheet, multiLevel))
 		return;
-	
+
 	IAliasCont *aliasCont = squadFamily->getAliasCont( AITYPES::AITypeGroupTemplate );
 	CAliasTreeOwner *child = squadFamily->createChild( aliasCont, aliasTree );
 	CGroupDesc<COutpostSquadFamily> *groupDesc = (dynamic_cast<CGroupDesc<COutpostSquadFamily>*>(child));
@@ -507,7 +507,7 @@ DEFINE_ACTION(ContextSquadTemplateVariant,GRPTMPL)
 	groupDesc->setBaseBotCount(botCount);
 	groupDesc->setCountMultiplierFlag(countMultipliedBySheet);
 	groupDesc->setMultiLevel(multiLevel);
-	
+
 	CContextStack::setContext(ContextOutpostGroupDesc);
 }
 
@@ -527,12 +527,12 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,GT_SHEE,FamilyT)
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
 		return;
-	
+
 	string lookSheet;
-	
+
 	if (!getArgs(args,name(), lookSheet))
 		return;
-	
+
 	if (!groupDesc->setSheet(lookSheet))
 	{
 		groupDesc->getOwner()->groupDescs().removeChildByIndex(groupDesc->getChildIndex());
@@ -548,12 +548,12 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,GT_LVLD,FamilyT)
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
 		return;
-	
+
 	sint32 levelDelta;
-	
+
 	if (!getArgs(args,name(), levelDelta))
 		return;
-	
+
 	groupDesc->setLevelDelta(levelDelta);
 }
 
@@ -564,12 +564,12 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,GT_SEAS,FamilyT)
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
 		return;
-	
+
 	bool seasons[4];
-	
+
 	if (!getArgs(args,name(), seasons[0], seasons[1], seasons[2], seasons[3]))
 		return;
-	
+
 	groupDesc->setSeasonFlags(seasons);
 }
 
@@ -580,11 +580,11 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,GT_ACT,FamilyT)
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
 		return;
-	
+
 	uint32 spawnType;
 	if (!getArgs(args, name(), spawnType))
 		return;
-	
+
 	groupDesc->setSpawnType((AITYPES::TSpawnType)spawnType);
 }
 
@@ -594,8 +594,8 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,GT_APRM,FamilyT)
 {
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
-		return;	
-	
+		return;
+
 	for (size_t i=0; i<args.size(); ++i)
 	{
 		string property;
@@ -611,12 +611,12 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,GT_NRG,FamilyT)
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
 		return;
-	
+
 	uint32 weight[4];
-	
+
 	if (!getArgs(args,name(), weight[0], weight[1], weight[2], weight[3]))
 		return;
-	
+
 	groupDesc->setWeightLevels(weight);
 }
 
@@ -627,9 +627,9 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,GT_EQUI,FamilyT)
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
 		return;
-	
+
 	groupDesc->botEquipment().clear();
-	
+
 	for (size_t i=0; i<args.size(); ++i)
 	{
 		string equip;
@@ -670,23 +670,23 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,BOTTMPL,FamilyT)
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
 		return;
-	
+
 	string lookSheet;
 	bool multiLevel;
-	
+
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode* aliasTree;
 	if (!getArgs(args, name(), aliasTree, lookSheet, multiLevel))
 		return;
-	
+
 	// see whether the region is already loaded
 	CBotDesc<FamilyT>* botDesc = groupDesc->botDescs().getChildByAlias(aliasTree->getAlias());
 	if (!botDesc)
 		return;
-	
+
 	botDesc->setMultiLevel(multiLevel);
 	botDesc->setSheet(lookSheet);
-	
+
 	CWorkPtr::botDesc(botDesc);
 	CContextStack::setContext(ContextOutpostBotDesc);
 }
@@ -698,7 +698,7 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostBotDesc,BT_EQUI,FamilyT)
 	CBotDesc<FamilyT>* botDesc = static_cast<CBotDesc<FamilyT>*>(CWorkPtr::botDesc());
 	if (!botDesc)
 		return;
-	
+
 	for (size_t i=0; i<args.size(); ++i)
 	{
 		string equip;
@@ -714,12 +714,12 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostBotDesc,BT_LVLD,FamilyT)
 	CBotDesc<FamilyT>* botDesc = static_cast<CBotDesc<FamilyT>*>(CWorkPtr::botDesc());
 	if (!botDesc)
 		return;
-	
+
 	sint32 levelDelta;
-	
+
 	if (!getArgs(args,name(), levelDelta))
 		return;
-	
+
 	botDesc->setLevelDelta(levelDelta);
 }
 
@@ -731,9 +731,9 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,GT_GNRJ,FamilyT)
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
 		return;
-	
+
 	uint32 energyValue;
-	
+
 	if (!getArgs(args,name(), energyValue))
 		return;
 }
@@ -747,34 +747,34 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,POPVER,FamilyT)
 
 	if(!CWorkPtr::groupDesc())
 		return;
-	
+
 	const uint32 fixedArgsCount = 0;
 	if (args.size()<fixedArgsCount+2 || ((args.size()-fixedArgsCount)&1)==1)
 	{
 		nlwarning("POPVER action FAILED due to bad number of arguments (%d)", args.size());
 		return;
 	}
-	
+
 	// get hold of the parameters and check their validity
 	for (size_t i=fixedArgsCount; i+1<args.size(); i+=2)
 	{
 		std::string sheet;
 		uint32 count;
-		
+
 		if	(	!args[i].get(sheet)
 			||	!args[i+1].get(count))
 		{
 			nlwarning("POPVER Add Record FAILED due to bad arguments");
 			continue;
 		}
-		
+
 		CSheetId sheetId(sheet);
 		if (sheetId==CSheetId::Unknown)
 		{
 			nlwarning("POPVER Add Record Invalid sheet: %s", sheet.c_str());
 			continue;
 		}
-		
+
 		AISHEETS::ICreatureCPtr sheetPtr = AISHEETS::CSheets::getInstance()->lookup(sheetId);
 		if (!sheetPtr)
 		{
@@ -794,7 +794,7 @@ DEFINE_ACTION_TEMPLATE1(ContextOutpostGroupDesc,GT_END,FamilyT)
 	CGroupDesc<FamilyT>* groupDesc = static_cast<CGroupDesc<FamilyT>*>(CWorkPtr::groupDesc());
 	if (!groupDesc)
 		return;
-	
+
 	if (!groupDesc->isMultiLevel())
 	{
 		uint32 totalEnergyValue = groupDesc->calcTotalEnergyValue();

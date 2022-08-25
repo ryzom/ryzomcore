@@ -50,6 +50,7 @@
 #include "game_share/mainland_summary.h"
 #include "game_share/shard_names.h"
 #include "server_share/handy_commands.h"
+#include "server_share/mongo_wrapper.h"
 
 // egs
 #include "game_item_manager/game_item_manager.h"
@@ -664,6 +665,20 @@ void updateConvertFile()
 	}
 }
 
+string getServerInfos(float x, float y)
+{
+	CVector pos;
+	pos.x = x;
+	pos.y = y;
+	pos.z = 0;
+	CRyzomTime::EWeather weather = WeatherEverywhere.getWeather(pos, CTimeDateSeasonManager::getRyzomTimeReference());
+	
+	return toString("%f|%d|%s|%u",
+		CTimeDateSeasonManager::getRyzomTimeReference().getRyzomTime(),
+		CTimeDateSeasonManager::getRyzomTimeReference().getRyzomDay(),
+		EGSPD::CSeason::toString(CTimeDateSeasonManager::getRyzomTimeReference().getRyzomSeason()).c_str(),
+		(uint)weather);
+}
 
 
 //---------------------------------------------------
@@ -1240,19 +1255,16 @@ void CPlayerService::initConfigFileVars()
 		MaxNbNpcSpawnedByEGS = varMaxNbNpcSpawnedByEGS->asInt();
 	else
 		MaxNbNpcSpawnedByEGS = 50;
-
 	CConfigFile::CVar *varMaxNbForageSources = ConfigFile.getVarPtr("NbForageSourcesLimit");
 	if ( varMaxNbForageSources )
 		MaxNbForageSources = varMaxNbForageSources->asInt();
 	else
 		MaxNbForageSources = 2000;
-
 	CConfigFile::CVar *varMaxNbToxicClouds = ConfigFile.getVarPtr("NbToxicCloudsLimit");
 	if ( varMaxNbToxicClouds )
 		MaxNbToxicClouds = varMaxNbToxicClouds->asInt();
 	else
 		MaxNbToxicClouds = 1000;
-
 	nlinfo( "NbPlayersLimit=%u NbObjectsLimit=%u NbNpcSpawnedByEGSLimit=%u NbForageSourcesLimit=%u NbToxicCloudsLimit=%u NbGuildLimit=%u", MaxNbPlayers, MaxNbObjects, MaxNbNpcSpawnedByEGS, MaxNbForageSources, MaxNbToxicClouds, MaxNbGuilds );
 
 	CConfigFile::CVar *varExportDepositContents = ConfigFile.getVarPtr("ExportDepositContents");
@@ -1333,6 +1345,10 @@ void CPlayerService::init()
 
 	initAdmin ();
 
+#ifdef HAVE_MONGO
+	CMongo::init();
+#endif
+
 	//uint16 i = SKILLS::NUM_SKILLS;
 
 	// Init mirror
@@ -1381,6 +1397,7 @@ void CPlayerService::init()
 	TRANSPORT_CLASS_REGISTER (CBSAIDeathReport);
 	TRANSPORT_CLASS_REGISTER (CAILostAggroMsgImp);
 	TRANSPORT_CLASS_REGISTER (CAIGainAggroMsgImp);
+	TRANSPORT_CLASS_REGISTER (CAINotifyDeathMsgImp);
 
 	TRANSPORT_CLASS_REGISTER (CSetBotHeadingMsg);
 	TRANSPORT_CLASS_REGISTER (CAIPlayerRespawnMsg);
@@ -1625,7 +1642,7 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 // {
 // 	if( args.size() == 0 )
 // 		return false;
-//
+// 
 // 	NLMEMORY::StatisticsReport( args[0].c_str(), args.size() > 1 );
 // 	return true;
 //}
@@ -1905,7 +1922,7 @@ void CPlayerService::release()
 //---------------------------------------------------
 void cbConnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg )
 {
-	// inform player about the service event that occurred
+	// inform player about the service event that occured
 #if !FINAL_VERSION
 	PlayerManager.broadcastMessage( 1, 0, 0, string("System event : Service UP : ")+serviceName);
 #endif
@@ -2029,8 +2046,11 @@ void cbMirrorUp( const std::string &serviceName, NLNET::TServiceId serviceId, vo
 	{
 		IOSIsUp = true;
 		nlinfo("IOS connection, serviceId %d",serviceId.get());
+		DynChatEGS.iosConnection();
+		
 		CGuildManager::getInstance()->onIOSConnection();
 		CPVPManager2::getInstance()->onIOSMirrorUp();
+
 		// add all teams to chat groups
 		TeamManager.addAllTeamsToChatGroup();
 		PlayerManager.registerCharacterName();
@@ -2038,7 +2058,6 @@ void cbMirrorUp( const std::string &serviceName, NLNET::TServiceId serviceId, vo
 //		PlayerManager.addAllCharForStringIdRequest();
 		CZoneManager::getInstance().iosConnection();
 //		RY_PDS::CPDStringManager::buildStringAssociation();
-		DynChatEGS.iosConnection();
 		CAIAliasTranslator::getInstance()->sendAliasToIOS();
 
 		// update all the 'TEXT' property in the database
@@ -3726,7 +3745,7 @@ NLMISC_COMMAND( createItemInBagTest," create_item_in_bag", "player id(id:type:cr
 		{
 			string sheetName = args[1];
 			if (sheetName.find(".") == string::npos)
-				sheetName += string(".sitem");
+				sheetName += string(".item");
 			sheet = CSheetId(sheetName.c_str());
 		}
 		uint quantity, quality;
@@ -3880,7 +3899,7 @@ NLMISC_COMMAND(displayDatabaseEntry," display a database entry value","<entity i
 		}
 		else
 		{
-			log.displayNL("Unknown entity %s ", id.toString().c_str());
+			log.displayNL("Unknown entity %s ",id.toString().c_str());
 		}
 		return true;
 	}
@@ -4779,7 +4798,7 @@ NLMISC_COMMAND(setHPBar,"set the value of an entity HP bar (0..100)","<entity id
 		sint32 barValue;
 		NLMISC::fromString(args[1], barValue);
 
-		entity->setScoreBar( SCORES::hit_points, (uint32)(barValue * 1023 / 100) );
+		entity->setScoreBar( SCORES::hit_points, (uint32)(barValue * 1023 / 127) );
 		log.displayNL("for entity id %s, new hpBar value : %d", id.toString().c_str(), barValue );
 
 		return true;

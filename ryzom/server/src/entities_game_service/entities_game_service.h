@@ -36,6 +36,7 @@ void cbConnection( const std::string &serviceName, NLNET::TServiceId sid, void *
 void cbDisconnection( const std::string &serviceName, NLNET::TServiceId sid, void *arg );
 void cbMirrorUp( const std::string &serviceName, NLNET::TServiceId sid, void *arg );
 void cbMirrorDn( const std::string &serviceName, NLNET::TServiceId sid, void *arg );
+std::string getServerInfos(float x, float y);
 
 /**
  * CPlayerService

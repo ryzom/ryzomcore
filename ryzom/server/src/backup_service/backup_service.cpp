@@ -723,7 +723,7 @@ void CBackupService::init()
 		// I'm a slave, try to contact master
 		string	host = MasterBSHost.get();
 		if (host.find (":") == string::npos)
-			host += ":43990";
+			host += ":49990";
 
 		CUnifiedNetwork::getInstance()->addService ("BS", CInetAddress(host));
 	}
@@ -774,7 +774,7 @@ static const char* getShortServiceName(const IService* theService, const char *d
 	return s.c_str();
 }
 
-NLNET_SERVICE_MAIN( CBackupService, getShortServiceName(scn, "BS"), getCompleteServiceName(scn, "backup_service"), 43990, CbArray, "", "" )
+NLNET_SERVICE_MAIN( CBackupService, getShortServiceName(scn, "BS"), getCompleteServiceName(scn, "backup_service"), 49990, CbArray, "", "" )
 
 
 void	CDirectoryRateStat::clear()

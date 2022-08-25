@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -39,9 +36,6 @@ public:
 	/// Return the type of the property.
 	inline const EPropType &	type() const {return _Type;}
 
-	/// Return the type of the property.
-	inline bool					nullable() const {return _Nullable;}
-
 	/// The overridden version that is usable from ICDBStructNode
 	virtual EPropType			getType() const		{return _Type;}
 
@@ -52,7 +46,7 @@ public:
 	/**
 	 * Default constructor
 	 */
-	CCDBStructNodeLeaf() : ICDBStructNode(), _Parent( NULL ), _Type( UNKNOWN ), _Nullable( false ) {}
+	CCDBStructNodeLeaf() : ICDBStructNode(), _Parent( NULL ), _Type( UNKNOWN ) {}
 	
 	/**
 	 *	Build the structure of the database from a file
@@ -183,9 +177,6 @@ private:
 
 	/// property type
 	EPropType			_Type;
-
-	/// nullable
-	bool				_Nullable;
 
 	/// Binary property id of the leaf (precalculated & stored to avoid having to get back in the tree to build it)
 	CBinId				_LeafId;

@@ -64,7 +64,7 @@ public:
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 
 	/// Serial
-	void serial(NLMISC::IStream &f);
+	void serial(class NLMISC::IStream &f);
 
 	/// Return the version of this class, increments this value when the content of this class has changed
 	inline static uint getVersion () { return 1; }

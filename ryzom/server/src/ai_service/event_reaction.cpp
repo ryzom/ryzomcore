@@ -66,6 +66,14 @@ void CAIEventReaction::setState(uint32 alias)
 		_eventMgr->addReaction(this);
 }
 
+uint32 CAIEventReaction::getState()
+{
+	if (_states.empty())
+		return 0;
+
+	return _states[0];
+}
+
 void CAIEventReaction::setGroup(uint32 alias)
 {
 	if	(!_eventMgr.isNULL())

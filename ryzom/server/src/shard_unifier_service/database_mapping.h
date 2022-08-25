@@ -1,20 +1,4 @@
 
-// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
@@ -2202,7 +2186,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -2234,8 +2218,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -2337,7 +2320,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
@@ -2371,8 +2354,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -3699,7 +3681,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
@@ -3735,8 +3717,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -3838,7 +3819,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
@@ -3872,8 +3853,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -3974,7 +3954,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -4006,8 +3986,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4108,7 +4087,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -4140,8 +4119,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4244,7 +4222,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
@@ -4280,8 +4258,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4963,7 +4940,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
@@ -4997,8 +4974,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -5099,7 +5075,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -5131,8 +5107,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -5913,24 +5888,7 @@ namespace RSMGR
 			_SessionId(NOPE::INVALID_OBJECT_ID)
 		{
 			// Default initialisation
-			_SessionType = TSessionType::st_edit;
-			_OwnerId = 0;
-			_PlanDate = 0;
-			_StartDate = 0;
-			_Orientation = TSessionOrientation::so_other;
-			_Level = R2::TSessionLevel::sl_a;
-			_RuleType = TRuleType::rt_strict;
 			_AccessType = TAccessType::at_private;
-			_State = TSessionState::ss_planned;
-			_HostShardId = 0;
-			_SubscriptionSlots = 0;
-			_ReservedSlots = 0;
-			_EstimatedDuration = TEstimatedDuration::et_short;
-			_FinalDuration = 0;
-			_FolderId = 0;
-			_AnimMode = TAnimMode::am_dm;
-			_GuildFilter = TGuildFilter::gf_only_my_guild;
-			_SubscriptionClosed = 0;
 			_Newcomer = 1;
 			_SessionParticipants = NULL;
 			_GuildInvites = NULL;
@@ -6122,7 +6080,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
@@ -6158,8 +6116,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -7370,7 +7327,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -7402,8 +7359,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}

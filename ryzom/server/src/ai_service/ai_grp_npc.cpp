@@ -19,6 +19,7 @@
 
 #include "stdpch.h"
 #include "server_share/r2_variables.h"
+#include "messages.h"
 #include "ai_grp_npc.h"
 #include "ai_mgr_npc.h"
 #include "ai_bot_npc.h"
@@ -35,6 +36,7 @@ extern bool simulateBug(int bugId);
 using namespace MULTI_LINE_FORMATER;
 
 using namespace NLMISC;
+using namespace NLNET;
 using namespace std;
 using namespace	AITYPES;
 
@@ -60,6 +62,7 @@ CSpawnGroupNpc::CSpawnGroupNpc(CPersistent<CSpawnGroup>& owner)
 {
 	sint32 const randomVal = (sint32)CTimeInterface::gameCycle()-CAIS::rand32(20);
 	_LastUpdate = (randomVal>=0)?randomVal:CTimeInterface::gameCycle();
+	_Cell = 0;
 	_LastBotUpdate = CTimeInterface::gameCycle();
 	activityProfile().setAIProfile(new CGrpProfileNormal(this));
 	_BotUpdateTimer.set((CAIS::rand32(40)+((intptr_t)this>>2))%20); // start with a random value.
@@ -148,10 +151,10 @@ void CSpawnGroupNpc::sendInfoToEGS() const
 void CSpawnGroupNpc::update()
 {
 	H_AUTO(GrpNpcUpdate);
-	
+
 	++AISStat::GrpTotalUpdCtr;
 	++AISStat::GrpNpcUpdCtr;
-	
+
 	uint32 const Dt = CTimeInterface::gameCycle()-_LastUpdate;
 	bool const inFight = activityProfile().getAIProfileType()==FIGHT_NORMAL;
 
@@ -174,27 +177,27 @@ void CSpawnGroupNpc::update()
 	{
 		updateTrigger = 30;
 	}
-	
+
 	bool const haveToUpdateGroupBehaviour = (Dt>=updateTrigger); // every second.
-	
+
 	if (haveToUpdateGroupBehaviour)
 	{
 		H_AUTO(GrpNpcUpdateBehaviour);
 		// record the tick at which we ran this update (for future refference)
 		_LastUpdate = CTimeInterface::gameCycle();
-		
+
 		checkDespawn();
 		checkRespawn();
 		getPersistent().updateStateInstance();
 	}
-	
+
 	// bot update()s --------------------------------------------------
 	{
 		if (haveToUpdateGroupBehaviour)
 		{
 			H_AUTO(GrpNpcUpdateBots);
 			_GroupInVision = false;
-			
+
 			FOREACH(first,CCont<CBot>, bots())
 			{
 				CSpawnBotNpc const* const bot = static_cast<CBotNpc*>(*first)->getSpawn();
@@ -212,21 +215,21 @@ void CSpawnGroupNpc::update()
 				}
 				if (!bot->havePlayersAround())
 					continue;
-				
+
 				_GroupInVision = true;
 				break;
 			}
 		}
-		
+
 		// TODO : hack : remove this when the "can't reach and turn arround" debility is corrected
 		bool fastUpdate = _GroupInVision || inFight;
 		bool slowUpdate = (CTimeInterface::gameCycle()%_SlowUpdatePeriod)==_SlowUpdateCycle;
-		
+
 		if (fastUpdate || slowUpdate)
 		{
 			uint32 const botDt = CTimeInterface::gameCycle()-_LastBotUpdate;
 			_LastBotUpdate = CTimeInterface::gameCycle();
-			
+
 			FOREACH(first, CCont<CBot>, bots())
 			{
 				CSpawnBotNpc* const bot = static_cast<CBotNpc*>(*first)->getSpawn();
@@ -239,9 +242,9 @@ void CSpawnGroupNpc::update()
 			_BotUpdateTimer.set(10);
 		}
 	}
-	
+
 	if (haveToUpdateGroupBehaviour)
-	{			
+	{
 		H_AUTO(GrpNpcUpdateGrpBehaviour);
 		if (!activityProfile().getAISpawnProfile().isNull()) // Check if we have a behaviour.
 			activityProfile().updateProfile(Dt); // If so, then update it !
@@ -263,27 +266,27 @@ void CSpawnGroupNpc::stateChange(CAIState const* oldState, CAIState const* newSt
 	// Find changing group profiles.
 	{
 		setProfileParameters(getPersistent().profileParameters());
-		
+
 		IAIProfileFactory* moveProfile = newState->moveProfile();
 		IAIProfileFactory* actProfile = newState->activityProfile();
-		
+
 		mergeProfileParameters(newState->profileParameters());
-		
+
 		FOREACHC(it, CCont<CAIStateProfile>, newState->profiles())
 		{
 			if (!it->testCompatibility(getPersistent()))
 				continue;
-			
+
 			if (it->moveProfile()!= RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
 				moveProfile = it->moveProfile();
-			
+
 			if (it->activityProfile()!=RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
 				actProfile = it->activityProfile();
-			
+
 			mergeProfileParameters(it->profileParameters());
 			break;
 		}
-		
+
 		breakable
 		{
 			if (oldState)
@@ -294,36 +297,36 @@ void CSpawnGroupNpc::stateChange(CAIState const* oldState, CAIState const* newSt
 					// need to backup the current profiles
 					_PunctualHoldActivityProfile = activityProfile();
 					_PunctualHoldMovingProfile = movingProfile();
-					
+
 					activityProfile() = CProfilePtr();
 					movingProfile() = CProfilePtr();
 					break;
 				}
-				
+
 				if (newState->isPositional() && !oldState->isPositional())
 				{
 					// end of punctual state
 					// need to restore the backuped profile
 					activityProfile() = _PunctualHoldActivityProfile;
 					movingProfile() = _PunctualHoldMovingProfile;
-					
+
 					_PunctualHoldActivityProfile = CProfilePtr();
 					_PunctualHoldMovingProfile = CProfilePtr();
-					
+
 					// resume the profiles
 					activityProfile().getAISpawnProfile()->resumeProfile();
 					movingProfile().getAISpawnProfile()->resumeProfile();
 					break;
 				}
 			}
-			
+
 			// normal behavior, transition from positionnal to positionnal state
 			if	(moveProfile!=RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
 				setMoveProfileFromStateMachine(moveProfile);
-			
+
 			if	(actProfile!=RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
 				setActivityProfileFromStateMachine(actProfile);
-			
+
 			break;
 		}
 	}
@@ -338,13 +341,88 @@ void CSpawnGroupNpc::stateChange(CAIState const* oldState, CAIState const* newSt
 	}
 }
 
+void CSpawnGroupNpc::spawnBots(const std::string &name)
+{
+	ucstring ucName;
+	ucName.fromUtf8(name);
+
+	FOREACH(itBot, CCont<CBot>, bots())
+	{
+		CBot* bot = *itBot;
+		if (!bot->isSpawned()) {
+			bot->spawn();
+
+			if (!ucName.empty())
+			{
+				CSpawnBot *spawnBot = bot->getSpawnObj();
+				if (spawnBot)
+				{
+					TDataSetRow	row = spawnBot->dataSetRow();
+					NLNET::CMessage	msgout("CHARACTER_NAME");
+					msgout.serial(row);
+					msgout.serial(ucName);
+					sendMessageViaMirror("IOS", msgout);
+					spawnBot->getPersistent().setCustomName(ucName);
+				}
+			}
+
+			if (_Cell < 0) {
+				CEntityId id = bot->getSpawnObj()->getEntityId();
+				sint32 x = bot->getSpawnObj()->pos().x();
+				sint32 y = bot->getSpawnObj()->pos().y();
+				sint32 z = bot->getSpawnObj()->pos().h();
+				float t = bot->getSpawnObj()->pos().theta().asRadians();
+				uint8 cont = 0;
+				uint8 slide = 1;
+				NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle() + 1;
+				CMessage msgout2("ENTITY_TELEPORTATION");
+				msgout2.serial( id );
+				msgout2.serial( x );
+				msgout2.serial( y );
+				msgout2.serial( z );
+				msgout2.serial( t );
+				msgout2.serial( tick );
+				msgout2.serial( cont );
+				msgout2.serial( _Cell );
+				msgout2.serial( slide );
+
+				sendMessageViaMirror("GPMS", msgout2);
+			}
+		}
+	}
+}
+
 void CSpawnGroupNpc::spawnBots()
 {
 	FOREACH(itBot, CCont<CBot>, bots())
 	{
 		CBot* bot = *itBot;
-		if (!bot->isSpawned())
+		if (!bot->isSpawned()) {
 			bot->spawn();
+
+			if (_Cell < 0) {
+				CEntityId id = bot->getSpawnObj()->getEntityId();
+				sint32 x = bot->getSpawnObj()->pos().x();
+				sint32 y = bot->getSpawnObj()->pos().y();
+				sint32 z = bot->getSpawnObj()->pos().h();
+				float t = bot->getSpawnObj()->pos().theta().asRadians();
+				uint8 cont = 0;
+				uint8 slide = 1;
+				NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle() + 1;
+				CMessage msgout2("ENTITY_TELEPORTATION");
+				msgout2.serial( id );
+				msgout2.serial( x );
+				msgout2.serial( y );
+				msgout2.serial( z );
+				msgout2.serial( t );
+				msgout2.serial( tick );
+				msgout2.serial( cont );
+				msgout2.serial( _Cell );
+				msgout2.serial( slide );
+
+				sendMessageViaMirror("GPMS", msgout2);
+			}
+		}
 	}
 }
 
@@ -355,7 +433,7 @@ void CSpawnGroupNpc::despawnBots(bool immediately)
 		CBot* const bot = *itBot;
 		if (!bot->isSpawned())
 			continue;
-		
+
 		if (TheDataset.getOnlineTimestamp( bot->getSpawnObj()->dataSetRow()) >= CTickEventHandler::getGameCycle())
 			nlwarning("Bots %s:%s spawn/despawn in the same tick ! despawn ignored", getPersistent().getName().c_str(), bot->getName().c_str());
 		else
@@ -380,7 +458,7 @@ CGroupNpc::CGroupNpc(CMgrNpc* mgr, CAIAliasDescriptionNode* aliasTree, RYAI_MAP_
 , CPersistentStateInstance(*mgr->getStateMachine())
 {
 	_BotsAreNamed = true;
-	
+
 	_PlayerAttackable = false;
 	_BotAttackable = false;
 	_AggroDist = 0;
@@ -393,25 +471,25 @@ CGroupNpc::CGroupNpc(CMgrNpc* mgr, uint32 alias, std::string const& name, RYAI_M
 , CPersistentStateInstance(*mgr->getStateMachine())
 {
 	_BotsAreNamed = true;
-	
+
 	_PlayerAttackable = false;
 	_BotAttackable = false;
 	_AggroDist = 0;
 }
 
-CGroupNpc::~CGroupNpc() 
+CGroupNpc::~CGroupNpc()
 {
 	// avoid re-deletion by despawn
 	_AutoDestroy = false;
 	if (isSpawned()) // to avoid bad CDbgPtr link interpretation
 		despawnGrp();
-	
+
 	// clear all persistent state instance
 	while (!_PSIChilds.empty())
 	{
 		_PSIChilds.back()->setParentStateInstance(NULL);
 	}
-	
+
 	_PSIChilds.clear();
 }
 
@@ -424,7 +502,7 @@ std::vector<std::string> CGroupNpc::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
 	std::vector<std::string> strings;
-	
+
 	pushTitle(container, "CGroupNpc");
 	strings = CGroup::getMultiLineInfoString();
 	FOREACHC(itString, std::vector<std::string>, strings)
@@ -435,7 +513,7 @@ std::vector<std::string> CGroupNpc::getMultiLineInfoString() const
 	pushEntry(container, NLMISC::toString("attackable: player=%s bot=%s", _PlayerAttackable?"yes":"no", _BotAttackable?"yes":"no"));
 	pushEntry(container, "state=" + (getState()?getState()->getName():string("<null>")));
 	pushFooter(container);
-	
+
 	return container;
 }
 
@@ -445,9 +523,9 @@ CMgrNpc& CGroupNpc::mgr() const
 }
 
 void CGroupNpc::updateDependencies(CAIAliasDescriptionNode const& aliasTree, CAliasTreeOwner* aliasTreeOwner)
-{	
+{
 	switch(aliasTree.getType())
-	{		
+	{
 		case AITypeEvent:
 		{
 			CAIEventReaction* const eventPtr = NLMISC::safe_cast<CAIEventReaction*>(mgr().getStateMachine()->eventReactions().getChildByAlias(aliasTree.getAlias()));
@@ -477,19 +555,19 @@ IAliasCont* CGroupNpc::getAliasCont(TAIType type)
 CAliasTreeOwner* CGroupNpc::createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree)
 {
 	CAliasTreeOwner* child = NULL;
-	
+
 	switch (aliasTree->getType())
 	{
 	case AITypeOutpostBuilding:
 	case AITypeBot:
 		child = new CBotNpc(this, aliasTree);
 		break;
-		
+
 	case AITypeFolder:
 	default:
 		break;
 	}
-	
+
 	if (child!=NULL)
 		cont->addAliasChild(child);
 	return (child);
@@ -503,7 +581,7 @@ CSmartPtr<CSpawnGroup> CGroupNpc::createSpawnGroup()
 void CGroupNpc::serviceEvent (const CServiceEvent &info)
 {
 	CGroup::serviceEvent(info);
-	
+
 	// If the EGS crash
 	if ( (info.getServiceName() == "EGS") && (info.getEventType() == CServiceEvent::SERVICE_DOWN) )
 	{
@@ -527,19 +605,19 @@ void CGroupNpc::serviceEvent (const CServiceEvent &info)
 	{
 		processStateEvent(getEventContainer().EventEGSUp);
 	}
-	
+
 }
 
 
 bool	CGroupNpc::spawn	()
-{		
+{
 	if (CGroup::spawn())
 	{
 		setStartState(getStartState());	//	stateInstance.
-		
+
 		// inform the EGS of our existence - simulate connection of EGS
 		serviceEvent	(CServiceEvent(NLNET::TServiceId(0),std::string("EGS"),CServiceEvent::SERVICE_UP));
-		
+
 		if (isAutoSpawn())
 		{
 			CCont<CBot >::iterator first(bots().begin()), last(bots().end());
@@ -550,7 +628,7 @@ bool	CGroupNpc::spawn	()
 				bot->spawn();
 			}
 		}
-		return	true; 		
+		return	true;
 	}
 	return	false;
 }
@@ -604,19 +682,19 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			_BotAttackable = true;
 			break;
 		}
-		
+
 		if (key == ATTACKABLE || key == PLAYER_ATTACKABLE)
 		{
-			// the bots are attackable ! 
+			// the bots are attackable !
 			_PlayerAttackable = true;
-			if (!IsRingShard) // In Ring shard, BotAttackable means attackable by bot not vulnerable 
-			{			
+			if (!IsRingShard) // In Ring shard, BotAttackable means attackable by bot not vulnerable
+			{
 				// attackable implie vulnerable!
 				_BotAttackable = true;
 			}
 			break;
 		}
-		
+
 		if (key == BADGUY)
 		{
 			// the bots are bad guys! they will attack players in their aggro range.
@@ -648,7 +726,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			}
 			break;
 		}
-		
+
 		if (key == ESCORT_RANGE)
 		{
 			if (!tail.empty())
@@ -663,7 +741,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			}
 			break;
 		}
-		
+
 		if (key == RESPAWN_TIME)
 		{
 			if (!tail.empty())
@@ -681,7 +759,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			}
 			break;
 		}
-		
+
 		if (key == DESPAWN_TIME)
 		{
 			if (!tail.empty())
@@ -699,7 +777,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			}
 			break;
 		}
-		
+
 		if (key == DENIED_ASTAR_FLAGS)
 		{
 			if (!tail.empty())
@@ -724,7 +802,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 
 		if	(parameter.empty())
 			break;
-		
+
 		nlwarning("CAIBotNpc::addParameter unknown parameter '%s'", parameter.c_str());
 	}
 }
@@ -740,7 +818,7 @@ void CGroupNpc::delHpUpTrigger(float threshold, int eventId)
 	CGroupNpc::THpTriggerList::iterator first, last, trigger;
 	first = hpTriggers.lower_bound(threshold);
 	last = hpTriggers.upper_bound(threshold);
-	
+
 	for (; first!=last; ++first)
 	{
 		if (first->second==eventId)
@@ -761,7 +839,7 @@ void CGroupNpc::delHpDownTrigger(float threshold, int eventId)
 	CGroupNpc::THpTriggerList::iterator first, last, trigger;
 	first = hpTriggers.lower_bound(threshold);
 	last = hpTriggers.upper_bound(threshold);
-	
+
 	for (; first!=last; ++first)
 	{
 		if (first->second==eventId)
@@ -782,7 +860,7 @@ void CGroupNpc::delHpUpTrigger(float threshold, std::string cbFunc)
 	CGroupNpc::THpTriggerList2::iterator first, last, trigger;
 	first = hpTriggers.lower_bound(threshold);
 	last = hpTriggers.upper_bound(threshold);
-	
+
 	for (; first!=last; ++first)
 	{
 		if (first->second==cbFunc)
@@ -803,7 +881,7 @@ void CGroupNpc::delHpDownTrigger(float threshold, std::string cbFunc)
 	CGroupNpc::THpTriggerList2::iterator first, last, trigger;
 	first = hpTriggers.lower_bound(threshold);
 	last = hpTriggers.upper_bound(threshold);
-	
+
 	for (; first!=last; ++first)
 	{
 		if (first->second==cbFunc)
@@ -944,7 +1022,7 @@ void CGroupNpc::addHandle(TDataSetRow playerRowId, uint32 missionAlias, uint32 D
 	{
 		_AutoSpawnWhenNoMoreHandle = isAutoSpawn();
 	}
-	
+
 	setAutoSpawn(true);
 	// There is always a spawned object for group
 	if (getSpawnObj() != NULL)
@@ -959,7 +1037,7 @@ void CGroupNpc::addHandle(TDataSetRow playerRowId, uint32 missionAlias, uint32 D
 	SHandle h;
 	h.MissionAlias = missionAlias;
 	h.PlayerRowId = playerRowId;
-	
+
 	set<SHandle>::const_iterator it = _Handles.find(h);
 
 	if (it != _Handles.end())
@@ -1033,7 +1111,7 @@ std::string	CSpawnGroupNpc::buildDebugString(uint idx) const
 
 std::string	CGroupNpc::buildDebugString(uint idx) const
 {
-	
+
 	switch(idx)
 	{
 	case 0: return "-- CGroupNpc -----------------------------";
@@ -1096,6 +1174,41 @@ void CGroupNpc::firstBotSpawned()
 	setFirstBotSpawned();
 }
 
+void CGroupNpc::setStateAlias(const std::string &state, uint32 alias)
+{
+	TStatesToAlias::iterator it=_StatesToAlias.find(state);
+	if (it != _StatesToAlias.end())
+		it->second = alias;
+	else
+		_StatesToAlias.insert(make_pair(state, alias));
+}
+
+uint32 CGroupNpc::getStateAlias(const std::string &state)
+{
+	TStatesToAlias::iterator it=_StatesToAlias.find(state);
+	if (it != _StatesToAlias.end())
+		return it->second;
+	return 0;
+}
+
+void CGroupNpc::setStateEventAlias(const std::string &stateEvent, uint32 alias)
+{
+	TStatesToAlias::iterator it=_StateEventToAlias.find(stateEvent);
+	if (it != _StateEventToAlias.end())
+		it->second = alias;
+	else
+		_StateEventToAlias.insert(make_pair(stateEvent, alias));
+}
+
+uint32 CGroupNpc::getStateEventAlias(const std::string &state)
+{
+	TStatesToAlias::iterator it=_StateEventToAlias.find(state);
+	if (it != _StateEventToAlias.end())
+		return it->second;
+	return 0;
+}
+
+
 void CGroupNpc::setColour(uint8 colour)
 {
 	FOREACH(itBot, CCont<CBot>, bots())
@@ -1116,26 +1229,26 @@ void CGroupNpc::setOutpostSide(OUTPOSTENUMS::TPVPSide side)
 	}
 }
 
-void CGroupNpc::setOutpostFactions(OUTPOSTENUMS::TPVPSide side)
+void CGroupNpc::setOutpostFactions(const std::string &alias, OUTPOSTENUMS::TPVPSide side)
 {
 	// Attack only the declared ennemies of the outpost
 	if (side == OUTPOSTENUMS::OutpostOwner)
 	{
 		// Bots factions
-		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
-		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
-		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
+		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_defender", alias.c_str()));
+		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", alias.c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", alias.c_str()));
 		// Players faction
-		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:attacker", getAliasString().c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:attacker", alias.c_str()));
 	}
 	if (side == OUTPOSTENUMS::OutpostAttacker)
 	{
 		// Bots factions
-		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
-		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
-		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
+		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_attacker", alias.c_str()));
+		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", alias.c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", alias.c_str()));
 		// Players faction
-		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:defender", getAliasString().c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:defender", alias.c_str()));
 	}
 }
 
@@ -1192,10 +1305,10 @@ NLMISC_COMMAND(verboseNPCGrp,"Turn on or off or check the state of verbose npc g
 {
 	if(args.size()>1)
 		return false;
-	
+
 	if(args.size()==1)
 		StrToBool	(VerboseLog, args[0]);
-	
+
 	nlinfo("VerboseLogging is %s",VerboseLog?"ON":"OFF");
 	return true;
 }
