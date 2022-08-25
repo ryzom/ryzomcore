@@ -35,7 +35,7 @@ string CMongo::dbname;
 void CMongo::init()
 {
 	dbname = ChatDbName.get();
-	
+
 	try
 	{
 		bool res;
@@ -114,6 +114,14 @@ void CMongo::remove(const string &collection, const string &jsonQuery, bool just
 	{
 		nlwarning("mongo: update failed, caught DBException '%s'", e.toString().c_str());
 	}
+}
+
+
+string CMongo::id()
+{
+	BSONElement e;
+	BSON(GENOID).getObjectID(e);
+	return e.__oid().toString();
 }
 
 
