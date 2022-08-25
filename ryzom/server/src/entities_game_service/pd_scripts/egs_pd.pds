@@ -1,0 +1,25 @@
+// namespace and pd system file of the EGS
+db EGSPD "entities_game_service/egs_pd"
+{
+
+	usepch "stdpch.h"
+
+	file "entities_game_service/common_pd.h"
+	{
+		type TCharacterId		CEntityId;
+		type TGuildId			uint32;
+	}
+	
+	// game share files
+	verbatim "game_share/pd_scripts/people.pds"
+	verbatim "game_share/pd_scripts/sp_type.pds"
+	verbatim "game_share/pd_scripts/guild_grade.pds"
+	verbatim "game_share/pd_scripts/season.pds"
+
+
+	// EGS files
+	verbatim "entities_game_service/pd_scripts/fame.pds"
+	verbatim "entities_game_service/pd_scripts/guild.pds"
+	verbatim "entities_game_service/pd_scripts/mission.pds"
+//	verbatim "entities_game_service/pd_scripts/pd_logs.pds"
+}
