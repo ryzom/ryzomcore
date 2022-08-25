@@ -20,9 +20,10 @@
 #ifdef HAVE_MONGO
 
 #include <mongo/client/dbclient.h>
+#include <mongo/bson/bsonmisc.h>
 
 using namespace mongo;
-//using namespace bson;
+using namespace bson;
 
 class CMongo {
 public:
@@ -32,6 +33,7 @@ public:
 	static void update(const std::string &collection, const std::string &jsonQuery, const std::string &jsonObj, bool upsert=false, bool multi=false);
 	static void remove(const std::string &collection, const std::string &jsonQuer, bool justOne = false);
 	static std::string quote(const std::string &s);
+	static std::string id();
 
 private:
     static DBClientConnection conn;
