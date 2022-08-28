@@ -764,7 +764,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	string src = getParam(Params, "src");
 	CDBCtrlSheet *pCSSrc;
 	CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-	
+
 	// NB: THIS IS UGLY BUT WORKS BECAUSE Memory ctrls are first initialized as SPhrase (branchname init)
 
 	// type check
@@ -788,7 +788,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	sint32 dstMacroId= pCSDst->getMacroId();
 
 	if (src.empty() && (CHandlerPhraseMemoryCopy::haveLastPhraseElement))
-	{		
+	{
 		// get the slot ids from save
 		srcIsMacro= CHandlerPhraseMemoryCopy::isMacro;
 		srcPhraseId= CHandlerPhraseMemoryCopy::sPhraseId;
@@ -818,7 +818,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	{
 		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
-		
+
 		// type check
 		if (pCSSrc == NULL) return;
 		// The src must be a phraseid, a phrasesheet, or a macro droped
@@ -828,7 +828,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 		srcIsMacro= pCSSrc->isMacro();
 		srcPhraseId= pCSSrc->getSPhraseId();
 		srcMacroId= pCSSrc->getMacroId();
-		
+
 
 		// If the src comes not from a memory
 		if(!pCSSrc->isSPhraseIdMemory() && !pCSSrc->isMacroMemory())
@@ -898,7 +898,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 					        srcMemoryLine = pPM->getSelectedMemoryLineDB();
 					else
 					        srcMemoryLine = pPM->getSelectedMemoryAltLineDB();
-					
+
 					// memorize dst into src
 					memorizePhraseOrMacro(srcMemoryLine, srcMemoryIndex, dstIsMacro, dstPhraseId, dstMacroId);
 					// memorize src into dst
@@ -926,7 +926,7 @@ void CHandlerMemorizePhraseOrMacro::memorizePhraseOrMacro(sint32 memoryLine, uin
 
 	if (memoryLine<0)
 	        return;
-	
+
 	if(isMacro)
 	{
 		pPM->memorizeMacro(memoryLine, memoryIndex, macroId);
@@ -1041,7 +1041,7 @@ public:
 
 		// is alternative action bar
 		bool isMain = pCSDst->isShortCut();
-		
+
 		// get the memory index
 		uint memoryIndex = pCSDst->getIndexInDB();
 
@@ -1084,7 +1084,7 @@ public:
 		// Ok, the user try to forget a phrase slot
 		CSPhraseManager	*pPM = CSPhraseManager::getInstance();
 
-		
+
 		// get params
 		bool isMain;
 		fromString(getParam(Params, "isMain"), isMain);
@@ -1102,7 +1102,7 @@ public:
 		        memoryLine = pPM->getSelectedMemoryAltLineDB();
 		if (memoryLine<0)
 		        return;
-		
+
 		if (isMacro)
 		{
 			pPM->forgetMacro(memoryLine, memoryIndex);
@@ -1245,16 +1245,20 @@ public:
 							// VERY important if previous MoveTo was a SPhrase MoveTo (because cancelClientExecute() must be called)
 							UserEntity->resetAnyMoveTo();
 
+							pPM->cancelClientExecute(cyclic);
+
+							// Move to targetted source
+							if (target)
+								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
+
 							// start client execution
 							pPM->clientExecute(memoryLine, memoryIndex, cyclic);
 
-							// Move to targetted source or inform Server of phrase cast
-							// If target is close, then sendExecuteToServer is called from extractRM()
-							// If target is far, then client executes move-to-target first, and then calls extractRM()
-							if (target)
-								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
-							else
+							if (!target)
+							{
+								// inform Server of phrase cast
 								pPM->sendExecuteToServer(memoryLine, memoryIndex, cyclic);
+							}
 						}
 					}
 					else

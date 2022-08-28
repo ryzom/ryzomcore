@@ -1,0 +1,109 @@
+cpack_add_install_type(Full DISPLAY_NAME "Full Install")
+cpack_add_install_type(Developer DISPLAY_NAME "Developer Install")
+cpack_add_install_type(Runtime DISPLAY_NAME "Runtime Files")
+
+cpack_add_component_group(Drivers 
+  EXPANDED 
+  DESCRPTION "The drivers needed to run NeL-based software.")
+cpack_add_component_group(Samples 
+  EXPANDED 
+  DESCRPTION "Sample applications and configurations demonstrating NeL.")
+cpack_add_component_group(Tools 
+  EXPANDED 
+  DESCRPTION "Tools for NeL development and media creation.")
+
+
+
+###############
+#             #
+# Development #
+#             #
+###############
+cpack_add_component(libraries
+  DISPLAY_NAME "Libraries"
+  DESCRIPTION "Libraries used to build programs with NeL"
+  GROUP Development
+  INSTALL_TYPES Full Developer)
+cpack_add_component(headers
+  DISPLAY_NAME "C++ Headers"
+  DESCRIPTION "C++ headers used to build programs with NeL"
+  GROUP Development
+  INSTALL_TYPES Full Developer)
+
+###########
+#         #
+# Drivers #
+#         #
+###########
+cpack_add_component(drivers3d
+  DISPLAY_NAME "3D Drivers"
+  DESCRIPTION "3D Drivers for running NeL based applications."
+  GROUP Drivers
+  INSTALL_TYPES Full Runtime)
+cpack_add_component(driverssound
+  DISPLAY_NAME "Sound Drivers"
+  DESCRIPTION "Sound Drivers for running NeL based applications."
+  GROUP Drivers
+  INSTALL_TYPES Full Runtime)  
+
+#########
+#       #
+# Tools #
+#       #
+#########
+cpack_add_component(toolsmisc
+  DISPLAY_NAME "Misc Tools"
+  DESCRIPTION "Misc. NeL Tools"
+  GROUP Tools
+  INSTALL_TYPES Full Runtime)
+cpack_add_component(tools3d
+  DISPLAY_NAME "3D Tools"
+  DESCRIPTION "3D NeL Tools"
+  GROUP Tools
+  INSTALL_TYPES Full Runtime)
+cpack_add_component(toolsgeorges
+  DISPLAY_NAME "Georges Tools"
+  DESCRIPTION "NeL Georges Tools"
+  GROUP Tools
+  INSTALL_TYPES Full Runtime)
+cpack_add_component(toolspacs
+  DISPLAY_NAME "PACS Tools"
+  DESCRIPTION "NeL PACS Tools"
+  GROUP Tools
+  INSTALL_TYPES Full Runtime)
+  
+###########
+#         #
+# Samples #
+#         #
+###########
+cpack_add_component(samplespacs
+  DISPLAY_NAME "PACS Samples"
+  DESCRIPTION "Sample applications demonstrating the PACS collision library."
+  GROUP Samples
+  INSTALL_TYPES Full)
+cpack_add_component(samples3d
+  DISPLAY_NAME "3D Samples"
+  DESCRIPTION "Sample applications demonstrating the NeL 3D library."
+  GROUP Samples
+  INSTALL_TYPES Full)  
+cpack_add_component(samplesgeorges
+  DISPLAY_NAME "Georges Samples"
+  DESCRIPTION "Sample applications demonstrating the Georges data loading module."
+  GROUP Samples
+  INSTALL_TYPES Full)   
+cpack_add_component(samplesmisc
+  DISPLAY_NAME "Misc Samples"
+  DESCRIPTION "Sample applications demonstrating the core NeL functionality module."
+  GROUP Samples
+  INSTALL_TYPES Full)
+cpack_add_component(samplesnet
+  DISPLAY_NAME "Net Samples"
+  DESCRIPTION "Sample applications demonstrating the NeL Network functionality."
+  GROUP Samples
+  INSTALL_TYPES Full)
+cpack_add_component(samplessound
+  DISPLAY_NAME "Sound Samples"
+  DESCRIPTION "Sample applications demonstrating the NeL Sound functionality."
+  GROUP Samples
+  INSTALL_TYPES Full)

@@ -377,9 +377,6 @@ CCharacterCL::CCharacterCL()
 
 
 	_CustomScale = 1.f;
-	_OldCustomScale = 0.f;
-	_StepCustomScale = 0.f;
-	_StartCustomScale = ryzomGetLocalTime();
 }// CCharacterCL //
 
 //-----------------------------------------------
@@ -1693,38 +1690,13 @@ void CCharacterCL::updateVisualPropertyVpb(const NLMISC::TGameCycle &/* gameCycl
 		nlinfo("(%05d,%03d) CH:updtVPVpb:%d: Scale(%d)", sint32(T1%100000), NetMngr.getCurrentServerTick(), _Slot,
 			(uint)altLookProp.PropertySubData.Scale);
 	}
-
-	float customScale;
-	// Set new scale
-	if (altLookProp.PropertySubData.Scale==0)
-		customScale = 1.f;
-	else
-		customScale = ((float)altLookProp.PropertySubData.Scale/100.f);
-	nlinfo("customScale = %f", customScale);
-	_StartCustomScale = ryzomGetLocalTime();
-	if (_OldCustomScale == 0) // first time
-	{
-		_StartCustomScale -= 1001.f;
-		_OldCustomScale = 1.f;
-		_CustomScale = 1.f;
-	}
-
-	_StepCustomScale = customScale - _CustomScale;
-	_OldCustomScale = _CustomScale;
-}
-
-void CCharacterCL::scale(bool calculate)
-{
 	// Save old scale
 	float oldCustomScale = _CustomScale;
-	_CustomScale = _OldCustomScale + (float(ryzomGetLocalTime() - _StartCustomScale) / 1000.f) * _StepCustomScale;
-	if ((_StepCustomScale >= 0 && _CustomScale > _OldCustomScale+_StepCustomScale)
-		|| (_StepCustomScale < 0 && _CustomScale < _OldCustomScale+_StepCustomScale))
-	{
-		_CustomScale = _OldCustomScale+_StepCustomScale;
-		_StepCustomScale = 0;
-	}
-
+	// Set new scale
+	if (altLookProp.PropertySubData.Scale==0)
+		_CustomScale = 1.f;
+	else
+		_CustomScale = (float)altLookProp.PropertySubData.Scale/100.f;
 	// Apply modification
 	_CustomScalePos /= oldCustomScale;
 	_CustomScalePos *= _CustomScale;
@@ -2149,7 +2121,6 @@ double CCharacterCL::computeSpeed()
 //-----------------------------------------------
 double CCharacterCL::computeSpeedFactor(double speedToDest)
 {
-
 	double speedFactor = 1.0;
 
 	// \todo GUIGUI : optimize emotes, currently it's badly designed.
@@ -6076,9 +6047,6 @@ void CCharacterCL::updateAttachedFX()
 //-----------------------------------------------
 void CCharacterCL::updateVisible (const TTime &currentTimeInMs, CEntityCL *target)
 {
-	if (_StepCustomScale)
-		scale();
-
 	// Changes the skeleton state
 	if(!_Skeleton.empty())
 	{
@@ -6599,7 +6567,6 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 	_OldAutomaton = _CurrentAutomaton;
 	// Compute the Time Step.
 	double frameTimeRemaining = computeTimeStep(((double)currentTimeInMs)*0.001);
-
 	// Update the LodCharacter Animation.
 	if(_LodCharacterAnimEnabled)
 	{

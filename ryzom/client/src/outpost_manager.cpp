@@ -62,26 +62,23 @@ void	COutpostManager::startPvpJoinProposal(OUTPOSTENUMS::TPVPType type, bool out
 
 	// open Popup
 
-	// Useless feature
 	CCtrlBase *ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:random"));
 	if (ctrl)
-		ctrl->setActive(false);
+		ctrl->setActive(type != OUTPOSTENUMS::GVE && outpostInFire);
 
 	ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:neutral"));
 	if (ctrl)
-		ctrl->setActive(true);
+		ctrl->setActive(type == OUTPOSTENUMS::GVE || !outpostInFire);
 
 	// GvE: only attacker guild can have the option
 	ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:attack"));
-	if (ctrl && (type == OUTPOSTENUMS::GVE || type == OUTPOSTENUMS::PVE || type == OUTPOSTENUMS::GVG))
+	if (ctrl && type == OUTPOSTENUMS::GVE)
 		ctrl->setActive(playerGuildIsAttacker);
 
 	// GvE : No defend option
 	ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:defend"));
-	if (ctrl && (type == OUTPOSTENUMS::GVE || type == OUTPOSTENUMS::PVE))
+	if (ctrl && type == OUTPOSTENUMS::GVE)
 		ctrl->setActive(false);
-	if (ctrl && (type == OUTPOSTENUMS::GVG))
-		ctrl->setActive(playerGuildInConflict && !playerGuildIsAttacker);
 
 
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));

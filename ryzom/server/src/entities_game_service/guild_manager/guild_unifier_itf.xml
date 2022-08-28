@@ -1,0 +1,119 @@
+<generator header_tag="GUILD_UNIFIER_ITF">
+
+	<include file="nel/misc/entity_id.h"/>
+	<include file="game_share/people_pd.h"/>
+	<include file="game_share/pvp_clan.h"/>
+	<include file="game_share/string_manager_sender.h"/>
+	<include file="egs_pd.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="GU">
+
+		<!-- ===========================================================-->
+		<class name="CGuildMemberDesc">
+			<serial/>
+
+			<property type="NLMISC::CEntityId"					name="MemberId"		byref="true"/>
+<!--			<property type="ucstring"							name="MemberName"	byref="true"/>-->
+			<property type="NLMISC::TGameCycle"					name="MemberEnterTime"/>
+			<property type="EGSPD::CGuildGrade::TGuildGrade"	name="MemberGrade"	serial="Enum"/>
+		</class>
+
+
+		<!-- ===========================================================-->
+		<class name="CFameEntryDesc">
+			<serial/>
+
+			<property type="NLMISC::CSheetId"		name="FactionSheetId" />
+			<property type="sint32"					name="FameValue"/>
+			<property type="sint32"					name="FameMemory"/>
+			<property type="EGSPD::CFameTrend::TFameTrend"	name="FameTrend"	serial="Enum"/>
+		</class>
+
+
+		<!-- ===========================================================-->
+		<class name="CGuildDesc">
+			<serial/>
+
+			<property type="uint32"				name="GuildId"/>
+			<property type="ucstring"			name="GuildName"	byref="true"/>
+			<property type="ucstring"			name="GuildDesc"	byref="true"/>
+			<property type="uint64"				name="GuildMoney"/>
+			<property type="uint32"				name="GuildCreationDate"/>
+<!--			<property type="uint32"				name="GuildXP"/>
+			<property type="uint32"				name="GuildChargePoints"/>-->
+			<property type="EGSPD::CPeople::TPeople"	name="GuildRace"	serial="Enum"/>
+			<property type="uint64"				name="GuildIcon"/>
+			<property type="PVP_CLAN::TPVPClan"	name="DeclaredCult" serial="Enum"/>
+			<property type="PVP_CLAN::TPVPClan"	name="DeclaredCiv"	serial="Enum"/>
+
+			<property type="std::vector &lt; CFameEntryDesc &gt;"	name="Fames"	byref="true" serial="Cont"/>
+			<property type="std::vector &lt; CGuildMemberDesc &gt;"	name="Members"	byref="true" serial="Cont"/>
+		</class>
+
+		<!-- ========================================================== -->
+		<!-- ===  Guild unifier client module  ======================== -->
+		<!-- ========================================================== -->
+		<module_interface name="CGuildUnifierClient">
+			<doc line="Interface used by EGS and implemented in the EGS"/>
+			<doc line="EGS send to other EGS info about localy loaded guilds"/>
+
+			<!-- ===========================================================-->
+			<method name="guildReady" msg="GR" broadcast="true">
+				<doc line="A client says to others clients that it is ready to send/receive guild data"/>
+			</method>
+			<!-- ===========================================================-->
+			<method name="receiveForeignGuild" msg="RFG" broadcast="true">
+				<doc line="The server send it local guilds to the client"/>
+
+				<param type="std::vector &lt; CGuildDesc &gt;"	name="guilds" byref="true" serial="Cont"/>
+			</method>
+
+			<!-- ===========================================================-->
+			<method name="updateMemberList" msg="UML" broadcast="true">
+				<doc line="The member list have changed, each guild unifier receive a copy of the new list"/>
+
+				<param type="uint32"									name="guildId" />
+				<param type="std::vector &lt; CGuildMemberDesc &gt;"	name="members" byref="true" serial="Cont"/>
+			</method>
+
+			<!-- ===========================================================-->
+			<method name="updateMemberInfo" msg="UMI" broadcast="true">
+				<doc line="A member in the guild has changed, update it's info"/>
+
+				<param type="uint32"			name="guildId" />
+				<param type="CGuildMemberDesc"	name="membersInfo" byref="true"/>
+			</method>
+
+			<!-- ===========================================================-->
+			<method name="updateGuild" msg="UG" broadcast="true">
+				<doc line="The guild has been saved, the guild host send an update of the guild status (with fames, but no members)"/>
+				<param type="CGuildDesc"	name="guildInfo" byref="true"/>
+			</method>
+
+			<!-- ===========================================================-->
+			<method name="guildDeleted" msg="GD" broadcast="true">
+				<doc line="A guild have been deleted"/>
+				<param type="uint32"	name="guildId"/>
+			</method>
+
+			<!-- ===========================================================-->
+			<method name="messageToGuildMembers" msg="MGM" broadcast="true">
+				<doc line="Send a message to all the guild members"/>
+
+				<param type="uint32"			name="guildId"/>
+				<param type="std::string"		name="messageName"	byref="true"/>
+				<param type="TVectorParamCheck"	name="params"		byref="true" serial="Cont"/>
+			</method>
+		</module_interface>
+
+		<!-- ========================================================== -->
+		<!-- ===  Guild unifier server module  ======================== -->
+		<!-- ========================================================== -->
+<!--		<module_interface name="CGuildUnifierServer">
+			<doc line="Interface used by EGS and implemented in the EGS"/>
+			<doc line="EGS send to other EGS event that occur on guild proxi"/>
+		</module_interface>
+-->
+	</namespace>
+</generator>
