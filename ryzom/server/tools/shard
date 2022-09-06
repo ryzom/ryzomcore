@@ -1,0 +1,121 @@
+#!/bin/bash
+# ______                           _____ _                   _   _____           _
+# | ___ \                         /  ___| |                 | | |_   _|         | |
+# | |_/ /   _ _______  _ __ ___   \ `--.| |__   __ _ _ __ __| |   | | ___   ___ | |___
+# |    / | | |_  / _ \| '_ ` _ \   `--. \ '_ \ / _` | '__/ _` |   | |/ _ \ / _ \| / __|
+# | |\ \ |_| |/ / (_) | | | | | | /\__/ / | | | (_| | | | (_| |   | | (_) | (_) | \__ \
+# \_| \_\__, /___\___/|_| |_| |_| \____/|_| |_|\__,_|_|  \__,_|   \_/\___/ \___/|_|___/
+#        __/ |
+#       |___/
+#
+# Ryzom - MMORPG Framework <https://ryzom.com/dev/>
+# Copyright (C) 2019  Winch Gate Property Limited
+# This program is free software: read https://ryzom.com/dev/copying.html for more details
+#
+# This script helps to manage the shard using a screen session.
+# You can start, join, stop and get state of services
+#
+
+CMD=$1
+DOMAIN=shard
+
+if [[ ! -z "$2" ]]
+then
+	SHARD_PATH=$2
+fi
+
+if [[ -z "$CMD" ]]
+then
+	echo
+	echo Screen sessions currently running:
+	screen -list
+	echo
+	echo "Commands:"
+	echo "  'start' to start the ${DOMAIN}"
+	echo "  'stop'  to stop the ${DOMAIN}"
+	echo "  'join'  to join the ${DOMAIN}'s screen session"
+	echo "  'share' to join the ${DOMAIN} in shared mode"
+	echo "  'state' to view state information for the ${DOMAIN}"
+	echo
+	printf "Enter a command: "
+	read CMD
+fi
+
+if [ "$CMD" = "stop" ]
+then
+	if [ $(screen -list | grep \\\.${DOMAIN} | wc -l) != 1 ]
+	then
+		echo Cannot stop domain \'${DOMAIN}\' because no screen by that name appears to be running
+		screen -list
+	else
+		screen -d -r $(screen -list | grep \\\.${DOMAIN}| sed 's/(.*)//') -X quit > /dev/null
+		if [ -f $SHARD_PATH/run/aes_state.txt ]
+		then
+			rm -r $SHARD_PATH/run/*
+		fi
+	fi
+fi
+
+STARTARGS=
+if [ "$CMD" = "batchstart" ]
+then
+	STARTARGS="-d -m"
+	CMD="start"
+fi
+
+LIGHT=
+if [ "$CMD" = "light" ]
+then
+	LIGHT=".light"
+	CMD="start"
+fi
+
+if [ "$CMD" = "start" ]
+then
+
+	cd $SHARD_PATH/run
+
+	ulimit -c unlimited
+	screen -wipe > /dev/null
+
+	if [ $( screen -list | grep \\\.${DOMAIN} | wc -w ) != 0 ]
+	then
+		echo Cannot start domain \'${DOMAIN}\' because this domain is already started
+		screen -list | grep $DOMAIN
+	else
+		echo "Starting shard screen from $(pwd) with SHARD_PATH=$SHARD_PATH"
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SHARD_PATH/lib
+		export SHARD_PATH=$SHARD_PATH
+		screen $STARTARGS -S ${DOMAIN} -c $SHARD_PATH/tools/${DOMAIN}.screen${LIGHT}.rc
+	fi
+fi
+
+JOINARGS=
+if [ "$CMD" = "share" ]
+then
+	JOINARGS="-x"
+	CMD="join"
+fi
+
+if [ "$CMD" = "join" ]
+then
+	if [ $(screen -list | grep \\\.${DOMAIN} | wc -l) != 1 ]
+	then
+	echo Cannot join domain \'${DOMAIN}\' because no screen by that name appears to be running
+	screen -list
+	else
+	screen -r ${JOINARGS} $(screen -list | grep \\\.${DOMAIN}| sed 's/(.*)//')
+	fi
+fi
+
+if [ "$CMD" = "state" ]
+then
+	cd $SHARD_PATH/run
+	echo State of domain ${DOMAIN}:
+	if [ $(echo */*.state) = "*/*.state" ]
+	then
+		echo - No state files found
+	else
+		grep RUNNING */*state
+	fi
+fi

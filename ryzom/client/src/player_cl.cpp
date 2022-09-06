@@ -850,18 +850,29 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 				vector<string> tagInfos;
 				splitString(rightHandTag, string("|"), tagInfos);
 				UInstance instance;
+
+				// Manage cache of items
+				if (!tagInfos[0].empty() && tagInfos[0][0] == '#')
+				{
+					int itemNameId;
+					fromString(tagInfos[0].substr(1), itemNameId);
+					tagInfos[0] = SheetMngr.getRpItem(itemNameId);
+				}
+
 				if (tagInfos.size() == 2)
 				{
 					sint instTexture;
 					fromString(tagInfos[1], instTexture);
-					equip(slot, tagInfos[0], itemSheet, instTexture);
+					equip(slot, tagInfos[0], itemSheet);
+					UInstance pInst = _Instances[slot].createLoadingFromCurrent();
+					if(!pInst.empty())
+						pInst.selectTextureSet(instTexture);
 					_Instances[slot].TextureSet = instTexture;
 				}
 				else
 				{
 					equip(slot, tagInfos[0], itemSheet);
 				}
-				return;
 			}
 			else
 			{
@@ -888,6 +899,47 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		{
 			// No Valid item in the left hand.
 			equip(SLOTTYPE::LEFT_HAND_SLOT, "");
+			SLOTTYPE::EVisualSlot slot = SLOTTYPE::LEFT_HAND_SLOT;
+			string leftHandTag = getTag(6);
+			if (!leftHandTag.empty() && leftHandTag != "_")
+			{
+				vector<string> tagInfos;
+				splitString(leftHandTag, string("|"), tagInfos);
+				UInstance instance;
+
+				// Manage cache of items
+				if (!tagInfos[0].empty() && tagInfos[0][0] == '#')
+				{
+					int itemNameId;
+					fromString(tagInfos[0].substr(1), itemNameId);
+					tagInfos[0] = SheetMngr.getRpItem(itemNameId);
+				}
+
+				sint idx;
+				if (tagInfos.size() == 3 && tagInfos[2] == ")")
+					idx = SheetMngr.getVSIndex("icbss_pvp.sitem", slot);
+				else
+					idx = SheetMngr.getVSIndex("icfm1pd.sitem", slot);
+
+				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)idx);
+
+				if (tagInfos.size() >= 2)
+				{
+					sint instTexture;
+					fromString(tagInfos[1], instTexture);
+					equip(slot, tagInfos[0], itemSheet);
+					_Instances[slot].selectTextureSet(instTexture);
+					_Instances[slot].TextureSet = instTexture;
+				}
+				else
+				{
+					equip(slot, tagInfos[0], itemSheet);
+				}
+			}
+			else
+			{
+				equip(slot, "");
+			}
 		}
 		// Create face
 		// Only create a face when there is no Helmet
@@ -932,6 +984,42 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 			else
 				nlwarning("PL::updateVPVpa:%d: Face Item '%s' does not exist.", _Slot,
 					_PlayerSheet->GenderInfos[_Gender].Items[SLOTTYPE::FACE_SLOT].c_str());
+
+			equip(SLOTTYPE::HEAD_SLOT, visualA.PropertySubData.HatModel, visualA.PropertySubData.HatColor);
+
+			SLOTTYPE::EVisualSlot slot = SLOTTYPE::HEAD_SLOT;
+			string hatTag = getTag(7);
+			if (!hatTag.empty() && hatTag != "_")
+			{
+				sint idx = SheetMngr.getVSIndex("eroukan_h.sitem", slot);
+				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)idx);
+				vector<string> tagInfos;
+				splitString(hatTag, string("|"), tagInfos);
+				UInstance instance;
+
+				// Manage cache of items
+				if (!tagInfos[0].empty() && tagInfos[0][0] == '#')
+				{
+					int itemNameId;
+					fromString(tagInfos[0].substr(1), itemNameId);
+					tagInfos[0] = SheetMngr.getRpItem(itemNameId);
+				}
+
+				if (tagInfos.size() == 2)
+				{
+					sint instTexture;
+					fromString(tagInfos[1], instTexture);
+					equip(slot, tagInfos[0], itemSheet);
+					_Instances[slot].selectTextureSet(instTexture);
+					_Instances[slot].TextureSet = instTexture;
+				}
+				else
+				{
+					equip(slot, tagInfos[0], itemSheet);
+				}
+			}
+
+
 		}
 		else
 		{

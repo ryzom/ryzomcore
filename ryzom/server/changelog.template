@@ -1,0 +1,6 @@
+# To generate ChangeLog files use these commands :
+# hg log -M --style ./changelog.template nel > nel/ChangeLog
+# hg log -M --style ./changelog.template ryzom > ryzom/ChangeLog
+
+header = '\n{date|shortdate}  {author}\n\n'
+changeset = '\t* {desc|fill68|tabindent|strip} [r{rev}]\n'

@@ -1,0 +1,9 @@
+Module name:		Event Manager
+Short name:			EM
+Associated modules: EE (event executor)
+Requires:			Nothing
+
+Description
+-----------
+This module runs on the local machine of an event manager and communicates with the Event Executor modules
+running on the shard(s) to make things happen

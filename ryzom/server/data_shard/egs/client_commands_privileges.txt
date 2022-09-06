@@ -165,13 +165,14 @@ eventSetNpcGroupEmote		:DEV:SGM:GM:EM:					// Set the emote for the NPC group to
 eventSetFaunaBotAggroRange		:DEV:SGM:GM:EM:				// Set the aggro ranges (not hungry, hungry and hunting) of a fauna creature
 eventResetFaunaBotAggroRange		:DEV:SGM:GM:EM:			// Reset the aggro range of a fauna creature to sheet values
 eventSetBotCanAggro			:DEV:SGM:GM:EM:					// Define if a creature can take aggro for another entity
-eventSetItemCustomText			:DEV:SGM:GM:EM:				// Set the custom text of an item. For scroll-like items it's the text displayed in the help window.
-eventResetItemCustomText		:DEV:SGM:GM:EM:				// Reset the custom text of an item to an empty string.
 eventSetBotSheet			:DEV:SGM:GM:EM:					// Changes the sheet of a bot: <.creature sheet>
 eventSetBotFaction			:DEV:SGM:GM:EM:					// Changes the faction of a bot: <faction name>
 eventSetBotFameByKill			:DEV:SGM:GM:EM:				// Changes the amount of fame earned for bot faction when killing it: <fame value>
 eventSetBotURL					:DEV:SGM:GM:EM:				// Set the url of a bot
 eventSetBotURLName				:DEV:SGM:GM:EM:				// Set the url name of a bot
+eventSetItemCustomText			:DEV:SGM:GM:EM:				// Set the custom text of an item. For scroll-like items it's the text displayed in the help window.
+eventResetItemCustomText		:DEV:SGM:GM:EM:				// Reset the custom text of an item to an empty string.
+eventSetItemName			:DEV:SGM:GM:EM:					// Set a name on an item. Can be a literal or a phrase from translation
 eventSpawnToxic				:DEV:SGM:GM:EM:					// Add toxic cloud
 eventNpcSay					:DEV:SGM:GM:EM:					// Have an NPC say a text
 eventSetBotFacing			:DEV:SGM:GM:EM:					// Set the direction in which a bot faces
