@@ -888,7 +888,10 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 					}
 					else
 					{
-						string ryzomId = CMongo::id();
+						string ryzomId;
+#ifdef HAVE_MONGO
+						ryzomId = CMongo::id();
+#endif
 						_Log.displayNL("[%s]%s|%s|*|%s-*|%s", ryzomId.c_str(), "universe", fullName.c_str(), senderLang.c_str(), ucstr.toUtf8().c_str());
 						sendToMongo = false;
 					}
@@ -902,7 +905,12 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 					if (isTranslation)
 						CMongo::insert("ryzom_chats", toString("{ 'rocketId': '%s', 'username': '%s', 'translations': {'%s': '%s'}, 'chatType': '%s', 'chatId': 'FACTION_EN', 'date': %f, 'ig': true, 'autoSub': %s }", rocketId.c_str(), CMongo::quote(fullName).c_str(), usedlang.c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, "1"));
 					else
-						CMongo::insert("ryzom_chats", toString("{ '_id': '%s', 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_EN', 'date': %f, 'ig': true, 'autoSub': %s }", rocketId.c_str(), CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, "1"));
+					{
+						string ryzomId = rocketId;
+						if (ryzomId.empty())
+							ryzomId = CMongo::id();
+						CMongo::insert("ryzom_chats", toString("{ '_id': '%s', 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_EN', 'date': %f, 'ig': true, 'autoSub': %s }", ryzomId.c_str(), CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, "1"));
+					}
 				}
 #endif
 
@@ -983,9 +991,12 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 
 						if (nbrReceivers > 0)
 						{
-							sendToMongo = false;
-							string ryzomId = CMongo::id();
+							string ryzomId;
+#ifdef HAVE_MONGO
+							ryzomId = CMongo::id();
+#endif
 							_Log.displayNL("[%s]guild:%s|%s|%d|%s|%s", ryzomId.c_str(), grpId.toString().c_str(), fullName.c_str(), nbrReceivers, langs.c_str(), ucstr.toUtf8().c_str() );
+							sendToMongo = false;
 						}
 					}
 				}
@@ -996,10 +1007,14 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 					if (isTranslation)
 						CMongo::insert("ryzom_chats", toString("{ 'rocketId': '%s', 'username': '%s', 'translations': {'%s': '%s'}, 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': 1 }", rocketId.c_str(), CMongo::quote(fullName).c_str(), usedlang.c_str(), CMongo::quote(mongoText).c_str(), sGuildId.str().c_str(), date));
 					else
-						CMongo::insert("ryzom_chats", toString("{ '_id': '%s', 'username': '%s', 'chat': '%s', 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': 1 }", rocketId.c_str(), CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), sGuildId.str().c_str(), date));
+					{
+						string ryzomId = rocketId;
+						if (ryzomId.empty())
+							ryzomId = CMongo::id();
+						CMongo::insert("ryzom_chats", toString("{ '_id': '%s', 'username': '%s', 'chat': '%s', 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': 1 }", ryzomId.c_str(), CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), sGuildId.str().c_str(), date));
+					}
 				}
 #endif
-				//chatInGroup( grpId, ucstr, sender );
 			}
 			break;
 
@@ -1037,7 +1052,6 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 					string mongoText = ucstr.toUtf8();
 
 					bool sendMessages = true;
-					bool sendToAllForge = false;
 					bool haveOriginMessage = false;
 					bool isTranslation = false;
 					uint8 startPos = 0;
@@ -1047,11 +1061,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 
 					if (EnableDeepL)
 					{
-						if (senderClient.dontSendTranslation(senderLang))
-						{
-							sendToAllForge = true;
-						}
-						else if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
+						if (senderClient.dontSendTranslation(senderLang) || ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
 						{
 							startPos = 1;
 							mongoText = mongoText.substr(1);
@@ -1087,7 +1097,10 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 						// Send for translation
 						else if (chatId.substr(0, 8) == "FACTION_" || chatId.substr(0, 7) == "league_")
 						{
-							string ryzomId = CMongo::id();
+							string ryzomId;
+#ifdef HAVE_MONGO
+							ryzomId = CMongo::id();
+#endif
 							_Log.displayNL("[%s]%s|%s|*|%s-*|%s", ryzomId.c_str(), string("#"+chatId).c_str(), fullName.c_str(), senderLang.c_str(), ucstr.toUtf8().c_str());
 							sendMessages = false; // We need translated it before
 						}
@@ -1099,8 +1112,12 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 						if (isTranslation)
 							CMongo::insert("ryzom_chats", toString("{ 'rocketId': '%s', 'username': '%s', 'translations': {'%s': '%s'}, 'chatType': 'dynamic', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': %s }", rocketId.c_str(), CMongo::quote(fullName).c_str(), usedlang.c_str(), CMongo::quote(mongoText).c_str(), chatId.c_str(), date, "1"));
 						else
-							CMongo::insert("ryzom_chats", toString("{ '_id': '%s', 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': %s }", rocketId.c_str(), CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatId.c_str(), date, "1"));
-
+						{
+							string ryzomId = rocketId;
+							if (ryzomId.empty())
+								ryzomId = CMongo::id();
+							CMongo::insert("ryzom_chats", toString("{ '_id': '%s', 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': %s }", ryzomId.c_str(), CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatId.c_str(), date, "1"));
+						}
 #endif
 
 						if (!session->getChan()->getDontBroadcastPlayerInputs())
