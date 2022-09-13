@@ -848,8 +848,9 @@ private:
 	void		updateIconSize();
 	void		resetAllTexIDs();
 	void		setupInit();
-	// remove enchant and buff markers from item icon
+	// update/remove enchant and buff markers from item icon
 	void		clearIconBuffs();
+	void		updateIconBuffs();
 
 	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown= false);
 	void		resetCharBitmaps();
