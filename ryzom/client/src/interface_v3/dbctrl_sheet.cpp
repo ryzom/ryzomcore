@@ -1137,6 +1137,14 @@ void CDBCtrlSheet::clearIconBuffs()
 // ***************************************************************************
 void CDBCtrlSheet::infoReceived()
 {
+	updateIconBuffs();
+
+	_LastItemInfoVersion = getItemInfoVersion();
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::updateIconBuffs()
+{
 	if (!_ItemSheet)
 	{
 		clearIconBuffs();
@@ -1374,6 +1382,9 @@ void CDBCtrlSheet::setupItem ()
 
 			// Special Item requirement
 			updateItemCharacRequirement(_LastSheetId);
+
+			// update icon buffs using cached info
+			updateIconBuffs();
 
 			// update item info markers
 			_ItemInfoChanged = true;
