@@ -847,7 +847,7 @@ void initAutoLogin()
 	pGEBPwd->setInputString(LoginPassword);
 	CAHManager::getInstance()->runActionHandler("on_login", NULL, "");
 
-	if (ClientCfg.R2Mode)
+/*	if (ClientCfg.R2Mode)
 	{
 		LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
 	}
@@ -871,10 +871,12 @@ void initAutoLogin()
 		}
 		else
 		{
+			
 			LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
 			//		CAHManager::getInstance()->runActionHandler("login_connect_2", NULL);
 		}
 	}
+	* */
 }
 
 void initAltLogin()
@@ -1261,106 +1263,7 @@ void onlogin(bool vanishScreen = true)
 	string res = checkLogin(LoginLogin, LoginPassword, ClientApp, LoginCustomParameters);
 	if (res.empty())
 	{
-		// if not in auto login, push login ok event
-		if (LoginSM.getCurrentState() != CLoginStateMachine::st_auto_login)
-			LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
-
-		return;
-		// Ok there is something ! Display next window
-
-		if (ClientCfg.R2Mode)
-		{
-//			if (ClientCfg.PatchWanted)
-//			{
-//				// start the patching system
-//				CPatchManager *pPM = CPatchManager::getInstance();
-//
-//				pPM->init(R2PatchURLs, R2BackupPatchURL, R2ServerVersion);
-//
-//				pPM->startCheckThread();
-//				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
-//			}
-//			else
-//			{
-//				// go directly to web browser
-//				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
-//
-//				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//				// start the browser
-//				CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
-//
-//				pGH->browse(RingMainURL.c_str());
-//			}
-//			return;
-		}
-		else
-		{
-//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
-		}
-
-//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD));
-//		if (pList == NULL)
-//		{
-//			nlwarning("element "GROUP_LIST_SHARD" not found probably bad login_main.xml");
-//			return;
-//		}
-//		/* // To test more servers
-//		for (uint fff = 0; fff < 20; ++fff)
-//		{
-//			CShard s (	toString("%05d",fff), fff%3, fff+32, toString("%s%d","pipo",fff),
-//						32*fff%46546, "32.32.32.32", "http://www.ryzom.com" );
-//			Shards.push_back(s);
-//		}*/
-//
-//		CInterfaceGroup *pPrevLine = NULL;
-//		for(uint i = 0; i < Shards.size(); i++)
-//		{
-//			vector< pair < string, string > > params;
-//			params.clear();
-//			params.push_back(pair<string,string>("id", "s"+toString(i)));
-//			if (i>0)
-//				params.push_back(pair<string,string>("posref", "BL TL"));
-//
-//			CInterfaceGroup *pNewLine =pIM->createGroupInstance("t_shard", GROUP_LIST_SHARD, params);
-//			if (pNewLine != NULL)
-//			{
-//				CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
-//				if (pVT != NULL) pVT->setText(Shards[i].Name);
-//
-//				pVT = dynamic_cast<CViewText*>(pNewLine->getView("version"));
-//				if (pVT != NULL) pVT->setText(Shards[i].Version);
-//
-//				CViewBase *pVBon = pNewLine->getView("online");
-//				CViewBase *pVBoff = pNewLine->getView("offline");
-//				if ((pVBon != NULL) && (pVBoff != NULL))
-//				{
-//					pVBon->setActive (Shards[i].Online);
-//					pVBoff->setActive (!Shards[i].Online);
-//				}
-//
-//				pVT = dynamic_cast<CViewText*>(pNewLine->getView("nbplayer"));
-//				if (pVT != NULL) pVT->setText(toString(Shards[i].NbPlayers));
-//
-//
-//				// Add to the list
-//				pNewLine->setParent(pList);
-//				pNewLine->setParentSize(pList);
-//				pNewLine->setParentPos(pPrevLine);
-//				pList->addGroup(pNewLine);
-//
-//				pPrevLine = pNewLine;
-//			}
-//		}
-//		// UI Patch
-//		if (!Shards.empty())
-//		{
-//			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
-//			if (pCB != NULL)
-//				pCB->setPushed(true);
-//			CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
-//
-//		}
-//		pList->invalidateCoords();
+		LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
 	}
 	else
 	{
@@ -1370,13 +1273,6 @@ void onlogin(bool vanishScreen = true)
 		pIM->messageBoxWithHelp("Error : " + res, "ui:login");
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_bad_login);
-//		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
-//
-//		if (LoginLogin.empty())
-//			CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
-//		else
-//			CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
-
 	}
 }
 

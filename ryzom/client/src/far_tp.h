@@ -47,6 +47,8 @@ public:
 		st_check_patch,
 		/// display the list of optional patch category for patching
 		st_display_cat,
+		/// display an error
+		st_display_error,
 		/// run the patch process and display progress
 		st_patch,
 		/// terminate the client and quit
