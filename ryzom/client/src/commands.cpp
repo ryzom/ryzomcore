@@ -399,17 +399,6 @@ NLMISC_COMMAND(freeHands, "free hands !", "")
 	return true;
 }
 
-NLMISC_COMMAND(freeHands, "free hands !", "")
-{
-	std::string handPath = "LOCAL:INVENTORY:HAND:";
-	uint32 i;
-	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
-	{
-		CInventoryManager::getInstance()->unequip(handPath + NLMISC::toString(i));
-	}
-	return true;
-}
-
 NLMISC_COMMAND(afk, "Set the player as 'away from keyboard'","[<custom text>]")
 {
 	string customText;
