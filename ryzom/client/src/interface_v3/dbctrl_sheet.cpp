@@ -1296,9 +1296,6 @@ void CDBCtrlSheet::setupItem ()
 	_DispQuality = -1;
 	_DispQuantity = -1;
 
-	_DispQuality = -1;
-	_DispQuantity = -1;
-
 	// If this is the same sheet, need to resetup
 	if (isItemChanged || _NeedSetup)
 	{
