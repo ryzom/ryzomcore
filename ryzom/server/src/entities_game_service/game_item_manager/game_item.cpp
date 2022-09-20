@@ -2609,6 +2609,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //			_RefInventorySlot = slotImage;
 //			nlinfo("Convert item %s, had slot image %u, is now in HAND, slot %u", _SheetId.toString().c_str(),slotImage,_RefInventorySlot);
 //		}
+		// TODO : add hotbar
 //		else
 //		{
 //			refInventoryId = INVENTORIES::equipment;
@@ -4723,7 +4724,7 @@ void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * o
 				CGameItemPtr itemPtr(this);
 				inv->insertItem(itemPtr, slot);
 
-				_DisableStacking = (_Form && _Form->Family != ITEMFAMILY::AMMO);
+				_DisableStacking = (_Form && _Form->Family != ITEMFAMILY::AMMO && refInventoryId != INVENTORIES::hotbar);
 			}
 
 			//owner->equipCharacter(refInventoryId, slot,getInventorySlot());

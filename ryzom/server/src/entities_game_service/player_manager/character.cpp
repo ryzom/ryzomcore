@@ -16031,7 +16031,7 @@ void CCharacter::sendPhrasesToClient()
 //-----------------------------------------------
 // learnPhrase
 //-----------------------------------------------
-void CCharacter::learnPhrase(const vector<CSheetId> &bricks, uint16 phraseId, const ucstring &name)
+void CCharacter::learnPhrase(const vector<CSheetId> &bricks, uint16 phraseId, const ucstring &name, uint8 iconIndex)
 {
 	if (phraseId >= _KnownPhrases.size())
 		_KnownPhrases.resize(phraseId + 1);
@@ -16046,6 +16046,7 @@ void CCharacter::learnPhrase(const vector<CSheetId> &bricks, uint16 phraseId, co
 	}
 
 	_KnownPhrases[phraseId].PhraseDesc.Name = name;
+	_KnownPhrases[phraseId].PhraseDesc.IconIndex = iconIndex;
 } // learnPhrase //
 
 //-----------------------------------------------
@@ -19091,6 +19092,7 @@ void CCharacter::applyGooDamage(float gooDistance, string zoneDamage)
 				if (damageRatio > 0.0f)
 				{
 					_LastTickSufferGooDamage = CTickEventHandler::getGameCycle();
+					_CurrentRegenerateReposBonus = 0;
 
 					// Apply damage corresponding to distance from goo if not dead
 					if (_PhysScores._PhysicalScores[SCORES::hit_points].Current > 0)

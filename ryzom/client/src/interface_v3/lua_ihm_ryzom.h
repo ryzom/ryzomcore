@@ -268,6 +268,7 @@ private:
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
 	static float setChar3dDBfromVPX(const std::string &branch, const std::string &people, const std::string &vpa, const std::string &vpb, const std::string &vpc);
+	static void setChar3dDBfromServerDB(const std::string &branch);
 	static float getRefHeightScale(const std::string &people, const std::string &vpa);
 	static std::string getRegionByAlias(uint32 alias);
 	static float getGroundZ(float x, float y);
@@ -288,6 +289,8 @@ private:
 	static int addRespawnPoint(CLuaState &ls);
 	static int delArkPoints(CLuaState &ls);
 	static int setArkPowoOptions(CLuaState &ls);
+	static int getActualMapZoom(CLuaState &ls);
+	static int setActualMapZoom(CLuaState &ls);
 
 
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
