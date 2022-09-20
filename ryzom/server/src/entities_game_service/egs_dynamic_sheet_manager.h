@@ -24,7 +24,6 @@ struct CUserModels
 {
 	NLNET::TServiceId					ServiceId;
 	NLMISC::CSmartPtr<CStaticCreatures>	CustomSheet;
-	std::vector< NLMISC::CEntityId >	CreaturesWithModel;
 };
 
 struct CCustomLootTables
@@ -77,13 +76,13 @@ public:
 	* @param scriptData all script lines
 	* @param serviceId id of the AIS that sent the datas
 	*/
-	void instanciateDynamicSheet(CCustomElementId modelId, std::vector<std::string> scriptData, NLNET::TServiceId serviceId, bool update);
+	void instanciateDynamicSheet(CCustomElementId modelId, std::vector<std::string> scriptData, NLNET::TServiceId serviceId);
 	void removeDynamicSheet(CCustomElementId modelId);
-
+	
 	/** Returns the modified CStaticCreature associated to a UserModel
 	* @param userModelId the id of the user model
 	*/
-	CStaticCreatures *getDynamicSheet(uint32 primAlias, const std::string &userModelId, const NLMISC::CEntityId & entityId);
+	CStaticCreatures *getDynamicSheet(uint32 primAlias, const std::string &userModelId);
 
 	/** Indicates whether there have been parse errors while building a UserModel or not.
 	* @param userModelId id of the user model

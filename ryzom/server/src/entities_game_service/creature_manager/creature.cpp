@@ -446,7 +446,7 @@ void CCreature::initFormPointer(NLMISC::CSheetId sheetId)
 	}
 	else
 	{
-		_Form = CDynamicSheetManager::getInstance()->getDynamicSheet(_PrimAlias, _UserModelId, _Id);
+		_Form = CDynamicSheetManager::getInstance()->getDynamicSheet(_PrimAlias, _UserModelId);
 	}
 }
 

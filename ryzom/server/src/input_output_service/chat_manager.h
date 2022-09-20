@@ -165,7 +165,7 @@ public :
 	 * \param sender is the id of the talking char
 	 * \param str is the chat content
 	 */
-	void chat( const TDataSetRow& sender, const ucstring& ucstr, std::string rocketId = "" );
+	void chat( const TDataSetRow& sender, const ucstring& ucstr );
 
 	/**
 	 * Transmit a chat message to a group
@@ -395,7 +395,7 @@ public:
 	/**
 	 * Send a far chat message
 	 */
-	void sendFarChat(const std::string &name, const ucstring& ucstr, const std::string &chan, const std::string &rocketId = "");
+	void sendFarChat(const std::string &name, const ucstring& ucstr, const std::string &chan);
 	void sendFarChat( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, const ucstring& ucstr, const ucstring &senderName, TChanID chanID = NLMISC::CEntityId::Unknown);
 
 	/**

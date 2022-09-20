@@ -27,7 +27,6 @@ namespace PVP_RELATION
 		NeutralPVP, // No Heal, No attack
 		Ally, // Only heal, propagation
 		Ennemy, // Only attack, propagation
-		NeutralOutpostPVP, // No Heal, No attack in any case
 		Unknown
 	};
 

@@ -492,8 +492,6 @@ public:
 	void	setFameByKillValid(bool value) { _FameByKillValid = value; }
 	void	setFameByKill(sint32 value) { _FameByKill = value; }
 
-	void setForm(const CStaticCreatures *form) { _Form = form;}
-
 	void reset()
 	{
 		if (_Form)
@@ -657,7 +655,7 @@ private:
 
 	// keep nb of guardians killers
 	uint16							_NbOfGuardiansKillers;
-
+	
 	// keep nb of players in creature aggro list (as aggro list also contains npcs or creatures)
 	uint16						_NbOfPlayersInAggroList;
 

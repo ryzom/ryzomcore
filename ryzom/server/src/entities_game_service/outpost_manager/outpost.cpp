@@ -688,7 +688,7 @@ void COutpost::setOwnerGuild( EGSPD::TGuildId ownerGuild )
 	EGSPD::TGuildId oldOwnerGuildId = _OwnerGuildId;
 
 	_OwnerGuildId = ownerGuild;
-	OUTPOST_INF( "Outpost %s is now owned by 0x%x", _Name.c_str(), _OwnerGuildId );
+	OUTPOST_DBG( "Outpost %s is now owned by 0x%x", _Name.c_str(), _OwnerGuildId );
 
 	if (ownerGuild != oldOwnerGuildId)
 	{
@@ -732,7 +732,7 @@ void COutpost::setAttackerGuild( EGSPD::TGuildId attackerGuild )
 	EGSPD::TGuildId oldAttackerGuildId = _AttackerGuildId;
 
 	_AttackerGuildId = attackerGuild;
-	OUTPOST_INF( "Outpost %s is now attacked by 0x%x", _Name.c_str(), _AttackerGuildId );
+	OUTPOST_DBG( "Outpost %s is now attacked by 0x%x", _Name.c_str(), _AttackerGuildId );
 
 	if (attackerGuild != oldAttackerGuildId)
 	{
@@ -792,7 +792,7 @@ void COutpost::setState(OUTPOSTENUMS::TOutpostState state)
 		}
 	}
 
-	OUTPOST_INF( "Outpost %s: [%s] -> [%s]", _Name.c_str(), OUTPOSTENUMS::toString( _State ).c_str(), OUTPOSTENUMS::toString( state ).c_str() );
+	OUTPOST_DBG( "Outpost %s: [%s] -> [%s]", _Name.c_str(), OUTPOSTENUMS::toString( _State ).c_str(), OUTPOSTENUMS::toString( state ).c_str() );
 	_State = state;
 
 	// Send to AIS
@@ -814,7 +814,7 @@ std::string COutpost::getStateName() const
 //----------------------------------------------------------------------------
 COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGuild, bool simulate )
 {
-	OUTPOST_INF( "Outpost %s: Challenged by %s", _Name.c_str(), attackerGuild->getName().toString().c_str() );
+	OUTPOST_DBG( "Outpost %s: Challenged by %s", _Name.c_str(), attackerGuild->getName().toString().c_str() );
 
 	nlassert( attackerGuild->getId() != 0 );
 
@@ -874,7 +874,7 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 //----------------------------------------------------------------------------
 void COutpost::ownerGuildVanished()
 {
-	OUTPOST_INF( "Outpost %s: Owner guild vanished", _Name.c_str() );
+	OUTPOST_DBG( "Outpost %s: Owner guild vanished", _Name.c_str() );
 
 	eventTriggered(OUTPOSTENUMS::OwnerVanished);
 }
@@ -882,7 +882,7 @@ void COutpost::ownerGuildVanished()
 //----------------------------------------------------------------------------
 void COutpost::attackerGuildVanished()
 {
-	OUTPOST_INF( "Outpost %s: Attacker guild vanished", _Name.c_str() );
+	OUTPOST_DBG( "Outpost %s: Attacker guild vanished", _Name.c_str() );
 
 	eventTriggered(OUTPOSTENUMS::AttackerVanished);
 }
@@ -890,7 +890,7 @@ void COutpost::attackerGuildVanished()
 //----------------------------------------------------------------------------
 void COutpost::giveupAttack()
 {
-	OUTPOST_INF( "Outpost %s: Attacker gave up", _Name.c_str() );
+	OUTPOST_DBG( "Outpost %s: Attacker gave up", _Name.c_str() );
 
 	eventTriggered(OUTPOSTENUMS::AttackerGiveUp);
 }
@@ -898,7 +898,7 @@ void COutpost::giveupAttack()
 //----------------------------------------------------------------------------
 void COutpost::giveupOwnership()
 {
-	OUTPOST_INF( "Outpost %s: Owner gave up", _Name.c_str() );
+	OUTPOST_DBG( "Outpost %s: Owner gave up", _Name.c_str() );
 
 	eventTriggered(OUTPOSTENUMS::OwnerGiveUp);
 }

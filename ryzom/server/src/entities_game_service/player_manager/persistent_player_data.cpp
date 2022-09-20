@@ -586,7 +586,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 \
 	LSTRUCT_MAP2(Inventory,string,\
 		for(uint32 i=0; i<INVENTORIES::NUM_INVENTORY; ++i) \
-			if (i!=INVENTORIES::handling && i!=INVENTORIES::equipment) \
+			if (i!=INVENTORIES::handling && i!=INVENTORIES::equipment && i!=INVENTORIES::hotbar) \
 				if (_Inventory[i]!=NULL && _Inventory[i]->getSlotCount() != 0),\
 		INVENTORIES::toString((INVENTORIES::TInventory)i),\
 		CInventoryProxy(const_cast<CCharacter *>(this), _Inventory[i]).store(pdr),\
@@ -1207,6 +1207,7 @@ static void displayWarning(const std::string& s)
 	FLAG0(CLEAR,clear())\
 	PROP2(Name,string,Name.toUtf8(),Name.fromUtf8(val))\
 	PROP_VECT(CSheetId,Bricks)\
+	PROP2(IconIndex,uint8,IconIndex,IconIndex=val)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
@@ -1376,7 +1377,7 @@ private:
 	uint32 RefInventoryId = INVENTORIES::NUM_INVENTORY;\
 	uint16 slotImage = 0xffff;\
 
-
+// TODO: add hotbar 
 #define PERSISTENT_POST_APPLY\
 	if ( slotImage != 0xFFFF )\
 	{\

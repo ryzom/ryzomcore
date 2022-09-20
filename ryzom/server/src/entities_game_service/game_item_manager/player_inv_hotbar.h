@@ -14,30 +14,35 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef MONGODB_WRAPPER_H
-#define MONGODB_WRAPPER_H
 
-#ifdef HAVE_MONGO
+#ifndef PLAYER_INV_HOTBAR_H
+#define PLAYER_INV_HOTBAR_H
 
-#include <mongo/client/dbclient.h>
+#include "game_item_manager/game_item.h"
+#include "game_item_manager/player_inventory.h"
 
-using namespace mongo;
-//using namespace bson;
-
-class CMongo {
+class CHotbarInventory : public CRefInventory
+{
 public:
-	static void init();
-	static void insert(const std::string &collection, const std::string &json);
-	static CUniquePtr<DBClientCursor> query(const std::string &collection, const std::string &json);
-	static void update(const std::string &collection, const std::string &jsonQuery, const std::string &jsonObj, bool upsert=false, bool multi=false);
-	static void remove(const std::string &collection, const std::string &jsonQuer, bool justOne = false);
-	static std::string quote(const std::string &s);
+	//@{
+	//@name Overloads from inventory base
+	/// Return the max slot for equipment
+	uint32 getMaxSlot() const;
 
-private:
-    static DBClientConnection conn;
-	static std::string dbname;
+};
+
+/** View for the hotbar inventory */
+class CHotbarInvView : public CCharacterInvView
+{
+public:
+	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
+	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags);
+
+protected:
+	/** Update the given slot on the client with item infos.
+	 *  If item is NULL, slot is updated as empty on the client.
+	 */
+	virtual void updateClientSlot(uint32 clientSlot, const CGameItemPtr item);
 };
 
 #endif
-
-#endif //  MONGODB_WRAPPER_H

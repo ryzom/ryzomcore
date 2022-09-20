@@ -674,7 +674,7 @@ void cbClientPhraseLearn( NLNET::CMessage& msgin, const std::string &serviceName
 		return;
 	}
 
-	ch->learnPhrase( phrase.Bricks, phraseId, phrase.Name );
+	ch->learnPhrase( phrase.Bricks, phraseId, phrase.Name, phrase.IconIndex );
 	ch->setAfkState(false);
 }
 
