@@ -1133,6 +1133,80 @@ void CGroupMap::checkCoords()
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
+	// **** retrieve pos of respawn and update it, or hide it if there's no target
+	uint offset = 0;
+	
+	if (!_ArkPoints.empty())
+	{
+		offset = _ArkPoints.size();
+		if (_ArkPoints.size() < _RespawnLM.size())
+		{
+			for (uint i = (uint)_ArkPoints.size(); i < _RespawnLM.size(); i++)
+			{
+				delCtrl(_RespawnLM[i]);
+				_RespawnLM[i] = NULL;
+			}
+		}
+
+		_RespawnLM.resize(_ArkPoints.size(), NULL);
+		for(uint i = 0; i < _ArkPoints.size(); i++)
+		{
+			if (_RespawnLM[i] == NULL)
+			{
+				_RespawnLM[i] = createArkPointButton(_ArkPoints[i]);
+				_RespawnLM[i]->setId(this->getId() + ":arklm_" + NLMISC::toString(i));
+				_RespawnLM[i]->setParent(this);
+				_RespawnLM[i]->setDefaultContextHelp(_ArkPoints[i].Title);
+				_RespawnLM[i]->HandleEvents = true;
+				addCtrl(_RespawnLM[i]);
+				updateLMPosFromDBPos(_RespawnLM[i], _ArkPoints[i].x, _ArkPoints[i].y);
+			}
+		}
+	}
+
+
+	if (_ArkPoints.empty() || !isIsland())
+	{
+		if (offset + _RespawnPos.size() < _RespawnLM.size())
+		{
+			for (uint i = offset + _RespawnPos.size(); i < _RespawnLM.size(); i++)
+			{
+				delCtrl(_RespawnLM[i]);
+				_RespawnLM[i] = NULL;
+			}
+		}
+
+		_RespawnLM.resize(offset + _RespawnPos.size(), NULL);
+		for(int j = 0; j < _RespawnPos.size(); ++j)
+		{
+			uint i = offset + j;
+			if (_RespawnLM[i] == NULL)
+			{
+				_RespawnLM[i] = createLandMarkButton(_RespawnLMOptions);
+				_RespawnLM[i]->setId(this->getId() + ":rplm_" + NLMISC::toString(i));
+				_RespawnLM[i]->setParent(this);
+				if (_MapMode == MapMode_SpawnSquad)
+					_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiSquadSpawnPoint") + NLMISC::toString(" %u", i+1));
+				else
+				{
+					if (isIsland())
+					{
+						_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiR2EntryPoint"));
+					}
+					else
+					{
+						_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiRespawnPoint"));
+					}
+					_RespawnLM[i]->HandleEvents = R2::getEditor().getMode() != R2::CEditor::EditionMode;
+				}
+				addCtrl(_RespawnLM[i]);
+			}
+			if (_RespawnLM[i])
+				updateLMPosFromDBPos(_RespawnLM[i], _RespawnPos[j].x, _RespawnPos[j].y);
+		}
+	}
+
+
 	// **** update landmark for missions from the database
 	if (_MissionPosStates.empty()) // pointers on db node initialised ?
 	{
@@ -1224,81 +1298,6 @@ void CGroupMap::checkCoords()
 		updateLMPosFromDBPos(_HomeLM, px, py);
 	}
 
-	// **** retrieve pos of respawn and update it, or hide it if there's no target
-	uint i;
-	uint offset = 0;
-
-	if (!_ArkPoints.empty())
-	{
-		offset = _ArkPoints.size();
-		if (_ArkPoints.size() < _RespawnLM.size())
-		{
-			for (i = (uint)_ArkPoints.size(); i < _RespawnLM.size(); i++)
-			{
-				delCtrl(_RespawnLM[i]);
-				_RespawnLM[i] = NULL;
-			}
-		}
-
-		_RespawnLM.resize(_ArkPoints.size(), NULL);
-		for(i = 0; i < _ArkPoints.size(); i++)
-		{
-			if (_RespawnLM[i] == NULL)
-			{
-				_RespawnLM[i] = createArkPointButton(_ArkPoints[i]);
-				_RespawnLM[i]->setId(this->getId() + ":arklm_" + NLMISC::toString(i));
-				_RespawnLM[i]->setParent(this);
-				_RespawnLM[i]->setDefaultContextHelp(_ArkPoints[i].Title);
-				_RespawnLM[i]->HandleEvents = true;
-				addCtrl(_RespawnLM[i]);
-				updateLMPosFromDBPos(_RespawnLM[i], _ArkPoints[i].x, _ArkPoints[i].y);
-			}
-		}
-	}
-
-
-	if (_ArkPoints.empty() || !isIsland())
-	{
-		if (offset + _RespawnPos.size() < _RespawnLM.size())
-		{
-			for (i = offset + _RespawnPos.size(); i < _RespawnLM.size(); i++)
-			{
-				delCtrl(_RespawnLM[i]);
-				_RespawnLM[i] = NULL;
-			}
-		}
-
-		_RespawnLM.resize(offset + _RespawnPos.size(), NULL);
-		for(int j = 0; j < _RespawnPos.size(); ++j)
-		{
-			i = offset + j;
-			if (_RespawnLM[i] == NULL)
-			{
-				_RespawnLM[i] = createLandMarkButton(_RespawnLMOptions);
-				_RespawnLM[i]->setId(this->getId() + ":rplm_" + NLMISC::toString(i));
-				_RespawnLM[i]->setParent(this);
-				if (_MapMode == MapMode_SpawnSquad)
-					_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiSquadSpawnPoint") + NLMISC::toString(" %u", i+1));
-				else
-				{
-					if (isIsland())
-					{
-						_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiR2EntryPoint"));
-					}
-					else
-					{
-						_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiRespawnPoint"));
-					}
-					_RespawnLM[i]->HandleEvents = R2::getEditor().getMode() != R2::CEditor::EditionMode;
-				}
-				addCtrl(_RespawnLM[i]);
-			}
-			if (_RespawnLM[i])
-				updateLMPosFromDBPos(_RespawnLM[i], _RespawnPos[j].x, _RespawnPos[j].y);
-		}
-	}
-
-
 	if ((_MapMode == MapMode_Death) || (_MapMode == MapMode_SpawnSquad))
 	{
 		if (_RespawnPosReseted)
@@ -1335,7 +1334,7 @@ void CGroupMap::checkCoords()
 		}
 	}
 	// update DB pos & tooltip text
-	for(i=0;i<_AnimalLM.size();i++)
+	for(uint i=0;i<_AnimalLM.size();i++)
 	{
 		if( _AnimalLM[i] )
 		{
@@ -1397,7 +1396,7 @@ void CGroupMap::checkCoords()
 		}
 	}
 	// update DB pos.
-	for(i=0; i < _TeammateLM.size(); i++)
+	for(uint i=0; i < _TeammateLM.size(); i++)
 	{
 
 		if (_TeammateLM[i])
@@ -1424,7 +1423,7 @@ void CGroupMap::checkCoords()
 	// update position for mission landmarks
 	// TODO : try to factor behaviour between anim / treamate / missions (they are all dynamic)
 	// TODO : make just one list of landmark with a CCompassTarget would be better ?
-	for(i=0; i < _MissionPosStates.size(); i++)
+	for(uint i=0; i < _MissionPosStates.size(); i++)
 	{
 		if (_MissionLM[i])
 		{
@@ -1727,10 +1726,10 @@ void CGroupMap::draw()
 				quv.V0 = center - 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
 				quv.V1 = center + 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
 				quv.V2 = center + 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
-				quv.V3 = center - 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
-				quv.Uv0.set(0.f, 1.f);
-				quv.Uv1.set(1.f, 1.f);
-				quv.Uv2.set(1.f, 0.f);
+			quv.V3 = center - 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
+			quv.Uv0.set(0.f, 1.f);
+			quv.Uv1.set(1.f, 1.f);
+			quv.Uv2.set(1.f, 0.f);
 				quv.Uv3.set(0.f, 0.f);
 				quv.Color0 = quv.Color1 = quv.Color2 = quv.Color3 = CRGBA(255, 255, 255, alpha);
 				quv.V0.x /= (float) sw;
@@ -2297,15 +2296,11 @@ void CGroupMap::setMap(SMap *map)
 	invalidateCoords();
 	createContinentLandMarks();
 
-	nlinfo("setMap (%f,%f) (%f,%f)", _CurMap->MinX, _CurMap->MinY, _CurMap->MaxX, _CurMap->MaxY);
-
-	delArkPoints();
-
 	CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:lm_events:html"));
 
 	if (groupHtml)
 	{
-		groupHtml->setHome(groupHtml->Home+toString("&min_x=%f&min_y=%f&max_x=%f&max_y=%f", _CurMap->MinX, _CurMap->MinY, _CurMap->MaxX, _CurMap->MaxY));
+		groupHtml->setHome(groupHtml->Home+toString("&map=%s&min_x=%f&min_y=%f&max_x=%f&max_y=%f", map->Name.c_str(), _CurMap->MinX, _CurMap->MinY, _CurMap->MaxX, _CurMap->MaxY));
 		groupHtml->browse(groupHtml->Home.c_str());
 	}
 
@@ -2770,6 +2765,7 @@ CGroupMap::CLandMarkButton *CGroupMap::createArkPointButton(const CArkPoint &poi
 	lmb->setColorOver(point.Color);
 	lmb->setColorPushed(point.Color);
 	lmb->setModulateGlobalColorAll(false);
+	lmb->setRenderLayer(-1);
 
 	lmb->setPosRef(Hotspot_MM);
 	return lmb;
