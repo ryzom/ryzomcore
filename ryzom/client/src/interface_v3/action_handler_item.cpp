@@ -2487,6 +2487,12 @@ class CHandlerUseHotbarItem : public IActionHandler
 			return;
 		}
 
+		if (pCS->getLockedByOwner())
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Item is locked.");
+			return;
+		}
+
 		const CItemSheet *pIS = pCS->asItemSheet();
 		if (!pIS)
 		{
