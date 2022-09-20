@@ -1,0 +1,3 @@
+inputFileRule AddFilesFromFdcCache
+inputFileRule FileAge 0 14
+inputFileRule LargestFile
