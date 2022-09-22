@@ -190,6 +190,17 @@ class CAHToggleLight: public IActionHandler
 REGISTER_ACTION_HANDLER (CAHToggleLight, "toggle_light");
 
 // ------------------------------------------------------------------------------------------------
+class CAHToggleLightOn: public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		UserEntity->lightOn();
+	}
+};
+REGISTER_ACTION_HANDLER (CAHToggleLightOn, "light_on");
+
+
+// ------------------------------------------------------------------------------------------------
 class CAHFreeMouse : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
