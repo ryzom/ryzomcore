@@ -36,6 +36,7 @@
 #include "../cursor_functions.h"
 #include "../time_client.h"
 #include "../interface_v3/interface_manager.h"
+#include "../ingame_database_manager.h"
 #include "../entities.h"
 #include "../view.h"
 #include "../input.h"
@@ -206,6 +207,7 @@ void CUserControls::autowalkState(bool enable)
 {
 	if(enable)
 	{
+		checkSpeedFactor();
 		_DirectionMove |= autowalk;
 		// If not backward, default is forward.
 		if(!(_DirectionMove & backward))
@@ -729,6 +731,7 @@ void CUserControls::commonMove()
 				_DirectionMove &= ~(autowalk|forward|backward);
 			else
 			{
+				checkSpeedFactor();
 				// Start Autowalk
 				_DirectionMove |= autowalk;
 				// If not backward, default is forward.
@@ -1352,5 +1355,20 @@ void CUserControls::cancelActionsWhenMoving()
 	if( UserEntity->behaviour() == MBEHAV::RANGE_ATTACK )
 	{
 		//UserEntity->disengage();
+	}
+}
+
+//-----------------------------------------------
+// checkSpeedFactor()
+//-----------------------------------------------
+void CUserControls::checkSpeedFactor()
+{
+	if (!IngameDbMngr.initInProgress())
+	{
+		// check if speed factor is zero, and if yes, notify the player
+		CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
+		if (pNodeLeaf && pNodeLeaf->getValue64() == 0) {
+			CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiSpeedFactorZero"), "CHK");
+		}
 	}
 }
