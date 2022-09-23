@@ -881,8 +881,6 @@ void contextWebPage(bool rightClick, bool dblClick)
 //-----------------------------------------------
 void contextWebIG(bool rightClick, bool dblClick)
 {
-	if(rightClick)
-		return;
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
 	CInterfaceElement *pGC = CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object");
 	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));

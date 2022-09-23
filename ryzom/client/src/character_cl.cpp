@@ -6274,6 +6274,11 @@ void CCharacterCL::updateVisiblePostPos(const NLMISC::TTime &currentTimeInMs, CE
 					pos = (box().getMin() + box().getMax())/2;
 					pos.z = box().getMax().z;
 				}
+
+				CRaceStatsSheet *sheet = const_cast<CRaceStatsSheet*>(UserEntity->playerSheet());
+				float namePosZ = sheet->GenderInfos[UserEntity->getGender()].NamePosZNormal;
+				if (pos.z > box().getMin().z + namePosZ)
+					pos.z = box().getMin().z + namePosZ;
 				nlassert(isValidDouble(pos.x) && isValidDouble(pos.y) && isValidDouble(pos.z));
 				_CurrentBubble->Position = pos;
 			}
@@ -6679,7 +6684,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 			updatePosCombatFloat(frameTimeRemaining, target);
 		}
 		// Compute the average speed to the destination.
-		// double spd = 
+		// double spd =
 		computeSpeed();
 
 
@@ -8233,14 +8238,14 @@ float CCharacterCL::getSheetScale() const	// virtual
 // getColRadius :
 // Return the entity collision radius. (return 0.5 if there is any problem).
 //---------------------------------------------------
-float CCharacterCL::getSheetColRadius() const 
+float CCharacterCL::getSheetColRadius() const
 {
-	if(!_Sheet) 
+	if(!_Sheet)
 		return 0.5f;
 	else
 		return _Sheet->ColRadius;
 }
-	
+
 
 //---------------------------------------------------
 // getScale :
@@ -8359,7 +8364,7 @@ std::string CCharacterCL::shapeFromItem(const CItemSheet &itemSheet) const
 		sheet = itemSheet.getShape();
 
 	return sheet;
-		
+
 }// shapeFromItem //
 
 
@@ -9147,7 +9152,7 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 			bi.DelayBeforeStart = 11.5f;
 			_AttachedFXListToStart.push_front(bi);
 		}
-		else 
+		else
 		{
 			CAttachedFX::TSmartPtr fx = new CAttachedFX;
 			fx->create(*this, bi, CAttachedFX::CTargeterInfo());

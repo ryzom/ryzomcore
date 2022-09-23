@@ -67,6 +67,7 @@ private:
 	static int	displayChatMessage(CLuaState &ls);
 	static int	setWeatherValue(CLuaState &ls); // first value is a boolean to say automatic, second value ranges from of to 1 and gives the weather
 	static int	getWeatherValue(CLuaState &ls); // get current real weather value (blend between server driven value & predicted value). Manual weather value is ignored
+	static int	getRyzomTime(CLuaState &ls); // get day and hour in ryzom time
 	static int	getContinentSheet(CLuaState &ls);
 	static int	disableContextHelpForControl(CLuaState &ls);	// params: CCtrlBase*. return: none
 	static int  disableContextHelp(CLuaState &ls);
@@ -115,6 +116,8 @@ private:
 	// LUA functions exported for Dev only (debug)
 	static int	dumpUI(CLuaState &ls);			// params: CInterfaceElement*.... return: none
 	static int	setKeyboardContext(CLuaState &ls);
+
+	static int setRpItems(CLuaState &ls);
 
 	static int getCompleteIslands(CLuaState &ls);
 	static int getIslandId(CLuaState &ls);//TEMP
@@ -287,6 +290,8 @@ private:
 	static int addRespawnPoint(CLuaState &ls);
 	static int delArkPoints(CLuaState &ls);
 	static int setArkPowoOptions(CLuaState &ls);
+	static int getActualMapZoom(CLuaState &ls);
+	static int setActualMapZoom(CLuaState &ls);
 
 
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
@@ -320,7 +325,7 @@ private:
 	static uint64 getPlayerVpc();
 	static sint32 getTargetLevel();		// get current, precise level of the selected target, or -1 if there's no such selected target
 	static sint32 getTargetForceRegion(); // get 'force region' for current target, or -1 if there's no selected target
-	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target					     
+	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target
 #ifdef RYZOM_LUA_UCSTRING
 	static ucstring getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
 #else
@@ -329,6 +334,7 @@ private:
 	static std::string getTargetVpaHex();
 	static std::string getTargetVpbHex();
 	static std::string getTargetVpcHex();
+	static void updateVpa();
 	static uint64 getTargetVpa();
 	static uint64 getTargetVpb();
 	static uint64 getTargetVpc();

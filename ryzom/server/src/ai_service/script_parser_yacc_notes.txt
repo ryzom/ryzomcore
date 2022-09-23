@@ -1,0 +1,10 @@
+1) To generate script_parser.yacc, install bison and flex for windows.
+Don't forget to set the environnement variables BISON_HAIRY and BISON_SIMPLE
+with the path to the bison.simple and bison.hairy files.
+
+BISON_SIMPLE=c:\bin\bison.simple
+BISON_HAIRY=c:\bin\bison.hairy
+
+2) Make sure, flex, bison and sed are available from the PATH
+
+3) Simply run script_parser.bat, it generates script_parser_yacc.cpp, script_parser_yacc.h and script_parser_lex.cpp

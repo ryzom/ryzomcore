@@ -800,10 +800,32 @@ void CUserControls::commonMove()
 				// Cursor mode.
 				SetMouseCursor ();
 
+				sint32 x, y = -1;
+				CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+				if (cursor)
+					cursor->getPointerPos(x, y);
+
+				uint32 w, h;
+				CViewRenderer::getInstance()->getScreenSize(w, h);
+				// Get the pointer position (in float)
+				float cursX, cursY;
+				cursX = (float)x/(float)w;
+				cursY = (float)y/(float)h;
+
+
 				// Short Right Click -> Check Action
-				if((T1-_RightClickStart) <= _TimeLongClick)
+				if ((T1-_RightClickStart) <= _TimeLongClick)
 				{
-					if(ClientCfg.SelectWithRClick || R2::isEditionCurrent())
+					
+					sint32 instance_idx;
+					CShapeInstanceReference instref = EntitiesMngr.getShapeInstanceUnderPos(cursX, cursY, instance_idx);
+					nlinfo("instance_idx = %d", instance_idx);
+					if  (instance_idx != -1 && !instref.Instance.empty() && !instref.ContextURL.empty())
+					{
+						UserEntity->selection(CLFECOMMON::INVALID_SLOT);
+					}
+					
+					if (ClientCfg.SelectWithRClick || R2::isEditionCurrent())
 					{
 						// nb : the ring editor also need that kind of events
 						execActionCursorPos(true,dblClickRight);
@@ -811,9 +833,7 @@ void CUserControls::commonMove()
 
 					// Launch Context Menu
 					if (R2::getEditor().getMode() != R2::CEditor::EditionMode)
-					{
 						IM->launchContextMenuInGame("ui:interface:game_context_menu");
-					}
 				}
 
 

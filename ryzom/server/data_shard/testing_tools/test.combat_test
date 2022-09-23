@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.3 $" State="modified">
+  <STRUCT>
+    <ATOM Name="test description" Value="test??"/>
+    <ATOM Name="iteration count" Value="2"/>
+    <ATOM Name="level min" Value="60"/>
+    <ATOM Name="level max" Value="60"/>
+    <STRUCT Name="actor 0">
+      <ATOM Name="repeat action" Value="0"/>
+      <ATOM Name="punctual action 1 phrase" Value="0"/>
+      <ATOM Name="punctual action 1 repeat rate" Value="12"/>
+      <ATOM Name="punctual action 2 phrase" Value="0"/>
+      <ATOM Name="Actor Setting" Value="FY_HOM_melee_fighter.player"/>
+      <ATOM Name="Target" Value="1"/>
+    </STRUCT>
+    <STRUCT Name="actor 1">
+      <ATOM Name="level offset" Value="1"/>
+      <ATOM Name="repeat action" Value="0"/>
+      <ATOM Name="punctual action 1 phrase" Value="0"/>
+      <ATOM Name="punctual action 1 repeat rate" Value="12"/>
+      <ATOM Name="punctual action 2 phrase" Value="0"/>
+      <ATOM Name="punctual action 2 repeat rate" Value="0.0"/>
+      <ATOM Name="Actor Setting" Value="FY_HOM_melee_fighter.player"/>
+      <ATOM Name="Target" Value="0"/>
+    </STRUCT>
+    <STRUCT Name="actor 2">
+      <ATOM Name="level offset" Value="2"/>
+      <ATOM Name="repeat action" Value="1"/>
+      <ATOM Name="punctual action 1 phrase" Value="1"/>
+      <ATOM Name="punctual action 1 repeat rate" Value="12"/>
+      <ATOM Name="punctual action 2 phrase" Value="1"/>
+      <ATOM Name="punctual action 2 repeat rate" Value="1"/>
+      <ATOM Name="Target" Value="3"/>
+    </STRUCT>
+    <STRUCT Name="actor 3">
+      <ATOM Name="punctual action 1 repeat rate" Value="12"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Oct 22 16:09:39 2002 (saffray) .actor 1.Actor Setting = FY_HOM_caster_buffer.player
+Tue Oct 22 16:09:39 2002 (saffray) .actor 1.level offset = -1
+Tue Oct 22 16:09:39 2002 (saffray) .actor 1.repeat action = 1
+Tue Oct 22 16:09:39 2002 (saffray) .actor 2.Actor Setting = FY_HOM_harvester.player
+Tue Oct 22 16:09:39 2002 (saffray) .actor 2.level offset = 1
+Tue Oct 22 16:09:39 2002 (saffray) .iteration count = 2
+Tue Oct 22 16:09:39 2002 (saffray) .level max = 4
+Tue Oct 22 16:09:39 2002 (saffray) .level min = 2
+Tue Oct 22 16:09:39 2002 (saffray) .test description = 
+Fri Oct 25 10:48:10 2002 (saffray) .actor 1.Actor Setting = FY_HOM_melee_fighter.player
+Fri Oct 25 10:48:10 2002 (saffray) .actor 2.Actor Setting = FY_HOM_range_fighter.player
+Fri Oct 25 14:18:53 2002 (saffray) .actor 2.Actor Setting = FY_HOM_melee_fighter.player
+Fri Oct 25 14:46:02 2002 (saffray) .actor 1.repeat action = 0
+Tue Nov 12 12:00:04 2002 (saffray) .iteration count = 1
+Tue Nov 12 12:00:04 2002 (saffray) .level min = 4
+Tue Nov 12 19:25:35 2002 (saffray) .iteration count = 2
+Mon Dec 09 15:09:28 2002 (brigand) .actor 1.repeat action = 1
+Mon Dec 09 15:09:28 2002 (brigand) .actor 2.repeat action = 1
+Wed Dec 11 12:02:13 2002 (brigand) .level max = 60
+Wed Dec 11 12:02:13 2002 (brigand) .level min = 60
+Wed Dec 11 12:08:52 2002 (brigand) .test description = test??
+Wed Dec 11 12:28:58 2002 (brigand) .actor 1.repeat action = 0
+Wed Dec 11 12:28:58 2002 (brigand) .actor 2.repeat action = 0
+Wed Dec 11 14:55:21 2002 (brigand) .actor 1.punctual action 1 phrase = 1
+Wed Dec 11 14:55:21 2002 (brigand) .actor 1.punctual action 1 repeat rate = 6
+Wed Dec 11 14:55:21 2002 (brigand) .actor 1.punctual action 2 phrase = 2
+Wed Dec 11 14:55:21 2002 (brigand) .actor 1.punctual action 2 repeat rate = 6
+Wed Dec 11 16:12:17 2002 (brigand) .actor 1.punctual action 1 phrase = 0
+Wed Dec 11 16:12:17 2002 (brigand) .actor 1.punctual action 2 phrase = 0
+Wed Dec 11 16:12:17 2002 (brigand) .actor 1.punctual action 2 repeat rate = 6
+Fri Dec 13 19:48:15 2002 (brigand) .actor 0.Actor Setting = toto.player
+Mon Dec 16 10:49:46 2002 (brigand) .actor 0.Target = 1
+Mon Dec 16 11:05:26 2002 (brigand) .actor 0.Actor Setting = FY_HOM_melee_fighter.player
+Mon Dec 16 12:23:11 2002 (brigand) .actor 0.punctual action 1 repeat rate = 8
+Mon Dec 16 12:32:13 2002 (brigand) .actor 0.punctual action 1 repeat rate = 12
+Mon Dec 16 12:32:13 2002 (brigand) .actor 1.level offset = 1
+Mon Dec 16 12:32:13 2002 (brigand) .actor 1.punctual action 1 repeat rate = 12
+Mon Dec 16 12:32:13 2002 (brigand) .actor 1.punctual action 2 repeat rate = 0.0
+Mon Dec 16 12:32:13 2002 (brigand) .actor 2.level offset = 2
+Mon Dec 16 12:32:13 2002 (brigand) .actor 2.punctual action 1 repeat rate = 12
+Mon Dec 16 12:32:13 2002 (brigand) .actor 3.punctual action 1 repeat rate = 12
+Mon Dec 16 12:37:14 2002 (brigand) .actor 2.Actor Setting = 
+Mon Dec 16 14:01:57 2002 (brigand) .actor 2.Actor Setting = FY_HOM_melee_fighter.player
+Mon Dec 16 14:01:57 2002 (brigand) .actor 3.Actor Setting = FY_HOM_melee_fighter.player
+Mon Dec 16 14:05:43 2002 (brigand) .actor 0.Target = 3
+Mon Dec 16 14:05:43 2002 (brigand) .actor 1.Target = 3
+Mon Dec 16 14:05:43 2002 (brigand) .actor 2.Target = 3
+Mon Dec 16 14:26:03 2002 (brigand) .actor 0.punctual action 1 phrase = 1
+Mon Dec 16 14:26:03 2002 (brigand) .actor 0.punctual action 2 phrase = 0
+Mon Dec 16 14:26:03 2002 (brigand) .actor 0.repeat action = 1
+Mon Dec 16 14:26:03 2002 (brigand) .actor 1.punctual action 1 phrase = 1
+Mon Dec 16 14:26:03 2002 (brigand) .actor 1.repeat action = 1
+Mon Dec 16 14:26:03 2002 (brigand) .actor 2.punctual action 1 phrase = 1
+Mon Dec 16 14:26:03 2002 (brigand) .actor 2.punctual action 2 phrase = 1
+Mon Dec 16 14:26:03 2002 (brigand) .actor 2.punctual action 2 repeat rate = 1
+Mon Dec 16 14:26:03 2002 (brigand) .actor 2.repeat action = 1
+Mon Dec 16 18:34:47 2002 (brigand) .actor 2.Actor Setting = 
+Mon Dec 16 18:34:47 2002 (brigand) .actor 3.Actor Setting = 
+Mon Dec 16 18:35:00 2002 (brigand) .actor 0.Target = 1
+Mon Dec 16 18:35:00 2002 (brigand) .actor 1.Target = 0
+Mon Dec 16 19:05:12 2002 (brigand) .actor 0.punctual action 1 phrase = 0
+Mon Dec 16 19:05:12 2002 (brigand) .actor 0.repeat action = 0
+Mon Dec 16 19:05:12 2002 (brigand) .actor 1.punctual action 1 phrase = 0
+Mon Dec 16 19:05:12 2002 (brigand) .actor 1.repeat action = 0</LOG>
+</FORM>

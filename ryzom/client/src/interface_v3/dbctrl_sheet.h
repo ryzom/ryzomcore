@@ -164,7 +164,6 @@ public:
 	bool				_UseQuantity	       : 1; // is the quantity read and displayed ?
 	bool				_ReadQuantityFromSheet : 1; // Read quantity from sheet rather than from database
 	bool				_UseQuality            : 1; // is the quality read and displayed ?
-	bool				_DisplayItemQuality    : 1; // Do we have to display the quality for the item (false for Cosmetics and Teleport and if _UseQuality==fasle)?
 	bool                _DuplicateOnDrag       : 1; // when dragged, the item is shown twice : one version at the mouse position.
 	                                             // and another in the source slot. Useful for items to buy that are in infinite quantity.
 	bool				_AutoGrayed            : 1; // if true then gray the ctrlSheeet if: 1/ Items: Is the Item Locked. 2/ Bricks: is the brick Latent.
@@ -646,9 +645,9 @@ protected:
 	void setupSPhraseId();
 	void setupOutpostBuilding();
 	// optSheet is for special faber
-	void setupDisplayAsSBrick(sint32 sheet, sint32 optSheet= 0);
+	void setupDisplayAsSBrick(sint32 sheet, sint32 optSheet = 0, bool force = false);
 	// setup icon from phrases
-	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName);
+	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName, uint8 phraseIconIndex = std::numeric_limits<uint8>::max());
 
 	// draw a number and returns the width of the drawn number
 	sint32 drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value, bool rightAlign=true);
@@ -674,6 +673,9 @@ protected:
 	NLMISC::CCDBNodeLeaf		*_ItemRMFaberStatType;
 
 	mutable sint32		_LastSheetId;
+	sint32				_LastItemInfoVersion;
+	sint32				_LastItemCreateTime;
+	sint32				_LastItemSerial;
 	bool				_ItemInfoChanged;
 
 	/// Display
@@ -852,8 +854,9 @@ private:
 	void		updateIconSize();
 	void		resetAllTexIDs();
 	void		setupInit();
-	// remove enchant and buff markers from item icon
+	// update/remove enchant and buff markers from item icon
 	void		clearIconBuffs();
+	void		updateIconBuffs();
 
 	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown= false);
 	void		resetCharBitmaps();
