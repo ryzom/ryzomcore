@@ -25,6 +25,12 @@ using namespace NLMISC;
 
 NL_INSTANCE_COUNTER_IMPL(CGearLatency);
 
+CGearLatency::CGearLatency()
+{
+	_LastLatencyUpdate = 0;
+	_MaxEquipTime = 0;
+}
+
 
 void CGearLatency::update(CCharacter * user)
 {
@@ -65,6 +71,12 @@ void CGearLatency::setSlot( INVENTORIES::TInventory inventory, uint32 slot, cons
 {
 	static NLMISC::CSheetId equipSheet("big_equip_item.sbrick");
 
+	if (_LastLatencyUpdate != CTickEventHandler::getGameCycle())
+	{
+		_MaxEquipTime = 0;
+		_LastLatencyUpdate = CTickEventHandler::getGameCycle();
+	}
+
 	// checks must be done by the caller
 	nlassert(form);
 	nlassert(user);
@@ -94,11 +106,14 @@ void CGearLatency::setSlot( INVENTORIES::TInventory inventory, uint32 slot, cons
 	if ( equipTime == 0 )
 		return;
 
+	if (equipTime > _MaxEquipTime)
+		_MaxEquipTime = equipTime;
+
 	gear.Slot = slot;
 
 	// added _GearLatencies.size() to increment the gear.LatencyEndDate when server 2 or more equip at same tick
 	// without that, client don't display the progress bar
-	gear.LatencyEndDate = (equipTime * EquipTimeFactor.get()) + CTickEventHandler::getGameCycle() + _GearLatencies.size();
+	gear.LatencyEndDate = CTickEventHandler::getGameCycle() + (_MaxEquipTime * EquipTimeFactor.get()) + _GearLatencies.size();
 
 	// add it in our sorted list
 	std::list<CGearSlot>::iterator it = _GearLatencies.begin();
