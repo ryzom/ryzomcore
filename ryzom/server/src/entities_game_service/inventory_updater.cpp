@@ -38,6 +38,7 @@ const CInventoryUpdaterForCharacter::TInventoryId CInventoryUpdaterForCharacter:
 	CInventoryCategoryForCharacter::InvalidInvId, //temporary,					
 //	CInventoryCategoryForCharacter::InvalidInvId, //pickup,						
 	CInventoryCategoryForCharacter::InvalidInvId, //equipment,					
+	CInventoryCategoryForCharacter::InvalidInvId, //hotbar,			
 	CInventoryCategoryForCharacter::Bag,						
 	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+0),
 	(CInventoryCategoryForCharacter::TInventoryId)(CInventoryCategoryForCharacter::Packers+1),
@@ -209,6 +210,9 @@ void		CInventoryUpdaterForCharacter::resetItemIntoClassicDatabase( INVENTORIES::
 		}
 		break;
 	case INVENTORIES::equipment:
+		// nothing to do
+		break;
+	case INVENTORIES::hotbar:
 		// nothing to do
 		break;
 	}

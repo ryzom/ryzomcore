@@ -561,6 +561,7 @@ CInventoryPtr getInventory(CCharacter *c, const string &inv)
 			case INVENTORIES::bag:
 			case INVENTORIES::equipment:
 			case INVENTORIES::handling:
+			case INVENTORIES::hotbar:
 			case INVENTORIES::pet_animal1:
 			case INVENTORIES::pet_animal2:
 			case INVENTORIES::pet_animal3:
@@ -804,6 +805,7 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 		inventories.push_back(INVENTORIES::temporary);
 		inventories.push_back(INVENTORIES::handling);
 		inventories.push_back(INVENTORIES::equipment);
+		inventories.push_back(INVENTORIES::hotbar);
 		inventories.push_back(INVENTORIES::bag);
 		inventories.push_back(INVENTORIES::pet_animal1);
 		inventories.push_back(INVENTORIES::pet_animal2);
@@ -906,6 +908,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 	} else {
 		inventories.push_back(INVENTORIES::handling);
 		inventories.push_back(INVENTORIES::equipment);
+		inventories.push_back(INVENTORIES::hotbar);
 		inventories.push_back(INVENTORIES::bag);
 		inventories.push_back(INVENTORIES::pet_animal1);
 		inventories.push_back(INVENTORIES::pet_animal2);

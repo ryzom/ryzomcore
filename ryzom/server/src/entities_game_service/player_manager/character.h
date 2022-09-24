@@ -1735,7 +1735,7 @@ public:
 	void forgetPhrase(uint8 memSet, uint8 i);
 
 	/// learn a new phrase
-	void learnPhrase(const std::vector<NLMISC::CSheetId> &bricks, uint16 phraseId, const ucstring &name);
+	void learnPhrase(const std::vector<NLMISC::CSheetId> &bricks, uint16 phraseId, const ucstring &name, uint8 iconIndex);
 
 	/// delete a known phrase
 	void deleteKnownPhrase(uint16 phraseId);
