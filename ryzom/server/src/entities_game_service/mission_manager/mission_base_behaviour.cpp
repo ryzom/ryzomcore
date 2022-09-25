@@ -1508,15 +1508,17 @@ uint CMissionBaseBehaviour::_updateCompass(CCharacter & user, DBType &missionDb)
 	}
 
 	CMissionTemplate * tpl = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
+	if (tpl)
+	{
+		sint32 x;
+		sint32 y;
+		string txtName;
 
-	sint32 x;
-	sint32 y;
-	string txtName;
+		user.getPositionCheck(toUpper(tpl->getMissionName()), x, y, txtName);
 
-	user.getPositionCheck(toUpper(tpl->getMissionName()), x, y, txtName);
-
-	if (!txtName.empty())
-		compassIdx++;
+		if (!txtName.empty())
+			compassIdx++;
+	}
 
 	return compassIdx;
 }
