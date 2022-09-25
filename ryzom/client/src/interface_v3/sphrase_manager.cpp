@@ -1975,7 +1975,7 @@ void	CSPhraseManager::clientExecute(uint32 memoryLine, uint32 memorySlot, bool c
 // ***************************************************************************
 void	CSPhraseManager::cancelClientExecute(bool cyclic)
 {
-	if(!cyclic)
+	if(cyclic)
 	{
 		// Dec Local Counter For Server/Client synchronisation
 		_PhraseCycleExecuteCounter--;
