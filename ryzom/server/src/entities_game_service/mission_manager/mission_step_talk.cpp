@@ -225,11 +225,13 @@ class CMissionStepTalk : public IMissionStepTemplate
 		}
 
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
+		nlinfo("check bot");
 		if ( bot )
 		{
+			nlinfo("have bot");
 			if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
 				( _Bot == CAIAliasTranslator::Invalid && bot->getAlias() == instance->getGiver() ) )
-				return true;	
+				return true;
 		}
 		else
 		{

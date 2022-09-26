@@ -14319,14 +14319,17 @@ void CCharacter::botChatMissionAdvance(uint8 index)
 	}
 
 	uint idx = 0;
+	nlinfo("index = %d", index);
 
 	for (map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it)
 	{
 		std::vector<CMission::CBotChat> botchats;
 		(*it).second->getBotChatOptions(TheDataset.getDataSetRow(_CurrentInterlocutor), botchats);
 
+		nlinfo("botchats.size = %d", botchats.size());
 		for (uint j = 0; j < botchats.size();)
 		{
+			nlinfo("idx = %d", idx);
 			if (idx == index)
 			{
 				if (!botchats[j].Gift)
@@ -14538,7 +14541,7 @@ void CCharacter::botChatMissionAdvance(uint8 index)
 					setTargetBotchatProgramm(bot, bot->getId());
 					return;
 				}
-
+				
 				idx++;
 			}
 	}
