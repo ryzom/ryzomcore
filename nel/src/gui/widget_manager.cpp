@@ -2446,18 +2446,18 @@ namespace NLGUI
 			}
 		}
 
-	    if (eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE && !handled && !isKeyboardCaptured())
-	    {
-		    CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:quit_dialog");
-		    handled = true;
-	    }
-
 	    // General case: handle it in the Captured keyboard
-		if ( getCaptureKeyboard() != NULL && !handled)
+		if (!handled && getCaptureKeyboard() != NULL)
 		{
 			bool result = getCaptureKeyboard()->handleEvent(evnt);
 			CDBManager::getInstance()->flushObserverCalls();
 			return result;
+		} 
+			
+		if (!handled && eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE)
+		{
+			CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:quit_dialog");
+			handled = true;
 		}
 
 		lastKeyEvent = eventDesc;
