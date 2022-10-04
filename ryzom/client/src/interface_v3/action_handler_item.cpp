@@ -2487,6 +2487,12 @@ class CHandlerUseHotbarItem : public IActionHandler
 			return;
 		}
 
+		if (pCS->getLockedByOwner())
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Item is locked.");
+			return;
+		}
+
 		const CItemSheet *pIS = pCS->asItemSheet();
 		if (!pIS)
 		{
@@ -2566,20 +2572,26 @@ class CHandlerItemGroupCreate : public IActionHandler
 			name = eb->getInputString();
 			CWidgetManager::getInstance()->resetCaptureKeyboard();
 			if (name.empty()) {
-				nlinfo("Trying to create a group with a caller not part of any group");
+				nlinfo("<CHandlerItemGroupCreate::execute> Trying to create a group with a caller not part of any group");
 				return;
 			}
 		}
 
 		if (name.find_first_not_of(' ') == name.npos) {
-			nlinfo("Trying to create a group with whitespace as name");
+			nlinfo("<CHandlerItemGroupCreate::execute> Trying to create a group with whitespace as name");
 			return;
 		}
 
 		bool removeEmpty = false;
 		if (name.substr(0, 1) == "!") {
+			std::string tmp = name.substr(1);
+			if (tmp.find_first_not_of(' ') == tmp.npos) {
+				nlinfo("<CHandlerItemGroupCreate::execute> Trying to create a group with whitespace as name");
+				return;
+			}
+
 			removeEmpty = true;
-			name = name.substr(1);
+			name = tmp;
 		}
 
 		CItemGroupManager::getInstance()->createGroup(name, removeEmpty);

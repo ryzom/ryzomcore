@@ -121,7 +121,7 @@ public:
 		UserEntity->disableFollow();
 
 		// check if speed factor is zero, and if yes, notify the player
-		if (!Actions.valide("turn_left") && !Actions.valide("turn_right") && !IngameDbMngr.initInProgress())
+		if (!Actions.valide("turn_left") && !Actions.valide("turn_right") && !IngameDbMngr.initInProgress() && !UserEntity->isSit())
 		{
 			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
 			if (pNodeLeaf && pNodeLeaf->getValue64() == 0)
@@ -188,6 +188,17 @@ class CAHToggleLight: public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHToggleLight, "toggle_light");
+
+// ------------------------------------------------------------------------------------------------
+class CAHToggleLightOn: public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		UserEntity->lightOn();
+	}
+};
+REGISTER_ACTION_HANDLER (CAHToggleLightOn, "light_on");
+
 
 // ------------------------------------------------------------------------------------------------
 class CAHFreeMouse : public IActionHandler

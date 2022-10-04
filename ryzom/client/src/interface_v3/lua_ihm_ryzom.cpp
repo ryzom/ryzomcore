@@ -504,6 +504,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("disableContextHelp", disableContextHelp);
 	ls.registerFunc("setWeatherValue", setWeatherValue);
 	ls.registerFunc("getWeatherValue", getWeatherValue);
+	ls.registerFunc("getRyzomTime", getRyzomTime);
 	ls.registerFunc("getContinentSheet", getContinentSheet);
 	ls.registerFunc("getCompleteIslands", getCompleteIslands);
 	ls.registerFunc("displayBubble", displayBubble);
@@ -1905,6 +1906,19 @@ int CLuaIHMRyzom::getWeatherValue(CLuaState &ls)
 	ls.push(weather);
 	return 1;
 }
+
+int CLuaIHMRyzom::getRyzomTime(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_getWeatherValue)
+	const char *funcName = "getRyzomTime";
+	CLuaIHM::checkArgCount(ls, funcName, 0);
+	uint64 currDay = RT.getRyzomDay();
+	float currHour = (float) RT.getRyzomTime();
+	ls.push(currDay);
+	ls.push(currHour);
+	return 2;
+}
+
 
 int CLuaIHMRyzom::getContinentSheet(CLuaState &ls)
 {
@@ -4388,6 +4402,10 @@ sint32 CLuaIHMRyzom::getTargetLevelForce()
 	}
 	else
 	{
+		uint8 nForce = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:FORCE_RATIO")->getValue8();
+		if (nForce > 11)
+			return nForce;
+
 		CCharacterSheet *pCS = dynamic_cast<CCharacterSheet*>(SheetMngr.get(target->sheetId()));
 		return pCS ? (sint32) pCS->ForceLevel : -1;
 	}

@@ -202,7 +202,7 @@ void			CSPhraseManager::initInGame()
 	for(CSheetManager::TEntitySheetMap::const_iterator it = sm.begin(); it != sm.end(); ++it)
 	{
 		if (it->second.EntitySheet && it->second.EntitySheet->Type == CEntitySheet::SPHRASE)
-		{						
+		{
 			const_cast<CSPhraseManager *>(this)->buildPhraseFromSheet(tmpPhrase, it->first.asInt());
 			_PhraseToSheet[tmpPhrase] = it->first.asInt();
 		}
@@ -567,23 +567,27 @@ void		CSPhraseManager::updateMemoryDBSlot(uint32 memorySlot)
 	if(!_InitInGameDone)
 		return;
 
-	if(_SelectedMemoryDB==-1 || _SelectedMemoryDB>=(sint32)_Memories.size())
-		return;
-
 	if(memorySlot<PHRASE_MAX_MEMORY_SLOT)
 	{
-		CMemorySlot		&slot= _Memories[_SelectedMemoryDB].Slot[memorySlot];
-		if(!slot.isPhrase())
-			_MemoryDbLeaves[memorySlot]->setValue32(0);
-		else
-			_MemoryDbLeaves[memorySlot]->setValue32(slot.Id);
+		if(_SelectedMemoryDB !=-1 && _SelectedMemoryDB < (sint32)_Memories.size())
+		{
+			CMemorySlot &slot= _Memories[_SelectedMemoryDB].Slot[memorySlot];
 
-		CMemorySlot		&slotAlt= _Memories[_SelectedMemoryDBalt].Slot[memorySlot];
+			if(!slot.isPhrase())
+				_MemoryDbLeaves[memorySlot]->setValue32(0);
+			else
+				_MemoryDbLeaves[memorySlot]->setValue32(slot.Id);
+		}
 
-		if(!slotAlt.isPhrase())
-			_MemoryAltDbLeaves[memorySlot]->setValue32(0);
-		else
-			_MemoryAltDbLeaves[memorySlot]->setValue32(slotAlt.Id);
+		if(_SelectedMemoryDBalt !=-1 && _SelectedMemoryDBalt < (sint32)_Memories.size())
+		{
+			CMemorySlot &slotAlt= _Memories[_SelectedMemoryDBalt].Slot[memorySlot];
+
+			if(!slotAlt.isPhrase())
+				_MemoryAltDbLeaves[memorySlot]->setValue32(0);
+			else
+				_MemoryAltDbLeaves[memorySlot]->setValue32(slotAlt.Id);
+		}
 	}
 }
 
@@ -2442,15 +2446,15 @@ void CSPhraseManager::updateEquipInvalidation(sint64 serverTick)
 
 // ***************************************************************************
 void CSPhraseManager::updateAllActionRegen()
-{	
+{
 	if (_RegenTickRangeTouched)
 	{
 		TTicks startTime = CTime::getPerformanceTime();
-		updateAllMemoryCtrlRegenTickRange();		
+		updateAllMemoryCtrlRegenTickRange();
 		_RegenTickRangeTouched = false;
-		TTicks endTime = CTime::getPerformanceTime();		
-		//nldebug("***** %d ms for CSPhraseManager::updateAllActionRegen", (int) (1000 * CTime::ticksToSecond(endTime - startTime)));	
-	}	
+		TTicks endTime = CTime::getPerformanceTime();
+		//nldebug("***** %d ms for CSPhraseManager::updateAllActionRegen", (int) (1000 * CTime::ticksToSecond(endTime - startTime)));
+	}
 }
 
 // ***************************************************************************
@@ -2761,7 +2765,7 @@ CTickRange CSPhraseManager::getRegenTickRange(const CSPhraseCom &phrase) const
 		{
 			if (brick->isSpecialPower())
 			{
-				uint64 phraseFlags = getPhraseRequiredFlags(phrase);				
+				uint64 phraseFlags = getPhraseRequiredFlags(phrase);
 				for(uint b = 0; b < 64; ++b)
 				{
 					if (phraseFlags & (uint64(1) << b))
@@ -3084,7 +3088,7 @@ void	CSPhraseManager::updateAllMemoryCtrlState()
 			updateMemoryCtrlState(i, ctrlAlt, itemSkill);
 	}
 	TTicks endTime = CTime::getPerformanceTime();
-	//nldebug("***** %d ms for CSPhraseManager::updateAllMemoryCtrlState", (int) (1000 * CTime::ticksToSecond(endTime - startTime)));	
+	//nldebug("***** %d ms for CSPhraseManager::updateAllMemoryCtrlState", (int) (1000 * CTime::ticksToSecond(endTime - startTime)));
 }
 
 // ***************************************************************************
@@ -3105,7 +3109,7 @@ CDBCtrlSheet	*CSPhraseManager::getMemorySlotCtrl(uint memorySlot)
 
 	// Get the ctrl
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	return dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryCtrlBase + toString(memorySlot)));	
+	return dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryCtrlBase + toString(memorySlot)));
 }
 
 // ***************************************************************************
@@ -3116,12 +3120,12 @@ CDBCtrlSheet	*CSPhraseManager::getMemoryAltSlotCtrl(uint memorySlot)
 
 	// Get the ctrl
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	return dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryAltCtrlBase + toString(memorySlot)));	
+	return dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryAltCtrlBase + toString(memorySlot)));
 }
 
 // ***************************************************************************
 void	CSPhraseManager::updateMemoryCtrlState(uint memorySlot)
-{	
+{
 	CDBCtrlSheet	*ctrl= getMemorySlotCtrl(memorySlot);
 	CDBCtrlSheet	*ctrlAlt= getMemoryAltSlotCtrl(memorySlot);
 	if(ctrl)
@@ -4508,10 +4512,10 @@ void		CSPhraseManager::getPhraseSectionBoundFromSkillFilter(sint &minSectionId, 
 
 // ***************************************************************************
 sint32 CSPhraseManager::getSheetFromPhrase(const CSPhraseCom &phrase) const
-{		
-	TPhraseToSheet::const_iterator it = _PhraseToSheet.find(phrase);		
+{
+	TPhraseToSheet::const_iterator it = _PhraseToSheet.find(phrase);
 	if (it == _PhraseToSheet.end()) return 0;
-	return it->second;	
+	return it->second;
 }
 
 // ***************************************************************************
@@ -4539,33 +4543,33 @@ uint32 CSPhraseManager::getTotalActionMalus(const CSPhraseCom &phrase) const
 // ***************************************************************************
 CCDBNodeLeaf	*CSPhraseManager::getRegenTickRangeDbLeaf(uint powerIndex) const
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();	
-	CCDBNodeLeaf	*dbLeaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FLAGS:BRICK_TICK_RANGE:%d:TICK_RANGE", (int) powerIndex), false);		
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CCDBNodeLeaf	*dbLeaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FLAGS:BRICK_TICK_RANGE:%d:TICK_RANGE", (int) powerIndex), false);
 	return dbLeaf;
 }
 
 // ***************************************************************************
 CTickRange CSPhraseManager::getRegenTickRange(uint powerIndex) const
 {
-	CTickRange tickRange;	
+	CTickRange tickRange;
 	CCDBNodeLeaf	*dbLeaf = getRegenTickRangeDbLeaf(powerIndex);
 	if (dbLeaf)
-	{		
+	{
 		tickRange.StartTick = (NLMISC::TGameCycle) dbLeaf->getValue32();
 		tickRange.EndTick = (NLMISC::TGameCycle) (((uint64) dbLeaf->getValue64()) >> 32);
-	}	
+	}
 	return tickRange;
 }
 
 // ***************************************************************************
 void CSPhraseManager::setRegenTickRange(uint powerIndex, const CTickRange &tickRange)
-{	
+{
 	CCDBNodeLeaf	*dbLeaf = getRegenTickRangeDbLeaf(powerIndex);
 	if (dbLeaf)
-	{	
+	{
 		uint64 value = uint64(tickRange.StartTick) | (uint64(tickRange.EndTick) << 32);
 		dbLeaf->setValue64(value);
-	}		
+	}
 }
 
 
@@ -4577,7 +4581,7 @@ int CSPhraseComAdpater::luaGetCastTime(CLuaState &ls)
 		ls.push(0.0);
 		return 1;
 	}
-	CSPhraseManager *pPM = CSPhraseManager::getInstance();	
+	CSPhraseManager *pPM = CSPhraseManager::getInstance();
 	float castTime;
 	float castTimeMalus;
 	pPM->getPhraseCastTime(Phrase, pPM->getTotalActionMalus(Phrase), castTime, castTimeMalus);
@@ -4774,7 +4778,7 @@ int CSPhraseComAdpater::luaIsPowerPhrase(CLuaState &ls)
 
 // ***************************************************************************
 int CSPhraseComAdpater::luaGetRegenTime(CLuaState &ls)
-{	
+{
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
 	ls.push((sint)pPM->getRegenTime(Phrase));
 	return 1;
