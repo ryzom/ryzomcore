@@ -117,6 +117,8 @@ void	CSPhraseCom::serial(NLMISC::IStream &impulse)
 		// write
 		impulse.serialCont(compBricks);
 	}
+
+	impulse.serial(IconIndex);
 }
 
 // ***************************************************************************

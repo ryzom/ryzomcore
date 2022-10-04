@@ -1,0 +1,12 @@
+<generator header_tag="SPM_MODULE_ITF_H">
+
+	<include file="nel/misc/sstring.h"/>
+	<include file="nel/net/module_message.h"/>
+	<include file="server_patch_types.h"/>
+
+	<namespace name="PATCHMAN">
+
+
+	</namespace>
+
+</generator>

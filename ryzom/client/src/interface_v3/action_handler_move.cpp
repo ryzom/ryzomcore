@@ -35,6 +35,7 @@ using namespace NLMISC;
 #include "../actions_client.h"
 #include "../entities.h"
 #include "interface_manager.h"
+#include "ingame_database_manager.h"
 #include "action_handler_tools.h"
 #include "nel/gui/ctrl_base_button.h"
 
@@ -118,6 +119,15 @@ public:
 	{
 		// Moving Break the Follow Mode
 		UserEntity->disableFollow();
+
+		// check if speed factor is zero, and if yes, notify the player
+		if (!Actions.valide("turn_left") && !Actions.valide("turn_right") && !IngameDbMngr.initInProgress() && !UserEntity->isSit())
+		{
+			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
+			if (pNodeLeaf && pNodeLeaf->getValue64() == 0)
+				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiSpeedFactorZero"), "CHK");
+		}
+		
 		UserEntity->moveTo(CLFECOMMON::INVALID_SLOT, 0.0, CUserEntity::None);
 	}
 };
@@ -178,6 +188,17 @@ class CAHToggleLight: public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHToggleLight, "toggle_light");
+
+// ------------------------------------------------------------------------------------------------
+class CAHToggleLightOn: public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		UserEntity->lightOn();
+	}
+};
+REGISTER_ACTION_HANDLER (CAHToggleLightOn, "light_on");
+
 
 // ------------------------------------------------------------------------------------------------
 class CAHFreeMouse : public IActionHandler

@@ -1,0 +1,47 @@
+// This file is used to test the compiler error returns.
+spawnAll(;
+toto.spawnAll(;
+spawnAll);
+toto.spawnAll);
+toto=(1+1;
+toto=1+1);
+toto+=(1+1;
+toto/=1+1);
+toto=(1*1;
+toto=1*1);
+toto=(1*(1-2);
+toto=1);
+spawnAll();
+spawnAll();
+spawnAll();
+toto.spawnAll();
+spawnAll(;
+()newNpcChildGroup($group,$state_machine_boss $spawnzone);
+()newNpcChildGroup($group,$state_machine_boss,$spawnzone;
+()newNpcChildGroup $group,$state_machine_boss,$spawnzone);
+()setEvent("toto");
+()setEvent(1+2);
+if (0 == "toto")
+	toto = 2;
+if (0 == "toto"
+{
+	toto = 2;
+}
+toto = "titi" - 2;
+toto = 2 - "tutu";
+toto = "titi" * 2;
+toto = 2 / "tutu";
+switch ("toto")
+{
+	case 0:
+		toto =0;
+	case "tutu":
+		toto =0;
+}
+switch (2)
+{
+	case 0:
+		toto =0;
+	case "tutu":
+		toto =0;
+}

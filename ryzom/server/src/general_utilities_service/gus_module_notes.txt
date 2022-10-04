@@ -1,0 +1,97 @@
+ToDo:
+-----
+- need to reorganise the project file to make it possible to add new systems without loosing project organisation
+
+
+EXAMPLE MODULE:
+---------------
+
+/** \file ec_event_chat.cpp
+ *
+ * $id$
+ *
+ */
+
+//-----------------------------------------------------------------------------
+// includes
+//-----------------------------------------------------------------------------
+
+// game share
+#include "game_share/utils.h"
+
+// local
+#include "gus_module_manager.h"
+
+
+//-------------------------------------------------------------------------------------------------
+// namespaces
+//-------------------------------------------------------------------------------------------------
+
+using namespace std;
+using namespace NLMISC;
+using namespace NLNET;
+using namespace GUS;
+
+
+//-----------------------------------------------------------------------------
+// class CEventChat
+//-----------------------------------------------------------------------------
+
+class CEventChat: public GUS::IModule
+{
+public:
+	// ISession specialisation implementation
+	bool initialiseModule(const NLMISC::CSString& rawArgs);
+
+	NLMISC::CSString getState() const;
+	const char* getName() const;
+	const char* getParameters() const;
+	void displayModule() const;
+
+public:
+	// remaining public interface
+	CEventChat();
+
+private:
+};
+
+
+//-----------------------------------------------------------------------------
+// methods CEventChat
+//-----------------------------------------------------------------------------
+
+CEventChat::CEventChat()
+{
+}
+
+bool CEventChat::initialiseModule(const NLMISC::CSString& rawArgs)
+{
+	return true;
+}
+
+NLMISC::CSString CEventChat::getState() const
+{
+	return getName();
+}
+
+const char* CEventChat::getName() const
+{
+	return "EC";
+}
+
+const char* CEventChat::getParameters() const
+{
+	return "";
+}
+
+void CEventChat::displayModule() const
+{
+}
+
+
+//-----------------------------------------------------------------------------
+// CEventChat registration
+//-----------------------------------------------------------------------------
+
+REGISTER_GUS_MODULE(CEventChat,"EC")
+

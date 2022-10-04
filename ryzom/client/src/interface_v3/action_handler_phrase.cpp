@@ -524,6 +524,46 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerPhraseChangeName, "phrase_change_name");
 
+// ***************************************************************************
+class CHandlerPhraseSelectIcon : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
+	{
+		// pCaller == ui:interface:phrase_composition:header_opened:spell_view
+		CDBGroupBuildPhrase	*buildGroup= dynamic_cast<CDBGroupBuildPhrase*>(pCaller->getParent());
+		if(!buildGroup)
+			return;
+
+		CHandlerPhraseValidateBrick::BuildPhraseGroup = buildGroup;
+
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId( CDBGroupBuildPhrase::BrickIconSelectionModal ) );
+		if(group)
+			CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerPhraseSelectIcon, "phrase_select_icon");
+
+// ***************************************************************************
+class CHandlerPhraseSetIcon : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &sParams)
+	{
+		if (!CHandlerPhraseValidateBrick::BuildPhraseGroup)
+			return;
+
+		string s = getParam(sParams, "index");
+		uint8 index;
+		if (fromString(s, index))
+		{
+			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:ICON:%d:INDEX", index));
+			if (node)
+				CHandlerPhraseValidateBrick::BuildPhraseGroup->setPhraseIcon(node->getValue32());
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerPhraseSetIcon, "phrase_set_icon");
 
 // ***************************************************************************
 /*
@@ -764,7 +804,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	string src = getParam(Params, "src");
 	CDBCtrlSheet *pCSSrc;
 	CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-	
+
 	// NB: THIS IS UGLY BUT WORKS BECAUSE Memory ctrls are first initialized as SPhrase (branchname init)
 
 	// type check
@@ -788,7 +828,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	sint32 dstMacroId= pCSDst->getMacroId();
 
 	if (src.empty() && (CHandlerPhraseMemoryCopy::haveLastPhraseElement))
-	{		
+	{
 		// get the slot ids from save
 		srcIsMacro= CHandlerPhraseMemoryCopy::isMacro;
 		srcPhraseId= CHandlerPhraseMemoryCopy::sPhraseId;
@@ -818,7 +858,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	{
 		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
-		
+
 		// type check
 		if (pCSSrc == NULL) return;
 		// The src must be a phraseid, a phrasesheet, or a macro droped
@@ -828,7 +868,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 		srcIsMacro= pCSSrc->isMacro();
 		srcPhraseId= pCSSrc->getSPhraseId();
 		srcMacroId= pCSSrc->getMacroId();
-		
+
 
 		// If the src comes not from a memory
 		if(!pCSSrc->isSPhraseIdMemory() && !pCSSrc->isMacroMemory())
@@ -898,7 +938,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 					        srcMemoryLine = pPM->getSelectedMemoryLineDB();
 					else
 					        srcMemoryLine = pPM->getSelectedMemoryAltLineDB();
-					
+
 					// memorize dst into src
 					memorizePhraseOrMacro(srcMemoryLine, srcMemoryIndex, dstIsMacro, dstPhraseId, dstMacroId);
 					// memorize src into dst
@@ -926,7 +966,7 @@ void CHandlerMemorizePhraseOrMacro::memorizePhraseOrMacro(sint32 memoryLine, uin
 
 	if (memoryLine<0)
 	        return;
-	
+
 	if(isMacro)
 	{
 		pPM->memorizeMacro(memoryLine, memoryIndex, macroId);
@@ -1041,7 +1081,7 @@ public:
 
 		// is alternative action bar
 		bool isMain = pCSDst->isShortCut();
-		
+
 		// get the memory index
 		uint memoryIndex = pCSDst->getIndexInDB();
 
@@ -1084,7 +1124,7 @@ public:
 		// Ok, the user try to forget a phrase slot
 		CSPhraseManager	*pPM = CSPhraseManager::getInstance();
 
-		
+
 		// get params
 		bool isMain;
 		fromString(getParam(Params, "isMain"), isMain);
@@ -1102,7 +1142,7 @@ public:
 		        memoryLine = pPM->getSelectedMemoryAltLineDB();
 		if (memoryLine<0)
 		        return;
-		
+
 		if (isMacro)
 		{
 			pPM->forgetMacro(memoryLine, memoryIndex);
@@ -1245,18 +1285,16 @@ public:
 							// VERY important if previous MoveTo was a SPhrase MoveTo (because cancelClientExecute() must be called)
 							UserEntity->resetAnyMoveTo();
 
-							// Move to targetted source
-							if (target)
-								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
-
 							// start client execution
 							pPM->clientExecute(memoryLine, memoryIndex, cyclic);
 
-							if (!target)
-							{
-								// inform Server of phrase cast
+							// Move to targetted source or inform Server of phrase cast
+							// If target is close, then sendExecuteToServer is called from extractRM()
+							// If target is far, then client executes move-to-target first, and then calls extractRM()
+							if (target)
+								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
+							else
 								pPM->sendExecuteToServer(memoryLine, memoryIndex, cyclic);
-							}
 						}
 					}
 					else
@@ -1449,6 +1487,22 @@ public:
 };
 REGISTER_ACTION_HANDLER(CHandlerPhraseCancelCast, "phrase_cancel_cast");
 
+// ***************************************************************************
+/** Called to cancel a Phrase link
+ */
+class CHandlerPhraseCancelCastNext: public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		CSPhraseManager	*pPM= CSPhraseManager::getInstance();
+		UserEntity->cancelAllPhrases();
+		pPM->cancelClientExecute(true);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerPhraseCancelCastNext, "phrase_cancel_cast_next");
+
+
 
 // ***************************************************************************
 /// Called when one of the BRICK_TICK_RANGE has changed
@@ -1579,6 +1633,8 @@ public:
 				pPM->setBookFilter(BRICK_TYPE::UNKNOWN, (SKILLS::ESkills)index);
 			else
 				pPM->setBookFilter(BRICK_TYPE::UNKNOWN, SKILLS::unknown);
+
+			CLuaManager::getInstance().executeLuaScript(toString("game:updatePhraseBookProgression(%i)", index));
 		}
 	}
 };
@@ -1602,7 +1658,8 @@ public:
 			{
 				CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 				sint	val= (sint32)value.getInteger();
-				clamp(val, 0, MEM_SET_TYPES::NumMemories-1);
+				// first half of memorized stanza sets
+				clamp(val, 0, MEM_SET_TYPES::NumMemories / 2 - 1);
 				pPM->selectMemoryLineDB(val);
 			}
 		}
@@ -1626,8 +1683,11 @@ public:
 			else
 			{
 				CSPhraseManager		*pPM= CSPhraseManager::getInstance();
-				sint	val= (sint32)value.getInteger();
-				clamp(val, 0, MEM_SET_TYPES::NumMemories-1);
+				// second half of memorized stanza sets
+				sint	minValue = MEM_SET_TYPES::NumMemories / 2;
+				sint	maxValue = MEM_SET_TYPES::NumMemories - 1;
+				sint	val = (sint32)value.getInteger() + minValue;
+				clamp(val, minValue, maxValue);
 				pPM->selectMemoryLineDBalt(val);
 			}
 		}

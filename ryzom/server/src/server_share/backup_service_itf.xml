@@ -1,0 +1,56 @@
+<generator header_tag="BACKUP_SERVICE_ITF">
+
+	<include file="nel/misc/entity_id.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="BS">
+
+		<!-- ############################################################## -->
+		<module_interface name="CBackupService">
+			<doc line="Interface implemented by BS to receive file save and file requests"/>
+
+			<!-- ========================================================== -->
+			<method name="saveFile" msg="BSSF">
+				<doc line="A module ask to save a file in the backup repository"/>
+
+				<param type="std::string"		name="fileName" byref="true"/>
+				<param type="NLNET::TBinBuffer"	name="data"		byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="loadFile" msg="BSLF">
+				<doc line="A module ask to load a file"/>
+
+				<param type="std::string"		name="fileName" byref="true"/>
+				<param type="uint32"			name="requestId"/>
+			</method>
+
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<module_interface name="CBackupServiceClient">
+			<doc line="Interface for client of backup service module"/>
+
+			<!-- ========================================================== -->
+			<method name="loadFileResult" msg="BSLFR">
+				<doc line="The BS return for a load file request"/>
+
+				<param type="uint32"			name="requestId"/>
+				<param type="std::string"		name="fileName" byref="true"/>
+				<param type="uint32"			name="fileTimeStamp"/>
+				<param type="NLNET::TBinBuffer"	name="data"		byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="fileUpdate" msg="BSFU">
+				<doc line="A file listened by the client have been changed, BS resend the file content"/>
+
+				<param type="std::string"						name="fileName" byref="true"/>
+				<param type="std::vector &lt; std::string &gt;"	name="content"	byref="true" serial="Cont"/>
+			</method>
+
+		</module_interface>
+
+	</namespace>
+</generator>
+

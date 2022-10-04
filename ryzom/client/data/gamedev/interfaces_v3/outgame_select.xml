@@ -1,0 +1,1327 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
+
+<!-- ***************** -->
+<!-- *   PROCEDURES  * -->
+<!-- ***************** -->
+
+<variable entry="UI:TEMP:CHARSELCLICK" type="sint64" value="-1"/>
+<variable entry="UI:TEMP:CHARSELOPT1" type="sint64" value="0"/>
+<variable entry="UI:TEMP:CHARSELOPT2" type="sint64" value="0"/>
+<variable entry="UI:TEMP:CHARSELDELCHAR" type="sint64" value="0"/>
+
+<variable entry="UI:TEMP:HAIRCUT" type="sint64" value="1" />
+<variable entry="UI:TEMP:RAND" type="sint64" value="1" />
+<variable entry="UI:TEMP:CHAR3DFYROS:PEOPLE" type="sint64" value="0" />
+<variable entry="UI:TEMP:CHAR3DMATIS:PEOPLE" type="sint64" value="1" />
+<variable entry="UI:TEMP:CHAR3DTRYKER:PEOPLE" type="sint64" value="2" />
+<variable entry="UI:TEMP:CHAR3DZORAI:PEOPLE" type="sint64" value="3" />
+
+
+<!-- ********************** -->
+<!-- *  RESET APPEARANCE  * -->
+<!-- ********************** -->
+<proc id="proc_backup_species">
+
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:TATTOO|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:HATCOLOR|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:EYESCOLOR|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:HAIRCUT|value=2" />
+	
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:CHARACTERHEIGHT|value=7" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:TORSOWIDTH|value=7" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:ARMSWIDTH|value=7" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:LEGSWIDTH|value=7" />
+
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:WEAPONRIGHTHAND|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:WEAPONLEFTHAND|value=0" />
+
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:JACKETCOLOR|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:ARMCOLOR|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPB:HANDSCOLOR|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:TROUSERCOLOR|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPB:FEETCOLOR|value=0" />
+	
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET1|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET2|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET3|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET4|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET5|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET6|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET7|value=0" />
+
+	<action handler="proc"	params="init_backup_fyros" />
+	<action handler="proc"	params="init_backup_matis" />
+	<action handler="proc"	params="init_backup_tryker" />
+	<action handler="proc"	params="init_backup_zorai" />
+	
+</proc>
+
+<proc id="init_backup_fyros">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:PEOPLE|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_medium01.sitem','HEAD')" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3DFYROS|dbsrc=UI:TEMP:CHAR3D" />
+</proc>
+
+<proc id="init_backup_matis">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:PEOPLE|value=1" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_medium01.sitem','HEAD')" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3DMATIS|dbsrc=UI:TEMP:CHAR3D" />
+</proc>
+
+<proc id="init_backup_tryker">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:PEOPLE|value=2" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_medium01.sitem','HEAD')" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3DTRYKER|dbsrc=UI:TEMP:CHAR3D" />
+</proc>
+
+<proc id="init_backup_zorai">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:PEOPLE|value=3" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_medium01.sitem','HEAD')" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3DZORAI|dbsrc=UI:TEMP:CHAR3D" />
+</proc>
+
+
+
+<!-- called when we click on a slot -->
+<proc id="proc_click_slot">
+	<action handler="play_sound"	params="name=charsel_slot_click" />
+	
+	<action handler="reset_pushed"	params="dblink=ui:outgame:character_selection:option1" />
+	<action handler="reset_pushed"	params="dblink=ui:outgame:character_selection:option2" />
+	<action handler="set" 		 	params="dblink=UI:TEMP:CHARSELOPT1|value=0"/>
+	<action handler="set" 		 	params="dblink=UI:TEMP:CHARSELOPT2|value=0"/>
+	<action handler="set" 		 	params="target_property=ui:outgame:character_selection:option1:play:pushed|value=1"/>
+	<action handler="set" 		 	params="target_property=ui:outgame:character_selection:option2:manualy:pushed|value=1"/>
+	
+	<action handler="set"	params="target_property=ui:outgame:character_selection:char3d:char:anim|value=0" />
+	<action handler="set"	params="target_property=ui:outgame:character_selection:option1:active|value=1" />
+	<action handler="set"	params="target_property=ui:outgame:character_selection:option2:active|value=1" />
+	<action handler="set"	params="target_property=ui:outgame:character_selection:next:active|value=1" />
+	<action handler="copy"	params="dbdst=UI:TEMP:CHARSELCLICK|dbsrc=UI:NEW_SELECTED_SLOT" />
+	<action handler="set"	params="dblink=UI:NEW_SELECTED_SLOT|@0" />
+	<action handler="proc"	cond="eq(@UI:TEMP:CHARSELCLICK,-1)" params="proc_click_slot_init|@0" />
+	<action handler="proc"	cond="ne(@UI:TEMP:CHARSELCLICK,-1)" params="proc_click_slot_normal|@0" />
+	<action handler="set"	params="dblink=UI:SELECTED_SLOT|@0" />
+	
+</proc>
+
+<proc id="proc_select_init_right_screen" >
+	<action handler="get_slot"	params="prop=title	|target=ui:outgame:character_selection:titles:title_txt:uc_hardtext|slot=@UI:NEW_SELECTED_SLOT" />
+<!--	<action handler="get_slot"	params="prop=job	|target=ui:outgame:character_selection:titles:job_txt:uc_hardtext|slot=@UI:NEW_SELECTED_SLOT" /> 
+	<action handler="get_slot"	params="prop=level	|target=ui:outgame:character_selection:titles:level_txt:uc_hardtext|slot=@UI:NEW_SELECTED_SLOT" />-->
+	<action handler="get_slot"	params="prop=pos	|target=ui:outgame:character_selection:titles:pos_txt:textid|slot=@UI:NEW_SELECTED_SLOT" />
+	<action handler="get_slot"	params="prop=name	|target=ui:outgame:character_selection:titles:name_txt:uc_hardtext|slot=@UI:NEW_SELECTED_SLOT" />
+	<action handler="reset_camera"		params="target=ui:outgame:character_selection:char3d:cam" />
+	<action handler="set_db_from_slot"	params="dblink=UI:TEMP:CHAR3D|slot=@UI:NEW_SELECTED_SLOT" />
+	<action handler="proc"				params="proc_charsel_init3d" />
+</proc>
+
+<!-- called when we click on a slot for the first time -->
+<proc id="proc_click_slot_init">
+	<action handler="reset_pushed"	params="dblink=ui:outgame:character_selection:option1" />
+	<action handler="reset_pushed"	params="dblink=ui:outgame:character_selection:option2" />
+	<action handler="set" 		 	params="dblink=UI:TEMP:CHARSELOPT1|value=0"/>
+	<action handler="set" 		 	params="dblink=UI:TEMP:CHARSELOPT2|value=0"/>
+	<action handler="set" 		 	params="target_property=ui:outgame:character_selection:option1:play:pushed|value=1"/>
+	<action handler="set" 		 	params="target_property=ui:outgame:character_selection:option2:manualy:pushed|value=1"/>
+	
+	<action handler="anim_start" cond="isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT)" params="anim=anim_init_empty" />
+	
+	<action handler="proc" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))"
+			params="proc_select_init_right_screen" />
+	
+	<action handler="anim_start" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="anim=anim_init_full" />
+</proc>
+
+<!-- called when we click on a slot and we are already initialized
+	if the last slot is empty and the new one too do nothing
+	if the last slot is full and the new one is empty call anim full to empty 
+	if the last slot is empty and the new one is full initialize the 3D view then call the anim empty to full
+	if the last slot is full and the new one is full call anim full to empty then proc empty to full (proc_click_slot2)
+	-->
+<proc id="proc_click_slot_normal">
+
+	<action handler="anim_start" cond="and(not(isCharSelSlotEmpty(@UI:SELECTED_SLOT)),isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" 
+								params="anim=anim_char_sel_full_to_empty" />
+
+	<action handler="proc" cond="and(isCharSelSlotEmpty(@UI:SELECTED_SLOT),not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT)))" 
+			params="proc_select_init_right_screen" />
+
+	<action handler="anim_start"		cond="and(isCharSelSlotEmpty(@UI:SELECTED_SLOT),not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT)))" 
+										params="anim=anim_char_sel_empty_to_full" />
+	<action handler="anim_start" cond="and(not(isCharSelSlotEmpty(@UI:SELECTED_SLOT)),not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT)))" 
+								params="anim=anim_char_sel_full_to_full_1" />
+</proc>
+
+<!-- called at the end of the first animation part of the full_to_full anim
+	used to change at the end of full_to_full_1 anim the 3D view of the character and launch the second part
+	-->
+<proc id="proc_click_slot2">
+	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=title	|target=ui:outgame:character_selection:titles:title_txt:uc_hardtext|dbslot=UI:NEW_SELECTED_SLOT" />
+<!--	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=job	|target=ui:outgame:character_selection:titles:job_txt:uc_hardtext|dbslot=UI:NEW_SELECTED_SLOT" />
+	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=level	|target=ui:outgame:character_selection:titles:level_txt:uc_hardtext|dbslot=UI:NEW_SELECTED_SLOT" />-->
+	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=pos	|target=ui:outgame:character_selection:titles:pos_txt:textid|dbslot=UI:NEW_SELECTED_SLOT" />
+	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="prop=name	|target=ui:outgame:character_selection:titles:name_txt:uc_hardtext|dbslot=UI:NEW_SELECTED_SLOT" />
+	<action handler="reset_camera"	cond="not(isCharSelSlotEmpty(@UI:NEW_SELECTED_SLOT))" params="target=ui:outgame:character_selection:char3d:cam" />
+	<action handler="set_db_from_slot" params="dblink=UI:TEMP:CHAR3D|slot=@UI:SELECTED_SLOT" />
+	<action handler="proc" params="proc_charsel_init3d" />
+	<action handler="anim_start" params="anim=anim_char_sel_full_to_full_2" />
+</proc>
+
+<!-- called when we click on the next button (just call the outro anim and after call proc_choice_next_screen_when_outro_finished -->
+<proc id="proc_choice_next_screen">
+	<action handler="play_sound" params="name=generic_next_click" />
+	<!--<action handler="proc" params="proc_select_close_help2" />-->
+		
+	<action handler="anim_start" params="anim=anim_char_sel_outro" />
+</proc>
+
+<!-- choose if we have to launch the game or go to character creation -->
+
+<proc id="proc_choice_next_screen_when_outro_finished">
+	<action handler="anim_start" cond="and(isCharSelSlotEmpty(@UI:SELECTED_SLOT),eq(@UI:TEMP:CHARSELOPT2,0))" 		params="anim=anim_char_sel_outro2" />
+	<action handler="anim_start" cond="and(isCharSelSlotEmpty(@UI:SELECTED_SLOT),eq(@UI:TEMP:CHARSELOPT2,1))" 		params="anim=anim_char_sel_outro2" />
+	<action handler="anim_start" cond="and(not(isCharSelSlotEmpty(@UI:SELECTED_SLOT)),eq(@UI:TEMP:CHARSELOPT1,0))" 	params="anim=anim_char_sel_outro_char" />
+	<action handler="anim_start" cond="and(not(isCharSelSlotEmpty(@UI:SELECTED_SLOT)),eq(@UI:TEMP:CHARSELOPT1,2))" 	params="anim=anim_char_sel_outro_char" />
+
+	<action handler="anim_start" cond="and(not(isCharSelSlotEmpty(@UI:SELECTED_SLOT)),eq(@UI:TEMP:CHARSELOPT1,1))" 	params="anim=anim_char_sel_delete_title" />
+</proc>
+
+
+<proc id="proc_choice_next_screen_when_outro_finished2">
+	<action handler="set" cond="and(isCharSelSlotEmpty(@UI:SELECTED_SLOT),eq(@UI:TEMP:CHARSELOPT2,0))" params="dblink=UI:CURRENT_SCREEN|value=%screen_specie" />
+	<action handler="proc" cond="and(isCharSelSlotEmpty(@UI:SELECTED_SLOT),eq(@UI:TEMP:CHARSELOPT2,1))" params="proc_charsel_randomcreate" />
+	<action handler="stop_music"  cond="and(not(isCharSelSlotEmpty(@UI:SELECTED_SLOT)),eq(@UI:TEMP:CHARSELOPT1,0))" params="name=music_intro" />
+	<action handler="launch_game" cond="and(not(isCharSelSlotEmpty(@UI:SELECTED_SLOT)),eq(@UI:TEMP:CHARSELOPT1,0))" params="slot=@UI:SELECTED_SLOT" />
+	<!--<action handler="proc" cond="and(not(isCharSelSlotEmpty(@UI:SELECTED_SLOT)),eq(@UI:TEMP:CHARSELOPT1,2))" params="proc_charsel_renamechar" />-->
+</proc>
+
+<proc id="proc_choice_back_screen" >
+	<action handler="set" params="dblink=UI:TEMP:SKIP_INTRO|value=0" />
+	<action handler="set" params="dblink=UI:CURRENT_SCREEN|value=%screen_intro" />
+</proc>
+
+<proc id="proc_charsel_randomcreate">
+
+	<!-- INI  TS -->
+	<action handler="set" params="dblink=UI:TEMP:RAND|value=1" />
+	<action handler="set" params="dblink=UI:TEMP:HAIRCUT|value=rand(0,6)" />
+
+	<!-- SPECIE AND SEX -->
+	<action handler="proc" params="proc_rand_specie" />
+
+	<!-- BODY -->
+	<action handler="proc" params="proc_rand_appear" />	
+				
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:JACKETMODEL|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:ARMMODEL|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPB:HANDSMODEL|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:TROUSERMODEL|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPB:FEETMODEL|value=0" />
+	
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:WEAPONRIGHTHAND|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:WEAPONLEFTHAND|value=0" />
+
+	<!-- RANDOM CAREER -->
+
+	<action handler="proc" params="export_fyros" />
+	<action handler="proc" params="export_matis" />
+	<action handler="proc" params="export_tryker" />
+	<action handler="proc" params="export_zorai" />
+
+	<action handler="set" params="dblink=UI:CURRENT_SCREEN|value=%screen_summary" />
+
+	
+</proc>
+
+<proc id="convert_careerclickjob_to_char3dcareer">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:CAREER|value=getRoleId('Refugee')" />
+</proc>
+
+<proc id="proc_rand_career2">
+	<action handler="set" params="dblink=UI:TEMP:CAREERCLICKJOB|value=rand(1,3)" />
+	<action handler="proc" params="convert_careerclickjob_to_char3dcareer" />
+</proc>
+
+<proc id="proc_rand_career">
+	<action handler="repeatuntil" params="proc=proc_rand_career2|cond=isCareerActive(@UI:TEMP:CHAR3D:CAREER)" />
+	<action handler="disp_info" params="str='isCareerActive(@UI:TEMP:CHAR3D:CAREER) = '|val=isCareerActive(@UI:TEMP:CHAR3D:CAREER)" />
+	<action handler="disp_info" params="str='@UI:TEMP:CHAR3D:CAREER = '|val=@UI:TEMP:CHAR3D:CAREER" />
+	<action handler="proc" params="proc_update_career" />
+</proc>
+
+<proc id="proc_update_career">
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="proc_set_base_caracs_fy" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="proc_set_base_caracs_ma" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="proc_set_base_caracs_tr" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="proc_set_base_caracs_zo" />
+	
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="proc_set_add_caracs_fy" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="proc_set_add_caracs_ma" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="proc_set_add_caracs_tr" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="proc_set_add_caracs_zo" />
+	
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D:CARACS|dbsrc=UI:TEMP:CARACS" />
+
+	<action handler="proc" params="convert_careerclickjob_to_char3dcareer" />
+</proc>
+
+<proc id="proc_rand_specie2">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:PEOPLE|value=rand(0,3)" />
+</proc>
+
+<proc id="proc_rand_specie">
+	<action handler="repeatuntil" params="proc=proc_rand_specie2|cond=isPeopleActive(@UI:TEMP:CHAR3D:PEOPLE)" />
+	<action handler="proc" params="proc_change_haircut" />
+</proc>
+	
+<proc id="proc_change_haircut">
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),eq(@UI:TEMP:HAIRCUT,0))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_shave01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),eq(@UI:TEMP:HAIRCUT,1))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_short01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),eq(@UI:TEMP:HAIRCUT,2))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_short02.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),eq(@UI:TEMP:HAIRCUT,3))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_medium01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),eq(@UI:TEMP:HAIRCUT,4))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_medium02.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),eq(@UI:TEMP:HAIRCUT,5))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_medium03.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),eq(@UI:TEMP:HAIRCUT,6))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_long01.sitem','HEAD')" />
+
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),eq(@UI:TEMP:HAIRCUT,0))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_shave01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),eq(@UI:TEMP:HAIRCUT,1))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_short01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),eq(@UI:TEMP:HAIRCUT,2))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_short02.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),eq(@UI:TEMP:HAIRCUT,3))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_medium01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),eq(@UI:TEMP:HAIRCUT,4))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_medium02.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),eq(@UI:TEMP:HAIRCUT,5))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_long01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),eq(@UI:TEMP:HAIRCUT,6))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_long02.sitem','HEAD')" />
+
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),eq(@UI:TEMP:HAIRCUT,0))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_shave01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),eq(@UI:TEMP:HAIRCUT,1))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_short01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),eq(@UI:TEMP:HAIRCUT,2))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_short02.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),eq(@UI:TEMP:HAIRCUT,3))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_short03.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),eq(@UI:TEMP:HAIRCUT,4))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_medium01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),eq(@UI:TEMP:HAIRCUT,5))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_medium02.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),eq(@UI:TEMP:HAIRCUT,6))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_long01.sitem','HEAD')" />
+
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),eq(@UI:TEMP:HAIRCUT,0))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_shave01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),eq(@UI:TEMP:HAIRCUT,1))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_short01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),eq(@UI:TEMP:HAIRCUT,2))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_medium01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),eq(@UI:TEMP:HAIRCUT,3))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_medium02.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),eq(@UI:TEMP:HAIRCUT,4))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_medium03.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),eq(@UI:TEMP:HAIRCUT,5))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_long01.sitem','HEAD')" />
+	<action handler="set" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),eq(@UI:TEMP:HAIRCUT,6))" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_long02.sitem','HEAD')" />
+	
+</proc>
+
+<proc id="proc_rand_appear">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:SEX|value=not(@UI:TEMP:CHAR3D:VPA:SEX)" />
+	<!--
+	<action handler="proc" params="proc_rand_body" />	
+	<action handler="proc" params="proc_rand_face" />
+	<action handler="proc" params="proc_rand_colors" />
+	-->
+</proc>
+
+
+<proc id="proc_rand_body">
+
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:CHARACTERHEIGHT|value=rand(0,14)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:TORSOWIDTH|value=rand(0,14)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:ARMSWIDTH|value=rand(0,14)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:LEGSWIDTH|value=rand(0,14)" />
+</proc>
+
+<proc id="proc_rand_face">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET1|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET2|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET3|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET4|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET5|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET6|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:MORPHTARGET7|value=rand(0,7)" />
+	
+	<action handler="set" params="dblink=UI:TEMP:HAIRCUT|value=rand(0,6)" />
+
+	<action handler="proc" params="proc_change_haircut" />
+	
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:TATTOO|value=rand(0,31)" />
+</proc>
+
+<proc id="proc_rand_colors">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPC:EYESCOLOR|value=rand(0,6)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:HATCOLOR|value=rand(0,5)" />
+
+<!--	
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:JACKETCOLOR|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:ARMCOLOR|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPB:HANDSCOLOR|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:TROUSERCOLOR|value=rand(0,7)" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPB:FEETCOLOR|value=rand(0,7)" />
+-->
+</proc>
+
+
+
+
+<!-- Delete character -->
+<proc id="proc_charsel_deletechar">
+	<action handler="set" params="dblink=UI:TEMP:CHARSELDELCHAR|value=1"/>
+	<action handler="enter_modal" params="group=ui:outgame:charsel_delchar_confirm" />
+</proc>
+
+<proc id="proc_charsel_delchar_confirm_ok">
+	<action handler="play_sound" params="name=charsel_delok_click" />
+	<action handler="leave_modal" params="" />
+	<action handler="ask_delete_char" params="slot=@UI:SELECTED_SLOT" />
+</proc>
+
+<proc id="proc_charsel_delchar_confirm_ok2">
+	<action handler="set" params="dblink=UI:TEMP:CHARSELDELCHAR|value=0"/>
+	<action handler="anim_start" params="anim=anim_char_sel_delete" />
+</proc>
+
+<proc id="proc_charsel_test">
+	<action handler="proc" params="proc_charsel_delchar_confirm_ok2"
+		cond="and(eq(@UI:TEMP:CHARSELDELCHAR,1),eq(@UI:CURRENT_SCREEN, %screen_select),eq(@UI:SERVER_RECEIVED_CHARS,1))" />
+</proc>
+
+<!-- When we got the answer from server terminate delchar -->
+<link expr="depends(@UI:CURRENT_SCREEN,@UI:SERVER_RECEIVED_CHARS)" action="proc" params="proc_charsel_test" />
+	
+
+<proc id="proc_charsel_delchar_confirm_cancel">
+	<action handler="play_sound" params="name=charsel_delno_click" />
+	<action handler="leave_modal" params="" />
+	<action handler="anim_start" params="anim=anim_char_sel_delete" />
+</proc>
+
+<!-- Rename character -->
+<!--
+<proc id="proc_charsel_renamechar">
+	<action handler="get_slot" params="prop=name	|target=ui:outgame:charsel_renchar_confirm:ebname:eb:input_string|dbslot=UI:SELECTED_SLOT" />
+	<action handler="get_slot" params="prop=surname	|target=ui:outgame:charsel_renchar_confirm:ebsurname:eb:input_string|dbslot=UI:SELECTED_SLOT" />
+	<action handler="enter_modal" params="group=ui:outgame:charsel_renchar_confirm" />
+</proc>
+
+<proc id="proc_charsel_renchar_confirm_ok">
+	<action handler="leave_modal" params="" />
+	<action handler="ask_rename_char" params="dbslot=UI:SELECTED_SLOT|name=ui:outgame:charsel_renchar_confirm:ebname:eb:input_string|surname=ui:outgame:charsel_renchar_confirm:ebsurname:eb:input_string" />
+	<action handler="proc" params="active_char_sel" />
+</proc>
+
+<proc id="proc_charsel_renchar_confirm_cancel">
+	<action handler="leave_modal" params="" />
+	<action handler="proc" params="active_char_sel" />
+</proc>
+-->
+
+	
+
+<!-- Initialize the 3d view from the database -->
+<proc id="proc_charsel_init3d">
+
+	<action handler="set" params="target_property=ui:outgame:character_selection:logo_fy:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:logo_ma:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:logo_tr:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:logo_zo:active|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:titles:active|value=1" />
+	
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:WEAPONRIGHTHAND|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:WEAPONLEFTHAND|value=0" />
+	
+	
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="proc_charsel_init3d_fy" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="proc_charsel_init3d_ma" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="proc_charsel_init3d_tr" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="proc_charsel_init3d_zo" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:character_selection:char3d:back:near|value=2.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:character_selection:char3d:back:far|value=3.5" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:character_selection:char3d:back:posz|value=2.0" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:character_selection:char3d:back:near|value=1.5" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:character_selection:char3d:back:far|value=3.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:character_selection:char3d:back:posz|value=2.2" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:character_selection:char3d:back:near|value=2.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:character_selection:char3d:back:far|value=3.5" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:character_selection:char3d:back:posz|value=2.0" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:character_selection:char3d:back:near|value=3.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:character_selection:char3d:back:far|value=4.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:character_selection:char3d:back:posz|value=2.4" />
+	
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:char:posx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:char:posy|value=26.5"/>
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:SEX,0)" params="target_property=ui:outgame:character_selection:char3d:char:posz|value=0.0"/>
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:SEX,1)" params="target_property=ui:outgame:character_selection:char3d:char:posz|value=0.04"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:char:rotx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:char:roty|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:char:rotz|value=0.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:posx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:posy|value=23.5"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:tgtx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:tgty|value=26.5"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:shadow:posx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:shadow:posy|value=26.5"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:shadow:posz|value=0.85"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:posx|value=-0.4" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:posy|value=28.5" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:lgt:posx|value=0.4" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:lgt:posy|value=25.3" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:lgt:posz|value=2.48" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:lgt:colr|value=255" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:lgt:colg|value=255" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:lgt:colb|value=255" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:char:anim|value=0" />
+</proc>
+
+
+
+
+			<!-- fyros -->
+<proc id="proc_charsel_init3d_fy">
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:env:name|value='outgame_fyros.ig'"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:env:posz|value=-1.03"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:posz|value=2.3"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:tgtz|value=1.7"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:fov|value=50.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colr|value=255" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colg|value=128" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colb|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:logo_fy:active|value=1" />
+
+</proc>
+
+			<!-- matis -->
+<proc id="proc_charsel_init3d_ma">
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:env:name|value='outgame_matis.ig'"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:env:posz|value=0"/>
+
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:posz|value=2.3"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:tgtz|value=1.7"/>
+
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:fov|value=50.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colr|value=192" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colg|value=255" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colb|value=64" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:logo_ma:active|value=1" />
+</proc>
+
+			<!-- tryker -->
+<proc id="proc_charsel_init3d_tr">
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:env:name|value='outgame_tryker.ig'"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:env:posz|value=0"/>
+
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:posz|value=2.0"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:tgtz|value=1.6"/>
+
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:fov|value=45.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colr|value=64" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colg|value=255" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colb|value=255" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:logo_tr:active|value=1" />
+</proc>
+
+			<!-- zorai -->
+<proc id="proc_charsel_init3d_zo">
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:env:name|value='outgame_zorai.ig'"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:env:posz|value=0"/>
+
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:posz|value=2.4"/>
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:tgtz|value=1.9"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:cam:fov|value=60.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colr|value=255" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colg|value=128" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:back:colb|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:logo_zo:active|value=1" />
+</proc>
+
+<!-- activate character selection init from network and launch intro 
+	we have to setup alpha here if the init (click on a slot) is not done because alpha is not parsed but reflected 
+	-->
+<proc id="active_char_sel">
+	<action handler="proc" params="proc_backup_species" />
+	
+	<action handler="set" params="dblink=UI:NEW_SELECTED_SLOT|value=-1" />
+	<action handler="set" params="dblink=UI:SELECTED_SLOT|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:RAND|value=0" />
+	<action handler="reset_pushed" params="dblink=ui:outgame:character_selection:slots" />
+	<action handler="net_init_char_sel" params="slottexts=ui:outgame:character_selection:slots" />
+
+
+	<action handler="set" params="target_property=ui:outgame:character_selection:titles:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:bg_empty:alpha|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:options:alpha|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:option1:alpha|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:option2:alpha|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:next:alpha|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:option1:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:option2:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:option1:x|value=-176" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:option2:x|value=-176" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:x|value=sub(getprop('ui:outgame:character_selection:w'),224)" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:next:active|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:shadow:posx|value=0.0" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:shadow:posy|value=26.5" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:char3d:shadow:posz|value=1.0" />
+	
+	<action handler="anim_start" params="anim=anim_char_sel_intro" />
+</proc>
+
+<!-- OPTIONS -->
+<proc id="proc_option1" >
+	<action handler="play_sound" params="name=charsel_option_click" />
+	<action handler="set" params="dblink=UI:TEMP:CHARSELOPT1|@0"/>
+</proc>
+<proc id="proc_option2" >
+	<action handler="play_sound" params="name=charsel_option_click" />
+	<action handler="set" params="dblink=UI:TEMP:CHARSELOPT2|@0"/>
+</proc>
+
+<!--
+<proc id="proc_charsel_help" >
+	<action handler="play_sound" params="name=generic_help_click" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:help_box:active|value=1"/>
+</proc>
+
+<proc id="proc_select_close_help" >
+	<action handler="play_sound" params="name=generic_help_close_click" />
+	<action handler="set" params="target_property=ui:outgame:character_selection:help_box:active|value=0"/>
+</proc>
+
+<proc id="proc_select_close_help2" >
+	<action handler="set" params="target_property=ui:outgame:character_selection:help_box:active|value=0"/>
+</proc>
+-->
+
+<proc id="proc_quit" >
+	<action handler="play_sound" params="name=charsel_quit_click" />
+	<action handler="stop_music" params="name=music_intro" />
+	<action handler="quit_ryzom" />
+</proc>
+
+
+<!-- ***************** -->
+<!-- *   TEMPLATES   * -->
+<!-- ***************** -->
+
+<!-- a slot text is setup by net_init_char_sel action handler -->
+<template name="select_slot" posparent="parent" posref="TL TL" x="16" y="0" w="128" h="20" id="" >
+
+	<ctrl type="button" button_type="radio_button" id="slot#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="#w" h="#h"
+													color="98 121 55 255" col_over="255 255 255 255" col_pushed="98 121 55 255" 
+													tx_normal="button_default.tga" tx_over="button_default.tga" tx_pushed="button_default_pushed.tga"
+													onover="play_sound" params_over="name=charsel_slot_over"
+													onclick_l="proc" params_l="proc_click_slot|value=#id" render_layer="3"/>
+
+	<view type="text" id="text#id" posparent="slot#id" posref="ML ML" x="30" hardtext="uiEmptySlot" fontsize="14" />
+
+</template>
+
+<!-- Window Border -->
+<template name="window_border" posparent="parent">
+		<view type="bitmap" id="t" texture="border_hor.tga" posref="TM TM" posparent="#posparent" scale="true" sizeref="w" w="-2" h="1"/>
+		<view type="bitmap" id="b" texture="border_hor.tga" posref="BM BM" posparent="#posparent" scale="true" sizeref="w" w="-2" h="1"/>
+		<view type="bitmap" id="l" texture="border_ver.tga" posref="TL TL" posparent="#posparent" scale="true" sizeref="h" w="1" h="0" />
+		<view type="bitmap" id="r" texture="border_ver.tga" posref="TR TR" posparent="#posparent" scale="true" sizeref="h" w="1" h="0" />
+</template>
+
+<!-- ***************** -->
+<!-- * MODALS WINDOW * -->
+<!-- ***************** -->
+<!-- delete character -->
+<group type="modal" id="charsel_delchar_confirm" mouse_pos="false" escapable="false" exit_click_out="false" posref="MM ML" x="-394" w="224" h="64" y="24">
+
+	<view type="text" id="text" posref="TM TM" x="0" y="0" color="255 255 255 255" global_color="false" fontsize="16" shadow="true" hardtext="uiDelChar" />
+
+	<ctrl type="button" id="ok" button_type="push_button" posref="BM BL" x="2" y="6"
+			tx_normal="answer_valid.tga" tx_pushed="answer_valid.tga" tx_over="answer_over.tga" 
+			onover="play_sound" params_over="name=charsel_delok_over"
+			onclick_l="proc" params_l="proc_charsel_delchar_confirm_ok" global_color_normal="false" global_color_pushed="false" />
+
+	<ctrl type="button" id="cancel" button_type="push_button" posref="BM BR" x="-2" y="6"
+			tx_normal="answer_cancel.tga" tx_pushed="answer_cancel.tga" tx_over="answer_over.tga" 
+			onover="play_sound" params_over="name=charsel_delno_over"
+			onclick_l="proc" params_l="proc_charsel_delchar_confirm_cancel" global_color_normal="false" global_color_pushed="false" />	
+</group>
+
+<!-- rename character -->
+<!--
+<group type="modal" id="charsel_renchar_confirm" mouse_pos="false" escapable="false" exit_click_out="false" posref="MM MM" w="320" h="148">
+
+	<view type="bitmap" id="bg" sizeref="wh" posref="TL TL" x="0" y="0" texture="blank.tga" scale="true" color="0 0 0 192" global_color="false" />
+	<instance template="window_border" id="bord" posref="MM MM" />
+
+	<view type="text" id="title" posref="TL TL" x="4" y="-4" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="uiRenChar" />
+
+	<instance template="edit_box_widget" id="ebname" posparent="title" posref="BL TL" x="64" y="-48" w="128" onenter="" reset_focus_on_hide="false" prompt=" " max_num_chars="16" />
+	<view type="text" id="titname" posparent="ebname" posref="TL BL" x="0" y="8" hardtext="uiName" color="255 255 255 255" fontsize="12"/>
+
+	<instance template="edit_box_widget" id="ebsurname" posparent="ebname" posref="BL TL" x="0" y="-16" w="128" onenter="" reset_focus_on_hide="false" prompt=" " max_num_chars="16" />
+	<view type="text" id="titsurname" posparent="ebsurname" posref="TL BL" x="0" y="8" hardtext="uiSurName" color="255 255 255 255" fontsize="12"/>
+
+	<ctrl type="button" id="ok" button_type="push_button" posparent="ebsurname" posref="BR TR" y="-4"
+			tx_normal="w_answer_16_valid.tga" tx_pushed="w_answer_16_valid.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="proc" params_l="proc_charsel_renchar_confirm_ok" global_color_normal="false" global_color_pushed="false" />
+
+	<ctrl type="button" id="cancel" button_type="push_button" posparent="ok" posref="TL TR" x="-4"
+			tx_normal="w_answer_16_cancel.tga" tx_pushed="w_answer_16_cancel.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="proc" params_l="proc_charsel_renchar_confirm_cancel" global_color_normal="false" global_color_pushed="false" />	
+</group>
+-->
+
+<!-- ***************** -->
+<!-- *  MAIN WINDOW  * -->
+<!-- ***************** -->
+
+<group id="character_selection" w="800" h="600" posref="MM MM"
+								on_active="proc" on_active_params="active_char_sel" >
+
+	<!-- BLACK BACK -->
+<!--
+	<view type="bitmap" id="bg" posref="TL TL" x="0" y="-32" sizeref="w" w="0" h="0" texture="blank.tga" color="0 0 0 255" scale="true" global_color="false" />
+-->
+	<view type="bitmap" id="bg" txtoffsetx="0" txtoffsety="0" txtwidth="800" txtheight="488"
+			global_color="false" color="255 255 255 255" posref="TL TL" x="0" y="-32" texture="bk_select.tga" w="800" h="488" scale="true" /> 
+			
+			
+	<view type="bitmap" id="bg_empty" txtoffsetx="0" txtoffsety="0" txtwidth="512" txtheight="512"
+			global_color="false" color="255 255 255 255" posref="MR MR" x="-32" y="24" texture="bk_empty.tga" w="512" h="512" /> 
+				
+				
+	
+	<!-- Title -->
+	<view type="text" id="title" posref="TL TL" x="8" y="-6" hardtext="uiSelectTitle" fontsize="20"/>
+	
+	<!-- Title Delete -->
+	<view type="text" id="del_title" posref="TL TL" x="8" y="20" hardtext="uiDeleteTitle" fontsize="20"/>
+	
+
+	<!-- TIMELINE -->
+	<group id="timeline" sizeref="w" w="-16" h="32" posref="BL BL" x="8" y="16" >
+		<view type="bitmap" id="line" posref="ML ML" x="0" y="0" texture="time_line.tga" scale="true" sizeref="w" w="-64" h="4" global_color="false" />
+		<view type="bitmap" id="back_bg" posref="TL TL" x="0" y="0" texture="time_back.tga" global_color="false" />
+		<view type="bitmap" id="next_bg" posref="TR TR" x="0" y="0" texture="time_next.tga" global_color="false" />
+	</group>
+	
+		
+	<!-- Quit & Help -->
+	<ctrl type="button" id="quit" button_type="push_button" posref="TR MM" x="-24" y="-16"
+		tx_normal="button_quit.tga" tx_pushed="button_quit.tga" tx_over="button_quit_over.tga" 
+		onover="play_sound" params_over="name=charsel_quit_over"
+		onclick_l="proc" params_l="proc_quit" tooltip="uiQuit" />
+		
+	<!-- Removed for Beta 1
+	<ctrl type="button" id="help" button_type="push_button" posparent="quit" posref="TL TR" x="-8" y="0"
+		tx_normal="button_help.tga" tx_pushed="button_help.tga" tx_over="button_help_over.tga" 
+		onover="play_sound" params_over="name=generic_help_over"
+		onclick_l="launch_help" params_l="url=help_outgame.html" tooltip="uiHelp" />
+	-->
+
+	<!-- Menu titles -->
+	<view type="text" id="select" posref="TL TL" x="24" y="-112" hardtext="uiSelCharTitle" fontsize="14"/>
+	<view type="text" id="options" posref="TL TL" x="24" y="-320" hardtext="uiOptTitle" fontsize="14" />
+	
+
+	<!-- Buttons timeline -->
+
+	<ctrl type="button" id="back" button_type="push_button" posref="BL BL" x="8" y="16"
+		tx_normal="button_back.tga" tx_pushed="button_back_over.tga" tx_over="button_back_over.tga" 
+		onover="play_sound" params_over="name=generic_prev_over"
+		onclick_l="proc" params_l="proc_choice_back_screen" tooltip="uiPrevStep" />
+
+	<ctrl type="button" id="next" button_type="push_button" posref="BR BR" x="-8" y="16"
+		tx_normal="button_next.tga" tx_pushed="button_next_over.tga" tx_over="button_next_over.tga" 
+		onover="play_sound" params_over="name=generic_next_over"
+		onclick_l="proc" params_l="proc_choice_next_screen" tooltip="uiNextStep"/>
+		
+	<!-- SLOTS -->
+	<group id="slots" w="272" h="256" posparent="select" posref="BL TL" x="0" y="-16" >
+		<instance template="select_slot" id="0" posref="TL TL" />
+		<instance template="select_slot" id="1" posparent="slot0" 	posref="TL TL" y="-32" />
+		<instance template="select_slot" id="2" posparent="slot1" 	posref="TL TL" y="-32" />
+		<instance template="select_slot" id="3" posparent="slot2" 	posref="TL TL" y="-32" />
+		<instance template="select_slot" id="4" posparent="slot3" 	posref="TL TL" y="-32" />
+	</group>
+	
+	
+	<!-- Options if the slot is full (play, delete, rename) -->
+	
+	<group id="option1" w="160" h="84" posparent="options" posref="BL TL" x="-176" y="-16" >
+	
+		<ctrl type="button" button_type="radio_button" id="play" posref="TL TL" pushed="true" render_layer="3"
+							color="203 190 112 255" col_over="255 255 255 255" col_pushed="203 190 112 255" 
+							tx_normal="button_default.tga" tx_over="button_default.tga" tx_pushed="button_default_pushed.tga"
+							onover="play_sound" params_over="name=charsel_option_over"
+							onclick_l="proc" params_l="proc_option1|value=0"/>
+
+		<view type="text" id="pl" posparent="play" posref="ML ML" x="30" hardtext="uiPlay" fontsize="14" />
+	
+		<ctrl type="button" button_type="radio_button" id="delete" posref="ML ML" render_layer="3"
+							color="203 190 112 255" col_over="255 255 255 255" col_pushed="203 190 112 255"
+							tx_normal="button_default.tga" tx_over="button_default.tga" tx_pushed="button_default_pushed.tga"
+							onover="play_sound" params_over="name=charsel_option_over"
+							onclick_l="proc" params_l="proc_option1|value=1"/>
+
+		<view type="text" id="del" posparent="delete" posref="ML ML" x="30" hardtext="uiDelete" fontsize="14" />
+<!--		
+		<ctrl type="button" button_type="radio_button" id="rename" posref="BL BL"
+							color="203 190 112 255" col_over="255 255 255 255" col_pushed="203 190 112 255"
+							tx_normal="button_default.tga" tx_over="button_default.tga" tx_pushed="button_default_pushed.tga"
+							onclick_l="set" params_l="dblink=UI:TEMP:CHARSELOPT1|value=2"/>
+
+		<view type="text" id="ren" posparent="rename" posref="ML ML" x="30" hardtext="uiRename" fontsize="14" />
+-->
+	</group>
+	
+	<!-- Options if the slot is empty (manual creation, random creation) -->
+	
+	<group id="option2" w="160" h="52" posparent="options" posref="BL TL" x="-176" y="-16" >
+		<ctrl type="button" button_type="radio_button" id="manualy" posref="TL TL" pushed="true" render_layer="3"
+							color="203 190 112 255" col_over="255 255 255 255" col_pushed="203 190 112 255"
+							tx_normal="button_default.tga" tx_over="button_default.tga" tx_pushed="button_default_pushed.tga"
+							onover="play_sound" params_over="name=charsel_option_over"
+							onclick_l="proc" params_l="proc_option2|value=0"/>
+
+		<view type="text" id="man" posparent="manualy" posref="ML ML" x="30" hardtext="uiManCrea" fontsize="14" />
+		
+		<ctrl type="button" button_type="radio_button" id="random" posref="BL BL" render_layer="3"
+							color="203 190 112 255" col_over="255 255 255 255" col_pushed="203 190 112 255"
+							tx_normal="button_default.tga" tx_over="button_default.tga" tx_pushed="button_default_pushed.tga"
+							onover="play_sound" params_over="name=charsel_option_over"
+							onclick_l="proc" params_l="proc_option2|value=1"/>
+
+		<view type="text" id="ran" posparent="random" posref="ML ML" x="30" hardtext="uiRanCrea" fontsize="14" />
+	</group>
+	
+	
+	<group type="scroll_text" id="sel_infos" posref="TM TL" x="-60" y="-112" w="340" h="120" min_height="120" max_height="400" >
+		<group id="black" posref="TL TL" sizeref="hw" w="0" h="0" />
+		<group type="list" id="text_list" hardtext="uiSelInfos" shadow="true" fontsize="12" justification="justified" color="255 255 255 255" space="0" 
+											posref="TL TL" posparent="black" x="0" y="0" sizeref="hw" w="0" h="0" />
+	</group>
+	
+	
+	<!-- vue 3D du perso -->
+	<scene3d id="char3d" x="576" y="-32" sizeref="wh" w="-224" h="-112" posref="TR TR" curcam="cam" curcs="env"
+						user_interaction="true" rotz_factor="0.017"
+						roty_factor="0.005" roty_limit_min="-10" roty_limit_max="15"
+						dist_factor="0.005" dist_limit_min="3.0" dist_limit_max="4.0"	
+						ambient="0 0 0" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+						
+	
+		<character3d id="char" dblink="UI:TEMP:CHAR3D" pos="0 26.5 0.0" rot="0.0 0.0 0.0" />
+		
+		<camera id="cam" fov="80" pos="0.0 24.0 2.2" target="0.0 26.5 2.2" roll="0" />
+	
+		<light id="back" pos="0.0 28.2 1.6" color="255 128 0" near="2.5" far="4.0" />
+		<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="2.0" far="2.5" />
+			
+		<ig id="env" name="matis.ig" pos="0 0 0" />   
+		
+		<shape id="shadow" name="shadow.shape" pos="0.0 26.5 0.85" rot="0.0 0.0 0.0" />
+		
+		<auto_anim name="waterfall01_maserre.anim"/>
+		<auto_anim name="waterfall02_maserre.anim"/>
+	</scene3d>
+
+
+	<!-- TITLES -->
+	<group id="titles" x="0" y="0" posparent="char3d" posref="TL TL" w="576" h="488" >
+		<view type="text" id="name_txt"		render_layer="0" 						posref="TL TL" x="20" 	y="-16" hardtext="uiEmptySlot" 		shadow="true" fontsize="28" color="255 255 255 255" />
+
+		<view type="text" id="title_txt" 	render_layer="0" posparent="name_txt" 	posref="BL TL" x="0" 	y="-12" hardtext="uiCaNaBoldMF" 	shadow="true" fontsize="24" color="255 192 64 255" 	/>
+<!--
+		<view type="text" id="job_txt" 		render_layer="0" posparent="career_txt" posref="BL TL" x="0" 	y="-12" hardtext="uiCaNaBoldMF" 	shadow="true" fontsize="20" color="255 192 64 255" 	/>
+		<view type="text" id="level" 		render_layer="0" posparent="job_txt"	posref="TR TL" x="0" 	y="0" 	hardtext="uiSelLevel" 		shadow="true" fontsize="20" color="255 192 64 255" 	 />
+		<view type="text" id="level_txt" 	render_layer="0" posparent="level"		posref="TR TL" x="4" 	y="0" 	hardtext="uiCaNaBoldMF" 	shadow="true" fontsize="20" color="255 192 64 255" 	/>
+-->		
+		<view type="text_id" id="pos_txt"		render_layer="0"  					posref="BL BL" x="20" 	y="16"	shadow="true" fontsize="18" color="250 230 65 255"	/>
+
+	</group>
+
+	<!-- LOGOS -->
+	
+	<view type="bitmap" id="logo_fy" render_layer="0" txtoffsetx="0" txtoffsety="0" txtwidth="200" txtheight="256"
+		global_color="false" color="255 255 255 255" posparent="char3d" posref="TR TR" x="0" y="-8" texture="logo_species.tga"  active="false" />
+		
+	<view type="bitmap" id="logo_ma" render_layer="0" txtoffsetx="200" txtoffsety="0" txtwidth="200" txtheight="256"
+		global_color="false" color="255 255 255 255" posparent="char3d" posref="TR TR" x="0" y="-8" texture="logo_species.tga"  active="false" />
+		
+	<view type="bitmap" id="logo_tr" render_layer="0" txtoffsetx="400" txtoffsety="0" txtwidth="200" txtheight="256"
+		global_color="false" color="255 255 255 255" posparent="char3d" posref="TR TR" x="0" y="-8" texture="logo_species.tga"  active="false" />
+		
+	<view type="bitmap" id="logo_zo" render_layer="0" txtoffsetx="600" txtoffsety="0" txtwidth="200" txtheight="256"
+		global_color="false" color="255 255 255 255" posparent="char3d" posref="TR TR" x="0" y="-8" texture="logo_species.tga"  active="false" />
+
+
+	<!-- HELP -->
+	<!--
+	<group id="help_box" w="320" h="240" posref="MM MM" active="false" group_onclick_l="proc" group_params_l="proc_nothing" >
+		<view type="bitmap" id="bg" sizeref="wh" posref="TL TL" x="0" y="0" texture="blank.tga" scale="true" color="0 0 0 192" global_color="false" />
+		<instance template="window_border" id="bord" posref="MM MM" />
+		<view type="text" id="title_help" posref="TL TL" x="8" y="-8" hardtext="uiHelpTitle" fontsize="12" />
+		<ctrl type="button" id="close_help" button_type="push_button" posref="TR TR" x="-8" y="-8"
+			onover="play_sound" params_over="name=generic_help_close_over"
+			tx_normal="W_close.tga" tx_pushed="W_close.tga" tx_over="W_button_12_over.tga" 
+			onclick_l="proc" params_l="proc_select_close_help" tooltip="uiClose" />	
+	</group>
+	-->
+	
+	
+	<!-- BORDERS -->
+	<view type="bitmap" id="top_line" posref="TL TL" posparent="bg" x="0" y="1" texture="border_hor.tga" scale="true" sizeref="w" w="0" h="1" global_color="false" />
+	<view type="bitmap" id="bot_line" posref="BL BL" posparent="bg" x="0" y="-1" texture="border_hor.tga" scale="true" sizeref="w" w="0" h="1" global_color="false" />
+	<view type="bitmap" id="vertical_line" posparent="bg" posref="ML ML" x="224" y="0" texture="border_ver.tga" scale="true" w="1" sizeref="h" h="0" global_color="false" />
+
+	
+	<!-- Confirm delete char -->
+
+
+
+</group>
+
+<!-- This link is used to display the right screen among the outgame screens -->
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_select)" target="character_selection:active" />
+
+<!-- ***************** -->
+<!-- *  ANIMATIONS   * -->
+<!-- ***************** -->
+
+<!-- Intro -->
+<anim id="anim_char_sel_intro" duration="4.0" loop="false" reverse="false" >
+
+	<track type="linear" target="character_selection:bg:h" dynamic="true" >
+		<key time="0.1" value="0" />
+		<key time="0.35" value="sub(getprop('ui:outgame:character_selection:h'),112)" />
+	</track>
+
+	<track type="linear" target="character_selection:bg:y" dynamic="true" > <!-- 0-(32+(h-112)/2) -->
+		<key time="0.1" value="sub(0,add(div(sub(getprop('ui:outgame:character_selection:h'),112),2),32))" />
+		<key time="0.35" value="-32" />
+	</track>
+
+<!--
+	<track type="linear" target="character_selection:help:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.5" value="255" />
+	</track>
+-->
+	
+	<track type="linear" target="character_selection:quit:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.5" value="255" />
+	</track>	
+
+	<track type="linear" target="character_selection:title:y">
+		<key time="0.0" value="20" />
+		<key time="1.0" value="-6" />
+	</track>
+	
+	<track type="linear" target="character_selection:timeline:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+
+	<track type="linear" target="character_selection:back:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+<!--		
+	<track type="linear" target="character_selection:vertical_line:x">
+		<key time="1.0" value="-1" />
+		<key time="1.5" value="224" />
+	</track>
+-->
+	<track type="linear" target="character_selection:select:alpha">
+		<key time="2.0" value="0" />
+		<key time="3.0" value="255" />
+	</track>
+		
+	<track type="linear" target="character_selection:slots:slot0:alpha,character_selection:slots:text0:alpha">
+		<key time="2.5" value="0" />
+		<key time="3.0" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:slot1:alpha,character_selection:slots:text1:alpha">
+		<key time="2.75" value="0" />
+		<key time="3.25" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:slot2:alpha,character_selection:slots:text2:alpha">
+		<key time="3.0" value="0" />
+		<key time="3.5" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:slot3:alpha,character_selection:slots:text3:alpha">
+		<key time="3.25" value="0" />
+		<key time="3.75" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:slot4:alpha,character_selection:slots:text4:alpha">
+		<key time="3.5" value="0" />
+		<key time="4.0" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:sel_infos:alpha">
+		<key time="2.0" value="0" />
+		<key time="3.0" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:slot0:x">
+		<key time="2.5" value="0" />
+		<key time="2.9" value="16" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:slot1:x">
+		<key time="2.75" value="-16" />
+		<key time="3.15" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:slot2:x">
+		<key time="3.0" value="-16" />
+		<key time="3.4" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:slot3:x">
+		<key time="3.25" value="-16" />
+		<key time="3.65" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:slot4:x">
+		<key time="3.5" value="-16" />
+		<key time="3.9" value="0" />
+	</track>
+	
+</anim>
+
+
+
+<!-- Outro -->
+<anim id="anim_char_sel_outro" duration="2.30" on_finish="proc" on_finish_params="proc_choice_next_screen_when_outro_finished" loop="false" reverse="false" >
+	
+	<track type="linear" target="character_selection:select:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:options:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+<!--		
+	<track type="linear" target="character_selection:vertical_line:x">
+		<key time="1.0" value="224" />
+		<key time="1.5" value="-1" />
+	</track>
+-->
+	<track type="linear" target="character_selection:timeline:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.5" value="0" />
+	</track>
+
+	<track type="linear" target="character_selection:back:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.5" value="0" />
+	</track>
+
+	<track type="linear" target="character_selection:next:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.5" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:slots:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:option1:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:option2:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>	
+	
+	<track type="linear" target="character_selection:title:y">
+		<key time="1.0" value="-6" />
+		<key time="2.0" value="20" />
+	</track>
+	
+	<track type="linear" target="character_selection:bg_empty:alpha" dynamic="true" >
+		<key time="0.0" value="getprop('ui:outgame:character_selection:bg_empty:alpha')" />
+		<key time="0.5" value="0" />
+	</track>
+
+
+</anim>
+
+
+
+<anim id="anim_char_sel_outro2" duration="0.5"  on_finish="proc" on_finish_params="proc_choice_next_screen_when_outro_finished2">
+	<track type="linear" target="character_selection:bg:h" dynamic="true" >
+		<key time="0.0" value="sub(getprop('ui:outgame:character_selection:h'),112)" />
+		<key time="0.5" value="0" />
+	</track>
+
+	<track type="linear" target="character_selection:bg:y" dynamic="true" >
+		<key time="0.0" value="-32" />
+		<key time="0.5" value="sub(0,add(div(sub(getprop('ui:outgame:character_selection:h'),112),2),32))" />
+	</track>
+</anim>
+
+
+<anim id="anim_char_sel_outro_char" duration="1.0"  on_finish="anim_start" on_finish_params="anim=anim_char_sel_outro2" >
+
+	<track type="linear" target="character_selection:char3d:x" dynamic="true" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="sub(getprop('ui:outgame:character_selection:w'),224)" />
+	</track>
+
+	<track type="linear" target="character_selection:logo_fy:alpha,character_selection:logo_ma:alpha,character_selection:logo_tr:alpha,character_selection:logo_zo:alpha" >
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+	
+</anim>
+
+
+<anim id="anim_char_sel_delete_title" duration="1.0" on_finish="proc" on_finish_params="proc_charsel_deletechar" >
+
+<!--
+	<track type="linear" target="character_selection:help:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+-->
+	
+	<track type="linear" target="character_selection:quit:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+
+	<track type="linear" target="character_selection:del_title:y">
+		<key time="0.0" value="20" />
+		<key time="1.0" value="-6" />
+	</track>
+	
+</anim>
+
+
+<anim id="anim_char_sel_delete" duration="1.0"  on_finish="anim_start" on_finish_params="anim=anim_char_sel_delete2" >
+
+	<track type="linear" target="character_selection:del_title:y">
+		<key time="0.0" value="-6" />
+		<key time="1.0" value="20" />
+	</track>
+
+	<track type="linear" target="character_selection:char3d:x" dynamic="true" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="sub(getprop('ui:outgame:character_selection:w'),224)" />
+	</track>
+
+	<track type="linear" target="character_selection:logo_fy:alpha,character_selection:logo_ma:alpha,character_selection:logo_tr:alpha,character_selection:logo_zo:alpha" >
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+	
+
+</anim>
+
+
+<anim id="anim_char_sel_delete2" duration="0.5"  on_finish="proc" on_finish_params="active_char_sel">
+	<track type="linear" target="character_selection:bg:h" dynamic="true" >
+		<key time="0.0" value="sub(getprop('ui:outgame:character_selection:h'),112)" />
+		<key time="0.5" value="0" />
+	</track>
+
+	<track type="linear" target="character_selection:bg:y" dynamic="true" >
+		<key time="0.0" value="-32" />
+		<key time="0.5" value="sub(0,add(div(sub(getprop('ui:outgame:character_selection:h'),112),2),32))" />
+	</track>
+</anim>
+
+
+<!-- Anim called when we are on a full slot and we click on an empty slot -->
+<anim id="anim_char_sel_full_to_empty" duration="0.75" >
+	<track type="linear" target="character_selection:char3d:x" dynamic="true" >
+		<key time="0.0" value="0" />
+		<key time="0.75" value="sub(getprop('ui:outgame:character_selection:w'),224)" />
+	</track>
+	
+	<track type="linear" target="character_selection:bg_empty:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.75" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:logo_fy:alpha,character_selection:logo_ma:alpha,character_selection:logo_tr:alpha,character_selection:logo_zo:alpha" >
+		<key time="0.0" value="255" />
+		<key time="0.75" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:option1:x">
+		<key time="0.0" value="16" />
+		<key time="0.75" value="-176" />
+	</track>
+	<track type="linear" target="character_selection:option2:x">
+		<key time="0.0" value="-176" />
+		<key time="0.75" value="16" />
+	</track>
+	<track type="linear" target="character_selection:option1:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.75" value="0" />
+	</track>
+	<track type="linear" target="character_selection:option2:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.75" value="255" />
+	</track>
+	
+	
+</anim>
+
+<!-- Anim called when we are on a empty slot and we click on a full slot -->
+<anim id="anim_char_sel_empty_to_full" duration="0.75" >
+	<track type="linear" target="character_selection:char3d:x" dynamic="true" >
+		<key time="0.0" value="sub(getprop('ui:outgame:character_selection:w'),224)" />
+		<key time="0.75" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:bg_empty:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.75" value="0" />
+	</track>
+	
+	<track type="linear" target="character_selection:logo_fy:alpha,character_selection:logo_ma:alpha,character_selection:logo_tr:alpha,character_selection:logo_zo:alpha" >
+		<key time="0.0" value="0" />
+		<key time="0.75" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:option2:x">
+		<key time="0.0" value="16" />
+		<key time="0.75" value="-176" />
+	</track>
+	<track type="linear" target="character_selection:option1:x">
+		<key time="0.0" value="-176" />
+		<key time="0.75" value="16" />
+	</track>
+	<track type="linear" target="character_selection:option2:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.75" value="0" />
+	</track>
+	<track type="linear" target="character_selection:option1:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.75" value="255" />
+	</track>
+	
+
+</anim>
+
+
+
+<!-- Anim called when we are on a full slot and we click on a full slot -->
+<anim id="anim_char_sel_full_to_full_1" duration="0.5" on_finish="proc" on_finish_params="proc_click_slot2" >
+	<track type="linear" target="character_selection:char3d:x" dynamic="true" >
+		<key time="0.0" value="0" />
+		<key time="0.5" value="sub(getprop('ui:outgame:character_selection:w'),224)" />
+	</track>
+	
+		<track type="linear" target="character_selection:logo_fy:alpha,character_selection:logo_ma:alpha,character_selection:logo_tr:alpha,character_selection:logo_zo:alpha" >
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_char_sel_full_to_full_2" duration="0.5" >
+	<track type="linear" target="character_selection:char3d:x" dynamic="true" >
+		<key time="0.0" value="sub(getprop('ui:outgame:character_selection:w'),224)" />
+		<key time="0.5" value="0" />
+	</track>
+	
+		<track type="linear" target="character_selection:logo_fy:alpha,character_selection:logo_ma:alpha,character_selection:logo_tr:alpha,character_selection:logo_zo:alpha" >
+		<key time="0.0" value="0" />
+		<key time="0.5" value="255" />
+	</track>
+	
+</anim>
+
+<!-- anim called the first time we click on a slot and this one is empty -->
+<anim id="anim_init_empty" duration="0.75" >
+	<track type="linear" target="character_selection:next:alpha,character_selection:option2:alpha,character_selection:options:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.75" value="255" />
+	</track>
+	<track type="linear" target="character_selection:option2:x">
+		<key time="0.0" value="-176" />
+		<key time="0.75" value="16" />
+	</track>
+	
+	<track type="linear" target="character_selection:bg_empty:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.75" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:sel_infos:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.75" value="0" />
+	</track>
+	
+</anim>
+
+<!-- anim called the first time we click on a slot and this one is full -->
+<anim id="anim_init_full" duration="0.75" >
+	<track type="linear" target="character_selection:next:alpha,character_selection:option1:alpha,character_selection:options:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.75" value="255" />
+	</track>
+	<track type="linear" target="character_selection:option1:x">
+		<key time="0.0" value="-176" />
+		<key time="0.75" value="16" />
+	</track>
+	<track type="linear" target="character_selection:char3d:x" dynamic="true" >
+		<key time="0.0" value="sub(getprop('ui:outgame:character_selection:w'),224)" />
+		<key time="0.75" value="0" />
+	</track>
+	
+		<track type="linear" target="character_selection:logo_fy:alpha,character_selection:logo_ma:alpha,character_selection:logo_tr:alpha,character_selection:logo_zo:alpha" >
+		<key time="0.0" value="0" />
+		<key time="0.5" value="255" />
+	</track>
+	
+	<track type="linear" target="character_selection:sel_infos:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.75" value="0" />
+	</track>
+	
+</anim>
+
+<!-- ROTATION OF THE CHARACTER -->
+
+</interface_config>
+
