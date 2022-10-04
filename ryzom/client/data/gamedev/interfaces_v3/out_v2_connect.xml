@@ -1,0 +1,84 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="1024" h="768" active="false" />
+
+<proc id="proc_con_test">
+	<action handler="anim_start" params="anim=anim_connection_outro"
+		cond="and(eq(@UI:CURRENT_SCREEN, %screen_connecting),eq(@UI:SERVER_RECEIVED_CHARS,1))" />
+</proc>
+
+<proc id="proc_con_test2">
+	<action handler="set" params="dblink=UI:CURRENT_SCREEN|value=%screen_select" />
+</proc>
+
+
+
+<proc id="proc_con_quit" >
+	<action handler="play_sound" params="name=charsel_quit_click" />
+	<action handler="quit_ryzom" />
+</proc>
+
+
+
+
+<proc id="proc_startall_connect" >
+	<action handler="anim_start" params="anim=anim_connection_intro" />
+</proc>
+
+<proc id="proc_restart_connect" >
+</proc>
+
+<proc id="proc_restart_viseur" >
+</proc>
+
+
+
+<group id="connecting" w="1024" h="768" posref="MM MM" on_active="proc" on_active_params="proc_startall_connect" >
+
+	<!-- JENA BACK -->
+	<view type="bitmap" id="jena" render_layer="-1" 
+		global_color="false" color="255 255 255 255" posref="TL TL" x="0" y="0" texture="new_launcher_bg.tga" />
+
+	
+	<!-- Quit Button -->
+	<ctrl style="valid_txt_button" id="finish_but" posref="BR BR" x="-40" y="130" hardtext="uiQuit"
+					onover="play_sound" params_over="name=charsel_quit_over"
+					onclick_l="proc" params_l="proc_con_quit"/>
+
+	<view type="text" id="title" posref="MM MM" y="24" hardtext="uiConnecting" fontsize="20"/>
+
+	
+	<!-- BLACK SCREEN FADE -->
+	<view type="bitmap" id="black_screen" posref="TL TL" x="0" y="0" render_layer="4" texture="blank.tga"
+		color="0 0 0 255" sizeref="wh" scale="true" global_color="false" />
+
+
+
+
+</group>
+
+<!-- This link is used to display the right screen among the outgame screens -->
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_connecting)" target="connecting:active" />
+
+<!-- When we got the answer from server go to screen_intro -->
+<link expr="depends(@UI:CURRENT_SCREEN,@UI:SERVER_RECEIVED_CHARS)" action="proc" params="proc_con_test" />
+
+
+<!-- ANIMATIONS -->
+<anim id="anim_connection_intro" duration="1.0"  disable_buttons="true" on_finish="" on_finish_params="" >
+	<track type="linear" target="connecting:black_screen:alpha" >
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+</anim>
+
+<anim id="anim_connection_outro" duration="1.0"  disable_buttons="true" on_finish="proc" on_finish_params="proc_con_test2" >
+	<track type="linear" target="connecting:black_screen:alpha" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+</anim>
+
+
+</interface_config>
+
