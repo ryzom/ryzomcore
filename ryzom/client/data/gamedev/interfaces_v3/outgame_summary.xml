@@ -1,0 +1,923 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
+<variable entry="UI:TEMP:VALID" type="sint64" value="-1"/>
+<variable entry="UI:TEMP:FROM" type="sint64" value="0"/>
+
+<!-- ************** -->
+<!-- * PROCEDURES * -->
+<!-- ************** -->
+
+<proc id="proc_summary_start">
+	<action handler="reset_camera"	 params="target=ui:outgame:summary:char3d:cam" />
+	<action handler="reset_camera"	 params="target=ui:outgame:summary:char3d:camf" />
+	
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="import_fyros" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="import_matis" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="import_tryker" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="import_zorai" />
+	
+	<action handler="set" params="dblink=UI:TEMP:VALID|value=-1" />
+
+	<action handler="set" params="target_property=ui:outgame:summary:next:alpha|value=0" />
+	<action handler="set" params="target_property=ui:outgame:summary:next:active|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:summary:home:alpha|value=255" />
+	<action handler="set" params="target_property=ui:outgame:summary:invalid_txt:alpha|value=0" />
+	<action handler="set" params="target_property=ui:outgame:summary:valid_txt:alpha|value=0" />
+	<action handler="set" params="target_property=ui:outgame:summary:input_txt:alpha|value=0" />
+	<action handler="set" params="target_property=ui:outgame:summary:eb:input_string|value=''" />
+	
+	<action handler="set" params="target_property=ui:outgame:summary:name_txt:active|value=1" />
+	<action handler="set" params="target_property=ui:outgame:summary:job_txt:active|value=1" />
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:posx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:posy|value=23.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:tgtx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:tgty|value=26.5"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:camf:posx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:camf:posy|value=25.3"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:camf:tgtx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:camf:tgty|value=26.5"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:char:posx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:char:posy|value=26.5"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:char:posz|value=0.0"/>
+
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:char:rotx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:char:roty|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:char:rotz|value=0.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:shadow:posx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:shadow:posy|value=26.5"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:shadow:posz|value=0.85"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:posx|value=-0.4" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:posy|value=28.5" />
+		
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:lgt:posx|value=0.4" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:lgt:posy|value=25.3" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:lgt:posz|value=2.48" />
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:lgt:colr|value=255" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:lgt:colg|value=255" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:lgt:colb|value=255" />
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:char:anim|value=0" />
+	
+	<action handler="proc" params="proc_summary_init_3d" />
+	<action handler="anim_start" params="anim=anim_summary_intro" />
+	<action handler="anim_start" params="anim=anim_summary_intro2" />
+	
+</proc>
+
+<proc id="proc_summary_init_3d">
+
+	<action handler="set" params="target_property=ui:outgame:summary:logo_fy:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:summary:logo_ma:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:summary:logo_tr:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:summary:logo_zo:active|value=0" />
+	
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="proc_summary_init3d_fy" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="proc_summary_init3d_ma" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="proc_summary_init3d_tr" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="proc_summary_init3d_zo" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:CAREER,0)" params="target_property=ui:outgame:summary:job_txt:hardtext|value='uiCaNaBoldF'" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:CAREER,1)" params="target_property=ui:outgame:summary:job_txt:hardtext|value='uiCaNaBoldM'" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:CAREER,2)" params="target_property=ui:outgame:summary:job_txt:hardtext|value='uiCaNaBoldC'" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:summary:char3d:back:near|value=2.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:summary:char3d:back:far|value=3.5" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:summary:char3d:back:posz|value=2.0" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:summary:char3d:back:near|value=1.5" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:summary:char3d:back:far|value=3.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:summary:char3d:back:posz|value=2.2" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:summary:char3d:back:near|value=2.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:summary:char3d:back:far|value=3.5" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:summary:char3d:back:posz|value=2.0" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:summary:char3d:back:near|value=3.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:summary:char3d:back:far|value=4.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:summary:char3d:back:posz|value=2.4" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:SEX,0)" params="target_property=ui:outgame:summary:char3d:char:posz|value=0.0"/>
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:SEX,1)" params="target_property=ui:outgame:summary:char3d:char:posz|value=0.04"/>
+	
+
+</proc>
+
+			<!-- fyros -->
+<proc id="proc_summary_init3d_fy">
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:env:name|value='outgame_fyros.ig'"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:env:posz|value=-1.03"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:posz|value=2.3"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:tgtz|value=1.7"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:fov|value=55.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colr|value=255" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colg|value=128" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colb|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:summary:logo_fy:active|value=1" />
+
+</proc>
+
+			<!-- matis -->
+<proc id="proc_summary_init3d_ma">
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:env:name|value='outgame_matis.ig'"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:env:posz|value=0"/>
+
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:posz|value=2.4"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:tgtz|value=1.8"/>
+
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:fov|value=60.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colr|value=192" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colg|value=255" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colb|value=64" />
+	
+	<action handler="set" params="target_property=ui:outgame:summary:logo_ma:active|value=1" />
+</proc>
+
+			<!-- tryker -->
+<proc id="proc_summary_init3d_tr">
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:env:name|value='outgame_tryker.ig'"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:env:posz|value=0"/>
+
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:posz|value=2.0"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:tgtz|value=1.6"/>
+
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:fov|value=50.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colr|value=64" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colg|value=255" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colb|value=255" />
+	
+	<action handler="set" params="target_property=ui:outgame:summary:logo_tr:active|value=1" />
+</proc>
+
+			<!-- zorai -->
+<proc id="proc_summary_init3d_zo">
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:env:name|value='outgame_zorai.ig'"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:env:posz|value=0"/>
+
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:posz|value=2.4"/>
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:tgtz|value=1.9"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:cam:fov|value=65.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colr|value=255" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colg|value=128" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:back:colb|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:summary:logo_zo:active|value=1" />
+</proc>
+
+<proc id="proc_sum_enter_name">
+	<action handler="reset_keyboard_focus" />
+	<action handler="play_sound" params="name=summary_enter_name" />
+	<action handler="ask_valid_name" params="target=ui:outgame:summary:eb:uc_input_string|dblink=UI:TEMP:VALID" />
+</proc>	
+
+<!-- proc_sum_enter_name2 is called after the server reception of VALID look at SERVER_RECEIVED_VALID -->
+<proc id="proc_sum_enter_name2">
+	<action handler="set" params="target_property=ui:outgame:summary:input_txt:uc_hardtext|value=getprop('ui:outgame:summary:eb:uc_input_string')"/>
+
+	<action handler="disp_info" params="str='isPeopleActive(@UI:TEMP:CHAR3D:PEOPLE) = '|val=isPeopleActive(@UI:TEMP:CHAR3D:PEOPLE)" />
+	<action handler="disp_info" params="str='isCareerActive(@UI:TEMP:CHAR3D:CAREER) = '|val=isCareerActive(@UI:TEMP:CHAR3D:CAREER)" />
+	<action handler="disp_info" params="str='@UI:TEMP:CHAR3D:CAREER = '|val=@UI:TEMP:CHAR3D:CAREER" />
+	<action handler="disp_info" params="str='@UI:TEMP:VALID = '|val=@UI:TEMP:VALID" />
+	<action handler="proc" cond="not(isPeopleActive(@UI:TEMP:CHAR3D:PEOPLE))" params="proc_warning_people" />
+	<action handler="proc" cond="not(isCareerActive(@UI:TEMP:CHAR3D:CAREER))" params="proc_warning_career" />
+	<action handler="proc" cond="and(isPeopleActive(@UI:TEMP:CHAR3D:PEOPLE),isCareerActive(@UI:TEMP:CHAR3D:CAREER))" 
+			params="proc_sum_enter_name3" />
+</proc>
+
+<proc id="proc_sum_enter_name3">
+	<action handler="play_sound" cond="eq(@UI:TEMP:VALID,1)" params="name=summary_valid_name" />
+	<action handler="play_sound" cond="eq(@UI:TEMP:VALID,0)" params="name=summary_invalid_name" />
+	<!--<action handler="enter_modal" cond="eq(@UI:TEMP:VALID,0)" params="group=ui:outgame:summary_invalid_name" />-->
+	<action handler="anim_start" cond="eq(@UI:TEMP:VALID,0)" params="anim=anim_invalid_name" />
+	<action handler="set" cond="eq(@UI:TEMP:VALID,1)" params="target_property=ui:outgame:summary:next:active|value=1" />
+	<action handler="anim_start" cond="eq(@UI:TEMP:VALID,1)" params="anim=anim_valid_name" />
+</proc>
+
+<proc id="proc_sum_change_name">
+	<action handler="play_sound" params="name=summary_typing" />
+	<action handler="anim_start" cond="eq(@UI:TEMP:VALID,1)" params="anim=anim_sum_hide_next" />
+	<action handler="anim_start" cond="ne(@UI:TEMP:VALID,-1)" params="anim=anim_sum_hide_texts" />	
+	<action handler="set" params="dblink=UI:TEMP:VALID|value=-1" />
+</proc>
+
+<proc id="proc_sum_rand_all">
+	<action handler="proc" params="proc_charsel_randomcreate" />
+	<action handler="proc" params="proc_summary_init_3d" />
+	<action handler="anim_start" params="anim=anim_fadeout_randomize" />
+</proc>
+
+<proc id="proc_sum_rand_career">
+	<action handler="proc" params="proc_rand_career" />
+	<action handler="proc" params="proc_summary_init_3d" />
+	<action handler="anim_start" params="anim=anim_fadeout_randomize" />
+</proc>
+
+<proc id="proc_sum_rand_appear">
+	<action handler="proc" params="proc_rand_appear" />	
+	<action handler="proc" params="proc_summary_init_3d" />
+	<action handler="anim_start" params="anim=anim_fadeout_randomize" />
+</proc>
+
+<proc id="proc_sum_rand_specie">
+	<action handler="proc" params="proc_rand_specie" />
+	<action handler="proc" params="proc_update_career" />
+	<action handler="proc" params="proc_summary_init_3d" />
+	<action handler="anim_start" params="anim=anim_fadeout_randomize" />
+</proc>
+
+<proc id="proc_sum_rand_body">
+	<action handler="proc" params="proc_rand_body" />
+	<action handler="proc" params="proc_summary_init_3d" />
+	<action handler="anim_start" params="anim=anim_fadeout_randomize" />
+</proc>
+
+<proc id="proc_sum_rand_face">
+	<action handler="proc" params="proc_rand_face" />
+	<action handler="proc" params="proc_summary_init_3d" />
+	<action handler="anim_start" params="anim=anim_fadeout_randomize" />
+</proc>
+
+<proc id="proc_sum_rand_colors">
+	<action handler="proc" params="proc_rand_colors" />
+	<action handler="proc" params="proc_summary_init_3d" />
+	<action handler="anim_start" params="anim=anim_fadeout_randomize" />
+</proc>
+
+<proc id="proc_update_camf">
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:camf:posz|value=add(0.1,getprop('ui:outgame:summary:char3d:char:headz'))" />
+	<action handler="set" params="target_property=ui:outgame:summary:char3d:camf:tgtz|value=add(0.1,getprop('ui:outgame:summary:char3d:char:headz'))" />
+</proc>
+
+<proc id="proc_summary_finish">
+	<action handler="set" params="target_property=ui:outgame:summary:next:active|value=0" />
+	<action handler="proc" params="proc_summary_close_help2" />
+	<action handler="anim_start" params="anim=anim_summary_outro2" />
+</proc>
+
+<proc id="proc_summary_finish2">
+	<action handler="copy" cond="eq(@UI:TEMP:FROM,0)" params="dbdst=UI:CURRENT_SCREEN|dbsrc=UI:NEXT_SCREEN" />
+	<action handler="proc" cond="eq(@UI:TEMP:FROM,1)" params="proc_summary_next_screen2" />
+</proc>
+
+<proc id="proc_summary_open_help">
+	<action handler="play_sound" params="name=generic_help_click" />
+	<action handler="set" params="target_property=ui:outgame:summary:help_box:active|value=1" />
+</proc>
+
+<proc id="proc_summary_close_help">
+	<action handler="play_sound" params="name=generic_help_close_click" />
+	<action handler="set" params="target_property=ui:outgame:summary:help_box:active|value=0" />
+</proc>
+
+<proc id="proc_summary_close_help2">
+	<action handler="set" params="target_property=ui:outgame:summary:help_box:active|value=0" />
+</proc>
+
+
+<!-- BACK -->
+<proc id="proc_summary_back_screen">
+	<action handler="reset_keyboard_focus" />
+	<action handler="play_sound" params="name=generic_prev_click" />
+	<action handler="set" cond="eq(@UI:TEMP:RAND,0)" params="dblink=UI:NEXT_SCREEN|value=%screen_appear" />
+	<action handler="set" cond="eq(@UI:TEMP:RAND,1)" params="dblink=UI:NEXT_SCREEN|value=%screen_select" />
+	<action handler="set" params="dblink=UI:TEMP:FROM|value=0" />
+	<action handler="anim_start" params="anim=anim_summary_outro" />
+</proc>
+
+<proc id="proc_summary_home_screen">
+	<action handler="reset_keyboard_focus" />
+	<action handler="play_sound" params="name=generic_home_click" />
+	<action handler="set" params="dblink=UI:NEXT_SCREEN|value=%screen_select" />
+	<action handler="set" params="dblink=UI:TEMP:FROM|value=0" />
+	<action handler="anim_start" params="anim=anim_summary_outro" />
+</proc>
+
+
+<!-- NEXT -->
+<proc id="proc_summary_next_screen">
+	<action handler="reset_keyboard_focus" />
+	<action handler="play_sound" params="name=generic_next_click" />
+	<!--<action handler="ask_create_char" params="name=ui:outgame:summary:eb|caracs=UI:TEMP:CARACS|charsum=UI:TEMP:CHAR3D" />-->
+	<action handler="set" params="dblink=UI:TEMP:FROM|value=1" />
+	<action handler="anim_start" params="anim=anim_summary_outro" />
+</proc>
+
+<proc id="proc_summary_next_screen2">
+	<action handler="set" params="dblink=UI:NEXT_SCREEN|value=%screen_location" />
+	<action handler="copy" params="dbdst=UI:CURRENT_SCREEN|dbsrc=UI:NEXT_SCREEN" />
+	<!--<action handler="anim_start" params="anim=anim_summary_outro" />-->
+</proc>
+
+<proc id="proc_sum_server_test">
+	<action handler="proc" params="proc_sum_enter_name2"
+		cond="and(eq(@UI:CURRENT_SCREEN,%screen_summary),eq(@UI:SERVER_RECEIVED_VALID,1))" />
+</proc>
+
+<link expr="depends(@UI:CURRENT_SCREEN, @UI:SERVER_RECEIVED_VALID)"
+	action="proc" params="proc_sum_server_test" />
+
+
+<!-- TEMPLATE DISPLAY CARACS -->
+<template name="sum_caracs" posparent="parent" x="0" y="0" w="128" h="16" posref="TL TL" id="" title="" max="" reg="" color="" >
+	<group id="#id" x="#x" y="#y" w="#w" h="#h" posparent="#posparent" posref="#posref" > 
+		<view type="text" id="score" posref="ML ML" x="0" y="0" hardtext="#title" shadow="true" fontsize="14" color="#color" />
+		<view type="text" id="value1" posref="MR MR" x="-32" y="0" value="#max" fontsize="14" shadow="true" color="#color" />
+		<view type="text" id="value2" posref="MR MR" x="0" y="0" value="#reg" fontsize="14" shadow="true" color="#color"  />
+		<link expr="#max" target="value1:hardtext" />
+		<link expr="#reg" target="value2:hardtext" />
+	</group>
+</template>
+
+<!-- *************** -->
+<!-- * MODAL WINDOW * -->
+<!-- *************** -->
+
+<group type="modal" id="summary_invalid_name" mouse_pos="false" escapable="false" exit_click_out="false" posref="MM MM" w="320" h="68">
+
+	<view type="bitmap" id="bg" sizeref="wh" posref="TL TL" x="0" y="0" texture="blank.tga" scale="true" color="0 0 0 192" global_color="false" />
+	<instance template="window_border" id="bord" posref="MM MM" />
+
+	<view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="invalid char name" />
+
+	<ctrl type="button" id="ok" button_type="push_button" posparent="text" posref="BR TR" y="-4"
+			tx_normal="w_answer_16_valid.tga" tx_pushed="w_answer_16_valid.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="proc" params_l="proc_invalid_name" global_color_normal="false" global_color_pushed="false" />
+</group>
+
+
+<!-- *************** -->
+<!-- * MAIN WINDOW * -->
+<!-- *************** -->
+
+<group id="summary" w="800" h="600" posref="MM MM"
+				on_active="proc" on_active_params="proc_summary_start">
+
+
+	<!-- BLACK BACK -->
+	<view type="bitmap" id="bg" posref="TL TL" x="0" y="-32" render_layer="-4" texture="blank.tga" color="0 0 0 255" scale="true" w="800" h="488" global_color="false" />
+	
+	<!-- Title -->
+	<view type="text" id="title" posref="TL TL" x="8" y="-6" hardtext="uiSummaryTitle" fontsize="20"/>
+
+
+
+	
+	
+<!--	<instance template="edit_box_widget" id="ebw" posref="TR TR" x="-128" y="-228" w="128" onenter="proc" params="proc_sum_enter_name" reset_focus_on_hide="false" prompt=" " max_num_chars="16" /> 
+	<view type="text" id="eyn" posparent="ebw" posref="TL BL" x="0" y="8" hardtext="uiEnterName" color="255 255 255 255" fontsize="12"/> -->
+
+
+
+	<!-- vue 3D du perso -->
+	<scene3d id="char3d" x="0" y="-32" w="800" h="488" posref="TL TL" curcam="cam" curcs="env" render_layer="-2"
+						user_interaction="true" rotz_factor="0.017"
+						roty_factor="0.005" roty_limit_min="-20" roty_limit_max="10"
+						dist_factor="0.005" dist_limit_min="3.0" dist_limit_max="4.0"	
+						ambient="0 0 0" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+						
+	
+		<character3d id="char" dblink="UI:TEMP:CHAR3D" pos="0 26.5 0.0" rot="0.0 0.0 0.0" />
+		
+		<camera id="cam" fov="80" pos="0.0 24.0 2.2" target="0.0 26.5 2.2" roll="0" />
+		<camera id="camf" fov="20" pos="0.0 25.3 2.2" target="0.0 26.5 2.2" roll="0" />
+	
+		<light id="back" pos="0.0 28.2 1.6" color="255 128 0" near="2.5" far="4.0" />
+		<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="2.0" far="2.5" />
+			
+		<ig id="env" name="matis.ig" pos="0 0 0" />
+		
+		<shape id="shadow" name="shadow.shape" pos="0.0 26.5 0.85" rot="0.0 0.0 0.0" />
+			
+		<auto_anim name="waterfall01_maserre.anim"/>
+		<auto_anim name="waterfall02_maserre.anim"/>
+
+	</scene3d>
+
+	<view type="bitmap" id="bg_camface" posref="TR TR" scale="true" w="244" h="204" x="-14" y="-46" texture="blank.tga" color="0 0 0 255" global_color="false" render_layer="-2" />
+
+	<scene3d id="char3dface" x="-2" y="-2" w="240" h="200" posparent="bg_camface" posref="TR TR" reference="char3d" curcam="camf" render_layer="-1"
+						user_interaction="true" rotz_factor="0.017"
+						roty_factor="0.005" roty_limit_min="-10" roty_limit_max="15"
+						dist_factor="0.005" dist_limit_min="0.9" dist_limit_max="1.5" >
+	</scene3d>
+
+
+	
+
+	<!-- Character select its name -->
+
+	<group type="edit_box" id="eb" posref="TL TL" x="16" y="-64"  w="226" h="32" render_layer="4" child_resize_h="true" 
+									onenter="proc" params="proc_sum_enter_name" 
+									onchange="proc" onchange_params="proc_sum_change_name"
+									prompt="" enter_loose_focus="true" reset_focus_on_hide="true" 
+									menu_r="" max_historic="" entry_type="alpha">
+
+		<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="blank2.tga" color="0 0 0 255" global_color="false" render_layer="4" />
+		<instance template="window_border" id="bord" posref="MM MM" />
+		<view type="text" id="edit_text" x="4" y="-2" posref="ML ML" multi_line="false" render_layer="4" 
+		fontsize="20" shadow="true" hardtext="" global_color="false" line_maxw="216" case="%case_first_string_letter_up" />		
+
+	</group>
+
+
+	<!-- BUTTON VALIDATE NAME -->
+	<ctrl type="button" button_type="push_button" id="valid_name" posparent="eb" posref="MR ML" x="4" y="0"
+									tx_normal="logo_ok.tga" tx_over="button_blank_over.tga" tx_pushed="logo_ok.tga"
+									onover="play_sound" params_over="name=generic_next_over"
+									over_when_pushed="false" onclick_l="proc" params_l="proc_sum_enter_name" tooltip="uiValidName"/>
+									
+	
+	<!-- RANDOMIZE BUTTONS -->
+	
+	<group id="randomize" posref="BR BR" x="-16" y="96" w="96" h="176" active="false">
+	
+		<view type="text" id="rand_txt" render_layer="0" posref="TM MM" x="0" y="-16" shadow="true" hardtext="uiRand" fontsize="14" color="255 192 64 255" />
+		
+		<group id="buttons" posref="BL BL" w="96" h="144">
+			<ctrl type="button" button_type="push_button" id="rand_but1" posref="TL TL" x="0" y="0"
+								tx_normal="blank.tga" tx_over="blank.tga" tx_pushed="blank.tga"
+								color="0 0 0 128" col_over="111 125 116 255" col_pushed="0 0 0 128" scale="true" w="96" h="24"
+								onover="play_sound" params_over="name=generic_next_over" onclick_l="anim_start" params_l="anim=anim_fadein_rand1" />
+	<!--
+			<ctrl type="button" button_type="push_button" id="rand_but2" posref="TL TL" x="0" y="-24"
+								tx_normal="blank.tga" tx_over="blank.tga" tx_pushed="blank.tga"
+								color="0 0 0 128" col_over="111 125 116 255" col_pushed="0 0 0 128" scale="true" w="96" h="24"
+								onover="play_sound" params_over="name=generic_next_over" onclick_l="anim_start" params_l="anim=anim_fadein_rand2" />
+	-->
+			<ctrl type="button" button_type="push_button" id="rand_but3" posref="TL TL" x="0" y="-24"
+								tx_normal="blank.tga" tx_over="blank.tga" tx_pushed="blank.tga"
+								color="0 0 0 128" col_over="111 125 116 255" col_pushed="0 0 0 128" scale="true" w="96" h="24"
+								onover="play_sound" params_over="name=generic_next_over" onclick_l="anim_start" params_l="anim=anim_fadein_rand3" />
+			
+			<ctrl type="button" button_type="push_button" id="rand_but4" posref="TL TL" x="0" y="-48"
+								tx_normal="blank.tga" tx_over="blank.tga" tx_pushed="blank.tga"
+								color="0 0 0 128" col_over="111 125 116 255" col_pushed="0 0 0 128" scale="true" w="96" h="24"
+								onover="play_sound" params_over="name=generic_next_over" onclick_l="anim_start" params_l="anim=anim_fadein_rand4" />
+		
+			<ctrl type="button" button_type="push_button" id="rand_but5" posref="TL TL" x="0" y="-72"
+								tx_normal="blank.tga" tx_over="blank.tga" tx_pushed="blank.tga"
+								color="0 0 0 128" col_over="111 125 116 255" col_pushed="0 0 0 128" scale="true" w="96" h="24"
+								onover="play_sound" params_over="name=generic_next_over" onclick_l="anim_start" params_l="anim=anim_fadein_rand5" />
+		
+			<ctrl type="button" button_type="push_button" id="rand_but6" posref="TL TL" x="0" y="-96"
+								tx_normal="blank.tga" tx_over="blank.tga" tx_pushed="blank.tga"
+								color="0 0 0 128" col_over="111 125 116 255" col_pushed="0 0 0 128" scale="true" w="96" h="24"
+								onover="play_sound" params_over="name=generic_next_over" onclick_l="anim_start" params_l="anim=anim_fadein_rand6" />
+		
+			<ctrl type="button" button_type="push_button" id="rand_but7" posref="TL TL" x="0" y="-120"
+								tx_normal="blank.tga" tx_over="blank.tga" tx_pushed="blank.tga"
+								color="0 0 0 128" col_over="111 125 116 255" col_pushed="0 0 0 128" scale="true" w="96" h="24"
+								onover="play_sound" params_over="name=generic_next_over" onclick_l="anim_start" params_l="anim=anim_fadein_rand7" />
+		
+			
+			<view type="text" id="rand_txt1" render_layer="0" posparent="rand_but1" posref="MM MM" x="0" y="0" shadow="true" hardtext="uiRand1"  fontsize="14" color="255 255 255 255" />
+			<!--
+			<view type="text" id="rand_txt2" render_layer="0" posparent="rand_but2" posref="MM MM" x="0" y="0" shadow="true" hardtext="uiRand2"  fontsize="14" color="255 255 255 255" />
+			-->
+			<view type="text" id="rand_txt3" render_layer="0" posparent="rand_but3" posref="MM MM" x="0" y="0" shadow="true" hardtext="uiRand3"  fontsize="14" color="255 255 255 255" />
+			<view type="text" id="rand_txt4" render_layer="0" posparent="rand_but4" posref="MM MM" x="0" y="0" shadow="true" hardtext="uiRand4"  fontsize="14" color="255 255 255 255" />
+			<view type="text" id="rand_txt5" render_layer="0" posparent="rand_but5" posref="MM MM" x="0" y="0" shadow="true" hardtext="uiRand5"  fontsize="14" color="255 255 255 255" />
+			<view type="text" id="rand_txt6" render_layer="0" posparent="rand_but6" posref="MM MM" x="0" y="0" shadow="true" hardtext="uiRand6"  fontsize="14" color="255 255 255 255" />
+			<view type="text" id="rand_txt7" render_layer="0" posparent="rand_but7" posref="MM MM" x="0" y="0" shadow="true" hardtext="uiRand7"  fontsize="14" color="255 255 255 255" />
+			
+			<instance template="window_border" id="bord" posref="MM MM" />
+		</group>	
+	</group>
+	<link expr="eq(@UI:TEMP:RAND,1)" target="randomize:active" />
+
+	
+	<!-- NAME TITLES -->
+	<view type="text" id="name_txt" render_layer="0" posref="TL TL" x="16" y="-48" hardtext="uiEnterName" shadow="true" fontsize="14" color="255 192 64 255" active="false" />
+
+	<!-- JOBS TITLES -->
+	
+	<view type="text" id="job_txt" render_layer="0" posref="TL TL" x="16" y="-104" hardtext="uiCaNaBoldF" shadow="true" fontsize="20" color="255 192 64 0" active="false" />
+	
+	<!-- VALID TITLES -->
+
+	<view type="text" id="input_txt" render_layer="0" posref="BM BM" x="0" y="36" hardtext="" shadow="true" fontsize="24" color="255 192 64 0" />
+	<view type="text" id="invalid_txt" render_layer="0" posref="BM BM" x="0" y="16" hardtext="uiInvalid" shadow="true" fontsize="22" color="255 192 64 0"/>
+	<view type="text" id="valid_txt" render_layer="0" posref="BM BM" x="0" y="16" hardtext="uiValid" shadow="true" fontsize="22" color="255 192 64 0" />
+
+
+
+
+
+	<!-- LOGOS -->
+	
+	<view type="bitmap" id="logo_fy" render_layer="0" txtoffsetx="0" txtoffsety="0" txtwidth="200" txtheight="256"
+		global_color="false" color="255 255 255 255" posref="BL BL" x="0" y="48" texture="logo_species.tga"  active="false" />
+		
+	<view type="bitmap" id="logo_ma" render_layer="0" txtoffsetx="200" txtoffsety="0" txtwidth="200" txtheight="256"
+		global_color="false" color="255 255 255 255" posref="BL BL" x="0" y="48" texture="logo_species.tga"  active="false" />
+		
+	<view type="bitmap" id="logo_tr" render_layer="0" txtoffsetx="400" txtoffsety="0" txtwidth="200" txtheight="256"
+		global_color="false" color="255 255 255 255" posref="BL BL" x="0" y="48" texture="logo_species.tga"  active="false" />
+		
+	<view type="bitmap" id="logo_zo" render_layer="0" txtoffsetx="600" txtoffsety="0" txtwidth="200" txtheight="256"
+		global_color="false" color="255 255 255 255" posref="BL BL" x="0" y="48" texture="logo_species.tga"  active="false" />
+
+
+	
+	<group id="table" posparent="job_txt" posref="BL TL" w="136" h="96" x="0" y="-8"  >
+		<!--
+		<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="blank2.tga" color="0 0 0 255" global_color="false" />
+		<instance template="window_border" id="bord" posref="MM MM" />
+		
+		<view type="text" id="score" posref="TL TL" x="4" y="-4" hardtext="uiSumScore" 	shadow="true" fontsize="16" color="255 255 255 255" />
+		<view type="text" id="max" posref="TR TR" x="-36" y="-4" hardtext="uiSumMax" 	shadow="true" fontsize="16" color="255 255 255 255" />
+		<view type="text" id="reg" posref="TR TR" x="-4" y="-4" 	hardtext="uiSumReg" 	shadow="true" fontsize="16" color="255 255 255 255" />
+	
+		<instance template="sum_caracs" id="c_hpmax" 	posref="TL TL" x="4" y="-24" 					 	title="uiSumHp"	  color="%hp_color"	max="mul(@UI:TEMP:CARACS:HPMAX,10)"  reg="div(@UI:TEMP:CARACS:HPREG,10)" />
+		<instance template="sum_caracs" id="c_stamax" 	posref="BL TL" 	posparent="c_hpmax" x="0" y="-2" 	title="uiSumSta"  color="%sta_color"	max="mul(@UI:TEMP:CARACS:STAMAX,10)" reg="div(@UI:TEMP:CARACS:STAREG,10)" />
+		<instance template="sum_caracs" id="c_sapmax" 	posref="BL TL" 	posparent="c_stamax" x="0" y="-2" 	title="uiSumSap"  color="%sap_color"	max="mul(@UI:TEMP:CARACS:SAPMAX,10)" reg="div(@UI:TEMP:CARACS:SAPREG,10)" />
+		<instance template="sum_caracs" id="c_wishmax" 	posref="BL TL" 	posparent="c_sapmax" x="0" y="-2" 	title="uiSumWish" color="%focus_color"	max="mul(@UI:TEMP:CARACS:WISHMAX,10)" reg="div(@UI:TEMP:CARACS:WISHREG,10)" />
+		-->
+	</group>
+	
+
+
+	<!-- BLACK BOX (sert a faire les transition...) -->
+	<view type="bitmap" id="blackbox" posref="TL TL" x="0" y="-32" render_layer="1" texture="blank.tga" color="0 0 0 255" scale="true" w="800" h="488" global_color="false" />
+
+	<!-- TIMELINE -->
+	<group id="timeline" w="784" h="32" posref="BL BL" x="8" y="16" >
+		<view type="bitmap" id="back_bg" posref="TL TL" x="0" y="0" texture="time_back.tga" global_color="false" />
+		<view type="bitmap" id="next_bg" posref="TR TR" x="0" y="0" texture="time_next.tga" global_color="false" />
+		<view type="bitmap" id="line" posref="MM MM" x="0" y="0" texture="time_line.tga" scale="true" w="656" h="4" global_color="false" />
+	</group>
+	
+	
+	<!-- Home & Help -->
+	<!-- Removed for Beta 1
+	<ctrl type="button" id="help" button_type="push_button" posref="TR MM" x="-24" y="-16"
+		tx_normal="button_help.tga" tx_pushed="button_help.tga" tx_over="button_help_over.tga" 
+		onover="play_sound" params_over="name=generic_help_over"
+		onclick_l="launch_help" params_l="url=help_outgame.html" tooltip="uiHelp" />
+		-->
+
+	<ctrl type="button" id="home" button_type="push_button" posref="TR MM" x="-24" y="-16"
+		tx_normal="button_home.tga" tx_pushed="button_home.tga" tx_over="button_home_over.tga"
+		onover="play_sound" params_over="name=generic_home_over" 
+		onclick_l="proc" params_l="proc_summary_home_screen" tooltip="uiReturnCharSel" />
+
+	<!-- BORDERS -->
+	<view type="bitmap" id="top_line" posref="TL TL" posparent="blackbox" x="0" y="1" texture="border_hor.tga" scale="true" w="800" h="1" global_color="false" />
+	<view type="bitmap" id="bot_line" posref="BL BL" posparent="blackbox" x="0" y="-1" texture="border_hor.tga" scale="true" w="800" h="1" global_color="false" />
+	<view type="bitmap" id="vertical_line" posref="TL TL" x="-1" y="-32"  texture="border_ver.tga" scale="true" w="1" h="488" global_color="false" />
+
+
+	<!-- Buttons timeline -->
+	<ctrl type="button" id="back" button_type="push_button" posref="BL BL" x="8" y="16"
+		tx_normal="button_back.tga" tx_pushed="button_back_over.tga" tx_over="button_back_over.tga" 
+		onover="play_sound" params_over="name=generic_prev_over"
+		onclick_l="proc" params_l="proc_summary_back_screen" tooltip="uiPrevStep" />
+
+	<ctrl type="button" id="next" button_type="push_button" posref="BR BR" x="-8" y="16" 
+		tx_normal="button_next.tga" tx_pushed="button_next_over.tga" tx_over="button_next_over.tga" 
+		onover="play_sound" params_over="name=generic_next_over" 
+		onclick_l="proc" params_l="proc_summary_next_screen" tooltip="uiNextStep" />
+
+
+	<!-- HELP -->
+	<group id="help_box" w="320" h="240" posref="MM MM" active="false" group_onclick_l="proc" group_params_l="proc_nothing" >
+		<view type="bitmap" id="bg" sizeref="wh" posref="TL TL" x="0" y="0" texture="blank.tga" scale="true" color="0 0 0 192" global_color="false" />
+		<instance template="window_border" id="bord" posref="MM MM" />
+		<view type="text" id="title_help" posref="TL TL" x="8" y="-8" hardtext="uiHelpTitle" fontsize="12" />
+		<ctrl type="button" id="close_help" button_type="push_button" posref="TR TR" x="-8" y="-8"
+			tx_normal="W_close.tga" tx_pushed="W_close.tga" tx_over="W_button_12_over.tga" 
+			onover="play_sound" params_over="name=generic_help_close_over"
+			onclick_l="proc" params_l="proc_summary_close_help" tooltip="uiClose" />
+		
+	</group>
+	
+
+
+</group>
+
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_summary)" target="summary:active" />
+
+
+
+<!-- ANIMATION -->
+<!-- Intro -->
+<anim id="anim_summary_intro" duration="3.0" >
+	
+	<track type="linear" target="summary:bg:h,summary:blackbox:h">
+		<key time="0.1" value="0" />
+		<key time="0.35" value="488" />
+	</track>
+
+
+	<track type="linear" target="summary:bg:y,summary:blackbox:y">
+		<key time="0.1" value="-276" />
+		<key time="0.35" value="-32" />
+	</track>
+
+	<track type="linear" target="summary:title:y">
+		<key time="0.0" value="20" />
+		<key time="1.0" value="-6" />
+	</track>
+	
+	<track type="linear" target="summary:timeline:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+
+	<track type="linear" target="summary:table:alpha,summary:logo_fy:alpha,summary:logo_ma:alpha,summary:logo_tr:alpha,summary:logo_zo:alpha,summary:name_txt:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.4" value="0" />
+		<key time="0.5" value="255" />
+	</track>
+	
+	<track type="linear" target="summary:eb:alpha,summary:valid_name:alpha,summary:randomize:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.4" value="0" />
+		<key time="0.5" value="255" />
+	</track>
+
+	
+	<track type="linear" target="summary:char3d:x">
+		<key time="0.0" value="-800" />
+		<key time="0.4" value="-800" />
+		<key time="0.5" value="0" />
+	</track>
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="255" />
+		<key time="2.5" value="255" />
+		<key time="3.0" value="0" />
+	</track>
+
+	
+	<track type="linear" target="summary:back:alpha">
+		<key time="1.5" value="0" />
+		<key time="2.5" value="255" />
+	</track>
+	
+</anim>
+
+<anim id="anim_summary_intro2" duration="0.5" on_finish="proc" on_finish_params="proc_update_camf" >
+	<track type="linear" target="summary:bg_camface:x">
+		<key time="0.0" value="300" />
+		<key time="0.4" value="300" />
+		<key time="0.5" value="-14" />
+	</track>
+</anim>
+
+
+<!-- Outro called when NEXT button pressed -->
+<anim id="anim_summary_outro" duration="2.0" on_finish="proc" on_finish_params="proc_summary_finish" >
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.5" value="255" />
+	</track>
+
+	<track type="linear" target="summary:table:alpha,summary:logo_fy:alpha,summary:logo_ma:alpha,summary:logo_tr:alpha,summary:logo_zo:alpha,summary:name_txt:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.5" value="255" />
+		<key time="1.5" value="0" />
+	</track>
+	
+	<track type="linear" target="summary:eb:alpha,summary:valid_name:alpha,summary:randomize:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+	
+	<track type="linear" target="summary:back:alpha,summary:home:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+	
+	<track type="linear" target="summary:next:alpha" dynamic="true">
+		<key time="0.0" value="getprop('ui:outgame:summary:next:alpha')" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="summary:input_txt:alpha" dynamic="true">
+		<key time="0.0" value="getprop('ui:outgame:summary:input_txt:alpha')" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="summary:valid_txt:alpha" dynamic="true">
+		<key time="0.0" value="getprop('ui:outgame:summary:valid_txt:alpha')" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="summary:invalid_txt:alpha" dynamic="true">
+		<key time="0.0" value="getprop('ui:outgame:summary:invalid_txt:alpha')" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="summary:char3d:x">
+		<key time="0.0" value="0" />
+		<key time="0.5" value="0" />
+		<key time="1.5" value="-800" />
+	</track>
+
+	<track type="linear" target="summary:bg_camface:x">
+		<key time="0.0" value="-14" />
+		<key time="0.4" value="-14" />
+		<key time="0.5" value="300" />
+	</track>
+
+	<track type="linear" target="summary:title:y">
+		<key time="1.0" value="-6" />
+		<key time="2.0" value="20" />
+	</track>
+	
+	<track type="linear" target="summary:timeline:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.5" value="0" />
+	</track>
+
+</anim>
+
+
+<anim id="anim_summary_outro2" duration="0.4" on_finish="proc" on_finish_params="proc_summary_finish2" >
+
+	<track type="linear" target="summary:bg:h,summary:blackbox:h">
+		<key time="0.1" value="488" />
+		<key time="0.35" value="0" />
+	</track>
+
+	<track type="linear" target="summary:bg:y,summary:blackbox:y">
+		<key time="0.1" value="-32" />
+		<key time="0.35" value="-276" />
+	</track>
+	
+</anim>
+
+
+<anim id="anim_fadein_rand1" duration="0.1" on_finish="proc" on_finish_params="proc_sum_rand_all" >
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.1" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_fadein_rand2" duration="0.1" on_finish="proc" on_finish_params="proc_sum_rand_career" >
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.1" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_fadein_rand3" duration="0.1" on_finish="proc" on_finish_params="proc_sum_rand_specie" >
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.1" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_fadein_rand4" duration="0.1" on_finish="proc" on_finish_params="proc_sum_rand_appear" >
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.1" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_fadein_rand5" duration="0.1" on_finish="proc" on_finish_params="proc_sum_rand_body" >
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.1" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_fadein_rand6" duration="0.1" on_finish="proc" on_finish_params="proc_sum_rand_face" >
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.1" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_fadein_rand7" duration="0.1" on_finish="proc" on_finish_params="proc_sum_rand_colors" >
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.1" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_fadeout_randomize" duration="0.1" on_finish="proc" on_finish_params="proc_update_camf" >
+
+	<track type="linear" target="summary:blackbox:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.1" value="0" />
+	</track>
+
+</anim>
+
+
+
+
+<anim id="anim_valid_name" duration="1.0" disable_buttons="false" >
+
+	<track type="linear" target="summary:next:alpha" dynamic="true">
+		<key time="0.5" value="getprop('ui:outgame:summary:next:alpha')" />
+		<key time="1.0" value="255" />
+	</track>
+
+	<track type="linear" target="summary:valid_txt:alpha" dynamic="true" >
+		<key time="0.5" value="getprop('ui:outgame:summary:valid_txt:alpha')" />
+		<key time="1.0" value="255" />
+	</track>
+	
+	<track type="linear" target="summary:invalid_txt:alpha" dynamic="true" >
+		<key time="0.0" value="getprop('ui:outgame:summary:invalid_txt:alpha')" />
+		<key time="0.5" value="0" />
+	</track>
+	
+	<track type="linear" target="summary:input_txt:alpha" dynamic="true">
+		<key time="0.5" value="getprop('ui:outgame:summary:input_txt:alpha')" />
+		<key time="1.0" value="255" />
+	</track>
+	
+</anim>
+
+
+<anim id="anim_invalid_name" duration="1.0" disable_buttons="false" on_finish="set" on_finish_params="target_property=ui:outgame:summary:next:active|value=0" >
+
+	<track type="linear" target="summary:next:alpha" dynamic="true">
+		<key time="0.0" value="getprop('ui:outgame:summary:next:alpha')" />
+		<key time="0.5" value="0" />
+	</track>
+
+	<track type="linear" target="summary:valid_txt:alpha" dynamic="true" >
+		<key time="0.0" value="getprop('ui:outgame:summary:valid_txt:alpha')" />
+		<key time="0.5" value="0" />
+	</track>
+	
+	<track type="linear" target="summary:invalid_txt:alpha" dynamic="true" >
+		<key time="0.5" value="getprop('ui:outgame:summary:invalid_txt:alpha')" />
+		<key time="1.0" value="255" />
+	</track>
+
+	<track type="linear" target="summary:input_txt:alpha" dynamic="true">
+		<key time="0.5" value="getprop('ui:outgame:summary:input_txt:alpha')" />
+		<key time="1.0" value="255" />
+	</track>
+
+</anim>
+
+<!-- disable_buttons="true" -->
+<anim id="anim_sum_hide_next" duration="0.1" disable_buttons="false" on_finish="set" on_finish_params="target_property=ui:outgame:summary:next:active|value=0" >
+
+	<track type="linear" target="summary:next:alpha" dynamic="true">
+		<key time="0.0" value="getprop('ui:outgame:summary:next:alpha')" />
+		<key time="0.1" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_sum_hide_texts" duration="0.5" disable_buttons="false" >
+
+	<track type="linear" target="summary:valid_txt:alpha" dynamic="true" >
+		<key time="0.0" value="getprop('ui:outgame:summary:valid_txt:alpha')" />
+		<key time="0.5" value="0" />
+	</track>
+	
+	<track type="linear" target="summary:invalid_txt:alpha" dynamic="true" >
+		<key time="0.0" value="getprop('ui:outgame:summary:invalid_txt:alpha')" />
+		<key time="0.5" value="0" />
+	</track>
+
+	<track type="linear" target="summary:input_txt:alpha" dynamic="true">
+		<key time="0.0" value="getprop('ui:outgame:summary:input_txt:alpha')" />
+		<key time="0.5" value="0" />
+	</track>
+
+</anim>
+
+</interface_config>

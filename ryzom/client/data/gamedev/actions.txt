@@ -1,0 +1,84 @@
+
+// List of actions that do not need a specific caller
+// If no precised the argument do not need a name
+
+// ***************************************************************************
+// open
+// Arg : a container name
+// Open a container
+// ***************************************************************************
+// close
+// Arg : a container name
+// Close a container
+// ***************************************************************************
+// open_close
+// Arg : a container name
+// Close a container if opened and open it if closed
+// ***************************************************************************
+// popup
+// Arg : a container name
+// Popup a container
+// ***************************************************************************
+// popin
+// Arg : a container name
+// Popin a container (restore it)
+// ***************************************************************************
+// popup_popin
+// Arg : a container name
+// Toggle Popup/Popin a container
+// ***************************************************************************
+// next_sheath
+// Arg : none
+// Set the Next sheath
+// ***************************************************************************
+// previous_sheath
+// Arg : none
+// Set the Previous sheath
+// ***************************************************************************
+// set_sheath
+// Arg : the sheath number (int)
+// Set the sheath ##
+// ***************************************************************************
+// toggle_combat
+// Arg : none
+// Attack/Disengage the current target
+// ***************************************************************************
+// talk_untalk
+// Arg : none
+// Talk or end dialog with the current target
+// ***************************************************************************
+// mount_unmount
+// Arg : none
+// Mount or unseat if we can the current target
+// ***************************************************************************
+// exchange
+// Arg : none
+// Exchange with the current target
+// ***************************************************************************
+// no_target
+// Arg : none
+// Target nothing
+// ***************************************************************************
+// self_target
+// Arg : none
+// Target the player
+// ***************************************************************************
+// beast_call
+// Arg : the beast number (int)
+// Order the beast to come
+// ***************************************************************************
+// beast_follow
+// Arg : the beast number (int)
+// Order the beast to follow us
+// ***************************************************************************
+// beast_stop
+// Arg : the beast number (int)
+// Order the beast to stop
+// ***************************************************************************
+// set_desktop
+// Arg : the desktop number (0,1,2,3) (int)
+// set the current desktop (exploration, info, labo, help)
+// ***************************************************************************
+// run_shortcut
+// Arg : the shortcut number (0...9) (int)
+// Execute the shortcut of the current shortcut bar
