@@ -1,0 +1,163 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
+
+<proc id="proc_con_quit" >
+	<action handler="play_sound" params="name=charsel_quit_click" />
+	<action handler="stop_music" params="name=music_intro" />
+	<action handler="quit_ryzom" />
+</proc>
+
+<proc id="proc_startall_connect" >
+	<action handler="set" params="target_property=ui:outgame:connecting:back3d:fx1:started|value=1" />
+	<action handler="anim_start" params="anim=anim_connect" />
+	<action handler="anim_start" params="anim=anim_viseur" />
+</proc>
+
+<proc id="proc_restart_connect" >
+	<action handler="anim_start" cond="eq(@UI:CURRENT_SCREEN, %screen_connecting)" params="anim=anim_connect" />
+</proc>
+
+<proc id="proc_restart_viseur" >
+	<action handler="anim_start" cond="eq(@UI:CURRENT_SCREEN, %screen_connecting)" params="anim=anim_viseur" />
+</proc>
+
+
+<!-- Window Border2 -->
+<template name="window_border2" posparent="parent">
+		<view type="bitmap" id="t" texture="border_hor.tga" posref="TM TM" posparent="#posparent" scale="true" sizeref="w" w="-4" h="2"/>
+		<view type="bitmap" id="b" texture="border_hor.tga" posref="BM BM" posparent="#posparent" scale="true" sizeref="w" w="-4" h="2"/>
+		<view type="bitmap" id="l" texture="border_ver.tga" posref="TL TL" posparent="#posparent" scale="true" sizeref="h" w="2" h="0" />
+		<view type="bitmap" id="r" texture="border_ver.tga" posref="TR TR" posparent="#posparent" scale="true" sizeref="h" w="2" h="0" />
+</template>
+
+
+<group id="connecting" w="800" h="600" posref="MM MM" on_active="proc" on_active_params="proc_startall_connect" >
+
+	<!-- BLACK BACK -->
+
+
+	<view type="bitmap" id="stars" render_layer="-1" txtoffsetx="0" txtoffsety="0" txtwidth="800" txtheight="600"
+		global_color="false" color="255 255 255 255" posref="MM MM" x="0" y="0" w="800" h="600" texture="default_bg.tga" scale="true" />
+
+	<view type="bitmap" id="bg" posref="MM MM" sizeref="wh" w="0" h="0" x="0" y="0" render_layer="0" texture="blank.tga" color="0 0 0 64" scale="true" global_color="false" />
+
+
+
+	<!-- ATYS -->
+	<scene3d id="back3d" x="0" y="0" w="800" h="600" posref="MM MM" curcam="cam" 
+						ambient="0 0 0" sun_ambient="50 50 50" sun_diffuse="160 160 160" sun_specular="255 255 255" sun_direction="1.0 1.0 -1.0" >
+
+		<camera id="cam" fov="45" pos="-5.0 -45.0 0.0" target="0.0 0.0 0.0" roll="0" />
+
+		<light id="l1" pos="-4.6 -5.0 4.0" color="255 255 192" near="8.0" far="10.0" />
+
+		<shape id="glow" name="atysglow.shape" pos="0 0 0" rot="0.0 0.0 0.0" />
+		<shape id="atys" name="atys.shape" pos="0 0 0" rot="0.0 0.0 0.0" />
+		<shape id="atm1" name="atmos1.shape" pos="0 0 0" rot="0.0 0.0 0.0" />
+		<shape id="atm2" name="atmos2.shape" pos="0 0 0" rot="0.0 0.0 0.0" />
+
+		<fx id="fx1" pos="-4.5 -39.0 0.0" name="stars.ps" rot="0.0 0.0 0.0" />
+
+	</scene3d>
+
+
+	<group id="viseur" posref="MM MM" w="640" h="536" >
+		<instance template="window_border2" id="b_viseur" posref="MM MM" />
+	</group>
+	
+
+	<!-- BORDERS -->
+	<view type="bitmap" id="top_line" posref="TL TL" x="0" y="-32" texture="border_hor.tga" scale="true" w="800" h="1" global_color="false" />
+
+	<!-- Skip when click anywhere -->
+	<ctrl type="button" id="quit" button_type="push_button" posref="TR MM" x="-24" y="-16"
+		tx_normal="button_quit.tga" tx_pushed="button_quit.tga" tx_over="button_quit_over.tga" 
+		onover="play_sound" params_over="name=charsel_quit_over"
+		onclick_l="proc" params_l="proc_con_quit" tooltip="uiQuit" />
+
+	<view type="text" id="title" posref="TL TL" x="8" y="-6" hardtext="uiConnecting" fontsize="20"/>
+
+</group>
+
+<!-- This link is used to display the right screen among the outgame screens -->
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_connecting)" target="connecting:active" />
+
+<proc id="proc_con_test">
+	<action handler="set" params="dblink=UI:CURRENT_SCREEN|value=%screen_intro"
+		cond="and(eq(@UI:CURRENT_SCREEN, %screen_connecting),eq(@UI:SERVER_RECEIVED_CHARS,1))" />
+</proc>
+
+<!-- When we got the answer from server go to screen_intro -->
+<link expr="depends(@UI:CURRENT_SCREEN,@UI:SERVER_RECEIVED_CHARS)" action="proc" params="proc_con_test" />
+
+
+<!-- ANIMATIONS -->
+
+<anim id="anim_connect" duration="90.0" disable_buttons="false"
+							on_finish="proc" on_finish_params="proc_restart_connect" >
+
+	<track type="linear" target="connecting:back3d:atys:roty">
+		<key time="0.0" value="0.0" />
+		<key time="90.0" value="-360.0"/>
+	</track>
+
+	<track type="linear" target="connecting:back3d:atm1:rotx">
+		<key time="0.0" value="0.0" />
+		<key time="90.0" value="-360.0"/>
+	</track>
+	
+	<track type="linear" target="connecting:back3d:atm2:rotz">
+		<key time="0.0" value="0.0" />
+		<key time="90.0" value="-360.0"/>
+	</track>
+
+	<track type="linear" target="connecting:back3d:atm1:rotz">
+		<key time="0.0" value="0.0" />
+		<key time="90.0" value="360.0"/>
+	</track>
+	
+	<track type="linear" target="connecting:back3d:atm2:rotx">
+		<key time="0.0" value="0.0" />
+		<key time="90.0" value="360.0"/>
+	</track>
+
+</anim>
+
+<anim id="anim_viseur" duration="2.0" disable_buttons="false"
+							on_finish="proc" on_finish_params="proc_restart_viseur" >
+
+	<track type="tcb" target="connecting:viseur:w">
+		<key time="0.0" value="800" tension="1.0" easeto="1"  />
+		<key time="1.5" value="128" tension="1.0" easefrom="1" />
+	</track>
+	
+	<track type="tcb" target="connecting:viseur:h">
+		<key time="0.0" value="536" tension="1.0" easeto="1"  />
+		<key time="1.5" value="128" tension="1.0" easefrom="1" />
+	</track>
+	
+	<track type="tcb" target="connecting:viseur:alpha">
+		<key time="0.0" value="255" tension="1.0" />
+		<key time="0.75" value="255" tension="1.0" easeto="1"  />
+		<key time="1.5" value="0" tension="1.0" easefrom="1" />
+	</track>
+
+	<track type="linear" target="connecting:bg:alpha" dynamic="true">
+		<key time="0.0" value="getprop('ui:outgame:connecting:bg:alpha')" />
+		<key time="0.4" value="rand(64,160)" />
+		<key time="0.8" value="rand(64,160)" />
+		<key time="1.2" value="rand(64,160)" />
+		<key time="1.6" value="rand(64,160)" />
+		<key time="2.0" value="rand(64,160)" />
+	</track>
+
+</anim>
+
+
+
+
+
+</interface_config>
+
