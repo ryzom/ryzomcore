@@ -71,7 +71,7 @@ function outgame:getTrykerLastName()
 	return trykerLastNames[math.random(nbTrykerLastNames)]
 end
 
--- Zoraï
+-- Zoraï¿½
 function outgame:getZoraiFirstName()
 	local nbFirstNamesOne = #zoraiFirstNamesOne
 	local FirstNameOne = zoraiFirstNamesOne[math.random(nbFirstNamesOne)]
@@ -104,7 +104,7 @@ function outgame:procGenerateName()
 	local lastName = "test"
 
 	-- Fyros and Matis are using "first name, last name" order
-	-- Trykers and Zoraïs are using "last name, first name" order
+	-- Trykers and Zoraï¿½s are using "last name, first name" order
 	if  tonumber(dbNameRace) == 1 then
 	-- Fyros
 		firstName = self:getFyrosFirstName()
@@ -192,7 +192,7 @@ end
 
 -- Name race slider update.
 function outgame:procUpdateNameRaceLabel()
-	local nameRaceType = { "Fyros", "Matis", "Tryker", "Zoraï", "uiCP_Maraudeur" }
+	local nameRaceType = { "uiCP_Specie_Fyros", "uiCP_Specie_Matis", "uiCP_Specie_Tryker", "uiCP_Specie_Zorai", "uiCP_Maraudeur" }
 
 	local uiNameRaceText = getUI("ui:outgame:appear_name:name_race_slider:name_race")
 	local dbNameRace = getDbProp("UI:TEMP:NAME_RACE")
@@ -226,12 +226,8 @@ function outgame:procUpdateNameRaceLabel()
 	uiNameRaceText.hardtext = tostring(nameRaceType[tonumber(dbNameRace)])
 end
 
-
-local matisF = "Matis " .. (string.lower(tostring(i18n.get("uiCP_Sex_Female")) )):gsub("^%l", string.upper)
-local matisM = "Matis " .. (string.lower(tostring(i18n.get("uiCP_Sex_Male")) )):gsub("^%l", string.upper)
-
 function outgame:procUpdateNameSubRaceFirstNameLabel()
-	local nameSubRaceFirstNameType = { "Fyros", matisM, matisF, "Tryker", "Zoraï" }
+	local nameSubRaceFirstNameType = { "uiCP_Specie_Fyros", "uiCP_Specie_Matis_Male", "uiCP_Specie_Matis_Female", "uiCP_Specie_Tryker", "uiCP_Specie_Zorai" }
 	local uiNameSubRaceFirstNameText = getUI("ui:outgame:appear_name:name_sub_race_first_name_slider:name_race")
 	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME")
 
@@ -239,7 +235,7 @@ function outgame:procUpdateNameSubRaceFirstNameLabel()
 end
 
 function outgame:procUpdateNameSubRaceLastNameLabel()
-	local nameSubRaceLastNameType = { "Fyros", "Matis", "Tryker", "Zoraï" }
+	local nameSubRaceLastNameType = { "uiCP_Specie_Fyros", "uiCP_Specie_Matis", "uiCP_Specie_Tryker", "uiCP_Specie_Zorai" }
 	local uiNameSubRaceLastNameText = getUI("ui:outgame:appear_name:name_sub_race_last_name_slider:name_race")
 	local dbNameSubRaceLastName = getDbProp("UI:TEMP:NAME_SUB_RACE_LAST_NAME")
 
@@ -273,6 +269,21 @@ end
 ------------------------------------------------------------------------------------------------------------
 -- called to construct pack
 function outgame:buildActionPack()
+
+	local slot = getDbProp("UI:TEMP:CHARSELSLOT")
+	local lang = getClientCfg("LanguageCode")
+	local sex = "m"
+	if getDbProp("UI:TEMP:CHAR3D:VPA:SEX") == 1 then
+		sex = "f"
+	end
+	rpbg_key = tostring(nltime.getSecondsSince1970())..":"..tostring(math.random(100000, 429496729))
+	local dst = io.open("save/rpbg_"..tostring(slot)..".key", "wb")
+	dst:write(rpbg_key)
+	dst:close()
+
+	getUI("ui:outgame:appear:finish_but").frozen = 1
+	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
+
 
 	local uiDesc = getUI("ui:outgame:appear:job_options:options:desc")
 	if (uiDesc==nil) then
@@ -411,4 +422,15 @@ function outgame:launchGame()
 		end
 	end
 	runAH(getUICaller(), "proc", "proc_charsel_play")
+end
+
+function outgame:loadRPBGPage()
+	local slot = getDbProp("UI:TEMP:CHARSELSLOT")
+	local lang = getClientCfg("LanguageCode")
+	local sex = "m"
+	if getDbProp("UI:TEMP:CHAR3D:VPA:SEX") == 1 then
+		sex = "f"
+	end
+	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
+	getUI("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
 end

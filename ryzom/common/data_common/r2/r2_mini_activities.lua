@@ -66,13 +66,13 @@ function r2.miniActivities:updateSequenceButtonBar()
 		end
 	end
 
-	local sequ = ""
+	local uc_sequ = ucstring()
 	if sequenceInst and sequenceInst.User.Deleted~=true then
-		sequ = sequenceInst:getName()
+		uc_sequ:fromUtf8(sequenceInst:getName())
 	else
-		sequ = i18n.get("uiR2EDSequences") 	
+		uc_sequ = i18n.get("uiR2EDSequences") 	
 	end
-	sequencesButton.text = sequ
+	sequencesButton.uc_hardtext = uc_sequ
 end
 
 
@@ -145,7 +145,9 @@ function r2.miniActivities:updateMiniActivityView()
 						assert(place)
 						activityType = activityType .. " '" .. place.Name .."'"
 					end
-					activityText.text = activityType
+					local uc_type = ucstring()
+					uc_type:fromUtf8(activityType)
+					activityText.uc_hardtext = uc_type
 				else
 					decalErased = decalErased+1
 				end
@@ -157,7 +159,7 @@ function r2.miniActivities:updateMiniActivityView()
 		if (sequenceInst.Components.Size==0) or (sequenceInst.Components.Size==1 and erasedInstId~=nil) 
 			or (startCount == 0) then
 			noActivityLabel.active = true
-			noActivityLabel.text = i18n.get("uiR2EdNoActivity")
+			noActivityLabel.uc_hardtext = i18n.get("uiR2EdNoActivity")
 		else
 			noActivityLabel.active = false
 		end
@@ -165,7 +167,7 @@ function r2.miniActivities:updateMiniActivityView()
 	else
 
 		noActivityLabel.active = true
-		noActivityLabel.text = i18n.get("uiR2EdNoSequence")
+		noActivityLabel.uc_hardtext = i18n.get("uiR2EdNoSequence")
 	end
 
 	-- hide remaining mini activity templates

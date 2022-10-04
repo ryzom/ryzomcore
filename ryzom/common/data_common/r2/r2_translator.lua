@@ -13,14 +13,18 @@ Translator.PredatorEnemyFaction = "Player|guard|bandit|herbivore|karavan";
 function printMsg(str)	
 	messageBox(str)	
 	debugInfo(colorTag(255,255,0)..str)
-	displaySystemInfo(str, "BC")
+	local ucStringMsg = ucstring()
+	ucStringMsg:fromUtf8(str)	
+	displaySystemInfo(ucStringMsg, "BC")
 	messageBox(str)
 end
 
 function printError( str)
 	local msg = "Translation WRN:"
 	debugInfo(colorTag(255,0,0)..msg..str)
---	displaySystemInfo(str, "BC")
+--	local ucStringMsg = ucstring()
+--	ucStringMsg:fromUtf8(str)
+--	displaySystemInfo(ucStringMsg, "BC")
 	--messageBox(str)
 	assert(nil)
 end
@@ -30,8 +34,10 @@ r2.Translator.MultilineBc = {}
 function Translator.updateEachSecond()
 	if table.getn( Translator.MultilineBc ) > 0 then
 		local msg=table.remove(Translator.MultilineBc, 1)
-		if msg then
-			displaySystemInfo(msg, "BC")
+		if msg then 
+			local ucStringMsg = ucstring()
+			ucStringMsg:fromUtf8(msg)	
+			displaySystemInfo(ucStringMsg, "BC")
 		end
 	end
 end
@@ -54,8 +60,9 @@ function printWarning( str)
  	-- Just report the last error
  	if (r2.LastTranslationErrorMsg  == nil) then
 		r2.LastTranslationErrorMsg = str
-		--displaySystemInfo(str, "BC")
-		displaySystemInfo("Translation Error", "BC")
+		local ucStringMsg = ucstring("Translation Error")
+		-- ucStringMsg:fromUtf8(r2.LastTranslationErrorMsg)
+		displaySystemInfo(ucStringMsg, "BC")
 	 	messageBox(str)
 	end
 	if devMode then
@@ -3955,19 +3962,15 @@ function Translator.translateDialog(entity, context)
 			end
 
 			rtAction = Translator.createAction("chat_step", rtNpcGrp.Id, param)
-			assert(rtAction)
 			table.insert(rtDialogOk.Children, rtAction)
 
-			assert(param.Index)
-			assert(param.Emote)
-			assert(param.Says)
-			assert(param.WhoNoEntity)
 			table.insert(endParam.Indexs, param.Index)
-			table.insert(endParam.Grps, param.WhoGrp or '')
-			table.insert(endParam.Whos, param.Who or '')
+			table.insert(endParam.Grps, param.WhoGrp)
+			table.insert(endParam.Whos, param.Who)
 			table.insert(endParam.Emotes, param.Emote)
 			table.insert(endParam.Says, param.Says)
-			table.insert(endParam.WhoNoEntitys, param.WhoNoEntity)
+			table.insert(endParam.WhoNoEntitys, param.WhoNoEntity)			
+		
 
 		else -- !if isKindOf("ChatStep")
 			componentIndex, component = next(entity.Components, componentIndex)
@@ -4377,18 +4380,18 @@ end
 
 function Translator.addActivationToTranslations(logicTranslations)
 	if logicTranslations.ApplicableActions == nil then logicTranslations.ApplicableActions = {} end
-	--logicTranslations.ApplicableActions.activate = {menu=i18n.get("uiR2EdActivate"), text="activates"}
-	--logicTranslations.ApplicableActions.deactivate = {menu=i18n.get("uiR2EdDesactivate"), text="deactivates"}
-	--logicTranslations.ApplicableActions.trigger = {menu=i18n.get("uiR2EdTrigger"), text="triggers"}
+	--logicTranslations.ApplicableActions.activate = {menu=i18n.get("uiR2EdActivate"):toUtf8(), text="activates"}
+	--logicTranslations.ApplicableActions.deactivate = {menu=i18n.get("uiR2EdDesactivate"):toUtf8(), text="deactivates"}
+	--logicTranslations.ApplicableActions.trigger = {menu=i18n.get("uiR2EdTrigger"):toUtf8(), text="triggers"}
 
 	if logicTranslations.Events == nil then logicTranslations.Events = {} end
-	--logicTranslations.Events.activation	= {menu=i18n.get("uiR2EdActivation"), text=r2:lowerTranslate("uiR2EdActivation")}
-	--logicTranslations.Events.deactivation = {menu=i18n.get("uiR2EdDesactivation"), text=r2:lowerTranslate("uiR2EdDesactivation")}
-	--logicTranslations.Events.trigger = {menu=i18n.get("uiR2EdTrigger"), text=r2:lowerTranslate("uiR2EdTrigger")}
+	--logicTranslations.Events.activation	= {menu=i18n.get("uiR2EdActivation"):toUtf8(), text=r2:lowerTranslate("uiR2EdActivation")}
+	--logicTranslations.Events.deactivation = {menu=i18n.get("uiR2EdDesactivation"):toUtf8(), text=r2:lowerTranslate("uiR2EdDesactivation")}
+	--logicTranslations.Events.trigger = {menu=i18n.get("uiR2EdTrigger"):toUtf8(), text=r2:lowerTranslate("uiR2EdTrigger")}
 
 	if logicTranslations.Conditions == nil then logicTranslations.Conditions = {} end
-	--logicTranslations.Conditions["is active"] = {menu=i18n.get("uiR2EdIsActive"), text=r2:lowerTranslate("uiR2EdIsActive")}
-	--logicTranslations.Conditions["is inactive"]	= {menu=i18n.get("uiR2EdIsInactive"), text=r2:lowerTranslate("uiR2EdIsInactive")}
+	--logicTranslations.Conditions["is active"] = {menu=i18n.get("uiR2EdIsActive"):toUtf8(), text=r2:lowerTranslate("uiR2EdIsActive")}
+	--logicTranslations.Conditions["is inactive"]	= {menu=i18n.get("uiR2EdIsInactive"):toUtf8(), text=r2:lowerTranslate("uiR2EdIsInactive")}
 	return logicTranslations
 end
 
@@ -4400,7 +4403,7 @@ function Translator.CreateUserComponent(featureName)
 	end
 
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of '"..featureName.."' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of '"..featureName.."' at pos (%d, %d, %d)", x, y, z))
 		local component = r2.Features[featureName].createUserComponent( x, y)
 		component.Texts = nil
 		r2.requestInsertNode(r2:getCurrentAct().InstanceId, "Features", -1, "", component)

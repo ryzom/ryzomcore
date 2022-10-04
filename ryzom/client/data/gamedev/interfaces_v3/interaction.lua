@@ -117,26 +117,6 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 --
-function game:updateEmoteMenu(prop, tooltip, tooltip_pushed, name, param)
-	for i=0,9 do
-		-- Get key shortcut
-		local text = i18n.get('uiTalkMemMsg0' .. i);
-		local key = runExpr( "getKey('talk_message','0" .. i .. "',1)" );
-
-		if (key ~= nil and key  ~= '') then
-			key = ' @{T25}@{2F2F}(' .. key .. ')';
-			text = concatUCString(text, key);
-		end
-
-		-- if we don't do the full getUI, it doesn't work (don't understand why)
-		local	uiQC= getUI("ui:interface:user_chat_emote_menu:quick_chat:" .. "qc" .. i);
-		uiQC.uc_hardtext_format= text;
-	end
-
-end
-
-------------------------------------------------------------------------------------------------------------
---
 if (ui_free_chat_h == nil) then
 	ui_free_chat_h = {}
 end
@@ -281,9 +261,8 @@ end
 -- Level of the creature
 -- Is its level known (not too high ...)
 -- Boss/Mini-bosses/Names colored ring
-function game:updateTargetConsiderUI()
-	-- debugInfo("Updating consider widget")
 
+function game:updateTargetConsiderUI()
 	local targetWindow = getUI("ui:interface:target")
 	--
 	local wgTargetSlotForce = targetWindow:find("slot_force")
@@ -296,7 +275,9 @@ function game:updateTargetConsiderUI()
 	local wgLock        = targetWindow:find("lock")
 
 	wgTargetSlotForce.active = true
+	wgTargetSlotForce.texture = "consider_bg.tga"
 	wgImpossible.active = true
+	wgTargetSlotForce.h = 16
 
 	-- no selection ?
 	if twGetTargetLevel() == -1 then
@@ -420,6 +401,20 @@ function game:updateTargetConsiderUI()
 			wgTargetSlotForce.color = "213 212 9 255"
 			wgToolTip.tooltip = i18n.get("uittConsiderBoss")
 		end
+	elseif levelForce == 12 then
+		wgImpossible.color = "255 255 255 255"
+		wgTargetSlotForce.texture = "episode_step.tga"
+		wgTargetSlotForce.color = "255 255 255 255"
+		wgToolTip.tooltip = i18n.get("uittConsiderUnknownLevel")
+		wgTargetLevel.active = false
+		wgImpossible.y = -5
+	elseif levelForce > 12 then
+		wgImpossible.color = "255 255 255 255"
+		wgTargetSlotForce.texture = "episode_step_ok.tga"
+		wgTargetSlotForce.color = "255 255 255 255"
+		wgToolTip.tooltip = i18n.get("uittConsiderSpecialLevel")
+		wgTargetLevel.active = false
+		wgImpossible.y = -5
 	end
 
 	if impossible then
@@ -648,17 +643,19 @@ function game:openWindowHeader()
 	local ui = getUICaller().parent;
 	local id = ui.id;
 
-	-- set size from saved values
-	if game.ui_props[id].pop_min_h ~= nil then
-		ui.pop_min_h = game.ui_props[id].pop_min_h
-	end
+	if ui ~= nil and game.ui_props[id] ~= nil then
+		-- set size from saved values
+		if game.ui_props[id].pop_min_h ~= nil then
+			ui.pop_min_h = game.ui_props[id].pop_min_h
+		end
 
-	if game.ui_props[id].h ~= nil then
-		ui.h = game.ui_props[id].h
-	end
+		if game.ui_props[id].h ~= nil then
+			ui.h = game.ui_props[id].h
+		end
 
-	 if ui_webig_browser_w ~= nil then
-		ui.w = game.ui_props[id].w;
+		 if ui_webig_browser_w ~= nil then
+			ui.w = game.ui_props[id].w;
+		end
 	end
 end
 
@@ -679,6 +676,11 @@ function game:openGuildIsland(url_island)
 	getUI("ui:interface:guild:content:tab_island:props:html"):browse(url_island.."params="..params);
 	runAH(nil, "browse_home", "name=ui:interface:guild:content:tab_island:inv:html")
 end
+
+function game:openGuildSpecialBag()
+	runAH(nil, "browse_home", "name=ui:interface:guild:content:tab_special_bag:inv:html")
+end
+
 
 
 ------------------------------------------------------------------------------------------------------------
@@ -954,7 +956,6 @@ function arkNpcShop:checkitems(db, items, quality, id)
 			local name = string.lower(getSheetName(sheet))
 			for _, item in pairs(items) do
 				if name == item then
-					debug(item)
 					local qual =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUALITY")
 					local quant =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUANTITY")
 

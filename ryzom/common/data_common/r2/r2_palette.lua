@@ -268,6 +268,7 @@ r2.loadPalette = function()
 		chest_plate = 
 		{
 			["refugee vest"] =	"icravr.sitem",
+			["civilian vest"] =	"icfacv_3.sitem",
 			["light vest"] =	"icfalv.sitem",
 			["light vest II"] =	"icfalv_3.sitem",
 			["medium vest"] =	"icfamv.sitem",
@@ -292,6 +293,7 @@ r2.loadPalette = function()
 			["light boots"] = "icfalb.sitem",
 			["medium boots"] = "icfamb.sitem",
 			["heavy boots"] = "icfahb.sitem",
+			["boots 4"] = "icfacb_3.sitem",
 			["boots 5"] = "icfahb_3.sitem",
 			["boots 6"] = "icfamb_3.sitem",
 			["boots 7"] = "icfalb_3.sitem"
@@ -309,6 +311,7 @@ r2.loadPalette = function()
 			["light sleeves"] = "icfals.sitem",
 			["medium sleeves"] = "icfams.sitem",
 			["heavy sleeves"] = "icfahs.sitem",
+			["sleeves 4"] = "icfacs_3.sitem",
 			["sleeves 5"] = "icfahs_3.sitem",
 			["sleeves 6"] = "icfams_3.sitem",
 			["sleeves 7"] = "icfals_3.sitem"
@@ -364,6 +367,7 @@ r2.loadPalette = function()
 
 		chest_plate = 
 		{
+			["vest 1"] = "icmacv_3.sitem",
 			["vest 2"] = "icmahv_3.sitem",
 			["vest 3"] = "icmamv_3.sitem",
 			["vest 4"] = "icmalv_3.sitem",
@@ -380,6 +384,7 @@ r2.loadPalette = function()
 
 		boots = 
 		{
+			["boots 1"] = "icmacb_3.sitem",
 			["boots 2"] = "icmahb_3.sitem",
 			["boots 3"] = "icmamb_3.sitem",
 			["boots 4"] = "icmalb_3.sitem"
@@ -392,6 +397,7 @@ r2.loadPalette = function()
 
 		arms_guard = 
 		{
+			["sleeves 1"] = "icmacs_3.sitem",
 			["sleeves 2"] = "icmahs_3.sitem",
 			["sleeves 3"] = "icmams_3.sitem",
 			["sleeves 4"] = "icmals_3.sitem"
@@ -447,6 +453,7 @@ r2.loadPalette = function()
 
 		chest_plate = 
 		{
+			["vest 1"] = "ictacv_3.sitem",
 			["vest 2"] = "ictahv_3.sitem",
 			["vest 3"] = "ictamv_3.sitem",
 			["vest 4"] = "ictalv_3.sitem",
@@ -462,6 +469,7 @@ r2.loadPalette = function()
 
 		boots = 
 		{
+			["boots 1"] = "ictacb_3.sitem",
 			["boots 2"] = "ictahb_3.sitem",
 			["boots 3"] = "ictamb_3.sitem",
 			["boots 4"] = "ictalb_3.sitem"
@@ -474,6 +482,7 @@ r2.loadPalette = function()
 
 		arms_guard = 
 		{
+			["sleeves 1"] = "ictacs_3.sitem",
 			["sleeves 2"] = "ictahs_3.sitem",
 			["sleeves 3"] = "ictams_3.sitem",
 			["sleeves 4"] = "ictals_3.sitem"
@@ -527,6 +536,7 @@ r2.loadPalette = function()
 
 		chest_plate = 
 		{
+			["vest 1"] = "icmacv_3.sitem",
 			["vest 2"] = "icmahv_3.sitem",
 			["vest 3"] = "icmamv_3.sitem",
 			["vest 4"] = "icmalv_3.sitem",
@@ -542,6 +552,7 @@ r2.loadPalette = function()
 
 		boots = 
 		{
+			["boots 1"] = "icmacb_3.sitem",
 			["boots 2"] = "icmahb_3.sitem",
 			["boots 3"] = "icmamb_3.sitem",
 			["boots 4"] = "icmalb_3.sitem"
@@ -553,6 +564,7 @@ r2.loadPalette = function()
 
 		arms_guard = 
 		{
+			["sleeves 1"] = "icmacs_3.sitem",
 			["sleeves 2"] = "icmahs_3.sitem",
 			["sleeves 3"] = "icmams_3.sitem",
 			["sleeves 4"] = "icmals_3.sitem"

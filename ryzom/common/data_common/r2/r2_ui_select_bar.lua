@@ -112,7 +112,7 @@ function r2.SelectBar:update()
 	local function setupButton(butt, instance)
 		butt.active = true
 		butt.b.pushed = (instance == selection)		
-		butt.b.text = instance:getDisplayName()
+		butt.b.uc_hardtext = instance:getDisplayName()
 		local icon = instance:getSelectBarIcon()
 		if icon ~= "" and icon ~= nil then
 			butt.icon.texture = icon
@@ -323,7 +323,7 @@ function r2.SelectBar:browseSequences()
 	r2:clearMenu(rm)
 	for s = 0, activitySequences.Size - 1 do
 		local sequence = activitySequences[s]
-		rm:addLine(r2:getSequenceName(sequence), "lua", "r2:selectActivitiesSequence(".. tostring(s) .. ")", "s")
+		rm:addLine(ucstring(r2:getSequenceName(sequence)), "lua", "r2:selectActivitiesSequence(".. tostring(s) .. ")", "s")
 	end
 	rm:addSeparator()
 	r2:addMenuLine(rm, i18n.get("uiR2EDNewSequence"), "lua", "r2:newMiniActivitySequence()", "new_sequence", "r2_icon_create.tga", 14)

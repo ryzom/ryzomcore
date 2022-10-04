@@ -1,0 +1,598 @@
+[1]RADIO_BUTTON
+[2]RADIO_BUTTON
+[3]RADIO_BUTTON
+[4]RADIO_BUTTON
+[5]RADIO_CONTROLLER
+
+[6]RADIO_BUTTON
+[7]RADIO_BUTTON
+[8]RADIO_CONTROLLER
+
+[9]BUTTON
+[10]CAPTURE
+[11]CAPTURE
+
+[12]LIST
+[13]TEXT
+[14]TEXT
+[15]BUTTON
+[16]BUTTON
+[17]TEXT
+[18]CAPTURE
+[19]CAPTURE
+[20]BUTTON
+
+[21]BITMAP
+
+
+/**************************************************************/
+/ The Chat Window
+/*************************************************************/
+
+/ the chat control box
+[22]CHAT
+/ the chat input control
+[23]CHAT_INPUT
+
+/ whisper
+[24]RADIO_BUTTON
+/ say
+[25]RADIO_BUTTON
+/shout
+[26]RADIO_BUTTON
+
+/speech mode
+[55]RADIO_BUTTON
+/ public mode
+[56]RADIO_BUTTON
+/ teammate mode
+[58]RADIO_BUTTON
+/ clade mode
+[59]RADIO_BUTTON
+/ family mode
+[60]RADIO_BUTTON
+/clade mode
+[70]RADIO_BUTTON
+
+/ the radio controller
+[64]RADIO_CONTROLLER
+
+/ unmute all
+[27]BUTTON
+
+/1
+[28]RADIO_BUTTON
+/2
+[29]RADIO_BUTTON
+/3
+[30]RADIO_BUTTON
+/4
+[31]RADIO_BUTTON
+/5
+[32]RADIO_BUTTON
+/ radio controller for 28 to 32
+[33]RADIO_CONTROLLER
+
+/ Speech
+[34]BUTTON
+/ leave speech
+[53]BUTTON
+
+/vote
+[35]BUTTON
+/create group
+[54]BUTTON
+
+/min
+[36]BUTTON
+/lock-unlock
+[37]BUTTON
+
+/Create Teammate button
+[61]BUTTON
+/leave teammate button
+[62]BUTTON
+
+/**************************************************************/
+/ The pop-up window displayed with a right-click in public chat
+/*************************************************************/
+/ surname
+[38]TEXT
+
+/ I want to be your teammate
+[57]BUTTON
+/ do you want to be my teammate
+[39]BUTTON
+/join clade proposal
+[69]BUTTON
+
+/add to contact list
+[40]BUTTON
+/Propose to join Clad
+[41]BUTTON
+
+/ use preprog
+[42]BUTTON
+
+/ preprog 1
+[43]RADIO_BUTTON
+/ preprog 2
+[44]RADIO_BUTTON
+/ preprog 3
+[45]RADIO_BUTTON
+/ preprog 4
+[46]RADIO_BUTTON
+/ preprog 5
+[47]RADIO_BUTTON
+
+/ the radio controller for the radio buttons 43 to 47
+[65]RADIO_CONTROLLER
+
+/the five possible clades buttons
+[48]BUTTON
+[49]BUTTON
+[50]BUTTON
+[51]BUTTON
+[52]BUTTON
+
+/[53] already used
+/[54] already used
+/[55] already used
+/[56] already used
+/[57] already used
+/[58] already used
+/[59] already used
+/[60] already used
+/[61] already used
+/[62] already used
+
+/ the capture control used to send message to the selected player
+[63]CAPTURE
+
+/[64] already used
+/[65] already used
+[66]BUTTON
+[67]BUTTON
+[68]BUTTON
+
+/[69] already used
+/[70] already used
+
+/ the Vote button
+[71]BUTTON
+
+[75]BITMAP
+/ the close button (not in final version)
+[99]BUTTON
+
+
+/**************************************************************/
+/ Dialog Box with a Bot (OSD 3).
+/*************************************************************/
+[100]TEXT
+[101]TEXT
+[102]LIST
+[103]CHOICE_LIST
+
+[104]BITMAP
+[105]BITMAP
+[106]BITMAP
+[107]BITMAP
+[108]BITMAP
+[109]BITMAP
+[110]BITMAP
+[111]BITMAP
+[112]BITMAP
+[113]BITMAP
+[114]BITMAP
+[115]BITMAP
+[116]BITMAP
+[117]BITMAP
+[118]BITMAP
+
+
+/***********************************************************/
+/ 		THE CREATE CLADE INTERFACE
+/**********************************************************/
+// Background
+[200]BITMAP
+[209]BITMAP
+[210]BITMAP
+
+/ clade name
+[201]CAPTURE
+
+/ window name
+[202]TEXT
+
+/ clade corporate name
+[203]CAPTURE
+
+/ public clade
+[204]RADIO_BUTTON
+/ secret clade
+[205]RADIO_BUTTON
+/
+[206]RADIO_CONTROLLER
+
+[207]BUTTON
+[208]BUTTON
+
+
+/***********************************************************/
+/ 		THE VOTE INTERFACE
+/**********************************************************/
+/ background bitmaps
+[300]BITMAP
+[301]BITMAP
+[302]BITMAP
+[303]BITMAP
+[304]BITMAP
+[305]BITMAP
+[306]BITMAP
+[307]BITMAP
+[308]BITMAP
+
+[314]BITMAP
+[315]BITMAP
+
+/ title (ex: Territory chief election)
+[309]TEXT
+/ countdown to end of election
+[310]TEXT
+
+/ the candidates list
+[311]CANDIDATE_LIST
+/ vote for current candidate
+[312]BUTTON
+/ current candidate program
+[313]LIST
+
+
+/**************************************************************/
+/ INVENTORY (OSD 400).
+/*************************************************************/
+// Background
+[400]BITMAP
+// Money
+[401]TEXT
+[402]TEXT
+[403]TEXT
+[404]TEXT
+// Slots
+[405]BUTTON
+[406]BUTTON
+[407]BUTTON
+[408]BUTTON
+
+[409]BUTTON
+[410]BUTTON
+[411]BUTTON
+[412]BUTTON
+
+[413]BUTTON
+[414]BUTTON
+[415]BUTTON
+
+[416]BUTTON
+[417]BUTTON
+[418]BUTTON
+
+
+/**************************************************************/
+/ TROC (me) (OSD 500).
+/*************************************************************/
+// Background
+[500]BITMAP
+// Money
+[501]TEXT
+[502]TEXT
+[503]TEXT
+[504]TEXT
+// Slots
+[505]BUTTON
+[506]BUTTON
+[507]BUTTON
+[508]BUTTON
+// Rdy
+[509]BITMAP
+// OK | Cancel
+[510]BUTTON
+[511]BUTTON
+
+
+/**************************************************************/
+/ TROC (you) (OSD 600).
+/*************************************************************/
+// Background
+[600]BITMAP
+// Money
+[601]TEXT
+[602]TEXT
+[603]TEXT
+[604]TEXT
+// Slots
+[605]BUTTON
+[606]BUTTON
+[607]BUTTON
+[608]BUTTON
+// Rdy
+[609]BITMAP
+
+
+/**************************************************************/
+/ LOGIN (OSD 700).
+/*************************************************************/
+// Background
+[700]BITMAP
+// Login
+[701]CAPTURE
+// Password
+[702]CAPTURE
+// Button Connect
+[703]BUTTON
+// Text Connect
+[704]TEXT
+
+
+/**************************************************************/
+/ CHARACTER CHOICE (OSD 800).
+/*************************************************************/
+// Background
+[800]BITMAP
+
+// Button Enter
+[801]BUTTON
+// Text Enter
+[802]TEXT
+
+// Character Buttons
+[803]RADIO_BUTTON
+[804]RADIO_BUTTON
+[805]RADIO_BUTTON
+[806]RADIO_BUTTON
+[807]RADIO_BUTTON
+[808]RADIO_BUTTON
+[809]RADIO_BUTTON
+[810]RADIO_CONTROLLER
+
+
+/**************************************************************/
+/ BUY (OSD 900).
+/*************************************************************/
+// Background
+[900]BITMAP
+// Money
+[901]TEXT
+[902]TEXT
+[903]TEXT
+[904]TEXT
+// Slots
+[905]BUTTON
+[906]BUTTON
+[907]BUTTON
+[908]BUTTON
+// Rdy
+[909]BITMAP
+// BUY | Cancel
+[910]BUTTON
+[911]BUTTON
+
+
+//Background of the "character creation" interface
+[999]BITMAP
+[998]TEXT
+
+/***********************************************************/
+/ THE WINDOW DISPLAYED WHEN A PLAYER IVITE YOU TO JOIN HIS TEAM
+/**********************************************************/
+/ the text " 'playerName' Invite you to his team
+[1000]TEXT
+/ accept
+[1001]BUTTON
+/ player info
+[1002]BUTTON
+/ reject
+[1003]BUTTON
+/background
+[1006]BITMAP
+
+
+/***********************************************************/
+/ THE WINDOW DISPLAYED WHEN A PLAYER WANT TO JOIN A TEAM
+/**********************************************************/
+/ the text " 'playerName' WANTS TO JOIN YOUR TEAM
+[1100]TEXT
+/ accept
+[1101]BUTTON
+/ player info
+[1102]BUTTON
+/ reject
+[1103]BUTTON
+
+/ background bitmap
+[1106]BITMAP
+
+/***********************************************************/
+/ THE WINDOW DISPLAYED to create/join a speech
+/**********************************************************/
+/join
+[1004]BUTTON
+/create
+[1005]BUTTON
+
+
+
+/**********************************************/
+/ 	JOIN CLADE PROPOSAL POP-UP	       /
+/**********************************************/
+/ the text
+[1170]TEXT
+/ accept
+[1171]BUTTON
+/ infos
+[1172]BUTTON
+/ reject
+[1173]BUTTON
+
+/background
+[1176]BITMAP
+
+
+
+[2000]BITMAP
+[2001]BITMAP
+[2002]BITMAP
+[2003]BITMAP
+[2004]BITMAP
+[2005]BITMAP
+[2006]BITMAP
+[2007]BITMAP
+[2008]BITMAP
+
+[3000]SPELL_LIST
+[3001]BUTTON
+[3002]BUTTON
+[3003]HORIZONTAL_LIST
+[3004]HORIZONTAL_LIST
+
+/***********************************************************/
+/ 		Spell Creation Interface
+/***********************************************************/
+[4000]BITMAP
+[4001]BITMAP
+[4002]TEXT
+[4003]CONTROL_LIST
+[4004]BITMAP
+[4005]BITMAP
+[4006]BITMAP
+[4007]BITMAP
+[4008]BITMAP
+[4009]BITMAP
+
+[4010]BITMAP
+[4011]TEXT
+[4012]SPELL_LIST
+[4013]BUTTON
+[4014]BITMAP
+[4015]BITMAP
+[4016]BUTTON
+
+[4020]BITMAP
+[4024]BITMAP
+[4025]BITMAP
+[4026]BITMAP
+[4027]BITMAP
+
+[4021]TEXT
+[4022]HORIZONTAL_LIST
+
+[4030]BITMAP
+[4031]BITMAP
+[4032]HORIZONTAL_LIST
+
+[4040]BITMAP
+[4041]BITMAP
+[4042]HORIZONTAL_LIST
+
+[4050]BUTTON
+[4051]BUTTON
+[4052]BUTTON
+[4053]TEXT
+[4054]PROGRESS_BAR
+[4055]TEXT
+
+
+/***********************************************************/
+/ 		Spell Info Pop Up
+/***********************************************************/
+/background
+[4100]BITMAP
+[4101]BITMAP
+[4102]BITMAP
+
+/ window title
+[4103]TEXT
+
+/ spell name
+[4110]TEXT
+/ spell 'phrase' (syllables)
+[4111]TEXT
+/ spell formula (bricks)
+[4112]HORIZONTAL_LIST
+/ scroll formula left
+[4113]BITMAP
+/ scroll formula right
+[4114]BITMAP
+/ spell difficulty
+[4115]TEXT
+/ spell cost
+[4116]PROGRESS_BAR
+/ edit comment
+[4117]CAPTURE
+
+
+/***********************************************************/
+/ 		Brick Info Pop Up
+/***********************************************************/
+/background
+[4200]BITMAP
+/ brick name
+[4210]TEXT
+/ brick icon
+//[4211]BITMAP
+[4211]BRICK_CONTROL
+/ syllable
+[4212]TEXT
+/ effect
+[4213]TEXT
+
+
+/***********************************************************/
+/ 		Memorized spells
+/***********************************************************/
+/background
+[4300]BITMAP
+[4301]BITMAP
+[4302]BITMAP
+[4303]BITMAP
+[4304]BITMAP
+[4305]BITMAP
+[4306]BITMAP
+[4307]BITMAP
+[4308]BITMAP
+
+/ title
+[4309]TEXT
+
+/ Spells
+[4310]SPELL_LIST
+/delete
+[4311]BUTTON
+/ close
+[4312]BUTTON
+/ cast
+[4313]BUTTON
+
+
+
+/***********************************************************/
+/ 			casting bar
+/***********************************************************/
+[4400]CASTING_BAR
+
+
+
+/***********************************************************/
+/ 			Bars
+/***********************************************************/
+[5000]PROGRESS_BAR // HP
+[5100]PROGRESS_BAR // Sap
+[5200]PROGRESS_BAR // Stamina
+
+
+/***********************************************************/
+/ 			Target
+/***********************************************************/
+[6000]TEXT
+[6001]BITMAP

@@ -222,7 +222,7 @@ function component.createComponent(x, y)
 	assert(comp)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.user_event")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2ED" .. component.Name))			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2ED" .. component.Name)):toUtf8()			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -268,7 +268,7 @@ component.create = function(this)
 	end
 
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'UserTrigger' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of 'UserTrigger' at pos (%d, %d, %d)", x, y, z))
 		if r2.mustDisplayInfo("UserTrigger") == 1 then 
 			r2.displayFeatureHelp("UserTrigger")
 		end
@@ -315,12 +315,12 @@ function component:getLogicTranslations()
 
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["trigger"]				= { menu=i18n.get( "uiR2AA0Trigger"			), 
-										text=i18n.get( "uiR2AA1Trigger"			)},
+			["trigger"]				= { menu=i18n.get( "uiR2AA0Trigger"			):toUtf8(), 
+										text=i18n.get( "uiR2AA1Trigger"			):toUtf8()},
 		},
 		["Events"] = {	
-			["triggered"]			= { menu=i18n.get( "uiR2Event0Trigger"		), 
-										text=i18n.get( "uiR2Event1Trigger"		)},
+			["triggered"]			= { menu=i18n.get( "uiR2Event0Trigger"		):toUtf8(), 
+										text=i18n.get( "uiR2Event1Trigger"		):toUtf8()},
 		}
 	}
 	return logicTranslations

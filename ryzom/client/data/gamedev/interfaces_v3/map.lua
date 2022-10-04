@@ -10,10 +10,22 @@ end
 game.mapTextures = {}
 -- game.mapTextures["zorai_map.tga"] = "tryker_map.tga"
 
--- Dynamic points for the map
+-- Dynamic points/icons for the map
 game.mapArkPoints = {}
 
--- register alternative texture for map
+-- Hide sections for the map
+game.mapHideSections = {}
+
+-- Region sections for the map
+game.mapRegionSections = {}
+
+-- Region sections for the map
+game.mapArkPointsCachedHelp = {}
+
+-- Shapes spawned
+game.spawnShapesByZone = {}
+
+-- register alternative texture for map1
 function game:setAltMap(mapName, altMap)
 	self.mapTextures[mapName] = altMap
 end
@@ -56,7 +68,6 @@ function game:openMapArkPointHelp(url, h)
 	local x, y = getMousePos()
 	whm.x = x
 	whm.y = y
-	debug(whm)
 	if whm.active == false  then
 		runAH(nil, "enter_modal", "group=ui:interface:webig_html_modal")
 		whm.child_resize_h = false
@@ -65,21 +76,28 @@ function game:openMapArkPointHelp(url, h)
 			h = 240
 		end
 		whm.h = h
-		if game.mapMapArkPointHelpUrl ~= url then
-			whm_html = getUI("ui:interface:webig_html_modal:html")
-			whm_html:renderHtml("<body style:'background-color: #ffffff00'>...</body>")
+		local whm_html = getUI("ui:interface:webig_html_modal:html")
+		if game.mapArkPointsCachedHelp[url] == nil then
 			if whm_html ~= nil then
-				whm_html:browse(url)
 				game.mapMapArkPointHelpUrl = url
+				whm_html:renderHtml("<body style:'background-color: #ffffff00'>...</body>")
+				whm_html:browse(url)
 			end
+		else
+			whm_html:renderHtml(game.mapArkPointsCachedHelp[url])
 		end
-		setOnDraw(getUI("ui:interface:webig_html_modal"), "game:updateMapArkPointHelp()")
+		setOnDraw(getUI("ui:interface:webig_html_modal"), "game:updateMapArkPointHelp([["..url.."]])")
 		game.mapArkPointHelpOpened = 1
 	end
 end
 
 function game:updateMapArkPointHelp()
 	local caller = getUI("ui:interface:webig_html_modal")
+	local whm_html = getUI("ui:interface:webig_html_modal:html")
+	if whm_html.html ~= "<body style:'background-color: #ffffff00'>...</body>" and game.mapArkPointsCachedHelp[game.mapMapArkPointHelpUrl] == nil then
+		game.mapArkPointsCachedHelp[game.mapMapArkPointHelpUrl] = whm_html.html
+	end
+
 	local x, y = getMousePos()
 	x0 = game.mapArkPointHelpMousePosX
 	if caller.x ~= 0 or caller.y ~= 0 then
@@ -90,15 +108,44 @@ function game:updateMapArkPointHelp()
 	end
 end
 
--- map = getUI("ui:interface:map:content:map_content:actual_map")
 function game:onLoadMap(map)
-	-- debugInfo("onLoadMap(id=".. map.id ..", texture=".. map.texture ..")");
+	if map then
+		game.currentMap = map
+		if map.continent then
+			game.currentMapContinent = map.continent
+		end
+		if map.texture then
+			game.currentMapTexture = map.texture
+		end
+	end
+
+
+	local texture = game.currentMap.texture
+	if not texture then
+		texture = game.currentMapTexture
+	end
+
 
 	delArkPoints()
 	game.mapMapArkPointHelpUrl = ""
 	for section, points in pairs(game.mapArkPoints) do
-		for name, point in pairs(points) do
-			addLandMark(point[1], point[2], point[3], point[4], "lua", point[5], "", "", "lua", point[6])
+		real_section = {}
+		map_section = section
+		for k, v in string.gmatch(section, "(%w+)/(%w+)") do
+			real_section = {k, v}
+		end
+
+		if real_section[1] then
+			section = real_section[1]
+			map_section = real_section[2]
+		end
+
+		if game.mapHideSections[section] == nil then
+			if game.mapRegionSections[map_section] == nil or game.mapRegionSections[map_section][texture] == true then
+				for name, point in pairs(points) do
+					addLandMark(point[1], point[2], point[3], point[4], "lua", point[5], "", "", "lua", point[6])
+				end
+			end
 		end
 	end
 
@@ -107,12 +154,11 @@ function game:onLoadMap(map)
 		return
 	end
 
-	local texture = map.texture
+
 	if self.mapTextures[texture] ~= nil then
 		-- debugInfo("-- using ".. self.mapTextures[texture] .." for " .. texture)
 		return self.mapTextures[texture]
 	end
-
 end
 
 function game:openFullMap()
@@ -127,6 +173,11 @@ function game:openFullMap()
 		ui.y = game.saveMapY
 		ui.w = game.saveMapW
 		ui.h = game.saveMapH
+
+		game.savedMapFullZoom = getActualMapZoom()
+		if game.savedMapZoom then
+			setActualMapZoom(game.savedMapZoom)
+		end
 	else
 		game.saveMapFull = true
 		game.saveMapX = ui.x
@@ -137,13 +188,72 @@ function game:openFullMap()
 		ui.y = 0
 		ui.w = getUI("ui:interface").w
 		ui.h = getUI("ui:interface").h
+		game.savedMapZoom = getActualMapZoom()
+		if game.savedMapFullZoom then
+			setActualMapZoom(game.savedMapFullZoom)
+		end
 		setTopWindow(ui)
 	end
 end
 
+function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, finish, openShape)
+	local id1 = -1
+	local id2 = -1
+
+	if game.spawnShapesByZone[continent] == nil
+	then
+		game.spawnShapesByZone[continent] = {}
+	end
+
+	if game.spawnShapesByZone[continent][name] then
+		id1 = game.spawnShapesByZone[continent][name][9]
+		id2 = game.spawnShapesByZone[continent][name][10]
+	end
+
+	table.insert(setup, id1)
+	table.insert(setup, id2)
+	table.insert(setup, finish)
+	table.insert(setup, openShape)
+	game.spawnShapesByZone[continent][name] = setup
+	game.spawnShapesByZone[continent][name][8] = Json.decode(setup[8])
+
+	if displayIcon == 1 then
+		game:addMapArkPoint(zone, setup[2], setup[3], setup[1], i18n.get("uiWisdomChest"):toUtf8(), "ico_box.tga")
+	end
+end
+
+function game:doSpawnShapesByZone(continent)
+	if game.spawnShapesByZone[continent] then
+		for name, shape in pairs(game.spawnShapesByZone[continent]) do
+			if shape[9] then
+				deleteShape(shape[9])
+			end
+			if shape[10] then
+				deleteShape(shape[10])
+			end
+
+			local setup = shape[8]
+			game.spawnShapesByZone[continent][name][9] = SceneEditor:doSpawnShape(shape[1]..".shape", setup, shape[2], shape[3], shape[4], shape[5], shape[6], shape[7], "user", 1, true, setup["action"], setup["url"], false, false, setup["textures"], "", false)
+			if shape[11] == 0 then
+				game.spawnShapesByZone[continent][name][10] = SceneEditor:doSpawnShape("ge_mission_evenement.ps", setup, shape[2], shape[3], shape[4]+0.35, shape[5], shape[6], shape[7], "user", 1, false, setup["action"], setup["url"], false, false, setup["textures"], "", false)
+			else
+				game.spawnShapesByZone[continent][name][10] = nil
+			end
+		end
+	end
+end
+
+game.mapRegionSections["Silan"] = {}
+game.mapRegionSections["Silan"]["newbieland_city.tga"] = true
+
+game:addMapArkPoint("Vip/Silan", 10276, -11791, "vip_silan_tryker", "", "dynicon_vip.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=nb_tryker_leader&title=fct_chief_explorer&gender=1", 150)
+game:addMapArkPoint("Vip/Silan", 10341, -11822, "vip_silan_matis",  "", "dynicon_vip.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=nb_matis_leader&title=fct_matis_master_artisan&gender=1", 150)
+game:addMapArkPoint("Vip/Silan", 10382, -11741, "vip_silan_zorai",  "", "dynicon_vip.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=nb_zorai_leader&title=fct_sage&gender=1", 150)
+game:addMapArkPoint("Vip/Silan", 10366, -11692, "vip_silan_fyros",  "", "dynicon_vip.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=nb_fyros_leader&title=fct_fyros_commander&gender=1", 150)
+game:addMapArkPoint("Vip/Silan", 10304, -11719, "vip_silan_ranger", "", "dynicon_vipbox.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=chiang_the_strong&title=fct_ranger_leader&gender=1", 150)
+
+game:addMapArkPoint("Vip", 4154, -3305, "vip_allegory", "", "allegory_16.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=allegory_vip&title=fct_allegory_maker&gender=1", 150)
+
 
 -- register map overrride
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")
-
--- TEST
--- game:addMapArkPoint("vip", 4154,-3305, "vip_allegory", "", "allegory_16.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=allegory_vip&title=fct_allegory_maker&gender=1", 140)

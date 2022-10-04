@@ -112,28 +112,28 @@ end
 --***********************************************************************
 function PlayerTracking:initRaceTypes()
 	for k = 0, 3 do	
-		self.RaceTypeToUtf8[math.pow(2, k)] = i18n.get("uiRAP_PlayerRace_" .. tostring(k))	
+		self.RaceTypeToUtf8[math.pow(2, k)] = i18n.get("uiRAP_PlayerRace_" .. tostring(k)):toUtf8()	
 	end
 end
 
 --***********************************************************************
 function PlayerTracking:initReligionTypes()
 	for k = 0, 2 do		
-		self.ReligionTypeToUtf8[math.pow(2, k)] = i18n.get("uiRAP_PlayerReligion_" .. tostring(k))		
+		self.ReligionTypeToUtf8[math.pow(2, k)] = i18n.get("uiRAP_PlayerReligion_" .. tostring(k)):toUtf8()		
 	end
 end
 
 --***********************************************************************
 function PlayerTracking:initShardTypes()
 	for k = 0, 2 do		
-		self.ShardTypeToUtf8[math.pow(2, k)] = i18n.get("uiRAP_PlayerShard_" .. tostring(k))		
+		self.ShardTypeToUtf8[math.pow(2, k)] = i18n.get("uiRAP_PlayerShard_" .. tostring(k)):toUtf8()		
 	end
 end
 
 --***********************************************************************
 function PlayerTracking:initLevelTypes()
 	for k = 0, 5 do	
-		self.LevelTypeToUtf8[math.pow(2, k)] = i18n.get("uiRAP_PlayerLevel_" .. tostring(k))		
+		self.LevelTypeToUtf8[math.pow(2, k)] = i18n.get("uiRAP_PlayerLevel_" .. tostring(k)):toUtf8()		
 	end
 end
 
@@ -154,6 +154,9 @@ function PlayerTracking:getSelectList()
 	return getUI("ui:login:ring_players_tracking:content:main:enclosing:columns:getw:select")
 end
 
+
+local scratchUCStr = ucstring()
+
 --***********************************************************************
 function PlayerTracking:newTemplate(name, cache)	
 	local group
@@ -170,7 +173,8 @@ end
 -- build a new text group from utf8 text
 function PlayerTracking:newTextLabel(value)		
 	local group = self:newTemplate("rap_text", self.TextCache)
-	group:find("t").text_single_line_format = value
+	scratchUCStr:fromUtf8(value)
+	group:find("t").uc_hardtext_single_line_format = scratchUCStr
 	return group
 end
 
@@ -178,14 +182,15 @@ end
 -- build a new text group from utf8 text
 function PlayerTracking:newCenteredTextLabel(value)		
 	local group = self:newTemplate("rap_text_centered", self.CenteredTextCache)
-	group:find("t").text_single_line_format = value
+	scratchUCStr:fromUtf8(value)
+	group:find("t").uc_hardtext_single_line_format = scratchUCStr
 	return group
 end
 
 --***********************************************************************
 function PlayerTracking:newNumberLabel(value)	
 	local group = self:newTemplate("rap_number", self.NumberCache)
-	group:find("t").text_single_line_format = tostring(value)
+	group:find("t").uc_hardtext_single_line_format = tostring(value)
 	return group
 end
 
@@ -353,7 +358,7 @@ function PlayerTracking:fill(list)
 			self:setErrorMessage("uiRAP_NoSessionForLangFilter")
 		else 
 			--self:setErrorMessage(i18n.get("uiRAP_NoSessionFound"))
-			self:setErrorMessage("")
+			self:setErrorMessage(ucstring())
 			self:enableButtons(false)
 		end
 	else
@@ -367,7 +372,7 @@ end
 --***********************************************************************
 function PlayerTracking:setMessage(msg, color)		
 	local errorTxt = self:getWindow():find("errorMsg")
-	errorTxt.text = msg
+	errorTxt.uc_hardtext = msg
 	errorTxt.color = color
 	errorTxt.active=true
 end
@@ -458,9 +463,9 @@ function PlayerTracking:onLineRightClick()
 	self:onLineLeftClick()	
 	local menu = getUI("ui:login:ring_player_menu")
 
-	menu:find("tell").text = i18n.get("uiRAP_MenuPlayerTell") .. "'" .. self:getPlayerFromId(self.SelectedPlayerId).Player .."'"
-	menu:find("teleport").text = i18n.get("uiRAP_MenuTeleportTo") .. "'" .. self:getPlayerFromId(self.SelectedPlayerId).Player.."'"
-	menu:find("kick").text = i18n.get("uiRAP_MenuKick") .. "'" .. self:getPlayerFromId(self.SelectedPlayerId).Player.."'"
+	menu:find("tell").uc_hardtext = ucstring(i18n.get("uiRAP_MenuPlayerTell"):toUtf8() .. "'" .. self:getPlayerFromId(self.SelectedPlayerId).Player .."'")
+	menu:find("teleport").uc_hardtext = ucstring(i18n.get("uiRAP_MenuTeleportTo"):toUtf8() .. "'" .. self:getPlayerFromId(self.SelectedPlayerId).Player.."'")
+	menu:find("kick").uc_hardtext = ucstring(i18n.get("uiRAP_MenuKick"):toUtf8() .. "'" .. self:getPlayerFromId(self.SelectedPlayerId).Player.."'")
 
 	menu:find("kick").grayed = not self:isConnected(self:getPlayerFromId(self.SelectedPlayerId).Flags)
 	menu:find("teleport").grayed = not self:isConnected(self:getPlayerFromId(self.SelectedPlayerId).Flags)
@@ -476,7 +481,9 @@ end
 --***********************************************************************
 function PlayerTracking:onTell()
 	debugInfo("tell to owner of session" .. self.SelectedPlayerId)
-	tell(self:getPlayerFromId(self.SelectedPlayerId).Player)
+	player = ucstring()	
+	player:fromUtf8(self:getPlayerFromId(self.SelectedPlayerId).Player)
+	tell(player)
 end
 
 --***********************************************************************

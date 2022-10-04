@@ -401,10 +401,20 @@ function SceneEditor:addFromDb(group, db_id, json_shape, edit)
 end
 
 function SceneEditor:spawnShape(shape, x, y, z, rotx, roty, rotz, setup)
-	local id = addShape(shape, x, y, z, "user", 1, true, "", "", false, false, "", "", true)
-	rotateShape(id, tostring(rotx), tostring(roty), tostring(rotz))
-	setupShape(id, Json.decode(setup))
+	if type(setup) == "string" then
+		setup = Json.decode(setup)
+	end
+	return SceneEditor:doSpawnShape(shape, setup, x, y, z, rotx, roty, rotz, "user", 1, setup["no collisons"] == nil, setup["action"], setup["url"], false, false, setup["textures"], "", true)
 end
+
+function SceneEditor:doSpawnShape(shape, setup, x, y, z, rotx, roty, rotz, angle, scale, collisions, action, url, highlight, transparency, textures, skeleton, igzone)
+
+	local id = addShape(shape, x, y, z, angle, scale, collisions, misc:nilToEmpty(action), misc:nilToEmpty(url), highlight, transparency, misc:nilToEmpty(textures), misc:nilToEmpty(skeleton), igzone)
+	rotateShape(id, tostring(rotx), tostring(roty), tostring(rotz))
+	setupShape(id, setup)
+	return id
+end
+
 
 function SceneEditor:removeGroup(group, no_get_html)
 	if self.Groups[group] == nil then

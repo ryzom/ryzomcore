@@ -377,7 +377,7 @@ component.createComponent = function(x, y)
 	assert(comp)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.user_event")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdManHunt"))			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdManHunt")):toUtf8()			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -403,7 +403,7 @@ component.create = function()
 		debugInfo("Cancel form for 'ManHuntFeature' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'ManHuntFeature' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of 'ManHuntFeature' at pos (%d, %d, %d)", x, y, z))
 		if r2.mustDisplayInfo("ManHunt") == 1 then 
 			r2.displayFeatureHelp("ManHunt")
 		end
@@ -427,7 +427,7 @@ component.create = function()
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EdManHunt")
-	logicEntityMenu:addLine(name, "lua", "", "ManHunt")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "ManHunt")
 end
 
 

@@ -204,7 +204,7 @@ component.createComponent = function(x, y, value, tvalue)
 	assert(comp)
 
 	comp.Base = "palette.entities.botobjects.milestone"
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EDRollout_CounterFeature"))			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EDRollout_CounterFeature")):toUtf8()			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -245,7 +245,7 @@ component.create = function()
 		debugInfo("Cancel form for 'CounterFeature' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'CounterFeature' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of 'CounterFeature' at pos (%d, %d, %d)", x, y, z))
 		r2:doForm("CounterFeatureForm", {X=x, Y=y}, paramsOk, paramsCancel)
 	end
 	local function posCancel()
@@ -256,32 +256,32 @@ end
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EDRollout_CounterFeature")
-	logicEntityMenu:addLine(name, "lua", "", "CounterFeature")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "CounterFeature")
 end
 
 function component:getLogicTranslations()
 	local logicTranslations = {
 		["ApplicableActions"] = {
-				["Activate"]		= { menu=i18n.get( "uiR2AA0Activate"			),
-										text=i18n.get( "uiR2AA1Activate"			)},
-				["Desactivate"]		= { menu=i18n.get( "uiR2AA0Deactivate"			),
-										text=i18n.get( "uiR2AA1Deactivate"			)},
-				["Increment"]		= { menu=i18n.get( "uiR2AA0CounterIncrement"	),
-										text=i18n.get( "uiR2AA1CounterIncrement"	)},
-				["Decrement"]		= { menu=i18n.get( "uiR2AA0CounterDecrement"	),
-										text=i18n.get( "uiR2AA1CounterDecrement"	)},
+				["Activate"]		= { menu=i18n.get( "uiR2AA0Activate"			):toUtf8(),
+										text=i18n.get( "uiR2AA1Activate"			):toUtf8()},
+				["Desactivate"]		= { menu=i18n.get( "uiR2AA0Deactivate"			):toUtf8(),
+										text=i18n.get( "uiR2AA1Deactivate"			):toUtf8()},
+				["Increment"]		= { menu=i18n.get( "uiR2AA0CounterIncrement"	):toUtf8(),
+										text=i18n.get( "uiR2AA1CounterIncrement"	):toUtf8()},
+				["Decrement"]		= { menu=i18n.get( "uiR2AA0CounterDecrement"	):toUtf8(),
+										text=i18n.get( "uiR2AA1CounterDecrement"	):toUtf8()},
 		},
 		["Events"] = {	
-				["activation"]		= { menu=i18n.get( "uiR2Event0Activation"		), 
-										text=i18n.get( "uiR2Event1Activation"		)},
-				["desactivation"]	= { menu=i18n.get( "uiR2Event0Deactivation"		), 
-										text=i18n.get( "uiR2Event1Deactivation"		)},
-				["trigger"]			= { menu=i18n.get( "uiR2Event0Trigger"			),
-										text=i18n.get( "uiR2Event1Trigger"			)},
+				["activation"]		= { menu=i18n.get( "uiR2Event0Activation"		):toUtf8(), 
+										text=i18n.get( "uiR2Event1Activation"		):toUtf8()},
+				["desactivation"]	= { menu=i18n.get( "uiR2Event0Deactivation"		):toUtf8(), 
+										text=i18n.get( "uiR2Event1Deactivation"		):toUtf8()},
+				["trigger"]			= { menu=i18n.get( "uiR2Event0Trigger"			):toUtf8(),
+										text=i18n.get( "uiR2Event1Trigger"			):toUtf8()},
 		},
 		["Conditions"] = {	
-				["is active"]		= { menu=i18n.get( "uiR2Test0Active"			), 
-										text=i18n.get( "uiR2Test1Active"			)}
+				["is active"]		= { menu=i18n.get( "uiR2Test0Active"			):toUtf8(), 
+										text=i18n.get( "uiR2Test1Active"			):toUtf8()}
 		}
 	}
 	return logicTranslations

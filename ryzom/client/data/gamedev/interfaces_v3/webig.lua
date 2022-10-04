@@ -8,6 +8,10 @@ if (webig.sheetLists==nil) then
 	webig.sheetLists = {}
 end
 
+if (webig.urls==nil) then
+	webig.urls = {}
+end
+
 function getUCtf8(text)
 	local uctext = ucstring()
 	if type(text) == "string" then
@@ -34,7 +38,6 @@ function game:openUrlOnWebig(url, noblink, close_if_open)
 		end
 	end
 end
-
 
 
 function webig:addSheet(dst, sheet, quality, quantity, worned, user_color, rm_class_type, rm_faber_stat_type)
@@ -212,11 +215,21 @@ function getUICallerRoot()
 	return getUI(getUICaller().id:match("(ui:interface:[^:]*):?"))
 end
 
-function webig:openUrl(url)
-	getUI("ui:interface:web_transactions"):find("html"):browse(url)
+function webig:openUrl(url, ui)
+	if ui == nil then
+		getUI("ui:interface:web_transactions"):find("html"):browse(url)
+	else
+		getUI("ui:interface:"..ui):find("html"):browse(url)
+	end
 end
 
-
+function webig:openUrlInBg(url)
+	if webig.urls[url] ~= nil then
+		WebQueue:push(webig.urls[url])
+	else
+		WebQueue:push(url)
+	end
+end
 
 
 

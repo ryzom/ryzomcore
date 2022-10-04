@@ -1,6 +1,35 @@
 if Ark == nil then
-	Ark = {
-	}
+	Ark = {}
+end
+
+function print_r(arr, indentLevel)
+	local str = ""
+	local indentStr = "#"
+
+	if(indentLevel == nil) then
+		debug(print_r(arr, 0))
+		return
+	end
+
+	for i = 0, indentLevel do
+		indentStr = indentStr.."    "
+	end
+
+	for index,value in pairs(arr) do
+		if type(value) == "table" then
+			str = str..indentStr..index..": \n"..print_r(value, (indentLevel + 1))
+		else
+			str = str..indentStr..index..": "..value.."\n"
+		end
+	end
+	return str
+end
+
+
+function openPageInWebIg(url)
+	getUI("ui:interface:webig:content:html"):browse(url)
+	getUI("ui:interface:webig").active = true
+	getUI("ui:interface:webig").opened = true
 end
 
 function broadcast(text, t)
@@ -12,18 +41,44 @@ function broadcast(text, t)
 	displaySystemInfo(message, t)
 end
 
+function fixUrl(url)
+	return url:gsub("{amp}", "&")
+end
+
+function openArkScript(id, winid, extra)
+	if winid == nil then
+		winid = "ui:interface:web_transactions"
+	end
+	if extra == nil then
+		extra = ""
+	end
+	getUI(winid):find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..id.."&command=reset_all&"..extra)
+end
+
+function openMissionArkScript(winid, id)
+	WebBrowser:openWindow(winid, "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..id.."&command=reset_all")
+end
+
+function getArkScript(id, selected)
+	if selected ~= nil then
+		url = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..id.."&_hideWindow=1&command=reset_all&selected="..tostring(selected)
+	else
+		url = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..id.."&_hideWindow=1&command=reset_all"
+	end
+	return url
+end
+
 --------------------------------------------------------------------------------
 --- ARK MISSION CATALOG ---
 --------------------------------------------------------------------------------
 if ArkMissionCatalog == nil then
 	ArkMissionCatalog = {
 		window = nil,
-		window_id = "ui:interface:ark_mission_catalog"
+		window_id = "ui:interface:encyclopedia"
 	}
 end
 
 function ArkMissionCatalog:OpenWindow(urlA, urlB, dont_active)
-	ArkMissionCatalog.window_id = "ui:interface:encyclopedia"
 	local winframe = getUI(ArkMissionCatalog.window_id)
 	winframe.opened=true
 	if dont_active ~= true then
@@ -43,16 +98,15 @@ function ArkMissionCatalog:OpenCat(cat, url)
 	local ency = getUI("ui:interface:encyclopedia")
 	setOnDraw(ency, "")
 	ArkMissionCatalog.cat = cat
-	local htmlb = getUI(ArkMissionCatalog.window_id..":content:htmlB")
-	local htmlc = getUI(ArkMissionCatalog.window_id..":content:htmlC")
-	if cat == "title" then
+	local htmlA = getUI(ArkMissionCatalog.window_id..":content:htmlA")
+	local htmlB = getUI(ArkMissionCatalog.window_id..":content:htmlB")
+	local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
+	if cat == "title" or cat == "academic" or cat == "rykea" or cat == "workshops" then
 		ArkMissionCatalog.posxB = 180
 		ArkMissionCatalog.widthB = 240
 		ArkMissionCatalog.widthC = 530
 		ArkMissionCatalog.posxC = 405
 
-		local htmlB = getUI(ArkMissionCatalog.window_id..":content:htmlB")
-		local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
 		htmlB.x = ArkMissionCatalog.posxB
 		htmlB.w = ArkMissionCatalog.widthB
 		htmlC.w = ArkMissionCatalog.widthC
@@ -60,17 +114,20 @@ function ArkMissionCatalog:OpenCat(cat, url)
 		htmlC.active = true
 	else
 		ArkMissionCatalog.widthB = 740
-		htmlb.w = ArkMissionCatalog.widthB
-		if htmlc then
-			htmlc.active = false
+		htmlB.w = ArkMissionCatalog.widthB
+		if htmlC then
+			htmlC.active = false
 		end
 	end
-	htmlb.home = url.."&continent="..getContinentSheet()
-	htmlb:browse("home")
+	htmlB.home = url.."&continent="..getContinentSheet()
+	htmlB:browse("home")
 	setOnDraw(ency, "ArkMissionCatalog:autoResize()")
+	if ArkMissionCatalog.continent ~= getContinentSheet() then
+		ArkMissionCatalog.continent = getContinentSheet()
+		htmlA:browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8746&command=reset_all&no_html_header=1&ig=1")
+	end
 end
 
--- TODO: check removing fromUTF8
 function ArkMissionCatalog:UpdateMissionTexts(win, id, text1, text2)
 	local w = win:find("ark_mission_"..id)
 	local text = ucstring()
@@ -98,7 +155,7 @@ function ArkMissionCatalog:autoResize()
 	local htmlB = getUI(ArkMissionCatalog.window_id..":content:htmlB")
 	local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
 
-	if htmlC.active == false then
+	if htmlC == nil or htmlC.active == false then
 		if ArkMissionCatalog.cat == "storyline" then
 			if ui.w < 784 then
 				local td30 = htmlB:find("storyline_content")
@@ -118,38 +175,21 @@ function ArkMissionCatalog:autoResize()
 		end
 
 		if ui.w < 950 then
-			htmlA.w = math.max(60, 220-950+ui.w)
+			htmlA.w = math.max(68, 220-950+ui.w)
 			htmlB.x = math.max(35, 190-950+ui.w)
 			ArkMissionCatalog.need_restore = true
 		else
 			if ArkMissionCatalog.need_restore then
 				htmlA.w = 220
-				htmlB.x = 190
+				htmlB.x = 180
 				ArkMissionCatalog.need_restore = false
 			end
 		end
 	else
-		if ui.w < 950 then
-			htmlA.w = math.max(68, 220-950+ui.w)
-			htmlB.x = math.max(35, ArkMissionCatalog.posxB-950+ui.w)
-			if htmlB:find("scroll_bar").h > 0 then
-				htmlC.x = math.max(80, ui.w-htmlC.w)
-				htmlB.w = math.max(62, ui.w-htmlA.w-htmlC.x+16)
-			else
-				htmlC.x = math.max(75, ui.w-htmlC.w-16)
-				htmlB.w = math.max(55, htmlC.x-htmlB.x+16)
-			end
-			ArkMissionCatalog.need_restore = true
-		else
-			if ArkMissionCatalog.need_restore then
-				htmlA.w = 220
-				htmlB.w = ArkMissionCatalog.widthB
-				htmlB.x = ArkMissionCatalog.posxB
-				htmlC.w = ArkMissionCatalog.widthC
-				htmlC.x = ArkMissionCatalog.posxC
-				ArkMissionCatalog.need_restore = false
-			end
-		end
+		htmlA.w = math.max(68, 220-950+ui.w)
+		htmlB.x = math.max(35, ArkMissionCatalog.posxB-950+ui.w)
+		htmlC.x = math.max(75, ui.w-htmlC.w-16)
+		htmlB.w = math.max(55, htmlC.x-htmlB.x+16)
 	end
 end
 
@@ -160,10 +200,6 @@ function ArkMissionCatalog:showLegacyEncyclopedia(state)
 		getUI("ui:interface:legacy_encyclopedia").active=0
 	end
 end
-
-
-
-
 
 if S2E1 == nil then
 	S2E1 = {}

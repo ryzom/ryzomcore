@@ -19,8 +19,8 @@ eltTemplateParams =	{
 						multiMaxLine="3"
 					},
 elementEditorTemplate = "template_edit_activity",
-elementInitialName=i18n.get("uiR2EdActivity"),
-sequenceInitialName=i18n.get("uiR2EdSeq"),
+elementInitialName=i18n.get("uiR2EdActivity"):toUtf8(),
+sequenceInitialName=i18n.get("uiR2EdSeq"):toUtf8(),
 
 isInitialized = false,
 
@@ -37,33 +37,33 @@ updatedEltUIID = nil,	-- creation or update of element
 
 
 activityTypeTranslation =   {
-						["Stand Still"]				={trans=i18n.get("uiR2EdStandStill"),			zone=""},
-						["Follow Route"]			={trans=i18n.get("uiR2EdFollowRoad"),			zone="Road"},
-						["Patrol"]					={trans=i18n.get("uiR2EdPatrol"),				zone="Road"},
-						["Repeat Road"]				={trans=i18n.get("uiR2EdRepeatRoad"),			zone="Road"},
-						["Wander"]					={trans=i18n.get("uiR2EdWander"),				zone="Region"},
-						["Stand On Start Point"]	={trans=i18n.get("uiR2EdStandOnStartPoint"),	zone=""},
-						["Go To Start Point"]		={trans=i18n.get("uiR2EdGoToStartPoint"),		zone=""},
-						["Go To Zone"]				={trans=i18n.get("uiR2EdGoToZone"),			zone="Region"},
-						["Sit Down"]				={trans=i18n.get("uiR2EdSitDown"),				zone=""},
-						["Stand Up"]				={trans=i18n.get("uiR2EdStandUp"),				zone=""},
-						["Rest In Zone"]			={trans=i18n.get("uiR2EDRest"),				zone="Region"},
-						["Feed In Zone"]			={trans=i18n.get("uiR2EDFeed"),				zone="Region"},
-						["Work In Zone"]			={trans=i18n.get("uiR2EDWork"),				zone="Region"},
-						["Hunt In Zone"]			={trans=i18n.get("uiR2EDHunt"),				zone="Region"},
-						["Guard Zone"]				={trans=i18n.get("uiR2EDGuard"),				zone="Region"},	
+						["Stand Still"]				={trans=i18n.get("uiR2EdStandStill"):toUtf8(),			zone=""},
+						["Follow Route"]			={trans=i18n.get("uiR2EdFollowRoad"):toUtf8(),			zone="Road"},
+						["Patrol"]					={trans=i18n.get("uiR2EdPatrol"):toUtf8(),				zone="Road"},
+						["Repeat Road"]				={trans=i18n.get("uiR2EdRepeatRoad"):toUtf8(),			zone="Road"},
+						["Wander"]					={trans=i18n.get("uiR2EdWander"):toUtf8(),				zone="Region"},
+						["Stand On Start Point"]	={trans=i18n.get("uiR2EdStandOnStartPoint"):toUtf8(),	zone=""},
+						["Go To Start Point"]		={trans=i18n.get("uiR2EdGoToStartPoint"):toUtf8(),		zone=""},
+						["Go To Zone"]				={trans=i18n.get("uiR2EdGoToZone"):toUtf8(),			zone="Region"},
+						["Sit Down"]				={trans=i18n.get("uiR2EdSitDown"):toUtf8(),				zone=""},
+						["Stand Up"]				={trans=i18n.get("uiR2EdStandUp"):toUtf8(),				zone=""},
+						["Rest In Zone"]			={trans=i18n.get("uiR2EDRest"):toUtf8(),				zone="Region"},
+						["Feed In Zone"]			={trans=i18n.get("uiR2EDFeed"):toUtf8(),				zone="Region"},
+						["Work In Zone"]			={trans=i18n.get("uiR2EDWork"):toUtf8(),				zone="Region"},
+						["Hunt In Zone"]			={trans=i18n.get("uiR2EDHunt"):toUtf8(),				zone="Region"},
+						["Guard Zone"]				={trans=i18n.get("uiR2EDGuard"):toUtf8(),				zone="Region"},	
 					},
 
 timeLimitsTranslation = {
-							["No Limit"]	=i18n.get("uiR2EdNoTimeLimit"),
-							["Chat"]		=i18n.get("uiR2EdWhileChat"),
-							["Few Sec"]		=i18n.get("uiR2EdForCertainTime"),
+							["No Limit"]	=i18n.get("uiR2EdNoTimeLimit"):toUtf8(),
+							["Chat"]		=i18n.get("uiR2EdWhileChat"):toUtf8(),
+							["Few Sec"]		=i18n.get("uiR2EdForCertainTime"):toUtf8(),
 						},
 
 timeLimitsProperties = {
-							[i18n.get("uiR2EdNoTimeLimit")]	="No Limit",
-							[i18n.get("uiR2EdWhileChat")]		="Chat",
-							[i18n.get("uiR2EdForCertainTime")]	="Few Sec"
+							[i18n.get("uiR2EdNoTimeLimit"):toUtf8()]	="No Limit",
+							[i18n.get("uiR2EdWhileChat"):toUtf8()]		="Chat",
+							[i18n.get("uiR2EdForCertainTime"):toUtf8()]	="Few Sec"
 						},
 }
 
@@ -192,8 +192,9 @@ function r2.activities:initEditorAfterFirstCall()
 			self:triggerSelectSequence(activitySequences[selectedSequenceIndex].InstanceId)
 		end
 	
-		local title = i18n.get("uiR2EDActivitySequenceEditor")..entity.Name
-		ui.title = title
+		local uc_title = ucstring()
+		uc_title:fromUtf8(i18n.get("uiR2EDActivitySequenceEditor"):toUtf8() .. entity.Name)
+		ui.uc_title = uc_title 
 
 		self.isInitialized = true
 	end
@@ -260,7 +261,9 @@ function r2.activities:openSequenceEditor()
 		end
 	end
 
-	editName.input_string = tabName
+	local uc_sequ = ucstring()
+	uc_sequ:fromUtf8(tabName)
+	editName.uc_input_string = uc_sequ
 end
 
 
@@ -276,7 +279,7 @@ function r2.activities:setSequenceName()
 	assert(editName)
 
 	local sequenceInstId = self:currentSequInstId()
-	r2.requestSetNode(sequenceInstId, "Name", editName.input_string)
+	r2.requestSetNode(sequenceInstId, "Name", editName.uc_input_string:toUtf8())
 
 	sequenceEditor.active = false
 end
@@ -315,8 +318,8 @@ function r2.activities:newSequenceUI(activitySequence)
 
 	local templateParams = {
 								newElt="r2.activities:newElementInst()",
-								newEltText=i18n.get("uiR2EdNewActivity"),
-								eltOrderText=i18n.get("uiR2EdActivityOrder"),
+								newEltText=i18n.get("uiR2EdNewActivity"):toUtf8(),
+								eltOrderText=i18n.get("uiR2EdActivityOrder"):toUtf8(),
 								upElt="r2.activities:upElementInst()",
 								downElt="r2.activities:downElementInst()",
 								maxMinElts="r2.activities:maximizeMinimizeElements()",
@@ -430,7 +433,9 @@ function r2.activities:newSequenceUI(activitySequence)
 			sequName = self.sequenceInitialName .. (i+1)
 		end
 
-		tabButton.text = sequName
+		local uc_name = ucstring()
+		uc_name:fromUtf8(sequName)
+		tabButton.uc_hardtext = uc_name
 	end
 end
 
@@ -471,7 +476,7 @@ function r2.activities:removeSequenceUI(instance)
 			local buttonTab = tab:find("tab"..i)
 			assert(buttonTab)
 			if buttonTab.hardtext == self.sequenceInitialName..(i+1) then
-				buttonTab.text = self.sequenceInitialName..i
+				buttonTab.uc_hardtext = self.sequenceInitialName..i
 			end
 		end
 	end
@@ -539,7 +544,9 @@ function r2.activities:updateSequenceUI(instance, attributeName)
 			local buttonTab = tab:find("tab"..tabId)
 			assert(buttonTab)
 			
-			buttonTab.text = name
+			local uc_name = ucstring()
+			uc_name:fromUtf8(name)
+			buttonTab.uc_hardtext = uc_name
 
 			local viewText = buttonTab:getViewText()
 			assert(viewText)
@@ -735,7 +742,7 @@ function r2.activities:createElementEditor()
 		local i = 0
 		while i < 20 do
 			i = i + 1
-			cb:addText(tostring(i))
+			cb:addText(ucstring(tostring(i)))
 		end
 
 	end
@@ -777,7 +784,7 @@ function r2.activities:updateElementEditor()
 		assert(comboBox)
 		local value = select(instanceActivity.RoadCountLimit, instanceActivity.RoadCountLimit, "0")
 		if value == "0" then
-			value = i18n.get("uiR2EdNoRoadCountLimit") 
+			value = i18n.get("uiR2EdNoRoadCountLimit"):toUtf8() 
 		end
 		comboBox.Env.locked = true
 		comboBox.selection_text = value
@@ -790,11 +797,11 @@ function r2.activities:updateElementEditor()
 	assert(comboBox)
 
 	local index = r2.logicComponents:searchElementIndex(instanceActivity)
+	local uc_activityName = ucstring(self.elementInitialName.." : ")
 	if index~= nil then
-		activityName.text = self.elementInitialName.." "..index.." : "
-	else
-		activityName.text = self.elementInitialName.." : "
+		uc_activityName:fromUtf8(self.elementInitialName.." "..index.." : ")
 	end
+	activityName.uc_hardtext = uc_activityName
 	
 	-- activity type
 	local activityText = instanceActivity:getVerb()
@@ -805,7 +812,9 @@ function r2.activities:updateElementEditor()
 		activityText = activityText .. " " .. place.Name
 	end
 	if activityText then
-		activityButtonText.text = activityText
+		local uc_activityText = ucstring()
+		uc_activityText:fromUtf8(activityText)
+		activityButtonText.uc_hardtext = uc_activityText
 	end
 
 	-- time limit
@@ -823,25 +832,27 @@ function r2.activities:updateElementEditor()
 			
 			local hoursNb, minNb, secNb = r2.logicComponents:calculHourMinSec(timeLimitValue)
 
-			local timeLimitText = i18n.get("uiR2EdFor") .. " "
-			if hoursNb ~= 0 then timeLimitText = timeLimitText .. hoursNb .. i18n.get("uiR2EdShortHours") .. " " end
-			if minNb ~= 0 then timeLimitText = timeLimitText .. minNb .. i18n.get("uiR2EdShortMinutes") .. " " end
-			timeLimitText = timeLimitText .. secNb .. i18n.get("uiR2EdShortSeconds") 
+			local timeLimitText = i18n.get("uiR2EdFor"):toUtf8() .. " "
+			if hoursNb ~= 0 then timeLimitText = timeLimitText .. hoursNb .. i18n.get("uiR2EdShortHours"):toUtf8() .. " " end
+			if minNb ~= 0 then timeLimitText = timeLimitText .. minNb .. i18n.get("uiR2EdShortMinutes"):toUtf8() .. " " end
+			timeLimitText = timeLimitText .. secNb .. i18n.get("uiR2EdShortSeconds"):toUtf8() 
 
 			certainTime.active = true
 			local hoursMenu = certainTime:find("hours"):find("text")
 			assert(hoursMenu)
-			hoursMenu.text = tostring(hoursNb)
+			hoursMenu.uc_hardtext = tostring(hoursNb)
 
 			local minutesMenu = certainTime:find("minutes"):find("text")
 			assert(minutesMenu)
-			minutesMenu.text = tostring(minNb)
+			minutesMenu.uc_hardtext = tostring(minNb)
 
 			local secondsMenu = certainTime:find("seconds"):find("text")
 			assert(secondsMenu)
-			secondsMenu.text = tostring(secNb)
+			secondsMenu.uc_hardtext = tostring(secNb)
 
-			comboBox.view_text = timeLimitText
+			local uc_time = ucstring()
+			uc_time:fromUtf8(timeLimitText)
+			comboBox.view_text = uc_time
 		end
 	else
 		certainTime.active = false
@@ -948,14 +959,14 @@ function r2.activities:newElementInst(tableInit)
 		end
 
 		if roadAct then
-			actionToInitDefaultActivity = i18n.get("uiR2EdRoad") .. " "
+			actionToInitDefaultActivity = i18n.get("uiR2EdRoad"):toUtf8() .. " "
 		end
 
 		if regionAct then
 			if actionToInitDefaultActivity~="" then
-				actionToInitDefaultActivity = actionToInitDefaultActivity .. i18n.get("uiR2EdOr").. " "
+				actionToInitDefaultActivity = actionToInitDefaultActivity .. i18n.get("uiR2EdOr"):toUtf8().. " "
 			end
-			actionToInitDefaultActivity = actionToInitDefaultActivity .. i18n.get("uiR2EdRegion") .. " "
+			actionToInitDefaultActivity = actionToInitDefaultActivity .. i18n.get("uiR2EdRegion"):toUtf8() .. " "
 		end
 	end
 
@@ -967,8 +978,10 @@ function r2.activities:newElementInst(tableInit)
 		r2.logicComponents:newElementInst(r2.activities)
 
 	elseif not existZone then
-		local message = i18n.get("uiR2EdCreateZone") .. actionToInitDefaultActivity .. i18n.get("uiR2EdFor") .. " " .. selectedInst.Name
-		messageBox(message)	
+		local message = i18n.get("uiR2EdCreateZone"):toUtf8() .. actionToInitDefaultActivity .. i18n.get("uiR2EdFor"):toUtf8() .. " " .. selectedInst.Name
+		local uc_message = ucstring()
+		uc_message:fromUtf8(message)
+		messageBox(uc_message)	
 	end
 	r2.requestForceEndMultiAction()
 end
@@ -1036,19 +1049,22 @@ function r2.activities:initActivityMenu()
 	local activityMenu = activityMenu:getRootMenu()
 	assert(activityMenu)
 	activityMenu:reset()
+	local uc_activity = ucstring()
 
 	local activitiesTable = {}
 	r2:getSelectedInstance():getAvailableActivities(activitiesTable)
 
 	local activitiesNb = 0
 	for k, actType in pairs(activitiesTable) do
+		local uc_activity = ucstring()
 		local translation = self.activityTypeTranslation[actType].trans
+		uc_activity:fromUtf8(translation)
 		
 		local zone = self.activityTypeTranslation[actType].zone
 		if zone == "" then
-			activityMenu:addLine(translation, "lua", "r2.activities:setActivityType('"..actType.."')", actType)
+			activityMenu:addLine(uc_activity, "lua", "r2.activities:setActivityType('"..actType.."')", actType)
 		else
-			activityMenu:addLine(translation, "", "", actType)
+			activityMenu:addLine(uc_activity, "", "", actType)
 
 			local textureName = ""
 			if zone == "Road" then
@@ -1063,7 +1079,8 @@ function r2.activities:initActivityMenu()
 			local zonesMenu = activityMenu:getSubMenu(activitiesNb)
 			local zonesTable = r2.Scenario:getAllInstancesByType(zone)
 			for key, z in pairs(zonesTable) do
-				zonesMenu:addLine(z.Name, "lua", "r2.activities:setActivityType('"..actType.."', '".. z.InstanceId .."')", z.InstanceId)
+				uc_activity:fromUtf8(z.Name)
+				zonesMenu:addLine(uc_activity, "lua", "r2.activities:setActivityType('"..actType.."', '".. z.InstanceId .."')", z.InstanceId)
 			end
 			if table.getn(zonesTable) == 0 then
 				zonesMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2.activities:setActivityType()", "")
@@ -1109,7 +1126,7 @@ function r2.activities:setTimeLimit(timeLimit)
 	assert(activityInstId)
 
 	-- TimeLimitValue
-	if timeLimit == i18n.get("uiR2EdForCertainTime") then
+	if timeLimit == i18n.get("uiR2EdForCertainTime"):toUtf8() then
 		r2.requestSetNode(activityInstId, "TimeLimitValue", tostring(20))
 	else	
 		r2.requestSetNode(activityInstId, "TimeLimitValue", "")
@@ -1135,7 +1152,7 @@ function r2.activities:setRoadCountLimit(limit)
 	assert(activityInstId)
 
 	-- RoadCountLimit
-	if limit == i18n.get("uiR2EdNoRoadCountLimit") then
+	if limit == i18n.get("uiR2EdNoRoadCountLimit"):toUtf8() then
 		r2.requestSetNode(activityInstId, "RoadCountLimit", "0")
 	else	
 		r2.requestSetNode(activityInstId, "RoadCountLimit", timeLimit)
@@ -1154,17 +1171,17 @@ function r2.activities:initTimeMenu(timeFunction, isHours)
 	timeMenu:reset()
 
 	for i=0,9 do
-		timeMenu:addLine(tostring(i), "lua", timeFunction .. "(" .. tostring(i) .. ")", tostring(i))
+		timeMenu:addLine(ucstring(tostring(i)), "lua", timeFunction .. "(" .. tostring(i) .. ")", tostring(i))
 	end
 
 	if isHours == true then
-		timeMenu:addLine(tostring(10), "lua", timeFunction .. "(" .. tostring(10) .. ")", tostring(10))
+		timeMenu:addLine(ucstring(tostring(10)), "lua", timeFunction .. "(" .. tostring(10) .. ")", tostring(10))
 	else
 
 		local lineNb = 9
 		for i=10, 50, 10 do
 			local lineStr = tostring(i).."/"..tostring(i+9)
-			timeMenu:addLine(lineStr, "", "", tostring(i))
+			timeMenu:addLine(ucstring(lineStr), "", "", tostring(i))
 			lineNb = lineNb+1
 
 			timeMenu:addSubMenu(lineNb)
@@ -1172,7 +1189,7 @@ function r2.activities:initTimeMenu(timeFunction, isHours)
 
 			for s=0,9 do
 				lineStr = tostring(i+s) 
-				subMenu:addLine(lineStr, "lua", timeFunction .. "(" .. tostring(i+s) .. ")", lineStr)
+				subMenu:addLine(ucstring(lineStr), "lua", timeFunction .. "(" .. tostring(i+s) .. ")", lineStr)
 			end
 		end
 	end

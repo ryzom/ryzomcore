@@ -11,6 +11,7 @@ chmod +x "$ROOTPATH/ryzom_client"
 chmod +x "$ROOTPATH/crash_report"
 chmod +x "$ROOTPATH/ryzom_client_patcher"
 chmod +x "$ROOTPATH/ryzom_configuration_qt"
+<<<<<<< HEAD
 chmod +x "$ROOTPATH/ryzom_installer_qt"
 
 # copy Ryzom Installer if present in parent directory
@@ -19,5 +20,7 @@ then
   rm -f "$ROOTPATH/../ryzom_installer_qt"
   cp -a "$ROOTPATH/ryzom_installer_qt" "$ROOTPATH/.."
 fi
+=======
+>>>>>>> atys-live
 
 exit 0

@@ -50,7 +50,7 @@ function game:updatePlayerBars()
 	local dispSap = getDbProp('UI:SAVE:PLAYER:DISP_SAP');
 	local dispSta = getDbProp('UI:SAVE:PLAYER:DISP_STA');
 	local dispFoc = getDbProp('UI:SAVE:PLAYER:DISP_FOC');
-	
+
 	local ui = getUI('ui:interface:player:content');
 
 	-- active ui in function of what is displayed
@@ -150,17 +150,17 @@ function game:pvpTagUpdateDisplay()
 	else
 		-- There are 8 possibilities according to the combination of the 3 flags
 		-- Here: TL= pvpLocalTag, TS= pvpServerTag, AS= pvpServerActivateTimerOn)
-		--  TL  TS  AS  
+		--  TL  TS  AS
 		--				** GREEN MODE **
 		--  0   0   0	-> Standard disabled PVP
 		--  1   0   0	-> The user pressed the button but still no response from server
 		--  1   1   1	-> The user pressed the button and got response from server. => GREEN icon with timer
-		--  0   1   1	-> The user canceled the activation (server not acked yet the cancel). => default display 
+		--  0   1   1	-> The user canceled the activation (server not acked yet the cancel). => default display
 		--				** ORANGE MODE **
 		--  1   1   0	-> Standard enabled PVP
 		--  0   1   0	-> The user pressed the button but still no response from server
 		--  0   0   1	-> The user pressed the button and got response from server. => ORANGE icon with timer
-		--  1   0   1	-> The user canceled the activation (server not acked yet the cancel). => default display 
+		--  1   0   1	-> The user canceled the activation (server not acked yet the cancel). => default display
 
 		-- From this table, we can deduce the following rules
 
@@ -199,10 +199,10 @@ function game:pvpTagUpdateDisplay()
 		-- Flag Bar?
 		if(buttonMode==RED) then
 			-- display a reverse timer
-			uiBar.w = uiBarBg.w * (pvpServerFlagTimer - currentServerTick) / (pvpServerFlagTimer - game.PVP.flagStartTimer); 
+			uiBar.w = uiBarBg.w * (pvpServerFlagTimer - currentServerTick) / (pvpServerFlagTimer - game.PVP.flagStartTimer);
 		else
 			-- display a forward timer
-			uiBar.w = uiBarBg.w * (currentServerTick - game.PVP.tagStartTimer) / (pvpServerTagTimer - game.PVP.tagStartTimer); 
+			uiBar.w = uiBarBg.w * (currentServerTick - game.PVP.tagStartTimer) / (pvpServerTagTimer - game.PVP.tagStartTimer);
 		end
 	end
 
@@ -258,7 +258,7 @@ function game:updatePvpTag()
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:updatePvpTimer()
 
 	-- update display
@@ -286,9 +286,9 @@ function game:updatePvpTimer()
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:formatTime(temps)
-	
+
 	local hours = math.floor(temps/(10*60*60));
 	local minutes = math.floor((temps - (hours*10*60*60)) / (10*60));
 	local seconds = math.floor((temps - (hours*10*60*60) - (minutes*10*60)) / 10);
@@ -301,7 +301,7 @@ function game:formatTime(temps)
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:playerTTPvp()
 
 	-- The tooltip to display depends on the current display state
@@ -314,9 +314,9 @@ function game:playerTTPvp()
 	if(buttonMode==2) then
 		local pvpServerFlagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT');
 		local currentServerTick = getDbPropU('UI:VARIABLES:CURRENT_SERVER_TICK');
-		local tempsString = game:formatTime( pvpServerFlagTimer - currentServerTick ); 
+		local tempsString = game:formatTime( pvpServerFlagTimer - currentServerTick );
 		text = i18n.get('uittPvPModeFlag');
-		text = findReplaceAll(text, '%temps', tempsString); 
+		text = findReplaceAll(text, '%temps', tempsString);
 	-- Tag mode
 	else
 		-- base text
@@ -335,7 +335,7 @@ function game:playerTTPvp()
 		if(buttonTimer) then
 			local pvpServerTagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:ACTIVATION_TIME');
 			local currentServerTick = getDbPropU('UI:VARIABLES:CURRENT_SERVER_TICK');
-			local tempsString = game:formatTime( pvpServerTagTimer - currentServerTick ); 
+			local tempsString = game:formatTime( pvpServerTagTimer - currentServerTick );
 			local timeFmt= i18n.get('uittPvPTagTimer');
 			timeFmt= findReplaceAll(timeFmt, '%temps', tempsString);
 			text= concatUCString(text, timeFmt);
@@ -404,7 +404,7 @@ function game:updateXpCatQuantity(textSlot, ui)
 
 	-- format the text
 	local	fmt= "x@{FF6F}" .. tostring( getDbProp("SERVER:CHARACTER_INFO:XP_CATALYSER:Count") );
-	
+
 	self:bonusMalusSetText(ui, textSlot, fmt);
 end
 
@@ -419,7 +419,7 @@ function game:updateRingXpCatQuantity(textSlot, ui)
 
 	-- format the text
 	local	fmt= "x@{FF6F}" .. tostring( getDbProp("SERVER:CHARACTER_INFO:RING_XP_CATALYSER:Count") );
-	
+
 	self:bonusMalusSetText(ui, textSlot, fmt);
 end
 
@@ -619,7 +619,7 @@ function game:updatePlayerBonusMalus()
 		mustUpdateTextSetup= true;
 	end
 
-	-- *** Then insert RingXPCatalyzer 
+	-- *** Then insert RingXPCatalyzer
 	local	ringxpcatCount= getDbProp("SERVER:CHARACTER_INFO:RING_XP_CATALYSER:Count");
 	if(ringxpcatCount~=0) then
 		local	ringxpcatLevel= getDbProp("SERVER:CHARACTER_INFO:RING_XP_CATALYSER:Level");
@@ -748,11 +748,11 @@ function game:updatePlayerBonusMalus()
 	-- *** erase any remaining malus
 	while destIndex<numLocalBonusMalus do
 		setDbProp(dbLocalMalusBase .. tostring(destIndex) .. ":SHEET", 0 );
-		destIndex= destIndex + 1;
+		destIndex = destIndex + 1;
 	end
 
 
-	
+
 	-- ***********************
 	-- *** update Text setup
 	-- ***********************
@@ -821,34 +821,34 @@ function game:setPhraseTooltipCarac(ttWin, name, value, textValue)
 	else
 		icon.active = true
 		text.active = true
-		if textValue ~= nil then 			
+		if textValue ~= nil then
 			text.uc_hardtext = textValue
 		else
-			text.hardtext = tostring(value)			
+			text.hardtext = tostring(value)
 		end
 	end
 end
 
 
-function game:timeInSecondsToReadableTime(regenTime)			
-	local seconds = math.fmod(regenTime, 60)	
-	local minutes = math.fmod(math.floor(regenTime / 60), 60)	
-	local hours = math.floor(regenTime / 3600)	
+function game:timeInSecondsToReadableTime(regenTime)
+	local seconds = math.fmod(regenTime, 60)
+	local minutes = math.fmod(math.floor(regenTime / 60), 60)
+	local hours = math.floor(regenTime / 3600)
 	local result = ""
 	if seconds > 0 then result = concatUCString(tostring(seconds), i18n.get("uittSecondsShort"))	end
-	if minutes > 0 then result = concatUCString(tostring(minutes), i18n.get("uittMinutesShort"), result) end	
-	if hours > 0 then result = concatUCString(tostring(hours), i18n.get("uittHoursShort"), result) end	
-	return result	
+	if minutes > 0 then result = concatUCString(tostring(minutes), i18n.get("uittMinutesShort"), result) end
+	if hours > 0 then result = concatUCString(tostring(hours), i18n.get("uittHoursShort"), result) end
+	return result
 end
 
 ------------------------------------------------------------------------------------------------------------
 -- display the time left for a power / auras in its tooltip
 function game:setPhraseTooltipPowerRegenTime(ttWin, regenTimeInTicks)
-	local text = ttWin:find("regen_time")	
-	if regenTimeInTicks == 0 then		
+	local text = ttWin:find("regen_time")
+	if regenTimeInTicks == 0 then
 		text.active = false
-	else				
-		text.active = true		
+	else
+		text.active = true
 		text.uc_hardtext_single_line_format = concatUCString(i18n.get("uittRegenTime"), game:timeInSecondsToReadableTime(math.floor((regenTimeInTicks + 9) * 0.1)))
 		text:invalidateCoords()
 		ttWin:invalidateCoords()
@@ -860,11 +860,11 @@ local EmptyUCString = ucstring()
 
 ------------------------------------------------------------------------------------------------------------
 -- called by C++ code when the tooltip of a phrase is about to be displayed
-function game:updatePhraseTooltip(phrase)	
+function game:updatePhraseTooltip(phrase)
 	LastTooltipPhrase = phrase
 	local ttWin = getUI("ui:interface:action_context_help")
 	local text = phrase:getName()
-	
+
 	if not text or text == EmptyUCString then
 		text = ucstring("")
 	end
@@ -885,11 +885,11 @@ function game:updatePhraseTooltip(phrase)
 	else
 		text = concatUCString(text, "@{CCCF}")
 	end
-	-- IMPORTANT : the following getters on 'phrase' take in account the 'total action malus' for the timebeing 	
+	-- IMPORTANT : the following getters on 'phrase' take in account the 'total action malus' for the timebeing
 	self:setPhraseTooltipCarac(ttWin, "hp_cost",	phrase:getHpCost())
 	self:setPhraseTooltipCarac(ttWin, "sta_cost",	phrase:getStaCost())
-	self:setPhraseTooltipCarac(ttWin, "sap_cost",	phrase:getSapCost())	
-	self:setPhraseTooltipCarac(ttWin, "focus_cost", phrase:getFocusCost())	
+	self:setPhraseTooltipCarac(ttWin, "sap_cost",	phrase:getSapCost())
+	self:setPhraseTooltipCarac(ttWin, "focus_cost", phrase:getFocusCost())
 	self:setPhraseTooltipCarac(ttWin, "cast_time",  phrase:getCastTime(), concatUCString(string.format("%.1f", phrase:getCastTime()), i18n.get("uittSeconds")))
 	local castRange = phrase:getCastRange()
 	if not phrase:isMagicPhrase() then
@@ -912,7 +912,7 @@ function game:updatePhraseTooltip(phrase)
 		successRateText.uc_hardtext_single_line_format = concatUCString(i18n.get("uittSuccessRate"), tostring(successRate), " %")
 	end
 
-	local disableTimeText = ttWin:find("disable_time")	
+	local disableTimeText = ttWin:find("disable_time")
 	if phrase:isPowerPhrase() then
 		local disableTime = phrase:getPowerDisableTime()
 		if disableTime == 0 then
@@ -925,7 +925,7 @@ function game:updatePhraseTooltip(phrase)
 		disableTimeText.active = false
 	end
 	game:updatePowerPhraseTooltip()
-	updateTooltipCoords()	
+	updateTooltipCoords()
 	return text
 end
 
@@ -936,7 +936,7 @@ function game:updatePowerPhraseTooltip()
 	local leftRegenTime = 0
 	if LastTooltipPhrase:isPowerPhrase() then
 		leftRegenTime = LastTooltipPhrase:getTotalRegenTime() - LastTooltipPhrase:getRegenTime()
-	end	
+	end
 	if leftRegenTime < 0 then
 		leftRegenTime = 0
 	end
@@ -953,7 +953,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 -- called by C++ code when the tooltip of a buff item is about to be displayed
-function game:updateBuffItemTooltip(buffItem)	
+function game:updateBuffItemTooltip(buffItem)
 	local ttWin = getUI("ui:interface:buff_item_context_help")
 	local item = buffItem:getItemInfo()
 	local text = buffItem:getName()
@@ -986,13 +986,13 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 -- called by C++ code when the tooltip of a cristallized spell is about to be displayed
-function game:updateCrystallizedSpellTooltip(crystallizedSpell)	
-	local ttWin = getUI("ui:interface:crystallized_spell_context_help")	
-	local text = crystallizedSpell:getName()	
+function game:updateCrystallizedSpellTooltip(crystallizedSpell)
+	local ttWin = getUI("ui:interface:crystallized_spell_context_help")
+	local text = crystallizedSpell:getName()
 
 	crystallizedSpell:buildCrystallizedSpellListBrick()
 
-	updateTooltipCoords()	
+	updateTooltipCoords()
 	return text
 end
 
@@ -1019,3 +1019,14 @@ function game:updatePhraseFaberPreview(dbPath)
 	end
 end
 
+
+function game:fixVpx(vpx)
+	while string.len(vpx) < 16 do
+		vpx = "0"..vpx
+	end
+
+	local vpx1 = string.format("%06d", tonumber(vpx:sub(1, string.len(vpx)-2), 16)*256)
+	local vpx2 = string.format("%06d", tonumber(vpx:sub(string.len(vpx)-1, string.len(vpx)), 16)+tonumber(vpx1:sub(string.len(vpx1)-5, string.len(vpx1))))
+	local nvpx = vpx1:sub(1, string.len(vpx1)-6)..vpx2:sub(string.len(vpx2)-5, string.len(vpx2))
+	return nvpx
+end

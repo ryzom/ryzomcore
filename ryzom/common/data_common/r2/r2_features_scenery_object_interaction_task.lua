@@ -453,18 +453,18 @@ end
 
 component.createComponent = function(x, y)
 	
-	local contextualText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_ContextualText")
-	local missionText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_MissionText")
-	local notValidatedText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_NotValidatedText")
-	local broadcastText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_BroadcastText")
-	local missionSucceedText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_MissionSucceedTextText")
+	local contextualText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_ContextualText"):toUtf8()
+	local missionText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_MissionText"):toUtf8()
+	local notValidatedText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_NotValidatedText"):toUtf8()
+	local broadcastText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_BroadcastText"):toUtf8()
+	local missionSucceedText = i18n.get("uiR2EdSceneryObjectInteractionTaskStep_MissionSucceedTextText"):toUtf8()
 
 
 	local comp = r2.newComponent("SceneryObjectInteractionTaskStep")
 	assert(comp)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.bot_chat")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdSceneryObjectInteractionTaskStep"))			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdSceneryObjectInteractionTaskStep")):toUtf8()			
 	
 	comp.ContextualText = contextualText
 	comp.MissionText = missionText
@@ -487,7 +487,7 @@ component.create = function()
 	r2:checkAiQuota()
 
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'SceneryObjectInteractionTaskStep' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of 'SceneryObjectInteractionTaskStep' at pos (%d, %d, %d)", x, y, z))
 		if r2.mustDisplayInfo("SceneryObjectInteractionTaskStep") == 1 then 
 			r2.displayFeatureHelp("SceneryObjectInteractionTaskStep")
 		end
@@ -506,35 +506,35 @@ end
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EdSceneryObjectInteractionTaskStep")
-	logicEntityMenu:addLine(name, "lua", "", "SceneryObjectInteractionTaskStep")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "SceneryObjectInteractionTaskStep")
 end
 
 function component:getLogicTranslations()
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["activate"]			= { menu=i18n.get( "uiR2AA0Activate"				), 
-										text=i18n.get( "uiR2AA1Activate"				)}, 
-			["deactivate"]			= { menu=i18n.get( "uiR2AA0Deactivate"				), 
-										text=i18n.get( "uiR2AA1Deactivate"				)}, 
+			["activate"]			= { menu=i18n.get( "uiR2AA0Activate"				):toUtf8(), 
+										text=i18n.get( "uiR2AA1Activate"				):toUtf8()}, 
+			["deactivate"]			= { menu=i18n.get( "uiR2AA0Deactivate"				):toUtf8(), 
+										text=i18n.get( "uiR2AA1Deactivate"				):toUtf8()}, 
 		},
 		["Events"] = {	
-			["activation"]			= { menu=i18n.get( "uiR2Event0Activation"			), 
-										text=i18n.get( "uiR2Event1Activation"			)},
-			["deactivation"]		= { menu=i18n.get( "uiR2Event0Deactivation"			), 
-										text=i18n.get( "uiR2Event1Deactivation"			)},
-			["succeeded"]			= { menu=i18n.get( "uiR2Event0TaskSuccess"			),
-										text=i18n.get( "uiR2Event1TaskSuccess"			)},
+			["activation"]			= { menu=i18n.get( "uiR2Event0Activation"			):toUtf8(), 
+										text=i18n.get( "uiR2Event1Activation"			):toUtf8()},
+			["deactivation"]		= { menu=i18n.get( "uiR2Event0Deactivation"			):toUtf8(), 
+										text=i18n.get( "uiR2Event1Deactivation"			):toUtf8()},
+			["succeeded"]			= { menu=i18n.get( "uiR2Event0TaskSuccess"			):toUtf8(),
+										text=i18n.get( "uiR2Event1TaskSuccess"			):toUtf8()},
 
 		},
 		["Conditions"] = {	
-			["is active"]			= { menu=i18n.get( "uiR2Test0Active"				), 
-										text=i18n.get( "uiR2Test1Active"				)},
-			["is inactive"]			= { menu=i18n.get( "uiR2Test0Inactive"				), 
-										text=i18n.get( "uiR2Test1Inactive"				)},
-			["is succeeded"]		= { menu=i18n.get( "uiR2Test0TaskSuccess"			), 
-										text=i18n.get( "uiR2Test1TaskSuccess"			)},
-			["in progress"]			= { menu=i18n.get( "uiR2Test0InProgress"			), 
-										text=i18n.get( "uiR2Test1InProgress"			)},
+			["is active"]			= { menu=i18n.get( "uiR2Test0Active"				):toUtf8(), 
+										text=i18n.get( "uiR2Test1Active"				):toUtf8()},
+			["is inactive"]			= { menu=i18n.get( "uiR2Test0Inactive"				):toUtf8(), 
+										text=i18n.get( "uiR2Test1Inactive"				):toUtf8()},
+			["is succeeded"]		= { menu=i18n.get( "uiR2Test0TaskSuccess"			):toUtf8(), 
+										text=i18n.get( "uiR2Test1TaskSuccess"			):toUtf8()},
+			["in progress"]			= { menu=i18n.get( "uiR2Test0InProgress"			):toUtf8(), 
+										text=i18n.get( "uiR2Test1InProgress"			):toUtf8()},
 		}
 	}
 	return logicTranslations

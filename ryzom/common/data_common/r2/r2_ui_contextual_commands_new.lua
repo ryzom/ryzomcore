@@ -85,12 +85,12 @@ end
 function r2:updateContextualCommandTooltip(index)
 	local command = r2.ContextualCommands.ToolbarCommands[index + 1]
 	assert(command)
-	local keyName = runExpr(string.format("getKey('r2ed_context_command', 'commandId=%s')", command.Id))
+	local keyName = ucstring(runExpr(string.format("getKey('r2ed_context_command', 'commandId=%s')", command.Id)))
 	if keyName == i18n.get("uiNotAssigned") then
 		-- no associated key
 		setContextHelpText(i18n.get(command.TextId))
 	else
-		setContextHelpText(concatString(i18n.get(command.TextId), " (", keyName, ")"))
+		setContextHelpText(concatUCString(i18n.get(command.TextId), " (", keyName, ")"))
 	end
 end
 
@@ -111,13 +111,13 @@ function r2.ContextualCommands:setupMenu(instance, menu)
 	--	end
 	--	debugInfo("Line with id 'dynamic_content_start' has index " .. tostring(rm:getLineFromId('dynamic_content_start')))
 	--	debugInfo("Line 6 is separator = " .. tostring(rm:isSeparator(6)))
-	--	rm:addLine("toto", "lua", "debugInfo('pouet')", "toto")
+	--	rm:addLine(ucstring("toto"), "lua", "debugInfo('pouet')", "toto")
 	--	rm:addSeparator()
-	--	rm:addLine("tutu", "lua", "debugInfo('pouet')", "tutu")
-	--	rm:addLine("titi", "lua", "debugInfo('pouet')", "titi")
+	--	rm:addLine(ucstring("tutu"), "lua", "debugInfo('pouet')", "tutu")
+	--	rm:addLine(ucstring("titi"), "lua", "debugInfo('pouet')", "titi")
 	--	local titiIndex = rm:getLineFromId('titi')
 	--	rm:addSeparatorAtIndex(titiIndex)
-	--	rm:addLine("bidon", "lua", "debugInfo('pouet')", "titi")
+	--	rm:addLine(ucstring("bidon"), "lua", "debugInfo('pouet')", "titi")
 	--	debugInfo("################################")
 	-- end	
 	
@@ -181,12 +181,12 @@ function r2.ContextualCommands:setupMenu(instance, menu)
 			end
          local keyNameGroup = createGroupInstance("r2_keyname", "", { id = command.Id })
          if keyNameGroup then
-            local keyName = runExpr(string.format("getKey('r2ed_context_command', 'commandId=%s')", command.Id))
+            local keyName = ucstring(runExpr(string.format("getKey('r2ed_context_command', 'commandId=%s')", command.Id)))
             if keyName == i18n.get("uiNotAssigned") then
                -- no associated key
-               keyNameGroup:find("t").text = keyName
+               keyNameGroup:find("t").uc_hardtext = keyName
             else
-               keyNameGroup:find("t").text = "(" ..keyName..")"
+               keyNameGroup:find("t").uc_hardtext = concatUCString(ucstring("(") , keyName, ucstring(")"))
             end
             destNode:setUserGroupRight(line, keyNameGroup)
          end

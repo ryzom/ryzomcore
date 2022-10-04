@@ -1,6 +1,6 @@
 RyzhomeBar = {
 	id = "ui:interface:webig_ryzhome_toolbar",
-	saveuri = "http://app.ryzom.com/app_ryzhome/index.php?action=toolbar_save",
+	saveuri = "https://app.ryzom.com/app_ryzhome/index.php?action=toolbar_save",
 	selectedPage = 1
 }
 
@@ -11,22 +11,22 @@ function RyzhomeBar:close()
 end
 
 function RyzhomeBar:addItems()
-	local url = "http://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=add"
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=add"
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
 function RyzhomeBar:moveItems()
-	local url = "http://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=move"
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=move"
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
 function RyzhomeBar:removeItems()
-	local url = "http://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=remove"
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=remove"
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
 function RyzhomeBar:inviteFriend()
-	local url = "http://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_InviteFriend"
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_InviteFriend"
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
@@ -109,7 +109,7 @@ function RyzhomeBar:listItems()
 		local ui = getUI("ui:interface")
 		framewin.x = (ui.w - framewin.w) / 2
 		framewin.y = (ui.h + framewin.h) / 2
-	end 
+	end
 
 	if RyzhomeBar.Items == nil then
 		RyzhomeBar.Items = {}
@@ -175,7 +175,7 @@ function RyzhomeBar:spawnItems()
 end
 
 function RyzhomeBar:setupItems()
-	for k = 1, 8 do 
+	for k = 1, 8 do
 		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":but"..tostring(k)).active=false
 		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":icon"..tostring(k)).active=false
 		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).uc_hardtext=""
@@ -233,10 +233,4 @@ end
 function RyzhomePlace:close()
 	--runAH(nil, "remove_shapes", "")
 	getUI("ui:interface:webig_ryzhome_place_item").active=false
-end
-
-function debug(text)
-	local uc = ucstring()
-	uc:fromUtf8(tostring(text))
-	displaySystemInfo(ucstring(uc), "sys")
 end

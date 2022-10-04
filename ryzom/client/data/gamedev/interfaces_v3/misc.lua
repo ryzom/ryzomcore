@@ -21,6 +21,14 @@ function misc:encodeColorTag(hex, str)
     return "@{"..self:toHexShort(hex).."}"..str
 end
 
+
+function misc:nilToEmpty(value)
+	if value == nil then
+		return ""
+	end
+	return value
+end
+
 --
 -- inventories observer
 function misc:initInvObserver(

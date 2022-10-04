@@ -1,6 +1,8 @@
 <interface_config>
     <root id="interface" x="0" y="0" w="800" h="600" active="true" />
     <lua file="info_player.lua" />
+    <variable entry="UI:SAVE:CAP_ID" type="sint32" value="0" />
+    <variable entry="UI:SAVE:CAP_SCRIPT_ID" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:FAME_DETAIL" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:TOTAL_MALUS_EQUIP" type="sint32" value="0" />
     <variable entry="UI:VARIABLES:TOTAL_MAGIC_ABSORB" type="sint32" value="0" />
@@ -10,7 +12,7 @@
         - absorb factor
         - max baseskilllevel of the player
 -->
-    <link expr="depends( @LOCAL:INVENTORY:EQUIP, @LOCAL:INVENTORY:BAG, @%player_protect_absorbfactor, @UI:VARIABLES:TRACK_SKILL_CHANGE)" action="lua:game:computeMagicProtectTotalAbsorb()" />
+    <link expr="depends(                 @LOCAL:INVENTORY:EQUIP,                 @LOCAL:INVENTORY:BAG,                 @%player_protect_absorbfactor,                 @UI:VARIABLES:TRACK_SKILL_CHANGE)" action="lua:game:computeMagicProtectTotalAbsorb()" />
     <!--**************************-->
     <!--*   info_player_skills   *-->
     <!--**************************-->
@@ -22,7 +24,7 @@
             <view type="text_number" id="max" posref="MR MR" x="-4" y="0" color="255 255 255 255" shadow="true" fontsize="12" value="#maxval" positive="true" />
             <view type="text" id="sep" posparent="max" posref="TL TR" x="0" color="255 255 255 255" shadow="true" fontsize="12" hardtext="/" />
             <view type="text_number" id="val" posparent="max" posref="TL TR" x="-10" color="255 255 255 255" shadow="true" fontsize="12" value="#val" positive="true" />
-            <link expr="ifthenelse(lt(@#maxval,@#baseval), '182 39 0 255', ifthenelse(gt(@#maxval,@#baseval), '180 165 0 255', '255 255 255 255'))" target="max:color" />
+            <link expr="ifthenelse(lt(@#maxval,@#baseval),          '182 39 0 255',                                                 ifthenelse(gt(@#maxval,@#baseval),      '180 165 0 255', '255 255 255 255'))" target="max:color" />
             <ctrl type="tooltip" id="tt" sizeref="wh" on_tooltip="lua:game:tooltipScore('#baseval', '#maxval','#tooltip')" />
         </group>
     </template>
@@ -31,7 +33,7 @@
         <group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref">
             <view type="text" id="t" posref="TL TL" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="#text" />
             <view type="text_number" id="val" posref="MR MR" x="-4" y="0" color="255 255 255 255" shadow="true" fontsize="12" value="#val" positive="true" />
-            <link expr="ifthenelse(lt(@#val,@#baseval), '182 39 0 255', ifthenelse(gt(@#val,@#baseval), '180 165 0 255', '255 255 255 255'))" target="val:color" />
+            <link expr="ifthenelse(lt(@#val,@#baseval),             '182 39 0 255',                                                 ifthenelse(gt(@#val,@#baseval), '180 165 0 255', '255 255 255 255'))" target="val:color" />
             <ctrl type="tooltip" id="tt" sizeref="wh" on_tooltip="lua:game:tooltipScoreEP('#baseval', '#val','#tooltip','#level','#mod')" />
         </group>
     </template>
@@ -46,7 +48,7 @@
         <group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref">
             <view type="text" id="t" posref="TL TL" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="#text" />
             <view type="text_number" id="val" posref="MR MR" x="-4" y="0" color="255 255 255 255" shadow="true" fontsize="12" value="#val" positive="true" suffix="#suffix" />
-            <link expr="ifthenelse(lt(@#val,@#baseval), '182 39 0 255', ifthenelse(gt(@#val,@#baseval), '180 165 0 255', '255 255 255 255'))" target="val:color" />
+            <link expr="ifthenelse(lt(@#val,@#baseval),             '182 39 0 255',                                                 ifthenelse(gt(@#val,@#baseval), '180 165 0 255', '255 255 255 255'))" target="val:color" />
             <ctrl type="tooltip" id="tt" sizeref="wh" on_tooltip="lua:game:tooltipScore('#baseval', '#val','#tooltip')" />
         </group>
     </template>
@@ -548,7 +550,7 @@
         <!-- must set y to 0 if hole in the list -->
         <link expr="ifthenelse(eq(@SERVER:MISSIONS:#stepindex:TITLE,0),0,-2)" target="#id:y" />
         <!-- set the correct bitmap according to mission type -->
-        <link expr="ifthenelse(ne(@SERVER:MISSIONS:#stepindex:FINISHED,0), ifthenelse(eq(@SERVER:MISSIONS:#stepindex:FINISHED,1), 'Small_Task_Done.tga', 'Small_Task_Failed.tga'), getMissionSmallIcon(@SERVER:MISSIONS:#stepindex:ICON) )" target="#id:texture" />
+        <link expr="ifthenelse(ne(@SERVER:MISSIONS:#stepindex:FINISHED,0),                                         ifthenelse(eq(@SERVER:MISSIONS:#stepindex:FINISHED,1),                                                  'Small_Task_Done.tga',                                                  'Small_Task_Failed.tga'),                                                 getMissionSmallIcon(@SERVER:MISSIONS:#stepindex:ICON) )" target="#id:texture" />
     </template>
     <!-- Same for Group Missions -->
     <!-- Change Title -->
@@ -598,7 +600,7 @@
         <!-- must set y to 0 if hole in the list -->
         <link expr="ifthenelse(eq(@SERVER:GROUP:MISSIONS:#stepindex:TITLE,0),0,-2)" target="#id:y" />
         <!-- set the correct bitmap according to mission type -->
-        <link expr="ifthenelse(ne(@SERVER:GROUP:MISSIONS:#stepindex:FINISHED,0), ifthenelse(eq(@SERVER:GROUP:MISSIONS:#stepindex:FINISHED,1), 'Small_Task_Done.tga', 'Small_Task_Failed.tga'), getMissionSmallIcon(@SERVER:GROUP:MISSIONS:#stepindex:ICON) )" target="#id:texture" />
+        <link expr="ifthenelse(ne(@SERVER:GROUP:MISSIONS:#stepindex:FINISHED,0),                                         ifthenelse(eq(@SERVER:GROUP:MISSIONS:#stepindex:FINISHED,1),                                                  'Small_Task_Done.tga',                                                  'Small_Task_Failed.tga'),                                         getMissionSmallIcon(@SERVER:GROUP:MISSIONS:#stepindex:ICON) )" target="#id:texture" />
     </template>
     <!-- End of Group Missions -->
     <template name="t_mission_step" id="" stepindex="" x="0" posref="BL TL" posparent="parent">
@@ -633,6 +635,45 @@
     <group type="menu" id="mission_journal_menu" extends="base_menu_with_color">
         <action id="caption_toggle" name="uiCaptionToggle" handler="lua:game:toggleMissionJournalCaption()" icon="r2_icon_properties.tga" />
     </group>
+
+    <!-- Main container : cap -->
+    <group type="container" id="cap" w="280" h="84" global_color="false" right_button="false" opened="true" openable="true" resizer="true" pop_min_h="84" pop_max_h="85" pop_min_w="292" pop_max_w="800" movable="true" active="false" on_resize="lua" on_resize_params="game:onCapResize()" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:CAP|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:CAP|value=0">
+        <group id="header_closed" x="0" y="0" h="25" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:webig_menu" on_active="lua" on_active_params="game:closeCapHeader()">
+            <group id="cap_group" x="0" y="15" sizeref="wh" posref="TL TL">
+                <view type="bitmap" id="cap_icon" w="15" h="15" scale="true" posref="TL TL" x="10" y="-15" texture="tb_encyclopedia.tga" global_color="false" inherit_gc_alpha="false" />
+                <view type="text" id="cap_desc" x="2" y="0" shadow="true" global_color="false" posparent="cap_icon" posref="TR TL" color="255 189 0 255" fontsize="12" hardtext="uiWisdomChest" />
+                <view type="bar" id="cap_progress" active="true" mini="false" posref="TL TL" x="2" y="-36" value="UI:TEMP:CAP_PROGRESS" range="100" />
+                <view type="text" id="cap_infos" active="true" posparent="cap_progress" posref="MR ML" x="2" y="0" global_color="false" fontsize="10" hardtext="" />
+                <ctrl type="button" id="cap_ctrl" button_type="push_button" posref="TL TL" w="800" h="15" x="-1" y="-34" col_over="255 255 255 90" tx_over="blank.tga" scale="true" onclick_l="lua:game:openInfosUrl()" tooltip_posref="TR TL"/>
+                <ctrl type="button" button_type="push_button" id="cap_list" posparent="cap_ctrl" posref="BL TL"  w="800" h="15" x="1" y="-" color="0 0 0 90" tx_over="blank.tga" scale="true" onclick_l="lua:game:openFullCap()" tooltip="" tooltip_posref="TR TL"/>
+                <view type="text" id="infos" x="0" y="0" shadow="true" global_color="false" posparent="cap_list" render_layer="2" posref="TL TL" color="255 255 255 255" fontsize="11" format_taged="true" multi_line="true" hardtext_format="" />
+            </group>
+        </group>
+        <group id="header_opened" x="0" y="0" w="280" h="70" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color"  on_active="lua" on_active_params="game:openCapHeader()">
+            <group id="cap_group" x="0" y="15" sizeref="wh" posref="TL TL">
+                <view type="bitmap" id="cap_mini_icon" w="15" h="15" scale="true" posref="TL TL" x="10" y="-15" texture="ico_cap_mini.tga" global_color="false" inherit_gc_alpha="false" />
+                <view type="text" id="cap_title" x="2" y="0" shadow="true" global_color="false" posparent="cap_mini_icon" posref="TR TL" color="255 189 0 255" fontsize="12" hardtext="uiWelcomeWhatTitle" />
+                <view type="bitmap" id="cap_icon" w="32" h="32" x="-10" y="-4" posparent="cap_mini_icon"  posref="BL TL" scale="true" global_color="false" color="255 255 255 255" texture="tb_encyclopedia.tga" />
+                <view type="text" id="cap_desc" x="4" y="0" global_color="false" posref="TR TL" posparent="cap_icon" fontsize="10" hardtext="uiWisdomChest" />
+                <view type="bar" id="cap_progress" active="true" posparent="cap_desc" posref="BL TL" x="0" y="-4" value="UI:TEMP:CAP_PROGRESS" range="100" />
+                <view type="text" id="cap_infos" active="true" posparent="cap_progress" posref="MR ML" x="2" y="0" global_color="false" fontsize="10" hardtext="" />
+                <ctrl type="button" id="cap_ctrl" button_type="push_button"  posparent="cap_icon" posref="TL TL" w="800" h="34" x="-1" y="1" col_over="255 255 255 90" tx_over="blank.tga" scale="true" onclick_l="lua:game:openInfosUrl()" tooltip="" tooltip_posref="TR TL"/>
+                <ctrl type="button" id="expand_mission_list" active="true" button_type="push_button" posparent="cap_ctrl" posref="TR TL" w="20" h="20" x="-1" y="-2" scale="true" color="192 192 192 255" tx_normal="w_pad_popup.tga" col_over="255 255 255 225" tx_over="w_pad_popup.tga" col_pushed="192 192 192 255" tx_pushed="w_pad_popup.tga" tooltip="uittShowCapPopup" onclick_l="lua:game:switchCapPopup()" />
+                <ctrl type="button" id="show_in_map" active="true" button_type="push_button" posparent="cap_ctrl" posref="TR TL" w="20" h="20" x="-1" y="-24" scale="true" color="192 192 192 255" tx_normal="lm_mission.tga" col_over="255 255 255 225" tx_over="lm_mission.tga" col_pushed="192 192 192 255" tx_pushed="lm_mission.tga" tooltip="uittShowCapInMap" onclick_l="lua:game:showCapInMap()" />
+
+                <view id="background_bitmap" type="bitmap" posref="BM BM" sizeref="wh" h="-67" w="-4" inherit_gc_alpha="true" scale="true" texture="blank.tga" color="0 0 0 125" global_color="false" />
+                <view type="bitmap" id="right" w="15" h="15" scale="true" posparent="cap_icon" posref="BL TL" x="0" y="-3" texture="grey_0.tga" global_color="false" inherit_gc_alpha="false" />
+                <ctrl type="button" button_type="push_button" id="cap_list" posparent="right" posref="TL TL"  w="800" h="15" x="1" y="0" col_over="255 255 255 90" tx_over="blank.tga" scale="true" onclick_l="lua:game:keepExpandCapWeb()" tooltip="" tooltip_posref="TR TL"/>
+                <view type="text" id="infos" x="12" y="0" shadow="true" global_color="false" posparent="cap_list" posref="TL TL" color="255 255 255 255" fontsize="11" format_taged="true" multi_line="true" hardtext_format="" />
+                <group type="webig_html" id="html" posref="BL BL" home="" title_prefix="" y="0" sizeref="h" h="-87" w="272" background_color="255 255 255 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline" browse_refresh="" browse_undo="" browse_redo="">
+                    <group type="list" id="text_list" fontsize="9" posref="TL TL" x="5" y="-2" space="0" sizeref="hw" w="-12" h="-30" maxelements="2000" />
+                    <ctrl id="scroll_bar" style="skin_scroll" x="2" h="5" y="30" posref="TR TR" />
+                </group>
+
+            </group>
+        </group>
+    </group>
+
     <!-- Main container : info_player_journal -->
     <group type="container" id="info_player_journal" w="280" h="382" title="uiJournalTitle" global_color="false" opened="true" openable="false" header_color="UI:SAVE:WIN:COLORS:PLA" resizer="true" pop_min_w="292" pop_min_h="137" pop_max_w="800" pop_max_h="800" movable="true" active="false" on_active="proc" on_active_params="mission_proc_active" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:MISSIONS|value=0">
         <group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:mission_journal_menu"></group>
@@ -648,18 +689,7 @@
             </group>
         </group>
         <group id="content" x="0" y="0" w="0" h="0" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:mission_journal_menu">
-            <group id="cap_group" x="0" y="0" sizeref="w" w="0" h="48" posref="TL TL" active="true">
-                <view type="bitmap" id="cap_icon" w="40" h="40" y="0" scale="true" global_color="false" color="255 255 255 255" texture="ico_task_generic.tga" />
-                <view type="bitmap" id="cap_mini_icon" w="15" h="15" scale="true" posref="TR TL" posparent="cap_icon" x="2" y="0" texture="ico_cap_mini.tga" global_color="false" inherit_gc_alpha="false" />
-                <view type="text" id="cap_title" x="2" y="0" shadow="true" global_color="false" posref="TR TL" posparent="cap_mini_icon" color="255 189 0 255" fontsize="12" hardtext="uiWelcomeWhatTitle" />
-                <view type="text" id="cap_desc" x="4" y="-15" global_color="false" posref="TR TL" posparent="cap_icon" fontsize="10" hardtext="uittMissionJournal" />
-                <view type="bar" id="cap_progress" active="false" posparent="cap_icon" posref="TR TL" x="4" y="-32" mini="true" value="UI:TEMP:CAP_PROGRESS" range="100" />
-                <view type="text" id="cap_infos" posparent="cap_icon" posref="TR TL" sizeref="w" x="72" y="-28" global_color="false" fontsize="10" hardtext="" />
-                <ctrl type="button" button_type="push_button" id="cap_ctrl" w="-22" h="40" x="0" y="0" sizeref="w" col_over="255 255 255 90" tx_over="blank.tga" scale="true" onclick_l="lua:game:openInfosUrl()" tooltip="uittExpandMissionList" tooltip_posref="TR TL" />
-                <ctrl type="button" active="true" button_type="push_button" id="expand_mission_list" posparent="cap_ctrl" posref="TR TL" w="20" h="20" x="-1" y="-2" scale="true" color="192 192 192 255" tx_normal="w_pad_popup.tga" col_over="255 255 255 225" tx_over="w_pad_popup.tga" col_pushed="192 192 192 255" tx_pushed="w_pad_popup.tga" tooltip="uittShowCapPopup" onclick_l="lua:game:switchCapPopup()" />
-                <ctrl type="button" active="true" button_type="push_button" id="show_in_map" posparent="cap_ctrl" posref="TR TL" w="20" h="20" x="-1" y="-24" scale="true" color="192 192 192 255" tx_normal="lm_mission.tga" col_over="255 255 255 225" tx_over="lm_mission.tga" col_pushed="192 192 192 255" tx_pushed="lm_mission.tga" tooltip="uittShowCapInMap" onclick_l="lua:game:showCapInMap()" />
-            </group>
-            <group id="mission_combo" type="group_wheel" posref="TL TL" x="2" y="-52" sizeref="w" w="-26" h="24" on_wheel_up="lua" on_wheel_up_params="game:onMissionComboWheelUp()" on_wheel_down="lua" on_wheel_down_params="game:onMissionComboWheelDown()">
+            <group id="mission_combo" type="group_wheel" posref="TL TL" x="2" y="-5" sizeref="w" w="-26" h="24" on_wheel_up="lua" on_wheel_up_params="game:onMissionComboWheelUp()" on_wheel_down="lua" on_wheel_down_params="game:onMissionComboWheelDown()">
                 <!-- DECORATION -->
                 <instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
                 <view type="bitmap" active="false" id="arrow" posref="MR MR" x="-2" texture="W_arrow_down_0.tga" />
@@ -669,21 +699,21 @@
                 <view type="text" id="no_selected_mission" active="false" x="4" y="0" posref="ML ML" fontsize="10" hardtext="uiClickToSelectAMission" />
                 <view type="text" id="no_available_mission" active="true" x="4" y="0" posref="ML ML" fontsize="10" hardtext="uiNoAvailableMission" />
             </group>
-            <group id="mission_list" w="-32" active="false" posref="TL TL" x="6" y="-52" sizeref="w" child_resize_h="true" child_resize_hmargin="2" max_sizeref="wh5" max_w="-12" max_h="-42">
+            <group id="mission_list" w="-32" active="false" posref="TL TL" x="6" y="-5" sizeref="w" child_resize_h="true" child_resize_hmargin="2" max_sizeref="wh5" max_w="-12" max_h="-42">
                 <vector template="t_mission_title" _size="%ipj_nb_mission" _firstpos="TL TL" _nextpos="BL TL" _xfirst="0" id="title$i" stepindex="$i" tooltip="uittMissionJournal" />
                 <vector template="t_group_mission_title" posparent="%ipj_last_title" _size="%ipj_nb_group_mission" _firstpos="BL TL" _nextpos="BL TL" _xfirst="0" id="group_title$i" stepindex="$i" tooltip="uittMissionJournal" />
                 <view type="text" id="no_selected_mission" active="false" x="4" y="0" posref="ML ML" fontsize="10" hardtext="uiClickToSelectAMission" />
                 <view type="text" id="no_available_mission" active="true" x="4" y="0" posref="ML ML" fontsize="10" hardtext="uiNoAvailableMission" />
             </group>
-            <ctrl style="skin_scroll" id="sv" posref="TL TL" x="0" y="-52" target="mission_list" target_stepy="18" />
-            <ctrl type="button" active="true" button_type="push_button" id="expand_mission_list" w="20" h="20" x="-1" y="-52" scale="true" color="192 192 192 255" tx_normal="Switch_Ratio.tga" col_over="255 255 255 225" tx_over="Switch_Ratio.tga" col_pushed="192 192 192 255" tx_pushed="Switch_Ratio.tga" posref="TR TR" tooltip="uittExpandMissionList" onclick_l="lua:game:expandMissionList()" />
-            <group id="fake" posref="TL TL" x="0" y="-40" sizeref="" w="0" h="42"></group>
+            <ctrl style="skin_scroll" id="sv" posref="TL TL" x="0" y="-5" target="mission_list" target_stepy="18" />
+            <ctrl type="button" active="true" button_type="push_button" id="expand_mission_list" w="20" h="20" x="-1" y="-5" scale="true" color="192 192 192 255" tx_normal="Switch_Ratio.tga" col_over="255 255 255 225" tx_over="Switch_Ratio.tga" col_pushed="192 192 192 255" tx_pushed="Switch_Ratio.tga" posref="TR TR" tooltip="uittExpandMissionList" onclick_l="lua:game:expandMissionList()" />
+            <group id="fake" posref="TL TL" x="0" y="0" sizeref="" w="0" h="42"></group>
             <group id="separator" posref="BL TL" posparent="fake" sizeparent="parent" sizeref="w" w="0" h="8" x="0" y="-5">
                 <view type="bitmap" id="sep_lef" posref="TL TL" texture="Skin_Sep_L.tga" inherit_gc_alpha="false" />
                 <view type="bitmap" id="sep_mid" posref="MM MM" scale="true" sizeref="w" w="-16" h="4" texture="Skin_Sep_M.tga" inherit_gc_alpha="false" />
                 <view type="bitmap" id="sep_rig" posref="TR TR" texture="Skin_Sep_R.tga" inherit_gc_alpha="false" />
             </group>
-            <group id="desc" posref="BL TL" posparent="separator" x="9" y="0" sizeparent="parent" max_sizeref="w" max_w="0" max_h="-42" sizeref="w" w="-12" child_resize_h="true" child_resize_hmargin="24" h="0">
+            <group id="desc" posref="BL TL" posparent="separator" x="9" y="0" sizeparent="parent" max_sizeref="wh" max_w="0" max_h="-5" sizeref="w" w="-12" child_resize_h="true" child_resize_hmargin="0" h="0">
                 <group id="uppart" x="0" y="-4" sizeref="w" w="0" h="0" child_resize_h="true" posref="TL TL">
                     <ctrl type="sheet" id="icon" nature="mission" posref="TL TL" x="0" y="0" value="SERVER:MISSIONS:0" global_color="false" />
                     <view type="bitmap" id="over_icon" render_layer="1" posref="MM MM" x="0" y="0" posparent="icon" texture="blank2.tga" global_color="false" color="255 255 255 255" />
@@ -691,7 +721,7 @@
                 </group>
                 <group id="web" w="0" h="64" posparent="uppart" posref="BL TL" y="-2" x="-5" sizeref="w">
                     <view id="background_bitmap" type="bitmap" posref="MM MM" sizeref="wh" w="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" color="0 0 0 125" global_color="false" />
-                    <instance template="webig_html_noborder" home="#home" browse_redo="#browse_redo" browse_undo="#browse_undo" browse_refresh="#browse_refresh" x="-1" w="240" y="7" h="64" />
+                    <instance template="webig_html_noborder" home="#home" browse_redo="#browse_redo" browse_undo="#browse_undo" browse_refresh="#browse_refresh" x="-1" w="240" y="7" h="64"/>
                 </group>
                 <group id="timer" posparent="web" posref="BL TL" x="10" y="-5" child_resize_h="true" child_resize_w="true">
                     <view type="bar" id="b" ultra_mini="true" posref="TL TL" color="255 255 255 255" value="UI:VARIABLES:CURRENT_SERVER_TICK" range="SERVER:MISSIONS:0:END_DATE" reference="SERVER:MISSIONS:0:BEGIN_DATE" />
@@ -717,16 +747,18 @@
             <link expr="depends(@SERVER:MISSIONS,@SERVER:GROUP:MISSIONS)" action="mission_choose_next_valid" />
         </group>
     </group>
+    <tree node="cap" />
     <tree node="info_player_journal" />
-    <group id="cap_popup" title="" type="container" posref="MM MM" x="" y="" movable="false" pop_max_h="80" pop_min_h="80" pop_min_w="800" pop_max_w="800" resizer="true" opened="false" openable="false" options="compass" header_active="false" right_button="false">
-        <group id="html" type="html" posref="TL TL" url="" title_prefix="uiQuickhelpTitle" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="patch_off.tga" checkbox_bitmap_pushed="patch_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline">
-            <group id="black" posref="BR BR" sizeref="hw" inherit_gc_alpha="true" />
-            <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" color="0 0 0 0" texture="blank.tga" global_color="false" />
-            <group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
-            <ctrl style="skin_scroll" id="scroll_bar" />
-        </group>
-    </group>
+
+	<group id="cap_popup" title=""  type="container" posref="MM MM" x="" y="" movable="false" pop_min_w="800" pop_max_w="800" resizer="true" opened="false" openable="false" options="compass" header_active="false" right_button="false">
+		<group id="html" type="html" posref="TL TL" url="" title_prefix="uiQuickhelpTitle" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="patch_off.tga" checkbox_bitmap_pushed="patch_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
+			<group id="black" posref="BR BR" sizeref="hw" inherit_gc_alpha="true"/>
+			<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="0" h="0" inherit_gc_alpha="true" scale="true" color="0 0 0 0" texture="blank.tga" global_color="false"/>
+			<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="0" y="-8" space="0" sizeref="hw" w="0" h="0" maxelements="2000"/>
+		</group>
+	</group>
     <tree node="cap_popup" />
+
     <!-- update ui when one goes from start island to mainland -->
     <link expr="depends(@SERVER:USER:IS_NEWBIE)" action="lua:game:onMissionJournalOpened()" />
     <link expr="depends(@SERVER:USER:IS_TRIAL)" action="lua:game:onMissionJournalOpened()" />
@@ -814,35 +846,39 @@
         </group>
     </group>
     <tree node="npc_web_browser" />
-    <template name="ark_mission" w="45" h="45" keep="true" icon="blank.tga" tooltip="" text1="" text2="" text3="" text1_color="255 255 255 255" text2_color="255 255 255 255" text3_color="255 255 255 255" color="255 255 255 255" color_over="255 255 255 50" shadow="true" bg="w_slot_item.tga" params_l="" params_r="" tx_over="blank.tga" icon_x="0" icon_y="0" text_x="4" text_y="0">
+
+    <template name="ark_mission" w="45" h="45" ctrl_h="44" keep="true" icon="blank.tga" tooltip="" text1="" text2="" text3="" text1_color="255 255 255 255" text2_color="255 255 255 255" text3_color="255 255 255 255" color="0 0 0 0" color_over="255 255 255 50" shadow="true" bg="w_slot_item.tga" params_l="" params_r="" tx_over="blank.tga" icon_x="0" icon_y="0" text_x="4" text_y="0">
         <group id="#id" posref="MM MM" w="0" h="#h" x="0" y="0" sizeref="w">
             <view type="bitmap" id="back" posref="ML ML" x="0" y="0" h="#h" w="#w" scale="true" texture="#bg" color="#color" global_color="false" />
             <view type="bitmap" id="icon" posref="ML ML" w="40" h="40" scale="true" x="4" y="0" render_layer="3" posparent="back" texture="#icon" global_color="false" />
-            <view type="text" id="text1" x="#text_x" y="#text_y" w="0" sizeref="#w" posparent="icon" posref="TR TL" color="#text1_color" shadow="#shadow" fontsize="10" hardtext="#text1" global_color="false" multi_line="true" />
-            <view type="text" id="text2" x="0" y="0" w="0" sizeref="w" posparent="text1" color="#text2_color" posref="BL TL" shadow="#shadow" fontsize="10" hardtext="#text2" global_color="false" multi_line="false" />
+            <view type="text" id="text1" x="#text_x" y="#text_y" w="0" sizeref="w" posparent="icon" posref="TR TL" color="#text1_color" shadow="#shadow" fontsize="10" hardtext="#text1" global_color="false" multi_line="true" />
+            <view type="text" id="text2" x="0" y="0" w="0" sizeref="w" posparent="text1" color="#text2_color" posref="BL TL" shadow="#shadow" fontsize="10" hardtext="#text2" global_color="false" multi_line_space="0" multi_line="true"  />
             <view type="text" id="text3" x="0" y="0" w="0" sizeref="w" posparent="text2" color="#text3_color" posref="BL TL" shadow="#shadow" fontsize="10" hardtext="#text3" global_color="false" multi_line="false" />
-            <ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="ML ML" w="-6" x="1" y="0" tx_normal="#tx_over" tx_pushed="#bg" tx_over="#tx_over" scale="true" sizeref="w" h="44" tooltip="#tooltip" color="0 0 0 0" col_over="#color_over" col_pushed="255 255 255 0" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r" />
+            <ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="ML ML" w="-6" x="1" y="0" tx_normal="#tx_over" tx_pushed="#bg" tx_over="#tx_over" scale="true" sizeref="w" h="#ctrl_h" tooltip="#tooltip" color="#color" col_over="#color_over" col_pushed="255 255 255 0" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r" />
         </group>
     </template>
-    <group type="container" id="ark_mission_catalog" active="false" w="950" h="700" pop_max_w="950" pop_max_h="700" pop_min_w="950" pop_min_h="700" header_color="UI:SAVE:WIN:COLORS:COM" posref="TL TL" title="Mission Catalog" global_color="true" global_color_over="true" right_button="true" movable="true" lockable="true" openable="true" opened="true" resizer="true" active_savable="false">
+
+    <group type="container" id="ark_mission_catalog" active="false" w="950" h="700" pop_max_w="950" pop_max_h="700" pop_min_w="950" pop_min_h="700" header_color="UI:SAVE:WIN:COLORS:COM" posref="TL TL" title="Mission Catalog" global_color="true" global_color_over="true" right_button="true" movable="true" lockable="true" openable="true" opened="true" resizer="true" active_savable="false" >
         <group id="header_closed" x="0" y="0" w="120" h="16" posref="TL TL" on_active="lua" on_active_params="WebBrowser:saveWindowPop()"></group>
         <group id="header_opened" x="0" y="0" w="950" h="16" posref="TL TL" on_active="lua" on_active_params="WebBrowser:restoreWindowPop()"></group>
         <group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
-            <group id="htmlA" type="html" posref="ML ML" url="http://app.ryzom.com" title_prefix="" sizeref="h" x="-16" y="10" w="220" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline">
-                <group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true" />
-                <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" color="255 255 255 0" />
-                <group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
-                <ctrl style="skin_scroll" id="scroll_bar" x="8" />
+            <group id="htmlA" type="html" posref="ML ML" url="http://app.ryzom.com" title_prefix="" sizeref="h" x="-16" y="10" w="220" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
+                <group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true"/>
+                <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" color="255 255 255 0"/>
+                <group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+                <ctrl style="skin_scroll" id="scroll_bar" x="8"/>
             </group>
-            <group id="htmlB" type="html" posref="ML ML" url="http://app.ryzom.com" title_prefix="" sizeref="h" x="190" y="10" w="740" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline">
-                <group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true" />
-                <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" color="255 255 255 0" />
-                <group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
-                <ctrl style="skin_scroll" id="scroll_bar" x="8" />
+            <group id="htmlB" type="html" posref="ML ML" url="http://app.ryzom.com" title_prefix="" sizeref="h" x="190" y="10" w="740" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
+                <group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true"/>
+                <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" color="255 255 255 0"/>
+                <group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+                <ctrl style="skin_scroll" id="scroll_bar" x="8"/>
             </group>
         </group>
     </group>
     <tree node="ark_mission_catalog" />
-    <group type="container" id="storyline_window" active="true" w="0" h="0" pop_max_w="0" pop_max_h="0" pop_min_w="0" pop_min_h="0"></group>
+
+	<group type="container" id="storyline_window" active="true" w="0" h="0" pop_max_w="0" pop_max_h="0" pop_min_w="0" pop_min_h="0"></group>
     <tree node="storyline_window" />
+
 </interface_config>

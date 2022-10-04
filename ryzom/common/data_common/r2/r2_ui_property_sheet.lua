@@ -34,13 +34,13 @@ r2.DefaultPropertySheetTitleClampSize = -28
 local eventArgs = {} -- static table here to avoid costly allocs with the ellipsis ...
 local emptyArgs = {}
 -- build an edit box for an arbitrary type
-function r2:buildEditBox(prop, textRef, entryType, multiLine, maxNumBytes, onChangeAction, onFocusLostAction)		
+function r2:buildEditBox(prop, textRef, entryType, multiLine, maxNumChars, onChangeAction, onFocusLostAction)		
 	local result =
 	[[<instance template="edit_box_widget" text_y="-1" posref="ML ML" sizeref="w" w="-8" fontsize="14" x="4" reset_focus_on_hide="true"
 		 child_resize_hmargin="4"
 		 max_historic="0"
 		 y="-2"		 
-		 negative_filter = ''
+		 negative_filter = '"{}[]'
 		 prompt="" enter_loose_focus="true" 
 		 color="255 255 255 255"
 		 continuous_text_update="true"
@@ -51,8 +51,7 @@ function r2:buildEditBox(prop, textRef, entryType, multiLine, maxNumBytes, onCha
 	[[ text_ref   =      ]] .. strifyXml(textRef)   ..
 	[[ entry_type =      ]] .. strifyXml(entryType) ..
 	[[ multi_line =      ]] .. strifyXml(multiLine) ..
-	[[ max_num_bytes =   ]] .. strifyXml(maxNumBytes) ..
-	[[ max_num_chars =   ]] .. strifyXml(maxNumBytes) ..
+	[[ max_num_chars =   ]] .. strifyXml(maxNumChars) ..
 	[[ params = ]] .. strifyXml(onChangeAction) ..
 	[[ on_focus_lost_params = ]] .. strifyXml(onFocusLostAction) ..	
 	"/>"
@@ -149,20 +148,22 @@ r2.WidgetStyles.String =
 				ok = r2.assert(loadstring('return '.. prop.ValidationFun))()(value)
 			end
 			if ok then
+				local ucValue = ucstring()
 				--debugInfo("value = " .. tostring(value))
-				widget.eb.input_string = value
-				widget.eb.Env.CurrString = value
+				ucValue:fromUtf8(value)
+				widget.eb.uc_input_string = ucValue
+				widget.eb.Env.CurrString = ucValue			
 				--debugInfo("setting" .. widget.eb.id .. " to " .. tostring(value))
 			else
-				widget.eb.input_string = widget.eb.Env.CurrString
-				widget.eb.input_string = widget.eb.input_string
+				widget.eb.uc_input_string = widget.eb.Env.CurrString
+				widget.eb.input_string = widget.eb.uc_input_string:toUtf8()
 			end
 		end
 
 		local validation = ""
 		
 		if prop.ValidationFun then
-			validation = string.format([[	if not %s(utf8Value) then editBox.input_string = editBox.Env.CurrString; return end]], prop.ValidationFun)
+			validation = string.format([[	if not %s(utf8Value) then editBox.uc_input_string = editBox.Env.CurrString; return end]], prop.ValidationFun)
 		end
 			
 		local onChangeAction = 
@@ -173,7 +174,7 @@ r2.WidgetStyles.String =
 					return
 				end
 
-				local utf8Value = editBox.input_string
+				local utf8Value = editBox.uc_input_string:toUtf8()
 				%s
 				editBox.Env.CurrString = editBox.input_string		
 				r2:requestSetObjectProperty('%s', utf8Value)
@@ -183,7 +184,7 @@ r2.WidgetStyles.String =
 		if prop.ValidateOnEnter then
 			onChangeAction = onChangeAction .. "r2:validateForm(r2.CurrentForm)"
 		end
-		return r2:buildEditBox(prop, "TL TL", defaulting(prop.EntryType, "text"), true, defaulting(prop.MaxNumChar, 255), onChangeAction, onFocusLostAction),
+		return r2:buildEditBox(prop, "TL TL", defaulting(prop.EntryType, "text"), true, defaulting(prop.MaxNumChar, 256), onChangeAction, onFocusLostAction),
 		       setter,
 			   nil
 	end,
@@ -192,7 +193,9 @@ r2.WidgetStyles.String =
 		--debugInfo("Building static text")
 		local function setter(widget, prop, value)
 			--debugInfo("value = " .. tostring(value))
-			widget.text = value
+			local ucValue = ucstring()
+			ucValue:fromUtf8(value)
+			widget.uc_hardtext = ucValue
 		end
 		local widgetXml = 
 		string.format([[ <view type="text" id="%s" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> ]], prop.Name)
@@ -203,7 +206,9 @@ r2.WidgetStyles.String =
 		--debugInfo("Building static text")
 		local function setter(widget, prop, value)
 			--debugInfo("value = " .. tostring(value))
-			widget.text = value
+			local ucValue = ucstring()
+			ucValue:fromUtf8(value)
+			widget.uc_hardtext = ucValue
 		end
 		local widgetXml = 
 		string.format([[ <view type="text" id="%s" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" multi_line="true" auto_clamp="true"/> ]], prop.Name)
@@ -276,10 +281,12 @@ end
 --
 function refIdDefaultEventHandler:update(widget, value, target)
 	local text = widget:find("name")		
-	if target then
-		text.text = target.Name
+	if target then		
+		local newName = ucstring()
+		newName:fromUtf8(target.Name)
+		text.uc_hardtext = newName
 	else		
-		text.text = i18n.get("uiR2EDNone")
+		text.uc_hardtext = i18n.get("uiR2EDNone")
 	end
 end
 --
@@ -616,7 +623,8 @@ function refIdPlotItemEventHandler:updateSheet(widget, targetPlotItem)
       local dbPath = "LOCAL:R2:PLOT_ITEMS:" .. tostring(k)
       if getDbProp(dbPath .. ":SHEET") == targetPlotItem.SheetId then         
          widget.sheet.sheet = dbPath
-         widget.t.text = targetPlotItem.Name
+         r2.ScratchUCStr:fromUtf8(targetPlotItem.Name)	
+         widget.t.uc_hardtext = r2.ScratchUCStr
          return true
       end
    end   
@@ -636,7 +644,7 @@ function refIdPlotItemEventHandler:update(widget, value, target)
    end      
  
    widget.sheet.sheet = ""
-   widget.t.text = i18n.get("uiR2EDChooseItem")   
+   widget.t.uc_hardtext = i18n.get("uiR2EDChooseItem")   
 end
 
 -- ui handling for selection of plot items from the scenario
@@ -779,7 +787,7 @@ function r2:requestSetObjectProperty(propName, value, isLocal)
 			return -- not really modified -> no op
 		end		
 		local ucActionName = r2:getPropertyTranslation(prop)		
-		r2.requestNewAction(concatString(i18n.get("uiR2EDChangePropertyAction"), ucActionName, i18n.get("uiR2EDChangePropertyOf"), target:getDisplayName()))
+		r2.requestNewAction(concatUCString(i18n.get("uiR2EDChangePropertyAction"), ucActionName, i18n.get("uiR2EDChangePropertyOf"), target:getDisplayName()))
 		-- this is a property sheet
 		
 
@@ -919,7 +927,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 -- get a form from its name
 function r2:getForm(name)
-	assert(name) -- why is name nil???
+	assert(name) -- why is nam nil???
 	return getUI("ui:interface:r2ed_form_" .. name)
 end
 
@@ -952,11 +960,11 @@ r2.WidgetStyles.Number =
 			local prop = r2:getPropertyDefinition('%s', getUICaller())
 			assert(prop)
 			local clamped = false						
-			if prop.Min and newValue < tonumber(prop.Min) then
+			if prop.Min and newValue &lt; tonumber(prop.Min) then
 				newValue = tonumber(prop.Min)
 				clamped = true
 			end			
-			if prop.Max and newValue > tonumber(prop.Max) then
+			if prop.Max and newValue &gt; tonumber(prop.Max) then
 				newValue = tonumber(prop.Max)
 				clamped = true
 			end			
@@ -1907,7 +1915,7 @@ function r2:buildAllPropertySheetsAndForms()
 		--f:write(r2:encloseXmlScript(xmlScript))
 		--f:flush()
 		--f:close()
-		parseInterfaceFromString(r2:encloseXmlScript(xmlScript))
+		parseInterfaceFromString(ucstring(r2:encloseXmlScript(xmlScript)):toUtf8())
 		local endTime = nltime.getLocalTime()
 		debugInfo(string.format("Reparsing generated xml took %f second", (endTime - startTime) / 1000))
 	end
@@ -2047,7 +2055,7 @@ function propertySheetDisplayerTable:onAttrModified(instance, attributeName, ind
 		local propertySheet = r2:getPropertySheet(instance)
 			if propertySheet then
 				if attributeName == "Name" and instance == r2:getSelectedInstance() then
-					propertySheet.title = concatString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
+					propertySheet.uc_title = concatUCString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
 				end
 				propertySheet.Env.updatePropVisibility()
 			end
@@ -2156,7 +2164,7 @@ function r2:showProperties(instance)
 			end			
 		end		
 		if instance and instance:getClass().BuildPropertySheet then
-			newPropWindow.title = concatString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
+			newPropWindow.uc_title = concatUCString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
 		end
 	end	
 	r2.CurrentPropertyWindow = newPropWindow
@@ -2217,9 +2225,9 @@ function r2:doForm(formName, initialTable, validateCallback, cancelCallback)
 	formUI:center()	
 	formUI:updateCoords()
 	if form.Caption ~= nil then
-		formUI.title = i18n.get(form.Caption)
+		formUI.uc_title = i18n.get(form.Caption)
 	else
-		formUI.title = i18n.get("uiR2EDForm")
+		formUI.uc_title = i18n.get("uiR2EDForm")
 	end
 	r2.CurrentForm = formUI
 	if type(form.onShow) == "function" then
