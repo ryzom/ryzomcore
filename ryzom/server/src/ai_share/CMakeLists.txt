@@ -3,13 +3,12 @@ FILE(GLOB SRC *.cpp *.h)
 NL_TARGET_LIB(ryzom_aishare ${SRC})
 
 TARGET_LINK_LIBRARIES(ryzom_aishare
-						${RYZOM_GAMESHARE_LIBRARIES}
+						ryzom_gameshare
 						ryzom_servershare
-						${NELMISC_LIBRARIES}
-						${NELLIGO_LIBRARIES}
-						${NELNET_LIBRARIES}
-						${NELGEORGES_LIBRARIES}
-						${NELPACS_LIBRARIES})
+						nelmisc
+						nelnet
+						nelgeorges
+						nelpacs)
 
 NL_DEFAULT_PROPS(ryzom_aishare "Ryzom, Library: AI Shared")
 NL_ADD_RUNTIME_FLAGS(ryzom_aishare)
