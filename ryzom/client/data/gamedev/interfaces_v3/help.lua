@@ -65,7 +65,7 @@ function help:displayWelcome()
 		return
 	end
 
-	if getDbProp("UI:SAVE:SKIP_WELCOME") == 1 then
+	if getDbProp("UI:SAVE:SKIP_TUTORIAL") == 1 then
 		return
 	end
 
