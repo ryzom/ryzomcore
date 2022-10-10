@@ -31,6 +31,12 @@ game.capExpanded = false
 game.CapInfos = ""
 game.keepExpandStatus = false
 
+function debug(text, type)
+end
+
+function p(text, type)
+end
+
 
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
@@ -1885,6 +1891,10 @@ function game:onInGameDbInitialized()
 
 	runAH(nil, "proc", "init_3d_preview")
 	runAH(nil, "sort_tribefame", "")
+
+	if getDbProp("UI:SAVE:AUTO_LIGHT") == 1 then
+		runAH(nil, "light_on", "")
+	end
 end
 
 function game:onWebIgReady()
