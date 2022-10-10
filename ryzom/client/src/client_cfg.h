@@ -157,6 +157,7 @@ struct CClientConfig
 	float			InterfaceScale_min;
 	float			InterfaceScale_max;
 	float			InterfaceScale_step;
+	bool			InterfaceScaleAuto;
 	bool			BilinearUI;
 
 	// Window snap
