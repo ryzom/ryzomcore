@@ -149,8 +149,8 @@ void saveIngameResolution()
 	{
 		uint32 width, height;
 		Driver->getWindowSize(width, height);
-		ClientCfg.writeInt("Width", width);
-		ClientCfg.writeInt("Height", height);
+		ClientCfg.writeInt("Width", std::max((sint)width, 800));
+		ClientCfg.writeInt("Height", std::max((sint)height, 600));
 	}
 }
 
