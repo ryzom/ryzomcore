@@ -94,7 +94,7 @@ public:
 	/// - the text Id of the menu option
 	void sendContextTexts(const TDataSetRow& user, const TDataSetRow& interlocutor, std::vector< std::pair<bool,uint32> >& textInfos);
 	/// fill a vector of bool. each entry is set to true if the option is a bot gift
-	void getBotChatOptions(const TDataSetRow& interlocutor, std::vector<CBotChat> & botChats);
+	void getBotChatOptions(const TDataSetRow& user,const TDataSetRow& interlocutor, std::vector<CBotChat> & botChats);
 	/// override the mission description
 	void overrideDesc( uint32 descIndex );
 	/// send the mission description text

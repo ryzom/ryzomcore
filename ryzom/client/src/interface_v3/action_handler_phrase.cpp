@@ -524,6 +524,46 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerPhraseChangeName, "phrase_change_name");
 
+// ***************************************************************************
+class CHandlerPhraseSelectIcon : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
+	{
+		// pCaller == ui:interface:phrase_composition:header_opened:spell_view
+		CDBGroupBuildPhrase	*buildGroup= dynamic_cast<CDBGroupBuildPhrase*>(pCaller->getParent());
+		if(!buildGroup)
+			return;
+
+		CHandlerPhraseValidateBrick::BuildPhraseGroup = buildGroup;
+
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId( CDBGroupBuildPhrase::BrickIconSelectionModal ) );
+		if(group)
+			CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerPhraseSelectIcon, "phrase_select_icon");
+
+// ***************************************************************************
+class CHandlerPhraseSetIcon : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &sParams)
+	{
+		if (!CHandlerPhraseValidateBrick::BuildPhraseGroup)
+			return;
+
+		string s = getParam(sParams, "index");
+		uint8 index;
+		if (fromString(s, index))
+		{
+			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:ICON:%d:INDEX", index));
+			if (node)
+				CHandlerPhraseValidateBrick::BuildPhraseGroup->setPhraseIcon(node->getValue32());
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerPhraseSetIcon, "phrase_set_icon");
 
 // ***************************************************************************
 /*
@@ -1245,20 +1285,16 @@ public:
 							// VERY important if previous MoveTo was a SPhrase MoveTo (because cancelClientExecute() must be called)
 							UserEntity->resetAnyMoveTo();
 
-							pPM->cancelClientExecute(cyclic);
-
-							// Move to targetted source
-							if (target)
-								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
-
 							// start client execution
 							pPM->clientExecute(memoryLine, memoryIndex, cyclic);
 
-							if (!target)
-							{
-								// inform Server of phrase cast
+							// Move to targetted source or inform Server of phrase cast
+							// If target is close, then sendExecuteToServer is called from extractRM()
+							// If target is far, then client executes move-to-target first, and then calls extractRM()
+							if (target)
+								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
+							else
 								pPM->sendExecuteToServer(memoryLine, memoryIndex, cyclic);
-							}
 						}
 					}
 					else
@@ -1622,7 +1658,8 @@ public:
 			{
 				CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 				sint	val= (sint32)value.getInteger();
-				clamp(val, 0, MEM_SET_TYPES::NumMemories-1);
+				// first half of memorized stanza sets
+				clamp(val, 0, MEM_SET_TYPES::NumMemories / 2 - 1);
 				pPM->selectMemoryLineDB(val);
 			}
 		}
@@ -1646,8 +1683,11 @@ public:
 			else
 			{
 				CSPhraseManager		*pPM= CSPhraseManager::getInstance();
-				sint	val= (sint32)value.getInteger();
-				clamp(val, 0, MEM_SET_TYPES::NumMemories-1);
+				// second half of memorized stanza sets
+				sint	minValue = MEM_SET_TYPES::NumMemories / 2;
+				sint	maxValue = MEM_SET_TYPES::NumMemories - 1;
+				sint	val = (sint32)value.getInteger() + minValue;
+				clamp(val, minValue, maxValue);
 				pPM->selectMemoryLineDBalt(val);
 			}
 		}

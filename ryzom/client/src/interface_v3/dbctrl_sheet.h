@@ -626,6 +626,9 @@ public:
 	// callback from info waiter
 	void infoReceived();
 
+	// do the sheets point to the same item in the DB ?
+	bool isSheetEqual(CDBCtrlSheet *pCS) const;
+
 	// set enchant/buff marker visiblility
 	static void setShowIconBuffs(bool b) { _ShowIconBuffs = b; }
 
@@ -642,9 +645,9 @@ protected:
 	void setupSPhraseId();
 	void setupOutpostBuilding();
 	// optSheet is for special faber
-	void setupDisplayAsSBrick(sint32 sheet, sint32 optSheet= 0);
+	void setupDisplayAsSBrick(sint32 sheet, sint32 optSheet = 0, bool force = false);
 	// setup icon from phrases
-	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName);
+	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName, uint8 phraseIconIndex = std::numeric_limits<uint8>::max());
 
 	// draw a number and returns the width of the drawn number
 	sint32 drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value, bool rightAlign=true);
@@ -670,6 +673,9 @@ protected:
 	NLMISC::CCDBNodeLeaf		*_ItemRMFaberStatType;
 
 	mutable sint32		_LastSheetId;
+	sint32				_LastItemInfoVersion;
+	sint32				_LastItemCreateTime;
+	sint32				_LastItemSerial;
 	bool				_ItemInfoChanged;
 
 	/// Display
@@ -848,8 +854,9 @@ private:
 	void		updateIconSize();
 	void		resetAllTexIDs();
 	void		setupInit();
-	// remove enchant and buff markers from item icon
+	// update/remove enchant and buff markers from item icon
 	void		clearIconBuffs();
+	void		updateIconBuffs();
 
 	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown= false);
 	void		resetCharBitmaps();

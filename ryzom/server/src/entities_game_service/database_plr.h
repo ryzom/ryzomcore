@@ -3794,6 +3794,80 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		
 	};
 		
+	class THOTBAR
+	{
+	public:
+		
+	class TArray
+	{
+	public:
+		
+
+	private:
+		ICDBStructNode	*_BranchNode;
+
+		ICDBStructNode	*_INDEX_IN_BAG;
+		
+
+	public:
+		void init(ICDBStructNode *parent, uint index);
+
+		// accessor to branch node
+		ICDBStructNode *getCDBNode()
+		{
+			return _BranchNode;
+		}
+
+		
+		void setINDEX_IN_BAG(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
+		{
+			
+			// Check that the value is not out of database precision
+			STOP_IF(value > (1<<9)-1, "setINDEX_IN_BAG : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 9 bits");
+				
+
+			_setProp(dbGroup, _INDEX_IN_BAG, value, forceSending);
+		}
+
+		uint16 getINDEX_IN_BAG(const CCDBSynchronised &dbGroup)
+		{
+			uint16 value;
+			_getProp(dbGroup, _INDEX_IN_BAG, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getINDEX_IN_BAGCDBNode()
+		{
+			return _INDEX_IN_BAG;
+		}
+	
+	};
+		
+
+	private:
+		ICDBStructNode	*_BranchNode;
+
+		TArray _Array[5];
+		
+
+	public:
+		void init(ICDBStructNode *parent);
+
+		// accessor to branch node
+		ICDBStructNode *getCDBNode()
+		{
+			return _BranchNode;
+		}
+
+		TArray &getArray(uint32 index)
+		{
+			nlassert(index < 5);
+			return _Array[index];
+		}
+		
+	};
+		
 	class TTEMP
 	{
 	public:
@@ -4783,6 +4857,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_COUNTER;
 		THAND	_HAND;
 		TEQUIP	_EQUIP;
+		THOTBAR	_HOTBAR;
 		TTEMP	_TEMP;
 		TSHARE	_SHARE;
 		TROOM	_ROOM;
@@ -4847,6 +4922,10 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		TEQUIP &getEQUIP()
 		{
 			return _EQUIP;
+		}
+		THOTBAR &getHOTBAR()
+		{
+			return _HOTBAR;
 		}
 		TTEMP &getTEMP()
 		{

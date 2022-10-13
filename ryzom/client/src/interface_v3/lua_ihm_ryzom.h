@@ -67,6 +67,7 @@ private:
 	static int	displayChatMessage(CLuaState &ls);
 	static int	setWeatherValue(CLuaState &ls); // first value is a boolean to say automatic, second value ranges from of to 1 and gives the weather
 	static int	getWeatherValue(CLuaState &ls); // get current real weather value (blend between server driven value & predicted value). Manual weather value is ignored
+	static int	getRyzomTime(CLuaState &ls); // get day and hour in ryzom time
 	static int	getContinentSheet(CLuaState &ls);
 	static int	disableContextHelpForControl(CLuaState &ls);	// params: CCtrlBase*. return: none
 	static int  disableContextHelp(CLuaState &ls);
@@ -268,6 +269,7 @@ private:
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
 	static float setChar3dDBfromVPX(const std::string &branch, const std::string &people, const std::string &vpa, const std::string &vpb, const std::string &vpc);
+	static void setChar3dDBfromServerDB(const std::string &branch);
 	static float getRefHeightScale(const std::string &people, const std::string &vpa);
 	static std::string getRegionByAlias(uint32 alias);
 	static float getGroundZ(float x, float y);
@@ -288,6 +290,8 @@ private:
 	static int addRespawnPoint(CLuaState &ls);
 	static int delArkPoints(CLuaState &ls);
 	static int setArkPowoOptions(CLuaState &ls);
+	static int getActualMapZoom(CLuaState &ls);
+	static int setActualMapZoom(CLuaState &ls);
 
 
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly

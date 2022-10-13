@@ -497,7 +497,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextCreateGuild, "context_create_guild");
 // ***************************************************************************
 // GCM Mission option
 // ***************************************************************************
-class CHandlerContextMissionOption : public IActionHandler
+class CHandlerContextOpenMissionOption : public IActionHandler
 {
 public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
@@ -524,7 +524,23 @@ public:
 		}
 	}
 };
+REGISTER_ACTION_HANDLER(CHandlerContextOpenMissionOption, "open_mission_option");
+
+
+class CHandlerContextMissionOption : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		std::string id = getParam(sParams, "id");
+		sint intId;
+		if (!fromString(id, intId)) return;
+		UserEntity->moveToMission(UserEntity->targetSlot(), 3.0, intId);
+	}
+};
 REGISTER_ACTION_HANDLER(CHandlerContextMissionOption, "mission_option");
+
+
 
 
 // ***************************************************************************
@@ -933,7 +949,7 @@ public:
 			CEntityCL *pSel = EntitiesMngr.entity(UserEntity->selection());
 			if (pSel != NULL)
 				if (pSel->isForageSource())
-					UserEntity->moveToExtractionPhrase(UserEntity->selection(), 2.0f, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
+					UserEntity->moveToExtractionPhrase(UserEntity->selection(), MaxExtractionDistance, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
 		}
 	}
 };
@@ -3803,21 +3819,37 @@ class CHandlerSetInterfaceScale : public IActionHandler
 		std::string s;
 		s = getParam(Params, "scale");
 		if (!s.empty()) {
-			float scale;
-			if (fromString(s, scale))
+			bool valid = false;
+			if (nlstricmp(s, "auto") == 0 || s == "0")
 			{
-				if (scale >= ClientCfg.InterfaceScale_min && scale <= ClientCfg.InterfaceScale_max)
+				valid = true;
+				ClientCfg.InterfaceScaleAuto = true;
+			}
+			else
+			{
+				float scale;
+				if (fromString(s, scale))
 				{
-					ClientCfg.InterfaceScale = scale;
-					ClientCfg.writeDouble("InterfaceScale", ClientCfg.InterfaceScale);
-
-					ClientCfg.IsInvalidated = true;
-					return;
+					if (scale >= ClientCfg.InterfaceScale_min && scale <= ClientCfg.InterfaceScale_max)
+					{
+						valid = true;
+						ClientCfg.InterfaceScale = scale;
+						ClientCfg.InterfaceScaleAuto = false;
+					}
 				}
+			}
+
+			if (valid)
+			{
+				ClientCfg.writeDouble("InterfaceScale", ClientCfg.InterfaceScale);
+				ClientCfg.writeBool("InterfaceScaleAuto", ClientCfg.InterfaceScaleAuto);
+				ClientCfg.IsInvalidated = true;
+				return;
 			}
 		}
 
 		string help = "/setuiscale "+toString("%.1f .. %.1f", ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
+		CInterfaceManager::getInstance()->displaySystemInfo("/setuiscale auto");
 		CInterfaceManager::getInstance()->displaySystemInfo(help);
 	}
 };

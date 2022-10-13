@@ -504,6 +504,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("disableContextHelp", disableContextHelp);
 	ls.registerFunc("setWeatherValue", setWeatherValue);
 	ls.registerFunc("getWeatherValue", getWeatherValue);
+	ls.registerFunc("getRyzomTime", getRyzomTime);
 	ls.registerFunc("getContinentSheet", getContinentSheet);
 	ls.registerFunc("getCompleteIslands", getCompleteIslands);
 	ls.registerFunc("displayBubble", displayBubble);
@@ -535,6 +536,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("delArkPoints",  delArkPoints);
 	ls.registerFunc("addRespawnPoint",  addRespawnPoint);
 	ls.registerFunc("setArkPowoOptions",  setArkPowoOptions);
+	ls.registerFunc("getActualMapZoom",  getActualMapZoom);
+	ls.registerFunc("setActualMapZoom",  setActualMapZoom);
 	ls.registerFunc("saveUserChannels", saveUserChannels);
 	ls.registerFunc("readUserChannels", readUserChannels);
 	ls.registerFunc("getMaxDynChan", getMaxDynChan);
@@ -626,6 +629,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getCharacterSheetRegionForce),
 		LUABIND_FUNC(getCharacterSheetRegionLevel),
 		LUABIND_FUNC(setChar3dDBfromVPX),
+		LUABIND_FUNC(setChar3dDBfromServerDB),
 		LUABIND_FUNC(getRefHeightScale),
 		LUABIND_FUNC(getRegionByAlias),
 		LUABIND_FUNC(getGroundZ),
@@ -1902,6 +1906,19 @@ int CLuaIHMRyzom::getWeatherValue(CLuaState &ls)
 	ls.push(weather);
 	return 1;
 }
+
+int CLuaIHMRyzom::getRyzomTime(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_getWeatherValue)
+	const char *funcName = "getRyzomTime";
+	CLuaIHM::checkArgCount(ls, funcName, 0);
+	uint64 currDay = RT.getRyzomDay();
+	float currHour = (float) RT.getRyzomTime();
+	ls.push(currDay);
+	ls.push(currHour);
+	return 2;
+}
+
 
 int CLuaIHMRyzom::getContinentSheet(CLuaState &ls)
 {
@@ -3971,6 +3988,13 @@ float CLuaIHMRyzom::setChar3dDBfromVPX(const std::string &branch, const std::str
 	return cs.VisualPropC.PropertySubData.CharacterHeight;
 }
 
+void CLuaIHMRyzom::setChar3dDBfromServerDB(const std::string &branch)
+{
+	CCharacterSummary cs;
+	SCharacter3DSetup::setupCharacterSummaryFromSERVERDB(cs);
+	SCharacter3DSetup::setupDBFromCharacterSummary(branch, cs);
+}
+
 float CLuaIHMRyzom::getRefHeightScale(const std::string &people, const std::string &vpa)
 {
 	CCharacterSummary cs;
@@ -4378,6 +4402,10 @@ sint32 CLuaIHMRyzom::getTargetLevelForce()
 	}
 	else
 	{
+		uint8 nForce = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:FORCE_RATIO")->getValue8();
+		if (nForce > 11)
+			return nForce;
+
 		CCharacterSheet *pCS = dynamic_cast<CCharacterSheet*>(SheetMngr.get(target->sheetId()));
 		return pCS ? (sint32) pCS->ForceLevel : -1;
 	}
@@ -4529,6 +4557,35 @@ int CLuaIHMRyzom::setArkPowoOptions(CLuaState &ls)
 	if (pMap != NULL) {
 		pMap->setArkPowoMode(ls.toString(1));
 		pMap->setArkPowoMapMenu(ls.toString(2));
+	}
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getActualMapZoom(CLuaState &ls)
+{
+	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (gm != NULL)
+		ls.push(gm->getScale());
+	else
+		ls.push(0);
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::setActualMapZoom(CLuaState &ls)
+{
+
+	const char* funcName = "setActualMapZoom";
+	CLuaIHM::checkArgMin(ls, funcName, 1);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+	CInterfaceManager *im = CInterfaceManager::getInstance();
+	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (gm != NULL)
+	{
+		CVector2f center;
+		gm->windowToMap(center, gm->getWReal() / 2, gm->getHReal() / 2);
+		gm->setScale(ls.toNumber(1), center);
 	}
 	return 0;
 }

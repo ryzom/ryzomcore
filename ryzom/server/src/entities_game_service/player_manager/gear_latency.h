@@ -36,6 +36,9 @@ class CGearLatency
 	NL_INSTANCE_COUNTER_DECL(CGearLatency);
 public:
 
+
+	CGearLatency();
+
 	/// update latencies
 	void update(CCharacter * user);
 
@@ -51,9 +54,13 @@ public:
 
 		bool inHand = false;
 		if (inventory == INVENTORIES::handling)
+		{
 			inHand = true;
-		else
-			nlassert(inventory == INVENTORIES::equipment);
+		}
+		else if (inventory != INVENTORIES::hotbar && inventory != INVENTORIES::equipment) {
+			nlerror("isSlotLatent : Invalid inventory %u ('%s') : must be handling or hotbar or equipment ",inventory,INVENTORIES::toString(inventory).c_str() );
+			return false;
+		}
 			
 		std::list<CGearSlot>::const_iterator it = _GearLatencies.begin();
 		for (; it != _GearLatencies.end(); ++it)
@@ -82,7 +89,9 @@ private:
 	};
 
 	/// list of affected slots, sorted by increasing latency end dates
-	std::list<CGearSlot>	_GearLatencies;	
+	std::list<CGearSlot>	_GearLatencies;
+	NLMISC::TGameCycle	_LastLatencyUpdate;
+	NLMISC::TGameCycle	_MaxEquipTime;
 };
 
 
