@@ -89,6 +89,7 @@ CVariable<uint32> OutpostStateTimeOverride("egs", "OutpostStateTimeOverride", "E
 CVariable<uint32> OutpostJoinPvpTimer("egs", "OutpostJoinPvpTimer", "Max time the player has to answer the JoinPvp Window, in seconds", 10, 0, true );
 CVariable<uint32> NumberDayFactorGuildNeedForChallengeOutpost("egs","NumberDayFactorGuildNeedForChallengeOutpost","Nombre de 'level outpost / factor' jours d'existance que la guilde doit avoir pour pouvoir challenger un outpost",10,0,true);
 CVariable<sint32> NumberDaysMinusOutpostLevelForChallenge("egs","NumberDaysMinusOutpostLevelForChallenge", "Number to substract from outpost level to get oldness required to challenge an outpost",50,0,true);
+CVariable<sint32> NumberDaysGuildNeedWaitAfterGVEFail("egs","NumberDayGuildNeedWaitAfterGVEFail", "Number to days a guild need wait after a fail in GVE",7*days,0,true);
 
 extern CPlayerManager PlayerManager;
 
@@ -849,9 +850,12 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 			}
 		}
 	}
-
+	
+	if (attackerGuild->getLastFailedGVE() > CTickEventHandler::getGameCycle() - (NumberDaysGuildNeedWaitAfterGVEFail / CTickEventHandler::getGameTimeStep()))
+		return COutpost::FailedGVE;
+	
 	if (_CurrentOutpostLevel >= computeRoundCount())
-		return COutpost::InvalidOutpost;
+		return COutpost::NeedWaitToAttack;
 
 	if(!guildAttackerValid)
 	{
@@ -2766,6 +2770,8 @@ std::string COutpost::getErrorString(TChallengeOutpostErrors error)
 	case AlreadyOwned:			return "OUTPOST_ERROR_ALREADY_OWNED";
 	case TimePeriodEstimationChanged:	return "OUTPOST_ERROR_TIME_PERIOD_ESTIMATION_CHANGED";
 	case TooManyGuildOutposts:	return "OUTPOST_ERROR_TOO_MANY_GUILD_OUTPOSTS";
+	case NeedWaitToAttack:		return "OUTPOST_ERROR_NEED_WAIT_TO_ATTCK";
+	case FailedGVE:				return "OUTPOST_ERROR_FAILED_GVG";
 	case UnknownError:			return "OUTPOST_ERROR_UNKNOWN";
 	}
 	return "OUTPOST_ERROR_UNKNOWN";
