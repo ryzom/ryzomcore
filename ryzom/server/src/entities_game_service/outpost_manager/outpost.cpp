@@ -1481,7 +1481,7 @@ PVP_RELATION::TPVPRelation COutpost::getPVPRelation( CCharacter * user, CEntityB
 
 	if( target->getOutpostAlias() == 0 )
 	{
-		return PVP_RELATION::Neutral;
+		return PVP_RELATION::NeutralOutpostPVP;
 	}
 
 	CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
@@ -1502,7 +1502,7 @@ PVP_RELATION::TPVPRelation COutpost::getPVPRelation( CCharacter * user, CEntityB
 
 	// One is safe but not other => NeutralPVP
 	if ((targetSafe && !actorSafe) || (actorSafe && !targetSafe)) {
-		return PVP_RELATION::NeutralPVP;
+		return PVP_RELATION::NeutralOutpostPVP;
 	}
 
 	if( user->getOutpostAlias() == target->getOutpostAlias() )
@@ -1522,7 +1522,7 @@ PVP_RELATION::TPVPRelation COutpost::getPVPRelation( CCharacter * user, CEntityB
 		}
 	}
 
-	return PVP_RELATION::Neutral;
+	return PVP_RELATION::NeutralOutpostPVP;
 
 } // getPVPRelation //
 
