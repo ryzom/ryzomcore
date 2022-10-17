@@ -5982,7 +5982,7 @@ namespace NLGUI
 					bool notfound = true;
 					for (uint i=0; i<form.Entries.size(); i++)
 					{
-						if (form.Entries[i].Name == name && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
+						if (form.Entries[i].Name == name && form.Entries[i].Checkbox != NULL && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
 						{
 							checkbox->initRBRefFromRadioButton(form.Entries[i].Checkbox);
 							notfound = false;
