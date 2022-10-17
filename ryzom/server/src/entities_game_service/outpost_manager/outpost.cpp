@@ -850,10 +850,10 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 			}
 		}
 	}
-	
-	if (attackerGuild->getLastFailedGVE() > CTickEventHandler::getGameCycle() - (NumberDaysGuildNeedWaitAfterGVEFail / CTickEventHandler::getGameTimeStep()))
+
+	if ((getName().substr(0, 14) != "outpost_nexus_") && (attackerGuild->getLastFailedGVE() > CTickEventHandler::getGameCycle() - (NumberDaysGuildNeedWaitAfterGVEFail / CTickEventHandler::getGameTimeStep())))
 		return COutpost::FailedGVE;
-	
+
 	if (_CurrentOutpostLevel >= computeRoundCount())
 		return COutpost::NeedWaitToAttack;
 
@@ -2770,8 +2770,8 @@ std::string COutpost::getErrorString(TChallengeOutpostErrors error)
 	case AlreadyOwned:			return "OUTPOST_ERROR_ALREADY_OWNED";
 	case TimePeriodEstimationChanged:	return "OUTPOST_ERROR_TIME_PERIOD_ESTIMATION_CHANGED";
 	case TooManyGuildOutposts:	return "OUTPOST_ERROR_TOO_MANY_GUILD_OUTPOSTS";
-	case NeedWaitToAttack:		return "OUTPOST_ERROR_NEED_WAIT_TO_ATTCK";
-	case FailedGVE:				return "OUTPOST_ERROR_FAILED_GVG";
+	case NeedWaitToAttack:		return "OUTPOST_ERROR_NEED_WAIT_TO_ATTACK";
+	case FailedGVE:				return "OUTPOST_ERROR_FAILED_GVE";
 	case UnknownError:			return "OUTPOST_ERROR_UNKNOWN";
 	}
 	return "OUTPOST_ERROR_UNKNOWN";
