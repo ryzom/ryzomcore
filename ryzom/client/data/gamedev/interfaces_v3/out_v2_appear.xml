@@ -1364,7 +1364,7 @@
 			<view type="text" id="firstName" case="%case_first_string_letter_up" posparent="name_sub_race_first_name_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_FirstName" color="255 255 255 255" fontsize="11"/>
 			<view type="text" id="name_race" case="%case_first_string_letter_up" posparent="name_sub_race_first_name_slider" posref="TR TL" x="-100" y="0" hardtext="Fyros" color="255 255 255 255" fontsize="11"/>
 			<ctrl type="scroll" id="name_race_scroll" posparent="name_sub_race_first_name_slider" posref="MM MM" x="0" y="0" w="160" h="32"
-								vertical="false" align="L" min="1" max="5" value="UI:TEMP:NAME_SUB_RACE_FIRST_NAME" tracksize="40"
+								vertical="false" align="L" min="1" max="4" value="UI:TEMP:NAME_SUB_RACE_FIRST_NAME" tracksize="40"
 								tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""
 								onscroll="proc" params="proc_appear_name_sub_race_first_name_label_change" />
 		</group>
@@ -1656,7 +1656,7 @@
 	<action handler="lua:outgame:procUpdateNameSubRaceFirstNameLabel()" />
 </proc>
 <proc id="proc_appear_name_sub_race_first_name_add_one">
-	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE_FIRST_NAME|value=min(add(@UI:TEMP:NAME_SUB_RACE_FIRST_NAME,1),5)" />
+	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE_FIRST_NAME|value=min(add(@UI:TEMP:NAME_SUB_RACE_FIRST_NAME,1),4)" />
 	<action handler="lua:outgame:procUpdateNameSubRaceFirstNameLabel()" />
 </proc>
 <proc id="proc_appear_name_sub_race_first_name_sub_one">
@@ -2410,6 +2410,15 @@
 
 
 		<group id="rpbg" x="230" y="780" w="-300" h="-140" sizeref="wh" posref="TL Tl" >
+			<instance template="job_frame" id="back" posref="TL TL" />
+			<group id="html" type="webig_html" posref="MM MM" title_prefix="" sizeref="wh" x="0" y="0" w="-40" h="-40" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline">
+				<group id="black" posref="BR BR" sizeref="hw" w="0" h="0" inherit_gc_alpha="true" />
+				<view id="background_bitmap" type="bitmap" posparent="black" posref="MM MM" sizeref="wh" w="0" h="0" inherit_gc_alpha="true" scale="true" texture="blank.tga" color="0 0 0 0" global_color="false" />
+				<group id="text_list" type="list" fontsize="9" posref="TL TL" posparent="black" x="0" y="0" space="0" sizeref="hw" w="0" h="0" maxelements="2000" />
+			</group>
+		</group>
+
+		<group id="generator" x="0" y="0" w="0" h="0" active="false" sizeref="wh" posref="TL Tl" >
 			<instance template="job_frame" id="back" posref="TL TL" />
 			<group id="html" type="webig_html" posref="MM MM" title_prefix="" sizeref="wh" x="0" y="0" w="-40" h="-40" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline">
 				<group id="black" posref="BR BR" sizeref="hw" w="0" h="0" inherit_gc_alpha="true" />

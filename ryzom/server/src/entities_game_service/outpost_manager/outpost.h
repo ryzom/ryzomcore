@@ -80,6 +80,8 @@ public:
 		AlreadyOwned,
 		TimePeriodEstimationChanged,
 		TooManyGuildOutposts,
+		NeedWaitToAttack,
+		FailedGVE,
 		UnknownError,
 	};
 

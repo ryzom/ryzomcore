@@ -8020,7 +8020,7 @@ NLMISC_COMMAND(setOrganizationStatus, "set the organization status of a player",
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m>] [<spawnBots=true>] [<orientation=random|self|-360..360>] [<name>] [<x>] [<y>] [client_sheet] [inVIllage?inOutpost?inStable?inAtys?]")
+NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m>] [<spawnBots=true>] [<orientation=random|self|-360..360>] [<name>] [<x>] [<y>] [<z>] [client_sheet] [inVIllage?inOutpost?inStable?inAtys?]")
 {
 	if (args.size () < 3) return false;
 	GET_CHARACTER

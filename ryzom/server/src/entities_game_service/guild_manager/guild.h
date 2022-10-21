@@ -136,6 +136,9 @@ public:
 	/// rebuild the client database, use after a name unifier update
 //	void rebuildCliendDB();
 
+	void setLastFailedGVE(NLMISC::TGameCycle time) { _LastFailedGVE = time; }
+	NLMISC::TGameCycle getLastFailedGVE() { return _LastFailedGVE; }
+
 
 	///\name Member management
 	//@{
@@ -388,6 +391,8 @@ private:
 	ucstring							_Description;
 	// words of the day
 	ucstring							_MessageOfTheDay;
+
+	NLMISC::TGameCycle					_LastFailedGVE;
 
 	// The declared Cult and Civilization information for the guild for fame purposes.
 	PVP_CLAN::TPVPClan					_DeclaredCult;
