@@ -108,8 +108,8 @@ function webig:swapItems(src, dst)
 	addDbProp(src..":USER_COLOR", user_color)
 	addDbProp(src..":RM_CLASS_TYPE", rm_class_type)
 	addDbProp(src..":RM_FABER_STAT_TYPE", rm_faber_stat_type)
-	addDbProp(dst..":CREATE_TIME", 0)
-	addDbProp(dst..":SERIAL", 0)
+	addDbProp(src..":CREATE_TIME", 0)
+	addDbProp(src..":SERIAL", 0)
 end
 
 function webig:deleteItem(src)
@@ -120,8 +120,8 @@ function webig:deleteItem(src)
 	addDbProp(src..":USER_COLOR", 0)
 	addDbProp(src..":RM_CLASS_TYPE", 0)
 	addDbProp(src..":RM_FABER_STAT_TYPE", 0)
-	addDbProp(dst..":CREATE_TIME", 0)
-	addDbProp(dst..":SERIAL", 0)
+	addDbProp(src..":CREATE_TIME", 0)
+	addDbProp(src..":SERIAL", 0)
 end
 
 function webig:paramDbSheetSlot(sheet_list, ctrl)
