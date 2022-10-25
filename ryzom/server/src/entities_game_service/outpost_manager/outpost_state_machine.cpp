@@ -213,7 +213,7 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 			bool won;
 			if (_FightData._KilledSquads < (_FightData._SpawnedSquadsA+_FightData._SpawnedSquadsB))
 			{
-				if (_FightData._CurrentCombatLevel>0)
+				if (_PVPType != OUTPOSTENUMS::GVE && _PVPType != OUTPOSTENUMS::PVE && _PVPType != OUTPOSTENUMS::GVG && _FightData._CurrentCombatLevel > 0)
 					--_FightData._CurrentCombatLevel;
 				won = false;
 			}
@@ -325,14 +325,17 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 				{
 					if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
 					{
-						CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(getAttackerGuild());
-						if (pGuild)
-							pGuild->setLastFailedGVE(CTickEventHandler::getGameCycle());
+						if (getName().substr(0, 14) != "outpost_nexus_")
+						{
+							CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(getAttackerGuild());
+							if (pGuild)
+								pGuild->setLastFailedGVE(CTickEventHandler::getGameCycle());
+						}
 					}
-					
+
 					if (_PVPType == OUTPOSTENUMS::GVE)
 						_PVPType = OUTPOSTENUMS::PVE;
-					
+
 					actionPostNextState(Peace);
 				}
 				else
