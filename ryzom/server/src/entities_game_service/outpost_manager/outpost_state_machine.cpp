@@ -323,9 +323,16 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 				// On GVE/PVE lose, set OutpostLevelAfterLoseOnGvE and instant peace
 				if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
 				{
-					_CurrentOutpostLevel = OutpostLevelAfterLoseOnGvE.get();
+					if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
+					{
+						CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(getAttackerGuild());
+						if (pGuild)
+							pGuild->setLastFailedGVE(CTickEventHandler::getGameCycle());
+					}
+					
 					if (_PVPType == OUTPOSTENUMS::GVE)
 						_PVPType = OUTPOSTENUMS::PVE;
+					
 					actionPostNextState(Peace);
 				}
 				else
@@ -497,7 +504,7 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 			if (OutpostStateTimeOverride>(uint32)0)
 				actionSetTimer0(OutpostStateTimeOverride);
 			else
-				actionSetTimer0(computeTimeAfterAttack());
+				actionSetTimer0(10);
 		} break;
 		case Timer0End:
 		{

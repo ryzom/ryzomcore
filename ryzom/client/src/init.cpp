@@ -1093,9 +1093,6 @@ void prelogInit()
 			ClientCfg.writeInt("Depth", ClientCfg.Depth, true);
 			ClientCfg.writeInt("Frequency", ClientCfg.Frequency, true);
 
-			// enable auto UI scale for new install
-			ClientCfg.writeBool("InterfaceScaleAuto", true, true);
-
 			ClientCfg.ConfigFile.save();
 		}
 		else
@@ -1315,7 +1312,9 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
-		CInterfaceManager::getInstance()->setInterfaceScale(1.f, true);
+
+		CInterfaceManager::getInstance();
+		CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 		CWidgetManager::getInstance()->setWindowSnapInvert(ClientCfg.WindowSnapInvert);
