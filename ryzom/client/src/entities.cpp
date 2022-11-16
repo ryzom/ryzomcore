@@ -556,6 +556,9 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 		{
 			idx = _LastRemovedInstance;
 			_ShapeInstances[idx].Instance = instance;
+			if (_ShapeInstances[idx].Primitive)
+				PACS->removePrimitive(_ShapeInstances[idx].Primitive);
+
 			_ShapeInstances[idx].Primitive = primitive;
 			_ShapeInstances[idx].ContextText = text;
 			_ShapeInstances[idx].ContextURL = url;
@@ -603,20 +606,26 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 	return nullinstref;
 }
 
-bool CEntityManager::deleteInstance(uint32 idx)
+bool CEntityManager::deleteInstance(uint32 idx, bool force)
 {
 	if (!Scene || idx >= _ShapeInstances.size())
 		return false;
 
+	if (!force && _ShapeInstances[idx].InIGZone)
+		return true;
+
 	if (!_ShapeInstances[idx].Instance.empty())
 		Scene->deleteInstance(_ShapeInstances[idx].Instance);
+
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
 	if (primitive)
+	{
 		PACS->removePrimitive(primitive);
+		_ShapeInstances[idx].Primitive = NULL;
+	}
 
 	if (!_ShapeInstances[idx].Deleted)
 	{
-		_ShapeInstances[idx].Primitive = NULL;
 		_ShapeInstances[idx].Deleted = true;
 		_ShapeInstances[idx].LastDeleted = _LastRemovedInstance;
 		_LastRemovedInstance = idx;
@@ -635,7 +644,7 @@ void CEntityManager::removeInstancesInIgZone(uint16 igZone)
 	{
 		vector<uint32> &shapes = (*it).second;
 		for (uint i = 0; i < shapes.size(); i++)
-			deleteInstance(shapes[i]);
+			deleteInstance(shapes[i], true);
 		_IgZoneShapes.erase(it);
 	}
 
