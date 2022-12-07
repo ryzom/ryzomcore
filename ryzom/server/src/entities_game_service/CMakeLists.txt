@@ -93,15 +93,15 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${RZ_SERVER_SRC_DIR} ${LIBXML2_I
 
 TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 						ryzom_adminmodules
-						ryzom_gameshare
+						${RYZOM_GAMESHARE_LIBRARIES}
 						ryzom_servershare
 						ryzom_aishare
 						ryzom_pd
 						ryzom_gameplaymodule
-						nelmisc
-						nelnet
-						nelgeorges
-						nelligo)
+						${NELMISC_LIBRARIES}
+						${NELNET_LIBRARIES}
+						${NELGEORGES_LIBRARIES}
+						${NELLIGO_LIBRARIES})
 
 IF(MONGO_FOUND)
   TARGET_LINK_LIBRARIES(ryzom_entities_game_service ${MONGO_LIBRARIES})
