@@ -4918,3 +4918,95 @@ NLMISC_COMMAND(setServerPhrase, "Set an IOS phrase", "<phrase> [<language code>]
 	sendMessageViaMirror("IOS", msgout);
 	return true;
 }
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getRpPoints, "get RP points of player (if quantity, give/take/set the points)", "<uid> [[+-]<quantity>]")
+{
+	GET_ACTIVE_CHARACTER
+
+	uint32 points = c->getRpPoints();
+
+	if (args.size() == 2)
+	{
+		string quant = args[1];
+		uint32 quantity;
+		if (quant[0] == '+')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				points += quantity;
+			}
+		}
+		else if (quant[0] == '-')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				if (points >= quantity)
+				{
+					points -= quantity;
+				}
+				else
+				{
+					log.displayNL("-1"); // No enough points
+					return true;
+				}
+			}
+		}
+		else
+		{
+			fromString(quant, points);
+		}
+
+		c->setRpPoints(points);
+	}
+
+	log.displayNL("%u", points);
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getBattlePoints, "get Battle points of player (if quantity, give/take/set the points)", "<uid> [[+-]<quantity>]")
+{
+	GET_ACTIVE_CHARACTER
+
+	uint32 points = c->getBattlePoints();
+
+	if (args.size() == 2)
+	{
+		string quant = args[1];
+		uint32 quantity;
+		if (quant[0] == '+')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				points += quantity;
+			}
+		}
+		else if (quant[0] == '-')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				if (points >= quantity)
+				{
+					points -= quantity;
+				}
+				else
+				{
+					log.displayNL("-1"); // No enough points
+					return true;
+				}
+			}
+		}
+		else
+		{
+			fromString(quant, points);
+		}
+
+		c->setBattlePoints(points);
+	}
+
+	log.displayNL("%u", points);
+}
