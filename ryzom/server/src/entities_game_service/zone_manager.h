@@ -159,7 +159,7 @@ public:
 	inline void setGooActive(bool state) { _GooActive = state; }
 
 	void updateCenter();
-	
+
 	bool getReported() const	{ return _Reported; }
 	bool isGooPath() const { return _GooPath; }
 	bool isGooActive() const { return _GooActive; }
@@ -505,7 +505,7 @@ public:
 	void	unregisterDepositToAutoSpawnUpdate(CDeposit *);
 
 	/// get a starting point for new character. NULL if invalid
-	const CTpSpawnZone * getStartPoint( uint16 startPointIdx, TAIAlias & bot, TAIAlias & mission )
+	inline const CTpSpawnZone * getStartPoint( uint16 startPointIdx, TAIAlias & bot, TAIAlias & mission )
 	{
 		if ( startPointIdx >= _StartPoints.size() )
 		{
@@ -526,21 +526,62 @@ public:
 
 	// Global Triggers for zones
 	std::map<std::string, std::string>	_RegionTriggers;
-	void addRegionTrigger(const std::string region, const std::string url)
+	inline void addRegionTrigger(const std::string region, const std::string url)
 	{
 		_RegionTriggers[region] = url;
 	}
 
-	std::string getRegionTrigger(const std::string region)
+	inline std::string getRegionTrigger(const std::string region)
 	{
-		std::string regionName;
+		std::string url;
 		std::map<std::string, std::string>::const_iterator it = _RegionTriggers.find(region);
 		if ( it != _RegionTriggers.end() )
 		{
-			regionName = _RegionTriggers[region];
+			url = _RegionTriggers[region];
 		}
-		return regionName;
+		return url;
 	}
+
+	// Global Triggers for entities
+	std::map<TAIAlias, std::string>	EntitiesUrlTriggers;
+	std::map<TAIAlias, uint8>	EntitiesDistanceTriggers;
+	inline void addEntitiesTrigger(const TAIAlias alias, uint16 distance, const std::string url)
+	{
+		EntitiesUrlTriggers[alias] = url;
+		EntitiesDistanceTriggers[alias] = distance;
+	}
+
+
+	inline void delEntitiesTrigger(const TAIAlias alias)
+	{
+		std::map<TAIAlias, std::string>::const_iterator it = EntitiesUrlTriggers.find(alias);
+		if ( it != EntitiesUrlTriggers.end()
+			EntitiesUrlTriggers.erase(alias);
+		std::map<TAIAlias, uint8>::const_iterator it = EntitiesDistanceTriggers.find(alias);
+		if ( it != EntitiesDistanceTriggers.end()
+			EntitiesDistanceTriggers.erase(alias);
+	}
+
+	inline std::string getEntitiesUrlTrigger(const TAIAlias alias)
+	{
+		std::string url;
+		std::map<TAIAlias, std::string>::const_iterator it = EntitiesUrlTriggers.find(alias);
+		if ( it != EntitiesUrlTriggers.end() )
+		{
+			url = EntitiesUrlTriggers[alias
+		}
+		return url;
+	}
+
+	inline uint16 getEntitiesDistanceTrigger(const TAIAlias alias)
+	{
+		uint16 distance = 0;
+		std::map<TAIAlias, std::string>::const_iterator it = EntitiesDistanceTriggers.find(alias);
+		if ( it != EntitiesDistanceTriggers.end() )
+			distance = EntitiesDistanceTriggers[alias];
+		return distance;
+	}
+
 
 	/// get start point vector, slow because it makes a copy
 	/// warning: this should only be used by CCharacterVersionAdapter::adaptToVersion3()

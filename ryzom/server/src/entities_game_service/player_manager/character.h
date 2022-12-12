@@ -1327,6 +1327,15 @@ public:
 	void changeOrganizationStatus(sint32 status);
 	void changeOrganizationPoints(sint32 points);
 
+	void addBattlePoints(sint32 points);
+	void setBattlePoints(uint32 points);
+	uint32 getBattlePoints();
+
+	void addRpPoints(sint32 points);
+	uint32 getRpPoints();
+	void setRpPoints(uint32 points);
+	void sendRpPoints(std::string url);
+
 	/// send faction point gain phrase to the client
 	void sendFactionPointGainMessage(PVP_CLAN::TPVPClan clan, uint32 fpGain);
 	/// send faction point gain kill phrase to the client
@@ -3400,6 +3409,13 @@ private:
 	uint32 _Organization;
 	uint32 _OrganizationStatus;
 	uint32 _OrganizationPoints;
+
+	uint32 _BattlePoints;
+
+	uint32 _TimedUrl;
+	uint32 _RpPoints;
+	NLMISC::TGameCycle _FirstRpPointsWin;
+	NLMISC::TGameCycle _LastRpPointsWin;
 
 	std::string _LangChannel;
 
