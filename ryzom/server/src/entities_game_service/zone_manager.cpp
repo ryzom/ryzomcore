@@ -1732,7 +1732,7 @@ CContinent* CZoneManager::getContinentFromId( CONTINENT::TContinent id )
 //-----------------------------------------------
 // CZoneManager updateCharacterPosition
 //-----------------------------------------------
-void CZoneManager::updateCharacterPosition( CCharacter * user )
+void CZoneManager::updateCharacterPosition( CCharacter * user, uint32 elapsedTime )
 {
 	nlassert(user);
 
@@ -1902,26 +1902,30 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 		std::map<TAIAlias, uint8>::const_iterator it;
 		for (it = EntitiesDistanceTriggers.begin(); it != EntitiesDistanceTriggers.end(); it++)
 		{
-			if (it.second == 0)
+			nlinfo("Entity trigger : %s", NLMISC::toString(it->first).c_str());
+			if (it->second == 0)
 			{
-				std::map<TAIAlias, std::string>::const_iterator it2 = EntitiesDistanceTriggers.find(it.first);
-				if ( it != EntitiesDistanceTriggers.end() )
-					user->sendRpPoints(it2.second);
+				std::map<TAIAlias, std::string>::const_iterator it2 = EntitiesUrlTriggers.find(it->first);
+				if ( it2 != EntitiesUrlTriggers.end() )
+					user->sendRpPoints(it2->second);
 			}
 			else
 			{
-				const CEntityId & botId = CAIAliasTranslator::getInstance()->getEntityId(it.first);
+				nlinfo("Distance = %d", it->second);
+				const CEntityId & botId = CAIAliasTranslator::getInstance()->getEntityId(it->first);
 				if ( botId != CEntityId::Unknown )
 				{
-					entityBase = CreatureManager.getCreature (botId);
+					nlinfo("Botid found");
+					CEntityBase *entityBase = CreatureManager.getCreature (botId);
 					if (entityBase != NULL)
 					{
 						sint32 x = entityBase->getState().X;
 						sint32 y = entityBase->getState().Y;
 						sint32 px = user->getState().X;
 						sint32 py = user->getState().Y;
-						if ((px-x)*(px-x)+(py-y)*(py-y) < it.second * it.second)
-							user->addRpPoints(1);
+						nlinfo("entityBase found, check pos %i, %i, %i, %i", x, y, px, py);
+						if ((px-x)*(px-x)+(py-y)*(py-y) < it->second * it->second)
+							user->addRpPoints(elapsedTime);
 					}
 				}
 			}

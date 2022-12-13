@@ -5010,3 +5010,44 @@ NLMISC_COMMAND(getBattlePoints, "get Battle points of player (if quantity, give/
 
 	log.displayNL("%u", points);
 }
+
+//addEntitiesTrigger 2 #target# 50 app_arcc&nbsp&action=mScript_Edit&script=11450
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> <entity> <distance> <url>")
+{
+
+	if (args.size() < 4)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	TAIAlias alias;
+
+	string e = args[1];
+	if (e == "#target#")
+	{
+		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getTarget());
+	}
+	else if (e == "#self#")
+	{
+		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getId());
+	}
+	else
+	{
+		vector<TAIAlias> aliases;
+		CAIAliasTranslator::getInstance()->getNPCAliasesFromName( e, aliases );
+		if ( aliases.empty() )
+		{
+			log.displayNL("ERR: no entity");
+			return true;
+		}
+		alias = aliases[0];
+	}
+
+	uint16 distance;
+	fromString(args[2], distance);
+	string url = args[3];
+	CZoneManager::getInstance().addEntitiesTrigger(alias, distance, url);
+	log.displayNL("OK");
+}
+
