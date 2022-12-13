@@ -985,7 +985,8 @@ uint32 CCharacter::tickUpdate()
 
 	// update connexion stats.
 	uint32 time = CTime::getSecondsSince1970();
-	_PlayedTime += time - _LastConnectedTime;
+	uint32 elapsedTime = time - _LastConnectedTime;
+	_PlayedTime += elapsedTime;
 	_LastConnectedTime = time;
 
 	if (!checkCharacterStillValide("<CCharacter::tickUpdate> Character corrupted : start tickUpdate !!!"))
@@ -1039,7 +1040,7 @@ uint32 CCharacter::tickUpdate()
 	{
 		H_AUTO(CharacterCheckEnterLeaveZone);
 		// check if the player enter/ leaves a zone
-		CZoneManager::getInstance().updateCharacterPosition(this);
+		CZoneManager::getInstance().updateCharacterPosition(this, elapsedTime);
 
 		if (!checkCharacterStillValide(
 					"<CCharacter::tickUpdate> Character corrupted : after CZoneManager::updateCharacterPosition !!!"))
@@ -12283,6 +12284,7 @@ void CCharacter::addRpPoints(sint32 points)
 		_LastRpPointsWin = CTickEventHandler::getGameCycle();
 	}
 
+	nlinfo("Add rp points : %d", points);
 	if (_RpPoints + points > 0)
 		_RpPoints += points;
 	else
@@ -12301,7 +12303,8 @@ uint32 CCharacter::getRpPoints()
 
 void CCharacter::sendRpPoints(string url)
 {
-	setCustomMissionParams("__SEND_TIMED_URL__", url+"&player_eid=" + getId().toString() + "&rp_points=%"+toString(_RpPoints)+"&first_rp_points="+toString(_FirstRpPointsWin)+"&last_rp_points="+tostring(_LastRpPointsWin));
+	nlinfo("Send url = %s", url+"&player_eid=" + getId().toString() + "&rp_points=%"+toString(_RpPoints)+"&first_rp_points="+toString(_FirstRpPointsWin)+"&last_rp_points="+toString(_LastRpPointsWin));
+	setCustomMissionParams("__SEND_TIMED_URL__", url+"&player_eid=" + getId().toString() + "&rp_points=%"+toString(_RpPoints)+"&first_rp_points="+toString(_FirstRpPointsWin)+"&last_rp_points="+toString(_LastRpPointsWin));
 	_RpPoints = 0;
 	_TimedUrl = rand() % 15;
 	_FirstRpPointsWin = 0;

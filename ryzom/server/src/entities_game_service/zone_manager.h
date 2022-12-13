@@ -452,7 +452,7 @@ public:
 	 * update the position of a character
 	 * \param entityRow: row id of the chracter to update
 	 */
-	void updateCharacterPosition( CCharacter *  user );
+	void updateCharacterPosition( CCharacter *  user, uint32 elapsedTime );
 
 	///update called at each tick
 	void tickUpdate();
@@ -555,11 +555,11 @@ public:
 	inline void delEntitiesTrigger(const TAIAlias alias)
 	{
 		std::map<TAIAlias, std::string>::const_iterator it = EntitiesUrlTriggers.find(alias);
-		if ( it != EntitiesUrlTriggers.end()
-			EntitiesUrlTriggers.erase(alias);
-		std::map<TAIAlias, uint8>::const_iterator it = EntitiesDistanceTriggers.find(alias);
-		if ( it != EntitiesDistanceTriggers.end()
-			EntitiesDistanceTriggers.erase(alias);
+		if ( it != EntitiesUrlTriggers.end() )
+			EntitiesUrlTriggers.erase(it);
+		std::map<TAIAlias, uint8>::const_iterator it2 = EntitiesDistanceTriggers.find(alias);
+		if ( it2 != EntitiesDistanceTriggers.end() )
+			EntitiesDistanceTriggers.erase(it2);
 	}
 
 	inline std::string getEntitiesUrlTrigger(const TAIAlias alias)
@@ -568,7 +568,7 @@ public:
 		std::map<TAIAlias, std::string>::const_iterator it = EntitiesUrlTriggers.find(alias);
 		if ( it != EntitiesUrlTriggers.end() )
 		{
-			url = EntitiesUrlTriggers[alias
+			url = it->second;
 		}
 		return url;
 	}
@@ -576,9 +576,9 @@ public:
 	inline uint16 getEntitiesDistanceTrigger(const TAIAlias alias)
 	{
 		uint16 distance = 0;
-		std::map<TAIAlias, std::string>::const_iterator it = EntitiesDistanceTriggers.find(alias);
+		std::map<TAIAlias, uint8>::const_iterator it = EntitiesDistanceTriggers.find(alias);
 		if ( it != EntitiesDistanceTriggers.end() )
-			distance = EntitiesDistanceTriggers[alias];
+			distance = it->second;
 		return distance;
 	}
 
