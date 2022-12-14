@@ -12306,8 +12306,8 @@ void CCharacter::sendRpPoints(string url)
 	if (_RpPoints)
 	{
 		_TimedUrl = rand() % 15;
-		nlinfo("Send timed %d url = %s", _TimedUrl, (url+"&player_eid=" + getId().toString() + "&rp_points=%"+toString(_RpPoints)+"&first_rp_points="+toString(_FirstRpPointsWin)+"&last_rp_points="+toString(_LastRpPointsWin)).c_str());
-		setCustomMissionParams("__SEND_TIMED_URL__", url+"&player_eid=" + getId().toString() + "&rp_points=%"+toString(_RpPoints)+"&first_rp_points="+toString(_FirstRpPointsWin)+"&last_rp_points="+toString(_LastRpPointsWin));
+		nlinfo("Send timed %d url = %s", _TimedUrl, (url+"&player_eid=" + getId().toString() + "&rp_points="+toString(_RpPoints)+"&first_rp_points="+toString(_FirstRpPointsWin)+"&last_rp_points="+toString(_LastRpPointsWin)).c_str());
+		setCustomMissionParams("__SEND_TIMED_URL__", url+"&player_eid=" + getId().toString() + "&rp_points="+toString(_RpPoints)+"&first_rp_points="+toString(_FirstRpPointsWin)+"&last_rp_points="+toString(_LastRpPointsWin));
 		_RpPoints = 0;
 		_FirstRpPointsWin = 0;
 		_LastRpPointsWin = 0;

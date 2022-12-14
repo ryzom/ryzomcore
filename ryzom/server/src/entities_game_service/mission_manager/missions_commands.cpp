@@ -5052,3 +5052,8 @@ NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> 
 	log.displayNL("OK");
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(delEntitiesTriggers, "delete all Entities triggers", "")
+{
+	CZoneManager::getInstance().delEntitiesTriggers();
+}
