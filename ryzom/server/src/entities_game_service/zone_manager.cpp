@@ -1919,10 +1919,10 @@ void CZoneManager::updateCharacterPosition( CCharacter * user, uint32 elapsedTim
 					CEntityBase *entityBase = CreatureManager.getCreature (botId);
 					if (entityBase != NULL)
 					{
-						sint32 x = entityBase->getState().X;
-						sint32 y = entityBase->getState().Y;
-						sint32 px = user->getState().X;
-						sint32 py = user->getState().Y;
+						sint32 x = entityBase->getState().X/1000.f;
+						sint32 y = entityBase->getState().Y/1000.f;
+						sint32 px = user->getState().X/1000.f;
+						sint32 py = user->getState().Y/1000.f;
 						nlinfo("entityBase found, check pos %i, %i, %i, %i", x, y, px, py);
 						if ((px-x)*(px-x)+(py-y)*(py-y) < it->second * it->second)
 							user->addRpPoints(elapsedTime);
