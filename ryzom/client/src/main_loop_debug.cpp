@@ -705,7 +705,7 @@ REGISTER_ACTION_HANDLER( CHandlerDebugUiDumpElementUnderMouse, "debug_ui_inspect
 //---------------------------------------------------
 // getActionKey :
 // Return action key binding as string.
-static std::string getActionKey(const char* name, const char* param = "")
+std::string getActionKey(const char* name, const char* param)
 {
 	std::string category;
 

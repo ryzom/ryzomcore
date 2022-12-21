@@ -68,6 +68,8 @@
 #include "misc.h"
 #include "user_agent.h"
 
+#include "main_loop_debug.h"
+
 void ConnectToShard();
 
 // ***************************************************************************
@@ -400,6 +402,11 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 	}
 }
 
+#if !FINAL_RELEASE
+// forward declaration
+void loginDebug();
+#endif
+
 // ***************************************************************************
 // Main loop of the login step
 void loginMainLoop()
@@ -442,14 +449,9 @@ void loginMainLoop()
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
-
-
-//		if (::GetAsyncKeyState(VK_SPACE))
-//		{
-//			pIM->displayUIViewBBoxs("");
-//			pIM->displayUICtrlBBoxs("");
-//			pIM->displayUIGroupBBoxs("");
-//		}
+#if !FINAL_VERSION
+		loginDebug();
+#endif
 
 		// Force the client to sleep a bit.
 		if(ClientCfg.Sleep >= 0)
@@ -3333,3 +3335,135 @@ void loginIntro()
 	beginLoading(StartBackground);
 	ProgressBar.finish();
 }
+
+#if !FINAL_VERSION
+static bool DebugLoginUI = false;
+static bool DebugLoginNextScreen = false;
+static bool DebugLoginPrevScreen = false;
+static bool DebugLoginReloadUI = false;
+static bool DebugLoginShowHelp = false;
+
+void loginDebug()
+{
+	if (DebugLoginUI)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		pIM->displayUIViewBBoxs("");
+		pIM->displayUICtrlBBoxs("");
+		pIM->displayUIGroupBBoxs("");
+		displayDebugUIUnderMouse();
+	}
+
+	if (DebugLoginNextScreen)
+	{
+		DebugLoginNextScreen = false;
+		sint maxValue = UI_VARIABLES_SCREEN_CREATE_ACCOUNT;
+		CCDBNodeLeaf *node;
+		node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DEBUG:SCREEN_MAX", false);
+		if (node) maxValue = node->getValue32();
+		node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN", false);
+		if (node) node->setValue32(std::min(maxValue, node->getValue32() + 1));
+	}
+
+	if (DebugLoginPrevScreen)
+	{
+		DebugLoginPrevScreen = false;
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN", false);
+		if (node) node->setValue32(std::max(0, node->getValue32() - 1));
+	}
+
+	if (DebugLoginReloadUI)
+	{
+		DebugLoginReloadUI = false;
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		sint32 activeScreen = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32();
+		if (activeScreen == -1) activeScreen = UI_VARIABLES_SCREEN_CHECKPASS;
+		pIM->uninitLogin();
+		pIM->initLogin();
+
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(activeScreen);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS")->setValue32(ClientCfg.DisplayAccountButtons);
+
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
+		Actions.enable(true);
+		EditActions.enable(true);
+		CWidgetManager::getInstance()->getParser()->reloadAllLuaFileScripts();
+	}
+
+	if (DebugLoginShowHelp)
+	{
+#define DISP_TEXT(x, text) \
+		TextContext->printfAt(x, line, std::string(text).c_str()); \
+		line += lineStep;
+
+		TextContext->setShaded(true);
+		TextContext->setShadeOutline(false);
+		TextContext->setFontSize(ClientCfg.DebugFontSize);
+		TextContext->setColor(ClientCfg.HelpFontColor);
+		TextContext->setHotSpot(UTextContext::TopLeft);
+
+		float line = 1.0f;
+		float lineStep = -ClientCfg.HelpLineStep;
+
+		DISP_TEXT(0.0f, getActionKey("debug_login_toggle_help") + " : This Menu");
+		DISP_TEXT(0.0f, getActionKey("debug_login_reload_ui") + " : Reload UI");
+		DISP_TEXT(0.0f, getActionKey("debug_login_prev_screen") + " : Previous screen");
+		DISP_TEXT(0.0f, getActionKey("debug_login_next_screen") + " : Next screen");
+		DISP_TEXT(0.0f, getActionKey("debug_login_ui") + " : Debug elements under mouse");
+
+#undef DISP_TEXT
+	}
+}
+
+// ***************************************************************************
+class CAHDebugLoginToggleHelp : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		DebugLoginShowHelp = !DebugLoginShowHelp;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHDebugLoginToggleHelp, "debug_login_toggle_help");
+
+// ***************************************************************************
+class CAHDebugLoginPrevScreen : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		DebugLoginPrevScreen = !DebugLoginPrevScreen;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHDebugLoginPrevScreen, "debug_login_prev_screen");
+
+// ***************************************************************************
+class CAHDebugLoginNextScreen : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		DebugLoginNextScreen = !DebugLoginNextScreen;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHDebugLoginNextScreen, "debug_login_next_screen");
+
+// ***************************************************************************
+class CAHDebugLoginReloadUI : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		DebugLoginReloadUI = !DebugLoginReloadUI;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHDebugLoginReloadUI, "debug_login_reload_ui");
+
+// ***************************************************************************
+class CAHDebugLoginUI : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		DebugLoginUI = !DebugLoginUI;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHDebugLoginUI, "debug_login_ui");
+
+#endif
