@@ -39,4 +39,8 @@
 <key name="KeyTAB" action="edit_expand" context="edit"/>
 <key name="KeyBACK" action="edit_back" context="edit"/>
 
+<!-- debug -->
+<key name="KeyR" ctrl="1" shift="1" menu="1" action="debug_outgame_reload_ui"/>
+<key name="KeyD" ctrl="1" shift="1" menu="1" action="debug_outgame_ui"/>
+
 </interface_config>
