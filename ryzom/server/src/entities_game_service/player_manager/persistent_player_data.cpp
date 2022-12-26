@@ -449,6 +449,11 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(uint32,_Organization)\
 	PROP(uint32,_OrganizationStatus)\
 	PROP(uint32,_OrganizationPoints)\
+	PROP(uint32,_RpPoints)\
+	PROP(uint32,_BattlePoints)\
+	PROP_GAME_CYCLE_COMP(_FirstRpPointsWin)\
+	PROP_GAME_CYCLE_COMP(_LastRpPointsWin)\
+	PROP(uint32,_TimedUrl)\
 	PROP2(DeclaredCult,string,PVP_CLAN::toString(_DeclaredCult),_DeclaredCult=PVP_CLAN::fromString(val))\
 	PROP2(DeclaredCiv,string,PVP_CLAN::toString(_DeclaredCiv),_DeclaredCiv=PVP_CLAN::fromString(val))\
 \
@@ -1377,7 +1382,7 @@ private:
 	uint32 RefInventoryId = INVENTORIES::NUM_INVENTORY;\
 	uint16 slotImage = 0xffff;\
 
-// TODO: add hotbar 
+// TODO: add hotbar
 #define PERSISTENT_POST_APPLY\
 	if ( slotImage != 0xFFFF )\
 	{\
