@@ -320,17 +320,14 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 			}
 			else
 			{
-				// On GVE/PVE lose, set OutpostLevelAfterLoseOnGvE and instant peace
+				// On GVE/PVE lose instant peace
 				if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
 				{
-					if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
+					if (getName().substr(0, 14) != "outpost_nexus_")
 					{
-						if (getName().substr(0, 14) != "outpost_nexus_")
-						{
-							CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(getAttackerGuild());
-							if (pGuild)
-								pGuild->setLastFailedGVE(CTickEventHandler::getGameCycle());
-						}
+						CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(getAttackerGuild());
+						if (pGuild)
+							pGuild->setLastFailedGVE(CTickEventHandler::getGameCycle());
 					}
 
 					if (_PVPType == OUTPOSTENUMS::GVE)
