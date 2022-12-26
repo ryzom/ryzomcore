@@ -1,0 +1,36 @@
+notes:
+
+- RSC (remote server control) module needs to:
+  INSTALL:
+  - set requested version
+  ACTIVATE:
+  - if live directory is already at required version number then do nothing / return
+  - DOWN SHARD
+  - INSTALL
+  - wait for requested version to appear in tmp directory (may already be there)
+  - switch temp directory and live directory
+  - check that switch succeeded
+  - UP SHARD
+
+
+SPA:
+parameters: root, unifier
+  - patches in <root>/patch
+  - next in <root>/next
+  - live in <root>/live
+  - file containing id of version to install <root>/patch/cfg_<unifier>_version_install
+  - file containing id of version to launch <root>/patch/cfg_<unifier>_version_launch (note - this version must already be installed)
+  - file containing id of installed version <root>/patch/cfg_<unifier>_version_install
+  - file containing id of live version <root>/patch/cfg_<unifier>_version_install
+
+RR:
+lock file: rrBusyMarkerFileName(targetDirectory) => targetDirectory["/"]"rr_busy"
+
+tests
+	- 2 files
+	- 3 patches
+	- a present in 1 & 2 & 3
+	- b present in 2 & 3
+=> up and down version number...
+=> different writing of home parameter (slashes, quotes,etc)
+=> different writing of unifier (slashes, quotes,etc)

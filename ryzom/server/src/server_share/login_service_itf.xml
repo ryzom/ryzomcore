@@ -1,0 +1,78 @@
+<generator header_tag="LOGIN_SERVICE_ITF">
+	<include file="nel/net/login_cookie.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="LS">
+
+<!--		<module_interface name="CLoginService" module_class='"LoginService"'>
+
+			<method name="pendingUserLost" msg="PUL">
+				<doc line="An awaited user did not connect before the allowed timeout expire"/>
+
+				<param type="NLNET::CLoginCookie" name="cookie" byref="true"/>
+			</method>
+			
+		</module_interface>
+-->
+<!--		
+		<module_interface name="CLoginServiceClient">
+			<method name="disconnectUser" msg="DU">
+				<doc line="A user log but is was already 'in game' logged, disconnect it"/>
+				<param type="uint32" name="userId"/>
+			</method>
+		</module_interface>
+-->
+		<callback_interface name="CLoginServiceWeb" caller="php">
+
+			<invoke name="login" msg="LG">
+				<doc line="The web side as authentified an user"/>
+				<doc line="and inform the LS that the user is now online"/>
+				<doc line="and authentified for the indicated ring domain"/>
+				<doc line="LS then generate a cookie that will be"/>
+				<doc line="used to authenticate the user when it will"/>
+				<doc line="conect to the front end later"/>
+
+				<param type="uint32" name="userId"/>
+				<param type="std::string" name="ipAddress" php_serial="String" byref="true"/>
+				<param type="uint32" name="domainId"/>
+			</invoke>
+
+			<return name="loginResult" msg="LGR">
+				<doc line="Return the cookie generated for this user session"/>
+				<doc line="Eventualy, return an empty string as cookie in case of error"/>
+				<doc line="		resultCode : 0 - ok, login success"/>
+				<doc line="					 1 - invalid user"/>
+				<doc line="					 2 - user already online, must relog"/>
+				<doc line="	errorString contain a stringified description in case of error"/>
+
+				<param type="uint32"		name="userId"/>
+				<param type="std::string"	name="cookie"		php_serial="String" byref="true"/>
+				<param type="uint32"		name="resultCode"/>
+				<param type="std::string"	name="errorString"	php_serial="String" byref="true"/>
+			</return>
+
+			<invoke name="logout" msg="LO">
+				<doc line="The web side says that the user is no more actif (has logged out)"/>
+				<doc line="If the user is not in game (status cs_online), then "/>
+				<doc line="it's status is set to cs_offline and the cookie cleared"/>
+				<doc line="Otherwise, the status is unchanged and the cookie is still valid."/>
+
+				<param type="uint32" name="userId"/>
+			</invoke>
+
+			<return name="logoutResult" msg="LGOR">
+				<doc line="Return an error code for the logout attemp"/>
+				<doc line="If return is not 0, then reason contains a debug string"/>
+				<doc line="Return values : 0 - ok"/>
+				<doc line="                1 - invalid user"/>
+				<doc line="                2 - user already offline"/>
+
+				<param type="uint32"		name="errorCode"/>
+				<param type="std::string"	name="reason"	php_serial="String" byref="true"/>
+			</return>
+
+		</callback_interface>
+
+	</namespace>
+</generator>
+

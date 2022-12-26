@@ -86,15 +86,15 @@ bool CDBCtrlSheet::_ShowIconBuffs = true;
 
 void CControlSheetInfoWaiter::sendRequest()
 {
+	if (Requesting) return;
+
 	Requesting = true;
 	getInventory().addItemInfoWaiter(this);
 }
 
 void CControlSheetInfoWaiter::infoReceived()
 {
-	if (!Requesting) {
-		return;
-	}
+	if (!Requesting) return;
 
 	getInventory().removeItemInfoWaiter(this);
 	infoValidated();
@@ -510,6 +510,9 @@ CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param) :
 CCtrlDraggable(param)
 {
 	_LastSheetId = 0;
+	_LastItemInfoVersion = 0;
+	_LastItemCreateTime = 0;
+	_LastItemSerial = 0;
 	_DispSlotBmpId= -1;
 	_DispBackBmpId = -1;
 	_DispSheetBmpId = -1;
@@ -1134,6 +1137,14 @@ void CDBCtrlSheet::clearIconBuffs()
 // ***************************************************************************
 void CDBCtrlSheet::infoReceived()
 {
+	updateIconBuffs();
+
+	_LastItemInfoVersion = getItemInfoVersion();
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::updateIconBuffs()
+{
 	if (!_ItemSheet)
 	{
 		clearIconBuffs();
@@ -1211,6 +1222,8 @@ void CDBCtrlSheet::infoReceived()
 			rVR.getTextureSizeFromId(_BuffIcons[i].TextureId, _BuffIcons[i].IconW, _BuffIcons[i].IconH);
 		}
 	}
+
+	_LastItemInfoVersion = getItemInfoVersion();
 }
 
 // ***************************************************************************
@@ -1275,17 +1288,24 @@ void CDBCtrlSheet::setupItem ()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	sint32 sheet = _SheetId.getSInt32();
+	sint32 itemCreateTime = getItemCreateTime();
+	sint32 itemSerial = getItemSerial();
+
+	bool isItemChanged = _LastSheetId != sheet || _LastItemCreateTime != itemCreateTime || _LastItemSerial != itemSerial;
 
 	_DispQuality = -1;
 	_DispQuantity = -1;
 
 	// If this is the same sheet, need to resetup
-	if (_LastSheetId != sheet || _NeedSetup)
+	if (isItemChanged || _NeedSetup)
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_NeedSetup= false;
 		_LastSheetId = sheet;
+		_LastItemCreateTime = itemCreateTime;
+		_LastItemSerial = itemSerial;
+
 		CSheetId sheetId(sheet);
 		CEntitySheet *pES = SheetMngr.get (sheetId);
 		if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
@@ -1362,6 +1382,9 @@ void CDBCtrlSheet::setupItem ()
 
 			// Special Item requirement
 			updateItemCharacRequirement(_LastSheetId);
+
+			// update icon buffs using cached info
+			updateIconBuffs();
 
 			// update item info markers
 			_ItemInfoChanged = true;
@@ -1462,7 +1485,9 @@ void CDBCtrlSheet::setupItem ()
 */
 
 	// at each frame, update item info icon if changed
-	if (_ItemInfoChanged)
+	// This will not trigger on slots where client has not asked info version yet
+	// (enchanting weapon right after login)
+	if (_ItemInfoChanged || _LastItemInfoVersion != getItemInfoVersion())
 	{
 		_ItemInfoChanged = false;
 		setupItemInfoWaiter();
@@ -1641,7 +1666,7 @@ void CDBCtrlSheet::setupGuildFlag ()
 
 
 // ***************************************************************************
-void CDBCtrlSheet::setupDisplayAsSBrick(sint32 sheet, sint32 optSheet)
+void CDBCtrlSheet::setupDisplayAsSBrick(sint32 sheet, sint32 optSheet, bool force)
 {
 	// Setup with the param sheet
 	CSBrickManager *pBM = CSBrickManager::getInstance();
@@ -1658,7 +1683,17 @@ void CDBCtrlSheet::setupDisplayAsSBrick(sint32 sheet, sint32 optSheet)
 		_IconOverColor = pBR->IconOverColor;
 
 		// For phrase display, replace icon and over2 with optional brick
-		if(pBROpt)
+		if (pBROpt && force)
+		{
+			// force all icons from optSheet except background
+			_DispSheetBmpId = rVR.getTextureIdFromName(pBROpt->getIcon());
+			_DispOverBmpId = rVR.getTextureIdFromName(pBROpt->getIconOver());
+			_DispOver2BmpId = rVR.getTextureIdFromName(pBROpt->getIconOver2());
+			_IconColor = pBROpt->IconColor;
+			_IconOverColor = pBROpt->IconOverColor;
+			_IconOver2Color = pBROpt->IconOver2Color;
+		}
+		else if(pBROpt)
 		{
 			// get the correct icon
 			bool iconOver2NotSuitableForActionDisplay;
@@ -1737,15 +1772,16 @@ void CDBCtrlSheet::setupSBrick ()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const string &phraseName)
+void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const string &phraseName, uint8 phraseIconIndex)
 {
 	CSBrickManager		*pBM = CSBrickManager::getInstance();
 
 	// Get the best SBrick to display.
 	CSheetId	rootBrickSheetId= bricks[0];
 	{
-		CSheetId	bestBrickSheetId= pBM->getSabrinaCom().getPhraseBestDisplayBrick(bricks);
-		setupDisplayAsSBrick (rootBrickSheetId.asInt(), bestBrickSheetId.asInt() );
+		bool forceIcon = phraseIconIndex < bricks.size();
+		CSheetId	bestBrickSheetId = forceIcon ? bricks[phraseIconIndex] : pBM->getSabrinaCom().getPhraseBestDisplayBrick(bricks);
+		setupDisplayAsSBrick (rootBrickSheetId.asInt(), bestBrickSheetId.asInt(), forceIcon );
 	}
 
 	// Override background if type is forace extraction/prospection and ecosystem brick is used
@@ -1871,7 +1907,7 @@ void CDBCtrlSheet::setupSPhraseId ()
 			}
 			else
 			{
-				setupDisplayAsPhrase(phrase.Bricks, phrase.Name.toUtf8()); // FIXME: UTF-8 (serial)
+				setupDisplayAsPhrase(phrase.Bricks, phrase.Name.toUtf8(), phrase.IconIndex); // FIXME: UTF-8 (serial)
 			}
 		}
 
@@ -2571,11 +2607,11 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 				if (_ShowIconBuffs && !_EnchantIcons.empty())
 				{
-					// should only only 2 icons at most
-					// draw them in single line, top-right
+					// draw icons in column of 3, top-right
 					sint32 hArea = (hSheet / 3);
 					sint32 xIcon = x + wSheet - 1;
-					sint32 yIcon = y + hSheet - 1/* - hArea*/;
+					sint32 yIcon = y + hSheet - 1;
+					sint32 yTop = yIcon;
 					// 0 is expected to be background
 					for (uint i = 1; i < _EnchantIcons.size(); ++i)
 					{
@@ -2598,6 +2634,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 						if ((i - 1) < _BoostIcons.size()) {
 							rVR.drawRotFlipBitmap(_RenderLayer + 2, xIcon+wIcon-_BoostIcons[i-1].IconW, yIcon, _BoostIcons[i-1].IconW, _BoostIcons[i-1].IconH, 0, false, _BoostIcons[i-1].TextureId, fastMulRGB(curSheetColor, _BoostIcons[i-1].Color));
+						}
+
+						// move to new column as needed
+						if (i % 3 == 0) {
+							xIcon -= wIcon;
+							yIcon = yTop;
 						}
 					}
 				}
@@ -3521,9 +3563,11 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 	_ItemInfoWaiter.ItemSlotId= itemSlotId;
 	_ItemInfoWaiter.CtrlSheet = ctrlSheet;
 
-	// send out request only if cache is not set
+	// Use cache on first load or when server updates info version.
+	// This will show wrong info if item is in cache, but modified server side.
 	const CClientItemInfo *itemInfo = getInventory().getItemInfoCache(getItemSerial(), getItemCreateTime());
-	if (itemInfo)
+	sint32 itemInfoVersion = getItemInfoVersion();
+	if (itemInfo && (_LastItemInfoVersion == 0 || itemInfoVersion == _LastItemInfoVersion))
 	{
 		infoReceived();
 	}
@@ -3609,15 +3653,12 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			if (useItemInfoForFamily(item->Family))
 			{
 				// call lua function to update tooltip window
-				_ItemInfoWaiter.sendRequest();
+				if (!getInventory().isItemInfoUpToDate(_ItemInfoWaiter.ItemSlotId))
+					_ItemInfoWaiter.sendRequest();
 				help = _ItemInfoWaiter.infoValidated();
 				// its expected to get at least item name back
 				if (help.empty())
 					help = getItemActualName();
-			}
-			else if (!_ContextHelp.empty())
-			{
-				help = _ContextHelp;
 			}
 			else
 			{
@@ -3746,7 +3787,8 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 		{
 			if (useItemInfoForFamily(item->Family))
 			{
-				_ItemInfoWaiter.sendRequest();
+				if (!getInventory().isItemInfoUpToDate(_ItemInfoWaiter.ItemSlotId))
+					_ItemInfoWaiter.sendRequest();
 				help = _ItemInfoWaiter.infoValidated();
 				return;
 			}
@@ -3760,132 +3802,99 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 // ***************************************************************************
 bool	CDBCtrlSheet::canDropItem(CDBCtrlSheet *src) const
 {
-	if( src->getSheetId()==0 )
+	if (src->getSheetId() == 0)
 		return true;
 
 	// If the dest or src is Grayed, cannot drop it
-	if( src->getInventoryIndex() != INVENTORIES::exchange)
+	if (src->getInventoryIndex() != INVENTORIES::exchange)
 	{
-		if (src->getGrayed() || getGrayed()) return false;
-		if (src->getItemWeared() || getItemWeared()) return false;
+		if (src->getGrayed() || getGrayed())
+			return false;
+		if (src->getItemWeared() || getItemWeared())
+			return false;
 	}
 
 	// if no filter defined => OK.
-	if( _ItemSlot== SLOTTYPE::UNDEFINED )
+	if (_ItemSlot == SLOTTYPE::UNDEFINED)
 		return true;
 
-
 	// Verify the item slot of the src
-	CSheetId		sheetId(src->getSheetId());
-	CEntitySheet	*pES = SheetMngr.get (sheetId);
-	if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+	CSheetId sheetId(src->getSheetId());
+	CEntitySheet *pES = SheetMngr.get(sheetId);
+	if (pES == NULL || pES->type() != CEntitySheet::ITEM)
+		return false;
+
+	CItemSheet *pIS = (CItemSheet *)pES;
+
+	// build the bitField for test.
+	uint32 bf;
+	bf = 1 << _ItemSlot;
+	// special for right hand
+	if (_ItemSlot == SLOTTYPE::RIGHT_HAND)
 	{
-		CItemSheet *pIS = (CItemSheet*)pES;
-
-		// build the bitField for test.
-		uint32	bf;
-		bf= 1<<_ItemSlot;
-		// special for right hand
-		if( _ItemSlot== SLOTTYPE::RIGHT_HAND )
-		{
-			// Can put an object in right hand also if it is TWO_HANDS, or RIGHT_HAND_EXCLUSIVE
-			bf|= 1<<SLOTTYPE::TWO_HANDS;
-			bf|= 1<<SLOTTYPE::RIGHT_HAND_EXCLUSIVE;
-		}
-
-		// Look if one slot solution match.
-		if( pIS->SlotBF & bf )
-		{
-			// Ok the object is compatible with the dest
-
-			// Can put an object in left or right hand is dependent of other hand content
-			if( _OtherHandItemFilter && (_ItemSlot == SLOTTYPE::LEFT_HAND || _ItemSlot == SLOTTYPE::RIGHT_HAND) )
-			{
-				// special for left hand
-				if( _ItemSlot == SLOTTYPE::LEFT_HAND )
-				{
-					// If the item comes from right hand cant drop
-					if (src->_ItemSlot == SLOTTYPE::RIGHT_HAND)
-						return false;
-					// get the item in the right hand
-					CSheetId		sheetId(_OtherHandItemFilter->getSheetId());
-					CEntitySheet	*pRightHandES = SheetMngr.get (sheetId);
-					// if item present: must check if the right has a TWO_HANDS or RIGHT_HAND_EXCLUSIVE
-					if ( pRightHandES != NULL && pRightHandES->type() == CEntitySheet::ITEM )
-					{
-						CItemSheet *pRightHandIS = (CItemSheet*)pRightHandES;
-						if( pRightHandIS->hasSlot(SLOTTYPE::TWO_HANDS) ||
-							pRightHandIS->hasSlot(SLOTTYPE::RIGHT_HAND_EXCLUSIVE) )
-							return false;
-
-						// if the current item we wants to drop is a dagger, check if right hand is a sword or a dagger
-						if (pIS->ItemType == ITEM_TYPE::DAGGER)
-						{
-							if ((pRightHandIS->ItemType != ITEM_TYPE::DAGGER) &&
-								(pRightHandIS->ItemType != ITEM_TYPE::SWORD))
-								return false;
-						}
-					}
-					else
-					{
-						// If nothing valid in right hand cant drop a dagger
-						if (pIS->ItemType == ITEM_TYPE::DAGGER)
-							return false;
-					}
-				}
-				// special for right hand
-				else
-				{
-					/*
-					// If the right hand do not contains a two hand item
-					bool bRightHandContainsTwoHandItem = false;
-					CSheetId		sheetId(getSheetId());
-					CEntitySheet	*pOwnES = SheetMngr.get (sheetId);
-					// if item present: must check if the right has a TWO_HANDS or RIGHT_HAND_EXCLUSIVE
-					if ( pOwnES != NULL && pOwnES->type() == CEntitySheet::ITEM )
-					{
-						CItemSheet *pOwnIS = (CItemSheet*)pOwnES;
-						if( pOwnIS->hasSlot( SLOTTYPE::TWO_HANDS ) || pOwnIS->hasSlot( SLOTTYPE::RIGHT_HAND_EXCLUSIVE ) )
-							bRightHandContainsTwoHandItem = true;
-					}
-
-					// if the LeftHand is not empty, and If the item we want to drop is a 2Hands item, CANNOT drop
-					if (!bRightHandContainsTwoHandItem)
-					if( _OtherHandItemFilter->getSheetId()!=0 )
-					if( pIS->hasSlot( SLOTTYPE::TWO_HANDS ) || pIS->hasSlot( SLOTTYPE::RIGHT_HAND_EXCLUSIVE ) )
-					{
-						return false;
-					}
-					*/
-				}
-			}
-
-			// Check if the ammo has the same type as the hand containing the weapon
-			if( _OtherHandItemFilter && (_ItemSlot== SLOTTYPE::AMMO))
-			{
-				CSheetId		sheetId(_OtherHandItemFilter->getSheetId());
-				CEntitySheet	*pESWeapon = SheetMngr.get (sheetId);
-				if ( pESWeapon == NULL || pESWeapon->type() != CEntitySheet::ITEM )
-					return false;
-				CItemSheet *pISWeapon = (CItemSheet*)pESWeapon;
-				if (pISWeapon->Family != ITEMFAMILY::RANGE_WEAPON)
-					return false;
-				if(pIS->Family != ITEMFAMILY::AMMO)
-					return false;
-				if (pISWeapon->RangeWeapon.Skill != pIS->Ammo.Skill)
-					return false;
-			}
-
-			// ok, can drop!
-			return true;
-		}
-		else
-			return false;
-
+		// Can put an object in right hand also if it is TWO_HANDS, or RIGHT_HAND_EXCLUSIVE
+		bf |= 1 << SLOTTYPE::TWO_HANDS;
+		bf |= 1 << SLOTTYPE::RIGHT_HAND_EXCLUSIVE;
 	}
 
-	// Default: OK
-	return true;
+	// Look if one slot solution match.
+	if (pIS->SlotBF & bf)
+	{
+		// Ok the object is compatible with the dest
+
+		// Can put an object in left or right hand is dependent of other hand content
+		if (_OtherHandItemFilter && _ItemSlot == SLOTTYPE::LEFT_HAND)
+		{
+			// If the item comes from right hand cant drop
+			if (src->_ItemSlot == SLOTTYPE::RIGHT_HAND)
+				return false;
+			// get the item in the right hand
+			CSheetId sheetId(_OtherHandItemFilter->getSheetId());
+			CEntitySheet *pRightHandES = SheetMngr.get(sheetId);
+			// if item present: must check if the right has a TWO_HANDS or RIGHT_HAND_EXCLUSIVE
+			if (pRightHandES != NULL && pRightHandES->type() == CEntitySheet::ITEM)
+			{
+				CItemSheet *pRightHandIS = (CItemSheet *)pRightHandES;
+				if (pRightHandIS->hasSlot(SLOTTYPE::TWO_HANDS) || pRightHandIS->hasSlot(SLOTTYPE::RIGHT_HAND_EXCLUSIVE))
+					return false;
+
+				// if the current item we wants to drop is a dagger, check if right hand is a sword or a dagger
+				if (pIS->ItemType == ITEM_TYPE::DAGGER)
+				{
+					if (pRightHandIS->ItemType != ITEM_TYPE::DAGGER && pRightHandIS->ItemType != ITEM_TYPE::SWORD)
+						return false;
+				}
+			}
+			else
+			{
+				// If nothing valid in right hand cant drop a dagger
+				if (pIS->ItemType == ITEM_TYPE::DAGGER)
+					return false;
+			}
+		}
+
+		// Check if the ammo has the same type as the hand containing the weapon
+		if (_OtherHandItemFilter && _ItemSlot == SLOTTYPE::AMMO)
+		{
+			CSheetId sheetId(_OtherHandItemFilter->getSheetId());
+			CEntitySheet *pESWeapon = SheetMngr.get(sheetId);
+			if (pESWeapon == NULL || pESWeapon->type() != CEntitySheet::ITEM)
+				return false;
+			CItemSheet *pISWeapon = (CItemSheet *)pESWeapon;
+			if (pISWeapon->Family != ITEMFAMILY::RANGE_WEAPON)
+				return false;
+			if (pIS->Family != ITEMFAMILY::AMMO)
+				return false;
+			if (pISWeapon->RangeWeapon.Skill != pIS->Ammo.Skill)
+				return false;
+		}
+
+		// ok, can drop!
+		return true;
+	}
+
+	// default: cannot drop
+	return false;
 }
 
 // ***************************************************************************
@@ -4328,6 +4337,15 @@ bool CDBCtrlSheet::isSheetValid() const
 	// TODO_BRICK: SPhrase / SPhraseId????
 
 	return validSheet;
+}
+
+// ***************************************************************************
+bool CDBCtrlSheet::isSheetEqual(CDBCtrlSheet *pCS) const 
+{
+	if (!pCS)
+		return false;
+	
+	return getInventoryIndex() == pCS->getInventoryIndex() && getIndexInDB() == pCS->getIndexInDB();
 }
 
 // ***************************************************************************

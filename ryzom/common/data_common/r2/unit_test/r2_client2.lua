@@ -1,0 +1,6 @@
+doFile("lua/unit_test/unit_test.lua")
+UnitTest.testAddDefaultFeature()
+UnitTest.testAddNpcGrpFeature()
+UnitTest.testAddFaunaFeature()
+r2.translateFeatures()
+r2.show()

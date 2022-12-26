@@ -1,0 +1,5 @@
+
+
+Les NPC spawn mais sont invisible sur le client (hormis leur noms au dessus de la tete)
+- Le parametre seed de la visual propertyA est à zéro.
+	* car le bot n'as pas d'alias.

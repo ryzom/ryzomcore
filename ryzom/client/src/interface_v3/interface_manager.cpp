@@ -1608,9 +1608,6 @@ void CInterfaceManager::updateFrameEvents()
 #ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().update();
 #endif
-
-	CItemGroupManager::getInstance()->update();
-
 }
 
 // ------------------------------------------------------------------------------------------------

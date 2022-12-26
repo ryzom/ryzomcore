@@ -1079,7 +1079,6 @@ class CCanDropToExchange : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CCanDropToExchange, "can_drop_to_exchange");
 
-
 // **********************************************************************************************************
 
 /** Clear the selected sheet
@@ -2462,6 +2461,63 @@ class CHandlerRingXpCatalyserStopUse : public IActionHandler
 };
 REGISTER_ACTION_HANDLER( CHandlerRingXpCatalyserStopUse, "ring_xp_catalyser_stop_use" );
 
+// ***************************************************************************
+class CHandlerUseHotbarItem : public IActionHandler
+{
+	void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		sint64 slot;
+		if (!CInterfaceExpr::evalAsInt(getParam(sParams, "slot"), slot))
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Can't retrieve counter.");
+			return;
+		}
+
+		if (slot > INVENTORIES::NbHotbarSlots) {
+			nlwarning("<CHandlerUseHotbarItem::execute> Slot out of range.");
+			return;
+		}
+
+		CDBCtrlSheet *pCS = getInventory().getHotbarSheet(slot);
+		if (!pCS)
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Can't retrieve sheet.");
+			return;
+		}
+
+		if (pCS->getLockedByOwner())
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Item is locked.");
+			return;
+		}
+
+		const CItemSheet *pIS = pCS->asItemSheet();
+		if (!pIS)
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Can't retrieve item.");
+			return;
+		}
+
+		ITEMFAMILY::EItemFamily fam = pIS->Family;
+
+		if (!getInventory().isUsableItem(pCS->getSheetId())) {
+			nlwarning("<CHandlerUseHotbarItem::execute> Item is not usable.");
+			return;
+		}
+
+		if (fam == ITEMFAMILY::ITEM_SAP_RECHARGE || fam == ITEMFAMILY::CRYSTALLIZED_SPELL) 
+		{
+			sendToServerEnchantMessage((uint8)pCS->getInventoryIndex(), (uint16)pCS->getIndexInDB());
+		} 
+		else if (fam == ITEMFAMILY::CONSUMABLE || fam == ITEMFAMILY::XP_CATALYSER) 
+		{
+			sendMsgUseItem(uint16(pCS->getIndexInDB()));
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerUseHotbarItem, "use_hotbar_item" );
 
 // ***************************************************************************
 // item groups
@@ -2491,7 +2547,7 @@ class CHandlerItemGroupEquip : public IActionHandler
 		std::string name = getParam(sParams, "name");
 		if(name.empty())
 		{
-			nlinfo("Trying to move a group with a caller not part of any group");
+			nlinfo("Trying to equip a group with a caller not part of any group");
 			return;
 		}
 
@@ -2499,3 +2555,72 @@ class CHandlerItemGroupEquip : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerItemGroupEquip, "item_group_equip");
+
+// ***************************************************************************
+class CHandlerItemGroupCreate : public IActionHandler
+{
+	void execute (CCtrlBase *pCaller, const std::string & sParams)
+	{
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(pCaller->getParent()->findFromShortId("edit_name:eb"));
+			if (!eb) {
+				nlwarning("<CHandlerItemGroupCreate::execute> Can't retrieve edit box.");
+				return;
+			}
+			name = eb->getInputString();
+			CWidgetManager::getInstance()->resetCaptureKeyboard();
+			if (name.empty()) {
+				nlinfo("<CHandlerItemGroupCreate::execute> Trying to create a group with a caller not part of any group");
+				return;
+			}
+		}
+
+		if (name.find_first_not_of(' ') == name.npos) {
+			nlinfo("<CHandlerItemGroupCreate::execute> Trying to create a group with whitespace as name");
+			return;
+		}
+
+		bool removeEmpty = false;
+		if (name.substr(0, 1) == "!") {
+			std::string tmp = name.substr(1);
+			if (tmp.find_first_not_of(' ') == tmp.npos) {
+				nlinfo("<CHandlerItemGroupCreate::execute> Trying to create a group with whitespace as name");
+				return;
+			}
+
+			removeEmpty = true;
+			name = tmp;
+		}
+
+		CItemGroupManager::getInstance()->createGroup(name, removeEmpty);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupCreate, "item_group_create");
+
+// ***************************************************************************
+class CHandlerItemGroupDelete : public IActionHandler
+{
+	void execute (CCtrlBase * /* pCaller */, const std::string & sParams)
+	{
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			CCtrlButton *button = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+			if (!button) {
+				nlwarning("<CHandlerItemGroupDelete::execute> Can't retrieve button.");
+				return;
+			}
+			CAHManager::getInstance()->runActionHandler("leave_modal", NULL);
+			name = dynamic_cast<CViewText*>(button->getParent()->getView("name"))->getText();
+			if (name.empty()) {
+				nlinfo("Trying to delete a group with a caller not part of any group");
+				return;
+			}
+		}
+
+		CItemGroupManager::getInstance()->deleteGroup(name);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupDelete, "item_group_delete");

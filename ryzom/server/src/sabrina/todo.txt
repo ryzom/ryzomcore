@@ -1,0 +1,481 @@
+TODO:
+
+- split phrase descriptions into 4 files (1 per class)
+- SORT the TODO list!!!
+
+- make entity base all private with sabrina player class as friend
+
+- Think through time management for Sabrina actions 
+  - we should have a 'setActionRateModifier(float m)' default to 1.0f
+  - the setActionRate() should apply to SabrinaActors - they should pass on to their phrases
+
+- draw up timing diagrams of event actions.
+
+- Document a few notes on responsibilities of the phrase model:
+  - applying damage to actor only?
+
+- Centralise all time/ action state management (use model callbacks to interrogate times...)
+	- This makes the whole system more explicit and removes 'non-dits)
+    > this fixes this point > sort out who sets up pre and post action delays - where and when!
+
+- add some comments to explain behaviour of phrase instances 
+  - at which moment target ptrs are set and cleared, etc...
+
++ re-do header independence tests
+
+- for item locking - finish the delete all items' thing (or just scrap it)
+
+Re-think TDmgType
+
+Command to display active phrases
+- actors need a 'display'
+- actors need to add selves to an 'active actors' table?
+
+- Available phrases should not be sheet Ids - they should be phrase refferences
+  - phrase refferences should be name + compiled brick set ...
+  - each static sheet should have a phrase ref
+  - each custom action for each player should have a phrase ref
+  - CSabrinaPhraseDescriptionStatic::init - to do
+
+- specialise actor class separately for npcs and creatures
+  - ai armor is done for creatures only - need to do NPCs too => see below...
+
+- CSabrinaActorPlayer - methods for manageing message dispatch to players
+  - don't forget to limit messages (if player has already had a message of this type...)
+
+- Player Singleton - * player record
+- AI Singleton - * ai record
++ Phrase manager singleton - * phrase instance
++ Entity base
+- Player Record: Entity base - 1 sabrina actor player
+- AI Record: Entity base - 1 sabrina actor ai
++ Sabrina actor - 1..* phrase instance
++ Sabrina actor player: sabrina actor	- 1 player record - * phrase descriptions
+- Sabrina actor ai: sabrina actor	- 1 ai record
+- Sabrina actor ai npc: sabrina actor ai
+- Sabrina actor ai fauna: sabrina actor ai
+- Phrase description
+- phrase description static: phrase description - 1 phrase model
+- phrase description user: phrase description
++ phrase instance - 1 phrase model - 2 sabrina actor
++ phrase model
+- phrase model combat: phrase model
+- phrase model magic: phrase model
+- phrase model craft: phrase model
+
++ available_phrases.h
++ available_phrases.cpp
+
++ sabrina_manager_callbacks.h
++ sabrina_manager_callbacks.cpp
+
++ s_effect.h
++ s_effect.cpp
+
++ sabrina_actor.h
++ sabrina_actor_creature.h
+- sabrina_actor_creature.cpp
++ sabrina_actor_player.h
+- sabrina_actor_player.cpp
+
++ sabrina_ai_interface.h
++ sabrina_ai_interface.cpp
++ sabrina_item_stats.h
++ sabrina_item_stats.cpp
+
+! sabrina_messagess.h
+
++ sabrina_phrase_instance.h
+- sabrina_phrase_instance.cpp
++ sabrina_phrase_manager.h
++ sabrina_phrase_manager.cpp
++ sabrina_phrase_model.h
++ sabrina_phrase_model_factory.h
++ sabrina_phrase_model_factory.cpp
+
+! sabrina_wrapper.h
+
+- convert all std::string to CSString
+  - get hold of new copy of NeL first with CSSting integrated
+
+- combat phrases require localisation tables - they should be in the combat stuff...
+//	PHRASE_UTILITIES::loadLocalisationTable( CPath::lookup("localisation.localisation_table" ) );
+
+- general pass through INFOLOG logs...
+
+- add phrase validity tests...
+
+*** WTF is: typedef std::map< NLMISC::CSheetId, CStaticRolemasterPhrase> CAllRolemasterPhrases;
+
+
+**********************************************************************************************************
+**********************************************************************************************************
+
+** stuff that belongs to the combat defender AI
+
+**********************************************************************************************************
+**********************************************************************************************************
+
+
+CCombatDefenderAI::CCombatDefenderAI(const TDataSetRow &rowId) : CCombatDefender(rowId), CreatureForm(0)
+{
+	CEntityBase * entity = getEntity();
+	if(!entity) 
+		return;
+
+	/// TODO : specialize this class for NPCs other than creature
+
+	CreatureForm = CSheets::getCreaturesForm(entity->getType());
+	if (!CreatureForm)
+		return;
+
+	_GlobalArmor.Quality = CreatureForm->Level;
+
+	for (int i=0;i<DMGTYPE::NBTYPES;++i)
+	{
+		_ProtectionFactor[i]=CreatureForm->Protections[i].Factor;
+		_ProtectionLimit[i]=CreatureForm->Protections[i].Max;
+	}
+
+	_GlobalArmor.Skill = SKILLS::unknown;
+	_GlobalArmor.SkillValue = CreatureForm->Level * 10;
+	_GlobalArmor.ArmorType = ARMORTYPE::UNKNOWN;
+	
+	_DefenseValue = entity->getSkills()._Skills[ SKILLS::SDD ].Current;
+
+/*	pair< const CStaticItem *, uint16> item;
+
+	// head
+	item = getArmorOnSlot( SLOT_EQUIPMENT::HEAD );
+	if (item.first != NULL)
+	{
+		_HeadArmor = CCombatArmor( item.first, item.second);
+		_HeadArmor.SkillValue = _HeadArmor.Quality * 10;
+	}
+	
+	//chest
+	item = getArmorOnSlot( SLOT_EQUIPMENT::CHEST );
+	if (item.first != NULL)
+	{
+		_ChestArmor = CCombatArmor( item.first, item.second);
+		_ChestArmor.SkillValue = _ChestArmor.Quality * 10;
+	}
+
+	//arms
+	item = getArmorOnSlot( SLOT_EQUIPMENT::ARMS );
+	if (item.first != NULL)
+	{
+		_ArmsArmor = CCombatArmor( item.first, item.second);
+		_ArmsArmor.SkillValue = _ArmsArmor.Quality * 10;
+	}
+
+	//hands
+	item = getArmorOnSlot( SLOT_EQUIPMENT::HANDS );
+	if (item.first != NULL)
+	{
+		_HandsArmor = CCombatArmor( item.first, item.second);
+		_HandsArmor.SkillValue = _HandsArmor.Quality * 10;
+	}
+
+	//legs
+	item = getArmorOnSlot( SLOT_EQUIPMENT::LEGS );
+	if (item.first != NULL)
+	{
+		_LegsArmor = CCombatArmor( item.first, item.second);
+		_LegsArmor.SkillValue = _LegsArmor.Quality * 10;
+	}
+
+	//feet
+	item = getArmorOnSlot( SLOT_EQUIPMENT::FEET );
+	if (item.first != NULL)
+	{
+		_FeetArmor = CCombatArmor( item.first, item.second);
+		_FeetArmor.SkillValue = _FeetArmor.Quality * 10;
+	}
+
+	// FIX TEMP
+	if (_ChestArmor.SkillValue > _DefenseValue)
+		_DefenseValue = _ChestArmor.SkillValue;
+*/
+} // CCombatDefenderAI constructor //
+
+bool CCombatDefenderAI::getArmor( SLOT_EQUIPMENT::ESlotEquipment slot, CCombatArmor &armor ) const
+{
+	/*
+	switch(slot)
+	{
+	case SLOT_EQUIPMENT::HEAD:
+		if (_HeadArmor.Quality > 0)
+			armor = _HeadArmor;
+		else
+			return false;
+		break;
+
+	case SLOT_EQUIPMENT::CHEST:
+		if (_ChestArmor.Quality > 0)
+			armor = _ChestArmor;
+		else
+			return false;
+		break;
+
+	case SLOT_EQUIPMENT::ARMS:
+		if (_ArmsArmor.Quality > 0)
+			armor = _ArmsArmor;
+		else
+			return false;
+		break;
+	
+	case SLOT_EQUIPMENT::LEGS:
+		if (_LegsArmor.Quality > 0)
+			armor = _LegsArmor;
+		else
+			return false;
+		break;
+
+	case SLOT_EQUIPMENT::FEET:
+		if (_FeetArmor.Quality > 0)
+			armor = _FeetArmor;
+		else
+			return false;
+		break;
+
+	case SLOT_EQUIPMENT::HANDS:
+		if (_HandsArmor.Quality > 0)
+			armor = _HandsArmor;
+		else
+			return false;
+		break;
+
+	default:
+		return false;
+	};
+	*/
+	if ( _GlobalArmor.Quality > 0)
+		armor = _GlobalArmor;
+	else
+		return false;
+	
+	return true;
+} // CCombatDefenderAI::getArmor //
+
+//--------------------------------------------------------------
+//				CCombatDefenderAI::getArmorOnSlot()  
+//--------------------------------------------------------------
+pair<const CStaticItem *, uint16> CCombatDefenderAI::getArmorOnSlot( SLOT_EQUIPMENT::ESlotEquipment slot )
+{
+	CEntityBase * entity = getEntity();
+	if (!entity) return make_pair( (const CStaticItem*)(NULL),0);
+
+	const CEquipmentSlots &items = entity->getEquipment();
+	CSheetId sheet;
+	sint16	 quality = 0;
+
+	switch( slot )
+	{
+	case SLOT_EQUIPMENT::HEAD:
+		{			
+			sheet = items.Head.IdSheet;
+			quality = items.Head.Quality;
+		}
+		break;
+
+	case SLOT_EQUIPMENT::ARMS:
+		{
+			sheet = items.Arms.IdSheet;
+			quality = items.Arms.Quality;
+		}
+		break;
+
+	case SLOT_EQUIPMENT::HANDS:
+		{
+			sheet = items.Hands.IdSheet;
+			quality = items.Hands.Quality;
+		}
+		break;
+
+	case SLOT_EQUIPMENT::CHEST:
+		{
+			sheet = items.Chest.IdSheet;
+			quality = items.Chest.Quality;
+		}
+		break;
+
+	case SLOT_EQUIPMENT::LEGS:
+		{
+			sheet = items.Legs.IdSheet;
+			quality = items.Legs.Quality;
+		}
+		break;
+
+	case SLOT_EQUIPMENT::FEET:
+		{
+			sheet = items.Feet.IdSheet;
+			quality = items.Feet.Quality;
+		}
+		break;
+
+	default:
+		nlwarning("<CCombatAttackerAI::getArmorOnSlot> slot id %d not managed by getItemOnSlot", slot);
+		return make_pair( (const CStaticItem*)(NULL),0);
+	};
+
+	if (sheet != CSheetId::Unknown)
+	{
+		const CStaticItem *item = CSheets::getForm(sheet);
+		return make_pair( item, quality);
+	}
+	else
+	{
+		return make_pair( (const CStaticItem *)NULL, 0);
+	}
+} // CCombatDefenderAI::getArmorOnSlot //
+
+
+
+
+**********************************************************************************************************
+**********************************************************************************************************
+
+** stuff that belongs to the phrase model implementation
+
+**********************************************************************************************************
+**********************************************************************************************************
+
+//-----------------------------------------------
+//			executePhrase()
+//-----------------------------------------------
+void CPhraseManager::executePhrase( const TDataSetRow &actorRowId, const TDataSetRow &targetRowId,  const std::vector<NLMISC::CSheetId> &brickIds, bool cyclic, uint16 phraseId, uint8 nextCounter )
+{
+	CSPhrase *phrase = buildSabrinaPhrase(actorRowId, targetRowId, brickIds, phraseId, nextCounter);
+	if (!phrase)
+	{
+		nlwarning("<CPhraseManager::executePhrase> Failed to build sabrina phrase for actor %u", actorRowId.getIndex());
+		return;
+	}
+	phrase->setPrimaryTarget( targetRowId );
+
+	TMapIdToPhraseStruc::iterator it = _Phrases.find( actorRowId );
+	// actor doesn't already have phrases
+	if (it == _Phrases.end() )
+	{	
+		// new entry
+		CEntityPhrases entityPhrases;
+		
+		if (cyclic)
+		{
+			entityPhrases.setCyclicAction(phrase);
+			entityPhrases.CyclicInProgress = true;
+		}
+		else
+		{
+			entityPhrases.addPhraseFifo(phrase);
+		}
+		
+		_Phrases.insert( make_pair(actorRowId, entityPhrases) );
+	}
+	// actor already have phrases in the manager, just add the new one
+	else
+	{
+		CEntityPhrases &entityPhrases = (*it).second;
+		if (cyclic)
+		{
+			entityPhrases.setCyclicAction(phrase);
+		}
+		else
+		{
+			entityPhrases.addPhraseFifo(phrase);
+		}
+	}
+} // executePhrase //
+
+
+
+//-----------------------------------------------
+//			checkPhraseValidity()
+//-----------------------------------------------
+bool CPhraseManager::checkPhraseValidity( const std::vector<NLMISC::CSheetId> &brickIds ) const
+{
+	/*
+	vector<CSheetId>::const_iterator it;
+	vector<CSheetId>::const_iterator itEnd = brickIds.end();
+
+	set<BRICK_FAMILIES::TBrickFamily> mandatoryFamilies;	
+	set<BRICK_FAMILIES::TBrickFamily> allowedFamilies;
+	set<BRICK_FAMILIES::TBrickFamily> forbiddenFamilies;
+
+	set<BRICK_FAMILIES::TBrickFamily> foundFamilies;
+
+	sint16 totalCost = 0;
+
+	for (it = brickIds.begin() ; it != itEnd ; ++it)
+	{
+		const CStaticBrick *brick = CSheets::getSBrickForm(*it);
+		if (!brick)
+		{
+			nlwarning("<CPhraseManager::checkPhraseValidity> Cannot find brick object for brick sheet %s", (*it).toString().c_str() );
+			return false;
+		}
+
+		mandatoryFamilies.insert( brick->MandatoryFamilies.begin(), brick->MandatoryFamilies.end() );
+		allowedFamilies.insert( brick->OptionalFamilies.begin(), brick->OptionalFamilies.end() );
+		allowedFamilies.insert( brick->CreditFamilies.begin(), brick->CreditFamilies.end() );
+		forbiddenFamilies.insert( brick->ForbiddenFamilies.begin(), brick->ForbiddenFamilies.end() );
+
+		if ( foundFamilies.insert( brick->Family ).second == false)
+		{
+			nlwarning("<checkPhraseValidity> The family %s were already found in phrase, error", BRICK_FAMILIES::toString(brick->Family).c_str() );
+			return false;
+		}
+
+		totalCost += brick->SabrinaValue;
+	}
+
+	// check cost
+	if (totalCost > 0)
+	{
+		DEBUGLOG("<checkPhraseValidity> Creadit must be > to cost for a phrase to be valid, cancel return false");
+		return false;
+	}
+
+	// check all mandatory are present
+	set<BRICK_FAMILIES::TBrickFamily>::const_iterator itb;
+	set<BRICK_FAMILIES::TBrickFamily>::const_iterator itbEnd = mandatoryFamilies.end();
+	for (itb = mandatoryFamilies.begin() ; itb != itbEnd ; ++itb)
+	{
+		set<BRICK_FAMILIES::TBrickFamily>::iterator itbf = foundFamilies.find(*itb);
+		if ( itbf == foundFamilies.end() )
+		{
+			DEBUGLOG("<checkPhraseValidity> The family %s is mandatory but isn't in the phrase, cancel return false", BRICK_FAMILIES::toString(*itb).c_str() );
+			return false;
+		}
+		else
+			foundFamilies.erase(itbf);
+	}
+
+	// check no forbidden is present
+	itbEnd = forbiddenFamilies.end();
+	for (itb = forbiddenFamilies.begin() ; itb != itbEnd ; ++itb)
+	{
+		if (foundFamilies.find(*itb) != foundFamilies.end() )
+		{
+			DEBUGLOG("<checkPhraseValidity> The family %s is forbidden but is in the phrase, cancel return false", BRICK_FAMILIES::toString(*itb).c_str() );
+			return false;
+		}
+	}
+
+	// check all the other families are allowed
+	itbEnd = foundFamilies.end();
+	for (itb = foundFamilies.begin() ; itb != itbEnd ; ++itb)
+	{
+		if (allowedFamilies.find(*itb) == allowedFamilies.end() )
+		{
+			DEBUGLOG("<checkPhraseValidity> The family %s isn't a valid optional or creadit one, cancel return false", BRICK_FAMILIES::toString(*itb).c_str() );
+			return false;
+		}
+	}
+	*/
+
+	return true;
+} // checkPhraseValidity //
+
+
