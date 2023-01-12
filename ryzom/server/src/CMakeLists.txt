@@ -2,8 +2,8 @@
 # Need servershare for build packed collision tool
 # Need aishare for build wmap tool
 IF(WITH_RYZOM_TOOLS OR WITH_RYZOM_SERVER)
-  FIND_PACKAGE(Mongo)
-  IF(MONGO_FOUND)
+  IF(WITH_MONGODB)
+    FIND_PACKAGE(Mongo REQUIRED)
     SET(MONGO_DEFINITIONS -DHAVE_MONGO)
   ENDIF()
 
@@ -40,7 +40,9 @@ ADD_SUBDIRECTORY(persistant_data_service)
 ADD_SUBDIRECTORY(session_browser_server)
 ADD_SUBDIRECTORY(shard_unifier_service)
 ADD_SUBDIRECTORY(tick_service)
-ADD_SUBDIRECTORY(patchman_service)
+IF(WITH_PATCHMAN_SERVICE)
+  ADD_SUBDIRECTORY(patchman_service)
+ENDIF()
 
 
 # Deprecated, no longer used.

@@ -323,6 +323,9 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_TOOLS               "Build Tools"                                   OFF)
 
   OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            ON)
+
+  OPTION(WITH_MONGODB             "Compile server with MongoDB support"           ON)
+  OPTION(WITH_PATCHMAN_SERVICE    "Compile Ryzom server patchman service"         OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
