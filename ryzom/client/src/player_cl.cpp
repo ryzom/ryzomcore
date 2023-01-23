@@ -57,6 +57,7 @@
 #include "game_share/player_visual_properties.h"
 #include "game_share/gender.h"
 #include "game_share/bot_chat_types.h"
+#include "interface_v3/lua_ihm_ryzom.h"
 
 
 ///////////
@@ -803,6 +804,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 	// Check the skeleton.
 	if(skeleton() && !ClientCfg.Light)
 	{
+		string rightHandTag, leftHandTag;
 		// To re-link the skeleton to the mount if needed.
 		parent(parent());
 		// Set the skeleton scale.
@@ -852,7 +854,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 			// No Valid item in the right hand.
 
 			SLOTTYPE::EVisualSlot slot = SLOTTYPE::RIGHT_HAND_SLOT;
-			string rightHandTag = getTag(5);
+			rightHandTag = getTag(5);
 			if (!rightHandTag.empty() && rightHandTag != "_")
 			{
 				sint idx = SheetMngr.getVSIndex("stake.sitem", slot);
@@ -911,7 +913,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 			// No Valid item in the left hand.
 			equip(SLOTTYPE::LEFT_HAND_SLOT, "");
 			SLOTTYPE::EVisualSlot slot = SLOTTYPE::LEFT_HAND_SLOT;
-			string leftHandTag = getTag(6);
+			leftHandTag = getTag(6);
 			if (!leftHandTag.empty() && leftHandTag != "_")
 			{
 				vector<string> tagInfos;
@@ -953,6 +955,8 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 				equip(slot, "");
 			}
 		}
+		CLuaManager::getInstance().executeLuaScript(toString("game:updateRpItems('%s', '%s')", leftHandTag.c_str(), rightHandTag.c_str()), 0);
+
 		// Create face
 		// Only create a face when there is no Helmet
 		if(_Items[SLOTTYPE::HEAD_SLOT].Sheet == 0 || _Items[SLOTTYPE::HEAD_SLOT].Sheet->Family != ITEMFAMILY::ARMOR)
