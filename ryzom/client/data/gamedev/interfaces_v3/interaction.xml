@@ -3267,6 +3267,36 @@
 </proc>
 
 
+
+<!-- Main container : rpitems_actions -->
+<group type="container"
+	 id="rpitems_actions"
+	 w="60"
+	 h="60"
+	 title=""
+	 global_color="false"
+	 global_color_over="true"
+	 resizer="false"
+	 header_active="false"
+	 right_button="false"
+	 movable="true"
+	 active="true"
+	 opened="true"
+	 openable="false"
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	 options="compass">
+	<group id="header_closed" x="0" y="0" w="0" h="0" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="52" posref="TL TL">
+	    <group id="html" type="webig_html" posref="TL TL" home="#home" title_prefix="" sizeref="wh" x="0" y="0" w="0" h="0" background_color="#bg_color" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline" browse_refresh="#browse_refresh" browse_undo="#browse_undo" browse_redo="#browse_redo">
+            <group id="black" posref="BR BR" sizeref="hw" w="-10" h="-12" inherit_gc_alpha="true" />
+            <group id="text_list" type="list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
+        </group>
+	</group>
+</group>
+ <tree node="rpitems_actions" />
+
+
 <template name="arkshop_inv_item" sheetdb="UI:TEMP:ARK:ITEM:0" usesheet="false" isvirtual="true" lock="false" render_layer1="1" render_layer2="2" fontsize="8" render_layer3="3" render_layer4="4" w="45" over="grey_0.tga" keep="true" img1scale="false" img2scale="false" img1="token_basic.tga" img2="" img3="" tooltip="" quality="" quantity="" overlay="" text="" text2="" text3="" overlay_active="0"  overlay2_active="0" qualquan_active="0" color="255 255 255 255" gc1="false" gc2="false" gc3="true" ctrlcolor="0 0 0 0" color2="255 255 255 255" color3="255 255 255 255" colover="255 255 255 30" bg="w_slot_item.tga" params_l="" params_r="" x="0" y="0">
 	<group id="#id" posref="MM MM" w="#w" h="45" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
 		<ctrl type="sheet" tooltip="#text" onclick_r="open_help_auto" active="#usesheet" id="sheet" value="#sheetdb" posref="ML ML" y="0" x="#x" render_layer="#render_layer2" use_quality="true" use_quantity="true" />
