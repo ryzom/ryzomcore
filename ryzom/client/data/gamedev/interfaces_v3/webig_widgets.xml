@@ -231,7 +231,7 @@
 		</group>
 	</template>
 
-	<template name="lesson_template" keep="true" bg="storyline_lesson_bg" bg_color="255 255 255 255" script="0" parent="0" open_script="false" check_color="255 255 255 200" over="80" pushed="90" waiting="true" started="false" finished="false" event="" lesson="">
+	<template name="lesson_template" bg="storyline_lesson_bg" keep="true" bg_color="255 255 255 255" script="0" parent="0" open_script="false" check_color="255 255 255 200" over="80" pushed="90" waiting="true" started="false" finished="false" event="" lesson="">
 		<group id="#id" posref="MM MM" w="510" h="70">
 			<view type="bitmap" id="back" posref="ML ML" texture="#bg.tga" color="#bg_color" global_color="false" />
 			<group id="html" type="webig_html" posref="TL TL" global_color="false"  title_prefix="" sizeref="wh" x="30" y="0" w="510" h="70" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline">
@@ -241,14 +241,14 @@
 			<view type="bitmap" id="check" active="#waiting" x="9" posref="ML ML" texture="https://app.ryzom.com/app_arcc/data/app/Scripts//1/8/0/7/assets/new.png" color="255 255 255 255" global_color="false" />
 			<view type="bitmap" id="started" active="#started" x="9" posref="ML ML" texture="https://app.ryzom.com/app_arcc/data/app/Scripts//1/8/0/7/assets/ico_amber_ball_wip.png" color="255 255 255 255" global_color="false" />
 			<view type="bitmap" id="finished" active="#finished" x="9" render_layer="2" posref="ML ML" texture="ico_amber_ball.tga" color="255 255 255 255" global_color="false" />
-			<ctrl type="button" id="lesson" button_type="push_button" global_color_normal="false" global_color_over="false"  global_color_pushed="false" posref="MM MM" x="0" y="0" w="510" h="60" tx_normal="blank.tga" tx_pushed="storyline_lesson_bg_white.tga" tx_over="storyline_lesson_bg_white.tga" scale="true" color="255 255 255 0" col_over="255 255 255 #over" col_pushed="255 255 255 #pushed" onclick_l="lua" params_l="ArkOpenLesson(#lesson)"  />
+			<ctrl type="button" id="lesson" button_type="push_button" global_color_normal="false" global_color_over="false"  global_color_pushed="false" posref="MM MM" x="0" y="0" w="510" h="60" tx_normal="blank.tga" tx_pushed="storyline_lesson_bg_white.tga" tx_over="storyline_lesson_bg_white.tga" scale="true" color="255 255 255 0" col_over="255 255 255 #over" col_pushed="255 255 255 #pushed" onclick_l="lua" params_l="openLesson(#event, #lesson)"  />
 			<ctrl type="button" id="open_script" active="#open_script"  button_type="push_button" posref="BL BL" x="80" y="11" tx_normal="mp3_button_list.tga" tx_pushed="mp3_button_list.tga" tx_over="mp3_button_over.tga" onclick_l="lua" params_l="openStorylineStepDetails(#script, #parent)" tooltip="" />
 		</group>
 	</template>
 
-	<template name="webig_button" keep="true" w="100" h="20" x="0" y="0" text="OK" fontsize="12" shadow="true" color_text="255 255 255 255" tooltip="" normal="blank.tga" pushed="blank.tga" over="blank.tga" color="255 255 255 0" color_over="255 255 255 55" color_pushed="255 255 255 100" params_l="">
+	<template name="webig_button" w="100" h="20" x="0" y="0" text="OK" fontsize="12" shadow="true" color_text="255 255 255 255" normal="blank.tga" pushed="blank.tga" over="blank.tga" color="255 255 255 0" color_over="255 255 255 55" color_pushed="255 255 255 100" params_l="">
 		<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y">
-			<ctrl type="button" id="but" button_type="push_button" tooltip="#tooltip" tooltip_posref="BM TM" global_color_normal="false" global_color_over="false"  global_color_pushed="false" posref="MM MM" x="0" y="0" w="#w" h="#h" tx_normal="#normal" tx_pushed="#pushed" tx_over="#over" scale="true" color="#color" col_over="#color_over" col_pushed="#color_pushed" onclick_l="lua" params_l="#params_l"  />
+			<ctrl type="button" id="but" button_type="push_button" global_color_normal="false" global_color_over="false"  global_color_pushed="false" posref="MM MM" x="0" y="0" w="#w" h="#h" tx_normal="#normal" tx_pushed="#pushed" tx_over="#over" scale="true" color="#color" col_over="#color_over" col_pushed="#color_pushed" onclick_l="lua" params_l="#params_l"  />
 			<view type="text" id="text" color="#color_text" global_color="false" fontsize="#fontsize" shadow="#shadow" posref="MM MM" hardtext="#text" />
 		</group>
 	</template>
