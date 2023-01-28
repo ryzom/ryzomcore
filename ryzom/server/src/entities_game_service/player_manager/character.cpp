@@ -451,6 +451,10 @@ CCharacter::CCharacter()
 	_Organization = 0;
 	_OrganizationStatus = 0;
 	_OrganizationPoints = 0;
+	_BattlePoints = 0;
+	_RpPoints = 0;
+	_FirstRpPointsWin = 0;
+	_LastRpPointsWin = 0;
 	_DefaultHairType = 0;
 	_DefaultHairColor = 0;
 	_WigHairType = 0;
@@ -981,7 +985,8 @@ uint32 CCharacter::tickUpdate()
 
 	// update connexion stats.
 	uint32 time = CTime::getSecondsSince1970();
-	_PlayedTime += time - _LastConnectedTime;
+	uint32 elapsedTime = time - _LastConnectedTime;
+	_PlayedTime += elapsedTime;
 	_LastConnectedTime = time;
 
 	if (!checkCharacterStillValide("<CCharacter::tickUpdate> Character corrupted : start tickUpdate !!!"))
@@ -1035,7 +1040,7 @@ uint32 CCharacter::tickUpdate()
 	{
 		H_AUTO(CharacterCheckEnterLeaveZone);
 		// check if the player enter/ leaves a zone
-		CZoneManager::getInstance().updateCharacterPosition(this);
+		CZoneManager::getInstance().updateCharacterPosition(this, elapsedTime);
 
 		if (!checkCharacterStillValide(
 					"<CCharacter::tickUpdate> Character corrupted : after CZoneManager::updateCharacterPosition !!!"))
@@ -1636,6 +1641,7 @@ uint32 CCharacter::tickUpdate()
 			}
 		}
 	}
+
 	for (uint32 i = 0; i < missionToRemove.size(); i++)
 	{
 		TAIAlias missionAlias = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName(missionToRemove[i]);
@@ -1657,6 +1663,20 @@ uint32 CCharacter::tickUpdate()
 		}
 		_LastTickNpcStopped = 0;
 		setStoppedNpc(TDataSetRow());
+	}
+
+
+	// Send timed url
+	if (_TimedUrl > 0)
+		_TimedUrl--;
+
+	if (_TimedUrl == 0) {
+		vector<string> params = getCustomMissionParams("__SEND_TIMED_URL__");
+		if (params.size() >= 1 && !params[0].empty())
+		{
+			validateDynamicMissionStep(params[0]);
+			setCustomMissionParams("__SEND_TIMED_URL__", "");
+		}
 	}
 
 	return nextUpdate;
@@ -12230,7 +12250,70 @@ void CCharacter::initOrganizationInfos()
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(1).setVALUE(_PropertyDatabase, _Organization);
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(2).setVALUE(_PropertyDatabase, _OrganizationStatus);
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(3).setVALUE(_PropertyDatabase, _OrganizationPoints);
+	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(4).setVALUE(_PropertyDatabase, _BattlePoints);
 }
+
+//-----------------------------------------------------------------------------
+void CCharacter::addBattlePoints(sint32 points)
+{
+	if (_BattlePoints + points > 0)
+		_BattlePoints += points;
+	else
+		_BattlePoints = 0;
+	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(4).setVALUE(_PropertyDatabase, _BattlePoints);
+}
+
+void CCharacter::setBattlePoints(uint32 points)
+{
+	_BattlePoints = points;
+	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(4).setVALUE(_PropertyDatabase, _BattlePoints);
+}
+
+uint32 CCharacter::getBattlePoints()
+{
+	return _BattlePoints;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::addRpPoints(sint32 points)
+{
+	if (points > 0)
+	{
+		if (_RpPoints == 0)
+			_FirstRpPointsWin = CTickEventHandler::getGameCycle();
+		_LastRpPointsWin = CTickEventHandler::getGameCycle();
+	}
+
+	nlinfo("Add rp points : %d", points);
+	if (_RpPoints + points > 0)
+		_RpPoints += points;
+	else
+		_RpPoints = 0;
+}
+
+void CCharacter::setRpPoints(uint32 points)
+{
+	_RpPoints = points;
+}
+
+uint32 CCharacter::getRpPoints()
+{
+	return _RpPoints;
+}
+
+void CCharacter::sendRpPoints(string url)
+{
+	if (_RpPoints)
+	{
+		_TimedUrl = rand() % 5;
+		nlinfo("Send timed %d url = %s", _TimedUrl, (url+"&player_eid=" + getId().toString() + "&rp_points="+toString(_RpPoints)+"&first_rp_points="+toString(_FirstRpPointsWin)+"&last_rp_points="+toString(_LastRpPointsWin)).c_str());
+		setCustomMissionParams("__SEND_TIMED_URL__", url+"&player_eid=" + getId().toString() + "&rp_points="+toString(_RpPoints)+"&first_rp_points="+toString(_FirstRpPointsWin)+"&last_rp_points="+toString(_LastRpPointsWin));
+		_RpPoints = 0;
+		_FirstRpPointsWin = 0;
+		_LastRpPointsWin = 0;
+	}
+}
+
 
 //-----------------------------------------------------------------------------
 void CCharacter::sendFactionPointGainMessage(PVP_CLAN::TPVPClan clan, uint32 fpGain)
@@ -14321,7 +14404,7 @@ void CCharacter::botChatMissionAdvance(uint8 index)
 
 	nlinfo("_CurrentInterlocutor = %d", _CurrentInterlocutor.toString().c_str());
 	nlinfo("_Target = %d", getTarget().toString().c_str());
-	
+
 	uint idx = 0;
 	nlinfo("index = %d", index);
 
@@ -14545,7 +14628,7 @@ void CCharacter::botChatMissionAdvance(uint8 index)
 					setTargetBotchatProgramm(bot, bot->getId());
 					return;
 				}
-				
+
 				idx++;
 			}
 	}
