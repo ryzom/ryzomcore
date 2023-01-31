@@ -161,7 +161,7 @@ protected:
 	void equip(SLOTTYPE::EVisualSlot slot, uint index, uint color);
 
 	/// Compute the animation set to use according to weapons, mode and race.
-	virtual void computeAnimSet();
+	virtual void computeAnimSet(sint32 fakeLeftHand = -1, sint32 fakeRightHand = -1);
 
 	/// Update the Visual Property A
 	virtual void updateVisualPropertyVpa(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
