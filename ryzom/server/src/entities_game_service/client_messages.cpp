@@ -582,6 +582,8 @@ void cbClientPhraseExecuteFaber( NLNET::CMessage& msgin, const std::string &serv
 		return;
 	}
 
+	ch->abortExchange();
+
 	ch->setCraftPlan( craftPlan );
 
 	ch->clearFaberRms();
