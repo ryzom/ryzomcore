@@ -101,7 +101,7 @@ function ArkMissionCatalog:OpenCat(cat, url)
 	local htmlA = getUI(ArkMissionCatalog.window_id..":content:htmlA")
 	local htmlB = getUI(ArkMissionCatalog.window_id..":content:htmlB")
 	local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
-	if cat == "title" or cat == "academic" or cat == "rykea" or cat == "workshops" then
+	if cat == "title" or cat == "academic" or cat == "rykea" or cat == "workshops" or cat == "etools" then
 		ArkMissionCatalog.posxB = 180
 		ArkMissionCatalog.widthB = 240
 		ArkMissionCatalog.widthC = 530
