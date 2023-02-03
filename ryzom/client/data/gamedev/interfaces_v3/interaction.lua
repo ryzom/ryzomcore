@@ -283,7 +283,7 @@ function game:updateRpItems(left, right)
 			local html = getUI("ui:interface:rpitems_actions"):find("html")
 			local a = html:find("action"..v)
 			if a then
-				a:find("but").frozen = not (k == left..":"..target..":"..mode or k == left..":"..target..":*")
+				a:find("but").frozen = not (string.find(left..":"..target..":"..mode, k) or string.find(left..":"..target..":*", k))
 			end
 		end
 	end
