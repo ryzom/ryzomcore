@@ -57,6 +57,7 @@
 #include "game_share/player_visual_properties.h"
 #include "game_share/gender.h"
 #include "game_share/bot_chat_types.h"
+#include "interface_v3/lua_ihm_ryzom.h"
 
 
 ///////////
@@ -707,7 +708,7 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 // computeAnimSet :
 // Compute the animation set to use according to weapons, mode and race.
 //-----------------------------------------------
-void CPlayerCL::computeAnimSet(CItemSheet *fakeLeftHand, CItemSheet *fakeRightHand)
+void CPlayerCL::computeAnimSet(sint32 fakeLeftHand, sint32 fakeRightHand)
 {
 	// We need a valid Gender to compute the animset.
 	if(_Gender >= 2)
@@ -720,10 +721,11 @@ void CPlayerCL::computeAnimSet(CItemSheet *fakeLeftHand, CItemSheet *fakeRightHa
 	// Do not count weapons if swimming.
 	const CItemSheet *leftHand = _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet;
 	const CItemSheet *rightHand = _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet;
-	if (fakeLeftHand)
-		leftHand = fakeLeftHand;
-	if (fakeRightHand)
-		rightHand = fakeRightHand;
+
+	if (fakeLeftHand >= 0)
+		leftHand = SheetMngr.getItem(SLOTTYPE::LEFT_HAND_SLOT, fakeLeftHand);
+	if (fakeRightHand >= 0)
+		rightHand = SheetMngr.getItem(SLOTTYPE::RIGHT_HAND_SLOT, fakeRightHand);
 
 	if(!::computeAnimSet(_CurrentAnimSet[MOVE], _Mode, _PlayerSheet->GenderInfos[_Gender].AnimSetBaseName, leftHand, rightHand, !modeWithHiddenItems()))
 		nlwarning("PL:computeAnimSet:%d: pb when computing the animset.", _Slot);
@@ -746,8 +748,8 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 	// Get the property.
 	SPropVisualA visualA = *(SPropVisualA *)(&prop);
 
-	CItemSheet *fakeLeftHand = NULL;
-	CItemSheet *fakeRightHand = NULL;
+	sint32 fakeLeftHand = -1;
+	sint32 fakeRightHand = -1;
 
 	// GENDER
 	_Gender = (GSGENDER::EGender)(visualA.PropertySubData.Sex);
@@ -803,6 +805,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 	// Check the skeleton.
 	if(skeleton() && !ClientCfg.Light)
 	{
+		string rightHandTag, leftHandTag;
 		// To re-link the skeleton to the mount if needed.
 		parent(parent());
 		// Set the skeleton scale.
@@ -852,12 +855,11 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 			// No Valid item in the right hand.
 
 			SLOTTYPE::EVisualSlot slot = SLOTTYPE::RIGHT_HAND_SLOT;
-			string rightHandTag = getTag(5);
+			rightHandTag = getTag(5);
 			if (!rightHandTag.empty() && rightHandTag != "_")
 			{
-				sint idx = SheetMngr.getVSIndex("stake.sitem", slot);
-				fakeRightHand = SheetMngr.getItem(slot, (uint)idx);
-				const CItemSheet *itemSheet = fakeRightHand;
+				fakeRightHand = SheetMngr.getVSIndex("stake.sitem", slot);
+				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)fakeRightHand);
 				vector<string> tagInfos;
 				splitString(rightHandTag, string("|"), tagInfos);
 				UInstance instance;
@@ -911,7 +913,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 			// No Valid item in the left hand.
 			equip(SLOTTYPE::LEFT_HAND_SLOT, "");
 			SLOTTYPE::EVisualSlot slot = SLOTTYPE::LEFT_HAND_SLOT;
-			string leftHandTag = getTag(6);
+			leftHandTag = getTag(6);
 			if (!leftHandTag.empty() && leftHandTag != "_")
 			{
 				vector<string> tagInfos;
@@ -926,14 +928,12 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 					tagInfos[0] = SheetMngr.getRpItem(itemNameId);
 				}
 
-				sint idx;
 				if (tagInfos.size() == 3 && tagInfos[2] == ")")
-					idx = SheetMngr.getVSIndex("icbss_pvp.sitem", slot);
+					fakeLeftHand = SheetMngr.getVSIndex("icbss_pvp.sitem", slot);
 				else
-					idx = SheetMngr.getVSIndex("icfm1pd.sitem", slot);
+					fakeLeftHand = SheetMngr.getVSIndex("icfm1pd.sitem", slot);
 
-				fakeLeftHand = SheetMngr.getItem(slot, (uint)idx);
-				const CItemSheet *itemSheet = fakeLeftHand;
+				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)fakeLeftHand);
 
 				if (tagInfos.size() >= 2)
 				{
@@ -953,6 +953,8 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 				equip(slot, "");
 			}
 		}
+		CLuaManager::getInstance().executeLuaScript(toString("game:updateRpItems('%s', '%s')", leftHandTag.c_str(), rightHandTag.c_str()), 0);
+
 		// Create face
 		// Only create a face when there is no Helmet
 		if(_Items[SLOTTYPE::HEAD_SLOT].Sheet == 0 || _Items[SLOTTYPE::HEAD_SLOT].Sheet->Family != ITEMFAMILY::ARMOR)

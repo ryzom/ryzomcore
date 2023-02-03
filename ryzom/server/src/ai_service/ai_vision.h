@@ -54,7 +54,7 @@ public:
 	virtual ~CAIVision()		{}
 
 	template <class VectorClass>
-	void updateBotsAndPlayers(CAIInstance *aii, const VectorClass &xy,uint32 playerRadiusInMeters,uint32 botRadiusInMeters, uint32 cell=0)
+	void updateBotsAndPlayers(CAIInstance *aii, const VectorClass &xy,uint32 playerRadiusInMeters,uint32 botRadiusInMeters, TYPE_CELL cell=0)
 	{
 //		_lastUpdate=CTimeInterface::gameCycle();
 		updatePlayers(aii, xy, playerRadiusInMeters, cell);
@@ -191,7 +191,7 @@ private:
 
 
 	template <class VectorClass>
-		void updateBots(CAIInstance *aii, const VectorClass &xy, uint32 botRadiusInMeters, uint32 cell)
+		void updateBots(CAIInstance *aii, const VectorClass &xy, uint32 botRadiusInMeters, TYPE_CELL cell)
 	{
 		H_AUTO(VisionUpdateBots);
 
@@ -212,7 +212,7 @@ private:
 		{
 			CAIEntityPhysical const* phys = const_cast<T*>(&*it)->getSpawnObj();
 
-			CMirrorPropValueRO<uint32> botCell( TheDataset, phys->dataSetRow(), DSPropertyCELL );
+			CMirrorPropValueRO<TYPE_CELL> botCell( TheDataset, phys->dataSetRow(), DSPropertyCELL );
 			if ((cell >= 0 || botCell() == cell) && phys && phys->aipos().quickDistTo(aiVectorXy) < botRadiusInMeters)
 			{
 				_bots.push_back(const_cast<T*>(&*it));
@@ -221,7 +221,7 @@ private:
 	}
 
 	template <class VectorClass>
-		void updatePlayers(CAIInstance *aii, const VectorClass &xy, uint32 playerRadiusInMeters, uint32 cell = 0)
+		void updatePlayers(CAIInstance *aii, const VectorClass &xy, uint32 playerRadiusInMeters, TYPE_CELL cell = 0)
 	{
 		H_AUTO(VisionUpdatePlayers);
 
@@ -240,7 +240,7 @@ private:
 		for (it = aii->playerMatrix().beginEntities(tbl,xy); !it.end(); ++it)
 		{
 			CAIEntityPhysical const* phys = const_cast<T*>(&*it)->getSpawnObj();
-			CMirrorPropValueRO<uint32> botCell( TheDataset, phys->dataSetRow(), DSPropertyCELL );
+			CMirrorPropValueRO<TYPE_CELL> botCell( TheDataset, phys->dataSetRow(), DSPropertyCELL );
 			if ((cell >= 0 || botCell() == cell) && phys && phys->aipos().quickDistTo(aiVectorXy) < playerRadiusInMeters)
 			{
 				_players.push_back(const_cast<T*>(&*it));
