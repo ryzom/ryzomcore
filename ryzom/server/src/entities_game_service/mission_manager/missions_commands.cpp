@@ -823,6 +823,8 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 		return false;
 	}
 
+	c->abortExchange();
+
 	for (uint32 i=0; i<inventories.size(); i++)
 	{
 		CInventoryPtr childSrc = c->getInventory(inventories[i]);
@@ -921,6 +923,8 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 		inventories.push_back(INVENTORIES::player_room);
 	}
 
+	c->abortExchange();
+
 	for (uint32 i=0; i<inventories.size(); i++)
 	{
 		CInventoryPtr childSrc = c->getInventory(inventories[i]);
@@ -1018,6 +1022,7 @@ NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory",
 			}
 		}
 
+		c->abortExchange();
 		//Delete them
 		for (std::map<uint32, uint32>::iterator it = slots.begin(); it != slots.end(); ++it)
 		{
@@ -1079,6 +1084,8 @@ NLMISC_COMMAND(checkInventoryItems, "Check items from a characters inventory", "
 		fromString(quantities[i], quantity);
 		need_items.insert(make_pair(sheet_names[i]+":"+qualities[i], quantity));
 	}
+
+	c->abortExchange();
 
 	std::map<uint32, uint32> slots;
 	std::map<string, uint32>::iterator itNeedItems;
@@ -1148,6 +1155,8 @@ NLMISC_COMMAND(enchantEquipedItem, "enchantEquipedItem", "<uid> <slotname> <shee
 		}
 	}
 
+	c->abortExchange();
+
 	CGameItemPtr itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
 	if (itemPtr != NULL)
 	{
@@ -1185,6 +1194,8 @@ NLMISC_COMMAND(getEnchantmentInEquipedItem, "getEnchantmentInEquipedItem", "<uid
 
 	string selected_slot = args[1];
 
+	c->abortExchange();
+
 	CGameItemPtr itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
 	if (itemPtr != NULL)
 	{
@@ -1208,6 +1219,8 @@ NLMISC_COMMAND(sapLoadInEquipedItem, "reloadSapLoadInEquipedItem", "<uid> <slotn
 	GET_ACTIVE_CHARACTER
 
 	string selected_slot = args[1];
+
+	c->abortExchange();
 
 	CGameItemPtr itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
 	if (itemPtr != NULL)
@@ -4917,4 +4930,143 @@ NLMISC_COMMAND(setServerPhrase, "Set an IOS phrase", "<phrase> [<language code>]
 		msgout.serial(lang);
 	sendMessageViaMirror("IOS", msgout);
 	return true;
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getRpPoints, "get RP points of player (if quantity, give/take/set the points)", "<uid> [[+-]<quantity>]")
+{
+	GET_ACTIVE_CHARACTER
+
+	uint32 points = c->getRpPoints();
+
+	if (args.size() == 2)
+	{
+		string quant = args[1];
+		uint32 quantity;
+		if (quant[0] == '+')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				points += quantity;
+			}
+		}
+		else if (quant[0] == '-')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				if (points >= quantity)
+				{
+					points -= quantity;
+				}
+				else
+				{
+					log.displayNL("-1"); // No enough points
+					return true;
+				}
+			}
+		}
+		else
+		{
+			fromString(quant, points);
+		}
+
+		c->setRpPoints(points);
+	}
+
+	log.displayNL("%u", points);
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getBattlePoints, "get Battle points of player (if quantity, give/take/set the points)", "<uid> [[+-]<quantity>]")
+{
+	GET_ACTIVE_CHARACTER
+
+	uint32 points = c->getBattlePoints();
+
+	if (args.size() == 2)
+	{
+		string quant = args[1];
+		uint32 quantity;
+		if (quant[0] == '+')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				points += quantity;
+			}
+		}
+		else if (quant[0] == '-')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				if (points >= quantity)
+				{
+					points -= quantity;
+				}
+				else
+				{
+					log.displayNL("-1"); // No enough points
+					return true;
+				}
+			}
+		}
+		else
+		{
+			fromString(quant, points);
+		}
+
+		c->setBattlePoints(points);
+	}
+
+	log.displayNL("%u", points);
+}
+
+//addEntitiesTrigger 2 arkai_914_Chest 50 app_arcc&nbsp&action=mScript_Run&script=11450
+//addEntitiesTrigger 2 arkai_914_Chest 0 "app_arcc action=mScript_Run&script=11450"
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> <entity> <distance> <url>")
+{
+
+	if (args.size() < 4)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	TAIAlias alias;
+
+	string e = args[1];
+	if (e == "#_target_#")
+	{
+		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getTarget());
+	}
+	else if (e == "#_self_#")
+	{
+		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getId());
+	}
+	else
+	{
+		vector<TAIAlias> aliases;
+		CAIAliasTranslator::getInstance()->getNPCAliasesFromName( e, aliases );
+		if ( aliases.empty() )
+		{
+			log.displayNL("ERR: no entity");
+			return true;
+		}
+		alias = aliases[0];
+	}
+
+	uint16 distance;
+	fromString(args[2], distance);
+	string url = args[3];
+	CZoneManager::getInstance().addEntitiesTrigger(alias, distance, url);
+	log.displayNL("OK");
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(delEntitiesTriggers, "delete all Entities triggers", "")
+{
+	CZoneManager::getInstance().delEntitiesTriggers();
 }
