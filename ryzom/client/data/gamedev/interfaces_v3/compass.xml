@@ -827,7 +827,7 @@
            w="24"
            h="24"
            x="-7"
-           y="-30">
+           y="-50">
       <view id="envelop"
             type="bitmap"
             texture="dyn_event_compass.tga"
@@ -870,7 +870,7 @@
            w="24"
            h="24"
            x="-4"
-           y="-5">
+           y="-20">
       <view id="envelop"
             type="bitmap"
             texture="tb_help2.tga"
