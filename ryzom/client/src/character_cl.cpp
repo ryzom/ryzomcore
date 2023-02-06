@@ -376,8 +376,9 @@ CCharacterCL::CCharacterCL()
 
 
 
+	_ScaleDone = false;
 	_CustomScale = 1.f;
-	_OldCustomScale = 0.f;
+	_BaseCustomScale = 0.f;
 	_StepCustomScale = 0.f;
 	_StartCustomScale = ryzomGetLocalTime();
 }// CCharacterCL //
@@ -1699,32 +1700,40 @@ void CCharacterCL::updateVisualPropertyVpb(const NLMISC::TGameCycle &/* gameCycl
 	if (altLookProp.PropertySubData.Scale==0)
 		customScale = 1.f;
 	else
-		customScale = ((float)altLookProp.PropertySubData.Scale/100.f);
-	nlinfo("customScale = %f", customScale);
-	_StartCustomScale = ryzomGetLocalTime();
-	if (_OldCustomScale == 0) // first time
+		customScale = (float)altLookProp.PropertySubData.Scale/100.f;
+
+	if (!_ScaleDone) // first time
 	{
-		_StartCustomScale -= 1001.f;
-		_OldCustomScale = 1.f;
-		_CustomScale = 1.f;
+		_CustomScale = customScale;
+		applyScale(1.0f);
+		_ScaleDone = true;
+	}
+	else
+	{
+		_StartCustomScale = ryzomGetLocalTime();
+		_BaseCustomScale = _CustomScale;
+		_StepCustomScale = customScale - _BaseCustomScale;
 	}
 
-	_StepCustomScale = customScale - _CustomScale;
-	_OldCustomScale = _CustomScale;
 }
 
-void CCharacterCL::scale(bool calculate)
+void CCharacterCL::scale()
 {
 	// Save old scale
 	float oldCustomScale = _CustomScale;
-	_CustomScale = _OldCustomScale + (float(ryzomGetLocalTime() - _StartCustomScale) / 1000.f) * _StepCustomScale;
-	if ((_StepCustomScale >= 0 && _CustomScale > _OldCustomScale+_StepCustomScale)
-		|| (_StepCustomScale < 0 && _CustomScale < _OldCustomScale+_StepCustomScale))
+
+	_CustomScale = _BaseCustomScale + ((float(ryzomGetLocalTime() - _StartCustomScale) * _StepCustomScale) / 1000.f);
+	if ((_StepCustomScale >= 0.f && _CustomScale > _BaseCustomScale + _StepCustomScale)
+		|| (_StepCustomScale < 0.f && _CustomScale < _BaseCustomScale + _StepCustomScale))
 	{
-		_CustomScale = _OldCustomScale+_StepCustomScale;
-		_StepCustomScale = 0;
+		_StepCustomScale = 0.f;
 	}
 
+	applyScale(oldCustomScale);
+}
+
+void CCharacterCL::applyScale(float oldCustomScale)
+{
 	// Apply modification
 	_CustomScalePos /= oldCustomScale;
 	_CustomScalePos *= _CustomScale;
@@ -6076,7 +6085,7 @@ void CCharacterCL::updateAttachedFX()
 //-----------------------------------------------
 void CCharacterCL::updateVisible (const TTime &currentTimeInMs, CEntityCL *target)
 {
-	if (_StepCustomScale)
+	if (_StepCustomScale != 0.f)
 		scale();
 
 	// Changes the skeleton state

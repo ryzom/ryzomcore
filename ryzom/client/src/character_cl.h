@@ -711,8 +711,9 @@ protected:
 	// for selectBox() computing
 	sint64										_LastSelectBoxComputeTime;
 
+	bool										_ScaleDone;
 	float										_CustomScale;
-	float										_OldCustomScale;
+	float										_BaseCustomScale;
 	float										_StepCustomScale;
 	NLMISC::TTime								_StartCustomScale;
 
@@ -875,7 +876,8 @@ protected:
 	/// Method to Flag the character as alive and do everything needed.
 	virtual void setAlive();
 
-	void scale(bool calculate = true);
+	void scale();
+	void applyScale(float oldCustomScale);
 
 	///
 	double computeTimeStep(const double &currentTime);
