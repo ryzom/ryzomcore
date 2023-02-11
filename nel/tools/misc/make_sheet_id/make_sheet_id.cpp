@@ -158,14 +158,14 @@ void readFormId( string& outputFileName )
 
 		if (isDuplicate && keepDuplicates)
 		{
-			nlwarning("Duplicate sheet (id:%d; name:'%s')", (*itIF).first, (*itIF).second.c_str());
+			nlwarning("Duplicate sheet (id:%d; name:'%s')", (*itIF).first.Id, (*itIF).second.c_str());
 			isDuplicate = false;
 		}
 
 		if (isDuplicate || (*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || (*itIF).second[0]=='_' || (*itIF).second.find(".#")==0)
 		{
 			if (isDuplicate)
-				nlwarning("Removed duplicate (id:%d; name:'%s')", (*itIF).first, (*itIF).second.c_str());
+				nlwarning("Removed duplicate (id:%d; name:'%s')", (*itIF).first.Id, (*itIF).second.c_str());
 
 			map<TFormId,string>::iterator itErase = itIF;
 			++itIF;
