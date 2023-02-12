@@ -94,7 +94,7 @@ void CUdpSock::bind( const CInetAddress& addr )
 	_LocalAddr = addr;
 
 	// Bind the socket
-	if ( ::bind( _Sock, (sockaddr*)(_LocalAddr.sockAddr()), sizeof(sockaddr) ) == SOCKET_ERROR )
+	if ( ::bind( _Sock, (sockaddr*)(_LocalAddr.sockAddr()), sizeof(sockaddr) ) == SOCKET_ERROR ) // TODO: IPv6
 	{
 		throw ESocket( "Bind failed" );
 	}
@@ -113,7 +113,7 @@ void CUdpSock::sendTo( const uint8 *buffer, uint len, const CInetAddress& addr )
 {
 
 	//  Send
-	if ( ::sendto( _Sock, (const char*)buffer, len, 0, (sockaddr*)(addr.sockAddr()), sizeof(sockaddr) ) != (sint32)len )
+	if ( ::sendto( _Sock, (const char*)buffer, len, 0, (sockaddr*)(addr.sockAddr()), sizeof(sockaddr) ) != (sint32)len ) // TODO: IPv6
 	{
 		throw ESocket( "Unable to send datagram" );
 	}

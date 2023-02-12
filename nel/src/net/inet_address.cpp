@@ -17,6 +17,7 @@
 #include "stdnet.h"
 
 #include "nel/misc/common.h"
+#include "nel/misc/wang_hash.h"
 
 #include "nel/net/inet_address.h"
 #include "nel/net/sock.h"
@@ -141,7 +142,7 @@ bool CInetAddress::RetrieveNames = false;
 CInetAddress::CInetAddress()
 {
 	init();
-
+	
 	// IPv4
 	_SockAddr->sin_port = 0; // same as htons(0)
 	memset( &_SockAddr->sin_addr, 0, sizeof(in_addr) ); // same as htonl(INADDR_ANY)
@@ -177,7 +178,7 @@ CInetAddress::CInetAddress( const in_addr *ip, const char *hostname )
 		updateHostName();
 	}
 
-	_Valid = true;
+	_Valid = 4;
 }
 
 
@@ -206,7 +207,7 @@ CInetAddress::CInetAddress( const in6_addr *ip, const char *hostname )
 		updateHostName();
 	}
 
-	_Valid = true;
+	_Valid = 6;
 }
 
 
@@ -296,7 +297,22 @@ CInetAddress& CInetAddress::operator=( const CInetAddress& other )
 bool operator==( const CInetAddress& a1, const CInetAddress& a2 )
 {
 	// Compares the sockaddr structure except the last 8 bytes equal to zero.
-	return ( memcmp( a1._SockAddr, a2._SockAddr, sizeof(sockaddr_in)-8 ) == 0 );
+	// FIXME: return ( memcmp( a1._SockAddr, a2._SockAddr, sizeof(sockaddr_in)-8 ) == 0 );
+	if (a1._Valid != a2._Valid)
+	{
+		return false;
+	}
+	else if (a1._Valid == 4)
+	{
+		return (a1._SockAddr->sin_port == a2._SockAddr->sin_port)
+			&& (a1._SockAddr->sin_addr.s_addr == a2._SockAddr->sin_addr.s_addr);
+	}
+	else if (a1._Valid == 6)
+	{
+		return (a1._SockAddr6->sin6_port == a2._SockAddr6->sin6_port)
+			&& (a1._SockAddr6->sin6_addr.s6_addr == a2._SockAddr6->sin6_addr.s6_addr);
+	}
+	return a1.port() == a2.port();
 }
 
 
@@ -305,14 +321,37 @@ bool operator==( const CInetAddress& a1, const CInetAddress& a2 )
  */
 bool operator<( const CInetAddress& a1, const CInetAddress& a2 )
 {
-	if ( a1._SockAddr->sin_addr.s_addr == a2._SockAddr->sin_addr.s_addr )
+	if (a1._Valid != a2._Valid)
 	{
-		return ( a1.port() < a2.port() );
+		return a1._Valid > a2._Valid;
 	}
-	else
+	else if (a1.isLoopbackIPAddress() != a2.isLoopbackIPAddress())
 	{
-		return ( a1._SockAddr->sin_addr.s_addr < a2._SockAddr->sin_addr.s_addr );
+		return a1.isLoopbackIPAddress();
 	}
+	else if (a1._Valid == 4)
+	{
+		if (a1._SockAddr->sin_addr.s_addr == a2._SockAddr->sin_addr.s_addr)
+		{
+			return (a1.port() < a2.port());
+		}
+		else
+		{
+			return (a1._SockAddr->sin_addr.s_addr < a2._SockAddr->sin_addr.s_addr);
+		}
+	}
+	else if (a1._Valid == 6)
+	{
+		if (a1._SockAddr6->sin6_addr.s6_addr == a2._SockAddr6->sin6_addr.s6_addr)
+		{
+			return (a1.port() < a2.port());
+		}
+		else
+		{
+			return (a1._SockAddr6->sin6_addr.s6_addr < a2._SockAddr6->sin6_addr.s6_addr);
+		}
+	}
+	return a1.port() < a2.port();
 }
 
 
@@ -323,7 +362,7 @@ void CInetAddress::init()
 {
 	CSock::initNetwork();
 
-	_Valid = false;
+	_Valid = 0;
 
 	// IPv4
 	_SockAddr = new sockaddr_in;
@@ -344,28 +383,36 @@ CInetAddress::~CInetAddress()
 {
 	delete _SockAddr;
 	delete _SockAddr6;
-	// _Valid = false;
+	// _Valid = 0;
 }
 
 /*
- * Sets hostname and port (ex: www.nevrax.com:80)
+ * Sets hostname and port (ex: www.nevrax.com:80, 192.168.0.2:80, [::1]:80)
  */
-void CInetAddress::setNameAndPort( const std::string& hostNameAndPort )
+void CInetAddress::setNameAndPort(const std::string &hostNameAndPort)
 {
-	string::size_type pos = hostNameAndPort.find_first_of (':');
-	if (pos != string::npos)
+	string::size_type pos6end = hostNameAndPort.find_last_of(']');
+	string::size_type pos = hostNameAndPort.find_last_of(':');
+	if (pos != string::npos && (pos6end == string::npos || pos > pos6end))
 	{
 		uint16 port;
 		fromString(hostNameAndPort.substr(pos + 1), port);
-		setPort( port );
+		setPort(port);
+		if (pos6end != string::npos)
+		{
+			string::size_type pos6begin = hostNameAndPort.find_first_of('[');
+			setByName(hostNameAndPort.substr(pos6begin + 1, pos6end - pos6begin - 1));
+		}
+		else
+		{
+			setByName(hostNameAndPort.substr(0, pos));
+		}
 	}
 	else
 	{
-		setPort( 0 );
+		setPort(0);
+		setByName(hostNameAndPort);
 	}
-
-	// if pos == -1, it will copy all the string
-	setByName( hostNameAndPort.substr (0, pos) );
 }
 
 
@@ -380,6 +427,13 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 	// invalid IPv6
 	memset(&_SockAddr6->sin6_addr, 0, sizeof(in6_addr));
 
+	if (hostName.empty())
+	{
+		_Valid = 0;
+		_HostName.clear();
+		return *this;
+	}
+
 	// Try to convert directly for addresses such as a.b.c.d and a:b:c:d:e:f:g:h
 	in_addr ipv4;
 	sint res = inet_pton(AF_INET, hostName.c_str(), &ipv4);
@@ -388,6 +442,7 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 	{
 		// hostname is a valid IPv4
 		memcpy(&_SockAddr->sin_addr, &ipv4, sizeof(in_addr));
+		_Valid = 4;
 	}
 	else
 	{
@@ -398,6 +453,7 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 		{
 			// hostname is a valid IPv6
 			memcpy(&_SockAddr6->sin6_addr, &ipv6, sizeof(in6_addr));
+			_Valid = 6;
 		}
 	}
 
@@ -419,7 +475,8 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 
 		if (status)
 		{
-			_Valid = false;
+			_Valid = 0;
+			_HostName.clear();
 			LNETL0_DEBUG( "LNETL0: Network error: resolution of hostname '%s' failed: %s", hostName.c_str(), gai_strerror(status) );
 			// return *this;
 			throw ESocket( (string("Hostname resolution failed for ")+hostName).c_str() );
@@ -430,7 +487,7 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 
 		struct addrinfo *p = res;
 
-		// process all addresses
+		// process all addresses, use the first one
 		while (p != NULL)
 		{
 			// check address family
@@ -438,26 +495,29 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 			{
 				// ipv4
 				struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
-
-				memcpy( &_SockAddr->sin_addr, &ipv4->sin_addr, sizeof(in_addr) );
+				memcpy(&_SockAddr->sin_addr, &ipv4->sin_addr, sizeof(in_addr));
+				memset(&_SockAddr6->sin6_addr, 0, sizeof(in6_addr));
+				_Valid = 4;
+				break;
 			}
 			else if (p->ai_family == AF_INET6)
 			{
 				// ipv6
 				struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
-
-				memcpy( &_SockAddr6->sin6_addr, &ipv6->sin6_addr, sizeof(in6_addr) );
+				memcpy(&_SockAddr6->sin6_addr, &ipv6->sin6_addr, sizeof(in6_addr));
+				memset(&_SockAddr->sin_addr, 0, sizeof(in_addr));
+				_Valid = 6;
+				break;
 			}
 
 			// process next address
 			p = p->ai_next;
 		}
- 
+
 		// free the linked list
 		freeaddrinfo(res);
 	}
 
-	_Valid = true;
 	return *this;
 }
 
@@ -489,7 +549,7 @@ void CInetAddress::setSockAddr( const sockaddr_in* saddr )
 		updateHostName();
 	}
 
-	_Valid = true;
+	_Valid = 4;
 }
 
 
@@ -510,7 +570,7 @@ void CInetAddress::setSockAddr6( const sockaddr_in6* saddr6 )
 		updateHostName();
 	}
 
-	_Valid = true;
+	_Valid = 6;
 }
 
 
@@ -540,18 +600,70 @@ const sockaddr_in6 *CInetAddress::sockAddr6() const
 	return _SockAddr6;
 }
 
+bool CInetAddress::isIPAddressEqual(const CInetAddress &other) const
+{
+	if (other._Valid != _Valid)
+	{
+		return false;
+	}
+	if (_Valid == 4)
+	{
+		return (memcmp(&_SockAddr->sin_addr, &other._SockAddr->sin_addr, sizeof(in_addr)) == 0);
+	}
+	else if (_Valid == 6)
+	{
+		return (memcmp(&_SockAddr6->sin6_addr, &other._SockAddr6->sin6_addr, sizeof(in6_addr)) == 0);
+	}
+	return false;
+}
+
+size_t CInetAddress::hash() const
+{
+	if (sizeof(size_t) == sizeof(uint64))
+	{
+		uint64 hash = wangHash64((uint64)port());
+		if (_Valid == 4)
+		{
+			hash = wangHash(hash ^ (uint64)_SockAddr->sin_addr.s_addr);
+		}
+		else
+		{
+			uint64 *addr = reinterpret_cast<uint64 *>(_SockAddr6->sin6_addr.s6_addr);
+			hash = wangHash(hash ^ addr[0]);
+			hash = wangHash(hash ^ addr[1]);
+		}
+		return (size_t)hash;
+	}
+	else
+	{
+		uint32 hash = wangHash((uint32)port());
+		if (_Valid == 4)
+		{
+			hash = wangHash(hash ^ (uint32)_SockAddr->sin_addr.s_addr);
+		}
+		else
+		{
+			uint32 *addr = reinterpret_cast<uint32 *>(_SockAddr6->sin6_addr.s6_addr);
+			hash = wangHash(hash ^ addr[0]);
+			hash = wangHash(hash ^ addr[1]);
+			hash = wangHash(hash ^ addr[2]);
+			hash = wangHash(hash ^ addr[3]);
+		}
+		return (size_t)hash;
+	}
+}
 
 /*
  * Returns internal IP address
  */
-uint32 CInetAddress::internalIPAddress() const
+uint32 CInetAddress::internalIPv4Address() const
 {
 	return _SockAddr->sin_addr.s_addr;
 }
 
-uint32 CInetAddress::internalNetAddress() const
+uint32 CInetAddress::internalNetV4Address() const
 {
-	uint32 ip = internalIPAddress();
+	uint32 ip = internalIPv4Address();
 	if ((ip&0x00000080) == 0)
 	{
 		// A class
@@ -578,9 +690,6 @@ uint32 CInetAddress::internalNetAddress() const
 	}
 }
 
-
-
-
 /*
  * Returns readable IP address. (ex: "195.68.21.195")
  */
@@ -588,7 +697,7 @@ string CInetAddress::ipAddress() const
 {
 	// longer size is IPv6
 	char straddr[INET6_ADDRSTRLEN];
-	const char *name = inet_ntop(AF_INET, &_SockAddr->sin_addr, straddr, INET_ADDRSTRLEN);
+	const char *name = _SockAddr->sin_addr.s_addr ? inet_ntop(AF_INET, &_SockAddr->sin_addr, straddr, INET_ADDRSTRLEN) : NULL;
 
 	// IPv4 is invalid, return IPv6
 	if (name == NULL || strcmp(name, "0.0.0.0") == 0) name = inet_ntop(AF_INET6, &_SockAddr6->sin6_addr, straddr, INET6_ADDRSTRLEN);
@@ -629,7 +738,7 @@ std::string CInetAddress::asString() const
  */
 std::string CInetAddress::asIPString() const
 {
-	return ipAddress() + ":" + NLMISC::toString(port());
+	return (_Valid == 6 ? "[" : "") + ipAddress() + (_Valid == 6 ? "]:" : ":") + NLMISC::toString(port());
 }
 
 
@@ -658,15 +767,23 @@ void CInetAddress::serial( NLMISC::IStream& s )
 	else
 	{
 		// Binary stream
-		s.serialBuffer( (uint8*)_SockAddr, sizeof(*_SockAddr) ); // this is possible only because the contents of _SockAddr is platform-independant !
-		s.serial( _Valid );
+		s.serialBuffer((uint8 *)_SockAddr, sizeof(*_SockAddr)); // this is possible only because the contents of _SockAddr is platform-independant !
+		s.serialBuffer((uint8 *)_SockAddr6, sizeof(*_SockAddr6)); // this is possible only because the contents of _SockAddr6 is platform-independant !
+		s.serial(_Valid);
 
-		if(_Valid)
+		if (s.isReading())
 		{
-			// retreive the fullname
-			setSockAddr (_SockAddr);
+			if (_Valid == 4)
+			{
+				// retreive the fullname
+				setSockAddr(_SockAddr);
+			}
+			else if (_Valid == 6)
+			{
+				// retreive the fullname
+				setSockAddr6(_SockAddr6);
+			}
 		}
-
 	}
 }
 
@@ -690,11 +807,58 @@ CInetAddress CInetAddress::localHost()
 	return localaddr;
 }
 
+/// Creates a CInetAddress object with a loopback address, port=0
+CInetAddress CInetAddress::loopback()
+{
+	// Loop through local addresses, only return IPv6 loopback if we have IPv6 hosts
+	std::vector<CInetAddress> addr = localAddresses(true);
+	std::sort(addr.begin(), addr.end());
+	
+	for (uint i = 0; i < addr.size(); i++)
+	{
+		if (addr[i].isLoopbackIPAddress())
+		{
+			return addr[i];
+		}
+	}
+
+	return loopbackIPv4();
+}
+
+CInetAddress CInetAddress::loopbackIPv4()
+{
+	// 1. Get local host name
+	const uint maxlength = 80;
+	char localhost [maxlength];
+	if (gethostname(localhost, maxlength) == SOCKET_ERROR)
+	{
+		throw ESocket("Unable to get local hostname");
+	}
+
+	struct in_addr psin_addrIPv4;
+	psin_addrIPv4.s_addr = htonl(INADDR_LOOPBACK);
+	return CInetAddress(&psin_addrIPv4, localhost);
+}
+
+CInetAddress CInetAddress::loopbackIPv6()
+{
+	// 1. Get local host name
+	const uint maxlength = 80;
+	char localhost [maxlength];
+	if (gethostname(localhost, maxlength) == SOCKET_ERROR)
+	{
+		throw ESocket("Unable to get local hostname");
+	}
+
+	struct in6_addr psin_addrIPv6 = IN6ADDR_LOOPBACK_INIT;
+	return CInetAddress(&psin_addrIPv6, localhost);
+}
+
 
 /* Returns the list of the local host addresses (with port=0)
  * (especially useful if the host is multihomed)
  */
-std::vector<CInetAddress> CInetAddress::localAddresses()
+std::vector<CInetAddress> CInetAddress::localAddresses(bool loopback)
 {
 	// 1. Get local host name
 	const uint maxlength = 80;
@@ -736,7 +900,7 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 		if (p->ai_family == AF_INET)
 		{
 			// loopback ipv4
-			if (!IPv4LoopbackAdded)
+			if (!IPv4LoopbackAdded && loopback)
 			{
 				// add loopback address only once
 				struct in_addr psin_addrIPv4;
@@ -747,14 +911,16 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 			}
 			
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
-
-			vect.push_back( CInetAddress( &ipv4->sin_addr, localhost ) );
-
+			
+			if (ipv4->sin_addr.s_addr != htonl(INADDR_LOOPBACK))
+			{
+				vect.push_back(CInetAddress(&ipv4->sin_addr, localhost));
+			}
 		}
 		else if (p->ai_family == AF_INET6)
 		{
 			// loopback ipv6
-			if (!IPv6LoopbackAdded)
+			if (!IPv6LoopbackAdded && loopback)
 			{
 				// add loopback address only once
 				struct in6_addr psin_addrIPv6 = IN6ADDR_LOOPBACK_INIT;
@@ -765,7 +931,11 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 
 			struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
 
-			vect.push_back( CInetAddress( &ipv6->sin6_addr, localhost ) );
+			// add if not loopback
+			if (!IN6_IS_ADDR_LOOPBACK(&ipv6->sin6_addr))
+			{
+				vect.push_back(CInetAddress(&ipv6->sin6_addr, localhost));
+			}
 		}
 
 		// process next address
@@ -783,19 +953,47 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	return vect;
 }
 
+/// Loopback addresses first, IPv6 first, keep same order otherwise O(4*N)
+std::vector<CInetAddress> CInetAddress::sortPriority(std::vector<CInetAddress> addr)
+{
+	std::vector<CInetAddress> res;
+	res.reserve(addr.size());
+	for (size_t i = 0; i < addr.size(); i++)
+		if (addr[i].isLoopbackIPAddress() && addr[i].isIPv6())
+			res.push_back(addr[i]);
+	for (size_t i = 0; i < addr.size(); i++)
+		if (addr[i].isLoopbackIPAddress() && addr[i].isIPv4())
+			res.push_back(addr[i]);
+	for (size_t i = 0; i < addr.size(); i++)
+		if (!addr[i].isLoopbackIPAddress() && addr[i].isIPv6())
+			res.push_back(addr[i]);
+	for (size_t i = 0; i < addr.size(); i++)
+		if (!addr[i].isLoopbackIPAddress() && addr[i].isIPv4())
+			res.push_back(addr[i]);
+	return res;
+}
+
+#if 0
 bool CInetAddress::is127001 () const
 {
 	return (internalIPAddress () == htonl(0x7F000001));
 }
+#endif
 
 bool CInetAddress::isLoopbackIPAddress () const
 {
-	std::string sIPAddress = ipAddress();
-	
-	return	(sIPAddress.compare("::") == 0) ||
-			(sIPAddress.compare("::1") == 0) ||
-			(sIPAddress.compare("127.0.0.1") == 0) ||
-			(sIPAddress.compare("0:0:0:0:0:0:0:1") == 0);
+	if (_Valid == 4)
+	{
+		return (_SockAddr->sin_addr.s_addr == htonl(INADDR_LOOPBACK));
+	}
+	else if (_Valid == 6)
+	{
+		return (IN6_IS_ADDR_LOOPBACK(&_SockAddr6->sin6_addr));
+	}
+	else
+	{
+		return false;
+	}
 }
 
 

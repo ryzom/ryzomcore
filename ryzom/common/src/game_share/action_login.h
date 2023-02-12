@@ -79,7 +79,7 @@ protected:
 		uint32 ua, uk, ui;
 		if (Cookie.isValid ())
 		{
-			ua = Cookie.getUserAddr ();
+			ua = Cookie.getUserAddrV4 ();
 			uk = Cookie.getUserKey ();
 			ui = Cookie.getUserId ();
 		}

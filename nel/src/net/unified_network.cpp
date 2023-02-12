@@ -541,7 +541,7 @@ bool	CUnifiedNetwork::init(const CInetAddress *addr, CCallbackNetBase::TRecordin
 
 	ThreadCreator = NLMISC::getThreadId();
 
-	vector<CInetAddress> laddr = CInetAddress::localAddresses();
+	vector<CInetAddress> laddr = CInetAddress::sortPriority(CInetAddress::localAddresses(true));
 
 	_RecordingState = rec;
 	_Name = shortName;
@@ -793,11 +793,6 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 
 	nlinfo("HNETL5: addService %s-%hu '%s'", name.c_str(), sid.get(), vectorCInetAddressToString(addr).c_str());
 
-	if (external && addr.size () != 1)
-	{
-		AUTOCHECK_DISPLAY ("HNETL5: Can't add external service with more than one connection");
-	}
-
 	// add the entry in the unified connection table
 
 	if (sid.get() >= _IdCnx.size())
@@ -832,14 +827,13 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 
 	// connect to all connection
 	bool	connectSuccess;
-
-	if (uc->Connections.size () < addr.size ())
-	{
-		uc->Connections.resize (addr.size ());
-	}
+	
+	uc->Connections.resize(1);
 
 	for (size_t i = 0; i < min(addr.size(), (size_t)255); ++i)
 	{
+		uint8 pos = 0; // uint8 pos = uc->IsExternal ? 0 : i; // Only make one connection per target
+		
 		// Create a new connection with the service, setup callback and connect
 		CCallbackClient	*cbc = new CCallbackClient( CCallbackNetBase::Off, "", true, false ); // don't init one pipe per connection
 #if defined(NL_OS_UNIX)
@@ -870,7 +864,7 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 		}
 		else
 		{
-			uc->Connections[i] = CUnifiedNetwork::CUnifiedConnection::TConnection(cbc);
+			uc->Connections[pos] = CUnifiedNetwork::CUnifiedConnection::TConnection(cbc);
 		}
 
 		if (connectSuccess && sendId)
@@ -887,21 +881,16 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 				ssid.set(0);
 			}
 			msg.serial(ssid); // serializes a 16 bits service id
-			uint8 pos = uc->IsExternal ? 0 : i;
 			msg.serial(pos); // send the position in the connection table
 			msg.serial(uc->IsExternal);
 			cbc->send(msg);
 
-			if (uc->IsExternal)
-				break;
+			// Only make one connection per target
+			// Multiple connections cause concurrency issues
+			break;
 		}
 	}
-
-	if (addr.size () != uc->Connections.size())
-	{
-		nlwarning ("HNETL5: Can't connect to all connections to the service %d/%d", addr.size (), uc->Connections.size());
-	}
-
+	
 	bool cntok = false;
 	for (uint j = 0; j < uc->Connections.size(); j++)
 	{
@@ -997,7 +986,7 @@ void	CUnifiedNetwork::update(TTime timeout)
 			H_AUTO(L5NSReconnect);
 			try
 			{
-				vector<CInetAddress> laddr = CInetAddress::localAddresses();
+				vector<CInetAddress> laddr = CInetAddress::sortPriority(CInetAddress::localAddresses(true));
 				CNamingClient::connect (_NamingServiceAddr, _RecordingState, laddr);
 				// re-register the service
 				for (uint i = 0; i < laddr.size(); i++)
@@ -1804,19 +1793,20 @@ bool CUnifiedNetwork::isServiceLocal (TServiceId sid)
 		return false;
 	}
 
-	vector<CInetAddress> laddr = CInetAddress::localAddresses();
-
-	for (uint i = 0; i < laddr.size(); i++)
+	vector<CInetAddress> laddr = CInetAddress::localAddresses(true);
+	
+	for (uint j = 0; j < _IdCnx[sid.get()].ExtAddress.size(); j++)
 	{
-		for (uint j = 0; j < _IdCnx[sid.get()].ExtAddress.size(); j++)
+		if (_IdCnx[sid.get()].ExtAddress[j].isLoopbackIPAddress())
+			return true;
+		
+		for (uint i = 0; i < laddr.size(); i++)
 		{
-			if (_IdCnx[sid.get()].ExtAddress[j].isLoopbackIPAddress ())
-				return true;
-
-			if (_IdCnx[sid.get()].ExtAddress[j].internalIPAddress () == laddr[i].internalIPAddress ())
+			if (_IdCnx[sid.get()].ExtAddress[j].isIPAddressEqual(laddr[i]))
 				return true;
 		}
 	}
+
 	return false;
 }
 
@@ -1970,7 +1960,9 @@ void	CUnifiedNetwork::autoCheck()
 			{
 				if (_IdCnx[i].NetworkConnectionAssociations[j] != 0)
 				{
-					if (_NetworkAssociations[j] != _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ()) AUTOCHECK_DISPLAY ("HLNET5: sid %d nid %d have address 0x%08x and is not the good connection net 0x%08x", i, j, _NetworkAssociations[j], _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ());
+					if (!_IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].isIPv4() 
+						|| _NetworkAssociations[j] != _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetV4Address ())
+						AUTOCHECK_DISPLAY ("HLNET5: sid %d nid %d have address 0x%08x and is not the good connection net 0x%08x", i, j, _NetworkAssociations[j], _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetV4Address());
 				}
 			}
 		}

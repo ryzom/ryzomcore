@@ -29,6 +29,7 @@
 #		define NOMINMAX
 #	endif
 #	include <winsock2.h>
+#	include <ws2ipdef.h>
 #	include <windows.h>
 #	define socklen_t int
 #	define ERROR_NUM WSAGetLastError()
@@ -275,10 +276,17 @@ void CSock::createSocket( int type, int protocol )
 {
 	nlassert( _Sock == INVALID_SOCKET );
 
-	_Sock = (SOCKET)socket( AF_INET, type, protocol ); // or IPPROTO_IP (=0) ?
+	_Sock = (SOCKET)socket( AF_INET6, type, protocol ); // or IPPROTO_IP (=0) ?
 	if ( _Sock == INVALID_SOCKET )
 	{
 		throw ESocket( "Socket creation failed" );
+	}
+
+	// Disable IPv6 ONLY flag
+	int no = 0;
+	if (setsockopt(_Sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&no, sizeof(no)) == SOCKET_ERROR)
+	{
+		throw ESocket("Could not disable IPV6_V6ONLY flag");
 	}
 
 	if ( _Logging )
@@ -356,14 +364,54 @@ CSock::~CSock()
 /*
  * Connection
  */
-void CSock::connect( const CInetAddress& addr )
+void CSock::connect( const CInetAddress& addr_ )
 {
-	LNETL0_DEBUG( "LNETL0: Socket %d connecting to %s...", _Sock, addr.asString().c_str() );
+	LNETL0_DEBUG( "LNETL0: Socket %d connecting to %s...", _Sock, addr_.asString().c_str() );
 
 	// Check address
+	CInetAddress addr = addr_;
 	if ( ! addr.isValid() )
 	{
 		throw ESocket( "Unable to connect to invalid address", false );
+	}
+
+	if (!addr.isLoopbackIPAddress())
+	{
+		// TEMPORARY WORKAROUND: On development boxes there may be bogus addresses that don't work, which gives issues with the local hostname
+		// Check if this addr matches any local address, if it does, connect to a loopback address
+		// TODO: Connections that connect to a hostname should attempt every IP address that's reported by the hostname
+		// TODO: Expand CInetAddress to contain an array of IP addresses alongside the hostname
+		CInetAddress *loopbackIPv4, *loopbackIPv6;
+		loopbackIPv4 = loopbackIPv6 = NULL;
+		bool isLocal = false;
+
+		// Get all local addresses
+		vector<CInetAddress> localAddresses = CInetAddress::localAddresses(true);
+		for (uint i = 0; i < localAddresses.size(); i++)
+		{
+			if (localAddresses[i].isLoopbackIPAddress())
+			{
+				if (localAddresses[i].isIPv4())
+					loopbackIPv4 = &localAddresses[i];
+				else if (localAddresses[i].isIPv6())
+					loopbackIPv6 = &localAddresses[i];
+			}
+			if (addr.isIPAddressEqual(localAddresses[i]))
+				isLocal = true;
+		}
+		
+		// If the address is local, connect to a loopback address
+		if (isLocal)
+		{
+			uint16 port = addr.port();
+			if (addr.isIPv4() && loopbackIPv4)
+				addr = *loopbackIPv4;
+			else if (addr.isIPv6() && loopbackIPv6)
+				addr = *loopbackIPv6;
+			addr.setPort(port);
+		}
+
+		nlwarning("Local hostname address detected, redirected to loopback address: %s", addr.asString().c_str());
 	}
 
 #ifndef NL_OS_WINDOWS
@@ -376,9 +424,12 @@ void CSock::connect( const CInetAddress& addr )
 #endif
 
 	// Connection (when _Sock is a datagram socket, connect establishes a default destination address)
-	if ( ::connect( _Sock, (const sockaddr *)(addr.sockAddr()), sizeof(sockaddr_in) ) != 0 )
+	if ((addr.isIPv4()
+	            ? ::connect(_Sock, (const sockaddr *)addr.sockAddr(), sizeof(sockaddr_in))
+	            : ::connect(_Sock, (const sockaddr *)addr.sockAddr6(), sizeof(sockaddr_in6)))
+	    != 0)
 	{
-/*		if ( _Logging )
+		/*		if ( _Logging )
 		{
 #ifdef NL_OS_WINDOWS
 			nldebug( "Impossible to connect socket %d to %s %s (%d)", _Sock, addr.hostName().c_str(), addr.asIPString().c_str(), ERROR_NUM );
@@ -434,13 +485,23 @@ bool CSock::dataAvailable()
  */
 void CSock::setLocalAddress()
 {
-	sockaddr saddr;
+	sockaddr_in saddr;
 	socklen_t saddrlen = sizeof(saddr);
-	if ( getsockname( _Sock, &saddr, &saddrlen ) != 0 )
+	if (getsockname(_Sock, (sockaddr *)&saddr, &saddrlen) != 0)
 	{
-		throw ESocket( "Unable to find local address" );
+		// try again for ipv6
+		sockaddr_in6 saddr6;
+		saddrlen = sizeof(saddr6);
+		if (getsockname(_Sock, (sockaddr *)&saddr6, &saddrlen) != 0)
+		{
+			throw ESocket("Unable to find local address");
+		}
+		_LocalAddr.setSockAddr6(&saddr6);
 	}
-	_LocalAddr.setSockAddr( (const sockaddr_in *)&saddr );
+	else
+	{
+		_LocalAddr.setSockAddr((const sockaddr_in *)&saddr);
+	}
 }
 
 

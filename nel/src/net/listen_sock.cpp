@@ -28,6 +28,7 @@
 #ifndef NL_COMP_MINGW
 #	define NOMINMAX
 #endif
+#include <ws2ipdef.h>
 #include <windows.h>
 typedef sint socklen_t;
 
@@ -105,9 +106,12 @@ void CListenSock::init( const CInetAddress& addr )
 #endif
 
 	// Bind socket to port
-	if ( ::bind( _Sock, (const sockaddr *)addr.sockAddr(), sizeof(sockaddr_in) ) != 0 )
+	if ((addr.isIPv4()
+	            ? ::bind(_Sock, (const sockaddr *)addr.sockAddr(), sizeof(sockaddr_in))
+	            : ::bind(_Sock, (const sockaddr *)addr.sockAddr6(), sizeof(sockaddr_in6)))
+	    != 0)
 	{
-		throw ESocket( "Unable to bind listen socket to port" );
+		throw ESocket("Unable to bind listen socket to port");
 	}
 	_LocalAddr = addr;
 	_Bound = true;

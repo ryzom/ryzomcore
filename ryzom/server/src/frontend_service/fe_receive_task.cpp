@@ -61,7 +61,7 @@ TReceivedMessage::TReceivedMessage()
 /// Return a vector containing the address info
 void	TReceivedMessage::addressToVector()
 {
-	memcpy( &*VAddrFrom.begin(), AddrFrom.sockAddr(), sizeof(sockaddr_in) );
+	memcpy( &*VAddrFrom.begin(), AddrFrom.sockAddr(), sizeof(sockaddr_in) ); // TODO: IPv6
 }
 
 /// Set address with address info from specified vector
@@ -87,7 +87,7 @@ CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptabl
 
 	// Test of multihomed host: bind the first address
 /*	vector<CInetAddress> addrlist;
-	addrlist = CInetAddress::localAddresses();
+	addrlist = CInetAddress::localAddresses(true);
 	vector<CInetAddress>::iterator ivi;
 	nlinfo( "Listing local interfaces:" );
 	for ( ivi=addrlist.begin(); ivi!=addrlist.end(); ++ivi )

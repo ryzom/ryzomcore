@@ -169,7 +169,7 @@ void CFeReceiveSub::release()
 	_ReceiveTask->requireExit();
 #ifdef NL_OS_UNIX
 	// Send dummy data to a bound udp socket, to wake-up the receive thread
-	vector<CInetAddress> addrlist = CInetAddress::localAddresses();
+	vector<CInetAddress> addrlist = CInetAddress::localAddresses(true);
 	if ( ! addrlist.empty() )
 	{
 		CUdpSock tempSock;
@@ -870,7 +870,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 				}
 
 				// Look up the address
-				TAutoUidMap::iterator itaum = _AutoUidMap.find( _CurrentInMsg->AddrFrom.internalIPAddress() );
+				TAutoUidMap::iterator itaum = _AutoUidMap.find( _CurrentInMsg->AddrFrom.internalIPv4Address() ); // FIXME: IPv6
 				if ( itaum != _AutoUidMap.end() )
 				{
 					// This ip address is already known: if not already connected, give the same user id back.
@@ -887,7 +887,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					// This ip address is new to us, give a new user id and store it
 					do { uid = CurrentAutoAllocUserid++; }
 					while ( findClientHostByUid( uid ) != NULL );
-					_AutoUidMap.insert( std::make_pair( _CurrentInMsg->AddrFrom.internalIPAddress(), uid ) );
+					_AutoUidMap.insert( std::make_pair( _CurrentInMsg->AddrFrom.internalIPv4Address(), uid ) ); // FIXME: IPv6
 
 				}
 

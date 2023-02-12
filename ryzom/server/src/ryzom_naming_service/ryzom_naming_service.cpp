@@ -191,7 +191,7 @@ bool		CServiceInstanceManager::queryStartService( const std::string& serviceName
 					if ( cnb1->hostAddress( hostid1 ).internalIPAddress() == cnb2->hostAddress( hostid2 ).internalIPAddress() )*/
 
 					// Implementation for NS
-					if ( addr[0].internalIPAddress() == getHostAddress( *ios ).internalIPAddress() )
+					if (addr[0].isIPAddressEqual(getHostAddress(*ios)))
 					{
 						grantStarting = false;
 						reason = toString( "Service %s already found as %hu on same machine", serviceName.c_str(), ios->get() );
@@ -283,12 +283,15 @@ bool canAccess (const vector<CInetAddress> &addr, const CServiceEntry &entry, ve
 
 	for (uint i = 0; i < addr.size(); i++)
 	{
-		uint32 net = addr[i].internalNetAddress();
-		for (uint j = 0; j < entry.Addr.size(); j++)
+		if (addr[i].isIPv4())
 		{
-			if (net == entry.Addr[j].internalNetAddress())
+			uint32 net = addr[i].internalNetV4Address();
+			for (uint j = 0; j < entry.Addr.size(); j++)
 			{
-				accessibleAddr.push_back (entry.Addr[j]);
+				if (entry.Addr[j].isIPv4() && net == entry.Addr[j].internalNetV4Address())
+				{
+					accessibleAddr.push_back(entry.Addr[j]);
+				}
 			}
 		}
 	}
@@ -1002,7 +1005,7 @@ public:
 		// DEBUG
 		// DebugLog->addDisplayer( new CStdDisplayer() );
 
-		vector<CInetAddress> v = CInetAddress::localAddresses();
+		vector<CInetAddress> v = CInetAddress::localAddresses(true);
 		nlinfo ("%d detected local addresses:", v.size());
 		for (uint i = 0; i < v.size(); i++)
 		{

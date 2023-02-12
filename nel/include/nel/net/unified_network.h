@@ -585,7 +585,7 @@ private:
 				uint j;
 				for (j = 0; j < ExtAddress.size (); j++)
 				{
-					if (ExtAddress[j].internalNetAddress() == networkAssociations[i])
+					if (ExtAddress[j].isIPv4() && ExtAddress[j].internalNetV4Address() == networkAssociations[i])
 					{
 						// we found an association, add it
 						if (i >= NetworkConnectionAssociations.size ())

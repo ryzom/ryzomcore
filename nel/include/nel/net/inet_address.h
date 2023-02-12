@@ -110,17 +110,28 @@ public:
 	/// Returns if object (address and port) is valid
 	bool				isValid() const;
 
+	/// Returns if it's an IPv4 address
+	bool isIPv4() const { return _Valid == 4; }
+
+	/// Returns if it's an IPv6 address
+	bool isIPv6() const { return _Valid == 6; }
+
 	/// Returns internal IPv4 socket address (read only)
 	const sockaddr_in	 *sockAddr() const;
 
 	/// Returns internal IPv6 socket address (read only)
 	const sockaddr_in6	 *sockAddr6() const;
 
+	/// Returns true if the IP address is equal, port is ignored
+	bool				isIPAddressEqual(const CInetAddress &other) const;
+
+	size_t				hash() const;
+	
 	/// Returns internal IP address
-	uint32				internalIPAddress() const;
+	uint32				internalIPv4Address() const;
 
 	/// Returns the internal network address (it s the network address for example 192.168.0.0 for a C class)
-	uint32				internalNetAddress () const;
+	uint32				internalNetV4Address () const;
 
 	/// Returns readable IP address. (ex: "195.68.21.195")
 	std::string			ipAddress() const;
@@ -140,8 +151,10 @@ public:
 	/// Serialize
 	void serial( NLMISC::IStream& s );
 
+#if 0
 	/// Returns true if this CInetAddress is 127.0.0.1
 	bool is127001 () const;
+#endif
 
 	/// Returns true if this CInetAddress is a loop back address
 	bool isLoopbackIPAddress () const;
@@ -149,10 +162,22 @@ public:
 	/// Creates a CInetAddress object with local host address, port=0
 	static CInetAddress	localHost();
 
+	/// Creates a CInetAddress object with a loopback address, port=0
+	static CInetAddress	loopback();
+
+	/// Creates a CInetAddress object with a loopback address, port=0
+	static CInetAddress	loopbackIPv4();
+
+	/// Creates a CInetAddress object with a loopback address, port=0
+	static CInetAddress	loopbackIPv6();
+
 	/** Returns the list of the local host addresses (with port=0)
 	 * (especially useful if the host is multihomed)
 	 */
-	static std::vector<CInetAddress> localAddresses();
+	static std::vector<CInetAddress> localAddresses(bool loopback);
+	
+	/// Loopback addresses first, IPv6 first, keep same order otherwise O(4*N)
+	static std::vector<CInetAddress> sortPriority(std::vector<CInetAddress> addr);
 
 	/// If true, setSockAddr() always tries to retrieve the host name from the address
 	static bool RetrieveNames;
@@ -176,7 +201,7 @@ private:
 	std::string			_HostName;
 	sockaddr_in			*_SockAddr;
 	sockaddr_in6		*_SockAddr6;
-	bool				_Valid;
+	int					_Valid;
 
 };
 

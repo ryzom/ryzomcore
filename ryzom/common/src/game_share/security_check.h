@@ -62,7 +62,7 @@ public:
 	/// Set session (or can be set by receiveSecurityCode())
 	void setSessionId(TSessionId sessionId) { Block.SessionId = sessionId; }
 	/// Set cookie
-	void setCookie(const NLNET::CLoginCookie& cookie) { Block.Cookie.set(cookie.getUserAddr(), cookie.getUserKey(), cookie.getUserId()); } // don't use the default generated bitwise assignment operator, because of padding junk that would be copied
+	void setCookie(const NLNET::CLoginCookie& cookie) { Block.Cookie.set(cookie.getUserAddrV4(), cookie.getUserKey(), cookie.getUserId()); } // don't use the default generated bitwise assignment operator, because of padding junk that would be copied
 	/// Return the security code
 	CSecurityCode encode(const char *passPhrase);
 	/// Check  the security code

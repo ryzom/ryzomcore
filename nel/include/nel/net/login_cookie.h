@@ -91,7 +91,7 @@ public:
 			return "<InvalidCookie>";
 	}
 
-	uint32	getUserAddr () const { nlassert (_Valid); return _UserAddr; }
+	uint32	getUserAddrV4 () const { nlassert (_Valid); return _UserAddr; }
 	uint32	getUserKey () const { nlassert (_Valid); return _UserKey; }
 	uint32	getUserId () const { nlassert (_Valid); return _UserId; }
 
