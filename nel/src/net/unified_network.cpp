@@ -268,12 +268,7 @@ void	uncbServiceIdentification(CMessage &msgin, TSockId from, CCallbackNetBase &
 
 	if (isExternal)
 	{
-
-#ifdef NL_OS_WINDOWS
-		pos = 0;
-#else
 		nlassert(pos == 0);
-#endif
 	}
 
 	if (inSid.get() == 0)
@@ -843,34 +838,8 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 		uc->Connections.resize (addr.size ());
 	}
 
-	vector<CInetAddress> laddr = CInetAddress::localAddresses();
-
-	for (uint i = 0; i < addr.size(); i++)
+	for (size_t i = 0; i < min(addr.size(), (size_t)255); ++i)
 	{
-		// first we have to look if we have a network that can established the connection
-		uint j = 0;
-
-		// it's loopback ip address, it's ok
-		if (!addr[i].isLoopbackIPAddress())
-		{
-			for (j = 0; j < laddr.size (); j++)
-			{
-				if (laddr[j].internalNetAddress () == addr[i].internalNetAddress ())
-				{
-					// it's ok, we can try
-					break;
-				}
-			}
-
-			// If we don't found a valid network, we'll try with the first one.
-			// It's happen, for example, when you try to connect to a service that is not in the network but use IP translation
-			if (j == laddr.size ())
-			{
-				nlwarning ("HNETL5: I can't access '%s' because I haven't a net card on this network, we'll use the first network", addr[i].asString ().c_str ());
-				j = 0;
-			}
-		}
-
 		// Create a new connection with the service, setup callback and connect
 		CCallbackClient	*cbc = new CCallbackClient( CCallbackNetBase::Off, "", true, false ); // don't init one pipe per connection
 #if defined(NL_OS_UNIX)
@@ -907,9 +876,9 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 		if (connectSuccess && sendId)
 		{
 			// send identification to the service
-			CMessage	msg("UN_SIDENT");
+			CMessage msg("UN_SIDENT");
 			msg.serial(_Name);
-			TServiceId		ssid = _SId;
+			TServiceId ssid = _SId;
 			if (uc->IsExternal)
 			{
 				// in the case that the service is external, we can't send our sid because the external service can
@@ -917,11 +886,14 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 				// the other side to find a good number
 				ssid.set(0);
 			}
-			msg.serial(ssid);	// serializes a 16 bits service id
-			uint8 pos = uint8(j);
-			msg.serial(pos);	// send the position in the connection table
-			msg.serial (uc->IsExternal);
-			cbc->send (msg);
+			msg.serial(ssid); // serializes a 16 bits service id
+			uint8 pos = uc->IsExternal ? 0 : i;
+			msg.serial(pos); // send the position in the connection table
+			msg.serial(uc->IsExternal);
+			cbc->send(msg);
+
+			if (uc->IsExternal)
+				break;
 		}
 	}
 
