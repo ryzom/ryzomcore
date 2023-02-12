@@ -751,6 +751,7 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 			vect.push_back( CInetAddress( &ipv4->sin_addr, localhost ) );
 
 		}
+#if 0
 		else if (p->ai_family == AF_INET6)
 		{
 			// loopback ipv6
@@ -767,6 +768,7 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 
 			vect.push_back( CInetAddress( &ipv6->sin6_addr, localhost ) );
 		}
+#endif
 
 		// process next address
 		p = p->ai_next;

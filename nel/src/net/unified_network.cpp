@@ -793,11 +793,6 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 
 	nlinfo("HNETL5: addService %s-%hu '%s'", name.c_str(), sid.get(), vectorCInetAddressToString(addr).c_str());
 
-	if (external && addr.size () != 1)
-	{
-		AUTOCHECK_DISPLAY ("HNETL5: Can't add external service with more than one connection");
-	}
-
 	// add the entry in the unified connection table
 
 	if (sid.get() >= _IdCnx.size())
@@ -832,11 +827,7 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 
 	// connect to all connection
 	bool	connectSuccess;
-
-	if (uc->Connections.size () < addr.size ())
-	{
-		uc->Connections.resize (addr.size ());
-	}
+	uc->Connections.resize(1);
 
 	for (size_t i = 0; i < min(addr.size(), (size_t)255); ++i)
 	{
@@ -870,7 +861,7 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 		}
 		else
 		{
-			uc->Connections[i] = CUnifiedNetwork::CUnifiedConnection::TConnection(cbc);
+			uc->Connections[0] = CUnifiedNetwork::CUnifiedConnection::TConnection(cbc);
 		}
 
 		if (connectSuccess && sendId)
@@ -887,19 +878,15 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 				ssid.set(0);
 			}
 			msg.serial(ssid); // serializes a 16 bits service id
-			uint8 pos = uc->IsExternal ? 0 : i;
+			uint8 pos = 0;
 			msg.serial(pos); // send the position in the connection table
 			msg.serial(uc->IsExternal);
 			cbc->send(msg);
 
-			if (uc->IsExternal)
-				break;
+			// Only make one connection per target
+			// Multiple connections cause concurrency issues
+			break;
 		}
-	}
-
-	if (addr.size () != uc->Connections.size())
-	{
-		nlwarning ("HNETL5: Can't connect to all connections to the service %d/%d", addr.size (), uc->Connections.size());
 	}
 
 	bool cntok = false;
