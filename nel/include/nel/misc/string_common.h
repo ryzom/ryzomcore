@@ -356,8 +356,8 @@ inline const wchar_t *asCStr(const std::wstring &str) { return str.c_str(); }
 #define nlUtf8ToMbcsS(str, len) (NLMISC::utf8ToMbcs(str, len).c_str())
 #define nlMbcsToUtf8S(str, len) (NLMISC::mbcsToUtf8(str, len).c_str())
 #else
-#define nlUtf8ToMbcsS(str, len) (NLMISC::asCStr(str, len))
-#define nlMbcsToUtf8S(str, len) (NLMISC::asCStr(str, len))
+#define nlUtf8ToMbcsS(str, len) (NLMISC::asCStr(str))
+#define nlMbcsToUtf8S(str, len) (NLMISC::asCStr(str))
 #endif
 #define nlWideToUtf8S(str, len) (NLMISC::wideToUtf8(str, len).c_str())
 #define nlUtf8ToWideS(str, len) (NLMISC::utf8ToWide(str, len).c_str())
@@ -380,7 +380,7 @@ inline std::string tStrToMbcs(const tstring &str) { return wideToMbcs((const std
 #define nlTStrToWide(str) ((const wchar_t *)NLMISC::asCStr(str))
 #define nlTStrToMbcs(str) (NLMISC::tStrToMbcs(str).c_str())
 #define nlTStrToUtf8S(str, len) (NLMISC::tStrToUtf8(str, len).c_str())
-#define nlTStrToWideS(str, len) ((const wchar_t *)NLMISC::asCStr(str, len))
+#define nlTStrToWideS(str, len) ((const wchar_t *)NLMISC::asCStr(str))
 #define nlTStrToMbcsS(str, len) (NLMISC::tStrToMbcs(str, len).c_str())
 inline tstring utf8ToTStr(const char *str) {return (const tstring &)utf8ToWide(str); }
 inline tstring utf8ToTStr(const std::string &str) { return (const tstring &)utf8ToWide(str); }
@@ -392,7 +392,7 @@ inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)mbcs
 #define nlWideToTStr(str) ((const tchar *)NLMISC::asCStr(str))
 #define nlMbcsToTStr(str) (NLMISC::mbcsToTStr(str).c_str())
 #define nlUtf8ToTStrS(str, len) (NLMISC::utf8ToTStr(str, len).c_str())
-#define nlWideToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str, len))
+#define nlWideToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str))
 #define nlMbcsToTStrS(str, len) (NLMISC::mbcsToTStr(str, len).c_str())
 #else
 typedef std::string tstring;
@@ -413,10 +413,10 @@ inline std::string tStrToMbcs(const tstring &str) { return (const std::string &)
 #if defined(NL_OS_WINDOWS)
 #define nlTStrToUtf8S(str, len) (NLMISC::tStrToUtf8(str, len).c_str())
 #else
-#define nlTStrToUtf8S(str, len) ((const char *)NLMISC::asCStr(str, len))
+#define nlTStrToUtf8S(str, len) ((const char *)NLMISC::asCStr(str))
 #endif
 #define nlTStrToWideS(str, len) (NLMISC::tStrToWide(str, len).c_str())
-#define nlTStrToMbcsS(str, len) ((const char *)NLMISC::asCStr(str, len))
+#define nlTStrToMbcsS(str, len) ((const char *)NLMISC::asCStr(str))
 inline tstring utf8ToTStr(const char *str) { return (const tstring &)utf8ToMbcs(str); }
 inline tstring utf8ToTStr(const std::string &str) { return (const tstring &)utf8ToMbcs(str); }
 inline tstring wideToTStr(const wchar_t *str) { return (const tstring &)wideToMbcs(str); }
@@ -433,10 +433,10 @@ inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)str;
 #if defined(NL_OS_WINDOWS)
 #define nlUtf8ToTStrS(str, len) (NLMISC::utf8ToTStr(str, len).c_str())
 #else
-#define nlUtf8ToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str, len))
+#define nlUtf8ToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str))
 #endif
 #define nlWideToTStrS(str, len) (NLMISC::wideToTStr(str, len).c_str())
-#define nlMbcsToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str, len))
+#define nlMbcsToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str))
 #endif
 
 } // NLMISC
