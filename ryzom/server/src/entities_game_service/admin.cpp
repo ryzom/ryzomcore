@@ -47,6 +47,8 @@
 #include "nel/net/admin.h"
 #include "nel/net/service.h"
 
+#include "nel/web/http_post_task.h"
+
 #include "game_share/scores.h"
 #include "game_share/send_chat.h"
 #include "game_share/time_weather_season/time_date_season_manager.h"
@@ -55,7 +57,6 @@
 #include "game_share/outpost.h"
 #include "game_share/visual_slot_manager.h"
 #include "game_share/shard_names.h"
-#include "game_share/http_client.h"
 #include "server_share/log_command_gen.h"
 #include "server_share/r2_vision.h"
 
@@ -135,6 +136,7 @@ extern NLMISC::CVariable<uint32> FixedSessionId;
 
 using namespace NLMISC;
 using namespace NLNET;
+using namespace NLWEB;
 using namespace std;
 
 extern CVariable<string>	BannerPriv;

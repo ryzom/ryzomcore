@@ -23,6 +23,8 @@
 #include "nel/misc/types_nl.h"
 #include <string>
 
+typedef void CURL;
+
 namespace NLWEB
 {
 
@@ -34,7 +36,7 @@ class CCurlHttpClient
 public:
 
 	/// Constructor
-	CCurlHttpClient() : _CurlStruct(NULL), m_Verify(true) {}
+	CCurlHttpClient() : _Curl(NULL), m_Verify(true) {}
 
 	/// Connect to an http server (string by val is intended). If you specify a whole URL, an attempt will be made to determine the server.
 	bool connect(const std::string &server);
@@ -76,7 +78,7 @@ protected:
 	static size_t writeDataFromCurl(void *buffer, size_t size, size_t nmemb, void *pHttpClient);
 private:
 
-	void *_CurlStruct; // void* to prevent including curl.h in a header file
+	CURL *_Curl;
 
 	std::vector<uint8>	_ReceiveBuffer;
 	std::string			_Auth; // must be kept here because curl only stores the char pointer
