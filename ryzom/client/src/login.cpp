@@ -1819,7 +1819,7 @@ class CAHSetReleaseNote : public IActionHandler
 			sURL = ClientCfg.RingReleaseNotePath +
 				"?version=" + (VersionName.empty() ? R2ServerVersion : VersionName)+
 				"&lang=" + ClientCfg.LanguageCode +
-				"&ca=" + ClientCfg.ConfigFile.getVar("Application").asString(0);
+				"&ca=" + ClientCfg.ConfigFile.getVar("Application").asString(0) +
 				"&startPage="+RingMainURL;
 		}
 		else
