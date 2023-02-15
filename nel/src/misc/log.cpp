@@ -44,6 +44,23 @@ CLog::CLog( TLogType logType) : _LogType (logType), _FileName(NULL), _Line(-1), 
 {
 }
 
+CLog::CLog(const CLog &other)
+{
+	_LogType = other._LogType;
+	_ProcessName = other._ProcessName;
+	_FileName = other._FileName;
+	_Line = other._Line;
+	_FuncName = other._FuncName;
+	_Displayers = other._Displayers;
+	_BypassFilterDisplayers = other._BypassFilterDisplayers;
+	// _Mutex = other._Mutex;
+	_PosSet = other._PosSet;
+	_NegativeFilter = other._NegativeFilter;
+	_PositiveFilter = other._PositiveFilter;
+	TempString = other.TempString;
+	TempArgs = other.TempArgs;
+}
+
 void CLog::setDefaultProcessName ()
 {
 	if (_ProcessName == NULL)

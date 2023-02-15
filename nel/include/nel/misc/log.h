@@ -183,6 +183,9 @@ public:
 
 	/// Do not call this unless you know why you're doing it, it kills the debug/log system!
 	static void releaseProcessName();
+	
+	/// Explicit copy constructor
+	CLog(const CLog &other);
 
 protected:
 
