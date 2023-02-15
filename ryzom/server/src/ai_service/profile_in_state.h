@@ -46,7 +46,9 @@ public:
 	
 private:
 	struct TFindParameter
+#ifndef NL_CPP17
 	: public std::unary_function<TProfileParameter, bool>
+#endif
 	{
 		std::string _Value;
 		TFindParameter(std::string const& value)

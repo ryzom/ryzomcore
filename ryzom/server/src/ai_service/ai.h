@@ -93,6 +93,10 @@ public:
 	// singleton access
 	static CAIS &instance();
 
+#ifdef NL_CPP11
+	std::mt19937 RandomGenerator = std::mt19937(std::random_device()());
+#endif
+
 	static bool instanceCreated()	{ return _Instance != NULL; }
 	
 	static	std::string	getIndexString()	{	return	NLMISC::toString("AIS_%u", NLNET::IService::getInstance()->getServiceId().get());	}

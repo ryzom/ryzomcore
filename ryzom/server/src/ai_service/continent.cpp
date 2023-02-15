@@ -1682,7 +1682,11 @@ const	CFaunaZone	*CCellZone::lookupFaunaZone(const	CPropertySet &activity,	TASta
 	vector<CCell*>	cells;
 	for	(CCont<CCell>::iterator	it=_Cells.begin(), itEnd=_Cells.end();it!=itEnd;++it)
 		cells.push_back(*it);
+#ifndef NL_CPP17
 	random_shuffle(cells.begin(), cells.end());
+#else
+	std::shuffle(cells.begin(), cells.end(), CAIS::instance().RandomGenerator);
+#endif
 	
 
 	// look for a conveninent zone in a convenient cell.
@@ -1795,7 +1799,11 @@ const CNpcZone	*CCellZone::lookupNpcZone(const	CPropertySet &activity, size_t re
 	vector<CCell*>	cells;
 	for	(CCont<CCell>::iterator	it=_Cells.begin(), itEnd=_Cells.end();it!=itEnd;++it)
 		cells.push_back(*it);
+#ifndef NL_CPP17
 	random_shuffle(cells.begin(), cells.end());
+#else
+	std::shuffle(cells.begin(), cells.end(), CAIS::instance().RandomGenerator);
+#endif
 	
 	vector<const CNpcZone*>	candidates;
 
@@ -2295,7 +2303,10 @@ private:
 	float	_Value;
 };
 
-struct	TOrderItemOnValue	:	unary_function<TListItem, bool>
+struct	TOrderItemOnValue	
+#ifndef NL_CPP17
+	:	unary_function<TListItem, bool>
+#endif
 {
 	bool operator () (const TListItem &item1, const TListItem &item2) const
 	{
@@ -2304,7 +2315,10 @@ struct	TOrderItemOnValue	:	unary_function<TListItem, bool>
 
 };
 
-struct TOrderItemOnZone : unary_function<TListItem, bool>
+struct TOrderItemOnZone
+#ifndef NL_CPP17
+	: unary_function<TListItem, bool>
+#endif
 {
 	bool operator () (const TListItem &item1, const TListItem &item2) const
 	{

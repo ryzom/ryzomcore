@@ -35,6 +35,10 @@
 #include <cstdlib>
 #include <algorithm>
 
+#ifdef NL_CPP11
+#include <random>
+#endif
+
 #ifdef NL_OS_WINDOWS
 #	include <process.h>
 #	include <intrin.h>

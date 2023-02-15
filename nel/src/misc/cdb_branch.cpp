@@ -787,7 +787,10 @@ void CCDBNodeBranch::removeAllBranchObserver()
 //-----------------------------------------------
 // Useful for find
 //-----------------------------------------------
-class CCDBNodeBranchComp : public std::binary_function<ICDBNode *, ICDBNode *, bool>
+class CCDBNodeBranchComp 
+#ifndef NL_CPP17
+	: public std::binary_function<ICDBNode *, ICDBNode *, bool>
+#endif
 {
 public:
 	bool operator()(const ICDBNode * x, const ICDBNode * y) const
@@ -796,7 +799,10 @@ public:
 	}
 };
 
-class CCDBNodeBranchComp2 : public std::binary_function<ICDBNode *, const string &, bool>
+class CCDBNodeBranchComp2 
+#ifndef NL_CPP17
+	: public std::binary_function<ICDBNode *, const string &, bool>
+#endif
 {
 public:
 	bool operator()(const ICDBNode * x, const string & y) const

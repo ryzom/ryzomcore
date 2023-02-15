@@ -178,7 +178,10 @@ TSoundAnimPlayId CSoundAnimManager::playAnimation(TSoundAnimId id, float time, C
 }
 */
 
-struct TFindId : std::unary_function<TSoundAnimMap::value_type, bool>
+struct TFindId 
+#ifndef NL_CPP17
+	: std::unary_function<TSoundAnimMap::value_type, bool>
+#endif
 {
 	TSoundAnimId	Id;
 

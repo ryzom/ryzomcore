@@ -37,7 +37,10 @@ namespace NLSOUND {
 
 /// Hasher functor for hashed container with pointer key.
 template <class Pointer>
-struct THashPtr : public std::unary_function<const Pointer &, size_t>
+struct THashPtr 
+#ifndef NL_CPP17
+	: public std::unary_function<const Pointer &, size_t>
+#endif
 {
 	enum { bucket_size = 4, min_buckets = 8, };
 	size_t operator () (const Pointer &ptr) const

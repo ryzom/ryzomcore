@@ -2362,7 +2362,10 @@ void			CAudioMixerUser::loadEnvSounds( const char *filename, UEnvSound **treeRoo
 
 // ******************************************************************
 
-struct CompareSources : public binary_function<const CSimpleSource*, const CSimpleSource*, bool>
+struct CompareSources 
+#ifndef NL_CPP17
+	: public binary_function<const CSimpleSource*, const CSimpleSource*, bool>
+#endif
 {
 	// Constructor
 	CompareSources( const CVector &pos ) : _Pos(pos) {}

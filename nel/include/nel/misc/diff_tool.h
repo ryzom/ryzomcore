@@ -339,7 +339,10 @@ namespace STRING_MANAGER
 		}
 	};
 
-	struct TTestWorksheetItem : public std::unary_function<TWorksheet::TRow, bool>
+	struct TTestWorksheetItem 
+#ifndef NL_CPP17
+		: public std::unary_function<TWorksheet::TRow, bool>
+#endif
 	{
 		ucstring	Identifier;
 		TTestWorksheetItem(const std::string &identifier)
@@ -386,7 +389,10 @@ namespace STRING_MANAGER
 	};
 
 	template<class ItemType>
-	struct TTestItem : public std::unary_function<ItemType, bool>
+	struct TTestItem 
+#ifndef NL_CPP17
+		: public std::unary_function<ItemType, bool>
+#endif
 	{
 		std::string	Identifier;
 		TTestItem(const std::string &identifier)

@@ -1060,7 +1060,10 @@ void CFgProspectionPhrase::stopLocateDeposit( CCharacter *player )
 /**
  *
  */
-struct COpenForProspectionPred : public std::unary_function< CDeposit*, bool >
+struct COpenForProspectionPred 
+#ifndef NL_CPP17
+	: public std::unary_function< CDeposit*, bool >
+#endif
 {
 	/// Predicate
 	bool operator() ( CDeposit* deposit ) const
@@ -1073,7 +1076,10 @@ struct COpenForProspectionPred : public std::unary_function< CDeposit*, bool >
 /**
  *
  */
-struct CContextMatchPred : public std::unary_function< CDeposit*, bool >
+struct CContextMatchPred 
+#ifndef NL_CPP17
+	: public std::unary_function< CDeposit*, bool >
+#endif
 {
 	enum TContextStatus { CSMatching=0, CSSeason=1, CSTimeOfDay=2, CSWeather=4 };
 
@@ -1243,7 +1249,13 @@ void CFgProspectionPhrase::filterDeposits(
 	// Filter the remaining deposits with ecotype specialization (if any)
 	if ( ecotypeSpec != ECOSYSTEM::common_ecosystem )
 	{
-		matchingEnd = partition( matchingDeposits.begin(), matchingEnd, bind2nd( mem_fun(&CDeposit::matchEcotype), ecotypeSpec ) );
+		matchingEnd = partition( matchingDeposits.begin(), matchingEnd,
+#ifndef NL_CPP17
+			bind2nd( mem_fun(&CDeposit::matchEcotype), ecotypeSpec ) 
+#else
+			std::bind(&CDeposit::matchEcotype, std::placeholders::_1, ecotypeSpec)
+#endif
+		);
 		if ( matchingEnd == matchingDeposits.begin() )
 		{
 			reason = NFInvalidEcotype;
@@ -1254,17 +1266,35 @@ void CFgProspectionPhrase::filterDeposits(
 	// Filter the remaining deposits with group and family filters, and item part filter
 	if ( craftableItemPartFilter != ~0 )
 	{
-		matchingEnd = partition( matchingDeposits.begin(), matchingEnd, bind2nd( mem_fun(&CDeposit::hasRMForItemPart), craftableItemPartFilter ) );
+		matchingEnd = partition( matchingDeposits.begin(), matchingEnd, 
+#ifndef NL_CPP17
+			bind2nd( mem_fun(&CDeposit::hasRMForItemPart), craftableItemPartFilter ) 
+#else
+		    std::bind(&CDeposit::hasRMForItemPart, std::placeholders::_1, craftableItemPartFilter)
+#endif		
+		);
 	}
 	if ( familyFilter != RM_FAMILY::Unknown )
 	{
-		matchingEnd = partition( matchingDeposits.begin(), matchingEnd, bind2nd( mem_fun(&CDeposit::hasFamily), familyFilter ) );
+		matchingEnd = partition( matchingDeposits.begin(), matchingEnd, 
+#ifndef NL_CPP17
+			bind2nd( mem_fun(&CDeposit::hasFamily), familyFilter ) 
+#else
+		    std::bind(&CDeposit::hasFamily, std::placeholders::_1, familyFilter)
+#endif
+		);
 	}
 	else
 	{
 		if ( groupFilter != RM_GROUP::Unknown )
 		{
-			matchingEnd = partition( matchingDeposits.begin(), matchingEnd, bind2nd( mem_fun(&CDeposit::hasGroup), groupFilter ) );
+			matchingEnd = partition( matchingDeposits.begin(), matchingEnd, 
+#ifndef NL_CPP17
+				bind2nd( mem_fun(&CDeposit::hasGroup), groupFilter ) 
+#else
+			    std::bind(&CDeposit::hasGroup, std::placeholders::_1, groupFilter)
+#endif
+			);
 		}
 	}
 	if ( matchingEnd == matchingDeposits.begin() )
@@ -1282,7 +1312,12 @@ void CFgProspectionPhrase::filterDeposits(
 	// Filter the remaining deposits with max stat energy
 
 	matchingEnd = partition( matchingDeposits.begin(), matchingEnd,
-		bind2nd( mem_fun( findExactStatEnergy ? &CDeposit::hasExactStatEnergy : &CDeposit::hasLowerStatEnergy ), statEnergy ) );
+#ifndef NL_CPP17
+		bind2nd( mem_fun( findExactStatEnergy ? &CDeposit::hasExactStatEnergy : &CDeposit::hasLowerStatEnergy ), statEnergy )
+#else
+	    std::bind(findExactStatEnergy ? &CDeposit::hasExactStatEnergy : &CDeposit::hasLowerStatEnergy, std::placeholders::_1, statEnergy)
+#endif
+	);
 	if ( matchingEnd == matchingDeposits.begin() )
 	{
 		if ( findExactStatEnergy )

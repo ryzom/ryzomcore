@@ -286,7 +286,11 @@ void CMusicPlayer::updateSong(const CSongs &song)
 // ***************************************************************************
 void CMusicPlayer::shuffleAndRebuildPlaylist()
 {
+#ifndef NL_CPP17
 	std::random_shuffle(_Songs.begin(), _Songs.end());
+#else
+	std::shuffle(_Songs.begin(), _Songs.end(), std::default_random_engine());
+#endif
 	rebuildPlaylist();
 }
 

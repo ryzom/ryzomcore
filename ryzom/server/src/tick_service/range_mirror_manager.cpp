@@ -101,7 +101,10 @@ CRangeMirrorManager::CRangeMirrorManager()
 }
 
 
-class ServiceNameIs : public binary_function< CNamingClient::CServiceEntry, const char *, bool >
+class ServiceNameIs 
+#ifndef NL_CPP17
+	: public binary_function< CNamingClient::CServiceEntry, const char *, bool >
+#endif
 {
 public:
 	bool	operator() ( const CNamingClient::CServiceEntry& se, const char* name ) const
@@ -123,7 +126,14 @@ void cbMSDown( const string& serviceName, NLNET::TServiceId serviceId, void * )
 {
 	// Test if there is any MS remaining
 	list<CNamingClient::CServiceEntry> serviceList = CNamingClient::getRegisteredServices();
-	if ( find_if( serviceList.begin(), serviceList.end(), std::bind2nd(ServiceNameIs(), "MS") ) == serviceList.end() )
+	if (find_if(serviceList.begin(), serviceList.end(),
+#ifndef NL_CPP17
+	        std::bind2nd(ServiceNameIs(), "MS")
+#else
+	        std::bind(ServiceNameIs(), std::placeholders::_1, "MS")
+#endif
+	            )
+	    == serviceList.end())
 	{
 		// Not found => reset the ranges
 		RMMInstance->releaseAllRanges();

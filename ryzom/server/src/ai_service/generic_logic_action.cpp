@@ -2646,7 +2646,11 @@ groupFound:
 			}
 
 		}
+#ifndef NL_CPP17
 		std::random_shuffle(cellZones.begin(), cellZones.end());
+#else
+		std::shuffle(cellZones.begin(), cellZones.end(), CAIS::instance().RandomGenerator);
+#endif
 
 		const	CNpcZone	*spawnZone;
 		FOREACH(itCellZone, vector<CCellZone*>, cellZones)

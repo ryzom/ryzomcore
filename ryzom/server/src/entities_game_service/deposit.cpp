@@ -282,7 +282,10 @@ void CDeposit::clearEcotypes()
 }
 
 
-struct TCompareStaticItemPtrBySheetId : public std::binary_function<CStaticItem*,CStaticItem*,bool>
+struct TCompareStaticItemPtrBySheetId
+#ifndef NL_CPP17
+	: public std::binary_function<CStaticItem*,CStaticItem*,bool>
+#endif
 {
 	bool operator() ( const CStaticItem* p1, const CStaticItem* p2 )
 	{
@@ -626,7 +629,10 @@ void CDeposit::selectRMsByFilters( std::vector<std::string>& exactRMCodesS, cons
 /**
  * Helper for CDeposit::hasFamily()
  */
-struct CIsOfFamilyPred : public std::binary_function< CStaticDepositRawMaterial, RM_FAMILY::TRMFamily, bool >
+struct CIsOfFamilyPred 
+#ifndef NL_CPP17
+	: public std::binary_function< CStaticDepositRawMaterial, RM_FAMILY::TRMFamily, bool >
+#endif
 {
 	/// Predicate
 	bool operator() ( const CStaticDepositRawMaterial& rm, RM_FAMILY::TRMFamily family ) const
@@ -647,7 +653,10 @@ struct CIsOfFamilyPred : public std::binary_function< CStaticDepositRawMaterial,
 /**
  * Helper for CDeposit::hasFamily()
  */
-struct CIsOfGroupPred : public std::binary_function< CStaticDepositRawMaterial, RM_GROUP::TRMGroup, bool >
+struct CIsOfGroupPred
+#ifndef NL_CPP17
+	: public std::binary_function< CStaticDepositRawMaterial, RM_GROUP::TRMGroup, bool >
+#endif
 {
 	/// Predicate
 	bool operator() ( const CStaticDepositRawMaterial& rm, RM_GROUP::TRMGroup group ) const
@@ -668,7 +677,10 @@ struct CIsOfGroupPred : public std::binary_function< CStaticDepositRawMaterial, 
 /**
  * Helper for CDeposit::hasRMForItemPart()
  */
-struct CCanCraftItemPartPred : public std::binary_function< CStaticDepositRawMaterial, uint, bool >
+struct CCanCraftItemPartPred 
+#ifndef NL_CPP17
+	: public std::binary_function< CStaticDepositRawMaterial, uint, bool >
+#endif
 {
 	/// Predicate
 	bool operator() ( const CStaticDepositRawMaterial& rm, uint itemPartIndex ) const
@@ -695,7 +707,10 @@ struct CCanCraftItemPartPred : public std::binary_function< CStaticDepositRawMat
 /**
  * Helper for CDeposit::hasFamily()
  */
-struct CMatchStatEnergyPred : public std::binary_function< CStaticDepositRawMaterial, uint8, bool >
+struct CMatchStatEnergyPred
+#ifndef NL_CPP17
+	: public std::binary_function< CStaticDepositRawMaterial, uint8, bool >
+#endif
 {
 	/// Predicate
 	bool operator() ( const CStaticDepositRawMaterial& rm, uint8 maxStatEnergy ) const
@@ -719,7 +734,10 @@ struct CMatchStatEnergyPred : public std::binary_function< CStaticDepositRawMate
 /**
  * Helper for CDeposit::hasFamily()
  */
-struct CMatchExactStatEnergyPred : public std::binary_function< CStaticDepositRawMaterial, uint8, bool >
+struct CMatchExactStatEnergyPred 
+#ifndef NL_CPP17
+	: public std::binary_function< CStaticDepositRawMaterial, uint8, bool >
+#endif
 {
 	/// Predicate
 	bool operator() ( const CStaticDepositRawMaterial& rm, uint8 maxStatEnergy ) const
@@ -740,41 +758,76 @@ struct CMatchExactStatEnergyPred : public std::binary_function< CStaticDepositRa
 /*
  * Return true if the deposit contains at least one RM of the specified family
  */
-bool CDeposit::hasFamily( RM_FAMILY::TRMFamily family ) const
+bool CDeposit::hasFamily(RM_FAMILY::TRMFamily family) const
 {
-	return find_if( _RawMaterials.begin(), _RawMaterials.end(), bind2nd( CIsOfFamilyPred(), family ) ) != _RawMaterials.end();
+	return find_if(_RawMaterials.begin(), _RawMaterials.end(),
+#ifndef NL_CPP17
+	           bind2nd(CIsOfFamilyPred(), family)
+#else
+	           std::bind(CIsOfFamilyPred(), std::placeholders::_1, family)
+#endif
+	               )
+	    != _RawMaterials.end();
 }
 
 /*
  * Return true if the deposit contains at least one RM of the specified group
  */
-bool CDeposit::hasGroup( RM_GROUP::TRMGroup group ) const
+bool CDeposit::hasGroup(RM_GROUP::TRMGroup group) const
 {
-	return find_if( _RawMaterials.begin(), _RawMaterials.end(), bind2nd( CIsOfGroupPred(), group ) ) != _RawMaterials.end();
+	return find_if(_RawMaterials.begin(), _RawMaterials.end(),
+#ifndef NL_CPP17
+	           bind2nd(CIsOfGroupPred(), group)
+#else
+	           std::bind(CIsOfGroupPred(), std::placeholders::_1, group)
+#endif
+	               )
+	    != _RawMaterials.end();
 }
 
 /*
  * Return true if the deposit contains at least one RM than can craft the specified item part
  */
-bool CDeposit::hasRMForItemPart( uint itemPartIndex ) const
+bool CDeposit::hasRMForItemPart(uint itemPartIndex) const
 {
-	return find_if( _RawMaterials.begin(), _RawMaterials.end(), bind2nd( CCanCraftItemPartPred(), itemPartIndex ) ) != _RawMaterials.end();
+	return find_if(_RawMaterials.begin(), _RawMaterials.end(),
+#ifndef NL_CPP17
+	           bind2nd(CCanCraftItemPartPred(), itemPartIndex)
+#else
+	           std::bind(CCanCraftItemPartPred(), std::placeholders::_1, itemPartIndex)
+#endif
+	               )
+	    != _RawMaterials.end();
 }
 
 /*
  * Return true if the deposit contains at least one RM with energy lower_eq than the specified value
  */
-bool CDeposit::hasLowerStatEnergy( uint8 maxStatEnergy ) const
+bool CDeposit::hasLowerStatEnergy(uint8 maxStatEnergy) const
 {
-	return find_if( _RawMaterials.begin(), _RawMaterials.end(), bind2nd( CMatchStatEnergyPred(), maxStatEnergy ) ) != _RawMaterials.end(); 
+	return find_if(_RawMaterials.begin(), _RawMaterials.end(),
+#ifndef NL_CPP17
+	           bind2nd(CMatchStatEnergyPred(), maxStatEnergy)
+#else
+	           std::bind(CMatchStatEnergyPred(), std::placeholders::_1, maxStatEnergy)
+#endif
+	               )
+	    != _RawMaterials.end();
 }
 
 /*
  * Return true if the deposit contains at least one RM with energy equalling the specifing value
  */
-bool CDeposit::hasExactStatEnergy( uint8 statEnergy ) const
+bool CDeposit::hasExactStatEnergy(uint8 statEnergy) const
 {
-	return find_if( _RawMaterials.begin(), _RawMaterials.end(), bind2nd( CMatchExactStatEnergyPred(), statEnergy ) ) != _RawMaterials.end(); 
+	return find_if(_RawMaterials.begin(), _RawMaterials.end(),
+#ifndef NL_CPP17
+	           bind2nd(CMatchExactStatEnergyPred(), statEnergy)
+#else
+	           std::bind(CMatchExactStatEnergyPred(), std::placeholders::_1, statEnergy)
+#endif
+	               )
+	    != _RawMaterials.end();
 }
 
 
@@ -1573,7 +1626,10 @@ NLMISC_COMMAND( forageDisplayDeposit, "Display info about one or all the deposit
 	return true;
 }
 
-struct TCompareDepositsByHighestKamiAnger : public std::binary_function<CDeposit*,CDeposit*,bool>
+struct TCompareDepositsByHighestKamiAnger 
+#ifndef NL_CPP17
+	: public std::binary_function<CDeposit*,CDeposit*,bool>
+#endif
 {
 	bool operator() ( const CDeposit* d1, const CDeposit* d2 )
 	{

@@ -196,7 +196,12 @@ bool	CAIS::markTagForDelete(const std::string &filename)
 	{
 		// first: tag the dynamic regions in the continents
 		for_each(it->continents().begin(), it->continents().end(),
-			bind2nd(mem_fun(&CContinent::markTagForDelete), fileId));
+#ifndef NL_CPP17
+			bind2nd(mem_fun(&CContinent::markTagForDelete), fileId)
+#else
+		    std::bind(&CContinent::markTagForDelete, std::placeholders::_1, fileId)
+#endif
+		);
 
 		for_each(it->managers().begin(),it->managers().end(),
 			CAliasTreeRoot::CMarkTagForDelete(fileId));
@@ -211,7 +216,12 @@ void CAIS::deleteTaggedAlias(const std::string &filename)
 	{
 		// first: tag the dynamic regions in the continents
 		for_each(it->continents().begin(), it->continents().end(),
-			bind2nd(mem_fun(&CContinent::deleteTaggedAlias),fileId));
+#ifndef NL_CPP17
+			bind2nd(mem_fun(&CContinent::deleteTaggedAlias),fileId)
+#else
+		    std::bind(&CContinent::deleteTaggedAlias, std::placeholders::_1, fileId)
+#endif
+		);
 
 		for_each(it->managers().begin(),it->managers().end(),
 			CAliasTreeRoot::CDeleteTagged<CManager>(it->managers()));
@@ -233,7 +243,13 @@ uint32	CAIS::getEmotNumber(const std::string &name)
 bool CAIS::advanceUserTimer	(uint32 nbTicks)
 {
 	// for each manager, look for a timer event
-	for_each(AIList().begin(), AIList().end(), bind2nd(mem_fun(&CAIInstance::advanceUserTimer),nbTicks) );
+	for_each(AIList().begin(), AIList().end(), 
+#ifndef NL_CPP17
+		bind2nd(mem_fun(&CAIInstance::advanceUserTimer),nbTicks) 
+#else
+	    std::bind(&CAIInstance::advanceUserTimer, std::placeholders::_1, nbTicks)
+#endif
+	);
 	return	true;
 }
 

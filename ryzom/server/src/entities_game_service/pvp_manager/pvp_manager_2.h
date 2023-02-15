@@ -30,10 +30,16 @@ class CGameItemPtr;
 class IPVPInterface;
 
 // Comparator for case-insensitive comparison in STL assos. containers
-struct ci_less : std::binary_function<std::string, std::string, bool>
+struct ci_less 
+#ifndef NL_CPP17
+	: std::binary_function<std::string, std::string, bool>
+#endif
 {
 	// case-independent (ci) compare_less binary function
-	struct nocase_compare : public std::binary_function<unsigned char,unsigned char,bool> 
+	struct nocase_compare 
+#ifndef NL_CPP17
+		: public std::binary_function<unsigned char,unsigned char,bool> 
+#endif
 	{
 		bool operator() (const unsigned char& c1, const unsigned char& c2) const
 		{

@@ -83,7 +83,10 @@ public:
 private:
 
 	// functor to search a continent from name
-	struct TFindContinent : public std::unary_function<TContinentInfo, bool>
+	struct TFindContinent 
+#ifndef NL_CPP17
+		: public std::unary_function<TContinentInfo, bool>
+#endif
 	{ 
 		bool operator ()(const TContinentInfo &ci) const
 		{
@@ -97,7 +100,10 @@ private:
 	};
 
 	// functor to search a continent from enum Value
-	struct TFindContinentFromEnum : public std::unary_function<TContinentInfo, bool>
+	struct TFindContinentFromEnum 
+#ifndef NL_CPP17
+		: public std::unary_function<TContinentInfo, bool>
+#endif
 	{
 		bool operator ()(const TContinentInfo &ci) const
 		{
@@ -112,7 +118,10 @@ private:
 	};
 
 	// functor to search an instance number
-	struct TFindInstance : public std::unary_function<TContinentInfo, bool>
+	struct TFindInstance 
+#ifndef NL_CPP17
+		: public std::unary_function<TContinentInfo, bool>
+#endif
 	{ 
 		bool operator ()(const TContinentInfo &ci) const
 		{

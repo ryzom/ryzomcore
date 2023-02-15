@@ -424,7 +424,13 @@ void CWeatherManagerClient::setupFXs(const NLMISC::CMatrix &camMat, NLPACS::UGlo
 	// update waiting precipitations
 	updatePrecipitationVect(_WaitingPrecipitations, camMat, gr);
 	// Remove waiting precipitation that are not running anymore (no more particles)
-	TPrecipitationVect::iterator lastValid = std::remove_if(_WaitingPrecipitations.begin(), _WaitingPrecipitations.end(), std::not1(std::mem_fun(&CPrecipitation::isRunning)));
+	TPrecipitationVect::iterator lastValid = std::remove_if(_WaitingPrecipitations.begin(), _WaitingPrecipitations.end(), 
+#ifndef NL_CPP17
+		std::not1(std::mem_fun(&CPrecipitation::isRunning))
+#else
+	    std::not1(std::mem_fn(&CPrecipitation::isRunning))
+#endif
+	);
 	_WaitingPrecipitations.erase(lastValid, _WaitingPrecipitations.end());
 }
 

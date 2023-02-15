@@ -80,7 +80,14 @@ private:
 inline void CAIEvent::addReaction	(CAIEventReaction	*reaction)
 {
 
-	if	(std::find_if(_Reactions.begin(), _Reactions.end(), std::bind2nd(std::equal_to<CAIEventReaction*>(),reaction))==_Reactions.end())
+	if (std::find_if(_Reactions.begin(), _Reactions.end(),
+#ifndef NL_CPP17
+	        std::bind2nd(std::equal_to<CAIEventReaction *>(), reaction)
+#else
+	        std::bind(std::equal_to<CAIEventReaction *>(), std::placeholders::_1, reaction)
+#endif
+	            )
+	    == _Reactions.end())
 	{
 		_Reactions.push_back(reaction);
 	}
@@ -94,7 +101,13 @@ inline void CAIEvent::addReaction	(CAIEventReaction	*reaction)
 inline	void CAIEvent::removeReaction(CAIEventReaction *reaction)
 {
 
-	TReactionList::iterator	it=std::find_if(_Reactions.begin(), _Reactions.end(), std::bind2nd(std::equal_to<CAIEventReaction*>(),reaction));
+	TReactionList::iterator it = std::find_if(_Reactions.begin(), _Reactions.end(),
+#ifndef NL_CPP17
+	    std::bind2nd(std::equal_to<CAIEventReaction *>(), reaction)
+#else
+	    std::bind(std::equal_to<CAIEventReaction *>(), std::placeholders::_1, reaction)
+#endif
+	);
 	if	(it==_Reactions.end())
 	{
 		nlwarning("BUG: Failed to remove event reaction from manager as object not found!!!");

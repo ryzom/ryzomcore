@@ -469,7 +469,10 @@ private:
  * Predicate to compare two pointed deposits using their kami anger level.
  * If a value is -1, it is not considered as lower.
  */
-struct CHasLowerKamiAngerPred : std::binary_function< CDeposit*, CDeposit*, bool >
+struct CHasLowerKamiAngerPred 
+#ifndef NL_CPP17
+	: std::binary_function< CDeposit*, CDeposit*, bool >
+#endif
 {
 	bool operator() ( CDeposit *d1, CDeposit *d2 )
 	{

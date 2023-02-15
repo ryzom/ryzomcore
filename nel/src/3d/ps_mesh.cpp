@@ -1568,7 +1568,13 @@ void CPSConstraintMesh::serial(NLMISC::IStream &f)
 		{
 			// remove path
 			TMeshNameVect meshNamesWithoutPath = _MeshShapeFileName;
-			std::transform(meshNamesWithoutPath.begin(), meshNamesWithoutPath.end(), meshNamesWithoutPath.begin(), std::ptr_fun(NLMISC::CFile::getFilename));
+			std::transform(meshNamesWithoutPath.begin(), meshNamesWithoutPath.end(), meshNamesWithoutPath.begin(), 
+#ifndef NL_CPP17
+				std::ptr_fun(NLMISC::CFile::getFilename)
+#else
+			    std::bind(&NLMISC::CFile::getFilename, std::placeholders::_1)
+#endif
+			);
 			f.serialCont(meshNamesWithoutPath);
 		}
 		else

@@ -1272,7 +1272,11 @@ void getNeighbourZoneWithFlags_ssss_s(CStateInstance* entity, CScriptStack& stac
 	vector<CCell*> cells;
 	curZone->getOwner()->getNeighBourgCellList(cells);
 	cells.push_back(curZone->getOwner());
+#ifndef NL_CPP17
 	std::random_shuffle(cells.begin(), cells.end());
+#else
+	std::shuffle(cells.begin(), cells.end(), CAIS::instance().RandomGenerator);
+#endif
 	
 	CNpcZone const* const newZone = CCellZone::lookupNpcZoneScorer(cells, scorer);
 	

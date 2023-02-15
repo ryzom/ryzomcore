@@ -3222,7 +3222,10 @@ NLMISC_COMMAND(simulateClientReady,"Simulate clientReady for a character","clien
 
 
 // predicate for following command
-struct TIsNotACharFile : std::unary_function<string, bool>
+struct TIsNotACharFile 
+#ifndef NL_CPP17
+	: std::unary_function<string, bool>
+#endif
 {
 	bool operator ()(const std::string &fileName) const
 	{
@@ -3369,7 +3372,10 @@ NLMISC_COMMAND(loadAllPlayerAndReady,"Load all the player saves (all account, al
 
 
 // predicate for following command
-struct TIsNotAOldCharFile : std::unary_function<string, bool>
+struct TIsNotAOldCharFile
+#ifndef NL_CPP17
+	: std::unary_function<string, bool>
+#endif
 {
 	bool operator ()(const std::string &fileName) const
 	{

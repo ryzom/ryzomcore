@@ -163,7 +163,11 @@ void getZoneWithFlags_helper(CStateInstance* entity, CScriptStack& stack, CAIIns
 		}
 	}
 	// Shuffle 'em
+#ifndef NL_CPP17
 	std::random_shuffle(cellZones.begin(), cellZones.end());
+#else
+	std::shuffle(cellZones.begin(), cellZones.end(), CAIS::instance().RandomGenerator);
+#endif
 	// While no zone found
 	FOREACH(itCellZone, std::vector<CCellZone*>, cellZones)
 	{
@@ -172,7 +176,11 @@ void getZoneWithFlags_helper(CStateInstance* entity, CScriptStack& stack, CAIIns
 		FOREACH(it, CCont<CCell>, (*itCellZone)->cells())
 			cells.push_back(*it);
 		// Shuffle 'em
+#ifndef NL_CPP17
 		std::random_shuffle(cells.begin(), cells.end());
+#else
+		std::shuffle(cells.begin(), cells.end(), CAIS::instance().RandomGenerator);
+#endif
 		// Get a zone with a good score
 		CNpcZone const* spawnZone = CCellZone::lookupNpcZoneScorer(cells, scorer);
 		if (spawnZone)

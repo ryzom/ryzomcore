@@ -866,7 +866,10 @@ void CFgExtractionPhrase::applyExtraction( CCharacter *player, float successFact
 /*
  **
  */
-struct CNonNullGameItemPtrPred : std::unary_function<CGameItemPtr,bool>
+struct CNonNullGameItemPtrPred 
+#ifndef NL_CPP17
+	: std::unary_function<CGameItemPtr,bool>
+#endif
 {
 	bool operator() ( const CGameItemPtr& p ) { return (p != NULL); }
 };

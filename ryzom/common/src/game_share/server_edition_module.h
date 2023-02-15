@@ -544,7 +544,10 @@ namespace R2
 			CUniquePtr<CUserComponent> _Component;
 		};
 
-		struct CHashKeyMD5Less : public std::binary_function<NLMISC::CHashKeyMD5, NLMISC::CHashKeyMD5, bool>
+		struct CHashKeyMD5Less 
+#ifndef NL_CPP17
+			: public std::binary_function<NLMISC::CHashKeyMD5, NLMISC::CHashKeyMD5, bool>
+#endif
 		{
 			bool operator()(const NLMISC::CHashKeyMD5& x, const NLMISC::CHashKeyMD5& y) const { return x.operator<(y); }
 		};

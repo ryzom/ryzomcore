@@ -68,7 +68,10 @@ CCharacterShoppingList::~CCharacterShoppingList()
 }
 
 //-----------------------------------------------------------------------------
-struct TTradeItemCmp : public std::binary_function< TItemTradePtr, TItemTradePtr, bool>
+struct TTradeItemCmp 
+#ifndef NL_CPP17
+	: public std::binary_function< TItemTradePtr, TItemTradePtr, bool>
+#endif
 {
 	// operator < in fact
 	bool operator () (const TItemTradePtr &lItemPtr, const TItemTradePtr &rItemPtr) const
