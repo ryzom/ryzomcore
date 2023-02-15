@@ -835,6 +835,9 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 		std::string	name;
 		getTextureShareName (tex, name);
 
+		// Destructor of texture infos locks _SyncTexDrvInfos, so any existing pointers must be deleted outside the lock
+		NLMISC::CSmartPtr<ITextureDrvInfos> maybeDeleted;
+
 		// insert or get the texture.
 		{
 			CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
@@ -848,6 +851,8 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 			{
 				// insert into driver map. (so it is deleted when driver is deleted).
 				itTex= (rTexDrvInfos.insert(make_pair(name, (ITextureDrvInfos*)NULL))).first;
+				// keep old value, so it only gets deleted after we release the lock on _SyncTexDrvInfos
+				maybeDeleted = tex.TextureDrvShare->DrvTexture;
 				// create and set iterator, for future deletion.
 				itTex->second= tex.TextureDrvShare->DrvTexture = new CTextureDrvInfosGL(this, itTex, this, isTextureRectangle(&tex));
 
@@ -856,6 +861,9 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 			}
 			else
 			{
+				// keep old value, so it only gets deleted after we release the lock on _SyncTexDrvInfos
+				maybeDeleted = tex.TextureDrvShare->DrvTexture;
+				// set new value
 				tex.TextureDrvShare->DrvTexture= itTex->second;
 
 				if(bMustRecreateSharedTexture)
