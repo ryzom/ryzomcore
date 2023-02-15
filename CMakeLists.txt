@@ -59,11 +59,6 @@ IF(HUNTER_ENABLED)
 ENDIF()
 
 
-SET(CMAKE_CXX_STANDARD 17)
-SET(CMAKE_CXX_STANDARD_REQUIRED OFF)
-SET(CMAKE_C_STANDARD 11)
-SET(CMAKE_C_STANDARD_REQUIRED OFF)
-
 #-----------------------------------------------------------------------------
 
 INCLUDE(nel)
