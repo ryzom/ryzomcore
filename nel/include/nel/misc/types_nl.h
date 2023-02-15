@@ -242,7 +242,9 @@
 #	pragma warning (disable : 4250)			// inherits via dominance (informational warning).
 #	pragma warning (disable : 4390)			// don't warn in empty block "if(exp) ;"
 #	pragma warning (disable : 4996)			// 'vsnprintf': This function or variable may be unsafe. Consider using vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#	pragma warning (disable : 5033)			// 'register' is no longer a supported storage class
+#	ifdef NL_CPP17
+#		pragma warning (disable : 5033)			// 'register' is no longer a supported storage class
+#	endif
 // Debug : Sept 01 2006
 #	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
 #		pragma warning (disable : 4005)			// don't warn on redefinitions caused by xp platform sdk
