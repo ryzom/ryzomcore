@@ -133,7 +133,7 @@ void CSock::initNetwork()
 	if ( ! CSock::_Initialized )
 	{
 #ifdef NL_OS_WINDOWS
-		WORD winsock_version = MAKEWORD( 2, 0 );
+		WORD winsock_version = MAKEWORD( 2, 2 );
 		WSADATA wsaData;
 		if ( WSAStartup( winsock_version, &wsaData ) != 0 )
 		{
@@ -150,7 +150,10 @@ void CSock::initNetwork()
 void CSock::releaseNetwork()
 {
 #ifdef NL_OS_WINDOWS
-	WSACleanup();
+	if (CSock::_Initialized)
+	{
+		WSACleanup();
+	}
 #endif
 	CSock::_Initialized = false;
 }
