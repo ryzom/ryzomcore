@@ -80,6 +80,24 @@ public:
 	{
 	}
 
+	// Constructs an address from a binary address
+	// IPv4 is 4 bytes, IPv6 is 16 bytes
+	CIPv6Address(const uint8_t *addr, size_t len)
+		: m_Valid(len == 16 || len == 4)
+	{
+		if (len == 16)
+		{
+			memcpy(m_Address, addr, 16);
+		}
+		else if (len == 4)
+		{
+			memset(m_Address, 0, 10);
+			m_Address[10] = 0xFF;
+			m_Address[11] = 0xFF;
+			memcpy(&m_Address[12], addr, 4);
+		}
+	}
+
 	// Sets the address to the given string.
 	bool set(const std::string &str) { return set(str.c_str(), str.size()); }
 

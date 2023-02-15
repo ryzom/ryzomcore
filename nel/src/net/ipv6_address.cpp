@@ -21,11 +21,15 @@
 #include "nel/misc/string_view.h"
 #include "nel/misc/wang_hash.h"
 
+#include "nel/net/sock.h"
+
 #ifdef NL_OS_WINDOWS
 // Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
 #include <ws2ipdef.h>
 // Windows includes for `inet_pton` and `getaddrinfo`
 #include <ws2tcpip.h>
+// For Windows 2000 compatibility
+#include <wspiapi.h>
 #else
 // Linux includes for `sockaddr_in`, `sockaddr_in6`, `inet_pton`, and `inet_ntop`
 #include <arpa/inet.h>
@@ -48,6 +52,8 @@ bool addressFromString(uint8 address[], const char *str, size_t len)
 	// Text "null", or just any text starting with 'n', may also be used to specify null address
 	if (str[0] == 'n')
 		return false;
+
+	CSock::initNetwork();
 
 #ifdef NL_OS_WINDOWS
 
@@ -118,6 +124,8 @@ CIPv6Address CIPv6Address::loopback()
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
+	
+	CSock::initNetwork();
 
 	hints.ai_family = AF_INET6;
 	if (getaddrinfo(NULL, NULL, &hints, &result) == 0)
@@ -167,6 +175,8 @@ CIPv6Address CIPv6Address::any()
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_flags = AI_PASSIVE;
 
+	CSock::initNetwork();
+
 	hints.ai_family = AF_INET6;
 	if (getaddrinfo(NULL, NULL, &hints, &result) == 0)
 	{
@@ -197,6 +207,8 @@ bool CIPv6Address::set(const char *str, size_t len)
 std::string CIPv6Address::toIPv4String() const
 {
 	if (!isIPv4() && !isAny()) return nlstr("null");
+
+	CSock::initNetwork();
 
 #ifdef NL_OS_WINDOWS
 
@@ -233,6 +245,8 @@ std::string CIPv6Address::toIPv4String() const
 std::string CIPv6Address::toIPv6String() const
 {
 	if (!isValid()) return nlstr("null");
+
+	CSock::initNetwork();
 
 #ifdef NL_OS_WINDOWS
 
@@ -377,17 +391,18 @@ bool CIPv6Address::operator==(CIPv6Address &other) const
 	return memcmp(m_Address, other.m_Address, 16) == 0;
 }
 
-// Sorting operator puts invalid addresses at the bottom, IPv6 addresses at the top
 bool CIPv6Address::operator<(CIPv6Address &other) const
 {
 	if (!isValid() || !other.isValid())
 		return isValid();
+#if 0 // Don't sort, just use operator for map
 	const TType type = getType();
 	const TType otherType = other.getType();
 	if (type != otherType)
 		return type < otherType;
 	if (isIPv4() != other.isIPv4())
 		return other.isIPv4();
+#endif
 	return memcmp(m_Address, other.m_Address, 16) < 0;
 }
 
@@ -395,12 +410,14 @@ bool CIPv6Address::operator<=(CIPv6Address &other) const
 {
 	if (!isValid() || !other.isValid())
 		return isValid() || (isValid() == other.isValid());
+#if 0 // Don't sort, just use operator for map
 	const TType type = getType();
 	const TType otherType = other.getType();
 	if (type != otherType)
 		return type < otherType;
 	if (isIPv4() != other.isIPv4())
 		return other.isIPv4();
+#endif
 	return memcmp(m_Address, other.m_Address, 16) <= 0;
 }
 
