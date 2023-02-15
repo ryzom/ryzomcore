@@ -186,6 +186,7 @@
 
 #if (defined(_MSC_VER) && (_MSC_VER >= 1900)) || (defined(__GNUC__ ) && (__GNUC__ >= 6) && (__cplusplus >=  201402L))
 #	define NL_CPP14
+#	define NL_CPP11
 #endif
 
 #if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)

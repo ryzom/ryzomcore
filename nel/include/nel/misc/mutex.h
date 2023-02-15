@@ -26,6 +26,10 @@
 #include "common.h"
 #include <map>
 
+#ifdef NL_CPP11
+#include <mutex>
+#endif
+
 #ifdef NL_OS_WINDOWS
 #	ifdef NL_NO_ASM
 #		include <intrin.h>
@@ -57,7 +61,11 @@ namespace NLMISC {
  */
 #define STORE_MUTEX_NAME
 
-#ifdef NL_OS_WINDOWS
+#if defined(NL_CPP14)
+	// Use STL mutex by default on C++14 and up
+#	define CMutex CStdMutex
+#	define CSynchronized CStdSynchronized
+#elif defined(NL_OS_WINDOWS)
 	// By default on Windows, all mutex/synchronization use the CFair* class to avoid freeze problem.
 #	define CMutex CFairMutex
 #	define CSynchronized CFairSynchronized
@@ -486,6 +494,24 @@ struct TNelRtlCriticalSection {
 };
 #endif // NL_OS_WINDOWS
 
+#ifdef NL_CPP11
+class CStdMutex : std::mutex
+{
+public:
+	CStdMutex(const std::string &name)
+	    : std::mutex()
+	{
+	}
+	CStdMutex()
+	    : std::mutex()
+	{
+	}
+
+	void enter() { std::mutex::lock(); }
+	void leave() { std::mutex::unlock(); }
+};
+#endif
+
 
 /**
  * Kind of "fair" mutex
@@ -711,6 +737,53 @@ private:
 	/// The synchronized value.
 	volatile T			_Value;
 };
+
+#ifdef NL_CPP11
+template <class T>
+class CStdSynchronized
+{
+public:
+	CStdSynchronized() { }
+	CStdSynchronized(const std::string &name)
+	    : m_Mutex(name)
+	{
+	}
+
+	class CAccessor
+	{
+	public:
+		/// get the mutex or wait
+		CAccessor(CStdSynchronized<T> *cs) : m_Synchronized(cs)
+		{
+			const_cast<CStdMutex &>(m_Synchronized->m_Mutex).enter();
+		}
+
+		/// release the mutex
+		~CAccessor()
+		{
+			const_cast<CStdMutex &>(m_Synchronized->m_Mutex).leave();
+		}
+
+		/// access to the Value
+		T &value()
+		{
+			return const_cast<T &>(m_Synchronized->m_Value);
+		}
+
+	private:
+		CStdSynchronized<T> *m_Synchronized;
+	};
+
+private:
+	friend class CStdSynchronized::CAccessor;
+
+	/// The mutex of the synchronized value.
+	CStdMutex m_Mutex;
+
+	/// The synchronized value.
+	T m_Value;
+};
+#endif
 
 
 /** Helper class that allow easy usage of mutex to protect
