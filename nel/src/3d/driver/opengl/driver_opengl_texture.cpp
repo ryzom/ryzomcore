@@ -1931,11 +1931,11 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
 			//
 			// Arg0.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, SourceLUT[env.Env.SrcArg0RGB] );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, OperandLUT[env.Env.OpArg0RGB]);
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, SourceLUT[env.Env.SrcArg0Alpha] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, OperandLUT[env.Env.OpArg0Alpha]);
 			// Arg1.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, SourceLUT[env.Env.SrcArg1RGB] );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, OperandLUT[env.Env.OpArg1RGB]);
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, SourceLUT[env.Env.SrcArg1Alpha] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, OperandLUT[env.Env.OpArg1Alpha]);
 		}
 	}
 	else
@@ -2026,7 +2026,17 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 			//=====
 			if (env.Env.OpAlpha == CMaterial::Mad)
 			{
-				if (_Extensions.ATITextureEnvCombine3)
+				if (((SourceLUT[env.Env.SrcArg1Alpha] == GL_ZERO && OperandLUT[env.Env.OpArg1Alpha] == GL_ONE_MINUS_SRC_ALPHA)
+					|| (SourceLUT[env.Env.SrcArg1Alpha] == GL_ONE && OperandLUT[env.Env.OpArg1Alpha] == GL_SRC_ALPHA)) // 1
+					&& ((SourceLUT[env.Env.SrcArg2Alpha] == GL_ONE && OperandLUT[env.Env.OpArg2Alpha] == GL_ONE_MINUS_SRC_ALPHA)
+						|| (SourceLUT[env.Env.SrcArg2Alpha] == GL_ZERO && OperandLUT[env.Env.OpArg2Alpha] == GL_SRC_ALPHA))) // 0
+				{
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE);
+					// Arg0.
+					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, SourceLUT[env.Env.SrcArg0Alpha] );
+					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, OperandLUT[env.Env.OpArg0Alpha]);
+				}
+				else if (_Extensions.ATITextureEnvCombine3)
 				{
 					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE_ADD_ATI);
 					// Arg0.
@@ -2045,11 +2055,11 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
 					//
 					// Arg0.
-					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, SourceLUT[env.Env.SrcArg0RGB] );
-					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, OperandLUT[env.Env.OpArg0RGB]);
+					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, SourceLUT[env.Env.SrcArg0Alpha] );
+					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, OperandLUT[env.Env.OpArg0Alpha]);
 					// Arg1.
-					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, SourceLUT[env.Env.SrcArg1RGB] );
-					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, OperandLUT[env.Env.OpArg1RGB]);
+					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, SourceLUT[env.Env.SrcArg1Alpha] );
+					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, OperandLUT[env.Env.OpArg1Alpha]);
 				}
 			}
 			else
