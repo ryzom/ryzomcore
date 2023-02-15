@@ -82,7 +82,7 @@ public:
 
 	// Constructs an address from a binary address
 	// IPv4 is 4 bytes, IPv6 is 16 bytes
-	CIPv6Address(const uint8_t *addr, size_t len)
+	CIPv6Address(const uint8 *addr, size_t len)
 		: m_Valid(len == 16 || len == 4)
 	{
 		if (len == 16)
