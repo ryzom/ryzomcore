@@ -75,6 +75,14 @@ namespace NLNET {
 
 bool CSock::_Initialized = false;
 
+namespace /* anonymous */ {
+
+#ifdef NL_OS_WINDOWS
+NLMISC::CMutex s_InitMutex;
+#endif
+
+} /* anonymous namespace */
+
 
 /*
  * ESocket constructor
@@ -133,11 +141,15 @@ void CSock::initNetwork()
 	if ( ! CSock::_Initialized )
 	{
 #ifdef NL_OS_WINDOWS
-		WORD winsock_version = MAKEWORD( 2, 0 );
-		WSADATA wsaData;
-		if ( WSAStartup( winsock_version, &wsaData ) != 0 )
+		CAutoMutex<CMutex> mutex(s_InitMutex);
+		if (!CSock::_Initialized)
 		{
-			throw ESocket( "Winsock initialization failed" );
+			WORD winsock_version = MAKEWORD(2, 2);
+			WSADATA wsaData;
+			if (WSAStartup(winsock_version, &wsaData) != 0)
+			{
+				throw ESocket("Winsock initialization failed");
+			}
 		}
 #endif
 		CSock::_Initialized = true;
@@ -150,7 +162,11 @@ void CSock::initNetwork()
 void CSock::releaseNetwork()
 {
 #ifdef NL_OS_WINDOWS
-	WSACleanup();
+	CAutoMutex<CMutex> mutex(s_InitMutex);
+	if (CSock::_Initialized)
+	{
+		WSACleanup();
+	}
 #endif
 	CSock::_Initialized = false;
 }
