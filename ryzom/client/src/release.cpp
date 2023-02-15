@@ -710,6 +710,7 @@ void release()
 	CHttpCache::release();
 	CStrictTransportSecurity::release();
 	CAsyncFileManager3D::releaseInstance();
+	NLNET::CSock::releaseNetwork();
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");
