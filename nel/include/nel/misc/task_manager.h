@@ -95,14 +95,6 @@ public:
 	/// Register task priority callback
 	void	registerTaskPriorityCallback (IChangeTaskPriority *callback);
 
-private:
-
-	/// Register task priority callback
-	void	changeTaskPriority ();
-
-	/// The callback
-	IChangeTaskPriority		*_ChangePriorityCallback;
-
 protected:
 
 	/** If any, wait the current running task to complete
@@ -148,6 +140,14 @@ protected:
 
 	/// flag indicate thread loop, if false cause thread exit
 	volatile	bool _ThreadRunning;
+
+private:
+
+	/// Register task priority callback
+	void	changeTaskPriority(CSynchronized<std::list<CWaitingTask>>::CAccessor &acces);
+
+	/// The callback
+	IChangeTaskPriority		*_ChangePriorityCallback;
 
 private:
 

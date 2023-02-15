@@ -77,7 +77,7 @@ void CTaskManager::run(void)
 			else
 			{
 				// Update task priorities
-				changeTaskPriority ();
+				changeTaskPriority (acces);
 
 				// Get the best task
 				list<CWaitingTask> &taskList = acces.value();
@@ -225,11 +225,10 @@ uint CTaskManager::getNumWaitingTasks()
 
 // ***************************************************************************
 
-void CTaskManager::changeTaskPriority ()
+void CTaskManager::changeTaskPriority(CSynchronized<std::list<CWaitingTask>>::CAccessor &acces)
 {
 	if (_ChangePriorityCallback)
 	{
-		CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 		list<CWaitingTask> &taskList = acces.value();
 
 		list<CWaitingTask>::iterator ite = taskList.begin();
