@@ -1978,7 +1978,7 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 				//
 				if (_Extensions.ATITextureEnvCombine3)
 				{
-					glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
 					// Arg0.
 					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, SourceLUT[env.Env.SrcArg0RGB] );
 					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_EXT, OperandLUT[env.Env.OpArg0RGB]);
@@ -1992,7 +1992,7 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 				else
 				{
 					// fallback to modulate ..
-					glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
 					//
 					// Arg0.
 					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, SourceLUT[env.Env.SrcArg0RGB] );
@@ -2028,7 +2028,7 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 			{
 				if (_Extensions.ATITextureEnvCombine3)
 				{
-					glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE_ADD_ATI);
 					// Arg0.
 					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, SourceLUT[env.Env.SrcArg0Alpha] );
 					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, OperandLUT[env.Env.OpArg0Alpha]);
@@ -2042,7 +2042,7 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 				else
 				{
 					// fallback to modulate ..
-					glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
 					//
 					// Arg0.
 					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, SourceLUT[env.Env.SrcArg0RGB] );

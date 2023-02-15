@@ -1489,7 +1489,7 @@ void CDriverGL::enableFog(bool enable)
 void CDriverGL::setupFog(float start, float end, CRGBA color)
 {
 	H_AUTO_OGL(CDriverGL_setupFog)
-	glFogf(GL_FOG_MODE, GL_LINEAR);
+	glFogi(GL_FOG_MODE, GL_LINEAR);
 	glFogf(GL_FOG_START, start);
 	glFogf(GL_FOG_END, end);
 
