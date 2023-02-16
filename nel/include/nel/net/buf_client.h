@@ -95,7 +95,10 @@ public:
 	virtual ~CBufClient();
 
 	/// Connects to the specified host
-	void	connect( const CInetAddress& addr );
+	void	connect( const CInetAddress &addr );
+
+	/// Connects to the specified host
+	void	connect( const std::vector<CInetAddress> &addr );
 
 	/** Disconnects the remote host and empties the receive queue.
 	 * Before that, tries to flush pending data to send unless quick is true.

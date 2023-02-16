@@ -59,6 +59,9 @@ public:
 	/// Connects to the specified host
 	void	connect( const CInetAddress& addr );
 
+	/// Connects to the specified host
+	void	connect( const std::vector<CInetAddress>& addrs );
+
 	/** Returns true if the connection is still connected (changed when a disconnection
 	 * event has reached the front of the receive queue, just before calling the disconnection callback
 	 * if there is one)

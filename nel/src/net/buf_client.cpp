@@ -85,17 +85,23 @@ CBufClient::CBufClient( bool nodelay, bool replaymode, bool ) :
 	}
 }
 
+void CBufClient::connect(const CInetAddress &addr)
+{
+	std::vector<CInetAddress> addrs;
+	addrs.push_back(addr);
+	connect(addrs);
+}
 
 /*
  * Connects to the specified host
  * Precond: not connected
  */
-void CBufClient::connect( const CInetAddress& addr )
+void CBufClient::connect(const std::vector<CInetAddress> &addrs)
 {
 	nlnettrace( "CBufClient::connect" );
 	nlassert( ! _BufSock->Sock->connected() );
 	_BufSock->setMaxExpectedBlockSize( maxExpectedBlockSize() );
-	_BufSock->connect( addr, _NoDelay, true );
+	_BufSock->connect( addrs, _NoDelay, true );
 	_BufSock->setNonBlocking(); // ADDED: non-blocking client connection
 	_PrevBytesDownloaded = 0;
 	_PrevBytesUploaded = 0;

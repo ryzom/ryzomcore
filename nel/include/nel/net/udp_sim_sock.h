@@ -50,6 +50,7 @@ public:
 
 	// CUdpSock functions wrapping
 	void				connect( const CInetAddress& addr );
+	void				connect( const std::vector<CInetAddress>& addr );
 	void				close();
 	bool				dataAvailable();
 	bool				receive( uint8 *buffer, uint32& len, bool throw_exception=true );

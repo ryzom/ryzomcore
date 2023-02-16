@@ -141,6 +141,8 @@ public:
 
 	/// @name Socket setup
 	//@{
+	
+	virtual void		connect( const CInetAddress& addr );
 
 	/** Connection.
 	 * This method does not return a boolean, otherwise a programmer could ignore the result and no
@@ -148,7 +150,7 @@ public:
 	 * - If addr is not valid, an exception ESocket is thrown
 	 * - If connect() fails for another reason, an exception ESocketConnectionFailed is thrown
 	 */
-	virtual void		connect( const CInetAddress& addr );
+	virtual void		connect( const std::vector<CInetAddress>& addrs );
 
 	/** Sets the socket in nonblocking mode. Call this method *after* connect(), otherwise you will get
 	 * an "would block" error (10035 on Windows). In nonblocking mode, use received() and sent() instead of receive() and send()

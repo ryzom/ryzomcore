@@ -319,16 +319,23 @@ bool CBufSock::update()
 }
 
 
+void CBufSock::connect(const CInetAddress &addr, bool nodelay, bool connectedstate)
+{
+	std::vector<CInetAddress> addrs;
+	addrs.push_back(addr);
+	connect(addrs, nodelay, connectedstate);
+}
+
 /*
  * Connects to the specified addr; set connectedstate to true if no connection advertising is needed
  * Precond: not connected
  */
-void CBufSock::connect( const CInetAddress& addr, bool nodelay, bool connectedstate )
+void CBufSock::connect( const std::vector<CInetAddress>& addrs, bool nodelay, bool connectedstate )
 {
 	nlassert (this != InvalidSockId);	// invalid bufsock
 	nlassert( ! Sock->connected() );
 
-	Sock->connect( addr );
+	Sock->connect( addrs );
 	_ConnectedState = connectedstate;
 	_KnowConnected = connectedstate;
 	if ( nodelay )

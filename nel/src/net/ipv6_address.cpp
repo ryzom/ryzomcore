@@ -124,7 +124,7 @@ CIPv6Address CIPv6Address::loopback()
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
-	
+
 	CSock::initNetwork();
 
 	hints.ai_family = AF_INET6;
@@ -198,9 +198,40 @@ CIPv6Address CIPv6Address::any()
 	return addr;
 }
 
-bool CIPv6Address::set(const char *str, size_t len)
+// Constructs an address suitable for listening on any interface
+CIPv6Address CIPv6Address::anyIPv4()
 {
-	m_Valid = addressFromString(m_Address, str, len);
+	// Return the standard IPv4 any address
+	CIPv6Address addr;
+	memset(addr.m_Address, 0, sizeof(addr.m_Address) - 6);
+	addr.m_Address[10] = 0xFF;
+	addr.m_Address[11] = 0xFF;
+	addr.m_Valid = true;
+	return addr;
+}
+
+bool CIPv6Address::set(const std::string &str)
+{
+	m_Valid = addressFromString(m_Address, str.c_str(), str.size());
+	return m_Valid;
+}
+
+bool CIPv6Address::set(const uint8 *addr, size_t len)
+{
+	if (len == 16)
+	{
+		memcpy(m_Address, addr, 16);
+		m_Valid = true;
+	}
+	else if (len == 4)
+	{
+		memset(m_Address, 0, 10);
+		m_Address[10] = 0xFF;
+		m_Address[11] = 0xFF;
+		memcpy(&m_Address[12], addr, 4);
+		m_Valid = true;
+	}
+	m_Valid = false;
 	return m_Valid;
 }
 
@@ -348,6 +379,21 @@ bool CIPv6Address::toSockAddrInet6(TSockAddrIn6 *addr) const
 	return true;
 }
 
+void CIPv6Address::fromSockAddrInet(const TSockAddrIn *addr)
+{
+	memset(m_Address, 0, 10);
+	m_Address[10] = 0xFF;
+	m_Address[11] = 0xFF;
+	memcpy(&m_Address[12], &addr->sin_addr, 4);
+	m_Valid = true;
+}
+
+void CIPv6Address::fromSockAddrInet6(const TSockAddrIn6 *addr)
+{
+	memcpy(m_Address, &addr->sin6_addr, 16);
+	m_Valid = true;
+}
+
 CIPv6Address::TType CIPv6Address::getType() const
 {
 	if (!isValid()) return Invalid;
@@ -421,7 +467,7 @@ bool CIPv6Address::operator<=(CIPv6Address &other) const
 	return memcmp(m_Address, other.m_Address, 16) <= 0;
 }
 
-uint32 CIPv6Address::hash32()
+uint32 CIPv6Address::hash32() const
 {
 	if (!m_Valid) return 0;
 	uint32 hash = NLMISC::wangHash(((uint32)m_Address[0] | ((uint32)m_Address[1] << 8) | ((uint32)m_Address[2] << 16) | ((uint32)m_Address[3] << 24)));
@@ -431,7 +477,7 @@ uint32 CIPv6Address::hash32()
 	return hash;
 }
 
-uint64 CIPv6Address::hash64()
+uint64 CIPv6Address::hash64() const
 {
 	if (!m_Valid) return 0;
 	uint64 hash = NLMISC::wangHash64(((uint64)m_Address[0] | ((uint64)m_Address[1] << 8) | ((uint64)m_Address[2] << 16) | ((uint64)m_Address[3] << 24) | ((uint64)m_Address[4] << 32) | ((uint64)m_Address[5] << 40) | ((uint64)m_Address[6] << 48) | ((uint64)m_Address[7] << 56)));

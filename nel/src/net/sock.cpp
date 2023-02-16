@@ -355,50 +355,74 @@ CSock::~CSock()
 	}
 }
 
+void CSock::connect(const CInetAddress &addr)
+{
+	std::vector<CInetAddress> addrs;
+	addrs.push_back(addr);
+	connect(addrs);
+}
 
 /*
  * Connection
  */
-void CSock::connect( const CInetAddress& addr )
+void CSock::connect( const std::vector<CInetAddress>& addrs )
 {
-	LNETL0_DEBUG( "LNETL0: Socket %d connecting to %s...", _Sock, addr.asString().c_str() );
-
-	// Check address
-	if ( ! addr.isValid() )
+	bool attempted = false;
+	bool connected = false;
+	for (size_t ai = 0; ai < addrs.size(); ++ai)
 	{
-		throw ESocket( "Unable to connect to invalid address", false );
-	}
+		CInetAddress addr = addrs[ai];
+
+		LNETL0_DEBUG("LNETL0: Socket %d connecting to %s...", _Sock, addr.asString().c_str());
+
+		// Check address
+		if (!addr.isValid())
+		{
+			continue;
+		}
 
 #ifndef NL_OS_WINDOWS
-	// Set Reuse Address On (does not work on Win98 and is useless on Win2000)
-	int value = true;
-	if ( setsockopt( _Sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value) ) == SOCKET_ERROR )
-	{
-		throw ESocket( "ReuseAddr failed" );
-	}
-#endif
-
-	// Connection (when _Sock is a datagram socket, connect establishes a default destination address)
-	if ( ::connect( _Sock, (const sockaddr *)(addr.sockAddr()), sizeof(sockaddr_in) ) != 0 )
-	{
-/*		if ( _Logging )
+		// Set Reuse Address On (does not work on Win98 and is useless on Win2000)
+		int value = true;
+		if (setsockopt(_Sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) == SOCKET_ERROR)
 		{
-#ifdef NL_OS_WINDOWS
-			nldebug( "Impossible to connect socket %d to %s %s (%d)", _Sock, addr.hostName().c_str(), addr.asIPString().c_str(), ERROR_NUM );
-#elif defined NL_OS_UNIX
-			nldebug( "Impossible to connect socket %d to %s %s (%d:%s)", _Sock, addr.hostName().c_str(), addr.asIPString().c_str(), ERROR_NUM, strerror(ERROR_NUM) );
-#endif
+			throw ESocket("ReuseAddr failed");
 		}
-*/
+#endif
 
-		throw ESocketConnectionFailed( addr );
+		attempted = true;
+		// Connection (when _Sock is a datagram socket, connect establishes a default destination address)
+		if (::connect(_Sock, (const sockaddr *)(addr.sockAddr()), sizeof(sockaddr_in)) != 0)
+		{
+			/*		if ( _Logging )
+					{
+			#ifdef NL_OS_WINDOWS
+						nldebug( "Impossible to connect socket %d to %s %s (%d)", _Sock, addr.hostName().c_str(), addr.asIPString().c_str(), ERROR_NUM );
+			#elif defined NL_OS_UNIX
+						nldebug( "Impossible to connect socket %d to %s %s (%d:%s)", _Sock, addr.hostName().c_str(), addr.asIPString().c_str(), ERROR_NUM, strerror(ERROR_NUM) );
+			#endif
+					}
+			*/
+			LNETL0_DEBUG("LNETL0: Socket %d failed to connect to %s", _Sock, addr.asString().c_str());
+			continue;
+		}
+		setLocalAddress();
+		if (_Logging)
+		{
+			LNETL0_DEBUG("LNETL0: Socket %d connected to %s (local %s)", _Sock, addr.asString().c_str(), _LocalAddr.asString().c_str());
+		}
+		_RemoteAddr = addr;
+		connected = true;
+		break;
 	}
-	setLocalAddress();
-	if ( _Logging )
+	if (!connected)
 	{
-		LNETL0_DEBUG( "LNETL0: Socket %d connected to %s (local %s)", _Sock, addr.asString().c_str(), _LocalAddr.asString().c_str() );
+		if (!attempted)
+		{
+			throw ESocket("Unable to connect to invalid address", false);
+		}
+		throw ESocketConnectionFailed(addrs[0]); // FIXME: List all attempted addresses
 	}
-	_RemoteAddr = addr;
 
 	_BytesReceived = 0;
 	_BytesSent = 0;

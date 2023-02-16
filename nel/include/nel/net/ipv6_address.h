@@ -59,55 +59,33 @@ public:
 	// Constructs an any listener address
 	static CIPv6Address any();
 
+	// Constructs an any listener address
+	static CIPv6Address anyIPv4();
+
 	// Constructs a valid loopback address
 	static CIPv6Address loopback();
 
 	// Constructs an address from a string.
 	CIPv6Address(const std::string &str)
-	    : m_Valid(set(str.c_str(), str.size()))
-	{
-	}
-
-	// Constructs an address from a string.
-	CIPv6Address(const char *str)
-	    : m_Valid(set(str, 0))
-	{
-	}
-
-	// Constructs an address from a string.
-	CIPv6Address(const char *str, size_t len)
-	    : m_Valid(set(str, len))
+	    : m_Valid(set(str))
 	{
 	}
 
 	// Constructs an address from a binary address
 	// IPv4 is 4 bytes, IPv6 is 16 bytes
 	CIPv6Address(const uint8 *addr, size_t len)
-		: m_Valid(len == 16 || len == 4)
+		: m_Valid(set(addr, len))
 	{
-		if (len == 16)
-		{
-			memcpy(m_Address, addr, 16);
-		}
-		else if (len == 4)
-		{
-			memset(m_Address, 0, 10);
-			m_Address[10] = 0xFF;
-			m_Address[11] = 0xFF;
-			memcpy(&m_Address[12], addr, 4);
-		}
 	}
-
-	// Sets the address to the given string.
-	bool set(const std::string &str) { return set(str.c_str(), str.size()); }
-
-	// Sets the address to the given string.
-	bool set(const char *str) { return set(str, 0); }
 
 	// Sets the address to the given string.
 	// Returns true if the address was valid, false otherwise.
 	// If the address was invalid, the address is set to null.
-	bool set(const char *str, size_t len);
+	bool set(const std::string &str);
+
+	// Constructs an address from a binary address
+	// IPv4 is 4 bytes, IPv6 is 16 bytes
+	bool set(const uint8 *addr, size_t len);
 	inline void setNull() { m_Valid = false; }
 
 	// String format of the address in IPv4 format
@@ -131,6 +109,12 @@ public:
 	
 	// Convert an IPv6 address to the sockaddr_in6 structure
 	bool toSockAddrInet6(TSockAddrIn6 *addr) const;
+
+	// Convert from the sockaddr_in structure
+	void fromSockAddrInet(const TSockAddrIn *addr);
+
+	// Convert from the sockaddr_in6 structure
+	void fromSockAddrInet6(const TSockAddrIn6 *addr);
 
 	inline bool isIPv4() const
 	{
@@ -156,9 +140,9 @@ public:
 	inline operator bool() const { return m_Valid; }
 	inline bool operator!() const { return !m_Valid; }
 
-	uint32 hash32();
-	uint64 hash64();
-	inline size_t hash()
+	uint32 hash32() const;
+	uint64 hash64() const;
+	inline size_t hash() const
 	{
 		if (sizeof(size_t) == sizeof(uint64)) return hash64();
 		else return hash32();
