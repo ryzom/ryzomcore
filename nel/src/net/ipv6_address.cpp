@@ -385,13 +385,13 @@ void CIPv6Address::fromSockAddrInet(const TSockAddrIn *addr)
 	m_Address[10] = 0xFF;
 	m_Address[11] = 0xFF;
 	memcpy(&m_Address[12], &addr->sin_addr, 4);
-	m_Valid = true;
+	m_Valid = (addr->sin_family == AF_INET);
 }
 
 void CIPv6Address::fromSockAddrInet6(const TSockAddrIn6 *addr)
 {
 	memcpy(m_Address, &addr->sin6_addr, 16);
-	m_Valid = true;
+	m_Valid = (addr->sin6_family == AF_INET6);
 }
 
 CIPv6Address::TType CIPv6Address::getType() const

@@ -365,18 +365,19 @@ void CSock::connect(const CInetAddress &addr)
 /*
  * Connection
  */
-void CSock::connect( const std::vector<CInetAddress>& addrs )
+void CSock::connect( const std::vector<CInetAddress>& addrs ) // FIXME: CInetHost
 {
 	bool attempted = false;
 	bool connected = false;
 	for (size_t ai = 0; ai < addrs.size(); ++ai)
 	{
 		CInetAddress addr = addrs[ai];
+		sockaddr_in sockAddr; // FIXME: IPv6
 
 		LNETL0_DEBUG("LNETL0: Socket %d connecting to %s...", _Sock, addr.asString().c_str());
 
 		// Check address
-		if (!addr.isValid())
+		if (!addr.toSockAddrInet(&sockAddr))
 		{
 			continue;
 		}
@@ -392,7 +393,7 @@ void CSock::connect( const std::vector<CInetAddress>& addrs )
 
 		attempted = true;
 		// Connection (when _Sock is a datagram socket, connect establishes a default destination address)
-		if (::connect(_Sock, (const sockaddr *)(addr.sockAddr()), sizeof(sockaddr_in)) != 0)
+		if (::connect(_Sock, (const sockaddr *)(&sockAddr), sizeof(sockaddr_in)) != 0)
 		{
 			/*		if ( _Logging )
 					{
@@ -421,7 +422,7 @@ void CSock::connect( const std::vector<CInetAddress>& addrs )
 		{
 			throw ESocket("Unable to connect to invalid address", false);
 		}
-		throw ESocketConnectionFailed(addrs[0]); // FIXME: List all attempted addresses
+		throw ESocketConnectionFailed(addrs[0]); // FIXME: CInetHost
 	}
 
 	_BytesReceived = 0;

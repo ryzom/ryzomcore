@@ -61,7 +61,7 @@ TReceivedMessage::TReceivedMessage()
 /// Return a vector containing the address info
 void	TReceivedMessage::addressToVector()
 {
-	memcpy( &*VAddrFrom.begin(), AddrFrom.sockAddr(), sizeof(sockaddr_in) );
+	AddrFrom.toSockAddrInet((sockaddr_in *)(&*VAddrFrom.begin())); // FIXME: IPv6
 }
 
 /// Set address with address info from specified vector

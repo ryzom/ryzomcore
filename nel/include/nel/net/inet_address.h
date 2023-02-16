@@ -19,6 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 
+#include "nel/net/ipv6_address.h"
+
 #include <string>
 #include <vector>
 
@@ -62,9 +64,13 @@ struct ESocket;
 class CInetAddress
 {
 public:
+	typedef struct sockaddr_in TSockAddrIn;
+	typedef struct sockaddr_in6 TSockAddrIn6;
+	typedef struct sockaddr_storage TSockAddrStorage;
 
 	/// Default Constructor. The address is set to INADDR_ANY
 	CInetAddress();
+	CInetAddress(bool any);
 
 	/// Alternate constructor (calls setByName())
 	CInetAddress( const std::string& hostName, uint16 port );
@@ -110,16 +116,19 @@ public:
 	/// Returns if object (address and port) is valid
 	bool				isValid() const;
 
-	/// Returns internal IPv4 socket address (read only)
-	const sockaddr_in	 *sockAddr() const;
+	// Convert an IPv4 or the Any listener address and port to the sockaddr_in structure
+	bool toSockAddrInet(TSockAddrIn *addr) const;
 
-	/// Returns internal IPv6 socket address (read only)
-	const sockaddr_in6	 *sockAddr6() const;
+	// Convert an IPv6 address and port to the sockaddr_in6 structure
+	bool toSockAddrInet6(TSockAddrIn6 *addr) const;
 
 	/// Returns internal IP address
+	inline const CIPv6Address &getAddress() const { return m_Address; }
+
+	/// Returns internal IP address (DEPRECATED) // FIXME: IPv6
 	uint32				internalIPAddress() const;
 
-	/// Returns the internal network address (it s the network address for example 192.168.0.0 for a C class)
+	/// Returns the internal network address (it s the network address for example 192.168.0.0 for a C class) (DEPRECATED) // FIXME: IPv6
 	uint32				internalNetAddress () const;
 
 	/// Returns readable IP address. (ex: "195.68.21.195")
@@ -154,8 +163,15 @@ public:
 	 */
 	static std::vector<CInetAddress> localAddresses();
 
-protected:
+	uint32 hash32() const;
+	uint64 hash64() const;
+	inline size_t hash() const
+	{
+		if (sizeof(size_t) == sizeof(uint64)) return hash64();
+		else return hash32();
+	}
 
+protected:
 	/// Constructor with IPv4 address, port=0
 	CInetAddress( const in_addr *ip, const char *hostname = 0);
 
@@ -163,13 +179,11 @@ protected:
 	CInetAddress( const in6_addr *ip, const char *hostname = 0);
 
 private:
-
 	// Called in all constructors. Calls CBaseSocket::init().
 	void				init();
 	
-	sockaddr_in			*_SockAddr;
-	sockaddr_in6		*_SockAddr6;
-	bool				_Valid;
+	CIPv6Address m_Address;
+	uint16 m_Port;
 
 };
 

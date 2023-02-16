@@ -82,6 +82,14 @@ void CUdpSock::bind( uint16 port )
  */
 void CUdpSock::bind( const CInetAddress& addr )
 {
+	sockaddr_in sockAddr; // FIXME: IPv6
+	
+	if (!addr.toSockAddrInet(&sockAddr))
+	{
+		nlwarning("LNETL0: Invalid address %s", addr.asString().c_str());
+		return;
+	}
+	
 #ifndef NL_OS_WINDOWS
 	// Set Reuse Address On (does not work on Win98 and is useless on Win2000)
 	int value = true;
@@ -94,7 +102,7 @@ void CUdpSock::bind( const CInetAddress& addr )
 	_LocalAddr = addr;
 
 	// Bind the socket
-	if ( ::bind( _Sock, (sockaddr*)(_LocalAddr.sockAddr()), sizeof(sockaddr) ) == SOCKET_ERROR )
+	if ( ::bind( _Sock, (sockaddr*)(&sockAddr), sizeof(sockaddr) ) == SOCKET_ERROR )
 	{
 		throw ESocket( "Bind failed" );
 	}
@@ -111,9 +119,16 @@ void CUdpSock::bind( const CInetAddress& addr )
  */
 void CUdpSock::sendTo( const uint8 *buffer, uint len, const CInetAddress& addr )
 {
+	sockaddr_in sockAddr; // FIXME: IPv6
+
+	if (!addr.toSockAddrInet(&sockAddr))
+	{
+		nlwarning("LNETL0: Invalid address %s", addr.asString().c_str());
+		return;
+	}
 
 	//  Send
-	if ( ::sendto( _Sock, (const char*)buffer, len, 0, (sockaddr*)(addr.sockAddr()), sizeof(sockaddr) ) != (sint32)len )
+	if ( ::sendto( _Sock, (const char*)buffer, len, 0, (sockaddr*)(&sockAddr), sizeof(sockaddr_in) ) != (sint32)len )
 	{
 		throw ESocket( "Unable to send datagram" );
 	}

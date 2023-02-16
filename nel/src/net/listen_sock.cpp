@@ -90,9 +90,17 @@ void CListenSock::init( uint16 port )
  */
 void CListenSock::init( const CInetAddress& addr )
 {
-	if ( ! addr.isValid() )
+	sockaddr_in sockAddr; // FIXME: IPv6
+
+	if (addr.getAddress().isAny())
 	{
 		LNETL0_DEBUG( "LNETL0: Binding listen socket to any address, port %hu", addr.port() );
+	}
+
+	if (!addr.toSockAddrInet(&sockAddr))
+	{
+		nlwarning("LNETL0: Invalid address %s", addr.asString().c_str());
+		return;
 	}
 
 #ifndef NL_OS_WINDOWS
@@ -105,7 +113,7 @@ void CListenSock::init( const CInetAddress& addr )
 #endif
 
 	// Bind socket to port
-	if ( ::bind( _Sock, (const sockaddr *)addr.sockAddr(), sizeof(sockaddr_in) ) != 0 )
+	if ( ::bind( _Sock, (const sockaddr *)(&sockAddr), sizeof(sockaddr_in) ) != 0 )
 	{
 		throw ESocket( "Unable to bind listen socket to port" );
 	}
