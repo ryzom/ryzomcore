@@ -198,8 +198,7 @@ namespace NLGUI
 	std::string getRGBAString(const NLMISC::CRGBA &color);
 
 	// ***************************************************************************
-
-	const std::string &setCurrentDomain(const std::string &uri);
+	
 	void receiveCookies (CURL *curl, const std::string &domain, bool trusted);
 	void sendCookies(CURL *curl, const std::string &domain, bool trusted);
 
