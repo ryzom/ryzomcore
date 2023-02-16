@@ -30,7 +30,7 @@
 #define XML_READ_UINT(node, name, var, def) { \
 	uint tmp; \
 	prop = (char *) xmlGetProp(node, (xmlChar*)name); \
-	if (prop && fromString((const char*)prop, tmp)) \
+	if (prop && NLMISC::fromString((const char*)prop, tmp)) \
 		var = tmp; \
 	else \
 		var = def; \
@@ -39,7 +39,7 @@
 #define XML_READ_SINT(node, name, var, def) { \
 	sint tmp; \
 	prop = (char *) xmlGetProp(node, (xmlChar*)name); \
-	if (prop && fromString((const char*)prop, tmp)) \
+	if (prop && NLMISC::fromString((const char*)prop, tmp)) \
 		var = tmp; \
 	else \
 		var = def; \
@@ -56,7 +56,7 @@
 #define XML_READ_COLOR(node, name, var, def) { \
 	NLMISC::CRGBA tmp; \
 	prop = (char *) xmlGetProp(node, (xmlChar*)name); \
-	if (prop && fromString((const char*)prop, tmp)) \
+	if (prop && NLMISC::fromString((const char*)prop, tmp)) \
 		var = tmp; \
 	else \
 		var = def; \
@@ -66,6 +66,15 @@
 	prop = (char *) xmlGetProp(node, (xmlChar*)name); \
 	if (prop) \
 		var = (const char*)prop; \
+	else \
+		var = def; \
+}
+
+#define XML_READ_FLOAT(node, name, var, def) { \
+	float tmp; \
+	prop = (char *)xmlGetProp(node, (xmlChar*)name); \
+	if (prop && NLMISC::fromString((const char*)prop, tmp)) \
+		var = tmp; \
 	else \
 		var = def; \
 }
