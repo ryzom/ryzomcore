@@ -125,8 +125,8 @@ public:
 	/// Returns readable IP address. (ex: "195.68.21.195")
 	std::string			ipAddress() const;
 
-	/// Returns hostname. (ex: "www.nevrax.org")
-	const std::string&	hostName() const;
+	/// Returns readable IP address. (ex: "195.68.21.195") (previously host name) (DEPRECATED)
+	std::string			hostName() const;
 
 	/// Returns port
 	uint16				port() const;
@@ -154,9 +154,6 @@ public:
 	 */
 	static std::vector<CInetAddress> localAddresses();
 
-	/// If true, setSockAddr() always tries to retrieve the host name from the address
-	static bool RetrieveNames;
-
 protected:
 
 	/// Constructor with IPv4 address, port=0
@@ -165,15 +162,11 @@ protected:
 	/// Constructor with IPv6 address, port=0
 	CInetAddress( const in6_addr *ip, const char *hostname = 0);
 
-	/// Update _HostName from _SockAddr
-	void				updateHostName();
-
 private:
 
 	// Called in all constructors. Calls CBaseSocket::init().
 	void				init();
-
-	std::string			_HostName;
+	
 	sockaddr_in			*_SockAddr;
 	sockaddr_in6		*_SockAddr6;
 	bool				_Valid;

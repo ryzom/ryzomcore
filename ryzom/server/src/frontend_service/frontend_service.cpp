@@ -1268,7 +1268,6 @@ void CFrontEndService::init()
 		frontendPort = _ReceiveSub.dataSock()->localAddr().port();
 		listenAddr.setPort( frontendPort );
 		CLoginServer::setListenAddress( PublishFSHostAsIP.get() ? listenAddr.asIPString() : (listenAddr.hostName() + ":" + NLMISC::toString( listenAddr.port() )) ); // note: asString() returns more information
-		CInetAddress::RetrieveNames = false;
 
 		StalledMode = false;
 		LastTickTime = 0;

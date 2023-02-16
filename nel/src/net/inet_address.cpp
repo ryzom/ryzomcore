@@ -132,8 +132,6 @@ using namespace NLMISC;
 namespace NLNET
 {
 
-bool CInetAddress::RetrieveNames = false;
-
 
 /*
  * Constructor
@@ -167,16 +165,6 @@ CInetAddress::CInetAddress( const in_addr *ip, const char *hostname )
 	_SockAddr6->sin6_port = 0;
 	memset( &_SockAddr6->sin6_addr, 0, sizeof(in6_addr) );
 
-	// get the host name to be displayed
-	if(hostname)
-	{
-		_HostName = hostname;
-	}
-	else
-	{
-		updateHostName();
-	}
-
 	_Valid = true;
 }
 
@@ -196,20 +184,10 @@ CInetAddress::CInetAddress( const in6_addr *ip, const char *hostname )
 	_SockAddr->sin_port = 0;
 	memset( &_SockAddr->sin_addr, 0, sizeof(in_addr) );
 
-	// get the host name to be displayed
-	if(hostname)
-	{
-		_HostName = hostname;
-	}
-	else
-	{
-		updateHostName();
-	}
-
 	_Valid = true;
 }
 
-
+#if 0
 /*
  * Update _HostName from _SockAddr current value 
  */
@@ -241,7 +219,7 @@ void CInetAddress::updateHostName()
 		_HostName = string( host );
 	}
 }
-
+#endif
 
 /*
  * Alternate constructor (calls setByName())
@@ -270,7 +248,6 @@ CInetAddress::CInetAddress( const std::string& hostNameAndPort )
 CInetAddress::CInetAddress( const CInetAddress& other )
 {
 	init();
-	_HostName = other._HostName;
 	memcpy( _SockAddr, other._SockAddr, sizeof( *_SockAddr ) );
 	memcpy( _SockAddr6, other._SockAddr6, sizeof( *_SockAddr6 ) );
 	_Valid = other._Valid;
@@ -282,7 +259,6 @@ CInetAddress::CInetAddress( const CInetAddress& other )
  */
 CInetAddress& CInetAddress::operator=( const CInetAddress& other )
 {
-	_HostName = other._HostName;
 	memcpy( _SockAddr, other._SockAddr, sizeof( *_SockAddr ) );
 	memcpy( _SockAddr6, other._SockAddr6, sizeof( *_SockAddr6 ) );
 	_Valid = other._Valid;
@@ -403,8 +379,7 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 
 	if (res == 1)
 	{
-		// use IPv4 or IPv6 as hostname
-		_HostName = hostName;
+		// use IPv4 or IPv6
 	}
 	else
 	{
@@ -424,9 +399,6 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 			// return *this;
 			throw ESocket( (string("Hostname resolution failed for ")+hostName).c_str() );
 		}
-
-		// hostname is valid, use it
-		_HostName = hostName;
 
 		struct addrinfo *p = res;
 
@@ -482,13 +454,6 @@ void CInetAddress::setSockAddr( const sockaddr_in* saddr )
 	// invalid IPv6
 	memset(&_SockAddr6->sin6_addr, 0, sizeof(in6_addr));
 
-	// Get host name
-	// Warning: when it can't find it, it take more than 4 seconds
-	if ( CInetAddress::RetrieveNames )
-	{
-		updateHostName();
-	}
-
 	_Valid = true;
 }
 
@@ -502,13 +467,6 @@ void CInetAddress::setSockAddr6( const sockaddr_in6* saddr6 )
 
 	// invalid IPv4
 	memset(&_SockAddr->sin_addr, 0, sizeof(in_addr));
-
-	// Get host name
-	// Warning: when it can't find it, it take more than 4 seconds
-	if ( CInetAddress::RetrieveNames )
-	{
-		updateHostName();
-	}
 
 	_Valid = true;
 }
@@ -600,9 +558,9 @@ string CInetAddress::ipAddress() const
 /*
  * Returns host name. (ex: "www.nevrax.org")
  */
-const string& CInetAddress::hostName() const
+string CInetAddress::hostName() const
 {
-	return _HostName;
+	return ipAddress();
 }
 
 
