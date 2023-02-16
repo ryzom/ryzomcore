@@ -49,6 +49,7 @@
 #include "weather_manager_client.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/group_map.h"
+#include "interface_v3/view_map.h"
 //
 #include "input.h"
 
@@ -378,6 +379,10 @@ void CContinentManager::select(const string &name, const CVectorD &pos, NLMISC::
 			pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
 			if (pMap != NULL)
 				pMap->setMap(pWS->Maps[i].Name);
+
+			CViewMap* pvMap = dynamic_cast<CViewMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:visuel:map"));
+			if (pvMap)
+				pvMap->setMap(pWS->Maps[i].BitmapName, {pWS->Maps[i].MinX, pWS->Maps[i].MinY}, {pWS->Maps[i].MaxX,pWS->Maps[i].MaxY});
 			break;
 		}
 

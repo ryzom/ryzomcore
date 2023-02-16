@@ -20,6 +20,7 @@
 #include "stdpch.h"
 #include "interface_3d_scene.h"
 #include "view_radar.h"
+#include "view_map.h"
 #include "dbctrl_sheet.h"
 #include "dbgroup_list_sheet.h"
 #include "sphrase_manager.h"
@@ -37,6 +38,7 @@ void registerInterfaceElements()
 	CViewPointerRyzom::forceLinking();
 
 	REGISTER_REFLECTABLE_CLASS(CViewRadar, CViewBase);
+	REGISTER_REFLECTABLE_CLASS(CViewMap, CViewBase);
 	REGISTER_REFLECTABLE_CLASS(CGroupMap, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CDBCtrlSheet, CCtrlDraggable);
 	REGISTER_REFLECTABLE_CLASS(IListSheetBase, CInterfaceGroup);

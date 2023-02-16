@@ -942,10 +942,22 @@
            w="128"
            h="128"
            y="-8">
+
+      <!-- map image goes behing radar decal -->
+      <view id="map"
+            type="mapview"
+            texture_mask="w_radar_mask.tga"
+            world_size="50.0"
+            posref="MM MM"
+            w="108"
+            h="108"
+            y="8"
+            global_color="false" />
       <!-- Background -->
       <view id="back"
             type="bitmap"
-            texture="w_radar.tga" />
+            texture="w_radar2.tga" />
+
       <view type="text"
             id="range"
             posref="BM MM"
@@ -1001,6 +1013,8 @@
         target="ui:interface:compass:visuel:range:hardtext" />
   <link expr="switch(@UI:SAVE:RADARZOOM, 50.0, 100.0, 250.0, 500.0)"
         target="ui:interface:compass:visuel:radar:world_size" />
+  <link expr="switch(@UI:SAVE:RADARZOOM, 50.0, 100.0, 250.0, 500.0)"
+        target="ui:interface:compass:visuel:map:world_size" />
   <!--******************-->
   <!--*   CONNECTION   *-->
   <!--******************-->

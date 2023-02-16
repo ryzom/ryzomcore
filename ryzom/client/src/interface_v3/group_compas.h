@@ -31,6 +31,7 @@
 #include "animal_position_state.h"
 
 class CViewRadar;
+class CViewMap;
 
 // time for the compass to blink (to indicate that player has clicked on it)
 const float COMPASS_BLINK_TIME = 0.3f;
@@ -134,6 +135,7 @@ private:
 	CViewRadar	*_RadarView;
 	CViewText	*_RadarRangeView;
 	uint32		_RadarPos;
+	CViewMap	*_MapView;
 
 	NLMISC::CVector2f getNorthPos(const NLMISC::CVector2f &userPos) const;
 

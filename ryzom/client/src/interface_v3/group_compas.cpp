@@ -38,7 +38,9 @@
 #include "../net_manager.h"
 #include "../string_manager_client.h"
 #include "view_radar.h"
+#include "view_map.h"
 #include "../client_cfg.h"
+#include "../sheet_manager.h"
 // Game share
 #include "game_share/mission_desc.h"
 #include "game_share/inventories.h"
@@ -138,6 +140,7 @@ CGroupCompas::CGroupCompas(const TCtorParam &param)
 	_NewTargetSelectedColor = CRGBA(255, 127, 0);
 	_DistView = NULL;
 	_RadarView = NULL;
+	_MapView = NULL;
 	_RadarRangeView = NULL;
 	_RadarPos = 1; // 50 m
 	_DynamicTargetPos = NULL;
@@ -233,6 +236,13 @@ void CGroupCompas::updateCoords()
 		if (element)
 			_RadarRangeView = dynamic_cast<CViewText*>(element);
 	}
+
+	if (_MapView == NULL)
+	{
+		CInterfaceElement *element = getElement(_Id+":visuel:map");
+		if (element)
+			_MapView = dynamic_cast<CViewMap*>(element);
+	}
 }
 
 // ***************************************************************************
@@ -283,6 +293,12 @@ void CGroupCompas::draw()
 	{
 		const CVector &front = UserEntity->front();
 		myAngle = (float)atan2 (front.y, front.x);
+	}
+
+	if (_MapView)
+	{
+		_MapView->setPosition(NLMISC::CVector2f{userPos.x, userPos.y});
+		_MapView->setRotateZ(-(myAngle  - (Pi / 2.0)));
 	}
 
 	switch(_Target.getType())
