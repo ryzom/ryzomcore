@@ -474,6 +474,10 @@ CInterfaceManager::CInterfaceManager()
 
 	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
 
+	parser->clearFeatureFlags();
+	for (size_t i = 0; i < ClientCfg.UiFeatureFlags.size(); ++i)
+		parser->addFeatureFlag(ClientCfg.UiFeatureFlags[i]);
+
 	parser->setSetupOptionsCallback( this );
 	parser->addModule( "scene3d", new CIF3DSceneParser() );
 	parser->addModule( "ddx", new CIFDDXParser() );

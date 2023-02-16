@@ -107,6 +107,9 @@ struct CClientConfig
 	/// vector of XML file names that describe R2 editor
 	std::vector<string> XMLR2EDInterfaceFiles;
 
+	/// Feature flags for UI XML files
+	std::vector<string> UiFeatureFlags;
+
 	/// logo that are displayed
 	std::vector<string>	Logos;
 

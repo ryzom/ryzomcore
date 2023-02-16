@@ -512,6 +512,8 @@ CClientConfig::CClientConfig()
 	IntroNevrax_BG		= "launcher_nevrax.tga";
 	IntroNVidia_BG		= "launcher_nvidia.tga";
 
+	UiFeatureFlags.push_back(RYZOM_CLIENT_UI_FEATURE_FLAG);
+
 	TipsY				= 0.07f;
 	TeleportInfoY		= 0.23f;
 
@@ -805,6 +807,8 @@ void CClientConfig::setValues()
 
 	// r2ed interfaces
 	READ_STRINGVECTOR_FV(XMLR2EDInterfaceFiles);
+
+	READ_STRINGVECTOR_FV(UiFeatureFlags)
 
 	// logos
 	READ_STRINGVECTOR_FV(Logos);

@@ -131,6 +131,8 @@ SET(RYZOM_CLIENT_APP_NAME               "core4")
 SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://core4.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 
+SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomcore" CACHE STRING "Ryzom Client UI Feature Flag")
+
 #-----------------------------------------------------------------------------
 # urls when compiling ryzom live client
 IF(WITH_RYZOM_LIVE)
@@ -141,8 +143,10 @@ IF(WITH_RYZOM_LIVE)
   SET(RYZOM_CLIENT_PATCH_URL            "http://dl.ryzom.com/patch_live")
   SET(RYZOM_CLIENT_APP_NAME             "ryzom_live")
 
-SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/releasenotes/index.php")
-SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/releasenotes_ring/index.php")
+  SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/releasenotes/index.php")
+  SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/releasenotes_ring/index.php")
+
+  SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomforge")
 ENDIF()
 
 #-----------------------------------------------------------------------------
