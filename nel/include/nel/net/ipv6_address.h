@@ -60,6 +60,9 @@ public:
 	static CIPv6Address any();
 
 	// Constructs an any listener address
+	static CIPv6Address anyIPv6();
+
+	// Constructs an any listener address
 	static CIPv6Address anyIPv4();
 
 	// Constructs a valid loopback address

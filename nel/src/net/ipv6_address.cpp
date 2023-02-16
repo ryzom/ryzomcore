@@ -182,7 +182,6 @@ CIPv6Address CIPv6Address::any()
 	{
 		// IPv6
 		CIPv6Address addr;
-		// memcpy(addr.m_Address, &((sockaddr_in6 *)result->ai_addr)->sin6_addr, 16);
 		memset(addr.m_Address, 0, 16);
 		addr.m_Valid = true;
 		freeaddrinfo(result);
@@ -191,9 +190,20 @@ CIPv6Address CIPv6Address::any()
 
 	// No IPv6 address found, return the standard IPv4 any address
 	CIPv6Address addr;
-	memset(addr.m_Address, 0, sizeof(addr.m_Address) - 6);
+	memset(addr.m_Address, 0, 16);
 	addr.m_Address[10] = 0xFF;
 	addr.m_Address[11] = 0xFF;
+
+	addr.m_Valid = true;
+	return addr;
+}
+
+// Constructs an address suitable for listening on any interface
+CIPv6Address CIPv6Address::anyIPv6()
+{
+	// Return the standard IPv6 any address
+	CIPv6Address addr;
+	memset(addr.m_Address, 0, 16);
 	addr.m_Valid = true;
 	return addr;
 }
@@ -203,7 +213,7 @@ CIPv6Address CIPv6Address::anyIPv4()
 {
 	// Return the standard IPv4 any address
 	CIPv6Address addr;
-	memset(addr.m_Address, 0, sizeof(addr.m_Address) - 6);
+	memset(addr.m_Address, 0, 16);
 	addr.m_Address[10] = 0xFF;
 	addr.m_Address[11] = 0xFF;
 	addr.m_Valid = true;
@@ -244,13 +254,13 @@ std::string CIPv6Address::toIPv4String() const
 #ifdef NL_OS_WINDOWS
 
 	// Use WSAAddressToString
-	TSockAddrStorage sockaddr;
-	sockaddr.ss_family = AF_INET;
-	((sockaddr_in *)&sockaddr)->sin_addr.s_addr = *(DWORD *)&m_Address[12];
-	DWORD addressLen = sizeof(sockaddr);
+	TSockAddrStorage sockAddr;
+	toSockAddrInet((TSockAddrIn *)(&sockAddr));
+	((TSockAddrIn *)(&sockAddr))->sin_port = 0;
+	DWORD addressLen = sizeof(sockAddr);
 	WCHAR addressStr[INET_ADDRSTRLEN];
 	DWORD addressStrLen = sizeof(addressStr) / sizeof(WCHAR);
-	if (WSAAddressToStringW((LPSOCKADDR)&sockaddr, addressLen, NULL, addressStr, &addressStrLen) != 0)
+	if (WSAAddressToStringW((LPSOCKADDR)(&sockAddr), addressLen, NULL, addressStr, &addressStrLen) != 0)
 	{
 		// Failed to convert
 		return nlstr("null");
@@ -282,13 +292,13 @@ std::string CIPv6Address::toIPv6String() const
 #ifdef NL_OS_WINDOWS
 
 	// Use WSAAddressToString
-	TSockAddrStorage sockaddr;
-	sockaddr.ss_family = AF_INET6;
-	memcpy(&((sockaddr_in6 *)&sockaddr)->sin6_addr, m_Address, 16);
-	DWORD addressLen = sizeof(sockaddr);
+	TSockAddrStorage sockAddr;
+	toSockAddrInet6((TSockAddrIn6 *)(&sockAddr));
+	((TSockAddrIn6 *)(&sockAddr))->sin6_port = 0;
+	DWORD addressLen = sizeof(sockAddr);
 	WCHAR addressStr[INET6_ADDRSTRLEN];
 	DWORD addressStrLen = sizeof(addressStr) / sizeof(WCHAR);
-	if (WSAAddressToStringW((LPSOCKADDR)&sockaddr, addressLen, NULL, addressStr, &addressStrLen) != 0)
+	if (WSAAddressToStringW((LPSOCKADDR)(&sockAddr), addressLen, NULL, addressStr, &addressStrLen) != 0)
 	{
 		// Failed to convert
 		return nlstr("null");

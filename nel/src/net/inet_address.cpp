@@ -305,20 +305,33 @@ CInetAddress::~CInetAddress()
  */
 void CInetAddress::setNameAndPort( const std::string& hostNameAndPort )
 {
-	string::size_type pos = hostNameAndPort.find_first_of (':');
-	if (pos != string::npos)
+	std::string hostName;
+	uint16 port;
+
+	// Sets hostname and port (ex: www.nevrax.com:80, 192.168.0.2:80, [::1]:80)
+	string::size_type pos6end = hostNameAndPort.find_last_of(']');
+	string::size_type pos = hostNameAndPort.find_last_of(':');
+	if (pos != string::npos && (pos6end == string::npos || pos > pos6end))
 	{
-		uint16 port;
 		fromString(hostNameAndPort.substr(pos + 1), port);
-		setPort( port );
+		if (pos6end != string::npos)
+		{
+			string::size_type pos6begin = hostNameAndPort.find_first_of('[');
+			hostName = hostNameAndPort.substr(pos6begin + 1, pos6end - pos6begin - 1);
+		}
+		else
+		{
+			hostName = hostNameAndPort.substr(0, pos);
+		}
 	}
 	else
 	{
-		setPort( 0 );
+		port = 0;
+		hostName = hostNameAndPort;
 	}
 
-	// if pos == -1, it will copy all the string
-	setByName( hostNameAndPort.substr (0, pos) );
+	setByName(hostName);
+	m_Port = port;
 }
 
 
