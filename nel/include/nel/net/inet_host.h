@@ -34,6 +34,7 @@ class CInetHost
 {
 public:
 	CInetHost();
+	CInetHost(const char *hostnameAndPort);
 	CInetHost(const std::string &hostnameAndPort);
 	CInetHost(const std::string &hostname, uint16 port);
 

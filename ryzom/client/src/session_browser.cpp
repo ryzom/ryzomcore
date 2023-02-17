@@ -138,7 +138,7 @@ CCallbackClientAdaptor *CSessionBrowser::getCallbackAdaptor()
 	return static_cast<CCallbackClientAdaptor *>(_CallbackClient.get());
 }
 
-void CSessionBrowser::connectItf(NLNET::CInetAddress address)
+void CSessionBrowser::connectItf(NLNET::CInetHost address)
 {
 	// call the interface connectItf
 	CSessionBrowserServerWebClientItf::connectItf(address);

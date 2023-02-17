@@ -725,7 +725,7 @@ void CBackupService::init()
 		if (host.find (":") == string::npos)
 			host += ":43990";
 
-		CUnifiedNetwork::getInstance()->addService ("BS", CInetAddress(host));
+		CUnifiedNetwork::getInstance()->addService ("BS", CInetHost(host));
 	}
 
 	// set the initial read state from the config file

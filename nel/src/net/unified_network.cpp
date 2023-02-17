@@ -2553,7 +2553,7 @@ NLMISC_CLASS_COMMAND_IMPL(CUnifiedNetwork, addService)
 		return false;
 	}
 
-	CInetAddress ia(address->ParamValue);;
+	CInetHost ia(address->ParamValue);;
 	if (!ia.isValid())
 	{
 		log.displayNL("Can't parse internet address in '%s'", address->ParamValue.c_str());

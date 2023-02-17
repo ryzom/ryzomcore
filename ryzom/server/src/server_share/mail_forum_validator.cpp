@@ -231,7 +231,7 @@ bool	CMailForumValidator::init()
 		if (host.find (":") == string::npos)
 			host+= ":43980";
 
-		CUnifiedNetwork::getInstance()->addService("MFS", CInetAddress(host)); // warning: can call the serviceUp callback => initMFS() again
+		CUnifiedNetwork::getInstance()->addService("MFS", CInetHost(host)); // warning: can call the serviceUp callback => initMFS() again
 	}
 	else
 	{

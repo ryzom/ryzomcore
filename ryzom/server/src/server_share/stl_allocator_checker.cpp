@@ -27,7 +27,7 @@
 #include "nel/misc/variable.h"
 #include "stl_allocator_checker.h"
 
-bool EnableStlAllocatorChecker = true;
+bool EnableStlAllocatorChecker = false;
 NLMISC_VARIABLE(bool, EnableStlAllocatorChecker, "Enable stl allocator tests");
 
 uint64 StlAllocatorMaxFree = 0;

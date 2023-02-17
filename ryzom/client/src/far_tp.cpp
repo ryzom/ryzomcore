@@ -741,7 +741,7 @@ bool CFarTP::requestFarTPToSession(TSessionId sessionId, uint8 charSlot, CFarTP:
 	CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 	sb.init(NULL);
 //	sb.setAuthInfo(NetMngr.getLoginCookie());
-//	sb.connectItf(CInetAddress("borisb", 80));
+//	sb.connectItf(CInetHost("borisb", 80));
 
 	sb.CurrentJoinMode = joinMode;
 	// send the join session
@@ -1205,7 +1205,7 @@ void CFarTP::connectToNewShard()
 	NetMngr.initCookie(Cookie, FSAddr);
 
 	// connect the session browser to the new shard
-	NLNET::CInetAddress sbsAddress(CSessionBrowserImpl::getInstance().getFrontEndAddress());
+	NLNET::CInetHost sbsAddress(CSessionBrowserImpl::getInstance().getFrontEndAddress());
 	sbsAddress.setPort(sbsAddress.port()+SBSPortOffset);
 	CSessionBrowserImpl::getInstance().connectItf(sbsAddress);
 

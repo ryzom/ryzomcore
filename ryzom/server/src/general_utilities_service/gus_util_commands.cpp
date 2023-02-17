@@ -90,7 +90,7 @@ NLMISC_CATEGORISED_COMMAND(utils,connect,"add a layer5 service connection to the
 	if (args.size()!=2)
 		return false;
 
-	NLNET::CUnifiedNetwork::getInstance()->addService(args[0], NLNET::CInetAddress(args[1]));
+	NLNET::CUnifiedNetwork::getInstance()->addService(args[0], NLNET::CInetHost(args[1]));
 
 	return true;
 }

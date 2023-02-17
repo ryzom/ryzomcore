@@ -110,6 +110,12 @@ CInetHost::CInetHost()
 	m_Addresses.push_back(CInetAddress(false));
 }
 
+CInetHost::CInetHost(const char *hostnameAndPort)
+{
+	set(std::string(hostnameAndPort));
+	nlassert(m_Addresses.size());
+}
+
 CInetHost::CInetHost(const std::string &hostnameAndPort)
 {
 	set(hostnameAndPort);

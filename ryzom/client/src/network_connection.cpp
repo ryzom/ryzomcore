@@ -580,21 +580,21 @@ bool	CNetworkConnection::connect(string &result)
 		// do this process only if Use == 1
 		if (cfg.getVar("Use").asInt() == 1)
 		{
-			CInetAddress fsaddr (_FrontendAddress);
+			CInetHost fsaddr (_FrontendAddress);
 
 			fsaddr.setPort(0);
 
-			nlinfo ("Try to find a shard that have fsaddr = '%s'", fsaddr.asString().c_str());
+			nlinfo ("Try to find a shard that have fsaddr = '%s'", fsaddr.toStringLong().c_str());
 
 			CConfigFile::CVar &shards = cfg.getVar("Shards");
-			CInetAddress net;
+			CInetHost net;
 			uint i;
 			for (i = 0; i < shards.size(); i+=2)
 			{
 				try
 				{
-					net.setNameAndPort (shards.asString(i));
-					nlinfo ("testAddr = '%s'", net.asString().c_str());
+					net = CInetHost(shards.asString(i));
+					nlinfo ("testAddr = '%s'", net.toStringLong().c_str());
 					if (net == fsaddr)
 					{
 						// ok, we found it, now overwrite files
@@ -646,7 +646,7 @@ bool	CNetworkConnection::connect(string &result)
 			}
 			if (i == shards.size())
 			{
-				nlwarning ("the fsaddr '%s' is not in the shards.cfg, can't copy data_common files", fsaddr.asString().c_str());
+				nlwarning ("the fsaddr '%s' is not in the shards.cfg, can't copy data_common files", fsaddr.toStringLong().c_str());
 			}
 		}
 	}
@@ -667,7 +667,7 @@ bool	CNetworkConnection::connect(string &result)
 		//
 		// S12: connect to the FES. Note: In UDP mode, it's the user that have to send the cookie to the front end
 		//
-		_Connection.connect (CInetAddress(_FrontendAddress));
+		_Connection.connect (CInetHost(_FrontendAddress));
 	}
 	catch (const ESocket &e)
 	{

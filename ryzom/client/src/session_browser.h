@@ -52,7 +52,7 @@ class CSessionBrowser : public RSMGR::CSessionBrowserServerWebClientItf,
 	bool				_TerminateComm;
 
 	// the server address for connection
-	NLNET::CInetAddress	_ServerAddr;
+	NLNET::CInetHost	_ServerAddr;
 
 	// a flag to signal a failure in connection attempt
 	bool				_SignalConnFail;
@@ -103,7 +103,7 @@ public:
 	 *	connection information, the connection is made only when the
 	 *	client effectively send message.
 	 */
-	virtual void connectItf(NLNET::CInetAddress address);
+	virtual void connectItf(NLNET::CInetHost address);
 
 	// call update each frame
 	void update();
