@@ -139,7 +139,11 @@ namespace NLNET
 CInetAddress::CInetAddress()
 {
 	init();
-	m_Address = CIPv6Address::anyIPv4(); // TODO: IPv6
+#if NLNET_IPV6_LOOKUP
+	m_Address = CIPv6Address::anyIPv6();
+#else
+	m_Address = CIPv6Address::anyIPv4();
+#endif
 }
 
 /*
@@ -150,7 +154,11 @@ CInetAddress::CInetAddress(bool any)
 	init();
 	if (any)
 	{
-		m_Address = CIPv6Address::anyIPv4(); // TODO: IPv6
+#if NLNET_IPV6_LOOKUP
+		m_Address = CIPv6Address::anyIPv6();
+#else
+		m_Address = CIPv6Address::anyIPv4();
+#endif
 	}
 }
 
@@ -686,19 +694,9 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	return vect;
 }
 
-bool CInetAddress::is127001 () const
-{
-	return (internalIPAddress () == htonl(0x7F000001));
-}
-
 bool CInetAddress::isLoopbackIPAddress () const
 {
-	std::string sIPAddress = ipAddress();
-	
-	return	(sIPAddress.compare("::") == 0) ||
-			(sIPAddress.compare("::1") == 0) ||
-			(sIPAddress.compare("127.0.0.1") == 0) ||
-			(sIPAddress.compare("0:0:0:0:0:0:0:1") == 0);
+	return m_Address.getType() == CIPv6Address::Loopback;
 }
 
 uint32 CInetAddress::hash32() const
