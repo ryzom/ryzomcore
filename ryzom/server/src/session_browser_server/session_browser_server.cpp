@@ -84,7 +84,7 @@ class CSessionBrowserServerMod
 	MSW::CConnection		_RingDB;
 
 	/// Address of the SU server
-	CInetAddress	_ServerAddress;
+	CInetHost	_ServerAddress;
 
 	// date of last SU connection attempt
 	time_t		_LastConnAttempt;
@@ -115,8 +115,8 @@ public:
 		const TParsedCommandLine *sa = initInfo.getParam("suAddr");
 		BOMB_IF(sa == NULL, "Failed to find param 'suAddr' in init param", return false);
 
-		_ServerAddress = CInetAddress(sa->ParamValue);
-		nldebug("Initializing module, SU at %s", _ServerAddress.asString().c_str());
+		_ServerAddress = CInetHost(sa->ParamValue);
+		nldebug("Initializing module, SU at %s", _ServerAddress.toStringLong().c_str());
 		BOMB_IF(!_ServerAddress.isValid(), "Invalid server address in '"<<sa->ParamValue<<"'", return false);
 
 		const TParsedCommandLine *lp = initInfo.getParam("listenPort");
@@ -160,7 +160,7 @@ public:
 
 			try
 			{
-				nldebug("Connecting to SU at %s...", _ServerAddress.asString().c_str());
+				nldebug("Connecting to SU at %s...", _ServerAddress.toStringLong().c_str());
 				CRingSessionManagerWebClientItf::connectItf(_ServerAddress);
 			}
 			catch(...)

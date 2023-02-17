@@ -3941,7 +3941,7 @@ namespace RSMGR
 		}
 
 		/// Connect the interface client to the callback server at the specified address and port
-		virtual void connectItf(NLNET::CInetHost address)
+		virtual void connectItf(const NLNET::CInetHost &address)
 		{
 			NLNET::TCallbackItem *arrayPtr;
 			uint32 arraySize;
@@ -6047,7 +6047,7 @@ namespace RSMGR
 		{}
 
 		/// Connect the interface client to the callback server at the specified address and port
-		virtual void connectItf(NLNET::CInetHost address)
+		virtual void connectItf(const NLNET::CInetHost &address)
 		{
 			NLNET::TCallbackItem *arrayPtr;
 			uint32 arraySize;

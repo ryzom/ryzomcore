@@ -2729,7 +2729,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		}
 </xsl:if>
 		/// Connect the interface client to the callback server at the specified address and port
-		virtual void connectItf(NLNET::CInetHost address)
+		virtual void connectItf(const NLNET::CInetHost &amp;address)
 		{
 			NLNET::TCallbackItem *arrayPtr;
 			uint32 arraySize;
