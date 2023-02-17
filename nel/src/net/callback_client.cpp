@@ -256,19 +256,12 @@ TSockId	CCallbackClient::getSockId (TSockId hostid)
 	return id ();
 }
 
-void CCallbackClient::connect(const CInetAddress &addr)
-{
-	std::vector<CInetAddress> addrs;
-	addrs.push_back(addr);
-	connect(addrs);
-}
-
 /*
  * Connect to the specified host
  * Recorded : YES
  * Replayed : YES
  */
-void CCallbackClient::connect( const std::vector<CInetAddress> &addrs )
+void CCallbackClient::connect( const CInetHost &addrs )
 {
 #ifdef USE_MESSAGE_RECORDER
 	if ( _MR_RecordingState != Replay )

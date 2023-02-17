@@ -57,10 +57,7 @@ public:
 	void	update (sint32 timeout=0);
 
 	/// Connects to the specified host
-	void	connect( const CInetAddress& addr );
-
-	/// Connects to the specified host
-	void	connect( const std::vector<CInetAddress>& addrs );
+	void	connect(const CInetHost &addrs);
 
 	/** Returns true if the connection is still connected (changed when a disconnection
 	 * event has reached the front of the receive queue, just before calling the disconnection callback

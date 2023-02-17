@@ -89,6 +89,9 @@ public:
 
 	/// To string hostname:port (ip, ip, ip)
 	std::string toStringLong() const;
+
+	/// To string hostname:port (ip)
+	std::string toStringLong(size_t i) const;
 	
 	/// To string short hostname:port
 	std::string toString() const;

@@ -225,10 +225,7 @@ protected:
 
 
 	/// Connects to the specified addr; set connectedstate to true if no connection advertising is needed
-	void connect( const CInetAddress& addr, bool nodelay, bool connectedstate );
-
-	/// Connects to the specified addr; set connectedstate to true if no connection advertising is needed
-	void connect( const std::vector<CInetAddress>& addrs, bool nodelay, bool connectedstate );
+	void connect(const CInetHost &addr, bool nodelay, bool connectedstate);
 
 	/// Disconnects; set connectedstate to false if no disconnection advertising is needed
 	void disconnect( bool connectedstate );

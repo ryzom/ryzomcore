@@ -85,18 +85,11 @@ CBufClient::CBufClient( bool nodelay, bool replaymode, bool ) :
 	}
 }
 
-void CBufClient::connect(const CInetAddress &addr)
-{
-	std::vector<CInetAddress> addrs;
-	addrs.push_back(addr);
-	connect(addrs);
-}
-
 /*
  * Connects to the specified host
  * Precond: not connected
  */
-void CBufClient::connect(const std::vector<CInetAddress> &addrs)
+void CBufClient::connect(const CInetHost &addrs)
 {
 	nlnettrace( "CBufClient::connect" );
 	nlassert( ! _BufSock->Sock->connected() );

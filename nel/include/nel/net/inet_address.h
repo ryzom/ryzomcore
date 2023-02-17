@@ -166,6 +166,8 @@ public:
 	 */
 	static std::vector<CInetAddress> localAddresses();
 
+	inline void setNull() { m_Address.setNull(); m_Port = 0; }
+
 	uint32 hash32() const;
 	uint64 hash64() const;
 	inline size_t hash() const

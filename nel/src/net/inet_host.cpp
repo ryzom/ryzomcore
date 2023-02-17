@@ -481,6 +481,15 @@ std::string CInetHost::toStringLong() const
 	return res;
 }
 
+std::string CInetHost::toStringLong(size_t i) const
+{
+	std::string res = toString();
+	res += nlstr(" (");
+	res += m_Addresses[i].getAddress().toString();
+	res += nlstr(")");
+	return res;
+}
+
 std::string CInetHost::toString() const
 {
 	std::string hostname = m_Hostname.empty() ? nlstr("invalid.invalid") : m_Hostname;

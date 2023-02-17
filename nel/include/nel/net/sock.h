@@ -39,14 +39,14 @@ struct ESocket : public NLMISC::Exception
 	 * where the address should be written. Moreover, the length of reason plus
 	 * the length of the address when displayed by asString() should no exceed 256.
 	 */
-	ESocket( const char *reason="", bool systemerror=true, CInetAddress *addr=NULL );
+	ESocket( const char *reason="", bool systemerror=true, CInetHost *addr=NULL );
 };
 
 
 /// Exception raised when connect() fails
 struct ESocketConnectionFailed : public ESocket
 {
-	ESocketConnectionFailed( CInetAddress addr ) : ESocket( "Connection to %s failed", true, &addr ) {}
+	ESocketConnectionFailed( CInetHost addr ) : ESocket( "Connection to %s failed", true, &addr ) {}
 };
 
 
@@ -141,8 +141,6 @@ public:
 
 	/// @name Socket setup
 	//@{
-	
-	virtual void		connect( const CInetAddress& addr );
 
 	/** Connection.
 	 * This method does not return a boolean, otherwise a programmer could ignore the result and no
@@ -150,7 +148,7 @@ public:
 	 * - If addr is not valid, an exception ESocket is thrown
 	 * - If connect() fails for another reason, an exception ESocketConnectionFailed is thrown
 	 */
-	virtual void		connect( const std::vector<CInetAddress>& addrs );
+	virtual void		connect( const CInetHost& addrs );
 
 	/** Sets the socket in nonblocking mode. Call this method *after* connect(), otherwise you will get
 	 * an "would block" error (10035 on Windows). In nonblocking mode, use received() and sent() instead of receive() and send()

@@ -79,7 +79,7 @@ bool CSock::_Initialized = false;
 /*
  * ESocket constructor
  */
-ESocket::ESocket( const char *reason, bool systemerror, CInetAddress *addr )
+ESocket::ESocket( const char *reason, bool systemerror, CInetHost *addr )
 {
 /*it doesnt work on linux, should do something more cool
   	std::stringstream ss;
@@ -100,7 +100,7 @@ ESocket::ESocket( const char *reason, bool systemerror, CInetAddress *addr )
 	if ( addr != NULL )
 	{
 		// Version with address
-		smprintf( str, 256, reason, addr->asString().c_str() ); // reason *must* contain "%s"
+		smprintf( str, 256, reason, addr->toStringLong().c_str() ); // reason *must* contain "%s"
 		_Reason += str;
 	}
 	else
@@ -355,26 +355,19 @@ CSock::~CSock()
 	}
 }
 
-void CSock::connect(const CInetAddress &addr)
-{
-	std::vector<CInetAddress> addrs;
-	addrs.push_back(addr);
-	connect(addrs);
-}
-
 /*
  * Connection
  */
-void CSock::connect( const std::vector<CInetAddress>& addrs ) // FIXME: CInetHost
+void CSock::connect( const CInetHost& addrs )
 {
 	bool attempted = false;
 	bool connected = false;
 	for (size_t ai = 0; ai < addrs.size(); ++ai)
 	{
-		CInetAddress addr = addrs[ai];
+		CInetAddress addr = addrs.addresses()[ai];
 		sockaddr_in sockAddr; // FIXME: IPv6
 
-		LNETL0_DEBUG("LNETL0: Socket %d connecting to %s...", _Sock, addr.asString().c_str());
+		LNETL0_DEBUG("LNETL0: Socket %d connecting to %s...", _Sock, addrs.toStringLong(ai).c_str());
 
 		// Check address
 		if (!addr.toSockAddrInet(&sockAddr))
@@ -404,13 +397,13 @@ void CSock::connect( const std::vector<CInetAddress>& addrs ) // FIXME: CInetHos
 			#endif
 					}
 			*/
-			LNETL0_DEBUG("LNETL0: Socket %d failed to connect to %s", _Sock, addr.asString().c_str());
+			LNETL0_DEBUG("LNETL0: Socket %d failed to connect to %s", _Sock, addrs.toStringLong(ai).c_str());
 			continue;
 		}
 		setLocalAddress();
 		if (_Logging)
 		{
-			LNETL0_DEBUG("LNETL0: Socket %d connected to %s (local %s)", _Sock, addr.asString().c_str(), _LocalAddr.asString().c_str());
+			LNETL0_DEBUG("LNETL0: Socket %d connected to %s (local %s)", _Sock, addrs.toStringLong(ai).c_str(), _LocalAddr.asString().c_str());
 		}
 		_RemoteAddr = addr;
 		connected = true;
@@ -422,7 +415,7 @@ void CSock::connect( const std::vector<CInetAddress>& addrs ) // FIXME: CInetHos
 		{
 			throw ESocket("Unable to connect to invalid address", false);
 		}
-		throw ESocketConnectionFailed(addrs[0]); // FIXME: CInetHost
+		throw ESocketConnectionFailed(addrs);
 	}
 
 	_BytesReceived = 0;

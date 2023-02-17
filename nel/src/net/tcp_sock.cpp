@@ -67,20 +67,13 @@ CTcpSock::CTcpSock( SOCKET sock, const CInetAddress& remoteaddr ) :
 	CSock( sock, remoteaddr )
 {}
 
-void CTcpSock::connect(const CInetAddress &addr)
-{
-	std::vector<CInetAddress> addrs;
-	addrs.push_back(addr);
-	connect(addrs);
-}
-
 /* Connection. You can reconnect a socket after being disconnected.
  * This method does not return a boolean, otherwise a programmer could ignore the result and no
  * exception would be thrown if connection fails :
  * - If addr is not valid, an exception ESocket is thrown
  * - If connect() fails for another reason, an exception ESocketConnectionFailed is thrown
  */
-void CTcpSock::connect( const std::vector<CInetAddress> & addrs )
+void CTcpSock::connect( const CInetHost & addrs )
 {
 	// Create a new socket
 	if ( _Sock != INVALID_SOCKET )

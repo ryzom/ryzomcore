@@ -217,14 +217,7 @@ void				CUdpSimSock::setSimValues (NLMISC::CConfigFile &cf)
 		cbSimVar( *pv );
 }
 
-void				CUdpSimSock::connect(const CInetAddress &addr)
-{
-	std::vector<CInetAddress> addrs;
-	addrs.push_back(addr);
-	connect(addrs);
-}
-
-void				CUdpSimSock::connect( const std::vector<CInetAddress>& addrs )
+void				CUdpSimSock::connect( const CInetHost& addrs )
 {
 	UdpSock.connect (addrs);
 }

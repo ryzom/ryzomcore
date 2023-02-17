@@ -54,8 +54,6 @@ public:
 
 	/// Construct a CTcpSock object using an already connected socket descriptor and its associated remote address
 	CTcpSock( SOCKET sock, const CInetAddress& remoteaddr );
-
-	virtual void		connect( const CInetAddress& addr ) NL_OVERRIDE;
 	
 	/** Connection. You can reconnect a socket after being disconnected.
 	 * This method does not return a boolean, otherwise a programmer could ignore the result and no
@@ -63,7 +61,7 @@ public:
 	 * - If addr is not valid, an exception ESocket is thrown
 	 * - If connect() fails for another reason, an exception ESocketConnectionFailed is thrown
 	 */
-	virtual void		connect( const std::vector<CInetAddress>& addr ) NL_OVERRIDE;
+	virtual void		connect( const CInetHost& addr ) NL_OVERRIDE;
 
 	/** Sets a custom TCP Window size (SO_RCVBUF and SO_SNDBUF).
 	 * You must close the socket is necessary, before calling this method.
