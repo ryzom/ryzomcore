@@ -122,7 +122,7 @@ private:
 // DEPRECATED. For compatibility
 inline std::string vectorCInetAddressToString(const CInetHost &host)
 {
-	host.toStringLong();
+	return host.toStringLong();
 }
 
 } /* namespace NLNET */

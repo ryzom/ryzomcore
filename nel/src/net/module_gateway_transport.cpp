@@ -394,7 +394,7 @@ namespace NLNET
 	{
 	public:
 		/// The server address for this route
-		CInetAddress				ServerAddr;
+		CInetHost					ServerAddr;
 		/// The Client callback
 		mutable CCallbackClient		CallbackClient;
 		/// Time stamp of last message received/emitted
@@ -406,7 +406,7 @@ namespace NLNET
 		// conn id
 		uint32						ConnId;
 
-		CL3ClientRoute(IGatewayTransport *transport, CInetAddress serverAddr,uint32 connId)
+		CL3ClientRoute(IGatewayTransport *transport, CInetHost serverAddr,uint32 connId)
 			: CGatewayRoute(transport),
 			ServerAddr(serverAddr),
 			LastCommTime(CTime::getSecondsSince1970()),
@@ -532,14 +532,14 @@ namespace NLNET
 						route->LastConnectionRetry = now;
 						try
 						{
-							nldebug("Connecting to %s...", route->ServerAddr.asString().c_str());
+							nldebug("Connecting to %s...", route->ServerAddr.toStringLong().c_str());
 							route->CallbackClient.connect(route->ServerAddr);
-							nldebug("Connected to %s", route->ServerAddr.asString().c_str());
+							nldebug("Connected to %s", route->ServerAddr.toStringLong().c_str());
 							_Gateway->onRouteAdded(route);
 						}
 						catch(...)
 						{
-							nlinfo("Server %s still not available for connection", route->ServerAddr.asString().c_str());
+							nlinfo("Server %s still not available for connection", route->ServerAddr.toStringLong().c_str());
 						}
 					}
 				}
@@ -584,7 +584,7 @@ namespace NLNET
 			{
 				CL3ClientRoute *route = first->second;
 				log.displayNL("    + route to '%s', %s, %u entries in the proxy translation table :",
-					route->ServerAddr.asString().c_str(),
+					route->ServerAddr.toStringLong().c_str(),
 					route->CallbackClient.connected() ? "connected" : "NOT CONNECTED",
 					route->ForeignToLocalIdx.getAToBMap().size());
 				{
@@ -592,7 +592,7 @@ namespace NLNET
 					for (; first != last; ++first)
 					{
 						IModuleProxy *modProx = mm.getModuleProxy(first->second);
-
+						
 						log.displayNL("      - Proxy '%s' : local proxy id %u => foreign module id %u",
 							modProx != NULL ? modProx->getModuleName().c_str() : "ERROR, invalid module",
 							first->second,
@@ -625,7 +625,7 @@ namespace NLNET
 				if (addrParam == NULL)
 					throw EInvalidCommand();
 
-				CInetAddress addr(addrParam->ParamValue);
+				CInetHost addr(addrParam->ParamValue);
 
 				connect(addr);
 			}
@@ -656,7 +656,7 @@ namespace NLNET
 		}
 
 		/// connect to a server
-		void connect(CInetAddress &addr)
+		void connect(CInetHost &addr)
 		{
 			H_AUTO(L3C_connect);
 			uint32 connId;
@@ -681,15 +681,15 @@ namespace NLNET
 
 			try
 			{
-				nldebug("CGatewayL3ClientTransport : Connecting to %s...", addr.asString().c_str());
+				nldebug("CGatewayL3ClientTransport : Connecting to %s...", addr.toStringLong().c_str());
 				route->LastConnectionRetry = CTime::getSecondsSince1970();
 				// connect to the server
 				route->CallbackClient.connect(addr);
-				nldebug("CGatewayL3ClientTransport : Connected to %s with connId %u", addr.asString().c_str(), connId);
+				nldebug("CGatewayL3ClientTransport : Connected to %s with connId %u", addr.toStringLong().c_str(), connId);
 			}
 			catch (const ESocketConnectionFailed &)
 			{
-				nlinfo("CGatewayL3ClientTransport : Failed to connect to server %s, retrying in %u seconds", addr.asString().c_str(), _RetryInterval);
+				nlinfo("CGatewayL3ClientTransport : Failed to connect to server %s, retrying in %u seconds", addr.toStringLong().c_str(), _RetryInterval);
 			}
 
 			// store the route
@@ -733,7 +733,7 @@ namespace NLNET
 
 			CL3ClientRoute *route = it->second;
 
-			nldebug("CGatewayL3ClientTransport : Closing connection %u to %s", connId, route->ServerAddr.asString().c_str());
+			nldebug("CGatewayL3ClientTransport : Closing connection %u to %s", connId, route->ServerAddr.toStringLong().c_str());
 
 
 			if (route->CallbackClient.connected())
@@ -766,7 +766,7 @@ namespace NLNET
 			TClientRoutes::iterator it(_Routes.find(from));
 			nlassert(it != _Routes.end());
 
-			nldebug("CGatewayL3ClientTransport : Disconnection from %s", it->second->ServerAddr.asString().c_str());
+			nldebug("CGatewayL3ClientTransport : Disconnection from %s", it->second->ServerAddr.toStringLong().c_str());
 
 
 			// callback the gateway that this route is no more

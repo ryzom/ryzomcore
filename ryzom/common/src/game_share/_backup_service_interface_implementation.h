@@ -123,8 +123,8 @@ private:
 	bool	_BSInReadMode;
 
 //	bool _HaveSeparatePDBS;
-	NLNET::CInetAddress		_BSMasterAddress;
-	NLNET::CInetAddress		_BSSlaveAddress;
+	NLNET::CInetHost _BSMasterAddress;
+	NLNET::CInetHost _BSSlaveAddress;
 
 	// Layer 3 connection to the BS
 	NLNET::CCallbackClient	_L3BSConn;

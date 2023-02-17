@@ -40,7 +40,7 @@
 #include <netdb.h>
 #endif
 
-#define NLNET_IPV6_LOOKUP (0)
+#define NLNET_IPV6_LOOKUP (1)
 
 namespace NLNET {
 
