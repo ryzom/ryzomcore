@@ -340,7 +340,11 @@ void CIPv6Address::serial(NLMISC::IStream &s)
 	}
 	else
 	{
-		uint8 family = isNull() ? ~0 : (isIPv4() ? AF_INET : AF_INET6);
+		uint8 family;
+		if (!s.isReading())
+		{
+			family = isNull() ? ~0 : (isIPv4() ? AF_INET : AF_INET6);
+		}
 		s.serial(family);
 		if (family == AF_INET)
 		{
