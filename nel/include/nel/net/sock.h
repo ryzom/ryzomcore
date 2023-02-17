@@ -301,6 +301,9 @@ protected:
 	/// Secondary time out value (microsec) for select in dataAvailable()
 	long			_TimeoutUs;
 
+	/// Socket address family used for creating the socket
+	int				_AddressFamily;
+
 private:
 
 	/// True if the network library has been initialized

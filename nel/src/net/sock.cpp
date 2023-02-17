@@ -239,7 +239,8 @@ CSock::CSock( SOCKET sock, const CInetAddress& remoteaddr ) :
 	_BytesReceived( 0 ),
 	_BytesSent( 0 ),
 	_MaxReceiveTime( 0 ),
-	_MaxSendTime( 0 )
+	_MaxSendTime( 0 ),
+	_AddressFamily(AF_UNSPEC)
 {
 	nlassert( CSock::_Initialized );
 	/*{
@@ -279,19 +280,33 @@ void CSock::createSocket( int type, int protocol )
 {
 	nlassert( _Sock == INVALID_SOCKET );
 
-	_Sock = (SOCKET)socket( AF_INET6, type, protocol ); // or IPPROTO_IP (=0) ?
-	if ( _Sock == INVALID_SOCKET )
+	// First try IPv6
+	_Sock = (SOCKET)socket(AF_INET6, type, protocol); // or IPPROTO_IP (=0) ?
+	if (_Sock == INVALID_SOCKET)
 	{
-		throw ESocket( "Socket creation failed" );
-	}    
-	
-	// Disable IPv6 ONLY flag
-	int no = 0;
-	if (setsockopt(_Sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&no, sizeof(no)) == SOCKET_ERROR)
+		// Fallback to IPv4
+		_Sock = (SOCKET)socket(AF_INET, type, protocol);
+		if (_Sock == INVALID_SOCKET)
+		{
+			throw ESocket("Could not create socket");
+		}
+		_AddressFamily = AF_INET;
+	}
+	else
 	{
-		throw ESocket("Could not disable IPV6_V6ONLY flag");
+		_AddressFamily = AF_INET6;
 	}
 
+	if (_AddressFamily == AF_INET6)
+	{
+		// Ensure this is dual stack IPv6 and IPv4
+		// Disable IPv6 ONLY flag
+		int no = 0;
+		if (setsockopt(_Sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&no, sizeof(no)) == SOCKET_ERROR)
+		{
+			throw ESocket("Could not disable IPV6_V6ONLY flag");
+		}
+	}
 
 	if ( _Logging )
 	{
@@ -332,6 +347,7 @@ void CSock::close()
 	::close( sockToClose );
 #endif
 	_Connected = false;
+	_AddressFamily = AF_UNSPEC;
 }
 
 
@@ -361,6 +377,7 @@ CSock::~CSock()
 		::close( _Sock );
 #endif
 		_Sock = INVALID_SOCKET;
+		_AddressFamily = AF_UNSPEC;
 	}
 }
 
@@ -374,12 +391,12 @@ void CSock::connect( const CInetHost& addrs )
 	for (size_t ai = 0; ai < addrs.size(); ++ai)
 	{
 		CInetAddress addr = addrs.addresses()[ai];
-		sockaddr_in6 sockAddr6;
+		sockaddr_storage sockAddr;
 
 		LNETL0_DEBUG("LNETL0: Socket %d connecting to %s...", _Sock, addrs.toStringLong(ai).c_str());
 
 		// Check address
-		if (!addr.toSockAddrInet6(&sockAddr6))
+		if (!addr.toSockAddrStorage(&sockAddr, _AddressFamily))
 		{
 			continue;
 		}
@@ -395,7 +412,7 @@ void CSock::connect( const CInetHost& addrs )
 
 		attempted = true;
 		// Connection (when _Sock is a datagram socket, connect establishes a default destination address)
-		if (::connect(_Sock, (const sockaddr *)(&sockAddr6), sizeof(sockAddr6)) != 0)
+		if (::connect(_Sock, (const sockaddr *)(&sockAddr), sizeof(sockAddr)) != 0)
 		{
 			/*		if ( _Logging )
 					{

@@ -84,9 +84,9 @@ void CUdpSock::bind( uint16 port )
  */
 void CUdpSock::bind( const CInetAddress& addr )
 {
-	sockaddr_in6 sockAddr6;
+	sockaddr_storage sockAddr;
 	
-	if (!addr.toSockAddrInet6(&sockAddr6))
+	if (!addr.toSockAddrStorage(&sockAddr, _AddressFamily))
 	{
 		throw ESocket("Cannot bind to an invalid address");
 	}
@@ -101,24 +101,28 @@ void CUdpSock::bind( const CInetAddress& addr )
 #endif
 
 	// Bind the socket
-	if (::bind(_Sock, (sockaddr *)(&sockAddr6), sizeof(sockAddr6)) != 0)
+	if (::bind(_Sock, (sockaddr *)(&sockAddr), sizeof(sockAddr)) != 0)
 	{
-		if (addr.getAddress().isAny() && !addr.getAddress().isIPv4())
+		if (_AddressFamily == AF_INET6 && addr.getAddress().isAny() && !addr.getAddress().isIPv4())
 		{
 			// Try to bind to IPv4 Any address if a dual stack listen (default) was attempted and failed
 			CInetAddress anyIPv4 = CInetAddress(CIPv6Address::anyIPv4(), addr.port());
-			anyIPv4.toSockAddrInet6(&sockAddr6);
-			if (::bind(_Sock, (sockaddr *)&sockAddr6, sizeof(sockAddr6)) != 0)
+			anyIPv4.toSockAddrInet6((sockaddr_in6 *)(&sockAddr));
+			if (::bind(_Sock, (sockaddr *)&sockAddr, sizeof(sockaddr_in6)) != 0)
 			{
 				throw ESocket("Unable to bind listen socket to to port");
 			}
+			_LocalAddr = anyIPv4;
 		}
 		else
 		{
 			throw ESocket("Unable to bind listen socket to port");
 		}
 	}
-	_LocalAddr.fromSockAddrInet6(&sockAddr6);
+	else
+	{
+		_LocalAddr = addr;
+	}
 	_Bound = true;
 	if ( _Logging )
 	{
@@ -132,15 +136,15 @@ void CUdpSock::bind( const CInetAddress& addr )
  */
 void CUdpSock::sendTo( const uint8 *buffer, uint len, const CInetAddress& addr )
 {
-	sockaddr_in6 sockAddr6;
+	sockaddr_storage sockAddr;
 
-	if (!addr.toSockAddrInet6(&sockAddr6))
+	if (!addr.toSockAddrStorage(&sockAddr, _AddressFamily))
 	{
 		throw ESocket("Cannot send datagram to an invalid address");
 	}
 
 	//  Send
-	if (::sendto(_Sock, (const char *)buffer, len, 0, (sockaddr *)(&sockAddr6), sizeof(sockAddr6)) != (sint32)len)
+	if (::sendto(_Sock, (const char *)buffer, len, 0, (sockaddr *)(&sockAddr), sizeof(sockAddr)) != (sint32)len)
 	{
 		throw ESocket("Unable to send datagram");
 	}
@@ -207,14 +211,14 @@ bool CUdpSock::receive( uint8 *buffer, uint32& len, bool throw_exception )
 bool CUdpSock::receivedFrom( uint8 *buffer, uint& len, CInetAddress& addr, bool throw_exception )
 {
 	// Receive incoming message
-	sockaddr_in6 sockAddr6;
-	socklen_t saddrlen = sizeof(sockAddr6);
+	sockaddr_storage sockAddr;
+	socklen_t saddrlen = sizeof(sockAddr);
 
-	len = ::recvfrom(_Sock, (char *)buffer, len, 0, (sockaddr *)(&sockAddr6), &saddrlen);
+	len = ::recvfrom(_Sock, (char *)buffer, len, 0, (sockaddr *)(&sockAddr), &saddrlen);
 
 	// If an error occurs, the saddr is not valid
 	// When the remote socket is closed, get sender's address to know who is quitting
-	addr.fromSockAddrInet6(&sockAddr6);
+	addr.fromSockAddrStorage(&sockAddr);
 
 	// Check for errors (after setting the address)
 	if ( ((int)len) == SOCKET_ERROR )

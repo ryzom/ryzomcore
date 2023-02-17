@@ -110,6 +110,11 @@ public:
 	 */
 	void fromSockAddrInet6(const TSockAddrIn6 *saddr6);
 
+	/** Sets internal socket address directly (contents is copied).
+	 * It also retrieves the host name if CInetAddress::RetrieveNames is true.
+	 */
+	void fromSockAddrStorage(const TSockAddrStorage *saddr);
+
 	/// Returns if object (address and port) is valid
 	/// If you only care about the address, check getAddress().isValid() or isAddressValid()
 	bool isValid() const;
@@ -122,6 +127,9 @@ public:
 
 	// Convert an IPv6 address and port to the sockaddr_in6 structure
 	bool toSockAddrInet6(TSockAddrIn6 *addr) const;
+
+	// Convert to IPv4 or IPv6 storage
+	bool toSockAddrStorage(TSockAddrStorage *addr, int family) const;
 
 	/// Returns internal IP address
 	inline const CIPv6Address &getAddress() const { return m_Address; }

@@ -268,6 +268,27 @@ void CInetAddress::fromSockAddrInet6(const TSockAddrIn6 *saddr6)
 	m_Port = ntohs(saddr6->sin6_port);
 }
 
+void CInetAddress::fromSockAddrStorage(const TSockAddrStorage *saddr)
+{
+	if (saddr->ss_family == AF_INET)
+	{
+		fromSockAddrInet((const TSockAddrIn *)saddr);
+	}
+	else if (saddr->ss_family == AF_INET6)
+	{
+		fromSockAddrInet6((const TSockAddrIn6 *)saddr);
+	}
+	else
+	{
+		if (saddr->ss_family != AF_UNSPEC)
+		{
+			nlwarning("CInetAddress::fromSockAddrStorage(): unknown address family %d", saddr->ss_family);
+		}
+		m_Address.setNull();
+		m_Port = 0;
+	}
+}
+
 /*
  * Returns if object (address and port) is valid
  */
@@ -288,6 +309,23 @@ bool CInetAddress::toSockAddrInet6(TSockAddrIn6 *addr) const
 	bool res = m_Address.toSockAddrInet6(addr);
 	addr->sin6_port = htons(m_Port);
 	return res && m_Port;
+}
+
+bool CInetAddress::toSockAddrStorage(TSockAddrStorage *addr, int family) const
+{
+	if (family == AF_INET)
+	{
+		return toSockAddrInet((TSockAddrIn *)addr);
+	}
+	else if (family == AF_INET6)
+	{
+		return toSockAddrInet6((TSockAddrIn6 *)addr);
+	}
+	else
+	{
+		addr->ss_family = AF_UNSPEC;
+		return false;
+	}
 }
 
 /*
