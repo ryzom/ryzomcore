@@ -217,46 +217,49 @@ CInetAddress::~CInetAddress()
 {
 }
 
-/*
- * Sets hostname and port (ex: www.nevrax.com:80)
- */
-void CInetAddress::setNameAndPort(const std::string &hostNameAndPort)
+void CInetAddress::parseNameAndPort(std::string &hostname, uint16 &port, const std::string &hostnameAndPort)
 {
-	std::string hostName;
-	uint16 port;
-
 	// Sets hostname and port (ex: www.nevrax.com:80, 192.168.0.2:80, [::1]:80)
-	string::size_type pos6end = hostNameAndPort.find_last_of(']');
-	string::size_type pos = hostNameAndPort.find_last_of(':');
+	string::size_type pos6end = hostnameAndPort.find_last_of(']');
+	string::size_type pos = hostnameAndPort.find_last_of(':');
 	if (pos != string::npos && (pos6end == string::npos || pos > pos6end))
 	{
-		fromString(hostNameAndPort.substr(pos + 1), port);
+		fromString(hostnameAndPort.substr(pos + 1), port);
 		if (pos6end != string::npos)
 		{
-			string::size_type pos6begin = hostNameAndPort.find_first_of('[');
-			hostName = hostNameAndPort.substr(pos6begin + 1, pos6end - pos6begin - 1);
+			string::size_type pos6begin = hostnameAndPort.find_first_of('[');
+			hostname = hostnameAndPort.substr(pos6begin + 1, pos6end - pos6begin - 1);
 		}
 		else
 		{
-			hostName = hostNameAndPort.substr(0, pos);
+			hostname = hostnameAndPort.substr(0, pos);
 		}
 	}
 	else
 	{
 		port = 0;
-		hostName = hostNameAndPort;
+		hostname = hostnameAndPort;
 	}
+}
 
-	setByName(hostName);
+/*
+ * Sets hostname and port (ex: www.nevrax.com:80)
+ */
+void CInetAddress::setNameAndPort(const std::string &hostnameAndPort)
+{
+	std::string hostname;
+	uint16 port;
+	parseNameAndPort(hostname, port, hostnameAndPort);
+	setByName(hostname);
 	m_Port = port;
 }
 
 /*
  * Resolves a name
  */
-CInetAddress &CInetAddress::setByName(const std::string &hostName)
+CInetAddress &CInetAddress::setByName(const std::string &hostname)
 {
-	if (m_Address.set(hostName))
+	if (m_Address.set(hostname))
 	{
 		// use IPv4 or IPv6
 	}
@@ -269,13 +272,13 @@ CInetAddress &CInetAddress::setByName(const std::string &hostName)
 		hints.ai_socktype = SOCK_STREAM;
 
 		struct addrinfo *res = NULL;
-		sint status = getaddrinfo(hostName.c_str(), NULL, &hints, &res);
+		sint status = getaddrinfo(hostname.c_str(), NULL, &hints, &res);
 
 		if (status)
 		{
-			LNETL0_DEBUG("LNETL0: Network error: resolution of hostname '%s' failed: %s", hostName.c_str(), gai_strerror(status));
+			LNETL0_DEBUG("LNETL0: Network error: resolution of hostname '%s' failed: %s", hostname.c_str(), gai_strerror(status));
 			// return *this;
-			throw ESocket((string("Hostname resolution failed for ") + hostName).c_str());
+			throw ESocket((string("Hostname resolution failed for ") + hostname).c_str());
 		}
 
 		struct addrinfo *p = res;

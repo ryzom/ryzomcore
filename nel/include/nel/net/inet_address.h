@@ -65,7 +65,7 @@ public:
 
 	/// Alternate constructor (calls setByName())
 	/// example: CInetAddress("www.nevrax.com:80")
-	CInetAddress(const std::string &hostNameAndPort);
+	CInetAddress(const std::string &hostnameAndPort);
 
 	/// Copy constructor
 	CInetAddress(const CInetAddress &other);
@@ -88,8 +88,11 @@ public:
 	/// Sets port
 	void setPort(uint16 port);
 
+	/// Parse hostname and port
+	static void parseNameAndPort(std::string &hostname, uint16 &port, const std::string &hostnameAndPort);
+
 	/// Sets hostname and port (ex: www.nevrax.com:80)
-	void setNameAndPort(const std::string &hostNameAndPort);
+	void setNameAndPort(const std::string &hostnameAndPort);
 
 	/** Sets internal IPv4 socket address directly (contents is copied).
 	 * It also retrieves the host name if CInetAddress::RetrieveNames is true.
