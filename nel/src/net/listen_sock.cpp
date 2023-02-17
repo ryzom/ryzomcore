@@ -29,6 +29,8 @@
 #	define NOMINMAX
 #endif
 #include <windows.h>
+// Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
+#include <ws2ipdef.h>
 typedef sint socklen_t;
 
 #elif defined NL_OS_UNIX
@@ -90,17 +92,21 @@ void CListenSock::init( uint16 port )
  */
 void CListenSock::init( const CInetAddress& addr )
 {
-	sockaddr_in sockAddr; // FIXME: IPv6
+	sockaddr_in6 sockAddr6;
+
+	if (_Bound)
+	{
+		throw ESocket("Already bound");
+	}
 
 	if (addr.getAddress().isAny())
 	{
-		LNETL0_DEBUG( "LNETL0: Binding listen socket to any address, port %hu", addr.port() );
+		LNETL0_DEBUG( "LNETL0: Binding listen socket to any address (%s), port %hu", addr.getAddress().toString().c_str(), addr.port() );
 	}
 
-	if (!addr.toSockAddrInet(&sockAddr))
+	if (!addr.toSockAddrInet6(&sockAddr6))
 	{
-		nlwarning("LNETL0: Invalid address %s", addr.asString().c_str());
-		return;
+		throw ESocket("Unable to bind listen socket to invalid address");
 	}
 
 #ifndef NL_OS_WINDOWS
@@ -113,11 +119,24 @@ void CListenSock::init( const CInetAddress& addr )
 #endif
 
 	// Bind socket to port
-	if ( ::bind( _Sock, (const sockaddr *)(&sockAddr), sizeof(sockaddr_in) ) != 0 )
+	if (::bind(_Sock, (sockaddr *)&sockAddr6, sizeof(sockAddr6)) != 0)
 	{
-		throw ESocket( "Unable to bind listen socket to port" );
+		if (addr.getAddress().isAny() && !addr.getAddress().isIPv4())
+		{
+			// Try to bind to IPv4 Any address if a dual stack listen (default) was attempted and failed
+			CInetAddress anyIPv4 = CInetAddress(CIPv6Address::anyIPv4(), addr.port());
+			anyIPv4.toSockAddrInet6(&sockAddr6);
+			if (::bind(_Sock, (sockaddr *)&sockAddr6, sizeof(sockAddr6)) != 0)
+			{
+				throw ESocket("Unable to bind listen socket to to port");
+			}
+		}
+		else
+		{
+			throw ESocket("Unable to bind listen socket to port");
+		}
 	}
-	_LocalAddr = addr;
+	_LocalAddr.fromSockAddrInet6(&sockAddr6);
 	_Bound = true;
 
 	// Listen
@@ -135,9 +154,9 @@ void CListenSock::init( const CInetAddress& addr )
 CTcpSock *CListenSock::accept()
 {
 	// Accept connection
-	sockaddr_in saddr;
-	socklen_t saddrlen = (socklen_t)sizeof(saddr);
-	SOCKET newsock = (SOCKET)::accept( _Sock, (sockaddr*)&saddr, &saddrlen );
+	sockaddr_in6 sockAddr6;
+	socklen_t saddrlen = (socklen_t)sizeof(sockAddr6);
+	SOCKET newsock = (SOCKET)::accept(_Sock, (sockaddr *)(&sockAddr6), &saddrlen);
 	if ( newsock == INVALID_SOCKET )
 	{
 		if (_Sock == INVALID_SOCKET)
@@ -155,7 +174,7 @@ CTcpSock *CListenSock::accept()
 
 	// Construct and save a CTcpSock object
 	CInetAddress addr;
-	addr.fromSockAddrInet( &saddr );
+	addr.fromSockAddrInet6(&sockAddr6);
 	LNETL0_DEBUG( "LNETL0: Socket %d accepted an incoming connection from %s, opening socket %d", _Sock, addr.asString().c_str(), newsock );
 	CTcpSock *connection = new CTcpSock( newsock, addr );
 	return connection;

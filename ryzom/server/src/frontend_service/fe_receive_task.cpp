@@ -25,10 +25,13 @@
 #include "fe_types.h"
 
 #ifdef NL_OS_WINDOWS
+#	include <winsock2.h>
 #	ifndef NL_COMP_MINGW
 #		define NOMINMAX
 #	endif
 #	include <windows.h>
+// Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
+#	include <ws2ipdef.h>
 #elif defined NL_OS_UNIX
 
 #include <unistd.h>
@@ -55,19 +58,19 @@ volatile uint32 CFEReceiveTask::LastUDPPacketReceived = 0;
 /// Constructor
 TReceivedMessage::TReceivedMessage()
 {
-	VAddrFrom.resize( sizeof(sockaddr_in) );
+	VAddrFrom.resize(sizeof(sockaddr_in6));
 }
 
 /// Return a vector containing the address info
 void	TReceivedMessage::addressToVector()
 {
-	AddrFrom.toSockAddrInet((sockaddr_in *)(&*VAddrFrom.begin())); // FIXME: IPv6
+	AddrFrom.toSockAddrInet6((sockaddr_in6 *)(&*VAddrFrom.begin()));
 }
 
 /// Set address with address info from specified vector
 void	TReceivedMessage::vectorToAddress()
 {
-	AddrFrom.fromSockAddrInet( (sockaddr_in*)&*VAddrFrom.begin() );
+	AddrFrom.fromSockAddrInet6((sockaddr_in6 *)&*VAddrFrom.begin());
 }
 
 

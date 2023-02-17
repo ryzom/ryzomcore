@@ -28,6 +28,8 @@
 #		define NOMINMAX
 #	endif
 #	include <windows.h>
+// Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
+#	include <ws2ipdef.h>
 #	define socklen_t int
 #	define ERROR_NUM WSAGetLastError()
 #elif defined NL_OS_UNIX
@@ -82,30 +84,41 @@ void CUdpSock::bind( uint16 port )
  */
 void CUdpSock::bind( const CInetAddress& addr )
 {
-	sockaddr_in sockAddr; // FIXME: IPv6
+	sockaddr_in6 sockAddr6;
 	
-	if (!addr.toSockAddrInet(&sockAddr))
+	if (!addr.toSockAddrInet6(&sockAddr6))
 	{
-		nlwarning("LNETL0: Invalid address %s", addr.asString().c_str());
-		return;
+		throw ESocket("Cannot bind to an invalid address");
 	}
 	
 #ifndef NL_OS_WINDOWS
 	// Set Reuse Address On (does not work on Win98 and is useless on Win2000)
 	int value = true;
-	if ( setsockopt( _Sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value) ) == SOCKET_ERROR )
+	if ( setsockopt( _Sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value) ) != 0 )
 	{
 		throw ESocket( "ReuseAddr failed" );
 	}
 #endif
 
-	_LocalAddr = addr;
-
 	// Bind the socket
-	if ( ::bind( _Sock, (sockaddr*)(&sockAddr), sizeof(sockaddr) ) == SOCKET_ERROR )
+	if (::bind(_Sock, (sockaddr *)(&sockAddr6), sizeof(sockAddr6)) != 0)
 	{
-		throw ESocket( "Bind failed" );
+		if (addr.getAddress().isAny() && !addr.getAddress().isIPv4())
+		{
+			// Try to bind to IPv4 Any address if a dual stack listen (default) was attempted and failed
+			CInetAddress anyIPv4 = CInetAddress(CIPv6Address::anyIPv4(), addr.port());
+			anyIPv4.toSockAddrInet6(&sockAddr6);
+			if (::bind(_Sock, (sockaddr *)&sockAddr6, sizeof(sockAddr6)) != 0)
+			{
+				throw ESocket("Unable to bind listen socket to to port");
+			}
+		}
+		else
+		{
+			throw ESocket("Unable to bind listen socket to port");
+		}
 	}
+	_LocalAddr.fromSockAddrInet6(&sockAddr6);
 	_Bound = true;
 	if ( _Logging )
 	{
@@ -119,18 +132,17 @@ void CUdpSock::bind( const CInetAddress& addr )
  */
 void CUdpSock::sendTo( const uint8 *buffer, uint len, const CInetAddress& addr )
 {
-	sockaddr_in sockAddr; // FIXME: IPv6
+	sockaddr_in6 sockAddr6;
 
-	if (!addr.toSockAddrInet(&sockAddr))
+	if (!addr.toSockAddrInet6(&sockAddr6))
 	{
-		nlwarning("LNETL0: Invalid address %s", addr.asString().c_str());
-		return;
+		throw ESocket("Cannot send datagram to an invalid address");
 	}
 
 	//  Send
-	if ( ::sendto( _Sock, (const char*)buffer, len, 0, (sockaddr*)(&sockAddr), sizeof(sockaddr_in) ) != (sint32)len )
+	if (::sendto(_Sock, (const char *)buffer, len, 0, (sockaddr *)(&sockAddr6), sizeof(sockAddr6)) != (sint32)len)
 	{
-		throw ESocket( "Unable to send datagram" );
+		throw ESocket("Unable to send datagram");
 	}
 	_BytesSent += len;
 
@@ -195,14 +207,14 @@ bool CUdpSock::receive( uint8 *buffer, uint32& len, bool throw_exception )
 bool CUdpSock::receivedFrom( uint8 *buffer, uint& len, CInetAddress& addr, bool throw_exception )
 {
 	// Receive incoming message
-	sockaddr_in saddr;
-	socklen_t saddrlen = sizeof(saddr);
+	sockaddr_in6 sockAddr6;
+	socklen_t saddrlen = sizeof(sockAddr6);
 
-	len = ::recvfrom( _Sock, (char*)buffer, len , 0, (sockaddr*)&saddr, &saddrlen );
+	len = ::recvfrom(_Sock, (char *)buffer, len, 0, (sockaddr *)(&sockAddr6), &saddrlen);
 
 	// If an error occurs, the saddr is not valid
 	// When the remote socket is closed, get sender's address to know who is quitting
-	addr.fromSockAddrInet( &saddr );
+	addr.fromSockAddrInet6(&sockAddr6);
 
 	// Check for errors (after setting the address)
 	if ( ((int)len) == SOCKET_ERROR )

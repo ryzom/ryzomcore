@@ -29,6 +29,7 @@
 #		define NOMINMAX
 #	endif
 #	include <winsock2.h>
+#   include <ws2ipdef.h>
 #	include <windows.h>
 #	define socklen_t int
 #	define ERROR_NUM WSAGetLastError()
@@ -278,11 +279,19 @@ void CSock::createSocket( int type, int protocol )
 {
 	nlassert( _Sock == INVALID_SOCKET );
 
-	_Sock = (SOCKET)socket( AF_INET, type, protocol ); // or IPPROTO_IP (=0) ?
+	_Sock = (SOCKET)socket( AF_INET6, type, protocol ); // or IPPROTO_IP (=0) ?
 	if ( _Sock == INVALID_SOCKET )
 	{
 		throw ESocket( "Socket creation failed" );
+	}    
+	
+	// Disable IPv6 ONLY flag
+	int no = 0;
+	if (setsockopt(_Sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&no, sizeof(no)) == SOCKET_ERROR)
+	{
+		throw ESocket("Could not disable IPV6_V6ONLY flag");
 	}
+
 
 	if ( _Logging )
 	{
@@ -365,12 +374,12 @@ void CSock::connect( const CInetHost& addrs )
 	for (size_t ai = 0; ai < addrs.size(); ++ai)
 	{
 		CInetAddress addr = addrs.addresses()[ai];
-		sockaddr_in sockAddr; // FIXME: IPv6
+		sockaddr_in6 sockAddr6;
 
 		LNETL0_DEBUG("LNETL0: Socket %d connecting to %s...", _Sock, addrs.toStringLong(ai).c_str());
 
 		// Check address
-		if (!addr.toSockAddrInet(&sockAddr))
+		if (!addr.toSockAddrInet6(&sockAddr6))
 		{
 			continue;
 		}
@@ -386,7 +395,7 @@ void CSock::connect( const CInetHost& addrs )
 
 		attempted = true;
 		// Connection (when _Sock is a datagram socket, connect establishes a default destination address)
-		if (::connect(_Sock, (const sockaddr *)(&sockAddr), sizeof(sockaddr_in)) != 0)
+		if (::connect(_Sock, (const sockaddr *)(&sockAddr6), sizeof(sockAddr6)) != 0)
 		{
 			/*		if ( _Logging )
 					{
@@ -455,13 +464,24 @@ bool CSock::dataAvailable()
  */
 void CSock::setLocalAddress()
 {
-	sockaddr saddr;
-	socklen_t saddrlen = sizeof(saddr);
-	if ( getsockname( _Sock, &saddr, &saddrlen ) != 0 )
+	sockaddr_storage storage;
+	socklen_t saddrlen = sizeof(storage);
+	if (getsockname(_Sock, (sockaddr *)(&storage), &saddrlen) != 0)
 	{
-		throw ESocket( "Unable to find local address" );
+		throw ESocket("Unable to find local address");
 	}
-	_LocalAddr.fromSockAddrInet( (const sockaddr_in *)&saddr );
+	if (storage.ss_family == AF_INET6)
+	{
+		_LocalAddr.fromSockAddrInet6((sockaddr_in6 *)(&storage));
+	}
+	else if (storage.ss_family == AF_INET)
+	{
+		_LocalAddr.fromSockAddrInet((sockaddr_in *)(&storage));
+	}
+	else
+	{
+		throw ESocket("Unknown socket address family");
+	}
 }
 
 

@@ -402,7 +402,13 @@ void CIPv6Address::serial(NLMISC::IStream &s)
 
 bool CIPv6Address::toSockAddrInet(TSockAddrIn *addr) const
 {
-	if (!isIPv4() && !isAny()) return false;
+	if (!isIPv4() && !isAny())
+	{
+		// IPv6 addresses cannot be converted to IPv4, except for the IPv6 Any address
+		addr->sin_family = AF_UNSPEC;
+		return false;
+	}
+	// IPv4, IPv4 Any, and IPv6 Any address can be represented
 	addr->sin_family = AF_INET;
 	memcpy(&addr->sin_addr.s_addr, &m_Address[12], 4);
 	return true;
@@ -410,7 +416,13 @@ bool CIPv6Address::toSockAddrInet(TSockAddrIn *addr) const
 
 bool CIPv6Address::toSockAddrInet6(TSockAddrIn6 *addr) const
 {
-	if (!isValid()) return false;
+	if (!isValid())
+	{
+		// Invalid addresses cannot be represented as IPv6
+		addr->sin6_family = AF_UNSPEC;
+		return false;
+	}
+	// All valid IPv4 and IPv6 addresses can be represented as IPv6
 	addr->sin6_family = AF_INET6;
 	addr->sin6_flowinfo = 0;
 	memcpy(&addr->sin6_addr.s6_addr, m_Address, 16);

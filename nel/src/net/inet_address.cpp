@@ -44,7 +44,7 @@
 #define SOCKET_ERROR -1
 #endif
 
-#define NLNET_IPV6_LOOKUP (0)
+#define NLNET_IPV6_LOOKUP (1)
 
 using namespace std;
 using namespace NLMISC;
@@ -108,40 +108,6 @@ CInetAddress::CInetAddress(const in6_addr *ip, const char *hostname)
 	addr.sin6_addr = *ip;
 	m_Address.fromSockAddrInet6(&addr);
 }
-
-#if 0
-/*
- * Update _HostName from _SockAddr current value 
- */
-void CInetAddress::updateHostName()
-{
-	char host[NI_MAXHOST];
-
-	// if unable to resolve DNS, returns an error and use IP address instead
-	sint status = 1;
-	
-	// check if IPv4 is valid
-	if (_SockAddr->sin_addr.s_addr != 0)
-	{
-		// IPv4
-		status = getnameinfo((struct sockaddr *) _SockAddr, sizeof (sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICSERV | NI_NAMEREQD);
-	}
-	else if (!IN6_IS_ADDR_UNSPECIFIED(&_SockAddr6->sin6_addr))
-	{
-		// IPv6
-		status = getnameinfo((struct sockaddr *) _SockAddr6, sizeof (sockaddr_in6), host, NI_MAXHOST, NULL, 0, NI_NUMERICSERV | NI_NAMEREQD);
-	}
-
-	if ( status )
-	{
-		_HostName = ipAddress();
-	}
-	else
-	{
-		_HostName = string( host );
-	}
-}
-#endif
 
 /*
  * Alternate constructor (calls setByName())
@@ -270,63 +236,10 @@ void CInetAddress::setNameAndPort(const std::string &hostnameAndPort)
  */
 CInetAddress &CInetAddress::setByName(const std::string &hostname)
 {
-#if 1
 	CInetHost host(hostname, m_Port);
 	nlassert(host.addresses().size());
 	m_Address = host.address().m_Address;
 	return *this;
-#else
-	if (m_Address.set(hostname))
-	{
-		// use IPv4 or IPv6
-	}
-	else
-	{
-		// Otherwise use the traditional DNS look-up
-		struct addrinfo hints;
-		memset(&hints, 0, sizeof(hints));
-		hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
-		hints.ai_socktype = SOCK_STREAM;
-
-		struct addrinfo *res = NULL;
-		sint status = getaddrinfo(hostname.c_str(), NULL, &hints, &res);
-
-		if (status)
-		{
-			LNETL0_DEBUG("LNETL0: Network error: resolution of hostname '%s' failed: %s", hostname.c_str(), gai_strerror(status));
-			// return *this;
-			throw ESocket((string("Hostname resolution failed for ") + hostname).c_str());
-		}
-
-		struct addrinfo *p = res;
-
-		// process all addresses
-		while (p != NULL)
-		{
-			// check address family
-			if (p->ai_family == AF_INET)
-			{
-				// ipv4
-				m_Address.fromSockAddrInet((sockaddr_in *)p->ai_addr);
-			}
-#if NLNET_IPV6_LOOKUP
-			else if (p->ai_family == AF_INET6)
-			{
-				// ipv6
-				m_Address.fromSockAddrInet6((sockaddr_in6 *)p->ai_addr);
-			}
-#endif
-
-			// process next address
-			p = p->ai_next;
-		}
-
-		// free the linked list
-		freeaddrinfo(res);
-	}
-
-	return *this;
-#endif
 }
 
 /*
@@ -480,26 +393,11 @@ CInetAddress CInetAddress::loopback(uint16 port)
  */
 CInetAddress CInetAddress::localHost(uint16 port)
 {
-#if 1
 	CInetHost localAddrs = CInetHost::localAddresses(port, false, false);
 	if (localAddrs.isAddressValid())
 		return localAddrs.address(); // First one from unsorted list will be used
 	else
 		return CInetAddress::loopback(port);
-#else
-	const uint maxlength = 80;
-	char localhost[maxlength];
-	if (gethostname(localhost, maxlength) != 0)
-		throw ESocket("Unable to get local hostname");
-	CInetAddress localaddr = CInetAddress(string(localhost));
-
-	if (localaddr.ipAddress() == "127.0.0.1")
-	{
-		nlwarning("LNETL0: No network card detected! using localhost (127.0.0.1)");
-	}
-
-	return localaddr;
-#endif
 }
 
 /* Returns the list of the local host addresses (with port=0)
@@ -507,99 +405,10 @@ CInetAddress CInetAddress::localHost(uint16 port)
  */
 std::vector<CInetAddress> CInetAddress::localAddresses()
 {
-#if 1
 	CInetHost res = CInetHost::localAddresses();
 	if (!res.isAddressValid()) // Hide the invalid address
 		return std::vector<CInetAddress>();
 	return res.addresses();
-#else
-	// 1. Get local host name
-	const uint maxlength = 80;
-	char localhost[maxlength];
-	if (gethostname(localhost, maxlength) == SOCKET_ERROR)
-	{
-		throw ESocket("Unable to get local hostname");
-	}
-
-	// 2. Get address list
-	vector<CInetAddress> vect;
-
-	struct addrinfo hints;
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
-	hints.ai_socktype = SOCK_STREAM;
-
-	struct addrinfo *res = NULL;
-	sint status = getaddrinfo(localhost, NULL, &hints, &res);
-
-	if (status)
-	{
-		// will come here if the local hostname (/etc/hostname in Linux) is not the real name
-		throw ESocket(toString("Hostname resolution failed for %s", localhost).c_str());
-	}
-
-	struct addrinfo *p = res;
-
-	// for loopback ipv4
-	bool IPv4LoopbackAdded = false;
-
-	// for loopback ipv6
-	bool IPv6LoopbackAdded = false;
-
-	// process all addresses
-	while (p != NULL)
-	{
-		// check address family
-		if (p->ai_family == AF_INET)
-		{
-			// loopback ipv4
-			if (!IPv4LoopbackAdded)
-			{
-				// add loopback address only once
-				struct in_addr psin_addrIPv4;
-				psin_addrIPv4.s_addr = htonl(INADDR_LOOPBACK);
-				vect.push_back(CInetAddress(&psin_addrIPv4, localhost));
-
-				IPv4LoopbackAdded = true;
-			}
-
-			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
-
-			vect.push_back(CInetAddress(&ipv4->sin_addr, localhost));
-		}
-#if NLNET_IPV6_LOOKUP
-		else if (p->ai_family == AF_INET6)
-		{
-			// loopback ipv6
-			if (!IPv6LoopbackAdded)
-			{
-				// add loopback address only once
-				struct in6_addr psin_addrIPv6 = IN6ADDR_LOOPBACK_INIT;
-				vect.push_back(CInetAddress(&psin_addrIPv6, localhost));
-
-				IPv6LoopbackAdded = true;
-			}
-
-			struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
-
-			vect.push_back(CInetAddress(&ipv6->sin6_addr, localhost));
-		}
-#endif
-
-		// process next address
-		p = p->ai_next;
-	}
-
-	// free the linked list
-	freeaddrinfo(res);
-
-	if (vect.empty())
-	{
-		throw ESocket(toString("No network card detected for %s", localhost).c_str());
-	}
-
-	return vect;
-#endif
 }
 
 bool CInetAddress::isLoopbackIPAddress() const
