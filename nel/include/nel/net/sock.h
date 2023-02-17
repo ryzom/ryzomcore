@@ -19,7 +19,7 @@
 
 #include "nel/misc/common.h"
 #include "nel/misc/mutex.h"
-#include "inet_address.h"
+#include "inet_host.h"
 //#include <sstream>
 
 /// This namespace contains all network class

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -66,6 +69,9 @@ public:
 	/// Alternate constructor (calls setByName())
 	/// example: CInetAddress("www.nevrax.com:80")
 	CInetAddress(const std::string &hostnameAndPort);
+
+	/// From CIPv6Address
+	CInetAddress(const CIPv6Address &ipv6Address, uint16 port);
 
 	/// Copy constructor
 	CInetAddress(const CInetAddress &other);
@@ -145,8 +151,11 @@ public:
 	/// Returns true if this CInetAddress is a loop back address
 	bool isLoopbackIPAddress() const;
 
+	/// Create a valid loopback address
+	static CInetAddress CInetAddress::loopback(uint16 port);
+
 	/// Creates a CInetAddress object with local host address, port=0
-	static CInetAddress localHost();
+	static CInetAddress localHost(uint16 port = 0);
 
 	/** Returns the list of the local host addresses (with port=0)
 	 * (especially useful if the host is multihomed)

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -15,12 +18,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdnet.h"
+#include "nel/net/inet_address.h"
 
 #include "nel/misc/common.h"
 #include "nel/misc/string_view.h"
 #include "nel/misc/wang_hash.h"
 
-#include "nel/net/inet_address.h"
+#include "nel/net/inet_host.h"
 #include "nel/net/sock.h"
 #include "nel/net/net_log.h"
 
@@ -158,6 +162,12 @@ CInetAddress::CInetAddress(const std::string &hostNameAndPort)
 	setNameAndPort(hostNameAndPort);
 }
 
+CInetAddress::CInetAddress(const CIPv6Address &ipv6Address, uint16 port)
+{
+	init();
+
+}
+
 /*
  * Copy constructor
  */
@@ -259,6 +269,18 @@ void CInetAddress::setNameAndPort(const std::string &hostnameAndPort)
  */
 CInetAddress &CInetAddress::setByName(const std::string &hostname)
 {
+#if 1
+	CInetHost host(hostname, m_Port);
+	if (host.addresses().size())
+	{
+		m_Address = host.addresses()[0].m_Address;
+	}
+	else
+	{
+		m_Address.setNull();
+	}
+	return *this;
+#else
 	if (m_Address.set(hostname))
 	{
 		// use IPv4 or IPv6
@@ -309,6 +331,7 @@ CInetAddress &CInetAddress::setByName(const std::string &hostname)
 	}
 
 	return *this;
+#endif
 }
 
 /*
@@ -449,11 +472,26 @@ void CInetAddress::serial(NLMISC::IStream &s)
 	s.serial(m_Port);
 }
 
+CInetAddress CInetAddress::loopback(uint16 port)
+{
+	CInetAddress addr(false);
+	addr.m_Address = CIPv6Address::loopback();
+	addr.m_Port = port;
+	return addr;
+}
+
 /*
  * Creates a CInetAddress object with local host address, port=0
  */
-CInetAddress CInetAddress::localHost()
+CInetAddress CInetAddress::localHost(uint16 port)
 {
+#if 1
+	CInetHost localAddrs = CInetHost::localAddresses(port, false, false);
+	if (localAddrs.addresses().size())
+		return localAddrs.addresses().at(0); // First one from unsorted list will be used
+	else
+		return CInetAddress::loopback(port);
+#else
 	const uint maxlength = 80;
 	char localhost[maxlength];
 	if (gethostname(localhost, maxlength) != 0)
@@ -466,6 +504,7 @@ CInetAddress CInetAddress::localHost()
 	}
 
 	return localaddr;
+#endif
 }
 
 /* Returns the list of the local host addresses (with port=0)
@@ -473,6 +512,9 @@ CInetAddress CInetAddress::localHost()
  */
 std::vector<CInetAddress> CInetAddress::localAddresses()
 {
+#if 1
+	return CInetHost::localAddresses().addresses();
+#else
 	// 1. Get local host name
 	const uint maxlength = 80;
 	char localhost[maxlength];
@@ -559,6 +601,7 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	}
 
 	return vect;
+#endif
 }
 
 bool CInetAddress::isLoopbackIPAddress() const
