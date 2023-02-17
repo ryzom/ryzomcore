@@ -183,7 +183,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 		{
 			if (DefaultFrom.empty())
 			{
-				formatedFrom = CInetAddress::localHost().hostName();
+				formatedFrom = CInetHost::localHostName();
 				formatedFrom += "@gnu.org";
 			}
 			else

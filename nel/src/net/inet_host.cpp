@@ -287,12 +287,23 @@ void CInetHost::clear()
 	m_Addresses.push_back(CInetAddress(false));
 }
 
-/* Returns the list of the local host addresses (with port=0)
- * (especially useful if the host is multihomed)
- */
+std::string CInetHost::localHostName()
+{
+	char localhost[NI_MAXHOST];
+	if (gethostname(localhost, NI_MAXHOST) != SOCKET_ERROR)
+	{
+		// Save hostname as UTF-8, from locale
+		return NLMISC::mbcsToUtf8(localhost);
+	}
+	return localAddresses(0, false, false).address().getAddress().toString();
+}
+
 CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 {
+	CSock::initNetwork();
+	
 	CInetHost host;
+	host.m_Addresses.clear();
 
 	addrinfo *result = NULL;
 	addrinfo hints;
@@ -365,7 +376,10 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 					CInetAddress addr(false);
 					addr.fromSockAddrInet((sockaddr_in *)ptr->ai_addr);
 					addr.setPort(port);
-					host.m_Addresses.push_back(addr);
+					if (loopback || !addr.isLoopbackIPAddress())
+					{
+						host.m_Addresses.push_back(addr);
+					}
 				}
 #if NLNET_IPV6_LOOKUP
 				else if (ptr->ai_family == AF_INET6)
@@ -374,12 +388,15 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 					{
 						CInetAddress loopback(CIPv6Address::loopbackIPv6(), port);
 						host.m_Addresses.push_back(loopback);
-						haveLoopback = true;
+						haveLoopback6 = true;
 					}
 					CInetAddress addr(false);
 					addr.fromSockAddrInet6((sockaddr_in6 *)ptr->ai_addr);
 					addr.setPort(port);
-					host.m_Addresses.push_back(addr);
+					if (loopback || !addr.isLoopbackIPAddress())
+					{
+						host.m_Addresses.push_back(addr);
+					}
 				}
 #endif
 			}

@@ -229,7 +229,7 @@ static TCallbackItem NamingClientCallbackArray[] =
 	{ "UNB", cbUnregisterBroadcast }
 };
 
-void CNamingClient::connect( const CInetAddress &addr, CCallbackNetBase::TRecordingState rec, const vector<CInetAddress> &/* addresses */ )
+void CNamingClient::connect( const CInetHost &addr, CCallbackNetBase::TRecordingState rec, const vector<CInetAddress> &/* addresses */ )
 {
 	nlassert (_Connection == NULL || (_Connection != NULL && !_Connection->connected ()));
 

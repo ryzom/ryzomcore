@@ -104,6 +104,9 @@ public:
 	/// To string short hostname:port
 	std::string toString() const;
 
+	/// Local host name
+	static std::string localHostName();
+
 	/// Comparison == operator
 	bool operator==(const CInetHost &other) const;
 	inline bool operator!=(const CInetHost &other) const { return !(*this == other); }

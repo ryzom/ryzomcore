@@ -37,6 +37,8 @@ using namespace NLMISC;
 
 namespace NLNET {
 
+extern bool wasExitSignalAsked();
+
 static size_t ThreadCreator = 0;
 
 static const uintptr_t AppIdDeadConnection = 0xDEAD;
@@ -437,7 +439,7 @@ public:
 	struct CCheckAddress
 	{
 		CCheckAddress() : ConnectionId(0xDEAD), NeedCheck(false), AddressValid(false) { }
-		CInetAddress	Address;
+		CInetHost		Address;
 		std::string		ServiceName;
 		TServiceId		ServiceId;
 		uint			ConnectionId;
@@ -448,7 +450,7 @@ public:
 
 	CCheckAddress		CheckList[128];
 
-	void			checkService(CInetAddress address, uint connectionId, uint connectionIndex, const std::string &service, TServiceId id);
+	void			checkService(const CInetHost &address, uint connectionId, uint connectionIndex, const std::string &service, TServiceId id);
 
 };
 
@@ -501,7 +503,7 @@ void	CAliveCheck::run()
 	ExitRequired = false;
 }
 
-void	CAliveCheck::checkService(CInetAddress address, uint connectionId, uint connectionIndex, const std::string &service, TServiceId id)
+void	CAliveCheck::checkService(const CInetHost &address, uint connectionId, uint connectionIndex, const std::string &service, TServiceId id)
 {
 	uint	i;
 	for (i=0; i<sizeof(CheckList)/sizeof(CheckList[0]); ++i)
@@ -527,7 +529,7 @@ void	CAliveCheck::checkService(CInetAddress address, uint connectionId, uint con
 //
 //
 
-bool	CUnifiedNetwork::init(const CInetAddress *addr, CCallbackNetBase::TRecordingState rec,
+bool	CUnifiedNetwork::init(const CInetHost *addr, CCallbackNetBase::TRecordingState rec,
 							  const string &shortName, uint16 port, TServiceId &sid)
 {
 	// the commands can now be invoked
@@ -604,7 +606,7 @@ bool	CUnifiedNetwork::init(const CInetAddress *addr, CCallbackNetBase::TRecordin
 
 				retry = true;
 			}
-		} while(retry);
+		} while(retry && !wasExitSignalAsked());
 
 		_CbServer->addCallbackArray(unServerCbArray, 1);				// the service ident callback
 		_CbServer->setDefaultCallback(uncbMsgProcessing);				// the default callback wrapper
@@ -979,7 +981,7 @@ void	CUnifiedNetwork::update(TTime timeout)
 			}
 			catch (const ESocketConnectionFailed &)
 			{
-				nlwarning ("HNETL5: Could not connect to the Naming Service (%s). Retrying in a few seconds...", _NamingServiceAddr.asString().c_str());
+				nlwarning ("HNETL5: Could not connect to the Naming Service (%s). Retrying in a few seconds...", _NamingServiceAddr.toStringLong().c_str());
 			}
 		}
 	}
@@ -1055,7 +1057,7 @@ void	CUnifiedNetwork::update(TTime timeout)
 					else if (!uc.ValidRequested && CAliveCheck::Thread)
 					{
 						uc.ValidRequested = true;
-						CAliveCheck::Thread->checkService(uc.ExtAddress.addresses()[j], _UsedConnection[k].get(), j, uc.ServiceName, uc.ServiceId);
+						CAliveCheck::Thread->checkService(uc.ExtAddress, _UsedConnection[k].get(), j, uc.ServiceName, uc.ServiceId);
 					}
 				}
 			}
@@ -1944,7 +1946,7 @@ void	CUnifiedNetwork::autoCheck()
 			{
 				if (_IdCnx[i].NetworkConnectionAssociations[j] != 0)
 				{
-					// FIXME: if (_NetworkAssociations[j] != _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ()) AUTOCHECK_DISPLAY ("HLNET5: sid %d nid %d have address 0x%08x and is not the good connection net 0x%08x", i, j, _NetworkAssociations[j], _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ());
+					if (_NetworkAssociations[j] != _IdCnx[i].ExtAddress.addresses()[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ()) AUTOCHECK_DISPLAY ("HLNET5: sid %d nid %d have address 0x%08x and is not the good connection net 0x%08x", i, j, _NetworkAssociations[j], _IdCnx[i].ExtAddress.addresses()[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ());
 				}
 			}
 		}

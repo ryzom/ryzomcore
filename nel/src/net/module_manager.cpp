@@ -195,7 +195,7 @@ namespace NLNET
 				if (IService::isServiceInitialized())
 					hostName = IService::getInstance()->getHostName();
 				else
-					hostName = ::NLNET::CInetAddress::localHost().hostName();
+					hostName = ::NLNET::CInetHost::localHostName();
 				int pid = ::getpid();
 
 				_UniqueNameRoot = hostName+":"+toString(pid);

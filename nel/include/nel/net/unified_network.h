@@ -256,7 +256,7 @@ public:
 	 * \param rec recording state to know if we have to record or replay messages
 	 * \return false if the instance startup was denied by the naming service
 	 */
-	bool	init (const CInetAddress *addr, CCallbackNetBase::TRecordingState rec, const std::string &shortName, uint16 port, TServiceId &sid );
+	bool	init (const CInetHost *addr, CCallbackNetBase::TRecordingState rec, const std::string &shortName, uint16 port, TServiceId &sid );
 
 	/** Registers to the Naming Service, and connects to the present services
 	 */
@@ -691,7 +691,7 @@ private:
 //	static CUnifiedNetwork						*_Instance;
 
 	/// Naming service
-	NLNET::CInetAddress							_NamingServiceAddr;
+	NLNET::CInetHost							_NamingServiceAddr;
 
 	/// for each nid, which network address
 	std::vector<uint32>							_NetworkAssociations;
