@@ -95,14 +95,14 @@ void	uNetRegistrationBroadcast(const string &name, TServiceId sid, const vector<
 		uni->_UsedConnection.push_back (sid);
 	}
 
-	if (!uni->_IdCnx[sid.get()].ExtAddress.empty ())
-		AUTOCHECK_DISPLAY ("HNETL5: %s-%u already inserted in the table with '%s'", name.c_str(), sid.get(), vectorCInetAddressToString (uni->_IdCnx[sid.get()].ExtAddress).c_str ());
+	if (uni->_IdCnx[sid.get()].ExtAddress.isValid())
+		AUTOCHECK_DISPLAY ("HNETL5: %s-%u already inserted in the table with '%s'", name.c_str(), sid.get(), uni->_IdCnx[sid.get()].ExtAddress.toStringLong().c_str ());
 
 	// set the list of external addresses
 
 	nlassert (!addr.empty());
 
-	uni->_IdCnx[sid.get()].ExtAddress = addr;
+	uni->_IdCnx[sid.get()].ExtAddress = CInetHost(addr, true);
 
 	// associate nid with ext address
 	uni->_IdCnx[sid.get()].setupNetworkAssociation (uni->_NetworkAssociations, uni->_DefaultNetwork);
@@ -326,7 +326,7 @@ void	uncbServiceIdentification(CMessage &msgin, TSockId from, CCallbackNetBase &
 	// If the connection is external, we'll never receive the ExtAddress by the naming service, so add it manually
 	if (isExternal)
 	{
-		uni->_IdCnx[inSid.get()].ExtAddress.push_back (netbase.hostAddress (from));
+		uni->_IdCnx[inSid.get()].ExtAddress = CInetHost(netbase.hostAddress(from), true);
 		uni->_IdCnx[inSid.get()].setupNetworkAssociation (uni->_NetworkAssociations, uni->_DefaultNetwork);
 	}
 
@@ -668,7 +668,7 @@ void	CUnifiedNetwork::connect()
 			{
 				// add service with name, address, ident, not external, service id, and not autoretry (obsolete)
 				// we put the last true because the name callback should already inserted it by uNetRegistrationBroadcast()
-				addService((*its).Name, (*its).Addr, true, false, (*its).SId, false, true);
+				addService((*its).Name, CInetHost((*its).Addr, true), true, false, (*its).SId, false, true);
 			}
 			else
 			{
@@ -772,14 +772,7 @@ void	CUnifiedNetwork::release(bool mustFlushSendQueues, const std::vector<std::s
 #endif
 }
 
-void	CUnifiedNetwork::addService(const string &name, const CInetAddress &addr, bool sendId, bool external, TServiceId sid, bool autoRetry, bool shouldBeAlreayInserted)
-{
-	vector <CInetAddress> addrs;
-	addrs.push_back (addr);
-	addService (name, addrs, sendId, external, sid, autoRetry, shouldBeAlreayInserted);
-}
-
-void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> &addr, bool sendId, bool external, TServiceId sid, bool autoRetry, bool shouldBeAlreayInserted)
+void CUnifiedNetwork::addService(const string &name, const CInetHost &addr, bool sendId, bool external, TServiceId sid, bool autoRetry, bool shouldBeAlreayInserted)
 {
 	nlassertex(_Initialised == true, ("Try to CUnifiedNetwork::addService() whereas it is not initialised yet"));
 
@@ -815,12 +808,12 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 		// If the entry already set, check that all is correct
 		if (name != uc->ServiceName) AUTOCHECK_DISPLAY ("HNETL5: name are different in addService %s %s", name.c_str (), uc->ServiceName.c_str ());
 		if (sid != uc->ServiceId) AUTOCHECK_DISPLAY ("HNETL5: sid are different in addService %hu %hu", sid.get(), uc->ServiceId.get());
-		if (addr != uc->ExtAddress) AUTOCHECK_DISPLAY ("HNETL5: external addr are different in addService '%s' '%s'", vectorCInetAddressToString(addr).c_str(), vectorCInetAddressToString(uc->ExtAddress).c_str ());
+		if (addr != uc->ExtAddress) AUTOCHECK_DISPLAY ("HNETL5: external addr are different in addService '%s' '%s'", addr.toStringLong().c_str(), uc->ExtAddress.toStringLong().c_str ());
 	}
 	uc->AutoRetry = autoRetry;
 	uc->SendId = sendId;
 	uc->ExtAddress = addr;
-	nlassert (!addr.empty());
+	nlassert(addr.isValid());
 
 	// associate nid with ext address
 	uc->setupNetworkAssociation (_NetworkAssociations, _DefaultNetwork);
@@ -829,64 +822,57 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 	bool	connectSuccess;
 	uc->Connections.resize(1);
 
-	for (size_t i = 0; i < min(addr.size(), (size_t)255); ++i)
-	{
-		// Create a new connection with the service, setup callback and connect
-		CCallbackClient	*cbc = new CCallbackClient( CCallbackNetBase::Off, "", true, false ); // don't init one pipe per connection
+	// Create a new connection with the service, setup callback and connect
+	CCallbackClient *cbc = new CCallbackClient(CCallbackNetBase::Off, "", true, false); // don't init one pipe per connection
 #if defined(NL_OS_UNIX)
-		cbc->setExternalPipeForDataAvailable( _MainDataAvailablePipe ); // the main pipe is shared for all connections
-		//nldebug( "Pipe: set (client %p)", cbc );
+	cbc->setExternalPipeForDataAvailable(_MainDataAvailablePipe); // the main pipe is shared for all connections
+	// nldebug( "Pipe: set (client %p)", cbc );
 #elif defined(NL_OS_WINDOWS)
-		cbc->setExternalPipeForDataAvailable(_MainDataAvailableHandle);
+	cbc->setExternalPipeForDataAvailable(_MainDataAvailableHandle);
 #endif
-		cbc->setDisconnectionCallback(uncbDisconnection, NULL);
-		cbc->setDefaultCallback(uncbMsgProcessing);
-		cbc->getSockId()->setAppId(sid.get());
+	cbc->setDisconnectionCallback(uncbDisconnection, NULL);
+	cbc->setDefaultCallback(uncbMsgProcessing);
+	cbc->getSockId()->setAppId(sid.get());
 
-		try
-		{
-			cbc->connect(addr[i]);
-			connectSuccess = true;
-		}
-		catch (const ESocketConnectionFailed &e)
-		{
-			nlwarning ("HNETL5: can't connect to %s (sid %u) now (%s) '%s'", name.c_str(), sid.get(), e.what (), addr[i].asString ().c_str());
-			connectSuccess = false;
-		}
+	try
+	{
+		cbc->connect(addr);
+		connectSuccess = true;
+	}
+	catch (const ESocketConnectionFailed &e)
+	{
+		nlwarning("HNETL5: can't connect to %s (sid %u) now (%s) '%s'", name.c_str(), sid.get(), e.what(), addr.toStringLong().c_str());
+		connectSuccess = false;
+	}
 
-		if (!connectSuccess && !autoRetry)
-		{
-			nlwarning ("HNETL5: Can't add service because no retry and can't connect");
-			delete cbc;
-		}
-		else
-		{
-			uc->Connections[0] = CUnifiedNetwork::CUnifiedConnection::TConnection(cbc);
-		}
+	if (!connectSuccess && !autoRetry)
+	{
+		nlwarning("HNETL5: Can't add service because no retry and can't connect");
+		delete cbc;
+	}
+	else
+	{
+		uc->Connections[0] = CUnifiedNetwork::CUnifiedConnection::TConnection(cbc);
+	}
 
-		if (connectSuccess && sendId)
+	if (connectSuccess && sendId)
+	{
+		// send identification to the service
+		CMessage msg("UN_SIDENT");
+		msg.serial(_Name);
+		TServiceId ssid = _SId;
+		if (uc->IsExternal)
 		{
-			// send identification to the service
-			CMessage msg("UN_SIDENT");
-			msg.serial(_Name);
-			TServiceId ssid = _SId;
-			if (uc->IsExternal)
-			{
-				// in the case that the service is external, we can't send our sid because the external service can
-				// have other connection with the same sid (for example, LS can have 2 WS with same sid => sid = 0 and leave
-				// the other side to find a good number
-				ssid.set(0);
-			}
-			msg.serial(ssid); // serializes a 16 bits service id
-			uint8 pos = 0;
-			msg.serial(pos); // send the position in the connection table
-			msg.serial(uc->IsExternal);
-			cbc->send(msg);
-
-			// Only make one connection per target
-			// Multiple connections cause concurrency issues
-			break;
+			// in the case that the service is external, we can't send our sid because the external service can
+			// have other connection with the same sid (for example, LS can have 2 WS with same sid => sid = 0 and leave
+			// the other side to find a good number
+			ssid.set(0);
 		}
+		msg.serial(ssid); // serializes a 16 bits service id
+		uint8 pos = 0;
+		msg.serial(pos); // send the position in the connection table
+		msg.serial(uc->IsExternal);
+		cbc->send(msg);
 	}
 
 	bool cntok = false;
@@ -1069,7 +1055,7 @@ void	CUnifiedNetwork::update(TTime timeout)
 					else if (!uc.ValidRequested && CAliveCheck::Thread)
 					{
 						uc.ValidRequested = true;
-						CAliveCheck::Thread->checkService(uc.ExtAddress[j], _UsedConnection[k].get(), j, uc.ServiceName, uc.ServiceId);
+						CAliveCheck::Thread->checkService(uc.ExtAddress.addresses()[j], _UsedConnection[k].get(), j, uc.ServiceName, uc.ServiceId);
 					}
 				}
 			}
@@ -1166,10 +1152,11 @@ void	CUnifiedNetwork::update(TTime timeout)
 void CUnifiedNetwork::autoReconnect( CUnifiedConnection &uc, uint connectionIndex )
 {
 	H_AUTO(L5AutoReconnect);
+	nlassert(connectionIndex == 0);
 	try
 	{
 		CCallbackClient *cbc = (CCallbackClient *)uc.Connections[connectionIndex].CbNetBase;
-		cbc->connect(uc.ExtAddress[connectionIndex]);
+		cbc->connect(uc.ExtAddress);
 		uc.Connections[connectionIndex].CbNetBase->getSockId()->setAppId(uc.ServiceId.get());
 		nlinfo ("HNETL5: reconnection to %s-%hu success", uc.ServiceName.c_str(), uc.ServiceId.get());
 
@@ -1797,10 +1784,10 @@ bool CUnifiedNetwork::isServiceLocal (TServiceId sid)
 	{
 		for (uint j = 0; j < _IdCnx[sid.get()].ExtAddress.size(); j++)
 		{
-			if (_IdCnx[sid.get()].ExtAddress[j].isLoopbackIPAddress ())
+			if (_IdCnx[sid.get()].ExtAddress.addresses()[j].isLoopbackIPAddress ())
 				return true;
 
-			if (_IdCnx[sid.get()].ExtAddress[j].getAddress () == laddr[i].getAddress ())
+			if (_IdCnx[sid.get()].ExtAddress.addresses()[j].getAddress () == laddr[i].getAddress ())
 				return true;
 		}
 	}
@@ -1933,7 +1920,7 @@ void	CUnifiedNetwork::autoCheck()
 			if (_IdCnx[i].ServiceName != "DEAD") AUTOCHECK_DISPLAY ("HLNET5: sid %d name should be DEAD and is '%s'", i, _IdCnx[i].ServiceName.c_str ());
 			if (_IdCnx[i].ServiceId.get() != 0xDEAD) AUTOCHECK_DISPLAY ("HLNET5: sid %d sid should be 0xDEAD and is 0x%X", i, _IdCnx[i].ServiceId.get());
 			if (!_IdCnx[i].Connections.empty ()) AUTOCHECK_DISPLAY ("HLNET5: sid %d connection size should be 0 and is %d", i, _IdCnx[i].Connections.size ());
-			if (!_IdCnx[i].ExtAddress.empty ()) AUTOCHECK_DISPLAY ("HLNET5: sid %d ext addr size should be 0 and is %d", i, _IdCnx[i].ExtAddress.size ());
+			if (_IdCnx[i].ExtAddress.isValid()) AUTOCHECK_DISPLAY ("HLNET5: sid %d ext addr size should be 0 and is %d", i, _IdCnx[i].ExtAddress.size ());
 			if (_IdCnx[i].AutoCheck != 0) AUTOCHECK_DISPLAY ("HLNET5: sid %d prob with syncro with _NamedCnx", i);
 		}
 		else if (_IdCnx[i].State == CUnifiedNetwork::CUnifiedConnection::Ready)
@@ -1942,7 +1929,7 @@ void	CUnifiedNetwork::autoCheck()
 
 			if (_IdCnx[i].ServiceName == "DEAD") AUTOCHECK_DISPLAY ("HLNET5: sid %d name should not be DEAD and is '%s'", i, _IdCnx[i].ServiceName.c_str ());
 			if (_IdCnx[i].ServiceId.get() == 0xDEAD) AUTOCHECK_DISPLAY ("HLNET5: sid %d sid should not be 0xDEAD and is 0x%X", i, _IdCnx[i].ServiceId.get());
-			if (!_IdCnx[i].ExtAddress.empty () && _IdCnx[i].Connections.size () > _IdCnx[i].ExtAddress.size()) AUTOCHECK_DISPLAY ("HLNET5: sid %d ext addr size should not be 0 and is %d", i, _IdCnx[i].ExtAddress.size ());
+			if (_IdCnx[i].ExtAddress.isValid() && _IdCnx[i].Connections.size () > _IdCnx[i].ExtAddress.size()) AUTOCHECK_DISPLAY ("HLNET5: sid %d ext addr size should not be 0 and is %d", i, _IdCnx[i].ExtAddress.size ());
 
 			if (_IdCnx[i].AutoRetry == true && _IdCnx[i].Connections.size () > 1) AUTOCHECK_DISPLAY ("HLNET5: sid %d auto retry with more than one connection %d", i, _IdCnx[i].Connections.size ());
 			if (_IdCnx[i].AutoRetry == true && _IdCnx[i].IsExternal == false) AUTOCHECK_DISPLAY ("HLNET5: sid %d auto retry with internal connection", i);
@@ -1957,7 +1944,7 @@ void	CUnifiedNetwork::autoCheck()
 			{
 				if (_IdCnx[i].NetworkConnectionAssociations[j] != 0)
 				{
-					if (_NetworkAssociations[j] != _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ()) AUTOCHECK_DISPLAY ("HLNET5: sid %d nid %d have address 0x%08x and is not the good connection net 0x%08x", i, j, _NetworkAssociations[j], _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ());
+					// FIXME: if (_NetworkAssociations[j] != _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ()) AUTOCHECK_DISPLAY ("HLNET5: sid %d nid %d have address 0x%08x and is not the good connection net 0x%08x", i, j, _NetworkAssociations[j], _IdCnx[i].ExtAddress[_IdCnx[i].NetworkConnectionAssociations[j]].internalNetAddress ());
 				}
 			}
 		}
@@ -2170,7 +2157,7 @@ void CUnifiedNetwork::CUnifiedConnection::display (bool full, CLog *log)
 		string base;
 		if(j < ExtAddress.size ())
 		{
-			base += ExtAddress[j].asString ();
+			base += ExtAddress.toStringLong();
 		}
 		else
 		{

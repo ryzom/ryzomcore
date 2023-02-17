@@ -45,6 +45,9 @@ public:
 	/// This will do a reverse lookup to find the hostname
 	/// If lookup is set, it will also do a lookup to find all other addresses
 	CInetHost(const CInetAddress &address, bool lookup);
+	
+	/// Set multiple existing addresses, for backwards compatibility
+	CInetHost(const std::vector<CInetAddress> &address, bool lookup);
 
 public:
 	/// Sets hostname and port (ex: www.nevrax.com:80)
@@ -56,6 +59,11 @@ public:
 	/// This will do a reverse lookup to find the hostname
 	/// If lookup is set, it will also do a lookup to find all other addresses
 	void set(const CInetAddress &address, bool lookup = false);
+
+	/// Set multiple existing addresses, for backwards compatibility
+	void set(const std::vector<CInetAddress> &addresses, bool lookup);
+
+	void clear();
 
 	/// Returns if the host and port are valid, check isAddressValid if you only care about the hostname
 	inline bool isValid() const { return m_Addresses[0].isValid(); }
@@ -96,10 +104,26 @@ public:
 	/// To string short hostname:port
 	std::string toString() const;
 
+	/// Comparison == operator
+	bool operator==(const CInetHost &other) const;
+	inline bool operator!=(const CInetHost &other) const { return !(*this == other); }
+
+	/// Assignment operator
+	CInetHost &operator=(const CInetHost &other);
+
+private:
+	void updateAddressesHostname(std::string &hostname);
+
 private:
 	std::string m_Hostname;
 	std::vector<CInetAddress> m_Addresses;
 };
+
+// DEPRECATED. For compatibility
+inline std::string vectorCInetAddressToString(const CInetHost &host)
+{
+	host.toStringLong();
+}
 
 } /* namespace NLNET */
 

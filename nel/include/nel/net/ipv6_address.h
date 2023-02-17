@@ -68,6 +68,12 @@ public:
 	// Constructs a valid loopback address
 	static CIPv6Address loopback();
 
+	// Constructs a valid loopback address
+	static CIPv6Address loopbackIPv6();
+
+	// Constructs a valid loopback address
+	static CIPv6Address loopbackIPv4();
+
 	// Constructs an address from a string.
 	CIPv6Address(const std::string &str)
 	    : m_Valid(set(str))

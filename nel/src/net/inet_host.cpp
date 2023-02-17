@@ -134,6 +134,12 @@ CInetHost::CInetHost(const CInetAddress &address, bool lookup)
 	nlassert(m_Addresses.size());
 }
 
+CInetHost::CInetHost(const std::vector<CInetAddress> &address, bool lookup)
+{
+	set(address, lookup);
+	nlassert(m_Addresses.size());
+}
+
 void CInetHost::set(const std::string &hostnameAndPort)
 {
 	std::string hostname;
@@ -258,6 +264,29 @@ void CInetHost::set(const CInetAddress &address, bool lookup)
 	}
 }
 
+void CInetHost::set(const std::vector<CInetAddress> &addresses, bool lookup)
+{
+	m_Addresses = addresses;
+	m_Hostname.clear();
+	if (m_Addresses.empty())
+	{
+		m_Addresses.push_back(CInetAddress(false));
+	}
+	if (lookup)
+	{
+		std::string hostname;
+		updateAddressesHostname(hostname);
+		m_Hostname = hostname;
+	}
+}
+
+void CInetHost::clear()
+{
+	m_Hostname.clear();
+	m_Addresses.clear();
+	m_Addresses.push_back(CInetAddress(false));
+}
+
 /* Returns the list of the local host addresses (with port=0)
  * (especially useful if the host is multihomed)
  */
@@ -274,6 +303,8 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 
 	// Add loopback addresses
 	std::string loopbackHostname;
+	bool haveLoopback = false;
+	bool haveLoopback6 = false;
 	if (loopback)
 	{
 		if (getaddrinfo(NULL, NULL, &hints, &result) == 0)
@@ -290,6 +321,7 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 						loopbackHostname = findHostname(addr);
 					}
 					host.m_Addresses.push_back(addr);
+					haveLoopback = true;
 				}
 #if NLNET_IPV6_LOOKUP
 				else if (ptr->ai_family == AF_INET6)
@@ -302,6 +334,7 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 						loopbackHostname = findHostname(addr);
 					}
 					host.m_Addresses.push_back(addr);
+					haveLoopback6 = true;
 				}
 #endif
 			}
@@ -323,6 +356,12 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 			{
 				if (ptr->ai_family == AF_INET)
 				{
+					if (loopback && !haveLoopback)
+					{
+						CInetAddress loopback(CIPv6Address::loopbackIPv4(), port);
+						host.m_Addresses.push_back(loopback);
+						haveLoopback = true;
+					}
 					CInetAddress addr(false);
 					addr.fromSockAddrInet((sockaddr_in *)ptr->ai_addr);
 					addr.setPort(port);
@@ -331,6 +370,12 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 #if NLNET_IPV6_LOOKUP
 				else if (ptr->ai_family == AF_INET6)
 				{
+					if (loopback && !haveLoopback6)
+					{
+						CInetAddress loopback(CIPv6Address::loopbackIPv6(), port);
+						host.m_Addresses.push_back(loopback);
+						haveLoopback = true;
+					}
 					CInetAddress addr(false);
 					addr.fromSockAddrInet6((sockaddr_in6 *)ptr->ai_addr);
 					addr.setPort(port);
@@ -445,25 +490,7 @@ void CInetHost::serial(NLMISC::IStream &s)
 		{
 			m_Addresses.push_back(CInetAddress(false));
 		}
-		if (hostname.empty())
-		{
-			// Loop addresses from the back
-			for (size_t i = m_Addresses.size(); i > 0; --i)
-			{
-				hostname = findHostname(m_Addresses[0]);
-				if (!hostname.empty())
-					break;
-			}
-		}
-		if (hostname.empty())
-		{
-			// Use the first IP address in case of failure
-			m_Hostname = m_Addresses[0].getAddress().toString();
-			if (m_Hostname[0] == 'n') // "null" invalid IP
-			{
-				m_Hostname = nlstr("invalid.invalid"); // "invalid.invalid" invalid hostname
-			}
-		}
+		updateAddressesHostname(hostname);
 	}
 	m_Hostname = hostname;
 }
@@ -504,6 +531,45 @@ std::string CInetHost::toString() const
 		hostname += nlstr(":") + NLMISC::toString(port_);
 	}
 	return hostname;
+}
+
+bool CInetHost::operator==(const CInetHost &other) const
+{
+	return m_Addresses == other.m_Addresses
+		|| (isAddressValid() && (m_Hostname == other.m_Hostname));
+}
+
+CInetHost &CInetHost::operator=(const CInetHost &other)
+{
+	m_Hostname = other.m_Hostname;
+	m_Addresses = other.m_Addresses;
+	nlassert(m_Addresses.size());
+	return *this;
+}
+
+void CInetHost::updateAddressesHostname(std::string &hostname)
+{
+	// Sanitizes addresses structure
+	// Attempts to find a good hostname
+	if (hostname.empty())
+	{
+		// Loop addresses from the back
+		for (size_t i = m_Addresses.size(); i > 0; --i)
+		{
+			hostname = findHostname(m_Addresses[0]);
+			if (!hostname.empty())
+				break;
+		}
+	}
+	if (hostname.empty())
+	{
+		// Use the first IP address in case of failure
+		hostname = m_Addresses[0].getAddress().toString();
+		if (hostname[0] == 'n') // "null" invalid IP
+		{
+			hostname = nlstr("invalid.invalid"); // "invalid.invalid" invalid hostname
+		}
+	}
 }
 
 } /* namespace NLNET */

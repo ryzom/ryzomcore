@@ -165,6 +165,31 @@ CIPv6Address CIPv6Address::loopback()
 	return addr;
 }
 
+// Constructs a valid loopback address
+CIPv6Address CIPv6Address::loopbackIPv6()
+{
+	CIPv6Address addr;
+	memset(addr.m_Address, 0, sizeof(addr.m_Address));
+	addr.m_Address[15] = 1;
+	addr.m_Valid = true;
+	return addr;
+}
+
+// Constructs a valid loopback address
+CIPv6Address CIPv6Address::loopbackIPv4()
+{
+	CIPv6Address addr;
+	memset(addr.m_Address, 0, sizeof(addr.m_Address) - 6);
+	addr.m_Address[10] = 0xFF;
+	addr.m_Address[11] = 0xFF;
+	addr.m_Address[12] = 127;
+	addr.m_Address[13] = 0;
+	addr.m_Address[14] = 0;
+	addr.m_Address[15] = 1;
+	addr.m_Valid = true;
+	return addr;
+}
+
 // Constructs an address suitable for listening on any interface
 CIPv6Address CIPv6Address::any()
 {

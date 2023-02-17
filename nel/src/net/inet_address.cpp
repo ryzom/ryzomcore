@@ -165,7 +165,8 @@ CInetAddress::CInetAddress(const std::string &hostNameAndPort)
 CInetAddress::CInetAddress(const CIPv6Address &ipv6Address, uint16 port)
 {
 	init();
-
+	m_Address = ipv6Address;
+	m_Port = port;
 }
 
 /*

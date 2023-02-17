@@ -26,6 +26,7 @@ namespace NLNET {
 
 
 class CInetAddress;
+class CInetHost;
 
 
 /**

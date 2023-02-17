@@ -282,8 +282,7 @@ public:
 	 *
 	 * Warning: currently, this method must not be called within a network callback.
 	 */
-	void	addService(const std::string &name, const CInetAddress &addr, bool sendId = true, bool external = true, TServiceId sid=TServiceId(), bool autoRetry = true, bool shouldBeAlreayInserted = false);
-	void	addService(const std::string &name, const std::vector<CInetAddress> &addr, bool sendId = true, bool external = true, TServiceId sid=TServiceId(), bool autoRetry = true, bool shouldBeAlreayInserted = false);
+	void	addService(const std::string &name, const CInetHost &addr, bool sendId = true, bool external = true, TServiceId sid=TServiceId(), bool autoRetry = true, bool shouldBeAlreayInserted = false);
 
 	/** Adds a callback array in the system. You can add callback only *after* adding the server, the client or the group.
 	 */
@@ -524,7 +523,7 @@ private:
 		/// Used for debug purpose
 		uint						AutoCheck;
 		/// The external connection address
-		std::vector<CInetAddress>	ExtAddress;
+		CInetHost					ExtAddress;
 		/// Connection to the service (me be > 1)
 		std::vector<TConnection>	Connections;
 		/// This is used to associate a nid (look addNetworkAssociation) with a TConnection.
@@ -585,7 +584,7 @@ private:
 				uint j;
 				for (j = 0; j < ExtAddress.size (); j++)
 				{
-					if (ExtAddress[j].internalNetAddress() == networkAssociations[i])
+					if (ExtAddress.addresses()[j].internalNetAddress() == networkAssociations[i])
 					{
 						// we found an association, add it
 						if (i >= NetworkConnectionAssociations.size ())
