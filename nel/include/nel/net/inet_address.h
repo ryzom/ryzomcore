@@ -151,9 +151,6 @@ public:
 	/// Serialize
 	void serial( NLMISC::IStream& s );
 
-	/// Returns true if this CInetAddress is 127.0.0.1
-	bool is127001 () const;
-
 	/// Returns true if this CInetAddress is a loop back address
 	bool isLoopbackIPAddress () const;
 

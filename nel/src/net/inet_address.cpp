@@ -32,84 +32,6 @@
 #	include <ws2ipdef.h>
 // for Windows 2000 compatibility
 #	include <wspiapi.h>
-
-#if !defined(NTDDI_VISTA) || (NTDDI_VERSION < NTDDI_VISTA)
-
-// inet_pton and inet_ntop not defined in winsock DLL before Vista
-
-// taken from http://stackoverflow.com/questions/13731243/what-is-the-windows-xp-equivalent-of-inet-pton-or-inetpton
-int inet_pton(int af, const char *src, void *dst)
-{
-	struct sockaddr_storage ss;
-	int size = sizeof(ss);
-	char src_copy[INET6_ADDRSTRLEN+1];
-
-	ZeroMemory(&ss, sizeof(ss));
-	// stupid non-const API
-	strncpy (src_copy, src, INET6_ADDRSTRLEN+1);
-	src_copy[INET6_ADDRSTRLEN] = 0;
-
-	if (WSAStringToAddress(src_copy, af, NULL, (struct sockaddr *)&ss, &size) == 0)
-	{
-		switch(af)
-		{
-			case AF_INET:
-			*(struct in_addr *)dst = ((struct sockaddr_in *)&ss)->sin_addr;
-			return 1;
-
-			case AF_INET6:
-			*(struct in6_addr *)dst = ((struct sockaddr_in6 *)&ss)->sin6_addr;
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
-{
-	struct sockaddr_storage ss;
-	unsigned long s = size;
-
-	ZeroMemory(&ss, sizeof(ss));
-	ss.ss_family = af;
-
-	switch(af)
-	{
-		case AF_INET:
-		((struct sockaddr_in *)&ss)->sin_addr = *(struct in_addr *)src;
-		break;
-
-		case AF_INET6:
-		((struct sockaddr_in6 *)&ss)->sin6_addr = *(struct in6_addr *)src;
-		break;
-
-		default:
-		return NULL;
-	}
-	
-	// cannot directly use &size because of strict aliasing rules
-	return WSAAddressToString((struct sockaddr *)&ss, sizeof(ss), NULL, dst, &s) == 0 ? dst : NULL;
-}
-
-BOOLEAN IN6_IS_ADDR_UNSPECIFIED(CONST IN6_ADDR *a)
-{
-	//
-	// We can't use the in6addr_any variable, since that would
-	// require existing callers to link with a specific library.
-	//
-	return (BOOLEAN)((a->s6_words[0] == 0) &&
-		(a->s6_words[1] == 0) &&
-		(a->s6_words[2] == 0) &&
-		(a->s6_words[3] == 0) &&
-		(a->s6_words[4] == 0) &&
-		(a->s6_words[5] == 0) &&
-		(a->s6_words[6] == 0) &&
-		(a->s6_words[7] == 0));
-}
-
-#endif
-
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
 #	include <sys/socket.h>
@@ -342,42 +264,12 @@ void CInetAddress::setNameAndPort( const std::string& hostNameAndPort )
 	m_Port = port;
 }
 
-
 /*
  * Resolves a name
  */
 CInetAddress& CInetAddress::setByName(const std::string& hostName)
 {
-	m_Address.setNull();
-
-	// Try to convert directly for addresses such as a.b.c.d and a:b:c:d:e:f:g:h
-	in_addr ipv4;
-	sint res = inet_pton(AF_INET, hostName.c_str(), &ipv4);
-
-	if (res == 1)
-	{
-		// hostname is a valid IPv4
-		sockaddr_in addr;
-		addr.sin_family = AF_INET;
-		addr.sin_addr = ipv4;
-		m_Address.fromSockAddrInet(&addr);
-	}
-	else
-	{
-		in6_addr ipv6;
-		res = inet_pton(AF_INET6, hostName.c_str(), &ipv6);
-
-		if (res == 1)
-		{
-			// hostname is a valid IPv6
-			sockaddr_in6 addr;
-			addr.sin6_family = AF_INET6;
-			addr.sin6_addr = ipv6;
-			m_Address.fromSockAddrInet6(&addr);
-		}
-	}
-
-	if (res == 1)
+	if (m_Address.set(hostName))
 	{
 		// use IPv4 or IPv6
 	}
