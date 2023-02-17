@@ -202,7 +202,7 @@ bool CUdpSock::receivedFrom( uint8 *buffer, uint& len, CInetAddress& addr, bool 
 
 	// If an error occurs, the saddr is not valid
 	// When the remote socket is closed, get sender's address to know who is quitting
-	addr.setSockAddr( &saddr );
+	addr.fromSockAddrInet( &saddr );
 
 	// Check for errors (after setting the address)
 	if ( ((int)len) == SOCKET_ERROR )

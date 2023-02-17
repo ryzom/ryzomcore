@@ -155,7 +155,7 @@ CTcpSock *CListenSock::accept()
 
 	// Construct and save a CTcpSock object
 	CInetAddress addr;
-	addr.setSockAddr( &saddr );
+	addr.fromSockAddrInet( &saddr );
 	LNETL0_DEBUG( "LNETL0: Socket %d accepted an incoming connection from %s, opening socket %d", _Sock, addr.asString().c_str(), newsock );
 	CTcpSock *connection = new CTcpSock( newsock, addr );
 	return connection;

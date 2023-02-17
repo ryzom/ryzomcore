@@ -322,7 +322,7 @@ void CInetAddress::setPort(uint16 port)
 /* Sets internal socket address directly (contents is copied).
  * It also retrieves the host name if CInetAddress::RetrieveNames is true.
  */
-void CInetAddress::setSockAddr(const sockaddr_in *saddr)
+void CInetAddress::fromSockAddrInet(const TSockAddrIn *saddr)
 {
 	m_Address.fromSockAddrInet(saddr);
 	m_Port = ntohs(saddr->sin_port);
@@ -331,7 +331,7 @@ void CInetAddress::setSockAddr(const sockaddr_in *saddr)
 /* Sets internal socket address directly (contents is copied).
  * It also retrieves the host name if CInetAddress::RetrieveNames is true.
  */
-void CInetAddress::setSockAddr6(const sockaddr_in6 *saddr6)
+void CInetAddress::fromSockAddrInet6(const TSockAddrIn6 *saddr6)
 {
 	m_Address.fromSockAddrInet6(saddr6);
 	m_Port = ntohs(saddr6->sin6_port);

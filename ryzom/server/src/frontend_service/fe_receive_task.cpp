@@ -67,7 +67,7 @@ void	TReceivedMessage::addressToVector()
 /// Set address with address info from specified vector
 void	TReceivedMessage::vectorToAddress()
 {
-	AddrFrom.setSockAddr( (sockaddr_in*)&*VAddrFrom.begin() );
+	AddrFrom.fromSockAddrInet( (sockaddr_in*)&*VAddrFrom.begin() );
 }
 
 

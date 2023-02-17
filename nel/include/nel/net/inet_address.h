@@ -97,12 +97,12 @@ public:
 	/** Sets internal IPv4 socket address directly (contents is copied).
 	 * It also retrieves the host name if CInetAddress::RetrieveNames is true.
 	 */
-	void setSockAddr(const sockaddr_in *saddr);
+	void fromSockAddrInet(const TSockAddrIn *saddr);
 
 	/** Sets internal IPv6 socket address directly (contents is copied).
 	 * It also retrieves the host name if CInetAddress::RetrieveNames is true.
 	 */
-	void setSockAddr6(const sockaddr_in6 *saddr6);
+	void fromSockAddrInet6(const TSockAddrIn6 *saddr6);
 
 	/// Returns if object (address and port) is valid
 	bool isValid() const;

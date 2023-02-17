@@ -468,7 +468,7 @@ void CSock::setLocalAddress()
 	{
 		throw ESocket( "Unable to find local address" );
 	}
-	_LocalAddr.setSockAddr( (const sockaddr_in *)&saddr );
+	_LocalAddr.fromSockAddrInet( (const sockaddr_in *)&saddr );
 }
 
 
