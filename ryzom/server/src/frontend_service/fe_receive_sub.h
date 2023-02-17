@@ -23,6 +23,7 @@
 #include "nel/misc/buf_fifo.h"
 
 #include "nel/net/login_cookie.h"
+#include "nel/net/ipv6_address.h"
 
 #include "fe_types.h"
 #include "client_host.h"
@@ -75,7 +76,7 @@ struct THackingDesc
 typedef CHashMap<NLNET::CInetAddress,THackingDesc,CInetAddressHashMapTraits> THackingAddrSet;
 
 /// Type of map of ip -> user id
-typedef std::map<uint32,TUid> TAutoUidMap;
+typedef std::map<NLNET::CIPv6Address,TUid> TAutoUidMap;
 
 
 /**

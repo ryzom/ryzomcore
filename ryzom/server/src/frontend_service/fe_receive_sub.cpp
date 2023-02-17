@@ -850,9 +850,16 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					// Load from file
 					try
 					{
-						CIFile file( filename );
-						sint v = file.serialVersion( 0 );
-						file.serialCont( _AutoUidMap );
+						CIFile file(filename);
+						sint v = file.serialVersion(1);
+						if (v >= 1)
+						{
+							file.serialCont(_AutoUidMap);
+						}
+						else
+						{
+							nlwarning("AutoAllocUserid out of date version");
+						}
 					}
 					catch (const Exception&)
 					{
@@ -870,7 +877,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 				}
 
 				// Look up the address
-				TAutoUidMap::iterator itaum = _AutoUidMap.find( _CurrentInMsg->AddrFrom.internalIPAddress() );
+				TAutoUidMap::iterator itaum = _AutoUidMap.find( _CurrentInMsg->AddrFrom.getAddress() );
 				if ( itaum != _AutoUidMap.end() )
 				{
 					// This ip address is already known: if not already connected, give the same user id back.
@@ -887,7 +894,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					// This ip address is new to us, give a new user id and store it
 					do { uid = CurrentAutoAllocUserid++; }
 					while ( findClientHostByUid( uid ) != NULL );
-					_AutoUidMap.insert( std::make_pair( _CurrentInMsg->AddrFrom.internalIPAddress(), uid ) );
+					_AutoUidMap.insert( std::make_pair( _CurrentInMsg->AddrFrom.getAddress(), uid ) );
 
 				}
 

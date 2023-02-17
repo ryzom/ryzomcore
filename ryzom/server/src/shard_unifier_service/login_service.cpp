@@ -411,7 +411,7 @@ namespace LS
 
 			NLNET::CInetAddress addr(ipAddress);
 			//2 generate a cookie and set the player status and cookie in database
-			NLNET::CLoginCookie cookie(addr.internalIPAddress(), userId);
+			NLNET::CLoginCookie cookie(addr.hash32(), userId);
 			ru->setCookie(cookie.setToString());
 			ru->setCurrentStatus(TCurrentStatus::cs_logged);
 			ru->setCurrentActivity(TCurrentActivity::ca_none);

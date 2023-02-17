@@ -1800,7 +1800,7 @@ bool CUnifiedNetwork::isServiceLocal (TServiceId sid)
 			if (_IdCnx[sid.get()].ExtAddress[j].isLoopbackIPAddress ())
 				return true;
 
-			if (_IdCnx[sid.get()].ExtAddress[j].internalIPAddress () == laddr[i].internalIPAddress ())
+			if (_IdCnx[sid.get()].ExtAddress[j].getAddress () == laddr[i].getAddress ())
 				return true;
 		}
 	}

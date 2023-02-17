@@ -125,9 +125,11 @@ public:
 	/// Returns internal IP address
 	inline const CIPv6Address &getAddress() const { return m_Address; }
 
+private:
 	/// Returns internal IP address (DEPRECATED) // FIXME: IPv6
 	uint32				internalIPAddress() const;
 
+public:
 	/// Returns the internal network address (it s the network address for example 192.168.0.0 for a C class) (DEPRECATED) // FIXME: IPv6
 	uint32				internalNetAddress () const;
 

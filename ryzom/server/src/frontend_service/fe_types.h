@@ -74,21 +74,33 @@ typedef uint32 TUid;
  */
 struct CInetAddressHashMapTraits
 {
-	enum { bucket_size = 4, min_buckets = 8 };
-	inline size_t operator() ( const NLNET::CInetAddress& x ) const
+	enum
 	{
-		//return x.port();
-		return x.internalIPAddress();
+		bucket_size = 4,
+		min_buckets = 8
+	};
+	inline size_t operator()(const NLNET::CInetAddress &x) const
+	{
+		return x.hash();
 	}
-	bool operator() (const NLNET::CInetAddress& left, const NLNET::CInetAddress& right) { return left < right; }
-// 	bool operator() (const NLNET::CInetAddress &x1, const NLNET::CInetAddress &x2) const
-// 	{
-// 		return classId1 < classId2;
-// 	}
+	bool operator()(const NLNET::CInetAddress &left, const NLNET::CInetAddress &right) { return left < right; }
+};
+struct CIPv6HashMapTraits
+{
+	enum
+	{
+		bucket_size = 4,
+		min_buckets = 8
+	};
+	inline size_t operator()(const NLNET::CIPv6Address &x) const
+	{
+		return x.hash();
+	}
+	bool operator()(const NLNET::CIPv6Address &left, const NLNET::CIPv6Address &right) { return left < right; }
 };
 
 /// Type of client map by address
-typedef CHashMap<NLNET::CInetAddress,CClientHost*,CInetAddressHashMapTraits> THostMap;
+typedef CHashMap<NLNET::CInetAddress, CClientHost *, CInetAddressHashMapTraits> THostMap;
 #define GETCLIENTA(it) (*it).second
 
 /// TEMP! fe/client time/tick types
