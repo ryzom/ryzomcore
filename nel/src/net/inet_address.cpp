@@ -482,7 +482,7 @@ uint32 CInetAddress::internalIPAddress() const
 	if (toSockAddrInet(&addr))
 		return addr.sin_addr.s_addr;
 	else
-		return 0;
+		return m_Address.hash32();
 }
 
 uint32 CInetAddress::internalNetAddress() const

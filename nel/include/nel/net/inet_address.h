@@ -126,7 +126,7 @@ public:
 	inline const CIPv6Address &getAddress() const { return m_Address; }
 
 private:
-	/// Returns internal IP address (DEPRECATED) // FIXME: IPv6
+	/// Returns internal IP address (DEPRECATED)
 	uint32				internalIPAddress() const;
 
 public:
