@@ -667,23 +667,46 @@ bool	CNetworkConnection::connect(string &result)
 		//
 		// S12: connect to the FES. Note: In UDP mode, it's the user that have to send the cookie to the front end
 		//
-		CInetHost frontendHost(_FrontendAddress); // LS just sends us some IP instead of a hostname
-#if 0
-		if (frontendHost.size() == 1)
+		CInetHost frontendHost(_FrontendAddress);
+		// Under UDP we need to connect one by one by ourselves
+		_FrontendHost = frontendHost;
+		_FrontendHostIndex = 0;
+		std::string tres = "No remaining FS connection addresses";
+		while (_FrontendHostIndex < _FrontendHost.size())
 		{
-			// Reverse resolve frontend address, because login server might send and IPv6 that's not supported
-			// Reverse lookup IP to domain and forward lookup domain to all valid IP addresses
-			CInetAddress frontendAddr = frontendHost.address();
-			frontendHost = CInetHost(frontendAddr, true);
-			if (frontendHost.size() > 1 || !(frontendHost.address() == frontendAddr))
-			nlwarning("CNET[%p]: Frontend address remapped through hostname lookup from '%s' to '%s'", this, _FrontendAddress.c_str(), frontendHost.toStringLong().c_str());
-		}
+			try
+			{
+				// Connect
+				_Connection.connect(_FrontendHost.at(_FrontendHostIndex));
+				tres.clear();
+				break;
+			}
+			catch (const ESocket &e)
+			{
+				tres = toString ("FS refused the connection (%s)", e.what());
+			}
+			++_FrontendHostIndex;
+			
+			// Reuse the udp socket
+			_Connection.~CUdpSimSock();
+#ifdef new
+#undef new
 #endif
-		_Connection.connect(frontendHost);
+			new (&_Connection)CUdpSimSock();
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+		}
+		if (!tres.empty())
+		{
+			result = tres;
+			return false;
+		}
 	}
 	catch (const ESocket &e)
 	{
-		result = toString ("FS refused the connection (%s)", e.what());
+		result = toString ("FS hostname resolution failed (%s)", e.what());
 		return false;
 	}
 
@@ -799,6 +822,57 @@ bool	CNetworkConnection::update()
 	return res;
 #endif
 
+	if (_ConnectionState == NextAddress)
+	{
+		nlassert(!_Connection.connected());
+
+		std::string tres = "No remaining FS connection addresses";
+		while (_FrontendHostIndex < _FrontendHost.size())
+		{
+			// Reuse the udp socket
+			_Connection.~CUdpSimSock();
+#ifdef new
+#undef new
+#endif
+			new (&_Connection)CUdpSimSock();
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+			CInetHost frontendHost = _FrontendHost.at(_FrontendHostIndex);
+			nlinfo("CNET[%p]: Connecting to next FS host address '%s'", this, frontendHost.address().asIPString().c_str());
+			try
+			{
+				// Connect
+				_Connection.connect(frontendHost);
+				tres.clear();
+				break;
+			}
+			catch (const ESocket &e)
+			{
+				tres = toString("FS refused the connection (%s)", e.what());
+			}
+			++_FrontendHostIndex;
+		}
+		if (tres.empty())
+		{
+			_ConnectionState = Login;
+
+			_LatestLoginTime = ryzomGetLocalTime ();
+			_LatestSyncTime = _LatestLoginTime;
+			_LatestProbeTime = _LatestLoginTime;
+			m_LoginAttempts = 0;
+
+			nlinfo("CNET[%p]: Client connected to shard again, attempting login", this);
+		}
+		else
+		{
+			nlwarning("CNET[%p]: %s", this, tres.c_str());
+
+			_ConnectionState = Disconnect;
+		}
+	}
+
 	if (!_Connection.connected())
 	{
 		//if(!ClientCfg.Local)
@@ -877,7 +951,10 @@ bool	CNetworkConnection::update()
 	}
 	catch (const ESocket &)
 	{
-		_ConnectionState = Disconnect;
+		if (_ConnectionState != NextAddress)
+		{
+			_ConnectionState = Disconnect;
+		}
 	}
 
 	//updateBufferizedPackets ();
@@ -944,10 +1021,21 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 	}
 	else
 	{
+		// Try the next address if we're still logging in
+		bool tryNextAddress = (_ConnectionState == Login) && ((_FrontendHostIndex + 1) < _FrontendHost.size());
+
 		// A receiving error means the front-end is down
 		_ConnectionState = Disconnect;
 		disconnect(); // won't send a disconnection msg because state is already Disconnect
-		nlwarning( "DISCONNECTION" );
+		if (tryNextAddress)
+		{
+			_ConnectionState = NextAddress;
+			++_FrontendHostIndex;
+		}
+		else
+		{
+			nlwarning("DISCONNECTION");
+		}
 		return false;
 	}
 }
@@ -2828,6 +2916,7 @@ void	CNetworkConnection::disconnect()
 		_ConnectionState == Disconnect)
 	{
 		//nlwarning("Unable to disconnect(): not connected yet, or already disconnected.");
+		_Connection.close();
 		return;
 	}
 

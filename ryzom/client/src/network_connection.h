@@ -270,6 +270,7 @@ public:
 		NotConnected,			// init() called
 		Authenticate,			// connect() called, identified by the login server
 		Login,					// connecting to the frontend, sending identification
+		NextAddress,			// failed while in Login state, next host address can be tried
 		Synchronize,			// connection accepted by the frontend, synchronizing
 		Connected,				// synchronized, connected, ready to work
 		Probe,					// connection lost by frontend, probing for response
@@ -567,6 +568,8 @@ protected:
 
 	/// The address of the frontend service
 	std::string					_FrontendAddress;
+	NLNET::CInetHost			_FrontendHost;
+	size_t						_FrontendHostIndex;
 
 	/// The cookie for the login service
 	NLNET::CLoginCookie			_LoginCookie;
