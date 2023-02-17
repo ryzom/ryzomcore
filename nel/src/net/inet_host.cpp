@@ -19,6 +19,7 @@
 
 #include "nel/misc/string_common.h"
 #include "nel/misc/string_view.h"
+#include "nel/misc/stream.h"
 
 #include "nel/net/sock.h"
 #include "nel/net/net_log.h"
@@ -410,6 +411,90 @@ void CInetHost::setPort(uint16 port)
 	{
 		m_Addresses[i].setPort(port);
 	}
+}
+
+CInetHost CInetHost::at(size_t i) const
+{
+	CInetHost host;
+	host.m_Addresses.clear();
+	host.m_Addresses.push_back(m_Addresses[i]);
+	host.m_Hostname = m_Hostname;
+	return host;
+}
+
+std::vector<CInetHost> CInetHost::split() const
+{
+	std::vector<CInetHost> res;
+	for (size_t i = 0; i < m_Addresses.size(); ++i)
+	{
+		res.push_back(at(i));
+	}
+	return res;
+}
+
+void CInetHost::serial(NLMISC::IStream &s)
+{
+	// Don't write "localhost", when reading
+	// When hostname is empty, try to reverse lookup starting from the *last *address, which is most likely a public one
+	std::string hostname = m_Hostname == nlstr("localhost") ? std::string() : m_Hostname;
+	s.serial(hostname);
+	s.serialCont(m_Addresses);
+	if (s.isReading())
+	{
+		if (m_Addresses.empty())
+		{
+			m_Addresses.push_back(CInetAddress(false));
+		}
+		if (hostname.empty())
+		{
+			// Loop addresses from the back
+			for (size_t i = m_Addresses.size(); i > 0; --i)
+			{
+				hostname = findHostname(m_Addresses[0]);
+				if (!hostname.empty())
+					break;
+			}
+		}
+		if (hostname.empty())
+		{
+			// Use the first IP address in case of failure
+			m_Hostname = m_Addresses[0].getAddress().toString();
+			if (m_Hostname[0] == 'n') // "null" invalid IP
+			{
+				m_Hostname = nlstr("invalid.invalid"); // "invalid.invalid" invalid hostname
+			}
+		}
+	}
+	m_Hostname = hostname;
+}
+
+std::string CInetHost::toStringLong() const
+{
+	std::string res = toString();
+	res += nlstr(" (");
+	for (size_t i = 0; i < m_Addresses.size(); ++i)
+	{
+		if (i != 0) res += nlstr(", ");
+		res += m_Addresses[i].getAddress().toString();
+	}
+	res += nlstr(")");
+	return res;
+}
+
+std::string CInetHost::toString() const
+{
+	std::string hostname = m_Hostname.empty() ? nlstr("invalid.invalid") : m_Hostname;
+	if (hostname.find(':') != std::string::npos)
+	{
+		// IPv6
+		hostname = nlstr("[") + hostname + nlstr("]");
+	}
+	uint16 port_ = port();
+	if (port_ != 0)
+	{
+		hostname += nlstr(":") + NLMISC::toString(port_);
+	}
+	return hostname;
 }
 
 } /* namespace NLNET */

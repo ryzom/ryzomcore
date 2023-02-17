@@ -75,6 +75,24 @@ public:
 	inline uint16 port() const { return m_Addresses[0].port(); }
 	void setPort(uint16 port);
 
+	/// Get a CInetHost with a single address. This is for compatibility purposes
+	CInetHost at(size_t i) const;
+
+	/// Number of addresses available
+	inline size_t size() const { return m_Addresses.size(); }
+
+	/// Get a vector of this CInetHost separated into individual copies for each address. This is for compatibility purposes
+	std::vector<CInetHost> split() const;
+
+	/// Serialize
+	void serial(NLMISC::IStream &s);
+
+	/// To string hostname:port (ip, ip, ip)
+	std::string toStringLong() const;
+	
+	/// To string short hostname:port
+	std::string toString() const;
+
 private:
 	std::string m_Hostname;
 	std::vector<CInetAddress> m_Addresses;
