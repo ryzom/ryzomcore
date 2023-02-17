@@ -271,14 +271,8 @@ CInetAddress &CInetAddress::setByName(const std::string &hostname)
 {
 #if 1
 	CInetHost host(hostname, m_Port);
-	if (host.addresses().size())
-	{
-		m_Address = host.addresses()[0].m_Address;
-	}
-	else
-	{
-		m_Address.setNull();
-	}
+	nlassert(host.addresses().size());
+	m_Address = host.address().m_Address;
 	return *this;
 #else
 	if (m_Address.set(hostname))
@@ -487,8 +481,8 @@ CInetAddress CInetAddress::localHost(uint16 port)
 {
 #if 1
 	CInetHost localAddrs = CInetHost::localAddresses(port, false, false);
-	if (localAddrs.addresses().size())
-		return localAddrs.addresses().at(0); // First one from unsorted list will be used
+	if (localAddrs.isAddressValid())
+		return localAddrs.address(); // First one from unsorted list will be used
 	else
 		return CInetAddress::loopback(port);
 #else
@@ -513,7 +507,10 @@ CInetAddress CInetAddress::localHost(uint16 port)
 std::vector<CInetAddress> CInetAddress::localAddresses()
 {
 #if 1
-	return CInetHost::localAddresses().addresses();
+	CInetHost res = CInetHost::localAddresses();
+	if (!res.isAddressValid()) // Hide the invalid address
+		return std::vector<CInetAddress>();
+	return res.addresses();
 #else
 	// 1. Get local host name
 	const uint maxlength = 80;

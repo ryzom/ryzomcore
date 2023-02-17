@@ -26,6 +26,7 @@ namespace NLNET {
 
 /**
  * A host name and a set of addresses.
+ * It contains at minimum one address, which may be null.
  * \author Jan BOON (Kaetemi)
  * \date 2023
  */
@@ -56,14 +57,23 @@ public:
 	/// If lookup is set, it will also do a lookup to find all other addresses
 	void set(const CInetAddress &address, bool lookup = false);
 
+	/// Returns if the host and port are valid, check isAddressValid if you only care about the hostname
+	inline bool isValid() const { return m_Addresses[0].isValid(); }
+
 	/// Returns if the host is valid
-	inline bool isValid() const { return m_Addresses.size(); }
+	inline bool isAddressValid() const { return m_Addresses[0].getAddress().isValid(); }
 
 	/// Returns all local addresses
 	static CInetHost CInetHost::localAddresses(uint16 port = 0, bool sort = true, bool loopback = true);
 
 	/// Returns the list of addresses
 	inline const std::vector<CInetAddress> &addresses() const { return m_Addresses; }
+
+	/// Returns the first address
+	inline const CInetAddress &address() const { return m_Addresses[0]; }
+
+	inline uint16 port() const { return m_Addresses[0].port(); }
+	void setPort(uint16 port);
 
 private:
 	std::string m_Hostname;

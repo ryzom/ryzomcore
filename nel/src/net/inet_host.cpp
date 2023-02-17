@@ -106,26 +106,31 @@ std::string findHostname(const CInetAddress &address)
 
 CInetHost::CInetHost()
 {
+	m_Addresses.push_back(CInetAddress(false));
 }
 
 CInetHost::CInetHost(const std::string &hostnameAndPort)
 {
 	set(hostnameAndPort);
+	nlassert(m_Addresses.size());
 }
 
 CInetHost::CInetHost(const std::string &hostname, uint16 port)
 {
 	set(hostname, port);
+	nlassert(m_Addresses.size());
 }
 
 CInetHost::CInetHost(const CInetAddress &address)
 {
 	set(address);
+	nlassert(m_Addresses.size());
 }
 
 CInetHost::CInetHost(const CInetAddress &address, bool lookup)
 {
 	set(address, lookup);
+	nlassert(m_Addresses.size());
 }
 
 void CInetHost::set(const std::string &hostnameAndPort)
@@ -170,6 +175,10 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 
 	if (status)
 	{
+		if (m_Addresses.empty())
+		{
+			m_Addresses.push_back(CInetAddress(CIPv6Address(), port));
+		}
 		LNETL0_DEBUG("LNETL0: Network error: resolution of hostname '%s' failed: %s", hostname.c_str(), gai_strerror(status));
 		throw ESocket((std::string("Hostname resolution failed for ") + hostname).c_str());
 	}
@@ -211,12 +220,19 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 #else
 	freeaddrinfo(res);
 #endif
+	
+	if (m_Addresses.empty())
+	{
+		m_Addresses.push_back(CInetAddress(CIPv6Address(), port));
+	}
 }
 
 void CInetHost::set(const CInetAddress &address, bool lookup)
 {
 	// Reverse lookup the address
 	m_Hostname = findHostname(address);
+	m_Addresses.clear();
+
 	if (m_Hostname.empty())
 	{
 		// Use the IP address in case of failure
@@ -384,6 +400,16 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 	}
 
 	return host;
+}
+
+void CInetHost::setPort(uint16 port)
+{
+	// Set port on all addresses
+	nlassert(m_Addresses.size());
+	for (size_t i = 0; i < m_Addresses.size(); ++i)
+	{
+		m_Addresses[i].setPort(port);
+	}
 }
 
 } /* namespace NLNET */

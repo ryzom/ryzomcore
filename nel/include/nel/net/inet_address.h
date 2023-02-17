@@ -111,7 +111,11 @@ public:
 	void fromSockAddrInet6(const TSockAddrIn6 *saddr6);
 
 	/// Returns if object (address and port) is valid
+	/// If you only care about the address, check getAddress().isValid() or isAddressValid()
 	bool isValid() const;
+
+	/// Returns if address is valid
+	inline bool isAddressValid() const { return m_Address.isValid(); }
 
 	// Convert an IPv4 or the Any listener address and port to the sockaddr_in structure
 	bool toSockAddrInet(TSockAddrIn *addr) const;
