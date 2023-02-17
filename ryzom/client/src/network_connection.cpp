@@ -667,16 +667,18 @@ bool	CNetworkConnection::connect(string &result)
 		//
 		// S12: connect to the FES. Note: In UDP mode, it's the user that have to send the cookie to the front end
 		//
-		// Reverse resolve frontend address, because login server might send and IPv6 that's not supported
 		CInetHost frontendHost(_FrontendAddress); // LS just sends us some IP instead of a hostname
+#if 0
 		if (frontendHost.size() == 1)
 		{
+			// Reverse resolve frontend address, because login server might send and IPv6 that's not supported
 			// Reverse lookup IP to domain and forward lookup domain to all valid IP addresses
 			CInetAddress frontendAddr = frontendHost.address();
 			frontendHost = CInetHost(frontendAddr, true);
 			if (frontendHost.size() > 1 || !(frontendHost.address() == frontendAddr))
 			nlwarning("CNET[%p]: Frontend address remapped through hostname lookup from '%s' to '%s'", this, _FrontendAddress.c_str(), frontendHost.toStringLong().c_str());
 		}
+#endif
 		_Connection.connect(frontendHost);
 	}
 	catch (const ESocket &e)
