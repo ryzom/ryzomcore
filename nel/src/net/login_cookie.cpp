@@ -17,6 +17,7 @@
 #include "stdnet.h"
 
 #include "nel/net/login_cookie.h"
+#include "nel/misc/wang_hash.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -51,21 +52,45 @@ CLoginCookie::CLoginCookie (uint32 addr, uint32 id) : _Valid(true), _UserAddr(ad
 
 uint32 CLoginCookie::generateKey()
 {
-	uint32 t = (uint32)time (NULL);
-    srand (t);
+	// This is a very poor random number generator that ensures no duplicates are generated within the same hour
+	
+	static uint32_t salt0;
+	static uint32_t salt1;
+	static bool seeded;
 
-	uint32 r = rand ();
+	uint32 t = (uint32)time(NULL);
+
+	if (!seeded)
+	{
+		// Generate a not very random number as an extra salt to obfuscate the key
+#ifdef NL_CPP14
+		srand(std::random_device()());
+#else
+		srand(wangHash(t));
+#endif
+		salt0 = wangHash(rand() | rand() << 8 | rand() << 16 | rand() << 24);
+		salt1 = wangHash(rand() | rand() << 8 | rand() << 16 | rand() << 24);
+		seeded = true;
+	}
+
+	// Random number and counter
+	uint32 r = rand(); // FIXME: Not thread safe!
 	static uint32 n = 0;
-	n++;
+	n += rand() & 3;
+
+	// Time moves the counter forward, but the counter may go ahead of time
+	t <<= 12;
+	if (t > n)
+	{
+		// Move forward along with extra random bits
+		n = (t + (rand() & 0xFFF));
+	}
 
 	// 12bits for the time (in second) => loop in 1 hour
+	// 12bits for the inc number => can generate 1024 keys per second without any problem (if you generate more than this number, time will just go faster)
 	//  8bits for random => 256 case
-	// 12bits for the inc number => can generate 4096 keys per second without any problem (if you generate more than this number, you could have 2 same keys)
-	return (t&0xFFF)<<20 | (r&0xFF)<<12 | (n&0xFFF);
-
-	// 12bits for the time (in second) => loop in 1 hour
-	// 20bits for the inc number => can generate more than 1 million keys per second without any problem (never exceed on my computer)
-//	return (t&0xFFF)<<20 | (n&0xFFFFF);
+	// double salted for obfuscating
+	return wangHash(((n & 0xFFFFFF) << 8 | (r & 0xFF)) ^ salt0) ^ salt1;
 }
 
 
