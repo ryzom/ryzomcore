@@ -245,7 +245,17 @@ void CInetHost::set(const CInetAddress &address, bool lookup)
 	// Reverse lookup the address
 	m_Hostname = findHostname(address);
 	m_Addresses.clear();
-
+	if (lookup && m_Hostname.empty())
+	{
+		CInetHost localhost = CInetHost::localAddresses(address.port(), true, true);
+		if (std::find(localhost.addresses().begin(), localhost.addresses().end(), address) != localhost.addresses().end())
+		{
+			// It's me!
+			m_Hostname = localhost.m_Hostname;
+			m_Addresses.swap(localhost.m_Addresses);
+			lookup = false;
+		}
+	}
 	if (m_Hostname.empty())
 	{
 		// Use the IP address in case of failure

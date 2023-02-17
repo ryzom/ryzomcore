@@ -77,7 +77,7 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 	if (!ClientCfg.Local)
 	{
 		CSessionBrowserImpl::getInstance().setAuthInfo(getCookie());
-		NLNET::CInetAddress address(getFrontEndAddress());
+		NLNET::CInetHost address(getFrontEndAddress());
 		address.setPort(address.port()+SBSPortOffset);
 		CSessionBrowserImpl::getInstance().connectItf(address);
 	}

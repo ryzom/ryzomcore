@@ -61,7 +61,7 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 		return _CallbackClient;
 	}
 
-	virtual void connect( const NLNET::CInetAddress& /* addr */ )
+	virtual void connect( const NLNET::CInetHost& /* addr */ )
 	{
 		// do not connect now
 	}
