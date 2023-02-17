@@ -278,7 +278,7 @@ void CCallbackClient::connect( const CInetHost &addrs )
 			{
 				// Record connection
 				CMessage addrmsg;
-				addrmsg.serial( const_cast<std::vector<CInetAddress> &>(addrs) );
+				addrmsg.serial( const_cast<CInetHost &>(addrs) );
 				_MR_Recorder.recordNext( _MR_UpdateCounter, Connecting, _BufSock, addrmsg );
 			}
 		}
@@ -288,7 +288,7 @@ void CCallbackClient::connect( const CInetHost &addrs )
 			{
 				// Record connection
 				CMessage addrmsg;
-				addrmsg.serial( const_cast<std::vector<CInetAddress> &>(addrs) );
+				addrmsg.serial( const_cast<CInetHost &>(addrs) );
 				_MR_Recorder.recordNext( _MR_UpdateCounter, ConnFailing, _BufSock, addrmsg );
 			}
 			throw;

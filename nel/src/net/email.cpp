@@ -154,7 +154,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 			formatedSMTPServer = smtpServer;
 		}
 
-		sock.connect(CInetAddress(formatedSMTPServer, 25));
+		sock.connect(CInetHost(formatedSMTPServer, 25));
 
 		if (!sock.connected())
 		{

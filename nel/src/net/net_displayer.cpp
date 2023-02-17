@@ -63,7 +63,7 @@ void CNetDisplayer::findAndConnect()
 /*
  * Sets logging server address
  */
-void CNetDisplayer::setLogServer (const CInetAddress& logServerAddr)
+void CNetDisplayer::setLogServer (const CInetHost& logServerAddr)
 {
 	if (_Server != NULL && _Server->connected()) return;
 

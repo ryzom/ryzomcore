@@ -144,7 +144,7 @@ string CLoginClient::authenticateBegin(const string &loginServiceAddr, const ucs
 			addr += ":43997";
 		if(_LSCallbackClient->connected())
 			_LSCallbackClient->disconnect();
-		_LSCallbackClient->connect (CInetAddress(addr));
+		_LSCallbackClient->connect (CInetHost(addr));
 	}
 	catch (const ESocket &e)
 	{
@@ -207,7 +207,7 @@ string CLoginClient::connectToShard(CLoginCookie &lc, const std::string &addr, C
 		//
 		// S12: connect to the FES and send "SV" message to the FES
 		//
-		cnx.connect (CInetAddress(addr));
+		cnx.connect (CInetHost(addr));
 		cnx.addCallbackArray (FESCallbackArray, sizeof(FESCallbackArray)/sizeof(FESCallbackArray[0]));
 
 		// send the cookie
@@ -248,7 +248,7 @@ string CLoginClient::connectToShard (const std::string &addr, CUdpSock &cnx)
 		// If the user denies the connection, the exception ESocket is thrown.
 		// Other firewalls such as Kerio make the send() fail instead.
 		//
-		cnx.connect (CInetAddress(addr));
+		cnx.connect (CInetHost(addr));
 	}
 	catch (const ESocket &e)
 	{
@@ -270,7 +270,7 @@ string CLoginClient::connectToShard (const std::string &addr, CUdpSimSock &cnx)
 		//
 		// See firewall comment in connectToShard(string,CUdpSock)
 		//
-		cnx.connect (CInetAddress(addr));
+		cnx.connect (CInetHost(addr));
 	}
 	catch (const ESocket &e)
 	{

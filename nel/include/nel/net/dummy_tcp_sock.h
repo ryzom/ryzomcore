@@ -38,16 +38,16 @@ public:
 	CDummyTcpSock( bool logging = true ) : CTcpSock(logging) {}
 
 	// Dummy connection
-	virtual void			connect( const CInetAddress& addr );
+	virtual void			connect( const CInetHost& addr ) NL_OVERRIDE;
 
 	// Dummy disconnection
-	virtual void			disconnect();
+	virtual void			disconnect() NL_OVERRIDE;
 
 	// Nothing
-	virtual void			setNoDelay( bool /* value */ ) {}
+	virtual void			setNoDelay( bool /* value */ ) NL_OVERRIDE {}
 
 	// Nothing
-	virtual void			close() {}
+	virtual void			close() NL_OVERRIDE {}
 
 };
 

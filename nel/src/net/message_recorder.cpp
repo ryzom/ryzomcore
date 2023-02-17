@@ -20,7 +20,7 @@
 #include "stdnet.h"
 
 #include "nel/net/message_recorder.h"
-#include "nel/net/inet_address.h"
+#include "nel/net/inet_host.h"
 
 using namespace NLMISC;
 using namespace std;
@@ -317,7 +317,7 @@ TNetworkEvent CMessageRecorder::checkNextOne( sint64 updatecounter )
 /*
  * Get the first stored connection attempt corresponding to addr
  */
-TNetworkEvent CMessageRecorder::replayConnectionAttempt( const CInetAddress& addr )
+TNetworkEvent CMessageRecorder::replayConnectionAttempt( const CInetHost& addr )
 {
 	TNetworkEvent event;
 	deque<TMessageRecord>::iterator ipr;
@@ -327,7 +327,7 @@ TNetworkEvent CMessageRecorder::replayConnectionAttempt( const CInetAddress& add
 		// Search in the already processed connection attempts
 		for ( ipr=_ConnectionAttempts.begin(); ipr!=_ConnectionAttempts.end(); ++ipr )
 		{
-			CInetAddress stored_addr;
+			CInetHost stored_addr;
 			(*ipr).Message.serial( stored_addr );
 			if ( stored_addr == addr )
 			{
@@ -346,7 +346,7 @@ TNetworkEvent CMessageRecorder::replayConnectionAttempt( const CInetAddress& add
 		event = (*ipr).Event;
 		if ( (event == Connecting) || (event == ConnFailing) )
 		{
-			CInetAddress stored_addr;
+			CInetHost stored_addr;
 			(*ipr).Message.serial( stored_addr );
 			if ( stored_addr == addr )
 			{
@@ -365,7 +365,7 @@ TNetworkEvent CMessageRecorder::replayConnectionAttempt( const CInetAddress& add
 		{
 			if ( ( rec.Event == Connecting ) || ( rec.Event == ConnFailing ) )
 			{
-				CInetAddress stored_addr;
+				CInetHost stored_addr;
 				rec.Message.serial( stored_addr );
 				if ( stored_addr == addr )
 				{

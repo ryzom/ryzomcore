@@ -28,9 +28,9 @@ namespace NLNET {
 /*
  * Set only the remote address
  */
-void CDummyTcpSock::connect( const CInetAddress& addr )
+void CDummyTcpSock::connect( const CInetHost& addr )
 {
-	_RemoteAddr = addr;
+	_RemoteAddr = addr.address();
 	_Sock = 100;
 
 	_BytesReceived = 0;
@@ -40,7 +40,7 @@ void CDummyTcpSock::connect( const CInetAddress& addr )
 	//sync.value() = true;
 	_Connected = true;
 
-	LNETL0_DEBUG( "LNETL0: Socket connected to %s", addr.asString().c_str() );
+	LNETL0_DEBUG( "LNETL0: Socket connected to %s", addr.toStringLong().c_str() );
 }
 
 

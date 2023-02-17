@@ -25,7 +25,7 @@
 namespace NLNET
 {
 
-class CInetAddress;
+class CInetHost;
 class CCallbackServer;
 class CCallbackClient;
 
@@ -60,7 +60,7 @@ public:
 	 * This function can be called *ONLY* by services that are inside of the shard.
 	 * Don't use it for a client or a service outside of the shard.
 	 */
-	static void				syncUniTimeFromService (CCallbackNetBase::TRecordingState rec=CCallbackNetBase::Off, const CInetAddress *addr = NULL);
+	static void				syncUniTimeFromService (CCallbackNetBase::TRecordingState rec=CCallbackNetBase::Off, const CInetHost *addr = NULL);
 
 	/** Call this function in the init part of the front end service to enable time syncro between
 	 * shard and clients.

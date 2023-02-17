@@ -31,7 +31,7 @@
 namespace NLNET {
 
 
-class CInetAddress;
+class CInetHost;
 
 /// Type of network events (if changed, don't forget to change EventToString() and StringToEvent()
 enum TNetworkEvent { Sending, Receiving, Connecting, ConnFailing, Accepting, Disconnecting, Error };
@@ -136,7 +136,7 @@ public:
 	TNetworkEvent	checkNextOne( sint64 updatecounter );
 
 	/// Get the first stored connection attempt corresponding to addr
-	TNetworkEvent	replayConnectionAttempt( const CInetAddress& addr );
+	TNetworkEvent	replayConnectionAttempt( const CInetHost& addr );
 
 	/// Stop playback
 	void	stopReplay();

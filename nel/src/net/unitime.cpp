@@ -148,7 +148,7 @@ static TCallbackItem UniTimeCallbackArray[] =
 };
 ***************************************************************/
 
-void _CUniTime::syncUniTimeFromService (CCallbackNetBase::TRecordingState /* rec */, const CInetAddress * /* addr */)
+void _CUniTime::syncUniTimeFromService (CCallbackNetBase::TRecordingState /* rec */, const CInetHost * /* addr */)
 {
 	nlstop;
 /***************************************************************/

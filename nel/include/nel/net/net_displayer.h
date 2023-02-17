@@ -43,7 +43,7 @@ public:
 	/** Sets logging server address. Call this method from outside only if you want to use a LOGS not registered within the NS.
 	 * It does nothing if the displayer is already connected to a server.
 	 */
-	void setLogServer( const CInetAddress& logServerAddr );
+	void setLogServer( const CInetHost& logServerAddr );
 
 	/** Sets logging server with an already connected server.
 	 */
@@ -67,7 +67,7 @@ protected:
 
 private:
 
-	CInetAddress	_ServerAddr;
+	CInetHost	_ServerAddr;
 //	CCallbackClient	_Server;
 	CCallbackClient	*_Server;
 	bool			_ServerAllocated;

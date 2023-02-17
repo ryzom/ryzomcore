@@ -99,7 +99,7 @@ public:
 	/** Creates the connection to the Naming Service.
 	 * If the connection failed, ESocketConnectionFailed exception is generated.
 	 */
-	static void	init (const CInetAddress *addr, CCallbackNetBase::TRecordingState rec );
+	static void	init (const CInetHost *addr, CCallbackNetBase::TRecordingState rec );
 
 	static void release ();
 
@@ -150,7 +150,7 @@ public:
 
 	static void setUpdateTimeout (uint32 timeout);
 
-	static void createConnection(CBaseStruct &Base, const CInetAddress &Addr, const std::string& name);
+	static void createConnection(CBaseStruct &Base, const CInetHost &Addr, const std::string& name);
 
 	static uint64 getBytesSent ();
 	static uint64 getBytesReceived ();
