@@ -76,13 +76,13 @@ bool addressFromString(uint8 address[], const char *str, size_t len)
 			memset(address, 0, 10);
 			address[10] = 0xFF;
 			address[11] = 0xFF;
-			memcpy(&address[12], &((sockaddr_in *)&sockaddr)->sin_addr, 4);
+			memcpy(&address[12], &((sockaddr_in *)&sockaddr)->sin_addr.s_addr, 4);
 			return true;
 		}
 	}
 
 	// IPv6
-	memcpy(address, &((sockaddr_in6 *)&sockaddr)->sin6_addr, 16);
+	memcpy(address, &((sockaddr_in6 *)&sockaddr)->sin6_addr.s6_addr, 16);
 
 #else
 
@@ -132,7 +132,7 @@ CIPv6Address CIPv6Address::loopback()
 	{
 		// IPv6
 		CIPv6Address addr;
-		memcpy(addr.m_Address, &((sockaddr_in6 *)result->ai_addr)->sin6_addr, 16);
+		memcpy(addr.m_Address, &((sockaddr_in6 *)result->ai_addr)->sin6_addr.s6_addr, 16);
 		addr.m_Valid = true;
 		freeaddrinfo(result);
 		return addr;
@@ -146,7 +146,7 @@ CIPv6Address CIPv6Address::loopback()
 		memset(addr.m_Address, 0, 10);
 		addr.m_Address[10] = 0xFF;
 		addr.m_Address[11] = 0xFF;
-		memcpy(&addr.m_Address[12], &((sockaddr_in *)result->ai_addr)->sin_addr, 4);
+		memcpy(&addr.m_Address[12], &((sockaddr_in *)result->ai_addr)->sin_addr.s_addr, 4);
 		addr.m_Valid = true;
 		freeaddrinfo(result);
 		return addr;
@@ -379,7 +379,7 @@ bool CIPv6Address::toSockAddrInet(TSockAddrIn *addr) const
 {
 	if (!isIPv4() && !isAny()) return false;
 	addr->sin_family = AF_INET;
-	memcpy(&addr->sin_addr, &m_Address[12], 4);
+	memcpy(&addr->sin_addr.s_addr, &m_Address[12], 4);
 	return true;
 }
 
@@ -388,7 +388,7 @@ bool CIPv6Address::toSockAddrInet6(TSockAddrIn6 *addr) const
 	if (!isValid()) return false;
 	addr->sin6_family = AF_INET6;
 	addr->sin6_flowinfo = 0;
-	memcpy(&addr->sin6_addr, m_Address, 16);
+	memcpy(&addr->sin6_addr.s6_addr, m_Address, 16);
 	addr->sin6_scope_id = 0;
 	return true;
 }
@@ -398,13 +398,13 @@ void CIPv6Address::fromSockAddrInet(const TSockAddrIn *addr)
 	memset(m_Address, 0, 10);
 	m_Address[10] = 0xFF;
 	m_Address[11] = 0xFF;
-	memcpy(&m_Address[12], &addr->sin_addr, 4);
+	memcpy(&m_Address[12], &addr->sin_addr.s_addr, 4);
 	m_Valid = (addr->sin_family == AF_INET);
 }
 
 void CIPv6Address::fromSockAddrInet6(const TSockAddrIn6 *addr)
 {
-	memcpy(m_Address, &addr->sin6_addr, 16);
+	memcpy(m_Address, &addr->sin6_addr.s6_addr, 16);
 	m_Valid = (addr->sin6_family == AF_INET6);
 }
 

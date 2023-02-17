@@ -35,7 +35,7 @@ namespace NLNET {
  * \author Jan BOON (Kaetemi)
  * \date 2023
  */
-class CIPv6Address
+class NL_ALIGNLIKE(size_t) CIPv6Address
 {
 public:
 	typedef struct sockaddr_in TSockAddrIn;
@@ -126,7 +126,7 @@ public:
 		static const uint8 reference[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF };
 		return memcmp(m_Address, reference, 12) == 0;
 	}
-
+	
 	TType getType() const;
 
 	inline bool isValid() const { return m_Valid; }
@@ -156,8 +156,8 @@ private:
 	// An IPv4 address is stored in the last 4 bytes, with 0xffff in the 2 bytes before.
 	// For example, IPv4 address 192.168.0.1 is stored as
 	// 0000:0000:0000:0000:0000:ffff:c0a8:0001
-	uint8 m_Address[16];
-
+	uint8 NL_ALIGNLIKE(size_t) m_Address[16];
+	
 	// If false, this structure is considered empty or null.
 	bool m_Valid;
 };

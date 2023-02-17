@@ -189,6 +189,12 @@
 #	define NL_CPP11
 #endif
 
+#ifdef NL_CPP14
+#define NL_ALIGNLIKE(type) alignas(alignof(type))
+#else
+#define NL_ALIGNLIKE(type)
+#endif
+
 #if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)
 #define nlmove(v) std::move(v)
 #else
