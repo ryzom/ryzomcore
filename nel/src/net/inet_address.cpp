@@ -24,22 +24,20 @@
 #include "nel/net/sock.h"
 #include "nel/net/net_log.h"
 
-
-
 #ifdef NL_OS_WINDOWS
-#	include <winsock2.h>
-#	include <ws2tcpip.h>
-#	include <ws2ipdef.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <ws2ipdef.h>
 // for Windows 2000 compatibility
-#	include <wspiapi.h>
+#include <wspiapi.h>
 #elif defined NL_OS_UNIX
-#	include <unistd.h>
-#	include <sys/socket.h>
-#	include <arpa/inet.h>
-#	include <netinet/in.h>
-#	include <netdb.h>
-#	define WSAGetLastError() 0
-#	define SOCKET_ERROR -1
+#include <unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#define WSAGetLastError() 0
+#define SOCKET_ERROR -1
 #endif
 
 #define NLNET_IPV6_LOOKUP (0)
@@ -52,11 +50,10 @@ using namespace NLMISC;
 #endif
 
 #ifndef NI_MAXHOST
-#	define NI_MAXHOST 1025
+#define NI_MAXHOST 1025
 #endif
 
-namespace NLNET
-{
+namespace NLNET {
 
 CInetAddress::CInetAddress()
 {
@@ -84,11 +81,10 @@ CInetAddress::CInetAddress(bool any)
 	}
 }
 
-
 /*
  * Constructor with IPv4 address, port=0
  */
-CInetAddress::CInetAddress( const in_addr *ip, const char *hostname )
+CInetAddress::CInetAddress(const in_addr *ip, const char *hostname)
 {
 	init();
 	sockaddr_in addr;
@@ -97,11 +93,10 @@ CInetAddress::CInetAddress( const in_addr *ip, const char *hostname )
 	m_Address.fromSockAddrInet(&addr);
 }
 
-
 /*
  * Constructor with IPv6 address, port=0
  */
-CInetAddress::CInetAddress( const in6_addr *ip, const char *hostname )
+CInetAddress::CInetAddress(const in6_addr *ip, const char *hostname)
 {
 	init();
 	sockaddr_in6 addr;
@@ -147,59 +142,54 @@ void CInetAddress::updateHostName()
 /*
  * Alternate constructor (calls setByName())
  */
-CInetAddress::CInetAddress( const std::string& hostName, uint16 port )
+CInetAddress::CInetAddress(const std::string &hostName, uint16 port)
 {
 	init();
-	setPort( port );
-	setByName( hostName );
+	setPort(port);
+	setByName(hostName);
 }
-
 
 /*
  * Alternate constructor (calls setNameAndPort())
  */
-CInetAddress::CInetAddress( const std::string& hostNameAndPort )
+CInetAddress::CInetAddress(const std::string &hostNameAndPort)
 {
 	init();
-	setNameAndPort( hostNameAndPort );
+	setNameAndPort(hostNameAndPort);
 }
-
 
 /*
  * Copy constructor
  */
-CInetAddress::CInetAddress( const CInetAddress& other )
+CInetAddress::CInetAddress(const CInetAddress &other)
 {
 	init();
 	m_Address = other.m_Address;
 	m_Port = other.m_Port;
 }
 
-
 /*
  * Assignment operator
  */
-CInetAddress& CInetAddress::operator=( const CInetAddress& other )
+CInetAddress &CInetAddress::operator=(const CInetAddress &other)
 {
 	m_Address = other.m_Address;
 	m_Port = other.m_Port;
 	return *this;
 }
 
-
 /*
  * Comparison == operator
  */
-bool operator==( const CInetAddress& a1, const CInetAddress& a2 )
+bool operator==(const CInetAddress &a1, const CInetAddress &a2)
 {
 	return (a1.m_Port == a2.m_Port) && (a1.m_Address == a2.m_Address);
 }
 
-
 /*
  * Comparison < operator
  */
-bool operator<( const CInetAddress& a1, const CInetAddress& a2 )
+bool operator<(const CInetAddress &a1, const CInetAddress &a2)
 {
 	if (a1.m_Port != a2.m_Port)
 	{
@@ -211,7 +201,6 @@ bool operator<( const CInetAddress& a1, const CInetAddress& a2 )
 	}
 }
 
-
 /*
  * Constructor contents
  */
@@ -221,19 +210,17 @@ void CInetAddress::init()
 	m_Port = 0;
 }
 
-
 /*
  * Destructor
  */
 CInetAddress::~CInetAddress()
 {
-	
 }
 
 /*
  * Sets hostname and port (ex: www.nevrax.com:80)
  */
-void CInetAddress::setNameAndPort( const std::string& hostNameAndPort )
+void CInetAddress::setNameAndPort(const std::string &hostNameAndPort)
 {
 	std::string hostName;
 	uint16 port;
@@ -267,7 +254,7 @@ void CInetAddress::setNameAndPort( const std::string& hostNameAndPort )
 /*
  * Resolves a name
  */
-CInetAddress& CInetAddress::setByName(const std::string& hostName)
+CInetAddress &CInetAddress::setByName(const std::string &hostName)
 {
 	if (m_Address.set(hostName))
 	{
@@ -286,9 +273,9 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 
 		if (status)
 		{
-			LNETL0_DEBUG( "LNETL0: Network error: resolution of hostname '%s' failed: %s", hostName.c_str(), gai_strerror(status) );
+			LNETL0_DEBUG("LNETL0: Network error: resolution of hostname '%s' failed: %s", hostName.c_str(), gai_strerror(status));
 			// return *this;
-			throw ESocket( (string("Hostname resolution failed for ")+hostName).c_str() );
+			throw ESocket((string("Hostname resolution failed for ") + hostName).c_str());
 		}
 
 		struct addrinfo *p = res;
@@ -313,14 +300,13 @@ CInetAddress& CInetAddress::setByName(const std::string& hostName)
 			// process next address
 			p = p->ai_next;
 		}
- 
+
 		// free the linked list
 		freeaddrinfo(res);
 	}
-	
+
 	return *this;
 }
-
 
 /*
  * Sets port
@@ -330,26 +316,23 @@ void CInetAddress::setPort(uint16 port)
 	m_Port = port;
 }
 
-
 /* Sets internal socket address directly (contents is copied).
  * It also retrieves the host name if CInetAddress::RetrieveNames is true.
  */
-void CInetAddress::setSockAddr( const sockaddr_in* saddr )
+void CInetAddress::setSockAddr(const sockaddr_in *saddr)
 {
 	m_Address.fromSockAddrInet(saddr);
 	m_Port = ntohs(saddr->sin_port);
 }
 
-
 /* Sets internal socket address directly (contents is copied).
  * It also retrieves the host name if CInetAddress::RetrieveNames is true.
  */
-void CInetAddress::setSockAddr6( const sockaddr_in6* saddr6 )
+void CInetAddress::setSockAddr6(const sockaddr_in6 *saddr6)
 {
 	m_Address.fromSockAddrInet6(saddr6);
 	m_Port = ntohs(saddr6->sin6_port);
 }
-
 
 /*
  * Returns if object (address and port) is valid
@@ -388,22 +371,22 @@ uint32 CInetAddress::internalIPAddress() const
 uint32 CInetAddress::internalNetAddress() const
 {
 	uint32 ip = internalIPAddress();
-	if ((ip&0x00000080) == 0)
+	if ((ip & 0x00000080) == 0)
 	{
 		// A class
 		return ip & 0x000000FF;
 	}
-	else if ((ip&0x00000040) == 0)
+	else if ((ip & 0x00000040) == 0)
 	{
 		// B class
 		return ip & 0x0000FFFF;
 	}
-	else if ((ip&0x00000020) == 0)
+	else if ((ip & 0x00000020) == 0)
 	{
 		// C class
 		return ip & 0x00FFFFFF;
 	}
-	else if ((ip&0x00000010) == 0)
+	else if ((ip & 0x00000010) == 0)
 	{
 		// D class
 		return ip & 0xFFFFFFFF;
@@ -414,9 +397,6 @@ uint32 CInetAddress::internalNetAddress() const
 	}
 }
 
-
-
-
 /*
  * Returns readable IP address. (ex: "195.68.21.195")
  */
@@ -424,7 +404,6 @@ string CInetAddress::ipAddress() const
 {
 	return m_Address.toString();
 }
-
 
 /*
  * Returns host name. (ex: "www.nevrax.org")
@@ -434,7 +413,6 @@ string CInetAddress::hostName() const
 	return ipAddress();
 }
 
-
 /*
  * Returns port
  */
@@ -442,7 +420,6 @@ uint16 CInetAddress::port() const
 {
 	return m_Port;
 }
-
 
 /*
  * Returns hostname and port as a string. (ex: "www.nevrax.org:80 (195.68.21.195)")
@@ -452,7 +429,6 @@ std::string CInetAddress::asString() const
 	return asIPString();
 }
 
-
 /*
  * Returns IP address and port as a string. (ex: "195.68.21.195:80")
  */
@@ -461,16 +437,14 @@ std::string CInetAddress::asIPString() const
 	return ((m_Address.isValid() && !m_Address.isIPv4()) ? "[" + ipAddress() + "]" : ipAddress()) + ":" + NLMISC::toString(port());
 }
 
-
 /*
  * Serialize
  */
-void CInetAddress::serial( NLMISC::IStream& s )
+void CInetAddress::serial(NLMISC::IStream &s)
 {
 	s.serial(m_Address);
 	s.serial(m_Port);
 }
-
 
 /*
  * Creates a CInetAddress object with local host address, port=0
@@ -478,19 +452,18 @@ void CInetAddress::serial( NLMISC::IStream& s )
 CInetAddress CInetAddress::localHost()
 {
 	const uint maxlength = 80;
-	char localhost [maxlength];
-	if ( gethostname( localhost, maxlength ) != 0 )
-		throw ESocket( "Unable to get local hostname" );
-	CInetAddress localaddr = CInetAddress( string(localhost) );
+	char localhost[maxlength];
+	if (gethostname(localhost, maxlength) != 0)
+		throw ESocket("Unable to get local hostname");
+	CInetAddress localaddr = CInetAddress(string(localhost));
 
-	if ( localaddr.ipAddress() == "127.0.0.1" )
+	if (localaddr.ipAddress() == "127.0.0.1")
 	{
-		nlwarning ("LNETL0: No network card detected! using localhost (127.0.0.1)");
+		nlwarning("LNETL0: No network card detected! using localhost (127.0.0.1)");
 	}
 
 	return localaddr;
 }
-
 
 /* Returns the list of the local host addresses (with port=0)
  * (especially useful if the host is multihomed)
@@ -499,10 +472,10 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 {
 	// 1. Get local host name
 	const uint maxlength = 80;
-	char localhost [maxlength];
-	if ( gethostname( localhost, maxlength ) == SOCKET_ERROR )
+	char localhost[maxlength];
+	if (gethostname(localhost, maxlength) == SOCKET_ERROR)
 	{
-		throw ESocket( "Unable to get local hostname" );
+		throw ESocket("Unable to get local hostname");
 	}
 
 	// 2. Get address list
@@ -519,7 +492,7 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	if (status)
 	{
 		// will come here if the local hostname (/etc/hostname in Linux) is not the real name
-		throw ESocket( toString("Hostname resolution failed for %s", localhost).c_str() );
+		throw ESocket(toString("Hostname resolution failed for %s", localhost).c_str());
 	}
 
 	struct addrinfo *p = res;
@@ -546,11 +519,10 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 
 				IPv4LoopbackAdded = true;
 			}
-			
+
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
 
-			vect.push_back( CInetAddress( &ipv4->sin_addr, localhost ) );
-
+			vect.push_back(CInetAddress(&ipv4->sin_addr, localhost));
 		}
 #if NLNET_IPV6_LOOKUP
 		else if (p->ai_family == AF_INET6)
@@ -567,7 +539,7 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 
 			struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
 
-			vect.push_back( CInetAddress( &ipv6->sin6_addr, localhost ) );
+			vect.push_back(CInetAddress(&ipv6->sin6_addr, localhost));
 		}
 #endif
 
@@ -578,15 +550,15 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	// free the linked list
 	freeaddrinfo(res);
 
-	if(vect.empty())
+	if (vect.empty())
 	{
-		throw ESocket(toString("No network card detected for %s", localhost).c_str() );
+		throw ESocket(toString("No network card detected for %s", localhost).c_str());
 	}
 
 	return vect;
 }
 
-bool CInetAddress::isLoopbackIPAddress () const
+bool CInetAddress::isLoopbackIPAddress() const
 {
 	return m_Address.getType() == CIPv6Address::Loopback;
 }
@@ -601,7 +573,6 @@ uint64 CInetAddress::hash64() const
 	return NLMISC::wangHash64(m_Address.hash64() ^ m_Port);
 }
 
-
 std::string vectorCInetAddressToString(const std::vector<CInetAddress> &addrs)
 {
 	string str;
@@ -610,28 +581,27 @@ std::string vectorCInetAddressToString(const std::vector<CInetAddress> &addrs)
 	{
 		if (i != 0)
 			str += " ";
-		str += addrs[i].asString().c_str ();
+		str += addrs[i].asString().c_str();
 	}
 	return str;
 }
 
-uint32 stringToInternalIPAddress (const std::string &addr)
+uint32 stringToInternalIPAddress(const std::string &addr)
 {
-	return inet_addr( addr.c_str() );
+	return inet_addr(addr.c_str());
 }
 
-std::string internalIPAddressToString (uint32 addr)
+std::string internalIPAddressToString(uint32 addr)
 {
 	string res;
 	res = toString((addr)&0xFF);
 	res += ".";
-	res += toString((addr>>8)&0xFF);
+	res += toString((addr >> 8) & 0xFF);
 	res += ".";
-	res += toString((addr>>16)&0xFF);
+	res += toString((addr >> 16) & 0xFF);
 	res += ".";
-	res += toString((addr>>24)&0xFF);
+	res += toString((addr >> 24) & 0xFF);
 	return res;
 }
-
 
 } // NLNET

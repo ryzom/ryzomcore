@@ -24,35 +24,23 @@
 #include <string>
 #include <vector>
 
-
 struct sockaddr_in;
 struct sockaddr_in6;
 struct in_addr;
 struct in6_addr;
 
-
 #ifdef NL_OS_WINDOWS
 // automatically add the win socket library if you use nel network part
 #pragma comment(lib, "ws2_32.lib")
-
-// it seems that the default loop back address is not defined for ipv6
-#ifndef IN6ADDR_LOOPBACK_INIT
-#define IN6ADDR_LOOPBACK_INIT { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }
 #endif
 
-#endif
-
-namespace NLMISC
-{
-	class IStream;
+namespace NLMISC {
+class IStream;
 }
 
-
-namespace NLNET
-{
+namespace NLNET {
 
 struct ESocket;
-
 
 /**
  * Internet address (IP + port).
@@ -73,48 +61,48 @@ public:
 	CInetAddress(bool any);
 
 	/// Alternate constructor (calls setByName())
-	CInetAddress( const std::string& hostName, uint16 port );
+	CInetAddress(const std::string &hostName, uint16 port);
 
 	/// Alternate constructor (calls setByName())
 	/// example: CInetAddress("www.nevrax.com:80")
-	CInetAddress( const std::string& hostNameAndPort );
+	CInetAddress(const std::string &hostNameAndPort);
 
 	/// Copy constructor
-	CInetAddress( const CInetAddress& other );
+	CInetAddress(const CInetAddress &other);
 
 	/// Assignment operator
-	CInetAddress& operator=( const CInetAddress& other );
+	CInetAddress &operator=(const CInetAddress &other);
 
 	/// Comparison == operator
-	friend bool operator==( const CInetAddress& a1, const CInetAddress& a2 );
+	friend bool operator==(const CInetAddress &a1, const CInetAddress &a2);
 
 	/// Comparison < operator
-	friend bool operator<( const CInetAddress& a1, const CInetAddress& a2 );
+	friend bool operator<(const CInetAddress &a1, const CInetAddress &a2);
 
 	/// Destructor
 	~CInetAddress();
 
 	/// Resolves a name
-	CInetAddress&		setByName( const std::string& hostname );
+	CInetAddress &setByName(const std::string &hostname);
 
 	/// Sets port
-	void				setPort( uint16 port );
+	void setPort(uint16 port);
 
 	/// Sets hostname and port (ex: www.nevrax.com:80)
-	void				setNameAndPort( const std::string& hostNameAndPort );
+	void setNameAndPort(const std::string &hostNameAndPort);
 
 	/** Sets internal IPv4 socket address directly (contents is copied).
 	 * It also retrieves the host name if CInetAddress::RetrieveNames is true.
 	 */
-	void				setSockAddr( const sockaddr_in* saddr );
+	void setSockAddr(const sockaddr_in *saddr);
 
 	/** Sets internal IPv6 socket address directly (contents is copied).
 	 * It also retrieves the host name if CInetAddress::RetrieveNames is true.
 	 */
-	void				setSockAddr6( const sockaddr_in6* saddr6 );
+	void setSockAddr6(const sockaddr_in6 *saddr6);
 
 	/// Returns if object (address and port) is valid
-	bool				isValid() const;
+	bool isValid() const;
 
 	// Convert an IPv4 or the Any listener address and port to the sockaddr_in structure
 	bool toSockAddrInet(TSockAddrIn *addr) const;
@@ -127,35 +115,35 @@ public:
 
 private:
 	/// Returns internal IP address (DEPRECATED)
-	uint32				internalIPAddress() const;
+	uint32 internalIPAddress() const;
 
 public:
 	/// Returns the internal network address (it s the network address for example 192.168.0.0 for a C class) (DEPRECATED) // FIXME: IPv6
-	uint32				internalNetAddress () const;
+	uint32 internalNetAddress() const;
 
 	/// Returns readable IP address. (ex: "195.68.21.195")
-	std::string			ipAddress() const;
+	std::string ipAddress() const;
 
 	/// Returns readable IP address. (ex: "195.68.21.195") (previously host name) (DEPRECATED)
-	std::string			hostName() const;
+	std::string hostName() const;
 
 	/// Returns port
-	uint16				port() const;
+	uint16 port() const;
 
 	/// Returns hostname and port as a string. (ex: "www.nevrax.org:80 (195.68.21.195)")
-	std::string			asString() const;
+	std::string asString() const;
 
 	/// Returns IP address and port as a string. (ex: "195.68.21.195:80")
-	std::string			asIPString() const;
+	std::string asIPString() const;
 
 	/// Serialize
-	void serial( NLMISC::IStream& s );
+	void serial(NLMISC::IStream &s);
 
 	/// Returns true if this CInetAddress is a loop back address
-	bool isLoopbackIPAddress () const;
+	bool isLoopbackIPAddress() const;
 
 	/// Creates a CInetAddress object with local host address, port=0
-	static CInetAddress	localHost();
+	static CInetAddress localHost();
 
 	/** Returns the list of the local host addresses (with port=0)
 	 * (especially useful if the host is multihomed)
@@ -172,25 +160,24 @@ public:
 
 protected:
 	/// Constructor with IPv4 address, port=0
-	CInetAddress( const in_addr *ip, const char *hostname = 0);
+	CInetAddress(const in_addr *ip, const char *hostname = 0);
 
 	/// Constructor with IPv6 address, port=0
-	CInetAddress( const in6_addr *ip, const char *hostname = 0);
+	CInetAddress(const in6_addr *ip, const char *hostname = 0);
 
 private:
 	// Called in all constructors. Calls CBaseSocket::init().
-	void				init();
-	
+	void init();
+
 	CIPv6Address m_Address;
 	uint16 m_Port;
-
 };
 
 /// Take a internet dot string and convert it in an uint32 internal format for example "128.64.32.16" -> 0xF0804020
-uint32 stringToInternalIPAddress (const std::string &addr);
+uint32 stringToInternalIPAddress(const std::string &addr);
 
 /// Take an internal address and convert it to a internet dot string
-std::string internalIPAddressToString (uint32 addr);
+std::string internalIPAddressToString(uint32 addr);
 
 std::string vectorCInetAddressToString(const std::vector<CInetAddress> &addrs);
 
