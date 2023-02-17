@@ -71,6 +71,10 @@ using namespace NLMISC;
 #define new DEBUG_NEW
 #endif
 
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0501)
+#define IPPROTO_IPV6 41
+#endif
+
 namespace NLNET {
 
 

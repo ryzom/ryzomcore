@@ -62,7 +62,7 @@ std::string findHostname(const CInetAddress &address)
 		return std::string();
 	nlassert(storage.ss_family == AF_INET || storage.ss_family == AF_INET6);
 
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS) && defined(GetNameInfo)
 	WCHAR host[NI_MAXHOST];
 #else
 	char host[NI_MAXHOST];
@@ -73,7 +73,7 @@ std::string findHostname(const CInetAddress &address)
 	if (storage.ss_family == AF_INET)
 	{
 		((TSockAddrIn *)&storage)->sin_port = 0;
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS) && defined(GetNameInfo)
 		res = GetNameInfoW((SOCKADDR *)&storage, sizeof(TSockAddrIn), host, NI_MAXHOST, NULL, 0, NI_NAMEREQD);
 #else
 		res = getnameinfo((struct sockaddr *)&storage, sizeof(TSockAddrIn), host, NI_MAXHOST, NULL, 0, NI_NAMEREQD);
@@ -82,7 +82,7 @@ std::string findHostname(const CInetAddress &address)
 	else if (storage.ss_family == AF_INET6)
 	{
 		((TSockAddrIn6 *)&storage)->sin6_port = 0;
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS) && defined(GetNameInfo)
 		res = GetNameInfoW((SOCKADDR *)&storage, sizeof(TSockAddrIn6), host, NI_MAXHOST, NULL, 0, NI_NAMEREQD);
 #else
 		res = getnameinfo((struct sockaddr *)&storage, sizeof(TSockAddrIn6), host, NI_MAXHOST, NULL, 0, NI_NAMEREQD);
@@ -96,7 +96,11 @@ std::string findHostname(const CInetAddress &address)
 	else
 	{
 #ifdef NL_OS_WINDOWS
+#ifdef GetNameInfo
 		return NLMISC::wideToUtf8(host);
+#else
+		return NLMISC::mbcsToUtf8(host);
+#endif
 #else
 		return host;
 #endif
@@ -169,7 +173,7 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 	}
 
 	// Otherwise use the traditional DNS look-up
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS) && defined(GetAddrInfo)
 	ADDRINFOW *res = NULL;
 	ADDRINFOW hints;
 #else
@@ -181,7 +185,11 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 	hints.ai_socktype = SOCK_STREAM;
 
 #ifdef NL_OS_WINDOWS
+#ifdef GetAddrInfo
 	INT status = GetAddrInfoW(nlUtf8ToWide(hostname), NULL, &hints, &res);
+#else
+	INT status = getaddrinfo(nlUtf8ToMbcs(hostname), NULL, &hints, &res);
+#endif
 #else
 	sint status = getaddrinfo(hostName.c_str(), NULL, &hints, &res);
 #endif
@@ -196,7 +204,7 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 		throw ESocket((std::string("Hostname resolution failed for ") + hostname).c_str());
 	}
 
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS) && defined(GetAddrInfo)
 	ADDRINFOW *p = res;
 #else
 	struct addrinfo *p = res;
@@ -228,7 +236,7 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 	}
 
 	// free the linked list
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS) && defined(GetAddrInfo)
 	FreeAddrInfoW(res);
 #else
 	freeaddrinfo(res);

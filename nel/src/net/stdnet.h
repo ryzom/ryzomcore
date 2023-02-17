@@ -58,15 +58,22 @@
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
-#	define _WIN32_WINDOWS 0x0500
+#	ifndef _WIN32_WINDOWS
+#		define _WIN32_WINDOWS 0x0410
+	#endif
 #	ifndef _WIN32_WINNT
 #		define _WIN32_WINNT 0x0500
 #	endif
 #	ifndef NL_COMP_MINGW
-#		define WINVER 0x0500
-#		define NOMINMAX
+#		ifndef WINVER
+#			define WINVER 0x0500
+#		endif
+#		ifndef NOMINMAX
+#			define NOMINMAX
+#		endif
 #	endif
 #	include <WinSock2.h>
+#	include <WS2tcpip.h>
 #	include <Windows.h>
 #endif
 

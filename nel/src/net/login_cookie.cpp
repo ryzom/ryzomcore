@@ -54,8 +54,8 @@ uint32 CLoginCookie::generateKey()
 {
 	// This is a very poor random number generator that ensures no duplicates are generated within the same hour
 	
-	static uint32_t salt0;
-	static uint32_t salt1;
+	static uint32 salt0;
+	static uint32 salt1;
 	static bool seeded;
 
 	uint32 t = (uint32)time(NULL);
