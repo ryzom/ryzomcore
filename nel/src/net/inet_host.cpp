@@ -64,12 +64,13 @@ std::string findHostname(const CInetAddress &address)
 
 #if defined(NL_OS_WINDOWS) && defined(GetNameInfo)
 	WCHAR host[NI_MAXHOST];
+	INT res;
 #else
 	char host[NI_MAXHOST];
+	int res;
 #endif
 	host[0] = 0;
 
-	INT res;
 	if (storage.ss_family == AF_INET)
 	{
 		((TSockAddrIn *)&storage)->sin_port = 0;
@@ -191,7 +192,7 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 	INT status = getaddrinfo(nlUtf8ToMbcs(hostname), NULL, &hints, &res);
 #endif
 #else
-	sint status = getaddrinfo(hostName.c_str(), NULL, &hints, &res);
+	sint status = getaddrinfo(hostname.c_str(), NULL, &hints, &res);
 #endif
 
 	if (status)
@@ -314,7 +315,7 @@ void CInetHost::clear()
 std::string CInetHost::localHostName()
 {
 	char localhost[NI_MAXHOST];
-	if (gethostname(localhost, NI_MAXHOST) != SOCKET_ERROR)
+	if (gethostname(localhost, NI_MAXHOST) == 0)
 	{
 		// Save hostname as UTF-8, from locale
 		return NLMISC::mbcsToUtf8(localhost);
@@ -379,7 +380,7 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 
 	// Get local host name
 	char localhost[NI_MAXHOST];
-	if (gethostname(localhost, NI_MAXHOST) != SOCKET_ERROR)
+	if (gethostname(localhost, NI_MAXHOST) == 0)
 	{
 		// Save hostname as UTF-8, from locale
 		host.m_Hostname = NLMISC::mbcsToUtf8(localhost);

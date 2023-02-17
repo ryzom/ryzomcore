@@ -73,7 +73,7 @@ public:
 	inline bool isAddressValid() const { return m_Addresses[0].getAddress().isValid(); }
 
 	/// Returns all local addresses
-	static CInetHost CInetHost::localAddresses(uint16 port = 0, bool sort = true, bool loopback = true);
+	static CInetHost localAddresses(uint16 port = 0, bool sort = true, bool loopback = true);
 
 	/// Returns the list of addresses
 	inline const std::vector<CInetAddress> &addresses() const { return m_Addresses; }

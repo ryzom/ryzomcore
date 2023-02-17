@@ -164,7 +164,7 @@ public:
 	bool isLoopbackIPAddress() const;
 
 	/// Create a valid loopback address
-	static CInetAddress CInetAddress::loopback(uint16 port);
+	static CInetAddress loopback(uint16 port);
 
 	/// Creates a CInetAddress object with local host address, port=0
 	static CInetAddress localHost(uint16 port = 0);
