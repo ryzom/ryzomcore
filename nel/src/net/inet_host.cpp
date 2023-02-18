@@ -328,6 +328,8 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 	CSock::initNetwork();
 	
 	CInetHost host;
+	std::set<CIPv6Address> addresses;
+	std::vector<CInetAddress> skipLoopback;
 	host.m_Addresses.clear();
 
 	addrinfo *result = NULL;
@@ -341,41 +343,52 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 	std::string loopbackHostname;
 	bool haveLoopback = false;
 	bool haveLoopback6 = false;
-	if (loopback)
+	if (getaddrinfo(NULL, NULL, &hints, &result) == 0)
 	{
-		if (getaddrinfo(NULL, NULL, &hints, &result) == 0)
+		for (addrinfo *ptr = result; ptr != NULL; ptr = ptr->ai_next)
 		{
-			for (addrinfo *ptr = result; ptr != NULL; ptr = ptr->ai_next)
+			if (ptr->ai_family == AF_INET)
 			{
-				if (ptr->ai_family == AF_INET)
+				CInetAddress addr(false);
+				addr.fromSockAddrInet((sockaddr_in *)ptr->ai_addr);
+				addr.setPort(port);
+				if (loopbackHostname.empty())
 				{
-					CInetAddress addr(false);
-					addr.fromSockAddrInet((sockaddr_in *)ptr->ai_addr);
-					addr.setPort(port);
-					if (loopbackHostname.empty())
-					{
-						loopbackHostname = findHostname(addr);
-					}
-					host.m_Addresses.push_back(addr);
-					haveLoopback = true;
+					loopbackHostname = findHostname(addr);
 				}
-#if NLNET_IPV6_LOOKUP
-				else if (ptr->ai_family == AF_INET6)
+				if (addresses.find(addr.getAddress()) == addresses.end())
 				{
-					CInetAddress addr(false);
-					addr.fromSockAddrInet6((sockaddr_in6 *)ptr->ai_addr);
-					addr.setPort(port);
-					if (loopbackHostname.empty())
-					{
-						loopbackHostname = findHostname(addr);
-					}
-					host.m_Addresses.push_back(addr);
-					haveLoopback6 = true;
+					addresses.insert(addr.getAddress());
+					if (loopback)
+						host.m_Addresses.push_back(addr);
+					else
+						skipLoopback.push_back(addr);
 				}
-#endif
+				haveLoopback = true;
 			}
-			freeaddrinfo(result);
+#if NLNET_IPV6_LOOKUP
+			else if (ptr->ai_family == AF_INET6)
+			{
+				CInetAddress addr(false);
+				addr.fromSockAddrInet6((sockaddr_in6 *)ptr->ai_addr);
+				addr.setPort(port);
+				if (loopbackHostname.empty())
+				{
+					loopbackHostname = findHostname(addr);
+				}
+				if (addresses.find(addr.getAddress()) == addresses.end())
+				{
+					addresses.insert(addr.getAddress());
+					if (loopback)
+						host.m_Addresses.push_back(addr);
+					else
+						skipLoopback.push_back(addr);
+				}
+				haveLoopback6 = true;
+			}
+#endif
 		}
+		freeaddrinfo(result);
 	}
 
 	// Get local host name
@@ -384,6 +397,11 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 	{
 		// Save hostname as UTF-8, from locale
 		host.m_Hostname = NLMISC::mbcsToUtf8(localhost);
+		result = NULL;
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_family = AF_UNSPEC;
 
 		// Get all addresses, and add them all
 		if (getaddrinfo(localhost, NULL, &hints, &result) == 0)
@@ -392,46 +410,74 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 			{
 				if (ptr->ai_family == AF_INET)
 				{
-					if (loopback && !haveLoopback)
+					if (!haveLoopback)
 					{
-						CInetAddress loopback(CIPv6Address::loopbackIPv4(), port);
-						host.m_Addresses.push_back(loopback);
+						CInetAddress loopbackAddr(CIPv6Address::loopbackIPv4(), port);
+						if (loopback)
+							host.m_Addresses.push_back(loopbackAddr);
+						else
+							skipLoopback.push_back(loopbackAddr);
 						haveLoopback = true;
 					}
 					CInetAddress addr(false);
 					addr.fromSockAddrInet((sockaddr_in *)ptr->ai_addr);
 					addr.setPort(port);
-					if (loopback || !addr.isLoopbackIPAddress())
+					if (addresses.find(addr.getAddress()) == addresses.end())
 					{
-						host.m_Addresses.push_back(addr);
+						addresses.insert(addr.getAddress());
+						if (loopback || !addr.isLoopbackIPAddress())
+							host.m_Addresses.push_back(addr);
+						else
+							skipLoopback.push_back(addr);
 					}
 				}
 #if NLNET_IPV6_LOOKUP
 				else if (ptr->ai_family == AF_INET6)
 				{
-					if (loopback && !haveLoopback6)
+					if (!haveLoopback6)
 					{
-						CInetAddress loopback(CIPv6Address::loopbackIPv6(), port);
-						host.m_Addresses.push_back(loopback);
+						CInetAddress loopbackAddr(CIPv6Address::loopbackIPv6(), port);
+						if (loopback)
+							host.m_Addresses.push_back(loopbackAddr);
+						else
+							skipLoopback.push_back(loopbackAddr);
 						haveLoopback6 = true;
 					}
 					CInetAddress addr(false);
 					addr.fromSockAddrInet6((sockaddr_in6 *)ptr->ai_addr);
 					addr.setPort(port);
-					if (loopback || !addr.isLoopbackIPAddress())
+					if (addresses.find(addr.getAddress()) == addresses.end())
 					{
-						host.m_Addresses.push_back(addr);
+						addresses.insert(addr.getAddress());
+						if (loopback || !addr.isLoopbackIPAddress())
+							host.m_Addresses.push_back(addr);
+						else
+							skipLoopback.push_back(addr);
 					}
 				}
 #endif
 			}
 			freeaddrinfo(result);
 		}
+		else
+		{
+			// nlwarning("Failed to get addresses for local hostname");
+		}
+	}
+	else
+	{
+		// nlwarning("Failed to get local hostname");
 	}
 
 	if (host.m_Hostname.empty())
 	{
 		host.m_Hostname = loopbackHostname;
+	}
+
+	if (!host.m_Addresses.size() && skipLoopback.size())
+	{
+		nlwarning("The local hostname only resolves to loopback addresses, using them anyway");
+		host.m_Addresses.swap(skipLoopback);
 	}
 
 	if (sort)
@@ -450,6 +496,11 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 			// Then IPv4
 			if (host.m_Addresses[i].getAddress().isIPv4())
 				sorting.push_back(host.m_Addresses[i]);
+		}
+
+		if (sorting.size() < host.m_Addresses.size())
+		{
+			nlwarning("Discarded %i local host addresses (phase 1)", (int)(host.m_Addresses.size() - sorting.size()));
 		}
 
 		// Second sorting pass, local addresses first
@@ -480,11 +531,16 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 			if (sorting[i].getAddress().getType() == CIPv6Address::Internet)
 				host.m_Addresses.push_back(sorting[i]);
 		}
+
+		if (host.m_Addresses.size() < sorting.size())
+		{
+			nlwarning("Discarded %i local host addresses (phase 2)", (int)(sorting.size() - host.m_Addresses.size()));
+		}
 	}
 
 	if (host.m_Addresses.empty())
 	{
-		throw ESocket(NLMISC::toString("No network card detected for %s", localhost).c_str());
+		throw ESocket(NLMISC::toString("No network card detected for %s", localhost).c_str(), false);
 	}
 
 	return host;

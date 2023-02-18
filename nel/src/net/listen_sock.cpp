@@ -81,9 +81,24 @@ void CListenSock::init( uint16 port )
 	init( localaddr );
 
 	// Now set the address visible from outside
-	_LocalAddr = CInetAddress::localHost();
-	_LocalAddr.setPort( port );
-	LNETL0_DEBUG( "LNETL0: Socket %d listen socket is at %s", _Sock, _LocalAddr.asString().c_str() );
+	try
+	{
+		_LocalAddr = CInetAddress::localHost(port);
+	}
+	catch (ESocket &e)
+	{
+		nlwarning("CListenSock::init: Can't get local host address: %s", e.what());
+	}
+	LNETL0_DEBUG("LNETL0: Socket %d listen socket is at %s", _Sock, _LocalAddr.asString().c_str());
+}
+
+inline static int sizeOfSockAddr(const sockaddr_storage &storage)
+{
+	if (storage.ss_family == AF_INET6)
+		return sizeof(sockaddr_in6);
+	if (storage.ss_family == AF_INET)
+		return sizeof(sockaddr_in);
+	return sizeof(storage);
 }
 
 
@@ -96,9 +111,11 @@ void CListenSock::init( const CInetAddress& addr )
 
 	if (_Bound)
 	{
-		throw ESocket("Already bound");
+		throw ESocket("Already bound", false);
 	}
 
+	_LocalAddr.setNull();
+	_RemoteAddr.setNull();
 	if (addr.getAddress().isAny())
 	{
 		LNETL0_DEBUG( "LNETL0: Binding listen socket to any address (%s), port %hu", addr.getAddress().toString().c_str(), addr.port() );
@@ -106,7 +123,7 @@ void CListenSock::init( const CInetAddress& addr )
 
 	if (!addr.toSockAddrStorage(&sockAddr, _AddressFamily))
 	{
-		throw ESocket("Unable to bind listen socket to invalid address");
+		throw ESocket("Unable to bind listen socket to invalid address", false);
 	}
 
 #ifndef NL_OS_WINDOWS
@@ -119,28 +136,25 @@ void CListenSock::init( const CInetAddress& addr )
 #endif
 
 	// Bind socket to port
-	if (::bind(_Sock, (sockaddr *)&sockAddr, sizeof(sockAddr)) != 0)
+	if (::bind(_Sock, (sockaddr *)&sockAddr, sizeOfSockAddr(sockAddr)) != 0)
 	{
 		if (_AddressFamily == AF_INET6 && addr.getAddress().isAny() && !addr.getAddress().isIPv4())
 		{
 			// Try to bind to IPv4 Any address if a dual stack listen (default) was attempted and failed
+			nlwarning("Failed to bind to dual stack IPv6 Any addres, binding to IPv4 Any address instead");
 			CInetAddress anyIPv4 = CInetAddress(CIPv6Address::anyIPv4(), addr.port());
 			anyIPv4.toSockAddrInet6((sockaddr_in6 *)(&sockAddr));
 			if (::bind(_Sock, (sockaddr *)&sockAddr, sizeof(sockaddr_in6)) != 0)
 			{
 				throw ESocket("Unable to bind listen socket to to port");
 			}
-			_LocalAddr = anyIPv4;
 		}
 		else
 		{
 			throw ESocket("Unable to bind listen socket to port");
 		}
 	}
-	else
-	{
-		_LocalAddr = addr;
-	}
+	_LocalAddr.fromSockAddrStorage(&sockAddr);
 	_Bound = true;
 
 	// Listen

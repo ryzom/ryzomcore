@@ -54,6 +54,15 @@ using namespace NLMISC;
 
 namespace NLNET {
 
+inline static int sizeOfSockAddr(const sockaddr_storage &storage)
+{
+	if (storage.ss_family == AF_INET6)
+		return sizeof(sockaddr_in6);
+	if (storage.ss_family == AF_INET)
+		return sizeof(sockaddr_in);
+	return sizeof(storage);
+}
+
 
 /*
  * Constructor
@@ -88,7 +97,7 @@ void CUdpSock::bind( const CInetAddress& addr )
 	
 	if (!addr.toSockAddrStorage(&sockAddr, _AddressFamily))
 	{
-		throw ESocket("Cannot bind to an invalid address");
+		throw ESocket("Cannot bind to an invalid address", false);
 	}
 	
 #ifndef NL_OS_WINDOWS
@@ -101,7 +110,7 @@ void CUdpSock::bind( const CInetAddress& addr )
 #endif
 
 	// Bind the socket
-	if (::bind(_Sock, (sockaddr *)(&sockAddr), sizeof(sockAddr)) != 0)
+	if (::bind(_Sock, (sockaddr *)(&sockAddr), sizeOfSockAddr(sockAddr)) != 0)
 	{
 		if (_AddressFamily == AF_INET6 && addr.getAddress().isAny() && !addr.getAddress().isIPv4())
 		{
@@ -144,7 +153,7 @@ void CUdpSock::sendTo( const uint8 *buffer, uint len, const CInetAddress& addr )
 	}
 
 	//  Send
-	if (::sendto(_Sock, (const char *)buffer, len, 0, (sockaddr *)(&sockAddr), sizeof(sockAddr)) != (sint32)len)
+	if (::sendto(_Sock, (const char *)buffer, len, 0, (sockaddr *)(&sockAddr), sizeOfSockAddr(sockAddr)) != (sint32)len)
 	{
 		throw ESocket("Unable to send datagram");
 	}

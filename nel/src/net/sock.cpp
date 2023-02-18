@@ -211,18 +211,21 @@ std::string CSock::errorString( uint errorcode )
 /*
  * Constructor
  */
-CSock::CSock( bool logging ) :
-	_Sock( INVALID_SOCKET ),
-	_Logging( logging ),
-	_NonBlocking( false ),
-	_BytesReceived( 0 ),
-	_BytesSent( 0 ),
-	_TimeoutS( 0 ),
-	_TimeoutUs( 0 ),
-	_MaxReceiveTime( 0 ),
-	_MaxSendTime( 0 ),
-	_Blocking( false )
-	{
+CSock::CSock(bool logging)
+    : _Sock(INVALID_SOCKET)
+	, _LocalAddr(false)
+	, _RemoteAddr(false)
+    , _Logging(logging)
+    , _NonBlocking(false)
+    , _BytesReceived(0)
+    , _BytesSent(0)
+    , _TimeoutS(0)
+    , _TimeoutUs(0)
+    , _MaxReceiveTime(0)
+    , _MaxSendTime(0)
+    , _Blocking(false)
+    , _AddressFamily(AF_UNSPEC)
+{
 	nlassert( CSock::_Initialized );
 	/*{
 		CSynchronized<bool>::CAccessor sync( &_SyncConnected );
@@ -231,20 +234,19 @@ CSock::CSock( bool logging ) :
 	_Connected = false;
 }
 
-
 /*
  * Construct a CSock object using an existing connected socket descriptor and its associated remote address
  */
-CSock::CSock( SOCKET sock, const CInetAddress& remoteaddr ) :
-	_Sock( sock ),
-	_RemoteAddr( remoteaddr ),
-	_Logging( true ),
-	_NonBlocking( false ),
-	_BytesReceived( 0 ),
-	_BytesSent( 0 ),
-	_MaxReceiveTime( 0 ),
-	_MaxSendTime( 0 ),
-	_AddressFamily(AF_UNSPEC)
+CSock::CSock(SOCKET sock, const CInetAddress &remoteaddr)
+    : _Sock(sock)
+    , _RemoteAddr(remoteaddr)
+    , _Logging(true)
+    , _NonBlocking(false)
+    , _BytesReceived(0)
+    , _BytesSent(0)
+    , _MaxReceiveTime(0)
+    , _MaxSendTime(0)
+    , _AddressFamily(AF_UNSPEC)
 {
 	nlassert( CSock::_Initialized );
 	/*{
@@ -274,41 +276,65 @@ CSock::CSock( SOCKET sock, const CInetAddress& remoteaddr ) :
 	ioctl(_Sock, FIOCLEX, NULL);
 	// fcntl should be more portable but not tested fcntl(_Sock, F_SETFD, FD_CLOEXEC);
 #endif
-	}
+}
 
+static SOCKET createSocketInternal(int &family, int familyA, int familyB, int type, int protocol)
+{
+	// First try IPv6
+	SOCKET res = (SOCKET)socket(familyA, type, protocol); // or IPPROTO_IP (=0) ?
+	if (res == INVALID_SOCKET)
+	{
+		// Fallback to IPv4
+		nlwarning("Could not create a socket of the preferred socket family %i, create a socket with family %i, the system may lack IPv6 support", familyA , familyB);
+		res = (SOCKET)socket(familyB, type, protocol);
+		if (res == INVALID_SOCKET)
+		{
+			family = AF_UNSPEC;
+			throw ESocket("Could not create socket");
+		}
+		family = familyB;
+	}
+	else
+	{
+		family = familyA;
+	}
+	return res;
+}
+
+inline static int sizeOfSockAddr(const sockaddr_storage &storage)
+{
+	if (storage.ss_family == AF_INET6)
+		return sizeof(sockaddr_in6);
+	if (storage.ss_family == AF_INET)
+		return sizeof(sockaddr_in);
+	return sizeof(storage);
+}
 
 /*
  * Creates the socket and get a valid descriptor
  */
-void CSock::createSocket( int type, int protocol )
+void CSock::createSocket(int type, int protocol)
 {
-	nlassert( _Sock == INVALID_SOCKET );
+	nlassert(_Sock == INVALID_SOCKET);
 
-	// First try IPv6
-	_Sock = (SOCKET)socket(AF_INET6, type, protocol); // or IPPROTO_IP (=0) ?
-	if (_Sock == INVALID_SOCKET)
-	{
-		// Fallback to IPv4
-		_Sock = (SOCKET)socket(AF_INET, type, protocol);
-		if (_Sock == INVALID_SOCKET)
-		{
-			throw ESocket("Could not create socket");
-		}
-		_AddressFamily = AF_INET;
-	}
-	else
-	{
-		_AddressFamily = AF_INET6;
-	}
+	// Create socket, throws in case of failure
+	_Sock = createSocketInternal(_AddressFamily, AF_INET6, AF_INET, type, protocol); // TEMP HACK: Only connect to IPv4
 
 	if (_AddressFamily == AF_INET6)
 	{
 		// Ensure this is dual stack IPv6 and IPv4
 		// Disable IPv6 ONLY flag
 		int no = 0;
-		if (setsockopt(_Sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&no, sizeof(no)) == SOCKET_ERROR)
+		if (setsockopt(_Sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&no, sizeof(no)) != 0)
 		{
-			throw ESocket("Could not disable IPV6_V6ONLY flag");
+			nlwarning("Could not disable IPV6_V6ONLY flag, this means we're running on a legacy OS, and IPv4 is preferred");
+#ifdef NL_OS_WINDOWS
+			closesocket(_Sock);
+#elif defined NL_OS_UNIX
+			::close(_Sock);
+#endif
+			_Sock = INVALID_SOCKET;
+			_Sock = createSocketInternal(_AddressFamily, AF_INET, AF_INET6, type, protocol);
 		}
 	}
 
@@ -388,13 +414,20 @@ CSock::~CSock()
 /*
  * Connection
  */
-void CSock::connect( const CInetHost& addrs )
+void CSock::connect(const CInetHost &addrs)
 {
+	if (_Connected)
+	{
+		throw ESocket("Already connected", false);
+	}
+
 	bool attempted = false;
 	bool connected = false;
+	_LocalAddr.setNull();
+	_RemoteAddr.setNull();
 	for (size_t ai = 0; ai < addrs.size(); ++ai)
 	{
-		CInetAddress addr = addrs.addresses()[ai];
+		const CInetAddress &addr = addrs.addresses()[ai];
 		sockaddr_storage sockAddr;
 
 		LNETL0_DEBUG("LNETL0: Socket %d connecting to %s...", _Sock, addrs.toStringLong(ai).c_str());
@@ -416,7 +449,7 @@ void CSock::connect( const CInetHost& addrs )
 
 		attempted = true;
 		// Connection (when _Sock is a datagram socket, connect establishes a default destination address)
-		if (::connect(_Sock, (const sockaddr *)(&sockAddr), sizeof(sockAddr)) != 0)
+		if (::connect(_Sock, (const sockaddr *)(&sockAddr), sizeOfSockAddr(sockAddr)) != 0)
 		{
 			/*		if ( _Logging )
 					{
@@ -715,9 +748,9 @@ void CSock::setSendBufferSize( sint32 size )
 sint32 CSock::getSendBufferSize()
 {
   int size = -1;
-  socklen_t bufsize;
-  getsockopt( _Sock, SOL_SOCKET, SO_SNDBUF, (char*)(&size), &bufsize );
-  return size;
+	socklen_t bufsize = sizeof(size);
+	getsockopt(_Sock, SOL_SOCKET, SO_SNDBUF, (char *)(&size), &bufsize);
+	return size;
 }
 
 } // NLNET
