@@ -255,6 +255,40 @@ local function twIsTargetInPVPMode()
 end
 
 
+game.updateRpItemsUrl = nil
+game.wantedRpLeftItem = ""
+game.wantedRpRightItem = ""
+game.wantedRpTargets = {}
+
+function game:addRequireRpItems(left, target, mode, id)
+	game.wantedRpTargets[left..":"..target..":"..mode] = id
+end
+
+game.usedRpLeftItem  = "_"
+game.usedRpRightItem  = "_"
+function game:updateRpItems(left, right)
+	if game.updateRpItemsUrl then
+		if game.usedRpLeftItem ~= left or game.usedRpRightItem ~= right then
+			game.usedRpLeftItem = left
+			game.usedRpRightItem = right
+			webig:openUrl(game.updateRpItemsUrl.."&left_hand="..left.."&right_hand="..right)
+		end
+
+		local target = tostring(getTargetSheet())
+		local mode = ""
+		if target ~= "" then
+			mode = tostring(getTargetMode())
+		end
+		for k, v in pairs(game.wantedRpTargets) do
+			local html = getUI("ui:interface:rpitems_actions"):find("html")
+			local a = html:find("action"..v)
+			if a then
+				a:find("but").frozen = not (string.find(left..":"..target..":"..mode, k) or string.find(left..":"..target..":*", k))
+			end
+		end
+	end
+end
+
 
 ------------------------------------------------------------------------------------------------------------
 -- This function is called when a new target is selected, it should update the 'consider' widget
@@ -263,6 +297,7 @@ end
 -- Boss/Mini-bosses/Names colored ring
 
 function game:updateTargetConsiderUI()
+	game:updateRpItems(game.usedRpLeftItem, game.usedRpRightItem)
 	local targetWindow = getUI("ui:interface:target")
 	--
 	local wgTargetSlotForce = targetWindow:find("slot_force")

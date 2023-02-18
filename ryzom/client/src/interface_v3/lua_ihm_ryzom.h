@@ -89,6 +89,8 @@ private:
 	static int	getPlayerName(CLuaState &ls);
 	static int	getPlayerTitleRaw(CLuaState &ls);
 	static int	getPlayerTitle(CLuaState &ls);
+	static int	getPlayerTag(CLuaState &ls);
+	static int	getPlayerMode(CLuaState &ls);
 	static int	getTargetPos(CLuaState &ls);
 	static int	getTargetFront(CLuaState &ls);
 	static int	getTargetDirection(CLuaState &ls);
@@ -96,6 +98,8 @@ private:
 	static int	getTargetName(CLuaState &ls);
 	static int	getTargetTitleRaw(CLuaState &ls);
 	static int	getTargetTitle(CLuaState &ls);
+	static int	getTargetTag(CLuaState &ls);
+	static int	getTargetMode(CLuaState &ls);
 	static int	moveToTarget(CLuaState &ls);
 	static int  addSearchPathUser(CLuaState &ls);
 	static int  getClientCfgVar(CLuaState &ls);
