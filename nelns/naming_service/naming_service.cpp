@@ -199,7 +199,7 @@ bool		CServiceInstanceManager::queryStartService( const std::string& serviceName
 					if ( cnb1->hostAddress( hostid1 ).internalIPAddress() == cnb2->hostAddress( hostid2 ).internalIPAddress() )*/
 
 					// Implementation for NS
-					if ( addr[0].internalIPAddress() == getHostAddress( *ios ).internalIPAddress() )
+					if ( addr[0].getAddress() == getHostAddress( *ios ).getAddress() )
 					{
 						grantStarting = false;
 						reason = toString( "Service %s already found as %hu on same machine", serviceName.c_str(), ios->get() );

@@ -24,6 +24,8 @@
 #	ifndef NL_COMP_MINGW
 #		define NOMINMAX
 #	endif
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #	include <windows.h>
 #elif defined NL_OS_UNIX
 
@@ -49,19 +51,19 @@ using namespace NLNET;
 /// Constructor
 TReceivedMessage::TReceivedMessage()
 {
-	VAddrFrom.resize( sizeof(sockaddr_in) );
+	VAddrFrom.resize(sizeof(sockaddr_in6));
 }
 
 /// Return a vector containing the address info
 void	TReceivedMessage::addressToVector()
 {
-	memcpy( &*VAddrFrom.begin(), AddrFrom.sockAddr(), sizeof(sockaddr_in) );
+	AddrFrom.fromSockAddrInet6((sockaddr_in6 *)&*VAddrFrom.begin());
 }
 
 /// Set address with address info from specified vector
 void	TReceivedMessage::vectorToAddress()
 {
-	AddrFrom.setSockAddr( (sockaddr_in*)&*VAddrFrom.begin() );
+	AddrFrom.toSockAddrInet6((sockaddr_in6 *)&*VAddrFrom.begin());
 }
 
 
