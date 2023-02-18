@@ -823,6 +823,8 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 		return false;
 	}
 
+	c->abortExchange();
+
 	for (uint32 i=0; i<inventories.size(); i++)
 	{
 		CInventoryPtr childSrc = c->getInventory(inventories[i]);
@@ -921,6 +923,8 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 		inventories.push_back(INVENTORIES::player_room);
 	}
 
+	c->abortExchange();
+
 	for (uint32 i=0; i<inventories.size(); i++)
 	{
 		CInventoryPtr childSrc = c->getInventory(inventories[i]);
@@ -1018,6 +1022,7 @@ NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory",
 			}
 		}
 
+		c->abortExchange();
 		//Delete them
 		for (std::map<uint32, uint32>::iterator it = slots.begin(); it != slots.end(); ++it)
 		{
@@ -1079,6 +1084,8 @@ NLMISC_COMMAND(checkInventoryItems, "Check items from a characters inventory", "
 		fromString(quantities[i], quantity);
 		need_items.insert(make_pair(sheet_names[i]+":"+qualities[i], quantity));
 	}
+
+	c->abortExchange();
 
 	std::map<uint32, uint32> slots;
 	std::map<string, uint32>::iterator itNeedItems;
@@ -1148,6 +1155,8 @@ NLMISC_COMMAND(enchantEquipedItem, "enchantEquipedItem", "<uid> <slotname> <shee
 		}
 	}
 
+	c->abortExchange();
+
 	CGameItemPtr itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
 	if (itemPtr != NULL)
 	{
@@ -1185,6 +1194,8 @@ NLMISC_COMMAND(getEnchantmentInEquipedItem, "getEnchantmentInEquipedItem", "<uid
 
 	string selected_slot = args[1];
 
+	c->abortExchange();
+
 	CGameItemPtr itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
 	if (itemPtr != NULL)
 	{
@@ -1208,6 +1219,8 @@ NLMISC_COMMAND(sapLoadInEquipedItem, "reloadSapLoadInEquipedItem", "<uid> <slotn
 	GET_ACTIVE_CHARACTER
 
 	string selected_slot = args[1];
+
+	c->abortExchange();
 
 	CGameItemPtr itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
 	if (itemPtr != NULL)
