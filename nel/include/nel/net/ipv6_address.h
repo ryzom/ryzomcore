@@ -130,9 +130,12 @@ public:
 		if (!m_Valid)
 			return false;
 		static const uint8 NL_ALIGNLIKE(uint64_t) reference[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF };
-		// return memcmp(m_Address, reference, 12) == 0;
+#ifndef NL_CPP14
+		return memcmp(m_Address, reference, 12) == 0;
+#else
 		return ((const uint64_t *)reference)[0] == ((const uint64_t *)m_Address)[0]
 		    && ((const uint32_t *)reference)[2] == ((const uint32_t *)m_Address)[2];
+#endif
 	}
 	
 	TType getType() const;
@@ -174,13 +177,15 @@ inline bool CIPv6Address::operator==(const CIPv6Address &other) const
 {
 	if (m_Valid && other.m_Valid)
 	{
-		// return memcmp(m_Address, other.m_Address, 16) == 0;
+#ifndef NL_CPP14
+		return memcmp(m_Address, other.m_Address, 16) == 0;
+#else
 		return ((const uint64_t *)m_Address)[0] == ((const uint64_t *)other.m_Address)[0]
 			&& ((const uint64_t *)m_Address)[1] == ((const uint64_t *)other.m_Address)[1];
+#endif
 	}
 	else
 	{
-		nlwarning("Comparing mismatching addresses");
 		return m_Valid == other.m_Valid;
 	}
 }
@@ -189,11 +194,14 @@ inline bool CIPv6Address::operator<(const CIPv6Address &other) const
 {
 	if (m_Valid && other.m_Valid)
 	{
-		// return memcmp(m_Address, other.m_Address, 16) < 0;
+#ifndef NL_CPP14
+		return memcmp(m_Address, other.m_Address, 16) < 0;
+#else
 		if (((const uint64_t *)m_Address)[0] != ((const uint64_t *)other.m_Address)[0])
 			return ((const uint64_t *)m_Address)[0] < ((const uint64_t *)other.m_Address)[0];
 		else
 			return ((const uint64_t *)m_Address)[1] < ((const uint64_t *)other.m_Address)[1];
+#endif
 	}
 	else
 	{
@@ -205,11 +213,14 @@ inline bool CIPv6Address::operator<=(const CIPv6Address &other) const
 {
 	if (m_Valid && other.m_Valid)
 	{
-		// return memcmp(m_Address, other.m_Address, 16) <= 0;
+#ifndef NL_CPP14
+		return memcmp(m_Address, other.m_Address, 16) <= 0;
+#else
 		if (((const uint64_t *)m_Address)[0] != ((const uint64_t *)other.m_Address)[0])
 			return ((const uint64_t *)m_Address)[0] < ((const uint64_t *)other.m_Address)[0];
 		else
 			return ((const uint64_t *)m_Address)[1] <= ((const uint64_t *)other.m_Address)[1];
+#endif
 	}
 	else
 	{
