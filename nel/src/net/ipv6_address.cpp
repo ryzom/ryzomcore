@@ -458,8 +458,11 @@ CIPv6Address::TType CIPv6Address::getType() const
 	}
 	else
 	{
-		static const uint8 loopback[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
-		if (memcmp(m_Address, loopback, 16) == 0) return Loopback;
+		static const uint8 NL_ALIGNLIKE(uint64_t) loopback[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+		// if (memcmp(m_Address, loopback, 16) == 0) return Loopback;
+		if (((const uint64_t *)m_Address)[0] == ((const uint64_t *)loopback)[0]
+			&& ((const uint64_t *)m_Address)[1] == ((const uint64_t *)loopback)[1])
+			return Loopback;
 		if ((m_Address[0] & 0xFE) == 0xFC) return UniqueLocal;
 		if (m_Address[0] == 0xFE && (m_Address[1] & 0xC0) == 0x80) return LinkLocal;
 	}
@@ -476,8 +479,10 @@ bool CIPv6Address::isAny() const
 	}
 	else
 	{
-		static const uint8 any[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		return memcmp(m_Address, any, 16) == 0;
+		static const uint8 NL_ALIGNLIKE(uint64_t) any[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		// return memcmp(m_Address, any, 16) == 0;
+		return ((const uint64_t *)m_Address)[0] == ((const uint64_t *)any)[0]
+			&& ((const uint64_t *)m_Address)[1] == ((const uint64_t *)any)[1];
 	}
 }
 
