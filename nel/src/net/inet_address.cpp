@@ -156,29 +156,6 @@ CInetAddress &CInetAddress::operator=(const CInetAddress &other)
 }
 
 /*
- * Comparison == operator
- */
-bool operator==(const CInetAddress &a1, const CInetAddress &a2)
-{
-	return (a1.m_Port == a2.m_Port) && (a1.m_Address == a2.m_Address);
-}
-
-/*
- * Comparison < operator
- */
-bool operator<(const CInetAddress &a1, const CInetAddress &a2)
-{
-	if (a1.m_Port != a2.m_Port)
-	{
-		return a1.m_Port < a2.m_Port;
-	}
-	else
-	{
-		return a1.m_Address < a2.m_Address;
-	}
-}
-
-/*
  * Constructor contents
  */
 void CInetAddress::init()

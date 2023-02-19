@@ -38,6 +38,8 @@
 // #include <sys/socket.h>
 // Linux includes for `getaddrinfo`
 #include <netdb.h>
+// Linux includes for `getifaddrs`
+#include <ifaddrs.h>
 #endif
 
 #define NLNET_IPV6_LOOKUP (1)
@@ -474,9 +476,53 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 		host.m_Hostname = loopbackHostname;
 	}
 
+#ifndef NL_OS_WINDOWS
+	// Local hostname might be mapped to only return a loopback address, try interface addresses as well
+	struct ifaddrs *ifaddr, *ifa;
+	if (getifaddrs(&ifaddr) == 0)
+	{
+		for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+		{
+			if (ifa->ifa_addr == NULL)
+				continue;
+			if (ifa->ifa_addr->sa_family == AF_INET)
+			{
+				CInetAddress addr(false);
+				addr.fromSockAddrInet((sockaddr_in *)ifa->ifa_addr);
+				addr.setPort(port);
+				if (addresses.find(addr.getAddress()) == addresses.end())
+				{
+					addresses.insert(addr.getAddress());
+					if (loopback || !addr.isLoopbackIPAddress())
+						host.m_Addresses.push_back(addr);
+					else
+						skipLoopback.push_back(addr);
+				}
+			}
+#if NLNET_IPV6_LOOKUP
+			else if (ifa->ifa_addr->sa_family == AF_INET6)
+			{
+				CInetAddress addr(false);
+				addr.fromSockAddrInet6((sockaddr_in6 *)ifa->ifa_addr);
+				addr.setPort(port);
+				if (addresses.find(addr.getAddress()) == addresses.end())
+				{
+					addresses.insert(addr.getAddress());
+					if (loopback || !addr.isLoopbackIPAddress())
+						host.m_Addresses.push_back(addr);
+					else
+						skipLoopback.push_back(addr);
+				}
+			}
+#endif
+		}
+		freeifaddrs(ifaddr);
+	}
+#endif
+	
 	if (!host.m_Addresses.size() && skipLoopback.size())
 	{
-		nlwarning("The local hostname only resolves to loopback addresses, using them anyway");
+		nlwarning("The local hostname only resolves to %i loopback addresses, using them anyway", (int)skipLoopback.size());
 		host.m_Addresses.swap(skipLoopback);
 	}
 
@@ -523,6 +569,7 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 		}
 		for (size_t i = 0; i < sorting.size(); ++i)
 		{
+			// Not sure if we should keep link local addresses or just discard them...
 			if (sorting[i].getAddress().getType() == CIPv6Address::LinkLocal)
 				host.m_Addresses.push_back(sorting[i]);
 		}

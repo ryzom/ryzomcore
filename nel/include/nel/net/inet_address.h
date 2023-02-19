@@ -32,11 +32,6 @@ struct sockaddr_in6;
 struct in_addr;
 struct in6_addr;
 
-#ifdef NL_OS_WINDOWS
-// automatically add the win socket library if you use nel network part
-#pragma comment(lib, "ws2_32.lib")
-#endif
-
 namespace NLMISC {
 class IStream;
 }
@@ -80,10 +75,10 @@ public:
 	CInetAddress &operator=(const CInetAddress &other);
 
 	/// Comparison == operator
-	friend bool operator==(const CInetAddress &a1, const CInetAddress &a2);
+	inline bool operator==(const CInetAddress &other) const;
 
 	/// Comparison < operator
-	friend bool operator<(const CInetAddress &a1, const CInetAddress &a2);
+	inline bool operator<(const CInetAddress &other) const;
 
 	/// Destructor
 	~CInetAddress();
@@ -198,6 +193,23 @@ private:
 	CIPv6Address m_Address;
 	uint16 m_Port;
 };
+
+inline bool CInetAddress::operator==(const CInetAddress &other) const
+{
+	return (m_Port == other.m_Port) && (m_Address == other.m_Address);
+}
+
+inline bool CInetAddress::operator<(const CInetAddress &other) const
+{
+	if (m_Port != other.m_Port)
+	{
+		return m_Port < other.m_Port;
+	}
+	else
+	{
+		return m_Address < other.m_Address;
+	}
+}
 
 /// Take a internet dot string and convert it in an uint32 internal format for example "128.64.32.16" -> 0xF0804020
 uint32 stringToInternalIPAddress(const std::string &addr);

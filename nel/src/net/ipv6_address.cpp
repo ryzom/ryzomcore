@@ -481,43 +481,6 @@ bool CIPv6Address::isAny() const
 	}
 }
 
-bool CIPv6Address::operator==(CIPv6Address &other) const
-{
-	if (!isValid() || !other.isValid())
-		return isValid() == other.isValid();
-	return memcmp(m_Address, other.m_Address, 16) == 0;
-}
-
-bool CIPv6Address::operator<(CIPv6Address &other) const
-{
-	if (!isValid() || !other.isValid())
-		return isValid();
-#if 0 // Don't sort, just use operator for map
-	const TType type = getType();
-	const TType otherType = other.getType();
-	if (type != otherType)
-		return type < otherType;
-	if (isIPv4() != other.isIPv4())
-		return other.isIPv4();
-#endif
-	return memcmp(m_Address, other.m_Address, 16) < 0;
-}
-
-bool CIPv6Address::operator<=(CIPv6Address &other) const
-{
-	if (!isValid() || !other.isValid())
-		return isValid() || (isValid() == other.isValid());
-#if 0 // Don't sort, just use operator for map
-	const TType type = getType();
-	const TType otherType = other.getType();
-	if (type != otherType)
-		return type < otherType;
-	if (isIPv4() != other.isIPv4())
-		return other.isIPv4();
-#endif
-	return memcmp(m_Address, other.m_Address, 16) <= 0;
-}
-
 uint32 CIPv6Address::hash32() const
 {
 	if (!m_Valid) return 0;

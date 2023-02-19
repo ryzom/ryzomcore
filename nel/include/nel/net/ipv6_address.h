@@ -130,7 +130,9 @@ public:
 		if (!m_Valid)
 			return false;
 		static const uint8 reference[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF };
-		return memcmp(m_Address, reference, 12) == 0;
+		// return memcmp(m_Address, reference, 12) == 0;
+		return ((const uint64_t *)reference)[0] == ((const uint64_t *)m_Address)[0]
+		    && ((const uint32_t *)reference)[2] == ((const uint32_t *)m_Address)[2];
 	}
 	
 	TType getType() const;
@@ -140,12 +142,12 @@ public:
 
 	bool isAny() const;
 
-	bool operator==(CIPv6Address &other) const;
-	inline bool operator!=(CIPv6Address &other) const { return !(*this == other); }
-	bool operator<(CIPv6Address &other) const;
-	inline bool operator>(CIPv6Address &other) const { return !(*this <= other); }
-	bool operator<=(CIPv6Address &other) const;
-	inline bool operator>=(CIPv6Address &other) const { return !(*this < other); }
+	inline bool operator==(const CIPv6Address &other) const;
+	inline bool operator!=(const CIPv6Address &other) const { return !(*this == other); }
+	inline bool operator<(const CIPv6Address &other) const;
+	inline bool operator>(const CIPv6Address &other) const { return other < *this; }
+	inline bool operator<=(const CIPv6Address &other) const;
+	inline bool operator>=(const CIPv6Address &other) const { return other <= *this; }
 	inline operator bool() const { return m_Valid; }
 	inline bool operator!() const { return !m_Valid; }
 
@@ -167,6 +169,53 @@ private:
 	// If false, this structure is considered empty or null.
 	bool m_Valid;
 };
+
+inline bool CIPv6Address::operator==(const CIPv6Address &other) const
+{
+	if (m_Valid && other.m_Valid)
+	{
+		// return memcmp(m_Address, other.m_Address, 16) == 0;
+		return ((const uint64_t *)m_Address)[0] == ((const uint64_t *)other.m_Address)[0]
+			&& ((const uint64_t *)m_Address)[1] == ((const uint64_t *)other.m_Address)[1];
+	}
+	else
+	{
+		nlwarning("Comparing mismatching addresses");
+		return m_Valid == other.m_Valid;
+	}
+}
+
+inline bool CIPv6Address::operator<(const CIPv6Address &other) const
+{
+	if (m_Valid && other.m_Valid)
+	{
+		// return memcmp(m_Address, other.m_Address, 16) < 0;
+		if (((const uint64_t *)m_Address)[0] != ((const uint64_t *)other.m_Address)[0])
+			return ((const uint64_t *)m_Address)[0] < ((const uint64_t *)other.m_Address)[0];
+		else
+			return ((const uint64_t *)m_Address)[1] < ((const uint64_t *)other.m_Address)[1];
+	}
+	else
+	{
+		return m_Valid;
+	}
+}
+
+inline bool CIPv6Address::operator<=(const CIPv6Address &other) const
+{
+	if (m_Valid && other.m_Valid)
+	{
+		// return memcmp(m_Address, other.m_Address, 16) <= 0;
+		if (((const uint64_t *)m_Address)[0] != ((const uint64_t *)other.m_Address)[0])
+			return ((const uint64_t *)m_Address)[0] < ((const uint64_t *)other.m_Address)[0];
+		else
+			return ((const uint64_t *)m_Address)[1] <= ((const uint64_t *)other.m_Address)[1];
+	}
+	else
+	{
+		return m_Valid || (m_Valid == other.m_Valid);
+	}
+}
 
 }
 

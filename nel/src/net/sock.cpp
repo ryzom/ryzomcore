@@ -75,6 +75,11 @@ using namespace NLMISC;
 #define IPPROTO_IPV6 41
 #endif
 
+#ifdef NL_OS_WINDOWS
+// automatically add the win socket library if you use nel network part
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
 namespace NLNET {
 
 
