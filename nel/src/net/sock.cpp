@@ -323,7 +323,7 @@ void CSock::createSocket(int type, int protocol)
 	nlassert(_Sock == INVALID_SOCKET);
 
 	// Create socket, throws in case of failure
-	_Sock = createSocketInternal(_AddressFamily, AF_INET6, AF_INET, type, protocol); // TEMP HACK: Only connect to IPv4
+	_Sock = createSocketInternal(_AddressFamily, AF_INET6, AF_INET, type, protocol);
 
 	if (_AddressFamily == AF_INET6)
 	{
