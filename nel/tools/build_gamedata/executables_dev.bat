@@ -13,3 +13,4 @@ python b2_shard_data.py
 title Ryzom Core: b3_shard_dev.py
 python b3_shard_dev.py
 title Ryzom Core: Ready
+dir *.py
