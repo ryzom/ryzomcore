@@ -33,13 +33,17 @@ jobs:
         mkdir build
         cmake --version
         cd build
-        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
         cd build
         make -j`nproc`
       displayName: 'Make'
+    - script: |
+        cd nel/tools/nel_unit_test
+        ../../../build/bin/nel_unit_test
+      displayName: 'Unit Tests'
   - job: ubuntu20
     timeoutInMinutes: 120
     pool:
@@ -70,13 +74,17 @@ jobs:
         mkdir build
         cmake --version
         cd build
-        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
         cd build
         make -j`nproc`
       displayName: 'Make'
+    - script: |
+        cd nel/tools/nel_unit_test
+        ../../../build/bin/nel_unit_test
+      displayName: 'Unit Tests'
   - job: client
     strategy:
       matrix:
