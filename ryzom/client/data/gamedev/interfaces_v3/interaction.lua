@@ -260,13 +260,27 @@ game.wantedRpLeftItem = ""
 game.wantedRpRightItem = ""
 game.wantedRpTargets = {}
 
-function game:addRequireRpItems(left, target, mode, id)
-	game.wantedRpTargets[left..":"..target..":"..mode] = id
+function game:addRequireRpItemsPosition(x, y, id)
+	local sx = tostring(math.floor(x/10))
+	local sy = tostring(math.floor(y/10))
+	game.wantedRpPositions[sx..":"..sy] = id
 end
 
 game.usedRpLeftItem  = "_"
 game.usedRpRightItem  = "_"
-function game:updateRpItems(left, right)
+
+function game:updateRpItems()
+	local left = getPlayerTag(6)
+	local right = getPlayerTag(5)
+
+	if getDbProp("LOCAL:INVENTORY:HAND:1:INDEX_IN_BAG") ~= 0 then
+		left = "_"
+	end
+
+	if getDbProp("LOCAL:INVENTORY:HAND:0:INDEX_IN_BAG") ~= 0 then
+		right = "_"
+	end
+
 	if game.updateRpItemsUrl then
 		if game.usedRpLeftItem ~= left or game.usedRpRightItem ~= right then
 			game.usedRpLeftItem = left
@@ -275,20 +289,27 @@ function game:updateRpItems(left, right)
 		end
 
 		local target = tostring(getTargetSheet())
+
 		local mode = ""
 		if target ~= "" then
 			mode = tostring(getTargetMode())
 		end
+
 		for k, v in pairs(game.wantedRpTargets) do
 			local html = getUI("ui:interface:rpitems_actions"):find("html")
 			local a = html:find("action"..v)
 			if a then
-				a:find("but").frozen = not (string.find(left..":"..target..":"..mode, k) or string.find(left..":"..target..":*", k))
+				if string.find(left..":"..target..":"..mode, k) or string.find(left..":"..target..":*", k) then
+					a:find("but").frozen = false
+					a:find("text").alpha = 255
+				else
+					a:find("but").frozen = true
+					a:find("text").alpha = 155
+				end
 			end
 		end
 	end
 end
-
 
 ------------------------------------------------------------------------------------------------------------
 -- This function is called when a new target is selected, it should update the 'consider' widget

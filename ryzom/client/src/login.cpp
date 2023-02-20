@@ -871,7 +871,7 @@ void initAutoLogin()
 		}
 		else
 		{
-			
+
 			LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
 			//		CAHManager::getInstance()->runActionHandler("login_connect_2", NULL);
 		}
@@ -1886,10 +1886,9 @@ class CAHOpenURL : public IActionHandler
 		}
 		else
 		{
-			nlwarning("no URL found");
-			return;
+			url = sParams;
 		}
-		
+
 		if(sParams != "cfg_ConditionsTermsURL" && sParams != "cfg_NamingPolicyURL")
 		{
 			// modify existing languages
