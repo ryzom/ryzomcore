@@ -99,6 +99,20 @@ bool addressFromString(uint8 address[], const char *str, size_t len)
 		// Try IPv4 format
 		if (inet_pton(AF_INET, strCopy.c_str(), &address[12]) != 1)
 		{
+			uint32 dec;
+			// Parse as dotless decimal IPv4, since it's valid under Windows
+			if (NLMISC::fromString(strCopy, dec))
+			{
+				memset(address, 0, 10);
+				address[10] = 0xFF;
+				address[11] = 0xFF;
+				address[12] = (dec >> 24) & 0xFF;
+				address[13] = (dec >> 16) & 0xFF;
+				address[14] = (dec >> 8) & 0xFF;
+				address[15] = dec & 0xFF;
+				return true;
+			}
+			
 			// Failed to parse
 			return false;
 		}
