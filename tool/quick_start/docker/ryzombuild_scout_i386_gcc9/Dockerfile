@@ -43,6 +43,10 @@ RUN git clone https://github.com/ninja-build/ninja.git && cd ninja && git checko
 #  && cd .. && rm -rf CMake \
 #  && cmake --version
 
+ENV CC=/usr/lib/ccache/gcc
+ENV CXX=/usr/lib/ccache/g++
+ENV CCACHE_SLOPPINESS=pch_defines,time_macros
+
 RUN mkdir -p /mnt/nel
 
 WORKDIR /mnt/nel

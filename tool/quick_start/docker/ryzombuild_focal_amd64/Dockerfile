@@ -5,7 +5,7 @@ RUN sed -i -e 's/archive\.ubuntu\.com/mirrors\.digitalocean\.com/' /etc/apt/sour
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   software-properties-common \
-  cmake ninja-build curl wget build-essential \
+  cmake ninja-build curl wget build-essential ccache \
   bison autoconf automake \
   libpng-dev \
   libjpeg-dev \
@@ -22,6 +22,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libgsf-1-dev \
   qtbase5-dev qttools5-dev qttools5-dev-tools \
   && rm -rf /var/lib/apt/lists/*
+
+ENV CC=/usr/lib/ccache/gcc
+ENV CXX=/usr/lib/ccache/g++
+ENV CCACHE_SLOPPINESS=pch_defines,time_macros
 
 RUN mkdir -p /mnt/nel
 

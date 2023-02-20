@@ -29,6 +29,10 @@ RUN rm /usr/bin/addr2line && ln -s /usr/bin/addr2line-2.30 /usr/bin/addr2line \
   && rm /usr/bin/strings && ln -s /usr/bin/strings-2.30 /usr/bin/strings \
   && rm /usr/bin/strip && ln -s /usr/bin/strip-2.30 /usr/bin/strip
 
+ENV CC=/usr/lib/ccache/gcc
+ENV CXX=/usr/lib/ccache/g++
+ENV CCACHE_SLOPPINESS=pch_defines,time_macros
+
 RUN mkdir -p /mnt/nel
 
 WORKDIR /mnt/nel

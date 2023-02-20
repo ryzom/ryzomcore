@@ -5,7 +5,7 @@ RUN sed -i -e 's/archive\.ubuntu\.com/mirrors\.digitalocean\.com/' /etc/apt/sour
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   software-properties-common \
-  ninja-build curl wget build-essential \
+  ninja-build curl wget build-essential ccache \
   bison autoconf automake \
   libpng-dev \
   libjpeg-dev \
@@ -30,6 +30,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 \
   && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60 \
   && rm -rf /var/lib/apt/lists/*
+
+ENV CC=/usr/lib/ccache/gcc
+ENV CXX=/usr/lib/ccache/g++
+ENV CCACHE_SLOPPINESS=pch_defines,time_macros
 
 RUN mkdir -p /mnt/nel
 
