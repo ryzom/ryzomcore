@@ -9,7 +9,7 @@ jobs:
         sudo apt install -y software-properties-common
         # sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt update
-        sudo apt install cmake build-essential ninja-build -y
+        sudo apt install cmake build-essential ninja-build ccache -y
         sudo apt install gcc-8 g++-8 -y
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
@@ -29,11 +29,24 @@ jobs:
         sudo apt install libgsf-1-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
       displayName: 'Dependencies'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.OS)" | $(HashKey) | $(Date:ww)'
+        path: '$(HOME)/.ccache'
+        cacheHitVar: 'CCACHE_CACHE_RESTORED'
+      displayName: 'Cache ccache'
     - script: |
         mkdir build
         cmake --version
         cd build
-        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_LINKER_LAUNCHER=ccache -DCMAKE_C_LINKER_LAUNCHER=ccache \
+          -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON \
+          -DWITH_LUA51=OFF -DWITH_LUA52=ON \
+          -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
+          -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
+          -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
@@ -49,7 +62,7 @@ jobs:
         sudo apt update
         sudo apt install -y software-properties-common
         sudo apt update
-        sudo apt install cmake build-essential ninja-build -y
+        sudo apt install cmake build-essential ninja-build ccache -y
         sudo apt install bison autoconf automake -y
         sudo apt install libpng-dev -y
         sudo apt install libjpeg-dev -y
@@ -66,11 +79,24 @@ jobs:
         sudo apt install libgsf-1-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
       displayName: 'Dependencies'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.OS)" | $(HashKey) | $(Date:ww)'
+        path: '$(HOME)/.ccache'
+        cacheHitVar: 'CCACHE_CACHE_RESTORED'
+      displayName: 'Cache ccache'
     - script: |
         mkdir build
         cmake --version
         cd build
-        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_LINKER_LAUNCHER=ccache -DCMAKE_C_LINKER_LAUNCHER=ccache \
+          -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
+          -DWITH_LUA51=OFF -DWITH_LUA52=ON \
+          -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
+          -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
+          -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
@@ -90,7 +116,7 @@ jobs:
         sudo apt update
         sudo apt install -y software-properties-common
         sudo apt update
-        sudo apt install cmake build-essential ninja-build -y
+        sudo apt install cmake build-essential ninja-build ccache -y
         sudo apt install bison autoconf automake -y
         sudo apt install libpng-dev -y
         sudo apt install libjpeg-dev -y
@@ -107,11 +133,24 @@ jobs:
         sudo apt install libgsf-1-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
       displayName: 'Dependencies'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.OS)" | $(HashKey) | $(Date:ww)'
+        path: '$(HOME)/.ccache'
+        cacheHitVar: 'CCACHE_CACHE_RESTORED'
+      displayName: 'Cache ccache'
     - script: |
         mkdir build
         cmake --version
         cd build
-        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_LINKER_LAUNCHER=ccache -DCMAKE_C_LINKER_LAUNCHER=ccache \
+          -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
+          -DWITH_LUA51=OFF -DWITH_LUA52=ON \
+          -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
+          -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
+          -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
