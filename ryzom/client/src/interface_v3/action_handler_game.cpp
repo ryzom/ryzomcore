@@ -3819,21 +3819,37 @@ class CHandlerSetInterfaceScale : public IActionHandler
 		std::string s;
 		s = getParam(Params, "scale");
 		if (!s.empty()) {
-			float scale;
-			if (fromString(s, scale))
+			bool valid = false;
+			if (nlstricmp(s, "auto") == 0 || s == "0")
 			{
-				if (scale >= ClientCfg.InterfaceScale_min && scale <= ClientCfg.InterfaceScale_max)
+				valid = true;
+				ClientCfg.InterfaceScaleAuto = true;
+			}
+			else
+			{
+				float scale;
+				if (fromString(s, scale))
 				{
-					ClientCfg.InterfaceScale = scale;
-					ClientCfg.writeDouble("InterfaceScale", ClientCfg.InterfaceScale);
-
-					ClientCfg.IsInvalidated = true;
-					return;
+					if (scale >= ClientCfg.InterfaceScale_min && scale <= ClientCfg.InterfaceScale_max)
+					{
+						valid = true;
+						ClientCfg.InterfaceScale = scale;
+						ClientCfg.InterfaceScaleAuto = false;
+					}
 				}
+			}
+
+			if (valid)
+			{
+				ClientCfg.writeDouble("InterfaceScale", ClientCfg.InterfaceScale);
+				ClientCfg.writeBool("InterfaceScaleAuto", ClientCfg.InterfaceScaleAuto);
+				ClientCfg.IsInvalidated = true;
+				return;
 			}
 		}
 
 		string help = "/setuiscale "+toString("%.1f .. %.1f", ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
+		CInterfaceManager::getInstance()->displaySystemInfo("/setuiscale auto");
 		CInterfaceManager::getInstance()->displaySystemInfo(help);
 	}
 };
