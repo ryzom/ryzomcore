@@ -9,7 +9,7 @@ jobs:
         sudo apt install -y software-properties-common
         # sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt update
-        sudo apt install cmake build-essential -y
+        sudo apt install cmake build-essential ninja -y
         sudo apt install gcc-8 g++-8 -y
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
@@ -33,12 +33,12 @@ jobs:
         mkdir build
         cmake --version
         cd build
-        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
         cd build
-        make -j`nproc`
+        ninja -j`nproc`
       displayName: 'Make'
   - job: ubuntu20
     timeoutInMinutes: 120
@@ -49,7 +49,7 @@ jobs:
         sudo apt update
         sudo apt install -y software-properties-common
         sudo apt update
-        sudo apt install cmake build-essential -y
+        sudo apt install cmake build-essential ninja -y
         sudo apt install bison autoconf automake -y
         sudo apt install libpng-dev -y
         sudo apt install libjpeg-dev -y
@@ -70,12 +70,12 @@ jobs:
         mkdir build
         cmake --version
         cd build
-        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
         cd build
-        make -j`nproc`
+        ninja -j`nproc`
       displayName: 'Make'
     - script: |
         cd nel/tools/nel_unit_test
@@ -90,7 +90,7 @@ jobs:
         sudo apt update
         sudo apt install -y software-properties-common
         sudo apt update
-        sudo apt install cmake build-essential -y
+        sudo apt install cmake build-essential ninja -y
         sudo apt install bison autoconf automake -y
         sudo apt install libpng-dev -y
         sudo apt install libjpeg-dev -y
@@ -111,12 +111,12 @@ jobs:
         mkdir build
         cmake --version
         cd build
-        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
         cd build
-        make -j`nproc`
+        ninja -j`nproc`
       displayName: 'Make'
     - script: |
         cd nel/tools/nel_unit_test
