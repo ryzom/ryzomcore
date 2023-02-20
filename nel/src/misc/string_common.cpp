@@ -199,10 +199,10 @@ std::string mbcsToUtf8(const char *str, size_t len)
 	UINT codePage = GetACP();
 	// Windows 10 allows setting the local codepage to UTF-8
 	if (codePage == CP_UTF8) /* 65001 */
-		return str;
+		return len ? std::string(str, len) : str;
 	return winCpToCp(str, len, CP_ACP, CP_UTF8);
 #else
-	return str; /* no-op */
+	return len ? std::string(str, len) : str;
 #endif
 }
 
@@ -260,10 +260,10 @@ std::string utf8ToMbcs(const char *str, size_t len)
 	UINT codePage = GetACP();
 	// Windows 10 allows setting the local codepage to UTF-8
 	if (codePage == CP_UTF8) /* 65001 */
-		return str;
+		return len ? std::string(str, len) : str;
 	return winCpToCp(str, len, CP_UTF8, CP_ACP);
 #else
-	return str; /* no-op */
+	return len ? std::string(str, len) : str;
 #endif
 }
 

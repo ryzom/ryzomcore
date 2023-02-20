@@ -72,8 +72,20 @@ bool addressFromString(uint8 address[], const char *str, size_t len)
 		sockaddr.ss_family = AF_INET;
 		if (WSAStringToAddressW((LPWSTR)wstr.c_str(), AF_INET, NULL, (LPSOCKADDR)&sockaddr, &addressLen) != 0)
 		{
+			// Fallback to `inet_addr`
+			std::string lstr = NLMISC::utf8ToMbcs(str, len);
+			uint32 addr = inet_addr(lstr.c_str());
+
 			// Failed to parse
-			return false;
+			if (addr == INADDR_NONE)
+				return false;
+
+			// Convert to IPv4-mapped IPv6 address
+			memset(address, 0, 10);
+			address[10] = 0xFF;
+			address[11] = 0xFF;
+			memcpy(address + 12, &addr, 4);
+			return true;
 		}
 		else
 		{
@@ -92,29 +104,26 @@ bool addressFromString(uint8 address[], const char *str, size_t len)
 #else
 
 	// Parse using inet_pton
-	std::string strCopy(str, len); // Limit by length, not null character
-	if (inet_pton(AF_INET6, strCopy.c_str(), address) != 1)
+	std::string lstr = NLMISC::utf8ToMbcs(str, len); // Limit by length, not null character
+	if (inet_pton(AF_INET6, lstr.c_str(), address) != 1)
 	{
 		// Failed to parse as IPv6
 		// Try IPv4 format
-		if (inet_pton(AF_INET, strCopy.c_str(), &address[12]) != 1)
+		if (inet_pton(AF_INET, lstr.c_str(), &address[12]) != 1)
 		{
-			uint32 dec;
-			// Parse as dotless decimal IPv4, since it's valid under Windows
-			if (NLMISC::fromString(strCopy, dec))
-			{
-				memset(address, 0, 10);
-				address[10] = 0xFF;
-				address[11] = 0xFF;
-				address[12] = (dec >> 24) & 0xFF;
-				address[13] = (dec >> 16) & 0xFF;
-				address[14] = (dec >> 8) & 0xFF;
-				address[15] = dec & 0xFF;
-				return true;
-			}
+			// Fallback to `inet_addr`
+			uint32 addr = inet_addr(lstr.c_str());
 			
 			// Failed to parse
-			return false;
+			if (addr == INADDR_NONE)
+				return false;
+			
+			// Convert to IPv4-mapped IPv6 address
+			memset(address, 0, 10);
+			address[10] = 0xFF;
+			address[11] = 0xFF;
+			memcpy(address + 12, &addr, 4);
+			return true;
 		}
 		else
 		{
