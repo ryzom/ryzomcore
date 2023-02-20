@@ -3,8 +3,6 @@ jobs:
     timeoutInMinutes: 120
     pool:
       vmImage: 'ubuntu-18.04'
-    variables:
-      CCACHE_DIR: $(Pipeline.Workspace)/ccache
     steps:
     - script: |
         sudo apt update
@@ -31,19 +29,10 @@ jobs:
         sudo apt install libgsf-1-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
       displayName: 'Dependencies'
-    - task: Cache@2
-      inputs:
-        key: 'ccache | ubuntu18'
-        path: $(CCACHE_DIR)
-        cacheHitVar: 'CCACHE_CACHE_RESTORED'
-      displayName: 'Cache ccache'
     - script: |
         mkdir build
         cmake --version
         cd build
-        export CC="/usr/lib/ccache/gcc"
-        export CXX="/usr/lib/ccache/g++"
-        export CCACHE_SLOPPINESS=pch_defines,time_macros
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
@@ -60,8 +49,6 @@ jobs:
     timeoutInMinutes: 120
     pool:
       vmImage: 'ubuntu-20.04'
-    variables:
-      CCACHE_DIR: $(Pipeline.Workspace)/ccache
     steps:
     - script: |
         sudo apt update
@@ -84,19 +71,10 @@ jobs:
         sudo apt install libgsf-1-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
       displayName: 'Dependencies'
-    - task: Cache@2
-      inputs:
-        key: 'ccache | ubuntu20'
-        path: $(CCACHE_DIR)
-        cacheHitVar: 'CCACHE_CACHE_RESTORED'
-      displayName: 'Cache ccache'
     - script: |
         mkdir build
         cmake --version
         cd build
-        export CC="/usr/lib/ccache/gcc"
-        export CXX="/usr/lib/ccache/g++"
-        export CCACHE_SLOPPINESS=pch_defines,time_macros
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
@@ -117,8 +95,6 @@ jobs:
     timeoutInMinutes: 120
     pool:
       vmImage: 'ubuntu-22.04'
-    variables:
-      CCACHE_DIR: $(Pipeline.Workspace)/ccache
     steps:
     - script: |
         sudo apt update
@@ -141,19 +117,10 @@ jobs:
         sudo apt install libgsf-1-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
       displayName: 'Dependencies'
-    - task: Cache@2
-      inputs:
-        key: 'ccache | ubuntu22'
-        path: $(CCACHE_DIR)
-        cacheHitVar: 'CCACHE_CACHE_RESTORED'
-      displayName: 'Cache ccache'
     - script: |
         mkdir build
         cmake --version
         cd build
-        export CC="/usr/lib/ccache/gcc"
-        export CXX="/usr/lib/ccache/g++"
-        export CCACHE_SLOPPINESS=pch_defines,time_macros
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
