@@ -164,6 +164,12 @@ jobs:
         sudo apt install -y --no-install-recommends $(aptPackages)
       displayName: '(ubuntu) Dependencies'
       condition: eq(variables['Agent.JobName'], 'client ubuntu')
+    - task: Cache@2
+      inputs:
+        key: 'dxsdk'
+        path: 'C:/DXSDK'
+      condition: contains(variables['cmakeExtra'], 'DIRECT3D=ON')
+      displayName: '(windows) DirectX SDK Cache'
     - task: CmdLine@2
       inputs:
         script: |
@@ -174,8 +180,9 @@ jobs:
       condition: contains(variables['cmakeExtra'], 'DIRECT3D=ON')
     - task: Cache@2
       inputs:
-        key: 'hunter321b-$(releaseName)'
+        key: 'hunter | $(releaseName) | "$(Agent.OS)"'
         path: '$(Pipeline.Workspace)/.hunter/_Base/Cache'
+      displayName: 'Hunter Cache'
     - task: CMake@1
       displayName: 'Configure'
       inputs:
