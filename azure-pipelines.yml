@@ -173,9 +173,11 @@ jobs:
     - task: CmdLine@2
       inputs:
         script: |
-          aria2c https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
-          7z x DXSDK_Jun10.exe -oC:\ -r -y
-          del DXSDK_Jun10.exe
+          IF NOT EXIST C:\DXSDK (
+            aria2c https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
+            7z x DXSDK_Jun10.exe -oC:\ -r -y
+            del DXSDK_Jun10.exe
+          )
       displayName: '(windows) DirectX SDK'
       condition: contains(variables['cmakeExtra'], 'DIRECT3D=ON')
     - task: Cache@2
