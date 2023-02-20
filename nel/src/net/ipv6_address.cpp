@@ -45,13 +45,17 @@ namespace /* anonymous */ {
 
 bool addressFromString(uint8 address[], const char *str, size_t len)
 {
-	// Single value "0" may be used to specify null address
-	if (len < 2)
+	// Empty value may be used to specify null address
+	// Text "null", or just any text starting with 'n', may also be used to specify null address
+	if (str[0] == '\0' || str[0] == 'n')
 		return false;
 
-	// Text "null", or just any text starting with 'n', may also be used to specify null address
-	if (str[0] == 'n')
-		return false;
+	// Strip excess square brackets
+	if (str[0] == '[' && str[len - 1] == ']')
+	{
+		++str;
+		len -= 2;
+	}
 
 	CSock::initNetwork();
 
@@ -61,11 +65,12 @@ bool addressFromString(uint8 address[], const char *str, size_t len)
 	CIPv6Address::TSockAddrStorage sockaddr;
 	sockaddr.ss_family = AF_INET6;
 	INT addressLen = sizeof(sockaddr);
-	if (WSAStringToAddressW((LPWSTR)NLMISC::utf8ToWide(str, len).c_str(), AF_INET6, NULL, (LPSOCKADDR)&sockaddr, &addressLen) != 0)
+	std::wstring wstr = NLMISC::utf8ToWide(str, len);
+	if (WSAStringToAddressW((LPWSTR)wstr.c_str(), AF_INET6, NULL, (LPSOCKADDR)&sockaddr, &addressLen) != 0)
 	{
 		// Failed to parse as IPv6, try IPv4 format
 		sockaddr.ss_family = AF_INET;
-		if (WSAStringToAddressW((LPWSTR)NLMISC::utf8ToWide(str, len).c_str(), AF_INET, NULL, (LPSOCKADDR)&sockaddr, &addressLen) != 0)
+		if (WSAStringToAddressW((LPWSTR)wstr.c_str(), AF_INET, NULL, (LPSOCKADDR)&sockaddr, &addressLen) != 0)
 		{
 			// Failed to parse
 			return false;
@@ -87,11 +92,12 @@ bool addressFromString(uint8 address[], const char *str, size_t len)
 #else
 
 	// Parse using inet_pton
-	if (inet_pton(AF_INET6, str, address) != 1)
+	std::string strCopy(str, len); // Limit by length, not null character
+	if (inet_pton(AF_INET6, strCopy.c_str(), address) != 1)
 	{
 		// Failed to parse as IPv6
 		// Try IPv4 format
-		if (inet_pton(AF_INET, str, &address[12]) != 1)
+		if (inet_pton(AF_INET, strCopy.c_str(), &address[12]) != 1)
 		{
 			// Failed to parse
 			return false;
@@ -266,7 +272,10 @@ bool CIPv6Address::set(const uint8 *addr, size_t len)
 		memcpy(&m_Address[12], addr, 4);
 		m_Valid = true;
 	}
-	m_Valid = false;
+	else
+	{
+		m_Valid = false;
+	}
 	return m_Valid;
 }
 
@@ -291,7 +300,7 @@ std::string CIPv6Address::toIPv4String() const
 		return nlstr("null");
 	}
 
-	return NLMISC::wideToUtf8(addressStr, addressStrLen);
+	return NLMISC::wideToUtf8(addressStr, addressStrLen - 1);
 
 #else
 
@@ -329,7 +338,7 @@ std::string CIPv6Address::toIPv6String() const
 		return nlstr("null");
 	}
 
-	return NLMISC::wideToUtf8(addressStr, addressStrLen);
+	return NLMISC::wideToUtf8(addressStr, addressStrLen - 1);
 
 #else
 

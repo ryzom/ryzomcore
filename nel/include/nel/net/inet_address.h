@@ -59,11 +59,13 @@ public:
 	CInetAddress(bool any);
 
 	/// Alternate constructor (calls setByName())
-	CInetAddress(const std::string &hostName, uint16 port);
+	CInetAddress(const std::string &hostname, uint16 port);
+	CInetAddress(const char *hostname, uint16 port);
 
 	/// Alternate constructor (calls setByName())
 	/// example: CInetAddress("www.nevrax.com:80")
 	CInetAddress(const std::string &hostnameAndPort);
+	CInetAddress(const char *hostnameAndPort);
 
 	/// From CIPv6Address
 	CInetAddress(const CIPv6Address &ipv6Address, uint16 port);
@@ -74,11 +76,14 @@ public:
 	/// Assignment operator
 	CInetAddress &operator=(const CInetAddress &other);
 
-	/// Comparison == operator
 	inline bool operator==(const CInetAddress &other) const;
-
-	/// Comparison < operator
+	inline bool operator!=(const CInetAddress &other) const { return !(*this == other); }
 	inline bool operator<(const CInetAddress &other) const;
+	inline bool operator>(const CInetAddress &other) const { return other < *this; }
+	inline bool operator<=(const CInetAddress &other) const;
+	inline bool operator>=(const CInetAddress &other) const { return other <= *this; }
+	inline operator bool() const { return isValid(); }
+	inline bool operator!() const { return !isValid(); }
 
 	/// Destructor
 	~CInetAddress();
@@ -208,6 +213,18 @@ inline bool CInetAddress::operator<(const CInetAddress &other) const
 	else
 	{
 		return m_Address < other.m_Address;
+	}
+}
+
+inline bool CInetAddress::operator<=(const CInetAddress &other) const
+{
+	if (m_Port != other.m_Port)
+	{
+		return m_Port < other.m_Port;
+	}
+	else
+	{
+		return m_Address <= other.m_Address;
 	}
 }
 

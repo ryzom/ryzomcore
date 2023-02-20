@@ -132,7 +132,7 @@ std::string winWideToCp(const wchar_t *str, size_t len, UINT cp)
 		return std::string();
 	}
 
-	std::string res = tmp;
+	std::string res(tmp, (size_t)tmpLen - 1);
 	_freea(tmp);
 	return res;
 }
@@ -183,7 +183,7 @@ std::wstring winCpToWide(const char *str, size_t len, UINT cp)
 		return std::wstring();
 	}
 
-	std::wstring res = tmp;
+	std::wstring res(tmp, (size_t)tmpLen - 1);
 	_freea(tmp);
 	return res;
 }

@@ -112,11 +112,18 @@ CInetAddress::CInetAddress(const in6_addr *ip, const char *hostname)
 /*
  * Alternate constructor (calls setByName())
  */
-CInetAddress::CInetAddress(const std::string &hostName, uint16 port)
+CInetAddress::CInetAddress(const std::string &hostname, uint16 port)
 {
 	init();
-	setPort(port);
-	setByName(hostName);
+	setByName(hostname);
+	m_Port = port;
+}
+
+CInetAddress::CInetAddress(const char *hostname, uint16 port)
+{
+	init();
+	setByName(hostname);
+	m_Port = port;
 }
 
 /*
@@ -126,6 +133,12 @@ CInetAddress::CInetAddress(const std::string &hostNameAndPort)
 {
 	init();
 	setNameAndPort(hostNameAndPort);
+}
+
+CInetAddress::CInetAddress(const char *hostnameAndPort)
+{
+	init();
+	setNameAndPort(hostnameAndPort);
 }
 
 CInetAddress::CInetAddress(const CIPv6Address &ipv6Address, uint16 port)
@@ -176,9 +189,19 @@ void CInetAddress::parseNameAndPort(std::string &hostname, uint16 &port, const s
 	// Sets hostname and port (ex: www.nevrax.com:80, 192.168.0.2:80, [::1]:80)
 	string::size_type pos6end = hostnameAndPort.find_last_of(']');
 	string::size_type pos = hostnameAndPort.find_last_of(':');
-	if (pos != string::npos && (pos6end == string::npos || pos > pos6end))
+	if (pos != string::npos
+		&& ((pos6end == string::npos && pos == hostnameAndPort.find(':')) || pos > pos6end)
+	    && (pos == 0 || hostnameAndPort[pos - 1] != ':')
+		&& (hostnameAndPort.find('.', pos) == string::npos))
 	{
-		fromString(hostnameAndPort.substr(pos + 1), port);
+		if (pos + 1 < hostnameAndPort.size())
+		{
+			fromString(hostnameAndPort.substr(pos + 1), port);
+		}
+		else
+		{
+			port = 0;
+		}
 		if (pos6end != string::npos)
 		{
 			string::size_type pos6begin = hostnameAndPort.find_first_of('[');

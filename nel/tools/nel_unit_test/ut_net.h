@@ -22,6 +22,7 @@
 #include "ut_net_layer3.h"
 #include "ut_net_message.h"
 #include "ut_net_module.h"
+#include "ut_net_address.h"
 // Add a line here when adding a new test CLASS
 
 struct CUTNet : public Test::Suite
@@ -31,6 +32,7 @@ struct CUTNet : public Test::Suite
 		add(std::auto_ptr<Test::Suite>(new CUTNetLayer3));
 		add(std::auto_ptr<Test::Suite>(new CUTNetMessage));
 		add(std::auto_ptr<Test::Suite>(new CUTNetModule));
+		add(std::auto_ptr<Test::Suite>(new CUTNetAddress));
 		// Add a line here when adding a new test CLASS
 	}
 };

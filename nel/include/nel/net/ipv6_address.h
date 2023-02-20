@@ -80,6 +80,12 @@ public:
 	{
 	}
 
+	// Constructs an address from a string.
+	CIPv6Address(const char *str)
+	    : m_Valid(set(str))
+	{
+	}
+
 	// Constructs an address from a binary address
 	// IPv4 is 4 bytes, IPv6 is 16 bytes
 	CIPv6Address(const uint8 *addr, size_t len)
