@@ -237,13 +237,21 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 	// Printf ?
 	if (consoleMode)
 	{
+#ifndef NL_OS_WINDOWS
 		// we don't use cout because sometimes, it crashs because cout isn't already init, printf doesn t crash.
 		if (!str.empty())
 			printf ("%s", str.c_str());
 
 		if (!args.CallstackAndLog.empty())
 			printf ("%s", args.CallstackAndLog.c_str());
+#else
+		// we don't use cout because sometimes, it crashs because cout isn't already init, printf doesn t crash.
+		if (!str.empty())
+			wprintf(L"%s", nlUtf8ToWide(str));
 
+		if (!args.CallstackAndLog.empty())
+			wprintf(L"%s", nlUtf8ToWide(args.CallstackAndLog));
+#endif
 		fflush(stdout);
 	}
 
@@ -470,19 +478,26 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 
 	str += message;
 
-	if (_FilePointer > (FILE*)1)
+	if (_FilePointer > (FILE *)1)
 	{
 		// if the file is too big (>5mb), rename it and create another one (check only after 20 lines to speed up)
 		if (_LastLogSizeChecked++ > 20)
 		{
-		  int res = ftell (_FilePointer);
-		  if (res > 5*1024*1024)
-		    {
-			fclose (_FilePointer);
-			rename (_FileName.c_str(), CFile::findNewFile (_FileName).c_str());
-			_FilePointer = (FILE*) 1;
-			_LastLogSizeChecked = 0;
-		    }
+			int res = ftell(_FilePointer);
+			if (res > 5 * 1024 * 1024)
+			{
+				fclose(_FilePointer);
+				std::string newFileName = CFile::findNewFile(_FileName);
+#ifndef NL_OS_WINDOWS
+				if (rename(_FileName.c_str(), CFile::findNewFile(_FileName).c_str()) != 0)
+					printf("Can't rename the log file '%s' to '%s'", _FileName.c_str(), CFile::findNewFile(_FileName).c_str());
+#else
+				if (_wrename(nlUtf8ToWide(_FileName), nlUtf8ToWide(newFileName)) != 0)
+					wprintf(L"Can't rename the log file '%s' to '%s'", nlUtf8ToWide(_FileName), nlUtf8ToWide(newFileName));
+#endif
+				_FilePointer = (FILE *)1;
+				_LastLogSizeChecked = 0;
+			}
 		}
 	}
 
@@ -490,7 +505,11 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 	{
 		_FilePointer = nlfopen (_FileName, "at");
 		if (_FilePointer == NULL)
+#ifndef NL_OS_WINDOWS
 			printf ("Can't open log file '%s': %s\n", _FileName.c_str(), strerror (errno));
+#else
+			wprintf(L"Can't open log file '%s': %s\n", nlUtf8ToWide(_FileName), _wcserror(errno));
+#endif
 	}
 
 	if (_FilePointer != 0)
@@ -501,7 +520,11 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 
 			if (fwrite(hs, strlen(hs), 1, _FilePointer) != 1)
 			{
+#ifndef NL_OS_WINDOWS
 				printf("Unable to write header: %s\n", hs);
+#else
+				wprintf(L"Unable to write header: %s\n", nlUtf8ToWide(hs));
+#endif
 			}
 
 			_NeedHeader = false;
@@ -511,7 +534,11 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 		{
 			if (fwrite(str.c_str(), str.size(), 1, _FilePointer) != 1)
 			{
+#ifndef NL_OS_WINDOWS
 				printf("Unable to write string: %s\n", str.c_str());
+#else
+				wprintf(L"Unable to write string: %s\n", nlUtf8ToWide(str));
+#endif
 			}
 		}
 
@@ -519,7 +546,11 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 		{
 			if (fwrite(args.CallstackAndLog.c_str(), args.CallstackAndLog.size(), 1, _FilePointer) != 1)
 			{
+#ifndef NL_OS_WINDOWS
 				printf("Unable to write call stack: %s\n", args.CallstackAndLog.c_str());
+#else
+				wprintf(L"Unable to write call stack: %s\n", nlUtf8ToWide(args.CallstackAndLog));
+#endif
 			}
 		}
 
