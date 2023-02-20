@@ -39,9 +39,9 @@ jobs:
         mkdir build
         cmake --version
         cd build
+        export CC="/usr/lib/ccache/gcc"
+        export CXX="/usr/lib/ccache/g++"
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_LINKER_LAUNCHER=ccache -DCMAKE_C_LINKER_LAUNCHER=ccache \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
           -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
@@ -89,9 +89,9 @@ jobs:
         mkdir build
         cmake --version
         cd build
+        export CC="/usr/lib/ccache/gcc"
+        export CXX="/usr/lib/ccache/g++"
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_LINKER_LAUNCHER=ccache -DCMAKE_C_LINKER_LAUNCHER=ccache \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
           -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
@@ -143,9 +143,9 @@ jobs:
         mkdir build
         cmake --version
         cd build
+        export CC="/usr/lib/ccache/gcc"
+        export CXX="/usr/lib/ccache/g++"
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_LINKER_LAUNCHER=ccache -DCMAKE_C_LINKER_LAUNCHER=ccache \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
           -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
@@ -235,7 +235,6 @@ jobs:
           -DHUNTER_CONFIGURATION_TYPES=Release
           -DHUNTER_ENABLED=ON
           -DHUNTER_ROOT=$(Pipeline.Workspace)/.hunter
-          -DHUNTER_STATUS_DEBUG=ON
           -DWITH_DRIVER_OPENAL=ON
           -DWITH_DRIVER_OPENGL=ON
           -DWITH_INSTALL_LIBRARIES=OFF
