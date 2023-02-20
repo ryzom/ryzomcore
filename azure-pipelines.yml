@@ -9,7 +9,7 @@ jobs:
         sudo apt install -y software-properties-common
         # sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt update
-        sudo apt install cmake build-essential ninja -y
+        sudo apt install cmake build-essential ninja-build -y
         sudo apt install gcc-8 g++-8 -y
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
@@ -49,7 +49,7 @@ jobs:
         sudo apt update
         sudo apt install -y software-properties-common
         sudo apt update
-        sudo apt install cmake build-essential ninja -y
+        sudo apt install cmake build-essential ninja-build -y
         sudo apt install bison autoconf automake -y
         sudo apt install libpng-dev -y
         sudo apt install libjpeg-dev -y
@@ -90,7 +90,7 @@ jobs:
         sudo apt update
         sudo apt install -y software-properties-common
         sudo apt update
-        sudo apt install cmake build-essential ninja -y
+        sudo apt install cmake build-essential ninja-build -y
         sudo apt install bison autoconf automake -y
         sudo apt install libpng-dev -y
         sudo apt install libjpeg-dev -y
