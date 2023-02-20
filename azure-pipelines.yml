@@ -31,7 +31,7 @@ jobs:
       displayName: 'Dependencies'
     - task: Cache@2
       inputs:
-        key: 'ccache | "$(Agent.OS)" | $(HashKey) | $(Date:ww)'
+        key: 'ccache | ubuntu18'
         path: '$(HOME)/.ccache'
         cacheHitVar: 'CCACHE_CACHE_RESTORED'
       displayName: 'Cache ccache'
@@ -81,7 +81,7 @@ jobs:
       displayName: 'Dependencies'
     - task: Cache@2
       inputs:
-        key: 'ccache | "$(Agent.OS)" | $(HashKey) | $(Date:ww)'
+        key: 'ccache | ubuntu20'
         path: '$(HOME)/.ccache'
         cacheHitVar: 'CCACHE_CACHE_RESTORED'
       displayName: 'Cache ccache'
@@ -135,7 +135,7 @@ jobs:
       displayName: 'Dependencies'
     - task: Cache@2
       inputs:
-        key: 'ccache | "$(Agent.OS)" | $(HashKey) | $(Date:ww)'
+        key: 'ccache | ubuntu22'
         path: '$(HOME)/.ccache'
         cacheHitVar: 'CCACHE_CACHE_RESTORED'
       displayName: 'Cache ccache'
