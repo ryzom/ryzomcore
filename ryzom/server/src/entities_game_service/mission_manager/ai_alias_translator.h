@@ -299,7 +299,7 @@ inline const NLMISC::CEntityId& CAIAliasTranslator::getEntityId(TAIAlias aiid) c
 	CHashMap< uint, NLMISC::CEntityId >::const_iterator it = _HashTableAiId.find(aiid);
 	if(  it != _HashTableAiId.end() )
 		return (*it).second;
-#ifndef FINAL_VERSION
+#if !FINAL_VERSION
 	nlerror( "Illegal call to getEntityId on entity with no alias" ); // see 
 #endif
 	return NLMISC::CEntityId::Unknown;

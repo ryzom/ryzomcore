@@ -154,7 +154,7 @@ void sendUDP (CUdpSock *client, const uint8 *packet, uint32 packetSize, const CI
 	nlassert (packet != NULL);
 	nlassert (packetSize > 0);
 
-#ifdef FINAL_VERSION
+#if !FINAL_VERSION
 	if ((float)rand()/(float)(RAND_MAX)*100.0f >= PacketLoss)
 	{
 		sint32 lag = Lag /*+ (rand()%40) - 20*/;// void disordering
@@ -201,7 +201,7 @@ void sendUDP (CUdpSock *client, const uint8 *packet, uint32 packetSize, const CI
 			{
 				sendUDPNow (client, packet, packetSize, addr);
 			}
-#ifdef FINAL_VERSION
+#if !FINAL_VERSION
 		}
 	}
 #endif

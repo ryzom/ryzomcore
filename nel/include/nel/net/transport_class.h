@@ -510,7 +510,7 @@ inline NLNET::CMessage &CTransportClass::write ()
 	nlassert (Init);
 	nlassert (Mode == 0);
 
-#ifndef FINAL_VERSION
+#if !FINAL_VERSION
 	// Did the programmer forget to register the transport class? Forbid sending then.
 	nlassert( LocalRegisteredClass.find( className() ) != LocalRegisteredClass.end() );
 #endif
