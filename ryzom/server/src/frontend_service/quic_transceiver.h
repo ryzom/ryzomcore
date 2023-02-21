@@ -175,53 +175,6 @@ private:
 
 	/// Generates a token address to identify the connection with existing code
 	NLNET::CInetAddress generateTokenAddr();
-
-	// public:
-	//	/// Constructor
-	//	CFEReceiveTask(uint16 firstAcceptablePort, uint16 lastAcceptablePort, uint32 msgsize);
-	//
-	//	/// Destructor
-	//	~CFEReceiveTask();
-	//
-	//	/// Run
-	//	virtual void run();
-	//
-	//	/// Set new write queue (thread-safe because mutexed)
-	//	void setWriteQueue(NLMISC::CBufFIFO *writequeue);
-	//
-	//	/// Require exit (thread-safe because atomic assignment)
-	//	void requireExit() { _ExitRequired = true; }
-	//
-	//	/// Return the number of rejected datagrams since the last call (thread-safe because atomic assignment)
-	//	uint nbNewRejectedDatagrams()
-	//	{
-	//		uint nb = _NbRejectedDatagrams;
-	//		_NbRejectedDatagrams = 0;
-	//		return nb;
-	//	}
-	//
-	// private:
-	//	/// Datagram length
-	//	uint _DatagramLength;
-	//
-	//	/// Received message
-	//	TReceivedMessage _ReceivedMessage;
-	//
-	//	/// Write queue access
-	//	NLMISC::CSynchronized<NLMISC::CBufFIFO *> _WriteQueue;
-	//
-	//	/// Number of datagrams not copied because too big
-	//	volatile uint _NbRejectedDatagrams;
-	//
-	//	/// Exit required
-	//	volatile bool _ExitRequired;
-	//
-	// public:
-	//	/// External datagram socket
-	//	NLNET::CUdpSock *DataSock;
-	//
-	//	/// The date of the last UPD packet recevied
-	//	static volatile uint32 LastUDPPacketReceived;
 };
 
 #endif /* NL_QUIC_TRANSCEIVER_H */
