@@ -259,11 +259,16 @@ game.updateRpItemsUrl = nil
 game.wantedRpLeftItem = ""
 game.wantedRpRightItem = ""
 game.wantedRpTargets = {}
+game.wantedRpPositions = {}
 
 function game:addRequireRpItemsPosition(x, y, id)
 	local sx = tostring(math.floor(x/10))
 	local sy = tostring(math.floor(y/10))
 	game.wantedRpPositions[sx..":"..sy] = id
+end
+
+function game:addRequireRpItems(left, target, mode, id)
+	game.wantedRpTargets[left..":"..target..":"..mode] = id
 end
 
 game.usedRpLeftItem  = "_"
@@ -295,8 +300,8 @@ function game:updateRpItems()
 			mode = tostring(getTargetMode())
 		end
 
+		local html = getUI("ui:interface:rpitems_actions"):find("html")
 		for k, v in pairs(game.wantedRpTargets) do
-			local html = getUI("ui:interface:rpitems_actions"):find("html")
 			local a = html:find("action"..v)
 			if a then
 				if string.find(left..":"..target..":"..mode, k) or string.find(left..":"..target..":*", k) then
@@ -306,6 +311,25 @@ function game:updateRpItems()
 					a:find("but").frozen = true
 					a:find("text").alpha = 155
 				end
+			end
+		end
+	end
+end
+
+function game:checkRpItemsPosition()
+	local x,y,z = getPlayerPos()
+	local sx = tostring(math.floor(x/10))
+	local sy = tostring(math.floor(y/10))
+	local html = getUI("ui:interface:rpitems_actions"):find("html")
+	for k, v in pairs(game.wantedRpPositions) do
+		local a = html:find("action"..v)
+		if a then
+			if string.find(sx..":"..sy, k) then
+				a:find("but").frozen = false
+				a:find("text").alpha = 255
+			else
+				a:find("but").frozen = true
+				a:find("text").alpha = 155
 			end
 		end
 	end
