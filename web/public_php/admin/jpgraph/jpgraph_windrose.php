@@ -570,7 +570,7 @@ class WindrosePlot {
         $this->iCircGridWeight = 1;
     }
 
-    function _ThickCircle($aImg,$aXC,$aYC,$aRad,$aWeight=2,$aColor) {
+    function _ThickCircle($aImg,$aXC,$aYC,$aRad,$aWeight,$aColor) {
 
         $aImg->SetColor($aColor);
         $aRad *= 2 ;

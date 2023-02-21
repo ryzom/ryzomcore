@@ -126,7 +126,7 @@ class Image {
         }
 
         $this->img = @imagecreatetruecolor($aWidth, $aHeight);
-        if( $this->img < 1 ) {
+        if( !$this->img ) {
             JpGraphError::RaiseL(25126);
             //die("Can't create truecolor image. Check that you really have GD2 library installed.");
         }
@@ -188,7 +188,7 @@ class Image {
         else {
             $f = 'imagecopyresampled';
         }
-        $f($aToHdl,$aFromHdl,$aToX,$aToY,$aFromX,$aFromY, $aWidth,$aHeight,$aw,$ah);
+        $f($aToHdl,$aFromHdl,(int)$aToX,(int)$aToY,(int)$aFromX,(int)$aFromY, (int)$aWidth,(int)$aHeight,(int)$aw,(int)$ah);
     }
 
     function Copy($fromImg,$toX,$toY,$fromX,$fromY,$toWidth,$toHeight,$fromWidth=-1,$fromHeight=-1) {
@@ -285,7 +285,7 @@ class Image {
 
     // Get the specific height for a text string
     function GetTextHeight($txt="",$angle=0) {
-        $tmp = preg_split('/\n/',$txt);
+        $tmp = preg_split('/\n/',$txt ?: '');
         $n = count($tmp);
         $m=0;
         for($i=0; $i< $n; ++$i) {
@@ -333,7 +333,7 @@ class Image {
     // etxt width.
     function GetTextWidth($txt,$angle=0) {
 
-        $tmp = preg_split('/\n/',$txt);
+        $tmp = preg_split('/\n/',$txt ?: '');
         $n = count($tmp);
         if( $this->font_family <= FF_FONT2+1 ) {
 
@@ -648,7 +648,7 @@ class Image {
         $use_font = $this->font_family;
 
         if( $dir==90 ) {
-            imagestringup($this->img,$use_font,$x,$y,$txt,$this->current_color);
+            imagestringup($this->img,$use_font,(int)$x,(int)$y,$txt,$this->current_color);
             $aBoundingBox = array(round($x),round($y),round($x),round($y-$w),round($x+$h),round($y-$w),round($x+$h),round($y));
             if( $aDebug ) {
                 // Draw bounding box
@@ -658,7 +658,7 @@ class Image {
             }
         }
         else {
-            if( preg_match('/\n/',$txt) ) {
+            if( preg_match('/\n/',$txt ?: '') ) {
                 $tmp = preg_split('/\n/',$txt);
                 for($i=0; $i < count($tmp); ++$i) {
                     $w1 = $this->GetTextWidth($tmp[$i]);
@@ -675,7 +675,7 @@ class Image {
             }
             else {
                 //Put the text
-                imagestring($this->img,$use_font,$x,$y-$h+1,$txt,$this->current_color);
+                imagestring($this->img,$use_font,(int)$x,(int)($y-$h+1),$txt ?: '',$this->current_color);
             }
             if( $aDebug ) {
                 // Draw the bounding rectangle and the bounding box
@@ -931,7 +931,7 @@ class Image {
                     // Do nothing the text is drawn at baseline by default
                 }
             } 
-            ImageTTFText ($this->img, $this->font_size, $dir, $x, $y,
+            ImageTTFText ($this->img, $this->font_size, $dir, (int)$x, (int)$y,
                           $this->current_color,$this->font_file,$txt);
 
             // Calculate and return the co-ordinates for the bounding box
@@ -1038,7 +1038,7 @@ class Image {
                 $xl -= $bbox[0]/2;
                 $yl = $y - $yadj;
                 //$xl = $xl- $xadj;
-                ImageTTFText($this->img, $this->font_size, $dir, $xl, $yl-($h-$fh)+$fh*$i,
+                ImageTTFText($this->img, $this->font_size, $dir, (int)$xl, (int)($yl-($h-$fh)+$fh*$i),
                              $this->current_color,$this->font_file,$tmp[$i]);
 
                // echo "xl=$xl,".$tmp[$i]." <br>";
@@ -1437,7 +1437,11 @@ class Image {
         }
         $old = $this->line_weight;
         imagesetthickness($this->img,1);
-        imagefilledpolygon($this->img,$pts,count($pts)/2,$this->current_color);
+        if (CheckPHPVersion('8.1.0')) {
+            imagefilledpolygon($this->img,$pts,$this->current_color);
+        } else {
+            imagefilledpolygon($this->img,$pts,count($pts)/2,$this->current_color);
+        }
         $this->line_weight = $old;
         imagesetthickness($this->img,$old);
     }
@@ -1768,7 +1772,11 @@ class Image {
         $p4y=ceil(($y1 - $dist_y));
 
         $array=array($p1x,$p1y,$p2x,$p2y,$p3x,$p3y,$p4x,$p4y);
-        imagefilledpolygon ( $im, $array, (count($array)/2), $color );
+        if (CheckPHPVersion('8.1.0')) {
+            imagefilledpolygon ( $im, $array, $color );
+        } else {
+            imagefilledpolygon ( $im, $array, (count($array)/2), $color );
+        }
 
         // for antialias
         imageline($im, $p1x, $p1y, $p2x, $p2y, $color);
@@ -1829,7 +1837,11 @@ class Image {
         } 
 
         imagesetthickness($im, 1);
-        imagefilledpolygon($im, $pts,count($pts)/2, $color);
+        if (CheckPHPVersion('8.1.0')) {
+            imagefilledpolygon($im, $pts, $color);
+        } else {
+            imagefilledpolygon($im, $pts,count($pts)/2, $color);
+        }
 
 
         $weight *= 2;
