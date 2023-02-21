@@ -108,7 +108,7 @@ public:
 	virtual void	run();
 
 	/// Set new write queue (thread-safe because mutexed)
-	void			setWriteQueue( NLMISC::CBufFIFO *writequeue );
+	CBufFIFO *swapWriteQueue(NLMISC::CBufFIFO *writeQueue);
 
 	/// Require exit (thread-safe because atomic assignment)
 	void			requireExit() { _ExitRequired = true; }

@@ -47,6 +47,7 @@ class CHistory;
 class CVision;
 class CVisionData;
 
+class CQuicTransceiver;
 
 /// Type of remove list
 typedef std::list< std::pair<TClientId,uint8> > TClientsToRemove;
@@ -94,11 +95,11 @@ public:
 		EntityToClient(),
 		_ReceiveTask(NULL),
 		_ReceiveThread(NULL),
+		m_QuicTransceiver(NULL),
 		_ClientMap(),
 		_ClientIdCont(NULL),
-		_Queue1(),
-		_Queue2(),
-		_CurrentReadQueue(NULL),
+		m_CurrentReadQueue(NULL),
+		m_CurrentQuicReadQueue(NULL),
 		_CurrentInMsg(),
 		_RcvCounter(0),
 		_RcvBytes(0),
@@ -214,6 +215,9 @@ private:
 
 	/// Receive thread
 	NLMISC::IThread		*_ReceiveThread;
+	
+	/// QUIC receiver and sender
+	CQuicTransceiver	*m_QuicTransceiver;
 
 	/// Client map by address
 	THostMap			_ClientMap;
@@ -221,14 +225,13 @@ private:
 	/// Client map by id (belonging to the send subsystem)
 	TClientIdCont		*_ClientIdCont;
 
-	/// First queue
-	NLMISC::CBufFIFO	_Queue1;
-
-	/// Second queue
-	NLMISC::CBufFIFO	_Queue2;
+	/// Queues
+	NLMISC::CBufFIFO	m_Queues[4];
 
 	/// Current read queue
-	NLMISC::CBufFIFO	*_CurrentReadQueue;
+	NLMISC::CBufFIFO	*m_CurrentReadQueue;
+	
+	NLMISC::CBufFIFO	*m_CurrentQuicReadQueue;
 
 	/// Current incoming message
 	TReceivedMessage	*_CurrentInMsg;

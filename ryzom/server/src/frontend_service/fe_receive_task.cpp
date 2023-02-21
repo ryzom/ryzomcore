@@ -205,9 +205,12 @@ void CFEReceiveTask::run()
 /*
  * Set new write queue
  */
-void CFEReceiveTask::setWriteQueue( CBufFIFO *writequeue )
+CBufFIFO *CFEReceiveTask::swapWriteQueue(CBufFIFO *writeQueue)
 {
-	CSynchronized<CBufFIFO*>::CAccessor wq( &_WriteQueue );
-	wq.value() = writequeue;
+	CSynchronized<CBufFIFO *>::CAccessor wq(&_WriteQueue);
+	CBufFIFO *previous = wq.value();
+	wq.value() = writeQueue;
+	return previous;
 }
 
+/* end of file */

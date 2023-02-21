@@ -46,6 +46,7 @@
 
 #include "uid_impulsions.h"
 #include "id_impulsions.h"
+#include "quic_transceiver.h"
 
 #include "game_share/ryzom_entity_id.h"
 #include "game_share/system_message.h"
@@ -124,14 +125,21 @@ void CFeReceiveSub::init( uint16 firstAcceptableFrontendPort, uint16 lastAccepta
 	nlassert( (_ReceiveTask==NULL) && (_ReceiveThread==NULL) );
 
 	// Start external datagram socket
-	nlinfo( "FERECV: Starting external datagram socket" );
-	_ReceiveTask = new CFEReceiveTask( firstAcceptableFrontendPort, lastAcceptableFrontendPort, dgrammaxlength );
-	_CurrentReadQueue = &_Queue2;
-	_ReceiveTask->setWriteQueue( &_Queue1 );
-	nlassert( _ReceiveTask != NULL );
-	_ReceiveThread = IThread::create( _ReceiveTask );
-	nlassert( _ReceiveThread != NULL );
+	nlinfo("FERECV: Starting external datagram socket");
+	_ReceiveTask = new CFEReceiveTask(firstAcceptableFrontendPort, lastAcceptableFrontendPort, dgrammaxlength);
+	nlassert(_ReceiveTask != NULL);
+	m_CurrentReadQueue = &m_Queues[1];
+	_ReceiveTask->swapWriteQueue(&m_Queues[0]);
+	_ReceiveThread = IThread::create(_ReceiveTask);
+	nlassert(_ReceiveThread != NULL);
 	_ReceiveThread->start();
+
+	// Start QUIC transceiver
+	nlinfo("FERECV: Starting QUIC transceiver");
+	m_QuicTransceiver = new CQuicTransceiver(firstAcceptableFrontendPort - 5000, lastAcceptableFrontendPort - 5000, dgrammaxlength);
+	m_CurrentQuicReadQueue = &m_Queues[3];
+	m_QuicTransceiver->swapWriteQueue(&m_Queues[2]);
+	m_QuicTransceiver->start();
 
 	// Setup current message placeholder
 	_CurrentInMsg = new TReceivedMessage();
@@ -237,14 +245,32 @@ void CFeReceiveSub::readIncomingData()
 	}
 
 	// Read queue of messages received from clients
-	while ( ! _CurrentReadQueue->empty() )
+	_CurrentInMsg->AddrFrom.setNull(); // FIXME: QUIC
+	while (!m_CurrentQuicReadQueue->empty())
 	{
-		//nlinfo( "Read queue size = %u", _CurrentReadQueue->size() );
-		_CurrentReadQueue->front( _CurrentInMsg->data() );
-		_CurrentReadQueue->pop();
-		nlassert( ! _CurrentReadQueue->empty() );
-		_CurrentReadQueue->front( _CurrentInMsg->VAddrFrom );
-		_CurrentReadQueue->pop();
+		// nlinfo( "Read queue size = %u", _CurrentReadQueue->size() );
+		m_CurrentQuicReadQueue->front(_CurrentInMsg->data());
+		m_CurrentQuicReadQueue->pop();
+		nlassert(!m_CurrentQuicReadQueue->empty());
+		m_CurrentQuicReadQueue->front(_CurrentInMsg->VAddrFrom);
+		m_CurrentQuicReadQueue->pop();
+		// _CurrentInMsg->vectorToAddress(); // FIXME: QUIC
+
+#ifndef MEASURE_RECEIVE_TASK
+		handleIncomingMsg();
+#endif
+	}
+	
+	// _CurrentInMsg->AddrFrom.setNull(); // FIXME: QUIC
+	// Read queue of messages received from clients
+	while (!m_CurrentReadQueue->empty())
+	{
+		// nlinfo( "Read queue size = %u", m_CurrentReadQueue->size() );
+		m_CurrentReadQueue->front(_CurrentInMsg->data());
+		m_CurrentReadQueue->pop();
+		nlassert(!m_CurrentReadQueue->empty());
+		m_CurrentReadQueue->front(_CurrentInMsg->VAddrFrom);
+		m_CurrentReadQueue->pop();
 		_CurrentInMsg->vectorToAddress();
 
 #ifndef MEASURE_RECEIVE_TASK
@@ -299,18 +325,8 @@ void CFeReceiveSub::readIncomingData()
  */
 void CFeReceiveSub::swapReadQueues()
 {
-	if ( _CurrentReadQueue == &_Queue1 )
-	{
-		_CurrentReadQueue = &_Queue2;
-		_ReceiveTask->setWriteQueue( &_Queue1 );
-		//nlinfo( "** Write1 Read2 ** Read=%p Write=%p", &_Queue2, &_Queue1 );
-	}
-	else
-	{
-		_CurrentReadQueue = &_Queue1;
-		_ReceiveTask->setWriteQueue( &_Queue2 );
-		//nlinfo( "** Read1 Write2 ** Read=%p Write=%p", &_Queue1, &_Queue2 );
-	}
+	m_CurrentReadQueue = _ReceiveTask->swapWriteQueue(m_CurrentReadQueue);
+	m_CurrentQuicReadQueue = m_QuicTransceiver->swapWriteQueue(m_CurrentQuicReadQueue);
 }
 
 

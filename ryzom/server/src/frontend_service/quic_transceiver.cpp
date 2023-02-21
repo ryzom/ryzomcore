@@ -1,0 +1,447 @@
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#include "stdpch.h"
+#include "quic_transceiver.h"
+
+#include "nel/misc/mutex.h"
+#include "nel/misc/buf_fifo.h"
+#include "nel/misc/string_view.h"
+
+#include "config.h"
+
+#ifdef NL_MSQUIC_AVAILABLE
+#include <msquic.h>
+
+#define MsQuic m->Api
+
+using namespace NLMISC;
+using namespace NLNET;
+
+// This really hammers fast
+class CAtomicFlagLock
+{
+public:
+	CAtomicFlagLock(std::atomic_flag &flag)
+	    : m_Flag(flag)
+	{
+		while (m_Flag.test_and_set(std::memory_order_acquire))
+			;
+	}
+
+	~CAtomicFlagLock()
+	{
+		m_Flag.clear(std::memory_order_release);
+	}
+	
+private:
+	std::atomic_flag &m_Flag;
+};
+
+// This is a bit more relaxed
+class CAtomicFlagLockYield
+{
+public:
+	CAtomicFlagLockYield(std::atomic_flag &flag)
+		: m_Flag(flag)
+	{
+		while (m_Flag.test_and_set(std::memory_order_acquire))
+			std::this_thread::yield();
+	}
+
+	~CAtomicFlagLockYield()
+	{
+		m_Flag.clear(std::memory_order_release);
+	}
+
+private:
+	std::atomic_flag &m_Flag;
+};
+
+class CQuicTransceiverImpl
+{
+public:
+	const QUIC_API_TABLE *Api = null;
+	HQUIC Registration = null;
+	HQUIC Configuration = null;
+	HQUIC Listener = null;
+
+	std::atomic_flag BufferMutex = ATOMIC_FLAG_INIT;
+	NLMISC::CBufFIFO *Buffer = null;
+	
+	std::atomic<bool> Listening;
+
+	// Some salt for generating the token address
+	uint64 SaltA0 = (((uint64)std::random_device()()) << 32) | std::random_device()();
+	uint64 SaltA1 = (((uint64)std::random_device()()) << 32) | std::random_device()();
+	uint32 SaltB0 = std::random_device()();
+	uint32 SaltB1 = std::random_device()();
+	std::atomic<uint64> AddrA;
+	std::atomic<uint32> AddrB;
+
+	// IPv6 unique local address range to use as a token address for each connection
+	CInetAddress TokenSubnet = CInetAddress("[fdd5:d66b:8698::]:0");
+
+	static QUIC_STATUS listenerCallback(HQUIC listener, void *context, QUIC_LISTENER_EVENT *ev);
+	static QUIC_STATUS connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev);
+};
+
+CQuicTransceiver::CQuicTransceiver(uint32 msgsize)
+    : m(std::make_unique<CQuicTransceiverImpl>())
+    , m_MsgSize(msgsize)
+{
+	// Open library
+	QUIC_STATUS status = MsQuicOpenVersion(QUIC_API_VERSION_2, (const void **)&MsQuic);
+	if (QUIC_FAILED(status))
+	{
+		nlwarning("MsQuicOpenVersion failed with status 0x%x", status);
+		return;
+	}
+
+	// Registration, this creates the worker threads
+	QUIC_REGISTRATION_CONFIG regConfig = { 0 };
+	regConfig.AppName = "Ryzom Core (FES)";
+	regConfig.ExecutionProfile = QUIC_EXECUTION_PROFILE_LOW_LATENCY;
+	status = MsQuic->RegistrationOpen(&regConfig, &m->Registration);
+	if (QUIC_FAILED(status))
+	{
+		nlwarning("MsQuic->RegistrationOpen failed with status 0x%x", status);
+		release();
+		return;
+	}
+}
+
+CQuicTransceiver::~CQuicTransceiver()
+{
+	stop();
+	release();
+}
+
+void CQuicTransceiver::start(uint16 port)
+{
+	stop();
+
+	if (!MsQuic)
+	{
+		nlwarning("QUIC API not available");
+	}
+	
+	static const char *protocolName = "ryzomcore4";
+	static const QUIC_BUFFER alpn = { sizeof(protocolName) - 1, (uint8_t *)protocolName };
+
+	// Configuration, initialized in start, but destroyed on release only (may attempt more than once)
+	QUIC_STATUS status = QUIC_STATUS_SUCCESS;
+	if (!m->Configuration)
+	{
+		QUIC_SETTINGS settings = { 0 };
+		settings.DatagramReceiveEnabled = TRUE;
+		settings.IsSet.DatagramReceiveEnabled = TRUE;
+		settings.MigrationEnabled = TRUE;
+		settings.IsSet.MigrationEnabled = TRUE;
+		settings.PeerBidiStreamCount = 0;
+		settings.IsSet.PeerBidiStreamCount = TRUE;
+		settings.PeerUnidiStreamCount = 0; // TODO: Configured from msg.xml
+		settings.IsSet.PeerUnidiStreamCount = TRUE;
+		// settings.SendBufferingEnabled = TRUE;
+		// settings.IsSet.SendBufferingEnabled = TRUE;
+		// settings.GreaseQuicBitEnabled = TRUE;
+		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
+		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
+		if (QUIC_FAILED(status))
+		{
+			nlwarning("MsQuic->ConfigurationOpen failed with status 0x%x", status);
+			return;
+		}
+
+		// Server credentials
+		QUIC_CREDENTIAL_CONFIG credConfig;
+		memset(&credConfig, 0, sizeof(credConfig));
+		credConfig.Flags = QUIC_CREDENTIAL_FLAG_NO_CERTIFICATE_VALIDATION;
+		credConfig.Type = QUIC_CREDENTIAL_TYPE_NONE; // FIXME: Supposedly doesn't work on server
+		status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
+	}
+
+	// Open listener listening using MSQUIC on e.g. [::]:5000 (port)
+	QUIC_ADDR addr = { 0 };
+	QuicAddrSetFamily(&addr, QUIC_ADDRESS_FAMILY_UNSPEC);
+	QuicAddrSetPort(&addr, port);
+	status = MsQuic->ListenerOpen(m->Registration, CQuicTransceiverImpl::listenerCallback, this, &m->Listener);
+	if (QUIC_FAILED(status))
+	{
+		stop();
+		nlwarning("MsQuic->ListenerOpen failed with status 0x%x", status);
+		return;
+	}
+
+	// Start listening
+	status = MsQuic->ListenerStart(m->Listener, &alpn, 1, &addr);
+	if (QUIC_FAILED(status))
+	{
+		stop();
+		nlwarning("MsQuic->ListenerStart failed with status 0x%x", status);
+		return;
+	}
+
+	// Ok
+	m->Listening.store(true, std::memory_order_release);
+}
+
+void CQuicTransceiver::stop()
+{
+	// Stop listening
+	if (m->Listener)
+	{
+		if (m->Listening)
+		{
+			MsQuic->ListenerStop(m->Listener);
+		}
+		MsQuic->ListenerClose(m->Listener);
+		m->Listener = null;
+	}
+}
+
+void CQuicTransceiver::release()
+{
+	// Close configuration
+	if (m->Configuration)
+	{
+		MsQuic->ConfigurationClose(m->Configuration);
+		m->Configuration = null;
+	}
+
+	// Close registration
+	if (m->Registration)
+	{
+		MsQuic->RegistrationClose(m->Registration);
+		m->Registration = null;
+	}
+
+	// Close library
+	if (MsQuic)
+	{
+		MsQuicClose(MsQuic);
+		MsQuic = null;
+	}
+}
+
+QUIC_STATUS CQuicTransceiverImpl::listenerCallback(HQUIC listener, void *context, QUIC_LISTENER_EVENT *ev)
+{
+	CQuicTransceiver *self = (CQuicTransceiver *)context;
+	CQuicTransceiverImpl *m = self->m.get();
+	QUIC_STATUS status = QUIC_STATUS_NOT_SUPPORTED;
+	switch (ev->Type)
+	{
+	case QUIC_LISTENER_EVENT_NEW_CONNECTION: {
+		// Create user context
+		CQuicUserContext *user = new CQuicUserContext();
+		user->Transceiver = self;
+		user->TokenAddr = self->generateTokenAddr();
+		TReceivedMessage msg;
+		msg.AddrFrom = user->TokenAddr;
+		msg.addressToVector();
+		user->VTokenAddr = msg.VAddrFrom;
+		// They're in.
+		MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, CQuicTransceiverImpl::connectionCallback, (void *)user);
+		status = MsQuic->ConnectionSetConfiguration(ev->NEW_CONNECTION.Connection, m->Configuration);
+		nlwarning("New QUIC connection");
+		break;
+	}
+	case QUIC_LISTENER_EVENT_STOP_COMPLETE: {
+		// TODO: Set flag and attempt restart from the service
+		nlwarning("QUIC listener stopped");
+		status = QUIC_STATUS_SUCCESS;
+		break;
+	}
+	default: {
+		nlwarning("Unknown event type %d", ev->Type);
+		break;
+	}
+	}
+	return status;
+}
+
+QUIC_STATUS CQuicTransceiverImpl::connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev)
+{
+	CQuicUserContext *user = (CQuicUserContext *)context;
+	CQuicTransceiver *self = user->Transceiver;
+	CQuicTransceiverImpl *m = self->m.get();
+	QUIC_STATUS status = QUIC_STATUS_NOT_SUPPORTED;
+	switch (ev->Type)
+	{
+	case QUIC_CONNECTION_EVENT_CONNECTED:
+		nlinfo("Connected");
+		nlassert(CStringView((const char *)ev->CONNECTED.NegotiatedAlpn, ev->CONNECTED.NegotiatedAlpnLength) == "ryzomcore4");
+		MsQuic->ConnectionSendResumptionTicket(connection, QUIC_SEND_RESUMPTION_FLAG_NONE, 0, NULL); // What does this even do?
+		break;
+	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT:
+		nlinfo("Shutdown initiated by transport");
+		status = QUIC_STATUS_SUCCESS;
+		break;
+	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER:
+		nlinfo("Shutdown initiated by peer");
+		status = QUIC_STATUS_SUCCESS;
+		break;
+	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE:
+		nlinfo("Shutdown complete");
+		nlassert(!ev->SHUTDOWN_COMPLETE.AppCloseInProgress); // Only applicable on client, but assert to be sure
+		if (!ev->SHUTDOWN_COMPLETE.AppCloseInProgress)
+		{
+			MsQuic->ConnectionClose(connection);
+		}
+		// TODO: Report to the boss
+		delete user;
+		status = QUIC_STATUS_SUCCESS;
+		break;
+	case QUIC_CONNECTION_EVENT_DATAGRAM_RECEIVED:
+		nlinfo("Datagram received");
+		// YES PLEASE
+		self->datagramReceived(user, ev->DATAGRAM_RECEIVED.Buffer->Buffer, ev->DATAGRAM_RECEIVED.Buffer->Length);
+		break;
+	case QUIC_CONNECTION_EVENT_DATAGRAM_STATE_CHANGED:
+		nlinfo("Datagram state changed");
+		// ev->DATAGRAM_STATE_CHANGED.SendEnabled
+		// ev->DATAGRAM_STATE_CHANGED.MaxSendLength
+		break;
+	case QUIC_CONNECTION_EVENT_LOCAL_ADDRESS_CHANGED:
+	case QUIC_CONNECTION_EVENT_PEER_ADDRESS_CHANGED:
+	case QUIC_CONNECTION_EVENT_IDEAL_PROCESSOR_CHANGED:
+	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
+	case QUIC_CONNECTION_EVENT_RESUMED:
+	case QUIC_CONNECTION_EVENT_PEER_CERTIFICATE_RECEIVED:
+	case QUIC_CONNECTION_EVENT_STREAMS_AVAILABLE: // TODO: Match with msg.xml
+		// Don't care
+		status = QUIC_STATUS_SUCCESS;
+		break;
+	case QUIC_CONNECTION_EVENT_PEER_STREAM_STARTED:
+	case QUIC_CONNECTION_EVENT_PEER_NEEDS_STREAMS:
+	case QUIC_CONNECTION_EVENT_RESUMPTION_TICKET_RECEIVED:
+		// Not supported
+		break;
+	}
+	return status;
+}
+
+CInetAddress CQuicTransceiver::generateTokenAddr()
+{
+	// TODO: We could wrap a pointer and refcount CQuicUserContext somehow
+	// But it'll need to be correctly released from the receive sub
+
+	// That way we can entirely bypass stupid lookup tables and get the real user context
+	// As well as get the connection context when sending
+
+	// Use the same address trick to signal that it's a QUIC connection and not a real address
+	
+	uint64 addrA = m->AddrA++;
+	uint32 addrB = m->AddrB++;
+	addrA = NLMISC::wangHash64(addrA ^ m->SaltA0) ^ m->SaltA1;
+	addrB = NLMISC::wangHash(addrB ^ m->SaltB0) ^ m->SaltB1;
+	sockaddr_in6 sa;
+	m->TokenSubnet.toSockAddrInet6(&sa);
+	// Keep the first 6 bytes of sa.sin6_addr.s6_addr
+	// Then 2 bytes from addrB
+	// Then 8 bytes from addrA
+	memcpy(&sa.sin6_addr.s6_addr[6], &addrB, 2);
+	memcpy(&sa.sin6_addr.s6_addr[8], &addrA, 8);
+	// And the remaining 2 bytes from addrB are to set the port
+	sa.sin6_port = htons(((uint16 *)&addrB)[1]);
+	CInetAddress res(false);
+	res.fromSockAddrInet6(&sa);
+	return res;
+	
+	// This make a copy of the shared ptr into a memory block
+	//uint8 alignas(std::shared_ptr<CQuicUserContext>) memory[sizeof(std::shared_ptr<CQuicUserContext>)];
+	//std::shared_ptr<CQuicUserContext> *ptr = new (memory) std::shared_ptr<CQuicUserContext>(user);
+	
+	// Can do the same with NLMISC::CSmartPtr
+}
+
+bool CQuicTransceiver::listening()
+{
+	return m->Listening.load(std::memory_order_acquire);
+}
+
+void CQuicTransceiver::datagramReceived(const CQuicUserContext *user, const uint8 *buffer, uint32 length)
+{
+	CAtomicFlagLock(m->BufferMutex);
+	m->Buffer->push(buffer, length);
+	m->Buffer->push(user->VTokenAddr);
+}
+
+NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
+{
+	CAtomicFlagLockYield(m->BufferMutex);
+	CBufFIFO *previous = m->Buffer;
+	m->Buffer = writeQueue;
+	return previous;
+}
+
+#else
+
+class CQuicTransceiverImpl
+{
+public:
+	NLMISC::CBufFIFO *Buffer = null;
+};
+
+CQuicTransceiver::CQuicTransceiver(uint32 msgsize)
+    : m(std::make_unique<CQuicTransceiverImpl>())
+    , m_MsgSize(msgsize)
+{
+}
+
+CQuicTransceiver::~CQuicTransceiver()
+{
+}
+
+void CQuicTransceiver::start()
+{
+}
+
+void CQuicTransceiver::stop()
+{
+}
+
+CInetAddress CQuicTransceiver::generateTokenAddr()
+{
+	return CInetAddress(false);
+}
+
+bool CQuicTransceiver::listening()
+{
+	return false;
+}
+
+void CQuicTransceiver::datagramReceived(const CQuicUserContext *user, const uint8 *buffer, uint32 length)
+{
+	// LOCK
+	// m->Buffer->push(buffer, length);
+	// m->Buffer->push(user->VTokenAddr);
+}
+
+NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
+{
+	// LOCK
+	CBufFIFO *previous = m->Buffer;
+	m->Buffer = writeQueue;
+	return previous;
+}
+
+#endif
+
+/* end of file */
