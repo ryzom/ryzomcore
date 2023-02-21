@@ -1774,6 +1774,7 @@ class Smarty_Compiler extends Smarty {
                 } else {
                     $_var_name = substr(array_shift($_indexes), 1);
                     $_output = "\$this->_smarty_vars['$_var_name']";
+                    $_output = "(isset($_output) ? $_output : null)";
                 }
             } elseif(is_numeric($_var_name) && is_numeric(substr($var_expr, 0, 1))) {
                 // because . is the operator for accessing arrays thru inidizes we need to put it together again for floating point numbers
@@ -1785,9 +1786,11 @@ class Smarty_Compiler extends Smarty {
                 $_output = $_var_name;
             } else {
                 $_output = "\$this->_tpl_vars['$_var_name']";
+                $_output = "(isset($_output) ? $_output : null)";
             }
 
             foreach ($_indexes as $_index) {
+                $_lastOutput = $_output;
                 if (substr($_index, 0, 1) == '[') {
                     $_index = substr($_index, 1, -1);
                     if (is_numeric($_index)) {
@@ -1828,6 +1831,10 @@ class Smarty_Compiler extends Smarty {
                     $_output .= $_index;
                 } else {
                     $_output .= $_index;
+                }
+                if ($_lastOutput != $_output)
+                {
+                    $_output = "(null !== $_lastOutput ? $_output : null)";
                 }
             }
         }

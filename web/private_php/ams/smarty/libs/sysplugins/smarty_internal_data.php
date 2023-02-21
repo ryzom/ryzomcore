@@ -29,6 +29,8 @@
  * @method Smarty_Internal_Data clearConfig(string $varName = null)
  * @method Smarty_Internal_Data configLoad(string $config_file, mixed $sections = null, string $scope = 'local')
  */
+
+#[AllowDynamicProperties]
 abstract class Smarty_Internal_Data
 {
     /**

@@ -38,6 +38,13 @@ class sql_db
 	var $query_result;
 	var $num_queries = 0;
 
+	var $user;
+	var $password;
+	var $server;
+	var $persistency;
+	var $port;
+	var $dbname;
+
 	//
 	// Constructor
 	//
