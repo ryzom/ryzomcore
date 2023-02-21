@@ -43,6 +43,7 @@ configLines = {
 	";date.timezone =": "date.timezone = UTC",
 	";extension_dir = \"ext\"": "extension_dir = \"ext\"",
 	";extension=gd2": "extension=gd2",
+	";extension=gd": "extension=gd",
 	";extension=mbstring": "extension=mbstring",
 	";extension=mysqli": "extension=mysqli",
 	";extension=openssl": "extension=openssl",
@@ -66,6 +67,11 @@ if os.path.isfile(phpIniDevelopment):
 					del configLines[line]
 				else:
 					fo.write(line + '\n')
+		# Remove duplicates
+		if ";extension=gd2" in configLines and not ";extension=gd" in configLines:
+			del configLines[";extension=gd2"]
+		if ";extension=gd" in configLines and not ";extension=gd2" in configLines:
+			del configLines[";extension=gd"]
 		# Append any remaining lines to php.ini
 		if len(configLines) > 0:
 			fo.write('\n')
