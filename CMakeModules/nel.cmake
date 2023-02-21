@@ -282,6 +282,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_LIBGSF              "Use libgsf for max file library"               OFF)
 
   OPTION(WITH_FFMPEG              "Use ffmpeg for audio decoder"                  OFF)
+  OPTION(WITH_MSQUIC              "Use msquic for QUIC networking support"        OFF)
 
   ###
   # GUI toolkits

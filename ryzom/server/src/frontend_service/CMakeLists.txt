@@ -8,6 +8,8 @@ LIST(REMOVE_ITEM SRC
 			${CMAKE_CURRENT_SOURCE_DIR}/property_dispatcher.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/property_dispatcher.h)
 
+SOURCE_GROUP("" FILES ${SRC})
+
 ADD_EXECUTABLE(ryzom_frontend_service WIN32 ${SRC})
 
 INCLUDE_DIRECTORIES(${MYSQL_INCLUDE_DIR})
@@ -20,6 +22,11 @@ TARGET_LINK_LIBRARIES(ryzom_frontend_service
 						nelnet
 						nelgeorges
 						nelligo)
+
+IF(WITH_MSQUIC)
+  INCLUDE_DIRECTORIES(${msquic_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(ryzom_frontend_service ${msquic_LIBRARIES})
+ENDIF()
 
 NL_DEFAULT_PROPS(ryzom_frontend_service "Ryzom, Services: Frontend Service (FS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_frontend_service)
