@@ -30,6 +30,7 @@
 #include <msquic.h>
 
 #define MsQuic m->Api
+#define null nullptr
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -49,7 +50,7 @@ public:
 	{
 		m_Flag.clear(std::memory_order_release);
 	}
-	
+
 private:
 	std::atomic_flag &m_Flag;
 };
@@ -59,7 +60,7 @@ class CAtomicFlagLockYield
 {
 public:
 	CAtomicFlagLockYield(std::atomic_flag &flag)
-		: m_Flag(flag)
+	    : m_Flag(flag)
 	{
 		while (m_Flag.test_and_set(std::memory_order_acquire))
 			std::this_thread::yield();
@@ -84,7 +85,7 @@ public:
 
 	std::atomic_flag BufferMutex = ATOMIC_FLAG_INIT;
 	NLMISC::CBufFIFO *Buffer = null;
-	
+
 	std::atomic<bool> Listening;
 
 	// Some salt for generating the token address
@@ -141,7 +142,7 @@ void CQuicTransceiver::start(uint16 port)
 	{
 		nlwarning("QUIC API not available");
 	}
-	
+
 	static const char *protocolName = "ryzomcore4";
 	static const QUIC_BUFFER alpn = { sizeof(protocolName) - 1, (uint8_t *)protocolName };
 
@@ -251,11 +252,9 @@ QUIC_STATUS CQuicTransceiverImpl::listenerCallback(HQUIC listener, void *context
 		// Create user context
 		CQuicUserContext *user = new CQuicUserContext();
 		user->Transceiver = self;
-		user->TokenAddr = self->generateTokenAddr();
-		TReceivedMessage msg;
-		msg.AddrFrom = user->TokenAddr;
-		msg.addressToVector();
-		user->VTokenAddr = msg.VAddrFrom;
+		user->TokenAddr = self->generateTokenAddr(); // ev->NEW_CONNECTION.Info->RemoteAddress // Could change on migration, so don't expose it for now (OK in the future)
+		user->Connection = ev->NEW_CONNECTION.Connection;
+		user->increaseRef();
 		// They're in.
 		MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, CQuicTransceiverImpl::connectionCallback, (void *)user);
 		status = MsQuic->ConnectionSetConfiguration(ev->NEW_CONNECTION.Connection, m->Configuration);
@@ -297,7 +296,8 @@ QUIC_STATUS CQuicTransceiverImpl::connectionCallback(HQUIC connection, void *con
 		nlinfo("Shutdown initiated by peer");
 		status = QUIC_STATUS_SUCCESS;
 		break;
-	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE:
+	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
+		CQuicUserContextRelease releaseUser(user); // Hopefully we only get QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE once!
 		nlinfo("Shutdown complete");
 		nlassert(!ev->SHUTDOWN_COMPLETE.AppCloseInProgress); // Only applicable on client, but assert to be sure
 		if (!ev->SHUTDOWN_COMPLETE.AppCloseInProgress)
@@ -305,9 +305,9 @@ QUIC_STATUS CQuicTransceiverImpl::connectionCallback(HQUIC connection, void *con
 			MsQuic->ConnectionClose(connection);
 		}
 		// TODO: Report to the boss
-		delete user;
 		status = QUIC_STATUS_SUCCESS;
 		break;
+	}
 	case QUIC_CONNECTION_EVENT_DATAGRAM_RECEIVED:
 		nlinfo("Datagram received");
 		// YES PLEASE
@@ -339,14 +339,6 @@ QUIC_STATUS CQuicTransceiverImpl::connectionCallback(HQUIC connection, void *con
 
 CInetAddress CQuicTransceiver::generateTokenAddr()
 {
-	// TODO: We could wrap a pointer and refcount CQuicUserContext somehow
-	// But it'll need to be correctly released from the receive sub
-
-	// That way we can entirely bypass stupid lookup tables and get the real user context
-	// As well as get the connection context when sending
-
-	// Use the same address trick to signal that it's a QUIC connection and not a real address
-	
 	uint64 addrA = m->AddrA++;
 	uint32 addrB = m->AddrB++;
 	addrA = NLMISC::wangHash64(addrA ^ m->SaltA0) ^ m->SaltA1;
@@ -363,12 +355,6 @@ CInetAddress CQuicTransceiver::generateTokenAddr()
 	CInetAddress res(false);
 	res.fromSockAddrInet6(&sa);
 	return res;
-	
-	// This make a copy of the shared ptr into a memory block
-	//uint8 alignas(std::shared_ptr<CQuicUserContext>) memory[sizeof(std::shared_ptr<CQuicUserContext>)];
-	//std::shared_ptr<CQuicUserContext> *ptr = new (memory) std::shared_ptr<CQuicUserContext>(user);
-	
-	// Can do the same with NLMISC::CSmartPtr
 }
 
 bool CQuicTransceiver::listening()
@@ -376,11 +362,17 @@ bool CQuicTransceiver::listening()
 	return m->Listening.load(std::memory_order_acquire);
 }
 
-void CQuicTransceiver::datagramReceived(const CQuicUserContext *user, const uint8 *buffer, uint32 length)
+void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buffer, uint32 length)
 {
-	CAtomicFlagLock(m->BufferMutex);
-	m->Buffer->push(buffer, length);
-	m->Buffer->push(user->VTokenAddr);
+	// Increase reference for FIFO copy
+	user->increaseRef();
+	
+	// Locked block
+	{
+		CAtomicFlagLockYield(m->BufferMutex);
+		m->Buffer->push(buffer, length);
+		m->Buffer->push((uint8 *)&user, sizeof(user)); // Pointer
+	}
 }
 
 NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
@@ -389,6 +381,18 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 	CBufFIFO *previous = m->Buffer;
 	m->Buffer = writeQueue;
 	return previous;
+}
+
+void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
+{
+	QUIC_BUFFER buf;
+	buf.Buffer = (uint8 *)buffer;
+	buf.Length = size;
+	QUIC_STATUS status = MsQuic->DatagramSend((HQUIC)user->Connection, &buf, 1, QUIC_SEND_FLAG_NONE, (void *)user);
+	if (QUIC_FAILED(status))
+	{
+		nlwarning("MsQuic->ConnectionSendDatagram failed with status %d", status);
+	}
 }
 
 #else
@@ -427,7 +431,7 @@ bool CQuicTransceiver::listening()
 	return false;
 }
 
-void CQuicTransceiver::datagramReceived(const CQuicUserContext *user, const uint8 *buffer, uint32 length)
+void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buffer, uint32 length)
 {
 	// LOCK
 	// m->Buffer->push(buffer, length);
@@ -440,6 +444,11 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 	CBufFIFO *previous = m->Buffer;
 	m->Buffer = writeQueue;
 	return previous;
+}
+
+void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
+{
+
 }
 
 #endif

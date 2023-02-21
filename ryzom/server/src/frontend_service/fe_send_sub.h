@@ -51,6 +51,7 @@ public:
 
 		/// Destination address
 		NLNET::CInetAddress		DestAddress;
+		CQuicUserContextPtr		QuicUser;
 
 		/// Used (connected) or not
 		volatile TSBState		SBState;
@@ -59,13 +60,14 @@ public:
 		TOutBox					OutBox;
 
 		/// Default constructor
-		CSendBuffer() : SBState(false), OutBox(false, 512) {} // prealloc 512 bytes to avoid bitmemstream reallocation
+		CSendBuffer() : SBState(false), OutBox(false, 512), QuicUser(nullptr) {} // prealloc 512 bytes to avoid bitmemstream reallocation
 
 		/// Set the new address. state should be SBReady or SBNotReady only.
-		void	setAddress( const NLNET::CInetAddress *addr, TSBState state )
+		void	setAddress( const NLNET::CInetAddress *addr, CQuicUserContext *quicUser, TSBState state )
 		{
 			// Copy the address (just a link would not work)
 			DestAddress = *addr;
+			QuicUser = quicUser;
 			SBState = state;
 		}
 
@@ -127,11 +129,11 @@ public:
 	volatile uint32			&sendCounter() { return _SendCounter; }
 
 	/// Set the address for send buffer, to match a connected client
-	void					setSendBufferAddress( TClientId id, const NLNET::CInetAddress *addr )
+	void					setSendBufferAddress( TClientId id, const NLNET::CInetAddress *addr, CQuicUserContext *quicUser )
 	{
 		// We set the address for both, but we can't enable the buffer yet
-		((*_CurrentFillingBuffers)[id]).setAddress( addr, false /*true*/ );
-		((*_CurrentFlushingBuffers)[id]).setAddress( addr, false );
+		((*_CurrentFillingBuffers)[id]).setAddress( addr, quicUser, false /*true*/ );
+		((*_CurrentFlushingBuffers)[id]).setAddress( addr, quicUser, false );
 		//_BuffersToEnable.insert( id ); // OBSOLETE: now it is enabled/disabled in CFeSendSub::fillPrioritizedActions
 	}
 

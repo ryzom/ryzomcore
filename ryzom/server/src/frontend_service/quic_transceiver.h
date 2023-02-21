@@ -23,18 +23,118 @@
 
 #include "fe_receive_task.h"
 
-class CQuicTransceiverImpl;
+class CClientHost;
 
-struct CQuicUserContext
+class CQuicTransceiverImpl;
+class CQuicTransceiver;
+
+// User context for quic messages
+class CQuicUserContext
 {
+public:
+	// Manual reference count
+	void increaseRef()
+	{
+		m_RefCount.fetch_add(1, std::memory_order_relaxed);
+	}
+
+	void decreaseRef()
+	{
+		if (m_RefCount.fetch_sub(1, std::memory_order_release) == 1)
+		{
+			delete this;
+		}
+	}
+
+public:
+	// Reference to QUIC context (immutable)
 	CQuicTransceiver *Transceiver;
 
-	// Not a real address, just a token to identify the connection
+	// Reference to the internal connection (immutable)
+	void *Connection;
+
+	// Not a real address, just a token to identify the connection (immutable)
 	// Give everyone an IPv6 in unique local network fdd5:d66b:8698::/48
 	// The addresses are a sequential hash sequence, so should be unique for a very very long time
 	// They should not be used for security purposes
-	CInetAddress TokenAddr;
-	std::vector<uint8> VTokenAddr;
+	NLNET::CInetAddress TokenAddr;
+
+	// Reference to the client host (game state) (owned by service main thread)
+	CClientHost *ClientHost = nullptr;
+
+private:
+	std::atomic_int m_RefCount = 0;
+};
+
+// Utility to decrease reference count, does not increase count
+// This is to ensure that the reference count is decreased even when exceptions get thrown
+class CQuicUserContextRelease
+{
+public:
+	CQuicUserContextRelease(CQuicUserContext *user)
+	    : m_User(user)
+	{
+	}
+
+	~CQuicUserContextRelease()
+	{
+		if (m_User)
+			m_User->decreaseRef();
+	}
+
+	CQuicUserContextRelease(const CQuicUserContextRelease &) = delete;
+	CQuicUserContextRelease &operator=(const CQuicUserContextRelease &) = delete;
+
+private:
+	CQuicUserContext *m_User;
+};
+
+// Regular reference counting
+class CQuicUserContextPtr
+{
+public:
+	CQuicUserContextPtr(CQuicUserContext *user)
+		: m_User(user)
+	{
+		if (m_User)
+			m_User->increaseRef();
+	}
+
+	~CQuicUserContextPtr()
+	{
+		if (m_User)
+			m_User->decreaseRef();
+	}
+
+	CQuicUserContextPtr(const CQuicUserContextPtr &other)
+	    : m_User(other.m_User)
+	{
+		if (m_User)
+			m_User->increaseRef();
+	}
+	
+	CQuicUserContextPtr &operator=(const CQuicUserContextPtr &other)
+	{
+		if (m_User)
+			m_User->decreaseRef();
+		m_User = other.m_User;
+		if (m_User)
+			m_User->increaseRef();
+		return *this;
+	}
+	
+	CQuicUserContext *operator->() const
+	{
+		return m_User;
+	}
+	
+	CQuicUserContext *get() const
+	{
+		return m_User;
+	}
+
+private:
+	CQuicUserContext *m_User;
 };
 
 class CQuicTransceiver
@@ -58,9 +158,12 @@ public:
 	/// Check if still listening
 	bool listening();
 
+	/// Send a datagram, fancier than a telegram, but not as reliable
+	void sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size);
+
 private:
 	friend CQuicTransceiverImpl;
-	
+
 	/// Internal implementation specific
 	std::unique_ptr<CQuicTransceiverImpl> m;
 
@@ -68,10 +171,10 @@ private:
 	uint32 m_MsgSize;
 
 	/// Received datagram
-	void datagramReceived(const CQuicUserContext *user, const uint8 *buffer, uint32 length);
+	void datagramReceived(CQuicUserContext *user, const uint8 *buffer, uint32 length);
 
 	/// Generates a token address to identify the connection with existing code
-	CInetAddress generateTokenAddr();
+	NLNET::CInetAddress generateTokenAddr();
 
 	// public:
 	//	/// Constructor

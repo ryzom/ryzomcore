@@ -436,6 +436,11 @@ CClientHost::~CClientHost()
 {
 	//REMOVE_PROPERTY_FROM_EMITER( _Id, uint16, "AvailImpulseBitsize" );
 	//_Id = CEntityId::Unknown;
+
+	if (QuicUser.get() && QuicUser->ClientHost == this)
+	{
+		QuicUser->ClientHost = nullptr;
+	}
 }
 
 

@@ -189,8 +189,6 @@
 #	define NL_CPP11
 #endif
 
-#define null nullptr
-
 #ifdef NL_CPP14
 #define NL_ALIGNLIKE(type) alignas(alignof(type))
 #else

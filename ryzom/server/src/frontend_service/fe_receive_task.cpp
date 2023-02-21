@@ -56,7 +56,7 @@ volatile uint32 CFEReceiveTask::LastUDPPacketReceived = 0;
  */
 
 /// Constructor
-TReceivedMessage::TReceivedMessage()
+TReceivedMessage::TReceivedMessage() : QuicUser(nullptr)
 {
 	VAddrFrom.resize(sizeof(sockaddr_in6));
 }

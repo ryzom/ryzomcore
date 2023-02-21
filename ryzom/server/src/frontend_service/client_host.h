@@ -34,10 +34,10 @@
 #include "game_share/ryzom_entity_id.h"
 #include "game_share/entity_types.h"
 #include "game_share/welcome_service_itf.h"
+#include "quic_transceiver.h"
 
 #include <vector>
 #include <deque>
-
 
 const uint32 FirstClientId = 1;
 const uint16 InvalidClientId = 0xFFFF;
@@ -48,7 +48,6 @@ namespace NLNET
 };
 
 struct TPairState;
-
 
 /**
  * CClientIdPool
@@ -108,7 +107,7 @@ class CClientHost
 {
 public:
 	/// Constructor
-	CClientHost( const NLNET::CInetAddress& addr, TClientId id ) :
+	CClientHost( const NLNET::CInetAddress& addr, CQuicUserContext *quicUser, TClientId id ) :
 		Uid (0xFFFFFFFF),
 		InstanceId(0xFFFFFFFF),
 		StartupRole(WS::TUserRole::ur_player),
@@ -145,12 +144,17 @@ public:
 		//
 		//AvailableImpulseBitsize( "AvailImpulseBitsize", MaxImpulseBitSizes[2] ),
 		NbActionsSentAtCycle(0),
-		QuitId(0)
+		QuitId(0),
+		QuicUser(quicUser)
 		{
 			IdTranslator.setId( id );
 			ImpulseEncoder.setClientHost( this );
 			ConnectionState = Synchronize;
 			initClientBandwidth();
+			if (quicUser)
+			{
+				quicUser->ClientHost = this;
+			}
 		}
 
 	/// Destructor
@@ -495,6 +499,8 @@ public:
 	/// Quit Id
 	uint32				QuitId;
 
+	CQuicUserContextPtr QuicUser;
+
 private:
 
 	/// Client IP and port
@@ -591,7 +597,7 @@ class CLimboClient
 {
 public:
 	CLimboClient( CClientHost* client ) :
-		AddrFrom(client->address()), Uid(client->Uid), UserName(client->UserName), UserPriv(client->UserPriv), UserExtended(client->UserExtended),
+		AddrFrom(client->address()), QuicUser(client->QuicUser), Uid(client->Uid), UserName(client->UserName), UserPriv(client->UserPriv), UserExtended(client->UserExtended),
 		LanguageId(client->LanguageId), QuitId(client->QuitId)
 	{
 		// Set limbo timeout start
@@ -600,6 +606,7 @@ public:
 	}
 
 	NLNET::CInetAddress	AddrFrom;
+	CQuicUserContextPtr QuicUser;
 	TUid				Uid;
 	std::string			UserName, UserPriv, UserExtended, LanguageId;
 	uint32				QuitId;

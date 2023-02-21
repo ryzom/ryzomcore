@@ -331,8 +331,15 @@ inline void	CFeSendSub::CSendBuffer::sendOutBox( NLNET::CUdpSock *datasock )
 {
 	if ( OutBox.length() != 0 )
 	{
-		sendUDP( datasock, OutBox.buffer(), OutBox.length(), &DestAddress );
-		//nlinfo( "Sent %u bytes to %s", OutBox.length(), DestAddress.asString().c_str() );
+		if (QuicUser.get())
+		{
+			QuicUser->Transceiver->sendDatagram(QuicUser.get(), OutBox.buffer(), OutBox.length());
+		}
+		else
+		{
+			sendUDP(datasock, OutBox.buffer(), OutBox.length(), &DestAddress);
+			//nlinfo( "Sent %u bytes to %s", OutBox.length(), DestAddress.asString().c_str() );
+		}
 	}
 
 #ifdef MEASURE_SENDING

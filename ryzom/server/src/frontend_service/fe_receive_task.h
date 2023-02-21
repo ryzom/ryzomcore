@@ -34,6 +34,7 @@
 
 const uint32 MsgHeaderSize = 1;
 
+class CQuicUserContext;
 
 /**
  * Placeholder for received messages
@@ -85,6 +86,9 @@ public:
 
 	/// Placeholder vector for address info
 	std::vector<uint8>	VAddrFrom;
+
+	/// QUIC user context, no need to refcount since it's already held in the FIFO readout
+	CQuicUserContext *QuicUser;
 };
 
 
@@ -108,7 +112,7 @@ public:
 	virtual void	run();
 
 	/// Set new write queue (thread-safe because mutexed)
-	CBufFIFO *swapWriteQueue(NLMISC::CBufFIFO *writeQueue);
+	NLMISC::CBufFIFO *swapWriteQueue(NLMISC::CBufFIFO *writeQueue);
 
 	/// Require exit (thread-safe because atomic assignment)
 	void			requireExit() { _ExitRequired = true; }

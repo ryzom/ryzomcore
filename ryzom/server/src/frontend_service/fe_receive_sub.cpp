@@ -133,13 +133,14 @@ void CFeReceiveSub::init( uint16 firstAcceptableFrontendPort, uint16 lastAccepta
 	_ReceiveThread = IThread::create(_ReceiveTask);
 	nlassert(_ReceiveThread != NULL);
 	_ReceiveThread->start();
+	uint16 udpPort = _ReceiveTask->DataSock->localAddr().port();
 
 	// Start QUIC transceiver
 	nlinfo("FERECV: Starting QUIC transceiver");
-	m_QuicTransceiver = new CQuicTransceiver(firstAcceptableFrontendPort - 5000, lastAcceptableFrontendPort - 5000, dgrammaxlength);
+	m_QuicTransceiver = new CQuicTransceiver(dgrammaxlength);
 	m_CurrentQuicReadQueue = &m_Queues[3];
 	m_QuicTransceiver->swapWriteQueue(&m_Queues[2]);
-	m_QuicTransceiver->start();
+	m_QuicTransceiver->start((udpPort ? udpPort : firstAcceptableFrontendPort) - 5000);
 
 	// Setup current message placeholder
 	_CurrentInMsg = new TReceivedMessage();
@@ -245,24 +246,31 @@ void CFeReceiveSub::readIncomingData()
 	}
 
 	// Read queue of messages received from clients
-	_CurrentInMsg->AddrFrom.setNull(); // FIXME: QUIC
+	_CurrentInMsg->AddrFrom.setNull();
 	while (!m_CurrentQuicReadQueue->empty())
 	{
 		// nlinfo( "Read queue size = %u", _CurrentReadQueue->size() );
 		m_CurrentQuicReadQueue->front(_CurrentInMsg->data());
 		m_CurrentQuicReadQueue->pop();
 		nlassert(!m_CurrentQuicReadQueue->empty());
-		m_CurrentQuicReadQueue->front(_CurrentInMsg->VAddrFrom);
+		uint8 *buffer;
+		uint32 size;
+		m_CurrentQuicReadQueue->front(buffer, size);
+		nlassert(size == sizeof(_CurrentInMsg->QuicUser));
+		memcpy(&_CurrentInMsg->QuicUser, buffer, size);
+		CQuicUserContextRelease(_CurrentInMsg->QuicUser); // Decrease ref count after handling message
 		m_CurrentQuicReadQueue->pop();
-		// _CurrentInMsg->vectorToAddress(); // FIXME: QUIC
+		
+		// Use token address for user mapping, since it'll stay constant
+		_CurrentInMsg->AddrFrom = _CurrentInMsg->QuicUser->TokenAddr;
 
 #ifndef MEASURE_RECEIVE_TASK
 		handleIncomingMsg();
 #endif
 	}
 	
-	// _CurrentInMsg->AddrFrom.setNull(); // FIXME: QUIC
 	// Read queue of messages received from clients
+	_CurrentInMsg->QuicUser = nullptr;
 	while (!m_CurrentReadQueue->empty())
 	{
 		// nlinfo( "Read queue size = %u", m_CurrentReadQueue->size() );
@@ -341,6 +349,13 @@ void CFeReceiveSub::handleIncomingMsg()
 #ifndef SIMUL_CLIENTS
 
 	//nldebug( "FERECV: Handling incoming message" );
+	
+	if (_CurrentInMsg->QuicUser)
+	{
+		// TODO: Bypass _ClientMap lookup
+		// _CurrentInMsg->QuicUser->ClientHost
+		// _CurrentInMsg->QuicUser->ClientHost->QuicUser
+	}
 
 	// Retrieve client info or add one
 	THostMap::iterator ihm = _ClientMap.find( _CurrentInMsg->AddrFrom );
@@ -404,7 +419,7 @@ bool		CFeReceiveSub::acceptUserIdConnection( TUid userId )
 /*
  * Add client
  */
-CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, TUid userId, const string &userName, const string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorizedCharSlot, bool sendCLConnect )
+CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const string &userName, const string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorizedCharSlot, bool sendCLConnect )
 {
 	MEM_DELTA_MULTI_LAST2(Client,AddClient);
 	if ( ! acceptUserIdConnection( userId ) )
@@ -430,7 +445,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, TUid
 	THostMap::iterator cmPreviousEnd = _ClientMap.end();
 	{
 		MEM_DELTA_MULTI2(CClientHost,New);
-		clienthost = new CClientHost( addrfrom, clientid );
+		clienthost = new CClientHost( addrfrom, quicUser, clientid );
 	}
 	nlassert( clienthost );
 	nlinfo( "Adding client %u (uid %u name %s priv '%s') at %s", clientid, userId, userName.c_str(), userPriv.c_str(), addrfrom.asIPString().c_str() );
@@ -462,7 +477,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, TUid
 	clienthost->AuthorizedCharSlot = authorizedCharSlot;
 
 	clienthost->initSendCycle( false );
-	CFrontEndService::instance()->sendSub()->setSendBufferAddress( clientid, &addrfrom );
+	CFrontEndService::instance()->sendSub()->setSendBufferAddress( clientid, &addrfrom, quicUser );
 
 	//This must be commented out when the GPMS always activates slot 0
 	//CFrontEndService::instance()->PrioSub.Prioritizer.addEntitySeenByClient( clientid, 0 );
@@ -572,7 +587,7 @@ CClientHost *CFeReceiveSub::exitFromLimboMode( const CLimboClient& lc )
 {
 	nldebug( "Restoring user %u from limbo mode", lc.Uid );
 
-	CClientHost *client = addClient( lc.AddrFrom, lc.Uid, lc.UserName, lc.UserPriv, lc.UserExtended, lc.LanguageId, lc.LoginCookie, 0xF, false );
+	CClientHost *client = addClient(lc.AddrFrom, lc.QuicUser.get(), lc.Uid, lc.UserName, lc.UserPriv, lc.UserExtended, lc.LanguageId, lc.LoginCookie, 0xF, false);
 	NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle();
 	client->setFirstSentPacket( client->sendNumber()+1, tick );
 	client->setSynchronizeState();
@@ -935,7 +950,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			// ALWAYS REMOVE CLIENT FROM LIMBO!
 			LimboClients.erase(uid);
 
-			clienthost = addClient( _CurrentInMsg->AddrFrom, uid, userName, userPriv, userExtended, languageId, lc, instanceId, (uint8)charSlot );
+			clienthost = addClient( _CurrentInMsg->AddrFrom, _CurrentInMsg->QuicUser, uid, userName, userPriv, userExtended, languageId, lc, instanceId, (uint8)charSlot );
 
 			// Check if the addition worked
 			if ( clienthost != NULL )
