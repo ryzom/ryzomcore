@@ -51,6 +51,12 @@ using namespace NLNET;
 // which should improve the login experience for players
 // and speed up loading of NPC dialogs.
 
+// Advantages of using QUIC over adding a TCP connection on the side:
+// - Only a single point of failure and disconnection.
+// - Connection migration reduces chance of getting disconnected,
+//   e.g. when switching on or off a VPN, and now we know who you are.
+// - Encryption, so nobody can find out you're actually playing Ryzom.
+
 namespace /* anonymous */ {
 
 // This really hammers fast
