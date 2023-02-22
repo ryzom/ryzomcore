@@ -108,11 +108,21 @@ public:
 	std::atomic<uint64> AddrA;
 	std::atomic<uint32> AddrB;
 
-	// IPv6 unique local address range to use as a token address for each connection
+	// IPv6 unique local address range to use as a token address for each connection.
+	// This is used for compatibility with the existing UDP-based protocol handling
+	// and the existing client address to game state pointer mapping.
 	CInetAddress TokenSubnet = CInetAddress("[fdd5:d66b:8698::]:0");
 
-	static QUIC_STATUS listenerCallback(HQUIC listener, void *context, QUIC_LISTENER_EVENT *ev);
-	static QUIC_STATUS connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev);
+	static QUIC_STATUS
+#ifdef _Function_class_
+	    _Function_class_(QUIC_LISTENER_CALLBACK)
+#endif
+	        listenerCallback(HQUIC listener, void *context, QUIC_LISTENER_EVENT *ev);
+	static QUIC_STATUS
+#ifdef _Function_class_
+	    _Function_class_(QUIC_CONNECTION_CALLBACK)
+#endif
+	        connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev);
 };
 
 CQuicTransceiver::CQuicTransceiver(uint32 msgsize)
@@ -175,6 +185,8 @@ void CQuicTransceiver::start(uint16 port)
 		// settings.IsSet.SendBufferingEnabled = TRUE;
 		// settings.GreaseQuicBitEnabled = TRUE;
 		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
+		// settings.MinimumMtu = m_MsgSize + size of QUIC header; // Probably violates QUIC protocol if we do this
+		// settings.IsSet.MinimumMtu = TRUE;
 		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
 		{
@@ -253,7 +265,11 @@ void CQuicTransceiver::release()
 	}
 }
 
-QUIC_STATUS CQuicTransceiverImpl::listenerCallback(HQUIC listener, void *context, QUIC_LISTENER_EVENT *ev)
+QUIC_STATUS
+#ifdef _Function_class_
+_Function_class_(QUIC_LISTENER_CALLBACK)
+#endif
+    CQuicTransceiverImpl::listenerCallback(HQUIC listener, void *context, QUIC_LISTENER_EVENT *ev)
 {
 	CQuicTransceiver *self = (CQuicTransceiver *)context;
 	CQuicTransceiverImpl *m = self->m.get();
@@ -287,7 +303,11 @@ QUIC_STATUS CQuicTransceiverImpl::listenerCallback(HQUIC listener, void *context
 	return status;
 }
 
-QUIC_STATUS CQuicTransceiverImpl::connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev)
+QUIC_STATUS
+#ifdef _Function_class_
+_Function_class_(QUIC_CONNECTION_CALLBACK)
+#endif
+    CQuicTransceiverImpl::connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev)
 {
 	CQuicUserContext *user = (CQuicUserContext *)context;
 	CQuicTransceiver *self = user->Transceiver;
@@ -327,8 +347,7 @@ QUIC_STATUS CQuicTransceiverImpl::connectionCallback(HQUIC connection, void *con
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_STATE_CHANGED:
 		nlinfo("Datagram state changed");
-		// ev->DATAGRAM_STATE_CHANGED.SendEnabled
-		// ev->DATAGRAM_STATE_CHANGED.MaxSendLength
+		user->MaxSendLength.store(ev->DATAGRAM_STATE_CHANGED.SendEnabled ? ev->DATAGRAM_STATE_CHANGED.MaxSendLength : 0, std::memory_order_release);
 		break;
 	case QUIC_CONNECTION_EVENT_LOCAL_ADDRESS_CHANGED:
 	case QUIC_CONNECTION_EVENT_PEER_ADDRESS_CHANGED:
@@ -351,6 +370,7 @@ QUIC_STATUS CQuicTransceiverImpl::connectionCallback(HQUIC connection, void *con
 
 CInetAddress CQuicTransceiver::generateTokenAddr()
 {
+	// This generates a random address from a deterministic pseudo-random sequence
 	uint64 addrA = m->AddrA++;
 	uint32 addrB = m->AddrB++;
 	addrA = NLMISC::wangHash64(addrA ^ m->SaltA0) ^ m->SaltA1;
@@ -381,7 +401,7 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 
 	// Locked block
 	{
-		CAtomicFlagLockYield(m->BufferMutex);
+		CAtomicFlagLockYield lock(m->BufferMutex);
 		m->Buffer->push(buffer, length);
 		m->Buffer->push((uint8 *)&user, sizeof(user)); // Pointer
 	}
@@ -389,7 +409,7 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 
 NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 {
-	CAtomicFlagLockYield(m->BufferMutex);
+	CAtomicFlagLockYield lock(m->BufferMutex);
 	CBufFIFO *previous = m->Buffer;
 	m->Buffer = writeQueue;
 	return previous;

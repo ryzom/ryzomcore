@@ -62,6 +62,9 @@ public:
 	// Reference to the client host (game state) (owned by service main thread)
 	CClientHost *ClientHost = nullptr;
 
+	// Set if datagrams can be sent (set on connection thread, read on service main thread)
+	std::atomic<uint16> MaxSendLength = 0;
+
 private:
 	std::atomic_int m_RefCount = 0;
 };
