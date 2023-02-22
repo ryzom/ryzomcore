@@ -37,6 +37,7 @@
 
 #ifdef NL_CPP11
 #include <random>
+#include <atomic>
 #endif
 
 #ifdef NL_OS_WINDOWS
