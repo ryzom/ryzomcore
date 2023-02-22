@@ -22,9 +22,17 @@
 #include "nel/misc/string_view.h"
 
 #include "config.h"
+#include "quic_selfsign.h"
 
 #ifdef NL_MSQUIC_AVAILABLE
 #include <msquic.h>
+
+#ifdef NL_OS_WINDOWS
+#pragma warning(push)
+#pragma warning(disable : 6553) // Annotation does not apply to value type.
+#include <wincrypt.h>
+#pragma warning(pop)
+#endif
 
 #define MsQuic m->Api
 #define null nullptr
@@ -113,6 +121,10 @@ public:
 	// and the existing client address to game state pointer mapping.
 	CInetAddress TokenSubnet = CInetAddress("[fdd5:d66b:8698::]:0");
 
+	// Listener stop event wait
+	std::mutex ListenerStopMutex;
+	std::condition_variable ListenerStopCondition;
+
 	static QUIC_STATUS
 #ifdef _Function_class_
 	    _Function_class_(QUIC_LISTENER_CALLBACK)
@@ -185,7 +197,7 @@ void CQuicTransceiver::start(uint16 port)
 		// settings.IsSet.SendBufferingEnabled = TRUE;
 		// settings.GreaseQuicBitEnabled = TRUE;
 		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
-		// settings.MinimumMtu = m_MsgSize + size of QUIC header; // Probably violates QUIC protocol if we do this
+		// settings.MinimumMtu = m_MsgSize + size of QUIC header; // Probably violates QUIC protocol if we do this, also no need
 		// settings.IsSet.MinimumMtu = TRUE;
 		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
@@ -194,12 +206,51 @@ void CQuicTransceiver::start(uint16 port)
 			return;
 		}
 
-		// Server credentials
-		QUIC_CREDENTIAL_CONFIG credConfig;
-		memset(&credConfig, 0, sizeof(credConfig));
-		credConfig.Flags = QUIC_CREDENTIAL_FLAG_NO_CERTIFICATE_VALIDATION;
-		credConfig.Type = QUIC_CREDENTIAL_TYPE_NONE; // FIXME: Supposedly doesn't work on server
-		status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
+		// TODO: Certificate should depend on a configuration variable, if it's configured, at least for production
+
+		// Programmatically create a self signed certificate, only valid in Windows
+		// This is very useful for development servers
+		uint8 certHash[20];
+		PCCERT_CONTEXT schannelCert = (PCCERT_CONTEXT)FES_findOrCreateSelfSignedCertificate(certHash);
+		if (schannelCert)
+		{
+			// Server credentials
+			QUIC_CREDENTIAL_CONFIG credConfig;
+			memset(&credConfig, 0, sizeof(credConfig));
+			credConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_CONTEXT;
+			credConfig.Flags = QUIC_CREDENTIAL_FLAG_NONE;
+			credConfig.CertificateContext = (QUIC_CERTIFICATE *)schannelCert;
+			status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
+			if (QUIC_FAILED(status))
+			{
+				nlwarning("MsQuic->ConfigurationLoadCredential failed with status 0x%x", status);
+				FES_freeSelfSignedCertificate((void *)schannelCert);
+				schannelCert = nullptr;
+			}
+		}
+		else
+		{
+#ifdef NL_OS_WINDOWS
+			nlwarning("Failed to create self-signed certificate");
+#endif
+		}
+		if (schannelCert)
+		{
+			// Don't need the certificate anymore (I guess? Let's hope it's been copied by MsQuic!)
+			nlinfo("Self-signed certificate hash: %s", NLMISC::toHexa(certHash, 20).c_str());
+			FES_freeSelfSignedCertificate((void *)schannelCert);
+			schannelCert = nullptr;
+		}
+		else
+		{
+			// Either we could not create a self-signed certificate on Windows, or could not load it into the configuration
+			// Try with an OpenSSL certificate
+			// TODO
+			nlwarning("Self signed OpenSSL certificates are not yet supported, QUIC will not work. Specify a certificate in the configuration file.");
+			MsQuic->ConfigurationClose(m->Configuration);
+			m->Configuration = nullptr;
+			return;
+		}
 	}
 
 	// Open listener listening using MSQUIC on e.g. [::]:5000 (port)
@@ -235,6 +286,16 @@ void CQuicTransceiver::stop()
 		if (m->Listening)
 		{
 			MsQuic->ListenerStop(m->Listener);
+			try
+			{
+				// Wait for stop
+				std::unique_lock<std::mutex> lock(m->ListenerStopMutex);
+				m->ListenerStopCondition.wait(lock, [this] { return !m->Listening; });
+			}
+			catch (const std::exception &e)
+			{
+				nlwarning("Exception while waiting for listener stop: %s", e.what());
+			}
 		}
 		MsQuic->ListenerClose(m->Listener);
 		m->Listener = null;
@@ -290,8 +351,10 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 		break;
 	}
 	case QUIC_LISTENER_EVENT_STOP_COMPLETE: {
-		// TODO: Set flag and attempt restart from the service
 		nlwarning("QUIC listener stopped");
+		std::unique_lock<std::mutex> lock(m->ListenerStopMutex);
+		m->Listening.store(false, std::memory_order_release);
+		m->ListenerStopCondition.notify_all();
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
