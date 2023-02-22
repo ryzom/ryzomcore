@@ -261,7 +261,7 @@ void CFeReceiveSub::readIncomingData()
 		m_CurrentQuicReadQueue->front(buffer, size);
 		nlassert(size == sizeof(_CurrentInMsg->QuicUser));
 		memcpy(&_CurrentInMsg->QuicUser, buffer, size);
-		CQuicUserContextRelease(_CurrentInMsg->QuicUser); // Decrease ref count after handling message
+		CQuicUserContextRelease releaseUser(_CurrentInMsg->QuicUser); // Decrease ref count after handling message
 		m_CurrentQuicReadQueue->pop();
 		
 		// Use token address for user mapping, since it'll stay constant
