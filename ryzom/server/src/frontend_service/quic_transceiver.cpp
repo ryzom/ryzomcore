@@ -282,6 +282,7 @@ void CQuicTransceiver::start(uint16 port)
 
 	// Ok
 	m->Listening.store(true, std::memory_order_release);
+	nlinfo("Listening for QUIC connections on port %i", (int)port);
 }
 
 void CQuicTransceiver::stop()
