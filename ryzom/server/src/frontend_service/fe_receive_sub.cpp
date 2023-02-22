@@ -344,43 +344,67 @@ void CFeReceiveSub::swapReadQueues()
  */
 void CFeReceiveSub::handleIncomingMsg()
 {
-	nlassert( _History && _CurrentInMsg );
+	nlassert(_History && _CurrentInMsg);
 
 #ifndef SIMUL_CLIENTS
 
-	//nldebug( "FERECV: Handling incoming message" );
-	
+	// nldebug( "FERECV: Handling incoming message" );
+	CClientHost *client;
+
 	if (_CurrentInMsg->QuicUser)
 	{
-		// TODO: Bypass _ClientMap lookup
-		// _CurrentInMsg->QuicUser->ClientHost
-		// _CurrentInMsg->QuicUser->ClientHost->QuicUser
-	}
-
-	// Retrieve client info or add one
-	THostMap::iterator ihm = _ClientMap.find( _CurrentInMsg->AddrFrom );
-	if ( ihm == _ClientMap.end() )
-	{
-		if ( _CurrentInMsg->eventType() == TReceivedMessage::User )
+		// Bypass _ClientMap lookup
+		client = _CurrentInMsg->QuicUser->ClientHost;
+#if !FINAL_VERSION
+		if (!client)
 		{
-			// Handle message for a new client
-			handleReceivedMsg( NULL );
+			nlassert(_ClientMap.find(_CurrentInMsg->AddrFrom) == _ClientMap.end());
 		}
 		else
 		{
-			nlinfo( "FERECV: Not removing already removed client" );
+			nlassert(_ClientMap.find(_CurrentInMsg->AddrFrom) != _ClientMap.end());
+			nlassert(client->QuicUser.get() == _CurrentInMsg->QuicUser);
+		}
+#endif
+		if (client && client->QuicUser.get() != _CurrentInMsg->QuicUser)
+		{
+			nlwarning("FERECV: QuicUser mismatch for client %u (%p != %p)", client->clientId(), client->QuicUser.get(), _CurrentInMsg->QuicUser);
+			return;
+		}
+	}
+	else
+	{
+		// Find the client
+		THostMap::iterator ihm = _ClientMap.find(_CurrentInMsg->AddrFrom);
+		client = (ihm != _ClientMap.end()) ? GETCLIENTA(ihm) : nullptr;
+#if !FINAL_VERSION
+		nlassert(!client || !client->QuicUser.get());
+#endif
+	}
+
+	// Retrieve client info or add one
+	if (!client)
+	{
+		if (_CurrentInMsg->eventType() == TReceivedMessage::User)
+		{
+			// Handle message for a new client
+			handleReceivedMsg(nullptr);
+		}
+		else
+		{
+			nlinfo("FERECV: Not removing already removed client");
 			return;
 		}
 	}
 	else
 	{
 		// Already existing
-		if ( _CurrentInMsg->eventType() == TReceivedMessage::RemoveClient )
+		if (_CurrentInMsg->eventType() == TReceivedMessage::RemoveClient)
 		{
 			// Remove client
-			nlinfo( "FERECV: Disc event for client %u", GETCLIENTA(ihm)->clientId() );
-			removeFromRemoveList(GETCLIENTA(ihm)->clientId() );
-			removeClientById( GETCLIENTA(ihm)->clientId() );
+			nlinfo("FERECV: Disc event for client %u", client->clientId());
+			removeFromRemoveList(client->clientId());
+			removeClientById(client->clientId());
 
 			// Do not call handleReceivedMsg()
 			return;
@@ -389,7 +413,7 @@ void CFeReceiveSub::handleIncomingMsg()
 		{
 			// Handle message
 			H_AUTO(HandleRecvdMsgNotNew);
-			handleReceivedMsg( GETCLIENTA(ihm) );
+			handleReceivedMsg(client);
 		}
 	}
 
@@ -609,6 +633,14 @@ void CFeReceiveSub::removeClientFromMap( CClientHost *client )
 	CFrontEndService::instance()->PrioSub.Prioritizer.DiscreetSpreader.notifyClientRemoval( icm );*/
 
 	_ClientMap.erase( client->address() );
+	if (client->QuicUser.get())
+	{
+		if (client->QuicUser->ClientHost == client)
+		{
+			client->QuicUser->ClientHost = nullptr;
+		}
+		client->QuicUser = nullptr;
+	}
 }
 
 /*
