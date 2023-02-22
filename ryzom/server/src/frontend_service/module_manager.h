@@ -99,11 +99,9 @@ private:
 	//@}
 
 private:
-	/// Constructor. WARNING, never create module manager from another manager !!
-	CModuleManager(const CModuleManager &mod) { nlerror("FEMMAN: forbidden constructor used!"); }
-
 	/// WARNING, never initialize module manager from another manager !!
-	CModuleManager	& operator = (const CModuleManager &mod) { nlerror("FEMMAN: forbidden operator = used!");}
+	CModuleManager(const CModuleManager &mod) = delete;
+	CModuleManager &operator=(const CModuleManager &mod) = delete;
 
 public:
 

@@ -530,6 +530,8 @@ void CQuicTransceiver::shutdown(CQuicUserContext *user)
 
 #else
 
+#define null nullptr
+
 using namespace NLMISC;
 using namespace NLNET;
 
@@ -549,11 +551,19 @@ CQuicTransceiver::~CQuicTransceiver()
 {
 }
 
-void CQuicTransceiver::start()
+void CQuicTransceiver::start(uint16 port)
 {
 }
 
 void CQuicTransceiver::stop()
+{
+}
+
+CQuicUserContext::CQuicUserContext()
+{
+}
+
+CQuicUserContext::~CQuicUserContext()
 {
 }
 
