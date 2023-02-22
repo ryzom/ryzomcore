@@ -490,7 +490,7 @@ CIPv6Address::TType CIPv6Address::getType() const
 	}
 	else
 	{
-		static const uint8 NL_ALIGNLIKE(uint64_t) loopback[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+		static NL_ALIGNLIKE(uint64_t) const uint8 loopback[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
 #ifndef NL_CPP14
 		if (memcmp(m_Address, loopback, 16) == 0) return Loopback;
 #else
@@ -514,7 +514,7 @@ bool CIPv6Address::isAny() const
 	}
 	else
 	{
-		static const uint8 NL_ALIGNLIKE(uint64_t) any[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		static NL_ALIGNLIKE(uint64_t) const uint8 any[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 #ifndef NL_CPP14
 		return memcmp(m_Address, any, 16) == 0;
 #else
