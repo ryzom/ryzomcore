@@ -4280,9 +4280,9 @@ YY_MALLOC_DECL
 
 YY_DECL
 	{
-	register yy_state_type yy_current_state;
-	register char *yy_cp, *yy_bp;
-	register int yy_act;
+	NL_REGISTER yy_state_type yy_current_state;
+	NL_REGISTER char *yy_cp, *yy_bp;
+	NL_REGISTER int yy_act;
 
 #line 90 "ai_service/script_parser.lex"
 

@@ -19,7 +19,9 @@
 
 #include "nel/misc/types_nl.h"
 
+#include <memory>
 #include <atomic>
+
 #include "nel/net/inet_address.h"
 #include "fe_receive_task.h"
 

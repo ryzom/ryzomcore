@@ -21,7 +21,7 @@
 
 #include "crypt.h"
 
-std::string rz_crypt(register const char *key, register const char *setting, char *buf);
+std::string rz_crypt(NL_REGISTER const char *key, NL_REGISTER const char *setting, char *buf);
 std::string __crypt_sha512(const char *key, const char *setting, char *output);
 
 
@@ -329,17 +329,17 @@ typedef union {
 #define	PERM3264(d,d0,d1,cpp,p)				\
 	{ C_block tblk; rz_permute(cpp,&tblk,p,4); LOAD (d,d0,d1,tblk); }
 
-int rz_des_setkey(register const char *key);
+int rz_des_setkey(NL_REGISTER const char *key);
 int rz_des_cipher(const char *in, char *out, long salt, int num_iter);
 void rz_init_des();
 void rz_init_perm(C_block perm[64/CHUNKBITS][1<<CHUNKBITS],
 	unsigned char p[64], int chars_in, int chars_out);
 
 
-void rz_permute(unsigned char *cp, C_block *out, register C_block *p, int chars_in) {
-	register DCL_BLOCK(D,D0,D1);
-	register C_block *tp;
-	register int t;
+void rz_permute(unsigned char *cp, C_block *out, NL_REGISTER C_block *p, int chars_in) {
+	NL_REGISTER DCL_BLOCK(D,D0,D1);
+	NL_REGISTER C_block *tp;
+	NL_REGISTER int t;
 
 	ZERO(D,D0,D1);
 	do {
@@ -508,10 +508,10 @@ static char	cryptresult[1+4+4+11+1];	/* encrypted result */
  * Return a pointer to static data consisting of the "setting"
  * followed by an encryption produced by the "key" and "setting".
  */
-std::string rz_crypt(register const char *key, register const char *setting, char *buf) {
-	register char *encp;
-	register long i;
-	register int t;
+std::string rz_crypt(NL_REGISTER const char *key, NL_REGISTER const char *setting, char *buf) {
+	NL_REGISTER char *encp;
+	NL_REGISTER long i;
+	NL_REGISTER int t;
 	long salt;
 	int num_iter, salt_size;
 	C_block keyblock, rsltblock;
@@ -618,10 +618,10 @@ static C_block	KS[KS_SIZE];
 /*
  * Set up the key schedule from the key.
  */
-int rz_des_setkey(register const char *key) {
-	register DCL_BLOCK(K, K0, K1);
-	register C_block *ptabp;
-	register int i;
+int rz_des_setkey(NL_REGISTER const char *key) {
+	NL_REGISTER DCL_BLOCK(K, K0, K1);
+	NL_REGISTER C_block *ptabp;
+	NL_REGISTER int i;
 	static int des_ready = 0;
 
 	if (!des_ready) {
@@ -653,11 +653,11 @@ int rz_des_setkey(register const char *key) {
 int rz_des_cipher(const char *in, char *out, long salt, int num_iter) {
 	/* variables that we want in registers, most important first */
 #if defined(pdp11)
-	register int j;
+	NL_REGISTER int j;
 #endif
-	register long L0, L1, R0, R1, k;
-	register C_block *kp;
-	register int ks_inc, loop_count;
+	NL_REGISTER long L0, L1, R0, R1, k;
+	NL_REGISTER C_block *kp;
+	NL_REGISTER int ks_inc, loop_count;
 	C_block B;
 
 	L0 = salt;
@@ -766,9 +766,9 @@ int rz_des_cipher(const char *in, char *out, long salt, int num_iter) {
  * done at compile time, if the compiler were capable of that sort of thing.
  */
 /* STATIC */void  rz_init_des() {
-	register int i, j;
-	register long k;
-	register int tableno;
+	NL_REGISTER int i, j;
+	NL_REGISTER long k;
+	NL_REGISTER int tableno;
 	static unsigned char perm[64], tmp32[32];	/* "static" for speed */
 
 	/*
@@ -909,7 +909,7 @@ int rz_des_cipher(const char *in, char *out, long salt, int num_iter) {
  */
 /* STATIC */void rz_init_perm(C_block perm[64/CHUNKBITS][1<<CHUNKBITS],
 	unsigned char p[64], int /* chars_in */, int chars_out) {
-	register int i, j, k, l;
+	NL_REGISTER int i, j, k, l;
 
 	for (k = 0; k < chars_out*8; k++) {	/* each output bit position */
 		l = p[k] - 1;		/* where this bit comes from */
@@ -927,8 +927,8 @@ int rz_des_cipher(const char *in, char *out, long salt, int num_iter) {
 /*
  * "setkey" routine (for backwards compatibility)
  */
-int rz_setkey(register const char *key) {
-	register int i, j, k;
+int rz_setkey(NL_REGISTER const char *key) {
+	NL_REGISTER int i, j, k;
 	C_block keyblock;
 
 	for (i = 0; i < 8; i++) {
@@ -945,8 +945,8 @@ int rz_setkey(register const char *key) {
 /*
  * "encrypt" routine (for backwards compatibility)
  */
-int rz_encrypt(register char *block, int flag) {
-	register int i, j, k;
+int rz_encrypt(NL_REGISTER char *block, int flag) {
+	NL_REGISTER int i, j, k;
 	C_block cblock;
 
 	for (i = 0; i < 8; i++) {
@@ -972,7 +972,7 @@ int rz_encrypt(register char *block, int flag) {
 #ifdef DEBUG_CRYPT
 void prtab(char *s, unsigned char *t, int num_rows)
 {
-	register int i, j;
+	NL_REGISTER int i, j;
 
 	(void)printf("%s:\n", s);
 	for (i = 0; i < num_rows; i++) {
