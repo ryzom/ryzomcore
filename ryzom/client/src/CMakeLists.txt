@@ -48,10 +48,31 @@ IF(WITH_RYZOM_CLIENT)
     ${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/view_bitmap_progress.h)
 
   SOURCE_GROUP("" FILES ${SRC})
-  SOURCE_GROUP("cfg" FILES ${CFG})
-  SOURCE_GROUP("interface_v3" FILES ${SRC_INTERFACE})
-  SOURCE_GROUP("mode" FILES ${SRC_MODE})
-  SOURCE_GROUP("r2" FILES ${SRC_R2})
+  SOURCE_GROUP("__cfg" FILES ${CFG})
+  SOURCE_GROUP("_interface_v3" FILES ${SRC_INTERFACE})
+  SOURCE_GROUP("_motion_modes" FILES ${SRC_MODE})
+  SOURCE_GROUP("_r2" FILES ${SRC_R2})
+
+  # VS grouping for convenience
+  FILE(GLOB RZCLIENT_NETWORK
+    net*.cpp net*.h
+    cdb*.cpp cdb*.h
+    conn*.cpp conn*.h
+    *_decoder.cpp *_decoder.h
+    login.cpp login.h
+    login_*.cpp login_*.h
+    ping.cpp ping.h
+    perm*.cpp perm*.h
+    session_*.cpp session_*.h
+    steam_client.cpp steam_client.h
+    string_manager_client.cpp string_manager_client.h
+  )
+  SOURCE_GROUP("network" FILES ${RZCLIENT_NETWORK})
+  FILE(GLOB RZCLIENT_GLOBALS
+    *_database_*.cpp *_database_*.h
+    global.cpp global.h
+  )
+  SOURCE_GROUP("globals" FILES ${RZCLIENT_GLOBALS})
 
   # on Mac, create a .App Bundle
   if(APPLE)
@@ -184,6 +205,11 @@ IF(WITH_RYZOM_CLIENT)
 
   IF(APPLE)
     TARGET_LINK_LIBRARIES(ryzom_client ${FOUNDATION_FRAMEWORK})
+  ENDIF()
+
+  IF(WITH_MSQUIC)
+    INCLUDE_DIRECTORIES(${msquic_INCLUDE_DIRS})
+    TARGET_LINK_LIBRARIES(ryzom_client ${msquic_LIBRARIES})
   ENDIF()
 
   ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${CURL_DEFINITIONS} ${LUABIND_DEFINITIONS})
