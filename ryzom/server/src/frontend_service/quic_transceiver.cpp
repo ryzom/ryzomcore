@@ -333,6 +333,23 @@ void CQuicTransceiver::release()
 	}
 }
 
+CQuicUserContext::CQuicUserContext()
+{
+}
+
+CQuicUserContext::~CQuicUserContext()
+{
+	// This should never get called before the connection is shutdown,
+	// since we increase the reference when the connection gets opened,
+	// and decrease the reference when the connection is shutdown.
+	CQuicTransceiverImpl *m = Transceiver->m.get();
+	if (Connection) // Should always be set, this is already warned for in the shutdown handling.
+	{
+		MsQuic->ConnectionClose((HQUIC)Connection);
+		Connection = null;
+	}
+}
+
 QUIC_STATUS
 #ifdef _Function_class_
 _Function_class_(QUIC_LISTENER_CALLBACK)
@@ -389,6 +406,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		nlinfo("Connected");
 		nlassert(CStringView((const char *)ev->CONNECTED.NegotiatedAlpn, ev->CONNECTED.NegotiatedAlpnLength) == "ryzomcore4");
 		MsQuic->ConnectionSendResumptionTicket(connection, QUIC_SEND_RESUMPTION_FLAG_NONE, 0, NULL); // What does this even do?
+		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT:
 		nlinfo("Shutdown initiated by transport");
@@ -401,12 +419,15 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
 		CQuicUserContextRelease releaseUser(user); // Hopefully we only get QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE once!
 		nlinfo("Shutdown complete");
-		nlassert(!ev->SHUTDOWN_COMPLETE.AppCloseInProgress); // Only applicable on client, but assert to be sure
-		if (!ev->SHUTDOWN_COMPLETE.AppCloseInProgress)
+		if (ev->SHUTDOWN_COMPLETE.AppCloseInProgress)
 		{
-			MsQuic->ConnectionClose(connection);
+			// Only applicable on client when ConnectionClose is called on the connection, so warn if this happens
+			nlwarning("App close in progress flagged, connection was deleted before the context. This should never happen.");
+			// Should never happen, but just in case, set to null to avoid double deletion
+			user->Connection = null;
 		}
-		// TODO: Report to the boss
+		// TODO: Report to the boss (forge a disconnect datagram from this user)
+		// It's detected through the datagram handling already, anyway
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
@@ -414,10 +435,12 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		nlinfo("Datagram received");
 		// YES PLEASE
 		self->datagramReceived(user, ev->DATAGRAM_RECEIVED.Buffer->Buffer, ev->DATAGRAM_RECEIVED.Buffer->Length);
+		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_STATE_CHANGED:
 		nlinfo("Datagram state changed");
 		user->MaxSendLength.store(ev->DATAGRAM_STATE_CHANGED.SendEnabled ? ev->DATAGRAM_STATE_CHANGED.MaxSendLength : 0, std::memory_order_release);
+		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_LOCAL_ADDRESS_CHANGED:
 	case QUIC_CONNECTION_EVENT_PEER_ADDRESS_CHANGED:
@@ -497,7 +520,18 @@ void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer,
 	}
 }
 
+void CQuicTransceiver::shutdown(CQuicUserContext *user)
+{
+	// Gracefully shuts down a connection (assume this is called from the main service thread only)
+	// Assuming we can call shutdown as many times as we like...
+	CQuicTransceiverImpl *m = user->Transceiver->m.get();
+	MsQuic->ConnectionShutdown((HQUIC)user->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
+}
+
 #else
+
+using namespace NLMISC;
+using namespace NLNET;
 
 class CQuicTransceiverImpl
 {
@@ -549,6 +583,10 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 }
 
 void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
+{
+}
+
+void CQuicTransceiver::shutdown(CQuicUserContext *user)
 {
 }
 

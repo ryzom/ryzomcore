@@ -47,6 +47,9 @@ public:
 	}
 
 public:
+	CQuicUserContext();
+	~CQuicUserContext();
+
 	// Reference to QUIC context (immutable)
 	CQuicTransceiver *Transceiver;
 
@@ -164,8 +167,12 @@ public:
 	/// Send a datagram, fancier than a telegram, but not as reliable
 	void sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size);
 
+	/// Shutdown a connection
+	void shutdown(CQuicUserContext *user);
+
 private:
 	friend CQuicTransceiverImpl;
+	friend CQuicUserContext;
 
 	/// Internal implementation specific
 	std::unique_ptr<CQuicTransceiverImpl> m;

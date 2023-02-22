@@ -642,6 +642,7 @@ void CFeReceiveSub::removeClientFromMap( CClientHost *client )
 		{
 			client->QuicUser->ClientHost = nullptr;
 		}
+		client->QuicUser->Transceiver->shutdown(client->QuicUser.get());
 		client->QuicUser = nullptr;
 	}
 }
