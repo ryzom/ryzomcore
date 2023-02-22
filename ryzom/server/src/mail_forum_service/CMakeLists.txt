@@ -15,7 +15,7 @@ NL_DEFAULT_PROPS(ryzom_mail_forum_service "Ryzom, Services: Mail Forum Service (
 NL_ADD_RUNTIME_FLAGS(ryzom_mail_forum_service)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_mail_forum_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(ryzom_mail_forum_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 INSTALL(TARGETS ryzom_mail_forum_service RUNTIME DESTINATION sbin COMPONENT services)

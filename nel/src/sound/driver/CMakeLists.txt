@@ -11,7 +11,7 @@ NL_ADD_STATIC_SND_DRIVERS(nelsnd_lowlevel)
 NL_ADD_LIB_SUFFIX(nelsnd_lowlevel)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nelsnd_lowlevel ${CMAKE_CURRENT_SOURCE_DIR}/stdsound_lowlevel.h ${CMAKE_CURRENT_SOURCE_DIR}/stdsound_lowlevel.cpp)
+  target_precompile_headers(nelsnd_lowlevel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdsound_lowlevel.h)
 ENDIF()
 
 IF((WITH_INSTALL_LIBRARIES AND WITH_STATIC) OR NOT WITH_STATIC)

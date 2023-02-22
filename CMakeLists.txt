@@ -56,6 +56,7 @@ IF(HUNTER_ENABLED)
  
  # Workaround for PCH compilation issue, from curl intsizeof depencency
   ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
+  # TODO: Still applicable after switching to CMake's builtin precompiled header support?
 ENDIF()
 
 
@@ -252,8 +253,6 @@ IF(WITH_STATIC)
 
   ENDIF()
 ENDIF()
-
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 
 IF(FINAL_VERSION)
   ADD_DEFINITIONS(-DFINAL_VERSION=1)

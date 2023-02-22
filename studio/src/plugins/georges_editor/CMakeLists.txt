@@ -60,7 +60,7 @@ ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
 
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(studio_plugin_georges_editor ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(studio_plugin_georges_editor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 IF(WIN32)

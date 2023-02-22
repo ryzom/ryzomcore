@@ -14,7 +14,7 @@ NL_ADD_LIB_SUFFIX(nelpacs)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nelpacs ${CMAKE_CURRENT_SOURCE_DIR}/stdpacs.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpacs.cpp)
+  target_precompile_headers(nelpacs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpacs.h)
 ENDIF()
 
 NL_GEN_PC(nel-pacs.pc)
