@@ -94,7 +94,7 @@ class CQuicUserContextPtr
 {
 public:
 	CQuicUserContextPtr(CQuicUserContext *user)
-		: m_User(user)
+	    : m_User(user)
 	{
 		if (m_User)
 			m_User->increaseRef();
@@ -112,7 +112,7 @@ public:
 		if (m_User)
 			m_User->increaseRef();
 	}
-	
+
 	CQuicUserContextPtr &operator=(const CQuicUserContextPtr &other)
 	{
 		if (m_User)
@@ -122,12 +122,12 @@ public:
 			m_User->increaseRef();
 		return *this;
 	}
-	
+
 	CQuicUserContext *operator->() const
 	{
 		return m_User;
 	}
-	
+
 	CQuicUserContext *get() const
 	{
 		return m_User;

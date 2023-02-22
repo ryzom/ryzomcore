@@ -32,6 +32,19 @@
 using namespace NLMISC;
 using namespace NLNET;
 
+// This implements QUIC connection support between the Ryzom Core client and server.
+
+// It simply runs the existing UDP-based protocol over QUIC datagrams
+// i.e. we're just treating QUIC as an alternate transport.
+
+// In the future we can use QUIC's stream support to add dedicated reliable channels
+// for messages from IOS (chat, etc.) and DDS (Ryzom Ring scenario editor),
+// as well as for the initial database sync message at login,
+// which should improve the login experience for players
+// and speed up loading of NPC dialogs.
+
+namespace /* anonymous */ {
+
 // This really hammers fast
 class CAtomicFlagLock
 {
@@ -71,6 +84,8 @@ public:
 private:
 	std::atomic_flag &m_Flag;
 };
+
+} /* anonymous namespace */
 
 class CQuicTransceiverImpl
 {
@@ -363,7 +378,7 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 {
 	// Increase reference for FIFO copy
 	user->increaseRef();
-	
+
 	// Locked block
 	{
 		CAtomicFlagLockYield(m->BufferMutex);
@@ -445,7 +460,6 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 
 void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
 {
-
 }
 
 #endif
