@@ -64,7 +64,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::readDecimal (double &value)
 void CEvalNumExpr::readIntegerNumberDecimal (double &value)
 {
 	// Registered values
-	register double regValue = 0;
+	NL_REGISTER double regValue = 0;
 
 	// Read the first value
 	char currentChar = *_ExprPtr;
@@ -294,7 +294,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::getNextToken (TToken &token)
 				currentChar = *_ExprPtr;
 
 				// Registered values
-				register double regValue = 0;
+				NL_REGISTER double regValue = 0;
 				if ((currentChar >= '0') && (currentChar <= '9'))
 				{
 					regValue += (currentChar - '0');
@@ -358,7 +358,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::getNextToken (TToken &token)
 				currentChar = *_ExprPtr;
 
 				// Registered values
-				register double regValue = 0;
+				NL_REGISTER double regValue = 0;
 
 				// Check octal number
 				if (currentChar > '7')

@@ -190,9 +190,15 @@
 #endif
 
 #ifdef NL_CPP14
-#define NL_ALIGNLIKE(type) alignas(alignof(type))
+#define NL_ALIGNAS(type) alignas(type)
 #else
-#define NL_ALIGNLIKE(type)
+#define NL_ALIGNAS(type)
+#endif
+
+#ifdef NL_CPP17
+#define NL_REGISTER
+#else
+#define NL_REGISTER register
 #endif
 
 #if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)

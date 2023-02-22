@@ -1010,7 +1010,7 @@ bool CVertexBuffer::setVertexColorFormat (TVertexColorType format)
 			{
 				if (ptr0)
 				{
-					const register uint32 value = *ptr0;
+					const NL_REGISTER uint32 value = *ptr0;
 #ifdef NL_LITTLE_ENDIAN
 					*ptr0 = (value&0xff00ff00)|((value&0xff)<<16)|((value&0xff0000)>>16);
 #else // NL_LITTLE_ENDIAN
@@ -1020,7 +1020,7 @@ bool CVertexBuffer::setVertexColorFormat (TVertexColorType format)
 				}
 				if (ptr1)
 				{
-					const register uint32 value = *ptr1;
+					const NL_REGISTER uint32 value = *ptr1;
 #ifdef NL_LITTLE_ENDIAN
 					*ptr1 = (value&0xff00ff00)|((value&0xff)<<16)|((value&0xff0000)>>16);
 #else // NL_LITTLE_ENDIAN

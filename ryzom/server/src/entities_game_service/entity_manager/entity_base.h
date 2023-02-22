@@ -640,8 +640,8 @@ public:
 	///
 	inline void setBars()
 	{
-		register TYPE_BARS barresValue = 0;
-		register sint32 barLevel;
+		NL_REGISTER TYPE_BARS barresValue = 0;
+		NL_REGISTER sint32 barLevel;
 		SCharacteristicsAndScores &hp = _PhysScores._PhysicalScores[SCORES::hit_points];
 		sint32 maxhp = hp.Max;
 		if ( maxhp != 0 )

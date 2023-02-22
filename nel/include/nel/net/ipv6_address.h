@@ -35,7 +35,7 @@ namespace NLNET {
  * \author Jan BOON (Kaetemi)
  * \date 2023
  */
-class NL_ALIGNLIKE(uint64_t) CIPv6Address
+class NL_ALIGNAS(uint64_t) CIPv6Address
 {
 public:
 	typedef struct sockaddr_in TSockAddrIn;
@@ -135,7 +135,7 @@ public:
 	{
 		if (!m_Valid)
 			return false;
-		static NL_ALIGNLIKE(uint64_t) const uint8 reference[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF };
+		NL_ALIGNAS(uint64_t) static const uint8 reference[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF };
 #ifndef NL_CPP14
 		return memcmp(m_Address, reference, 12) == 0;
 #else
@@ -173,7 +173,7 @@ private:
 	// An IPv4 address is stored in the last 4 bytes, with 0xffff in the 2 bytes before.
 	// For example, IPv4 address 192.168.0.1 is stored as
 	// 0000:0000:0000:0000:0000:ffff:c0a8:0001
-	NL_ALIGNLIKE(uint64_t) uint8 m_Address[16];
+	NL_ALIGNAS(uint64_t) uint8 m_Address[16];
 	
 	// If false, this structure is considered empty or null.
 	bool m_Valid;
