@@ -85,10 +85,15 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 	opts += [ "-DWITH_NEL_TESTS=OFF" ]
 	opts += [ "-DWITH_STATIC=ON" ]
 	
-	if len(FilterExternalDirs([ "ffmpeg", "ffmpeg" ], filteredPrefix)) > 0:
+	if len(FilterExternalDirs([ "ffmpeg" ], filteredPrefix)) > 0:
 		opts += [ "-DWITH_FFMPEG=ON" ]
 	else:
 		opts += [ "-DWITH_FFMPEG=OFF" ]
+	
+	if len(FilterExternalDirs([ "msquic" ], filteredPrefix)) > 0:
+		opts += [ "-DWITH_MSQUIC=ON" ]
+	else:
+		opts += [ "-DWITH_MSQUIC=OFF" ]
 	
 	if len(FilterExternalDirs([ "qt4", "qt4_static" ], filteredPrefix)) > 0:
 		opts += [ "-DWITH_QT=ON" ]
@@ -250,6 +255,7 @@ def FilterPrefix(target, spec):
 	global NeLSpecPluginMax
 	nelDirs = [ "zlib", "openssl", "curl", "libjpeg", "libpng", "iconv", "libxml2", "freetype2", "ogg", "vorbis", "openal", "gl", "gles", "lua", "boost", "luabind" , "mariadb" ]
 	toolsDirs = [ "squish", "assimp" ]
+	serverClientDirs = [ "msquic" ]
 	tc = NeLToolchains[target["Toolchain"]]
 	cfg = target["Config"]
 	qt = None
@@ -258,6 +264,8 @@ def FilterPrefix(target, spec):
 	dirs = [] + nelDirs
 	if spec == NeLSpecTools or spec == NeLSpecSamples or spec == NeLSpecPluginMax:
 		dirs = dirs + toolsDirs
+	if spec == NeLSpecServer or spec == NeLSpecClient:
+		dirs = dirs + serverClientDirs
 	res = FilterExternalDirs(dirs, tc["Prefix"])
 	if qt:
 		for qtVer in qt:
