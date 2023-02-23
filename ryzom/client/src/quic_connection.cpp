@@ -129,9 +129,10 @@ void CQuicConnection::connect(const NLNET::CInetHost &addr)
 	}
 
 	{
-		CAutoMutex<CMutex> lock(m->StateMutex);
+		CUnlockableAutoMutex<CMutex> lock(m->StateMutex);
 		if (m->State != Disconnected)
 		{
+			lock.unlock();
 			m->ConnectingAddr = addr;
 			m->ConnectingAddrSet = true;
 			return; // Try again in update()

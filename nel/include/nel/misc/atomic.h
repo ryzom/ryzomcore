@@ -273,12 +273,17 @@ private:
 public:
 	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
+		if (order == TMemoryOrderRelaxed)
+			return m_Value;
 		return _InterlockedExchangeAdd(const_cast<volatile long *>(&m_Value), 0); // acquire
 	}
 
 	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
 	{
-		_InterlockedExchange(&m_Value, value); // release
+		if (order == TMemoryOrderRelaxed)
+			m_Value = value;
+		else
+			_InterlockedExchange(&m_Value, value); // release
 		return value;
 	}
 
@@ -327,14 +332,23 @@ private:
 public:
 	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
+		if (order == TMemoryOrderRelaxed)
+			return m_Value;
 		return __sync_fetch_and_add(const_cast<volatile int *>(&m_Value), 0); // acquire
 	}
 
 	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
 	{
-		__sync_lock_test_and_set(&m_Value, value);
-		if (order >= TMemoryOrderRelease)
-			__sync_synchronize(); // release
+		if (order == TMemoryOrderRelaxed)
+		{
+			m_Value = value;
+		}
+		else
+		{
+			__sync_lock_test_and_set(&m_Value, value);
+			if (order >= TMemoryOrderRelease)
+				__sync_synchronize(); // release
+		}
 		return value;
 	}
 
@@ -414,7 +428,7 @@ public:
 	{
 		return load() == value;
 	}
-	
+
 	NL_FORCE_INLINE bool operator!=(int value) const
 	{
 		return load() != value;
@@ -471,7 +485,7 @@ public:
 	}
 };
 
-template<typename T>
+template <typename T>
 class CAtomicEnum
 {
 #ifdef NL_CPP14
@@ -479,7 +493,7 @@ class CAtomicEnum
 	// In this case we must use the standard atomic class anyway
 	// even if NL_ATOMIC_CPP14 is not defined,
 	// since we need to match the type size
-	
+
 private:
 	std::atomic<T> m_Value;
 
@@ -500,23 +514,26 @@ public:
 	}
 
 	static_assert(sizeof(std::atomic<T>) <= sizeof(T),
-		"Atomic enum is larger than enum type, it may be better to use a native implementation");
+	    "Atomic enum is larger than enum type, it may be better to use a native implementation");
 #else
 private:
 	CAtomicInt m_Value;
 
 public:
-	NL_FORCE_INLINE (int)T load(TMemoryOrder order = TMemoryOrderAcquire) const
+	NL_FORCE_INLINE(int)
+	T load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
 		return m_Value.load(order);
 	}
 
-	NL_FORCE_INLINE (int)T store(T value, TMemoryOrder order = TMemoryOrderRelease)
+	NL_FORCE_INLINE(int)
+	T store(T value, TMemoryOrder order = TMemoryOrderRelease)
 	{
 		return m_Value.store((int)value, order);
 	}
 
-	NL_FORCE_INLINE (int)T exchange(T value, TMemoryOrder order = TMemoryOrderAcqRel)
+	NL_FORCE_INLINE(int)
+	T exchange(T value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
 		return m_Value.exchange((int)value, order);
 	}
@@ -536,7 +553,7 @@ public:
 	{
 		return store(value);
 	}
-	
+
 	NL_FORCE_INLINE CAtomicEnum(const CAtomicEnum &other)
 	{
 		store(other.load());
@@ -568,7 +585,7 @@ public:
 	{
 		return load() <= value;
 	}
-	
+
 	NL_FORCE_INLINE bool operator>(T value) const
 	{
 		return load() > value;
@@ -611,17 +628,17 @@ public:
 };
 
 /// Hold a spinlock on an atomic flag
-class CAtomicFlagLockSpin
+class CAtomicLockSpin
 {
 public:
-	NL_FORCE_INLINE CAtomicFlagLockSpin(CAtomicFlag &flag)
+	NL_FORCE_INLINE CAtomicLockSpin(CAtomicFlag &flag)
 	    : m_Flag(flag)
 	{
 		while (m_Flag.testAndSet())
 			;
 	}
 
-	NL_FORCE_INLINE ~CAtomicFlagLockSpin()
+	NL_FORCE_INLINE ~CAtomicLockSpin()
 	{
 		m_Flag.clear();
 	}
@@ -632,27 +649,27 @@ private:
 
 /// Hold a spinlock on an atomic flag
 /// Yield while waiting
-class CAtomicFlagLockYield
+class CAtomicLockYield
 {
 private:
 	CAtomicFlag &m_Flag;
 
 public:
-	NL_FORCE_INLINE CAtomicFlagLockYield(CAtomicFlag &flag)
+	NL_FORCE_INLINE CAtomicLockYield(CAtomicFlag &flag)
 	    : m_Flag(flag)
 	{
 		while (m_Flag.testAndSet())
 			nlYield();
 	}
 
-	NL_FORCE_INLINE ~CAtomicFlagLockYield()
+	NL_FORCE_INLINE ~CAtomicLockYield()
 	{
 		m_Flag.clear();
 	}
 };
 
 /// Spinlock that follows the original implementation of NLMISC::CFastMutex
-class CAtomicFlagLockFast
+class CAtomicLockFast
 {
 private:
 	CAtomicFlag &m_Flag;
@@ -699,20 +716,20 @@ public:
 		flag.clear();
 	}
 
-	inline CAtomicFlagLockFast(CAtomicFlag &flag)
+	inline CAtomicLockFast(CAtomicFlag &flag)
 	    : m_Flag(flag)
 	{
 		enter(flag);
 	}
 
-	NL_FORCE_INLINE ~CAtomicFlagLockFast()
+	NL_FORCE_INLINE ~CAtomicLockFast()
 	{
 		leave(m_Flag);
 	}
 };
 
 /// Spinlock that follows the original implementation of NLMISC::CFastMutexMP
-class CAtomicFlagLockFastMP
+class CAtomicLockFastMP
 {
 private:
 	CAtomicFlag &m_Flag;
@@ -787,20 +804,20 @@ public:
 		flag.clear();
 	}
 
-	inline CAtomicFlagLockFastMP(CAtomicFlag &flag)
+	inline CAtomicLockFastMP(CAtomicFlag &flag)
 	    : m_Flag(flag)
 	{
 		enter(flag);
 	}
 
-	NL_FORCE_INLINE ~CAtomicFlagLockFastMP()
+	NL_FORCE_INLINE ~CAtomicLockFastMP()
 	{
 		leave(m_Flag);
 	}
 };
 
 /// This class wraps an existing CAtomicFlag to have the same semantics as NLMISC::CMutex and std::mutex
-/// It uses the CAtomicFlagLockFast locking mechanism
+/// It uses the CAtomicLockFast locking mechanism
 class CFastMutexWrapper
 {
 private:
@@ -814,22 +831,22 @@ public:
 
 	inline void lock()
 	{
-		CAtomicFlagLockFast::enter(m_Flag);
+		CAtomicLockFast::enter(m_Flag);
 	}
 
 	inline void enter()
 	{
-		CAtomicFlagLockFast::enter(m_Flag);
+		CAtomicLockFast::enter(m_Flag);
 	}
 
 	NL_FORCE_INLINE void unlock()
 	{
-		CAtomicFlagLockFast::leave(m_Flag);
+		CAtomicLockFast::leave(m_Flag);
 	}
 
 	NL_FORCE_INLINE void leave()
 	{
-		CAtomicFlagLockFast::leave(m_Flag);
+		CAtomicLockFast::leave(m_Flag);
 	}
 };
 

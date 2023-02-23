@@ -71,7 +71,8 @@ namespace NLMISC {
 // using CSynchronized = CStdSynchronized<T>;
 #	define CStdMutex CMutex
 #	define CStdSynchronized CSynchronized
-//#	define CUnfairMutex CStdMutex
+#	define CUnfairMutex CStdMutex
+#	define CFairMutex CStdMutex
 #elif defined(NL_OS_WINDOWS)
 	// By default on Windows, all mutex/synchronization use the CFair* class to avoid freeze problem.
 #	define CMutex CFairMutex
@@ -223,7 +224,7 @@ test_again:
  * \author Nevrax France
  * \date 2002, 2003
  */
-#if defined(__ppc__) && !defined(NL_OS_MAC) && (GCC_VERSION <= 40100)
+#if defined(__ppc__) && !defined(NL_OS_MAC) && (GCC_VERSION <= 40100) && !defined(NL_ATOMIC_H)
 #	error "no CFastMutex implementation available, try to use GCC >4.0.1"
 #endif
 
@@ -241,21 +242,21 @@ private:
 
 public:
 	/// Same as constructor, useful for init in a shared memory block (though, you should really use emplacement new!)
-	void init()
+	NL_FORCE_INLINE void init()
 	{
 		m_Flag.clear();
 	}
 
 	/// Enter the critical section
-	void enter()
+	inline void enter()
 	{
-		CAtomicFlagLockFast::enter(m_Flag);
+		CAtomicLockFast::enter(m_Flag);
 	}
 
 	/// Leave the critical section
-	void leave()
+	NL_FORCE_INLINE void leave()
 	{
-		CAtomicFlagLockFast::leave(m_Flag);
+		CAtomicLockFast::leave(m_Flag);
 	}
 };
 
@@ -376,21 +377,21 @@ private:
 
 public:
 	/// Same as constructor, useful for init in a shared memory block (though, you should really use emplacement new!)
-	void init()
+	NL_FORCE_INLINE void init()
 	{
 		m_Flag.clear();
 	}
 
 	/// Enter the critical section
-	void enter()
+	inline void enter()
 	{
-		CAtomicFlagLockFastMP::enter(m_Flag);
+		CAtomicLockFastMP::enter(m_Flag);
 	}
 
 	/// Leave the critical section
-	void leave()
+	NL_FORCE_INLINE void leave()
 	{
-		CAtomicFlagLockFastMP::leave(m_Flag);
+		CAtomicLockFastMP::leave(m_Flag);
 	}
 };
 
@@ -568,20 +569,21 @@ struct TNelRtlCriticalSection {
 class CStdMutex : std::mutex
 {
 public:
-	CStdMutex(const std::string &name)
+	NL_FORCE_INLINE CStdMutex(const std::string &name)
 	    : std::mutex()
 	{
 	}
-	CStdMutex()
+	NL_FORCE_INLINE CStdMutex()
 	    : std::mutex()
 	{
 	}
 
-	void enter() { std::mutex::lock(); }
-	void leave() { std::mutex::unlock(); }
+	NL_FORCE_INLINE void enter() { std::mutex::lock(); }
+	NL_FORCE_INLINE void leave() { std::mutex::unlock(); }
 };
 #endif
 
+#ifndef CFairMutex
 
 /**
  * Kind of "fair" mutex
@@ -650,6 +652,8 @@ private:
 #endif // MUTEX_DEBUG
 
 };
+
+#endif
 
 
 /*
@@ -855,37 +859,120 @@ private:
 };
 #endif
 
+#ifdef NL_ATOMIC_H
+
+/// Fair spinlock
+/// Yield while waiting
+class CAtomicTicketMutex
+{
+private:
+	CAtomicInt m_Ticket;
+	CAtomicInt m_Serving;
+
+public: 
+	NL_FORCE_INLINE CAtomicTicketMutex()
+		: m_Ticket(0)
+		, m_Serving(0)
+	{
+	}
+
+	NL_FORCE_INLINE void lock()
+	{
+		int ticket = m_Ticket.fetchAdd(1, TMemoryOrderAcqRel);
+		while (m_Serving.load(TMemoryOrderAcquire) != ticket)
+			nlYield();
+	}
+
+	NL_FORCE_INLINE void enter()
+	{
+		lock();
+	}
+
+	NL_FORCE_INLINE void unlock()
+	{
+		m_Serving.fetchAdd(1, TMemoryOrderRelease);
+	}
+
+	NL_FORCE_INLINE void leave()
+	{
+		unlock();
+	}
+};
+
+#endif
 
 /** Helper class that allow easy usage of mutex to protect
  *	a local block of code with an existing mutex.
  */
-template <class TMutex=CMutex>
+template <class TMutex = CMutex>
 class CAutoMutex
 {
-	TMutex	&_Mutex;
+private:
+	TMutex &m_Mutex;
 
-	// forbeden copy or assignent
-	CAutoMutex(const CAutoMutex &/* other */)
-	{
-	}
-
-	CAutoMutex &operator = (const CAutoMutex &/* other */)
-	{
-		return *this;
-	}
+#ifdef NL_CPP14
+	CAutoMutex(const CAutoMutex &) = delete;
+	CAutoMutex &operator=(const CAutoMutex &) = delete;
+#else
+	// Forbidden copy or assignent
+	CAutoMutex(const CAutoMutex & /* other */);
+	CAutoMutex &operator=(const CAutoMutex & /* other */);
+#endif
 
 public:
-	CAutoMutex(TMutex &mutex)
-		:	_Mutex(mutex)
+	NL_FORCE_INLINE CAutoMutex(TMutex &mutex)
+	    : m_Mutex(mutex)
 	{
-		_Mutex.enter();
+		m_Mutex.enter();
 	}
 
-	~CAutoMutex()
+	NL_FORCE_INLINE ~CAutoMutex()
 	{
-		_Mutex.leave();
+		m_Mutex.leave();
+	}
+};
+
+/// Same as CAutoMutex, but you can unlock it early.
+template <class TMutex = CMutex>
+class CUnlockableAutoMutex
+{
+private:
+	TMutex &m_Mutex;
+	bool m_Unlocked;
+
+#ifdef NL_CPP14
+	CUnlockableAutoMutex(const CUnlockableAutoMutex &) = delete;
+	CUnlockableAutoMutex &operator=(const CUnlockableAutoMutex &) = delete;
+#else
+	// Forbidden copy or assignent
+	CUnlockableAutoMutex(const CUnlockableAutoMutex & /* other */);
+	CUnlockableAutoMutex &operator=(const CUnlockableAutoMutex & /* other */);
+#endif
+
+public:
+	NL_FORCE_INLINE CUnlockableAutoMutex(TMutex &mutex)
+	    : m_Mutex(mutex)
+	    , m_Unlocked(false)
+	{
+		m_Mutex.enter();
 	}
 
+	NL_FORCE_INLINE ~CUnlockableAutoMutex()
+	{
+		if (!m_Unlocked)
+			m_Mutex.leave();
+	}
+
+	NL_FORCE_INLINE void leave()
+	{
+		m_Unlocked = true;
+		m_Mutex.leave();
+	}
+
+	NL_FORCE_INLINE void unlock()
+	{
+		leave();
+	}
 };
 
 } // NLMISC

@@ -48,7 +48,7 @@ CAdpcmXAudio2::~CAdpcmXAudio2()
 /// Submit the next ADPCM buffer, only 1 buffer can be submitted at a time!
 void CAdpcmXAudio2::submitSourceBuffer(CBufferXAudio2 *buffer)
 {
-	_Mutex.enter();
+	NLMISC::CAutoMutex<NLMISC::CMutex> lock(_Mutex);
 	if (_SourceData) nlerror(NLSOUND_XAUDIO2_PREFIX "Only 1 ADPCM buffer can be submitted at a time! Call flushSourceBuffers first in CSourceXAudio2 stop().");
 	_SourceSize = buffer->getSize();
 	if (_SourceSize == 0)
@@ -64,13 +64,12 @@ void CAdpcmXAudio2::submitSourceBuffer(CBufferXAudio2 *buffer)
 		// nldebug("submit called!!!");
 		processBuffers();
 	}
-	_Mutex.leave();
 }
 
 /// Reset the decoder, clear the queued buffer
 void CAdpcmXAudio2::flushSourceBuffers()
 {
-	_Mutex.enter();
+	NLMISC::CAutoMutex<NLMISC::CMutex> lock(_Mutex);
 	_SourceData = NULL;
 	for (uint i = 0; i < _BufferNb; ++i) 
 		_ValidBufferContext[i] = 0;
@@ -80,7 +79,6 @@ void CAdpcmXAudio2::flushSourceBuffers()
 	_AdpcmIndex = 0;
 	//_PcmSize = 0;
 	//_AdpcmSize = 0;
-	_Mutex.leave();
 }
 
 void CAdpcmXAudio2::processBuffers()
@@ -180,9 +178,10 @@ ProcessBuffers:
 	// The "correct" way would be to decode the buffer on a seperate thread,
 	// but since ADPCM decoding should be really fast, there is no problem
 	// with doing it here directly.
-	_Mutex.enter();
-	processBuffers();
-	_Mutex.leave();
+	{
+		NLMISC::CAutoMutex<NLMISC::CMutex> lock(_Mutex);
+		processBuffers();
+	}
 }
 
 void CAdpcmXAudio2::OnLoopEnd(void * /* pBufferContext */)

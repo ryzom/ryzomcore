@@ -195,6 +195,7 @@ void CSharedMutex::leave()
 
 /////////////////////////// CFairMutex
 
+#ifndef CFairMutex
 
 /*
  * Windows version
@@ -281,6 +282,8 @@ void CFairMutex::leave()
 
 	debugLeave();
 }
+
+#endif
 
 /*************
  * Unix code *
@@ -391,6 +394,8 @@ void CUnfairMutex::leave()
 
 #endif
 
+#ifndef CFairMutex
+
 /*
  * Unix version
  */
@@ -451,6 +456,8 @@ void CFairMutex::leave()
 	sem_post( const_cast<sem_t*>(&_Sem) );
 #endif
 }
+
+#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
