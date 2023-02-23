@@ -81,6 +81,10 @@ public:
 	/// Returns the first address
 	inline const CInetAddress &address() const { return m_Addresses[0]; }
 
+	/// Hostname
+	const std::string &hostname() const { return m_Hostname; }
+
+	/// Port
 	inline uint16 port() const { return m_Addresses[0].port(); }
 	void setPort(uint16 port);
 

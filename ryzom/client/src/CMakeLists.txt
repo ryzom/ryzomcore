@@ -66,6 +66,8 @@ IF(WITH_RYZOM_CLIENT)
     session_*.cpp session_*.h
     steam_client.cpp steam_client.h
     string_manager_client.cpp string_manager_client.h
+    *_connection.cpp *_connection.h
+    *download*.cpp *download*.h
   )
   SOURCE_GROUP("network" FILES ${RZCLIENT_NETWORK})
   FILE(GLOB RZCLIENT_GLOBALS
@@ -73,6 +75,37 @@ IF(WITH_RYZOM_CLIENT)
     global.cpp global.h
   )
   SOURCE_GROUP("globals" FILES ${RZCLIENT_GLOBALS})
+  FILE(GLOB RZCLIENT_ANIMATION
+    animation.cpp animation.h
+    animation_*.cpp animation_*.h
+  )
+  SOURCE_GROUP("animation" FILES ${RZCLIENT_ANIMATION})
+  FILE(GLOB RZCLIENT_FX
+    fx*.cpp fx*.h
+    *_fx*.cpp *_fx*.h
+    projectile_*.cpp projectile_*.h
+  )
+  SOURCE_GROUP("fx" FILES ${RZCLIENT_FX})
+  FILE(GLOB RZCLIENT_WEATHER
+    sky.cpp sky.h
+    sky_*.cpp sky_*.h
+    weather.cpp weather.h
+    weather_*.cpp weather_*.h
+    precipitation.cpp precipitation.h
+    precipitation_*.cpp precipitation_*.h
+    light_cycle_*.cpp light_cycle_*.h
+  )
+  SOURCE_GROUP("weather" FILES ${RZCLIENT_WEATHER})
+  FILE(GLOB RZCLIENT_OUTPOSTS
+    outpost.cpp outpost.h
+    outpost_*.cpp outpost_*.h
+  )
+  SOURCE_GROUP("outposts" FILES ${RZCLIENT_OUTPOSTS})
+  FILE(GLOB RZCLIENT_DECALS
+    decal.cpp decal.h
+    decal*.cpp decal_*.h
+  )
+  SOURCE_GROUP("decals" FILES ${RZCLIENT_DECALS})
 
   # on Mac, create a .App Bundle
   if(APPLE)
