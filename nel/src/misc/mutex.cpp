@@ -47,8 +47,6 @@ using namespace std;
 
 namespace NLMISC {
 
-
-
 inline void EnterMutex( void *handle )
 {
 #ifdef NL_DEBUG
@@ -88,6 +86,8 @@ inline void LeaveMutex( void *handle )
 
 /////////////////////////// CUnfairMutex
 
+
+#ifndef CUnfairMutex
 
 /*
  * Windows version
@@ -137,6 +137,7 @@ void CUnfairMutex::leave()
 	LeaveMutex( _Mutex );
 }
 
+#endif
 
 /////////////////////////// CSharedMutexW
 
@@ -309,6 +310,7 @@ extern "C"
 
 namespace NLMISC {
 
+#ifndef CUnfairMutex
 
 CUnfairMutex::CUnfairMutex()
 {
@@ -387,6 +389,7 @@ void CUnfairMutex::leave()
 	}*/
 }
 
+#endif
 
 /*
  * Unix version

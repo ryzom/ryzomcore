@@ -1,0 +1,639 @@
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#pragma once
+#ifndef NL_ATOMIC_H
+#define NL_ATOMIC_H
+
+#include "types_nl.h"
+#include "common.h"
+
+#ifdef NL_CPP14
+// Disable this to test native implementation
+// #define NL_ATOMIC_CPP14
+#endif
+
+#if (defined(NL_ATOMIC_CPP14) && defined(NL_CPP20))
+#define NL_ATOMIC_CPP20
+#endif
+
+#if (defined(NL_COMP_GCC) || defined(NL_COMP_CLANG))
+#include <sched.h>
+#define NL_ATOMIC_GCC
+#endif
+
+#if (defined(NL_ATOMIC_GCC) && defined(__has_builtin))
+#if __has_builtin(__atomic_load_n)       \
+    && __has_builtin(__atomic_store_n)   \
+    && __has_builtin(__atomic_fetch_add) \
+    && __has_builtin(__atomic_exchange_n)
+#define NL_ATOMIC_GCC_CXX11
+#endif
+#endif
+
+#if (defined(NL_COMP_VC) || defined(NL_OS_WINDOWS))
+#define NL_ATOMIC_WIN32
+#endif
+
+#ifdef NL_ATOMIC_CPP14
+#include <atomic>
+#include <mutex>
+#endif
+
+namespace NLMISC {
+
+#if !defined(NL_ATOMIC_CPP14) && defined(NL_ATOMIC_WIN32)
+extern void nlYield();
+#else
+namespace /* anonymous */ {
+NL_FORCE_INLINE void nlYield()
+{
+#if defined(NL_ATOMIC_CPP14)
+	std::this_thread::yield();
+#elif defined(NL_ATOMIC_GCC)
+	sched_yield();
+#else
+	NLMISC::nlSleep(0);
+#endif
+}
+} /* anonymous namespace */
+#endif
+
+enum TMemoryOrder
+{
+#if defined(NL_ATOMIC_CPP14)
+	TMemoryOrderRelaxed = std::memory_order_relaxed,
+	TMemoryOrderConsume = std::memory_order_consume,
+	TMemoryOrderAcquire = std::memory_order_acquire,
+	TMemoryOrderRelease = std::memory_order_release,
+	TMemoryOrderAcqRel = std::memory_order_acq_rel,
+	TMemoryOrderSeqCst = std::memory_order_seq_cst,
+#elif defined(NL_ATOMIC_GCC_CXX11)
+	TMemoryOrderRelaxed = __ATOMIC_RELAXED,
+	TMemoryOrderConsume = __ATOMIC_CONSUME,
+	TMemoryOrderAcquire = __ATOMIC_ACQUIRE,
+	TMemoryOrderRelease = __ATOMIC_RELEASE,
+	TMemoryOrderAcqRel = __ATOMIC_ACQ_REL,
+	TMemoryOrderSeqCst = __ATOMIC_SEQ_CST,
+#else
+	TMemoryOrderRelaxed = 0,
+	TMemoryOrderConsume = 1,
+	TMemoryOrderAcquire = 2,
+	TMemoryOrderRelease = 3,
+	TMemoryOrderAcqRel = 4,
+	TMemoryOrderSeqCst = 5,
+#endif
+};
+
+#if defined(NL_ATOMIC_CPP14) && defined(NL_ATOMIC_GCC_CXX11)
+static_assert(std::memory_order_relaxed == __ATOMIC_RELAXED);
+static_assert(std::memory_order_consume == __ATOMIC_CONSUME);
+static_assert(std::memory_order_acquire == __ATOMIC_ACQUIRE);
+static_assert(std::memory_order_release == __ATOMIC_RELEASE);
+static_assert(std::memory_order_acq_rel == __ATOMIC_ACQ_REL);
+static_assert(std::memory_order_seq_cst == __ATOMIC_SEQ_CST);
+#endif
+
+/// Atomic flag
+/// Initialized clear.
+/// The only supported memory orders are
+/// TMemoryOrderAcquire for testAndSet and TMemoryOrderRelease for clear.
+/// Higher memory orders may be used depending on the implementation.
+/// This flag is useful for spinlocks.
+class CAtomicFlag
+{
+#if defined(NL_ATOMIC_GCC_CXX11)
+private:
+	volatile bool m_Flag;
+
+public:
+	NL_FORCE_INLINE bool testAndSet()
+	{
+		return __atomic_test_and_set(&m_Flag, __ATOMIC_ACQUIRE); // acquire
+	}
+
+	NL_FORCE_INLINE void clear()
+	{
+		__atomic_clear(&m_Flag, __ATOMIC_RELEASE); // release
+	}
+
+	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+	{
+		return __atomic_load_n(&m_Flag, __ATOMIC_ACQUIRE); // acquire
+	}
+#elif defined(NL_ATOMIC_GCC)
+private:
+	volatile bool m_Flag;
+
+public:
+	NL_FORCE_INLINE bool testAndSet()
+	{
+		return __sync_lock_test_and_set(&m_Flag, true); // acquire
+	}
+
+	NL_FORCE_INLINE void clear()
+	{
+		__sync_lock_release(&m_Flag); // release
+	}
+
+	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+	{
+		return __sync_fetch_and_add(const_cast<volatile bool *>(&m_Flag), 0); // acquire
+	}
+#elif defined(NL_ATOMIC_CPP20)
+private:
+	std::atomic_flag m_Flag;
+
+public:
+	NL_FORCE_INLINE bool testAndSet()
+	{
+		return m_Flag.test_and_set(std::memory_order_acquire);
+	}
+
+	NL_FORCE_INLINE void clear()
+	{
+		m_Flag.clear(std::memory_order_release);
+	}
+
+	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+	{
+		return m_Flag.test(std::memory_order_acquire);
+	}
+
+	CAtomicFlag(const CAtomicFlag &) = delete; // Flags cannot be copied
+	CAtomicFlag &operator=(const CAtomicFlag &) = delete;
+
+	static_assert(sizeof(std::atomic_flag) <= sizeof(int) || sizeof(std::atomic_flag) <= sizeof(bool),
+	    "Atomic flag is larger than int and bool, it may be better to use a native implementation");
+#elif defined(NL_ATOMIC_CPP14)
+private:
+	std::atomic_bool m_Flag;
+
+public:
+	NL_FORCE_INLINE bool testAndSet()
+	{
+		return m_Flag.exchange(true, std::memory_order_acquire);
+	}
+
+	NL_FORCE_INLINE void clear()
+	{
+		m_Flag.store(false, std::memory_order_release);
+	}
+
+	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+	{
+		return m_Flag.load(std::memory_order_acquire);
+	}
+
+	CAtomicFlag(const CAtomicFlag &) = delete; // Flags cannot be copied
+	CAtomicFlag &operator=(const CAtomicFlag &) = delete;
+
+	static_assert(sizeof(std::atomic_bool) <= sizeof(bool),
+	    "Atomic bool is larger than bool, it may be better to use a native implementation");
+#elif defined(NL_ATOMIC_WIN32)
+private:
+	volatile LONG m_Flag;
+
+public:
+	NL_FORCE_INLINE bool testAndSet()
+	{
+		return InterlockedExchange(&m_Flag, 1) != 0; // acquire-release
+	}
+
+	NL_FORCE_INLINE void clear()
+	{
+		InterlockedExchange(&m_Flag, 0); // release
+	}
+
+	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+	{
+		return InterlockedExchangeAdd(const_cast<volatile LONG *>(&m_Flag), 0) != 0; // acquire
+	}
+#endif
+	NL_FORCE_INLINE CAtomicFlag()
+	{
+		clear();
+	}
+};
+
+/// Atomic integer.
+/// The highest supported memory orders are aqcuire and release.
+class CAtomicInt
+{
+#if defined(NL_ATOMIC_CPP14)
+private:
+	std::atomic_int m_Value;
+
+public:
+	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
+	{
+		static_assert(order <= TMemoryOrderAcquire, "Unsupported memory order");
+		return m_Value.load((std::memory_order)order);
+	}
+
+	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
+	{
+		static_assert(order <= TMemoryOrderRelease, "Unsupported memory order");
+		m_Value.store(value, (std::memory_order)order);
+		return value;
+	}
+
+	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		static_assert(order <= TMemoryOrderAcqRel, "Unsupported memory order");
+		return m_Value.fetch_add(value, (std::memory_order)order);
+	}
+
+	NL_FORCE_INLINE int exchange(int value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		static_assert(order <= TMemoryOrderAcqRel, "Unsupported memory order");
+		return m_Value.exchange(value, (std::memory_order)order);
+	}
+
+	static_assert(sizeof(std::atomic_int) <= sizeof(int),
+	    "Atomic int is larger than int, it may be better to use a native implementation");
+#elif defined(NL_ATOMIC_WIN32)
+private:
+	volatile LONG m_Value;
+
+public:
+	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
+	{
+		return InterlockedExchangeAdd(const_cast<volatile LONG *>(&m_Value), 0); // acquire
+	}
+
+	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
+	{
+		InterlockedExchange(&m_Value, value); // release
+		return value;
+	}
+
+	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		return InterlockedExchangeAdd(&m_Value, value); // acquire-release
+	}
+
+	NL_FORCE_INLINE int exchange(int value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		return InterlockedExchange(&m_Value, value); // acquire-release
+	}
+#elif defined(NL_ATOMIC_GCC_CXX11)
+private:
+	volatile int m_Value;
+
+public:
+	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
+	{
+		static_assert(order <= TMemoryOrderAcquire, "Unsupported memory order");
+		return __atomic_load_n(&m_Value, (int)order);
+	}
+
+	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
+	{
+		static_assert(order <= TMemoryOrderRelease, "Unsupported memory order");
+		__atomic_store_n(&m_Value, value, (int)order);
+		return value;
+	}
+
+	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		static_assert(order <= TMemoryOrderAcqRel, "Unsupported memory order");
+		return __atomic_fetch_add(&m_Value, value, (int)order);
+	}
+
+	NL_FORCE_INLINE int exchange(int valu, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		static_assert(order <= TMemoryOrderAcqRel, "Unsupported memory order");
+		return __atomic_exchange_n(&m_Value, value, (int)order);
+	}
+#elif defined(NL_ATOMIC_GCC)
+private:
+	volatile int m_Value;
+
+public:
+	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
+	{
+		return __sync_fetch_and_add(const_cast<volatile int *>(&m_Value), 0); // acquire
+	}
+
+	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
+	{
+		__sync_lock_test_and_set(&m_Value, value);
+		if (order >= TMemoryOrderRelease)
+			__sync_synchronize(); // release
+		return value;
+	}
+
+	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		return __sync_fetch_and_add(&m_Value, value); // acquire-release
+	}
+
+	NL_FORCE_INLINE int exchange(int value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		return __sync_lock_test_and_set(&m_Value, value); // acquire
+		if (order >= TMemoryOrderRelease)
+			__sync_synchronize(); // release
+	}
+#endif
+
+public:
+	// Atomic operators
+	NL_FORCE_INLINE CAtomicInt(int value = 0)
+	{
+		store(value);
+	}
+
+	NL_FORCE_INLINE operator int() const
+	{
+		return load();
+	}
+
+	NL_FORCE_INLINE int operator=(int value)
+	{
+		return store(value);
+	}
+
+	NL_FORCE_INLINE int operator+=(int value)
+	{
+		return fetchAdd(value) + value;
+	}
+
+	NL_FORCE_INLINE int operator-=(int value)
+	{
+		return fetchAdd(-value) - value;
+	}
+
+	NL_FORCE_INLINE int operator++()
+	{
+		return fetchAdd(1) + 1;
+	}
+
+	NL_FORCE_INLINE int operator++(int)
+	{
+		return fetchAdd(1);
+	}
+
+	NL_FORCE_INLINE int operator--()
+	{
+		return fetchAdd(-1) - 1;
+	}
+
+	NL_FORCE_INLINE int operator--(int)
+	{
+		return fetchAdd(-1);
+	}
+
+	NL_FORCE_INLINE CAtomicInt(const CAtomicInt &other)
+	{
+		store(other.load());
+	}
+
+	NL_FORCE_INLINE CAtomicInt &operator=(const CAtomicInt &other)
+	{
+		store(other.load());
+		return *this;
+	}
+};
+
+/// Hold a spinlock on an atomic flag
+class CAtomicFlagLockSpin
+{
+public:
+	NL_FORCE_INLINE CAtomicFlagLockSpin(CAtomicFlag &flag)
+	    : m_Flag(flag)
+	{
+		while (m_Flag.testAndSet())
+			;
+	}
+
+	NL_FORCE_INLINE ~CAtomicFlagLockSpin()
+	{
+		m_Flag.clear();
+	}
+
+private:
+	CAtomicFlag &m_Flag;
+};
+
+/// Hold a spinlock on an atomic flag
+/// Yield while waiting
+class CAtomicFlagLockYield
+{
+private:
+	CAtomicFlag &m_Flag;
+
+public:
+	NL_FORCE_INLINE CAtomicFlagLockYield(CAtomicFlag &flag)
+	    : m_Flag(flag)
+	{
+		while (m_Flag.testAndSet())
+			nlYield();
+	}
+
+	NL_FORCE_INLINE ~CAtomicFlagLockYield()
+	{
+		m_Flag.clear();
+	}
+};
+
+/// Spinlock that follows the original implementation of NLMISC::CFastMutex
+class CAtomicFlagLockFast
+{
+private:
+	CAtomicFlag &m_Flag;
+
+public:
+	// Original implementation of NLMISC::CFastMutex
+	// Licensed under GPLv2
+	// Copyright (C) 2000  Nevrax Ltd.
+	// Modified by the following contributors:
+	// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+	static NL_FORCE_INLINE void enter(CAtomicFlag &flag)
+	{
+		if (flag.testAndSet())
+		{
+			// First test
+			uint i;
+			for (i = 0;; ++i)
+			{
+				uint wait_time = i + 6;
+
+				// Increment wait time with a log function
+				if (wait_time > 27)
+					wait_time = 27;
+
+				// Sleep
+				if (wait_time <= 20)
+					wait_time = 0;
+				else
+					wait_time = 1 << (wait_time - 20);
+
+				if (!flag.testAndSet())
+					break;
+
+				if (!wait_time)
+					nlYield();
+				else
+					nlSleep(wait_time);
+			}
+		}
+	}
+
+	static NL_FORCE_INLINE void leave(CAtomicFlag &flag)
+	{
+		flag.clear();
+	}
+
+	inline CAtomicFlagLockFast(CAtomicFlag &flag)
+	    : m_Flag(flag)
+	{
+		enter(flag);
+	}
+
+	NL_FORCE_INLINE ~CAtomicFlagLockFast()
+	{
+		leave(m_Flag);
+	}
+};
+
+/// Spinlock that follows the original implementation of NLMISC::CFastMutexMP
+class CAtomicFlagLockFastMP
+{
+private:
+	CAtomicFlag &m_Flag;
+
+public:
+	// Original implementation of NLMISC::CFastMutexMP
+	// Licensed under GPLv2
+	// Copyright (C) 2000  Nevrax Ltd.
+	// Modified by the following contributors:
+	// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+	static NL_FORCE_INLINE void enter(CAtomicFlag &flag)
+	{
+		// std::cout << "Entering, Lock=" << _Lock << std::endl;
+		while (flag.testAndSet())
+		{
+			static CAtomicInt last = 0;
+			static CAtomicInt _max = 30;
+			int spinMax = _max;
+			int lastSpins = last;
+			volatile int temp = 17; // volatile so it's not optimized out, this is just to keep busy
+			int i;
+			for (i = 0; i < spinMax; ++i)
+			{
+				if (i < lastSpins / 2 || flag.test())
+				{
+					temp *= temp;
+					temp *= temp;
+					temp *= temp;
+					temp *= temp;
+				}
+				else
+				{
+					if (!flag.testAndSet())
+					{
+						last = i;
+						_max = 1000;
+						return;
+					}
+				}
+			}
+
+			_max = 30;
+
+			// First test
+			for (i = 0;; ++i)
+			{
+				uint wait_time = i + 6;
+
+				// Increment wait time with a log function
+				if (wait_time > 27)
+					wait_time = 27;
+
+				// Sleep
+				if (wait_time <= 20)
+					wait_time = 0;
+				else
+					wait_time = 1 << (wait_time - 20);
+
+				if (!flag.testAndSet())
+					break;
+
+				if (!wait_time)
+					nlYield();
+				else
+					nlSleep(wait_time);
+			}
+		}
+	}
+
+	static NL_FORCE_INLINE void leave(CAtomicFlag &flag)
+	{
+		flag.clear();
+	}
+
+	inline CAtomicFlagLockFastMP(CAtomicFlag &flag)
+	    : m_Flag(flag)
+	{
+		enter(flag);
+	}
+
+	NL_FORCE_INLINE ~CAtomicFlagLockFastMP()
+	{
+		leave(m_Flag);
+	}
+};
+
+/// This class wraps an existing CAtomicFlag to have the same semantics as NLMISC::CMutex and std::mutex
+/// It uses the CAtomicFlagLockFast locking mechanism
+class CFastMutexWrapper
+{
+private:
+	CAtomicFlag &m_Flag;
+
+public:
+	NL_FORCE_INLINE CFastMutexWrapper(CAtomicFlag &flag)
+	    : m_Flag(flag)
+	{
+	}
+
+	inline void lock()
+	{
+		CAtomicFlagLockFast::enter(m_Flag);
+	}
+
+	inline void enter()
+	{
+		CAtomicFlagLockFast::enter(m_Flag);
+	}
+
+	NL_FORCE_INLINE void unlock()
+	{
+		CAtomicFlagLockFast::leave(m_Flag);
+	}
+
+	NL_FORCE_INLINE void leave()
+	{
+		CAtomicFlagLockFast::leave(m_Flag);
+	}
+};
+
+} /* namespace NLMISC */
+
+#endif /* #ifndef NL_ATOMIC_H */
+
+/* end of file */
