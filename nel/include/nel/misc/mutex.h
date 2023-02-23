@@ -24,6 +24,7 @@
 #include "types_nl.h"
 #include "time_nl.h"
 #include "common.h"
+#include "atomic.h"
 #include <map>
 
 #ifdef NL_OS_WINDOWS
@@ -49,7 +50,6 @@
 
 namespace NLMISC {
 
-
 /*
  * This define must be disabled when sharing a mutex between several processes that can
  * have a different debug mode (because when __STL_DEBUG is on, sizeof(string) is twice
@@ -57,7 +57,18 @@ namespace NLMISC {
  */
 #define STORE_MUTEX_NAME
 
-#ifdef NL_OS_WINDOWS
+#if defined(NL_CPP14)
+	// Use STL mutex by default on C++14 and up
+// class CStdMutex;
+// using CMutex = CStdMutex;
+// template<typename T>
+// class CStdSynchronized;
+// template<typename T>
+// using CSynchronized = CStdSynchronized<T>;
+#	define CStdMutex CMutex
+#	define CStdSynchronized CSynchronized
+//#	define CUnfairMutex CStdMutex
+#elif defined(NL_OS_WINDOWS)
 	// By default on Windows, all mutex/synchronization use the CFair* class to avoid freeze problem.
 #	define CMutex CFairMutex
 #	define CSynchronized CFairSynchronized
@@ -67,6 +78,7 @@ namespace NLMISC {
 #	define CSynchronized CUnfairSynchronized
 #endif
 
+#ifndef CUnfairMutex
 
 /**
  * Classic mutex implementation (not necessarly fair)
@@ -117,6 +129,7 @@ private:
 
 };
 
+#endif
 
 // Inline assembler for gcc tutorial:
 // AT&T syntax:
@@ -214,6 +227,35 @@ test_again:
 #ifdef NL_OS_WINDOWS
 #pragma managed(push, off)
 #endif
+
+#ifdef NL_ATOMIC_H
+
+class CFastMutex
+{
+private:
+	CAtomicFlag m_Flag;
+
+public:
+	/// Same as constructor, useful for init in a shared memory block (though, you should really use emplacement new!)
+	void init()
+	{
+		m_Flag.clear();
+	}
+
+	/// Enter the critical section
+	void enter()
+	{
+		CAtomicFlagLockFast::enter(m_Flag);
+	}
+
+	/// Leave the critical section
+	void leave()
+	{
+		CAtomicFlagLockFast::leave(m_Flag);
+	}
+};
+
+#else
 
 class CFastMutex
 {
@@ -313,6 +355,37 @@ private:
 	volatile uint32	_Lock;
 };
 
+#endif
+
+
+#ifdef NL_ATOMIC_H
+
+class CFastMutexMP
+{
+private:
+	CAtomicFlag m_Flag;
+
+public:
+	/// Same as constructor, useful for init in a shared memory block (though, you should really use emplacement new!)
+	void init()
+	{
+		m_Flag.clear();
+	}
+
+	/// Enter the critical section
+	void enter()
+	{
+		CAtomicFlagLockFastMP::enter(m_Flag);
+	}
+
+	/// Leave the critical section
+	void leave()
+	{
+		CAtomicFlagLockFastMP::leave(m_Flag);
+	}
+};
+
+#else
 
 /**
  * Fast mutex for multiprocessor implementation (not fairly).
@@ -417,6 +490,7 @@ private:
 };
 #endif
 
+#endif
 
 /**
  * Windows: uses Mutex, the handle can't be shared among processes, but
