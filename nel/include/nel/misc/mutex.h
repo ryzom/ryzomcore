@@ -871,8 +871,8 @@ private:
 
 public: 
 	NL_FORCE_INLINE CAtomicTicketMutex()
-		: m_Ticket(0)
-		, m_Serving(0)
+		: m_Ticket(0, TMemoryOrderRelaxed)
+		, m_Serving(0, TMemoryOrderRelease)
 	{
 	}
 

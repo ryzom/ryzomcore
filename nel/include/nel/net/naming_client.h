@@ -163,7 +163,7 @@ public:
 
 	static void displayRegisteredServices (NLMISC::CLog *log = NLMISC::DebugLog)
 	{
-		CAutoMutex<CMutex> lock(RegisteredServicesMutex);
+		NLMISC::CAutoMutex<NLMISC::CMutex> lock(RegisteredServicesMutex);
 		log->displayNL ("Display the %d registered services :", RegisteredServices.size());
 		for (std::list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
 		{
@@ -201,7 +201,7 @@ private:
 
 	static void find (const std::string &name, std::vector<CInetAddress> &addrs)
 	{
-		CAutoMutex<CMutex> lock(RegisteredServicesMutex);
+		NLMISC::CAutoMutex<NLMISC::CMutex> lock(RegisteredServicesMutex);
 		for (std::list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
 			if (name == (*it).Name)
 				addrs.push_back ((*it).Addr[0]);
@@ -209,7 +209,7 @@ private:
 
 	static void find (TServiceId sid, std::vector<CInetAddress> &addrs)
 	{
-		CAutoMutex<CMutex> lock(RegisteredServicesMutex);
+		NLMISC::CAutoMutex<NLMISC::CMutex> lock(RegisteredServicesMutex);
 		for (std::list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
 			if (sid == (*it).SId)
 				addrs.push_back ((*it).Addr[0]);

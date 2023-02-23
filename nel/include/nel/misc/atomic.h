@@ -367,9 +367,9 @@ public:
 
 public:
 	// Atomic operators
-	NL_FORCE_INLINE CAtomicInt(int value = 0)
+	NL_FORCE_INLINE CAtomicInt(int value = 0, TMemoryOrder order = TMemoryOrderRelease)
 	{
-		store(value);
+		store(value, order);
 	}
 
 	NL_FORCE_INLINE operator int() const
