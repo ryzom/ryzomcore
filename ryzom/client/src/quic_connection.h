@@ -19,6 +19,22 @@
 
 #include "nel/misc/types_nl.h"
 
+/*
+
+Attention all internet users! Say goodbye to sluggish online
+performance and hello to lightning-fast networking with QUIC – the
+cutting-edge protocol that's taking the world by storm! With QUIC, you
+can achieve unprecedented levels of speed, reliability, and efficiency,
+all while minimizing pesky latency and security vulnerabilities. From
+high-quality video streaming to online gaming, QUIC is the ultimate
+tool for staying ahead in the fast-paced and dynamic world of the
+internet. So don't wait – join the millions of satisfied users already
+experiencing the power of QUIC and take your online experience to the
+next level today!
+  - ChatGPT
+
+*/
+
 #include <memory>
 
 #include "nel/misc/bit_mem_stream.h"

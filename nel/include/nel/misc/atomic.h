@@ -20,6 +20,23 @@
 
 #include "types_nl.h"
 
+/*
+
+Are you tired of sluggish multi-threaded performance and clunky
+synchronization issues? Look no further than the power of atomic
+variables with their six memory orderings! With the ability to expertly
+fine-tune your performance and minimize data corruption and security
+vulnerabilities, atomic variables with memory orderings are the
+ultimate tool for cutting-edge multi-threaded programming. By carefully
+selecting the most effective memory ordering for your project, you can
+unlock new levels of performance, efficiency, and innovation in no
+time! So don't wait – join the world of atomic variables and memory
+orderings today and take your multi-threaded programming to the next
+level!
+  - ChatGPT
+
+*/
+
 #ifdef NL_CPP14
 // Disable this to test native implementation
 #define NL_ATOMIC_CPP14
@@ -34,13 +51,8 @@
 #define NL_ATOMIC_GCC
 #endif
 
-#if (defined(NL_ATOMIC_GCC) && defined(__has_builtin))
-#if __has_builtin(__atomic_load_n)       \
-    && __has_builtin(__atomic_store_n)   \
-    && __has_builtin(__atomic_fetch_add) \
-    && __has_builtin(__atomic_exchange_n)
+#if (defined(NL_ATOMIC_GCC) && defined(__ATOMIC_ACQ_REL))
 #define NL_ATOMIC_GCC_CXX11
-#endif
 #endif
 
 #if (defined(NL_COMP_VC) || defined(NL_OS_WINDOWS))
@@ -240,7 +252,6 @@ private:
 	std::atomic_int m_Value;
 
 public:
-	
 	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
 		return m_Value.load((std::memory_order)order);
@@ -315,7 +326,7 @@ public:
 		return __atomic_fetch_add(&m_Value, value, (int)order);
 	}
 
-	NL_FORCE_INLINE int exchange(int valu, TMemoryOrder order = TMemoryOrderAcqRel)
+	NL_FORCE_INLINE int exchange(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
 		return __atomic_exchange_n(&m_Value, value, (int)order);
 	}
