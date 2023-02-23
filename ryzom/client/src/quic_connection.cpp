@@ -18,6 +18,7 @@
 #include "quic_connection.h"
 
 #include "nel/misc/mutex.h"
+#include "nel/misc/atomic.h"
 #include "nel/misc/buf_fifo.h"
 #include "nel/misc/string_view.h"
 #include "nel/misc/string_common.h"
@@ -56,6 +57,9 @@ public:
 	HQUIC Registration;
 	HQUIC Configuration;
 	HQUIC Connection;
+	
+	bool ConnectingAddrSet;
+	NLNET::CInetHost ConnectingAddr;
 
 	CMutex BufferMutex;
 	NLMISC::CBufFIFO Buffer;
@@ -67,6 +71,7 @@ public:
 	bool ShutdownFlag;
 
 	uint32 MaxSendLength;
+
 
 	static QUIC_STATUS
 #ifdef _Function_class_
@@ -105,27 +110,33 @@ CQuicConnection::CQuicConnection()
 
 CQuicConnection::~CQuicConnection()
 {
-	disconnect();
+	disconnect(true);
 	release();
 }
 
 void CQuicConnection::connect(const NLNET::CInetHost &addr)
 {
-	disconnect();
+	disconnect(false);
 
 	if (!MsQuic)
 	{
 		nlwarning("QUIC API not available");
 	}
 
+	if (!addr.isValid())
 	{
-		CAutoMutex<CMutex> lock(m->StateMutex);
-		m->State = Connecting;
+		return;
 	}
 
 	{
-		CAutoMutex<CMutex> lock(m->ShutdownMutex);
-		m->ShutdownFlag = false;
+		CAutoMutex<CMutex> lock(m->StateMutex);
+		if (m->State != Disconnected)
+		{
+			m->ConnectingAddr = addr;
+			m->ConnectingAddrSet = true;
+			return; // Try again in update()
+		}
+		m->State = Connecting;
 	}
 
 	static const char *protocolName = "ryzomcore4";
@@ -153,7 +164,8 @@ void CQuicConnection::connect(const NLNET::CInetHost &addr)
 		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
 		{
-			disconnect();
+			m->ShutdownFlag = true;
+			disconnect(false);
 			nlwarning("MsQuic->ConfigurationOpen failed with status 0x%x", status);
 			return;
 		}
@@ -166,7 +178,8 @@ void CQuicConnection::connect(const NLNET::CInetHost &addr)
 		status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
 		if (QUIC_FAILED(status))
 		{
-			disconnect();
+			m->ShutdownFlag = true;
+			disconnect(false);
 			MsQuic->ConfigurationClose(m->Configuration);
 			m->Configuration = nullptr;
 			nlwarning("MsQuic->ConfigurationLoadCredential failed with status 0x%x", status);
@@ -178,7 +191,8 @@ void CQuicConnection::connect(const NLNET::CInetHost &addr)
 	status = MsQuic->ConnectionOpen(m->Registration, CQuicConnectionImpl::connectionCallback, (void *)this, &m->Connection);
 	if (QUIC_FAILED(status))
 	{
-		disconnect();
+		m->ShutdownFlag = true;
+		disconnect(false);
 		nlwarning("MsQuic->ConnectionOpen failed with status 0x%x", status);
 		return;
 	}
@@ -187,40 +201,76 @@ void CQuicConnection::connect(const NLNET::CInetHost &addr)
 	status = MsQuic->ConnectionStart(m->Connection, m->Configuration, QUIC_ADDRESS_FAMILY_UNSPEC, nlUtf8ToMbcs(addr.hostname()), addr.port());
 	if (QUIC_FAILED(status))
 	{
-		disconnect();
+		m->ShutdownFlag = true;
+		disconnect(false);
 		nlwarning("MsQuic->ConnectionStart to %s failed with status 0x%x", addr.toStringLong().c_str(), status);
 		return;
 	}
+
+	// Check
+	update();
 }
 
-void CQuicConnection::disconnect()
+void CQuicConnection::disconnect(bool blocking)
 {
 	// Stop connection
 	if (m->Connection)
 	{
 		MsQuic->ConnectionShutdown(m->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
-		try
+		if (blocking)
 		{
-			for (;;) // Spin wait because we don't have fancy mechanisms when supporting legacy code base
+			try
 			{
-				CAutoMutex<CMutex> lock(m->ShutdownMutex);
-				if (m->ShutdownFlag)
-					break;
-				nlSleep(1);
+				for (;;) // Spin wait because we don't have fancy mechanisms when supporting legacy code base
+				{
+					CAutoMutex<CMutex> lock(m->ShutdownMutex);
+					if (m->ShutdownFlag)
+						break;
+					nlSleep(1);
+				}
+			}
+			catch (const std::exception &e)
+			{
+				nlwarning("Exception while waiting for connection shutdown: %s", e.what());
 			}
 		}
-		catch (const std::exception &e)
-		{
-			nlwarning("Exception while waiting for connection shutdown: %s", e.what());
-		}
-
-		MsQuic->ConnectionClose(m->Connection);
-		m->Connection = NULL;
 	}
+	m->ConnectingAddr.clear();
+	m->ConnectingAddrSet = false;
 
+	// Check
+	update();
+}
+
+void CQuicConnection::update()
+{
+	bool shutdownFlag;
 	{
-		CAutoMutex<CMutex> lock(m->StateMutex);
-		m->State = Disconnected;
+		CAutoMutex<CMutex> lock(m->ShutdownMutex);
+		shutdownFlag = m->ShutdownFlag;
+	}
+	if (shutdownFlag)
+	{
+		{
+			CAutoMutex<CMutex> lock(m->StateMutex);
+			m->State = Disconnected;
+		}
+		if (m->Connection)
+		{
+			MsQuic->ConnectionClose(m->Connection);
+			m->Connection = NULL;
+		}
+		{
+			CAutoMutex<CMutex> lock(m->ShutdownMutex);
+			shutdownFlag = false;
+		}
+	}
+	if (m->ConnectingAddrSet)
+	{
+		CInetHost addr = m->ConnectingAddr;
+		m->ConnectingAddr.clear();
+		m->ConnectingAddrSet = false;
+		connect(addr);
 	}
 }
 
@@ -280,7 +330,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		nlinfo("Shutdown initiated by transport");
 		{
 			CAutoMutex<CMutex> lock(m->StateMutex);
-			m->State = CQuicConnection::Disconnected;
+			m->State = CQuicConnection::Disconnecting;
 		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
@@ -289,7 +339,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		nlinfo("Shutdown initiated by peer");
 		{
 			CAutoMutex<CMutex> lock(m->StateMutex);
-			m->State = CQuicConnection::Disconnected;
+			m->State = CQuicConnection::Disconnecting;
 		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
@@ -298,7 +348,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		nlinfo("Shutdown complete");
 		{
 			CAutoMutex<CMutex> lock(m->StateMutex);
-			m->State = CQuicConnection::Disconnected;
+			m->State = CQuicConnection::Disconnecting;
 		}
 		{
 			CAutoMutex<CMutex> lock(m->ShutdownMutex);

@@ -19,7 +19,6 @@
 #define NL_ATOMIC_H
 
 #include "types_nl.h"
-#include "common.h"
 
 #ifdef NL_CPP14
 // Disable this to test native implementation
@@ -46,7 +45,7 @@
 
 #if (defined(NL_COMP_VC) || defined(NL_OS_WINDOWS))
 #define NL_ATOMIC_WIN32
-WINBASEAPI BOOL WINAPI SwitchToThread(VOID);
+#include <intrin.h>
 #endif
 
 #ifdef NL_CPP14
@@ -56,22 +55,23 @@ WINBASEAPI BOOL WINAPI SwitchToThread(VOID);
 
 namespace NLMISC {
 
+void nlSleep(uint32 ms);
+#if !defined(NL_ATOMIC_CPP14) && defined(NL_ATOMIC_WIN32)
+void nlYield();
+#else
 namespace /* anonymous */ {
-
 NL_FORCE_INLINE void nlYield()
 {
 #if defined(NL_ATOMIC_CPP14)
 	std::this_thread::yield();
-#elif defined(NL_ATOMIC_WIN32)
-	::SwitchToThread();
 #elif defined(NL_ATOMIC_GCC)
 	sched_yield();
 #else
 	NLMISC::nlSleep(0);
 #endif
 }
-
 } /* anonymous namespace */
+#endif
 
 enum TMemoryOrder
 {
@@ -206,22 +206,22 @@ public:
 	    "Atomic bool is larger than bool, it may be better to use a native implementation");
 #elif defined(NL_ATOMIC_WIN32)
 private:
-	volatile LONG m_Flag;
+	volatile long m_Flag;
 
 public:
 	NL_FORCE_INLINE bool testAndSet()
 	{
-		return InterlockedExchange(&m_Flag, 1) != 0; // acquire-release
+		return _InterlockedExchange(&m_Flag, 1) != 0; // acquire-release
 	}
 
 	NL_FORCE_INLINE void clear()
 	{
-		InterlockedExchange(&m_Flag, 0); // release
+		_InterlockedExchange(&m_Flag, 0); // release
 	}
 
 	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
 	{
-		return InterlockedExchangeAdd(const_cast<volatile LONG *>(&m_Flag), 0) != 0; // acquire
+		return _InterlockedExchangeAdd(const_cast<volatile long *>(&m_Flag), 0) != 0; // acquire
 	}
 #endif
 	NL_FORCE_INLINE CAtomicFlag()
@@ -268,28 +268,28 @@ public:
 	    "Atomic int is larger than int, it may be better to use a native implementation");
 #elif defined(NL_ATOMIC_WIN32)
 private:
-	volatile LONG m_Value;
+	volatile long m_Value;
 
 public:
 	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
-		return InterlockedExchangeAdd(const_cast<volatile LONG *>(&m_Value), 0); // acquire
+		return _InterlockedExchangeAdd(const_cast<volatile long *>(&m_Value), 0); // acquire
 	}
 
 	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
 	{
-		InterlockedExchange(&m_Value, value); // release
+		_InterlockedExchange(&m_Value, value); // release
 		return value;
 	}
 
 	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
-		return InterlockedExchangeAdd(&m_Value, value); // acquire-release
+		return _InterlockedExchangeAdd(&m_Value, value); // acquire-release
 	}
 
 	NL_FORCE_INLINE int exchange(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
-		return InterlockedExchange(&m_Value, value); // acquire-release
+		return _InterlockedExchange(&m_Value, value); // acquire-release
 	}
 #elif defined(NL_ATOMIC_GCC_CXX11)
 private:

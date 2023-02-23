@@ -33,7 +33,8 @@ public:
 	{
 		Disconnected,
 		Connecting,
-		Connected
+		Connected,
+		Disconnecting,
 	};
 
 	CQuicConnection();
@@ -43,14 +44,27 @@ public:
 	void connect(const NLNET::CInetHost &addr); // const CInetAddress &addr);
 
 	/// Shutdown and close gracefully, this object can be reused immediately for a new connection
-	void disconnect();
+	void disconnect(bool blocking);
+
+	/// Update connection state
+	void update();
 
 	/// Release. Instance is useless after this call
 	void release();
 
 	/// Check if still connecting or connected
 	TState state() const;
+	
+	/// Check if the connection is in a limbo state
+	inline bool limbo() const
+	{
+		TState s = state();
+		return s == Connecting || s == Disconnecting;
+	}
 
+	/// Check if the connection is connected
+	inline bool connected() const { return state() == Connected; }
+	
 	/// Send a datagram, fancier than a telegram, but not as reliable
 	void sendDatagram(const uint8 *buffer, uint32 size);
 
