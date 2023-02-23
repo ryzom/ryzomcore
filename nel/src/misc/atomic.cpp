@@ -19,14 +19,10 @@
 
 namespace NLMISC {
 
-#if !defined(NL_ATOMIC_CPP14) && defined(NL_ATOMIC_WIN32)
-
-void nlYield()
+void atomic_dummy__cpp()
 {
-	::SwitchToThread();
+	// make linker happy
 }
-
-#endif /* !defined(NL_ATOMIC_CPP14) && defined(NL_ATOMIC_WIN32) */
 
 } /* namespace NLMISC */
 

@@ -46,31 +46,32 @@
 
 #if (defined(NL_COMP_VC) || defined(NL_OS_WINDOWS))
 #define NL_ATOMIC_WIN32
+WINBASEAPI BOOL WINAPI SwitchToThread(VOID);
 #endif
 
-#ifdef NL_ATOMIC_CPP14
+#ifdef NL_CPP14
 #include <atomic>
 #include <mutex>
 #endif
 
 namespace NLMISC {
 
-#if !defined(NL_ATOMIC_CPP14) && defined(NL_ATOMIC_WIN32)
-extern void nlYield();
-#else
 namespace /* anonymous */ {
+
 NL_FORCE_INLINE void nlYield()
 {
 #if defined(NL_ATOMIC_CPP14)
 	std::this_thread::yield();
+#elif defined(NL_ATOMIC_WIN32)
+	::SwitchToThread();
 #elif defined(NL_ATOMIC_GCC)
 	sched_yield();
 #else
 	NLMISC::nlSleep(0);
 #endif
 }
+
 } /* anonymous namespace */
-#endif
 
 enum TMemoryOrder
 {
@@ -406,6 +407,206 @@ public:
 	{
 		store(other.load());
 		return *this;
+	}
+
+	// Compare operators
+	NL_FORCE_INLINE bool operator==(int value) const
+	{
+		return load() == value;
+	}
+	
+	NL_FORCE_INLINE bool operator!=(int value) const
+	{
+		return load() != value;
+	}
+
+	NL_FORCE_INLINE bool operator<(int value) const
+	{
+		return load() < value;
+	}
+
+	NL_FORCE_INLINE bool operator<=(int value) const
+	{
+		return load() <= value;
+	}
+
+	NL_FORCE_INLINE bool operator>(int value) const
+	{
+		return load() > value;
+	}
+
+	NL_FORCE_INLINE bool operator>=(int value) const
+	{
+		return load() >= value;
+	}
+
+	NL_FORCE_INLINE bool operator==(const CAtomicInt &other) const
+	{
+		return load() == other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator!=(const CAtomicInt &other) const
+	{
+		return load() != other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator<(const CAtomicInt &other) const
+	{
+		return load() < other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator<=(const CAtomicInt &other) const
+	{
+		return load() <= other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator>(const CAtomicInt &other) const
+	{
+		return load() > other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator>=(const CAtomicInt &other) const
+	{
+		return load() >= other.load(TMemoryOrderRelaxed);
+	}
+};
+
+template<typename T>
+class CAtomicEnum
+{
+#ifdef NL_CPP14
+	// Starting from C++14 we use enums with specific types
+	// In this case we must use the standard atomic class anyway
+	// even if NL_ATOMIC_CPP14 is not defined,
+	// since we need to match the type size
+	
+private:
+	std::atomic<T> m_Value;
+
+public:
+	NL_FORCE_INLINE T load(TMemoryOrder order = TMemoryOrderAcquire) const
+	{
+		return m_Value.load((std::memory_order)order);
+	}
+
+	NL_FORCE_INLINE T store(T value, TMemoryOrder order = TMemoryOrderRelease)
+	{
+		return m_Value.store(value, (std::memory_order)order);
+	}
+
+	NL_FORCE_INLINE T exchange(T value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		return m_Value.exchange(value, (std::memory_order)order);
+	}
+
+	static_assert(sizeof(std::atomic<T>) <= sizeof(T),
+		"Atomic enum is larger than enum type, it may be better to use a native implementation");
+#else
+private:
+	CAtomicInt m_Value;
+
+public:
+	NL_FORCE_INLINE (int)T load(TMemoryOrder order = TMemoryOrderAcquire) const
+	{
+		return m_Value.load(order);
+	}
+
+	NL_FORCE_INLINE (int)T store(T value, TMemoryOrder order = TMemoryOrderRelease)
+	{
+		return m_Value.store((int)value, order);
+	}
+
+	NL_FORCE_INLINE (int)T exchange(T value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		return m_Value.exchange((int)value, order);
+	}
+#endif
+	// Atomic load and store operators
+	NL_FORCE_INLINE CAtomicEnum(T value = T(0))
+	{
+		store(value);
+	}
+
+	NL_FORCE_INLINE operator T() const
+	{
+		return (T)load();
+	}
+
+	NL_FORCE_INLINE T operator=(T value)
+	{
+		return store(value);
+	}
+	
+	NL_FORCE_INLINE CAtomicEnum(const CAtomicEnum &other)
+	{
+		store(other.load());
+	}
+
+	NL_FORCE_INLINE CAtomicEnum &operator=(const CAtomicEnum &other)
+	{
+		store(other.load());
+		return *this;
+	}
+
+	// Compare operators
+	NL_FORCE_INLINE bool operator==(T value) const
+	{
+		return load() == value;
+	}
+
+	NL_FORCE_INLINE bool operator!=(T value) const
+	{
+		return load() != value;
+	}
+
+	NL_FORCE_INLINE bool operator<(T value) const
+	{
+		return load() < value;
+	}
+
+	NL_FORCE_INLINE bool operator<=(T value) const
+	{
+		return load() <= value;
+	}
+	
+	NL_FORCE_INLINE bool operator>(T value) const
+	{
+		return load() > value;
+	}
+
+	NL_FORCE_INLINE bool operator>=(T value) const
+	{
+		return load() >= value;
+	}
+
+	NL_FORCE_INLINE bool operator==(const CAtomicEnum &other) const
+	{
+		return load() == other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator!=(const CAtomicEnum &other) const
+	{
+		return load() != other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator<(const CAtomicEnum &other) const
+	{
+		return load() < other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator<=(const CAtomicEnum &other) const
+	{
+		return load() <= other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator>(const CAtomicEnum &other) const
+	{
+		return load() > other.load(TMemoryOrderRelaxed);
+	}
+
+	NL_FORCE_INLINE bool operator>=(const CAtomicEnum &other) const
+	{
+		return load() >= other.load(TMemoryOrderRelaxed);
 	}
 };
 
