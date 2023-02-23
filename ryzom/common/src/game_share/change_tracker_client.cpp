@@ -56,7 +56,7 @@ void		CChangeTrackerClient::clean()
 	// (do not clear the ones that could have been added (by a parallel recordChange())
 	// since the latest call to notifyNext()
 
-	trackerMutex().enter();
+	NLMISC::CAutoMutex<NLMISC::CFastMutex> lock(trackerMutex());
 
 	TDataSetRow entityIndex = getFirstChanged(), entityIndex2;
 #ifdef NL_DEBUG
@@ -101,8 +101,7 @@ void		CChangeTrackerClient::clean()
 	{
 		_Header->Last = TDataSetRow();
 	}
-
-	trackerMutex().leave();
+	
 }
 #endif
 

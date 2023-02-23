@@ -139,7 +139,7 @@ public:
 	{
 		// Protect consistency of popFirstChanged() in parallel with recordChange()
 		// (there can't be two parallels calls to popFirstChanged()
-		trackerMutex().enter();
+		NLMISC::CAutoMutex<NLMISC::CFastMutex> lock(trackerMutex());
 #ifdef NL_DEBUG
 		nlassert( _Header->First != LAST_CHANGED );
 #endif
@@ -153,7 +153,6 @@ public:
 #ifdef COUNT_MIRROR_PROP_CHANGES
 		--_Header->NbDistinctChanges;
 #endif
-		trackerMutex().leave();
 	}
 
 	/// Return the number of changes (assumes isAllocated()) (slow)

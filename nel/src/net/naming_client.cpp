@@ -130,9 +130,10 @@ void cbRegisterBroadcast (CMessage &msgin, TSockId /* from */, CCallbackNetBase 
 
 		if (addrs.empty())
 		{
-			CNamingClient::RegisteredServicesMutex.enter ();
-			CNamingClient::RegisteredServices.push_back (CNamingClient::CServiceEntry (name, sid, addr));
-			CNamingClient::RegisteredServicesMutex.leave ();
+			{
+				CAutoMutex<CMutex> lock(CNamingClient::RegisteredServicesMutex);
+				CNamingClient::RegisteredServices.push_back(CNamingClient::CServiceEntry(name, sid, addr));
+			}
 
 			nlinfo ("NC: Registration Broadcast of the service %s-%hu '%s'", name.c_str(), sid.get(), vectorCInetAddressToString(addr).c_str());
 
@@ -141,17 +142,18 @@ void cbRegisterBroadcast (CMessage &msgin, TSockId /* from */, CCallbackNetBase 
 		}
 		else if (addrs.size() == 1)
 		{
-			CNamingClient::RegisteredServicesMutex.enter ();
-			for (std::list<CNamingClient::CServiceEntry>::iterator it = CNamingClient::RegisteredServices.begin(); it != CNamingClient::RegisteredServices.end (); it++)
 			{
-				if (sid == (*it).SId)
+				CAutoMutex<CMutex> lock(CNamingClient::RegisteredServicesMutex);
+				for (std::list<CNamingClient::CServiceEntry>::iterator it = CNamingClient::RegisteredServices.begin(); it != CNamingClient::RegisteredServices.end(); it++)
 				{
-					(*it).Name = name;
-					(*it).Addr = addr;
-					break;
+					if (sid == (*it).SId)
+					{
+						(*it).Name = name;
+						(*it).Addr = addr;
+						break;
+					}
 				}
 			}
-			CNamingClient::RegisteredServicesMutex.leave ();
 			nlinfo ("NC: Registration Broadcast (update) of the service %s-%hu '%s'", name.c_str(), sid.get(), addr[0].asString().c_str());
 		}
 		else
@@ -178,22 +180,23 @@ void cbUnregisterBroadcast (CMessage &msgin, TSockId /* from */, CCallbackNetBas
 
 	// remove it in the list, if the service is not found, ignore it
 
-	CNamingClient::RegisteredServicesMutex.enter ();
-	for (std::list<CNamingClient::CServiceEntry>::iterator it = CNamingClient::RegisteredServices.begin(); it != CNamingClient::RegisteredServices.end (); it++)
 	{
-		CNamingClient::CServiceEntry &serviceEntry = *it;
-		if (serviceEntry.SId == sid)
+		CAutoMutex<CMutex> lock(CNamingClient::RegisteredServicesMutex);
+		for (std::list<CNamingClient::CServiceEntry>::iterator it = CNamingClient::RegisteredServices.begin(); it != CNamingClient::RegisteredServices.end(); it++)
 		{
-			// check the structure
-			nlassertex (serviceEntry.Name == name, ("%s %s",serviceEntry.Name.c_str(), name.c_str()));
+			CNamingClient::CServiceEntry &serviceEntry = *it;
+			if (serviceEntry.SId == sid)
+			{
+				// check the structure
+				nlassertex(serviceEntry.Name == name, ("%s %s", serviceEntry.Name.c_str(), name.c_str()));
 
-			addrs = serviceEntry.Addr;
+				addrs = serviceEntry.Addr;
 
-			CNamingClient::RegisteredServices.erase (it);
-			break;
+				CNamingClient::RegisteredServices.erase(it);
+				break;
+			}
 		}
 	}
-	CNamingClient::RegisteredServicesMutex.leave ();
 
 	nlinfo ("NC: Unregistration Broadcast of the service %s-%hu", name.c_str(), sid.get());
 
@@ -450,17 +453,17 @@ bool CNamingClient::lookupAlternate (const std::string &name, CInetAddress &addr
 	nlassert (_Connection != NULL && _Connection->connected ());
 
 	// remove it from his local list
-
-	RegisteredServicesMutex.enter ();
-	for (std::list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
 	{
-		if ((*it).Addr[0] == addr)
+		CAutoMutex<CMutex> lock(RegisteredServicesMutex);
+		for (std::list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end(); it++)
 		{
-			RegisteredServices.erase (it);
-			break;
+			if ((*it).Addr[0] == addr)
+			{
+				RegisteredServices.erase(it);
+				break;
+			}
 		}
 	}
-	RegisteredServicesMutex.leave ();
 
 	vector<CInetAddress> addrs;
 	find (name, addrs);

@@ -467,10 +467,9 @@ private:
 	NLMISC::CSynchronized<std::vector<bool> >	_PatchComputed;
 	std::vector<uint>							_LastPatchComputed;
 	uint										_NumberOfPatchComputed;
-	uint										_ProcessCount;
+	int											_ProcessCount;
 	uint64										_CPUMask;
-	NLMISC::CMutex								_ProcessExitedMutex;
-	volatile uint								_ProcessExited;
+	NLMISC::CAtomicInt							_ProcessExited;
 
 	// *** Bitmap sharing
 	std::map<std::string, NLMISC::CBitmap>		_Bitmaps;

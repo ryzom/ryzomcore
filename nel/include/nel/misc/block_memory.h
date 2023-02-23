@@ -87,7 +87,7 @@ public:
 	/// allocate an element. ctor is called.
 	T*				allocate()
 	{
-		_Mutex.enter();
+		CAutoMutex<CMutex> lock(_Mutex);
 
 		// if not enough memory, aloc a block.
 		if(!_NextFreeElt)
@@ -125,9 +125,7 @@ public:
 #endif
 
 		_NAllocatedElts++;
-
-		_Mutex.leave();
-
+		
 		return ret;
 	}
 
@@ -137,7 +135,7 @@ public:
 		if(!ptr)
 			return;
 
-		_Mutex.enter();
+		CAutoMutex<CMutex> lock(_Mutex);
 
 		// some simple Check.
 		nlassert(_NAllocatedElts>0);
@@ -159,8 +157,6 @@ public:
 		_NextFreeElt= (void*) ptr;
 
 		_NAllocatedElts--;
-
-		_Mutex.leave();
 	}
 
 
@@ -171,7 +167,7 @@ public:
 	 */
 	void	purge ()
 	{
-		_Mutex.enter();
+		CAutoMutex<CMutex> lock(_Mutex);
 
 		if(NL3D_BlockMemoryAssertOnPurge)
 		{
@@ -186,8 +182,6 @@ public:
 
 		_NextFreeElt= NULL;
 		_NAllocatedElts= 0;
-
-		_Mutex.leave();
 	}
 
 
@@ -197,7 +191,7 @@ public:
 	// This is to be used with CSTLBlockAllocator only!!! It changes the size of an element!!
 	void		__stl_alloc_changeEltSize(uint eltSize)
 	{
-		_Mutex.enter();
+		CAutoMutex<CMutex> lock(_Mutex);
 
 		// must not be used with object ctor/dtor behavior.
 		nlassert(__ctor_dtor__ == false);
@@ -211,8 +205,6 @@ public:
 			// change the size.
 			_EltSize= eltSize;
 		}
-
-		_Mutex.leave();
 	};
 	// This is to be used with CSTLBlockAllocator only!!!
 	uint		__stl_alloc_getEltSize() const
