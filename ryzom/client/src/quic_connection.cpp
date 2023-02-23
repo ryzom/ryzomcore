@@ -452,7 +452,7 @@ void CQuicConnection::connect(const NLNET::CInetHost &addr)
 {
 }
 
-void CQuicConnection::disconnect()
+void CQuicConnection::disconnect(bool blocking)
 {
 }
 

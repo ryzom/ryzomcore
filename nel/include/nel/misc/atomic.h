@@ -22,7 +22,7 @@
 
 #ifdef NL_CPP14
 // Disable this to test native implementation
-// #define NL_ATOMIC_CPP14
+#define NL_ATOMIC_CPP14
 #endif
 
 #if (defined(NL_ATOMIC_CPP14) && defined(NL_CPP20))
@@ -49,8 +49,9 @@
 #endif
 
 #ifdef NL_CPP14
-#include <atomic>
+#include <thread>
 #include <mutex>
+#include <atomic>
 #endif
 
 namespace NLMISC {
@@ -137,7 +138,7 @@ public:
 	}
 #elif defined(NL_ATOMIC_GCC)
 private:
-	volatile bool m_Flag;
+	volatile int m_Flag;
 
 public:
 	NL_FORCE_INLINE bool testAndSet()
@@ -152,7 +153,7 @@ public:
 
 	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
 	{
-		return __sync_fetch_and_add(const_cast<volatile bool *>(&m_Flag), 0); // acquire
+		return __sync_fetch_and_add(const_cast<volatile int *>(&m_Flag), 0); // acquire
 	}
 #elif defined(NL_ATOMIC_CPP20)
 private:
@@ -239,28 +240,25 @@ private:
 	std::atomic_int m_Value;
 
 public:
+	
 	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
-		static_assert(order <= TMemoryOrderAcquire, "Unsupported memory order");
 		return m_Value.load((std::memory_order)order);
 	}
 
 	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
 	{
-		static_assert(order <= TMemoryOrderRelease, "Unsupported memory order");
 		m_Value.store(value, (std::memory_order)order);
 		return value;
 	}
 
 	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
-		static_assert(order <= TMemoryOrderAcqRel, "Unsupported memory order");
 		return m_Value.fetch_add(value, (std::memory_order)order);
 	}
 
 	NL_FORCE_INLINE int exchange(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
-		static_assert(order <= TMemoryOrderAcqRel, "Unsupported memory order");
 		return m_Value.exchange(value, (std::memory_order)order);
 	}
 
@@ -303,26 +301,22 @@ private:
 public:
 	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
-		static_assert(order <= TMemoryOrderAcquire, "Unsupported memory order");
 		return __atomic_load_n(&m_Value, (int)order);
 	}
 
 	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
 	{
-		static_assert(order <= TMemoryOrderRelease, "Unsupported memory order");
 		__atomic_store_n(&m_Value, value, (int)order);
 		return value;
 	}
 
 	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
-		static_assert(order <= TMemoryOrderAcqRel, "Unsupported memory order");
 		return __atomic_fetch_add(&m_Value, value, (int)order);
 	}
 
 	NL_FORCE_INLINE int exchange(int valu, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
-		static_assert(order <= TMemoryOrderAcqRel, "Unsupported memory order");
 		return __atomic_exchange_n(&m_Value, value, (int)order);
 	}
 #elif defined(NL_ATOMIC_GCC)
@@ -520,20 +514,17 @@ private:
 	CAtomicInt m_Value;
 
 public:
-	NL_FORCE_INLINE(int)
-	T load(TMemoryOrder order = TMemoryOrderAcquire) const
+	NL_FORCE_INLINE T load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
 		return m_Value.load(order);
 	}
 
-	NL_FORCE_INLINE(int)
-	T store(T value, TMemoryOrder order = TMemoryOrderRelease)
+	NL_FORCE_INLINE T store(T value, TMemoryOrder order = TMemoryOrderRelease)
 	{
 		return m_Value.store((int)value, order);
 	}
 
-	NL_FORCE_INLINE(int)
-	T exchange(T value, TMemoryOrder order = TMemoryOrderAcqRel)
+	NL_FORCE_INLINE T exchange(T value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
 		return m_Value.exchange((int)value, order);
 	}
