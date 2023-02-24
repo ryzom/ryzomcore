@@ -73,14 +73,14 @@ public:
 
 	/// Check the maximum datagram length
 	uint32 maxSendLength() const;
-	
+
 	/// Check if the connection is in a limbo state
 	inline bool limbo() const
 	{
-		TState s = state();
+		const TState s = state();
 		return s == Connecting || s == Disconnecting;
 	}
-	
+
 	/// Check if we can send
 	inline bool canSend() const
 	{
@@ -89,12 +89,12 @@ public:
 
 	/// Check if the connection is connected
 	inline bool connected() const { return state() == Connected; }
-	
+
 	/// Send a datagram, fancier than a telegram, but not as reliable
 	void sendDatagram(const uint8 *buffer, uint32 size);
 
 	/// Check if any datagram has been received
-	bool datagramAvailable();
+	bool datagramAvailable() const;
 
 	/// Receive a datagram
 	bool receiveDatagram(NLMISC::CBitMemStream &msgin);

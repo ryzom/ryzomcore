@@ -55,9 +55,9 @@ public:
 	    : Api(NULL)
 	    , Registration(NULL)
 	    , Configuration(NULL)
-		, Connection(NULL)
+	    , Connection(NULL)
 	    , DesiredStateChange(NoChange)
-		, BufferReads(0)
+	    , BufferReads(0)
 	    , State(CQuicConnection::Disconnected)
 	    , MaxSendLength(0)
 	{
@@ -67,7 +67,7 @@ public:
 	HQUIC Registration;
 	HQUIC Configuration;
 	HQUIC Connection;
-	
+
 	// This value is set by connect and disconnect,
 	// and checked from the update call. (main thread only)
 	TDesiredStateChange DesiredStateChange;
@@ -78,15 +78,15 @@ public:
 	CSynchronizedFIFO Buffer; // (any thread)
 	CAtomicInt BufferWrites; // (any thread)
 	int BufferReads; // If BufferReads == BufferWrites, then there's no more datagrams (main thread only)
-	
+
 	// Current state of the connection
 	CQuicConnection::TState State; // Updated by the update call (main thread only)
 	CAtomicFlag ConnectedFlag; // Set by the callback thread, checked by update (main)
 	CAtomicFlag ShuttingDownFlag; // Set by the callback thread, checked by the update call (main thread), reset by update on complete disconnection
 	CAtomicFlag ShutdownFlag; // Set by the callback thread, checked by the update call (main thread), reset by update on complete disconnection
-	
+
 	CAtomicInt MaxSendLength; // Set by the callback thread, not used currently
-	
+
 	static QUIC_STATUS
 #ifdef _Function_class_
 	    _Function_class_(QUIC_CONNECTION_CALLBACK)
@@ -106,6 +106,11 @@ CQuicConnection::CQuicConnection()
     : m(new CQuicConnectionImpl())
 #endif
 {
+	// TestAndSet has acquire semantics, clear has release semantics, so we use clear to flag the events
+	m->ConnectedFlag.testAndSet();
+	m->ShuttingDownFlag.testAndSet();
+	m->ShutdownFlag.testAndSet();
+	
 	// Open library
 	QUIC_STATUS status = MsQuicOpenVersion(QUIC_API_VERSION_2, (const void **)&MsQuic);
 	if (QUIC_FAILED(status))
@@ -142,18 +147,18 @@ void CQuicConnection::connect(const NLNET::CInetHost &addr)
 
 void CQuicConnectionImpl::connect()
 {
-	CQuicConnectionImpl *m = this;
-	
+	CQuicConnectionImpl *const m = this;
+
 	nlassert(m->State == CQuicConnection::Disconnected);
 	nlassert(m->DesiredStateChange == Connect);
-	
+
 	NLNET::CInetHost addr = m->DesiredAddr;
-	
+
 	// Reset state
 	m->DesiredStateChange = NoChange;
-	m->ConnectedFlag.clear();
-	m->ShuttingDownFlag.clear();
-	m->ShutdownFlag.clear();
+	m->ConnectedFlag.testAndSet();
+	m->ShuttingDownFlag.testAndSet();
+	m->ShutdownFlag.testAndSet();
 	m->MaxSendLength = 0;
 	m->BufferReads = m->BufferWrites;
 
@@ -167,7 +172,7 @@ void CQuicConnectionImpl::connect()
 	{
 		return;
 	}
-	
+
 	static const char *protocolName = "ryzomcore4";
 	static const QUIC_BUFFER alpn = { sizeof(protocolName) - 1, (uint8_t *)protocolName };
 
@@ -261,7 +266,7 @@ void CQuicConnection::disconnect(bool blocking)
 
 void CQuicConnectionImpl::shutdown()
 {
-	CQuicConnectionImpl *m = this;
+	CQuicConnectionImpl *const m = this;
 	if (m->Connection)
 	{
 		MsQuic->ConnectionShutdown(m->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
@@ -271,7 +276,7 @@ void CQuicConnectionImpl::shutdown()
 
 void CQuicConnectionImpl::close()
 {
-	CQuicConnectionImpl *m = this;
+	CQuicConnectionImpl *const m = this;
 	if (m->Connection)
 	{
 		MsQuic->ConnectionClose(m->Connection);
@@ -282,11 +287,19 @@ void CQuicConnectionImpl::close()
 // All the state updates and switches are done here
 void CQuicConnectionImpl::update()
 {
-	CQuicConnectionImpl *m = this;
+	CQuicConnectionImpl *const m = this;
+
+	// Early exit
+	if (m->State == CQuicConnection::Disconnected
+	    && m->DesiredStateChange != CQuicConnectionImpl::Connect)
+	{
+		nlassert(!m->Connection);
+		return;
+	}
 
 	// Simple case, initial state, user wants to connect and we're disconnected
 	if (m->DesiredStateChange == Connect
-		&& m->State == CQuicConnection::Disconnected)
+	    && m->State == CQuicConnection::Disconnected)
 	{
 		nlassert(!m->Connection);
 		connect();
@@ -294,7 +307,7 @@ void CQuicConnectionImpl::update()
 	}
 
 	// Also simple case
-	if (m->DesiredStateChange == Disconnect
+	if (m->DesiredStateChange != NoChange // Disconnect or Connect (reconnecting)
 	    && m->State == CQuicConnection::Connected)
 	{
 		m->State = CQuicConnection::Disconnecting;
@@ -303,15 +316,21 @@ void CQuicConnectionImpl::update()
 	}
 
 	// Connected!
-	if (m->ConnectedFlag.test())
+	if (!m->ConnectedFlag.testAndSet())
 	{
-		nlassert(m->State == CQuicConnection::Connecting);
-		m->State = CQuicConnection::Connected;
-		// We're good!
+		if (m->State == CQuicConnection::Connecting)
+		{
+			m->State = CQuicConnection::Connected;
+			// We're good!
+		}
+		else
+		{
+			nlwarning("Connection is connected, but state is %d", m->State);
+		}
 	}
 
 	// Shutting down, this is just a limbo state
-	if (m->ShuttingDownFlag.test())
+	if (!m->ShuttingDownFlag.testAndSet())
 	{
 		if (m->State == CQuicConnection::Connected)
 		{
@@ -320,7 +339,7 @@ void CQuicConnectionImpl::update()
 	}
 
 	// Shutdown complete, now close!
-	if (m->ShutdownFlag.test())
+	if (!m->ShutdownFlag.testAndSet())
 	{
 		nlassert(m->State != CQuicConnection::Disconnected);
 		nlassert(m->Connection);
@@ -374,32 +393,32 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 #endif
     CQuicConnectionImpl::connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev)
 {
-	CQuicConnection *self = (CQuicConnection *)context;
-	CQuicConnectionImpl *m = self->m.get();
+	CQuicConnection *const self = (CQuicConnection *)context;
+	CQuicConnectionImpl *const m = self->m.get();
 	QUIC_STATUS status = QUIC_STATUS_NOT_SUPPORTED;
 	switch (ev->Type)
 	{
 	case QUIC_CONNECTION_EVENT_CONNECTED: {
-		m->ConnectedFlag.testAndSet();
+		m->ConnectedFlag.clear();
 		nlinfo("Connected");
 		nlassert(CStringView((const char *)ev->CONNECTED.NegotiatedAlpn, ev->CONNECTED.NegotiatedAlpnLength) == "ryzomcore4");
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT: {
-		m->ShuttingDownFlag.testAndSet();
+		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER: {
-		m->ShuttingDownFlag.testAndSet();
+		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
-		m->ShutdownFlag.testAndSet();
+		m->ShutdownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
 		break;
@@ -445,7 +464,7 @@ void CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
 	}
 }
 
-bool CQuicConnection::datagramAvailable()
+bool CQuicConnection::datagramAvailable() const
 {
 	// CFifoAccessor access(&m->Buffer);
 	// return !access.value().empty();
@@ -456,7 +475,8 @@ bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 {
 	int writes = m->BufferWrites;
 	int reads = m->BufferReads;
-	if (writes != reads);
+	if (writes != reads)
+		;
 	{
 		CFifoAccessor access(&m->Buffer);
 		CBufFIFO *fifo = &access.value();
