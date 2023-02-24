@@ -17,6 +17,8 @@
 #ifndef NL_TREE_H_
 #define NL_TREE_H_
 
+#include "nel/misc/types_nl.h"
+
 #include <vector>
 #include <map>
 #include "record.h"
@@ -33,7 +35,11 @@ class CTree
 
 	public:
 
-		struct greater : public std::binary_function<std::pair<double,int> , std::pair<double,int> , bool> {
+		struct greater 
+#ifndef NL_CPP17
+			: public std::binary_function<std::pair<double,int> , std::pair<double,int> , bool> 
+#endif
+		{
 			bool operator()(std::pair<double,int> x, std::pair<double,int> y) const
 			{
 				return x.first > y.first;

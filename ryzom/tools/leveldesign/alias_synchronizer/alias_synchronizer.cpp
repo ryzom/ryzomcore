@@ -33,7 +33,10 @@ vector<string>	Filters;
 
 
 // always true predicate
-struct TAllPrimitivePredicate : public std::unary_function<IPrimitive*, bool>
+struct TAllPrimitivePredicate 
+#ifndef NL_CPP17
+	: public std::unary_function<IPrimitive*, bool>
+#endif
 {
 	bool operator () (IPrimitive *prim)
 	{

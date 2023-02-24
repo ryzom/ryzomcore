@@ -822,7 +822,10 @@ int mergeStringDiff(int argc, char *argv[], const std::string &baseName)
 
 
 /*
-struct TFindPhrase : unary_function<TPhrase, bool>
+struct TFindPhrase 
+#ifndef NL_CPP17
+		: unary_function<TPhrase, bool>
+		#endif
 {
 	string	Identifier;
 	TFindPhrase (const string &identifier)

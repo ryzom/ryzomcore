@@ -1156,7 +1156,10 @@ bool strtokquote(const vector<string> &src, VectorType &tokens)
 	return true;
 }
 
-struct TFindParamPred : std::unary_function<CPhrase::TParamInfo, bool>
+struct TFindParamPred
+#ifndef NL_CPP17
+	: std::unary_function<CPhrase::TParamInfo, bool>
+#endif
 {
 	string	Name;
 	TFindParamPred(const std::string &name)

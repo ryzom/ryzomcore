@@ -29,7 +29,6 @@
 #include "extract_warnings.h"
 #include <stdio.h>
 #include <string>
-using namespace std;
 
 #include "nel/misc/mem_displayer.h"
 #include "nel/misc/app_context.h"
@@ -39,6 +38,7 @@ using namespace std;
 
 #include <windows.h>
 
+using namespace std;
 
 BOOL APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 
