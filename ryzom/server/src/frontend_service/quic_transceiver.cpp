@@ -495,7 +495,9 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 	// Locked block
 	{
 		CAtomicFlagLockYield lock(m->BufferMutex);
-		m->Buffer->push(buffer, length);
+		static const uint8 userEvent = TReceivedMessage::User;
+		static_assert(MsgHeaderSize == sizeof(userEvent));
+		m->Buffer->push(&userEvent, MsgHeaderSize, buffer, length);
 		m->Buffer->push((uint8 *)&user, sizeof(user)); // Pointer
 	}
 }
@@ -510,10 +512,12 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 
 void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
 {
-	QUIC_BUFFER buf;
-	buf.Buffer = (uint8 *)buffer;
-	buf.Length = size;
-	QUIC_STATUS status = MsQuic->DatagramSend((HQUIC)user->Connection, &buf, 1, QUIC_SEND_FLAG_NONE, (void *)user);
+	QUIC_BUFFER *buf = new QUIC_BUFFER(); // wow leak :)
+	uint8 *copy = new uint8[size];
+	memcpy(copy, buffer, size);
+	buf->Buffer = copy; // (uint8 *)buffer;
+	buf->Length = size;
+	QUIC_STATUS status = MsQuic->DatagramSend((HQUIC)user->Connection, buf, 1, QUIC_SEND_FLAG_NONE, (void *)user);
 	if (QUIC_FAILED(status))
 	{
 		nlwarning("MsQuic->ConnectionSendDatagram failed with status %d", status);

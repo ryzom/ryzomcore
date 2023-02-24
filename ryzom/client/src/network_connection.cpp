@@ -1231,6 +1231,7 @@ bool	CNetworkConnection::stateLogin()
 		sendSystemLogin();
 		_LatestLoginTime = _UpdateTime;
 		// Time out the login after 24 attempts (every 300ms, so after 7.2 seconds)
+#if 1 // Disable login timeout here when debugging login messages
 		if (m_LoginAttempts > 24)
 		{
 			m_LoginAttempts = 0;
@@ -1239,6 +1240,7 @@ bool	CNetworkConnection::stateLogin()
 			return false; // exit now from loop, don't expect a new state
 		}
 		else
+#endif
 		{
 			++m_LoginAttempts;
 		}

@@ -532,12 +532,14 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 
 bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
 {
-	if (m->Connection && size <= m->MaxSendLength)
+	if (m->Connection && m->State && CQuicConnection::Connected && size <= m->MaxSendLength.load())
 	{
-		QUIC_BUFFER buf;
-		buf.Buffer = (uint8 *)buffer;
-		buf.Length = size;
-		QUIC_STATUS status = MsQuic->DatagramSend(m->Connection, &buf, 1, QUIC_SEND_FLAG_NONE, this);
+		QUIC_BUFFER *buf = new QUIC_BUFFER(); // wow leak :)
+		uint8 *copy = new uint8[size];
+		memcpy(copy, buffer, size);
+		buf->Buffer = copy; // (uint8 *)buffer;
+		buf->Length = size;
+		QUIC_STATUS status = MsQuic->DatagramSend(m->Connection, buf, 1, QUIC_SEND_FLAG_NONE, this);
 		if (QUIC_FAILED(status))
 		{
 			nlwarning("DatagramSend failed with %d", status);

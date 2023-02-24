@@ -121,17 +121,22 @@ void	 CBufFIFO::push (const uint8 *buffer, uint32 s)
 
 void CBufFIFO::push(const std::vector<uint8> &buffer1, const std::vector<uint8> &buffer2)
 {
+	push(&buffer1[0], buffer1.size(), &buffer2[0], buffer2.size());
+}
+
+void CBufFIFO::push(const uint8 *buffer1, uint32 size1, const uint8 *buffer2, uint32 size2)
+{
 #if STAT_FIFO
 	TTicks before = CTime::getPerformanceTime();
 #endif
 
-	TFifoSize s = (TFifoSize)(buffer1.size() + buffer2.size());
+	TFifoSize s = (TFifoSize)(size1 + size2);
 
 #if DEBUG_FIFO
 	nldebug("%p push2(%d)", this, s);
 #endif
 
-	nlassert((buffer1.size() + buffer2.size ()) > 0 && (buffer1.size() + buffer2.size ()) < pow(2.0, static_cast<double>(sizeof(TFifoSize)*8)));
+	nlassert((size1 + size2) > 0 && (size1 + size2) < pow(2.0, static_cast<double>(sizeof(TFifoSize)*8)));
 
 	// avoid too big fifo
 	if (this->size() > 10000000)
@@ -157,8 +162,8 @@ void CBufFIFO::push(const std::vector<uint8> &buffer1, const std::vector<uint8> 
 	_Head += sizeof(TFifoSize);
 
 	// store the block itself
-	CFastMem::memcpy(_Head, &(buffer1[0]), buffer1.size());
-	CFastMem::memcpy(_Head + buffer1.size(), &(buffer2[0]), buffer2.size());
+	CFastMem::memcpy(_Head, &(buffer1[0]), size1);
+	CFastMem::memcpy(_Head + size1, &(buffer2[0]), size2);
 	_Head += s;
 
 	_Empty = false;
