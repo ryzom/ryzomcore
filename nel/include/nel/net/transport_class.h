@@ -27,6 +27,7 @@
 #include "nel/misc/entity_id.h"
 #include "nel/misc/sheet_id.h"
 #include "nel/misc/variable.h"
+#include "nel/misc/string_view.h"
 
 #include "unified_network.h"
 #include "message.h"
@@ -512,7 +513,8 @@ inline NLNET::CMessage &CTransportClass::write ()
 
 #if !FINAL_VERSION
 	// Did the programmer forget to register the transport class? Forbid sending then.
-	nlassert( LocalRegisteredClass.find( className() ) != LocalRegisteredClass.end() );
+	// nlassert( LocalRegisteredClass.find( className() ) != LocalRegisteredClass.end() );
+	// Name is never set unless in Mode 3 on the temporary registration object, so this nlassert is invalid! :(
 #endif
 
 	// set the mode to register
