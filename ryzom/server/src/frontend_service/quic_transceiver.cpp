@@ -183,8 +183,8 @@ void CQuicTransceiver::start(uint16 port)
 		nlwarning("QUIC API not available");
 	}
 
-	static const char *protocolName = "ryzomcore4";
-	static const QUIC_BUFFER alpn = { sizeof(protocolName) - 1, (uint8_t *)protocolName };
+	static const CStringView protocolName = "ryzomcore4";
+	static const QUIC_BUFFER alpn = { (uint32)protocolName.size(), (uint8 *)protocolName.data() };
 
 	// Configuration, initialized in start, but destroyed on release only (may attempt more than once)
 	QUIC_STATUS status = QUIC_STATUS_SUCCESS;
@@ -403,9 +403,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	switch (ev->Type)
 	{
 	case QUIC_CONNECTION_EVENT_CONNECTED:
-		nlinfo("Connected");
-		nlassert(CStringView((const char *)ev->CONNECTED.NegotiatedAlpn, ev->CONNECTED.NegotiatedAlpnLength) == "ryzomcore4");
-		MsQuic->ConnectionSendResumptionTicket(connection, QUIC_SEND_RESUMPTION_FLAG_NONE, 0, NULL); // What does this even do?
+		nlinfo("Connected over QUIC protocol with ALPN '%s'", nlsvc(CStringView((const char *)ev->CONNECTED.NegotiatedAlpn, ev->CONNECTED.NegotiatedAlpnLength)));
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT:
@@ -449,13 +447,15 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	case QUIC_CONNECTION_EVENT_RESUMED:
 	case QUIC_CONNECTION_EVENT_PEER_CERTIFICATE_RECEIVED:
 	case QUIC_CONNECTION_EVENT_STREAMS_AVAILABLE: // TODO: Match with msg.xml
+	case QUIC_CONNECTION_EVENT_RESUMPTION_TICKET_RECEIVED:
 		// Don't care
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_PEER_STREAM_STARTED:
 	case QUIC_CONNECTION_EVENT_PEER_NEEDS_STREAMS:
-	case QUIC_CONNECTION_EVENT_RESUMPTION_TICKET_RECEIVED:
+	default:
 		// Not supported
+		nlwarning("Unsupported QUIC connection event type");
 		break;
 	}
 	return status;

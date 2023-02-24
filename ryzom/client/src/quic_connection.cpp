@@ -203,8 +203,8 @@ void CQuicConnectionImpl::connect()
 		return;
 	}
 
-	static const char *protocolName = "ryzomcore4";
-	static const QUIC_BUFFER alpn = { sizeof(protocolName) - 1, (uint8_t *)protocolName };
+	static const CStringView protocolName = "ryzomcore4";
+	static const QUIC_BUFFER alpn = { (uint32)protocolName.size(), (uint8 *)protocolName.data() };
 
 	// Configuration, initialized in start, but destroyed on release only (may attempt more than once)
 	QUIC_STATUS status = QUIC_STATUS_SUCCESS;
@@ -236,7 +236,8 @@ void CQuicConnectionImpl::connect()
 		// Load credentials for client, client doesn't need a certificate
 		QUIC_CREDENTIAL_CONFIG credConfig;
 		memset(&credConfig, 0, sizeof(credConfig));
-		credConfig.Flags = QUIC_CREDENTIAL_FLAG_CLIENT;
+		credConfig.Flags = QUIC_CREDENTIAL_FLAG_CLIENT
+			| QUIC_CREDENTIAL_FLAG_NO_CERTIFICATE_VALIDATION; // FIXME: Don't care for development
 		credConfig.Type = QUIC_CREDENTIAL_TYPE_NONE;
 		status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
 		if (QUIC_FAILED(status))
@@ -464,14 +465,24 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	{
 	case QUIC_CONNECTION_EVENT_CONNECTED: {
 		m->ConnectedFlag.clear();
-		nlinfo("Connected");
-		nlassert(CStringView((const char *)ev->CONNECTED.NegotiatedAlpn, ev->CONNECTED.NegotiatedAlpnLength) == "ryzomcore4");
+		nlinfo("Connected over QUIC protocol with ALPN '%s'", nlsvc(CStringView((const char *)ev->CONNECTED.NegotiatedAlpn, ev->CONNECTED.NegotiatedAlpnLength)));
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT: {
 		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
+		nlwarning("Shutdown initiated by transport, error code %llu, status 0x%x", ev->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode, ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status);
+		switch (ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status)
+		{
+		case QUIC_STATUS_CLOSE_NOTIFY: nlinfo("Close notify"); break;
+		case QUIC_STATUS_BAD_CERTIFICATE: nlinfo("Bad Certificate"); break;
+		case QUIC_STATUS_UNSUPPORTED_CERTIFICATE: nlinfo("Unsupported Certficiate"); break;
+		case QUIC_STATUS_REVOKED_CERTIFICATE: nlinfo("Revoked Certificate"); break;
+		case QUIC_STATUS_EXPIRED_CERTIFICATE: nlinfo("Expired Certificate"); break;
+		case QUIC_STATUS_UNKNOWN_CERTIFICATE: nlinfo("Unknown Certificate"); break;
+		case QUIC_STATUS_REQUIRED_CERTIFICATE: nlinfo("Required Certificate"); break;
+		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
@@ -505,13 +516,15 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	case QUIC_CONNECTION_EVENT_RESUMED:
 	case QUIC_CONNECTION_EVENT_PEER_CERTIFICATE_RECEIVED:
 	case QUIC_CONNECTION_EVENT_STREAMS_AVAILABLE: // TODO: Match with msg.xml
+	case QUIC_CONNECTION_EVENT_RESUMPTION_TICKET_RECEIVED:
 		// Don't care
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_PEER_STREAM_STARTED:
 	case QUIC_CONNECTION_EVENT_PEER_NEEDS_STREAMS:
-	case QUIC_CONNECTION_EVENT_RESUMPTION_TICKET_RECEIVED:
+	default:
 		// Not supported
+		nlwarning("Unsupported QUIC connection event type");
 		break;
 	}
 	return status;
