@@ -160,13 +160,23 @@ void	setCrashAlreadyReported(bool state);
 #define NL_LOC_MSG __FILE__ "(" NL_MACRO_TO_STR(__LINE__) ") : Message: "
 #define NL_LOC_WRN __FILE__ "(" NL_MACRO_TO_STR(__LINE__) ") : Warning Msg: "
 
+ //
+ // Following are internal functions, you should never use them
+ //
+
+ /// Never use this function (internal use only)
+void nlFatalError (const char *format, ...);
+
+/// Never use this function but call the nlerror macro (internal use only)
+void nlError (const char *format, ...);
+
 struct CSetLogPosition
 {
 private:
 	CLog *m_Log;
 
 public:
-	inline CSetLogPosition(CLog *log, sint line, const char *fileName, const char *funcName) : m_Log(log)
+	inline CSetLogPosition(CLog *log, sint line, const char *fileName, const char *funcName = NULL) : m_Log(log)
 	{
 		log->setPosition(line, fileName, funcName);
 	};
@@ -176,6 +186,10 @@ public:
 	}
 
 	CLog *log() const { return m_Log; }
+	
+	typedef void (*TError)(const char *format, ...);
+	TError error() { return NLMISC::nlError; }
+	TError fatalError() { return NLMISC::nlFatalError; }
 };
 
 
@@ -261,7 +275,7 @@ public:
 	}
  *\endcode
  */
-#define nlerror (NLMISC::createDebug (), NLMISC::CSetLogPosition(NLMISC::INelContext::getInstance().getErrorLog(), __LINE__, __FILE__, __FUNCTION__ ).log(), NLMISC::nlFatalError)
+#define nlerror (NLMISC::createDebug (), NLMISC::CSetLogPosition(NLMISC::INelContext::getInstance().getErrorLog(), __LINE__, __FILE__, __FUNCTION__ ).fatalError())
 
 
 /**
@@ -269,7 +283,7 @@ public:
  * Same as nlerror but it doesn't generate any exceptions. It's used only in very specific case, for example, when you
  * call a nlerror in a catch block (look the service.cpp)
  */
-#define nlerrornoex (NLMISC::createDebug (), NLMISC::CSetLogPosition(NLMISC::INelContext::getInstance().getErrorLog(), __LINE__, __FILE__, __FUNCTION__ ).log(), NLMISC::nlError)
+#define nlerrornoex (NLMISC::createDebug (), NLMISC::CSetLogPosition(NLMISC::INelContext::getInstance().getErrorLog(), __LINE__, __FILE__, __FUNCTION__ ).error())
 
 
 /**
@@ -922,12 +936,6 @@ private:
 //
 // Following are internal functions, you should never use them
 //
-
-/// Never use this function (internal use only)
-void nlFatalError (const char *format, ...);
-
-/// Never use this function but call the nlerror macro (internal use only)
-void nlError (const char *format, ...);
 
 #define NL_CRASH_DUMP_FILE "nel_debug.dmp"
 
