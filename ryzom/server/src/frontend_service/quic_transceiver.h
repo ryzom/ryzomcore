@@ -185,6 +185,9 @@ private:
 	/// Received datagram
 	void datagramReceived(CQuicUserContext *user, const uint8 *buffer, uint32 length);
 
+	/// Received shutdown
+	void shutdownReceived(CQuicUserContext *user);
+
 	/// Generates a token address to identify the connection with existing code
 	NLNET::CInetAddress generateTokenAddr();
 };

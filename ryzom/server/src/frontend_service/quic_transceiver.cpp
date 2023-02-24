@@ -408,10 +408,12 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT:
 		nlinfo("Shutdown initiated by transport");
+		self->shutdownReceived(user);
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER:
 		nlinfo("Shutdown initiated by peer");
+		self->shutdownReceived(user);
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
@@ -498,6 +500,21 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 		static const uint8 userEvent = TReceivedMessage::User;
 		static_assert(MsgHeaderSize == sizeof(userEvent));
 		m->Buffer->push(&userEvent, MsgHeaderSize, buffer, length);
+		m->Buffer->push((uint8 *)&user, sizeof(user)); // Pointer
+	}
+}
+
+void CQuicTransceiver::shutdownReceived(CQuicUserContext *user)
+{
+	// Increase reference for FIFO copy
+	user->increaseRef();
+
+	// Locked block
+	{
+		CAtomicFlagLockYield lock(m->BufferMutex);
+		static const uint8 removeEvent = TReceivedMessage::RemoveClient;
+		static_assert(MsgHeaderSize == sizeof(removeEvent));
+		m->Buffer->push(&removeEvent, MsgHeaderSize);
 		m->Buffer->push((uint8 *)&user, sizeof(user)); // Pointer
 	}
 }
