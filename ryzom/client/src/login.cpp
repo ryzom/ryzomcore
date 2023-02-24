@@ -2870,6 +2870,8 @@ string checkLogin(const string &login, const string &password, const string &cli
 		}
 
 		nldebug("res1: %s", res.c_str());
+		if (res.empty())
+			return "Empty answer body from server (error code 71)";
 
 		if (res[0] == 'H')
 		{
@@ -2952,6 +2954,8 @@ string checkLogin(const string &login, const string &password, const string &cli
 		}
 
 		nldebug("res2: %s", res.c_str());
+		if (res.empty())
+			return "Empty answer body from server (error code 70)";
 
 		if (res[0] == 'H')
 		{
@@ -3063,6 +3067,8 @@ string checkLogin(const string &login, const string &password, const string &cli
 		}
 
 		nldebug("res2: %s", res.c_str());
+		if (res.empty())
+			return "Empty answer body from server (error code 72)";
 
 		if (res[0] == 'H')
 		{
