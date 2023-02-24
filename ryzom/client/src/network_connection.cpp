@@ -660,6 +660,7 @@ bool	CNetworkConnection::connect(string &result)
 	// then connect to the frontend using the udp sock
 //ace faut faire la nouveau login client 	result = CLoginClient::connectToShard (_FrontendAddress, _Connection);
 
+	m_QuicConnection.update();
 	nlassert((!m_Connection.connected()) && !(m_QuicConnection.state() == CQuicConnection::Connected));
 	
 	try
@@ -1118,7 +1119,7 @@ void	CNetworkConnection::sendSystemLogin()
 	{
 		//sendUDP (&(_Connection), message.buffer(), length);
 		if (m_UseQuic)
-			m_QuicConnection.sendDatagram(message.buffer(), length);
+			m_QuicConnection.sendDatagramSwap(message, length);
 		else
 			m_Connection.send(message.buffer(), length);
 	}
@@ -1350,7 +1351,7 @@ void	CNetworkConnection::sendSystemAckSync()
 
 	uint32	length = message.length();
 	if (m_UseQuic)
-		m_QuicConnection.sendDatagram(message.buffer(), length);
+		m_QuicConnection.sendDatagramSwap(message, length);
 	else
 		m_Connection.send (message.buffer(), length);
 	//sendUDP (&(_Connection), message.buffer(), length);
@@ -2239,7 +2240,7 @@ void	CNetworkConnection::sendNormalMessage()
 	//_PropertyDecoder.send (_CurrentSendNumber, _LastReceivedNumber);
 	uint32	length = message.length();
 	if (m_UseQuic)
-		m_QuicConnection.sendDatagram(message.buffer(), length);
+		m_QuicConnection.sendDatagramSwap(message, length);
 	else
 		m_Connection.send(message.buffer(), length);
 	//sendUDP (&(_Connection), message.buffer(), length);
@@ -2403,7 +2404,7 @@ void	CNetworkConnection::sendSystemAckProbe()
 
 	uint32	length = message.length();
 	if (m_UseQuic)
-		m_QuicConnection.sendDatagram(message.buffer(), length);
+		m_QuicConnection.sendDatagramSwap(message, length);
 	else
 		m_Connection.send(message.buffer(), length);
 	//sendUDP (&(_Connection), message.buffer(), length);
@@ -2946,7 +2947,7 @@ void	CNetworkConnection::sendSystemDisconnection()
 	}
 	if (m_QuicConnection.canSend())
 	{
-		m_QuicConnection.sendDatagram(message.buffer(), length);
+		m_QuicConnection.sendDatagramSwap(message, length);
 	}
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
@@ -3186,7 +3187,7 @@ void	CNetworkConnection::sendSystemQuit()
 
 	uint32	length = message.length();
 	if (m_UseQuic)
-		m_QuicConnection.sendDatagram(message.buffer(), length);
+		m_QuicConnection.sendDatagramSwap(message, length);
 	else
 		m_Connection.send(message.buffer(), length);
 	//sendUDP (&(_Connection), message.buffer(), length);

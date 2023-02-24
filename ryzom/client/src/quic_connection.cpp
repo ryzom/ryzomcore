@@ -91,6 +91,11 @@ public:
 	bool ReceiveEnable; // Set when datagrams may be received, otherwise they'll be ignored, this is to avoid stray messages after disconnecting (set and accessed by main thread only)
 	CAtomicInt MaxSendLength; // Set by the callback thread, used to check if we can send
 
+	CAtomicFlag SendBusy;
+	CBitMemStream SendBuffer;
+	QUIC_BUFFER SendQuicBuffer;
+	CAtomicInt SentCount;
+
 	static QUIC_STATUS
 #ifdef _Function_class_
 	    _Function_class_(QUIC_CONNECTION_CALLBACK)
@@ -136,6 +141,7 @@ void CQuicConnectionImpl::init()
 	m->ConnectedFlag.testAndSet();
 	m->ShuttingDownFlag.testAndSet();
 	m->ShutdownFlag.testAndSet();
+	m->SendBusy.clear(); // release order
 
 	// Open library
 	QUIC_STATUS status = MsQuicOpenVersion(QUIC_API_VERSION_2, (const void **)&MsQuic);
@@ -414,6 +420,8 @@ void CQuicConnectionImpl::release()
 		fifo->clear();
 	}
 
+	m->SendBuffer.clear();
+
 	// Close configuration
 	if (m->Configuration)
 	{
@@ -509,10 +517,17 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		m->MaxSendLength = ev->DATAGRAM_STATE_CHANGED.SendEnabled ? ev->DATAGRAM_STATE_CHANGED.MaxSendLength : 0;
 		status = QUIC_STATUS_SUCCESS;
 		break;
+	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
+		if (ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_SENT
+			&& (ptrdiff_t)ev->DATAGRAM_SEND_STATE_CHANGED.ClientContext == (ptrdiff_t)m->SentCount.load())
+		{
+			m->SendBusy.clear(); // release
+		}
+		status = QUIC_STATUS_SUCCESS;
+		break;
 	case QUIC_CONNECTION_EVENT_LOCAL_ADDRESS_CHANGED:
 	case QUIC_CONNECTION_EVENT_PEER_ADDRESS_CHANGED:
 	case QUIC_CONNECTION_EVENT_IDEAL_PROCESSOR_CHANGED:
-	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
 	case QUIC_CONNECTION_EVENT_RESUMED:
 	case QUIC_CONNECTION_EVENT_PEER_CERTIFICATE_RECEIVED:
 	case QUIC_CONNECTION_EVENT_STREAMS_AVAILABLE: // TODO: Match with msg.xml
@@ -530,18 +545,45 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	return status;
 }
 
-bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
+//bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
+//{
+//	if (m->Connection && m->State && CQuicConnection::Connected && size <= m->MaxSendLength.load())
+//	{
+//		QUIC_BUFFER *buf = new QUIC_BUFFER(); // wow leak :)
+//		uint8 *copy = new uint8[size];
+//		memcpy(copy, buffer, size);
+//		buf->Buffer = copy; // (uint8 *)buffer;
+//		buf->Length = size;
+//		QUIC_STATUS status = MsQuic->DatagramSend(m->Connection, buf, 1, QUIC_SEND_FLAG_NONE, this);
+//		if (QUIC_FAILED(status))
+//		{
+//			nlwarning("DatagramSend failed with %d", status);
+//			return false;
+//		}
+//		return true;
+//	}
+//	return false;
+//}
+
+bool CQuicConnection::sendDatagramSwap(NLMISC::CBitMemStream &buffer, uint32 size)
 {
-	if (m->Connection && m->State && CQuicConnection::Connected && size <= m->MaxSendLength.load())
+	if (m->Connection && m->State && CQuicConnection::Connected && size <= m->MaxSendLength.load() && size <= buffer.length())
 	{
-		QUIC_BUFFER *buf = new QUIC_BUFFER(); // wow leak :)
-		uint8 *copy = new uint8[size];
-		memcpy(copy, buffer, size);
-		buf->Buffer = copy; // (uint8 *)buffer;
-		buf->Length = size;
-		QUIC_STATUS status = MsQuic->DatagramSend(m->Connection, buf, 1, QUIC_SEND_FLAG_NONE, this);
+		if (m->SendBusy.testAndSet())
+		{
+			// Already busy
+			return false;
+		}
+		
+		// Swap buffers
+		++m->SentCount;
+		m->SendBuffer.swap(buffer);
+		m->SendQuicBuffer.Buffer = (uint8 *)m->SendBuffer.buffer();
+		m->SendQuicBuffer.Length = size;
+		QUIC_STATUS status = MsQuic->DatagramSend(m->Connection, &m->SendQuicBuffer, 1, QUIC_SEND_FLAG_NONE, (void *)(ptrdiff_t)m->SentCount.load());
 		if (QUIC_FAILED(status))
 		{
+			m->SendBusy.clear();
 			nlwarning("DatagramSend failed with %d", status);
 			return false;
 		}
@@ -638,8 +680,13 @@ CQuicConnection::TState CQuicConnection::state() const
 	return Disconnected;
 }
 
-void CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
+//bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
+//{
+//}
+
+bool CQuicConnection::sendDatagramSwap(NLMISC::CBitMemStream &buffer, uint32 size)
 {
+
 }
 
 bool CQuicConnection::datagramAvailable()
