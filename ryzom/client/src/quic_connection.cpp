@@ -244,7 +244,7 @@ void CQuicConnectionImpl::connect()
 		QUIC_CREDENTIAL_CONFIG credConfig;
 		memset(&credConfig, 0, sizeof(credConfig));
 		credConfig.Flags = QUIC_CREDENTIAL_FLAG_CLIENT
-			| QUIC_CREDENTIAL_FLAG_NO_CERTIFICATE_VALIDATION; // FIXME: Don't care for development
+		    | QUIC_CREDENTIAL_FLAG_NO_CERTIFICATE_VALIDATION; // FIXME: Don't care for development
 		credConfig.Type = QUIC_CREDENTIAL_TYPE_NONE;
 		status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
 		if (QUIC_FAILED(status))
@@ -522,7 +522,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
 		if (ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_SENT
-			&& (ptrdiff_t)ev->DATAGRAM_SEND_STATE_CHANGED.ClientContext == (ptrdiff_t)m->SentCount.load())
+		    && (ptrdiff_t)ev->DATAGRAM_SEND_STATE_CHANGED.ClientContext == (ptrdiff_t)m->SentCount.load())
 		{
 			m->SendBusy.clear(); // release
 		}
@@ -548,7 +548,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	return status;
 }
 
-//bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
+// bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
 //{
 //	if (m->Connection && m->State && CQuicConnection::Connected && size <= m->MaxSendLength.load())
 //	{
@@ -566,7 +566,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 //		return true;
 //	}
 //	return false;
-//}
+// }
 
 bool CQuicConnection::sendDatagramSwap(NLMISC::CBitMemStream &buffer, uint32 size)
 {
@@ -577,7 +577,7 @@ bool CQuicConnection::sendDatagramSwap(NLMISC::CBitMemStream &buffer, uint32 siz
 			// Already busy
 			return false;
 		}
-		
+
 		// Swap buffers
 		++m->SentCount;
 		m->SendBuffer.swap(buffer);
@@ -674,6 +674,10 @@ void CQuicConnection::disconnect(bool blocking)
 {
 }
 
+void CQuicConnection::update()
+{
+}
+
 void CQuicConnection::release()
 {
 }
@@ -683,9 +687,14 @@ CQuicConnection::TState CQuicConnection::state() const
 	return Disconnected;
 }
 
-//bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
+uint32 CQuicConnection::maxSendLength() const
+{
+	return 0;
+}
+
+// bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
 //{
-//}
+// }
 
 bool CQuicConnection::sendDatagramSwap(NLMISC::CBitMemStream &buffer, uint32 size)
 {
