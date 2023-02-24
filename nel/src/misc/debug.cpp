@@ -279,7 +279,7 @@ void _assertex_stop_0(bool &ignoreNextTime, sint line, const char *file, const c
 		NLMISC::DefaultMsgBoxDisplayer->IgnoreNextTime = ignoreNextTime;
 	else if(!INelContext::getInstance().getNoAssert())
 		INelContext::getInstance().setDebugNeedAssert(true);
-	NLMISC::AssertLog->setPosition (line, file, funcName);
+	NLMISC::CSetLogPosition logPos__(NLMISC::AssertLog, line, file, funcName);
 	if(exp)		NLMISC::AssertLog->displayNL ("\"%s\" ", exp);
 	else		NLMISC::AssertLog->displayNL ("STOP");
 }

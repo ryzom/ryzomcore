@@ -332,7 +332,7 @@ void CLog::displayString (const char *str)
 		}
 	}
 	TempString.clear();
-	unsetPosition();
+	// unsetPosition();
 }
 
 
@@ -452,7 +452,7 @@ void CLog::displayRawString (const char *str)
 		}
 	}
 	TempString.clear();
-	unsetPosition();
+	// unsetPosition();
 }
 
 /*
