@@ -653,8 +653,9 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 	return previous;
 }
 
-void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
+bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemStream &buffer)
 {
+	return false;
 }
 
 void CQuicTransceiver::shutdown(CQuicUserContext *user)

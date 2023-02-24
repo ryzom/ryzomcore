@@ -689,10 +689,10 @@ CQuicConnection::TState CQuicConnection::state() const
 
 bool CQuicConnection::sendDatagramSwap(NLMISC::CBitMemStream &buffer, uint32 size)
 {
-
+	return false;
 }
 
-bool CQuicConnection::datagramAvailable()
+bool CQuicConnection::datagramAvailable() const
 {
 	return false;
 }
