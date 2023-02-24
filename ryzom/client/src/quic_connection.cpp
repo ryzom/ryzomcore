@@ -565,6 +565,7 @@ bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 		}
 		return true;
 	}
+	return false;
 }
 
 void CQuicConnection::datagramReceived(const uint8 *buffer, uint32 length)

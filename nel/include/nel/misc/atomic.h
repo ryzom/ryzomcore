@@ -510,7 +510,8 @@ public:
 
 	NL_FORCE_INLINE T store(T value, TMemoryOrder order = TMemoryOrderRelease)
 	{
-		return m_Value.store(value, (std::memory_order)order);
+		m_Value.store(value, (std::memory_order)order);
+		return value;
 	}
 
 	NL_FORCE_INLINE T exchange(T value, TMemoryOrder order = TMemoryOrderAcqRel)
