@@ -407,17 +407,20 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT:
+		user->MaxSendLength = 0;
 		nlinfo("Shutdown initiated by transport");
 		self->shutdownReceived(user);
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER:
+		user->MaxSendLength = 0;
 		nlinfo("Shutdown initiated by peer");
 		self->shutdownReceived(user);
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
 		CQuicUserContextRelease releaseUser(user); // Hopefully we only get QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE once!
+		user->MaxSendLength = 0;
 		nlinfo("Shutdown complete");
 		if (ev->SHUTDOWN_COMPLETE.AppCloseInProgress)
 		{
@@ -432,20 +435,27 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_DATAGRAM_RECEIVED:
-		nlinfo("Datagram received");
+		nldebug("Datagram received");
 		// YES PLEASE
 		self->datagramReceived(user, ev->DATAGRAM_RECEIVED.Buffer->Buffer, ev->DATAGRAM_RECEIVED.Buffer->Length);
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_STATE_CHANGED:
 		nlinfo("Datagram state changed");
-		user->MaxSendLength.store(ev->DATAGRAM_STATE_CHANGED.SendEnabled ? ev->DATAGRAM_STATE_CHANGED.MaxSendLength : 0, std::memory_order_release);
+		user->MaxSendLength = ev->DATAGRAM_STATE_CHANGED.SendEnabled ? ev->DATAGRAM_STATE_CHANGED.MaxSendLength : 0;
+		status = QUIC_STATUS_SUCCESS;
+		break;
+	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
+		if (ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_SENT
+		    && (ptrdiff_t)ev->DATAGRAM_SEND_STATE_CHANGED.ClientContext == (ptrdiff_t)user->SentCount.load())
+		{
+			user->SendBusy.clear(); // release
+		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_LOCAL_ADDRESS_CHANGED:
 	case QUIC_CONNECTION_EVENT_PEER_ADDRESS_CHANGED:
 	case QUIC_CONNECTION_EVENT_IDEAL_PROCESSOR_CHANGED:
-	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
 	case QUIC_CONNECTION_EVENT_RESUMED:
 	case QUIC_CONNECTION_EVENT_PEER_CERTIFICATE_RECEIVED:
 	case QUIC_CONNECTION_EVENT_STREAMS_AVAILABLE: // TODO: Match with msg.xml
@@ -527,18 +537,48 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 	return previous;
 }
 
-void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
+// void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
+//{
+//	QUIC_BUFFER *buf = new QUIC_BUFFER(); // wow leak :)
+//	uint8 *copy = new uint8[size];
+//	memcpy(copy, buffer, size);
+//	buf->Buffer = copy; // (uint8 *)buffer;
+//	buf->Length = size;
+//	QUIC_STATUS status = MsQuic->DatagramSend((HQUIC)user->Connection, buf, 1, QUIC_SEND_FLAG_NONE, (void *)user);
+//	if (QUIC_FAILED(status))
+//	{
+//		nlwarning("MsQuic->ConnectionSendDatagram failed with status %d", status);
+//	}
+// }
+
+bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemStream &buffer)
 {
-	QUIC_BUFFER *buf = new QUIC_BUFFER(); // wow leak :)
-	uint8 *copy = new uint8[size];
-	memcpy(copy, buffer, size);
-	buf->Buffer = copy; // (uint8 *)buffer;
-	buf->Length = size;
-	QUIC_STATUS status = MsQuic->DatagramSend((HQUIC)user->Connection, buf, 1, QUIC_SEND_FLAG_NONE, (void *)user);
-	if (QUIC_FAILED(status))
+	if (buffer.size() <= user->MaxSendLength.load())
 	{
-		nlwarning("MsQuic->ConnectionSendDatagram failed with status %d", status);
+		if (user->SendBusy.testAndSet())
+		{
+			// Already busy
+			return false;
+		}
+
+		// Swap buffers
+		++user->SentCount;
+		user->SendBuffer.swap(buffer);
+		static_assert(sizeof(CQuicBuffer) == sizeof(QUIC_BUFFER));
+		static_assert(offsetof(CQuicBuffer, Buffer) == offsetof(QUIC_BUFFER, Buffer));
+		static_assert(offsetof(CQuicBuffer, Length) == offsetof(QUIC_BUFFER, Length));
+		user->SendQuicBuffer.Buffer = (uint8 *)user->SendBuffer.buffer();
+		user->SendQuicBuffer.Length = user->SendBuffer.length();
+		QUIC_STATUS status = MsQuic->DatagramSend((HQUIC)user->Connection, (QUIC_BUFFER *)(&user->SendQuicBuffer), 1, QUIC_SEND_FLAG_NONE, (void *)(ptrdiff_t)user->SentCount.load());
+		if (QUIC_FAILED(status))
+		{
+			user->SendBusy.clear();
+			nlwarning("DatagramSend failed with %d", status);
+			return false;
+		}
+		return true;
 	}
+	return false;
 }
 
 void CQuicTransceiver::shutdown(CQuicUserContext *user)

@@ -22,13 +22,22 @@
 #include <memory>
 #include <atomic>
 
+#include "nel/misc/atomic.h"
+#include "nel/misc/bit_mem_stream.h"
 #include "nel/net/inet_address.h"
+
 #include "fe_receive_task.h"
 
 class CClientHost;
 
 class CQuicTransceiverImpl;
 class CQuicTransceiver;
+
+struct CQuicBuffer
+{
+	uint32 Length;
+	uint8 *Buffer;
+};
 
 // User context for quic messages
 class CQuicUserContext
@@ -68,7 +77,13 @@ public:
 	CClientHost *ClientHost = nullptr;
 
 	// Set if datagrams can be sent (set on connection thread, read on service main thread)
-	std::atomic<uint16> MaxSendLength = 0;
+	NLMISC::CAtomicInt MaxSendLength;
+
+	// Send buffer, one being sent at a time, released as soon as it's sent out
+	NLMISC::CAtomicFlag SendBusy;
+	NLMISC::CBitMemStream SendBuffer = NLMISC::CBitMemStream(false, 512);
+	CQuicBuffer SendQuicBuffer;
+	NLMISC::CAtomicInt SentCount;
 
 private:
 	std::atomic_int m_RefCount = 0;
@@ -167,7 +182,11 @@ public:
 	bool listening();
 
 	/// Send a datagram, fancier than a telegram, but not as reliable
-	void sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size);
+	// void sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size);
+
+	/// Send a datagram, this swaps the buffer with the previous one sent
+	/// Only one datagram may be in flight at a time
+	bool sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemStream &buffer);
 
 	/// Shutdown a connection
 	void shutdown(CQuicUserContext *user);

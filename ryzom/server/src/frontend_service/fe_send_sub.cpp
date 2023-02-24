@@ -333,7 +333,7 @@ inline void	CFeSendSub::CSendBuffer::sendOutBox( NLNET::CUdpSock *datasock )
 	{
 		if (QuicUser.get())
 		{
-			QuicUser->Transceiver->sendDatagram(QuicUser.get(), OutBox.buffer(), OutBox.length());
+			QuicUser->Transceiver->sendDatagramSwap(QuicUser.get(), OutBox);
 		}
 		else
 		{
