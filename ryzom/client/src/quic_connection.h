@@ -95,7 +95,7 @@ public:
 
 	/// Send a datagram, this swaps the buffer with the previous one sent
 	/// Only one datagram may be in flight at a time
-	bool sendDatagramSwap(NLMISC::CBitMemStream &buffer, uint32 size = 0);
+	bool sendDatagramSwap(NLMISC::CBitMemStream &buffer, uint32 size);
 
 	/// Check if any datagram has been received
 	bool datagramAvailable() const;

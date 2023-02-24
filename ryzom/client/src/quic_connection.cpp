@@ -91,6 +91,7 @@ public:
 	bool ReceiveEnable; // Set when datagrams may be received, otherwise they'll be ignored, this is to avoid stray messages after disconnecting (set and accessed by main thread only)
 	CAtomicInt MaxSendLength; // Set by the callback thread, used to check if we can send
 
+	// Send buffer, one being sent at a time, released as soon as it's sent out
 	CAtomicFlag SendBusy;
 	CBitMemStream SendBuffer;
 	QUIC_BUFFER SendQuicBuffer;
@@ -495,19 +496,21 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER: {
+		nlinfo("Shutdown initiated by peer");
 		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
+		nlinfo("Shutdown complete");
 		m->ShutdownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_DATAGRAM_RECEIVED:
-		nlinfo("Datagram received");
+		nldebug("Datagram received");
 		// YES PLEASE
 		m->datagramReceived(ev->DATAGRAM_RECEIVED.Buffer->Buffer, ev->DATAGRAM_RECEIVED.Buffer->Length);
 		status = QUIC_STATUS_SUCCESS;
