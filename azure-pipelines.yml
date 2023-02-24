@@ -28,7 +28,9 @@ jobs:
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
         sudo apt install libmsquic
         wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic.h
+        wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic_posix.h
         sudo mv msquic.h /usr/include/msquic.h
+        sudo mv msquic_posix.h /usr/include/msquic_posix.h
       displayName: 'Dependencies'
     - script: |
         mkdir build
@@ -79,7 +81,9 @@ jobs:
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
         sudo apt install libmsquic
         wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic.h
+        wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic_posix.h
         sudo mv msquic.h /usr/include/msquic.h
+        sudo mv msquic_posix.h /usr/include/msquic_posix.h
       displayName: 'Dependencies'
     - script: |
         mkdir build
@@ -145,7 +149,9 @@ jobs:
         sudo apt remove -y man-db
         sudo apt install -y --no-install-recommends $(aptPackages)
         wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic.h
+        wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic_posix.h
         sudo mv msquic.h /usr/include/msquic.h
+        sudo mv msquic_posix.h /usr/include/msquic_posix.h
       displayName: '(ubuntu) Dependencies'
       condition: eq(variables['Agent.JobName'], 'client ubuntu')
     - task: Cache@2

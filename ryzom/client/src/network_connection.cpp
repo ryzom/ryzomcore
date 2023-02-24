@@ -3126,7 +3126,7 @@ void	CNetworkConnection::reset()
 	_TotalLostPackets = 0;
 	_ConnectionQuality = false;
 
-	m_UseQuic = true;
+	m_UseQuic = false;
 
 	_CurrentSmoothServerTick= 0;
 	_SSTLastLocalTime= 0;
