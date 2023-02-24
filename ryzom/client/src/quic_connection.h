@@ -70,12 +70,21 @@ public:
 
 	/// Check if still connecting or connected
 	TState state() const;
+
+	/// Check the maximum datagram length
+	uint32 maxSendLength() const;
 	
 	/// Check if the connection is in a limbo state
 	inline bool limbo() const
 	{
 		TState s = state();
 		return s == Connecting || s == Disconnecting;
+	}
+	
+	/// Check if we can send
+	inline bool canSend() const
+	{
+		return state() == Connected && maxSendLength() > 0;
 	}
 
 	/// Check if the connection is connected
