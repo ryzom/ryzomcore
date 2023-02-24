@@ -47,7 +47,8 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 	NLMISC::CUnfairMutex	_Mutex;
 
 	// A flag to let some message passthrue without enqueuing (for authenticate)
-	bool					_PassThrue;
+	// Mutex must already be locked during passthrough, as it's also bypassed
+	NLMISC::CAtomicBool		_PassThrue;
 
 	CCallbackClientAdaptor(void *containerClass)
 		:	CNelCallbackClientAdaptor(containerClass),
@@ -69,11 +70,10 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 
 	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid = NLNET::InvalidSockId, bool log = true)
 	{
-		CAutoMutex<CUnfairMutex> mutex(_Mutex);
-
 		if (!_PassThrue)
 		{
 			// queue the message for later sending.
+			CAutoMutex<CUnfairMutex> mutex(_Mutex);
 			nldebug("SB: Pushing a buffer into SendQueue (from %u elts)", _SendQueue.size());
 			_SendQueue.push(buffer);
 		}
