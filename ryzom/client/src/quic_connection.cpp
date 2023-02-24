@@ -48,7 +48,8 @@ public:
 	{
 		NoChange,
 		Connect,
-		Disconnect
+		Disconnect,
+		Release,
 	};
 
 	CQuicConnectionImpl()
@@ -59,7 +60,7 @@ public:
 	    , DesiredStateChange(NoChange)
 	    , BufferReads(0)
 	    , State(CQuicConnection::Disconnected)
-	    , MaxSendLength(0)
+		, ReceiveEnable(0)
 	{
 	}
 
@@ -85,7 +86,8 @@ public:
 	CAtomicFlag ShuttingDownFlag; // Set by the callback thread, checked by the update call (main thread), reset by update on complete disconnection
 	CAtomicFlag ShutdownFlag; // Set by the callback thread, checked by the update call (main thread), reset by update on complete disconnection
 
-	CAtomicInt MaxSendLength; // Set by the callback thread, not used currently
+	bool ReceiveEnable; // Set when datagrams may be received, otherwise they'll be ignored, this is to avoid stray messages after disconnecting (set and accessed by main thread only)
+	CAtomicInt MaxSendLength; // Set by the callback thread, used to check if we can send
 
 	static QUIC_STATUS
 #ifdef _Function_class_
@@ -93,10 +95,12 @@ public:
 #endif
 	        connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev);
 
+	void init(); // Delayed init
 	void update();
 	void connect();
 	void shutdown();
 	void close();
+	void release();
 };
 
 CQuicConnection::CQuicConnection()
@@ -106,6 +110,23 @@ CQuicConnection::CQuicConnection()
     : m(new CQuicConnectionImpl())
 #endif
 {
+}
+
+CQuicConnection::~CQuicConnection()
+{
+	disconnect(true);
+	release();
+}
+
+void CQuicConnectionImpl::init()
+{
+	CQuicConnectionImpl *const m = this;
+	
+	if (MsQuic)
+	{
+		return;
+	}
+	
 	// TestAndSet has acquire semantics, clear has release semantics, so we use clear to flag the events
 	m->ConnectedFlag.testAndSet();
 	m->ShuttingDownFlag.testAndSet();
@@ -132,12 +153,6 @@ CQuicConnection::CQuicConnection()
 	}
 }
 
-CQuicConnection::~CQuicConnection()
-{
-	disconnect(true);
-	release();
-}
-
 void CQuicConnection::connect(const NLNET::CInetHost &addr)
 {
 	m->DesiredStateChange = CQuicConnectionImpl::Connect;
@@ -148,6 +163,8 @@ void CQuicConnection::connect(const NLNET::CInetHost &addr)
 void CQuicConnectionImpl::connect()
 {
 	CQuicConnectionImpl *const m = this;
+
+	init();
 
 	nlassert(m->State == CQuicConnection::Disconnected);
 	nlassert(m->DesiredStateChange == Connect);
@@ -161,6 +178,14 @@ void CQuicConnectionImpl::connect()
 	m->ShutdownFlag.testAndSet();
 	m->MaxSendLength = 0;
 	m->BufferReads = m->BufferWrites;
+	m->ReceiveEnable = true;
+
+	// Clear FIFO
+	{
+		CFifoAccessor access(&m->Buffer);
+		CBufFIFO *fifo = &access.value();
+		fifo->clear();
+	}
 
 	if (!MsQuic)
 	{
@@ -228,7 +253,7 @@ void CQuicConnectionImpl::connect()
 		return;
 	}
 
-	// Start the connection
+	// Start the connection (NOTE: The hostname lookup is a bit redundant here, but it's okay I suppose...)
 	status = MsQuic->ConnectionStart(m->Connection, m->Configuration, QUIC_ADDRESS_FAMILY_UNSPEC, nlUtf8ToMbcs(addr.hostname()), addr.port());
 	if (QUIC_FAILED(status))
 	{
@@ -245,7 +270,8 @@ void CQuicConnectionImpl::connect()
 void CQuicConnection::disconnect(bool blocking)
 {
 	m->DesiredStateChange = CQuicConnectionImpl::Disconnect;
-	if (blocking)
+	m->ReceiveEnable = false;
+	if (MsQuic && blocking)
 	{
 		try
 		{
@@ -289,6 +315,17 @@ void CQuicConnectionImpl::update()
 {
 	CQuicConnectionImpl *const m = this;
 
+	// Asynchronous release
+	if (!m->Connection
+		&& m->DesiredStateChange == CQuicConnectionImpl::Release)
+	{
+		nlassert(m->State == CQuicConnection::Disconnected);
+		m->release();
+		m->DesiredStateChange = CQuicConnectionImpl::NoChange;
+		update();
+		return;
+	}
+
 	// Early exit
 	if (m->State == CQuicConnection::Disconnected
 	    && m->DesiredStateChange != CQuicConnectionImpl::Connect)
@@ -327,6 +364,8 @@ void CQuicConnectionImpl::update()
 		{
 			nlwarning("Connection is connected, but state is %d", m->State);
 		}
+		update();
+		return;
 	}
 
 	// Shutting down, this is just a limbo state
@@ -336,6 +375,8 @@ void CQuicConnectionImpl::update()
 		{
 			m->State = CQuicConnection::Disconnecting;
 		}
+		update();
+		return;
 	}
 
 	// Shutdown complete, now close!
@@ -345,6 +386,8 @@ void CQuicConnectionImpl::update()
 		nlassert(m->Connection);
 		close();
 		m->State = CQuicConnection::Disconnected;
+		update();
+		return;
 	}
 }
 
@@ -353,8 +396,17 @@ void CQuicConnection::update()
 	m->update();
 }
 
-void CQuicConnection::release()
+void CQuicConnectionImpl::release()
 {
+	CQuicConnectionImpl *const m = this;
+
+	// Clear FIFO
+	{
+		CFifoAccessor access(&m->Buffer);
+		CBufFIFO *fifo = &access.value();
+		fifo->clear();
+	}
+	
 	// Close configuration
 	if (m->Configuration)
 	{
@@ -375,6 +427,13 @@ void CQuicConnection::release()
 		MsQuicClose(MsQuic);
 		MsQuic = NULL;
 	}
+}
+
+void CQuicConnection::release()
+{
+	m->DesiredStateChange = CQuicConnectionImpl::Release;
+	m->ReceiveEnable = false;
+	update();
 }
 
 CQuicConnection::TState CQuicConnection::state() const
@@ -453,30 +512,39 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	return status;
 }
 
-void CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
+bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
 {
-	if (m->Connection && size < m->MaxSendLength)
+	if (m->Connection && size <= m->MaxSendLength)
 	{
 		QUIC_BUFFER buf;
 		buf.Buffer = (uint8 *)buffer;
 		buf.Length = size;
-		MsQuic->DatagramSend(m->Connection, &buf, 1, QUIC_SEND_FLAG_NONE, this);
+		QUIC_STATUS status = MsQuic->DatagramSend(m->Connection, &buf, 1, QUIC_SEND_FLAG_NONE, this);
+		if (QUIC_FAILED(status))
+		{
+			nlwarning("DatagramSend failed with %d", status);
+			return false;
+		}
+		return true;
 	}
+	return false;
 }
 
 bool CQuicConnection::datagramAvailable() const
 {
 	// CFifoAccessor access(&m->Buffer);
 	// return !access.value().empty();
-	return m->BufferWrites != m->BufferReads;
+	return m->ReceiveEnable && m->BufferWrites != m->BufferReads;
 }
 
 bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 {
+	if (!m->ReceiveEnable)
+		return false;
+	
 	int writes = m->BufferWrites;
 	int reads = m->BufferReads;
 	if (writes != reads)
-		;
 	{
 		CFifoAccessor access(&m->Buffer);
 		CBufFIFO *fifo = &access.value();

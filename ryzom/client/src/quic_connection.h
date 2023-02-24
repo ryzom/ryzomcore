@@ -59,13 +59,13 @@ public:
 	/// Connect
 	void connect(const NLNET::CInetHost &addr); // const CInetAddress &addr);
 
-	/// Shutdown and close gracefully, this object can be reused immediately for a new connection
-	void disconnect(bool blocking);
+	/// Shutdown and close gracefully, this object can be reused immediately for a new connection even if non-blocking
+	void disconnect(bool blocking = false);
 
 	/// Update connection state
 	void update();
 
-	/// Release. Instance is useless after this call
+	/// Release QUIC resources asynchronously (during update), library can be safely reused even after this call
 	void release();
 
 	/// Check if still connecting or connected
@@ -91,7 +91,7 @@ public:
 	inline bool connected() const { return state() == Connected; }
 
 	/// Send a datagram, fancier than a telegram, but not as reliable
-	void sendDatagram(const uint8 *buffer, uint32 size);
+	bool sendDatagram(const uint8 *buffer, uint32 size);
 
 	/// Check if any datagram has been received
 	bool datagramAvailable() const;

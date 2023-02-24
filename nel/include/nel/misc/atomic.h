@@ -629,6 +629,12 @@ public:
 	}
 };
 
+#ifdef NL_CPP11
+using CAtomicBool = CAtomicEnum<bool>;
+#else
+typedef CAtomicEnum<bool> CAtomicBool;
+#endif
+
 /// Hold a spinlock on an atomic flag
 class CAtomicLockSpin
 {

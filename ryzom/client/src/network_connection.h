@@ -40,6 +40,7 @@
 #include <nel/misc/vectord.h>
 #include <nel/misc/md5.h>
 
+#include "quic_connection.h"
 #include "time_client.h"
 #include "game_share/entity_types.h"
 #include "property_decoder.h"
@@ -512,13 +513,13 @@ public:
 	/// Get local IP address
 	const NLNET::CInetAddress&	getAddress()
 	{
-		return _Connection.localAddr();
+		return m_Connection.localAddr(); // FIXME: QUIC
 	}
 
 	/// Get socket
 	NLNET::CUdpSock&			getConnection()
 	{
-		return _Connection.UdpSock;
+		return m_Connection.UdpSock; // FIXME: QUIC
 	}
 
 	/// Get userId
@@ -575,7 +576,13 @@ protected:
 	NLNET::CLoginCookie			_LoginCookie;
 
 	/// The UDP connection to the frontend
-	NLNET::CUdpSimSock			_Connection;
+	NLNET::CUdpSimSock			m_Connection;
+
+	/// The QUIC connection to the frontend
+	CQuicConnection				m_QuicConnection;
+	
+	/// Whether to use QUIC or not
+	bool						m_UseQuic;
 
 	/// The receive buffer
 	uint32						_ReceiveBuffer[65536];
