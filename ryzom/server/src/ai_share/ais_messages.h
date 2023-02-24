@@ -47,7 +47,7 @@ public:
 	virtual void description ()
 	{
 		className ("CMsgAIUploadActions");
-		property (std::string("data"), PropString, std::string(), Data);
+		property ("data", PropString, std::string(), Data);
 	}
 
 	virtual void callback (const std::string &name, NLNET::TServiceId id);

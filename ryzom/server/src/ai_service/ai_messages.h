@@ -65,7 +65,7 @@ public:
 		_name.push_back(name);
 	}
 
-	void push_back(uint16 idx,constr std::string &name)
+	void push_back(uint16 idx,const std::string &name)
 	{
 		_idx.push_back(idx);
 		_name.push_back(name);
