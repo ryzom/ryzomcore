@@ -52,18 +52,20 @@ public:
 		Release,
 	};
 
-	CQuicConnectionImpl()
-	    : Api(NULL)
+	CQuicConnectionImpl(CQuicConnection *self)
+	    : Self(self)
+	    , Api(NULL)
 	    , Registration(NULL)
 	    , Configuration(NULL)
 	    , Connection(NULL)
 	    , DesiredStateChange(NoChange)
 	    , BufferReads(0)
 	    , State(CQuicConnection::Disconnected)
-		, ReceiveEnable(0)
+	    , ReceiveEnable(0)
 	{
 	}
 
+	CQuicConnection *Self;
 	const QUIC_API_TABLE *Api;
 	HQUIC Registration;
 	HQUIC Configuration;
@@ -101,13 +103,16 @@ public:
 	void shutdown();
 	void close();
 	void release();
+
+	/// Received datagram (from quic threads)
+	void datagramReceived(const uint8 *buffer, uint32 length);
 };
 
 CQuicConnection::CQuicConnection()
 #ifdef NL_CPP14
-    : m(std::make_unique<CQuicConnectionImpl>())
+    : m(std::make_unique<CQuicConnectionImpl>(this))
 #else
-    : m(new CQuicConnectionImpl())
+    : m(new CQuicConnectionImpl(this))
 #endif
 {
 }
@@ -121,17 +126,17 @@ CQuicConnection::~CQuicConnection()
 void CQuicConnectionImpl::init()
 {
 	CQuicConnectionImpl *const m = this;
-	
+
 	if (MsQuic)
 	{
 		return;
 	}
-	
+
 	// TestAndSet has acquire semantics, clear has release semantics, so we use clear to flag the events
 	m->ConnectedFlag.testAndSet();
 	m->ShuttingDownFlag.testAndSet();
 	m->ShutdownFlag.testAndSet();
-	
+
 	// Open library
 	QUIC_STATUS status = MsQuicOpenVersion(QUIC_API_VERSION_2, (const void **)&MsQuic);
 	if (QUIC_FAILED(status))
@@ -317,7 +322,7 @@ void CQuicConnectionImpl::update()
 
 	// Asynchronous release
 	if (!m->Connection
-		&& m->DesiredStateChange == CQuicConnectionImpl::Release)
+	    && m->DesiredStateChange == CQuicConnectionImpl::Release)
 	{
 		nlassert(m->State == CQuicConnection::Disconnected);
 		m->release();
@@ -371,7 +376,8 @@ void CQuicConnectionImpl::update()
 	// Shutting down, this is just a limbo state
 	if (!m->ShuttingDownFlag.testAndSet())
 	{
-		if (m->State == CQuicConnection::Connected)
+		if (m->State == CQuicConnection::Connected
+		    || m->State == CQuicConnection::Connecting)
 		{
 			m->State = CQuicConnection::Disconnecting;
 		}
@@ -406,7 +412,7 @@ void CQuicConnectionImpl::release()
 		CBufFIFO *fifo = &access.value();
 		fifo->clear();
 	}
-	
+
 	// Close configuration
 	if (m->Configuration)
 	{
@@ -452,8 +458,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 #endif
     CQuicConnectionImpl::connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev)
 {
-	CQuicConnection *const self = (CQuicConnection *)context;
-	CQuicConnectionImpl *const m = self->m.get();
+	CQuicConnectionImpl *const m = (CQuicConnectionImpl *)context;
 	QUIC_STATUS status = QUIC_STATUS_NOT_SUPPORTED;
 	switch (ev->Type)
 	{
@@ -485,7 +490,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	case QUIC_CONNECTION_EVENT_DATAGRAM_RECEIVED:
 		nlinfo("Datagram received");
 		// YES PLEASE
-		self->datagramReceived(ev->DATAGRAM_RECEIVED.Buffer->Buffer, ev->DATAGRAM_RECEIVED.Buffer->Length);
+		m->datagramReceived(ev->DATAGRAM_RECEIVED.Buffer->Buffer, ev->DATAGRAM_RECEIVED.Buffer->Length);
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_STATE_CHANGED:
@@ -541,12 +546,12 @@ bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 {
 	if (!m->ReceiveEnable)
 		return false;
-	
+
 	int writes = m->BufferWrites;
 	int reads = m->BufferReads;
 	if (writes != reads)
 	{
-		CFifoAccessor access(&m->Buffer);
+		CFifoAccessor access(&m->Buffer); // This block is mutex'd now
 		CBufFIFO *fifo = &access.value();
 		if (fifo->empty())
 		{
@@ -568,9 +573,10 @@ bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 	return false;
 }
 
-void CQuicConnection::datagramReceived(const uint8 *buffer, uint32 length)
+void CQuicConnectionImpl::datagramReceived(const uint8 *buffer, uint32 length)
 {
-	CFifoAccessor access(&m->Buffer);
+	CQuicConnectionImpl *const m = this;
+	CFifoAccessor access(&m->Buffer); // This block is mutex'd now
 	CBufFIFO *fifo = &access.value();
 	fifo->push(buffer, length);
 	++m->BufferWrites;
@@ -629,10 +635,6 @@ bool CQuicConnection::datagramAvailable()
 bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 {
 	return false;
-}
-
-void CQuicConnection::datagramReceived(const uint8 *buffer, uint32 length)
-{
 }
 
 #endif

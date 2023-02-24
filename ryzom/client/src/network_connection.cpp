@@ -891,13 +891,6 @@ bool	CNetworkConnection::update()
 		}
 	}
 
-	if (m_UseQuic ? (m_QuicConnection.state() == CQuicConnection::Disconnected) : !m_Connection.connected())
-	{
-		//if(!ClientCfg.Local)
-		//	nlwarning("CNET[%p]: update() attempted whereas socket is not connected !", this);
-		return false;
-	}
-
 	try
 	{
 		// State automaton
@@ -975,9 +968,16 @@ bool	CNetworkConnection::update()
 		}
 	}
 
-	if (m_UseQuic && m_QuicConnection.state() == CQuicConnection::Disconnected)
+	if (m_UseQuic && (m_QuicConnection.state() == CQuicConnection::Disconnected))
 	{
 		// Bye
+		_ConnectionState = Disconnect;
+	}
+
+	if (!m_UseQuic && !m_Connection.connected())
+	{
+		//if(!ClientCfg.Local)
+		//	nlwarning("CNET[%p]: update() attempted whereas socket is not connected !", this);
 		_ConnectionState = Disconnect;
 	}
 
@@ -1230,12 +1230,12 @@ bool	CNetworkConnection::stateLogin()
 	{
 		sendSystemLogin();
 		_LatestLoginTime = _UpdateTime;
-		// On UDP time out the login after 24 attempts (every 300ms, so after 7.2 seconds)
-		if ((!m_UseQuic) && (m_LoginAttempts > 24))
+		// Time out the login after 24 attempts (every 300ms, so after 7.2 seconds)
+		if (m_LoginAttempts > 24)
 		{
 			m_LoginAttempts = 0;
 			disconnect(); // will send disconnection message
-			nlwarning("CNET[%p]: Too many LOGIN attempts, connection problem", this);
+			nlwarning("CNET[%p]: Too many LOGIN attempts, connection problem (using %s)", this, m_UseQuic ? "QUIC" : "UDP");
 			return false; // exit now from loop, don't expect a new state
 		}
 		else
@@ -3123,7 +3123,7 @@ void	CNetworkConnection::reset()
 	_TotalLostPackets = 0;
 	_ConnectionQuality = false;
 
-	m_UseQuic = false;
+	m_UseQuic = true;
 
 	_CurrentSmoothServerTick= 0;
 	_SSTLastLocalTime= 0;

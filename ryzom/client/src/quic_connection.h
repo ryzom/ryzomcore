@@ -104,9 +104,6 @@ private:
 
 	/// Internal implementation specific
 	CUniquePtr<CQuicConnectionImpl> m;
-
-	/// Received datagram
-	void datagramReceived(const uint8 *buffer, uint32 length);
 };
 
 #endif /* NL_QUIC_TRANSCEIVER_H */
