@@ -363,6 +363,7 @@ bool CBuildingManager::parseTriggers( const NLLIGO::IPrimitive* prim, CBuildingP
 //----------------------------------------------------------------------------
 void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 triggerId )
 {
+	TDataSetRow realRowId = rowId;
 	//GPMS can send a trigger msg more than one. So check if we already received it
 	TTriggerRequestCont::iterator itReq = _TriggerRequests.find( rowId );
 	if ( itReq != _TriggerRequests.end() )
@@ -385,10 +386,19 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 	CCharacter * user= PlayerManager.getChar( rowId );
 	if ( !user )
 	{
-		nlwarning("<BUILDING> row %u is invalid",rowId.getIndex() );
-		return;
+		CEntityBase * e = CEntityBaseManager::getEntityBasePtr( rowId );
+		if( e )
+		{
+			realRowId = e->getRiderEntity();
+			user = PlayerManager.getChar( realRowId );
+			if ( !user )
+			{
+				nlwarning("<BUILDING> row %u is invalid",rowId.getIndex() );
+				return;
+			}
+		}
 	}
-	
+
 
 
 	// build a request for our user
@@ -398,7 +408,7 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 
 	// Get the custom trigger (if exists)
 	std::string url = getCustomTrigger(triggerId);
-	
+
 	if (url.empty()) // No custom trigger, build it from parsed primitives
 	{
 		CTriggerRequestEntry entry;
@@ -430,11 +440,11 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 			return;
 		}
 	}
-	
+
 	request.Timer = new CTimer;
-	request.Timer->setRemaining( TriggerRequestTimout, new CTriggerRequestTimoutEvent(rowId) );
+	request.Timer->setRemaining( TriggerRequestTimout, new CTriggerRequestTimoutEvent(realRowId) );
 	// add the request to our manager
-	_TriggerRequests.insert( make_pair( rowId, request ) );
+	_TriggerRequests.insert( make_pair( realRowId, request ) );
 
 	// Don't teleport when it's a custom trigger, send url instead
 	if (!url.empty())
@@ -637,7 +647,7 @@ void CBuildingManager::removePlayerFromRoom( CCharacter * user, bool send_url )
 	nlassert(user);
 #endif
 
-	
+
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
 	sint32 cell = mirrorCell;
 	if ( !isRoomCell(cell) )
@@ -677,7 +687,7 @@ void CBuildingManager::removePlayerFromRoom( CCharacter * user, bool send_url )
 	for (uint16 i = 0; i < (uint16)pets.size(); ++i)
 	{
 		nlinfo("Checking pet %d", i);
-		
+
 		if (pets[i].PetStatus == CPetAnimal::landscape)
 		{
 			nlinfo("pet in landscape");
@@ -686,7 +696,7 @@ void CBuildingManager::removePlayerFromRoom( CCharacter * user, bool send_url )
 
 			if (!cont)
 				continue;
-	
+
 			CONTINENT::TContinent continent = (CONTINENT::TContinent)cont->getId();
 
 			if (continent == CONTINENT::R2_ROOTS ||
@@ -721,7 +731,7 @@ void CBuildingManager::deleteRoom(sint32 cell)
 		nlwarning("<BUILDING>cell %d is not a valid room!", cell);
 		return;
 	}
-	
+
 	// if there is nobody in the room, remove it
 	if ( !_RoomInstances[idx].Ptr->isValid() )
 	{
@@ -753,7 +763,7 @@ IRoomInstance *  CBuildingManager::allocateRoom( sint32 & cellRet, BUILDING_TYPE
 		nlwarning("<BUILDING>invalid room type %d",type);
 		return NULL;
 	}
-	
+
 	_RoomInstances[idx].Persistant = persistant;
 	return _RoomInstances[idx].Ptr;
 }
@@ -935,7 +945,7 @@ void CBuildingManager::setCustomTrigger(sint32 triggerId, const std::string & ur
 	std::map<sint,std::string>::iterator it = _CustomTriggers.find( triggerId );
 	if (it != _CustomTriggers.end())
 		_CustomTriggers.erase(it);
-	
+
 	if (!url.empty())
 		_CustomTriggers.insert(make_pair(triggerId, url));
 }
@@ -946,7 +956,7 @@ std::string CBuildingManager::getCustomTrigger(sint32 triggerId)
 	std::map<sint,std::string>::iterator it = _CustomTriggers.find( triggerId );
 	if ( it != _CustomTriggers.end() )
 		return (*it).second;
-	
+
 	return "";
 }
 
