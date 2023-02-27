@@ -3206,7 +3206,7 @@ NLMISC_COMMAND(mount,"mount the target","<uid>")
 						}
 						else
 						{
-							c->mount(c->getTargetDataSetRow());
+							c->mount(c->getTargetDataSetRow(), true);
 							log.displayNL("OK");
 						}
 					}
@@ -3225,10 +3225,11 @@ NLMISC_COMMAND(mount,"mount the target","<uid>")
 	return true;
 }
 
+// spawnMount 2 sagass_mount_00.creature "Mount$#Property of Ulukyn"
 //-----------------------------------------------
 NLMISC_COMMAND(spawnMount,"spawn a mount close to player","<uid> <mount sheet name> [<pet custom name>]")
 {
-	if (args.size() != 2)
+	if (args.size() < 2)
 		return false;
 
 	GET_ACTIVE_CHARACTER;
@@ -3630,7 +3631,7 @@ NLMISC_COMMAND(spawnPlayerPet, "spawn player pet", "<uid> <slot>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(removePlayerPet, "put player pet", "<uid> <slot> [<keepInventory=0|1>]")
+NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInventory=0|1>]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3639,6 +3640,12 @@ NLMISC_COMMAND(removePlayerPet, "put player pet", "<uid> <slot> [<keepInventory=
 
 	uint32 index;
 	fromString(args[1], index);
+
+	if (index == 8)
+	{
+		c->removeRentAMount();
+		return true;
+	}
 
 	bool keepInventory =  args.size() > 2 && args[2] == "1";
 
@@ -5038,11 +5045,11 @@ NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> 
 	TAIAlias alias;
 
 	string e = args[1];
-	if (e == "#_target_#")
+	if (e == "_target_")
 	{
 		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getTarget());
 	}
-	else if (e == "#_self_#")
+	else if (e == "_self_")
 	{
 		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getId());
 	}
