@@ -1005,6 +1005,15 @@ void CInterfaceManager::initInGame()
 	CMacroCmdManager::getInstance()->initInGame();
 
 	{
+		// Before loadInterfaceConfig(), CViewRenderer needs to know correct scale, because CWidgetManager asks it.
+		// Usually set in CInterfaceManager::drawViews(), but then its too late for loadInterfaceConfig()
+		if (ClientCfg.InterfaceScaleAuto)
+			CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+		else
+			CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+	}
+
+	{
 		H_AUTO( RZUpdAll )
 
 		CWidgetManager::getInstance()->updateAllLocalisedElements(); // To init all things
