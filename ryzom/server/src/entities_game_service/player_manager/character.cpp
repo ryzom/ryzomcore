@@ -628,6 +628,9 @@ CCharacter::CCharacter()
 	_EnterCriticalZoneProposalQueueId = 0;
 	_NbNonNullClassificationTypesSkillMod = 0;
 
+	_RequestMount = TDataSetRow();
+	_RequestMountTimer = 0;
+
 	for (uint i = 0; i < (uint)EGSPD::CClassificationType::EndClassificationType; ++i)
 		_ClassificationTypesSkillModifiers[i] = 0;
 
@@ -1665,6 +1668,15 @@ uint32 CCharacter::tickUpdate()
 		setStoppedNpc(TDataSetRow());
 	}
 
+	if (_RequestMount != TDataSetRow())
+	{
+		_RequestMountTimer--;
+		if (_RequestMountTimer == 0)
+		{
+			mount(_RequestMount, false, true);
+			_RequestMount = TDataSetRow();
+		}
+	}
 
 	// Send timed url
 	if (_TimedUrl > 0)
@@ -2243,7 +2255,7 @@ void CCharacter::displayPowerFlags()
 //---------------------------------------------------
 // Entity want mount another
 //---------------------------------------------------
-void CCharacter::mount(TDataSetRow PetRowId, bool fromArk)
+void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 {
 	if (!R2_VISION::isEntityVisibleToPlayers(getWhoSeesMe()))
 	{
@@ -2274,7 +2286,7 @@ void CCharacter::mount(TDataSetRow PetRowId, bool fromArk)
 						CVector2d start(_EntityState.X, _EntityState.Y);
 						float distance = (float)(start - destination).sqrnorm();
 
-						if (distance <= MaxTalkingDistSquare * 1000 * 1000)
+						if (skipDistance || distance <= MaxTalkingDistSquare * 1000 * 1000)
 						{
 							// prevent from giving the mount which the player mounts
 							abortExchange();
@@ -5790,7 +5802,7 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 
 			if (player != NULL)
 			{
-				if (player->havePriv(TeleportWithMektoubPriv))
+				if (fromVortex || player->havePriv(TeleportWithMektoubPriv))
 				{
 					CCreature* creature = CreatureManager.getCreature(creatureId);
 
@@ -6650,9 +6662,11 @@ void CCharacter::onAnimalSpawned(CPetSpawnConfirmationMsg::TSpawnError SpawnStat
 			CCreature* c = CreatureManager.getCreature(TheDataset.getEntityId(PetMirrorRow));
 			if (c)
 				c->setIsAPet(true);
+			c->setName("pet_of_"+getName().toString());
 
 			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
 			freeSpeedMode = true;
+			_RentAMount = PetMirrorRow;
 
 		}
 		else if (PetIdx < MAX_INVENTORY_ANIMAL)
@@ -6700,7 +6714,8 @@ void CCharacter::onAnimalSpawned(CPetSpawnConfirmationMsg::TSpawnError SpawnStat
 					if (animal.IsMounted)
 					{
 						// Remount it!
-						mount(PetMirrorRow);
+						_RequestMount  = PetMirrorRow;
+						_RequestMountTimer = 1;
 					}
 				}
 				else
@@ -7200,6 +7215,19 @@ void CCharacter::removeAnimal(CGameItemPtr item, CPetCommandMsg::TCommand mode)
 			removeAnimalIndex(i, mode);
 		}
 	}
+}
+
+void CCharacter::removeRentAMount()
+{
+	CPetCommandMsg msg;
+	msg.Command = CPetCommandMsg::DESPAWN;
+	msg.CharacterMirrorRow = _EntityRowId;
+	msg.PetMirrorRow = _RentAMount;
+	msg.Coordinate_X = _EntityState.X;
+	msg.Coordinate_Y = _EntityState.Y;
+	msg.Coordinate_H = _EntityState.Z;
+	uint32 AIInstanceId = getInstanceNumber();
+	CWorldInstances::instance().msgToAIInstance(AIInstanceId, msg);
 }
 
 //-----------------------------------------------
@@ -15580,11 +15608,20 @@ string CCharacter::getTargetInfos()
 
 			if (petSlot == -1)
 	 		{
-		 		CAIAliasTranslator::getInstance()->getNPCNameFromAlias(CAIAliasTranslator::getInstance()->getAIAlias(target), name);
-	 			if (name.find('$') != string::npos)
+				if (target.getType() == RYZOMID::npc)
 				{
-					title = name.substr(name.find('$')+1);
-					name = name.substr(0, name.find('$'));
+					CAIAliasTranslator::getInstance()->getNPCNameFromAlias(CAIAliasTranslator::getInstance()->getAIAlias(target), name);
+					if (name.find('$') != string::npos)
+					{
+						title = name.substr(name.find('$')+1);
+						name = name.substr(0, name.find('$'));
+					}
+				}
+				else
+				{
+					ucstring shortName = cTarget->getName();
+					CEntityIdTranslator::removeShardFromName(shortName);
+					name = shortName.toString();
 				}
 				msg += name+"|";
 			}
