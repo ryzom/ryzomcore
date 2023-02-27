@@ -311,7 +311,7 @@ void CPeopleInterraction::release()
 	ChatInput.Team.removeListeningPeopleList(&TeamList);
 
 	FriendList.saveContactGroups();
-	
+
 	CChatWindowManager &cwm = getChatWndMgr();
 
 	AroundMe.release();
@@ -1282,7 +1282,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const string &nameI
 	// remove the shard name if possible
 	string	name= CEntityCL::removeShardFromName(nameIn);
 
-	
+
 
 	// add the contact to this list
 	sint index = pl.getIndexFromName(name);
@@ -1335,6 +1335,19 @@ bool CPeopleInterraction::isContactInList(const string &nameIn, uint8 nList) con
 	// remove the shard name if possible
 	string	name= CEntityCL::removeShardFromName(nameIn);
 	return pl.getIndexFromName(name) != -1;
+}
+
+//=================================================================================================================
+bool CPeopleInterraction::isContactOnline(const string &nameIn) const
+{
+	// select correct people list
+	const CPeopleList	&pl = FriendList;
+	// remove the shard name if possible
+	string	name = CEntityCL::removeShardFromName(nameIn);
+	sint idx =  pl.getIndexFromName(name);
+	if (idx != -1)
+		return pl.getOnline(idx) == ccs_online;
+	return false;
 }
 
 //=================================================================================================================
@@ -1409,11 +1422,11 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 							break;
 						}
 					}
-					
+
 					TCharConnectionState prevState = FriendList.getOnline(index);
 					bool showMsg = bOnlyFriend && (prevState == ccs_offline || online == ccs_offline);
 
-					// Player is not in my guild, and the status change is from offline to online/abroad online or vice versa. 
+					// Player is not in my guild, and the status change is from offline to online/abroad online or vice versa.
 					if (showMsg)
 					{
 						string msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
@@ -2357,7 +2370,7 @@ public:
 			CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:change_contact_group:change_contact_group_eb:eb"));
 			if (geb)
 			{
-				
+
 				PeopleInterraction.FriendList.changeGroup(lastPeopleIndexChangeGroup, geb->getInputString());
 				geb->setInputString(std::string(""));
 				CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
