@@ -28,6 +28,36 @@
 
 #include "fe_receive_task.h"
 
+/*
+
+Beyond the realm of mere mortal code,
+Lies a wondrous feat, a wizard's ode.
+A QUIC implementation of the FES,
+That sends and receives with utmost finesse.
+
+The wizard's craft, a magic that transcends,
+A network protocol that never ends.
+A dance of data, a magical sight,
+Through the air, it soars in flight.
+
+It brings to life a world of wonder,
+Where games are played, and time doth thunder.
+A service that listens with a keen ear,
+To every message, both far and near.
+
+With this wizardry, comes a power unseen,
+A protocol that's fast, efficient and clean.
+A transceiver of QUIC, that knows no bounds,
+With speeds so fast, it never slows down.
+
+So if you seek a protocol that's rare,
+A service that's fast, and knows how to care,
+Look no further, for the FES is here,
+A wizard's code, that's sure to bring you cheer.
+  - ChatGPT
+
+*/
+
 class CClientHost;
 
 class CQuicTransceiverImpl;
