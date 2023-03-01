@@ -45,6 +45,13 @@ public:
 	 *	Shutdown Steam client and unload library.
 	 */
 	bool release();
+	
+	/**
+	 *	Save current Language from Steam Settings
+	 */
+	std::string GameLanguage;
+
+	std::string GameLanguageWebApiFormat();
 
 	/**
 	 *	Return the authentication session ticket if available.

@@ -318,8 +318,18 @@ int main(int argc, char **argv)
 #ifdef RZ_USE_STEAM
 	CSteamClient steamClient;
 
-	if (steamClient.init())
+	if (steamClient.init()){
 		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
+		string steamLanguage = steamClient.GameLanguageWebApiFormat();
+		//change language full to right format
+
+		if (steamLanguage != ClientCfg.LanguageCode)
+		{
+			nlinfo("Force Apply Steam Laguage: %s, current CFG Language %s", steamLanguage.c_str(), ClientCfg.LanguageCode.c_str());
+			ClientCfg.ForceLanguage= true;
+			ClientCfg.LanguageCode = steamLanguage;
+		}
+	}
 #endif
 
 #if !FINAL_VERSION
