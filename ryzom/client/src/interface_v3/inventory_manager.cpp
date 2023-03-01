@@ -304,6 +304,8 @@ CInventoryManager::CInventoryManager()
 	{
 		Hands[i] = ServerHands[i] = 0;
 		UIHands[i] = NULL;
+		UIHands2[i] = NULL;
+		UIHands3[i] = NULL;
 	}
 
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
@@ -553,6 +555,9 @@ void CInventoryManager::init()
 	UIHotbar[3] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_4));
 	UIHotbar[4] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR_5));
 
+	UIHands2[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND2_RIGHT));
+	UIHands2[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND2_LEFT));
+
 	UIEquip2[SLOT_EQUIPMENT::HEADDRESS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_HEADDRESS));
 	UIEquip2[SLOT_EQUIPMENT::EARL]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_EARING_LEFT));
 	UIEquip2[SLOT_EQUIPMENT::EARR]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_EARING_RIGHT));
@@ -576,6 +581,9 @@ void CInventoryManager::init()
 	UIHotbar2[2] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_3));
 	UIHotbar2[3] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_4));
 	UIHotbar2[4] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR2_5));
+
+	UIHands3[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND3_RIGHT));
+	UIHands3[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND3_LEFT));
 
 	UIHotbar3[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_1));
 	UIHotbar3[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HOTBAR3_2));
@@ -692,6 +700,14 @@ std::string CInventoryManager::getDBIndexPath(CDBCtrlSheet *pCS)
 	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
 		if (UIHands[i] == pCS)
+		{
+			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
+		}
+		if (UIHands2[i] == pCS)
+		{
+			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
+		}
+		if (UIHands3[i] == pCS)
 		{
 			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
 		}
@@ -1264,10 +1280,16 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 		sTmp = sTmp.substr(0,sTmp.rfind(':'));
 		sint index;
 		fromString(sTmp, index);
-		if (index == 0)
+		if (index == 0) {
 			sIE = CTRL_HAND_RIGHT;
-		else
+			sIE2 = CTRL_HAND2_RIGHT;
+			sIE3 = CTRL_HAND3_RIGHT;
+		}
+		else {
 			sIE = CTRL_HAND_LEFT;
+			sIE2 = CTRL_HAND2_LEFT;
+			sIE3 = CTRL_HAND3_LEFT;
+		}
 		// update Hands.
 		getInventory().Hands[index]= pNL->getValue16();
 	}
