@@ -180,18 +180,22 @@ void CMissionBaseBehaviour::sendContextTexts(const TDataSetRow& user, const TDat
 }
 
 //----------------------------------------------------------------------------
-void CMissionBaseBehaviour::getBotChatOptions(const TDataSetRow& interlocutor, std::vector<CBotChat> & botChats)
+void CMissionBaseBehaviour::getBotChatOptions(const TDataSetRow & userRow, const TDataSetRow& interlocutor, std::vector<CBotChat> & botChats)
 // "gift" is a bool, as in.. "true, there is a gift" or "false, no gift".
 {
+	nlinfo("get");
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	if (templ == NULL)
 		return;
+	nlinfo("have tmpl");
 	for ( map<uint32, EGSPD::CActiveStepPD>::const_iterator it = _Mission->getStepsBegin(); it != _Mission->getStepsEnd(); ++it )
 	{
+		nlinfo("check step");
 		bool gift = false;
 		nlassert( (*it).second.getIndexInTemplate() - 1 < templ->Steps.size() );
-		if( templ->Steps[  (*it).second.getIndexInTemplate() - 1  ]->hasBotChatOption(interlocutor, _Mission , gift ) )
+		if( templ->Steps[  (*it).second.getIndexInTemplate() - 1  ]->hasBotChatOption(userRow, interlocutor, _Mission , gift ) )
 		{
+			nlinfo("hasBotChatOption");
 			CBotChat botChat;
 			botChat.Gift = gift;
 			botChat.StepIndex =  (*it).second.getIndexInTemplate();
