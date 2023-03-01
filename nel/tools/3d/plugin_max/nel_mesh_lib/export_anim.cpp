@@ -2230,8 +2230,11 @@ void				CSSSBuild::compile(NL3D::CAnimation &dest, const char* sBaseName)
 				std::string	&line= lines[k];
 
 				// remove any '\r'
-				line.resize( std::remove_if(line.begin(), line.end(), std::bind2nd(std::equal_to<char>(), '\r') )
-					- line.begin() );
+#ifndef NL_CPP17
+				line.resize(std::remove_if(line.begin(), line.end(), std::bind2nd(std::equal_to<char>(), '\r')) - line.begin());
+#else
+				line.resize(std::remove_if(line.begin(), line.end(), std::bind(std::equal_to<char>(), std::placeholders::_1, '\r')) - line.begin());
+#endif
 
 				// parse
 				static std::vector<std::string>		words;
