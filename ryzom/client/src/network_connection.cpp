@@ -2789,15 +2789,6 @@ void	CNetworkConnection::pushTarget(TCLEntityId slot, LHSTATE::TLHState targetOr
 	CActionTargetSlot *ats = (CActionTargetSlot*)CActionFactory::getInstance ()->create (INVALID_SLOT, ACTION_TARGET_SLOT_CODE);
 	nlassert (ats != NULL);
 	ats->Slot = slot;
-	switch ( targetOrPickup ) // ensure the value is good for the FE
-	{
-		case LHSTATE::NONE: ats->TargetOrPickup = 0; break;
-		case LHSTATE::LOOTABLE: ats->TargetOrPickup = 1; break;
-		case LHSTATE::HARVESTABLE: ats->TargetOrPickup = 2; break;
-		default:
-		break;
-	}
-
 	ats->TargetOrPickup = (uint32)targetOrPickup;
 	push(ats);
 }
