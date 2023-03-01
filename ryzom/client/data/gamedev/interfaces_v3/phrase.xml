@@ -255,7 +255,7 @@
 -->
 
 <!-- The modal for Brick selection. NB: don't exit on lclick cause of scrollbar -->
-<group type="modal" id="build_phrase_select_brick" x="0" y="0" w="280" posref="BL TL" child_resize_h="true" child_resize_hmargin="4" options="skin_modal" >
+<group type="modal" id="build_phrase_select_brick" x="0" y="0" w="285" posref="BL TL" child_resize_h="true" child_resize_hmargin="4" options="skin_modal" >
 		<!-- This group is here only to ensure that the modal is not too small -->
 		<group id="fake_minh" posref="TL TL" sizeref="w" w="0" h="30" />
 
@@ -266,7 +266,7 @@
 			 y="-4"
 			 xitem="2" yitem="-2"
 			 xtext="32" ytext="-2"
-			 xcost="230" ycost="-8"
+			 xcost="235" ycost="-8"
 			 hspace="4"
 			 array="false"
 			 value="UI:PHRASE:SELECT"
@@ -287,7 +287,7 @@
 			 shadow="true"
 			 multi_line="true"
 			 multi_line_space="0"
-			 line_maxw="180"
+			 line_maxw="210"
 			>
 			<!-- the scroll -->
 			<ctrl style="skin_scroll" id="scroll_row" posref="TL TL" y="-2" />
@@ -297,15 +297,47 @@
 		</group>
 </group>
 
-
 <!-- ******************************** -->
-<!-- * PHRASE COMPOSITION ELEMENTS  * -->
+<!-- * PHRASE COMPOSITION           * -->
 <!-- ******************************** -->
-
 
 <!-- Max Slots for phrase composition -->
 <define	id="phrase_max_brick" value="64" />
 
+<!-- ******************************** -->
+<!-- * Phrase icon select           * -->
+<!-- ******************************** -->
+<variable entry="UI:PHRASE:BUILD:ICON:$i:SHEET"  type="sint32" value="0" size="%phrase_max_brick" />
+<variable entry="UI:PHRASE:BUILD:ICON:$i:INDEX"  type="sint32" value="0" size="%phrase_max_brick" />
+
+<proc id="proc_phrase_set_icon">
+	<action handler="phrase_set_icon" params="index=@0" />
+	<action handler="leave_modal"/>
+</proc>
+<template name="ctrl_phrase_select_icon" posparent="parent" posref="" x="0" y="0" index="" id="" >
+	<ctrl type="sheet" id="#id" nature="sbrick" value="UI:PHRASE:BUILD:ICON:#index" posparent="#posparent" posref="#posref"
+		x="#x" y="#y" auto_grayed="true" onclick_l="proc" params_l="proc_phrase_set_icon|#index"/>
+	<link expr="ne(@UI:PHRASE:BUILD:ICON:#index:SHEET,0)" target="#id:active" />
+</template>
+
+<group type="modal" id="build_phrase_select_icon" x="0" y="0" w="0" h="0" posref="BL TL" child_resize_w="true" child_resize_wmargin="8" child_resize_h="true" child_resize_hmargin="8" options="skin_modal" >
+		<!-- This group is here only to ensure that the modal is not too small -->
+		<group id="fake_minh" posref="TL TL" sizeref="w" w="0" h="30" />
+
+		<!-- this depends on phrase_max_brick values -->
+		<vector template="ctrl_phrase_select_icon" _firstindex="0"  _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-4" _nextpos="TR TL" />
+		<vector template="ctrl_phrase_select_icon" _firstindex="8"  _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-30" _nextpos="TR TL" />
+		<vector template="ctrl_phrase_select_icon" _firstindex="16" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-56" _nextpos="TR TL" />
+		<vector template="ctrl_phrase_select_icon" _firstindex="24" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-82" _nextpos="TR TL" />
+		<vector template="ctrl_phrase_select_icon" _firstindex="32" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-108" _nextpos="TR TL" />
+		<vector template="ctrl_phrase_select_icon" _firstindex="40" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-134" _nextpos="TR TL" />
+		<vector template="ctrl_phrase_select_icon" _firstindex="48" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-160" _nextpos="TR TL" />
+		<vector template="ctrl_phrase_select_icon" _firstindex="56" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-186" _nextpos="TR TL" />
+</group>
+
+<!-- ******************************** -->
+<!-- * PHRASE COMPOSITION ELEMENTS  * -->
+<!-- ******************************** -->
 
 <!-- Ctrls for a Parameter -->
 <template name="ctrl_phrase_param" id="" index="" paramindex="" posparent="" x="4" y="0" >
@@ -387,8 +419,8 @@
 		<!-- BACK -->
 		<group id="back" posref="TM TM" w="256" h="0" x="0" y="-74">
 			<instance template="box_widget" id="back_root" posref="TL TL" w="256" h="0" x="0" y="0" />
-				<view type="bitmap" id="col1" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-51" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
-				<view type="bitmap" id="col2" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-7" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
+			<view type="bitmap" id="col1" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-51" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
+			<view type="bitmap" id="col2" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-7" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
 			<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="col1:active" />
 			<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="col2:active" />
 		</group>
@@ -412,7 +444,7 @@
 
 
 		<!-- SPELL ICON -->
-		<ctrl type="sheet" id="spell_view" nature="sphraseid" posref="TL BL" x="4" y="-56" value="UI:PHRASE:BUILD:EDITION_PHRASE" tooltip="uittActionIcon" />
+		<ctrl type="sheet" id="spell_view" nature="sphraseid" posref="TL BL" x="4" y="-56" value="UI:PHRASE:BUILD:EDITION_PHRASE" tooltip="uittActionIcon" onclick_l="phrase_select_icon" />
 		<view type="text" id="spell_view_name" posparent="spell_view" posref="TL BL" x="0" y="-3" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPhraseEditIcon" />
 		<!-- Hide only the Icon if no composition starter (game design request) -->
 		<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="spell_view:active" />
@@ -500,21 +532,23 @@
 <variable entry="UI:PHRASE:FABER:MP_SELECT:$i:SHEET" type="sint32" value="0" size="%phrase_faber_selection_max" />
 <variable entry="UI:PHRASE:FABER:MP_SELECT:$i:QUALITY" type="sint32" value="0" size="%phrase_faber_selection_max" />
 <variable entry="UI:PHRASE:FABER:MP_SELECT:$i:QUANTITY" type="sint32" value="0" size="%phrase_faber_selection_max" />
-<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:USER_COLOR" type="sint32" value="1" size="%phrase_faber_selection_max" />
-<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:CHARAC_BUFFS" type="sint8" value="0" size="%phrase_faber_selection_max" />
+<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:USER_COLOR" type="sint32" value="0" size="%phrase_faber_selection_max" />
 <variable entry="UI:PHRASE:FABER:MP_SELECT:$i:WEIGHT" type="sint32" value="0" size="%phrase_faber_selection_max" />
 <!-- Define varaibles for the mp selected array-->
 <template name="phrase_faber_def_build_mps" index="" id="" >
 	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:SHEET" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
 	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:QUALITY" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
 	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:QUANTITY" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
-	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:USER_COLOR" type="sint32" value="1" size="%phrase_faber_max_mp_slot" />
-	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:CHARAC_BUFFS" type="sint8" value="0" size="%phrase_faber_max_mp_slot" />
+	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:USER_COLOR" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
 	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:WEIGHT" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
 </template>
 <vector template="phrase_faber_def_build_mps" id="yoyo_pipo_faber$i" index="$i" _size="%phrase_faber_max_item_req" _firstpos="TL TL" _xfirst="0" _nextpos="TR TL" _yfirst="0" />
 <!-- Define varaibles for the plan selection -->
 <variable entry="UI:PHRASE:FABER:FABER_PLAN:SHEET" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:FABER_PLAN:HP_BUFF" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:FABER_PLAN:SAP_BUFF" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:FABER_PLAN:STA_BUFF" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:FABER_PLAN:FOCUS_BUFF" type="sint32" value="0" />
 <!-- Define varaibles for the Mp Quantity setup -->
 <variable entry="UI:PHRASE:FABER:MP_QUANTITY:$i:SELECTED" type="sint32" value="0" size="%phrase_faber_max_item_req" />
 <variable entry="UI:PHRASE:FABER:MP_QUANTITY:$i:REQUIRED" type="sint32" value="0" size="%phrase_faber_max_item_req" />
@@ -522,8 +556,7 @@
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:SHEET" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:QUALITY" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:QUANTITY" type="sint32" value="0" />
-<variable entry="UI:PHRASE:FABER:STACK_SELECT:USER_COLOR" type="sint32" value="1" />
-<variable entry="UI:PHRASE:FABER:STACK_SELECT:CHARAC_BUFFS" type="sint8" value="0" />
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:USER_COLOR" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:WEIGHT" type="sint32" value="0" />
 <!-- declare the dummy mp stack selection value -->
 <variable entry="UI:PHRASE:FABER:STACK_SELECT:CUR_QUANTITY" type="sint32" value="0" />
@@ -532,8 +565,7 @@
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:SHEET" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:QUALITY" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:QUANTITY" type="sint32" value="0" />
-<variable entry="UI:PHRASE:FABER:RESULT_ITEM:USER_COLOR" type="sint32" value="1" />
-<variable entry="UI:PHRASE:FABER:RESULT_ITEM:CHARAC_BUFFS" type="sint8" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:USER_COLOR" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:LOCKED" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:WEIGHT" type="sint32" value="0" />
 <variable entry="UI:PHRASE:FABER:RESULT_ITEM:NAMEID" type="sint32" value="0" />
@@ -569,7 +601,7 @@
  posref="TL TL" w="185" h="100" x="-35" y="85"
  on_enter="phrase_faber_select_mp_quantity" options="skin_modal"
 >
-	<view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="SELECT QUANTITY" />
+	<view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="uiSelectQuantity" />
 	<ctrl type="sheet" id="sheet" onclick_r="open_help_auto" value="UI:PHRASE:FABER:STACK_SELECT" posref="MM MM" x="-26" y="0" use_quantity="false" />
 	<view type="text" id="x" posparent="sheet" posref="MR MM" x="8" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="X" />
 	<instance template="edit_box_widget" id="edit" entry_type="positive_integer" text_ref="TR TR" text_y="-1" fontsize="12"
@@ -596,10 +628,10 @@
 <template name="faber_item_req" posref="" posparent="parent" x="0" y="0" item_req="" id="" >
 	<group id="#id" x="#x" y="#y" posref="#posref" posparent="#posparent" w="350" child_resize_h="true" >
 		<!-- The item part info Icon. Hidden if a formula MP and not an item part -->
-		<view type="bitmap" id="icon" posref="TL TL" scale="true" x="0" y="0" w="24" h="24" global_color="false" />
+		<view type="bitmap" id="icon" posref="TL TL" scale="true" x="5" y="0" w="24" h="24" global_color="false" />
 
 		<!-- The item part/formula MP info text -->
-		<view type="text" id="text" posref="TL TL" x="26" y="-8"
+		<view type="text" id="text" posref="TL TL" x="30" y="-8"
 			color="255 255 255 255" global_color="true" fontsize="10" shadow="true" />
 
 		<!-- The Quantity of item required info text -->
@@ -621,9 +653,9 @@
 
 <!-- Template for a MPStat in Faber -->
 <template name="template_mp_faber_stat" id="" x="0" y="-2" posparent="item_result" posref="" >
-	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="350" h="16" active="false" >
-		<view type="text" id="text" line_maxw="170" posref="ML ML" over_extend_view_text="true" />
-		<view type="bar" id="bar" posref="MR MR" x="-50" value="0" range="100" />
+	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="380" h="18" active="false" >
+		<view type="text" id="text" line_maxw="190" posref="ML ML" over_extend_view_text="true" />
+		<view type="bar" id="bar" posref="MR MR" x="-55" value="0" range="100" />
 		<view type="text" id="textstat" posref="MR MR" />
 		<ctrl type="tooltip" id="tt" sizeref="wh" w="0" h="0" tooltip="" />
 	</group>
@@ -643,7 +675,7 @@
 
 <!-- container modal on hand -->
 <!--	on_enter="phrase_faber_validate_on_enter" -->
-<group style="container_modal" id="phrase_faber_execution" w="780" h="516" title="uiPhraseFaberExecute"
+<group style="container_modal" id="phrase_faber_execution" w="800" h="516" title="uiPhraseFaberExecute"
 	modal_parent="gestionsets|bot_chat_missions"   header_color="UI:SAVE:WIN:COLORS:INV" pop_max_h="716"
 	on_active="proc" on_active_params="proc_phrase_faber_opened"
 	on_deactive="proc" on_deactive_params="proc_phrase_faber_closed"
@@ -654,8 +686,8 @@
 
 	<group id="header_opened" x="0" y="0" w="0" h="496" posref="TL TL" >
 		<!-- BACK -->
-		<group id="back" posref="TL TL" w="772" h="424" x="0" y="-44">
-			<instance template="box_widget" id="back_root" posref="TL TL" w="772" h="424" x="0" y="0" />
+		<group id="back" posref="TL TL" w="792" h="424" x="0" y="-44">
+			<instance template="box_widget" id="back_root" posref="TL TL" w="792" h="424" x="0" y="0" />
 		</group>
 
 		<!-- Help info -->
@@ -670,11 +702,15 @@
 			multi_line="true" line_maxw="250" multi_line_space="0" hardtext="uiTextHelpSelectFaberPlanSlot" />
 		<link expr="eq(@UI:PHRASE:FABER:FABER_PLAN:SHEET, 0)" target="faber_plan_info:active" />
 
+		<view type="text" id="name" posparent="faber_plan" posref="TR TL" x="4" y="0" color="255 255 255 255" shadow="true" fontsize="10" multi_line="false" line_maxw="350" hardtext="" over_extend_view_text="true" />
+		<view type="text" id="desc" posparent="name" posref="BL TL" x="0" y="0" color="255 255 255 255" shadow="true" fontsize="8" multi_line="false" line_maxw="350" hardtext="" over_extend_view_text="true" />
+		<link expr="ne(@UI:PHRASE:FABER:FABER_PLAN:SHEET, 0)" target="name:active,desc:active" />
+		<link expr="@UI:PHRASE:FABER:FABER_PLAN:SHEET" action="lua:game:updatePhraseFaberPreview('UI:PHRASE:FABER:FABER_PLAN:SHEET')" />
+
 		<!-- The Success Rate info. Must be multiline for Formating -->
 		<view type="text" id="success_text" posparent="back" posref="TL TL" x="8" y="-36" color="255 255 255 255" shadow="true" fontsize="12"
 			multi_line="true" line_maxw="350" multi_line_space="0" hardtext="" />
 		<link expr="ne(@UI:PHRASE:FABER:FABER_PLAN:SHEET, 0)" target="success_text:active" />
-
 
 		<!-- The 10 item_req (itemParts and specific Formula items) -->
 		<group id="back_slots" x="16" y="-56" posparent="back" posref="TL TL" w="368" h="312" >
@@ -686,17 +722,36 @@
 		<ctrl style="skin_scroll" id="sv" posparent="back" posref="TL TL" x="4" y="-60" target="item_reqs" />
 
 		<!-- RESULT ITEM -->
-		<group id="item_result" posparent="back" posref="TR TR" x="-20" y="-4" w="360" child_resize_h="true" max_h="368" >
-			<instance template="inner_thin_border" inherit_gc_alpha="true" />
+		<group id="item_result" posparent="back" posref="TR TR" x="-10" y="-6" w="390" child_resize_h="true" max_h="375" >
+			<instance template="inner_thin_border"  inherit_gc_alpha="true" />
 
 			<!-- Text Header -->
-			<view type="text" id="header" posref="TL TL" y="0" hardtext="uiFaberItemResultHeader"/> <!-- for item, pacts, .. -->
+			<view type="text" id="header" posref="TL TL" x="5" y="-2" hardtext="uiFaberItemResultHeader"/> <!-- for item, pacts, .. -->
 
 			<!-- item result -->
-			<ctrl type="sheet" id="item_result" nature="item" value="UI:PHRASE:FABER:RESULT_ITEM" posparent="header" posref="BL TL" x="0" y="-2" tooltip="uittFaberItemResult" />
+			<ctrl type="sheet" id="item_result" nature="item" value="UI:PHRASE:FABER:RESULT_ITEM" posparent="header" posref="BL TL" y="-4" tooltip="uittFaberItemResult" />
+			<view type="text" id="name" posparent="item_result" posref="TR TL" x="4" y="0" fontsize="10" multi_line="false" line_maxw="340" hardtext="uittFaberItemResult" over_extend_view_text="true" />
+			<view type="text" id="desc" posparent="name" posref="BL TL" x="0" y="0" fontsize="8" multi_line="false" line_maxw="340" hardtext="..." over_extend_view_text="true" />
+			<link expr="@UI:PHRASE:FABER:RESULT_ITEM:SHEET" action="lua:game:updatePhraseFaberPreview('UI:PHRASE:FABER:RESULT_ITEM:SHEET')" />
+
+			<!-- buffs -->
+			<view type="bitmap"      id="hp_icon"                           posref="TR TR" x="-2" y="-2" scale="true" w="16" h="16" texture="ico_heal.tga" />
+			<view type="bitmap"      id="sap_icon"   posparent="hp_icon"    posref="BR TR" x="0" y="0"   scale="true" w="16" h="16" texture="ico_sap.tga" />
+			<view type="bitmap"      id="sta_icon"   posparent="sap_icon"   posref="BR TR" x="0" y="0"   scale="true" w="16" h="16" texture="ico_stamina.tga" />
+			<view type="bitmap"      id="focus_icon" posparent="sta_icon"   posref="BR TR" x="0" y="0"   scale="true" w="16" h="16" texture="ico_focus.tga" />
+
+			<view type="text_number" id="hp_text"    posparent="hp_icon"    posref="ML MR" x="0" y="0" fontsize="10" shadow="true" value="UI:PHRASE:FABER:FABER_PLAN:HP_BUFF" global_color="true" />
+			<view type="text_number" id="sap_text"   posparent="sap_icon"   posref="ML MR" x="0" y="0" fontsize="10" shadow="true" value="UI:PHRASE:FABER:FABER_PLAN:SAP_BUFF" global_color="true" />
+			<view type="text_number" id="sta_text"   posparent="sta_icon"   posref="ML MR" x="0" y="0" fontsize="10" shadow="true" value="UI:PHRASE:FABER:FABER_PLAN:STA_BUFF" global_color="true" />
+			<view type="text_number" id="focus_text" posparent="focus_icon" posref="ML MR" x="0" y="0" fontsize="10" shadow="true" value="UI:PHRASE:FABER:FABER_PLAN:FOCUS_BUFF" global_color="true" />
+
+			<link expr="ne(@UI:PHRASE:FABER:FABER_PLAN:HP_BUFF, 0)" target="hp_icon:active,hp_text:active" />
+			<link expr="ne(@UI:PHRASE:FABER:FABER_PLAN:SAP_BUFF, 0)" target="sap_icon:active,sap_text:active" />
+			<link expr="ne(@UI:PHRASE:FABER:FABER_PLAN:STA_BUFF, 0)" target="sta_icon:active,sta_text:active" />
+			<link expr="ne(@UI:PHRASE:FABER:FABER_PLAN:FOCUS_BUFF, 0)" target="focus_icon:active,focus_text:active" />
 
 			<!-- Stat Preview -->
-			<vector template="template_mp_faber_stat" id="stat$i" _size="%MAX_STAT_MP_CRAFT" _firstpos="BL TL" _xfirst="0" _yfirst="-2" _nextpos="BL TL" />
+			<vector template="template_mp_faber_stat" id="stat$i" _size="%MAX_STAT_MP_CRAFT" _firstpos="BL TL" _xfirst="0" _yfirst="-6" _nextpos="BL TL" />
 		</group>
 		<ctrl style="skin_scroll" id="sv_ir" posparent="back" posref="TR TR" x="-8" y="-44" target="item_result" />
 
@@ -734,7 +789,7 @@
 			<!-- NAME. Get the Name spell -->
 			<view type="text" id="spell_name" posref="TL TL" y="-1" w="120" h="10" shadow="true" fontsize="10"
 				global_color="false" />
-			<link expr="getSPhraseName(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE)" target="spell_name:hardtext" />
+			<link expr="getSPhraseName(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE)" target="spell_name:uc_hardtext" />
 
 			<!-- COSTS (HP, SAP, STA) -->
 			<!--

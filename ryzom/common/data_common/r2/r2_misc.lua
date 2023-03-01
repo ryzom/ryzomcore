@@ -191,9 +191,9 @@ end
 -------------------------------------------------------------------------------------------------
 -- enclose a string by double quotes
 function strifyXml(str)
-	local strxml = string.gsub(tostring(str), "&", "&amp;")
+	local strxml = string.gsub(tostring(str), ">", "&gt;")
 	strxml = string.gsub(strxml, "<", "&lt;")
-	strxml = string.gsub(strxml, ">", "&gt;")
+	strxml = string.gsub(strxml, "&", "&amp;")
 	strxml = string.gsub(strxml, "'", "&apos;")
 	strxml = string.gsub(strxml, '"', "&quot;")
 	return [["]] .. strxml .. [["]]
@@ -302,27 +302,6 @@ table.getn = function(table)
 		end
 	end
 	return #table
-end
-
-if oldInsertFunction == nil then
-	oldInsertFunction = table.insert
-end
-
-table.insert = function(t, key, value)
-	if not key then
-		debugWarning(string.format("Inserting '%s' '%s' in table with %d elements, nil is not a valid appending value, inserting false instead to fix behaviour!", key, value, #t))
-		if value then
-			oldInsertFunction(t, false, value)
-		else
-			oldInsertFunction(t, false)
-		end
-	else
-		if value then
-			oldInsertFunction(t, key, value)
-		else
-			oldInsertFunction(t, key)
-		end
-	end
 end
 
 

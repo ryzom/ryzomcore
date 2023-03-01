@@ -24,40 +24,43 @@
 >
 
 	<!-- Put First NPC interaction, sorted by usage frequency-->
-	<!-- trade -->
-	<action id="trade_item"				name="uimGcmTrade"				handler="context_trade_item"			params="" />
-	<action id="trade_pact"				name="uimGcmTradePact"			handler="context_trade_pact"			params="" />
-	<action id="trade_phrase"			name="uimGcmTradePhase"			handler="context_trade_phrase"			params="" />
-	<action id="trade_teleport"         name="uimGcmTeleport"			handler="context_trade_teleport"		params="" />
-	<action id="trade_faction"			name="uimGcmFaction"			handler="context_trade_faction"			params="" />
-	<action id="trade_cosmetic"         name="uimGcmCosmetic"			handler="context_trade_cosmetic"		params="" />
 
-	<action id="trade_guild_options"	name="uimGcmGuildOptions"		handler="context_trade_guild_options"	params="" />
-	<action id="trade_outpost_building" name="uimGcmOutpostBuilding"	handler="context_trade_outpost_building" params="" />
-	<action id="trade_guild_role_master" name="uimGcmGuildRoleMaster"	handler="context_trade_guild_role_master" params="" />
-	<!-- choose mission -->
-	<action id="choose_mission"			name="uimGcmMissions"           handler="context_choose_mission"        params=""/>
-	<!-- access to the web page -->
-	<action id="web_page"				name=""							handler="context_web_page"				params=""/>
-	<!-- create guild -->
-	<action id="create_guild"			name="uimGcmCreateGuild"        handler="context_create_guild"          params="" />
 	<!-- mission options -->
-	<action id="mo0"					name=""							handler="mission_option"				params="id=0" />
-	<action id="mo1"					name=""							handler="mission_option"				params="id=1" />
-	<action id="mo2"					name=""							handler="mission_option"				params="id=2" />
-	<action id="mo3"					name=""							handler="mission_option"				params="id=3" />
-	<action id="mo4"					name=""							handler="mission_option"				params="id=4" />
-	<action id="mo5"					name=""							handler="mission_option"				params="id=5" />
-	<action id="mo6"					name=""							handler="mission_option"				params="id=6" />
-	<action id="mo7"					name=""							handler="mission_option"				params="id=7" />
+	<action id="mo0"					name=""							handler="mission_option"				params="id=0"	icon="radar_mission2_16.tga"/>
+	<action id="mo1"					name=""							handler="mission_option"				params="id=1"	icon="radar_mission2_16.tga"/>
+	<action id="mo2"					name=""							handler="mission_option"				params="id=2"	icon="radar_mission2_16.tga"/>
+	<action id="mo3"					name=""							handler="mission_option"				params="id=3"	icon="radar_mission2_16.tga"/>
+	<action id="mo4"					name=""							handler="mission_option"				params="id=4"	icon="radar_mission2_16.tga"/>
+	<action id="mo5"					name=""							handler="mission_option"				params="id=5"	icon="radar_mission2_16.tga"/>
+	<action id="mo6"					name=""							handler="mission_option"				params="id=6"	icon="radar_mission2_16.tga"/>
+	<action id="mo7"					name=""							handler="mission_option"				params="id=7"	icon="radar_mission2_16.tga"/>
 	<!-- mission ring -->
 	<action id="mr0"					name=""							handler="mission_ring"					params="id=0" />
 	<action id="mr1"					name=""							handler="mission_ring"					params="id=1" />
 	<action id="mr2"					name=""							handler="mission_ring"					params="id=2" />
 	<action id="mr3"					name=""							handler="mission_ring"					params="id=3" />
+
+	<!-- trade -->
+	<action id="trade_item"				name="uimGcmTrade"				handler="context_trade_item"			params=""	icon="ico_mission_casket.tga"/>
+	<action id="trade_pact"				name="uimGcmTradePact"			handler="context_trade_pact"			params=""	icon="ico_mission_casket.tga"/>
+	<action id="trade_phrase"			name="uimGcmTradePhase"			handler="context_trade_phrase"			params=""	icon="pvp_aura.tga"/>
+	<action id="trade_teleport"         name="uimGcmTeleport"			handler="context_trade_teleport"		params=""	icon="ico_mission_casket.tga"/>
+	<action id="trade_faction"			name="uimGcmFaction"			handler="context_trade_faction"			params=""	icon="ico_mission_package.tga"/>
+	<action id="trade_cosmetic"         name="uimGcmCosmetic"			handler="context_trade_cosmetic"		params=""	icon="ico_tatoo.tga"/>
+
+	<action id="trade_guild_options"	name="uimGcmGuildOptions"		handler="context_trade_guild_options"	params=""	icon="spe_memory.tga"/>
+	<action id="trade_outpost_building" name="uimGcmOutpostBuilding"	handler="context_trade_outpost_building" params=""	icon="ge_mission_outpost_townhall.tga"/>
+	<action id="trade_guild_role_master" name="uimGcmGuildRoleMaster"	handler="context_trade_guild_role_master" params=""	icon="spe_memory.tga" />
+	<!-- choose mission -->
+	<action id="choose_mission"			name="uimGcmMissions"           handler="context_choose_mission"        params=""	icon="radar_mission_16.tga" />
+	<!-- access to the web page -->
+	<action id="web_page"				name=""							handler="context_web_page"				params=""	icon="r2_icon_speak_as.tga" />
+	<!-- create guild -->
+	<action id="create_guild"			name="uimGcmCreateGuild"        handler="context_create_guild"          params=""	icon="spe_memory.tga"/>
+
 	<!-- Loot/Forage/Quartering -->
-	<action id="loot_action"			name="uimGcmLoot"				handler="context_loot"					params="" />
-	<action id="quartering"				name="uimGcmQuartering"			handler="context_quartering"			params="" />
+	<action id="loot_action"			name="uimGcmLoot"				handler="context_loot"					params=""	icon="ico_looting.tga" />
+	<action id="quartering"				name="uimGcmQuartering"			handler="context_quartering"			params=""	icon="ico_looting.tga" />
 	<!-- New BotChat By Yoyo -->
 	<action id="choose_zc_charge"		name="uimGcmZoneCharge"         handler="context_choose_zc_charge"      params=""/>
 	<action id="cancel_zc_charge"		name="uimGcmCancelZoneCharge"	handler="context_cancel_zc_charge"		params=""/>
@@ -69,46 +72,59 @@
 	<action id="outpost_bannish_player"	name="uimGcmOutpostBanishPlayer"	handler="outpost_ban_player"		params=""/>
 	<action id="outpost_bannish_guild"	name="uimGcmOutpostBanishGuild"	handler="outpost_ban_guild"			params=""/>
 
-	<!-- talk : engage conversation with player or ask news to a npc -->
-	<action id="talk"					name="uimGcmTalk"				handler="context_talk"					params="" />
-	<action id="news"					name="uimGcmNews"				handler="context_talk"					params="" />
+	<!-- interaction -->
+	<action id="talk"					name="uimGcmTalk"				handler="context_talk"						params=""	icon="r2_mini_activity_empty_chat.tga" />
+	<action id="news"					name="uimGcmChat"				handler="lua"					params="game:TalkWithNpc(0)"	icon="radar_mission3_16.tga" />
+	<action id="news_aggressive"		name="uimGcmBullying"			handler="lua"					params="game:TalkWithNpc(1)"	icon="bullying.tga" />
+	<action id="attack"					name="uimGcmAttack"				handler="context_attack"				params=""	icon="ico_blade.tga" />
 
 
-	<!-- Action misc with selection -->
+	<action id="duel"					name="uimGcmDuel"				handler="context_duel"					params=""	icon="pvp_duel.tga" />
+	<action id="unduel"					name="uimGcmUnDuel"				handler="context_unduel"				params=""	icon="pvp_neutral.tga" />
+
+
+
+	<!-- <action id="pvp_challenge"			name="uimGcmPvpChallenge"		handler="context_pvp_challenge"			params="" /> -->
+	<!-- <action id="unpvp_challenge"		name="uimGcmUnPvpChanllenge"	handler="context_unpvp_challenge"		params="" /> -->
+	<action id="disengage"				name="uimGcmDisengage"			handler="context_disengage"				params=""	icon="ico_disarm.tga" />
+
 	<separator/>
-	<!-- ennemy -->
-	<action id="attack"					name="uimGcmAttack"				handler="context_attack"				params="" />
-	<action id="duel"					name="uimGcmDuel"				handler="context_duel"					params="" />
-	<action id="unduel"					name="uimGcmUnDuel"				handler="context_unduel"				params="" />
-	<action id="pvp_challenge"			name="uimGcmPvpChallenge"		handler="context_pvp_challenge"			params="" />
-	<action id="unpvp_challenge"		name="uimGcmUnPvpChanllenge"	handler="context_unpvp_challenge"		params="" />
-	<action id="disengage"				name="uimGcmDisengage"			handler="context_disengage"				params="" />
+	<action id="info"					name="uimGcmInfo"				handler="open_title_help"				params="from=target" icon="spe_status.tga" />
+	<separator/>
+
 	<!-- friendly -->
-	<action id="assist"					name="uimAssist"				handler="assist_target"					params="" />
-	<action id="follow"					name="uimFollow"				handler="command"						params="follow" />
-	<action id="exchange"				name="uimGcmExchange"			handler="context_exchange"				params="" />
-	<action id="invit"					name="uimGcmInvit"				handler="context_invit"					params="" />
-	<action id="guild_invit"			name="uimGcmGuildInvit"			handler="context_guild_invit"			params="" />
-	<action id="add_to_friend_list"		name="uimGcmAddToFriendList"	handler="context_add_to_friend_list"	params="" />
+	<action id="assist"					name="uimAssist"				handler="assist_target"					params=""	icon="ico_aim.tga" />
+	<action id="follow"					name="uimFollow"				handler="command"						params="follow"	icon="r2_mini_activity_follow_road.tga" />
+	<action id="exchange"				name="uimGcmExchange"			handler="context_exchange"				params=""	icon="ico_exchange.tga" />
+	<action id="invit"					name="uimGcmInvit"				handler="context_invit"					params="" icon="tb_team.tga" />
+	<action id="guild_invit"			name="uimGcmGuildInvit"			handler="context_guild_invit"			params="" icon="tb_guild.tga" />
+	<action id="add_to_friend_list"		name="uimGcmAddToFriendList"	handler="context_add_to_friend_list"	params="" icon="ico_preservation.tga" />
 	<!-- misc -->
-	<action id="mount"					name="uimGcmMount"				handler="beast_order"	params="order=mount|beast_index=@UI:GCM_BEAST_SELECTED" />
-	<action id="pa_follow"				name="uimFollowMe"				handler="beast_order"	params="order=follow|beast_index=@UI:GCM_BEAST_SELECTED"/>
-	<action id="pa_stop"				name="uimGcmStop"				handler="beast_order"	params="order=stop|beast_index=@UI:GCM_BEAST_SELECTED"/>
-	<action id="pa_free"				name="uimGcmFree"				handler="beast_order"	params="order=free|beast_index=@UI:GCM_BEAST_SELECTED"/>
-	<action id="pa_enter_stable"		name="uimGcmEnterStable"		handler="beast_order"	params="order=enter_stable|beast_index=@UI:GCM_BEAST_SELECTED"/>
-	<action id="extract_rm"				name="uimGcmExtractRM"			handler="context_extract_rm"			params="" />
-	<action id="info"					name="uimGcmInfo"				handler="open_title_help"				params="from=target" />
-	<action id="build_totem"			name="uimGcmChooseBuilding"		handler="build_totem"					params="" />
+	<action id="mount"					name="uimGcmMount"				handler="beast_order"	params="order=mount|beast_index=@UI:GCM_BEAST_SELECTED" icon="mektoub_mount.tga"/>
+	<action id="pa_follow"				name="uimFollowMe"				handler="beast_order"	params="order=follow|beast_index=@UI:GCM_BEAST_SELECTED" icon="lm_target.tga"/>
+	<action id="pa_stop"				name="uimGcmStop"				handler="beast_order"	params="order=stop|beast_index=@UI:GCM_BEAST_SELECTED" icon="r2ed_icon_stop.tga"/>
+	<action id="pa_enter_stable"		name="uimGcmEnterStable"		handler="beast_order"	params="order=enter_stable|beast_index=@UI:GCM_BEAST_SELECTED" icon="stable_enter.tga"/>
+	<action id="pa_enter_bag"			name="uimEnterBag"			handler="beast_order"	params="order=enter_bag|beast_index=@UI:GCM_BEAST_SELECTED" icon="bag_enter.tga"/>
+	<action id="extract_rm"				name="uimGcmExtractRM"			handler="context_extract_rm"			params="" icon="ico_forage_buff.tga" />
+	<action id="build_totem"			name="uimGcmChooseBuilding"		handler="build_totem"					params="" icon="building_state1.tga" />
+
+	<action id="stop"					name="uimGcmStopMove"			handler="context_stop"					params="" icon="r2_hand_pan.tga"/>
+	<action id="unseat"					name="uimUnmount"				handler="beast_order"	params="order=unmount|beast_index=0" icon="mektoub_unmount.tga"/>
+
+
+	<separator/>
+	<!-- Action for GMs -->
+	<action id="invisible"				name="Invisible"				handler="command"				params="a Invisible toggle"	icon="ico_fear.tga" />
+	<action id="invulnerable"			name="Invulnerable"				handler="command"			params="a Invulnerable toggle"	icon="ico_invulnerability.tga" />
+	<action id="god"					name="God"						handler="command"					params="a God toggle"	icon="forage_spawn.tga" />
 
 	<!-- Action with no selection -->
+	<action id="free_look"				name="uiMouseHead"				handler="context_free_look"				params=""	icon="ico_visibility.tga" />
+	<action id="move"					name="uimGcmMove"				handler="context_move"					params="" icon="ico_move.tga" />
 	<separator/>
-	<action id="free_look"				name="uiMouseHead"				handler="context_free_look"				params="" />
-	<action id="move"					name="uimGcmMove"				handler="context_move"					params="" />
-	<action id="stop"					name="uimGcmStopMove"			handler="context_stop"					params="" />
-	<action id="unseat"					name="uimUnmount"				handler="beast_order"	params="order=unmount|beast_index=0" />
 
-	<separator/>
-	<action id="quit_team"				name="uimGcmQuitTeam"			handler="context_quit_team"				params="" />
+	<action id="pa_free"				name="uimGcmFree"				handler="beast_order"	params="order=free|beast_index=@UI:GCM_BEAST_SELECTED" icon="r2_toolbar_kill.tga"/>
+	<action id="quit_team"				name="uimGcmQuitTeam"			handler="context_quit_team"				params="" icon="w_answer_16_cancel.tga"/>
 </group>
 
 	<!-- TEMPORARY FOR TESTS -->

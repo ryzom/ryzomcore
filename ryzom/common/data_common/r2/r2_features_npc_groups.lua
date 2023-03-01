@@ -96,7 +96,7 @@ local registerFeature = function ()
 			---------------------------------------------------------------------------------------------------------
 			-- get select bar type
 			SelectBarType = function(this)
-				return i18n.get("uiR2EDScene")
+				return i18n.get("uiR2EDScene"):toUtf8()
 			end,
 
 			updateVersion = function(this, scenarioValue, currentValue )
@@ -246,8 +246,10 @@ local registerFeature = function ()
 							
 							local baseName = r2.PaletteIdToTranslation[this.Components[k-1].Base]
 							if counterNames[baseName]==nil then
-								local name = r2:genInstanceName(baseName)
-								counterName = string.gsub(name, tostring(baseName), "")
+								local uc_name = ucstring()
+								uc_name:fromUtf8(baseName)
+								local name = r2:genInstanceName(uc_name):toUtf8()
+								counterName = string.gsub(name, tostring(uc_name), "")
 								counterNames[baseName] = tonumber(counterName)
 							else
 								counterNames[baseName] = counterNames[baseName]+1
@@ -429,66 +431,66 @@ local registerFeature = function ()
 
 		local logicTranslations = {
 			["ApplicableActions"] = {
-				["Activate"]					= { menu=i18n.get( "uiR2AA0Spawn"					), 
-													text=i18n.get( "uiR2AA1Spawn"					)},
-				["Deactivate"]					= { menu=i18n.get( "uiR2AA0Despawn"					), 
-													text=i18n.get( "uiR2AA1Despawn"					)},
-				["Sit Down"]					= { menu=i18n.get( "uiR2AA0NpcSit"					), 
-													text=i18n.get( "uiR2AA1NpcSit"					),
+				["Activate"]					= { menu=i18n.get( "uiR2AA0Spawn"					):toUtf8(), 
+													text=i18n.get( "uiR2AA1Spawn"					):toUtf8()},
+				["Deactivate"]					= { menu=i18n.get( "uiR2AA0Despawn"					):toUtf8(), 
+													text=i18n.get( "uiR2AA1Despawn"					):toUtf8()},
+				["Sit Down"]					= { menu=i18n.get( "uiR2AA0NpcSit"					):toUtf8(), 
+													text=i18n.get( "uiR2AA1NpcSit"					):toUtf8(),
 													groupIndependant=true},
-				["Stand Up"]					= { menu=i18n.get( "uiR2AA0NpcStand"				), 
-													text=i18n.get( "uiR2AA1NpcStand"				),
+				["Stand Up"]					= { menu=i18n.get( "uiR2AA0NpcStand"				):toUtf8(), 
+													text=i18n.get( "uiR2AA1NpcStand"				):toUtf8(),
 													groupIndependant=true},
-				["Kill"]						= { menu=i18n.get( "uiR2AA0Kill"					), 
-													text=i18n.get( "uiR2AA1Kill"					)},
-				["begin activity sequence"]		= { menu=i18n.get( "uiR2AA0BeginSeq"				), 
-													text=i18n.get( "uiR2AA1BeginSeq"				)},
-				["Fight with player"]			= { menu=i18n.get( "uiR2AA0FlagFightPlayersOn"		), 
-													text=i18n.get( "uiR2AA1FlagFightPlayersOn"		)},
-				["Dont fight with player"]		= { menu=i18n.get( "uiR2AA0FlagFightPlayersOff"		), 
-													text=i18n.get( "uiR2AA1FlagFightPlayersOff"		)},
-				["Fight with Npcs"]				= { menu=i18n.get( "uiR2AA0FlagFightNpcsOn"			), 
-													text=i18n.get( "uiR2AA1FlagFightNpcsOn"			)},
-				["Dont fight with Npcs"]		= { menu=i18n.get( "uiR2AA0FlagFightNpcsOff"		), 
-													text=i18n.get( "uiR2AA1FlagFightNpcsOff"		)},
-				["Run"]							= { menu=i18n.get( "uiR2AA0FlagRunOn"				), 
-													text=i18n.get( "uiR2AA1FlagRunOn"				)},
-				["Dont run"]					= { menu=i18n.get( "uiR2AA0FlagRunOff"				), 
-													text=i18n.get( "uiR2AA1FlagRunOff"				)},
+				["Kill"]						= { menu=i18n.get( "uiR2AA0Kill"					):toUtf8(), 
+													text=i18n.get( "uiR2AA1Kill"					):toUtf8()},
+				["begin activity sequence"]		= { menu=i18n.get( "uiR2AA0BeginSeq"				):toUtf8(), 
+													text=i18n.get( "uiR2AA1BeginSeq"				):toUtf8()},
+				["Fight with player"]			= { menu=i18n.get( "uiR2AA0FlagFightPlayersOn"		):toUtf8(), 
+													text=i18n.get( "uiR2AA1FlagFightPlayersOn"		):toUtf8()},
+				["Dont fight with player"]		= { menu=i18n.get( "uiR2AA0FlagFightPlayersOff"		):toUtf8(), 
+													text=i18n.get( "uiR2AA1FlagFightPlayersOff"		):toUtf8()},
+				["Fight with Npcs"]				= { menu=i18n.get( "uiR2AA0FlagFightNpcsOn"			):toUtf8(), 
+													text=i18n.get( "uiR2AA1FlagFightNpcsOn"			):toUtf8()},
+				["Dont fight with Npcs"]		= { menu=i18n.get( "uiR2AA0FlagFightNpcsOff"		):toUtf8(), 
+													text=i18n.get( "uiR2AA1FlagFightNpcsOff"		):toUtf8()},
+				["Run"]							= { menu=i18n.get( "uiR2AA0FlagRunOn"				):toUtf8(), 
+													text=i18n.get( "uiR2AA1FlagRunOn"				):toUtf8()},
+				["Dont run"]					= { menu=i18n.get( "uiR2AA0FlagRunOff"				):toUtf8(), 
+													text=i18n.get( "uiR2AA1FlagRunOff"				):toUtf8()},
 			},
 			["Events"] = {	
-				["activation"]					= { menu=i18n.get( "uiR2Event0Spawn"				), 
-													text=i18n.get( "uiR2Event1Spawn"				)},
-				["desactivation"]				= { menu=i18n.get( "uiR2Event0Despawn"				),  
-													text=i18n.get( "uiR2Event1Despawn"				)},
-				["member death"]				= { menu=i18n.get( "uiR2Event0MemberDeath"			),  
-													text=i18n.get( "uiR2Event1MemberDeath"			)},
-				["group death"]					= { menu=i18n.get( "uiR2Event0GroupDeath"			), 
-													text=i18n.get( "uiR2Event1GroupDeath"			)},
-				["end of activity step"]		= { menu=i18n.get( "uiR2Event0EndActivityStep"		), 
-													text=i18n.get( "uiR2Event1EndActivityStep"		)},
-				["end of activity sequence"]	= { menu=i18n.get( "uiR2Event0EndActivitySeq"		), 
-													text=i18n.get( "uiR2Event1EndActivitySeq"		)},
-				["begin of activity step"]		= { menu=i18n.get( "uiR2Event0BeginActivityStep"	), 
-													text=i18n.get( "uiR2Event1BeginActivityStep"	)},
-				["begin of activity sequence"]	= { menu=i18n.get( "uiR2Event0BeginOfActivitySeq"	), 
-													text=i18n.get( "uiR2Event1BeginOfActivitySeq"	)},
-				["targeted by player"]			= { menu=i18n.get( "uiR2Event0TargetedByPlayer"		), 
-													text=i18n.get( "uiR2Event1TargetedByPlayer"		)},
+				["activation"]					= { menu=i18n.get( "uiR2Event0Spawn"				):toUtf8(), 
+													text=i18n.get( "uiR2Event1Spawn"				):toUtf8()},
+				["desactivation"]				= { menu=i18n.get( "uiR2Event0Despawn"				):toUtf8(),  
+													text=i18n.get( "uiR2Event1Despawn"				):toUtf8()},
+				["member death"]				= { menu=i18n.get( "uiR2Event0MemberDeath"			):toUtf8(),  
+													text=i18n.get( "uiR2Event1MemberDeath"			):toUtf8()},
+				["group death"]					= { menu=i18n.get( "uiR2Event0GroupDeath"			):toUtf8(), 
+													text=i18n.get( "uiR2Event1GroupDeath"			):toUtf8()},
+				["end of activity step"]		= { menu=i18n.get( "uiR2Event0EndActivityStep"		):toUtf8(), 
+													text=i18n.get( "uiR2Event1EndActivityStep"		):toUtf8()},
+				["end of activity sequence"]	= { menu=i18n.get( "uiR2Event0EndActivitySeq"		):toUtf8(), 
+													text=i18n.get( "uiR2Event1EndActivitySeq"		):toUtf8()},
+				["begin of activity step"]		= { menu=i18n.get( "uiR2Event0BeginActivityStep"	):toUtf8(), 
+													text=i18n.get( "uiR2Event1BeginActivityStep"	):toUtf8()},
+				["begin of activity sequence"]	= { menu=i18n.get( "uiR2Event0BeginOfActivitySeq"	):toUtf8(), 
+													text=i18n.get( "uiR2Event1BeginOfActivitySeq"	):toUtf8()},
+				["targeted by player"]			= { menu=i18n.get( "uiR2Event0TargetedByPlayer"		):toUtf8(), 
+													text=i18n.get( "uiR2Event1TargetedByPlayer"		):toUtf8()},
 			},
 			["Conditions"] = {	
-				["is active"]					= { menu=i18n.get( "uiR2Test0Spawned"				), 
-													text=i18n.get( "uiR2Test1Spawned"				)},
-				["is inactive"]					= { menu=i18n.get( "uiR2Test0Despawned"				), 
-													text=i18n.get( "uiR2Test1Despawned"				)},
-				["is dead"]						= { menu=i18n.get( "uiR2Test0Dead"					), 
-													text=i18n.get( "uiR2Test1Dead"					)},
-				["is alive"]					= { menu=i18n.get( "uiR2Test0Alive"					), 
-													text=i18n.get( "uiR2Test1Alive"					)},
-				["is in activity sequence"]		= { menu=i18n.get( "uiR2Test0Seq"					), 
-													text=i18n.get( "uiR2Test1Seq"					)},
-				["is in activity step"]			= { menu=i18n.get( "uiR2Test0Step"					), 
-													text=i18n.get( "uiR2Test1Step"					)},
+				["is active"]					= { menu=i18n.get( "uiR2Test0Spawned"				):toUtf8(), 
+													text=i18n.get( "uiR2Test1Spawned"				):toUtf8()},
+				["is inactive"]					= { menu=i18n.get( "uiR2Test0Despawned"				):toUtf8(), 
+													text=i18n.get( "uiR2Test1Despawned"				):toUtf8()},
+				["is dead"]						= { menu=i18n.get( "uiR2Test0Dead"					):toUtf8(), 
+													text=i18n.get( "uiR2Test1Dead"					):toUtf8()},
+				["is alive"]					= { menu=i18n.get( "uiR2Test0Alive"					):toUtf8(), 
+													text=i18n.get( "uiR2Test1Alive"					):toUtf8()},
+				["is in activity sequence"]		= { menu=i18n.get( "uiR2Test0Seq"					):toUtf8(), 
+													text=i18n.get( "uiR2Test1Seq"					):toUtf8()},
+				["is in activity step"]			= { menu=i18n.get( "uiR2Test0Step"					):toUtf8(), 
+													text=i18n.get( "uiR2Test1Step"					):toUtf8()},
 			}
 		}
 		return logicTranslations

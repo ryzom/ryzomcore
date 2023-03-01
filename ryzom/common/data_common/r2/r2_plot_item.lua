@@ -48,7 +48,8 @@ local plotItemNamePrefix = i18n.get("uiR2EDPlotItemNamePrefix")
 
 
 function plotItem.getDisplayName(this)
-   return plotItemNamePrefix..this.Name
+   r2.ScratchUCStr:fromUtf8(this.Name)
+   return concatUCString(plotItemNamePrefix, r2.ScratchUCStr)
 end
 
 function plotItem.isNextSelectable(this)
@@ -58,7 +59,7 @@ end
 ---------------------------------------------------------------------------------------------------------
 -- get select bar type
 function plotItem.SelectBarType(this)
-	return i18n.get("uiR2EDPlotItems")
+	return i18n.get("uiR2EDPlotItems"):toUtf8()
 end
 
 ---------------------------------------------------------------------------------------------------------
@@ -78,6 +79,10 @@ r2.registerComponent(plotItem)
 -- /////////////
 -- // PRIVATE //
 -- /////////////
+
+local itemUCName = ucstring() -- keep a ucstring to avoid creation of string on the fly
+local itemUCDesc = ucstring() -- keep a ucstring to avoid creation of string on the fly
+local itemUCComment = ucstring() -- keep a ucstring to avoid creation of string on the fly
 
 local plotItemSheetToDBPath = {}
 
@@ -102,15 +107,18 @@ r2.PlotItemDisplayerCommon = {}
 -- update name for tooltip display + availability
 function r2.PlotItemDisplayerCommon:updateNameAndAvailability(instance, sheetId)
 	if plotItemSheetNbRef[sheetId] == 0 then
-		r2:setPlotItemInfos(sheetId, i18n.get("uiR2EDPlotItemDefaultName"), "", "")
+		r2:setPlotItemInfos(sheetId, i18n.get("uiR2EDPlotItemDefaultName"), ucstring(), ucstring())			
 		setDbProp(plotItemSheetToDBPath[sheetId], sheetId) -- available again
 	elseif plotItemSheetNbRef[sheetId] > 1 then
 		-- duplicated slot, may happen during concurrent edition (bad luck)
-		r2:setPlotItemInfos(sheetId, i18n.get("uiR2EDDuplicatedPlotItemName"), "", "")
+		r2:setPlotItemInfos(sheetId, i18n.get("uiR2EDDuplicatedPlotItemName"), ucstring(), ucstring())			
 		setDbProp(plotItemSheetToDBPath[sheetId], 0) -- available again
 		r2.PlotItemDisplayerCommon:touch() -- force to refresh the icon display
 	else
-		r2:setPlotItemInfos(sheetId, instance.Name, instance.Desc, instance.Comment)
+		itemUCName:fromUtf8(instance.Name)
+		itemUCDesc:fromUtf8(instance.Desc)
+		itemUCComment:fromUtf8(instance.Comment)
+		r2:setPlotItemInfos(sheetId, itemUCName, itemUCDesc, itemUCComment)		
 		setDbProp(plotItemSheetToDBPath[sheetId], 0) -- available again
 	end
 end
@@ -252,8 +260,9 @@ function r2.PlotItemDisplayerCommon:updateAll()
 		setDbProp("LOCAL:R2:PLOT_ITEMS:" .. tostring(index) ..":SHEET", v.SheetId)
 		local slot = groupListSheet["item_" .. tostring(index)]
 		slot.but.pushed = (v == r2:getSelectedInstance()) -- update selection      
+      itemUCName:fromUtf8(v.Name)
 	   self:updateSheetColor(slot.sheet, v.SheetId)
-      slot.t.text = v.Name
+      slot.t.uc_hardtext = itemUCName
       slot.t.global_color = true
 		slot.active=true
 		index = index + 1
@@ -266,7 +275,7 @@ function r2.PlotItemDisplayerCommon:updateAll()
 		local slot = groupListSheet["item_" .. tostring(index)]
 		slot.but.pushed = false
 		slot.active=true
-		slot.t.text = i18n.get("uiR2EDCreateNewItem")
+		slot.t.uc_hardtext = i18n.get("uiR2EDCreateNewItem")
         slot.t.global_color = false
 		slot.sheet.color = validItemColor
 		window:find("new_plot_item").frozen = false
@@ -413,7 +422,7 @@ function r2.PlotItemsPanel:requestNewItem(sheetId)
 	r2.requestNewAction(i18n.get("uiR2EDCreateNewPlotItemAction"))
 	local newItem = r2.newComponent("PlotItem")
 	newItem.SheetId = sheetId
-	newItem.Name = i18n.get("uiR2EDPlotItemDefaultName")
+	newItem.Name = i18n.get("uiR2EDPlotItemDefaultName"):toUtf8()
 	newItem.Desc = ""
 	newItem.Comment = ""
 	r2.requestInsertNode(r2.Scenario.InstanceId, "PlotItems", -1, "", newItem)
@@ -435,7 +444,7 @@ function r2.PlotItemsPanel:reinit()
 		if sheetId ~= 0 then
 			plotItemSheetToDBPath[sheetId] = availableDbPath
 			plotItemSheetNbRef[sheetId] = 0
-			r2:setPlotItemInfos(sheetId, defaultPlotItemName, "", "")
+			r2:setPlotItemInfos(sheetId, defaultPlotItemName, ucstring(), ucstring())			
 			setDbProp(availableDbPath, getDbProp(refDbPath))
 		end
 		--local slot = groupListSheet["item_" .. tostring(k)]

@@ -184,12 +184,12 @@
 <proc id="proc_sum_enter_name">
 	<action handler="reset_keyboard_focus" />
 	<action handler="play_sound" params="name=summary_enter_name" />
-	<action handler="ask_valid_name" params="target=ui:outgame:summary:eb:input_string|dblink=UI:TEMP:VALID" />
+	<action handler="ask_valid_name" params="target=ui:outgame:summary:eb:uc_input_string|dblink=UI:TEMP:VALID" />
 </proc>	
 
 <!-- proc_sum_enter_name2 is called after the server reception of VALID look at SERVER_RECEIVED_VALID -->
 <proc id="proc_sum_enter_name2">
-	<action handler="set" params="target_property=ui:outgame:summary:input_txt:hardtext|value=getprop('ui:outgame:summary:eb:input_string')"/>
+	<action handler="set" params="target_property=ui:outgame:summary:input_txt:uc_hardtext|value=getprop('ui:outgame:summary:eb:uc_input_string')"/>
 
 	<action handler="disp_info" params="str='isPeopleActive(@UI:TEMP:CHAR3D:PEOPLE) = '|val=isPeopleActive(@UI:TEMP:CHAR3D:PEOPLE)" />
 	<action handler="disp_info" params="str='isCareerActive(@UI:TEMP:CHAR3D:CAREER) = '|val=isCareerActive(@UI:TEMP:CHAR3D:CAREER)" />

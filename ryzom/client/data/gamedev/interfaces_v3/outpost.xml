@@ -47,7 +47,7 @@
 <style style="o_del_button" type="text_button" id="del" posref="MR MR" x="-4"
 			button_type="push_button" tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 			global_color_normal="true" global_color_over="true" global_color_pushed="true"
-			text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" 
+			text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
 			hardtext="uiOutpostDel" />
 
 <style style="o_spawn_button" type="text_button" id="spawn" posref="MR MR" x="-2" posparent="parent"
@@ -68,10 +68,10 @@
 
 <!-- common Status Text  -->
 <template name="t_outpost_stat_link" id="" db="" >
-	<!-- status for each outpost (see game_share/outpost.h: TOutpostState) -->	
+	<!-- status for each outpost (see game_share/outpost.h: TOutpostState) -->
 	<link expr="switch(@#db, 'uiOutpostPeace', 'uiOutpostPeace', 'uiOutpostWarDeclaration',
-				'uiOutpostAttackBefore', 'uiOutpostAttackRound', 'uiOutpostAttackAfter', 
-				'uiOutpostDefenseBefore', 'uiOutpostDefenseRound', 'uiOutpostDefenseAfter')" 
+				'uiOutpostAttackBefore', 'uiOutpostAttackRound', 'uiOutpostAttackAfter',
+				'uiOutpostDefenseBefore', 'uiOutpostDefenseRound', 'uiOutpostDefenseAfter')"
 				target="#id:hardtext" />
 </template>
 <template name="t_outpost_stat_link_desc" id="" db="" >
@@ -83,7 +83,7 @@
 <template name="t_outpost_stat" id="" posref="TL TL" posparent="parent" x="0" y="0" db="" index="" >
 	<view type="text" id="#id" posref="#posref" posparent="#posparent" x="#x" y="#y" fontsize="10" />
 	<instance template="text_tt" posparent="#id" on_tooltip="lua:game:outpostDisplayStatusInfoTooltip('@#db', '#index')" />
-	<!-- status for each outpost (see game_share/outpost.h: TOutpostState) -->	
+	<!-- status for each outpost (see game_share/outpost.h: TOutpostState) -->
 	<instance template="t_outpost_stat_link" id="#id" db="#db" />
 </template>
 
@@ -95,9 +95,9 @@
 			hardtext="uiOutpostTimeZone" case_mode="%case_normal" line_maxw="#x_check_box" />
 		<instance template="text_tt" posparent="title_time_zone" tooltip="uittOutpostTimeZone" />
 		<instance template="check_box" id="auto" posparent="title_time_zone" posref="ML ML" x="#x_check_box" y="1" w="0" h="16" fontsize="10" hardtext="uiOutpostAutoTimeZone" dblink="UI:SAVE:OUTPOST:TIME_ZONE_AUTO" />
-		<ctrl style="text_button_16" id="outpost_time_zone" posparent="auto" posref="MR ML" x="8" y="0" 
-			hardtext="GMT" onclick_l="active_menu:menu=ui:interface:outpost_time_zone_menu" 
-			text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255" 
+		<ctrl style="text_button_16" id="outpost_time_zone" posparent="auto" posref="MR ML" x="8" y="0"
+			hardtext="GMT" onclick_l="active_menu:menu=ui:interface:outpost_time_zone_menu"
+			text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255"
 			tooltip="uittOutpostTimeZone" />
 		<link expr="@UI:SAVE:OUTPOST:TIME_ZONE" action="lua:game:outpostDisplayTimeZone('outpost_time_zone')" />
 		<link expr="@UI:SAVE:OUTPOST:TIME_ZONE_AUTO" target="outpost_time_zone:frozen" />
@@ -126,14 +126,14 @@
 	<group id="#id" posref="#posref" posparent="#posparent" x="#x" y="0" sizeparent="parent" sizeref="w" w="0" h="20" >
 		<!-- name and status of the outpost -->
 		<view type="text" id="name" posref="ML ML" x="2" hardtext="testTestTest#index" fontsize="10" line_maxw="%outpost_name_w" over_extend_view_text="true" />
-		<instance template="t_outpost_stat" id="status" posref="ML ML" x="%outpost_name_w" y="0" 
+		<instance template="t_outpost_stat" id="status" posref="ML ML" x="%outpost_name_w" y="0"
 			db="SERVER:GUILD:OUTPOST:O#index:STATUS" index="#index" />
 
 		<!-- Selection button -->
 		<ctrl type="button" id="select" posref="ML ML" x="0" h="22" w="420"
 			button_type="push_button" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true"
 			color="0 0 0 0" col_over="255 255 255 128" col_pushed="0 0 0 192"
-			global_color_normal="true" global_color_over="true" global_color_pushed="true" 
+			global_color_normal="true" global_color_over="true" global_color_pushed="true"
 			onclick_l="proc" params_l="om_proc_outpost|#index" />
 
 		<!-- Delete ownage of an outpost -->
@@ -142,22 +142,22 @@
 	</group>
 
 	<!-- active the line if the outpost slot is here, and if for the correct list -->
-	<link expr="and(ne(@SERVER:GUILD:OUTPOST:O#index:SHEET,0), 
+	<link expr="and(ne(@SERVER:GUILD:OUTPOST:O#index:SHEET,0),
 					eq(@SERVER:GUILD:OUTPOST:O#index:OWNED,#owned))" target="#id:active" />
 	<!-- name of the outpost -->
-	<link expr="getOutpostName(@SERVER:GUILD:OUTPOST:O#index:SHEET)" target="#id:name:hardtext" />
+	<link expr="getOutpostName(@SERVER:GUILD:OUTPOST:O#index:SHEET)" target="#id:name:uc_hardtext" />
 
 	<!-- if the player has the rights to modify outposts let him destroy an outpost -->
 	<!-- the outpost must also be owned by the guild, and the guild must be able to delete the oupost -->
-	<link expr="and( ne(@SERVER:USER:OUTPOST_ADMIN,0), ne(@SERVER:GUILD:OUTPOST:CANDEL,0), ne(#owned,0) )" 
+	<link expr="and( ne(@SERVER:USER:OUTPOST_ADMIN,0), ne(@SERVER:GUILD:OUTPOST:CANDEL,0), ne(#owned,0) )"
 		target="#id:del:active" />
 
 	<!-- if the selected outpost is lost close the outpost window -->
-	<link expr="depends(@SERVER:GUILD:OUTPOST:O#index:SHEET, @SERVER:GUILD:OUTPOST:O#index:OWNED)" 
+	<link expr="depends(@SERVER:GUILD:OUTPOST:O#index:SHEET, @SERVER:GUILD:OUTPOST:O#index:OWNED)"
 		cond="eq(#index,@UI:TEMP:OUTPOST:SELECTION)" action="hide" params="outpost" />
 
 	<!-- if the outpost list is modified close the "del outpost" confirm dialog -->
-	<link expr="depends(@SERVER:GUILD:OUTPOST:O#index:SHEET, @SERVER:GUILD:OUTPOST:O#index:OWNED)" 
+	<link expr="depends(@SERVER:GUILD:OUTPOST:O#index:SHEET, @SERVER:GUILD:OUTPOST:O#index:OWNED)"
 		cond="ne(@UI:TEMP:OUTPOST:CONFIRM_DEL_OUTPOST,0)" action="proc" params="proc_valid_message_box_cancel" />
 
 </template>
@@ -316,21 +316,21 @@
 <template name="t_outpost_wanted_def_period_1" id="" outpost_db="" >
 	<view style="outpost_title" id="#id" posparent="parent" posref="TL TL" x="0" y="-20" hardtext="uiOutpostDefHour" case_mode="%case_normal" />
 	<instance template="text_tt" posparent="#id" tooltip="uittOutpostDefHour" />
-	<ctrl style="text_button_16" id="outpost_def_hour" posparent="#id" posref="ML ML" x="%outpost_title_maxw" y="1" 
-		hardtext="test11h" onclick_l="active_menu:menu=ui:interface:outpost_def_period_menu" 
-		text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255" 
+	<ctrl style="text_button_16" id="outpost_def_hour" posparent="#id" posref="ML ML" x="%outpost_title_maxw" y="1"
+		hardtext="test11h" onclick_l="active_menu:menu=ui:interface:outpost_def_period_menu"
+		text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255"
 		tooltip="uittOutpostDefHour" />
-	<link expr="depends(@#outpost_db:TIME_RANGE_DEF_WANTED, @UI:SAVE:OUTPOST:TIME_ZONE)" 
+	<link expr="depends(@#outpost_db:TIME_RANGE_DEF_WANTED, @UI:SAVE:OUTPOST:TIME_ZONE)"
 		action="lua:game:outpostAdjustHour('outpost_def_hour', '@#outpost_db:TIME_RANGE_DEF_WANTED')" />
 	<!-- disable feature if : !Owned || !outpost_admin || !(peace or decl war) -->
-	<link expr="depends(@#outpost_db:OWNED, @SERVER:USER:OUTPOST_ADMIN, @#outpost_db:STATUS, 
+	<link expr="depends(@#outpost_db:OWNED, @SERVER:USER:OUTPOST_ADMIN, @#outpost_db:STATUS,
 		@#outpost_db:TIME_RANGE_DEF, @#outpost_db:TIME_RANGE_DEF_WANTED)"
 		action="lua:game:outpostActiveDefenderHourButton()" />
 </template>
 
 <!-- Common Outpost Info For Both SelectedOutpost (type=0), and GuildOutpost (type=1) -->
 <template name="t_outpost_info" id="" outpost_db="" type="" x="0" y="0" >
-	<group id="#id" x="#x" y="#y" h="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="0" posref="TL TL" 
+	<group id="#id" x="#x" y="#y" h="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="0" posref="TL TL"
 		lua_class="game:outpostInitInfo(#type)" >
 
 		<!-- *** GLOBAL STATE *** -->
@@ -338,13 +338,13 @@
 		<group id="global_state" sizeref="w" w="0" child_resize_h="true" posparent="sep_gs" posref="BL TL" x="0" y="-10" >
 			<!-- NAME -->
 			<view type="text" id="outpost_name" posref="TM TM" x="0" y="0" global_color="false" fontsize="12" shadow="true" />
-			<link expr="getOutpostName(@#outpost_db:SHEET)" target="outpost_name:hardtext" />
+			<link expr="getOutpostName(@#outpost_db:SHEET)" target="outpost_name:uc_hardtext" />
 
 			<!-- LEVEL -->
 			<view style="outpost_title" id="title_level" posparent="parent" posref="TL TL" x="0" y="-20" hardtext="uiOutpostLevel" />
 			<instance template="text_tt" posparent="title_level" tooltip="uittOutpostLevel" />
 			<view style="outpost_value_R" id="outpost_level" posparent="title_level" />
-			<link expr="@#outpost_db:LEVEL" target="outpost_level:hardtext" />
+			<link expr="@#outpost_db:LEVEL" target="outpost_level:uc_hardtext" />
 
 			<!-- OWNER: GUILD/TRIBE -->
 			<view style="outpost_title" id="title_owner" posparent="title_level" hardtext="uiOutpostOwner" />
@@ -396,35 +396,35 @@
 			<view style="outpost_title" id="title_lvl_thre" posparent="parent" posref="TL TL" x="0" y="-20" hardtext="uiOutpostLvlThreshold" case_mode="%case_normal" />
 			<instance template="text_tt" posparent="title_lvl_thre" tooltip="uittOutpostLvlThreshold" />
 			<view style="outpost_value_RC" id="outpost_lvl_thre" posparent="title_lvl_thre" />
-			<link expr="depends(@#outpost_db:ROUND_LVL_THRESHOLD)" 
+			<link expr="depends(@#outpost_db:ROUND_LVL_THRESHOLD)"
 				action="lua:game:outpostChangeRoundLvlThreshold()" />
 
 			<!-- LVL MAX ATTACKER -->
 			<view style="outpost_title" id="title_lvl_max_att" posparent="title_lvl_thre" hardtext="uiOutpostLvlMaxAttacker" case_mode="%case_normal" />
 			<instance template="text_tt" posparent="title_lvl_max_att" tooltip="uittOutpostLvlMaxAttacker" />
 			<view style="outpost_value_RC" id="outpost_lvl_max_att" posparent="title_lvl_max_att" />
-			<link expr="depends(@#outpost_db:ROUND_LVL_MAX_ATT, @#outpost_db:STATUS)" 
+			<link expr="depends(@#outpost_db:ROUND_LVL_MAX_ATT, @#outpost_db:STATUS)"
 				action="lua:game:outpostChangeRoundLvlMaxAtt()" />
 
 			<!-- LVL MAX DEFENDER -->
 			<view style="outpost_title" id="title_lvl_max_def" posparent="title_lvl_max_att" hardtext="uiOutpostLvlMaxDefender" case_mode="%case_normal" />
 			<instance template="text_tt" posparent="title_lvl_max_def" tooltip="uittOutpostLvlMaxDefender" />
 			<view style="outpost_value_RC" id="outpost_lvl_max_def" posparent="title_lvl_max_def" />
-			<link expr="depends(@#outpost_db:ROUND_LVL_MAX_DEF, @#outpost_db:STATUS)" 
+			<link expr="depends(@#outpost_db:ROUND_LVL_MAX_DEF, @#outpost_db:STATUS)"
 				action="lua:game:outpostChangeRoundLvlMaxDef()" />
 
 			<!-- CURRENT LVL -->
 			<view style="outpost_title" id="title_lvl_cur" posparent="title_lvl_max_def" hardtext="uiOutpostLvlCurrent" case_mode="%case_normal" />
 			<instance template="text_tt" posparent="title_lvl_cur" tooltip="uittOutpostLvlCurrent" />
 			<view style="outpost_value_RC" id="outpost_lvl_cur" posparent="title_lvl_cur" />
-			<link expr="depends(@#outpost_db:ROUND_LVL_CUR, @#outpost_db:STATUS)" 
+			<link expr="depends(@#outpost_db:ROUND_LVL_CUR, @#outpost_db:STATUS)"
 				action="lua:game:outpostChangeRoundLvlCur()" />
 
 			<!-- ROUND/ROUND TOTAL (add space for better understanding) -->
 			<view style="outpost_title" id="title_round_cur" posparent="title_lvl_cur" hardtext="uiOutpostRoundCur" case_mode="%case_normal" y="-18" />
 			<instance template="text_tt" posparent="title_round_cur" tooltip="uittOutpostRoundCur" />
 			<view style="outpost_value_RC" id="outpost_round_cur" posparent="title_round_cur" />
-			<link expr="depends(@#outpost_db:ROUND_ID_CUR, @#outpost_db:ROUND_ID_MAX, @#outpost_db:STATUS)" 
+			<link expr="depends(@#outpost_db:ROUND_ID_CUR, @#outpost_db:ROUND_ID_MAX, @#outpost_db:STATUS)"
 				action="lua:game:outpostChangeRoundId()" />
 
 		</group>
@@ -443,14 +443,14 @@
 			<instance template="text_tt" posparent="title_att_period" tooltip="uittOutpostAttPeriod" />
 			<view style="outpost_value_RC2" id="outpost_att_period" posparent="title_att_period" />
 			<link expr="getOutpostPeriod(@#outpost_db:TIME_RANGE_ATT, @#outpost_db:TIME_RANGE_LENGTH, @UI:SAVE:OUTPOST:TIME_ZONE, @#outpost_db:STATUS, 1)"
-				target="outpost_att_period:hardtext" />
+				target="outpost_att_period:uc_hardtext" />
 
 			<!-- ACTUAL DEFENDER PERIOD -->
 			<view style="outpost_title" id="title_def_period" posparent="title_att_period" hardtext="uiOutpostDefPeriod" case_mode="%case_normal" />
 			<instance template="text_tt" posparent="title_def_period" tooltip="uittOutpostDefPeriod" />
 			<view style="outpost_value_RC2" id="outpost_def_period" posparent="title_def_period" />
 			<link expr="getOutpostPeriod(@#outpost_db:TIME_RANGE_DEF, @#outpost_db:TIME_RANGE_LENGTH, @UI:SAVE:OUTPOST:TIME_ZONE, @#outpost_db:STATUS, 0)"
-				target="outpost_def_period:hardtext" />
+				target="outpost_def_period:uc_hardtext" />
 
 			<!-- TIME ZONE SELECTION -->
 			<instance template="t_outpost_time_zone_selector" id="time_zone_selector" posparent="title_def_period" />
@@ -466,7 +466,7 @@
 <!--***************-->
 
 <!-- Should be HALF the value in Database -->
-<define id="outpost_nb_max_squad_in_list"  value="12" />
+<define id="outpost_nb_max_squad_in_list"  value="6" />
 <define id="outpost_selected"	value="SERVER:GUILD:OUTPOST:O[UI:TEMP:OUTPOST:SELECTION]" />
 <define id="outpost_squad_line_h" value="15" />
 <define id="outpost_squad_name_w" value="210" />
@@ -492,7 +492,7 @@
 
 	<group id="#id" posref="#posref" posparent="#posparent" x="0" y="0" sizeparent="parent" sizeref="w" w="-#x" h="%outpost_squad_line_h" >
 		<instance template="inner_thin_border" inherit_gc_alpha="true"/>
-		<view type="text" id="name" posref="ML ML" x="0" fontsize="10" 
+		<view type="text" id="name" posref="ML ML" x="0" fontsize="10"
 			line_maxw="%outpost_squad_name_w" over_extend_view_text="true" />
 		<view type="text" id="cost" posref="ML ML" x="%outpost_squad_name_w" fontsize="10" />
 	</group>
@@ -500,9 +500,9 @@
 	<!-- active the line if the squad slot is here -->
 	<link expr="ne(@%outpost_selected:SQUADS:SP#index:SHEET, 0)" target="#id:active" />
 	<!-- name of the squad -->
-	<link expr="getSquadName(@%outpost_selected:SQUADS:SP#index:SHEET)" target="#id:name:hardtext" />
+	<link expr="getSquadName(@%outpost_selected:SQUADS:SP#index:SHEET)" target="#id:name:uc_hardtext" />
 	<!-- squad cost -->
-	<link expr="getSquadCost(@%outpost_selected:SQUADS:SP#index:SHEET)" target="#id:cost:hardtext" />
+	<link expr="getSquadCost(@%outpost_selected:SQUADS:SP#index:SHEET)" target="#id:cost:uc_hardtext" />
 
 </template>
 
@@ -511,16 +511,16 @@
 
 	<group id="#id" posref="#posref" posparent="#posparent" x="0" y="0" sizeparent="parent" sizeref="w" w="-#x" h="%outpost_squad_line_h" >
 		<instance template="inner_thin_border" inherit_gc_alpha="true"/>
-		<view type="text" id="name" posref="ML ML" x="0" fontsize="10" 
+		<view type="text" id="name" posref="ML ML" x="0" fontsize="10"
 			line_maxw="%outpost_squad_name_w" over_extend_view_text="true" />
 		<view type="text" id="cost" posref="ML ML" x="%outpost_squad_name_w" fontsize="10" />
 
 		<!-- Selection button -->
-		<ctrl type="button" id="select" posparent="parent" posref="TL TL" x="0" y="0" w="0" h="0" sizeref="wh" 
+		<ctrl type="button" id="select" posparent="parent" posref="TL TL" x="0" y="0" w="0" h="0" sizeref="wh"
 			button_type="push_button" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true"
 			color="0 0 0 0" col_over="255 255 255 128" col_pushed="0 0 0 192"
-			global_color_normal="true" global_color_over="true" global_color_pushed="true" 
-			onclick_l="proc" params_l="om_proc_set_squad|#index" 
+			global_color_normal="true" global_color_over="true" global_color_pushed="true"
+			onclick_l="proc" params_l="om_proc_set_squad|#index"
 			on_tooltip="lua:game:outpostToolTipTrainSquad(#index)" />
 
 		<!-- Spawn button -->
@@ -530,14 +530,14 @@
 	<!-- active the line if the squad slot is here -->
 	<link expr="ne(@%outpost_selected:SQUADS:T#index:SHEET, 0)" target="#id:active" />
 	<!-- name of the squad -->
-	<link expr="getSquadName(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:name:hardtext" />
+	<link expr="getSquadName(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:name:uc_hardtext" />
 	<!-- squad cost -->
-	<link expr="getSquadCost(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:cost:hardtext" />
+	<link expr="getSquadCost(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:cost:uc_hardtext" />
 	<!-- clickable only if allowed rights -->
 	<link expr="ne(@SERVER:USER:OUTPOST_ADMIN,0)" target="#id:select:active" />
 	<link expr="eq(@SERVER:USER:OUTPOST_ADMIN,0)" target="#id:spawn:frozen" />
 	<!-- spawn pos button -->
-	<link expr="add(@%outpost_selected:SQUADS:T#index:SPAWN,1)" target="#id:spawn:hardtext" />
+	<link expr="add(@%outpost_selected:SQUADS:T#index:SPAWN,1)" target="#id:spawn:uc_hardtext" />
 
 </template>
 
@@ -571,11 +571,11 @@
 		<ctrl type="sheet" id="building_sheet" nature="outpost_building" posref="TL TL" x="18" y="-5" value="UI:DUMMY" onclick_r="open_help_auto" />
 		<view type="text" id="building_name" posparent="building_sheet" posref="TR TL" x="5" y="-4" color="255 255 255 255" fontsize="10" shadow="true" hardtext="" multi_line="true" multi_line_space="0" />
 		<view type="text" id="building_desc" posparent="building_name" posref="BL TL" x="0" y="-4"  color="255 255 255 255" fontsize="10" shadow="true" hardtext="" multi_line="true" multi_line_space="0" />
-		
-		<link expr="getOutpostBuildingName(@%outpost_selected:BUILDINGS:#index:SHEET)" target="building_name:hardtext" />
-		<link expr="getOutpostBuildingDesc(@%outpost_selected:BUILDINGS:#index:SHEET)" target="building_desc:hardtext" />
+
+		<link expr="getOutpostBuildingName(@%outpost_selected:BUILDINGS:#index:SHEET)" target="building_name:uc_hardtext" />
+		<link expr="getOutpostBuildingDesc(@%outpost_selected:BUILDINGS:#index:SHEET)" target="building_desc:uc_hardtext" />
 		<link expr="@UI:TEMP:OUTPOST:SELECTION" action="lua:game:outpostUpdateBuildingSheet(#index)" />
-		
+
 	</group>
 </template>
 
@@ -601,15 +601,15 @@
 	on_deactive="proc" on_deactive_params="om_proc_on_deactivate_outpost"
 	escapable = "true"
 >
-	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"  
-		 group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" 
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"
+		 group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color"
 		 on_active="set" on_active_params="target='ui:interface:outpost:w'|value=620" >
 	</group>
-	
-	<group id="header_closed" x="0" y="0" w="0" h="16" posref="TL TL"  
+
+	<group id="header_closed" x="0" y="0" w="0" h="16" posref="TL TL"
 		 on_active="set" on_active_params="target='ui:interface:outpost:w'|value=250" >
 	</group>
-	
+
 	<group id="content" x="0" y="0" w="0" h="0" child_resize_h="true" child_resize_hmargin="24" posref="TL TL" >
 		<!-- Tab Selection -->
 		<group id="tab_group" posref="TL TL" x="0" y="-8" sizeref="w" w="0" h="24" >
@@ -630,29 +630,29 @@
 			<view type="bitmap" id="sep_doc" posref="TL TL" scale="true" sizeref="w" w="0" h="2" x="0" y="0" texture="W_line_hor.tga" />
 			<view type="text" id="explain_edit" posparent="sep_doc" posref="BL TL" x="0" y="-10" global_color="true" shadow="true" hardtext="" fontsize="10" multi_line="true" multi_line_space="0" />
 			<!-- Different Doc wether attacking or defending -->
-			<link expr="localize(ifthenelse(@%outpost_selected:OWNED, 'uiOutpostSquadEditDef', 'uiOutpostSquadEditAtt'))" 
-				target="explain_edit:hardtext_format" />
+			<link expr="localize(ifthenelse(@%outpost_selected:OWNED, 'uiOutpostSquadEditDef', 'uiOutpostSquadEditAtt'))"
+				target="explain_edit:uc_hardtext_format" />
 
 			<!-- Current Round -->
 			<view type="bitmap" id="sep_cur" posparent="explain_edit" posref="BL TL" scale="true" sizeref="w" w="0" h="2" x="0" y="-8" texture="W_line_hor.tga" sizeparent="parent" />
 			<view type="text" id="cur_round" posparent="sep_cur" posref="BL TL" x="0" y="-10" global_color="false" shadow="true" hardtext="uiOutpostSSquad" case_mode="%case_upper" />
 			<instance template="text_tt" posparent="cur_round" tooltip="uittOutpostSSquad" />
-			<instance template="t_squad_list" id="list_cur_start" x="0" y="0" posparent="cur_round" posref="BL TL" 
-				squad_template="t_spawned_squad_line" firstindex="0" 
+			<instance template="t_squad_list" id="list_cur_start" x="0" y="0" posparent="cur_round" posref="BL TL"
+				squad_template="t_spawned_squad_line" firstindex="0"
 				header="uiOutpostSSquadStart" tooltip="uittOutpostSSquadStart" />
-			<instance template="t_squad_list" id="list_cur_during" x="10" y="0" posparent="list_cur_start" posref="TR TL" 
-				squad_template="t_spawned_squad_line" firstindex="%outpost_nb_max_squad_in_list" 
+			<instance template="t_squad_list" id="list_cur_during" x="10" y="0" posparent="list_cur_start" posref="TR TL"
+				squad_template="t_spawned_squad_line" firstindex="%outpost_nb_max_squad_in_list"
 				header="uiOutpostSSquadDuring" tooltip="uittOutpostSSquadDuring" />
 
 			<!-- Next Round -->
 			<view type="bitmap" id="sep_next" posparent="list_cur_start" posref="BL TL" scale="true" sizeref="w" w="0" h="2" x="0" y="-8" texture="W_line_hor.tga" sizeparent="parent" />
 			<view type="text" id="next_round" posparent="sep_next" posref="BL TL" x="0" y="-10" global_color="false" shadow="true" hardtext="uiOutpostTSquad" case_mode="%case_upper" />
 			<instance template="text_tt" posparent="next_round" tooltip="uittOutpostTSquad" />
-			<instance template="t_squad_list" id="list_next_start" x="0" y="0" posparent="next_round" posref="BL TL" 
-				squad_template="t_training_squad_line" firstindex="0" 
+			<instance template="t_squad_list" id="list_next_start" x="0" y="0" posparent="next_round" posref="BL TL"
+				squad_template="t_training_squad_line" firstindex="0"
 				header="uiOutpostTSquadStart" tooltip="uittOutpostTSquadStart" />
-			<instance template="t_squad_list" id="list_next_during" x="10" y="0" posparent="list_next_start" posref="TR TL" 
-				squad_template="t_training_squad_line" firstindex="%outpost_nb_max_squad_in_list" 
+			<instance template="t_squad_list" id="list_next_during" x="10" y="0" posparent="list_next_start" posref="TR TL"
+				squad_template="t_training_squad_line" firstindex="%outpost_nb_max_squad_in_list"
 				header="uiOutpostTSquadDuring" tooltip="uittOutpostTSquadDuring" />
 
 			<!-- Capital -->
@@ -662,40 +662,40 @@
 			<group id="capital_selector" posparent="capital" posref="BL TL" x="0" y="-4" sizeref="w" sizeparent="parent" child_resize_h="true" w="0" h="0" child_resize_hmargin="2" >
 				<view style="outpost_title" id="cap_text" posparent="parent" posref="TL TL" x="0" y="-2"
 					hardtext="uiOutpostCapitalHeader" case_mode="%case_normal" />
-				<ctrl style="text_button_16" id="cap_but" posparent="cap_text" posref="MR ML" x="8" y="1" 
-					hardtext="0" onclick_l="lua:game:outpostSelectSquadCapitalOpen()" 
+				<ctrl style="text_button_16" id="cap_but" posparent="cap_text" posref="MR ML" x="8" y="1"
+					hardtext="0" onclick_l="lua:game:outpostSelectSquadCapitalOpen()"
 					text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255" />
-				<link expr="@%outpost_selected:SQUAD_CAPITAL" target="cap_but:hardtext" />
+				<link expr="@%outpost_selected:SQUAD_CAPITAL" target="cap_but:uc_hardtext" />
 				<link expr="eq(@SERVER:USER:OUTPOST_ADMIN,0)" target="cap_but:frozen" />
-				<link expr="ifthenelse(eq(@SERVER:USER:OUTPOST_ADMIN,0), 
+				<link expr="ifthenelse(eq(@SERVER:USER:OUTPOST_ADMIN,0),
 								localize('uiOutpostCapitalEditKO'),
-								localize('uiOutpostCapitalEditOK'))" 
+								localize('uiOutpostCapitalEditOK'))"
 					target="cap_but:tooltip" />
 			</group>
 
 		</group>
-		
+
 		<!-- Outpost Buildings -->
 		<group id="buildings" x="0" y="-36" h="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="0" posref="TL TL" >
-		
+
 			<view type="bitmap" id="sep_building" posref="TL TL" scale="true" sizeref="w" w="0" h="2" x="0" y="0" texture="W_line_hor.tga" />
 			<view type="text" id="outpost_name" posref="TM TM" x="0" y="-12" global_color="false" fontsize="12" shadow="true" />
-			<link expr="getOutpostName(@%outpost_selected:SHEET)" target="outpost_name:hardtext" />
+			<link expr="getOutpostName(@%outpost_selected:SHEET)" target="outpost_name:uc_hardtext" />
 			<view type="text" id="building_info" posparent="parent" posref="TL TL" x="0" y="-50" global_color="false" fontsize="12" shadow="true" hardtext="uiOutpostBuildingInfoNotOwned" />
-			
+
 			<instance template="t_outpost_building" id="building1" index="0"	posparent="parent" 		posref="TL TL" y="-64" />
 			<instance template="t_outpost_building" id="building2" index="1"	posparent="building1" 	posref="BL TL"/>
 			<instance template="t_outpost_building" id="building3" index="2"	posparent="building2"	posref="BL TL"/>
 			<instance template="t_outpost_building" id="building4" index="3"	posparent="building3" 	posref="BL TL"/>
-			
-			<link expr="ifthenelse(eq(@%outpost_selected:OWNED,0), localize('uiOutpostBuildingInfoNotOwned'), localize('uiOutpostBuildingInfoOwned'))" 
-				  target="building_info:hardtext" />
-				  
+
+			<link expr="ifthenelse(eq(@%outpost_selected:OWNED,0), localize('uiOutpostBuildingInfoNotOwned'), localize('uiOutpostBuildingInfoOwned'))"
+				  target="building_info:uc_hardtext" />
+
 			<link expr="ifthenelse(eq(@%outpost_selected:OWNED,0), 0, 1)" target="building1:active" />
 			<link expr="ifthenelse(eq(@%outpost_selected:OWNED,0), 0, 1)" target="building2:active" />
 			<link expr="ifthenelse(eq(@%outpost_selected:OWNED,0), 0, 1)" target="building3:active" />
 			<link expr="ifthenelse(eq(@%outpost_selected:OWNED,0), 0, 1)" target="building4:active" />
-			
+
 		</group>
 	</group>
 
@@ -722,15 +722,15 @@
 	on_deactive="proc" on_deactive_params="om_proc_on_deactivate_outpost_selected"
 	escapable = "true"
 >
-	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"  
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"
 		 group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color"
 		 on_active="set" on_active_params="target='ui:interface:outpost_selected:w'|value=510" > >
 	</group>
-	
-	<group id="header_closed" x="0" y="0" w="0" h="16" posref="TL TL"  
+
+	<group id="header_closed" x="0" y="0" w="0" h="16" posref="TL TL"
 		 on_active="set" on_active_params="target='ui:interface:outpost_selected:w'|value=250" >
 	</group>
-	
+
 	<group id="content" x="0" y="0" w="0" h="0" child_resize_h="true" child_resize_hmargin="24" posref="TL TL" >
 		<!-- The info -->
 		<instance template="t_outpost_info" id="info" outpost_db="SERVER:OUTPOST_SELECTED" type="0" y="-8" />
@@ -740,10 +740,10 @@
 		<!-- Declare War Button -->
 		<view type="bitmap" id="sep_dw" posparent="info" posref="BL TL" scale="true" sizeref="w" w="0" h="2" x="0" y="-8" texture="W_line_hor.tga" />
 		<group id="declare_war" sizeref="w" w="0" child_resize_h="true" posparent="sep_dw" posref="BL TL" x="0" y="-10" >
-			<ctrl style="text_button_16" id="outpost_decl_war" posref="TM TM" x="0" y="0" 
-				hardtext="uiOutpostDeclareWar" onclick_l="lua:game:outpostDeclareWar()" 
-				global_color_normal="false" global_color_over="false" global_color_pushed="false" 
-				text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255" 
+			<ctrl style="text_button_16" id="outpost_decl_war" posref="TM TM" x="0" y="0"
+				hardtext="uiOutpostDeclareWar" onclick_l="lua:game:outpostDeclareWar()"
+				global_color_normal="false" global_color_over="false" global_color_pushed="false"
+				text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255"
 				tooltip="uittOutpostDeclareWar" />
 			<!-- If BotChat Selection is not the DB wanted, freeze -->
 			<link expr="ne(@UI:TEMP:OUTPOST:BOT_SELECTION, @SERVER:OUTPOST_SELECTED:SHEET)" target="outpost_decl_war:frozen" />
@@ -766,19 +766,19 @@
 	global_color="false" opened="true" movable="true" active="false" header_color="UI:SAVE:WIN:COLORS:MEM"
 	escapable = "true"
 >
-	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"  
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"
 		 group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" >
 	</group>
-	
+
 	<group id="content" x="0" y="0" w="0" h="0" child_resize_h="true" child_resize_hmargin="8" posref="TL TL" >
 		<!-- NAME -->
 		<view type="text" id="outpost_name" posref="TM TM" x="0" y="-8" global_color="false" fontsize="12" shadow="true" />
-		<link expr="getOutpostName(@SERVER:OUTPOST_SELECTED:SHEET)" target="outpost_name:hardtext" />
+		<link expr="getOutpostName(@SERVER:OUTPOST_SELECTED:SHEET)" target="outpost_name:uc_hardtext" />
 
 		<!-- WAR COST -->
 		<view style="outpost_title" id="title_war_cost" posparent="parent" posref="TL TL" x="0" y="-30" hardtext="uiOutpostWarCost" />
 		<view style="outpost_value_R" id="outpost_war_cost" posparent="title_war_cost" />
-		<link expr="@SERVER:OUTPOST_SELECTED:WARCOST" target="outpost_war_cost:hardtext" />
+		<link expr="@SERVER:OUTPOST_SELECTED:WARCOST" target="outpost_war_cost:uc_hardtext" />
 		<view style="outpost_value_B" id="outpost_war_cost_desc" posparent="title_war_cost" hardtext="uiOutpostWarCostDesc" fontsize="10" />
 
 		<!-- TIME SETUP -->
@@ -787,14 +787,14 @@
 			<!-- WANTED ATTACKER PERIOD -->
 			<view style="outpost_title" id="title_att_hour" posparent="parent" posref="TL TL" x="0" y="-2" hardtext="uiOutpostAttHour" case_mode="%case_normal" />
 			<instance template="text_tt" posparent="title_att_hour" tooltip="uittOutpostAttHour" />
-			<ctrl style="text_button_16" id="outpost_att_hour" posparent="title_att_hour" posref="MR ML" x="8" y="1" 
-				hardtext="test11h" onclick_l="active_menu:menu=ui:interface:outpost_att_period_menu" 
-				text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255" 
-				tooltip="uittOutpostAttHour" />				
-			<link expr="depends(@UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD,@UI:SAVE:OUTPOST:TIME_ZONE)" 
+			<ctrl style="text_button_16" id="outpost_att_hour" posparent="title_att_hour" posref="MR ML" x="8" y="1"
+				hardtext="test11h" onclick_l="active_menu:menu=ui:interface:outpost_att_period_menu"
+				text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255"
+				tooltip="uittOutpostAttHour" />
+			<link expr="depends(@UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD,@UI:SAVE:OUTPOST:TIME_ZONE)"
 				action="lua:game:outpostAdjustHour('outpost_att_hour', '@UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD')" />
 			<!-- disable feature if : !Owned || !outpost_admin || !(peace or decl war) -->
-			<link expr="depends(@UI:TEMP:OUTPOST:DECLARE_WAR_ACK_OK, 
+			<link expr="depends(@UI:TEMP:OUTPOST:DECLARE_WAR_ACK_OK,
 				@UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TIME_RANGE_ATT, @UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD)"
 				action="lua:game:outpostActiveAttackerHourButton()" />
 
@@ -804,7 +804,7 @@
 			<view style="outpost_value_B" id="outpost_att_period" posparent="title_att_period" />
 			<!-- NB: emulate war for this text (don't want to display N/A) -->
 			<link expr="getOutpostPeriod(@UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TIME_RANGE_ATT, @SERVER:OUTPOST_SELECTED:TIME_RANGE_LENGTH, @UI:SAVE:OUTPOST:TIME_ZONE, %outpost_status_WarDeclaration, 1)"
-				target="outpost_att_period:hardtext" />
+				target="outpost_att_period:uc_hardtext" />
 			<!-- Relevant only if ACK received -->
 			<link expr="@UI:TEMP:OUTPOST:DECLARE_WAR_ACK_RECEIVED" target="outpost_att_period:active" />
 
@@ -812,17 +812,17 @@
 			<instance template="t_outpost_time_zone_selector" id="time_zone_selector" posparent="outpost_att_period" x="-8" x_check_box="150" />
 
 		</group>
-	
+
 		<!-- DOC (relevant only if ACK received) -->
 		<view style="outpost_value_B" type="text_id" id="outpost_doc" posparent="war_schedule"
 			textid="UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TEXTID" dynamic_string="true" fontsize="10" />
 		<link expr="@UI:TEMP:OUTPOST:DECLARE_WAR_ACK_RECEIVED" target="outpost_doc:active" />
 
 		<!-- OK/CANCEL -->
-		<group id="ok_cancel_group" w="0" h="0" sizeparent="parent" sizeref="w" child_resize_h="true" 
+		<group id="ok_cancel_group" w="0" h="0" sizeparent="parent" sizeref="w" child_resize_h="true"
 			posparent="outpost_doc" posref="BL TL" x="-8" y="-4" >
-			<instance template="button_ok_cancel" posref="TR TR" x="0" y="0" 
-					onclick_ok="lua:game:outpostDeclareWarValidate()" ok_text="uiOutpostDeclareWar" 
+			<instance template="button_ok_cancel" posref="TR TR" x="0" y="0"
+					onclick_ok="lua:game:outpostDeclareWarValidate()" ok_text="uiOutpostDeclareWar"
 					onclick_cancel="hide" onclick_cancel_param="ui:interface:outpost_declare_war" cancel_text="uittCancel" />
 			<link expr="not(@UI:TEMP:OUTPOST:DECLARE_WAR_ACK_OK)" target="ok_cancel:ok:frozen" />
 		</group>
@@ -842,24 +842,24 @@
 
 
 <!-- Dialog to select the Capital for the outpost -->
-<group type="modal" id="squad_change_capital" w="200" h="70" x="0" y="0" active="false"  
- options="skin_modal" 
+<group type="modal" id="squad_change_capital" w="200" h="70" x="0" y="0" active="false"
+ options="skin_modal"
  escapable="true"
  global_color="true"
  on_enter="lua:game:outpostSelectSquadCapitalConfirm()"
->		
+>
 	<!-- Title -->
 	<view type="text" id="title" posref="TL TL" x="6" y="-4" color="255 255 255 255" global_color="false" fontsize="14" shadow="true" hardtext="uiOutpostChangeCapital" />
 
 	<!-- Capital selection (1Gig max) -->
 	<view type="text" id="text" posparent="title" posref="BL TL" x="0" y="-8" global_color="false" fontsize="10" shadow="true" hardtext="uiOutpostCapitalHeader" />
-	<instance template="edit_box_widget" id="edit" posparent="text" posref="ML ML" x="50" text_x="-4" text_ref="BR BR" w="120" prompt="" enter_loose_focus="true" multi_line="false" 
-		 onenter="lua:game:outpostSelectSquadCapitalConfirm()" enter_recover_focus="false" reset_focus_on_hide="true" max_historic="0" 
+	<instance template="edit_box_widget" id="edit" posparent="text" posref="ML ML" x="50" text_x="-4" text_ref="BR BR" w="120" prompt="" enter_loose_focus="true" multi_line="false"
+		 onenter="lua:game:outpostSelectSquadCapitalConfirm()" enter_recover_focus="false" reset_focus_on_hide="true" max_historic="0"
 		 entry_type="positive_integer" max_num_chars="9" />
 
 	<!-- OK/Cancel -->
-	<instance template="button_ok_cancel" posref="BR BR" x="-6" y="6" 
-			onclick_ok="lua:game:outpostSelectSquadCapitalConfirm()" 
+	<instance template="button_ok_cancel" posref="BR BR" x="-6" y="6"
+			onclick_ok="lua:game:outpostSelectSquadCapitalConfirm()"
 			onclick_cancel="set"
 			onclick_cancel_param="target_property=ui:interface:squad_change_capital:active|value=0" />
 </group>
@@ -877,7 +877,7 @@
  openable="false" opened="true" right_button="true"
  movable="true" open_button="false"
  savable="true" active_savable="false"
- title="uiSquadSpawnTitle" 
+ title="uiSquadSpawnTitle"
  header_color="UI:SAVE:WIN:COLORS:MEM" global_color="false"
  on_deactive="outpost_squad_map_send" on_deactive_params="ui:interface:squad_spawn_map:content:map_content:actual_map"
  modal_parent="outpost"
@@ -893,15 +893,15 @@
 	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" >
 		<group id="map_content" posref="TL TL" sizeref="wh" w="0" h="-12" y="-12" >
 
-			<!-- zoom in -->			
+			<!-- zoom in -->
 			<ctrl type="button" id="zoom_in" button_type="push_button" posref="TL TL" y="0"  x="4" tx_normal="w_zoom_in.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
-			onclick_l="map_zoom_in" params_l="map=ui:interface:squad_spawn_map:content:map_content:actual_map" tooltip="uittZoomIn" />			
-			<!-- zoom out -->			
+			onclick_l="map_zoom_in" params_l="map=ui:interface:squad_spawn_map:content:map_content:actual_map" tooltip="uittZoomIn" />
+			<!-- zoom out -->
 			<ctrl type="button" id="zoom_out" button_type="push_button" posparent="zoom_in" posref="TR TL" y="0"  x="4" tx_normal="w_zoom_out.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
-			onclick_l="map_zoom_out" params_l="map=ui:interface:squad_spawn_map:content:map_content:actual_map" tooltip="uittZoomOut" />			
-			
+			onclick_l="map_zoom_out" params_l="map=ui:interface:squad_spawn_map:content:map_content:actual_map" tooltip="uittZoomOut" />
+
 			<instance template="box_widget" id="back" posref="TL TL" sizeref="wh" w="-2" h="-22" x="1" y="-22" render_layer="0" />
-			
+
 			<group type="map" id="actual_map" sizeref="wh" w="-4" h="-4" posparent="back" posref="TL TL" x="2" y="-2" render_layer="1"
 
 			 map_mode="spawn_squad"
@@ -909,15 +909,15 @@
 
 			 respawn_landmark_tex_normal="LM_respawn.tga"
 			 respawn_landmark_tex_over="LM_respawn_over.tga"
-			 respawn_landmark_tex_pushed="LM_respawn_pushed.tga"			 
+			 respawn_landmark_tex_pushed="LM_respawn_pushed.tga"
 			 respawn_landmark_color_normal="255 255 255 255"
 			 respawn_landmark_color_over="255 255 255 255"
 			 respawn_landmark_color_pushed="255 255 255 255"
 			 respawn_landmark_menu="ui:interface:land_mark_menu"
 
 			 scale_max="2"
-			/>			
-			
+			/>
+
 		</group>
 	</group>
 </group>
@@ -960,16 +960,16 @@
 	<ctrl type="button" id="#id_select" posref="TL TL" posparent="#id" x="0" h="%outpost_squad_line_h" w="460"
 		button_type="radio_button" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true"
 		color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
-		global_color_normal="true" global_color_over="true" global_color_pushed="true" 
+		global_color_normal="true" global_color_over="true" global_color_pushed="true"
 		onclick_l="proc" params_l="ss_proc_squad|#index" />
 
 	<!-- active the line if the squad slot is here -->
 	<link expr="ne(@%outpost_selected:SQUAD_SHOP:#index:SHEET, 0)" target="#id:active,#id_select:active" />
 	<!-- squad name -->
-	<link expr="getSquadName(@%outpost_selected:SQUAD_SHOP:#index:SHEET)" target="#id:name:hardtext" />
+	<link expr="getSquadName(@%outpost_selected:SQUAD_SHOP:#index:SHEET)" target="#id:name:uc_hardtext" />
 	<!-- squad cost -->
-	<link expr="getSquadCost(@%outpost_selected:SQUAD_SHOP:#index:SHEET)" target="#id:cost:hardtext" />
-	
+	<link expr="getSquadCost(@%outpost_selected:SQUAD_SHOP:#index:SHEET)" target="#id:cost:uc_hardtext" />
+
 </template>
 
 
@@ -978,10 +978,10 @@
 	global_color="false" opened="true" movable="true" active="false" header_color="UI:SAVE:WIN:COLORS:MEM"
 	modal_parent="outpost"
 >
-	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"  
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"
 		 group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" >
 	</group>
-	
+
 	<group id="content" x="0" y="0" w="0" h="300" posref="TL TL" >
 
 		<!-- squad to buy -->
@@ -1003,15 +1003,15 @@
 			<view type="text" id="title_desc" posref="TL TL" x="300" y="-8" hardtext="uiOutpostDescription" global_color="false" />
 			<instance template="text_tt" posparent="title_desc" tooltip="uittOutpostSquadDesc" />
 			<view type="text" id="squad_desc" posref="TL TL" x="300" y="-26" multi_line="true" multi_line_space="0" line_maxw="200" fontsize="10" />
-			<link expr="ifthenelse(eq(@UI:TEMP:OUTPOST:SQUAD_TO_BUY,-1), 
-						'', 
-						getSquadDesc(@%outpost_selected:SQUAD_SHOP:[UI:TEMP:OUTPOST:SQUAD_TO_BUY]:SHEET))" target="squad_desc:hardtext" />
+			<link expr="ifthenelse(eq(@UI:TEMP:OUTPOST:SQUAD_TO_BUY,-1),
+						'',
+						getSquadDesc(@%outpost_selected:SQUAD_SHOP:[UI:TEMP:OUTPOST:SQUAD_TO_BUY]:SHEET))" target="squad_desc:uc_hardtext" />
 
 			<!-- SET / CANCEL -->
-			<instance template="button_ok_cancel" posref="BR BR" x="-8" y="4" 
+			<instance template="button_ok_cancel" posref="BR BR" x="-8" y="4"
 					onclick_ok="proc" onclick_ok_param="ss_proc_set_squad"
 					ok_text="uiOutpostSetSquad" tooltip_ok="uittOutpostSetSquad"
-					onclick_cancel="hide" onclick_cancel_param="ui:interface:squad_shop" 
+					onclick_cancel="hide" onclick_cancel_param="ui:interface:squad_shop"
 					cancel_text="uittCancel" />
 			<link expr="eq(@UI:TEMP:OUTPOST:SQUAD_TO_BUY,-1)" target="ok_cancel:ok:frozen" />
 
@@ -1044,7 +1044,7 @@
 
 <style style="text_button_pvp_outpost" type="text_button" button_type="push_button" y="-8"
 		tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
-		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		global_color_normal="false" global_color_over="false" global_color_pushed="false"
 		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
 		text_color_normal="255 255 255 255" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
 
@@ -1085,12 +1085,13 @@
 
 		<!-- Choice -->
 		<ctrl style="text_button_pvp_outpost" id="neutral" posref="BL TL" posparent="timer_decl" onclick_l="lua:game:outpostPvpJoin('neutral')" hardtext="uiOutpostJoinPVPNeutral" color="128 128 255 255" />
+		<ctrl style="text_button_pvp_outpost" active="false" id="random" posref="BL TL" posparent="timer_decl" onclick_l="lua:game:outpostPvpJoin('neutral')" hardtext="uiCharSel_CreateRan" color="128 128 255 255" />
 		<ctrl style="text_button_pvp_outpost" id="attack" posref="BM TM" posparent="timer_decl" onclick_l="lua:game:outpostPvpJoin('attack')" hardtext="uiOutpostJoinPVPAttack" color="255 128 128 255" />
 		<ctrl style="text_button_pvp_outpost" id="defend" posref="BR TR" posparent="timer_decl" onclick_l="lua:game:outpostPvpJoin('defend')" hardtext="uiOutpostJoinPVPDefend" color="128 255 128 255" />
 		<!-- Hide according to possibilities -->
-		<link expr="or(eq(@UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IN_CONFLICT,0), 
+		<link expr="or(eq(@UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IN_CONFLICT,0),
 					   eq(@UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IS_ATTACKER,1))" target="attack:active" />
-		<link expr="and(or( eq(@UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IN_CONFLICT,0), 
+		<link expr="and(or( eq(@UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IN_CONFLICT,0),
 			 				eq(@UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IS_ATTACKER,0)),
 						ne(@UI:TEMP:OUTPOST:PVP_PROPOSAL_DEFENDER,0))" target="defend:active" />
 	</group>

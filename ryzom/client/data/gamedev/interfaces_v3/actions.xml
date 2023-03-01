@@ -23,21 +23,24 @@
 	<value value="bonus_malus"			hardtext="uiBonusMalus" contexts="game"/>
 	<value value="info_player_skills"	hardtext="uiStatus" contexts="game"/>
 	<value value="info_player_journal"	hardtext="uiJournal" contexts="game"/>
-	<value value="encyclopedia"			hardtext="uiEncyclopedia" contexts="game"/>
+	<value value="encyclopedia"			hardtext="uiWisdomChest" contexts="game"/>
 	<value value="fame"					hardtext="uiFameTitle" contexts="game"/>
 
 	<value value="gestionsets"			hardtext="uiHands" contexts="game, r2ed_anim_test"/>
 	<value value="gestionsets2"			hardtext="uiHands2" contexts="game, r2ed_anim_test"/>
+	<value value="inv_hotbar"			hardtext="uiHotbarTitle" contexts="game, r2ed_anim_test"/>
 	<value value="inventory"			hardtext="uiInventory" contexts="game, r2ed_anim_test"/>
 	<value value="phrase_book"			hardtext="uiPhraseBook" contexts="game, r2ed_anim_test"/>
 	<value value="mailbox"				hardtext="uiMailBox" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
+	<value value="webig"				hardtext="uiWebIG" contexts="game"/>
+	<value value="appzone"				hardtext="uiAppZone" contexts="game"/>
 
 	<value value="animal_global"		hardtext="uiAnimals" contexts="game"/>
 
 	<value value="compass"				hardtext="uiCompas" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
-	
+
 	<value value="map"					hardtext="uiMap" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
-	
+
 	<value value="gestion_windows"		hardtext="uiWindows" contexts="game"/>
 	<value value="milko_pad"			hardtext="uiTaskbar" contexts="game"/>
 
@@ -51,12 +54,13 @@
 	<value value="contact_list"			hardtext="uiContactList" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
 	<value value="main_chat"			hardtext="uiMainChat" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
 	<value value="tell"					hardtext="uiTellWinAct" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
-	
+
 	<value value="keys"					hardtext="uiKeys" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
 	<value value="macros"				hardtext="uiMacros" contexts="game"/>
 	<value value="game_config"			hardtext="uiGlobalSettings" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
 	<value value="connection"			hardtext="uiConnection" contexts="game"/>
 	<value value="mp3_player"			hardtext="uimwMP3Player" contexts="game"/>
+	<value value="bg_downloader"		hardtext="uimwBGDownloader" contexts="game"/>
 	<value value="links"				hardtext="uiLinks" contexts="game"/>
 	<value value="debug_info"			hardtext="uiDebug" contexts="game"/>
 
@@ -78,10 +82,113 @@
 <action_category name="player" hardtext="uiPlayer" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
 	<action name="toggle_light"         hardtext="uiLightOnOff"/>
 	<action name="toggle_dodge_parry"   hardtext="uiToggleDodgeParry"/>
+	<action name="dodge" 				hardtext="uiMK_Defense_0"/>
+	<action name="parry" 				hardtext="uiMK_Defense_1"/>
 </action_category>
 
-<action_category name="movement" hardtext="uiMovement" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
+<action_category name="animal" hardtext="uiAnimals" contexts="game">
+	<action name="beast_order" hardtext="uimFollowMe">
+		<parameter name="order" value="follow" type="%action_param_hidden" />
+		<parameter hardtext="uiAnimals" name="beast_index" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="beast_order" hardtext="uimStop">
+		<parameter name="order" value="stop" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="do_beast_free" hardtext="uimFree">
+		<parameter hardtext="uiAnimals" type="%action_param_constant" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="beast_order" hardtext="uimEnterStable">
+		<parameter name="order" value="enter_stable" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="beast_order" hardtext="uimLeaveStable">
+		<parameter name="order" value="leave_stable" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="1">
+			<value value="1" hardtext="uimMtPaMount0"/>
+			<value value="2" hardtext="uimMtPaMount1"/>
+			<value value="3" hardtext="uimMtPaMount2"/>
+			<value value="4" hardtext="uimMtPaMount3"/>
+			<value value="1" hardtext="uimMtPaPacker0"/>
+			<value value="2" hardtext="uimMtPaPacker1"/>
+			<value value="3" hardtext="uimMtPaPacker2"/>
+			<value value="4" hardtext="uimMtPaPacker3"/>
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+		<action name="beast_order" hardtext="uimEnterBag">
+		<parameter name="order" value="enter_bag" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="5">
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+	<action name="beast_order" hardtext="uimLeaveBag">
+		<parameter name="order" value="leave_bag" type="%action_param_hidden"/>
+		<parameter hardtext="uiAnimals" name="beast_index" value="5">
+			<value value="5" hardtext="uitabInvPAZig1"/>
+			<value value="6" hardtext="uitabInvPAZig2"/>
+			<value value="7" hardtext="uitabInvPAZig3"/>
+		</parameter>
+	</action>
+</action_category>
+
+<action_category name="movement" hardtext="uiMovement" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm, misc">
 	<action name="toggle_sit_stand"	hardtext="uiMoveToggleSitStand" contexts="game, r2ed_anim_test"/>
+	<action name="command" hardtext="uimFollow" contexts="game, misc">
+    	<parameter name="" value="follow" type="%action_param_hidden"/>
+    </action>
 	<action name="forward"			hardtext="uiMoveForward" macroisable="false" />
 	<action name="backward"			hardtext="uiMoveBackward" macroisable="false" />
 	<action name="turn_left"		hardtext="uiMoveTurnLeft" macroisable="false" />
@@ -134,7 +241,12 @@
 	</action>
 	<action name="assist_target"		hardtext="uiAssistTargetCmd" contexts="game, r2ed_anim_test"/>
 	<action name="self_target"			hardtext="uiSelfTarget" contexts="game, r2ed_anim_test"/>
+	<action name="target_landmark"		hardtext="uiTargetLandmarkCmd" >
+		<parameter hardtext="uiTargetLandmarkCmdEntity" type="%action_param_user" name="search"/>
+	</action>
 	<action name="toggle_combat"		hardtext="uiToggleCombat" contexts="game, r2ed_anim_test"/>
+	<action name="open_default_context"		hardtext="uiOpenDefaultContext" contexts="game"/>
+	<action name="context_quartering"		hardtext="uimGcmQuartering" contexts="game"/>
 	<action name="front_selection"	hardtext="uiFrontSelection" contexts="game, r2ed_anim_test">
 		<parameter hardtext="uiFrontSelectionType">
 			<value value="friend" hardtext="uiFrontSelectionFriend"/>
@@ -217,6 +329,15 @@
 			<value value="10" hardtext="uiNumber10"/>
 		</parameter>
 	</action>
+	<action name="use_hotbar_item" hardtext="uiUseHotbarItem" contexts="game, r2ed_anim_test">
+		<parameter hardtext="uiSlotNumber" name="slot">
+			<value value="0" hardtext="uiNumber01"/>
+			<value value="1" hardtext="uiNumber02"/>
+			<value value="2" hardtext="uiNumber03"/>
+			<value value="3" hardtext="uiNumber04"/>
+			<value value="4" hardtext="uiNumber05"/>
+		</parameter>
+	</action>
 	<action name="phrase_cancel_cast"		hardtext="uiCancelCast" contexts="game, r2ed_anim_test"/>
 	<action name="item_group_equip"	hardtext="uiMacroItemGroupEquip" contexts="game, r2ed_anim_test">
 		<parameter hardtext="uiMacroItemGroupName" type="%action_param_user_name" name="name" />
@@ -229,6 +350,9 @@
 			<value value="pet_animal2" hardtext="uimMtPaPacker1" />
 			<value value="pet_animal3" hardtext="uimMtPaPacker2" />
 			<value value="pet_animal4" hardtext="uimMtPaPacker3" />
+			<value value="pet_animal5" hardtext="uitabInvPAZig1" />
+			<value value="pet_animal6" hardtext="uitabInvPAZig2" />
+			<value value="pet_animal7" hardtext="uitabInvPAZig3" />
 			<value value="player_room" hardtext="uimMtRoom" />
 			<value value="guild"	   hardtext="uimMtGuild" />
 		</parameter>
@@ -282,31 +406,6 @@
 		</parameter>
 		<parameter hardtext="uiTalkCmdMsg" type="%action_param_user" name="text"/>
 	</action>
-
-	<action name="talk_message"				hardtext="uiTalkMem">
-		<parameter hardtext="uiTalkMemMsg" type="%action_param_constant" value="0">
-			<value value="00" hardtext="uiTalkMemMsg00"/>
-			<value value="01" hardtext="uiTalkMemMsg01"/>
-			<value value="02" hardtext="uiTalkMemMsg02"/>
-			<value value="03" hardtext="uiTalkMemMsg03"/>
-			<value value="04" hardtext="uiTalkMemMsg04"/>
-			<value value="05" hardtext="uiTalkMemMsg05"/>
-			<value value="06" hardtext="uiTalkMemMsg06"/>
-			<value value="07" hardtext="uiTalkMemMsg07"/>
-			<value value="08" hardtext="uiTalkMemMsg08"/>
-			<value value="09" hardtext="uiTalkMemMsg09"/>
-			<value value="10" hardtext="uiTalkMemMsg10"/>
-			<value value="11" hardtext="uiTalkMemMsg11"/>
-			<value value="12" hardtext="uiTalkMemMsg12"/>
-			<value value="13" hardtext="uiTalkMemMsg13"/>
-			<value value="14" hardtext="uiTalkMemMsg14"/>
-			<value value="15" hardtext="uiTalkMemMsg15"/>
-			<value value="16" hardtext="uiTalkMemMsg16"/>
-			<value value="17" hardtext="uiTalkMemMsg17"/>
-			<value value="18" hardtext="uiTalkMemMsg18"/>
-			<value value="19" hardtext="uiTalkMemMsg19"/>
-		</parameter>
-	</action>
 </action_category>
 
 <action_category name="view" hardtext="uiView" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
@@ -350,7 +449,7 @@
 		<parameter hardtext="uiWindowName">
 			<instance template="popable_window_list"/>
 		</parameter>
-	</action>	
+	</action>
 	<action name="show" hardtext="uiShow" repeat="1" keyup="1">
 		<parameter hardtext="uiWindowName">
 			<instance template="container_window_list"/>
@@ -375,12 +474,15 @@
 			<value value="REGION_CHAT"			hardtext="uiREGION" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
 			<value value="UNIVERSE_CHAT"		hardtext="uiUNIVERSE" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
 		</parameter>
-	</action>	
+	</action>
 	<action name="show_on_press" hardtext="uiShowOnPress" repeat="1" keyup="1" macroisable="false">
 		<parameter hardtext="uiWindowName">
 			<instance template="container_window_list"/>
 		</parameter>
-	</action>	
+	</action>
+
+	<action name="fullmap" hardtext="uiShowFullMap" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
+
 	<!-- in r2 virtual desktop are used for the different mode (edition, dm, test) -->
 	<action name="set_desktop"			hardtext="uiSetDesktop" repeat="1" keyup="1" contexts="game">
 		<parameter hardtext="uiDesktopNumber">
@@ -399,11 +501,11 @@
 		</parameter>
 	</action>
 </action_category>
-  
+
 <action_category name="system" hardtext="uiSystem" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
 	<action name="quit_game"						hardtext="uiQuitGameWithoutWarning" contexts="game, r2ed_scenario_creation"/>
-	<action name="quit_ryzom"						hardtext="uiQuitRyzomWithoutWarning" contexts="game, r2ed_scenario_creation"/>	
-	<action name="quit_ryzom_now"					hardtext="uiQuitRyzomWithoutWarning" contexts="r2ed, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm, r2ed_scenario_creation"/>	
+	<action name="quit_ryzom"						hardtext="uiQuitRyzomWithoutWarning" contexts="game, r2ed_scenario_creation"/>
+	<action name="quit_ryzom_now"					hardtext="uiQuitRyzomWithoutWarning" contexts="r2ed, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm, r2ed_scenario_creation"/>
 
 	<action name="enter_modal" hardtext="uiQuit">
 		<parameter value="ui:interface:quit_dialog" name="group" type="%action_param_hidden" />
@@ -450,7 +552,7 @@
 	<action name="display_infos"			hardtext="uiDebugDisplayInfos" contexts="game, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm, r2ed_scenario_creation"/>
 	<action name="render_mode"				hardtext="uiDebugRenderMode" />
 	<action name="toggle_render"			hardtext="uiDebugToggleRender" />
-	<action name="switch_console_display"	hardtext="uiDebugSwitchConsoleDisplay" />	
+	<action name="switch_console_display"	hardtext="uiDebugSwitchConsoleDisplay" />
 	<action name="toggle_fly"				hardtext="uiDebugToggleFly" />
 	<action name="test"						hardtext="uiDebugTest" />
 	<action name="set_pos"					hardtext="uiDebugSetPos" />
@@ -494,7 +596,7 @@
 	<action name="update_clouds"			hardtext="uiDebugWeatherUpdateClouds" />
 	<action name="toggle_weather_function"	hardtext="uiDebugWeatherTogFunction" />
 	<action name="inc_hour"					hardtext="uiDebugWeatherIncHour" />
-	<action name="dec_hour"					hardtext="uiDebugWeatherDecHour" />	
+	<action name="dec_hour"					hardtext="uiDebugWeatherDecHour" />
 	<action name="weather_stats"			hardtext="uiDebugWeatherStats" />
 	<action name="dec_display_factor"		hardtext="uiDebugWeatherDecDispFactor" />
 	<action name="inc_display_factor"		hardtext="uiDebugWeatherIncDispFactor" />
@@ -512,7 +614,7 @@
 <action_category name="r2ed" hardtext="uiR2EDActionCategory" macroisable="false" contexts="r2ed">
 	<!-- edition specific (in keys_r2ed.xml) -->
 	<action name="r2ed_context_command"		hardtext="uimR2EDContextualCommand">
-		<!-- contextual commands -->		
+		<!-- contextual commands -->
 		<parameter hardtext="uimR2EDCommandName" name="commandId">
 				<value value="delete"				hardtext="uimR2EDMenuDelete"/>
 				<value value="properties"			hardtext="uimR2EDMenuProperties"/>
@@ -524,7 +626,7 @@
 				<value value="patrol_route"			hardtext="uimR2EDMenuPatrolRoute"/>
 				<value value="repeat_route"			hardtext="uimR2EDMenuRepeatRoute"/>
 				<value value="stand_still"			hardtext="uimR2EDMenuStandInPlace"/>
-				<value value="customize_look"		hardtext="uiR2EDCustomizeLook"/>				
+				<value value="customize_look"		hardtext="uiR2EDCustomizeLook"/>
 		</parameter>
 	</action>
 	<action name="r2ed_cancel_tool"		hardtext="uimR2EDCancelTool" contexts="r2ed, r2ed_anim_dm"/>

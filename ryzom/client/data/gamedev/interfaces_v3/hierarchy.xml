@@ -22,6 +22,7 @@
 
 
 <tree node="inv_equip" />
+<tree node="inv_hotbar" />
 <tree node="inv_bag" />
 <tree node="inv_guild" />
 <tree node="inv_room" />
@@ -29,7 +30,7 @@
 <!-- ************************** -->
 <!-- 2nd List Menu : BEAST -->
 <tree node="animal_global">
-	
+
 	<!-- MAX_INVENTORY_ANIMAL -->
 	<tree node="userpa1"/>
 	<tree node="userpa2"/>
@@ -47,7 +48,7 @@
 	<tree node="JungleExoticRawMaterialKnowledge" />
 	<tree node="LakeExoticRawMaterialKnowledge" />
 </tree>-->
-<!-- 
+<!--
 <tree node="faber_create">
 	<tree node="faber_plan_selection" />
 </tree>
@@ -95,6 +96,8 @@
 
 <tree node="webig"/>
 
+<tree node="cap"/>
+
 <tree node="info_player_journal"/>
 
 <!-- info_player_career tree node auto generated (see info_player.xml) -->
@@ -111,6 +114,7 @@
 
 <tree node="keys" >
 	<tree node="keys_player"/>
+	<tree node="keys_animals"/>
 	<tree node="keys_movement"/>
 	<tree node="keys_actions"/>
 	<tree node="keys_chat"/>

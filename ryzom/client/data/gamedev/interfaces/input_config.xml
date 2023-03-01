@@ -1,0 +1,43 @@
+
+
+<input_config>
+	<system name="Keyboard">
+		<event type="keyDown" details="KeyESCAPE" context="KeySHIFT">
+			<action name="quit"/>
+		</event>
+		<event type="keyDown" details="KeyT" context="KeySHIFT+KeyCONTROL">
+			<action name="reset_interface"/>
+		</event>
+		<event type="keyDown" details="KeyF5" context="none">
+			<action name="hide_interface"/>
+		</event>
+		<event type="keyDown" details="KeyS" context="KeySHIFT+KeyCONTROL">
+			<action name="save_sentences"/>
+		</event>
+	</system>
+
+	<system name="mouse">
+		<event type="buttondown"		details="leftbutton">
+			<action name="capture"/>
+			<action name="enable_move_window"/>
+			<action name="enable_resize_window"/>
+			<action name="select_window"/>
+			<action name="enable_autoadd"/>
+		</event>
+		<event type="buttonreleased"	details="leftbutton">
+			<action name="release_capture"/>
+			<action name="execute"/>
+			<action name="disable_move_window"/>
+			<action name="disable_resize_window"/>
+			<action name="disable_autoadd"/>
+		</event>
+		<event type="buttonreleased"	details="rightbutton">
+			<action name="show_context_menu"/>
+			<action name="show_info" /> 
+		</event>
+		<event type="move"				details="none">
+			<action name="move_cursor" />
+		</event>
+	</system>
+</input_config>
+

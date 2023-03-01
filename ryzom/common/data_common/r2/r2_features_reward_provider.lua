@@ -306,18 +306,18 @@ end
 
 component.createComponent = function(x, y)
 	
-	local contextualText = i18n.get("uiR2EdRewardProvider_ContextualText")
-	local onTargetText = i18n.get("uiR2EdRewardProvider_OnTargetText")
-	local rewardText = i18n.get("uiR2EdRewardProvider_RewardText")
-	local rareRewardText = i18n.get("uiR2EdRewardProvider_RareRewardText")
-	local inventoryFullText = i18n.get("uiR2EdRewardProvider_InventoryFullText")
-	local notEnoughPointsText = i18n.get("uiR2EdRewardProvider_NotEnoughPointsText")
+	local contextualText = i18n.get("uiR2EdRewardProvider_ContextualText"):toUtf8()
+	local onTargetText = i18n.get("uiR2EdRewardProvider_OnTargetText"):toUtf8()
+	local rewardText = i18n.get("uiR2EdRewardProvider_RewardText"):toUtf8()
+	local rareRewardText = i18n.get("uiR2EdRewardProvider_RareRewardText"):toUtf8()
+	local inventoryFullText = i18n.get("uiR2EdRewardProvider_InventoryFullText"):toUtf8()
+	local notEnoughPointsText = i18n.get("uiR2EdRewardProvider_NotEnoughPointsText"):toUtf8()
 
 	local comp = r2.newComponent("RewardProvider")
 	assert(comp)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.bot_chat")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EDRewardProvider"))			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EDRewardProvider")):toUtf8()			
 	
 	comp.ContextualText = contextualText
 	comp.OnTargetText = onTargetText
@@ -369,7 +369,7 @@ component.create = function()
 		debugInfo("Cancel form for 'RewardProvider' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'RewardProvider' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of 'RewardProvider' at pos (%d, %d, %d)", x, y, z))
 		if r2.mustDisplayInfo("RewardProvider") == 1 then 
 			r2.displayFeatureHelp("RewardProvider")
 		end
@@ -388,30 +388,30 @@ end
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EDRollout_RewardProvider")
-	logicEntityMenu:addLine(name, "lua", "", "RewardProvider")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "RewardProvider")
 end
 
 function component:getLogicTranslations()
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["activate"]			= { menu=i18n.get( "uiR2AA0Activate"				), 
-										text=i18n.get( "uiR2AA1Activate"				)}, 
-			["deactivate"]			= { menu=i18n.get( "uiR2AA0Deactivate"				), 
-										text=i18n.get( "uiR2AA1Deactivate"				)}, 
+			["activate"]			= { menu=i18n.get( "uiR2AA0Activate"				):toUtf8(), 
+										text=i18n.get( "uiR2AA1Activate"				):toUtf8()}, 
+			["deactivate"]			= { menu=i18n.get( "uiR2AA0Deactivate"				):toUtf8(), 
+										text=i18n.get( "uiR2AA1Deactivate"				):toUtf8()}, 
 		},
 		["Events"] = {	
-			["activation"]			= { menu=i18n.get( "uiR2Event0Activation"			), 
-										text=i18n.get( "uiR2Event1Activation"			)},
-			["deactivation"]		= { menu=i18n.get( "uiR2Event0Deactivation"			), 
-										text=i18n.get( "uiR2Event1Deactivation"			)},
-			["reward given"]		= { menu=i18n.get( "uiR2Event0RewardGiven"			), 
-										text=i18n.get( "uiR2Event1RewardGiven"			)},
+			["activation"]			= { menu=i18n.get( "uiR2Event0Activation"			):toUtf8(), 
+										text=i18n.get( "uiR2Event1Activation"			):toUtf8()},
+			["deactivation"]		= { menu=i18n.get( "uiR2Event0Deactivation"			):toUtf8(), 
+										text=i18n.get( "uiR2Event1Deactivation"			):toUtf8()},
+			["reward given"]		= { menu=i18n.get( "uiR2Event0RewardGiven"			):toUtf8(), 
+										text=i18n.get( "uiR2Event1RewardGiven"			):toUtf8()},
 		},
 		["Conditions"] = {	
-			["is active"]			= { menu=i18n.get( "uiR2Test0Active"				), 
-										text=i18n.get( "uiR2Test1Active"				)},
-			["is inactive"]			= { menu=i18n.get( "uiR2Test0Inactive"				), 
-										text=i18n.get( "uiR2Test1Inactive"				)},
+			["is active"]			= { menu=i18n.get( "uiR2Test0Active"				):toUtf8(), 
+										text=i18n.get( "uiR2Test1Active"				):toUtf8()},
+			["is inactive"]			= { menu=i18n.get( "uiR2Test0Inactive"				):toUtf8(), 
+										text=i18n.get( "uiR2Test1Inactive"				):toUtf8()},
 		}
 	}
 	return logicTranslations

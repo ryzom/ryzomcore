@@ -16,69 +16,54 @@
   <key name="Key0" action="run_shortcut" params="09"/>
   <key name="Key0" ctrl="1" action="select_shortcut_bar" params="10"/>
   <key name="Key0" shift="1" action="run_shortcut" params="19"/>
-  <key name="Key0" menu="1" action="talk_message" params="09"/>
   <key name="Key0" ctrl="1" menu="1" action="toggle_3d_filter" params="9"/>
-  <key name="Key0" shift="1" menu="1" action="talk_message" params="19"/>
   <key name="Key1" action="run_shortcut" params="00"/>
   <key name="Key1" ctrl="1" action="select_shortcut_bar" params="1"/>
   <key name="Key1" shift="1" action="run_shortcut" params="10"/>
-  <key name="Key1" menu="1" action="talk_message" params="00"/>
+  <key name="Key1" menu="1" action="use_hotbar_item" params="slot=0"/>
   <key name="Key1" ctrl="1" menu="1" action="toggle_3d_filter" params="0"/>
-  <key name="Key1" shift="1" menu="1" action="talk_message" params="10"/>
   <key name="Key1" shift="1" ctrl="1" menu="1" action="command" params="mode 0 3"/>
   <key name="Key2" action="run_shortcut" params="01"/>
   <key name="Key2" ctrl="1" action="select_shortcut_bar" params="2"/>
   <key name="Key2" shift="1" action="run_shortcut" params="11"/>
-  <key name="Key2" menu="1" action="talk_message" params="01"/>
+  <key name="Key2" menu="1" action="use_hotbar_item" params="slot=1"/>
   <key name="Key2" ctrl="1" menu="1" action="toggle_3d_filter" params="1"/>
-  <key name="Key2" shift="1" menu="1" action="talk_message" params="11"/>
   <key name="Key2" shift="1" ctrl="1" menu="1" action="command" params="mode 0 1"/>
   <key name="Key3" action="run_shortcut" params="02"/>
   <key name="Key3" ctrl="1" action="select_shortcut_bar" params="3"/>
   <key name="Key3" shift="1" action="run_shortcut" params="12"/>
-  <key name="Key3" menu="1" action="talk_message" params="02"/>
+  <key name="Key3" menu="1" action="use_hotbar_item" params="slot=2"/>
   <key name="Key3" ctrl="1" menu="1" action="toggle_3d_filter" params="2"/>
-  <key name="Key3" shift="1" menu="1" action="talk_message" params="12"/>
   <key name="Key3" shift="1" ctrl="1" menu="1" action="command" params="a changeMode 3"/>
   <key name="Key4" action="run_shortcut" params="03"/>
   <key name="Key4" ctrl="1" action="select_shortcut_bar" params="4"/>
   <key name="Key4" shift="1" action="run_shortcut" params="13"/>
-  <key name="Key4" menu="1" action="talk_message" params="03"/>
+  <key name="Key4" menu="1" action="use_hotbar_item" params="slot=3"/>
   <key name="Key4" ctrl="1" menu="1" action="toggle_3d_filter" params="3"/>
-  <key name="Key4" shift="1" menu="1" action="talk_message" params="13"/>
   <key name="Key4" shift="1" ctrl="1" menu="1" action="command" params="a changeMode 1"/>
   <key name="Key5" action="run_shortcut" params="04"/>
   <key name="Key5" ctrl="1" action="select_shortcut_bar" params="5"/>
   <key name="Key5" shift="1" action="run_shortcut" params="14"/>
-  <key name="Key5" menu="1" action="talk_message" params="04"/>
+  <key name="Key5" menu="1" action="use_hotbar_item" params="slot=4"/>
   <key name="Key5" ctrl="1" menu="1" action="toggle_3d_filter" params="4"/>
-  <key name="Key5" shift="1" menu="1" action="talk_message" params="14"/>
   <key name="Key5" shift="1" ctrl="1" menu="1" action="command" params="a execPhrase 1 root_combat_all_weapons.sbrick combat_stamina_2.sbrick"/>
   <key name="Key6" action="run_shortcut" params="05"/>
   <key name="Key6" ctrl="1" action="select_shortcut_bar" params="6"/>
   <key name="Key6" shift="1" action="run_shortcut" params="15"/>
-  <key name="Key6" menu="1" action="talk_message" params="05"/>
   <key name="Key6" ctrl="1" menu="1" action="toggle_3d_filter" params="5"/>
-  <key name="Key6" shift="1" menu="1" action="talk_message" params="15"/>
   <key name="Key6" shift="1" ctrl="1" menu="1" action="command" params="a execPhrase 0 root_combat_all_weapons.sbrick melee_add_damage_1.sbrick combat_stamina_10.sbrick"/>
   <key name="Key7" action="run_shortcut" params="06"/>
   <key name="Key7" ctrl="1" action="select_shortcut_bar" params="7"/>
   <key name="Key7" shift="1" action="run_shortcut" params="16"/>
-  <key name="Key7" menu="1" action="talk_message" params="06"/>
   <key name="Key7" ctrl="1" menu="1" action="toggle_3d_filter" params="6"/>
-  <key name="Key7" shift="1" menu="1" action="talk_message" params="16"/>
   <key name="Key8" action="run_shortcut" params="07"/>
   <key name="Key8" ctrl="1" action="select_shortcut_bar" params="8"/>
   <key name="Key8" shift="1" action="run_shortcut" params="17"/>
-  <key name="Key8" menu="1" action="talk_message" params="07"/>
   <key name="Key8" ctrl="1" menu="1" action="toggle_3d_filter" params="7"/>
-  <key name="Key8" shift="1" menu="1" action="talk_message" params="17"/>
   <key name="Key9" action="run_shortcut" params="08"/>
   <key name="Key9" ctrl="1" action="select_shortcut_bar" params="9"/>
   <key name="Key9" shift="1" action="run_shortcut" params="18"/>
-  <key name="Key9" menu="1" action="talk_message" params="08"/>
   <key name="Key9" ctrl="1" menu="1" action="toggle_3d_filter" params="8"/>
-  <key name="Key9" shift="1" menu="1" action="talk_message" params="18"/>
   <key name="KeyA" action="turn_left"/>
   <key name="KeyA" shift="1" ctrl="1" action="debug_ui_prev_element_under_mouse"/>
   <key name="KeyB" action="show_hide" params="inventory"/>
@@ -100,6 +85,7 @@
   <key name="KeyL" shift="1" action="toggle_light"/>
   <key name="KeyL" ctrl="1" menu="1" action="dec_hour"/>
   <key name="KeyM" action="show_hide" params="map"/>
+  <key name="KeyM" ctrl="1" action="fullmap" params="" />
   <key name="KeyM" shift="1" action="show_hide" params="mailbox"/>
   <key name="KeyM" ctrl="1" menu="1" action="weather_stats"/>
   <key name="KeyN" shift="1" action="show_hide" params="connection"/>
@@ -115,7 +101,7 @@
   <key name="KeyS" action="backward"/>
   <key name="KeyS" ctrl="1" action="phrase_cancel_cast"/>
   <key name="KeyS" ctrl="1" menu="1" action="toggle_season"/>
-  <key name="KeyT" action="toggle_combat"/>
+  <key name="KeyT" action="team_list"/>
   <key name="KeyT" ctrl="1" action="r2ed_teleport"/>
   <key name="KeyT" ctrl="1" menu="1" action="reel_weather"/>
   <key name="KeyU" action="show_hide" params="fame"/>
@@ -155,6 +141,7 @@
   <key name="KeyF5" action="target_teammate_shortcut" params="indexInTeam=4"/>
   <key name="KeyF5" shift="1" action="target_teammate_shortcut" params="indexInTeam=8"/>
   <key name="KeyF5" shift="1" ctrl="1" menu="1" action="save_movie"/>
+  <key name="KeyF6" action="toggle_combat"/>
   <key name="KeyF6" shift="1" action="switch_console_display"/>
   <key name="KeyF6" shift="1" ctrl="1" menu="1" action="memory_report"/>
   <key name="KeyF7" action="mount_unmount"/>

@@ -241,8 +241,8 @@
 
 
 <group type="menu" id="ring_session_menu" options="context_menu_back" case_mode="0">
-	<action id="join" name="uiRAP_MenuJoin" handler="lua" params="RingAccessPoint:onJoin()" />
-	<action id="tell" name="uiRAP_MenuTell" handler="lua" params="RingAccessPoint:onTell()" />	
+	<action id="join" name="uiRAP_MenuJoin" handler="lua" params="RingAccessPoint:onJoin()" icon="r2ed_tool_redo.tga" />
+	<action id="tell" name="uiRAP_MenuTell" handler="lua" params="RingAccessPoint:onTell()" icon="r2_icon_dialog_mini.tga" />	
 </group>
 
 
@@ -468,10 +468,10 @@
 
 
 <group type="menu" id="ring_char_menu" options="context_menu_back" case_mode="0">
-	<action id="teleport" name="uiRAP_MenuTeleportTo" handler="lua" params="CharTracking:onTeleportTo()" />
-	<action id="kick" name="uiRAP_MenuKick" handler="lua" params="CharTracking:onKick()" />
-	<action id="unkick" name="uiRAP_MenuUnkick" handler="lua" params="CharTracking:onUnkick()" />	
-	<action id="tell" name="uiRAP_MenuCharTell" handler="lua" params="CharTracking:onTell()" />	
+	<action id="teleport" name="uiRAP_MenuTeleportTo" handler="lua" params="CharTracking:onTeleportTo()" icon="mp_batiment_noyau_maduk.tga" />
+	<action id="kick" name="uiRAP_MenuKick" handler="lua" params="CharTracking:onKick()" icon="r2ed_kicked_char.tga" />
+	<action id="unkick" name="uiRAP_MenuUnkick" handler="lua" params="CharTracking:onUnkick()" icon="ryzhome_invite.tga" />	
+	<action id="tell" name="uiRAP_MenuCharTell" handler="lua" params="CharTracking:onTell()" icon="r2_icon_dialog_mini.tga" />	
 </group>
 
 <group type="container" id="ring_chars_tracking" title="uiRAP_CharsTitle" global_color="false" line_at_bottom="false"
@@ -621,7 +621,7 @@
 
 	<view type="text" id="text" case_mode="%case_first_word_letter_up" posref="TL TL" x="6" y="-4" color="255 255 255 255" global_color="false" fontsize="14" shadow="true" hardtext="uiPeopleAddContact" />
 
-	<instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_bytes="255" entry_type="playername" />
+	<instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_chars="255" entry_type="playername" />
 	
 	<instance template="button_ok_cancel" posparent="add_contact_eb" posref="BR TR" x="0" y="-4" 
 				onclick_ok="r2ed_invite_character" 
@@ -832,7 +832,7 @@
 						 onenter="" params=""
 						 on_focus_lost="" on_focus_lost_params="" 
 						 reset_focus_on_hide="true"
-						 max_num_bytes="255"
+						 max_num_chars="256"
 						>
 											
 							<view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" 

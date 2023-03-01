@@ -8,10 +8,10 @@ if (outgame==nil) then
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:openEditorMenu()
-	if not isFullyPatched() then		
-		messageBoxWithHelp(i18n.get("uiBGD_FullPatchNeeded"), "ui:outgame");		
+	if not isFullyPatched() then
+		messageBoxWithHelp(i18n.get("uiBGD_FullPatchNeeded"), "ui:outgame");
 		return
 	end
 	local value = getDbProp('UI:TEMP:HAS_EDITSESSION')
@@ -23,12 +23,12 @@ function game:openEditorMenu()
 		assert(editorButton)
 
 		local menuName =  "ui:outgame:r2ed_editor_menu"
-		local menu = getUI(menuName)	
+		local menu = getUI(menuName)
 		assert(menu)
 		launchContextMenuInGame(menu.id)
 		menu.x = editorButton.x_real
 		menu.y = editorButton.y_real + editorButton.h_real
-		menu:updateCoords()	
+		menu:updateCoords()
 	end
 end
 

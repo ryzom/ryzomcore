@@ -122,9 +122,9 @@ function r2.Version.save(filename)
 			level = levelToString[tonumber(level)]
 			rules = string.gsub(r2.Scenario.AccessRules, "\n", "\\n")
 			if rules=="liberal" then 
-				rules=i18n.get("uiR2EDliberal")
+				rules=i18n.get("uiR2EDliberal"):toUtf8()
 			elseif rules == "strict" then
-				rules=i18n.get("uiR2EDstrict")
+				rules=i18n.get("uiR2EDstrict"):toUtf8()
 			end
 			title = string.gsub(r2.Scenario.Description.Title, "\n", "\\n")
 			language = r2.Scenario.Language 

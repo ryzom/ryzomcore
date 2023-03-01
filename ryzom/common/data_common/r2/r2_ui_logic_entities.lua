@@ -14,52 +14,52 @@ r2.logicEntityAttributes = {
 
 
 	["ApplicableActions"] = {	
---								["Activate"]					= tostring(i18n.get( "uiR2EdActivate"				)), 
---								["Deactivate"]					= tostring(i18n.get( "uiR2EdDeactivate"				)), 
---								["Wander"]						= tostring(i18n.get( "uiR2EdWander"					)), 
---								["Sit Down"]					= tostring(i18n.get( "uiR2EdSitDown"				)),
---								["Stand Up"]					= tostring(i18n.get( "uiR2EdStandUp"				)),
---								["Respawn"]						= tostring(i18n.get( "uiR2EdRespawn"				)), 
---								["Kill"]						= tostring(i18n.get( "uiR2EdKill"					)),
---								["begin activity sequence"]		= tostring(i18n.get( "uiR2EdBeginActivitySequ"		)),
+--								["Activate"]					= tostring(i18n.get( "uiR2EdActivate"				):toUtf8()), 
+--								["Deactivate"]					= tostring(i18n.get( "uiR2EdDeactivate"				):toUtf8()), 
+--								["Wander"]						= tostring(i18n.get( "uiR2EdWander"					):toUtf8()), 
+--								["Sit Down"]					= tostring(i18n.get( "uiR2EdSitDown"				):toUtf8()),
+--								["Stand Up"]					= tostring(i18n.get( "uiR2EdStandUp"				):toUtf8()),
+--								["Respawn"]						= tostring(i18n.get( "uiR2EdRespawn"				):toUtf8()), 
+--								["Kill"]						= tostring(i18n.get( "uiR2EdKill"					):toUtf8()),
+--								["begin activity sequence"]		= tostring(i18n.get( "uiR2EdBeginActivitySequ"		):toUtf8()),
 --								["begin chat sequence"]			= tostring(i18n.get( "uiR2EdBeginChatSequ"			))
 							},
 
 	["Events"] =			{	
---								["activation"]					= tostring(i18n.get( "uiR2EdActivation"				)), 
---								["desactivation"]				= tostring(i18n.get( "uiR2EdDesactivation"			)), 
---								["a member death"]				= tostring(i18n.get( "uiR2EdAMemberDeath"			)),
---								["member death"]				= tostring(i18n.get( "uiR2EdMemberDeath"			)),
---								["group death"]					= tostring(i18n.get( "uiR2EdGroupDeath"				)), 	
---								["head to wander zone"]			= tostring(i18n.get( "uiR2EdHeadWanderZone"			)), 
---								["arrive at wander zone"]		= tostring(i18n.get( "uiR2EdArriveWanderZone"		)), 
---								["head to camp"]				= tostring(i18n.get( "uiR2EdHeadCamp"				)), 
---								["arrive at camp"]				= tostring(i18n.get( "uiR2EdArriveCamp"				)),
---								["death"]						= tostring(i18n.get( "uiR2EdDeath"					)),
---								["end of activity step"]		= tostring(i18n.get( "uiR2EdEndActivityStep"		)), 
---								["begin of activity step"]		= tostring(i18n.get( "uiR2EdBeginActivityStep"		)),
---								["end of activity sequence"]	= tostring(i18n.get( "uiR2EdEndActivitySequ"		)),
---								["begin of activity sequence"]	= tostring(i18n.get( "uiR2EdBeginOfActivitySequ"	)),
+--								["activation"]					= tostring(i18n.get( "uiR2EdActivation"				):toUtf8()), 
+--								["desactivation"]				= tostring(i18n.get( "uiR2EdDesactivation"			):toUtf8()), 
+--								["a member death"]				= tostring(i18n.get( "uiR2EdAMemberDeath"			):toUtf8()),
+--								["member death"]				= tostring(i18n.get( "uiR2EdMemberDeath"			):toUtf8()),
+--								["group death"]					= tostring(i18n.get( "uiR2EdGroupDeath"				):toUtf8()), 	
+--								["head to wander zone"]			= tostring(i18n.get( "uiR2EdHeadWanderZone"			):toUtf8()), 
+--								["arrive at wander zone"]		= tostring(i18n.get( "uiR2EdArriveWanderZone"		):toUtf8()), 
+--								["head to camp"]				= tostring(i18n.get( "uiR2EdHeadCamp"				):toUtf8()), 
+--								["arrive at camp"]				= tostring(i18n.get( "uiR2EdArriveCamp"				):toUtf8()),
+--								["death"]						= tostring(i18n.get( "uiR2EdDeath"					):toUtf8()),
+--								["end of activity step"]		= tostring(i18n.get( "uiR2EdEndActivityStep"		):toUtf8()), 
+--								["begin of activity step"]		= tostring(i18n.get( "uiR2EdBeginActivityStep"		):toUtf8()),
+--								["end of activity sequence"]	= tostring(i18n.get( "uiR2EdEndActivitySequ"		):toUtf8()),
+--								["begin of activity sequence"]	= tostring(i18n.get( "uiR2EdBeginOfActivitySequ"	):toUtf8()),
 
---								["end of chat step"]			= tostring(i18n.get( "uiR2EdEndChatStep"			)), 
---								["end of chat sequence"]		= tostring(i18n.get( "uiR2EdEndChatSequ"			)),
---								["group death"]					= tostring(i18n.get( "uiR2EdGroupDeath"				)), 
+--								["end of chat step"]			= tostring(i18n.get( "uiR2EdEndChatStep"			):toUtf8()), 
+--								["end of chat sequence"]		= tostring(i18n.get( "uiR2EdEndChatSequ"			):toUtf8()),
+--								["group death"]					= tostring(i18n.get( "uiR2EdGroupDeath"				):toUtf8()), 
 							},
 
 
 	["Conditions"] =		{	
---								["is active"]					= tostring(i18n.get( "uiR2EdIsActive"				)), 
---								["is inactive"]					= tostring(i18n.get( "uiR2EdIsInactive"				)), 
---								["is dead"]						= tostring(i18n.get( "uiR2EdIsDead"					)), 
---								["is alive"]					= tostring(i18n.get( "uiR2EdIsAlive"				)),
---								["is wandering"]				= tostring(i18n.get( "uiR2EdIsWandering"			)), 
---								["is sitting"]					= tostring(i18n.get( "uiR2EdIsSitting"				)), 
---								["is heading to wander zone"]	= tostring(i18n.get( "uiR2EdIsHeadingWanderZone"	)), 
---								["is heading to camp"]			= tostring(i18n.get( "uiR2EdIsHeadingCamp"			)),
---								["is in activity sequence"]		= tostring(i18n.get( "uiR2EdIsInActivitySequ"		)),
---								["is in activity step"]			= tostring(i18n.get( "uiR2EdIsInActivityStep"		)), 
---								["is in chat sequence"]			= tostring(i18n.get( "uiR2EdIsInChatSequ"			)), 
---								["is in chat step"]				= tostring(i18n.get( "uiR2EdIsInChatStep"			)),
+--								["is active"]					= tostring(i18n.get( "uiR2EdIsActive"				):toUtf8()), 
+--								["is inactive"]					= tostring(i18n.get( "uiR2EdIsInactive"				):toUtf8()), 
+--								["is dead"]						= tostring(i18n.get( "uiR2EdIsDead"					):toUtf8()), 
+--								["is alive"]					= tostring(i18n.get( "uiR2EdIsAlive"				):toUtf8()),
+--								["is wandering"]				= tostring(i18n.get( "uiR2EdIsWandering"			):toUtf8()), 
+--								["is sitting"]					= tostring(i18n.get( "uiR2EdIsSitting"				):toUtf8()), 
+--								["is heading to wander zone"]	= tostring(i18n.get( "uiR2EdIsHeadingWanderZone"	):toUtf8()), 
+--								["is heading to camp"]			= tostring(i18n.get( "uiR2EdIsHeadingCamp"			):toUtf8()),
+--								["is in activity sequence"]		= tostring(i18n.get( "uiR2EdIsInActivitySequ"		):toUtf8()),
+--								["is in activity step"]			= tostring(i18n.get( "uiR2EdIsInActivityStep"		):toUtf8()), 
+--								["is in chat sequence"]			= tostring(i18n.get( "uiR2EdIsInChatSequ"			):toUtf8()), 
+--								["is in chat step"]				= tostring(i18n.get( "uiR2EdIsInChatStep"			):toUtf8()),
 							},
 }
 			
@@ -313,13 +313,13 @@ function r2:initWhichEntityMenu()
 	logicEntityMenu:reset()
 
 	local name = i18n.get("uiR2EdBanditCamps")
-	logicEntityMenu:addLine(name, "lua", "", "BanditCampFeature")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "BanditCampFeature")
 
 	name = i18n.get("uiR2EdGroups")
-	logicEntityMenu:addLine(name, "lua", "", "NpcGrpFeature")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "NpcGrpFeature")
 
 	name = i18n.get("uiR2EdNPCs")
-	logicEntityMenu:addLine(name, "lua", "", "Npc")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "Npc")
 
 	r2:registerFeaturesMenu(logicEntityMenu)
 
@@ -345,7 +345,7 @@ function r2:initWhichEntityMenu()
 				addLine = false
 			end
 			if addLine then
-				subMenu:addLine(entity.Name, "lua", "r2:selectWhichEntity(".. tostring(i) .. "," .. tostring(count) .. ")", entity.InstanceId)
+				subMenu:addLine(ucstring(entity.Name), "lua", "r2:selectWhichEntity(".. tostring(i) .. "," .. tostring(count) .. ")", entity.InstanceId)
 				count=count+1
 			end
 		end
@@ -500,7 +500,7 @@ function r2:updateActionText(actionUI)
 				totalText = totalText.."\n"
 			end
 
-			actionText:addTextChild(totalText)
+			actionText:addTextChild(ucstring(totalText))
 			sep.active = true
 		else
 			sep.active = false
@@ -575,7 +575,7 @@ function r2:updateReactionText(reactionUI)
 				end	
 			end
 
-			reactionText:addTextChild(totalText)
+			reactionText:addTextChild(ucstring(totalText))
 
 			sep.active = true
 		else
@@ -986,7 +986,7 @@ function r2:openRightMenu(isEntityOfLeftMenu, loadTable, selectLineFunction)
 		local openSequencesMenu = r2.openSequencesMenu[action]
 		local actionName = r2.logicEntityAttributes[loadTable][action]
 		if actionName == nil then actionName = "?"..action.."?" end
-		local actionText = actionName
+		local actionText = ucstring(actionName)
 		if openSequencesMenu ~= nil then
 
 			-- first line
@@ -1013,8 +1013,8 @@ function r2:openRightMenu(isEntityOfLeftMenu, loadTable, selectLineFunction)
 
 				if not openSequencesMenu.singleSubMenu then
 
-					--subMenu:addLine(sequence.Name, "", "", sequence.InstanceId)
-					subMenu:addLine(r2:getSequenceName(sequence), "", "", sequence.InstanceId)
+					--subMenu:addLine(ucstring(sequence.Name), "", "", sequence.InstanceId)
+					subMenu:addLine(ucstring(r2:getSequenceName(sequence)), "", "", sequence.InstanceId)
 					
 					-- steps sub menu
 					subMenu:addSubMenu(s)
@@ -1029,13 +1029,13 @@ function r2:openRightMenu(isEntityOfLeftMenu, loadTable, selectLineFunction)
 					for s = 0, steps.Size - 1 do
 						local step = steps[s]
 						local stepName = r2:getElementName(step)
-						stepsMenu:addLine(stepName, "lua", 
+						stepsMenu:addLine(ucstring(stepName), "lua", 
 							selectLineFunction.. "('".. action .. "','" .. step.InstanceId .."')", step.InstanceId)
 						count2=count2+1
 					end
 				else 
-					--subMenu:addLine(sequence.Name, "lua", 
-					subMenu:addLine(r2:getSequenceName(sequence), "lua", 
+					--subMenu:addLine(ucstring(sequence.Name), "lua", 
+					subMenu:addLine(ucstring(r2:getSequenceName(sequence)), "lua", 
 						selectLineFunction.. "('".. action .. "','" .. sequence.InstanceId .. "')", sequence.InstanceId)
 				end
 				
@@ -1321,7 +1321,7 @@ function r2:buildActionTitle(actionUI, erase)
 	-- title
 	local title = actionUI:find("title")
 	assert(title)
-	title.text= part1..part2
+	title.uc_hardtext= part1..part2
 end
 
 function r2:getActionName(actionInst)
@@ -1621,15 +1621,15 @@ function r2:updateActionEditor()
 	local whichEventNameText = whichEventLabel:find("name_text")
 	assert(whichEventNameText)
 	text = r2:getSelectedInstance().Name
-	whichEventNameText.text = text
+	whichEventNameText.uc_hardtext = text
 	
 	if actionInst ~= nil then
 
 		local index = r2:searchElementIndex(actionInst)
 		if index~= nil then
-			actionName.text = tostring(i18n.get("uiR2EdAction")).." "..index.." : "
+			actionName.uc_hardtext = tostring(i18n.get("uiR2EdAction")).." "..index.." : "
 		else
-			actionName.text = tostring(i18n.get("uiR2EdAction")).." : "
+			actionName.uc_hardtext = tostring(i18n.get("uiR2EdAction")).." : "
 		end
 
 		-- which event text
@@ -1641,7 +1641,7 @@ function r2:updateActionEditor()
 			assert(inst)
 			text = text .. " : " .. r2:getElementName(inst)
 		end
-		whichEventText.text = text
+		whichEventText.uc_hardtext = text
 
 		local previousButtonPair = actionsList:getChild(0)
 		-- ActionStep list
@@ -1659,7 +1659,7 @@ function r2:updateActionEditor()
 			local whichEntityText = whichEntityMenu:find("text")
 			assert(whichEntityText)
 			text = r2:getInstanceFromId(tostring(actionStepInst.Entity)).Name
-			whichEntityText.text = text
+			whichEntityText.uc_hardtext = text
 			
 
 			local whatActionMenu = previousButtonPair:find("right_menu")
@@ -1674,7 +1674,7 @@ function r2:updateActionEditor()
 				assert(inst)
 				text = text .. " : " .. r2:getElementName(inst)
 			end
-			whatActionText.text = text
+			whatActionText.uc_hardtext = text
 
 			previousButtonPair.Env.entityId = tostring(actionStepInst.Entity)
 			previousButtonPair = newButtonPair
@@ -1696,7 +1696,7 @@ function r2:updateActionEditor()
 			local whichEntityText = whichEntityMenu:find("text")
 			assert(whichEntityText)
 			text = r2:getInstanceFromId(tostring(conditionInst.Entity)).Name
-			whichEntityText.text = text
+			whichEntityText.uc_hardtext = text
 
 			local whatConditionMenu = previousButtonPair:find("right_menu")
 			assert(whatConditionMenu)
@@ -1710,7 +1710,7 @@ function r2:updateActionEditor()
 				assert(inst)
 				text = text .. " : " .. r2:getElementName(inst)
 			end
-			whatConditionText.text = text
+			whatConditionText.uc_hardtext = text
 
 			previousButtonPair.Env.entityId = tostring(conditionInst.Entity)
 			previousButtonPair = newButtonPair
@@ -1718,9 +1718,9 @@ function r2:updateActionEditor()
 	else
 
 		local name = tostring(i18n.get("uiR2EdAction")).." : "
-		actionName.text = name
+		actionName.uc_hardtext = name
 
-		whichEventText.text = "" 
+		whichEventText.uc_hardtext = "" 
 	end
 end
 
@@ -1834,12 +1834,12 @@ function r2:buildReactionTitle(reactionUI, erase)
 		local part3 = tostring(i18n.get("uiR2EdEventTxtPreEvent")).." '".. eventType .."' "..tostring(i18n.get("uiR2EdEventOf")).." ".. whichEntity.Name
 
 		-- title
-		title.text= part1..part2..part3
+		title.uc_hardtext= part1..part2..part3
 
 	elseif erase==true then
 		local eltsList = reactionUI.parent
 		local indexReactionUI = eltsList:getElementIndex(reactionUI) - 1
-		title.text = tostring(i18n.get("uiR2EdReaction")).." "..indexReactionUI.." : "
+		title.uc_hardtext = tostring(i18n.get("uiR2EdReaction")).." "..indexReactionUI.." : "
 	end
 end
 
@@ -2091,7 +2091,7 @@ function r2:updateReactionEditor()
 	local whatActionText = whatActionLabel:find("name_text")
 	assert(whatActionText)
 	local text = " " .. r2:getSelectedInstance().Name
-	whatActionText.text = text
+	whatActionText.uc_hardtext = text
 	
 	local conditions = reactionEditor:find("conditions_list")
 	assert(conditions)
@@ -2119,9 +2119,9 @@ function r2:updateReactionEditor()
 		actions.active = false
 		conditions.active = false
 
-		whatActionText.text = ""
-		whatTriggersText.text = ""
-		whichEventText.text = ""
+		whatActionText.uc_hardtext = ""
+		whatTriggersText.uc_hardtext = ""
+		whichEventText.uc_hardtext = ""
 
 		if reactionEditor.Env.minimize ~= true then 
 			reactionEditor.h = reactionEditor.h - 320
@@ -2162,7 +2162,7 @@ function r2:updateReactionEditor()
 			assert(inst)
 			text = text .. " : " .. r2:getElementName(inst)
 		end
-		whatActionText.text = text
+		whatActionText.uc_hardtext = text
 
 		-- "what triggers..." and "which event" buttons text
 		local entityName = actionInst.ParentInstance.Parent.Name
@@ -2175,9 +2175,9 @@ function r2:updateReactionEditor()
 			text = text .. " : " .. r2:getElementName(inst)
 		end
 
-		whatTriggersText.text = entityName
+		whatTriggersText.uc_hardtext = entityName
 
-		whichEventText.text = text
+		whichEventText.uc_hardtext = text
 
 		menuPair.Env.entityId = actionInst.ParentInstance.Parent.InstanceId
 
@@ -2200,7 +2200,7 @@ function r2:updateReactionEditor()
 				local whichEntityText = whichEntityMenu:find("text")
 				assert(whichEntityText)
 				text = r2:getInstanceFromId(tostring(actionStepInst.Entity)).Name
-				whichEntityText.text = text
+				whichEntityText.uc_hardtext = text
 
 				local whatActionMenu = previousButtonPair:find("right_menu")
 				assert(whatActionMenu)
@@ -2215,7 +2215,7 @@ function r2:updateReactionEditor()
 					assert(inst)
 					text = text .. " : " .. r2:getElementName(inst)
 				end
-				whatActionText.text = text
+				whatActionText.uc_hardtext = text
 
 				previousButtonPair.Env.entityId = tostring(actionStepInst.Entity)
 				previousButtonPair = newButtonPair
@@ -2239,7 +2239,7 @@ function r2:updateReactionEditor()
 			local whichEntityText = whichEntityMenu:find("text")
 			assert(whichEntityText)
 			text = r2:getInstanceFromId(tostring(conditionInst.Entity)).Name
-			whichEntityText.text = text
+			whichEntityText.uc_hardtext = text
 
 			local whatConditionMenu = previousButtonPair:find("right_menu")
 			assert(whatConditionMenu)
@@ -2252,14 +2252,14 @@ function r2:updateReactionEditor()
 				assert(inst)
 				text = text .. " : " .. r2:getElementName(inst)
 			end
-			whatConditionText.text = text
+			whatConditionText.uc_hardtext = text
 
 			previousButtonPair.Env.entityId = tostring(conditionInst.Entity)
 			previousButtonPair = newButtonPair
 		end
 	end
 
-	reactionName.text = name
+	reactionName.uc_hardtext = name
 end
 
 ---------------------------- new element --------------------------------------------------------------
@@ -2408,7 +2408,7 @@ function r2:updateLogicEntityUI(instance)
 		r2:updateReactionEditor()
 	end
 
-	logicEntityUI.title = tostring(i18n.get("uiR2EDEventsTriggersEditor")) .. r2:getSelectedInstance().Name
+	logicEntityUI.uc_title = tostring(i18n.get("uiR2EDEventsTriggersEditor")) .. r2:getSelectedInstance().Name
 end
 
 ----------------------------- CLOSE ACTION / REACTION EDITOR ------------------------------------
@@ -2485,7 +2485,7 @@ r2.logicEntityUIUpdated = false
 --		local logicEntityWnd = getUI("ui:interface:r2ed_logic_entities")
 --		assert(logicEntityWnd)
 
---		logicEntityWnd.title = tostring(i18n.get("uiR2EDEventsTriggersEditor")) .. instance[attributeName]	
+--		logicEntityWnd.uc_title = tostring(i18n.get("uiR2EDEventsTriggersEditor")) .. instance[attributeName]	
 --	end
 --end	
 

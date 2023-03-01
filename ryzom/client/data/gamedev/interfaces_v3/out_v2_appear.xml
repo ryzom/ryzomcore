@@ -280,11 +280,11 @@
 	<action handler="reset_camera"	 params="target=ui:outgame:appear:char3d:cam" />
 	<action handler="reset_camera"	 params="target=ui:outgame:appear:char3d:camface" />
 
-	<action handler="lua" params="pauseBGDownloader()" />
+<!--	<action handler="lua" params="pauseBGDownloader()" /> -->
 </proc>
 
 <proc id="proc_release_CP">
-	<action handler="lua" params="unpauseBGDownloader()" />
+	<!-- <action handler="lua" params="unpauseBGDownloader()" /> -->
 </proc>
 
 
@@ -345,7 +345,8 @@
 	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="export_tryker" />
 	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="export_zorai" />
 	<!-- launch Choose Mainland dialog box -->
-	<action handler="enter_modal" params="group=ui:outgame:appear_mainland" />
+	<action handler="enter_modal" params="group=ui:outgame:appear_keyset" />
+	<action handler="init_mainland_list" params="" />
 	<!-- launch enter name dialog box -->
 	<!--<action handler="enter_modal" params="group=ui:outgame:appear_name" />-->
 </proc>
@@ -353,12 +354,12 @@
 <proc id="proc_finish3">
 	<action handler="proc" params="appear_disable_buttons" />
 	<action handler="set" params="dblink=UI:TEMP:FROM|value=1" />
+	<!--
 	<action handler="set" params="dblink=UI:NEXT_SCREEN|value=%screen_location" />
 	<action handler="copy" params="dbdst=UI:CURRENT_SCREEN|dbsrc=UI:NEXT_SCREEN" />
-	<!--
+	-->
 	<action handler="set" params="dblink=UI:TEMP:CHAR3D:DEST|value=1" />
 	<action handler="ask_create_char" params="name=ui:outgame:appear_name:eb|caracs=UI:TEMP:JOB_|charsum=UI:TEMP:CHAR3D|loc=UI:TEMP:CHAR3D:DEST|slot=@UI:TEMP:CHARSELSLOT" />
-	-->
 </proc>
 
 
@@ -434,11 +435,6 @@
 <proc id="anim_perso_color">
 	<action handler="set" params="dblink=UI:TEMP:PANOPLYCOLOR|value=add(@UI:TEMP:PANOPLYCOLOR,1)" />
 	<action handler="proc" params="proc_change_armor_color" />
-</proc>
-
-<proc id="anim_perso_armor">
-	<action handler="set" params="dblink=UI:TEMP:PANOPLY|value=add(@UI:TEMP:PANOPLY,1)" />
-	<action handler="proc" params="proc_change_armor" />
 </proc>
 
 
@@ -880,6 +876,8 @@
 	<action handler="anim_start" cond="eq(@UI:TEMP:CP_MENU,3)" params="anim=anim_face_on" />
 	<action handler="anim_start" cond="ne(@UI:TEMP:CP_MENU,3)" params="anim=anim_face_off" />
 
+	<action handler="lua" cond="eq(@UI:TEMP:CP_MENU,4)" params="outgame:loadRPBGPage()" />
+
 	<action handler="set" cond="eq(@UI:TEMP:CP_MENU,4)" params="target_property=ui:outgame:appear:job_options:active|value=1" />
 	<action handler="anim_start" cond="eq(@UI:TEMP:CP_MENU,4)" params="anim=anim_job_on" />
 	<action handler="anim_start" cond="ne(@UI:TEMP:CP_MENU,4)" params="anim=anim_job_off" />
@@ -1042,11 +1040,10 @@
 
 
 	<!-- Music playing -->
-	<!-- Play character creation music -->
-	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="name=character creation fyros.ogg|async=1" />
-	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="name=character creation matis.ogg|async=1" />
-	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="name=character creation trykers.ogg|async=1" />
-	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="name=character creation zorai.ogg|async=1" />
+	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="name=Character Creation Fyros.ogg|async=1" />
+	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="name=Character Creation Matis.ogg|async=1" />
+	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="name=Character Creation Trykers.ogg|async=1" />
+	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="name=Character Creation Zorai.ogg|async=1" />
 
 </proc>
 
@@ -1289,9 +1286,7 @@
 	<!-- NamingPolicy -->
 	<ctrl style="opt_button" id="name_policy" posref="BM BM" posparent="text" x="0" y="-40" hardtext="uiCP_Name_Policy"
 		text_color_over="208 258 16 255" text_color_normal="255 255 46 255" text_color_pushed="108 158 16 255"
-		onover="play_sound" params_over="name=specie_but_over"
-		onclick_l="open_url" params_l="cfg_ConditionsTermsURL" />
-		<!-- onclick_l="open_url" params_l="cfg_NamingPolicyURL" /> -->
+		onclick_l="open_url" params_l="cfg_NamingPolicyURL" />
 
 	<group type="edit_box" id="eb" posparent="name_policy" posref="BM TM" x="0" y="-8"  w="300" h="52" render_layer="4" child_resize_h="true"
 									onenter="proc" params="proc_appear_name_enter"
@@ -1565,7 +1560,7 @@
 <proc id="proc_appear_name_enter">
 	<action handler="reset_keyboard_focus" />
 	<action handler="play_sound" params="name=summary_enter_name" />
-	<action handler="ask_valid_name" params="target=ui:outgame:appear_name:eb:input_string|dblink=UI:TEMP:NAME_VALID" />
+	<action handler="ask_valid_name" params="target=ui:outgame:appear_name:eb:uc_input_string|dblink=UI:TEMP:NAME_VALID" />
 </proc>
 
 <proc id="proc_appear_name_cancel">
@@ -2295,7 +2290,9 @@
 	<link expr="depends(@UI:TEMP:HAIRCUT)" 					action="proc" params="proc_change_haircut" />
 
 
-
+	<!--**************-->
+	<!-- BG Options -->
+	<!--**************-->
 
 
 	<!--**************-->
@@ -2304,8 +2301,10 @@
 
 	<group id="job_options" w="1024" h="768" posref="TL TL" x="0" y="0"  >
 
+
+
 		<!-- SELECTION SLIDERS -->
-		<group id="selection" child_resize_w="true" child_resize_wmargin="40" h="160" posref="TL TL" x="240" y="280" >
+		<group id="selection"  active="false" child_resize_w="true" child_resize_wmargin="40" h="160" posref="TL TL" x="240" y="280" >
 
 			<group id="sub" posref="TL TL" w="240" h="60" x="8" y="-80" >
 				<instance template="outgame_black_back" id="back" />
@@ -2326,7 +2325,7 @@
 		<link expr="depends(@UI:TEMP:JOB_POINT1)"	action="proc" params="proc_job_point1" />
 
 
-		<group id="options" posref="TR TR" w="815" h="762" >
+		<group id="options" active="false" posref="TR TR" w="815" h="762" >
 
 
 
@@ -2402,16 +2401,21 @@
 			</group>
 
 			<group id="result" posparent="desc" posref="TL TL" y="0" sizeref="w" h="96" >
-
 				<view type="text" id="title1" posref="TL TL" hardtext="uiCP_Title" color="140 162 107 255" fontsize="13" x="16" y="-10"/>
 				<view type="text" id="title2" posref="BR BL" hardtext="uiCP_Refugee" 	color="255 255 255 255" fontsize="15" y="-2" x="0" posparent="title1" />
-
 				<view type="text" id="title3" 		posparent="title1"	posref="BL TL" 	hardtext="uiCP_Pack" 	fontsize="13" color="140 162 107 255" y="-8"/>
 				<view type="text" id="res" 			posparent="title3"	posref="TR TL" 	hardtext="uiCP_Res_F" 	fontsize="13" color="255 255 255 255" x="8" multi_line="true" multi_line_space="0" />
-
-
 			</group>
+		</group>
 
+
+		<group id="rpbg" x="230" y="780" w="-300" h="-140" sizeref="wh" posref="TL Tl" >
+			<instance template="job_frame" id="back" posref="TL TL" />
+			<group id="html" type="webig_html" posref="MM MM" title_prefix="" sizeref="wh" x="0" y="0" w="-40" h="-40" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline">
+				<group id="black" posref="BR BR" sizeref="hw" w="0" h="0" inherit_gc_alpha="true" />
+				<view id="background_bitmap" type="bitmap" posparent="black" posref="MM MM" sizeref="wh" w="0" h="0" inherit_gc_alpha="true" scale="true" texture="blank.tga" color="0 0 0 0" global_color="false" />
+				<group id="text_list" type="list" fontsize="9" posref="TL TL" posparent="black" x="0" y="0" space="0" sizeref="hw" w="0" h="0" maxelements="2000" />
+			</group>
 		</group>
 
 	</group>
@@ -2447,20 +2451,12 @@
 		onover="play_sound" params_over="name=specie_but_over"
 		onclick_l="proc" params_l="proc_appear_infos"/>
 	<link expr="eq(@UI:TEMP:CP_MENU,0)" target="infos_but:active" />
-
 	<!--
 	<ctrl type="button" id="panoply_color" button_type="toggle_button" posparent="play_anim" posref="TL TR" x="8" y="0"
 				tx_normal="play_on.tga" tx_pushed="play_off.tga" tx_over="blank.tga"
 				color="255 255 255 255" col_pushed="255 255 255 255" col_over="0 0 0 0"
 				onover="play_sound" params_over="name=specie_but_over"
 				onclick_l="proc" params_l="anim_perso_color"/>
-	-->
-
-	<!--
-	<ctrl style="valid_txt_button" id="panoply_armor" posparent="play_anim" posref="TL TR" x="8" y="0"
-				 hardtext="uiCP_Armor"
-				onover="play_sound" params_over="name=specie_but_over"
-				onclick_l="proc" params_l="anim_perso_armor"/>
 	-->
 
 	<ctrl style="valid_txt_button" id="finish_but" posref="BR BM" x="-112" y="36" hardtext="uiCP_Finish"
@@ -2655,6 +2651,7 @@
 
 <anim id="anim_job_on" duration="1.0"  disable_buttons="true" on_finish="" on_finish_params="" >
 
+	<!--
 	<track type="tcb" target="appear:job_options:options:alpha" dynamic="true" >
 		<key time="0.0" value="getprop('ui:outgame:appear:job_options:options:alpha')" 	tension="1.0" easefrom="0"/>
 		<key time="1.0" value="255" 															tension="1.0" easeto="1"/>
@@ -2663,11 +2660,16 @@
 		<key time="0.0" value="getprop('ui:outgame:appear:job_options:selection:y')"			tension="1.0" easefrom="0"/>
 		<key time="1.0" value="-40"																tension="1.0" easeto="1"/>
 	</track>
-
+	-->
+	<track type="tcb" target="appear:job_options:rpbg:y" dynamic="true" >
+		<key time="0.0" value="getprop('ui:outgame:appear:job_options:rpbg:y')"			tension="1.0" easefrom="0"/>
+		<key time="1.0" value="0"																tension="1.0" easeto="1"/>
+	</track>
 </anim>
 
 <anim id="anim_job_off" duration="1.0"  disable_buttons="true" on_finish="set" on_finish_params="target_property=ui:outgame:appear:job_options:active|value=0" >
 
+	<!--
 	<track type="tcb" target="appear:job_options:options:alpha" dynamic="true" >
 		<key time="0.0" value="getprop('ui:outgame:appear:job_options:options:alpha')" 		tension="1.0" easefrom="0"/>
 		<key time="1.0" value="0" 																tension="1.0" easeto="1"/>
@@ -2676,7 +2678,11 @@
 		<key time="0.0" value="getprop('ui:outgame:appear:job_options:selection:y')"			tension="1.0" easefrom="0"/>
 		<key time="1.0" value="280" 															tension="1.0" easeto="1"/>
 	</track>
-
+	-->
+	<track type="tcb" target="appear:job_options:rpbg:y" dynamic="true" >
+		<key time="0.0" value="getprop('ui:outgame:appear:job_options:rpbg:y')"			tension="1.0" easefrom="0"/>
+		<key time="1.0" value="780" 															tension="1.0" easeto="1"/>
+	</track>
 </anim>
 
 

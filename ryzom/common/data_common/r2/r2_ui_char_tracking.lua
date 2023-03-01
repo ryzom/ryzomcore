@@ -113,21 +113,21 @@ end
 --***********************************************************************
 function CharTracking:initRaceTypes()
 	for k = 0, 3 do	
-		self.RaceTypeToUtf8[k] = i18n.get("uiRAP_CharRace_" .. tostring(k))	
+		self.RaceTypeToUtf8[k] = i18n.get("uiRAP_CharRace_" .. tostring(k)):toUtf8()	
 	end
 end
 
 --***********************************************************************
 function CharTracking:initReligionTypes()
 	for k = 0, 2 do		
-		self.ReligionTypeToUtf8[k] = i18n.get("uiRAP_CharReligion_" .. tostring(k))		
+		self.ReligionTypeToUtf8[k] = i18n.get("uiRAP_CharReligion_" .. tostring(k)):toUtf8()		
 	end
 end
 
 --***********************************************************************
 function CharTracking:initLevelTypes()
 	for k = 0, 5 do	
-		self.LevelTypeToUtf8[k] = i18n.get("uiRAP_CharLevel_" .. tostring(k))		
+		self.LevelTypeToUtf8[k] = i18n.get("uiRAP_CharLevel_" .. tostring(k)):toUtf8()		
 	end
 end
 
@@ -147,10 +147,14 @@ function CharTracking:getColumn(name)
 	return getUI("ui:interface:ring_chars_tracking:content:main:enclosing:columns:getw:column_group:" .. name .. ":values")
 end
 
+
 --***********************************************************************
 function CharTracking:getSelectList()
 	return getUI("ui:interface:ring_chars_tracking:content:main:enclosing:columns:getw:select")
 end
+
+
+local scratchUCStr = ucstring()
 
 --***********************************************************************
 function CharTracking:newTemplate(name, cache)	
@@ -168,7 +172,8 @@ end
 -- build a new text group from utf8 text
 function CharTracking:newTextLabel(value)		
 	local group = self:newTemplate("rap_text", self.TextCache)
-	group:find("t").text_single_line_format = value
+	scratchUCStr:fromUtf8(value)
+	group:find("t").uc_hardtext_single_line_format = scratchUCStr
 	return group
 end
 
@@ -176,14 +181,15 @@ end
 -- build a new text group from utf8 text
 function CharTracking:newCenteredTextLabel(value)		
 	local group = self:newTemplate("rap_text_centered", self.CenteredTextCache)
-	group:find("t").text_single_line_format = value
+	scratchUCStr:fromUtf8(value)
+	group:find("t").uc_hardtext_single_line_format = scratchUCStr
 	return group
 end
 
 --***********************************************************************
 function CharTracking:newNumberLabel(value)	
 	local group = self:newTemplate("rap_number", self.NumberCache)
-	group:find("t").text_single_line_format = tostring(value)
+	group:find("t").uc_hardtext_single_line_format = tostring(value)
 	return group
 end
 
@@ -375,7 +381,7 @@ function CharTracking:setMessage(msg, color)
 	-- The version below set the msg in the middle of the window
 	--local errorTxt = self:getWindow():find("errorMsg")
 
-	errorTxt.text = msg
+	errorTxt.uc_hardtext = msg
 	errorTxt.color = color
 	errorTxt.active=true
 	--self:getWindow():invalidateCoords()
@@ -487,10 +493,10 @@ function CharTracking:onLineRightClick()
 	self:onLineLeftClick()	
 	local menu = getUI("ui:interface:ring_char_menu")
 
-	menu:find("tell").text = i18n.get("uiRAP_MenuCharTell") .. "'" .. self:getCharFromId(self.SelectedCharId).Char .."'"
-	menu:find("teleport").text = i18n.get("uiRAP_MenuTeleportTo") .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'"
-	menu:find("kick").text = i18n.get("uiRAP_MenuKick") .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'"
-	menu:find("unkick").text = i18n.get("uiRAP_MenuUnkick") .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'"
+	menu:find("tell").uc_hardtext = ucstring(i18n.get("uiRAP_MenuCharTell"):toUtf8() .. "'" .. self:getCharFromId(self.SelectedCharId).Char .."'")
+	menu:find("teleport").uc_hardtext = ucstring(i18n.get("uiRAP_MenuTeleportTo"):toUtf8() .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'")
+	menu:find("kick").uc_hardtext = ucstring(i18n.get("uiRAP_MenuKick"):toUtf8() .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'")
+	menu:find("unkick").uc_hardtext = ucstring(i18n.get("uiRAP_MenuUnkick"):toUtf8() .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'")
 
 	menu:find("unkick").grayed = not self:isKicked(self:getCharFromId(self.SelectedCharId).Flags)
 	menu:find("kick").grayed = not self:isConnected(self:getCharFromId(self.SelectedCharId).Flags)
@@ -501,7 +507,9 @@ end
 --***********************************************************************
 function CharTracking:onTell()
 	debugInfo("tell to owner of session" .. self.SelectedCharId)
-	tell(self:getCharFromId(self.SelectedCharId).Char, i18n.get("uiRAP_AskForTall"))
+	char = ucstring()	
+	char:fromUtf8(self:getCharFromId(self.SelectedCharId).Char)
+	tell(char, i18n.get("uiRAP_AskForTall"))
 end
 
 --***********************************************************************
@@ -638,7 +646,7 @@ function CharTracking:onDraw()
 			--	refreshText.active = false
 			--else			
 			--	refreshText.active = true
-			--	refreshText.text = waitText 
+			--	refreshText.uc_hardtext = waitText 
 			--end
 		end
 	else

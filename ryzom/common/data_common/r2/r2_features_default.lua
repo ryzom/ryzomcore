@@ -181,7 +181,7 @@ local registerFeature = function ()
 				getUI(class.Menu .. ":activities").active = not  isBO and not isPlant
 				
 				if not  isBO and not isPlant  then
-					getUI(class.Menu .. ":activities").text = i18n.get("uimR2EDNewActivity")
+					getUI(class.Menu .. ":activities").uc_hardtext = i18n.get("uimR2EDNewActivity")
 				end
 			end,
 			--------------------------------------------------------------------------------------------
@@ -247,8 +247,10 @@ local registerFeature = function ()
 						local subMenu = menu:getSubMenu(ev)
 						local func = ""
 						for i=0, 9 do
+							local uc_name = ucstring()
+							uc_name:fromUtf8( tostring(i) )
 							func = "r2.events:setEventValue('','" .. categoryEvent .."','".. tostring(i).."')"
-							subMenu:addLine(tostring(i), "lua", func, tostring(i))
+							subMenu:addLine(uc_name, "lua", func, tostring(i))
 						end
 
 					elseif r2.events.eventTypeWithValue[eventType]~=nil then
@@ -262,7 +264,9 @@ local registerFeature = function ()
 								func = "r2.events:setEventValue('".. sequence.InstanceId .."','" .. categoryEvent .."')"
 							end
 
-							subMenu:addLine(sequence:getName(), "lua", func, sequence.InstanceId)
+							local uc_name = ucstring()
+							uc_name:fromUtf8(sequence:getName())
+							subMenu:addLine(uc_name, "lua", func, sequence.InstanceId)
 						end
 
 						if this:getBehavior().Activities.Size==0 then
@@ -281,7 +285,9 @@ local registerFeature = function ()
 								
 								for a=0, sequence.Components.Size-1 do
 									local activity = sequence.Components[a]
-									activitiesMenu:addLine(activity:getShortName(), "lua", 
+									local uc_name = ucstring()
+									uc_name:fromUtf8(activity:getShortName())
+									activitiesMenu:addLine(uc_name, "lua", 
 										"r2.events:setEventValue('".. activity.InstanceId .."','" .. categoryEvent .."')", activity.InstanceId)
 								end
 
@@ -399,11 +405,9 @@ local registerFeature = function ()
 				{Name="Aggro", Type="Number",  Min="0", Max="120", DefaultValue="30", DefaultInBase=1, 
 					Visible=function(this) return this:isGroupedAndLeader() or not this:isGrouped() and not this:isBotObject() end
 				},
-				
-				-- FIXME: https://github.com/kaetemi/ryzomclassic/issues/154
-				--{Name="TypeNPC", Type="Number", WidgetStyle="EnumDropDown", SecondRequestFunc=function(value) r2:updateType(true) end,
-				--	Enum= {}, Visible=true, DefaultValue="-1",
-				--},	
+				{Name="TypeNPC", Type="Number", WidgetStyle="EnumDropDown", SecondRequestFunc=r2.updateType,
+					Enum= {}, Visible=true, DefaultValue="-1",
+				},	
 
 				--
 				--
@@ -443,9 +447,9 @@ local registerFeature = function ()
 			-- get select bar type
 			SelectBarType = function(this)
 				if not this:isBotObject() then
-					return i18n.get("uiR2EDScene")
+					return i18n.get("uiR2EDScene"):toUtf8()
 				else
-					return i18n.get("uiR2EDbotObjects")
+					return i18n.get("uiR2EDbotObjects"):toUtf8()
 				end
 			end,
 
@@ -853,10 +857,10 @@ local registerFeature = function ()
 					Enum= { "uiR2EDWalk", "uiR2EDRun"},
 					Visible=true
 				},
-				--{Name="Level", Type="Number", WidgetStyle="EnumDropDown", Category="uiR2EDRollout_NpcCustom",
-				--	Enum= { "uiR2EDLowLevel", "uiR2EDAverageLevel", "uiR2EDHighLevel", "uiR2EDVeryHighLevel"}, SecondRequestFunc=function(value) r2.updateLevel(value, true) end,
-				--	Visible=function(this) return this:isGroupedAndLeader() or not this:isGrouped() and not this:isBotObject() end
-				--},
+				{Name="Level", Type="Number", WidgetStyle="EnumDropDown", Category="uiR2EDRollout_NpcCustom",
+					Enum= { "uiR2EDLowLevel", "uiR2EDAverageLevel", "uiR2EDHighLevel", "uiR2EDVeryHighLevel"}, SecondRequestFunc=r2.updateLevel,
+					Visible=function(this) return this:isGroupedAndLeader() or not this:isGrouped() and not this:isBotObject() end
+				},
 			},
 			-- from "BaseClass"
 			getAvailableCommands = function(this, dest)
@@ -1115,7 +1119,7 @@ local registerFeature = function ()
 			---------------------------------------------------------------------------------------------------------
 			-- get select bar type
 			SelectBarType = function(this)
-				return i18n.get("uiR2EDbotObjects")
+				return i18n.get("uiR2EDbotObjects"):toUtf8()
 			end,
 			--------------------------------------------------------------------------------------------
 			-- from 'BaseClass'
@@ -1166,7 +1170,7 @@ local registerFeature = function ()
 			---------------------------------------------------------------------------------------------------------
 			-- get select bar type
 			SelectBarType = function(this)
-				return i18n.get("uiR2EDbotObjects")
+				return i18n.get("uiR2EDbotObjects"):toUtf8()
 			end,
 			--------------------------------------------------------------------------------------------
 			-- from 'BaseClass'
@@ -1455,7 +1459,7 @@ local registerFeature = function ()
 
 	function userComponentHolder:registerMenu(logicEntityMenu)
 		local name = i18n.get("uiR2EdUserComponent")
-		logicEntityMenu:addLine(name, "lua", "", "uiR2EdUserComponent")
+		logicEntityMenu:addLine(ucstring(name), "lua", "", "uiR2EdUserComponent")
 	end
 
 
@@ -1491,13 +1495,13 @@ local registerFeature = function ()
 			debugInfo("Cancel form for 'User Component' creation")
 		end
 		local function posOk(x, y, z)
-			debugInfo(string.format("Validate creation of 'User Component' at pos (%f, %f, %f)", x, y, z))
+			debugInfo(string.format("Validate creation of 'User Component' at pos (%d, %d, %d)", x, y, z))
 			if r2.mustDisplayInfo("UserComponent") == 1 then 
 				r2.displayFeatureHelp("UserComponent")
 			end
 			local component = r2.newComponent("UserComponentHolder")
 			component.Base = r2.Translator.getDebugBase("palette.entities.botobjects.user_event")
-			component.Name = r2:genInstanceName(i18n.get("uiR2EdUserComponent"))			
+			component.Name = r2:genInstanceName(i18n.get("uiR2EdUserComponent")):toUtf8()			
 			
 			component.Position.x = x
 			component.Position.y = y
@@ -1516,7 +1520,7 @@ local registerFeature = function ()
 
 	function userComponentHolder:registerMenu(logicEntityMenu)
 		local name = i18n.get("uiR2EdUserComponent")
-		logicEntityMenu:addLine(name, "lua", "", "uiR2EdUserComponent")
+		logicEntityMenu:addLine(ucstring(name), "lua", "", "uiR2EdUserComponent")
 	end
 
 	function userComponentHolder.onPickAddEntity(this)
@@ -1564,13 +1568,13 @@ local registerFeature = function ()
 			debugInfo("Cancel form for 'User Component' creation")
 		end
 		local function posOk(x, y, z)
-			debugInfo(string.format("Validate creation of 'User Component' at pos (%f, %f, %f)", x, y, z))
+			debugInfo(string.format("Validate creation of 'User Component' at pos (%d, %d, %d)", x, y, z))
 			if r2.mustDisplayInfo("UserComponent") == 1 then 
 				r2.displayFeatureHelp("UserComponent")
 			end
 			local component = r2.newComponent("UserComponentHolder")
 			component.Base = r2.Translator.getDebugBase("palette.entities.botobjects.user_event")
-			component.Name = r2:genInstanceName(i18n.get("uiR2EdUserComponent"))			
+			component.Name = r2:genInstanceName(i18n.get("uiR2EdUserComponent")):toUtf8()			
 			
 			component.Position.x = x
 			component.Position.y = y
@@ -1687,7 +1691,9 @@ local registerFeature = function ()
 				addLine = not (entity:isKindOf("NpcCreature") or entity:isBotObject() or entity:isPlant() or entity:isGrouped()) --TEMP
 			end  --TEMP
 			if addLine then
-				subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+				local uc_name = ucstring()
+				uc_name:fromUtf8(entity.Name)
+				subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
 				empty = false
 			end
 		end
@@ -1703,64 +1709,64 @@ local registerFeature = function ()
 
 		local logicTranslations = { 
 			["ApplicableActions"] = {
-				["Activate"]		= {menu=i18n.get("uiR2EdActivates"), 
+				["Activate"]		= {menu=i18n.get("uiR2EdActivates"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdActivates")},
-				["Deactivate"]		= {menu=i18n.get("uiR2EdDeactivates"), 
+				["Deactivate"]		= {menu=i18n.get("uiR2EdDeactivates"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdDeactivates")},
-				["Sit Down"]		= {menu=i18n.get("uiR2EdSitDown"), 
+				["Sit Down"]		= {menu=i18n.get("uiR2EdSitDown"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdSitsDown")},
-				["Stand Up"]		= {menu=i18n.get("uiR2EdStandUp"), 
+				["Stand Up"]		= {menu=i18n.get("uiR2EdStandUp"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdStandsUp")},
-				["Kill"]			= {menu=i18n.get("uiR2EdKill"), 
+				["Kill"]			= {menu=i18n.get("uiR2EdKill"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdKills")},
-				["begin activity sequence"]		= {menu=i18n.get("uiR2EdBeginActivitySequ"), 
+				["begin activity sequence"]		= {menu=i18n.get("uiR2EdBeginActivitySequ"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdSequenceStarts")},
-				["Fight with player"]		= {menu=i18n.get("uiR2EdFightWithPlayer"), 
+				["Fight with player"]		= {menu=i18n.get("uiR2EdFightWithPlayer"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdFightWithPlayer")},
-				["Fight with Npcs"]		= {menu=i18n.get("uiR2EdFightWithNpcs"), 
+				["Fight with Npcs"]		= {menu=i18n.get("uiR2EdFightWithNpcs"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdFightWithNpcs")},
-				["Dont fight with player"]		= {menu=i18n.get("uiR2EdDontFightWithPlayer"), 
+				["Dont fight with player"]		= {menu=i18n.get("uiR2EdDontFightWithPlayer"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdDontFightWithPlayer")},
-				["Dont fight with Npcs"]		= {menu=i18n.get("uiR2EdDontFightWithNpcs"), 
+				["Dont fight with Npcs"]		= {menu=i18n.get("uiR2EdDontFightWithNpcs"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdDontFightWithNpcs")},
-				["Run"]		= {menu=i18n.get("uiR2EdRun"), 
+				["Run"]		= {menu=i18n.get("uiR2EdRun"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdRun")},
-				["Dont run"]		= {menu=i18n.get("uiR2EdDontRun"), 
+				["Dont run"]		= {menu=i18n.get("uiR2EdDontRun"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdDontRun")},
 			},
 
 			["Events"] = {	
-				["activation"]					= {menu=i18n.get("uiR2EdActivation"), 
+				["activation"]					= {menu=i18n.get("uiR2EdActivation"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdActivation")},
-				["desactivation"]				= {menu=i18n.get("uiR2EdDeactivation"), 
+				["desactivation"]				= {menu=i18n.get("uiR2EdDeactivation"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdDeactivation")},
-				["death"]						= {menu=i18n.get("uiR2EdDeath"), 
+				["death"]						= {menu=i18n.get("uiR2EdDeath"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdDeath")},
-				["end of activity step"]		= {menu=i18n.get("uiR2EdEndActivityStep"), 
+				["end of activity step"]		= {menu=i18n.get("uiR2EdEndActivityStep"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdEndActivityStep")},
-				["end of activity sequence"]	= {menu=i18n.get("uiR2EdEndActivitySequ"), 
+				["end of activity sequence"]	= {menu=i18n.get("uiR2EdEndActivitySequ"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdEndActivitySequ")},
-				["begin of activity step"]		= {menu=i18n.get("uiR2EdBeginActivityStep"), 
+				["begin of activity step"]		= {menu=i18n.get("uiR2EdBeginActivityStep"):toUtf8(), 
 												text=r2:lowerTranslate("uiR2EdBeginActivityStep")},
-				["begin of activity sequence"]	= {menu=i18n.get("uiR2EdBeginOfActivitySequ"), 
+				["begin of activity sequence"]	= {menu=i18n.get("uiR2EdBeginOfActivitySequ"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdBeginOfActivitySequ")},
-				["targeted by player"]				= {menu=i18n.get("uiR2EdTargetedByplayer"), 
+				["targeted by player"]				= {menu=i18n.get("uiR2EdTargetedByplayer"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdTargetedByplayer")}
 
 			},
 			["Conditions"] = {	
-				["is active"]					= { menu=i18n.get( "uiR2Test0Spawned"				), 
-													text=i18n.get( "uiR2Test1Spawned"				)},
-				["is inactive"]					= { menu=i18n.get( "uiR2Test0Despawned"				), 
-													text=i18n.get( "uiR2Test1Despawned"				)},
-				["is dead"]						= { menu=i18n.get( "uiR2Test0Dead"					), 
-													text=i18n.get( "uiR2Test1Dead"					)},
-				["is alive"]					= { menu=i18n.get( "uiR2Test0Alive"					), 
-													text=i18n.get( "uiR2Test1Alive"					)},
-				["is in activity sequence"]		= { menu=i18n.get( "uiR2Test0Seq"					), 
-													text=i18n.get( "uiR2Test1Seq"					)},
-				["is in activity step"]			= { menu=i18n.get( "uiR2Test0Step"					), 
-													text=i18n.get( "uiR2Test1Step"					)},
+				["is active"]					= { menu=i18n.get( "uiR2Test0Spawned"				):toUtf8(), 
+													text=i18n.get( "uiR2Test1Spawned"				):toUtf8()},
+				["is inactive"]					= { menu=i18n.get( "uiR2Test0Despawned"				):toUtf8(), 
+													text=i18n.get( "uiR2Test1Despawned"				):toUtf8()},
+				["is dead"]						= { menu=i18n.get( "uiR2Test0Dead"					):toUtf8(), 
+													text=i18n.get( "uiR2Test1Dead"					):toUtf8()},
+				["is alive"]					= { menu=i18n.get( "uiR2Test0Alive"					):toUtf8(), 
+													text=i18n.get( "uiR2Test1Alive"					):toUtf8()},
+				["is in activity sequence"]		= { menu=i18n.get( "uiR2Test0Seq"					):toUtf8(), 
+													text=i18n.get( "uiR2Test1Seq"					):toUtf8()},
+				["is in activity step"]			= { menu=i18n.get( "uiR2Test0Step"					):toUtf8(), 
+													text=i18n.get( "uiR2Test1Step"					):toUtf8()},
 			}
 		}
 		return logicTranslations
@@ -1916,7 +1922,9 @@ local registerFeature = function ()
 				addLine = not (entity:isKindOf("NpcPlant") or entity:isGrouped())	
 			end																		
 			if addLine then
-				subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+				local uc_name = ucstring()
+				uc_name:fromUtf8(entity.Name)
+				subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
 				empty = false
 			end
 		end
@@ -1947,32 +1955,32 @@ local registerFeature = function ()
 	function componentNpcPlant:getLogicTranslations() 
 		local logicTranslations = {
 			["ApplicableActions"] = {
-				["Activate"]		= {menu=i18n.get("uiR2EdActivates"), 
+				["Activate"]		= {menu=i18n.get("uiR2EdActivates"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdActivates")},
-				["Deactivate"]		= {menu=i18n.get("uiR2EdDeactivates"), 
+				["Deactivate"]		= {menu=i18n.get("uiR2EdDeactivates"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdDeactivates")},
-				["Kill"]			= {menu=i18n.get("uiR2EdKill"), 
+				["Kill"]			= {menu=i18n.get("uiR2EdKill"):toUtf8(), 
 										text=r2:lowerTranslate("uiR2EdKills")},
 			},
 
 			["Events"] = {	
-				["activation"]					= {menu=i18n.get("uiR2EdActivation"), 
+				["activation"]					= {menu=i18n.get("uiR2EdActivation"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdActivation")},
-				["desactivation"]				= {menu=i18n.get("uiR2EdDeactivation"), 
+				["desactivation"]				= {menu=i18n.get("uiR2EdDeactivation"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdDeactivation")},
-				["death"]						= {menu=i18n.get("uiR2EdDeath"), 
+				["death"]						= {menu=i18n.get("uiR2EdDeath"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdDeath")},
-				["targeted by player"]						= {menu=i18n.get("uiR2EdTargetedByplayer"), 
+				["targeted by player"]						= {menu=i18n.get("uiR2EdTargetedByplayer"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdTargetedByplayer")}
 			},
 			["Conditions"] = {	
-				["is active"]					= {menu=i18n.get("uiR2EdIsActive"), 
+				["is active"]					= {menu=i18n.get("uiR2EdIsActive"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdIsActive")},
-				["is dead"]						= {menu=i18n.get("uiR2EdIsDead"), 
+				["is dead"]						= {menu=i18n.get("uiR2EdIsDead"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdIsDead")},
-				["is alive"]					= {menu=i18n.get("uiR2EdIsAlive"), 
+				["is alive"]					= {menu=i18n.get("uiR2EdIsAlive"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdIsAlive")},
-				["is inactive"]					= {menu=i18n.get("uiR2EdIsInactive"), 
+				["is inactive"]					= {menu=i18n.get("uiR2EdIsInactive"):toUtf8(), 
 													text=r2:lowerTranslate("uiR2EdIsInactive")},
 			} 
 		}
@@ -2066,8 +2074,8 @@ function activeLogicEntityPropertySheetDisplayerTable:onAttrModified(instance, a
 		local dialogsUI = getUI(r2.dialogs.uiId)
 		assert(dialogsUI)
 
-		activitiesUI.title = i18n.get("uiR2EDActivitySequenceEditor") .. instance[attributeName]
-		dialogsUI.title = i18n.get("uiR2EDChatSequenceEditor") .. instance[attributeName]	
+		activitiesUI.uc_title = i18n.get("uiR2EDActivitySequenceEditor"):toUtf8() .. instance[attributeName]
+		dialogsUI.uc_title = i18n.get("uiR2EDChatSequenceEditor"):toUtf8() .. instance[attributeName]	
 	end
 end	
 
