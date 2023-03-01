@@ -1116,7 +1116,7 @@ void CCharacterCL::computeAutomaton()
 // computeAnimSet :
 // Compute the animation set to use according to weapons, mode and race.
 //-----------------------------------------------
-void CCharacterCL::computeAnimSet()
+void CCharacterCL::computeAnimSet(sint32 fakeLeftHand, sint32 fakeRightHand)
 {
 	if(ClientCfg.Light)
 		return;

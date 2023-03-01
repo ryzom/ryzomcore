@@ -562,6 +562,11 @@ public:
 			EntitiesDistanceTriggers.erase(it2);
 	}
 
+	inline void delEntitiesTriggers()
+	{
+		EntitiesDistanceTriggers.clear();
+	}
+
 	inline std::string getEntitiesUrlTrigger(const TAIAlias alias)
 	{
 		std::string url;

@@ -5011,7 +5011,8 @@ NLMISC_COMMAND(getBattlePoints, "get Battle points of player (if quantity, give/
 	log.displayNL("%u", points);
 }
 
-//addEntitiesTrigger 2 #target# 50 app_arcc&nbsp&action=mScript_Edit&script=11450
+//addEntitiesTrigger 2 arkai_914_Chest 50 app_arcc&nbsp&action=mScript_Run&script=11450
+//addEntitiesTrigger 2 arkai_914_Chest 0 "app_arcc action=mScript_Run&script=11450"
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> <entity> <distance> <url>")
 {
@@ -5024,11 +5025,11 @@ NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> 
 	TAIAlias alias;
 
 	string e = args[1];
-	if (e == "#target#")
+	if (e == "#_target_#")
 	{
 		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getTarget());
 	}
-	else if (e == "#self#")
+	else if (e == "#_self_#")
 	{
 		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getId());
 	}
@@ -5051,3 +5052,8 @@ NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> 
 	log.displayNL("OK");
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(delEntitiesTriggers, "delete all Entities triggers", "")
+{
+	CZoneManager::getInstance().delEntitiesTriggers();
+}
