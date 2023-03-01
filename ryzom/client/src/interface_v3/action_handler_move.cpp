@@ -35,6 +35,7 @@ using namespace NLMISC;
 #include "../actions_client.h"
 #include "../entities.h"
 #include "interface_manager.h"
+#include "ingame_database_manager.h"
 #include "action_handler_tools.h"
 #include "nel/gui/ctrl_base_button.h"
 

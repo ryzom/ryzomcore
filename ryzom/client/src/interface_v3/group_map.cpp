@@ -160,6 +160,7 @@ static void closeLandMarkNameDialog()
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 	if (!gc) return;
 	gc->setActive(false);
+	LastSelectedLandMark = NULL;
 }
 
 //============================================================================================================
@@ -2470,6 +2471,15 @@ void CGroupMap::removeLandMarks(TLandMarkButtonVect &lm)
 	lm.clear();
 }
 
+
+//============================================================================================================
+void CGroupMap::removeUserLandMarks()
+{
+	closeLandMarkNameDialog();
+	removeLandMarks(_UserLM);
+}
+
+
 //============================================================================================================
 void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 {
@@ -2557,7 +2567,7 @@ void CGroupMap::createContinentLandMarks()
 	for (k = 0; k < _ContinentText.size(); ++k)
 		delView(_ContinentText[k]);
 	_ContinentText.clear();
-	removeLandMarks(_UserLM);
+	removeUserLandMarks();
 	for (k = 0; k < _PolyButtons.size(); ++k)
 		delCtrl(_PolyButtons[k]);
 	_PolyButtons.clear();
@@ -2642,7 +2652,7 @@ void CGroupMap::updateUserLandMarks()
 	if (_CurMap == NULL || _CurMap->Name == "world" || _CurContinent == NULL) return;
 
 	// Remove all
-	removeLandMarks(_UserLM);
+	removeUserLandMarks();
 
 	// Re create User Landmarks
 	for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)

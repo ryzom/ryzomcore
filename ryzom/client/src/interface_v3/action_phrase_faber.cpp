@@ -237,6 +237,17 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	// Observe skill status change to update success rate
 	CSkillManager       *pSM= CSkillManager::getInstance();
 	pSM->appendSkillChangeCallback(&_SkillObserver);
+
+
+	// add observer to mod_craft_success.sbrick
+	{
+		CCDBNodeLeaf *node= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
+		if (node)
+		{
+			ICDBNode::CTextId textId;
+			node->addObserver(&_DBModCraftObs, textId);
+		}
+	}
 }
 
 
@@ -269,6 +280,17 @@ void			CActionPhraseFaber::onCloseFaberCastWindow()
 	}
 
 	pSM->removeSkillChangeCallback(&_SkillObserver);
+
+
+	// remove mod_craft_success.sbrick observer
+	{
+		CCDBNodeLeaf *node= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
+		if (node)
+		{
+			ICDBNode::CTextId textId;
+			node->removeObserver(&_DBModCraftObs, textId);
+		}
+	}
 }
 
 
@@ -1993,6 +2015,14 @@ void CActionPhraseFaber::CSkillObserver::onSkillChange()
 	// Dont update if the plan has not yet been selected
 	if(ActionPhraseFaber->_ExecuteFromItemPlanBrick==NULL)
 		return;
+	ActionPhraseFaber->updateItemResult();
+}
+
+void CActionPhraseFaber::CDBModCraftObs::update(ICDBNode * /* node */)
+{
+	if (ActionPhraseFaber == NULL || ActionPhraseFaber->_ExecuteFromItemPlanBrick == NULL)
+		return;
+
 	ActionPhraseFaber->updateItemResult();
 }
 

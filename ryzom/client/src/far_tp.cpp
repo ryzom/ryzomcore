@@ -314,7 +314,7 @@ void CLoginStateMachine::run()
 						SM_EVENT(ev_create_account, st_create_account);
 						SM_EVENT(ev_bad_login, st_login);
 						SM_EVENT(ev_quit, st_end);
-					SM_END_EVENT_TABLE
+					SM_END_EVENT_TABLE	
 				}
 				else
 				{
@@ -338,6 +338,7 @@ void CLoginStateMachine::run()
 				// r2 mode
 				SM_BEGIN_EVENT_TABLE
 					SM_EVENT(ev_login_ok, st_check_patch);
+					SM_EVENT(ev_bad_login, st_display_error);
 					SM_EVENT(ev_quit, st_end);
 				SM_END_EVENT_TABLE
 			}
@@ -499,6 +500,10 @@ void CLoginStateMachine::run()
 			SM_END_EVENT_TABLE
 
 			break;
+		case st_display_error:
+			_CurrentState = st_login;
+
+			break;
 		case st_patch:
 			/// run the patch process and display progress
 			initPatch();
@@ -532,6 +537,7 @@ void CLoginStateMachine::run()
 			{
 				SM_BEGIN_EVENT_TABLE
 					SM_EVENT(ev_enter_game, st_ingame);
+					SM_EVENT(ev_conn_failed, st_display_error);
 				SM_END_EVENT_TABLE
 			}
 			else
