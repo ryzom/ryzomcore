@@ -280,6 +280,8 @@ private:
 	static int addRespawnPoint(CLuaState &ls);
 	static int delArkPoints(CLuaState &ls);
 	static int setArkPowoOptions(CLuaState &ls);
+	static int getActualMapZoom(CLuaState &ls);
+	static int setActualMapZoom(CLuaState &ls);
 
 
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
