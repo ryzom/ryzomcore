@@ -279,6 +279,7 @@ CTimedFXManager::TDebugDisplayMode	ShowTimedFXMode = CTimedFXManager::NoText;
 
 // DEBUG
 bool				PACSBorders = false;
+bool				ARKPACSBorders = false;
 bool				DebugClusters = false;
 CVector				LastDebugClusterCameraThirdPersonStart= CVector::Null;
 CVector				LastDebugClusterCameraThirdPersonEnd= CVector::Null;
@@ -1816,6 +1817,12 @@ bool mainLoop()
 					{
 						H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
 						displayPACSBorders();
+						displayPACSPrimitive();
+					}
+
+					// Display PACS borders only (for ARK).
+					if (ARKPACSBorders)
+					{
 						displayPACSPrimitive();
 					}
 

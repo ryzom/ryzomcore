@@ -46,6 +46,7 @@ extern bool					Render;
 extern bool					WantProfiling;			// Do we want a CPU profile?
 extern bool					WantProfilingVBLock;			// Do we want a VBLock profile?
 extern bool					PACSBorders;
+extern bool					ARKPACSBorders;
 extern bool					DebugClusters;
 extern bool					SoundBox;
 extern uint8				ShowInfos;

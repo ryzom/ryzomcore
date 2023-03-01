@@ -2631,7 +2631,7 @@ class CAHAddShape : public IActionHandler
 			}
 
 			sint32 idx;
-			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, false, idx);
+			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, false, 0, idx);
 			UInstance instance = instref.Instance;
 
 			if(!instance.empty())
@@ -3084,9 +3084,7 @@ void updateSoundDriverComboUI()
 	uint32 selected = 0;
 
 	NLSOUND::UAudioMixer::TDriver cfgDriverId = NLSOUND::UAudioMixer::DriverAuto;
-	if(ClientCfg.DriverSound==CClientConfig::SoundDrvFMod)
-		cfgDriverId = NLSOUND::UAudioMixer::DriverFMod;
-	else if(ClientCfg.DriverSound==CClientConfig::SoundDrvOpenAL)
+	if(ClientCfg.DriverSound==CClientConfig::SoundDrvOpenAL)
 		cfgDriverId = NLSOUND::UAudioMixer::DriverOpenAl;
 	else if(ClientCfg.DriverSound==CClientConfig::SoundDrvDirectSound)
 		cfgDriverId = NLSOUND::UAudioMixer::DriverDSound;

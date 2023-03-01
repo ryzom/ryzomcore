@@ -41,6 +41,8 @@
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
+// Gui
+#include "nel/gui/lua_manager.h"
 // Client
 #include "global.h"
 #include "continent.h"
@@ -111,7 +113,7 @@ extern UVisualCollisionManager	*CollisionManager;
 extern bool		   InitCloudScape;
 extern bool			FirstFrame;
 extern CContinentManager ContinentMngr;
-
+extern CEntityManager	EntitiesMngr;
 
 //-----------------------------------------------
 // CUserLandMark
@@ -386,6 +388,23 @@ static uint getNumZones()
 	std::vector<std::string> zoneLoaded;
 	Landscape->getAllZoneLoaded(zoneLoaded);
 	return (uint)zoneLoaded.size();
+}
+
+static uint16 getZoneIdFromName(const string &zoneName)
+{
+	uint16 zoneId = 0;
+	CVector2f pos;
+	if (getPosFromZoneName(zoneName, pos))
+	{
+		uint x = (uint)pos.x / 160;
+		uint y = -(uint)pos.y / 160;
+		zoneId = (x&255) + (y<<8);
+	}
+	else
+	{
+		nlinfo("no zone...");
+	}
+	return zoneId;
 }
 
 //-----------------------------------------------
