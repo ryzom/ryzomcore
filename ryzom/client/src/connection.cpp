@@ -702,7 +702,7 @@ TInterfaceState autoLogin (const string &cookie, const string &fsaddr, bool firs
 			NetMngr.setDataBase (IngameDbMngr.getNodePtr());
 
 			// init the string manager cache.
-			STRING_MANAGER::CStringManagerClient::instance()->initCache(ClientCfg.LanguageCode);
+			STRING_MANAGER::CStringManagerClient::instance()->initCache(UsedFSAddr, ClientCfg.LanguageCode);
 		}
 	}
 	else

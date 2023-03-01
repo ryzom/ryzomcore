@@ -2328,11 +2328,10 @@ void impulseStringResp(NLMISC::CBitMemStream &impulse)
 //-----------------------------------------------
 void impulseReloadCache(NLMISC::CBitMemStream &impulse)
 {
-	uint32 timestamp, shardId;
+	uint32 timestamp;
 	impulse.serial(timestamp);
-	impulse.serial(shardId);
 	if (PermanentlyBanned) return;
-	STRING_MANAGER::CStringManagerClient::instance()->loadCache(timestamp, shardId);
+	STRING_MANAGER::CStringManagerClient::instance()->loadCache(timestamp);
 }
 
 //-----------------------------------------------

@@ -102,28 +102,21 @@ namespace STRING_MANAGER
 		}
 	}
 
-	void CStringManagerClient::initCache(const string &languageCode)
+	void CStringManagerClient::initCache(const std::string &shardId, const std::string &languageCode)
 	{
-		H_AUTO( CStringManagerClient_initLanguage )
+		H_AUTO( CStringManagerClient_initCache )
 
-		m_LanguageCode = languageCode;
+		_ShardId = shardId;
+		_LanguageCode = languageCode;
 
-		// clear all current data.
-		_ReceivedStrings.clear();
-		_ReceivedDynStrings.clear();
-		_CacheStringToSave.clear();
-		// NB : we keep the waiting strings and dyn strings
-
-		// insert the empty string.
-		_ReceivedStrings.insert(make_pair((uint)EmptyStringId, string()));
-
-		// to be inited, language code must be filled
-		_CacheInited = !m_LanguageCode.empty();
-		_CacheLoaded = false;
-		_CacheFilename.clear();
+		// to be inited, shard id and language code must be filled
+		if (!_ShardId.empty() && !_LanguageCode.empty())
+			_CacheInited = true;
+		else
+			_CacheInited = false;
 	}
 
-	void CStringManagerClient::loadCache(uint32 timestamp, uint32 shardId)
+	void CStringManagerClient::loadCache(uint32 timestamp)
 	{
 		H_AUTO( CStringManagerClient_loadCache )
 
@@ -132,9 +125,7 @@ namespace STRING_MANAGER
 			try
 			{
 				const uint currentVersion = 1;
-
-				string clientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
-				_CacheFilename = string("save/") + clientApp + "_" + toString(shardId) + "_" + m_LanguageCode + ".string_cache";
+				_CacheFilename = std::string("save/") + _ShardId.substr(0, _ShardId.find(":")) + ".string_cache";
 
 				nlinfo("SM : Try to open the string cache : %s", _CacheFilename.c_str());
 
@@ -176,7 +167,6 @@ namespace STRING_MANAGER
 				// clear all current data.
 				_ReceivedStrings.clear();
 				_ReceivedDynStrings.clear();
-				_CacheStringToSave.clear();
 				// NB : we keep the waiting strings and dyn strings
 
 				// insert the empty string.
@@ -550,7 +540,7 @@ restartLoop:
 
 	void CStringManagerClient::flushStringCache()
 	{
-		if (!_CacheStringToSave.empty() && !_CacheFilename.empty())
+		if(!_CacheStringToSave.empty())
 		{
 			NLMISC::COFile file(_CacheFilename, true);
 			for(uint i=0;i<_CacheStringToSave.size();i++)

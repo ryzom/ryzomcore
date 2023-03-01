@@ -52,14 +52,14 @@ public:
 	/** Prepare the string manager to use a persistent string cache.
 	 *	There is one cache file for each language and for each encountered shard.
 	 */
-	void initCache(const std::string &languageCode);
+	void initCache(const std::string &shardId, const std::string &languageCode);
 	/** Clear the current string table and load the content of the cache file.
 	 *	This method is called after receiving the impulse RELOAD_CACHE from
 	 *	IOS.
 	 *	If the received timestamp and the file timestamp differ, the file cache
 	 *	is reseted.
 	 */
-	void loadCache(uint32 timestamp, uint32 shardId);
+	void loadCache(uint32 timestamp);
 	bool isCacheLoaded()	{return _CacheLoaded;};
 	// Force the cache to be saved
 	void flushStringCache();
@@ -232,8 +232,10 @@ private:
 	//\name Cache management
 	/// Flag for cache management initialisation done.
 	bool			_CacheInited;
+	/// Shard id is used to identify the cache file to use.
+	std::string		_ShardId;
 	/// Language code is used to identify the cache file to use.
-	std::string		m_LanguageCode;
+	std::string		_LanguageCode;
 	/// Timestamp (unix date) of the corrently loaded cache file.
 	uint32			_Timestamp;
 	/// Fullpath name of the current cache file.
