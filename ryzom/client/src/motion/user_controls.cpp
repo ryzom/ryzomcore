@@ -1365,6 +1365,9 @@ void CUserControls::checkSpeedFactor()
 {
 	if (!IngameDbMngr.initInProgress())
 	{
+		if (UserEntity->isSit())
+			return;
+
 		// check if speed factor is zero, and if yes, notify the player
 		CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
 		if (pNodeLeaf && pNodeLeaf->getValue64() == 0) {
