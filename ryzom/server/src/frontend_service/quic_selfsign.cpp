@@ -1083,6 +1083,10 @@ void *FES_findOrCreateSelfSignedCertificate(uint8 *certHash)
 	return nullptr;
 }
 
+void FES_freeSelfSignedCertificate(void *cert)
+{
+}
+
 #endif
 
 /* end of file */

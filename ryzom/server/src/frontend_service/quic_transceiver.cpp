@@ -24,6 +24,8 @@
 #include "config.h"
 #include "quic_selfsign.h"
 
+#include <condition_variable>
+
 #ifdef NL_MSQUIC_AVAILABLE
 #include <msquic.h>
 
@@ -217,7 +219,7 @@ void CQuicTransceiver::start(uint16 port)
 		// Programmatically create a self signed certificate, only valid in Windows
 		// This is very useful for development servers
 		uint8 certHash[20];
-		PCCERT_CONTEXT schannelCert = (PCCERT_CONTEXT)FES_findOrCreateSelfSignedCertificate(certHash);
+		void *schannelCert = FES_findOrCreateSelfSignedCertificate(certHash); // PCCERT_CONTEXT
 		if (schannelCert)
 		{
 			// Server credentials
@@ -369,7 +371,7 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 		user->Connection = ev->NEW_CONNECTION.Connection;
 		user->increaseRef();
 		// They're in.
-		MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, CQuicTransceiverImpl::connectionCallback, (void *)user);
+		MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, (void *)CQuicTransceiverImpl::connectionCallback, (void *)user);
 		status = MsQuic->ConnectionSetConfiguration(ev->NEW_CONNECTION.Connection, m->Configuration);
 		nlwarning("New QUIC connection");
 		break;

@@ -5,30 +5,30 @@ ENDIF()
 FIND_PATH(
 	msquic_INCLUDE_DIRS
 	NAMES msquic.h
-	PATHS /usr/local/include/
+	PATHS /usr/local/include /usr/include
 )
 
 FIND_LIBRARY(
 	msquic_LIBRARY_RELEASE
-	NAMES msquic
-	PATHS /usr/local/lib/
+	NAMES libmsquic.so.2 msquic libmsquic
+	PATHS /usr/lib/x86_64-linux-gnu /usr/local/lib /usr/lib /opt/local
 )
 
 FIND_LIBRARY(
 	msquic_LIBRARY_DEBUG
-	NAMES msquicd
-	PATHS /usr/local/lib/
+	NAMES libmsquicd.so.2 msquicd libmsquicd
+	PATHS /usr/lib/x86_64-linux-gnu /usr/local/lib /usr/lib /opt/local
 )
 
 IF (msquic_INCLUDE_DIRS)
+  IF(msquic_LIBRARY_RELEASE AND msquic_LIBRARY_DEBUG)
     SET(msquic_FOUND TRUE)
-    IF(msquic_LIBRARY_RELEASE AND msquic_LIBRARY_DEBUG)
-      SET(msquic_LIBRARIES ${msquic_LIBRARIES} optimized ${msquic_LIBRARY_RELEASE})
-      SET(msquic_LIBRARIES ${msquic_LIBRARIES} debug ${msquic_LIBRARY_DEBUG})
-    ENDIF()
-    IF(msquic_LIBRARY_RELEASE)
-      SET(msquic_LIBRARIES ${msquic_LIBRARIES} ${msquic_LIBRARY_RELEASE})
-    ENDIF()
+    SET(msquic_LIBRARIES ${msquic_LIBRARIES} optimized ${msquic_LIBRARY_RELEASE})
+    SET(msquic_LIBRARIES ${msquic_LIBRARIES} debug ${msquic_LIBRARY_DEBUG})
+  ELSEIF(msquic_LIBRARY_RELEASE)
+    SET(msquic_FOUND TRUE)
+    SET(msquic_LIBRARIES ${msquic_LIBRARIES} ${msquic_LIBRARY_RELEASE})
+  ENDIF()
 ENDIF()
 
 IF (msquic_FOUND)

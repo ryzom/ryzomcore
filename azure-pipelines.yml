@@ -27,10 +27,12 @@ jobs:
         sudo apt install libgsf-1-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
         sudo apt install libmsquic
-        wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic.h
-        wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h /usr/include/msquic.h
         sudo mv msquic_posix.h /usr/include/msquic_posix.h
+        sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
       displayName: 'Dependencies'
     - script: |
         mkdir build
@@ -38,6 +40,7 @@ jobs:
         cd build
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
+          -DWITH_MSQUIC=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
           -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
           -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
@@ -80,10 +83,12 @@ jobs:
         sudo apt install libgsf-1-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
         sudo apt install libmsquic
-        wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic.h
-        wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h /usr/include/msquic.h
         sudo mv msquic_posix.h /usr/include/msquic_posix.h
+        sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
       displayName: 'Dependencies'
     - script: |
         mkdir build
@@ -91,6 +96,7 @@ jobs:
         cd build
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
+          -DWITH_MSQUIC=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
           -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
           -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
@@ -148,10 +154,12 @@ jobs:
         sudo apt update
         sudo apt remove -y man-db
         sudo apt install -y --no-install-recommends $(aptPackages)
-        wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic.h
-        wget https://github.com/microsoft/msquic/blob/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h /usr/include/msquic.h
         sudo mv msquic_posix.h /usr/include/msquic_posix.h
+        sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
       displayName: '(ubuntu) Dependencies'
       condition: eq(variables['Agent.JobName'], 'client ubuntu')
     - task: Cache@2
