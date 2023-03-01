@@ -161,7 +161,7 @@ namespace INVENTORIES
 		handling = 0,
 			temporary,						// 1
 			equipment,						// 2
-			hotbar,							// 3
+			hotbar,							// 3	
 			bag,							// 4
 			pet_animal,						// 5 Character can have 7 pack animal
 			pet_animal1 = pet_animal,	// for toString => TInventory convertion
@@ -198,6 +198,13 @@ namespace INVENTORIES
 	* \return name of inventory (or unknown if nit exist )
 	*/
 	const std::string& toString( TInventory inv );
+
+	/**
+	* Return local db branch name
+	* \param inv TInventory identify
+	* \return local db branch of inventory (or unknown if nit exist )
+	*/
+	const std::string toLocalDbBranch( TInventory inv );
 
 	/**
 	* get the name of an inventory in the data base. Use this API to fill the user database

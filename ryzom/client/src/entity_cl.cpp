@@ -1657,7 +1657,7 @@ void CEntityCL::snapToGround()
 				{
 					if ( isUser() || isPlayer() || isNPC())
 					{
-						
+
 						float waterOffset = ClientCfg.WaterOffset;
 						switch(people())
 						{
@@ -2294,7 +2294,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 			{
 				womanTitle = ( c->getGender() == GSGENDER::female );
 			}
-			
+
 			string replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
 
 			// Sometimes translation contains another title
@@ -2359,6 +2359,9 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 
 	// Must rebuild the in scene interface 'cause name has changed
 	buildInSceneInterface ();
+
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	updateVisualPropertyVpa(0, prop);
 
 }// onStringAvailable //
 
@@ -2789,7 +2792,7 @@ void CEntityCL::setOpacityMin(uint32 value)
 bool CEntityCL::mustShowInsceneInterface( bool enabledInSheet ) const
 {
 	return 	(
-				(enabledInSheet /*&& !CNPCIconCache::getInstance().getNPCIcon(this).getTextureMain().empty()*/) && 
+				(enabledInSheet /*&& !CNPCIconCache::getInstance().getNPCIcon(this).getTextureMain().empty()*/) &&
 				(_InSceneInterfaceEnabled) &&
 				(	ClientCfg.Names ||
 					isUser () ||
@@ -3134,7 +3137,7 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 		if (skeleton())
 			_StateFX.setClusterSystem(skeleton()->getClusterSystem());
 	}
-	
+
 	if (!_SelectionFX.empty() || !_MouseOverFX.empty())
 	{
 		// Build a matrix for the fx

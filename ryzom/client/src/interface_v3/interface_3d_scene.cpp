@@ -33,6 +33,7 @@
 #include "nel/3d/u_particle_system_instance.h"
 #include "nel/3d/u_animation_set.h"
 
+
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/action_handler.h"
 
@@ -355,9 +356,7 @@ void CInterface3DScene::checkCoords()
 	uint i;
 
 	for (i = 0; i < _Characters.size(); ++i)
-	{
 		_Characters[i]->checkCoords();
-	}
 	for (i = 0; i < _IGs.size(); ++i)
 		_IGs[i]->checkCoords();
 	for (i = 0; i < _Cameras.size(); ++i)
@@ -366,6 +365,8 @@ void CInterface3DScene::checkCoords()
 		_Lights[i]->checkCoords();
 	for (i = 0; i < _FXs.size(); ++i)
 		_FXs[i]->checkCoords();
+	for (i = 0; i < _Shapes.size(); ++i)
+		_Shapes[i]->checkCoords();
 
 	if (_Scene != NULL)
 		_Scene->animate (TimeInSec-FirstTimeInSec);
@@ -1254,12 +1255,22 @@ CInterface3DShape::~CInterface3DShape()
 	nlassert(pI3DS != NULL);
 	if (!_Instance.empty())
 		pI3DS->getScene()->deleteInstance(_Instance);
+	if (!_Skeleton.empty())
+		pI3DS->getScene()->deleteSkeleton(_Skeleton);
+	if (_PlayListManager)
+	{
+		_PlayListManager->deletePlayList(_PlayList);
+		_PlayList = NULL;
+		CViewRenderer::getInstance()->getDriver()->deleteAnimationSet(_AnimationSet);
+		_AnimationSet = NULL;
+		pI3DS->getScene()->deletePlayListManager(_PlayListManager);
+		_PlayListManager = NULL;
+	}
 }
 
 // ----------------------------------------------------------------------------
 bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 {
-	nlinfo("SHAPE ID PARENT = %s", parentGroup->getId().c_str());
 	if (!CInterfaceElement::parse(cur, parentGroup))
 		return false;
 
@@ -1282,6 +1293,15 @@ bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 	return true;
 }
+
+
+// ----------------------------------------------------------------------------
+void CInterface3DShape::checkCoords()
+{
+	if (_PlayListManager)
+		_PlayListManager->animate(TimeInSec);
+}
+
 
 float CInterface3DShape::getBBoxSizeX () const
 {
@@ -1352,6 +1372,7 @@ void CInterface3DShape::setPosY (float f)
 void CInterface3DShape::setPosZ (float f)
 {
 	_Pos.z = f;
+	if (!_Skeleton.empty()) _Skeleton.setPos(_Pos);
 	if (!_Instance.empty()) _Instance.setPos(_Pos);
 }
 
@@ -1463,6 +1484,78 @@ void CInterface3DShape::setTextures(const std::string &textures)
 		}
 	}
 }
+
+std::string CInterface3DShape::getSkeleton() const
+{
+	return _SkeletonName;
+}
+
+
+void CInterface3DShape::setSkeleton(const std::string &skeleton)
+{
+	if (skeleton.empty())
+		return;
+	_SkeletonName = skeleton;
+
+	CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
+	nlassert(pI3DS != NULL);
+
+	if (!_Skeleton.empty())
+		pI3DS->getScene()->deleteSkeleton(_Skeleton);
+
+	_Skeleton = pI3DS->getScene()->createSkeleton(skeleton);
+	if (!_Skeleton.empty())
+	{
+		_Skeleton.bindSkin(_Instance);
+	//	_Skeleton.setTransformMode(UTransformable::RotEuler);
+	//	_Skeleton.setPos(_Pos);
+	//	_Skeleton.setRotEuler(_Rot.x, _Rot.y, _Rot.z);
+	}
+}
+
+std::string CInterface3DShape::getAnim() const
+{
+	return _Anim;
+}
+
+
+void CInterface3DShape::setAnim(const std::string &anim)
+{
+	CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
+	nlassert(pI3DS != NULL);
+
+	if (!_PlayListManager)
+		_PlayListManager = pI3DS->getScene()->createPlayListManager();
+	if (!_AnimationSet)
+		_AnimationSet = CViewRenderer::getInstance()->getDriver()->createAnimationSet();
+
+	uint idAnim = 0;
+	try
+	{
+		idAnim = _AnimationSet->addAnimation( (anim+".anim").c_str(), anim.c_str() );
+	}
+	catch(Exception &)
+	{
+		nlwarning( "CInterface3DShape::setAnim Animation %s not found", anim.c_str() );
+		return;
+	}
+
+	_AnimationSet->build();
+	_PlayList = _PlayListManager->createPlayList( _AnimationSet );
+
+	if (!_Skeleton.empty())
+		_PlayList->registerTransform( _Skeleton );
+	else
+		_PlayList->registerTransform( _Instance );
+
+	_PlayList->setAnimation(0, idAnim);
+	_PlayList->setTimeOrigin(0, 0 );
+	_PlayList->setSpeedFactor( 0, 1 );
+	_PlayListManager->animate( 0 );
+
+}
+
+
 
 // ----------------------------------------------------------------------------
 // CInterface3DCamera

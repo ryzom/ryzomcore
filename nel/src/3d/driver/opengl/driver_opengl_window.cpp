@@ -265,10 +265,9 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 
 		case ConfigureNotify:
 
-		if (driver->_CurrentMode.Windowed && driver->_WndActive)
+		if (driver->_WndActive)
 		{
-			// first time setting decoration sizes
-			if ((driver->_DecorationWidth == -1) || (driver->_DecorationWidth == 0))
+			if (driver->_CurrentMode.Windowed)
 			{
 				Atom type_return = 0;
 				int format_return = 0;
@@ -294,12 +293,19 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 				// don't allow negative decoration sizes
 				if (driver->_DecorationWidth < 0) driver->_DecorationWidth = 0;
 				if (driver->_DecorationHeight < 0) driver->_DecorationHeight = 0;
+
+				driver->_WindowX = e.xconfigure.x - driver->_DecorationWidth;
+				driver->_WindowY = e.xconfigure.y - driver->_DecorationHeight;
+			}
+			else
+			{
+				// fullscreen
+				driver->_WindowX = e.xconfigure.x;
+				driver->_WindowY = e.xconfigure.y;
 			}
 
 			driver->_CurrentMode.Width = e.xconfigure.width;
 			driver->_CurrentMode.Height = e.xconfigure.height;
-			driver->_WindowX = e.xconfigure.x - driver->_DecorationWidth;
-			driver->_WindowY = e.xconfigure.y - driver->_DecorationHeight;
 		}
 
 		break;
@@ -641,6 +647,11 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 }
 
 // --------------------------------------------------
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+static Bool WaitForNotify( Display *dpy, XEvent *event, XPointer arg ) {
+	return (event->type == MapNotify) && (event->xmap.window == reinterpret_cast<Window>(arg));
+}
+#endif
 bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool resizeable)
 {
 	H_AUTO_OGL(CDriverGL_setDisplay)
@@ -1146,14 +1157,17 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	}
 
 	glXMakeCurrent (_dpy, _win, _ctx);
-//	XMapRaised (_dpy, _win);
-
-//	XMapWindow(_dpy, _win);
 
 	_EventEmitter.init (_dpy, _win, this);
 
-//	XEvent event;
-//	XIfEvent(dpy, &event, WaitForNotify, (char *)this);
+	// KDE/GNOME has issues selecting correct fullscreen monitor if window is not visible before setMode()
+	if (!mode.Windowed)
+	{
+		XMapRaised(_dpy, _win);
+		XEvent event;
+		nlctassert(sizeof(XPointer) >= sizeof(_win));
+		XPeekIfEvent(_dpy, &event, WaitForNotify, reinterpret_cast<XPointer>(_win));
+	}
 
 #endif // NL_OS_UNIX
 
@@ -2485,13 +2499,19 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	Window child;
 
 	// get window position so we can compare monitors (or mouse position if window not visible yet) 
-	XWindowAttributes xwa;
-	XGetWindowAttributes(_dpy, _win, &xwa);
-	if (xwa.map_state != IsUnmapped)
+	bool useMouseForPosition = true;
+	if (_win != EmptyWindow)
 	{
-		XTranslateCoordinates(_dpy, _win, xwa.root, xwa.x, xwa.y, &x, &y, &child);
+		XWindowAttributes xwa;
+		XGetWindowAttributes(_dpy, _win, &xwa);
+		if (xwa.map_state != IsUnmapped)
+		{
+			XTranslateCoordinates(_dpy, _win, xwa.root, xwa.x, xwa.y, &x, &y, &child);
+			useMouseForPosition = false;
+		}
 	}
-	else
+
+	if (useMouseForPosition)
 	{
 		sint rx, ry, wx, wy;
 		uint mask;
@@ -2764,15 +2784,7 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 #elif defined (NL_OS_UNIX)
 
 	if (_CurrentMode.Windowed)
-	{
-		// first time requesting decoration sizes
-		if (_WindowX && _WindowY && !_DecorationWidth && !_DecorationHeight && _WndActive)
-		{
-			_DecorationWidth = -1;
-			_DecorationHeight = -1;
-		}
 		XMoveWindow(_dpy, _win, x, y);
-	}
 
 #endif // NL_OS_WINDOWS
 }
@@ -2800,7 +2812,17 @@ void CDriverGL::showWindow(bool show)
 
 	if (show)
 	{
-		XMapRaised(_dpy, _win);
+		// if window is mapped, then MapNotify event will not trigger and XPeekIfEvent deadlocks
+		XWindowAttributes attr;
+		XGetWindowAttributes(_dpy, _win, &attr);
+		if (attr.map_state == IsUnmapped)
+		{
+			XMapRaised(_dpy, _win);
+			// sync to MapNotify event or setWindowSize() in GNOME might resize window to wrong size
+			XEvent event;
+			nlctassert(sizeof(XPointer) >= sizeof(_win));
+			XPeekIfEvent(_dpy, &event, WaitForNotify, reinterpret_cast<XPointer>(_win));
+		}
 
 		// fix window position if windows manager want to impose them
 		setWindowPos(_WindowX, _WindowY);

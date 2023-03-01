@@ -110,6 +110,8 @@ private:
 	static int	dumpUI(CLuaState &ls);			// params: CInterfaceElement*.... return: none
 	static int	setKeyboardContext(CLuaState &ls);
 
+	static int setRpItems(CLuaState &ls);
+
 	static int getCompleteIslands(CLuaState &ls);
 	static int getIslandId(CLuaState &ls);//TEMP
 
@@ -257,6 +259,7 @@ private:
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
 	static float setChar3dDBfromVPX(const std::string &branch, const std::string &people, const std::string &vpa, const std::string &vpb, const std::string &vpc);
+	static void setChar3dDBfromServerDB(const std::string &branch);
 	static float getRefHeightScale(const std::string &people, const std::string &vpa);
 	static std::string getRegionByAlias(uint32 alias);
 	static sint getGroundZ(uint32 x, sint32 y);
@@ -310,7 +313,7 @@ private:
 	static uint64 getPlayerVpc();
 	static sint32 getTargetLevel();		// get current, precise level of the selected target, or -1 if there's no such selected target
 	static sint32 getTargetForceRegion(); // get 'force region' for current target, or -1 if there's no selected target
-	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target					     
+	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target
 #ifdef RYZOM_LUA_UCSTRING
 	static ucstring getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
 #else
@@ -319,6 +322,7 @@ private:
 	static std::string getTargetVpaHex();
 	static std::string getTargetVpbHex();
 	static std::string getTargetVpcHex();
+	static void updateVpa();
 	static uint64 getTargetVpa();
 	static uint64 getTargetVpb();
 	static uint64 getTargetVpc();
