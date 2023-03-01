@@ -703,14 +703,6 @@ std::string CInventoryManager::getDBIndexPath(CDBCtrlSheet *pCS)
 		{
 			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
 		}
-		if (UIHands2[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
-		}
-		if (UIHands3[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":HAND:" + toString(i);
-		}
 	}
 
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
@@ -725,23 +717,6 @@ std::string CInventoryManager::getDBIndexPath(CDBCtrlSheet *pCS)
 	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
 	{
 		if (UIHotbar[i] == pCS || UIHotbar2[i] == pCS || UIHotbar3[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
-		}
-	}
-
-	
-	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
-	{
-		if (UIHotbar[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
-		}
-		if (UIHotbar2[i] == pCS)
-		{
-			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
-		}
-		if (UIHotbar3[i] == pCS)
 		{
 			return string(LOCAL_INVENTORY) + ":HOTBAR:" + toString(i);
 		}

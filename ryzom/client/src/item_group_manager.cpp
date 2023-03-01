@@ -157,12 +157,6 @@ void CItemGroup::CItem::writeTo(xmlNodePtr node)
 	dstSlot.writeTo(node);
 }
 
-// used for hotbar
-void CItemGroup::addRemove(uint16 slot)
-{
-	removeHotbar.push_back(slot);
-}
-
 void CItemGroup::writeTo(xmlNodePtr node)
 {
 	xmlNodePtr groupNode = xmlNewChild(node, NULL, (const xmlChar *)"group", NULL);
@@ -176,11 +170,6 @@ void CItemGroup::writeTo(xmlNodePtr node)
 	{
 		xmlNodePtr removeNode = xmlNewChild(groupNode, NULL, (const xmlChar *)"remove", NULL);
 		removeSlots[i].writeTo(removeNode);
-	}
-	for(int i=0;i<removeHotbar.size();i++)
-	{
-		xmlNodePtr removeNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"hotbar_remove", NULL);
-		xmlSetProp(removeNode, (const xmlChar*)"slot", (xmlChar*)NLMISC::toString(removeHotbar[i]).c_str());
 	}
 }
 
@@ -686,13 +675,6 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		if (!dbPath.empty())
 			CInventoryManager::getInstance()->unequip(dbPath);
 	}
-	// unequip hotbar
-	for(int i=0; i < group->removeHotbar.size(); i++)
-	{
-		uint16 slot = group->removeHotbar[i];
-		std::string dbPath = "LOCAL:INVENTORY:HOTBAR:" + NLMISC::toString(slot);
-		CInventoryManager::getInstance()->unequip(dbPath);
-	}
 
 	// then, equip items
 	uint32 equipTime = 0;
@@ -726,19 +708,6 @@ bool CItemGroupManager::createGroup(std::string name, bool removeEmpty)
 	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
 	{
 		group.addSheet(pIM->getHotbarSheet(i), CItemGroup::CSlot::hotbarSlot(i), removeEmpty);
-	}
-	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
-	{
-		pCS = CInventoryManager::getInstance()->getHotbarSheet(i);
-		if(!pCS) continue;
-		if(pCS->isSheetValid())
-		{
-			group.addItem(pCS->getItemCreateTime(), pCS->getItemSerial(), (uint16) i);
-		}
-		else if(removeUnequiped)
-		{
-			group.addRemove(i);
-		}
 	}
 
 	_Groups.push_back(group);
