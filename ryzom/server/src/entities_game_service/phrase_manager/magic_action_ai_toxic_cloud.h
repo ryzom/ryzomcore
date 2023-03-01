@@ -45,7 +45,7 @@ protected:
 	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode) { return true; }
 
 	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
+						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, std::vector<sint16> &targetDeltaHp, const NLMISC::CBitSet & invulnerabilityOffensive,
 						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport );
 
 	virtual void apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
@@ -66,6 +66,8 @@ protected:
 	sint32					_Damage;
 	/// cloud radius in meters
 	float					_Radius;
+	/// cloud .fx sheet
+	NLMISC::CSheetId		_Fx;
 };
 
 

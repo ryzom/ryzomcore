@@ -376,6 +376,11 @@ void CSpawnGroup::checkRespawn()
 	// respawn if there is not too much dead .. (no more than one at each tick).
 	if (_BotsToRespawn.size()<=0)
 		return;
+
+	// Send url to EGS
+	std::string url = getUrl();
+	std::string actionName = getActionName();
+	CCreatureSetUrlMsg msg;
 	
 	//FOREACH_NOINC(it, std::vector<CBotToSpawn>, _BotsToRespawn)
 	for(uint32 i = 0; i < _BotsToRespawn.size();)
@@ -397,6 +402,11 @@ void CSpawnGroup::checkRespawn()
 			}
 			if (botPt->isSpawned() || botPt->reSpawn(false))
 			{
+				CSpawnBot* pbot = botPt->getSpawnObj();
+				if (pbot!=NULL)
+				{
+					msg.Entities.push_back(pbot->dataSetRow());
+				}
 				continue;					//	directly test the same it (the next in fact).
 			}
 			else
@@ -405,6 +415,13 @@ void CSpawnGroup::checkRespawn()
 			}
 		}
 		++i;
+	}
+
+	if(url != "")
+	{
+		msg.ActionName = actionName;
+		msg.Url = url;
+		msg.send(egsString);
 	}
 	
 }

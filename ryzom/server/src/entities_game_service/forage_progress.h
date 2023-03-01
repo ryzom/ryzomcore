@@ -48,7 +48,7 @@ public:
 	void						reset( const NLMISC::CSheetId& material, const TDataSetRow& sourceRowId, sint32 initialFocus );
 
 	/// Add the result of an extraction action
-	void						fillFromExtraction( float quantity, float quality, CCharacter *player );
+	void						fillFromExtraction( const CHarvestSource *source, float quantity, float quality, CCharacter *player );
 
 	/// Add the result of a care action
 	void						fillFromCare( bool isUseful ) { _HasCastedUsefulCare |= isUseful; }
@@ -99,6 +99,9 @@ private:
 	/// Average quality of material obtained so far
 	float						_Quality;
 
+	/// MAx Average quality of material obtained so far
+	float						_MaxQuality;
+	
 	/// Skill used to forage
 	SKILLS::ESkills				_UsedSkill;
 

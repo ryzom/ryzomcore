@@ -45,7 +45,7 @@ namespace EGSPD
 //
 
 /** CGuildPD
- * defined at entities_game_service/pd_scripts/guild.pds:36
+ * defined at entities_game_service/pd_scripts/guild.pds:58
  */
 class CGuildPD : public RY_PDS::IPDBaseData
 {
@@ -66,6 +66,12 @@ public:
 	
 	uint32							getCreationDate() const;
 	void							setCreationDate(uint32 __v, bool forceWrite=false);
+	
+	uint32							getXP() const;
+	void							setXP(uint32 __v, bool forceWrite=false);
+	
+	uint32							getChargesPoints() const;
+	void							setChargesPoints(uint32 __v, bool forceWrite=false);
 	
 	CPeople::TPeople				getRace() const;
 	void							setRace(CPeople::TPeople __v, bool forceWrite=false);
@@ -191,6 +197,8 @@ protected:
 	TGuildId						_Id;
 	uint64							_Money;
 	uint32							_CreationDate;
+	uint32							_XP;
+	uint32							_ChargesPoints;
 	CPeople::TPeople				_Race;
 	uint64							_Icon;
 	uint32							_Building;

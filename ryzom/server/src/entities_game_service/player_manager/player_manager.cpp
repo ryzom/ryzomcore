@@ -463,9 +463,7 @@ void CPlayerManager::addClientCallback()
 		{ "SET_PLAYER_SEASON",					cbSetPlayerSeason		}, // from DSS
 
 		{ "TELEPORT_PLAYER",					cbTeleportPlayer		}, // from AIS
-#ifdef RYZOM_FORGE
 		{ "TRIGGER_WEBIG",						cbTriggerWebig			}, // from AIS
-#endif
 		
 		{ "SET_CHAR_AIINSTANCE",			cbSetCharacterAIInstance},
 
@@ -2017,7 +2015,7 @@ void CPlayerManager::addGMMute( const NLMISC::CEntityId & gmId , const NLMISC::C
 {
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 	
-	// remove previous root
+	// remove previous mute
 	for ( std::list<CUserCursedByGM>::iterator it = _UsersMutedByGM.begin(); it != _UsersMutedByGM.end(); ++it )
 	{
 		if ( (*it).Id == targetId )
@@ -2026,12 +2024,15 @@ void CPlayerManager::addGMMute( const NLMISC::CEntityId & gmId , const NLMISC::C
 			break;
 		}
 	}
-	params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
-	CCharacter::sendDynamicSystemMessage( gmId,"CSR_MUTE_OK",params );
-	params[0].setEIdAIAlias( gmId, CAIAliasTranslator::getInstance()->getAIAlias(gmId) );
-	CCharacter::sendDynamicSystemMessage( targetId,"CSR_IS_MUTED_BY",params );
+	if (gmId != NLMISC::CEntityId::Unknown) // Happens when CS use app_admin
+	{
+		params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
+		CCharacter::sendDynamicSystemMessage( gmId,"CSR_MUTE_OK",params );
+		params[0].setEIdAIAlias( gmId, CAIAliasTranslator::getInstance()->getAIAlias(gmId) );
+		CCharacter::sendDynamicSystemMessage( targetId,"CSR_IS_MUTED_BY",params );
+	}
 	
-	// put the new root in the sorted list
+	// put the new mute in the sorted list
 	std::list<CUserCursedByGM>::iterator it = _UsersMutedByGM.begin();
 	for (; it != _UsersMutedByGM.end(); ++it )
 	{
@@ -2056,16 +2057,20 @@ void CPlayerManager::removeGMMute( const NLMISC::CEntityId & gmId , const NLMISC
 	{
 		if ( (*it).Id == targetId )
 		{
-			params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
-			CCharacter::sendDynamicSystemMessage( gmId,"CSR_UNMUTE_OK",params );
-			params[0].setEIdAIAlias( gmId, CAIAliasTranslator::getInstance()->getAIAlias(gmId) );
-			CCharacter::sendDynamicSystemMessage( targetId,"CSR_IS_UNMUTED_BY",params );
+			if (gmId != NLMISC::CEntityId::Unknown) // Happens when CS use app_admin
+			{
+				params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
+				CCharacter::sendDynamicSystemMessage( gmId,"CSR_UNMUTE_OK",params );
+				params[0].setEIdAIAlias( gmId, CAIAliasTranslator::getInstance()->getAIAlias(gmId) );
+				CCharacter::sendDynamicSystemMessage( targetId,"CSR_IS_UNMUTED_BY",params );
+			}
 			_UsersMutedByGM.erase(it);
 			break;
 		}
 	}
 	params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
-	CCharacter::sendDynamicSystemMessage( gmId,"CSR_NOT_MUTED",params );
+	if (gmId != NLMISC::CEntityId::Unknown)
+		CCharacter::sendDynamicSystemMessage( gmId,"CSR_NOT_MUTED",params );
 
 	CMessage msgOut("MUTE_PLAYER");
 	bool mute = false;
@@ -2091,10 +2096,14 @@ void CPlayerManager::muteUniverse( const NLMISC::CEntityId & gmId, NLMISC::TGame
 			break;
 		}
 	}
-	params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
-	CCharacter::sendDynamicSystemMessage( gmId,"CSR_UNIVERSE_MUTE_OK",params );
-	params[0].setEIdAIAlias( gmId, CAIAliasTranslator::getInstance()->getAIAlias(gmId) );
-	CCharacter::sendDynamicSystemMessage( targetId,"CSR_IS_UNIVERSE_MUTED_BY",params );
+
+	if (gmId != NLMISC::CEntityId::Unknown) // Happens when CS use app_admin
+	{
+		params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
+		CCharacter::sendDynamicSystemMessage( gmId,"CSR_UNIVERSE_MUTE_OK",params );
+		params[0].setEIdAIAlias( gmId, CAIAliasTranslator::getInstance()->getAIAlias(gmId) );
+		CCharacter::sendDynamicSystemMessage( targetId,"CSR_IS_UNIVERSE_MUTED_BY",params );
+	}
 	
 	// put the new mute in the sorted list
 	std::list<CUserCursedByGM>::iterator it = _UsersUniversChatMutedByGM.begin();
@@ -2121,16 +2130,20 @@ void CPlayerManager::unmuteUniverse( const NLMISC::CEntityId & gmId, const NLMIS
 	{
 		if ( (*it).Id == targetId )
 		{
-			params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
-			CCharacter::sendDynamicSystemMessage( gmId,"CSR_UNIVERSE_UNMUTE_OK",params );
-			params[0].setEIdAIAlias( gmId, CAIAliasTranslator::getInstance()->getAIAlias(gmId) );
-			CCharacter::sendDynamicSystemMessage( targetId,"CSR_IS_UNIVERSE_UNMUTED_BY",params );
+			if (gmId != NLMISC::CEntityId::Unknown) // Happens when CS use app_admin
+			{
+				params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
+				CCharacter::sendDynamicSystemMessage( gmId,"CSR_UNIVERSE_UNMUTE_OK",params );
+				params[0].setEIdAIAlias( gmId, CAIAliasTranslator::getInstance()->getAIAlias(gmId) );
+				CCharacter::sendDynamicSystemMessage( targetId,"CSR_IS_UNIVERSE_UNMUTED_BY",params );
+			}
 			_UsersUniversChatMutedByGM.erase(it);
 			break;
 		}
 	}
 	params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias(targetId) );
-	CCharacter::sendDynamicSystemMessage( gmId,"CSR_NOT_UNIVERSE_MUTED",params );
+	if (gmId != NLMISC::CEntityId::Unknown) // Happens when CS use app_admin
+		CCharacter::sendDynamicSystemMessage( gmId,"CSR_NOT_UNIVERSE_MUTED",params );
 	
 	CMessage msgOut("MUTE_UNIVERSE");
 	bool mute = false;
@@ -2257,7 +2270,7 @@ bool CPlayerManager::hasBetterCSRGrade( CPlayer* p1, CPlayer *p2, bool devIsNorm
 	if ( p2->havePriv(":SGM:") )
 		return ( p1->havePriv(":SGM:") );
 	if ( p2->havePriv(":EM:") )
-		return ( p1->havePriv(":SGM:EM:") );
+		return ( p1->havePriv(":SGM:EM:GM:") );
 	if ( p2->havePriv(":GM:") )
 		return ( p1->havePriv(":SGM:EM:GM:") );
 	if ( p2->havePriv(":EG:") )
@@ -2386,7 +2399,7 @@ void CPlayerManager::broadcastMessageUpdate()
 		else if( _Stall == true )
 		{
 			forceDisconnectUserWithoutPrivileges();
-			broadcastMessage( 2, 0, 5, "Technical problem occurred on the server,");
+			broadcastMessage( 2, 0, 5, "Technical problem occured on the server,");
 			broadcastMessage( 2, 0, 5, "All non administrator accounts are disconnected immediately.");
 			broadcastMessage( 2, 0, 5, "Customer Support is already working on it.");
 			broadcastMessage( 2, 0, 5, "Sorry for any inconveniences.");
@@ -2492,7 +2505,8 @@ static void	mailNotification(const std::string& to, const std::string& from)
 		return;
 
 	// first, build a valid character (upper case first, then lower case);
-	ucstring ucCharname = ucstring::makeFromUtf8(capitalize(to));
+	ucstring	ucCharname = toLower(to);	// lower case
+	ucCharname[0] = toUpper(ucCharname[0]);	// first upper case
 
 	// second, get char id that matches the name
 	CEntityId	charId = NLMISC::CEntityIdTranslator::getInstance()->getByEntity(ucCharname);

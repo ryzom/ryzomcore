@@ -89,23 +89,69 @@ void despawn_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float const immediatly = stack.top();
 	stack.pop();
-	
+
 	if (!entity)
 	{
 		nlwarning("despawnInstance failed");
 		return;
 	}
-	
-	CGroup* const grp = entity->getGroup();	
+
+	CGroup* const grp = entity->getGroup();
 	if (!grp)
 	{
-		nlwarning("despawn : entity '%s'%s is not a group ? ", 
+		nlwarning("despawn : entity '%s'%s is not a group ? ",
 			entity->aliasTreeOwner()->getAliasFullName().c_str(),
 			entity->aliasTreeOwner()->getAliasString().c_str());
 		return;
-	}	
+	}
 	grp->despawnBots(immediatly!=0);
 }
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection spawnBot_fsssffff_
+Spawn new bots in the current group.
+
+Arguments: f(NbrBots), s(Sheet), s(Name), s(Look), f(x), f(y), f(orientation), f(dispersion) ->
+
+@code
+
+@endcode
+
+*/
+// CGroup
+void spawnBot_fsssffff_(CStateInstance* entity, CScriptStack& stack)
+{
+	double dispersionRadius = (double)(float)stack.top();
+	stack.pop();
+	double orientation = (double)(float)stack.top();
+	stack.pop();
+	double y = (double)(float)stack.top();
+	stack.pop();
+	double x = (double)(float)stack.top();
+	stack.pop();
+	string look = (string)stack.top();
+	stack.pop();
+	string name = (string)stack.top();
+
+	stack.pop();
+	CSheetId sheetId((string)stack.top());
+	stack.pop();
+	uint nbBots = (uint)(float)stack.top();
+	stack.pop();
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+
+	CGroupNpc* grp = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if (grp)
+		aiInstance->eventCreateNpcBot(grp, nbBots, true, sheetId, CAIVector(x, y), name, orientation, dispersionRadius, look);
+	return;
+}
+
 
 
 //----------------------------------------------------------------------------
@@ -118,37 +164,37 @@ Arguments:  -> f(Immediatly)
 @return 1 if group is spawned
 
 @code
-(alive)isAlived();  
+(alive)isAlived();
 @endcode
 
 */
 // CGroup
 void isAlived__f(CStateInstance* entity, CScriptStack& stack)
 {
-	
+
 	if (!entity)
 	{
 		stack.push(0.0f);
 		return;
 	}
-	
-	CGroup* const grp = entity->getGroup();	
+
+	CGroup* const grp = entity->getGroup();
 	if (!grp)
 	{
-		nlwarning("isAlived__f : entity '%s'%s is not a group ? ", 
+		nlwarning("isAlived__f : entity '%s'%s is not a group ? ",
 			entity->aliasTreeOwner()->getAliasFullName().c_str(),
-			entity->aliasTreeOwner()->getAliasString().c_str());				
+			entity->aliasTreeOwner()->getAliasString().c_str());
 		stack.push(0.0f);
 		return;
-	}	
-	
+	}
+
 	if (!grp->isSpawned())
 	{
 		stack.push(0.0f);
 		return;
 	}
 
-	
+
 	for (uint i=0; i<grp->bots().size(); ++i)
 	{
 		const	CBot *const	bot = grp->getBot(i);
@@ -197,12 +243,12 @@ void newNpcChildGroupPos_ssfff_c(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	float const x = stack.top();
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (dispersionRadius<0.)
 		dispersionRadius = 0.;
 	stack.push(spawnNewGroup(entity, stack, aiInstance, CAIVector(x, y), -1, dispersionRadius));
@@ -235,12 +281,12 @@ void newNpcChildGroupPos_ssfff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	float const x = stack.top();
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (dispersionRadius<0.)
 		dispersionRadius = 0.;
 	spawnNewGroup(entity, stack, aiInstance, CAIVector(x, y), -1, dispersionRadius);
@@ -324,12 +370,12 @@ void newNpcChildGroupPosMl_ssffff_c(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	float const x = stack.top();
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (dispersionRadius<0.)
 		dispersionRadius = 0.;
 	stack.push(spawnNewGroup(entity, stack, aiInstance, CAIVector(x,y), -1, dispersionRadius));
@@ -363,12 +409,12 @@ void newNpcChildGroupPosMl_ssffff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	float const x = stack.top();
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (dispersionRadius<0.)
 		dispersionRadius = 0.;
 	spawnNewGroup(entity, stack, aiInstance, CAIVector(x,y), -1, dispersionRadius);
@@ -444,17 +490,17 @@ Arguments: -> f(x), f(y)
 void getMidPos__ff(CStateInstance* entity, CScriptStack& stack)
 {
 	CGroup* const group = entity->getGroup();
-	
+
 	CAIVector vect;
 	if (group->isSpawned())
 	{
 		if (!group->getSpawnObj()->calcCenterPos(vect))
 			group->getSpawnObj()->calcCenterPos(vect, true);
 	}
-	
+
 	float x((float)vect.x().asDouble());
 	float y((float)vect.y().asDouble());
-	
+
 	stack.push(y);
 	stack.push(x);
 }
@@ -484,12 +530,12 @@ void newNpcChildGroup_sssf_c(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	TStringId const zoneName = CStringMapper::map(stack.top());
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	CNpcZone const* spawnZone = aiInstance->getZone(zoneName);
 	if (!spawnZone)
 	{
@@ -533,12 +579,12 @@ void newNpcChildGroup_sssf_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	TStringId const zoneName = CStringMapper::map(stack.top());
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	CNpcZone const* spawnZone = aiInstance->getZone(zoneName);
 	if (!spawnZone)
 	{
@@ -633,12 +679,12 @@ void newNpcChildGroupMl_sssff_c(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	TStringId const zoneName = CStringMapper::map(stack.top());
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	CNpcZone const* spawnZone = aiInstance->getZone(zoneName);
 	if (!spawnZone)
 	{
@@ -685,12 +731,12 @@ void newNpcChildGroupMl_sssff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	TStringId const zoneName = CStringMapper::map(stack.top());
 	stack.pop();
-	
+
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	CNpcZone const* spawnZone = aiInstance->getZone(zoneName);
 	if (!spawnZone)
 	{
@@ -786,7 +832,7 @@ void spawnManager_s_(CStateInstance* entity, CScriptStack& stack)
 			nlwarning("SpawnManager error entity not spawned");
 			break;
 		}
-		
+
 		IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 		CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 		if	(!aiInstance)
@@ -828,7 +874,7 @@ void despawnManager_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	string ManagerName = stack.top();
 	stack.pop();
-	
+
 	breakable
 	{
 		if (!entity)
@@ -836,7 +882,7 @@ void despawnManager_s_(CStateInstance* entity, CScriptStack& stack)
 			nlwarning("DespawnManager error entity not spawned");
 			break;
 		}
-		
+
 		IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 		CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 		if (!aiInstance)
@@ -884,7 +930,7 @@ void getGroupTemplateWithFlags_sss_s(CStateInstance* entity, CScriptStack& stack
 	stack.pop();
 	string oneOfProperties = stack.top();
 	stack.pop();
-	
+
 	// If no AI instance return
 	IManagerParent* managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* aiInstance = dynamic_cast<CAIInstance*>(managerParent);
@@ -893,12 +939,12 @@ void getGroupTemplateWithFlags_sss_s(CStateInstance* entity, CScriptStack& stack
 		stack.push(string());
 		return;
 	}
-	
+
 	//	Fill the property sets.
 	AITYPES::CPropertySet oneOfSet = readSet(oneOfProperties);
 	AITYPES::CPropertySet mandatorySet = readSet(mandatoryProperties);
 	AITYPES::CPropertySet exceptSet = readSet(exceptProperties);
-	
+
 	vector<CGroupDesc<CGroupFamily> const*>	groupDescs;
 	FOREACH (itCont, CCont<CContinent>, aiInstance->continents())
 	{
@@ -920,14 +966,14 @@ void getGroupTemplateWithFlags_sss_s(CStateInstance* entity, CScriptStack& stack
 			}
 		}
 	}
-	
+
 	if (groupDescs.size()==0)
 	{
 		nlwarning("getGroupTemplateWithFlags failed: no group template found that contains all of '%s' and a part of'%s' ", mandatoryProperties.c_str(), oneOfProperties.c_str());
 		stack.push(string());
 		return;
 	}
-	
+
 	CGroupDesc<CGroupFamily> const* groupDesc = groupDescs[CAIS::rand16((uint32)groupDescs.size())];
 	stack.push(groupDesc->getFullName());
 	return;
@@ -998,7 +1044,7 @@ void getZoneWithFlags_ssss_s(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	string oneOfProperties = stack.top();
 	stack.pop();
-	
+
 	// If no AI instance return
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
@@ -1007,7 +1053,7 @@ void getZoneWithFlags_ssss_s(CStateInstance* entity, CScriptStack& stack)
 		stack.push(string());
 		return;
 	}
-	
+
 	//	Fill the property sets.
 	AITYPES::CPropertySet oneOfSet = readSet(oneOfProperties);
 	AITYPES::CPropertySet mandatorySet = readSet(mandatoryProperties);
@@ -1079,7 +1125,7 @@ void getNearestZoneWithFlags_ffsss_s(CStateInstance* entity, CScriptStack& stack
 	stack.pop();
 	float const x = stack.top();
 	stack.pop();
-	
+
 	// If no AI instance return
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
@@ -1088,14 +1134,14 @@ void getNearestZoneWithFlags_ffsss_s(CStateInstance* entity, CScriptStack& stack
 		stack.push(string());
 		return;
 	}
-	
+
 	//	Fill the property sets.
 	AITYPES::CPropertySet oneOfSet = readSet(oneOfProperties);
 	AITYPES::CPropertySet mandatorySet = readSet(mandatoryProperties);
 	AITYPES::CPropertySet exceptSet = readSet(exceptProperties);
 	// Create the scorer
 	CZoneScorerMandatoryAndOneOfAndDistAndSpace const scorer(oneOfSet, mandatorySet, exceptSet, CAIVector(x, y));
-	
+
 	getZoneWithFlags_helper(entity, stack, aiInstance, scorer);
 }
 
@@ -1160,7 +1206,7 @@ void getNearestZoneWithFlagsStrict_ffsss_s(CStateInstance* entity, CScriptStack&
 	stack.pop();
 	float const x = stack.top();
 	stack.pop();
-	
+
 	// If no AI instance return
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
@@ -1169,14 +1215,14 @@ void getNearestZoneWithFlagsStrict_ffsss_s(CStateInstance* entity, CScriptStack&
 		stack.push(string());
 		return;
 	}
-	
+
 	//	Fill the property sets.
 	AITYPES::CPropertySet oneOfSet = readSet(oneOfProperties);
 	AITYPES::CPropertySet mandatorySet = readSet(mandatoryProperties);
 	AITYPES::CPropertySet exceptSet = readSet(exceptProperties);
 	// Create the scorer
 	const	CZoneScorerMandatoryAndOneOfAndDist	scorer(oneOfSet, mandatorySet, exceptSet, CAIVector(x, y));
-	
+
 	getZoneWithFlags_helper(entity, stack, aiInstance, scorer);
 }
 
@@ -1239,7 +1285,7 @@ void getNeighbourZoneWithFlags_ssss_s(CStateInstance* entity, CScriptStack& stac
 	stack.pop();
 	TStringId curZoneId = CStringMapper::map(stack.top());
 	stack.pop();
-	
+
 	// If no AI instance return
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
@@ -1248,7 +1294,7 @@ void getNeighbourZoneWithFlags_ssss_s(CStateInstance* entity, CScriptStack& stac
 		stack.push(string());
 		return;
 	}
-	
+
 	// If curzone is invalid return
 	CNpcZone const* const curZone = aiInstance->getZone(curZoneId);
 	if	(!curZone)
@@ -1261,21 +1307,21 @@ void getNeighbourZoneWithFlags_ssss_s(CStateInstance* entity, CScriptStack& stac
 		stack.push(string());
 		return;
 	}
-	
+
 	//	Fill the property sets.
 	AITYPES::CPropertySet oneOfSet = readSet(oneOfProperties);
 	AITYPES::CPropertySet mandatorySet = readSet(mandatoryProperties);
 	AITYPES::CPropertySet exceptSet = readSet(exceptProperties);
 	// Create the scorer
 	CZoneScorerMandatoryAndOneOfPlusExcept const scorer(oneOfSet, mandatorySet, exceptSet, curZone);
-	
+
 	vector<CCell*> cells;
 	curZone->getOwner()->getNeighBourgCellList(cells);
 	cells.push_back(curZone->getOwner());
 	std::random_shuffle(cells.begin(), cells.end());
-	
+
 	CNpcZone const* const newZone = CCellZone::lookupNpcZoneScorer(cells, scorer);
-	
+
 	if (newZone)
 	{
 		stack.push(newZone->getAliasTreeOwner().getAliasFullName());
@@ -1286,7 +1332,7 @@ void getNeighbourZoneWithFlags_ssss_s(CStateInstance* entity, CScriptStack& stac
 	nlwarning(" - oneOfProperties:     %s", oneOfProperties.c_str());
 	nlwarning(" - mandatoryProperties: %s", mandatoryProperties.c_str());
 	nlwarning(" - exceptProperties:    %s", exceptProperties.c_str());
-	
+
 	stack.push(string());
 	return;
 }
@@ -1338,9 +1384,9 @@ void setAggro_ff_(CStateInstance* entity, CScriptStack& stack)
 {
 	sint32 updateNbTicks = (sint32)(float)stack.top();
 	stack.pop();
-	float aggroRange = stack.top();
+	uint32 aggroRange = (uint32)(float)stack.top();
 	stack.pop();
-	
+
 	CGroup* const grp = entity->getGroup();
 	if (grp)
 	{
@@ -1369,7 +1415,7 @@ void setCanAggro_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	bool canAggro = ((float)stack.top())!=0.f;
 	stack.pop();
-	
+
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
 	{
 		if (!bot->isSpawned())
@@ -1455,11 +1501,11 @@ void setMode_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	string NewMode = stack.top();
 	stack.pop();
-	
+
 	MBEHAV::EMode mode = MBEHAV::stringToMode(NewMode);
 	if (mode==MBEHAV::UNKNOWN_MODE)
 		return;
-	
+
 	FOREACH(botIt, CCont<CBot>,	entity->getGroup()->bots())
 	{
 		if (botIt->getSpawnObj())
@@ -1487,9 +1533,9 @@ void setAutoSpawn_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float const autoSpawn = stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
-	
+
 	group->setAutoSpawn(autoSpawn!=0.f);
 }
 
@@ -1514,14 +1560,14 @@ void setMaxHP_ff_(CStateInstance* entity, CScriptStack& stack)
 {
 	bool  setFull = ((float)stack.top() != 0.f); stack.pop();
 	float maxHp = ((float)stack.top()); stack.pop();
-	
+
 	CChangeCreatureMaxHPMsg& msgList = CAIS::instance().getCreatureChangeMaxHP();
-	
+
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
 	{
 		if (!bot->isSpawned())
 			continue;
-		
+
 		if (maxHp > 0)
 		{
 			CSpawnBot* const sbot = bot->getSpawnObj();
@@ -1551,16 +1597,16 @@ void setHPLevel_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float coef = stack.top();
 	stack.pop();
-	
+
 	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
-	
+
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
 	{
 		if (!bot->isSpawned())
 			continue;
-		
+
 		CSpawnBot* const sbot = bot->getSpawnObj();
-		
+
 		msgList.Entities.push_back(sbot->dataSetRow());
 		msgList.DeltaHp.push_back((sint32)(sbot->maxHitPoints()*coef));
 	}
@@ -1596,16 +1642,16 @@ void setHPScale_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float coef = stack.top();
 	stack.pop();
-	
+
 	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
-	
+
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
 	{
 		if (!bot->isSpawned())
 			continue;
-		
+
 		CSpawnBot* const sbot = bot->getSpawnObj();
-		
+
 		msgList.Entities.push_back(sbot->dataSetRow());
 		msgList.DeltaHp.push_back((sint32)( sbot->maxHitPoints() *coef - sbot->currentHitPoints())  );
 	}
@@ -1630,19 +1676,23 @@ Arguments: s(actionName),s(url) ->
 // CGroup
 void setUrl_ss_(CStateInstance* entity, CScriptStack& stack)
 {
-	std::string url = (std::string)stack.top();stack.pop();	
-	std::string actionName = (std::string)stack.top();stack.pop();	
-	
+	CGroup* group = entity->getGroup();
+
+	std::string url = (std::string)stack.top();stack.pop();
+	std::string actionName = (std::string)stack.top();stack.pop();
+
 	CCreatureSetUrlMsg msg;
-	FOREACH(botIt, CCont<CBot>,	entity->getGroup()->bots())
+	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
 		CSpawnBot* pbot = botIt->getSpawnObj();
 		if (pbot!=NULL)
-		{		
+		{
 			msg.Entities.push_back(pbot->dataSetRow());
 		}
 	}
-	
+	CSpawnGroup* spawnGroup = group->getSpawnObj();
+	spawnGroup->setActionName(actionName);
+	spawnGroup->setUrl(url);
 	msg.ActionName = actionName;
 	msg.Url = url;
 	msg.send(egsString);
@@ -1668,16 +1718,16 @@ void scaleHP_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float coef = stack.top();
 	stack.pop();
-	
+
 	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
-	
+
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
 	{
 		if (!bot->isSpawned())
 			continue;
-		
+
 		CSpawnBot* const sbot = bot->getSpawnObj();
-		
+
 		msgList.Entities.push_back(sbot->dataSetRow());
 		msgList.DeltaHp.push_back((sint32)(sbot->currentHitPoints()*coef));
 	}
@@ -1703,19 +1753,19 @@ Arguments:  f(alias),f(Coef), ->
 void setBotHPScaleByAlias_fs_(CStateInstance* entity, CScriptStack& stack)
 {
 	uint32 alias =  LigoConfig.aliasFromString((string)stack.top()) ; stack.pop();
-		
+
 	float coef = stack.top(); stack.pop();
-	
+
 	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
-	
+
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
 	{
-		
+
 		if (bot->getAlias() != alias) { continue; }
-		if (!bot->isSpawned()) return;			
-		
+		if (!bot->isSpawned()) return;
+
 		CSpawnBot* const sbot = bot->getSpawnObj();
-		
+
 		msgList.Entities.push_back(sbot->dataSetRow());
 		msgList.DeltaHp.push_back((sint32)( sbot->maxHitPoints() *coef - sbot->currentHitPoints())  );
 	}
@@ -1724,7 +1774,7 @@ void setBotHPScaleByAlias_fs_(CStateInstance* entity, CScriptStack& stack)
 
 /** @page code
 
-@subsection downScaleHP_f_	
+@subsection downScaleHP_f_
 Scales the bots HP down.
 
 Arguments: f(Coef) ->
@@ -1740,17 +1790,17 @@ void downScaleHP_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float coef = stack.top();
 	stack.pop();
-	
+
 	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
-	
+
 	clamp(coef, 0.f, 1.f);
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
 	{
 		if (!bot->isSpawned())
 			continue;
-		
+
 		CSpawnBot* const sbot = bot->getSpawnObj();
-		
+
 		msgList.Entities.push_back(sbot->dataSetRow());
 		msgList.DeltaHp.push_back((sint32)(sbot->currentHitPoints()*(coef-1)));
 	}
@@ -1774,9 +1824,9 @@ void upScaleHP_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float coef = stack.top();
 	stack.pop();
-	
+
 	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
-	
+
 	clamp(coef, 0.f, 1.f);
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
 	{
@@ -1809,18 +1859,37 @@ void addHP_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float addHP = stack.top();
 	stack.pop();
-	
+
 	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
-	
+
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
 	{
 		if (!bot->isSpawned())
 			continue;
-		
+
 		CSpawnBot* const sbot = bot->getSpawnObj();
-		
+
 		msgList.Entities.push_back(sbot->dataSetRow());
 		msgList.DeltaHp.push_back((sint32)(sbot->currentHitPoints()+addHP));
+	}
+}
+
+void giveHP_f_(CStateInstance* entity, CScriptStack& stack)
+{
+	float addHP = stack.top();
+	stack.pop();
+
+	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
+
+	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
+	{
+		if (!bot->isSpawned())
+			continue;
+
+		CSpawnBot* const sbot = bot->getSpawnObj();
+
+		msgList.Entities.push_back(sbot->dataSetRow());
+		msgList.DeltaHp.push_back((sint32)(addHP));
 	}
 }
 
@@ -1855,7 +1924,7 @@ void aiAction_s_(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("Action SheetId Unknown %s", actionName.c_str());
 		return;
 	}
-	
+
 	FOREACH(botIt, CCont<CBot>,	entity->getGroup()->bots())
 	{
 		CSpawnBot* pbot = botIt->getSpawnObj();
@@ -1864,18 +1933,18 @@ void aiAction_s_(CStateInstance* entity, CScriptStack& stack)
 			CSpawnBot& bot = *pbot;
 			if (!bot.getAIProfile())
 				continue; // OK
-			
+
 			CBotProfileFight* profile = dynamic_cast<CBotProfileFight*>(bot.getAIProfile());
 			if (!profile)
 				continue; // OK
-			
+
 			if (!profile->atAttackDist())
 				continue; // NOT OK
-			
+
 			TDataSetRow	dataSetRow;
 			if ((CAIEntityPhysical*)bot.getTarget())
 				dataSetRow = bot.getTarget()->dataSetRow();
-			
+
 			CEGSExecuteAiActionMsg msg(bot.dataSetRow(), dataSetRow, action->SheetId(), bot._DamageCoef, bot._DamageSpeedCoef);
 			msg.send(egsString);
 			bot.setActionFlags(RYZOMACTIONFLAGS::Attacks);
@@ -1915,7 +1984,7 @@ void aiActionSelf_s_(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("Action SheetId Unknown %s", actionName.c_str());
 		return;
 	}
-	
+
 	FOREACH(botIt, CCont<CBot>,	entity->getGroup()->bots())
 	{
 		CSpawnBot* pbot = botIt->getSpawnObj();
@@ -1949,9 +2018,9 @@ void addProfileParameter_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
-	
+
 	if (group->isSpawned())
 		group->getSpawnObj()->addProfileParameter(name, "", 0.f);
 }
@@ -1979,9 +2048,9 @@ void addProfileParameter_ss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
-	
+
 	if (group->isSpawned())
 		group->getSpawnObj()->addProfileParameter(name, value, 0.f);
 }
@@ -2008,9 +2077,9 @@ void addProfileParameter_sf_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
-	
+
 	if (group->isSpawned())
 		group->getSpawnObj()->addProfileParameter(name, "", value);
 }
@@ -2034,9 +2103,9 @@ void removeProfileParameter_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
-	
+
 	if (group->isSpawned())
 		group->getSpawnObj()->removeProfileParameter(name);
 }
@@ -2060,7 +2129,7 @@ void addPersistentProfileParameter_s_(CStateInstance* entity, CScriptStack& stac
 {
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 
 	if (group->isSpawned())
@@ -2091,8 +2160,8 @@ void addPersistentProfileParameter_ss_(CStateInstance* entity, CScriptStack& sta
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();	
+
+	CGroup* group = entity->getGroup();
 
 	if (group->isSpawned())
 		group->getSpawnObj()->addProfileParameter(name, value, 0.f);
@@ -2122,7 +2191,7 @@ void addPersistentProfileParameter_sf_(CStateInstance* entity, CScriptStack& sta
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	if (group->isSpawned())
 		group->getSpawnObj()->addProfileParameter(name, "", value);
@@ -2149,7 +2218,7 @@ void removePersistentProfileParameter_s_(CStateInstance* entity, CScriptStack& s
 {
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
 	if (group->isSpawned())
 		group->getSpawnObj()->removeProfileParameter(name);
@@ -2174,23 +2243,23 @@ Arguments: -> s(StateName)
 void getOutpostStateName__s(CStateInstance* si, CScriptStack& stack)
 {
 	string str;
-	
+
 	breakable
 	{
 		if (!si)
 			break;
-		
+
 		CGroup* group = si->getGroup();
 		if (!group)
 			break;
-		
+
 		COutpostManager* manager = dynamic_cast<COutpostManager*>(group->getOwner());
 		if (!manager)
 			break;
-		
+
 		str = static_cast<COutpost*>(manager->getOwner())->getStateName();
 	}
-	
+
 	stack.push(str);
 }
 
@@ -2212,12 +2281,12 @@ Arguments: -> f(TribeOwner)
 void isOutpostTribeOwner__f(CStateInstance* si, CScriptStack& stack)
 {
 	float tribeOwner = 0.f;
-	
+
 	breakable
 	{
 		if (!si)
 			break;
-		
+
 		CGroup* group = si->getGroup();
 		if (!group)
 			break;
@@ -2225,11 +2294,11 @@ void isOutpostTribeOwner__f(CStateInstance* si, CScriptStack& stack)
 		COutpostManager* manager = dynamic_cast<COutpostManager*>(group->getOwner());
 		if (!manager)
 			break;
-		
+
 		if (!static_cast<COutpost*>(manager->getOwner())->isBelongingToAGuild())
 			tribeOwner = 1.f;
 	}
-	
+
 	stack.push(tribeOwner);
 }
 
@@ -2251,12 +2320,12 @@ Arguments: -> f(TribeOwner)
 void isOutpostGuildOwner__f(CStateInstance* si, CScriptStack& stack)
 {
 	float guildOwner = 0.f;
-	
+
 	breakable
 	{
 		if (!si)
 			break;
-		
+
 		CGroup* group = si->getGroup();
 		if (!group)
 			break;
@@ -2264,11 +2333,11 @@ void isOutpostGuildOwner__f(CStateInstance* si, CScriptStack& stack)
 		COutpostManager* manager = dynamic_cast<COutpostManager*>(group->getOwner());
 		if (!manager)
 			break;
-		
+
 		if (static_cast<COutpost*>(manager->getOwner())->isBelongingToAGuild())
 			guildOwner = 1.f;
 	}
-	
+
 	stack.push(guildOwner);
 }
 
@@ -2362,7 +2431,7 @@ void getPlayerStat_ss_f(CStateInstance* entity, CScriptStack& stack)
 
 	// get Dataset of the player to have access to mirror values
 	NLMISC::CEntityId playerEid;
-	playerEid.fromString(playerEidStr.c_str());	
+	playerEid.fromString(playerEidStr.c_str());
 	TDataSetRow playerRow = TheDataset.getDataSetRow( playerEid );
 	if (! TheDataset.isAccessible( playerRow  ) )
 	{
@@ -2372,7 +2441,7 @@ void getPlayerStat_ss_f(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	if (statName == "Hp" )
-	{	
+	{
 		// return DSPropertyCURRENT_HIT_POINTS Mirror value
 		CMirrorPropValue<sint32> mirrorSymbol( TheDataset, playerRow, DSPropertyCURRENT_HIT_POINTS );
 		stack.push((float)mirrorSymbol.getValue());
@@ -2398,15 +2467,58 @@ void getPlayerStat_ss_f(CStateInstance* entity, CScriptStack& stack)
 	{
 		nlwarning("Try to call %s with wrong state %s", funName.c_str(), statName.c_str() );
 	}
-	stack.push((float)0);		
+	stack.push((float)0);
 	return;
-		
+
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection getPlayerPosition_ss_ff
+Get player position (x or y).
+
+Arguments: s(playerEidAsString), s(statName) -> s(result)
+@param[in] playerEidAsString is EntityId as string from the player we want infos
+@param[in] axis ("X" or "Y")
+@param[out] value is a the value of the parameter
+
+@code
+($playerEid)getCurrentPlayerEid();
+(x, y)getPlayerPosition($playerEid);
+@endcode
+*/
+void getPlayerPosition_s_ff(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string funName = "getPlayerPosition_s_ff";
+	// reaed input
+	std::string statName = ((std::string)stack.top()); stack.pop();
+	std::string playerEidStr = ((std::string)stack.top()); stack.pop();
+
+
+	// get Dataset of the player to have access to mirror values
+	NLMISC::CEntityId playerEid;
+	playerEid.fromString(playerEidStr.c_str());
+	TDataSetRow playerRow = TheDataset.getDataSetRow( playerEid );
+	if (! TheDataset.isAccessible( playerRow  ) )
+	{
+		nlwarning("Try to call %s with on a player '%s' that is not accessible. The isPlayerAlived function must be called to be sure that the palyer is still alived.", funName.c_str(), playerEidStr.c_str() );
+		stack.push((float)0);
+		return;
+	}
+
+	CMirrorPropValue<sint32> mirrorSymbol( TheDataset, playerRow, DSPropertyPOSY );
+	stack.push((float)mirrorSymbol.getValue());
+	CMirrorPropValue<sint32> mirrorSymbol2( TheDataset, playerRow, DSPropertyPOSX );
+	stack.push((float)mirrorSymbol2.getValue());
+	return;
+
 }
 
 /** @page code
 
 @subsection getPlayerDistance_fs_f
-Get the distance between a player and a bot in meters. 
+Get the distance between a player and a bot in meters.
 
 A player EntityId is used to identify the player. This EntityId is passed as string as argument. The EntityId can be obtains via getCurrentPlayerAggroListTarget or getRandomPlayerAggroListTarget.
 The player must be in the same AI Instance (same continent).
@@ -2441,17 +2553,17 @@ void getPlayerDistance_fs_f(CStateInstance* entity, CScriptStack& stack)
 	// get the Spawn bot by its index
 	CGroup* group = entity->getGroup();
 	if (!group)
-	{	
+	{
 		nlwarning("%s on a non Npc Group, doesn't work", funName.c_str());
 		stack.push((float) -1);
 		return;
-	}	
+	}
 	if (!group->isSpawned() ||  botIndex <0 ||  group->bots().size() <= static_cast<uint32>(botIndex))
 	{
 		nlwarning("%s used bad index %d/%d (or group not spawn)", funName.c_str(), botIndex, group->bots().size());
 		stack.push((float)-1);
 		return;
-	}	
+	}
 	CBot* bot  = group->getBot(botIndex);
 	CSpawnBot* spBot = bot?bot->getSpawnObj():0;
 	if (!spBot)
@@ -2479,9 +2591,9 @@ void getPlayerDistance_fs_f(CStateInstance* entity, CScriptStack& stack)
 	const double dist = sqrt(dist2);
 
 	stack.push(float(dist));
-	
+
 	return;
-		
+
 }
 
 
@@ -2502,15 +2614,15 @@ Arguments: f(botIndex) -> s(playerEidAsString)
 @param[out] playerEidAsString is EntityId as string from the player we want infos
 
 @code
-($playerId)getCurrentPlayerAggroListTarget(4); 
-(distance)getPlayerDistance(4, $playerId); 
+($playerId)getCurrentPlayerAggroListTarget(4);
+(distance)getPlayerDistance(4, $playerId);
 @endcode
 
 */
 
 void getCurrentPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& stack)
 {
-	
+
 	std::string funName = "getCurrentPlayerAggroListTarget_f_s";
 
 	// get input params
@@ -2519,11 +2631,11 @@ void getCurrentPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& s
 	// get spawn Bot
 	CGroup* group = entity->getGroup();
 	if (!group)
-	{	
+	{
 		nlwarning("%s on a non Npc Group, doesn't work", funName.c_str());
 		stack.push(std::string(""));
 		return;
-	}	
+	}
 	if (!group->isSpawned() ||  botIndex <0 ||  group->bots().size() <= static_cast<uint32>(botIndex))
 	{
 		nlwarning("%s used bad index %d/%d (or group not spawn)", funName.c_str(), botIndex, group->bots().size());
@@ -2541,12 +2653,12 @@ void getCurrentPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& s
 	}
 
 	// iteratre throug aggro list to have the eid with max aggro
-	CBotAggroOwner::TBotAggroList const& aggroList = spBot->getBotAggroList();	
+	CBotAggroOwner::TBotAggroList const& aggroList = spBot->getBotAggroList();
 	CBotAggroOwner::TBotAggroList::const_iterator aggroIt(aggroList.begin()), aggroEnd(aggroList.end());
 	TDataSetRow foundRow = TDataSetRow();
 	float foundAggro = 0;
 	for (; aggroIt != aggroEnd; ++aggroIt)
-	{		
+	{
 		float aggro = aggroIt->second->finalAggro();
 		if (aggro > foundAggro)
 		{
@@ -2559,7 +2671,7 @@ void getCurrentPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& s
 			{
 				continue;
 			}
-			
+
 			CBotPlayer const* const player = NLMISC::safe_cast<CBotPlayer const*>(ep);
 			if (!player)
 			{
@@ -2579,7 +2691,7 @@ void getCurrentPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& s
 		stack.push(std::string(""));
 		return;
 	}
-	
+
 	const NLMISC::CEntityId& found = CMirrors::getEntityId(foundRow);
 	stack.push(std::string(found.toString()));
 }
@@ -2603,15 +2715,15 @@ Arguments: f(botIndex) -> s(playerEidAsString)
 @param[out] playerEidAsString is EntityId as string from the player we want infos
 
 @code
-($playerId)getRandomPlayerAggroListTarget(4); 
-()setAggroListTarget(4, $playerId); 
+($playerId)getRandomPlayerAggroListTarget(4);
+()setAggroListTarget(4, $playerId);
 @endcode
 */
 
 
 void getRandomPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& stack)
 {
-	
+
 	std::string funName = "getRandomPlayerAggroListTarget_f_s";
 
 	// test botIndex
@@ -2633,7 +2745,7 @@ void getRandomPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& st
 		stack.push(std::string(""));
 		return;
 	}
-	
+
 	// make a vector of aggroable player
 	CBotAggroOwner::TBotAggroList const& aggroList = spBot->getBotAggroList();
 	//typedef std::map<TDataSetRow, TAggroEntryPtr> TBotAggroList;
@@ -2641,7 +2753,7 @@ void getRandomPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& st
 	TDataSetRow foundRow = TDataSetRow();
 	std::vector<TDataSetRow> playerAggroable;
 	for (; aggroIt != aggroEnd; ++aggroIt)
-	{		
+	{
 		if (CMirrors::getEntityId(aggroIt->first).getType() != RYZOMID::player)
 		{
 			continue;
@@ -2651,7 +2763,7 @@ void getRandomPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& st
 		{
 			continue;
 		}
-		
+
 		CBotPlayer const* const player = NLMISC::safe_cast<CBotPlayer const*>(ep);
 		if (!player)
 		{
@@ -2660,7 +2772,7 @@ void getRandomPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& st
 		if (!player->isAggroable())
 		{
 			continue;
-		}					
+		}
 		playerAggroable.push_back(aggroIt->first);
 
 	}
@@ -2673,7 +2785,7 @@ void getRandomPlayerAggroListTarget_f_s(CStateInstance* entity, CScriptStack& st
 	}
 	// chose a randomly a player among the container
 	uint32 index = static_cast<uint32>( static_cast<double>(playerAggroable.size())*rand()/(RAND_MAX+1.0) );
-	
+
 	const NLMISC::CEntityId& found = CMirrors::getEntityId(playerAggroable[ index ]);
 	stack.push(std::string(found.toString()));
 }
@@ -2715,7 +2827,7 @@ clearAggroList();
 */
 void getAggroListElement_ff_s(CStateInstance* entity, CScriptStack& stack)
 {
-	
+
 	std::string funName = "getAggroListElement_ff_s";
 
 
@@ -2723,7 +2835,7 @@ void getAggroListElement_ff_s(CStateInstance* entity, CScriptStack& stack)
 	// get params
 	uint32 elementIndex = (uint32)((float)stack.top()); stack.pop();
 	sint32 botIndex = (uint32)((float)stack.top()); stack.pop();
-	
+
 	// get spawn bot by its index
 	CGroup* group = entity->getGroup();
 	if (!group || !group->isSpawned() ||  botIndex <0 ||  group->bots().size() <= static_cast<uint32>(botIndex))
@@ -2740,7 +2852,7 @@ void getAggroListElement_ff_s(CStateInstance* entity, CScriptStack& stack)
 		stack.push(std::string(""));
 		return;
 	}
-	
+
 	// make a vector of aggroable player
 	CBotAggroOwner::TBotAggroList const& aggroList = spBot->getBotAggroList();
 	//typedef std::map<TDataSetRow, TAggroEntryPtr> TBotAggroList;
@@ -2749,7 +2861,7 @@ void getAggroListElement_ff_s(CStateInstance* entity, CScriptStack& stack)
 
 	std::vector<TDataSetRow> playerAggroable;
 	for (; aggroIt != aggroEnd; ++aggroIt)
-	{		
+	{
 		if (CMirrors::getEntityId(aggroIt->first).getType() != RYZOMID::player)
 		{
 			continue;
@@ -2759,7 +2871,7 @@ void getAggroListElement_ff_s(CStateInstance* entity, CScriptStack& stack)
 		{
 			continue;
 		}
-		
+
 		CBotPlayer const* const player = NLMISC::safe_cast<CBotPlayer const*>(ep);
 		if (!player)
 		{
@@ -2768,7 +2880,7 @@ void getAggroListElement_ff_s(CStateInstance* entity, CScriptStack& stack)
 		if (!player->isAggroable())
 		{
 			continue;
-		}					
+		}
 		playerAggroable.push_back(aggroIt->first);
 
 	}
@@ -2785,7 +2897,7 @@ void getAggroListElement_ff_s(CStateInstance* entity, CScriptStack& stack)
 		stack.push(std::string(""));
 		return;
 	}
-	
+
 	const NLMISC::CEntityId& found = CMirrors::getEntityId(playerAggroable[ uint32(elementIndex) ]);
 	stack.push(std::string(found.toString()));
 }
@@ -2824,7 +2936,7 @@ clearAggroList();
 */
 void getAggroListSize_f_f(CStateInstance* entity, CScriptStack& stack)
 {
-	
+
 	std::string funName = "getRandomPlayerAggroListTarget_f_s";
 
 
@@ -2848,7 +2960,7 @@ void getAggroListSize_f_f(CStateInstance* entity, CScriptStack& stack)
 		stack.push(float(0) );
 		return;
 	}
-	
+
 	// make a vector of aggroable player
 	CBotAggroOwner::TBotAggroList const& aggroList = spBot->getBotAggroList();
 	//typedef std::map<TDataSetRow, TAggroEntryPtr> TBotAggroList;
@@ -2857,7 +2969,7 @@ void getAggroListSize_f_f(CStateInstance* entity, CScriptStack& stack)
 
 	std::vector<TDataSetRow> playerAggroable;
 	for (; aggroIt != aggroEnd; ++aggroIt)
-	{		
+	{
 		if (CMirrors::getEntityId(aggroIt->first).getType() != RYZOMID::player)
 		{
 			continue;
@@ -2867,7 +2979,7 @@ void getAggroListSize_f_f(CStateInstance* entity, CScriptStack& stack)
 		{
 			continue;
 		}
-		
+
 		CBotPlayer const* const player = NLMISC::safe_cast<CBotPlayer const*>(ep);
 		if (!player)
 		{
@@ -2876,13 +2988,13 @@ void getAggroListSize_f_f(CStateInstance* entity, CScriptStack& stack)
 		if (!player->isAggroable())
 		{
 			continue;
-		}					
+		}
 		playerAggroable.push_back(aggroIt->first);
 
 	}
 
 
-	// return the size of the aggro list		
+	// return the size of the aggro list
 	stack.push(float(playerAggroable.size()));
 }
 
@@ -2898,13 +3010,13 @@ If no bot are identified by the bot index (or bot not spawaned) the function dis
 
 A player EntityId is used to identify the player. If the entityId is not from the aggro list then a warning message is shown in the log. If the entityId is a empty string nothing no message are displayed.
 
-Arguments: f(botIndex) >s(playerEidAsString) > 
+Arguments: f(botIndex) >s(playerEidAsString) >
 @param[in] botIndex is the index of an bot member of the current group
 @param[in] playerEidAsString is EntityId of the player that will be attacked
 
 @code
-($playerId)getRandomPlayerAggroListTarget(4); 
-()setAggroListTarget(4, $playerId); 
+($playerId)getRandomPlayerAggroListTarget(4);
+()setAggroListTarget(4, $playerId);
 @endcode
 */
 
@@ -2912,9 +3024,9 @@ void setAggroListTarget_fs_(CStateInstance* entity, CScriptStack& stack)
 {
 
 	std::string funName = "setAggroListTarget_fs_";
-	
 
-	
+
+
 	std::string playerEidStr = ((std::string)stack.top()); stack.pop();
 	sint32 botIndex = (sint32)((float)stack.top());stack.pop();
 
@@ -2926,14 +3038,14 @@ void setAggroListTarget_fs_(CStateInstance* entity, CScriptStack& stack)
 	CGroup* group = entity->getGroup();
 	if (!group || !group->isSpawned() ||  botIndex <0 ||  group->bots().size() <= static_cast<uint32>(botIndex))
 	{
-		nlwarning("%s used bad index %d/%d (or group not spawn)", funName.c_str(), botIndex, group->bots().size());		
+		nlwarning("%s used bad index %d/%d (or group not spawn)", funName.c_str(), botIndex, group->bots().size());
 		return;
-	}	
+	}
 	CBot* bot  = group->getBot(botIndex);
 	CSpawnBot* spBot = bot?bot->getSpawnObj():0;
 	if (!spBot)
 	{
-		nlwarning("%s used bad index %d/%d (or bot not spawn)", funName.c_str(), botIndex, group->bots().size());		
+		nlwarning("%s used bad index %d/%d (or bot not spawn)", funName.c_str(), botIndex, group->bots().size());
 		return;
 	}
 
@@ -2943,15 +3055,15 @@ void setAggroListTarget_fs_(CStateInstance* entity, CScriptStack& stack)
 	TDataSetRow playerRow = TheDataset.getDataSetRow( playerEid );
 	bool accessible = TheDataset.isAccessible( playerRow );
 	bool pj = playerEid.getType() == RYZOMID::player;
-	CAIEntityPhysical* ep = accessible && pj ? CAIS::instance().getEntityPhysical(playerRow):0;		
+	CAIEntityPhysical* ep = accessible && pj ? CAIS::instance().getEntityPhysical(playerRow):0;
 	CBotPlayer const* const player = ep ? NLMISC::safe_cast<CBotPlayer const*>(ep):0;
 	if (!ep || !player ||!player->isAggroable() )
 	{
-		nlwarning("Try to call %s with on a player '%s' that is not accessible (or not aggroable). The isPlayerAlived function must be called to be sure that the player is still alived.", funName.c_str(), playerEidStr.c_str() );		
+		nlwarning("Try to call %s with on a player '%s' that is not accessible (or not aggroable). The isPlayerAlived function must be called to be sure that the player is still alived.", funName.c_str(), playerEidStr.c_str() );
 		return;
 	}
 
-	
+
 	// maximize aggro from the bot for the player
 	spBot->maximizeAggroFor(playerRow);
 }
@@ -2965,18 +3077,18 @@ Maximize the Aggro of a target from the Aggro list of one bot to his group (this
 
 A player EntityId is used to identify the player. If the entityId is not from the aggro list then a warning message is shown in the log. If the entityId is a empty string nothing no message are displayed.
 
-Arguments: s(playerEidAsString) >  
+Arguments: s(playerEidAsString) >
 @param[in] playerEidAsString is EntityId of the player that will be attacked by the group
 
 @code
-($playerId)getRandomPlayerAggroListTarget(4); 
-()setGroupAggroListTarget($playerId); 
+($playerId)getRandomPlayerAggroListTarget(4);
+()setGroupAggroListTarget($playerId);
 @endcode
 */
 
 void setGroupAggroListTarget_s_(CStateInstance* entity, CScriptStack& stack)
 {
-	
+
 	std::string funName = "setGroupAggroListTarget_s_";
 
 	// read params
@@ -2986,28 +3098,28 @@ void setGroupAggroListTarget_s_(CStateInstance* entity, CScriptStack& stack)
 	NLMISC::CEntityId playerEid;
 	playerEid.fromString(playerEidStr.c_str());
 
-	
+
 	// test if player eid is ok
 	if (playerEidStr.empty()) { return; }
 	TDataSetRow playerRow = TheDataset.getDataSetRow( playerEid );
 	bool accessible = TheDataset.isAccessible( playerRow );
 	bool pj = playerEid.getType() == RYZOMID::player;
-	CAIEntityPhysical* ep = accessible && pj ? CAIS::instance().getEntityPhysical(playerRow):0;		
+	CAIEntityPhysical* ep = accessible && pj ? CAIS::instance().getEntityPhysical(playerRow):0;
 	CBotPlayer const* const player = ep ? NLMISC::safe_cast<CBotPlayer const*>(ep):0;
 	if (!ep || !player ||!player->isAggroable() )
 	{
-		nlwarning("Try to call %s with on a player '%s' that is not accessible (or not aggroable). The isPlayerAlived function must be called to be sure that the player is still alived.", funName.c_str(), playerEidStr.c_str() );		
+		nlwarning("Try to call %s with on a player '%s' that is not accessible (or not aggroable). The isPlayerAlived function must be called to be sure that the player is still alived.", funName.c_str(), playerEidStr.c_str() );
 		return;
 	}
-	
+
 	// test if group is spawn
 	CGroup* group = entity->getGroup();
 	if (!group || !group->isSpawned() || group->bots().isEmpty() )
-	{		
+	{
 		nlwarning("Call %s on a empty/not spawned group", funName.c_str() );
 		return;
 	}
-	
+
 	// apply maximizeAggroFor on all member of the group
 	CCont<CBot>::iterator itBot = group->bots().begin();
 	CCont<CBot>::iterator itEnd = group->bots().end();
@@ -3019,7 +3131,7 @@ void setGroupAggroListTarget_s_(CStateInstance* entity, CScriptStack& stack)
 		if (!spBot) { continue; }
 		spBot->maximizeAggroFor(playerRow);
 	}
-	
+
 }
 
 /** @page code
@@ -3032,19 +3144,19 @@ A player EntityId is used to identify the player. If the entityId is not from th
 
 A string is used to select groups of the manager (groups name must contains this string)
 
-Arguments: f(botIndex), s(playerEidAsString) >  
+Arguments: f(botIndex), s(playerEidAsString) >
 @param[in] playerId is EntityId of the player
 @param[in] nameElement The element of the name of all group we are interest in.
 
 @code
-($playerId)getRandomPlayerAggroListTarget(0); 
+($playerId)getRandomPlayerAggroListTarget(0);
 ()setManagerAggroListTarget($playerId, "group_bandit_");  // all group that have name like "group_bandit_*" will attack the player
 @endcode
 */
 
 void setManagerAggroListTarget_ss_(CStateInstance* entity, CScriptStack& stack)
 {
-	
+
 	std::string funName = "setManagerAggroListTarget_ss_";
 
 
@@ -3061,25 +3173,25 @@ void setManagerAggroListTarget_ss_(CStateInstance* entity, CScriptStack& stack)
 	TDataSetRow playerRow = TheDataset.getDataSetRow( playerEid );
 	bool accessible = TheDataset.isAccessible( playerRow );
 	bool pj = playerEid.getType() == RYZOMID::player;
-	CAIEntityPhysical* ep = accessible && pj ? CAIS::instance().getEntityPhysical(playerRow):0;		
+	CAIEntityPhysical* ep = accessible && pj ? CAIS::instance().getEntityPhysical(playerRow):0;
 	CBotPlayer const* const player = ep ? NLMISC::safe_cast<CBotPlayer const*>(ep):0;
 	if (!ep || !player ||!player->isAggroable() )
 	{
-		nlwarning("Try to call %s with on a player '%s' that is not accessible (or not aggroable). The isPlayerAlived function must be called to be sure that the player is still alived.", funName.c_str(), playerEidStr.c_str() );		
+		nlwarning("Try to call %s with on a player '%s' that is not accessible (or not aggroable). The isPlayerAlived function must be called to be sure that the player is still alived.", funName.c_str(), playerEidStr.c_str() );
 		return;
 	}
-	
-	
+
+
 	CGroup* group = entity->getGroup();
 	if (!group )
-	{		
+	{
 		nlwarning("Call %s on a non exisiting group", funName.c_str() );
 		return;
 	}
 	// get the manager of the group
 	CManager* manager = group->getOwner();
 	if (!manager)
-	{		
+	{
 		nlwarning("Call %s on a non exisiting manager", funName.c_str() );
 		return;
 	}
@@ -3088,7 +3200,7 @@ void setManagerAggroListTarget_ss_(CStateInstance* entity, CScriptStack& stack)
 	while (group!=NULL)
 	{
 		if ( ! (!group || !group->isSpawned() || group->bots().isEmpty() ) && group->getName().find(groupNameStr) != std::string::npos )
-		{		
+		{
 				// apply maximizeAggroFor on all member of the group
 			CCont<CBot>::iterator itBot = group->bots().begin();
 			CCont<CBot>::iterator itEnd = group->bots().end();
@@ -3100,10 +3212,10 @@ void setManagerAggroListTarget_ss_(CStateInstance* entity, CScriptStack& stack)
 				if (!spBot) { continue; }
 				spBot->maximizeAggroFor(playerRow);
 			}
-		}			
+		}
 		group = manager->getNextValidGroupChild(group);
 	}
-			
+
 }
 
 
@@ -3123,8 +3235,8 @@ Arguments:, s(botName) >  f(botIndex)
 
 @code
 (botIndex)getBotIndexByName("boss_random_aggro");
-($playerId)getRandomPlayerAggroListTarget(botIndex); 
-()setAggroListTarget(botIndex, $playerId); 
+($playerId)getRandomPlayerAggroListTarget(botIndex);
+()setAggroListTarget(botIndex, $playerId);
 }
 @endcode
 */
@@ -3138,12 +3250,12 @@ void getBotIndexByName_s_f(CStateInstance* entity, CScriptStack& stack)
 	// test if group is spawned
 	CGroup* group = entity->getGroup();
 	if (!group || group->bots().isEmpty() )
-	{	
+	{
 		nlwarning("Call %s on a empty group", funName.c_str() );
 		stack.push((float)-1);
 		return;
 	}
-	
+
 
 	// Search on all  persistent bot of the groupe the bot that have the searched name
 	CCont<CBot>::iterator itBot = group->bots().begin();
@@ -3160,7 +3272,7 @@ void getBotIndexByName_s_f(CStateInstance* entity, CScriptStack& stack)
 			return;
 		}
 	}
-	
+
 	// Bot not found
 	stack.push((float)-1);
 	return;
@@ -3184,12 +3296,12 @@ Arguments: s(playerid) >  f(success)
 @code
 ($alived)isGroupAlived();
 if ($alived == 1.0f) {
-} 
+}
 @endcode
 
 */
 void isGroupAlived__f(CStateInstance* entity, CScriptStack& stack)
-{	
+{
 	isAlived__f(entity, stack);
 }
 
@@ -3222,11 +3334,11 @@ void isBotAlived_f_f(CStateInstance* entity, CScriptStack& stack)
 	// get Spawn Bot
 	CGroup* group = entity->getGroup();
 	if (!group)
-	{	
+	{
 		nlwarning("%s on a non Npc Group, doesn't work", funName.c_str());
 		stack.push((float)0);
 		return;
-	}	
+	}
 	if (!group->isSpawned() || group->bots().isEmpty() ||  botIndex < 0 || group->bots().size() < static_cast<uint32>(botIndex))
 	{
 		stack.push(0.0f);return;
@@ -3262,7 +3374,7 @@ Arguments: s(playerId) >  f(success)
 ($playerId)getCurrentPlayerAggroListTarget($botIndex):
 (alived)isPlayerlived($playerId);
 if (alived == 1.0f) {
-} 
+}
 @endcode
 */
 void isPlayerAlived_s_f(CStateInstance* entity, CScriptStack& stack)
@@ -3272,7 +3384,7 @@ void isPlayerAlived_s_f(CStateInstance* entity, CScriptStack& stack)
 
 	//get CAIEntityPhysical of the player
 	NLMISC::CEntityId playerEid;
-	playerEid.fromString(playerEidStr.c_str());		
+	playerEid.fromString(playerEidStr.c_str());
 	TDataSetRow playeDataSetRow = TheDataset.getDataSetRow( playerEid) ;
 	if (playerEidStr.empty() || !TheDataset.isAccessible( playeDataSetRow ) || playerEid.getType() != RYZOMID::player )
 	{
@@ -3281,7 +3393,7 @@ void isPlayerAlived_s_f(CStateInstance* entity, CScriptStack& stack)
 	CAIEntityPhysical* ep = CAIS::instance().getEntityPhysical(playeDataSetRow);
 	if (!ep)
 	{
-		
+
 		stack.push(0.0f); return;
 	}
 	// test if the player is alived
@@ -3291,7 +3403,7 @@ void isPlayerAlived_s_f(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	stack.push(0.0f); return;
-	
+
 }
 
 /** @page code
@@ -3300,7 +3412,7 @@ void isPlayerAlived_s_f(CStateInstance* entity, CScriptStack& stack)
 Gets the server time as string "eg 21:17:14 the x"
 This function is useful for stat purpose or debug (to know when a boss is down)
 
-Arguments: > s(serverTime) 
+Arguments: > s(serverTime)
 
 
 @param[out] The server time as debug string
@@ -3324,7 +3436,7 @@ void getServerTimeStr__s(CStateInstance* entity, CScriptStack& stack)
 
 Gets the server time as number (it is the number of seconde since 1970). This value is useful for saving the server date on a file
 
-Arguments: > s(serverTime) 
+Arguments: > s(serverTime)
 
 @param[out] The server time as string (a float is not sharp enough
 
@@ -3363,19 +3475,19 @@ void getRyzomDateStr__s(CStateInstance* entity, CScriptStack& stack)
 	std::string result;
 	const CRyzomTime &rt = CTimeInterface::getRyzomTime();
 	result = NLMISC::toString("%d:%d:00", (int) floorf(rt.getRyzomTime()) , (int) floorf(60.f * fmodf(rt.getRyzomTime(), 1.f)));
-	
+
 	uint32 month = rt.getRyzomMonth();
 	MONTH::EMonth monthInCycle = rt.getRyzomMonthInCurrentCycle();
 	std::string monthName = MONTH::toString((MONTH::EMonth) monthInCycle);
-	uint32 dayOfMonth = rt.getRyzomDayOfMonth();			
+	uint32 dayOfMonth = rt.getRyzomDayOfMonth();
 	std::string dayName = WEEKDAY::toString((WEEKDAY::EWeekDay) rt.getRyzomDayOfWeek());
 	result += NLMISC::toString(" / %s %d  %s(%d) %d",
 								dayName.c_str(),
 								(int) (dayOfMonth + 1),
 								monthName.c_str(),
-		                       (int)  (month + 1),							   
+		                       (int)  (month + 1),
 							   (int) rt.getRyzomYear());
-				
+
 	stack.push( result );
 }
 
@@ -3462,7 +3574,7 @@ Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum va
 - faction
 - power_type
 - race
-- damage_type		
+- damage_type
 - characteristic
 - score
 - body_part
@@ -3484,22 +3596,22 @@ Arguments: s(paramType), f(value) ->
 // CGroup
 void phrasePushValue_sf_(CStateInstance* entity, CScriptStack& stack)
 {
-	float f = (float)stack.top();stack.pop(); // get the value as float 
+	float f = (float)stack.top();stack.pop(); // get the value as float
 	std::string typeStr = (std::string)stack.top(); stack.pop(); // get the param type
 	// create the good STRING_MANAGER::TParam in fonction of its type and is value
 	STRING_MANAGER::TParamType type = STRING_MANAGER::stringToParamType(typeStr);
 	STRING_MANAGER::TParam param;
 	param.Type = type;
-	switch( type )	
-	{	
-		
+	switch( type )
+	{
+
 		case STRING_MANAGER::money:
 		{
 			param.Money = static_cast<uint64>(f);
 			break;
 		}
-		
-				
+
+
 		case STRING_MANAGER::integer:
 		{
 			param.Int = static_cast<sint32>(f);
@@ -3510,18 +3622,18 @@ void phrasePushValue_sf_(CStateInstance* entity, CScriptStack& stack)
 		{
 			param.Time = static_cast<uint32>(f);
 			break;
-		}			
+		}
 
 		case STRING_MANAGER::skill:
 		case STRING_MANAGER::faction:
 		case STRING_MANAGER::power_type:
 		case STRING_MANAGER::race:
-		case STRING_MANAGER::damage_type:			
+		case STRING_MANAGER::damage_type:
 		case STRING_MANAGER::characteristic:
 		case STRING_MANAGER::score:
-		case STRING_MANAGER::body_part:	
-		{		
-			param.Enum = static_cast<uint32>( f );	
+		case STRING_MANAGER::body_part:
+		{
+			param.Enum = static_cast<uint32>( f );
 			break;
 		}
 
@@ -3530,7 +3642,7 @@ void phrasePushValue_sf_(CStateInstance* entity, CScriptStack& stack)
 
 		break;
 	}
-	
+
 	PhraseParameters.Values.push_back(param);
 }
 
@@ -3588,7 +3700,7 @@ Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum va
 - faction
 - power_type
 - race
-- damage_type		
+- damage_type
 - characteristic
 - score
 - body_part
@@ -3622,15 +3734,15 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 	STRING_MANAGER::TParamType type = STRING_MANAGER::stringToParamType(typeStr);
 	STRING_MANAGER::TParam param;
 	param.Type = type;
-	switch( type )	
-	{	
-		
+	switch( type )
+	{
+
 		case STRING_MANAGER::money:
 		{
 			NLMISC::fromString(s, param.Money);
 			break;
 		}
-	
+
 		case STRING_MANAGER::player:
 		case STRING_MANAGER::bot:
 		case STRING_MANAGER::entity:
@@ -3640,14 +3752,14 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 			uint32 alias = 0;
 			id.fromString(s.c_str());
 			CAIEntityPhysical* entityPhysical=CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(id));
-			if (entityPhysical)	
+			if (entityPhysical)
 			{
 				switch( entityPhysical->getRyzomType())
 				{
 					case RYZOMID::creature:
 					case RYZOMID::npc:
 					{
-					
+
 						CSpawnBot* sb = NLMISC::safe_cast<CSpawnBot*>(entityPhysical);
 						alias = sb->getPersistent().getAlias();
 						break;
@@ -3660,7 +3772,7 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 			param.setEIdAIAlias( id, alias );
 		}
 		break;
-				
+
 		case STRING_MANAGER::integer:
 		{
 			NLMISC::fromString(s, param.Int);
@@ -3672,9 +3784,9 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 			NLMISC::fromString(s, param.Time);
 			break;
 		}
-		
-				
-		case STRING_MANAGER::item:	
+
+
+		case STRING_MANAGER::item:
 		case STRING_MANAGER::outpost:
 		case STRING_MANAGER::creature_model:
 		case STRING_MANAGER::creature:
@@ -3692,10 +3804,10 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 			}
 			break;
 		}
-		
-		
+
+
 		case STRING_MANAGER::place:
-		case STRING_MANAGER::event_faction:		
+		case STRING_MANAGER::event_faction:
 		case STRING_MANAGER::title:
 		case STRING_MANAGER::bot_name:
 		{
@@ -3707,11 +3819,11 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 		case STRING_MANAGER::faction:
 		case STRING_MANAGER::power_type:
 		case STRING_MANAGER::race:
-		case STRING_MANAGER::damage_type:			
+		case STRING_MANAGER::damage_type:
 		case STRING_MANAGER::characteristic:
 		case STRING_MANAGER::score:
-		case STRING_MANAGER::body_part:	
-		{		
+		case STRING_MANAGER::body_part:
+		{
 			NLMISC::fromString(s, param.Enum);
 			break;
 		}
@@ -3729,14 +3841,14 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 		case STRING_MANAGER::role:
 		case STRING_MANAGER::compass:
 		case STRING_MANAGER::guild:
-		case STRING_MANAGER::ecosystem:		
+		case STRING_MANAGER::ecosystem:
 		case STRING_MANAGER::classification_type:
 		default:
 			param.Type = STRING_MANAGER::invalid_value;
 
 		break;
 	}
-	
+
 	PhraseParameters.Values.push_back(param);
 }
 
@@ -3745,9 +3857,9 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 static void phraseEnd(CStateInstance* entity, CScriptStack& stack,  CPhraseParameters::TMode mode)
 {
 	std::string funName = "phraseEnd";
-	
-	// get Function parameters			
-	
+
+	// get Function parameters
+
 	std::string phraseId = (std::string)stack.top();stack.pop();
 	std::string sayMode;
 	if (mode != CPhraseParameters::EmoteMsg)
@@ -3755,25 +3867,25 @@ static void phraseEnd(CStateInstance* entity, CScriptStack& stack,  CPhraseParam
 		sayMode = (std::string)stack.top();stack.pop();
 	}
 	sint32 botIndex = (sint32)((float)stack.top());stack.pop();
-	
+
 
 	// Verify is bot is alived
 
 
 	CGroup* group = entity->getGroup();
 	if (!group)
-	{	
+	{
 		nlwarning("%s on a non Npc Group, doesn't work", funName.c_str());
 		PhraseParameters.Values.clear();
 		return;
-	}	
+	}
 	if (!group->isSpawned() || group->bots().isEmpty() ||  botIndex < 0 || group->bots().size() < static_cast<uint32>(botIndex))
 	{
 		PhraseParameters.Values.clear();
 		return;
-	}	
+	}
 	const CBot *const	bot = group->getBot(botIndex);
-	if	( !bot || !bot->isSpawned()) 
+	if	( !bot || !bot->isSpawned())
 	{
 		PhraseParameters.Values.clear();
 		return;
@@ -3784,7 +3896,7 @@ static void phraseEnd(CStateInstance* entity, CScriptStack& stack,  CPhraseParam
 		PhraseParameters.Values.clear();
 		return;
 	}
-	
+
 	// parse type of chat
 	CChatGroup::TGroupType groupType;
 	if (mode != CPhraseParameters::EmoteMsg)
@@ -3799,21 +3911,21 @@ static void phraseEnd(CStateInstance* entity, CScriptStack& stack,  CPhraseParam
 		return;
 	}
 
-	// send chat to client 
+	// send chat to client
 	switch (mode)
 	{
 	case CPhraseParameters::NpcMsg:
-		npcChatParamToChannel(sp->dataSetRow(), groupType, phraseId.c_str(), PhraseParameters.Values);	
+		npcChatParamToChannel(sp->dataSetRow(), groupType, phraseId.c_str(), PhraseParameters.Values);
 		break;
 	case CPhraseParameters::SystemMsg:
 		STRING_MANAGER::sendSystemStringToClientAudience(sp->dataSetRow(),std::vector<NLMISC::CEntityId>(), groupType, phraseId.c_str(), PhraseParameters.Values);
 		break;
 
 	case CPhraseParameters::EmoteMsg:
-		STRING_MANAGER::sendCustomEmoteTextToClientAudience(sp->dataSetRow(),std::vector<NLMISC::CEntityId>(), phraseId.c_str(), PhraseParameters.Values);	
+		STRING_MANAGER::sendCustomEmoteTextToClientAudience(sp->dataSetRow(),std::vector<NLMISC::CEntityId>(), phraseId.c_str(), PhraseParameters.Values);
 		break;
 	}
-	
+
 	PhraseParameters.Values.clear();
 }
 
@@ -3821,7 +3933,7 @@ static void phraseEnd(CStateInstance* entity, CScriptStack& stack,  CPhraseParam
 /** @page code
 
 @subsection phraseEndNpcMsg_fss_
-Send a message with parameter through a bot says. 
+Send a message with parameter through a bot says.
 Parameters are taken from the parameters stack.
 @see phrasePushValue_sf_
 @see phrasePushString_ss_
@@ -3939,10 +4051,10 @@ void phraseEndEmoteMsg_fs_(CStateInstance* entity, CScriptStack& stack)
 /** @page code
 
 @subsection queryEgs_sscfs_
-Send a query msg to egs to know infos on a player. 
+Send a query msg to egs to know infos on a player.
 Answer is asynchronous so we have to indicates a group and a user event that will be triggered when answer will come back to AIS
 
-Possible info to know are 
+Possible info to know are
 - Name
 - Hp
 - MaxHp
@@ -3987,7 +4099,7 @@ Answer will be given by the getParam
 @endcode
 Answer of the EGS
 @code
-	// the user_event 4 of groupToNotify will be trigered 
+	// the user_event 4 of groupToNotify will be trigered
 	($msgName)getEventParam(0); // the msg name
 	($ret)getEventParam(1); // the return
 	($funName)getEventParam(2); // the name of the function
@@ -4016,8 +4128,8 @@ void queryEgs_sscfs_(CStateInstance* entity, CScriptStack& stack)
 	std::string funName = "queryEgs_sscfs_";
 	// read input params
 	string literal = (string)stack.top(); stack.pop();
-	float useEventId = (float)stack.top(); stack.pop();	
-	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();	
+	float useEventId = (float)stack.top(); stack.pop();
+	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();
 	string param1 = (string)stack.top(); stack.pop();
 	string func = (string)stack.top(); stack.pop();
 
@@ -4044,14 +4156,14 @@ void queryEgs_sscfs_(CStateInstance* entity, CScriptStack& stack)
 
 /*
 @subsection queryEgs_ssscfs_
-Send a query msg to egs to know infos on a player. 
+Send a query msg to egs to know infos on a player.
 Answer is asynchronous so we have to indicates a group and a user event that will be triggered when answer will come back to AIS
 
-Possible info to know are: 
+Possible info to know are:
 - KnowBrick (to knwo if the player know a specific brick); return value is 0 or 1 (if the player know the brick)
-- IsInInventory (to knwo has an item in inventory of in equipement); return value is 0, 1(item in equipment), 2(item in bag) 
+- IsInInventory (to knwo has an item in inventory of in equipement); return value is 0, 1(item in equipment), 2(item in bag)
 - Target (to know if a player target a bot; return value is 0, 1(player target the bot)
-	
+
 Arguments: s(botIndex), s(query), s(queryParam), c(groupThatWillBeTriggered), f(idOfTheUserEvent), s(msgId)
 @param[in] botIndex the Position of the bot in the group ( see getBotIndexByName_s_f)
 @param[in] query The query we want to send
@@ -4109,8 +4221,8 @@ void queryEgs_ssscfs_(CStateInstance* entity, CScriptStack& stack)
 	std::string funName = "queryEgs_ssscfs_";
 	// get input params
 	string literal = (string)stack.top(); stack.pop();
-	float useEventId = (float)stack.top(); stack.pop();	
-	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();	
+	float useEventId = (float)stack.top(); stack.pop();
+	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();
 	string param2 = (string)stack.top(); stack.pop();
 	string param1 = (string)stack.top(); stack.pop();
 	string func = (string)stack.top(); stack.pop();
@@ -4150,12 +4262,12 @@ A player EntityId is used to identify the player.
 A index is used to identified the bot (index for the current group)
 
 
-Arguments:  f(botIndex), s(playerEid) > 
+Arguments:  f(botIndex), s(playerEid) >
 @param[in] botIndex is the index of the bot in the current group(static group)
 @param[in] playerEid The entityId of the player
 
 @code
-($playerId)getRandomPlayerAggroListTarget(0); 
+($playerId)getRandomPlayerAggroListTarget(0);
 ()teleportPlayer(0, $playerEid); // teleport player to the boss.
 @endcode
 */
@@ -4165,35 +4277,35 @@ void summonPlayer_fs_(CStateInstance* entity, CScriptStack& stack)
 	std::string funName = "summonPlayer_fffs_";
 	std::string playerEidStr = ((std::string)stack.top()); stack.pop();
 	sint32 botIndex = (sint32)((float)stack.top()); stack.pop();
-	
+
 
 	// Verify is bot is alived
 	CGroup* group = entity->getGroup();
 	if (!group)
-	{	
-		nlwarning("%s on a non Npc Group, doesn't work", funName.c_str());		
+	{
+		nlwarning("%s on a non Npc Group, doesn't work", funName.c_str());
 		return;
-	}	
+	}
 	if (!group->isSpawned() || group->bots().isEmpty() ||  botIndex < 0 || group->bots().size() < static_cast<uint32>(botIndex))
-	{		
+	{
 		return;
-	}	
+	}
 	const CBot *const	bot = group->getBot(botIndex);
-	if	( !bot || !bot->isSpawned()) 
-	{	
+	if	( !bot || !bot->isSpawned())
+	{
 		return;
 	}
 	CSpawnBot *const	sp= bot->getSpawnObj();
 	if	( !sp || !sp->isAlive() )
-	{	
+	{
 		return;
 	}
 
 
 	// Read position for mirror
-	TDataSetRow row = sp->dataSetRow();		
+	TDataSetRow row = sp->dataSetRow();
 	if (! TheDataset.isAccessible( row ) )
-	{	
+	{
 		return;
 	}
 
@@ -4218,9 +4330,9 @@ void summonPlayer_fs_(CStateInstance* entity, CScriptStack& stack)
 	TDataSetRow	CharacterRowId = charEntity->dataSetRow();
 
 	NLMISC::CEntityId player = CMirrors::getEntityId(CharacterRowId);
-	
+
 	if (player != NLMISC::CEntityId::Unknown)
-	{	
+	{
 		sint32 x2 = mirrorSymbolX.getValue();
 		sint32 y2 = mirrorSymbolY.getValue();
 		sint32 z2 = 0;
@@ -4229,13 +4341,13 @@ void summonPlayer_fs_(CStateInstance* entity, CScriptStack& stack)
 		NLNET::CMessage msgout( "TELEPORT_PLAYER" );
 		nlWrite(msgout, serial, player );
 		msgout.serial( const_cast<sint32 &>(x2) );
-		msgout.serial( const_cast<sint32 &>(y2) );		
-		msgout.serial( const_cast<sint32 &>(z2) );		
-		msgout.serial( const_cast<float &>(t) );		
-		sendMessageViaMirror( "EGS", msgout );	
+		msgout.serial( const_cast<sint32 &>(y2) );
+		msgout.serial( const_cast<sint32 &>(z2) );
+		msgout.serial( const_cast<float &>(t) );
+		sendMessageViaMirror( "EGS", msgout );
 	}
 
-	
+
 }
 
 /** @page code
@@ -4248,12 +4360,12 @@ A player EntityId is used to identify the player.
 The position is identified by the value x,y,z and the heading
 
 
-Arguments: s(playerId), f(x), f(y), f(z), f(heading) >  
+Arguments: s(playerId), f(x), f(y), f(z), f(heading) >
 @param[in] playerId is EntityId of the player
 @param[in] x,y,z,heading is the new position of the player
 
 @code
-($playerId)getRandomPlayerAggroListTarget(0); 
+($playerId)getRandomPlayerAggroListTarget(0);
 ()teleportPlayer($playerEid, 1000, 1000, 100, 0);
 @endcode
 */
@@ -4265,7 +4377,7 @@ void teleportPlayer_sffff_(CStateInstance* entity, CScriptStack& stack)
 	float y = (float)stack.top(); stack.pop();
 	float x = (float)stack.top(); stack.pop();
 	std::string playerEidStr = (std::string)stack.top(); stack.pop();
-	NLMISC::CEntityId playerEid; 
+	NLMISC::CEntityId playerEid;
 	playerEid.fromString(playerEidStr.c_str());
 
 	// retrieve the CBotPlayer
@@ -4281,20 +4393,20 @@ void teleportPlayer_sffff_(CStateInstance* entity, CScriptStack& stack)
 
 	// teleport player to position
 	if (playerEid != NLMISC::CEntityId::Unknown)
-	{		
+	{
 		sint32 x2 = static_cast<sint32>(x*1000);
 		sint32 y2 = static_cast<sint32>(y*1000);
-		sint32 z2 = static_cast<sint32>(z*1000);		
+		sint32 z2 = static_cast<sint32>(z*1000);
 
 		NLNET::CMessage msgout( "TELEPORT_PLAYER" );
 		msgout.serial( const_cast<CEntityId &>(playerEid) );
 		msgout.serial( const_cast<sint32 &>(x2) );
-		msgout.serial( const_cast<sint32 &>(y2) );		
-		msgout.serial( const_cast<sint32 &>(z2) );		
-		msgout.serial( const_cast<float &>(t) );		
-		sendMessageViaMirror( "EGS", msgout );	
+		msgout.serial( const_cast<sint32 &>(y2) );
+		msgout.serial( const_cast<sint32 &>(z2) );
+		msgout.serial( const_cast<float &>(t) );
+		sendMessageViaMirror( "EGS", msgout );
 	}
-	
+
 }
 //----------------------------------------------------------------------------
 /** @page code
@@ -4323,18 +4435,18 @@ void getBotEid_f_s(CStateInstance* entity, CScriptStack& stack)
 	// get spawn Bot by its index
 	CGroup* group = entity->getGroup();
 	if (!group)
-	{	
+	{
 		nlwarning("%s on a non Npc Group, doesn't work", funName.c_str());
 		stack.push(std::string(CEntityId::Unknown.toString()));
 		return;
-	}	
+	}
 	sint32 botIndex = (sint32)((float)stack.top());stack.pop();
 	if (!group->isSpawned() || group->bots().isEmpty() ||  botIndex < 0 || group->bots().size() < static_cast<uint32>(botIndex))
 	{
 		stack.push(std::string(CEntityId::Unknown.toString()));
 		return;
 	}
-	
+
 	const CBot *const	bot = group->getBot(botIndex);
 	if	( !bot  || !bot->isSpawned()) { stack.push(std::string(CEntityId::Unknown.toString())); return;}
 
@@ -4376,22 +4488,22 @@ void getBotIndex_s_f(CStateInstance* entity, CScriptStack& stack)
 	std::string funName = "getBotEid_f_s";
 	CGroup* group = entity->getGroup();
 	if (!group)
-	{	
+	{
 		nlwarning("%s on a non Npc Group, doesn't work", funName.c_str());
 		stack.push(std::string(CEntityId::Unknown.toString()));
 		return;
-	}	
+	}
 	std::string botEid = (std::string)stack.top(); stack.pop();
-		
+
 	// look in the group if the bot is alived
 	uint32 botIndex = 0, last = group->bots().size();
 	for ( ;botIndex != last; ++botIndex)
 	{
 		if (!group->isSpawned() || group->bots().isEmpty() || group->bots().size() < static_cast<uint32>(botIndex))
 		{
-			continue;			
+			continue;
 		}
-		
+
 		const CBot *const	bot = group->getBot(botIndex);
 		if	( !bot  || !bot->isSpawned()) { continue; }
 
@@ -4409,7 +4521,7 @@ void getBotIndex_s_f(CStateInstance* entity, CScriptStack& stack)
 	}
 	stack.push((float)-1);
 	return;
-	
+
 }
 
 /** @page code
@@ -4437,7 +4549,7 @@ void getCurrentPlayerEid__s(CStateInstance* entity, CScriptStack& stack)
 	std::string funName = "getCurrentPlayerEid__s";
 	CEntityId id = CEntityId::Unknown;
 	// if we are in player_target_npc event TempPlayer is valid
-	if (!TempPlayer)		
+	if (!TempPlayer)
 	{
 		//TempPlayer is invalid so return Unkwn eid
 		std::string s = id.toString();
@@ -4509,11 +4621,11 @@ void setSheet_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	string sheetname = stack.top();
 	stack.pop();
-	
+
 	CSheetId sheetId(sheetname+".creature");
 	if (sheetId==CSheetId::Unknown)
 		return;
-	
+
 	FOREACH(itBot, CCont<CBot>, entity->getGroup()->bots())
 	{
 		CBot* bot = *itBot;
@@ -4544,7 +4656,7 @@ void setClientSheet_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	string sheetname = stack.top();
 	stack.pop();
-	
+
 	if (sheetname.find(".creature") == string::npos)
 		sheetname += ".creature";
 
@@ -4578,9 +4690,9 @@ void setHealer_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	bool value = ((float)stack.top())!=0.f;
 	stack.pop();
-	
+
 	CGroup* group = entity->getGroup();
-	
+
 	if (group->isSpawned())
 	{
 		FOREACH(itBot, CCont<CBot>, group->bots())
@@ -4622,7 +4734,7 @@ void sitDown__(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("sitDown__ failed");
 		return;
 	}
-	
+
 	CAILogicActionSitDownHelper::sitDown(group);
 }
 
@@ -4636,7 +4748,7 @@ Make the group stand up (if was previously stand down)
 Arguments: ->
 
 @code
-()standUp(); 
+()standUp();
 
 @endcode
 
@@ -4650,7 +4762,7 @@ void standUp__(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("standUp__ failed");
 		return;
 	}
-	
+
 	CAILogicActionSitDownHelper::standUp(group);
 }
 
@@ -4663,7 +4775,7 @@ Use to implement setConditionRet
 Arguments: ->
 
 @code
-()setConditionRet(1); 
+()setConditionRet(1);
 
 @endcode
 
@@ -4678,7 +4790,7 @@ void setConditionSuccess_f_(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("setConditionSuccess_f_ failed");
 		return;
 	}
-	
+
 	CAILogicDynamicIfHelper::setConditionSuccess(conditionState);
 }
 
@@ -4732,7 +4844,7 @@ void facing_f_(CStateInstance* entity, CScriptStack& stack)
 						spawnBot->setTheta(randomAngle());
 					else
 						spawnBot->setTheta(theta);
-					
+
 				}
 			}
 		}
@@ -4742,12 +4854,13 @@ void facing_f_(CStateInstance* entity, CScriptStack& stack)
 std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 {
 	std::map<std::string, FScrptNativeFunc> functions;
-	
+
 #define REGISTER_NATIVE_FUNC(cont, func) cont.insert(std::make_pair(std::string(#func), &func))
-	
+
 	REGISTER_NATIVE_FUNC(functions, spawn__);
-	REGISTER_NATIVE_FUNC(functions, despawn_f_);	
+	REGISTER_NATIVE_FUNC(functions, despawn_f_);
 	REGISTER_NATIVE_FUNC(functions, isAlived__f);
+	REGISTER_NATIVE_FUNC(functions, spawnBot_fsssffff_);
 	REGISTER_NATIVE_FUNC(functions, newNpcChildGroupPos_ssfff_c);
 	REGISTER_NATIVE_FUNC(functions, newNpcChildGroupPos_ssfff_);
 	REGISTER_NATIVE_FUNC(functions, newNpcChildGroupPos_ssff_c);
@@ -4793,6 +4906,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, downScaleHP_f_);
 	REGISTER_NATIVE_FUNC(functions, upScaleHP_f_);
 	REGISTER_NATIVE_FUNC(functions, addHP_f_);
+	REGISTER_NATIVE_FUNC(functions, giveHP_f_);
 	REGISTER_NATIVE_FUNC(functions, aiAction_s_);
 	REGISTER_NATIVE_FUNC(functions, aiActionSelf_s_);
 	REGISTER_NATIVE_FUNC(functions, addProfileParameter_s_);
@@ -4834,6 +4948,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	// Boss functions (Player infos)
 	REGISTER_NATIVE_FUNC(functions, isPlayerAlived_s_f);
 	REGISTER_NATIVE_FUNC(functions, getPlayerStat_ss_f);
+	REGISTER_NATIVE_FUNC(functions, getPlayerPosition_s_ff);
 	REGISTER_NATIVE_FUNC(functions, getPlayerDistance_fs_f);
 	REGISTER_NATIVE_FUNC(functions, getCurrentPlayerEid__s);
 	REGISTER_NATIVE_FUNC(functions, queryEgs_sscfs_);
@@ -4847,7 +4962,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, setAggroListTarget_fs_);
 	REGISTER_NATIVE_FUNC(functions, setGroupAggroListTarget_s_);
 	REGISTER_NATIVE_FUNC(functions, setManagerAggroListTarget_ss_);
-	
+
 	// Boss functions (Time infos)
 	REGISTER_NATIVE_FUNC(functions, getServerTimeStr__s);
 	REGISTER_NATIVE_FUNC(functions, getServerTime__s);
@@ -4860,6 +4975,6 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 
 
 #undef REGISTER_NATIVE_FUNC
-	
+
 	return functions;
 }

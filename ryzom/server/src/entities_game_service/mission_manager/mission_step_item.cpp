@@ -20,6 +20,8 @@
 #include "nel/misc/algo.h"
 #include "mission_step_template.h"
 #include "mission_manager/mission_template.h"
+#include "player_manager/character.h"
+#include "player_manager/player_manager.h"
 #include "mission_log.h"
 #include "mission_manager/mission_parser.h"
 #include "mission_manager/ai_alias_translator.h"
@@ -40,7 +42,7 @@ Steps linked with items
 ***************************************************************************************************/
 
 bool	IMissionStepItem::buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
-{	
+{
 	_SourceLine = line;
 	bool ret = true;
 	if ( script.size() < 2 )
@@ -56,51 +58,61 @@ bool	IMissionStepItem::buildStep( uint32 line, const std::vector< std::string > 
 		bool qualityNotFound = false;
 		for ( uint i = 0; i < subs.size(); i++ )
 		{
+			CSubStep subStep;
 			std::vector< std::string > args;
 			CMissionParser::tokenizeString( subs[i]," \t", args );
-			if ( args.size() < 1 || args.size() > 3 )
-			{
-				ret = false;
-				MISLOGSYNTAXERROR("<item> [<quantity>][<quality>] *[; <item> [<quantity>][<quality>]]");
-				return false;
-			}
-			CSubStep subStep;
-			subStep.Sheet = CSheetId( args[0] + ".sitem" );
-			missionData.ChatParams.push_back( make_pair( args[0], STRING_MANAGER::item ) );
-			if ( args.size() > 1 )
-				NLMISC::fromString(args[1], subStep.Quantity);
-			else
-				subStep.Quantity = 1;
 
-			if ( args.size() == 3 )
+			//// Dynamic Mission Args : #dynamic#
+			if ((args.size() == 1) && (args[0] == "#dynamic#"))
 			{
-				NLMISC::fromString(args[2], subStep.Quality);
-				qualityFound = true;
+				subStep.Dynamic = missionData.Name;
+				subStep.Quantity = 1000; // Use a very high value to prevent end of mission
 			}
+			////
 			else
 			{
-				subStep.Quality = 0;
-				qualityNotFound = true;
+				if ( args.size() < 1 || args.size() > 3 )
+				{
+					ret = false;
+					MISLOGSYNTAXERROR("<item> [<quantity>][<quality>] *[; <item> [<quantity>][<quality>]]");
+					return false;
+				}
+				missionData.ChatParams.push_back( make_pair( args[0], STRING_MANAGER::item ) );
+				subStep.Dynamic = "";
+				subStep.Sheet = CSheetId(args[0] + ".sitem");
+				if ( args.size() > 1 )
+					NLMISC::fromString(args[1], subStep.Quantity);
+				else
+					subStep.Quantity = 1;
+
+				if ( args.size() == 3 )
+				{
+					NLMISC::fromString(args[2], subStep.Quality);
+					qualityFound = true;
+				}
+				else
+				{
+					subStep.Quality = 0;
+					qualityNotFound = true;
+				}
+				if ( subStep.Sheet == CSheetId::Unknown )
+				{
+					ret = false;
+					MISLOGERROR1("invalid sheet %s", args[0].c_str());
+				}
+				if ( qualityFound && qualityNotFound )
+				{
+					ret = false;
+					MISLOGERROR("step mixing steps mixing quality and quantity");
+				}
 			}
-			if ( subStep.Sheet == CSheetId::Unknown )
-			{
-				ret = false;
-				MISLOGERROR1("invalid sheet %s", args[0].c_str());
-			}
-			else
-			{
-				_SubSteps.push_back( subStep );
-			}
+			_SubSteps.push_back( subStep );
 		}
-		if ( qualityFound && qualityNotFound )
-		{
-			ret = false;
-			MISLOGERROR("step mixing steps mixing quality and quantity");
-		}
+
 		return ret;
 	}
 }
-	
+
 void IMissionStepItem::getInitState( std::vector<uint32>& ret )
 {
 	ret.clear();
@@ -110,33 +122,75 @@ void IMissionStepItem::getInitState( std::vector<uint32>& ret )
 		ret[i] = _SubSteps[i].Quantity;
 	}
 }
-	
+
 inline void IMissionStepItem::getTextParams(uint & nbSubSteps, TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 {
 	nlassert( _SubSteps.size() == subStepStates.size() );
+	CSheetId itemSheet;
+	uint16 quality;
+	uint32 quantity;
+
 	for ( uint i  = 0; i < subStepStates.size();i++ )
 	{
 		if ( subStepStates[i] != 0 )
 		{
-			nbSubSteps++;
-			retParams.push_back(STRING_MANAGER::TParam());
-			retParams.back().Type = STRING_MANAGER::item;
-			retParams.back().SheetId = _SubSteps[i].Sheet;
-		
-			retParams.push_back(STRING_MANAGER::TParam());
-			retParams.back().Type = STRING_MANAGER::integer;
-			retParams.back().Int = subStepStates[i];
-		
-			if ( _SubSteps[i].Quality )
+			if (_SubSteps[i].Dynamic.empty())
 			{
+				itemSheet = _SubSteps[i].Sheet;
+				quantity = subStepStates[i];
+				quality = _SubSteps[i].Quality;
+			}
+			else
+			{
+				//// Dynamic Mission Args
+				vector<string> params = _User->getCustomMissionParams(_SubSteps[i].Dynamic);
+				vector<string> status = _User->getCustomMissionParams(_SubSteps[i].Dynamic+"_STATUS");
+
+				if (params.size() < 2)
+				{
+					itemSheet = CSheetId::Unknown;
+				}
+				else
+				{
+					itemSheet = CSheetId(params[1]);
+				}
+
+				if (params.size() > 2)
+					NLMISC::fromString(params[2], quantity);
+						
+				if (status.size() > 0) // Use saved step quantity
+					NLMISC::fromString(status[0], quantity);
+
+				if (params.size() > 3) {
+					NLMISC::fromString(params[3], quality);
+				}
+
+				nlinfo("Sheet : %s, Quality : %d, Quantity: %d", itemSheet.toString().c_str(), quality, quantity);
+				////
+			}
+
+			if (itemSheet != CSheetId::Unknown)
+			{
+				nbSubSteps++;
+				retParams.push_back(STRING_MANAGER::TParam());
+				retParams.back().Type = STRING_MANAGER::item;
+				retParams.back().SheetId = itemSheet;
+
 				retParams.push_back(STRING_MANAGER::TParam());
 				retParams.back().Type = STRING_MANAGER::integer;
-				retParams.back().Int = _SubSteps[i].Quality;
+				retParams.back().Int = quantity;
+
+				if (quality)
+				{
+					retParams.push_back(STRING_MANAGER::TParam());
+					retParams.back().Type = STRING_MANAGER::integer;
+					retParams.back().Int = quality;
+				}
 			}
 		}
 	}
 }
-	
+
 
 // ----------------------------------------------------------------------------
 class CMissionStepForage : public IMissionStepItem
@@ -144,12 +198,53 @@ class CMissionStepForage : public IMissionStepItem
 
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
+		string webAppUrl;
+		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
+		
 		if ( event.Type == CMissionEvent::Forage )
 		{
 			CMissionEventForage & eventSpe = (CMissionEventForage&)event;
-			if ( eventSpe.Sheet == _SubSteps[subStepIndex].Sheet && eventSpe.Quality >= _SubSteps[subStepIndex].Quality )
+			CSheetId itemSheet;
+			uint16 quality;
+			uint32 quantity;
+
+			
+			if (_SubSteps[subStepIndex].Dynamic.empty()) {
+				itemSheet = _SubSteps[subStepIndex].Sheet;
+				quality = _SubSteps[subStepIndex].Quality;
+				quantity = _SubSteps[subStepIndex].Quantity;
+			}
+			else
+			{   /// Dynamic Mission Args
+				vector<string> params = _User->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic);
+				webAppUrl = params[0];
+				if (params.size() < 2)
+				{
+					LOGMISSIONSTEPERROR("forage : invalid item");
+					return 0;
+				}
+				else
+				{
+					itemSheet = CSheetId(params[1]);
+				}
+
+				if (params.size() > 2)
+					NLMISC::fromString(params[2], quantity);
+
+				if (params.size() > 3)
+					NLMISC::fromString(params[3], quality);
+			}
+
+			if ( eventSpe.Sheet == itemSheet && eventSpe.Quality >= quality )
 			{
 				LOGMISSIONSTEPSUCCESS("forage");
+				if (!webAppUrl.empty() && _SubSteps[subStepIndex].Quantity > quantity)
+				{
+					/// TODO : Check it
+
+					_SubSteps[subStepIndex].Quantity = 0;
+					_User->validateDynamicMissionStep(webAppUrl);
+				}
 				return eventSpe.Quantity;
 			}
 		}
@@ -169,22 +264,84 @@ MISSION_REGISTER_STEP(CMissionStepForage,"forage")
 
 
 // ----------------------------------------------------------------------------
+/// !!!!!!!!!!!! UNUSED !!!!!!!!!!!!!
+// ----------------------------------------------------------------------------
 class CMissionStepLootItem : public IMissionStepItem
 {
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
+		string webAppUrl;
+		uint16 quantity = 1;
+		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
+
+		nlinfo("ok");
+		
 		if ( event.Type == CMissionEvent::LootItem )
 		{
+			nlinfo("ok");
+			CSheetId itemSheet;
+			uint16 quality;
+
+			if (_SubSteps[subStepIndex].Dynamic.empty()) {
+				itemSheet = _SubSteps[subStepIndex].Sheet;
+				quality = _SubSteps[subStepIndex].Quality;
+			}
+			else
+			{   /// Dynamic Mission Args
+				vector<string> params = _User->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic);
+				vector<string> status = _User->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS");
+				webAppUrl = params[0];
+				if (params.size() < 2)
+				{
+					LOGMISSIONSTEPERROR("loot : invalid item");
+					return 0;
+				}
+				else
+				{
+					itemSheet = CSheetId(params[1]);
+				}
+
+
+				if (params.size() < 3) // If no quantity in mission params => 1 by default
+					params[2] = "1";
+
+				if (status.size() == 0) // If no saved quantity => use mission param
+					status.push_back(params[2]);
+				
+				NLMISC::fromString(status[0], quantity); // Use saved quantity
+
+				if (params.size() > 3)
+					NLMISC::fromString(params[3], quality);
+			}
+
+		
 			CMissionEventLootItem & eventSpe = (CMissionEventLootItem&)event;
-			if ( eventSpe.Sheet == _SubSteps[subStepIndex].Sheet && eventSpe.Quality >= _SubSteps[subStepIndex].Quality )
+			nlinfo("Sheet : %s, Quality : %d / %d, Quantity: %d / %d", eventSpe.Sheet.toString().c_str(), eventSpe.Quality, quality, eventSpe.Quantity, quantity);
+			if ( eventSpe.Sheet == itemSheet && eventSpe.Quality >= quality )
 			{
+				if (!webAppUrl.empty())
+					{
+						if (quantity <= eventSpe.Quantity)
+						{
+							_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", "");
+							_User->validateDynamicMissionStep(webAppUrl);
+							LOGMISSIONSTEPSUCCESS("loot_item");
+							return 1000; // Force the end of mission
+
+						}
+						else
+						{
+							_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", NLMISC::toString("%d", quantity-eventSpe.Quantity));
+						}
+					}
+				
 				LOGMISSIONSTEPSUCCESS("loot_item");
 				return eventSpe.Quantity;
 			}
 		}
 		return 0;
 	}
-	
+
 	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
 		IMissionStepItem::getTextParams(nbSubSteps, retParams, subStepStates);
@@ -200,11 +357,68 @@ MISSION_REGISTER_STEP(CMissionStepLootItem,"loot_item")
 // ----------------------------------------------------------------------------
 uint CMissionStepLootRm::processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 {
+	string webAppUrl;
+	uint16 quantity = 1;
+	_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
+
+
 	if ( event.Type == CMissionEvent::LootRm )
 	{
+		CSheetId itemSheet;
+		uint16 quality;
+
+		if (_SubSteps[subStepIndex].Dynamic.empty()) {
+			itemSheet = _SubSteps[subStepIndex].Sheet;
+			quality = _SubSteps[subStepIndex].Quality;
+		}
+		else
+		{   /// Dynamic Mission Args
+			vector<string> params = _User->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic);
+			vector<string> status = _User->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS");
+			webAppUrl = params[0];
+			if (params.size() < 2)
+			{
+				LOGMISSIONSTEPERROR("loot : invalid item");
+				return 0;
+			}
+			else
+			{
+				itemSheet = CSheetId(params[1]);
+			}
+
+
+			if (params.size() < 3) // If no quantity in mission params => 1 by default
+				params[2] = "1";
+
+			if (status.size() == 0) // If no saved quantity => use mission param
+				status.push_back(params[2]);
+			
+			NLMISC::fromString(status[0], quantity); // Use saved quantity
+
+			if (params.size() > 3)
+				NLMISC::fromString(params[3], quality);
+		}
+		
 		CMissionEventLootRm & eventSpe = (CMissionEventLootRm&)event;
-		if ( eventSpe.Sheet == _SubSteps[subStepIndex].Sheet && eventSpe.Quality >= _SubSteps[subStepIndex].Quality )
+		nlinfo("Sheet : %s, Quality : %d / %d, Quantity: %d / %d", eventSpe.Sheet.toString().c_str(), eventSpe.Quality, quality, eventSpe.Quantity, quantity);
+		if ( eventSpe.Sheet == itemSheet && eventSpe.Quality >= quality )
 		{
+			if (!webAppUrl.empty())
+				{
+					if (quantity <= eventSpe.Quantity)
+					{
+						_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", "");
+						_User->validateDynamicMissionStep(webAppUrl);
+						LOGMISSIONSTEPSUCCESS("loot_item");
+						return 1000; // Force the end of mission
+
+					}
+					else
+					{
+						_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", NLMISC::toString("%d", quantity-eventSpe.Quantity));
+					}
+				}
+			
 			LOGMISSIONSTEPSUCCESS("loot_mp");
 			return eventSpe.Quantity;
 		}
@@ -229,7 +443,7 @@ class CMissionStepCraft : public IMissionStepItem
 		if ( event.Type == CMissionEvent::Craft )
 		{
 			CMissionEventCraft & eventSpe = (CMissionEventCraft&)event;
-			if ( eventSpe.Sheet == _SubSteps[subStepIndex].Sheet && 
+			if ( eventSpe.Sheet == _SubSteps[subStepIndex].Sheet &&
 				eventSpe.Quality >= _SubSteps[subStepIndex].Quality )
 			{
 				LOGMISSIONSTEPSUCCESS("craft");
@@ -238,7 +452,7 @@ class CMissionStepCraft : public IMissionStepItem
 		}
 		return 0;
 	}
-	
+
 	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
 		IMissionStepItem::getTextParams(nbSubSteps, retParams, subStepStates);
@@ -255,7 +469,7 @@ MISSION_REGISTER_STEP(CMissionStepCraft,"craft")
 class CMissionStepBuyItem : public IMissionStepItem
 {
 	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
-	{	
+	{
 		_SourceLine = line;
 		_HasBot = false;
 		_Bot = CAIAliasTranslator::Invalid;
@@ -269,7 +483,7 @@ class CMissionStepBuyItem : public IMissionStepItem
 		}
 		return true;
 	}
-	
+
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
 		if ( event.Type == CMissionEvent::BuyItem )
@@ -302,7 +516,7 @@ class CMissionStepBuyItem : public IMissionStepItem
 		}
 		return 0;
 	}
-	
+
 	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
 		IMissionStepItem::getTextParams(nbSubSteps, retParams, subStepStates);
@@ -323,7 +537,7 @@ class CMissionStepBuyItem : public IMissionStepItem
 		else
 			textPtr = &stepText;
 	}
-	
+
 	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const { invalidIsGiver=true; return _Bot; }
 
 	bool _HasBot;
@@ -338,7 +552,7 @@ MISSION_REGISTER_STEP(CMissionStepBuyItem,"buy")
 class CMissionStepSellItem : public IMissionStepItem
 {
 	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
-	{	
+	{
 		_SourceLine = line;
 		_HasBot = false;
 		_Bot = CAIAliasTranslator::Invalid;
@@ -352,7 +566,7 @@ class CMissionStepSellItem : public IMissionStepItem
 		}
 		return true;
 	}
-	
+
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
 		if ( event.Type == CMissionEvent::SellItem )
@@ -379,13 +593,13 @@ class CMissionStepSellItem : public IMissionStepItem
 							return 0;
 					}
 				}
-				LOGMISSIONSTEPSUCCESS("sell");				
+				LOGMISSIONSTEPSUCCESS("sell");
 				return eventSpe.Quantity;
 			}
 		}
 		return 0;
 	}
-	
+
 	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
 		IMissionStepItem::getTextParams(nbSubSteps,retParams, subStepStates);
@@ -400,14 +614,14 @@ class CMissionStepSellItem : public IMissionStepItem
 				param.Int = _Bot;
 			else
 				param.Identifier = "giver";
-			
+
 			retParams.push_back(param);
 			textPtr = &stepTextNpc;
 		}
 		else
 			textPtr = &stepText;
 	}
-	
+
 	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const { invalidIsGiver=true; return _Bot; }
 
 	bool _HasBot;

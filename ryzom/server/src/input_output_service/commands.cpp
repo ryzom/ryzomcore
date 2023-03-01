@@ -101,7 +101,7 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 	if (ci == NULL)
 	{
 		// try to find a valid client
-		
+
 		log.displayNL("Unknown client '%s' !", args[0].c_str());
 		return false;
 	}
@@ -114,7 +114,7 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 	{
 		if (args.size() != 2)
 			return false;
-		
+
 		dynId = sendStringToClient(ci->DataSetIndex, "TEST_SELF", params, &IosLocalSender);
 	}
 	else
@@ -153,7 +153,6 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 			else
 			{
 				log.displayNL("Unknown player name '%s'", args[2].c_str());
-				return true;
 			}
 		}
 		else if (args[1] == "TEST_ENTITY")
@@ -177,7 +176,6 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 			else
 			{
 				log.displayNL("Can't make entity ID from '%s'", args[2].c_str());
-				return true;
 			}
 		}
 		else if (args[1] == "TEST_SBRICK")
@@ -492,7 +490,7 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 	}
 
 	log.displayNL("Dyn string send to client %s with ID = %u", args[0].c_str(), dynId);
-	
+
 	return true;
 }
 
@@ -552,7 +550,7 @@ NLMISC_COMMAND(mute,"Mute or unmute a player. the player can be muted for a fixe
 	{
 		nlwarning("(mute) No infos about the character %s",args[0].c_str());
 	}
-		
+
 	return true;
 
 } // mode //
@@ -595,7 +593,7 @@ NLMISC_COMMAND(genImpulsion,"generate a fake impulsion, used to debug the CActio
 	CEntityId id;
 	CMessage msgout( "IMPULSION_ID" );
 	msgout.serial( id );
-	
+
 	CBitMemStream stream;
 
 	uint count;
@@ -672,7 +670,125 @@ NLMISC_COMMAND( displayChatAudience, "Display the current chat dynamic audience 
 NLMISC_COMMAND(showChat,"show or hide chat messages","")
 {
 	ShowChat = !ShowChat;
-	
+
 	return true;
 
 } // showChat //
+
+
+NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
+{
+	if (args.size() < 3)
+		return false;
+
+	CCharacterInfos *ci = IOS->getCharInfos(args[0]);
+	if (ci == NULL)
+	{
+		log.displayNL("ERR: Unknown %s", args[0].c_str());
+		return false;
+	}
+
+	TChanID chanId = CEntityId::Unknown;
+	TGroupId groupId = CEntityId::Unknown;
+
+	CChatGroup::TGroupType mode;
+	if (args[1].substr(0, 8)  == "FACTION_" || args[1].substr(0, 7)  == "league_") // The current only translated dynamic chat
+	{
+		mode = CChatGroup::dyn_chat;
+		chanId = IOS->getChatManager().getChanId(args[1]);
+	}
+	else if (args[1].substr(0, 7) == "region:")
+	{
+		mode = CChatGroup::region;
+		groupId.fromString(args[1].substr(7).c_str());
+	}
+	else if (args[1].substr(0, 6) == "guild:")
+	{
+		mode = CChatGroup::guild;
+		groupId.fromString(args[1].substr(6).c_str());
+	}
+	else if (args[1].substr(0, 5) == "team:")
+	{
+		mode = CChatGroup::team;
+		groupId.fromString(args[1].substr(5).c_str());
+	}
+	else
+	{
+		mode = CChatGroup::stringToGroupType(args[1]);
+	}
+
+	string chat_group = args[1];
+	ucstring ucstr;
+	ucstr.fromUtf8(args[2]);
+	TDataSetRow rowId = ci->DataSetIndex;
+	try
+	{
+		CChatGroup::TGroupType oldMode = IOS->getChatManager().getClient(rowId).getChatMode();
+		TChanID oldChanId = IOS->getChatManager().getClient(rowId).getDynChatChan();
+		TGroupId oldRegionId =IOS->getChatManager().getClient(rowId).getRegionChatGroup();
+
+		if (mode != oldMode)
+			IOS->getChatManager().getClient(rowId).setChatMode(mode, chanId);
+
+		if (mode == CChatGroup::region)
+			IOS->getChatManager().getClient(rowId).setRegionChatGroup(groupId);
+
+		if (mode == CChatGroup::guild)
+			IOS->getChatManager().getClient(rowId).setGuildChatGroup(groupId);
+
+		if (mode == CChatGroup::team)
+			IOS->getChatManager().getClient(rowId).setTeamChatGroup(groupId);
+
+
+		IOS->getChatManager().getClient(rowId).updateAudience();
+		IOS->getChatManager().chat(rowId, ucstr);
+
+		if (oldMode != mode)
+		{
+			if (oldMode == CChatGroup::dyn_chat)
+				IOS->getChatManager().getClient(rowId).setChatMode(oldMode, oldChanId);
+			else if (oldMode == CChatGroup::region)
+				IOS->getChatManager().getClient(rowId).setRegionChatGroup(oldRegionId);
+			else
+				IOS->getChatManager().getClient(rowId).setChatMode(oldMode);
+		}
+	}
+	catch(const Exception &e)
+	{
+		nlwarning("<cbChatMessage> %s",e.what());
+	}
+
+	return true;
+}
+
+NLMISC_COMMAND(farChat, "send far message chat", "<char_name> <chat_id> <message>")
+{
+	if (args.size() < 3)
+		return false;
+
+	uint32 id;
+	ucstring ucstr;
+
+	string name = args[0];
+	ucstr.fromUtf8(args[2]);
+
+	IOS->getChatManager().sendFarChat(name, ucstr, args[1]);
+}
+
+NLMISC_COMMAND(getRealName, "getRealName", "<char_name>")
+{
+	if (args.size() != 1)
+		return false;
+
+	CCharacterInfos *ci = IOS->getCharInfos(args[0]);
+	if (ci == NULL)
+	{
+		log.displayNL("ERR: Unknown %s", args[0].c_str());
+		return true;
+	}
+
+	log.displayNL("%s", ci->ShortRealName.c_str());
+
+	return true;
+}
+

@@ -27,7 +27,10 @@ class CStateMachine
 #endif
 {
 public:
-	CStateMachine() { }
+	CStateMachine()
+	{
+		_LastStateEventAlias = 0;
+	}
 	virtual ~CStateMachine()
 	{
 		clearEventContainerContent ();
@@ -171,7 +174,10 @@ public:
 	CAliasCont<CAIState>& states() { return _states; }
 	CAliasCont<CAIState> const& cstStates() const { return _states; }
 	
+	uint32 getLastStateEventAlias() { return ++_LastStateEventAlias; }
+	
 protected:
+	uint32 _LastStateEventAlias;
 	CAliasCont<CAIState> _states;
 	CAliasCont<CAIEventReaction> _eventReactions;
 	std::map<std::string,NLMISC::CDbgPtr<CAIEvent> > _eventNameMap;

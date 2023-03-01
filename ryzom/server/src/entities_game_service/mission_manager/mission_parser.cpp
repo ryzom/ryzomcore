@@ -390,7 +390,9 @@ bool CMissionParser::addItemPrice(uint32 line, const vector<string>& args, uint 
 		ret = false;
 	}
 	float factor = (float) atof( args[2].c_str() );
-	amount += uint32 ( factor * CShopTypeManager::computeBasePrice( sheet, quality ) );
+	uint32 val = uint32 ( factor * CShopTypeManager::computeBasePrice( sheet, quality ) );
+	amount += val;
+	MISLOG("<MISSIONS> Value in dappers for ('%s|%d|%d') are %d", sheetName.c_str(), quality, (uint16)factor, val);
 	return ret;
 }
 

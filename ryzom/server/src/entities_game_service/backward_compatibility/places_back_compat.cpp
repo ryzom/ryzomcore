@@ -32,7 +32,6 @@ namespace BACK_COMPAT
 {
 
 // !!! DO NOT EDIT THIS TABLE !!!
-/*
 static const string OldPlaces[] =
 {
 	"region_groveofconfusion",
@@ -555,11 +554,10 @@ static const string OldPlaces[] =
 };
 
 static vector<uint16> OldToNewPlaceId;
-*/
 
 void initPlacesCompat()
 {
-/*	static bool initialized = false;
+	static bool initialized = false;
 	if (initialized)
 		return;
 
@@ -579,14 +577,13 @@ void initPlacesCompat()
 	}
 
 	initialized = true;
-*/
 }
 
 uint16 oldToNewPlaceId(uint16 oldId)
 {
-//	BOMB_IF( (oldId >= OldToNewPlaceId.size()), "<oldToNewPlaceId> invalid old place index", return 0xffff );
-//	return OldToNewPlaceId[oldId];
-	return oldId;
+	BOMB_IF( (oldId >= OldToNewPlaceId.size()), "<oldToNewPlaceId> invalid old place index", return 0xffff );
+
+	return OldToNewPlaceId[oldId];
 }
 
 } // namespace BACK_COMPAT

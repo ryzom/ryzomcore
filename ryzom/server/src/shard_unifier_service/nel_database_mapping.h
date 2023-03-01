@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -635,11 +632,11 @@ namespace RSMGR
 	{
 	protected:
 		// 
-		uint32	_PermissionId;
+		uint32	_Prim;
 		// 
 		uint32	_UserId;
 		// 
-		uint32	_DomainId;
+		std::string	_DomainName;
 		// 
 		uint32	_ShardId;
 		// 
@@ -665,20 +662,20 @@ namespace RSMGR
 
 		}
 			// 
-		uint32 getDomainId() const
+		const std::string &getDomainName() const
 		{
-			return _DomainId;
+			return _DomainName;
 		}
 
-		void setDomainId(uint32 value)
+		void setDomainName(const std::string &value)
 		{
 
-			if (_DomainId != value)
+			if (_DomainName != value)
 			{
 				if (getPersistentState() != NOPE::os_transient)
 					setPersistentState(NOPE::os_dirty);
 
-				_DomainId = value;
+				_DomainName = value;
 			}
 
 		}
@@ -727,9 +724,9 @@ namespace RSMGR
 	
 		bool operator == (const CNelPermission &other) const
 		{
-			return _PermissionId == other._PermissionId
+			return _Prim == other._Prim
 				&& _UserId == other._UserId
-				&& _DomainId == other._DomainId
+				&& _DomainName == other._DomainName
 				&& _ShardId == other._ShardId
 				&& _AccessPriv == other._AccessPriv;
 		}
@@ -740,7 +737,7 @@ namespace RSMGR
 		CNelPermission()
 			: _PtrList(NULL),
 			_ObjectState(NOPE::os_transient),
-			_PermissionId(NOPE::INVALID_OBJECT_ID)
+			_Prim(NOPE::INVALID_OBJECT_ID)
 		{
 
 			// register the cache for this class (if not already done)
@@ -858,7 +855,7 @@ namespace RSMGR
 		uint32 getObjectId() const
 		{
 
-			return _PermissionId;
+			return _Prim;
 		}
 
 		/** Set the object unique ID.
@@ -872,8 +869,8 @@ namespace RSMGR
 			// can only be set when in transient state
 			nlassert(getPersistentState() == NOPE::os_transient);
 			// can only be set once
-			nlassert(_PermissionId == NOPE::INVALID_OBJECT_ID);
-			_PermissionId = objectId;
+			nlassert(_Prim == NOPE::INVALID_OBJECT_ID);
+			_Prim = objectId;
 		}
 
 		/** Return the current persistent state of the object.*/

@@ -289,6 +289,7 @@ bool CFgSearchPhrase::build( const TDataSetRow & actorRowId, const std::vector< 
 			case TBrickParam::FG_ECT_SPC:
 				INFOLOG("FG_ECT_SPC: %s",((CSBrickParamForageEcotypeSpec *)param)->Ecotype.c_str());
 				_EcotypeSpec = ECOSYSTEM::stringToEcosystem( ((CSBrickParamForageEcotypeSpec *)param)->Ecotype );
+				_EcotypeSpecBonus = true;
 				break;
 			case TBrickParam::FG_RMGRP_FILT:
 				INFOLOG("FG_RMGRP_FILT: %i",((CSBrickParamForageRMGroupFilter *)param)->Value);
@@ -719,7 +720,7 @@ void CFgProspectionPhrase::apply()
 	MBEHAV::CBehaviour behav = player->getBehaviour(); // keep arguments
 	behav.Behaviour = MBEHAV::PROSPECTING_END;
 	PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, behav );
-	_LatencyEndDate = (double)ForageSourceSpawnDelay.get(); // wait a short time before spawning the source(s) (to let animation/fx time)
+	_LatencyEndDate =(double)ForageSourceSpawnDelay.get(); // wait a short time before spawning the source(s) (to let animation/fx time)
 }
 
 
@@ -759,8 +760,8 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 	for ( uint iSource=0; iSource!=nbOfSources; ++iSource )
 	{
 		TNothingFoundReason reason;
-		const CStaticDepositRawMaterial *rawMaterial = NULL;
-		CDeposit *deposit = NULL, *depositForK;
+		const CStaticDepositRawMaterial *rawMaterial;
+		CDeposit *deposit, *depositForK;
 
 		// Make several attempts to find a pos that matches the filters
 		for ( uint iAttempt=0; iAttempt!=(uint)_NbAttempts; ++iAttempt )
@@ -785,7 +786,7 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 				break; // stop attempts if RM found (rawMaterial) or impossible to find one (!deposit)
 		}
 
-		if ( rawMaterial && deposit )
+		if ( rawMaterial )
 		{
 			// Find or open a forage site //nlassert( deposit && depositForK && forageSite );
 			CRecentForageSite *forageSite = deposit->findOrCreateForageSite( pos );
@@ -800,7 +801,7 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 				CVector2f pos2f = pos;
 				if ( hsource->init( _SourceIniProperties, pos2f, forageSite, depositForK, rawMaterial, quantityRatio ) )
 				{
-					if ( _EcotypeSpec != ECOSYSTEM::common_ecosystem )
+					if ( _EcotypeSpecBonus )
 						hsource->setBonusForA( 20 );
 					
 					if ( hsource->spawnBegin( _KnowledgePrecision, player->getEntityRowId(), false ) )
@@ -1006,7 +1007,6 @@ void CFgProspectionPhrase::startLocateDeposit( CCharacter *player )
 	else
 	{
 		// Retain the first found matching deposit in which we are, or the nearest matching deposit
-		nlassert(matchingDeposits.size());
 		TDepositLoc *retainedLoc = NULL;
 		float minDist = _ForageRange;
 		for ( vector<CDeposit*>::iterator itd=matchingDeposits.begin(); itd!=matchingEnd; ++itd )
@@ -1028,11 +1028,10 @@ void CFgProspectionPhrase::startLocateDeposit( CCharacter *player )
 		}
 
 		// Start the effect
-		nlassert(retainedLoc);
 		CVector2f locatedPoint( retainedLoc->NearestPos );
 		TReportAction report;
 		sint32 effectFocusCostByUpdate = _FocusCost / ForageFocusRatioOfLocateDeposit.get();
-		if ( _EcotypeSpec != ECOSYSTEM::common_ecosystem )
+		if ( _EcotypeSpecBonus )
 			effectFocusCostByUpdate /= 2; // lower focus consumption with terrain specialization
 		CSEffectLocateDeposit *effect = new CSEffectLocateDeposit(
 			player->getEntityRowId(),

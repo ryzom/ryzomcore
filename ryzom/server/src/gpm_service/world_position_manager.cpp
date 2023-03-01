@@ -1478,27 +1478,47 @@ void	CWorldPositionManager::computeVision()
 		cell->setVisionUpdateCycle(CTickEventHandler::getGameCycle());
 		H_TIME(ComputeCellVision, computeCellVision(cell, cellVisionArray, numEntities, player->Entity););
 
-		CPlayerInfos	*plv;
-		for (plv=cell->getPlayersList(); plv!=NULL; plv=plv->Next)
+		if (!cell->isIndoor())
 		{
-			CFrontEndData	&fe = (*(plv->ItFrontEnd)).second;
+			CPlayerInfos	*plv;
+			for (plv=cell->getPlayersList(); plv!=NULL; plv=plv->Next)
+			{
+				CFrontEndData	&fe = (*(plv->ItFrontEnd)).second;
+				// if player's fe reached its maximum for this tick, get to next entity
+				if (fe.CurrentVisionsAtTick >= fe.MaxVisionsPerTick || plv->DelayVision > CTickEventHandler::getGameCycle())
+					continue;
+
+				// else set cell vision to the player
+				H_TIME(SetVisionToPlayer, setCellVisionToEntity(plv->Entity, cellVisionArray, numEntities););
+				++numVision;
+				plv->LastVisionTick = CTickEventHandler::getGameCycle();
+
+				//
+				++(fe.CurrentVisionsAtTick);
+
+				// put player at the end of the update list
+				if (plv == *itpl)
+					itpl = updateVisionState(itpl);
+				else
+					updateVisionState(plv->ItUpdatePlayer);
+			}
+		}
+		else
+		{
+			CFrontEndData	&fe = (*(player->ItFrontEnd)).second;
 			// if player's fe reached its maximum for this tick, get to next entity
-			if (fe.CurrentVisionsAtTick >= fe.MaxVisionsPerTick || plv->DelayVision > CTickEventHandler::getGameCycle())
+			if (fe.CurrentVisionsAtTick >= fe.MaxVisionsPerTick || player->DelayVision > CTickEventHandler::getGameCycle())
 				continue;
 
 			// else set cell vision to the player
-			H_TIME(SetVisionToPlayer, setCellVisionToEntity(plv->Entity, cellVisionArray, numEntities););
+			H_TIME(SetVisionToPlayer, setCellVisionToEntity(player->Entity, cellVisionArray, numEntities););
 			++numVision;
-			plv->LastVisionTick = CTickEventHandler::getGameCycle();
+			player->LastVisionTick = CTickEventHandler::getGameCycle();
 
 			//
 			++(fe.CurrentVisionsAtTick);
 
-			// put player at the end of the update list
-			if (plv == *itpl)
-				itpl = updateVisionState(itpl);
-			else
-				updateVisionState(plv->ItUpdatePlayer);
+			itpl = updateVisionState(itpl);
 		}
 	}
 
@@ -2155,8 +2175,7 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 	}
 
 	// check position received is not older than last received
-	NLMISC::TGameCycle lastTick = (entity->Tick() - GPMS_LCT_TICKS);
-	if (lastTick >= tick && !forceTick)
+	if (entity->Tick > tick && !forceTick)
 	{
 		if (Verbose)
 			nlwarning("CWorldPositionManager::movePlayer%s: received a position older (t=%d) than previous (t=%d)", entity->Id.toString().c_str(), tick, entity->Tick.getValue());
@@ -2181,11 +2200,7 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 	CVectorD							targetPos = CVectorD(x*0.001, y*0.001, z*0.001);
 	CVectorD							finalPos;
 
-	NLMISC::TGameCycle ticksSinceLastUpdate = tick - lastTick;
-
-	// limit interval to 1s
-	if (ticksSinceLastUpdate > GPMS_LCT_TICKS)
-		ticksSinceLastUpdate = GPMS_LCT_TICKS;
+	NLMISC::TGameCycle ticksSinceLastUpdate = tick - entity->Tick();
 
 	// Get master (player) entity (in case of a mount)
 	CWorldEntity	*master = entity;
@@ -2219,90 +2234,98 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 	// only consider (x,y) motion for speed and position correction
 	if (master->PlayerInfos != NULL /*&& master->PlayerInfos->CheckSpeed && CheckPlayerSpeed && fabs(movVector.x)+fabs(movVector.y) > maxDist*/)
 	{
-		double		movNorm = sqr(movVector.x)+sqr(movVector.y); // already done if (entity != master) but here is a rare overspeed case
+		double movNorm = sqr(movVector.x)+sqr(movVector.y); // already done if (entity != master) but here is a rare overspeed case
 
 		if (movNorm > sqr(maxDist))
 		{
-			movVector *= (maxDist / sqrt(movNorm));
-			// nlwarning("Player limitSpeed=%2.f, entitySpeed=%.2f, masterSpeed=%.2f", limitSpeedToUse, maxSpeed(), mountWalkSpeed);
+			if (movNorm > sqr(5 * SecuritySpeedFactor * CTickEventHandler::getGameTimeStep() * ticksSinceLastUpdate)) {
+				movVector *= (maxDist / sqrt(movNorm));
+			}
 		}
 	}
 
-	// check entity has a primitive
-	if (entity->hasPrimitive())
+	if ((movVector.x != 0 || movVector.x != 0) && entity->Dead)
 	{
-		uint8	wi = (uint8)((_CurrentWorldImage+_NbDynamicWorldImages-1-CTickEventHandler::getGameCycle()+tick)%_NbDynamicWorldImages+1);
-
-		CPlayerInfos	*pi = entity->PlayerInfos;
-		if (pi != NULL)
-		{
-			// Log plyer motion
-			CPlayerInfos::CPlayerPos	ppos;
-			ppos.AtTick = CTickEventHandler::getGameCycle();
-			entity->Primitive->getGlobalPosition(ppos.GPos, wi);
-			ppos.Motion = movVector;
-			ppos.Theta = theta;
-
-			if (pi->PosHistory.size() >= 50)
-				pi->PosHistory.pop_back();
-
-			pi->PosHistory.push_front(ppos);
-		}
-
-		// set entity orientation
-		entity->Primitive->setOrientation(theta, wi);
-
-		// do move
-		entity->Primitive->move(movVector, wi);
-
-		// eval collision and get triggers state
-		entity->MoveContainer->evalNCPrimitiveCollision(1, entity->Primitive, wi);
-		//_PatatSubscribeManager.processPacsTriggers(entity->MoveContainer);
-		processPacsTriggers(entity->MoveContainer);
-
-		// get final position and interior flag
-		finalPos = entity->Primitive->getFinalPosition(wi);
-		UGlobalPosition	gp;
-		entity->Primitive->getGlobalPosition(gp, wi);
-
-		NLPACS::UGlobalRetriever	*retriever = _ContinentContainer.getRetriever(entity->Continent);
-
-		if (retriever != NULL)
-		{
-			interior = retriever->isInterior(gp);
-			float	dummy;
-			water = retriever->isWaterPosition(gp, dummy);
-		}
-
-		// if the final position is more than one meter away from the param position, correct entity position
-		CVectorD	diff2d = targetPos-finalPos;
-		diff2d.z = 0.0;
-		if (diff2d.sqrnorm() > 1.0 )
-		{
-			correctPos = true;
-			if (true/*VerboseSpeedAbuse*/)
-			{
-				nlwarning("PlayerAbuse %s real=(%.1f,%.1f) targeted=(%.1f,%.1f)", master->Id.toString().c_str(), finalPos.x, finalPos.y, targetPos.x, targetPos.y);
-			}
-		}
-
-		// copy pos into targetPos
-		targetPos = finalPos;
-
-		// Update entity coordinates directly in mirror
-		entity->updatePosition((sint32)(finalPos.x * 1000), (sint32)(finalPos.y * 1000), (sint32)(finalPos.z * 1000), theta, tick + GPMS_LCT_TICKS, interior, water);
+		correctPos = true;
 	}
 	else
 	{
-		nlwarning("CWorldPositionManager::movePlayer(%s): entity has no NLPACS::MovePrimitive, motion cannot be checked!", entity->Id.toString().c_str(), tick, entity->Tick.getValue());
+		// check entity has a primitive
+		if (entity->hasPrimitive())
+		{
+			uint8	wi = (uint8)((_CurrentWorldImage+_NbDynamicWorldImages-1-CTickEventHandler::getGameCycle()+tick)%_NbDynamicWorldImages+1);
 
-		// Update entity coordinates directly in mirror
-		entity->updatePosition(x, y, z, theta, tick + GPMS_LCT_TICKS, interior, water);
+			CPlayerInfos	*pi = entity->PlayerInfos;
+			if (pi != NULL)
+			{
+				// Log plyer motion
+				CPlayerInfos::CPlayerPos	ppos;
+				ppos.AtTick = CTickEventHandler::getGameCycle();
+				entity->Primitive->getGlobalPosition(ppos.GPos, wi);
+				ppos.Motion = movVector;
+				ppos.Theta = theta;
+
+				if (pi->PosHistory.size() >= 50)
+					pi->PosHistory.pop_back();
+
+				pi->PosHistory.push_front(ppos);
+			}
+
+			// set entity orientation
+			entity->Primitive->setOrientation(theta, wi);
+
+			// do move
+			entity->Primitive->move(movVector, wi);
+
+			// eval collision and get triggers state
+			entity->MoveContainer->evalNCPrimitiveCollision(1, entity->Primitive, wi);
+			//_PatatSubscribeManager.processPacsTriggers(entity->MoveContainer);
+			processPacsTriggers(entity->MoveContainer);
+
+			// get final position and interior flag
+			finalPos = entity->Primitive->getFinalPosition(wi);
+			UGlobalPosition	gp;
+			entity->Primitive->getGlobalPosition(gp, wi);
+
+			NLPACS::UGlobalRetriever	*retriever = _ContinentContainer.getRetriever(entity->Continent);
+
+			if (retriever != NULL)
+			{
+				interior = retriever->isInterior(gp);
+				float	dummy;
+				water = retriever->isWaterPosition(gp, dummy);
+			}
+
+			// if the final position is more than one meter away from the param position, correct entity position
+			CVectorD diff2d = targetPos-finalPos;
+			diff2d.z = 0.0;
+			if (diff2d.sqrnorm() > 1.0 )
+			{
+				correctPos = true;
+				if (true/*VerboseSpeedAbuse*/)
+				{
+					nlwarning("PlayerAbuse %s real=(%.1f,%.1f) targeted=(%.1f,%.1f)", master->Id.toString().c_str(), finalPos.x, finalPos.y, targetPos.x, targetPos.y);
+				}
+			}
+
+			// copy pos into targetPos
+			targetPos = finalPos;
+
+			// Update entity coordinates directly in mirror
+			entity->updatePosition((sint32)(finalPos.x * 1000), (sint32)(finalPos.y * 1000), (sint32)(finalPos.z * 1000), theta, tick, interior, water);
+		}
+		else
+		{
+			nlwarning("CWorldPositionManager::movePlayer(%s): entity has no NLPACS::MovePrimitive, motion cannot be checked!", entity->Id.toString().c_str(), tick, entity->Tick.getValue());
+
+			// Update entity coordinates directly in mirror
+			entity->updatePosition(x, y, z, theta, tick, interior, water);
+		}
+
+		// and update entity links (and children) in cell map
+		updateEntityPosition(entity);
 	}
-
-	// and update entity links (and children) in cell map
-	updateEntityPosition(entity);
-
+	
 	if (correctPos)
 	{
 		CMessage msgout( "IMPULSION_ID" );

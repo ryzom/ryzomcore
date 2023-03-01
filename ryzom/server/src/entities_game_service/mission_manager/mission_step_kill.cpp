@@ -51,6 +51,7 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 {
 	struct CSubStep
 	{
+		string		Dynamic;
 		CSheetId	Sheet;
 		uint16		Quantity;
 	};
@@ -71,24 +72,35 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 			_SubSteps.reserve( subs.size() );
 			for ( uint i = 0; i < subs.size(); i++ )
 			{
+				CSubStep subStep;
 				std::vector< std::string > args;
 				CMissionParser::tokenizeString( subs[i]," \t", args );
 
-				if ( args.size() != 2 )
+				//// Dynamic Mission Args : #dynamic# <quantity>
+				if ((args.size() == 2) && (args[0] == "#dynamic#"))
 				{
-					MISLOGSYNTAXERROR("<creature> <quantity> *[; <creature> <quantity>] [: <place>]");
-					return false;
+					subStep.Dynamic = missionData.Name;
+					subStep.Quantity = 1000; // Use a very high value to prevent end of mission
 				}
-				missionData.ChatParams.push_back( make_pair(args[0],STRING_MANAGER::creature_model) );
+				////
+				else
+				{
+					if ( args.size() != 2 )
+					{
+						MISLOGSYNTAXERROR("<creature> <quantity> *[; <creature> <quantity>] [: <place>]");
+						return false;
+					}
+					missionData.ChatParams.push_back( make_pair(args[0],STRING_MANAGER::creature_model) );
 
-				CSubStep subStep;
-				subStep.Sheet = CSheetId( args[0] + ".creature");
-				if ( subStep.Sheet == CSheetId::Unknown )
-				{
-					ret = false;
-					MISLOGERROR1("invalid sheet '%s'", args[0].c_str());
+					subStep.Dynamic = "";
+					subStep.Sheet = CSheetId( args[0] + ".creature");
+					if ( subStep.Sheet == CSheetId::Unknown )
+					{
+						ret = false;
+						MISLOGERROR1("invalid sheet '%s'", args[0].c_str());
+					}
+					NLMISC::fromString(args[1], subStep.Quantity);
 				}
-				NLMISC::fromString(args[1], subStep.Quantity);
 				_SubSteps.push_back(subStep);
 			}
 			if ( script.size() == 3 )
@@ -109,17 +121,69 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 	}
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
+		string webAppUrl;
+		vector<string> status;
+		uint16 quantity = 1;
+		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
+
 		if ( event.Type == CMissionEvent::Kill )
 		{
 			CMissionEventKill & eventSpe = (CMissionEventKill&)event;
 			CCreature * c = CreatureManager.getCreature( event.TargetEntity );
+			CSheetId faunaSheet;
+
+			//// Dynamic Mission Args
+			if (_SubSteps[subStepIndex].Dynamic.empty()) {
+				faunaSheet = _SubSteps[subStepIndex].Sheet;
+			}
+			else
+			{
+				vector<string> params = _User->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic);
+				status = _User->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS");
+
+
+				if (params.size() < 2)
+				{
+					LOGMISSIONSTEPERROR("kill_fauna : invalid dynamic creature");
+					return 0;
+				}
+				else
+				{
+					webAppUrl = params[0];
+					faunaSheet = CSheetId(params[1]);
+
+					if (params.size() < 3)
+						params[2] = "1";
+
+					if (status.size() == 0)
+						status.push_back(params[2]);
+
+					NLMISC::fromString(status[0], quantity);
+
+					if (params.size() > 3)
+					{
+						string placeStr = CMissionParser::getNoBlankString( params[3] );
+						CPlace * place = CZoneManager::getInstance().getPlaceFromName( placeStr );
+						if ( !place )
+						{
+							LOGMISSIONSTEPERROR("kill_fauna : invalid place "+params[3]);
+							return 0;
+						}
+						else
+							_Place = place->getId();
+					}
+				}
+				////
+			}
 
 			if ( !c )
 			{
 				LOGMISSIONSTEPERROR("kill_fauna : invalid creature " + toString(event.TargetEntity.getIndex()));
+				return 0;
 			}
-			else if ( _SubSteps[subStepIndex].Sheet == c->getType() )
+			else if ( faunaSheet == c->getType() )
 			{
+
 				if ( _Place != 0xFFFF )
 				{
 					float gooDistance;
@@ -132,14 +196,44 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 
 					if ( region && region->getId() == _Place )
 					{
+						if (!webAppUrl.empty())
+						{
+							if (quantity <= 1)
+							{
+								_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", "");
+								_User->validateDynamicMissionStep(webAppUrl);
+								LOGMISSIONSTEPSUCCESS("kill_fauna");
+								return 1000; // force the end of mission
+
+							}
+							else
+							{
+								_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", NLMISC::toString("%d", quantity-1));
+							}
+						}
 						LOGMISSIONSTEPSUCCESS("kill_fauna");
 						return 1;
 					}
-					
+
 					for ( uint i = 0; i < places.size(); i++ )
 					{
 						if ( places[i] && places[i]->getId() == _Place )
 						{
+							if (!webAppUrl.empty())
+							{
+								if (quantity <= 1)
+								{
+									_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", "");
+									_User->validateDynamicMissionStep(webAppUrl);
+									LOGMISSIONSTEPSUCCESS("kill_fauna");
+									return 1000;
+								}
+								else
+								{
+									_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", NLMISC::toString("%d", quantity-1));
+								}
+
+							}
 							LOGMISSIONSTEPSUCCESS("kill_fauna");
 							return 1;
 						}
@@ -148,6 +242,21 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 				}
 				else
 				{
+					if (!webAppUrl.empty())
+					{
+						if (quantity <= 1)
+						{
+							_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", "");
+							_User->validateDynamicMissionStep(webAppUrl);
+							LOGMISSIONSTEPSUCCESS("kill_fauna");
+							return 1000;
+
+						}
+						else
+						{
+							_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", NLMISC::toString("%d", quantity-1));
+						}
+					}
 					LOGMISSIONSTEPSUCCESS("kill_fauna");
 					return 1;
 				}
@@ -162,48 +271,94 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 		ret.clear();
 		ret.resize( _SubSteps.size() );
 		for ( uint i = 0; i < _SubSteps.size(); i++ )
-		{
 			ret[i] = _SubSteps[i].Quantity;
-		}
 	}
 
 	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
+		static const std::string stepTextReact = "MIS_NEED_REACTIVATION";
 		static const std::string stepText = "MIS_KILL_FAUNA_";
 		static const std::string stepTextLoc = "MIS_KILL_FAUNA_LOC_";
 		nlassert( _SubSteps.size() == subStepStates.size() );
+
+		CSheetId faunaSheet = CSheetId::Unknown;
+		uint32 quantity = 1;
+
 		for ( uint i  = 0; i < subStepStates.size(); i++ )
 		{
 			if( subStepStates[i] != 0 )
 			{
-				nbSubSteps++;
-				retParams.push_back(STRING_MANAGER::TParam());
-				retParams.back().Type = STRING_MANAGER::creature_model;
-				retParams.back().SheetId = _SubSteps[i].Sheet;
-					
-				retParams.push_back(STRING_MANAGER::TParam());
-				retParams.back().Type = STRING_MANAGER::integer;
-				retParams.back().Int = subStepStates[i];
+				if (_SubSteps[i].Dynamic.empty())
+				{
+					faunaSheet = _SubSteps[i].Sheet;
+					quantity = subStepStates[i];
+				}
+				else
+				{
+
+					//// Dynamic Mission Args
+					vector<string> params = _User->getCustomMissionParams(_SubSteps[i].Dynamic);
+					vector<string> status = _User->getCustomMissionParams(_SubSteps[i].Dynamic+"_STATUS");
+
+					if (params.size() > 1)
+						faunaSheet = CSheetId(params[1]);
+
+					if (params.size() > 2)
+						NLMISC::fromString(params[2], quantity);
+
+					if (status.size() > 0) // Use saved step quantity
+						NLMISC::fromString(status[0], quantity);
+
+					if ((_Place == 0xFFFF) && (params.size() > 3))
+					{
+						string placeStr = CMissionParser::getNoBlankString( params[3] );
+						CPlace * place = CZoneManager::getInstance().getPlaceFromName( placeStr );
+						if ( !place )
+						{
+							MISLOG("sline:%u ERROR : kill_fauna : Invalid place %u", _SourceLine, _Place);
+						}
+						else
+							_Place = place->getId();
+					}
+					////
+				}
+
+				if (faunaSheet != CSheetId::Unknown)
+				{
+					nbSubSteps++;
+					retParams.push_back(STRING_MANAGER::TParam());
+					retParams.back().Type = STRING_MANAGER::creature_model;
+					retParams.back().SheetId = faunaSheet;
+
+					retParams.push_back(STRING_MANAGER::TParam());
+					retParams.back().Type = STRING_MANAGER::integer;
+					retParams.back().Int = quantity;
+				}
 			}
 		}
-		if ( _Place != 0xFFFF )
+		if (faunaSheet != CSheetId::Unknown)
 		{
-			STRING_MANAGER::TParam param;
-			param.Type = STRING_MANAGER::place;
-			CPlace * place = CZoneManager::getInstance().getPlaceFromId(_Place);
-			if ( !place )
+			if ( _Place != 0xFFFF )
 			{
-				MISLOG("sline:%u ERROR : kill_fauna : Invalid place %u", _SourceLine, _Place);
+				STRING_MANAGER::TParam param;
+				param.Type = STRING_MANAGER::place;
+				CPlace * place = CZoneManager::getInstance().getPlaceFromId(_Place);
+				if ( !place )
+				{
+					MISLOG("sline:%u ERROR : kill_fauna : Invalid place %u", _SourceLine, _Place);
+				}
+				else
+				{
+					param.Identifier = place->getName();
+					retParams.push_back(param);
+				}
+				textPtr = &stepTextLoc;
 			}
 			else
-			{
-				param.Identifier = place->getName();
-				retParams.push_back(param);
-			}
-			textPtr = &stepTextLoc;
+				textPtr = &stepText;
 		}
 		else
-			textPtr = &stepText;
+			textPtr = &stepTextReact;
 	}
 
 	std::vector< CSubStep > _SubSteps;
@@ -323,7 +478,7 @@ class CMissionStepKillRace : public IMissionStepTemplate
 		}
 		return 0;
 	}
-	
+
 	void getInitState( std::vector<uint32>& ret )
 	{
 		ret.clear();
@@ -349,7 +504,7 @@ class CMissionStepKillRace : public IMissionStepTemplate
 				retParams.push_back(STRING_MANAGER::TParam());
 				retParams.back().Type = STRING_MANAGER::race;
 				retParams.back().Enum = (uint)_SubSteps[i].Race;
-			
+
 				retParams.push_back(STRING_MANAGER::TParam());
 				retParams.back().Type = STRING_MANAGER::integer;
 				retParams.back().Int = subStepStates[i];
@@ -374,7 +529,7 @@ class CMissionStepKillRace : public IMissionStepTemplate
 		else
 			textPtr = &stepText;
 	}
-	
+
 	std::vector< CSubStep > _SubSteps;
 	uint16					_Place;
 
@@ -388,6 +543,7 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 {
 	struct CSubStep
 	{
+		string		Dynamic;
 		TAIAlias	Alias;
 //		NLMISC::TStringId	NpcName;
 	};
@@ -408,9 +564,17 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 			for ( uint i = 0; i < subs.size(); i++ )
 			{
 				CSubStep subStep;
-				subStep.Alias = CAIAliasTranslator::Invalid;
-				if ( !CMissionParser::parseBotName(subs[i],subStep.Alias,missionData) )
-					ret = false;
+				//// Dynamic Mission Args : #dynamic#
+				if (trim(subs[i]) == "#dynamic#") {
+					subStep.Dynamic = missionData.Name;
+				}
+				////
+				else
+				{
+					subStep.Alias = CAIAliasTranslator::Invalid;
+					if ( !CMissionParser::parseBotName(subs[i],subStep.Alias,missionData) )
+						ret = false;
+				}
 				_SubSteps.push_back( subStep );
 			}
 			return ret;
@@ -418,6 +582,9 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 	}
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
+		string webAppUrl;
+		CCharacter * user = PlayerManager.getChar(getEntityIdFromRow(userRow));
+
 		if ( event.Type == CMissionEvent::Kill )
 		{
 			CMissionEventKill & eventSpe = (CMissionEventKill&)event;
@@ -428,24 +595,53 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 			}
 			else
 			{
-				if ( _SubSteps[subStepIndex].Alias != CAIAliasTranslator::Invalid )
+				if (_SubSteps[subStepIndex].Dynamic.empty())
 				{
-					if ( _SubSteps[subStepIndex].Alias == c->getAlias() )
+					if ( _SubSteps[subStepIndex].Alias != CAIAliasTranslator::Invalid )
+					{
+						if ( _SubSteps[subStepIndex].Alias == c->getAlias() )
+						{
+							LOGMISSIONSTEPSUCCESS("kill_npc");
+							return 1;
+						}
+					}
+					else if (  event.TargetEntity == giverRow )
 					{
 						LOGMISSIONSTEPSUCCESS("kill_npc");
 						return 1;
 					}
 				}
-				else if (  event.TargetEntity == giverRow )
+				else
 				{
-					LOGMISSIONSTEPSUCCESS("kill_npc");
-					return 1;
+					//// Dynamic Mission Args
+					vector<string> params = user->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic);
+					if (params.size() < 2) {
+						LOGMISSIONSTEPERROR("kill_npc : invalid dynamic npc");
+						return 0;
+					}
+					else
+					{
+						webAppUrl = params[0];
+						string name;
+
+						CAIAliasTranslator::getInstance()->getNPCNameFromAlias(c->getAlias(), name);
+						if (name.find('$') != string::npos)
+							name = name.substr(0, name.find('$'));
+						nlinfo("NEED: %s GET : %s", name.c_str(), params[1].c_str());
+						if ( NLMISC::strlwr(name) == NLMISC::strlwr(params[1]) )
+						{
+							user->validateDynamicMissionStep(webAppUrl);
+							LOGMISSIONSTEPSUCCESS("kill_npc");
+							return 1;
+						}
+					}
+					////
 				}
 			}
 		}
 		return 0;
 	}
-	
+
 	void getInitState( std::vector<uint32>& ret )
 	{
 		ret.clear();
@@ -458,6 +654,7 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 
 	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
+		static const std::string stepTextReact = "MIS_NEED_REACTIVATION";
 		static const std::string stepText = "MIS_KILL_NPC_";
 		textPtr = &stepText;
 		nlassert( _SubSteps.size() == subStepStates.size() );
@@ -468,14 +665,38 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 				nbSubSteps++;
 				retParams.push_back(STRING_MANAGER::TParam());
 				retParams.back().Type = STRING_MANAGER::bot;
-				if ( _SubSteps[i].Alias != CAIAliasTranslator::Invalid )
-					retParams.back().Int = _SubSteps[i].Alias;
+				if (_SubSteps[i].Dynamic.empty())
+				{
+					if ( _SubSteps[i].Alias != CAIAliasTranslator::Invalid )
+						retParams.back().Int = _SubSteps[i].Alias;
+					else
+						retParams.back().Identifier = "giver";
+				}
 				else
-					retParams.back().Identifier = "giver";
+				{
+					vector<string> params = _User->getCustomMissionParams(_SubSteps[i].Dynamic);
+					if (params.size() < 2)
+					{
+						nlinfo("kill_npc : invalid dynamic npc");
+						textPtr = &stepTextReact;
+						return;
+					}
+					else
+					{
+						vector<TAIAlias> aliases;
+						CAIAliasTranslator::getInstance()->getNPCAliasesFromName( params[1] , aliases );
+						if ( aliases.empty() )
+						{
+							retParams.back().Int = CAIAliasTranslator::Invalid;
+							return;
+						}
+						retParams.back().Int = aliases[0];
+					}
+				}
 			}
 		}
 	}
-	
+
 	// We don't define getInvolvedBot() here, because 1) we don't want an icon on bots to kill,
 	// and 2) at the moment only one bot can be returned
 
@@ -493,7 +714,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 	{
 		TAIAlias	Alias;
 	};
-	
+
 	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
 	{
 		_SourceLine = line;
@@ -506,7 +727,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 
 		std::vector< std::string > subs;
 		NLMISC::splitString( script[1],";", subs );
-		
+
 		if ( subs.size() != 1 )
 		{
 			MISLOGSYNTAXERROR("<group_name>");
@@ -514,7 +735,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 		}
 
 		_SubSteps.reserve(1);
-		
+
 		{
  			CMissionParser::removeBlanks( subs[0] );
 			std::vector< TAIAlias > aliases;
@@ -551,7 +772,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 		}
 		return 0;
 	}
-	
+
 	void getInitState( std::vector<uint32>& ret )
 	{
 		ret.clear();
@@ -561,7 +782,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 			ret[i] = 1;
 		}
 	}
-	
+
 	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
 		/// overloaded text in script
@@ -580,7 +801,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 	{
 		return true;
 	}
-	
+
 	std::vector< CSubStep > _SubSteps;
 	std::string Target;
 
@@ -602,7 +823,7 @@ class CMissionStepKillFaction : public IMissionStepTemplate
 			MISLOGSYNTAXERROR("<faction> <quantity> [: <place>]");
 			return false;
 		}
-	
+
 		std::vector< std::string > args;
 		CMissionParser::tokenizeString( script[1]," \t", args );
 		if ( args.size() != 2 )
@@ -703,7 +924,7 @@ class CMissionStepKillFaction : public IMissionStepTemplate
 		retParams.push_back(STRING_MANAGER::TParam(STRING_MANAGER::faction));
 		retParams.back().Enum = _Faction;
 		retParams.push_back(STRING_MANAGER::TParam(STRING_MANAGER::integer, sint32(_Quantity)));
-				
+
 		if ( _Place != 0xFFFF )
 		{
 			STRING_MANAGER::TParam param;
@@ -722,7 +943,7 @@ class CMissionStepKillFaction : public IMissionStepTemplate
 		}
 		else
 			textPtr = &stepText;
-		
+
 	}
 
 	/// Faction as defined in CStaticFame
@@ -854,7 +1075,7 @@ class CMissionStepKillByName : public IMissionStepTemplate
 		}
 		return 0;
 	}
-	
+
 	void getInitState( std::vector<uint32>& ret )
 	{
 		ret.clear();
@@ -990,7 +1211,7 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 			else
 			{
 				sint32 victimFame = CFameInterface::getInstance().getFameIndexed(victim->getId(), _SubSteps[subStepIndex].Clan);
-				if ( (victimFame > _SubSteps[subStepIndex].MinLevel) && 
+				if ( (victimFame > _SubSteps[subStepIndex].MinLevel) &&
 					 (victimFame < _SubSteps[subStepIndex].MaxLevel) )
 				{
 					if ( _Place != 0xFFFF )
@@ -1032,7 +1253,7 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 		}
 		return 0;
 	}
-	
+
 
 	void getInitState( std::vector<uint32>& ret )
 	{
@@ -1063,7 +1284,7 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 				retParams.push_back(STRING_MANAGER::TParam());
 				retParams.back().Type = STRING_MANAGER::faction;
 				retParams.back().Enum = _SubSteps[i].Clan;
-	
+
 				retParams.push_back(STRING_MANAGER::TParam());
 				retParams.back().Type = STRING_MANAGER::integer;
 				retParams.back().Int = _SubSteps[i].MinLevel;

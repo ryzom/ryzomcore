@@ -58,6 +58,7 @@
 #include "game_share/http_client.h"
 #include "server_share/log_command_gen.h"
 #include "server_share/r2_vision.h"
+#include "server_share/mongo_wrapper.h"
 
 #include "egs_sheets/egs_sheets.h"
 #include "egs_sheets/egs_static_rolemaster_phrase.h"
@@ -96,6 +97,7 @@
 #include "player_manager/character_game_event.h"
 #include "game_event_manager.h"
 #include "dyn_chat_egs.h"
+#include "admin_log.h"
 
 #include "pvp_manager/pvp.h"
 #include "pvp_manager/pvp_manager_2.h"
@@ -138,6 +140,7 @@ using namespace NLNET;
 using namespace std;
 
 extern CVariable<string>	BannerPriv;
+extern CVariable<string>	ArkSalt;
 
 //
 // Functions
@@ -188,12 +191,18 @@ AdminCommandsInit[] =
 		"summonPet",						true,
 		"connectUserChannel",				true,
 		"connectLangChannel",				true,
+		"setDontTranslateLangs",			true,
 		"updateTarget",						true,
 		"resetName",						true,
 		"showOnline",						true,
 
-		// Web commands managment
+		"openTargetApp",					true,
+		"openTargetUrl",					true,
+
+		// DEPECRATED !!!
 		"webExecCommand",					true,
+		"webDelCommandsIds",				true,
+		"webAddCommandsIds",				true,
 
 		"addPetAnimal",						true,
 		"addSkillPoints",					true,
@@ -231,9 +240,7 @@ AdminCommandsInit[] =
 		"allowSummonPet",					true,
 		"setPetAnimalSatiety",				true,
 		"getPetAnimalSatiety",				true,
-#ifdef RYZOM_FORGE_PET_NAME
 		"setPetAnimalName",					true,
-#endif
 		"taskPass",							true,
 		"setFamePlayer",					true,
 		"guildMOTD",						true,
@@ -376,9 +383,7 @@ AdminCommandsInit[] =
 
 		"addFactionAttackableToTarget",		true,
 		"eventCreateNpcGroup",				true,
-#ifdef RYZOM_FORGE_EXECSCRIPT
 		"eScript",							true,
-#endif
 		"eventNpcGroupScript",				true,
 		"eventSetBotName",					true,
 		"eventSetBotScale",					true,
@@ -387,14 +392,11 @@ AdminCommandsInit[] =
 		"eventSetFaunaBotAggroRange",		true,
 		"eventResetFaunaBotAggroRange",		true,
 		"eventSetBotCanAggro",				true,
+		"eventSetItemCustomText",			true,
+		"eventResetItemCustomText",			true,
 		"eventSetBotSheet",					true,
 		"eventSetBotFaction",				true,
 		"eventSetBotFameByKill",			true,
-
-		"eventSetItemCustomText",			true,
-		"eventResetItemCustomText",			true,
-		"eventSetItemName",					true,
-
 		"dssTarget",						true,	//ring stuff
 		"forceMissionProgress",				true,
 		"eventSetBotURL",					true,
@@ -404,11 +406,10 @@ AdminCommandsInit[] =
 		"eventSetBotFacing",				true,
 		"eventGiveControl",					true,
 		"eventLeaveControl",				true,
+		"eventSpawnDamageLine",				true,
 
-#ifdef RYZOM_FORGE
 		"setOrganization",					true,
 		"setOrganizationStatus", 			true,
-#endif
 
 		"addGuildBuilding",					true,
 };
@@ -422,6 +423,7 @@ static const char *				DefaultPriv = ":DEV:";
 static void loadCommandsPrivileges(const string & fileName, bool init);
 void cbRemoteClientCallback (uint32 rid, const std::string &cmd, const std::string &entityNames);
 //
+
 
 // get AI instance and remove it form the group name
 bool getAIInstanceFromGroupName(string& groupName, uint32& instanceNumber)
@@ -448,7 +450,7 @@ bool checkBannerPriv(const string &sheetName, CEntityId eid)
 		// Not a banner
 		return true;
 	}
-	
+
 	CPlayer* player = PlayerManager.getPlayer( PlayerManager.getPlayerId(eid) );
 
 	if (player == NULL)
@@ -482,28 +484,28 @@ bool checkBannerPriv(const string &sheetName, CEntityId eid)
 			return true;
 		}
 		// VG uses SG banner for now
-		if (player->havePriv(":VG:")) 
+		if (player->havePriv(":VG:"))
 		{
 			return true;
 		}
 	}
 	else if (sheetName.find("_vgu") != string::npos)
 	{
-		if (player->havePriv(":VG:")) 
+		if (player->havePriv(":VG:"))
 		{
 			return true;
 		}
 	}
 	else if (sheetName.find("_gm") != string::npos)
 	{
-		if (player->havePriv(":GM:")) 
+		if (player->havePriv(":GM:"))
 		{
 			return true;
 		}
 	}
 	else if (sheetName.find("_sgm") != string::npos)
 	{
-		if (player->havePriv(":SGM:")) 
+		if (player->havePriv(":SGM:"))
 		{
 			return true;
 		}
@@ -555,6 +557,13 @@ void initAdmin ()
 
 void initCommandsPrivileges(const std::string & fileName)
 {
+	//init the admin log system
+	CConfigFile::CVar *varPtr = IService::getInstance()->ConfigFile.getVarPtr("AdminLogFile");
+	if ( !varPtr )
+		AdminLog.init("admin_cmds.log");
+	else
+		AdminLog.init( varPtr->asString() );
+
 	H_AUTO(initCommandsPrivileges);
 
 	loadCommandsPrivileges(fileName, true);
@@ -690,7 +699,7 @@ string getStringFromHash(const string &hash)
 {
 	ucstring finaltext;
 	getUCstringFromHash(hash, finaltext);
-	
+
 	return finaltext.toUtf8();
 }
 
@@ -713,7 +722,7 @@ void getUCstringFromHash(const string &hash, ucstring &finaltext)
 			// Unexpected string format
 			break;
 		}
-		
+
 		finaltext.push_back((ucchar)ch);
 	}
 }
@@ -966,7 +975,7 @@ ENTITY_VARIABLE(Money, "Money")
 
 	if (get)
 	{
-		value = toString(c->getMoney());
+		value = toString("%" NL_I64 "u", c->getMoney());
 	}
 	else
 	{
@@ -1018,7 +1027,7 @@ ENTITY_VARIABLE(MoneyGuild, "MoneyGuild")
 
 	if (get)
 	{
-		value = toString(guild->getMoney());
+		value = toString("%" NL_I64 "u", guild->getMoney());
 	}
 	else
 	{
@@ -1178,16 +1187,22 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 
 	vector<string> res;
 
+	float fx = 0, fy = 0, fz = 0;
 	sint32 x = 0, y = 0, z = 0;
-	sint32 cell = 0;
+
+	TDataSetRow dsr = e->getEntityRowId();
+	CMirrorPropValueRO<TYPE_CELL> playerCell(TheDataset, dsr, DSPropertyCELL);
+	sint32 cell = playerCell;
 
 	if (get)
 	{
-		x = e->getState().X() / 1000;
-		y = e->getState().Y() / 1000;
-		z = e->getState().Z() / 1000;
-
-		value = toString ("%d,%d,%d", x, y, z);
+		fx = e->getState().X() / 1000.f;
+		fy = e->getState().Y() / 1000.f;
+		fz = e->getState().Z() / 1000.f;
+		if (cell < 0)
+			value = toString ("%.2f,%.2f,%.2f@%d", fx, fy, fz, -cell);
+		else
+			value = toString ("%.2f,%.2f,%.2f", fx, fy, fz);
 	}
 	else
 	{
@@ -1196,15 +1211,15 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 			explode (value, string(","), res);
 			if (res.size() >= 2)
 			{
-				fromString(res[0], x);
-				x *= 1000;
-				fromString(res[1], y);
-				y *= 1000;
+				fromString(res[0], fx);
+				x =  sint32(fx*1000);
+				fromString(res[1], fy);
+				y =  sint32(fy*1000);
 			}
 			if (res.size() >= 3)
 			{
-				fromString(res[2], z);
-				z *= 1000;
+				fromString(res[2], fz);
+				z =  sint32(fz*1000);
 			}
 		}
 		else if ( value.find('@') != string::npos )
@@ -1313,7 +1328,7 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 		if( c )
 		{
 			CContinent * cont = CZoneManager::getInstance().getContinent(x,y);
-			if(c->getCurrentContinent() == CONTINENT::NEWBIELAND )
+			/*if(c->getCurrentContinent() == CONTINENT::NEWBIELAND )
 			{
 				if( cont == 0 || cont->getId() != CONTINENT::NEWBIELAND )
 				{
@@ -1321,6 +1336,7 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 //					nlwarning("Position %s player outside NEWBIELAND, this is logged.", c->getId().toString().c_str());
 				}
 			}
+			*/
 
 			c->allowNearPetTp();
 			if (res.size() >= 4)
@@ -1518,7 +1534,7 @@ NLMISC_COMMAND (createItemInTmpInv, "Create an item and put it in the player tem
 	else
 	{
 		if (sheetName.find(".") == string::npos)
-			sheetName += ".sitem";
+			sheetName += ".item";
 		sheet = CSheetId(sheetName.c_str());
 	}
 
@@ -2440,7 +2456,6 @@ NLMISC_COMMAND(getPetAnimalSatiety,"Get the satiety of pet animal (petIndex in 0
 	return true;
 }
 
-#ifdef RYZOM_FORGE_PET_NAME
 NLMISC_COMMAND(setPetAnimalName, "Set the name of a pet animal","<eid> <petIndex (0..3)> [<name>]")
 {
 	if (args.size () < 2) return false;
@@ -2458,7 +2473,6 @@ NLMISC_COMMAND(setPetAnimalName, "Set the name of a pet animal","<eid> <petIndex
 
 	return true;
 }
-#endif
 
 NLMISC_COMMAND (addSkillPoints, "add skill points of given type (Fight = 0,	Magic = 1,Craft = 2, Harvest = 3)", "<eid> <SP type [0..3]> <nb SP>")
 {
@@ -3115,7 +3129,7 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 			}
 		}
 
-		std::string targetName = string("implicite");
+		std::string targetName = string("Implicite");
 
 		// add the eid of the player or target if necessary
 		if (cmd->AddEId)
@@ -3125,7 +3139,7 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 				log_Command_ExecOnTarget(c->getTarget(), cmdName, arg);
 				res += c->getTarget().toString();
 				targetEid = c->getTarget();
-				targetName = NLMISC::toString("(%s,%s)", c->getTarget().toString().c_str(), CEntityIdTranslator::getInstance()->getByEntity(c->getTarget()).toString().c_str());
+				targetName = NLMISC::toString("%s,%s", c->getTarget().toString().c_str(), CEntityIdTranslator::getInstance()->getByEntity(c->getTarget()).toString().c_str());
 			}
 			else
 			{
@@ -3149,9 +3163,10 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 			strFindReplace(res, "#target", c->getTarget().toString().c_str());
 			strFindReplace(res, "#gtarget", string("#"+c->getTarget().toString()).c_str());
 		}
-		nlinfo ("ADMIN: Player (%s,%s) will execute client admin command '%s' on target %s", eid.toString().c_str(), csName.c_str(), res.c_str(), targetName.c_str());
+		ADMINLOG("/a %s %s %s", csName.c_str(), targetName.c_str(), res.c_str());
+//		nlinfo ("ADMIN: Player (%s,%s) will execute client admin command '%s' on target %s", eid.toString().c_str(), csName.c_str(), res.c_str(), targetName.c_str());
 
-		audit(cmd, res, eid, csName, targetName);
+		//audit(cmd, res, eid, csName, targetName);
 
 		CLightMemDisplayer *CmdDisplayer = new CLightMemDisplayer("CmdDisplayer");
 		CLog *CmdLogger = new CLog( CLog::LOG_NO );
@@ -3187,7 +3202,8 @@ void cbClientAdminOffline (NLNET::CMessage& msgin, const std::string &serviceNam
 	string cmdName, arg;
 	msgin.serial (cmdName, arg);
 
-	nlinfo("ADMIN: Executing admin /c command: eid=%s onTarget=%s cmdName=%s arg=%s",eid.toString().c_str(),characterName.c_str(),cmdName.c_str(),arg.c_str());
+	ADMINLOG("/c %s %s %s", eid.toString().c_str(), characterName.c_str(), cmdName.c_str(), arg.c_str());
+	//nlinfo("ADMIN: Executing admin /c command: eid=%s onTarget=%s cmdName=%s arg=%s",eid.toString().c_str(),characterName.c_str(),cmdName.c_str(),arg.c_str());
 
 	// find the character
 	CCharacter *c = PlayerManager.getChar( eid );
@@ -3267,7 +3283,8 @@ void cbClientAdminOffline (NLNET::CMessage& msgin, const std::string &serviceNam
 	std::string csName = CEntityIdTranslator::getInstance()->getByEntity(eid).toString();
 	std::string targetName = NLMISC::toString("(%s,%s)", CEntityIdTranslator::getInstance()->getByEntity( ucstring(characterName) ).toString().c_str(), characterName.c_str() );
 
-	nlinfo("ADMINOFFLINE: Player (%s,%s) will execute client admin command '%s' on target %s", eid.toString().c_str(), csName.c_str(), res.c_str(), targetName.c_str());
+	ADMINLOG("/o %s %s %s", csName.c_str(), targetName.c_str(), res.c_str());
+	//nlinfo("ADMINOFFLINE: Player (%s,%s) will execute client admin command '%s' on target %s", eid.toString().c_str(), csName.c_str(), res.c_str(), targetName.c_str());
 	NLMISC::ICommand::execute(res, *InfoLog);
 }
 
@@ -3421,7 +3438,7 @@ NLMISC_COMMAND( summon, "summon a player in front of the CSR", "<CSR eId><player
 	}
 	CHECK_RIGHT( c,target );
 
-	if(target->getCurrentContinent() == CONTINENT::NEWBIELAND )
+/*	if(target->getCurrentContinent() == CONTINENT::NEWBIELAND )
 	{
 		if( c->getCurrentContinent() != CONTINENT::NEWBIELAND )
 		{
@@ -3430,7 +3447,7 @@ NLMISC_COMMAND( summon, "summon a player in front of the CSR", "<CSR eId><player
 			return true;
 		}
 	}
-
+*/
 	COfflineEntityState state;
 	state.X = target->getState().X;
 	state.Y = target->getState().Y;
@@ -3925,7 +3942,7 @@ NLMISC_COMMAND (changeVar, "change a variable of a player", "<eid> <var> <val>")
 	string var = args[1];
 	string value = args[2];
 
-	CCharacter *e = PlayerManager.getChar(eid);
+	CEntityBase *e = CEntityBaseManager::getEntityBasePtr(eid);
 	if(e != 0)
 	{
 		if (e->setValue (var, value))
@@ -4240,8 +4257,9 @@ ENTITY_VARIABLE(Invisible, "Invisibility of a player")
 		CCharacter *c = dynamic_cast<CCharacter*>(e);
 
 		uint64 val;
+		bool isVisible = R2_VISION::isEntityVisibleToPlayers(e->getWhoSeesMe());
 
-		if (value=="1" || value=="on" || strlwr(value)=="true" )
+		if (value=="1" || value=="on" || strlwr(value)=="true" || (strlwr(value)=="toggle" && isVisible))
 		{
 			if (c != NULL)
 				c->setInvisibility(true);
@@ -4268,7 +4286,7 @@ ENTITY_VARIABLE(Invisible, "Invisibility of a player")
 				val=0;
 			}
 		}
-		else if (value=="0" || value=="off" || strlwr(value)=="false" )
+		else if (value=="0" || value=="off" || strlwr(value)=="false" || strlwr(value)=="toggle")
 		{
 			if (c != NULL)
 				c->setInvisibility(false);
@@ -4428,15 +4446,17 @@ ENTITY_VARIABLE (God, "God mode, invulnerability")
 	}
 	else
 	{
-		if (value=="1" || value=="on" || strlwr(value)=="god" || strlwr(value)=="true" )
+		if (value=="1" || value=="on" || strlwr(value)=="god" || strlwr(value)=="true" || (strlwr(value)=="toggle" && !c->godMode()))
 		{
 			c->setGodModeSave(true);
 			c->setGodMode(true);
+			c->setBonusMalusName("god", c->addEffectInDB(CSheetId("berserk.sbrick"), true));
 		}
-		else if (value=="0" || value=="off" || strlwr(value)=="false" )
+		else if (value=="0" || value=="off" || strlwr(value)=="false" || strlwr(value)=="toggle")
 		{
 			c->setGodModeSave(false);
 			c->setGodMode(false);
+			c->removeEffectInDB(c->getBonusMalusName("god"), true);
 		}
 		nlinfo ("%s %s now in god mode", entity.toString().c_str(), c->godMode()?"is":"isn't");
 	}
@@ -4453,13 +4473,15 @@ ENTITY_VARIABLE (Invulnerable, "Invulnerable mode, invulnerability too all")
 	}
 	else
 	{
-		if (value=="1" || value=="on" || strlwr(value)=="invulnerable" || strlwr(value)=="true" )
+		if (value=="1" || value=="on" || strlwr(value)=="invulnerable" || strlwr(value)=="true" || (strlwr(value)=="toggle" && !c->invulnerableMode()))
 		{
 			c->setInvulnerableMode(true);
+			c->setBonusMalusName("invulnerability", c->addEffectInDB(CSheetId("invulnerability.sbrick"), true));
 		}
-		else if (value=="0" || value=="off" || strlwr(value)=="false" )
+		else if (value=="0" || value=="off" || strlwr(value)=="false" || strlwr(value)=="toggle")
 		{
 			c->setInvulnerableMode(false);
+			c->removeEffectInDB(c->getBonusMalusName("invulnerability"), true);
 		}
 		nlinfo ("%s %s now in invulnerable mode", entity.toString().c_str(), c->invulnerableMode()?"is":"isn't");
 	}
@@ -4510,7 +4532,13 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 		pass = args[2];
 
 	if ( (channel == DYN_CHAT_INVALID_CHAN) && (pass != nlstr("*")) && (pass != nlstr("***")) )
-		channel = inst->createUserChannel(nameLwr, pass);
+	{
+		// Don't allow channels starting with "FACTION_" (to not clash with the faction channels)
+		if (!c->havePriv(":DEV:") && !c->havePriv(":SGM:") && !c->havePriv(":EM:") && nameLwr.substr(0, 8) == toCaseInsensitive("FACTION_"))
+			channel =  DYN_CHAT_INVALID_CHAN;
+		else
+			channel = inst->createUserChannel(nameLwr, pass);
+	}
 
 	if (channel != DYN_CHAT_INVALID_CHAN)
 	{
@@ -4550,7 +4578,6 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 
 }
 
-#ifdef RYZOM_FORGE
 NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang> <leave:0|1>")
 {
 	if ((args.size() < 2) || (args.size() > 3))
@@ -4559,14 +4586,20 @@ NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang>
 
 	CPVPManager2 *inst = CPVPManager2::getInstance();
 
-	string action;
 	string lang = args[1];
-	if (lang != "en" && lang != "fr" && lang != "de" && lang != "ru" && lang != "es")
+	if (lang != "en" && lang != "fr" && lang != "de" && lang != "ru" && lang != "es" && lang != "rf" && !c->havePriv(":DEV:"))
 		return false;
+
 	bool leave = false;
 	if (args.size() > 2)
 		leave = args[2] == "1";
-	TChanID channel = inst->getFactionDynChannel(lang);
+
+	string channelName = lang;
+	// Convert langs to usr lang channels
+	if (lang == "en" || lang == "fr" || lang == "de" || lang == "ru" || lang == "es")
+		channelName = "usr_"+lang;
+
+	TChanID channel = inst->getFactionDynChannel(channelName);
 
 	if (channel != DYN_CHAT_INVALID_CHAN)
 	{
@@ -4591,12 +4624,69 @@ NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang>
 	CCharacter::sendDynamicSystemMessage( eid, "EGS_CHANNEL_INVALID_NAME", params );
 	return false;
 }
-#endif
+
+
+NLMISC_COMMAND (setDontTranslateLangs, "Set langs that a player dont want to see translated", "<user id> <langs>")
+{
+	if (args.size() != 2)
+		return false;
+
+	GET_CHARACTER
+
+	TDataSetRow player = c->getEntityRowId();
+
+
+	CMessage msgout("SET_USER_DONT_TRANSLATE_LANGS");
+	msgout.serial(player);
+	string langs = args[1];
+	msgout.serial(langs);
+	CUnifiedNetwork::getInstance()->send("IOS", msgout);
+	c->setDontTranslate(langs);
+	return true;
+}
+
+
 
 NLMISC_COMMAND (updateTarget, "Update current target", "<user id>")
 {
 	GET_CHARACTER
 	c->updateTarget();
+	return true;
+}
+
+// !!! Deprecated !!!
+NLMISC_COMMAND (webAddCommandsIds, "Add ids of commands will be run from webig", "<user id> <bot_name> <web_app_url> <indexes>")
+{
+	if (args.size() != 4)
+		return false;
+
+	GET_CHARACTER
+
+	string web_app_url = args[2];
+	string indexes = args[3];
+
+	c->addWebCommandCheck(web_app_url, indexes, ArkSalt.get());
+	return true;
+}
+
+// !!! Deprecated !!!
+NLMISC_COMMAND (webDelCommandsIds, "Del ids of commands", "<user id> <web_app_url>")
+{
+	if (args.size() != 2)
+		return false;
+
+	GET_CHARACTER
+
+	string web_app_url = args[1];
+	uint item_idx = c->getWebCommandCheck(web_app_url);
+	if (item_idx == INVENTORIES::NbBagSlots)
+		return false;
+
+	CInventoryPtr inv = c->getInventory(INVENTORIES::bag);
+	CGameItemPtr item = inv->getItem(item_idx);
+	inv->removeItem(item_idx);
+	item.deleteItem();
+	c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=deleted");
 	return true;
 }
 
@@ -4615,6 +4705,9 @@ CInventoryPtr getInv(CCharacter *c, const string &inv)
 			case INVENTORIES::pet_animal2:
 			case INVENTORIES::pet_animal3:
 			case INVENTORIES::pet_animal4:
+			case INVENTORIES::pet_animal5:
+			case INVENTORIES::pet_animal6:
+			case INVENTORIES::pet_animal7:
 			case INVENTORIES::guild:
 			case INVENTORIES::player_room:
 				inventoryPtr = c->getInventory(selectedInv);
@@ -4628,7 +4721,6 @@ CInventoryPtr getInv(CCharacter *c, const string &inv)
 	return inventoryPtr;
 }
 
-#ifdef RYZOM_FORGE
 NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url> <index> <command> <hmac> [<new_check=0|1|2|3>] [<next_step=0|1>] [<send_url=0|1|2>]")
 {
 
@@ -4873,6 +4965,9 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 				case INVENTORIES::pet_animal2:
 				case INVENTORIES::pet_animal3:
 				case INVENTORIES::pet_animal4:
+				case INVENTORIES::pet_animal5:
+				case INVENTORIES::pet_animal6:
+				case INVENTORIES::pet_animal7:
 				case INVENTORIES::guild:
 				case INVENTORIES::player_room:
 					inventory = inv;
@@ -4934,8 +5029,9 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 			if (command_args.size() >= 6 && command_args[5] != "*")
 			{
-				customValue.fromUtf8(command_args[5]);
-				new_item->setCustomName(customValue);
+				//deprecated
+				//customValue.fromUtf8(command_args[5]);
+				//new_item->setCustomName(customValue);
 			}
 
 			if (command_args.size() >= 7 && command_args[6] != "*")
@@ -5262,10 +5358,11 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 				{
 					if (!crafted || itemPtr->getCreator() == c->getId())
 					{
-						if (needCustomName.empty() || itemPtr->getCustomName() == needCustomName)
-						{
+						// deprecated
+						//if (needCustomName.empty() || itemPtr->getCustomName() == needCustomName)
+						//{
 							numberItem += itemPtr->getStackSize();
-						}
+						//}
 					}
 				}
 			}
@@ -6689,7 +6786,6 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 	return true;
 }
-#endif
 
 //----------------------------------------------------------------------------
 ENTITY_VARIABLE (PriviledgePVP, "Priviledge Pvp Mode")
@@ -6912,7 +7008,6 @@ NLMISC_COMMAND(listGuildMembers, "display guild members list", "<csr eid> <guild
 	return true;
 }
 
-#ifdef RYZOM_FORGE_ROOM
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(roomInvite, "send a room invite to a player character", "<eid> <member name>")
 {
@@ -6996,7 +7091,6 @@ NLMISC_COMMAND(roomKick, "kick player from room", "<eid> <member name>")
 
 	return true;
 }
-#endif
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(guildInvite, "send a guild invite to a player character", "<eid> <member name>")
@@ -7632,11 +7726,9 @@ ENTITY_VARIABLE (Aggro, "Aggroable by creatures")
 			c->setAggroableOverride(aggroable);
 			c->setAggroableSave(aggroable);
 
-			aggroable = c->getAggroableOverride();
-			nlinfo ("%s aggroable = %d", entity.toString().c_str(), aggroable);
-			if (aggroable>0)
+			if (aggroable > 0)
 				nlinfo ("%s is now aggroable", entity.toString().c_str());
-			else if (aggroable<0)
+			else if (aggroable < 0)
 				nlinfo ("%s aggroable is defined by privilege", entity.toString().c_str());
 			else
 				nlinfo ("%s is now non aggroable", entity.toString().c_str());
@@ -7848,7 +7940,7 @@ NLMISC_COMMAND(setFamePlayer, "set the fame value of a player in the given facti
 
 	uint32 factionIndex	=CStaticFames::getInstance().getFactionIndex(args[1]);
 	if (factionIndex == CStaticFames::INVALID_FACTION_INDEX)
-			return false;	
+			return false;
 
 	sint32 fame;
 	NLMISC::fromString(args[2], fame);
@@ -7880,7 +7972,6 @@ NLMISC_COMMAND(addGuildBuilding, "sadd a building to guild", "<player eid> <buil
 	return true;
 }
 
-#ifdef RYZOM_FORGE
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setOrganization, "set the organization of a player to the given faction", "<player eid> <faction>")
 {
@@ -7891,7 +7982,7 @@ NLMISC_COMMAND(setOrganization, "set the organization of a player to the given f
 
 	uint32 factionIndex	= CStaticFames::getInstance().getFactionIndex(args[1]);
 	if (factionIndex == CStaticFames::INVALID_FACTION_INDEX)
-			return false;	
+			return false;
 
 	c->setOrganization(factionIndex);
 
@@ -7927,7 +8018,6 @@ NLMISC_COMMAND(setOrganizationStatus, "set the organization status of a player",
 
 	return true;
 }
-#endif
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m>] [<spawnBots=true>] [<orientation=random|self|-360..360>] [<name>] [<x>] [<y>] [client_sheet] [inVIllage?inOutpost?inStable?inAtys?]")
@@ -7935,7 +8025,6 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 	if (args.size () < 3) return false;
 	GET_CHARACTER
 
-	uint32 instanceNumber = c->getInstanceNumber();
 	sint32 x = c->getX();
 	sint32 y = c->getY();
 	sint32 z = c->getZ();
@@ -7949,9 +8038,10 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 		return true;
 	}
 
-	NLMISC::CSheetId sheetId(args[2]);
-	if (sheetId==CSheetId::Unknown)
-		sheetId = args[2] + ".creature";
+	string sheetName = args[2];
+	if (sheetName.find(".creature") == string::npos)
+		sheetName += ".creature";
+	NLMISC::CSheetId sheetId(sheetName);
 	if (sheetId==CSheetId::Unknown)
 	{
 		log.displayNL("invalid sheet id");
@@ -8023,10 +8113,20 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 			look += ".creature";
 	}
 
-	// See if another AI instance has been specified
-	if ( ! getAIInstanceFromGroupName(botsName, instanceNumber))
+
+	//Get instance number from position
+	CContinent * continent = CZoneManager::getInstance().getContinent(x, y);
+	if (!continent)
 	{
-		return true;
+		log.displayNL("ERR: invalid continent");
+		return false;
+	}
+	uint32 instanceNumber = CUsedContinent::instance().getInstanceForContinent((CONTINENT::TContinent)continent->getId());
+
+	if (instanceNumber == ~0)
+	{
+		log.displayNL("ERR: invalid continent");
+		return false;
 	}
 
 	TDataSetRow dsr = c->getEntityRowId();
@@ -8080,7 +8180,6 @@ NLMISC_COMMAND(eventNpcGroupScript, "executes a script on an event npc group", "
 	return true;
 }
 
-#ifdef RYZOM_FORGE_EXECSCRIPT
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(eScript, "executes a script on an event npc group", "<player eid> <groupname> <script>")
 {
@@ -8090,7 +8189,7 @@ NLMISC_COMMAND(eScript, "executes a script on an event npc group", "<player eid>
 	uint32 instanceNumber = c->getInstanceNumber();
 
 	uint32 nbString = (uint32)args.size();
- 
+
 	string botsName = args[1];
 	if ( ! getAIInstanceFromGroupName(botsName, instanceNumber))
 	{
@@ -8143,7 +8242,6 @@ NLMISC_COMMAND(eScript, "executes a script on an event npc group", "<player eid>
 
 	return true;
 }
-#endif
 
 NLMISC_COMMAND(eventSetBotName, "changes the name of a bot", "<bot eid> <name>")
 {
@@ -8340,7 +8438,7 @@ NLMISC_COMMAND(eventSetBotSheet, "Change the sheet of a bot", "<bot eid> <sheet 
 }
 
 //----------------------------------------------------------------------------
-extern sint32 clientItemWrite(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text);
+extern sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text);
 
 NLMISC_COMMAND(eventSetItemCustomText, "set an item custom text, which replaces help text", "<eId> <inventory> <slot in inventory> <text>")
 {
@@ -8360,7 +8458,7 @@ NLMISC_COMMAND(eventSetItemCustomText, "set an item custom text, which replaces 
 	NLMISC::fromString(args[2], slot);
 	text.fromUtf8(args[3]);
 
-	sint32 ret = clientItemWrite(c, inventory, slot, text);
+	sint32 ret = clientEventSetItemCustomText(c, inventory, slot, text);
 
 	switch (ret)
 	{
@@ -8413,7 +8511,7 @@ NLMISC_COMMAND(eventResetItemCustomText, "set an item custom text, which replace
 	}
 
 	CGameItemPtr item = invent->getItem(slot);
-	item->setCustomText(std::string());
+	item->setCustomText(ucstring());
 	// Following line was commented out by trap, reason unknown
 	c->incSlotVersion(INVENTORIES::bag, slot);
 	log.displayNL("item in slot %u has now its default text displayed", slot);
@@ -8422,67 +8520,14 @@ NLMISC_COMMAND(eventResetItemCustomText, "set an item custom text, which replace
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(eventSetItemName, "change an item name to a phrase or literal (e.g.: /a eventSetItemName bag 5 1 \"Shield of Destruction\", /a eventSetItemName bag 5 0 shield_ep2_kami250_1)", "<eId> <inventory> <slot in inventory> <literal> <name>")
-{
-	if (args.size() < 5)
-		return false;
 
-	GET_CHARACTER;
-	if (!c)
-	{
-		log.displayNL("Invalid character '%s'", args[0].c_str());
-		return false;
-	}
-
-	INVENTORIES::TInventory	inventory = INVENTORIES::toInventory(args[1]);
-	if (inventory == INVENTORIES::UNDEFINED)
-	{
-		log.displayNL("Inventory is undefined");
-		return false;
-	}
-	uint32 slot;
-	if (!NLMISC::fromString(args[2], slot))
-	{
-		log.displayNL("Slot '%s' is not a valid integer", args[2].c_str());
-		return false;
-	}
-	bool literal = NLMISC::toBool(args[3]);
-	string name = args[4];
-
-	CInventoryPtr invent = c->getInventory(inventory);
-	if (slot >= invent->getSlotCount())
-	{
-		log.displayNL("Invalid slot specified");
-		return false;
-	}
-	CGameItemPtr item = invent->getItem(slot);
-	if (item == NULL)
-	{
-		log.displayNL("Item does not exist");
-		return false;
-	}
-
-	if (literal)
-	{
-		name = capitalizeFirst(name); // Require first character to be capitalized
-
-		if (name.size() >= 255) // Limit literal text length
-			name = name.substr(0, 255);
-	}
-
-	item->setPhraseId(name, literal);
-
-	return true;
-}
-
-//----------------------------------------------------------------------------
 NLMISC_COMMAND(eventSpawnToxic, "Spawn a toxic cloud", "<player eid> <posXm> <posYm> <iRadius{0,1,2}=0> <dmgPerHit=0> <updateFrequency=ToxicCloudUpdateFrequency> <lifetimeInTicks=ToxicCloudDefaultLifetime>" )
 {
 	if ( args.size() < 1 )
 		return false;
 
 	GET_CHARACTER
-	
+
 	float x = (float)c->getX();
 	float y = (float)c->getY();
 
@@ -8514,7 +8559,7 @@ NLMISC_COMMAND(eventSpawnToxic, "Spawn a toxic cloud", "<player eid> <posXm> <po
 			}
 		}
 	}
-	
+
 	CToxicCloud *tc = new CToxicCloud();
 	float radius = (float)(iRadius*2 + 1); // {1, 3, 5} corresponding to the 3 sheets
 	tc->init( cloudPos, radius, dmgPerHit, updateFrequency, lifetime );
@@ -8530,6 +8575,30 @@ NLMISC_COMMAND(eventSpawnToxic, "Spawn a toxic cloud", "<player eid> <posXm> <po
 	}
 	return true;
 }
+
+//----------------------------------------------------------------------------
+/*
+/a eventSpawnDamageLine test_ulu 40900,-12198|40651,-12148 teanwen_haleine
+ */
+NLMISC_COMMAND(eventSpawnDamageLine, "Spawn a damage line", "<player eid> <name> [<px1,py1|px2,py2|...>] [<dammage>]" )
+{
+	if ( args.size() < 2 )
+		return false;
+
+	GET_CHARACTER
+	string path = "";
+	if (args.size() > 2 )
+		path = args[2];
+
+	string dammage = "";
+	if (args.size() > 3 )
+		dammage = args[3];
+
+	CZoneManager::getInstance().parseGooBorder( args[1], path, dammage );
+
+	return true;
+}
+
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(useCatalyser, "use an xp catalyser", "<eId> [<slot in bag>]")
@@ -8898,17 +8967,17 @@ NLMISC_COMMAND(leagueKick, "kick a player character from league", "<eid> <member
 
 	// Kick
 	user->setAfkState(false);
-	
+
 	CTeam * team = TeamManager.getTeam( user->getTeamId() );
 	if (!team)
 		return true;
-	
+
 	if (team->getLeader() != eId )
 		return true;
-	
+
 	if (user->getLeagueId() != invitedCharacter->getLeagueId())
 		return true;
-	
+
 	team = TeamManager.getTeam( invitedCharacter->getTeamId() );
 	if (!team) {
 		invitedCharacter->setLeagueId(DYN_CHAT_INVALID_CHAN);
@@ -8916,7 +8985,7 @@ NLMISC_COMMAND(leagueKick, "kick a player character from league", "<eid> <member
 		team->setLeagueId(DYN_CHAT_INVALID_CHAN);
 		team->updateLeague();
 	}
-	
+
 	return true;
 }
 
@@ -8988,6 +9057,44 @@ NLMISC_COMMAND(quitDelay, "Inform the player that the shard will be stopped in N
 
 	return true;
 }
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(openTargetApp, "open target app", "<user_id>")
+{
+	if (args.size() < 1)
+		return false;
+
+	GET_CHARACTER
+
+	CCreature* creature = CreatureManager.getCreature(c->getTarget());
+	if (!creature)
+		return false;
+
+	uint32 program = creature->getBotChatProgram();
+	if (program & (1 << BOTCHATTYPE::WebPageFlag))
+	{
+		c->sendUrl(creature->getWebPage());
+	}
+}
+
+//----------------------------------------------------------------------------
+// (ulukyn) Very special case to use with ARK.
+// !!! Never let user call openTargetUrl with a custom url or player
+//   will able to sign any url with server salt.
+// It's why the url are hardcoded here
+NLMISC_COMMAND(openTargetUrl, "Open target url", "<user_id> [bullying]")
+{
+	if (args.size() < 1)
+		return false;
+
+	GET_CHARACTER
+
+	if (args.size() > 1 && args[1] == "1")
+		c->sendUrl("app_arcc action=mScript_Run&script_name=TalkNpc&bullying=1&command=reset_all");
+	else
+		c->sendUrl("app_arcc action=mScript_Run&script_name=TalkNpc&command=reset_all");
+}
+
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(eventSetBotURL, "changes the url of a bot", "<bot eid> [<url>]")
@@ -9178,8 +9285,8 @@ NLMISC_COMMAND(characterInventoryDump, "Dump character inventory info", "<eid> <
 			string sheet = itemPtr->getSheetId().toString();
 			uint32 quality = itemPtr->quality();
 			uint32 stacksize = itemPtr->getStackSize();
-			
-			msg += NLMISC::toString("- Slot %3d: SHEETID: %s    QUALITY: %d   QUANTITY: %d\n", 
+
+			msg += NLMISC::toString("- Slot %3d: SHEETID: %s    QUALITY: %d   QUANTITY: %d\n",
 				i,
 				sheet.c_str(),
 				quality,
@@ -9187,7 +9294,7 @@ NLMISC_COMMAND(characterInventoryDump, "Dump character inventory info", "<eid> <
 
 			++j;
 			if ( ! (j % 3)) {
-				log.displayNL(msg.c_str());	
+				log.displayNL(msg.c_str());
 				msg = "";
 				j = 0;
 			}
@@ -9254,7 +9361,7 @@ NLMISC_COMMAND(deleteInventoryItem, "Delete an item from a characters inventory"
 			itemPtr->quality() == quality &&
 			itemPtr->getStackSize() >= quantity)
 		{
-			log.displayNL("Deleted item '%s' in slot %d of inventory '%s'", 
+			log.displayNL("Deleted item '%s' in slot %d of inventory '%s'",
 				itemPtr->getSheetId().toString().c_str(),
 				slot,
 				INVENTORIES::toString(inventory->getInventoryId()).c_str()
@@ -9304,8 +9411,9 @@ NLMISC_COMMAND (lockItem, "Lock/unlock item in inventory", "<user id> <inventory
 	sint32 slot = -1;
 	fromString(args[2], slot);
 
-	CInventoryPtr inventory = getInv(c, selected_inv);
+	if (selected_inv == "guild") return false;
 
+	CInventoryPtr inventory = getInv(c, selected_inv);
 	if (inventory == NULL) return false;
 
 	if (slot < 0 || slot >= INVENTORIES::NbBagSlots) return false;
@@ -9368,7 +9476,7 @@ NLMISC_COMMAND (setLeague, "Set the League of the team", "<user id> [<name>]")
 			CCharacter::sendDynamicSystemMessage( c->getId(),"LEAGUE_INVITOR_NOT_LEADER" );
 		return true;
 	}
-	
+
 	if (team->getLeader() != c->getId())
 	{
 		CCharacter::sendDynamicSystemMessage( c->getId(),"LEAGUE_INVITOR_NOT_LEADER" );
@@ -9386,10 +9494,10 @@ NLMISC_COMMAND (setLeague, "Set the League of the team", "<user id> [<name>]")
 NLMISC_COMMAND(eventGiveControl, "Give control of entity A to entity B", "<eid> <master eid> <slave eid>")
 {
 	if (args.size() != 3) return false;
- 
+
 	CEntityId masterEid(args[1]);
 	CEntityId slaveEid(args[2]);
-	
+
 	nlinfo("%s takes control of %s", args[1].c_str(), args[2].c_str());
 
 	CMessage msgout("ACQUIRE_CONTROL");
@@ -9408,9 +9516,9 @@ NLMISC_COMMAND(eventGiveControl, "Give control of entity A to entity B", "<eid> 
 NLMISC_COMMAND(eventLeaveControl, "Leave control of entity", "<eid> <master eid>")
 {
 	if (args.size() != 2) return false;
- 
+
 	CEntityId masterEid(args[1]);
-	
+
 	nlinfo("%s leaves control", args[1].c_str());
 
 	CMessage msgout("LEAVE_CONTROL");
@@ -9427,15 +9535,18 @@ NLMISC_COMMAND(setSimplePhrase, "Set an IOS phrase", "<id> <phrase> [<language c
 		return false;
 
 	string phraseName = args[0];
-	ucstring phraseContent = phraseName;
-	phraseContent += "(){[";
-	phraseContent += args[1];
-	phraseContent += "]}";
+	ucstring phraseContent;
+	ucstring phraseText;
+	phraseContent.fromUtf8(phraseName);
+	phraseText.fromUtf8(args[1]);
+	phraseContent += ucstring("(){[");
+	phraseContent += phraseText;
+	phraseContent += ucstring("]}");
 
 	string msgname = "SET_PHRASE";
 	bool withLang = false;
 	string lang = "";
-	if (args.size() == 3) 
+	if (args.size() == 3)
 	{
 		lang = args[2];
 		if (lang != "all")

@@ -70,14 +70,14 @@ void copyDynEnergy_sff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	string Request = stack.top();
 	stack.pop();
-	
+
 	vector<string> args;
 	{
 		CStringSeparator sep(Request," ");
 		while (sep.hasNext())
 			args.push_back(sep.get());
 	}
-	
+
 	CDoOnFamilyCopyDynEnergy command(srcIndex, destIndex);
 	doOnFamily(args, &command);
 }
@@ -112,14 +112,14 @@ void setDynEnergy_sff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	string Request = stack.top();
 	stack.pop();
-	
+
 	vector<string> args;
 	{
 		CStringSeparator sep(Request, " ");
 		while (sep.hasNext())
 			args.push_back(sep.get());
 	}
-	
+
 	CDoOnFamilySetDynEnergy command(index, value);
 	doOnFamily(args, &command);
 }
@@ -152,7 +152,7 @@ void clamp_fff_f(CStateInstance* entity, CScriptStack& stack)
 	float lim1 = stack.top();
 	stack.pop();
 	float& value = stack.top();
-	
+
 	// Order limits
 	if (lim1>lim2)
 		std::swap(lim1, lim2);
@@ -239,7 +239,7 @@ void rndm_ff_f(CStateInstance* entity, CScriptStack& stack)
 	float max = stack.top();
 	stack.pop();
 	float min = stack.top();
-	
+
 	// Min value
 	static uint32 const maxLimit = std::numeric_limits<uint32>::max()>>1;
 	double const rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
@@ -646,7 +646,7 @@ void pow_ff_f(CStateInstance* entity, CScriptStack& stack)
 	float const exponent = stack.top();
 	stack.pop();
 	float const base = stack.top();
-	
+
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	float const value = powf(base,exponent);
@@ -725,7 +725,7 @@ void substr_sff_s(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	int start = (int)(float)stack.top();
 	stack.pop();
-	
+
 	BOMB_IF( ((string&)stack.top()).length() < (uint)(start + length), "String too short for substr_sff_s operation", return );
 	stack.top() = ((string&)stack.top()).substr(start, length);
 }
@@ -918,7 +918,7 @@ void setNamedEntityPropCb_sss_(CStateInstance* entity, CScriptStack& stack)
 
 //----------------------------------------------------------------------------
 // getNamedEntityProp_ss_s
-// Arguments: s(name) -> 
+// Arguments: s(name) ->
 /** @page code
 
 @subsection getNamedEntityProp_ss_s
@@ -945,7 +945,7 @@ void getNamedEntityProp_ss_s(CStateInstance* entity, CScriptStack& stack)
 	std::string prop = (std::string)stack.top();
 	stack.pop();
 	std::string name = (std::string)stack.top();
-	
+
 	stack.top() = CNamedEntityManager::getInstance()->get(name).get(prop);
 }
 
@@ -992,7 +992,7 @@ void setSimplePhrase_ss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string phraseName = (std::string)stack.top();
 	stack.pop();
-	
+
 	std::string phraseContent2;
 	phraseContent2 += phraseName;
 	phraseContent2 += "(){[";
@@ -1002,7 +1002,7 @@ void setSimplePhrase_ss_(CStateInstance* entity, CScriptStack& stack)
 	ucstring ucPhraseContent;
 	ucPhraseContent.fromUtf8(phraseContent2); // utf-8 version
 	//ucPhraseContent = phraseContent2; // iso-8859-1 version
-	
+
 	NLNET::CMessage	msgout("SET_PHRASE");
 	msgout.serial(phraseName);
 	msgout.serial(ucPhraseContent);
@@ -1017,7 +1017,7 @@ void setSimplePhrase_sss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string phraseName = (std::string)stack.top();
 	stack.pop();
-	
+
 	std::string phraseContent2;
 	phraseContent2 += phraseName;
 	phraseContent2 += "(){[";
@@ -1027,7 +1027,7 @@ void setSimplePhrase_sss_(CStateInstance* entity, CScriptStack& stack)
 	ucstring ucPhraseContent;
 	ucPhraseContent.fromUtf8(phraseContent2); // utf-8 version
 	//ucPhraseContent = phraseContent2; // iso-8859-1 version
-	
+
 	NLNET::CMessage	msgout("SET_PHRASE_LANG");
 	msgout.serial(phraseName);
 	msgout.serial(ucPhraseContent);
@@ -1057,7 +1057,7 @@ Arguments: s(name) -> s(value)
 void dataGetVar_s_s(CStateInstance* entity, CScriptStack& stack)
 {
 	std::string varId = (std::string)stack.top();
-	
+
 	stack.top() = CAIScriptDataManager::getInstance()->getVar_s(varId);
 }
 
@@ -1082,7 +1082,7 @@ Arguments: s(name) -> f(value)
 void dataGetVar_s_f(CStateInstance* entity, CScriptStack& stack)
 {
 	std::string varId = (std::string)stack.top();
-	
+
 	stack.top() = CAIScriptDataManager::getInstance()->getVar_f(varId);
 }
 
@@ -1094,7 +1094,7 @@ Changes the content of a script data variable. Data variable name is composed
 of a file name and a variable name separated with ':', like in
 "file:variable".
 
-Arguments: s(name),s(value) -> 
+Arguments: s(name),s(value) ->
 @param[in] name is a the name of the data variable
 @param[in] value is a the content of the data variable
 
@@ -1110,7 +1110,7 @@ void dataSetVar_ss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string varId = (std::string)stack.top();
 	stack.pop();
-	
+
 	CAIScriptDataManager::getInstance()->setVar(varId, value);
 }
 
@@ -1122,7 +1122,7 @@ Changes the content of a script data variable. Data variable name is composed
 of a file name and a variable name separated with ':', like in
 "file:variable".
 
-Arguments: s(name),s(value) -> 
+Arguments: s(name),s(value) ->
 @param[in] name is a the name of the data variable
 @param[in] value is a the content of the data variable
 
@@ -1138,7 +1138,7 @@ void dataSetVar_sf_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string varId = (std::string)stack.top();
 	stack.pop();
-	
+
 	CAIScriptDataManager::getInstance()->setVar(varId, value);
 }
 
@@ -1152,7 +1152,7 @@ necessary to save CPU, because writing operations can take time. This also
 permit to ensure data integrity if a crash occurs between the writing of two
 related variables.
 
-Arguments:  -> 
+Arguments:  ->
 
 @code
 ()dataSave();
@@ -1170,7 +1170,7 @@ void dataSave__(CStateInstance* entity, CScriptStack& stack)
 
 @subsection setZoneState_sf_
 
-Arguments:  -> 
+Arguments:  ->
 
 arg0: is the zone name id
 
@@ -1178,7 +1178,7 @@ arg1:
 if zone is not pvp
 	arg1 is interpreted as a boolean (0 - inactive, 1 - active)
 if zone is a pvp zone
-	arg1 is interpreted as 
+	arg1 is interpreted as
 		0 - inactive
 		1 - active with faction point rewards
 		2 - active without faction point rewards
@@ -1195,7 +1195,7 @@ void setZoneState_sf_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string zoneName = (std::string)stack.top();
 	stack.pop();
-	
+
 	NLNET::CMessage	msgout("SET_ZONE_STATE");
 	msgout.serial(zoneName);
 	msgout.serial(state);
@@ -1234,6 +1234,21 @@ void context__c(CStateInstance* entity, CScriptStack& stack)
 	stack.push(entity);
 }
 
+void context_s_c(CStateInstance* entity, CScriptStack& stack)
+{
+	string groupName = stack.top();
+
+	std::vector<CGroup*> grps;
+	entity->getGroup()->getAIInstance()->findGroup(grps, groupName);
+	if (grps.size() > 0)
+	{
+		CGroup* group = grps.back();
+		CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
+		if (npcGroup)
+			stack.push(npcGroup->getPersistentStateInstance());
+	}
+}
+
 //----------------------------------------------------------------------------
 // setActivityVa
 // Arguments: v(Activity,...) ->
@@ -1245,7 +1260,7 @@ void	setActivityVa	(CStateInstance	*entity, CScriptStack	&stack)
 	stack.pop();
 	string outSig = stack.top();
 	stack.pop();
-	
+
 	// Pop input args
 	std::deque<size_t> params;
 	for (string::size_type i=0; i<inSig.length(); ++i)
@@ -1256,13 +1271,13 @@ void	setActivityVa	(CStateInstance	*entity, CScriptStack	&stack)
 	vector<size_t> inParams(params.begin(), params.end());
 	params.clear();
 	vector<size_t> outParams(pOutSig->length());
-	
+
 //////////////////////////////////////////////////////////////////////////////
-	
+
 	// Content
-	
+
 //////////////////////////////////////////////////////////////////////////////
-	
+
 	// Push output args
 	params.assign(outParams.begin(), outParams.end());
 	for (string::size_type i=0; i<outSig.length(); ++i)
@@ -1320,9 +1335,9 @@ void debug_f_(CStateInstance* entity, CScriptStack& stack)
 std::map<std::string, FScrptNativeFunc> nfGetStaticNativeFunctions()
 {
 	std::map<std::string, FScrptNativeFunc> functions;
-	
+
 #define REGISTER_NATIVE_FUNC(cont, func) cont.insert(std::make_pair(std::string(#func), &func))
-	
+
 	REGISTER_NATIVE_FUNC(functions, copyDynEnergy_sff_);
 	REGISTER_NATIVE_FUNC(functions, setDynEnergy_sff_);
 	REGISTER_NATIVE_FUNC(functions, clamp_fff_f);
@@ -1367,14 +1382,15 @@ std::map<std::string, FScrptNativeFunc> nfGetStaticNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, break__);
 	REGISTER_NATIVE_FUNC(functions, getName_c_s);
 	REGISTER_NATIVE_FUNC(functions, context__c);
+	REGISTER_NATIVE_FUNC(functions, context_s_c);
 	REGISTER_NATIVE_FUNC(functions, warning_s_);
 	REGISTER_NATIVE_FUNC(functions, info_s_);
 	REGISTER_NATIVE_FUNC(functions, debug_s_);
 	REGISTER_NATIVE_FUNC(functions, warning_f_);
 	REGISTER_NATIVE_FUNC(functions, info_f_);
 	REGISTER_NATIVE_FUNC(functions, debug_f_);
-	
+
 #undef REGISTER_NATIVE_FUNC
-	
+
 	return functions;
 }

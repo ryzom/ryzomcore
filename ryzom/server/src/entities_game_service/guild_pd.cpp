@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -55,6 +52,30 @@ void							CGuildPD::setCreationDate(uint32 __v, bool forceWrite)
 	}
 	_CreationDate = __v;
 }
+uint32							CGuildPD::getXP() const
+{
+	return _XP;
+}
+void							CGuildPD::setXP(uint32 __v, bool forceWrite)
+{
+	if ((_XP != __v) || forceWrite)
+	{
+		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(3), __v);
+	}
+	_XP = __v;
+}
+uint32							CGuildPD::getChargesPoints() const
+{
+	return _ChargesPoints;
+}
+void							CGuildPD::setChargesPoints(uint32 __v, bool forceWrite)
+{
+	if ((_ChargesPoints != __v) || forceWrite)
+	{
+		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(4), __v);
+	}
+	_ChargesPoints = __v;
+}
 CPeople::TPeople				CGuildPD::getRace() const
 {
 	return _Race;
@@ -64,7 +85,7 @@ void							CGuildPD::setRace(CPeople::TPeople __v, bool forceWrite)
 	nlassert(__v<CPeople::___TPeople_useSize);
 	if ((_Race != __v) || forceWrite)
 	{
-		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(3), (uint32)__v);
+		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(5), (uint32)__v);
 	}
 	_Race = __v;
 }
@@ -76,7 +97,7 @@ void							CGuildPD::setIcon(uint64 __v, bool forceWrite)
 {
 	if ((_Icon != __v) || forceWrite)
 	{
-		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(4), __v);
+		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(6), __v);
 	}
 	_Icon = __v;
 }
@@ -88,7 +109,7 @@ void							CGuildPD::setBuilding(uint32 __v, bool forceWrite)
 {
 	if ((_Building != __v) || forceWrite)
 	{
-		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(5), __v);
+		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(7), __v);
 	}
 	_Building = __v;
 }
@@ -100,7 +121,7 @@ void							CGuildPD::setVersion(uint32 __v, bool forceWrite)
 {
 	if ((_Version != __v) || forceWrite)
 	{
-		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(6), __v);
+		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(8), __v);
 	}
 	_Version = __v;
 }
@@ -151,7 +172,7 @@ void							CGuildPD::setMembers(CGuildMemberPD* __v)
 	__v->pds__setParent(this);
 	_Members[__k] = __v;
 	{
-		// callback the manager 
+		// callback the manager
 		IGuildManager::getInstance().guildMemberListChanged(this);
 	}
 }
@@ -164,7 +185,7 @@ void							CGuildPD::deleteFromMembers(const TCharacterId &__k)
 	__o->pds__destroy();
 	delete __o;
 	{
-		// callback the manager 
+		// callback the manager
 		IGuildManager::getInstance().guildMemberListChanged(this);
 	}
 }
@@ -199,14 +220,18 @@ void							CGuildPD::clear()
 	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(1), (uint64)0);
 	_CreationDate = 0;
 	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(2), 0);
+	_XP = 0;
+	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(3), 0);
+	_ChargesPoints = 0;
+	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(4), 0);
 	_Race = (CPeople::TPeople)0;
-	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(3), (uint32)(CPeople::TPeople)0);
+	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(5), (uint32)(CPeople::TPeople)0);
 	_Icon = (uint64)0;
-	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(4), (uint64)0);
+	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(6), (uint64)0);
 	_Building = 0;
-	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(5), 0);
+	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(7), 0);
 	_Version = 0;
-	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(6), 0);
+	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(8), 0);
 	for (std::map<TCharacterId, CGuildMemberPD*>::iterator __it=_Members.begin(); __it!=_Members.end(); )
 	{
 		std::map<TCharacterId, CGuildMemberPD*>::iterator __itr=__it++;
@@ -249,6 +274,8 @@ void							CGuildPD::apply(CPersistentDataRecord &__pdr)
 	uint16	__TokId = __pdr.addString("Id");
 	uint16	__TokMoney = __pdr.addString("Money");
 	uint16	__TokCreationDate = __pdr.addString("CreationDate");
+	uint16	__TokXP = __pdr.addString("XP");
+	uint16	__TokChargesPoints = __pdr.addString("ChargesPoints");
 	uint16	__TokRace = __pdr.addString("Race");
 	uint16	__TokIcon = __pdr.addString("Icon");
 	uint16	__TokBuilding = __pdr.addString("Building");
@@ -270,6 +297,14 @@ void							CGuildPD::apply(CPersistentDataRecord &__pdr)
 		else if (__pdr.peekNextToken() == __TokCreationDate)
 		{
 			__pdr.pop(__TokCreationDate, _CreationDate);
+		}
+		else if (__pdr.peekNextToken() == __TokXP)
+		{
+			__pdr.pop(__TokXP, _XP);
+		}
+		else if (__pdr.peekNextToken() == __TokChargesPoints)
+		{
+			__pdr.pop(__TokChargesPoints, _ChargesPoints);
 		}
 		else if (__pdr.peekNextToken() == __TokRace)
 		{
@@ -354,9 +389,7 @@ void							CGuildPD::apply(CPersistentDataRecord &__pdr)
 		}
 		else
 		{
-// The following warning was removed because the pdr object for the guild contains both the stuff managed here and the stuff managed in guild_manager/guild.cpp
-// - the latter is ignored by the code here. This is normal behaviour and doesn't deserve a warning
-//			nlwarning("Skipping unrecognised token: %s", __pdr.peekNextTokenName().c_str());
+			nlwarning("Skipping unrecognised token: %s", __pdr.peekNextTokenName().c_str());
 			__pdr.skipData();
 		}
 	}
@@ -369,6 +402,8 @@ void							CGuildPD::store(CPersistentDataRecord &__pdr) const
 	uint16	__TokId = __pdr.addString("Id");
 	uint16	__TokMoney = __pdr.addString("Money");
 	uint16	__TokCreationDate = __pdr.addString("CreationDate");
+	uint16	__TokXP = __pdr.addString("XP");
+	uint16	__TokChargesPoints = __pdr.addString("ChargesPoints");
 	uint16	__TokRace = __pdr.addString("Race");
 	uint16	__TokIcon = __pdr.addString("Icon");
 	uint16	__TokBuilding = __pdr.addString("Building");
@@ -378,6 +413,8 @@ void							CGuildPD::store(CPersistentDataRecord &__pdr) const
 	__pdr.push(__TokId, _Id);
 	__pdr.push(__TokMoney, _Money);
 	__pdr.push(__TokCreationDate, _CreationDate);
+	__pdr.push(__TokXP, _XP);
+	__pdr.push(__TokChargesPoints, _ChargesPoints);
 	{
 		std::string	valuename = CPeople::toString(_Race);
 		__pdr.push(__TokRace, valuename);
@@ -427,6 +464,8 @@ void							CGuildPD::pds__init(const TGuildId &Id)
 	_Id = Id;
 	_Money = (uint64)0;
 	_CreationDate = 0;
+	_XP = 0;
+	_ChargesPoints = 0;
 	_Race = (CPeople::TPeople)0;
 	_Icon = (uint64)0;
 	_Building = 0;
@@ -459,6 +498,8 @@ void							CGuildPD::pds__fetch(RY_PDS::CPData &data)
 	data.serial(_Id);
 	data.serial(_Money);
 	data.serial(_CreationDate);
+	data.serial(_XP);
+	data.serial(_ChargesPoints);
 	data.serialEnum(_Race);
 	data.serial(_Icon);
 	data.serial(_Building);
@@ -473,7 +514,7 @@ void							CGuildPD::pds__fetch(RY_PDS::CPData &data)
 		TCharacterId	__k;
 		data.serial(__k);
 		CGuildMemberPD*	__o = static_cast<CGuildMemberPD*>(PDSLib.create(tableIndex));
-		_Members.insert(std::pair<TCharacterId,CGuildMemberPD*>(__k, __o));
+		_Members.insert(std::make_pair(__k, __o));
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
 		__o->pds__setParentUnnotified(this);
@@ -535,7 +576,7 @@ void							CGuildPD::pds__setParent(CGuildContainerPD* __parent)
 		_Parent->pds__unlinkGuilds(_Id);
 	}
 	_Parent = __parent;
-	PDSLib.setParent(4, getRow(), (RY_PDS::TColumnIndex)(9), (__parent != NULL ? RY_PDS::CObjectIndex(5, __parent->getRow()) : RY_PDS::CObjectIndex::null()));
+	PDSLib.setParent(4, getRow(), (RY_PDS::TColumnIndex)(11), (__parent != NULL ? RY_PDS::CObjectIndex(5, __parent->getRow()) : RY_PDS::CObjectIndex::null()));
 }
 void							CGuildPD::pds__setParentUnnotified(CGuildContainerPD* __parent)
 {

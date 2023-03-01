@@ -877,7 +877,7 @@ void COutpost::createSquad(CGroupDesc<COutpostSquadFamily> const* groupDesc, COu
 	}*/
 	
 	grp->setOutpostSide(side);
-	grp->setOutpostFactions(side);
+	grp->setOutpostFactions(getAliasString(), side);
 
 	grp->_AggroRange = 25;
 	grp->_UpdateNbTicks = 10;
@@ -902,6 +902,10 @@ void COutpost::createSquad(CGroupDesc<COutpostSquadFamily> const* groupDesc, COu
 void COutpost::spawnSquad(uint32 groupId)
 {
 	OUTPOST_DBG( "Outpost %s: Spawning squad 0x%08x", getName().c_str(), groupId );
+
+	setAttackerAlliance(_AttackerAllianceId);
+
+	
 	FOREACH(itManager, CAliasCont<COutpostManager>, _Managers)
 	{
 		COutpostManager* manager = *itManager;
@@ -1156,7 +1160,7 @@ NLMISC_COMMAND(displayOutposts, "list the available outpost", "")
 	if (args.size() > 0)
 		return false;
 	
-	static const uint32 instanceNumber = std::numeric_limits<uint32>::max();
+	uint32 instanceNumber = std::numeric_limits<uint32>::max();
 	for (uint i=0; i<CAIS::instance().AIList().size(); ++i)
 	{
 		CAIInstance	*const	aii = CAIS::instance().AIList()[i];

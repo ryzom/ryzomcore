@@ -104,7 +104,7 @@ public:
 		// Quantity of this Mp needed
 		uint16	Quantity;
 		
-		void serial(NLMISC::IStream &f)
+		void serial(class NLMISC::IStream &f)
 		{
 			f.serialEnum( MpType );
 			f.serial( Quantity );
@@ -118,7 +118,7 @@ public:
 		// Quantity of this Mp needed
 		uint16	Quantity;
 		
-		void serial(NLMISC::IStream &f)
+		void serial(class NLMISC::IStream &f)
 		{
 			f.serial( MpType );
 			f.serial( Quantity );
@@ -176,7 +176,7 @@ public:
 		AllowPartialSuccess= true;
 	}
 	
-	void serial(NLMISC::IStream &f)
+	void serial(class NLMISC::IStream &f)
 	{
 		f.serial( CraftedItem );
 		f.serial( NbItemsPerUnit );
@@ -393,6 +393,9 @@ public:
 	/// Skills required to learn the brick (OR)
 	std::vector<CPlayerSkill>				LearnRequiresOneOfSkills;
 
+	/// Skills required to learn the brick (AND: all of them are required)
+	std::vector<CPlayerSkill>				LearnRequiresSkills;
+
 	/// Bricks required to learn the brick (AND: all of them are required)
 	std::vector<NLMISC::CSheetId>			LearnRequiresBricks;
 
@@ -428,7 +431,7 @@ public:
 	virtual ~CStaticBrick();
 	
 	/// Serialisation
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(class NLMISC::IStream &f);
 
 	/// read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);

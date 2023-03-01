@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2018-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -20,6 +17,7 @@
 #include "stdpch.h"
 #include "server_share/r2_vision.h"
 #include "ai_instance.h"
+#include "ais_actions.h"
 
 #include "ai_player.h"
 #include "ai_grp_npc.h"
@@ -29,6 +27,8 @@
 
 #include "ai_instance_inline.h"
 
+#include "nel/ligo/primitive_utils.h"
+
 #include "commands.h"
 #include "messages.h"
 
@@ -36,6 +36,10 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 using namespace MULTI_LINE_FORMATER;
+using namespace NLLIGO;
+
+NLLIGO::CLigoConfig		CAIInstance::_LigoConfig;
+
 
 CAIInstance::CAIInstance(CAIS* owner)
 : CChild<CAIS>(owner)
@@ -212,6 +216,10 @@ void CAIInstance::initInstance(string const& continentName, uint32 instanceNumbe
 	_ContinentName = continentName;
 	_InstanceNumber = instanceNumber;
 
+	_LastSpawnAlias = (900 + _InstanceNumber) << LigoConfig.getDynamicAliasSize();
+	_LastStateAlias = 0;
+	_LastGroupAlias = (900 + _InstanceNumber) << LigoConfig.getDynamicAliasSize();
+
 	sendInstanceInfoToEGS();
 
 	if	(!EGSHasMirrorReady)
@@ -288,12 +296,20 @@ void CAIInstance::addGroupInfo(CGroup* grp)
 {
 	string const& name = grp->aliasTreeOwner()->getName();
 	uint32 alias = grp->aliasTreeOwner()->getAlias();
-
 	if (!name.empty())
 		_GroupFromNames[name].push_back(grp);
 	if (alias)
 		_GroupFromAlias[alias] = grp;
 }
+
+void CAIInstance::addGroupInfo(CGroup* grp, const string &name, uint32 alias)
+{
+	if (!name.empty())
+		_GroupFromNames[name].push_back(grp);
+	if (alias)
+		_GroupFromAlias[alias] = grp;
+}
+
 
 void CAIInstance::removeGroupInfo(CGroup* grp, CAliasTreeOwner* grpAliasTreeOwner)
 {
@@ -329,8 +345,9 @@ CGroup* CAIInstance::findGroup(uint32 alias)
 void CAIInstance::findGroup(std::vector<CGroup*>& result, std::string const& name)
 {
 	std::map<std::string, std::vector<NLMISC::CDbgPtr<CGroup> > >::iterator it(_GroupFromNames.find(name));
-	if (it != _GroupFromNames.end())
+	if (it != _GroupFromNames.end()) {
 		result.insert(result.end(), it->second.begin(), it->second.end());
+	}
 }
 
 void CAIInstance::addMissionInfo(std::string const& missionName, uint32 alias)
@@ -632,14 +649,15 @@ std::vector<std::string> CAIInstance::getMultiLineInfoString() const
 #include "ai_bot_npc.h"
 #include "ai_profile_npc.h"
 
-inline
-static CAIVector randomPos(double dispersionRadius)
+extern CAIVector randomPos(double dispersionRadius);
+
+CAIVector randomPos(double dispersionRadius)
 {
 	if (dispersionRadius<=0.)
 	{
 		return CAIVector(0., 0.);
 	}
-	static const uint32 maxLimit = std::numeric_limits<uint32>::max() >> 1;
+	const uint32 maxLimit = std::numeric_limits<uint32>::max() >> 1;
 	double rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
 	double r = dispersionRadius*sqrt(rval);
 	rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
@@ -657,8 +675,7 @@ static float randomAngle()
 	return val;
 }
 
-CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look)
-{
+CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look, sint32 cell) {
 	if (!_EventNpcManager)
 		return NULL;
 
@@ -669,13 +686,17 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 		return NULL;
 	}
 
+	_LastGroupAlias++;
+	string name = botsName.empty() ? NLMISC::toString("event_group_%u", _LastGroupAlias):botsName;
 	// Create a group
-	CGroupNpc* grp = new CGroupNpc(_EventNpcManager, NULL, RYAI_MAP_CRUNCH::Nothing);
+	CGroupNpc* grp = new CGroupNpc(_EventNpcManager, _LastGroupAlias, name, RYAI_MAP_CRUNCH::Nothing);
 	// Register it in the manager
 	_EventNpcManager->groups().addAliasChild(grp);
 	// Set the group parameters
 	grp->setAutoSpawn(false);
-	grp->setName(NLMISC::toString("event_group_%u", grp->getChildIndex()));
+
+
+	grp->setName(name);
 	grp->clearParameters();
 	grp->setPlayerAttackable(true);
 	grp->setBotAttackable(true);
@@ -684,51 +705,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	grp->clrBotsAreNamedFlag();
 
-	{
-		// build unnamed bot
-		for	(uint i=0; i<nbBots; ++i)
-		{
-			grp->bots().addChild(new CBotNpc(grp, 0, botsName.empty() ? grp->getName():botsName), i); // Doub: 0 instead of getAlias()+i otherwise aliases are wrong
-
-			CBotNpc* const bot = NLMISC::safe_cast<CBotNpc*>(grp->bots()[i]);
-
-			bot->setSheet(sheet);
-			if (!look.empty())
-				bot->setClientSheet(look);
-			bot->equipmentInit();
-			bot->initEnergy(/*groupEnergyCoef()*/0);
-			CAIVector rpos(pos);
-			if (dispersionRadius == 0)
-			{
-				nlinfo("Stucked !");
-				bot->setStuck(true);
-			}
-			// Spawn all randomly except if only 1 bot
-			if (nbBots > 1)
-			{
-				RYAI_MAP_CRUNCH::CWorldMap const& worldMap = CWorldContainer::getWorldMap();
-				RYAI_MAP_CRUNCH::CWorldPosition	wp;
-				uint32 maxTries = 100;
-				do
-				{
-					rpos = pos;
-					rpos += randomPos(dispersionRadius);
-					--maxTries;
-				}
-				while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
-				if (maxTries<=0)
-					rpos = pos;
-			}
-
-			float angle = 0.f;
-			if (orientation < (NLMISC::Pi * 2.0) && orientation > (-NLMISC::Pi * 2.0))
-				angle = (float)orientation;
-			else
-				angle = randomAngle();
-
-			bot->setStartPos(rpos.x().asDouble(),rpos.y().asDouble(), angle, AITYPES::vp_auto);
-		}
-	}
+	eventCreateNpcBot(grp, nbBots, false, sheetId, pos, "", orientation, dispersionRadius, look);
 
 	grp->spawn();
 	CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
@@ -740,15 +717,101 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 		return NULL;
 	}
 
+	spawnGroup->setCell(cell);
+
 	NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
 	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(pos, 0, 0), (uint32)(dispersionRadius*1000.));
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
+
+	if (!botsName.empty())
+	{
+		CStateMachine* sm = _EventNpcManager->getStateMachine();
+		uint32 stateAlias = grp->getStateAlias("start");
+		CAIStatePositional* statePositional;
+		if (stateAlias == 0)
+		{
+			_LastStateAlias++;
+			statePositional = new CAIStatePositional(sm, _LastStateAlias, "start");
+			grp->setStateAlias("start", statePositional->getAlias());
+			sm->states().addChild(statePositional);
+		}
+		else
+		{
+			statePositional = safe_cast<CAIStatePositional*>(sm->states().getChildByAlias(stateAlias));
+		}
+		grp->setNextState(statePositional);
+	}
 
 	if (spawnBots)
 		grp->getSpawnObj()->spawnBots();
 
 	return grp;
 }
+
+bool CAIInstance::eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, const std::string &name, double orientation, double dispersionRadius, const std::string &look)
+{
+	uint32 offset = grp->bots().size();
+	for	(uint i=0; i<nbBots; ++i)
+	{
+		_LastSpawnAlias++;
+		grp->bots().addChild(new CBotNpc(grp, _LastSpawnAlias, grp->getName()), offset+i);
+
+		CBotNpc* const bot = NLMISC::safe_cast<CBotNpc*>(grp->bots()[offset+i]);
+
+		AISHEETS::ICreatureCPtr sheet = AISHEETS::CSheets::getInstance()->lookup(sheetId);
+		if (!sheet)
+		{
+			nlwarning("invalid sheet while creating event npc group");
+			return false;
+		}
+
+		bot->setSheet(sheet);
+		bot->setPrimAlias(900+_InstanceNumber);
+		if (!look.empty())
+			bot->setClientSheet(look);
+		bot->equipmentInit();
+		bot->initEnergy(/*groupEnergyCoef()*/0);
+		CAIVector rpos(pos);
+		if (dispersionRadius == 0)
+			bot->setStuck(true);
+
+		float angle = 0.f;
+		if (orientation < (NLMISC::Pi * 2.0) && orientation > (-NLMISC::Pi * 2.0))
+			angle = (float)orientation;
+		else
+			angle = randomAngle();
+
+		// Spawn all randomly except if only 1 bot
+		if (nbBots > 1 || dispersionRadius > 1)
+		{
+			bot->saveFirstPosition(pos, dispersionRadius);
+			RYAI_MAP_CRUNCH::CWorldMap const& worldMap = CWorldContainer::getWorldMap();
+			RYAI_MAP_CRUNCH::CWorldPosition	wp;
+			uint32 maxTries = 100;
+			do
+			{
+				rpos = pos;
+				rpos += randomPos(dispersionRadius);
+				--maxTries;
+			}
+			while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
+			if (maxTries<=0)
+				rpos = pos;
+
+			bot->setStartPos(pos.x().asDouble(), pos.y().asDouble(), angle, AITYPES::vp_auto);
+		}
+		else
+			bot->setStartPos(rpos.x().asDouble(),rpos.y().asDouble(), angle, AITYPES::vp_auto);
+	}
+
+	if (spawnBots)
+		grp->getSpawnObj()->spawnBots(name);
+
+	return true;
+}
+
+
+
 
 CBotEasterEgg* CAIInstance::createEasterEgg(uint32 easterEggId, NLMISC::CSheetId const& sheetId, std::string const& botName, double x, double y, double z, double heading, const std::string& look)
 {
@@ -890,7 +953,7 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	CAIInstance* instance = CAIS::instance().getAIInstance(instanceNumber);
 	if (instance)
 	{
-		CGroupNpc* npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(((double)x)/1000.0, ((double)y)/1000.0), dispersionRadius, spawnBots, ((double)orientation)/1000.0, botsName, look);
+		CGroupNpc* npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(((double)x)/1000.0, ((double)y)/1000.0), dispersionRadius, spawnBots, ((double)orientation)/1000.0, botsName, look, cell);
 		if (npcGroup != NULL)
 		{
 			_PlayersLastCreatedNpcGroup[playerId] = npcGroup->getName();
@@ -942,28 +1005,27 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 
 	if (firstCommand[0] == '(') // Old eventNpcGroupScript command : (boteid, commands...)
 	{
-		nlinfo("Event group script with %d strings :", nbString);
 		strings.resize(nbString);
 		strings[0] = eid;
-		nlinfo("  %d '%s'", 0, strings[0].c_str());
 		strings[1] = firstCommand;
-		nlinfo("  %d '%s'", 1, strings[1].c_str());
 		for (uint32 i=2; i<nbString-2; ++i)
 		{
 			msgin.serial(strings[i]);
-			nlinfo("  %d '%s'", i, strings[i].c_str());
 		}
 	}
 	else
 	{
 		nlinfo("Event group script with %d strings :", nbString-1);
-		CEntityId playerId(eid);
+		CEntityId playerId;
+		if (!eid.empty())
+			playerId = CEntityId(eid);
+
 		strings.resize(nbString-1);
-		NLMISC::CSString groupname = CSString(firstCommand);
+		CSString groupname = CSString(firstCommand);
 		if (firstCommand[0] == '#' && firstCommand[1] == '(')
 		{
-			NLMISC::CEntityId botEId = NLMISC::CEntityId(firstCommand.substr(1));
-			if (botEId==NLMISC::CEntityId::Unknown)
+			CEntityId botEId = CEntityId(firstCommand.substr(1));
+			if (botEId==CEntityId::Unknown)
 				return;
 			CAIEntityPhysical* entity = CAIEntityPhysicalLocator::getInstance()->getEntity(botEId);
 			CSpawnBotNpc* bot = dynamic_cast<CSpawnBotNpc*>(entity);
@@ -976,13 +1038,14 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 		}
 		else
 		{
-			strings[0] =  (string)groupname.replace("#last", _PlayersLastCreatedNpcGroup[playerId].c_str());
+			if (!eid.empty())
+				strings[0] = (string)groupname.replace("#last", _PlayersLastCreatedNpcGroup[playerId].c_str());
+			else
+				strings[0] = (string)groupname;
 		}
-		nlinfo("  %d '%s'", 0, strings[0].c_str());
 		for (uint32 i=1; i<nbString-1; ++i)
 		{
 			msgin.serial(strings[i]);
-			nlinfo("  %d '%s'", i, strings[i].c_str());
 		}
 	}
 	scriptCommands2.push_back(strings);
@@ -1569,5 +1632,3 @@ NLMISC_COMMAND(simulateMsgDespawnEasterEgg, "", "<service_id> <ai_instance> <eas
 
 	return true;
 }
-
-#include "event_reaction_include.h"

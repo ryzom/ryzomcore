@@ -130,7 +130,7 @@ protected:
 	}
 
 	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
+						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, std::vector<sint16> &targetDeltaHp, const NLMISC::CBitSet & invulnerabilityOffensive,
 						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
 	{
 		///\todo nico:
@@ -148,7 +148,10 @@ protected:
 		// Get Spell Targets
 		const std::vector< CSpellTarget > & targets = phrase->getTargets();
 		const uint nbTargets = (uint)targets.size();
-		
+
+		// targetDeltaHp must be prefilled
+		nlassertex( nbTargets == (sint32)targetDeltaHp.size(), ("%d %d", nbTargets, targetDeltaHp.size() ) );
+
 		// apply power factor os used item
 		successFactor *= (1 + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost()) );
 
@@ -191,14 +194,23 @@ protected:
 
 				// update behaviour for healed Hp
 				behav.DeltaHP += sint16(targetInfos.HealHp);
+				targetDeltaHp[i] += sint16(targetInfos.HealHp);
 			}
 			if (_HealSap != 0)
 			{
 				targetInfos.HealSap = sint32(_HealSap * factor);
+
+				// update behaviour for healed Sap
+				behav.DeltaHP += sint16(targetInfos.HealSap);
+				targetDeltaHp[i] += sint16(targetInfos.HealSap);
 			}
 			if ( _HealSta != 0 )
 			{
 				targetInfos.HealSta = sint32(_HealSta * factor);
+
+				// update behaviour for healed Sta
+				behav.DeltaHP += sint16(targetInfos.HealSta);
+				targetDeltaHp[i] += sint16(targetInfos.HealSta);
 			}
 
 			_ApplyTargets.push_back(targetInfos);

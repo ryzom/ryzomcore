@@ -92,7 +92,7 @@ namespace GUILD_OPTION
 }
 
 //--------------------------------------------------------------
-void CCosmetics::serial(NLMISC::IStream &f)
+void CCosmetics::serial(class NLMISC::IStream &f)
 {
 	f.serial( VPValue );
 }
@@ -110,7 +110,7 @@ IItemServiceData * IItemServiceData::buildItemServiceData(ITEM_SERVICE_TYPE::TIt
 }
 
 //--------------------------------------------------------------
-void CConsumable::serial(NLMISC::IStream &f)
+void CConsumable::serial(class NLMISC::IStream &f)
 {
 	f.serial(LoopTimer);
 	f.serial(MaxNbLoops);
@@ -158,7 +158,7 @@ void CConsumable::serial(NLMISC::IStream &f)
 
 
 //--------------------------------------------------------------
-void CXpCatalyser::serial(NLMISC::IStream &f)
+void CXpCatalyser::serial(class NLMISC::IStream &f)
 {
 	f.serial(IsRingCatalyser);
 	f.serial(XpBonus);
@@ -215,7 +215,7 @@ bool	SItemSpecialEffect::build(std::string const& str)
 	return false;
 }
 
-void SItemSpecialEffect::serial(NLMISC::IStream &f)
+void SItemSpecialEffect::serial(class NLMISC::IStream &f)
 {
 	// Don't forget to change the SItem version and the code here if no more 4.
 	nlctassert(MaxEffectPerItem==4);
@@ -232,7 +232,7 @@ void SItemSpecialEffect::serial(NLMISC::IStream &f)
 	f.serial( EffectArgString[3] );
 }
 
-void SItemSpecialEffects::serial(NLMISC::IStream &f)
+void SItemSpecialEffects::serial(class NLMISC::IStream &f)
 {
 	f.serialCont(Effects);
 }
@@ -252,7 +252,7 @@ void CStaticItem::init(bool doDelete)
 	CraftingToolType = TOOL_TYPE::Unknown;
 
 	Origin			= ITEM_ORIGIN::UNKNOWN;
-	Sack.clear();
+	Sack			= std::string("");
 	Stackable		= 1;
 	Color			= -2;
 	SlotCount		= 0;
@@ -1226,7 +1226,7 @@ void loadCommandTicket( NLGEORGES::UFormElm &root, CStaticItem *item, const NLMI
 //--------------------------------------------------------------
 //						serial()  
 //--------------------------------------------------------------
-void CStaticItem::serial(NLMISC::IStream &f)
+void CStaticItem::serial(class NLMISC::IStream &f)
 {
 	f.serial( SheetId );
 	f.serialEnum( Origin );

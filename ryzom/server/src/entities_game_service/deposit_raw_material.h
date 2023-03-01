@@ -34,7 +34,7 @@ struct CDepositRawMaterial
 	}
 
 	/// serialize
-//	void serial(NLMISC::IStream &f) 
+//	void serial(class NLMISC::IStream &f)
 //	{
 //	}
 };

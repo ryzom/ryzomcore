@@ -277,15 +277,13 @@ void CCreatureSetUrlImp::callback(const string &, NLNET::TServiceId sid)
 				(string &)wp = "";
 				program &= ~(1 << BOTCHATTYPE::WebPageFlag);
 				c->setBotChatProgram(program);
-				return;
+				continue;
 			}
 			else
 				(string &)wp = Url;
 
 			const string &wpn = c->getWebPageName();
 			(string &)wpn = ActionName;
-
-			return;
 		}
 	}
 }
@@ -661,6 +659,14 @@ void CAIGainAggroMsgImp::callback (const std::string &name, NLNET::TServiceId id
 	if( creature )
 	{
 //		creature->getCreatureOpponent().storeAggressor(PlayerRowId,0);
-		creature->addAggressivenessAgainstPlayerCharacter( PlayerRowId );
+		if (IsBoss)
+		{
+			creature->addGuardianKiller(PlayerRowId);
+			nlinfo("Player is a guardian killer");
+		}
+		else
+		{
+			creature->addAggressivenessAgainstPlayerCharacter( PlayerRowId );
+		}
 	}
 }

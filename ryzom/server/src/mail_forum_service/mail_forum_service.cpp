@@ -129,7 +129,7 @@ TUnifiedCallbackItem CbArray[]=
 	{ "CHANGE_UNAME",		CMailForumService::cbChangeUserName },
 };
 
-NLNET_SERVICE_MAIN( CMailForumService, "MFS", "mail_forum_service", 43980, CbArray, "", "" )
+NLNET_SERVICE_MAIN( CMailForumService, "MFS", "mail_forum_service", 49980, CbArray, "", "" )
 
 
 

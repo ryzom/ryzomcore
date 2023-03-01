@@ -128,8 +128,8 @@ CGameItemManager::CGameItemManager()
 //CGameItemPtr CGameItemManager::getNewItem( CEntityId& id, CSheetId& sheetId, uint16 quality, bool destroyable , bool dropable)
 CGameItemPtr CGameItemManager::getNewItem( const CSheetId& sheetId, uint16 quality, bool destroyable , bool dropable)
 {
-	CAllStaticItems::const_iterator itForm = CSheets::getItemMapForm().find( sheetId );
-	if( itForm != CSheets::getItemMapForm().end() )
+	CAllStaticItems::iterator itForm = CSheets::getItemMapFormNoConst().find( sheetId );
+	if( itForm != CSheets::getItemMapFormNoConst().end() )
 	{
 		// get the slot count
 //		sint16 slotCount = 0;
@@ -236,13 +236,14 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 //				nlerror("<CGameItemManager::createItem> Can't find the owner item %s",owner.toString().c_str());
 //			}
 //		}
-		log_Item_Create(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 	}
 	else
 	{
 //		nlwarning("<CGameItemManager::createItem> Can't create the item %s with invalid sheet '%s'", id.toString().c_str(), sheetId.toString().c_str());
 		nlwarning("<CGameItemManager::createItem> Can't create an item with invalid sheet '%s'", sheetId.toString().c_str());
 	}
+
+	log_Item_Create(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 
 	return item;
 
@@ -469,7 +470,7 @@ CGameItemPtr CGameItemManager::createInGameItem( uint16 quality, uint32 quantity
 				item = sellingItem->getItemCopy();
 				item->quality( quality );
 				if ( phraseId )
-					item->setPhraseIdInternal(*phraseId);
+					item->setPhraseId(*phraseId);
 			}
 			else if (sheet == preorderSheetId)
 			{
@@ -793,7 +794,7 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //void CGameItemManager::dumpGameItemList( const string& fileName )
 //{
 //	FILE * f;
-//	f = nlfopen(fileName, "w");
+//	f = fopen(fileName.c_str(),"w");
 //	
 //	if(f)
 //	{

@@ -71,6 +71,10 @@ public:
 	void removeTriggerRequest( const TDataSetRow & rowId);
 	/// teleport a user through a lift
 	void triggerTeleport(CCharacter * user, uint16 index);
+	/// pacs trigger will launch an url and no more teleport a player
+	void setCustomTrigger(sint32 triggerId, const std::string & url);
+	/// get url from CustomTrigger
+	std::string getCustomTrigger(sint32 triggerId);
 	//@}
 
 
@@ -89,9 +93,11 @@ public:
 	/// get a building destination from its name.
 	IBuildingPhysical* getBuildingPhysicalsByName( const std::string & name );
 	/// remove a player from a room
-	void removePlayerFromRoom( CCharacter * user );
+	void removePlayerFromRoom( CCharacter * user, bool send_url = true );
+	/// delete a room
+	void deleteRoom(sint32 cell);
 	/// alocate a new room instance. Fills the room cell passed a sparam and returns a pointer on the instance
-	IRoomInstance * allocateRoom( sint32 & cellRet, BUILDING_TYPES::TBuildingType type );
+	IRoomInstance * allocateRoom( sint32 & cellRet, BUILDING_TYPES::TBuildingType type, bool persistant = false );
 	/// get a room instance from its cell
 	IRoomInstance * getRoomInstanceFromCell( sint32 cellId )
 	{
@@ -198,6 +204,9 @@ private:
 	/// container of triggers
 	CHashMap< sint,CTrigger >	_Triggers;
 
+	/// container of custom triggers
+	std::map< sint,std::string >	_CustomTriggers;
+
 	/// trigger requests of the players
 	typedef CHashMap< TDataSetRow , CTriggerRequest , TDataSetRow::CHashCode > TTriggerRequestCont;
 	TTriggerRequestCont		_TriggerRequests;
@@ -212,6 +221,7 @@ private:
 	struct CRoomInstanceEntry
 	{
 		uint32			NextFreeId;
+		bool			Persistant;
 		IRoomInstance*	Ptr;
 	};
 	std::vector< CRoomInstanceEntry > _RoomInstances;

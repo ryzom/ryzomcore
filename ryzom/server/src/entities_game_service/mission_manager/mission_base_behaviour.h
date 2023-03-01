@@ -100,7 +100,7 @@ public:
 	/// send the mission description text
 	uint32 sendDesc( const TDataSetRow & user );
 	/// add a target to the missin compass. targetId is either the bot /place id
-	void addCompassTarget( uint32 targetId, bool isBot );
+	void addCompassTarget( uint32 targetId, bool isBot = true, bool isPosition = false );
 	/// remove a bot from the compass
 	void removeCompassBot( TAIAlias bot );
 	/// remove a place from the compass

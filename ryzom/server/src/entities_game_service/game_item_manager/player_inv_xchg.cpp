@@ -23,7 +23,7 @@
 
 #include "game_share/slot_equipment.h"
 #include "player_manager/character.h"
-
+#include "guild_manager/guild_member_module.h"
 
 using namespace NLMISC;
 using namespace std;
@@ -33,7 +33,7 @@ using namespace std;
 // CExchangeView
 /////////////////////////////////////////////////////////////
 
-const uint32 CExchangeView::NbExchangeSlots = 8;
+const uint32 CExchangeView::NbExchangeSlots = 10;
 
 // ****************************************************************************
 CExchangeView::CExchangeView()
@@ -42,6 +42,7 @@ CExchangeView::CExchangeView()
 	_ExchangeSlots.resize(NbExchangeSlots);
 	_PackerTicketCount = 0;
 	_MountTicketCount = 0;
+	_ZigTicketCount = 0;
 }
 
 // ****************************************************************************
@@ -65,12 +66,12 @@ void CExchangeView::setInterlocutorView(CExchangeView * interlocutorView)
 }
 
 // ****************************************************************************
-bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint32 quantity)
+bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exchangeSlot, uint32 quantity)
 {
-	nlassert(bagSlot < getInventory()->getSlotCount());
+	nlassert(invSlot < getCharacter()->getInventory(INVENTORIES::TInventory(invSrc))->getSlotCount());
 	nlassert(exchangeSlot < NbExchangeSlots);
-
-	CGameItemPtr item = getInventory()->getItem(bagSlot);
+	CCharacter * c = getCharacter();
+	CGameItemPtr item = c->getInventory(INVENTORIES::TInventory(invSrc))->getItem(invSlot);
 	if (item == NULL)
 		return false;
 
@@ -82,10 +83,22 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 	if (form == NULL)
 		return false;
 
+	// if item is from guild inventory, check permissions
+	CGuildMemberModule * module;
+	if (INVENTORIES::TInventory(invSrc) == INVENTORIES::guild && (!c->getModuleParent().getModule(module) || !module->canTakeGuildItem()))
+	{
+		CCharacter::sendDynamicSystemMessage(c->getId(), "GUILD_ITEM_DONT_HAVE_RIGHTS");
+		return false;
+	}
+
 	// if it is an exchange between 2 players
 	// do not permit exchange of non dropable items, but pet animal ticket are NoDrop item but must ne exchangeable
 	if (!item->getMovable() && _InterlocutorView != NULL && form->Family != ITEMFAMILY::PET_ANIMAL_TICKET && (!form->DropOrSell || item->getUnMovable()))
 		return false;
+
+	// pet animal ticket must be exchangeable only if shardExchangeable
+	if (form->Family == ITEMFAMILY::PET_ANIMAL_TICKET && !form->ShardExchangeable)
+			return false;
 
 	// Can't trade items locked by owner
 	if (item->getLockedByOwner())
@@ -94,11 +107,20 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 	// You cannot exchange genesis named items
 	if (item->getPhraseId().find("genesis_") == 0)
 	{
-		nlwarning("Character %s tries to sell '%s'", getCharacter()->getId().toString().c_str(), item->getPhraseId().c_str() );
+		nlwarning("Character %s tries to sell '%s'", c->getId().toString().c_str(), item->getPhraseId().c_str() );
 		return false;
 	}
 
-	if( getCharacter()->isAnActiveXpCatalyser(item) )
+	// you cannot exchange jewels with non tags allegories
+	std::vector<CSheetId> sheets;
+	item->getJewelNonTagsEnchantments(sheets);
+	if (sheets.size() > 0)
+	{
+		CCharacter::sendDynamicSystemMessage(c->getId(), "JEWEL_WITH_ALLEGORIES");
+		return false;
+	}
+
+	if( c->isAnActiveXpCatalyser(item) )
 		return false;
 
 	if (getExchangeItem(exchangeSlot) != NULL)
@@ -109,33 +131,40 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 	// check the pet animal count of interlocutor
 	if (isPetTicket(form->Type) && _InterlocutorView != NULL)
 	{
-		uint petIndex = getCharacter()->getAnimalByTicket(item);
+		uint petIndex = c->getAnimalByTicket(item);
 		if (petIndex != ~0)
 		{
 			// check that the pet animal is empty
-			if (!getCharacter()->checkPackAnimalEmptyInventory(petIndex))
+			if (!c->checkPackAnimalEmptyInventory(petIndex))
 			{
-				CCharacter::sendDynamicSystemMessage(getCharacter()->getId(), "PACK_ANIMAL_INVENTORY_MUST_BE_EMPTY");
+				CCharacter::sendDynamicSystemMessage(c->getId(), "PACK_ANIMAL_INVENTORY_MUST_BE_EMPTY");
 				return false;
 			}
 			// check that the pet animal is not mounted
-			if (getCharacter()->getPlayerPets()[petIndex].IsMounted)
+			if (c->getPlayerPets()[petIndex].IsMounted)
 			{
-				CCharacter::sendDynamicSystemMessage(getCharacter()->getId(), "ANIMAL_MOUNTED");
+				CCharacter::sendDynamicSystemMessage(c->getId(), "ANIMAL_MOUNTED");
+				return false;
+			}
+
+			if (c->getPlayerPets()[petIndex].PetSheetId != form->PetSheet && c->getPlayerPets()[petIndex].PetStatus != CPetAnimal::stable)
+			{
+				CCharacter::sendDynamicSystemMessage(c->getId(), "ANIMAL_CUSTOM_MUST_BE_IN_STABLE");
 				return false;
 			}
 		}
 		else
-			nlwarning("Pet animal ticket not found for %s", getCharacter()->getId().toString().c_str());
+			nlwarning("Pet animal ticket not found for %s", c->getId().toString().c_str());
 
 		// update ticket count
 		(*getPetTicketCount(form->Type))++;
 	}
 
-	_ExchangeSlots[exchangeSlot].BagSlot = bagSlot;
+	_ExchangeSlots[exchangeSlot].InvSrc = INVENTORIES::TInventory(invSrc);
+	_ExchangeSlots[exchangeSlot].InvSlot = invSlot;
 	_ExchangeSlots[exchangeSlot].Quantity = quantity;
 
-	// lock the item in the bag while exchanging
+	// lock the item in the inv while exchanging
 	item->setLockCount(item->getLockCount() + quantity);
 
 	updateExchangeSlot(exchangeSlot);
@@ -145,9 +174,9 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 // BRIANCODE - to support automatic building of mission object exchanges
 // NOTE - sets the database to "accept" (validates transaction) on client!
 // ****************************************************************************
-bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 bagSlot, uint32 quantity)
+bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 invSrc, uint32 invSlot, uint32 quantity)
 {
-	nlassert(bagSlot < getInventory()->getSlotCount());
+	nlassert(invSlot < getCharacter()->getInventory(INVENTORIES::TInventory(invSrc))->getSlotCount());
 
 	bool foundSlot;
 	uint32 exchangeSlot;
@@ -162,13 +191,13 @@ bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 bagSlot, uint32 quant
 		}
 	}
 
-	// only 8 slots in exchange bag, so unlikely, but possible.
+	// only 10 slots in exchange, so unlikely, but possible.
 	if (foundSlot == false)
 		return false;
 
 	string sDBPath = NLMISC::toString("EXCHANGE:GIVE:%u", exchangeSlot);
 
-	CGameItemPtr item = getInventory()->getItem(bagSlot);
+	CGameItemPtr item = getCharacter()->getInventory(INVENTORIES::TInventory(invSrc))->getItem(invSlot);
 	if (item == NULL)
 		return false;
 
@@ -181,10 +210,11 @@ bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 bagSlot, uint32 quant
 		removeItemFromExchange(exchangeSlot);
 	}
 
-	_ExchangeSlots[exchangeSlot].BagSlot = bagSlot;
+	_ExchangeSlots[exchangeSlot].InvSrc = INVENTORIES::TInventory(invSrc);
+	_ExchangeSlots[exchangeSlot].InvSlot = invSlot;
 	_ExchangeSlots[exchangeSlot].Quantity = quantity;
 
-	// lock the item in the bag while exchanging
+	// lock the item in the inv while exchanging
 	item->setLockCount(item->getLockCount() + quantity);
 
 	updateExchangeSlot(exchangeSlot);
@@ -244,19 +274,22 @@ void CExchangeView::validateExchange(std::vector<CGameItemPtr> * givenItems)
 {
 	for (uint i = 0; i < _ExchangeSlots.size(); i++)
 	{
-		uint32 bagSlot = _ExchangeSlots[i].BagSlot;
+		INVENTORIES::TInventory invSrc = _ExchangeSlots[i].InvSrc;
+		uint32 invSlot = _ExchangeSlots[i].InvSlot;
 		uint32 exchangeQuantity = _ExchangeSlots[i].Quantity;
 
 		// skip empty slots
-		if (bagSlot == INVENTORIES::INVALID_INVENTORY_SLOT)
+		if (invSlot == INVENTORIES::INVALID_INVENTORY_SLOT)
 			continue;
 
 		// remove the item from the exchange view and unlock it
 		removeItemFromExchange(i);
 
-		// remove the exchange quantity of item from the bag
-		CGameItemPtr item = getInventory()->removeItem(bagSlot, exchangeQuantity);
-		BOMB_IF( item == NULL, "<CExchangeView::validateExchange> Can't remove "<<exchangeQuantity<<" item(s) from slot "<<bagSlot<<" of the bag", continue );
+		// remove the exchange quantity of item from the inv
+		CGameItemPtr item = getCharacter()->getInventory(invSrc)->removeItem(invSlot, exchangeQuantity);
+		if (item == NULL)
+			continue;
+		//BOMB_IF( item == NULL, "<CExchangeView::validateExchange> Can't remove "<<exchangeQuantity<<" item(s) from slot "<<invSlot<<" of the "<<invSrc<<" inventory", continue );
 
 		// put the removed item in the given items
 		if (givenItems != NULL)
@@ -269,8 +302,9 @@ CGameItemPtr CExchangeView::getExchangeItem(uint32 exchangeSlot, uint32 * exchan
 {
 	nlassert(exchangeSlot < NbExchangeSlots);
 
-	uint32 bagSlot = _ExchangeSlots[exchangeSlot].BagSlot;
-	bool emptySlot = (bagSlot == INVENTORIES::INVALID_INVENTORY_SLOT);
+	INVENTORIES::TInventory invSrc = _ExchangeSlots[exchangeSlot].InvSrc;
+	uint32 invSlot = _ExchangeSlots[exchangeSlot].InvSlot;
+	bool emptySlot = (invSlot == INVENTORIES::INVALID_INVENTORY_SLOT);
 
 	if (exchangeQuantity != NULL)
 	{
@@ -280,14 +314,21 @@ CGameItemPtr CExchangeView::getExchangeItem(uint32 exchangeSlot, uint32 * exchan
 			*exchangeQuantity = _ExchangeSlots[exchangeSlot].Quantity;
 	}
 
-	// get the item on the bag
+	// get the item on the inv
 	CGameItemPtr item = NULL;
 	if (!emptySlot)
 	{
-		item = getInventory()->getItem(bagSlot);
+		item = getConstCharacter()->getInventory(invSrc)->getItem(invSlot);
 	}
 
 	return item;
+}
+
+// ****************************************************************************
+INVENTORIES::TInventory CExchangeView::getSlotInvSrc(uint32 exchangeSlot) const
+{
+	nlassert(exchangeSlot < NbExchangeSlots);
+	return _ExchangeSlots[exchangeSlot].InvSrc;
 }
 
 // ****************************************************************************
@@ -295,7 +336,7 @@ bool CExchangeView::isEmpty() const
 {
 	for (uint i = 0; i < NbExchangeSlots; i++)
 	{
-		if (_ExchangeSlots[i].BagSlot != INVENTORIES::INVALID_INVENTORY_SLOT)
+		if (_ExchangeSlots[i].InvSlot != INVENTORIES::INVALID_INVENTORY_SLOT)
 			return false;
 	}
 
@@ -316,8 +357,9 @@ void CExchangeView::onInterlocutorSlotChanged(uint32 interlocutorGiveSlot)
 
 	if (item != NULL)
 	{
+		const INVENTORIES::TItemId &itemId = item->getItemId();
 		RM_FABER_STAT_TYPE::TRMStatType itemBestStat = RM_FABER_STAT_TYPE::Unknown;
-		
+
 		if (item->getCraftParameters() != NULL)
 			itemBestStat = item->getCraftParameters()->getBestItemStat();
 
@@ -327,10 +369,10 @@ void CExchangeView::onInterlocutorSlotChanged(uint32 interlocutorGiveSlot)
 		recvItem.setQUALITY(getCharacter()->_PropertyDatabase, item->quality());
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			exchangeQuantity);
 		recvItem.setQUANTITY(getCharacter()->_PropertyDatabase, uint16(exchangeQuantity));
+		recvItem.setSERIAL(getCharacter()->_PropertyDatabase, uint32(itemId.getSerialNumber()));
+		recvItem.setCREATE_TIME(getCharacter()->_PropertyDatabase, uint32(itemId.getCreateTime()));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		item->color());
 		recvItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, item->color());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		item->buffFlags());
-		recvItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, item->buffFlags());
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			item->weight() / 10);
 		recvItem.setWEIGHT(getCharacter()->_PropertyDatabase, uint16(item->weight() / 10));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			item->sendNameId(getCharacter()));
@@ -353,10 +395,10 @@ void CExchangeView::onInterlocutorSlotChanged(uint32 interlocutorGiveSlot)
 		recvItem.setQUALITY(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
 		recvItem.setQUANTITY(getCharacter()->_PropertyDatabase, 0);
+		recvItem.setSERIAL(getCharacter()->_PropertyDatabase, 0);
+		recvItem.setCREATE_TIME(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		0);
-		recvItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 1);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
-		recvItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, 0);
+		recvItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			0);
 		recvItem.setWEIGHT(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			0);
@@ -370,7 +412,7 @@ void CExchangeView::onInterlocutorSlotChanged(uint32 interlocutorGiveSlot)
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", 0);
 		recvItem.setPREREQUISIT_VALID(getCharacter()->_PropertyDatabase, false);
 	}
-	
+
 	// increment the info version
 //	sint64 nPropValue = getCharacter()->_PropertyDatabase.getProp(sDBPath+":INFO_VERSION");
 	uint8 nPropValue = recvItem.getINFO_VERSION(getCharacter()->_PropertyDatabase);
@@ -384,14 +426,15 @@ void CExchangeView::updateExchangeSlot(uint32 exchangeSlot)
 //	string sDBPath = NLMISC::toString("EXCHANGE:GIVE:%u", exchangeSlot);
 	CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray &giveItem = CBankAccessor_PLR::getEXCHANGE().getGIVE().getArray(exchangeSlot);
 
-	// get the item on the bag
+	// get the item on the i
 	uint32 exchangeQuantity;
 	CGameItemPtr item = getExchangeItem(exchangeSlot, &exchangeQuantity);
 
 	if (item != NULL)
 	{
+		const INVENTORIES::TItemId &itemId = item->getItemId();
 		RM_FABER_STAT_TYPE::TRMStatType itemBestStat = RM_FABER_STAT_TYPE::Unknown;
-		
+
 		if (item->getCraftParameters() != NULL)
 			itemBestStat = item->getCraftParameters()->getBestItemStat();
 
@@ -401,10 +444,10 @@ void CExchangeView::updateExchangeSlot(uint32 exchangeSlot)
 		giveItem.setQUALITY(getCharacter()->_PropertyDatabase, item->quality());
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			exchangeQuantity);
 		giveItem.setQUANTITY(getCharacter()->_PropertyDatabase, uint16(exchangeQuantity));
+		giveItem.setSERIAL(getCharacter()->_PropertyDatabase, uint32(itemId.getSerialNumber()));
+		giveItem.setCREATE_TIME(getCharacter()->_PropertyDatabase, uint32(itemId.getCreateTime()));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		item->color());
 		giveItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, item->color());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		item->buffFlags());
-		giveItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, item->buffFlags());
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			item->weight() / 10);
 		giveItem.setWEIGHT(getCharacter()->_PropertyDatabase, uint16(item->weight() / 10));
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			item->sendNameId(getCharacter()));
@@ -427,10 +470,10 @@ void CExchangeView::updateExchangeSlot(uint32 exchangeSlot)
 		giveItem.setQUALITY(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
 		giveItem.setQUANTITY(getCharacter()->_PropertyDatabase, 0);
+		giveItem.setSERIAL(getCharacter()->_PropertyDatabase, 0);
+		giveItem.setCREATE_TIME(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		0);
-		giveItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 1);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
-		giveItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, 0);
+		giveItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			0);
 		giveItem.setWEIGHT(getCharacter()->_PropertyDatabase, 0);
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			0);
@@ -444,7 +487,7 @@ void CExchangeView::updateExchangeSlot(uint32 exchangeSlot)
 //		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", 0);
 		giveItem.setPREREQUISIT_VALID(getCharacter()->_PropertyDatabase, false);
 	}
-	
+
 	// increment the info version
 //	sint64 nPropValue = getCharacter()->_PropertyDatabase.getProp(sDBPath+":INFO_VERSION");
 	uint8 nPropValue = giveItem.getINFO_VERSION(getCharacter()->_PropertyDatabase);
@@ -461,7 +504,7 @@ void CExchangeView::updateExchangeSlot(uint32 exchangeSlot)
 // ****************************************************************************
 bool CExchangeView::isPetTicket(ITEM_TYPE::TItemType itemType) const
 {
-	if (itemType == ITEM_TYPE::MEKTOUB_PACKER_TICKET || itemType == ITEM_TYPE::MEKTOUB_MOUNT_TICKET)
+	if (itemType == ITEM_TYPE::MEKTOUB_PACKER_TICKET || itemType == ITEM_TYPE::MEKTOUB_MOUNT_TICKET || itemType == ITEM_TYPE::ANIMAL_TICKET)
 		return true;
 
 	return false;
@@ -475,6 +518,9 @@ uint32 * CExchangeView::getPetTicketCount(ITEM_TYPE::TItemType itemType)
 
 	if (itemType == ITEM_TYPE::MEKTOUB_MOUNT_TICKET)
 		return &_MountTicketCount;
+
+	if (itemType == ITEM_TYPE::ANIMAL_TICKET)
+		return &_ZigTicketCount;
 
 	return NULL;
 }
@@ -492,6 +538,7 @@ CExchangeView::CExchangeSlot::CExchangeSlot()
 // ****************************************************************************
 void CExchangeView::CExchangeSlot::reset()
 {
-	BagSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
+	InvSrc = INVENTORIES::bag;
+	InvSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	Quantity = 0;
 }

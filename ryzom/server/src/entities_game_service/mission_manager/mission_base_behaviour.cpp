@@ -55,7 +55,8 @@ void CMissionBaseBehaviour::onCreation( TAIAlias giver)
 
 
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 
 	_ProcessingState = Normal;
 
@@ -138,7 +139,8 @@ void CMissionBaseBehaviour::putInGame()
 void CMissionBaseBehaviour::sendContextTexts(const TDataSetRow& user, const TDataSetRow& interlocutor, std::vector< std::pair<bool,uint32> >& textInfos)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 
 	const NLMISC::CEntityId & giver = CAIAliasTranslator::getInstance()->getEntityId( _Mission->getGiver() );
 	// send mission progress context
@@ -182,7 +184,8 @@ void CMissionBaseBehaviour::getBotChatOptions(const TDataSetRow& interlocutor, s
 // "gift" is a bool, as in.. "true, there is a gift" or "false, no gift".
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	for ( map<uint32, EGSPD::CActiveStepPD>::const_iterator it = _Mission->getStepsBegin(); it != _Mission->getStepsEnd(); ++it )
 	{
 		bool gift = false;
@@ -208,46 +211,52 @@ void CMissionBaseBehaviour::overrideDesc(uint32 descIndex)
 uint32 CMissionBaseBehaviour::sendDesc( const TDataSetRow & user )
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return 0;
 	TDataSetRow row = TheDataset.getDataSetRow( CAIAliasTranslator::getInstance()->getEntityId( _Mission->getGiver() ) );
 	return templ->sendDescText( user,row, _Mission->getDescIndex() );
 }
 
 //----------------------------------------------------------------------------
-void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot )
+void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot, bool isPosition )
 {
 	CCreature * c = NULL;
 	CPlace * place = NULL;
-	if (isBot)
+	if (!isPosition)
 	{
-		const CEntityId & id = CAIAliasTranslator::getInstance()->getEntityId( targetId );
-		if (id != CEntityId::Unknown)
+		if (isBot)
 		{
-			c = CreatureManager.getCreature( id );
-			if (c == NULL)
+
+			const CEntityId & id = CAIAliasTranslator::getInstance()->getEntityId( targetId );
+			if (id != CEntityId::Unknown)
 			{
-				nlwarning("<CMissionInstance addCompassTarget> Invalid entity %s", id.toString().c_str());
+				c = CreatureManager.getCreature( id );
+				if (c == NULL)
+				{
+					nlwarning("<CMissionInstance addCompassTarget> Invalid entity %s", id.toString().c_str());
+					return;
+				}
+			}
+			else
+			{
+				nlwarning("<CMissionInstance addCompassTarget> Invalid entity alias %s", CPrimitivesParser::aliasToString(targetId).c_str());
 				return;
 			}
 		}
 		else
 		{
-			nlwarning("<CMissionInstance addCompassTarget> Invalid entity alias %s", CPrimitivesParser::aliasToString(targetId).c_str());
-			return;
-		}
-	}
-	else
-	{
-		place = CZoneManager::getInstance().getPlaceFromId( (uint16)targetId );
-		if (place == NULL)
-		{
-			nlwarning("<MISSIONS> Invalid place %u", targetId);
-			return;
+			place = CZoneManager::getInstance().getPlaceFromId( (uint16)targetId );
+			if (place == NULL)
+			{
+				nlwarning("<MISSIONS> Invalid place %u", targetId);
+				return;
+			}
 		}
 	}
 
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 
 	// get a free compass index
 	uint32 freeIdx = 1;
@@ -269,6 +278,8 @@ void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot )
 					return;
 				if (place != NULL && currentCompass.getPlace() == place->getAlias())
 					return;
+				if (isPosition && currentCompass.getBotId() == targetId)
+					return;
 			}
 
 			if ( (*it).first != freeIdx )
@@ -288,22 +299,49 @@ void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot )
 		}
 	}
 
-	nlassert(_Mission->getCompass(freeIdx) == NULL);
-	EGSPD::CMissionCompassPD * compass = _Mission->addToCompass(freeIdx);
-	nlassert(compass != NULL);
-	if (c != NULL)
+	if (freeIdx < 8)
 	{
-		compass->setBotId(c->getAlias());
-		compass->setPlace(CAIAliasTranslator::Invalid);
-	}
-	else if (place != NULL)
-	{
-		compass->setBotId(CAIAliasTranslator::Invalid);
-		compass->setPlace(place->getAlias());
-	}
-	else
-	{
-		nlstop;
+		if (_Mission->getCompass(freeIdx) == NULL)
+		{
+			EGSPD::CMissionCompassPD * compass = _Mission->addToCompass(freeIdx);
+
+			if (compass)
+			{
+				if (c != NULL)
+				{
+					compass->setBotId(c->getAlias());
+					compass->setPlace(CAIAliasTranslator::Invalid);
+				}
+				else if (place != NULL)
+				{
+					compass->setBotId(CAIAliasTranslator::Invalid);
+					compass->setPlace(place->getAlias());
+				}
+				else
+				{
+					if (isPosition)
+					{
+						compass->setBotId(targetId);
+						compass->setPlace(CAIAliasTranslator::Invalid);
+
+						sint32 x;
+						sint32 y;
+						string textName;
+
+						CCharacter * user = getMainEntity();
+						user->getPositionCheck(toUpper(templ->getMissionName()), x, y, textName);
+
+						if (targetId != 0) {
+							CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(freeIdx).setX(user->_PropertyDatabase, x*1000);
+							CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(freeIdx).setY(user->_PropertyDatabase, y*1000);
+							CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(freeIdx).setTITLE(user->_PropertyDatabase, targetId);
+						}
+
+						targetId = CAIAliasTranslator::Invalid;
+					}
+				}
+			}
+		}
 	}
 
 	std::vector<TDataSetRow> entities;
@@ -313,6 +351,7 @@ void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot )
 		TVectorParamCheck params(1);
 		sint32 x = 0;
 		sint32 y = 0;
+		uint32 txt = 0;
 		string msg;
 
 		if ( c )
@@ -334,9 +373,20 @@ void CMissionBaseBehaviour::addCompassTarget( uint32 targetId, bool isBot )
 			params[0].Type = STRING_MANAGER::place;
 			msg = "COMPASS_PLACE";
 		}
+		else if (isPosition)
+		{
+			string textName;
+			CCharacter * user = getMainEntity();
+			if (user)
+				user->getPositionCheck(toUpper(templ->getMissionName()), x, y, textName);
+			txt = targetId;
+		}
+
 		for ( uint i  = 0; i < entities.size(); i++)
 		{
-			uint32 txt = STRING_MANAGER::sendStringToClient( entities[i],msg,params );
+			if (!isPosition)
+				txt = STRING_MANAGER::sendStringToClient( entities[i],msg,params );
+
 			PlayerManager.sendImpulseToClient( getEntityIdFromRow(entities[i]), "JOURNAL:ADD_COMPASS", x,y,txt );
 		}
 	}
@@ -363,7 +413,8 @@ void CMissionBaseBehaviour::removeCompassBot( TAIAlias bot )
 	}
 
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	std::vector<TDataSetRow> entities;
 	getEntities(entities);
 	if ( templ->Tags.NoList )
@@ -402,7 +453,8 @@ void CMissionBaseBehaviour::removeCompassPlace( uint16 placeId )
 		}
 	}
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	std::vector<TDataSetRow> entities;
 	getEntities(entities);
 	if ( templ->Tags.NoList )
@@ -428,7 +480,8 @@ void CMissionBaseBehaviour::removeCompassPlace( uint16 placeId )
 CMissionEvent::TResult CMissionBaseBehaviour::processEventForStep( const TDataSetRow & userRow, EGSPD::CActiveStepPD & step, CMissionEvent & event )
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return CMissionEvent::Nothing;
 	nlassert( uint(step.getIndexInTemplate() - 1) < templ->Steps.size() );
 	IMissionStepTemplate * stepTempl = templ->Steps[ step.getIndexInTemplate() - 1 ];
 	//let's test all the substeps of the step we are testing
@@ -512,7 +565,8 @@ bool CMissionBaseBehaviour::checkConstraints( bool logForProcessingEvent, const 
 CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & userRow, std::list< CMissionEvent* > & eventList,uint32 stepIndex )
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return CMissionEvent::Nothing;
 
 	CCharacter *user = PlayerManager.getChar(userRow);
 	string sDebugPrefix;
@@ -653,7 +707,6 @@ CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & 
 	{
 		MISDBG("%s ok, step %u done -> mission completed", sDebugPrefix.c_str(), currentStep->getIndexInTemplate() );
 		templ->AlreadyDone = true;
-		nlassert(user);
 		if(!user->isShopingListInProgress())
 			user->endBotChat();
 		return CMissionEvent::MissionEnds;
@@ -664,7 +717,6 @@ CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & 
 		MISDBG("%s ok, step %u done -> mission failed", sDebugPrefix.c_str(), currentStep->getIndexInTemplate() );
 		_ProcessingState = Normal;
 		onFailure( true );
-		nlassert(user);
 		if(!user->isShopingListInProgress())
 			user->endBotChat();
 		return CMissionEvent::MissionFailed;
@@ -690,7 +742,8 @@ CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & 
 void CMissionBaseBehaviour::jump( uint32 step, uint32 action,std::list< CMissionEvent * > & eventList)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 
 	// if we jump before first step
 	if ( step == 0xFFFFFFFF )
@@ -793,7 +846,8 @@ void CMissionBaseBehaviour::setTimer( NLMISC::TGameCycle cycle )
 void CMissionBaseBehaviour::activateInitialSteps(std::list< CMissionEvent * > & eventList)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	for ( map<uint32, EGSPD::CActiveStepPD>::const_iterator it = _Mission->getStepsBegin(); it != _Mission->getStepsEnd(); ++it )
 	{
 		const uint32 idx = (*it).second.getIndexInTemplate()-1;
@@ -807,7 +861,8 @@ void CMissionBaseBehaviour::activateInitialSteps(std::list< CMissionEvent * > & 
 void CMissionBaseBehaviour::setSuccessFlag()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	_Mission->setFinished(true);
 	_Mission->setMissionSuccess(true);
 	while( _Mission->getStepsBegin() != _Mission->getStepsEnd() )
@@ -827,7 +882,8 @@ void CMissionBaseBehaviour::setSuccessFlag()
 void CMissionBaseBehaviour::setFailureFlag()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	_Mission->setFinished(true);
 	_Mission->setMissionSuccess(false);
 	while( _Mission->getStepsBegin() != _Mission->getStepsEnd() )
@@ -842,7 +898,8 @@ void CMissionBaseBehaviour::setFailureFlag()
 void CMissionBaseBehaviour::onFailure(bool ignoreJumps,bool sendMessage)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 
 	// if mission was in a waiting queue, removed player from queue manager
 	if (_Mission->getWaitingQueueId() != 0)
@@ -988,7 +1045,8 @@ void CMissionBaseBehaviour::teleport(CCharacter * user,uint tpIndex)
 		return;
 	}
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	nlassert( tpIndex - 1 < templ->Teleports.size() );
 	nlassert( templ->Teleports[tpIndex - 1] );
 
@@ -1017,7 +1075,8 @@ TAIAlias CMissionBaseBehaviour::getTeleportBot(uint32 tpIndex)
 		return CAIAliasTranslator::Invalid;
 	}
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		CAIAliasTranslator::Invalid;
 	nlassert( uint( tpIndex - 1 ) < templ->Teleports.size() );
 	nlassert( templ->Teleports[tpIndex - 1] );
 	if ( templ->Teleports[tpIndex -1]->Bot != CAIAliasTranslator::Invalid )
@@ -1447,6 +1506,18 @@ uint CMissionBaseBehaviour::_updateCompass(CCharacter & user, DBType &missionDb)
 			compassIdx++;
 		}
 	}
+
+	CMissionTemplate * tpl = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
+
+	sint32 x;
+	sint32 y;
+	string txtName;
+
+	user.getPositionCheck(toUpper(tpl->getMissionName()), x, y, txtName);
+
+	if (!txtName.empty())
+		compassIdx++;
+
 	return compassIdx;
 }
 

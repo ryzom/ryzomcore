@@ -71,7 +71,7 @@ using namespace NLNET;
 		return true; \
 	} \
 
-	
+
 #define GET_INVITATION_MODULE( _id_ ) \
 	GET_CHAR( _id_ ) \
 	CGuildMember *gmModule = NULL;	\
@@ -279,6 +279,64 @@ NLMISC_COMMAND(guildSetLeader, "set the leader of a guild", "<guildName|<shardId
 	return true;
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(guildMoney, "get money of guild (if quantity, give/take/set the money)", "<guildName|<shardId>:<guildId> [+-]<quantity>")
+{
+
+	if (args.size() != 2)
+		return false;
+
+	GET_GUILD(true);
+
+	if (guild)
+	{
+		uint64 money = guild->getMoney();
+
+		if (args.size() == 2)
+		{
+			string quant = args[1];
+			uint64 quantity;
+			if (quant[0] == '+')
+			{
+				if (quant.size() > 1)
+				{
+					fromString(quant.substr(1), quantity);
+					money += quantity;
+				}
+			}
+			else if (quant[0] == '-')
+			{
+				if (quant.size() > 1)
+				{
+					fromString(quant.substr(1), quantity);
+					if (money >= quantity)
+					{
+						money -= quantity;
+					}
+					else
+					{
+						log.displayNL("-1"); // No enough money
+						return true;
+					}
+				}
+			}
+			else
+			{
+				fromString(quant, money);
+			}
+
+			guild->setMoney(money);
+		}
+
+		log.displayNL("%" NL_I64 "u", money);
+	} else {
+		log.displayNL("ERR: no guild");
+	}
+
+	return true;
+}
+
+
 
 //----------------------------------------------------------------------------
 // TEST COMMANDS
@@ -292,7 +350,7 @@ NLMISC_COMMAND(guildMOTD,"Set the guild message of the day","<userId><message of
 
 	CEntityId eId;
 	eId.fromString(args[0].c_str());
-	
+
 	GET_CHAR(eId);
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 	if( guild )
@@ -315,7 +373,7 @@ NLMISC_COMMAND(guildCreate,"create a new guild","<userId><name><description><ico
 	ucstring name = args[1];
 	ucstring description = args[2];
 	uint64 icon = NLMISC::atoiInt64( args[3].c_str() );
-	
+
 	// get the character and build a proxy from it
 	GET_CHAR(eId);
 	CGuildCharProxy proxy(user);
@@ -343,9 +401,9 @@ NLMISC_COMMAND(guildJoinInvitation,"guild Join Invitation","<user><target>")
 	eId2.fromString(args[1].c_str());
 	CCharacter * firstChar = PlayerManager.getChar( eId1 );
 	if ( !firstChar )
-	{ 
+	{
 		log.displayNL("<GUILD>'%s' is not a valid char. Cant process command",eId1.toString().c_str());
-		return true; 
+		return true;
 	}
 	firstChar->setTarget( eId2 );
 	GET_GUILD_MODULE(eId1);
@@ -491,7 +549,7 @@ NLMISC_COMMAND( importGuildFile, "Import a guild file into the server", "<filena
 
 	static CPersistentDataRecord	pdr;
 	pdr.clear();
-	
+
 	// check if we have a guild file
 	if ( file.size() == len &&
 		file.find( "guild_" ) == 0 &&

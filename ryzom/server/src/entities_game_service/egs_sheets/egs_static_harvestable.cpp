@@ -86,8 +86,8 @@ static	void	getVarListFromParents	(const NLGEORGES::UForm	*form, std::set<NLGEOR
 		const NLGEORGES::UFormElm &item=form->getRootNode();
 
 		NLGEORGES::UFormElm	*elem=NULL;
-		const_cast<NLGEORGES::UFormElm*>(&item)->getNodeByName(&elem, varName);
-		if	(elem!=NULL)	//	item.getValueByName(temp, varName))
+		const_cast<NLGEORGES::UFormElm*>(&item)->getNodeByName(&elem, varName.c_str());
+		if	(elem!=NULL)	//	item.getValueByName(temp, varName.c_str()))
 		{
 			varList.insert	(elem);
 		}
@@ -126,7 +126,7 @@ void CStaticHarvestable::loadFromGeorges( const UForm &form, const NLMISC::CShee
 */
 		{
 			string value;
-			if	(	form.getRootNode().getValueByName( value, "Harvest.Skill" )
+			if	(	form.getRootNode().getValueByName( value, (string("Harvest.")+"Skill").c_str() )
 				&&	!value.empty()	)
 			{
 				_HarvestSkill = SKILLS::toSkill( value );
@@ -142,22 +142,22 @@ void CStaticHarvestable::loadFromGeorges( const UForm &form, const NLMISC::CShee
 			const string mpName=NLMISC::toString("MP%u",i);
 			CStaticCreatureRawMaterial	mp;
 			
-			if( form.getRootNode().getValueByName( mp.MpCommon.AssociatedItemName, "Harvest." +mpName+".AssociatedItem")
+			if( form.getRootNode().getValueByName( mp.MpCommon.AssociatedItemName, ("Harvest." +mpName+".AssociatedItem").c_str())
 				&& !mp.MpCommon.AssociatedItemName.empty() )
 			{
 				if (VerboseQuartering)
 					nldebug("QRTR: %s=%s", mpName.c_str(), mp.MpCommon.AssociatedItemName.c_str());
 
-				form.getRootNode().getValueByName( mp.MpCommon.Name,		"Harvest." +mpName+".Name"			);
+				form.getRootNode().getValueByName( mp.MpCommon.Name,		("Harvest." +mpName+".Name").c_str()			);
 				uint16 sheetQuantity;
-				form.getRootNode().getValueByName( sheetQuantity,			"Harvest." +mpName+".Quantity"		);
+				form.getRootNode().getValueByName( sheetQuantity,			("Harvest." +mpName+".Quantity").c_str()		);
 				if ( sheetQuantity != 0 )
 				{
 					nlwarning( "Quantity set to %hu in %s", sheetQuantity, sheetId.toString().c_str() );
 				}
-				form.getRootNode().getValueByName( mp.MpCommon.MinQuality,	"Harvest." +mpName+".MinQuality"	);
-				form.getRootNode().getValueByName( mp.MpCommon.MaxQuality,	"Harvest." +mpName+".MaxQuality"	);
-	//			harvest->getValueByName( mp.PresenceProbabilities,	mpName+".PresenceProbabilities"	);
+				form.getRootNode().getValueByName( mp.MpCommon.MinQuality,	("Harvest." +mpName+".MinQuality").c_str()		);
+				form.getRootNode().getValueByName( mp.MpCommon.MaxQuality,	("Harvest." +mpName+".MaxQuality").c_str()		);
+	//			harvest->getValueByName( mp.PresenceProbabilities,	(mpName+".PresenceProbabilities").c_str()	);
 
 				mp.ItemId = mp.MpCommon.AssociatedItemName;
 				if ( mp.MpCommon.MinQuality == 0)

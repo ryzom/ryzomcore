@@ -537,6 +537,45 @@ void import_s_(CStateInstance* entity, CScriptStack& stack)
 		nlwarning("unknown library %s", LibName.c_str());
 }
 
+void setVar_sf_(CStateInstance* entity, CScriptStack& stack)
+{
+	float value = (float)stack.top();
+	stack.pop();
+	std::string varName = (std::string)stack.top();
+	TStringId varId=CStringMapper::map(varName);
+	stack.pop();
+
+	entity->setLogicVar(varId, value);
+}
+
+void getVar_s_f(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string varName = (std::string)stack.top();
+	TStringId varId=CStringMapper::map(varName);
+
+	stack.top() = entity->getLogicVar(varId);
+}
+
+void setVar_ss_(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string value = (std::string)stack.top();
+	stack.pop();
+	std::string varName = (std::string)stack.top();
+	TStringId varId=CStringMapper::map(varName);
+	stack.pop();
+
+	entity->setStrLogicVar(varId, value);
+}
+
+void getVar_s_s(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string varName = (std::string)stack.top();
+	TStringId varId=CStringMapper::map(varName);
+
+	stack.top() = entity->getStrLogicVar(varId);
+}
+
+
 //----------------------------------------------------------------------------
 /** @page code
 
@@ -804,6 +843,10 @@ std::map<std::string, FScrptNativeFunc> nfGetStateInstanceNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, setNelVar_ss_);
 	REGISTER_NATIVE_FUNC(functions, getNelVar_s_s);
 	REGISTER_NATIVE_FUNC(functions, delNelVar_ss_);
+	REGISTER_NATIVE_FUNC(functions, setVar_sf_);
+	REGISTER_NATIVE_FUNC(functions, getVar_s_f);
+	REGISTER_NATIVE_FUNC(functions, setVar_ss_);
+	REGISTER_NATIVE_FUNC(functions, getVar_s_s);
 	REGISTER_NATIVE_FUNC(functions, setGlobalNelVar_sf_);
 	REGISTER_NATIVE_FUNC(functions, setGlobalNelVar_ss_);
 	REGISTER_NATIVE_FUNC(functions, getStateName__s);

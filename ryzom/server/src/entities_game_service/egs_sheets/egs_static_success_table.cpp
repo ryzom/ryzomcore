@@ -140,7 +140,7 @@ void CStaticSuccessTable::initTables()
 //--------------------------------------------------------------
 // serial
 //--------------------------------------------------------------
-void CStaticSuccessTable::serial(NLMISC::IStream &f)
+void CStaticSuccessTable::serial(class NLMISC::IStream &f)
 {
 	f.serial(_MaxSuccessFactor);
 	f.serial(_MaxPartialSuccessFactor);

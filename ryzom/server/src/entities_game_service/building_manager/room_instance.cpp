@@ -38,7 +38,7 @@ NL_INSTANCE_COUNTER_IMPL(CRoomInstanceGuild);
 NL_INSTANCE_COUNTER_IMPL(CRoomInstancePlayer);
 
 //----------------------------------------------------------------------------
-void CRoomInstanceCommon::removeUser( CCharacter* user )
+void CRoomInstanceCommon::removeUser( CCharacter* user, bool send_url, bool keep_room )
 {
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
@@ -56,13 +56,14 @@ void CRoomInstanceCommon::removeUser( CCharacter* user )
 	--_RefCount;
 	if ( _RefCount == 0 )
 	{
-		commonBuilding->resetRoomCell( _RoomIdx );
+		if (!keep_room)
+			commonBuilding->resetRoomCell( _RoomIdx );
 		release();
 	}
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstanceCommon::addUser( CCharacter* user, CCharacter* owner )
+void CRoomInstanceCommon::addUser( CCharacter* user, const NLMISC::CEntityId & owner, bool send_url )
 {
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
@@ -76,7 +77,7 @@ std::string CRoomInstanceCommon::getRoomDescription() const
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstanceGuild::removeUser( CCharacter* user )
+void CRoomInstanceGuild::removeUser( CCharacter* user, bool send_url, bool keep_room )
 {
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
@@ -94,26 +95,29 @@ void CRoomInstanceGuild::removeUser( CCharacter* user )
 		return;
 	}
 
+	user->sendUrl("app_ryzhome action=quit_guild_room&room_name="+guildBuilding->getName());
+
 	--_RefCount;
 	if ( _RefCount == 0 )
 	{
-		guildBuilding->resetRoomCell( _RoomIdx, _GuildId );
+		if (!keep_room)
+			guildBuilding->resetRoomCell( _RoomIdx, _GuildId );
 		release();
 	}
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstanceGuild::addUser( CCharacter* user, CCharacter* owner )
+void CRoomInstanceGuild::addUser( CCharacter* user, const NLMISC::CEntityId & owner, bool send_url )
 {
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
-#ifdef RYZOM_FORGE_ROOM
 	CBuildingPhysicalGuild * guildBuilding = dynamic_cast<CBuildingPhysicalGuild *>( _Building );
 	BOMB_IF( !guildBuilding, "<BUILDING> building type does not match with room type", return );
-#endif
 
 	// open guild inventory window
 	PlayerManager.sendImpulseToClient(user->getId(), "GUILD:OPEN_INVENTORY");
+	
+	user->sendUrl("app_ryzhome action=open_guild_room&owner="+ owner.toString()+"&room_name="+guildBuilding->getName());
 
 	++_RefCount;
 }
@@ -131,7 +135,7 @@ std::string CRoomInstanceGuild::getRoomDescription() const
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstancePlayer::removeUser( CCharacter* user )
+void CRoomInstancePlayer::removeUser( CCharacter* user, bool send_url, bool keep_room )
 {
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
@@ -148,47 +152,46 @@ void CRoomInstancePlayer::removeUser( CCharacter* user )
 			);
 		return;
 	}
-	
+
+	if (send_url)
+		user->sendUrl(toString("app_ryzhome action=quit_player_room&room_name=%s&powo=%d", playerBuilding->getName().c_str(), user->getPowoCell()));
+
 	--_RefCount;
 	if ( _RefCount == 0 )
 	{
-#ifdef RYZOM_FORGE_ROOM
-		playerBuilding->resetRoomCell( _RoomIdx , user->getInRoomOfPlayer());
-#else
-		playerBuilding->resetRoomCell( _RoomIdx , user->getId() );
-#endif
+		if (!keep_room)
+			playerBuilding->resetRoomCell( _RoomIdx , user->getInRoomOfPlayer());
 		release();
 	}
-#ifdef RYZOM_FORGE_ROOM
 	user->setInRoomOfPlayer(CEntityId::Unknown);
-#endif
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstancePlayer::addUser( CCharacter* user, CCharacter* owner )
+void CRoomInstancePlayer::addUser( CCharacter* user, const NLMISC::CEntityId & owner, bool send_url )
 {
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
-#ifdef RYZOM_FORGE_ROOM
 	CBuildingPhysicalPlayer * playerBuilding = dynamic_cast<CBuildingPhysicalPlayer *>( _Building );
 	BOMB_IF( !playerBuilding, "<BUILDING> building type does not match with room type", return );
-#endif
 
-	// open room inventory window
-	// TODO: Does a visiting user have access to the inventory? -Kaetemi
-	PlayerManager.sendImpulseToClient(user->getId(), "ITEM:OPEN_ROOM_INVENTORY");
-#ifdef RYZOM_FORGE_ROOM
-	if (owner)
+	// open room inventory window if not in powo or in powo and have access
+	if (user->getPowoCell() == 0 || user->getPowoFlag("room_inv"))
+		PlayerManager.sendImpulseToClient(user->getId(), "ITEM:OPEN_ROOM_INVENTORY");
+
+	// open guild inventory window if in powo and have access (in powo all are player rooms)
+	if (user->getPowoCell() != 0 && user->getPowoFlag("guild_inv"))
+		PlayerManager.sendImpulseToClient(user->getId(), "GUILD:OPEN_INVENTORY");
+	
+	if (owner != CEntityId::Unknown)
 	{
-		owner->removeRoomAccesToPlayer(user->getId(),false);
-		user->setInRoomOfPlayer(owner->getId());
+		CCharacter * o = PlayerManager.getChar(owner);
+		if (o)
+			o->removeRoomAccesToPlayer(user->getId(), false);
+		user->setInRoomOfPlayer(owner);
 	}
-	else
-	{
-		// Very rare case
-		owner = user;
-	}
-#endif
+
+	if (send_url)
+		user->sendUrl(toString("app_ryzhome action=open_player_room&owner=%s&room_name=%s&powo=%d",  owner.toString().c_str(), playerBuilding->getName().c_str(), user->getPowoCell()));
 
 	++_RefCount;
 }

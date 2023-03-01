@@ -40,6 +40,17 @@ public:
 	virtual void callback (const std::string &name, NLNET::TServiceId id);
 };
 
+//---------------------------------------------------
+// Implementation of CAINotifyDeathMsgImp
+//
+//---------------------------------------------------
+class CAINotifyDeathMsgImp : public CAINotifyDeathMsg
+{
+public:
+	virtual void callback (const std::string &name, NLNET::TServiceId id);
+};
+
+
 
 namespace PROGRESSIONPVE
 {

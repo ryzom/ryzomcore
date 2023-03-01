@@ -46,6 +46,7 @@ void initCommandsPrivileges(const std::string & fileName);
 void initPositionFlags(const std::string & fileName);
 void getUCstringFromHash(const std::string & hash, ucstring & finaltext);
 std::string getStringFromHash(const std::string &hash);
+bool getAIInstanceFromGroupName(std::string& groupName, uint32& instanceNumber);
 
 CAdminCommand * findAdminCommand(const std::string & name);
 
@@ -111,6 +112,29 @@ extern void GET_CHARACTER_Helper(std::string& command, const NLMISC::CEntityId& 
 	uint32 uid; \
 	NLMISC::fromString(args[0], uid); \
 	CCharacter *c = CPlayerManager::getInstance().getActiveChar(uid); \
+	if(c == 0) \
+	{ \
+		log.displayNL ("ERR: Unknown player '%u' (%s)", uid, args[0].c_str()); \
+		return false; \
+	} \
+	CEntityId eid = c->getId(); \
+	TLogContext_Character_AdminCommand commandContext(eid); \
+	if(!c->getEnterFlag()) \
+	{ \
+		log.displayNL ("ERR: '%s' is not entered", eid.toString().c_str()); \
+		return false; \
+	} \
+	if(!TheDataset.isAccessible(c->getEntityRowId())) \
+	{ \
+		log.displayNL ("ERR: '%s' is not valid in mirror", eid.toString().c_str()); \
+		return false; \
+	} \
+
+#define GET_ACTIVE_CHARACTER2 \
+	if (args.size() < 1) { nlwarning ("ERR: Missing argument number 0 that should be the uid"); return false; } \
+	uint32 uid; \
+	NLMISC::fromString(args[0], uid); \
+	c = CPlayerManager::getInstance().getActiveChar(uid); \
 	if(c == 0) \
 	{ \
 		log.displayNL ("ERR: Unknown player '%u' (%s)", uid, args[0].c_str()); \

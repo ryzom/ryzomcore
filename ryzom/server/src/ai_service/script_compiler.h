@@ -19,6 +19,20 @@
 
 #include "script_vm.h"
 
+
+static std::string scriptHex_decode(std::string str)
+{
+	std::string output;
+	for (size_t i=0; i<(str.length()-1); i+=2)
+	{
+		char c1 = str[i], c2 = str[i+1];
+		char buffer[3] = { c1, c2, '\0' };
+		char c = (char)strtol(buffer, NULL, 16);
+		output.push_back(c);
+	}
+	return output;
+}
+
 // Forward declarations
 class CStateInstance;
 

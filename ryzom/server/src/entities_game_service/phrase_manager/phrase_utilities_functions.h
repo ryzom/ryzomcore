@@ -271,6 +271,16 @@ inline void sendNaturalEventHitMessages( RYZOMID::TTypeId aggressorType, const T
 }
 
 
+void sendNaturalEventHealMessages( RYZOMID::TTypeId aggressorType, const NLMISC::CEntityId &victimId, sint32 amount, SCORES::TScores score );
+
+inline void sendNaturalEventHealMessages( RYZOMID::TTypeId aggressorType, const TDataSetRow &victimRowId, sint32 amount, SCORES::TScores score )
+{
+	if (TheDataset.isAccessible(victimRowId))
+	{
+		sendNaturalEventHealMessages( aggressorType, TheDataset.getEntityId( victimRowId ), amount, score );
+	}
+}
+
 /**
  * fumble messages
  * \param aggressorId NLMISC::CEntityId of the acting entity
@@ -569,13 +579,14 @@ void sendScoreModifierSpellMessage( const NLMISC::CEntityId &aggressorId, const 
 // send resist message
 
 
-inline void updateMirrorTargetList(CMirrorPropValueList<uint32>& targetList, const TDataSetRow & target, float distance,bool resist)
+inline void updateMirrorTargetList(CMirrorPropValueList<uint32>& targetList, const TDataSetRow & target, float distance, bool resist, sint16 dmg)
 {
 	static float maxDistance = 100.0f;
 	uint8 byte = (distance >= maxDistance) ? 127 : uint8(127 * distance / maxDistance);
 	if ( resist )
 		byte |= 0x80;
 	 
+	targetList.push_front((uint32)dmg);
 	targetList.push_front(TDataSetIndex(byte)); // distance!
 	uint32 utarget = *((uint32*)(&target));
 	targetList.push_front(utarget);

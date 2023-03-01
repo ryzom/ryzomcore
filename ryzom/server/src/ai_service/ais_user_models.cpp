@@ -91,7 +91,8 @@ DEFINE_ACTION(ContextGlobal,USR_MDL)
 	std::vector<CAIActions::CArg>::const_iterator it = args.begin();
 	
 	uint32 primAlias;
-
+	string modelId;
+	
 	for (it = args.begin(); it != args.end();++it)
 	{
 		if (it == args.begin())
@@ -102,9 +103,9 @@ DEFINE_ACTION(ContextGlobal,USR_MDL)
 			}
 			continue;
 		}
-		std::string modelId(it->toString());
-		std::string sheetId((++it)->toString());
-		std::string script((++it)->toString());
+		modelId = it->toString();
+		string sheetId((++it)->toString());
+		string script((++it)->toString());
 		
 		//will contain all script info and the base sheet id
 		TScriptContent scriptContent;
@@ -134,7 +135,10 @@ DEFINE_ACTION(ContextGlobal,USR_MDL)
 	//send msg to EGS if EGS up
 	if (EGSHasMirrorReady)
 	{
-		CAIUserModelManager::getInstance()->sendUserModels();
+		if (modelId.size() > 4 && modelId[0] == 'A' && modelId[1] == 'R' && modelId[2] == 'K' && modelId[3] == '_') // Ark user model (only one)
+			CAIUserModelManager::getInstance()->sendUserModel(primAlias, modelId);
+		else
+			CAIUserModelManager::getInstance()->sendUserModels();
 	}
 }
 
@@ -303,6 +307,14 @@ void CAIUserModelManager::addToUserModels(uint32				primAlias,
 										  const std::string		&userModelId, 
 										  const TScriptContent	&userModel)
 {
+	if (userModelId.size() > 4 && userModelId[0] == 'A' && userModelId[1] == 'R' && userModelId[2] == 'K' && userModelId[3] == '_') // Ark user model (can be updated)
+	{
+		CCustomElementId id(primAlias, userModelId);
+		TScripts::iterator it = _UserModels.Scripts.find(id);
+		if (it != _UserModels.Scripts.end())
+			_UserModels.Scripts.erase(it);
+	}
+
 	bool inserted = _UserModels.Scripts.insert(make_pair(CCustomElementId(primAlias, userModelId), userModel)).second;
 	if (!inserted)
 	{
@@ -310,6 +322,23 @@ void CAIUserModelManager::addToUserModels(uint32				primAlias,
 		return;
 	}
 	nldebug("<AIUserModelManager::addToUserModels> Added usermodel '%s' with alias '%u'", userModelId.c_str(), primAlias);
+}
+
+void CAIUserModelManager::sendUserModel(uint32 primAlias, const std::string &userModelId)
+{
+	NLNET::CMessage msgout("USER_MODEL");
+
+	CCustomElementId id(primAlias, userModelId);
+	TScripts::iterator it = _UserModels.Scripts.find(id);
+	if (it == _UserModels.Scripts.end())
+		return;
+	
+	CScriptData scriptData;
+	scriptData.Scripts.insert(make_pair(id, it->second));
+	msgout.serial(const_cast<CScriptData&>(scriptData));
+	
+	nlinfo("Sending %u user models to EGS", scriptData.Scripts.size());
+	sendMessageViaMirror("EGS", msgout);
 }
 
 void CAIUserModelManager::sendUserModels()

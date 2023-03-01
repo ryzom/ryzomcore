@@ -77,7 +77,7 @@ private:
 	///\name interface callbacks
 	//@{
 
-	/// callback when user potentially leaves PVP. Return false if an error occurred
+	/// callback when user potentially leaves PVP. Return false if an error occured
 	virtual bool leavePVP( CCharacter * user, IPVP::TEndType type) = 0;
 
 	/// callback when a player hurts another, does nothing by default

@@ -212,6 +212,9 @@ public:
 	inline void setIsFromConsumable(bool fromConsumable) { _IsFromConsumable = fromConsumable; }
 	inline bool getIsFromConsumable() { return _IsFromConsumable; }
 
+	///
+	inline NLMISC::TGameCycle getEndTime() const { return _EndTimer.getTime(); }
+
 
 protected:
 	/// send chat message for effect begin

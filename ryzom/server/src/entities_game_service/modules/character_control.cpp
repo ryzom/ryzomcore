@@ -417,31 +417,28 @@ public:
 		}
 		CRingRewardPoints &rrp = ic->getRingRewardPoints();
 
-		if (scenario)
+		SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+		CRingRewardPoints::TGenerateRewardResult result = rrp.generateReward(scenario->getSessionLevel());
+		switch(result)
 		{
-			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
-			CRingRewardPoints::TGenerateRewardResult result = rrp.generateReward(scenario->getSessionLevel());
-			switch (result)
-			{
-			case CRingRewardPoints::grr_ok:
-				params[0].Literal = rewardText;
-				break;
-			case CRingRewardPoints::grr_ok_rare:
-				params[0].Literal = rareRewardText;
-				break;
-			case CRingRewardPoints::grr_no_place:
-				params[0].Literal = inventoryFullText;
-				break;
-			case CRingRewardPoints::grr_no_points:
-				params[0].Literal = notEnoughPointsText;
-				break;
-			case CRingRewardPoints::grr_invalid:
-			default:
-				params[0].Literal = ucstring();
-			}
-			if (!params[0].Literal.empty())
-				PHRASE_UTILITIES::sendDynamicSystemMessage( creatureRowId, "LITERAL", params );
+		case CRingRewardPoints::grr_ok:
+			params[0].Literal = rewardText;
+			break;
+		case CRingRewardPoints::grr_ok_rare:
+			params[0].Literal = rareRewardText;
+			break;
+		case CRingRewardPoints::grr_no_place:
+			params[0].Literal = inventoryFullText;
+			break;
+		case CRingRewardPoints::grr_no_points:
+			params[0].Literal = notEnoughPointsText;
+			break;
+		case CRingRewardPoints::grr_invalid:
+		default:
+			params[0].Literal = "";
 		}
+		if (!params[0].Literal.empty())
+			PHRASE_UTILITIES::sendDynamicSystemMessage( creatureRowId, "LITERAL", params );
 	}
 
 	/*
@@ -503,7 +500,7 @@ public:
 			return;
 		}
 
-		c->teleportCharacter(sint32(1000.0f*x), sint32(1000.0f*y), sint32(1000.0f*z), true, false, 0.f, 0xFF, 0, season, tpInfos);
+		c->teleportCharacter(sint32(1000.0f*x), sint32(1000.0f*y), sint32(1000.0f*z), true, false, 0.f, 0xFF, 0, season, false, tpInfos);
 	}
 
 	virtual void disconnectChar(NLNET::IModuleProxy *sender, uint32 charId)

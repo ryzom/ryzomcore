@@ -189,8 +189,10 @@ public:
 
 	/// instanciate a charge mission
 	void instanciateChargeMission(TAIAlias  alias, TAIAlias giver, CGuild * guild );
+	/// cehck if mission is successfull
+	bool isMissionSuccessfull(CCharacter* user,TAIAlias  alias);
 	/// instanciate a mission for a specific player 
-	void instanciateMission(CCharacter* user,TAIAlias alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission = CAIAliasTranslator::Invalid);
+	uint8 instanciateMission(CCharacter* user,TAIAlias alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission = CAIAliasTranslator::Invalid);
 	/// deinstanciate a mission From this manager. It doesnt delete it, nor does it remove it from a character
 	void deInstanciateMission(CMission * mission);
 	/// tell the system that a mission was done for the first time
@@ -218,6 +220,8 @@ public:
 	void switchDynChatSpeaker(CCharacter * user, const NLMISC::CEntityId & successorId);
 	/// remove all the dynamic chats of a user
 	void removeAllUserDynChat(CCharacter * user);
+	/// precosse missions event end dyn chat of a user
+	void processMissionsEventEndDynChat(CCharacter * user);
 	/// remove a dynamic chat
 	void removeMissionDynChat(CCharacter * user, CMission * instance);
 	/// player selected a dyn chat answer
