@@ -151,6 +151,8 @@ private:
 	///  when user moves, some actions must be cancelled
 	void cancelActionsWhenMoving();
 
+	///  when user moves and speed factor is 0, show warning message
+	void checkSpeedFactor();
 public:
 	/// Constructor
 	CUserControls();
