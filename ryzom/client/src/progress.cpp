@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -51,6 +51,7 @@ extern NL3D::UMaterial LoadingMaterialFull;
 extern std::vector<UTextureFile*> LogoBitmaps;
 extern uint TipsOfTheDayIndex;
 extern string			TipsOfTheDay;
+extern string			NewsAtProgress;
 extern bool					UseEscapeDuringLoading;
 
 CProgress::CProgress ()
@@ -368,23 +369,27 @@ void CProgress::internalProgress (float value)
 				// apply text commands
 				if( ApplyTextCommands )
 				{
-					std::vector<CClientConfig::SPrintfCommand> printfCommands = ClientCfg.PrintfCommands;
-					if(FreeTrial) printfCommands = ClientCfg.PrintfCommandsFreeTrial;
+					std::vector<CClientConfig::SPrintfCommand> loadingTexts = ClientCfg.loadingTexts;
 
-					if( !printfCommands.empty() )
+					if( !loadingTexts.empty() )
 					{
 						TextContext->setHotSpot(UTextContext::MiddleBottom);
 
 						vector<CClientConfig::SPrintfCommand>::iterator itpc;
-						for( itpc = printfCommands.begin(); itpc != printfCommands.end(); ++itpc )
+						for( itpc = loadingTexts.begin(); itpc != loadingTexts.end(); ++itpc )
 						{
 							float x = 0.5f;//((*itpc).X / 1024.f);
 							float y = ((*itpc).Y / 768.f);
 							TextContext->setColor( (*itpc).Color );
-							TextContext->setFontSize( (uint)(16.f * fontFactor));
+							TextContext->setFontSize( (uint)((*itpc).FontSize * fontFactor));
 
 							// build the ucstr(s)
-							string ucstr = CI18N::get((*itpc).Text);
+							string text = (*itpc).Text;
+							string ucstr;
+							if (text == "NEWS")
+								ucstr = NewsAtProgress;
+							else
+								ucstr = CI18N::get(text);
 							vector<string> vucstr;
 							string sep("\n");
 							splitString(ucstr,sep,vucstr);

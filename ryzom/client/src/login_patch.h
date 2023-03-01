@@ -272,6 +272,7 @@ public:
 	void setStartRyzomAtEnd(bool startAtEnd){ _StartRyzomAtEnd = startAtEnd; }
 	// Forward message to installation software if needed
 	void fatalError(const std::string& errorId, const std::string& param1, const std::string& param2);
+	bool bnpUnpack(const std::string &srcBigfile, const std::string &dstPath, std::vector<std::string> &vFilenames);
 
 	const std::string &	getServerVersion () { return ServerVersion; }
 private:
@@ -322,8 +323,6 @@ private:
 	void applyDate (const std::string &sFilename, uint32 nDate);
 
 	void getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, bool forceCheckSumTest);
-
-	bool bnpUnpack(const std::string &srcBigfile, const std::string &dstPath, std::vector<std::string> &vFilenames);
 
 	// stop the threads (called when knowing the thread ended)
 	void stopCheckThread();
@@ -550,7 +549,7 @@ private:
 
 	void run();
 	void processFile (CPatchManager::SFileToPatch &rFTP);
-	void xDeltaPatch(const std::string &patch, const std::string &src, const std::string &out);
+	bool xDeltaPatch(const std::string &patch, const std::string &src, const std::string &out);
 
 };
 /**

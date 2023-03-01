@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
@@ -589,7 +589,8 @@ void CBotChatPageTrade::updateTradeModal()
 			if ((_BuyMean == MoneyGuildXP) || (_BuyMean == GuildMoney) || (_BuyMean == GuildMoneyGuildXP))
 			{
 				uint64 totalPrice = (uint64) priceWithoutFame * (uint64) quantity;
-				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE")->setValue64(totalPrice);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE")->setValue64(totalPrice);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_WITH_FAME")->setValue64(totalPrice);
 				uint64 totalXP = (uint64) getCurrItemXP() * (uint64) quantity;
 				CGuildManager *pGM = CGuildManager::getInstance();
 

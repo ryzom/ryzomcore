@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -1095,6 +1095,20 @@ public:
 REGISTER_ACTION_HANDLER( CHandlerContextWebPage, "context_web_page");
 
 
+// ***************************************************************************
+class CHandlerFullMap : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+
+		CLuaManager::getInstance().executeLuaScript("game:openFullMap()", true);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerFullMap, "fullmap");
+
+
 
 
 // ***************************************************************************
@@ -1956,7 +1970,7 @@ public:
 					bool womanTitle = false;
 					if (pChar != NULL)
 						womanTitle = pChar->getGender() == GSGENDER::female;
-					
+
 					copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
 
 					// Sometimes translation contains another title
@@ -2662,9 +2676,9 @@ class CAHAddShape : public IActionHandler
 					instance.setPos(CVector((float)x, (float)y, (float)z));
 					instance.setRotQuat(dir.getRot());
 				}
-				
+
 				instance.setTransformMode(UTransformable::RotEuler);
-				
+
 				// if the shape is a particle system, additionnal parameters are user params
 				UParticleSystemInstance psi;
 				psi.cast (instance);
@@ -3399,7 +3413,7 @@ class CHandlerGameConfigVREnable : public IActionHandler
 		// VR_CONFIG
 
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
-		if (pBut) 
+		if (pBut)
 		{
 			// hide or show device list depending on enabled or not
 			updateVRDevicesComboUI(pBut->getPushed());
@@ -3529,7 +3543,7 @@ class CHandlerGameConfigApply : public IActionHandler
 		}
 
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
-		if (pBut) 
+		if (pBut)
 		{
 			// store the new config variables
 			ClientCfg.VREnable = pBut->getPushed();
@@ -4637,6 +4651,45 @@ public:
 REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
 
 #ifdef RYZOM_FORGE
+
+// ***************************************************************************
+class CHandlerOutgameNaviGetKeys : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const std::string &Params)
+	{
+		if (!pCaller->getParent())
+			return;
+
+		if (pCaller->getParent()->getId() != "ui:outgame")
+			return;
+
+		if (Params.empty())
+		{
+			sint32 event = -1;
+
+			if (Driver->AsyncListener.isKeyPushed(KeyESCAPE)) event = 0;
+			if (Driver->AsyncListener.isKeyPushed(KeyDELETE)) event = 1;
+			if (Driver->AsyncListener.isKeyPushed(KeyRETURN)) event = 2;
+			if (Driver->AsyncListener.isKeyPushed(KeyDOWN))   event = 3;
+			if (Driver->AsyncListener.isKeyPushed(KeyUP))     event = 4;
+			if (Driver->AsyncListener.isKeyPushed(KeyI))      event = 5;
+			if (Driver->AsyncListener.isKeyPushed(KeyP))      event = 6;
+			if (Driver->AsyncListener.isKeyPushed(KeyE))      event = 7;
+			if (Driver->AsyncListener.isKeyPushed(KeyLEFT))   event = 8;
+			if (Driver->AsyncListener.isKeyPushed(KeyRIGHT))  event = 9;
+
+			std::string id = "create";
+			if (pCaller->getId() == "ui:outgame:charsel")
+				id = "sel";
+
+			if (event != -1)
+				CLuaManager::getInstance().executeLuaScript(toString("outgame:eventChar%sKeyGet(%i)", id.c_str(), event));
+		}
+		// reset previous input
+		Driver->AsyncListener.reset();
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerOutgameNaviGetKeys, "navigate_outgame" );
 
 // ***************************************************************************
 class CHandlerTriggerIconBuffs : public IActionHandler

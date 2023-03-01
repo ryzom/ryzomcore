@@ -40,7 +40,7 @@ COutpostManager::COutpostManager()
 
 
 // ***************************************************************************
-void	COutpostManager::startPvpJoinProposal(bool playerGuildInConflict, bool playerGuildIsAttacker,
+void	COutpostManager::startPvpJoinProposal(OUTPOSTENUMS::TPVPType type, bool outpostInFire, bool playerGuildInConflict, bool playerGuildIsAttacker,
 							 uint32 ownerGuildNameId, uint32 attackerGuildNameId, uint32 declTimer)
 {
 	// reset counter that force player to be neutral (eg: 10 seconds)
@@ -61,6 +61,26 @@ void	COutpostManager::startPvpJoinProposal(bool playerGuildInConflict, bool play
 	if(node)	node->setValue32(_EndTickForPvpJoinProposal);
 
 	// open Popup
+
+	CCtrlBase *ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:random"));
+	if (ctrl)
+		ctrl->setActive(type != OUTPOSTENUMS::GVE && outpostInFire);
+
+	ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:neutral"));
+	if (ctrl)
+		ctrl->setActive(type == OUTPOSTENUMS::GVE || !outpostInFire);
+
+	// GvE: only attacker guild can have the option
+	ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:attack"));
+	if (ctrl && type == OUTPOSTENUMS::GVE)
+		ctrl->setActive(playerGuildIsAttacker);
+
+	// GvE : No defend option
+	ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:defend"));
+	if (ctrl && type == OUTPOSTENUMS::GVE)
+		ctrl->setActive(false);
+
+
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
 	if (pGC)
 	{

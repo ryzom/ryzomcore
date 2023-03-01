@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -33,6 +33,7 @@
 #include "game_share/chat_group.h"
 #include "game_share/character_summary.h"
 #include "game_share/sphrase_com.h"
+#include "game_share/outpost.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/ryzom_database_banks.h"
 #include "game_share/msg_encyclopedia.h"
@@ -147,6 +148,7 @@ extern bool CharNameValidArrived;
 extern bool CharNameValid;
 bool IsInRingSession = false;
 TSessionId HighestMainlandSessionId; // highest in the position stack
+std::string lastUniversMessage;
 
 extern const char *CDBBankNames[INVALID_CDB_BANK+1];
 
@@ -778,7 +780,11 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		}
 		else if (mode == CChatGroup::universe)
 		{
-			PeopleInterraction.ChatInput.Universe.displayMessage(finalString, col, 2, &windowVisible);
+			if (lastUniversMessage != finalString)
+			{
+				PeopleInterraction.ChatInput.Universe.displayMessage(finalString, col, 2, &windowVisible);
+				lastUniversMessage = finalString;
+			}
 		}
 		else if (mode == CChatGroup::dyn_chat)
 		{
@@ -3208,8 +3214,12 @@ void impulseUserBars(NLMISC::CBitMemStream &impulse)
 void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 {
 	// read message
+	uint8 type;
+	bool outpostInFire;
 	bool playerGuildInConflict;
 	bool playerGuildIsAttacker;
+	impulse.serial(type);
+	impulse.serial(outpostInFire);
 	impulse.serial(playerGuildInConflict);
 	impulse.serial(playerGuildIsAttacker);
 	uint32 ownerGuildNameId;
@@ -3220,7 +3230,7 @@ void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 	impulse.serial( declTimer );
 
 	// start
-	OutpostManager.startPvpJoinProposal(playerGuildInConflict, playerGuildIsAttacker,
+	OutpostManager.startPvpJoinProposal((OUTPOSTENUMS::TPVPType)type, outpostInFire, playerGuildInConflict, playerGuildIsAttacker,
 		ownerGuildNameId, attackerGuildNameId, declTimer);
 }
 

@@ -66,6 +66,8 @@ INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
 INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
+MESSAGE("EXTERNAL ${WITH_EXTERNAL}")
+
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
 
@@ -134,14 +136,14 @@ SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ri
 # urls when compiling ryzom live client
 IF(WITH_RYZOM_LIVE)
   MESSAGE("Using RYZOM_LIVE urls")
-  SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL   "https://account.ryzom.com/signup/from_client.php")
-  SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL     "https://account.ryzom.com/payment_profile/index.php")
-  SET(RYZOM_CLIENT_FORGET_PASSWORD_URL  "https://account.ryzom.com/payment_profile/lost_secure_password.php")
-  SET(RYZOM_CLIENT_PATCH_URL            "http://dl.ryzom.com/patch_live")
-  SET(RYZOM_CLIENT_APP_NAME             "ryzom_live")
+  SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL  "https://me.ryzom.com")
+  SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL    "https://me.ryzom.com")
+  SET(RYZOM_CLIENT_FORGET_PASSWORD_URL "https://me.ryzom.com/?forget_password=1")
+  SET(RYZOM_CLIENT_PATCH_URL           "http://dl.ryzom.com/patch_live")
+  SET(RYZOM_CLIENT_APP_NAME            "ryzom_live")
 
-SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/releasenotes/index.php")
-SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/releasenotes_ring/index.php")
+SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/app_releasenotes/index.php")
+SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/app_releasenotes/index.php")
 ENDIF()
 
 #-----------------------------------------------------------------------------

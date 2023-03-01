@@ -1103,7 +1103,19 @@ namespace NLGUI
 						// first loop -> true
 						// second loop -> false && break
 						loop = !loop;
-						if (next < parts.size())
+
+						if (next >= parts.size())
+							break;
+
+						val = toLower(parts[next]);
+						if (val == "center")
+						{
+							if (bgPositionX.empty()) bgPositionX = "center";
+							if (bgPositionY.empty()) bgPositionY = "center";
+							// consume 'center'
+							next++;
+						}
+						else if (val == "left" || val == "right")
 						{
 							val = toLowerAscii(parts[next]);
 							if (val == "center")

@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -1064,7 +1064,7 @@ void CInterfaceManager::initInGame()
 	// rebuild mp3 player playlist if user reselected a char (songs are already scanned)
 	CAHManager::getInstance()->runActionHandler("music_player", NULL, "update_playlist");
 	CAHManager::getInstance()->runActionHandler("music_player", NULL, "stop");
-	
+
 	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHATLOG_STATE", false);
 	if (node)
 	{
@@ -2542,6 +2542,25 @@ void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
 
+	string cleanStr = str;
+	string::size_type pos = str.find("|");
+	if (pos != std::string::npos)
+	{
+		string::size_type end = str.find("|", pos+1);
+		if (end != std::string::npos)
+			cleanStr = str.substr(pos+1, end-pos-1);
+		else
+			cleanStr = str.substr(pos+1);
+	}
+
+	// If broadcast, parse lua code
+	if (toLower(cat) == "bc" && str.size() > 3 && str[0]=='@' && str[1]=='L' && str[2]=='U' && str[3]=='A')
+	{
+		string code = str.substr(4, str.size()-4);
+		if (!code.empty())
+			CLuaManager::getInstance().executeLuaScript(code);
+		return;
+	}
 
 	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLowerAscii(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
@@ -2553,11 +2572,11 @@ void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 	if (mode != CClientConfig::SSysInfoParam::OverOnly && mode != CClientConfig::SSysInfoParam::Around)
 	{
 		if (PeopleInterraction.SystemInfo)
-			PeopleInterraction.ChatInput.SystemInfo.displayMessage(str, color, 2);
+			PeopleInterraction.ChatInput.SystemInfo.displayMessage(cleanStr, color, 2);
 		else
 		{
 			CPeopleInterraction::CSysMsg sysMsg;
-			sysMsg.Str = str;
+			sysMsg.Str = cleanStr;
 			sysMsg.Cat = cat;
 			PeopleInterraction.SystemMessageBuffer.push_back( sysMsg );
 		}
@@ -2568,10 +2587,11 @@ void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 
 	// If over popup a string at the bottom of the screen
 	if ((mode == CClientConfig::SSysInfoParam::Over) || (mode == CClientConfig::SSysInfoParam::OverOnly))
-		InSceneBubbleManager.addMessagePopup(str, color);
+		InSceneBubbleManager.addMessagePopup(cleanStr, color);
 	else if ( (mode == CClientConfig::SSysInfoParam::Around || mode == CClientConfig::SSysInfoParam::CenterAround)
 		&& PeopleInterraction.AroundMe.Window)
-		PeopleInterraction.ChatInput.AroundMe.displayMessage(str, color, 2);
+		PeopleInterraction.ChatInput.AroundMe.displayMessage(cleanStr, color, 2);
+
 }
 
 // ***************************************************************************

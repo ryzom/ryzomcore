@@ -36,6 +36,7 @@ namespace INVENTORIES
 		NL_STRING_CONVERSION_TABLE_ENTRY(handling)
 		NL_STRING_CONVERSION_TABLE_ENTRY(temporary)
 		NL_STRING_CONVERSION_TABLE_ENTRY(equipment)
+		NL_STRING_CONVERSION_TABLE_ENTRY(hotbar)
 		NL_STRING_CONVERSION_TABLE_ENTRY(bag)
 		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal1)
 		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal2)
@@ -88,6 +89,7 @@ namespace INVENTORIES
 			"TEMP",			// temporary
 			//	"",				// pick-up
 			"EQUIP",		// equipment
+			"HOTBAR",		// hotbar	
 			"",				// bag
 			"",				// pack_animal1
 			"",				// pack_animal2

@@ -205,10 +205,39 @@ int main(int argc, char *argv[])
 
 	Args.setVersion(getDisplayVersion());
 	Args.setDescription("Ryzom client");
+	Args.addArg("p", "patch", "patch", "Name of the file to use tp xdelta the source file");
+	Args.addArg("s", "source", "source", "Name of source file to xdelta with patch file");
+	Args.addArg("d", "destination", "destination", "Name of destination operation (patch or unpack)");
+	Args.addArg("u", "unpack", "unpack", "Name of bnp file to unpack");
 	Args.addArg("", "url", "PatchUrl", "Patch server url, ie 'https://dl.ryzom.com/patch_live'");
 	Args.addArg("", "app", "Application", "Patch application name for version file, ie 'ryzom_live' requests ryzom_live.version from PatchUrl");
 
 	if (!Args.parse(argc, argv)) return 1;
+
+	if (Args.haveArg("p") && Args.haveArg("s") && Args.haveArg("d"))
+	{
+		string	patchName = Args.getArg("p").front();
+		string	sourceName = Args.getArg("s").front();
+		string	destinationName = Args.getArg("d").front();
+
+		std::string errorMsg;
+		CXDeltaPatch::TApplyResult ar = CXDeltaPatch::apply(patchName, sourceName, destinationName, errorMsg);
+		nlinfo("%s", errorMsg.c_str());
+		return ar;
+	}
+
+	// initialize patch manager and set the ryzom full path, before it's used
+	CPatchManager *pPM = CPatchManager::getInstance();
+
+	if (Args.haveArg("u") && Args.haveArg("d"))
+	{
+		string	bnpName = Args.getArg("u").front();
+		string	destinationName = Args.getArg("d").front();
+		vector<string> vFilenames;
+		if (pPM->bnpUnpack(bnpName, destinationName, vFilenames))
+			return 0;
+		return 1;
+	}
 
 	// create logs in temporary directory
 	createDebug(CPath::getTemporaryDirectory().c_str(), true, true);
@@ -268,10 +297,7 @@ int main(int argc, char *argv[])
 	printf("\n");
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
 	printf("Using '%s/%s.version'\n", ClientCfg.ConfigFile.getVar("PatchUrl").asString().c_str(),
-		ClientCfg.ConfigFile.getVar("Application").asString().c_str());
-
-	// initialize patch manager and set the ryzom full path, before it's used
-	CPatchManager *pPM = CPatchManager::getInstance();
+	ClientCfg.ConfigFile.getVar("Application").asString().c_str());
 
 	// use PatchUrl
 	vector<string> patchURLs;

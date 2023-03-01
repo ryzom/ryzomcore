@@ -101,6 +101,8 @@ namespace ITEMFAMILY
 	bool	isResellable( EItemFamily fam );
 	/// return true if this family of item can display a custom text
 	bool	isTextCustomizable( EItemFamily fam );
+	/// return true if this family of item can use item (consume, execute, open, etc)
+	bool	isUsable( EItemFamily fam );
 	/// is craftable
 
 }; // ITEMFAMILY

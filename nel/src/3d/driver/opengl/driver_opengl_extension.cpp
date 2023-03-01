@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
@@ -1275,7 +1275,7 @@ static bool	setupNVFragmentProgram2(const char *glext)
 {
 	H_AUTO_OGL(setupNVFragmentProgram2);
 	CHECK_EXT("GL_NV_fragment_program2");
-	
+
 	return true;
 }
 
@@ -1284,7 +1284,7 @@ static bool	setupARBFragmentShader(const char *glext)
 {
 	H_AUTO_OGL(setupNVFragmentProgram2);
 	CHECK_EXT("GL_ARB_fragment_shader");
-	
+
 	return true;
 }
 
@@ -1699,12 +1699,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.EXTVertexShader = false;
 		ext.ARBVertexProgram = false;
 	}
-	
+
 	// Check pixel program
 	// Disable feature ???
 	if (!ext.DisableHardwarePixelProgram)
 	{
-		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);	
+		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);
 		ext.NVFragmentProgram2 = setupNVFragmentProgram2(glext);
 		ext.ARBFragmentShader = setupARBFragmentShader(glext);
 	}

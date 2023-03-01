@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -143,6 +143,7 @@ extern std::vector<std::pair<
 
 extern std::string					Cookie, FSAddr;
 extern std::string					RingMainURL;
+extern std::string					NewsAtProgress;
 extern bool							FreeTrial;
 
 void resetTextContext (const char *font, bool resetInterfaceManager);

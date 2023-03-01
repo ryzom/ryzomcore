@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -441,6 +441,7 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_HomeLM = NULL;
 	_LandmarkFilter.clear();
 	_MatchedLandmarks.clear();
+	_UserLandMarkVisible = true;
 	//
 	_ScaleMax = 8.f;
 	_ScaleMaxR2 = 8.f;
@@ -2568,7 +2569,11 @@ void CGroupMap::createContinentLandMarks()
 			CLandMarkOptions options = getUserLandMarkOptions(k);
 			addLandMark(_UserLM, mapPos, _CurContinent->UserLandMarks[k].Title, options);
 
-			if (_LandmarkFilter.size() > 0)
+			if (!_UserLandMarkVisible)
+			{
+				_UserLM.back()->setActive(false);
+			}
+			else if (_LandmarkFilter.size() > 0)
 			{
 				if (filterLandmark(_CurContinent->UserLandMarks[k].Title))
 				{
@@ -2588,7 +2593,7 @@ void CGroupMap::createContinentLandMarks()
 
 static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 {
-	bool showTeleport = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG());
+	bool showTeleport = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER()|| hasPrivilegeTESTER());
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 
 	CInterfaceElement *ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu:teleport");
@@ -2610,7 +2615,7 @@ void CGroupMap::setLandmarkFilter(const std::string &s)
 	_LandmarkFilter.clear();
 
 	if (!s.empty()) {
-		splitUCString(ucstring(toLower(s)), ucstring(" "), _LandmarkFilter);
+		splitUCString(ucstring::makeFromUtf8(toLower(s)), ucstring(" "), _LandmarkFilter);
 	}
 
 	// recreate landmarks
@@ -2637,7 +2642,7 @@ void CGroupMap::updateUserLandMarks()
 		addLandMark(_UserLM, mapPos, _CurContinent->UserLandMarks[k].Title, getUserLandMarkOptions(k));
 
 		// hide landmark if not matching filter
-		if (!filterLandmark(_CurContinent->UserLandMarks[k].Title))
+		if (!_UserLandMarkVisible || !filterLandmark(_CurContinent->UserLandMarks[k].Title))
 			_UserLM.back()->setActive(false);
 	}
 	invalidateCoords();
@@ -2669,6 +2674,32 @@ CGroupMap::CLandMarkButton *CGroupMap::createLandMarkButton(const CLandMarkOptio
 	lmb->setPosRef(Hotspot_MM);
 	return lmb;
 }
+
+//============================================================================================================
+CGroupMap::CLandMarkButton *CGroupMap::createArkPointButton(const CArkPoint &point)
+{
+ 	CLandMarkButton *lmb = new CLandMarkButton(CViewBase::TCtorParam());
+	static int statFool = 0;
+	lmb->setId(this->getId()+":lm"+toString(statFool++));
+	lmb->setTexture(point.Texture);
+	lmb->setTextureOver(point.Texture);
+	lmb->setTexturePushed(point.Texture);
+	lmb->setType(CCtrlButton::PushButton);
+	lmb->setActionOnLeftClick(point.LeftClickAction);
+	lmb->setParamsOnLeftClick(point.LeftClickParam);
+	lmb->setActionOnRightClick(point.RightClickAction);
+	lmb->setParamsOnRightClick(point.RightClickParam);
+	lmb->setActionOnOver(point.OverClickAction);
+	lmb->setParamsOnOver(point.OverClickParam);
+	lmb->setColor(point.Color);
+	lmb->setColorOver(point.Color);
+	lmb->setColorPushed(point.Color);
+	lmb->setModulateGlobalColorAll(false);
+
+	lmb->setPosRef(Hotspot_MM);
+	return lmb;
+}
+
 //============================================================================================================
 void CGroupMap::updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOptions &options)
 {
@@ -2848,6 +2879,15 @@ CLandMarkOptions CGroupMap::getUserLandMarkOptions(uint32 lmindex) const
 
 }
 
+//============================================================================================================
+void CGroupMap::setUserLandMarkVisible(bool state)
+{
+	if (_UserLandMarkVisible != state)
+	{
+		_UserLandMarkVisible = state;
+		updateUserLandMarks();
+	}
+}
 
 //============================================================================================================
 void CGroupMap::updatePlayerPos()
@@ -3603,6 +3643,9 @@ void CGroupMap::updateClosestLandMarkMenu(const std::string &menu, const NLMISC:
 	// no continent selected (ie world map view)
 	if (!_CurContinent) return;
 
+	// user markers not visible
+	if (!_UserLandMarkVisible) return;
+
 	// sort landmarks, keep indices
 	typedef std::pair<uint, float> TSortedDistPair;
 	std::vector<TSortedDistPair> sortedIndices;
@@ -3764,9 +3807,9 @@ REGISTER_ACTION_HANDLER(CAHLandMarkSelected, "land_mark_selected");
 // Remove a user landmark
 class CAHRemoveUserLandMark : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
 	{
-		CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
+		CCtrlButton *button = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (!button) return;
 		CGroupMap *map = dynamic_cast<CGroupMap *>(button->getParent());
 		if (!map) return;
@@ -3774,6 +3817,8 @@ class CAHRemoveUserLandMark : public IActionHandler
 		// close the rename window & create window
 		closeLandMarkNameDialog();
 		LastSelectedLandMark = NULL;
+		// close confirmation
+		CAHManager::getInstance()->runActionHandler("leave_modal", NULL);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHRemoveUserLandMark, "remove_user_landmark");
@@ -4123,6 +4168,44 @@ class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute
 }};
 REGISTER_ACTION_HANDLER (CUpdateLandMarksColor, "update_landmarks_color");
 
+NLMISC_COMMAND( setMap, "Change the map", "" )
+{
+	if (args.size() != 1) return false;
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pMap != NULL)
+		pMap->setMap(args[0]);
+
+	return true;
+}
+
+//=========================================================================================================
+// toggle user landmarks visibility
+// no arguments - toggle show/hide
+// 0 - hide
+// 1 - show (any non "0" value)
+NLMISC_COMMAND( showHideUserLandMark, "Show/Hide user landmarks", "0|1")
+{
+	const std::string mapId("ui:interface:map:content:map_content:actual_map");
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CGroupMap *map = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapId));
+	if (!map)
+	{
+		nlwarning("Unable to find map element '%s'", mapId.c_str());
+		return false;
+	}
+
+	bool state;
+	if (args.size() == 0)
+		state = !map->getUserLandMarkVisible();
+	else
+		state = !(args[0] == "0");
+
+	map->setUserLandMarkVisible(state);
+	return true;
+}
 
 ////////////////////
 // DEBUG COMMANDS //
@@ -4180,18 +4263,6 @@ NLMISC_COMMAND( testRespawn, "Debug : test respawn map", "" )
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":BIND_POINT")->setValue64((((sint64) 4687 * 1000) << 32 )| (sint64) (uint32) ((sint64) -3561 * 1000));
 */
-	return true;
-}
-
-NLMISC_COMMAND( setMap, "Debug : test respawn map", "" )
-{
-	if (args.size() != 1) return false;
-
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
-	if (pMap != NULL)
-		pMap->setMap(args[0]);
-
 	return true;
 }
 

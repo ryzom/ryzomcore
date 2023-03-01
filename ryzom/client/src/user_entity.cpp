@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -153,7 +153,7 @@ CUserEntity::CUserEntity()
 	_LateralVelocity	= 0.0f;
 
 	_SpeedServerAdjust  = 1.0f;
-	
+
 	// \todo GUIGUI : do it more generic.
 	_First_Pos = false;
 
@@ -189,6 +189,7 @@ CUserEntity::CUserEntity()
 
 	_LastSentClientTick = 0;
 
+	_HeadPitch = Pi/2;
 	_FollowForceHeadPitch= false;
 
 	_ForceLookSlot= CLFECOMMON::INVALID_SLOT;
@@ -211,7 +212,7 @@ CUserEntity::~CUserEntity()
 	_MountSpeeds.release();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	
+
 	{
 		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_INVISIBLE", false);
 		if (node)
@@ -493,8 +494,8 @@ void CUserEntity::updateVisualPropertyBehaviour(const NLMISC::TGameCycle &/* gam
 	}
 	CCDBNodeLeaf *targetList0 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_0));
 	CCDBNodeLeaf *targetList1 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_1));
-	CCDBNodeLeaf *targetList2 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_1));
-	CCDBNodeLeaf *targetList3 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_1));
+	CCDBNodeLeaf *targetList2 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_2));
+	CCDBNodeLeaf *targetList3 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_3));
 	if (targetList0 && targetList1 && targetList2 && targetList3)
 	{
 		uint64 vp[4] =
@@ -1222,7 +1223,7 @@ void CUserEntity::applyMotion(CEntityCL *target)
 		speed = getVelocity()*_SpeedFactor.getValue();
 		_SpeedFactor.addFactorValue(0.005f);
 	}
-	
+
 	// SPEED VECTOR NULL -> NO MOVE
 	if(speed == CVectorD::Null)
 		return;
@@ -1679,6 +1680,10 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 	// BuildTotem
 	case CUserEntity::BuildTotem:
 		buildTotem();
+		break;
+	// openArkUrl
+	case CUserEntity::OpenArkUrl:
+		CLuaManager::getInstance().executeLuaScript("getUI('ui:interface:web_transactions'):find('html'):browse(ArkTargetUrl)", 0);
 		break;
 	default:
 		break;
@@ -2556,9 +2561,9 @@ void CUserEntity::rotHeadVertically(float ang)
 //-----------------------------------------------
 void CUserEntity::setHeadPitch(double hp)
 {
-	_HeadPitch= hp;
-	const double bound= Pi/2 - 0.01;	//  epsilon to avoid gimbal lock
-	clamp(_HeadPitch, -bound, bound);
+	_HeadPitch = hp;
+	//  epsilon to avoid gimbal lock
+	clamp(_HeadPitch, -Pi/2 + 0.01, Pi/2 - 0.5);
 }
 
 //---------------------------------------------------
@@ -3620,7 +3625,7 @@ void CUserEntity::CSpeedFactor::update(ICDBNode *node) // virtual
 	CCDBNodeLeaf *leaf = safe_cast<CCDBNodeLeaf *>(node);
 	_Value = ((float)leaf->getValue64())/100.0f;
 	//nlinfo("SpeedFactor changed to %f / %" NL_I64 "u", _Value, leaf->getValue64());
-	
+
 	// clamp the value (2.0 is the egg item or the level 6 speed up power up, nothing should be faster)
 	// commented because ring editor speed is in fact faster
 	//if(_Value > 2.0f)

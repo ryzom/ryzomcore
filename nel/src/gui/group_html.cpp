@@ -5331,7 +5331,7 @@ namespace NLGUI
 			string suri = elm.getAttribute("href");
 			if(suri.find("ah:") == 0)
 			{
-				if (_TrustedDomain)
+				if (_TrustedDomain || suri.find("ah:script:") == 0)
 					_Link.back() = suri;
 			}
 			else
@@ -6196,11 +6196,13 @@ namespace NLGUI
 
 	void CGroupHTML::htmlOBJECTend(const CHtmlElement &elm)
 	{
-		if (!_TrustedDomain)
-			return;
+
 
 		if (_ObjectType=="application/ryzom-data")
 		{
+			if (!_TrustedDomain)
+				return;
+
 			if (!_ObjectData.empty())
 			{
 				if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
@@ -6209,6 +6211,20 @@ namespace NLGUI
 				}
 				_ObjectScript.clear();
 			}
+		}
+		else if (_ObjectType=="application/ryzom-tutorial")
+		{
+			while(strFindReplace(_ObjectScript, "[", "〈"));
+			while(strFindReplace(_ObjectScript, "]", "〉"));
+			CLuaManager::getInstance().executeLuaScript("\ngame:executeTutorial([["+_ObjectScript+"]])\n", true);
+			_ObjectScript.clear();
+		}
+		else if (_ObjectType=="application/ryzom-script")
+		{
+			while(strFindReplace(_ObjectScript, "[", "〈"));
+			while(strFindReplace(_ObjectScript, "]", "〉"));
+			CLuaManager::getInstance().executeLuaScript("\ngame:executeRyzomScript([["+_ObjectScript+"]])\n", true);
+			_ObjectScript.clear();
 		}
 		_Object = false;
 	}

@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
@@ -214,29 +214,52 @@ void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGrou
 	CChatTextManager &ctm = getChatTextMngr();
 
 	gl = dynamic_cast<CGroupList *>(_Chat->getGroup("cb:text_list"));
-	if (gl)	gl->addChild(ctm.createMsgText(msg, col));
 
-	// if the group is closed, make it blink
-	if (!_Chat->isOpen())
-	{
-		if (numBlinks) _Chat->enableBlink(numBlinks);
-	}
-	if (_ParentBlink)
-	{
-		CGroupContainer *father = dynamic_cast<CGroupContainer *>(_Chat->getParent());
-		if (father && !father->isOpen())
-		{
-			father->enableBlink(numBlinks);
+
+
+	bool noTranslation = false;
+	CCDBNodeLeaf *nodeNoTranslation = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(gt)) + ":DISABLE", false);
+	if (nodeNoTranslation)
+		noTranslation = nodeNoTranslation->getValueBool();
+
+	string msgNoTranslate = msg;
+
+	if (noTranslation) {
+		string::size_type startTr = msg.find("{:");
+		string::size_type endOfOriginal = msg.find("}@{");
+
+		if (startTr != string::npos && endOfOriginal != string::npos) {
+			msgNoTranslate = msg.substr(0, startTr) + msg.substr(startTr+5, endOfOriginal-startTr-5);
 		}
 	}
-	if (windowVisible != NULL)
+
+	CViewBase *child = ctm.createMsgText(msgNoTranslate, col);
+	if (child)
 	{
-		*windowVisible = isVisible();
+		if (gl)	gl->addChild(child);
+
+		// if the group is closed, make it blink
+		if (!_Chat->isOpen())
+		{
+			if (numBlinks) _Chat->enableBlink(numBlinks);
+		}
+		if (_ParentBlink)
+		{
+			CGroupContainer *father = dynamic_cast<CGroupContainer *>(_Chat->getParent());
+			if (father && !father->isOpen())
+			{
+				father->enableBlink(numBlinks);
+			}
+		}
+		if (windowVisible != NULL)
+		{
+			*windowVisible = isVisible();
+		}
+		/*for(std::vector<IObserver *>::iterator it = _Observers.begin(); it != _Observers.end(); ++it)
+		{
+			(*it)->displayMessage(this, msg, col, numBlinks);
+		}*/
 	}
-	/*for(std::vector<IObserver *>::iterator it = _Observers.begin(); it != _Observers.end(); ++it)
-	{
-		(*it)->displayMessage(this, msg, col, numBlinks);
-	}*/
 }
 
 //=================================================================================
@@ -556,12 +579,31 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 	string newmsg = msg;
 	string prefix;
 
+	bool noTranslation = false;
+	CCDBNodeLeaf *nodeNoTranslation = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(gt)) + ":DISABLE", false);
+	if (nodeNoTranslation)
+		noTranslation = nodeNoTranslation->getValueBool();
+
+	if (noTranslation) {
+		string::size_type startTr = msg.find("{:");
+		string::size_type endOfOriginal = msg.find("}@{");
+
+		if (startTr != string::npos && endOfOriginal != string::npos) {
+			newmsg = newmsg.substr(0, startTr) + newmsg.substr(startTr+5, endOfOriginal-startTr-5);
+		}
+	}
+
+	CViewBase *child = NULL;
 	if (gl != NULL)
 	{
-		gl->addChild(ctm.createMsgText(newmsg, col));
-		if (!gl->getParent()->getActive())
-			if (tab != NULL)
-				tab->setTextColorNormal(newMsgColor);
+		child = ctm.createMsgText(newmsg, col);
+		if (child)
+		{
+			gl->addChild(child);
+			if (!gl->getParent()->getActive())
+				if (tab != NULL)
+					tab->setTextColorNormal(newMsgColor);
+		}
 	}
 
 	// *** Display the message in the UserChat (special case)
@@ -583,7 +625,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 			case CChatGroup::guild:		if (ci.Guild.isListeningWindow(cw))			gl = gl2;	break;
 			case CChatGroup::system:	if (ci.SystemInfo.isListeningWindow(cw))	gl = gl2;	break;
 			case CChatGroup::universe:	if (ci.Universe.isListeningWindow(cw))		gl = gl2;	break;
-			case CChatGroup::dyn_chat:	
+			case CChatGroup::dyn_chat:
 				if (ci.DynamicChat[dynamicChatDbIndex].isListeningWindow(cw))
 				{
 					gl = gl2;
@@ -601,7 +643,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 						pos = newmsg.find("}");
 						prefix += " ";
 					}
-					
+
 					if (pos == string::npos)
 						newmsg = prefix + newmsg;
 					else
@@ -628,31 +670,37 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 
 		if (gl != NULL)
 		{
-			gl->addChild(ctm.createMsgText(newmsg, col));
-			if (!gl->getParent()->getActive())
-				if (tab != NULL)
-					tab->setTextColorNormal(newMsgColor);
+			child = ctm.createMsgText(newmsg, col);
+			if (child)
+			{
+				gl->addChild(child);
+				if (!gl->getParent()->getActive())
+					if (tab != NULL)
+						tab->setTextColorNormal(newMsgColor);
+			}
 		}
 	}
 
-
-	// *** Blink and visibility event
-	// if the group is closed, make it blink
-	if (!_Chat->isOpen())
+	if (child)
 	{
-		if (numBlinks) _Chat->enableBlink(numBlinks);
-	}
-	if (_ParentBlink)
-	{
-		CGroupContainer *father = dynamic_cast<CGroupContainer *>(_Chat->getParent());
-		if (father && !father->isOpen())
+		// *** Blink and visibility event
+		// if the group is closed, make it blink
+		if (!_Chat->isOpen())
 		{
-			father->enableBlink(numBlinks);
+			if (numBlinks) _Chat->enableBlink(numBlinks);
 		}
-	}
-	if (windowVisible != NULL)
-	{
-		*windowVisible = isVisible();
+		if (_ParentBlink)
+		{
+			CGroupContainer *father = dynamic_cast<CGroupContainer *>(_Chat->getParent());
+			if (father && !father->isOpen())
+			{
+				father->enableBlink(numBlinks);
+			}
+		}
+		if (windowVisible != NULL)
+		{
+			*windowVisible = isVisible();
+		}
 	}
 }
 
@@ -678,8 +726,9 @@ void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, 
 		nlwarning("<CChatGroupWindow::displayTellMessage> can't get text_list.");
 		return;
 	}
-
-	gl->addChild(getChatTextMngr().createMsgText(msg, col));
+	CViewBase *child = getChatTextMngr().createMsgText(msg, col);
+	if (child)
+		gl->addChild(child);
 }
 
 //=================================================================================

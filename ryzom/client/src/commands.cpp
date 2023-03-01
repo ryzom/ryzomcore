@@ -411,6 +411,18 @@ NLMISC_COMMAND(afk, "Set the player as 'away from keyboard'","[<custom text>]")
 	return true;
 }
 
+NLMISC_COMMAND(selfkill, "Kill the player ","")
+{
+	CBitMemStream out;
+	if(!GenericMsgHeaderMngr.pushNameToStream("COMMAND:SELFKILL", out))
+	{
+		nlwarning("Unknown message name COMMAND:SELFKILL");
+		return false;
+	}
+	NetMngr.push(out);
+	return true;
+}
+
 bool randomCheckCharset(std::string const& str)
 {
 	std::string::const_iterator it, itEnd = str.end();

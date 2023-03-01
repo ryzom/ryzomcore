@@ -321,7 +321,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_SNOWBALLS           "Build Snowballs."                              OFF)
   OPTION(WITH_TOOLS               "Build Tools"                                   OFF)
 
-  OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            OFF)
+  OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            ON)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)

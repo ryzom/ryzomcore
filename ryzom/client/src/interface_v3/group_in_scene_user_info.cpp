@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
@@ -463,25 +463,38 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			//else
 			//	stringSpace += textH;
 
+			bool have2pvptags = false;
 			if (rpTags)
 			{
 				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
-				CViewBitmap *bitmap;
-				if (pPlayer == NULL || (pPlayer != NULL && pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+				CViewBitmap *rp1 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_1"));
+				CViewBitmap *rp2 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_2"));
+				CViewBitmap *rp3 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_3"));
+				CViewBitmap *rp4 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_4"));
+
+				if (entityTag1 == "_") entityTag1.clear();
+				if (entityTag2 == "_") entityTag2.clear();
+				if (entityTag3 == "_") entityTag3.clear();
+				if (entityTag4 == "_") entityTag4.clear();
+
+				if (pPlayer && (pPlayer->getPvpMode() == PVP_MODE::None))
 				{
-					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_1"));
-					if (bitmap)
-						bitmap->setTexture(entityTag1);
-					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_2"));
-					if (bitmap)
-						bitmap->setTexture(entityTag2);
+					entityTag1.clear();
+					entityTag2.clear();
 				}
-				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_3"));
-				if (bitmap)
-					bitmap->setTexture(entityTag3);
-				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_4"));
-				if (bitmap)
-					bitmap->setTexture(entityTag4);
+
+				if (rp1) rp1->setTexture(entityTag1);
+				if (rp2) rp2->setTexture(entityTag2);
+				if (rp3) rp3->setTexture(entityTag3);
+				if (rp4) rp4->setTexture(entityTag4);
+
+				// hide if texture is empty
+				if (rp1) rp1->setActive(!entityTag1.empty());
+				if (rp2) rp2->setActive(!entityTag2.empty());
+				if (rp3) rp3->setActive(!entityTag3.empty());
+				if (rp4) rp4->setActive(!entityTag4.empty());
+
+				have2pvptags = !entityTag1.empty() && !entityTag2.empty();
 			}
 
 			// Get the permanent content bitmap
@@ -650,6 +663,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				}
 
 				CViewBase * pvpFactionLogo = info->getView ("pvp_faction_logo");
+				CViewBase * pvpFactionLogo2 = info->getView ("pvp_faction_logo2");
 				CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
 				CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
 
@@ -659,10 +673,11 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 
 				if (pPlayer != NULL && needPvPLogo)
 				{
-					if (pvpFactionLogo) 
+					if (pvpFactionLogo)
 					{
 						pvpFactionLogo->setActive(true);
 						CViewBitmap * pvpFactionBitmap = dynamic_cast<CViewBitmap *>(pvpFactionLogo);
+						CViewBitmap * pvpFactionBitmap2 = dynamic_cast<CViewBitmap *>(pvpFactionLogo2);
 						if( pvpFactionBitmap )
 						{
 							if (user)
@@ -710,8 +725,14 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 									pvpFactionLogo->setActive(false);
 							}
 						}
+
+						if( pvpFactionLogo && pvpFactionBitmap2 )
+						{
+							pvpFactionBitmap2->setTexture(pvpFactionBitmap->getTexture());
+							pvpFactionLogo2->setActive(have2pvptags);
+						}
 					}
-									
+
 					if (pvpOutpostLogo)
 					{
 						if( pPlayer->getOutpostId() != 0 )
@@ -719,7 +740,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 						else
 							pvpOutpostLogo->setActive(false);
 					}
-	
+
 					if (pvpDuelLogo)
 					{
 						if( pPlayer->getPvpMode()&PVP_MODE::PvpDuel )
@@ -727,13 +748,6 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 						else
 							pvpDuelLogo->setActive(false);
 					}
-
-				}
-				else
-				{
-					CInterfaceGroup* grp = info->getGroup("right_pvp");
-					if (grp)
-						info->delGroup(grp);
 				}
 			}
 
@@ -950,7 +964,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		else if (pPlayer->getStateFx() == "sp_medit.ps")
 			pPlayer->removeStateFx();
 	}
-	
+
 	if (_Entity->isDead())
 			_Entity->setStateFx("misc_dead.ps");
 

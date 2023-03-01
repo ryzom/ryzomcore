@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -226,6 +226,31 @@ bool CActionsManager::valide(const CAction::CName &name) const
 	else
 		return false;
 }// valide //
+
+
+// ***************************************************************************
+void CActionsManager::validate(const CAction::CName &name)
+{
+	// Recover the pointer on "actionName" if it exists.
+	TActionsMap::iterator it = _Actions.find(name);
+	if(it != _Actions.end())
+	{
+		it->second.Valide = true;
+	}
+}
+
+
+// ***************************************************************************
+void CActionsManager::unvalidate(const CAction::CName &name)
+{
+	// Recover the pointer on "actionName" if it exists.
+	TActionsMap::iterator it = _Actions.find(name);
+	if(it != _Actions.end())
+	{
+		it->second.Valide = false;
+	}
+}
+
 
 // ***************************************************************************
 bool CActionsManager::isActionPresentInContext(const CAction::CName &name) const

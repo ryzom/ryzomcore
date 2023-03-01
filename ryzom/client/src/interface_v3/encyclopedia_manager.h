@@ -77,11 +77,11 @@ private:
 	bool _Initializing;
 };
 
-#define CONT_ENCY		"ui:interface:encyclopedia"
-#define LIST_ENCY_ALBUM "ui:interface:encyclopedia:content:sbtree:tree_list"
-#define PAGE_ENCY_ALBUM "ui:interface:encyclopedia:content:album"
-#define PAGE_ENCY_THEMA "ui:interface:encyclopedia:content:theme"
-#define PAGE_ENCY_HELP	"ui:interface:encyclopedia:content:help"
+#define CONT_ENCY		"ui:interface:legacy_encyclopedia"
+#define LIST_ENCY_ALBUM "ui:interface:legacy_encyclopedia:content:sbtree:tree_list"
+#define PAGE_ENCY_ALBUM "ui:interface:legacy_encyclopedia:content:album"
+#define PAGE_ENCY_THEMA "ui:interface:legacy_encyclopedia:content:theme"
+#define PAGE_ENCY_HELP	"ui:interface:legacy_encyclopedia:content:help"
 
 #endif // RY_ENCYCLOPEDIA_MANAGER_H
 

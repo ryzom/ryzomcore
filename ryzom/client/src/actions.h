@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -368,6 +368,8 @@ public:
 
 	/// Return if the Action is valide.
 	bool valide(const CAction::CName &name) const;
+	void validate(const CAction::CName &name);
+	void unvalidate(const CAction::CName &name);
 
 	// Return true if the action is present in current (global) context
 	bool isActionPresentInContext(const CAction::CName &name) const;

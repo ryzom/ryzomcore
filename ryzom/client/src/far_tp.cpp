@@ -49,11 +49,11 @@
 #include "login_progress_post_thread.h"
 #include "interface_v3/action_handler_base.h"
 #include "item_group_manager.h"
+#include "nel/misc/cmd_args.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
 #endif
-
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -210,6 +210,7 @@ extern bool IsInRingSession;
 extern void selectTipsOfTheDay (uint tips);
 #define BAR_STEP_TP 2
 
+extern NLMISC::CCmdArgs Args;
 
 CLoginStateMachine::TEvent CLoginStateMachine::waitEvent()
 {
@@ -464,12 +465,14 @@ void CLoginStateMachine::run()
 		case st_check_patch:
 			/// check the data to check if patch needed
 			CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_PostLogin, "login_step_post_login"));
-			if (!ClientCfg.PatchWanted)
+
+			if (!ClientCfg.PatchWanted || Args.haveLongArg("nopatch"))
 			{
 				// client don't want to be patched !
 				_CurrentState = st_display_eula;
 				break;
 			}
+
 			initPatchCheck();
 			SM_BEGIN_EVENT_TABLE
 #ifdef RYZOM_BG_DOWNLOADER
@@ -1534,4 +1537,3 @@ void CFarTP::farTPmainLoop()
 	if(welcomeWindow)
 		initWelcomeWindow();
 }
-

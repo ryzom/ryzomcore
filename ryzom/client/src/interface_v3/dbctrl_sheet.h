@@ -736,6 +736,7 @@ protected:
 	};
 	std::vector<SBuffIcon> _BuffIcons;
 	std::vector<SBuffIcon> _EnchantIcons;
+	std::vector<SBuffIcon> _BoostIcons;
 
 	// Level Brick or Quality
 	union
@@ -892,7 +893,7 @@ private:
 	void		clearIconBuffs();
 #endif
 
-	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar= 1000, bool topDown= false);
+	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown= false);
 	void		resetCharBitmaps();
 	void		displayCharBitmaps(sint32 rdrLayer, sint32 x, sint32 y, NLMISC::CRGBA color);
 

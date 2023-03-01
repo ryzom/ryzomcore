@@ -15,7 +15,7 @@ private:
 
 	static int luaClientCfgIndex(CLuaState &ls);
 	static int luaClientCfgNewIndex(CLuaState &ls);
-	
+
 	// CInterfaceElement management on stack, stored by a CRefPtr.
 public:
 
@@ -48,6 +48,9 @@ private:
 	static int	launchContextMenuInGame(CLuaState &ls); // params : menu name
 	static int  parseInterfaceFromString(CLuaState &ls); // params : intreface script
 	static int  updateAllLocalisedElements(CLuaState &ls);
+	static int  isShiftDown(CLuaState &ls);
+	static int  isCtrlDown(CLuaState &ls);
+	static int  getTimestampHuman(CLuaState &ls);
 	static int  breakPoint(CLuaState &ls);
 	static int  i18n(CLuaState &ls);			// retrieve an unicode string from CI18N
 	static int	setTextFormatTaged(CLuaState &ls);	// set a text that may contains Tag Format infos
@@ -58,11 +61,13 @@ private:
 	static int  getDesktopIndex(CLuaState &ls);
 	static int  setLuaBreakPoint(CLuaState &ls); // set a breakpoint in lua external debugger (file, line)
 	static int	getMainPageURL(CLuaState &ls);
+	static int	setNewsAtProgress(CLuaState &ls);
 	static int	getCharSlot(CLuaState &ls);
 	static int	displaySystemInfo(CLuaState &ls);
 	static int	displayChatMessage(CLuaState &ls);
 	static int	setWeatherValue(CLuaState &ls); // first value is a boolean to say automatic, second value ranges from of to 1 and gives the weather
 	static int	getWeatherValue(CLuaState &ls); // get current real weather value (blend between server driven value & predicted value). Manual weather value is ignored
+	static int	getContinentSheet(CLuaState &ls);
 	static int	disableContextHelpForControl(CLuaState &ls);	// params: CCtrlBase*. return: none
 	static int  disableContextHelp(CLuaState &ls);
 	static int  getServerSeason(CLuaState &ls); // get the last season sent by the server
@@ -90,6 +95,7 @@ private:
 	static int	getTargetName(CLuaState &ls);
 	static int	getTargetTitleRaw(CLuaState &ls);
 	static int	getTargetTitle(CLuaState &ls);
+	static int	moveToTarget(CLuaState &ls);
 	static int  addSearchPathUser(CLuaState &ls);
 	static int  getClientCfgVar(CLuaState &ls);
 	static int	isPlayerFreeTrial(CLuaState &ls);
@@ -223,6 +229,8 @@ private:
 	static bool	isDynStringAvailable(sint32 dynStringId);
 	static bool	isFullyPatched();
 	static std::string getSheetType(const std::string &sheet);
+	static std::string getSheetShape(const std::string &sheet);
+	static float getCharacterSheetScale(const std::string &sheet);
 	static std::string getSheetFamily(const std::string &sheet);
 	static std::string getSheetName(uint32 sheetId);
 	static sint32 getFameIndex(const std::string &factionName);
@@ -248,9 +256,13 @@ private:
 	static sint32 getSheetId(const std::string &itemName);
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
+	static float setChar3dDBfromVPX(const std::string &branch, const std::string &people, const std::string &vpa, const std::string &vpb, const std::string &vpc);
+	static float getRefHeightScale(const std::string &people, const std::string &vpa);
 	static std::string getRegionByAlias(uint32 alias);
 	static sint getGroundZ(uint32 x, sint32 y);
 	static int getGroundAtMouse(CLuaState &ls);
+	static int moveCam(CLuaState &ls);
+	static int setCamMode(CLuaState &ls);
 	static int getMousePos(CLuaState &ls);
 	static int getMouseDown(CLuaState &ls);
 	static int getMouseMiddleDown(CLuaState &ls);
@@ -258,6 +270,15 @@ private:
 	static int getShapeIdAt(CLuaState &ls);
 	static int setupShape(CLuaState &ls);
 	static void setMouseCursor(const std::string &texture);
+
+	static int removeLandMarks(CLuaState &ls);
+	static int addLandMark(CLuaState &ls);
+	static int updateUserLandMarks(CLuaState &ls);
+	static int addRespawnPoint(CLuaState &ls);
+	static int delArkPoints(CLuaState &ls);
+	static int setArkPowoOptions(CLuaState &ls);
+
+
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
     // else, current command of the chat window will be replaced with tell 'player'
 #ifdef RYZOM_LUA_UCSTRING
@@ -269,17 +290,24 @@ private:
 	static void updateTooltipCoords();
 	// test if the ctrl key is down (NB nico : I didn't add other key,
 	// because it would be too easy to write a key recorder ...)
-	static bool	isCtrlKeyDown(); 							     
+	static bool	isCtrlKeyDown();
 #ifdef RYZOM_LUA_UCSTRING
 	static std::string encodeURLUnicodeParam(const ucstring &text);
 #else
 	static std::string encodeURLUnicodeParam(const std::string &text);
 #endif
+	static std::string encodeURLParam(const std::string &text);
+
+	static std::string encodeToHexa(const std::string &text);
+	static std::string decodeFromHexa(const std::string &text);
 
 	static sint32 getPlayerLevel();		// get max level among player skills (magi, combat, crafting ,foraging)
-	static sint64 getPlayerVpa();
-	static sint64 getPlayerVpb();
-	static sint64 getPlayerVpc();
+	static std::string getPlayerVpaHex();
+	static std::string getPlayerVpbHex();
+	static std::string getPlayerVpcHex();
+	static uint64 getPlayerVpa();
+	static uint64 getPlayerVpb();
+	static uint64 getPlayerVpc();
 	static sint32 getTargetLevel();		// get current, precise level of the selected target, or -1 if there's no such selected target
 	static sint32 getTargetForceRegion(); // get 'force region' for current target, or -1 if there's no selected target
 	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target					     
@@ -288,9 +316,12 @@ private:
 #else
 	static std::string getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
 #endif
-	static sint64 getTargetVpa();
-	static sint64 getTargetVpb();
-	static sint64 getTargetVpc();
+	static std::string getTargetVpaHex();
+	static std::string getTargetVpbHex();
+	static std::string getTargetVpcHex();
+	static uint64 getTargetVpa();
+	static uint64 getTargetVpb();
+	static uint64 getTargetVpc();
 	static bool	isTargetNPC(); // return 'true' if the target is an npc
 	static bool	isTargetPlayer(); // return 'true' if the target is a player
 	static bool	isTargetUser(); // return 'true' if the target is the user

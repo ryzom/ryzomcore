@@ -534,7 +534,7 @@ void CStaticFames::loadTribeThreshold( const string& filename )
 		// check table structure
 		uint nbTribe = ws.size()-2;
 		nlassert(nbTribe<=_FameTableSize);
-		nlassert(ws.ColCount == 16); // 5 ( 4 people + neutral ) * 3 cult + 1 for tribe name
+		nlassert(ws.ColCount == 17); // 5 ( 4 people + neutral ) * 3 cult + 1 for tribe name + marauder
 
 		_TribeCultThresholdPerCiv.resize(nbTribe);
 
@@ -548,7 +548,7 @@ void CStaticFames::loadTribeThreshold( const string& filename )
 
 			_TribeCultThresholdPerCiv[i-2].FameIndex = index;
 
-			for( uint c=1; c<ws.ColCount; c+=3)
+			for( uint c=1; c<ws.ColCount-1; c+=3)
 			{
 				sint32 thresholdKami, thresholdKaravan, thresholdNeutral;
 				fromString(ws.getData(i, c).toString(), thresholdKami);
@@ -585,6 +585,15 @@ void CStaticFames::loadTribeThreshold( const string& filename )
 				// This message removed by Sadge because there is no context displayed, meaning that message must be useless
 				// nldebug(" %s", ws.getData(i, c).toString().c_str() );
 			}
+
+			// Special case for Marauders
+
+			sint32 thresholdMarauder;
+			fromString(ws.getData(i, ws.ColCount-1).toString(), thresholdMarauder);
+
+			CTribeCultThreshold * tc;
+			tc = &_TribeCultThresholdPerCiv[i-2].Marauder;
+			tc->setMarauder(thresholdMarauder*6000);
 		}
 	}
 }
@@ -624,7 +633,7 @@ sint32	CStaticFames::getStaticFameIndexed(uint factionIndex1, uint factionIndex2
 
 	if (factionIndex1 >= _FameTableSize || factionIndex2 >= _FameTableSize)
 	{
-		nlwarning("FAME: CStaticFames::getStaticFame invalid faction, return 0");
+		//nlwarning("FAME: CStaticFames::getStaticFame invalid faction, return 0");
 		return 0;
 	}
 

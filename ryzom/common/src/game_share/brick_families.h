@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -297,7 +297,20 @@ namespace BRICK_FAMILIES
 				BCOKARM02,
 				BCOKARR02,
 				BCOKART02,
-			EndFaberMandatory = BCOKART02,
+				BCOMARM01,
+				BCOMARR01,
+				BCOMART01,
+				BCOMARM02,
+				BCOMARR02,
+				BCOMART02,
+				BCOGENM01,
+				BCOGENR01,
+				BCOGENT01,
+				BCOGENM02,
+				BCOGENR02,
+				BCOGENT02,
+
+			EndFaberMandatory = BCOGENT02,
 
 			// OPTION FABER
 			BeginFaberOption,
@@ -674,6 +687,9 @@ namespace BRICK_FAMILIES
 				BSCMC, // heal Sta
 				BSCMD, // heal Focus
 			EndPowerParameter = BSCMD,
+
+			BSGMC, // allegories
+				BSGMCB, // boost allegories
 
 			BeginMagicPowerCredit,
 				BSXCA = BeginMagicPowerCredit, // recast time

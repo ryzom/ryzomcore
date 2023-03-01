@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -236,7 +236,10 @@ public:
 	// The Action Nature
 	ACTNATURE::TActionNature		ActionNature;
 
-	// For Progression, the required skill
+	// For Progression, the required skills (at least one)
+	std::vector<CSkillValue>		RequiredOneOfSkills;
+
+	// For Progression, the required skills (all of them)
 	std::vector<CSkillValue>		RequiredSkills;
 
 	// For Progression, the required Bricks
@@ -383,6 +386,8 @@ public:
 		s.serial(SPCost);
 
 		s.serialEnum(ActionNature);
+
+		s.serialCont(RequiredOneOfSkills);
 
 		s.serialCont(RequiredSkills);
 

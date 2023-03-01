@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -37,7 +37,7 @@ struct SPropVisualA
 		uint64	JacketColor		: 3;  // max: 8		current: 8
 		uint64	TrouserModel	: 8;  // max: 256	current: 104
 		uint64	TrouserColor	: 3;  // max: 8		current: 8
-		uint64	WeaponRightHand	: 10; // max: 1024	current: 457
+		uint64	WeaponRightHand	: 10; // max: 1024	current: 625
 		uint64	WeaponLeftHand	: 8;  // max: 256	current: 63
 		uint64	ArmModel		: 8;  // max: 256	current: 94
 		uint64	ArmColor		: 3;  // max: 8		current: 8
@@ -88,6 +88,7 @@ struct SPropVisualA
 	}
 
 	std::string toString() const;
+	void fromString(const std::string &value);
 };
 
 struct SPropVisualB
@@ -138,6 +139,7 @@ struct SPropVisualB
 	}
 
 	std::string toString() const;
+	void fromString(const std::string &value);
 };
 
 struct SPropVisualC
@@ -223,6 +225,7 @@ struct SPropVisualC
 	}
 
 	std::string toString() const;
+	void fromString(const std::string &value);
 };
 
 /**

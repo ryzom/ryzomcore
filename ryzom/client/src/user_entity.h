@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -99,6 +99,7 @@ public:
 		Outpost,
 		BuildTotem,
 		MissionRing,
+		OpenArkUrl,
 	};
 
 public:
@@ -494,6 +495,16 @@ public:
 		return _LoginName;
 	}
 
+	CVector getCameraMoves()
+	{
+		return _CameraMoves;
+	}
+
+	void setCameraMoves(CVector moves)
+	{
+		_CameraMoves = moves;
+	}
+
 protected:
 	class CSpeedFactor : public NLMISC::ICDBNode::IPropertyObserver
 	{
@@ -607,6 +618,8 @@ protected:
 	sint64						_MoveToColStartTime;
 
 	NLMISC::TGameCycle			_LastSentClientTick;
+
+	CVector						_CameraMoves;
 
 
 	/// CSkill points observer

@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -298,6 +298,31 @@ class CAHRearView : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHRearView, "rear_view");
+
+
+// ------------------------------------------------------------------------------------------------
+class CAHRunAction : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+
+		CActionsManager *pAM = &Actions;
+		pAM->validate(CAction::CName(Params.c_str(), ""));
+	}
+};
+REGISTER_ACTION_HANDLER (CAHRunAction, "run_action");
+
+// ------------------------------------------------------------------------------------------------
+class CAHStopAction : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+
+		CActionsManager *pAM = &Actions;
+		pAM->unvalidate(CAction::CName(Params.c_str(), ""));
+	}
+};
+REGISTER_ACTION_HANDLER (CAHStopAction, "stop_action");
 
 // ------------------------------------------------------------------------------------------------
 class CAHCameraUp : public IActionHandler

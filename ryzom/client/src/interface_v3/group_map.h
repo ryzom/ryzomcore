@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -81,6 +81,29 @@ public:
 	CLandMarkOptions()
 	{
 		ColorNormal = ColorOver = ColorPushed = NLMISC::CRGBA::White;
+	}
+};
+
+class CArkPoint
+{
+public:
+	sint32 				x, y;
+	std::string			Texture;
+	NLMISC::CRGBA		Color;
+	std::string			Title;
+	std::string			LeftClickAction;
+	std::string			LeftClickParam;
+	std::string			RightClickAction;
+	std::string			RightClickParam;
+	std::string			OverClickAction;
+	std::string			OverClickParam;
+
+public:
+	CArkPoint()
+	{
+		Color = NLMISC::CRGBA::White;
+		x = 0;
+		y = 0;
 	}
 };
 
@@ -203,7 +226,12 @@ public:
 	void				getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &worldPos);
 
 	//Remove and re-create UserLandMarks
+	void removeUserLandMarks();
 	void updateUserLandMarks();
+	void addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, NLMISC::CRGBA color);
+	void addUserRespawnPoint(const NLMISC::CVector2f &pos);
+	void delArkPoints();
+
 
 	// set landmarks visibility based text query
 	void setLandmarkFilter(const std::string &s);
@@ -266,6 +294,10 @@ public:
 	bool isIsland() const { return _IsIsland; }
 
 	void updateClosestLandMarkMenu(const std::string &menu, const NLMISC::CVector2f &pos) const;
+
+	// show/hide all user landmarks
+	void setUserLandMarkVisible(bool state);
+	bool getUserLandMarkVisible() const { return _UserLandMarkVisible; };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 private:
@@ -439,6 +471,9 @@ private:
 	// LANDMARKS //
 	///////////////
 
+		// if false, user landmarks are not drawn
+		bool				_UserLandMarkVisible;
+
 		// landmarks of continent
 		TLandMarkButtonVect	_ContinentLM;
 		TLandMarkTextVect	_ContinentText;
@@ -555,6 +590,9 @@ private:
 	void addLandMark(TLandMarkButtonVect &destList, const NLMISC::CVector2f &pos, const ucstring &title, const CLandMarkOptions &options);
 	// Create a landmark button, but do not add it to this group
 	CLandMarkButton *createLandMarkButton(const CLandMarkOptions &options);
+	// Create a Ark landmark button, but do not add it to this group
+	CLandMarkButton *createArkPointButton(const CArkPoint &point);
+
 	// update a landmark button
 	void updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOptions &options);
 

@@ -412,7 +412,7 @@ restartLoop4:
 			else
 			{
 				result = it->second;
-				if (result.size() > 9 && result.substr(0, 9) == "<missing:") 
+				if (result.size() > 9 && result.substr(0, 9) == "<missing:")
 				{
 					map<string, string>::iterator itds = _DynStrings.find(result.substr(9, result.size()-10));
 					if (itds != _DynStrings.end())
@@ -761,6 +761,12 @@ restartLoop:
 						if ( ! str.empty() && pos != string::npos)
 						{
 							str = CEntityCL::removeTitleFromName(str);
+						}
+
+						// if the string contains a special rename of creature, remove it
+						if (str.size() > 2 && str[0] == '<' && str[1] == '#')
+						{
+							str = toUpper(str[2])+str.substr(3);
 						}
 
 						// append this string
@@ -1635,8 +1641,39 @@ const char *CStringManagerClient::getTitleLocalizedName(const string &titleId, b
 		_TitleWords.push_back(listInfos[0]);
 		return _TitleWords.back().c_str();
 	}
-	
-	return titleId.c_str();
+
+	return getLocalizedName(titleId);
+}
+
+
+const char *CStringManagerClient::getLocalizedName(const string &uctext)
+{
+	string text = uctext;
+	if (text[0] == '[')
+	{
+		vector<string> textLocalizations;
+		static string defaultText;
+		splitString(text.substr(1), "[", textLocalizations);
+		if (!textLocalizations.empty())
+		{
+			for(uint i = 0; i<textLocalizations.size(); i++)
+			{
+				if (textLocalizations[i].substr(0, 3) == CI18N::getCurrentLanguageCode()+"]")
+				{
+					defaultText = textLocalizations[i].substr(3);
+					return defaultText.c_str();
+				}
+				else if (textLocalizations[i].substr(0, 3) == "wk]")
+				{
+					defaultText = textLocalizations[i].substr(3);
+				}
+			}
+		}
+		if (!defaultText.empty()) {
+			return defaultText.c_str();
+		}
+	}
+	return uctext.c_str();
 }
 
 // ***************************************************************************
@@ -1649,7 +1686,19 @@ vector<string> CStringManagerClient::getTitleInfos(const string &titleId, bool w
 	{
 		if (titleId[0] != '#')
 		{
-			listInfos[0] = getSpecialWord(listInfos[0], women);
+			// Check special case like SON_OF|jane|joe (with SON_OF = "Son of {1} and {2}")
+			vector<string> titleReps;
+			splitString(listInfos[0], string("|"), titleReps);
+			if (titleReps.size() > 1)
+			{
+				listInfos[0] = getSpecialWord(titleReps[0], women);
+				for(uint i=1; i < titleReps.size(); ++i )
+				{
+					while(strFindReplace(listInfos[0], toString("{%d}", i), titleReps[i]));
+				}
+			}
+			else
+				listInfos[0] = getSpecialWord(listInfos[0], women);
 		}
 	}
 

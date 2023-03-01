@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2017  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -95,6 +95,38 @@ REGISTER_ACTION_HANDLER (CAHDisplayInfos, "display_infos");
 *										move player handlers  actions									  *
 *																										  *
 ***********************************************************************************************************/
+
+// ------------------------------------------------------------------------------------------------
+class CAHToggleARKPACSBorders : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+		if (!getParam(Params, "on").empty())
+			ARKPACSBorders = true;
+		else if (!getParam(Params, "off").empty())
+			ARKPACSBorders = false;
+		else ARKPACSBorders = !ARKPACSBorders;
+
+	}
+};
+REGISTER_ACTION_HANDLER (CAHToggleARKPACSBorders, "ark_pacs_borders");
+
+// ***************************************************************************
+class CAHToggleFly : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		// Change to AI Mode.
+		if(UserControls.mode() != CUserControls::AIMode)
+			UserControls.mode(CUserControls::AIMode);
+		// Leave the AI Mode.
+		else
+			UserEntity->viewMode(UserEntity->viewMode());
+	}
+};
+// ***************************************************************************
+REGISTER_ACTION_HANDLER (CAHToggleFly, "toggle_fly");
+
 
 #if !FINAL_VERSION
 // ------------------------------------------------------------------------------------------------
@@ -253,22 +285,6 @@ class CAHSwitchConsoleDisplay : public IActionHandler
 };
 // ***************************************************************************
 REGISTER_ACTION_HANDLER (CAHSwitchConsoleDisplay, "switch_console_display");
-
-// ***************************************************************************
-class CAHToggleFly : public IActionHandler
-{
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
-	{
-		// Change to AI Mode.
-		if(UserControls.mode() != CUserControls::AIMode)
-			UserControls.mode(CUserControls::AIMode);
-		// Leave the AI Mode.
-		else
-			UserEntity->viewMode(UserEntity->viewMode());
-	}
-};
-// ***************************************************************************
-REGISTER_ACTION_HANDLER (CAHToggleFly, "toggle_fly");
 
 // ***************************************************************************
 class CAHReloadLandscapeIg : public IActionHandler

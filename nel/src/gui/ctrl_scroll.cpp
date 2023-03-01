@@ -872,6 +872,7 @@ namespace NLGUI
 		if (CCtrlBase::handleEvent(event)) return true;
 		if (!_Active || _Frozen)
 			return false;
+
 		if (event.getType() == NLGUI::CEventDescriptor::mouse)
 		{
 			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
@@ -1254,6 +1255,7 @@ namespace NLGUI
 		sint32	wReal= _Target->getWReal();
 		if(wReal <= maxWReal)
 			return;
+
 
 		// compute the new ofsX.
 		sint32	ofsX= _Target->getOfsX();

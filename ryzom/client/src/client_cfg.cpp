@@ -327,8 +327,8 @@ CClientConfig::CClientConfig()
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
 
-	TexturesInterface.push_back("texture_interfaces_v3");
-	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc");
+	TexturesInterface.push_back("texture_interfaces_v3_2x");
+	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc_2x");
 
 	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
 
@@ -790,8 +790,8 @@ void CClientConfig::setValues()
 	READ_STRINGVECTOR_FV(TexturesOutGameInterfaceDXTC);
 
 	// interface textures ingame and r2
-	READ_STRINGVECTOR_FV(TexturesInterface);
-	READ_STRINGVECTOR_FV(TexturesInterfaceDXTC);
+	//READ_STRINGVECTOR_FV(TexturesInterface);
+	//READ_STRINGVECTOR_FV(TexturesInterfaceDXTC);
 
 	// interface files login menus
 	READ_STRINGVECTOR_FV(XMLLoginInterfaceFiles);
@@ -913,16 +913,76 @@ void CClientConfig::setValues()
 	READ_STRING_FV(FSHost)
 
 	READ_BOOL_DEV(DisplayAccountButtons)
-	READ_STRING_DEV(CreateAccountURL)
-	READ_STRING_DEV(EditAccountURL)
-	READ_STRING_DEV(ForgetPwdURL)
+	
+	
+	READ_STRING_FV(CreateAccountURL)
+	READ_STRING_FV(EditAccountURL)
+	READ_STRING_FV(ForgetPwdURL)
+	
 	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(FreeTrialURL)
 
 	// defined in client_default.cfg
-	READ_STRING_FV(ConditionsTermsURL)
-	READ_STRING_FV(NamingPolicyURL)
 	READ_STRING_FV(LoginSupportURL)
+	
+	// read NamingPolicyURL from client_default.cfg
+	//READ_STRING_FV(NamingPolicyURL)
+	
+	std::string languageCo = "wk";
+	CConfigFile::CVar *languageCodeVarPtr = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
+
+	if (languageCodeVarPtr)
+	{
+		languageCo = languageCodeVarPtr->asString();
+	}
+
+	CConfigFile::CVar *policyurl = ClientCfg.ConfigFile.getVarPtr("NamingPolicyURL");
+
+	if (policyurl)
+	{
+		for (uint i = 0; i < policyurl->size(); ++i)
+		{
+			std::string entry = policyurl->asString(i);
+			if (entry.size() >= languageCo.size())
+			{
+				if (nlstricmp(entry.substr(0, languageCo.size()), languageCo) == 0)
+				{
+					std::string::size_type pos = entry.find("=");
+
+					if (pos != std::string::npos)
+					{
+						ClientCfg.NamingPolicyURL = entry.substr(pos + 1);
+					}
+				}
+			}
+		}
+	}
+	
+	// read NamingPolicyURL from client_default.cfg
+	//READ_STRING_FV(ConditionsTermsURL)
+	CConfigFile::CVar *coturl = ClientCfg.ConfigFile.getVarPtr("ConditionsTermsURL");
+
+	if (coturl)
+	{
+		for (uint i = 0; i < coturl->size(); ++i)
+		{
+			std::string entry = coturl->asString(i);
+			
+			if (entry.size() >= languageCo.size())
+			{
+				if (nlstricmp(entry.substr(0, languageCo.size()), languageCo) == 0)
+				{
+					std::string::size_type pos = entry.find("=");
+
+					if (pos != std::string::npos)
+					{
+						ClientCfg.ConditionsTermsURL = entry.substr(pos + 1);
+					}
+				}
+			}
+		}
+	}
+	
 
 #ifndef RZ_NO_CLIENT
 	// if cookie is not empty, it means that the client was launch
@@ -1125,7 +1185,7 @@ void CClientConfig::setValues()
 		if (ClientCfg.getDefaultConfigLocation(defaultConfigFileName))
 			ClientCfg.CurlCABundle = CFile::getPath(defaultConfigFileName)+ClientCfg.CurlCABundle.substr(1);
 	}
-		
+
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold
@@ -1236,7 +1296,6 @@ void CClientConfig::setValues()
 	if (varPtr)
 	{
 		if (nlstricmp(varPtr->asString(), "Auto") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvAuto;
-		else if (nlstricmp(varPtr->asString(), "FMod") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvFMod;
 		else if (nlstricmp(varPtr->asString(), "OpenAL") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvOpenAL;
 		else if (nlstricmp(varPtr->asString(), "DirectSound") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvDirectSound;
 		else if (nlstricmp(varPtr->asString(), "XAudio2") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvXAudio2;
@@ -1448,35 +1507,27 @@ void CClientConfig::setValues()
 
 #ifndef RZ_NO_CLIENT
 	// printf commands in loading screens
-	ClientCfg.PrintfCommands.clear();
-	ClientCfg.PrintfCommandsFreeTrial.clear();
-	std::vector< std::string > printfCommands(2);
-	printfCommands[0] = "PrintfCommands";
-	printfCommands[1] = "PrintfCommandsFreeTrial";
-	for(uint p=0; p<2; p++)
+	ClientCfg.loadingTexts.clear();
+	CConfigFile::CVar *pc = ClientCfg.ConfigFile.getVarPtr("loadingTexts");
+	if (pc)
 	{
-		CConfigFile::CVar *pc = ClientCfg.ConfigFile.getVarPtr(printfCommands[p].c_str());
-		if (pc)
+		if( pc->size()%5 == 0 && pc->size() >= 5)
 		{
-			if( pc->size()%5 == 0 && pc->size() >= 5)
+			for (uint i = 0; i < pc->size(); i+=5)
 			{
-				for (uint i = 0; i < pc->size(); i+=5)
-				{
-					SPrintfCommand pcom;
-					pcom.X = pc->asInt(i);
-					pcom.Y = pc->asInt(i+1);
-					pcom.Color = CRGBA::stringToRGBA( pc->asString(i+2).c_str() );
-					pcom.FontSize = pc->asInt(i+3);
-					pcom.Text = pc->asString(i+4);
+				SPrintfCommand pcom;
+				pcom.X = pc->asInt(i);
+				pcom.Y = pc->asInt(i+1);
+				pcom.Color = CRGBA::stringToRGBA( pc->asString(i+2).c_str() );
+				pcom.FontSize = pc->asInt(i+3);
+				pcom.Text = pc->asString(i+4);
 
-					if(p==0) ClientCfg.PrintfCommands.push_back( pcom );
-					else ClientCfg.PrintfCommandsFreeTrial.push_back( pcom );
-				}
+				ClientCfg.loadingTexts.push_back( pcom );
 			}
-			else
-			{
-				cfgWarning(("Missing or too many parameters in " + printfCommands[p]).c_str());
-			}
+		}
+		else
+		{
+			cfgWarning("Missing or too many parameters in loadingTexts");
 		}
 	}
 #endif

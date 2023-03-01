@@ -1158,6 +1158,7 @@ void CDBCtrlSheet::clearIconBuffs()
 {
 	_EnchantIcons.clear();
 	_BuffIcons.clear();
+	_BoostIcons.clear();
 }
 
 // ***************************************************************************
@@ -1183,18 +1184,40 @@ void CDBCtrlSheet::infoReceived()
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		CSBrickManager *pBM= CSBrickManager::getInstance();
+		bool haveRoot = false;
 		for(uint i=0; i<itemInfo->Enchantment.Bricks.size(); ++i)
 		{
 			const CSBrickSheet *brick = pBM->getBrick(itemInfo->Enchantment.Bricks[i]);
 			if (brick)
 			{
-				if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
+				if (brick->BrickFamily == BRICK_FAMILIES::BSGMCB) // Boost of Allegories, use it as boost icon
 				{
+					_BoostIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
+					rVR.getTextureSizeFromId(_BoostIcons.back().TextureId, _BoostIcons.back().IconW, _BoostIcons.back().IconH);
+				}
+				else if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
+				{
+					if (!haveRoot)
+					{
+						haveRoot = true;
+						if (brick->getIconBack().empty())
+						{
+							// use blank texture with size from main icon
+							_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("blank.tga"), NLMISC::CRGBA::White));
+							rVR.getTextureSizeFromId(rVR.getTextureIdFromName(brick->getIcon()), _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+						}
+						else
+						{
+							_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
+							rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+						}
+					}
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
 				}
 				else if (brick->isRoot())
 				{
+					haveRoot = true;
 					// there should be single root icon and it should be first one
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
@@ -1382,10 +1405,10 @@ void CDBCtrlSheet::setupItem ()
 			// special icon text
 			if( _NeedSetup || _ItemSheet->getIconText() != _OptString )
 			{
-				// compute from OptString. Allow only 1 line and 4 chars
+				// compute from OptString. Allow only 1 line (-2 for padding)
 				_OptString= _ItemSheet->getIconText();
 				// Display Top Left
-				setupCharBitmaps(40, 1, 6, true);
+				setupCharBitmaps(40-2, 1, true);
 			}
 
 			// Special Item requirement
@@ -1506,8 +1529,8 @@ void CDBCtrlSheet::setupMacro()
 {
 	if (!_NeedSetup) return;
 
-	// compute from OptString
-	setupCharBitmaps(26, 4, 5);
+	// compute from OptString (-2 for padding)
+	setupCharBitmaps(26-2, 4);
 
 	_NeedSetup = false;
 
@@ -1809,8 +1832,8 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 		{
 			// recompute text
 			_OptString= iconName;
-			// compute from OptString. Allow only 1 line and 5 chars
-			setupCharBitmaps(26, 1, 5);
+			// compute from OptString. Allow only 1 line (-2 for padding)
+			setupCharBitmaps(26-2, 1);
 		}
 	}
 }
@@ -1936,10 +1959,10 @@ void CDBCtrlSheet::setupOutpostBuilding()
 			// special icon text
 			if (pOBSheet->getIconText() != _OptString)
 			{
-				// compute from OptString. Allow only 1 line and 4 chars
+				// compute from OptString. Allow only 1 line, (-2 for padding)
 				_OptString= pOBSheet->getIconText();
 				// Display Top Left
-				setupCharBitmaps(40, 1, 6, true);
+				setupCharBitmaps(40-2, 1, true);
 			}
 		}
 		else
@@ -1982,28 +2005,32 @@ void CDBCtrlSheet::resetCharBitmaps()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
+void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown)
 {
-	// Use the optString for the Macro name
-	_OptString = toLowerAscii(_OptString);
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = *CViewRenderer::getInstance();
-
 	_CharBitmaps.clear();
+	if(maxLine<=0) return;
 
-	if(maxLine<=0)
-		return;
+	std::string text(_OptString);
+	// check for icon text 'uiitLabel'
+	if (text.size() > 4 && text[0] == 'u' && text[1] == 'i' && text[2] == 'i' && text[3] == 't' && CI18N::hasTranslation(text))
+	{
+		// NOTE: translated text is expected to be us-ascii only
+		text = CI18N::get(text);
+	}
+	text = toLowerAscii(text);
+
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	uint h = rVR.getTypoTextureH('a');
 	sint lineNb = 0;
 	sint curLineSize = 0;
 	uint i;
 	uint xChar= 0;
-	for (i = 0; i < _OptString.size(); ++i)
+	for (i = 0; i < text.size(); ++i)
 	{
-		char c = _OptString[i];
+		char c = text[i];
 		sint32 w = rVR.getTypoTextureW(c);
-		if ((curLineSize + w) > maxW || (sint32)xChar>=maxWChar)
+		if ((curLineSize + w) > maxW)
 		{
 			lineNb ++;
 			if (lineNb == maxLine) break;
@@ -2555,7 +2582,8 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					// there is max 4 icons
 					sint32 hArea = (hSheet / 4);
 					sint32 xIcon = x;
-					sint32 yIcon = y;
+					// move buff icons up a row, quantity text is displayed on bottom-left corner
+					sint32 yIcon = y + hArea;
 					for (uint i = 0; i < _BuffIcons.size(); ++i)
 					{
 						sint32 wIcon = _BuffIcons[i].IconW;
@@ -2614,9 +2642,16 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 						}
 						yIcon -= hIcon;
 						rVR.drawRotFlipBitmap(_RenderLayer + 1, xIcon, yIcon, wIcon, hIcon, 0, false, _EnchantIcons[0].TextureId, fastMulRGB(curSheetColor, _EnchantIcons[0].Color));
-						rVR.drawRotFlipBitmap(_RenderLayer+1, xIcon, yIcon, wIcon, hIcon, 0, false, _EnchantIcons[i].TextureId, fastMulRGB(curSheetColor, _EnchantIcons[i].Color));
+						rVR.drawRotFlipBitmap(_RenderLayer + 1, xIcon, yIcon, wIcon, hIcon, 0, false, _EnchantIcons[i].TextureId, fastMulRGB(curSheetColor, _EnchantIcons[i].Color));
+
+
+						if ((i - 1) < _BoostIcons.size()) {
+							rVR.drawRotFlipBitmap(_RenderLayer + 2, xIcon+wIcon-_BoostIcons[i-1].IconW, yIcon, _BoostIcons[i-1].IconW, _BoostIcons[i-1].IconH, 0, false, _BoostIcons[i-1].TextureId, fastMulRGB(curSheetColor, _BoostIcons[i-1].Color));
+						}
 					}
 				}
+
+
 
 				// Draw Quality. -1 for lookandfeel. Draw it with global color
 				if (_DispQuality != -1)
@@ -3045,7 +3080,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 				}
 				else
 				{
-					validClic = isDraggable() && !isDragged() && ((!getItemWeared()&&!getGrayed()) || isShortCut());
+					validClic = isDraggable() && !isDragged() && ((!getItemWeared()&&!getGrayed()) || isSPhraseId());
 				}
 			}
 			if (_Type == SheetType_Macro)
@@ -3993,6 +4028,7 @@ void CDBCtrlSheet::resetAllTexIDs()
 #endif
 	_EnchantIcons.clear();
 	_BuffIcons.clear();
+	_BoostIcons.clear();
 }
 
 

@@ -285,8 +285,10 @@ namespace NLGUI
 		bool	_FontSizeCoef;
 		bool	_Embolden;
 		bool	_Oblique;
-		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
+		// width of the font in pixel. 
 		float	_FontWidth;
+		// width of tabs
+		float	_TabWidth;
 		// strings to use when computing font size
 		std::string _FontSizingChars;
 		std::string _FontSizingFallback;

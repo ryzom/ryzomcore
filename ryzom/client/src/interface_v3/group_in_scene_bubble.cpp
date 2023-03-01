@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
@@ -29,6 +29,7 @@
 #include "nel/gui/action_handler.h"
 #include "../entities.h"
 #include "nel/gui/group_paragraph.h" // For CCtrlLink
+#include "nel/gui/view_bitmap.h"
 #include "../net_manager.h"
 #include "../string_manager_client.h"
 #include "../login.h"
@@ -644,13 +645,39 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const string &message, C
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
+		string finalMessage = message;
+
+		string::size_type pos = message.find("|");
+		if (pos != std::string::npos)
+		{
+			CViewBitmap *pViewIcon = dynamic_cast<CViewBitmap*>(group->getView("iconA"));
+			if (pViewIcon != NULL)
+			{
+				pViewIcon->setTexture(message.substr(0, pos));
+			}
+
+			string::size_type end = message.find("|", pos+1);
+			if (end != std::string::npos)
+			{
+				CViewBitmap *pViewIcon = dynamic_cast<CViewBitmap*>(group->getView("iconZ"));
+				if (pViewIcon != NULL)
+				{
+					pViewIcon->setTexture(message.substr(end+1));
+				}
+				finalMessage = message.substr(pos+1, end-pos-1);
+			}
+			else
+				finalMessage = message.substr(pos+1);
+		}
+
 		// Skill name
 		CViewText *pViewName = dynamic_cast<CViewText*>(group->getView("name"));
 		if (pViewName != NULL)
 		{
-			pViewName->setTextFormatTaged(message);
+			pViewName->setTextFormatTaged(finalMessage);
 			pViewName->setColor (color);
 		}
+
 
 		// Link to the interface
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
@@ -843,6 +870,33 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const std::string &ucsTe
 	if (pChar == NULL || nUID==CLFECOMMON::INVALID_CLIENT_DATASET_INDEX) return;
 	if (bubbleTimer == 0) bubbleTimer = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 
+
+
+	// Clean bubble from translation system
+
+	string::size_type pos = 0;
+	string::size_type textSize = ucsText.size();
+	string::size_type startTr = ucsText.find(string("{:"));
+	string::size_type endOfOriginal = ucsText.find(string("}@{"));
+
+	if (startTr != string::npos && endOfOriginal != string::npos) {
+		bool inverse = false;
+		string lang = toUpper(ucsText.substr(startTr+2, 2));
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
+		if (node)
+			inverse = node->getValueBool();
+
+		if (!inverse)
+		{
+			pos = endOfOriginal+4;
+		}
+		else
+		{
+			pos = startTr+5;
+			textSize = endOfOriginal;
+		}
+	}
+
 	// Output the message in a bubble
 
 	bool show = false;
@@ -862,7 +916,7 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const std::string &ucsTe
 				return;
 
 		// Get a bubble
-		CGroupInSceneBubble *bubble = newBubble (ucsText);
+		CGroupInSceneBubble *bubble = newBubble (ucsText.substr(pos, textSize-pos));
 		if (bubble)
 		{
 			// Link the bubble
@@ -896,7 +950,7 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 	uint32 pos, j;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID)
+		if (_DynBubbles[pos].BotUID == nBotUID && _DynBubbles[pos].BotName != 0)
 			break;
 	}
 
@@ -1009,7 +1063,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 	uint32 pos, j;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID)
+		if (_DynBubbles[pos].BotUID == nBotUID && _DynBubbles[pos].BotName == 0)
 			break;
 	}
 

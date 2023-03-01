@@ -51,6 +51,7 @@ private:
 	// an observer to update big mission list from littles pages in server database
 	CHugeListObs _MissionPagesObs;
 	CDBCtrlSheet *_CurrSel;
+	bool		 _HaveAcceptedMission;
 	MISSION_DESC::TClientMissionType _MType;
 };
 

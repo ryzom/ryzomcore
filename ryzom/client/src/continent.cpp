@@ -114,7 +114,7 @@ extern CContinentManager ContinentMngr;
 
 
 //-----------------------------------------------
-// CUserLandMark 
+// CUserLandMark
 //-----------------------------------------------
 
 NLMISC::CRGBA	CUserLandMark::getColor () const
@@ -722,6 +722,34 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 					vector<string>		zonesRemoved;
 					completeIsland = R2::CScenarioEntryPoints::getInstance().getCompleteIslandFromCoords(CVector2f((float) UserEntity->pos().x, (float) UserEntity->pos().y));
 					Landscape->refreshAllZonesAround(pos, ClientCfg.Vision + ExtraZoneLoadingVision, zonesAdded, zonesRemoved, progress, completeIsland ? &(completeIsland->ZoneIDs) : NULL);
+
+					for (uint i = 0; i < zonesRemoved.size(); i++)
+						EntitiesMngr.removeInstancesInIgZone(getZoneIdFromName(zonesRemoved[i]));
+
+					for (uint i = 0; i < zonesAdded.size(); i++)
+					{
+						string luaScriptName = CPath::lookup(zonesAdded[i]+".lua", false);
+
+						if (!luaScriptName.empty())
+						{
+							CIFile in;
+							if (in.open(luaScriptName))
+							{
+
+								string luaScript;
+								if (in.readAll(luaScript))
+								{
+									CLuaManager::getInstance().executeLuaScript(luaScript, true);
+									nlinfo("loading %s", luaScriptName.c_str());
+								}
+							}
+						}
+						else
+						{
+							nlinfo("file not found %s", luaScriptName.c_str());
+						}
+					}
+
 					LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
 					LandscapeIGManager.loadArrayZoneIG(zonesAdded, &igAdded);
 				}
