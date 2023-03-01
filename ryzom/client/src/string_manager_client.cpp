@@ -728,6 +728,12 @@ restartLoop:
 						if (!getString(param.StringId, str))
 							return false;
 
+						ucstring::size_type p1 = str.find('[');
+						if (p1 != ucstring::npos)
+						{
+							str = str.substr(0, p1)+STRING_MANAGER::CStringManagerClient::getLocalizedName(str.substr(p1));
+						}
+
 						// If the string is a player name, we may have to remove the shard name (if the string looks like a player name)
 						if(!str.empty() && !PlayerSelectedHomeShardNameWithParenthesis.empty())
 						{
@@ -1423,9 +1429,7 @@ const char *CStringManagerClient::getSpecialWord(const string &label, bool women
 
 	if (label[0] == '#')
 	{
-		static string	rawString;
-		rawString = label.substr(1, label.size()-1);
-		return rawString.c_str();
+		return getLocalizedName(label.substr(1, label.size()-1));
 	}
 
 	// avoid case problems
@@ -1629,7 +1633,7 @@ const char *CStringManagerClient::getTitleLocalizedName(const string &titleId, b
 	if (!listInfos.empty())
 	{
 		_TitleWords.push_back(listInfos[0]);
-		return _TitleWords.back().c_str();
+		return getLocalizedName(_TitleWords.back());
 	}
 
 	return getLocalizedName(titleId);

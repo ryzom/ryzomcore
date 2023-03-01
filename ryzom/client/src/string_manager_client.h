@@ -111,6 +111,7 @@ public:
 
 	// Get the Localized Title name
 	static const char *getTitleLocalizedName(const std::string &titleId, bool women);
+	static const char *getLocalizedName(const std::string &text);
 	static std::vector<std::string> getTitleInfos(const std::string &titleId, bool women);
 
 	// Get the Localized name of a classification type

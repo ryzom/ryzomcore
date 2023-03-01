@@ -1056,6 +1056,7 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 			}
 		}
 
+		senderName = STRING_MANAGER::CStringManagerClient::getLocalizedName(senderName);
 		switch(type)
 		{
 			case CChatGroup::shout:

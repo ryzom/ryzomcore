@@ -2302,7 +2302,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 				string::size_type pos = replacement.find('$');
 				if (pos != string::npos)
 				{
-					_EntityName = replacement.substr(0, pos);
+					_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(replacement.substr(0, pos));
 					string::size_type pos2 = replacement.find('$', pos + 1);
 					_TitleRaw = replacement.substr(pos+1, pos2 - pos - 1);
 					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
@@ -2315,7 +2315,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 			{
 				// build the final name
 				p1 = _EntityName.find('$');
-				_EntityName   = _EntityName.substr(0, p1);	// + _Name.substr(p2+1)
+				_EntityName   = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName.substr(0, p1));	// + _Name.substr(p2+1)
 				// Get extended name
 				_NameEx = replacement;
 				newtitle = _NameEx;
@@ -2332,6 +2332,10 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 				if ( titleEnum == CHARACTER_TITLE::FBT )
 					_HasReservedTitle = true;
 			}
+		}
+		else
+		{
+			_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName);
 		}
 	}
 
