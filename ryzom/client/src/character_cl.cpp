@@ -8360,8 +8360,27 @@ std::string CCharacterCL::currentAnimationSetName(TAnimationType animType) const
 //---------------------------------------------------
 std::string CCharacterCL::shapeFromItem(const CItemSheet &itemSheet) const
 {
-	if(_Gender == GSGENDER::female && !itemSheet.getShapeFemale().empty())
-		return itemSheet.getShapeFemale();
+	string sheet = "";
+
+	if(_Gender == GSGENDER::male)
+	{
+		if(_Sheet)
+			switch(_Sheet->Race)
+			{
+				case EGSPD::CPeople::Fyros:
+					sheet = itemSheet.getShapeFyros();
+					break;
+				case EGSPD::CPeople::Matis:
+					sheet = itemSheet.getShapeMatis();
+					break;
+				case EGSPD::CPeople::Tryker:
+					sheet = itemSheet.getShapeTryker();
+					break;
+				case EGSPD::CPeople::Zorai:
+					sheet = itemSheet.getShapeZorai();
+					break;
+			}
+	}
 	else
 	{
 		if(_Sheet)
