@@ -59,29 +59,47 @@ void CGearLatency::update(CCharacter * user)
 
 
 CVariable<uint32> EquipTimeFactor("egs", "EquipTimeFactor", "", 1, 0, true);
+CVariable<uint32> EquipTimeHotbar("egs", "EquipTimeHotbar", "", 10, 0, true);
 
 void CGearLatency::setSlot( INVENTORIES::TInventory inventory, uint32 slot, const CStaticItem * form, CCharacter * user )
 {
 	static NLMISC::CSheetId equipSheet("big_equip_item.sbrick");
-	
+
 	// checks must be done by the caller
 	nlassert(form);
 	nlassert(user);
-	// ignore instant equip items
-	if ( form->TimeToEquip == 0)
-		return;
-	
+
+	NLMISC::TGameCycle equipTime = form->TimeToEquip;
+
 	// build a new entry
 	CGearSlot gear;
 	if (inventory == INVENTORIES::equipment)
+	{
 		gear.InHand = false;
+	}
 	else if (inventory == INVENTORIES::handling)
+	{
 		gear.InHand = true;
-	else
-		nlerror("setSlot : Invalid inventory %u ('%s') : must be handling or equipment ",inventory,INVENTORIES::toString(inventory).c_str() );
+	}
+	else if (inventory == INVENTORIES::hotbar) {
+		gear.InHand = false;
+		equipTime = EquipTimeHotbar.get();
+	}
+	else {
+		nlerror("setSlot : Invalid inventory %u ('%s') : must be handling or hotbar or equipment ",inventory,INVENTORIES::toString(inventory).c_str() );
+		return;
+	}
+
+	// ignore instant equip items
+	if ( equipTime == 0 )
+		return;
+
 	gear.Slot = slot;
-	gear.LatencyEndDate = (form->TimeToEquip * EquipTimeFactor.get()) + CTickEventHandler::getGameCycle();
-	
+
+	// added _GearLatencies.size() to increment the gear.LatencyEndDate when server 2 or more equip at same tick
+	// without that, client don't display the progress bar
+	gear.LatencyEndDate = (equipTime * EquipTimeFactor.get()) + CTickEventHandler::getGameCycle() + _GearLatencies.size();
+
 	// add it in our sorted list
 	std::list<CGearSlot>::iterator it = _GearLatencies.begin();
 	for (; it != _GearLatencies.end(); ++it)
@@ -111,10 +129,15 @@ void CGearLatency::unsetSlot( INVENTORIES::TInventory inventory, uint32 slot, CC
 	nlassert(user);
 	bool inHand = false;
 	if (inventory == INVENTORIES::handling)
+	{
 		inHand = true;
-	else
-		nlassert(inventory == INVENTORIES::equipment);
-	
+	}
+	else if (inventory != INVENTORIES::hotbar && inventory != INVENTORIES::equipment)
+ 	{
+		nlerror("unsetSlot : Invalid inventory %u ('%s') : must be handling or hotbar or equipment ",inventory,INVENTORIES::toString(inventory).c_str() );
+		return;
+	}
+
 	std::list<CGearSlot>::iterator it = _GearLatencies.begin();
 	for (; it != _GearLatencies.end(); ++it)
 	{
