@@ -167,7 +167,6 @@ public:
 	bool				_UseQuantity	       : 1; // is the quantity read and displayed ?
 	bool				_ReadQuantityFromSheet : 1; // Read quantity from sheet rather than from database
 	bool				_UseQuality            : 1; // is the quality read and displayed ?
-	bool				_DisplayItemQuality    : 1; // Do we have to display the quality for the item (false for Cosmetics and Teleport and if _UseQuality==fasle)?
 	bool                _DuplicateOnDrag       : 1; // when dragged, the item is shown twice : one version at the mouse position.
 	                                             // and another in the source slot. Useful for items to buy that are in infinite quantity.
 	bool				_AutoGrayed            : 1; // if true then gray the ctrlSheeet if: 1/ Items: Is the Item Locked. 2/ Bricks: is the brick Latent.

@@ -695,7 +695,24 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 
 	return NULL;
 }
-	
+
+int CInterface3DScene::luaGetElement(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::find", 1);
+	CLuaIHM::checkArgType(ls, "CInterfaceGroup::find", 1, LUA_TSTRING);
+	std::string id = ls.toString(1);
+	CInterfaceElement* element = getElement(id);
+	if (!element)
+	{
+		ls.pushNil();
+	}
+	else
+	{
+		CLuaIHM::pushUIOnStack(ls, element);
+	}
+	return 1;
+}
+
 // ----------------------------------------------------------------------------
 string CInterface3DScene::getCurrentCamera() const
 {
@@ -1266,6 +1283,39 @@ bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	return true;
 }
 
+float CInterface3DShape::getBBoxSizeX () const
+{
+	CAABBox bbox;
+	_Instance.getShapeAABBox(bbox);
+
+	if (bbox.getCenter() == CVector::Null)
+		return -0.5f;
+
+	return  bbox.getMax().x - bbox.getMin().x;
+}
+
+float CInterface3DShape::getBBoxSizeY () const
+{
+	CAABBox bbox;
+	_Instance.getShapeAABBox(bbox);
+
+	if (bbox.getCenter() == CVector::Null)
+		return -0.5f;
+
+	return bbox.getMax().y - bbox.getMin().y;
+}
+
+float CInterface3DShape::getBBoxSizeZ () const
+{
+	CAABBox bbox;
+	_Instance.getShapeAABBox(bbox);
+
+	if (bbox.getCenter() == CVector::Null)
+		return -0.5f;
+
+	return bbox.getMax().z - bbox.getMin().z;
+}
+
 // ----------------------------------------------------------------------------
 float CInterface3DShape::getPosX () const
 {
@@ -1383,6 +1433,34 @@ void CInterface3DShape::setName (const std::string &ht)
 		_Instance.setTransformMode(UTransformable::RotEuler);
 		_Instance.setPos (_Pos);
 		_Instance.setRotEuler (_Rot.x, _Rot.y, _Rot.z);
+	}
+}
+
+std::string CInterface3DShape::getTextures() const
+{
+	return _Textures;
+}
+
+
+void CInterface3DShape::setTextures(const std::string &textures)
+{
+	if (textures.empty())
+		return;
+
+	_Textures = textures;
+	vector<string> texList;
+	splitString(textures, " ", texList);
+
+	for(uint j=0;j<_Instance.getNumMaterials();j++)
+	{
+		sint numStages = _Instance.getMaterial(j).getLastTextureStage() + 1;
+		for(sint l = 0; l < numStages; l++)
+		{
+			if (_Instance.getMaterial(j).isTextureFile((uint) l))
+			{
+				_Instance.getMaterial(j).setTextureFileName(texList[std::min((int)j, (int)texList.size()-1)], (uint) l);
+			}
+		}
 	}
 }
 
