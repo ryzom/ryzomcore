@@ -4285,6 +4285,10 @@ sint32 CLuaIHMRyzom::getTargetLevelForce()
 	}
 	else
 	{
+		uint8 nForce = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:FORCE_RATIO")->getValue8();
+		if (nForce > 11)
+			return nForce;
+
 		CCharacterSheet *pCS = dynamic_cast<CCharacterSheet*>(SheetMngr.get(target->sheetId()));
 		return pCS ? (sint32) pCS->ForceLevel : -1;
 	}

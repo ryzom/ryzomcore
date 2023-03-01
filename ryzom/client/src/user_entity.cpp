@@ -1626,7 +1626,7 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 	case CUserEntity::Mission:
 		{
 			string param = toString("id=%d", _MoveToMissionId);
-			CAHManager::getInstance()->runActionHandler("mission_option", 0, param);
+			CAHManager::getInstance()->runActionHandler("open_mission_option", 0, param);
 		}
 		break;
 	// Dynamic Mission

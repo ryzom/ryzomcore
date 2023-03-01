@@ -497,7 +497,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextCreateGuild, "context_create_guild");
 // ***************************************************************************
 // GCM Mission option
 // ***************************************************************************
-class CHandlerContextMissionOption : public IActionHandler
+class CHandlerContextOpenMissionOption : public IActionHandler
 {
 public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
@@ -524,7 +524,23 @@ public:
 		}
 	}
 };
+REGISTER_ACTION_HANDLER(CHandlerContextOpenMissionOption, "open_mission_option");
+
+
+class CHandlerContextMissionOption : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		std::string id = getParam(sParams, "id");
+		sint intId;
+		if (!fromString(id, intId)) return;
+		UserEntity->moveToMission(UserEntity->targetSlot(), 3.0, intId);
+	}
+};
 REGISTER_ACTION_HANDLER(CHandlerContextMissionOption, "mission_option");
+
+
 
 
 // ***************************************************************************
