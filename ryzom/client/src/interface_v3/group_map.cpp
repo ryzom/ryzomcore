@@ -880,6 +880,12 @@ bool CGroupMap::getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, s
 inline void CGroupMap::updateButtonPos(CLandMarkButton &dest) const
 {
 	sint32 x, y;
+	CVector2f pos;
+	mapToWorld(pos, dest.Pos);
+
+	if (pos.x < _MapMinCorner.x || pos.x > _MapMaxCorner.x || pos.y < _MapMinCorner.y || pos.y > _MapMaxCorner.y)
+		dest.setActive(false);
+
 	mapToWindowSnapped(x, y, dest.Pos);
 	dest.setX(x);
 	dest.setY(y);

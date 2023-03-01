@@ -133,7 +133,7 @@ namespace NLGUI
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
 		if( node == NULL )
 			return NULL;
-		
+
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "combo_box" );
 		xmlSetProp( node, BAD_CAST "linked_to_db", BAD_CAST toString( _LinkedToDB ).c_str() );
 
@@ -378,7 +378,7 @@ namespace NLGUI
 		else
 			return null;
 	}
-	
+
 	// ***************************************************************************
 	uint	CDBGroupComboBox::getTextPos(uint nId) const
 	{
@@ -479,6 +479,13 @@ namespace NLGUI
 		}
 	}
 
+		// ***************************************************************************
+	void		CDBGroupComboBox::setOnChange(const std::string & val)
+	{
+		_AHOnChange = "lua";
+		_AHOnChangeParams = val;
+	}
+
 	// ***************************************************************************
 	void CDBGroupComboBox::setViewText(const std::string &text)
 	{
@@ -519,6 +526,13 @@ namespace NLGUI
 			return getText(_NotLinkedToDBSelection);
 		}
 	}
+
+// ***************************************************************************
+	std::string CDBGroupComboBox::getOnChange() const
+	{
+			return _AHOnChangeParams;
+	}
+
 
 	// ***************************************************************************
 	void	CDBGroupComboBox::setup()
