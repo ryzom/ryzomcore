@@ -4918,3 +4918,136 @@ NLMISC_COMMAND(setServerPhrase, "Set an IOS phrase", "<phrase> [<language code>]
 	sendMessageViaMirror("IOS", msgout);
 	return true;
 }
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getRpPoints, "get RP points of player (if quantity, give/take/set the points)", "<uid> [[+-]<quantity>]")
+{
+	GET_ACTIVE_CHARACTER
+
+	uint32 points = c->getRpPoints();
+
+	if (args.size() == 2)
+	{
+		string quant = args[1];
+		uint32 quantity;
+		if (quant[0] == '+')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				points += quantity;
+			}
+		}
+		else if (quant[0] == '-')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				if (points >= quantity)
+				{
+					points -= quantity;
+				}
+				else
+				{
+					log.displayNL("-1"); // No enough points
+					return true;
+				}
+			}
+		}
+		else
+		{
+			fromString(quant, points);
+		}
+
+		c->setRpPoints(points);
+	}
+
+	log.displayNL("%u", points);
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getBattlePoints, "get Battle points of player (if quantity, give/take/set the points)", "<uid> [[+-]<quantity>]")
+{
+	GET_ACTIVE_CHARACTER
+
+	uint32 points = c->getBattlePoints();
+
+	if (args.size() == 2)
+	{
+		string quant = args[1];
+		uint32 quantity;
+		if (quant[0] == '+')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				points += quantity;
+			}
+		}
+		else if (quant[0] == '-')
+		{
+			if (quant.size() > 1)
+			{
+				fromString(quant.substr(1), quantity);
+				if (points >= quantity)
+				{
+					points -= quantity;
+				}
+				else
+				{
+					log.displayNL("-1"); // No enough points
+					return true;
+				}
+			}
+		}
+		else
+		{
+			fromString(quant, points);
+		}
+
+		c->setBattlePoints(points);
+	}
+
+	log.displayNL("%u", points);
+}
+
+//addEntitiesTrigger 2 #target# 50 app_arcc&nbsp&action=mScript_Edit&script=11450
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> <entity> <distance> <url>")
+{
+
+	if (args.size() < 4)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	TAIAlias alias;
+
+	string e = args[1];
+	if (e == "#target#")
+	{
+		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getTarget());
+	}
+	else if (e == "#self#")
+	{
+		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getId());
+	}
+	else
+	{
+		vector<TAIAlias> aliases;
+		CAIAliasTranslator::getInstance()->getNPCAliasesFromName( e, aliases );
+		if ( aliases.empty() )
+		{
+			log.displayNL("ERR: no entity");
+			return true;
+		}
+		alias = aliases[0];
+	}
+
+	uint16 distance;
+	fromString(args[2], distance);
+	string url = args[3];
+	CZoneManager::getInstance().addEntitiesTrigger(alias, distance, url);
+	log.displayNL("OK");
+}
+

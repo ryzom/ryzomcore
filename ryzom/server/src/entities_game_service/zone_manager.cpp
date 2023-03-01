@@ -60,7 +60,7 @@ using namespace NLNET;
 // The ecotype zones
 CEcotypeZones CZoneManager::_EcotypeZones;
 /*
-const std::string CContinent::ContNames [] = 
+const std::string CContinent::ContNames [] =
 {
 	"fyros",
 	"tryker"
@@ -75,7 +75,7 @@ arg1:
 if zone is not pvp
 	arg1 is interpreted as a boolean (0 - inactive, 1 - active)
 if zone is a pvp zone
-	arg1 is interpreted as 
+	arg1 is interpreted as
 		0 - inactive
 		1 - active with faction point rewards
 		2 - active without faction point rewards
@@ -84,10 +84,10 @@ void cbSetZoneState( NLNET::CMessage& msgin, const std::string &serviceName, NLN
 {
 	string sZoneName;
 	uint32 nState;
-	
+
 	msgin.serial(sZoneName);
 	msgin.serial(nState);
-	
+
 	CZoneManager *pZM = &CZoneManager::getInstance();
 
 	// get the places
@@ -116,7 +116,7 @@ void cbSetZoneState( NLNET::CMessage& msgin, const std::string &serviceName, NLN
 	if (pPVPZ != NULL)
 	{
 		pPVPZ->setActive(nState!=0);
-		
+
 		CPVPVersusZone *pPVPVZ = dynamic_cast<CPVPVersusZone*>(pPVPZ);
 		if (pPVPVZ != NULL)
 			pPVPVZ->giveFactionPoints(nState == 1);
@@ -135,13 +135,13 @@ void cbSetZoneState( NLNET::CMessage& msgin, const std::string &serviceName, NLN
 {
 	_Id = id;
 	*( (NLLIGO::CPrimPath*)this ) = *path;
-	
+
 	if ( !zone->getPropertyByName("name",_Name) )
 	{
 		nlwarning("<CGooPath build> : no name in goo place %u", id);
 		return false;
 	}
-	
+
 	if ( VPoints.empty() )
 	{
 		nlwarning("<CGooPath build> :no points in goo place %u/%s", id, _Name.c_str());
@@ -206,7 +206,7 @@ bool CTpSpawnZone::build(const NLLIGO::CPrimPoint * point)
 	}
 	else
 		Point.z = 0.0f;
-	
+
 
 
 	// convert coords in mm
@@ -328,16 +328,16 @@ bool CPlace::build(const NLLIGO::CPrimZone * zone,uint16 id, bool reportAutorise
 //	_Alias = NLMISC::fromString( val.c_str() );
 	nlassert( _Alias != CAIAliasTranslator::Invalid );
 
-	 
-	
+
+
 	if ( VPoints.empty() )
 	{
 		nlwarning("<CPlace build> :no points in place %u/%s", id, _Name.c_str());
 		return false;
 	}
-	
+
 	updateCenter();
-	
+
 	_GooPath = false;
 	_GooActive = false;
 
@@ -352,7 +352,7 @@ bool CPlace::build(const NLLIGO::CPrimZone * zone,uint16 id, bool reportAutorise
 
 	// get children respawn points
 	bool ret = true;
-	for (uint i=0; i< getNumChildren();++i)	
+	for (uint i=0; i< getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( getChild(child,i) && child )
@@ -415,7 +415,7 @@ bool CRegion::build(const NLLIGO::CPrimZone * zone,uint16 id)
 //-----------------------------------------------
 CRegion::~CRegion()
 {
-	
+
 }// CRegion dtor
 
 //-----------------------------------------------
@@ -429,7 +429,7 @@ void CRegion::registerChatGroup()
 	CChatGroup::TGroupType type = CChatGroup::region;
 	msgout.serialEnum( type );
 	sendMessageViaMirror( "IOS", msgout );
-	
+
 	// add online members ( if IOS crashed... )
 	set< CEntityId >::iterator it = _Players.begin();
 	for (; it != _Players.end(); ++it )
@@ -499,7 +499,7 @@ bool CContinent::build(const NLLIGO::CPrimZone * zone)
 //-----------------------------------------------
 CContinent::~CContinent()
 {
-	
+
 }// CContinent dtor
 
 
@@ -531,15 +531,15 @@ void CZoneManager::initInstance()
 {
 	_NextDepositIndexUpdated = 0;
 	_SpreadUpdateLoopBeginTick = CTickEventHandler::getGameCycle();
-	
+
 	// get the loaded primitives
-	const CPrimitivesParser::TPrimitivesList & primsList = CPrimitivesParser::getInstance().getPrimitives();	
+	const CPrimitivesParser::TPrimitivesList & primsList = CPrimitivesParser::getInstance().getPrimitives();
 
 	_PlacesByAlias.clear();
 	// parse the zones
 	nlinfo("CZoneManager : parsing the zones");
 	CPrimitivesParser::TPrimitivesList::const_iterator first, last;
-	
+
 	for (first = primsList.begin(), last = primsList.end(); first != last; ++first)
 	{
 		if (! parseContinents(first->Primitive.RootNode ) )
@@ -592,7 +592,7 @@ void CZoneManager::initInstance()
 
 	// Don't keep ecotypes in memory, the information is already in the deposits
 	CDeposit::clearEcotypes();
- 
+
 	// Parse stables
 	for (first = primsList.begin(), last = primsList.end(); first != last; ++first)
 	{
@@ -601,7 +601,7 @@ void CZoneManager::initInstance()
 			nlwarning("<CZoneManager constructor> Error while building the stables");
 		}
 	}
-	
+
 	// Parse the goo border
 	for (first = primsList.begin(), last = primsList.end(); first != last; ++first)
 	{
@@ -657,7 +657,7 @@ void CZoneManager::initInstance()
 	};
 	// register call back for zone manager
 	CUnifiedNetwork::getInstance()->addCallbackArray( _cbArray, sizeof(_cbArray) / sizeof(_cbArray[0]) );
-	
+
 }// CZoneManager ctor
 
 //-----------------------------------------------
@@ -739,7 +739,7 @@ bool CZoneManager::parseContinents( const NLLIGO::IPrimitive* prim )
 	}
 		// Lookup recursively in the children
 	bool ok = true;
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -785,7 +785,7 @@ bool CZoneManager::parseRegions( const NLLIGO::IPrimitive* prim )
 	}
 	// Lookup recursively in the children
 	bool ok = true;
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -827,11 +827,11 @@ bool CZoneManager::parseZones( const NLLIGO::IPrimitive* prim )
 						}
 					}
 					_Places.push_back( place );
-					
+
 					TAIAlias alias = place->getAlias();
 					if (alias > maxGooBorderAlias)
 						maxGooBorderAlias = alias;
-						
+
 					_PlacesByAlias.insert( make_pair(place->getAlias(), place) );
 				}
 				else
@@ -841,7 +841,7 @@ bool CZoneManager::parseZones( const NLLIGO::IPrimitive* prim )
 	}
 	// Lookup recursively in the children
 	bool ok = true;
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -862,7 +862,7 @@ bool CZoneManager::parseEcotypes( const NLLIGO::IPrimitive* prim )
 		{
 			std::string ecotypeZoneListName;
 			prim->getPropertyByName( "name", ecotypeZoneListName );
-			
+
 			// Parse the children ecotypes
 			for( uint i = 0; i < prim->getNumChildren(); ++i )
 			{
@@ -870,9 +870,9 @@ bool CZoneManager::parseEcotypes( const NLLIGO::IPrimitive* prim )
 				if ( prim->getChild( childPrim, i ) )
 				{
 					// If the primitive is a zone, parse it
-					const CPrimZone* zone = dynamic_cast<const CPrimZone*>(childPrim);		
+					const CPrimZone* zone = dynamic_cast<const CPrimZone*>(childPrim);
 					if ( zone )
-					{	
+					{
 						string primType;
 						childPrim->getPropertyByName( "class", primType );
 						if( primType == "ecotypezone" )
@@ -898,7 +898,7 @@ bool CZoneManager::parseEcotypes( const NLLIGO::IPrimitive* prim )
 
 	// Lookup recursively in the children
 	bool ok = true;
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -920,7 +920,7 @@ bool CZoneManager::parseDeposits( const NLLIGO::IPrimitive* prim )
 		{
 			std::string depositZoneListName;
 			prim->getPropertyByName( "name", depositZoneListName );
-			
+
 			// Parse the children deposits
 			for( uint i = 0; i < prim->getNumChildren(); ++i )
 			{
@@ -928,9 +928,9 @@ bool CZoneManager::parseDeposits( const NLLIGO::IPrimitive* prim )
 				if ( prim->getChild( childPrim, i ) )
 				{
 					// If the primitive is a zone, parse it
-					const CPrimZone* zone = dynamic_cast<const CPrimZone*>(childPrim);		
+					const CPrimZone* zone = dynamic_cast<const CPrimZone*>(childPrim);
 					if ( zone )
-					{	
+					{
 						string primType;
 						childPrim->getPropertyByName( "class", primType );
 						if( primType == "depositzone" )
@@ -982,10 +982,10 @@ bool CZoneManager::parseDeposits( const NLLIGO::IPrimitive* prim )
 			}
 		}
 	}
-				
+
 	// Lookup recursively in the children
 	bool ok = true;
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -999,7 +999,7 @@ bool CZoneManager::parseDeposits( const NLLIGO::IPrimitive* prim )
 //-----------------------------------------------
 bool CZoneManager::parseStables( const NLLIGO::IPrimitive* prim )
 {
-// Primitives format:	
+// Primitives format:
 // <!-- stables -->
 // <PRIMITIVE CLASS_NAME="stables" TYPE="node" AUTO_INIT="true" DELETABLE="true">
 // <DYNAMIC_CHILD CLASS_NAME="stable"/>
@@ -1107,7 +1107,7 @@ bool CZoneManager::parseStables( const NLLIGO::IPrimitive* prim )
 
 	// Lookup recursively in the children
 	bool ok = true;
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -1154,7 +1154,7 @@ bool CZoneManager::parseTpSpawnZones( const NLLIGO::IPrimitive* prim )
 						break;
 					}
 				}
-				if( !found )	
+				if( !found )
 				{
 					nlwarning("<CZoneManager::parseTpSpawnZones> Re-spawn point '%s' is not in a continent", zone.getName().c_str());
 					return false;
@@ -1190,10 +1190,10 @@ bool CZoneManager::parseTpSpawnZones( const NLLIGO::IPrimitive* prim )
 			return true;
 		}
 	}
-	
+
 	// Lookup recursively in the children
 	bool ok = true;
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -1236,11 +1236,11 @@ bool CZoneManager::parseGooBorder( const NLLIGO::IPrimitive* prim )
 						}
 					}
 					_Places.push_back( place );
-					
+
 					TAIAlias alias = place->getAlias();
 					if (alias > maxGooBorderAlias)
 						maxGooBorderAlias = alias;
-						
+
 					_PlacesByAlias.insert( make_pair(place->getAlias(), place) );
 				}
 				else
@@ -1253,7 +1253,7 @@ bool CZoneManager::parseGooBorder( const NLLIGO::IPrimitive* prim )
 
 	// Lookup recursively in the children
 	bool ok = true;
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -1316,7 +1316,7 @@ bool CZoneManager::parseGooBorder( const string &name, const string &params, con
 }
 
 bool CZoneManager::parsePath( const string &params, CPrimPath *path )
-{	
+{
 	vector< string > points;
 	NLMISC::splitString(params, "|", points);
 	for (uint i=0; i<points.size(); i++)
@@ -1360,7 +1360,7 @@ bool CZoneManager::parseStartPoints( const NLLIGO::IPrimitive* prim )
 				_StartPoints.resize( startIdx + 1);
 
 			bool ok = true;
-			for (uint i=0;i<prim->getNumChildren();++i)	
+			for (uint i=0;i<prim->getNumChildren();++i)
 			{
 				const IPrimitive *child = NULL;
 				if ( prim->getChild(child,i) && child && child->getPropertyByName("class",value) && value == "start_point")
@@ -1404,7 +1404,7 @@ bool CZoneManager::parseStartPoints( const NLLIGO::IPrimitive* prim )
 	}
 	// Lookup recursively in the children
 	bool ok = true;
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	for (uint i=0;i<prim->getNumChildren();++i)
 	{
 		const IPrimitive *child;
 		if ( prim->getChild(child,i) )
@@ -1588,7 +1588,7 @@ bool CZoneManager::getPlace( sint32 x, sint32 y, float& gooDistance, const CPlac
 					{
 						const CPlace * p;
 						p = _Continents[i].getRegions()[j]->getPlaces()[k];
-								
+
 						if (!p->isGooActive())
 						{
 							if ( p->contains( vect ) )
@@ -1732,7 +1732,7 @@ CContinent* CZoneManager::getContinentFromId( CONTINENT::TContinent id )
 //-----------------------------------------------
 // CZoneManager updateCharacterPosition
 //-----------------------------------------------
-void CZoneManager::updateCharacterPosition( CCharacter * user )
+void CZoneManager::updateCharacterPosition( CCharacter * user, uint32 elapsedTime )
 {
 	nlassert(user);
 
@@ -1757,7 +1757,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 
 	// SOURCE: user->getCurrentContinent()
 	// DESTINATION: continent->getId()
-	//	{	
+	//	{
 		// update the continent if necessary
 		if ( continent == NULL )
 		{
@@ -1765,7 +1765,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 			if (oldPlace)
 			{
 				params[0].Identifier = oldPlace->getName();
-				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"EGS_LEAVE_CONTINENT",params);	
+				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"EGS_LEAVE_CONTINENT",params);
 			}
 			user->setCurrentContinent( CONTINENT::UNKNOWN );
 		}
@@ -1781,10 +1781,10 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 			if (oldPlace)
 			{
 				params[0].Identifier = oldPlace->getName();
-				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"EGS_LEAVE_CONTINENT",params);	
+				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"EGS_LEAVE_CONTINENT",params);
 			}
 			params[0].Identifier = continent->getName();
-			PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"EGS_ENTER_CONTINENT",params);	
+			PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"EGS_ENTER_CONTINENT",params);
 			user->setCurrentContinent( (CONTINENT::TContinent)continent->getId() );
 			// notify player respawn points system that continent changed
 			user->getRespawnPoints().cbContinentChanged(oldContinent);
@@ -1809,7 +1809,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 					IShardUnifierEvent::getInstance()->onUpdateCharNewbieFlag(user->getId(), newbie);
 			}
 		}
-		
+
 		// do the same for region
 		// first send message for leaving previous region
 		CRegion * oldRegion = dynamic_cast<CRegion *> ( getPlaceFromId( user->getCurrentRegion() ) );
@@ -1855,7 +1855,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 				}
 			}
 		}
-		
+
 		if ( region != 0 && (user->getCurrentRegion() != region->getId()) )
 		{
 			const CTotemBase* pTotem = CPVPFactionRewardManager::getInstance().getTotemBaseFromId( region->getId() );
@@ -1886,9 +1886,9 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 				user->sendUrl(regionTrigger);
 
 			user->setCurrentRegion( region->getId() );
-			
+
 			((CRegion*)region)->addPlayer( user->getId() );
-			
+
 			// add new spire effects for Pvp-flagged players
 			if ( user->getPVPFlag() )
 				CPVPFactionRewardManager::getInstance().giveTotemsEffects( user );
@@ -1898,8 +1898,42 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 			//user->processMissionMultipleEvent(event);
 		}
 
+		// Trigger entities
+		std::map<TAIAlias, uint8>::const_iterator it;
+		for (it = EntitiesDistanceTriggers.begin(); it != EntitiesDistanceTriggers.end(); it++)
+		{
+			nlinfo("Entity trigger : %s", NLMISC::toString(it->first).c_str());
+			if (it->second == 0)
+			{
+				std::map<TAIAlias, std::string>::const_iterator it2 = EntitiesUrlTriggers.find(it->first);
+				if ( it2 != EntitiesUrlTriggers.end() )
+					user->sendRpPoints(it2->second);
+			}
+			else
+			{
+				nlinfo("Distance = %d", it->second);
+				const CEntityId & botId = CAIAliasTranslator::getInstance()->getEntityId(it->first);
+				if ( botId != CEntityId::Unknown )
+				{
+					nlinfo("Botid found");
+					CEntityBase *entityBase = CreatureManager.getCreature (botId);
+					if (entityBase != NULL)
+					{
+						sint32 x = entityBase->getState().X;
+						sint32 y = entityBase->getState().Y;
+						sint32 px = user->getState().X;
+						sint32 py = user->getState().Y;
+						nlinfo("entityBase found, check pos %i, %i, %i, %i", x, y, px, py);
+						if ((px-x)*(px-x)+(py-y)*(py-y) < it->second * it->second)
+							user->addRpPoints(elapsedTime);
+					}
+				}
+			}
+		}
+
+
 		string zoneDamage;
-		
+
 		// get new places
 		const uint newPlacesSize = (uint)places.size();
 		//bool sendWarning = false;
@@ -1922,7 +1956,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 				// Now the VisitPlace missions are checked in CMissionManager::checkVisitPlaceMissions()
 				//CMissionEventVisitPlace event( places[i]->getId() );
 				//user->processMissionMultipleEvent(event);
-				
+
 				// validate respawn points
 				for ( uint j =  0; j< places[i]->getRespawnPoints().size(); j++ )
 				{
@@ -1968,7 +2002,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 				}
 				changed = true;
 			}
-			
+
 		}
 
 		// enter/leave PVP zones
@@ -1996,9 +2030,9 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 			{
 				COutpostManager::getInstance().leaveOutpostZone( user );
 			}
-			
+
 			user->setCurrentOutpostZone( outpostAlias );
-			
+
 			if ( outpostAlias != CAIAliasTranslator::Invalid )
 			{
 				COutpostManager::getInstance().enterOutpostZone( user );
@@ -2018,7 +2052,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 				}
 			}
 		}
-		
+
 		if ( changed )
 			user->setPlaces( places );
 
@@ -2037,7 +2071,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 				}
 			}*/
 
-			user->setCurrentStable( 0xFFFF,0xFFFF);	
+			user->setCurrentStable( 0xFFFF,0xFFFF);
 		}
 		// check if player left old current stable for enter to another
 		else if( user->getCurrentStable() != stable->getId() )
@@ -2098,7 +2132,7 @@ void CZoneManager::tickUpdate()
 				_Deposits[ i ]->lowFreqUpdate();
 			}
 		}
-		
+
 		if( i >= nbDeposit )
 			_NextDepositIndexUpdated = 0;
 		else
@@ -2140,7 +2174,7 @@ void CZoneManager::dumpWorld(CLog & log)
 			{
 				log.displayNL("            place %u : id=%u, name=%s", k, places[k]->getId(),places[k]->getName().c_str() );
 			}
-			log.displayNL("");          
+			log.displayNL("");
 			const std::vector< CDeposit* > & deposits =  regions[j]->getDeposits();
 			log.displayNL("%u deposits", deposits.size() );
 			//for (uint k = 0; k < deposits.size();k++ )
@@ -2199,7 +2233,7 @@ void CZoneManager::answerWhere(const NLMISC::CEntityId & eId)
 				break;
 			}
 		}
-		
+
 		STRING_MANAGER::TParam param;
 		param.Type = STRING_MANAGER::place;
 		if (place)
@@ -2255,16 +2289,16 @@ void CZoneManager::answerWhere(const NLMISC::CEntityId & eId)
 				{
 					string botName;
 					if ( CAIAliasTranslator::getInstance()->getNPCNameFromAlias( botPtr->getAlias(), botName ) )
-					{	
+					{
 						double dx = (double)botPtr->getState().X/1000.0-(double)xUser/1000.0;
 						double dy = (double)botPtr->getState().Y/1000.0-(double)yUser/1000.0;
 						double dist = sqrt(dx*dx+dy*dy);
 						uint32 distshort = (uint16)dist;
-						
+
 						double angle = atan2 (dy, dx) + NLMISC::Pi;
 						sint direction =(sint) floor( 0.5 + 8.0 * angle /(NLMISC::Pi) );
 						direction = direction %16;
-						
+
 						static string txts[]=
 						{
 								"W",
@@ -2285,11 +2319,11 @@ void CZoneManager::answerWhere(const NLMISC::CEntityId & eId)
 								"WNW",
 						};
 						static string msgBot = ("EGS_MISSION_DIR_BOT");
-						
+
 						CMessage msgout("STATIC_STRING");
 						msgout.serial( const_cast<CEntityId&>(eId) );
 						std::set<CEntityId> empty;
-						msgout.serialCont( empty );		
+						msgout.serialCont( empty );
 						msgout.serial( msgBot );
 						msgout.serial( botName );
 						msgout.serial( distshort );

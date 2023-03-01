@@ -209,7 +209,7 @@ void connectionRestoreVideoMode ()
 	SetMouseAcceleration (ClientCfg.CursorAcceleration);
 
 	// Restore user UI scaling
-	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
+	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
 }
 
 
@@ -246,7 +246,7 @@ void	setOutGameFullScreen()
 	}
 
 	// Enable auto scaling in login window
-	CInterfaceManager::getInstance()->setInterfaceScale(1.0f, true);
+	CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -482,7 +482,7 @@ bool connection (const string &cookie, const string &fsaddr)
 	firstConnection = false;
 
 	// Restore user UI scaling
-	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
+	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
 
 	// Disable inputs
 	Actions.enable(false);
@@ -623,7 +623,7 @@ bool reconnection()
 	}
 
 	// Restore user UI scaling
-	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
+	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
 
 	// Disable inputs
 	Actions.enable(false);

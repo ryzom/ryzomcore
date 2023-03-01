@@ -229,8 +229,8 @@ public:
 	void reinit();
 
 
-	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool haveCollisions, sint32 &idx);
-	bool deleteInstance(uint32 idx);
+	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool haveCollisions, uint16 inIgZone, sint32 &idx);
+	bool deleteInstance(uint32 idx, bool force = false);
 	bool removeInstances();
 	CVector getInstancePos(uint32 idx);
 	bool setInstancePos(uint32 idx, CVector pos);
