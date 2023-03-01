@@ -314,6 +314,7 @@ public:
 		// Called on impulse
 		void				onReceiveItemInfo(const CItemInfos &itemInfo);
 		void				onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion);
+		void				onUpdateEquipHands();
 		// Log for debug
 		void				debugItemInfoWaiters();
 #ifdef RYZOM_FORGE

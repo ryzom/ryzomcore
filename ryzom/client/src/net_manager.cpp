@@ -2899,6 +2899,8 @@ void impulseInitInventory (NLMISC::CBitMemStream &impulse)
 	impulseUpdateInventory( impulse );
 	IngameDbMngr.setInitPacketReceived();
 	nlinfo( "DB_INIT:INV done (%u bytes)", impulse.getPos()-p );
+
+	getInventory().onUpdateEquipHands();
 }
 
 //-----------------------------------------------
