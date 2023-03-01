@@ -545,10 +545,19 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 				if (it != _PassChannels.end())
 					_PassChannels.erase(it);
 
-				for (TMAPExtraFactionChannel::iterator it2 = _UserChannel.begin(); it2 != _UserChannel.end(); ++it2)
+				TMAPExtraFactionChannel::iterator it2 = _UserChannel.begin();
+				while (it2 != _UserChannel.end())
 				{
 					if ((*it2).second == currentChannels[i])
-						_UserChannel.erase(it2);
+					{
+						TMAPExtraFactionChannel::iterator itErase = it2;
+						++it2;
+						_UserChannel.erase(itErase);
+					}
+					else
+					{
+						++it2;
+					}
 				}
 			}
 

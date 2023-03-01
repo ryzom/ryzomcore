@@ -1626,7 +1626,7 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 	case CUserEntity::Mission:
 		{
 			string param = toString("id=%d", _MoveToMissionId);
-			CAHManager::getInstance()->runActionHandler("open_mission_option", 0, param);
+			CAHManager::getInstance()->runActionHandler("mission_option", 0, param);
 		}
 		break;
 	// Dynamic Mission
@@ -3673,7 +3673,7 @@ bool CUserEntity::CMountHunger::canRun() const
 			return (hungerLeaf->getValue32() != (sint)ANIMAL_TYPE::DbHungryValue);
 		}
 	}
-	return false;
+	return true;
 }
 
 
