@@ -328,7 +328,9 @@ struct CClientConfig
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
 
+	std::string     WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
+	uint			WebIgNotifInterval; // value in minutes for notification thread
 
 	sint32			CurlMaxConnections;
 	string			CurlCABundle;
