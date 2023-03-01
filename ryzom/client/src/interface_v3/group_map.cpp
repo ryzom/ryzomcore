@@ -1726,10 +1726,10 @@ void CGroupMap::draw()
 				quv.V0 = center - 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
 				quv.V1 = center + 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
 				quv.V2 = center + 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
-			quv.V3 = center - 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
-			quv.Uv0.set(0.f, 1.f);
-			quv.Uv1.set(1.f, 1.f);
-			quv.Uv2.set(1.f, 0.f);
+				quv.V3 = center - 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
+				quv.Uv0.set(0.f, 1.f);
+				quv.Uv1.set(1.f, 1.f);
+				quv.Uv2.set(1.f, 0.f);
 				quv.Uv3.set(0.f, 0.f);
 				quv.Color0 = quv.Color1 = quv.Color2 = quv.Color3 = CRGBA(255, 255, 255, alpha);
 				quv.V0.x /= (float) sw;

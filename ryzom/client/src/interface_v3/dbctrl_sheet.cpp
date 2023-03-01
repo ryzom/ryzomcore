@@ -2660,11 +2660,11 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 #endif
 					!_EnchantIcons.empty())
 				{
-					// should only only 2 icons at most
-					// draw them in single line, top-right
+					// draw icons in column of 3, top-right
 					sint32 hArea = (hSheet / 3);
 					sint32 xIcon = x + wSheet - 1;
-					sint32 yIcon = y + hSheet - 1/* - hArea*/;
+					sint32 yIcon = y + hSheet - 1;
+					sint32 yTop = yIcon;
 					// 0 is expected to be background
 					for (uint i = 1; i < _EnchantIcons.size(); ++i)
 					{
@@ -2687,6 +2687,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 						if ((i - 1) < _BoostIcons.size()) {
 							rVR.drawRotFlipBitmap(_RenderLayer + 2, xIcon+wIcon-_BoostIcons[i-1].IconW, yIcon, _BoostIcons[i-1].IconW, _BoostIcons[i-1].IconH, 0, false, _BoostIcons[i-1].TextureId, fastMulRGB(curSheetColor, _BoostIcons[i-1].Color));
+						}
+
+						// move to new column as needed
+						if (i % 3 == 0) {
+							xIcon -= wIcon;
+							yIcon = yTop;
 						}
 					}
 				}

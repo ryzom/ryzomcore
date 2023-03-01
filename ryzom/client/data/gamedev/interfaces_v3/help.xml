@@ -539,10 +539,7 @@
             hardtext="uittOK" />
     </group>
   </group>
-  <proc id="enable_light">
-    <action handler="light_on"
-            params="" />
-  </proc>
+  <proc id="enable_light"></proc>
   <!-- If necessary, not already displayed this session, and not avoided by user, show the warning -->
   <link expr="@UI:VARIABLES:NIGHT_WARNING_WANTED" action="proc" params="enable_light" />
   <tree node="night_warning"></tree>
