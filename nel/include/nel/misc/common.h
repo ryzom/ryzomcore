@@ -412,7 +412,7 @@ public:
 	Exception();
 	Exception(const std::string &reason);
 	Exception(const char *format, ...);
-#if defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
+#if !defined(CLANG_VERSION) && defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
 	virtual ~Exception() throw() {}
 	virtual const char      *what() const throw();
 #else
