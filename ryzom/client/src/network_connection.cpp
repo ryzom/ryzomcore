@@ -314,6 +314,7 @@ CNetworkConnection::CNetworkConnection()
 #endif
 {
 	_ConnectionState = NotInitialised;
+	m_LoginNextAddress = false;
 	_ImpulseCallback = NULL;
 	_ImpulseArg = NULL;
 	_DataBase = NULL;
@@ -835,13 +836,20 @@ bool	CNetworkConnection::update()
 	return res;
 #endif
 
-	if (m_UseQuic && _ConnectionState == NextAddress)
+	if (m_UseQuic && m_LoginNextAddress)
 	{
 		// Early exit this attempt since we're switching to QUIC
 		_ConnectionState = Disconnect;
+		m_LoginNextAddress = false;
 	}
 
-	if (_ConnectionState == NextAddress)
+	if (m_LoginNextAddress && _ConnectionState != Login)
+	{
+		nlwarning("Can only switch to next FS address while logging in");
+		m_LoginNextAddress = false;
+	}
+
+	if (m_LoginNextAddress)
 	{
 		nlassert(!m_Connection.connected());
 
@@ -963,7 +971,7 @@ bool	CNetworkConnection::update()
 	}
 	catch (const ESocket &)
 	{
-		if (_ConnectionState != NextAddress)
+		if (!m_LoginNextAddress)
 		{
 			_ConnectionState = Disconnect;
 		}
@@ -1065,7 +1073,8 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 		disconnect(); // won't send a disconnection msg because state is already Disconnect
 		if (tryNextAddress)
 		{
-			_ConnectionState = NextAddress;
+			_ConnectionState = Login;
+			m_LoginNextAddress = true;
 			++_FrontendHostIndex;
 		}
 		else

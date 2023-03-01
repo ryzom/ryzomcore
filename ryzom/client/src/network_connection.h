@@ -271,7 +271,6 @@ public:
 		NotConnected,			// init() called
 		Authenticate,			// connect() called, identified by the login server
 		Login,					// connecting to the frontend, sending identification
-		NextAddress,			// failed while in Login state, next host address can be tried
 		Synchronize,			// connection accepted by the frontend, synchronizing
 		Connected,				// synchronized, connected, ready to work
 		Probe,					// connection lost by frontend, probing for response
@@ -563,6 +562,7 @@ public:
 protected:
 	/// The current state of the connection
 	TConnectionState			_ConnectionState;
+	bool						m_LoginNextAddress;
 
 	/// Connection Quality check
 	bool						_ConnectionQuality;
