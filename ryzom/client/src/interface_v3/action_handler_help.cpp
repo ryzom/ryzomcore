@@ -1908,9 +1908,25 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(getInventory().getItemSlotId(item) );
 	if (!itemInfo.CustomText.empty())
 	{
-		strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText + "\n");
-		const string &itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
-		strFindReplace(itemText, "%mfc", itemMFC);
+		std::string text = itemInfo.CustomText.toUtf8();
+		if (text.size() > 3 && text[0]=='@' && ((text[1]=='W' && text[2]=='E' && text[3]=='B') || (text[1]=='L' && text[2]=='U' && text[3]=='A')))
+		{
+			if (text.size() > 5 && text[4]=='-' && text[5]=='-')
+			{
+				std::vector<string> luaCode;
+				string code = text.substr(6, text.size()-6);
+				splitString(code, "\n", luaCode);
+				strFindReplace(itemText, "%custom_text", CStringManagerClient::getLocalizedName(luaCode[0]) );
+			}
+			else
+				strFindReplace(itemText, "%custom_text", string() );
+		}
+		else
+		{
+			strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText.toUtf8() + "\n");
+			string itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
+			strFindReplace(itemText, "%mfc", itemMFC);
+		}
 	}
 	else
 		strFindReplace(itemText, "%custom_text", string() );

@@ -165,9 +165,11 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						display->setTextFormatTaged(localDesc);
 					else
 					{
-						string text = itemInfo.CustomText;
-						string::size_type delimiter = text.find(' ');
-						if (NLMISC::startsWith(text, "@WEB"))
+						string text = itemInfo.CustomText.toUtf8();
+						uint inv, index;
+						CInventoryManager::getInstance()->getSlotInvIndex(ItemSlotId, inv, index);
+						strFindReplace(text, "%slot", toString(index));
+						if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 						{
 							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 							if (pGH)
@@ -304,9 +306,12 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 							display->setTextFormatTaged(localDesc);
 						else
 						{
-							string text = itemInfo.CustomText;
-							string::size_type delimiter = text.find(' ');
-							if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
+							string text = itemInfo.CustomText.toUtf8();
+							uint inv, index;
+							CInventoryManager::getInstance()->getSlotInvIndex(ItemSlotId, inv, index);
+							strFindReplace(text, "%slot", toString(index));
+
+							if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 							{
 								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 								if (pGH)
@@ -2391,11 +2396,11 @@ class CHandlerUseHotbarItem : public IActionHandler
 			return;
 		}
 
-		if (fam == ITEMFAMILY::ITEM_SAP_RECHARGE || fam == ITEMFAMILY::CRYSTALLIZED_SPELL) 
+		if (fam == ITEMFAMILY::ITEM_SAP_RECHARGE || fam == ITEMFAMILY::CRYSTALLIZED_SPELL)
 		{
 			sendToServerEnchantMessage((uint8)pCS->getInventoryIndex(), (uint16)pCS->getIndexInDB());
-		} 
-		else if (fam == ITEMFAMILY::CONSUMABLE || fam == ITEMFAMILY::XP_CATALYSER) 
+		}
+		else if (fam == ITEMFAMILY::CONSUMABLE || fam == ITEMFAMILY::XP_CATALYSER)
 		{
 			sendMsgUseItem(uint16(pCS->getIndexInDB()));
 		}
