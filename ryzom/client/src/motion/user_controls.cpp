@@ -822,27 +822,18 @@ void CUserControls::commonMove()
 					nlinfo("instance_idx = %d", instance_idx);
 					if  (instance_idx != -1 && !instref.Instance.empty() && !instref.ContextURL.empty())
 					{
-						nlinfo("ici");
-						execActionCursorPos(false,dblClickRight);
-						// Give back the mouse handling to the interface.
-						CWidgetManager::getInstance()->enableMouseHandling(true);
-						EventsListener.enableMouseSmoothing(false);
-						return;
+						UserEntity->selection(CLFECOMMON::INVALID_SLOT);
 					}
-					else
+					
+					if (ClientCfg.SelectWithRClick || R2::isEditionCurrent())
 					{
-						if (ClientCfg.SelectWithRClick || R2::isEditionCurrent())
-						{
-							// nb : the ring editor also need that kind of events
-							execActionCursorPos(true,dblClickRight);
-						}
-
-						// Launch Context Menu
-						if (R2::getEditor().getMode() != R2::CEditor::EditionMode)
-						{
-							IM->launchContextMenuInGame("ui:interface:game_context_menu");
-						}
+						// nb : the ring editor also need that kind of events
+						execActionCursorPos(true,dblClickRight);
 					}
+
+					// Launch Context Menu
+					if (R2::getEditor().getMode() != R2::CEditor::EditionMode)
+						IM->launchContextMenuInGame("ui:interface:game_context_menu");
 				}
 
 

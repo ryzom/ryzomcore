@@ -3485,6 +3485,12 @@ void CUserEntity::updateVisualDisplay()
 	}
 }// updateVisualDisplay //
 
+void CUserEntity::lightOn()
+{
+	_LightOn = false;
+	light();
+}
+
 //---------------------------------------------------
 // light:
 // Show/Hide the user light.
