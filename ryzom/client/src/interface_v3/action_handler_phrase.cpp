@@ -1662,7 +1662,8 @@ public:
 			{
 				CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 				sint	val= (sint32)value.getInteger();
-				clamp(val, 0, MEM_SET_TYPES::NumMemories-1);
+				// first half of memorized stanza sets
+				clamp(val, 0, MEM_SET_TYPES::NumMemories / 2 - 1);
 				pPM->selectMemoryLineDB(val);
 			}
 		}
@@ -1686,8 +1687,11 @@ public:
 			else
 			{
 				CSPhraseManager		*pPM= CSPhraseManager::getInstance();
-				sint	val= (sint32)value.getInteger();
-				clamp(val, 0, MEM_SET_TYPES::NumMemories-1);
+				// second half of memorized stanza sets
+				sint	minValue = MEM_SET_TYPES::NumMemories / 2;
+				sint	maxValue = MEM_SET_TYPES::NumMemories - 1;
+				sint	val = (sint32)value.getInteger() + minValue;
+				clamp(val, minValue, maxValue);
 				pPM->selectMemoryLineDBalt(val);
 			}
 		}
