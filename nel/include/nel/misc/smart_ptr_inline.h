@@ -317,6 +317,8 @@ SMART_INLINE void	CVirtualRefPtr<T>::unRef() const
 		}
 		else
 		{
+			// Guarantueed by !pinfo->IsNullPtrInfo
+			nlassumeex(pinfo != &CRefCount::NullPtrInfo);
 			// If the CVirtualRefPtr still point to a valid object.
 			if(pinfo->Ptr)
 			{
