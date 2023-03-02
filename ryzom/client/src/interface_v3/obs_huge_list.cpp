@@ -165,12 +165,13 @@ bool CHugeListObs::init()
 			case Trading:
 				_Items[k].SlotType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:SLOT_TYPE").c_str(), (int) k), false);
 				_Items[k].Quality = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:QUALITY").c_str(), (int) k), false);
+				_Items[k].Serial = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:SERIAL").c_str(), (int) k), false);
+				_Items[k].CreateTime = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:CREATE_TIME").c_str(), (int) k), false);
 				_Items[k].SheetIDOrSkill = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:SHEET").c_str(), (int) k), false);
 				_Items[k].Price = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:PRICE").c_str(), (int) k), false);
 				_Items[k].Weight = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:WEIGHT").c_str(), (int) k), false);
 				_Items[k].NameId = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:NAMEID").c_str(), (int) k), false);
 				_Items[k].UserColor = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:USER_COLOR").c_str(), (int) k), false);
-				_Items[k].CharacBuffs = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:CHARAC_BUFFS").c_str(), (int) k), false);
 				_Items[k].Enchant = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:ENCHANT").c_str(), (int) k), false);
 				_Items[k].RMClassType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_CLASS_TYPE").c_str(), (int) k), false);
 				_Items[k].RMFaberStatType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_FABER_STAT_TYPE").c_str(), (int) k), false);
@@ -186,6 +187,7 @@ bool CHugeListObs::init()
 				if ((_Items[k].SlotType == NULL) || (_Items[k].Quality == NULL) || (_Items[k].SheetIDOrSkill == NULL) ||
 					(_Items[k].Price == NULL) || (_Items[k].Weight==NULL) || (_Items[k].InfoVersion==NULL) ||
 					(_Items[k].UserColor==NULL) || (_Items[k].NameId==NULL) || (_Items[k].Quantity==NULL) ||
+					(_Items[k].Serial == NULL) || (_Items[k].CreateTime == NULL) ||
 					(_Items[k].PriceRetire==NULL) || (_Items[k].SellerType==NULL) || (_Items[k].ResaleTimeLeft==NULL)  ||
 					(_Items[k].VendorNameId==NULL)  || (_Items[k].Enchant ==NULL) || (_Items[k].RMClassType == NULL) ||
 					(_Items[k].RMFaberStatType == NULL) || (_Items[k].PrerequisitValid == NULL) ||
@@ -196,13 +198,14 @@ bool CHugeListObs::init()
 			case ItemForMissions:
 				_Items[k].SlotType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:SLOT_TYPE").c_str(), (int) k), false);
 				_Items[k].Quality = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:QUALITY").c_str(), (int) k), false);
+				_Items[k].Serial = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:SERIAL").c_str(), (int) k), false);
+				_Items[k].CreateTime = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:CREATE_TIME").c_str(), (int) k), false);
 				_Items[k].SheetIDOrSkill = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:SHEET").c_str(), (int) k), false);
 				_Items[k].LogicTextID = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:LOGIC_TEXT_ID").c_str(), (int) k), false);
 				_Items[k].DescTextID = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:DESC_TEXT_ID").c_str(), (int) k), false);
 				_Items[k].Weight = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:WEIGHT").c_str(), (int) k), false);
 				_Items[k].NameId = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:NAMEID").c_str(), (int) k), false);
 				_Items[k].UserColor = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:USER_COLOR").c_str(), (int) k), false);
-				_Items[k].CharacBuffs = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:CHARAC_BUFFS").c_str(), (int) k), false);
 				_Items[k].Enchant = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:ENCHANT").c_str(), (int) k), false);
 				_Items[k].RMClassType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_CLASS_TYPE").c_str(), (int) k), false);
 				_Items[k].RMFaberStatType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_FABER_STAT_TYPE").c_str(), (int) k), false);
@@ -211,7 +214,7 @@ bool CHugeListObs::init()
 					(_Items[k].LogicTextID == NULL) || (_Items[k].DescTextID == NULL) ||
 					(_Items[k].Weight==NULL) || (_Items[k].InfoVersion==NULL) || (_Items[k].UserColor==NULL) ||
 					(_Items[k].Enchant ==NULL) || (_Items[k].RMClassType == NULL) || (_Items[k].RMFaberStatType == NULL) ||
-					(_Items[k].NameId==NULL)
+					(_Items[k].NameId==NULL) || (_Items[k].Serial == NULL) || (_Items[k].CreateTime == NULL)
 				   )
 					return false;
 			break;
@@ -389,12 +392,13 @@ void CHugeListObs::update(ICDBNode * /* node */)
 			{
 				page.Items[k].SlotType = (TRADE_SLOT_TYPE::TTradeSlotType) _Items[k].SlotType->getValue32();
 				page.Items[k].Quality = (uint16) _Items[k].Quality->getValue16();
+				page.Items[k].Serial = (uint32) _Items[k].Serial->getValue32();
+				page.Items[k].CreateTime = (uint32) _Items[k].CreateTime->getValue32();
 				page.Items[k].SheetIDOrSkill = (uint32) _Items[k].SheetIDOrSkill->getValue32();
 				page.Items[k].Price = (uint32) _Items[k].Price->getValue32();
 				page.Items[k].Weight= (uint16) _Items[k].Weight->getValue16();
 				page.Items[k].NameId= (uint32) _Items[k].NameId->getValue32();
 				page.Items[k].UserColor = _Items[k].UserColor->getValue32();
-				page.Items[k].CharacBuffs = _Items[k].CharacBuffs->getValue32();
 				page.Items[k].Enchant = _Items[k].Enchant->getValue32();
 				page.Items[k].RMClassType = _Items[k].RMClassType->getValue32();
 				page.Items[k].RMFaberStatType = _Items[k].RMFaberStatType->getValue32();
@@ -427,13 +431,14 @@ void CHugeListObs::update(ICDBNode * /* node */)
 			case ItemForMissions:
 				page.Items[k].SlotType = (TRADE_SLOT_TYPE::TTradeSlotType) _Items[k].SlotType->getValue32();
 				page.Items[k].Quality = (uint16) _Items[k].Quality->getValue16();
+				page.Items[k].Serial = (uint32) _Items[k].Serial->getValue32();
+				page.Items[k].CreateTime = (uint32) _Items[k].CreateTime->getValue32();
 				page.Items[k].SheetIDOrSkill = (uint32) _Items[k].SheetIDOrSkill->getValue32();
 				page.Items[k].LogicTextID = (uint32) _Items[k].LogicTextID->getValue32();
 				page.Items[k].DescTextID = (uint32) _Items[k].DescTextID->getValue32();
 				page.Items[k].Weight= (uint16) _Items[k].Weight->getValue16();
 				page.Items[k].NameId= (uint32) _Items[k].NameId->getValue32();
 				page.Items[k].UserColor = _Items[k].UserColor->getValue32();
-				page.Items[k].CharacBuffs = _Items[k].CharacBuffs->getValue32();
 				page.Items[k].Enchant = _Items[k].Enchant->getValue32();
 				page.Items[k].RMClassType = _Items[k].RMClassType->getValue32();
 				page.Items[k].RMFaberStatType = _Items[k].RMFaberStatType->getValue32();
@@ -577,6 +582,10 @@ void CHugeListObs::updateUIItemPage(uint index)
 			case Trading:
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":QUALITY", false);
 				if (leaf) leaf->setValue32(currItem.Quality);
+				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":SERIAL", false);
+				if (leaf) leaf->setValue32(currItem.Serial);
+				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":CREATE_TIME", false);
+				if (leaf) leaf->setValue32(currItem.CreateTime);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":SLOT_TYPE", false);
 				if (leaf) leaf->setValue32(currItem.SlotType);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":SHEET", false);
@@ -589,8 +598,6 @@ void CHugeListObs::updateUIItemPage(uint index)
 				if (leaf) leaf->setValue32(currItem.NameId);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":USER_COLOR", false);
 				if (leaf) leaf->setValue32(currItem.UserColor);
-				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":CHARAC_BUFFS", false);
-				if (leaf) leaf->setValue32(currItem.CharacBuffs);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":ENCHANT", false);
 				if (leaf) leaf->setValue32(currItem.Enchant);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":RM_CLASS_TYPE", false);
@@ -620,6 +627,10 @@ void CHugeListObs::updateUIItemPage(uint index)
 			case ItemForMissions:
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":QUALITY", false);
 				if (leaf) leaf->setValue32(currItem.Quality);
+				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":SERIAL", false);
+				if (leaf) leaf->setValue32(currItem.Serial);
+				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":CREATE_TIME", false);
+				if (leaf) leaf->setValue32(currItem.CreateTime);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":SLOT_TYPE", false);
 				if (leaf) leaf->setValue32(currItem.SlotType);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":SHEET", false);
@@ -634,8 +645,6 @@ void CHugeListObs::updateUIItemPage(uint index)
 				if (leaf) leaf->setValue32(currItem.NameId);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":USER_COLOR", false);
 				if (leaf) leaf->setValue32(currItem.UserColor);
-				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":CHARAC_BUFFS", false);
-				if (leaf) leaf->setValue32(currItem.CharacBuffs);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":ENCHANT", false);
 				if (leaf) leaf->setValue32(currItem.Enchant);
 				leaf = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + toString(k + index * TRADE_PAGE_NUM_ITEMS) + ":RM_CLASS", false);

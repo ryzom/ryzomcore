@@ -79,8 +79,6 @@ REGISTER_UI_CLASS(CDBCtrlSheet)
 
 const uint64 NOTIFY_ANIM_MS_DURATION = 1000;
 
-#ifdef RYZOM_FORGE
-
 // state kept and changed by UI:SAVE:SHOW_ICON_BUFFS
 bool CDBCtrlSheet::_ShowIconBuffs = true;
 
@@ -150,16 +148,12 @@ string CControlSheetInfoWaiter::infoValidated() const
 #endif
 }
 
-#endif
-
 // ***************************************************************************
 int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
 {
 	CLuaIHM::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) ));
 	return 1;
 }
-
-#ifdef RYZOM_FORGE
 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
@@ -195,8 +189,6 @@ int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
 
 	return 1;
 }
-
-#endif
 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetName(CLuaState &ls)
@@ -544,9 +536,7 @@ CCtrlDraggable(param)
 	_Useable= true;
 	_GrayedLink= NULL;
 	_NeedSetup= true;
-#ifdef RYZOM_FORGE
 	_ItemInfoChanged = true;
-#endif
 	_IconW = 0;
 	_IconH = 0;
 	_SetupInit= false;
@@ -571,12 +561,10 @@ CCtrlDraggable(param)
 	_ItemRMFaberStatType= NULL;
 	_NotifyAnimEndTime = 0;
 
-#ifdef RYZOM_FORGE
 	_HpBuffIcon = "ico_heal.tga";
 	_SapBuffIcon = "ico_sap.tga";
 	_StaBuffIcon = "ico_stamina.tga";
 	_FocusBuffIcon = "ico_focus.tga";
-#endif
 
 	_RegenText = NULL;
 	_RegenTextValue = 0;
@@ -596,12 +584,10 @@ CDBCtrlSheet::~CDBCtrlSheet()
 {
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
-#ifdef RYZOM_FORGE
 	if (_ItemInfoWaiter.Requesting)
 	{
 		getInventory().removeItemInfoWaiter(&_ItemInfoWaiter);
 	}
-#endif
 
 	if (_GuildBack)
 	{
@@ -686,7 +672,6 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"slot" );
 	if(prop)	_DrawSlot= CInterfaceElement::convertBool(prop);
 
-#ifdef RYZOM_FORGE
 	//
 	_HpBuffIcon = "ico_heal.tga";
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"hp_buff_icon" );
@@ -703,7 +688,6 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	_FocusBuffIcon = "ico_focus.tga";
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"focus_buff_icon" );
 	if (prop)	_FocusBuffIcon = string((const char *)prop);
-#endif
 
 	XML_READ_BOOL(cur, "regen_text", _RegenTextEnabled, true);
 	XML_READ_BOOL(cur, "regen_text_shadow", _RegenTextShadow, true);
@@ -1136,25 +1120,6 @@ void CDBCtrlSheet::updateIconSize()
 	}
 }
 
-void CDBCtrlSheet::updateCharacBuffs()
-{
-	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	uint8 characBuffs = getItemCharacBuffs();
-
-	_BuffIcons.clear();
-	if (characBuffs & (1 << CHARACTERISTICS::constitution)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_heal.tga")));
-	if (characBuffs & (1 << CHARACTERISTICS::intelligence)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_sap.tga")));
-	if (characBuffs & (1 << CHARACTERISTICS::strength)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_stamina.tga")));
-	if (characBuffs & (1 << CHARACTERISTICS::dexterity)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_focus.tga")));
-
-	// update sizes
-	for(uint i = 0; i < _BuffIcons.size(); ++i)
-	{
-		rVR.getTextureSizeFromId(_BuffIcons[i].TextureId, _BuffIcons[i].IconW, _BuffIcons[i].IconH);
-	}
-}
-
-#ifdef RYZOM_FORGE
 // ***************************************************************************
 void CDBCtrlSheet::clearIconBuffs()
 {
@@ -1236,7 +1201,6 @@ void CDBCtrlSheet::updateIconBuffs()
 		}
 	}
 
-#if 0
 	// buff icons
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -1254,9 +1218,7 @@ void CDBCtrlSheet::updateIconBuffs()
 	}
 
 	_LastItemInfoVersion = getItemInfoVersion();
-#endif
 }
-#endif
 
 // ***************************************************************************
 void CDBCtrlSheet::setupPact()
@@ -1299,8 +1261,6 @@ void CDBCtrlSheet::setupPact()
 	}
 }
 
-#ifdef RYZOM_FORGE
-
 // ***************************************************************************
 bool CDBCtrlSheet::useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const
 {
@@ -1315,8 +1275,6 @@ bool CDBCtrlSheet::useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const
 		|| family == ITEMFAMILY::TAMING_TOOL
 		|| family == ITEMFAMILY::TRAINING_TOOL;
 }
-
-#endif
 
 // ***************************************************************************
 void CDBCtrlSheet::setupItem ()
@@ -1419,16 +1377,11 @@ void CDBCtrlSheet::setupItem ()
 			// Special Item requirement
 			updateItemCharacRequirement(_LastSheetId);
 
-			// Update buff icons
-			updateCharacBuffs();
-
-#ifdef RYZOM_FORGE
 			// update icon buffs using cached info
 			updateIconBuffs();
 
 			// update item info markers
 			_ItemInfoChanged = true;
-#endif
 		}
 		else
 		{
@@ -1525,7 +1478,6 @@ void CDBCtrlSheet::setupItem ()
 	}
 */
 
-#ifdef RYZOM_FORGE
 	// at each frame, update item info icon if changed
 	// This will not trigger on slots where client has not asked info version yet
 	// (enchanting weapon right after login)
@@ -1534,7 +1486,6 @@ void CDBCtrlSheet::setupItem ()
 		_ItemInfoChanged = false;
 		setupItemInfoWaiter();
 	}
-#endif
 }
 
 
@@ -2612,12 +2563,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					rVR.draw11RotFlipBitmap (_RenderLayer+1, x, y, 0, false, _DispOver2BmpId, fastMulRGB(curSheetColor, _IconOver2Color));
 				}
 
-#ifdef RYZOM_FORGE
-				if (_ShowIconBuffs && 
-#else
-				if (
-#endif
-					!_BuffIcons.empty())
+				if (_ShowIconBuffs && !_BuffIcons.empty())
 				{
 					// there is max 4 icons
 					sint32 hArea = (hSheet / 4);
@@ -2634,11 +2580,11 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 							hIcon = hArea;
 						}
 						rVR.drawRotFlipBitmap (_RenderLayer+1, xIcon, yIcon, wIcon, hIcon, 0, false, _BuffIcons[i].TextureId, fastMulRGB(curSheetColor, _BuffIcons[i].Color));
-						xIcon += wIcon / 2;
+						xIcon += wIcon;
 						// move up the row for 3rd/4th icon
 						if (i % 3 == 1) {
 							xIcon = x;
-							yIcon += hIcon / 2;
+							yIcon += hIcon;
 						}
 					}
 				}
@@ -2653,12 +2599,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					drawNumber(x+1, y-2+hSheet-rVR.getFigurTextureH(), wSheet, hSheet, numberColor, enchant, false);
 				}
 
-#ifdef RYZOM_FORGE
-				if (_ShowIconBuffs && 
-#else
-				if (
-#endif
-					!_EnchantIcons.empty())
+				if (_ShowIconBuffs && !_EnchantIcons.empty())
 				{
 					// draw icons in column of 3, top-right
 					sint32 hArea = (hSheet / 3);
@@ -3465,18 +3406,14 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 
 		// swap the other props only if the DB exist in the 2 version. else no-op
 		swapDBProps(_UserColor, other->_UserColor);
-		swapDBProps(getItemCharacBuffsPtr(), other->getItemCharacBuffsPtr());
-		swapDBProps(getItemAccessPtr(), other->getItemAccessPtr());
 		swapDBProps(getItemLockedPtr(), other->getItemLockedPtr());
 		swapDBProps(getItemWeightPtr(), other->getItemWeightPtr());
 		swapDBProps(getItemInfoVersionPtr(), other->getItemInfoVersionPtr());
 		swapDBProps(getItemRMClassTypePtr(), other->getItemRMClassTypePtr());
 		swapDBProps(getItemRMFaberStatTypePtr(), other->getItemRMFaberStatTypePtr());
 		swapDBProps(getItemPrerequisitValidPtr(), other->getItemPrerequisitValidPtr());
-#ifdef RYZOM_FORGE
 		swapDBProps(getItemSerialPtr(), other->getItemSerialPtr());
 		swapDBProps(getItemCreateTimePtr(), other->getItemCreateTimePtr());
-#endif
 	}
 }
 
@@ -3588,7 +3525,6 @@ const COutpostBuildingSheet *CDBCtrlSheet::asOutpostBuildingSheet() const
 	return NULL;
 }
 
-#ifdef RYZOM_FORGE
 // ***************************************************************************
 void	CDBCtrlSheet::setupItemInfoWaiter()
 {
@@ -3646,7 +3582,6 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 		}
 	}
 }
-#endif
 
 // ***************************************************************************
 void	CDBCtrlSheet::getContextHelp(std::string &help) const
@@ -3709,7 +3644,6 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		const CItemSheet	*item= asItemSheet();
 		if(item)
 		{
-#ifdef RYZOM_FORGE
 			if (useItemInfoForFamily(item->Family))
 			{
 				// call lua function to update tooltip window
@@ -3724,16 +3658,6 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			{
 				help = getItemActualName();;
 			}
-#else
-			if (!_ContextHelp.empty())
-			{
-				help = _ContextHelp;
-			}
-			else
-			{
-				help = getItemActualName();;
-			}
-#endif
 		}
 		else
 			help= _ContextHelp;
@@ -3849,7 +3773,6 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 // ***************************************************************************
 void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 {
-#ifdef RYZOM_FORGE
 	// Special case for buff items and spell crystals, only for tooltips
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
 	{
@@ -3865,7 +3788,6 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 			}
 		}
 	}
-#endif
 
 	// Default
 	getContextHelp(help);
@@ -4044,9 +3966,7 @@ void CDBCtrlSheet::resetAllTexIDs()
 	_IconW = 0;
 	_IconH = 0;
 
-#ifdef RYZOM_FORGE
 	_ItemInfoChanged = true;
-#endif
 	_EnchantIcons.clear();
 	_BuffIcons.clear();
 	_BoostIcons.clear();
@@ -4114,10 +4034,6 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		// copy color for items
 		sint col = getItemColor();
 		if (col != -1) dest->setItemColor(col);
-		// copy charac buffs
-		dest->setItemCharacBuffs(getItemCharacBuffs());
-		// copy access
-		dest->setItemAccess(getItemAccess());
 		// copy weight
 		dest->setItemWeight(getItemWeight());
 		// copy nameId
@@ -4134,12 +4050,10 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		dest->setItemRMFaberStatType(getItemRMFaberStatType());
 		// copy prerequisit valid flag
 		dest->setItemPrerequisitValid(getItemPrerequisitValid());
-#ifdef RYZOM_FORGE
 		// copy item serial
 		dest->setItemSerial(getItemSerial());
 		// copy item create time
 		dest->setItemCreateTime(getItemCreateTime());
-#endif
 	}
 	// if brick, sphrase or sphraseId
 	if(isSBrick() || isSPhrase() || isSPhraseId())
@@ -4680,8 +4594,6 @@ void CDBCtrlSheet::setItemResaleFlag(sint32 rf)
 	node->setValue32(rf);
 }
 
-#ifdef RYZOM_FORGE
-
 // ***************************************************************************
 sint32 CDBCtrlSheet::getItemCreateTime() const
 {
@@ -4729,8 +4641,6 @@ void CDBCtrlSheet::setItemSerial(sint32 rf)
 	if (!node) return;
 	node->setValue32(rf);
 }
-
-#endif
 
 // ***************************************************************************
 bool CDBCtrlSheet::getLockedByOwner() const
@@ -4819,52 +4729,6 @@ void CDBCtrlSheet::setItemPrerequisitValid(bool prv)
 	CCDBNodeLeaf *node = getItemPrerequisitValidPtr();
 	if (!node) return;
 	node->setValueBool(prv);
-}
-
-// ***************************************************************************
-uint8 CDBCtrlSheet::getItemCharacBuffs() const
-{
-	CCDBNodeLeaf *node = getItemCharacBuffsPtr();
-	return (node ? (uint8)node->getValue8() : 0);
-}
-
-// ***************************************************************************
-CCDBNodeLeaf *CDBCtrlSheet::getItemCharacBuffsPtr() const
-{
-	CCDBNodeBranch *root = getRootBranch();
-	if (!root) return NULL;
-	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("CHARAC_BUFFS"), false));
-}
-
-// ***************************************************************************
-void CDBCtrlSheet::setItemCharacBuffs(uint8 val)
-{
-	CCDBNodeLeaf *node = getItemCharacBuffsPtr();
-	if (!node) return;
-	node->setValue8((sint8)val);
-}
-
-// ***************************************************************************
-uint8 CDBCtrlSheet::getItemAccess() const // TODO: Guild grade & proper default
-{
-	CCDBNodeLeaf *node = getItemAccessPtr();
-	return (node ? (uint8)node->getValue8() : 0);
-}
-
-// ***************************************************************************
-CCDBNodeLeaf *CDBCtrlSheet::getItemAccessPtr() const
-{
-	CCDBNodeBranch *root = getRootBranch();
-	if (!root) return NULL;
-	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("ACCESS"), false));
-}
-
-// ***************************************************************************
-void CDBCtrlSheet::setItemAccess(uint8 val)
-{
-	CCDBNodeLeaf *node = getItemAccessPtr();
-	if (!node) return;
-	node->setValue8((sint8)val);
 }
 
 // ***************************************************************************
@@ -5036,7 +4900,6 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 	{
 		return "action_context_help";
 	}
-#ifdef RYZOM_FORGE
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
 	{
 		const CItemSheet	*item= asItemSheet();
@@ -5052,7 +4915,6 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 			}
 		}
 	}
-#endif
 	return CCtrlBase::getContextHelpWindowName();
 }
 

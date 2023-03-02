@@ -62,6 +62,8 @@
 using namespace std;
 using namespace NLMISC;
 
+extern TSessionId CharacterHomeSessionId;
+
 extern NLMISC::CLog g_log;
 // Context help
 extern void contextHelp (const std::string &help);
@@ -126,8 +128,9 @@ CItemImage::CItemImage()
 	Sheet = NULL;
 	Quality = NULL;
 	Quantity = NULL;
+	CreateTime = NULL;
+	Serial = NULL;
 	UserColor = NULL;
-	CharacBuffs = NULL;
 	Price = NULL;
 	Weight= NULL;
 	NameId= NULL;
@@ -141,8 +144,9 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	Sheet = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("SHEET"), false));
 	Quality = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("QUALITY"), false));
 	Quantity = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("QUANTITY"), false));
+	CreateTime = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("CREATE_TIME"), false));
+	Serial = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("SERIAL"), false));
 	UserColor = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("USER_COLOR"), false));
-	CharacBuffs = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("CHARAC_BUFFS"), false));
 	Price = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("PRICE"), false));
 	Weight = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("WEIGHT"), false));
 	NameId = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("NAMEID"), false));
@@ -150,10 +154,13 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	ResaleFlag = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("RESALE_FLAG"), false));
 
 	// Should always have at least those one:(ie all but Price)
-	nlassert(Sheet && Quality && Quantity && UserColor && Weight && NameId && InfoVersion);
+	nlassert(Sheet && Quality && Quantity && CreateTime && Serial && UserColor && Weight && NameId && InfoVersion);
 }
 
-#ifdef RYZOM_FORGE
+uint64 CItemImage::getItemId() const
+{
+	return ((uint64)getSerial() << 32) | getCreateTime();
+}
 
 // *************************************************************************************************
 void CItemInfoCache::load(const std::string &filename)
@@ -288,8 +295,6 @@ void CItemInfoCache::debugItemInfoCache() const
 	pIM->displaySystemInfo(toString("ItemInfoCache: %d entries written to client.log", _ItemInfoCacheMap.size()));
 }
 
-#endif
-
 // *************************************************************************************************
 // CInventoryManager
 // *************************************************************************************************
@@ -328,12 +333,8 @@ CInventoryManager::CInventoryManager()
 		BagItemEquipped[i]= false;
 	}
 
-#ifdef RYZOM_FORGE
-
 	_ItemInfoCacheFilename = toString("save/item_infos_%d.cache", CharacterHomeSessionId.asInt());
 	_ItemInfoCache.load(_ItemInfoCacheFilename);
-
-#endif
 
 	nlctassert(NumInventories== sizeof(InventoryIndexes)/sizeof(InventoryIndexes[0]));
 }
@@ -341,9 +342,7 @@ CInventoryManager::CInventoryManager()
 // ***************************************************************************
 CInventoryManager::~CInventoryManager()
 {
-#ifdef RYZOM_FORGE
 	_ItemInfoCache.save(_ItemInfoCacheFilename);
-#endif
 }
 
 // *************************************************************************************************
@@ -3222,7 +3221,13 @@ class CHandlerLockInvItem : public IActionHandler
 			return;
 		}
 
-		uint16 slot = (uint16)item->getIndexInDB();
+		string lock = "1";
+		if (item->getLockedByOwner())
+		{
+			lock = "0";
+		}
+
+		uint32 slot = item->getIndexInDB();
 		uint32 inv = item->getInventoryIndex();
 		INVENTORIES::TInventory inventory = INVENTORIES::UNDEFINED;
 		inventory = (INVENTORIES::TInventory)(inv);
@@ -3230,22 +3235,7 @@ class CHandlerLockInvItem : public IActionHandler
 		{
 			return;
 		}
-
-		bool lock = !item->getLockedByOwner();
-		if (lock) item->setItemResaleFlag(BOTCHATTYPE::ResaleKOLockedByOwner);
-		// else wait for proper state
-
-		CBitMemStream out;
-		if(GenericMsgHeaderMngr.pushNameToStream("ITEM:LOCK", out))
-		{
-			out.serialShortEnum(inventory);
-			out.serial(slot);
-			out.serial(lock);
-
-			NetMngr.push(out);
-		}
-		else
-			nlwarning("mainLoop : unknown message name : '%s'", "ITEM:RENAME");
+		NLMISC::ICommand::execute("a lockItem " + INVENTORIES::toString(inventory) + " " + toString(slot) + " " + lock, g_log);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerLockInvItem, "lock_inv_item" );
@@ -3472,19 +3462,29 @@ uint				CInventoryManager::getItemSheetForSlotId(uint slotId) const
 	return 0;
 }
 
-#ifdef RYZOM_FORGE
 // ***************************************************************************
 const	CClientItemInfo *CInventoryManager::getItemInfoCache(uint32 serial, uint32 createTime) const
 {
 	return _ItemInfoCache.getItemInfo(serial, createTime);
 }
-#endif
 
 // ***************************************************************************
 const	CClientItemInfo	&CInventoryManager::getItemInfo(uint slotId) const
 {
 	TItemInfoMap::const_iterator	it= _ItemInfoMap.find(slotId);
 	static	CClientItemInfo	empty;
+	if (it == _ItemInfoMap.end() || !isItemInfoUpToDate(slotId))
+	{
+		// if slot has not been populated yet or out of date, then return info from cache if possible
+		const CItemImage *item = getServerItem(slotId);
+		if (item && item->getItemId() > 0) {
+			const CClientItemInfo *ret = _ItemInfoCache.getItemInfo(item->getItemId());
+			if (ret != NULL)
+			{
+				return *ret;
+			}
+		}
+	}
 
 	if (it == _ItemInfoMap.end())
 	{
@@ -3645,6 +3645,12 @@ void			CInventoryManager::onReceiveItemInfo(const CItemInfos &itemInfo)
 	// update the Info
 	uint itemSlotId = itemInfo.slotId;
 
+	const CItemImage *item = getServerItem(itemSlotId);
+	if (item && item->getItemId() > 0)
+	{
+		_ItemInfoCache.readFromImpulse(item->getItemId(), itemInfo);
+	}
+
 	// write in map, from DB.
 	_ItemInfoMap[itemSlotId].readFromImpulse(itemInfo);
 
@@ -3769,12 +3775,10 @@ void			CInventoryManager::debugItemInfoWaiters()
 }
 
 // ***************************************************************************
-#ifdef RYZOM_FORGE
 void			CInventoryManager::debugItemInfoCache() const
 {
 	_ItemInfoCache.debugItemInfoCache();
 }
-#endif
 
 // ***************************************************************************
 void CInventoryManager::sortBag()

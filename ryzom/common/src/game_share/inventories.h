@@ -278,22 +278,22 @@ namespace INVENTORIES
 	enum TItemPropId
 	{
 		Sheet,
-		Quality,
-		Quantity,
-		UserColor,
-		CharacBuffs,
-		Locked,
-		Access,
-		Weight,
-		NameId,
-		Enchant,
-		ItemClass,
-		ItemBestStat,
-		PrerequisitValid,
-		Price,
-		ResaleFlag,
-		Worned,
-		NbItemPropId
+			Quality,
+			Quantity,
+			UserColor,
+			CreateTime,
+			Serial,
+			Locked,
+			Weight,
+			NameId,
+			Enchant,
+			ItemClass,
+			ItemBestStat,
+			Price,
+			ResaleFlag,
+			PrerequisitValid,
+			Worned,
+			NbItemPropId
 	};
 
 	const uint NbBitsForItemPropId = 4; // TODO: replace this constant by an inline function using NbItemPropId
@@ -513,9 +513,6 @@ enum TItemChange
 	itc_lock_state		= 1<<6,
 	itc_info_version	= 1<<7,
 	itc_worned			= 1<<8,
-	itc_owner_locked    = itc_lock_state,
-	itc_access_grade    = itc_lock_state,
-	itc_name            = itc_lock_state,
 };
 
 typedef NLMISC::CEnumBitset<TItemChange>	TItemChangeFlags;

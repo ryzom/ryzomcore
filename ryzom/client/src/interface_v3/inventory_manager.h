@@ -65,8 +65,9 @@ public:
 	NLMISC::CCDBNodeLeaf *Sheet;
 	NLMISC::CCDBNodeLeaf *Quality;
 	NLMISC::CCDBNodeLeaf *Quantity;
+	NLMISC::CCDBNodeLeaf *CreateTime;
+	NLMISC::CCDBNodeLeaf *Serial;
 	NLMISC::CCDBNodeLeaf *UserColor;
-	NLMISC::CCDBNodeLeaf *CharacBuffs;
 	NLMISC::CCDBNodeLeaf *Price;
 	NLMISC::CCDBNodeLeaf *Weight;
 	NLMISC::CCDBNodeLeaf *NameId;
@@ -78,12 +79,14 @@ public:
 	CItemImage();
 	// build from a branch
 	void build(NLMISC::CCDBNodeBranch *branch);
+	uint64 getItemId() const;
 	// shortcuts to avoid NULL pointer tests
 	uint32 getSheetID() const						{ return (uint32)			(Sheet ? Sheet->getValue32() : 0); }
 	uint16 getQuality() const						{ return (uint16)			(Quality ? Quality->getValue16() : 0); }
 	uint16 getQuantity() const						{ return (uint16)			(Quantity ? Quantity->getValue16() : 0); }
+	uint32 getCreateTime() const					{ return (uint32)			(CreateTime ? CreateTime->getValue32() : 0); }
+	uint32 getSerial() const						{ return (uint32)			(Serial ? Serial->getValue32() : 0); }
 	uint8  getUserColor() const						{ return (uint8)			(UserColor ? UserColor->getValue8() : 0); }
-	uint8  getCharacBuffs() const					{ return (uint8)			(CharacBuffs ? CharacBuffs->getValue8() : 0); }
 	uint32 getPrice() const							{ return (uint32)			(Price ? Price->getValue32() : 0); }
 	uint32 getWeight() const						{ return (uint32)			(Weight ? Weight->getValue32() : 0); }
 	uint32 getNameId() const						{ return (uint32)			(NameId ? NameId->getValue32() : 0); }
@@ -94,8 +97,9 @@ public:
 	void   setSheetID(uint32 si)					{ if (Sheet) Sheet->setValue32((sint32) si); }
 	void   setQuality(uint16 quality)				{ if (Quality) Quality->setValue16((sint16) quality); }
 	void   setQuantity(uint16 quantity)				{ if (Quantity) Quantity->setValue16((sint16) quantity); }
+	void   setCreateTime(uint32 create_time)		{ if (CreateTime) CreateTime->setValue32((sint32) create_time); }
+	void   setSerial(uint32 serial)					{ if (Serial) Serial->setValue32((sint32) serial); }
 	void   setUserColor(uint8 uc)					{ if (UserColor) UserColor->setValue8((sint8) uc); }
-	void   setCharacBuffs(uint8 uc)					{ if (CharacBuffs) CharacBuffs->setValue8((sint8) uc); }
 	void   setPrice(uint32 price)					{ if (Price) Price->setValue32((sint32) price); }
 	void   setWeight(uint32 wgt)					{ if (Weight) Weight->setValue32((sint32) wgt); }
 	void   setNameId(uint32 nid)					{ if (NameId) NameId->setValue32((sint32) nid); }
@@ -134,8 +138,6 @@ public:
 	void			refreshInfoVersion(uint8 infoVersion) { InfoVersionFromMsg= infoVersion; }
 };
 
-#ifdef RYZOM_FORGE
-
 class CItemInfoCache
 {
 public:
@@ -155,8 +157,6 @@ private:
 	typedef std::map<uint64, CClientItemInfo> TItemInfoCacheMap;
 	TItemInfoCacheMap _ItemInfoCacheMap;
 };
-
-#endif
 
 // ***************************************************************************
 /** This manager gives direct access to inventory slots (bag, temporary inventory, hands, and equip inventory)
@@ -298,10 +298,8 @@ public:
 		uint16				getItemSlotId(CDBCtrlSheet *ctrl);
 		uint16				getItemSlotId(const std::string &itemDb, uint slotIndex);
 		const	CClientItemInfo	&getItemInfo(uint slotId) const;
-#ifdef RYZOM_FORGE
 		// get item info from cache
 		const	CClientItemInfo *getItemInfoCache(uint32 serial, uint32 createTime) const;
-#endif
 		uint				getItemSheetForSlotId(uint slotId) const;
 		// get item in bag from cache
 		uint32 getBagItemSheet(sint32 bagId) const;
@@ -319,9 +317,7 @@ public:
 		void				onUpdateEquipHands();
 		// Log for debug
 		void				debugItemInfoWaiters();
-#ifdef RYZOM_FORGE
 		void				debugItemInfoCache() const;
-#endif
 
 		void				sortBag();
 
@@ -373,10 +369,8 @@ private:
 		CDBCtrlSheet	*DNDCurrentItem;
 
 	// ItemExtraInfo management.
-#ifdef RYZOM_FORGE
 		std::string								_ItemInfoCacheFilename;
 		CItemInfoCache							_ItemInfoCache;
-#endif
 		typedef std::map<uint, CClientItemInfo>	TItemInfoMap;
 		TItemInfoMap							_ItemInfoMap;
 		typedef std::list<IItemInfoWaiter*>		TItemInfoWaiters;

@@ -61,8 +61,6 @@ namespace NLGUI
 
 class CDBCtrlSheet;
 
-#ifdef RYZOM_FORGE
-
 // ***************************************************************************
 // Item info request from server
 class CControlSheetInfoWaiter : public IItemInfoWaiter
@@ -80,7 +78,6 @@ public:
 	virtual void infoReceived();
 };
 
-#endif
 
 // ***************************************************************************
 /** Common info for CDBCtrlSheet and CDBGroupListSheet
@@ -308,9 +305,7 @@ public:
 		REFLECT_STRING_REF ("on_can_drop", getActionOnCanDrop, setActionOnCanDrop);
 		REFLECT_STRING_REF ("on_can_drop_params", getParamsOnCanDrop, setParamsOnCanDrop);
 		REFLECT_LUA_METHOD("getDraggedSheet", luaGetDraggedSheet);
-#ifdef RYZOM_FORGE
 		REFLECT_LUA_METHOD("getItemInfo", luaGetItemInfo);
-#endif
 		REFLECT_LUA_METHOD("getName", luaGetName);
 		REFLECT_LUA_METHOD("getCreatorName", luaGetCreatorName);
 		REFLECT_LUA_METHOD("waitInfo", luaWaitInfo);
@@ -318,9 +313,7 @@ public:
 	REFLECT_EXPORT_END
 
 	int luaGetDraggedSheet(CLuaState &ls);
-#ifdef RYZOM_FORGE
 	int luaGetItemInfo(CLuaState &ls);
-#endif
 	int luaGetName(CLuaState &ls);
 	int luaGetCreatorName(CLuaState &ls);
 	int luaWaitInfo(CLuaState &ls);
@@ -540,8 +533,6 @@ public:
 	// set item RESALE_FLAG
 	void setItemResaleFlag(sint32 rf);
 
-#ifdef RYZOM_FORGE
-
 	//get item CREATE_TIME. 0 if no DB
 	sint32 getItemCreateTime() const;
 	NLMISC::CCDBNodeLeaf *getItemCreateTimePtr() const;
@@ -553,8 +544,6 @@ public:
 	NLMISC::CCDBNodeLeaf *getItemSerialPtr() const;
 	// set item CREATE_TIME
 	void setItemSerial(sint32 serial);
-
-#endif
 
 	// get item locked by owner
 	bool getLockedByOwner() const;
@@ -590,18 +579,6 @@ public:
 	sint32	getItemColor() const {if(_UserColor) return _UserColor->getValue32(); else return -1;}
 	// set item color (if possible)
 	void	setItemColor(sint32 val) {if(_UserColor) _UserColor->setValue32(val);}
-
-	// get item CHARAC_BUFFS. 0 if no DB
-	uint8 getItemCharacBuffs() const;
-	NLMISC::CCDBNodeLeaf *getItemCharacBuffsPtr() const;
-	// set item CHARAC_BUFFS
-	void setItemCharacBuffs(uint8 val);
-
-	// get item ACCESS. 0 if no DB
-	uint8 getItemAccess() const; // TODO: Guild grade & proper default
-	NLMISC::CCDBNodeLeaf *getItemAccessPtr() const;
-	// set item CHARAC_BUFFS
-	void setItemAccess(uint8 val);
 
 	// Get the Actual item name. Localized version of SheetId, or given by server through NAMEID.
 	std::string getItemActualName() const;
@@ -646,25 +623,17 @@ public:
 	// start notify anim (at the end of regen usually)
 	void	startNotifyAnim();
 
-	void updateCharacBuffs();
-
-#ifdef RYZOM_FORGE
 	// callback from info waiter
 	void infoReceived();
-#endif
 
 	// do the sheets point to the same item in the DB ?
 	bool isSheetEqual(CDBCtrlSheet *pCS) const;
 
 	// set enchant/buff marker visiblility
-#ifdef RYZOM_FORGE
 	static void setShowIconBuffs(bool b) { _ShowIconBuffs = b; }
-#endif
 
 protected:
-#ifdef RYZOM_FORGE
 	inline bool useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const;
-#endif
 
 	void setupItem();
 	void setupPact();
@@ -704,12 +673,10 @@ protected:
 	NLMISC::CCDBNodeLeaf		*_ItemRMFaberStatType;
 
 	mutable sint32		_LastSheetId;
-#ifdef RYZOM_FORGE
 	sint32				_LastItemInfoVersion;
 	sint32				_LastItemCreateTime;
 	sint32				_LastItemSerial;
 	bool				_ItemInfoChanged;
-#endif
 
 	/// Display
 	sint32				_DispSlotBmpId;		// Display slot bitmap id
@@ -720,12 +687,10 @@ protected:
 	sint32				_DispOverBmpId;		// Over Icon
 	sint32				_DispOver2BmpId;	// Over Icon N0 2 for bricks / items. Useful for items when _DispOverBmpId is used to paint user color on the item.
 
-#ifdef RYZOM_FORGE
 	std::string			_HpBuffIcon;
 	std::string			_SapBuffIcon;
 	std::string			_StaBuffIcon;
 	std::string			_FocusBuffIcon;
-#endif
 
 	// texture ids to show
 	struct SBuffIcon
@@ -876,28 +841,22 @@ protected:
 
 	sint64		_NotifyAnimEndTime;
 	
-#ifdef RYZOM_FORGE
 	mutable CControlSheetInfoWaiter _ItemInfoWaiter;
-#endif
 private:
 	mutable TSheetType			_ActualType;
 
 	static		CDBCtrlSheet *_CurrSelection;
 	static		CDBCtrlSheet *_CurrMenuSheet;
 
-#ifdef RYZOM_FORGE
 	static		bool _ShowIconBuffs;
-#endif
 private:
 	void		updateActualType() const;
 	void		updateIconSize();
 	void		resetAllTexIDs();
 	void		setupInit();
-#ifdef RYZOM_FORGE
 	// update/remove enchant and buff markers from item icon
 	void		clearIconBuffs();
 	void		updateIconBuffs();
-#endif
 
 	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown= false);
 	void		resetCharBitmaps();
@@ -906,10 +865,8 @@ private:
 	// special for items
 	void		updateItemCharacRequirement(sint32 sheetId);
 
-#ifdef RYZOM_FORGE
 	// Send ITEM_INFO:GET request to server to fetch Buffs, Enchant info
 	void		setupItemInfoWaiter();
-#endif
 
 	// update armour color, and cache
 	void		updateArmourColor(sint8 col);

@@ -85,7 +85,7 @@ namespace BOTCHATTYPE
 		ResaleKOBroken,
 		// this item can't be sold because its Resold time has expired
 		ResaleKONoTimeLeft,
-		// this item can't be sold because the owner has locked it
+		// this item can't be sold because the owner has locked it (temporary hack to get around modifying database.xml)
 		ResaleKOLockedByOwner,
 
 		NumBotChatResaleFlag

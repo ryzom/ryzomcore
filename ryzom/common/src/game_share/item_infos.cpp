@@ -76,7 +76,7 @@ CItemInfos::CItemInfos()
 	LacustreMagicResistance = 0;
 	JungleMagicResistance = 0;
 	PrimaryRootMagicResistance = 0;
-
+	PetNumber = 0; // 1 based!
 }
 
 void CItemInfos::serial(NLMISC::IStream & s)
@@ -131,9 +131,9 @@ void CItemInfos::serial(NLMISC::IStream & s)
 		s.serial(CastingSpeedFactor[i]);
 		s.serial(MagicPowerFactor[i]);
 	}
-
 	s.serial( CustomText );
 	s.serial( R2ItemDescription );
 	s.serial( R2ItemComment );
+	s.serial( PetNumber );
 }
 
