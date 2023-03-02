@@ -130,7 +130,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				{
 					if ( pIS->Family == ITEMFAMILY::SCROLL)
 					{
-						editBoxLarge->setInputString(itemInfo.CustomText); // TODO: UTF-8 (serial)
+						editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText); // TODO: UTF-8 (serial)
 						editLarge->setActive(true);
 						editBoxLarge->setActive(true);
 
@@ -144,7 +144,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						string customText;
 						if (!itemInfo.CustomText.empty())
 						{
-							customText = itemInfo.CustomText; // TODO: UTF-8 (serial)
+							customText = itemInfo.CustomText.toUtf8(); // TODO: UTF-8 (serial)
 							strFindReplace(customText, "%mfc", string());
 						}
 
@@ -246,7 +246,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						// If we already have item info
 						if ( pIS->Family == ITEMFAMILY::SCROLL)
 						{
-							editBoxLarge->setInputString(itemInfo.CustomText); // TODO: UTF-8 (serial)
+							editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText); // TODO: UTF-8 (serial)
 							editLarge->setActive(true);
 							editBoxLarge->setActive(true);
 

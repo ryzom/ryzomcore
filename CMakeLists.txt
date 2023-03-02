@@ -150,6 +150,9 @@ IF(WITH_RYZOM_LIVE)
   SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/app_releasenotes/index.php")
 
   SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomforge")
+
+  # can be removed after lua ucstring cleanup
+  ADD_DEFINITIONS(-DRYZOM_LUA_UCSTRING)
 ENDIF()
 
 #-----------------------------------------------------------------------------
