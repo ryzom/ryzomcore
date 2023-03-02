@@ -123,15 +123,18 @@ void CDecalManager::computeBatch()
 
 	//_VB.setNumVertices( count );
 	_VB.setNumVertices( accum.size() );
-	CVertexBufferReadWrite vba;
-	_VB.lock(vba);
-	
-	memcpy( vba.getVertexCoordPointer(0), &accum[0], accum.size()*sizeof(CVector) );
+	if (accum.size())
+	{
+		CVertexBufferReadWrite vba;
+		_VB.lock(vba);
 
-	//nlassert( count == _UsedVertices );
-	nlassert(accum.size()%3 == 0);
+		memcpy(vba.getVertexCoordPointer(0), &accum[0], accum.size() * sizeof(CVector));
 
-	vba.unlock();
+		// nlassert( count == _UsedVertices );
+		nlassert(accum.size() % 3 == 0);
+
+		vba.unlock();
+	}
 	
 	_Touched = false;
 }
