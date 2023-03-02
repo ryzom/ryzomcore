@@ -70,7 +70,7 @@ public:
 	}
 private:
 	// send a message for the
-	void sendRawMessage(const std::string &transportMessageName, const CMessage &message) const
+	void sendRawMessage(const char *transportMessageName, const CMessage &message) const
 	{
 		// put the message in a bit mem stream for transmission
 		CBitMemStream bms;
