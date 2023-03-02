@@ -7,7 +7,7 @@
  */
 
 // NeL - MMORPG Framework <https://wiki.ryzom.dev/>
-// Copyright (C) 2008-2012  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2008-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2016  Winch Gate Property Limited
