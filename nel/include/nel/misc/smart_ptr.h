@@ -55,14 +55,15 @@ public:
 	*/
 	struct	CPtrInfoBase
 	{
+		CPtrInfoBase(const CRefCount *ptr, sint refCount, bool isNullPtrInfo) : Ptr(ptr), RefCount(refCount), IsNullPtrInfo(isNullPtrInfo) { }
 		const CRefCount* Ptr;	// to know if the instance is valid.
 		sint	RefCount;		// RefCount of ptrinfo (!= instance)
-		bool	IsNullPtrInfo;	// For dll problems, must use a flag to mark NullPtrInfo.
+		const bool IsNullPtrInfo;	// For dll problems, must use a flag to mark NullPtrInfo.
 	};
 
 	struct	CPtrInfo : public CPtrInfoBase
 	{
-		CPtrInfo(CRefCount const* p) {Ptr=p; RefCount=0; IsNullPtrInfo=false;}
+		CPtrInfo(CRefCount const *p) : CPtrInfoBase(p, 0, false) {}
 	};
 
 	// OWN null for ref ptr. (Optimisations!!!)
