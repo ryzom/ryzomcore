@@ -444,6 +444,9 @@
   <variable entry="UI:TEMP:SCREEN_RATIO_MODE"
             type="sint32"
             value="0" />
+  <variable entry="UI:TEMP:SOUND_DRIVER"
+            type="sint32"
+            value="0" />
   <define id="game_config_screen_ratio_eb"
           value="ui:interface:game_config:content:general:screen_ratio:edit:eb" />
   <define id="game_config_screen_ratio_cb"
@@ -3242,11 +3245,41 @@
                   posref="TL TL"
                   x="0"
                   y="-16" />
+        <group id="driver_gr"
+               posparent="enabler"
+               sizeparent="parent"
+               sizeref="w"
+               h="20"
+               posref="BL TL"
+               x="0"
+               y="-12">
+          <view type="text"
+                id="text"
+                posref="TL TL"
+                x="0"
+                y="-4"
+                color="255 255 255 192"
+                fontsize="12"
+                shadow="true"
+                hardtext="uigcSoundDriver"/>
+            <group type="combo_box"
+                   id="driver"
+                   w="70"
+                   h="20"
+                   value="UI:TEMP:SOUND_DRIVER"
+                   posref="MR ML"
+                   posparent="text"
+                   x="4"
+                   y="0">
+            <instance template="combo_box_def1"/>
+          </group>
+          <link expr="@UI:TEMP:SOUND_DRIVER" action="game_config_change_sound_driver"/>
+        </group>
         <instance template="tgcw_checkbox"
                   id="useeax"
                   text="uiUseEax"
                   posref="BL TL"
-                  posparent="enabler"
+                  posparent="driver_gr"
                   x="0"
                   y="-12" />
         <instance template="tgcw_checkbox"
