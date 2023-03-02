@@ -37,8 +37,8 @@ WARNING!!!!! If you change MAX_INVENTORY_ANIMAL value, you'll have to:
 * ******/
 #define MAX_PACK_ANIMAL					3
 #define MAX_MEKTOUB_MOUNT				1
-#define MAX_OTHER_PET					0
-#define MAX_INVENTORY_ANIMAL			( MAX_PACK_ANIMAL + MAX_MEKTOUB_MOUNT )
+#define MAX_OTHER_PET					3
+#define MAX_INVENTORY_ANIMAL			( MAX_PACK_ANIMAL + MAX_MEKTOUB_MOUNT + MAX_OTHER_PET)
 
 // This give by which value the WEIGHT in database must be divided to get the value in Kg
 // valueKg= valueDb / DB_WEIGHT_SCALE
@@ -382,8 +382,8 @@ namespace INVENTORIES
 			bms.serial( _SlotIndex, CInventoryCategoryTemplate::SlotBitSize );
 
 			uint i;
-			// SHEET, QUALITY, QUANTITY, and USER_COLOR never require compression
-			for (i = 0; i < 4; ++i)
+			// SHEET, QUALITY, QUANTITY, USER_COLOR, CREATE_TIME and SERIAL never require compression
+			for (i = 0; i < 6; ++i)
 				bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
 
 			// For all other the compression is simple the first bit indicates if the value is zero
