@@ -677,7 +677,7 @@ bool	CNetworkConnection::connect(string &result)
 		{
 			// Only need one connection attempt on QUIC as it handles migration
 			_FrontendHost.setPort(_FrontendHost.port() - 5000); // Same trick as SBS, just use a port offset
-			nlinfo("Connecting to QUIC at port instead %d", _FrontendHost.port());
+			nlinfo("Connecting to QUIC at port %d instead", _FrontendHost.port());
 			m_QuicConnection.connect(_FrontendHost);
 		}
 		else
