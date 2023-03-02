@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -95,14 +98,6 @@ public:
 	/// Register task priority callback
 	void	registerTaskPriorityCallback (IChangeTaskPriority *callback);
 
-private:
-
-	/// Register task priority callback
-	void	changeTaskPriority ();
-
-	/// The callback
-	IChangeTaskPriority		*_ChangePriorityCallback;
-
 protected:
 
 	/** If any, wait the current running task to complete
@@ -148,6 +143,14 @@ protected:
 
 	/// flag indicate thread loop, if false cause thread exit
 	volatile	bool _ThreadRunning;
+
+private:
+
+	/// Register task priority callback
+	void	changeTaskPriority(CSynchronized<std::list<CWaitingTask>>::CAccessor &acces);
+
+	/// The callback
+	IChangeTaskPriority		*_ChangePriorityCallback;
 
 private:
 

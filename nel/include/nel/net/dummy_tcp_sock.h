@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -38,16 +41,16 @@ public:
 	CDummyTcpSock( bool logging = true ) : CTcpSock(logging) {}
 
 	// Dummy connection
-	virtual void			connect( const CInetAddress& addr );
+	virtual void			connect( const CInetHost& addr ) NL_OVERRIDE;
 
 	// Dummy disconnection
-	virtual void			disconnect();
+	virtual void			disconnect() NL_OVERRIDE;
 
 	// Nothing
-	virtual void			setNoDelay( bool /* value */ ) {}
+	virtual void			setNoDelay( bool /* value */ ) NL_OVERRIDE {}
 
 	// Nothing
-	virtual void			close() {}
+	virtual void			close() NL_OVERRIDE {}
 
 };
 

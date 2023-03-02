@@ -35,7 +35,7 @@ NL_DEFAULT_PROPS(ryzom_ios_service "Ryzom, Services: Input Output Service (IOS)"
 NL_ADD_RUNTIME_FLAGS(ryzom_ios_service)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_ios_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(ryzom_ios_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 INSTALL(TARGETS ryzom_ios_service RUNTIME DESTINATION sbin COMPONENT services)

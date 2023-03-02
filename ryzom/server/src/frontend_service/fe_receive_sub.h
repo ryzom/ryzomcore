@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -23,6 +26,7 @@
 #include "nel/misc/buf_fifo.h"
 
 #include "nel/net/login_cookie.h"
+#include "nel/net/ipv6_address.h"
 
 #include "fe_types.h"
 #include "client_host.h"
@@ -46,6 +50,7 @@ class CHistory;
 class CVision;
 class CVisionData;
 
+class CQuicTransceiver;
 
 /// Type of remove list
 typedef std::list< std::pair<TClientId,uint8> > TClientsToRemove;
@@ -75,7 +80,7 @@ struct THackingDesc
 typedef CHashMap<NLNET::CInetAddress,THackingDesc,CInetAddressHashMapTraits> THackingAddrSet;
 
 /// Type of map of ip -> user id
-typedef std::map<uint32,TUid> TAutoUidMap;
+typedef std::map<NLNET::CIPv6Address,TUid> TAutoUidMap;
 
 
 /**
@@ -93,11 +98,11 @@ public:
 		EntityToClient(),
 		_ReceiveTask(NULL),
 		_ReceiveThread(NULL),
+		m_QuicTransceiver(NULL),
 		_ClientMap(),
 		_ClientIdCont(NULL),
-		_Queue1(),
-		_Queue2(),
-		_CurrentReadQueue(NULL),
+		m_CurrentReadQueue(NULL),
+		m_CurrentQuicReadQueue(NULL),
 		_CurrentInMsg(),
 		_RcvCounter(0),
 		_RcvBytes(0),
@@ -120,7 +125,7 @@ public:
 	void				release();
 
 	/// Add client
-	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, TUid userId, const std::string &userName, const std::string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool sendCLConnect=true );
+	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const std::string &userName, const std::string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool sendCLConnect=true );
 
 	/// Add to the list of clients which will be removed by addr at the three cycles later (leaving the time to send an impulsion to the client)
 	void				addToRemoveList( TClientId clientid ) { _ClientsToRemove.push_back( std::make_pair(clientid,3) ); }
@@ -213,6 +218,9 @@ private:
 
 	/// Receive thread
 	NLMISC::IThread		*_ReceiveThread;
+	
+	/// QUIC receiver and sender
+	CQuicTransceiver	*m_QuicTransceiver;
 
 	/// Client map by address
 	THostMap			_ClientMap;
@@ -220,14 +228,13 @@ private:
 	/// Client map by id (belonging to the send subsystem)
 	TClientIdCont		*_ClientIdCont;
 
-	/// First queue
-	NLMISC::CBufFIFO	_Queue1;
-
-	/// Second queue
-	NLMISC::CBufFIFO	_Queue2;
+	/// Queues
+	NLMISC::CBufFIFO	m_Queues[4];
 
 	/// Current read queue
-	NLMISC::CBufFIFO	*_CurrentReadQueue;
+	NLMISC::CBufFIFO	*m_CurrentReadQueue;
+	
+	NLMISC::CBufFIFO	*m_CurrentQuicReadQueue;
 
 	/// Current incoming message
 	TReceivedMessage	*_CurrentInMsg;

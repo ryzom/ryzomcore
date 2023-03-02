@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -47,8 +50,6 @@ using namespace std;
 
 namespace NLMISC {
 
-
-
 inline void EnterMutex( void *handle )
 {
 #ifdef NL_DEBUG
@@ -88,6 +89,8 @@ inline void LeaveMutex( void *handle )
 
 /////////////////////////// CUnfairMutex
 
+
+#ifndef CUnfairMutex
 
 /*
  * Windows version
@@ -137,6 +140,7 @@ void CUnfairMutex::leave()
 	LeaveMutex( _Mutex );
 }
 
+#endif
 
 /////////////////////////// CSharedMutexW
 
@@ -194,6 +198,7 @@ void CSharedMutex::leave()
 
 /////////////////////////// CFairMutex
 
+#ifndef CFairMutex
 
 /*
  * Windows version
@@ -281,6 +286,8 @@ void CFairMutex::leave()
 	debugLeave();
 }
 
+#endif
+
 /*************
  * Unix code *
  *************/
@@ -309,6 +316,7 @@ extern "C"
 
 namespace NLMISC {
 
+#ifndef CUnfairMutex
 
 CUnfairMutex::CUnfairMutex()
 {
@@ -387,6 +395,9 @@ void CUnfairMutex::leave()
 	}*/
 }
 
+#endif
+
+#ifndef CFairMutex
 
 /*
  * Unix version
@@ -448,6 +459,8 @@ void CFairMutex::leave()
 	sem_post( const_cast<sem_t*>(&_Sem) );
 #endif
 }
+
+#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

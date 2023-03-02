@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -30,10 +33,16 @@ class CGameItemPtr;
 class IPVPInterface;
 
 // Comparator for case-insensitive comparison in STL assos. containers
-struct ci_less : std::binary_function<std::string, std::string, bool>
+struct ci_less 
+#ifndef NL_CPP17
+	: std::binary_function<std::string, std::string, bool>
+#endif
 {
 	// case-independent (ci) compare_less binary function
-	struct nocase_compare : public std::binary_function<unsigned char,unsigned char,bool> 
+	struct nocase_compare 
+#ifndef NL_CPP17
+		: public std::binary_function<unsigned char,unsigned char,bool> 
+#endif
 	{
 		bool operator() (const unsigned char& c1, const unsigned char& c2) const
 		{

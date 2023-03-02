@@ -12,7 +12,7 @@ NL_DEFAULT_PROPS(ryzom_mission_compiler_fe "Ryzom, Tools, Misc: Mission Compiler
 NL_ADD_RUNTIME_FLAGS(ryzom_mission_compiler_fe)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_mission_compiler_fe ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.cpp)
+  target_precompile_headers(ryzom_mission_compiler_fe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h)
 ENDIF()
 
 INSTALL(TARGETS ryzom_mission_compiler_fe RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

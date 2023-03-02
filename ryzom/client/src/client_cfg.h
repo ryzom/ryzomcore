@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -106,6 +106,9 @@ struct CClientConfig
 
 	/// vector of XML file names that describe R2 editor
 	std::vector<string> XMLR2EDInterfaceFiles;
+
+	/// Feature flags for UI XML files
+	std::vector<string> UiFeatureFlags;
 
 	/// logo that are displayed
 	std::vector<string>	Logos;

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -54,14 +57,14 @@ public:
 
 	/// Construct a CTcpSock object using an already connected socket descriptor and its associated remote address
 	CTcpSock( SOCKET sock, const CInetAddress& remoteaddr );
-
+	
 	/** Connection. You can reconnect a socket after being disconnected.
 	 * This method does not return a boolean, otherwise a programmer could ignore the result and no
 	 * exception would be thrown if connection fails :
 	 * - If addr is not valid, an exception ESocket is thrown
 	 * - If connect() fails for another reason, an exception ESocketConnectionFailed is thrown
 	 */
-	virtual void		connect( const CInetAddress& addr );
+	virtual void		connect( const CInetHost& addr ) NL_OVERRIDE;
 
 	/** Sets a custom TCP Window size (SO_RCVBUF and SO_SNDBUF).
 	 * You must close the socket is necessary, before calling this method.

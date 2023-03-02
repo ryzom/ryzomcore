@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -76,7 +79,7 @@ NLMISC::CVariable<uint32> NumSPTWatches("spt","NumSPTWatches","number of SPT wat
 
 NLMISC::CVariable<string> DevConfigDirectory("spt", "DevConfigDirectory", "Directory used to build developer configuration file", "../../pipeline/shard_dev", 0, true);
 NLMISC::CVariable<string> DevWorkingDirectory("spt", "DevWorkingDirectory", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\pipeline\\shard_dev", 0, true);
-NLMISC::CVariable<string> DevSleepCmd("spt", "DevSleepCmd", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\distribution\\ryzom_tools_win_x64\\nircmd.exe wait 1000", 0, true);
+NLMISC::CVariable<string> DevSleepCmd("spt", "DevSleepCmd", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\external\\utils\\nircmd.exe wait 1000", 0, true);
 NLMISC::CVariable<string> DevExePrefix("spt", "DevExePrefix", "Executable prefix used in development startup batch", "start ", 0, true);
 NLMISC::CVariable<string> DevExeSuffix("spt", "DevExeSuffix", "Executable suffix used in development startup batch", ".exe", 0, true);
 

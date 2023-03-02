@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2011-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -53,7 +53,11 @@ bool CExportNel::scriptEvaluate (const char *script, void *out, TNelScriptValueT
 #endif
 
 		vl.source->flush_whitespace();
-		vl.code = vl.parser->compile_all(vl.source);
+		vl.code = vl.parser->compile_all(vl.source
+#if MAX_VERSION_MAJOR >= 24
+			, MAXScript::ScriptSource::NotSpecified
+#endif
+		);
 		vl.result = vl.code->eval();
 		
 		vl.source->flush_whitespace();

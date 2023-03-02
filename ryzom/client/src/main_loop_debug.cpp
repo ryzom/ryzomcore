@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -705,7 +705,7 @@ REGISTER_ACTION_HANDLER( CHandlerDebugUiDumpElementUnderMouse, "debug_ui_inspect
 //---------------------------------------------------
 // getActionKey :
 // Return action key binding as string.
-static std::string getActionKey(const char* name, const char* param = "")
+std::string getActionKey(const char* name, const char* param)
 {
 	std::string category;
 

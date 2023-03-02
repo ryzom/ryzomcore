@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -99,11 +102,9 @@ private:
 	//@}
 
 private:
-	/// Constructor. WARNING, never create module manager from another manager !!
-	CModuleManager(const CModuleManager &mod) { nlerror("FEMMAN: forbidden constructor used!"); }
-
 	/// WARNING, never initialize module manager from another manager !!
-	CModuleManager	& operator = (const CModuleManager &mod) { nlerror("FEMMAN: forbidden operator = used!");}
+	CModuleManager(const CModuleManager &mod) = delete;
+	CModuleManager &operator=(const CModuleManager &mod) = delete;
 
 public:
 

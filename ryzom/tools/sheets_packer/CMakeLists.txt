@@ -24,7 +24,7 @@ NL_DEFAULT_PROPS(sheets_packer "Ryzom, Tools: Sheets Packer")
 NL_ADD_RUNTIME_FLAGS(sheets_packer)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(sheets_packer ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(sheets_packer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 INSTALL(TARGETS sheets_packer RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

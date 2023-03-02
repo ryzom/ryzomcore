@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2011  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -186,6 +186,19 @@
 
 #if (defined(_MSC_VER) && (_MSC_VER >= 1900)) || (defined(__GNUC__ ) && (__GNUC__ >= 6) && (__cplusplus >=  201402L))
 #	define NL_CPP14
+#	define NL_CPP11
+#endif
+
+#ifdef NL_CPP14
+#define NL_ALIGNAS(type) alignas(type)
+#else
+#define NL_ALIGNAS(type)
+#endif
+
+#ifdef NL_CPP17
+#define NL_REGISTER
+#else
+#define NL_REGISTER register
 #endif
 
 #if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)
@@ -241,6 +254,9 @@
 #	pragma warning (disable : 4250)			// inherits via dominance (informational warning).
 #	pragma warning (disable : 4390)			// don't warn in empty block "if(exp) ;"
 #	pragma warning (disable : 4996)			// 'vsnprintf': This function or variable may be unsafe. Consider using vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+#	ifdef NL_CPP17
+#		pragma warning (disable : 5033)			// 'register' is no longer a supported storage class
+#	endif
 // Debug : Sept 01 2006
 #	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
 #		pragma warning (disable : 4005)			// don't warn on redefinitions caused by xp platform sdk

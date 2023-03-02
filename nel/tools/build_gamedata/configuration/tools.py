@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Tools configuration.
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -56,6 +56,7 @@ MaxShapeExportTimeout = 600000 # 10min
 TgaToDdsTool = "tga2dds"
 BuildInterfaceTool = "build_interface"
 ExecTimeoutTool = "exec_timeout"
+MeshExportTool = "mesh_export"
 BuildSmallbankTool = "build_smallbank"
 BuildFarbankTool = "build_far_bank"
 ZoneDependenciesTool = "zone_dependencies"

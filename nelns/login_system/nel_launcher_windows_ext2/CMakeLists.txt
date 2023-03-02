@@ -16,7 +16,7 @@ NL_DEFAULT_PROPS(nel_launcher_ext2 "NeLNS, Launcher: NeL Launcher Ext2")
 NL_ADD_RUNTIME_FLAGS(nel_launcher_ext2)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nel_launcher_ext2 ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.cpp)
+  target_precompile_headers(nel_launcher_ext2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h)
 ENDIF()
 
 INSTALL(TARGETS nel_launcher_ext2 RUNTIME DESTINATION bin COMPONENT launcher)

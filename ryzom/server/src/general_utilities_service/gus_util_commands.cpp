@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -90,7 +93,7 @@ NLMISC_CATEGORISED_COMMAND(utils,connect,"add a layer5 service connection to the
 	if (args.size()!=2)
 		return false;
 
-	NLNET::CUnifiedNetwork::getInstance()->addService(args[0], NLNET::CInetAddress(args[1]));
+	NLNET::CUnifiedNetwork::getInstance()->addService(args[0], NLNET::CInetHost(args[1]));
 
 	return true;
 }

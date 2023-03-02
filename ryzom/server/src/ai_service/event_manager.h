@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -80,7 +80,14 @@ private:
 inline void CAIEvent::addReaction	(CAIEventReaction	*reaction)
 {
 
-	if	(std::find_if(_Reactions.begin(), _Reactions.end(), std::bind2nd(std::equal_to<CAIEventReaction*>(),reaction))==_Reactions.end())
+	if (std::find_if(_Reactions.begin(), _Reactions.end(),
+#ifndef NL_CPP17
+	        std::bind2nd(std::equal_to<CAIEventReaction *>(), reaction)
+#else
+	        std::bind(std::equal_to<CAIEventReaction *>(), std::placeholders::_1, reaction)
+#endif
+	            )
+	    == _Reactions.end())
 	{
 		_Reactions.push_back(reaction);
 	}
@@ -94,7 +101,13 @@ inline void CAIEvent::addReaction	(CAIEventReaction	*reaction)
 inline	void CAIEvent::removeReaction(CAIEventReaction *reaction)
 {
 
-	TReactionList::iterator	it=std::find_if(_Reactions.begin(), _Reactions.end(), std::bind2nd(std::equal_to<CAIEventReaction*>(),reaction));
+	TReactionList::iterator it = std::find_if(_Reactions.begin(), _Reactions.end(),
+#ifndef NL_CPP17
+	    std::bind2nd(std::equal_to<CAIEventReaction *>(), reaction)
+#else
+	    std::bind(std::equal_to<CAIEventReaction *>(), std::placeholders::_1, reaction)
+#endif
+	);
 	if	(it==_Reactions.end())
 	{
 		nlwarning("BUG: Failed to remove event reaction from manager as object not found!!!");

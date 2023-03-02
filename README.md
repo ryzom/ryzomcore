@@ -12,7 +12,7 @@ Ryzom Core is open source and released under the terms of the GNU Affero General
 
 We are a passionate group of gamers, and open-source aficionados. Many of us fell in love with the original vision and promise of the Saga of Ryzom, or the ideals of open source. For some the game was once our home, or still is. To others, it was an introduction to the open-source software world. We work on Ryzom Core because we care for the things we love, and the friendships we've made over the years.
 
-The Ryzom Core repository is maintained by the community independently. It is not officially affiliated with the commercial game, nor with Winch Gate Ltd. See the History section on why.
+The Ryzom Core repository is maintained by the community independently. It is not officially affiliated with the commercial game, nor with Winch Gate Ltd. See the [History](#project-history) section on why.
 
 ## Support development
 

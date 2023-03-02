@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -65,7 +68,7 @@ public:
 		_name.push_back(name);
 	}
 
-	void push_back(uint16 idx,constr std::string &name)
+	void push_back(uint16 idx,const std::string &name)
 	{
 		_idx.push_back(idx);
 		_name.push_back(name);

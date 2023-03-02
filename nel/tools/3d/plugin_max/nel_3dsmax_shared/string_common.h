@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -32,6 +32,16 @@
 #define GET_OBJECT_NAME_CONST const
 #define NOTIFY_REF_PARAMS const Interval &changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message, BOOL propagate
 #define nl_p_end p_end
+#endif
+
+#if (MAX_VERSION_MAJOR < 24)
+#define NL_GET_CLASS_NAME_PARAMS TSTR &s
+#define NL_GET_OBJECT_NAME_PARAMS
+#define NL_GET_CLASS_NAME_CONST
+#else
+#define NL_GET_CLASS_NAME_PARAMS MSTR &s, bool localized = true
+#define NL_GET_OBJECT_NAME_PARAMS bool localized
+#define NL_GET_CLASS_NAME_CONST const
 #endif
 
 static TSTR MaxTStrFromUtf8(const std::string &src)

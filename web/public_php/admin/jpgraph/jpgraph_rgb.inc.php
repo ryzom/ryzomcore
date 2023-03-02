@@ -559,7 +559,7 @@ class RGB {
         if( $aAlpha < 0 || $aAlpha > 1 ) {
             JpGraphError::RaiseL(25080);//('Alpha parameter for color must be between 0.0 and 1.0');
         }
-        return imagecolorresolvealpha($this->img, $r, $g, $b, round($aAlpha * 127));
+        return imagecolorresolvealpha($this->img, (int)$r, (int)$g, (int)$b, (int)round($aAlpha * 127));
     }
 
     // Try to convert an array with three valid numbers to the corresponding hex array

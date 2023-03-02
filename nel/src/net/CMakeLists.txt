@@ -19,7 +19,7 @@ NL_ADD_RUNTIME_FLAGS(nelnet)
 NL_ADD_LIB_SUFFIX(nelnet)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nelnet ${CMAKE_CURRENT_SOURCE_DIR}/stdnet.h ${CMAKE_CURRENT_SOURCE_DIR}/stdnet.cpp)
+  target_precompile_headers(nelnet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdnet.h)
 ENDIF()
 
 NL_GEN_PC(nel-net.pc)

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -49,7 +52,7 @@ public:
 	static void			setSimValues (NLMISC::CConfigFile &cf);
 
 	// CUdpSock functions wrapping
-	void				connect( const CInetAddress& addr );
+	void				connect( const CInetHost& addr );
 	void				close();
 	bool				dataAvailable();
 	bool				receive( uint8 *buffer, uint32& len, bool throw_exception=true );

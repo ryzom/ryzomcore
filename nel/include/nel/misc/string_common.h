@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2016-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -352,6 +352,18 @@ inline const wchar_t *asCStr(const std::wstring &str) { return str.c_str(); }
 #define nlWideToMbcs(str) (NLMISC::wideToMbcs(str).c_str())
 #define nlMbcsToWide(str) (NLMISC::mbcsToWide(str).c_str())
 
+#if defined(NL_OS_WINDOWS)
+#define nlUtf8ToMbcsS(str, len) (NLMISC::utf8ToMbcs(str, len).c_str())
+#define nlMbcsToUtf8S(str, len) (NLMISC::mbcsToUtf8(str, len).c_str())
+#else
+#define nlUtf8ToMbcsS(str, len) (NLMISC::asCStr(str))
+#define nlMbcsToUtf8S(str, len) (NLMISC::asCStr(str))
+#endif
+#define nlWideToUtf8S(str, len) (NLMISC::wideToUtf8(str, len).c_str())
+#define nlUtf8ToWideS(str, len) (NLMISC::utf8ToWide(str, len).c_str())
+#define nlWideToMbcsS(str, len) (NLMISC::wideToMbcs(str, len).c_str())
+#define nlMbcsToWideS(str, len) (NLMISC::mbcsToWide(str, len).c_str())
+
 // On Windows, tstring is either local multibyte or utf-16 wide
 // On Linux, tstring is always utf-8
 
@@ -367,6 +379,9 @@ inline std::string tStrToMbcs(const tstring &str) { return wideToMbcs((const std
 #define nlTStrToUtf8(str) (NLMISC::tStrToUtf8(str).c_str())
 #define nlTStrToWide(str) ((const wchar_t *)NLMISC::asCStr(str))
 #define nlTStrToMbcs(str) (NLMISC::tStrToMbcs(str).c_str())
+#define nlTStrToUtf8S(str, len) (NLMISC::tStrToUtf8(str, len).c_str())
+#define nlTStrToWideS(str, len) ((const wchar_t *)NLMISC::asCStr(str))
+#define nlTStrToMbcsS(str, len) (NLMISC::tStrToMbcs(str, len).c_str())
 inline tstring utf8ToTStr(const char *str) {return (const tstring &)utf8ToWide(str); }
 inline tstring utf8ToTStr(const std::string &str) { return (const tstring &)utf8ToWide(str); }
 inline tstring wideToTStr(const wchar_t *str) { return (const tchar *)str; }
@@ -376,6 +391,9 @@ inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)mbcs
 #define nlUtf8ToTStr(str) (NLMISC::utf8ToTStr(str).c_str())
 #define nlWideToTStr(str) ((const tchar *)NLMISC::asCStr(str))
 #define nlMbcsToTStr(str) (NLMISC::mbcsToTStr(str).c_str())
+#define nlUtf8ToTStrS(str, len) (NLMISC::utf8ToTStr(str, len).c_str())
+#define nlWideToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str))
+#define nlMbcsToTStrS(str, len) (NLMISC::mbcsToTStr(str, len).c_str())
 #else
 typedef std::string tstring;
 typedef char tchar;
@@ -392,6 +410,13 @@ inline std::string tStrToMbcs(const tstring &str) { return (const std::string &)
 #endif
 #define nlTStrToWide(str) (NLMISC::tStrToWide(str).c_str())
 #define nlTStrToMbcs(str) ((const char *)NLMISC::asCStr(str))
+#if defined(NL_OS_WINDOWS)
+#define nlTStrToUtf8S(str, len) (NLMISC::tStrToUtf8(str, len).c_str())
+#else
+#define nlTStrToUtf8S(str, len) ((const char *)NLMISC::asCStr(str))
+#endif
+#define nlTStrToWideS(str, len) (NLMISC::tStrToWide(str, len).c_str())
+#define nlTStrToMbcsS(str, len) ((const char *)NLMISC::asCStr(str))
 inline tstring utf8ToTStr(const char *str) { return (const tstring &)utf8ToMbcs(str); }
 inline tstring utf8ToTStr(const std::string &str) { return (const tstring &)utf8ToMbcs(str); }
 inline tstring wideToTStr(const wchar_t *str) { return (const tstring &)wideToMbcs(str); }
@@ -405,6 +430,13 @@ inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)str;
 #endif
 #define nlWideToTStr(str) (NLMISC::wideToTStr(str).c_str())
 #define nlMbcsToTStr(str) ((const tchar *)NLMISC::asCStr(str))
+#if defined(NL_OS_WINDOWS)
+#define nlUtf8ToTStrS(str, len) (NLMISC::utf8ToTStr(str, len).c_str())
+#else
+#define nlUtf8ToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str))
+#endif
+#define nlWideToTStrS(str, len) (NLMISC::wideToTStr(str, len).c_str())
+#define nlMbcsToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str))
 #endif
 
 } // NLMISC

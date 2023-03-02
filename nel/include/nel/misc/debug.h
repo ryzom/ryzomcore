@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -160,6 +160,38 @@ void	setCrashAlreadyReported(bool state);
 #define NL_LOC_MSG __FILE__ "(" NL_MACRO_TO_STR(__LINE__) ") : Message: "
 #define NL_LOC_WRN __FILE__ "(" NL_MACRO_TO_STR(__LINE__) ") : Warning Msg: "
 
+ //
+ // Following are internal functions, you should never use them
+ //
+
+ /// Never use this function (internal use only)
+void nlFatalError (const char *format, ...);
+
+/// Never use this function but call the nlerror macro (internal use only)
+void nlError (const char *format, ...);
+
+struct CSetLogPosition
+{
+private:
+	CLog *m_Log;
+
+public:
+	inline CSetLogPosition(CLog *log, sint line, const char *fileName, const char *funcName = NULL) : m_Log(log)
+	{
+		log->setPosition(line, fileName, funcName);
+	};
+	inline ~CSetLogPosition()
+	{
+		m_Log->unsetPosition();
+	}
+
+	CLog *log() const { return m_Log; }
+	
+	typedef void (*TError)(const char *format, ...);
+	TError error() { return NLMISC::nlError; }
+	TError fatalError() { return NLMISC::nlFatalError; }
+};
+
 
 /**
  * \def nldebug(exp)
@@ -182,7 +214,7 @@ void	setCrashAlreadyReported(bool state);
 #	endif
 #else // NL_NO_DEBUG
 	extern bool DisableNLDebug;
-#	define nldebug if (NLMISC::DisableNLDebug) {} else (NLMISC::createDebug(), NLMISC::INelContext::getInstance().getDebugLog()->setPosition( __LINE__, __FILE__, __FUNCTION__ ), NLMISC::INelContext::getInstance().getDebugLog())->displayNL
+#	define nldebug if (NLMISC::DisableNLDebug) {} else (NLMISC::createDebug(), NLMISC::CSetLogPosition(NLMISC::INelContext::getInstance().getDebugLog(), __LINE__, __FILE__, __FUNCTION__ ).log())->displayNL
 #endif // NL_NO_DEBUG
 
 /**
@@ -196,7 +228,7 @@ void	setCrashAlreadyReported(bool state);
 #		define nlinfo 0&&
 #	endif
 #else // NL_NO_DEBUG
-#	define nlinfo (NLMISC::createDebug(), NLMISC::INelContext::getInstance().getInfoLog()->setPosition( __LINE__, __FILE__, __FUNCTION__ ), NLMISC::INelContext::getInstance().getInfoLog())->displayNL
+#	define nlinfo (NLMISC::createDebug(), NLMISC::CSetLogPosition(NLMISC::INelContext::getInstance().getInfoLog(), __LINE__, __FILE__, __FUNCTION__ ).log())->displayNL
 #endif // NL_NO_DEBUG
 
 /**
@@ -224,7 +256,7 @@ void	setCrashAlreadyReported(bool state);
 #		define nlwarning 0&&
 #	endif
 #else // NL_NO_DEBUG
-#	define nlwarning (NLMISC::createDebug(), NLMISC::INelContext::getInstance().getWarningLog()->setPosition( __LINE__, __FILE__, __FUNCTION__ ), NLMISC::INelContext::getInstance().getWarningLog())->displayNL
+#	define nlwarning (NLMISC::createDebug(), NLMISC::CSetLogPosition(NLMISC::INelContext::getInstance().getWarningLog(), __LINE__, __FILE__, __FUNCTION__ ).log())->displayNL
 #endif // NL_NO_DEBUG
 
 /**
@@ -243,7 +275,7 @@ void	setCrashAlreadyReported(bool state);
 	}
  *\endcode
  */
-#define nlerror (NLMISC::createDebug (), NLMISC::INelContext::getInstance().getErrorLog()->setPosition( __LINE__, __FILE__, __FUNCTION__ ), NLMISC::nlFatalError)
+#define nlerror (NLMISC::createDebug (), NLMISC::CSetLogPosition(NLMISC::INelContext::getInstance().getErrorLog(), __LINE__, __FILE__, __FUNCTION__ ).fatalError())
 
 
 /**
@@ -251,7 +283,7 @@ void	setCrashAlreadyReported(bool state);
  * Same as nlerror but it doesn't generate any exceptions. It's used only in very specific case, for example, when you
  * call a nlerror in a catch block (look the service.cpp)
  */
-#define nlerrornoex (NLMISC::createDebug (), NLMISC::INelContext::getInstance().getErrorLog()->setPosition( __LINE__, __FILE__, __FUNCTION__ ), NLMISC::nlError)
+#define nlerrornoex (NLMISC::createDebug (), NLMISC::CSetLogPosition(NLMISC::INelContext::getInstance().getErrorLog(), __LINE__, __FILE__, __FUNCTION__ ).error())
 
 
 /**
@@ -380,7 +412,14 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 #define nlassume(exp) do { } while (0)
 #endif
 
-#ifdef NL_NO_ASSERT
+#if defined(NL_COMP_GCC) && (GCC_VERSION >= 40500)
+// This may evaluate the expression at runtime if it has side effects, so it is not a desirable nlassume implementation in release mode
+#define nlassumeex(exp) do { if (!(exp)) __builtin_unreachable(); } while (0)
+#else
+#define nlassumeex(exp) nlassume(exp)
+#endif
+
+#ifdef NL_NO_ASSERT // NL_NO_DEBUG
 #	define nlassert(exp) nlassume(exp)
 #	define nlassertonce(exp) nlassume(exp)
 #	define nlassertex(exp, str) nlassume(exp)
@@ -398,7 +437,7 @@ do { \
 	bool _expResult_ = (exp) ? true : false; \
 	if (!(_expResult_)) { \
 		NLMISC::createDebug (); \
-		NLMISC::INelContext::getInstance().getAssertLog()->setPosition (__LINE__, __FILE__, __FUNCTION__); \
+		NLMISC::CSetLogPosition logPos__(NLMISC::INelContext::getInstance().getAssertLog(), __LINE__, __FILE__, __FUNCTION__); \
 		NLMISC::INelContext::getInstance().getAssertLog()->displayNL ("\"%s\" ", #exp); \
 		NLMISC_BREAKPOINT; \
 	} \
@@ -412,7 +451,7 @@ do { \
 	bool _expResult_ = (exp) ? true : false; \
 	if (!(_expResult_)) { \
 		NLMISC::createDebug (); \
-		NLMISC::INelContext::getInstance().getAssertLog()->setPosition (__LINE__, __FILE__, __FUNCTION__); \
+		NLMISC::CSetLogPosition logPos__(NLMISC::INelContext::getInstance().getAssertLog(), __LINE__, __FILE__, __FUNCTION__); \
 		NLMISC::INelContext::getInstance().getAssertLog()->displayNL ("\"%s\" ", #exp); \
 		NLMISC::INelContext::getInstance().getAssertLog()->displayRawNL str; \
 		NLMISC_BREAKPOINT; \
@@ -897,12 +936,6 @@ private:
 //
 // Following are internal functions, you should never use them
 //
-
-/// Never use this function (internal use only)
-void nlFatalError (const char *format, ...);
-
-/// Never use this function but call the nlerror macro (internal use only)
-void nlError (const char *format, ...);
 
 #define NL_CRASH_DUMP_FILE "nel_debug.dmp"
 

@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2021  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -94,6 +94,8 @@
 #include "nel/gui/dbgroup_combo_box.h"
 #include "nel/gui/ctrl_button.h"
 #include "../global.h"
+
+#include "nel/sound/u_audio_mixer.h"
 
 using namespace std;
 using namespace NL3D;
@@ -3014,6 +3016,10 @@ static vector<UDriver::CMode> VideoModes;
 #define GAME_CONFIG_ANISOTROPIC_COMBO	"ui:interface:game_config:content:fx:anisotropic_gr:anisotropic"
 #define GAME_CONFIG_ANISOTROPIC_DB		"UI:TEMP:ANISOTROPIC"
 
+// Sound driver
+#define GAME_CONFIG_SOUND_DRIVER_COMBO	"ui:interface:game_config:content:sound:driver_gr:driver"
+#define GAME_CONFIG_SOUND_DRIVER_DB		"UI:TEMP:SOUND_DRIVER"
+
 // The 3 possible modes editable (NB: do not allow client.cfg HDEntityTexture==1 and DivideTextureSizeBy2=2
 enum	TTextureMode	{LowTextureMode= 0, NormalTextureMode= 1, HighTextureMode= 2};
 
@@ -3059,6 +3065,77 @@ void updateVRDevicesComboUI(bool enable)
 			NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_VR_DEVICE_DB)->setValue32(selectedDevice);
 		}
 	}
+}
+
+// ***************************************************************************
+void updateSoundDriverComboUI()
+{
+	CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_SOUND_DRIVER_COMBO));
+	if (!pCB)
+	{
+		nlwarning("Sound driver UI element '%s' not found", GAME_CONFIG_SOUND_DRIVER_COMBO);
+		return;
+	}
+
+	pCB->resetTexts();
+
+	uint32 selected = 0;
+
+	NLSOUND::UAudioMixer::TDriver cfgDriverId = NLSOUND::UAudioMixer::DriverAuto;
+	if(ClientCfg.DriverSound==CClientConfig::SoundDrvFMod)
+		cfgDriverId = NLSOUND::UAudioMixer::DriverFMod;
+	else if(ClientCfg.DriverSound==CClientConfig::SoundDrvOpenAL)
+		cfgDriverId = NLSOUND::UAudioMixer::DriverOpenAl;
+	else if(ClientCfg.DriverSound==CClientConfig::SoundDrvDirectSound)
+		cfgDriverId = NLSOUND::UAudioMixer::DriverDSound;
+	else if(ClientCfg.DriverSound==CClientConfig::SoundDrvXAudio2)
+		cfgDriverId = NLSOUND::UAudioMixer::DriverXAudio2;
+
+	std::vector<NLSOUND::UAudioMixer::TDriverInfo> drivers = NLSOUND::UAudioMixer::getDrivers();
+
+	// add AUTO for ingame selection, if one is not already in list
+	bool found = false;
+	for(uint i = 0; i < drivers.size(); ++i)
+	{
+		if (drivers[i].ID == NLSOUND::UAudioMixer::DriverAuto)
+		{
+			found = true;
+			break;
+		}
+	}
+	if (!found)
+		drivers.insert(drivers.begin(), 1, NLSOUND::UAudioMixer::TDriverInfo(NLSOUND::UAudioMixer::DriverAuto, "Auto"));
+
+	for(uint i = 0; i < drivers.size(); ++i)
+	{
+		switch(drivers[i].ID)
+		{
+			case NLSOUND::UAudioMixer::DriverAuto:
+				pCB->addText("Auto");
+				break;
+			case NLSOUND::UAudioMixer::DriverFMod:
+				pCB->addText("FMod");
+				break;
+			case NLSOUND::UAudioMixer::DriverDSound:
+				pCB->addText("DirectSound");
+				break;
+			case NLSOUND::UAudioMixer::DriverOpenAl:
+				pCB->addText("OpenAL");
+				break;
+			case NLSOUND::UAudioMixer::DriverXAudio2:
+				pCB->addText("XAudio2");
+				break;
+			default:
+				pCB->addText(drivers[i].Name);
+				break;
+		}
+
+		if (cfgDriverId == drivers[i].ID)
+			selected = i;
+	}
+
+	NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_SOUND_DRIVER_DB)->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_SOUND_DRIVER_DB)->setValue32(selected);
 }
 
 // ***************************************************************************
@@ -3112,6 +3189,8 @@ public:
 			pBut->setPushed(!ClientCfg.Windowed);
 		}
 		CAHManager::getInstance()->runActionHandler("game_config_change_vid_fullscreen",NULL);
+
+		updateSoundDriverComboUI();
 
 		// **** Init Texture Size Modes
 		// init the combo box, according to Texture Installed or not
@@ -3470,6 +3549,32 @@ class CHandlerGameConfigVRDevice : public IActionHandler
 REGISTER_ACTION_HANDLER (CHandlerGameConfigVRDevice, "game_config_change_vr_device");
 
 // ***************************************************************************
+class CHandlerGameConfigSoundDriver : public IActionHandler
+{
+	virtual void execute (CCtrlBase * pCaller, const string &/* Params */)
+	{
+		sint oldDriver = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_SOUND_DRIVER_DB)->getOldValue32();
+		sint newDriver = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_SOUND_DRIVER_DB)->getValue32();
+
+		if (oldDriver != -1 && newDriver != oldDriver)
+		{
+			CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_SOUND_DRIVER_COMBO));
+			if (!pCB)
+			{
+				nlwarning("Unable to change sound driver. UI '%s' not found.", GAME_CONFIG_SOUND_DRIVER_COMBO);
+				return;
+			}
+
+			CDDXManager *pDM = CDDXManager::getInstance();
+			CInterfaceDDX *pDDX = pDM->get(GAME_CONFIG_DDX);
+			if(pDDX)
+				pDDX->validateApplyButton();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerGameConfigSoundDriver, "game_config_change_sound_driver");
+
+// ***************************************************************************
 class CHandlerGameConfigApply : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
@@ -3573,6 +3678,17 @@ class CHandlerGameConfigApply : public IActionHandler
 			ClientCfg.VRDisplayDeviceId = VRDeviceCache[deviceIdx].second;
 			ClientCfg.writeString("VRDisplayDevice", VRDeviceCache[deviceIdx].first);
 			ClientCfg.writeString("VRDisplayDeviceId", VRDeviceCache[deviceIdx].second);
+		}
+
+		sint sndDriver = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_SOUND_DRIVER_DB)->getValue32();
+		if (sndDriver != -1)
+		{
+			CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_SOUND_DRIVER_COMBO));
+			if (pCB)
+			{
+				std::string drv = pCB->getText(sndDriver);
+				ClientCfg.writeString("DriverSound", drv);
+			}
 		}
 
 		bool requestReboot = false;

@@ -7,3 +7,4 @@ python 3_install.py -ipj common/sound
 title Ryzom Core: b1_client_dev.py (SOUND)
 python b1_client_dev.py
 title Ryzom Core: Ready (SOUND)
+dir *.py

@@ -16,7 +16,7 @@ NL_ADD_RUNTIME_FLAGS(ryzom_aishare)
 NL_ADD_LIB_SUFFIX(ryzom_aishare)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_aishare ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(ryzom_aishare PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 IF(WITH_INSTALL_LIBRARIES)

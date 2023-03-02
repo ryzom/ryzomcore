@@ -56,6 +56,7 @@ IF(HUNTER_ENABLED)
  
  # Workaround for PCH compilation issue, from curl intsizeof depencency
   ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
+  # TODO: Still applicable after switching to CMake's builtin precompiled header support?
 ENDIF()
 
 
@@ -85,6 +86,7 @@ PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 4)
 SET(NL_VERSION_MINOR 0)
 SET(NL_VERSION_PATCH 0 CACHE STRING "Patch version")
+SET(NL_VERSION_BUILD 0 CACHE STRING "Build number")
 SET(YEAR "2001-${CURRENT_YEAR}")
 SET(AUTHOR "Winch Gate and The Ryzom Core Community")
 
@@ -132,6 +134,8 @@ SET(RYZOM_CLIENT_APP_NAME               "core4")
 SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://core4.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 
+SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomcore" CACHE STRING "Ryzom Client UI Feature Flag")
+
 #-----------------------------------------------------------------------------
 # urls when compiling ryzom live client
 IF(WITH_RYZOM_LIVE)
@@ -142,8 +146,10 @@ IF(WITH_RYZOM_LIVE)
   SET(RYZOM_CLIENT_PATCH_URL           "http://dl.ryzom.com/patch_live")
   SET(RYZOM_CLIENT_APP_NAME            "ryzom_live")
 
-SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/app_releasenotes/index.php")
-SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/app_releasenotes/index.php")
+  SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/app_releasenotes/index.php")
+  SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/app_releasenotes/index.php")
+
+  SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomforge")
 ENDIF()
 
 #-----------------------------------------------------------------------------
@@ -215,8 +221,8 @@ IF(WITH_STATIC_LIBXML2)
   ADD_DEFINITIONS(-DLIBXML_STATIC)
 ENDIF()
 
-IF(WITH_LIBXML2_ICONV)
-  FIND_PACKAGE(Iconv REQUIRED)
+FIND_PACKAGE(Iconv QUIET)
+IF(ICONV_FOUND)
   INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
   SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
 ENDIF()
@@ -249,8 +255,6 @@ IF(WITH_STATIC)
 
   ENDIF()
 ENDIF()
-
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 
 IF(FINAL_VERSION)
   ADD_DEFINITIONS(-DFINAL_VERSION=1)
@@ -310,6 +314,10 @@ IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)
 ENDIF()
 
+IF(WITH_MSQUIC)
+  FIND_PACKAGE(msquic REQUIRED)
+ENDIF()
+
 IF(WITH_NEL)
   IF(WITH_NEL_TESTS)
     FIND_PACKAGE(CppTest)
@@ -331,6 +339,10 @@ IF(WITH_NEL)
     ENDIF()
 
     FIND_PACKAGE(CURL REQUIRED)
+    # if cmake finds config-file package, ie FIND_PACKAGE(CURL CONFIG), then CURL_LIBRARIES is not defined
+    IF(TARGET CURL::libcurl)
+      SET(CURL_LIBRARIES CURL::libcurl)
+    ENDIF()
 
     IF((WIN32 OR CURL_LIBRARIES MATCHES "\\.a") AND WITH_STATIC_CURL)
       SET(CURL_STATIC ON)

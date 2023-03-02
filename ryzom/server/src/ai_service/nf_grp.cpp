@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1318,7 +1321,11 @@ void getNeighbourZoneWithFlags_ssss_s(CStateInstance* entity, CScriptStack& stac
 	vector<CCell*> cells;
 	curZone->getOwner()->getNeighBourgCellList(cells);
 	cells.push_back(curZone->getOwner());
+#ifndef NL_CPP17
 	std::random_shuffle(cells.begin(), cells.end());
+#else
+	std::shuffle(cells.begin(), cells.end(), CAIS::instance().RandomGenerator);
+#endif
 
 	CNpcZone const* const newZone = CCellZone::lookupNpcZoneScorer(cells, scorer);
 

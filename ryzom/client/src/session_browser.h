@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -52,7 +55,7 @@ class CSessionBrowser : public RSMGR::CSessionBrowserServerWebClientItf,
 	bool				_TerminateComm;
 
 	// the server address for connection
-	NLNET::CInetAddress	_ServerAddr;
+	NLNET::CInetHost	_ServerAddr;
 
 	// a flag to signal a failure in connection attempt
 	bool				_SignalConnFail;
@@ -103,7 +106,7 @@ public:
 	 *	connection information, the connection is made only when the
 	 *	client effectively send message.
 	 */
-	virtual void connectItf(NLNET::CInetAddress address);
+	virtual void connectItf(NLNET::CInetHost address);
 
 	// call update each frame
 	void update();

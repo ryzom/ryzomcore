@@ -240,7 +240,7 @@ NL_ADD_LIB_SUFFIX(nelmisc)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nelmisc ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.h ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.cpp)
+  target_precompile_headers(nelmisc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.h)
 ENDIF()
 
 NL_GEN_PC(nel-misc.pc)

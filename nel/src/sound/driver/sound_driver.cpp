@@ -1,9 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -57,7 +57,7 @@ namespace NLSOUND
 /// Interface version, increase when any part of sound_lowlevel is changed.
 /// Put your name in comment to make sure you don't commit with
 /// the same interface version number as someone else.
-const uint32 ISoundDriver::InterfaceVersion = 0x16; // Kaetemi
+const uint32 ISoundDriver::InterfaceVersion = 0x17; // Nimetu
 
 #ifdef NL_STATIC
 
@@ -102,6 +102,131 @@ const char *ISoundDriver::getDriverName(TDriver driverType)
 		case DriverXAudio2: return "XAudio2";
 		default: return "UNKNOWN";
 	}
+}
+
+/// Return driver filename from type.
+std::string ISoundDriver::getDriverFileName(TDriver driverType)
+{
+	switch(driverType)
+	{
+	case DriverFMod:
+#if defined (NL_COMP_MINGW)
+		return "libnel_drv_fmod_win";
+#elif defined (NL_OS_WINDOWS)
+		return "nel_drv_fmod_win";
+#elif defined (NL_OS_UNIX)
+		return "nel_drv_fmod";
+#else
+#		error "Driver name not define for this platform"
+#endif // NL_OS_UNIX / NL_OS_WINDOWS
+		break;
+	case DriverOpenAl:
+#if defined (NL_COMP_MINGW)
+		return "libnel_drv_openal_win";
+#elif defined (NL_OS_WINDOWS)
+		return "nel_drv_openal_win";
+#elif defined (NL_OS_UNIX)
+		return "nel_drv_openal";
+#else
+#		error "Driver name not define for this platform"
+#endif
+		break;
+	case DriverDSound:
+#if defined (NL_COMP_MINGW)
+		return "libnel_drv_dsound_win";
+#elif defined (NL_OS_WINDOWS)
+		return "nel_drv_dsound_win";
+#elif defined (NL_OS_UNIX)
+		return "";
+#else
+#		error "Driver name not define for this platform"
+#endif
+		break;
+	case DriverXAudio2:
+#if defined (NL_COMP_MINGW)
+		return "libnel_drv_xaudio2_win";
+#elif defined (NL_OS_WINDOWS)
+		return "nel_drv_xaudio2_win";
+#elif defined (NL_OS_UNIX)
+		return "";
+#else
+#		error "Driver name not define for this platform"
+#endif
+		break;
+	case DriverAuto:
+#if defined (NL_COMP_MINGW)
+		return "libnel_drv_xaudio2_win";
+#elif defined (NL_OS_WINDOWS)
+		return "nel_drv_xaudio2_win";
+#elif defined (NL_OS_UNIX)
+		return "nel_drv_openal";
+#else
+#		error "Driver name not define for this platform"
+#endif
+		break;
+	default:
+		break;
+	}
+
+	return "";
+}
+
+///
+std::vector<ISoundDriver::TDriver> ISoundDriver::getAvailableDrivers()
+{
+	static std::vector<TDriver> m_AvailableDrivers;
+
+	if (!m_AvailableDrivers.empty())
+		return m_AvailableDrivers;
+
+#ifdef NL_STATIC
+#	ifdef NL_FMOD_AVAILABLE
+	m_AvailableDrivers.push_back(DriverFMod);
+#	endif
+#	ifdef NL_OPENAL_AVAILABLE
+	m_AvailableDrivers.push_back(DriverOpenAl);
+#	endif
+#	ifdef NL_DSOUND_AVAILABLE
+	m_AvailableDrivers.push_back(DriverDSound);
+#	endif
+#	ifdef NL_XAUDIO2_AVAILABLE
+	m_AvailableDrivers.push_back(DriverXAudio2);
+#	endif
+
+#else // NL_STATIC
+
+#if 0
+	// if platform has dynamic driver name set, consider it as available
+	for(uint i = 0; i < vec.size(); i++)
+	{
+		std::string dllName = getDriverFileName(vec[i]);
+		if(!dllName.empty())
+			m_AvailableDrivers.push_back(vec[i]);
+	}
+#else
+	CLibrary driverLib;
+#if defined(NL_OS_UNIX) && defined(NL_DRIVER_PREFIX)
+	driverLib.addLibPath(NL_DRIVER_PREFIX);
+#endif
+	nlinfo("Detecting available sound drivers");
+	for(uint i = (uint)DriverAuto + 1; i < (uint)NumDrivers; i++)
+	{
+		std::string dllName = getDriverFileName((TDriver)i);
+		if(!dllName.empty())
+		{
+			// Load it (adding standard nel pre/suffix, looking in library path and taking ownership)
+			if (driverLib.loadLibrary(dllName, true, true, true))
+			{
+				m_AvailableDrivers.push_back((TDriver)i);
+				driverLib.freeLibrary();
+			}
+		}
+	}
+#endif
+
+#endif
+
+	return m_AvailableDrivers;
 }
 
 /*
@@ -151,67 +276,9 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	ISDRV_VERSION_PROC versionDriver = NULL;
 
 	// dll selected
-	std::string	dllName;
-
-	// Choose the DLL
-	switch(driverType)
-	{
-	case DriverFMod:
-#if defined (NL_COMP_MINGW)
-		dllName = "libnel_drv_fmod_win";
-#elif defined (NL_OS_WINDOWS)
-		dllName = "nel_drv_fmod_win";
-#elif defined (NL_OS_UNIX)
-		dllName = "nel_drv_fmod";
-#else
-#		error "Driver name not define for this platform"
-#endif // NL_OS_UNIX / NL_OS_WINDOWS
-		break;
-	case DriverOpenAl:
-#if defined (NL_COMP_MINGW)
-		dllName = "libnel_drv_openal_win";
-#elif defined (NL_OS_WINDOWS)
-		dllName = "nel_drv_openal_win";
-#elif defined (NL_OS_UNIX)
-		dllName = "nel_drv_openal";
-#else
-#		error "Driver name not define for this platform"
-#endif
-		break;
-	case DriverDSound:
-#if defined (NL_COMP_MINGW)
-		dllName = "libnel_drv_dsound_win";
-#elif defined (NL_OS_WINDOWS)
-		dllName = "nel_drv_dsound_win";
-#elif defined (NL_OS_UNIX)
-		nlerror("DriverDSound doesn't exist on Unix because it requires DirectX");
-#else
-#		error "Driver name not define for this platform"
-#endif
-		break;
-	case DriverXAudio2:
-#if defined (NL_COMP_MINGW)
-		dllName = "libnel_drv_xaudio2_win";
-#elif defined (NL_OS_WINDOWS)
-		dllName = "nel_drv_xaudio2_win";
-#elif defined (NL_OS_UNIX)
-		nlerror("DriverXAudio2 doesn't exist on Unix because it requires DirectX");
-#else
-#		error "Driver name not define for this platform"
-#endif
-		break;
-	default:
-#if defined (NL_COMP_MINGW)
-		dllName = "libnel_drv_xaudio2_win";
-#elif defined (NL_OS_WINDOWS)
-		dllName = "nel_drv_xaudio2_win";
-#elif defined (NL_OS_UNIX)
-		dllName = "nel_drv_openal";
-#else
-#		error "Driver name not define for this platform"
-#endif
-		break;
-	}
+	std::string dllName = getDriverFileName(driverType);
+	if (dllName.empty())
+		throw ESoundDriverCantCreateDriver(("Driver '%s' not available for this platform", ISoundDriver::getDriverName(driverType)));
 
 	CLibrary driverLib;
 

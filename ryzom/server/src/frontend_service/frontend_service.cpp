@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1231,7 +1231,7 @@ void CFrontEndService::init()
 		CLoginServer::init( "", cbDisconnectClient ); 
 
 //		// Init front end listening port
-		CInetAddress listenAddr(CLoginServer::getListenAddress());
+		CInetHost listenAddr(CLoginServer::getListenAddress());
 		uint16 frontendPort = listenAddr.port();
 
 		if (frontendPort == 0)
@@ -1267,8 +1267,7 @@ void CFrontEndService::init()
 		_ReceiveSub.init( frontendPort, lastAcceptableFrontendPort, _DgramLength, &_History, &_SendSub.clientIdCont() );
 		frontendPort = _ReceiveSub.dataSock()->localAddr().port();
 		listenAddr.setPort( frontendPort );
-		CLoginServer::setListenAddress( PublishFSHostAsIP.get() ? listenAddr.asIPString() : (listenAddr.hostName() + ":" + NLMISC::toString( listenAddr.port() )) ); // note: asString() returns more information
-		CInetAddress::RetrieveNames = false;
+		CLoginServer::setListenAddress(PublishFSHostAsIP.get() ? listenAddr.address().asIPString() : listenAddr.toString());
 
 		StalledMode = false;
 		LastTickTime = 0;

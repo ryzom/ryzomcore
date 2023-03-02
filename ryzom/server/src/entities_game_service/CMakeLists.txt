@@ -100,6 +100,7 @@ TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 						ryzom_gameplaymodule
 						${NELMISC_LIBRARIES}
 						${NELNET_LIBRARIES}
+						nelweb
 						${NELGEORGES_LIBRARIES}
 						${NELLIGO_LIBRARIES})
 
@@ -114,7 +115,7 @@ NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH AND NOT MINGW) # FIXME: PCH too large (> 130MB), crashes cc1plus under MinGW
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_entities_game_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
-ENDIF(WITH_PCH AND NOT MINGW)
+  target_precompile_headers(ryzom_entities_game_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
+ENDIF()
 
 INSTALL(TARGETS ryzom_entities_game_service RUNTIME DESTINATION sbin COMPONENT services)

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -19,7 +22,7 @@
 
 #include "nel/misc/common.h"
 #include "nel/misc/mutex.h"
-#include "inet_address.h"
+#include "inet_host.h"
 //#include <sstream>
 
 /// This namespace contains all network class
@@ -39,14 +42,14 @@ struct ESocket : public NLMISC::Exception
 	 * where the address should be written. Moreover, the length of reason plus
 	 * the length of the address when displayed by asString() should no exceed 256.
 	 */
-	ESocket( const char *reason="", bool systemerror=true, CInetAddress *addr=NULL );
+	ESocket( const char *reason="", bool systemerror=true, CInetHost *addr=NULL );
 };
 
 
 /// Exception raised when connect() fails
 struct ESocketConnectionFailed : public ESocket
 {
-	ESocketConnectionFailed( CInetAddress addr ) : ESocket( "Connection to %s failed", true, &addr ) {}
+	ESocketConnectionFailed( CInetHost addr ) : ESocket( "Connection to %s failed", true, &addr ) {}
 };
 
 
@@ -148,7 +151,7 @@ public:
 	 * - If addr is not valid, an exception ESocket is thrown
 	 * - If connect() fails for another reason, an exception ESocketConnectionFailed is thrown
 	 */
-	virtual void		connect( const CInetAddress& addr );
+	virtual void		connect( const CInetHost& addrs );
 
 	/** Sets the socket in nonblocking mode. Call this method *after* connect(), otherwise you will get
 	 * an "would block" error (10035 on Windows). In nonblocking mode, use received() and sent() instead of receive() and send()
@@ -300,6 +303,9 @@ protected:
 
 	/// Secondary time out value (microsec) for select in dataAvailable()
 	long			_TimeoutUs;
+
+	/// Socket address family used for creating the socket
+	int				_AddressFamily;
 
 private:
 

@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -822,7 +822,10 @@ int mergeStringDiff(int argc, char *argv[], const std::string &baseName)
 
 
 /*
-struct TFindPhrase : unary_function<TPhrase, bool>
+struct TFindPhrase 
+#ifndef NL_CPP17
+		: unary_function<TPhrase, bool>
+		#endif
 {
 	string	Identifier;
 	TFindPhrase (const string &identifier)

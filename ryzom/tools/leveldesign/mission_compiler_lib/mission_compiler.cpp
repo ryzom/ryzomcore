@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2011  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1156,7 +1156,10 @@ bool strtokquote(const vector<string> &src, VectorType &tokens)
 	return true;
 }
 
-struct TFindParamPred : std::unary_function<CPhrase::TParamInfo, bool>
+struct TFindParamPred
+#ifndef NL_CPP17
+	: std::unary_function<CPhrase::TParamInfo, bool>
+#endif
 {
 	string	Name;
 	TFindParamPred(const std::string &name)

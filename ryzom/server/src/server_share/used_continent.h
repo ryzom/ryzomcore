@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -83,7 +86,10 @@ public:
 private:
 
 	// functor to search a continent from name
-	struct TFindContinent : public std::unary_function<TContinentInfo, bool>
+	struct TFindContinent 
+#ifndef NL_CPP17
+		: public std::unary_function<TContinentInfo, bool>
+#endif
 	{ 
 		bool operator ()(const TContinentInfo &ci) const
 		{
@@ -97,7 +103,10 @@ private:
 	};
 
 	// functor to search a continent from enum Value
-	struct TFindContinentFromEnum : public std::unary_function<TContinentInfo, bool>
+	struct TFindContinentFromEnum 
+#ifndef NL_CPP17
+		: public std::unary_function<TContinentInfo, bool>
+#endif
 	{
 		bool operator ()(const TContinentInfo &ci) const
 		{
@@ -112,7 +121,10 @@ private:
 	};
 
 	// functor to search an instance number
-	struct TFindInstance : public std::unary_function<TContinentInfo, bool>
+	struct TFindInstance 
+#ifndef NL_CPP17
+		: public std::unary_function<TContinentInfo, bool>
+#endif
 	{ 
 		bool operator ()(const TContinentInfo &ci) const
 		{

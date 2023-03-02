@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -162,7 +162,7 @@ BOOL CGeorgesEditApp::initInstance (int nCmdShow, bool exeStandalone, int x, int
 	if (!isInitialized && exeStandalone)
 	{
 		m_nCmdShow = nCmdShow;
-		ExePath = tStrToUtf8(GetCommandLine ());
+		ExePath = wideToUtf8(GetCommandLineW());
 		if (ExePath.size()>0)
 		{
 			if (ExePath[0] == '\"')

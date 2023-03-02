@@ -23,7 +23,7 @@ NL_DEFAULT_PROPS(world_editor "Ryzom, Tools, World: World Editor")
 NL_ADD_RUNTIME_FLAGS(world_editor)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(world_editor ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.h ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.cpp)
+  target_precompile_headers(world_editor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.h)
 ENDIF()
 
 INSTALL(TARGETS world_editor RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

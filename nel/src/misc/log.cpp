@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -42,6 +45,23 @@ string *CLog::_ProcessName = NULL;
 
 CLog::CLog( TLogType logType) : _LogType (logType), _FileName(NULL), _Line(-1), _FuncName(NULL), _Mutex("LOG"+toString((uint)logType)), _PosSet(false)
 {
+}
+
+CLog::CLog(const CLog &other)
+{
+	_LogType = other._LogType;
+	_ProcessName = other._ProcessName;
+	_FileName = other._FileName;
+	_Line = other._Line;
+	_FuncName = other._FuncName;
+	_Displayers = other._Displayers;
+	_BypassFilterDisplayers = other._BypassFilterDisplayers;
+	// _Mutex = other._Mutex;
+	_PosSet = other._PosSet;
+	_NegativeFilter = other._NegativeFilter;
+	_PositiveFilter = other._PositiveFilter;
+	TempString = other.TempString;
+	TempArgs = other.TempArgs;
 }
 
 void CLog::setDefaultProcessName ()
@@ -315,7 +335,7 @@ void CLog::displayString (const char *str)
 		}
 	}
 	TempString.clear();
-	unsetPosition();
+	// unsetPosition();
 }
 
 
@@ -435,7 +455,7 @@ void CLog::displayRawString (const char *str)
 		}
 	}
 	TempString.clear();
-	unsetPosition();
+	// unsetPosition();
 }
 
 /*

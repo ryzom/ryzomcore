@@ -1,9 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010-2018  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2012-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -129,6 +129,39 @@ CAudioMixerUser::CAudioMixerUser() : _AutoLoadSample(false),
 		sprintf(tmp, "%u", i);
 		_BackgroundFilterShortNames[i] = tmp;
 	}
+}
+
+// ******************************************************************
+std::vector<UAudioMixer::TDriverInfo> UAudioMixer::getDrivers()
+{
+	std::vector<TDriverInfo> drivers;
+	std::vector<ISoundDriver::TDriver> drv = ISoundDriver::getAvailableDrivers();
+	for(uint i = 0; i < drv.size(); ++i)
+	{
+		switch(drv[i])
+		{
+			case ISoundDriver::DriverAuto:
+				drivers.push_back(TDriverInfo(DriverAuto, ISoundDriver::getDriverName(drv[i])));
+				break;
+			case ISoundDriver::DriverFMod:
+				drivers.push_back(TDriverInfo(DriverFMod, ISoundDriver::getDriverName(drv[i])));
+				break;
+			case ISoundDriver::DriverDSound:
+				drivers.push_back(TDriverInfo(DriverDSound, ISoundDriver::getDriverName(drv[i])));
+				break;
+			case ISoundDriver::DriverOpenAl:
+				drivers.push_back(TDriverInfo(DriverOpenAl, ISoundDriver::getDriverName(drv[i])));
+				break;
+			case ISoundDriver::DriverXAudio2:
+				drivers.push_back(TDriverInfo(DriverXAudio2, ISoundDriver::getDriverName(drv[i])));
+				break;
+			default:
+				nlwarning("Unknown driver id %d, name '%s'", drv[i], ISoundDriver::getDriverName(drv[i]));
+				break;
+		}
+	}
+
+	return drivers;
 }
 
 
@@ -374,16 +407,42 @@ void CAudioMixerUser::initDriver(const std::string &driverName)
 	std::string dn = NLMISC::toLowerAscii(driverName);
 	nldebug("AM: Init Driver '%s' ('%s')...", driverName.c_str(), dn.c_str());
 
-	ISoundDriver::TDriver driverType;
-	if (dn == "auto") driverType = ISoundDriver::DriverAuto;
-	else if (dn == "fmod") driverType = ISoundDriver::DriverFMod;
-	else if (dn == "dsound") driverType = ISoundDriver::DriverDSound;
-	else if (dn == "openal") driverType = ISoundDriver::DriverOpenAl;
-	else if (dn == "xaudio2") driverType = ISoundDriver::DriverXAudio2;
-	else
+	TDriver driverId = dn == "auto" ? DriverAuto : NumDrivers;
+	if (driverId == NumDrivers)
 	{
-		driverType = ISoundDriver::DriverAuto;
-		nlwarning("AM: driverName value '%s' ('%s') is invalid.", driverName.c_str(), dn.c_str());
+		std::vector<TDriverInfo> drivers = UAudioMixer::getDrivers();
+		for(uint i = 0; i < drivers.size(); ++i)
+		{
+			if (nlstricmp(drivers[i].Name, dn.c_str()) == 0)
+			{
+				driverId = drivers[i].ID;
+				break;
+			}
+		}
+	}
+
+	ISoundDriver::TDriver driverType;
+	switch(driverId)
+	{
+		case DriverAuto:
+			driverType = ISoundDriver::DriverAuto;
+			break;
+		case DriverFMod:
+			driverType = ISoundDriver::DriverFMod;
+			break;
+		case DriverDSound:
+			driverType = ISoundDriver::DriverDSound;
+			break;
+		case DriverOpenAl:
+			driverType = ISoundDriver::DriverOpenAl;
+			break;
+		case DriverXAudio2:
+			driverType = ISoundDriver::DriverXAudio2;
+			break;
+		case NumDrivers:
+			driverType = ISoundDriver::DriverAuto;
+			nlwarning("AM: driverName value '%s' ('%s') is not available.", driverName.c_str(), dn.c_str());
+			break;
 	}
 
 	try
@@ -2303,7 +2362,10 @@ void			CAudioMixerUser::loadEnvSounds( const char *filename, UEnvSound **treeRoo
 
 // ******************************************************************
 
-struct CompareSources : public binary_function<const CSimpleSource*, const CSimpleSource*, bool>
+struct CompareSources 
+#ifndef NL_CPP17
+	: public binary_function<const CSimpleSource*, const CSimpleSource*, bool>
+#endif
 {
 	// Constructor
 	CompareSources( const CVector &pos ) : _Pos(pos) {}

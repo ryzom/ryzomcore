@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -29,6 +29,8 @@
 #	define NOMINMAX
 #endif
 #include <windows.h>
+// Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
+#include <ws2ipdef.h>
 typedef sint socklen_t;
 
 #elif defined NL_OS_UNIX
@@ -79,9 +81,24 @@ void CListenSock::init( uint16 port )
 	init( localaddr );
 
 	// Now set the address visible from outside
-	_LocalAddr = CInetAddress::localHost();
-	_LocalAddr.setPort( port );
-	LNETL0_DEBUG( "LNETL0: Socket %d listen socket is at %s", _Sock, _LocalAddr.asString().c_str() );
+	try
+	{
+		_LocalAddr = CInetAddress::localHost(port);
+	}
+	catch (ESocket &e)
+	{
+		nlwarning("CListenSock::init: Can't get local host address: %s", e.what());
+	}
+	LNETL0_DEBUG("LNETL0: Socket %d listen socket is at %s", _Sock, _LocalAddr.asString().c_str());
+}
+
+inline static int sizeOfSockAddr(const sockaddr_storage &storage)
+{
+	if (storage.ss_family == AF_INET6)
+		return sizeof(sockaddr_in6);
+	if (storage.ss_family == AF_INET)
+		return sizeof(sockaddr_in);
+	return sizeof(storage);
 }
 
 
@@ -90,9 +107,23 @@ void CListenSock::init( uint16 port )
  */
 void CListenSock::init( const CInetAddress& addr )
 {
-	if ( ! addr.isValid() )
+	sockaddr_storage sockAddr;
+
+	if (_Bound)
 	{
-		LNETL0_DEBUG( "LNETL0: Binding listen socket to any address, port %hu", addr.port() );
+		throw ESocket("Already bound", false);
+	}
+
+	_LocalAddr.setNull();
+	_RemoteAddr.setNull();
+	if (addr.getAddress().isAny())
+	{
+		LNETL0_DEBUG( "LNETL0: Binding listen socket to any address (%s), port %hu", addr.getAddress().toString().c_str(), addr.port() );
+	}
+
+	if (!addr.toSockAddrStorage(&sockAddr, _AddressFamily))
+	{
+		throw ESocket("Unable to bind listen socket to invalid address", false);
 	}
 
 #ifndef NL_OS_WINDOWS
@@ -105,11 +136,25 @@ void CListenSock::init( const CInetAddress& addr )
 #endif
 
 	// Bind socket to port
-	if ( ::bind( _Sock, (const sockaddr *)addr.sockAddr(), sizeof(sockaddr_in) ) != 0 )
+	if (::bind(_Sock, (sockaddr *)&sockAddr, sizeOfSockAddr(sockAddr)) != 0)
 	{
-		throw ESocket( "Unable to bind listen socket to port" );
+		if (_AddressFamily == AF_INET6 && addr.getAddress().isAny() && !addr.getAddress().isIPv4())
+		{
+			// Try to bind to IPv4 Any address if a dual stack listen (default) was attempted and failed
+			nlwarning("Failed to bind to dual stack IPv6 Any addres, binding to IPv4 Any address instead");
+			CInetAddress anyIPv4 = CInetAddress(CIPv6Address::anyIPv4(), addr.port());
+			anyIPv4.toSockAddrInet6((sockaddr_in6 *)(&sockAddr));
+			if (::bind(_Sock, (sockaddr *)&sockAddr, sizeof(sockaddr_in6)) != 0)
+			{
+				throw ESocket("Unable to bind listen socket to to port");
+			}
+		}
+		else
+		{
+			throw ESocket("Unable to bind listen socket to port");
+		}
 	}
-	_LocalAddr = addr;
+	_LocalAddr.fromSockAddrStorage(&sockAddr);
 	_Bound = true;
 
 	// Listen
@@ -127,9 +172,9 @@ void CListenSock::init( const CInetAddress& addr )
 CTcpSock *CListenSock::accept()
 {
 	// Accept connection
-	sockaddr_in saddr;
-	socklen_t saddrlen = (socklen_t)sizeof(saddr);
-	SOCKET newsock = (SOCKET)::accept( _Sock, (sockaddr*)&saddr, &saddrlen );
+	sockaddr_storage sockAddr;
+	socklen_t saddrlen = (socklen_t)sizeof(sockAddr);
+	SOCKET newsock = (SOCKET)::accept(_Sock, (sockaddr *)(&sockAddr), &saddrlen);
 	if ( newsock == INVALID_SOCKET )
 	{
 		if (_Sock == INVALID_SOCKET)
@@ -147,7 +192,7 @@ CTcpSock *CListenSock::accept()
 
 	// Construct and save a CTcpSock object
 	CInetAddress addr;
-	addr.setSockAddr( &saddr );
+	addr.fromSockAddrStorage(&sockAddr);
 	LNETL0_DEBUG( "LNETL0: Socket %d accepted an incoming connection from %s, opening socket %d", _Sock, addr.asString().c_str(), newsock );
 	CTcpSock *connection = new CTcpSock( newsock, addr );
 	return connection;

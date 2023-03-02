@@ -47,7 +47,7 @@ NL_DEFAULT_PROPS(object_viewer_widget_qt "NeL, Tools, 3D: Object Viewer Qt Widge
 NL_ADD_RUNTIME_FLAGS(object_viewer_widget_qt)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(object_viewer_widget_qt ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(object_viewer_widget_qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 #INSTALL(TARGETS object_viewer_widget_qt RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT runtime)

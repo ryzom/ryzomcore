@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -3241,7 +3241,10 @@ NLMISC_COMMAND(simulateClientReady,"Simulate clientReady for a character","clien
 
 
 // predicate for following command
-struct TIsNotACharFile : std::unary_function<string, bool>
+struct TIsNotACharFile 
+#ifndef NL_CPP17
+	: std::unary_function<string, bool>
+#endif
 {
 	bool operator ()(const std::string &fileName) const
 	{
@@ -3388,7 +3391,10 @@ NLMISC_COMMAND(loadAllPlayerAndReady,"Load all the player saves (all account, al
 
 
 // predicate for following command
-struct TIsNotAOldCharFile : std::unary_function<string, bool>
+struct TIsNotAOldCharFile
+#ifndef NL_CPP17
+	: std::unary_function<string, bool>
+#endif
 {
 	bool operator ()(const std::string &fileName) const
 	{

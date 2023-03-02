@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -128,11 +131,11 @@ void		CPrimitivePlugin::init(IPluginAccess *pluginAccess)
 	if (pv)
 	{
 		for (uint i=0; i<pv->size(); ++i)
-			paths.push_back(pv->asString(i));
+			paths.push_back(_PluginAccess->transformProjectPath(pv->asString(i)));
 	}
 	// add the sheetId file
 	pv = cf.getVarPtr("PrimitivePluginSheetId");
-	sheetIdPath = pv->asString();
+	sheetIdPath = _PluginAccess->transformProjectPath(pv->asString());
 
 	// Init the sheet id
 	CPath::addSearchFile(sheetIdPath);

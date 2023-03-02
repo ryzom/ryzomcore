@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -67,7 +70,7 @@ public:
 	}
 	virtual void addCallbackArray(const NLNET::TCallbackItem *callbackarray, sint arraysize) =0;
 	virtual void setDisconnectionCallback(NLNET::TNetCallback cb, void *arg) =0;
-	virtual void connect( const NLNET::CInetAddress& addr ) =0;
+	virtual void connect( const NLNET::CInetHost& addr ) =0;
 	virtual bool connected(  ) =0;
 	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid = NLNET::InvalidSockId, bool log = true) =0;
 	virtual void update() =0;
@@ -142,7 +145,7 @@ protected:
 	{
 		_CallbackClient.setDisconnectionCallback(cb, arg);
 	}
-	virtual void connect( const NLNET::CInetAddress& addr )
+	virtual void connect( const NLNET::CInetHost& addr )
 	{
 		_CallbackClient.connect(addr);
 	}

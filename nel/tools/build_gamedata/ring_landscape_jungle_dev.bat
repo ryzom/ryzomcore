@@ -13,3 +13,4 @@ python b1_client_dev.py
 title Ryzom Core: b2_shard_data.py (RING LANDSCAPE)
 python b2_shard_data.py
 title Ryzom Core: Ready (RING LANDSCAPE)
+dir *.py

@@ -1,0 +1,52 @@
+{
+  "Domains": { "core4": {} },
+  "Defaults": {
+    "ClientCreateAccountUrl": "https://core.ryzom.dev/ams/",
+    "ClientEditAccountUrl": "https://core.ryzom.dev/ams/",
+    "ClientForgetPasswordUrl": "https://core.ryzom.dev/ams/",
+    "ClientPatchUrl": "https://cdn.ryzom.dev/core4/patch/",
+    "ClientReleaseNotesUrl": "https://core4.ryzom.dev/releasenotes/index.php",
+    "ClientReleaseNotesRingUrl": "https://core4.ryzom.dev/releasenotes_ring/index.php",
+    "ClientDomain": "core4"
+  },
+  "3dsMax": {
+    "Executable": "C:\\Program Files (x86)\\Autodesk\\3ds Max 2011\\3dsmax.exe",
+    "UserDirectory": "C:\\Users\\Kaetemi\\AppData\\Local\\Autodesk\\3dsMax\\2011 - 32bit\\enu"
+  },
+  "SignTool": {
+    "Executable": "C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Bin\\signtool.exe",
+    "Sha1": "f0ef3c22d0373d2d6e3735207194d097c8f69877",
+    "Timestamp": "http://timestamp.comodoca.com/authenticode"
+  },
+  "Toolchain": {
+    "Server": {
+      "Filter": [{ "OSId": "ubuntu", "OSCodename": "focal", "Platform": "amd64", "Hunter": false }],
+      "CMake": [
+        "-DCUSTOM_FLAGS=-march=znver2 -mtune=znver2"
+      ]
+    }
+  },
+  "Fallback": {
+    "PrefixBin": [
+      "C:\\2022q2_external_v143_x64\\zlib\\bin",
+      "C:\\2022q2_external_v143_x64\\openssl\\bin",
+      "C:\\2022q2_external_v143_x64\\curl\\bin",
+      "C:\\2022q2_external_v143_x64\\libjpeg\\bin",
+      "C:\\2022q2_external_v143_x64\\libpng\\bin",
+      "C:\\2022q2_external_v143_x64\\libxml2\\bin",
+      "C:\\2022q2_external_v143_x64\\freetype\\bin",
+      "C:\\2022q2_external_v143_x64\\ogg\\bin",
+      "C:\\2022q2_external_v143_x64\\vorbis\\bin",
+      "C:\\2022q2_external_v143_x64\\openal-soft\\bin",
+      "C:\\2022q2_external_v143_x64\\gles\\bin",
+      "C:\\2022q2_external_v143_x64\\lua\\bin",
+      "C:\\2022q2_external_v143_x64\\boost\\bin",
+      "C:\\2022q2_external_v143_x64\\mariadb-connector-c\\bin",
+      "C:\\2022q2_external_v143_x64\\qt5\\bin"
+    ],
+    "QtPluginBin": "C:\\2022q2_external_v143_x64\\qt5\\plugins",
+    "Client": "build_win32/client_dev",
+    "Server": "build_win32/server_dev",
+    "Tools": "build_win32/tools"
+  }
+}

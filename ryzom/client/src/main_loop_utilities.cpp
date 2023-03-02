@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -324,8 +324,19 @@ void updateFromClientCfg()
 	bool	mustReloadSoundMngrContinent= false;
 
 	// disable/enable sound?
-	if (ClientCfg.SoundOn != LastClientCfg.SoundOn)
+	if (ClientCfg.SoundOn != LastClientCfg.SoundOn || ClientCfg.DriverSound != LastClientCfg.DriverSound)
 	{
+		// changing sound driver
+		if (ClientCfg.DriverSound != LastClientCfg.DriverSound)
+		{
+			if (SoundMngr)
+			{
+				nlwarning("Changing sound driver...");
+				delete SoundMngr;
+				SoundMngr = NULL;
+			}
+		}
+
 		if (SoundMngr && !ClientCfg.SoundOn)
 		{
 			nlwarning("Deleting sound manager...");

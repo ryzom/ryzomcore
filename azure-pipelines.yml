@@ -1,45 +1,4 @@
 jobs:
-  - job: ubuntu18
-    timeoutInMinutes: 120
-    pool:
-      vmImage: 'ubuntu-18.04'
-    steps:
-    - script: |
-        sudo apt update
-        sudo apt install -y software-properties-common
-        # sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt update
-        sudo apt install cmake build-essential -y
-        sudo apt install gcc-8 g++-8 -y
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
-        sudo apt install bison autoconf automake -y
-        sudo apt install libpng-dev -y
-        sudo apt install libjpeg-dev -y
-        sudo apt install libgif-dev libfreetype6-dev -y
-        sudo apt install freeglut3-dev -y
-        sudo apt install liblua5.2-dev libluabind-dev libcpptest-dev -y
-        sudo apt install libogg-dev libvorbis-dev libopenal-dev -y
-        sudo apt install libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev -y
-        sudo apt install libmysqlclient-dev -y
-        sudo apt install libxml2-dev -y
-        sudo apt install libcurl4-openssl-dev libssl-dev -y
-        sudo apt install libsquish-dev -y
-        sudo apt install liblzma-dev -y
-        sudo apt install libgsf-1-dev -y
-        sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
-      displayName: 'Dependencies'
-    - script: |
-        mkdir build
-        cmake --version
-        cd build
-        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
-        cat CMakeCache.txt
-      displayName: 'CMake'
-    - script: |
-        cd build
-        make -j`nproc`
-      displayName: 'Make'
   - job: ubuntu20
     timeoutInMinutes: 120
     pool:
@@ -48,8 +7,10 @@ jobs:
     - script: |
         sudo apt update
         sudo apt install -y software-properties-common
+        wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
         sudo apt update
-        sudo apt install cmake build-essential -y
+        sudo apt install cmake build-essential ninja-build ccache -y
         sudo apt install bison autoconf automake -y
         sudo apt install libpng-dev -y
         sudo apt install libjpeg-dev -y
@@ -65,24 +26,97 @@ jobs:
         sudo apt install liblzma-dev -y
         sudo apt install libgsf-1-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
+        sudo apt install libmsquic
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+        sudo mv msquic.h /usr/include/msquic.h
+        sudo mv msquic_posix.h /usr/include/msquic_posix.h
+        sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
       displayName: 'Dependencies'
     - script: |
         mkdir build
         cmake --version
         cd build
-        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=OFF -DWITH_LUA52=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
+          -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
+          -DWITH_MSQUIC=ON \
+          -DWITH_LUA51=OFF -DWITH_LUA52=ON \
+          -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
+          -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
+          -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
         cd build
-        make -j`nproc`
+        ninja -j`nproc`
       displayName: 'Make'
+    - script: |
+        cd nel/tools/nel_unit_test
+        ../../../build/bin/nel_unit_test
+      displayName: 'Unit Tests'
+  - job: ubuntu22
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+    - script: |
+        sudo apt update
+        sudo apt install -y software-properties-common
+        wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
+        sudo apt update
+        sudo apt install cmake build-essential ninja-build ccache -y
+        sudo apt install bison autoconf automake -y
+        sudo apt install libpng-dev -y
+        sudo apt install libjpeg-dev -y
+        sudo apt install libgif-dev libfreetype6-dev -y
+        sudo apt install freeglut3-dev -y
+        sudo apt install liblua5.2-dev libluabind-dev libcpptest-dev -y
+        sudo apt install libogg-dev libvorbis-dev libopenal-dev -y
+        sudo apt install libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev -y
+        sudo apt install libmysqlclient-dev -y
+        sudo apt install libxml2-dev -y
+        sudo apt install libcurl4-openssl-dev libssl-dev -y
+        sudo apt install libsquish-dev -y
+        sudo apt install liblzma-dev -y
+        sudo apt install libgsf-1-dev -y
+        sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
+        sudo apt install libmsquic
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+        sudo mv msquic.h /usr/include/msquic.h
+        sudo mv msquic_posix.h /usr/include/msquic_posix.h
+        sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
+      displayName: 'Dependencies'
+    - script: |
+        mkdir build
+        cmake --version
+        cd build
+        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
+          -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
+          -DWITH_MSQUIC=ON \
+          -DWITH_LUA51=OFF -DWITH_LUA52=ON \
+          -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
+          -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
+          -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
+        cat CMakeCache.txt
+      displayName: 'CMake'
+    - script: |
+        cd build
+        ninja -j`nproc`
+      displayName: 'Make'
+    - script: |
+        cd nel/tools/nel_unit_test
+        ../../../build/bin/nel_unit_test
+      displayName: 'Unit Tests'
   - job: client
     strategy:
       matrix:
         ubuntu:
-          vmImage: 'ubuntu-18.04'
-          releaseName: 'Ubuntu18'
+          vmImage: 'ubuntu-20.04'
+          releaseName: 'Ubuntu20'
           aptPackages: >-
             libasound2-dev
             libgl1-mesa-dev
@@ -91,6 +125,9 @@ jobs:
             libxrandr-dev
             libxrender-dev
             libxxf86vm-dev
+            libmsquic
+          cmakeExtra: >-
+            -DCMAKE_INSTALL_LIBDIR=lib
         win2019:
           vmImage: 'windows-2019'
           releaseName: 'Win64'
@@ -112,23 +149,40 @@ jobs:
     - checkout: self
       fetchDepth: 0
     - script: |
+        wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
         sudo apt update
         sudo apt remove -y man-db
         sudo apt install -y --no-install-recommends $(aptPackages)
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+        sudo mv msquic.h /usr/include/msquic.h
+        sudo mv msquic_posix.h /usr/include/msquic_posix.h
+        sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
       displayName: '(ubuntu) Dependencies'
       condition: eq(variables['Agent.JobName'], 'client ubuntu')
+    - task: Cache@2
+      inputs:
+        key: 'dxsdk'
+        path: 'C:/DXSDK'
+      condition: contains(variables['cmakeExtra'], 'DIRECT3D=ON')
+      displayName: '(windows) DirectX SDK Cache'
     - task: CmdLine@2
       inputs:
         script: |
-          aria2c https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
-          7z x DXSDK_Jun10.exe -oC:\ -r -y
-          del DXSDK_Jun10.exe
+          IF NOT EXIST C:\DXSDK (
+            aria2c https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
+            7z x DXSDK_Jun10.exe -oC:\ -r -y
+            del DXSDK_Jun10.exe
+          )
       displayName: '(windows) DirectX SDK'
       condition: contains(variables['cmakeExtra'], 'DIRECT3D=ON')
     - task: Cache@2
       inputs:
-        key: 'hunter321b-$(releaseName)'
+        key: 'hunter | $(releaseName) | "$(Agent.OS)"'
         path: '$(Pipeline.Workspace)/.hunter/_Base/Cache'
+      displayName: 'Hunter Cache'
     - task: CMake@1
       displayName: 'Configure'
       inputs:
@@ -140,7 +194,6 @@ jobs:
           -DHUNTER_CONFIGURATION_TYPES=Release
           -DHUNTER_ENABLED=ON
           -DHUNTER_ROOT=$(Pipeline.Workspace)/.hunter
-          -DHUNTER_STATUS_DEBUG=ON
           -DWITH_DRIVER_OPENAL=ON
           -DWITH_DRIVER_OPENGL=ON
           -DWITH_INSTALL_LIBRARIES=OFF

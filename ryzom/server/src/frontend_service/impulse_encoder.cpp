@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -40,7 +43,7 @@ void cbImpulsionByteSize2Changed( IVariable& var );
 
 CVariable<uint> ImpulsionByteSize0( "fe", "ImpulsionByteSize0", "Size of impulsion channel 0", 20, 0, true, cbImpulsionByteSize0Changed, true );
 CVariable<uint> ImpulsionByteSize1( "fe", "ImpulsionByteSize1", "Size of impulsion channel 1", 200, 0, true, cbImpulsionByteSize1Changed, true );
-CVariable<uint> ImpulsionByteSize2( "fe", "ImpulsionByteSize2", "Size of impulsion channel 0", 200, 0, true, cbImpulsionByteSize2Changed, true );
+CVariable<uint> ImpulsionByteSize2( "fe", "ImpulsionByteSize2", "Size of impulsion channel 2", 200, 0, true, cbImpulsionByteSize2Changed, true );
 
 void cbImpulsionByteSize0Changed( IVariable& var )
 {

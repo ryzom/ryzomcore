@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -46,6 +49,7 @@
 
 #include "uid_impulsions.h"
 #include "id_impulsions.h"
+#include "quic_transceiver.h"
 
 #include "game_share/ryzom_entity_id.h"
 #include "game_share/system_message.h"
@@ -124,14 +128,22 @@ void CFeReceiveSub::init( uint16 firstAcceptableFrontendPort, uint16 lastAccepta
 	nlassert( (_ReceiveTask==NULL) && (_ReceiveThread==NULL) );
 
 	// Start external datagram socket
-	nlinfo( "FERECV: Starting external datagram socket" );
-	_ReceiveTask = new CFEReceiveTask( firstAcceptableFrontendPort, lastAcceptableFrontendPort, dgrammaxlength );
-	_CurrentReadQueue = &_Queue2;
-	_ReceiveTask->setWriteQueue( &_Queue1 );
-	nlassert( _ReceiveTask != NULL );
-	_ReceiveThread = IThread::create( _ReceiveTask );
-	nlassert( _ReceiveThread != NULL );
+	nlinfo("FERECV: Starting external datagram socket");
+	_ReceiveTask = new CFEReceiveTask(firstAcceptableFrontendPort, lastAcceptableFrontendPort, dgrammaxlength);
+	nlassert(_ReceiveTask != NULL);
+	m_CurrentReadQueue = &m_Queues[1];
+	_ReceiveTask->swapWriteQueue(&m_Queues[0]);
+	_ReceiveThread = IThread::create(_ReceiveTask);
+	nlassert(_ReceiveThread != NULL);
 	_ReceiveThread->start();
+	uint16 udpPort = _ReceiveTask->DataSock->localAddr().port();
+
+	// Start QUIC transceiver
+	nlinfo("FERECV: Starting QUIC transceiver");
+	m_QuicTransceiver = new CQuicTransceiver(dgrammaxlength);
+	m_CurrentQuicReadQueue = &m_Queues[3];
+	m_QuicTransceiver->swapWriteQueue(&m_Queues[2]);
+	m_QuicTransceiver->start((udpPort ? udpPort : firstAcceptableFrontendPort) - 5000);
 
 	// Setup current message placeholder
 	_CurrentInMsg = new TReceivedMessage();
@@ -165,6 +177,9 @@ void CFeReceiveSub::release()
 
 	nlassert( _ReceiveTask != NULL );
 	nlassert( _ReceiveThread != NULL );
+	
+	delete m_QuicTransceiver;
+	m_QuicTransceiver = nullptr;
 
 	_ReceiveTask->requireExit();
 #ifdef NL_OS_UNIX
@@ -237,14 +252,39 @@ void CFeReceiveSub::readIncomingData()
 	}
 
 	// Read queue of messages received from clients
-	while ( ! _CurrentReadQueue->empty() )
+	_CurrentInMsg->AddrFrom.setNull();
+	while (!m_CurrentQuicReadQueue->empty())
 	{
-		//nlinfo( "Read queue size = %u", _CurrentReadQueue->size() );
-		_CurrentReadQueue->front( _CurrentInMsg->data() );
-		_CurrentReadQueue->pop();
-		nlassert( ! _CurrentReadQueue->empty() );
-		_CurrentReadQueue->front( _CurrentInMsg->VAddrFrom );
-		_CurrentReadQueue->pop();
+		// nlinfo( "Read queue size = %u", _CurrentReadQueue->size() );
+		m_CurrentQuicReadQueue->front(_CurrentInMsg->data());
+		m_CurrentQuicReadQueue->pop();
+		nlassert(!m_CurrentQuicReadQueue->empty());
+		uint8 *buffer;
+		uint32 size;
+		m_CurrentQuicReadQueue->front(buffer, size);
+		nlassert(size == sizeof(_CurrentInMsg->QuicUser));
+		memcpy(&_CurrentInMsg->QuicUser, buffer, size);
+		CQuicUserContextRelease releaseUser(_CurrentInMsg->QuicUser); // Decrease ref count after handling message
+		m_CurrentQuicReadQueue->pop();
+		
+		// Use token address for user mapping, since it'll stay constant
+		_CurrentInMsg->AddrFrom = _CurrentInMsg->QuicUser->TokenAddr;
+
+#ifndef MEASURE_RECEIVE_TASK
+		handleIncomingMsg();
+#endif
+	}
+	
+	// Read queue of messages received from clients
+	_CurrentInMsg->QuicUser = nullptr;
+	while (!m_CurrentReadQueue->empty())
+	{
+		// nlinfo( "Read queue size = %u", m_CurrentReadQueue->size() );
+		m_CurrentReadQueue->front(_CurrentInMsg->data());
+		m_CurrentReadQueue->pop();
+		nlassert(!m_CurrentReadQueue->empty());
+		m_CurrentReadQueue->front(_CurrentInMsg->VAddrFrom);
+		m_CurrentReadQueue->pop();
 		_CurrentInMsg->vectorToAddress();
 
 #ifndef MEASURE_RECEIVE_TASK
@@ -299,18 +339,8 @@ void CFeReceiveSub::readIncomingData()
  */
 void CFeReceiveSub::swapReadQueues()
 {
-	if ( _CurrentReadQueue == &_Queue1 )
-	{
-		_CurrentReadQueue = &_Queue2;
-		_ReceiveTask->setWriteQueue( &_Queue1 );
-		//nlinfo( "** Write1 Read2 ** Read=%p Write=%p", &_Queue2, &_Queue1 );
-	}
-	else
-	{
-		_CurrentReadQueue = &_Queue1;
-		_ReceiveTask->setWriteQueue( &_Queue2 );
-		//nlinfo( "** Read1 Write2 ** Read=%p Write=%p", &_Queue1, &_Queue2 );
-	}
+	m_CurrentReadQueue = _ReceiveTask->swapWriteQueue(m_CurrentReadQueue);
+	m_CurrentQuicReadQueue = m_QuicTransceiver->swapWriteQueue(m_CurrentQuicReadQueue);
 }
 
 
@@ -320,36 +350,67 @@ void CFeReceiveSub::swapReadQueues()
  */
 void CFeReceiveSub::handleIncomingMsg()
 {
-	nlassert( _History && _CurrentInMsg );
+	nlassert(_History && _CurrentInMsg);
 
 #ifndef SIMUL_CLIENTS
 
-	//nldebug( "FERECV: Handling incoming message" );
+	// nldebug( "FERECV: Handling incoming message" );
+	CClientHost *client;
 
-	// Retrieve client info or add one
-	THostMap::iterator ihm = _ClientMap.find( _CurrentInMsg->AddrFrom );
-	if ( ihm == _ClientMap.end() )
+	if (_CurrentInMsg->QuicUser)
 	{
-		if ( _CurrentInMsg->eventType() == TReceivedMessage::User )
+		// Bypass _ClientMap lookup
+		client = _CurrentInMsg->QuicUser->ClientHost;
+#if !FINAL_VERSION
+		if (!client)
 		{
-			// Handle message for a new client
-			handleReceivedMsg( NULL );
+			nlassert(_ClientMap.find(_CurrentInMsg->AddrFrom) == _ClientMap.end());
 		}
 		else
 		{
-			nlinfo( "FERECV: Not removing already removed client" );
+			nlassert(_ClientMap.find(_CurrentInMsg->AddrFrom) != _ClientMap.end());
+			nlassert(client->QuicUser.get() == _CurrentInMsg->QuicUser);
+		}
+#endif
+		if (client && client->QuicUser.get() != _CurrentInMsg->QuicUser)
+		{
+			nlwarning("FERECV: QuicUser mismatch for client %u (%p != %p)", client->clientId(), client->QuicUser.get(), _CurrentInMsg->QuicUser);
+			return;
+		}
+	}
+	else
+	{
+		// Find the client
+		THostMap::iterator ihm = _ClientMap.find(_CurrentInMsg->AddrFrom);
+		client = (ihm != _ClientMap.end()) ? GETCLIENTA(ihm) : nullptr;
+#if !FINAL_VERSION
+		nlassert(!client || !client->QuicUser.get());
+#endif
+	}
+
+	// Retrieve client info or add one
+	if (!client)
+	{
+		if (_CurrentInMsg->eventType() == TReceivedMessage::User)
+		{
+			// Handle message for a new client
+			handleReceivedMsg(nullptr);
+		}
+		else
+		{
+			nlinfo("FERECV: Not removing already removed client");
 			return;
 		}
 	}
 	else
 	{
 		// Already existing
-		if ( _CurrentInMsg->eventType() == TReceivedMessage::RemoveClient )
+		if (_CurrentInMsg->eventType() == TReceivedMessage::RemoveClient)
 		{
 			// Remove client
-			nlinfo( "FERECV: Disc event for client %u", GETCLIENTA(ihm)->clientId() );
-			removeFromRemoveList(GETCLIENTA(ihm)->clientId() );
-			removeClientById( GETCLIENTA(ihm)->clientId() );
+			nlinfo("FERECV: Disc event for client %u", client->clientId());
+			removeFromRemoveList(client->clientId());
+			removeClientById(client->clientId());
 
 			// Do not call handleReceivedMsg()
 			return;
@@ -358,7 +419,7 @@ void CFeReceiveSub::handleIncomingMsg()
 		{
 			// Handle message
 			H_AUTO(HandleRecvdMsgNotNew);
-			handleReceivedMsg( GETCLIENTA(ihm) );
+			handleReceivedMsg(client);
 		}
 	}
 
@@ -388,7 +449,7 @@ bool		CFeReceiveSub::acceptUserIdConnection( TUid userId )
 /*
  * Add client
  */
-CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, TUid userId, const string &userName, const string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorizedCharSlot, bool sendCLConnect )
+CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const string &userName, const string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorizedCharSlot, bool sendCLConnect )
 {
 	MEM_DELTA_MULTI_LAST2(Client,AddClient);
 	if ( ! acceptUserIdConnection( userId ) )
@@ -414,7 +475,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, TUid
 	THostMap::iterator cmPreviousEnd = _ClientMap.end();
 	{
 		MEM_DELTA_MULTI2(CClientHost,New);
-		clienthost = new CClientHost( addrfrom, clientid );
+		clienthost = new CClientHost( addrfrom, quicUser, clientid );
 	}
 	nlassert( clienthost );
 	nlinfo( "Adding client %u (uid %u name %s priv '%s') at %s", clientid, userId, userName.c_str(), userPriv.c_str(), addrfrom.asIPString().c_str() );
@@ -446,7 +507,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, TUid
 	clienthost->AuthorizedCharSlot = authorizedCharSlot;
 
 	clienthost->initSendCycle( false );
-	CFrontEndService::instance()->sendSub()->setSendBufferAddress( clientid, &addrfrom );
+	CFrontEndService::instance()->sendSub()->setSendBufferAddress( clientid, &addrfrom, quicUser );
 
 	//This must be commented out when the GPMS always activates slot 0
 	//CFrontEndService::instance()->PrioSub.Prioritizer.addEntitySeenByClient( clientid, 0 );
@@ -556,7 +617,7 @@ CClientHost *CFeReceiveSub::exitFromLimboMode( const CLimboClient& lc )
 {
 	nldebug( "Restoring user %u from limbo mode", lc.Uid );
 
-	CClientHost *client = addClient( lc.AddrFrom, lc.Uid, lc.UserName, lc.UserPriv, lc.UserExtended, lc.LanguageId, lc.LoginCookie, 0xF, false );
+	CClientHost *client = addClient(lc.AddrFrom, lc.QuicUser.get(), lc.Uid, lc.UserName, lc.UserPriv, lc.UserExtended, lc.LanguageId, lc.LoginCookie, 0xF, false);
 	NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle();
 	client->setFirstSentPacket( client->sendNumber()+1, tick );
 	client->setSynchronizeState();
@@ -578,6 +639,15 @@ void CFeReceiveSub::removeClientFromMap( CClientHost *client )
 	CFrontEndService::instance()->PrioSub.Prioritizer.DiscreetSpreader.notifyClientRemoval( icm );*/
 
 	_ClientMap.erase( client->address() );
+	if (client->QuicUser.get())
+	{
+		if (client->QuicUser->ClientHost == client)
+		{
+			client->QuicUser->ClientHost = nullptr;
+		}
+		client->QuicUser->Transceiver->shutdown(client->QuicUser.get());
+		client->QuicUser = nullptr;
+	}
 }
 
 /*
@@ -850,9 +920,16 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					// Load from file
 					try
 					{
-						CIFile file( filename );
-						sint v = file.serialVersion( 0 );
-						file.serialCont( _AutoUidMap );
+						CIFile file(filename);
+						sint v = file.serialVersion(1);
+						if (v >= 1)
+						{
+							file.serialCont(_AutoUidMap);
+						}
+						else
+						{
+							nlwarning("AutoAllocUserid out of date version");
+						}
 					}
 					catch (const Exception&)
 					{
@@ -870,7 +947,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 				}
 
 				// Look up the address
-				TAutoUidMap::iterator itaum = _AutoUidMap.find( _CurrentInMsg->AddrFrom.internalIPAddress() );
+				TAutoUidMap::iterator itaum = _AutoUidMap.find( _CurrentInMsg->AddrFrom.getAddress() );
 				if ( itaum != _AutoUidMap.end() )
 				{
 					// This ip address is already known: if not already connected, give the same user id back.
@@ -887,7 +964,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					// This ip address is new to us, give a new user id and store it
 					do { uid = CurrentAutoAllocUserid++; }
 					while ( findClientHostByUid( uid ) != NULL );
-					_AutoUidMap.insert( std::make_pair( _CurrentInMsg->AddrFrom.internalIPAddress(), uid ) );
+					_AutoUidMap.insert( std::make_pair( _CurrentInMsg->AddrFrom.getAddress(), uid ) );
 
 				}
 
@@ -912,7 +989,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			// ALWAYS REMOVE CLIENT FROM LIMBO!
 			LimboClients.erase(uid);
 
-			clienthost = addClient( _CurrentInMsg->AddrFrom, uid, userName, userPriv, userExtended, languageId, lc, instanceId, (uint8)charSlot );
+			clienthost = addClient( _CurrentInMsg->AddrFrom, _CurrentInMsg->QuicUser, uid, userName, userPriv, userExtended, languageId, lc, instanceId, (uint8)charSlot );
 
 			// Check if the addition worked
 			if ( clienthost != NULL )

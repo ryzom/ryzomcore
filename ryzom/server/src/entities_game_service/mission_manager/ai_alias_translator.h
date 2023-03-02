@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -358,8 +361,8 @@ inline const NLMISC::CEntityId& CAIAliasTranslator::getEntityId(TAIAlias aiid) c
 	CHashMap< uint, NLMISC::CEntityId >::const_iterator it = _HashTableAiId.find(aiid);
 	if(  it != _HashTableAiId.end() )
 		return (*it).second;
-#ifndef FINAL_VERSION
-	nlerror( "Illegal call to getEntityId on entity with no alias" ); // see
+#if !FINAL_VERSION
+	nlerror( "Illegal call to getEntityId on entity with no alias" ); // see 
 #endif
 	return NLMISC::CEntityId::Unknown;
 }// CAIAliasTranslator getEntityId

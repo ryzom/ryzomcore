@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -279,16 +279,51 @@ CObjectViewer::CObjectViewer ()
 // ***************************************************************************
 std::string CObjectViewer::getModulePath() const
 {
-	// Get the configuration file path (located in same directory as module)
-	HMODULE hModule = AfxGetInstanceHandle();
-	nlassert(hModule); // shouldn't be null now anymore in any case
-	nlassert(hModule != GetModuleHandle(NULL)); // if this is dll, the module handle can't be same as exe
-	TCHAR sModulePath[256];
-	int res = GetModuleFileName(hModule, sModulePath, 256); nlassert(res);
-	nldebug("Object viewer module path is '%s'", sModulePath);
-
-	SPath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath));
-
+	// Check environment
+	if (SPath.empty())
+	{
+		wchar_t buf[MAX_PATH];
+		buf[0] = L'\0';
+		DWORD len = GetEnvironmentVariableW(L"%RC_ROOT%", buf, _countof(buf));
+		if (len)
+			SPath = NLMISC::CPath::standardizePath(NLMISC::wideToUtf8(buf, len), true) + ".nel/tools/";
+	}
+	// Check project
+	if (SPath.empty())
+	{
+		wchar_t buf[MAX_PATH];
+		DWORD len = GetCurrentDirectoryW(_countof(buf), buf);
+		std::string cwd = NLMISC::CPath::standardizePath(NLMISC::wideToUtf8(buf, len), false);
+		std::vector<std::string> cwdv;
+		NLMISC::explode(cwd, std::string("/"), cwdv, false);
+		std::vector<std::string> paths;
+		paths.reserve(cwdv.size());
+		std::string path = "";
+		for (size_t i = 0; i < cwdv.size(); ++i)
+		{
+			path += cwdv[i] + "/";
+			paths.push_back(path);
+		}
+		for (ptrdiff_t i = (ptrdiff_t)paths.size() - 1; i >= 0; --i)
+		{
+			if (NLMISC::CFile::isDirectory(paths[i] + ".nel"))
+			{
+				SPath = paths[i] + ".nel/tools/";
+				break;
+			}
+		}
+	}
+	if (SPath.empty())
+	{
+		wchar_t buf[MAX_PATH];
+		// Get the configuration file path (located in same directory as module)
+		HMODULE hModule = AfxGetInstanceHandle();
+		nlassert(hModule); // shouldn't be null now anymore in any case
+		nlassert(hModule != GetModuleHandle(NULL)); // if this is dll, the module handle can't be same as exe
+		int res = GetModuleFileNameW(hModule, buf, MAX_PATH); nlassert(res);
+		SPath = NLMISC::CFile::getPath(wideToUtf8(buf));
+	}
+	nldebug("Object viewer configuration path is '%s'", SPath.c_str());
 	return SPath + "object_viewer.cfg";
 }
 

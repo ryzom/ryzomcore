@@ -1,8 +1,8 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1333,7 +1333,7 @@ uint64 CSystemInfo::getProcessorFrequency(bool quick)
 
 static bool DetectMMX()
 {
-	#ifdef NL_CPU_INTEL
+	#if defined(NL_CPU_INTEL) && (defined(HAVE_X86_64) || !defined(NL_COMP_GCC))
 		if (!CSystemInfo::hasCPUID()) return false; // cpuid not supported ...
 
 		sint32 CPUInfo[4];
@@ -1348,7 +1348,7 @@ static bool DetectMMX()
 
 static bool DetectSSE()
 {
-	#ifdef NL_CPU_INTEL
+	#if defined(NL_CPU_INTEL) && (defined(HAVE_X86_64) || !defined(NL_COMP_GCC))
 		if (!CSystemInfo::hasCPUID()) return false; // cpuid not supported ...
 
 		sint32 CPUInfo[4];
