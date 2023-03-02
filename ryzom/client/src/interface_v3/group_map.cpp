@@ -1653,7 +1653,7 @@ void CGroupMap::draw()
 
 	if (_FrustumView)
 	{
-		if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
+		if (getArkPowoMode() == "editor" || R2::getEditor().getMode() == R2::CEditor::EditionMode)
 		{
 			static volatile bool wantFrustum = true;
 			if (wantFrustum)
@@ -1701,7 +1701,7 @@ void CGroupMap::draw()
 
 	Driver->setScissor(newScissor);
 
-	if (R2::getEditor().getMode() != R2::CEditor::EditionMode)
+	if (getArkPowoMode() == "editor" || R2::getEditor().getMode() != R2::CEditor::EditionMode)
 	{
 		// Draw the player TODO : replace with a CViewQuad
 		if (!_PlayerPosLoadFailure)
@@ -1748,7 +1748,7 @@ void CGroupMap::draw()
 	// draw border of frustum
 	if (_FrustumView)
 	{
-		if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
+		if (getArkPowoMode() == "editor" || R2::getEditor().getMode() == R2::CEditor::EditionMode)
 		{
 			if (_FrustumMaterial.empty())
 			{
@@ -2666,6 +2666,9 @@ static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 	CInterfaceElement *ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu:teleport");
 	if(ie) ie->setActive(showTeleport);
 
+	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu_island:teleport");
+	if(ie) ie->setActive(showTeleport);
+
 	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:land_mark_menu:lmteleport");
 	if(ie) ie->setActive(showTeleport);
 
@@ -2824,6 +2827,50 @@ void CGroupMap::addLandMark(TLandMarkButtonVect &destList, const NLMISC::CVector
 	destList.push_back(lmb);
 	addCtrl(lmb);
 }
+
+//============================================================================================================
+void CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, NLMISC::CRGBA color)
+{
+	if (_CurContinent == NULL) return;
+	
+	CUserLandMark ulm;
+	mapToWorld(ulm.Pos, pos);
+	ulm.Title = title;
+	ulm.Type = 5;
+	_CurContinent->UserLandMarks.push_back(ulm);
+	
+	CLandMarkOptions options(_UserLMOptions);
+	options.ColorNormal = options.ColorOver = options.ColorPushed = color;
+	// create a new button and add it to the list
+	CLandMarkButton *lmb = createLandMarkButton(options);
+	lmb->setParent(this);
+	lmb->Pos = pos;
+	lmb->setDefaultContextHelp(title.toUtf8());
+	_UserLM.push_back(lmb);
+	addCtrl(lmb);
+	invalidateCoords();
+}
+
+//============================================================================================================
+void CGroupMap::delArkPoints()
+{
+	for (uint i = 0; i < _RespawnLM.size(); i++)
+	{
+		delCtrl(_RespawnLM[i]);
+		_RespawnLM[i] = NULL;
+	}
+	_ArkPoints.clear();
+}
+
+//============================================================================================================
+void CGroupMap::addUserRespawnPoint(const NLMISC::CVector2f &pos)
+{
+	CRespawnPointsMsg rpm;
+	rpm.NeedToReset = false;
+	rpm.RespawnPoints.push_back(CRespawnPointsMsg::SRespawnPoint(pos.x*1000,pos.y*1000));
+	addRespawnPoints(rpm);
+}
+
 
 //============================================================================================================
 CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, const CUserLandMark::EUserLandMarkType lmType)
@@ -3557,6 +3604,38 @@ void CGroupMap::addRespawnPoints(const CRespawnPointsMsg &rpm)
 }
 
 //=========================================================================================================
+void CGroupMap::addArkPoint(const CArkPoint &point) {
+	_ArkPoints.push_back(point);
+
+	if (_MapMode != MapMode_Death) return;
+	if (_ArkPoints.empty()) return;
+
+	CWorldSheet *pWS = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
+	if (pWS == NULL) return;
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	if (pIM == NULL) return;
+
+	NLMISC::CVector2f rpWorldPos(point.x * 0.001f, point.y * 0.001f);
+
+	for (uint32 i = 0; i < pWS->Maps.size(); ++i)
+	{
+		SMap &rMap = pWS->Maps[i];
+		if (rMap.ContinentName.empty()) continue;
+
+		if ((rpWorldPos.x >= rMap.MinX) &&
+			(rpWorldPos.x <= rMap.MaxX) &&
+			(rpWorldPos.y >= rMap.MinY) &&
+			(rpWorldPos.y <= rMap.MaxY))
+		{
+			setMap(rMap.Name);
+			break;
+		}
+	}
+}
+
+
+//=========================================================================================================
 void CGroupMap::serialConfig(NLMISC::IStream &f)
 {
 	sint ver = f.serialVersion(3);
@@ -4125,11 +4204,29 @@ class CAHWorldMapRightClick : public IActionHandler
 
 		if (gm->isIsland())
 		{
-			menu = "ui:interface:map_menu_island";
+			if (gm->getArkPowoMode() == "editor")
+				menu = gm->getArkPowoMapMenu();
+			else
+				menu = "ui:interface:map_menu_island";
 		}
 		else
 		{
-			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
+			if (menu.empty())
+				menu = "ui:interface:map_menu";
+
+			// update menu with closest landmarks
+			NLMISC::CVector2f pos(NLMISC::CVector2f::Null);
+			CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
+			if (button)
+				gm->getLandmarkPosition(button, pos);
+
+			if(pos == NLMISC::CVector2f::Null)
+			{
+				pos = gm->getRightClickLastPos();
+				gm->mapToWorld(pos, pos);
+			}
+
+			gm->updateClosestLandMarkMenu(menu, pos);
 		}
 
 		CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=" + menu);

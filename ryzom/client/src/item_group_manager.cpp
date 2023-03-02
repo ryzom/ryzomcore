@@ -844,4 +844,3 @@ void CItemGroupManager::releaseInstance()
 		delete _Instance;
 	_Instance = NULL;
 }
-

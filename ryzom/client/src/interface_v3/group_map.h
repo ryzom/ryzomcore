@@ -126,6 +126,7 @@ public:
 class CGroupMap : public CInterfaceGroup
 {
 public:
+
 	// external element to be displayed on the map
 	struct IDeco
 	{
@@ -279,6 +280,14 @@ public:
 
 	// Server set all valid respawn points
 	void addRespawnPoints(const CRespawnPointsMsg &rpm);
+
+	// add Ark landscape point
+	void addArkPoint(const CArkPoint &point);
+
+	std::string getArkPowoMode() const { return _ArkPowoMode; }
+	void setArkPowoMode(const std::string &mode)  { _ArkPowoMode = mode; }
+	std::string getArkPowoMapMenu() const { return _ArkPowoMapMenu; }
+	void setArkPowoMapMenu(const std::string &menu)  { _ArkPowoMapMenu = menu; }
 
 	bool isInDeathMode() { return _MapMode == MapMode_Death; }
 
@@ -440,6 +449,8 @@ private:
 		sint32				_MapW;
 		sint32				_MapH;
 
+		std::string			_ArkPowoMode;
+		std::string			_ArkPowoMapMenu;
 		NLMISC::CRGBA		_FrustumViewColor;
 		NLMISC::CRGBA		_FrustumViewColorOver;
 		float				_FrustumOverBlendFactor;
@@ -549,6 +560,7 @@ private:
 		};
 
 		TMapMode			_MapMode;
+		std::vector<CArkPoint> _ArkPoints;
 		CLandMarkOptions	_RespawnLMOptions;
 		// landmark for respawn
 		TLandMarkButtonVect	_RespawnLM;

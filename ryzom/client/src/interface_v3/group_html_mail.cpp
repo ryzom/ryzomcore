@@ -90,11 +90,12 @@ string	CGroupHTMLMail::home () const
 void CGroupHTMLMail::handle ()
 {
 	// Do nothing if WebServer is not initialized
-	if (!WebServer.empty())
+/*	if (!WebServer.empty())
 	{
 		Home = "/webig/mailbox.php";
 		CGroupHTML::handle ();
 	}
+*/
 }
 
 // ***************************************************************************

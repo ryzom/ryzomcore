@@ -640,7 +640,7 @@ void		CGameContextMenu::update()
 		if (_TextPAEnterStable)
 			_TextPAEnterStable->setActive(false);
 		if (_TextPAEnterBag)
-			_TextPAEnterStable->setActive(false);
+			_TextPAEnterBag->setActive(false);
 	}
 
 	// Remove Free option to prevent miss click
@@ -1041,6 +1041,14 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 	node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", index), false);
 	if(!node)	return false;
 	ANIMAL_TYPE::EAnimalType		anitype= (ANIMAL_TYPE::EAnimalType)node->getValue32();
+
+	if (anitype != ANIMAL_TYPE::Pet)
+	{
+		if (pEnterBag)
+			pEnterBag->setActive(false);
+		if (pLeaveBag)
+			pLeaveBag->setActive(false);
+	}
 
 	// COMMON PART FOR ALL TYPES OF ANIMAL
 

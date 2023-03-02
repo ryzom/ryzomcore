@@ -4550,32 +4550,6 @@ NLMISC_COMMAND(debugInfoWindows, "log info windows sheetId", "")
 	return true;
 }
 
-NLMISC_COMMAND(renameItem, "rename an item", "inventory slot literal name")
-{
-	if (args.size() != 4)
-		return false;
-
-	CBitMemStream out;
-	if(GenericMsgHeaderMngr.pushNameToStream("ITEM:RENAME", out))
-	{
-		INVENTORIES::TInventory inventory = INVENTORIES::toInventory(args[0]);
-		out.serialShortEnum(inventory);
-		uint16 slot;
-		if (!fromString(args[1], slot))
-			return false;
-		out.serial(slot);
-		bool literal = toBool(args[2]);
-		out.serial(literal);
-		out.serial(const_cast<std::string &>(args[3]));
-
-		NetMngr.push(out);
-	}
-	else
-		nlwarning("mainLoop : unknown message name : '%s'", "ITEM:RENAME");
-
-	return true;
-}
-
 NLMISC_COMMAND(getSkillValue, "get a skill value by its name", "skill_name")
 {
 	if (args.size() != 1) return false;

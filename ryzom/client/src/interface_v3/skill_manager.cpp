@@ -1044,7 +1044,7 @@ void CSkillManager::setPlayerTitle(const std::string &name)
 // ***************************************************************************
 // ***************************************************************************
 
-#define GROUP_TITLE_COMBO "ui:interface:info_player_skills:header_opened:title:player_title"
+#define GROUP_TITLE_COMBO "ui:interface:info_player_skills:content:webinfos:title:player_title"
 
 // ***************************************************************************
 class CHandlerTitleInit: public IActionHandler

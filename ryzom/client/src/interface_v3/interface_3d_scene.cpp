@@ -666,12 +666,12 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 		return this;
 
 	string sTmp = id.substr(0, getId().size());
-	if (sTmp != getId()) return NULL;
+	//if (sTmp != getId()) return NULL;
 
 	uint i;
 
 	for (i = 0; i < _Characters.size(); ++i)
-		if (id == _Characters[i]->getId())
+		if (id == _Characters[i]->getId() || id == toString("character#%d", i))
 			return _Characters[i];
 
 	for (i = 0; i < _IGs.size(); ++i)
@@ -679,11 +679,11 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 			return _IGs[i];
 
 	for (i = 0; i < _Shapes.size(); ++i)
-		if (id == _Shapes[i]->getId())
+		if (id == _Shapes[i]->getId() || id == toString("shape#%d", i))
 			return _Shapes[i];
 
 	for (i = 0; i < _Cameras.size(); ++i)
-		if (id == _Cameras[i]->getId())
+		if (id == _Cameras[i]->getId() || id == toString("camera#%d", i))
 			return _Cameras[i];
 
 	for (i = 0; i < _Lights.size(); ++i)

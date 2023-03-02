@@ -104,6 +104,7 @@
 #include "../motion/user_controls.h"
 #include "../events_listener.h"
 #include "group_html_cs.h"
+#include "group_map.h"
 #include "bonus_malus.h"
 #include "nel/gui/group_editbox.h"
 #include "../entities.h"
@@ -130,6 +131,8 @@
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/misc/polygon.h"
+#include "nel/misc/i_xml.h"
+#include "nel/misc/o_xml.h"
 #include "game_share/scenario_entry_points.h"
 #include "game_share/bg_downloader_msg.h"
 #include "game_share/constants.h"
@@ -517,6 +520,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getUserRace",  getUserRace);
 	ls.registerFunc("getSheet2idx",  getSheet2idx);
 	ls.registerFunc("getTargetSlot",  getTargetSlot);
+	ls.registerFunc("setTargetAsInterlocutor",  setTargetAsInterlocutor);
+	ls.registerFunc("unsetTargetAsInterlocutor",  unsetTargetAsInterlocutor);
 	ls.registerFunc("getSlotDataSetId",  getSlotDataSetId);
 	ls.registerFunc("addShape",  addShape);
 	ls.registerFunc("moveShape",  moveShape);
@@ -587,6 +592,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getPlayerSelectedSlot),
 		LUABIND_FUNC(isInGame),
 		LUABIND_FUNC(isPlayerSlotNewbieLand),
+		LUABIND_FUNC(getSheetLocalizedName),
+		LUABIND_FUNC(getSheetLocalizedDesc),
 		LUABIND_FUNC(getSkillIdFromName),
 		LUABIND_FUNC(getSkillLocalizedName),
 		LUABIND_FUNC(getMaxSkillValue),
@@ -611,6 +618,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getClientCfg),
 		LUABIND_FUNC(sendMsgToServer),
 		LUABIND_FUNC(sendMsgToServerPvpTag),
+		LUABIND_FUNC(sendMsgToServerAutoPact),
 		LUABIND_FUNC(sendMsgToServerUseItem),
 		LUABIND_FUNC(isGuildQuitAvailable),
 		LUABIND_FUNC(sortGuildMembers),
@@ -1796,6 +1804,22 @@ int CLuaIHMRyzom::getTargetSlot(CLuaState &ls)
 }
 
 // ***************************************************************************
+int CLuaIHMRyzom::setTargetAsInterlocutor(CLuaState &ls)
+{
+	uint32 slot = (uint32)getTargetSlotNr();
+	UserEntity->interlocutor(slot);
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::unsetTargetAsInterlocutor(CLuaState &ls)
+{
+	uint32 slot = (uint32)getTargetSlotNr();
+	UserEntity->interlocutor(CLFECOMMON::INVALID_SLOT);
+	return 0;
+}
+
+// ***************************************************************************
 int CLuaIHMRyzom::getSlotDataSetId(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getSlotDataSetId", 1);
@@ -2347,14 +2371,14 @@ int CLuaIHMRyzom::getIslandId(CLuaState &ls)
 
 // ***************************************************************************
 //
-// addShape("shape", .x, .y, .z, "angle", .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton")
+// addShape("shape", .x, .y, .z, "angle", .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton", "inIgZone?")
 //
 //********
 int CLuaIHMRyzom::addShape(CLuaState &ls)
 {
 	const char* funcName = "addShape";
 	CLuaIHM::checkArgMin(ls, funcName, 1);
-	CLuaIHM::checkArgMax(ls, funcName, 13);
+	CLuaIHM::checkArgMax(ls, funcName, 14);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 
 	sint32 idx = -1;
@@ -3513,6 +3537,20 @@ bool CLuaIHMRyzom::isPlayerSlotNewbieLand(uint32 slot)
 }
 
 // ***************************************************************************
+ucstring	CLuaIHMRyzom::getSheetLocalizedName(const std::string &sheet)
+{
+	return ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(CSheetId(sheet)));
+}
+
+// ***************************************************************************
+ucstring	CLuaIHMRyzom::getSheetLocalizedDesc(const std::string &sheet)
+{
+	return ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(CSheetId(sheet)));
+}
+
+
+
+// ***************************************************************************
 sint32	CLuaIHMRyzom::getSkillIdFromName(const std::string &def)
 {
 	//H_AUTO(Lua_CLuaIHM_getSkillIdFromName)
@@ -3836,6 +3874,14 @@ void CLuaIHMRyzom::sendMsgToServerPvpTag(bool pvpTag)
 }
 
 // ***************************************************************************
+void CLuaIHMRyzom::sendMsgToServerAutoPact(bool bval)
+{
+	//H_AUTO(Lua_CLuaIHM_sendMsgToServerAutoPact)
+	uint8 dopact = (uint8)bval;
+	::sendMsgToServer("COMMAND:AUTOPACT", dopact);
+}
+
+// ***************************************************************************
 void CLuaIHMRyzom::sendMsgToServerUseItem(sint32 slot)
 {
     //H_AUTO(Lua_CLuaIHM_sendMsgToServerUseItem)
@@ -4015,7 +4061,7 @@ string CLuaIHMRyzom::getRegionByAlias(uint32 alias)
 	return ContinentMngr.getRegionNameByAlias(alias);
 }
 
-sint32 CLuaIHMRyzom::getGroundZ(uint32 x, sint32 y)
+float CLuaIHMRyzom::getGroundZ(float x, float y)
 {
 	CVector vect = UserEntity->pos();
 	vect.x = x;
@@ -4847,5 +4893,49 @@ int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
 		if (id >= 0 && id < CChatGroup::MaxDynChanPerPlayer)
 			ci.DynamicChat[id].displayMessage(msg, prop.getRGBA());
 	}
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::scrollElement(CLuaState &ls)
+{
+	const char *funcName = "scrollElement";
+
+	// scrollElement(object, vertical, direction, offset_multiplier)
+
+	CLuaIHM::checkArgMin(ls, funcName, 3);
+	CLuaIHM::check(ls, ls.getTop() > 2, funcName);
+
+	CLuaIHM::check(ls, CLuaIHM::isUIOnStack(ls, 1), toString("%s requires a UI object in param 1", funcName));
+	CLuaIHM::check(ls, ls.type(2)==LUA_TBOOLEAN, toString("%s requires a boolean in param 2", funcName));
+	CLuaIHM::check(ls, ls.isInteger(3), toString("%s requires a number in param 3", funcName));
+
+	if (ls.getTop() > 3)
+		CLuaIHM::check(ls, ls.isInteger(4), toString("%s requires a number in param 4", funcName));
+
+	CInterfaceElement *pIE = CLuaIHM::getUIOnStack(ls, 1);
+	if (pIE)
+	{
+		// must be a scroll element
+		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(pIE);
+		if (pCS)
+		{
+			sint32 direction = 0;
+			sint32 multiplier = 16;
+
+			direction = (ls.toInteger(3) > 0) ? 1 : -1;
+			if (ls.getTop() > 3)
+				multiplier = (ls.toInteger(4) > 0) ? ls.toInteger(4) : 1;
+
+			const bool vertical = ls.toBoolean(2);
+			if (vertical)
+				pCS->moveTrackY(-(direction * multiplier));
+			else
+				pCS->moveTrackX(-(direction * multiplier));
+
+			return 0;
+		}
+	}
+	ls.pushNil();
 	return 1;
 }

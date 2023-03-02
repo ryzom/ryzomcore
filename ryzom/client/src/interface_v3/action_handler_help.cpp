@@ -704,6 +704,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 				return;
 			}
 		}
+
 		CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(NULL);
 		if (!group) return;
 

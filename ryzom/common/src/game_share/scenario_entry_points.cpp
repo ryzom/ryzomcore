@@ -61,11 +61,13 @@ void CScenarioEntryPoints::init()
 {
 	_HardIslandsPath = false;
 	_CompleteIslandsFilenames.clear();
+#if 0 // disabled for atys
 	_CompleteIslandsFilenames.push_back("r2_desert_islands.xml");
 	_CompleteIslandsFilenames.push_back("r2_lakes_islands.xml");
 	_CompleteIslandsFilenames.push_back("r2_jungle_islands.xml");
 	_CompleteIslandsFilenames.push_back("r2_forest_islands.xml");
 	_CompleteIslandsFilenames.push_back("r2_roots_islands.xml");
+#endif
 	_EntryPointsFilename = "r2_entry_points.txt";
 }
 //-----------------------------------------------------------------------------

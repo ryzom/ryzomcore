@@ -75,7 +75,6 @@
 #include "group_skills.h"
 #include "group_compas.h"
 #include "nel/gui/group_html.h"
-#include <nel/gui/url_parser.h>
 
 // Misc
 #include "../input.h"
@@ -457,13 +456,6 @@ CInterfaceManager* CInterfaceManager::getInstance()
 	if( _Instance == NULL )
 		_Instance = new CInterfaceManager();
 	return _Instance;
-}
-
-void setGroupHTMLWebServer(const std::string &webServer)
-{
-	CUrlParser uri(webServer);
-	CGroupHTML::options.webServer = webServer;
-	CGroupHTML::options.webServerDomain = uri.host;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1166,7 +1158,7 @@ void CInterfaceManager::configureQuitDialogBox()
 				eltEdit->setActive(false);
 
 				if (eltCancel)
-					(safe_cast<CCtrlTextButton*>(eltCancel))->setText(R2::getEditor().getMode() != R2::CEditor::EditionMode ? CI18N::get("uittQuitCancel") : CI18N::get("uittQuitCancelEditor"));
+					(safe_cast<CCtrlTextButton*>(eltCancel))->setText(sessionOwner ? CI18N::get("uittQuitCancel") : CI18N::get("uittQuitCancelEditor"));
 			}
 		}
 

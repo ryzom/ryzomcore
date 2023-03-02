@@ -109,7 +109,13 @@ private:
 	static int  getUserRace(CLuaState &ls);
 	static int  getSheet2idx(CLuaState &ls);
 	static int	getTargetSlot(CLuaState &ls);
+	static int	setTargetAsInterlocutor(CLuaState &ls);
+	static int	unsetTargetAsInterlocutor(CLuaState &ls);
 	static int  getSlotDataSetId(CLuaState &ls);
+	//
+	static int	getMaxDynChan(CLuaState &ls);
+	static int	readUserChannels(CLuaState &ls);
+	static int	saveUserChannels(CLuaState &ls); // { name = "pass" }
 
 	// LUA functions exported for Dev only (debug)
 	static int	dumpUI(CLuaState &ls);			// params: CInterfaceElement*.... return: none
@@ -216,6 +222,8 @@ private:
 	static bool	isPlayerSlotNewbieLand(uint32 slot);  // test if one of the player slot is a newbieland one, if not so, client must be patched in order to continue
 
 	// GameInfo
+	static ucstring getSheetLocalizedName(const std::string &sheet);
+	static ucstring getSheetLocalizedDesc(const std::string &sheet);
 	static sint32 getSkillIdFromName(const std::string &def);
 #ifdef RYZOM_LUA_UCSTRING
 	static ucstring	getSkillLocalizedName(sint32 skillId);
@@ -248,6 +256,7 @@ private:
 	static std::string getClientCfg(const std::string &varName);
 	static void	sendMsgToServer(const std::string &msgName);
 	static void	sendMsgToServerPvpTag(bool pvpTag);
+	static void	sendMsgToServerAutoPact(bool bval);
 	static void	sendMsgToServerUseItem(sint32 slot);
 	static bool	isGuildQuitAvailable();
 	static void	sortGuildMembers();
@@ -267,7 +276,7 @@ private:
 	static void setChar3dDBfromServerDB(const std::string &branch);
 	static float getRefHeightScale(const std::string &people, const std::string &vpa);
 	static std::string getRegionByAlias(uint32 alias);
-	static sint getGroundZ(uint32 x, sint32 y);
+	static float getGroundZ(float x, float y);
 	static int getGroundAtMouse(CLuaState &ls);
 	static int moveCam(CLuaState &ls);
 	static int setCamMode(CLuaState &ls);
@@ -339,6 +348,9 @@ private:
 	static bool	isPlayerInPVPMode();
 	static bool	isTargetInPVPMode();
 
+	// vertical and horizontal scrolling
+	// do not require element to be focused
+	static int scrollElement(CLuaState &ls); // return none (nil if error)
 
 public:
 

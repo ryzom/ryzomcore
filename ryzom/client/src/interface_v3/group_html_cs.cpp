@@ -126,6 +126,15 @@ void CGroupHTMLCS::getParameters (std::vector<CParameter> &parameters, bool enco
 	string s = getDebugInformation();
 	s += getSystemInformation();
 
+	static bool webIgReady = false;
+
+	if (!webIgReady) // Webig is ready when getParameters of CGroupHTMLCS is called
+	{
+		webIgReady = true;
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		CLuaManager::getInstance().executeLuaScript("game:onWebIgReady()");
+	}
+
 	// For each line
 	string::size_type startOfLine = 0;
 	string::size_type endOfLine;
