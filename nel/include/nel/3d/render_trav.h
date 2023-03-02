@@ -29,6 +29,7 @@
 #include "nel/3d/light.h"
 #include "nel/3d/mesh_block_manager.h"
 #include "nel/3d/shadow_map_manager.h"
+#include "decal_manager.h"
 #include "nel/3d/u_scene.h"
 #include "nel/3d/vertex_program.h"
 #include "nel/3d/transform.h"
@@ -48,6 +49,7 @@ class	CMaterial;
 
 class	CTransform;
 class	CLandscapeModel;
+class	CDecal;
 
 class	CVertexStreamManager;
 class   CWaterModel;
@@ -247,8 +249,15 @@ public:
 	CVertexStreamManager		*getShadowMeshSkinManager() const {return _ShadowMeshSkinManager;}
 
 
+	/// get the decal manager
+	CDecalManager				&getDecalManager() {return _DecalManager;}
+	const CDecalManager			&getDecalManager() const {return _DecalManager;}
+
+
 	// add a landscape. Special for CLandscapeModel::traverseRender();
 	void			addRenderLandscape(CLandscapeModel *model);
+	// add a decal. Special for CDecal::traverseRender();
+	void			addRenderDecal(CDecal *decal);
 
 
 	/// \name Temp Debug
@@ -460,6 +469,8 @@ private:
 	CShadowMapManager			_ShadowMapManager;
 	/// The SkinManager, but For Shadow rendering
 	CVertexStreamManager		*_ShadowMeshSkinManager;
+	/// The decal manager
+	CDecalManager				_DecalManager;
 
 
 	/** \name Special Landscape RenderList.

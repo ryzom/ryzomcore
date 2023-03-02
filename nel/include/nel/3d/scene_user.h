@@ -161,6 +161,9 @@ public:
 	virtual	UPointLight		createPointLight();
 	virtual	void			deletePointLight(UPointLight &light);
 
+	virtual UDecal			createDecal();
+	virtual void			deleteDecal(UDecal &decal);
+
 	//@}
 
 	/// \name Animation gestion.

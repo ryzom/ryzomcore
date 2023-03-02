@@ -22,6 +22,7 @@
 #include "nel/3d/camera_col.h"
 #include "nel/3d/shadow_map.h"
 #include "nel/3d/light.h"
+#include "nel/3d/decal.h"
 #include "nel/misc/common.h"
 
 
@@ -342,6 +343,32 @@ void					CVisualCollisionManager::receiveShadowMap(IDriver *drv, CShadowMap *sha
 	}
 }
 
+
+// ***************************************************************************
+void CVisualCollisionManager::receiveDecal(CDecalContext &cdc)
+{
+	_MeshQuadGrid.select(cdc.WorldBBox.getMin(), cdc.WorldBBox.getMax());
+
+	CQuadGrid<CMeshInstanceCol*>::CIterator it    =  _MeshQuadGrid.begin();
+	CQuadGrid<CMeshInstanceCol*>::CIterator itEnd =  _MeshQuadGrid.end();
+
+	for(;it!=itEnd;++it)
+	{
+		(*it)->receiveDecal(cdc);
+	}
+
+}
+
+// ***************************************************************************
+void		CVisualCollisionManager::CMeshInstanceCol::receiveDecal(CDecalContext &cdc)
+{
+	// if mesh still present (else it s may be an error....)
+	if(Mesh)
+	{
+		// get the collision with the mesh
+		Mesh->receiveDecal(WorldMatrix, cdc);
+	}
+}
 
 // ***************************************************************************
 void		CVisualCollisionManager::CMeshInstanceCol::receiveShadowMap(const CVisualCollisionMesh::CShadowContext &shadowContext)

@@ -24,6 +24,7 @@
 #include "nel/3d/camera_col.h"
 #include "nel/3d/driver.h"
 #include "nel/3d/shadow_map.h"
+#include "nel/3d/decal.h"
 
 
 using namespace std;
@@ -34,7 +35,7 @@ using namespace NLMISC;
 #endif
 
 // TestYoyo. external debug flag
-bool	TESTYOYO_VCM_RedShadow= false;
+//bool	TESTYOYO_VCM_RedShadow= false;
 
 
 namespace NL3D
@@ -361,6 +362,122 @@ NLMISC::CAABBox			CVisualCollisionMesh::computeWorldBBox(const CMatrix &instance
 	return ret;
 }
 
+// ***************************************************************************
+void		CVisualCollisionMesh::receiveDecal(const NLMISC::CMatrix &instanceMatrix, CDecalContext &decalContext)
+{	
+	nlassert( decalContext.DestTris );
+	// empty mesh => no op
+	if(_Vertices.empty())
+		return;
+
+	// The VertexBuffer RefPtr has been released? quit
+	if(_VertexBuffer == NULL)
+		return;
+
+
+	// **** Select triangles to be rendered with quadGrid
+	// select with quadGrid local in mesh
+	CAABBox	localBBox;
+	localBBox = CAABBox::transformAABBox(decalContext.WorldMatrix.inverted(), decalContext.WorldBBox);
+
+	static	std::vector<uint16>	triInQuadGrid;
+	triInQuadGrid.clear();
+	uint numTrisInQuadGrid= _QuadGrid.select(localBBox, triInQuadGrid);
+
+	// no intersection at all? quit
+	if(numTrisInQuadGrid==0)
+		return;
+
+
+	static	std::vector<CPlane>		localClipPlanes;
+	// Allow max bits of planes clip.
+	localClipPlanes.resize(min((uint)decalContext.WorldClipPlanes.size(), (uint)NL3D_VCM_SHADOW_NUM_CLIP_PLANE));
+	// Transform into Mesh local space
+	for(uint i=0;i<localClipPlanes.size();i++)
+	{
+		localClipPlanes[i]= decalContext.WorldClipPlanes[i] * instanceMatrix;
+	}
+
+
+
+	static	std::vector<uint8>	vertexFlags;
+	if(vertexFlags.size()<_Vertices.size())
+		vertexFlags.resize(_Vertices.size());
+	memset(&vertexFlags[0], 0, _Vertices.size()*sizeof(uint8));
+
+
+	for(uint triq=0; triq<numTrisInQuadGrid; triq++)
+	{
+		uint16 triId[3];
+		triId[0] = _Triangles[uint(triInQuadGrid[triq])*3+0];
+		triId[1] = _Triangles[uint(triInQuadGrid[triq])*3+1];
+		triId[2] = _Triangles[uint(triInQuadGrid[triq])*3+2];
+		uint triFlag = NL3D_VCM_SHADOW_NUM_CLIP_PLANE_MASK;
+
+		// for all vertices, clip them
+		for(uint i=0; i<3; ++i)
+		{
+			uint vid = triId[i];
+			uint vf = vertexFlags[vid];
+
+			// if this vertex is still not computed
+			if(!vf)
+			{
+				// For all planes of the Clip Volume, clip this vertex.
+				for(uint j=0; j<localClipPlanes.size(); ++j)
+				{
+					// out if in front
+					bool out = localClipPlanes[j]*_Vertices[vid] > 0;
+
+					vf |= ((uint)out)<<j;
+				}
+
+				// add the bit flag to say "computed".
+				vf |= NL3D_VCM_SHADOW_NUM_CLIP_PLANE_SHIFT;
+
+				// store
+				vertexFlags[vid] = vf;
+			}
+
+			// And all vertex bits.
+			triFlag &= vf;
+		}
+
+		// if triangle not clipped, add the triangle
+		if( (triFlag & NL3D_VCM_SHADOW_NUM_CLIP_PLANE_MASK)==0 )
+		{
+			if(decalContext.Clipping)
+			{
+				static CPolygon clippedTri;
+				clippedTri.Vertices.resize(3);
+				clippedTri.Vertices[0] = instanceMatrix * _Vertices[triId[0]];
+				clippedTri.Vertices[1] = instanceMatrix * _Vertices[triId[1]];
+				clippedTri.Vertices[2] = instanceMatrix * _Vertices[triId[2]];
+				clippedTri.clip(decalContext.WorldClipPlanes);
+
+				if (clippedTri.Vertices.size() >= 3)
+				{					
+					for(uint k=0; k<clippedTri.Vertices.size() - 2; ++k)
+					{
+						decalContext.DestTris->push_back( clippedTri.Vertices[0]     );//+ vertDelta));
+						decalContext.DestTris->push_back( clippedTri.Vertices[k + 1] );//+ vertDelta));
+						decalContext.DestTris->push_back( clippedTri.Vertices[k + 2] );//+ vertDelta));
+					}
+				}
+
+			}
+			else
+			{
+				decalContext.DestTris->push_back( instanceMatrix * _Vertices[triId[0]] );
+				decalContext.DestTris->push_back( instanceMatrix * _Vertices[triId[1]] );
+				decalContext.DestTris->push_back( instanceMatrix * _Vertices[triId[2]] );
+			}
+
+		}
+
+	}
+
+}
 
 // ***************************************************************************
 void		CVisualCollisionMesh::receiveShadowMap(const NLMISC::CMatrix &instanceMatrix, const CShadowContext &shadowContext)
