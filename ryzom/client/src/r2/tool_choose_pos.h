@@ -92,8 +92,8 @@ protected:
 	bool					 _Valid;
 	NLMISC::CVector			 _CreatePosition;
 private:
-	CDecal					 _BadPlaceDecal;
-	CDecal					 _TestDecal;
+	CLegacyDecal					 _BadPlaceDecal;
+	CLegacyDecal					 _TestDecal;
 	bool					 _MultiPos;
 	bool					 _MultiPosLocked;
 	float					 _CreateAngle;

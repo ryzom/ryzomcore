@@ -310,7 +310,7 @@ void CLandscapePolyDrawer::renderLandscapePolyPart()
 	Driver->stencilFunc(UDriver::equal, 0x80, 0x80);
 
 	// call to render the decals just before the projected polygons on landscape
-	CDecalRenderList::getInstance().renderAllDecals();
+	CLegacyDecalRenderList::getInstance().renderAllDecals();
 
 	// disable stencil test
 	Driver->enableStencilTest(false);

@@ -33,10 +33,10 @@ namespace NLGUI
 
 using namespace NLGUI;
 
-class CDecal;
+class CLegacyDecal;
 
 // TODO nico : this would fit nicely in the particle system animation system (would be more flexible)
-class CDecalAnim
+class CLegacyDecalAnim
 {
 public:
 	std::string		Texture;
@@ -49,8 +49,8 @@ public:
 	NLMISC::CRGBA	StartEmissive;
 	NLMISC::CRGBA	EndEmissive;
 public:
-	CDecalAnim();
-	void updateDecal(const NLMISC::CVector2f &pos, float animRatio, CDecal &dest, float refScale) const;
+	CLegacyDecalAnim();
+	void updateDecal(const NLMISC::CVector2f &pos, float animRatio, CLegacyDecal &dest, float refScale) const;
 	void buildFromLuaTable(CLuaObject &table);
 };
 

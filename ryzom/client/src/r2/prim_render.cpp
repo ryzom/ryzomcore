@@ -366,7 +366,7 @@ void CPrimRender::update()
 		_VertexDecals.resize(_Vertices.size());
 		for(uint k = 0; k < _Vertices.size(); ++k)
 		{
-			_VertexDecals[k] = new CDecal;
+			_VertexDecals[k] = new CLegacyDecal;
 			_VertexDecals[k]->setClipDownFacing(_Look.ClipDownFacing);
 			if (k == 0 && !_Look.FirstVertexLook.DecalTexture.empty())
 			{
@@ -418,7 +418,7 @@ void CPrimRender::update()
 		_EdgeDecals.resize(_NumEdges);
 		for(sint k = 0; k < _NumEdges; ++k)
 		{
-			_EdgeDecals[k] = new CDecal;
+			_EdgeDecals[k] = new CLegacyDecal;
 			_EdgeDecals[k]->setClipDownFacing(_Look.ClipDownFacing);
 			_EdgeDecals[k]->setTexture(_Look.EdgeLook.DecalTexture, _Look.EdgeLook.DecalWrapMode == CEdgeLook::Centered, true, _Look.EdgeLook.DecalFiltered);
 			_EdgeDecals[k]->setDiffuse(_Look.EdgeLook.DecalColor);
@@ -541,7 +541,7 @@ void CPrimRender::updateEdge(NL3D::UInstance edge,const NLMISC::CVector &start, 
 }
 
 // *********************************************************
-void CPrimRender::updateEdgeDecal(CDecal &edgeDecal, const NLMISC::CVector &start, const NLMISC::CVector &end, float distToStartVertex, float distToEndVertex)
+void CPrimRender::updateEdgeDecal(CLegacyDecal &edgeDecal, const NLMISC::CVector &start, const NLMISC::CVector &end, float distToStartVertex, float distToEndVertex)
 {
 	//H_AUTO(R2_CPrimRender_updateEdgeDecal)
 	CVector2f start2f(start.x, start.y);

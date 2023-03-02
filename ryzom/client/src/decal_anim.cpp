@@ -31,7 +31,7 @@
 using namespace NLMISC;
 
 // *****************************************************************************
-CDecalAnim::CDecalAnim()
+CLegacyDecalAnim::CLegacyDecalAnim()
 {
 	DurationInMs = 1000;
 	EndScaleFactor = 1.f;
@@ -43,7 +43,7 @@ CDecalAnim::CDecalAnim()
 }
 
 // *****************************************************************************
-void CDecalAnim::updateDecal(const NLMISC::CVector2f &pos, float animRatio, CDecal &dest, float refScale) const
+void CLegacyDecalAnim::updateDecal(const NLMISC::CVector2f &pos, float animRatio, CLegacyDecal &dest, float refScale) const
 {
 	dest.setTexture(Texture);
 	dest.setWorldMatrixForSpot(pos, refScale * blend(1.f, EndScaleFactor, animRatio), blend(0.f, EndAngleInDegrees, animRatio));
@@ -55,7 +55,7 @@ void CDecalAnim::updateDecal(const NLMISC::CVector2f &pos, float animRatio, CDec
 
 
 // *****************************************************************************
-void CDecalAnim::buildFromLuaTable(CLuaObject &table)
+void CLegacyDecalAnim::buildFromLuaTable(CLuaObject &table)
 {
 	// retrieve a value from a lua table or affect a default value if not found
 	#define GET_LUA_VALUE(dest, Type, CastType, Default) \

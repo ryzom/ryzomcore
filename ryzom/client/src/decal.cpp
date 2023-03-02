@@ -49,12 +49,12 @@ using namespace NLMISC;
 #define new DEBUG_NEW
 #endif
 
-CDecalRenderList DecalRenderList;
+CLegacyDecalRenderList DecalRenderList;
 
 extern uint	SkipFrame;
 
-NL3D::CVertexBuffer CDecal::_VB;
-bool CDecal::_VBInitialized = false;
+NL3D::CVertexBuffer CLegacyDecal::_VB;
+bool CLegacyDecal::_VBInitialized = false;
 
 
 
@@ -156,7 +156,7 @@ static NLMISC::CSmartPtr<CVertexProgramDecalAttenuation> DecalAttenuationVertexP
 typedef CShadowPolyReceiver::CRGBAVertex CRGBAVertex;
 
 // ****************************************************************************
-CDecal::CDecal()
+CLegacyDecal::CLegacyDecal()
 {
 	if (!DecalAttenuationVertexProgram)
 	{
@@ -207,7 +207,7 @@ CDecal::CDecal()
 }
 
 // ****************************************************************************
-void CDecal::setCustomUVMatrix(bool on, const NLMISC::CMatrix &matrix)
+void CLegacyDecal::setCustomUVMatrix(bool on, const NLMISC::CMatrix &matrix)
 {
 	if (_CustomUVMatrix.set(on, matrix))
 	{
@@ -216,7 +216,7 @@ void CDecal::setCustomUVMatrix(bool on, const NLMISC::CMatrix &matrix)
 }
 
 // ****************************************************************************
-const std::string &CDecal::getTextureFileName() const
+const std::string &CLegacyDecal::getTextureFileName() const
 {
 	CTextureFile *tf = dynamic_cast<CTextureFile *>(_Material.getTexture(0));
 	if (tf) return tf->getFileName();
@@ -225,33 +225,33 @@ const std::string &CDecal::getTextureFileName() const
 }
 
 // ****************************************************************************
-void CDecal::setupMaterialColor()
+void CLegacyDecal::setupMaterialColor()
 {
 	_Material.texConstantColor(1,  NLMISC::CRGBA(_Emissive.R, _Emissive.G, _Emissive.B, _Diffuse.A));
 }
 
 // ****************************************************************************
-void CDecal::setEmissive(NLMISC::CRGBA emissive)
+void CLegacyDecal::setEmissive(NLMISC::CRGBA emissive)
 {
 	_Emissive = emissive;
 	setupMaterialColor();
 }
 
 // ****************************************************************************
-void CDecal::setDiffuse(NLMISC::CRGBA diffuse)
+void CLegacyDecal::setDiffuse(NLMISC::CRGBA diffuse)
 {
 	_Diffuse = diffuse;
 	setupMaterialColor();
 }
 
 // ****************************************************************************
-CRGBA CDecal::getDiffuse() const
+CRGBA CLegacyDecal::getDiffuse() const
 {
 	return _Diffuse;
 }
 
 // ****************************************************************************
-CDecal::~CDecal()
+CLegacyDecal::~CLegacyDecal()
 {
 	if (_ShadowMap)
 	{
@@ -261,7 +261,7 @@ CDecal::~CDecal()
 }
 
 // ****************************************************************************
-void CDecal::setTexture(const std::string &fileName,   bool clampU,   bool clampV, bool filtered)
+void CLegacyDecal::setTexture(const std::string &fileName,   bool clampU,   bool clampV, bool filtered)
 {
 	if (getTextureFileName() != fileName)
 	{
@@ -302,7 +302,7 @@ void CDecal::setTexture(const std::string &fileName,   bool clampU,   bool clamp
 }
 
 // ****************************************************************************
-void CDecal::setWorldMatrix(const NLMISC::CMatrix &matrix)
+void CLegacyDecal::setWorldMatrix(const NLMISC::CMatrix &matrix)
 {
 	float newMat[16];
 	matrix.get(newMat);
@@ -330,7 +330,7 @@ void CDecal::setWorldMatrix(const NLMISC::CMatrix &matrix)
 }
 
 // ****************************************************************************
-bool CDecal::clipFront(const NLMISC::CPlane &p) const
+bool CLegacyDecal::clipFront(const NLMISC::CPlane &p) const
 {
 	for(uint k = 0; k < 8; ++k)
 	{
@@ -340,7 +340,7 @@ bool CDecal::clipFront(const NLMISC::CPlane &p) const
 }
 
 // ****************************************************************************
-void CDecal::setWorldMatrixForArrow(const NLMISC::CVector2f &start,    const NLMISC::CVector2f &end,    float halfWidth)
+void CLegacyDecal::setWorldMatrixForArrow(const NLMISC::CVector2f &start,    const NLMISC::CVector2f &end,    float halfWidth)
 {
 	CMatrix matrix;
 	CVector I = CVector(end.x,    end.y,    0.f) - CVector(start.x,    start.y,    0.f);
@@ -351,7 +351,7 @@ void CDecal::setWorldMatrixForArrow(const NLMISC::CVector2f &start,    const NLM
 }
 
 // ****************************************************************************
-void CDecal::setWorldMatrixForSpot(const NLMISC::CVector2f &pos,  float radius, float angleInRadians)
+void CLegacyDecal::setWorldMatrixForSpot(const NLMISC::CVector2f &pos,  float radius, float angleInRadians)
 {
 	CMatrix matrix;
 	matrix.rotateZ(angleInRadians);
@@ -365,7 +365,7 @@ NLMISC::CVector r2MaskOffset(1.f / 4.f,  1.f / 4.f,  0.f);
 
 
 // ****************************************************************************
-void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* receiver */, bool useVertexProgram)
+void CLegacyDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* receiver */, bool useVertexProgram)
 {
 	if (_TriCache.empty()) return;
 	if (!_VBInitialized)
@@ -441,8 +441,8 @@ void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* 
 			const CRGBAVertex *destEnd = dest + _TriCache.size();
 			const CRGBAVertex *srcVert = &_TriCache[0];
 			const NLMISC::CVector camPos = MainCam.getMatrix().getPos() - _RefPosition;
-			float scale = 255.f * CDecalRenderList::getInstance()._DistScale;
-			float bias = 255.f * CDecalRenderList::getInstance()._DistBias;
+			float scale = 255.f * CLegacyDecalRenderList::getInstance()._DistScale;
+			float bias = 255.f * CLegacyDecalRenderList::getInstance()._DistBias;
 			float bottomBlendScale = 1.f / favoid0(_BottomBlendZMax - _BottomBlendZMin);
 			float bottomBlendBias = bottomBlendScale * (_RefPosition.z - _BottomBlendZMin);
 			do
@@ -478,7 +478,7 @@ void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* 
 }
 
 // ****************************************************************************
-void CDecal::render(NL3D::UDriver &/* drv */,
+void CLegacyDecal::render(NL3D::UDriver &/* drv */,
 					NL3D::CShadowPolyReceiver &receiver,
 					const std::vector<CPlane> &worldPyramid,
 					const std::vector<NLMISC::CVector> &pyramidCorners,
@@ -617,7 +617,7 @@ void CDecal::render(NL3D::UDriver &/* drv */,
 }
 
 // ****************************************************************************
-void CDecalRenderList::renderAllDecals()
+void CLegacyDecalRenderList::renderAllDecals()
 {
 	if (_Empty) return;
 
@@ -655,7 +655,7 @@ void CDecalRenderList::renderAllDecals()
 	}
 	for(uint k = 0; k < DECAL_NUM_PRIORITIES; ++k)
 	{
-		std::vector<CDecal::TRefPtr> &renderList = _RenderList[k];
+		std::vector<CLegacyDecal::TRefPtr> &renderList = _RenderList[k];
 		for(uint l = 0; l < renderList.size(); ++l)
 		{
 			if (renderList[l])
@@ -671,7 +671,7 @@ void CDecalRenderList::renderAllDecals()
 }
 
 // ****************************************************************************
-void CDecalRenderList::clearRenderList()
+void CLegacyDecalRenderList::clearRenderList()
 {
 	for(uint k = 0; k < DECAL_NUM_PRIORITIES; ++k)
 	{
@@ -681,27 +681,27 @@ void CDecalRenderList::clearRenderList()
 }
 
 // ****************************************************************************
-void CDecal::addToRenderList(uint priority /*=0*/)
+void CLegacyDecal::addToRenderList(uint priority /*=0*/)
 {
 	if( !Landscape)
 	{
 		return;
 	}
 	nlassert(priority < DECAL_NUM_PRIORITIES);
-	CDecalRenderList &drl = CDecalRenderList::getInstance();
+	CLegacyDecalRenderList &drl = CLegacyDecalRenderList::getInstance();
 	drl._RenderList[priority].push_back(this);
 	drl._Empty = false;
 }
 
 // ****************************************************************************
-bool CDecal::contains(const NLMISC::CVector2f &pos) const
+bool CLegacyDecal::contains(const NLMISC::CVector2f &pos) const
 {
 	CVector posIn = _InvertedWorldMatrix * CVector(pos.x, pos.y, 0.f);
 	return posIn.x >= 0.f && posIn.x <= 1.f && posIn.y >= 0.f && posIn.y <= 1.f;
 }
 
 // ****************************************************************************
-void CDecal::setClipDownFacing(bool clipDownFacing)
+void CLegacyDecal::setClipDownFacing(bool clipDownFacing)
 {
 	if (clipDownFacing != _ClipDownFacing)
 	{
@@ -711,7 +711,7 @@ void CDecal::setClipDownFacing(bool clipDownFacing)
 }
 
 // ****************************************************************************
-void CDecal::setBottomBlend(float zMin, float zMax)
+void CLegacyDecal::setBottomBlend(float zMin, float zMax)
 {
 	if (zMin > zMax) std::swap(zMin, zMax);
 	_BottomBlendZMin = zMin;
@@ -719,7 +719,7 @@ void CDecal::setBottomBlend(float zMin, float zMax)
 }
 
 // ****************************************************************************
-void CDecal::setTopBlend(float zMin, float zMax)
+void CLegacyDecal::setTopBlend(float zMin, float zMax)
 {
 	if (zMin > zMax) std::swap(zMin, zMax);
 	_TopBlendZMin = zMin;

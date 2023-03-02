@@ -225,8 +225,8 @@ private:
 	//
 	CMeshArray			 _VertexShapeInstances;
 	CMeshArray			 _EdgeShapeInstances;
-	std::vector<CDecal::TSmartPtr>   _VertexDecals;
-	std::vector<CDecal::TSmartPtr>	 _EdgeDecals;     // Decal of edges on landscape
+	std::vector<CLegacyDecal::TSmartPtr>   _VertexDecals;
+	std::vector<CLegacyDecal::TSmartPtr>	 _EdgeDecals;     // Decal of edges on landscape
 	NLMISC::CRGBA					 _Emissive;
 	sint							 _NumEdges;
 	float							 _InvWorldTextureWidth;
@@ -238,7 +238,7 @@ private:
 	void update();
 	void updatePos();
 	void updateEdge(NL3D::UInstance edge, const NLMISC::CVector &start, const NLMISC::CVector &end);
-	void updateEdgeDecal(CDecal &edgeDecal, const NLMISC::CVector &start, const NLMISC::CVector &end, float distToStartVertex, float distToEndVertex);
+	void updateEdgeDecal(CLegacyDecal &edgeDecal, const NLMISC::CVector &start, const NLMISC::CVector &end, float distToStartVertex, float distToEndVertex);
 	void forceSetEmissive(NLMISC::CRGBA emissive);
 	// world map display
 	void setWorldMapNumVertices(uint count);

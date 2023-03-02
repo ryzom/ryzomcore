@@ -52,7 +52,7 @@ private:
 	bool _AddedToWorldMap;
 	bool _Touched;
 	bool _Active;
-	std::vector<CDecal::TSmartPtr>					_Decals;
+	std::vector<CLegacyDecal::TSmartPtr>					_Decals;
 	std::vector<CCtrlQuad *>						_WorldMapEdges;
 	std::vector<CEditor::TInstanceObserverHandle>	_ObserverHandles;
 	// need to know when one of the component world pos is changed (no notification message reach us if

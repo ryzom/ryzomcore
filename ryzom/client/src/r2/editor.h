@@ -669,22 +669,22 @@ private:
 	CTool::TSmartPtr							_CurrentTool;
 	static bool									_ReloadWanted;
 	//
-	CDecal										_HighlightDecal;
-	CDecalAnim									_HighlightDecalAnim;
-	CDecal										_SelectDecal;
-	CDecalAnim									_SelectDecalAnim;
-	CDecalAnim									_SelectingDecalAnim;
-	CDecal										_PionneerDecal;
+	CLegacyDecal										_HighlightDecal;
+	CLegacyDecalAnim									_HighlightDecalAnim;
+	CLegacyDecal										_SelectDecal;
+	CLegacyDecalAnim									_SelectDecalAnim;
+	CLegacyDecalAnim									_SelectingDecalAnim;
+	CLegacyDecal										_PionneerDecal;
 	// alternative selection for huge element like particle systems, display a box on ground rather than
 	// the selection circle
 	CPrimRender									_SelectBox;
 	CPrimRender									_HighlightBox;
 	//
 	NLMISC::TTime								_LastAutoSaveTime;
-	CDecalAnim									_PionneerDecalAnim;
+	CLegacyDecalAnim									_PionneerDecalAnim;
 	struct CSelectingDecal : public NLMISC::CRefCount
 	{
-		CDecal Decal;
+		CLegacyDecal Decal;
 		sint64 EndDate;
 		NLMISC::CVector Pos;
 		float Scale;
@@ -924,7 +924,7 @@ private:
 	void			   saveCurrentKeySet();
 	void			   reloadUI(const char *filename);
 	void			   initHighlightDecal();
-	void			   updateDecalBlendRegion(CDecal &decal, const NLMISC::CVector &pos);
+	void			   updateDecalBlendRegion(CLegacyDecal &decal, const NLMISC::CVector &pos);
 	void               initPalette();
 	void			   initObjectProjectionMetatable();
 	void               registerDisplayers();
@@ -935,7 +935,7 @@ private:
 	void			   registerEnvFunction(const char *name, TLuaWrappedFunction func);
 	// Initialisation of contextual cursor.
 	void			   initDecals();
-	void			   showDecal(const NLMISC::CVector2f &pos, float scale, CDecal &decal, const CDecalAnim &decalAnim);
+	void			   showDecal(const NLMISC::CVector2f &pos, float scale, CLegacyDecal &decal, const CLegacyDecalAnim &decalAnim);
 	void			   updatePrimitiveContextualVisibility();
 	void			   initClassInheritanceTable();
 	// contextual mouse handling
@@ -947,9 +947,9 @@ private:
 	// update the display of decals created when the player select an instance in the scene
 	void updateSelectingDecals();
 	// display of highlight or select box (for selection of huge objects)
-	// the CDecalAnim is used to mimic the color cycle seen when standard selection circle is displayed
+	// the CLegacyDecalAnim is used to mimic the color cycle seen when standard selection circle is displayed
 	// (no CPrimRenderAnim for now)
-	void showPrimRender(CPrimRender &dest, const NLMISC::CAABBox &localBox, const NLMISC::CMatrix &worldMat, const CDecalAnim &refDecalAnim);
+	void showPrimRender(CPrimRender &dest, const NLMISC::CAABBox &localBox, const NLMISC::CMatrix &worldMat, const CLegacyDecalAnim &refDecalAnim);
 
 	CLuaObject _OldLuaRequestInsertNode;
 	CLuaObject _OldLuaRequestInsertGhostNode;

@@ -50,13 +50,13 @@ const uint DECAL_NUM_PRIORITIES = 8;
 // Helper class to display a decal on a poly receiver
 // Default decal is a unit rectangle (0, 0) - (1, 1)
 // TODO nico : put this in NL3D when working ? ...
-class CDecal : public NLMISC::CRefCount
+class CLegacyDecal : public NLMISC::CRefCount
 {
 public:
-	typedef NLMISC::CRefPtr<CDecal> TRefPtr;
-	typedef NLMISC::CSmartPtr<CDecal> TSmartPtr;
-	CDecal();
-	~CDecal();
+	typedef NLMISC::CRefPtr<CLegacyDecal> TRefPtr;
+	typedef NLMISC::CSmartPtr<CLegacyDecal> TSmartPtr;
+	CLegacyDecal();
+	~CLegacyDecal();
 	// Set a texture from its filename. It name match a global texture in the view renderer, it will be used ,first
 	void setTexture(const std::string &fileName, bool clampU = true, bool clampV = true, bool filtered = true);
 	NL3D::ITexture *getTexture() { return _Material.getTexture(0); }
@@ -108,7 +108,7 @@ private:
 	float								_TopBlendZMin;
 	float								_TopBlendZMax;
 private:
-	friend class CDecalRenderList;
+	friend class CLegacyDecalRenderList;
 	void render(NL3D::UDriver &drv,
 				NL3D::CShadowPolyReceiver &receiver,
 				const std::vector<NLMISC::CPlane> &worldPyramid,
@@ -121,15 +121,15 @@ private:
 };
 
 // list of all decals to be rendered after the landscape
-class CDecalRenderList : public NLMISC::CSingleton<CDecalRenderList>
+class CLegacyDecalRenderList : public NLMISC::CSingleton<CLegacyDecalRenderList>
 {
 public:
-	CDecalRenderList() : _Empty(true) {}
+	CLegacyDecalRenderList() : _Empty(true) {}
 	void renderAllDecals();
 	void clearRenderList();
 private:
-	friend class CDecal;
-	std::vector<CDecal::TRefPtr>	_RenderList[DECAL_NUM_PRIORITIES];
+	friend class CLegacyDecal;
+	std::vector<CLegacyDecal::TRefPtr>	_RenderList[DECAL_NUM_PRIORITIES];
 	bool							_Empty;
 	std::vector<NLMISC::CPlane>		_WorldCamPyramid;
 	std::vector<NLMISC::CVector>	_WorldCamPyramidCorners;
