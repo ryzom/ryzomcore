@@ -391,38 +391,22 @@ namespace INVENTORIES
 			{
 				for (; i < NbItemPropId; ++i)
 				{
-					if (DataBitSize[i] < 3)
-					{
-						// Don't compress 1 or 2 bits either
-						bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
-					}
+					bool b;
+					bms.serialBit(b);
+					if (b)
+						_ItemProp[i] = 0;
 					else
-					{
-						bool b;
-						bms.serialBit(b);
-						if (b)
-							_ItemProp[i] = 0;
-						else
-							bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
-					}
+						bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
 				}
 			}
 			else
 			{
 				for (; i != NbItemPropId; ++i)
 				{
-					if (DataBitSize[i] < 3)
-					{
-						// Don't compress 1 or 2 bits either
-						bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
-					}
-					else
-					{
-						bool b = (_ItemProp[i] == 0);
-						bms.serialBit(b);
-						if (!b)
-							bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
-					}
+					bool b = (_ItemProp[i] == 0);
+					bms.serialBit(b);
+					if (!b)
+						bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
 				}
 			}
 		}
