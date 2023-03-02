@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifdef RYZOM_FORGE
 #ifndef RY_ITEM_GROUP_MANAGER_H
 #define RY_ITEM_GROUP_MANAGER_H
 #include <limits>
@@ -142,4 +141,3 @@ private:
 };
 
 #endif // RY_ITEM_GROUP_MANAGER_H
-#endif

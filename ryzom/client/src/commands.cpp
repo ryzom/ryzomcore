@@ -222,7 +222,6 @@ GROUP COMMANDS
 ***********************************************************************/
 
 
-#ifdef RYZOM_FORGE
 NLMISC_COMMAND(listGroup, "list all available group", "")
 {
 	CItemGroupManager::getInstance()->listGroup();
@@ -362,7 +361,6 @@ NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
 		return false;
 	}
 }
-#endif
 
 
 NLMISC_COMMAND(naked, "get naked !", "")
@@ -4538,14 +4536,12 @@ NLMISC_COMMAND(debugItemInfoWaiters, "log ItemInfoWaiters", "")
 	return true;
 }
 
-#ifdef RYZOM_FORGE
 NLMISC_COMMAND(debugItemInfoCache, "log ItemInfoCache", "")
 {
 	getInventory().debugItemInfoCache();
 
 	return true;
 }
-#endif
 
 NLMISC_COMMAND(debugInfoWindows, "log info windows sheetId", "")
 {

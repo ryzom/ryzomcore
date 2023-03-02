@@ -1312,9 +1312,7 @@ void CFarTP::sendReady()
 			// Instead of doing it in disconnectFromPreviousShard(), we do it here, only when it's needed
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			pIM->uninitInGame0();
-#ifdef RYZOM_FORGE
 			CItemGroupManager::getInstance()->uninit();
-#endif
 
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			ActionsContext.removeAllCombos();

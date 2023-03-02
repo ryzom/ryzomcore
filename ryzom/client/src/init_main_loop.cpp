@@ -190,11 +190,7 @@ struct CStatThread : public NLMISC::IRunnable
 		if(!curl) return;
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)");
-#ifdef RYZOM_FORGE
 		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzom.com/" + referer).c_str());
-#else
-		curl_easy_setopt(curl, CURLOPT_REFERER, string("https://ryzom.dev/" + referer).c_str());
-#endif
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 		if (url.length() > 8 && (url[4] == 's' || url[4] == 'S')) // 01234 https
 		{
@@ -256,11 +252,7 @@ struct CStatThread : public NLMISC::IRunnable
 		addParam(params, "page", "");
 		addParam(params, "pagetitle", referer);
 		addParam(params, "screen", toString("%dx%d", ClientCfg.ConfigFile.getVar("Width").asInt(), ClientCfg.ConfigFile.getVar("Height").asInt()));
-#ifdef RYZOM_FORGE
 		addParam(params, "referer", "http%3A%2F%2Fwww.ryzom.com%2F" + referer);
-#else
-		addParam(params, "referer", "https%3A%2F%2Fryzom.dev%2F" + referer);
-#endif
 		time_t rawtime;
 		struct tm * timeinfo;
 		char buffer [80];
@@ -283,9 +275,7 @@ struct CStatThread : public NLMISC::IRunnable
 		default: shard= "unknown"; break;
 		}
 		addParam(params, "cv_Shard", shard);
-#ifdef RYZOM_FORGE
 		get("http://ryzom.com.woopra-ns.com/visit/"+params);
-#endif
 		return true;
 	}
 
@@ -295,9 +285,7 @@ struct CStatThread : public NLMISC::IRunnable
 		std::string params;
 		addParam(params, "cookie", cookie());
 		addParam(params, "ra", randomString());
-#ifdef RYZOM_FORGE
 		get("http://ryzom.com.woopra-ns.com/ping/"+params);
-#endif
 	}
 
 	void run()
@@ -739,9 +727,7 @@ void initMainLoop()
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		//nlinfo("****** InGame Interface Parsing and Init START ******");
 		pIM->initInGame(); // must be called after waitForUserCharReceived() because Ring information is used by initInGame()
-#ifdef RYZOM_FORGE
 		CItemGroupManager::getInstance()->init(); // Init at the same time keys.xml is loaded
-#endif
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
 		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing ingame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);

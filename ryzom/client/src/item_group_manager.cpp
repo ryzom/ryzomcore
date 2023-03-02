@@ -19,7 +19,6 @@
 
 #include "stdpch.h"
 
-#ifdef RYZOM_FORGE
 #include "item_group_manager.h"
 #include "interface_v3/inventory_manager.h"
 #include "nel/gui/widget_manager.h"
@@ -846,4 +845,3 @@ void CItemGroupManager::releaseInstance()
 	_Instance = NULL;
 }
 
-#endif

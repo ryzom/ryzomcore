@@ -4799,8 +4799,6 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
 
-#ifdef RYZOM_FORGE
-
 // ***************************************************************************
 class CHandlerOutgameNaviGetKeys : public IActionHandler
 {
@@ -4854,4 +4852,3 @@ public:
 };
 REGISTER_ACTION_HANDLER(CHandlerTriggerIconBuffs, "trigger_show_icon_buffs");
 
-#endif

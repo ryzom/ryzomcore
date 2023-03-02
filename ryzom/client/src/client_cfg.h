@@ -321,9 +321,7 @@ struct CClientConfig
 	bool			PatchWanted;
 	std::string		PatchUrl;
 	std::string		PatchVersion;
-#ifdef RYZOM_FORGE
 	std::string		PatchletUrl;
-#endif
 
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;

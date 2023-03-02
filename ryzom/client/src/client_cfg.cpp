@@ -432,9 +432,7 @@ CClientConfig::CClientConfig()
 #endif
 
 	PatchUrl.clear();
-#ifdef RYZOM_FORGE
 	PatchletUrl.clear();
-#endif
 	PatchVersion.clear();
 
 	WebIgMainDomain.clear();
@@ -1174,11 +1172,9 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ReleaseNotePath)
 #endif
 
-#ifdef RYZOM_FORGE
 	/////////////////////////////
 	// GARBAGE PATCHLET SYSTEM //
 	READ_STRING_FV(PatchletUrl)
-#endif
 
 	///////////
 	// WEBIG //
