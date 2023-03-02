@@ -694,8 +694,7 @@ public:
 		if (flag.testAndSet())
 		{
 			// First test
-			uint i;
-			for (i = 0;; ++i)
+			for (uint i = 0;; ++i)
 			{
 				uint wait_time = i + 6;
 
@@ -752,15 +751,14 @@ public:
 	static NL_FORCE_INLINE void enter(CAtomicFlag &flag)
 	{
 		// std::cout << "Entering, Lock=" << _Lock << std::endl;
-		while (flag.testAndSet())
+		if (flag.testAndSet())
 		{
 			static CAtomicInt last = 0;
 			static CAtomicInt _max = 30;
 			int spinMax = _max;
 			int lastSpins = last;
 			volatile int temp = 17; // volatile so it's not optimized out, this is just to keep busy
-			int i;
-			for (i = 0; i < spinMax; ++i)
+			for (int i = 0; i < spinMax; ++i)
 			{
 				if (i < lastSpins / 2 || flag.test())
 				{
@@ -781,30 +779,9 @@ public:
 			}
 
 			_max = 30;
-
-			// First test
-			for (i = 0;; ++i)
-			{
-				uint wait_time = i + 6;
-
-				// Increment wait time with a log function
-				if (wait_time > 27)
-					wait_time = 27;
-
-				// Sleep
-				if (wait_time <= 20)
-					wait_time = 0;
-				else
-					wait_time = 1 << (wait_time - 20);
-
-				if (!flag.testAndSet())
-					break;
-
-				if (!wait_time)
-					nlYield();
-				else
-					nlSleep(wait_time);
-			}
+			
+			// Fallthrough to NLMISC::CFastMutex implementation
+			CAtomicLockFast::enter(flag);
 		}
 	}
 
