@@ -615,7 +615,7 @@ void initAdmin (bool dontUseAES)
 	{
 		CUnifiedNetwork::getInstance()->setServiceUpCallback ("AES", cbAESConnection, NULL);
 		CUnifiedNetwork::getInstance()->setServiceDownCallback ("AES", cbAESDisconnection, NULL);
-		CUnifiedNetwork::getInstance()->addService ("AES", CInetHost("localhost:43997"));
+		CUnifiedNetwork::getInstance()->addService ("AES", CInetHost("localhost:49997"));
 	}
 	CUnifiedNetwork::getInstance()->addCallbackArray (CallbackArray, sizeof(CallbackArray)/sizeof(CallbackArray[0]));
 }
