@@ -81,8 +81,11 @@ public:
 
 	void decreaseRef()
 	{
+		// Release order to ensure this thread is done with this object
 		if (m_RefCount.fetch_sub(1, std::memory_order_release) == 1)
 		{
+			// Acquire order to ensure all other threads are done with this object
+			std::atomic_thread_fence(std::memory_order_acquire);
 			delete this;
 		}
 	}
