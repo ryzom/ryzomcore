@@ -57,7 +57,17 @@ level!
 
 #if (defined(NL_COMP_VC) || defined(NL_OS_WINDOWS))
 #define NL_ATOMIC_WIN32
+#if (defined(NL_COMP_VC) && !defined(NL_CPP14) && defined(NL_CPU_INTEL))
+// For legacy targets, assume /volatile:ms is used, and volatile has acquire and release semantics
+// In the future, enable /volatile:iso on all C++14 and up builds, once volatile usage is removed
+#define NL_VOLATILE_ACQ_REL
+#endif
 #include <intrin.h>
+#endif
+
+#if defined(NL_CPU_INTEL)
+// For legacy targets, treat volatile loads and stores as atomic with relaxed ordering semantics
+#define NL_VOLATILE_RELAXED
 #endif
 
 #ifdef NL_CPP14
@@ -230,17 +240,25 @@ private:
 public:
 	NL_FORCE_INLINE bool testAndSet()
 	{
-		return _InterlockedExchange(&m_Flag, 1) != 0; // acquire-release
+		return _InterlockedExchange(&m_Flag, 1) != 0; // full barrier
 	}
 
 	NL_FORCE_INLINE void clear()
 	{
-		_InterlockedExchange(&m_Flag, 0); // release
+#ifdef NL_VOLATILE_ACQ_REL
+		m_Flag = 0; // release
+#else
+		_InterlockedExchange(&m_Flag, 0); // full barrier
+#endif
 	}
 
 	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
 	{
-		return _InterlockedExchangeAdd(const_cast<volatile long *>(&m_Flag), 0) != 0; // acquire
+#ifdef NL_VOLATILE_ACQ_REL
+		return m_Flag; // acquire
+#else
+		return _InterlockedExchangeAdd(const_cast<volatile long *>(&m_Flag), 0) != 0; // full barrier
+#endif
 	}
 #endif
 	NL_FORCE_INLINE CAtomicFlag()
@@ -293,28 +311,41 @@ private:
 public:
 	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
+#ifdef NL_VOLATILE_RELAXED
 		if (order == TMemoryOrderRelaxed)
 			return m_Value;
-		return _InterlockedExchangeAdd(const_cast<volatile long *>(&m_Value), 0); // acquire
+#endif
+#ifdef NL_VOLATILE_ACQ_REL
+		if (order <= TMemoryOrderAcquire)
+			return m_Value;
+#endif
+		return _InterlockedExchangeAdd(const_cast<volatile long *>(&m_Value), 0); // full barrier
 	}
 
 	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
 	{
+#ifdef NL_VOLATILE_RELAXED
 		if (order == TMemoryOrderRelaxed)
 			m_Value = value;
 		else
-			_InterlockedExchange(&m_Value, value); // release
+#endif
+#ifdef NL_VOLATILE_ACQ_REL
+		if (order == TMemoryOrderRelease)
+			m_Value = value;
+		else
+#endif
+			_InterlockedExchange(&m_Value, value); // full barrier
 		return value;
 	}
 
 	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
-		return _InterlockedExchangeAdd(&m_Value, value); // acquire-release
+		return _InterlockedExchangeAdd(&m_Value, value); // full barrier
 	}
 
 	NL_FORCE_INLINE int exchange(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
-		return _InterlockedExchange(&m_Value, value); // acquire-release
+		return _InterlockedExchange(&m_Value, value); // full barrier
 	}
 #elif defined(NL_ATOMIC_GCC_CXX11)
 private:
