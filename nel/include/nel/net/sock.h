@@ -253,9 +253,6 @@ public:
 	/// Gets the send buffer size
 	sint32				getSendBufferSize();
 
-	/// Returns true if the network engine is initialized
-	static bool			initialized() { return CSock::_Initialized; }
-
 protected:
 
 	/**
@@ -308,9 +305,6 @@ protected:
 	int				_AddressFamily;
 
 private:
-
-	/// True if the network library has been initialized
-	static bool		_Initialized;
 
 	// Test: send & receive duration (ms)
 	uint32			_MaxReceiveTime;
