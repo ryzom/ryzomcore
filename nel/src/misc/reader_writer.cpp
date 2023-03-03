@@ -24,6 +24,8 @@
 
 namespace NLMISC {
 
+#ifndef NL_CPP17
+
 CReaderWriter::CReaderWriter()
 {
 	_ReadersLevel = 0;
@@ -34,6 +36,21 @@ CReaderWriter::~CReaderWriter()
 	// here some checks to avoid a reader/writer still working while we flush the mutexes...
 }
 
+#endif
 
+void reader_writer_dummy_cpp__()
+{
+	CReaderWriter readerWriter;
+	CRWSynchronized<int> num;
+	{
+		CRWSynchronized<int>::CReadAccessor access0(&num);
+		CRWSynchronized<int>::CReadAccessor access1(&num);
+	}
+	{
+		CRWSynchronized<int>::CWriteAccessor accessW(&num);
+	}
+}
 
 } // NLMISC
+
+/* end of file */
