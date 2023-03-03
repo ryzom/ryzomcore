@@ -1314,7 +1314,7 @@ void prelogInit()
 
 
 		// Create a text context. We need to put the full path because we not already add search path
-		resetTextContext("ryzom.ttf", false);
+		resetTextContext("ryzom.ttf", true);
 		//resetTextContext("uiFontSans", true); // TODO: read fonts from UI translation
 
 		CInterfaceManager::getInstance()->setInterfaceScale(1.f, true);
