@@ -28,6 +28,43 @@ void nlYield()
 
 #endif /* !defined(NL_ATOMIC_CPP14) && defined(NL_ATOMIC_WIN32) */
 
+// Dummy function to keep the compiler quiet on empty CPP and to ensure all types compiled well
+void atomic_cpp_dummy__()
+{
+	// Basic atomic types and operations
+	CAtomicFlag flag;
+	CAtomicInt num;
+	CAtomicBool ok; // is CAtomicEnum<bool>
+	flag.testAndSet();
+	flag.clear();
+	flag.test();
+	num.store(num.load());
+	num.fetchAdd(1);
+	num.exchange(2);
+	ok.store(true);
+	ok.load();
+	ok.exchange(false);
+
+	// All atomic lock strategies
+	{
+		CAtomicLockSpin lock(flag);
+	}
+	{
+		CAtomicLockYield lock(flag);
+	}
+	{
+		CAtomicLockFast lock(flag);
+	}
+	{
+		CAtomicLockFastMP lock(flag);
+	}
+
+	// Not initialized
+	CAtomicFlag flagUninit = CAtomicFlag(TNotInitialized());
+	CAtomicInt numUninit = CAtomicInt(TNotInitialized());
+	CAtomicBool okUninit = CAtomicBool(TNotInitialized());
+}
+
 } /* namespace NLMISC */
 
 /* end of file */

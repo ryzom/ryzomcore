@@ -121,6 +121,12 @@ static_assert(std::memory_order_acq_rel == __ATOMIC_ACQ_REL);
 static_assert(std::memory_order_seq_cst == __ATOMIC_SEQ_CST);
 #endif
 
+/// Struct to pass to initializers to bypass init
+struct TNotInitialized
+{
+	int Dummy;
+};
+
 /// Atomic flag
 /// Initialized clear.
 /// The only supported memory orders are
@@ -192,7 +198,7 @@ public:
 
 	static_assert(sizeof(std::atomic_flag) <= sizeof(int) || sizeof(std::atomic_flag) <= sizeof(bool),
 	    "Atomic flag is larger than int and bool, it may be better to use a native implementation");
-#elif defined(NL_ATOMIC_CPP14)
+#elif defined(NL_ATOMIC_CPP14) && defined(ATOMIC_BOOL_LOCK_FREE) && (ATOMIC_BOOL_LOCK_FREE == 2)
 private:
 	std::atomic_bool m_Flag;
 
@@ -240,6 +246,11 @@ public:
 	NL_FORCE_INLINE CAtomicFlag()
 	{
 		clear();
+	}
+	NL_FORCE_INLINE CAtomicFlag(const TNotInitialized &)
+	{
+		// when used as a global, create without clearing, as global memory is already init to 0
+		// otherwise, it might be cleared after being locked, due to undefined initialization order
 	}
 };
 
@@ -375,6 +386,12 @@ public:
 	NL_FORCE_INLINE CAtomicInt(int value = 0, TMemoryOrder order = TMemoryOrderRelease)
 	{
 		store(value, order);
+	}
+
+	NL_FORCE_INLINE CAtomicInt(const TNotInitialized &)
+	{
+		// when used as a global, you can create without initializing, as global memory is already init to 0
+		// otherwise, it might be cleared after being locked, due to undefined initialization order
 	}
 
 	NL_FORCE_INLINE operator int() const
@@ -545,6 +562,12 @@ public:
 	NL_FORCE_INLINE CAtomicEnum(T value = T(0))
 	{
 		store(value);
+	}
+
+	NL_FORCE_INLINE CAtomicEnum(const TNotInitialized &)
+	{
+		// when used as a global, you can create without initializing, as global memory is already init to 0
+		// otherwise, it might be cleared after being locked, due to undefined initialization order
 	}
 
 	NL_FORCE_INLINE operator T() const
