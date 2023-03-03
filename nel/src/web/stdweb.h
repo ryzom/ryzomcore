@@ -55,7 +55,7 @@
 #include <utility>
 #include <vector>
 
-#include <nel/misc/types_nl.h>
+#include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
@@ -83,6 +83,6 @@
 
 #include <curl/curl.h>
 
-#include <nel/misc/debug.h>
+#include "nel/misc/debug.h"
 
 #endif // NL_STDWEB_H

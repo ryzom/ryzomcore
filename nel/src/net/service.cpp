@@ -130,7 +130,7 @@ static uint32 LaunchingDate;
 
 static uint32 NbUserUpdate = 0;
 
-string CompilationMode = nlMode;
+string CompilationMode = NL_MODE_STR;
 
 //static bool Bench = false;
 
