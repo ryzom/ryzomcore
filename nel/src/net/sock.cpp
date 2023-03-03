@@ -524,6 +524,9 @@ void CSock::connect(const CInetHost &addrs)
  */
 bool CSock::dataAvailable()
 {
+	if (_Sock == INVALID_SOCKET)
+		throw ESocket("CSock::dataAvailable(): invalid socket");
+	
 	fd_set fdset;
 	FD_ZERO( &fdset );
 	FD_SET( _Sock, &fdset );
