@@ -242,6 +242,9 @@ public:
 	/// Set new write queue for incoming messages (thread-safe because mutexed)
 	NLMISC::CBufFIFO *swapWriteQueue(NLMISC::CBufFIFO *writeQueue);
 
+	/// Clear a write queue safely
+	void clearQueue(NLMISC::CBufFIFO *writeQueue);
+
 	/// Check if still listening
 	bool listening();
 

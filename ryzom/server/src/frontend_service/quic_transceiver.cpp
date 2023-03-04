@@ -403,6 +403,11 @@ void CQuicTransceiver::stop()
 		m->Listener = null;
 		nldebug("Listener closed");
 	}
+
+	// Clear queue
+	nldebug("Clear current write queue");
+	clearQueue(m->Buffer);
+	nldebug("Cleared");
 }
 
 void CQuicTransceiver::release()
@@ -645,10 +650,31 @@ void CQuicTransceiver::shutdownReceived(CQuicUserContext *user)
 
 NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 {
-	CAtomicFlagLockYield lock(m->BufferMutex);
+	CAtomicFlagLock lock(m->BufferMutex);
 	CBufFIFO *previous = m->Buffer;
 	m->Buffer = writeQueue;
 	return previous;
+}
+
+void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *queue)
+{
+	CAtomicFlagLockYield lock(m->BufferMutex);
+	while (!queue->empty())
+	{
+		// Data, don't care
+		queue->pop();
+		nlassert(!queue->empty());
+		uint8 *buffer;
+		uint32 size;
+		// User ptr, need to decrease ref
+		queue->front(buffer, size);
+		CQuicUserContext *user;
+		nlassert(size == sizeof(user));
+		memcpy(&user, buffer, size);
+		// Decrease ref count after pop
+		CQuicUserContextRelease releaseUser(user);
+		queue->pop();
+	}
 }
 
 // void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
@@ -766,6 +792,11 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 	CBufFIFO *previous = m->Buffer;
 	m->Buffer = writeQueue;
 	return previous;
+}
+
+void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *writeQueue)
+{
+
 }
 
 bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemStream &buffer)
