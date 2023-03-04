@@ -205,8 +205,8 @@ int main(int argc, char *argv[])
 
 	Args.setVersion(getDisplayVersion());
 	Args.setDescription("Ryzom client");
-	Args.addArg("", "url", "PatchUrl", "Patch server url, ie 'https://dl.ryzom.com/patch_live'");
-	Args.addArg("", "app", "Application", "Patch application name for version file, ie 'ryzom_live' requests ryzom_live.version from PatchUrl");
+	Args.addArg("", "url", "PatchUrl", "Patch server url, ie '" RYZOM_CLIENT_PATCH_URL "'");
+	Args.addArg("", "app", "Application", "Patch application name for version file, ie '" RYZOM_CLIENT_APP_NAME "' requests " RYZOM_CLIENT_APP_NAME ".version from PatchUrl");
 
 	if (!Args.parse(argc, argv)) return 1;
 
@@ -270,12 +270,22 @@ int main(int argc, char *argv[])
 	printf("Using '%s/%s.version'\n", ClientCfg.ConfigFile.getVar("PatchUrl").asString().c_str(),
 		ClientCfg.ConfigFile.getVar("Application").asString().c_str());
 
+	// FIXME: On Ryzom Core 4, the patch url and version are retrieved from the login server
+	// using StartupHost, StartupPage, and Application[0], as different domains 
+	// may be running on the same patch series at different versions.
+	// The version file on the patch server is a dummy containing just "*",
+	// since this file gets cached by the CDN.
+	
+	// defaults to the current build in case version file is not used
+	int versionNumbers[] = { RYZOM_VERSION_RC, 0, 0 };
+	VersionName = NLMISC::toString(versionNumbers[2]);
+
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
 
 	// use PatchUrl
 	vector<string> patchURLs;
-	pPM->init(patchURLs, ClientCfg.ConfigFile.getVar("PatchUrl").asString(), "");
+	pPM->init(patchURLs, ClientCfg.ConfigFile.getVar("PatchUrl").asString(), VersionName);
 	pPM->startCheckThread(true /* include background patchs */);
 
 	string state;
