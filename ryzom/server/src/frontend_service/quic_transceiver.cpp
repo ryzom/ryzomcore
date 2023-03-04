@@ -437,12 +437,12 @@ void CQuicTransceiver::release()
 
 CQuicUserContext::CQuicUserContext()
 {
-	nldebug("Create QUIC user context, total %i", (int)(s_UserContextCount++));
+	nldebug("Create QUIC user context, total %i", (int)(++s_UserContextCount));
 }
 
 CQuicUserContext::~CQuicUserContext()
 {
-	nldebug("Destroy QUIC user context, total %i", (int)(s_UserContextCount--));
+	nldebug("Destroy QUIC user context, total %i", (int)(--s_UserContextCount));
 	
 	// This should never get called before the connection is shutdown,
 	// since we increase the reference when the connection gets opened,
@@ -531,6 +531,9 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
 		CQuicUserContextRelease releaseUser(user); // Hopefully we only get QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE once!
+#ifdef FE_DEBUG_QUIC
+		user->DebugRefCount = true;
+#endif
 		user->MaxSendLength = 0;
 		nlinfo("Shutdown complete");
 		if (ev->SHUTDOWN_COMPLETE.AppCloseInProgress)

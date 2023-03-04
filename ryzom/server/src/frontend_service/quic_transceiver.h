@@ -58,6 +58,10 @@ A wizard's code, that's sure to bring you cheer.
 
 */
 
+//#ifdef NL_DEBUG
+#define FE_DEBUG_QUIC
+//#endif
+
 class CClientHost;
 
 class CQuicTransceiverImpl;
@@ -76,13 +80,22 @@ public:
 	// Manual reference count
 	void increaseRef()
 	{
-		m_RefCount.fetch_add(1, std::memory_order_relaxed);
+		int value = m_RefCount.fetch_add(1, std::memory_order_relaxed) + 1;
+#ifdef FE_DEBUG_QUIC
+		if (DebugRefCount)
+			nldebug("Reference count [%p] is now %i", this, value);
+#endif
 	}
 
 	void decreaseRef()
 	{
+		int value = m_RefCount.fetch_sub(1, std::memory_order_release) - 1;
+#ifdef FE_DEBUG_QUIC
+		if (DebugRefCount)
+			nldebug("Reference count [%p] is now %i", this, value);
+#endif
 		// Release order to ensure this thread is done with this object
-		if (m_RefCount.fetch_sub(1, std::memory_order_release) == 1)
+		if (value == 0)
 		{
 			// Acquire order to ensure all other threads are done with this object
 			std::atomic_thread_fence(std::memory_order_acquire);
@@ -117,6 +130,11 @@ public:
 	NLMISC::CBitMemStream SendBuffer = NLMISC::CBitMemStream(false, 512);
 	CQuicBuffer SendQuicBuffer;
 	NLMISC::CAtomicInt SentCount;
+
+#ifdef FE_DEBUG_QUIC
+	// After shutdown, enable ref count debugging
+	NLMISC::CAtomicBool DebugRefCount;
+#endif
 
 private:
 	std::atomic_int m_RefCount = 0;
@@ -167,6 +185,16 @@ public:
 	{
 		if (m_User)
 			m_User->increaseRef();
+	}
+
+	CQuicUserContextPtr &operator=(CQuicUserContext *user)
+	{
+		if (m_User)
+			m_User->decreaseRef();
+		m_User = user;
+		if (m_User)
+			m_User->increaseRef();
+		return *this;
 	}
 
 	CQuicUserContextPtr &operator=(const CQuicUserContextPtr &other)
