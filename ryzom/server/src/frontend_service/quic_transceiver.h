@@ -217,6 +217,38 @@ public:
 		return m_User;
 	}
 
+	// compare
+	bool operator==(const CQuicUserContextPtr &other) const
+	{
+		return m_User == other.m_User;
+	}
+
+	bool operator!=(const CQuicUserContextPtr &other) const
+	{
+		return m_User != other.m_User;
+	}
+
+	bool operator==(const CQuicUserContext *other) const
+	{
+		return m_User == other;
+	}
+
+	bool operator!=(const CQuicUserContext *other) const
+	{
+		return m_User != other;
+	}
+
+	// compare less
+	bool operator<(const CQuicUserContextPtr &other) const
+	{
+		return m_User < other.m_User;
+	}
+
+	bool operator<(const CQuicUserContext *other) const
+	{
+		return m_User < other;
+	}
+
 private:
 	CQuicUserContext *m_User;
 };

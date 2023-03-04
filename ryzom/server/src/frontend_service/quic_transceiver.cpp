@@ -141,6 +141,9 @@ public:
 	std::mutex ListenerStopMutex;
 	std::condition_variable ListenerStopCondition;
 
+	// Connections that have not shutdown yet
+	NLMISC::CSynchronized<std::set<CQuicUserContextPtr>> Connections;
+
 	static QUIC_STATUS
 #ifdef _Function_class_
 	    _Function_class_(QUIC_LISTENER_CALLBACK)
@@ -403,6 +406,49 @@ void CQuicTransceiver::stop()
 		m->Listener = null;
 		nldebug("Listener closed");
 	}
+	
+	// Shutdown all connections
+	for (;;) // Doesn't need to loop, but just in case...
+	{
+		std::set<CQuicUserContextPtr> connectionsCopy;
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			connectionsCopy = connections.value();
+		}
+		if (connectionsCopy.empty())
+			break;
+		
+		nldebug("Shutdown %i connections", (int)connectionsCopy.size());
+		for (const CQuicUserContextPtr &user : connectionsCopy)
+		{
+			if (user->Connection)
+			{
+				MsQuic->ConnectionShutdown((HQUIC)user->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
+			}
+		}
+		// Wait for connections to be empty, lousy spin loop
+		nldebug("Wait for shutdown");
+		for (;;)
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			if (connections.value().empty())
+				break;
+			nlSleep(1);
+		}
+		nldebug("Shutdown ok");
+		// Forcefully close all connections
+		for (const CQuicUserContextPtr &user : connectionsCopy)
+		{
+			if (user->Connection)
+			{
+				MsQuic->ConnectionClose((HQUIC)user->Connection);
+				user->Connection = nullptr;
+			}
+		}
+		nldebug("Closed all connections");
+		connectionsCopy.clear();
+		nldebug("Cleared references. There may be leftovers in CClientHost, etc");
+	}
 
 	// Clear queue
 	nldebug("Clear current write queue");
@@ -477,7 +523,12 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 		user->Transceiver = self;
 		user->TokenAddr = self->generateTokenAddr(); // ev->NEW_CONNECTION.Info->RemoteAddress // Could change on migration, so don't expose it for now (OK in the future)
 		user->Connection = ev->NEW_CONNECTION.Connection;
-		user->increaseRef();
+		CQuicUserContextPtr userPtr = user;
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			connections.value().insert(userPtr);
+		}
+		// user->increaseRef();
 		// They're in.
 		MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, (void *)CQuicTransceiverImpl::connectionCallback, (void *)user);
 		status = MsQuic->ConnectionSetConfiguration(ev->NEW_CONNECTION.Connection, m->Configuration);
@@ -535,7 +586,12 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
-		CQuicUserContextRelease releaseUser(user); // Hopefully we only get QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE once!
+		// CQuicUserContextRelease releaseUser(user); // Hopefully we only get QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE once!
+		CQuicUserContextPtr userPtr = user;
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			connections.value().erase(userPtr);
+		}
 #ifdef FE_DEBUG_QUIC
 		user->DebugRefCount = true;
 #endif
@@ -659,6 +715,7 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *queue)
 {
 	CAtomicFlagLockYield lock(m->BufferMutex);
+	int count = 0;
 	while (!queue->empty())
 	{
 		// Data, don't care
@@ -674,7 +731,9 @@ void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *queue)
 		// Decrease ref count after pop
 		CQuicUserContextRelease releaseUser(user);
 		queue->pop();
+		++count;
 	}
+	nldebug("Cleared %i messages from queue [%p]", count, queue);
 }
 
 // void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
