@@ -576,17 +576,17 @@ private:
 public:
 	NL_FORCE_INLINE T load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
-		return m_Value.load(order);
+		return (T)m_Value.load(order);
 	}
 
 	NL_FORCE_INLINE T store(T value, TMemoryOrder order = TMemoryOrderRelease)
 	{
-		return m_Value.store((int)value, order);
+		return (T)m_Value.store((int)value, order);
 	}
 
 	NL_FORCE_INLINE T exchange(T value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
-		return m_Value.exchange((int)value, order);
+		return (T)m_Value.exchange((int)value, order);
 	}
 #endif
 	// Atomic load and store operators
