@@ -1231,8 +1231,8 @@ void CFrontEndService::init()
 		CLoginServer::init( "", cbDisconnectClient ); 
 
 //		// Init front end listening port
-		CInetHost listenAddr(CLoginServer::getListenAddress());
-		uint16 frontendPort = listenAddr.port();
+		CInetHost listenHost = CLoginServer::getListenHost();
+		uint16 frontendPort = listenHost.port();
 
 		if (frontendPort == 0)
 		{
@@ -1266,8 +1266,8 @@ void CFrontEndService::init()
 		nlinfo( "Initializing receiving subsystem..." );
 		_ReceiveSub.init( frontendPort, lastAcceptableFrontendPort, _DgramLength, &_History, &_SendSub.clientIdCont() );
 		frontendPort = _ReceiveSub.dataSock()->localAddr().port();
-		listenAddr.setPort( frontendPort );
-		CLoginServer::setListenAddress(PublishFSHostAsIP.get() ? listenAddr.address().asIPString() : listenAddr.toString());
+		listenHost.setPort( frontendPort );
+		CLoginServer::setListenAddress(PublishFSHostAsIP.get() ? listenHost.address().asIPString() : listenHost.toString());
 
 		StalledMode = false;
 		LastTickTime = 0;

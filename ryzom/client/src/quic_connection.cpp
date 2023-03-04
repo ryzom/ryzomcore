@@ -210,8 +210,12 @@ void CQuicConnectionImpl::connect()
 		return;
 	}
 
-	static const CStringView protocolName = "ryzomcore4";
-	static const QUIC_BUFFER alpn = { (uint32)protocolName.size(), (uint8 *)protocolName.data() };
+	// Protocol feature levels, corresponds to Ryzom Core release versions, keep datagram-only support to give users and server owners the option to keep bandwidth restricted
+	// 4.1: Only datagram support (restricted bandwidth, same behaviour as UDP)
+	// 4.2?: Add up to 4 unidirectional streams from the server to client to send long impulses (keep bandwidth from client restricted) (DB_INIT, STRING, STRING_MANAGER, MODULE_GATEWAY)
+	// 4.3?: Add a single bidirectional stream opened by the client for the scenario editor gateway (more efficient MODULE_GATEWAY replacement)
+	static const CStringView protocolName41 = "ryzomcore/4.1";
+	static const QUIC_BUFFER alpn = { (uint32)protocolName41.size(), (uint8 *)protocolName41.data() };
 
 	// Configuration, initialized in start, but destroyed on release only (may attempt more than once)
 	QUIC_STATUS status = QUIC_STATUS_SUCCESS;
@@ -510,7 +514,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_DATAGRAM_RECEIVED:
-		nldebug("Datagram received");
+		// nldebug("Datagram received");
 		// YES PLEASE
 		m->datagramReceived(ev->DATAGRAM_RECEIVED.Buffer->Buffer, ev->DATAGRAM_RECEIVED.Buffer->Length);
 		status = QUIC_STATUS_SUCCESS;

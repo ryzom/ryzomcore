@@ -86,6 +86,9 @@ public:
 	/// Call this method to retrieve the listen address
 	static const std::string &getListenAddress();
 
+	/// Call this method to retrieve the listen host
+	static const CInetHost &getListenHost();
+
 	/// Return true if we are in 'dev' mode
 	static bool acceptsInvalidCookie();
 

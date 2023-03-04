@@ -199,6 +199,9 @@ public:
 	CQuicTransceiver(uint32 msgsize);
 	~CQuicTransceiver();
 
+	/// Check if QUIC is enabled in the config
+	bool isConfigEnabled() const;
+
 	/// Start listening
 	void start(uint16 port);
 

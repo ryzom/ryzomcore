@@ -40,20 +40,12 @@
 
 #define CXPLAT_CERT_CREATION_EVENT_NAME L"RyzomCoreCertEvent"
 #define CXPLAT_CERT_CREATION_EVENT_WAIT 10000
-#define CXPLAT_CERTIFICATE_TEST_FRIENDLY_NAME L"RyzomCoreTestCert2"
+#define CXPLAT_CERTIFICATE_TEST_FRIENDLY_NAME L"Ryzom Core 4 Server Development Certificate"
 #define CXPLAT_CERTIFICATE_TEST_CLIENT_FRIENDLY_NAME L"RyzomCoreTestClientCert"
 #define CXPLAT_KEY_CONTAINER_NAME L"RyzomCoreSelfSignKey2"
 #define CXPLAT_KEY_SIZE 2048
 
-#define CXPLAT_TEST_CERT_VALID_SERVER_FRIENDLY_NAME L"RyzomCoreTestServer"
-#define CXPLAT_TEST_CERT_VALID_CLIENT_FRIENDLY_NAME L"RyzomCoreTestClient"
-#define CXPLAT_TEST_CERT_EXPIRED_SERVER_FRIENDLY_NAME L"RyzomCoreTestExpiredServer"
-#define CXPLAT_TEST_CERT_EXPIRED_CLIENT_FRIENDLY_NAME L"RyzomCoreTestExpiredClient"
-#define CXPLAT_TEST_CERT_VALID_SERVER_SUBJECT_NAME "RyzomCoreTestServer"
-#define CXPLAT_TEST_CERT_VALID_CLIENT_SUBJECT_NAME "RyzomCoreTestClient"
-#define CXPLAT_TEST_CERT_EXPIRED_SERVER_SUBJECT_NAME "RyzomCoreTestExpiredServer"
-#define CXPLAT_TEST_CERT_EXPIRED_CLIENT_SUBJECT_NAME "RyzomCoreTestExpiredClient"
-#define CXPLAT_TEST_CERT_SELF_SIGNED_CLIENT_SUBJECT_NAME "RyzomCoreClient"
+#define CXPLAT_TEST_CERT_SELF_SIGNED_CLIENT_SUBJECT_NAME L"RyzomCoreClient"
 #define CXPLAT_TEST_CERT_SELF_SIGNED_SERVER_SUBJECT_NAME "localhost"
 
 #define QuicTraceEvent(x, y, z, msg) nlwarning("%s", msg)
@@ -266,7 +258,16 @@ CreateSubjAltNameExtension(
     _Out_ PCERT_EXTENSION CertExtension)
 {
 	CERT_ALT_NAME_ENTRY AltName = { CERT_ALT_NAME_DNS_NAME };
-	AltName.pwszDNSName = L"localhost";
+	const NLNET::CInetHost &listenHost = NLNET::CLoginServer::getListenHost();
+	std::string localHostName = listenHost.hostname();
+	if (localHostName.empty() || NLNET::CIPv6Address(localHostName).isValid()) // IP address...
+	{
+		localHostName = NLNET::CInetHost::localHostName();
+		if (NLNET::CIPv6Address(localHostName).isValid()) // IP address...
+			localHostName = CXPLAT_TEST_CERT_SELF_SIGNED_SERVER_SUBJECT_NAME;
+	}
+	std::wstring dnsName = NLMISC::utf8ToWide(localHostName);
+	AltName.pwszDNSName = (LPWSTR)dnsName.c_str();
 	CERT_ALT_NAME_INFO NameInfo;
 	NameInfo.cAltEntry = 1;
 	NameInfo.rgAltEntry = &AltName;
@@ -819,7 +820,7 @@ void *
 CreateClientCertificate()
 {
 	PCCERT_CONTEXT CertContext;
-	if (FAILED(CreateSelfSignedCertificate(L"CN=MsQuicClient", TRUE, &CertContext)))
+	if (FAILED(CreateSelfSignedCertificate(L"CN=" CXPLAT_TEST_CERT_SELF_SIGNED_CLIENT_SUBJECT_NAME, TRUE, &CertContext)))
 	{
 		return NULL;
 	}
@@ -831,7 +832,16 @@ void *
 CreateServerCertificate()
 {
 	PCCERT_CONTEXT CertContext;
-	if (FAILED(CreateSelfSignedCertificate(L"CN=localhost", FALSE, &CertContext)))
+	const NLNET::CInetHost &listenHost = NLNET::CLoginServer::getListenHost();
+	std::string localHostName = listenHost.hostname();
+	if (localHostName.empty() || NLNET::CIPv6Address(localHostName).isValid()) // IP address...
+	{
+		localHostName = NLNET::CInetHost::localHostName();
+		if (NLNET::CIPv6Address(localHostName).isValid()) // IP address...
+			localHostName = CXPLAT_TEST_CERT_SELF_SIGNED_SERVER_SUBJECT_NAME;
+	}
+	std::wstring subjectName = L"CN=" + NLMISC::utf8ToWide(localHostName);
+	if (FAILED(CreateSelfSignedCertificate((LPCWSTR)subjectName.c_str(), FALSE, &CertContext)))
 	{
 		return NULL;
 	}
