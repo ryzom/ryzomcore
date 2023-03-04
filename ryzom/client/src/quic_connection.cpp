@@ -24,6 +24,7 @@
 #include "nel/misc/string_common.h"
 
 #include "config.h"
+#include "client_cfg.h"
 
 #ifdef NL_MSQUIC_AVAILABLE
 #include <msquic.h>
@@ -247,8 +248,11 @@ void CQuicConnectionImpl::connect()
 		// Load credentials for client, client doesn't need a certificate
 		QUIC_CREDENTIAL_CONFIG credConfig;
 		memset(&credConfig, 0, sizeof(credConfig));
-		credConfig.Flags = QUIC_CREDENTIAL_FLAG_CLIENT
-		    | QUIC_CREDENTIAL_FLAG_NO_CERTIFICATE_VALIDATION; // FIXME: Don't care for development
+		credConfig.Flags = QUIC_CREDENTIAL_FLAG_CLIENT;
+		if (!ClientCfg.QuicCertValidation)
+		{
+			credConfig.Flags |= QUIC_CREDENTIAL_FLAG_NO_CERTIFICATE_VALIDATION; // Don't care for development
+		}
 		credConfig.Type = QUIC_CREDENTIAL_TYPE_NONE;
 		status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
 		if (QUIC_FAILED(status))
@@ -637,6 +641,11 @@ bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 	return false;
 }
 
+bool CQuicConnection::isSupported() const
+{
+	return true;
+}
+
 void CQuicConnectionImpl::datagramReceived(const uint8 *buffer, uint32 length)
 {
 	CQuicConnectionImpl *const m = this;
@@ -711,6 +720,11 @@ bool CQuicConnection::datagramAvailable() const
 }
 
 bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
+{
+	return false;
+}
+
+bool CQuicConnection::isSupported() const
 {
 	return false;
 }

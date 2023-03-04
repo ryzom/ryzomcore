@@ -328,6 +328,9 @@ CClientConfig::CClientConfig()
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
 
+	QuicConnection		= true;
+	QuicCertValidation	= true;
+
 	TexturesInterface.push_back("texture_interfaces_v3");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc");
 
@@ -918,6 +921,9 @@ void CClientConfig::setValues()
 #endif // FINAL_VERSION
 	// FSHost
 	READ_STRING_FV(FSHost)
+	// QUIC
+	READ_BOOL_FV(QuicConnection)
+	READ_BOOL_FV(QuicCertValidation)
 
 	READ_BOOL_DEV(DisplayAccountButtons)
 	READ_STRING_DEV(CreateAccountURL)

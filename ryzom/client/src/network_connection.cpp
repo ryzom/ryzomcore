@@ -3126,7 +3126,7 @@ void	CNetworkConnection::reset()
 	_TotalLostPackets = 0;
 	_ConnectionQuality = false;
 
-	m_UseQuic = false;
+	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
 
 	_CurrentSmoothServerTick= 0;
 	_SSTLastLocalTime= 0;

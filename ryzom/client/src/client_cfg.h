@@ -176,6 +176,9 @@ struct CClientConfig
 	bool			Local;
 	/// Host.
 	string			FSHost;
+	/// QUIC
+	bool			QuicConnection;
+	bool			QuicCertValidation;
 	/// Login.
 	bool			DisplayAccountButtons;
 	string			CreateAccountURL;
