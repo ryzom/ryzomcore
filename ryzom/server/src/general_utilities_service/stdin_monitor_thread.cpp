@@ -45,7 +45,7 @@ public:
 
 private:
 	std::string _NextCommand;
-	volatile bool _CommandWaiting;
+	NLMISC::CAtomicBool _CommandWaiting;
 
 };
 

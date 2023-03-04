@@ -65,7 +65,7 @@ bool	CReferenceBuilder::build(	const std::string& rootRefPath,
 									const std::string& logPath,
 									const std::string& mintimestamp,
 									const std::string& maxtimestamp,
-									volatile bool* stopAsked)
+									NLMISC::CAtomicBool* stopAsked)
 {
 	if (!internalBuild(	rootRefPath,
 						previousReferencePath,
@@ -107,7 +107,7 @@ bool	CReferenceBuilder::internalBuild(const std::string& rootRefPath,
 										 const std::string& logPath,
 										 const std::string& mintimestamp,
 										 const std::string& maxtimestamp,
-										 volatile bool* stopAsked)
+										 NLMISC::CAtomicBool* stopAsked)
 {
 	PDS_LOG_DEBUG(1)("CReferenceBuilder::build()");
 
@@ -192,7 +192,7 @@ bool	CReferenceBuilder::updateReference(std::vector<TUpdateList>& updateList,
 										   const CTimestamp& endTimestamp,
 										   const string& refRootPath,
 										   const string& refPath,
-										   volatile bool* stopAsked)
+										   NLMISC::CAtomicBool* stopAsked)
 {
 	if (updateList.empty())
 		return true;

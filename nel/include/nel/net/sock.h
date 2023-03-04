@@ -22,6 +22,7 @@
 
 #include "nel/misc/common.h"
 #include "nel/misc/mutex.h"
+#include "nel/misc/atomic.h"
 #include "inet_host.h"
 //#include <sstream>
 
@@ -287,7 +288,7 @@ protected:
 
 	/// True after calling connect()
 	//NLMISC::CSynchronized<bool>	_SyncConnected;
-	volatile bool	_Connected;
+	NLMISC::CAtomicBool _Connected;
 
 	/// Number of bytes received on this socket
 	uint64			_BytesReceived;

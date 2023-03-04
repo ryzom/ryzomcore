@@ -97,8 +97,8 @@ private:
 
 	/// @name The stop flags
 	//@{
-	volatile bool								_StopThread;
-	volatile bool								_ThreadStopped;
+	NLMISC::CAtomicBool							_StopThread;
+	NLMISC::CAtomicBool							_ThreadStopped;
 	//@}
 
 private:

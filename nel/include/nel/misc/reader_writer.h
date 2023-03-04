@@ -70,7 +70,7 @@ private:
 	CMutex	_Fairness;
 	CMutex	_ReadersMutex;
 	CMutex	_RWMutex;
-	volatile sint	_ReadersLevel; // TODO: Check if legacy CMutex enter and leave implies acquire and release memory order semantics, this doesn't need volatile
+	sint	_ReadersLevel;
 
 public:
 
@@ -173,9 +173,9 @@ private:
 	friend class CRWSynchronized::CReadAccessor;
 	friend class CRWSynchronized::CWriteAccessor;
 
-	volatile CReaderWriter		_RWSync;
+	CReaderWriter		_RWSync;
 
-	volatile T					_Value;
+	T					_Value;
 
 };
 

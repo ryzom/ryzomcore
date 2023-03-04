@@ -22,6 +22,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/mutex.h"
+#include "nel/misc/atomic.h"
 #include "nel/misc/buf_fifo.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/debug.h"
@@ -238,7 +239,7 @@ private:
 	uint32				_MaxSentBlockSize;
 
 	/// True if there is data available (avoids locking a mutex)
-	volatile bool		_DataAvailable;
+	NLMISC::CAtomicBool	_DataAvailable;
 
 #ifdef NL_OS_UNIX
 	bool _IsDataAvailablePipeSelfManaged;

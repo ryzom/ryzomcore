@@ -57,7 +57,7 @@ public:
 		CQuicUserContextPtr		QuicUser;
 
 		/// Used (connected) or not
-		volatile TSBState		SBState;
+		NLMISC::CAtomicEnum<TSBState> SBState;
 
 		/// Output buffer
 		TOutBox					OutBox;

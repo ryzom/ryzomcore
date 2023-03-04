@@ -15455,7 +15455,7 @@ TCharConnectionState CCharacter::isFriendCharVisualyOnline(const NLMISC::CEntity
 	CCharacter *friendChar = PlayerManager.getChar(friendId);
 	if (friendChar != NULL)
 	{
-		volatile TFriendVisibility friendMode = friendChar->getFriendVisibility();
+		TFriendVisibility friendMode = friendChar->getFriendVisibility();
 		switch (friendMode)
 		{
 			case VisibleToGuildOnly:

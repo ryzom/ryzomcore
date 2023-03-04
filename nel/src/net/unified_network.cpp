@@ -22,6 +22,7 @@
 #include "nel/misc/variable.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/mutex.h"
+#include "nel/misc/atomic.h"
 
 #include "nel/net/unified_network.h"
 #include "nel/net/module_common.h"
@@ -432,7 +433,7 @@ public:
 	virtual void	run();
 	virtual			~CAliveCheck()	{ }
 
-	volatile bool	ExitRequired;
+	NLMISC::CAtomicBool ExitRequired;
 
 	static CAliveCheck*	Thread;
 
@@ -444,8 +445,8 @@ public:
 		TServiceId		ServiceId;
 		uint			ConnectionId;
 		uint			ConnectionIndex;
-		volatile bool	NeedCheck;
-		volatile bool	AddressValid;
+		NLMISC::CAtomicBool NeedCheck;
+		NLMISC::CAtomicBool AddressValid;
 	};
 
 	CCheckAddress		CheckList[128];

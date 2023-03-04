@@ -40,18 +40,19 @@
 
 /**
  * Header of a tracker
+ * Mutex must be locked when changing or accessing values
  */
 struct TChangeTrackerHeader
 {
 	/** First changed item (useful to read the changed from the beginning).
 	 * When there is no change to read, First equals LAST_CHANGED.
 	 */
-	volatile TDataSetIndex		First;
+	TDataSetIndex		First;
 
 	/** Last changed item (useful to link the last changed to a newly changed item).
 	 * When there is no change yet, Last equals INVALID_DATASET_ROW.
 	 */
-	volatile TDataSetIndex		Last;
+	TDataSetIndex		Last;
 
 #ifdef USE_FAST_MUTEX
 	/// Fast mutex (TODO: use multi-processor version)
@@ -61,13 +62,13 @@ struct TChangeTrackerHeader
 	 * Number of values set (used in COUNT_MIRROR_CHANGES mode only, always allocated for mode interoperability)
 	 * Currently, not implemented.
 	 */
-	//volatile sint32				NbValuesSet;
+	//sint32				NbValuesSet;
 
 	/**
 	 * Number of changes really recorded (used in COUNT_MIRROR_CHANGES mode only, always allocated for mode interoperability).
 	 * NbValuesSet-NbDistinctChanges is the number of skipped changes.
 	 */
-	volatile sint32					NbDistinctChanges;
+	sint32					NbDistinctChanges;
 };
 
 
