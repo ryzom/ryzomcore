@@ -2154,8 +2154,8 @@ void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, string &sTrans
 // ****************************************************************************
 CCheckThread::CCheckThread(bool includeBackgroundPatch)
 {
-	Ended = false;
 	CheckOk = false;
+	Ended = false;
 	TotalFileToCheck = 0;
 	CurrentFileChecked = 0;
 	IncludeBackgroundPatch = includeBackgroundPatch;
@@ -2436,8 +2436,8 @@ void CCheckThread::run ()
 // ****************************************************************************
 CPatchThread::CPatchThread(bool commitPatch)
 {
-	Ended = false;
 	PatchOk = false;
+	Ended = false;
 	CurrentFilePatched = 0;
 	PatchSizeProgress = 0;
 	_CommitPatch = commitPatch;
@@ -2976,8 +2976,8 @@ void CPatchThread::xDeltaPatch(const string &patch, const string &src, const str
 CScanDataThread::CScanDataThread()
 {
 	AskForCancel= false;
-	Ended = false;
 	CheckOk = false;
+	Ended = false;
 	TotalFileToScan = 1;
 	CurrentFileScanned = 1;
 }
