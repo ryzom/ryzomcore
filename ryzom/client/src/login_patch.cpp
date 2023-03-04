@@ -533,6 +533,8 @@ void CPatchManager::getInfoToDisp(SPatchInfo &piOut)
 	}
 }
 
+void stopSoundMngr();
+
 // ****************************************************************************
 // TODO : use selected categories to patch a list of files
 void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, bool applyPatch)
@@ -623,6 +625,12 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 
 						// Close opened big files
 						CBigFile::getInstance().remove(FilesToPatch[k].FileName);
+						
+						if (NLMISC::startsWith(FilesToPatch[k].FileName, "sound"))
+						{
+							// Stop sound playback
+							stopSoundMngr();
+						}
 					}
 				}
 			}
@@ -2592,8 +2600,6 @@ public:
 	}
 };
 
-void stopSoundMngr();
-
 // ****************************************************************************
 void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 {
@@ -2604,12 +2610,6 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 	// Destination File Name (in writable directory)
 	string DestinationName;
-
-	if (NLMISC::startsWith(rFTP.FileName, "sound"))
-	{
-		// Stop sound playback
-		stopSoundMngr();
-	}
 
 	if (rFTP.ExtractPath.empty())
 	{
