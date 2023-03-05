@@ -58,9 +58,9 @@ A wizard's code, that's sure to bring you cheer.
 
 */
 
-//#ifdef NL_DEBUG
+// #ifdef NL_DEBUG
 #define FE_DEBUG_QUIC
-//#endif
+// #endif
 
 class CClientHost;
 

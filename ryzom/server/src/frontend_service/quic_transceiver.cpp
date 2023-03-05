@@ -192,7 +192,7 @@ CQuicTransceiver::CQuicTransceiver(uint32 msgsize)
 CQuicTransceiver::~CQuicTransceiver()
 {
 	CSynchronized<std::vector<CQuicTransceiver *>>::CAccessor transceivers(&s_QuicTransceivers);
-	
+
 	stop();
 	release();
 
@@ -356,7 +356,7 @@ void CQuicTransceiver::start(uint16 port)
 		{
 			nlwarning("No certificate configured for QUIC on hostname %s, try a self-signed", NLNET::CLoginServer::getListenHost().hostname().c_str());
 		}
-		
+
 		if (!liveCert)
 		{
 			// Programmatically create a self signed certificate, only valid in Windows
@@ -470,7 +470,7 @@ void CQuicTransceiver::stop()
 	// Then, shutdown or disconnect all existing connections (send disconnect through Ryzom datagram, then shutdown all QUIC)
 	// Once all connections are gone, proceed with closing down the sockets entirely
 	// If this takes more than one second, force close all QUIC connetions
-	
+
 	// Shutdown all connections
 	for (;;) // Doesn't need to loop, but just in case...
 	{
@@ -481,7 +481,7 @@ void CQuicTransceiver::stop()
 		}
 		if (connectionsCopy.empty())
 			break;
-		
+
 		nldebug("Shutdown %i connections", (int)connectionsCopy.size());
 		for (const CQuicUserContextPtr &user : connectionsCopy)
 		{
@@ -562,7 +562,7 @@ CQuicUserContext::~CQuicUserContext()
 #ifdef FE_DEBUG_QUIC
 	nldebug("Destroy QUIC user context, total %i", (int)(--s_UserContextCount));
 #endif
-	
+
 	// This should never get called before the connection is shutdown,
 	// since we increase the reference when the connection gets opened,
 	// and decrease the reference when the connection is shutdown.
@@ -932,7 +932,6 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 
 void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *writeQueue)
 {
-
 }
 
 bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemStream &buffer)
