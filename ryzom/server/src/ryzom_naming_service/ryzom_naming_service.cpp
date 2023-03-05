@@ -279,6 +279,11 @@ CCallbackServer		*CallbackServer = NULL;
 
 bool canAccess (const vector<CInetAddress> &addr, const CServiceEntry &entry, vector<CInetAddress> &accessibleAddr)
 {
+#if 1
+	// Bypass this check since it's not applicable currently
+	accessibleAddr = addr;
+	return true;
+#else
 	accessibleAddr.clear ();
 	
 	if (entry.WaitingUnregistration)
@@ -306,6 +311,7 @@ bool canAccess (const vector<CInetAddress> &addr, const CServiceEntry &entry, ve
 	}
 
 	return !accessibleAddr.empty ();
+#endif
 }
 
 void displayRegisteredServices (CLog *log = InfoLog)
