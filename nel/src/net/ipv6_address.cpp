@@ -505,6 +505,55 @@ CIPv6Address::TType CIPv6Address::getType() const
 	return Internet;
 }
 
+CIPv6Address CIPv6Address::subnet() const
+{
+	if (!isValid()) return CIPv6Address();
+
+	if (isIPv4())
+	{
+		if (m_Address[12] == 10)
+		{
+			CIPv6Address subnet = *this;
+			subnet.m_Address[13] = 0;
+			subnet.m_Address[14] = 0;
+			subnet.m_Address[15] = 0;
+			return subnet;
+		}
+		if (m_Address[12] == 172 && (m_Address[13] & 0xF0) == 16)
+		{
+			CIPv6Address subnet = *this;
+			subnet.m_Address[14] = 0;
+			subnet.m_Address[15] = 0;
+			return subnet;
+		}
+		if (m_Address[12] == 192 && m_Address[13] == 168)
+		{
+			CIPv6Address subnet = *this;
+			subnet.m_Address[15] = 0;
+			return subnet;
+		}
+	}
+	else
+	{
+		if ((m_Address[0] & 0xFE) == 0xFC)
+		{
+			CIPv6Address subnet = *this;
+			subnet.m_Address[6] = 0;
+			subnet.m_Address[7] = 0;
+			subnet.m_Address[8] = 0;
+			subnet.m_Address[9] = 0;
+			subnet.m_Address[10] = 0;
+			subnet.m_Address[11] = 0;
+			subnet.m_Address[12] = 0;
+			subnet.m_Address[13] = 0;
+			subnet.m_Address[14] = 0;
+			subnet.m_Address[15] = 0;
+			return subnet;
+		}
+	}
+	return CIPv6Address();
+}
+
 bool CIPv6Address::isAny() const
 {
 	if (!isValid()) return false;
