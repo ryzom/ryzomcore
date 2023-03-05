@@ -67,7 +67,11 @@ CVariable<std::string> QuicCertificate("fs", "QuicCertificate", "", "", 0, true)
 CVariable<std::string> QuicPrivateKey("fs", "QuicPrivateKey", "", "", 0, true);
 CVariable<std::string> QuicLetsEncryptLive("fs", "QuicLetsEncryptLive", "", "/home/nevrax/letsencrypt/live", 0, true);
 
+#ifdef FE_DEBUG_QUIC
 CAtomicInt s_UserContextCount = CAtomicInt(TNotInitialized());
+#endif
+
+CSynchronized<std::vector<CQuicTransceiver *>> s_QuicTransceivers;
 
 // This really hammers fast
 class CAtomicFlagLock
@@ -160,6 +164,8 @@ CQuicTransceiver::CQuicTransceiver(uint32 msgsize)
     : m(std::make_unique<CQuicTransceiverImpl>())
     , m_MsgSize(msgsize)
 {
+	CSynchronized<std::vector<CQuicTransceiver *>>::CAccessor transceivers(&s_QuicTransceivers);
+
 	// Open library
 	QUIC_STATUS status = MsQuicOpenVersion(QUIC_API_VERSION_2, (const void **)&MsQuic);
 	if (QUIC_FAILED(status))
@@ -179,12 +185,64 @@ CQuicTransceiver::CQuicTransceiver(uint32 msgsize)
 		release();
 		return;
 	}
+
+	transceivers.value().push_back(this);
 }
 
 CQuicTransceiver::~CQuicTransceiver()
 {
+	CSynchronized<std::vector<CQuicTransceiver *>>::CAccessor transceivers(&s_QuicTransceivers);
+	
 	stop();
 	release();
+
+	transceivers.value().erase(std::find(transceivers.value().begin(), transceivers.value().end(), this));
+}
+
+void CQuicTransceiver::reloadCert()
+{
+	nldebug("Reload QUIC certificates [%p]", this);
+
+	if (!MsQuic)
+	{
+		nldebug("QUIC API not available, skip [%p]", this);
+		return;
+	}
+
+	if (!m->Configuration)
+	{
+		nldebug("QUIC not configured yet, skip [%p]", this);
+		return;
+	}
+
+	if (!QuicCertificate.get().empty() && !QuicPrivateKey.get().empty())
+	{
+		// Server credentials
+		nlinfo("Using certificate %s with key %s", QuicCertificate.get().c_str(), QuicPrivateKey.get().c_str());
+		std::string certificate = NLMISC::utf8ToMbcs(QuicCertificate.get());
+		std::string privateKey = NLMISC::utf8ToMbcs(QuicPrivateKey.get());
+		QUIC_CREDENTIAL_CONFIG credConfig;
+		QUIC_CERTIFICATE_FILE certFile;
+		memset(&credConfig, 0, sizeof(credConfig));
+		credConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE;
+		credConfig.Flags = QUIC_CREDENTIAL_FLAG_NONE;
+		credConfig.CertificateFile = &certFile;
+		certFile.CertificateFile = certificate.c_str();
+		certFile.PrivateKeyFile = privateKey.c_str();
+		QUIC_STATUS status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
+		if (QUIC_FAILED(status))
+		{
+			nlinfo("MsQuic->ConfigurationLoadCredential failed with status 0x%x", status);
+		}
+		else
+		{
+			nlinfo("QUIC certificate reloaded");
+		}
+	}
+	else
+	{
+		nlinfo("No certificate configured for QUIC");
+	}
 }
 
 bool CQuicTransceiver::isConfigEnabled() const
@@ -494,12 +552,16 @@ void CQuicTransceiver::release()
 
 CQuicUserContext::CQuicUserContext()
 {
+#ifdef FE_DEBUG_QUIC
 	nldebug("Create QUIC user context, total %i", (int)(++s_UserContextCount));
+#endif
 }
 
 CQuicUserContext::~CQuicUserContext()
 {
+#ifdef FE_DEBUG_QUIC
 	nldebug("Destroy QUIC user context, total %i", (int)(--s_UserContextCount));
+#endif
 	
 	// This should never get called before the connection is shutdown,
 	// since we increase the reference when the connection gets opened,
@@ -817,6 +879,15 @@ CQuicTransceiver::~CQuicTransceiver()
 {
 }
 
+void CQuicTransceiver::reloadCert()
+{
+}
+
+bool CQuicTransceiver::isConfigEnabled() const
+{
+	return false;
+}
+
 void CQuicTransceiver::start(uint16 port)
 {
 	nlwarning("QUIC not supported, no listener started");
@@ -874,5 +945,15 @@ void CQuicTransceiver::shutdown(CQuicUserContext *user)
 }
 
 #endif
+
+NLMISC_CATEGORISED_COMMAND(fs, quicCertReload, "Reload QUIC certificates", "")
+{
+	CSynchronized<std::vector<CQuicTransceiver *>>::CAccessor transceivers(&s_QuicTransceivers);
+	for (CQuicTransceiver *transceiver : transceivers.value())
+	{
+		transceiver->reloadCert();
+	}
+	return true;
+}
 
 /* end of file */

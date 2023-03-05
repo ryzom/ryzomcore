@@ -259,6 +259,9 @@ public:
 	CQuicTransceiver(uint32 msgsize);
 	~CQuicTransceiver();
 
+	/// Reload certificate
+	void reloadCert();
+
 	/// Check if QUIC is enabled in the config
 	bool isConfigEnabled() const;
 
