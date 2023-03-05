@@ -93,7 +93,7 @@ bool UseTickService = false;
 uint32 Ticked = 0;
 
 // Synchronization of flushing (sending) thread
-volatile bool FlushInProgress = false;
+CAtomicFlag FlushInProgress = CAtomicFlag(TNotInitialized());
 
 // Allow beeping
 bool AllowBeep = false;
@@ -211,16 +211,13 @@ void fillPrioritizedActionsToSend()
 // Swap send buffers
 void swapSendBuffers()
 {
-	H_AUTO(WaitAndSwapSendBuffers)
+	H_AUTO(WaitAndSwapSendBuffers);
+	
     // Wait for the end of flushMessagesToSend()
-    while ( FlushInProgress )
-	{
-		nlSleep( 0 );
-	}
+	CAtomicLockFast::enter(FlushInProgress);
 
 	// Swap the buffers
 	CFrontEndService::instance()->sendSub()->swapSendBuffers();
-    FlushInProgress = true;
 
 	CFrontEndService::instance()->SendWatch.stop();
 }
@@ -230,7 +227,7 @@ void swapSendBuffers()
 void flushMessagesToSend()
 {
 	CFrontEndService::instance()->sendSub()->flushMessages();
-	FlushInProgress = false;
+	CAtomicLockFast::leave(FlushInProgress);
 }
 
 /*
