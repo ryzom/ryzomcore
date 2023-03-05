@@ -562,9 +562,12 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 		host.m_Addresses.clear();
 		for (size_t i = 0; i < sorting.size(); ++i)
 		{
-			// Filter only IPv4 for loopback first, since [::1] appears to have throttling on connect
+			// Filter only IPv4 for loopback first, since [::1] appears to have throttling on connect on Ubuntu
 			if (sorting[i].getAddress().getType() == CIPv6Address::Loopback && sorting[i].getAddress().isIPv4())
+			{
 				host.m_Addresses.push_back(sorting[i]);
+				break; // One loopback is enough
+			}
 		}
 		if (host.m_Addresses.empty())
 		{
@@ -572,7 +575,10 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 			for (size_t i = 0; i < sorting.size(); ++i)
 			{
 				if (sorting[i].getAddress().getType() == CIPv6Address::Loopback)
+				{
 					host.m_Addresses.push_back(sorting[i]);
+					break; // One loopback is enough
+				}
 			}
 		}
 		for (size_t i = 0; i < sorting.size(); ++i)
