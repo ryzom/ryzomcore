@@ -1037,6 +1037,11 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 	{
 		if (m_QuicConnection.receiveDatagram(msgin))
 		{
+			// Compute some statistics
+			// FIXME: Also get protocol stats QUIC_PARAM_CONN_STATISTICS QUIC_PARAM_CONN_STATISTICS_V2
+			statsReceive(msgin.length());
+			
+			// We're good
 			return true;
 		}
 		// Under quic receiving a datagram never fails if a datagram is flagged as available
