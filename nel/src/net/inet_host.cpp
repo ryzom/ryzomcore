@@ -417,6 +417,7 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 						CInetAddress loopbackAddr(CIPv6Address::loopbackIPv4(), port);
 						if (addresses.find(loopbackAddr.getAddress()) == addresses.end())
 						{
+							addresses.insert(loopbackAddr.getAddress());
 							if (loopback)
 								host.m_Addresses.push_back(loopbackAddr);
 							else
@@ -444,6 +445,7 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 						CInetAddress loopbackAddr(CIPv6Address::loopbackIPv6(), port);
 						if (addresses.find(loopbackAddr.getAddress()) == addresses.end())
 						{
+							addresses.insert(loopbackAddr.getAddress());
 							if (loopback)
 								host.m_Addresses.push_back(loopbackAddr);
 							else
