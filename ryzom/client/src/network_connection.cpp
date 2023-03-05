@@ -2492,7 +2492,10 @@ bool	CNetworkConnection::stateProbe()
 		_LatestProbeTime = _UpdateTime;
 	}
 	else
-		nlSleep(10);
+	{
+		// nlSleep(10);
+		nlYield();
+	}
 
 	return false;
 }

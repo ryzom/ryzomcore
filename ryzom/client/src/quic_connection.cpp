@@ -235,8 +235,8 @@ void CQuicConnectionImpl::connect()
 		// settings.IsSet.SendBufferingEnabled = TRUE;
 		// settings.GreaseQuicBitEnabled = TRUE;
 		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
-		// settings.MinimumMtu = m_MsgSize + size of QUIC header; // Probably violates QUIC protocol if we do this, also no need
-		// settings.IsSet.MinimumMtu = TRUE;
+		settings.MinimumMtu = 576;
+		settings.IsSet.MinimumMtu = TRUE;
 		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
 		{
@@ -524,8 +524,8 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_STATE_CHANGED:
-		nlinfo("Datagram state changed");
 		m->MaxSendLength = ev->DATAGRAM_STATE_CHANGED.SendEnabled ? ev->DATAGRAM_STATE_CHANGED.MaxSendLength : 0;
+		nlinfo("Datagram state changed, max send length is now %i", (int)m->MaxSendLength);
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:

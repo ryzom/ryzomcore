@@ -233,8 +233,8 @@ void CQuicTransceiver::start(uint16 port)
 		// settings.IsSet.SendBufferingEnabled = TRUE;
 		// settings.GreaseQuicBitEnabled = TRUE;
 		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
-		// settings.MinimumMtu = m_MsgSize + size of QUIC header; // Probably violates QUIC protocol if we do this, also no need
-		// settings.IsSet.MinimumMtu = TRUE;
+		settings.MinimumMtu = 576;
+		settings.IsSet.MinimumMtu = TRUE;
 		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
 		{
@@ -406,6 +406,12 @@ void CQuicTransceiver::stop()
 		m->Listener = null;
 		nldebug("Listener closed");
 	}
+
+	// TODO: Graceful shutdown.
+	// First, close all listeners (close QUIC listener, and ignore new UDP addresses in the UDP receiver)
+	// Then, shutdown or disconnect all existing connections (send disconnect through Ryzom datagram, then shutdown all QUIC)
+	// Once all connections are gone, proceed with closing down the sockets entirely
+	// If this takes more than one second, force close all QUIC connetions
 	
 	// Shutdown all connections
 	for (;;) // Doesn't need to loop, but just in case...
