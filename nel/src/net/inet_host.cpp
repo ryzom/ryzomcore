@@ -585,12 +585,14 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 			if (sorting[i].getAddress().getType() == CIPv6Address::SiteLocal)
 				host.m_Addresses.push_back(sorting[i]);
 		}
+#if 0
 		for (size_t i = 0; i < sorting.size(); ++i)
 		{
 			// Not sure if we should keep link local addresses or just discard them...
 			if (sorting[i].getAddress().getType() == CIPv6Address::LinkLocal)
 				host.m_Addresses.push_back(sorting[i]);
 		}
+#endif
 		for (size_t i = 0; i < sorting.size(); ++i)
 		{
 			if (sorting[i].getAddress().getType() == CIPv6Address::Internet)
@@ -599,7 +601,7 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 
 		if (host.m_Addresses.size() < sorting.size())
 		{
-			nlwarning("Discarded %i local host addresses (phase 2)", (int)(sorting.size() - host.m_Addresses.size()));
+			// nlwarning("Discarded %i local host addresses (phase 2)", (int)(sorting.size() - host.m_Addresses.size()));
 		}
 	}
 
