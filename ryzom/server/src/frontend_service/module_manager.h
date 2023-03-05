@@ -194,7 +194,7 @@ private:
 	{
 		//nldebug("FEMMAN: [%s] waiting for all modules to increase cycle", _StackName.c_str());
 		while (!allReady())
-			NLMISC::nlSleep(0);
+			NLMISC::nlSleep(0); // FIXME
 
 		/* Warning (Windows platform): this sleep(0) will make the service show 100% of CPU in the
 		 * Windows task manager. In fact, if there is idle time, the sleep(0) makes the system give
@@ -214,7 +214,7 @@ private:
 	{
 		//nldebug("FEMMAN: [%s] waiting for all modules to restart cycle", _StackName.c_str());
 		while (!allComplete())
-			NLMISC::nlSleep(0);
+			NLMISC::nlSleep(0); // FIXME
 
 		/* Warning (Windows platform) about sleep(0): see waitAllReady().
 		 */
