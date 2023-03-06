@@ -264,8 +264,8 @@ void		CServiceInstanceManager::killAllServices()
 
 list<CServiceEntry>	RegisteredServices;		/// List of all registred services
 
-uint16				MinBasePort = 51000;	/// Ports begin at 51000
-uint16				MaxBasePort = 52000;	/// (note: in this implementation there can be no more than 1000 services)
+uint16				MinBasePort = 30000;	/// Ports begin at 51000
+uint16				MaxBasePort = 30100;	/// (note: in this implementation there can be no more than 100 services)
 
 const TServiceId	BaseSId(128);			/// Allocated SIds begin at 128 (except for Agent Service)
 
@@ -813,17 +813,23 @@ uint16 doAllocatePort (const CInetAddress &addr)
 	// check if nextavailableport is free
 
 	if (nextAvailablePort >= MaxBasePort) nextAvailablePort = MinBasePort;
+	int test = MaxBasePort - MinBasePort;
+	int tested = 0;
 
 	bool ok;
 	do
 	{
 		ok = true;
 		list<CServiceEntry>::iterator it;
+		if (nextAvailablePort >= MaxBasePort) nextAvailablePort = MinBasePort;
 		for (it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
 		{
 			if ((*it).Addr[0].port () == nextAvailablePort)
 			{
 				nextAvailablePort++;
+				tested++;
+				if (tested >= test)
+					return 0; // no more space
 				ok = false;
 				break;
 			}
