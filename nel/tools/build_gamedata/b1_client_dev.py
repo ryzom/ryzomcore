@@ -74,6 +74,7 @@ if not os.path.isfile(ClientDevDirectory + "/client.cfg"):
 	cfg.write("Application          = {\n")
 	cfg.write("	\"dev\", \"./client_ryzom_r.exe\", \"./\" \n")
 	cfg.write("};\n")
+	cfg.write("QuicCertValidation = 0;\n")
 	cfg.flush()
 	cfg.close()
 	printLog(log, "")
