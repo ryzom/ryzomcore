@@ -395,6 +395,8 @@ list<CServiceEntry>::iterator doRemove (list<CServiceEntry>::iterator it)
 	nlinfo ("Broadcast the Unregistration of %s-%hu to all registered services", (*it).Name.c_str(), it->SId.get());
 	for (list<CServiceEntry>::iterator it3 = RegisteredServices.begin(); it3 != RegisteredServices.end (); it3++)
 	{
+		if (it3->WaitingUnregistration)
+			continue;
 		getDstAddresses(accessibleAddress, *it, *it3);
 		if (!accessibleAddress.empty())
 		{
@@ -611,6 +613,8 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 						// send only services that can be accessed and not itself
 						if (dstEntry.SId == (*it3).SId)
 							continue;
+						if (it3->WaitingUnregistration)
+							continue;
 						getDstAddresses(accessibleAddress, dstEntry, *it3);
 						if (!accessibleAddress.empty())
 						{
@@ -655,7 +659,8 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 				for (list<CServiceEntry>::iterator it2 = RegisteredServices.begin(); it2 != RegisteredServices.end (); it2++)
 				{
 					vector<CInetAddress> accessibleAddress;
-					getDstAddresses(accessibleAddress, *it2, dstEntry);
+					if (!it2->WaitingUnregistration)
+						getDstAddresses(accessibleAddress, *it2, dstEntry);
 					accessibleAddressV.push_back(accessibleAddress);
 					if (!accessibleAddress.empty())
 						nb++;
@@ -673,6 +678,8 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 						msgout.serialCont (accessibleAddressV[i0]);
 					}
 				}
+
+				nlassert(i0 == nb);
 			}
 			else
 			{
