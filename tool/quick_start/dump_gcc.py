@@ -24,7 +24,7 @@ except subprocess.CalledProcessError as e:
 except OSError as e:
 	print(json.dumps({"Failed": cmd}))
 	sys.exit(1)
-os = dict(csv.reader(io.StringIO(output.strip()), delimiter='='))
+osRelease = dict(csv.reader(io.StringIO(output.strip()), delimiter='='))
 
 cmd = [ "find", "/usr/lib", "-name", "libluabind.so" ]
 try:
@@ -53,14 +53,19 @@ if output:
 		if len(ldd) > 6:
 			luaVer = ldd[6:]
 
-# name = "GCC " + version + " (" + os["PRETTY_NAME"]
+# name = "GCC " + version + " (" + osRelease["PRETTY_NAME"]
 # if luaVer:
 # 	name += ", Lua " + luaVer
 # name += ")"
 
-res = { "GCCVersion": version, "OSRelease": os }
+# Check if MsQuic header is available
+hasMsQuic = os.path.isfile("/usr/include/msquic.h")
+
+res = { "GCCVersion": version, "OSRelease": osRelease }
 if luaVer:
 	res["LuaVersion"] = luaVer
+if hasMsQuic:
+	res["HasMsQuic"] = True
 print(json.dumps(res))
 
 # end of file
