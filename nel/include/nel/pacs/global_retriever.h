@@ -124,7 +124,7 @@ protected:
 		// Idle==false && Finished==false
 		// Idle==false && Finished==true
 
-		CLrLoader(const NLMISC::CVector &position) : Finished(true)
+		CLrLoader(const NLMISC::CVector &position) : Finished(true), Successful(false)
 		{
 			Position = position;
 		}

@@ -70,6 +70,14 @@ level!
 #define NL_VOLATILE_RELAXED
 #endif
 
+#if defined(NL_OS_MAC)
+#include <libkern/OSAtomic.h>
+#define NL_ATOMIC_MACOS
+#endif
+
+// Define this to add test() operation to CAtomicFlag (may not be supported on all platforms)
+// #define NL_ATOMIC_FLAG_TEST
+
 #ifdef NL_CPP14
 #include <thread>
 #include <mutex>
@@ -131,14 +139,9 @@ static_assert(std::memory_order_acq_rel == __ATOMIC_ACQ_REL);
 static_assert(std::memory_order_seq_cst == __ATOMIC_SEQ_CST);
 #endif
 
-/// Struct to pass to initializers to bypass init
-struct TNotInitialized
-{
-	int Dummy;
-};
-
 /// Atomic flag
-/// Initialized clear.
+/// Not initialized by default
+/// Initializing with a bool will call either clear() or testAndSet()
 /// The only supported memory orders are
 /// TMemoryOrderAcquire for testAndSet and TMemoryOrderRelease for clear.
 /// Higher memory orders may be used depending on the implementation.
@@ -160,10 +163,12 @@ public:
 		__atomic_clear(&m_Flag, __ATOMIC_RELEASE); // release
 	}
 
-	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+#ifdef NL_ATOMIC_FLAG_TEST
+	NL_FORCE_INLINE bool test() const // get current value without changing, acq-rel
 	{
-		return __atomic_load_n(&m_Flag, __ATOMIC_ACQUIRE); // acquire
+		return __atomic_load_n(&m_Flag, __ATOMIC_ACQ_REL); // acq-rel
 	}
+#endif
 #elif defined(NL_ATOMIC_GCC)
 private:
 	volatile int m_Flag;
@@ -179,11 +184,13 @@ public:
 		__sync_lock_release(&m_Flag); // release
 	}
 
-	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+#ifdef NL_ATOMIC_FLAG_TEST
+	NL_FORCE_INLINE bool test() const // get current value without changing, acq-rel
 	{
-		return __sync_fetch_and_add(const_cast<volatile int *>(&m_Flag), 0); // acquire
+		return __sync_fetch_and_add(const_cast<volatile int *>(&m_Flag), 0); // acq-rel
 	}
-#elif defined(NL_ATOMIC_CPP20)
+#endif
+#elif (!defined(NL_ATOMIC_FLAG_TEST) && defined(NL_ATOMIC_CPP14)) || defined(NL_ATOMIC_CPP20)
 private:
 	std::atomic_flag m_Flag;
 
@@ -198,13 +205,12 @@ public:
 		m_Flag.clear(std::memory_order_release);
 	}
 
-	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+#ifdef NL_ATOMIC_FLAG_TEST
+	NL_FORCE_INLINE bool test() const // get current value without changing, acq-rel
 	{
-		return m_Flag.test(std::memory_order_acquire);
+		return m_Flag.test(std::memory_order_acq_rel);
 	}
-
-	CAtomicFlag(const CAtomicFlag &) = delete; // Flags cannot be copied
-	CAtomicFlag &operator=(const CAtomicFlag &) = delete;
+#endif
 
 	static_assert(sizeof(std::atomic_flag) <= sizeof(int) || sizeof(std::atomic_flag) <= sizeof(bool),
 	    "Atomic flag is larger than int and bool, it may be better to use a native implementation");
@@ -223,13 +229,12 @@ public:
 		m_Flag.store(false, std::memory_order_release);
 	}
 
-	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+#ifdef NL_ATOMIC_FLAG_TEST
+	NL_FORCE_INLINE bool test() const // get current value without changing, acq-rel
 	{
-		return m_Flag.load(std::memory_order_acquire);
+		return m_Flag.load(std::memory_order_acq_rel);
 	}
-
-	CAtomicFlag(const CAtomicFlag &) = delete; // Flags cannot be copied
-	CAtomicFlag &operator=(const CAtomicFlag &) = delete;
+#endif
 
 	static_assert(sizeof(std::atomic_bool) <= sizeof(bool),
 	    "Atomic bool is larger than bool, it may be better to use a native implementation");
@@ -252,27 +257,63 @@ public:
 #endif
 	}
 
-	NL_FORCE_INLINE bool test() const // get current value without changing, acquire
+#ifdef NL_ATOMIC_FLAG_TEST
+	NL_FORCE_INLINE bool test() const // get current value without changing, acq-rel
 	{
-#ifdef NL_VOLATILE_ACQ_REL
-		return m_Flag; // acquire
-#else
 		return _InterlockedExchangeAdd(const_cast<volatile long *>(&m_Flag), 0) != 0; // full barrier
-#endif
 	}
 #endif
-	NL_FORCE_INLINE CAtomicFlag()
+#elif defined(NL_ATOMIC_MACOS)
+private:
+	OSSpinLock m_SpinLock;
+
+public:
+	NL_FORCE_INLINE bool testAndSet()
 	{
-		clear();
+		return OSSpinLockTry(&m_SpinLock); // acquire
 	}
-	NL_FORCE_INLINE CAtomicFlag(const TNotInitialized &)
+
+	NL_FORCE_INLINE void clear()
+	{
+		OSSpinLockUnlock(&m_SpinLock); // release
+	}
+
+#ifdef NL_ATOMIC_FLAG_TEST
+	NL_FORCE_INLINE bool test() const // get current value without changing, acq-rel
+	{
+		// No idea if this is legal, but it's the only way to do so without changing the flag value...
+		// OSSpinLock is normally just a 32-bit value!
+		if (sizeof(OSSpinLock) == sizeof(uint64_t))
+		{
+			return OSAtomicAdd64Barrier(0, const_cast<OSSpinLock *>(&m_SpinLock)) != 0; // acq-rel
+		}
+		else
+		{
+			return OSAtomicAdd32Barrier(0, const_cast<OSSpinLock *>(&m_SpinLock)) != 0; // acq-rel
+		}
+	}
+#endif
+#endif
+	NL_FORCE_INLINE CAtomicFlag(bool value) // acq-rel
+	{
+		clear(); // Always clear first so the set value is sane
+		if (value)
+			testAndSet();
+	}
+	NL_FORCE_INLINE CAtomicFlag()
 	{
 		// when used as a global, create without clearing, as global memory is already init to 0
 		// otherwise, it might be cleared after being locked, due to undefined initialization order
 	}
+
+#ifdef NL_CPP14
+	CAtomicFlag(const CAtomicFlag &) = delete; // Flags cannot be copied
+	CAtomicFlag &operator=(const CAtomicFlag &) = delete;
+#endif
 };
 
 /// Atomic integer.
+/// Like a normal integer, this is not initialized by default!
 /// The highest supported memory orders are aqcuire and release.
 class CAtomicInt
 {
@@ -330,7 +371,7 @@ public:
 		else
 #endif
 #ifdef NL_VOLATILE_ACQ_REL
-		if (order == TMemoryOrderRelease)
+		    if (order == TMemoryOrderRelease)
 			m_Value = value;
 		else
 #endif
@@ -410,16 +451,54 @@ public:
 		if (order >= TMemoryOrderRelease)
 			__sync_synchronize(); // release
 	}
+#elif defined(NL_ATOMIC_MACOS)
+private:
+	volatile int m_Value;
+
+public:
+	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
+	{
+		if (order == TMemoryOrderRelaxed)
+			return OSAtomicAdd32(0, const_cast<volatile int *>(&m_Value));
+		else
+			return OSAtomicAdd32Barrier(0, const_cast<volatile int *>(&m_Value)); // acq-rel
+	}
+
+	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
+	{
+		if (order == TMemoryOrderRelaxed)
+			while (!OSAtomicCompareAndSwap32(load(), value, &m_Value))
+				; // relaxed
+		else
+			while (!OSAtomicCompareAndSwap32Barrier(load(), value, &m_Value))
+				; // acq-rel
+	}
+
+	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		if (order == TMemoryOrderRelaxed)
+			return OSAtomicAdd32(value, &m_Value);
+		else
+			return OSAtomicAdd32Barrier(value, &m_Value); // acq-rel
+	}
+
+	NL_FORCE_INLINE int exchange(int value, TMemoryOrder order = TMemoryOrderAcqRel)
+	{
+		if (order == TMemoryOrderRelaxed)
+			return OSAtomicExchange32(value, &m_Value);
+		else
+			return OSAtomicExchange32Barrier(value, &m_Value); // acq-rel
+	}
 #endif
 
 public:
 	// Atomic operators
-	NL_FORCE_INLINE CAtomicInt(int value = 0, TMemoryOrder order = TMemoryOrderRelease)
+	NL_FORCE_INLINE CAtomicInt(int value, TMemoryOrder order = TMemoryOrderRelease)
 	{
 		store(value, order);
 	}
 
-	NL_FORCE_INLINE CAtomicInt(const TNotInitialized &)
+	NL_FORCE_INLINE CAtomicInt()
 	{
 		// when used as a global, you can create without initializing, as global memory is already init to 0
 		// otherwise, it might be cleared after being locked, due to undefined initialization order
@@ -590,12 +669,12 @@ public:
 	}
 #endif
 	// Atomic load and store operators
-	NL_FORCE_INLINE CAtomicEnum(T value = T(0))
+	NL_FORCE_INLINE CAtomicEnum(T value)
 	{
 		store(value);
 	}
 
-	NL_FORCE_INLINE CAtomicEnum(const TNotInitialized &)
+	NL_FORCE_INLINE CAtomicEnum()
 	{
 		// when used as a global, you can create without initializing, as global memory is already init to 0
 		// otherwise, it might be cleared after being locked, due to undefined initialization order
@@ -814,26 +893,30 @@ public:
 			volatile int temp = 17; // volatile so it's not optimized out, this is just to keep busy
 			for (int i = 0; i < spinMax; ++i)
 			{
-				if (i < lastSpins / 2 || flag.test())
+				if (i < lastSpins / 2)
 				{
 					temp *= temp;
 					temp *= temp;
 					temp *= temp;
 					temp *= temp;
 				}
+				else if (!flag.testAndSet())
+				{
+					last = i;
+					_max = 1000;
+					return;
+				}
 				else
 				{
-					if (!flag.testAndSet())
-					{
-						last = i;
-						_max = 1000;
-						return;
-					}
+					temp *= temp;
+					temp *= temp;
+					temp *= temp;
+					temp *= temp;
 				}
 			}
 
 			_max = 30;
-			
+
 			// Fallthrough to NLMISC::CFastMutex implementation
 			CAtomicLockFast::enter(flag);
 		}

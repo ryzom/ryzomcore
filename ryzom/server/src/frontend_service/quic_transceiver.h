@@ -80,7 +80,7 @@ public:
 	// Manual reference count
 	void increaseRef()
 	{
-		int value = m_RefCount.fetch_add(1, std::memory_order_relaxed) + 1;
+		int value = m_RefCount.fetchAdd(1, NLMISC::TMemoryOrderRelaxed) + 1;
 #ifdef FE_DEBUG_QUIC
 		if (DebugRefCount)
 			nldebug("Reference count [%p] is now %i", this, value);
@@ -89,7 +89,7 @@ public:
 
 	void decreaseRef()
 	{
-		int value = m_RefCount.fetch_sub(1, std::memory_order_release) - 1;
+		int value = m_RefCount.fetchAdd(-1, NLMISC::TMemoryOrderRelease) - 1;
 #ifdef FE_DEBUG_QUIC
 		if (DebugRefCount)
 			nldebug("Reference count [%p] is now %i", this, value);
@@ -123,21 +123,21 @@ public:
 	CClientHost *ClientHost = nullptr;
 
 	// Set if datagrams can be sent (set on connection thread, read on service main thread)
-	NLMISC::CAtomicInt MaxSendLength;
+	NLMISC::CAtomicInt MaxSendLength = 0;
 
 	// Send buffer, one being sent at a time, released as soon as it's sent out
-	NLMISC::CAtomicFlag SendBusy;
+	NLMISC::CAtomicFlag SendBusy = false;
 	NLMISC::CBitMemStream SendBuffer = NLMISC::CBitMemStream(false, 512);
 	CQuicBuffer SendQuicBuffer;
-	NLMISC::CAtomicInt SentCount;
+	NLMISC::CAtomicInt SentCount = 0;
 
 #ifdef FE_DEBUG_QUIC
 	// After shutdown, enable ref count debugging
-	NLMISC::CAtomicBool DebugRefCount;
+	NLMISC::CAtomicBool DebugRefCount = false;
 #endif
 
 private:
-	std::atomic_int m_RefCount = 0;
+	NLMISC::CAtomicInt m_RefCount = 0;
 };
 
 // Utility to decrease reference count, does not increase count

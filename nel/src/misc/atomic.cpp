@@ -37,7 +37,9 @@ void atomic_cpp_dummy__()
 	CAtomicBool ok; // is CAtomicEnum<bool>
 	flag.testAndSet();
 	flag.clear();
+#ifdef NL_ATOMIC_FLAG_TEST
 	flag.test();
+#endif
 	num.store(num.load());
 	num.fetchAdd(1);
 	num.exchange(2);
@@ -60,9 +62,14 @@ void atomic_cpp_dummy__()
 	}
 
 	// Not initialized
-	CAtomicFlag flagUninit = CAtomicFlag(TNotInitialized());
-	CAtomicInt numUninit = CAtomicInt(TNotInitialized());
-	CAtomicBool okUninit = CAtomicBool(TNotInitialized());
+	CAtomicFlag flagUninit;
+	CAtomicInt numUninit;
+	CAtomicBool okUninit;
+
+	// Initialized
+	CAtomicFlag flagInit = true;
+	CAtomicInt numInit = 0;
+	CAtomicBool okInit = false;
 }
 
 } /* namespace NLMISC */

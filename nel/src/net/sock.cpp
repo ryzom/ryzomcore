@@ -85,9 +85,9 @@ namespace NLNET {
 
 
 namespace /* anonymous */ {
-NLMISC::CAtomicBool s_Initialized = NLMISC::CAtomicBool(NLMISC::TNotInitialized());
+NLMISC::CAtomicBool s_Initialized;
 #ifdef NL_OS_WINDOWS
-NLMISC::CAtomicInt s_WsaInitCount = NLMISC::CAtomicInt(NLMISC::TNotInitialized());
+NLMISC::CAtomicInt s_WsaInitCount;
 #endif
 } /* anonymous namespace */
 

@@ -68,50 +68,10 @@ CVariable<std::string> QuicPrivateKey("fs", "QuicPrivateKey", "", "", 0, true);
 CVariable<std::string> QuicLetsEncryptLive("fs", "QuicLetsEncryptLive", "", "/home/nevrax/letsencrypt/live", 0, true);
 
 #ifdef FE_DEBUG_QUIC
-CAtomicInt s_UserContextCount = CAtomicInt(TNotInitialized());
+CAtomicInt s_UserContextCount;
 #endif
 
 CSynchronized<std::vector<CQuicTransceiver *>> s_QuicTransceivers;
-
-// This really hammers fast
-class CAtomicFlagLock
-{
-public:
-	CAtomicFlagLock(std::atomic_flag &flag)
-	    : m_Flag(flag)
-	{
-		while (m_Flag.test_and_set(std::memory_order_acquire))
-			;
-	}
-
-	~CAtomicFlagLock()
-	{
-		m_Flag.clear(std::memory_order_release);
-	}
-
-private:
-	std::atomic_flag &m_Flag;
-};
-
-// This is a bit more relaxed
-class CAtomicFlagLockYield
-{
-public:
-	CAtomicFlagLockYield(std::atomic_flag &flag)
-	    : m_Flag(flag)
-	{
-		while (m_Flag.test_and_set(std::memory_order_acquire))
-			std::this_thread::yield();
-	}
-
-	~CAtomicFlagLockYield()
-	{
-		m_Flag.clear(std::memory_order_release);
-	}
-
-private:
-	std::atomic_flag &m_Flag;
-};
 
 } /* anonymous namespace */
 
@@ -123,10 +83,10 @@ public:
 	HQUIC Configuration = null;
 	HQUIC Listener = null;
 
-	std::atomic_flag BufferMutex = ATOMIC_FLAG_INIT;
+	NLMISC::CAtomicFlag BufferMutex = false;
 	NLMISC::CBufFIFO *Buffer = null;
 
-	std::atomic<bool> Listening;
+	NLMISC::CAtomicBool Listening = false;
 
 	// Some salt for generating the token address
 	uint64 SaltA0 = (((uint64)std::random_device()()) << 32) | std::random_device()();
@@ -424,7 +384,7 @@ void CQuicTransceiver::start(uint16 port)
 		if (!QUIC_FAILED(status))
 		{
 			// Ok
-			m->Listening.store(true, std::memory_order_relaxed); // Released by lock
+			m->Listening.store(true, NLMISC::TMemoryOrderRelaxed); // Released by lock
 			nlinfo("Listening for QUIC connections on port %i", (int)port);
 		}
 	}
@@ -451,7 +411,7 @@ void CQuicTransceiver::stop()
 				// Wait for stop
 				nldebug("Wait for QUIC listener stop");
 				std::unique_lock<std::mutex> lock(m->ListenerStopMutex);
-				m->ListenerStopCondition.wait(lock, [this] { return !m->Listening.load(std::memory_order_relaxed); /* Aqcuired by lock */ });
+				m->ListenerStopCondition.wait(lock, [this] { return !m->Listening.load(NLMISC::TMemoryOrderRelaxed); /* Aqcuired by lock */ });
 				nldebug("Stop wait OK");
 			}
 			catch (const std::exception &e)
@@ -611,7 +571,7 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 	case QUIC_LISTENER_EVENT_STOP_COMPLETE: {
 		nldebug("QUIC listener stopped");
 		std::unique_lock<std::mutex> lock(m->ListenerStopMutex);
-		m->Listening.store(false, std::memory_order_relaxed); // Released by lock
+		m->Listening.store(false, NLMISC::TMemoryOrderRelaxed); // Released by lock
 		m->ListenerStopCondition.notify_all();
 		nldebug("QUIC listener stop notified");
 		status = QUIC_STATUS_SUCCESS;
@@ -739,7 +699,7 @@ CInetAddress CQuicTransceiver::generateTokenAddr()
 
 bool CQuicTransceiver::listening()
 {
-	return m->Listening.load(std::memory_order_acquire);
+	return m->Listening.load(NLMISC::TMemoryOrderAcquire);
 }
 
 void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buffer, uint32 length)
@@ -749,7 +709,7 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 
 	// Locked block
 	{
-		CAtomicFlagLockYield lock(m->BufferMutex);
+		NLMISC::CAtomicLockYield lock(m->BufferMutex);
 		static const uint8 userEvent = TReceivedMessage::User;
 		static_assert(MsgHeaderSize == sizeof(userEvent));
 		m->Buffer->push(&userEvent, MsgHeaderSize, buffer, length);
@@ -764,7 +724,7 @@ void CQuicTransceiver::shutdownReceived(CQuicUserContext *user)
 
 	// Locked block
 	{
-		CAtomicFlagLockYield lock(m->BufferMutex);
+		NLMISC::CAtomicLockYield lock(m->BufferMutex);
 		static const uint8 removeEvent = TReceivedMessage::RemoveClient;
 		static_assert(MsgHeaderSize == sizeof(removeEvent));
 		m->Buffer->push(&removeEvent, MsgHeaderSize);
@@ -774,7 +734,7 @@ void CQuicTransceiver::shutdownReceived(CQuicUserContext *user)
 
 NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 {
-	CAtomicFlagLock lock(m->BufferMutex);
+	NLMISC::CAtomicLockSpin lock(m->BufferMutex);
 	CBufFIFO *previous = m->Buffer;
 	m->Buffer = writeQueue;
 	return previous;
@@ -782,7 +742,7 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 
 void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *queue)
 {
-	CAtomicFlagLockYield lock(m->BufferMutex);
+	NLMISC::CAtomicLockFast lock(m->BufferMutex);
 	int count = 0;
 	while (!queue->empty())
 	{

@@ -93,7 +93,7 @@ bool UseTickService = false;
 uint32 Ticked = 0;
 
 // Synchronization of flushing (sending) thread
-CAtomicFlag FlushInProgress = CAtomicFlag(TNotInitialized());
+CAtomicFlag FlushInProgress;
 
 // Allow beeping
 bool AllowBeep = false;

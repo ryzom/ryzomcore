@@ -60,9 +60,16 @@ public:
 	    , Configuration(NULL)
 	    , Connection(NULL)
 	    , DesiredStateChange(NoChange)
+		, BufferWrites(0)
 	    , BufferReads(0)
 	    , State(CQuicConnection::Disconnected)
+		, ConnectedFlag(false)
+		, ShuttingDownFlag(false)
+		, ShutdownFlag(false)
 	    , ReceiveEnable(0)
+		, MaxSendLength(0)
+		, SendBusy(false)
+		, SentCount(0)
 	{
 	}
 
