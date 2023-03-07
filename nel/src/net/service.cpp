@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2016-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -130,7 +130,7 @@ static uint32 LaunchingDate;
 
 static uint32 NbUserUpdate = 0;
 
-string CompilationMode = nlMode;
+string CompilationMode = NL_MODE_STR;
 
 //static bool Bench = false;
 
@@ -153,6 +153,24 @@ CVariable<bool>					FlushSendingQueuesOnExit("nel", "FlushSendingQueuesOnExit",
 CVariable<string>				NamesOfOnlyServiceToFlushSending("nel", "NamesOfOnlyServiceToFlushSending",
 	"If FlushSendingQueuesOnExit is on, only the sending queues to these specified services will be flushed (ex: \"WS:LS\"; all will be flushed if empty string)", "", 0, true );
 
+bool wasExitSignalAsked()
+{
+	if (IService::isServiceInitialized() && IService::getInstance()->WindowDisplayer != NULL)
+	{
+		// update the window displayer and quit if asked
+		if (!IService::getInstance()->WindowDisplayer->update())
+		{
+			nlinfo("SERVICE: The window displayer was closed by user, need to quit");
+			ExitSignalAsked = 1;
+		}
+	}
+	return ExitSignalAsked;
+}
+
+struct EEarlyExit : public Exception
+{
+	EEarlyExit() : Exception( "Early exit" ) {}
+};
 
 //
 // Signals managing
@@ -708,7 +726,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			// we create the log with service name filename ("test_service_ALIAS.log" for example)
 			string logname = LogDirectory.toString() + _LongName;
 			if (haveArg('N'))
-				logname += "_" + toLower(getArg('N'));
+				logname += "_" + toLowerAscii(getArg('N'));
 			logname += ".log";
 			fd.setParam (logname, false);
 
@@ -917,7 +935,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			CSock::initNetwork();
 
 			// Get the localhost name
-			localhost = CInetAddress::localHost().hostName();
+			localhost = CInetHost::localHostName();
 		}
 		catch (const NLNET::ESocket &)
 		{
@@ -956,7 +974,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Load the recording state from the config file
 		if ((var = ConfigFile.getVarPtr ("Rec")) != NULL)
 		{
-			string srecstate = toUpper(var->asString());
+			string srecstate = toUpperAscii(var->asString());
 			if ( srecstate == "RECORD" )
 			{
 				_RecordingState = CCallbackNetBase::Record;
@@ -1052,7 +1070,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		if (!_DontUseNS)
 		{
 			bool ok = false;
-			while (!ok)
+			while (!ok && !wasExitSignalAsked())
 			{
 				string LSAddr;
 
@@ -1071,7 +1089,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 				if (LSAddr.find(":") == string::npos)
 					LSAddr += ":50000";
 
-				CInetAddress loc(LSAddr);
+				CInetHost loc(LSAddr);
 				try
 				{
 					// todo: check if app not closed by user, or you get stuck here
@@ -1098,7 +1116,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 				}
 				catch (const ESocketConnectionFailed &)
 				{
-					nlinfo ("SERVICE: Could not connect to the Naming Service (%s). Retrying in a few seconds...", loc.asString().c_str());
+					nlinfo ("SERVICE: Could not connect to the Naming Service (%s). Retrying in a few seconds...", loc.toStringLong().c_str());
 					nlSleep (5000);
 				}
 			}
@@ -1109,7 +1127,10 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		}
 
 		// get the hostname for later use
-		_HostName = CInetAddress::localHost().hostName();
+		_HostName = CInetHost::localHostName();
+
+		if (ExitSignalAsked)
+			throw EEarlyExit();
 
 		// At this point, the _SId must be ok if we use the naming service.
 		// If it's 0, it means that we don't use NS and we left the other side server to find a sid for your connection
@@ -1499,6 +1520,9 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 			MyTAT.deactivate();
 		}
+	}
+	catch (const EEarlyExit &)
+	{
 	}
 	catch (const EFatalError &)
 	{

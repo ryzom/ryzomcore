@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -408,7 +408,7 @@ void			CSBrickManager::compileBrickProperties()
 			string::size_type pos = prop.Text.find(':');
 			if (pos != string::npos)
 			{
-				string key = toLower(prop.Text.substr(0, pos));
+				string key = toLowerAscii(prop.Text.substr(0, pos));
 				string value = prop.Text.substr(pos + 1);
 				// get key id.
 				if (_BrickPropIdMap.find(key) == _BrickPropIdMap.end())
@@ -436,7 +436,7 @@ void			CSBrickManager::compileBrickProperties()
 
 
 	// **** for all bricks, recompute localized text with formated version
-	ucstring	textTemp;
+	string	textTemp;
 	textTemp.reserve(1000);
 	for (std::vector<CSBrickSheet *>::size_type ib = 0; ib < _BrickVector.size(); ++ib)
 	{
@@ -445,7 +445,7 @@ void			CSBrickManager::compileBrickProperties()
 			continue;
 
 		// Get the Brick texts
-		ucstring	texts[3];
+		std::string texts[3];
 		texts[0]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(brickSheet->Id);
 		texts[1]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedDescription(brickSheet->Id);
 		texts[2]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedCompositionDescription(brickSheet->Id);
@@ -453,7 +453,7 @@ void			CSBrickManager::compileBrickProperties()
 		// For alls texts, parse format
 		for(uint i=0;i<3;i++)
 		{
-			ucstring	&text= texts[i];
+			string	&text= texts[i];
 			textTemp.erase();
 
 			// Parse the text
@@ -486,7 +486,7 @@ void			CSBrickManager::compileBrickProperties()
 								k++;
 							}
 							// Param Id modifier? (ie read not the 0th value, but the 1th etc... up to 9)
-							else if(k<textSize && isdigit(text[k]))
+							else if(k<textSize && (uint8)text[k] < (uint8)'\x80' && isdigit(text[k]))
 							{
 								char	tp[2];
 								tp[0]= (char)text[k];
@@ -509,7 +509,7 @@ void			CSBrickManager::compileBrickProperties()
 							// Parse all the brick properties if match the key
 							float	value= 0.f;
 							// get the wanted prop id
-							key = toLower(key);
+							key = toLowerAscii(key);
 							uint	propId= getBrickPropId(key);
 							// if propid exist
 							if(propId)

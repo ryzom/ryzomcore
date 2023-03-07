@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -156,7 +156,7 @@ void CRingAccess::init()
 			CXMLAutoPtr sheetClientPtr( (const char*) xmlGetProp(entityAccess, (xmlChar*) "sheetClient") );
 			CXMLAutoPtr sheetPtr( (const char*) xmlGetProp(entityAccess, (xmlChar*) "sheetServer") );
 
-			if (!namePtr.getDatas()|| !packagePtr.getDatas() || !sheetPtr.getDatas() || !sheetPtr.getDatas())
+			if (!namePtr.getDatas()|| !packagePtr.getDatas() || !sheetClientPtr.getDatas() || !sheetPtr.getDatas())
 			{
 				nlerror( "Syntax error in %s", pathFileName.c_str());
 				return;

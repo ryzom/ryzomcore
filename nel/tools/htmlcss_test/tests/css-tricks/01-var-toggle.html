@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+p {
+	--mq-sm: initial;
+}
+
+.small {
+	--mq-sm: ;
+}
+
+p {
+	--padding-when-small: var(--mq-sm) 2rem;
+	--padding-when-large: 4rem;
+	padding: var(--padding-when-small, var(--padding-when-large));
+}
+		</style>
+		<p data-ruleset="padding-left: 4rem;" comment="--mq-sm==initial, should use fallback value" />
+		<div>
+			<p class="small" data-ruleset="padding-left: 2rem;" comment="--mq-sm==;, should use defined value"/>
+		</div>
+	</body>
+</html>

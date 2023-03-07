@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -33,6 +33,7 @@
 #include <nel/misc/progress_callback.h>
 #include <nel/misc/random.h>
 #include <nel/misc/common.h>
+#include <nel/misc/wang_hash.h>
 #include <nel/3d/u_material.h>
 
 #include <nel/3d/u_driver.h>
@@ -116,10 +117,15 @@ void CScreenshotIslands::init()
 	CPath::remapExtension("dds", "png", true);
 
 	// get the scenario entry points file
-	CConfigFile::CVar * epFile = cf.getVarPtr("CompleteIslandsFile");
+	CConfigFile::CVar * ciFile = cf.getVarPtr("CompleteIslandsFile");
+	if(ciFile)
+	{
+		_CompleteIslandsFile = ciFile->asString();
+	}
+	CConfigFile::CVar * epFile = cf.getVarPtr("EntryPointsFile");
 	if(epFile)
 	{
-		_CompleteIslandsFile = epFile->asString();
+		_EntryPointsFile = epFile->asString();
 	}
 
 	// get the out directory path
@@ -285,31 +291,18 @@ bool CScreenshotIslands::getPosFromZoneName(const std::string &name, NLMISC::CVe
 //-------------------------------------------------------------------------------------------------
 void CScreenshotIslands::searchIslandsBorders()
 {
-	vector<string> filenames;
-	list<string> zonelFiles;
-
-	map< CVector2f, bool> islandsMap;
+	vector<string> zonelFiles;
+	map<CVector2f, bool> islandsMap;
 	
 	TContinentsData::iterator itCont(_ContinentsData.begin()), lastCont(_ContinentsData.end());
 	for( ; itCont != lastCont ; ++itCont)
 	{
 		// for each continent we recover a map of zonel files whith position of 
 		// left/bottom point of each zone for keys
-		filenames.clear();
 		zonelFiles.clear();
+		CPath::getFileList("zonel", zonelFiles); // MAYBE FIXME: Constrain to continent (although we only build one continent at a time...)
 
-		string bnpFileName = itCont->first + ".bnp";
-		CBigFile::getInstance().list(bnpFileName.c_str(), filenames); // FIXME FIXME NOT READING FROM BNP!
-
-		for(uint i=0; i<filenames.size(); i++)
-		{
-			if(CFile::getExtension(filenames[i]) == "zonel")
-			{
-				zonelFiles.push_back(filenames[i]);
-			}
-		}
-
-		list<string>::iterator itZonel(zonelFiles.begin()), lastZonel(zonelFiles.end());
+		vector<string>::iterator itZonel(zonelFiles.begin()), lastZonel(zonelFiles.end());
 		for( ; itZonel != lastZonel ; ++itZonel)
 		{	
 			CVector2f position;
@@ -1105,7 +1098,9 @@ void CScreenshotIslands::loadIslands()
 {
 	// load entryPoints
 	map< string, CVector2f > islands;
-	CScenarioEntryPoints scenarioEntryPoints = CScenarioEntryPoints::getInstance();
+	CScenarioEntryPoints &scenarioEntryPoints = CScenarioEntryPoints::getInstance();
+
+	scenarioEntryPoints.setFiles(_CompleteIslandsFile, _EntryPointsFile);
 
 	scenarioEntryPoints.loadFromFile();
 	const CScenarioEntryPoints::TEntryPoints& entryPoints =  scenarioEntryPoints.getEntryPoints();
@@ -1197,43 +1192,68 @@ void CScreenshotIslands::loadIslands()
 		}
 	}
 
+	CScenarioEntryPoints::TCompleteIslands completeIslands; // Copy (empty if using separate xml files)
+	completeIslands.reserve(entryPoints.size());
 
-	CScenarioEntryPoints::TCompleteIslands completeIslands(entryPoints.size());
+	vector<string> zonelFiles;
+	CPath::getFileList("zonel", zonelFiles);
+	map<string, CVector2f> zonePosMap;
+	for (vector<string>::iterator it(zonelFiles.begin()), end(zonelFiles.end()); it != end; ++it)
+	{
+		CVector2f pos;
+		if (getPosFromZoneName(*it, pos))
+			zonePosMap[CFile::getFilenameWithoutExtension(*it)] = pos;
+	}
 
-	uint completeIslandsNb = 0;
-	for(uint e=0; e<entryPoints.size(); e++)
-	{	
-		const CScenarioEntryPoints::CEntryPoint & entry = entryPoints[e];
+	for (uint e = 0; e < entryPoints.size(); e++)
+	{
+		const CScenarioEntryPoints::CEntryPoint &entry = entryPoints[e];
 
-		CScenarioEntryPoints::CCompleteIsland completeIsland;
-		completeIsland.Island = entry.Island;
-		completeIsland.Package = entry.Package;
-
-		for(itCont=_ContinentsData.begin(); itCont!=_ContinentsData.end(); ++itCont)
+		for (itCont = _ContinentsData.begin(); itCont != _ContinentsData.end(); ++itCont) // Look through all continents
 		{
-			list< string >::const_iterator itIsland(itCont->second.Islands.begin()), lastIsland(itCont->second.Islands.end());
-			for( ; itIsland != lastIsland ; ++itIsland)
+			list<string>::const_iterator itIsland(itCont->second.Islands.begin()), lastIsland(itCont->second.Islands.end()); // Look through all islands
+			for (; itIsland != lastIsland; ++itIsland)
 			{
-				if(*itIsland == entry.Island)
+				if (*itIsland == entry.Island)
 				{
-					completeIsland.Continent = CSString(itCont->first);
-					if(_IslandsData.find(entry.Island)!=_IslandsData.end())
+					TIslandsData::iterator islandIt = _IslandsData.find(entry.Island);
+					if (islandIt != _IslandsData.end())
 					{
-						completeIsland.XMin = _IslandsData[entry.Island].getBoundXMin();
-						completeIsland.YMin = _IslandsData[entry.Island].getBoundYMin();
-						completeIsland.XMax = _IslandsData[entry.Island].getBoundXMax();
-						completeIsland.YMax = _IslandsData[entry.Island].getBoundYMax();
-						completeIslands[completeIslandsNb] = completeIsland;
-						completeIslandsNb++;
+						// Island found in the current build context
+						completeIslands.resize(completeIslands.size() + 1);
+						CScenarioEntryPoints::CCompleteIsland &island = completeIslands[completeIslands.size() - 1];
+
+						// Update data from r2_entry_points.txt
+						island.Island = entry.Island;
+						// island.Package = entry.Package; // Loaded from txt
+
+						// Update from _ContinentsData
+						island.Continent = CSString(itCont->first);
+
+						// Update from _IslandsData
+						island.XMin = islandIt->second.getBoundXMin();
+						island.YMin = islandIt->second.getBoundYMin();
+						island.XMax = islandIt->second.getBoundXMax();
+						island.YMax = islandIt->second.getBoundYMax();
+
+						sint32 zonelXMin = ((uint)(island.XMin / 160)) * 160;
+						sint32 zonelYMin = ((uint)(island.YMin / 160) - 1) * 160;
+						sint32 zonelXMax = ((uint)(island.XMax / 160)) * 160;
+						sint32 zonelYMax = ((uint)(island.YMax / 160) - 1) * 160;
+
+						// List all zones
+						for (map<string, CVector2f>::iterator it(zonePosMap.begin()), end(zonePosMap.end()); it != end; ++it)
+							if (it->second.x >= zonelXMin && it->second.x <= zonelXMax
+								&& it->second.y >= zonelYMin && it->second.y <= zonelYMax)
+								island.Zones.push_back(NLMISC::toUpperAscii(it->first));
 					}
 					break;
 				}
 			}
 		}
 	}
-	completeIslands.resize(completeIslandsNb);
 	
-	CScenarioEntryPoints::getInstance().saveXMLFile(completeIslands, _CompleteIslandsFile);
+	scenarioEntryPoints.saveXMLFile(completeIslands, _CompleteIslandsFile);
 }
 
 //--------------------------------------------------------------------------------
@@ -1369,6 +1389,7 @@ void CScreenshotIslands::buildIslandsTextures()
 	// Create and load landscape
 	ULandscape * landscape = scene->createLandscape();
 	landscape->setThreshold(0.0005);
+	landscape->setTileNear(10000);
 	if(_InverseZTest)
 	{
 		landscape->setZFunc(UMaterial::greaterequal);
@@ -1464,7 +1485,7 @@ void CScreenshotIslands::buildIslandsTextures()
 						vector<string>		zonesAdded;
 						vector<string>		zonesRemoved;
 						IProgressCallback progress;
-						landscape->refreshAllZonesAround(camera.getMatrix().getPos(), 1000, zonesAdded, zonesRemoved, progress);
+						landscape->refreshAllZonesAround(camera.getMatrix().getPos(), 2000, zonesAdded, zonesRemoved, progress);
 						if(_Vegetation)
 						{
 							LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
@@ -1644,8 +1665,8 @@ void CScreenshotIslands::buildIslandsTextures()
 
 
 							// little tga
-							bitmapLittle.resample(bitmapLittle.getWidth()/10, bitmapLittle.getHeight()/10);
-							if(!isPowerOf2(bitmapLittle.getWidth()) || !isPowerOf2(bitmapLittle.getHeight()) )
+							bitmapLittle.resample(bitmapLittle.getWidth() / 20, bitmapLittle.getHeight() / 20);
+							if (!isPowerOf2(bitmapLittle.getWidth()) || !isPowerOf2(bitmapLittle.getHeight()))
 							{
 								uint pow2w = NLMISC::raiseToNextPowerOf2(bitmapLittle.getWidth());
 								uint pow2h = NLMISC::raiseToNextPowerOf2(bitmapLittle.getHeight());
@@ -1871,15 +1892,19 @@ void CScreenshotIslands::buildBackTextureHLS(const std::string & islandName, con
 	{
 		_BackColor = maxColor;
 
-		CRandom	randomGenerator;
+		std::string islandNameLwr = toLowerAscii(islandName);
+		uint32_t seed = 0;
+		for (ptrdiff_t i = 0; i < (ptrdiff_t)islandNameLwr.size(); ++i)
+			seed += wangHash(seed ^ islandNameLwr[i]);
 
 		uint8 * backPixels = &(_BackBitmap.getPixels(0)[0]);
 
+		uint i = 0;
 		for(uint x=0; x<_BackBitmap.getWidth(); x++)
 		{
-			for(uint y=0; y<_BackBitmap.getHeight(); y++)
+			for(uint y=0; y<_BackBitmap.getHeight(); y++, i++)
 			{
-				sint32 randomVal = randomGenerator.rand(colorsNb-1);
+				sint32 randomVal = wangHash(seed ^ i) % colorsNb;
 				const CRGBA & color = sortedColors[randomVal];
 
 				*backPixels = (uint8) color.R;

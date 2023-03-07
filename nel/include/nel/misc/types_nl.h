@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2011  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -174,10 +174,6 @@
 #	define NL_COMP_GCC
 #endif
 
-#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110)
-#	define NL_ISO_CPP0X_AVAILABLE
-#endif
-
 #if defined(NL_COMP_GCC) && (__cplusplus >= 201103L)
 #	define NL_NO_EXCEPTION_SPECS
 #endif
@@ -190,6 +186,19 @@
 
 #if (defined(_MSC_VER) && (_MSC_VER >= 1900)) || (defined(__GNUC__ ) && (__GNUC__ >= 6) && (__cplusplus >=  201402L))
 #	define NL_CPP14
+#	define NL_CPP11
+#endif
+
+#ifdef NL_CPP14
+#define NL_ALIGNAS(type) alignas(type)
+#else
+#define NL_ALIGNAS(type)
+#endif
+
+#ifdef NL_CPP17
+#define NL_REGISTER
+#else
+#define NL_REGISTER register
 #endif
 
 #if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)
@@ -233,6 +242,10 @@
 #	endif
 #endif
 
+#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110) || (defined(NL_COMP_GCC) && (GCC_VERSION >= 40400) && (__cplusplus >= 201103L))
+#	define NL_ISO_CPP0X_AVAILABLE
+#endif
+
 // Remove stupid Visual C++ warnings
 #ifdef NL_OS_WINDOWS
 #	pragma warning (disable : 4503)			// STL: Decorated name length exceeded, name was truncated
@@ -241,6 +254,9 @@
 #	pragma warning (disable : 4250)			// inherits via dominance (informational warning).
 #	pragma warning (disable : 4390)			// don't warn in empty block "if(exp) ;"
 #	pragma warning (disable : 4996)			// 'vsnprintf': This function or variable may be unsafe. Consider using vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+#	ifdef NL_CPP17
+#		pragma warning (disable : 5033)			// 'register' is no longer a supported storage class
+#	endif
 // Debug : Sept 01 2006
 #	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
 #		pragma warning (disable : 4005)			// don't warn on redefinitions caused by xp platform sdk
@@ -548,6 +564,14 @@ template<> struct hash<uint64>
  */
 typedef	uint16	ucchar;
 
+#ifdef NL_CPP14
+typedef char32_t u32char;
+typedef std::u32string u32string;
+#else
+typedef uint32 u32char;
+typedef std::basic_string<uint32> u32string;
+#endif
+
 #ifndef NL_OVERRIDE
 #define NL_OVERRIDE override
 #endif
@@ -597,9 +621,9 @@ typedef	uint16	ucchar;
 #endif
 
 #ifdef NL_DEBUG
-const std::string nlMode("NL_DEBUG");
+#define NL_MODE_STR "NL_DEBUG"
 #else
-const std::string nlMode("NL_RELEASE");
+#define NL_MODE_STR "NL_RELEASE"
 #endif
 
 // Sanity checks

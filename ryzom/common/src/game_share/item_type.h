@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2018  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -26,6 +29,9 @@ namespace ITEM_TYPE
 	// Mode
 	// nb : sell filter uses two 64b database values to build a bitfield, so the item type limit is 128 for now
 	enum TItemType
+#ifdef NL_CPP14
+		: uint8
+#endif
 	{
 		DAGGER,
 		SWORD,
@@ -83,7 +89,6 @@ namespace ITEM_TYPE
 		CAMPSFIRE,
 		MEKTOUB_PACKER_TICKET,
 		MEKTOUB_MOUNT_TICKET,
-		ANIMAL_TICKET,
 		FOOD,
 		MAGICIAN_STAFF,
 		HAIR_MALE,

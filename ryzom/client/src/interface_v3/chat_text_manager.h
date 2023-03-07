@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2017  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -30,7 +31,6 @@ namespace NLGUI
 	class CInterfaceGroup;
 }
 
-class ucstring;
 namespace NLMISC{
 	class CCDBNodeLeaf;
 }
@@ -55,7 +55,7 @@ public:
 	  * \param justified Should be true for justified text (stretch spaces of line to fill the full width)
 	  * \param plaintext Text will not be parsed for uri markup links
 	  */
-	NLGUI::CViewBase *createMsgText(const ucstring &msg, NLMISC::CRGBA col, bool justified = false, bool plaintext = false);
+	NLGUI::CViewBase *createMsgText(const std::string &msg, NLMISC::CRGBA col, bool justified = false, bool plaintext = false);
 	// Singleton access
 	static CChatTextManager &getInstance();
 
@@ -79,8 +79,8 @@ private:
 
 	bool showTimestamps() const;
 
-	NLGUI::CViewBase *createMsgTextSimple(const ucstring &msg, NLMISC::CRGBA col, bool justified, NLGUI::CInterfaceGroup *commandGroup);
-	NLGUI::CViewBase *createMsgTextComplex(const ucstring &msg, NLMISC::CRGBA col, bool justified, bool plaintext, NLGUI::CInterfaceGroup *commandGroup);
+	NLGUI::CViewBase *createMsgTextSimple(const std::string &msg, NLMISC::CRGBA col, bool justified, NLGUI::CInterfaceGroup *commandGroup);
+	NLGUI::CViewBase *createMsgTextComplex(const std::string &msg, NLMISC::CRGBA col, bool justified, bool plaintext, NLGUI::CInterfaceGroup *commandGroup);
 };
 
 // shortcut to get text manager instance

@@ -37,6 +37,10 @@ void quitCrashReport()
 {
 }
 
+void stopSoundMngr()
+{
+}
+
 /// domain server version for patch
 string	R2ServerVersion;
 /// name of the version (used to alias many version under the same name),
@@ -191,7 +195,8 @@ struct CClientPatcherTranslations : public NLMISC::CI18N::ILoadProxy
 };
 
 // hardcoded URL to not depend on external files
-static const std::string PatchUrl = RYZOM_CLIENT_PATCH_URL; // "https://cdn.ryzom.dev/open/patch";
+static const std::string DefaultPatchUrl = RYZOM_CLIENT_PATCH_URL; // "https://cdn.ryzom.dev/open/patch";
+static const std::string DefaultAppName = RYZOM_CLIENT_APP_NAME; // "default"
 
 int main(int argc, char *argv[])
 {
@@ -200,6 +205,8 @@ int main(int argc, char *argv[])
 
 	Args.setVersion(getDisplayVersion());
 	Args.setDescription("Ryzom client");
+	Args.addArg("", "url", "PatchUrl", "Patch server url, ie '" RYZOM_CLIENT_PATCH_URL "'");
+	Args.addArg("", "app", "Application", "Patch application name for version file, ie '" RYZOM_CLIENT_APP_NAME "' requests " RYZOM_CLIENT_APP_NAME ".version from PatchUrl");
 
 	if (!Args.parse(argc, argv)) return 1;
 
@@ -212,7 +219,7 @@ int main(int argc, char *argv[])
 	INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
 
 	// check if console supports colors
-	std::string term = toLower(std::string(getenv("TERM") ? getenv("TERM"):""));
+	std::string term = toLowerAscii(std::string(getenv("TERM") ? getenv("TERM"):""));
 	useEsc = (term.find("xterm") != string::npos || term.find("linux") != string::npos);
 
 #ifdef NL_OS_WINDOWS
@@ -240,20 +247,49 @@ int main(int argc, char *argv[])
 	// now translations are read, we don't need it anymore
 	delete trans;
 
+	// create minimal client.cfg file in memory for patcher
+	{
+		CConfigFile::CVar patchUrl;
+		patchUrl.forceAsString(DefaultPatchUrl);
+		if (Args.haveLongArg("url") && !Args.getLongArg("url").empty())
+			patchUrl.forceAsString(Args.getLongArg("url").front());
+
+		CConfigFile::CVar appName;
+		appName.forceAsString(DefaultAppName);
+		if (Args.haveLongArg("app") && !Args.getLongArg("app").empty())
+			appName.forceAsString(Args.getLongArg("app").front());
+
+		ClientCfg.ConfigFile.insertVar("PatchUrl", patchUrl);
+		ClientCfg.ConfigFile.insertVar("Application", appName);
+	}
+
+	//
 	Args.displayVersion();
 	printf("\n");
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
+	printf("Using '%s/%s.version'\n", ClientCfg.ConfigFile.getVar("PatchUrl").asString().c_str(),
+		ClientCfg.ConfigFile.getVar("Application").asString().c_str());
+
+	// FIXME: On Ryzom Core 4, the patch url and version are retrieved from the login server
+	// using StartupHost, StartupPage, and Application[0], as different domains 
+	// may be running on the same patch series at different versions.
+	// The version file on the patch server is a dummy containing just "*",
+	// since this file gets cached by the CDN.
+	
+	// defaults to the current build in case version file is not used
+	int versionNumbers[] = { RYZOM_VERSION_RC, 0, 0 };
+	VersionName = NLMISC::toString(versionNumbers[2]);
 
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
 
 	// use PatchUrl
 	vector<string> patchURLs;
-	pPM->init(patchURLs, PatchUrl, "");
+	pPM->init(patchURLs, ClientCfg.ConfigFile.getVar("PatchUrl").asString(), VersionName);
 	pPM->startCheckThread(true /* include background patchs */);
 
-	ucstring state;
-	vector<ucstring> log;
+	string state;
+	vector<string> log;
 	bool res = false;
 	bool finished = false;
 
@@ -329,6 +365,7 @@ int main(int argc, char *argv[])
 		try
 		{
 			// move downloaded files to final location
+			// batch file will not be created
 			pPM->createBatchFile(pPM->getDescFile(), false, false);
 			CFile::createEmptyFile("show_eula");
 
@@ -359,17 +396,20 @@ int main(int argc, char *argv[])
 			printError(convert(CI18N::get("uiErrPatchApply")) + " " + error);
 			return 1;
 		}
-
-		pPM->executeBatchFile();
 	}
 
-/*
-	// Start Scanning
-	pPM->startScanDataThread();
-
-	// request to stop the thread
-	pPM->askForStopScanDataThread();
-*/
+	// upgd_nl.sh will normally take care of the permissions
+	//
+	// for linux/macOS (no-op on windows)
+	// Set for current executable (might be 'dev' version),
+	// and also 'ryzom_client_patcher' directly (from patched files)
+	CFile::setExecutable(Args.getProgramPath() + Args.getProgramName());
+	CFile::setExecutable("ryzom_client_patcher");
+	// other
+	CFile::setExecutable("crash_report");
+	CFile::setExecutable("ryzom_client");
+	CFile::setExecutable("ryzom_installer_qt");
+	CFile::setExecutable("ryzom_configuration_qt");
 
 	return 0;
 }

@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -64,6 +65,7 @@ namespace NLGUI
 		_Indent = 0;
 		_FirstViewIndentView = false;
 		_TextId = 0;
+		_TextAlign = AlignLeft;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -476,11 +478,10 @@ namespace NLGUI
 		{
 			_HardText = std::string( (const char*)ptr );
 			const char *propPtr = ptr;
-			ucstring Text = ucstring(propPtr);
-			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-				Text = CI18N::get (propPtr);
-
-			addTextChild(Text);
+			if (NLMISC::startsWith(propPtr, "ui"))
+				addTextChild(CI18N::get(propPtr));
+			else
+				addTextChild(propPtr);
 		}
 		else
 		{
@@ -496,7 +497,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	void CGroupParagraph::addTextChild(const ucstring& line, bool multiLine /*= true*/)
+	void CGroupParagraph::addTextChild(const std::string& line, bool multiLine /*= true*/)
 	{
 		const string elid = _Id + ":el" + toString(_IdCounter); ++_IdCounter;
 		CViewText *view= new CViewText (elid, string(""), _Templ.getFontSize(), _Templ.getColor(), _Templ.getShadow());
@@ -514,7 +515,7 @@ namespace NLGUI
 
 
 	// ----------------------------------------------------------------------------
-	void CGroupParagraph::addTextChild(const ucstring& line, const CRGBA& textColor, bool multiLine /*= true*/)
+	void CGroupParagraph::addTextChild(const std::string& line, const CRGBA& textColor, bool multiLine /*= true*/)
 	{
 		const string elid = _Id + ":el" + toString(_IdCounter); ++_IdCounter;
 		CViewText *view= new CViewText (elid, string(""), _Templ.getFontSize(), _Templ.getColor(), _Templ.getShadow());
@@ -713,6 +714,10 @@ namespace NLGUI
 							CViewText *viewText = dynamic_cast<CViewText*>(_Elements[i].Element);
 							if (viewText)
 							{
+								// FIXME: this does not work with multiple view text on same line
+								if (_TextAlign == AlignCenter && elmCount == 1)
+									viewText->setTextMode(CViewText::Centered);
+
 								viewText->setFirstLineX(x + ((i==0)?_FirstViewIndentView:0));
 								viewText->setX(0);
 								viewText->updateTextContext();
@@ -730,8 +735,14 @@ namespace NLGUI
 							// Does we balance the last line height ?
 							if (viewText)
 							{
+								if (_TextAlign == AlignCenter && elmCount == 1)
+								{
+									sint pad =  width - viewText->getWReal();
+									viewText->setX(pad/2);
+								}
+
 								changeLine = viewText->getNumLine() > 1;
-								if (!viewText->getText().empty() && *(viewText->getText().rbegin()) == (ucchar) '\n')
+								if (!viewText->getText().empty() && *(viewText->getText().rbegin()) == '\n')
 								{
 									changeLine = true;
 								}

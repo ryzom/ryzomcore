@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -442,6 +445,8 @@ void			CZone::serial(NLMISC::IStream &f)
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 	/*
+	Version 5:
+		- Ryzom Core release check
 	Version 4:
 		- PointLights
 	Version 3:
@@ -453,7 +458,7 @@ void			CZone::serial(NLMISC::IStream &f)
 	Version 0:
 		- base verison.
 	*/
-	uint	ver= f.serialVersion(4);
+	uint	ver= f.serialVersion(5);
 
 	// No more compatibility before version 3
 	if (ver<3)

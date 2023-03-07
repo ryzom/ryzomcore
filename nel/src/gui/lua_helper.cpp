@@ -2,8 +2,8 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -40,6 +40,12 @@
 	#define assert(x) nlassert(x)
 #else
 	#define assert(x)
+#endif
+
+// Always use unique_ptr with ValyriaTear/luabind on Ubuntu 20,
+// since the setting is not stored in build_information.hpp
+#ifndef LUABIND_USE_CXX11
+#define LUABIND_USE_CXX11
 #endif
 
 #include <luabind/luabind.hpp>

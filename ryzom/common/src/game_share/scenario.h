@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -214,7 +217,10 @@ private:
 	bool _Clean;
 
 
-	struct CHashKeyMD5Less : public std::binary_function<NLMISC::CHashKeyMD5, NLMISC::CHashKeyMD5, bool>
+	struct CHashKeyMD5Less 
+#ifndef NL_CPP17
+		: public std::binary_function<NLMISC::CHashKeyMD5, NLMISC::CHashKeyMD5, bool>
+#endif
 	{
 		bool operator()(const NLMISC::CHashKeyMD5& x, const NLMISC::CHashKeyMD5& y) const { return x.operator<(y); }
 	};

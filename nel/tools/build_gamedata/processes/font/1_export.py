@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Export font
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -49,6 +49,7 @@ mkPath(log, fontExportDir)
 for dir in FontSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".ttf")
+	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".otf")
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".afm")
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".pfb")
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".pfm")

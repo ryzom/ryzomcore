@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Build shard sheets
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2010-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -57,6 +57,11 @@ else:
 	mkPath(log, ExportBuildDirectory + "/" + VisualSlotTabBuildDirectory)
 	mkPath(log, DataShardDirectory + "/mirror_sheets") # FIXME: Hardcoded path mirror_sheets
 	mkPath(log, ExportBuildDirectory + "/" + SheetsShardBuildDirectory)
+	# Wipe all sheets older than visual_slot.tab
+	for p in os.listdir(ExportBuildDirectory + "/" + SheetsShardBuildDirectory):
+		fp = ExportBuildDirectory + "/" + SheetsShardBuildDirectory + "/" + p
+		if os.path.isfile(fp) and p.endswith(".packed_sheets"):
+			needUpdateLogRemoveDestSilentSkip(log, ExportBuildDirectory + "/" + VisualSlotTabBuildDirectory + "/visual_slot.tab", fp)
 	# sheets_packer_shard  <leveldesign> <dfn> <datasets> <tab> <build_packed_sheets>
 	subprocess.call([ SheetsPackerShard, LeveldesignDirectory, LeveldesignDfnDirectory, DataShardDirectory + "/mirror_sheets", ExportBuildDirectory + "/" + VisualSlotTabBuildDirectory, ExportBuildDirectory + "/" + SheetsShardBuildDirectory ])
 printLog(log, "")

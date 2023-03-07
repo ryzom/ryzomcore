@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -212,12 +213,12 @@ namespace NLGUI
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		if(prop)
 		{
-			string sTmp = NLMISC::toLower((const char*)prop);
+			string sTmp = NLMISC::toLowerAscii((const char*)prop);
 			_Texture = rVR.createTexture (sTmp, 0, 0, 256, 64, false, false);
 		}
 
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onchange" );
-		if (prop)	_AHOnChange = NLMISC::toLower((const char*)prop);
+		if (prop)	_AHOnChange = NLMISC::toLowerAscii((const char*)prop);
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onchange_params" );
 		if (prop)	_AHOnChangeParams = string((const char*)prop);
 

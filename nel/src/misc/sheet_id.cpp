@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -226,7 +226,7 @@ bool CSheetId::buildSheetId(const char *sheetName, size_t sheetNameLen)
 	// When no sheet_id.bin is loaded, use dynamically assigned IDs.
 	if (_DontHaveSheetKnowledge)
 	{
-		std::string sheetNameLc = toLower(sheetName);
+		std::string sheetNameLc = toLowerAscii(sheetName);
 		std::map<std::string, uint32>::iterator it = _DevSheetNameToId.find(sheetNameLc);
 		if (it == _DevSheetNameToId.end())
 		{
@@ -278,7 +278,7 @@ bool CSheetId::buildSheetId(const char *sheetName, size_t sheetNameLen)
 	c.Ptr = new char[sheetName.size() + 1];
 #endif
 	strcpy(c.Ptr, sheetName);
-	toLower(c.Ptr);
+	toLowerAscii(c.Ptr);
 
 	itId = _SheetNameToId.find(c);
 #ifndef alloca
@@ -381,7 +381,7 @@ void CSheetId::loadSheetId()
 			{
 				tempVec[nNb].Ptr = _AllStrings.Ptr + nSize;
 				strcpy(_AllStrings.Ptr + nSize, it->second.c_str());
-				toLower(_AllStrings.Ptr + nSize);
+				toLowerAscii(_AllStrings.Ptr + nSize);
 				nSize += (uint32)it->second.size() + 1;
 				nNb++;
 				it++;
@@ -422,7 +422,7 @@ void CSheetId::loadSheetId()
 				if (_FileExtensions[type].empty())
 				{
 					// find the file extension part of the given file name
-					_FileExtensions[type] = toLower(CFile::getExtension((*itStr).second.Ptr));
+					_FileExtensions[type] = toLowerAscii(CFile::getExtension((*itStr).second.Ptr));
 				}
 				nSize--;
 			}
@@ -826,7 +826,7 @@ uint32 CSheetId::typeFromFileExtension(const std::string &fileExtension)
 
 	uint i;
 	for (i = 0; i < _FileExtensions.size(); i++)
-		if (toLower(fileExtension) == _FileExtensions[i])
+		if (toLowerAscii(fileExtension) == _FileExtensions[i])
 			return i;
 
 	return std::numeric_limits<uint32>::max();

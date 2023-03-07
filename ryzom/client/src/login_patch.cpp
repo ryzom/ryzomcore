@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2014  Matthew LAGOE (Botanic) <cyberempires@gmail.com>
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -189,7 +189,7 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 }
 
 // ****************************************************************************
-void CPatchManager::setErrorMessage(const ucstring &message)
+void CPatchManager::setErrorMessage(const std::string &message)
 {
 	_ErrorMessage = message;
 }
@@ -533,6 +533,8 @@ void CPatchManager::getInfoToDisp(SPatchInfo &piOut)
 	}
 }
 
+void stopSoundMngr();
+
 // ****************************************************************************
 // TODO : use selected categories to patch a list of files
 void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, bool applyPatch)
@@ -623,6 +625,12 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 
 						// Close opened big files
 						CBigFile::getInstance().remove(FilesToPatch[k].FileName);
+						
+						if (NLMISC::startsWith(FilesToPatch[k].FileName, "sound"))
+						{
+							// Stop sound playback
+							stopSoundMngr();
+						}
 					}
 				}
 			}
@@ -656,7 +664,7 @@ bool CPatchManager::isPatchThreadEnded (bool &ok)
 
 // ****************************************************************************
 // Called in main thread
-bool CPatchManager::getThreadState (ucstring &stateOut, vector<ucstring> &stateLogOut)
+bool CPatchManager::getThreadState (std::string &stateOut, vector<string> &stateLogOut)
 {
 	if ((PatchThread == NULL) && (CheckThread == NULL) && (ScanDataThread==NULL))
 		return false;
@@ -685,7 +693,7 @@ bool CPatchManager::getThreadState (ucstring &stateOut, vector<ucstring> &stateL
 	// verbose log
 	if (isVerboseLog() && !stateLogOut.empty())
 		for (uint32 i = 0; i < stateLogOut.size(); ++i)
-			nlinfo("%s", stateLogOut[i].toUtf8().c_str());
+			nlinfo("%s", stateLogOut[i].c_str());
 
 	return changed;
 }
@@ -1035,6 +1043,7 @@ void CPatchManager::executeBatchFile()
 
 	// make script executable
 	CFile::setRWAccess(batchFilename);
+	CFile::setExecutable(batchFilename);
 
 	// append login, password and shard
 	if (!LoginLogin.empty())
@@ -1120,28 +1129,28 @@ float CPatchManager::getCurrentFileProgress() const
 // ****************************************************************************
 void CPatchManager::setRWAccess (const string &filename, bool bThrowException)
 {
-	ucstring s = CI18N::get("uiSetAttrib") + " " + CFile::getFilename(filename);
+	string s = CI18N::get("uiSetAttrib") + " " + CFile::getFilename(filename);
 	setState(true, s);
 
 	if (!NLMISC::CFile::setRWAccess(filename) && bThrowException)
 	{
 		s = CI18N::get("uiAttribErr") + " " + CFile::getFilename(filename) + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
-		throw Exception (s.toUtf8());
+		throw Exception (s);
 	}
 }
 
 // ****************************************************************************
 string CPatchManager::deleteFile (const string &filename, bool bThrowException, bool bWarning)
 {
-	ucstring s = CI18N::get("uiDelFile") + " " + CFile::getFilename(filename);
+	string s = CI18N::get("uiDelFile") + " " + CFile::getFilename(filename);
 	setState(true, s);
 
 	if (!NLMISC::CFile::fileExists(filename))
 	{
 		s = CI18N::get("uiDelNoFile");
 		setState(true, s);
-		return s.toUtf8();
+		return s;
 	}
 
 	if (!NLMISC::CFile::deleteFile(filename))
@@ -1150,8 +1159,8 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 		if(bWarning)
 			setState(true, s);
 		if(bThrowException)
-			throw Exception (s.toUtf8());
-		return s.toUtf8();
+			throw Exception (s);
+		return s;
 	}
 	return "";
 }
@@ -1159,20 +1168,20 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 // ****************************************************************************
 void CPatchManager::renameFile (const string &src, const string &dst)
 {
-	ucstring s = CI18N::get("uiRenameFile") + " " + NLMISC::CFile::getFilename(src);
+	string s = CI18N::get("uiRenameFile") + " " + NLMISC::CFile::getFilename(src);
 	setState(true, s);
 
 	if (!NLMISC::CFile::moveFile(dst, src))
 	{
 		s = CI18N::get("uiRenameErr") + " " + src + " -> " + dst + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
-		throw Exception (s.toUtf8());
+		throw Exception (s);
 	}
 }
 
 // ****************************************************************************
 // Take care this function is called by the thread
-void CPatchManager::setState (bool bOutputToLog, const ucstring &ucsNewState)
+void CPatchManager::setState (bool bOutputToLog, const string &ucsNewState)
 {
 	{
 		CSynchronized<CState>::CAccessor as(&State);
@@ -1342,7 +1351,7 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 
 		try
 		{
-			ucstring s = CI18N::get("uiLoginGetFile") + " " + NLMISC::CFile::getFilename(srcName);
+			string s = CI18N::get("uiLoginGetFile") + " " + NLMISC::CFile::getFilename(srcName);
 			setState(true, s);
 
 			// get the new file
@@ -1364,13 +1373,13 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 			// if emergency patch server, this is a real issue, rethrow exception
 			if (UsedServer < 0)
 			{
-				ucstring s = CI18N::get("uiDLFailed");
+				string s = CI18N::get("uiDLFailed");
 				setState(true, s);
 
 				throw Exception(e.what());
 			}
 
-			ucstring s = CI18N::get("uiDLURIFailed") + " " + serverDisplayPath;
+			string s = CI18N::get("uiDLURIFailed") + " " + serverDisplayPath;
 			setState(true, s);
 
 			// this server is unavailable
@@ -1384,7 +1393,7 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 			// scanned all servers? use alternative
 			if (nextServer == UsedServer)
 			{
-				ucstring s = CI18N::get("uiNoMoreURI");
+				string s = CI18N::get("uiNoMoreURI");
 				setState(true, s);
 				UsedServer = -1;
 				nlwarning("EXCEPTION CATCH: getServerFile() failed - no alternative found");
@@ -1409,7 +1418,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 	try
 	{
 #ifdef USE_CURL
-		ucstring s = CI18N::get("uiDLWithCurl") + " " + CFile::getFilename(dest);
+		string s = CI18N::get("uiDLWithCurl") + " " + CFile::getFilename(dest);
 		setState(true, s);
 
 		// user agent = nel_launcher
@@ -1417,7 +1426,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 		CURL *curl;
 		CURLcode res;
 
-		ucstring sTranslate = CI18N::get("uiLoginGetFile") + " " + NLMISC::CFile::getFilename (source);
+		string sTranslate = CI18N::get("uiLoginGetFile") + " " + NLMISC::CFile::getFilename (source);
 		setState(true, sTranslate);
 		CurrentFile = NLMISC::CFile::getFilename (source);
 
@@ -1538,7 +1547,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 void CPatchManager::downloadFile (const string &source, const string &dest, NLMISC::IProgressCallback *progress)
 {
 	// For the moment use only curl
-	const string sourceLower = toLower(source.substr(0, 6));
+	const string sourceLower = toLowerAscii(source.substr(0, 6));
 
 	if (startsWith(sourceLower, "http:")
 		|| startsWith(sourceLower, "https:")
@@ -1566,7 +1575,7 @@ void CPatchManager::downloadFile (const string &source, const string &dest, NLMI
 
 void CPatchManager::decompressFile (const string &filename)
 {
-	ucstring sTranslate = CI18N::get("uiDecompressing") + " " + NLMISC::CFile::getFilename(filename);
+	string sTranslate = CI18N::get("uiDecompressing") + " " + NLMISC::CFile::getFilename(filename);
 	setState(true, sTranslate);
 
 	//if(isVerboseLog()) nlinfo("Calling gzopen('%s','rb')", filename.c_str());
@@ -1664,7 +1673,7 @@ void CPatchManager::applyDate (const string &sFilename, uint32 nDate)
 	if(nDate != 0)
 	{
 		setRWAccess(sFilename, false);
-		ucstring s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + timestampToHumanReadable(NLMISC::CFile::getFileModificationDate (sFilename)) +
+		string s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + timestampToHumanReadable(NLMISC::CFile::getFileModificationDate (sFilename)) +
 						" -> " + timestampToHumanReadable(nDate);
 		setState(true,s);
 
@@ -1786,7 +1795,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 		// If the version cannot be found with size and time try with sha1
 		if (nVersionFound == 0xFFFFFFFF)
 		{
-			ucstring sTranslate = CI18N::get("uiCheckInt") + " " + rFilename;
+			string sTranslate = CI18N::get("uiCheckInt") + " " + rFilename;
 			setState(true, sTranslate);
 			CHashKey hkLocalSHA1 = getSHA1(sFilePath);
 			for (j = 0; j < rFile.versionCount(); ++j)
@@ -1806,7 +1815,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 		// No version available found
 		if (nVersionFound == 0xFFFFFFFF)
 		{
-			ucstring sTranslate = CI18N::get("uiNoVersionFound");
+			string sTranslate = CI18N::get("uiNoVersionFound");
 			setState(true, sTranslate);
 			// Get all patches from beginning (first patch is reference file)
 			ftpOut.FileName = rFilename;
@@ -1827,7 +1836,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 		}
 		else // A version of the file has been found
 		{
-			ucstring sTranslate = CI18N::get("uiVersionFound") + " " + toString(nVersionFound);
+			string sTranslate = CI18N::get("uiVersionFound") + " " + toString(nVersionFound);
 			setState(true, sTranslate);
 			// Get All patches from this version !
 			ftpOut.FileName = rFilename;
@@ -1883,7 +1892,7 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 	else
 		DestPath = CPath::standardizePath (dstPath);
 
-	ucstring s = CI18N::get("uiUnpack") + " " + NLMISC::CFile::getFilename(SourceName);
+	string s = CI18N::get("uiUnpack") + " " + NLMISC::CFile::getFilename(SourceName);
 	setState(true,s);
 
 	// Read Header of the BNP File
@@ -1892,7 +1901,7 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 
 	if (!bnpFile.readHeader())
 	{
-		ucstring s = CI18N::get("uiUnpackErrHead") + " " + CFile::getFilename(SourceName);
+		string s = CI18N::get("uiUnpackErrHead") + " " + CFile::getFilename(SourceName);
 		setState(true,s);
 		return false;
 	}
@@ -1931,15 +1940,15 @@ int CPatchManager::validateProgress(void *foo, double t, double d, double /* ult
 
 	if (units.empty())
 	{
-		units.push_back(CI18N::get("uiByte").toUtf8());
-		units.push_back(CI18N::get("uiKb").toUtf8());
-		units.push_back(CI18N::get("uiMb").toUtf8());
+		units.push_back(CI18N::get("uiByte"));
+		units.push_back(CI18N::get("uiKb"));
+		units.push_back(CI18N::get("uiMb"));
 	}
 
 	CPatchManager *pPM = CPatchManager::getInstance();
 	double pour1 = t!=0.0?d*100.0/t:0.0;
-	ucstring sTranslate = CI18N::get("uiLoginGetFile") + ucstring::makeFromUtf8(toString(" %s : %s / %s (%.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
-		NLMISC::bytesToHumanReadableUnits((uint64)d, units).c_str(), NLMISC::bytesToHumanReadableUnits((uint64)t, units).c_str(), pour1));
+	string sTranslate = CI18N::get("uiLoginGetFile") + toString(" %s : %s / %s (%.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
+		NLMISC::bytesToHumanReadableUnits((uint64)d, units).c_str(), NLMISC::bytesToHumanReadableUnits((uint64)t, units).c_str(), pour1);
 	pPM->setState(false, sTranslate);
 	if (foo)
 	{
@@ -1953,7 +1962,7 @@ void CPatchManager::MyPatchingCB::progress(float f)
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
 	double p = 100.0*f;
-	ucstring sTranslate = CI18N::get("uiApplyingDelta") + ucstring::makeFromUtf8(toString(" %s (%.02f %%)", CFile::getFilename(patchFilename).c_str(), p));
+	string sTranslate = CI18N::get("uiApplyingDelta") + toString(" %s (%.02f %%)", CFile::getFilename(patchFilename).c_str(), p);
 	pPM->setState(false, sTranslate);
 }
 
@@ -2079,7 +2088,7 @@ uint CPatchManager::applyScanDataResult()
 }
 
 // ***************************************************************************
-bool CPatchManager::getDataScanLog(ucstring &text)
+bool CPatchManager::getDataScanLog(string &text)
 {
 	text.clear();
 	bool	changed= false;
@@ -2092,7 +2101,7 @@ bool CPatchManager::getDataScanLog(ucstring &text)
 		{
 			for(uint i=0;i<val.FilesWithScanDataError.size();i++)
 			{
-				ucstring	str;
+				string	str;
 				getCorruptedFileInfo(val.FilesWithScanDataError[i], str);
 				text+= str + "\n";
 			}
@@ -2127,9 +2136,9 @@ void CPatchManager::clearDataScanLog()
 }
 
 // ***************************************************************************
-void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTranslate)
+void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, string &sTranslate)
 {
-	sTranslate = CI18N::get("uiCorruptedFile") + " " + ucstring::makeFromUtf8(ftp.FileName) + " (" +
+	sTranslate = CI18N::get("uiCorruptedFile") + " " + ftp.FileName + " (" +
 		toString("%.1f ", (float)ftp.FinalFileSize/1000000.f) + CI18N::get("uiMb") + ")";
 }
 
@@ -2145,8 +2154,8 @@ void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTra
 // ****************************************************************************
 CCheckThread::CCheckThread(bool includeBackgroundPatch)
 {
-	Ended = false;
 	CheckOk = false;
+	Ended = false;
 	TotalFileToCheck = 0;
 	CurrentFileChecked = 0;
 	IncludeBackgroundPatch = includeBackgroundPatch;
@@ -2167,7 +2176,7 @@ void CCheckThread::run ()
 		// Check if the client version is the same as the server version
 		string sClientVersion = pPM->getClientVersion();
 		string sServerVersion = pPM->getServerVersion();
-		ucstring sTranslate = CI18N::get("uiClientVersion") + " (" + sClientVersion + ") ";
+		string sTranslate = CI18N::get("uiClientVersion") + " (" + sClientVersion + ") ";
 		sTranslate += CI18N::get("uiServerVersion") + " (" + sServerVersion + ")";
 		pPM->setState(true, sTranslate);
 
@@ -2216,7 +2225,7 @@ void CCheckThread::run ()
 		for (i = 0; i < rDescFiles.fileCount(); ++i)
 		{
 			CPatchManager::SFileToPatch ftp;
-			sTranslate = CI18N::get("uiCheckingFile") + " " + ucstring::makeFromUtf8(rDescFiles.getFile(i).getFileName());
+			sTranslate = CI18N::get("uiCheckingFile") + " " + rDescFiles.getFile(i).getFileName();
 			pPM->setState(true, sTranslate);
 			// get list of patch to apply to this file. don't to a full checksum test if possible
 			nlwarning(rDescFiles.getFile(i).getFileName().c_str());
@@ -2408,7 +2417,7 @@ void CCheckThread::run ()
 	catch (const Exception &e)
 	{
 		nlwarning("EXCEPTION CATCH: CCheckThread::run() failed");
-		ucstring sTranslate = CI18N::get("uiCheckEndWithErr") + " " + e.what();
+		string sTranslate = CI18N::get("uiCheckEndWithErr") + " " + e.what();
 		pPM->setState(true, CI18N::get("uiCheckEndWithErr"));
 		pPM->setErrorMessage(sTranslate);
 		CheckOk = false;
@@ -2427,8 +2436,8 @@ void CCheckThread::run ()
 // ****************************************************************************
 CPatchThread::CPatchThread(bool commitPatch)
 {
-	Ended = false;
 	PatchOk = false;
+	Ended = false;
 	CurrentFilePatched = 0;
 	PatchSizeProgress = 0;
 	_CommitPatch = commitPatch;
@@ -2478,7 +2487,7 @@ void CPatchThread::run()
 
 	CurrentFilePatched = 0.f;
 
-	ucstring sTranslate;
+	string sTranslate;
 	try
 	{
 		// First do all ref files
@@ -2536,7 +2545,7 @@ void CPatchThread::run()
 	catch(const Exception &e)
 	{
 		nlwarning("EXCEPTION CATCH: CPatchThread::run() failed");
-		pPM->setState(true, ucstring(e.what()));
+		pPM->setState(true, string(e.what()));
 		sTranslate = CI18N::get("uiPatchEndWithErr");
 		bErr = true;
 	}
@@ -2590,8 +2599,6 @@ public:
 		CPatchManager::getInstance()->touchState();
 	}
 };
-
-
 
 // ****************************************************************************
 void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
@@ -2649,7 +2656,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 		rFTP.LocalFileExists = false;
 	}
 
-	ucstring sTranslate;
+	string sTranslate;
 	sTranslate = CI18N::get("uiProcessing") + " " + rFTP.FileName;
 	pPM->setState(true, sTranslate);
 
@@ -2969,8 +2976,8 @@ void CPatchThread::xDeltaPatch(const string &patch, const string &src, const str
 CScanDataThread::CScanDataThread()
 {
 	AskForCancel= false;
-	Ended = false;
 	CheckOk = false;
+	Ended = false;
 	TotalFileToScan = 1;
 	CurrentFileScanned = 1;
 }
@@ -2984,7 +2991,7 @@ void CScanDataThread::run ()
 		uint32 i;
 		// Check if the client version is the same as the server version
 		string sClientVersion = pPM->getClientVersion();
-		ucstring sTranslate = CI18N::get("uiClientVersion") + " (" + sClientVersion + ") ";
+		string sTranslate = CI18N::get("uiClientVersion") + " (" + sClientVersion + ") ";
 		pPM->setState(true, sTranslate);
 
 		// For all bnp in the description file get all patches to apply
@@ -3023,7 +3030,7 @@ void CScanDataThread::run ()
 	catch (const Exception &e)
 	{
 		nlwarning("EXCEPTION CATCH: CScanDataThread::run() failed");
-		ucstring sTranslate = CI18N::get("uiCheckEndWithErr") + " " + e.what();
+		string sTranslate = CI18N::get("uiCheckEndWithErr") + " " + e.what();
 		pPM->setState(true, sTranslate);
 		CheckOk = false;
 		Ended = true;
@@ -3157,7 +3164,7 @@ bool CPatchManager::download(const std::string& patchFullname, const std::string
 	catch ( const std::exception& e)
 	{
 		nlwarning("%s", e.what());
-		pPM->setState(true, ucstring(e.what()) );
+		pPM->setState(true, string(e.what()) );
 		return false;
 	}
 
@@ -3408,7 +3415,7 @@ void CDownloadThread::run()
 				catch ( const std::exception& e)
 				{
 					nlwarning("%s", e.what());
-					pPM->setState(true, ucstring(e.what()) );
+					pPM->setState(true, string(e.what()) );
 					pPM->fatalError("uiCanNotDownload", patchName.c_str(), "");
 				}
 				catch (...)
@@ -3525,7 +3532,7 @@ void CInstallThread::run()
 			catch ( const std::exception& e)
 			{
 				nlwarning("%s", e.what());
-				pPM->setState(true, ucstring(e.what()) );
+				pPM->setState(true, string(e.what()) );
 				pPM->fatalError("uiCanNotInstall", patchName.c_str(), "");
 				return;
 

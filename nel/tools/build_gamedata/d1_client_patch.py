@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Install to client patch
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
 from scripts import *
-from buildsite import *
+from buildsite_local import *
 from tools import *
 
 sys.path.append(WorkspaceDirectory)
@@ -56,9 +56,9 @@ PatchGen = findTool(log, ToolDirectories, PatchGenTool, ToolSuffix)
 printLog(log, "")
 
 # Find **** HARDCODED **** WINDOWS **** tools ... TODO: fix patch_gen tool !!!
-Lzma = findFileMultiDir(log, ToolDirectories + WindowsExeDllCfgDirectories, "lzma.exe")
+Lzma = findFileMultiDir(log, ToolDirectories + ExeDllCfgDirectories, "lzma.exe")
 printLog(log, "LZMA " + Lzma)
-XDelta = findFileMultiDir(log, ToolDirectories + WindowsExeDllCfgDirectories, "xdelta.exe")
+XDelta = findFileMultiDir(log, ToolDirectories + ExeDllCfgDirectories, "xdelta.exe")
 printLog(log, "XDELTA " + XDelta)
 printLog(log, "")
 

@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,9 @@
 #include "nel/misc/rgba.h"
 #include "nel/gui/css_selector.h"
 #include "nel/gui/css_types.h"
+#include "nel/gui/css_length.h"
+#include "nel/gui/css_background.h"
+#include "nel/gui/css_border.h"
 
 namespace NLGUI
 {
@@ -60,18 +63,15 @@ namespace NLGUI
 			Underlined=false;
 			StrikeThrough=false;
 			GlobalColor=false;
+			GlobalColorText=false;
 			DisplayBlock=false;
 			Width=-1;
 			Height=-1;
 			MaxWidth=-1;
 			MaxHeight=-1;
-			// border style
-			BorderTopWidth = BorderRightWidth = BorderBottomWidth = BorderLeftWidth = CSS_LINE_WIDTH_MEDIUM;
-			BorderTopStyle = BorderRightStyle = BorderBottomStyle = BorderLeftStyle = CSS_LINE_STYLE_NONE;
-			BorderTopColor = BorderRightColor = BorderBottomColor = BorderLeftColor = NLMISC::CRGBA::Transparent;
 			// background
-			BackgroundColor=NLMISC::CRGBA::Black;
 			BackgroundColorOver=NLMISC::CRGBA::Black;
+			MarginTop = MarginRight = MarginBottom = MarginLeft = 0;
 			PaddingTop = PaddingRight = PaddingBottom = PaddingLeft = 0;
 		}
 
@@ -94,6 +94,7 @@ namespace NLGUI
 		NLMISC::CRGBA TextColor;
 		STextShadow TextShadow;
 		bool GlobalColor;
+		bool GlobalColorText;
 		bool Underlined;
 		bool StrikeThrough;
 		bool DisplayBlock;
@@ -101,11 +102,10 @@ namespace NLGUI
 		sint32 Height;
 		sint32 MaxWidth;
 		sint32 MaxHeight;
-		uint32 BorderTopWidth, BorderRightWidth, BorderBottomWidth, BorderLeftWidth;
-		CSSLineStyle BorderTopStyle, BorderRightStyle, BorderBottomStyle, BorderLeftStyle;
-		NLMISC::CRGBA BorderTopColor, BorderRightColor, BorderBottomColor, BorderLeftColor;
-		NLMISC::CRGBA BackgroundColor;
+		CSSRect<CSSBorder> Border;
+		CSSBackground Background;
 		NLMISC::CRGBA BackgroundColorOver;
+		uint32 MarginTop, MarginRight, MarginBottom, MarginLeft;
 		uint32 PaddingTop, PaddingRight, PaddingBottom, PaddingLeft;
 
 		std::string WhiteSpace;
@@ -177,16 +177,24 @@ namespace NLGUI
 
 		// parse 'padding' into 'padding-top', 'padding-left', etc
 		void expandPaddingShorthand(const std::string &value, TStyle &style) const;
+		void expandMarginShorthand(const std::string &value, TStyle &style) const;
 
 		// expand shorthand rule, ie "border", into longhand names, ie "border-top-width"
 		// if shorthand is present in style, then its removed
 		void expandShorthand(const std::string &prop, const std::string &value, TStyle &style) const;
 
 		// parse string value into corresponding value
-		void applyBorderWidth(const std::string &value, uint32 *dest, const uint32 currentWidth, const uint32 fontSize) const;
+		void applyBorderWidth(const std::string &value, CSSLength *dest, const CSSLength &currentWidth) const;
 		void applyBorderColor(const std::string &value, NLMISC::CRGBA *dest, const NLMISC::CRGBA &currentColor, const NLMISC::CRGBA &textColor) const;
 		void applyLineStyle(const std::string &value, CSSLineStyle *dest, const CSSLineStyle &currentStyle) const;
 		void applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const;
+		void applyMarginWidth(const std::string &value, uint32 *dest, const uint32 current, uint32 fontSize) const;
+
+		// parse and replace var(--name, fallback) function
+		// return false if property should be ignored
+		bool cssFuncVar(std::string &func, const TStyle &styleRules, const std::set<std::string> &seenProperties) const;
+		// return false if property was not defined
+		bool lookupPropertyValue(const std::string &name, std::string &value, const TStyle &styleRules) const;
 
 	public:
 		void reset();
@@ -209,15 +217,22 @@ namespace NLGUI
 			_StyleStack.push_back(Current);
 
 			Current.GlobalColor = false;
+			// inherit GlobalColorText
 			Current.DisplayBlock = false;
 			Current.Width=-1;
 			Current.Height=-1;
 			Current.MaxWidth=-1;
 			Current.MaxHeight=-1;
 
-			Current.BorderTopWidth = Current.BorderRightWidth = Current.BorderBottomWidth = Current.BorderLeftWidth = CSS_LINE_WIDTH_MEDIUM;
-			Current.BorderTopStyle = Current.BorderRightStyle = Current.BorderBottomStyle = Current.BorderLeftStyle = CSS_LINE_STYLE_NONE;
-			Current.BorderTopColor = Current.BorderRightColor = Current.BorderBottomColor = Current.BorderLeftColor = Current.TextColor;
+			Current.Border.Top.reset();
+			Current.Border.Right.reset();
+			Current.Border.Bottom.reset();
+			Current.Border.Left.reset();
+
+			Current.Background = CSSBackground();
+			Current.BackgroundColorOver = NLMISC::CRGBA::Transparent;
+
+			Current.MarginTop = Current.MarginRight = Current.MarginBottom = Current.MarginLeft = 0;
 			Current.PaddingTop = Current.PaddingRight = Current.PaddingBottom = Current.PaddingLeft = 0;
 
 			Current.StyleRules.clear();

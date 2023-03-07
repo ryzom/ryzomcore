@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -41,10 +44,10 @@ struct CMainlandSummary
 	TSessionId Id;
 
 	/// description
-	ucstring Name;
+	ucstring Name; // TODO: UTF-8 (serial)
 
 	/// description
-	ucstring Description;
+	ucstring Description; // TODO: UTF-8 (serial)
 
 	/// language code
 	std::string LanguageCode;

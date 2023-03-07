@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -584,18 +585,18 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );
 		if (prop)
 		{
-			_ListMenuLeft = NLMISC::toLower(std::string((const char *) prop));
+			_ListMenuLeft = NLMISC::toLowerAscii(std::string((const char *) prop));
 		}
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
 		if (prop)
 		{
-			_ListMenuRight = NLMISC::toLower(std::string((const char *) prop));
+			_ListMenuRight = NLMISC::toLowerAscii(std::string((const char *) prop));
 		}
 		// list menu on both clicks
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_b" );
 		if (prop)
 		{
-			setListMenuBoth(NLMISC::toLower(std::string((const char *) prop)));
+			setListMenuBoth(NLMISC::toLowerAscii(std::string((const char *) prop)));
 		}
 
 		prop= (char*) xmlGetProp (cur, (xmlChar*)"frozen");

@@ -35,7 +35,7 @@ if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
 from scripts import *
-from buildsite import *
+from buildsite_local import *
 from tools import *
 
 sys.path.append(WorkspaceDirectory)
@@ -77,8 +77,10 @@ for execDir in InstallShardDataExecutables:
 printLog(log, ">>> Archive new admin_install.tgz <<<")
 mkPath(log, PatchmanBridgeServerDirectory)
 adminInstallTgz = PatchmanBridgeServerDirectory + "/admin_install.tgz"
-patchmanExecutable = LinuxServiceExecutableDirectory + "/ryzom_patchman_service"
-if needUpdateDirNoSubdirFile(log, PatchmanCfgAdminDirectory + "/bin", adminInstallTgz) or needUpdateDirNoSubdirFile(log, PatchmanCfgAdminDirectory + "/patchman", adminInstallTgz) or needUpdate(log, patchmanExecutable, adminInstallTgz):
+patchmanExecutable = findFileMultiDir(log, LinuxServiceExecutableDirectories, "ryzom_patchman_service")
+if patchmanExecutable == "":
+	printLog(log, "MISSING ryzom_patchman_service")
+elif needUpdateDirNoSubdirFile(log, PatchmanCfgAdminDirectory + "/bin", adminInstallTgz) or needUpdateDirNoSubdirFile(log, PatchmanCfgAdminDirectory + "/patchman", adminInstallTgz) or needUpdate(log, patchmanExecutable, adminInstallTgz):
 	printLog(log, "WRITE " + adminInstallTgz)
 	if os.path.isfile(adminInstallTgz):
 		os.remove(adminInstallTgz)

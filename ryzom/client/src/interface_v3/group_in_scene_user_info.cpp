@@ -3,8 +3,8 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -200,9 +200,9 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 
 	// Names
 	const char *templateName;
-	ucstring theTribeName;
-	ucstring entityName = entity->getDisplayName();
-	ucstring entityTitle = entity->getTitle();
+	const char *theTribeName = "";
+	std::string entityName = entity->getDisplayName();
+	std::string entityTitle = entity->getTitle();
 
 	// For some NPC's the name is empty and only a title is given,
 	// in that case, treat the title as the name.
@@ -212,10 +212,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 		entityTitle.clear();
 	}
 
-	ucstring entityTag1 = entity->getTag(1);
-	ucstring entityTag2 = entity->getTag(2);
-	ucstring entityTag3 = entity->getTag(3);
-	ucstring entityTag4 = entity->getTag(4);
+	string entityTag1 = entity->getTag(1);
+	string entityTag2 = entity->getTag(2);
+	string entityTag3 = entity->getTag(3);
+	string entityTag4 = entity->getTag(4);
 
 	string entityPermanentContent = entity->getPermanentStatutIcon();
 
@@ -471,17 +471,17 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				{
 					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_1"));
 					if (bitmap)
-						bitmap->setTexture(entityTag1.toString());
+						bitmap->setTexture(entityTag1);
 					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_2"));
 					if (bitmap)
-						bitmap->setTexture(entityTag2.toString());
+						bitmap->setTexture(entityTag2);
 				}
 				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_3"));
 				if (bitmap)
-					bitmap->setTexture(entityTag3.toString());
+					bitmap->setTexture(entityTag3);
 				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_4"));
 				if (bitmap)
-					bitmap->setTexture(entityTag4.toString());
+					bitmap->setTexture(entityTag4);
 			}
 
 			// Get the permanent content bitmap
@@ -959,7 +959,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	{
 		_Name->setColor(entityColor);
 		_Name->setModulateGlobalColor(false);
-		ucstring entityName = _Entity->getDisplayName();
+		string entityName = _Entity->getDisplayName();
 		if (entityName.empty())
 			entityName = _Entity->getTitle();
 
@@ -992,7 +992,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	if (_GuildName)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		ucstring ucsTmp;
+		string ucsTmp;
 		if (pSMC->getString (_Entity->getGuildNameID(), ucsTmp))
 			_GuildName->setText(ucsTmp);
 
@@ -1018,8 +1018,8 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	if (_EventFaction)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		ucstring ucsTmp;
-		if (pSMC->getString (_Entity->getEventFactionID(), ucsTmp))
+		string ucsTmp;
+		if (pSMC->getString(_Entity->getEventFactionID(), ucsTmp))
 			_EventFaction->setText(ucsTmp);
 
 		// guildname color depends of PVP faction or not
@@ -1122,7 +1122,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 			{
 				CInterfaceGroup *group = getGroup ("right");
 				CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(_Entity);
-				ucstring txt( CI18N::get( "uittForageContent" ) + toString( ": %u", forageSource->getCurrentQuantity() ) );
+				string txt( CI18N::get( "uittForageContent" ) + toString( ": %u", forageSource->getCurrentQuantity() ) );
 				CCtrlBase *toolTip = group->getCtrl ("tt1");
 				if ( toolTip )
 					toolTip->setDefaultContextHelp( txt );

@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -262,7 +262,7 @@ void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& roo
 	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
 #else
 	std::string groupControllerPath;
-	root.getValueByName(groupControllerPath, ".GroupControllerPath");
+	root.getValueByName(groupControllerPath, ".GroupController");
 	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(groupControllerPath);
 #endif
 

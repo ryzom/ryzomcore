@@ -16,12 +16,14 @@ if ($cfg['db']['shard']['host'] !=  $cfg['db']['ring']['host'])
 
 // where we can find the mysql database
 $DBHost         = $cfg['db']['shard']['host'];
+$DBPort         = $cfg['db']['shard']['port'];
 $DBUserName     = $cfg['db']['shard']['user'];
 $DBPassword     = $cfg['db']['shard']['pass'];
 $DBName         = $cfg['db']['shard']['name'];
 
 $RingDBUserName = $cfg['db']['ring']['user'];
 $RingDBPassword = $cfg['db']['ring']['pass'];
+$RingDBName     = $cfg['db']['ring']['name'];
 
 // If true, the server will add automatically unknown user in the database
 // (in nel.user, nel.permission, ring.ring_user and ring.characters

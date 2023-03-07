@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -43,9 +43,10 @@ namespace NLGUI
 	void force_link_dbgroup_combo_box_cpp() { }
 
 	// Compare strings
-	static inline bool lt_text(const std::pair<int,ucstring> &s1, const std::pair<int,ucstring> &s2)
+	static inline bool lt_text(const std::pair<int,std::string> &s1, const std::pair<int,std::string> &s2)
 	{
-		return toLower(s1.second) < toLower(s2.second);
+		// return toLower(s1.second) < toLower(s2.second);
+		return NLMISC::compareCaseInsensitive(s1.second, s2.second) < 0;
 	}
 
 	std::string CDBGroupComboBox::measureMenu;
@@ -183,10 +184,10 @@ namespace NLGUI
 				if (name)
 				{
 					const char *propPtr = name;
-					ucstring Text = ucstring::makeFromUtf8(propPtr);
-					if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-						Text = CI18N::get (propPtr);
-					addText(Text);
+					if (NLMISC::startsWith(propPtr, "ui"))
+						addText(CI18N::get(propPtr));
+					else
+						addText(propPtr);
 				}
 			}
 			child = child->next;
@@ -236,7 +237,7 @@ namespace NLGUI
 			// change selected text
 			if(_CacheSelection<0 || _CacheSelection>=(sint32)_Texts.size() )
 			{
-				_ViewText->setText(ucstring());
+				_ViewText->setText(std::string());
 			}
 			else if(_IsExternViewText)
 			{
@@ -274,7 +275,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void	CDBGroupComboBox::addText(const ucstring &text)
+	void	CDBGroupComboBox::addText(const std::string &text)
 	{
 		dirt();
 		_Texts.push_back(make_pair((uint)_Texts.size(), text));
@@ -283,7 +284,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void	CDBGroupComboBox::setText(uint i, const ucstring &text)
+	void	CDBGroupComboBox::setText(uint i, const std::string &text)
 	{
 		dirt();
 		if(i<_Texts.size())
@@ -291,7 +292,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void	CDBGroupComboBox::insertText(uint i, const ucstring &text)
+	void	CDBGroupComboBox::insertText(uint i, const std::string &text)
 	{
 		dirt();
 		if(i<_Texts.size())
@@ -313,7 +314,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void	CDBGroupComboBox::setTexture(uint i, const ucstring &texture)
+	void	CDBGroupComboBox::setTexture(uint i, const std::string &texture)
 	{
 		dirt();
 		if(i<_Textures.size())
@@ -351,14 +352,22 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	const ucstring	&CDBGroupComboBox::getText(uint i) const
+	const std::string &CDBGroupComboBox::getText(uint i) const
 	{
-		static	ucstring	null;
-		if(i<_Texts.size())
+		static const std::string empty;
+		if (i < _Texts.size())
 			return _Texts[i].second;
 		else
-			return null;
+			return empty;
 	}
+
+#ifdef RYZOM_LUA_UCSTRING
+	// ***************************************************************************
+	ucstring CDBGroupComboBox::getTextAsUtf16(uint i) const
+	{
+		return ucstring::makeFromUtf8(getText(i));
+	}
+#endif
 
 	// ***************************************************************************
 	uint CDBGroupComboBox::getTextId(uint i) const
@@ -385,16 +394,24 @@ namespace NLGUI
 	{
 		sort(_Texts.begin(), _Texts.end(), lt_text);
 	}
-	
+
 	// ***************************************************************************
-	const ucstring	&CDBGroupComboBox::getTexture(uint i) const
+	const std::string &CDBGroupComboBox::getTexture(uint i) const
 	{
-		static	ucstring	null;
-		if(i<_Textures.size())
+		static const std::string empty;
+		if (i < _Textures.size())
 			return _Textures[i];
 		else
-			return null;
+			return empty;
 	}
+
+#ifdef RYZOM_LUA_UCSTRING
+	// ***************************************************************************
+	ucstring CDBGroupComboBox::getTextureAsUtf16(uint i) const
+	{
+		return ucstring::makeFromUtf8(getTexture(i));
+	}
+#endif
 
 	// ***************************************************************************
 	void		CDBGroupComboBox::setSelection(sint32 val)
@@ -452,8 +469,7 @@ namespace NLGUI
 		sint32 value;
 		for(uint i=0; i<getNumTexts(); i++)
 		{
-			std::string sText;
-			getText(i).toString(sText);
+			std::string sText = getText(i);
 			if(sText == val)
 			{
 				value = i;
@@ -464,18 +480,26 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CDBGroupComboBox::setViewText(const ucstring & text)
+	void CDBGroupComboBox::setViewText(const std::string &text)
 	{
 		_IsExternViewText = true;
-		_ExternViewText = ucstring(text);
+		_ExternViewText = text;
 		_ViewText->setText(_ExternViewText);
 	}
 
 	// ***************************************************************************
-	ucstring CDBGroupComboBox::getViewText() const
+	std::string CDBGroupComboBox::getViewText() const
 	{
-		return  _ViewText->getText();
+		return _ViewText->getText();
 	}
+
+#ifdef RYZOM_LUA_UCSTRING
+	// ***************************************************************************
+	ucstring CDBGroupComboBox::getViewTextAsUtf16() const
+	{
+		return  CUtfStringView(_ViewText->getText()).toUtf16();
+	}
+#endif
 
 	// ***************************************************************************
 	CViewText *CDBGroupComboBox::getViewText()
@@ -486,18 +510,14 @@ namespace NLGUI
 	// ***************************************************************************
 	std::string CDBGroupComboBox::getSelectionText() const
 	{
-		ucstring text;
 		if (_LinkedToDB)
 		{
-			text = getText(_Selection.getSInt32());
+			return getText(_Selection.getSInt32());
 		}
 		else
 		{
-			text = getText(_NotLinkedToDBSelection);
+			return getText(_NotLinkedToDBSelection);
 		}
-		std::string texteS;
-		text.toString(texteS);
-		return texteS;
 	}
 
 	// ***************************************************************************
@@ -538,8 +558,7 @@ namespace NLGUI
 		sint32 value;
 		for(uint i=0; i<getNumTexts(); i++)
 		{
-			std::string sText;
-			getText(i).toString(sText);
+			std::string sText = getText(i);
 			if(sText == text)
 			{
 				value = i;
@@ -563,10 +582,16 @@ namespace NLGUI
 	{
 		const char *funcName = "addText";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
-		ucstring text;
+		ucstring text; // Compatibility
 		nlverify(CLuaIHM::pop(ls, text));
+		addText(text.toUtf8());
+#else
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		string text = ls.toString(1);
 		addText(text);
+#endif
 		return 0;
 	}
 
@@ -576,10 +601,16 @@ namespace NLGUI
 		const char *funcName = "setText";
 		CLuaIHM::checkArgCount(ls, funcName, 2);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
-		ucstring text;
+		ucstring text; // Compatibility
 		nlverify(CLuaIHM::pop(ls, text));
-		setText((uint) ls.toInteger(1), text);
+		setText((uint) ls.toInteger(1), text.toUtf8());
+#else
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		string text = ls.toString(2);
+		setText((uint)ls.toInteger(1), text);
+#endif
 		return 0;
 	}
 
@@ -589,10 +620,16 @@ namespace NLGUI
 		const char *funcName = "insertText";
 		CLuaIHM::checkArgCount(ls, funcName, 2);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring text;
 		nlverify(CLuaIHM::pop(ls, text));
-		insertText((uint) ls.toInteger(1), text);
+		insertText((uint) ls.toInteger(1), text.toUtf8()); // FIXME: Lua should just do UTF-8!
+#else
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		string text = ls.toString(2);
+		insertText((uint)ls.toInteger(1), text);
+#endif
 		return 0;
 	}
 
@@ -602,20 +639,30 @@ namespace NLGUI
 		const char *funcName = "setTexture";
 		CLuaIHM::checkArgCount(ls, funcName, 2);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring texture;
 		nlverify(CLuaIHM::pop(ls, texture));
-		setTexture((uint) ls.toInteger(1), texture);
+		setTexture((uint) ls.toInteger(1), texture.toUtf8()); // FIXME: Lua should just do UTF-8!
+#else
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		string texture = ls.toString(2);
+		setTexture((uint)ls.toInteger(1), texture);
+#endif
 		return 0;
 	}
 
 	// ***************************************************************************
 	int CDBGroupComboBox::luaGetText(CLuaState &ls)
 	{
-		const char *funcName = "setText";
+		const char *funcName = "getText";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CLuaIHM::push(ls, getText((uint) ls.toInteger(1)));
+#ifdef RYZOM_LUA_UCSTRING
+		CLuaIHM::push(ls, getTextAsUtf16((uint) ls.toInteger(1)));
+#else
+		ls.push(getText((uint)ls.toInteger(1)));
+#endif
 		return 1;
 	}
 
@@ -625,7 +672,7 @@ namespace NLGUI
 		const char *funcName = "removeText";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		removeText((uint) ls.toInteger(1));
+		removeText((uint)ls.toInteger(1));
 		return 0;
 	}
 
@@ -652,12 +699,12 @@ namespace NLGUI
 			{
 				// set the id as the parameter
 				bool checkable = false;
-				if(getTexture(i).toString() != std::string())
+				if (getTexture(i) != std::string())
 				{
 					checkable = true;
 				}
 				groupMenu->addLine(getText(i), "combo_box_select_end", toString(i),
-					"", std::string(), getTexture(i).toString(), checkable);
+					"", std::string(), getTexture(i), checkable);
 				groupMenu->setGrayedLine(i, getGrayed(i));
 			}
 
@@ -697,6 +744,10 @@ namespace NLGUI
 			groupMenu->setBaseX(pCB->getXReal());
 			groupMenu->setY(pCB->getYReal());
 			groupMenu->setBaseY(pCB->getYReal());
+
+			sint selected = pCB->getSelection();
+			if (selected >= 0)
+				groupMenu->setSelected((uint)selected);
 
 			// Must ensure the combo menu has same windows priority than the combo box window
 			CInterfaceGroup		*rootWin= pCB->getRootWindow();

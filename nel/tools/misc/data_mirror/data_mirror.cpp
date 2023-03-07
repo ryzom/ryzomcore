@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -108,21 +108,21 @@ BOOL CData_mirrorApp::InitInstance()
 
 		cf.load (path);
 		MainDirectory = cf.getVar ("MainDirectory").asString ();
-		MainDirectory = toLower (CPath::standardizePath (MainDirectory));
+		MainDirectory = toLowerAscii (CPath::standardizePath (MainDirectory));
 		
 		MirrorDirectory = cf.getVar ("MirrorDirectory").asString ();
-		MirrorDirectory = toLower (CPath::standardizePath (MirrorDirectory));
+		MirrorDirectory = toLowerAscii (CPath::standardizePath (MirrorDirectory));
 		
 		LogDirectory = cf.getVar ("LogDirectory").asString ();
-		LogDirectory = toLower (CPath::standardizePath (LogDirectory));
+		LogDirectory = toLowerAscii (CPath::standardizePath (LogDirectory));
 		
 		IgnoreDirectory = cf.getVar ("IgnoreDirectory").asString ();
-		IgnoreDirectory = toLower (CPath::standardizePath (IgnoreDirectory));
+		IgnoreDirectory = toLowerAscii (CPath::standardizePath (IgnoreDirectory));
 		if (IgnoreDirectory.empty())
 			IgnoreDirectory = MainDirectory;
 
 		string sBinaryCompare = cf.getVar ("BinaryCompare").asString ();
-		sBinaryCompare = toLower (sBinaryCompare);
+		sBinaryCompare = toLowerAscii (sBinaryCompare);
 		BinaryCompare = false;
 		if ((sBinaryCompare == "true") || (sBinaryCompare=="1"))
 			BinaryCompare = true;
@@ -145,12 +145,12 @@ BOOL CData_mirrorApp::InitInstance()
 		if (NLMISC::CFile::isDirectory (CurrentDir))
 		{
 			directory = true;
-			CurrentDir = toLower(CPath::standardizePath (CurrentDir));
+			CurrentDir = toLowerAscii(CPath::standardizePath (CurrentDir));
 		}
 		else if (NLMISC::CFile::fileExists (CurrentDir))
 		{
 			directory = false;
-			CurrentDir = toLower(CPath::standardizePath (NLMISC::CFile::getPath (CurrentDir)));
+			CurrentDir = toLowerAscii(CPath::standardizePath (NLMISC::CFile::getPath (CurrentDir)));
 		}
 		else
 		{

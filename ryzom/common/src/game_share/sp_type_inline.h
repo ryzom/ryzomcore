@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -43,7 +46,7 @@ inline CSPType::TSPType			CSPType::fromString(const std::string& v)
 	{
 		return Unknown;
 	}
-	const std::map<std::string, TSPType>::const_iterator	it = _ValueMap.find(NLMISC::toLower(v));
+	const std::map<std::string, TSPType>::const_iterator	it = _ValueMap.find(NLMISC::toLowerAscii(v));
 	if (it == _ValueMap.end())
 	{
 		nlwarning("TSPType::toString(): string '%s' is not matched, 'Unknown' enum value returned", v.c_str());

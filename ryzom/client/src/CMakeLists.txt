@@ -21,7 +21,7 @@ IF(WITH_RYZOM_CLIENT)
   ENDIF()
 
   FILE(GLOB CFG ../*.cfg)
-  FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc)
+  FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc *.manifest)
   FILE(GLOB SRC_INTERFACE interface_v3/*.h interface_v3/*.cpp)
   FILE(GLOB SRC_MODE motion/modes/*.cpp motion/modes/*.h)
   FILE(GLOB SRC_R2 r2/*.h r2/*.cpp r2/dmc/*.h r2/dmc/*.cpp)
@@ -48,10 +48,64 @@ IF(WITH_RYZOM_CLIENT)
     ${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/view_bitmap_progress.h)
 
   SOURCE_GROUP("" FILES ${SRC})
-  SOURCE_GROUP("cfg" FILES ${CFG})
-  SOURCE_GROUP("interface_v3" FILES ${SRC_INTERFACE})
-  SOURCE_GROUP("mode" FILES ${SRC_MODE})
-  SOURCE_GROUP("r2" FILES ${SRC_R2})
+  SOURCE_GROUP("__cfg" FILES ${CFG})
+  SOURCE_GROUP("_interface_v3" FILES ${SRC_INTERFACE})
+  SOURCE_GROUP("_motion_modes" FILES ${SRC_MODE})
+  SOURCE_GROUP("_r2" FILES ${SRC_R2})
+
+  # VS grouping for convenience
+  FILE(GLOB RZCLIENT_NETWORK
+    net*.cpp net*.h
+    cdb*.cpp cdb*.h
+    conn*.cpp conn*.h
+    *_decoder.cpp *_decoder.h
+    login.cpp login.h
+    login_*.cpp login_*.h
+    ping.cpp ping.h
+    perm*.cpp perm*.h
+    session_*.cpp session_*.h
+    steam_client.cpp steam_client.h
+    string_manager_client.cpp string_manager_client.h
+    *_connection.cpp *_connection.h
+    *download*.cpp *download*.h
+  )
+  SOURCE_GROUP("network" FILES ${RZCLIENT_NETWORK})
+  FILE(GLOB RZCLIENT_GLOBALS
+    *_database_*.cpp *_database_*.h
+    global.cpp global.h
+  )
+  SOURCE_GROUP("globals" FILES ${RZCLIENT_GLOBALS})
+  FILE(GLOB RZCLIENT_ANIMATION
+    animation.cpp animation.h
+    animation_*.cpp animation_*.h
+  )
+  SOURCE_GROUP("animation" FILES ${RZCLIENT_ANIMATION})
+  FILE(GLOB RZCLIENT_FX
+    fx*.cpp fx*.h
+    *_fx*.cpp *_fx*.h
+    projectile_*.cpp projectile_*.h
+  )
+  SOURCE_GROUP("fx" FILES ${RZCLIENT_FX})
+  FILE(GLOB RZCLIENT_WEATHER
+    sky.cpp sky.h
+    sky_*.cpp sky_*.h
+    weather.cpp weather.h
+    weather_*.cpp weather_*.h
+    precipitation.cpp precipitation.h
+    precipitation_*.cpp precipitation_*.h
+    light_cycle_*.cpp light_cycle_*.h
+  )
+  SOURCE_GROUP("weather" FILES ${RZCLIENT_WEATHER})
+  FILE(GLOB RZCLIENT_OUTPOSTS
+    outpost.cpp outpost.h
+    outpost_*.cpp outpost_*.h
+  )
+  SOURCE_GROUP("outposts" FILES ${RZCLIENT_OUTPOSTS})
+  FILE(GLOB RZCLIENT_DECALS
+    decal.cpp decal.h
+    decal*.cpp decal_*.h
+  )
+  SOURCE_GROUP("decals" FILES ${RZCLIENT_DECALS})
 
   # on Mac, create a .App Bundle
   if(APPLE)
@@ -60,15 +114,16 @@ IF(WITH_RYZOM_CLIENT)
       SET(RYZOM_BUILD ${RYZOM_VERSION_SHORT})
     ENDIF()
 
-    SET(MACOSX_BUNDLE_INFO_STRING "Ryzom")
+    SET(MACOSX_BUNDLE_INFO_STRING "Ryzom Core 4")
     SET(MACOSX_BUNDLE_ICON_FILE "ryzom.icns")
-    SET(MACOSX_BUNDLE_GUI_IDENTIFIER "com.winchgate.Ryzom")
+    SET(MACOSX_BUNDLE_GUI_IDENTIFIER "dev.ryzom.core4")
     SET(MACOSX_BUNDLE_LONG_VERSION_STRING ${RYZOM_VERSION})
-    SET(MACOSX_BUNDLE_BUNDLE_NAME "Ryzom")
+    SET(MACOSX_BUNDLE_BUNDLE_NAME "Ryzom Core 4")
     SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${RYZOM_VERSION_SHORT})
     SET(MACOSX_BUNDLE_BUNDLE_VERSION ${RYZOM_BUILD})
     SET(MACOSX_BUNDLE_COPYRIGHT ${COPYRIGHT})
-    SET(RYZOM_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${MACOSX_BUNDLE_BUNDLE_NAME}.app)
+    # RYZOM_OUTPUT_DIR == build.xcode/Debug/Ryzom Core4.app/Contents/MacOS
+    SET(RYZOM_OUTPUT_DIR $<TARGET_FILE_DIR:ryzom_client>/../..)
     SET(RYZOM_CONTENTS_DIR ${RYZOM_OUTPUT_DIR}/Contents)
     SET(RYZOM_RESOURCES_DIR ${RYZOM_CONTENTS_DIR}/Resources)
     SET(MAC_RESOURCES_DIR ${CMAKE_SOURCE_DIR}/ryzom/client/macosx)
@@ -101,7 +156,7 @@ IF(WITH_RYZOM_CLIENT)
       ADD_DEPENDENCIES(ryzom_client crash_report)
 
       # copy crash_report to bundle
-      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/crash_report ${RYZOM_CONTENTS_DIR}/MacOS/CrashReport)
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p $<TARGET_FILE:crash_report> ${RYZOM_CONTENTS_DIR}/MacOS/CrashReport)
 
       IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
         ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign ${ENTITLEMENTS} -fs "${APPLE_CERTIFICATE}" "${RYZOM_CONTENTS_DIR}/MacOS/CrashReport" COMMENT "Signing CrashReport executable...")
@@ -112,7 +167,7 @@ IF(WITH_RYZOM_CLIENT)
       ADD_DEPENDENCIES(ryzom_client ryzom_client_patcher)
 
       # copy ryzom_client_patcher to bundle
-      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ryzom_client_patcher ${RYZOM_CONTENTS_DIR}/MacOS/RyzomClientPatcher)
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p $<TARGET_FILE:ryzom_client_patcher> ${RYZOM_CONTENTS_DIR}/MacOS/RyzomClientPatcher)
 
       IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
         ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign ${ENTITLEMENTS} -fs "${APPLE_CERTIFICATE}" "${RYZOM_CONTENTS_DIR}/MacOS/RyzomClientPatcher" COMMENT "Signing RyzomClientPatcher executable...")
@@ -123,7 +178,7 @@ IF(WITH_RYZOM_CLIENT)
       ADD_DEPENDENCIES(ryzom_client ryzom_configuration_qt)
 
       # copy ryzom_configuration_qt to bundle
-      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ryzom_configuration_qt ${RYZOM_CONTENTS_DIR}/MacOS/RyzomConfiguration)
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p $<TARGET_FILE:ryzom_configuration_qt> ${RYZOM_CONTENTS_DIR}/MacOS/RyzomConfiguration)
 
       IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
         ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign ${ENTITLEMENTS} -fs "${APPLE_CERTIFICATE}" "${RYZOM_CONTENTS_DIR}/MacOS/RyzomConfiguration" COMMENT "Signing RyzomConfiguration executable...")
@@ -185,9 +240,14 @@ IF(WITH_RYZOM_CLIENT)
     TARGET_LINK_LIBRARIES(ryzom_client ${FOUNDATION_FRAMEWORK})
   ENDIF()
 
+  IF(WITH_MSQUIC)
+    INCLUDE_DIRECTORIES(${msquic_INCLUDE_DIRS})
+    TARGET_LINK_LIBRARIES(ryzom_client ${msquic_LIBRARIES})
+  ENDIF()
+
   ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${CURL_DEFINITIONS} ${LUABIND_DEFINITIONS})
 
-  NL_DEFAULT_PROPS(ryzom_client "Ryzom, Client: Ryzom Client")
+  NL_DEFAULT_PROPS(ryzom_client "Ryzom, Client: Ryzom Core 4")
   NL_ADD_RUNTIME_FLAGS(ryzom_client)
 
   IF(FINAL_VERSION)
@@ -209,7 +269,7 @@ IF(WITH_RYZOM_CLIENT)
   ENDIF()
 
   IF(WITH_PCH AND (NOT MINGW OR NOT WITH_SYMBOLS))
-    ADD_NATIVE_PRECOMPILED_HEADER(ryzom_client ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+    target_precompile_headers(ryzom_client PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
   ENDIF()
 
   INSTALL(TARGETS ryzom_client RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client BUNDLE DESTINATION /Applications)

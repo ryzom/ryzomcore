@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -333,8 +333,8 @@ namespace NLGUI
 		void updateTooltipCoords(CCtrlBase *newCtrl);
 		
 		/// for ContextHelp action handler only: set the result name
-		void setContextHelpText( const ucstring &text ){ _ContextHelpText = text; }
-		ucstring& getContextHelpText(){ return _ContextHelpText; }
+		void setContextHelpText( const std::string &text ){ _ContextHelpText = text; }
+		std::string& getContextHelpText(){ return _ContextHelpText; }
 		
 		/// force disable the context help
 		void disableContextHelp();
@@ -626,7 +626,7 @@ namespace NLGUI
 
 		SInterfaceTimes interfaceTimes;
 
-		ucstring _ContextHelpText;
+		std::string _ContextHelpText;
 		bool _ContextHelpActive;
 
 		bool inGame;
@@ -654,6 +654,8 @@ namespace NLGUI
 		bool _GroupSelection;
 		bool multiSelection;
 		uint32 _WidgetCount;
+
+		std::set<std::string> m_LoggedMissingElement;
 	};
 
 }

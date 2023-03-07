@@ -33,7 +33,7 @@ function printalert($type, $message) {
 	print '</div>';
 }
 function is__writable($path) {
-	if ($path{strlen($path) - 1} == '/') {
+	if ($path[strlen($path) - 1] == '/' || $path[strlen($path) - 1] == '\\') {
 		return is__writable($path.uniqid(mt_rand()).'.tmp');
 	}
 
@@ -92,6 +92,31 @@ function update_database_structure($continue_r, $con, $file) {
 		} else {
 			if (mysqli_multi_query($con, $sql)) {
 				printalert("success", "Database structure updated using <em>" . $file . "</em>");
+				while (mysqli_more_results($con) && mysqli_next_result($con)) {
+					// no-op
+				}
+			} else {
+				printalert("danger", "Error updating database using <em>" . $file . "</em>: " . mysqli_error($con));
+				$continue = false;
+			}
+		}
+	}
+	return $continue;
+}
+function update_database_configure($continue_r, $con, $file) {
+	$continue = $continue_r;
+	global $PRIVATE_PHP_PATH;
+	if ($continue) {
+		$sql = file_get_contents($PRIVATE_PHP_PATH . "/setup/sql/" . $file);
+		$sql = str_replace('%RC_HOSTNAME%', mysqli_real_escape_string($con, gethostname()), $sql);
+		$shardDevDir = str_replace('/www', '', str_replace('\\', '/', $_POST["domainUsersDir"]));
+		$sql = str_replace('%RC_SHARD_DEV%', mysqli_real_escape_string($con, $shardDevDir), $sql);
+		if (!$sql) {
+			printalert("danger", "Cannot read <em>" . $file . "</em>");
+			$continue = false;
+		} else {
+			if (mysqli_multi_query($con, $sql)) {
+				printalert("success", "Database updated using <em>" . $file . "</em>");
 				while (mysqli_more_results($con) && mysqli_next_result($con)) {
 					// no-op
 				}

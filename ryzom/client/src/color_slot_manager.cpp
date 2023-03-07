@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -134,7 +137,7 @@ uint CColorSlotManager::addSlot(const TStringVect &slotDescs)
 	_Slots.push_back(slotDescs);
 	for(uint k = 0; k < slotDescs.size(); ++k)
 	{
-		_Slots.back()[k] = NLMISC::toUpper(_Slots.back()[k]);
+		_Slots.back()[k] = NLMISC::toUpperAscii(_Slots.back()[k]);
 	}
 	return (uint)_Slots.size() - 1;
 }
@@ -266,7 +269,7 @@ bool CColorSlotManager::parseTexName(const char *texName, std::string *texNameWi
 	static  std::string nameToParse;
 	static  std::string currentExt;
 	static  TIntCoupleVect slotsId;
-	nameToParse = NLMISC::toUpper(NLMISC::CFile::getFilenameWithoutExtension(texName));
+	nameToParse = NLMISC::toUpperAscii(NLMISC::CFile::getFilenameWithoutExtension(texName));
 
 	TStrPos currPos = nameToParse.length();
 
@@ -376,7 +379,7 @@ bool CColorSlotManager::changeTexName(std::string &texName, TIntCouple *slotIDs,
 	static TIntCoupleVect srcSlotIDs;
 
 	everythingOk = true;
-	texNameNoExt = NLMISC::toUpper(NLMISC::CFile::getFilenameWithoutExtension(texName));
+	texNameNoExt = NLMISC::toUpperAscii(NLMISC::CFile::getFilenameWithoutExtension(texName));
 	texExt       = NLMISC::CFile::getExtension(texName);
 	TTex2Slots::const_iterator texIt = _TexMap.find(texNameNoExt);
 	if (texIt != _TexMap.end())

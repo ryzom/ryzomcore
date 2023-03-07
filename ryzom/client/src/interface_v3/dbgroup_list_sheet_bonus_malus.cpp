@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -23,7 +23,7 @@
 #include "stdpch.h"
 #include "dbgroup_list_sheet_bonus_malus.h"
 #include "interface_manager.h"
-
+#include "nel/misc/xml_macros.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -35,15 +35,89 @@ NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListSheetBonusMalus, std::string, "lis
 
 // ***************************************************************************
 CDBGroupListSheetBonusMalus::CDBGroupListSheetBonusMalus(const TCtorParam &param)
-:	CDBGroupListSheet(param)
+:	CDBGroupListSheet(param),
+	_RegenTextEnabled(true),
+	_RegenTextY(-14), _RegenTextFontSize(8),
+	_RegenTextColor(NLMISC::CRGBA::White),
+	_RegenTextDisabledColor(NLMISC::CRGBA(127,127,127))
 {
-	_TextId= -1;
-
 	// want leave space between controls in the list
 	// Yoyo: I think it's better like this, + this is important for space consideration and because of XPCat/PVPOutpost
 	//_ListLeaveSpace= false;
 }
 
+// ***************************************************************************
+CDBGroupListSheetBonusMalus::CSheetChildTimer::CSheetChildTimer()
+:	TimerDB(NULL), DisabledDB(NULL), TimerCache(0),
+	_RegenTextColor(NLMISC::CRGBA::White),
+	_RegenTextDisabledColor(NLMISC::CRGBA(127,127,127))
+{
+}
+
+// ***************************************************************************
+void CDBGroupListSheetBonusMalus::CSheetChildTimer::init(CDBGroupListSheet *pFather, uint index)
+{
+	// init my parent
+	CSheetChild::init(pFather, index);
+
+	CCDBNodeBranch *root = Ctrl->getRootBranch();
+	if (root)
+	{
+		TimerDB = dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("DISABLED_TIME"), false));
+		DisabledDB = dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("DISABLED"), false));
+	}
+
+	if (Ctrl)
+	{
+		CDBGroupListSheetBonusMalus *owner = dynamic_cast<CDBGroupListSheetBonusMalus *>(pFather);
+		if (owner)
+		{
+			_RegenTextColor = owner->_RegenTextColor;
+			_RegenTextDisabledColor = owner->_RegenTextDisabledColor;
+			Ctrl->setRegenText(owner->_RegenTextEnabled);
+			Ctrl->setRegenTextY(owner->_RegenTextY);
+			Ctrl->setRegenTextColor(owner->_RegenTextColor);
+			Ctrl->setRegenTextFontSize(owner->_RegenTextFontSize);
+			if (!owner->_RegenTextFct.empty())
+				Ctrl->setRegenTextFct(owner->_RegenTextFct);
+		}
+
+		Ctrl->setRegenTextOutline(true);
+	}
+}
+
+// ***************************************************************************
+void CDBGroupListSheetBonusMalus::CSheetChildTimer::update(CDBGroupListSheet * /* pFather */)
+{
+	if(!TimerDB)
+		return;
+
+	NLMISC::TGameCycle tick = TimerDB->getValue32();
+	if (TimerCache != tick)
+	{
+		TimerCache = TimerDB->getValue32();
+		Ctrl->setRegenTickRange(CTickRange(LastGameCycle, TimerCache));
+		if (DisabledDB)
+		{
+			if (DisabledDB->getValue32() == 0)
+			{
+				// active timer
+				Ctrl->setGrayed(false);
+				Ctrl->setRegenTextColor(_RegenTextColor);
+			}
+			else
+			{
+				// skill disabled timer
+				Ctrl->setGrayed(true);
+				Ctrl->setRegenTextColor(_RegenTextDisabledColor);
+			}
+		}
+		else
+		{
+			Ctrl->setGrayed(true);
+		}
+	}
+}
 
 // ***************************************************************************
 bool CDBGroupListSheetBonusMalus::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
@@ -53,69 +127,14 @@ bool CDBGroupListSheetBonusMalus::parse (xmlNodePtr cur, CInterfaceGroup *parent
 	if(!CDBGroupListSheet::parse(cur, parentGroup))
 		return false;
 
-	// read the texture
-	CXMLAutoPtr	prop;
-	prop = (char*) xmlGetProp( cur, (xmlChar*)"disable_texture" );
-	if (prop)
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = *CViewRenderer::getInstance();
-		_TextId= rVR.getTextureIdFromName ((const char *)prop);
-	}
-
-	// get the Node leaves to be tested each frame
-	uint	i= 0;
-	for(;;)
-	{
-		string	db= toString("%s:%d:" DISABLE_LEAF, _DbBranchName.c_str(), i);
-		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(db, false);
-		if(!node)
-		{
-			break;
-		}
-		else
-		{
-			_DisableStates.push_back(node);
-			i++;
-		}
-	}
+	CXMLAutoPtr prop;
+	XML_READ_BOOL(cur, "regen_text", _RegenTextEnabled, true);
+	XML_READ_SINT(cur, "regen_text_y", _RegenTextY, -14);
+	XML_READ_UINT(cur, "regen_text_fontsize", _RegenTextFontSize, 8);
+	XML_READ_COLOR(cur, "regen_text_color", _RegenTextColor, NLMISC::CRGBA::White);
+	XML_READ_COLOR(cur, "regen_text_disabled_color", _RegenTextDisabledColor, NLMISC::CRGBA(127, 127, 127));
+	XML_READ_STRING(cur, "regen_text_fct", _RegenTextFct, "");
 
 	return true;
-}
-
-// ***************************************************************************
-void CDBGroupListSheetBonusMalus::draw ()
-{
-	CDBGroupListSheet::draw();
-
-//	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-//	CViewRenderer		&rVR= *CViewRenderer::getInstance();
-
-//	sint32	drl= getRenderLayer()+1;
-
-	// May draw disable bitmaps on the ctrl sheets if disabled.
-	uint	numCtrls= (uint)min(_SheetChildren.size(), _DisableStates.size());
-	for(uint i=0;i<numCtrls;i++)
-	{
-		CDBCtrlSheet	*ctrl= _SheetChildren[i]->Ctrl;
-		// if the ctrl is displayed, and if the state is disabled
-		if(ctrl->getActive())
-		{
-			if(_DisableStates[i]->getValue32()!=0)
-			{
-				ctrl->setGrayed(true);
-				/*
-				// YOYO: for now, don't display the gray bitmap. cross not cool.
-				CRGBA	crossColor= ctrl->getSheetColor();
-				crossColor.A>>= 2;
-				// Draw the disable bitmap on this control. +1 for the slot (ugly)
-				rVR.drawRotFlipBitmap(drl, ctrl->getXReal()+1, ctrl->getYReal()+1,
-					CCtrlSheetInfo::BrickSheetWidth, CCtrlSheetInfo::BrickSheetHeight, 0, 0, _TextId, crossColor);
-				*/
-			}
-			else
-				ctrl->setGrayed(false);
-		}
-	}
 }
 

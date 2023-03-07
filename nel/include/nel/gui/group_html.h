@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -27,13 +28,16 @@
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
 #include "nel/gui/html_element.h"
+#include "nel/gui/html_parser.h"
 #include "nel/gui/css_style.h"
+#include "nel/gui/css_background_renderer.h"
 
 // forward declaration
 typedef void CURLM;
 
 namespace NLGUI
 {
+	class CViewLink;
 	class CCtrlButton;
 	class CCtrlTextButton;
 	class CCtrlScroll;
@@ -43,6 +47,20 @@ namespace NLGUI
 	class CGroupParagraph;
 
 	extern std::string CurrentCookie;
+
+	class ICurlDownloadCB
+	{
+	public:
+		ICurlDownloadCB(const std::string &url)
+		: url(url)
+		{}
+
+		virtual ~ICurlDownloadCB() {};
+
+		virtual void finish() = 0;
+
+		std::string url;
+	};
 
 	// HTML group
 	/**
@@ -67,7 +85,10 @@ namespace NLGUI
 			/// Language code of the browser( e.g.: en, hu )
 			std::string languageCode;
 			/// List of domains the widget can consider secure.
-			std::vector< std::string > trustedDomains;
+			std::vector<std::string> trustedDomains;
+			/// Web server
+			std::string webServer;
+			std::string webServerDomain;
 			/// Maximum concurrent MultiCurl connections per CGroupHTML instance
 			sint32 curlMaxConnections;
 
@@ -115,6 +136,9 @@ namespace NLGUI
 		// Browse error
 		void browseError (const char *msg);
 
+		// Error message with html content
+		void browseErrorHtml(const std::string &html);
+
 		bool isBrowsing();
 
 		// Update coords
@@ -127,9 +151,9 @@ namespace NLGUI
 		void endParagraph();
 
 		// add image download (used by view_bitmap.cpp to load web images)
-		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage, const std::string &placeholder = "web_del.tga");
-		// remove image from download list if present
-		void removeImageDownload(CViewBase *img);
+		ICurlDownloadCB *addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage, const std::string &placeholder = "web_del.tga");
+		ICurlDownloadCB *addTextureDownload(const std::string &url, sint32 &texId, CViewBase *view);
+		void removeImageDownload(ICurlDownloadCB *handle, CViewBase *img);
 		std::string localImageName(const std::string &url);
 
 		// Timeout
@@ -137,37 +161,15 @@ namespace NLGUI
 		float	getTimeout() const {return (float)_TimeoutValue;}
 
 		// Some constants
-		NLMISC::CRGBA	BgColor;
 		NLMISC::CRGBA	ErrorColor;
 		NLMISC::CRGBA	LinkColor;
-		NLMISC::CRGBA	TextColor;
-		NLMISC::CRGBA	H1Color;
-		NLMISC::CRGBA	H2Color;
-		NLMISC::CRGBA	H3Color;
-		NLMISC::CRGBA	H4Color;
-		NLMISC::CRGBA	H5Color;
-		NLMISC::CRGBA	H6Color;
 		bool			ErrorColorGlobalColor;
 		bool			LinkColorGlobalColor;
 		bool			TextColorGlobalColor;
-		bool			H1ColorGlobalColor;
-		bool			H2ColorGlobalColor;
-		bool			H3ColorGlobalColor;
-		bool			H4ColorGlobalColor;
-		bool			H5ColorGlobalColor;
-		bool			H6ColorGlobalColor;
-		uint			TextFontSize;
-		uint			H1FontSize;
-		uint			H2FontSize;
-		uint			H3FontSize;
-		uint			H4FontSize;
-		uint			H5FontSize;
-		uint			H6FontSize;
 		uint			TDBeginSpace;
 		uint			PBeginSpace;
 		uint			LIBeginSpace;
 		uint			ULBeginSpace;
-		uint			LIIndent;
 		uint			ULIndent;
 		float			LineSpaceFontFactor;
 		std::string		DefaultButtonGroup;
@@ -181,8 +183,8 @@ namespace NLGUI
 		std::string		DefaultRadioButtonBitmapNormal;
 		std::string		DefaultRadioButtonBitmapPushed;
 		std::string		DefaultRadioButtonBitmapOver;
+		// TODO: remove from interface xml and code
 		std::string		DefaultBackgroundBitmapView;
-		std::string		CurrentLinkTitle;
 
 		struct TFormField {
 		public:
@@ -320,16 +322,22 @@ namespace NLGUI
 		void clearContext();
 
 		// Translate a char
-		bool translateChar(ucchar &output, ucchar input, ucchar lastChar) const;
+		bool translateChar(u32char &output, u32char input, u32char lastChar) const;
+
+		// return true if text has same style
+		bool isSameStyle(CViewLink *text, const CStyleParams &style) const;
+		// add text link using template
+		void newTextButton(const std::string &text, const std::string &tpl);
+		void newTextLink(const std::string &text);
 
 		// Add a string in the current paragraph
-		void addString(const ucstring &str);
+		void addString(const std::string &str);
 
 		// Add an image in the current paragraph
 		void addImage(const std::string &id, const std::string &img, bool reloadImg=false, const CStyleParams &style = CStyleParams());
 
 		// Add a text area in the current paragraph
-		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength);
+		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const std::string &content, uint maxlength);
 
 		// Add a combo box in the current paragraph
 		CDBGroupComboBox *addComboBox(const std::string &templateName, const char *name);
@@ -341,6 +349,9 @@ namespace NLGUI
 			const CStyleParams &style = CStyleParams());
 
 		// Set the background color
+		void setupBackground(CSSBackgroundRenderer *bg);
+
+		// Set the background color
 		void setBackgroundColor (const NLMISC::CRGBA &bgcolor);
 
 		// Set the background
@@ -350,9 +361,9 @@ namespace NLGUI
 		void flushString();
 
 		// Set the title
-		void setTitle (const ucstring &title);
 		void setTitle (const std::string &title);
 		std::string getTitle() const;
+		void setContainerTitle (const std::string &title);
 
 		// Lookup a url in local file system
 		bool lookupLocalFile (std::string &result, const char *url, bool isUrl);
@@ -375,7 +386,16 @@ namespace NLGUI
 		// true if renderer is waiting for css files to finish downloading (link rel=stylesheet)
 		bool			_WaitingForStylesheet;
 		// list of css file urls that are queued up for download
-		std::vector<std::string> _StylesheetQueue;
+		std::vector<CHtmlParser::StyleLink> _StylesheetQueue;
+		// <style> and downloaded <link rel=stylesheet> elements
+		std::vector<std::string> _HtmlStyles;
+
+		// background from <html> or <body> element
+		CSSBackgroundRenderer m_HtmlBackground;
+		CSSBackgroundRenderer m_BodyBackground;
+
+		// active table.tr background color from css or from bgcolor attribute
+		std::vector<NLMISC::CRGBA> m_TableRowBackgroundColor;
 
 		// Valid base href was found
 		bool            _IgnoreBaseUrlTag;
@@ -392,10 +412,10 @@ namespace NLGUI
 		bool			_TrustedDomain;
 
 		// Title prefix
-		ucstring		_TitlePrefix;
+		std::string		_TitlePrefix;
 
 		// Title string
-		ucstring		_TitleString;
+		std::string		_TitleString;
 
 		// Need to browse next update coords..
 		bool			_BrowseNextTime;
@@ -644,7 +664,7 @@ namespace NLGUI
 				std::string		Name;
 
 				// Variable value
-				ucstring		Value;
+				std::string		Value;
 
 				// Text area group
 				CInterfaceGroup *TextArea;
@@ -745,9 +765,7 @@ namespace NLGUI
 		bool			_Localize;
 
 		// Current node is a text area
-		bool			_TextArea;
 		std::string		_TextAreaTemplate;
-		ucstring		_TextAreaContent;
 		std::string		_TextAreaName;
 		uint			_TextAreaRow;
 		uint			_TextAreaCols;
@@ -755,7 +773,7 @@ namespace NLGUI
 
 		// current mode is in select option
 		bool			_SelectOption;
-		ucstring		_SelectOptionStr;
+		std::string		_SelectOptionStr;
 
 		// Current node is a object
 		std::string		_ObjectType;
@@ -765,7 +783,7 @@ namespace NLGUI
 		std::string		_TextAreaScript;
 
 		// Get last char
-		ucchar getLastChar() const;
+		u32char getLastChar() const;
 
 		// Current link view
 		class CViewLink			*_CurrentViewLink;
@@ -826,49 +844,110 @@ namespace NLGUI
 		void spliceFragment(std::list<CHtmlElement>::iterator src);
 
 		// decode all HTML entities
-		static ucstring decodeHTMLEntities(const ucstring &str);
+		static std::string decodeHTMLEntities(const std::string &str);
 
-		struct CDataImageDownload
+		class CDataDownload : public ICurlDownloadCB
 		{
 		public:
-			CDataImageDownload(CViewBase *img, CStyleParams style, TImageType type): Image(img), Style(style), Type(type)
-			{
-			}
+			CDataDownload(const std::string &u, const std::string &d)
+				: ICurlDownloadCB(u), data(NULL), fp(NULL), dest(d), redirects(0), ConnectionTimeout(60)
+			{}
+			virtual ~CDataDownload();
+
 		public:
-			CViewBase * Image;
+			CCurlWWWData *data;
+			std::string dest;
+			std::string tmpdest;
+			uint32 redirects;
+			FILE *fp;
+			uint32 ConnectionTimeout;
+		};
+
+		class StylesheetDownloadCB : public CDataDownload
+		{
+		public:
+			StylesheetDownloadCB(const std::string &url, const std::string &dest, CGroupHTML *parent)
+				: CDataDownload(url, dest), Parent(parent)
+			{}
+
+			virtual void finish() NL_OVERRIDE;
+
+		private:
+			CGroupHTML *Parent;
+		};
+
+		class ImageDownloadCB : public CDataDownload
+		{
+		public:
+			struct SImageInfo
+			{
+				SImageInfo(CViewBase *img, const CStyleParams &style, TImageType type)
+				: Image(img), Style(style), Type(type)
+				{}
+
+				CViewBase *Image;
+				CStyleParams Style;
+				TImageType Type;
+			};
+
+			ImageDownloadCB(const std::string &url, const std::string &dest, CViewBase *img, const CStyleParams &style, TImageType type, CGroupHTML *parent)
+			: CDataDownload(url, dest), Parent(parent)
+			{
+				addImage(img, style, type);
+			}
+
+			virtual void finish() NL_OVERRIDE;
+
+			void addImage(CViewBase *img, const CStyleParams &style, TImageType type);
+			void removeImage(CViewBase *img);
+
+		private:
+			std::vector<SImageInfo> Images;
+			CGroupHTML *Parent;
 			CStyleParams Style;
 			TImageType Type;
 		};
 
-		struct CDataDownload
+		class TextureDownloadCB : public CDataDownload
 		{
 		public:
-			CDataDownload(const std::string &u, const std::string &d, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams(), const TImageType imagetype = NormalImage)
-				: data(NULL), fp(NULL), url(u), dest(d), type(t), luaScript(s), md5sum(m), redirects(0), ConnectionTimeout(60)
+			TextureDownloadCB(const std::string &url, const std::string &dest, sint32 texId, CViewBase *view)
+			: CDataDownload(url, dest)
 			{
-				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style, imagetype));
+				addTexture(texId, view);
 			}
-			~CDataDownload();
 
-		public:
-			CCurlWWWData *data;
-			std::string url;
-			std::string dest;
-			std::string luaScript;
-			std::string md5sum;
-			TDataType type;
-			uint32 redirects;
-			FILE *fp;
-			std::vector<CDataImageDownload> imgs;
-			uint32 ConnectionTimeout;
+			virtual void finish() NL_OVERRIDE;
+
+			void addTexture(sint32 texId, CViewBase *view) {
+				TextureIds.push_back(std::make_pair(texId, view));
+			}
+
+		private:
+			std::vector<std::pair<sint32, CViewBase *> > TextureIds;
 		};
 
-		std::list<CDataDownload> Curls;
+		class BnpDownloadCB : public CDataDownload
+		{
+		public:
+			BnpDownloadCB(const std::string &url, const std::string &dest, const std::string md5sum, const std::string lua, CGroupHTML *parent)
+			: CDataDownload(url, dest), Parent(parent), m_md5sum(md5sum), m_lua(lua)
+			{}
+
+			virtual void finish() NL_OVERRIDE;
+
+		private:
+			CGroupHTML *Parent;
+			std::string m_md5sum;
+			std::string m_lua;
+		};
+
+		std::list<CDataDownload*> Curls;
 		CURLM *MultiCurl;
 		int RunningCurls;
 
-		bool startCurlDownload(CDataDownload &download);
-		void finishCurlDownload(const CDataDownload &download);
+		bool startCurlDownload(CDataDownload *download);
+		void finishCurlDownload(CDataDownload *download);
 		void pumpCurlQueue();
 
 		void initImageDownload();
@@ -889,16 +968,17 @@ namespace NLGUI
 		std::string localBnpName(const std::string &url);
 
 		// add css file from <link href=".." rel="stylesheet"> to download queue
-		void addStylesheetDownload(std::vector<std::string> links);
+		void addStylesheetDownload(std::vector<CHtmlParser::StyleLink> links);
 
 		// stop all curl downalods (html and data)
 		void releaseDownloads();
+		void releaseDataDownloads();
 		void checkDownloads();
 
 		// _CurlWWW download finished
 		void htmlDownloadFinished(bool success, const std::string &error);
 		// images, stylesheets, etc finished downloading
-		void dataDownloadFinished(bool success, const std::string &error, CDataDownload &data);
+		void dataDownloadFinished(bool success, const std::string &error, CDataDownload *data);
 
 		// HtmlType download finished
 		void htmlDownloadFinished(const std::string &content, const std::string &type, long code);
@@ -914,9 +994,6 @@ namespace NLGUI
 
 		// :before, :after rendering
 		void renderPseudoElement(const std::string &pseudo, const CHtmlElement &elm);
-
-		// apply background from current style (for html, body)
-		void applyBackground(const CHtmlElement &elm);
 
 		void insertFormImageButton(const std::string &name,
 			const std::string &tooltip,
@@ -997,11 +1074,9 @@ namespace NLGUI
 		void htmlTD(const CHtmlElement &elm);
 		void htmlTDend(const CHtmlElement &elm);
 		void htmlTEXTAREA(const CHtmlElement &elm);
-		void htmlTEXTAREAend(const CHtmlElement &elm);
 		void htmlTH(const CHtmlElement &elm);
 		void htmlTHend(const CHtmlElement &elm);
 		void htmlTITLE(const CHtmlElement &elm);
-		void htmlTITLEend(const CHtmlElement &elm);
 		void htmlTR(const CHtmlElement &elm);
 		void htmlTRend(const CHtmlElement &elm);
 		//void htmlU(const CHtmlElement &elm);

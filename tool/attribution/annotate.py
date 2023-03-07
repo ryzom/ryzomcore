@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019  Jan BOON <jan.boon@kaetemi.be>
+# Copyright (C) 2019-2020  Jan BOON <jan.boon@kaetemi.be>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ from datetime import datetime
 from pathlib import Path
 
 from git import Repo
-repo = Repo("../../..")
+repo = Repo("../..")
 
 # Mapping for author short name to full display name
 authors = { }
@@ -83,6 +83,7 @@ authors["etrange"] = "StudioEtrange <nomorgan@gmail.com>"
 authors["sircotare"] = "SirCotare"
 authors["rolandw"] = "Roland WINKLMEIER <roland.m.winklmeier@gmail.com>"
 authors["thibg"] = "Thibaut GIRKA (ThibG) <thib@sitedethib.com>" # LibVR support
+authors["xtarsia"] = "Xtarsia"
 
 # Mapping from git author name to short name, dash to ignore author
 short_authors = { }
@@ -100,6 +101,7 @@ short_authors["Botanic"] = "botanic"
 short_authors["Matthew Lagoe@MatthewLagoe-PC <Matthew Lagoe@MatthewLagoe-PC>"] = "botanic"
 short_authors["Botanic <admin@tempestintheaether.org>"] = "botanic"
 short_authors["kaetemi <kaetemi@gmail.com>"] = "kaetemi"
+short_authors["kaetemi <jan.boon@kaetemi.be>"] = "kaetemi"
 short_authors["Jan Boon <jan.boon@kaetemi.be>"] = "kaetemi"
 short_authors["Jan Boon <kaetemi@no-break.space>"] = "kaetemi"
 short_authors["Jan Boon <kaetemi@gmail.com>"] = "kaetemi"
@@ -109,6 +111,7 @@ short_authors["kaetemi@users.sourceforge.net <kaetemi@users.sourceforge.net>"] =
 short_authors["kaetemi@kaevm.localdomain <kaetemi@kaevm.localdomain>"] = "kaetemi"
 short_authors["Jan Boon (Kaetemi)"] = "kaetemi"
 short_authors["NO-BREAK SPACE OÜ <support@no-break.space>"] = "-" # bot
+short_authors["Polyverse OÜ <support@polyverse.dev>"] = "-" # bot
 short_authors["Ryzom Pipeline <ryzom-pipeline@kaetemi.be>"] = "-" # bot
 short_authors["Nimetu <nimetu@gmail.com>"] = "nimetu"
 short_authors["nimetu@gmail.com <nimetu@gmail.com>"] = "nimetu"
@@ -164,6 +167,8 @@ short_authors["cemycc <cemycc@gmail.com>"] = "cemycc"
 short_authors["cemycc"] = "cemycc"
 short_authors["Thibaut Girka <thib@sitedethib.com>"] = "thibg"
 short_authors["Thibaut Girka (ThibG)"] = "thibg"
+short_authors["Xtarsia <69606701+Xtarsia@users.noreply.github.com>"] = "xtarsia"
+short_authors["Xtarsia"] = "xtarsia"
 # short_authors["\"picomancer ext:(%22) <pico-bitbucketpub-4mcdxm39-onlyham@picomancer.com>"] = "-"
 # short_authors["Quitta"] = "-"
 # short_authors["Krolock"] = "-"
@@ -175,7 +180,7 @@ short_authors["Thibaut Girka (ThibG)"] = "thibg"
 # short_authors["Michael Witrant <mike@lepton.fr>"] = "-"
 
 generic_authors = [ ]
-generic_authors += [ "Ryzom Core <http://ryzomcore.org/>" ]
+generic_authors += [ "Ryzom Core <http://ryzom.dev/>" ]
 generic_authors += [ "by authors" ]
 
 # Reverse mapping for parsing original annotation
@@ -203,15 +208,35 @@ override_author["43452ea27c6e92488d8bd1417b2aee60d75d8a68"] = "-" # Header
 override_author["8e21fed1e6b79bf92f6364c7cb4f0c56e1dda103"] = "-" # Header cleanup
 override_author["c8e562f37781d62ebc54b68ef74f7693de79a907"] = "-" # Header cleanup
 override_author["dc734ed66226b257becae9fcd140898e14510e6a"] = "-" # Header cleanup
+override_author["e97cf09e043e2e4b6f0f899b9230f4b6303fcc23"] = "/" # Initial commit.
+override_author["a3a074f455a3f52e6fa4d44214f6c34289fa6f8c"] = "-" # Sync
+override_author["141e7c645966ee3475097a75a65def8c9bd7086a"] = "-" # Sync
+override_author["e6a617b8bcd1630dba5fc3b6ae9815775ba2c19d"] = "-" # Sync
+override_author["41c8499bd4f1e6229a03c954132fcc5ba4f5dc3e"] = "-" # Sync
+override_author["ecf990f8ae8e04d946ce1d5519c065dc6fedf4c4"] = "-" # Sync
+override_author["b4638c79699b6ce84fdeff9e9f413b8c6a56a905"] = "winch_gate" # Sync
+override_author["6a79a5bf0ff4be9deaf0a6d5d0b3815b456891c5"] = "winch_gate" # Sync
+override_author["678d888b5cfbb1d6785ff3a23c32d19a8fd60ccb"] = "winch_gate" # Sync
+override_author["2889e81d63f3f5400cfe87d59ad6d1517ec30323"] = "winch_gate" # Sync
 
 # Exclude some paths
 exclude_paths = { }
-exclude_paths["code/nel/3rdparty"] = True
-exclude_paths["code/nel/src/3d/driver/opengl/GL"] = True
-exclude_paths["code/nel/src/3d/driver/opengl/EGL"] = True
-exclude_paths["code/nel/src/3d/driver/opengl/GLES"] = True
-exclude_paths["code/nel/src/3d/driver/opengl/KHR"] = True
-exclude_paths["code/studio/src/3rdparty"] = True
+exclude_paths["nel/3rdparty"] = True
+exclude_paths["nel/src/3d/driver/opengl/GL"] = True
+exclude_paths["nel/src/3d/driver/opengl/EGL"] = True
+exclude_paths["nel/src/3d/driver/opengl/GLES"] = True
+exclude_paths["nel/src/3d/driver/opengl/KHR"] = True
+exclude_paths["studio/src/3rdparty"] = True
+exclude_paths["ryzom/common/src/game_share/ring_session_manager_itf.cpp"] = True
+exclude_paths["ryzom/common/src/game_share/ring_session_manager_itf.h"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_guild.cpp"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_guild.h"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_outpost.cpp"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_outpost.h"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_plr.cpp"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_plr.h"] = True
+exclude_paths["ryzom/server/src/shard_unifier_service/database_mapping.cpp"] = True
+exclude_paths["ryzom/server/src/shard_unifier_service/database_mapping.h"] = True
 
 # Programmatical remappings
 def remap_author(blob, commit, author):
@@ -226,6 +251,9 @@ def remap_author(blob, commit, author):
 	short_author = short_authors.get(author)
 	if short_author == None:
 		short_author = "?"
+	if "Update GPL headers" in commit.message:
+		# Ignore if commit message matches "Update GPL headers"
+		short_author = "-"
 	# If you're paid by Winch Gate, or signed copyright transfer with 
 	# them, remap here, limit by authored_date if needed.
 	if short_author == "ulukyn" or short_author == "ace":
@@ -234,12 +262,14 @@ def remap_author(blob, commit, author):
 		short_author = "winch_gate"
 	if short_author == "sircotare" and authored_date.year >= 2012:
 		short_author = "winch_gate"
-	if short_author == "inky":
+	if short_author == "inky" and authored_date.year < 2020:
 		short_author = "winch_gate"
 	if "feature-export-assimp" in commit.message and authored_date.year <= 2015:
 		# Project paid for by Winch Gate
 		short_author = "winch_gate"
-	if short_author == "kervala" or short_author == "nimetu":
+	if short_author == "nimetu" and authored_date.year >= 2009:
+		short_author = "winch_gate"
+	if short_author == "kervala":
 		# Don't know if they signed the copyright assignment agreement with Winch Gate or Ryzom Forge
 		short_author = "?"
 	if short_author == "karu" or short_author == "kishan" or short_author == "glorf":
@@ -334,7 +364,7 @@ def rewrite_cpp(path, copyright_oldest, copyright_newest, copyright_lines):
 	# Everything before the first "// Copyright" remains intact
 	# Parse existing notices, merge with lists, track which one is first
 	# Write out new copyright and modification notices
-	contents = Path("../../../" + path).read_text()
+	contents = Path("../../" + path).read_text()
 	content_start = contents.find("// This program is free software")
 	if content_start < 0:
 		header_not_found[path] = True
@@ -431,7 +461,7 @@ def rewrite_cpp(path, copyright_oldest, copyright_newest, copyright_lines):
 	new_contents = contents[0:copyright_start] + new_statement + contents[content_start:]
 	if contents != new_contents:
 		print(new_statement)
-		Path("../../../" + path).write_text(new_contents)
+		Path("../../" + path).write_text(new_contents)
 
 def process_cpp(cpp_entry):
 	print(cpp_entry.path)

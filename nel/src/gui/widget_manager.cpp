@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -435,7 +435,22 @@ namespace NLGUI
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 			CInterfaceElement *pIEL = rMG.Group->getElement (sEltId);
 			if (pIEL != NULL)
+			{
+#if !FINAL_VERSION
+				if (m_LoggedMissingElement.find(sEltId) != m_LoggedMissingElement.end())
+				{
+					m_LoggedMissingElement.erase(sEltId);
+					nlwarning("Previously missing UI element with Id '%s' was now found!", sEltId.c_str());
+				}
+#endif
 				return pIEL;
+			}
+		}
+
+		if (m_LoggedMissingElement.find(sEltId) == m_LoggedMissingElement.end())
+		{
+			m_LoggedMissingElement.insert(sEltId);
+			nlwarning("Could not find UI element from Id '%s'...", sEltId.c_str());
 		}
 		return NULL;
 	}
@@ -1195,7 +1210,8 @@ namespace NLGUI
 					sint32 backupX = groupOver->getX();
 
 					// Copy all aspects to the view
-					vtDst->setText (vtSrc->getText());
+					vtDst->setLocalized (vtSrc->isLocalized());
+					vtDst->setText (vtSrc->getHardText());
 					vtDst->setFontSize (vtSrc->getFontSize());
 					vtDst->setColor (vtSrc->getColor());
 					vtDst->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
@@ -2296,7 +2312,7 @@ namespace NLGUI
 		// Hide menu if the key is pushed
 //		if ((eventDesc.getKeyEventType() == CEventDescriptorKey::keydown) && !_ModalStack.empty() && !eventDesc.getKeyAlt() && !eventDesc.getKeyCtrl() && !eventDesc.getKeyShift())
 		// Hide menu (or popup menu) is ESCAPE pressed
-		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyESCAPE )
+		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE )
 		{
 			if( hasModal() )
 			{
@@ -2307,7 +2323,7 @@ namespace NLGUI
 		}
 
 		// Manage "quit window" If the Key is ESCAPE, no captureKeyboard
-		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyESCAPE )
+		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE )
 		{
 			// Get the last escapable active top window. NB: this is ergonomically better.
 			CInterfaceGroup	*win= getLastEscapableTopWindow();

@@ -1,4 +1,4 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc)
 
 ADD_LIBRARY(world_editor_primitive_plugin SHARED ${SRC})
 
@@ -15,7 +15,7 @@ NL_ADD_LIB_SUFFIX(world_editor_primitive_plugin)
 ADD_DEFINITIONS(${MFC_DEFINITIONS} -DWIN32_DLL_EXPORTS)
 
 #IF(WITH_PCH)
-#  ADD_NATIVE_PRECOMPILED_HEADER(world_editor_primitive_plugin ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.cpp)
+#  target_precompile_headers(world_editor_primitive_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h)
 #ENDIF()
 
 INSTALL(TARGETS world_editor_primitive_plugin LIBRARY DESTINATION ${RYZOM_LIB_PREFIX} RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} ARCHIVE DESTINATION ${RYZOM_LIB_PREFIX} COMPONENT tools3d)

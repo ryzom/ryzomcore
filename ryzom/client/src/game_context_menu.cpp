@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -193,7 +194,6 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	_TextPAStop= "ui:interface:" + menuId + ":pa_stop";
 	_TextPAFree= "ui:interface:" + menuId + ":pa_free";
 	_TextPAEnterStable= "ui:interface:" + menuId + ":pa_enter_stable";
-	_TextPAEnterBag= "ui:interface:" + menuId + ":pa_enter_bag";
 
 	// Forage source
 	_TextExtractRM= "ui:interface:" + menuId + ":extract_rm";
@@ -561,7 +561,7 @@ void		CGameContextMenu::update()
 		// Enable/disable various menu items
 		bool ok = testMenuOptionForPackAnimal( selection, animalIndex, true, _TextPAFollow, _TextPAStop, _TextPAFree,
 			_TextPAEnterStable, NULL /*no 'leave stable' in context menu*/, pTextMount,
-			NULL /*unmount always active in context menu when the character is riding*/, _TextPAEnterBag, NULL);
+			NULL /*unmount always active in context menu when the character is riding*/);
 
 		// Follow & assist special case
 		if ( _TextFollow )
@@ -585,16 +585,11 @@ void		CGameContextMenu::update()
 			_TextPAFollow->setActive(false);
 		if (_TextPAStop)
 			_TextPAStop->setActive(false);
+		if (_TextPAFree)
+			_TextPAFree->setActive(false);
 		if (_TextPAEnterStable)
 			_TextPAEnterStable->setActive(false);
-		if (_TextPAEnterBag)
-			_TextPAEnterBag->setActive(false);
 	}
-
-	// Remove Free option to prevent miss click
-	if (_TextPAFree)
-		_TextPAFree->setActive(false);
-
 
 	// build spire
 	if(_TextBuildTotem)
@@ -712,7 +707,7 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 				uint32 textID = (uint32) _MissionOption[k]->getValue32();
 				if (textID)
 				{
-					ucstring result;
+					string result;
 					bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 					if (!res)
 					{
@@ -723,13 +718,13 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 				}
 				else
 				{
-					pVTM->setText(ucstring(""));
+					pVTM->setText("");
 					pVTM->setActive(false);
 				}
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 				pVTM->setActive(false);
 			}
 		}
@@ -753,7 +748,7 @@ void CGameContextMenu::updateContextMenuWebPage(uint options)
 			uint32 textID = (uint32) _WebPageTitle->getValue32();
 			if (textID)
 			{
-				ucstring result;
+				string result;
 				bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 				if (!res)
 				{
@@ -763,12 +758,12 @@ void CGameContextMenu::updateContextMenuWebPage(uint options)
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 			}
 		}
 		else
 		{
-			pVTM->setText(ucstring(""));
+			pVTM->setText("");
 		}
 	}
 
@@ -797,7 +792,7 @@ void CGameContextMenu::updateContextMenuOutpostState(uint options)
 	{
 		CViewTextMenu *pVTM = _TextOutpostState;
 		if (pVTM)
-			pVTM->setText(ucstring(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet)));
+			pVTM->setText(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet));
 	}
 
 	// apply the active
@@ -833,7 +828,7 @@ void CGameContextMenu::updateContextMenuMissionRing()
 			// if the textId is ok and Flag is set.
 			if ( textId )
 			{
-				ucstring result;
+				string result;
 				bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, result);
 				if (!res)
 				{
@@ -844,7 +839,7 @@ void CGameContextMenu::updateContextMenuMissionRing()
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 				pVTM->setActive(false);
 			}
 		}
@@ -949,8 +944,7 @@ void CGameContextMenu::applyTextTalk()
 bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index, bool clearAll,
 								  CViewTextMenu *pFollow, CViewTextMenu *pStop, CViewTextMenu *pFree,
 								  CViewTextMenu *pEnterStable, CViewTextMenu *pLeaveStable,
-								  CViewTextMenu *pMount, CViewTextMenu *pUnmount,
-								  CViewTextMenu *pEnterBag, CViewTextMenu *pLeaveBag)
+								  CViewTextMenu *pMount, CViewTextMenu *pUnmount )
 {
 	if ( clearAll )
 	{
@@ -960,8 +954,6 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 		if(pFree)			{ pFree->setActive(false); pFree->setGrayed(true); }
 		if(pEnterStable)	{ pEnterStable->setActive(false); pEnterStable->setGrayed(true); }
 		if(pLeaveStable)	{ pLeaveStable->setActive(false); pLeaveStable->setGrayed(true); }
-		if(pEnterBag)		{ pEnterBag->setActive(false); pEnterBag->setGrayed(true); }
-		if(pLeaveBag)		{ pLeaveBag->setActive(false); pLeaveBag->setGrayed(false); }
 		if(pMount)			{ pMount->setActive(false); pMount->setGrayed(true); }
 		if(pUnmount)		{ pUnmount->setActive(false); pUnmount->setGrayed(true); }
 	}
@@ -978,14 +970,6 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 	node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", index), false);
 	if(!node)	return false;
 	ANIMAL_TYPE::EAnimalType		anitype= (ANIMAL_TYPE::EAnimalType)node->getValue32();
-
-	if (anitype != ANIMAL_TYPE::Pet)
-	{
-		if (pEnterBag)
-			pEnterBag->setActive(false);
-		if (pLeaveBag)
-			pLeaveBag->setActive(false);
-	}
 
 	// COMMON PART FOR ALL TYPES OF ANIMAL
 
@@ -1006,7 +990,6 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 		distanceSquare = pow(vect1.x-vect2.x,2) + pow(vect1.y-vect2.y,2);
 	}
 
-	bool onBag = ANIMAL_STATUS::isInBag(status);
 
 	// Enable option only if pack animal present
 	if(ANIMAL_STATUS::isSpawned(status))
@@ -1038,15 +1021,7 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 				if(pFollow)			pFollow->setGrayed(false);
 				if(pStop)			pStop->setGrayed(false);
 				if(pEnterStable)	pEnterStable->setGrayed(false);
-				if (pEnterBag && !onBag)
-					pEnterBag->setGrayed(false);
 			}
-			if (pLeaveBag && onBag)
-				pLeaveBag->setActive(true);
-
-			if (pEnterBag && !onBag && anitype == ANIMAL_TYPE::Pet)
-				pEnterBag->setActive(true);
-
 			if(pLeaveStable)		pLeaveStable->setGrayed(false);
 		}
 	}

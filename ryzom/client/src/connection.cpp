@@ -1,10 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -145,21 +145,23 @@ string CharNameValidDBLink;
 uint8		PlayerSelectedSlot = 0;
 string		PlayerSelectedFileName;
 TSessionId	PlayerSelectedMainland= (TSessionId)0;	// This is the mainland selected at the SELECT perso!!
-ucstring	PlayerSelectedHomeShardName;
-ucstring	PlayerSelectedHomeShardNameWithParenthesis;
+std::string	PlayerSelectedHomeShardName;
+std::string	PlayerSelectedHomeShardNameWithParenthesis;
 extern std::string CurrentCookie;
 
-ucstring NewKeysCharNameWanted; // name of the character for which a new keyset must be created
-ucstring NewKeysCharNameValidated;
+std::string NewKeysCharNameWanted; // name of the character for which a new keyset must be created
+std::string NewKeysCharNameValidated;
 std::string GameKeySet = "keys.xml";
 std::string RingEditorKeySet = "keys_r2ed.xml";
 
 string		ScenarioFileName;
 sint 		LoginCharsel = -1;
 
+std::string ImportCharacter;
+
 static const char *KeySetVarName = "BuiltInKeySets";
 
-
+#define GROUP_LIST_CHARACTER            "ui:outgame:charsel_import:import_list"
 #define	GROUP_LIST_MAINLAND				"ui:outgame:appear_mainland:mainland_list"
 #define	GROUP_LIST_KEYSET				"ui:outgame:appear_keyset:keyset_list"
 vector<CMainlandSummary>	Mainlands;
@@ -174,6 +176,10 @@ bool PatchBegun = false;
 // \todo GUIGUI : USE TRANSPORT CLASS.
 //	SVersionAnswer versionAnswer;
 
+#if !FINAL_VERSION
+static bool DebugOutgameUI = false;
+static bool DebugOutgameReloadUI = false;
+#endif
 
 // Finite State Machine : all the states before entering the game
 // ------------------------------------------------------------------------------------------------
@@ -193,37 +199,8 @@ bool hasPrivilegeEG() { return (UserPrivileges.find(":EG:") != std::string::npos
 // Restore the video mode (fullscreen for example) after the connection (done in a window)
 void connectionRestoreVideoMode ()
 {
-	// Setup full screen if we have to
-	UDriver::CMode mode;
-	Driver->getCurrentScreenMode(mode);
-
-	if (mode.Windowed)
-	{
-		uint32 width, height;
-		Driver->getWindowSize(width, height);
-		mode.Width = width;
-		mode.Height = height;
-	}
-
-	// don't allow sizes smaller than 1024x768
-	if (ClientCfg.Width < 1024) ClientCfg.Width = 1024;
-	if (ClientCfg.Height < 768) ClientCfg.Height = 768;
-
 	if (StereoDisplay)
 		StereoDisplayAttached = StereoDisplay->attachToDisplay();
-
-	if (!StereoDisplayAttached && (
-		(ClientCfg.Windowed != mode.Windowed) ||
-		(ClientCfg.Width != mode.Width) ||
-		(ClientCfg.Height != mode.Height)))
-	{
-		mode.Windowed	= ClientCfg.Windowed;
-		mode.Depth		= uint8(ClientCfg.Depth);
-		mode.Width		= ClientCfg.Width;
-		mode.Height		= ClientCfg.Height;
-		mode.Frequency	= ClientCfg.Frequency;
-		setVideoMode(mode);
-	}
 
 	// And setup hardware mouse if we have to
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
@@ -233,7 +210,7 @@ void connectionRestoreVideoMode ()
 	SetMouseAcceleration (ClientCfg.CursorAcceleration);
 
 	// Restore user UI scaling
-	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
 }
 
 
@@ -270,7 +247,7 @@ void	setOutGameFullScreen()
 	}
 
 	// Enable auto scaling in login window
-	CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+	CInterfaceManager::getInstance()->setInterfaceScale(1.0f, true);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -304,9 +281,9 @@ void	CSoundGlobalMenu::updateSound()
 	// **** update the music played
 	// The first music played is the music played at loading, before select char
 	if (_MusicPlayed.empty())
-		_MusicPlayed = toLower(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
+		_MusicPlayed = toLowerAscii(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
 	if (_MusicWanted.empty())
-		_MusicWanted = toLower(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
+		_MusicWanted = toLowerAscii(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
 
 	// because music is changed when the player select other race for instance,
 	// wait the 3D to load (stall some secs)
@@ -333,7 +310,7 @@ void	CSoundGlobalMenu::updateSound()
 
 void	CSoundGlobalMenu::setMusic(const string &music, bool async)
 {
-	_MusicWanted= toLower(music);
+	_MusicWanted= toLowerAscii(music);
 	_MusicWantedAsync= async;
 	// reset the counter
 	_NbFrameBeforeChange= NbFrameBeforeChangeMax;
@@ -360,7 +337,7 @@ bool connection (const string &cookie, const string &fsaddr)
 
 	// Preload continents
 	{
-		const ucstring nmsg("Loading continents...");
+		const string nmsg("Loading continents...");
 		ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.preloadSheets();
 
@@ -398,7 +375,7 @@ bool connection (const string &cookie, const string &fsaddr)
 	// Init out game
 	setOutGameFullScreen();
 
-	ucstring nmsg("Initializing outgame...");
+	string nmsg("Initializing outgame...");
 	ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 	pIM->initOutGame();
 
@@ -506,19 +483,20 @@ bool connection (const string &cookie, const string &fsaddr)
 	firstConnection = false;
 
 	// Restore user UI scaling
-	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
 
 	// Disable inputs
 	Actions.enable(false);
 	EditActions.enable(false);
 
-//	resetTextContext ("ingame.ttf", true);
-	resetTextContext ("ryzom.ttf", true);
+	resetTextContext("uiFontSans", true);
 
 	if (InterfaceState == GOGOGO_IN_THE_GAME)
 	{
 		// set background downloader to 'paused' to ease loading of client
+#ifdef RYZOM_BG_DOWNLOADER
 		pauseBGDownloader();
+#endif
 		return true;
 	}
 
@@ -542,7 +520,7 @@ bool reconnection()
 
 	// Preload continents
 	{
-		const ucstring nmsg ("Loading continents...");
+		const string nmsg ("Loading continents...");
 		ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.preloadSheets();
 	}
@@ -646,18 +624,19 @@ bool reconnection()
 	}
 
 	// Restore user UI scaling
-	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
 
 	// Disable inputs
 	Actions.enable(false);
 	EditActions.enable(false);
 
-//	resetTextContext ("ingame.ttf", true);
-	resetTextContext ("ryzom.ttf", true);
+	resetTextContext("uiFontSans", true);
 
 	if (InterfaceState == GOGOGO_IN_THE_GAME)
 	{
+#ifdef RYZOM_BG_DOWNLOADER
 		pauseBGDownloader();
+#endif
 		return true;
 	}
 	if (InterfaceState == QUIT_THE_GAME)
@@ -720,7 +699,7 @@ TInterfaceState autoLogin (const string &cookie, const string &fsaddr, bool firs
 			NetMngr.setDataBase (IngameDbMngr.getNodePtr());
 
 			// init the string manager cache.
-			STRING_MANAGER::CStringManagerClient::instance()->initCache(UsedFSAddr, ClientCfg.LanguageCode);
+			STRING_MANAGER::CStringManagerClient::instance()->initCache(ClientCfg.LanguageCode);
 		}
 	}
 	else
@@ -777,12 +756,12 @@ void globalMenuMovieShooter()
 
 // ------------------------------------------------------------------------------------------------
 // Build a valid PlayerName for file Save selection.
-std::string	buildPlayerNameForSaveFile(const ucstring &playerNameIn)
+std::string	buildPlayerNameForSaveFile(const std::string &playerNameIn)
 {
 	// remove any shard name appended
-	ucstring playerName = playerNameIn;
-	ucstring::size_type pos = playerNameIn.find('(');
-	if(pos!=ucstring::npos && pos>0)
+	string playerName = playerNameIn;
+	string::size_type pos = playerNameIn.find('(');
+	if(pos!=string::npos && pos>0)
 	{
 		playerName.resize(pos);
 	}
@@ -798,7 +777,7 @@ std::string	buildPlayerNameForSaveFile(const ucstring &playerNameIn)
 			(c>='0' && c<='9') ||
 			(c=='_') )
 		{
-			ret[i]= tolower(c);
+			ret[i]= tolower(c); // TODO: toLowerAscii
 		}
 		else
 			ret[i]= '_';
@@ -807,8 +786,8 @@ std::string	buildPlayerNameForSaveFile(const ucstring &playerNameIn)
 }
 
 
+#ifdef RYZOM_BG_DOWNLOADER
 static bool LuaBGDSuccessFlag = true; // tmp, for debug
-
 
 void updateBGDownloaderUI()
 {
@@ -907,11 +886,12 @@ void updateBGDownloaderUI()
 		nlwarning("Some scipt error occurred");
 	}
 }
-
+#endif
 
 // compute patcher priority, depending on the presence of one or more mainland characters : in this case, give the patch a boost
 void updatePatcherPriorityBasedOnCharacters()
 {
+#ifdef RYZOM_BG_DOWNLOADER
 	if (isBGDownloadEnabled())
 	{
 		if (CBGDownloaderAccess::getInstance().getDownloadThreadPriority() != BGDownloader::ThreadPriority_Paused)
@@ -930,6 +910,7 @@ void updatePatcherPriorityBasedOnCharacters()
 			CBGDownloaderAccess::getInstance().requestDownloadThreadPriority(hasMainlandChar ? BGDownloader::ThreadPriority_Normal : BGDownloader::ThreadPriority_Low, false);
 		}
 	}
+#endif
 }
 
 // Launch the interface to choose a character
@@ -938,6 +919,7 @@ TInterfaceState globalMenu()
 {
 	CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_CharacterSelection, "login_step_character_selection"));
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess &bgDownloader = CBGDownloaderAccess::getInstance();
 
 	if (isBGDownloadEnabled())
@@ -948,14 +930,14 @@ TInterfaceState globalMenu()
 			// if a task is already started, then this was a situation where player went back from game to the character selection,
 			// so just unpause
 			BGDownloader::TTaskResult dummyResult;
-			ucstring				  dummyMessage;
+			ucstring				  dummyMessage; // OLD
 			if (!bgDownloader.isTaskEnded(dummyResult, dummyMessage))
 			{
 				unpauseBGDownloader();
 			}
 		}
 	}
-
+#endif
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -981,28 +963,31 @@ TInterfaceState globalMenu()
 	while (PlayerWantToGoInGame == false)
 	{
 
-		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG)
-			// tmp for debug
-			if (::GetAsyncKeyState(VK_SPACE))
-			{
-				pIM->uninitOutGame();
-				pIM->initOutGame();
-				CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", true);
-				NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(2); // TMP TMP
-				IngameDbMngr.flushObserverCalls();
-				NLGUI::CDBManager::getInstance()->flushObserverCalls();
-				CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel")->setActive(false);
-				CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel")->setActive(true);
-				// Active inputs
-				Actions.enable(true);
-				EditActions.enable(true);
-				LuaBGDSuccessFlag = true;
-				CWidgetManager::getInstance()->getParser()->reloadAllLuaFileScripts();
-			}
-		#endif
+#if !FINAL_VERSION
+		if (DebugOutgameReloadUI)
+		{
+			DebugOutgameReloadUI = false;
+			pIM->uninitOutGame();
+			pIM->initOutGame();
+			CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", true);
+			NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(2); // TMP TMP
+			IngameDbMngr.flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
+			CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel")->setActive(false);
+			CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel")->setActive(true);
+			// Active inputs
+			Actions.enable(true);
+			EditActions.enable(true);
+#ifdef RYZOM_BG_DOWNLOADER
+			LuaBGDSuccessFlag = true;
+#endif
+			CWidgetManager::getInstance()->getParser()->reloadAllLuaFileScripts();
+		}
+#endif
 
+#ifdef RYZOM_BG_DOWNLOADER
 		updateBGDownloaderUI();
-
+#endif
 
 		// Update network.
 		try
@@ -1021,7 +1006,7 @@ TInterfaceState globalMenu()
 				// Display the firewall alert string
 				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:connecting:title"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiFirewallAlert")+ucstring("..."));
+					pVT->setTextLocalized("uiFirewallAlert", true);
 
 				// The mouse and fullscreen mode should be unlocked for the user to set the firewall permission
 				nlSleep( 30 ); // 'nice' the client, and prevent to make too many send attempts
@@ -1067,15 +1052,15 @@ TInterfaceState globalMenu()
 			nlSleep(ClientCfg.Sleep);
 		}
 
-		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG)
-			if (::GetAsyncKeyState(VK_CONTROL))
-			{
-				pIM->displayUIViewBBoxs("");
-				pIM->displayUICtrlBBoxs("");
-				pIM->displayUIGroupBBoxs("");
-				displayDebugUIUnderMouse();
-			}
-		#endif
+#if !FINAL_VERSION
+		if (DebugOutgameUI)
+		{
+			pIM->displayUIViewBBoxs("");
+			pIM->displayUICtrlBBoxs("");
+			pIM->displayUIGroupBBoxs("");
+			displayDebugUIUnderMouse();
+		}
+#endif
 
 		// Display
 		Driver->swapBuffers();
@@ -1085,7 +1070,7 @@ TInterfaceState globalMenu()
 		{
 			if (noUserChar || userChar)
 			{
-
+#ifdef RYZOM_BG_DOWNLOADER
 				if (isBGDownloadEnabled())
 				{
 					// If there's a need for mainland download, then proceed
@@ -1094,7 +1079,7 @@ TInterfaceState globalMenu()
 						// if a task is already started, then this was a situation where player went back from game to the character selection,
 						// so just unpause
 						BGDownloader::TTaskResult dummyResult;
-						ucstring				  dummyMessage;
+						ucstring				  dummyMessage; // OLD
 						if (bgDownloader.isTaskEnded(dummyResult, dummyMessage))
 						{
 							// launch mainland patch as a background task
@@ -1109,6 +1094,7 @@ TInterfaceState globalMenu()
 						}
 					}
 				}
+#endif
 
 				//nlinfo("impulseCallBack : received userChars list");
 				noUserChar = userChar = false;
@@ -1237,8 +1223,8 @@ TInterfaceState globalMenu()
 					if (pVT != NULL)
 					{
 						pVT->setMultiLine( true );
-						pVT->setText(CI18N::get("uiFirewallFail")+ucstring(".\n")+
-									  CI18N::get("uiFirewallAlert")+ucstring("."));
+						pVT->setTextLocalized(CI18N::get("uiFirewallFail")+".\n"+
+									  CI18N::get("uiFirewallAlert")+".", false);
 					}
 				}
 			}
@@ -1258,8 +1244,8 @@ TInterfaceState globalMenu()
 	LoginSM.pushEvent(CLoginStateMachine::ev_global_menu_exited);
 
 	//  Init the current Player Name (for interface.cfg and sentence.name save). Make a good File Name.
-	ucstring	&playerName= CharacterSummaries[PlayerSelectedSlot].Name;
-	PlayerSelectedFileName= buildPlayerNameForSaveFile(playerName);
+	string playerName = CharacterSummaries[PlayerSelectedSlot].Name.toUtf8();
+	PlayerSelectedFileName = buildPlayerNameForSaveFile(playerName);
 
 	// Init the current Player Home shard Id and name
 	CharacterHomeSessionId = CharacterSummaries[PlayerSelectedSlot].Mainland;
@@ -1279,19 +1265,7 @@ TInterfaceState globalMenu()
 
 	// Restore video mode
 	if (ClientCfg.SelectCharacter == -1)
-	{
-		if (ClientCfg.Windowed)
-		{
-			// if used changed window resolution in char select
-			// if we don't update ClientCfg, then UI from icfg is restored wrong
-			uint32 width, height;
-			Driver->getWindowSize(width, height);
-			ClientCfg.Width = width;
-			ClientCfg.Height = height;
-		}
-
 		connectionRestoreVideoMode ();
-	}
 
 	// Skip intro next time
 	ClientCfg.writeBool("SkipIntro", true);
@@ -1300,6 +1274,26 @@ TInterfaceState globalMenu()
 	return GOGOGO_IN_THE_GAME;
 }
 
+#if !FINAL_VERSION
+// ***************************************************************************
+class CAHDebugOutgameDebugUI : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		DebugOutgameUI = !DebugOutgameUI;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHDebugOutgameDebugUI, "debug_outgame_ui");
+// ***************************************************************************
+class CAHDebugOutgameReloadUI : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		DebugOutgameReloadUI = !DebugOutgameReloadUI;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHDebugOutgameReloadUI, "debug_outgame_reload_ui");
+#endif
 
 // Init the character selection slot texts from the character summaries
 // ------------------------------------------------------------------------------------------------
@@ -1319,23 +1313,23 @@ public:
 			if (pVT == NULL) return;
 
 			if (rCS.Name.empty())
-				pVT->setText(CI18N::get("uiEmptySlot"));
+				pVT->setTextLocalized("uiEmptySlot", true);
 			else
-				pVT->setText(rCS.Name);
+				pVT->setTextLocalized(rCS.Name.toUtf8(), false);
 		}
 		// 5 slots
 		for (; i < 5; ++i)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i)));
 			if (pVT == NULL) return;
-			pVT->setText(CI18N::get("uiEmptySlot"));
+			pVT->setTextLocalized("uiEmptySlot", true);
 		}
 	}
 };
 REGISTER_ACTION_HANDLER (CAHNetInitCharSel, "net_init_char_sel");
 
 // ------------------------------------------------------------------------------------------------
-void setTarget(CCtrlBase *ctrl, const string &targetName, ucstring &value)
+void setTarget(CCtrlBase *ctrl, const string &targetName, std::string &value)
 {
 	std::vector<CInterfaceLink::CTargetInfo> targets;
 	// find first enclosing group
@@ -1350,7 +1344,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, ucstring &value)
 	if (ig)
 	{
 		CInterfaceExprValue exprValue;
-		exprValue.setUCString(value);
+		exprValue.setString(value);
 
 		CInterfaceLink::splitLinkTargets(targetName, ig, targets);
 		for(uint k = 0; k < targets.size(); ++k)
@@ -1408,12 +1402,12 @@ public:
 		if (CharacterSummaries[PlayerSelectedSlot].Name.empty())
 			return;
 
-		ucstring sValue("");
+		string sValue;
 		uint32 nValue = 0;
 
 		if (sProp == "name")
 		{
-			sValue = CharacterSummaries[PlayerSelectedSlot].Name;
+			sValue = CharacterSummaries[PlayerSelectedSlot].Name.toUtf8();
 			setTarget (pCaller, sTarget, sValue);
 		}
 /*			else if (sProp == "surname")
@@ -1438,8 +1432,8 @@ Deprecated	{
 			sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(titleStr, womanTitle);
 			{
 				// Sometimes translation contains another title
-				ucstring::size_type pos = sValue.find('$');
-				if (pos != ucstring::npos)
+				string::size_type pos = sValue.find('$');
+				if (pos != string::npos)
 				{
 					sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sValue), womanTitle);
 				}
@@ -1682,8 +1676,8 @@ public:
 
 		// Setup the name
 		string sEditBoxPath = getParam (Params, "name");
-		ucstring sFirstName = ucstring("NotSet");
-		ucstring sSurName = ucstring("NotSet");
+		string sFirstName = "NotSet";
+		string sSurName = "NotSet";
 		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBoxPath));
 		if (pGEB != NULL)
 			sFirstName = pGEB->getInputString();
@@ -1695,7 +1689,7 @@ public:
 		string sCharSumPath = getParam(Params, "charsum");
 		SCharacter3DSetup::setupCharacterSummaryFromDB(CS, sCharSumPath);
 		CS.Mainland = MainlandSelected;
-		CS.Name = sFirstName;
+		CS.Name = ucstring::makeFromUtf8(sFirstName); // FIXME: UTF-8 (serial)
 		//CS.Surname = sSurName;
 
 		// Create the message to send to the server from the character summary
@@ -1801,8 +1795,8 @@ public:
 		out.serial (nSelectedSlot);
 
 		// Yoyo: delete the Local files. To avoid problem if recreate a character with same name.
-		ucstring	&playerName= CharacterSummaries[nSelectedSlot].Name;
-		string		playerDeletedFileName= buildPlayerNameForSaveFile(playerName);
+		string playerName = CharacterSummaries[nSelectedSlot].Name.toUtf8();
+		string playerDeletedFileName = buildPlayerNameForSaveFile(playerName);
 		// Delete the 2 Local files
 		pIM->deletePlayerConfig(playerDeletedFileName);
 		pIM->deletePlayerKeys(playerDeletedFileName);
@@ -1852,6 +1846,7 @@ string getTarget(CCtrlBase * /* ctrl */, const string &targetName)
 	return "";
 }
 
+#ifdef RYZOM_LUA_UCSTRING
 // ------------------------------------------------------------------------------------------------
 ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName)
 {
@@ -1865,14 +1860,15 @@ ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName)
 	if (!elem)
 	{
 		nlwarning("<CInterfaceExpr::getprop> : Element is NULL");
-		return ucstring("");
+		return ucstring(""); // TODO: UTF-8 Lua
 	}
 	const CReflectedProperty *pRP = elem->getReflectedProperty(rTI.PropertyName);
 
 	if (pRP->Type == CReflectedProperty::UCString)
 		return ((elem->*(pRP->GetMethod.GetUCString))());
-	return ucstring("");
+	return ucstring(""); // TODO: UTF-8 Lua
 }
+#endif
 
 /*// Ask the server to rename a character
 // ------------------------------------------------------------------------------------------------
@@ -1944,7 +1940,11 @@ public:
 		string sDBLink = getParam(Params, "dblink");
 		CharNameValidDBLink = sDBLink;
 
-		ucstring sName = getUCTarget(NULL,sTarget);
+#ifdef RYZOM_LUA_UCSTRING
+		string sName = getUCTarget(NULL,sTarget).toUtf8(); // TODO: UTF-8 Lua
+#else
+		string sName = getTarget(NULL, sTarget);
+#endif
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (sName.empty())
@@ -1986,13 +1986,13 @@ public:
 					if (Mainlands[k].Id == MainlandSelected)
 					{
 						// extract name from mainland
-						/*ucstring::size_type first = Mainlands[k].Name.find('(');
-						ucstring::size_type last = Mainlands[k].Name.find(')');
-						if (first != ucstring::npos && last != ucstring::npos && first < last)
+						/*ucstring::size_type first = Mainlands[k].Name.find('('); // OLD
+						ucstring::size_type last = Mainlands[k].Name.find(')');// OLD
+						if (first != ucstring::npos && last != ucstring::npos && first < last)// OLD
 						{
 							NewKeysCharNameWanted += Mainlands[k].Name.substr(first, last - first + 1);
 						}*/
-						NewKeysCharNameWanted += ('(' + Mainlands[k].Name + ')');
+						NewKeysCharNameWanted += ('(' + Mainlands[k].Name.toUtf8() + ')');
 						break;
 					}
 				}
@@ -2015,7 +2015,7 @@ public:
 
 				for (uint i = 0; i < CharacterSummaries.size(); ++i)
 				{
-					ucstring ls = CharacterSummaries[i].Name.toString();
+					string ls = CharacterSummaries[i].Name.toString();
 					if (ls == sName)
 						CharNameValid = false;
 				}
@@ -2138,7 +2138,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		if (pList == NULL)
@@ -2170,8 +2170,8 @@ public:
 				CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
 				if (pVT != NULL)
 				{
-					ucstring ucstr = Mainlands[i].Name + ucstring(" ") + Mainlands[i].Description;
-					pVT->setText(ucstr);
+					std::string str = Mainlands[i].Name.toUtf8() + " " + Mainlands[i].Description.toUtf8();
+					pVT->setTextLocalized(str, false);
 				}
 
 				// Add to the list
@@ -2217,7 +2217,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		pList->clearGroups();
 	}
@@ -2302,7 +2302,7 @@ public:
 	}
 
 	// add a new keyset in the list
-	void addKeySet(const std::string &filename, const ucstring &name, const ucstring tooltip)
+	void addKeySet(const std::string &filename, const std::string &name, const std::string tooltip)
 	{
 		nlassert(List);
 		CInterfaceGroup *pNewLine = buildTemplate("t_keyset", toString(filename));
@@ -2311,7 +2311,7 @@ public:
 			CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
 			if (pVT != NULL)
 			{
-				pVT->setText(name);
+				pVT->setTextLocalized(name, false);
 			}
 
 			CCtrlBase *pBut = pNewLine->getCtrl("but");
@@ -2353,12 +2353,12 @@ public:
 
 				std::string strId = "uiCP_KeysetName_" + keySetVar->asString(k);
 				strFindReplace(strId, ".", "_");
-				ucstring keySetName = CI18N::get(strId);
+				const string &keySetName = CI18N::get(strId);
 				strId = "uiCP_KeysetTooltip_" + keySetVar->asString(k);
 				strFindReplace(strId, ".", "_");
 				if (CI18N::hasTranslation(strId))
 				{
-					ucstring keySetTooltip = CI18N::get(strId);
+					const string &keySetTooltip = CI18N::get(strId);
 					addKeySet(keySetVar->asString(k), keySetName, keySetTooltip);
 				}
 			}
@@ -2367,8 +2367,8 @@ public:
 		{
 			nlwarning("'%s' var not found in config file, or list is empty, proposing default keyset only", KeySetVarName);
 			std::string defaultKeySet = "keys";
-			ucstring keySetName = CI18N::get("uiCP_KeysetName_" + defaultKeySet);
-			ucstring keySetTooltip = CI18N::get("uiCP_KeysetTooltip_" + defaultKeySet);
+			const string &keySetName = CI18N::get("uiCP_KeysetName_" + defaultKeySet);
+			const string &keySetTooltip = CI18N::get("uiCP_KeysetTooltip_" + defaultKeySet);
 			addKeySet(defaultKeySet, keySetName, keySetTooltip);
 		}
 
@@ -2394,19 +2394,19 @@ public:
 		{
 			for(TKeySetFileMap::iterator it = keySetFiles.begin(); it != keySetFiles.end(); ++it)
 			{
-				ucstring name;
+				string name;
 				if (ClientCfg.Local)
 				{
-					name = ucstring(it->first);
+					name = it->first;
 				}
 				else
 				{
-					// search matching ucstring name from character summaries
+					// search matching utf-8 string name from character summaries
 					for (uint k = 0; k < CharacterSummaries.size(); ++k)
 					{
-						if (it->first == buildPlayerNameForSaveFile(CharacterSummaries[k].Name))
+						if (it->first == buildPlayerNameForSaveFile(CharacterSummaries[k].Name.toUtf8()))
 						{
-							name = CharacterSummaries[k].Name;
+							name = CharacterSummaries[k].Name.toUtf8();
 						}
 					}
 				}
@@ -2417,7 +2417,7 @@ public:
 						addSeparator();
 						separatorAdded = true;
 					}
-					addKeySet(it->first, ucstring(it->first), CI18N::get(std::string("uiCP_KeysetImport") + (it->second & GameKeys ? "_Game" : "")
+					addKeySet(it->first, it->first, CI18N::get(std::string("uiCP_KeysetImport") + (it->second & GameKeys ? "_Game" : "")
 																						  + (it->second & EditorKeys ? "_Editor" : "")));
 				}
 			}
@@ -2458,7 +2458,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		pList->clearGroups();
 	}
@@ -2552,14 +2552,14 @@ REGISTER_ACTION_HANDLER (CAHResetKeysetSelect, "keyset_select");
 // *************************** SCENARIO CONTROL WINDOW ***********************
 // ***************************************************************************
 // helper function for "setScenarioInformation"
-static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName, const ucstring &text)
+static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName, const std::string &text)
 {
 	CInterfaceElement *result = scenarioWnd->findFromShortId(uiName);
 	if(result)
 	{
 		CViewText* viewText = dynamic_cast<CViewText*>(result);
 		if(viewText)
-			viewText->setText(text);
+			viewText->setTextLocalized(text, false);
 		CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 		if(editBox)
 			editBox->setInputString(text);
@@ -2567,11 +2567,9 @@ static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName
 	}
 }
 // helper function for "setScenarioInformation"
-static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName, const std::string &utf8Text)
+static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName, const ucstring &text) // TODO: UTF-8 Lua
 {
-	ucstring ucText;
-	ucText.fromUtf8(utf8Text);
-	setTextField(scenarioWnd, uiName, ucText);
+	setTextField(scenarioWnd, uiName, text.toUtf8());
 }
 // helper function for "setScenarioInformation"
 static std::string fieldLookup(const vector< pair< string, string > > &values, const std::string &id)
@@ -2682,7 +2680,7 @@ class CAHScenarioControl : public IActionHandler
 			CViewText* viewText = dynamic_cast<CViewText*>(result);
 			if(viewText)
 			{
-				viewText->setText(R2::getEditor().isInitialized()?CI18N::get("uiR2EDScenarioName"):CI18N::get("uiR2EDScenarioFileName"));
+				viewText->setTextLocalized(R2::getEditor().isInitialized() ? "uiR2EDScenarioName" : "uiR2EDScenarioFileName", true);
 			}
 		}
 
@@ -2694,9 +2692,9 @@ class CAHScenarioControl : public IActionHandler
 			if(okButton)
 			{
 				if(R2::getEditor().getAccessMode()!=R2::CEditor::AccessDM)
-					okButton->setHardText(CI18N::get("uiR2EDLaunchScenario").toString());
+					okButton->setHardText(CI18N::get("uiR2EDLaunchScenario"));
 				else
-					okButton->setHardText(CI18N::get("uiR2EDApplyScenarioFilters").toString());
+					okButton->setHardText(CI18N::get("uiR2EDApplyScenarioFilters"));
 			}
 		}
 
@@ -2712,7 +2710,7 @@ class CAHScenarioControl : public IActionHandler
 				CViewText* viewText= dynamic_cast<CViewText*>(result);
 
 				if(viewText)
-					viewText->setText(ucstring(""));
+					viewText->setText(std::string());
 			}
 		}
 		setScenarioInformation(scenarioWnd, "");
@@ -2748,7 +2746,7 @@ class CAHScenarioControl : public IActionHandler
 					CViewText *shardName = dynamic_cast<CViewText *>(toggleGr->getView("button_text"));
 					if (shardName)
 					{
-						shardName->setText(Mainlands[i].Name);
+						shardName->setTextLocalized(Mainlands[i].Name.toUtf8(), false);
 					}
 				}
 			}
@@ -2888,7 +2886,7 @@ class CAHScenarioInformation : public IActionHandler
 					scenarioName = scenarioName.substr(posScenarioName==0?posScenarioName:posScenarioName+1);
 					posScenarioName = scenarioName.find('/');
 				}
-				viewText->setText(scenarioName);
+				viewText->setTextLocalized(scenarioName, false);
 			}
 		}
 
@@ -2977,7 +2975,7 @@ class CAHLoadScenario : public IActionHandler
 		{
 			CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 			if(editBox)
-				description = editBox->getInputString().toString();
+				description = editBox->getInputString();
 		}
 
 		// races
@@ -3184,9 +3182,9 @@ class CAHLoadScenario : public IActionHandler
 		// --------------------------
 
 		TRuleType ruleType(TRuleType::rt_strict);
-		if(rules==CI18N::get("uiR2EDliberal").toString())
+		if(rules==CI18N::get("uiR2EDliberal"))
 			ruleType = TRuleType(TRuleType::rt_liberal);
-		else if(rules == CI18N::get("uiR2EDstrict").toString())
+		else if(rules == CI18N::get("uiR2EDstrict"))
 			ruleType = TRuleType(TRuleType::rt_strict);
 		volatile static bool override = false;
 		if (override)
@@ -3250,7 +3248,7 @@ class CAHLoadScenario : public IActionHandler
 			{
 				CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
+					pVT->setTextLocalized("uiRingWarningFreeTrial", true);
 				CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 
 				return;
@@ -3331,7 +3329,7 @@ class CAHLoadScenario : public IActionHandler
 						{
 							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 							if (pVT != NULL)
-								pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
+								pVT->setTextLocalized("uiRingWarningFreeTrial", true);
 							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 						}
 
@@ -3345,10 +3343,10 @@ class CAHLoadScenario : public IActionHandler
 								if(val!=0)
 								{
 									STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-									ucstring res;
+									string res;
 									if (pSMC->getString(val,res))
 									{
-										string charName = CEntityCL::removeTitleAndShardFromName(res).toString();
+										string charName = CEntityCL::removeTitleAndShardFromName(res);
 										sessionBrowser.inviteCharacterByName(sessionBrowser._LastScheduleSessionCharId, charName);
 
 										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
@@ -3360,7 +3358,7 @@ class CAHLoadScenario : public IActionHandler
 										{
 											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 											if (pVT != NULL)
-												pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
+												pVT->setTextLocalized("uiRingWarningInviteFreeTrial", true);
 											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 										}
 									}
@@ -3435,3 +3433,239 @@ class CAHOpenRingSessions : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOpenRingSessions, "open_ring_sessions");
+
+// ***************************************************************************
+class CAHInitImportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CHARACTER));
+		if (!list)
+		{
+			nlwarning("element " GROUP_LIST_CHARACTER " not found probably bad outgame.xml");
+			return;
+		}
+
+		// retrieve saved files
+		std::vector<string> savedCharacters;
+		CPath::getPathContent("save/", false, false, true, savedCharacters);
+
+		CInterfaceGroup *newLine;
+		CInterfaceGroup *prevLine = NULL;
+
+		for (uint i = 0; i < savedCharacters.size(); ++i)
+		{
+			// search saved characters only
+			if (testWildCard(CFile::getFilename(savedCharacters[i]), "character_*.save"))
+			{
+				const std::string id = CFile::getFilenameWithoutExtension(savedCharacters[i]).substr(strlen("character_"));
+				if (id.empty())
+					continue;
+
+				std::vector<pair<string, string>> params;
+				params.clear();
+				params.push_back(std::pair<string, string>("id", id));
+				// adjust ref
+				if (list->getNumGroup() > 0)
+					params.push_back(std::pair<string, string>("posref", "BL TL"));
+
+				newLine = CWidgetManager::getInstance()->getParser()->createGroupInstance("t_import", GROUP_LIST_CHARACTER, params);
+				if (newLine)
+				{
+					CViewText *text = dynamic_cast<CViewText*>(newLine->getView("name"));
+					if (text)
+						text->setText(string(savedCharacters[i]));
+
+					// first button is pushed
+					CCtrlButton *button = dynamic_cast<CCtrlButton*>(newLine->getCtrl("but"));
+					if (button && list->getNumGroup() == 0)
+						button->setPushed(true);
+
+					// add to the list now
+					newLine->setParent(list);
+					newLine->setParentSize(list);
+					newLine->setParentPos(prevLine);
+
+					list->addGroup(newLine);
+
+					prevLine = newLine;
+				}
+			}
+		}
+		// none case
+		if (list->getNumGroup() == 0)
+			CLuaManager::getInstance().executeLuaScript("outgame:procCharselNotifaction(3)");
+
+		list->invalidateCoords();
+	}
+};
+REGISTER_ACTION_HANDLER( CAHInitImportCharacter, "import_char_init" );
+
+// ***************************************************************************
+class CAHResetImportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CHARACTER));
+		if (list)
+			list->clearGroups();
+
+		if (!ImportCharacter.empty())
+			ImportCharacter = "";
+	}
+};
+REGISTER_ACTION_HANDLER( CAHResetImportCharacter, "import_char_reset" );
+
+// ***************************************************************************
+class CAHSelectImportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const std::string &Params)
+	{
+		struct CUnpush : public CInterfaceElementVisitor
+		{
+			CCtrlBase *Ref;
+			virtual void visitCtrl(CCtrlBase *ctrl)
+			{
+				if (ctrl == Ref) return;
+				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(ctrl);
+				if (but)
+				{
+					but->setPushed(false);
+				}
+			}
+		};
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CHARACTER));
+		if (!list)
+			return;
+
+		// unselect
+		if (Params.empty())
+		{
+			CUnpush unpusher;
+			unpusher.Ref = pCaller;
+			list->visit(&unpusher);
+		}
+
+		// now select
+		std::string name;
+		if (Params.empty())
+		{
+			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pCaller);
+			if (!pCB)
+				return;
+
+			std::string id = pCB->getId();
+			id = id.substr(0, id.rfind(':'));
+
+			if (!fromString(id.substr(id.rfind(':')+1, id.size()), name))
+				return;
+
+			pCB->setPushed(true);
+		}
+		else
+			if (!fromString(Params, name))
+				return;
+
+		ImportCharacter = "";
+		// check filename and store
+		if (CFile::fileExists(toString("save/character_%s.save", name.c_str())))
+			ImportCharacter = name;
+	}
+};
+REGISTER_ACTION_HANDLER( CAHSelectImportCharacter, "import_char_select" );
+
+// ***************************************************************************
+class CAHImportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		if (ImportCharacter.empty())
+			return;
+
+		if (!CFile::fileExists(toString("save/character_%s.save", ImportCharacter.c_str())))
+			return;
+
+		bool success = false;
+
+		CIFile fd;
+		CCharacterSummary CS;
+		// use temporary file until close()
+		if (fd.open(toString("save/character_%s.save", ImportCharacter.c_str())))
+		{
+			try
+			{
+				CS.serial(fd);
+				SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", CS);
+
+				// validate import
+				CDBManager::getInstance()->getDbProp("UI:TEMP:IMPORT")->setValue32(1);
+				success = true;
+			}
+			catch (const EStream &e)
+			{
+				nlwarning(e.what());
+			}
+			fd.close();
+		}
+		else
+			nlwarning("Failed to open file: save/character_%s.save", ImportCharacter.c_str());
+
+		// user notification
+		if (!success)
+			CLuaManager::getInstance().executeLuaScript("outgame:procCharselNotifaction(2)");
+		else
+			CAHManager::getInstance()->runActionHandler("proc", NULL, "proc_charsel_create_new");
+	}
+};
+REGISTER_ACTION_HANDLER( CAHImportCharacter, "import_char" );
+
+// ***************************************************************************
+class CAHExportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	{
+		if (Params.empty())
+			return;
+
+		sint32 slot = -1;
+		if (!fromString(getParam(Params, "slot"), slot))
+			return;
+
+		if (slot >= CharacterSummaries.size() || slot < 0)
+			return;
+
+		// retrieve infos
+		CCharacterSummary &CS = CharacterSummaries[slot];
+		if (CS.Name.empty())
+			return;
+
+		// extract name
+		const std::string name = buildPlayerNameForSaveFile(CS.Name.toUtf8());
+
+		COFile fd;
+		bool success = false;
+		// use temporary file until close()
+		if (fd.open(toString("save/character_%s.save", name.c_str()), false, false, true))
+		{
+			try
+			{
+				fd.serial(CS);
+				fd.flush();
+				// validate
+				success = true;
+			}
+			catch (const EStream &e)
+			{
+				nlwarning(e.what());
+			}
+			fd.close();
+		}
+		else
+			nlwarning("Failed to open file: save/character_%s.save", name.c_str());
+
+		const uint8 val = (success == true) ? 0 : 1;
+		// user notification
+		CLuaManager::getInstance().executeLuaScript(toString("outgame:procCharselNotifaction(%i)", val));
+	}
+};
+REGISTER_ACTION_HANDLER( CAHExportCharacter, "export_char" );

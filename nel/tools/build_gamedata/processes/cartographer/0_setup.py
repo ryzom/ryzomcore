@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Setup cartographer
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2014  Jan BOON
 #
 # This program is free software: you can redistribute it and/or modify
@@ -46,6 +46,7 @@ printLog(log, "")
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + CartographerBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + CartographerMapBuildDirectory)
 
 # Setup lookup directories
 printLog(log, ">>> Setup lookup directories <<<")
@@ -65,6 +66,7 @@ for dir in PropertiesExportBuildSearchPaths:
 # Setup client directories
 printLog(log, ">>> Setup install directories <<<")
 mkPath(log, InstallDirectory + "/" + CartographerInstallDirectory)
+mkPath(log, InstallDirectory + "/" + IslandsInstallDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup configuration <<<")
@@ -95,15 +97,19 @@ cfg.write("\t\"" + CartographerContinent + "\", \n")
 cfg.write("};\n")
 cfg.write("\n")
 cfg.write("SeasonSuffixes = {\n")
-for suffix in MultipleTilesPostfix:
-	cfg.write("\t\"" + suffix + "\", \n")
+if CartographerSeasonSuffixes:
+	for suffix in CartographerSeasonSuffixes:
+		cfg.write("\t\"" + suffix + "\", \n")
+else:
+	for suffix in MultipleTilesPostfix:
+		cfg.write("\t\"" + suffix + "\", \n")
 cfg.write("};\n")
 cfg.write("\n")
 cfg.write("InverseZTest = true;\n")
 cfg.write("Vegetation = true;\n")
 cfg.write("MeterPixelSize = 2;\n")
 cfg.write("\n")
-cfg.write("CompleteIslandsFile = \"r2_islands.xml\";\n")
+cfg.write("CompleteIslandsFile = \"" + ExportBuildDirectory + "/" + CartographerBuildDirectory + "/" + IslandsXmlFile + "\";\n")
 cfg.write("EntryPointsFile = \"r2_entry_points.txt\";\n")
 cfg.write("\n")
 cfg.close()

@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -69,7 +70,7 @@ namespace NLGUI
 
 		static CAHManager* getInstance()
 		{
-			if (_GlobalInstance == NULL)
+			if (_GlobalInstance == NULL && !s_Deleted)
 				_GlobalInstance = new CAHManager;
 			return _GlobalInstance;
 		}
@@ -133,6 +134,19 @@ namespace NLGUI
 		CAHManager(){}
 		static CAHManager *_GlobalInstance;
 		static bool editorMode;
+
+		class CDeleter
+		{
+		public:
+			~CDeleter()
+			{
+				delete _GlobalInstance;
+				_GlobalInstance = NULL;
+				s_Deleted = true;
+			}
+		};
+		static CDeleter s_Deleter;
+		static bool s_Deleted;
 
 	};
 

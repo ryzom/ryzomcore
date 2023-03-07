@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -53,7 +56,7 @@ CShapeBank::~CShapeBank()
 
 IShape*CShapeBank::addRef(const string &shapeNameNotLwr)
 {
-	string	shapeName= toLower(shapeNameNotLwr);
+	string	shapeName= toLowerAscii(shapeNameNotLwr);
 
 	// get the shape info (must succeed)
 	TShapeInfoMap::iterator scfpmIt = ShapePtrToShapeInfo.find( getShapePtrFromShapeName( shapeName ) );
@@ -431,7 +434,7 @@ bool CShapeBank::processWSUploadTexture (CWaitingShape &rWS, uint32 &nTotalUploa
 
 CShapeBank::TShapeState CShapeBank::getPresentState (const string &shapeNameNotLwr)
 {
-	string	shapeName= toLower(shapeNameNotLwr);
+	string	shapeName= toLowerAscii(shapeNameNotLwr);
 
 	// Is the shape is found in the shape map so return Present
 	TShapeMap::iterator smIt = ShapeMap.find (shapeName);
@@ -447,7 +450,7 @@ CShapeBank::TShapeState CShapeBank::getPresentState (const string &shapeNameNotL
 // ***************************************************************************
 IShape	*CShapeBank::getShape (const std::string &shapeNameNotLwr)
 {
-	string	shapeName= toLower(shapeNameNotLwr);
+	string	shapeName= toLowerAscii(shapeNameNotLwr);
 
 	// Is the shape is found in the shape map so return Present
 	TShapeMap::iterator smIt = ShapeMap.find (shapeName);
@@ -461,7 +464,7 @@ IShape	*CShapeBank::getShape (const std::string &shapeNameNotLwr)
 
 void CShapeBank::load (const string &shapeNameNotLwr)
 {
-	string	shapeName= toLower(shapeNameNotLwr);
+	string	shapeName= toLowerAscii(shapeNameNotLwr);
 
 	TShapeMap::iterator smIt = ShapeMap.find(shapeName);
 	if( smIt == ShapeMap.end() )
@@ -495,7 +498,7 @@ void CShapeBank::load (const string &shapeNameNotLwr)
 
 void CShapeBank::loadAsync (const std::string &shapeNameNotLwr, IDriver *pDriver, const CVector &position, bool *bSignal, uint selectedTexture)
 {
-	string	shapeName= toLower(shapeNameNotLwr);
+	string	shapeName= toLowerAscii(shapeNameNotLwr);
 
 	TShapeMap::iterator smIt = ShapeMap.find(shapeName);
 	if (smIt != ShapeMap.end())
@@ -527,7 +530,7 @@ void CShapeBank::loadAsync (const std::string &shapeNameNotLwr, IDriver *pDriver
 
 void CShapeBank::cancelLoadAsync (const std::string &shapeNameNotLwr)
 {
-	string	shapeName= toLower(shapeNameNotLwr);
+	string	shapeName= toLowerAscii(shapeNameNotLwr);
 
 	TWaitingShapesMap::iterator wsmmIt = WaitingShapes.find(shapeName);
 	if (wsmmIt != WaitingShapes.end())
@@ -597,7 +600,7 @@ bool CShapeBank::isShapeWaiting ()
 void CShapeBank::add (const string &shapeNameNotLwr, IShape* pShp)
 {
 	nlassert(pShp);
-	string	shapeName= toLower(shapeNameNotLwr);
+	string	shapeName= toLowerAscii(shapeNameNotLwr);
 
 	// request a system mem geometry copy?
 	if(pShp && _ShapeNeedingSystemGeometryCopy.find(shapeName)!=_ShapeNeedingSystemGeometryCopy.end())
@@ -683,8 +686,7 @@ void CShapeBank::reset()
 	while( scmIt != ShapeCacheNameToShapeCache.end() )
 	{
 		CShapeCache *pShpCache = getShapeCachePtrFromShapeCacheName( scmIt->first );
-		if( pShpCache == NULL )
-			nlstop; // Should never happen
+		nlassert(pShpCache);
 		pShpCache->MaxSize = 0;
 		checkShapeCache( pShpCache );
 
@@ -722,7 +724,7 @@ sint CShapeBank::getShapeCacheFreeSpace(const std::string &shapeCacheName) const
 
 void CShapeBank::linkShapeToShapeCache(const string &shapeNameNotLwr, const string &shapeCacheName)
 {
-	string	shapeName= toLower(shapeNameNotLwr);
+	string	shapeName= toLowerAscii(shapeNameNotLwr);
 
 	for(;;)
 	{
@@ -855,7 +857,7 @@ void CShapeBank::preLoadShapes(const std::string &shapeCacheName,
 		return;
 
 	// lower case
-	string wildCard= toLower(wildCardNotLwr);
+	string wildCard= toLowerAscii(wildCardNotLwr);
 
 	// For all files
 	for(uint i=0;i<listFile.size();i++)
@@ -864,7 +866,7 @@ void CShapeBank::preLoadShapes(const std::string &shapeCacheName,
 		if (progress)
 			progress->progress ((float)i/(float)listFile.size ());
 
-		string	fileName= toLower(CFile::getFilename(listFile[i]));
+		string	fileName= toLowerAscii(CFile::getFilename(listFile[i]));
 		// if the file is ok for the wildCard, process it
 		if( testWildCard(fileName.c_str(), wildCard.c_str()) )
 		{
@@ -906,7 +908,7 @@ void CShapeBank::preLoadShapes(const std::string &shapeCacheName,
 // ***************************************************************************
 void CShapeBank::buildSystemGeometryForshape(const std::string &shapeName)
 {
-	_ShapeNeedingSystemGeometryCopy.insert(toLower(shapeName));
+	_ShapeNeedingSystemGeometryCopy.insert(toLowerAscii(shapeName));
 }
 
 

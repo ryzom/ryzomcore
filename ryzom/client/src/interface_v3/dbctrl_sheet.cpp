@@ -1,8 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -56,6 +56,7 @@
 #include "../r2/editor.h"
 
 #include "nel/gui/lua_manager.h"
+#include "nel/misc/xml_macros.h"
 
 extern CSheetManager SheetMngr;
 
@@ -77,6 +78,8 @@ REGISTER_UI_CLASS(CDBCtrlSheet)
 
 
 const uint64 NOTIFY_ANIM_MS_DURATION = 1000;
+
+#ifdef RYZOM_FORGE
 
 // state kept and changed by UI:SAVE:SHOW_ICON_BUFFS
 bool CDBCtrlSheet::_ShowIconBuffs = true;
@@ -102,9 +105,13 @@ void CControlSheetInfoWaiter::infoReceived()
 }
 
 
-ucstring CControlSheetInfoWaiter::infoValidated() const
+string CControlSheetInfoWaiter::infoValidated() const
 {
-	ucstring help;
+#ifdef RYZOM_LUA_UCSTRING
+	ucstring help; // Compatibility
+#else
+	string help;
+#endif
 	if (CtrlSheet && !LuaMethodName.empty())
 	{
 		// delegate setup of context he help ( & window ) to lua
@@ -122,7 +129,12 @@ ucstring CControlSheetInfoWaiter::infoValidated() const
 			// retrieve result from stack
 			if (!ls->empty())
 			{
+#ifdef RYZOM_LUA_UCSTRING
 				CLuaIHM::pop(*ls, help);
+#else
+				help = ls->toString(-1);
+				ls->pop();
+#endif
 			}
 			else
 			{
@@ -131,8 +143,14 @@ ucstring CControlSheetInfoWaiter::infoValidated() const
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
+	return help.toUtf8();
+#else
 	return help;
+#endif
 }
+
+#endif
 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
@@ -140,6 +158,8 @@ int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
 	CLuaIHM::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) ));
 	return 1;
 }
+
+#ifdef RYZOM_FORGE
 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
@@ -176,10 +196,16 @@ int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
 	return 1;
 }
 
+#endif
+
 // ***************************************************************************
 int CDBCtrlSheet::luaGetName(CLuaState &ls)
 {
-	CLuaIHM::push(ls, getItemActualName());
+#ifdef RYZOM_LUA_UCSTRING
+	CLuaIHM::push(ls, ucstring::makeFromUtf8(getItemActualName()));
+#else
+	ls.push(getItemActualName());
+#endif
 	return 1;
 }
 
@@ -207,9 +233,13 @@ int CDBCtrlSheet::luaGetCreatorName(CLuaState &ls)
 {
 	uint32	itemSlotId = getInventory().getItemSlotId(this);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-	ucstring creatorName;
+	string creatorName;
 	STRING_MANAGER::CStringManagerClient::instance()->getString(itemInfo.CreatorName, creatorName);
-	CLuaIHM::push(ls, creatorName);
+#ifdef RYZOM_LUA_UCSTRING
+	CLuaIHM::push(ls, ucstring::makeFromUtf8(creatorName)); // FIXME: Lua UTF-8
+#else
+	ls.push(creatorName);
+#endif
 
 	return 1;
 }
@@ -325,29 +355,30 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"nature" );
 	if (prop)
 	{
-		if (NLMISC::toLower(prop.str()) == "item")
+		std::string lwrProp = NLMISC::toLower(prop.str());
+		if (lwrProp == "item")
 			_Type = CCtrlSheetInfo::SheetType_Item;
-		else if (NLMISC::toLower(prop.str()) == "pact")
+		else if (lwrProp == "pact")
 			_Type = CCtrlSheetInfo::SheetType_Pact;
-		else if (NLMISC::toLower(prop.str()) == "skill")
+		else if (lwrProp == "skill")
 			_Type = CCtrlSheetInfo::SheetType_Skill;
-		else if (NLMISC::toLower(prop.str()) == "auto")
+		else if (lwrProp == "auto")
 			_Type = CCtrlSheetInfo::SheetType_Auto;
-		else if (NLMISC::toLower(prop.str()) == "macro")
+		else if (lwrProp == "macro")
 			_Type = CCtrlSheetInfo::SheetType_Macro;
-		else if (NLMISC::toLower(prop.str()) == "guild_flag")
+		else if (lwrProp == "guild_flag")
 			_Type = CCtrlSheetInfo::SheetType_GuildFlag;
-		else if (NLMISC::toLower(prop.str()) == "mission")
+		else if (lwrProp == "mission")
 			_Type = CCtrlSheetInfo::SheetType_Mission;
-		else if (NLMISC::toLower(prop.str()) == "sbrick")
+		else if (lwrProp == "sbrick")
 			_Type = CCtrlSheetInfo::SheetType_SBrick;
-		else if (NLMISC::toLower(prop.str()) == "sphraseid")
+		else if (lwrProp == "sphraseid")
 			_Type = CCtrlSheetInfo::SheetType_SPhraseId;
-		else if (NLMISC::toLower(prop.str()) == "sphrase")
+		else if (lwrProp == "sphrase")
 			_Type = CCtrlSheetInfo::SheetType_SPhrase;
-		else if (NLMISC::toLower(prop.str()) == "elevator_destination")
+		else if (lwrProp == "elevator_destination")
 			_Type = CCtrlSheetInfo::SheetType_ElevatorDestination;
-		else if (NLMISC::toLower(prop.str()) == "outpost_building")
+		else if (lwrProp == "outpost_building")
 			_Type = CCtrlSheetInfo::SheetType_OutpostBuilding;
 	}
 
@@ -355,7 +386,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_noitem" );
 	if (prop)
 	{
-		string TxName = toLower((const char *) prop);
+		string TxName = toLowerAscii((const char *) prop);
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_DispNoSheetBmpId = rVR.getTextureIdFromName (TxName);
 	}
@@ -401,23 +432,23 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );
 	if (prop)
 	{
-		_ListMenuLeft = toLower((const char *) prop);
+		_ListMenuLeft = toLowerAscii((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
 	if (prop)
 	{
-		_ListMenuRight = toLower((const char *) prop);
+		_ListMenuRight = toLowerAscii((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r_empty_slot" );
 	if (prop)
 	{
-		_ListMenuRightEmptySlot = toLower((const char *) prop);
+		_ListMenuRightEmptySlot = toLowerAscii((const char *) prop);
 	}
 	// list menu on both clicks
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_b" );
 	if (prop)
 	{
-		setListMenuBoth(toLower((const char *) prop));
+		setListMenuBoth(toLowerAscii((const char *) prop));
 	}
 
 	// _BrickTypeBitField
@@ -430,7 +461,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 		// The string may have multiple brick type separated by |
 		string	brickTypeArray= (const char*)prop;
 		vector<string>	strList;
-		NLMISC::splitString(NLMISC::toUpper(brickTypeArray), "|", strList);
+		NLMISC::splitString(NLMISC::toUpperAscii(brickTypeArray), "|", strList);
 
 		// Test All words
 		for(uint i=0;i<strList.size();i++)
@@ -456,7 +487,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	if(prop)
 	{
 		string str= prop.str();
-		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpper(str));
+		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpperAscii(str));
 	}
 
 	// _AutoGrayed
@@ -511,7 +542,9 @@ CCtrlDraggable(param)
 	_Useable= true;
 	_GrayedLink= NULL;
 	_NeedSetup= true;
+#ifdef RYZOM_FORGE
 	_ItemInfoChanged = true;
+#endif
 	_IconW = 0;
 	_IconH = 0;
 	_SetupInit= false;
@@ -536,13 +569,24 @@ CCtrlDraggable(param)
 	_ItemRMFaberStatType= NULL;
 	_NotifyAnimEndTime = 0;
 
+#ifdef RYZOM_FORGE
 	_HpBuffIcon = "ico_heal.tga";
 	_SapBuffIcon = "ico_sap.tga";
 	_StaBuffIcon = "ico_stamina.tga";
 	_FocusBuffIcon = "ico_focus.tga";
+#endif
 
 	_RegenText = NULL;
 	_RegenTextValue = 0;
+	_RegenTextEnabled = true;
+	_RegenTextShadow = true;
+	_RegenTextOutline = false;
+	_RegenTextFctLua = false;
+	_RegenTextY = 2;
+	_RegenTextFontSize = 8;
+	_RegenTextColor = NLMISC::CRGBA::White;
+	_RegenTextShadowColor = NLMISC::CRGBA::Black;
+	_RegenTextOutlineColor = NLMISC::CRGBA::Black;
 }
 
 // ----------------------------------------------------------------------------
@@ -550,10 +594,12 @@ CDBCtrlSheet::~CDBCtrlSheet()
 {
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
+#ifdef RYZOM_FORGE
 	if (_ItemInfoWaiter.Requesting)
 	{
 		getInventory().removeItemInfoWaiter(&_ItemInfoWaiter);
 	}
+#endif
 
 	if (_GuildBack)
 	{
@@ -638,6 +684,7 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"slot" );
 	if(prop)	_DrawSlot= CInterfaceElement::convertBool(prop);
 
+#ifdef RYZOM_FORGE
 	//
 	_HpBuffIcon = "ico_heal.tga";
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"hp_buff_icon" );
@@ -654,6 +701,18 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	_FocusBuffIcon = "ico_focus.tga";
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"focus_buff_icon" );
 	if (prop)	_FocusBuffIcon = string((const char *)prop);
+#endif
+
+	XML_READ_BOOL(cur, "regen_text", _RegenTextEnabled, true);
+	XML_READ_BOOL(cur, "regen_text_shadow", _RegenTextShadow, true);
+	XML_READ_BOOL(cur, "regen_text_outline", _RegenTextOutline, false);
+	XML_READ_SINT(cur, "regen_text_y", _RegenTextY, 2);
+	XML_READ_UINT(cur, "regen_text_fontsize", _RegenTextFontSize, 8);
+	XML_READ_COLOR(cur, "regen_text_color", _RegenTextColor, NLMISC::CRGBA::White);
+	XML_READ_COLOR(cur, "regen_text_shadow_color", _RegenTextShadowColor, NLMISC::CRGBA::Black);
+	XML_READ_COLOR(cur, "regen_text_outline_color", _RegenTextOutlineColor, NLMISC::CRGBA::Black);
+	XML_READ_STRING(cur, "regen_text_fct", _RegenTextFct, "");
+	_RegenTextFctLua = startsWith(_RegenTextFct, "lua:");
 
 	updateActualType();
 	// Init size for Type
@@ -929,7 +988,7 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 				return INVENTORIES::bag;
 			break;
 		case 'P':
-			nlctassert(MAX_INVENTORY_ANIMAL==7);
+			nlctassert(MAX_INVENTORY_ANIMAL==4);
 			if( strncmp( "PACK_ANIMAL", szName2, 11 ) )
 				break;
 			switch( szName2[11] )
@@ -942,12 +1001,6 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 				return INVENTORIES::pet_animal3;
 			case '3':
 				return INVENTORIES::pet_animal4;
-			case '4':
-				return INVENTORIES::pet_animal5;
-			case '5':
-				return INVENTORIES::pet_animal6;
-			case '6':
-				return INVENTORIES::pet_animal7;
 			default:
 				break;
 			}
@@ -1081,6 +1134,25 @@ void CDBCtrlSheet::updateIconSize()
 	}
 }
 
+void CDBCtrlSheet::updateCharacBuffs()
+{
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
+	uint8 characBuffs = getItemCharacBuffs();
+
+	_BuffIcons.clear();
+	if (characBuffs & (1 << CHARACTERISTICS::constitution)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_heal.tga")));
+	if (characBuffs & (1 << CHARACTERISTICS::intelligence)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_sap.tga")));
+	if (characBuffs & (1 << CHARACTERISTICS::strength)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_stamina.tga")));
+	if (characBuffs & (1 << CHARACTERISTICS::dexterity)) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName("ico_focus.tga")));
+
+	// update sizes
+	for(uint i = 0; i < _BuffIcons.size(); ++i)
+	{
+		rVR.getTextureSizeFromId(_BuffIcons[i].TextureId, _BuffIcons[i].IconW, _BuffIcons[i].IconH);
+	}
+}
+
+#ifdef RYZOM_FORGE
 // ***************************************************************************
 void CDBCtrlSheet::clearIconBuffs()
 {
@@ -1131,6 +1203,7 @@ void CDBCtrlSheet::infoReceived()
 		}
 	}
 
+#if 0
 	// buff icons
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -1146,7 +1219,9 @@ void CDBCtrlSheet::infoReceived()
 			rVR.getTextureSizeFromId(_BuffIcons[i].TextureId, _BuffIcons[i].IconW, _BuffIcons[i].IconH);
 		}
 	}
+#endif
 }
+#endif
 
 // ***************************************************************************
 void CDBCtrlSheet::setupPact()
@@ -1189,6 +1264,8 @@ void CDBCtrlSheet::setupPact()
 	}
 }
 
+#ifdef RYZOM_FORGE
+
 // ***************************************************************************
 bool CDBCtrlSheet::useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const
 {
@@ -1203,6 +1280,8 @@ bool CDBCtrlSheet::useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const
 		|| family == ITEMFAMILY::TAMING_TOOL
 		|| family == ITEMFAMILY::TRAINING_TOOL;
 }
+
+#endif
 
 // ***************************************************************************
 void CDBCtrlSheet::setupItem ()
@@ -1312,8 +1391,13 @@ void CDBCtrlSheet::setupItem ()
 			// Special Item requirement
 			updateItemCharacRequirement(_LastSheetId);
 
+			// Update buff icons
+			updateCharacBuffs();
+
+#ifdef RYZOM_FORGE
 			// update item info markers
 			_ItemInfoChanged = true;
+#endif
 		}
 		else
 		{
@@ -1389,12 +1473,14 @@ void CDBCtrlSheet::setupItem ()
 	}
 */
 
+#ifdef RYZOM_FORGE
 	// at each frame, update item info icon if changed
 	if (_ItemInfoChanged)
 	{
 		_ItemInfoChanged = false;
 		setupItemInfoWaiter();
 	}
+#endif
 }
 
 
@@ -1460,7 +1546,7 @@ void CDBCtrlSheet::setupMission()
 void CDBCtrlSheet::setupGuildFlag ()
 {
 	// Find the guild name
-	ucstring usGuildName;
+	string usGuildName;
 	sint32 nGuildName = _SheetId.getSInt32();
 	if (_LastSheetId != nGuildName || _NeedSetup)
 	{
@@ -1665,7 +1751,7 @@ void CDBCtrlSheet::setupSBrick ()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const ucstring &phraseName)
+void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const string &phraseName)
 {
 	CSBrickManager		*pBM = CSBrickManager::getInstance();
 
@@ -1718,7 +1804,7 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 	{
 		// Compute the text from the phrase only if needed
 //		string	iconName= phraseName.toString();
-		string	iconName= phraseName.toUtf8();
+		const string &iconName = phraseName;
 		if( _NeedSetup || iconName != _OptString )
 		{
 			// recompute text
@@ -1741,7 +1827,7 @@ void CDBCtrlSheet::setupSPhrase()
 		CSPhraseSheet *pSPS = dynamic_cast<CSPhraseSheet*>(SheetMngr.get(CSheetId(sheet)));
 		if (pSPS && !pSPS->Bricks.empty())
 		{
-			const ucstring phraseName(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheet)));
+			const char *phraseName = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheet));
 			setupDisplayAsPhrase(pSPS->Bricks, phraseName);
 		}
 		else
@@ -1799,7 +1885,7 @@ void CDBCtrlSheet::setupSPhraseId ()
 			}
 			else
 			{
-				setupDisplayAsPhrase(phrase.Bricks, phrase.Name);
+				setupDisplayAsPhrase(phrase.Bricks, phrase.Name.toUtf8()); // FIXME: UTF-8 (serial)
 			}
 		}
 
@@ -1899,7 +1985,7 @@ void CDBCtrlSheet::resetCharBitmaps()
 void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
 {
 	// Use the optString for the Macro name
-	_OptString = toLower(_OptString);
+	_OptString = toLowerAscii(_OptString);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
@@ -2086,35 +2172,8 @@ void CDBCtrlSheet::draw()
 				rVR.drawQuad(_RenderLayer + 1, regenTris[tri], backTex, CRGBA::White, false);
 			}
 
-			if (!_RegenText) {
-				_RegenText = new CViewText(CViewBase::TCtorParam());
-				_RegenText->setId(getId() + ":regen");
-				_RegenText->setParent(_Parent);
-				_RegenText->setOverflowText(ucstring(""));
-				_RegenText->setModulateGlobalColor(false);
-				_RegenText->setMultiLine(false);
-				_RegenText->setTextMode(CViewText::ClipWord);
-				_RegenText->setFontSizing("0", "0");
-				// TODO: font size / color hardcoded.
-				_RegenText->setFontSize(8);
-				_RegenText->setColor(CRGBA::White);
-				_RegenText->setShadow(true);
-				_RegenText->setActive(true);
-				_RegenText->updateTextContext();
-			}
-
-			// TODO: ticks in second hardcoded
-			uint32 nextValue = _RegenTickRange.EndTick > LastGameCycle ? (_RegenTickRange.EndTick - LastGameCycle) / 10 : 0;
-			if (_RegenTextValue != nextValue)
-			{
-				_RegenTextValue = nextValue;
-				_RegenText->setText(toString("%d", _RegenTextValue));
-				_RegenText->updateTextContext();
-			}
-			_RegenText->setXReal(_XReal+1);
-			_RegenText->setYReal(_YReal+2);
-			_RegenText->setRenderLayer(_RenderLayer+2);
-			_RegenText->draw();
+			if (_RegenTextEnabled)
+				drawRegenText();
 		}
 	}
 
@@ -2144,6 +2203,118 @@ void CDBCtrlSheet::draw()
 	}
 }
 
+// ----------------------------------------------------------------------------
+void CDBCtrlSheet::drawRegenText()
+{
+	if (!_RegenText) {
+		_RegenText = new CViewText(CViewBase::TCtorParam());
+		_RegenText->setId(getId() + ":regen");
+		_RegenText->setParent(_Parent);
+		_RegenText->setOverflowText(std::string());
+		_RegenText->setModulateGlobalColor(false);
+		_RegenText->setMultiLine(true);
+		_RegenText->setTextMode(CViewText::ClipWord);
+		_RegenText->setFontSize(_RegenTextFontSize);
+		_RegenText->setColor(_RegenTextColor);
+		// do not set shadow if outline is set to avoid clearing it on draw (would call invalidate)
+		_RegenText->setShadow(_RegenTextShadow && !_RegenTextOutline);
+		_RegenText->setShadowOutline(false);
+		_RegenText->setShadowColor(_RegenTextShadowColor);
+
+		_RegenText->setActive(true);
+		_RegenText->updateTextContext();
+	}
+
+	// TODO: 10 hardcoded (ticks in second)
+	sint32 nextValue;
+	if (_RegenTickRange.EndTick > LastGameCycle)
+		nextValue = (_RegenTickRange.EndTick - LastGameCycle) / 10;
+	else if (_RegenTextFctLua)
+		nextValue = ((sint64)_RegenTickRange.EndTick - (sint64)LastGameCycle) / 10;
+	else
+		nextValue = 0;
+
+	if (_RegenTextValue != nextValue)
+	{
+		_RegenTextValue = nextValue;
+		if (_RegenTextFct.empty())
+		{
+			// format as "10m", "9'59", "59"
+			if (_RegenTextValue > 600)
+			{
+				_RegenText->setText(toString("%dm", _RegenTextValue / 60));
+			}
+			else if (_RegenTextValue > 0)
+			{
+				if (_RegenTextValue < 60)
+					_RegenText->setText(toString("%d", _RegenTextValue));
+				else
+					_RegenText->setText(toString("%d'%02d", _RegenTextValue / 60, _RegenTextValue % 60));
+			}
+			else
+			{
+				_RegenText->setText("");
+			}
+		}
+		else
+		{
+			std::string fct;
+			if (_RegenTextFctLua)
+			{
+				CCDBNodeBranch *root = getRootBranch();
+				if (root)
+					fct = toString("%s(%d, '%s')", _RegenTextFct.c_str(), _RegenTextValue, root->getFullName().c_str());
+				else
+					fct = toString("%s(%d, nil)", _RegenTextFct.c_str(), _RegenTextValue);
+			}
+			else
+			{
+				fct = toString("%s(%d)", _RegenTextFct.c_str(), _RegenTextValue);
+			}
+
+			// if using color tags in format, then RegenText color should be set to CRGBA::White
+			// as tag color is modulated with main color
+			std::string result;
+			if (CInterfaceExpr::evalAsString(fct, result))
+				_RegenText->setTextFormatTaged(result);
+		}
+
+		_RegenText->updateTextContext();
+		// todo: posref
+		// note: if x,y is moved outside icon area it might get cliped and not be visible (wreal/hreal == 0)
+		_RegenText->setX(_WReal / 2 -_RegenText->getMaxUsedW() / 2);
+		// move RegenTextY=0 to baseline
+		_RegenText->setY(_RegenTextY - _RegenText->getFontLegHeight());
+	}
+
+	_RegenText->setXReal(_XReal + _RegenText->getX());
+	_RegenText->setYReal(_YReal + _RegenText->getY());
+	_RegenText->setRenderLayer(_RenderLayer+2);
+
+	// TODO: create shader for this
+	if (_RegenTextOutline)
+	{
+		// player.xml t_bonus_text template way of drawing
+		sint x = _RegenText->getXReal();
+		sint y = _RegenText->getYReal();
+
+		_RegenText->setColor(_RegenTextShadowColor);
+		_RegenText->setXReal(x-1); _RegenText->setYReal(y+0); _RegenText->draw();
+		_RegenText->setXReal(x+1); _RegenText->setYReal(y+0); _RegenText->draw();
+		_RegenText->setXReal(x+0); _RegenText->setYReal(y-1); _RegenText->draw();
+		_RegenText->setXReal(x+0); _RegenText->setYReal(y+1); _RegenText->draw();
+
+		_RegenText->setColor(_RegenTextColor);
+		_RegenText->setXReal(x); _RegenText->setYReal(y);
+		_RegenText->draw();
+		_RegenText->draw();
+	}
+	else
+	{
+		_RegenText->draw();
+		_RegenText->draw();
+	}
+}
 
 // ----------------------------------------------------------------------------
 void CDBCtrlSheet::drawRotatedQuad(CViewRenderer &vr, float angle, float scale, uint renderLayer, uint32 texId, sint32 texWidth, sint32 texHeight)
@@ -2374,7 +2545,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					rVR.draw11RotFlipBitmap (_RenderLayer+1, x, y, 0, false, _DispOver2BmpId, fastMulRGB(curSheetColor, _IconOver2Color));
 				}
 
-				if (_ShowIconBuffs && !_BuffIcons.empty())
+#ifdef RYZOM_FORGE
+				if (_ShowIconBuffs && 
+#else
+				if (
+#endif
+					!_BuffIcons.empty())
 				{
 					// there is max 4 icons
 					sint32 hArea = (hSheet / 4);
@@ -2390,11 +2566,11 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 							hIcon = hArea;
 						}
 						rVR.drawRotFlipBitmap (_RenderLayer+1, xIcon, yIcon, wIcon, hIcon, 0, false, _BuffIcons[i].TextureId, fastMulRGB(curSheetColor, _BuffIcons[i].Color));
-						xIcon += wIcon;
+						xIcon += wIcon / 2;
 						// move up the row for 3rd/4th icon
 						if (i % 3 == 1) {
 							xIcon = x;
-							yIcon += hIcon;
+							yIcon += hIcon / 2;
 						}
 					}
 				}
@@ -2409,7 +2585,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					drawNumber(x+1, y-2+hSheet-rVR.getFigurTextureH(), wSheet, hSheet, numberColor, enchant, false);
 				}
 
-				if (_ShowIconBuffs && !_EnchantIcons.empty())
+#ifdef RYZOM_FORGE
+				if (_ShowIconBuffs && 
+#else
+				if (
+#endif
+					!_EnchantIcons.empty())
 				{
 					// should only only 2 icons at most
 					// draw them in single line, top-right
@@ -3203,14 +3384,18 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 
 		// swap the other props only if the DB exist in the 2 version. else no-op
 		swapDBProps(_UserColor, other->_UserColor);
+		swapDBProps(getItemCharacBuffsPtr(), other->getItemCharacBuffsPtr());
+		swapDBProps(getItemAccessPtr(), other->getItemAccessPtr());
 		swapDBProps(getItemLockedPtr(), other->getItemLockedPtr());
 		swapDBProps(getItemWeightPtr(), other->getItemWeightPtr());
 		swapDBProps(getItemInfoVersionPtr(), other->getItemInfoVersionPtr());
 		swapDBProps(getItemRMClassTypePtr(), other->getItemRMClassTypePtr());
 		swapDBProps(getItemRMFaberStatTypePtr(), other->getItemRMFaberStatTypePtr());
 		swapDBProps(getItemPrerequisitValidPtr(), other->getItemPrerequisitValidPtr());
+#ifdef RYZOM_FORGE
 		swapDBProps(getItemSerialPtr(), other->getItemSerialPtr());
 		swapDBProps(getItemCreateTimePtr(), other->getItemCreateTimePtr());
+#endif
 	}
 }
 
@@ -3322,6 +3507,7 @@ const COutpostBuildingSheet *CDBCtrlSheet::asOutpostBuildingSheet() const
 	return NULL;
 }
 
+#ifdef RYZOM_FORGE
 // ***************************************************************************
 void	CDBCtrlSheet::setupItemInfoWaiter()
 {
@@ -3377,9 +3563,10 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 		}
 	}
 }
+#endif
 
 // ***************************************************************************
-void	CDBCtrlSheet::getContextHelp(ucstring &help) const
+void	CDBCtrlSheet::getContextHelp(std::string &help) const
 {
 	if (getType() == CCtrlSheetInfo::SheetType_Skill)
 	{
@@ -3394,22 +3581,22 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		if (!macro)
 			return;
 
-		ucstring macroName = macro->Name;
+		string macroName = macro->Name;
 		if (macroName.empty())
 			macroName = CI18N::get("uiNotAssigned");
 
-		ucstring assignedTo = macro->Combo.toUCString();
+		string assignedTo = macro->Combo.toString();
 		if (assignedTo.empty())
 			assignedTo = CI18N::get("uiNotAssigned");
 
-		ucstring dispText;
-		ucstring dispCommands;
+		string dispText;
+		string dispCommands;
 		const CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
 		uint nb = 0;
 		for (uint i = 0; i < macro->Commands.size(); ++i)
 		{
-			ucstring commandName;
+			string commandName;
 			for (uint j = 0; j < pMCM->ActionManagers.size(); ++j)
 			{
 				CAction::CName c(macro->Commands[i].Name.c_str(), macro->Commands[i].Params.c_str());
@@ -3425,13 +3612,13 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 			}
 		}
 		// formats
-		dispText = ucstring("%n (@{6F6F}%k@{FFFF})\n%c");
+		dispText = "%n (@{6F6F}%k@{FFFF})\n%c";
 		if (nb > 5) // more?
 			dispCommands += toString(" ... @{6F6F}%i@{FFFF}+", nb-5);
 
-		strFindReplace(dispText, ucstring("%n"), macroName);
-		strFindReplace(dispText, ucstring("%k"), assignedTo);
-		strFindReplace(dispText, ucstring("%c"), dispCommands);
+		strFindReplace(dispText, "%n", macroName);
+		strFindReplace(dispText, "%k", assignedTo);
+		strFindReplace(dispText, "%c", dispCommands);
 		help = dispText;
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
@@ -3439,6 +3626,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		const CItemSheet	*item= asItemSheet();
 		if(item)
 		{
+#ifdef RYZOM_FORGE
 			if (useItemInfoForFamily(item->Family))
 			{
 				// call lua function to update tooltip window
@@ -3448,13 +3636,15 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 				if (help.empty())
 					help = getItemActualName();
 			}
-			else if (!_ContextHelp.empty())
+			else
+#endif
+			if (!_ContextHelp.empty())
 			{
 				help = _ContextHelp;
 			}
 			else
 			{
-				help = getItemActualName();
+				help = getItemActualName();;
 			}
 		}
 		else
@@ -3494,7 +3684,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		sint32	phraseId= getSheetId();
 		if (phraseId == 0)
 		{
-			help = ucstring();
+			help = std::string();
 		}
 		else
 		{
@@ -3512,10 +3702,16 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 				game = game["game"];
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
 				// retrieve result from stack
-				help = ucstring();
 				if (!ls->empty())
 				{
-					CLuaIHM::pop(*ls, help);
+#ifdef RYZOM_LUA_UCSTRING
+					ucstring tmpHelp; // Compatibility
+					CLuaIHM::pop(*ls, tmpHelp);
+					help = tmpHelp.toUtf8();
+#else
+					help = ls->toString();
+					ls->pop();
+#endif
 				}
 				else
 				{
@@ -3536,10 +3732,10 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		if (phraseSheetID != 0)
 		{
 			// is it a built-in phrase?
-			ucstring desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
+			string desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
 			if (!desc.empty())
 			{
-				help += ucstring("\n\n@{CCCF}") + desc;
+				help += "\n\n@{CCCF}" + desc;
 			}
 		}
 		*/
@@ -3563,8 +3759,9 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 }
 
 // ***************************************************************************
-void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
+void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 {
+#ifdef RYZOM_FORGE
 	// Special case for buff items and spell crystals, only for tooltips
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
 	{
@@ -3579,6 +3776,7 @@ void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
 			}
 		}
 	}
+#endif
 
 	// Default
 	getContextHelp(help);
@@ -3790,7 +3988,9 @@ void CDBCtrlSheet::resetAllTexIDs()
 	_IconW = 0;
 	_IconH = 0;
 
+#ifdef RYZOM_FORGE
 	_ItemInfoChanged = true;
+#endif
 	_EnchantIcons.clear();
 	_BuffIcons.clear();
 }
@@ -3857,6 +4057,10 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		// copy color for items
 		sint col = getItemColor();
 		if (col != -1) dest->setItemColor(col);
+		// copy charac buffs
+		dest->setItemCharacBuffs(getItemCharacBuffs());
+		// copy access
+		dest->setItemAccess(getItemAccess());
 		// copy weight
 		dest->setItemWeight(getItemWeight());
 		// copy nameId
@@ -3873,10 +4077,12 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		dest->setItemRMFaberStatType(getItemRMFaberStatType());
 		// copy prerequisit valid flag
 		dest->setItemPrerequisitValid(getItemPrerequisitValid());
+#ifdef RYZOM_FORGE
 		// copy item serial
 		dest->setItemSerial(getItemSerial());
 		// copy item create time
 		dest->setItemCreateTime(getItemCreateTime());
+#endif
 	}
 	// if brick, sphrase or sphraseId
 	if(isSBrick() || isSPhrase() || isSPhraseId())
@@ -4408,6 +4614,8 @@ void CDBCtrlSheet::setItemResaleFlag(sint32 rf)
 	node->setValue32(rf);
 }
 
+#ifdef RYZOM_FORGE
+
 // ***************************************************************************
 sint32 CDBCtrlSheet::getItemCreateTime() const
 {
@@ -4455,6 +4663,8 @@ void CDBCtrlSheet::setItemSerial(sint32 rf)
 	if (!node) return;
 	node->setValue32(rf);
 }
+
+#endif
 
 // ***************************************************************************
 bool CDBCtrlSheet::getLockedByOwner() const
@@ -4546,6 +4756,52 @@ void CDBCtrlSheet::setItemPrerequisitValid(bool prv)
 }
 
 // ***************************************************************************
+uint8 CDBCtrlSheet::getItemCharacBuffs() const
+{
+	CCDBNodeLeaf *node = getItemCharacBuffsPtr();
+	return (node ? (uint8)node->getValue8() : 0);
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemCharacBuffsPtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("CHARAC_BUFFS"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemCharacBuffs(uint8 val)
+{
+	CCDBNodeLeaf *node = getItemCharacBuffsPtr();
+	if (!node) return;
+	node->setValue8((sint8)val);
+}
+
+// ***************************************************************************
+uint8 CDBCtrlSheet::getItemAccess() const // TODO: Guild grade & proper default
+{
+	CCDBNodeLeaf *node = getItemAccessPtr();
+	return (node ? (uint8)node->getValue8() : 0);
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemAccessPtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("ACCESS"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemAccess(uint8 val)
+{
+	CCDBNodeLeaf *node = getItemAccessPtr();
+	if (!node) return;
+	node->setValue8((sint8)val);
+}
+
+// ***************************************************************************
 void CDBCtrlSheet::initArmourColors()
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
@@ -4562,14 +4818,14 @@ void CDBCtrlSheet::initArmourColors()
 
 
 // ***************************************************************************
-ucstring CDBCtrlSheet::getItemActualName() const
+string CDBCtrlSheet::getItemActualName() const
 {
 	const CItemSheet *pIS= asItemSheet();
 	if(!pIS)
-		return ucstring();
+		return string();
 	else
 	{
-		ucstring ret;
+		string ret;
 		// If NameId not 0, get from StringManager
 		uint32	nameId= getItemNameId();
 		if(nameId)
@@ -4586,7 +4842,7 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		if (pIS->Family == ITEMFAMILY::SCROLL_R2)
 		{
 			const R2::TMissionItem *mi = R2::getEditor().getPlotItemInfos(getSheetId());
-			if (mi) return mi->Name;
+			if (mi) return mi->Name.toUtf8();
 		}
 		// if item is not a mp, append faber_quality & faber_stat_type
 		// Don't append quality and stat type for Named Items!!!
@@ -4601,21 +4857,21 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		{
 			// get description string for item format
 			std::string formatID = getItemRMFaberStatType() != RM_FABER_STAT_TYPE::Unknown ? "uihelpItemFaberPrefixAndSuffix" : "uihelpItemFaberPrefix";
-			ucstring format;
+			string format;
 			if (!CI18N::hasTranslation(formatID))
 			{
-				format = ucstring("%p %n %s"); // not found, uses default string
+				format = "%p %n %s"; // not found, uses default string
 			}
 			else
 			{
 				format = CI18N::get(formatID);
 			}
 			// suffix
-			strFindReplace(format, ucstring("%p"), RM_CLASS_TYPE::toLocalString(getItemRMClassType()));
+			strFindReplace(format, "%p", RM_CLASS_TYPE::toLocalString(getItemRMClassType()));
 			// name
-			strFindReplace(format, ucstring("%n"), ret);
+			strFindReplace(format, "%n", ret);
 			// prefix
-			strFindReplace(format, ucstring("%s"), CI18N::get(toString("mpstatItemQualifier%d", (int) getItemRMFaberStatType()).c_str()));
+			strFindReplace(format, "%s", CI18N::get(toString("mpstatItemQualifier%d", (int) getItemRMFaberStatType()).c_str()));
 
 
 			ret = format;
@@ -4714,6 +4970,7 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 	{
 		return "action_context_help";
 	}
+#ifdef RYZOM_FORGE
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
 	{
 		const CItemSheet	*item= asItemSheet();
@@ -4729,9 +4986,16 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 			}
 		}
 	}
+#endif
 	return CCtrlBase::getContextHelpWindowName();
 }
 
+// ***************************************************************************
+void CDBCtrlSheet::setRegenTextFct(const std::string &s)
+{
+	_RegenTextFct = s;
+	_RegenTextFctLua = startsWith(s, "lua:");
+}
 
 // ***************************************************************************
 void CDBCtrlSheet::setRegenTickRange(const CTickRange &tickRange)

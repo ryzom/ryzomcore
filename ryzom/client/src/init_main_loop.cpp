@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -190,7 +190,11 @@ struct CStatThread : public NLMISC::IRunnable
 		if(!curl) return;
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)");
+#ifdef RYZOM_FORGE
 		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzom.com/" + referer).c_str());
+#else
+		curl_easy_setopt(curl, CURLOPT_REFERER, string("https://ryzom.dev/" + referer).c_str());
+#endif
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 		if (url.length() > 8 && (url[4] == 's' || url[4] == 'S')) // 01234 https
 		{
@@ -225,18 +229,18 @@ struct CStatThread : public NLMISC::IRunnable
 	string cookie()
 	{
 		string name;
-		if(UserEntity && !UserEntity->getEntityName().toString().empty())
-			name = UserEntity->getEntityName().toString();
+		if(UserEntity && !UserEntity->getEntityName().empty())
+			name = UserEntity->getEntityName();
 
 		std::string userid = toString("u%d", NetMngr.getUserId())+name;
-		return toUpper(getMD5((const uint8 *)userid.c_str(), (uint32)userid.size()).toString());
+		return toUpperAscii(getMD5((const uint8 *)userid.c_str(), (uint32)userid.size()).toString());
 	}
 
 	// return true if we sent the connect because we have all information
 	bool connect()
 	{
 		//nlinfo("connect");
-		if(!UserEntity || UserEntity->getEntityName().toString().empty())
+		if(!UserEntity || UserEntity->getEntityName().empty())
 			return false;
 
 		referer = ContinentMngr.getCurrentContinentSelectName();
@@ -244,7 +248,7 @@ struct CStatThread : public NLMISC::IRunnable
 		std::string params;
 		addParam(params, "ra", randomString());
 		std::string session = toString("%d%d", NetMngr.getUserId(), CTime::getSecondsSince1970());
-		addParam(params, "sessioncookie", toUpper(getMD5((const uint8 *)session.c_str(), (uint32)session.size()).toString()));
+		addParam(params, "sessioncookie", toUpperAscii(getMD5((const uint8 *)session.c_str(), (uint32)session.size()).toString()));
 		addParam(params, "cookie", cookie());
 		addParam(params, "browsertoken", "X");
 		addParam(params, "platformtoken", "Win32");
@@ -252,7 +256,11 @@ struct CStatThread : public NLMISC::IRunnable
 		addParam(params, "page", "");
 		addParam(params, "pagetitle", referer);
 		addParam(params, "screen", toString("%dx%d", ClientCfg.ConfigFile.getVar("Width").asInt(), ClientCfg.ConfigFile.getVar("Height").asInt()));
+#ifdef RYZOM_FORGE
 		addParam(params, "referer", "http%3A%2F%2Fwww.ryzom.com%2F" + referer);
+#else
+		addParam(params, "referer", "https%3A%2F%2Fryzom.dev%2F" + referer);
+#endif
 		time_t rawtime;
 		struct tm * timeinfo;
 		char buffer [80];
@@ -260,7 +268,7 @@ struct CStatThread : public NLMISC::IRunnable
 		timeinfo = localtime ( &rawtime );
 		strftime (buffer,80,"%H%%3A%M", timeinfo);
 		addParam(params, "localtime", buffer);
-		addParam(params, "cv_name", UserEntity->getEntityName().toUtf8());
+		addParam(params, "cv_name", UserEntity->getEntityName());
 		//addParam(params, "cv_email", "");
 		//addParam(params, "cv_avatar", "");
 		addParam(params, "cv_Userid", toString(NetMngr.getUserId()));
@@ -275,7 +283,9 @@ struct CStatThread : public NLMISC::IRunnable
 		default: shard= "unknown"; break;
 		}
 		addParam(params, "cv_Shard", shard);
+#ifdef RYZOM_FORGE
 		get("http://ryzom.com.woopra-ns.com/visit/"+params);
+#endif
 		return true;
 	}
 
@@ -285,7 +295,9 @@ struct CStatThread : public NLMISC::IRunnable
 		std::string params;
 		addParam(params, "cookie", cookie());
 		addParam(params, "ra", randomString());
+#ifdef RYZOM_FORGE
 		get("http://ryzom.com.woopra-ns.com/ping/"+params);
+#endif
 	}
 
 	void run()
@@ -469,7 +481,7 @@ void initMainLoop()
 
 	// Progress bar for init_main_loop()
 	ProgressBar.reset (BAR_STEP_INIT_MAIN_LOOP);
-	ucstring nmsg;
+	string nmsg;
 
 	FPU_CHECKER_ONCE
 
@@ -727,7 +739,9 @@ void initMainLoop()
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		//nlinfo("****** InGame Interface Parsing and Init START ******");
 		pIM->initInGame(); // must be called after waitForUserCharReceived() because Ring information is used by initInGame()
+#ifdef RYZOM_FORGE
 		CItemGroupManager::getInstance()->init(); // Init at the same time keys.xml is loaded
+#endif
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
 		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing ingame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
@@ -1017,7 +1031,7 @@ void initMainLoop()
 	// PreLoad Fauna and Characters
 	if (!ClientCfg.Light && ClientCfg.PreCacheShapes)
 	{
-		ucstring nmsg("Loading character shapes ...");
+		string nmsg("Loading character shapes ...");
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
 
@@ -1071,14 +1085,18 @@ void initMainLoop()
 				ProgressBar.pushCropedValues (0, 0.25f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName, "data/3d/common/characters/shapes", "*.shape", false, &ProgressBar);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/characters/shapes" : ClientCfg.PreLoadPath + "/characters_shapes",
+						"*.shape", false, &ProgressBar);
 				}
 				ProgressBar.popCropedValues ();
 				ProgressBar.progress (0.25f);
 				ProgressBar.pushCropedValues (0.25f,0.5f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName, "data/3d/common/characters/skeletons", "*.skel", false, &ProgressBar);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/characters/skeletons" : ClientCfg.PreLoadPath + "/characters_skeletons",
+						"*.skel", false, &ProgressBar);
 				}
 				ProgressBar.popCropedValues ();
 			}
@@ -1126,14 +1144,18 @@ void initMainLoop()
 				ProgressBar.pushCropedValues (0.5f, 0.75f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName, "data/3d/common/fauna/shapes", "*.shape", false, &ProgressBar);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/fauna/shapes" : ClientCfg.PreLoadPath + "/fauna_shapes",
+						"*.shape", false, &ProgressBar);
 				}
 				ProgressBar.popCropedValues ();
 				ProgressBar.progress (0.75f);
 				ProgressBar.pushCropedValues (0.75f,1);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName, "data/3d/common/fauna/skeletons", "*.skel", false, &ProgressBar);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheName,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/fauna/skeletons" : ClientCfg.PreLoadPath + "/fauna_skeletons",
+						"*.skel", false, &ProgressBar);
 				}
 				ProgressBar.popCropedValues ();
 			}
@@ -1174,14 +1196,18 @@ void initMainLoop()
 				ProgressBar.pushCropedValues (0.0f, 0.5f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameFX, "data/3d/common/sfx", "*.ps", true, &ProgressBar, preloadFXTextures);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameFX,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/sfx" : ClientCfg.PreLoadPath + "/sfx",
+						"*.ps", true, &ProgressBar, preloadFXTextures);
 				}
 				ProgressBar.popCropedValues ();
 				ProgressBar.progress (0.5f);
 				ProgressBar.pushCropedValues (0.5f,1);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameFX, "data/3d/common/sfx", "*.shape", true, &ProgressBar, preloadFXTextures);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameFX,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/sfx" : ClientCfg.PreLoadPath + "/sfx",
+						"*.shape", true, &ProgressBar, preloadFXTextures);
 				}
 				ProgressBar.popCropedValues ();
 			}
@@ -1214,7 +1240,9 @@ void initMainLoop()
 				ProgressBar.pushCropedValues (0.0f, 1.f);
 				if(!DBG_DisablePreloadShape)
 				{
-					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameObjects, "data/3d/common/objects", "*.shape", true, &ProgressBar, preloadObjectTextures);
+					Driver->getShapeBank()->preLoadShapesFromDirectory(PreLoadCacheNameObjects,
+						ClientCfg.PreLoadPath.empty() ? "data/3d/common/objects" : ClientCfg.PreLoadPath + "/objects",
+						"*.shape", true, &ProgressBar, preloadObjectTextures);
 				}
 				ProgressBar.popCropedValues ();
 			}
@@ -1702,6 +1730,6 @@ void initBloomConfigUI()
 	else
 	{
 		if(group)
-			group->setDefaultContextHelp(ucstring(""));
+			group->setDefaultContextHelp(std::string());
 	}
 }

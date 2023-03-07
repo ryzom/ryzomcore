@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2012-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -921,7 +921,7 @@ void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool exclude
 		Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Diffuse[i], color);
 	}
 
-
+	nlassert(_VPNumLights <= MaxVPLight);
 	if (i != _VPNumLights)
 	{
 		color= _VPLightDiffuse[i] * matDiff;
@@ -1240,7 +1240,7 @@ std::string		CRenderTrav::getLightVPFragmentNeLVP(uint numActivePointLights, uin
 
 	// Code frag written for 4 light max.
 	nlassert(MaxVPLight==4);
-	nlassert(numActivePointLights<=MaxVPLight-1);
+	nlassert(numActivePointLights<=MaxVPLight);
 
 	// Add LightingVPFragmentNormalize fragment?
 	if(normalize)

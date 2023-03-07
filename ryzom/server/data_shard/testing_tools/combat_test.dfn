@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="test description" Type="Type" Filename="bigedit.typ"/>
+  <ELEMENT Name="iteration count" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="level min" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="level max" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="actor 0" Type="Dfn" Filename="_combat_test_actor.dfn"/>
+  <ELEMENT Name="actor 1" Type="Dfn" Filename="_combat_test_actor.dfn"/>
+  <ELEMENT Name="actor 2" Type="Dfn" Filename="_combat_test_actor.dfn"/>
+  <ELEMENT Name="actor 3" Type="Dfn" Filename="_combat_test_actor.dfn"/>
+  <LOG>Wed Sep 25 10:35:02 2002 (miller) Dfn Structure = 
+Wed Sep 25 10:47:07 2002 (miller) Dfn Structure = 
+Wed Sep 25 10:48:23 2002 (miller) Dfn Structure = 
+Wed Sep 25 15:51:14 2002 (miller) Dfn Structure = 
+Fri Dec 13 19:34:07 2002 (brigand) Dfn Structure = 
+Fri Dec 13 19:43:21 2002 (brigand) Dfn Structure = </LOG>
+</DFN>

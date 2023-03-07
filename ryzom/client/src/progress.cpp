@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -50,7 +50,7 @@ extern NL3D::UMaterial LoadingMaterialFull;
 
 extern std::vector<UTextureFile*> LogoBitmaps;
 extern uint TipsOfTheDayIndex;
-extern ucstring			TipsOfTheDay;
+extern string			TipsOfTheDay;
 extern bool					UseEscapeDuringLoading;
 
 CProgress::CProgress ()
@@ -71,7 +71,7 @@ void CProgress::setFontFactor(float temp)
 	_FontFactor = temp;
 }
 
-void CProgress::newMessage (const ucstring& message)
+void CProgress::newMessage (const string& message)
 {
 	popCropedValues ();
 	_CurrentRootStep++;
@@ -249,7 +249,7 @@ void CProgress::internalProgress (float value)
 			for(uint i = 0; i < ClientCfg.Logos.size(); i++)
 			{
 				std::vector<string> res;
-				explode(ClientCfg.Logos[i], std::string(":"), res);
+				explode(ClientCfg.Logos[i], string(":"), res);
 				if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
 				{
 					fromString(res[1], x);
@@ -287,8 +287,8 @@ void CProgress::internalProgress (float value)
 				// Display the tips of the day.
 				TextContext->setFontSize((uint)(16.f * fontFactor));
 				TextContext->setHotSpot(UTextContext::MiddleTop);
-				ucstring::size_type index = 0;
-				ucstring::size_type end = TipsOfTheDay.find((ucchar)'\n');
+				string::size_type index = 0;
+				string::size_type end = TipsOfTheDay.find('\n');
 				if (end == string::npos)
 					end = TipsOfTheDay.size();
 				float fY = ClientCfg.TipsY;
@@ -297,22 +297,22 @@ void CProgress::internalProgress (float value)
 					while (index < end)
 					{
 						// Get the line
-						ucstring line = TipsOfTheDay.substr (index, end-index);
+						string line = TipsOfTheDay.substr (index, end-index);
 
 						// Draw the line
 						TextContext->printAt(0.5f, fY, line);
 						fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
 
 						index=end+1;
-						end = TipsOfTheDay.find((ucchar)'\n', index);
-						if (end == ucstring::npos)
+						end = TipsOfTheDay.find('\n', index);
+						if (end == string::npos)
 							end = TipsOfTheDay.size();
 					}
 
 					// More help
 					TextContext->setFontSize((uint)(12.f * fontFactor));
 					/* todo tips of the day uncomment
-					ucstring ucstr = CI18N::get ("uiTipsEnd");
+					string ucstr = CI18N::get ("uiTipsEnd");
 					TextContext->printAt(0.5f, fY, ucstr); */
 					fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
 					fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
@@ -338,7 +338,7 @@ void CProgress::internalProgress (float value)
 						TextContext->setFontSize((uint)(15.f * fontFactor));
 						TextContext->setHotSpot(UTextContext::BottomLeft);
 
-						ucstring uc = CI18N::get("uiR2EDTPEscapeToInteruptLoading") + " (" + _TPCancelText + ") - " + CI18N::get("uiDelayedTPCancel");
+						string uc = CI18N::get("uiR2EDTPEscapeToInteruptLoading") + " (" + _TPCancelText + ") - " + CI18N::get("uiDelayedTPCancel");
 						UTextContext::CStringInfo info = TextContext->getStringInfo(uc);
 						float stringX = 0.5f - info.StringWidth/(ClientCfg.Width*2);
 						TextContext->printAt(stringX, 7.f / ClientCfg.Height, uc);
@@ -354,17 +354,15 @@ void CProgress::internalProgress (float value)
 
 					// Print some more info
 					uint32 day = RT.getRyzomDay();
-					str = toString (CI18N::get ("uiTipsTeleport").toUtf8().c_str(),
-						CI18N::get (LoadingContinent->LocalizedName).toUtf8().c_str(),
+					str = toString (CI18N::get ("uiTipsTeleport").c_str(),
+						CI18N::get (LoadingContinent->LocalizedName).c_str(),
 						day,
 						(uint)RT.getRyzomTime(),
-						CI18N::get ("uiSeason"+toStringEnum(CRyzomTime::getSeasonByDay(day))).toUtf8().c_str(),
-						CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName).toUtf8().c_str());
-					ucstring ucstr;
-					ucstr.fromUtf8 (str);
+						CI18N::get ("uiSeason"+toStringEnum(CRyzomTime::getSeasonByDay(day))).c_str(),
+						CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName).c_str());
 					TextContext->setHotSpot(UTextContext::MiddleBottom);
 					TextContext->setColor(CRGBA(186, 179, 163, 255));
-					TextContext->printAt(0.5f, 25/768.f, ucstr);
+					TextContext->printAt(0.5f, 25/768.f, str);
 				}
 
 				// apply text commands
@@ -386,13 +384,13 @@ void CProgress::internalProgress (float value)
 							TextContext->setFontSize( (uint)(16.f * fontFactor));
 
 							// build the ucstr(s)
-							ucstring ucstr = CI18N::get((*itpc).Text);
-							vector<ucstring> vucstr;
-							ucstring sep("\n");
-							splitUCString(ucstr,sep,vucstr);
+							string ucstr = CI18N::get((*itpc).Text);
+							vector<string> vucstr;
+							string sep("\n");
+							splitString(ucstr,sep,vucstr);
 
 							// Letter size
-							UTextContext::CStringInfo si = TextContext->getStringInfo(ucstring("|"));
+							UTextContext::CStringInfo si = TextContext->getStringInfo("|");
 							uint fontHeight = (uint) si.StringHeight + 2; // we add 2 pixels for the gap
 
 							uint i;
@@ -452,8 +450,9 @@ void CProgress::internalProgress (float value)
 		_TPCancelFlag = true;
 	}
 
-
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().update();
+#endif
 	// Display to screen.
 	Driver->swapBuffers();
 
@@ -474,7 +473,7 @@ void CProgress::internalProgress (float value)
 }
 
 
-void CProgress::setTPMessages(const ucstring &tpReason,const ucstring &tpCancelText, const std::string &/* iconName */)
+void CProgress::setTPMessages(const string &tpReason,const string &tpCancelText, const string &/* iconName */)
 {
 	_TPReason = tpReason;
 	_TPCancelText = tpCancelText;
@@ -497,7 +496,7 @@ bool CProgress::getTPCancelFlag(bool clearFlag /*=true*/)
 
 void CProgress::release()
 {
-	setTPMessages(ucstring(), ucstring(), "");
+	setTPMessages(string(), string(), string());
 	_TPCancelFlag = false;
 }
 

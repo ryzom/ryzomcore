@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -101,6 +101,7 @@ struct SExportOptions
 	float			ZFactor;
 	std::string		HeightMapFile2;
 	float			ZFactor2;
+	bool			ExtendCoords;
 
 	uint8			Light; // Roughly light the zone (0-none, 1-patch, 2-noise)
 

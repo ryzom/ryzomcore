@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -204,7 +207,7 @@ void CAutomatonStateSheet::build(const NLGEORGES::UFormElm &item, const string &
 	for(uint mode = 0; mode<MBEHAV::NUMBER_OF_MODES; ++mode)
 	{
 		string animset;
-		animset = NLMISC::toLower(MBEHAV::modeToString((MBEHAV::EMode)mode));
+		animset = NLMISC::toLowerAscii(MBEHAV::modeToString((MBEHAV::EMode)mode));
 		if(animset != "unknown_mode")
 		{
 			string resultTransition;
@@ -495,9 +498,9 @@ void CAutomatonListSheet::build(const NLGEORGES::UFormElm &rootList)
 				for(uint mode = 0; mode<MBEHAV::NUMBER_OF_MODES; ++mode)
 				{
 					// Get the Mode Name
-					string modeName = NLMISC::toLower(MBEHAV::modeToString((MBEHAV::EMode)mode));
+					string modeName = NLMISC::toLowerAscii(MBEHAV::modeToString((MBEHAV::EMode)mode));
 					// Compute the automaton name
-					string filename = NLMISC::toLower(automatonType) + "_" + modeName + ".automaton";
+					string filename = NLMISC::toLowerAscii(automatonType) + "_" + modeName + ".automaton";
 					// Push some information
 					nlinfo("loading automaton '%s'.", filename.c_str());
 					// Load the automaton's form.

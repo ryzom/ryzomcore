@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2017  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -39,17 +42,17 @@ namespace STRING_MANAGER
 
 	// ***************************************************************************
 	map<string, CStringManagerClient::CItem> CStringManagerClient::_SpecItem_TempMap;
-	map<ucstring, ucstring> CStringManagerClient::_DynStrings;
-	vector<ucstring> CStringManagerClient::_TitleWords;
+	map<string, string> CStringManagerClient::_DynStrings;
+	vector<string> CStringManagerClient::_TitleWords;
 	bool CStringManagerClient::_SpecItem_MemoryCompressed = false;
 	char *CStringManagerClient::_SpecItem_Labels = NULL;
-	ucchar *CStringManagerClient::_SpecItem_NameDesc = NULL;
+	char *CStringManagerClient::_SpecItem_NameDesc = NULL;
 	vector<CStringManagerClient::CItemLight> CStringManagerClient::_SpecItems;
 	bool MustReleaseStaticArrays = true;
 
 
 	CStringManagerClient *CStringManagerClient::_Instance= NULL;
-	ucstring CStringManagerClient::_WaitString("???");
+	string CStringManagerClient::_WaitString("???");
 
 
 	CStringManagerClient::CStringManagerClient()
@@ -57,7 +60,7 @@ namespace STRING_MANAGER
 		_CacheInited = false;
 		_CacheLoaded = false;
 		// insert the empty string.
-		_ReceivedStrings.insert(make_pair((uint)EmptyStringId, ucstring()));
+		_ReceivedStrings.insert(make_pair((uint)EmptyStringId, string()));
 		// reserve some place to avoid reallocation as possible
 		_CacheStringToSave.reserve(1024);
 	}
@@ -99,22 +102,28 @@ namespace STRING_MANAGER
 		}
 	}
 
-
-	void CStringManagerClient::initCache(const std::string &shardId, const std::string &languageCode)
+	void CStringManagerClient::initCache(const string &languageCode)
 	{
-		H_AUTO( CStringManagerClient_initCache )
+		H_AUTO( CStringManagerClient_initLanguage )
 
-		_ShardId = shardId;
-		_LanguageCode = languageCode;
+		m_LanguageCode = languageCode;
 
-		// to be inited, shard id and language code must be filled
-		if (!_ShardId.empty() && !_LanguageCode.empty())
-			_CacheInited = true;
-		else
-			_CacheInited = false;
+		// clear all current data.
+		_ReceivedStrings.clear();
+		_ReceivedDynStrings.clear();
+		_CacheStringToSave.clear();
+		// NB : we keep the waiting strings and dyn strings
+
+		// insert the empty string.
+		_ReceivedStrings.insert(make_pair((uint)EmptyStringId, string()));
+
+		// to be inited, language code must be filled
+		_CacheInited = !m_LanguageCode.empty();
+		_CacheLoaded = false;
+		_CacheFilename.clear();
 	}
 
-	void CStringManagerClient::loadCache(uint32 timestamp)
+	void CStringManagerClient::loadCache(uint32 timestamp, uint32 shardId)
 	{
 		H_AUTO( CStringManagerClient_loadCache )
 
@@ -122,16 +131,24 @@ namespace STRING_MANAGER
 		{
 			try
 			{
-				_CacheFilename = std::string("save/") + _ShardId.substr(0, _ShardId.find(":")) + ".string_cache";
+				const uint currentVersion = 1;
+
+				string clientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
+				_CacheFilename = string("save/") + clientApp + "_" + toString(shardId) + "_" + m_LanguageCode + ".string_cache";
 
 				nlinfo("SM : Try to open the string cache : %s", _CacheFilename.c_str());
 
-				if (CFile::fileExists(_CacheFilename))
+				if (CFile::fileExists(_CacheFilename) && CFile::getFileSize(_CacheFilename))
 				{
 					// there is a cache file, check date reset it if needed
 					{
 						NLMISC::CIFile file(_CacheFilename);
-						file.serial(_Timestamp);
+						file.setVersionException(false, false);
+						file.serialVersion(currentVersion);
+						if (file.getPos() + sizeof(_Timestamp) > file.getFileSize())
+							_Timestamp = ~timestamp;
+						else
+							file.serial(_Timestamp);
 					}
 
 					if (_Timestamp != timestamp)
@@ -139,6 +156,7 @@ namespace STRING_MANAGER
 						nlinfo("SM: Clearing string cache : outofdate");
 						// the cache is not sync, reset it
 						NLMISC::COFile file(_CacheFilename);
+						file.serialVersion(currentVersion);
 						file.serial(timestamp);
 					}
 					else
@@ -151,26 +169,30 @@ namespace STRING_MANAGER
 					nlinfo("SM: Creating string cache");
 					// cache file don't exist, create it with the timestamp
 					NLMISC::COFile file(_CacheFilename);
+					file.serialVersion(currentVersion);
 					file.serial(timestamp);
 				}
 
 				// clear all current data.
 				_ReceivedStrings.clear();
 				_ReceivedDynStrings.clear();
+				_CacheStringToSave.clear();
 				// NB : we keep the waiting strings and dyn strings
 
 				// insert the empty string.
-				_ReceivedStrings.insert(make_pair((uint)EmptyStringId, ucstring()));
+				_ReceivedStrings.insert(make_pair((uint)EmptyStringId, string()));
 
 				// load the cache file
 				NLMISC::CIFile file(_CacheFilename);
+				int version = file.serialVersion(currentVersion);
 				file.serial(_Timestamp);
 				nlassert(_Timestamp == timestamp);
+				nlassert(version >= 1); // Initial version
 
 				while (!file.eof())
 				{
 					uint32			id;
-					ucstring		str;
+					string		str;
 
 					file.serial(id);
 					file.serial(str);
@@ -194,12 +216,12 @@ namespace STRING_MANAGER
 
 
 
-	void CStringManagerClient::waitString(uint32 stringId, const IStringWaiterRemover *premover, ucstring *result)
+	void CStringManagerClient::waitString(uint32 stringId, const IStringWaiterRemover *premover, string *result)
 	{
 		H_AUTO( CStringManagerClient_waitString )
 
 		nlassert(premover && result);
-		ucstring value;
+		string value;
 		if (getString(stringId, value))
 			*result = value;
 		else
@@ -217,7 +239,7 @@ namespace STRING_MANAGER
 		H_AUTO( CStringManagerClient_waitString2 )
 
 		nlassert(pcallback != 0);
-		ucstring value;
+		string value;
 		if (getString(stringId, value))
 		{
 			pcallback->onStringAvailable(stringId, value);
@@ -230,12 +252,12 @@ namespace STRING_MANAGER
 	}
 
 
-	void CStringManagerClient::waitDynString(uint32 stringId, const IStringWaiterRemover *premover, ucstring *result)
+	void CStringManagerClient::waitDynString(uint32 stringId, const IStringWaiterRemover *premover, string *result)
 	{
 		H_AUTO( CStringManagerClient_waitDynString )
 
 		nlassert(premover && result);
-		ucstring value;
+		string value;
 		if (getDynString(stringId, value))
 			*result = value;
 		else
@@ -253,7 +275,7 @@ namespace STRING_MANAGER
 		H_AUTO( CStringManagerClient_waitDynString2 )
 
 		nlassert(pcallback != 0);
-		ucstring value;
+		string value;
 		if (getDynString(stringId, value))
 		{
 			pcallback->onDynStringAvailable(stringId, value);
@@ -330,7 +352,7 @@ restartLoop4:
 
 
 
-	bool CStringManagerClient::getString(uint32 stringId, ucstring &result)
+	bool CStringManagerClient::getString(uint32 stringId, string &result)
 	{
 		H_AUTO( CStringManagerClient_getString )
 
@@ -357,7 +379,7 @@ restartLoop4:
 					_WaitingStrings.insert(stringId);
 					// need to ask for this string.
 					NLMISC::CBitMemStream bms;
-					const std::string msgType = "STRING_MANAGER:STRING_RQ";
+					static const string msgType = "STRING_MANAGER:STRING_RQ";
 					if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 					{
 						bms.serial( stringId );
@@ -374,7 +396,7 @@ restartLoop4:
 				{
 					char tmp[1024];
 					sprintf(tmp, "<WAIT STR %u>", stringId);
-					result = ucstring(tmp);
+					result = tmp;
 				}
 				else
 					result.erase(); // = _WaitString;
@@ -385,14 +407,14 @@ restartLoop4:
 			{
 				char tmp[1024];
 				sprintf(tmp, "<STR %u>", stringId);
-				result = ucstring(tmp) + it->second;
+				result = tmp + it->second;
 			}
 			else
 			{
 				result = it->second;
-				if (result.size() > 9 && result.substr(0, 9) == ucstring("<missing:")) 
+				if (result.size() > 9 && result.substr(0, 9) == "<missing:") 
 				{
-					map<ucstring, ucstring>::iterator itds = _DynStrings.find(result.substr(9, result.size()-10));
+					map<string, string>::iterator itds = _DynStrings.find(result.substr(9, result.size()-10));
 					if (itds != _DynStrings.end())
 						result = itds->second;
 				}
@@ -402,7 +424,7 @@ restartLoop4:
 		return true;
 	}
 
-	void CStringManagerClient::receiveString(uint32 stringId, const ucstring &str)
+	void CStringManagerClient::receiveString(uint32 stringId, const string &str)
 	{
 		H_AUTO( CStringManagerClient_receiveString )
 
@@ -419,8 +441,8 @@ restartLoop4:
 			TStringsContainer::iterator it(_ReceivedStrings.find(stringId));
 			nlwarning("Receiving stringID %u (%s), already in received string (%s), replacing with new value.",
 				stringId,
-				str.toString().c_str(),
-				it->second.toString().c_str());
+				str.c_str(),
+				it->second.c_str());
 
 			if (it->second != str)
 				it->second = str;
@@ -484,7 +506,7 @@ restartLoop:
 			last = _WaitingDynStrings.end();
 			for (; first != last; ++first)
 			{
-				ucstring value;
+				string value;
 				uint number = first->first;
 				/// Warning: if getDynString() return true, 'first' is erased => don't use it after in this loop
 				if (getDynString(number, value))
@@ -528,7 +550,7 @@ restartLoop:
 
 	void CStringManagerClient::flushStringCache()
 	{
-		if(!_CacheStringToSave.empty())
+		if (!_CacheStringToSave.empty() && !_CacheFilename.empty())
 		{
 			NLMISC::COFile file(_CacheFilename, true);
 			for(uint i=0;i<_CacheStringToSave.size();i++)
@@ -616,7 +638,7 @@ restartLoop:
 				return false;
 			}
 			// ok, we have the base string, we can serial the parameters
-			ucstring::iterator first(dynInfo.String.begin()), last(dynInfo.String.end());
+			string::iterator first(dynInfo.String.begin()), last(dynInfo.String.end());
 			for (; first != last; ++first)
 			{
 				if (*first == '%')
@@ -699,10 +721,10 @@ restartLoop:
 		if (dynInfo.Status == TDynStringInfo::serialized)
 		{
 			// try to retreive all string parameter to build the string.
-			ucstring temp;
+			string temp;
 			temp.reserve(dynInfo.String.size() * 2);
-			ucstring::iterator src(dynInfo.String.begin());
-			ucstring::iterator move = src;
+			string::iterator src(dynInfo.String.begin());
+			string::iterator move = src;
 
 			std::vector<TParamValue>::iterator first(dynInfo.Params.begin()), last(dynInfo.Params.end());
 			for (; first != last; ++first)
@@ -712,15 +734,9 @@ restartLoop:
 				{
 				case string_id:
 					{
-						ucstring str;
+						string str;
 						if (!getString(param.StringId, str))
 							return false;
-
-						ucstring::size_type p1 = str.find('[');
-						if (p1 != ucstring::npos)
-						{
-							str = str.substr(0, p1)+STRING_MANAGER::CStringManagerClient::getLocalizedName(str.substr(p1));
-						}
 
 						// If the string is a player name, we may have to remove the shard name (if the string looks like a player name)
 						if(!str.empty() && !PlayerSelectedHomeShardNameWithParenthesis.empty())
@@ -734,15 +750,15 @@ restartLoop:
 									// If the shard name is the same as the player home shard name, remove it
 									uint	len= (uint)PlayerSelectedHomeShardNameWithParenthesis.size();
 									uint	start= (uint)str.size()-len;
-									if(ucstrnicmp(str, start, len, PlayerSelectedHomeShardNameWithParenthesis)==0)
+									if(ucstrnicmp(str, start, len, PlayerSelectedHomeShardNameWithParenthesis)==0) // TODO: NLMISC::compareCaseInsensitive
 										str.resize(start);
 								}
 							}
 						}
 
 						// If the string contains a title, then remove it
-						ucstring::size_type pos = str.find('$');
-						if ( ! str.empty() && pos != ucstring::npos)
+						string::size_type pos = str.find('$');
+						if ( ! str.empty() && pos != string::npos)
 						{
 							str = CEntityCL::removeTitleFromName(str);
 						}
@@ -759,13 +775,13 @@ restartLoop:
 						char value[1024];
 						sprintf(value, "%d", param.Integer);
 						temp.append(move, src+param.ReplacementPoint);
-						temp+=ucstring(value);
+						temp += value;
 						move = dynInfo.String.begin()+param.ReplacementPoint+2;
 					}
 					break;
 				case time:
 					{
-						ucstring value;
+						string value;
 						uint32 time = (uint32)param.Time;
 						if( time >= (10*60*60) )
 						{
@@ -796,7 +812,7 @@ restartLoop:
 						char value[1024];
 						sprintf(value, "%u", (uint32)param.Money);
 						temp.append(move, src+param.ReplacementPoint);
-						temp+=ucstring(value);
+						temp += value;
 						move = dynInfo.String.begin()+param.ReplacementPoint+2;
 					}
 					// TODO
@@ -805,7 +821,7 @@ restartLoop:
 					break;
 				case dyn_string_id:
 					{
-						ucstring dynStr;
+						string dynStr;
 						if (!getDynString(param.DynStringId, dynStr))
 							return false;
 						temp.append(move, src+param.ReplacementPoint);
@@ -823,8 +839,8 @@ restartLoop:
 
 			// apply any 'delete' character in the string and replace double '%'
 			{
-				uint i =0;
-				while (i < temp.size())
+				ptrdiff_t i =0;
+				while (i < (ptrdiff_t)temp.size())
 				{
 					if (temp[i] == 8)
 					{
@@ -853,7 +869,7 @@ restartLoop:
 	}
 
 
-	bool CStringManagerClient::getDynString(uint32 dynStringId, ucstring &result)
+	bool CStringManagerClient::getDynString(uint32 dynStringId, std::string &result)
 	{
 		H_AUTO( CStringManagerClient_getDynString )
 
@@ -882,7 +898,7 @@ restartLoop:
 				{
 					char tmp[1024];
 					sprintf(tmp, "<DYNSTR %u>", dynStringId);
-					result = ucstring(tmp) + it->second.String;
+					result = tmp + it->second.String;
 				}
 				else
 					result = it->second.String;
@@ -908,7 +924,7 @@ restartLoop:
 						nlwarning("DynStringID %u is unknown !", dynStringId);
 						char tmp[1024];
 						sprintf(tmp, "<UNKNOWN DYNSTR %u>", dynStringId);
-						result = ucstring(tmp);
+						result = tmp;
 					}
 					else
 						result.erase(); //_WaitString;
@@ -920,7 +936,7 @@ restartLoop:
 					{
 						char tmp[1024];
 						sprintf(tmp, "<DYNSTR %u>", dynStringId);
-						result = ucstring(tmp) + it->second.String;
+						result = tmp + it->second.String;
 					}
 					else
 						result = it->second.String;
@@ -933,7 +949,7 @@ restartLoop:
 				{
 					char tmp[1024];
 					sprintf(tmp, "<WAIT DYNSTR %u>", dynStringId);
-					result = ucstring(tmp);
+					result = tmp;
 				}
 				else
 					result.erase(); // = _WaitString;
@@ -943,7 +959,7 @@ restartLoop:
 	}
 
 	// Tool fct to lookup a reference file
-	static string	lookupReferenceFile(const std::string &fileName)
+	static string	lookupReferenceFile(const string &fileName)
 	{
 		string	referenceFile;
 		// special location for the "wk" language
@@ -964,14 +980,14 @@ restartLoop:
 		return referenceFile;
 	}
 
-	void CLoadProxy::loadStringFile(const std::string &filename, ucstring &text)
+	void CLoadProxy::loadStringFile(const string &filename, ucstring &text) // TODO: UTF-8 (serial)
 	{
 		vector<TStringInfo>	reference;
 		vector<TStringInfo> addition;
 		vector<TStringInfo> diff;
 
 		// get the correct path name of the ref file
-		std::string referenceFile= lookupReferenceFile(filename);
+		string referenceFile= lookupReferenceFile(filename);
 
 		// load the reference file
 		if (!referenceFile.empty())
@@ -1008,7 +1024,7 @@ restartLoop:
 		context.Diff.push_back(context.Addition[addIndex]);
 		//nldebug("Adding new string '%s' in CI18N", context.Addition[addIndex].Identifier.c_str());
 		if (ClientCfg.DebugStringManager)
-			context.Diff.back().Text = ucstring("<NEW>")+context.Diff.back().Text;
+			context.Diff.back().Text = ucstring("<NEW>")+context.Diff.back().Text; // TODO: UTF-8 (serial)
 	}
 	void CLoadProxy::onRemove(uint /* addIndex */, uint /* refIndex */, TStringDiffContext &/* context */)
 	{
@@ -1020,7 +1036,7 @@ restartLoop:
 		context.Diff.push_back(context.Addition[addIndex]);
 		//nldebug("Using changed string '%s' in CI18N", context.Addition[addIndex].Identifier.c_str());
 		if (ClientCfg.DebugStringManager)
-			context.Diff.back().Text = ucstring("<CHG>")+context.Diff.back().Text;
+			context.Diff.back().Text = ucstring("<CHG>")+context.Diff.back().Text; // TODO: UTF-8 (serial)
 	}
 	void CLoadProxy::onSwap(uint /* newIndex */, uint /* refIndex */, TStringDiffContext &/* context */)
 	{
@@ -1034,14 +1050,14 @@ restartLoop:
 class CReadWorkSheetFile : public TWorkSheetDiff::IDiffCallback
 {
 public:
-	void readWorkSheetFile(const string &filename, ucstring &text)
+	void readWorkSheetFile(const string &filename, ucstring &text) // TODO: UTF-8 (serial)
 	{
 		TWorksheet	addition;
 		TWorksheet	reference;
 		TWorksheet	diff;
 
 		// get the correct path name of the ref file
-		std::string referenceFile= lookupReferenceFile(filename);
+		string referenceFile= lookupReferenceFile(filename);
 
 		// load the reference file
 		if (!referenceFile.empty())
@@ -1134,7 +1150,7 @@ public:
 const string	StringClientPackedFileName= "./save/string_client.pack";
 // Must Increment this number if change are made to the code (else change not taken into account)
 const uint		StringClientPackedVersion= 0;
-bool CStringManagerClient::checkWordFileDates(vector<CFileCheck> &fileChecks, const std::vector<std::string> &fileNames, const std::string &languageCode)
+bool CStringManagerClient::checkWordFileDates(vector<CFileCheck> &fileChecks, const std::vector<string> &fileNames, const string &languageCode)
 {
 	fileChecks.resize(fileNames.size());
 
@@ -1142,7 +1158,7 @@ bool CStringManagerClient::checkWordFileDates(vector<CFileCheck> &fileChecks, co
 	for(uint i=0;i<fileChecks.size();i++)
 	{
 		// get the correct path name of the ref file
-		std::string referenceFile= lookupReferenceFile(fileNames[i]);
+		string referenceFile= lookupReferenceFile(fileNames[i]);
 		fileChecks[i].ReferenceDate= referenceFile.empty()?0:CFile::getFileModificationDate(referenceFile);
 
 		// get then one of the working File (NB: 0 is a valid reponse for Final Client: no working file)
@@ -1169,11 +1185,11 @@ bool CStringManagerClient::checkWordFileDates(vector<CFileCheck> &fileChecks, co
 
 
 // ***************************************************************************
-void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
+void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 {
-	ucstring		womenNameColIdent= string("women_name");
-	ucstring		descColIdent= string("description");
-	ucstring		descColIdent2= string("description2");
+	ucstring womenNameColIdent = ucstring("women_name"); // TODO: UTF-8 (serial)
+	ucstring descColIdent = ucstring("description"); // TODO: UTF-8 (serial)
+	ucstring descColIdent2 = ucstring("description2"); // TODO: UTF-8 (serial)
 
 	// List of words to append to the local CI18N system.
 	static const char	*specialWords[]=
@@ -1212,11 +1228,11 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 		{
 			uint32	profile0= (uint32)ryzomGetLocalTime();
 
-			ucstring ucs;
-			std::string fileName = fileNames[i];
-			std::string keyExtenstion = specialWords[i*3+2];
+			ucstring ucs; // TODO: UTF-8 (serial)
+			string fileName = fileNames[i];
+			string keyExtenstion = specialWords[i*3+2];
 
-			// read the ucstring and make diffs with data in ./translation/work.
+			// read the ucstring and make diffs with data in ./translation/work. // TODO: UTF-8 (serial)
 			CReadWorkSheetFile	rwsf;
 			rwsf.readWorkSheetFile(fileName, ucs);
 			if(ucs.empty())
@@ -1228,9 +1244,9 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 
 			// Get the Key and Data ColIndex.
 			uint	nameColIndex = 0, keyColIndex = 0;
-			if( !ws.findCol(ucstring("name"), nameColIndex) )
+			if( !ws.findCol(ucstring("name"), nameColIndex) ) // TODO: UTF-8 (serial)
 				continue;
-			if( !ws.findCol(ucstring(specialWords[i*3+1]), keyColIndex) )
+			if( !ws.findCol(ucstring(specialWords[i*3+1]), keyColIndex) ) // TODO: UTF-8 (serial)
 				continue;
 
 			// Get the women name index if possible.
@@ -1250,17 +1266,17 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 			for(uint j=1;j<ws.size();j++)
 			{
 				// Get the key and name string.
-				const ucstring &key=  ws.getData(j, keyColIndex);
-				const ucstring &name= ws.getData(j, nameColIndex);
+				string key=  ws.getData(j, keyColIndex).toUtf8(); // FIXME: const string & when UTF-8
+				string name= ws.getData(j, nameColIndex).toUtf8(); // FIXME: const string & when UTF-8
 				// Append to the I18N.
 				// avoid case problems
-				string	keyStr= NLMISC::toLower(key.toString());
+				string keyStr = NLMISC::toLowerAscii(key);
 
 				// append the special key extension.
 				keyStr+= keyExtenstion;
 
 				// insert in map.
-				std::map<std::string, CItem>::iterator	it;
+				std::map<string, CItem>::iterator	it;
 				it= _SpecItem_TempMap.find( keyStr );
 				if ( it!=_SpecItem_TempMap.end() )
 				{
@@ -1275,8 +1291,8 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 					// insert in map of Women Name if OK.
 					if(womenNameColIndex!=std::numeric_limits<uint>::max())
 					{
-						const ucstring &womenName= ws.getData(j, womenNameColIndex);
-						_SpecItem_TempMap[keyStr].WomenName= womenName;
+						const ucstring &womenName= ws.getData(j, womenNameColIndex); // TODO: UTF-8 (serial)
+						_SpecItem_TempMap[keyStr].WomenName= womenName.toUtf8();
 						// replace all \n in the women name with true \n
 						while(strFindReplace(_SpecItem_TempMap[keyStr].WomenName, "\\n", "\n"));
 					}
@@ -1284,8 +1300,8 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 					// insert in map of Description if OK.
 					if(descColIndex!=std::numeric_limits<uint>::max())
 					{
-						const ucstring &desc= ws.getData(j, descColIndex);
-						_SpecItem_TempMap[keyStr].Desc= desc;
+						const ucstring &desc= ws.getData(j, descColIndex); // TODO: UTF-8 (serial)
+						_SpecItem_TempMap[keyStr].Desc= desc.toUtf8();
 						// replace all \n in the desc with true \n
 						while(strFindReplace(_SpecItem_TempMap[keyStr].Desc, "\\n", "\n"));
 					}
@@ -1293,8 +1309,8 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 					// insert in map of Description2 if OK.
 					if(descColIndex2!=std::numeric_limits<uint>::max())
 					{
-						const ucstring &desc= ws.getData(j, descColIndex2);
-						_SpecItem_TempMap[keyStr].Desc2= desc;
+						const ucstring &desc= ws.getData(j, descColIndex2); // TODO: UTF-8 (serial)
+						_SpecItem_TempMap[keyStr].Desc2= desc.toUtf8();
 						// replace all \n in the desc with true \n
 						while(strFindReplace(_SpecItem_TempMap[keyStr].Desc2, "\\n", "\n"));
 					}
@@ -1358,7 +1374,7 @@ void CStringManagerClient::specialWordsMemoryCompress()
 	// Make big strings
 	_SpecItems.resize(nNbEntries);
 	_SpecItem_Labels = new char[nLabelSize];
-	_SpecItem_NameDesc = new ucchar[nNameDescSize];
+	_SpecItem_NameDesc = new char[nNameDescSize];
 
 	nNbEntries = 0;
 	nLabelSize = 0;
@@ -1366,35 +1382,30 @@ void CStringManagerClient::specialWordsMemoryCompress()
 	it = _SpecItem_TempMap.begin();
 	while (it != _SpecItem_TempMap.end())
 	{
-
-		if (strnicmp(it->first.c_str(), "bf", 2) == 0)
+		if (NLMISC::startsWith(it->first.c_str(), "bf"))
 		{
 			uint nDbg = 0;
 			nDbg++;
 		}
 
 		_SpecItems[nNbEntries].Label = _SpecItem_Labels+nLabelSize;
-		strcpy(_SpecItems[nNbEntries].Label, it->first.c_str());
+		strcpy(_SpecItem_Labels+nLabelSize, it->first.c_str());
 		nLabelSize += (uint32)it->first.size() + 1;
 
 		_SpecItems[nNbEntries].Name = _SpecItem_NameDesc+nNameDescSize;
-		memcpy(_SpecItems[nNbEntries].Name, it->second.Name.c_str(), 2*(it->second.Name.size()+1));
-		_SpecItems[nNbEntries].Name[it->second.Name.size()] = 0;
+		strcpy(_SpecItem_NameDesc+nNameDescSize, it->second.Name.c_str());
 		nNameDescSize += (uint32)it->second.Name.size() + 1;
 
 		_SpecItems[nNbEntries].WomenName = _SpecItem_NameDesc+nNameDescSize;
-		memcpy(_SpecItems[nNbEntries].WomenName, it->second.WomenName.c_str(), 2*(it->second.WomenName.size()+1));
-		_SpecItems[nNbEntries].WomenName[it->second.WomenName.size()] = 0;
+		strcpy(_SpecItem_NameDesc+nNameDescSize, it->second.WomenName.c_str());
 		nNameDescSize += (uint32)it->second.WomenName.size() + 1;
 
 		_SpecItems[nNbEntries].Desc = _SpecItem_NameDesc+nNameDescSize;
-		memcpy(_SpecItems[nNbEntries].Desc, it->second.Desc.c_str(), 2*(it->second.Desc.size()+1));
-		_SpecItems[nNbEntries].Desc[it->second.Desc.size()] = 0;
+		strcpy(_SpecItem_NameDesc+nNameDescSize, it->second.Desc.c_str());
 		nNameDescSize += (uint32)it->second.Desc.size() + 1;
 
 		_SpecItems[nNbEntries].Desc2 = _SpecItem_NameDesc+nNameDescSize;
-		memcpy(_SpecItems[nNbEntries].Desc2, it->second.Desc2.c_str(), 2*(it->second.Desc2.size()+1));
-		_SpecItems[nNbEntries].Desc2[it->second.Desc2.size()] = 0;
+		strcpy(_SpecItem_NameDesc+nNameDescSize, it->second.Desc2.c_str());
 		nNameDescSize += (uint32)it->second.Desc2.size() + 1;
 
 		nNbEntries++;
@@ -1406,23 +1417,24 @@ void CStringManagerClient::specialWordsMemoryCompress()
 }
 
 // ***************************************************************************
-const ucchar * CStringManagerClient::getSpecialWord(const std::string &label, bool women)
+const char *CStringManagerClient::getSpecialWord(const string &label, bool women)
 {
 	if (label.empty())
 	{
-		static ucstring	emptyString;
+		static string	emptyString;
 		return emptyString.c_str();
 	}
 
 	if (label[0] == '#')
 	{
-		static ucstring	rawString;
-		return getLocalizedName(label.substr(1, label.size()-1));
+		static string	rawString;
+		rawString = label.substr(1, label.size()-1);
+		return rawString.c_str();
 	}
 
 	// avoid case problems
-	static std::string lwrLabel;
-	lwrLabel = toLower(label);
+	static string lwrLabel;
+	lwrLabel = toLowerAscii(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1436,8 +1448,7 @@ const ucchar * CStringManagerClient::getSpecialWord(const std::string &label, bo
 			{
 				if( UseFemaleTitles && women )
 				{
-					ucstring ustr(it->WomenName);
-					if( !ustr.empty() )
+					if( !it->WomenName[0] )
 						return it->WomenName;
 				}
 				return it->Name;
@@ -1456,28 +1467,26 @@ const ucchar * CStringManagerClient::getSpecialWord(const std::string &label, bo
 		}
 	}
 
-	static ucstring	badString;
-
-	badString = ucstring(std::string("<NotExist:")+lwrLabel+">");
-
+	static string badString;
+	badString = "<NotExist:" + lwrLabel + ">";
 	return badString.c_str();
 }
 
 // ***************************************************************************
-const ucchar * CStringManagerClient::getSpecialDesc(const std::string &label)
+const char *CStringManagerClient::getSpecialDesc(const string &label)
 {
-	static ucstring	emptyString;
+	static string emptyString;
 	if (label.empty())
 		return emptyString.c_str();
 
 	// avoid case problems
-	static std::string	lwrLabel;
-	lwrLabel = toLower(label);
+	static string lwrLabel;
+	lwrLabel = toLowerAscii(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
 		CItemLight tmp;
-		tmp.Label = (char*)lwrLabel.c_str();
+		tmp.Label = lwrLabel.c_str();
 		vector<CItemLight>::iterator it = lower_bound(_SpecItems.begin(), _SpecItems.end(), tmp, CItemLightComp());
 
 		if (it != _SpecItems.end())
@@ -1497,20 +1506,20 @@ const ucchar * CStringManagerClient::getSpecialDesc(const std::string &label)
 }
 
 // ***************************************************************************
-const ucchar * CStringManagerClient::getSpecialDesc2(const std::string &label)
+const char *CStringManagerClient::getSpecialDesc2(const string &label)
 {
-	static ucstring	emptyString;
+	static string emptyString;
 	if (label.empty())
 		return emptyString.c_str();
 
 	// avoid case problems
-	static std::string	lwrLabel;
-	lwrLabel = toLower(label);
+	static string lwrLabel;
+	lwrLabel = toLowerAscii(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
 		CItemLight tmp;
-		tmp.Label = (char*)lwrLabel.c_str();
+		tmp.Label = lwrLabel.c_str();
 		vector<CItemLight>::iterator it = lower_bound(_SpecItems.begin(), _SpecItems.end(), tmp, CItemLightComp());
 
 		if (it != _SpecItems.end())
@@ -1539,140 +1548,108 @@ const ucchar * CStringManagerClient::getSpecialDesc2(const std::string &label)
 */
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getPlaceLocalizedName(const string &placeNameID)
+const char *CStringManagerClient::getPlaceLocalizedName(const string &placeNameID)
 {
 	return getSpecialWord(placeNameID);
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getFactionLocalizedName(const string &factionNameID)
+const char *CStringManagerClient::getFactionLocalizedName(const string &factionNameID)
 {
 	return getSpecialWord(factionNameID);
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getSkillLocalizedName(SKILLS::ESkills e)
+const char *CStringManagerClient::getSkillLocalizedName(SKILLS::ESkills e)
 {
 	return getSpecialWord(SKILLS::toString(e));
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getItemLocalizedName(CSheetId id)
+const char *CStringManagerClient::getItemLocalizedName(CSheetId id)
 {
 	return getSpecialWord(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getCreatureLocalizedName(NLMISC::CSheetId id)
+const char *CStringManagerClient::getCreatureLocalizedName(NLMISC::CSheetId id)
 {
 	return getSpecialWord(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getSBrickLocalizedName(NLMISC::CSheetId id)
+const char *CStringManagerClient::getSBrickLocalizedName(NLMISC::CSheetId id)
 {
 	return getSpecialWord(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getSPhraseLocalizedName(NLMISC::CSheetId id)
+const char *CStringManagerClient::getSPhraseLocalizedName(NLMISC::CSheetId id)
 {
 	return getSpecialWord(id.toString());
 }
 
 // ***************************************************************************
-/*const ucchar *CStringManagerClient::getBrickLocalizedDescription(BRICK_FAMILIES::TBrickFamily e)
+/*const char *CStringManagerClient::getBrickLocalizedDescription(BRICK_FAMILIES::TBrickFamily e)
 {
 	return getSpecialDesc(BRICK_FAMILIES::toString(e));
 }
 */
 // ***************************************************************************
-const ucchar *CStringManagerClient::getSkillLocalizedDescription(SKILLS::ESkills e)
+const char *CStringManagerClient::getSkillLocalizedDescription(SKILLS::ESkills e)
 {
 	return getSpecialDesc(SKILLS::toString(e));
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getItemLocalizedDescription(CSheetId id)
+const char *CStringManagerClient::getItemLocalizedDescription(CSheetId id)
 {
 	return getSpecialDesc(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getSBrickLocalizedDescription(NLMISC::CSheetId id)
+const char *CStringManagerClient::getSBrickLocalizedDescription(NLMISC::CSheetId id)
 {
 	return getSpecialDesc(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getSBrickLocalizedCompositionDescription(NLMISC::CSheetId id)
+const char *CStringManagerClient::getSBrickLocalizedCompositionDescription(NLMISC::CSheetId id)
 {
 	return getSpecialDesc2(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId id)
+const char *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId id)
 {
 	return getSpecialDesc(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleId, bool women)
+const char *CStringManagerClient::getTitleLocalizedName(const string &titleId, bool women)
 {
-	vector<ucstring> listInfos = getTitleInfos(titleId, women);
+	vector<string> listInfos = getTitleInfos(titleId, women);
+
 	if (!listInfos.empty())
 	{
 		_TitleWords.push_back(listInfos[0]);
-		return getLocalizedName(_TitleWords.back());
+		return _TitleWords.back().c_str();
 	}
 	
-	return getLocalizedName(titleId);
-}
-
-
-const ucchar *CStringManagerClient::getLocalizedName(const ucstring &uctext)
-{
-	string text = uctext.toUtf8();
-	if (text[0] == '[')
-	{
-		vector<string> textLocalizations;
-		static ucstring defaultText;
-		splitString(text.substr(1), "[", textLocalizations);
-		if (!textLocalizations.empty())
-		{
-			for(uint i = 0; i<textLocalizations.size(); i++)
-			{
-				if (textLocalizations[i].substr(0, 3) == CI18N::getCurrentLanguageCode()+"]")
-				{
-					defaultText.fromUtf8(textLocalizations[i].substr(3));
-					return defaultText.c_str();
-				}
-				else if (textLocalizations[i].substr(0, 3) == "wk]")
-				{
-					defaultText.fromUtf8(textLocalizations[i].substr(3));
-				}
-			}
-		}
-		if (!defaultText.empty()) {
-			return defaultText.c_str();
-		}
-	}
-	return uctext.c_str();
+	return titleId.c_str();
 }
 
 // ***************************************************************************
-vector<ucstring> CStringManagerClient::getTitleInfos(const ucstring &titleId, bool women)
+vector<string> CStringManagerClient::getTitleInfos(const string &titleId, bool women)
 {
-	//ucstring infosUC;
-	//infosUC.fromUtf8(titleId);
-	vector<ucstring> listInfos;
-	splitUCString(titleId, ucstring("#"), listInfos);
+	vector<string> listInfos;
+	splitString(titleId, string("#"), listInfos);
 
 	if (!listInfos.empty())
 	{
 		if (titleId[0] != '#')
 		{
-			listInfos[0] = getSpecialWord(listInfos[0].toUtf8(), women);
+			listInfos[0] = getSpecialWord(listInfos[0], women);
 		}
 	}
 
@@ -1680,74 +1657,76 @@ vector<ucstring> CStringManagerClient::getTitleInfos(const ucstring &titleId, bo
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getClassificationTypeLocalizedName(EGSPD::CClassificationType::TClassificationType type)
+const char *CStringManagerClient::getClassificationTypeLocalizedName(EGSPD::CClassificationType::TClassificationType type)
 {
 	return getSpecialDesc(EGSPD::CClassificationType::toString(type));
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getOutpostLocalizedName(NLMISC::CSheetId id)
+const char *CStringManagerClient::getOutpostLocalizedName(NLMISC::CSheetId id)
 {
 	return getSpecialWord(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getOutpostLocalizedDescription(NLMISC::CSheetId id)
+const char *CStringManagerClient::getOutpostLocalizedDescription(NLMISC::CSheetId id)
 {
 	return getSpecialDesc(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getOutpostBuildingLocalizedName(NLMISC::CSheetId id)
+const char *CStringManagerClient::getOutpostBuildingLocalizedName(NLMISC::CSheetId id)
 {
 	return getSpecialWord(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getOutpostBuildingLocalizedDescription(NLMISC::CSheetId id)
+const char *CStringManagerClient::getOutpostBuildingLocalizedDescription(NLMISC::CSheetId id)
 {
 	return getSpecialDesc(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getSquadLocalizedName(NLMISC::CSheetId id)
+const char *CStringManagerClient::getSquadLocalizedName(NLMISC::CSheetId id)
 {
 	return getSpecialWord(id.toString());
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getSquadLocalizedDescription(NLMISC::CSheetId id)
+const char *CStringManagerClient::getSquadLocalizedDescription(NLMISC::CSheetId id)
 {
 	return getSpecialDesc(id.toString());
 }
 
 // ***************************************************************************
-void CStringManagerClient::replaceDynString(const ucstring &name, const ucstring &text)
+void CStringManagerClient::replaceDynString(const std::string &name, const std::string &text)
 {
 	_DynStrings[name] = text;
 }
 
 
 // ***************************************************************************
-void CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstring &name, const ucstring &desc, const ucstring &desc2)
+void CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const std::string &name, const std::string &desc, const std::string &desc2)
 {
-	std::string	label= id.toString();
+	string	label= id.toString();
 	if (label.empty())
 	{
 		return;
 	}
 
 	// avoid case problems
-	static std::string	lwrLabel;
-	lwrLabel = toLower(label);
+	static string lwrLabel;
+	lwrLabel = toLowerAscii(label);
 
+	nlassert(!_SpecItem_MemoryCompressed); // Not allowed, strings are released!
 	if (_SpecItem_MemoryCompressed)
 	{
-		ucchar *strName = (ucchar *)name.c_str();
-		ucchar *strDesc = (ucchar *)desc.c_str();
-		ucchar *strDesc2 = (ucchar *)desc2.c_str();
+#if 0
+		const char *strName = name.c_str();
+		const char *strDesc = desc.c_str();
+		const char *strDesc2 = desc2.c_str();
 		CItemLight tmp;
-		tmp.Label = (char*)lwrLabel.c_str();
+		tmp.Label = lwrLabel.c_str();
 		vector<CItemLight>::iterator it = lower_bound(_SpecItems.begin(), _SpecItems.end(), tmp, CItemLightComp());
 
 		if (it != _SpecItems.end())
@@ -1773,6 +1752,7 @@ void CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstring
 			tmp.Desc2 = strDesc2;
 			_SpecItems.push_back(tmp);
 		}
+#endif
 	}
 	else
 	{

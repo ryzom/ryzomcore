@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -53,7 +53,11 @@ class PO2RPO : public Modifier {
 		HWND hRollup;
 
 		// From Animatable
+#if (MAX_VERSION_MAJOR < 24)
 		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
+#else
+		const MCHAR *GetObjectName(bool localized) const { if (localized) return GetString(IDS_CLASS_NAME); else return _T("Rykol Patchmesh Converter"); }
+#endif
 
 		//From Modifier
 		//TODO: Add the channels that the modifier needs to perform its modification
@@ -87,13 +91,21 @@ class PO2RPO : public Modifier {
 		//From Animatable
 		Class_ID ClassID() {return PO2RPO_CLASS_ID;}		
 		SClass_ID SuperClassID() { return OSM_CLASS_ID; }
-		void GetClassName(TSTR& s) {s = GetString(IDS_CLASS_NAME);}
+#if (MAX_VERSION_MAJOR < 24)
+		void GetClassName(TSTR& s) { s= GetString(IDS_CLASS_NAME); }  
+#else
+		void GetClassName(TSTR& s, bool localized) const { if (localized) s = GetString(IDS_CLASS_NAME); else s = _T("Rykol Patchmesh Converter"); }
+#endif
 		
 		RefTargetHandle Clone( RemapDir &remap );
 		RefResult NotifyRefChanged(NOTIFY_REF_PARAMS);
 
 		int NumSubs() { return 0; }
+#if (MAX_VERSION_MAJOR < 24)
 		TSTR SubAnimName(int i) { return GetString(IDS_PARAMS); }
+#else
+		virtual TSTR SubAnimName(int i, bool localized) NL_OVERRIDE { if (localized) return GetString(IDS_PARAMS); else return _T("Parameters"); }
+#endif
 		Animatable* SubAnim(int i) { return pblock; }
 		int NumRefs() { return 1; }
 		RefTargetHandle GetReference(int i) { return pblock; }
@@ -118,6 +130,9 @@ class PO2RPOClassDesc:public ClassDesc2 {
 	}
 
 	const MCHAR *	ClassName() {return _M("NeL Convert");}
+#if (MAX_VERSION_MAJOR >= 24)
+	virtual const TCHAR *NonLocalizedClassName() NL_OVERRIDE { return _M("NeL Convert"); }
+#endif
 	SClass_ID		SuperClassID() {return OSM_CLASS_ID;}
 	Class_ID		ClassID() {return PO2RPO_CLASS_ID;}
 	const MCHAR* 	Category() {return _M("NeL Tools");}

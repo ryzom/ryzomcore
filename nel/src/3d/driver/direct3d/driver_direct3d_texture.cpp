@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2012-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -574,6 +574,9 @@ bool CDriverD3D::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 		std::string	name;
 		getTextureShareName (tex, name);
 
+		// Destructor of texture infos locks _SyncTexDrvInfos, so any existing pointers must be deleted outside the lock
+		NLMISC::CSmartPtr<ITextureDrvInfos> maybeDeleted;
+
 		// insert or get the texture.
 		{
 			CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
@@ -587,6 +590,8 @@ bool CDriverD3D::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			{
 				// insert into driver map. (so it is deleted when driver is deleted).
 				itTex= (rTexDrvInfos.insert(make_pair(name, (ITextureDrvInfos*)NULL))).first;
+				// keep old value, so it only gets deleted after we release the lock on _SyncTexDrvInfos
+				maybeDeleted = tex.TextureDrvShare->DrvTexture;
 				// create and set iterator, for future deletion.
 				itTex->second= tex.TextureDrvShare->DrvTexture= new CTextureDrvInfosD3D(this, itTex, this, tex.getRenderTarget());
 
@@ -595,6 +600,9 @@ bool CDriverD3D::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			}
 			else
 			{
+				// keep old value, so it only gets deleted after we release the lock on _SyncTexDrvInfos
+				maybeDeleted = tex.TextureDrvShare->DrvTexture;
+				// set new value
 				tex.TextureDrvShare->DrvTexture= itTex->second;
 
 				if(bMustRecreateSharedTexture)

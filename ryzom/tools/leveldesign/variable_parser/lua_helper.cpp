@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -30,6 +33,13 @@ extern "C"
 #include <cassert>
 #undef assert
 #define assert nlassert
+
+// Always use unique_ptr with ValyriaTear/luabind on Ubuntu 20,
+// since the setting is not stored in build_information.hpp
+#ifndef LUABIND_USE_CXX11
+#define LUABIND_USE_CXX11
+#endif
+
 #include <luabind/luabind.hpp>
 
 using namespace std;

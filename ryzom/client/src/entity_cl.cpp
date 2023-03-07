@@ -1,10 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -2097,7 +2097,7 @@ bool CEntityCL::clipped (const std::vector<NLMISC::CPlane> &clippingPlanes, cons
 // Set the name of the entity. Handle replacement tag if any
 // to insert NPC task translated.
 //---------------------------------------------------
-void CEntityCL::setEntityName(const ucstring &name)
+void CEntityCL::setEntityName(const std::string &name)
 {
 	_EntityName = name;
 }
@@ -2262,7 +2262,7 @@ void CEntityCL::load()	// virtual
 // onStringAvailable :
 // Callback when the name is arrived.
 //-----------------------------------------------
-void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
+void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 {
 	_EntityName = value;
 
@@ -2270,24 +2270,24 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 	_EntityName= removeShardFromName(_EntityName);
 
 	// New title
-	ucstring newtitle;
+	string newtitle;
 
 	_HasReservedTitle = false;
 
 	// check if there is any replacement tag in the string
-	ucstring::size_type p1 = _EntityName.find('$');
-	if (p1 != ucstring::npos)
+	string::size_type p1 = _EntityName.find('$');
+	if (p1 != string::npos)
 	{
 		// we found a replacement point begin tag
-		ucstring::size_type p2 = _EntityName.find('$', p1+1);
-		if (p2 != ucstring::npos)
+		string::size_type p2 = _EntityName.find('$', p1+1);
+		if (p2 != string::npos)
 		{
 			// ok, we have the second replacement point!
 			// extract the replacement id
-			ucstring id = _EntityName.substr(p1+1, p2-p1-1);
+			string id = _EntityName.substr(p1+1, p2-p1-1);
 			// retrieve the translated string
-			_TitleRaw = id.toString();
-//			ucstring replacement = CI18N::get(strNewTitle);
+			_TitleRaw = id;
+//			string replacement = CI18N::get(strNewTitle);
 			bool womanTitle = false;
 			CCharacterCL * c = dynamic_cast<CCharacterCL*>(this);
 			if(c)
@@ -2295,17 +2295,16 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 				womanTitle = ( c->getGender() == GSGENDER::female );
 			}
 			
-			ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle));
+			string replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
 
 			// Sometimes translation contains another title
 			{
-				ucstring::size_type pos = replacement.find('$');
-				if (pos != ucstring::npos)
+				string::size_type pos = replacement.find('$');
+				if (pos != string::npos)
 				{
-					ucstring sn = replacement;
-					_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(sn.substr(0, pos));
-					ucstring::size_type pos2 = sn.find('$', pos + 1);
-					_TitleRaw = sn.substr(pos+1, pos2 - pos - 1);
+					_EntityName = replacement.substr(0, pos);
+					string::size_type pos2 = replacement.find('$', pos + 1);
+					_TitleRaw = replacement.substr(pos+1, pos2 - pos - 1);
 					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
 				}
 			}
@@ -2316,12 +2315,12 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 			{
 				// build the final name
 				p1 = _EntityName.find('$');
-				_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName.substr(0, p1));	// + _Name.substr(p2+1)
+				_EntityName   = _EntityName.substr(0, p1);	// + _Name.substr(p2+1)
 				// Get extended name
 				_NameEx = replacement;
 				newtitle = _NameEx;
 			}
-			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw.toString() );
+			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw );
 			if ( titleEnum >= CHARACTER_TITLE::BeginGmTitle && titleEnum <= CHARACTER_TITLE::EndGmTitle )
 			{
 				_GMTitle = titleEnum - CHARACTER_TITLE::BeginGmTitle;
@@ -2333,10 +2332,6 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 				if ( titleEnum == CHARACTER_TITLE::FBT )
 					_HasReservedTitle = true;
 			}
-		}
-		else
-		{
-			_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName);
 		}
 	}
 
@@ -2356,10 +2351,10 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 		if (pVT != NULL) pVT->setText(_Title);
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player"));
-		if (pGC != NULL) pGC->setUCTitle(_EntityName);
+		if (pGC != NULL) pGC->setTitle(_EntityName);
 
 		CSkillManager *pSM = CSkillManager::getInstance();
-		pSM->setPlayerTitle(_TitleRaw.toString());
+		pSM->setPlayerTitle(_TitleRaw);
 	}
 
 	// Must rebuild the in scene interface 'cause name has changed
@@ -2370,33 +2365,33 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 //-----------------------------------------------
 // getTitleFromName
 //-----------------------------------------------
-ucstring CEntityCL::getTitleFromName(const ucstring &name)
+std::string CEntityCL::getTitleFromName(const std::string &name)
 {
-	ucstring::size_type p1 = name.find('$');
-	if (p1 != ucstring::npos)
+	std::string::size_type p1 = name.find('$');
+	if (p1 != string::npos)
 	{
-		ucstring::size_type p2 = name.find('$', p1 + 1);
-		if (p2 != ucstring::npos)
+		std::string::size_type p2 = name.find('$', p1 + 1);
+		if (p2 != std::string::npos)
 			return name.substr(p1+1, p2-p1-1);
 	}
 
-	return ucstring("");
+	return std::string();
 }// getTitleFromName //
 
 //-----------------------------------------------
 // removeTitleFromName
 //-----------------------------------------------
-ucstring CEntityCL::removeTitleFromName(const ucstring &name)
+std::string CEntityCL::removeTitleFromName(const std::string &name)
 {
-	ucstring::size_type p1 = name.find('$');
-	if (p1 == ucstring::npos)
+	std::string::size_type p1 = name.find('$');
+	if (p1 == string::npos)
 	{
 		return name;
 	}
 	else
 	{
-		ucstring::size_type p2 = name.find('$', p1 + 1);
-		if (p2 != ucstring::npos)
+		std::string::size_type p2 = name.find('$', p1 + 1);
+		if (p2 != string::npos)
 		{
 			return name.substr(0, p1) + name.substr(p2 + 1);
 		}
@@ -2410,16 +2405,16 @@ ucstring CEntityCL::removeTitleFromName(const ucstring &name)
 //-----------------------------------------------
 // removeShardFromName
 //-----------------------------------------------
-ucstring CEntityCL::removeShardFromName(const ucstring &name)
+std::string CEntityCL::removeShardFromName(const std::string &name)
 {
 	// The string must contains a '(' and a ')'
-	ucstring::size_type	p0= name.find('(');
-	ucstring::size_type	p1= name.find(')');
-	if(p0==ucstring::npos || p1==ucstring::npos || p1<=p0)
+	std::string::size_type	p0= name.find('(');
+	std::string::size_type	p1= name.find(')');
+	if(p0==std::string::npos || p1==std::string::npos || p1<=p0)
 		return name;
 
 	// if it is the same as the shard name of the user, remove it
-	if(ucstrnicmp(name, (uint)p0+1, (uint)(p1-p0-1), PlayerSelectedHomeShardName)==0)
+	if (!NLMISC::compareCaseInsensitive(name.c_str() + p0 + 1, p1-p0-1, PlayerSelectedHomeShardName.c_str(), PlayerSelectedHomeShardName.size()))
 		return name.substr(0,p0) + name.substr(p1+1);
 	// else don't modify
 	else
@@ -2429,7 +2424,7 @@ ucstring CEntityCL::removeShardFromName(const ucstring &name)
 //-----------------------------------------------
 // removeTitleAndShardFromName
 //-----------------------------------------------
-ucstring CEntityCL::removeTitleAndShardFromName(const ucstring &name)
+std::string CEntityCL::removeTitleAndShardFromName(const std::string &name)
 {
 	return removeTitleFromName(removeShardFromName(name));
 }
@@ -2443,34 +2438,35 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		NLGUI::CDBManager *pCDBM = NLGUI::CDBManager::getInstance();
 
-		CEntityCL::_EntitiesColor[CEntityCL::User] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:USER")->getValueRGBA();
-		CEntityCL::_EntitiesColor[CEntityCL::Player] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PLAYER")->getValueRGBA();
-		CEntityCL::_EntitiesColor[CEntityCL::NPC] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:NPC")->getValueRGBA();
-		CEntityCL::_EntitiesColor[CEntityCL::Fauna] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:FAUNA")->getValueRGBA();
-		CEntityCL::_EntitiesColor[CEntityCL::ForageSource] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:SOURCE")->getValueRGBA();
-		CEntityCL::_DeadColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:DEAD")->getValueRGBA();
-		CEntityCL::_TargetColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:TARGET")->getValueRGBA();
-		CEntityCL::_GroupColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:GROUP")->getValueRGBA();
-		CEntityCL::_GuildColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:GUILD")->getValueRGBA();
-		CEntityCL::_UserMountColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:MOUNT")->getValueRGBA();
-		CEntityCL::_UserPackAnimalColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:BEAST")->getValueRGBA();
-		CEntityCL::_PvpEnemyColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PVPENEMY")->getValueRGBA();
-		CEntityCL::_PvpAllyColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLY")->getValueRGBA();
-		CEntityCL::_PvpAllyInTeamColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLYINTEAM")->getValueRGBA();
-		CEntityCL::_PvpNeutralColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PVPNEUTRAL")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::User] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:USER")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::Player] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PLAYER")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::NPC] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:NPC")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::Fauna] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:FAUNA")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::ForageSource] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:SOURCE")->getValueRGBA();
+		CEntityCL::_DeadColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:DEAD")->getValueRGBA();
+		CEntityCL::_TargetColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:TARGET")->getValueRGBA();
+		CEntityCL::_GroupColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:GROUP")->getValueRGBA();
+		CEntityCL::_GuildColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:GUILD")->getValueRGBA();
+		CEntityCL::_UserMountColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:MOUNT")->getValueRGBA();
+		CEntityCL::_UserPackAnimalColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:BEAST")->getValueRGBA();
+		CEntityCL::_PvpEnemyColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPENEMY")->getValueRGBA();
+		CEntityCL::_PvpAllyColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLY")->getValueRGBA();
+		CEntityCL::_PvpAllyInTeamColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLYINTEAM")->getValueRGBA();
+		CEntityCL::_PvpNeutralColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPNEUTRAL")->getValueRGBA();
 
 		// don't save these colors in .icfg because players can't change them
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::SGM - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:SGM")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::GM - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:GM")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::VG - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:VG")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::SG - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:SG")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::G - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:G")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::SGM - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:SGM")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::GM - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:GM")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::VG - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:VG")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::SG - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:SG")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::G - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:G")->getValueRGBA();
 
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::CM - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:CM")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::EM - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:EM")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::EG - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:EG")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::OBSERVER - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:OBSERVER")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::CM - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:CM")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::EM - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:EM")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::EG - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:EG")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::OBSERVER - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:OBSERVER")->getValueRGBA();
 	}
 };
 REGISTER_ACTION_HANDLER (CUpdateEntitiesColor, "update_entities_color");

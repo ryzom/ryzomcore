@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -871,21 +872,21 @@ bool setVect(CVector &vectToChange, const CVector &vect, bool compute, bool chec
 	return true;
 }// setVect //
 
-NLMISC::CRGBA interpClientCfgColor(const ucstring &src, ucstring &dest)
+NLMISC::CRGBA interpClientCfgColor(const string &src, string &dest)
 {
 	CRGBA color = CRGBA::White;
 	if (src.size() >= 3)
 	{
-		if (src[0] == (ucchar) '&')
+		if (src[0] == '&')
 		{
-			ucstring::size_type nextPos = src.find((ucchar) '&', 1);
-			if (nextPos != ucstring::npos)
+			string::size_type nextPos = src.find('&', 1);
+			if (nextPos != string::npos)
 			{
 				std::string colorCode;
 				colorCode.resize(nextPos - 1);
 				for(uint k = 0; k < nextPos - 1; ++k)
 				{
-					colorCode[k] = tolower((char) src[k + 1]);
+					colorCode[k] = tolower((char) src[k + 1]); // TODO: toLowerAscii
 				}
 				std::map<std::string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(colorCode);
 				if (it != ClientCfg.SystemInfoParams.end())
@@ -911,7 +912,7 @@ NLMISC::CRGBA interpClientCfgColor(const ucstring &src, ucstring &dest)
 	return color;
 }
 
-std::string getStringCategory(const ucstring &src, ucstring &dest, bool alwaysAddSysByDefault)
+std::string getStringCategory(const string &src, string &dest, bool alwaysAddSysByDefault)
 {
 	std::string str = getStringCategoryIfAny(src, dest);
 	if (alwaysAddSysByDefault)
@@ -921,41 +922,41 @@ std::string getStringCategory(const ucstring &src, ucstring &dest, bool alwaysAd
 }
 
 
-std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest)
+std::string getStringCategoryIfAny(const string &src, string &dest)
 {
 	std::string colorCode;
 	if (src.size() >= 3)
 	{
-		uint startPos = 0;
+		size_t startPos = 0;
 
 		// Skip <NEW> or <CHG> if present at beginning
-		ucstring preTag;
-		const uint PreTagSize = 5;
-		const ucstring newTag("<NEW>");
+		string preTag;
+		const size_t PreTagSize = 5;
+		static const string newTag = "<NEW>";
 		if ( (src.size() >= PreTagSize) && (src.substr( 0, PreTagSize ) == newTag) )
 		{
 			startPos = PreTagSize;
 			preTag = newTag;
 		}
-		const ucstring chgTag("<CHG>");
+		static const string chgTag = "<CHG>";
 		if ( (src.size() >= PreTagSize) && (src.substr( 0, PreTagSize ) == chgTag) )
 		{
 			startPos = PreTagSize;
 			preTag = chgTag;
 		}
 
-		if (src[startPos] == (ucchar) '&')
+		if (src[startPos] == '&')
 		{
-			ucstring::size_type nextPos = src.find((ucchar) '&', startPos+1);
-			if (nextPos != ucstring::npos)
+			string::size_type nextPos = src.find('&', startPos+1);
+			if (nextPos != string::npos)
 			{
-				uint codeSize = (uint)nextPos - startPos - 1;
+				size_t codeSize = nextPos - startPos - 1;
 				colorCode.resize( codeSize );
-				for(uint k = 0; k < codeSize; ++k)
+				for(ptrdiff_t k = 0; k < (ptrdiff_t)codeSize; ++k)
 				{
-					colorCode[k] = tolower((char) src[k + startPos + 1]);
+					colorCode[k] = tolower((char) src[k + startPos + 1]); // TODO: toLowerAscii
 				}
-				ucstring destTmp;
+				string destTmp;
 				if ( startPos != 0 )
 					destTmp = preTag; // leave <NEW> or <CHG> in the dest string
 				destTmp += src.substr(nextPos + 1);
@@ -980,7 +981,7 @@ std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest)
 
 
 // ***************************************************************************
-sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1)
+sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1) // OLD
 {
 	// start
 	const ucchar	*start1= s1.c_str();
@@ -1407,6 +1408,10 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	// **** Init Video Modes
 	Driver->getModes(videoModes);
 
+	NL3D::UDriver::CMode currentMode;
+	Driver->getCurrentScreenMode(currentMode);
+
+	// TODO: for resolutions below 1024x768, could use automatic UI scaling like in login/outgame
 	// Remove modes under 1024x768 (outgame ui limitation) and get the unique strings
 	sint i, j;
 	for (i = 0; i < (sint)videoModes.size(); ++i)
@@ -1422,6 +1427,9 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 
 			// create string format with width and height
 			string res = toString(videoModes[i].Width)+" x "+toString(videoModes[i].Height);
+
+			if (!videoModes[i].DisplayDevice.empty())
+				res += toString(" (%s)", videoModes[i].DisplayDevice.c_str());
 
 			// check if video mode already found in list
 			for (j = 0; j < (sint)stringModeList.size(); ++j)
@@ -1439,6 +1447,7 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 				// add it to the list
 				stringModeList.push_back(res);
 
+				// TODO: This should probably only be used when in fullscreen
 				// process all screen sizes less or equal to desired one
 				if ((videoModes[i].Width <= ClientCfg.Width) && (videoModes[i].Height <= ClientCfg.Height))
 				{
@@ -1458,6 +1467,16 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 							nFoundMode = i;
 						}
 					}
+				}
+				else
+				if (videoModes[i].Width == currentMode.Width &&
+					videoModes[i].Height == currentMode.Height &&
+					videoModes[i].Frequency == currentMode.Frequency &&
+					videoModes[i].DisplayDevice == currentMode.DisplayDevice)
+				{
+					// use current (active) monitor resolution
+					nFoundMode = i;
+					nFoundStringMode = j;
 				}
 			}
 		}

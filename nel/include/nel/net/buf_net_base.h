@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -19,6 +22,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/mutex.h"
+#include "nel/misc/atomic.h"
 #include "nel/misc/buf_fifo.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/debug.h"
@@ -56,6 +60,10 @@ extern uint32 	NbNetworkTask;
 enum TPipeWay { PipeRead, PipeWrite };
 #endif
 
+#ifdef NL_OS_WINDOWS
+typedef void *HANDLE;
+#endif
+
 
 /**
  * Layer 1
@@ -78,7 +86,7 @@ public:
 	/// Destructor
 	virtual ~CBufNetBase();
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	/** Init the pipe for data available with an external pipe.
 	 * Call it only if you set initPipeForDataAvailable to false in the constructor.
 	 * Then don't call sleepUntilDataAvailable() but use select() on the pipe.
@@ -88,6 +96,11 @@ public:
 	{
 		_DataAvailablePipeHandle[PipeRead] = twoPipeHandles[PipeRead];
 		_DataAvailablePipeHandle[PipeWrite] = twoPipeHandles[PipeWrite];
+	}
+#elif defined(NL_OS_WINDOWS)
+	void setExternalPipeForDataAvailable(HANDLE eventHandle)
+	{
+		_DataAvailableHandle = eventHandle;
 	}
 #endif
 
@@ -201,9 +214,11 @@ protected:
 	/// Return _DataAvailable
 	bool				dataAvailableFlag() const { return _DataAvailable; }
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX)
 	/// Pipe to select() on data available
 	int					_DataAvailablePipeHandle [2];
+#elif defined(NL_OS_WINDOWS)
+	HANDLE				_DataAvailableHandle;
 #endif
 
 private:
@@ -224,7 +239,7 @@ private:
 	uint32				_MaxSentBlockSize;
 
 	/// True if there is data available (avoids locking a mutex)
-	volatile bool		_DataAvailable;
+	NLMISC::CAtomicBool	_DataAvailable;
 
 #ifdef NL_OS_UNIX
 	bool _IsDataAvailablePipeSelfManaged;

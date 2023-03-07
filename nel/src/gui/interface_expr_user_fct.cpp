@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -359,13 +360,13 @@ namespace NLGUI
 	{
 		if (!args.empty())
 		{
-			ucstring res;
+			string res;
 			for (uint32 i = 0; i < args.size(); ++i)
 			{
 				args[i].toString();
-				res += args[i].getUCString();
+				res += args[i].getString();
 			}
-			result.setUCString (res);
+			result.setString (res);
 
 			return true;
 		}
@@ -552,15 +553,19 @@ namespace NLGUI
 			case CReflectedProperty::String:
 				result.setString ((elem->*(pRP->GetMethod.GetString))());
 			break;
+#ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCString:
-				result.setUCString ((elem->*(pRP->GetMethod.GetUCString))());
+				result.setString ((elem->*(pRP->GetMethod.GetUCString))().toUtf8());
 			break;
+#endif
 			case CReflectedProperty::StringRef:
 				result.setString ((elem->*(pRP->GetMethod.GetStringRef))());
 			break;
+#ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCStringRef:
-				result.setUCString ((elem->*(pRP->GetMethod.GetUCStringRef))());
+				result.setString ((elem->*(pRP->GetMethod.GetUCStringRef))().toUtf8());
 			break;
+#endif
 			case CReflectedProperty::RGBA:
 				result.setRGBA ((elem->*(pRP->GetMethod.GetRGBA))());
 			break;
@@ -1072,7 +1077,7 @@ namespace NLGUI
 		}
 
 		sint64 nVal = args[0].getInteger();
-		ucstring sTmp;
+		string sTmp;
 
 		if (nVal < 0) nVal = 0;
 
@@ -1099,7 +1104,7 @@ namespace NLGUI
 			}
 		}
 
-		result.setUCString(sTmp);
+		result.setString(sTmp);
 
 		return true;
 	}
@@ -1121,7 +1126,7 @@ namespace NLGUI
 		}
 
 		sint64 nVal = args[0].getInteger();
-		ucstring sTmp;
+		string sTmp;
 
 		if (nVal < 0) nVal = 0;
 
@@ -1150,7 +1155,7 @@ namespace NLGUI
 			}
 		}
 
-		result.setUCString(sTmp);
+		result.setString(sTmp);
 
 		return true;
 	}
@@ -1186,7 +1191,7 @@ namespace NLGUI
 			  nlwarning("localize : 1 arg required");
 			  return false;
 		 }
-		 result.setUCString(CI18N::get(args[0].getString()));
+		 result.setString(CI18N::get(args[0].getString()));
 		 return true;
 	}
 	REGISTER_INTERFACE_USER_FCT("localize", localize);

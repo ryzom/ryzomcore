@@ -37,7 +37,7 @@ NL_DEFAULT_PROPS(ryzom_client_patcher "Ryzom, Tools: Ryzom Client Patcher")
 NL_ADD_RUNTIME_FLAGS(ryzom_client_patcher)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_client_patcher ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.h ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.cpp)
+  target_precompile_headers(ryzom_client_patcher PRIVATE ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.h)
 ENDIF()
 
 INSTALL(TARGETS ryzom_client_patcher RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client)

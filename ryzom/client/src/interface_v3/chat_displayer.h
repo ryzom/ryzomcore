@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -97,7 +98,7 @@ public:
 		std::vector<SDispString> &rVal = acces.value ();
 		for (uint i = 0; i < rVal.size(); ++i)
 		{
-			CInterfaceManager::getInstance()->displayDebugInfo(ucstring(rVal[i].Str), rVal[i].Mode);
+			CInterfaceManager::getInstance()->displayDebugInfo(rVal[i].Str, rVal[i].Mode);
 		}
 		rVal.clear();
 	}

@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="long axe"/>
+      <ATOM Name="family" Value="melee weapon"/>
+      <ATOM Name="ItemType" Value="Two Hand Axe"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Name="two_hands" Value="Two Hands"/>
+        </ARRAY>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="melee weapon">
+      <ATOM Name="category" Value="Heavy"/>
+      <ATOM Name="skill" Value="two handed axe"/>
+      <ATOM Name="damage type" Value="Slashing"/>
+      <ATOM Name="latency" Value="6"/>
+    </STRUCT>
+    <STRUCT Name="crafting tool">
+      <ATOM Name="type" Value="Sharpener"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="icon" Value="MW_2h_axe.tga"/>
+      <ATOM Name="anim_set" Value="2H"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Skill" Value="make two_hands melee weapons"/>
+      <ATOM Name="Tool type" Value="Sharpener"/>
+      <ATOM Name="Price" Value="0.1*Standart_prices*8"/>
+      <STRUCT Name="Create">
+        <ATOM Name="MP 1" Value="Raw Material for Blade"/>
+        <ATOM Name="Quantity 1" Value="1"/>
+        <ATOM Name="MP 2" Value="Raw Material for Shaft"/>
+        <ATOM Name="MP 2 Property" Value="Stiff"/>
+        <ATOM Name="Quantity 2" Value="1"/>
+        <ATOM Name="MP 3" Value="Raw Material for Grip"/>
+        <ATOM Name="MP 3 Property" Value="Grip"/>
+        <ATOM Name="Quantity 3" Value="1"/>
+        <ATOM Name="MP 4" Value="Raw Material for Counterweight"/>
+        <ATOM Name="MP 4 Property" Value="Dense"/>
+        <ATOM Name="Quantity 4" Value="1"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="AsBrick">
+      <STRUCT Name="Basics">
+        <ATOM Name="FamilyId" Value="RootFaber"/>
+      </STRUCT>
+      <STRUCT Name="Client">
+        <ATOM Name="Icon" Value="MW_2h_axe.tga"/>
+        <ATOM Name="IconOver" Value="item_plan_over.tga"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Aug 22 20:07:54 2002 (receveur) .basics.name = long_axe
+Thu Aug 22 20:08:40 2002 (receveur) .melee weapon.category = Heavy
+Thu Aug 22 20:08:40 2002 (receveur) .melee weapon.latency = 6
+Thu Aug 22 20:08:40 2002 (receveur) .melee weapon.rate of fire = 2
+Thu Aug 22 20:08:40 2002 (receveur) .melee weapon.skill = GreatAxe
+Thu Aug 22 20:08:46 2002 (receveur) .melee weapon.damage type = Slashing
+Thu Aug 22 20:09:22 2002 (receveur) .basics.quality level = $filename
+Tue Aug 27 14:56:14 2002 (wuibout) .3d.icon = MW_2h_axe.tga
+Thu Oct 03 15:20:39 2002 (receveur) .basics.weight = very heavy
+Thu Oct 03 15:20:48 2002 (receveur) .basics.hit points = high
+Thu Dec 12 11:51:26 2002 (favre) formName Pasted = 
+Fri Jan 03 15:56:12 2003 (receveur) .melee weapon.skill = great axe
+Thu Feb 20 18:09:11 2003 (favre) .faber.Career = faber
+Thu Feb 20 18:09:11 2003 (favre) .faber.Skill = make two_hands melee weapons
+Thu Feb 20 18:09:11 2003 (favre) .faber.Specialization = make long axe
+Wed Feb 26 17:36:47 2003 (favre) .faber.Tool type = Sharpener
+Wed Feb 26 17:36:52 2003 (favre) .crafting tool.type = Sharpener
+Thu Feb 27 17:21:36 2003 (receveur) .faber.Create.MP 1 = yellow_amber.item
+Thu Feb 27 17:21:36 2003 (receveur) .faber.Create.Quantity 1 = 6
+Thu Feb 27 17:21:39 2003 (receveur) .faber.Create.Quantity 2 = 5
+Thu Feb 27 17:22:12 2003 (receveur) .faber.Create.MP 2 = desert_pod.items
+Mon Mar 03 15:29:25 2003 (receveur) .melee weapon.latency = 4
+Mon Mar 03 15:29:25 2003 (receveur) .melee weapon.rate of fire = 
+Thu May 29 16:05:58 2003 (fleury) .melee weapon.latency = 6
+Tue Sep 16 19:24:56 2003 (coutelas) .basics.ItemType = Two Hand Axe
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.MP 1 = Raw Material for Blade
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.MP 2 = Raw Material for Shaft
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.MP 2 Property = Stiff
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.MP 3 = Raw Material for Grip
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.MP 3 Property = Grip
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.MP 4 = Raw Material for Counterweight
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.MP 4 Property = Dense
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.Quantity 1 = 1
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.Quantity 2 = 1
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.Quantity 3 = 1
+Tue Sep 16 19:24:56 2003 (coutelas) .faber.Create.Quantity 4 = 1
+Tue Sep 16 19:24:56 2003 (coutelas) .melee weapon.skill = two handed axe
+Tue Sep 16 19:25:31 2003 (coutelas) .AsBrick.Client.Icon = MW_2h_axe.tga
+Thu Sep 18 12:25:52 2003 (coutelas) .basics.family = melee weapon
+Thu Sep 18 18:57:52 2003 (coutelas) .AsBrick.Basics.FamilyId = RootFaber
+Fri Sep 19 11:39:52 2003 (coutelas) .AsBrick.Client.IconOver = item_plan_over.tga</LOG>
+</FORM>

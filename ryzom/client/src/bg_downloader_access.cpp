@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2012  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,9 @@
 
 #include "stdpch.h"
 #include "bg_downloader_access.h"
+
+#ifdef RYZOM_BG_DOWNLOADER
+
 #include "global.h"
 #include "login_patch.h"
 //
@@ -84,7 +87,7 @@ CBGDownloaderAccess::CBGDownloaderAccess()
 //=====================================================
 void CBGDownloaderAccess::clearCurrentMessage()
 {
-	_CurrentMessage = ucstring();
+	_CurrentMessage = ucstring(); // OLD
 	_CurrentFilesToGet = 0;
 	_TotalFilesToGet = 0;
 	_PatchingSize = 0;
@@ -194,7 +197,7 @@ void CBGDownloaderAccess::startTask(const BGDownloader::CTaskDesc &taskDesc, con
 }
 
 //=====================================================
-bool CBGDownloaderAccess::isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const
+bool CBGDownloaderAccess::isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const // OLD
 {
 	if (_State == State_Finished)
 	{
@@ -230,7 +233,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 			// that the downloader is still running and in slave mode
 			if (!isDownloaderProcessRunning() && getDownloaderMode() != DownloaderMode_Slave)
 			{
-				throw EDownloadException(CI18N::get("uiBGD_DownloaderStopped").toUtf8());
+				throw EDownloadException(CI18N::get("uiBGD_DownloaderStopped"));
 			}
 		}
 		else
@@ -354,7 +357,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 	{
 		shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;
-		Parent->_ErrorMsg = ucstring(e.what());
+		Parent->_ErrorMsg = ucstring(e.what()); // OLD
 		Parent->_DownloadThreadPriority = ThreadPriority_DownloaderError;
 	}
 	catch(const NLMISC::EStream &e)
@@ -362,7 +365,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 		shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;
 		nlwarning("BG DOWNLOADER PROTOCOL ERROR ! Stream error");
-		Parent->_ErrorMsg = CI18N::get("uiBGD_ProtocolError") + ucstring(" : ") + ucstring(e.what());
+		Parent->_ErrorMsg = CI18N::get("uiBGD_ProtocolError") + ucstring(" : ") + ucstring(e.what()); // OLD
 		Parent->_DownloadThreadPriority = ThreadPriority_DownloaderError;
 	}
 	catch (const EWaitMessageTimeoutException &e)
@@ -370,7 +373,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 		shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;
 		nlwarning("BG DOWNLOADER PROTOCOL ERROR ! Message timeout");
-		Parent->_ErrorMsg = CI18N::get("uiBGD_ProtocolError") + ucstring(" : ") + ucstring(e.what());
+		Parent->_ErrorMsg = CI18N::get("uiBGD_ProtocolError") + ucstring(" : ") + ucstring(e.what()); // OLD
 		Parent->_DownloadThreadPriority = ThreadPriority_DownloaderError;
 	}
 	Parent->_State = State_Finished;
@@ -429,7 +432,7 @@ void CBGDownloaderAccess::CDownloadCoTask::createDownloaderProcess()
 		BOOL ok = NLMISC::launchProgram(BGDownloaderName, Parent->_CommandLine);
 		if (!ok)
 		{
-			throw EDownloadException(CI18N::get("uiBGD_LaunchError").toUtf8());
+			throw EDownloadException(CI18N::get("uiBGD_LaunchError"));
 		}
 	}
 	else
@@ -458,7 +461,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 			{
 				nlwarning("CBGDownloaderAccess::CDownloadCoTask : detected shared memory segment, with NULL pid");
 				// some problem here ...
-				throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance").toUtf8());
+				throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance"));
 			}
 		}
 		bool ok = NLMISC::CWinProcess::terminateProcess(*(DWORD *) ryzomInstPIDPtr);
@@ -467,7 +470,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 		{
 			nlwarning("CBGDownloaderAccess::CDownloadCoTask : detected shared memory segment, with good pid, but couldn't stop the process");
 			// couldn't stop the other client ...
-			throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance").toUtf8());
+			throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance"));
 		}
 	}
 	// write our pid into shared mem
@@ -475,7 +478,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 	if (!Parent->_RyzomInstPIDPtr)
 	{
 		// really, really bad luck ...
-		throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance").toUtf8());
+		throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance"));
 	}
 	*(uint32 *) Parent->_RyzomInstPIDPtr = (uint32) GetCurrentProcessId();
 
@@ -514,7 +517,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 		const uint32 totalTries = 7;
 		while (waitTime <= 32000)
 		{
-			Parent->_CurrentMessage.fromUtf8(toString(CI18N::get("uiBGD_HandShaking").toUtf8().c_str(), tryIndex, totalTries));
+			Parent->_CurrentMessage.fromUtf8(toString(CI18N::get("uiBGD_HandShaking").c_str(), tryIndex, totalTries));
 
 			sendSimpleMsg(CL_Probe);
 			NLMISC::CMemStream dummyMsg;
@@ -614,7 +617,7 @@ TDownloaderMode CBGDownloaderAccess::CDownloadCoTask::getDownloaderMode()
 void  CBGDownloaderAccess::CDownloadCoTask::getTaskResult(TTaskResult &result,
 														  uint32 &availablePatchs,
 														  bool &mustLaunchBatFile,
-														  ucstring &errorMsg
+														  ucstring &errorMsg // OLD
 														 )
 {
 	sendSimpleMsg(CL_GetTaskResult);
@@ -623,7 +626,7 @@ void  CBGDownloaderAccess::CDownloadCoTask::getTaskResult(TTaskResult &result,
 	inMsg.serialEnum(result);
 	inMsg.serial(availablePatchs);
 	inMsg.serial(mustLaunchBatFile);
-	inMsg.serial(errorMsg);
+	inMsg.serial(errorMsg); // OLD
 }
 
 //=====================================================
@@ -687,7 +690,7 @@ void CBGDownloaderAccess::CDownloadCoTask::shutdownDownloader()
 		}
 	}
 	CWinProcess::terminateProcessFromModuleName(BGDownloaderName); // for safety
-	Parent->_CurrentMessage = ucstring();
+	Parent->_CurrentMessage = ucstring(); // OLD
 }
 
 //=====================================================
@@ -758,7 +761,7 @@ void CBGDownloaderAccess::CDownloadCoTask::waitMsg(BGDownloader::TMsgType wanted
 	if (msgType != wantedMsgType)
 	{
 		nlwarning("BG DOWNLOADER PROTOCOL ERROR ! Bad message type received. Expected type is '%d', received type is '%d'", (int) wantedMsgType, (int) msgType);
-		throw EDownloadException(CI18N::get("uiBGD_ProtocolError").toUtf8());
+		throw EDownloadException(CI18N::get("uiBGD_ProtocolError"));
 	}
 }
 
@@ -795,7 +798,7 @@ bool CBGDownloaderAccess::CDownloadCoTask::defaultMessageHandling(BGDownloader::
 		case BGD_Error:
 		{
 			Parent->_TaskResult = TaskResult_Error;
-			ucstring errorMsg;
+			ucstring errorMsg; // OLD
 			msg.serial(errorMsg);
 			throw EDownloadException(errorMsg.toUtf8());
 		}
@@ -816,7 +819,7 @@ void CBGDownloaderAccess::CDownloadCoTask::checkDownloaderAlive()
 {
 	if (!Parent->_DownloaderMsgQueue.connected() || !isDownloaderProcessRunning())
 	{
-		throw EDownloadException(CI18N::get("uiBGD_DownloaderDisconnected").toUtf8());
+		throw EDownloadException(CI18N::get("uiBGD_DownloaderDisconnected"));
 	}
 }
 
@@ -885,7 +888,7 @@ void CBGDownloaderAccess::startTask(const BGDownloader::CTaskDesc &taskDesc, con
 }
 
 //=====================================================
-bool CBGDownloaderAccess::isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const
+bool CBGDownloaderAccess::isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const // OLD
 {
 	// TODO for Linux
 	return false;
@@ -956,3 +959,5 @@ void unpauseBGDownloader()
 		DownloaderPaused = false;
 	}
 }
+
+#endif

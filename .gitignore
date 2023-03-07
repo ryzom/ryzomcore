@@ -127,6 +127,9 @@ aes_state.txt
 # intellij project folder
 .idea/
 
+# VSCode project folder
+.vscode/
+
 # Python cache
 *.pyd
 *.pyc
@@ -160,6 +163,7 @@ build-2010/*
 build/*
 install/*
 build_*
+install_*
 nel/tools/build_gamedata/configuration/buildsite.py
 
 # Linux nel compile
@@ -242,6 +246,9 @@ external_stlport
 nel_tools*
 ryzom_tools*
 
+#personal projects
+personal/
+
 # Dumps
 *.dmp
 
@@ -258,6 +265,7 @@ web/public_php/db_version_tool
 web/public_php/db_version_web
 web/public_php/role_service
 web/public_php/role_support
+web/public_php/role_admin
 web/public_php/role_domain
 web/public_php/db_version_ring
 web/public_php/config_user.php

@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2011  Fabien HENON
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -471,7 +472,7 @@ public:
 
 		string s;
 		s = md.getProperty(prim, "hide_others", true, false);
-		_HideOthers = (NLMISC::toLower(s) == "true");
+		_HideOthers = NLMISC::toBool(s);
 	}
 
 	string genCode(CMissionData &md)
@@ -788,7 +789,7 @@ public:
 
 		string s;
 		s = md.getProperty(prim, "group", true, false);
-		_Group = (NLMISC::toLower(s) == "true");
+		_Group = NLMISC::toBool(s);
 
 		_Guild = md.getProperty(prim, "guild", false, true) == "true";
 		// Check: if _Guild is true then check if we are in a guild mission
@@ -866,7 +867,7 @@ public:
 		
 		string s;
 		s = md.getProperty(prim, "group", true, false);
-		_Group = (NLMISC::toLower(s) == "true");
+		_Group = NLMISC::toBool(s);
 
 		_Guild = md.getProperty(prim, "guild", false, true) == "true";
 		// Check: if _Guild is true then check if we are in a guild mission
@@ -1054,7 +1055,7 @@ public:
 
 		string s;
 		s = md.getProperty(prim, "group", true, false);
-		_Group = (NLMISC::toLower(s) == "true");
+		_Group = NLMISC::toBool(s);
 
 		IStepContent::init(md, prim);
 	}
@@ -1111,7 +1112,7 @@ public:
 
 		string s;
 		s = md.getProperty(prim, "group", true, false);
-		_Group = (NLMISC::toLower(s) == "true");
+		_Group = NLMISC::toBool(s);
 
 		IStepContent::init(md, prim);
 	}
@@ -1169,7 +1170,7 @@ public:
 
 		string s;
 		s = md.getProperty(prim, "group", true, false);
-		_Group = (NLMISC::toLower(s) == "true");
+		_Group = NLMISC::toBool(s);
 
 		IStepContent::init(md, prim);
 	}
@@ -1320,7 +1321,7 @@ public:
 		_WorldPosition = md.getProperty(prim, "world_position", true, false);
 		string s;
 		prim->getPropertyByName("once", s);
-		_Once = (NLMISC::toLower(s) == "true");
+		_Once = NLMISC::toBool(s);
 	}
 
 	string genCode(CMissionData &md)
@@ -3212,7 +3213,7 @@ public:
 	{
 		_GroupName = md.getProperty(prim, "group_to_escort", true, false);
 		string s = md.getProperty(prim, "save_all", true, false);
-		_SaveAll = (NLMISC::toLower(s) == "true");
+		_SaveAll = NLMISC::toBool(s);
 
 		CContentObjective::init(md, prim);
 	}

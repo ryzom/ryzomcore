@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Install pz
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2014  Jan BOON
 #
 # This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
 from scripts import *
-from buildsite import *
+from buildsite_local import *
 from process import *
 from tools import *
 from directories import *

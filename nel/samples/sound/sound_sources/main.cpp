@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -67,16 +67,23 @@ void Init()
 		AudioMixer->setPackedSheetOption("data", true);
 
 		printf("Select NLSOUND Driver:\n");
-		printf(" [1] FMod\n");
-		printf(" [2] OpenAl\n");
-		printf(" [3] DSound\n");
-		printf(" [4] XAudio2\n");
+		std::vector<UAudioMixer::TDriverInfo> drivers = UAudioMixer::getDrivers();
+		if (drivers.size() == 0)
+			nlerror("No sound drivers available");
+
+		for(uint i = 0; i < drivers.size(); ++i)
+			printf(" [%d] %s\n", i, drivers[i].Name);
+
 		printf("> ");
-		int selection = getchar();
+		int selection = getchar() - '0';
 		printf("\n");
 
+		UAudioMixer::TDriver selectedDriver = UAudioMixer::DriverAuto;
+		if (selection >= 0 && selection < drivers.size())
+			selectedDriver = drivers[selection].ID;
+
 		// init with 32 tracks, EAX enabled, no ADPCM, and activate automatic sample bank loading
-		AudioMixer->init(32, true, false, NULL, true, (UAudioMixer::TDriver)(selection - '0')/*UAudioMixer::DriverFMod*/);
+		AudioMixer->init(32, true, false, NULL, true, selectedDriver);
 
 		/*
 		 * 2. Initialize listener's position and orientation (in NeL coordinate system).

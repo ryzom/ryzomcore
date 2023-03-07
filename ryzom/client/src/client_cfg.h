@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -107,6 +107,9 @@ struct CClientConfig
 	/// vector of XML file names that describe R2 editor
 	std::vector<string> XMLR2EDInterfaceFiles;
 
+	/// Feature flags for UI XML files
+	std::vector<string> UiFeatureFlags;
+
 	/// logo that are displayed
 	std::vector<string>	Logos;
 
@@ -137,6 +140,8 @@ struct CClientConfig
 	TDriver3D		Driver3D;
 	/// Application start in a window or in fullscreen.
 	bool			Windowed;
+	/// Monitor to use for fullscreen
+	std::string		MonitorName;
 	/// Width for the Application.
 	uint16			Width;
 	/// Height for the Application.
@@ -155,6 +160,7 @@ struct CClientConfig
 	float			InterfaceScale_min;
 	float			InterfaceScale_max;
 	float			InterfaceScale_step;
+	bool			InterfaceScaleAuto;
 	bool			BilinearUI;
 
 	// Window snap
@@ -170,6 +176,9 @@ struct CClientConfig
 	bool			Local;
 	/// Host.
 	string			FSHost;
+	/// QUIC
+	bool			QuicConnection;
+	bool			QuicCertValidation;
 	/// Login.
 	bool			DisplayAccountButtons;
 	string			CreateAccountURL;
@@ -304,6 +313,7 @@ struct CClientConfig
 	bool			CameraRecorderBlend;
 
 	/// Screen shot
+	string			ScreenShotDirectory;
 	uint			ScreenShotWidth;	// If 0 : normal screen shot, else custom screen shot without interface
 	uint			ScreenShotHeight;
 	bool			ScreenShotFullDetail; // If set to true, then load balancing will be disabled for the duration of the screenshot
@@ -313,15 +323,15 @@ struct CClientConfig
 	// NEW PATCHING SYSTEM //
 	bool			PatchWanted;
 	std::string		PatchUrl;
-	std::string		PatchletUrl;
 	std::string		PatchVersion;
+#ifdef RYZOM_FORGE
+	std::string		PatchletUrl;
+#endif
 
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
 
-	std::string		WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
-	uint			WebIgNotifInterval; // value in minutes for notification thread
 
 	sint32			CurlMaxConnections;
 	string			CurlCABundle;
@@ -391,6 +401,8 @@ struct CClientConfig
 	std::vector<string>			DataPath;
 	/// Data Path no recurse.
 	std::vector<string>			DataPathNoRecurse;
+	/// Pre-load path
+	std::string					PreLoadPath;
 	/// Streamed package path
 	std::string					StreamedPackagePath;
 	/// Streamed package hosts
@@ -893,10 +905,10 @@ public:
 	float	getActualLandscapeThreshold() const;
 
 	// Return LanguageCode but if "wk", then return "en"
-	string	getHtmlLanguageCode() const;
+	std::string	getHtmlLanguageCode() const;
 
 	// return a random loading tip or, if there are not, return the string in argument
-	ucstring buildLoadingString( const ucstring& ucstr ) const;
+	std::string buildLoadingString(const std::string &ucstr) const;
 
 	/// get the path to client_default.cfg including the filename itself.
 	bool getDefaultConfigLocation(std::string& fileLocation) const;

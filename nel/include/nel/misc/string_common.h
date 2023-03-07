@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2016-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -193,6 +193,10 @@ inline std::string toString(const sint32 &val) { return toString("%d", val); }
 inline std::string toString(const uint64 &val) { return toString("%" NL_I64 "u", val); }
 inline std::string toString(const sint64 &val) { return toString("%" NL_I64 "d", val); }
 
+#ifdef NL_OS_WINDOWS
+inline std::string toString(const wchar_t &val) { return toString(reinterpret_cast<const uint16 &>(val)); }
+#endif
+
 #ifdef NL_COMP_GCC
 #	if GCC_VERSION == 40102
 
@@ -246,9 +250,14 @@ inline bool fromString(const std::string &str, sint64 &val) { bool ret = sscanf(
 inline bool fromString(const std::string &str, float &val) { bool ret = sscanf(str.c_str(), "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
 inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(str.c_str(), "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
 
-// Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, anything else is undefined.
-// (str[0] == '1' || (str[0] & 0xD2) == 0x50)
-//  - Kaetemi
+#ifdef NL_OS_WINDOWS
+inline bool fromString(const std::string &str, wchar_t &val) { return fromString(str, reinterpret_cast<uint16 &>(val)); }
+#endif
+
+/// Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, and empty strings, anything else is undefined.
+///  - Kaetemi
+inline bool toBool(const char *str) { return str[0] == '1' || (str[0] & 0xD2) == 0x50; }
+inline bool toBool(const std::string &str) { return toBool(str.c_str()); } // Safe because first byte may be null
 
 bool fromString(const std::string &str, bool &val);
 
@@ -343,6 +352,18 @@ inline const wchar_t *asCStr(const std::wstring &str) { return str.c_str(); }
 #define nlWideToMbcs(str) (NLMISC::wideToMbcs(str).c_str())
 #define nlMbcsToWide(str) (NLMISC::mbcsToWide(str).c_str())
 
+#if defined(NL_OS_WINDOWS)
+#define nlUtf8ToMbcsS(str, len) (NLMISC::utf8ToMbcs(str, len).c_str())
+#define nlMbcsToUtf8S(str, len) (NLMISC::mbcsToUtf8(str, len).c_str())
+#else
+#define nlUtf8ToMbcsS(str, len) (NLMISC::asCStr(str))
+#define nlMbcsToUtf8S(str, len) (NLMISC::asCStr(str))
+#endif
+#define nlWideToUtf8S(str, len) (NLMISC::wideToUtf8(str, len).c_str())
+#define nlUtf8ToWideS(str, len) (NLMISC::utf8ToWide(str, len).c_str())
+#define nlWideToMbcsS(str, len) (NLMISC::wideToMbcs(str, len).c_str())
+#define nlMbcsToWideS(str, len) (NLMISC::mbcsToWide(str, len).c_str())
+
 // On Windows, tstring is either local multibyte or utf-16 wide
 // On Linux, tstring is always utf-8
 
@@ -358,6 +379,9 @@ inline std::string tStrToMbcs(const tstring &str) { return wideToMbcs((const std
 #define nlTStrToUtf8(str) (NLMISC::tStrToUtf8(str).c_str())
 #define nlTStrToWide(str) ((const wchar_t *)NLMISC::asCStr(str))
 #define nlTStrToMbcs(str) (NLMISC::tStrToMbcs(str).c_str())
+#define nlTStrToUtf8S(str, len) (NLMISC::tStrToUtf8(str, len).c_str())
+#define nlTStrToWideS(str, len) ((const wchar_t *)NLMISC::asCStr(str))
+#define nlTStrToMbcsS(str, len) (NLMISC::tStrToMbcs(str, len).c_str())
 inline tstring utf8ToTStr(const char *str) {return (const tstring &)utf8ToWide(str); }
 inline tstring utf8ToTStr(const std::string &str) { return (const tstring &)utf8ToWide(str); }
 inline tstring wideToTStr(const wchar_t *str) { return (const tchar *)str; }
@@ -367,6 +391,9 @@ inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)mbcs
 #define nlUtf8ToTStr(str) (NLMISC::utf8ToTStr(str).c_str())
 #define nlWideToTStr(str) ((const tchar *)NLMISC::asCStr(str))
 #define nlMbcsToTStr(str) (NLMISC::mbcsToTStr(str).c_str())
+#define nlUtf8ToTStrS(str, len) (NLMISC::utf8ToTStr(str, len).c_str())
+#define nlWideToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str))
+#define nlMbcsToTStrS(str, len) (NLMISC::mbcsToTStr(str, len).c_str())
 #else
 typedef std::string tstring;
 typedef char tchar;
@@ -383,6 +410,13 @@ inline std::string tStrToMbcs(const tstring &str) { return (const std::string &)
 #endif
 #define nlTStrToWide(str) (NLMISC::tStrToWide(str).c_str())
 #define nlTStrToMbcs(str) ((const char *)NLMISC::asCStr(str))
+#if defined(NL_OS_WINDOWS)
+#define nlTStrToUtf8S(str, len) (NLMISC::tStrToUtf8(str, len).c_str())
+#else
+#define nlTStrToUtf8S(str, len) ((const char *)NLMISC::asCStr(str))
+#endif
+#define nlTStrToWideS(str, len) (NLMISC::tStrToWide(str, len).c_str())
+#define nlTStrToMbcsS(str, len) ((const char *)NLMISC::asCStr(str))
 inline tstring utf8ToTStr(const char *str) { return (const tstring &)utf8ToMbcs(str); }
 inline tstring utf8ToTStr(const std::string &str) { return (const tstring &)utf8ToMbcs(str); }
 inline tstring wideToTStr(const wchar_t *str) { return (const tstring &)wideToMbcs(str); }
@@ -396,6 +430,13 @@ inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)str;
 #endif
 #define nlWideToTStr(str) (NLMISC::wideToTStr(str).c_str())
 #define nlMbcsToTStr(str) ((const tchar *)NLMISC::asCStr(str))
+#if defined(NL_OS_WINDOWS)
+#define nlUtf8ToTStrS(str, len) (NLMISC::utf8ToTStr(str, len).c_str())
+#else
+#define nlUtf8ToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str))
+#endif
+#define nlWideToTStrS(str, len) (NLMISC::wideToTStr(str, len).c_str())
+#define nlMbcsToTStrS(str, len) ((const tchar *)NLMISC::asCStr(str))
 #endif
 
 } // NLMISC

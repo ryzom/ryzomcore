@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -66,6 +66,7 @@ void alExtInitDevice(ALCdevice *device)
 		}
 	}
 
+#if !defined(AL_LIBTYPE_STATIC)
 // Windows and Mac OS always link to shared OpenAL library
 #if defined(NL_OS_WINDOWS) || defined(NL_OS_MAC) || !defined(NL_STATIC)
 	// EFX
@@ -114,6 +115,7 @@ void alExtInitDevice(ALCdevice *device)
 		}
 	}
 #endif
+#endif
 }
 
 #if EAX_AVAILABLE
@@ -137,6 +139,7 @@ EAXGetBufferMode eaxGetBufferMode = NULL;
 // ALC_EXT_EFX
 bool AlExtEfx = false;
 // effect objects
+#if !defined(AL_LIBTYPE_STATIC)
 #if defined(NL_OS_WINDOWS) || defined(NL_OS_MAC) || !defined(NL_STATIC)
 LPALGENEFXOBJECTS alGenEffects = NULL;
 LPALDELETEEFXOBJECTS alDeleteEffects = NULL;
@@ -173,6 +176,7 @@ LPALGETEFXOBJECTI alGetAuxiliaryEffectSloti = NULL;
 LPALGETEFXOBJECTIV alGetAuxiliaryEffectSlotiv = NULL;
 LPALGETEFXOBJECTF alGetAuxiliaryEffectSlotf = NULL;
 LPALGETEFXOBJECTFV alGetAuxiliaryEffectSlotfv = NULL;
+#endif
 #endif
 }
 

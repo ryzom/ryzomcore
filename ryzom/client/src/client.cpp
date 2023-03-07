@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -302,7 +302,7 @@ int main(int argc, char **argv)
 		uint i;
 		for (i=0; i<files.size(); i++)
 		{
-			if (toLower(CFile::getExtension (files[i])) == "ttf")
+			if (toLowerAscii(CFile::getExtension (files[i])) == "ttf")
 				CFile::deleteFile (files[i]);
 		}
 	}
@@ -451,6 +451,7 @@ int main(int argc, char **argv)
 	// delete all logs and displayers when we're not using logs macros anymore
 	destroyDebug();
 	CLog::releaseProcessName();
+	// CCoTask::releaseInstance();
 
 	// delete the Nel context
 	delete appContext;

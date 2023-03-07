@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -22,6 +22,7 @@
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/event_listener.h"
 #include "nel/misc/path.h"
+#include "nel/misc/random.h"
 
 // look at 3dinit example
 #include "nel/3d/nelu.h"
@@ -97,10 +98,12 @@ int main(int argc, char **argv)
 	CNELU::EventServer.addEmitter(CNELU::Driver->getEventEmitter());
 	CNELU::AsyncListener.addToServer(CNELU::EventServer);
 
+	NLMISC::CValueSmoother smoothFPS;
+	NLMISC::CRandom rnd;
 	do
 	{
 		// look at 3dinit example
-		CNELU::clearBuffers(CRGBA(0,0,0));
+		CNELU::clearBuffers(CRGBA(120,120,0));
 
 		// now, every frame, we have to render the computer string.
 
@@ -168,12 +171,39 @@ int main(int argc, char **argv)
 		tc.setHotSpot (CComputedString::BottomRight);
 		tc.printAt (0.99f, 0.01f, string("Press <ESC> to quit"));
 
+		/*for(uint i = 0; i < 1000; ++i)
+		{
+			uint fontSize = rnd.rand(40) + 10;
+			tc.setColor(CRGBA(rnd.rand(255), rnd.rand(255), rnd.rand(255)));
+			tc.setFontSize(fontSize);
+			tc.setHotSpot(CComputedString::MiddleMiddle);
+			tc.printAt(rnd.frand(1.f), rnd.frand(1.f), toString("%d", fontSize));
+		}*/
+
+		{
+			static TTicks oldTick = CTime::getPerformanceTime();
+			TTicks newTick = CTime::getPerformanceTime();
+			double deltaTime = CTime::ticksToSecond (newTick-oldTick);
+			oldTick = newTick;
+			smoothFPS.addValue((float)deltaTime);
+			deltaTime = smoothFPS.getSmoothValue ();
+			if (deltaTime > 0.0)
+			{
+				//printf("FPS: %.5f\n", 1.f/deltaTime);
+				tc.setFontSize(16);
+				tc.setColor(CRGBA::Yellow);
+				tc.setHotSpot(CComputedString::TopLeft);
+				tc.printAt(0.01f, 0.99f, toString("FPS:%.f", 1.0f/deltaTime));
+			}
+		}
+
 		// look 3dinit example
 		CNELU::swapBuffers();
 		CNELU::screenshot();
 
 		// look at event example
 		CNELU::EventServer.pump(true);
+
 	}
 	while(!CNELU::AsyncListener.isKeyPushed(KeyESCAPE));
 

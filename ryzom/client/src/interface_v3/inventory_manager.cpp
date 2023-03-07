@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -62,8 +62,6 @@
 using namespace std;
 using namespace NLMISC;
 
-extern TSessionId CharacterHomeSessionId;
-
 extern NLMISC::CLog g_log;
 // Context help
 extern void contextHelp (const std::string &help);
@@ -86,9 +84,6 @@ const std::string CInventoryManager::InventoryDBs[]=
 	"INVENTORY:PACK_ANIMAL1",
 	"INVENTORY:PACK_ANIMAL2",
 	"INVENTORY:PACK_ANIMAL3",
-	"INVENTORY:PACK_ANIMAL4",
-	"INVENTORY:PACK_ANIMAL5",
-	"INVENTORY:PACK_ANIMAL6",
 	"INVENTORY:TEMP",
 	"EXCHANGE:GIVE",
 	"EXCHANGE:RECEIVE",
@@ -101,7 +96,7 @@ const std::string CInventoryManager::InventoryDBs[]=
 static void dummyCheck()
 {
 	// if this raise, correct the 2 tables above and below
-	nlctassert(MAX_INVENTORY_ANIMAL==7);
+	nlctassert(MAX_INVENTORY_ANIMAL==4);
 }
 
 const uint CInventoryManager::InventoryIndexes[]=
@@ -112,9 +107,6 @@ const uint CInventoryManager::InventoryIndexes[]=
 	INVENTORIES::pet_animal2,
 	INVENTORIES::pet_animal3,
 	INVENTORIES::pet_animal4,
-	INVENTORIES::pet_animal5,
-	INVENTORIES::pet_animal6,
-	INVENTORIES::pet_animal7,
 	INVENTORIES::temporary,
 	INVENTORIES::exchange,
 	INVENTORIES::exchange_proposition,
@@ -133,9 +125,8 @@ CItemImage::CItemImage()
 	Sheet = NULL;
 	Quality = NULL;
 	Quantity = NULL;
-	CreateTime = NULL;
-	Serial = NULL;
 	UserColor = NULL;
+	CharacBuffs = NULL;
 	Price = NULL;
 	Weight= NULL;
 	NameId= NULL;
@@ -149,9 +140,8 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	Sheet = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("SHEET"), false));
 	Quality = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("QUALITY"), false));
 	Quantity = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("QUANTITY"), false));
-	CreateTime = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("CREATE_TIME"), false));
-	Serial = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("SERIAL"), false));
 	UserColor = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("USER_COLOR"), false));
+	CharacBuffs = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("CHARAC_BUFFS"), false));
 	Price = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("PRICE"), false));
 	Weight = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("WEIGHT"), false));
 	NameId = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("NAMEID"), false));
@@ -159,13 +149,10 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	ResaleFlag = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("RESALE_FLAG"), false));
 
 	// Should always have at least those one:(ie all but Price)
-	nlassert(Sheet && Quality && Quantity && CreateTime && Serial && UserColor && Weight && NameId && InfoVersion);
+	nlassert(Sheet && Quality && Quantity && UserColor && Weight && NameId && InfoVersion);
 }
 
-uint64 CItemImage::getItemId() const
-{
-	return ((uint64)getSerial() << 32) | getCreateTime();
-}
+#ifdef RYZOM_FORGE
 
 // *************************************************************************************************
 void CItemInfoCache::load(const std::string &filename)
@@ -300,6 +287,8 @@ void CItemInfoCache::debugItemInfoCache() const
 	pIM->displaySystemInfo(toString("ItemInfoCache: %d entries written to client.log", _ItemInfoCacheMap.size()));
 }
 
+#endif
+
 // *************************************************************************************************
 // CInventoryManager
 // *************************************************************************************************
@@ -328,8 +317,12 @@ CInventoryManager::CInventoryManager()
 		BagItemEquipped[i]= false;
 	}
 
+#ifdef RYZOM_FORGE
+
 	_ItemInfoCacheFilename = toString("save/item_infos_%d.cache", CharacterHomeSessionId.asInt());
 	_ItemInfoCache.load(_ItemInfoCacheFilename);
+
+#endif
 
 	nlctassert(NumInventories== sizeof(InventoryIndexes)/sizeof(InventoryIndexes[0]));
 }
@@ -337,7 +330,9 @@ CInventoryManager::CInventoryManager()
 // ***************************************************************************
 CInventoryManager::~CInventoryManager()
 {
+#ifdef RYZOM_FORGE
 	_ItemInfoCache.save(_ItemInfoCacheFilename);
+#endif
 }
 
 // *************************************************************************************************
@@ -1679,7 +1674,7 @@ void CInventoryManager::getBranchSlotCounts(const std::string &basePath, uint& n
 // ***************************************************************************
 double CInventoryManager::getBagBulk(uint32 inventoryIndex)
 {
-	nlctassert(MAX_INVENTORY_ANIMAL==7);
+	nlctassert(MAX_INVENTORY_ANIMAL==4);
 	if (inventoryIndex == 0)
 		return getBranchBulk(LOCAL_INVENTORY ":BAG", 0, MAX_BAGINV_ENTRIES);
 	else if (inventoryIndex == 1)
@@ -1691,16 +1686,10 @@ double CInventoryManager::getBagBulk(uint32 inventoryIndex)
 	else if (inventoryIndex == 4)
 		return getBranchBulk(LOCAL_INVENTORY ":PACK_ANIMAL3", 0, MAX_ANIMALINV_ENTRIES);
 	else if (inventoryIndex == 5)
-		return getBranchBulk(LOCAL_INVENTORY ":PACK_ANIMAL4", 0, MAX_ANIMALINV_ENTRIES);
+		return 0;
 	else if (inventoryIndex == 6)
-		return getBranchBulk(LOCAL_INVENTORY ":PACK_ANIMAL5", 0, MAX_ANIMALINV_ENTRIES);
+		return 0;
 	else if (inventoryIndex == 7)
-		return getBranchBulk(LOCAL_INVENTORY ":PACK_ANIMAL6", 0, MAX_ANIMALINV_ENTRIES);
-	else if (inventoryIndex == 8)
-		return 0;
-	else if (inventoryIndex == 9)
-		return 0;
-	else if (inventoryIndex == 10)
 		return getBranchBulk(LOCAL_INVENTORY ":TEMP", 0, MAX_TEMPINV_ENTRIES);
 	return 0;
 }
@@ -1717,7 +1706,7 @@ double CInventoryManager::getItemBulk(uint32 sheetID)
 // ***************************************************************************
 double CInventoryManager::getMaxBagBulk(uint32 inventoryIndex)
 {
-	nlctassert(MAX_INVENTORY_ANIMAL==7);
+	nlctassert(MAX_INVENTORY_ANIMAL==4);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *pNL=NULL;
 	if (inventoryIndex == 0)
@@ -1730,12 +1719,6 @@ double CInventoryManager::getMaxBagBulk(uint32 inventoryIndex)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST2:BULK_MAX");
 	else if (inventoryIndex == 4)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST3:BULK_MAX");
-	else if (inventoryIndex == 5)
-		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST4:BULK_MAX");
-	else if (inventoryIndex == 6)
-		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST5:BULK_MAX");
-	else if (inventoryIndex == 7)
-		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST6:BULK_MAX");
 	if (pNL != NULL)
 		return pNL->getValue32();
 	return 0;
@@ -2021,11 +2004,11 @@ void CTempInvManager::updateForageQQ( uint whichOne )
 			break;
 		default:;
 		}
-		ucstring title = CI18N::get( WIN_TEMPINV_TITLE_FORAGING );
+		string title = CI18N::get( WIN_TEMPINV_TITLE_FORAGING );
 		strFindReplace( title, "%qt", toString( "%.1f", qt ) );
 		strFindReplace( title, "%ql", toString( "%.1f", ql ) );
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
-		pGC->setUCTitle( title );
+		pGC->setTitle( title );
 	}
 
 	isInUpdateForageQQ = false;
@@ -2199,7 +2182,7 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 }
 
 // ***************************************************************************
-void SBagOptions::setSearchFilter(const ucstring &s)
+void SBagOptions::setSearchFilter(const string &s)
 {
 	SearchQualityMin = 0;
 	SearchQualityMax = 999;
@@ -2208,13 +2191,13 @@ void SBagOptions::setSearchFilter(const ucstring &s)
 
 	if (!s.empty())
 	{
-		std::vector<ucstring> words;
-		splitUCString(toLower(s), ucstring(" "), words);
+		std::vector<string> words;
+		splitString(toLower(s), string(" "), words);
 
 		size_t pos;
 		for(int i = 0; i<words.size(); ++i)
 		{
-			std::string kw = words[i].toUtf8();
+			std::string kw = words[i];
 
 			pos = kw.find("-");
 			if (pos != std::string::npos)
@@ -2318,17 +2301,17 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 		if (SearchFilter.size() > 0)
 		{
 			bool match = true;
-			ucstring lcName = toLower(pCS->getItemActualName());
+			string lcName = toLower(pCS->getItemActualName());
 
 			// add item quality as a keyword to match
 			if (pCS->getQuality() > 1)
 			{
-				lcName += ucstring(" " + toString(pCS->getQuality()));
+				lcName += string(" " + toString(pCS->getQuality()));
 			}
 
 			for (uint i = 0; i< SearchFilter.size(); ++i)
 			{
-				if (lcName.find(SearchFilter[i]) == ucstring::npos)
+				if (lcName.find(SearchFilter[i]) == string::npos)
 				{
 					return false;
 				}
@@ -2741,7 +2724,7 @@ class CHandlerInvSearchButton : public IActionHandler
 			return;
 		}
 
-		ucstring filter;
+		string filter;
 		std::string id = btn->getParent()->getId() + ":" + sParams + ":eb";
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(id));
 		if (!eb)
@@ -2936,10 +2919,7 @@ class CHandlerInvCanDropTo : public IActionHandler
 				if ((pListDstIcon->getInvType() == CInventoryManager::InvPA0) ||
 					(pListDstIcon->getInvType() == CInventoryManager::InvPA1) ||
 					(pListDstIcon->getInvType() == CInventoryManager::InvPA2) ||
-					(pListDstIcon->getInvType() == CInventoryManager::InvPA3) ||
-					(pListDstIcon->getInvType() == CInventoryManager::InvPA4) ||
-					(pListDstIcon->getInvType() == CInventoryManager::InvPA5) ||
-					(pListDstIcon->getInvType() == CInventoryManager::InvPA6))
+					(pListDstIcon->getInvType() == CInventoryManager::InvPA3))
 				{
 					INVENTORIES::TInventory e = (INVENTORIES::TInventory)(INVENTORIES::pet_animal1 + (pListDstIcon->getInvType()-CInventoryManager::InvPA0));
 					if (!pInv->isInventoryAvailable(e))
@@ -2951,10 +2931,7 @@ class CHandlerInvCanDropTo : public IActionHandler
 				if ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
 					(pListDstText->getInvType() == CInventoryManager::InvPA1) ||
 					(pListDstText->getInvType() == CInventoryManager::InvPA2) ||
-					(pListDstText->getInvType() == CInventoryManager::InvPA3) ||
-					(pListDstText->getInvType() == CInventoryManager::InvPA4) ||
-					(pListDstText->getInvType() == CInventoryManager::InvPA5) ||
-					(pListDstText->getInvType() == CInventoryManager::InvPA6))
+					(pListDstText->getInvType() == CInventoryManager::InvPA3))
 				{
 					INVENTORIES::TInventory e = (INVENTORIES::TInventory)(INVENTORIES::pet_animal1 + (pListDstText->getInvType()-CInventoryManager::InvPA0));
 					if (!pInv->isInventoryAvailable(e))
@@ -3077,24 +3054,17 @@ class CHandlerInvDropTo : public IActionHandler
 					else if (((pListDstText != NULL) && ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
 														 (pListDstText->getInvType() == CInventoryManager::InvPA1) ||
 														 (pListDstText->getInvType() == CInventoryManager::InvPA2) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA3) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA4) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA5) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA6)
+														 (pListDstText->getInvType() == CInventoryManager::InvPA3)
 														)) ||
 							((pListDstIcon != NULL) && ((pListDstIcon->getInvType() == CInventoryManager::InvPA0) ||
 														(pListDstIcon->getInvType() == CInventoryManager::InvPA1) ||
 														(pListDstIcon->getInvType() == CInventoryManager::InvPA2) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA3) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA4) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA5) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA6)
+														(pListDstIcon->getInvType() == CInventoryManager::InvPA3)
 														)))
 					{
 						string sTmp;
 						if (pListDstText != NULL) sTmp = toString("%d",pListDstText->getInvType()-CInventoryManager::InvPA0);
 						if (pListDstIcon != NULL) sTmp = toString("%d",pListDstIcon->getInvType()-CInventoryManager::InvPA0);
-							nlinfo("ici :%s", sTmp.c_str());
 						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_pa|"+sTmp);
 					}
 					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvGuild)) ||
@@ -3190,13 +3160,7 @@ class CHandlerLockInvItem : public IActionHandler
 			return;
 		}
 
-		string lock = "1";
-		if (item->getLockedByOwner())
-		{
-			lock = "0";
-		}
-
-		uint32 slot = item->getIndexInDB();
+		uint16 slot = (uint16)item->getIndexInDB();
 		uint32 inv = item->getInventoryIndex();
 		INVENTORIES::TInventory inventory = INVENTORIES::UNDEFINED;
 		inventory = (INVENTORIES::TInventory)(inv);
@@ -3204,7 +3168,22 @@ class CHandlerLockInvItem : public IActionHandler
 		{
 			return;
 		}
-		NLMISC::ICommand::execute("a lockItem " + INVENTORIES::toString(inventory) + " " + toString(slot) + " " + lock, g_log);
+
+		bool lock = !item->getLockedByOwner();
+		if (lock) item->setItemResaleFlag(BOTCHATTYPE::ResaleKOLockedByOwner);
+		// else wait for proper state
+
+		CBitMemStream out;
+		if(GenericMsgHeaderMngr.pushNameToStream("ITEM:LOCK", out))
+		{
+			out.serialShortEnum(inventory);
+			out.serial(slot);
+			out.serial(lock);
+
+			NetMngr.push(out);
+		}
+		else
+			nlwarning("mainLoop : unknown message name : '%s'", "ITEM:RENAME");
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerLockInvItem, "lock_inv_item" );
@@ -3236,7 +3215,7 @@ class CHandlerInvTempToBag : public IActionHandler
 		// If we cant find place display a message and dont send the request to the server
 		if (!getInventory().isSpaceInAllBagsForItem(pCSDst))
 		{
-			ucstring msg = CI18N::get("msgCantPutItemInBag");
+			string msg = CI18N::get("msgCantPutItemInBag");
 			string cat = getStringCategory(msg, msg);
 			pIM->displaySystemInfo(msg, cat);
 			return;
@@ -3277,7 +3256,7 @@ class CHandlerInvTempAll : public IActionHandler
 		vector <pair <double, double> > BagsBulk;
 		BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(0), pInv->getMaxBagBulk(0)));
 
-		nlctassert(MAX_INVENTORY_ANIMAL==7);
+		nlctassert(MAX_INVENTORY_ANIMAL==4);
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal1))
 			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(1), pInv->getMaxBagBulk(1)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal2))
@@ -3286,12 +3265,6 @@ class CHandlerInvTempAll : public IActionHandler
 			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(3), pInv->getMaxBagBulk(3)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal4))
 			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
-		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal5))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(5), pInv->getMaxBagBulk(4)));
-		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal6))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(6), pInv->getMaxBagBulk(4)));
-		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal7))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(7), pInv->getMaxBagBulk(4)));
 
 		bool bPlaceFound = true;
 
@@ -3322,7 +3295,7 @@ class CHandlerInvTempAll : public IActionHandler
 
 		if (!bPlaceFound)
 		{
-			ucstring msg = CI18N::get("msgCantPutItemInBag");
+			string msg = CI18N::get("msgCantPutItemInBag");
 			string cat = getStringCategory(msg, msg);
 			CInterfaceManager::getInstance()->displaySystemInfo(msg, cat);
 			return;
@@ -3424,29 +3397,19 @@ uint				CInventoryManager::getItemSheetForSlotId(uint slotId) const
 	return 0;
 }
 
+#ifdef RYZOM_FORGE
 // ***************************************************************************
 const	CClientItemInfo *CInventoryManager::getItemInfoCache(uint32 serial, uint32 createTime) const
 {
 	return _ItemInfoCache.getItemInfo(serial, createTime);
 }
+#endif
 
 // ***************************************************************************
 const	CClientItemInfo	&CInventoryManager::getItemInfo(uint slotId) const
 {
 	TItemInfoMap::const_iterator	it= _ItemInfoMap.find(slotId);
 	static	CClientItemInfo	empty;
-	if (it == _ItemInfoMap.end() || !isItemInfoUpToDate(slotId))
-	{
-		// if slot has not been populated yet or out of date, then return info from cache if possible
-		const CItemImage *item = getServerItem(slotId);
-		if (item && item->getItemId() > 0) {
-			const CClientItemInfo *ret = _ItemInfoCache.getItemInfo(item->getItemId());
-			if (ret != NULL)
-			{
-				return *ret;
-			}
-		}
-	}
 
 	if (it == _ItemInfoMap.end())
 	{
@@ -3607,12 +3570,6 @@ void			CInventoryManager::onReceiveItemInfo(const CItemInfos &itemInfo)
 	// update the Info
 	uint itemSlotId = itemInfo.slotId;
 
-	const CItemImage *item = getServerItem(itemSlotId);
-	if (item && item->getItemId() > 0)
-	{
-		_ItemInfoCache.readFromImpulse(item->getItemId(), itemInfo);
-	}
-
 	// write in map, from DB.
 	_ItemInfoMap[itemSlotId].readFromImpulse(itemInfo);
 
@@ -3731,10 +3688,12 @@ void			CInventoryManager::debugItemInfoWaiters()
 }
 
 // ***************************************************************************
+#ifdef RYZOM_FORGE
 void			CInventoryManager::debugItemInfoCache() const
 {
 	_ItemInfoCache.debugItemInfoCache();
 }
+#endif
 
 // ***************************************************************************
 void CInventoryManager::sortBag()
@@ -4015,15 +3974,12 @@ const CItemImage *CInventoryManager::getServerItem(uint slotId) const
 // ***************************************************************************
 CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &str)
 {
-	string sTmp = toLower(str);
+	string sTmp = toLowerAscii(str);
 	if (sTmp == "inv_bag")		return InvBag;
 	if (sTmp == "inv_pa0")		return InvPA0;
 	if (sTmp == "inv_pa1")		return InvPA1;
 	if (sTmp == "inv_pa2")		return InvPA2;
 	if (sTmp == "inv_pa3")		return InvPA3;
-	if (sTmp == "inv_pa4")		return InvPA4;
-	if (sTmp == "inv_pa5")		return InvPA5;
-	if (sTmp == "inv_pa6")		return InvPA6;
 	if (sTmp == "inv_guild")	return InvGuild;
 	if (sTmp == "inv_room")		return InvRoom;
 	return InvUnknown;

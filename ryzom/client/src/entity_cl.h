@@ -3,8 +3,8 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -334,19 +334,19 @@ public:
 	 */
 	//@{
 	/// Return the Name of the entity. There may be a specification in it (guard, trader, etc ...). It is then surrounded by '$'
-	const ucstring &getEntityName() const {return _EntityName;}
+	const std::string &getEntityName() const {return _EntityName;}
 	/// Return the title from a name. The specification is surrounded by '$', and tells the title of the entity (guard, matis merchant, etc ..)
-	static ucstring getTitleFromName(const ucstring &name);
+	static std::string getTitleFromName(const std::string &name);
 	/// Remove the specification from a name. The specification is surrounded by '$', and tells the title of the entity (guard, matis merchant, etc ..)
-	static ucstring removeTitleFromName(const ucstring &name);
+	static std::string removeTitleFromName(const std::string &name);
 	/// Remove the shard from a name (if player from the same shard). The shard is surrounded by (), and tells the incoming shard of the entity (aniro, leanon etc...)
-	static ucstring removeShardFromName(const ucstring &name);
+	static std::string removeShardFromName(const std::string &name);
 	/// Remove both title and shard from name
-	static ucstring removeTitleAndShardFromName(const ucstring &name);
+	static std::string removeTitleAndShardFromName(const std::string &name);
 	/// Change the entity name.
-	void setEntityName(const ucstring &name);
+	void setEntityName(const std::string &name);
 	/// Return a displayable name
-	ucstring getDisplayName() const
+	std::string getDisplayName() const
 	{
 		return removeTitleAndShardFromName(_EntityName);
 	}
@@ -638,7 +638,7 @@ public:
 
 	// Add hit points gain/lost by this entity.
 	void addHPOutput(sint16 hp, NLMISC::CRGBA color, float dt=0.0f) { if(_HPModifiers.size()<20) _HPModifiers.push_back(CHPModifier(hp,color,dt));}
-	void addHPOutput(const ucstring &text, NLMISC::CRGBA color, float dt=0.0f) { if(_HPModifiers.size()<20 && !text.empty()) _HPModifiers.push_back(CHPModifier(text,color,dt));}
+	void addHPOutput(const std::string &text, NLMISC::CRGBA color, float dt=0.0f) { if(_HPModifiers.size()<20 && !text.empty()) _HPModifiers.push_back(CHPModifier(text,color,dt));}
 
 	/// Return the entity sheet scale. (return 1.0 if there is any problem).
 	virtual float getSheetScale() const {return 1.0f;}
@@ -769,25 +769,25 @@ public:
 	bool					isAnOutpostAlly() const;
 
 	/// Return the entity title
-	const ucstring &getTitle() const
+	const std::string &getTitle() const
 	{
 		return _Title;
 	}
 
 	/// Return the entity tags
-	const ucstring &getTag(uint8 id) const
+	const std::string &getTag(uint8 id) const
 	{
 		if (_Tags.size() > id) {
 			return _Tags[id];
 		}
-		static ucstring empty;
+		static const std::string empty;
 		return empty;
 	}
 
 	/// Return the raw unparsed entity title
-	const ucstring getTitleRaw() const
+	const std::string &getTitleRaw() const
 	{
-		return ucstring(_TitleRaw);
+		return _TitleRaw;
 	}
 
 	/// Return true if this entity has a reserved title
@@ -931,20 +931,20 @@ protected:
 	// Flags to know what is possible to do with the entity (selectable, liftable, etc.).
 	CProperties						_Properties;
 	// Current Name for the entity
-	ucstring						_EntityName;
+	std::string						_EntityName;
 	// Current entity title
-	ucstring						_Title;
+	std::string						_Title;
 	// Current entity tags
-	std::vector<ucstring>			_Tags;
+	std::vector<std::string>		_Tags;
 	// Current entity title string id
-	ucstring						_TitleRaw;
+	std::string						_TitleRaw;
 	// Current permanent content symbol for the entity
 	std::string						_PermanentStatutIcon;
 	// Has reserved title?
 	bool							_HasReservedTitle;
 
 	// Extended Name
-	ucstring						_NameEx;
+	std::string						_NameEx;
 	// String ID
 	uint32							_NameId;
 	// Primitive used for the collision in PACS
@@ -995,10 +995,10 @@ protected:
 		CHPModifier() {}
 		virtual ~CHPModifier() {}
 		CHPModifier (sint16 value, NLMISC::CRGBA color, float dt) : Value(value), Color(color), DeltaT(dt) {}
-		CHPModifier (const ucstring &text, NLMISC::CRGBA color, float dt) : Text(text), Color(color), DeltaT(dt) {}
+		CHPModifier (const std::string &text, NLMISC::CRGBA color, float dt) : Text(text), Color(color), DeltaT(dt) {}
 
 		sint16			Value;		// If Text.empty(), take the Value
-		ucstring		Text;
+		std::string		Text;
 		NLMISC::CRGBA	Color;
 		float			DeltaT;
 	};
@@ -1222,7 +1222,7 @@ public:
 private:
 
 	// Override for string reception callback
-	virtual void onStringAvailable(uint stringId, const ucstring &value);
+	virtual void onStringAvailable(uint stringId, const std::string &value);
 
 };
 

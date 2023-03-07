@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -76,7 +76,7 @@ void updateFromClientCfg()
 		// set latest config display mode if not attached
 		if (!StereoDisplayAttached)
 			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
-				ClientCfg.Windowed, ClientCfg.Frequency));
+				ClientCfg.Windowed, ClientCfg.Frequency, -1, ClientCfg.MonitorName));
 		// force software cursor when attached
 		InitMouseWithCursor(ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	}
@@ -87,12 +87,13 @@ void updateFromClientCfg()
 		(ClientCfg.Width != LastClientCfg.Width)		||
 		(ClientCfg.Height != LastClientCfg.Height)		||
 		(ClientCfg.Depth != LastClientCfg.Depth)		||
-		(ClientCfg.Frequency != LastClientCfg.Frequency))
+		(ClientCfg.Frequency != LastClientCfg.Frequency)||
+		(ClientCfg.MonitorName != LastClientCfg.MonitorName))
 	{
 		if (!StereoDisplayAttached)
 		{
 			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
-				ClientCfg.Windowed, ClientCfg.Frequency));
+				ClientCfg.Windowed, ClientCfg.Frequency, -1, ClientCfg.MonitorName));
 		}
 	}
 
@@ -104,8 +105,8 @@ void updateFromClientCfg()
 			Driver->forceTextureResize(1);
 	}
 
-	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale)
-		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale || ClientCfg.InterfaceScaleAuto != LastClientCfg.InterfaceScaleAuto)
+		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
 
 	if (ClientCfg.BilinearUI != LastClientCfg.BilinearUI)
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
@@ -323,8 +324,19 @@ void updateFromClientCfg()
 	bool	mustReloadSoundMngrContinent= false;
 
 	// disable/enable sound?
-	if (ClientCfg.SoundOn != LastClientCfg.SoundOn)
+	if (ClientCfg.SoundOn != LastClientCfg.SoundOn || ClientCfg.DriverSound != LastClientCfg.DriverSound)
 	{
+		// changing sound driver
+		if (ClientCfg.DriverSound != LastClientCfg.DriverSound)
+		{
+			if (SoundMngr)
+			{
+				nlwarning("Changing sound driver...");
+				delete SoundMngr;
+				SoundMngr = NULL;
+			}
+		}
+
 		if (SoundMngr && !ClientCfg.SoundOn)
 		{
 			nlwarning("Deleting sound manager...");

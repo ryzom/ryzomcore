@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2015  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -46,7 +47,7 @@ class CCompassTarget
 public:
 	enum TType	{ North = 0, Selection, Home, Respawn, ContinentLandMark, UserLandMark, PosTracker, NumTypes };
 	NLMISC::CVector2f		Pos;		// Used for static target (ie not the current selection, a team member ...)
-	ucstring				Name;
+	std::string					Name;
 	CCompassTarget();
 	TType					 getType() const { return _Type; }
 	void                     setType(TType type) { if (type == _Type) return; setPositionState(NULL); _Type = type; }
@@ -124,11 +125,11 @@ private:
 
 	bool	_Blinking;
 	double  _StartBlinkTime;
-	ucstring _CurrTargetName;
+	std::string _CurrTargetName;
 
 	// The dist text
 	CViewText	*_DistView;
-	ucstring	_DistViewText;
+	std::string	_DistViewText;
 
 	CViewRadar	*_RadarView;
 	CViewText	*_RadarRangeView;

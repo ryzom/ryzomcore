@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -49,7 +52,7 @@ public:
 	/** add a flying text at a position (called during entity display). NB: may fail if no more free groups
 	 *	\param offsetx: screen offsetx of the group in scene
 	 */
-	void	addFlyingText(void *key, const ucstring &text, const NLMISC::CVector &pos, NLMISC::CRGBA color, float scale, sint offsetX=0);
+	void	addFlyingText(void *key, const std::string &text, const NLMISC::CVector &pos, NLMISC::CRGBA color, float scale, sint offsetX=0);
 	/// release no more used flying text (called by CEntityManager at each draw)
 	void	releaseNotUsedFlyingText();
 

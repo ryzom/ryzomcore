@@ -1,0 +1,49 @@
+<generator header_tag="NEL_DATABASE_MAPPING">
+
+	<include file="ring_session_manager.h"/>
+	<include file="game_share/ring_session_manager_itf.h"/>
+	<cpp-include file="stdpch.h"/>
+	<namespace name="RSMGR">
+
+		<!-- *********************** Nel DB (not exhaustive) *************************-->
+
+		<class name="CNelUser">
+			<!-- activate database code generation -->
+			<database table="user"/>
+
+			<property type="uint32"			name="UserId"			db_col="UId"		unique_id="true" autogen="true"/>
+			<property type="std::string"	name="LoginName"		db_col="Login"		byref="true"/>
+			<property type="std::string"	name="State"			db_col="State"		byref="true"/>
+			<property type="std::string"	name="Privilege"		db_col="Privilege"	byref="true"/>
+			<property type="std::string"	name="ExtendedPrivilege" db_col="ExtendedPrivilege"	byref="true"/>
+			<property type="uint32"			name="GMId"				db_col="GMId"/>
+
+		</class>
+
+		<class name="CNelPermission">
+			<!-- activate database code generation -->
+			<database table="permission"/>
+
+			<property type="uint32"			name="PermissionId"		db_col="PermissionId"	unique_id="true"/>
+			<property type="uint32"			name="UserId"			db_col="UId"/>
+			<property type="uint32"			name="DomainId"			db_col="DomainId"/>
+			<property type="uint32"			name="ShardId"			db_col="ShardId"/>
+			<property type="std::string"	name="AccessPriv"		db_col="AccessPrivilege"	byref="true"/>
+
+		</class>
+
+<!--		<class name="CNelShard">-->
+			<!-- activate database code generation -->
+<!--			<database table="shard"/>
+
+			<property type="uint32"			name="Prim"				db_col="prim"		unique_id="true" autogen="true"/>
+			<property type="uint32"			name="ShardId"			db_col="ShardId"	/>
+			<property type="sint32"			name="DomainId"			db_col="domain_id"	/>
+			<property type="std::string"	name="ClientApplication" db_col="ClientApplication" byref="true"	/>
+			<property type="TAccessLevel"	name="State"			db_col="State"		byref="true"	enum="smart"/>
+			<property type="std::string"	name="MOTD"				db_col="MOTD"		byref="true"/>
+
+		</class>
+-->
+	</namespace>
+</generator>

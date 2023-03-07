@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -36,7 +39,7 @@ public:
 	// A child node
 	struct	CSheetChildMission : public CDBGroupListSheetText::CSheetChild
 	{
-		virtual void updateText(CDBGroupListSheetText * /* pFather */, ucstring &/* text */) {}
+		//virtual void updateText(CDBGroupListSheetText * /* pFather */, std::string &/* text */) {}
 		virtual CViewText *createViewText() const;
 		virtual void updateViewText(CDBGroupListSheetText *pFather);
 		virtual bool isInvalidated(CDBGroupListSheetText *pFather);

@@ -17,7 +17,7 @@ NL_DEFAULT_PROPS(build_world_packed_col "Ryzom, Tools, Server: Build World Packe
 NL_ADD_RUNTIME_FLAGS(build_world_packed_col)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(build_world_packed_col ${CMAKE_CURRENT_SOURCE_DIR}/std_header.h ${CMAKE_CURRENT_SOURCE_DIR}/std_header.cpp)
+  target_precompile_headers(build_world_packed_col PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/std_header.h)
 ENDIF()
 
 INSTALL(TARGETS build_world_packed_col RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

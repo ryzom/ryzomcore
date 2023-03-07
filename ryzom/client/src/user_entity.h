@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -485,7 +486,7 @@ public:
 	/// true if current behaviour allows to change front
 	bool canChangeFront();
 
-	ucstring getLoginName()
+	string getLoginName()
 	{
 		if (_LoginName.empty())
 			_LoginName = getDisplayName();
@@ -604,6 +605,8 @@ protected:
 	uint32						_MoveToMissionId;		 // Used for both mission option and mission ring
 	/// Time in MS when the User started beiing in collision with anything that avoid him to do an Action (and still is).
 	sint64						_MoveToColStartTime;
+
+	NLMISC::TGameCycle			_LastSentClientTick;
 
 
 	/// CSkill points observer
@@ -772,7 +775,7 @@ private:
 	CItemSnapshot			_PreviousRightHandItem;
 	CItemSnapshot			_PreviousLeftHandItem;
 
-	ucstring _LoginName;
+	std::string _LoginName;
 };
 
 /// Out game received position

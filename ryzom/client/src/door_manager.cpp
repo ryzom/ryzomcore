@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -248,7 +251,7 @@ void CDoorManager::SDoor::checkToClose()
 std::string CDoorManager::transformName (uint /* index */, const std::string &/* instanceName */, const std::string &shapeName)
 {
 	if (shapeName.rfind('.') == string::npos) return shapeName;
-	string sExt = toLower(shapeName.substr(shapeName.rfind('.')+1,shapeName.size()));
+	string sExt = toLowerAscii(shapeName.substr(shapeName.rfind('.')+1,shapeName.size()));
 	if (sExt != "pacs_prim") return shapeName;
 	return ""; // Do not load a pacs prim as a mesh...
 }
@@ -265,7 +268,7 @@ void CDoorManager::loadedCallback (NL3D::UInstanceGroup *ig)
 		string sShapeName = ig->getShapeName(k);
 		if (sShapeName.rfind('.') == string::npos) continue;
 
-		string sExt = toLower(sShapeName.substr(sShapeName.rfind('.')+1,sShapeName.size()));
+		string sExt = toLowerAscii(sShapeName.substr(sShapeName.rfind('.')+1,sShapeName.size()));
 		if (sExt != "pacs_prim") continue;
 
 		// Check if the pacs_prim is a door detection
@@ -347,7 +350,7 @@ void CDoorManager::loadedCallback (NL3D::UInstanceGroup *ig)
 						case SDoor::Matis3PartBourgeon:
 						{
 							string sDebug = ig->getShapeName(i);
-							sDebug = toLower(sDebug.substr(sDebug.rfind('_')+1,sDebug.size()));
+							sDebug = toLowerAscii(sDebug.substr(sDebug.rfind('_')+1,sDebug.size()));
 							if (sDebug == "gauche")
 								pDoor->Instances[0] = i;
 							else if (sDebug == "droite")
@@ -360,7 +363,7 @@ void CDoorManager::loadedCallback (NL3D::UInstanceGroup *ig)
 						case SDoor::Zorai2Part:
 						{
 							string sDebug = ig->getShapeName(i);
-							sDebug = toLower(sDebug.substr(sDebug.rfind('_')+1,sDebug.size()));
+							sDebug = toLowerAscii(sDebug.substr(sDebug.rfind('_')+1,sDebug.size()));
 							if (sDebug == "gauche")
 								pDoor->Instances[0] = i;
 							else if (sDebug == "droite")

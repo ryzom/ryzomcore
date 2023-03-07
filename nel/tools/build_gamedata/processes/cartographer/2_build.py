@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Build cartographer
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2014  Jan BOON
 #
 # This program is free software: you can redistribute it and/or modify
@@ -45,6 +45,7 @@ printLog(log, "")
 
 # Find tools
 R2IslandsTextures = findTool(log, ToolDirectories, R2IslandsTexturesTool, ToolSuffix)
+TgaToDds = findTool(log, ToolDirectories, TgaToDdsTool, ToolSuffix)
 
 if R2IslandsTextures == "":
 	toolLogFail(log, R2IslandsTexturesTool, ToolSuffix)
@@ -53,7 +54,31 @@ else:
 	cfgPath = ActiveProjectDirectory + "/generated/island_screenshots.cfg"
 	shutil.copy(cfgPath, "island_screenshots.cfg")
 	printLog(log, ">>> Build cartographer <<<")
+	mkPath(log, ExportBuildDirectory + "/" + CartographerBuildDirectory)
 	subprocess.call([ R2IslandsTextures ])
+printLog(log, "")
+
+printLog(log, ">>> Compress cartographer maps to DDS <<<")
+if TgaToDds == "":
+	toolLogFail(log, TgaToDdsTool, ToolSuffix)
+else:
+	destPath = ExportBuildDirectory + "/" + CartographerMapBuildDirectory
+	mkPath(log, destPath)
+	sourcePath = ExportBuildDirectory + "/" + CartographerBuildDirectory
+	mkPath(log, sourcePath)
+	files = os.listdir(sourcePath)
+	len_tga_png = len(".tga")
+	len_dds = len(".dds")
+	for fileName in files:
+		if isLegalFileName(fileName):
+			sourceFile = sourcePath + "/" + fileName
+			if os.path.isfile(sourceFile):
+				if (fileName[-len_tga_png:].lower() == ".tga") or (fileName[-len_tga_png:].lower() == ".png"):
+					destFile = destPath + "/" + os.path.basename(fileName)[0:-len_tga_png] + ".dds"
+					if needUpdateLogRemoveDest(log, sourceFile, destFile):
+						subprocess.call([ TgaToDds, sourceFile, "-o", destFile, "-m" ])
+			elif not os.path.isdir(sourceFile):
+				printLog(log, "FAIL ?! file not dir or file ?! " + sourceFile)
 printLog(log, "")
 
 log.close()

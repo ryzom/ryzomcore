@@ -4,7 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -617,7 +617,7 @@ uint32 CCharacterCL::buildEquipment(const CCharacterSheet::CEquipment &slot, SLO
 	{
 		// IS the item a valid one ?
 		CSheetId itemId;
-		if(itemId.buildSheetId(NLMISC::toLower(slot.getItem())))
+		if(itemId.buildSheetId(NLMISC::toLowerAscii(slot.getItem())))
 		{
 			// Is it stored in the database ?
 			CEntitySheet *entitySheet = SheetMngr.get(itemId);
@@ -809,8 +809,8 @@ bool CCharacterCL::build(const CEntitySheet *sheet)	// virtual
 	if (Type == Fauna)
 	{
 		// Get the fauna name in the sheet
-		const ucstring creatureName(STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id));
-		if (creatureName.find(ucstring("<NotExist:")) != 0)
+		const char *creatureName = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id);
+		if (!FINAL_VERSION || !NLMISC::startsWith(creatureName, "<NotExist:"))
 			_EntityName = creatureName;
 	}
 	else
@@ -1105,7 +1105,7 @@ string CCharacterCL::automatonType() const	// virtual
 //-----------------------------------------------
 void CCharacterCL::computeAutomaton()
 {
-	_CurrentAutomaton = automatonType() + "_" + NLMISC::toLower(MBEHAV::modeToString(_Mode)) + ".automaton";
+	_CurrentAutomaton = automatonType() + "_" + NLMISC::toLowerAscii(MBEHAV::modeToString(_Mode)) + ".automaton";
 }// computeAutomaton //
 
 
@@ -7589,7 +7589,7 @@ void CCharacterCL::displayName()
 //---------------------------------------------------
 void CCharacterCL::drawName(const NLMISC::CMatrix &mat)	// virtual
 {
-	const ucstring &ucname = getEntityName();
+	const string &ucname = getEntityName();
 	if(!getEntityName().empty())
 	{
 		// If there is no extended name, just display the name
@@ -7616,8 +7616,8 @@ void CCharacterCL::drawName(const NLMISC::CMatrix &mat)	// virtual
 	{
 		if(_Sheet != 0)
 		{
-			const ucstring name(STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id));
-			if (name.find(ucstring("<NotExist:")) != 0)
+			const char *name = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id);
+			if (!FINAL_VERSION || !NLMISC::startsWith(name, "<NotExist:"))
 				TextContext->render3D(mat, name);
 		}
 	}
@@ -7674,9 +7674,9 @@ void CCharacterCL::displayModifiers()	// virtual
 		}
 		else if (TimeInSec >= mod.Time)
 		{
-			ucstring hpModifier;
+			string hpModifier;
 			if (mod.Text.empty())
-				hpModifier = ucstring(toString("%d", mod.Value));
+				hpModifier = toString("%d", mod.Value);
 			else
 				hpModifier = mod.Text;
 			double t = TimeInSec-mod.Time;
@@ -8312,53 +8312,10 @@ std::string CCharacterCL::currentAnimationSetName(TAnimationType animType) const
 //---------------------------------------------------
 std::string CCharacterCL::shapeFromItem(const CItemSheet &itemSheet) const
 {
-	string sheet = "";
-
-	if(_Gender == GSGENDER::male)
-	{
-		if(_Sheet)
-			switch(_Sheet->Race)
-			{
-				case EGSPD::CPeople::Fyros:
-					sheet = itemSheet.getShapeFyros();
-					break;
-				case EGSPD::CPeople::Matis:
-					sheet = itemSheet.getShapeMatis();
-					break;
-				case EGSPD::CPeople::Tryker:
-					sheet = itemSheet.getShapeTryker();
-					break;
-				case EGSPD::CPeople::Zorai:
-					sheet = itemSheet.getShapeZorai();
-					break;
-			}
-	}
+	if(_Gender == GSGENDER::female && !itemSheet.getShapeFemale().empty())
+		return itemSheet.getShapeFemale();
 	else
-	{
-		if(_Sheet)
-			switch(_Sheet->Race)
-			{
-				case EGSPD::CPeople::Fyros:
-					sheet = itemSheet.getShapeFyrosFemale();
-					break;
-				case EGSPD::CPeople::Matis:
-					sheet = itemSheet.getShapeMatisFemale();
-					break;
-				case EGSPD::CPeople::Tryker:
-					sheet = itemSheet.getShapeTrykerFemale();
-					break;
-				case EGSPD::CPeople::Zorai:
-					sheet = itemSheet.getShapeZoraiFemale();
-					break;
-			}
-		if (sheet.empty())
-			sheet = itemSheet.getShapeFemale();
-	}
-	if (sheet.empty())
-		sheet = itemSheet.getShape();
-
-	return sheet;
-		
+		return itemSheet.getShape();
 }// shapeFromItem //
 
 
@@ -10250,11 +10207,11 @@ NLMISC_COMMAND(setNamePosZ, "", "<low/high/normal> <value>")
 			CRaceStatsSheet *sheet = const_cast<CRaceStatsSheet*>(playerTarget->playerSheet());
 			if (sheet)
 			{
-				if (toLower(args[0]) == "low")
+				if (toLowerAscii(args[0]) == "low")
 					namePosZ = &sheet->GenderInfos[playerTarget->getGender()].NamePosZLow;
-				else if (toLower(args[0]) == "normal")
+				else if (toLowerAscii(args[0]) == "normal")
 					namePosZ = &sheet->GenderInfos[playerTarget->getGender()].NamePosZNormal;
-				else if (toLower(args[0]) == "high")
+				else if (toLowerAscii(args[0]) == "high")
 					namePosZ = &sheet->GenderInfos[playerTarget->getGender()].NamePosZHigh;
 
 				sheetName = sheet->Id.toString();
@@ -10270,11 +10227,11 @@ NLMISC_COMMAND(setNamePosZ, "", "<low/high/normal> <value>")
 			CCharacterSheet *sheet = const_cast<CCharacterSheet*>(creatureTarget->getSheet());
 			if (sheet)
 			{
-				if (toLower(args[0]) == "low")
+				if (toLowerAscii(args[0]) == "low")
 					namePosZ = &sheet->NamePosZLow;
-				else if (toLower(args[0]) == "normal")
+				else if (toLowerAscii(args[0]) == "normal")
 					namePosZ = &sheet->NamePosZNormal;
-				else if (toLower(args[0]) == "high")
+				else if (toLowerAscii(args[0]) == "high")
 					namePosZ = &sheet->NamePosZHigh;
 
 				sheetName = sheet->Id.toString();
@@ -10301,11 +10258,11 @@ NLMISC_COMMAND(setMyNamePosZ, "", "<low/high/normal> <value>")
 	CRaceStatsSheet *sheet = const_cast<CRaceStatsSheet*>(UserEntity->playerSheet());
 	if (sheet)
 	{
-		if (toLower(args[0]) == "low")
+		if (toLowerAscii(args[0]) == "low")
 			namePosZ = &sheet->GenderInfos[UserEntity->getGender()].NamePosZLow;
-		else if (toLower(args[0]) == "normal")
+		else if (toLowerAscii(args[0]) == "normal")
 			namePosZ = &sheet->GenderInfos[UserEntity->getGender()].NamePosZNormal;
-		else if (toLower(args[0]) == "high")
+		else if (toLowerAscii(args[0]) == "high")
 			namePosZ = &sheet->GenderInfos[UserEntity->getGender()].NamePosZHigh;
 
 		sheetName = sheet->Id.toString();
@@ -10367,7 +10324,7 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 			str+="in_safe_zone ";
 		if( pvpMode&PVP_MODE::PvpSafe)
 			str+="safe ";
-		IM->displaySystemInfo(ucstring(str));
+		IM->displaySystemInfo(str);
 		nlinfo("<pvpMode> %s",str.c_str());
 	}
 	else

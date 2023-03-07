@@ -1,0 +1,136 @@
+********************
+* High Level Specs *
+********************
+
+There are 3 types of modules in the gudnet system: GUSHUB, GUSNET and GUSUSERS modules
+The first 2 module types manage physical connections between GUS services
+The third (GUSUSERS) is a user group and password manager that integrates into the gusnet system
+
+GUSHUB:
+-------
+This module acts in a similar fasion to a network hub. It manages rooting of messages from a module
+on one distant service to one or more modules on other distanr services.
+
+The syntax for instantiating a GUHUB is:
+	modulesAdd gushub <port>
+	- where 'port' is the listen port for the gushub to use (typically 44748)
+	- eg: modulesAdd gushub 44748
+
+
+GUSNET:
+-------
+This module acts as an interface for local modules to use to exchange messages with modules on
+distant GUS services. 
+Each GUSNET module connects to exactly one GUSHUB. The minimum syntax for instantiating a GUSNET 
+module is:
+	modulesAdd gusnet <hub_address>:<hub_port>
+	- eg: modulesAdd gusnet 192.168.1.100:44748
+	- eg: modulesAdd gusnet bob.bobnet.net:44748
+	- eg: modulesAdd gusnet localhost:44748
+
+Each GUSNET module may be named. The name is used to identify which gusnets should be associated 
+with each module launched on the service. If no name is provided then the gusnet will automatically
+be used by all local modules. The syntax for a named module is:
+	modulesAdd gusnet <name> <hub_address>:<hub_port>
+	- where 'name' must be a single keyword respecting standard keyword character conventions
+	- eg: modulesAdd gusnet admin 192.168.1.100:44748
+	- eg: modulesAdd gusnet bob   bob.bobnet.net:44748
+	- eg: modulesAdd gusnet fred  localhost:44748
+
+Each GUSNET module may be associated with a user manager. In this case the gusnet system performs
+authentication tests on all messages to verify that they come from a valid user with a valid
+password. The sintax for instantiating the module becomes:
+	modulesAdd -gusnet:<gususers_net_name> gusnet [<name>] <hub_address>:<hub_port> [#<userGroup>[...]]
+	- where 'gususers_net_name' is the name of the gusnet module that connects to the gususers module
+	- where 'userGroup' is a user group that users must belong to in order to be allowed access across
+	  this gusnet module
+
+
+GUSUSERS:
+---------
+This module manages the set of user groups, users and passwords. It uses a dedicated hub and 
+watches for the connections of gusnet modules over the hub in order to establish comms:
+	modulesAdd gususers <port> [<cfg_file_name>="./gususers.cfg"]
+	- where 'port' is the name of the dedicated hub port to use
+	- where 'cfg_file_name' is the name of the CFG file to use
+
+It operates from 2 tables defined in its configuration files (these are basically database tables):
+Lines containing entries for the users table are of the form:
+	USER <login> <password> [<groupName>[...]]
+	- where 'login' is a single word user name - respecting keywod naming conventions
+	- where 'password' is a password or phrase that may be several words long and quoted 
+	  (using C quoting conventions)
+	- where 'groupName' is a user group name - the special groupName '*' represents 'all groups' 
+	  (this is for admin users)
+Lines containing entries for the groups table are of the form:
+	GROUP <groupName> [<subGroupName>[...]]
+	- where 'groupName' is a user group name - respecting keywod naming conventions
+	- where 'subGroupName' is the name of another user group that this group encompasses
+
+
+***********
+* EXAMPLE *
+***********
+
+Intro:
+	In the following example we look at a situation where we have a game running on a set of servers. 
+	Some of these servers have 2 network cards, one giving access to the internet, the other on an 
+	internal LAN. The rest of the servers only have one network card, giving access to the internal
+	network only (the latter are reffered to as 'back end' servers).
+	For this game, event teams working from different offices need to be able to upload and control 
+	events running on different back end servers.
+	- We setup GUS applications on the event teams' PCs to perform the control operations
+	- We setup 'slave' GUS modules on the back end servers to perform the operations indicated by 
+	  the event team member
+	- We setup a user and password database on one of the backend machines to allow splitting of
+	  users with access to each of the different back end modules
+	- We setup a GUS HUB on a front end server to act as a hub and gateway allowing all of the
+	  different gus modules to inter-communicate
+
+machine: MyMachine0 (this is a machine with no access to the internet - we are using it to run the 
+					 user database only)
+	GUS StartCommands reads:
+		modulesAdd gususers 44748 /home/admin/users.cfg
+
+	The file "/home/admin/users.cfg" contains:
+		USER admin	"this is a long admin password"	*
+		USER tom	"tom's password"				GM
+		USER frank	"frank's password"				SGM
+		USER harry	"a password for harry: \"bla\""	DEV
+		USER bertha	"a lady's password"				GM
+		USER boris	"a man with no rank"
+		GROUP CM
+		GROUP Events1
+		GROUP Events2
+		GROUP EM Events1 Events2
+		GROUP GM
+		GROUP SGM GM
+		GROUP DEV SGM EM
+
+machine: MyMachine1 (this is an internet gateway machine - in this example it acts as the main 
+					 GUS HUB and provides a connection point for GUS services running on users'
+					 machines. Note that for it to be an internet connection point the port '44748'
+					 must be opened in the firewall)
+	GUS StartCommands reads:
+		modulesAdd gushub 44748
+
+machine: MyMachine2 (this is a machine on which events are installed by event team 1)
+	GUS StartCommands reads:
+		modulesAdd					gusnet			users  MyMachine0:44748
+		modulesAdd -gusnet:users	gusnet			events MyMachine1:44748 #Events1
+		modulesAdd -gusnet:events	eventInstaller	bla bla bla
+		modulesAdd -gusnet:events	eventExecutor	bli blo blo
+
+machine: MyMachine3 (this is a machine on which events are installed by event team 2)
+	GUS StartCommands reads:
+		modulesAdd					gusnet			users  MyMachine0:44748
+		modulesAdd -gusnet:users	gusnet			events MyMachine1:44748 #Events2
+		modulesAdd -gusnet:events	eventInstaller	bla bla bla
+		modulesAdd -gusnet:events	eventExecutor	bli blo blo
+
+machine: UserMachine (this is a machine belonging to one of the members of an event team)
+	GUS StartCommands reads:
+		modulesAdd guslogin	eventLogin
+		modulesAdd gusnet	events MyMachine1:44748
+		modulesAdd -gusnet:events -guslogin:eventLogin eventInterface	blam blam
+

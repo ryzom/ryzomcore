@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -361,7 +361,7 @@ void CWinDisplayer::setTitleBar (const string &titleBar)
 		wn += titleBar;
 		wn += ": ";
 	}
-	wn += "Nel Service Console (compiled " __DATE__ " " __TIME__ " in " + nlMode + " mode)";
+	wn += "Nel Service Console (compiled " __DATE__ " " __TIME__ " in " NL_MODE_STR " mode)";
 
 	nldebug("SERVICE: Set title bar to '%s'", wn.c_str());
 

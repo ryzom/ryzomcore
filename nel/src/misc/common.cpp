@@ -1,8 +1,8 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -577,7 +577,6 @@ uint32 fromHumanReadable (const std::string &str)
 	return 0;
 }
 
-
 NLMISC_CATEGORISED_COMMAND(nel,stohr, "Convert a second number into an human readable time", "<int>")
 {
 	nlunreferenced(rawCommandString);
@@ -593,6 +592,52 @@ NLMISC_CATEGORISED_COMMAND(nel,stohr, "Convert a second number into an human rea
 
 	return true;
 }
+
+NLMISC_CATEGORISED_COMMAND(nel, toLower, "Convert a string to lowercase", "<string>")
+{
+	nlunreferenced(args);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
+	log.displayNL("%s", toLower(rawCommandString).c_str());
+
+	return true;
+}
+
+NLMISC_CATEGORISED_COMMAND(nel, toUpper, "Convert a string to uppercase", "<string>")
+{
+	nlunreferenced(args);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
+	log.displayNL("%s", toUpper(rawCommandString).c_str());
+
+	return true;
+}
+
+NLMISC_CATEGORISED_COMMAND(nel, toLowerAscii, "Convert a string's ascii-characters to lowercase", "<string>")
+{
+	nlunreferenced(args);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
+	log.displayNL("%s", toLowerAscii(rawCommandString).c_str());
+
+	return true;
+}
+
+NLMISC_CATEGORISED_COMMAND(nel, toUpperAscii, "Convert a string's ascii-characters to uppercase", "<string>")
+{
+	nlunreferenced(args);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
+	log.displayNL("%s", toUpperAscii(rawCommandString).c_str());
+
+	return true;
+}
+
+#if 0
 
 std::string toLower(const char *str)
 {
@@ -625,6 +670,8 @@ std::string	toLower(const std::string &str)
 	return res;
 }
 
+#endif
+
 char toLower(const char ch)
 {
 	if( (ch >= 'A') && (ch <= 'Z') )
@@ -652,6 +699,8 @@ void toLower(char *str)
 	}
 }
 
+#if 0
+
 std::string toUpper(const std::string &str)
 {
 	string res;
@@ -666,6 +715,8 @@ std::string toUpper(const std::string &str)
 	return res;
 }
 
+#endif
+
 void toUpper(char *str)
 {
 	if (str == 0)
@@ -678,6 +729,102 @@ void toUpper(char *str)
 			*str = *str - 'a' + 'A';
 		}
 		str++;
+	}
+}
+
+std::string toLowerAscii(const std::string &str, char replacement)
+{
+	std::string res;
+	res.reserve(str.size());
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+	{
+		char c = *it;
+		if ((sint8)(c + '\x01') < (sint8)(' ' + '\x01')) res += replacement;
+		else if (c >= 'A' && c <= 'Z') res += c + ('a' - 'A');
+		else res += c;
+	}
+	return res;
+}
+
+void toLowerAscii(char *str, char replacement)
+{
+	for (ptrdiff_t i = 0; str[i]; ++i)
+	{
+		char c = str[i];
+		if ((sint8)(c + '\x01') < (sint8)(' ' + '\x01')) str[i] = replacement;
+		else if (c >= 'A' && c <= 'Z') str[i] = c + ('a' - 'A');
+		else str[i] = c;
+	}
+}
+
+std::string toUpperAscii(const std::string &str, char replacement)
+{
+	std::string res;
+	res.reserve(str.size());
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+	{
+		char c = *it;
+		if ((sint8)(c + '\x01') < (sint8)(' ' + '\x01')) res += replacement;
+		else if (c >= 'a' && c <= 'z') res += c - ('a' - 'A');
+		else res += c;
+	}
+	return res;
+}
+
+void toUpperAscii(char *str, char replacement)
+{
+	for (ptrdiff_t i = 0; str[i]; ++i)
+	{
+		char c = str[i];
+		if ((sint8)(c + '\x01') < (sint8)(' ' + '\x01')) str[i] = replacement;
+		else if (c >= 'a' && c <= 'z') str[i] = c - ('a' - 'A');
+		else str[i] = c;
+	}
+}
+
+std::string toLowerAscii(const std::string &str)
+{
+	std::string res;
+	res.reserve(str.size());
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+	{
+		char c = *it;
+		if (c >= 'A' && c <= 'Z') res += c + ('a' - 'A');
+		else res += c;
+	}
+	return res;
+}
+
+void toLowerAscii(char *str)
+{
+	for (ptrdiff_t i = 0; str[i]; ++i)
+	{
+		char c = str[i];
+		if (c >= 'A' && c <= 'Z') str[i] = c + ('a' - 'A');
+		else str[i] = c;
+	}
+}
+
+std::string toUpperAscii(const std::string &str)
+{
+	std::string res;
+	res.reserve(str.size());
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+	{
+		char c = *it;
+		if (c >= 'a' && c <= 'z') res += c - ('a' - 'A');
+		else res += c;
+	}
+	return res;
+}
+
+void toUpperAscii(char *str)
+{
+	for (ptrdiff_t i = 0; str[i]; ++i)
+	{
+		char c = str[i];
+		if (c >= 'a' && c <= 'z') str[i] = c - ('a' - 'A');
+		else str[i] = c;
 	}
 }
 
@@ -876,7 +1023,7 @@ std::string formatThousands(const std::string& s)
 {
 	sint i, k;
 	sint remaining = (sint)s.length() - 1;
-	static std::string separator = NLMISC::CI18N::get("uiThousandsSeparator").toUtf8();
+	static std::string separator = NLMISC::CI18N::get("uiThousandsSeparator");
 
 	// Don't add separator if the number is < 10k
 	if (remaining < 4) return s;
@@ -1044,7 +1191,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 #ifdef NL_OS_MAC
 	// special OS X case with bundles
-	if (toLower(CFile::getExtension(programName)) == ".app")
+	if (toLowerAscii(CFile::getExtension(programName)) == ".app")
 	{
 		// we need to open bundles with "open" command
 		std::string command = NLMISC::toString("open \"%s\"", programName.c_str());
@@ -1152,7 +1299,7 @@ bool launchProgramArray (const std::string &programName, const std::vector<std::
 
 #ifdef NL_OS_MAC
 	// special OS X case with bundles
-	if (toLower(CFile::getExtension(programName)) == "app")
+	if (toLowerAscii(CFile::getExtension(programName)) == "app")
 	{
 		// we need to open bundles with "open" command
 		std::string command = NLMISC::toString("open \"%s\"", programName.c_str());
@@ -1541,12 +1688,12 @@ void displayDwordBits( uint32 b, uint nbits, sint beginpos, bool displayBegin, N
 	}
 }
 
-FILE* nlfopen(const std::string &filename, const std::string &mode)
+FILE* nlfopen(const std::string &filename, const char *mode)
 {
 #ifdef NL_OS_WINDOWS
 	return _wfopen(nlUtf8ToWide(filename), nlUtf8ToWide(mode));
 #else
-	return fopen(filename.c_str(), mode.c_str());
+	return fopen(filename.c_str(), mode);
 #endif
 }
 

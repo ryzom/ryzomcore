@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Build rbank
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -55,6 +55,7 @@ printLog(log, "")
 # Build rbank bbox
 printLog(log, ">>> Build rbank bbox <<<")
 tempBbox = ExportBuildDirectory + "/" + RbankBboxBuildDirectory + "/temp.bbox"
+rebuiltBbox = False
 if BuildIgBoxes == "":
 	toolLogFail(log, BuildIgBoxesTool, ToolSuffix)
 else:
@@ -70,6 +71,7 @@ else:
 	else:
 		printLog(log, "DETECT SKIP Shape->Bbox")
 	if needUpdateIg or needUpdateShape:
+		rebuiltBbox = True
 		printLog(log, "DETECT DECIDE UPDATE")
 		cf = open("build_ig_boxes.cfg", "w")
 		cf.write("\n")
@@ -204,23 +206,35 @@ elif ExecTimeout == "":
 	toolLogFail(log, ExecTimeoutTool, ToolSuffix)
 else:
 	zonefiles = findFiles(log, ExportBuildDirectory + "/" + ZoneWeldBuildDirectory, "", ".zonew")
+	zonesToBuild = []
 	for zonefile in zonefiles:
 		zone = os.path.basename(zonefile)[0:-len(".zonew")]
 		lr1 = ExportBuildDirectory + "/" + RbankSmoothBuildDirectory + "/" + zone + ".lr"
 		nearzones = subprocess.Popen([ GetNeighbors, zone ], stdout = subprocess.PIPE).communicate()[0].strip().split(" ")
 		printLog(log, "ZONE " + zone + ": " + str(nearzones))
-		zone_to_build = 0
+		zoneToBuild = 0
 		for nearzone in nearzones:
 			sourcePath = ExportBuildDirectory + "/" + ZoneWeldBuildDirectory + "/" + nearzone + ".zonew"
 			if (os.path.isfile(sourcePath)):
-				if (needUpdate(log, sourcePath, lr1)):
-					zone_to_build = 1
+				if (rebuiltBbox or needUpdate(log, sourcePath, lr1)):
+					zoneToBuild = 1
+					zonesToBuild.append(os.path.basename(zonefile))
 		sourcePath = ExportBuildDirectory + "/" + ZoneWeldBuildDirectory + "/" + zone + ".zonew"
-		if zone_to_build:
+		if zoneToBuild:
 			printLog(log, sourcePath + " -> " + lr1)
-			subprocess.call([ ExecTimeout, str(RbankBuildTesselTimeout), BuildRbank, "-c", "-P", "-g", os.path.basename(zonefile) ])
+			# subprocess.call([ ExecTimeout, str(RbankBuildTesselTimeout), BuildRbank, "-c", "-P", "-g", os.path.basename(zonefile) ])
 		else:
 			printLog(log, "SKIP " + lr1)
+	while len(zonesToBuild) > 0:
+		processCommand = [ ExecTimeout, str(RbankBuildTesselTimeout), BuildRbank, "-c", "-P", "-g" ]
+		processCommand.extend(zonesToBuild[:min(len(zonesToBuild), 64)])
+		if len(zonesToBuild) > 64:
+			zonesToBuild = zonesToBuild[64:]
+		else:
+			zonesToBuild = []
+		print processCommand
+		callParallelProcess(processCommand)
+	flushParallelProcesses()
 printLog(log, "")
 
 printLog(log, ">>> Detect modifications to rebuild lr <<<")
@@ -245,7 +259,7 @@ if needUpdateBboxRbank:
 else:
 	printLog(log, "DETECT SKIP Lr->Rbank")
 
-if needUpdateCmbLr or needUpdateCmbRbank or needUpdateLrRbank or needUpdateBboxRbank:
+if rebuiltBbox or needUpdateCmbLr or needUpdateCmbRbank or needUpdateLrRbank or needUpdateBboxRbank:
 	printLog(log, "DETECT DECIDE UPDATE")
 	printLog(log, ">>> Build rbank process global <<<") # This generates temp lr files. TODO: Check if the LR changed?
 	if BuildRbank == "":

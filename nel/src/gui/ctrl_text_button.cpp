@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -136,7 +137,7 @@ namespace NLGUI
 		if( name == "hardtext" )
 		{
 			if( _ViewText != NULL )
-				return _ViewText->getText().toString();
+				return _ViewText->getHardText();
 			else
 				return std::string( "" );
 		}
@@ -316,7 +317,7 @@ namespace NLGUI
 		if( name == "hardtext" )
 		{
 			if( _ViewText != NULL )
-				_ViewText->setText( value );
+				_ViewText->setHardText( value );
 			return;
 		}
 		else
@@ -487,7 +488,7 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "wmargin", BAD_CAST toString( _WMargin ).c_str() );
 		xmlNewProp( node, BAD_CAST "wmin", BAD_CAST toString( _WMin ).c_str() );
 		xmlNewProp( node, BAD_CAST "hmin", BAD_CAST toString( _HMin ).c_str() );
-		xmlNewProp( node, BAD_CAST "hardtext", BAD_CAST _ViewText->getText().toString().c_str() );
+		xmlNewProp( node, BAD_CAST "hardtext", BAD_CAST _ViewText->getHardText().c_str() );
 		xmlNewProp( node, BAD_CAST "text_y", BAD_CAST toString( _TextY ).c_str() );
 		xmlNewProp( node, BAD_CAST "text_x", BAD_CAST toString( _TextX ).c_str() );
 		xmlNewProp( node, BAD_CAST "text_underlined", BAD_CAST toString( _ViewText->getUnderlined() ).c_str() );
@@ -541,7 +542,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_normal" );
 		if (prop)
 		{
-			string TxName = toLower(std::string((const char *) prop));
+			string TxName = toLowerAscii(std::string((const char *) prop));
 			_TextureIdNormal[0].setTexture((TxName+"_l.tga").c_str());
 			_TextureIdNormal[1].setTexture((TxName+"_m.tga").c_str());
 			_TextureIdNormal[2].setTexture((TxName+"_r.tga").c_str());
@@ -550,7 +551,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_pushed" );
 		if (prop)
 		{
-			string TxName = toLower(std::string((const char *) prop));
+			string TxName = toLowerAscii(std::string((const char *) prop));
 			_TextureIdPushed[0].setTexture((TxName+"_l.tga").c_str());
 			_TextureIdPushed[1].setTexture((TxName+"_m.tga").c_str());
 			_TextureIdPushed[2].setTexture((TxName+"_r.tga").c_str());
@@ -559,7 +560,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_over" );
 		if (prop)
 		{
-			string TxName = toLower(std::string((const char *) prop));
+			string TxName = toLowerAscii(std::string((const char *) prop));
 			_TextureIdOver[0].setTexture((TxName+"_l.tga").c_str());
 			_TextureIdOver[1].setTexture((TxName+"_m.tga").c_str());
 			_TextureIdOver[2].setTexture((TxName+"_r.tga").c_str());
@@ -596,10 +597,7 @@ namespace NLGUI
 			if (prop)
 			{
 				const char *propPtr = prop;
-				ucstring text = ucstring(propPtr);
-				if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-					text = CI18N::get (propPtr);
-				_ViewText->setText(text);
+				_ViewText->setTextLocalized(propPtr, true);
 			}
 		}
 
@@ -988,7 +986,7 @@ namespace NLGUI
 			nlassert( v != NULL );
 			_ViewText = dynamic_cast< CViewText* >( v );
 			_ViewText->setId( _Id + "_text" );
-			_ViewText->setText( ucstring( "text" ) );
+			_ViewText->setText( "text" );
 			_ViewText->setSerializable( false );
 		}
 
@@ -1039,19 +1037,49 @@ namespace NLGUI
 
 
 	// ***************************************************************************
-	void CCtrlTextButton::setText (const ucstring &text)
+	void CCtrlTextButton::setText (const std::string &text)
 	{
 		if (_ViewText && !_IsViewTextId)
 			_ViewText->setText(text);
 	}
 
 	// ***************************************************************************
-	ucstring CCtrlTextButton::getText () const
+	std::string CCtrlTextButton::getText () const
 	{
 		if (_ViewText && !_IsViewTextId)
 			return _ViewText->getText();
+		return std::string();
+	}
+
+	void CCtrlTextButton::setLocalize(bool localize)
+	{
+		if (_ViewText && !_IsViewTextId)
+			_ViewText->setLocalized(localize);
+	}
+
+	bool CCtrlTextButton::isLocalized() const
+	{
+		if (_ViewText && !_IsViewTextId)
+			return _ViewText->isLocalized();
+		return true;
+	}
+
+#ifdef RYZOM_LUA_UCSTRING
+	// ***************************************************************************
+	void CCtrlTextButton::setTextAsUtf16 (const ucstring &text)
+	{
+		if (_ViewText && !_IsViewTextId)
+			_ViewText->setText(text.toUtf8());
+	}
+
+	// ***************************************************************************
+	ucstring CCtrlTextButton::getTextAsUtf16 () const
+	{
+		if (_ViewText && !_IsViewTextId)
+			return CUtfStringView(_ViewText->getText()).toUtf16();
 		return ucstring("");
 	}
+#endif
 
 	// ***************************************************************************
 	void CCtrlTextButton::setHardText (const std::string &text)

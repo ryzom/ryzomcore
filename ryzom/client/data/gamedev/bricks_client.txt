@@ -1,0 +1,54 @@
+name	id	type	family	syllable	effect	texture_id	specific_text
+destroy	1	ROOT	0	krash	inflict damages to it's target	10000	none
+heal	2	ROOT	0	saf	heal the target of the spell	10001	none
+alter	3	ROOT	0	shange	Alter target's characteristics	10002	none
+power very weak	4	KEY	1	aka	Minimal spell power	9001	1
+power weak	5	KEY	1	aki	Low spell power	9001	3
+power average	6	KEY	1	aku	Average spell power	9001	5
+power high	7	KEY	1	aky	High spell power	9001	6
+power very high	8	KEY	1	akaha	Very high spell power	9001	7
+minor_area	9	SUFFIX	2	arre	the spell affects a small area	9002	1
+basic_area	10	SUFFIX	2	arri	spell affects an everage sized area	9002	2
+major_area	11	SUFFIX	2	arro	big effect area	9002	3
+quick casting	12	SUFFIX	3	thyy	cast faster	9003	-1
+fast casting	13	SUFFIX	3	thuu	cast much faster	9003	-2
+fastest casting	14	SUFFIX	3	thoo	smallest casting time	9003	-3
+very_close	15	KEY	4	pra	very short range	9004	0
+close	16	KEY	4	pre	close range	9004	1
+distant	17	KEY	4	pri	medium range	9004	2
+far	18	KEY	4	pro	long rang	9004	3
+very_far	19	KEY	4	pru	very long range	9004	4
+sap	20	KEY	5	sap	affect target's sap	9005	sap
+hp	21	KEY	5	hp	affect target's hp	9005	hp
+stamina	22	KEY	5	sta	affect target's stamina	9005	sta
+weak dose	23	KEY	6	dose	modify target char by a small amount	9006	1
+base dose	24	KEY	6	dosi	modify target char	9006	2
+strong dose	25	KEY	6	doso	important modification of char	9006	3
+very strong dose	26	KEY	6	dosu	very important modification of char	9006	4
+minor healing	27	KEY	7	bla	target recovers a few hit points	9007	1
+partial healing	28	KEY	7	ble	target recovers some hit points	9007	2
+basic healing	29	KEY	7	bli	target recovers hit points	9007	3
+benefactor healing	30	KEY	7	blo	target recovers a lot of HP	9007	4
+powerful healing	31	KEY	7	blu	target recovers lots of HP	9007	5
+30 seconds	32	KEY	8	mnii	spell last 30 seconds	9008	0.5
+2 minutes	33	KEY	8	mnoo	spell last 2 minutes	9008	2
+4 minutes	34	KEY	8	mnyy	spell last 4 minutes	9008	4
+teleport	35	ROOT	0	apula	teleportation	10003	none
+oasis	36	KEY	9	des	teleport to Vitka oasis	10003	vitka
+etoole	37	KEY	9	etoo	teleport to Etoole lakes	10003	etoo
+vampirism	38	ROOT	0	vampyr	vampirize target health	10003	none
+transfert	39	ROOT	0	trans	transfert caster health to target	10003	none
+boost regen	40	ROOT	0	troll	boost target Hp regen rate	10003	none
+accelerate	41	ROOT	0	spid	speed up the character	10003	none
+reduce resistance 1	42	SUFFIX	10	lresi	reduce target's resistance	10003	1
+reduce resistance 2	43	SUFFIX	10	lreso	reduce target's resistance	10003	2
+reduce resistance 3	44	SUFFIX	10	lresu	reduce target's resistance	10003	3
+easy 1	45	SUFFIX	11	isyli	reduce spell difficulty	10003	1
+easy 2	46	SUFFIX	11	isylo	reduce spell difficulty	10003	2
+easy 3	47	SUFFIX	11	isylu	reduce spell difficulty	10003	3
+cheap 1	48	SUFFIX	12	chipi	reduce spell cost	10003	1
+cheap 2	49	SUFFIX	12	chipo	reduce spell cost	10003	2
+cheap 3	50	SUFFIX	12	chipu	reduce spell cost	10003	3
+concentrate 1	51	SUFFIX	13	konci	reduce casting interruption chances	10003	1
+concentrate 2	52	SUFFIX	13	konco	reduce casting interruption chances	10003	2
+concentrate 3	53	SUFFIX	13	koncu	reduce casting interruption chances	10003	3

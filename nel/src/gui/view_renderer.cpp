@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -266,10 +267,18 @@ namespace NLGUI
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(ite->Texture);
-			if (tf)
+			if (ite->Texture)
 			{
-				driver->deleteTextureFile (tf);
+				UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(ite->Texture);
+				if (tf)
+				{
+					driver->deleteTextureFile (tf);
+				}
+				else
+				{
+					UTextureMem *tf = dynamic_cast<NL3D::UTextureMem *>(ite->Texture);
+					if (tf) driver->deleteTextureMem(tf);
+				}
 			}
 			ite++;
 		}
@@ -311,7 +320,7 @@ namespace NLGUI
 		if (fonts.count(name) > 0)
 			driver->deleteTextContext(fonts[name]);
 
-		std::string fontFile = CPath::lookup(font, false);
+		std::string fontFile = NLMISC::startsWith(font, "ui") ? font : CPath::lookup(font, false);
 		if (fontFile.empty())
 		{
 			nlwarning("Font file '%s' not found", font.c_str());
@@ -621,9 +630,7 @@ namespace NLGUI
 			return;
 
 		sint32 txw, txh;
-		SImage &rImage = *getSImage(nTxId);
-		txw = (sint32)((rImage.UVMax.U - rImage.UVMin.U)*rImage.GlobalTexturePtr->Width+0.5f);
-		txh = (sint32)((rImage.UVMax.V - rImage.UVMin.V)*rImage.GlobalTexturePtr->Height+0.5f);
+		getTextureSizeFromId(nTxId, txw, txh);
 
 		drawRotFlipBitmap (layerId, x, y, txw, txh, rot, flipv, nTxId, col);
 	}
@@ -859,6 +866,14 @@ namespace NLGUI
 		CIFile ifTmp;
 		if (ifTmp.open(filename))
 			CBitmap::loadSize (ifTmp, gt.Width, gt.Height);
+
+		// extract textures scale from filename
+		// texture_interface_v3_2x.tga / texture_interface_v3_4x.tga
+		if (textureFileName.find("_2x.") != std::string::npos)
+			gt.Scale = 2.f;
+		else if (textureFileName.find("_4x.") != std::string::npos)
+			gt.Scale = 4.f;
+
 		gt.Texture = driver->createTextureFile (filename);
 		// Force to generate the texture now. This way we can extract the mouse bitmaps from it now without having to load it again.
 		// Its why we don't release it at the end, because it is likely to be uploaded soon)
@@ -882,6 +897,7 @@ namespace NLGUI
 		driver->setCursorScale( CViewRenderer::hwCursorScale );
 
 		char bufTmp[256], tgaName[256];
+		tgaName[0] = 0;
 		string sTGAname;
 		float uvMinU, uvMinV, uvMaxU, uvMaxV;
 		while (!iFile.eof())
@@ -893,7 +909,7 @@ namespace NLGUI
 			image.UVMin.V = uvMinV;
 			image.UVMax.U = uvMaxU;
 			image.UVMax.V = uvMaxV;
-			sTGAname = toLower(string(tgaName));
+			sTGAname = toLowerAscii(string(tgaName));
 
 			string::size_type stripPng = sTGAname.find(".png");
 			if (stripPng != string::npos)
@@ -932,6 +948,10 @@ namespace NLGUI
 						CBitmap curs;
 						curs.resize(x1 - x0, y1 - y0);
 						curs.blit(*texDatas, x0, y0, (x1 - x0), (y1 - y0), 0, 0);
+						// TODO: scaled cursors not supported
+						if (gt.Scale > 1.f) {
+							curs.resample((sint)(curs.getWidth() / gt.Scale), (sint)(curs.getHeight() / gt.Scale));
+						}
 						driver->addCursor(image.Name, curs);
 					}
 				}
@@ -962,11 +982,11 @@ namespace NLGUI
 			return;
 		}
 		// Look if already existing
-		string sLwrGTName = toLower(sGlobalTextureName);
+		string sLwrGTName = toLowerAscii(sGlobalTextureName);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			if (toLower(ite->Name) == sLwrGTName)
+			if (toLowerAscii(ite->Name) == sLwrGTName)
 				break;
 			ite++;
 		}
@@ -987,6 +1007,207 @@ namespace NLGUI
 		ite->Texture = externalTexture;
 	}
 
+	bool CViewRenderer::loadTextureFromString(CViewRenderer::SGlobalTexture *gt, const std::string &data)
+	{
+		size_t pos = data.find(";base64,");
+		if (pos == std::string::npos)
+		{
+			nlwarning("Data does not have 'data:image/...;base64,...' format '%s'", data.c_str());
+			return false;
+		}
+
+		std::string decoded = base64::decode(data.substr(pos + 8));
+		if (decoded.empty())
+		{
+			nlwarning("base64 decoding failed '%s", data.substr(pos + 8).c_str());
+			return false;
+		}
+
+		CMemStream buf;
+		if (buf.isReading()) buf.invert();
+		buf.serialBuffer((uint8 *)(decoded.data()), decoded.size());
+		buf.invert();
+
+		CBitmap btm;
+		btm.load(buf);
+
+		gt->Width = gt->DefaultWidth = btm.getWidth();;
+		gt->Height = gt->DefaultHeight = btm.getHeight();
+
+		if (gt->Width == 0 || gt->Height == 0)
+		{
+			nlwarning("Decoded image has width==0 || height==0, check image format. '%s'", data.c_str());
+			return false;
+		}
+
+		UTextureMem *texture = driver->createTextureMem(btm.getWidth(), btm.getHeight(), CBitmap::RGBA);
+		if (!texture)
+		{
+			nlwarning("Failed to create mem texture (%d,%d)", btm.getWidth(), btm.getHeight());
+			return false;
+		}
+
+		memcpy(texture->getPointer(), btm.getPixels().getPtr(), btm.getSize() * 4);
+		gt->Texture = texture;
+		gt->FromGlobaleTexture = false;
+
+		return true;
+	}
+
+	bool CViewRenderer::loadTextureFromFile(CViewRenderer::SGlobalTexture *gt, const std::string &filename)
+	{
+		// load new file
+		CIFile ifTmp;
+		if (ifTmp.open(filename))
+		{
+			CBitmap::loadSize (ifTmp, gt->Width, gt->Height);
+			gt->DefaultWidth = gt->Width;
+			gt->DefaultHeight = gt->Height;
+			if (gt->Width == 0 || gt->Height == 0)
+			{
+				nlwarning("Failed to load the texture '%s', please check image format", filename.c_str());
+				return false;
+			}
+		}
+
+		gt->Texture = driver->createTextureFile(filename);
+		gt->FromGlobaleTexture = false;
+
+		return true;
+	}
+
+	sint32 CViewRenderer::newTextureId(const std::string &name)
+	{
+		SImage iTmp;
+		iTmp.Name = toLowerAscii(name);
+		iTmp.UVMin = CUV(0,0);
+		iTmp.UVMax = CUV(1,1);
+
+		// lookup global texture with same name
+		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
+		while (ite != _GlobalTextures.end())
+		{
+			std::string sText = toLowerAscii(ite->Name);
+			if (sText == iTmp.Name)
+				break;
+			ite++;
+		}
+
+		if (ite == _GlobalTextures.end())
+		{
+			SGlobalTexture gtTmp;
+			gtTmp.Name = iTmp.Name;
+			gtTmp.FromGlobaleTexture = false;
+			gtTmp.DefaultWidth = gtTmp.Width = 0;
+			gtTmp.DefaultHeight = gtTmp.Height = 0;
+			gtTmp.Texture = NULL;
+			_GlobalTextures.push_back(gtTmp);
+			ite = _GlobalTextures.end();
+			ite--;
+		}
+		iTmp.GlobalTexturePtr = &(*ite);
+
+		// allocate new texture id
+		return addSImage(iTmp);
+	}
+
+	void CViewRenderer::reloadTexture(sint32 texId, const std::string &name, bool uploadDXTC, bool bReleasable)
+	{
+		if ((uint)texId >= _SImageIterators.size())
+		{
+			nlwarning("Invalid texture id %d, maximum is %u", texId, _SImageIterators.size());
+			return;
+		}
+
+		SImage *sImage = getSImage(texId);
+		SGlobalTexture *gt = sImage->GlobalTexturePtr;
+		if (!gt)
+		{
+			nlwarning("Unknown texture id %d (file %s)", texId, name.c_str());
+			return;
+		}
+
+		// create new global texture if previous is atlas
+		if (gt->FromGlobaleTexture)
+		{
+			uint count = 0;
+			TSImageList::iterator ite = _SImages.begin();
+			while (ite != _SImages.end() && count != 2)
+			{
+				// Same global texture ?
+				if (ite->GlobalTexturePtr == gt)
+					count++;
+
+				ite++;
+			}
+
+			// create new only when atlas is used by 2+ textures
+			if (count == 2)
+			{
+				SGlobalTexture gtTmp;
+				gtTmp.Name = toLowerAscii(name);
+				gtTmp.FromGlobaleTexture = false;
+				gtTmp.DefaultWidth = gtTmp.Width = 0;
+				gtTmp.DefaultHeight = gtTmp.Height = 0;
+				gtTmp.Texture = NULL;
+				_GlobalTextures.push_back(gtTmp);
+
+				TGlobalTextureList::iterator ite = _GlobalTextures.end();
+				ite--;
+
+				sImage->GlobalTexturePtr = &(*ite);
+				gt = sImage->GlobalTexturePtr;
+			}
+		}
+
+		NL3D::UTexture *oldTexture = gt->Texture;
+
+		std::string sLwrGTName;
+		if (startsWith(name, "data:image/"))
+		{
+			if (!loadTextureFromString(gt, name))
+				return;
+
+			sLwrGTName = getMD5((uint8 *)name.c_str(), (uint32)name.size()).toString();
+		}
+		else
+		{
+			sLwrGTName = toLowerAscii(name);
+			std::string filename = CPath::lookup(sLwrGTName, false);
+			if (filename.empty())
+			{
+				nlwarning("Unable to find file '%s for texture %d", name.c_str(), texId);
+				return;
+			}
+
+			if (!loadTextureFromFile(gt, filename))
+			{
+				nlwarning("Unable to load texture from file '%s'", filename.c_str());
+				return;
+			}
+		}
+
+		gt->Name = sLwrGTName;
+		gt->Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
+		gt->Texture->setUploadFormat(uploadDXTC ? UTexture::DXTC5 : UTexture::Auto);
+		gt->Texture->setReleasable(bReleasable);
+
+		// release previous only after successfully loading new one
+		if (oldTexture)
+		{
+			UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(oldTexture);
+			if (tf)
+			{
+				driver->deleteTextureFile (tf);
+			}
+			else
+			{
+				UTextureMem *tf = dynamic_cast<NL3D::UTextureMem *>(oldTexture);
+				if (tf) driver->deleteTextureMem(tf);
+			}
+		}
+	}
+
 	/*
 	 * createTexture
 	 */
@@ -1005,11 +1226,11 @@ namespace NLGUI
 			return createTextureFromDataURL(sGlobalTextureName, uploadDXTC, bReleasable);
 
 		// Look if already existing
-		string sLwrGTName = toLower(sGlobalTextureName);
+		string sLwrGTName = toLowerAscii(sGlobalTextureName);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			std::string sText = toLower(ite->Name);
+			std::string sText = toLowerAscii(ite->Name);
 			if (sText == sLwrGTName)
 				break;
 			ite++;
@@ -1018,27 +1239,20 @@ namespace NLGUI
 		// If global texture not exists create it
 		if (ite == _GlobalTextures.end())
 		{
-			SGlobalTexture gtTmp;
-			gtTmp.FromGlobaleTexture = false;
 			string filename = CPath::lookup (sLwrGTName, false);
 			if (filename.empty() ) return -1;
-			CIFile ifTmp;
-			if (ifTmp.open(filename))
-			{
-				CBitmap::loadSize (ifTmp, gtTmp.Width, gtTmp.Height);
-				gtTmp.DefaultWidth = gtTmp.Width;
-				gtTmp.DefaultHeight = gtTmp.Height;
-				if (gtTmp.Width == 0 || gtTmp.Height == 0)
-				{
-					nlwarning("Failed to load the texture '%s', please check image format", filename.c_str());
-				}
-			}
-			gtTmp.Texture = driver->createTextureFile (sLwrGTName);
+
+			SGlobalTexture gtTmp;
 			gtTmp.Name = sLwrGTName;
+
+			if (!loadTextureFromFile(&gtTmp, filename))
+				return -1;
+
 			gtTmp.Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
 			if(uploadDXTC)
 				gtTmp.Texture->setUploadFormat(UTexture::DXTC5);
 			gtTmp.Texture->setReleasable(bReleasable);
+
 			_GlobalTextures.push_back(gtTmp);
 			ite = _GlobalTextures.end();
 			ite--;
@@ -1093,44 +1307,10 @@ namespace NLGUI
 		// If global texture not exists create it
 		if (ite == _GlobalTextures.end())
 		{
-			std::string decoded = base64::decode(data.substr(pos + 8));
-			if (decoded.empty())
-			{
-				nlwarning("base64 decode failed '%s'", data.substr(pos + 8).c_str());
-				return -1;
-			}
-
-			//
-			CMemStream buf;
-			if (buf.isReading()) buf.invert();
-			buf.serialBuffer((uint8 *)(decoded.data()), decoded.size());
-			buf.invert();
-
-			CBitmap btm;
-			btm.load(buf);
-
 			SGlobalTexture gtTmp;
-			gtTmp.FromGlobaleTexture = false;
-
-			gtTmp.Width = gtTmp.DefaultWidth = btm.getWidth();;
-			gtTmp.Height = gtTmp.DefaultHeight = btm.getHeight();
-
-			if (gtTmp.Width == 0 || gtTmp.Height == 0)
-			{
-				nlwarning("Failed to load the texture '%s', please check image format", data.c_str());
+			if (!loadTextureFromString(&gtTmp, data))
 				return -1;
-			}
 
-			UTextureMem *texture = driver->createTextureMem(btm.getWidth(), btm.getHeight(), CBitmap::RGBA);
-			if (!texture)
-			{
-				nlwarning("Failed to create mem texture (%d,%d)", btm.getWidth(), btm.getHeight());
-				return -1;
-			}
-
-			memcpy(texture->getPointer(), btm.getPixels().getPtr(), btm.getSize() * 4);
-
-			gtTmp.Texture = texture;
 			gtTmp.Name = md5hash;
 			gtTmp.Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
 			gtTmp.Texture->setReleasable(bReleasable);
@@ -1182,11 +1362,11 @@ namespace NLGUI
 	 */
 	NL3D::UTexture *CViewRenderer::getGlobalTexture(const std::string &name)
 	{
-		string sLwrGTName = NLMISC::toLower(name);
+		string sLwrGTName = NLMISC::toLowerAscii(name);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			std::string sText = NLMISC::toLower(ite->Name);
+			std::string sText = NLMISC::toLowerAscii(ite->Name);
 			if (sText == sLwrGTName)
 				break;
 			ite++;
@@ -1246,6 +1426,8 @@ namespace NLGUI
 					// This one ?
 					if (&(*iteGT) == gt)
 					{
+						if (iteGT->Texture == NULL)
+							return;
 						// Remove this global texture
 						UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(iteGT->Texture);
 						if (tf)
@@ -1316,7 +1498,7 @@ namespace NLGUI
 			return -1;
 
 		// convert to lowCase
-		string nameLwr = toLower(sName);
+		string nameLwr = toLowerAscii(sName);
 
 		string::size_type stripPng = nameLwr.find(".png");
 		if (stripPng != string::npos)
@@ -1357,8 +1539,8 @@ namespace NLGUI
 		else
 		{
 			SImage &rImage = *getSImage(id);
-			width = (sint32)((rImage.UVMax.U - rImage.UVMin.U)*rImage.GlobalTexturePtr->Width+0.5f);
-			height = (sint32)((rImage.UVMax.V - rImage.UVMin.V)*rImage.GlobalTexturePtr->Height+0.5f);
+			width = (sint32)(((rImage.UVMax.U - rImage.UVMin.U)*rImage.GlobalTexturePtr->Width / rImage.GlobalTexturePtr->Scale)+0.5f);
+			height = (sint32)(((rImage.UVMax.V - rImage.UVMin.V)*rImage.GlobalTexturePtr->Height / rImage.GlobalTexturePtr->Scale)+0.5f);
 		}
 	}
 	/*
@@ -1373,9 +1555,11 @@ namespace NLGUI
 
 		SImage &rImage = *getSImage(id);
 		SGlobalTexture &rGT = *rImage.GlobalTexturePtr;
+		// get (possibly) scaled width/height
 		sint32 width, height;
-		width = (sint32)((rImage.UVMax.U - rImage.UVMin.U)*rGT.Width+0.5f);
-		height = (sint32)((rImage.UVMax.V - rImage.UVMin.V)*rGT.Height+0.5f);
+		getTextureSizeFromId(id, width, height);
+		if (width == 0 || height == 0)
+			return CRGBA(255,255,255);
 		float xRatio = ((float)x) / ((float)(width));
 		float yRatio = ((float)y) / ((float)(height));
 		UTexture *pTF = rGT.Texture;
@@ -1425,6 +1609,13 @@ namespace NLGUI
 			TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 			while (ite != _GlobalTextures.end())
 			{
+				// texture not loaded yet
+				if (ite->Texture == NULL)
+				{
+					++ite;
+					continue;
+				}
+
 				// TMP TMP
 	//			volatile SGlobalTexture *sg = &(*ite);
 				CLayer	&layer= ite->Layers[layerId];

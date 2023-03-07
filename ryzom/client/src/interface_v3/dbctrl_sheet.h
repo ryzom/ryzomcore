@@ -1,8 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -61,6 +61,8 @@ namespace NLGUI
 
 class CDBCtrlSheet;
 
+#ifdef RYZOM_FORGE
+
 // ***************************************************************************
 // Item info request from server
 class CControlSheetInfoWaiter : public IItemInfoWaiter
@@ -73,11 +75,12 @@ public:
 		: IItemInfoWaiter(), Requesting(false)
 	{ }
 public:
-	ucstring infoValidated() const;
+	std::string infoValidated() const;
 	void sendRequest();
 	virtual void infoReceived();
 };
 
+#endif
 
 // ***************************************************************************
 /** Common info for CDBCtrlSheet and CDBGroupListSheet
@@ -306,7 +309,9 @@ public:
 		REFLECT_STRING_REF ("on_can_drop", getActionOnCanDrop, setActionOnCanDrop);
 		REFLECT_STRING_REF ("on_can_drop_params", getParamsOnCanDrop, setParamsOnCanDrop);
 		REFLECT_LUA_METHOD("getDraggedSheet", luaGetDraggedSheet);
+#ifdef RYZOM_FORGE
 		REFLECT_LUA_METHOD("getItemInfo", luaGetItemInfo);
+#endif
 		REFLECT_LUA_METHOD("getName", luaGetName);
 		REFLECT_LUA_METHOD("getCreatorName", luaGetCreatorName);
 		REFLECT_LUA_METHOD("waitInfo", luaWaitInfo);
@@ -314,7 +319,9 @@ public:
 	REFLECT_EXPORT_END
 
 	int luaGetDraggedSheet(CLuaState &ls);
+#ifdef RYZOM_FORGE
 	int luaGetItemInfo(CLuaState &ls);
+#endif
 	int luaGetName(CLuaState &ls);
 	int luaGetCreatorName(CLuaState &ls);
 	int luaWaitInfo(CLuaState &ls);
@@ -393,9 +400,9 @@ public:
 	NLMISC::CRGBA			getSheetColor() const {return _SheetColor;}
 
 	/// Special ContextHelp for ctrl sheet.
-	virtual void			getContextHelp(ucstring &help) const;
+	virtual void			getContextHelp(std::string &help) const;
 
-	virtual void			getContextHelpToolTip(ucstring &help) const;
+	virtual void			getContextHelpToolTip(std::string &help) const;
 
 
 	/** true if an item of another ctrlSheet can be dropped on this slot.
@@ -534,6 +541,8 @@ public:
 	// set item RESALE_FLAG
 	void setItemResaleFlag(sint32 rf);
 
+#ifdef RYZOM_FORGE
+
 	//get item CREATE_TIME. 0 if no DB
 	sint32 getItemCreateTime() const;
 	NLMISC::CCDBNodeLeaf *getItemCreateTimePtr() const;
@@ -545,6 +554,8 @@ public:
 	NLMISC::CCDBNodeLeaf *getItemSerialPtr() const;
 	// set item CREATE_TIME
 	void setItemSerial(sint32 serial);
+
+#endif
 
 	// get item locked by owner
 	bool getLockedByOwner() const;
@@ -570,7 +581,7 @@ public:
 	// set item FABER_STAT_TYPE
 	void setItemRMFaberStatType(sint32 fss);
 
-	// get item PREREQUISIT_VALID. true of no DB
+	// get item PREREQUISIT_VALID. true if no DB
 	bool getItemPrerequisitValid() const;
 	NLMISC::CCDBNodeLeaf *getItemPrerequisitValidPtr() const;
 	// set item PREREQUISIT_VALID
@@ -581,8 +592,20 @@ public:
 	// set item color (if possible)
 	void	setItemColor(sint32 val) {if(_UserColor) _UserColor->setValue32(val);}
 
+	// get item CHARAC_BUFFS. 0 if no DB
+	uint8 getItemCharacBuffs() const;
+	NLMISC::CCDBNodeLeaf *getItemCharacBuffsPtr() const;
+	// set item CHARAC_BUFFS
+	void setItemCharacBuffs(uint8 val);
+
+	// get item ACCESS. 0 if no DB
+	uint8 getItemAccess() const; // TODO: Guild grade & proper default
+	NLMISC::CCDBNodeLeaf *getItemAccessPtr() const;
+	// set item CHARAC_BUFFS
+	void setItemAccess(uint8 val);
+
 	// Get the Actual item name. Localized version of SheetId, or given by server through NAMEID.
-	ucstring getItemActualName() const;
+	std::string getItemActualName() const;
 
 	/// true if support drag copy (with CTRL). action handler has to check control.
 	bool	canDragCopy() const {return _DragCopy;}
@@ -602,17 +625,44 @@ public:
 	void	setRegenTickRange(const CTickRange &tickRange);
 	const CTickRange &getRegenTickRange() const { return _RegenTickRange; }
 
+	// Default regen text is displayed on bottom of icon.
+	void setRegenText(bool b) { _RegenTextEnabled = b; }
+	// Allow to override default formatter.
+	// First parameter will be replaced with current timer value (always >= 0)
+	// If its a lua function, then parameters are
+	// 1: current timer value; can be negative
+	// 2: DB path for ctrl root (ie UI:VARIABLES:BONUSES:0), or nil
+	//
+	// ie: "secondsToTimeStringShort"     -> CInterfaceExpr::evalAsString("secondsToTimeStringShort(123)", ret)
+	// ie: "lua:secondsToTimeStringShort" -> CInterfaceExpr::evalAsString("lua:secondsToTimeStringShort(123, 'UI:VARIABLES:BONUSES:0')", ret)
+	void setRegenTextFct(const std::string &s);
+	void setRegenTextY(sint32 y) { _RegenTextY = y; }
+	void setRegenTextShadow(bool b) { _RegenTextShadow = b; }
+	void setRegenTextShadowColor(NLMISC::CRGBA c) { _RegenTextShadowColor = c; }
+	void setRegenTextOutline(bool b) { _RegenTextOutline = b; }
+	void setRegenTextOutlineColor(NLMISC::CRGBA c) { _RegenTextOutlineColor = c; }
+	void setRegenTextFontSize(uint32 s) { _RegenTextFontSize = s; }
+	void setRegenTextColor(NLMISC::CRGBA c) { _RegenTextColor = c; }
+
 	// start notify anim (at the end of regen usually)
 	void	startNotifyAnim();
 
+	void updateCharacBuffs();
+
+#ifdef RYZOM_FORGE
 	// callback from info waiter
 	void infoReceived();
+#endif
 
 	// set enchant/buff marker visiblility
+#ifdef RYZOM_FORGE
 	static void setShowIconBuffs(bool b) { _ShowIconBuffs = b; }
+#endif
 
 protected:
+#ifdef RYZOM_FORGE
 	inline bool useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const;
+#endif
 
 	void setupItem();
 	void setupPact();
@@ -626,7 +676,7 @@ protected:
 	// optSheet is for special faber
 	void setupDisplayAsSBrick(sint32 sheet, sint32 optSheet= 0);
 	// setup icon from phrases
-	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const ucstring &phraseName);
+	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName);
 
 	// draw a number and returns the width of the drawn number
 	sint32 drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value, bool rightAlign=true);
@@ -652,7 +702,9 @@ protected:
 	NLMISC::CCDBNodeLeaf		*_ItemRMFaberStatType;
 
 	mutable sint32		_LastSheetId;
+#ifdef RYZOM_FORGE
 	bool				_ItemInfoChanged;
+#endif
 
 	/// Display
 	sint32				_DispSlotBmpId;		// Display slot bitmap id
@@ -663,10 +715,12 @@ protected:
 	sint32				_DispOverBmpId;		// Over Icon
 	sint32				_DispOver2BmpId;	// Over Icon N0 2 for bricks / items. Useful for items when _DispOverBmpId is used to paint user color on the item.
 
+#ifdef RYZOM_FORGE
 	std::string			_HpBuffIcon;
 	std::string			_SapBuffIcon;
 	std::string			_StaBuffIcon;
 	std::string			_FocusBuffIcon;
+#endif
 
 	// texture ids to show
 	struct SBuffIcon
@@ -738,7 +792,19 @@ protected:
 
 	CTickRange		_RegenTickRange;
 	NLGUI::CViewText	*_RegenText;
-	uint32			_RegenTextValue;
+	sint32			_RegenTextValue;
+	//
+	std::string		_RegenTextFct;
+	bool			_RegenTextFctLua;
+	bool			_RegenTextEnabled;
+	bool			_RegenTextShadow;
+	bool			_RegenTextOutline;
+	sint32			_RegenTextY;
+	uint32			_RegenTextFontSize;
+	NLMISC::CRGBA	_RegenTextShadowColor;
+	NLMISC::CRGBA	_RegenTextOutlineColor;
+	NLMISC::CRGBA	_RegenTextColor;
+
 
 	/// D'n'd
 	sint32		_DragX, _DragY;
@@ -803,22 +869,28 @@ protected:
 	static NLMISC::CSmartPtr<CSPhraseComAdpater> _PhraseAdapter;
 
 	sint64		_NotifyAnimEndTime;
-
+	
+#ifdef RYZOM_FORGE
 	mutable CControlSheetInfoWaiter _ItemInfoWaiter;
+#endif
 private:
 	mutable TSheetType			_ActualType;
 
 	static		CDBCtrlSheet *_CurrSelection;
 	static		CDBCtrlSheet *_CurrMenuSheet;
 
+#ifdef RYZOM_FORGE
 	static		bool _ShowIconBuffs;
+#endif
 private:
 	void		updateActualType() const;
 	void		updateIconSize();
 	void		resetAllTexIDs();
 	void		setupInit();
+#ifdef RYZOM_FORGE
 	// remove enchant and buff markers from item icon
 	void		clearIconBuffs();
+#endif
 
 	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar= 1000, bool topDown= false);
 	void		resetCharBitmaps();
@@ -827,8 +899,10 @@ private:
 	// special for items
 	void		updateItemCharacRequirement(sint32 sheetId);
 
+#ifdef RYZOM_FORGE
 	// Send ITEM_INFO:GET request to server to fetch Buffs, Enchant info
 	void		setupItemInfoWaiter();
+#endif
 
 	// update armour color, and cache
 	void		updateArmourColor(sint8 col);
@@ -851,6 +925,9 @@ private:
 
 	// gelper to draw the notify animation
 	void drawRotatedQuad(CViewRenderer &vr, float angle, float scale, uint renderLayer, uint32 textureId, sint32 texWidth, sint32 texHeight);
+
+	// create and draw regen text over icon
+	void drawRegenText();
 
 };
 

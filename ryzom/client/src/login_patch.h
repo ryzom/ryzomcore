@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -23,6 +26,7 @@
 #include "nel/misc/config_file.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/progress_callback.h"
+#include "nel/misc/atomic.h"
 
 #include "game_share/bnp_patch.h"
 
@@ -56,7 +60,7 @@ public:
 class IPatchManagerStateListener
 {
 public:
-	virtual void setState (bool /* bOutputToLog */, const ucstring &/* ucsNewState */){}
+	virtual void setState (bool /* bOutputToLog */, const std::string &/* ucsNewState */){}
 };
 
 // Get Info of file to install
@@ -154,12 +158,12 @@ public:
 
 	// Get the string information about what the threads are doing
 	// Return true if the state has changed
-	bool getThreadState (ucstring &state, std::vector<ucstring> &stateLog);
+	bool getThreadState (std::string &state, std::vector<std::string> &stateLog);
 
 	/** Get the error message (filled after a patch of check)
 	  * May be empty if the cause of error is unknown or unhandled
 	  */
-	const ucstring &getLastErrorMessage() { return _ErrorMessage; }
+	const std::string &getLastErrorMessage() { return _ErrorMessage; }
 
 	// ---------------------
 	// First Part : Checking
@@ -235,7 +239,7 @@ public:
 	uint applyScanDataResult();
 
 	// get the current info Log for data Scan (true if some change from last get, else text is not filled)
-	bool getDataScanLog(ucstring &text);
+	bool getDataScanLog(std::string &text);
 
 	CProductDescriptionForClient &getDescFile() { return DescFile; }
 
@@ -284,7 +288,7 @@ private:
 	friend class CPatchThreadDownloadProgress;
 
 	// Set the thread state (called by threads to let us know what they are doing)
-	void setState (bool bOutputToLog, const ucstring &ucsState);
+	void setState (bool bOutputToLog, const std::string &ucsState);
 	void touchState();
 
 	/// Get the version of the server given during init()
@@ -330,7 +334,7 @@ private:
 	// add a file to the scan data log
 	void addDataScanLogCorruptedFile(const SFileToPatch &ftp);
 	void clearDataScanLog();
-	static void getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTranslate);
+	static void getCorruptedFileInfo(const SFileToPatch &ftp, std::string &sTranslate);
 
 	static bool downloadAndUnpack(const std::string& patchPath, const std::string& sourceFilename, const std::string& extractPath, const std::string& tmpDirectory, uint32 timestamp);
 	// Forward message to Installation Software
@@ -404,7 +408,7 @@ private:
 	std::vector<SFileToPatch>		FilesToPatch;
 	std::vector<std::string>		OptionalCat;
 
-	ucstring						_ErrorMessage;
+	std::string						_ErrorMessage;
 
 	// Threads
 	CPatchThread	*PatchThread;
@@ -417,8 +421,8 @@ private:
 	// State
 	struct CState
 	{
-		ucstring					State;
-		std::vector<ucstring>		StateLog;
+		std::string					State;
+		std::vector<std::string>		StateLog;
 		bool						StateChanged;
 		CState()
 		{
@@ -470,7 +474,7 @@ private:
 	bool _StartRyzomAtEnd;
 public:
 	// used by threads to signal error at the end of execution
-	void setErrorMessage(const ucstring &message);
+	void setErrorMessage(const std::string &message);
 };
 
 /**
@@ -489,9 +493,9 @@ public:
 
 public:
 
-	bool		Ended;					// true if the thread have ended
-	bool		CheckOk;				// true if the check is good
-	bool		StopAsked;
+	NLMISC::CAtomicBool Ended; // true if the thread have ended
+	bool CheckOk; // true if the check is good
+	NLMISC::CAtomicBool StopAsked;
 
 	int TotalFileToCheck;
 	int CurrentFileChecked;
@@ -515,9 +519,9 @@ class CPatchThread : public NLMISC::IRunnable
 
 public:
 
-	bool		Ended;					// true if the thread have ended the patch
-	bool		PatchOk;				// true if the patch was good
-	bool		StopAsked;
+	NLMISC::CAtomicBool Ended; // true if the thread have ended the patch
+	bool PatchOk; // true if the patch was good
+	NLMISC::CAtomicBool StopAsked;
 
 public:
 
@@ -588,10 +592,10 @@ public:
 public:
 
 	// Written by MainThread, read by thread
-	bool		AskForCancel;			// true if the main thread ask to cancel the task
+	NLMISC::CAtomicBool AskForCancel; // true if the main thread ask to cancel the task
 
 	// Written by thread, read by Main Thread
-	bool		Ended;					// true if the thread have ended
+	NLMISC::CAtomicBool Ended; // true if the thread have ended
 	bool		CheckOk;				// true if the check is good
 	int			TotalFileToScan;
 	int			CurrentFileScanned;

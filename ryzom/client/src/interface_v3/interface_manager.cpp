@@ -1,8 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2023  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011  Robert TIMM (rti) <mail@rtti.de>
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -75,6 +75,7 @@
 #include "group_skills.h"
 #include "group_compas.h"
 #include "nel/gui/group_html.h"
+#include <nel/gui/url_parser.h>
 
 // Misc
 #include "../input.h"
@@ -310,12 +311,12 @@ public:
 
 class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
 {
-	bool getString( uint32 stringId, ucstring &result )
+	bool getString( uint32 stringId, string &result )
 	{
 		return STRING_MANAGER::CStringManagerClient::instance()->getString( stringId, result );
 	}
 
-	bool getDynString( uint32 dynStringId, ucstring &result )
+	bool getDynString( uint32 dynStringId, string &result )
 	{
 		return STRING_MANAGER::CStringManagerClient::instance()->getDynString( dynStringId, result );
 	}
@@ -324,112 +325,119 @@ class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
 class CRyzomTextFormatter : public CViewTextFormated::IViewTextFormatter
 {
 public:
-	ucstring formatString( const ucstring &inputString, const ucstring &paramString )
+	std::string formatString( const std::string &inputString, const std::string &paramString )
 	{
-		ucstring formatedResult;
+		std::string formatedResult;
 
 		// Apply the format
-		for(ucstring::const_iterator it = inputString.begin(); it != inputString.end();)
+		for(std::string::const_iterator it = inputString.begin(); it != inputString.end();)
 		{
 			if (*it == '$')
 			{
 				++it;
 				if (it == inputString.end())
+				{
+					formatedResult += '$';
+					--it;
 					break;
+				}
 
 				switch(*it)
 				{
 				case 't': // add text ID
+				{
 					formatedResult += paramString;
 					break;
-
+				}
 				case 'P':
 				case 'p':  // add player name
-					if (ClientCfg.Local)
+				{
+					if (ClientCfg.Local || !UserEntity)
 					{
-						formatedResult += ucstring("player");
+						if (*it == 'P') formatedResult += "PLAYER";
+						else formatedResult += "Player";
 					}
 					else
 					{
-						if(UserEntity)
-						{
-							ucstring name = UserEntity->getEntityName();
-							if (*it == 'P') setCase(name, CaseUpper);
-							formatedResult += name;
-						}
+						std::string name = UserEntity->getEntityName();
+						if (*it == 'P') name = toUpper(name);
+						formatedResult += name;
 					}
 					break;
-					//
+				}
 				case 's':
 				case 'b': // add bot name
+				{
+					string botName;
+					bool womanTitle = false;
+					if (ClientCfg.Local)
 					{
-						ucstring botName;
-						bool womanTitle = false;
-						if (ClientCfg.Local)
+						botName = "NPC";
+					}
+					else
+					{
+						CLFECOMMON::TCLEntityId trader = CLFECOMMON::INVALID_SLOT;
+						if(UserEntity)
+							trader = UserEntity->trader();
+						if (trader != CLFECOMMON::INVALID_SLOT)
 						{
-							botName = ucstring("NPC");
-						}
-						else
-						{
-							CLFECOMMON::TCLEntityId trader = CLFECOMMON::INVALID_SLOT;
-							if(UserEntity)
-								trader = UserEntity->trader();
-							if (trader != CLFECOMMON::INVALID_SLOT)
+							CEntityCL *entity = EntitiesMngr.entity(trader);
+							if (entity != NULL)
 							{
-								CEntityCL *entity = EntitiesMngr.entity(trader);
-								if (entity != NULL)
+								uint32 nDBid = entity->getNameId();
+								if (nDBid != 0)
 								{
-									uint32 nDBid = entity->getNameId();
-									if (nDBid != 0)
-									{
-										STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-										pSMC->getString(nDBid, botName);
-									}
-									else
-									{
-										botName = entity->getDisplayName();
-									}
-									CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
-									if (pChar != NULL)
-										womanTitle = pChar->getGender() == GSGENDER::female;
+									STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
+									pSMC->getString(nDBid, botName);
 								}
+								else
+								{
+									botName = entity->getDisplayName();
+								}
+								CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
+								if (pChar != NULL)
+									womanTitle = pChar->getGender() == GSGENDER::female;
 							}
 						}
-						// get the title translated
-						ucstring sTitleTranslated = botName;
-						CStringPostProcessRemoveName spprn;
-						spprn.Woman = womanTitle;
-						spprn.cbIDStringReceived(sTitleTranslated);
-
-						botName = CEntityCL::removeTitleAndShardFromName(botName);
-
-						// short name (with no title such as 'guard', 'merchant' ...)
-						if (*it == 's')
-						{
-							// But if there is no name, display only the title
-							if (botName.empty())
-								botName = sTitleTranslated;
-						}
-						else
-						{
-							// Else we want the title !
-							if (!botName.empty())
-								botName += " ";
-							botName += sTitleTranslated;
-						}
-
-						formatedResult += botName;
 					}
+					// get the title translated
+					string sTitleTranslated = botName; // FIXME: UTF-8
+					CStringPostProcessRemoveName spprn;
+					spprn.Woman = womanTitle;
+					spprn.cbIDStringReceived(sTitleTranslated);
+
+					botName = CEntityCL::removeTitleAndShardFromName(botName);
+
+					// short name (with no title such as 'guard', 'merchant' ...)
+					if (*it == 's')
+					{
+						// But if there is no name, display only the title
+						if (botName.empty())
+							botName = sTitleTranslated;
+					}
+					else
+					{
+						// Else we want the title !
+						if (!botName.empty())
+							botName += " ";
+						botName += sTitleTranslated;
+					}
+
+					formatedResult += botName;
 					break;
-					default:
-						formatedResult += (ucchar) '$';
+				}
+				default:
+				{
+					formatedResult += '$';
+					--it;
 					break;
+				}
 				}
 				++it;
 			}
 			else
 			{
-				formatedResult += (ucchar) *it;
+				formatedResult += *it;
 				++it;
 			}
 		}
@@ -451,6 +459,13 @@ CInterfaceManager* CInterfaceManager::getInstance()
 	return _Instance;
 }
 
+void setGroupHTMLWebServer(const std::string &webServer)
+{
+	CUrlParser uri(webServer);
+	CGroupHTML::options.webServer = webServer;
+	CGroupHTML::options.webServerDomain = uri.host;
+}
+
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::CInterfaceManager()
 {
@@ -458,6 +473,10 @@ CInterfaceManager::CInterfaceManager()
 	CWidgetManager::getInstance()->registerOnWidgetsDrawnHandler( new CDrawDraggedSheet() );
 
 	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
+
+	parser->clearFeatureFlags();
+	for (size_t i = 0; i < ClientCfg.UiFeatureFlags.size(); ++i)
+		parser->addFeatureFlag(ClientCfg.UiFeatureFlags[i]);
 
 	parser->setSetupOptionsCallback( this );
 	parser->addModule( "scene3d", new CIF3DSceneParser() );
@@ -495,6 +514,7 @@ CInterfaceManager::CInterfaceManager()
 	_LastInGameScreenW = _LastInGameScreenH = 0;
 	_InterfaceScaleChanged = false;
 	_InterfaceScale = 1.0f;
+	_InterfaceScaleAuto = false;
 	_DescTextTarget = NULL;
 	_ConfigLoaded = false;
 	_LogState = false;
@@ -790,6 +810,7 @@ void CInterfaceManager::initOutGame()
 	}
 	//NLMEMORY::CheckHeap (true);
 
+#ifdef RYZOM_FORGE
 	// Initialize the web browser
 	{
 		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>( CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
@@ -800,6 +821,7 @@ void CInterfaceManager::initOutGame()
 			pGH->browse(ClientCfg.PatchletUrl.c_str());
 		}
 	}
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -983,6 +1005,15 @@ void CInterfaceManager::initInGame()
 	CMacroCmdManager::getInstance()->initInGame();
 
 	{
+		// Before loadInterfaceConfig(), CViewRenderer needs to know correct scale, because CWidgetManager asks it.
+		// Usually set in CInterfaceManager::drawViews(), but then its too late for loadInterfaceConfig()
+		if (ClientCfg.InterfaceScaleAuto)
+			CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+		else
+			CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+	}
+
+	{
 		H_AUTO( RZUpdAll )
 
 		CWidgetManager::getInstance()->updateAllLocalisedElements(); // To init all things
@@ -1062,8 +1093,6 @@ void CInterfaceManager::initInGame()
 	{
 		displaySystemInfo(CI18N::get("uiLogTurnedOff"));
 	}
-
-	startWebIgNotificationThread();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1137,7 +1166,7 @@ void CInterfaceManager::configureQuitDialogBox()
 				eltEdit->setActive(false);
 
 				if (eltCancel)
-					(safe_cast<CCtrlTextButton*>(eltCancel))->setText(sessionOwner ? CI18N::get("uittQuitCancel") : CI18N::get("uittQuitCancelEditor"));
+					(safe_cast<CCtrlTextButton*>(eltCancel))->setText(R2::getEditor().getMode() != R2::CEditor::EditionMode ? CI18N::get("uittQuitCancel") : CI18N::get("uittQuitCancelEditor"));
 			}
 		}
 
@@ -1317,8 +1346,6 @@ void CInterfaceManager::uninitInGame0 ()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::uninitInGame1 ()
 {
-	stopWebIgNotificationThread();
-
 	// release Bar Manager (HP, SAP etc... Bars)
 	CBarManager::getInstance()->releaseInGame();
 
@@ -1520,7 +1547,7 @@ void CInterfaceManager::updateFrameEvents()
 		if ((T0 - _UpdateWeatherTime) > (1 * 3 * 1000))
 		{
 			_UpdateWeatherTime = T0;
-			ucstring str =	CI18N::get ("uiTheSeasonIs") +
+			string str =	CI18N::get ("uiTheSeasonIs") +
 							CI18N::get ("uiSeason"+toStringEnum(computeCurrSeason())) +
 							CI18N::get ("uiAndTheWeatherIs") +
 							CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName) +
@@ -1535,7 +1562,7 @@ void CInterfaceManager::updateFrameEvents()
 			CCtrlBase *pTooltip= dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather_tt"));
 			if (pTooltip != NULL)
 			{
-				ucstring tt =	toString("%02d", WeatherManager.getNextWeatherHour()) + CI18N::get("uiMissionTimerHour") +
+				string tt =	toString("%02d", WeatherManager.getNextWeatherHour()) + CI18N::get("uiMissionTimerHour") +
 								" - " + CI18N::get("uiHumidity") + " " +
 								toString("%d", (uint)(roundWeatherValue(WeatherManager.getNextWeatherValue()) * 100.f)) + "%";
 				pTooltip->setDefaultContextHelp(tt);
@@ -1598,9 +1625,13 @@ void CInterfaceManager::updateFrameEvents()
 	// handle gc for lua
 	CLuaManager::getInstance().getLuaState()->handleGC();
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().update();
+#endif
 
+#ifdef RYZOM_FORGE
 	CItemGroupManager::getInstance()->update();
+#endif
 
 }
 
@@ -1890,9 +1921,13 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		// NB: we are typically InGame here (even though the _InGame flag is not yet set)
 		// Use the screen size of the config file. Don't update current UI, just _Modes
 		//
-		// ClientCfg has W/H set to screen size, but interface expects scaled size
-		sint32 scaledW = ClientCfg.Width / ClientCfg.InterfaceScale;
-		sint32 scaledH = ClientCfg.Height / ClientCfg.InterfaceScale;
+		uint32 width, height;
+		// get non-scaled width/height
+		Driver->getWindowSize(width, height);
+		// convert to (auto)scaled width/height for ui
+		float scale = CViewRenderer::getInstance()->getInterfaceScale();
+		sint32 scaledW = width / scale;
+		sint32 scaledH = height / scale;
 		CWidgetManager::getInstance()->moveAllWindowsToNewScreenSize(scaledW, scaledH, false);
 		updateDesktops(scaledW, scaledH);
 	}
@@ -2203,7 +2238,11 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	// scale must be updated right before widget manager checks it
 	if (_InterfaceScaleChanged)
 	{
-		CViewRenderer::getInstance()->setInterfaceScale(_InterfaceScale);
+		if (_InterfaceScaleAuto)
+			CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+		else
+			CViewRenderer::getInstance()->setInterfaceScale(_InterfaceScale);
+
 		_InterfaceScaleChanged = false;
 	}
 
@@ -2302,7 +2341,7 @@ void CInterfaceManager::addServerString (const std::string &sTarget, uint32 id, 
 	if (id == 0)
 	{
 		CInterfaceExprValue val;
-		val.setUCString (ucstring(""));
+		val.setString (std::string());
 		CInterfaceLink::setTargetProperty (sTarget, val);
 		return;
 	}
@@ -2320,7 +2359,7 @@ void CInterfaceManager::addServerID (const std::string &sTarget, uint32 id, IStr
 	if (id == 0)
 	{
 		CInterfaceExprValue val;
-		val.setUCString (ucstring(""));
+		val.setString (std::string());
 		CInterfaceLink::setTargetProperty (sTarget, val);
 		return;
 	}
@@ -2340,7 +2379,7 @@ void CInterfaceManager::processServerIDString()
 	for (uint32 i = 0; i < _IDStringWaiters.size(); ++i)
 	{
 		bool bAffect = false;
-		ucstring ucstrToAffect;
+		string ucstrToAffect;
 		SIDStringWaiter *pISW = _IDStringWaiters[i];
 		if (pISW->IdOrString == true) // ID !
 		{
@@ -2366,8 +2405,7 @@ void CInterfaceManager::processServerIDString()
 
 			if (bValid)
 			{
-				ucstrToAffect = STRING_MANAGER::CStringManagerClient::getLocalizedName(ucstrToAffect);
-				val.setUCString (ucstrToAffect);
+				val.setString (ucstrToAffect);
 				CInterfaceLink::setTargetProperty (pISW->Target, val);
 			}
 
@@ -2380,7 +2418,7 @@ void CInterfaceManager::processServerIDString()
 }
 
 // ------------------------------------------------------------------------------------------------
-void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const ucstring &text, const string &masterGroup, TCaseMode caseMode)
+void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const string &text, const string &masterGroup, TCaseMode caseMode)
 {
 	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup));
 	CViewText		*viewText= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup + ":text"));
@@ -2397,14 +2435,14 @@ void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const ucst
 }
 
 // ------------------------------------------------------------------------------------------------
-void	CInterfaceManager::messageBox(const ucstring &text, const string &masterGroup, TCaseMode caseMode)
+void	CInterfaceManager::messageBox(const string &text, const string &masterGroup, TCaseMode caseMode)
 {
 	messageBoxInternal("message_box", text, masterGroup, caseMode);
 }
 
 
 // ------------------------------------------------------------------------------------------------
-void CInterfaceManager::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup,
+void CInterfaceManager::messageBoxWithHelp(const std::string &text, const std::string &masterGroup,
 										   const std::string &ahOnOk, const std::string &paramsOnOk,
 										   TCaseMode caseMode)
 {
@@ -2426,7 +2464,7 @@ void CInterfaceManager::messageBoxWithHelp(const ucstring &text, const std::stri
 
 
 // ------------------------------------------------------------------------------------------------
-void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const ucstring &text, const std::string &ahOnOk,
+void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const std::string &text, const std::string &ahOnOk,
 	const std::string &paramsOnOk, const std::string &ahOnCancel, const std::string &paramsOnCancel, const string &masterGroup)
 {
 	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":valid_message_box"));
@@ -2488,7 +2526,7 @@ bool	CInterfaceManager::getCurrentValidMessageBoxOnOk(string &ahOnOk, const std:
 
 
 // ***************************************************************************
-void CInterfaceManager::displayDebugInfo(const ucstring &str, TSystemInfoMode mode /*=InfoMsg*/)
+void CInterfaceManager::displayDebugInfo(const string &str, TSystemInfoMode mode /*=InfoMsg*/)
 {
 	if (PeopleInterraction.DebugInfo)
 		PeopleInterraction.ChatInput.DebugInfo.displayMessage(str, getDebugInfoColor(mode), 2);
@@ -2518,13 +2556,13 @@ NLMISC::CRGBA CInterfaceManager::getDebugInfoColor(TSystemInfoMode mode)
 }
 
 // ***************************************************************************
-void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat)
+void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 {
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
 
 
-	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLower(cat));
+	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLowerAscii(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
 	{
 		mode = it->second.Mode;
@@ -2559,7 +2597,7 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 CRGBA CInterfaceManager::getSystemInfoColor(const std::string &cat)
 {
 	CRGBA col = CRGBA::White;
-	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLower(cat));
+	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLowerAscii(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
 		col = it->second.Color;
 	return col;
@@ -2969,7 +3007,7 @@ bool CInterfaceManager::deletePlayerKeys (const std::string &playerFileIdent)
 }
 
 // ***************************************************************************
-void CInterfaceManager::log(const ucstring &str, const std::string &cat)
+void CInterfaceManager::log(const std::string &str, const std::string &cat)
 {
 	if (_LogState)
 	{
@@ -2978,10 +3016,10 @@ void CInterfaceManager::log(const ucstring &str, const std::string &cat)
 		FILE *f = nlfopen(fileName, "at");
 		if (f != NULL)
 		{
-			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpper(cat) + ") * " + str.toUtf8();
+			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpperAscii(cat) + ") * " + str;
 			fprintf(f, "%s\n", finalString.c_str());
+			fclose(f);
 		}
-		fclose(f);
 	}
 }
 
@@ -3054,7 +3092,7 @@ NLMISC_COMMAND( localCounter, "Get value of local counter", "" )
 {
 	if (args.size() != 0) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->displaySystemInfo(ucstring(toString(im->getLocalSyncActionCounter())));
+	im->displaySystemInfo(toString(im->getLocalSyncActionCounter()));
 	return true;
 }
 
@@ -3167,8 +3205,8 @@ struct CEmoteEntry
 			string::size_type pos1 = path1.find('|');
 			string::size_type pos2 = path2.find('|');
 
-			ucstring s1 = toUpper(CI18N::get(path1.substr(0, pos1)));
-			ucstring s2 = toUpper(CI18N::get(path2.substr(0, pos2)));
+			string s1 = toUpper(CI18N::get(path1.substr(0, pos1)));
+			string s2 = toUpper(CI18N::get(path2.substr(0, pos2)));
 
 			sint result = s1.compare(s2);
 			if (result != 0)
@@ -3186,14 +3224,14 @@ struct CEmoteEntry
 	}
 };
 
-static bool translateEmote(const std::string &id, ucstring &translatedName, std::string &commandName, std::string &commandNameAlt)
+static bool translateEmote(const std::string &id, std::string &translatedName, std::string &commandName, std::string &commandNameAlt)
 {
 	if (CI18N::hasTranslation(id))
 	{
 		translatedName = CI18N::get(id);
 
 		// convert command to utf8 since emote translation can have strange chars
-		commandName = toLower(translatedName).toUtf8();
+		commandName = toLower(translatedName);
 
 		// replace all spaces by _
 		while (strFindReplace(commandName, " ", "_"));
@@ -3292,7 +3330,7 @@ void CInterfaceManager::initEmotes()
 		CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
 		nlassert(pMenu);
 
-		ucstring sTranslatedName;
+		std::string sTranslatedName;
 		std::string sCommandName;
 		std::string sCommandNameAlt;
 
@@ -3336,7 +3374,7 @@ void CInterfaceManager::initEmotes()
 					translateEmote(sTmp, sTranslatedName, sCommandName, sCommandNameAlt);
 
 					// Create a line
-					pMenu->addLine (sTranslatedName + " (/" + ucstring::makeFromUtf8(sCommandName) + ")", "emote",
+					pMenu->addLine (sTranslatedName + " (/" + sCommandName + ")", "emote",
 						"nb="+toString(nEmoteNb)+"|behav="+toString(nBehav), sTmp);
 				}
 			}
@@ -3392,7 +3430,7 @@ void CInterfaceManager::initEmotes()
 					{
 						// Yeah that's a quick emote too; set command
 						pMenu->addLineAtIndex (i,
-								"@{FFFF}/" + ucstring::makeFromUtf8(sCommandName),
+								"@{FFFF}/" + sCommandName,
 								"emote", "nb="+toString(nEmoteNb)+"|behav="+toString(nBehav),
 								"", "", "", false, false, true);
 
@@ -4040,11 +4078,11 @@ char* CInterfaceManager::getTimestampHuman(const char* format /* "[%H:%M:%S] " *
  *
  * All \d's in default parameter remove a following character.
  */
-bool CInterfaceManager::parseTokens(ucstring& ucstr)
+bool CInterfaceManager::parseTokens(string& ucstr)
 {
-	ucstring str = ucstr;
-	ucstring start_token("$");
-	ucstring end_token("$");
+	string str = ucstr;
+	string start_token("$");
+	string end_token("$");
 	size_t start_pos = 0;
 	size_t end_pos = 1;
 
@@ -4061,8 +4099,8 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		// Get the whole token substring first
 		end_pos = str.find(end_token, start_pos + 1);
 
-		if ((start_pos == ucstring::npos) ||
-			(end_pos   == ucstring::npos) ||
+		if ((start_pos == string::npos) ||
+			(end_pos   == string::npos) ||
 			(end_pos   <= start_pos + 1))
 		{
 			// Wrong formatting; give up on this one.
@@ -4080,19 +4118,19 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 			continue;
 		}
 
-		ucstring token_whole = str.luabind_substr(start_pos, end_pos - start_pos + 1);
-		ucstring token_string = token_whole.luabind_substr(1, token_whole.length() - 2);
-		ucstring token_replacement = token_whole;
-		ucstring token_default = token_whole;
+		string token_whole = str.substr(start_pos, end_pos - start_pos + 1);
+		string token_string = token_whole.substr(1, token_whole.length() - 2);
+		string token_replacement = token_whole;
+		string token_default = token_whole;
 
-		ucstring token_subject;
-		ucstring token_param;
+		string token_subject;
+		string token_param;
 
 		// Does the token have a parameter?
 		// If not it is 'name' by default
-		vector<ucstring> token_vector;
-		vector<ucstring> param_vector;
-		splitUCString(token_string, ucstring("."), token_vector);
+		vector<string> token_vector;
+		vector<string> param_vector;
+		splitString(token_string, ".", token_vector);
 		if (token_vector.empty())
 		{
 			// Wrong formatting; give up on this one.
@@ -4102,23 +4140,23 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		token_subject = token_vector[0];
 		if (token_vector.size() == 1)
 		{
-			splitUCString(token_subject, ucstring("/"), param_vector);
-			token_subject = !param_vector.empty() ? param_vector[0] : ucstring("");
-			token_param = ucstring("name");
+			splitString(token_subject, "/", param_vector);
+			token_subject = !param_vector.empty() ? param_vector[0] : string();
+			token_param = string("name");
 		}
 		else if (token_vector.size() > 1)
 		{
 			token_param = token_vector[1];
-			if (token_param.luabind_substr(0, 3) != ucstring("gs("))
+			if (token_param.substr(0, 3) != "gs(")
 			{
-				splitUCString(token_vector[1], ucstring("/"), param_vector);
-				token_param = !param_vector.empty() ? param_vector[0] : ucstring("");
+				splitString(token_vector[1], "/", param_vector);
+				token_param = !param_vector.empty() ? param_vector[0] : string();
 			}
 		}
 
 		// Get any default value, if not gs
 		sint extra_replacement = 0;
-		if (token_param.luabind_substr(0, 3) != ucstring("gs("))
+		if (token_param.substr(0, 3) != "gs(")
 		{
 			if (param_vector.size() == 2)
 			{
@@ -4126,9 +4164,9 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 				token_replacement = param_vector[1];
 				// Delete following chars for every '\d' in default
 				string::size_type token_replacement_pos;
-				while ((token_replacement_pos = token_replacement.find(ucstring("\\d"))) != string::npos)
+				while ((token_replacement_pos = token_replacement.find(string("\\d"))) != string::npos)
 				{
-					token_replacement.replace(token_replacement_pos, 2, ucstring(""));
+					token_replacement.replace(token_replacement_pos, 2, string());
 					extra_replacement++;
 				}
 				token_default = token_replacement;
@@ -4137,17 +4175,17 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 
 		CEntityCL *pTokenSubjectEntity = NULL;
 
-		if (token_subject == ucstring("me"))
+		if (token_subject == "me")
 		{
 			pTokenSubjectEntity = static_cast<CEntityCL*>(UserEntity);
 		}
-		else if (token_subject == ucstring("t"))
+		else if (token_subject == "t")
 		{
 			// Target
 			uint targetSlot = UserEntity->targetSlot();
 			pTokenSubjectEntity = EntitiesMngr.entity(targetSlot);
 		}
-		else if (token_subject == ucstring("tt"))
+		else if (token_subject == "tt")
 		{
 			// Target's target
 			uint targetSlot = UserEntity->targetSlot();
@@ -4165,11 +4203,11 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 			}
 		}
 		else if ((token_subject.length() == 3) &&
-			     (token_subject.luabind_substr(0, 2) == ucstring("tm")))
+			     (token_subject.substr(0, 2) == "tm"))
 		{
 			// Teammate
 			uint indexInTeam = 0;
-			fromString(token_subject.luabind_substr(2, 1).toString(), indexInTeam);
+			fromString(token_subject.substr(2, 1), indexInTeam);
 
 			// Make 0-based
 			--indexInTeam;
@@ -4205,9 +4243,9 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		if (pTokenSubjectEntity != NULL)
 		{
 			// Parse the parameter
-			if (token_param == ucstring("name"))
+			if (token_param == "name")
 			{
-				ucstring name = pTokenSubjectEntity->getDisplayName();
+				string name = pTokenSubjectEntity->getDisplayName();
 				// special case where there is only a title, very rare case for some NPC
 				if (name.empty())
 				{
@@ -4215,12 +4253,12 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 				}
 				token_replacement = name.empty() ? token_replacement : name;
 			}
-			else if (token_param == ucstring("title"))
+			else if (token_param == "title")
 			{
-				ucstring title = pTokenSubjectEntity->getTitle();
+				string title = pTokenSubjectEntity->getTitle();
 				token_replacement = title.empty() ? token_replacement : title;
 			}
-			else if (token_param == ucstring("race"))
+			else if (token_param == "race")
 			{
 				CCharacterCL *pC = dynamic_cast<CCharacterCL*>(pTokenSubjectEntity);
 				if (pC)
@@ -4228,27 +4266,27 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 					EGSPD::CPeople::TPeople race = pC->people();
 					if (race >= EGSPD::CPeople::Playable && race <= EGSPD::CPeople::EndPlayable)
 					{
-						ucstring srace = NLMISC::CI18N::get("io" + EGSPD::CPeople::toString(race));
+						string srace = NLMISC::CI18N::get("io" + EGSPD::CPeople::toString(race));
 						token_replacement = srace.empty() ? token_replacement : srace;
 					}
 				}
 			}
-			else if (token_param == ucstring("guild"))
+			else if (token_param == "guild")
 			{
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring ucGuildName;
+				string ucGuildName;
 				if (pSMC->getString(pTokenSubjectEntity->getGuildNameID(), ucGuildName))
 				{
 					token_replacement = ucGuildName.empty() ? token_replacement : ucGuildName;
 				}
 			}
-			else if (token_param.luabind_substr(0, 3) == ucstring("gs(") &&
-				token_param.luabind_substr(token_param.length() - 1 , 1) == ucstring(")"))
+			else if (token_param.substr(0, 3) == "gs(" &&
+				token_param.substr(token_param.length() - 1 , 1) == ")")
 			{
 				// Gender string
-				vector<ucstring> strList;
-				ucstring gender_string = token_param.luabind_substr(3, token_param.length() - 4);
-				splitUCString(gender_string, ucstring("/"), strList);
+				vector<string> strList;
+				string gender_string = token_param.substr(3, token_param.length() - 4);
+				splitString(gender_string, "/", strList);
 
 				if (strList.size() <= 1)
 				{
@@ -4277,8 +4315,8 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		{
 			// Nothing to replace; show message and exit
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			ucstring message = ucstring(CI18N::get("uiUntranslatedToken"));
-			message.replace(message.find(ucstring("%s")), 2, token_whole);
+			string message = CI18N::get("uiUntranslatedToken");
+			message.replace(message.find("%s"), 2, token_whole);
 			im->displaySystemInfo(message);
 			return false;
 		}

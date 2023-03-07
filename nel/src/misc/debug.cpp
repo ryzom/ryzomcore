@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2015  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -279,7 +279,7 @@ void _assertex_stop_0(bool &ignoreNextTime, sint line, const char *file, const c
 		NLMISC::DefaultMsgBoxDisplayer->IgnoreNextTime = ignoreNextTime;
 	else if(!INelContext::getInstance().getNoAssert())
 		INelContext::getInstance().setDebugNeedAssert(true);
-	NLMISC::AssertLog->setPosition (line, file, funcName);
+	NLMISC::CSetLogPosition logPos__(NLMISC::AssertLog, line, file, funcName);
 	if(exp)		NLMISC::AssertLog->displayNL ("\"%s\" ", exp);
 	else		NLMISC::AssertLog->displayNL ("STOP");
 }
@@ -807,6 +807,8 @@ public:
 
 		DWORD symSize = 10000;
 		PIMAGEHLP_SYMBOL  sym = (PIMAGEHLP_SYMBOL) GlobalAlloc (GMEM_FIXED, symSize);
+		if (!sym) return str;
+
 		::ZeroMemory (sym, symSize);
 		sym->SizeOfStruct = symSize;
 		sym->MaxNameLength = symSize - sizeof(IMAGEHLP_SYMBOL);

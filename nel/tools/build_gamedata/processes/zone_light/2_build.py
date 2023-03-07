@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Build zone_light
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -68,7 +68,8 @@ else:
 		destFile = destDir + "/" + file[0:-len(".zonew")] + ".zonel"
 		if (needUpdateLogRemoveDest(log, srcFile, destFile)):
 			dependFile = dependDir + "/" + file[0:-len(".zonew")] + ".depend"
-			subprocess.call([ ExecTimeout, str(ZoneLightBuildTimeout), ZoneLighter, srcFile, destFile, ActiveProjectDirectory + "/generated/properties.cfg", dependFile ])
+			callParallelProcess([ ExecTimeout, str(ZoneLightBuildTimeout), ZoneLighter, srcFile, destFile, ActiveProjectDirectory + "/generated/properties.cfg", dependFile ])
+	flushParallelProcesses()
 printLog(log, "")
 
 # For each zone_light ig
@@ -94,7 +95,8 @@ else:
 			if (needUpdateLogRemoveDest(log, igsrcFile, destFile)):
 				srcFile = srcDir + "/" + file
 				dependFile = dependDir + "/" + file[0:-len(".zonel")] + ".depend"
-				subprocess.call([ ExecTimeout, str(ZoneIgLightBuildTimeout), ZoneIgLighter, srcFile, destFile, ActiveProjectDirectory + "/generated/properties.cfg", dependFile ])
+				callParallelProcess([ ExecTimeout, str(ZoneIgLightBuildTimeout), ZoneIgLighter, srcFile, destFile, ActiveProjectDirectory + "/generated/properties.cfg", dependFile ])
+	flushParallelProcesses()
 printLog(log, "")
 
 log.close()

@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -141,12 +141,12 @@ static void popupLandMarkNameDialog()
 		const CUserLandMark userLM = map->getUserLandMark(LastSelectedLandMark);
 
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(userLM.Type));
-		eb->setInputString(userLM.Title);
+		eb->setInputString(userLM.Title.toUtf8());
 	}
 	else
 	{
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(CUserLandMark::Misc));
-		eb->setInputString(ucstring());
+		eb->setInputString(string());
 	}
 
 	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
@@ -1176,7 +1176,7 @@ void CGroupMap::checkCoords()
 			// update text if needed
 			if (!_MissionTargetTextReceived[k])
 			{
-				ucstring result;
+				string result;
 				if (STRING_MANAGER::CStringManagerClient::instance()->getDynString(_MissionTargetTextIDs[k], result))
 				{
 					_MissionLM[k]->setDefaultContextHelp(result);
@@ -1218,81 +1218,41 @@ void CGroupMap::checkCoords()
 
 	// **** retrieve pos of respawn and update it, or hide it if there's no target
 	uint i;
-	uint offset = 0;
-
-	if (!_ArkPoints.empty())
+	if (_RespawnPos.size() < _RespawnLM.size())
 	{
-		offset = _ArkPoints.size();
-		if (_ArkPoints.size() < _RespawnLM.size())
+		for (i = (uint)_RespawnPos.size(); i < _RespawnLM.size(); i++)
 		{
-			for (i = (uint)_ArkPoints.size(); i < _RespawnLM.size(); i++)
-			{
-				delCtrl(_RespawnLM[i]);
-				_RespawnLM[i] = NULL;
-			}
-		}
-
-		_RespawnLM.resize(_ArkPoints.size(), NULL);
-		for(i = 0; i < _ArkPoints.size(); i++)
-		{
-			if (_RespawnLM[i] == NULL)
-			{
-				_RespawnLM[i] = createArkPointButton(_ArkPoints[i]);
-				_RespawnLM[i]->setId(this->getId() + ":arklm_" + NLMISC::toString(i));
-				_RespawnLM[i]->setParent(this);
-				ucstring title;
-				title.fromUtf8(_ArkPoints[i].Title);
-				_RespawnLM[i]->setDefaultContextHelp(title);
-				_RespawnLM[i]->HandleEvents = true;
-				addCtrl(_RespawnLM[i]);
-				updateLMPosFromDBPos(_RespawnLM[i], _ArkPoints[i].x, _ArkPoints[i].y);
-			}
+			delCtrl(_RespawnLM[i]);
+			_RespawnLM[i] = NULL;
 		}
 	}
-
-
-	if (_ArkPoints.empty() || !isIsland())
+	_RespawnLM.resize(_RespawnPos.size(), NULL);
+	for(i = 0; i < _RespawnPos.size(); ++i)
 	{
-		if (offset + _RespawnPos.size() < _RespawnLM.size())
+		if (_RespawnLM[i] == NULL)
 		{
-			for (i = offset + _RespawnPos.size(); i < _RespawnLM.size(); i++)
+			_RespawnLM[i] = createLandMarkButton(_RespawnLMOptions);
+			_RespawnLM[i]->setId(this->getId() + ":rplm_" + NLMISC::toString(i));
+			_RespawnLM[i]->setParent(this);
+			if (_MapMode == MapMode_SpawnSquad)
+				_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiSquadSpawnPoint") + NLMISC::toString(" %u", i+1));
+			else
 			{
-				delCtrl(_RespawnLM[i]);
-				_RespawnLM[i] = NULL;
-			}
-		}
-
-		_RespawnLM.resize(offset + _RespawnPos.size(), NULL);
-		for(int j = 0; j < _RespawnPos.size(); ++j)
-		{
-			i = offset + j;
-			if (_RespawnLM[i] == NULL)
-			{
-				_RespawnLM[i] = createLandMarkButton(_RespawnLMOptions);
-				_RespawnLM[i]->setId(this->getId() + ":rplm_" + NLMISC::toString(i));
-				_RespawnLM[i]->setParent(this);
-				if (_MapMode == MapMode_SpawnSquad)
-					_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiSquadSpawnPoint") + NLMISC::toString(" %u", i+1));
+				if (isIsland())
+				{
+					_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiR2EntryPoint"));
+				}
 				else
 				{
-					if (isIsland())
-					{
-						_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiR2EntryPoint"));
-					}
-					else
-					{
-						_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiRespawnPoint"));
-					}
-					_RespawnLM[i]->HandleEvents = R2::getEditor().getMode() != R2::CEditor::EditionMode;
+					_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiRespawnPoint"));
 				}
-				addCtrl(_RespawnLM[i]);
+				_RespawnLM[i]->HandleEvents = R2::getEditor().getMode() != R2::CEditor::EditionMode;
 			}
-			if (_RespawnLM[i])
-				updateLMPosFromDBPos(_RespawnLM[i], _RespawnPos[j].x, _RespawnPos[j].y);
+			addCtrl(_RespawnLM[i]);
 		}
+		if (_RespawnLM[i])
+			updateLMPosFromDBPos(_RespawnLM[i], _RespawnPos[i].x, _RespawnPos[i].y);
 	}
-
-
 	if ((_MapMode == MapMode_Death) || (_MapMode == MapMode_SpawnSquad))
 	{
 		if (_RespawnPosReseted)
@@ -1403,12 +1363,12 @@ void CGroupMap::checkCoords()
 				CInterfaceManager *im = CInterfaceManager::getInstance();
 				uint32 val = NLGUI::CDBManager::getInstance()->getDbProp(NLMISC::toString("SERVER:GROUP:%d:NAME",i))->getValue32();
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring res;
+				string res;
 
-				if (pSMC->getString(val,res))
+				if (pSMC->getString(val, res))
 				{
-						res = CEntityCL::removeTitleAndShardFromName(res);
-						_TeammateLM[i]->setDefaultContextHelp(res);
+						std::string res2 = CEntityCL::removeTitleAndShardFromName(res);
+						_TeammateLM[i]->setDefaultContextHelp(res2);
 				}
 			}
 			updateLMPosFromDBPos(_TeammateLM[i], px, py);
@@ -1648,7 +1608,7 @@ void CGroupMap::draw()
 
 	if (_FrustumView)
 	{
-		if (getArkPowoMode() == "editor" || R2::getEditor().getMode() == R2::CEditor::EditionMode)
+		if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
 		{
 			static volatile bool wantFrustum = true;
 			if (wantFrustum)
@@ -1696,7 +1656,7 @@ void CGroupMap::draw()
 
 	Driver->setScissor(newScissor);
 
-	if (getArkPowoMode() == "editor" || R2::getEditor().getMode() != R2::CEditor::EditionMode)
+	if (R2::getEditor().getMode() != R2::CEditor::EditionMode)
 	{
 		// Draw the player TODO : replace with a CViewQuad
 		if (!_PlayerPosLoadFailure)
@@ -1737,7 +1697,7 @@ void CGroupMap::draw()
 	// draw border of frustum
 	if (_FrustumView)
 	{
-		if (getArkPowoMode() == "editor" || R2::getEditor().getMode() == R2::CEditor::EditionMode)
+		if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
 		{
 			if (_FrustumMaterial.empty())
 			{
@@ -2285,19 +2245,6 @@ void CGroupMap::setMap(SMap *map)
 	invalidateCoords();
 	createContinentLandMarks();
 
-	nlinfo("setMap (%f,%f) (%f,%f)", _CurMap->MinX, _CurMap->MinY, _CurMap->MaxX, _CurMap->MaxY);
-
-	delArkPoints();
-
-	CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:lm_events:html"));
-
-	if (groupHtml)
-	{
-		groupHtml->setHome(groupHtml->Home+toString("&min_x=%f&min_y=%f&max_x=%f&max_y=%f", _CurMap->MinX, _CurMap->MinY, _CurMap->MaxX, _CurMap->MaxY));
-		groupHtml->browse(groupHtml->Home.c_str());
-	}
-
-
 	if (_CurContinent != NULL)
 		_MapMaterial.setTexture(1, _CurContinent->FoW.Tx);
 	else
@@ -2483,7 +2430,7 @@ void CGroupMap::updateMatchedLandmarks()
 			CViewText* t = dynamic_cast<CViewText *>(g->getView("title"));
 			if (t)
 			{
-				t->setSingleLineTextFormatTaged(_MatchedLandmarks[k].Title);
+				t->setSingleLineTextFormatTaged(_MatchedLandmarks[k].Title.toUtf8());
 			}
 
 			CViewBitmap* b = dynamic_cast<CViewBitmap *>(g->getView("icon"));
@@ -2511,14 +2458,6 @@ void CGroupMap::removeLandMarks(TLandMarkButtonVect &lm)
 	lm.clear();
 }
 
-
-//============================================================================================================
-void CGroupMap::removeUserLandMarks()
-{
-	removeLandMarks(_UserLM);
-}
-
-
 //============================================================================================================
 void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 {
@@ -2532,19 +2471,19 @@ void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 		NLMISC::CVector2f mapPos;
 		worldToMap(mapPos, rCLM.Pos);
 
-		const ucstring ucsTmp(CStringManagerClient::getPlaceLocalizedName(rCLM.TitleTextID));
-		const ucstring lcTitle = toLower(ucsTmp);
+		const char *ucsTmp = CStringManagerClient::getPlaceLocalizedName(rCLM.TitleTextID);
+		const std::string lcTitle = toLower(ucsTmp);
 
 		bool searchMatch = notWorldMode && _LandmarkFilter.size() > 0 && filterLandmark(lcTitle);
 		if (searchMatch)
-			_MatchedLandmarks.push_back(SMatchedLandmark(rCLM.Pos, ucsTmp, _ContinentLMOptions));
+			_MatchedLandmarks.push_back(SMatchedLandmark(rCLM.Pos, ucstring::makeFromUtf8(ucsTmp), _ContinentLMOptions));
 
 		// Add button if not a region nor a place
 		if ((rCLM.Type != CContLandMark::Region) && (rCLM.Type != CContLandMark::Place) &&
 			(rCLM.Type != CContLandMark::Street))
 		{
 			if (rCLM.Type != CContLandMark::Stable)
-				addLandMark(_ContinentLM, mapPos, ucsTmp, _ContinentLMOptions);
+				addLandMark(_ContinentLM, mapPos, ucstring::makeFromUtf8(ucsTmp), _ContinentLMOptions);
 			else
 				addLandMark(_ContinentLM, mapPos, CI18N::get("uiStable"), _ContinentLMOptions);
 			_ContinentLM.back()->Type = rCLM.Type;
@@ -2655,9 +2594,6 @@ static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 	CInterfaceElement *ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu:teleport");
 	if(ie) ie->setActive(showTeleport);
 
-	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu_island:teleport");
-	if(ie) ie->setActive(showTeleport);
-
 	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:land_mark_menu:lmteleport");
 	if(ie) ie->setActive(showTeleport);
 
@@ -2674,9 +2610,7 @@ void CGroupMap::setLandmarkFilter(const std::string &s)
 	_LandmarkFilter.clear();
 
 	if (!s.empty()) {
-		ucstring ucs;
-		ucs.fromUtf8(s);
-		splitUCString(toLower(ucs), ucstring(" "), _LandmarkFilter);
+		splitUCString(ucstring(toLower(s)), ucstring(" "), _LandmarkFilter);
 	}
 
 	// recreate landmarks
@@ -2735,30 +2669,6 @@ CGroupMap::CLandMarkButton *CGroupMap::createLandMarkButton(const CLandMarkOptio
 	lmb->setPosRef(Hotspot_MM);
 	return lmb;
 }
-
-//============================================================================================================
-CGroupMap::CLandMarkButton *CGroupMap::createArkPointButton(const CArkPoint &point)
-{
- 	CLandMarkButton *lmb = new CLandMarkButton(CViewBase::TCtorParam());
-	static int statFool = 0;
-	lmb->setId(this->getId()+":lm"+toString(statFool++));
-	lmb->setTexture(point.Texture);
-	lmb->setTextureOver(point.Texture);
-	lmb->setTexturePushed(point.Texture);
-	lmb->setType(CCtrlButton::PushButton);
-	lmb->setActionOnLeftClick(point.LeftClickAction);
-	lmb->setParamsOnLeftClick(point.LeftClickParam);
-	lmb->setActionOnRightClick(point.RightClickAction);
-	lmb->setParamsOnRightClick(point.RightClickParam);
-	lmb->setColor(point.Color);
-	lmb->setColorOver(point.Color);
-	lmb->setColorPushed(point.Color);
-	lmb->setModulateGlobalColorAll(false);
-
-	lmb->setPosRef(Hotspot_MM);
-	return lmb;
-}
-
 //============================================================================================================
 void CGroupMap::updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOptions &options)
 {
@@ -2811,54 +2721,10 @@ void CGroupMap::addLandMark(TLandMarkButtonVect &destList, const NLMISC::CVector
 	CLandMarkButton *lmb = createLandMarkButton(options);
 	lmb->setParent(this);
 	lmb->Pos = pos;
-	lmb->setDefaultContextHelp(title);
+	lmb->setDefaultContextHelp(title.toUtf8());
 	destList.push_back(lmb);
 	addCtrl(lmb);
 }
-
-//============================================================================================================
-void CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, NLMISC::CRGBA color)
-{
-	if (_CurContinent == NULL) return;
-
-	CUserLandMark ulm;
-	mapToWorld(ulm.Pos, pos);
-	ulm.Title = title;
-	ulm.Type = 5;
-	_CurContinent->UserLandMarks.push_back(ulm);
-
-	CLandMarkOptions options(_UserLMOptions);
-	options.ColorNormal = options.ColorOver = options.ColorPushed = color;
-	// create a new button and add it to the list
-	CLandMarkButton *lmb = createLandMarkButton(options);
-	lmb->setParent(this);
-	lmb->Pos = pos;
-	lmb->setDefaultContextHelp(title);
-	_UserLM.push_back(lmb);
-	addCtrl(lmb);
-	invalidateCoords();
-}
-
-//============================================================================================================
-void CGroupMap::delArkPoints()
-{
-	for (uint i = 0; i < _RespawnLM.size(); i++)
-	{
-		delCtrl(_RespawnLM[i]);
-		_RespawnLM[i] = NULL;
-	}
-	_ArkPoints.clear();
-}
-
-//============================================================================================================
-void CGroupMap::addUserRespawnPoint(const NLMISC::CVector2f &pos)
-{
-	CRespawnPointsMsg rpm;
-	rpm.NeedToReset = false;
-	rpm.RespawnPoints.push_back(CRespawnPointsMsg::SRespawnPoint(pos.x*1000,pos.y*1000));
-	addRespawnPoints(rpm);
-}
-
 
 //============================================================================================================
 CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, const CUserLandMark::EUserLandMarkType lmType)
@@ -2937,7 +2803,7 @@ void CGroupMap::updateUserLandMark(CCtrlButton *button, const ucstring &newTitle
 			_CurContinent->UserLandMarks[k].Type =  (uint8)lmType;
 
 			updateLandMarkButton(_UserLM[k], getUserLandMarkOptions(k));
-			button->setDefaultContextHelp(newTitle);
+			button->setDefaultContextHelp(newTitle.toUtf8());
 
 			CInterfaceManager::getInstance()->saveLandmarks();
 			return;
@@ -3348,7 +3214,7 @@ void CGroupMap::targetLandmarkResult(uint32 index)
 
 	CCompassTarget ct;
 	ct.Pos = _MatchedLandmarks[index].Pos;
-	ct.Name = _MatchedLandmarks[index].Title;
+	ct.Name = _MatchedLandmarks[index].Title.toUtf8();
 	// type sets compass arrow color
 	ct.setType(CCompassTarget::UserLandMark);
 
@@ -3379,9 +3245,10 @@ CGroupMap::CLandMarkButton* CGroupMap::findClosestLandmark(const CVector2f &cent
 	closest = std::numeric_limits<float>::max();
 	for(TLandMarkButtonVect::const_iterator it = landmarks.begin(); it != landmarks.end(); ++it)
 	{
-		ucstring lc;
+		std::string lc;
 		(*it)->getContextHelp(lc);
-		if(filterLandmark(lc, keywords, startsWith)) {
+		ucstring ulc = ucstring::makeFromUtf8(lc);
+		if(filterLandmark(ulc, keywords, startsWith)) {
 			CVector2f pos;
 			mapToWorld(pos, (*it)->Pos);
 			float dist = distsqr(center, pos);
@@ -3411,7 +3278,7 @@ CGroupMap::CLandMarkText* CGroupMap::findClosestLandmark(const CVector2f &center
 	for(TLandMarkTextVect::const_iterator it = landmarks.begin(); it != landmarks.end(); ++it)
 	{
 		ucstring lc;
-		lc = (*it)->getText();
+		lc = CUtfStringView((*it)->getText()).toUtf16();
 		if(filterLandmark(lc, keywords, startsWith)) {
 			CVector2f pos;
 			mapToWorld(pos, (*it)->Pos);
@@ -3582,38 +3449,6 @@ void CGroupMap::addRespawnPoints(const CRespawnPointsMsg &rpm)
 }
 
 //=========================================================================================================
-void CGroupMap::addArkPoint(const CArkPoint &point) {
-	_ArkPoints.push_back(point);
-
-	if (_MapMode != MapMode_Death) return;
-	if (_ArkPoints.empty()) return;
-
-	CWorldSheet *pWS = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
-	if (pWS == NULL) return;
-
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	if (pIM == NULL) return;
-
-	NLMISC::CVector2f rpWorldPos(point.x * 0.001f, point.y * 0.001f);
-
-	for (uint32 i = 0; i < pWS->Maps.size(); ++i)
-	{
-		SMap &rMap = pWS->Maps[i];
-		if (rMap.ContinentName.empty()) continue;
-
-		if ((rpWorldPos.x >= rMap.MinX) &&
-			(rpWorldPos.x <= rMap.MaxX) &&
-			(rpWorldPos.y >= rMap.MinY) &&
-			(rpWorldPos.y <= rMap.MaxY))
-		{
-			setMap(rMap.Name);
-			break;
-		}
-	}
-}
-
-
-//=========================================================================================================
 void CGroupMap::serialConfig(NLMISC::IStream &f)
 {
 	sint ver = f.serialVersion(3);
@@ -3714,13 +3549,13 @@ std::string CGroupMap::getContinentName() const
 {
 	if (_CurMap == NULL) return "";
 
-	return toLower(_CurMap->ContinentName);
+	return toLowerAscii(_CurMap->ContinentName);
 }
 
 //=========================================================================================================
 std::string CGroupMap::getMapTexture() const
 {
-	return toLower(_MapTexture);
+	return toLowerAscii(_MapTexture);
 }
 
 //=========================================================================================================
@@ -3811,10 +3646,10 @@ void CGroupMap::updateClosestLandMarkMenu(const std::string &menu, const NLMISC:
 		std::string lineId = toString("%s:lmcosest%d", menu.c_str(), i);
 		std::string ahParams = toString("type=user|map=%s|index=%d", _Id.c_str(), index);
 
-		CViewTextMenu* vt = rootMenu->addLine(ucstring(""), "map_landmark_by_index", ahParams, lineId.c_str(), "", "", false, false, false);
+		CViewTextMenu* vt = rootMenu->addLine(std::string(), "map_landmark_by_index", ahParams, lineId.c_str(), "", "", false, false, false);
 		if (!vt) break;
 
-		vt->setSingleLineTextFormatTaged(name);
+		vt->setSingleLineTextFormatTaged(name.toUtf8());
 		// TODO: should calculate from mouse pos and client width
 		vt->setLineMaxW(800);
 
@@ -3882,7 +3717,7 @@ class CAHLandMarkFilter : public IActionHandler
 			CGroupEditBox* eb = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(group));
 			if (!eb) return;
 
-			text = eb->getInputString().toUtf8();
+			text = eb->getInputString();
 		}
 
 		map->setLandmarkFilter(text);
@@ -3988,7 +3823,7 @@ class CAHValidateUserLandMarkName : public IActionHandler
 			CGroupMap *map = dynamic_cast<CGroupMap *>(LastSelectedLandMark->getParent());
 			if (!map) return;
 			// update existing landmark
-			map->updateUserLandMark(LastSelectedLandMark, eb->getInputString(), landMarkType);
+			map->updateUserLandMark(LastSelectedLandMark, ucstring::makeFromUtf8(eb->getInputString()), landMarkType);
 		}
 		else
 		{
@@ -3996,11 +3831,11 @@ class CAHValidateUserLandMarkName : public IActionHandler
 			if (!LastClickedMap) return;
 			if( UseUserPositionForLandMark )
 			{
-				LastClickedMap->addUserLandMark(LastClickedMap->getPlayerPos(), eb->getInputString(), landMarkType);
+				LastClickedMap->addUserLandMark(LastClickedMap->getPlayerPos(), ucstring::makeFromUtf8(eb->getInputString()), landMarkType);
 			}
 			else
 			{
-				LastClickedMap->addUserLandMark(LastClickedMap->getRightClickLastPos(), eb->getInputString(), landMarkType);
+				LastClickedMap->addUserLandMark(LastClickedMap->getRightClickLastPos(), ucstring::makeFromUtf8(eb->getInputString()), landMarkType);
 			}
 			LastClickedMap->invalidateCoords();
 		}
@@ -4177,29 +4012,11 @@ class CAHWorldMapRightClick : public IActionHandler
 
 		if (gm->isIsland())
 		{
-			if (gm->getArkPowoMode() == "editor")
-				menu = gm->getArkPowoMapMenu();
-			else
-				menu = "ui:interface:map_menu_island";
+			menu = "ui:interface:map_menu_island";
 		}
 		else
 		{
-			if (menu.empty())
-				menu = "ui:interface:map_menu";
-
-			// update menu with closest landmarks
-			NLMISC::CVector2f pos(NLMISC::CVector2f::Null);
-			CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
-			if (button)
-				gm->getLandmarkPosition(button, pos);
-
-			if(pos == NLMISC::CVector2f::Null)
-			{
-				pos = gm->getRightClickLastPos();
-				gm->mapToWorld(pos, pos);
-			}
-
-			gm->updateClosestLandMarkMenu(menu, pos);
+			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
 		}
 
 		CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=" + menu);

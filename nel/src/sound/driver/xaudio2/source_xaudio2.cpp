@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2008-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2008-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -359,7 +359,8 @@ void CSourceXAudio2::setStreaming(bool streaming)
 		_SourceVoice->GetState(&voice_state);
 		if (!voice_state.BuffersQueued)
 		{
-			nlwarning(NLSOUND_XAUDIO2_PREFIX "Switched streaming mode while buffer still queued!?! Flush");
+			if (!_IsLooping)
+				nlwarning(NLSOUND_XAUDIO2_PREFIX "Switched streaming mode while buffer still queued!?! Flush");
 			_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
 			if (FAILED(_SourceVoice->FlushSourceBuffers())) 
 				nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
@@ -555,7 +556,7 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 	}
 	if (_SourceVoice && (bufferFormat != _Format || channels != _Channels || bitsPerSample != _BitsPerSample))
 	{
-		nlwarning(NLSOUND_XAUDIO2_PREFIX "Switching format %u to %u!", (uint32)_Format, (uint32)bufferFormat);
+		// nlwarning(NLSOUND_XAUDIO2_PREFIX "Switching format %u to %u!", (uint32)_Format, (uint32)bufferFormat);
 		// destroy existing voice
 		_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
 		_SoundDriver->destroySourceVoice(_SourceVoice); _SourceVoice = NULL;

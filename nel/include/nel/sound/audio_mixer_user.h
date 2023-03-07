@@ -1,9 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2016  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -42,7 +42,7 @@
 
 // Current version is 2, Ryzom Live uses 1
 // Provided to allow compatibility with old binary files
-#define NLSOUND_SHEET_VERSION_BUILT 1
+#define NLSOUND_SHEET_VERSION_BUILT 2
 
 namespace NLLIGO {
 	class CLigoConfig;

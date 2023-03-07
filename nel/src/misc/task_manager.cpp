@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -36,11 +39,11 @@ CTaskManager::CTaskManager() : _RunningTask (""), _TaskQueue (""), _DoneTaskQueu
 {
 	_IsTaskRunning = false;
 	_ThreadRunning = true;
+	_ChangePriorityCallback = NULL;
 	CSynchronized<string>::CAccessor currentTask(&_RunningTask);
 	currentTask.value ().clear();
-	_Thread = IThread::create(this);
+	_Thread.reset(IThread::create(this));
 	_Thread->start();
-	_ChangePriorityCallback = NULL;
 }
 
 /*
@@ -49,16 +52,19 @@ CTaskManager::CTaskManager() : _RunningTask (""), _TaskQueue (""), _DoneTaskQueu
 CTaskManager::~CTaskManager()
 {
 	_ThreadRunning = false;
-	while(!_ThreadRunning)
-		nlSleep(10);
+	try
+	{
+		_Thread->wait();
+	}
+	catch (EThread &)
+	{
+		// no exception in destructor
+	}
 
 	// There should be no remaining Tasks
 	CSynchronized<std::list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	nlassert(acces.value().empty());
-	_Thread->wait();
-	delete _Thread;
-	_Thread = NULL;
-
+	_Thread.reset(NULL);
 }
 
 // Manage TaskQueue
@@ -77,7 +83,7 @@ void CTaskManager::run(void)
 			else
 			{
 				// Update task priorities
-				changeTaskPriority ();
+				changeTaskPriority (acces);
 
 				// Get the best task
 				list<CWaitingTask> &taskList = acces.value();
@@ -124,7 +130,6 @@ void CTaskManager::run(void)
 		}
 	}
 	CBigFile::getInstance().currentThreadFinished();
-	_ThreadRunning = true;
 }
 
 // Add a task to TaskManager
@@ -225,11 +230,10 @@ uint CTaskManager::getNumWaitingTasks()
 
 // ***************************************************************************
 
-void CTaskManager::changeTaskPriority ()
+void CTaskManager::changeTaskPriority(CSynchronized<std::list<CWaitingTask>>::CAccessor &acces)
 {
 	if (_ChangePriorityCallback)
 	{
-		CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 		list<CWaitingTask> &taskList = acces.value();
 
 		list<CWaitingTask>::iterator ite = taskList.begin();

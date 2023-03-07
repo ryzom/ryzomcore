@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2010-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -327,10 +327,10 @@ int main(int argc, char **argv)
 
 	if (args.haveArg("a"))
 	{
-		std::string strAlgo = args.getArg("a").front();
+		std::string strAlgo = toLowerAscii(args.getArg("a").front());
 
 		if (strAlgo == "1")					OptAlgo = DXT1;
-		else if (toLower(strAlgo) == "1a") 	OptAlgo = DXT1A;
+		else if (strAlgo == "1a") 			OptAlgo = DXT1A;
 		else if (strAlgo == "3")			OptAlgo = DXT3;
 		else if (strAlgo == "5") 			OptAlgo = DXT5;
 		else if (strAlgo == "tga8")			OptAlgo = TGA8;

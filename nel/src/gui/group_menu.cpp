@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -129,9 +129,11 @@ namespace NLGUI
 		_SelectionView = NULL;
 		_GroupList = NULL;
 		_GroupMenu = NULL;
+		_MouseOver = -1;
 		_Selected = -1;
 		_MaxVisibleLine = -1;
 		_ScrollBar = NULL;
+		_ScrollToView = false;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -275,7 +277,7 @@ namespace NLGUI
 			if (stricmp((char*)cur->name, "action") == 0)
 			{
 				string		strId,  strAh,  strParams,  strCond, strTexture;
-				ucstring	ucstrName;
+				string	ucstrName;
 
 				if (id)		strId = (const char*)id;
 				CXMLAutoPtr name((const char*) xmlGetProp (cur,  (xmlChar*)"name"));
@@ -283,9 +285,10 @@ namespace NLGUI
 				if (name)
 				{
 					const char *ptrName = (const char*)name;
-					ucstrName = ucstring(ptrName);
-					if ((strlen(ptrName)>2) && (ptrName[0] == 'u') && (ptrName[1] == 'i'))
-						ucstrName = CI18N::get (ptrName);
+					if (NLMISC::startsWith(ptrName, "ui"))
+						ucstrName = CI18N::get(ptrName);
+					else
+						ucstrName = ptrName;
 				}
 
 				CXMLAutoPtr ah((const char*) xmlGetProp (cur,  (xmlChar*)"handler"));
@@ -588,6 +591,7 @@ namespace NLGUI
 				_GroupList->setMaxH(widgetMaxH*_MaxVisibleLine+_GroupList->getSpace()*(_MaxVisibleLine-1));
 				if (_ScrollBar == NULL)
 				{
+					_ScrollToView = true;
 					_ScrollBar = new CCtrlScroll(CViewBase::TCtorParam());
 					_ScrollBar->setParent (this);
 					_ScrollBar->setParentPos (_GroupList);
@@ -881,8 +885,8 @@ namespace NLGUI
 		_SelectionView->setH (8);
 		_SelectionView->setY (4);
 
-
-		if (_Selected != -1 && _Lines[_Selected].ViewText != NULL)
+		sint highlight = _MouseOver != -1 ? _MouseOver : _Selected;
+		if (highlight != -1 && _Lines[highlight].ViewText != NULL)
 		{
 			CRGBA col= _GroupMenu->_HighLightOver;
 
@@ -890,10 +894,20 @@ namespace NLGUI
 			_SelectionView->setModulateGlobalColor(getModulateGlobalColor());
 
 			// get refElm and refElmYReal
-			GET_REF_ELM(_Selected)
+			GET_REF_ELM(highlight)
 
 			_SelectionView->setH (refElmHReal);
 			_SelectionView->setY (refElmYReal - this->getYReal());
+		}
+
+		// initial scroll after becoming active
+		if (_ScrollBar && _ScrollToView)
+		{
+			_ScrollToView = false;
+			if (_Selected != -1 && _Lines[_Selected].ViewText != NULL)
+				_ScrollBar->ensureVisible(_Lines[_Selected].ViewText, Hotspot_Tx, Hotspot_Mx);
+			else
+				_ScrollBar->setTrackPos(_GroupList->getHReal());
 		}
 	}
 
@@ -910,12 +924,12 @@ namespace NLGUI
 			(xMouse < (_XReal + _WReal))&&
 			(yMouse > _YReal) &&
 			(yMouse <= (_YReal+ _HReal))))
-			_Selected= -1;
+			_MouseOver = -1;
 
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		// Highlight (background under the selection)
-		if (_Selected != -1)
+		if (_MouseOver != -1 || _Selected != -1)
 		{
 			// display hightlight
 			if(_GroupMenu->_HighLightOver.A > 0)
@@ -945,7 +959,7 @@ namespace NLGUI
 				}
 				else
 				{
-					if (i == _Selected) // Colors when the text is selected
+					if (i == _MouseOver) // Colors when the text is selected
 					{
 						_Lines[i].ViewText->Over = true;
 						_Lines[i].ViewText->setColor (_Lines[i].ViewText->OldColorOver);
@@ -983,7 +997,7 @@ namespace NLGUI
 		if (event.getType() == NLGUI::CEventDescriptor::mouse)
 		{
 			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
-			_Selected = -1;
+			_MouseOver = -1;
 
 			// TODO First check sub menus that can be not in the area of this menu
 
@@ -991,6 +1005,9 @@ namespace NLGUI
 				(eventDesc.getX() < (_XReal + _WReal))&&
 				(eventDesc.getY() > _YReal) &&
 				(eventDesc.getY() <= (_YReal+ _HReal))))
+				return false;
+
+			if (_ScrollBar && _ScrollBar->isIn(eventDesc.getX(), eventDesc.getY()))
 				return false;
 
 			uint32 i = 0;
@@ -1007,7 +1024,7 @@ namespace NLGUI
 						if ((eventDesc.getY() > refElmYReal) &&
 							(eventDesc.getY() <= (refElmYReal + refElmHReal + _GroupList->getSpace())))
 						{
-							_Selected = i;
+							_MouseOver = i;
 							break;
 						}
 					}
@@ -1017,16 +1034,16 @@ namespace NLGUI
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 			{
 				// If a line is selected and the line is not grayed
-				if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()))
+				if ((_MouseOver != -1) && (!_Lines[i].ViewText->getGrayed()))
 				{
 
-					CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHName,
+					CAHManager::getInstance()->runActionHandler (	_Lines[_MouseOver].AHName,
 											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
-											_Lines[_Selected].AHParams );
+											_Lines[_MouseOver].AHParams );
 
-					if (_SubMenus[_Selected] != NULL)
+					if (_SubMenus[_MouseOver] != NULL)
 					{
-						openSubMenu (_Selected);
+						openSubMenu (_MouseOver);
 					}
 					else
 					{
@@ -1045,11 +1062,11 @@ namespace NLGUI
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 			{
 				// If a line is selected and the line is not grayed and has right click action handler
-				if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()) && !_Lines[_Selected].AHRightClick.empty())
+				if ((_MouseOver != -1) && (!_Lines[i].ViewText->getGrayed()) && !_Lines[_MouseOver].AHRightClick.empty())
 				{
-					CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHRightClick,
+					CAHManager::getInstance()->runActionHandler (	_Lines[_MouseOver].AHRightClick,
 											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
-											_Lines[_Selected].AHRightClickParams );
+											_Lines[_MouseOver].AHRightClickParams );
 					return true;
 				}
 			}
@@ -1214,7 +1231,7 @@ namespace NLGUI
 
 
 	// ------------------------------------------------------------------------------------------------
-	CViewTextMenu* CGroupSubMenu::addLine (const ucstring &name,  const std::string &ah,
+	CViewTextMenu* CGroupSubMenu::addLine (const std::string &name,  const std::string &ah,
 										   const std::string &params,  const std::string &id,
 										   const std::string &cond, const std::string &texture,
 										   bool checkable /*= false*/,  bool checked /*= false*/, bool formatted /*= false */
@@ -1295,7 +1312,7 @@ namespace NLGUI
 		return pV;
 	}
 
-	CViewTextMenu* CGroupSubMenu::addLineAtIndex(uint index,  const ucstring &name,  const std::string &ah,
+	CViewTextMenu* CGroupSubMenu::addLineAtIndex(uint index,  const std::string &name,  const std::string &ah,
 												 const std::string &params,  const std::string &id /*=""*/,
 												 const std::string &cond /*=std::string()*/, const std::string &texture,
 												 bool checkable /*= false*/,  bool checked /*= false*/, bool formatted /*= false */
@@ -1407,7 +1424,14 @@ namespace NLGUI
 		_Lines.erase(_Lines.begin() + index);
 
 		//invalidate selection
-		_Selected = -1;
+		_MouseOver = -1;
+		if (_Selected != -1)
+		{
+			if (_Selected == index)
+				_Selected = -1;
+			else if (_Selected > index)
+				_Selected--;
+		}
 
 		if(_SubMenus[index])
 		{
@@ -1441,6 +1465,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void	CGroupSubMenu::reset()
 	{
+		_Selected = -1;
 		uint lineCount = (uint)_Lines.size();
 		for(sint k = lineCount - 1; k >= 0; --k)
 		{
@@ -1651,10 +1676,10 @@ namespace NLGUI
 			}
 		}
 
-		if(_ScrollBar && _GroupList)
-			_ScrollBar->setTrackPos(_GroupList->getHReal());
-
 		CGroupFrame::setActive(state);
+
+		// handle scrolling in next updateCoords() call
+		_ScrollToView = true;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1822,8 +1847,13 @@ namespace NLGUI
 		const char *funcName = "getLineId";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		std::string id = getLineId((uint) ls.toInteger(1));
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring id = getLineId((uint) ls.toInteger(1)); // Compatibility
 		CLuaIHM::push(ls, id);
+#else
+		std::string id = getLineId((uint)ls.toInteger(1));
+		ls.push(id);
+#endif
 		return 1;
 	}
 
@@ -1852,13 +1882,21 @@ namespace NLGUI
 	{
 		const char *funcName = "addLine";
 		CLuaIHM::checkArgCount(ls, funcName, 4);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
+#else
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+#endif
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
-		ucstring arg1;
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring arg1; // Compatibility
 		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1));
-		addLine(arg1, ls.toString(2), ls.toString(3), ls.toString(4));
+		addLine(arg1.toUtf8(), ls.toString(2), ls.toString(3), ls.toString(4));
+#else
+		addLine(ls.toString(1), ls.toString(2), ls.toString(3), ls.toString(4));
+#endif
 		return 0;
 	}
 
@@ -1867,14 +1905,22 @@ namespace NLGUI
 	{
 		const char *funcName = "addIconLine";
 		CLuaIHM::checkArgCount(ls, funcName, 5);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
+#else
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+#endif
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
-		ucstring arg1;
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring arg1; // Compatibility
 		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1));
-		addLine(arg1, ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+		addLine(arg1.toUtf8(), ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+#else
+		addLine(ls.toString(1), ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+#endif
 		return 0;
 	}
 
@@ -1884,13 +1930,21 @@ namespace NLGUI
 		const char *funcName = "addLineAtIndex";
 		CLuaIHM::checkArgCount(ls, funcName, 5);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
+#else
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+#endif
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
+#ifdef RYZOM_LUA_UCSTRING
 		ucstring arg2;
 		nlverify(CLuaIHM::getUCStringOnStack(ls, 2, arg2));
-		addLineAtIndex((uint) ls.toInteger(1), arg2, ls.toString(3), ls.toString(4), ls.toString(5));
+		addLineAtIndex((uint) ls.toInteger(1), arg2.toUtf8(), ls.toString(3), ls.toString(4), ls.toString(5));
+#else
+		addLineAtIndex((uint)ls.toInteger(1), ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5));
+#endif
 		return 0;
 	}
 
@@ -2496,6 +2550,10 @@ namespace NLGUI
 
 		CGroupFrame::setActive (state);
 
+		// skip rest if being hidden
+		if (!state)
+			return;
+
 		// must recompute now the pos of the menu
 		uint32 i;
 		for (i = 0; i < _ChildrenGroups.size(); ++i)
@@ -2531,25 +2589,7 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::addLine (const string &name,  const string &ah,  const string &params,
-							  const std::string &id/*=std::string()*/,
-							  const std::string &cond /*= std::string()*/, const std::string &texture,
-							  bool checkable /*= false*/,  bool checked /*= false*/
-							 )
-	{
-		if (_RootMenu == NULL)
-		{
-			_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
-			_RootMenu->_GroupMenu = this;
-			_RootMenu->setSerializable( false );
-			addGroup (_RootMenu);
-		}
-
-		_RootMenu->addLine (name,  ah,  params,  id,  cond,  texture,  checkable,  checked, _Formatted);
-	}
-
-	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::addLine(const ucstring &name,  const std::string &ah,  const std::string &params,
+	void CGroupMenu::addLine(const std::string &name,  const std::string &ah,  const std::string &params,
 							 const std::string &id /* = std::string()*/,
 							 const std::string &cond /*= std::string()*/, const std::string &texture,
 							 bool checkable /*= false*/,  bool checked /*= false*/
@@ -2565,7 +2605,7 @@ namespace NLGUI
 		_RootMenu->addLine (name,  ah,  params,  id,  cond,  texture,  checkable,  checked, _Formatted);
 	}
 	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::addLineAtIndex(uint index, const ucstring &name, const std::string &ah,
+	void CGroupMenu::addLineAtIndex(uint index, const std::string &name, const std::string &ah,
 									const std::string &params, const std::string &id /*=std::string()*/,
 									const std::string &cond /*=std::string()*/, const std::string &texture,
 									bool checkable /*=false*/, bool checked /*=false*/)

@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -41,7 +41,7 @@ bool CStreamedPackageManager::loadPackage(const std::string &package)
 {
 	nldebug("Load package '%s'", package.c_str());
 
-	std::string packname = NLMISC::toLower(CFile::getFilename(package));
+	std::string packname = NLMISC::toLowerAscii(CFile::getFilename(package));
 	m_Packages[packname] = CStreamedPackage();
 	std::map<std::string, CStreamedPackage>::iterator it = m_Packages.find(packname);
 	CStreamedPackage &p = it->second;

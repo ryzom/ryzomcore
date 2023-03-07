@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Run all build processes
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -47,11 +47,15 @@ if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
 from scripts import *
-from buildsite import *
+from buildsite_local import *
 from tools import *
 
 sys.path.append(WorkspaceDirectory)
 from projects import *
+
+NeLWorkspaceDir = None
+if NeLConfigDir:
+	NeLWorkspaceDir = os.path.join(NeLConfigDir, "workspace")
 
 # Log error
 printLog(log, "")
@@ -64,7 +68,10 @@ printLog(log, "")
 for projectName in ProjectsToProcess:
 	if ((args.includeproject == None or projectName in args.includeproject) and (args.excludeproject == None or not projectName in args.excludeproject)):
 		printLog(log, "PROJECT " + projectName)
-		os.putenv("NELBUILDACTIVEPROJECT", os.path.abspath(WorkspaceDirectory + "/" + projectName))
+		if os.path.isfile(os.path.join(os.path.join(NeLWorkspaceDir, projectName), "process.py")):
+			os.putenv("NELBUILDACTIVEPROJECT", os.path.abspath(os.path.join(NeLWorkspaceDir, projectName).replace("\\", "/")))
+		else:
+			os.putenv("NELBUILDACTIVEPROJECT", os.path.abspath(WorkspaceDirectory + "/" + projectName))
 		os.chdir("processes")
 		try:
 			if not args.includeprocess == None:

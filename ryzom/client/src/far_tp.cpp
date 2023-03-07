@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2011  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -422,11 +422,13 @@ void CLoginStateMachine::run()
 
 			bool mustReboot = false;
 
+#ifdef RYZOM_BG_DOWNLOADER
 			if (isBGDownloadEnabled())
 			{
 				mustReboot = CBGDownloaderAccess::getInstance().mustLaunchBatFile();
 			}
 			else
+#endif
 			{
 				mustReboot = CPatchManager::getInstance()->mustLaunchBatFile();
 			}
@@ -470,11 +472,13 @@ void CLoginStateMachine::run()
 			}
 			initPatchCheck();
 			SM_BEGIN_EVENT_TABLE
+#ifdef RYZOM_BG_DOWNLOADER
 				if (isBGDownloadEnabled())
 				{
 					SM_EVENT(ev_patch_needed, st_patch); // no choice for patch content when background downloader is used
 				}
 				else
+#endif
 				{
 					SM_EVENT(ev_patch_needed, st_display_cat);
 				}
@@ -600,7 +604,9 @@ void CLoginStateMachine::run()
 			break;
 		case st_enter_far_tp_main_loop:
 			// if bgdownloader is used, then pause it
+#ifdef RYZOM_BG_DOWNLOADER
 			pauseBGDownloader();
+#endif
 
 
 			// Far TP part 1.2: let the main loop finish the current frame.
@@ -612,7 +618,7 @@ void CLoginStateMachine::run()
 			break;
 		case st_disconnect:
 			// Far TP part 2: disconnect from the FS and unload shard-specific data (called from farTPmainLoop())
-			// FarTP.disconnectFromPreviousShard();
+			FarTP.disconnectFromPreviousShard();
 
 			SM_BEGIN_EVENT_TABLE
 				SM_EVENT(ev_connect, st_reconnect_fs);
@@ -735,7 +741,7 @@ bool CFarTP::requestFarTPToSession(TSessionId sessionId, uint8 charSlot, CFarTP:
 	CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 	sb.init(NULL);
 //	sb.setAuthInfo(NetMngr.getLoginCookie());
-//	sb.connectItf(CInetAddress("borisb", 80));
+//	sb.connectItf(CInetHost("borisb", 80));
 
 	sb.CurrentJoinMode = joinMode;
 	// send the join session
@@ -927,7 +933,7 @@ retryJoinEdit:
 			}
 		}
 		pIM->messageBoxWithHelp(
-			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + ucstring(errorMsg),
+			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + errorMsg,
 			letReturnToCharSelect ? "ui:outgame:charsel" : "ui:interface");
 
 		// Info in the log
@@ -1004,13 +1010,13 @@ void CFarTP::hookNextFarTPForEditor()
  */
 void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)
 {
-	const string msgName = "CONNECTION:RET_MAINLAND";
+	const char *msgName = "CONNECTION:RET_MAINLAND";
 	CBitMemStream out;
 	nlverify(GenericMsgHeaderMngr.pushNameToStream(msgName, out));
 	out.serial(PlayerSelectedSlot);
 	out.serial(rejectedSessionId);
 	NetMngr.push(out);
-	nlinfo("%s sent", msgName.c_str());
+	nlinfo("%s sent", msgName);
 }
 
 /*
@@ -1117,7 +1123,7 @@ void CFarTP::disconnectFromPreviousShard()
 
 		// Start progress bar and display background
 		ProgressBar.reset (BAR_STEP_TP);
-		ucstring nmsg("Loading...");
+		string nmsg("Loading...");
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		ProgressBar.progress(0);
 
@@ -1155,6 +1161,9 @@ void CFarTP::disconnectFromPreviousShard()
 	}
 	else
 	{
+		// flush the server string cache
+		STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
+
 		// String manager: remove all waiting callbacks and removers
 		// (if some interface stuff has not received its string yet, its remover will get useless)
 		STRING_MANAGER::CStringManagerClient::release( false );
@@ -1196,7 +1205,7 @@ void CFarTP::connectToNewShard()
 	NetMngr.initCookie(Cookie, FSAddr);
 
 	// connect the session browser to the new shard
-	NLNET::CInetAddress sbsAddress(CSessionBrowserImpl::getInstance().getFrontEndAddress());
+	NLNET::CInetHost sbsAddress(CSessionBrowserImpl::getInstance().getFrontEndAddress());
 	sbsAddress.setPort(sbsAddress.port()+SBSPortOffset);
 	CSessionBrowserImpl::getInstance().connectItf(sbsAddress);
 
@@ -1210,7 +1219,7 @@ void CFarTP::connectToNewShard()
 	}
 
 	// Reinit the string manager cache.
-	STRING_MANAGER::CStringManagerClient::instance()->initCache(FSAddr, ClientCfg.LanguageCode);
+	STRING_MANAGER::CStringManagerClient::instance()->initCache(ClientCfg.LanguageCode);
 
 	// reset the chat mode
 	ChatMngr.resetChatMode();
@@ -1297,7 +1306,9 @@ void CFarTP::sendReady()
 			// Instead of doing it in disconnectFromPreviousShard(), we do it here, only when it's needed
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			pIM->uninitInGame0();
+#ifdef RYZOM_FORGE
 			CItemGroupManager::getInstance()->uninit();
+#endif
 
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			ActionsContext.removeAllCombos();
@@ -1459,7 +1470,7 @@ void CFarTP::farTPmainLoop()
 	ConnectionReadySent = false;
 	LoginSM.pushEvent(CLoginStateMachine::ev_far_tp_main_loop_entered);
 
-	disconnectFromPreviousShard();
+	// disconnectFromPreviousShard();
 
 	uint nbRecoSelectCharReceived = 0;
 

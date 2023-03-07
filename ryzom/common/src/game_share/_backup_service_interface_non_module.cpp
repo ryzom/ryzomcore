@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -391,9 +391,9 @@ void CBSIINonModule::activate()
 		return;
 	}
 	if (host.find (":") == string::npos)
-		host+= ":49990";
+		host+= ":43990";
 
-	_BSMasterAddress = CInetAddress(host);
+	_BSMasterAddress = CInetHost(host);
 	CUnifiedNetwork::getInstance()->addService ("BS", _BSMasterAddress);
 
 	// connect to the slave bs if any
@@ -401,9 +401,9 @@ void CBSIINonModule::activate()
 	if (!host.empty())
 	{
 		if (host.find (":") == string::npos)
-			host+= ":49990";
+			host+= ":43990";
 
-		_BSSlaveAddress = CInetAddress(host);
+		_BSSlaveAddress = CInetHost(host);
 		CUnifiedNetwork::getInstance()->addService ("BS", _BSSlaveAddress);
 	}
 
@@ -413,16 +413,16 @@ void CBSIINonModule::activate()
 //	if (_HaveSeparatePDBS)
 //	{
 //		if (host.find (":") == string::npos)
-//			host+= ":49990";
-//		CUnifiedNetwork::getInstance()->addService ("PDBS", CInetAddress(host));
+//			host+= ":43990";
+//		CUnifiedNetwork::getInstance()->addService ("PDBS", CInetHost(host));
 //
 //		// connect to the global slave bs if any
 //		host = SlavePDBackupServiceIP.get();
 //		if (!host.empty())
 //		{
 //			if (host.find (":") == string::npos)
-//				host+= ":49990";
-//			CUnifiedNetwork::getInstance()->addService ("PDBS", CInetAddress(host));
+//				host+= ":43990";
+//			CUnifiedNetwork::getInstance()->addService ("PDBS", CInetHost(host));
 //		}
 //	}
 
@@ -524,17 +524,17 @@ void CBSIINonModule::connectL3()
 		{
 			std::string bsName;
 
-			CInetAddress addr1 = _BSMasterAddress;
+			CInetHost addr1 = _BSMasterAddress;
 			addr1.setPort(BackupServiceL3Port);
 
-			CInetAddress addr2 = _BSMasterAddress;
+			CInetHost addr2 = _BSMasterAddress;
 			addr2.setPort(addr2.port()+1);
 
 			try
 			{
 				// try connecting to the BS Master on an explicit port
 				_L3BSConn.connect(addr1);
-				bsName= addr1.asString();
+				bsName = addr1.toStringLong();;
 			}
 			catch (...)
 			{
@@ -542,11 +542,11 @@ void CBSIINonModule::connectL3()
 				{
 					// connect to the BS Master layer 3 interface (port+1)
 					_L3BSConn.connect(addr2);
-					bsName= addr2.asString();
+					bsName = addr2.toStringLong();
 				}
 				catch (...)
 				{
-					nlinfo("Connection to BS Master: %s or %s Failed",addr1.asString().c_str(),addr2.asString().c_str());
+					nlinfo("Connection to BS Master: %s or %s Failed", addr1.toStringLong().c_str(), addr2.toStringLong().c_str());
 					break;
 				}
 			}
@@ -566,17 +566,17 @@ void CBSIINonModule::connectL3()
 		{
 			std::string bsName;
 
-			CInetAddress addr1 = _BSSlaveAddress;
+			CInetHost addr1 = _BSSlaveAddress;
 			addr1.setPort(SlaveBackupServiceL3Port);
 
-			CInetAddress addr2 = _BSSlaveAddress;
+			CInetHost addr2 = _BSSlaveAddress;
 			addr2.setPort(addr2.port()+1);
 
 			try
 			{
 				// try connecting to the BS Slave on an explicit port
 				_L3BSConn.connect(addr1);
-				bsName= addr1.asString();
+				bsName = addr1.toStringLong();
 			}
 			catch (...)
 			{
@@ -584,11 +584,11 @@ void CBSIINonModule::connectL3()
 				{
 					// connect to the BS Slave layer 3 interface (port+1)
 					_L3BSConn.connect(addr2);
-					bsName= addr2.asString();
+					bsName = addr2.toStringLong();
 				}
 				catch (...)
 				{
-					nlinfo("Connection to BS Slave: %s or %s Failed",addr1.asString().c_str(),addr2.asString().c_str());
+					nlinfo("Connection to BS Slave: %s or %s Failed", addr1.toStringLong().c_str(), addr2.toStringLong().c_str());
 					break;
 				}
 			}

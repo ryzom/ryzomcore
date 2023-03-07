@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -18,6 +21,7 @@
 #include "stdpch.h"
 
 #include "nel/gui/html_element.h"
+#include "nel/gui/libwww.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -120,6 +124,123 @@ namespace NLGUI
 		{
 			_Pseudo[key] = style;
 		}
+	}
+
+	// ***************************************************************************
+	std::string CHtmlElement::getInheritedLanguage() const
+	{
+		const CHtmlElement *node = this;
+		while(node)
+		{
+			if (node->hasAttribute("lang"))
+				return node->getAttribute("lang");
+
+			node = node->parent;
+		}
+
+		return "";
+	}
+
+	// ***************************************************************************
+	std::string CHtmlElement::htmlEscape(const std::string &val) const
+	{
+		if (val.find_first_of("\"'&<>\xA0") == std::string::npos)
+			return val;
+
+		std::string ret;
+		// resize is quaranteed, make room for some free replacements
+		ret.reserve(val.size() + 24);
+		for(size_t pos = 0; pos != val.size(); pos++)
+		{
+			switch(val[pos])
+			{
+				case '"': ret.append("&quot;"); break;
+				case '\'': ret.append("&#39;"); break;
+				case '&': ret.append("&amp;"); break;
+				case '<': ret.append("&lt;"); break;
+				case '>': ret.append("&gt;"); break;
+				case '\xA0': ret.append("&nbsp;"); break;
+				default : ret.append(&val[pos],1); break;
+			}
+		}
+
+		return ret;
+	}
+
+	// ***************************************************************************
+	std::string CHtmlElement::serializeAttributes(bool escape) const
+	{
+		std::string result;
+		for(std::map<std::string, std::string>::const_iterator it = Attributes.begin(); it != Attributes.end(); ++it)
+		{
+			if (it->first == "class")
+			{
+				result += " class=\"";
+				for(std::set<std::string>::const_iterator it2 = ClassNames.begin(); it2 != ClassNames.end(); ++it2)
+				{
+					if (it2 != ClassNames.begin())
+					{
+						result += " ";
+					}
+					result += (escape ? htmlEscape(*it2) : *it2);
+				}
+				result += "\"";
+			}
+			else
+			{
+				result += " " + it->first + "=\"" + (escape ? htmlEscape(it->second) : it->second) + "\"";
+			}
+		}
+		return result;
+	}
+
+	// ***************************************************************************
+	std::string CHtmlElement::serializeChilds(bool escape) const
+	{
+		std::string result;
+		for(std::list<CHtmlElement>::const_iterator it = Children.begin(); it != Children.end(); ++it)
+			result += it->serialize(escape);
+
+		return result;
+	}
+
+	// ***************************************************************************
+	std::string CHtmlElement::serialize(bool escape) const
+	{
+		if (Type == TEXT_NODE)
+		{
+			if (parent && (parent->ID == HTML_SCRIPT || parent->ID == HTML_STYLE ||
+				parent->ID == HTML_IFRAME || parent->ID == HTML_NOEMBED ||
+				parent->ID == HTML_NOSCRIPT))
+			{
+				return Value;
+			} else if (escape) {
+				return htmlEscape(Value);
+			} else {
+				return Value;
+			}
+		}
+
+		std::string result = "<" + Value + serializeAttributes(escape) + ">";
+
+		if (ID == HTML_AREA || ID == HTML_BASE || ID == HTML_BR ||
+			ID == HTML_COL || ID == HTML_EMBED || ID == HTML_HR ||
+			ID == HTML_IMG || ID == HTML_INPUT || ID == HTML_LINK ||
+			ID == HTML_META || ID == HTML_PARAM || ID == HTML_WBR)
+		{
+			return result;
+		}
+
+		// first linebreak that will be ignored on parse time
+		if (ID == HTML_PRE || ID == HTML_TEXTAREA)
+			result += "\n";
+
+		if (!Children.empty())
+			result += serializeChilds(escape);
+
+		result += "</" + Value + ">";
+
+		return result;
 	}
 
 	// ***************************************************************************

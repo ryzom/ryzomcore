@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -98,7 +98,7 @@ public:
 class CShapeInstanceReference
 {
 public:
-	CShapeInstanceReference (NL3D::UInstance instance, const string &text, const string &url, bool bbox_active=true, bool in_ig_zone = false)
+	CShapeInstanceReference (NL3D::UInstance instance, const string &text, const string &url, bool bbox_active=true)
 	{
 		Instance = instance;
 		ContextText = text;
@@ -106,7 +106,6 @@ public:
 		BboxActive = bbox_active;
 		Deleted = false;
 		LastDeleted = -1;
-		InIGZone = in_ig_zone;
 		Primitive = NULL;
 		PrimSize = CVector(1.f, 1.f, 1.f);
 		PrimHeight = 1.f;
@@ -122,7 +121,6 @@ public:
 	string ContextURL;
 	bool BboxActive;
 	bool Deleted;
-	bool InIGZone;
 	sint32 LastDeleted;
 };
 
@@ -148,8 +146,6 @@ private:
 	std::vector<CEntityReference>	_VisibleEntities;
 
 	/// Shapes Instances caches
-	typedef std::map<uint16, std::vector<uint32>>	TIGZoneShapes;
-	TIGZoneShapes							_IgZoneShapes;
 	std::vector<CShapeInstanceReference>	_ShapeInstances;
 	sint32									_LastRemovedInstance;
 	bool									_InstancesRemoved;
@@ -233,10 +229,9 @@ public:
 	void reinit();
 
 
-	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool haveCollisions, uint16 inIgZone, sint32 &idx);
+	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool haveCollisions, sint32 &idx);
 	bool deleteInstance(uint32 idx);
 	bool removeInstances();
-	void removeInstancesInIgZone(uint16 igZone);
 	CVector getInstancePos(uint32 idx);
 	bool setInstancePos(uint32 idx, CVector pos);
 	CVector getInstanceRot(uint32 idx);
@@ -247,6 +242,7 @@ public:
 	CVector getInstanceBBoxMin(uint32 idx);
 	CVector getInstanceBBoxMax(uint32 idx);
 	bool setInstanceRot(uint32 idx, CVector pos);
+	bool instancesRemoved();
 	bool setupInstance(uint32 idx, const std::vector<std::string> &keys, const std::vector<std::string> &values);
 	CShapeInstanceReference getShapeInstanceUnderPos(float x, float y, sint32 &idx);
 
@@ -308,13 +304,13 @@ public:
 	  * \param caseSensitive type of test to perform
 	  * \param complete : if true, the name must match the full name of the entity.
 	  */
-	CEntityCL *getEntityByName (const ucstring &name, bool caseSensitive, bool complete) const;
+	CEntityCL *getEntityByName (const std::string &name, bool caseSensitive, bool complete) const;
 	/**
 	 * Case insensitive match against entity name. All listed keywords must match.
 	 * \param keywords to match
 	 * \param onlySelectable : if true, match only entity that can be selected
 	 */
-	CEntityCL *getEntityByKeywords (const std::vector<ucstring> &keywords, bool onlySelectable) const;
+	CEntityCL *getEntityByKeywords (const std::vector<std::string> &keywords, bool onlySelectable) const;
 	CEntityCL *getEntityBySheetName (const std::string &sheet) const;
 	/// Get an entity by dataset index. Returns NULL if the entity is not found.
 	CEntityCL *getEntityByCompressedIndex(TDataSetIndex compressedIndex) const;

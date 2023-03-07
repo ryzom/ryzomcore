@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -353,7 +356,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 		// Read the file extension
 		parameter.FileExtension.clear();
 		CIXml::getPropertyString (parameter.FileExtension, paramNode, "FILE_EXTENSION");
-		parameter.FileExtension = toLower(parameter.FileExtension);
+		parameter.FileExtension = toLowerAscii(parameter.FileExtension);
 
 		// Autonaming preference
 		parameter.Autoname.clear();
@@ -362,7 +365,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 		// Read the file extension
 		parameter.Folder.clear();
 		CIXml::getPropertyString (parameter.Folder, paramNode, "FOLDER");
-		parameter.Folder = toLower(parameter.Folder);
+		parameter.Folder = toLowerAscii(parameter.Folder);
 
 		// Read the combo values
 		for (	xmlNodePtr comboValueNode = CIXml::getFirstChildNode (paramNode, "COMBO_VALUES");
@@ -427,7 +430,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 				for (uint i=0; i<files.size (); i++)
 				{
 					// Good extension ?
-					if (toLower(NLMISC::CFile::getExtension (files[i])) != parameter.FileExtension)
+					if (toLowerAscii(NLMISC::CFile::getExtension (files[i])) != parameter.FileExtension)
 						continue;
 
 					// Add a combo value
@@ -438,7 +441,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 					CParameter::CConstStringValue &comboValue = insertResult.first->second;
 
 					// Get the filename without extension
-					string nameWithoutExt = toLower(NLMISC::CFile::getFilenameWithoutExtension (files[i]));
+					string nameWithoutExt = toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension (files[i]));
 
 					// Add the values
 					comboValue.Values.push_back (nameWithoutExt);

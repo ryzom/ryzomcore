@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1695,7 +1695,10 @@ void CMirror::release()
 #ifdef NL_DEBUG
 
 // Helper functor for testMirrorReadyStatus
-class PropIndexIs : public binary_function< CChangeTrackerClientProp, TPropertyIndex, bool >
+class PropIndexIs 
+#ifndef NL_CPP17
+	: public binary_function< CChangeTrackerClientProp, TPropertyIndex, bool >
+#endif
 {
 public:
 	bool	operator() ( const CChangeTrackerClientProp& tracker, TPropertyIndex propIndex ) const
@@ -1789,7 +1792,13 @@ void	CMirror::testMirrorReadyStatus()
 			if ( propinfo.flagNotifyChanges() && (!propinfo.flagGroupNotifiedByOtherProp()) )
 			{
 				nlassert( propinfo.DataSet );
-				TSelfPropTrackers::iterator ipt = find_if( propinfo.DataSet->_SelfPropTrackers.begin(), propinfo.DataSet->_SelfPropTrackers.end(), bind2nd( PropIndexIs(), propinfo.PropertyIndex ) );
+				TSelfPropTrackers::iterator ipt = find_if(propinfo.DataSet->_SelfPropTrackers.begin(), propinfo.DataSet->_SelfPropTrackers.end(), 
+#ifndef NL_CPP17
+					bind2nd( PropIndexIs(), propinfo.PropertyIndex ) 
+#else
+				    std::bind(PropIndexIs(), std::placeholders::_1, propinfo.PropertyIndex)
+#endif
+				);
 				if ( ipt == propinfo.DataSet->_SelfPropTrackers.end() )
 				{
 					nlwarning( "MIRROR: Property %s/%hd with notification of changes: selfprop tracker not received", propinfo.DataSet->name().c_str(), propinfo.PropertyIndex );

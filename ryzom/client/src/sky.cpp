@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -288,7 +288,7 @@ CBitmap *buildSharedBitmap(const std::string &filename,
 {
 	alreadyBuilt = false;
 	if (filename.empty()) return NULL;
-	std::string lcBMFilename = toLower(CFile::getFilenameWithoutExtension(filename));
+	std::string lcBMFilename = toLowerAscii(CFile::getFilenameWithoutExtension(filename));
 	std::map<std::string, CBitmap *>::iterator it = bitmapByName.find(lcBMFilename);
 	if (it != bitmapByName.end())
 	{

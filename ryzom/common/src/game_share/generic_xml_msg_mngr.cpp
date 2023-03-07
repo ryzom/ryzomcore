@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -155,6 +156,16 @@ bool	CGenericXmlMsgHeaderManager::pushNameToStream(const string &msgName, CBitMe
 	bool res = (_Root->select(msgName.c_str(), strm) != NULL);
 
 	if (!res) nlwarning("pushNameToStream failed: Unknown message name '%s'", msgName.c_str());
+
+	return res;
+}
+
+//
+bool	CGenericXmlMsgHeaderManager::pushNameToStream(const char *msgName, CBitMemStream &strm)
+{
+	bool res = (_Root->select(msgName, strm) != NULL);
+
+	if (!res) nlwarning("pushNameToStream failed: Unknown message name '%s'", msgName);
 
 	return res;
 }

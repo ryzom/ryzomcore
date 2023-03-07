@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010-2011  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
@@ -152,7 +152,7 @@ static NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 	return NLMISC::KeyNOKEY;
 }
 
-bool CCocoaEventEmitter::pasteTextFromClipboard(ucstring &text)
+bool CCocoaEventEmitter::pasteTextFromClipboard(std::string &text)
 {
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
@@ -163,17 +163,17 @@ bool CCocoaEventEmitter::pasteTextFromClipboard(ucstring &text)
 	{
 		NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
 		NSString *nstext = [objectsToPaste objectAtIndex:0];
-		text.fromUtf8([nstext UTF8String]);
+		text = [nstext UTF8String];
 		return true;
 	}
 	return false;
 }
 
-bool CCocoaEventEmitter::copyTextToClipboard(const ucstring &text)
+bool CCocoaEventEmitter::copyTextToClipboard(const std::string &text)
 {
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	[pasteboard clearContents];
-	NSArray *copiedObjects = [NSArray arrayWithObject:[NSString stringWithUTF8String:text.toUtf8().c_str()]];
+	NSArray *copiedObjects = [NSArray arrayWithObject:[NSString stringWithUTF8String:text.c_str()]];
 	[pasteboard writeObjects:copiedObjects];
 	return true;
 }

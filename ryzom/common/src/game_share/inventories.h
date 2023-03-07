@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2018  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -34,8 +37,8 @@ WARNING!!!!! If you change MAX_INVENTORY_ANIMAL value, you'll have to:
 * ******/
 #define MAX_PACK_ANIMAL					3
 #define MAX_MEKTOUB_MOUNT				1
-#define MAX_OTHER_PET					3
-#define MAX_INVENTORY_ANIMAL			( MAX_PACK_ANIMAL + MAX_MEKTOUB_MOUNT + MAX_OTHER_PET)
+#define MAX_OTHER_PET					0
+#define MAX_INVENTORY_ANIMAL			( MAX_PACK_ANIMAL + MAX_MEKTOUB_MOUNT )
 
 // This give by which value the WEIGHT in database must be divided to get the value in Kg
 // valueKg= valueDb / DB_WEIGHT_SCALE
@@ -159,25 +162,22 @@ namespace INVENTORIES
 			temporary,						// 1
 			equipment,						// 2
 			bag,							// 3
-			pet_animal,						// 4 Character can have 7 pack animal
+			pet_animal,						// 4 Character can have 5 pack animal
 			pet_animal1 = pet_animal,	// for toString => TInventory convertion
 			pet_animal2,
 			pet_animal3,
 			pet_animal4,
-			pet_animal5,
-			pet_animal6,
-			pet_animal7,
-			max_pet_animal,					// 11
-			NUM_INVENTORY = max_pet_animal,	// 11
-			UNDEFINED = NUM_INVENTORY,		// 11
+			max_pet_animal,					// 8
+			NUM_INVENTORY = max_pet_animal,	// 8
+			UNDEFINED = NUM_INVENTORY,		// 8
 
-			exchange,						// 12  This is not a bug : exchange is a fake inventory
-			exchange_proposition,			// 13  and should not count in the number of inventory
+			exchange,						// 9  This is not a bug : exchange is a fake inventory
+			exchange_proposition,			// 10  and should not count in the number of inventory
 			// same for botChat trading.
-			trading,						// 14
-			reward_sharing,					// 15 fake inventory, not in database.xml. Used by the item info protocol only
-			guild,							// 16 (warning: number stored in guild saved file)
-			player_room,					// 17
+			trading,						// 11
+			reward_sharing,					// 12 fake inventory, not in database.xml. Used by the item info protocol only
+			guild,							// 13 (warning: number stored in guild saved file)
+			player_room,					// 14
 			NUM_ALL_INVENTORY				// warning: distinct from NUM_INVENTORY
 	};
 
@@ -266,22 +266,22 @@ namespace INVENTORIES
 	enum TItemPropId
 	{
 		Sheet,
-			Quality,
-			Quantity,
-			UserColor,
-			CreateTime,
-			Serial,
-			Locked,
-			Weight,
-			NameId,
-			Enchant,
-			ItemClass,
-			ItemBestStat,
-			Price,
-			ResaleFlag,
-			PrerequisitValid,
-			Worned,
-			NbItemPropId
+		Quality,
+		Quantity,
+		UserColor,
+		CharacBuffs,
+		Locked,
+		Access,
+		Weight,
+		NameId,
+		Enchant,
+		ItemClass,
+		ItemBestStat,
+		PrerequisitValid,
+		Price,
+		ResaleFlag,
+		Worned,
+		NbItemPropId
 	};
 
 	const uint NbBitsForItemPropId = 4; // TODO: replace this constant by an inline function using NbItemPropId
@@ -370,8 +370,8 @@ namespace INVENTORIES
 			bms.serial( _SlotIndex, CInventoryCategoryTemplate::SlotBitSize );
 
 			uint i;
-			// SHEET, QUALITY, QUANTITY, USER_COLOR, CREATE_TIME and SERIAL never require compression
-			for (i = 0; i < 6; ++i)
+			// SHEET, QUALITY, QUANTITY, and USER_COLOR never require compression
+			for (i = 0; i < 4; ++i)
 				bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
 
 			// For all other the compression is simple the first bit indicates if the value is zero
@@ -379,22 +379,38 @@ namespace INVENTORIES
 			{
 				for (; i < NbItemPropId; ++i)
 				{
-					bool b;
-					bms.serialBit(b);
-					if (b)
-						_ItemProp[i] = 0;
-					else
+					if (DataBitSize[i] < 3)
+					{
+						// Don't compress 1 or 2 bits either
 						bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
+					}
+					else
+					{
+						bool b;
+						bms.serialBit(b);
+						if (b)
+							_ItemProp[i] = 0;
+						else
+							bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
+					}
 				}
 			}
 			else
 			{
 				for (; i != NbItemPropId; ++i)
 				{
-					bool b = (_ItemProp[i] == 0);
-					bms.serialBit(b);
-					if (!b)
+					if (DataBitSize[i] < 3)
+					{
+						// Don't compress 1 or 2 bits either
 						bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
+					}
+					else
+					{
+						bool b = (_ItemProp[i] == 0);
+						bms.serialBit(b);
+						if (!b)
+							bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
+					}
 				}
 			}
 		}
@@ -485,6 +501,9 @@ enum TItemChange
 	itc_lock_state		= 1<<6,
 	itc_info_version	= 1<<7,
 	itc_worned			= 1<<8,
+	itc_owner_locked    = itc_lock_state,
+	itc_access_grade    = itc_lock_state,
+	itc_name            = itc_lock_state,
 };
 
 typedef NLMISC::CEnumBitset<TItemChange>	TItemChangeFlags;

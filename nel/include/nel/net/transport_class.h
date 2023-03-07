@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -27,6 +30,7 @@
 #include "nel/misc/entity_id.h"
 #include "nel/misc/sheet_id.h"
 #include "nel/misc/variable.h"
+#include "nel/misc/string_view.h"
 
 #include "unified_network.h"
 #include "message.h"
@@ -510,9 +514,10 @@ inline NLNET::CMessage &CTransportClass::write ()
 	nlassert (Init);
 	nlassert (Mode == 0);
 
-#ifndef FINAL_VERSION
+#if !FINAL_VERSION
 	// Did the programmer forget to register the transport class? Forbid sending then.
-	nlassert( LocalRegisteredClass.find( className() ) != LocalRegisteredClass.end() );
+	// nlassert( LocalRegisteredClass.find( className() ) != LocalRegisteredClass.end() );
+	// Name is never set unless in Mode 3 on the temporary registration object, so this nlassert is invalid! :(
 #endif
 
 	// set the mode to register

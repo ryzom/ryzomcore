@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -253,6 +253,19 @@ namespace NLGUI
 		bool loadTextures (const std::string &textureFileName, const std::string &uvFileName, bool uploadDXTC);
 
 		/*
+		 * newTextureId : Return new placeholder texture id.
+		 *                You should call deleteTexture when the texture is not used anymore.
+		 */
+		sint32 newTextureId (const std::string &name);
+
+		/*
+		 * reloadTexture : Replace existing global texture with new.
+		 *                 If previous was texture atlas and still used by 2+ textures,
+		 *                 then create new global texture.
+		 */
+		void reloadTexture (sint32 texId, const std::string &name, bool uploadDXTC=true, bool bReleasable=true);
+
+		/*
 		 *	createTexture : create a texture for the interface, possibly from an externally created texture
 		 *  If no external texture is given, then 'sGlobalTextureName' is the filename of the big texture
 		 *  You should call deleteTexture when the texture is not used anymore
@@ -312,6 +325,9 @@ namespace NLGUI
 
 		/**
 		 * get a texture file pointer from a string name. O(logN)
+		 *
+		 * FIXME: only works with textures in atlas loaded with loadTextures()
+		 *
 		 * \param id : the id of the texture
 		 * \return a texture file pointer. -1 if not found or if sName is empty()
 		 */
@@ -444,9 +460,13 @@ namespace NLGUI
 			SGlobalTexture ()
 			{
 				FromGlobaleTexture = true;
+				Scale = 1.f;
 			}
 			uint32				Width, Height;
 			uint32				DefaultWidth, DefaultHeight;
+			// used by texture atlas to unscale individual texture
+			// getTextureSizeFromId() calls to return 1x size for GUI.
+			float				Scale;
 			NL3D::UTexture		*Texture;
 			std::string			Name;
 			bool				FromGlobaleTexture;
@@ -474,6 +494,9 @@ namespace NLGUI
 		// ***************************************************************************
 		// \name Texture management
 		// ***************************************************************************
+
+		bool loadTextureFromString(SGlobalTexture *gt, const std::string &data);
+		bool loadTextureFromFile(SGlobalTexture *gt, const std::string &filename);
 
 		// SImage accessors
 		SImage	*getSImage(sint32 textureId)

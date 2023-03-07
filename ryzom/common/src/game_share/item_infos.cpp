@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -73,7 +76,7 @@ CItemInfos::CItemInfos()
 	LacustreMagicResistance = 0;
 	JungleMagicResistance = 0;
 	PrimaryRootMagicResistance = 0;
-	PetNumber = 0; // 1 based!
+
 }
 
 void CItemInfos::serial(NLMISC::IStream & s)
@@ -128,9 +131,9 @@ void CItemInfos::serial(NLMISC::IStream & s)
 		s.serial(CastingSpeedFactor[i]);
 		s.serial(MagicPowerFactor[i]);
 	}
+
 	s.serial( CustomText );
 	s.serial( R2ItemDescription );
 	s.serial( R2ItemComment );
-	s.serial( PetNumber );
 }
 

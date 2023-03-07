@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -2618,7 +2618,7 @@ CNpcSerializer::CNpcSerializer()
 	static const char* optionalProp[] = { "GabaritHeight", "GabaritTorsoWidth","GabaritArmsWidth", "GabaritLegsWidth", "GabaritBreastSize",
 		"HairType", "HairColor", "Tattoo", "EyesColor", "MorphTarget1", "MorphTarget2", "MorphTarget3", "MorphTarget4", "MorphTarget5",
 		"MorphTarget6", "MorphTarget7", "MorphTarget8", "Sex", "JacketModel", "TrouserModel", "FeetModel", "HandsModel", "ArmModel",
-		"WeaponRightHand", "WeaponLeftHand", "JacketColor", "ArmColor", "HandsColor", "TrouserColor", "FeetColor", "Function","Level",
+		"WeaponRightHand", "WeaponLeftHand", "JacketColor", "ArmColor", "HandsColor", "TrouserColor", "FeetColor", "Function",
 		"Profile", "Speed", "Aggro", "PlayerAttackable", "BotAttackable" };
 
 	_ClassName = "Npc";
@@ -2654,7 +2654,7 @@ CNpcCustomSerializer::CNpcCustomSerializer()
 		"MorphTarget6", "MorphTarget7", "MorphTarget8", "JacketModel", "TrouserModel", "FeetModel", "HandsModel", "ArmModel",
 		"JacketColor", "ArmColor", "HandsColor", "TrouserColor", "FeetColor" };
 	static const char* optionalProp[] = {
-		"Name", "Profile", "Speed", "Aggro", "PlayerAttackable", "BotAttackable", "Function", "Level", "WeaponRightHand", "WeaponLeftHand", "Sex" };
+		"Name", "Profile", "Speed", "Aggro", "PlayerAttackable", "BotAttackable", "Function", "WeaponRightHand", "WeaponLeftHand", "Sex" };
 
 	_ClassName = "NpcCustom";
 	_Type = ObjectTableNpcCustom;

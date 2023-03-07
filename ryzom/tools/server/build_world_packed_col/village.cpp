@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -266,7 +269,7 @@ void CIGInfo::load(TShapeCache &shapeCache)
 		for(uint k = 0; k < IG->getNumInstance(); ++k)
 		{
 			std::string shapeName = standardizeShapeName(IG->getShapeName(k));			
-			if (NLMISC::toLower(CFile::getExtension(shapeName)) == "pacs_prim")
+			if (NLMISC::toLowerAscii(CFile::getExtension(shapeName)) == "pacs_prim")
 			{
 				continue;
 			}

@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -551,9 +552,9 @@ void CToolDrawPrim::commit()
 		if (!_Extending)
 		{
 			// set readable name
-			ucstring readableName = NLMISC::CI18N::get(_PrimType == Road ? "uiR2EDNameBotRoad" : "uiR2EDNameBotRegion");
-			readableName = getEditor().genInstanceName(readableName);
-			desc->set("Name", readableName.toUtf8());
+			string readableName = NLMISC::CI18N::get(_PrimType == Road ? "uiR2EDNameBotRoad" : "uiR2EDNameBotRegion");
+			readableName = getEditor().genInstanceName(readableName).toUtf8();
+			desc->set("Name", readableName);
 			// send creation command
 			// tmp : static npc counter
 			// add in component list of default feature

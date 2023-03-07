@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -2171,13 +2171,19 @@ float CExport::getHeight (float x, float y)
 	sint32 SizeX = _ZoneMaxX - _ZoneMinX + 1;
 	sint32 SizeY = _ZoneMaxY - _ZoneMinY + 1;
 
-	clamp (x, _Options->CellSize*_ZoneMinX, _Options->CellSize*(_ZoneMaxX+1));
-	clamp (y, _Options->CellSize*_ZoneMinY, _Options->CellSize*(_ZoneMaxY+1));
-
 	if (_HeightMap != NULL)
 	{
-		color = _HeightMap->getColor (	(x-_Options->CellSize*_ZoneMinX)/(_Options->CellSize*SizeX),
-										1.0f - ((y-_Options->CellSize*_ZoneMinY)/(_Options->CellSize*SizeY)));
+		float xc = (x - _Options->CellSize * _ZoneMinX) / (_Options->CellSize * SizeX);
+		float yc = 1.0f - ((y - _Options->CellSize * _ZoneMinY) / (_Options->CellSize * SizeY));
+		if (_Options->ExtendCoords)
+		{
+			uint32 w = _HeightMap->getWidth(), h = _HeightMap->getHeight();
+			xc -= .5f / (float)w;
+			yc -= .5f / (float)h;
+			xc = xc * (float)(w + 1) / (float)w;
+			yc = yc * (float)(h + 1) / (float)h;
+		}
+		color = _HeightMap->getColor(xc, yc);
 		color *= 255;
 		deltaZ = color.A;
 		deltaZ = deltaZ - 127.0f; // Median intensity is 127
@@ -2186,8 +2192,17 @@ float CExport::getHeight (float x, float y)
 
 	if (_HeightMap2 != NULL)
 	{
-		color = _HeightMap2->getColor (	(x-_Options->CellSize*_ZoneMinX)/(_Options->CellSize*SizeX),
-										1.0f - ((y-_Options->CellSize*_ZoneMinY)/(_Options->CellSize*SizeY)));
+		float xc = (x - _Options->CellSize * _ZoneMinX) / (_Options->CellSize * SizeX);
+		float yc = 1.0f - ((y - _Options->CellSize * _ZoneMinY) / (_Options->CellSize * SizeY));
+		if (_Options->ExtendCoords)
+		{
+			uint32 w = _HeightMap2->getWidth(), h = _HeightMap2->getHeight();
+			xc -= .5f / (float)w;
+			yc -= .5f / (float)h;
+			xc = xc * (float)(w + 1) / (float)w;
+			yc = yc * (float)(h + 1) / (float)h;
+		}
+		color = _HeightMap2->getColor(xc, yc);
 		color *= 255;
 		deltaZ2 = color.A;
 		deltaZ2 = deltaZ2 - 127.0f; // Median intensity is 127

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -134,7 +137,7 @@ void	makeAnimByRace(const std::string &animSetFile, const std::vector<string> &a
 		// get the possible anim file name (lowered)
 		static vector<string>	raceAnimNames;
 		raceAnimNames.clear();
-		buildRaceAnimNames(raceAnimNames, toLower(CFile::getFilename(animList[i])));
+		buildRaceAnimNames(raceAnimNames, toLowerAscii(CFile::getFilename(animList[i])));
 
 		// For each line of the animSet
 		uint	lastStructLine= 0;
@@ -142,7 +145,7 @@ void	makeAnimByRace(const std::string &animSetFile, const std::vector<string> &a
 		for(uint j=0;j<animSetText.size();)
 		{
 			string	line= animSetText[j];
-			string	lineLwr= toLower(line);
+			string	lineLwr= toLowerAscii(line);
 
 			// Find <LOG> TAg? => stop
 			if(line.find("<LOG>")!=string::npos)

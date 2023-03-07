@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Setup ligo
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -96,6 +96,7 @@ if LigoExportLand != "":
 	cf.write("ZFactor1 = " + LigoExportZFactor1 + ";\n")
 	cf.write("HeightMapFile2 = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportHeightmap2 + "\";\n")
 	cf.write("ZFactor2 = " + LigoExportZFactor2 + ";\n")
+	cf.write("ExtendCoords = " + str(LigoExportExtendCoords) + ";\n")
 	cf.write("\n")
 	cf.write("ZoneLight = 0;\n")
 	cf.write("CellSize = 160;\n")

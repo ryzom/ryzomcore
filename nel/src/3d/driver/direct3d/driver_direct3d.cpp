@@ -1,9 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2020  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2014  Matthew LAGOE (Botanic) <cyberempires@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -246,10 +246,13 @@ CDriverD3D::CDriverD3D()
 		nlwarning ("Can't create the direct 3d 9 object.");
 
 #ifdef NL_OS_WINDOWS
-		sint val = MessageBoxA(NULL, "Your DirectX version is too old. You need to install the latest one.\r\n\r\nPressing OK will quit the game and automatically open your browser to download the latest version of DirectX.\r\nPress Cancel will just quit the game.\r\n", "Mtp Target Error", MB_OKCANCEL);
-		if(val == IDOK)
+		sint val = MessageBoxA(NULL,
+			"Your DirectX version is too old. You need to install the latest one.\r\n\r\n"
+			"Pressing OK will quit the game and automatically open your browser to download the latest version of DirectX.\r\n"
+			"Press Cancel will just quit the game.\r\n", "NeL Error", MB_OKCANCEL);
+		if (val == IDOK)
 		{
-			openURL("http://www.microsoft.com/downloads/details.aspx?FamilyID=4b1f5d0c-5e44-4864-93cd-464ef59da050");
+			openURL("https://www.microsoft.com/en-us/download/details.aspx?id=35");
 		}
 #endif
 		exit(EXIT_FAILURE);
@@ -1173,7 +1176,7 @@ void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPAR
 		}
 	}
 
-	if (driver->_EventEmitter.getNumEmitters() > 0)
+	if (driver && driver->_EventEmitter.getNumEmitters() > 0)
 	{
 		CWinEventEmitter *we = NLMISC::safe_cast<CWinEventEmitter *>(driver->_EventEmitter.getEmitter(0));
 		// Process the message by the emitter
@@ -1225,11 +1228,28 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		D3DWndProc (pDriver, hWnd, message, wParam, lParam);
 	}
 
+	if (message == WM_SYSCOMMAND)
+	{
+		switch (wParam)
+		{
 #ifdef NL_DISABLE_MENU
-	// disable menu (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
-	if(message == WM_SYSCOMMAND && wParam == SC_KEYMENU)
-		return 0;
+			// disable menu (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
+		case SC_KEYMENU:
 #endif // NL_DISABLE_MENU
+
+			// Screensaver Trying To Start?
+		case SC_SCREENSAVE:
+
+			// Monitor Trying To Enter Powersave?
+		case SC_MONITORPOWER:
+
+			// Prevent From Happening
+			return 0;
+
+		default:
+			break;
+		}
+	}
 
 	// ace: if we receive close, exit now or it'll assert after
 	if(message == WM_CLOSE)
@@ -1247,6 +1267,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		}
 		return 0;
 	}
+
+#ifdef WM_UNICHAR
+	// https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-unichar
+	if (message == WM_UNICHAR)
+		return (wParam == UNICODE_NOCHAR);
+#endif
 
 	return DefWindowProcW(hWnd, message, wParam, lParam);
 }
@@ -3995,12 +4021,12 @@ void CDriverD3D::findNearestFullscreenVideoMode()
 		}
 	}
 }
-bool CDriverD3D::copyTextToClipboard(const ucstring &text)
+bool CDriverD3D::copyTextToClipboard(const std::string &text)
 {
 	return _EventEmitter.copyTextToClipboard(text);
 }
 
-bool CDriverD3D::pasteTextFromClipboard(ucstring &text)
+bool CDriverD3D::pasteTextFromClipboard(std::string &text)
 {
 	return _EventEmitter.pasteTextFromClipboard(text);
 }

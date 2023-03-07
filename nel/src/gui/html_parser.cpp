@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -57,7 +60,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// recursive function to walk html document
-	void CHtmlParser::parseNode(xmlNode *a_node, CHtmlElement &parent, std::string &styleString, std::vector<std::string> &links) const
+	void CHtmlParser::parseNode(xmlNode *a_node, CHtmlElement &parent, std::vector<std::string> &styles, std::vector<StyleLink> &links) const
 	{
 		uint childIndex = 0;
 		uint element_number;
@@ -66,7 +69,15 @@ namespace NLGUI
 		{
 			if (node->type == XML_TEXT_NODE)
 			{
-				parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content)));
+				// linebreak right after pre,textare open tag should be removed
+				if (parent.Children.empty() && (*node->content == '\n') && (parent.ID == HTML_PRE || parent.ID == HTML_TEXTAREA))
+				{
+					parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content) + 1));
+				}
+				else
+				{
+					parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content)));
+				}
 			}
 			else
 			if (node->type == XML_ELEMENT_NODE)
@@ -89,7 +100,7 @@ namespace NLGUI
 					}
 				}
 
-				parent.Children.push_back(CHtmlElement(CHtmlElement::ELEMENT_NODE, toLower((const char*)node->name)));
+				parent.Children.push_back(CHtmlElement(CHtmlElement::ELEMENT_NODE, toLowerAscii((const char*)node->name)));
 				CHtmlElement &elm = parent.Children.back();
 				elm.ID = element_number;
 				elm.parent = &parent;
@@ -109,7 +120,7 @@ namespace NLGUI
 				elm.Attributes.clear();
 
 				for (xmlAttr *cur_attr = node->properties; cur_attr; cur_attr = cur_attr->next) {
-					std::string key(toLower((const char *)(cur_attr->name)));
+					std::string key(toLowerAscii((const char *)(cur_attr->name)));
 					std::string value;
 					if (cur_attr->children)
 					{
@@ -124,7 +135,7 @@ namespace NLGUI
 					NLMISC::splitString(elm.getAttribute("class"), " ", parts);
 					for(uint i = 0; i<parts.size();++i)
 					{
-						elm.ClassNames.insert(toLower(trim(parts[i])));
+						elm.ClassNames.insert(toLowerAscii(trim(parts[i])));
 					}
 				}
 
@@ -136,7 +147,7 @@ namespace NLGUI
 					bool useStyle = true;
 					if (elm.hasAttribute("media"))
 					{
-						std::string media = trim(toLower(elm.Attributes["media"]));
+						std::string media = trim(toLowerAscii(elm.Attributes["media"]));
 						useStyle = media.empty() || media.find("all") != std::string::npos || media.find("screen") != std::string::npos;
 
 						// <style media="ryzom"> for ingame browser
@@ -145,7 +156,9 @@ namespace NLGUI
 
 					if (useStyle)
 					{
-						parseStyle(node->children, styleString);
+						std::string style;
+						parseStyle(node->children, style);
+						styles.push_back(style);
 					}
 					// style tag is kept in dom
 				}
@@ -154,7 +167,7 @@ namespace NLGUI
 					bool useStyle = true;
 					if (elm.hasAttribute("media"))
 					{
-						std::string media = trim(toLower(elm.Attributes["media"]));
+						std::string media = trim(toLowerAscii(elm.Attributes["media"]));
 						useStyle = media.empty() || media.find("all") != std::string::npos || media.find("screen") != std::string::npos;
 
 						// <style media="ryzom"> for ingame browser
@@ -163,13 +176,24 @@ namespace NLGUI
 
 					if (useStyle)
 					{
-						links.push_back(elm.getAttribute("href"));
+						styles.push_back("");
+						links.push_back(StyleLink(styles.size()-1, elm.getAttribute("href")));
 					}
 					// link tag is kept in dom
 				}
 				else if (node->children)
 				{
-					parseNode(node->children, elm, styleString, links);
+					parseNode(node->children, elm, styles, links);
+
+					if (!elm.Children.empty() && elm.ID == HTML_PRE && elm.Children.back().Type == CHtmlElement::TEXT_NODE)
+					{
+						std::string::size_type size = elm.Children.back().Value.size();
+						// strip last '\n' from non-empty line
+						if (size > 1 && elm.Children.back().Value[size-1] == '\n')
+						{
+							elm.Children.back().Value = elm.Children.back().Value.substr(0, size - 1);
+						}
+					}
 
 					// must cleanup nested tags that libxml2 does not fix
 					// dt without end tag: <dl><dt><dt></dl>
@@ -406,7 +430,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CHtmlParser::getDOM(std::string htmlString, CHtmlElement &dom, std::string &styleString, std::vector<std::string> &links) const
+	void CHtmlParser::getDOM(std::string htmlString, CHtmlElement &dom, std::vector<std::string> &styles, std::vector<StyleLink> &links) const
 	{
 		htmlParserCtxtPtr parser = htmlCreatePushParserCtxt(NULL, NULL, NULL, 0, NULL, XML_CHAR_ENCODING_UTF8);
 		if (!parser)
@@ -428,8 +452,7 @@ namespace NLGUI
 			xmlNode *root = xmlDocGetRootElement(parser->myDoc);
 			if (root)
 			{
-				styleString.clear();
-				parseNode(root, dom, styleString, links);
+				parseNode(root, dom, styles, links);
 			}
 			else
 			{

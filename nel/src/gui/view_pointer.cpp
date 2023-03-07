@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -91,43 +92,43 @@ namespace NLGUI
 		_OffsetY = getY();
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_default");
-		if (prop) _TxDefault = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxDefault = NLMISC::toLowerAscii ((const char *) prop);
 
  		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_move_window");
-		if (prop) _TxMoveWindow = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxMoveWindow = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_resize_BR_TL");
-		if (prop) _TxResizeBRTL = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxResizeBRTL = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_resize_BL_TR");
-		if (prop) _TxResizeBLTR = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxResizeBLTR = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_resize_TB");
-		if (prop) _TxResizeTB = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxResizeTB = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_resize_LR");
-		if (prop) _TxResizeLR = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxResizeLR = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_rotate");
-		if (prop) _TxRotate = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxRotate = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_scale");
-		if (prop) _TxScale = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxScale = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_colpick");
-		if (prop) _TxColPick = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxColPick = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_pan");
-		if (prop) _TxPan = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxPan = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_can_pan");
-		if (prop) _TxCanPan = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxCanPan = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_pan_r2");
-		if (prop) _TxPanR2 = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxPanR2 = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_can_pan_r2");
-		if (prop) _TxCanPanR2 = NLMISC::toLower ((const char *) prop);
+		if (prop) _TxCanPanR2 = NLMISC::toLowerAscii ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"color");
 		if (prop) _Color = convertColor(prop);
@@ -206,7 +207,10 @@ namespace NLGUI
 
 		if (_TxIdDefault == -2)
 		{
-			_TxIdDefault	= rVR.getTextureIdFromName (_TxDefault);
+			_TxIdDefault = rVR.getTextureIdFromName(_TxDefault);
+		}
+		if (_TxIdMoveWindow == -2)
+		{
 			_TxIdMoveWindow = rVR.getTextureIdFromName (_TxMoveWindow);
 			_TxIdResizeBRTL = rVR.getTextureIdFromName (_TxResizeBRTL);
 			_TxIdResizeBLTR = rVR.getTextureIdFromName (_TxResizeBLTR);
@@ -250,7 +254,7 @@ namespace NLGUI
 
 				if (vLink->getMouseOverShape(tooltip, rot, col))
 				{
-					setString(ucstring::makeFromUtf8(tooltip));
+					setString(tooltip);
 					sint32 texId = rVR.getTextureIdFromName ("curs_pick.tga");
 
 					CInterfaceGroup *stringCursor = hwMouse ? _StringCursorHardware : _StringCursor;
@@ -406,7 +410,7 @@ namespace NLGUI
 				splitString(tooltipInfos, "@", tooltipInfosList);
 				texName = tooltipInfosList[0];
 				tooltip = tooltipInfosList[1];
-				setString(ucstring::makeFromUtf8(tooltip));
+				setString(tooltip);
 				CViewRenderer &rVR = *CViewRenderer::getInstance();
 				sint32 texId = rVR.getTextureIdFromName (texName);
 
@@ -449,7 +453,7 @@ namespace NLGUI
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------
-	void CViewPointer::setString (const ucstring &str, CInterfaceGroup *target)
+	void CViewPointer::setString(const std::string &str, CInterfaceGroup *target)
 	{
 		if (target)
 		{
@@ -475,7 +479,7 @@ namespace NLGUI
 
 
 	// --------------------------------------------------------------------------------------------------------------------
-	void CViewPointer::setString (const ucstring &str)
+	void CViewPointer::setString (const std::string &str)
 	{
 		if (_ContextString != str)
 		{

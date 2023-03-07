@@ -19,6 +19,3 @@
 
 
 #include "stdafx.h"
-
-void nlmax_mesh_library_stdafx_dummy() { }
-

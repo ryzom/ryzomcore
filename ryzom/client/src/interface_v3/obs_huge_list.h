@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -127,8 +128,6 @@ private:
 		//
 		NLMISC::CCDBNodeLeaf *SlotType;
 		NLMISC::CCDBNodeLeaf *Quality;
-		NLMISC::CCDBNodeLeaf *Serial;
-		NLMISC::CCDBNodeLeaf *CreateTime;
 		NLMISC::CCDBNodeLeaf *SheetIDOrSkill;
 		//
 		NLMISC::CCDBNodeLeaf *LogicTextID;	// valid if the item is to be obtained for a mission
@@ -145,6 +144,7 @@ private:
 		NLMISC::CCDBNodeLeaf *NameId;
 		NLMISC::CCDBNodeLeaf *InfoVersion;
 		NLMISC::CCDBNodeLeaf *UserColor;
+		NLMISC::CCDBNodeLeaf *CharacBuffs;
 		NLMISC::CCDBNodeLeaf *Enchant;
 		NLMISC::CCDBNodeLeaf *RMClassType;
 		NLMISC::CCDBNodeLeaf *RMFaberStatType;
@@ -162,8 +162,6 @@ private:
 							GuildName(NULL),
 							SlotType(NULL),
 							Quality(NULL),
-							Serial(NULL),
-							CreateTime(NULL),
 							SheetIDOrSkill(NULL),
 							LogicTextID(NULL),
 							DescTextID(NULL),
@@ -176,6 +174,7 @@ private:
 							NameId(NULL),
 							InfoVersion(NULL),
 							UserColor(NULL),
+							CharacBuffs(NULL),
 							Enchant(NULL),
 							RMClassType(NULL),
 							RMFaberStatType(NULL),
@@ -223,8 +222,6 @@ private:
 
 		TRADE_SLOT_TYPE::TTradeSlotType	SlotType;
 		uint16							Quality;
-		uint32							Serial;
-		uint32							CreateTime;
 		uint32							SheetIDOrSkill;
 		uint32 LogicTextID;				// Valid if the item is to be obtained as a mission reward
 		uint32 DescTextID;				// Valid if the item is to be obtained as a mission reward
@@ -239,6 +236,7 @@ private:
 		uint32 NameId;		// Valid for items
 		uint32 InfoVersion; // Valid for items
 		sint32 UserColor;   // Valid for items
+		uint32 CharacBuffs;	// Valid for items
 		uint32 Enchant;
 		uint32 RMClassType;
 		uint32 RMFaberStatType;

@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -122,12 +122,12 @@ namespace NLGUI
 		// retrieve the index of a line from its id (-1 if not found)
 		sint getLineFromId(const std::string &id);
 
-		CViewTextMenu* addLine (const ucstring &name, const std::string &ah,
+		CViewTextMenu* addLine (const std::string &name, const std::string &ah,
 								const std::string &params, const std::string &id="",
 								const std::string &cond = std::string(), const std::string &texture="",
 								bool checkable = false, bool checked = false, bool formatted = false
 							   );
-		CViewTextMenu* addLineAtIndex(uint index, const ucstring &name, const std::string &ah,
+		CViewTextMenu* addLineAtIndex(uint index, const std::string &name, const std::string &ah,
 									  const std::string &params, const std::string &id="",
 									  const std::string &cond = std::string(), const std::string &texture="",
 									  bool checkable = false, bool checked = false, bool formatted = false
@@ -187,6 +187,10 @@ namespace NLGUI
 
 		// Hide a line.
 		void setHiddenLine(uint line,  bool h);
+
+		// Highlight single line
+		void setSelected(uint line) { _Selected = line < _Lines.size() ? line : -1; }
+		void clearSelected() { _Selected = -1; }
 
 		// Max Visible Line (-1 == no limit)
 		void setMaxVisibleLine(sint32 mvl);
@@ -280,9 +284,12 @@ namespace NLGUI
 		std::vector<CGroupSubMenu*>		_SubMenus;
 
 		CGroupMenu						*_GroupMenu; // Master parent
+		sint32							_MouseOver;
 		sint32							_Selected;
 
 		sint32							_MaxVisibleLine; // -1 == no limit
+
+		bool							_ScrollToView;
 
 		friend class CGroupMenu;
 	private:
@@ -332,12 +339,7 @@ namespace NLGUI
 		virtual void setActive (bool state);
 
 		virtual bool isWindowUnder (sint32 x, sint32 y);
-
-		// add line with a string, for backward compatibility
-		void addLine (const std::string &name, const std::string &ah, const std::string &params,
-					  const std::string &id = std::string(),
-					  const std::string &cond = std::string(), const std::string &texture="",
-					  bool checkable = false, bool checked = false);
+		
 		uint getNumLine() const;
 		void deleteLine(uint index);
 		const std::string getActionHandler(uint lineIndex) const;
@@ -350,12 +352,12 @@ namespace NLGUI
 		void setRightClickHandler(uint lineIndex, const std::string &ah = "");
 		void setRightClickHandlerParam(uint lineIndex, const std::string &params = "");
 
-		void addLine (const ucstring &name, const std::string &ah = "", const std::string &params = "",
+		void addLine (const std::string &name, const std::string &ah = "", const std::string &params = "",
 					  const std::string &id = std::string(),
 					  const std::string &cond = std::string(), const std::string &texture="",
 					  bool checkable = false, bool checked = false
 					 );
-		void addLineAtIndex (uint index, const ucstring &name, const std::string &ah = "", const std::string &params = "",
+		void addLineAtIndex (uint index, const std::string &name, const std::string &ah = "", const std::string &params = "",
 							 const std::string &id = std::string(),
 							 const std::string &cond = std::string(), const std::string &texture="",
 							 bool checkable = false, bool checked = false
@@ -375,6 +377,10 @@ namespace NLGUI
 
 		// Gray a line on the RootMenu
 		void	setGrayedLine(uint line, bool g);
+
+		// Highlight single line
+		void setSelected(uint line) { if (_RootMenu) _RootMenu->setSelected(line); }
+		void clearSelected() { if(_RootMenu) _RootMenu->clearSelected(); }
 
 		CGroupSubMenu	*getRootMenu() const { return _RootMenu; }
 

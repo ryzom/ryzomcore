@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -302,6 +302,7 @@ CClientConfig::CClientConfig()
 	SelectedSlot		= 0;						// Default is slot 0
 
 	Windowed			= false;					// Default is windowed mode.
+	MonitorName			= "";
 	Width				= 0;						// Default Width for the window (0 = current screen resolution).
 	Height				= 0;						// Default Height for the window (0 = current screen resolution).
 	Depth				= 32;						// Default Bit per Pixel.
@@ -314,6 +315,7 @@ CClientConfig::CClientConfig()
 	InterfaceScale_min	= 0.8f;
 	InterfaceScale_max	= 2.0f;
 	InterfaceScale_step	= 0.05;
+	InterfaceScaleAuto  = false;
 	BilinearUI			= true;
 
 	WindowSnapInvert	= false;
@@ -326,17 +328,11 @@ CClientConfig::CClientConfig()
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
 
-#if 1 // Yubo hack
-	// The order is important here, because in a layer, global texture are rendered through this order
-	TexturesInterface.push_back("texture_interfaces_v3");
-	// DXTC contain all items and bricks bitmaps, they must come after standard texture
-	TexturesInterface.push_back("new_texture_interfaces_dxtc");
-	// Added icons by Yubo's Team 2009
-	TexturesInterface.push_back("texture_extra");
-#else
+	QuicConnection		= true;
+	QuicCertValidation	= true;
+
 	TexturesInterface.push_back("texture_interfaces_v3");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc");
-#endif
 
 	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
 
@@ -421,6 +417,7 @@ CClientConfig::CClientConfig()
 	CameraRecorderPrefix = "cam_rec";
 	CameraRecorderBlend  = true;
 
+	ScreenShotDirectory = "screenshots";
 	ScreenShotWidth		= 0;
 	ScreenShotHeight	= 0;
 	ScreenShotFullDetail = true;
@@ -438,18 +435,18 @@ CClientConfig::CClientConfig()
 #endif
 
 	PatchUrl.clear();
+#ifdef RYZOM_FORGE
 	PatchletUrl.clear();
+#endif
 	PatchVersion.clear();
 
-	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
-	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
-	WebIgNotifInterval = 10; // time in minutes
+	WebIgTrustedDomains.clear();
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_RING_URL;
+	ReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_URL;
 
 
 	///////////////
@@ -517,6 +514,8 @@ CClientConfig::CClientConfig()
 	End_BG				= "end_bg.tga";				// Default name for the last background file.
 	IntroNevrax_BG		= "launcher_nevrax.tga";
 	IntroNVidia_BG		= "launcher_nvidia.tga";
+
+	UiFeatureFlags.push_back(RYZOM_CLIENT_UI_FEATURE_FLAG);
 
 	TipsY				= 0.07f;
 	TeleportInfoY		= 0.23f;
@@ -728,7 +727,7 @@ CClientConfig::CClientConfig()
 
 	R2EDLoadDynamicFeatures	= 0;
 
-	CheckR2ScenarioMD5 = true;
+	CheckR2ScenarioMD5 = false;
 
 	DisplayTPReason = false;
 
@@ -812,6 +811,8 @@ void CClientConfig::setValues()
 	// r2ed interfaces
 	READ_STRINGVECTOR_FV(XMLR2EDInterfaceFiles);
 
+	READ_STRINGVECTOR_FV(UiFeatureFlags)
+
 	// logos
 	READ_STRINGVECTOR_FV(Logos);
 
@@ -856,6 +857,8 @@ void CClientConfig::setValues()
 	}
 	else
 		cfgWarning("Default value used for 'Fullscreen'");
+
+	READ_STRING_FV(MonitorName);
 	// Width
 	READ_INT_FV(Width)
 	// Height
@@ -869,11 +872,13 @@ void CClientConfig::setValues()
 	// Gamma
 	READ_FLOAT_FV(Gamma)
 	// UI scaling
+	READ_BOOL_FV(InterfaceScaleAuto);
 	READ_FLOAT_FV(InterfaceScale);
 	READ_FLOAT_FV(InterfaceScale_min);
 	READ_FLOAT_FV(InterfaceScale_max);
 	READ_FLOAT_FV(InterfaceScale_step);
 	clamp(ClientCfg.InterfaceScale, ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
+
 	READ_BOOL_FV(BilinearUI);
 	READ_BOOL_FV(WindowSnapInvert);
 	READ_INT_FV(WindowSnapDistance);
@@ -917,6 +922,9 @@ void CClientConfig::setValues()
 #endif // FINAL_VERSION
 	// FSHost
 	READ_STRING_FV(FSHost)
+	// QUIC
+	READ_BOOL_FV(QuicConnection)
+	READ_BOOL_FV(QuicCertValidation)
 
 	READ_BOOL_DEV(DisplayAccountButtons)
 	READ_STRING_DEV(CreateAccountURL)
@@ -1089,6 +1097,7 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(CameraRecorderBlend)
 
 	// Screenshot
+	READ_STRING_FV(ScreenShotDirectory)
 	READ_INT_FV(ScreenShotWidth)
 	READ_INT_FV(ScreenShotHeight)
 	READ_BOOL_FV(ScreenShotFullDetail)
@@ -1110,18 +1119,15 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ReleaseNotePath)
 #endif
 
-	/////////////////////////
-	// NEW PATCHLET SYSTEM //
+#ifdef RYZOM_FORGE
+	/////////////////////////////
+	// GARBAGE PATCHLET SYSTEM //
 	READ_STRING_FV(PatchletUrl)
+#endif
 
 	///////////
 	// WEBIG //
-	READ_STRING_FV(WebIgMainDomain);
-	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
-		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
-		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
-	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;
@@ -1324,6 +1330,9 @@ void CClientConfig::setValues()
 	// Data Path no recurse.
 	READ_STRINGVECTOR_FV(DataPathNoRecurse);
 
+	// Pre-load path
+	READ_STRING_DEV(PreLoadPath);
+
 	// Streamed package path
 	READ_STRING_FV(StreamedPackagePath);
 
@@ -1446,7 +1455,7 @@ void CClientConfig::setValues()
 				else if (stricmp(mode, "centeraround") == 0)	p.Mode = SSysInfoParam::CenterAround;
 				else if (stricmp(mode, "around") == 0)	p.Mode = SSysInfoParam::Around;
 
-				ClientCfg.SystemInfoParams[toLower(sic->asString(2 * k))] = p;
+				ClientCfg.SystemInfoParams[toLowerAscii(sic->asString(2 * k))] = p;
 			}
 		}
 	}
@@ -1869,7 +1878,7 @@ void CClientConfig::setValues()
 		ClientCfg.HardwareCursors.clear ();
 		int iSz = pcvHardwareCursors->size();
 		for (int i = 0; i < iSz; i++)
-			ClientCfg.HardwareCursors.insert(toLower(pcvHardwareCursors->asString(i)));
+			ClientCfg.HardwareCursors.insert(toLowerAscii(pcvHardwareCursors->asString(i)));
 	}
 	else
 	{
@@ -1946,6 +1955,11 @@ void CClientConfig::serial(NLMISC::IStream &f)
 		f.xmlPushBegin("Light");
 		f.xmlPushEnd();
 		f.serial(Light);
+		f.xmlPop();
+
+		f.xmlPushBegin("MonitorName");
+		f.xmlPushEnd();
+		f.serial(MonitorName);
 		f.xmlPop();
 
 		f.xmlPushBegin("Windowed");
@@ -2036,7 +2050,7 @@ void CClientConfig::init(const string &configFileName)
 	}
 
 	// read the exising config file (don't parse it yet!)
-	ucstring content;
+	ucstring content; // UTF-16 and UTF-8 textfile support
 	NLMISC::CI18N::readTextFile(configFileName, content);
 	std::string contentUtf8 = content.toUtf8();
 
@@ -2070,37 +2084,39 @@ void CClientConfig::init(const string &configFileName)
 	// load the config files
 	ClientCfg.ConfigFile.load (configFileName);
 
-	CConfigFile::CVar *pCV;
+	CConfigFile::CVar *varPtr;
 	// check language code is supported
-	pCV = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
-	if (pCV)
+	varPtr = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
+	if (varPtr)
 	{
-		std::string lang = pCV->asString();
+		std::string lang = varPtr->asString();
 		if (!CI18N::isLanguageCodeSupported(lang))
 		{
 			nlinfo("Unsupported language code \"%s\" fallback on default", lang.c_str());
 			// fallback to default language
 			ClientCfg.LanguageCode = CI18N::getSystemLanguageCode();
 			// update ConfigFile variable
-			pCV->setAsString(ClientCfg.LanguageCode);
+			varPtr->setAsString(ClientCfg.LanguageCode);
 			ClientCfg.ConfigFile.save();
 		}
 	}
 
 	// update the ConfigFile variable in the config file
-	pCV = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
-	if (pCV)
+	varPtr = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
+	if (varPtr)
 	{
-		std::string str = pCV->asString ();
+		std::string str = varPtr->asString ();
 		if (str != getVersion() && ClientCfg.SaveConfig)
 		{
 			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), getVersion().c_str());
-			pCV->setAsString(getVersion());
+			varPtr->setAsString(getVersion());
 			ClientCfg.ConfigFile.save();
 		}
 	}
 	else
+	{
 		nlwarning ("There's no ClientVersion variable in the config file!");
+	}
 
 }// init //
 
@@ -2279,14 +2295,13 @@ string	CClientConfig::getHtmlLanguageCode() const
 }
 
 // ***************************************************************************
-ucstring CClientConfig::buildLoadingString( const ucstring& ucstr ) const
+string CClientConfig::buildLoadingString( const string& ucstr ) const
 {
 	if( LoadingStringCount > 0 )
 	{
 		uint index = rand()%LoadingStringCount;
-		string tipId = "uiLoadingString"+toString(index);
-		ucstring randomUCStr = CI18N::get(tipId);
-		return randomUCStr;
+		string tipId = "uiLoadingString" + toString(index);
+		return CI18N::get(tipId);
 	}
 	else
 		return ucstr;

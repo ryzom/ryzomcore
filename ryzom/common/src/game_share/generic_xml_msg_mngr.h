@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -24,6 +27,7 @@
 #include "nel/misc/i_xml.h"
 #include "nel/misc/entity_id.h"
 #include "nel/misc/bit_mem_stream.h"
+#include "nel/misc/string_view.h"
 
 #include <string>
 #include <vector>
@@ -232,6 +236,14 @@ public:
 	bool	pushNameToStream(const std::string &msgName, NLMISC::CBitMemStream &strm);
 
 	/**
+	* Convert and write a Message Name into a stream.
+	* \param string msgName : Message Name to convert and write into the stream.
+	* \param CBitMemStream strm : the stream to receive the Message Name.
+	* \return bool : 'false' if the method cannot write the message Name into the stream (probably because de message name is wrong).
+	*/
+	bool	pushNameToStream(const char *msgName, NLMISC::CBitMemStream &strm);
+
+	/**
 	 * Convert and return the Message Name from a stream.
 	 * \param string resultName: The result for the Message Name.
 	 * \param CBitMemStream strm : the stream with the Message Name.
@@ -337,7 +349,7 @@ protected:
 	{
 	public:
 		typedef std::vector<CNode*>					TNodes;
-		typedef std::map<std::string, CNode*>		TNodesByName;
+		typedef std::map<std::string, CNode*, NL_SV_LESS> TNodesByName;
 
 		TNodes				Nodes;
 		TNodesByName		NodesByName;
@@ -361,24 +373,26 @@ protected:
 		CNode	*select(const char *name)
 		{
 			CNode					*node = this;
-			std::string				sub;
+			ptrdiff_t				nameIdx = 0;
+			ptrdiff_t				subIdx;
 			TNodesByName::iterator	it;
 
 			for(;;)
 			{
-				sub.resize(0);
-				while (*name != '\0' && *name != ':')
-					sub += *name++;
-				it = node->NodesByName.find(sub);
+				subIdx = nameIdx;
+				while (name[nameIdx] != '\0' && name[nameIdx] != ':')
+					++nameIdx;
+				
+				it = node->NodesByName.find(nlsvf(NLMISC::CStringView(&name[subIdx], nameIdx - subIdx)));
 				if (it == node->NodesByName.end())
 				{
-					nlwarning("Couldn't select node '%s', not found in parent '%s'", sub.c_str(), node->Name.c_str());
+					nlwarning("Couldn't select node '%s', not found in parent '%s'", nlsvc(NLMISC::CStringView(&name[subIdx], nameIdx - subIdx)), node->Name.c_str());
 					return NULL;
 				}
 				node = (*it).second;
-				if (*name == '\0')
+				if (name[nameIdx] == '\0')
 					return node;
-				++name;
+				++nameIdx;
 			}
 			return NULL;
 		}
@@ -387,34 +401,35 @@ protected:
 		CNode	*select(const char *name, NLMISC::CBitMemStream &strm)
 		{
 			CNode					*node = this;
-			std::string				sub;
+			ptrdiff_t				nameIdx = 0;
+			ptrdiff_t				subIdx;
 			TNodesByName::iterator	it;
 
 			for(;;)
 			{
-				sub.resize(0);
-				while (*name != '\0' && *name != ':')
-					sub += *name++;
+				subIdx = nameIdx;
+				while (name[nameIdx] != '\0' && name[nameIdx] != ':')
+					++nameIdx;
 
 				if (node->NbBits == 0)
 				{
-					nlwarning("Couldn't select node '%s', parent '%s' has no bit per child", sub.c_str(), node->Name.c_str());
+					nlwarning("Couldn't select node '%s', parent '%s' has no bit per child", nlsvc(NLMISC::CStringView(&name[subIdx], nameIdx - subIdx)), node->Name.c_str());
 					return 0;
 				}
 
-				it = node->NodesByName.find(sub);
+				it = node->NodesByName.find(nlsvf(NLMISC::CStringView(&name[subIdx], nameIdx - subIdx)));
 				if (it == node->NodesByName.end())
 				{
-					nlwarning("Couldn't select node '%s', not found in parent '%s'", sub.c_str(), node->Name.c_str());
+					nlwarning("Couldn't select node '%s', not found in parent '%s'", nlsvc(NLMISC::CStringView(&name[subIdx], nameIdx - subIdx)), node->Name.c_str());
 					return NULL;
 				}
 
 				strm.serialAndLog2((*it).second->Value, node->NbBits);
 
 				node = (*it).second;
-				if (*name == '\0')
+				if (name[nameIdx] == '\0')
 					return node;
-				++name;
+				++nameIdx;
 			}
 			return NULL;
 		}

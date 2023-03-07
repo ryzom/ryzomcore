@@ -14,7 +14,7 @@ NL_ADD_LIB_SUFFIX(nelligo)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nelligo ${CMAKE_CURRENT_SOURCE_DIR}/stdligo.h ${CMAKE_CURRENT_SOURCE_DIR}/stdligo.cpp)
+  target_precompile_headers(nelligo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdligo.h)
 ENDIF()
 
 NL_GEN_PC(nel-ligo.pc)

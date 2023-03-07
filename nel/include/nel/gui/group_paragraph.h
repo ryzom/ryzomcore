@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -54,6 +55,8 @@ namespace NLGUI
 			Right
 		};
 
+		enum TTextAlign { AlignLeft = 0, AlignCenter, AlignRight, AlignJustify };
+
 		///constructor
 		CGroupParagraph(const TCtorParam &param);
 
@@ -84,18 +87,20 @@ namespace NLGUI
 		* \param line : text to be added
 		* \param color : text color
 		*/
-		void addTextChild (const ucstring& line,const NLMISC::CRGBA &textColor, bool multiLine = true);
+		void addTextChild (const std::string& line,const NLMISC::CRGBA &textColor, bool multiLine = true);
 
 		/**
 		* add a text child element to the group, using the text template
 		* \param line : text to be added
 		*/
-		void addTextChild (const ucstring& line, bool multiLine = true);
+		void addTextChild (const std::string& line, bool multiLine = true);
 
 		/// Same as adding a text child but the text will be taken from the string manager
 		void addTextChildID (uint32 id, bool multiLine = true);
 		// the same, but with id taken from the database
 		void addTextChildID (const std::string &dbPath, bool multiLine = true);
+
+		void setTextAlign(const TTextAlign align) { _TextAlign = align; }
 
 	protected:
 
@@ -269,6 +274,9 @@ namespace NLGUI
 		// To conserve elements in the order they have been added
 		// (the element drawn are stored in _views, _contrlos or _childrengroups of cinterfacegroup
 		std::vector<CElementInfo> _Elements;
+
+		// Horizontal align for elements
+		TTextAlign _TextAlign;
 
 		// Last parent width
 		sint32		_LastW;

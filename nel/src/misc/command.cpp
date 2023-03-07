@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -49,9 +52,8 @@ ICommand::ICommand(const char *categoryName, const char *commandName, const char
 
 	if (comm != LocalCommands->end ())
 	{
-		nlinfo("command with same name: %s", commandName);
 		// 2 commands have the same name
-		// nlstopex (("There are 2 commands that have the same name in the project (command name '%s'), skip the second definition", commandName));
+		nlstopex (("There are 2 commands that have the same name in the project (command name '%s'), skip the second definition", commandName));
 	}
 	else
 	{
@@ -466,7 +468,7 @@ void CCommandRegistry::expand (std::string &commandName, NLMISC::CLog &log)
 		useprefix = false;
 	}
 
-	string lowerCommandName = toLower(commandName);
+	string lowerCommandName = toLowerAscii(commandName);
 	// Build the list of matching command names
 	vector<string> matchingnames;
 	{
@@ -475,7 +477,7 @@ void CCommandRegistry::expand (std::string &commandName, NLMISC::CLog &log)
 			// list of global commands
 			for (TCommand::iterator comm = _Commands.begin(); comm != _Commands.end(); comm++)
 			{
-				string first = toLower((*comm).first);
+				string first = toLowerAscii((*comm).first);
 				if (first.find( lowerCommandName ) == 0)
 				{
 					matchingnames.push_back( (*comm).first );
@@ -485,7 +487,7 @@ void CCommandRegistry::expand (std::string &commandName, NLMISC::CLog &log)
 			// list of object instance
 			for (TCommandsHandlers::TAToBMap::const_iterator it(_CommandsHandlers.getAToBMap().begin()); it != _CommandsHandlers.getAToBMap().end(); ++it)
 			{
-				string first = toLower(it->first);
+				string first = toLowerAscii(it->first);
 				if (first.find( lowerCommandName ) == 0)
 				{
 					matchingnames.push_back( it->first );
@@ -507,7 +509,7 @@ void CCommandRegistry::expand (std::string &commandName, NLMISC::CLog &log)
 
 					for (TCommandHandlerClassInfo::TCommandsInfo::iterator it(chci._Commands.begin()); it != chci._Commands.end(); ++it)
 					{
-						string first = toLower(it->first);
+						string first = toLowerAscii(it->first);
 						if (first.find( lowerCommandName ) == 0)
 						{
 							matchingnames.push_back( it->first );

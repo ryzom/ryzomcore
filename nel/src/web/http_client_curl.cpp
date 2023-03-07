@@ -1,8 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -31,10 +31,35 @@ using namespace NLWEB;
 #define new DEBUG_NEW
 #endif
 
-#define _Curl (CURL *)_CurlStruct
+namespace NLWEB {
 
-namespace NLWEB
+namespace /* anonymous */ {
+
+// Mutex protected global curl init counter
+CMutex s_CurlInitMutex;
+uint32 s_CurlInitCount = 0;
+
+void initCurl()
 {
+	CAutoMutex<CMutex> mutex(s_CurlInitMutex);
+	if (s_CurlInitCount == 0)
+	{
+		curl_global_init(CURL_GLOBAL_ALL);
+	}
+	s_CurlInitCount++;
+}
+
+void releaseCurl()
+{
+	CAutoMutex<CMutex> mutex(s_CurlInitMutex);
+	if (s_CurlInitCount == 1)
+	{
+		curl_global_cleanup();
+	}
+	s_CurlInitCount--;
+}
+
+} /* anonymous namespace */
 
 // Ugly CURL callback
 size_t CCurlHttpClient::writeDataFromCurl(void *buffer, size_t size, size_t nmemb, void *pHttpClient)
@@ -52,10 +77,13 @@ bool CCurlHttpClient::connect(const std::string &/* server */)
 	if ((vdata->features & CURL_VERSION_SSL) == 0)
 		nlwarning("SSL not supported");
 
-	curl_global_init(CURL_GLOBAL_ALL);
-	_CurlStruct = curl_easy_init();
+	initCurl();
+	_Curl = curl_easy_init();
 	if(_Curl == NULL)
+	{
+		releaseCurl();
 		return false;
+	}
 
 	return true;
 }
@@ -72,8 +100,9 @@ static const std::string CAFilename = "cacert.pem"; // https://curl.haxx.se/docs
 // ***************************************************************************
 bool CCurlHttpClient::verifyServer(bool verify)
 {
-	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, verify ? 2 : 0);
+	m_Verify = verify;
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
+	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, verify ? 2 : 0);
 
 	// specify custom CA certs
 	CCurlCertificates::addCertificateFile(CAFilename);
@@ -94,8 +123,8 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	curl_easy_setopt(_Curl, CURLOPT_URL, url.c_str());
 	if (url.length() > 8 && (url[4] == 's' || url[4] == 'S')) // 01234 https
 	{
-		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, 1L);
-		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, 2L);
+		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, m_Verify ? 1L : 0);
+		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, m_Verify ? 2L : 0);
 	}
 
 	// Authentication
@@ -121,15 +150,17 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	curl_easy_setopt(_Curl, CURLOPT_WRITEFUNCTION, CCurlHttpClient::writeDataFromCurl);
 	curl_easy_setopt(_Curl, CURLOPT_WRITEDATA, this);
 
-	char errorbuf [CURL_ERROR_SIZE+1];
-	curl_easy_setopt(_Curl, CURLOPT_ERRORBUFFER, errorbuf);
+	if (!m_ErrorBuf.size())
+		m_ErrorBuf.resize(CURL_ERROR_SIZE + 1);
+	m_ErrorBuf[0] = '\0';
+	curl_easy_setopt(_Curl, CURLOPT_ERRORBUFFER, &m_ErrorBuf[0]);
 
 	// Send
 	CURLcode res = curl_easy_perform(_Curl);
 	if (res != 0)
 	{
 		if (verbose)
-			nlwarning(errorbuf);
+			nlwarning(&m_ErrorBuf[0]);
 		return false;
 	}
 
@@ -191,12 +222,12 @@ bool CCurlHttpClient::receive(string &res, bool verbose)
 // ***************************************************************************
 void CCurlHttpClient::disconnect()
 {
-	if (_CurlStruct)
+	if (_Curl)
 	{
 		curl_easy_cleanup(_Curl);
-		_CurlStruct = NULL;
+		_Curl= NULL;
+		releaseCurl();
 	}
-	curl_global_cleanup();
 }
 
 CCurlHttpClient CurlHttpClient;

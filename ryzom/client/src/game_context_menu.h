@@ -131,7 +131,6 @@ private:
 	CViewTextMenuPtr _TextPAStop;
 	CViewTextMenuPtr _TextPAFree;
 	CViewTextMenuPtr _TextPAEnterStable;
-	CViewTextMenuPtr _TextPAEnterBag;
 
 	// BotChat and player talk
 	CViewTextMenuPtr _TextNews;
@@ -203,8 +202,7 @@ class CEntityCL;
 bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index, bool clearAll,
 								  CViewTextMenu *pFollow, CViewTextMenu *pStop, CViewTextMenu *pFree,
 								  CViewTextMenu *pEnterStable, CViewTextMenu *pLeaveStable,
-								  CViewTextMenu *pMount, CViewTextMenu *pUnmount,
-								  CViewTextMenu *pEnterBag, CViewTextMenu *pLeaveBag );
+								  CViewTextMenu *pMount, CViewTextMenu *pUnmount );
 
 
 #endif // NL_GAME_CONTEXT_MENU_H

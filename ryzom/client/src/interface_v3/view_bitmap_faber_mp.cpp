@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -62,7 +63,7 @@ bool CViewBitmapFaberMp::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_noitem" );
 	if (prop)
 	{
-		_TextureNoItemName = toLower((const char *) prop);
+		_TextureNoItemName = toLowerAscii((const char *) prop);
 		_TextureNoItemId = -2;
 	}
 
@@ -110,13 +111,13 @@ void CViewBitmapFaberMp::draw ()
 	///\todo nico : draw icon
 	/*xOffset+=_XReal;
 	yOffset+=_YReal;
-	_SheetText->setText(ucstring(toString(_SheetId.getSInt32())));
+	_SheetText->setText(toString(_SheetId.getSInt32()));
 	_SheetText->draw(xOffset,yOffset+20);
 
-	_QuantityText->setText(ucstring(toString(_Quantity.getSInt32())));
+	_QuantityText->setText(toString(_Quantity.getSInt32()));
 	_QuantityText->draw(xOffset,yOffset+10);
 
-	_QualityText->setText(ucstring(toString(_Quality.getSInt32())));
+	_QualityText->setText(toString(_Quality.getSInt32()));
 	_QualityText->draw(xOffset,yOffset);
 */
 

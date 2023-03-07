@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -435,6 +436,14 @@ namespace NLGUI
 	void CInterfaceElement::setSizeRef(const std::string &sizeref)
 	{
 		parseSizeRef(sizeref.c_str());
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	std::string CInterfaceElement::getPosParent() const
+	{
+		std::string id;
+		getPosParent(id);
+		return id;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1028,21 +1037,16 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	bool			CInterfaceElement::convertBool (const char *ptr)
+	bool CInterfaceElement::convertBool (const char *ptr)
 	{
-		std::string str = toLower(ptr);
-		bool b = false;
-		fromString( str, b );
-		return b;
+		return NLMISC::toBool(ptr);
 	}
 
 	// ------------------------------------------------------------------------------------------------
 	NLMISC::CVector CInterfaceElement::convertVector (const char *ptr)
 	{
 		float x = 0.0f, y = 0.0f, z = 0.0f;
-
 		sscanf (ptr, "%f %f %f", &x, &y, &z);
-
 		return CVector(x,y,z);
 	}
 

@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Build zone
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -145,9 +145,28 @@ else:
 	files = findFiles(log, ExportBuildDirectory + "/" + ZoneWeldBuildDirectory, "", ".zonenhw")
 	for file in files:
 		sourceFile = ExportBuildDirectory + "/" + ZoneWeldBuildDirectory + "/" + file
-		destFile = ExportBuildDirectory + "/" + ZoneWeldBuildDirectory + "/" + os.path.basename(file)[0:-len(".zonenhw")] + ".zonew"
+		destFile = ExportBuildDirectory + "/" + ZoneWeldBuildDirectory + "/" + os.path.basename(file)[0:-len(".zonenhw")] + ".zone"
 		if needUpdateLogRemoveDest(log, sourceFile, destFile):
-			subprocess.call([ ZoneElevation, sourceFile, destFile, "--land", land, "--heightmap", heightMap1, "--zfactor", LigoExportZFactor1, "--heightmap2", heightMap2, "--zfactor2", LigoExportZFactor2 ])
+			command = [ ZoneElevation, sourceFile, destFile, "--land", land, "--heightmap", heightMap1, "--zfactor", LigoExportZFactor1, "--heightmap2", heightMap2, "--zfactor2", LigoExportZFactor2 ]
+			if LigoExportExtendCoords != 0:
+				command.append("--extendcoords")
+			callParallelProcess(command)
+	flushParallelProcesses()
+printLog(log, "")
+
+printLog(log, ">>> Re-weld zone with heightmap <<<")
+if ZoneWelder == "":
+	toolLogFail(log, ZoneWelderTool, ToolSuffix)
+elif ExecTimeout == "":
+	toolLogFail(log, ExecTimeoutTool, ToolSuffix)
+else:
+	mkPath(log, ExportBuildDirectory + "/" + ZoneWeldBuildDirectory)
+	files = findFiles(log, ExportBuildDirectory + "/" + ZoneWeldBuildDirectory, "", ".zone")
+	for file in files:
+		sourceFile = ExportBuildDirectory + "/" + ZoneWeldBuildDirectory + "/" + file
+		destFile = ExportBuildDirectory + "/" + ZoneWeldBuildDirectory + "/" + os.path.basename(file)[0:-len(".zone")] + ".zonew"
+		if needUpdateLogRemoveDest(log, sourceFile, destFile):
+			subprocess.call([ ExecTimeout, str(ZoneBuildWeldTimeout), ZoneWelder, sourceFile, destFile ])
 printLog(log, "")
 
 log.close()

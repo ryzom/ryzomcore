@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -298,7 +298,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 			CXMLAutoPtr ptr((const char*)xmlGetProp (cur, (xmlChar*)"name"));
 			string animName;
 			if (ptr)
-				animName = toLower(CFile::getFilenameWithoutExtension(ptr.str()));
+				animName = toLowerAscii(CFile::getFilenameWithoutExtension(ptr.str()));
 
 			if (!animName.empty())
 			{
@@ -665,25 +665,24 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 		return this;
 
 	string sTmp = id.substr(0, getId().size());
-	//if (sTmp != getId()) return NULL;
+	if (sTmp != getId()) return NULL;
 
 	uint i;
 
 	for (i = 0; i < _Characters.size(); ++i)
-		if (id == _Characters[i]->getId() || id == toString("character#%d", i))
+		if (id == _Characters[i]->getId())
 			return _Characters[i];
 
 	for (i = 0; i < _IGs.size(); ++i)
 		if (id == _IGs[i]->getId())
 			return _IGs[i];
 
-	for (i = 0; i < _Shapes.size(); ++i) {
-		if (id == _Shapes[i]->getId() || id == toString("shape#%d", i))
+	for (i = 0; i < _Shapes.size(); ++i)
+		if (id == _Shapes[i]->getId())
 			return _Shapes[i];
-	}
 
 	for (i = 0; i < _Cameras.size(); ++i)
-		if (id == _Cameras[i]->getId() || id == toString("camera#%d", i))
+		if (id == _Cameras[i]->getId())
 			return _Cameras[i];
 
 	for (i = 0; i < _Lights.size(); ++i)
@@ -695,23 +694,6 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 			return _FXs[i];
 
 	return NULL;
-}
-
-int CInterface3DScene::luaGetElement(CLuaState &ls)
-{
-	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::find", 1);
-	CLuaIHM::checkArgType(ls, "CInterfaceGroup::find", 1, LUA_TSTRING);
-	std::string id = ls.toString(1);
-	CInterfaceElement* element = getElement(id);
-	if (!element)
-	{
-		ls.pushNil();
-	}
-	else
-	{
-		CLuaIHM::pushUIOnStack(ls, element);
-	}
-	return 1;
 }
 	
 // ----------------------------------------------------------------------------
@@ -1108,7 +1090,7 @@ bool CInterface3DIG::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (ptr) _Rot = convertVector(ptr);
 
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) _Name = toLower((const char*)ptr);
+	if (ptr) _Name = toLowerAscii((const char*)ptr);
 
 	_IG = UInstanceGroup::createInstanceGroup(_Name);
 	if (_IG == NULL)
@@ -1223,7 +1205,7 @@ std::string CInterface3DIG::getName() const
 // ----------------------------------------------------------------------------
 void CInterface3DIG::setName (const std::string &ht)
 {
-	string lwrname = toLower(ht);
+	string lwrname = toLowerAscii(ht);
 	if (lwrname != _Name)
 	{
 		CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
@@ -1271,7 +1253,7 @@ bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (ptr) _Rot = convertVector(ptr);
 
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) _Name = toLower((const char*)ptr);
+	if (ptr) _Name = toLowerAscii((const char*)ptr);
 
 	_Instance = dynamic_cast<CInterface3DScene*>(parentGroup)->getScene()->createInstance(_Name);
 	if (_Instance.empty())
@@ -1282,39 +1264,6 @@ bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	_Instance.setRotEuler (_Rot.x, _Rot.y, _Rot.z);
 
 	return true;
-}
-
-float CInterface3DShape::getBBoxSizeX () const
-{
-	CAABBox bbox;
-	_Instance.getShapeAABBox(bbox);
-		
-	if (bbox.getCenter() == CVector::Null)
-		return -0.5f;
-
-	return  bbox.getMax().x - bbox.getMin().x;
-}
-
-float CInterface3DShape::getBBoxSizeY () const
-{
-	CAABBox bbox;
-	_Instance.getShapeAABBox(bbox);
-	
-	if (bbox.getCenter() == CVector::Null)
-		return -0.5f;
-
-	return bbox.getMax().y - bbox.getMin().y;
-}
-
-float CInterface3DShape::getBBoxSizeZ () const
-{
-	CAABBox bbox;
-	_Instance.getShapeAABBox(bbox);
-	
-	if (bbox.getCenter() == CVector::Null)
-		return -0.5f;
-
-	return bbox.getMax().z - bbox.getMin().z;
 }
 
 // ----------------------------------------------------------------------------
@@ -1417,7 +1366,7 @@ void CInterface3DShape::setName (const std::string &ht)
 		_Name.clear();
 	}
 
-	string lwrname = toLower(ht);
+	string lwrname = toLowerAscii(ht);
 	if (lwrname != _Name)
 	{
 		CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
@@ -1583,7 +1532,7 @@ bool CInterface3DFX::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (ptr) _Rot = convertVector(ptr);
 
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) _Name = toLower((const char*)ptr);
+	if (ptr) _Name = toLowerAscii((const char*)ptr);
 
 	return true;
 }

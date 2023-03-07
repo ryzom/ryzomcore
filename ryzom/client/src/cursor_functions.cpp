@@ -3,8 +3,8 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -94,7 +94,6 @@ void contextExtractRM		(bool rightClick, bool dblClick);
 void contextMission			(bool rightClick, bool dblClick);
 void contextWebPage			(bool rightClick, bool dblClick);
 void contextWebIG			(bool rightClick, bool dblClick);
-void contextARKitect		(bool rightClick, bool dblClick);
 void contextRingMission		(bool rightClick, bool dblClick);
 void contextOutpost			(bool rightClick, bool dblClick);
 void contextBuildTotem		(bool rightClick, bool dblClick);
@@ -133,7 +132,6 @@ void initContextualCursor()
 	ContextCur.add(true,	"MISSION",			string(""),							0.0f,	checkUnderCursor,	contextMission);
 	ContextCur.add(true,	"WEB PAGE",			string(""),							0.0f,	checkUnderCursor,	contextWebPage);
 	ContextCur.add(true,	"WEBIG",			string(""),							0.0f,	checkUnderCursor,	contextWebIG);
-	ContextCur.add(false,	"ARKITECT",			string("curs_create.tga"),			0.0f,	checkUnderCursor,	contextARKitect);
 	ContextCur.add(true,	"OUTPOST",			string(""),							0.0f,	checkUnderCursor,	contextOutpost);
 	ContextCur.add(true,	"RING MISSION",		string(""),							0.0f,	checkUnderCursor,	contextRingMission);
 	ContextCur.add(true,	"BUILD_TOTEM",		string("uimGcmChooseBuilding"),		0.0f,	checkUnderCursor,	contextBuildTotem);
@@ -197,7 +195,7 @@ static bool testMissionOption(sint32 priorityWanted)
 	// Get the Text for the cursor
 	if(textID)
 	{
-		ucstring result;
+		string result;
 		bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 		if (!res)
 			result = NLMISC::CI18N::get("uiMissionOptionNotReceived");
@@ -224,7 +222,7 @@ static bool testMissionRing()
 			uint32	textID = pNL->getValue32();
 
 			// if the string is not received display a temp string
-			ucstring	missionRingText;
+			string	missionRingText;
 			if(!STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, missionRingText))
 				missionRingText = NLMISC::CI18N::get("uiMissionRingNameNotReceived");
 
@@ -445,7 +443,7 @@ void checkUnderCursor()
 									uint32	textID = pNL->getValue32();
 
 									// if the string is not received display a temp string
-									ucstring	webPageText;
+									string	webPageText;
 									if(!STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, webPageText))
 										webPageText = NLMISC::CI18N::get("uiWebPageNameNotReceived");
 
@@ -463,8 +461,8 @@ void checkUnderCursor()
 								{
 									// get the outpost name
 									CSheetId outpostSheet(pNL->getValue32());
-									ucstring outpostName;
-									outpostName= ucstring(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet));
+									string outpostName;
+									outpostName= STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet);
 
 									// display the cursor
 									if(ContextCur.context("OUTPOST", 0.f, outpostName))
@@ -564,14 +562,11 @@ void checkUnderCursor()
 					
 					cursor->setCursor("r2ed_tool_select_move_over.tga");
 					InstanceId = instance_idx;
-					if (ContextCur.context("ARKITECT", 0.f, ucstring("Edit")))
-						return;
 				}
 				else
 				{
 					cursor->setCursor("curs_pick.tga");
-					ucstring contextText;
-					contextText.fromUtf8(instref.ContextText);
+					string contextText = instref.ContextText;
 					if (ContextCur.context("WEBIG", 0.f, contextText))
 						return;
 				}
@@ -902,31 +897,10 @@ void contextWebIG(bool rightClick, bool dblClick)
 	{
 		if (pGC != NULL)
 			pGC->setActive(false);
-
-		if (selectedInstanceURL.substr(0, 5) == "@LUA ") 
-		{
-			string header = toString("doubleClick = %s\nrightClick = %s\nSelectedInstanceId = %u\n", dblClick?"true":"false", rightClick?"true":"false", InstanceId);
-			CLuaManager::getInstance().executeLuaScript(header+selectedInstanceURL.substr(5), true);
-		}
-		else
-		{
-			CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
-		}
+		CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
 	}
 	
 }// contextWebIG //
-
-//-----------------------------------------------
-// contextARKitect :
-//-----------------------------------------------
-void contextARKitect(bool rightClick, bool dblClick)
-{
-	string header = toString("doubleClick = %s\nrightClick = %s\nSelectedInstanceId = %u\n", dblClick?"true":"false", rightClick?"true":"false", InstanceId);
-
-	CLuaManager::getInstance().executeLuaScript(header+selectedInstanceURL, true);
-	
-}// contextARKitect //
-
 
 //-----------------------------------------------
 // contextOutpost

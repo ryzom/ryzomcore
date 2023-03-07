@@ -1,9 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2014  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -94,6 +95,7 @@ void			CActionPhraseFaber::fillDBWithMP(const std::string &sheetBase, const CIte
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUALITY")->setValue32(item.Quality);
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUANTITY")->setValue32(item.Quantity);
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":USER_COLOR")->setValue32(item.UserColor);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":CHARAC_BUFFS")->setValue32(item.CharacBuffs);
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":WEIGHT")->setValue32(item.Weight);
 }
 
@@ -116,7 +118,7 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 
 	if (!rootBrick->Properties.empty())
 	{
-		string prop= NLMISC::toUpper(rootBrick->Properties[0].Text);
+		string prop= NLMISC::toUpperAscii(rootBrick->Properties[0].Text);
 		vector<string>	strList;
 		splitString(prop, " ", strList);
 		// The prop Id should be 'FPLAN:'
@@ -187,8 +189,8 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 		window->setActive(true);
 
 		// Setup the Title with a default text
-		ucstring	title= CI18N::get("uiPhraseFaberExecuteNoPlan");
-		window->setUCTitle (title);
+		string	title= CI18N::get("uiPhraseFaberExecuteNoPlan");
+		window->setTitle (title);
 	}
 
 	// **** setup DB observer!
@@ -469,6 +471,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 				_InventoryMirror[i].Quality= itemImage->getQuality();
 				_InventoryMirror[i].Quantity= itemImage->getQuantity();
 				_InventoryMirror[i].UserColor= itemImage->getUserColor();
+				_InventoryMirror[i].CharacBuffs= itemImage->getCharacBuffs();
 				_InventoryMirror[i].Weight= itemImage->getWeight();
 				// Bkup original quantity from inventory
 				_InventoryMirror[i].OriginalQuantity= _InventoryMirror[i].Quantity;
@@ -509,7 +512,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 				CViewText	*viewText= dynamic_cast<CViewText*>(itemReqLineGroup->getView(FaberPhraseText));
 				if(viewText)
 				{
-					ucstring	text;
+					string	text;
 					if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 					{
 						text= CI18N::get("uihelpFaberMpHeader");
@@ -523,7 +526,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 					{
 						nlstop;
 					}
-					viewText->setText( text );
+					viewText->setText(text);
 				}
 
 				// Set as Icon the required MP FaberType / or Sheet Texture (directly...)
@@ -569,9 +572,9 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 	if(window)
 	{
 		// Setup the Title with the item built
-		ucstring	title= CI18N::get("uiPhraseFaberExecute");
+		string	title= CI18N::get("uiPhraseFaberExecute");
 		strFindReplace(title, "%item", STRING_MANAGER::CStringManagerClient::getItemLocalizedName(_ExecuteFromItemPlanBrick->FaberPlan.ItemBuilt) );
-		window->setUCTitle (title);
+		window->setTitle (title);
 	}
 
 
@@ -1383,6 +1386,7 @@ void		CActionPhraseFaber::onInventoryChange()
 				newInvItem.Quality= itemImage->getQuality();
 				newInvItem.Quantity= itemImage->getQuantity();
 				newInvItem.UserColor= itemImage->getUserColor();
+				newInvItem.CharacBuffs= itemImage->getCharacBuffs();
 				newInvItem.Weight= itemImage->getWeight();
 				newInvItem.OriginalQuantity= newInvItem.Quantity;
 				newInvItem.LockedByOwner = bLockedByOwner;
@@ -1416,6 +1420,7 @@ void		CActionPhraseFaber::onInventoryChange()
 				sameMp=	curInvItem.Sheet == newInvItem.Sheet &&
 						curInvItem.Quality == newInvItem.Quality &&
 						curInvItem.UserColor == newInvItem.UserColor &&
+						curInvItem.CharacBuffs == newInvItem.CharacBuffs &&
 						curInvItem.LockedByOwner == newInvItem.LockedByOwner;
 
 				// if the Mp was deleted from this slot, delete it from all faber execution
@@ -1686,7 +1691,7 @@ void	CActionPhraseFaber::updateItemResult()
 	CViewText	*successView= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseFpSuccessText));
 	if(successView)
 	{
-		ucstring	text= CI18N::get("uiPhraseFaberSuccessRate");
+		string	text= CI18N::get("uiPhraseFaberSuccessRate");
 		// Get the success rate of the related phrase
 		uint		phraseSlot= pPM->getMemorizedPhrase(_ExecuteFromMemoryLine, _ExecuteFromMemoryIndex);
 
@@ -1812,7 +1817,7 @@ void	CActionPhraseFaber::updateItemResult()
 							RM_FABER_STAT_TYPE::isMagicProtectStat(RM_FABER_STAT_TYPE::TRMStatType(i)) )
 							statToolTip->setDefaultContextHelp(CI18N::get("uiFaberStatActive"));
 						else
-							statToolTip->setDefaultContextHelp(ucstring());
+							statToolTip->setDefaultContextHelp(std::string());
 					}
 					else
 						statToolTip->setDefaultContextHelp(CI18N::get("uiFaberStatGrayed"));

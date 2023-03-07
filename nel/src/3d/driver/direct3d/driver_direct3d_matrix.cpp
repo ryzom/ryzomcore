@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -283,18 +283,16 @@ void CDriverD3D::setupScissor (const class CScissor& scissor)
 	// Get viewport
 	_ScissorTouched = false;
 	float x= scissor.X;
+	float y= scissor.Y;
 	float width= scissor.Width;
 	float height= scissor.Height;
 
-	if(x==0 && x==0 && width==1 && height==1)
+	if(x==0 && y==0 && width==1 && height==1)
 	{
 		setRenderState (D3DRS_SCISSORTESTENABLE, FALSE);
 	}
 	else
 	{
-
-		float y= scissor.Y;
-
 		if (_HWnd)
 		{
 			// Get the render target size

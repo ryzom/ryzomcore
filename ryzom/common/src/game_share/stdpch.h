@@ -50,33 +50,33 @@
 #include <functional>
 
 #include "nel/misc/types_nl.h"
-#include <nel/misc/common.h>
-#include <nel/misc/debug.h>
+#include "nel/misc/common.h"
+#include "nel/misc/debug.h"
 
-#include <nel/misc/stream.h>
-#include <nel/misc/time_nl.h>
-#include <nel/misc/vector.h>
-#include <nel/misc/matrix.h>
-#include <nel/misc/rgba.h>
-#include <nel/misc/sheet_id.h>
-#include <nel/misc/command.h>
-#include <nel/misc/config_file.h>
-#include <nel/misc/variable.h>
-#include <nel/misc/shared_memory.h>
-#include <nel/misc/file.h>
-#include <nel/misc/path.h>
-#include <nel/misc/singleton.h>
-#include <nel/misc/string_common.h>
-#include <nel/misc/sstring.h>
-#include <nel/misc/bit_mem_stream.h>
-#include <nel/misc/o_xml.h>
-#include <nel/misc/i_xml.h>
+#include "nel/misc/stream.h"
+#include "nel/misc/time_nl.h"
+#include "nel/misc/vector.h"
+#include "nel/misc/matrix.h"
+#include "nel/misc/rgba.h"
+#include "nel/misc/sheet_id.h"
+#include "nel/misc/command.h"
+#include "nel/misc/config_file.h"
+#include "nel/misc/variable.h"
+#include "nel/misc/shared_memory.h"
+#include "nel/misc/file.h"
+#include "nel/misc/path.h"
+#include "nel/misc/singleton.h"
+#include "nel/misc/string_common.h"
+#include "nel/misc/sstring.h"
+#include "nel/misc/bit_mem_stream.h"
+#include "nel/misc/o_xml.h"
+#include "nel/misc/i_xml.h"
 
-#include <nel/net/udp_sock.h>
-#include <nel/net/unified_network.h>
-#include <nel/net/service.h>
+#include "nel/net/udp_sock.h"
+#include "nel/net/unified_network.h"
+#include "nel/net/service.h"
 
-#include <nel/georges/load_form.h>
+#include "nel/georges/load_form.h"
 
 #include <libxml/parser.h>
 

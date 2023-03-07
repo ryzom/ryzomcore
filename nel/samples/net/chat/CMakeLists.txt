@@ -2,7 +2,9 @@ ADD_EXECUTABLE(nl_sample_chatclient client.cpp kbhit.cpp kbhit.h)
 
 ADD_EXECUTABLE(nl_sample_chatserver WIN32 server.cpp)
 
-ADD_DEFINITIONS(-DCHAT_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_chat/\\"")
+SET(CHAT_DIR "CHAT_DIR=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_chat/\"")
+TARGET_COMPILE_DEFINITIONS(nl_sample_chatclient PRIVATE ${CHAT_DIR})
+TARGET_COMPILE_DEFINITIONS(nl_sample_chatserver PRIVATE ${CHAT_DIR})
 
 TARGET_LINK_LIBRARIES(nl_sample_chatclient nelmisc nelnet)
 NL_DEFAULT_PROPS(nl_sample_chatclient "NeL, Samples, Net, Chat: Chat Client")

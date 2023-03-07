@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2017  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -63,26 +64,29 @@ namespace NLGUI
 		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
 
 		/// Accessors
-		ucstring getInputString() const { return _InputString; }
-		const ucstring &getInputStringRef() const { return _InputString; }
-		const ucstring &getPrompt() const { return _Prompt; }
+		std::string getInputString() const;
+		std::string getPrompt() const;
+		const ::u32string &getInputStringRef() const { return _InputString; }
+		const ::u32string &getPromptRef() const { return _Prompt; }
 
 		/** Set the prompt
 		  * NB : line returns are encoded as '\n', not '\r\n'
 		  */
-		void		setPrompt(const ucstring &s) { _Prompt = s; }
-		void		setInputString(const ucstring &str);
-		void		setInputStringRef(const ucstring &str) {_InputString = str; };
+		void		setPrompt(const std::string &s);
+		void		setInputString(const std::string &str);
+		void		setInputStringRef(const ::u32string &str);
 		void		setInputStringAsInt(sint32 val);
 		sint32		getInputStringAsInt() const;
 		void		setInputStringAsInt64(sint64 val);
 		sint64		getInputStringAsInt64() const;
 		void		setInputStringAsFloat(float val);
 		float		getInputStringAsFloat() const;
-		void		setInputStringAsStdString(const std::string &str);
-		std::string	getInputStringAsStdString() const;
-		void		setInputStringAsUtf8(const std::string &str);
-		std::string	getInputStringAsUtf8() const;
+#ifdef RYZOM_LUA_UCSTRING
+		void		setInputStringAsUtf16(const ucstring &str); // Compatibility
+		ucstring    getInputStringAsUtf16() const; // Compatibility
+		void		setInputStringAsUtf32(const ::u32string &str) { setInputStringRef(str); } // Compatibility
+		::u32string   getInputStringAsUtf32() const { return _InputString; } // Compatibility
+#endif
 		void		setColor(NLMISC::CRGBA col);
 
 
@@ -97,7 +101,7 @@ namespace NLGUI
 
 		static CGroupEditBox *getMenuFather() { return _MenuFather; }
 
-		void setCommand(const ucstring &command, bool execute);
+		void setCommand(const std::string &command, bool execute);
 
 		// Stop parent from blinking
 		void		stopParentBlink() { if (_Parent) _Parent->disableBlink(); }
@@ -121,7 +125,7 @@ namespace NLGUI
 		sint32	getMaxHistoric() const {return _MaxHistoric;}
 		sint32	getCurrentHistoricIndex () const {return _CurrentHistoricIndex;}
 		void	setCurrentHistoricIndex (sint32 index) {_CurrentHistoricIndex=index;}
-		const ucstring	&getHistoric(uint32 index) const {return _Historic[index];}
+		const ::u32string	&getHistoric(uint32 index) const {return _Historic[index];}
 		uint32	getNumHistoric() const {return (uint32)_Historic.size ();}
 
 		// Get on change action handler
@@ -139,7 +143,7 @@ namespace NLGUI
 		// Paste the selection into buffer
 		void		paste();
 		// Write the string into buffer
-		void		writeString(const ucstring &str, bool replace = true, bool atEnd = true);
+		void		writeString(const std::string &str, bool replace = true, bool atEnd = true);
 
 		// Expand the expression (true if there was a '/' at the start of the line)
 		bool		expand();
@@ -170,7 +174,7 @@ namespace NLGUI
 		virtual void onKeyboardCaptureLost();
 
 		// set the input string as "default". will be reseted at first click (used for user information)
-		void	setDefaultInputString(const ucstring &str);
+		void	setDefaultInputString(const std::string &str);
 
 		// For Interger and PositiveInteger, can specify min and max values
 		void	setIntegerMinValue(sint32 minValue) {_IntegerMinValue=minValue;}
@@ -189,8 +193,10 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("setSelectionAll", luaSetSelectionAll);
 			REFLECT_LUA_METHOD("setFocusOnText", luaSetFocusOnText);
 			REFLECT_LUA_METHOD("cancelFocusOnText", luaCancelFocusOnText);
-			REFLECT_STRING("input_string", getInputStringAsStdString, setInputStringAsStdString);
-			REFLECT_UCSTRING("uc_input_string", getInputString, setInputString);
+			REFLECT_STRING("input_string", getInputString, setInputString);
+#ifdef RYZOM_LUA_UCSTRING
+			REFLECT_UCSTRING("uc_input_string", getInputStringAsUtf16, setInputStringAsUtf16); // Compatibility
+#endif
 		REFLECT_EXPORT_END
 
 		/** Restore the original value of the edit box.
@@ -215,6 +221,7 @@ namespace NLGUI
 		float	_BlinkTime;
 		sint32	_CursorPos;
 		uint32  _MaxNumChar;
+		uint32  _MaxNumBytes;
 		uint32  _MaxNumReturn;
 		uint32  _MaxFloatPrec;		// used in setInputStringAsFloat() only
 		sint32	_MaxCharsSize;
@@ -228,17 +235,17 @@ namespace NLGUI
 		NLMISC::CRGBA	_BackSelectColor;
 
 		// Text info
-		ucstring	_Prompt;
-		ucstring	_InputString;
+		::u32string	_Prompt;
+		::u32string	_InputString;
 		CViewText	*_ViewText;
 
 		// undo / redo
-		ucstring	_StartInputString;  // value of the input string when focus was acuired first
-		ucstring	_ModifiedInputString;
+		::u32string	_StartInputString;  // value of the input string when focus was acuired first
+		::u32string	_ModifiedInputString;
 
 
 		// Historic info
-		typedef std::deque<ucstring>		THistoric;
+		typedef std::deque<::u32string>		THistoric;
 		THistoric	_Historic;
 		uint32		_MaxHistoric;
 		sint32		_CurrentHistoricIndex;
@@ -275,7 +282,7 @@ namespace NLGUI
 		bool	_CanRedo                   : 1;
 		bool	_CanUndo                   : 1;
 
-		std::vector<char>					_NegativeFilter;
+		std::vector<u32char>					_NegativeFilter;
 
 		sint	_CursorTexID;
 		sint32	_CursorWidth;
@@ -298,13 +305,13 @@ namespace NLGUI
 		void handleEventString(const NLGUI::CEventDescriptorKey &event);
 		void setup();
 		void triggerOnChangeAH();
-		void appendStringFromClipboard(const ucstring &str);
+		void appendStringFromClipboard(const std::string &str);
 
-		ucstring	getSelection();
+		std::string	getSelection();
 
 		static CGroupEditBox *_MenuFather;
 
-		static bool isValidAlphaNumSpace(ucchar c)
+		static bool isValidAlphaNumSpace(u32char c)
 		{
 			if (c > 255) return false;
 			char ac = (char) c;
@@ -314,7 +321,7 @@ namespace NLGUI
 				ac==' ';
 		}
 
-		static bool isValidAlphaNum(ucchar c)
+		static bool isValidAlphaNum(u32char c)
 		{
 			if (c > 255) return false;
 			char ac = (char) c;
@@ -323,7 +330,7 @@ namespace NLGUI
 				   (ac >= 'A' && ac <= 'Z');
 		}
 
-		static bool isValidAlpha(ucchar c)
+		static bool isValidAlpha(u32char c)
 		{
 			if (c > 255) return false;
 			char ac = (char) c;
@@ -331,13 +338,13 @@ namespace NLGUI
 				   (ac >= 'A' && ac <= 'Z');
 		}
 
-		static bool isValidPlayerNameChar(ucchar c)
+		static bool isValidPlayerNameChar(u32char c)
 		{
 			// valid player name (with possible shard prefix / suffix format
 			return isValidAlpha(c) || c=='.' || c=='(' || c==')';
 		}
 
-		static bool isValidFilenameChar(ucchar c)
+		static bool isValidFilenameChar(u32char c)
 		{
 			if (c == '\\' ||
 				c == '/' ||
@@ -351,12 +358,12 @@ namespace NLGUI
 			return true;
 		}
 		//
-		bool isFiltered(ucchar c)
+		bool isFiltered(u32char c)
 		{
-			uint length = (uint)_NegativeFilter.size();
-			for (uint k = 0; k < length; ++k)
+			ptrdiff_t length = _NegativeFilter.size();
+			for (ptrdiff_t k = 0; k < length; ++k)
 			{
-				if ((ucchar) _NegativeFilter[k] == c) return true;
+				if (_NegativeFilter[k] == c) return true;
 			}
 			return false;
 		}

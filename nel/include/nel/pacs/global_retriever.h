@@ -30,6 +30,7 @@
 #include "nel/misc/thread.h"
 #include "nel/misc/mem_stream.h"
 #include "nel/misc/task_manager.h"
+#include "nel/misc/atomic.h"
 
 #include "local_retriever.h"
 #include "retriever_instance.h"
@@ -107,9 +108,9 @@ protected:
 	{
 	public:
 		/// Finished task
-		volatile bool		Finished;
+		NLMISC::CAtomicBool Finished;
 		/// Finished successfully
-		volatile bool		Successful;
+		NLMISC::CAtomicBool Successful;
 		/// Lr Id
 		uint				LrId;
 		/// Lr to load
@@ -123,7 +124,7 @@ protected:
 		// Idle==false && Finished==false
 		// Idle==false && Finished==true
 
-		CLrLoader(const NLMISC::CVector &position) : Finished(true)
+		CLrLoader(const NLMISC::CVector &position) : Finished(true), Successful(false)
 		{
 			Position = position;
 		}

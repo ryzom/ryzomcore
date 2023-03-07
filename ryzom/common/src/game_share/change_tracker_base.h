@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -37,34 +40,35 @@
 
 /**
  * Header of a tracker
+ * Mutex must be locked when changing or accessing values
  */
 struct TChangeTrackerHeader
 {
 	/** First changed item (useful to read the changed from the beginning).
 	 * When there is no change to read, First equals LAST_CHANGED.
 	 */
-	volatile TDataSetIndex		First;
+	TDataSetIndex		First;
 
 	/** Last changed item (useful to link the last changed to a newly changed item).
 	 * When there is no change yet, Last equals INVALID_DATASET_ROW.
 	 */
-	volatile TDataSetIndex		Last;
+	TDataSetIndex		Last;
 
 #ifdef USE_FAST_MUTEX
 	/// Fast mutex (TODO: use multi-processor version)
-  volatile NLMISC::CFastMutex	FastMutex;
+	NLMISC::CFastMutex			FastMutex;
 #endif
 	/*
 	 * Number of values set (used in COUNT_MIRROR_CHANGES mode only, always allocated for mode interoperability)
 	 * Currently, not implemented.
 	 */
-	//volatile sint32				NbValuesSet;
+	//sint32				NbValuesSet;
 
 	/**
 	 * Number of changes really recorded (used in COUNT_MIRROR_CHANGES mode only, always allocated for mode interoperability).
 	 * NbValuesSet-NbDistinctChanges is the number of skipped changes.
 	 */
-	volatile sint32					NbDistinctChanges;
+	sint32					NbDistinctChanges;
 };
 
 
@@ -139,7 +143,7 @@ public:
 	{
 		// Protect consistency of popFirstChanged() in parallel with recordChange()
 		// (there can't be two parallels calls to popFirstChanged()
-		trackerMutex().enter();
+		NLMISC::CAutoMutex<NLMISC::CFastMutex> lock(trackerMutex());
 #ifdef NL_DEBUG
 		nlassert( _Header->First != LAST_CHANGED );
 #endif
@@ -153,7 +157,6 @@ public:
 #ifdef COUNT_MIRROR_PROP_CHANGES
 		--_Header->NbDistinctChanges;
 #endif
-		trackerMutex().leave();
 	}
 
 	/// Return the number of changes (assumes isAllocated()) (slow)
@@ -161,7 +164,7 @@ public:
 
 #ifdef USE_FAST_MUTEX
 	/// Return the mutex
-	volatile NLMISC::CFastMutex&	trackerMutex() { return _Header->FastMutex; }
+	NLMISC::CFastMutex &trackerMutex() { return _Header->FastMutex; }
 #else
 	/// Return the mutex
 	NLMISC::CSharedMutex&	trackerMutex() { return _TrackerMutex; }

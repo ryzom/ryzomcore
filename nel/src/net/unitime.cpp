@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -148,7 +148,7 @@ static TCallbackItem UniTimeCallbackArray[] =
 };
 ***************************************************************/
 
-void _CUniTime::syncUniTimeFromService (CCallbackNetBase::TRecordingState /* rec */, const CInetAddress * /* addr */)
+void _CUniTime::syncUniTimeFromService (CCallbackNetBase::TRecordingState /* rec */, const CInetHost * /* addr */)
 {
 	nlstop;
 /***************************************************************/

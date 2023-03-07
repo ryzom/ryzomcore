@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -415,7 +415,7 @@ void CInstanceLighter::light (const CInstanceGroup &igIn, CInstanceGroup &igOut,
 		string name= _Instances[i].Name;
 		bool	shapeFound= true;
 
-		if (toLower (CFile::getExtension (name)) == "pacs_prim")
+		if (toLowerAscii (CFile::getExtension (name)) == "pacs_prim")
 		{
 			nlwarning("EXPORT BUG: Can't read %s (not a shape), should not be part of .ig!", name.c_str());
 			continue;

@@ -26,7 +26,7 @@ namespace ANIMAL_TYPE
 {
 	enum	EAnimalType
 	{
-		All, Pet = 0,
+		All = 0,
 		Mount,
 		Packer,
 		Demon,

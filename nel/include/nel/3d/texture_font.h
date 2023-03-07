@@ -1,5 +1,8 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -35,11 +38,42 @@ class CTextureFont : public ITexture
 
 public:
 
+	struct SLetterKey
+	{
+		u32char Char;
+		sint Size;
+		bool Embolden;
+		bool Oblique;
+		CFontGenerator *FontGenerator;
+
+		SLetterKey() : Char(0), Size(0), Embolden(false), Oblique(false), FontGenerator(NULL)
+		{
+		}
+
+		// Does not use FontGenerator in return value
+		inline uint64 getVal() const
+		{
+			return Char                           // 32 bits
+				| (uint64(Size & 0xFFFF) << 32)   // 16 bits
+				| (uint64(Embolden) << (32+16))   // 1 bit
+				| (uint64(Oblique) << (32+16+1)); // 1 bit
+		}
+
+		bool operator<(const SLetterKey &rhs) const
+		{
+			uint64 a = getVal();
+			uint64 b = rhs.getVal();
+			return (a < b) || ((a == b) && (FontGenerator < rhs.FontGenerator));
+		}
+	};
+
 	// Holds info for glyphs rendered on atlas
-	struct SGlyphInfo
+	struct SGlyphInfo : SLetterKey
 	{
 		// font atlas info
 		uint32 CacheVersion;
+
+		uint32 GlyphIndex;
 
 		// atlas region with padding
 		uint32 X, Y, W, H;
@@ -51,30 +85,17 @@ public:
 		// UV coords for rendered glyph without padding
 		float U0, V0, U1, V1;
 
-		uint32 GlyphIndex;
-		sint Size;
-		bool Embolden;
-		bool Oblique;
-		CFontGenerator *FontGenerator;
-
 		SGlyphInfo()
-			: CacheVersion(0),
+			: CacheVersion(0), GlyphIndex(0),
 			  U0(0.f), V0(0.f), U1(0.f), V1(0.f),
-			  X(0), Y(0), W(0), H(0), CharWidth(0), CharHeight(0),
-			  GlyphIndex(0), Size(0), Embolden(false), Oblique(false), FontGenerator(NULL)
+			  X(0), Y(0), W(0), H(0), CharWidth(0), CharHeight(0)
 		{
 		}
 	};
 
 	// Holds info for glyphs displayed on screen
-	struct SLetterInfo
+	struct SLetterInfo : SLetterKey
 	{
-		ucchar Char;
-		sint Size;
-		bool Embolden;
-		bool Oblique;
-		CFontGenerator *FontGenerator;
-
 		uint32 GlyphIndex;
 		uint32 CharWidth;	// Displayed glyph height
 		uint32 CharHeight;	// Displayed glyph height
@@ -85,25 +106,8 @@ public:
 		SGlyphInfo* glyph;
 
 		SLetterInfo()
-			: Char(0), Size(0), Embolden(false), Oblique(false), FontGenerator(NULL),
-			  GlyphIndex(0), CharWidth(0), CharHeight(0), Top(0), Left(0), AdvX(0),
+			: GlyphIndex(0), CharWidth(0), CharHeight(0), Top(0), Left(0), AdvX(0),
 			  glyph(NULL)
-		{
-		}
-	};
-
-	struct SLetterKey
-	{
-		ucchar Char;
-		sint Size;
-		bool Embolden;
-		bool Oblique;
-		CFontGenerator *FontGenerator;
-
-		// Does not use FontGenerator in return value
-		uint32 getVal();
-
-		SLetterKey():Char(0), FontGenerator(NULL), Size(0), Embolden(false), Oblique(false)
 		{
 		}
 	};
@@ -148,7 +152,7 @@ private:
 	// Keep track of available space in main texture
 	std::vector<NLMISC::CRect> _AtlasNodes;
 
-	std::vector <SLetterInfo> _Letters;
+	std::map<SLetterKey, SLetterInfo> _Letters;
 
 	// lookup letter from letter cache or create new
 	SLetterInfo* findLetter(SLetterKey& k, bool insert);
@@ -162,7 +166,7 @@ private:
 	uint _GlyphSizeStep;
 
 	// rendered glyph cache
-	std::list<SGlyphInfo> _GlyphCache;
+	std::map<SLetterKey, SGlyphInfo> _GlyphCache;
 	SGlyphInfo* findLetterGlyph(SLetterInfo *letter, bool insert);
 
 	// render letter glyph into glyph cache

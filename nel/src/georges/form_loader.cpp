@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -67,7 +70,7 @@ CFormLoader::~CFormLoader()
 CType *CFormLoader::loadType (const std::string &filename)
 {
 	// Lower string filename
-	string lowerStr = toLower(filename);
+	string lowerStr = toLowerAscii(filename);
 	lowerStr = CFile::getFilename (lowerStr);
 
 	// Already in the map ?
@@ -137,7 +140,7 @@ CType *CFormLoader::loadType (const std::string &filename)
 CFormDfn *CFormLoader::loadFormDfn (const std::string &filename, bool forceLoad)
 {
 	// Lower string filename
-	string lowerStr = toLower(filename);
+	string lowerStr = toLowerAscii(filename);
 	lowerStr = CFile::getFilename (lowerStr);
 
 	// Already in the map ?
@@ -203,7 +206,7 @@ CFormDfn *CFormLoader::loadFormDfn (const std::string &filename, bool forceLoad)
 UForm *CFormLoader::loadForm (const std::string &filename)
 {
 	// Lower string filename
-	string lowerStr = toLower((string)filename);
+	string lowerStr = toLowerAscii((string)filename);
 	lowerStr = CFile::getFilename (lowerStr);
 
 	// Already in the map ?
@@ -241,7 +244,7 @@ UForm *CFormLoader::loadForm (const std::string &filename)
 			name += ".dfn";
 
 			// Load the dfn
-			CFormDfn	*dfn = loadFormDfn (name, false);
+			CSmartPtr<CFormDfn> dfn = loadFormDfn (name, false);
 			if (dfn)
 			{
 				// Open the file

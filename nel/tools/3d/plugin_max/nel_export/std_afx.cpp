@@ -18,6 +18,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "std_afx.h"
-
-void nlmax_nel_export_std_afx_dummy() { }
-

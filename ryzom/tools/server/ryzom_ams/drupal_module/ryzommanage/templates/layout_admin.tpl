@@ -1,2 +1,0 @@
-{extends file="layout.tpl"}
-

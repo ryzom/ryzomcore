@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -30,6 +33,7 @@
 #include "nel/3d/render_trav.h"
 #include "nel/3d/visual_collision_mesh.h"
 #include "nel/3d/meshvp_wind_tree.h"
+#include "nel/3d/vertex_stream_manager.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -766,9 +770,34 @@ void	CMeshGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 	// NB: the skeleton matrix has already been setuped by CSkeletonModel
 	// NB: the normalize flag has already been setuped by CSkeletonModel
 
+	bool supportVertexStream = ((_VBuffer.getVertexFormat() & ~(CVertexBuffer::PaletteSkinFlag | CVertexBuffer::WeightFlag))
+		== (CVertexBuffer::PositionFlag | CVertexBuffer::NormalFlag | CVertexBuffer::TexCoord0Flag))
+		&& (_VBuffer.getValueType(CVertexBuffer::TexCoord0) == CVertexBuffer::Float2)
+		&& (_OriginalSkinNormals.size()) && (!_OriginalTGSpace.size());
+	CVertexStreamManager *meshSkinManager = renderTrav->getMeshSkinManager();
 
-	// apply the skinning: _VBuffer is modified.
-	applySkin(skeleton);
+	if (supportVertexStream)
+	{
+		uint maxVertices = meshSkinManager->getMaxVertices();
+		uint vertexSize = meshSkinManager->getVertexSize();
+
+		if (maxVertices >= _OriginalSkinVertices.size() && vertexSize == 32)
+		{
+			// apply the skinning
+			uint8 *dstVb = meshSkinManager->lock();
+			applySkin(dstVb, skeleton);
+			meshSkinManager->unlock(_OriginalSkinVertices.size());
+		}
+		else
+		{
+			supportVertexStream = false;
+			nlwarning("Unable to animate skinned model, too many vertices, or stream format unsupported");
+		}
+	}
+	else
+	{
+		nlwarning("Unable to animate skinned model, unsupported vertex format");
+	}
 
 
 	// Setup meshVertexProgram
@@ -788,7 +817,14 @@ void	CMeshGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 	// Render the mesh.
 	//===========
 	// active VB.
-	drv->activeVertexBuffer(_VBuffer);
+	if (supportVertexStream)
+	{
+		meshSkinManager->activate();
+	}
+	else
+	{
+		drv->activeVertexBuffer(_VBuffer);
+	}
 
 
 	// For all _MatrixBlocks
@@ -816,6 +852,11 @@ void	CMeshGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 			drv->activeIndexBuffer(rdrPass.PBlock);
 			drv->renderTriangles(material, 0, rdrPass.PBlock.getNumIndexes()/3);
 		}
+	}
+
+	if (supportVertexStream)
+	{
+		meshSkinManager->swapVBHard();
 	}
 
 	// End VertexProgram effect
@@ -1789,7 +1830,7 @@ void	CMeshGeom::restoreOriginalSkinVertices()
 
 
 // ***************************************************************************
-void	CMeshGeom::applySkin(CSkeletonModel *skeleton)
+void	CMeshGeom::applySkin(void *dstVb, CSkeletonModel *skeleton)
 {
 	// init.
 	//===================
@@ -1797,24 +1838,13 @@ void	CMeshGeom::applySkin(CSkeletonModel *skeleton)
 		return;
 
 	// Use correct skinning
-	TSkinType	skinType;
-	if( _OriginalSkinNormals.empty() )
-		skinType= SkinPosOnly;
-	else if( _OriginalTGSpace.empty() )
-		skinType= SkinWithNormal;
-	else
-		skinType= SkinWithTgSpace;
+	nlassert(!_OriginalSkinNormals.empty());
+	nlassert(_OriginalTGSpace.empty());
 
 	// Get VB src/dst info/ptrs.
 	uint	numVertices= (uint)_OriginalSkinVertices.size();
-	uint	dstStride= _VBuffer.getVertexSize();
-	// Get dst TgSpace.
-	uint	tgSpaceStage = 0;
-	if( skinType>= SkinWithTgSpace)
-	{
-		nlassert(_VBuffer.getNumTexCoordUsed() > 0);
-		tgSpaceStage= _VBuffer.getNumTexCoordUsed() - 1;
-	}
+	static const uint	dstStride = 32; // _VBuffer.getVertexSize();
+	uint	srcStride = _VBuffer.getVertexSize();
 
 	// Mark all vertices flag to not computed.
 	static	vector<uint8>	skinFlags;
@@ -1824,6 +1854,10 @@ void	CMeshGeom::applySkin(CSkeletonModel *skeleton)
 
 	CVertexBufferRead vba;
 	_VBuffer.lock (vba);
+
+	uint8 *dstVbPos = (uint8 *)dstVb;
+	uint8 *dstVbNormal = dstVbPos + 12;
+	uint8 *dstVbUV = dstVbPos + 24;
 
 	// For all MatrixBlocks
 	//===================
@@ -1841,24 +1875,10 @@ void	CMeshGeom::applySkin(CSkeletonModel *skeleton)
 		CVector		*srcVector= &_OriginalSkinVertices[0];
 		uint8		*srcPal= (uint8*)vba.getPaletteSkinPointer(0);
 		uint8		*srcWgt= (uint8*)vba.getWeightPointer(0);
-		uint8		*dstVector= (uint8*)vba.getVertexCoordPointer(0);
+		uint8		*dstVector = dstVbPos;
 		// Normal.
-		CVector		*srcNormal= NULL;
-		uint8		*dstNormal= NULL;
-		if(skinType>=SkinWithNormal)
-		{
-			srcNormal= &_OriginalSkinNormals[0];
-			dstNormal= (uint8*)vba.getNormalCoordPointer(0);
-		}
-		// TgSpace.
-		CVector		*srcTgSpace= NULL;
-		uint8		*dstTgSpace= NULL;
-		if(skinType>=SkinWithTgSpace)
-		{
-			srcTgSpace= &_OriginalTGSpace[0];
-			dstTgSpace= (uint8*)vba.getTexCoordPointer(0, tgSpaceStage);
-		}
-
+		CVector		*srcNormal= &_OriginalSkinNormals[0];
+		uint8		*dstNormal = dstVbNormal;
 
 		// For all vertices that need to be computed.
 		uint		size= numVertices;
@@ -1882,12 +1902,7 @@ void	CMeshGeom::applySkin(CSkeletonModel *skeleton)
 				computeSoftwarePointSkinning(matrixes, srcVector, psPal, (float*)srcWgt, (CVector*)dstVector);
 
 				// compute normal part.
-				if(skinType>=SkinWithNormal)
-					computeSoftwareVectorSkinning(matrixes, srcNormal, psPal, (float*)srcWgt, (CVector*)dstNormal);
-
-				// compute tg part.
-				if(skinType>=SkinWithTgSpace)
-					computeSoftwareVectorSkinning(matrixes, srcTgSpace, psPal, (float*)srcWgt, (CVector*)dstTgSpace);
+				computeSoftwareVectorSkinning(matrixes, srcNormal, psPal, (float*)srcWgt, (CVector*)dstNormal);
 			}
 
 			// inc flags.
@@ -1895,19 +1910,46 @@ void	CMeshGeom::applySkin(CSkeletonModel *skeleton)
 			// inc src (all whatever skin type used...)
 			srcVector++;
 			srcNormal++;
-			srcTgSpace++;
 			// inc paletteSkin and dst  (all whatever skin type used...)
-			srcPal+= dstStride;
-			srcWgt+= dstStride;
+			srcPal+= srcStride;
+			srcWgt+= srcStride;
 			dstVector+= dstStride;
 			dstNormal+= dstStride;
-			dstTgSpace+= dstStride;
 		}
 	}
 
+	// Remaining vertices
+	{
+		uint8 *pFlag = &skinFlags[0];
+		CVector *srcVector = &_OriginalSkinVertices[0];
+		uint8 *dstVector = dstVbPos;
+		CVector *srcNormal = &_OriginalSkinNormals[0];
+		uint8 *dstNormal = dstVbNormal;
+		uint8 *srcUV = (uint8 *)vba.getTexCoordPointer(0, 0);
+		uint8 *dstUV = dstVbUV;
+		uint srcStride = _VBuffer.getVertexSize();
 
-	// dirt
-	_OriginalSkinRestored= false;
+		for (uint i = 0; i < numVertices; ++i)
+		{
+			if (*pFlag != NL3D_SOFTSKIN_VCOMPUTED)
+			{
+				*(CVector *)dstVector = *srcVector;
+				*(CVector *)dstNormal = *srcNormal;
+			}
+			*(CVector2f *)dstUV = *(CVector2f *)srcUV;
+
+			// inc flags.
+			pFlag++;
+			// inc src (all whatever skin type used...)
+			srcVector++;
+			srcNormal++;
+			srcUV += srcStride;
+			// inc paletteSkin and dst  (all whatever skin type used...)
+			dstVector += dstStride;
+			dstNormal += dstStride;
+			dstUV += dstStride;
+		}
+	}
 }
 
 

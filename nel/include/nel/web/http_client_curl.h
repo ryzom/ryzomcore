@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,8 @@
 #include "nel/misc/types_nl.h"
 #include <string>
 
+typedef void CURL;
+
 namespace NLWEB
 {
 
@@ -34,7 +36,7 @@ class CCurlHttpClient
 public:
 
 	/// Constructor
-	CCurlHttpClient() : _CurlStruct(NULL) {}
+	CCurlHttpClient() : _Curl(NULL), m_Verify(true) {}
 
 	/// Connect to an http server (string by val is intended). If you specify a whole URL, an attempt will be made to determine the server.
 	bool connect(const std::string &server);
@@ -63,6 +65,8 @@ public:
 	/// Disconnect if connected (otherwise does nothing)
 	void disconnect();
 
+	const char *lastError() { return &m_ErrorBuf[0]; }
+
 protected:
 
 	/// Helper
@@ -74,10 +78,14 @@ protected:
 	static size_t writeDataFromCurl(void *buffer, size_t size, size_t nmemb, void *pHttpClient);
 private:
 
-	void *_CurlStruct; // void* to prevent including curl.h in a header file
+	CURL *_Curl;
 
 	std::vector<uint8>	_ReceiveBuffer;
 	std::string			_Auth; // must be kept here because curl only stores the char pointer
+
+	std::vector<char> m_ErrorBuf;
+	bool m_Verify;
+
 };
 
 extern CCurlHttpClient CurlHttpClient;

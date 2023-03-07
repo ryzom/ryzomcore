@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2014  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -338,7 +338,7 @@ public:
 	 *  \specialPhraseFormat if empty, format is auto selected. if "composition", same but the text is cut under the %compostart tag.
 	 *		else take directly this format.
 	 */
-	void				buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase, uint32 phraseSheetId, bool wantRequirement, const std::string &specialPhraseFormat= std::string());
+	void				buildPhraseDesc(std::string &text, const CSPhraseCom &phrase, uint32 phraseSheetId, bool wantRequirement, const std::string &specialPhraseFormat= std::string());
 	// Get the Phrase Success Rate %
 	sint				getPhraseSuccessRate(const CSPhraseCom &phrase);
 	// Get the Phrase Success Rate %. Manually gives the Skill to do the comparison (for craft)
@@ -346,7 +346,7 @@ public:
 	// Get the Phrase Success Rate %. Manually gives the Skill to do the comparison (for Forage Extraction)
 	sint				getForageExtractionPhraseSuccessRate(const CSPhraseCom &phrase, SKILLS::ESkills skill);
 	// return the fmt according to forage terrain specializing
-	ucstring			getForageExtractionPhraseEcotypeFmt(const CSPhraseCom &phrase);
+	std::string			getForageExtractionPhraseEcotypeFmt(const CSPhraseCom &phrase);
 	// Get the Phrase Sap Cost
 	void				getPhraseSapCost(const CSPhraseCom &phrase, uint32 totalActionMalus, sint &cost, sint &costMalus);
 	// Get the Phrase Sta Cost
@@ -370,8 +370,8 @@ public:
 	/// true if interesting to list the bricks of this phrase in help
 	bool				allowListBrickInHelp(const CSPhraseCom &phrase) const;
 	/// return the combat restriction text (empty if not combat)
-	void				getCombatWeaponRestriction(ucstring &text, const CSPhraseCom &phrase, bool& usableWithMelee, bool& usableWithRange);
-	void				getCombatWeaponRestriction(ucstring &text, sint32 phraseSheetId, bool& usableWithMelee, bool& usableWithRange);
+	void				getCombatWeaponRestriction(std::string &text, const CSPhraseCom &phrase, bool& usableWithMelee, bool& usableWithRange);
+	void				getCombatWeaponRestriction(std::string &text, sint32 phraseSheetId, bool& usableWithMelee, bool& usableWithRange);
 	// return true if any of the Bricks contains AvoidCyclic==true (the phrase cannot be cyclic)
 	bool				avoidCyclicForPhrase(const CSPhraseCom &phrase) const;
 	bool				avoidCyclicForPhrase(sint32 phraseSheetId) const;
@@ -693,8 +693,8 @@ private:
 
 	// @}
 
-	ucstring	formatMalus(sint base, sint malus);
-	ucstring	formatMalus(float base, float malus);
+	std::string	formatMalus(sint base, sint malus);
+	std::string	formatMalus(float base, float malus);
 	std::string		formatBonusMalus(sint32 base, sint32 mod);
 
 	// Special for combat: Build the "phrase skill compatible" formula

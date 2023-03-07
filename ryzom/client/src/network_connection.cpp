@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -314,6 +314,7 @@ CNetworkConnection::CNetworkConnection()
 #endif
 {
 	_ConnectionState = NotInitialised;
+	m_LoginNextAddress = false;
 	_ImpulseCallback = NULL;
 	_ImpulseArg = NULL;
 	_DataBase = NULL;
@@ -580,21 +581,21 @@ bool	CNetworkConnection::connect(string &result)
 		// do this process only if Use == 1
 		if (cfg.getVar("Use").asInt() == 1)
 		{
-			CInetAddress fsaddr (_FrontendAddress);
+			CInetHost fsaddr (_FrontendAddress);
 
 			fsaddr.setPort(0);
 
-			nlinfo ("Try to find a shard that have fsaddr = '%s'", fsaddr.asString().c_str());
+			nlinfo ("Try to find a shard that have fsaddr = '%s'", fsaddr.toStringLong().c_str());
 
 			CConfigFile::CVar &shards = cfg.getVar("Shards");
-			CInetAddress net;
+			CInetHost net;
 			uint i;
 			for (i = 0; i < shards.size(); i+=2)
 			{
 				try
 				{
-					net.setNameAndPort (shards.asString(i));
-					nlinfo ("testAddr = '%s'", net.asString().c_str());
+					net = CInetHost(shards.asString(i));
+					nlinfo ("testAddr = '%s'", net.toStringLong().c_str());
 					if (net == fsaddr)
 					{
 						// ok, we found it, now overwrite files
@@ -646,7 +647,7 @@ bool	CNetworkConnection::connect(string &result)
 			}
 			if (i == shards.size())
 			{
-				nlwarning ("the fsaddr '%s' is not in the shards.cfg, can't copy data_common files", fsaddr.asString().c_str());
+				nlwarning ("the fsaddr '%s' is not in the shards.cfg, can't copy data_common files", fsaddr.toStringLong().c_str());
 			}
 		}
 	}
@@ -660,18 +661,65 @@ bool	CNetworkConnection::connect(string &result)
 	// then connect to the frontend using the udp sock
 //ace faut faire la nouveau login client 	result = CLoginClient::connectToShard (_FrontendAddress, _Connection);
 
-	nlassert (!_Connection.connected());
-
+	m_QuicConnection.update();
+	nlassert((!m_Connection.connected()) && !(m_QuicConnection.state() == CQuicConnection::Connected));
+	
 	try
 	{
 		//
 		// S12: connect to the FES. Note: In UDP mode, it's the user that have to send the cookie to the front end
 		//
-		_Connection.connect (CInetAddress(_FrontendAddress));
+		CInetHost frontendHost(_FrontendAddress);
+		// Under UDP we need to connect one by one by ourselves
+		_FrontendHost = frontendHost;
+		_FrontendHostIndex = 0;
+		if (m_UseQuic)
+		{
+			// Only need one connection attempt on QUIC as it handles migration
+			_FrontendHost.setPort(_FrontendHost.port() - 5000); // Same trick as SBS, just use a port offset
+			nlinfo("Connecting to QUIC at port %d instead", _FrontendHost.port());
+			m_QuicConnection.connect(_FrontendHost);
+		}
+		else
+		{
+			m_QuicConnection.release(); // Do clean up any resources if we're no longer using QUIC
+			std::string tres = "No remaining FS connection addresses";
+			while (_FrontendHostIndex < _FrontendHost.size())
+			{
+				try
+				{
+					// Connect
+					m_Connection.connect(_FrontendHost.at(_FrontendHostIndex));
+					tres.clear();
+					break;
+				}
+				catch (const ESocket &e)
+				{
+					tres = toString("FS refused the connection (%s)", e.what());
+				}
+				++_FrontendHostIndex;
+
+				// Reuse the udp socket
+				m_Connection.~CUdpSimSock();
+#ifdef new
+#undef new
+#endif
+				new (&m_Connection) CUdpSimSock();
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+			}
+			if (!tres.empty())
+			{
+				result = tres;
+				return false;
+			}
+		}
 	}
 	catch (const ESocket &e)
 	{
-		result = toString ("FS refused the connection (%s)", e.what());
+		result = toString("FS hostname resolution failed (%s)", e.what());
 		return false;
 	}
 
@@ -680,6 +728,7 @@ bool	CNetworkConnection::connect(string &result)
 	_LatestLoginTime = ryzomGetLocalTime ();
 	_LatestSyncTime = _LatestLoginTime;
 	_LatestProbeTime = _LatestLoginTime;
+	m_LoginAttempts = 0;
 
 	nlinfo("CNET[%p]: Client connected to shard, attempting login", this);
 	return true;
@@ -743,6 +792,7 @@ bool	CNetworkConnection::update()
 	_TotalMessages = 0;
 
 	//nldebug("CNET[%d]: begin update()", this);
+	m_QuicConnection.update(); // Always update QUIC state
 
 	// If we are disconnected, bypass the real network update
 	if ( _ConnectionState == Disconnect )
@@ -786,11 +836,68 @@ bool	CNetworkConnection::update()
 	return res;
 #endif
 
-	if (!_Connection.connected())
+	if (m_UseQuic && m_LoginNextAddress)
 	{
-		//if(!ClientCfg.Local)
-		//	nlwarning("CNET[%p]: update() attempted whereas socket is not connected !", this);
-		return false;
+		// Early exit this attempt since we're switching to QUIC
+		_ConnectionState = Disconnect;
+		m_LoginNextAddress = false;
+	}
+
+	if (m_LoginNextAddress && _ConnectionState != Login)
+	{
+		nlwarning("Can only switch to next FS address while logging in");
+		m_LoginNextAddress = false;
+	}
+
+	if (m_LoginNextAddress)
+	{
+		nlassert(!m_Connection.connected());
+
+		std::string tres = "No remaining FS connection addresses";
+		while (_FrontendHostIndex < _FrontendHost.size())
+		{
+			// Reuse the udp socket
+			m_Connection.~CUdpSimSock();
+#ifdef new
+#undef new
+#endif
+			new (&m_Connection)CUdpSimSock();
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+			CInetHost frontendHost = _FrontendHost.at(_FrontendHostIndex);
+			nlinfo("CNET[%p]: Connecting to next FS host address '%s'", this, frontendHost.address().asIPString().c_str());
+			try
+			{
+				// Connect
+				m_Connection.connect(frontendHost);
+				tres.clear();
+				break;
+			}
+			catch (const ESocket &e)
+			{
+				tres = toString("FS refused the connection (%s)", e.what());
+			}
+			++_FrontendHostIndex;
+		}
+		if (tres.empty())
+		{
+			_ConnectionState = Login;
+
+			_LatestLoginTime = ryzomGetLocalTime ();
+			_LatestSyncTime = _LatestLoginTime;
+			_LatestProbeTime = _LatestLoginTime;
+			m_LoginAttempts = 0;
+
+			nlinfo("CNET[%p]: Client connected to shard again, attempting login", this);
+		}
+		else
+		{
+			nlwarning("CNET[%p]: %s", this, tres.c_str());
+
+			_ConnectionState = Disconnect;
+		}
 	}
 
 	try
@@ -864,6 +971,22 @@ bool	CNetworkConnection::update()
 	}
 	catch (const ESocket &)
 	{
+		if (!m_LoginNextAddress)
+		{
+			_ConnectionState = Disconnect;
+		}
+	}
+
+	if (m_UseQuic && (m_QuicConnection.state() == CQuicConnection::Disconnected))
+	{
+		// Bye
+		_ConnectionState = Disconnect;
+	}
+
+	if (!m_UseQuic && !m_Connection.connected())
+	{
+		//if(!ClientCfg.Local)
+		//	nlwarning("CNET[%p]: update() attempted whereas socket is not connected !", this);
 		_ConnectionState = Disconnect;
 	}
 
@@ -910,8 +1033,24 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 	}
 #endif
 
+	if (m_UseQuic)
+	{
+		if (m_QuicConnection.receiveDatagram(msgin))
+		{
+			// Compute some statistics
+			// FIXME: Also get protocol stats QUIC_PARAM_CONN_STATISTICS QUIC_PARAM_CONN_STATISTICS_V2
+			statsReceive(msgin.length());
+			
+			// We're good
+			return true;
+		}
+		// Under quic receiving a datagram never fails if a datagram is flagged as available
+		nlwarning("QUIC datagram available but receiving datagram failed, this is a bug.");
+		return false;
+	}
+
 	uint32 len = 65536;
-	if ( _Connection.receive( (uint8*)_ReceiveBuffer, len, false ) )
+	if ( m_Connection.receive( (uint8*)_ReceiveBuffer, len, false ) )
 	{
 		// Compute some statistics
 		statsReceive( len );
@@ -931,10 +1070,22 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 	}
 	else
 	{
+		// Try the next address if we're still logging in
+		bool tryNextAddress = (_ConnectionState == Login) && ((_FrontendHostIndex + 1) < _FrontendHost.size());
+
 		// A receiving error means the front-end is down
 		_ConnectionState = Disconnect;
 		disconnect(); // won't send a disconnection msg because state is already Disconnect
-		nlwarning( "DISCONNECTION" );
+		if (tryNextAddress)
+		{
+			_ConnectionState = Login;
+			m_LoginNextAddress = true;
+			++_FrontendHostIndex;
+		}
+		else
+		{
+			nlwarning("DISCONNECTION");
+		}
 		return false;
 	}
 }
@@ -981,7 +1132,10 @@ void	CNetworkConnection::sendSystemLogin()
 	try
 	{
 		//sendUDP (&(_Connection), message.buffer(), length);
-		_Connection.send( message.buffer(), length );
+		if (m_UseQuic)
+			m_QuicConnection.sendDatagramSwap(message, length);
+		else
+			m_Connection.send(message.buffer(), length);
 	}
 	catch (const ESocket &e)
 	{
@@ -1031,7 +1185,7 @@ bool	CNetworkConnection::stateLogin()
 	while ( (_ReplayIncomingMessagesOn && dataToReplayAvailable()) ||
 			_Connection.dataAvailable() )
 #else
-	while ( _Connection.dataAvailable() )// && _TotalMessages<5)
+	while ( m_UseQuic ? m_QuicConnection.datagramAvailable() : m_Connection.dataAvailable() )// && _TotalMessages<5)
 #endif
 	{
 		_DecodedHeader = false;
@@ -1091,6 +1245,20 @@ bool	CNetworkConnection::stateLogin()
 	{
 		sendSystemLogin();
 		_LatestLoginTime = _UpdateTime;
+		// Time out the login after 24 attempts (every 300ms, so after 7.2 seconds)
+#if 1 // Disable login timeout here when debugging login messages
+		if (m_LoginAttempts > 24)
+		{
+			m_LoginAttempts = 0;
+			disconnect(); // will send disconnection message
+			nlwarning("CNET[%p]: Too many LOGIN attempts, connection problem (using %s)", this, m_UseQuic ? "QUIC" : "UDP");
+			return false; // exit now from loop, don't expect a new state
+		}
+		else
+#endif
+		{
+			++m_LoginAttempts;
+		}
 	}
 
 	return false;
@@ -1196,7 +1364,10 @@ void	CNetworkConnection::sendSystemAckSync()
 	message.serial(_LatestSync);
 
 	uint32	length = message.length();
-	_Connection.send (message.buffer(), length);
+	if (m_UseQuic)
+		m_QuicConnection.sendDatagramSwap(message, length);
+	else
+		m_Connection.send (message.buffer(), length);
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
 
@@ -1238,7 +1409,7 @@ bool	CNetworkConnection::stateSynchronize()
 	while ( (_ReplayIncomingMessagesOn && dataToReplayAvailable()) ||
 			_Connection.dataAvailable() )
 #else
-	while (_Connection.dataAvailable())// && _TotalMessages<5)
+	while (m_UseQuic ? m_QuicConnection.datagramAvailable() : m_Connection.dataAvailable())// && _TotalMessages<5)
 #endif
 	{
 		_DecodedHeader = false;
@@ -2082,7 +2253,10 @@ void	CNetworkConnection::sendNormalMessage()
 
 	//_PropertyDecoder.send (_CurrentSendNumber, _LastReceivedNumber);
 	uint32	length = message.length();
-	_Connection.send (message.buffer(), length);
+	if (m_UseQuic)
+		m_QuicConnection.sendDatagramSwap(message, length);
+	else
+		m_Connection.send(message.buffer(), length);
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
 	// remember send time
@@ -2109,7 +2283,7 @@ bool	CNetworkConnection::stateConnected()
 		TTime now = ryzomGetLocalTime ();
 		TTime diff = now - previousTime;
 		previousTime = now;
-		if ( (diff > 3000) && (! _Connection.dataAvailable()) )
+		if ( (diff > 3000) && (! (m_UseQuic ? m_QuicConnection.datagramAvailable() : m_Connection.dataAvailable())) )
 		{
 			return false;
 		}
@@ -2125,7 +2299,7 @@ bool	CNetworkConnection::stateConnected()
 			_MachineTicksAtTick = _UpdateTicks;
 		}
 
-		if (_CurrentClientTick >= _CurrentServerTick && !_Connection.dataAvailable())
+		if (_CurrentClientTick >= _CurrentServerTick && !(m_UseQuic ? m_QuicConnection.datagramAvailable() : m_Connection.dataAvailable()))
 		{
 			return false;
 		}
@@ -2137,7 +2311,7 @@ bool	CNetworkConnection::stateConnected()
 	while ( (_ReplayIncomingMessagesOn && dataToReplayAvailable()) ||
 			_Connection.dataAvailable() )
 #else
-	while (_Connection.dataAvailable())// && _TotalMessages<5)
+	while (m_UseQuic ? m_QuicConnection.datagramAvailable() : m_Connection.dataAvailable())// && _TotalMessages<5)
 #endif
 	{
 		_DecodedHeader = false;
@@ -2243,7 +2417,10 @@ void	CNetworkConnection::sendSystemAckProbe()
 	_LatestProbes.clear();
 
 	uint32	length = message.length();
-	_Connection.send (message.buffer(), length);
+	if (m_UseQuic)
+		m_QuicConnection.sendDatagramSwap(message, length);
+	else
+		m_Connection.send(message.buffer(), length);
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
 
@@ -2263,7 +2440,7 @@ bool	CNetworkConnection::stateProbe()
 	while ( (_ReplayIncomingMessagesOn && dataToReplayAvailable()) ||
 			_Connection.dataAvailable() )
 #else
-	while (_Connection.dataAvailable())// && _TotalMessages<5)
+	while (m_UseQuic ? m_QuicConnection.datagramAvailable() : m_Connection.dataAvailable())// && _TotalMessages<5)
 #endif
 	{
 		_DecodedHeader = false;
@@ -2308,6 +2485,7 @@ bool	CNetworkConnection::stateProbe()
 			else
 			{
 				nlwarning("CNET[%p]: received normal in state Probe", this);
+				_LatestProbeTime = _UpdateTime;
 			}
 		}
 	}
@@ -2319,7 +2497,10 @@ bool	CNetworkConnection::stateProbe()
 		_LatestProbeTime = _UpdateTime;
 	}
 	else
-		nlSleep(10);
+	{
+		// nlSleep(10);
+		nlYield();
+	}
 
 	return false;
 }
@@ -2351,7 +2532,7 @@ bool	CNetworkConnection::stateStalled()
 	while ( (_ReplayIncomingMessagesOn && dataToReplayAvailable()) ||
 			_Connection.dataAvailable() )
 #else
-	while (_Connection.dataAvailable())// && _TotalMessages<5)
+	while (m_UseQuic ? m_QuicConnection.datagramAvailable() : m_Connection.dataAvailable())// && _TotalMessages<5)
 #endif
 	{
 		_DecodedHeader = false;
@@ -2625,15 +2806,6 @@ void	CNetworkConnection::pushTarget(TCLEntityId slot, LHSTATE::TLHState targetOr
 	CActionTargetSlot *ats = (CActionTargetSlot*)CActionFactory::getInstance ()->create (INVALID_SLOT, ACTION_TARGET_SLOT_CODE);
 	nlassert (ats != NULL);
 	ats->Slot = slot;
-	switch ( targetOrPickup ) // ensure the value is good for the FE
-	{
-		case LHSTATE::NONE: ats->TargetOrPickup = 0; break;
-		case LHSTATE::LOOTABLE: ats->TargetOrPickup = 1; break;
-		case LHSTATE::HARVESTABLE: ats->TargetOrPickup = 2; break;
-		default:
-		break;
-	}
-
 	ats->TargetOrPickup = (uint32)targetOrPickup;
 	push(ats);
 }
@@ -2770,16 +2942,20 @@ void	CNetworkConnection::sendSystemDisconnection()
 
 	uint32	length = message.length();
 
-	if (_Connection.connected())
+	if (m_Connection.connected())
 	{
 		try
 		{
-			_Connection.send(message.buffer(), length);
+			m_Connection.send(message.buffer(), length);
 		}
 		catch (const ESocket &e)
 		{
 			nlwarning("Socket exception: %s", e.what());
 		}
+	}
+	if (m_QuicConnection.canSend())
+	{
+		m_QuicConnection.sendDatagramSwap(message, length);
 	}
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
@@ -2803,11 +2979,18 @@ void	CNetworkConnection::disconnect()
 		_ConnectionState == Disconnect)
 	{
 		//nlwarning("Unable to disconnect(): not connected yet, or already disconnected.");
+		m_QuicConnection.disconnect();
+		if (!m_UseQuic)
+			m_QuicConnection.release();
+		m_Connection.close();
 		return;
 	}
 
 	sendSystemDisconnection();
-	_Connection.close();
+	m_QuicConnection.disconnect();
+	if (!m_UseQuic)
+		m_QuicConnection.release();
+	m_Connection.close();
 	_ConnectionState = Disconnect;
 }
 
@@ -2833,7 +3016,7 @@ bool	CNetworkConnection::stateQuit()
 	while ( (_ReplayIncomingMessagesOn && dataToReplayAvailable()) ||
 			_Connection.dataAvailable() )
 #else
-	while (_Connection.dataAvailable())// && _TotalMessages<5)
+	while (m_UseQuic ? m_QuicConnection.datagramAvailable() : m_Connection.dataAvailable())// && _TotalMessages<5)
 #endif
 	{
 		_DecodedHeader = false;
@@ -2951,6 +3134,8 @@ void	CNetworkConnection::reset()
 	_TotalLostPackets = 0;
 	_ConnectionQuality = false;
 
+	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
+
 	_CurrentSmoothServerTick= 0;
 	_SSTLastLocalTime= 0;
 }
@@ -2979,16 +3164,21 @@ void	CNetworkConnection::reinit()
 	initTicks();
 
 	// Reuse the udp socket
-	_Connection.~CUdpSimSock();
+	m_Connection.~CUdpSimSock();
 
 #ifdef new
 #undef new
 #endif
-	new (&_Connection) CUdpSimSock();
+	new (&m_Connection) CUdpSimSock();
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
 #endif
+
+	// Disconnect QUIC
+	m_QuicConnection.disconnect();
+	if (!m_UseQuic)
+		m_QuicConnection.release();
 }
 
 // sends system sync acknowledge
@@ -3004,7 +3194,10 @@ void	CNetworkConnection::sendSystemQuit()
 	message.serial(_QuitId);
 
 	uint32	length = message.length();
-	_Connection.send (message.buffer(), length);
+	if (m_UseQuic)
+		m_QuicConnection.sendDatagramSwap(message, length);
+	else
+		m_Connection.send(message.buffer(), length);
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
 

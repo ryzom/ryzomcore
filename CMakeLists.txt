@@ -34,6 +34,34 @@ IF(COMMAND cmake_policy)
   ENDIF()
 ENDIF()
 
+
+#-----------------------------------------------------------------------------
+# Downloads and install Hunger into HUNTER_ROOT directory.
+OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
+IF(HUNTER_ENABLED)
+  INCLUDE("CMakeModules/HunterGate.cmake")
+  HunterGate(
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.321.tar.gz"
+    SHA1 "5e53cbb0429037ea8e2592bfd92704b8ff3ab492"
+    FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
+  )
+
+  # default options for hunterized build
+  SET(WITH_STATIC         ON CACHE BOOL "static" FORCE)
+  SET(WITH_STATIC_DRIVERS ON CACHE BOOL "static drivers" FORCE)
+  SET(WITH_STATIC_CURL    ON CACHE BOOL "static curl" FORCE)
+  SET(WITH_STATIC_LIBXML2 ON CACHE BOOL "static libxml2" FORCE)
+  SET(WITH_STATIC_EXTERNAL ON CACHE BOOL "static external" FORCE)
+  SET(WITH_EXTERNAL       OFF CACHE BOOL "external libs" FORCE)
+ 
+ # Workaround for PCH compilation issue, from curl intsizeof depencency
+  ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
+  # TODO: Still applicable after switching to CMake's builtin precompiled header support?
+ENDIF()
+
+
+#-----------------------------------------------------------------------------
+
 INCLUDE(nel)
 INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
@@ -53,15 +81,12 @@ ENDIF()
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
-SET(NL_VERSION_MAJOR 1)
+SET(NL_VERSION_MAJOR 4)
 SET(NL_VERSION_MINOR 1)
 SET(NL_VERSION_PATCH 0 CACHE STRING "Patch version")
+SET(NL_VERSION_BUILD 0 CACHE STRING "Build number")
 SET(YEAR "2001-${CURRENT_YEAR}")
 SET(AUTHOR "Winch Gate and The Ryzom Core Community")
-
-SET(RYZOM_VERSION_MAJOR 3)
-SET(RYZOM_VERSION_MINOR 5)
-SET(RYZOM_VERSION_PATCH 0)
 
 #-----------------------------------------------------------------------------
 # Redirect output files
@@ -98,25 +123,31 @@ RYZOM_SETUP_PREFIX_PATHS()
 
 #-----------------------------------------------------------------------------
 # Default values for URL's
-SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL  "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
-SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL    "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
-SET(RYZOM_CLIENT_FORGET_PASSWORD_URL "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
-SET(RYZOM_CLIENT_PATCH_URL           "https://cdn.ryzom.dev/open/patch/" CACHE STRING "Ryzom Client Patch URL")
+SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL     "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
+SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL       "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
+SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
+SET(RYZOM_CLIENT_PATCH_URL              "https://cdn.ryzom.dev/core4/patch/" CACHE STRING "Ryzom Client Patch URL")
+SET(RYZOM_CLIENT_APP_NAME               "core4")
 
-SET(RYZOM_WEBIG_MAIN_URL             "https://open.ryzom.dev/" CACHE STRING "Ryzom Client WebIG Main URL")
-SET(RYZOM_WEBIG_TRUSTED_DOMAIN       "open.ryzom.dev" CACHE STRING "Ryzom Client WebIG Trusted Domain")
+SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://core4.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
+SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
+
+SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomcore" CACHE STRING "Ryzom Client UI Feature Flag")
 
 #-----------------------------------------------------------------------------
 # urls when compiling ryzom live client
 IF(WITH_RYZOM_LIVE)
   MESSAGE("Using RYZOM_LIVE urls")
-  SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL  "https://account.ryzom.com/signup/from_client.php")
-  SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL    "https://account.ryzom.com/payment_profile/index.php")
-  SET(RYZOM_CLIENT_FORGET_PASSWORD_URL "https://account.ryzom.com/payment_profile/lost_secure_password.php")
-  SET(RYZOM_CLIENT_PATCH_URL           "http://dl.ryzom.com/patch_live")
+  SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL   "https://account.ryzom.com/signup/from_client.php")
+  SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL     "https://account.ryzom.com/payment_profile/index.php")
+  SET(RYZOM_CLIENT_FORGET_PASSWORD_URL  "https://account.ryzom.com/payment_profile/lost_secure_password.php")
+  SET(RYZOM_CLIENT_PATCH_URL            "http://dl.ryzom.com/patch_live")
+  SET(RYZOM_CLIENT_APP_NAME             "ryzom_live")
 
-  SET(RYZOM_WEBIG_MAIN_URL             "https://app.ryzom.com/")
-  SET(RYZOM_WEBIG_TRUSTED_DOMAIN       "app.ryzom.com")
+  SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/releasenotes/index.php")
+  SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/releasenotes_ring/index.php")
+
+  SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomforge")
 ENDIF()
 
 #-----------------------------------------------------------------------------
@@ -132,6 +163,36 @@ IF(WIN32)
   ENDIF()
 ENDIF()
 
+IF(HUNTER_ENABLED)
+  # This fix is for compiling OpenSSL in Azure Pipeline linux agent where ENV{SYSTEM} == "build"
+  IF(DEFINED ENV{SYSTEM} AND UNIX AND NOT APPLE)
+    STRING(TOUPPER "$ENV{SYSTEM}" _tmp)
+    IF (_tmp STREQUAL "BUILD")
+      UNSET(ENV{SYSTEM})
+    ENDIF()
+    UNSET(_tmp)
+  ENDIF()
+  ## TODO: hack for freetype hunter package
+  SET(ON 1)
+  ##
+  HUNTER_ADD_PACKAGE(ZLIB)
+
+  FIND_PACKAGE(ZLIB CONFIG REQUIRED)
+  SET(ZLIB_LIBRARY ZLIB::zlib)
+
+  HUNTER_ADD_PACKAGE(libxml2)
+  FIND_PACKAGE(libxml2 CONFIG REQUIRED)
+  SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
+
+  HUNTER_ADD_PACKAGE(OpenSSL)
+  FIND_PACKAGE(OpenSSL REQUIRED)
+  # TODO: is OpenSSL::Crypto only needed for WIN32?
+  SET(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+
+  # for precompiled headers, not needed if using TARGET_PRECOMPILE_HEADERS() from cmake 3.16+
+  SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
+  SET(LIBXML2_INCLUDE_DIR ${LIBXML2_ROOT}/include/libxml2)
+ELSE()
 FIND_PACKAGE(ZLIB REQUIRED)
 FIND_PACKAGE(LibXml2 REQUIRED)
 FIND_PACKAGE(PNG REQUIRED)
@@ -142,6 +203,7 @@ FIND_PACKAGE(Jpeg)
 IF(WIN32)
   SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
 ENDIF()
+ENDIF() #hunter
 
 IF(WITH_LIBOVR)
   FIND_PACKAGE(LibOVR)
@@ -154,11 +216,11 @@ ENDIF()
 NL_CONFIGURE_CHECKS()
 
 IF(WITH_STATIC_LIBXML2)
-  SET(LIBXML2_DEFINITIONS ${LIBXML2_DEFINITIONS} -DLIBXML_STATIC)
+  ADD_DEFINITIONS(-DLIBXML_STATIC)
 ENDIF()
 
-IF(WITH_LIBXML2_ICONV)
-  FIND_PACKAGE(Iconv REQUIRED)
+FIND_PACKAGE(Iconv QUIET)
+IF(ICONV_FOUND)
   INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
   SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
 ENDIF()
@@ -169,16 +231,28 @@ IF(WITH_STATIC)
     SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${WINSOCK2_LIB})
   ENDIF()
 
-  IF(UNIX)
+  IF(UNIX AND NOT HUNTER_ENABLED)
     # under Linux and OS X, recent libxml2 versions are linked against liblzma
     FIND_PACKAGE(LibLZMA)
     IF(LIBLZMA_LIBRARIES)
       SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${LIBLZMA_LIBRARIES})
     ENDIF()
+
+    # under Linux and OS X, recent libxml2 versions are linked against libicu
+    # FIND_PACKAGE(Icu)
+    FIND_LIBRARY(ICU_LIBRARY icuuc)
+    IF(ICU_LIBRARY)
+       FIND_LIBRARY(ICU_DATA_LIBRARY icudata)
+       IF(ICU_LIBRARY)
+         MESSAGE(STATUS "ICU UC was found: ${ICU_LIBRARY}")
+       ELSE()
+         MESSAGE(STATUS "ICU UC was NOT found")
+       ENDIF()
+       SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICU_DATA_LIBRARY} ${ICU_LIBRARY})
+    ENDIF()
+
   ENDIF()
 ENDIF()
-
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 
 IF(FINAL_VERSION)
   ADD_DEFINITIONS(-DFINAL_VERSION=1)
@@ -221,6 +295,7 @@ ENDIF()
 
 INCLUDE(FindHelpers)
 
+#TODO: hunter qt package
 IF(WITH_QT5)
   FIND_QT5()
 ENDIF()
@@ -232,8 +307,13 @@ IF(WITH_QT)
   FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED)
 ENDIF()
 
+#TODO: hunter assimp package
 IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)
+ENDIF()
+
+IF(WITH_MSQUIC)
+  FIND_PACKAGE(msquic REQUIRED)
 ENDIF()
 
 IF(WITH_NEL)
@@ -241,11 +321,26 @@ IF(WITH_NEL)
     FIND_PACKAGE(CppTest)
   ENDIF()
 
-  IF(WITH_GUI)
-    FIND_PACKAGE(Luabind REQUIRED)
-  ENDIF()
+  IF(HUNTER_ENABLED)
+    IF(WITH_GUI)
+      HUNTER_ADD_PACKAGE(luabind)
+      FIND_PACKAGE(Luabind REQUIRED)
+    ENDIF()
+
+    HUNTER_ADD_PACKAGE(CURL)
+    FIND_PACKAGE(CURL CONFIG REQUIRED)
+    # TODO: for nelgui
+    SET(CURL_LIBRARIES CURL::libcurl libxml2::libxml2)
+  ELSE()
+    IF(WITH_GUI)
+      FIND_PACKAGE(Luabind REQUIRED)
+    ENDIF()
 
     FIND_PACKAGE(CURL REQUIRED)
+    # if cmake finds config-file package, ie FIND_PACKAGE(CURL CONFIG), then CURL_LIBRARIES is not defined
+    IF(TARGET CURL::libcurl)
+      SET(CURL_LIBRARIES CURL::libcurl)
+    ENDIF()
 
     IF((WIN32 OR CURL_LIBRARIES MATCHES "\\.a") AND WITH_STATIC_CURL)
       SET(CURL_STATIC ON)
@@ -294,6 +389,7 @@ IF(WITH_NEL)
         ENDIF()
       ENDIF()
     ENDIF()
+  ENDIF() #hunter
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)
@@ -365,7 +461,7 @@ ENDIF()
 # packaging information
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ryzom Core MMORPG Framework")
 SET(CPACK_PACKAGE_VENDOR "Ryzom Core")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/README)
+SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/README.md)
 SET(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/COPYING)
 SET(CPACK_PACKAGE_VERSION_MAJOR "${NL_VERSION_MAJOR}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${NL_VERSION_MINOR}")

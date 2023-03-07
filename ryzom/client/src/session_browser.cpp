@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -44,7 +47,8 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 	NLMISC::CUnfairMutex	_Mutex;
 
 	// A flag to let some message passthrue without enqueuing (for authenticate)
-	bool					_PassThrue;
+	// Mutex must already be locked during passthrough, as it's also bypassed
+	NLMISC::CAtomicBool		_PassThrue;
 
 	CCallbackClientAdaptor(void *containerClass)
 		:	CNelCallbackClientAdaptor(containerClass),
@@ -58,7 +62,7 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 		return _CallbackClient;
 	}
 
-	virtual void connect( const NLNET::CInetAddress& /* addr */ )
+	virtual void connect( const NLNET::CInetHost& /* addr */ )
 	{
 		// do not connect now
 	}
@@ -66,11 +70,10 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 
 	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid = NLNET::InvalidSockId, bool log = true)
 	{
-		CAutoMutex<CUnfairMutex> mutex(_Mutex);
-
 		if (!_PassThrue)
 		{
 			// queue the message for later sending.
+			CAutoMutex<CUnfairMutex> mutex(_Mutex);
 			nldebug("SB: Pushing a buffer into SendQueue (from %u elts)", _SendQueue.size());
 			_SendQueue.push(buffer);
 		}
@@ -135,7 +138,7 @@ CCallbackClientAdaptor *CSessionBrowser::getCallbackAdaptor()
 	return static_cast<CCallbackClientAdaptor *>(_CallbackClient.get());
 }
 
-void CSessionBrowser::connectItf(NLNET::CInetAddress address)
+void CSessionBrowser::connectItf(NLNET::CInetHost address)
 {
 	// call the interface connectItf
 	CSessionBrowserServerWebClientItf::connectItf(address);

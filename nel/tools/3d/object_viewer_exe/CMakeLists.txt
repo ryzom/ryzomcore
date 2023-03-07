@@ -18,7 +18,7 @@ NL_DEFAULT_PROPS(object_viewer "NeL, Tools, 3D: Object Viewer")
 NL_ADD_RUNTIME_FLAGS(object_viewer)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(object_viewer ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.cpp)
+  target_precompile_headers(object_viewer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h)
 ENDIF()
 
 INSTALL(TARGETS object_viewer RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)

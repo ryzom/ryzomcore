@@ -50,6 +50,7 @@ static list<CPendingUser> PendingUsers;
 
 static CCallbackServer *Server = NULL;
 static string ListenAddr;
+static CInetHost ListenHost;
 
 static bool AcceptInvalidCookie = false;
 
@@ -293,11 +294,13 @@ void CLoginServer::setListenAddress(const string &la)
 	// check that listen address is valid
 	if (ListenAddr.empty())
 	{
+		ListenHost.clear();
 		nlerror("FATAL : listen address in invalid, it should be either set via ListenAddress variable or with -D argument");
 		nlstop;
 	}
 
 	nlinfo("LS: Listen Address that will be sent to the client is now '%s'", ListenAddr.c_str());
+	ListenHost = CInetHost(ListenAddr);
 }
 
 uint32 CLoginServer::getNbPendingUsers()
@@ -500,6 +503,12 @@ const std::string &CLoginServer::getListenAddress()
 	return ListenAddr;
 }
 
+
+/// Call this method to retrieve the listen address
+const CInetHost &CLoginServer::getListenHost()
+{
+	return ListenHost;
+}
 bool CLoginServer::acceptsInvalidCookie()
 {
 	return AcceptInvalidCookie;
@@ -577,6 +586,7 @@ NLMISC_CATEGORISED_DYNVARIABLE(nel, string, LSListenAddress, "the listen address
 		{
 			ListenAddr = *pointer;
 		}
+		ListenHost = CInetHost(ListenAddr);
 		nlinfo ("LS: Listen Address that will be send to client is '%s'", ListenAddr.c_str());
 	}
 }

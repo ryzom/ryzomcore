@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2010-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -118,6 +118,7 @@ int main(int argc, char* argv[])
 	CPath::remapExtension("dds", "png", true);
 	//
 	R2::CScenarioEntryPoints &sep = R2::CScenarioEntryPoints::getInstance();
+	sep.setFiles(builderConfig.CompleteIslandsFile, builderConfig.EntryPointsFile);
 	try
 	{
 		sep.loadCompleteIslands();
@@ -180,7 +181,7 @@ int main(int argc, char* argv[])
 			if (!zonePath.empty())
 			{
 				presentZonePathes.push_back(zonePath);
-				presentZoneNames.push_back(toLower(zoneNames[l]));
+				presentZoneNames.push_back(toLowerAscii(zoneNames[l]));
 			}
 		}
 		//

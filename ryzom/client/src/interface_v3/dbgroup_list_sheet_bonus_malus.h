@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -25,7 +25,6 @@
 #include "nel/misc/types_nl.h"
 #include "dbgroup_list_sheet.h"
 
-
 // ***************************************************************************
 /**
  * Special list_sheet that display some disalbe bitmap if needed according to DB
@@ -40,14 +39,34 @@ public:
 	/// Constructor
 	CDBGroupListSheetBonusMalus(const TCtorParam &param);
 
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+	// A child node
+	struct	CSheetChildTimer : public CDBGroupListSheet::CSheetChild
+	{
+		CSheetChildTimer();
+		virtual void init(CDBGroupListSheet *pFather, uint index) NL_OVERRIDE;
+		virtual void update(CDBGroupListSheet *pFather) NL_OVERRIDE;
 
-	virtual void draw ();
+		NLMISC::CCDBNodeLeaf *TimerDB;
+		NLMISC::CCDBNodeLeaf *DisabledDB;
+		uint TimerCache;
+
+		NLMISC::CRGBA _RegenTextColor;
+		NLMISC::CRGBA _RegenTextDisabledColor;
+	};
+
+	virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+
+	virtual CSheetChild *createSheetChild() NL_OVERRIDE { return new CSheetChildTimer; }
 
 private:
-	sint32							_TextId;
+	friend CSheetChildTimer;
 
-	std::vector<NLMISC::CCDBNodeLeaf*>		_DisableStates;
+	bool _RegenTextEnabled;
+	std::string _RegenTextFct;
+	sint32 _RegenTextY;
+	uint32 _RegenTextFontSize;
+	NLMISC::CRGBA _RegenTextColor;
+	NLMISC::CRGBA _RegenTextDisabledColor;
 };
 
 

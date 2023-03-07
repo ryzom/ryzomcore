@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -43,7 +44,7 @@ public:
 		std::vector<std::string>		Keywords;
 	};
 
-	CUserCommand (const std::string &commandName, const ucstring &help, const ucstring &argsHelp);
+	CUserCommand (const std::string &commandName, const std::string &help, const std::string &argsHelp);
 
 	void addMode (const std::string &action, uint numArg, bool infiniteAgr, const std::vector<std::string> &keywords);
 

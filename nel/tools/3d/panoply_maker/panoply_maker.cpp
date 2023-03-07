@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2010  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -325,7 +325,7 @@ int main(int argc, char* argv[])
 					NLMISC::CConfigFile::CVar &bitmap_extensions = cf.getVar ("bitmap_extensions");
 					for (uint k = 0; k < (uint) bitmap_extensions.size(); ++k)
 					{
-						std::string ext = "." + NLMISC::toLower(bitmap_extensions.asString(k));
+						std::string ext = "." + NLMISC::toLowerAscii(bitmap_extensions.asString(k));
 						if (std::find(bi.BitmapExtensions.begin(), bi.BitmapExtensions.end(), ext) == bi.BitmapExtensions.end())
 						{
 							bi.BitmapExtensions.push_back(ext);
@@ -483,7 +483,7 @@ static void BuildColoredVersions(const CBuildInfo &bi)
 		{
 			for (uint l = 0; l < bi.BitmapExtensions.size(); ++l)
 			{
-				std::string fileExt = "." + NLMISC::toLower(NLMISC::CFile::getExtension(files[k]));
+				std::string fileExt = "." + NLMISC::toLowerAscii(NLMISC::CFile::getExtension(files[k]));
 				if (fileExt == bi.BitmapExtensions[l])
 				{
 					//nlwarning("Processing : %s ", files[k].c_str());
@@ -532,7 +532,7 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 	masks.clear();
 
 	std::string fileName = NLMISC::CFile::getFilenameWithoutExtension(fileNameWithExtension);
-	std::string fileExt  = NLMISC::toLower(NLMISC::CFile::getExtension(fileNameWithExtension));
+	std::string fileExt  = NLMISC::toLowerAscii(NLMISC::CFile::getExtension(fileNameWithExtension));
 
 	for (uint k = 0; k < bi.ColorMasks.size(); ++k)
 	{
@@ -721,7 +721,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 	masks.clear();
 
 	std::string fileName = NLMISC::CFile::getFilenameWithoutExtension(fileNameWithExtension);
-	std::string fileExt  = NLMISC::toLower(NLMISC::CFile::getExtension(fileNameWithExtension));
+	std::string fileExt  = NLMISC::toLowerAscii(NLMISC::CFile::getExtension(fileNameWithExtension));
 
 	uint	k;
 	for (k = 0; k < bi.ColorMasks.size(); ++k)

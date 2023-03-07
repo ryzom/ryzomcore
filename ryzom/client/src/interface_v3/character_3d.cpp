@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -439,45 +440,9 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 
 		Parts[part].Quality = item->MapVariant;
 		if (Male)
-		{
-			switch(People)
-			{
-				case EGSPD::CPeople::Fyros:
-					Parts[part].Name = item->getShapeFyros();
-					break;
-				case EGSPD::CPeople::Matis:
-					Parts[part].Name = item->getShapeMatis();
-					break;
-				case EGSPD::CPeople::Tryker:
-					Parts[part].Name = item->getShapeTryker();
-					break;
-				case EGSPD::CPeople::Zorai:
-					Parts[part].Name = item->getShapeZorai();
-					break;
-			}
-			if (Parts[part].Name.empty())
-				Parts[part].Name = item->getShape();
-		}
+			Parts[part].Name = item->getShape();
 		else
-		{
-			switch(People)
-			{
-				case EGSPD::CPeople::Fyros:
-					Parts[part].Name = item->getShapeFyrosFemale();
-					break;
-				case EGSPD::CPeople::Matis:
-					Parts[part].Name = item->getShapeMatisFemale();
-					break;
-				case EGSPD::CPeople::Tryker:
-					Parts[part].Name = item->getShapeTrykerFemale();
-					break;
-				case EGSPD::CPeople::Zorai:
-					Parts[part].Name = item->getShapeZoraiFemale();
-					break;
-			}
-			if (Parts[part].Name.empty())
-				Parts[part].Name = item->getShapeFemale();
-		}
+			Parts[part].Name = item->getShapeFemale();
 
 		// use the right type of boots if wearing a caster dress
 		if ((s == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS || item->ItemType == ITEM_TYPE::MEDIUM_BOOTS || item->ItemType == ITEM_TYPE::HEAVY_BOOTS))
@@ -486,7 +451,7 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 
 			if (shapeLegs.find("_caster01_") != std::string::npos)
 			{
-				std::string tmpName = toLower(Parts[part].Name);
+				std::string tmpName = toLowerAscii(Parts[part].Name);
 
 				std::string::size_type posBottes = tmpName.find("_bottes");
 
@@ -898,7 +863,7 @@ void CCharacter3D::setup (const SCharacter3DSetup &c3ds)
 		if (c3ds.People != EGSPD::CPeople::Undefined)
 		if ((c3ds.People != _CurrentSetup.People) || bInstanceRebuilt || bQualityRebuilt)
 		{
-			if (!_Instances[i].empty())
+			if (!_Instances[i].empty() && i != Char3DPart_HandRightItem && i != Char3DPart_HandLeftItem)
 			{
 				ColorSlotManager.setInstanceSlot (	_Instances[i],
 													0u, // Slot 0 is for skin

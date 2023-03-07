@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -26,6 +26,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/net/unified_network.h"
+#include "nel/misc/wang_hash.h"
 
 #include <limits>
 
@@ -300,7 +301,7 @@ private:
 	/// Get Hash code
 	uint32		getHashCode() const
 	{
-		return (uint32)(getIndex());
+		return NLMISC::wangHash((uint32)(getIndex()));
 	}
 
 	union

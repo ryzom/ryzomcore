@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2018  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -44,9 +47,7 @@ namespace PVP_CLAN
 			Zorai,
 
 		EndCivs = Zorai, // end of civs
-
-		Marauder,
-		EndClans = Marauder, // end of clans
+		EndClans = Zorai, // end of clans
 
 		Unknown,
 		NbClans = Unknown,

@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -629,7 +629,11 @@ void sqlInit ()
 		nlerror ("mysql_init() failed");
 	}
 
+#if LIBMYSQL_VERSION_ID < 80000
 	my_bool opt = true;
+#else
+	bool opt = true;
+#endif
 	if (mysql_options (db, MYSQL_OPT_RECONNECT, &opt))
 	{
 		mysql_close(db);

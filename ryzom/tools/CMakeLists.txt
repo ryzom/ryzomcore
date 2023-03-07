@@ -1,5 +1,7 @@
 
-FIND_PACKAGE(MySQL)
+IF(NOT HUNTER_ENABLED)
+  FIND_PACKAGE(MySQL)
+ENDIF()
 
 IF(WITH_RYZOM_TOOLS)
   ADD_SUBDIRECTORY(skill_extractor)
@@ -21,7 +23,7 @@ IF(WITH_RYZOM_TOOLS)
 
     IF(WIN32)
       IF(MYSQL_FOUND)
-        #ADD_SUBDIRECTORY(sheets_packer_shard)
+        ADD_SUBDIRECTORY(sheets_packer_shard)
       ENDIF()
     ENDIF()
   ENDIF()

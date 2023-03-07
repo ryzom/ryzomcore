@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -415,7 +418,8 @@ void CMoveContainer::updateCells (CMovePrimitive *primitive, uint8 worldImage)
 	CPrimitiveWorldImage *wI=primitive->getWorldImage (worldImage);
 
 #if !FINAL_VERSION
-/*	// Check BB width not too large
+#ifndef RYZOM_FORGE
+	// Check BB width not too large
 	if (wI->getBBXMax() - wI->getBBXMin() > _CellWidth)
 	{
 		nlwarning ("Primitives have moved more than a cell, width: %f.", (float)(wI->getBBXMax() - wI->getBBXMin()));
@@ -426,7 +430,7 @@ void CMoveContainer::updateCells (CMovePrimitive *primitive, uint8 worldImage)
 	{
 		nlwarning ("Primitives have moved more than a cell, height: %f.", (float)(wI->getBBYMax() - wI->getBBYMin()));
 	}
-*/
+#endif
 #endif
 
 	// Get coordinate in the cell array

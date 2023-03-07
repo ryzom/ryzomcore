@@ -1,8 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2017  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -705,7 +705,7 @@ REGISTER_ACTION_HANDLER( CHandlerDebugUiDumpElementUnderMouse, "debug_ui_inspect
 //---------------------------------------------------
 // getActionKey :
 // Return action key binding as string.
-static std::string getActionKey(const char* name, const char* param = "")
+std::string getActionKey(const char* name, const char* param)
 {
 	std::string category;
 
@@ -714,9 +714,9 @@ static std::string getActionKey(const char* name, const char* param = "")
 
 	CActionsManager::TActionComboMap::const_iterator ite = acmap.find(CAction::CName(name, param));
 	if (ite != acmap.end())
-		return ite->second.toUCString().toString();
+		return ite->second.toString();
 
-	return CI18N::get("uiNotAssigned").toString();
+	return CI18N::get("uiNotAssigned");
 }
 
 //---------------------------------------------------

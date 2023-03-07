@@ -1,0 +1,30 @@
+db IOSPD "ios_pd"
+{
+	usepch "stdpch.h"
+
+	/*
+	 * Chat Logging
+	 */
+	file "ios_chat_log"
+	{
+		logmsg CreateTeam(CEntityId team)
+		{
+			"Player team $team$ created"
+		}
+
+		logmsg DeleteTeam(CEntityId team)
+		{
+			"Player team $team$ deleted"
+		}
+
+		logmsg PlayerJoinsTeam(CEntityId player, CEntityId team)
+		{
+			"Player $player$ joins team $team$"
+		}
+
+		logmsg PlayerLeavesTeam(CEntityId player, CEntityId team)
+		{
+			"Player $player$ leaves team $team$"
+		}
+	}
+}

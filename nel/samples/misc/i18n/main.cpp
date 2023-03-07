@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -44,9 +47,9 @@ int main (int argc, char **argv)
 	// load the language
 	CI18N::load(langName);
 
-	InfoLog->displayRawNL(CI18N::get("Hi").toString().c_str());
-	InfoLog->displayRawNL(CI18N::get("PresentI18N").toString().c_str(), "Nevrax");
-	InfoLog->displayRawNL(CI18N::get("ExitStr").toString().c_str());
+	InfoLog->displayRawNL(CI18N::get("Hi").c_str());
+	InfoLog->displayRawNL(CI18N::get("PresentI18N").c_str(), "Nevrax");
+	InfoLog->displayRawNL(CI18N::get("ExitStr").c_str());
 	getchar();
 
 	return EXIT_SUCCESS;

@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -96,6 +97,7 @@ public:
 		_Property = 0;
 		_oldProperty = 0;
 		_Type = UNKNOWN;
+		m_Nullable = false;
 		_Changed = false;
 		_LastChangeGC = 0;
 	}
@@ -234,6 +236,9 @@ private:
 
 	/// property type
 	EPropType			_Type;
+
+	/// nullable
+	bool				m_Nullable;
 
 	/// true if this value has changed
 	bool				_Changed;

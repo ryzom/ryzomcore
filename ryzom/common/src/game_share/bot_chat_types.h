@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -82,7 +85,7 @@ namespace BOTCHATTYPE
 		ResaleKOBroken,
 		// this item can't be sold because its Resold time has expired
 		ResaleKONoTimeLeft,
-		// this item can't be sold because the owner has locked it (temporary hack to get around modifying database.xml)
+		// this item can't be sold because the owner has locked it
 		ResaleKOLockedByOwner,
 
 		NumBotChatResaleFlag

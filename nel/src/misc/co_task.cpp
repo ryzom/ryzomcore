@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -24,6 +24,7 @@
 #include "nel/misc/tds.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/debug.h"
+#include "nel/misc/atomic.h"
 
 // Flag to use thread instead of coroutine primitives (i.e windows fibers or gcc context)
 #ifndef NL_OS_WINDOWS
@@ -83,9 +84,9 @@ namespace NLMISC
 		CCoTask				*_CoTask;
 
 		// set by master, cleared by task
-		volatile bool		_ResumeTask;
+		NLMISC::CAtomicBool _ResumeTask;
 		// set by task, cleared by master
-		volatile bool		_TaskHasYield;
+		NLMISC::CAtomicBool _TaskHasYield;
 
 
 		TCoTaskData(CCoTask *task)

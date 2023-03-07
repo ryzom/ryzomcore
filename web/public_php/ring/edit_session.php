@@ -16,9 +16,9 @@
 	
 	$domainInfo = getDomainInfo($domainId);
 	
-	global $DBHost, $RingDBUserName, $RingDBPassword;
+	global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword;
 
-	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
+	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
 	mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the db dbname:" . $domainInfo['ring_db_name']);
 
 	// Find out if the character has an open editing session

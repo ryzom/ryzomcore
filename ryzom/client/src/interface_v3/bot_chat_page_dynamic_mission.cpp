@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -156,14 +157,14 @@ void CBotChatPageDynamicMission::update()
 				{
 					if (ClientCfg.Local)
 					{
-						_ChoiceCB[k]->setText(l, ucstring(toString("Dynamic mission %d:%d", (int) k, (int) l)));
+						_ChoiceCB[k]->setText(l, toString("Dynamic mission %d:%d", (int) k, (int) l));
 						_TextReceived[k][l] = true;
 					}
 					else
 					{
 						uint32 textID = (uint32) NLGUI::CDBManager::getInstance()->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->getValue32();
 						// see if text has been receive
-						ucstring result;
+						string result;
 						bool received = CStringManagerClient::instance()->getDynString(textID, result);
 						if (received)
 						{
@@ -179,7 +180,7 @@ void CBotChatPageDynamicMission::update()
 				uint32 textID = (uint32) NLGUI::CDBManager::getInstance()->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->getValue32();
 				if (textID == 0 && !ClientCfg.Local) break;
 				// see if text has been received
-				ucstring result;
+				string result;
 				bool received = CStringManagerClient::instance()->getDynString(textID, result);
 				if (received)
 				{
@@ -206,7 +207,7 @@ void CBotChatPageDynamicMission::update()
 			uint32 textID = NLGUI::CDBManager::getInstance()->getDbProp(DM_TITLE_DB_PATH)->getValue32();
 			if (textID != 0)
 			{
-				ucstring result;
+				string result;
 				if (CStringManagerClient::instance()->getDynString(textID, result))
 				{
 					textID = NLGUI::CDBManager::getInstance()->getDbProp(DM_DESCRIPTION_DB_PATH)->getValue32();

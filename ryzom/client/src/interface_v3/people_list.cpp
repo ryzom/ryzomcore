@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -126,10 +127,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 
 	_BaseContainer->setSavable(desc.Savable);
 	_BaseContainer->setLocalize(desc.Localize);
-	if (desc.Localize)
-		_BaseContainer->setTitle(desc.PeopleListTitle.toString());
-	else
-		_BaseContainer->setUCTitle(desc.PeopleListTitle);
+	_BaseContainer->setTitle(desc.PeopleListTitle);
 	//_BaseContainer->setId("ui:interface:" + desc.Id);
 
 	// create the chat window if there's one
@@ -156,12 +154,12 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 }
 
 //==================================================================
-sint CPeopleList::getIndexFromName(const ucstring &name) const
+sint CPeopleList::getIndexFromName(const string &name) const
 {
-	string sNameIn = toLower(name.toString());
+	string sNameIn = toLowerAscii(name);
 	for(uint k = 0; k < _Peoples.size(); ++k)
 	{
-		string sPeopleName = toLower(_Peoples[k].getName().toString());
+		string sPeopleName = toLowerAscii(_Peoples[k].getName());
 		if (sPeopleName == sNameIn) return k;
 	}
 	return -1;
@@ -197,22 +195,16 @@ bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
 //==================================================================
 bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 {
-	ucstring name_a = toUpper(a.getName());
-	ucstring name_b = toUpper(b.getName());
-	
-	return (name_a < name_b);
+	return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
 }
 
 //==================================================================
 bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 {
-	ucstring name_a = toUpper(a.getName());
-	ucstring name_b = toUpper(b.getName());
-	
 	// We want order: online/alpha, offworld/alpha, offline/alpha
 	if (a.Online == b.Online)
 	{
-		return (name_a < name_b);
+		return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
 	}
 	else
 	{
@@ -330,13 +322,13 @@ bool CPeopleList::isPeopleWindowVisible(uint index) const
 */
 
 //==================================================================
-sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
+sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 {
 	if (!_BaseContainer) return - 1;
 	// check if not already inserted
 	if (getIndexFromName(name) != -1)
 	{
-		nlwarning("<CPeopleList::addPeople> people %s inserted twice.", name.toString().c_str());
+		nlwarning("<CPeopleList::addPeople> people %s inserted twice.", name.c_str());
 	}
 
 	vector<pair<string ,string> > properties;
@@ -370,11 +362,11 @@ sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
 	if (!gc)
 	{
 		delete group;
-		nlwarning("<CPeopleList::addPeople> group is not a container.", name.toString().c_str());
+		nlwarning("<CPeopleList::addPeople> group is not a container.", name.c_str());
 		return -1;
 	}
 	// set title from the name
-	gc->setUCTitle(name);
+	gc->setTitle(name);
 	// People inside list are not savable !
 	gc->setSavable(false);
 	//
@@ -448,7 +440,7 @@ void CPeopleList::setContactId(uint index, uint32 contactId)
 }
 
 //==================================================================
-void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, const ucstring &msg,uint numBlinks /*=0*/)
+void CPeopleList::displayLocalPlayerTell(const string &receiver, uint index, const string &msg,uint numBlinks /*=0*/)
 {
 	if (_ContactType == CPeopleListDesc::Ignore)
 	{
@@ -471,13 +463,13 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 		return;
 	}
 
- 	ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
-	ucstring finalMsg = csr + CI18N::get("youTell") + ": " + msg;
+ 	string csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
+	string finalMsg = csr + CI18N::get("youTell") + ": " + msg;
 	// display msg with good color
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 
-	ucstring s = CI18N::get("youTellPlayer");
+	string s = CI18N::get("youTellPlayer");
 	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	gl->addChild(getChatTextMngr().createMsgText(finalMsg, prop.getRGBA()));
@@ -496,7 +488,7 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 
 
 //==================================================================
-void CPeopleList::displayMessage(uint index, const ucstring &msg, NLMISC::CRGBA col, uint /* numBlinks */ /*= 0*/)
+void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA col, uint /* numBlinks */ /*= 0*/)
 {
 	if (_ContactType == CPeopleListDesc::Ignore)
 	{
@@ -686,12 +678,12 @@ void CPeopleList::updatePeopleMenu(uint index)
 }
 
 //==================================================================
-ucstring CPeopleList::getName(uint index) const
+std::string CPeopleList::getName(uint index) const
 {
 	if (index >= _Peoples.size())
 	{
 		nlwarning("bad index");
-		return ucstring("BAD INDEX!");
+		return "BAD INDEX!";
 	}
 	return _Peoples[index].getName();
 }
@@ -876,7 +868,7 @@ class CHandlerContactEntry : public IActionHandler
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
 		if (pEB == NULL) return;
-		ucstring text = pEB->getInputString();
+		string text = pEB->getInputString();
 		// If the line is empty, do nothing
 		if(text.empty())
 			return;
@@ -884,7 +876,7 @@ class CHandlerContactEntry : public IActionHandler
 		// Parse any tokens in the text
 		if ( ! CInterfaceManager::parseTokens(text))
 		{
-			pEB->setInputString (string(""));
+			pEB->setInputString (std::string());
 			return;
 		}
 
@@ -892,10 +884,9 @@ class CHandlerContactEntry : public IActionHandler
 		if(text[0] == '/')
 		{
 			CChatWindow::_ChatWindowLaunchingCommand = NULL; // no CChatWindow instance there ..
-			// TODO : have NLMISC::ICommand accept unicode strings
-			std::string str = text.toUtf8().substr(1);
+			std::string str = text.substr(1);
 			NLMISC::ICommand::execute( str, g_log );
-			pEB->setInputString (string(""));
+			pEB->setInputString (std::string());
 			return;
 		}
 		// Well, we could have used CChatWindow class to handle this, but CPeopleList was written earlier, so for now
@@ -904,11 +895,11 @@ class CHandlerContactEntry : public IActionHandler
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pCaller->getParent()->getEnclosingContainer() );
 
 		// title gives the name of the player
-		ucstring playerName = gc->getUCTitle();
+		string playerName = gc->getTitle();
 
 		// Simply do a tell on the player
-		ChatMngr.tell(playerName.toString(), text);
-		pEB->setInputString (string(""));
+		ChatMngr.tell(playerName, text);
+		pEB->setInputString (std::string());
 		if (gc)
 		{
 			// Restore position of enclosing container if it hasn't been moved/scaled/poped by the user
@@ -940,17 +931,17 @@ class CHandlerContactEntry : public IActionHandler
 				CChatGroupWindow *pWin = PeopleInterraction.getChatGroupWindow();
 				CInterfaceProperty prop;
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
-				ucstring final;
+				string final;
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, false);
 
-				ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+				string csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
 				final += csr + CI18N::get("youTell")+": ";
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, true);
 				final += text;
 				pWin->displayTellMessage(final, prop.getRGBA(), pWin->getFreeTellerName(str));
 
-				ucstring s = CI18N::get("youTellPlayer");
+				string s = CI18N::get("youTellPlayer");
 				strFindReplace(s, "%name", pWin->getFreeTellerName(str));
 				strFindReplace(final, CI18N::get("youTell"), s);
 				CInterfaceManager::getInstance()->log(final, CChatGroup::groupTypeToString(CChatGroup::tell));

@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2017  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -306,9 +307,10 @@ namespace NLGUI
 			if (name)
 			{
 				const char *ptrName = (const char*)name;
-				Text = ucstring(ptrName);
-				if ((strlen(ptrName)>2) && (ptrName[0] == 'u') && (ptrName[1] == 'i'))
-					Text = CI18N::get (ptrName);
+				if (NLMISC::startsWith(ptrName, "ui"))
+					Text = CI18N::get(ptrName);
+				else
+					Text = ptrName;
 			}
 
 			CXMLAutoPtr color((const char*) xmlGetProp (cur,   (xmlChar*)"color"));
