@@ -313,7 +313,10 @@ void CQuicConnection::disconnect(bool blocking)
 		catch (const std::exception &e)
 		{
 			m->close(); // Not very safe safety fallback
-			nlwarning("Exception while waiting for connection shutdown: %s", e.what());
+			if (INelContext::isContextInitialised())
+			{
+				nlwarning("Exception while waiting for connection shutdown: %s", e.what());
+			}
 		}
 	}
 }
@@ -496,29 +499,38 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT: {
 		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
-		nlwarning("Shutdown initiated by transport, error code %llu, status 0x%x", ev->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode, ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status);
-		switch (ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status)
+		if (INelContext::isContextInitialised())
 		{
-		case QUIC_STATUS_CLOSE_NOTIFY: nlinfo("Close notify"); break;
-		case QUIC_STATUS_BAD_CERTIFICATE: nlinfo("Bad Certificate"); break;
-		case QUIC_STATUS_UNSUPPORTED_CERTIFICATE: nlinfo("Unsupported Certficiate"); break;
-		case QUIC_STATUS_REVOKED_CERTIFICATE: nlinfo("Revoked Certificate"); break;
-		case QUIC_STATUS_EXPIRED_CERTIFICATE: nlinfo("Expired Certificate"); break;
-		case QUIC_STATUS_UNKNOWN_CERTIFICATE: nlinfo("Unknown Certificate"); break;
-		case QUIC_STATUS_REQUIRED_CERTIFICATE: nlinfo("Required Certificate"); break;
+			nlwarning("Shutdown initiated by transport, error code %llu, status 0x%x", ev->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode, ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status);
+			switch (ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status)
+			{
+			case QUIC_STATUS_CLOSE_NOTIFY: nlinfo("Close notify"); break;
+			case QUIC_STATUS_BAD_CERTIFICATE: nlinfo("Bad Certificate"); break;
+			case QUIC_STATUS_UNSUPPORTED_CERTIFICATE: nlinfo("Unsupported Certficiate"); break;
+			case QUIC_STATUS_REVOKED_CERTIFICATE: nlinfo("Revoked Certificate"); break;
+			case QUIC_STATUS_EXPIRED_CERTIFICATE: nlinfo("Expired Certificate"); break;
+			case QUIC_STATUS_UNKNOWN_CERTIFICATE: nlinfo("Unknown Certificate"); break;
+			case QUIC_STATUS_REQUIRED_CERTIFICATE: nlinfo("Required Certificate"); break;
+			}
 		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER: {
-		nlinfo("Shutdown initiated by peer");
+		if (INelContext::isContextInitialised())
+		{
+			nlinfo("Shutdown initiated by peer");
+		}
 		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
-		nlinfo("Shutdown complete");
+		if (INelContext::isContextInitialised())
+		{
+			nlinfo("Shutdown complete");
+		}
 		m->ShutdownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
@@ -532,7 +544,10 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_STATE_CHANGED:
 		m->MaxSendLength = ev->DATAGRAM_STATE_CHANGED.SendEnabled ? ev->DATAGRAM_STATE_CHANGED.MaxSendLength : 0;
-		nlinfo("Datagram state changed, max send length is now %i", (int)m->MaxSendLength);
+		if (INelContext::isContextInitialised())
+		{
+			nlinfo("Datagram state changed, max send length is now %i", (int)m->MaxSendLength);
+		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
