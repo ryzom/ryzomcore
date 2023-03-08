@@ -40,6 +40,8 @@
 #define MsQuic m->Api
 #define null nullptr
 
+#endif /* #ifdef NL_MSQUIC_AVAILABLE */
+
 using namespace NLMISC;
 using namespace NLNET;
 
@@ -74,6 +76,8 @@ CAtomicInt s_UserContextCount;
 CSynchronized<std::vector<CQuicTransceiver *>> s_QuicTransceivers;
 
 } /* anonymous namespace */
+
+#ifdef NL_MSQUIC_AVAILABLE
 
 class CQuicTransceiverImpl
 {
