@@ -21,6 +21,13 @@
 
 #include "stdpch.h"
 
+#ifdef NL_OS_WINDOWS
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 #include <nel/misc/stop_watch.h>
 #include <nel/misc/sheet_id.h>
 #include <nel/misc/path.h>
@@ -58,13 +65,6 @@
 
 #include "id_impulsions.h"
 #include "uid_impulsions.h"
-
-#ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
-#endif // NL_OS_WINDOWS
 
 #include <mutex>
 #include <condition_variable>
