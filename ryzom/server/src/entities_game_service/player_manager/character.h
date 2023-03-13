@@ -1085,6 +1085,7 @@ public:
 	void removeAnimal(CGameItemPtr item, CPetCommandMsg::TCommand command);
 
 	// remove pet from player corresponding to index and despawn it
+	void removeRentAMount();
 	void removeAnimalIndex(uint32 beastIndex, CPetCommandMsg::TCommand command, bool keepInventory=false);
 
 	// update coordinate for spawned pets
@@ -1636,7 +1637,7 @@ public:
 	std::string getEquipementInfos(INVENTORIES::TInventory invId);
 
 	/// Mount a mount
-	void mount(TDataSetRow PetRowId, bool fromArk = false);
+	void mount(TDataSetRow PetRowId, bool fromArk = false, bool skipDistance = false);
 
 	/**
 	 * Unmount a mount.
@@ -3413,6 +3414,8 @@ private:
 	uint32 _BattlePoints;
 
 	uint32 _TimedUrl;
+	TDataSetRow _RequestMount;
+	uint8 _RequestMountTimer;
 	uint32 _RpPoints;
 	NLMISC::TGameCycle _FirstRpPointsWin;
 	NLMISC::TGameCycle _LastRpPointsWin;
@@ -3600,6 +3603,8 @@ private:
 	std::vector<TDataSetRow> _BeastTrain;
 	/// max number of beasts in the train
 	uint8 _TrainMaxSize;
+
+	TDataSetRow _RentAMount;
 
 	/// counter for the current action of the player (used for macros)
 	uint8 _ActionCounter;
