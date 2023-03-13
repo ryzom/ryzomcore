@@ -1206,6 +1206,49 @@ NLMISC_COMMAND(getEnchantmentInEquipedItem, "getEnchantmentInEquipedItem", "<uid
 	return true;
 }
 
+//updateSheetItem 2 LEGS ikaracp_ep2_1.sitem
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(updateSheetItem, "updateSheetItem", "<uid> <slotname> <sheet>")
+{
+	if (args.size () < 3)
+	{
+		log.displayNL("ERR: Invalid number of parameters. Parameters: <uid> <slotname> <sheet>");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	string selected_slot = args[1];
+	CGameItemPtr itemPtr;
+
+	if (selected_slot == "WEAPON_LEFT")
+		itemPtr = c->getItem(INVENTORIES::handling, INVENTORIES::left);
+	else if (selected_slot == "WEAPON_RIGHT")
+		itemPtr = c->getItem(INVENTORIES::handling, INVENTORIES::right);
+	else
+		itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
+
+	if (itemPtr != NULL)
+	{
+		itemPtr->setSheetId(CSheetId(args[2]));
+
+		uint32 slot = itemPtr->getInventorySlot();
+		if (selected_slot == "WEAPON_LEFT")
+			c->equipCharacter(INVENTORIES::handling, INVENTORIES::left, slot);
+		else if  (selected_slot == "WEAPON_RIGHT")
+			c->equipCharacter(INVENTORIES::handling, INVENTORIES::left, slot);
+		else
+			c->equipCharacter(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot), slot);
+
+		log.displayNL("OK");
+	}
+	else
+		log.displayNL("ERR");
+	return true;
+}
+
+
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(sapLoadInEquipedItem, "reloadSapLoadInEquipedItem", "<uid> <slotname> [<value>]")
 {
@@ -1803,7 +1846,7 @@ NLMISC_COMMAND(setFaction, "set the faction of player", "<uid> <faction> [<civ>]
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [instance] [exit_pos] [can_xp,cant_dead,can_teleport,can_speedup,can_dp,onetry] [access_room_inv,access_guild_room] [scope]")
+NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [instance] [exit_pos] [can_xp,cant_dead,can_teleport,can_speedup,can_dp,onetry,can_enchant] [access_room_inv,access_guild_room] [scope]")
 {
 	if (args.size() < 2)
 		return false;
@@ -1816,8 +1859,8 @@ NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [insta
 	else
 		building = CBuildingManager::getInstance()->getBuildingPhysicalsByName("building_instance_ZO_player_111");
 
-	string powoFlags = "000000";
-	if (args.size() > 4 && args[4].length() == 6)
+	string powoFlags = "0000000";
+	if (args.size() > 4 && args[4].length() == 7)
 		powoFlags = args[4];
 
 	string invFlags = "00";
@@ -1852,6 +1895,7 @@ NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [insta
 					c->setPowoFlag("speed", powoFlags[3] == '1');
 					c->setPowoFlag("dp", powoFlags[4] == '1');
 					c->setPowoFlag("retry", powoFlags[5] == '1');
+					c->setPowoFlag("enchant", powoFlags[6] == '1');
 
 					c->setPowoFlag("room_inv", invFlags[0] == '1');
 					c->setPowoFlag("guild_inv", invFlags[1] == '1');
@@ -3602,9 +3646,10 @@ NLMISC_COMMAND(getPlayerPetsInfos, "get player pets infos", "<uid>")
 {
 	GET_ACTIVE_CHARACTER
 
-	string pets = c->getPetsInfos();
-
-	log.displayNL("%s", pets.c_str());
+	std::vector< std::string > lines;
+	NLMISC::splitString(c->getPetsInfos(), ",", lines);
+	for (uint8 i = 0; i < lines.size(); i++)
+		log.displayNL("%s", lines[i].c_str());
 	return true;
 }
 

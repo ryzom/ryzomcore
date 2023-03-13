@@ -13981,8 +13981,12 @@ void CCharacter::removeMission(TAIAlias alias, /*TMissionResult*/ uint32 result,
 				result = mr_success;
 
 				string icon = tpl->Icon.toString().c_str();
-				if (icon == "generic_craft.mission_icon" || icon == "generic_fight.mission_icon" || icon == "generic_forage.mission_icon" || icon == "generic_travel.mission_icon")
-					addGuildPoints(NBPointsForGuild); // Add 1 XP to guild
+				CGuild* guild = CGuildManager::getInstance()->getGuildFromId(_GuildId);
+				if (EnableGuildPoints.get() && guild)
+				{
+					if (icon == "generic_craft.mission_icon" || icon == "generic_fight.mission_icon" || icon == "generic_forage.mission_icon" || icon == "generic_travel.mission_icon")
+						addGuildPoints(NBPointsForGuild); // Add 1 XP to guild
+				}
 			}
 			else
 				result = mr_fail;
