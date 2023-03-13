@@ -3664,7 +3664,8 @@ private:
 
 	/// Structure for forage sessions (NULL if there is no forage in progress)
 	CForageProgress* _ForageProgress;
-
+	NLMISC::TGameCycle _LastTickForageLoot;
+	NLMISC::TGameCycle _LastTickCreatureLoot;
 	/// Distance to current prospected deposit
 	CSEffectPtr _ProspectionLocateDepositEffect;
 
