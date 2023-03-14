@@ -17025,7 +17025,7 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 				_LastTickCreatureLoot = CTickEventHandler::getGameCycle();
 				CSheetId usedSheet;
 				CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
-				if (true || (sbrickParam.ParsedOk && sbrickParam.Value == "loot" && (rand() % 1000) < sbrickParam.Modifier))
+				if ((sbrickParam.ParsedOk && sbrickParam.Value == "loot" && (rand() % 1000) < sbrickParam.Modifier))
 				{
 					SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
 					params[0].SheetId = usedSheet;
