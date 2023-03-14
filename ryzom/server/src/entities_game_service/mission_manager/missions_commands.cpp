@@ -2924,6 +2924,15 @@ NLMISC_COMMAND(getPlayerStats,"get player stats","<uid> <stat1,stat2,stat3..>")
 		i++;
 	}
 
+	if (i < stats.size() && stats[i] == "water") //in water
+	{
+		if (c->isInWater())
+			log.displayNL("1");
+		else
+			log.displayNL("0");
+		i++;
+	}
+
 	return true;
 }
 
@@ -5028,6 +5037,7 @@ NLMISC_COMMAND(getRpPoints, "get RP points of player (if quantity, give/take/set
 	}
 
 	log.displayNL("%u", points);
+	return true;
 }
 
 //----------------------------------------------------------------------------
@@ -5074,6 +5084,7 @@ NLMISC_COMMAND(getBattlePoints, "get Battle points of player (if quantity, give/
 	}
 
 	log.displayNL("%u", points);
+	return true;
 }
 
 //addEntitiesTrigger 2 arkai_914_Chest 50 app_arcc&nbsp&action=mScript_Run&script=11450
@@ -5115,10 +5126,76 @@ NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> 
 	string url = args[3];
 	CZoneManager::getInstance().addEntitiesTrigger(alias, distance, url);
 	log.displayNL("OK");
+	return true;
 }
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(delEntitiesTriggers, "delete all Entities triggers", "")
 {
 	CZoneManager::getInstance().delEntitiesTriggers();
+	return true;
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(useConsumableItem, "use consumable item", "uid sitem quality")
+{
+
+	if (args.size() < 3)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	CSheetId sheet = CSheetId(args[1].c_str());
+
+	uint16 quality;
+	fromString(args[2], quality);
+
+	if (sheet != CSheetId::Unknown)
+	{
+		CGameItemPtr item = GameItemManager.createItem(sheet, quality, 1, 0);
+		if (item != NULL)
+		{
+			if (item->getStaticForm() != NULL)
+			{
+				CPhraseManager::getInstance().useConsumableItem(c->getEntityRowId(), item->getStaticForm(), quality);
+				item.deleteItem();
+				log.displayNL("OK");
+				return true;
+			}
+		}
+	}
+	log.displayNL("ERR");
+	return true;
+}
+
+
+//executePhrase 2 0 bspdma01.sbrick
+
+NLMISC_COMMAND(executePhrase,"execute a sabrina phrase","uid cyclic? [<brick ids>...]")
+{
+	if (args.size() < 3)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	bool cyclic;
+	NLMISC::fromString(args[1], cyclic);
+
+	if (args.size() > 3)
+	{
+		vector<CSheetId> brickIds;
+		for (uint i = 2 ; i < args.size() ; ++i)
+		{
+			CSheetId sheet(args[i]);
+			brickIds.push_back( sheet );
+		}
+
+		CPhraseManager::getInstance().executePhrase(c->getEntityRowId(), c->getTargetDataSetRow(), brickIds, cyclic);
+	}
+	else
+	{
+		CSheetId phraseSheet(args[2]);
+		CPhraseManager::getInstance().executePhrase(c->getEntityRowId(), c->getTargetDataSetRow(), phraseSheet, cyclic);
+	}
+	return true;
 }
