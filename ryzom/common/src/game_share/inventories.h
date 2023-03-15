@@ -151,17 +151,17 @@ namespace INVENTORIES
 	enum THandSlot
 	{
 		right = 0,
-			left,
-			NB_HAND_SLOT
+		left,
+		NB_HAND_SLOT
 	};
 
 	enum TInventory
 	{
-		// TODO : remove handling, merge it with equipement
-		handling = 0,
+		// TODO : remove handling, merge it with equipement ?????
+			handling = 0,
 			temporary,						// 1
 			equipment,						// 2
-			hotbar,							// 3	
+			hotbar,							// 3
 			bag,							// 4
 			pet_animal,						// 5 Character can have 7 pack animal
 			pet_animal1 = pet_animal,	// for toString => TInventory convertion

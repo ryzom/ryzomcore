@@ -314,10 +314,14 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_NEL                 "Build NeL (nearly always required)."           ON )
   OPTION(WITH_NELNS               "Build NeL Network Services."                   OFF)
   OPTION(WITH_RYZOM               "Build Ryzom Core."                             ON )
+  OPTION(WITH_RYZOM_GAMESHARE     "Build Ryzom GameShare library."                ON )
   OPTION(WITH_SNOWBALLS           "Build Snowballs."                              OFF)
   OPTION(WITH_TOOLS               "Build Tools"                                   OFF)
 
   OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            ON)
+
+  OPTION(WITH_MONGODB             "Compile server with MongoDB support"           ON)
+  OPTION(WITH_PATCHMAN_SERVICE    "Compile Ryzom server patchman service"         OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)

@@ -104,7 +104,7 @@ TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 						${NELGEORGES_LIBRARIES}
 						${NELLIGO_LIBRARIES})
 
-IF(MONGO_FOUND)
+IF(WITH_MONGODB)
   TARGET_LINK_LIBRARIES(ryzom_entities_game_service ${MONGO_LIBRARIES})
   ADD_DEFINITIONS(${MONGO_DEFINITIONS})
 ENDIF()
@@ -113,6 +113,10 @@ NL_DEFAULT_PROPS(ryzom_entities_game_service "Ryzom, Services: Entities Game Ser
 NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+
+IF(MSVC)
+	SET_TARGET_PROPERTIES(ryzom_entities_game_service PROPERTIES COMPILE_FLAGS "/bigobj")
+ENDIF()
 
 IF(WITH_PCH AND NOT MINGW) # FIXME: PCH too large (> 130MB), crashes cc1plus under MinGW
   target_precompile_headers(ryzom_entities_game_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
