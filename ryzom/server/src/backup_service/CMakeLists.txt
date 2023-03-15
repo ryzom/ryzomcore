@@ -8,11 +8,11 @@ TARGET_LINK_LIBRARIES(ryzom_backup_service
 					ryzom_adminmodules
 					${RYZOM_GAMESHARE_LIBRARIES}
 					ryzom_servershare
-					${NELMISC_LIBRARIES} 
+					${NELMISC_LIBRARIES}
 					${NELNET_LIBRARIES}
 					${NELGEORGES_LIBRARIES}
 					${NELLIGO_LIBRARIES})
-					
+
 NL_DEFAULT_PROPS(ryzom_backup_service "Ryzom, Services: Backup Service (BS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_backup_service)
 
