@@ -226,15 +226,12 @@ int main(int argc, char *argv[])
 		return ar;
 	}
 
-	// initialize patch manager and set the ryzom full path, before it's used
-	CPatchManager *pPM = CPatchManager::getInstance();
-
 	if (Args.haveArg("u") && Args.haveArg("d"))
 	{
 		string	bnpName = Args.getArg("u").front();
 		string	destinationName = Args.getArg("d").front();
 		vector<string> vFilenames;
-		if (pPM->bnpUnpack(bnpName, destinationName, vFilenames))
+		if (CPatchManager::getInstance()->bnpUnpack(bnpName, destinationName, vFilenames))
 			return 0;
 		return 1;
 	}
