@@ -146,6 +146,9 @@ public:
 	
 	TType getType() const;
 
+	// Get the default (widest) subnet for this address, returns null address if not applicable for this address
+	CIPv6Address subnet() const;
+
 	inline bool isValid() const { return m_Valid; }
 	inline bool isNull() const { return !m_Valid; }
 

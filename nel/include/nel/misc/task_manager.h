@@ -28,6 +28,7 @@
 
 #include "mutex.h"
 #include "thread.h"
+#include "atomic.h"
 
 namespace NLMISC {
 
@@ -139,10 +140,10 @@ protected:
 	CSynchronized<std::deque<std::string> >	_DoneTaskQueue;
 
 	/// thread pointer
-	IThread *_Thread;
+	CUniquePtr<IThread> _Thread;
 
 	/// flag indicate thread loop, if false cause thread exit
-	volatile	bool _ThreadRunning;
+	CAtomicBool _ThreadRunning;
 
 private:
 
@@ -154,7 +155,7 @@ private:
 
 private:
 
-	volatile	bool _IsTaskRunning;
+	CAtomicBool _IsTaskRunning;
 
 };
 

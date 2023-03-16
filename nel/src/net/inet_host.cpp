@@ -415,10 +415,14 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 					if (!haveLoopback)
 					{
 						CInetAddress loopbackAddr(CIPv6Address::loopbackIPv4(), port);
-						if (loopback)
-							host.m_Addresses.push_back(loopbackAddr);
-						else
-							skipLoopback.push_back(loopbackAddr);
+						if (addresses.find(loopbackAddr.getAddress()) == addresses.end())
+						{
+							addresses.insert(loopbackAddr.getAddress());
+							if (loopback)
+								host.m_Addresses.push_back(loopbackAddr);
+							else
+								skipLoopback.push_back(loopbackAddr);
+						}
 						haveLoopback = true;
 					}
 					CInetAddress addr(false);
@@ -439,10 +443,14 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 					if (!haveLoopback6)
 					{
 						CInetAddress loopbackAddr(CIPv6Address::loopbackIPv6(), port);
-						if (loopback)
-							host.m_Addresses.push_back(loopbackAddr);
-						else
-							skipLoopback.push_back(loopbackAddr);
+						if (addresses.find(loopbackAddr.getAddress()) == addresses.end())
+						{
+							addresses.insert(loopbackAddr.getAddress());
+							if (loopback)
+								host.m_Addresses.push_back(loopbackAddr);
+							else
+								skipLoopback.push_back(loopbackAddr);
+						}
 						haveLoopback6 = true;
 					}
 					CInetAddress addr(false);
@@ -554,8 +562,24 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 		host.m_Addresses.clear();
 		for (size_t i = 0; i < sorting.size(); ++i)
 		{
-			if (sorting[i].getAddress().getType() == CIPv6Address::Loopback)
+			// Filter only IPv4 for loopback first, since [::1] appears to have throttling on connect on Ubuntu
+			if (sorting[i].getAddress().getType() == CIPv6Address::Loopback && sorting[i].getAddress().isIPv4())
+			{
 				host.m_Addresses.push_back(sorting[i]);
+				break; // One loopback is enough
+			}
+		}
+		if (host.m_Addresses.empty())
+		{
+			// If there's no IPv4 loopback, include all
+			for (size_t i = 0; i < sorting.size(); ++i)
+			{
+				if (sorting[i].getAddress().getType() == CIPv6Address::Loopback)
+				{
+					host.m_Addresses.push_back(sorting[i]);
+					break; // One loopback is enough
+				}
+			}
 		}
 		for (size_t i = 0; i < sorting.size(); ++i)
 		{
@@ -567,12 +591,14 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 			if (sorting[i].getAddress().getType() == CIPv6Address::SiteLocal)
 				host.m_Addresses.push_back(sorting[i]);
 		}
+#if 0
 		for (size_t i = 0; i < sorting.size(); ++i)
 		{
 			// Not sure if we should keep link local addresses or just discard them...
 			if (sorting[i].getAddress().getType() == CIPv6Address::LinkLocal)
 				host.m_Addresses.push_back(sorting[i]);
 		}
+#endif
 		for (size_t i = 0; i < sorting.size(); ++i)
 		{
 			if (sorting[i].getAddress().getType() == CIPv6Address::Internet)
@@ -581,7 +607,7 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 
 		if (host.m_Addresses.size() < sorting.size())
 		{
-			nlwarning("Discarded %i local host addresses (phase 2)", (int)(sorting.size() - host.m_Addresses.size()));
+			// nlwarning("Discarded %i local host addresses (phase 2)", (int)(sorting.size() - host.m_Addresses.size()));
 		}
 	}
 

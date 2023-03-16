@@ -55,7 +55,7 @@
 #include <utility>
 #include <vector>
 
-#include <nel/misc/types_nl.h>
+#include "nel/misc/types_nl.h"
 
 #include <libxml/parser.h>
 

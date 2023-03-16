@@ -31,6 +31,8 @@ def printBuildTarget(name, tn):
 			addtl += ", Hunter"
 		if "LuaVersion" in tc:
 			addtl += ", Lua " + str(tc["LuaVersion"])[0:1] + "." + str(int(str(tc["LuaVersion"])[1:], 10))
+		if "HasMsQuic" in tc:
+			addtl += ", MsQuic"
 		if "Generator" in tc:
 			print("  " + name + ": " + tc["DisplayName"] + " (" + tc["Generator"] + ", " + tc["Toolset"] + ", " + tc["Platform"] + ")" + addtl)
 		else:

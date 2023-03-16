@@ -92,6 +92,9 @@ for ts in SortedToolsets:
 		luaVersion = FindLuaVersion(toolchain["Prefix"])
 		if luaVersion:
 			toolchain["LuaVersion"] = luaVersion
+		hasMsQuic = FindMsQuic(toolchain["Prefix"])
+		if hasMsQuic:
+			toolchain["HasMsQuic"] = True
 		toolchain["VCVars"] = FindVCVars(vs["Path"], vs["Toolset"], platform)
 		if vs["Version"] >= 11:
 			if toolchain["Toolset"].endswith("_xp"):
@@ -146,6 +149,8 @@ for gcc in FoundGCC:
 			toolchain["LuaVersion"] = 503
 		elif luaVer == "5.4":
 			toolchain["LuaVersion"] = 504
+	if "HasMsQuic" in gcc and gcc["HasMsQuic"]:
+		toolchain["HasMsQuic"] = True
 	toolchain["CMake"] = []
 	toolchain["OSId"] = gcc["OSRelease"]["ID"]
 	toolchain["OSCodename"] = gcc["OSRelease"]["VERSION_CODENAME"]

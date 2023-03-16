@@ -58,6 +58,10 @@ A wizard's code, that's sure to bring you cheer.
 
 */
 
+// #ifdef NL_DEBUG
+#define FE_DEBUG_QUIC
+// #endif
+
 class CClientHost;
 
 class CQuicTransceiverImpl;
@@ -76,13 +80,25 @@ public:
 	// Manual reference count
 	void increaseRef()
 	{
-		m_RefCount.fetch_add(1, std::memory_order_relaxed);
+		int value = m_RefCount.fetchAdd(1, NLMISC::TMemoryOrderRelaxed) + 1;
+#ifdef FE_DEBUG_QUIC
+		if (DebugRefCount)
+			nldebug("Reference count [%p] is now %i", this, value);
+#endif
 	}
 
 	void decreaseRef()
 	{
-		if (m_RefCount.fetch_sub(1, std::memory_order_release) == 1)
+		int value = m_RefCount.fetchAdd(-1, NLMISC::TMemoryOrderRelease) - 1;
+#ifdef FE_DEBUG_QUIC
+		if (DebugRefCount)
+			nldebug("Reference count [%p] is now %i", this, value);
+#endif
+		// Release order to ensure this thread is done with this object
+		if (value == 0)
 		{
+			// Acquire order to ensure all other threads are done with this object
+			std::atomic_thread_fence(std::memory_order_acquire);
 			delete this;
 		}
 	}
@@ -107,16 +123,21 @@ public:
 	CClientHost *ClientHost = nullptr;
 
 	// Set if datagrams can be sent (set on connection thread, read on service main thread)
-	NLMISC::CAtomicInt MaxSendLength;
+	NLMISC::CAtomicInt MaxSendLength = 0;
 
 	// Send buffer, one being sent at a time, released as soon as it's sent out
-	NLMISC::CAtomicFlag SendBusy;
+	NLMISC::CAtomicFlag SendBusy = false;
 	NLMISC::CBitMemStream SendBuffer = NLMISC::CBitMemStream(false, 512);
 	CQuicBuffer SendQuicBuffer;
-	NLMISC::CAtomicInt SentCount;
+	NLMISC::CAtomicInt SentCount = 0;
+
+#ifdef FE_DEBUG_QUIC
+	// After shutdown, enable ref count debugging
+	NLMISC::CAtomicBool DebugRefCount = false;
+#endif
 
 private:
-	std::atomic_int m_RefCount = 0;
+	NLMISC::CAtomicInt m_RefCount = 0;
 };
 
 // Utility to decrease reference count, does not increase count
@@ -166,6 +187,16 @@ public:
 			m_User->increaseRef();
 	}
 
+	CQuicUserContextPtr &operator=(CQuicUserContext *user)
+	{
+		if (m_User)
+			m_User->decreaseRef();
+		m_User = user;
+		if (m_User)
+			m_User->increaseRef();
+		return *this;
+	}
+
 	CQuicUserContextPtr &operator=(const CQuicUserContextPtr &other)
 	{
 		if (m_User)
@@ -186,6 +217,38 @@ public:
 		return m_User;
 	}
 
+	// compare
+	bool operator==(const CQuicUserContextPtr &other) const
+	{
+		return m_User == other.m_User;
+	}
+
+	bool operator!=(const CQuicUserContextPtr &other) const
+	{
+		return m_User != other.m_User;
+	}
+
+	bool operator==(const CQuicUserContext *other) const
+	{
+		return m_User == other;
+	}
+
+	bool operator!=(const CQuicUserContext *other) const
+	{
+		return m_User != other;
+	}
+
+	// compare less
+	bool operator<(const CQuicUserContextPtr &other) const
+	{
+		return m_User < other.m_User;
+	}
+
+	bool operator<(const CQuicUserContext *other) const
+	{
+		return m_User < other;
+	}
+
 private:
 	CQuicUserContext *m_User;
 };
@@ -195,6 +258,12 @@ class CQuicTransceiver
 public:
 	CQuicTransceiver(uint32 msgsize);
 	~CQuicTransceiver();
+
+	/// Reload certificate
+	void reloadCert();
+
+	/// Check if QUIC is enabled in the config
+	bool isConfigEnabled() const;
 
 	/// Start listening
 	void start(uint16 port);
@@ -207,6 +276,9 @@ public:
 
 	/// Set new write queue for incoming messages (thread-safe because mutexed)
 	NLMISC::CBufFIFO *swapWriteQueue(NLMISC::CBufFIFO *writeQueue);
+
+	/// Clear a write queue safely
+	void clearQueue(NLMISC::CBufFIFO *writeQueue);
 
 	/// Check if still listening
 	bool listening();

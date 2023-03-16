@@ -22,6 +22,7 @@
 
 #include "nel/misc/common.h"
 #include "nel/misc/mutex.h"
+#include "nel/misc/atomic.h"
 #include "inet_host.h"
 //#include <sstream>
 
@@ -253,9 +254,6 @@ public:
 	/// Gets the send buffer size
 	sint32				getSendBufferSize();
 
-	/// Returns true if the network engine is initialized
-	static bool			initialized() { return CSock::_Initialized; }
-
 protected:
 
 	/**
@@ -290,7 +288,7 @@ protected:
 
 	/// True after calling connect()
 	//NLMISC::CSynchronized<bool>	_SyncConnected;
-	volatile bool	_Connected;
+	NLMISC::CAtomicBool _Connected;
 
 	/// Number of bytes received on this socket
 	uint64			_BytesReceived;
@@ -308,9 +306,6 @@ protected:
 	int				_AddressFamily;
 
 private:
-
-	/// True if the network library has been initialized
-	static bool		_Initialized;
 
 	// Test: send & receive duration (ms)
 	uint32			_MaxReceiveTime;

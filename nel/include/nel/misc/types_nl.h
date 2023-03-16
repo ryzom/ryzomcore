@@ -621,9 +621,9 @@ typedef std::basic_string<uint32> u32string;
 #endif
 
 #ifdef NL_DEBUG
-const std::string nlMode("NL_DEBUG");
+#define NL_MODE_STR "NL_DEBUG"
 #else
-const std::string nlMode("NL_RELEASE");
+#define NL_MODE_STR "NL_RELEASE"
 #endif
 
 // Sanity checks

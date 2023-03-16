@@ -1037,6 +1037,11 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 	{
 		if (m_QuicConnection.receiveDatagram(msgin))
 		{
+			// Compute some statistics
+			// FIXME: Also get protocol stats QUIC_PARAM_CONN_STATISTICS QUIC_PARAM_CONN_STATISTICS_V2
+			statsReceive(msgin.length());
+			
+			// We're good
 			return true;
 		}
 		// Under quic receiving a datagram never fails if a datagram is flagged as available
@@ -2492,7 +2497,10 @@ bool	CNetworkConnection::stateProbe()
 		_LatestProbeTime = _UpdateTime;
 	}
 	else
-		nlSleep(10);
+	{
+		// nlSleep(10);
+		nlYield();
+	}
 
 	return false;
 }
@@ -3126,7 +3134,7 @@ void	CNetworkConnection::reset()
 	_TotalLostPackets = 0;
 	_ConnectionQuality = false;
 
-	m_UseQuic = false;
+	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
 
 	_CurrentSmoothServerTick= 0;
 	_SSTLastLocalTime= 0;

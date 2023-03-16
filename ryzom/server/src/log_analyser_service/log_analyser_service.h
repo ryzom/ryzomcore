@@ -70,7 +70,7 @@ public:
 		std::vector<std::string>	Result;
 		NLMISC::TTime				Timeout;
 
-		volatile bool				Finished;
+		NLMISC::CAtomicBool			Finished;
 
 	};
 

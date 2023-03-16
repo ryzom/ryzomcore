@@ -1878,8 +1878,8 @@ private:
 
 	void	pleaseStop() { _Stopping = true; }
 
-	volatile bool	_Stopping;
-	volatile bool	_Complete;
+	NLMISC::CAtomicBool _Stopping;
+	NLMISC::CAtomicBool _Complete;
 
 	NLMISC::IThread	*_Thread;
 };

@@ -57,7 +57,7 @@ public:
 		CQuicUserContextPtr		QuicUser;
 
 		/// Used (connected) or not
-		volatile TSBState		SBState;
+		NLMISC::CAtomicEnum<TSBState> SBState;
 
 		/// Output buffer
 		TOutBox					OutBox;
@@ -144,8 +144,11 @@ public:
 	void					disableSendBuffer( TClientId id )
 	{
 		// We can disable both, because no problem if the flushing thread sees the state of a buffer change to unused
-		((*_CurrentFillingBuffers)[id]).enableSendBuffer( false );
-		((*_CurrentFlushingBuffers)[id]).enableSendBuffer( false );
+		// ((*_CurrentFillingBuffers)[id]).enableSendBuffer( false );
+		// ((*_CurrentFlushingBuffers)[id]).enableSendBuffer( false );
+		NLNET::CInetAddress nullAddr(false);
+		((*_CurrentFillingBuffers)[id]).setAddress( &nullAddr, NULL, false );
+		((*_CurrentFlushingBuffers)[id]).setAddress( &nullAddr, NULL, false );
 
 		// But we must remove the id for _BuffersToEnable in the case when there was
 		// a connection and then a disconnection for the same client in the same cycle

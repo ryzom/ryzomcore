@@ -24,6 +24,7 @@
 #include "nel/misc/string_common.h"
 
 #include "config.h"
+#include "client_cfg.h"
 
 #ifdef NL_MSQUIC_AVAILABLE
 #include <msquic.h>
@@ -59,9 +60,16 @@ public:
 	    , Configuration(NULL)
 	    , Connection(NULL)
 	    , DesiredStateChange(NoChange)
+		, BufferWrites(0)
 	    , BufferReads(0)
 	    , State(CQuicConnection::Disconnected)
+		, ConnectedFlag(false)
+		, ShuttingDownFlag(false)
+		, ShutdownFlag(false)
 	    , ReceiveEnable(0)
+		, MaxSendLength(0)
+		, SendBusy(false)
+		, SentCount(0)
 	{
 	}
 
@@ -210,8 +218,12 @@ void CQuicConnectionImpl::connect()
 		return;
 	}
 
-	static const CStringView protocolName = "ryzomcore4";
-	static const QUIC_BUFFER alpn = { (uint32)protocolName.size(), (uint8 *)protocolName.data() };
+	// Protocol feature levels, corresponds to Ryzom Core release versions, keep datagram-only support to give users and server owners the option to keep bandwidth restricted
+	// 4.1: Only datagram support (restricted bandwidth, same behaviour as UDP)
+	// 4.2?: Add up to 4 unidirectional streams from the server to client to send long impulses (keep bandwidth from client restricted) (DB_INIT, STRING, STRING_MANAGER, MODULE_GATEWAY)
+	// 4.3?: Add a single bidirectional stream opened by the client for the scenario editor gateway (more efficient MODULE_GATEWAY replacement)
+	static const CStringView protocolName41 = "ryzomcore/4.1";
+	static const QUIC_BUFFER alpn = { (uint32)protocolName41.size(), (uint8 *)protocolName41.data() };
 
 	// Configuration, initialized in start, but destroyed on release only (may attempt more than once)
 	QUIC_STATUS status = QUIC_STATUS_SUCCESS;
@@ -230,8 +242,8 @@ void CQuicConnectionImpl::connect()
 		// settings.IsSet.SendBufferingEnabled = TRUE;
 		// settings.GreaseQuicBitEnabled = TRUE;
 		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
-		// settings.MinimumMtu = m_MsgSize + size of QUIC header; // Probably violates QUIC protocol if we do this, also no need
-		// settings.IsSet.MinimumMtu = TRUE;
+		settings.MinimumMtu = 576;
+		settings.IsSet.MinimumMtu = TRUE;
 		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
 		{
@@ -243,8 +255,11 @@ void CQuicConnectionImpl::connect()
 		// Load credentials for client, client doesn't need a certificate
 		QUIC_CREDENTIAL_CONFIG credConfig;
 		memset(&credConfig, 0, sizeof(credConfig));
-		credConfig.Flags = QUIC_CREDENTIAL_FLAG_CLIENT
-		    | QUIC_CREDENTIAL_FLAG_NO_CERTIFICATE_VALIDATION; // FIXME: Don't care for development
+		credConfig.Flags = QUIC_CREDENTIAL_FLAG_CLIENT;
+		if (!ClientCfg.QuicCertValidation)
+		{
+			credConfig.Flags |= QUIC_CREDENTIAL_FLAG_NO_CERTIFICATE_VALIDATION; // Don't care for development
+		}
 		credConfig.Type = QUIC_CREDENTIAL_TYPE_NONE;
 		status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
 		if (QUIC_FAILED(status))
@@ -298,7 +313,10 @@ void CQuicConnection::disconnect(bool blocking)
 		catch (const std::exception &e)
 		{
 			m->close(); // Not very safe safety fallback
-			nlwarning("Exception while waiting for connection shutdown: %s", e.what());
+			if (INelContext::isContextInitialised())
+			{
+				nlwarning("Exception while waiting for connection shutdown: %s", e.what());
+			}
 		}
 	}
 }
@@ -481,43 +499,55 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT: {
 		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
-		nlwarning("Shutdown initiated by transport, error code %llu, status 0x%x", ev->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode, ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status);
-		switch (ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status)
+		if (INelContext::isContextInitialised())
 		{
-		case QUIC_STATUS_CLOSE_NOTIFY: nlinfo("Close notify"); break;
-		case QUIC_STATUS_BAD_CERTIFICATE: nlinfo("Bad Certificate"); break;
-		case QUIC_STATUS_UNSUPPORTED_CERTIFICATE: nlinfo("Unsupported Certficiate"); break;
-		case QUIC_STATUS_REVOKED_CERTIFICATE: nlinfo("Revoked Certificate"); break;
-		case QUIC_STATUS_EXPIRED_CERTIFICATE: nlinfo("Expired Certificate"); break;
-		case QUIC_STATUS_UNKNOWN_CERTIFICATE: nlinfo("Unknown Certificate"); break;
-		case QUIC_STATUS_REQUIRED_CERTIFICATE: nlinfo("Required Certificate"); break;
+			nlwarning("Shutdown initiated by transport, error code %llu, status 0x%x", ev->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode, ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status);
+			switch (ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status)
+			{
+			case QUIC_STATUS_CLOSE_NOTIFY: nlinfo("Close notify"); break;
+			case QUIC_STATUS_BAD_CERTIFICATE: nlinfo("Bad Certificate"); break;
+			case QUIC_STATUS_UNSUPPORTED_CERTIFICATE: nlinfo("Unsupported Certficiate"); break;
+			case QUIC_STATUS_REVOKED_CERTIFICATE: nlinfo("Revoked Certificate"); break;
+			case QUIC_STATUS_EXPIRED_CERTIFICATE: nlinfo("Expired Certificate"); break;
+			case QUIC_STATUS_UNKNOWN_CERTIFICATE: nlinfo("Unknown Certificate"); break;
+			case QUIC_STATUS_REQUIRED_CERTIFICATE: nlinfo("Required Certificate"); break;
+			}
 		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER: {
-		nlinfo("Shutdown initiated by peer");
+		if (INelContext::isContextInitialised())
+		{
+			nlinfo("Shutdown initiated by peer");
+		}
 		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
-		nlinfo("Shutdown complete");
+		if (INelContext::isContextInitialised())
+		{
+			nlinfo("Shutdown complete");
+		}
 		m->ShutdownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_DATAGRAM_RECEIVED:
-		nldebug("Datagram received");
+		// nldebug("Datagram received");
 		// YES PLEASE
 		m->datagramReceived(ev->DATAGRAM_RECEIVED.Buffer->Buffer, ev->DATAGRAM_RECEIVED.Buffer->Length);
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_STATE_CHANGED:
-		nlinfo("Datagram state changed");
 		m->MaxSendLength = ev->DATAGRAM_STATE_CHANGED.SendEnabled ? ev->DATAGRAM_STATE_CHANGED.MaxSendLength : 0;
+		if (INelContext::isContextInitialised())
+		{
+			nlinfo("Datagram state changed, max send length is now %i", (int)m->MaxSendLength);
+		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
@@ -633,6 +663,11 @@ bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 	return false;
 }
 
+bool CQuicConnection::isSupported() const
+{
+	return true;
+}
+
 void CQuicConnectionImpl::datagramReceived(const uint8 *buffer, uint32 length)
 {
 	CQuicConnectionImpl *const m = this;
@@ -707,6 +742,11 @@ bool CQuicConnection::datagramAvailable() const
 }
 
 bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
+{
+	return false;
+}
+
+bool CQuicConnection::isSupported() const
 {
 	return false;
 }

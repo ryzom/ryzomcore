@@ -396,7 +396,7 @@ inline float nlroundf(float x)
 #endif
 
 // Wrapper for fopen to be able to open files with an UTF-8 filename
-FILE *nlfopen(const std::string &filename, const std::string &mode);
+FILE *nlfopen(const std::string &filename, const char *mode);
 
 /** Signed 64 bit fseek. Same interface as fseek
   */

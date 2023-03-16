@@ -21,6 +21,13 @@
 
 #include "stdpch.h"
 
+#ifdef NL_OS_WINDOWS
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 #include <nel/misc/stop_watch.h>
 #include <nel/misc/sheet_id.h>
 #include <nel/misc/path.h>
@@ -59,13 +66,6 @@
 #include "id_impulsions.h"
 #include "uid_impulsions.h"
 
-#ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
-#endif // NL_OS_WINDOWS
-
 #include <mutex>
 #include <condition_variable>
 
@@ -93,7 +93,7 @@ bool UseTickService = false;
 uint32 Ticked = 0;
 
 // Synchronization of flushing (sending) thread
-volatile bool FlushInProgress = false;
+CAtomicFlag FlushInProgress;
 
 // Allow beeping
 bool AllowBeep = false;
@@ -211,16 +211,13 @@ void fillPrioritizedActionsToSend()
 // Swap send buffers
 void swapSendBuffers()
 {
-	H_AUTO(WaitAndSwapSendBuffers)
+	H_AUTO(WaitAndSwapSendBuffers);
+	
     // Wait for the end of flushMessagesToSend()
-    while ( FlushInProgress )
-	{
-		nlSleep( 0 );
-	}
+	CAtomicLockFast::enter(FlushInProgress);
 
 	// Swap the buffers
 	CFrontEndService::instance()->sendSub()->swapSendBuffers();
-    FlushInProgress = true;
 
 	CFrontEndService::instance()->SendWatch.stop();
 }
@@ -230,7 +227,7 @@ void swapSendBuffers()
 void flushMessagesToSend()
 {
 	CFrontEndService::instance()->sendSub()->flushMessages();
-	FlushInProgress = false;
+	CAtomicLockFast::leave(FlushInProgress);
 }
 
 /*
@@ -1231,8 +1228,8 @@ void CFrontEndService::init()
 		CLoginServer::init( "", cbDisconnectClient ); 
 
 //		// Init front end listening port
-		CInetHost listenAddr(CLoginServer::getListenAddress());
-		uint16 frontendPort = listenAddr.port();
+		CInetHost listenHost = CLoginServer::getListenHost();
+		uint16 frontendPort = listenHost.port();
 
 		if (frontendPort == 0)
 		{
@@ -1266,8 +1263,8 @@ void CFrontEndService::init()
 		nlinfo( "Initializing receiving subsystem..." );
 		_ReceiveSub.init( frontendPort, lastAcceptableFrontendPort, _DgramLength, &_History, &_SendSub.clientIdCont() );
 		frontendPort = _ReceiveSub.dataSock()->localAddr().port();
-		listenAddr.setPort( frontendPort );
-		CLoginServer::setListenAddress(PublishFSHostAsIP.get() ? listenAddr.address().asIPString() : listenAddr.toString());
+		listenHost.setPort( frontendPort );
+		CLoginServer::setListenAddress(PublishFSHostAsIP.get() ? listenHost.address().asIPString() : listenHost.toString());
 
 		StalledMode = false;
 		LastTickTime = 0;

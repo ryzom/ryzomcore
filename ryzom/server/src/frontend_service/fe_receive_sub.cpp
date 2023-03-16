@@ -177,9 +177,17 @@ void CFeReceiveSub::release()
 
 	nlassert( _ReceiveTask != NULL );
 	nlassert( _ReceiveThread != NULL );
-	
-	delete m_QuicTransceiver;
-	m_QuicTransceiver = nullptr;
+
+	if (m_QuicTransceiver)
+	{
+		m_QuicTransceiver->stop();
+
+		m_QuicTransceiver->clearQueue(&m_Queues[2]);
+		m_QuicTransceiver->clearQueue(&m_Queues[3]);
+
+		delete m_QuicTransceiver;
+		m_QuicTransceiver = nullptr;
+	}
 
 	_ReceiveTask->requireExit();
 #ifdef NL_OS_UNIX

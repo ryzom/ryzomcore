@@ -17,8 +17,8 @@
 #ifndef STDPCH_H
 #define STDPCH_H
 
-#include <nel/misc/types_nl.h>
-#include <nel/misc/config_file.h>
+#include "nel/misc/types_nl.h"
+#include "nel/misc/config_file.h"
 
 #include <QtCore/QtCore>
 #include <QtGui/QtGui>

@@ -39,11 +39,11 @@ CTaskManager::CTaskManager() : _RunningTask (""), _TaskQueue (""), _DoneTaskQueu
 {
 	_IsTaskRunning = false;
 	_ThreadRunning = true;
+	_ChangePriorityCallback = NULL;
 	CSynchronized<string>::CAccessor currentTask(&_RunningTask);
 	currentTask.value ().clear();
-	_Thread = IThread::create(this);
+	_Thread.reset(IThread::create(this));
 	_Thread->start();
-	_ChangePriorityCallback = NULL;
 }
 
 /*
@@ -52,16 +52,19 @@ CTaskManager::CTaskManager() : _RunningTask (""), _TaskQueue (""), _DoneTaskQueu
 CTaskManager::~CTaskManager()
 {
 	_ThreadRunning = false;
-	while(!_ThreadRunning)
-		nlSleep(10);
+	try
+	{
+		_Thread->wait();
+	}
+	catch (EThread &)
+	{
+		// no exception in destructor
+	}
 
 	// There should be no remaining Tasks
 	CSynchronized<std::list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	nlassert(acces.value().empty());
-	_Thread->wait();
-	delete _Thread;
-	_Thread = NULL;
-
+	_Thread.reset(NULL);
 }
 
 // Manage TaskQueue
@@ -127,7 +130,6 @@ void CTaskManager::run(void)
 		}
 	}
 	CBigFile::getInstance().currentThreadFinished();
-	_ThreadRunning = true;
 }
 
 // Add a task to TaskManager

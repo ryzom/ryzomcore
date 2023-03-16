@@ -23,6 +23,7 @@
 #include "nel/net/net_log.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/hierarchical_timer.h"
+#include "nel/misc/atomic.h"
 
 #ifdef NL_OS_WINDOWS
 #	ifndef NL_COMP_MINGW
@@ -83,8 +84,12 @@ using namespace NLMISC;
 namespace NLNET {
 
 
-bool CSock::_Initialized = false;
-
+namespace /* anonymous */ {
+NLMISC::CAtomicBool s_Initialized;
+#ifdef NL_OS_WINDOWS
+NLMISC::CAtomicInt s_WsaInitCount;
+#endif
+} /* anonymous namespace */
 
 /*
  * ESocket constructor
@@ -140,18 +145,26 @@ ESocket::ESocket( const char *reason, bool systemerror, CInetHost *addr )
  */
 void CSock::initNetwork()
 {
-	if ( ! CSock::_Initialized )
-	{
 #ifdef NL_OS_WINDOWS
+	if (!s_Initialized.load(NLMISC::TMemoryOrderRelaxed))
+	{
 		WORD winsock_version = MAKEWORD( 2, 2 );
 		WSADATA wsaData;
 		if ( WSAStartup( winsock_version, &wsaData ) != 0 )
 		{
 			throw ESocket( "Winsock initialization failed" );
 		}
-#endif
-		CSock::_Initialized = true;
+		s_Initialized = true;
+		// Ok if it gets initialized more than once due to multiple threads reaching here,
+		// just need to release multiple times!
+		++s_WsaInitCount;
 	}
+#else
+	if (!s_Initialized.load(NLMISC::TMemoryOrderRelaxed))
+	{
+		s_Initialized = true;
+	}
+#endif
 }
 
 /*
@@ -160,12 +173,23 @@ void CSock::initNetwork()
 void CSock::releaseNetwork()
 {
 #ifdef NL_OS_WINDOWS
-	if (CSock::_Initialized)
+	s_Initialized = false;
+	while (int previous = (s_WsaInitCount--))
 	{
-		WSACleanup();
+		if (previous > 0)
+		{
+			WSACleanup();
+		}
+		else // Oops, went too far!
+		{
+			++s_WsaInitCount;
+		}
 	}
+	// Twice, in case called concurrently with initNetwork (don't do this, though)
+	s_Initialized = false;
+#else
+	s_Initialized = false;
 #endif
-	CSock::_Initialized = false;
 }
 
 
@@ -231,7 +255,7 @@ CSock::CSock(bool logging)
     , _Blocking(false)
     , _AddressFamily(AF_UNSPEC)
 {
-	nlassert( CSock::_Initialized );
+	nlassert(s_Initialized);
 	/*{
 		CSynchronized<bool>::CAccessor sync( &_SyncConnected );
 		sync.value() = false;
@@ -253,7 +277,7 @@ CSock::CSock(SOCKET sock, const CInetAddress &remoteaddr)
     , _MaxSendTime(0)
     , _AddressFamily(AF_UNSPEC)
 {
-	nlassert( CSock::_Initialized );
+	nlassert(s_Initialized);
 	/*{
 		CSynchronized<bool>::CAccessor sync( &_SyncConnected );
 		sync.value() = true;
@@ -500,6 +524,9 @@ void CSock::connect(const CInetHost &addrs)
  */
 bool CSock::dataAvailable()
 {
+	if (_Sock == INVALID_SOCKET)
+		throw ESocket("CSock::dataAvailable(): invalid socket");
+	
 	fd_set fdset;
 	FD_ZERO( &fdset );
 	FD_SET( _Sock, &fdset );

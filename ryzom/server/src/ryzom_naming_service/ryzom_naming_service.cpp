@@ -264,8 +264,8 @@ void		CServiceInstanceManager::killAllServices()
 
 list<CServiceEntry>	RegisteredServices;		/// List of all registred services
 
-uint16				MinBasePort = 51000;	/// Ports begin at 51000
-uint16				MaxBasePort = 52000;	/// (note: in this implementation there can be no more than 1000 services)
+uint16				MinBasePort = 30000;	/// Ports begin at 51000
+uint16				MaxBasePort = 30100;	/// (note: in this implementation there can be no more than 100 services)
 
 const TServiceId	BaseSId(128);			/// Allocated SIds begin at 128 (except for Agent Service)
 
@@ -277,35 +277,74 @@ CCallbackServer		*CallbackServer = NULL;
 // Functions
 //
 
-bool canAccess (const vector<CInetAddress> &addr, const CServiceEntry &entry, vector<CInetAddress> &accessibleAddr)
+void getDstAddresses(vector<CInetAddress> &dstAddr, const CServiceEntry &dstEntry, const CServiceEntry &srcEntry)
 {
-	accessibleAddr.clear ();
-	
-	if (entry.WaitingUnregistration)
-		return false;
+	// Connecting from srcEntry, make a nice list of addresses that are usable to reach dstEntry
+	dstAddr.clear();
 
-	for (uint i = 0; i < addr.size(); i++)
+	// First check if it's the same host
+	// If all the IP addresses in the destination exist in the source, and there's more than just loopbacks, it's the same host
+	// Then, just send the first loopback address if there is one
+	// Otherwise, send all the destination addresses
+	
+	// Check
+	bool foundMissing = false;
+	bool foundNonLoopback = false;
+	std::set<CIPv6Address> srcAddrs;
+	for (const CInetAddress &addr : srcEntry.Addr)
 	{
-		uint32 net = addr[i].internalNetAddress();
-		for (uint j = 0; j < entry.Addr.size(); j++)
+		srcAddrs.insert(addr.getAddress());
+	}
+	for (const CInetAddress &addr : dstEntry.Addr)
+	{
+		if (addr.getAddress().getType() != CIPv6Address::Loopback)
+			foundNonLoopback = true;
+		if (srcAddrs.find(addr.getAddress()) == srcAddrs.end())
+			foundMissing = true;
+	}
+	if (foundNonLoopback && !foundMissing)
+	{
+		// There are addresses other than the loopback, and none of them are found missing, this is the same host
+		for (const CInetAddress &addr : dstEntry.Addr)
 		{
-			if (net == entry.Addr[j].internalNetAddress())
+			if (addr.getAddress().getType() == CIPv6Address::Loopback)
 			{
-				accessibleAddr.push_back (entry.Addr[j]);
+				// Just send one loopback address
+				dstAddr.push_back(addr);
+				return;
+			}
+		}
+		
+		// Didn't find a loopback, so just send all addresses
+		dstAddr = dstEntry.Addr;
+	}
+
+	// It's not the same host
+	// Filter out all loopback addresses
+	// Filter out all LAN addresses with unreachable networks
+	
+	// Get all the subnets at the source
+	std::set<CIPv6Address> subnets;
+	for (const CInetAddress &addr : srcEntry.Addr)
+	{
+		CIPv6Address subnet = addr.getAddress().subnet();
+		if (subnet.isValid())
+			subnets.insert(subnet);
+	}
+
+	// List all the valid addresses
+	for (const CInetAddress &addr : dstEntry.Addr)
+	{
+		if (addr.getAddress().getType() != CIPv6Address::Loopback) // No loopbacks
+		{
+			CIPv6Address subnet = addr.getAddress().subnet();
+			if (!subnet.isValid() || subnets.find(subnet) != subnets.end())
+			{
+				// If this is not a LAN address, or if the source has an address with the same subnet, add it
+				dstAddr.push_back(addr);
 			}
 		}
 	}
-
-	if (accessibleAddr.empty())
-	{
-		nldebug ("service %s-%hu is not accessible by '%s'", entry.Name.c_str(), entry.SId.get(), vectorCInetAddressToString (addr).c_str ());
-	}
-	else
-	{
-		nldebug ("service %s-%hu is accessible by '%s'", entry.Name.c_str(), entry.SId.get(), vectorCInetAddressToString (accessibleAddr).c_str ());
-	}
-
-	return !accessibleAddr.empty ();
 }
 
 void displayRegisteredServices (CLog *log = InfoLog)
@@ -356,7 +395,10 @@ list<CServiceEntry>::iterator doRemove (list<CServiceEntry>::iterator it)
 	nlinfo ("Broadcast the Unregistration of %s-%hu to all registered services", (*it).Name.c_str(), it->SId.get());
 	for (list<CServiceEntry>::iterator it3 = RegisteredServices.begin(); it3 != RegisteredServices.end (); it3++)
 	{
-		if (canAccess((*it).Addr, (*it3), accessibleAddress))
+		if (it3->WaitingUnregistration)
+			continue;
+		getDstAddresses(accessibleAddress, *it, *it3);
+		if (!accessibleAddress.empty())
 		{
 			CallbackServer->send (msgout, (*it3).SockId);
 			//CNetManager::send ("NS", msgout, (*it3).SockId);
@@ -551,36 +593,40 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 		}
 
 		// if ok, register the service and send a broadcast to other people
+		CServiceEntry dstEntry = CServiceEntry(from, addr, name, sid);
 		if (ok)
 		{
 			// Check if the instance is allowed to start, according to the restriction in the config file			
 			if ( SIMInstance->queryStartService( name, sid, addr, reason ) )
 			{
 				// add him in the registered list
-				RegisteredServices.push_back (CServiceEntry(from, addr, name, sid));
+				RegisteredServices.push_back (dstEntry);
 
 				// tell to everybody but not him that this service is registered
 				if (!reconnection)
 				{
-					CMessage msgout ("RGB");
-					TServiceId::size_type s = 1;
-					msgout.serial (s);
-					msgout.serial (const_cast<string &>(name));
-					msgout.serial (sid);
-					// we need to send all addr to all services even if the service can't access because we use the address index
-					// to know which connection comes.
-					msgout.serialCont (const_cast<vector<CInetAddress> &>(addr));
 					nlinfo ("The service is %s-%d, broadcast the Registration to everybody", name.c_str(), sid.get());
 
 					vector<CInetAddress> accessibleAddress;
-					for (list<CServiceEntry>::iterator it3 = RegisteredServices.begin(); it3 != RegisteredServices.end (); it3++)
+					for (list<CServiceEntry>::iterator it3 = RegisteredServices.begin(); it3 != RegisteredServices.end(); it3++)
 					{
 						// send only services that can be accessed and not itself
-						if ((*it3).SId != sid && canAccess(addr, (*it3), accessibleAddress))
+						if (dstEntry.SId == (*it3).SId)
+							continue;
+						if (it3->WaitingUnregistration)
+							continue;
+						getDstAddresses(accessibleAddress, dstEntry, *it3);
+						if (!accessibleAddress.empty())
 						{
-							CallbackServer->send (msgout, (*it3).SockId);
-							//CNetManager::send ("NS", msgout, (*it3).SockId);
-							nldebug ("Broadcast to %s-%hu", (*it3).Name.c_str(), it3->SId.get());
+							CMessage msgout("RGB");
+							TServiceId::size_type s = 1;
+							msgout.serial(s);
+							msgout.serial(const_cast<string &>(name));
+							msgout.serial(sid);
+							msgout.serialCont(const_cast<vector<CInetAddress> &>(accessibleAddress));
+							CallbackServer->send(msgout, (*it3).SockId);
+							// CNetManager::send ("NS", msgout, (*it3).SockId);
+							nldebug("Broadcast to %s-%hu", (*it3).Name.c_str(), it3->SId.get());
 						}
 					}
 				}
@@ -608,26 +654,32 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 				// send him all services available (also itself)
 				TServiceId::size_type nb = 0;
 
-				vector<CInetAddress> accessibleAddress;
+				vector<vector<CInetAddress>> accessibleAddressV;
 
 				for (list<CServiceEntry>::iterator it2 = RegisteredServices.begin(); it2 != RegisteredServices.end (); it2++)
 				{
-					// send only services that are available
-					if (canAccess(addr, (*it2), accessibleAddress))
+					vector<CInetAddress> accessibleAddress;
+					if (!it2->WaitingUnregistration)
+						getDstAddresses(accessibleAddress, *it2, dstEntry);
+					accessibleAddressV.push_back(accessibleAddress);
+					if (!accessibleAddress.empty())
 						nb++;
 				}
 				msgout.serial (nb);
 
-				for (list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
+				int i0 = 0;
+				for (list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end (); it++, i0++)
 				{
 					// send only services that are available
-					if (canAccess(addr, (*it), accessibleAddress))
+					if (!accessibleAddressV[i0].empty())
 					{
 						msgout.serial ((*it).Name);
 						msgout.serial ((*it).SId);
-						msgout.serialCont ((*it).Addr);
+						msgout.serialCont (accessibleAddressV[i0]);
 					}
 				}
+
+				nlassert(i0 == nb);
 			}
 			else
 			{
@@ -768,17 +820,23 @@ uint16 doAllocatePort (const CInetAddress &addr)
 	// check if nextavailableport is free
 
 	if (nextAvailablePort >= MaxBasePort) nextAvailablePort = MinBasePort;
+	int test = MaxBasePort - MinBasePort;
+	int tested = 0;
 
 	bool ok;
 	do
 	{
 		ok = true;
 		list<CServiceEntry>::iterator it;
+		if (nextAvailablePort >= MaxBasePort) nextAvailablePort = MinBasePort;
 		for (it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
 		{
 			if ((*it).Addr[0].port () == nextAvailablePort)
 			{
 				nextAvailablePort++;
+				tested++;
+				if (tested >= test)
+					return 0; // no more space
 				ok = false;
 				break;
 			}

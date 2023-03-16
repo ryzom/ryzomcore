@@ -663,6 +663,56 @@ private:
 
 
 //-------------------------------------------------------------------------------------------
+// 	set_punctual_state_timeout
+//-------------------------------------------------------------------------------------------
+
+class CAILogicActionSetPunctualStateTimeout : public IAILogicAction
+{
+public:
+	// init is called just after instantiation to give class a chance to parse arguments and
+	// deal with sub actions
+	CAILogicActionSetPunctualStateTimeout(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	{
+		if (!subActions.empty())
+			nlwarning("sub-actions of 'set punctual state timeout' are ignored");
+
+		switch (args.size())
+		{
+		case 2:
+			NLMISC::fromString(args[0], _min); if (args[0] != NLMISC::toString(_min)) goto BadArgs;
+			NLMISC::fromString(args[1], _max); if (args[1] != NLMISC::toString(_max)) goto BadArgs;
+			break;
+		case 1:
+			NLMISC::fromString(args[0], _min); if (args[0] != NLMISC::toString(_min)) goto BadArgs;
+			_max = _min;
+			break;
+		default:
+		BadArgs:
+			nlwarning("Invalid arguments for 'set punctual state timeout'");
+			_min = 0;
+			_max = 0;
+		}
+	}
+
+	// this is the executeAction 'callback' for the action type.
+	// NOTE: This code should be fast and compact as it may be called very large numbers of times
+	// depending on the whim of the level designers
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
+	{
+		uint t = _min;
+		if (_min != _max)
+			t += CAIS::rand32(_max - _min);
+		entity->timerPunctTimeout().set(t);
+		entity->getDebugHistory()->addHistory("GRP Set Punctual State Timeout: %u", t);
+		return true;
+	}
+
+private:
+	uint32 _min, _max;
+};
+
+
+//-------------------------------------------------------------------------------------------
 // 	set_timer_t*
 //-------------------------------------------------------------------------------------------
 
@@ -3248,6 +3298,7 @@ IAILogicAction	*CAIEventReaction::newAILogicAction(const char *name,
 	BUILD(	"punctual_state_end",	CAILogicActionPunctualStateEnd	)
 	BUILD(	"random_select",		CAILogicActionRandomSelect		)
 	BUILD(	"set_state_timeout",	CAILogicActionSetStateTimeout	)
+	BUILD(	"set_punctual_state_timeout", CAILogicActionSetPunctualStateTimeout	)
 	BUILD(	"set_timer_t0",			CAILogicActionSetTimerT0		)
 	BUILD(	"set_timer_t1",			CAILogicActionSetTimerT1		)
 	BUILD(	"set_timer_t2",			CAILogicActionSetTimerT2		)

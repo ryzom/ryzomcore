@@ -20,6 +20,7 @@
 #include "nel/misc/mutex.h"
 #include "nel/misc/buf_fifo.h"
 #include "nel/misc/string_view.h"
+#include "nel/misc/variable.h"
 
 #include "config.h"
 #include "quic_selfsign.h"
@@ -38,6 +39,8 @@
 
 #define MsQuic m->Api
 #define null nullptr
+
+#endif /* #ifdef NL_MSQUIC_AVAILABLE */
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -61,47 +64,20 @@ using namespace NLNET;
 
 namespace /* anonymous */ {
 
-// This really hammers fast
-class CAtomicFlagLock
-{
-public:
-	CAtomicFlagLock(std::atomic_flag &flag)
-	    : m_Flag(flag)
-	{
-		while (m_Flag.test_and_set(std::memory_order_acquire))
-			;
-	}
+CVariable<bool> QuicConnection("fs", "QuicConnection", "", true, 0, true);
+CVariable<std::string> QuicCertificate("fs", "QuicCertificate", "", "", 0, true);
+CVariable<std::string> QuicPrivateKey("fs", "QuicPrivateKey", "", "", 0, true);
+CVariable<std::string> QuicLetsEncryptLive("fs", "QuicLetsEncryptLive", "", "/home/nevrax/letsencrypt/live", 0, true);
 
-	~CAtomicFlagLock()
-	{
-		m_Flag.clear(std::memory_order_release);
-	}
+#ifdef FE_DEBUG_QUIC
+CAtomicInt s_UserContextCount;
+#endif
 
-private:
-	std::atomic_flag &m_Flag;
-};
-
-// This is a bit more relaxed
-class CAtomicFlagLockYield
-{
-public:
-	CAtomicFlagLockYield(std::atomic_flag &flag)
-	    : m_Flag(flag)
-	{
-		while (m_Flag.test_and_set(std::memory_order_acquire))
-			std::this_thread::yield();
-	}
-
-	~CAtomicFlagLockYield()
-	{
-		m_Flag.clear(std::memory_order_release);
-	}
-
-private:
-	std::atomic_flag &m_Flag;
-};
+CSynchronized<std::vector<CQuicTransceiver *>> s_QuicTransceivers;
 
 } /* anonymous namespace */
+
+#ifdef NL_MSQUIC_AVAILABLE
 
 class CQuicTransceiverImpl
 {
@@ -111,10 +87,10 @@ public:
 	HQUIC Configuration = null;
 	HQUIC Listener = null;
 
-	std::atomic_flag BufferMutex = ATOMIC_FLAG_INIT;
+	NLMISC::CAtomicFlag BufferMutex = false;
 	NLMISC::CBufFIFO *Buffer = null;
 
-	std::atomic<bool> Listening;
+	NLMISC::CAtomicBool Listening = false;
 
 	// Some salt for generating the token address
 	uint64 SaltA0 = (((uint64)std::random_device()()) << 32) | std::random_device()();
@@ -133,6 +109,9 @@ public:
 	std::mutex ListenerStopMutex;
 	std::condition_variable ListenerStopCondition;
 
+	// Connections that have not shutdown yet
+	NLMISC::CSynchronized<std::set<CQuicUserContextPtr>> Connections;
+
 	static QUIC_STATUS
 #ifdef _Function_class_
 	    _Function_class_(QUIC_LISTENER_CALLBACK)
@@ -149,6 +128,8 @@ CQuicTransceiver::CQuicTransceiver(uint32 msgsize)
     : m(std::make_unique<CQuicTransceiverImpl>())
     , m_MsgSize(msgsize)
 {
+	CSynchronized<std::vector<CQuicTransceiver *>>::CAccessor transceivers(&s_QuicTransceivers);
+
 	// Open library
 	QUIC_STATUS status = MsQuicOpenVersion(QUIC_API_VERSION_2, (const void **)&MsQuic);
 	if (QUIC_FAILED(status))
@@ -168,29 +149,98 @@ CQuicTransceiver::CQuicTransceiver(uint32 msgsize)
 		release();
 		return;
 	}
+
+	transceivers.value().push_back(this);
 }
 
 CQuicTransceiver::~CQuicTransceiver()
 {
+	CSynchronized<std::vector<CQuicTransceiver *>>::CAccessor transceivers(&s_QuicTransceivers);
+
 	stop();
 	release();
+
+	transceivers.value().erase(std::find(transceivers.value().begin(), transceivers.value().end(), this));
+}
+
+void CQuicTransceiver::reloadCert()
+{
+	nldebug("Reload QUIC certificates [%p]", this);
+
+	if (!MsQuic)
+	{
+		nldebug("QUIC API not available, skip [%p]", this);
+		return;
+	}
+
+	if (!m->Configuration)
+	{
+		nldebug("QUIC not configured yet, skip [%p]", this);
+		return;
+	}
+
+	if (!QuicCertificate.get().empty() && !QuicPrivateKey.get().empty())
+	{
+		// Server credentials
+		nlinfo("Using certificate %s with key %s", QuicCertificate.get().c_str(), QuicPrivateKey.get().c_str());
+		std::string certificate = NLMISC::utf8ToMbcs(QuicCertificate.get());
+		std::string privateKey = NLMISC::utf8ToMbcs(QuicPrivateKey.get());
+		QUIC_CREDENTIAL_CONFIG credConfig;
+		QUIC_CERTIFICATE_FILE certFile;
+		memset(&credConfig, 0, sizeof(credConfig));
+		credConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE;
+		credConfig.Flags = QUIC_CREDENTIAL_FLAG_NONE;
+		credConfig.CertificateFile = &certFile;
+		certFile.CertificateFile = certificate.c_str();
+		certFile.PrivateKeyFile = privateKey.c_str();
+		QUIC_STATUS status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
+		if (QUIC_FAILED(status))
+		{
+			nlinfo("MsQuic->ConfigurationLoadCredential failed with status 0x%x", status);
+		}
+		else
+		{
+			nlinfo("QUIC certificate reloaded");
+		}
+	}
+	else
+	{
+		nlinfo("No certificate configured for QUIC");
+	}
+}
+
+bool CQuicTransceiver::isConfigEnabled() const
+{
+	return QuicConnection.get();
 }
 
 void CQuicTransceiver::start(uint16 port)
 {
 	stop();
 
+	if (!QuicConnection.get())
+	{
+		nlinfo("QUIC listener disabled");
+		return;
+	}
+
 	if (!MsQuic)
 	{
 		nlwarning("QUIC API not available");
+		return;
 	}
 
-	static const CStringView protocolName = "ryzomcore4";
-	static const QUIC_BUFFER alpn = { (uint32)protocolName.size(), (uint8 *)protocolName.data() };
+	nldebug("Configure QUIC at port %i", (int)port);
+	// Protocol feature levels, corresponds to Ryzom Core release versions, keep datagram-only support to give users and server owners the option to keep bandwidth restricted
+	// 4.1: Only datagram support (restricted bandwidth, same behaviour as UDP)
+	// 4.2?: Add up to 4 unidirectional streams from the server to client to send long impulses (keep bandwidth from client restricted) (DB_INIT, STRING, STRING_MANAGER, MODULE_GATEWAY)
+	// 4.3?: Add a single bidirectional stream opened by the client for the scenario editor gateway (more efficient MODULE_GATEWAY replacement)
+	static const CStringView protocolName41 = "ryzomcore/4.1";
+	static const QUIC_BUFFER alpn = { (uint32)protocolName41.size(), (uint8 *)protocolName41.data() };
 
 	// Configuration, initialized in start, but destroyed on release only (may attempt more than once)
 	QUIC_STATUS status = QUIC_STATUS_SUCCESS;
-	if (!m->Configuration)
+	if (!m->Configuration) // Might need a configuration per supported version... or just the highest supported :)
 	{
 		QUIC_SETTINGS settings = { 0 };
 		settings.DatagramReceiveEnabled = TRUE;
@@ -205,8 +255,8 @@ void CQuicTransceiver::start(uint16 port)
 		// settings.IsSet.SendBufferingEnabled = TRUE;
 		// settings.GreaseQuicBitEnabled = TRUE;
 		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
-		// settings.MinimumMtu = m_MsgSize + size of QUIC header; // Probably violates QUIC protocol if we do this, also no need
-		// settings.IsSet.MinimumMtu = TRUE;
+		settings.MinimumMtu = 576;
+		settings.IsSet.MinimumMtu = TRUE;
 		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
 		{
@@ -214,50 +264,108 @@ void CQuicTransceiver::start(uint16 port)
 			return;
 		}
 
-		// TODO: Certificate should depend on a configuration variable, if it's configured, at least for production
+		if (QuicCertificate.get().empty() || QuicPrivateKey.get().empty())
+		{
+			// Attempt to auto configure certificate from well-known locations
+			const NLNET::CInetHost &listenHost = NLNET::CLoginServer::getListenHost();
+			std::string localHostName = listenHost.hostname();
+			if (localHostName.empty() || NLNET::CIPv6Address(localHostName).isValid()) // IP address...
+				localHostName = NLNET::CInetHost::localHostName();
+			if (!localHostName.empty() && !NLNET::CIPv6Address(localHostName).isValid()) // If not empty and not an IP address
+			{
+				std::string fullchain = QuicLetsEncryptLive.get() + "/" + localHostName + "/fullchain.pem";
+				std::string privkey = QuicLetsEncryptLive.get() + "/" + localHostName + "/privkey.pem";
+				nldebug("Check if %s and %s exist", fullchain.c_str(), privkey.c_str());
+				if (CFile::fileExists(fullchain) && CFile::fileExists(privkey))
+				{
+					nldebug("They exist");
+					QuicCertificate.set(fullchain);
+					QuicPrivateKey.set(privkey);
+				}
+				else
+				{
+					nldebug("They don't exist");
+				}
+			}
+		}
 
-		// Programmatically create a self signed certificate, only valid in Windows
-		// This is very useful for development servers
-		uint8 certHash[20];
-		void *schannelCert = FES_findOrCreateSelfSignedCertificate(certHash); // PCCERT_CONTEXT
-		if (schannelCert)
+		// Certificate depends on a configuration variable, if it's configured, at least for production
+		bool liveCert = false;
+		if (!QuicCertificate.get().empty() && !QuicPrivateKey.get().empty())
 		{
 			// Server credentials
+			nlinfo("Using certificate %s with key %s", QuicCertificate.get().c_str(), QuicPrivateKey.get().c_str());
+			std::string certificate = NLMISC::utf8ToMbcs(QuicCertificate.get());
+			std::string privateKey = NLMISC::utf8ToMbcs(QuicPrivateKey.get());
 			QUIC_CREDENTIAL_CONFIG credConfig;
+			QUIC_CERTIFICATE_FILE certFile;
 			memset(&credConfig, 0, sizeof(credConfig));
-			credConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_CONTEXT;
+			credConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_FILE;
 			credConfig.Flags = QUIC_CREDENTIAL_FLAG_NONE;
-			credConfig.CertificateContext = (QUIC_CERTIFICATE *)schannelCert;
+			credConfig.CertificateFile = &certFile;
+			certFile.CertificateFile = certificate.c_str();
+			certFile.PrivateKeyFile = privateKey.c_str();
 			status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
 			if (QUIC_FAILED(status))
 			{
-				nlwarning("MsQuic->ConfigurationLoadCredential failed with status 0x%x", status);
-				FES_freeSelfSignedCertificate((void *)schannelCert);
-				schannelCert = nullptr;
+				nlwarning("MsQuic->ConfigurationLoadCredential failed with status 0x%x, try a self-signed", status);
+			}
+			else
+			{
+				// TODO: Flag to reload somehow when the files change!
+				liveCert = true;
 			}
 		}
 		else
 		{
+			nlwarning("No certificate configured for QUIC on hostname %s, try a self-signed", NLNET::CLoginServer::getListenHost().hostname().c_str());
+		}
+
+		if (!liveCert)
+		{
+			// Programmatically create a self signed certificate, only valid in Windows
+			// This is very useful for development servers
+			uint8 certHash[20];
+			void *certContext = FES_findOrCreateSelfSignedCertificate(certHash); // PCCERT_CONTEXT
+			if (certContext)
+			{
+				// Server credentials
+				QUIC_CREDENTIAL_CONFIG credConfig;
+				memset(&credConfig, 0, sizeof(credConfig));
+				credConfig.Type = QUIC_CREDENTIAL_TYPE_CERTIFICATE_CONTEXT;
+				credConfig.Flags = QUIC_CREDENTIAL_FLAG_NONE;
+				credConfig.CertificateContext = (QUIC_CERTIFICATE *)certContext;
+				status = MsQuic->ConfigurationLoadCredential(m->Configuration, &credConfig);
+				if (QUIC_FAILED(status))
+				{
+					nlwarning("MsQuic->ConfigurationLoadCredential failed with status 0x%x", status);
+					FES_freeSelfSignedCertificate((void *)certContext);
+					certContext = nullptr;
+				}
+			}
+			else
+			{
 #ifdef NL_OS_WINDOWS
-			nlwarning("Failed to create self-signed certificate");
+				nlwarning("Failed to create self-signed certificate");
 #endif
-		}
-		if (schannelCert)
-		{
-			// Don't need the certificate anymore (I guess? Let's hope it's been copied by MsQuic!)
-			nlinfo("Self-signed certificate hash: %s", NLMISC::toHexa(certHash, 20).c_str());
-			FES_freeSelfSignedCertificate((void *)schannelCert);
-			schannelCert = nullptr;
-		}
-		else
-		{
-			// Either we could not create a self-signed certificate on Windows, or could not load it into the configuration
-			// Try with an OpenSSL certificate
-			// TODO
-			nlwarning("Self signed OpenSSL certificates are not yet supported, QUIC will not work. Specify a certificate in the configuration file.");
-			MsQuic->ConfigurationClose(m->Configuration);
-			m->Configuration = nullptr;
-			return;
+			}
+			if (certContext)
+			{
+				// Don't need the certificate anymore (I guess? Let's hope it's been copied by MsQuic!)
+				nlinfo("Self-signed certificate hash: %s", NLMISC::toHexa(certHash, 20).c_str());
+				FES_freeSelfSignedCertificate((void *)certContext);
+				certContext = nullptr;
+			}
+			else
+			{
+				// Either we could not create a self-signed certificate on Windows, or could not load it into the configuration
+				// Try with an OpenSSL certificate
+				// TODO
+				nlwarning("Self signed OpenSSL certificate generation is not yet supported, QUIC will not work. Specify a certificate in the configuration file");
+				MsQuic->ConfigurationClose(m->Configuration);
+				m->Configuration = nullptr;
+				return;
+			}
 		}
 	}
 
@@ -274,17 +382,24 @@ void CQuicTransceiver::start(uint16 port)
 	}
 
 	// Start listening
-	status = MsQuic->ListenerStart(m->Listener, &alpn, 1, &addr);
+	{
+		std::unique_lock<std::mutex> lock(m->ListenerStopMutex); // Lock m->Listening
+		status = MsQuic->ListenerStart(m->Listener, &alpn, 1, &addr);
+		if (!QUIC_FAILED(status))
+		{
+			// Ok
+			m->Listening.store(true, NLMISC::TMemoryOrderRelaxed); // Released by lock
+			nlinfo("Listening for QUIC connections on port %i", (int)port);
+		}
+	}
+
+	// Failed
 	if (QUIC_FAILED(status))
 	{
 		stop();
 		nlwarning("MsQuic->ListenerStart failed with status 0x%x", status);
 		return;
 	}
-
-	// Ok
-	m->Listening.store(true, std::memory_order_release);
-	nlinfo("Listening for QUIC connections on port %i", (int)port);
 }
 
 void CQuicTransceiver::stop()
@@ -298,49 +413,120 @@ void CQuicTransceiver::stop()
 			try
 			{
 				// Wait for stop
+				nldebug("Wait for QUIC listener stop");
 				std::unique_lock<std::mutex> lock(m->ListenerStopMutex);
-				m->ListenerStopCondition.wait(lock, [this] { return !m->Listening; });
+				m->ListenerStopCondition.wait(lock, [this] { return !m->Listening.load(NLMISC::TMemoryOrderRelaxed); /* Aqcuired by lock */ });
+				nldebug("Stop wait OK");
 			}
 			catch (const std::exception &e)
 			{
 				nlwarning("Exception while waiting for listener stop: %s", e.what());
 			}
 		}
+		nldebug("Close listener");
 		MsQuic->ListenerClose(m->Listener);
 		m->Listener = null;
+		nldebug("Listener closed");
 	}
+
+	// TODO: Graceful shutdown.
+	// First, close all listeners (close QUIC listener, and ignore new UDP addresses in the UDP receiver)
+	// Then, shutdown or disconnect all existing connections (send disconnect through Ryzom datagram, then shutdown all QUIC)
+	// Once all connections are gone, proceed with closing down the sockets entirely
+	// If this takes more than one second, force close all QUIC connetions
+
+	// Shutdown all connections
+	for (;;) // Doesn't need to loop, but just in case...
+	{
+		std::set<CQuicUserContextPtr> connectionsCopy;
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			connectionsCopy = connections.value();
+		}
+		if (connectionsCopy.empty())
+			break;
+
+		nldebug("Shutdown %i connections", (int)connectionsCopy.size());
+		for (const CQuicUserContextPtr &user : connectionsCopy)
+		{
+			if (user->Connection)
+			{
+				MsQuic->ConnectionShutdown((HQUIC)user->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
+			}
+		}
+		// Wait for connections to be empty, lousy spin loop
+		nldebug("Wait for shutdown");
+		for (;;)
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			if (connections.value().empty())
+				break;
+			nlSleep(1);
+		}
+		nldebug("Shutdown ok");
+		// Forcefully close all connections
+		for (const CQuicUserContextPtr &user : connectionsCopy)
+		{
+			if (user->Connection)
+			{
+				MsQuic->ConnectionClose((HQUIC)user->Connection);
+				user->Connection = nullptr;
+			}
+		}
+		nldebug("Closed all connections");
+		connectionsCopy.clear();
+		nldebug("Cleared references. There may be leftovers in CClientHost, etc");
+	}
+
+	// Clear queue
+	nldebug("Clear current write queue");
+	clearQueue(m->Buffer);
+	nldebug("Cleared");
 }
 
 void CQuicTransceiver::release()
 {
 	// Close configuration
+	nldebug("Closing configuration");
 	if (m->Configuration)
 	{
 		MsQuic->ConfigurationClose(m->Configuration);
 		m->Configuration = null;
 	}
+	nldebug("Configuration closed");
 
 	// Close registration
+	nldebug("Closing registration");
 	if (m->Registration)
 	{
 		MsQuic->RegistrationClose(m->Registration);
 		m->Registration = null;
 	}
+	nldebug("Registration closed");
 
 	// Close library
+	nldebug("Closing library");
 	if (MsQuic)
 	{
 		MsQuicClose(MsQuic);
 		MsQuic = null;
 	}
+	nldebug("Library closed");
 }
 
 CQuicUserContext::CQuicUserContext()
 {
+#ifdef FE_DEBUG_QUIC
+	nldebug("Create QUIC user context, total %i", (int)(++s_UserContextCount));
+#endif
 }
 
 CQuicUserContext::~CQuicUserContext()
 {
+#ifdef FE_DEBUG_QUIC
+	nldebug("Destroy QUIC user context, total %i", (int)(--s_UserContextCount));
+#endif
+
 	// This should never get called before the connection is shutdown,
 	// since we increase the reference when the connection gets opened,
 	// and decrease the reference when the connection is shutdown.
@@ -369,18 +555,29 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 		user->Transceiver = self;
 		user->TokenAddr = self->generateTokenAddr(); // ev->NEW_CONNECTION.Info->RemoteAddress // Could change on migration, so don't expose it for now (OK in the future)
 		user->Connection = ev->NEW_CONNECTION.Connection;
-		user->increaseRef();
+		CQuicUserContextPtr userPtr = user;
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			connections.value().insert(userPtr);
+		}
+		// user->increaseRef();
 		// They're in.
 		MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, (void *)CQuicTransceiverImpl::connectionCallback, (void *)user);
 		status = MsQuic->ConnectionSetConfiguration(ev->NEW_CONNECTION.Connection, m->Configuration);
-		nlwarning("New QUIC connection");
+		nldebug("New QUIC connection");
+		if (QUIC_FAILED(status))
+		{
+			nlwarning("MsQuic->ConnectionSetConfiguration failed with status 0x%x", status);
+			// Assuming we still get a QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE after this, which will decreaseRef the user context!
+		}
 		break;
 	}
 	case QUIC_LISTENER_EVENT_STOP_COMPLETE: {
-		nlwarning("QUIC listener stopped");
+		nldebug("QUIC listener stopped");
 		std::unique_lock<std::mutex> lock(m->ListenerStopMutex);
-		m->Listening.store(false, std::memory_order_release);
+		m->Listening.store(false, NLMISC::TMemoryOrderRelaxed); // Released by lock
 		m->ListenerStopCondition.notify_all();
+		nldebug("QUIC listener stop notified");
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
@@ -421,7 +618,15 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE: {
-		CQuicUserContextRelease releaseUser(user); // Hopefully we only get QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE once!
+		// CQuicUserContextRelease releaseUser(user); // Hopefully we only get QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE once!
+		CQuicUserContextPtr userPtr = user;
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			connections.value().erase(userPtr);
+		}
+#ifdef FE_DEBUG_QUIC
+		user->DebugRefCount = true;
+#endif
 		user->MaxSendLength = 0;
 		nlinfo("Shutdown complete");
 		if (ev->SHUTDOWN_COMPLETE.AppCloseInProgress)
@@ -437,7 +642,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_DATAGRAM_RECEIVED:
-		nldebug("Datagram received");
+		// nldebug("Datagram received");
 		// YES PLEASE
 		self->datagramReceived(user, ev->DATAGRAM_RECEIVED.Buffer->Buffer, ev->DATAGRAM_RECEIVED.Buffer->Length);
 		status = QUIC_STATUS_SUCCESS;
@@ -498,7 +703,7 @@ CInetAddress CQuicTransceiver::generateTokenAddr()
 
 bool CQuicTransceiver::listening()
 {
-	return m->Listening.load(std::memory_order_acquire);
+	return m->Listening.load(NLMISC::TMemoryOrderAcquire);
 }
 
 void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buffer, uint32 length)
@@ -508,7 +713,7 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 
 	// Locked block
 	{
-		CAtomicFlagLockYield lock(m->BufferMutex);
+		NLMISC::CAtomicLockYield lock(m->BufferMutex);
 		static const uint8 userEvent = TReceivedMessage::User;
 		static_assert(MsgHeaderSize == sizeof(userEvent));
 		m->Buffer->push(&userEvent, MsgHeaderSize, buffer, length);
@@ -523,7 +728,7 @@ void CQuicTransceiver::shutdownReceived(CQuicUserContext *user)
 
 	// Locked block
 	{
-		CAtomicFlagLockYield lock(m->BufferMutex);
+		NLMISC::CAtomicLockYield lock(m->BufferMutex);
 		static const uint8 removeEvent = TReceivedMessage::RemoveClient;
 		static_assert(MsgHeaderSize == sizeof(removeEvent));
 		m->Buffer->push(&removeEvent, MsgHeaderSize);
@@ -533,10 +738,34 @@ void CQuicTransceiver::shutdownReceived(CQuicUserContext *user)
 
 NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 {
-	CAtomicFlagLockYield lock(m->BufferMutex);
+	NLMISC::CAtomicLockSpin lock(m->BufferMutex);
 	CBufFIFO *previous = m->Buffer;
 	m->Buffer = writeQueue;
 	return previous;
+}
+
+void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *queue)
+{
+	NLMISC::CAtomicLockFast lock(m->BufferMutex);
+	int count = 0;
+	while (!queue->empty())
+	{
+		// Data, don't care
+		queue->pop();
+		nlassert(!queue->empty());
+		uint8 *buffer;
+		uint32 size;
+		// User ptr, need to decrease ref
+		queue->front(buffer, size);
+		CQuicUserContext *user;
+		nlassert(size == sizeof(user));
+		memcpy(&user, buffer, size);
+		// Decrease ref count after pop
+		CQuicUserContextRelease releaseUser(user);
+		queue->pop();
+		++count;
+	}
+	nldebug("Cleared %i messages from queue [%p]", count, queue);
 }
 
 // void CQuicTransceiver::sendDatagram(CQuicUserContext *user, const uint8 *buffer, uint32 size)
@@ -614,8 +843,18 @@ CQuicTransceiver::~CQuicTransceiver()
 {
 }
 
+void CQuicTransceiver::reloadCert()
+{
+}
+
+bool CQuicTransceiver::isConfigEnabled() const
+{
+	return false;
+}
+
 void CQuicTransceiver::start(uint16 port)
 {
+	nlwarning("QUIC not supported, no listener started");
 }
 
 void CQuicTransceiver::stop()
@@ -655,6 +894,10 @@ NLMISC::CBufFIFO *CQuicTransceiver::swapWriteQueue(NLMISC::CBufFIFO *writeQueue)
 	return previous;
 }
 
+void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *writeQueue)
+{
+}
+
 bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemStream &buffer)
 {
 	return false;
@@ -665,5 +908,15 @@ void CQuicTransceiver::shutdown(CQuicUserContext *user)
 }
 
 #endif
+
+NLMISC_CATEGORISED_COMMAND(fs, quicCertReload, "Reload QUIC certificates", "")
+{
+	CSynchronized<std::vector<CQuicTransceiver *>>::CAccessor transceivers(&s_QuicTransceivers);
+	for (CQuicTransceiver *transceiver : transceivers.value())
+	{
+		transceiver->reloadCert();
+	}
+	return true;
+}
 
 /* end of file */

@@ -103,6 +103,9 @@ public:
 	/// Receive a datagram
 	bool receiveDatagram(NLMISC::CBitMemStream &msgin);
 
+	/// Check if quick is supported
+	bool isSupported() const;
+
 private:
 	friend CQuicConnectionImpl;
 

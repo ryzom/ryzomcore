@@ -241,6 +241,11 @@ private:
 	CAtomicFlag m_Flag;
 
 public:
+	NL_FORCE_INLINE CFastMutex()
+	{
+		init();
+	}
+
 	/// Same as constructor, useful for init in a shared memory block (though, you should really use emplacement new!)
 	NL_FORCE_INLINE void init()
 	{
@@ -376,6 +381,11 @@ private:
 	CAtomicFlag m_Flag;
 
 public:
+	NL_FORCE_INLINE CFastMutexMP()
+	{
+		init();
+	}
+
 	/// Same as constructor, useful for init in a shared memory block (though, you should really use emplacement new!)
 	NL_FORCE_INLINE void init()
 	{

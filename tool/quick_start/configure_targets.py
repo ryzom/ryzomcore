@@ -90,7 +90,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 	else:
 		opts += [ "-DWITH_FFMPEG=OFF" ]
 	
-	if len(FilterExternalDirs([ "msquic" ], filteredPrefix)) > 0:
+	if "HasMsQuic" in tc and tc["HasMsQuic"] and (len(filteredPrefix) == 0 or len(FilterExternalDirs([ "msquic" ], filteredPrefix)) > 0):
 		opts += [ "-DWITH_MSQUIC=ON" ]
 	else:
 		opts += [ "-DWITH_MSQUIC=OFF" ]
