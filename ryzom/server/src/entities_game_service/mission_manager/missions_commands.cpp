@@ -3660,7 +3660,7 @@ NLMISC_COMMAND(getPlayerPetsInfos, "get player pets infos", "<uid>")
 	GET_ACTIVE_CHARACTER
 
 	std::vector< std::string > lines;
-	NLMISC::splitString(c->getPetsInfos(), ",", lines);
+	NLMISC::splitString(c->getPetsInfos(), "\n", lines);
 	for (uint8 i = 0; i < lines.size(); i++)
 		log.displayNL("%s", lines[i].c_str());
 	return true;
