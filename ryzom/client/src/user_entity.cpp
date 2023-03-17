@@ -197,6 +197,7 @@ CUserEntity::CUserEntity()
 
 	_R2CharMode= R2::TCharMode::Player;
 
+	_CameraMoves = NLMISC::CVector(0, 0, 0);
 }// CUserEntity //
 
 
