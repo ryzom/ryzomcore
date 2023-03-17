@@ -1910,7 +1910,15 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 		std::string text = itemInfo.CustomText.toUtf8();
 		if (text.size() > 3 && text[0]=='@' && ((text[1]=='W' && text[2]=='E' && text[3]=='B') || (text[1]=='L' && text[2]=='U' && text[3]=='A')))
 		{
-			strFindReplace(itemText, "%custom_text", string() );
+			if (text.size() > 5 && text[4]=='-' && text[5]=='-')
+			{
+				std::vector<string> luaCode;
+				string code = text.substr(6, text.size()-6);
+				splitString(code, "\n", luaCode);
+				strFindReplace(itemText, "%custom_text", CStringManagerClient::getLocalizedName(luaCode[0]) );
+			}
+			else
+				strFindReplace(itemText, "%custom_text", string() );
 		}
 		else
 		{

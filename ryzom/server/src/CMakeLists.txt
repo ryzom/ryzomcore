@@ -1,8 +1,17 @@
 # Supporting modules and libraries.
 # Need servershare for build packed collision tool
 # Need aishare for build wmap tool
-ADD_SUBDIRECTORY(server_share)
-ADD_SUBDIRECTORY(ai_share)
+IF(WITH_RYZOM_TOOLS OR WITH_RYZOM_SERVER)
+  IF(WITH_MONGODB)
+    FIND_PACKAGE(Mongo REQUIRED)
+    SET(MONGO_DEFINITIONS -DHAVE_MONGO)
+  ENDIF()
+
+  ADD_SUBDIRECTORY(server_share)
+  ADD_SUBDIRECTORY(ai_share)
+ENDIF()
+
+IF(WITH_RYZOM_SERVER)
 
 # Supporting modules and libraries.
 ADD_SUBDIRECTORY(admin_modules)
@@ -31,7 +40,9 @@ ADD_SUBDIRECTORY(persistant_data_service)
 ADD_SUBDIRECTORY(session_browser_server)
 ADD_SUBDIRECTORY(shard_unifier_service)
 ADD_SUBDIRECTORY(tick_service)
-#ADD_SUBDIRECTORY(patchman_service)
+IF(WITH_PATCHMAN_SERVICE)
+  ADD_SUBDIRECTORY(patchman_service)
+ENDIF()
 
 
 # Deprecated, no longer used.
@@ -44,3 +55,5 @@ ADD_SUBDIRECTORY(general_utilities_service)
 #sabrina
 #simulation_service
 #testing_tool_service
+
+ENDIF()
