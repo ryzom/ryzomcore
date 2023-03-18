@@ -83,16 +83,22 @@ end
 function ArkLessonUpdateHtml(win, scriptid, title, progression, started, finished, requirement, reward)
 	win = getUI(win)
 	win = win:find("div_lesson_"..scriptid..":html")
+	local top = ""
 	if requirement ~= [[]] then
-		requirement = game.ArkLessonNeedRequirement
+		requirement = [[<tr><td height="20px" style="font-size: 11px; color: pink">]]..ArkLessons.NeedRequirement..[[</td>]]
 	else
 		requirement = ""
+		top = [[<tr><td height="5px"></td></tr>]]
 	end
 
 	local progressionHtml = "<td><table><tr><td><table style=\'background-color: black;\'><tr><td></td></tr></table></td></tr></table></td>"
 	local height = "50"
 	if progression then
-		height = "12"
+		if requirement ~= "" then
+			height = "12"
+		else
+			height = "25"
+		end
 		pogressionHtml = "<tr><td height=\'12px\' align=\'left\' >"..progression.."</td></tr>"
 	end
 
@@ -112,13 +118,11 @@ function ArkLessonUpdateHtml(win, scriptid, title, progression, started, finishe
 			<td width="2px"></td>
 			<td width="407px" align="left" valign="top">
 				<table width="407px" cellspacing="0" cellpadding="0">
+					]]..top..[[
 					<tr>
-						<td height="]]..height..[[px" valign="middle"><strong style="color: #]]..color..[[">]]..title..[[</strong></td>
+						<td height="]]..height..[[px" valign="top"><strong style="color: #]]..color..[[">]]..title..[[</strong></td>
 					</tr>
-					<tr>
-						<td height="12px" style="font-size: 11px; color: pink">]]..requirement..[[</td>
-					</tr>
-					]]..pogressionHtml..[[
+					]]..requirement..pogressionHtml..[[
 				</table>
 			</td>
 			<td width="6px"></td>
@@ -128,7 +132,6 @@ function ArkLessonUpdateHtml(win, scriptid, title, progression, started, finishe
 	</td>
 	]])
 end
-
 
 function ArkLessons:Show(id, w, h, content, scriptid)
 	local ui = getUI("ui:interface:"..id)
