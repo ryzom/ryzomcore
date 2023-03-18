@@ -1,3 +1,7 @@
+if game == nil then
+	game= {}
+end
+
 if ArkLessons == nil then
 	ArkLessons = {}
 
@@ -24,7 +28,107 @@ function ArkLessons:Callback(event, id, args)
 	end
 end
 
+game.ArkLessonUsedWindowUrl = "https://app.ryzom.com/app_arcc/index.php?action=mLesson_Run&script="
+
 webig.urls_to_check = {}
+
+
+function ArkOpenLesson(id, require_rpitem)
+	debug(require_rpitem)
+	if id ~= 0 and id ~= nil then
+		local win = getUI("ui:interface:web_transaction_lessons")
+		if win then
+			win:find("html"):browse(game.ArkLessonUsedWindowUrl..id)
+		else
+			getUI("ui:interface:web_transactions"):find("html"):browse(game.ArkLessonUsedWindowUrl..id)
+		end
+	end
+end
+
+function ArkRevealLesson(id, i, total)
+	if i == game.ArkLessonRevealStep[id] then
+		game.ArkLessonRevealStep[id] = game.ArkLessonRevealStep[id] + 1
+		game:ArkLessonCallback("step", id, i)
+		game:ArkRevealLessonInfos(id, i, total)
+		if i == total then
+			game:ArkAcceptLesson()
+		end
+	end
+end
+
+function game:ArkRevealLessonInfos(id, i, total)
+	local ui = getUI("ui:interface:ArkLessonWin"..tostring(id))
+	if ui ~= nil  then
+		local html = ui:find("html")
+		html:showDiv("enabled_"..tostring(i), false)
+		html:showDiv("disabled_"..tostring(i), false)
+		html:showDiv("current_"..tostring(i), true)
+		if i > 1 then
+			if i ~= total+1 then
+				html:showDiv("current_"..tostring(i-1), false)
+				html:showDiv("enabled_"..tostring(i-1), true)
+			end
+		end
+		if game.ArkLessonRevealCaps and game.ArkLessonRevealCaps[id] then
+			if total > i then
+				setCap(game.ArkLessonRevealCaps[id], "p", math.floor((100*i)/total), tostring(i).." / "..tostring(total))
+			else
+				setCap(game.ArkLessonRevealCaps[id], "p", 100, "")
+			end
+		end
+	end
+end
+
+
+function ArkLessonUpdateHtml(win, scriptid, title, progression, started, finished, requirement, reward)
+	win = getUI(win)
+	win = win:find("div_lesson_"..scriptid..":html")
+	if requirement ~= [[]] then
+		requirement = game.ArkLessonNeedRequirement
+	else
+		requirement = ""
+	end
+
+	local progressionHtml = "<td><table><tr><td><table style=\'background-color: black;\'><tr><td></td></tr></table></td></tr></table></td>"
+	local height = "50"
+	if progression then
+		height = "12"
+		pogressionHtml = "<tr><td height=\'12px\' align=\'left\' >"..progression.."</td></tr>"
+	end
+
+	local color = "AAA"
+	if started then
+		if finished then
+			color = "FFFFFF"
+		else
+			color = "FFDD4AFF"
+		end
+	end
+
+	win:renderHtml([[
+		<td height="60px">
+		<table cellspacing="0" cellpadding="0">
+		<tr>
+			<td width="2px"></td>
+			<td width="407px" align="left" valign="top">
+				<table width="407px" cellspacing="0" cellpadding="0">
+					<tr>
+						<td height="]]..height..[[px" valign="middle"><strong style="color: #]]..color..[[">]]..title..[[</strong></td>
+					</tr>
+					<tr>
+						<td height="12px" style="font-size: 11px; color: pink">]]..requirement..[[</td>
+					</tr>
+					]]..pogressionHtml..[[
+				</table>
+			</td>
+			<td width="6px"></td>
+			<td align="left" valign="top" height="80px" width="46px">]]..reward..[[</td>
+		</tr>
+		</table>
+	</td>
+	]])
+end
+
 
 function ArkLessons:Show(id, w, h, content, scriptid)
 	local ui = getUI("ui:interface:"..id)
@@ -117,10 +221,6 @@ function ArkLessons:ArkRevealLessonInfos(scriptid, i, total)
 			end
 		end
 	end
-end
-
-function ArkOpenLesson(id)
-	WebQueue:push("https://app.ryzom.com/app_arcc/index.php?action=mLesson_Run&script="..tostring(id))
 end
 
 function openArkLessonScript(i, script_id, url)
