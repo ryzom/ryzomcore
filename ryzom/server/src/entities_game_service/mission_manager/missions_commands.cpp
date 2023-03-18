@@ -1053,9 +1053,13 @@ string getJewelEnchantAttr(CSheetId sbrick)
 }
 
 
-//enchantEquipedItem 530162 WristR jmod_focus_tryker_1.sbrick
-//enchantEquipedItem 530162 Neck tag_fyros_3.sbrick
-//enchantEquipedItem 530162 Neck jrez_fulllife_tryker.sbrick,jboost2.sbrick
+//enchantEquipedItem 2 FingerL jloot_generic.sbrick,jboost_100x.sbrick
+//enchantEquipedItem 2 FingerL jloot_forage.sbrick,jboost_100x.sbrick
+//enchantEquipedItem 2 FingerR jloot_hunt.sbrick,jboost_100x.sbrick
+//enchantEquipedItem 2 Neck jrez_lastpoint.sbrick,jboost_100x.sbrick
+//enchantEquipedItem 2 WristR jmod_focus_tryker_1.sbrick
+//enchantEquipedItem 2 Neck tag_fyros_3.sbrick
+//enchantEquipedItem 2 Neck jrez_fulllife_tryker.sbrick,jboost2x.sbrick
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(checkInventoryItems, "Check items from a characters inventory", "<uid> <inventory> <sheetnames> <quality> <quantity>")
 {
@@ -3656,7 +3660,7 @@ NLMISC_COMMAND(getPlayerPetsInfos, "get player pets infos", "<uid>")
 	GET_ACTIVE_CHARACTER
 
 	std::vector< std::string > lines;
-	NLMISC::splitString(c->getPetsInfos(), ",", lines);
+	NLMISC::splitString(c->getPetsInfos(), "\n", lines);
 	for (uint8 i = 0; i < lines.size(); i++)
 		log.displayNL("%s", lines[i].c_str());
 	return true;
