@@ -25,6 +25,7 @@ jobs:
         sudo apt install libsquish-dev -y
         sudo apt install liblzma-dev -y
         sudo apt install libgsf-1-dev -y
+        sudo apt install libxrandr-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
         sudo apt install libmsquic
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
@@ -81,6 +82,7 @@ jobs:
         sudo apt install libsquish-dev -y
         sudo apt install liblzma-dev -y
         sudo apt install libgsf-1-dev -y
+        sudo apt install libxrandr-dev -y
         sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
         sudo apt install libmsquic
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
