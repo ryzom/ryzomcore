@@ -4448,7 +4448,11 @@ bool CGameItem::getStats(const std::string &stats, std::string &final )
 		else if (part == "Fo")
 			final += NLMISC::toString("%s|", _Form->Name.c_str());
 		else if (part == "Ct")
-			final += NLMISC::toString("%s|", getCustomText().toString().c_str());
+		{
+			string customText = getCustomText().toUtf8();
+			while (strFindReplace(customText, "\n", "\\n"));
+			final += NLMISC::toString("%s|", customText.c_str());
+		}
 		else if (part == "Bu")
 			final += NLMISC::toString("%u|", _Form->Bulk);
 		else if (part == "We")
