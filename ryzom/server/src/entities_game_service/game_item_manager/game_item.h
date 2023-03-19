@@ -613,6 +613,7 @@ public :
 	 */
 	const NLMISC::CSheetId& getSheetId() const { return _SheetId; }
 	NLMISC::CSheetId& getSheetId() { return _SheetId; }
+	void setSheetId(const NLMISC::CSheetId& sheet) { _SheetId = sheet; }
 
 	/// accessor to the destroyable property
 	bool isDestroyable() const { return _Destroyable; }
