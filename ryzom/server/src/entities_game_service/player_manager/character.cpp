@@ -1113,13 +1113,17 @@ uint32 CCharacter::tickUpdate()
 	// Check Death of player and manage pact if death occurs
 	if (currentHp() <= 0 && !_IsDead && !teleportInProgress())
 	{
-
 		CSheetId usedSheet;
 		CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("rez", SLOT_EQUIPMENT::NECKLACE, usedSheet);
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
 		params[0].SheetId = usedSheet;
-		if (sbrickParam.ParsedOk && sbrickParam.Value == "lastPoint" && (rand() % 200) < sbrickParam.Modifier)
+		uint32 randvalue = rand() % 400;
+
+		if (sbrickParam.ParsedOk && sbrickParam.Value == "lastPoint" && randvalue < sbrickParam.Modifier)
+		{
 			_PhysScores._PhysicalScores[SCORES::hit_points].Current = 1;
+			sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
+		}
 		else
 		{
 			kill();
@@ -8157,8 +8161,6 @@ void CCharacter::addGuildPoints(uint32 points)
 		guild->addXP(1);
 		_GuildPoints = 0;
 	}
-
-	nlinfo("_TodayGuildPoints, wantedPoints, _GuildPoints = %u, %u, %u", _TodayGuildPoints, wantedPoints, _GuildPoints);
 }
 
 //---------------------------------------------------
@@ -14448,21 +14450,15 @@ void CCharacter::botChatMissionAdvance(uint8 index)
 	}
 
 
-	nlinfo("_CurrentInterlocutor = %d", _CurrentInterlocutor.toString().c_str());
-	nlinfo("_Target = %d", getTarget().toString().c_str());
-
 	uint idx = 0;
-	nlinfo("index = %d", index);
 
 	for (map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it)
 	{
 		std::vector<CMission::CBotChat> botchats;
 		(*it).second->getBotChatOptions(_EntityRowId, TheDataset.getDataSetRow(_CurrentInterlocutor), botchats);
 
-		nlinfo("botchats.size = %d", botchats.size());
 		for (uint j = 0; j < botchats.size();)
 		{
-			nlinfo("idx = %d", idx);
 			if (idx == index)
 			{
 				if (!botchats[j].Gift)
@@ -16785,7 +16781,7 @@ void CCharacter::getMatchingMissionLootRequirements(uint16 itemLevel, const std:
 	// (note: If he can get, it doesn't mean it will get)
 	if ((!foundMatchingOK) && foundMatchingExceptLevel)
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage(getEntityRowId(), "AUTO_LOOT_LEVEL_TOO_LOW");
+		PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "AUTO_LOOT_LEVEL_TOO_LOW");
 	}
 }
 
@@ -16836,19 +16832,30 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 					params[0].Int = (sint32)_ForageProgress->amount();
 					params[1].SheetId = _ForageProgress->material();
 					params[2].Int = (sint32)_ForageProgress->quality();
-					PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "HARVEST_SUCCESS", params);
+					sendDynamicSystemMessage(_EntityRowId, "HARVEST_SUCCESS", params);
 				}
 
 				if ((CTickEventHandler::getGameCycle() - _LastTickForageLoot) > ArkLootTimeBeforeNewDraw)
 				{
 					_LastTickForageLoot = CTickEventHandler::getGameCycle();
 					CSheetId usedSheet;
-					CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
-					if (sbrickParam.ParsedOk && sbrickParam.Value == "loot" && (rand() % 1000) < sbrickParam.Modifier)
+					CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
+					CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
+					sint32 modifierL = -1;
+					sint32 modifierR = -1;
+
+					if (sbrickParamL.ParsedOk && sbrickParamL.Value == "loot")
+						modifierL = sbrickParamL.Modifier;
+
+					if (sbrickParamR.ParsedOk && sbrickParamR.Value == "loot")
+						modifierR = sbrickParamR.Modifier;
+
+					sint32 modifier = max(modifierL, modifierR);
+					if (modifier >= 0 && rand() % 1000 < modifier)
 					{
 						SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
 						params[0].SheetId = usedSheet;
-						sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
+						sendDynamicSystemMessage(_EntityRowId, "ALLEGORY_EFFECT_TRIGGERED", params);
 						sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Forage&quality=%d%quantity=%d&command=reset_all", quality, _ForageProgress->amount()));
 					}
 				}
@@ -16925,22 +16932,24 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 			}
 		}
 
-		bool useGenericMats = false;
+
 		uint8 bonus = 1;
 
 		CSheetId usedSheet;
-		CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
-		if (sbrickParam.ParsedOk && sbrickParam.Value == "generic")
-		{
-			useGenericMats = true;
-			if ((rand() % 1000) < sbrickParam.Modifier)
-			{
-				SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
-				params[0].SheetId = usedSheet;
-				sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
-				bonus = 2;
-			}
-		}
+		CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
+		CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
+		sint32 modifierL = -1;
+		sint32 modifierR = -1;
+
+		if (sbrickParamL.ParsedOk && sbrickParamL.Value == "generic")
+			modifierL = sbrickParamL.Modifier;
+
+		if (sbrickParamR.ParsedOk && sbrickParamR.Value == "generic")
+			modifierR = sbrickParamR.Modifier;
+
+		sint32 modifier = max(modifierL, modifierR);
+
+		bool useGenericMats = modifier >= 0;
 
 
 		// first slots are filled with loot items, quarter items are not in temp inv but only info in DB
@@ -16962,10 +16971,20 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 
 		if (quality != 0)
 		{
-			// Create and stack the item in the bag (use genericMp beca
+			// Create and stack the item in the bag
 			CGameItemPtr item;
 			if (useGenericMats)
+			{
+				 // Not Named or Boss mats
+				if (genericMp->ItemId != mp->ItemId && rand() % 500 < modifier)
+				{
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
+					params[0].SheetId = usedSheet;
+					sendDynamicSystemMessage(_EntityRowId, "ALLEGORY_EFFECT_TRIGGERED", params);
+					bonus = 2;
+				}
 				item = createItem(quality, bonus*genericMp->Quantity, genericMp->ItemId);
+			}
 			else
 				item = createItem(quality, mp->Quantity, mp->ItemId);
 
@@ -17019,21 +17038,6 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 					}
 				}
 			}
-
-			if ((CTickEventHandler::getGameCycle() - _LastTickCreatureLoot) > ArkLootTimeBeforeNewDraw)
-			{
-				_LastTickCreatureLoot = CTickEventHandler::getGameCycle();
-				CSheetId usedSheet;
-				CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
-				if ((sbrickParam.ParsedOk && sbrickParam.Value == "loot" && (rand() % 1000) < sbrickParam.Modifier))
-				{
-					SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
-					params[0].SheetId = usedSheet;
-					sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
-					sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Loot&quality=%d&quantity=%d&command=reset_all", (uint32)quality, (uint32)mp->Quantity));
-				}
-			}
-
 		}
 
 		// remove the quantity of mp harvested from the ressource
@@ -17054,6 +17058,33 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 		{
 			if (lastMaterial)
 				*lastMaterial = true;
+			if ((CTickEventHandler::getGameCycle() - _LastTickCreatureLoot) > ArkLootTimeBeforeNewDraw)
+			{
+				_LastTickCreatureLoot = CTickEventHandler::getGameCycle();
+				CSheetId usedSheet;
+
+				CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
+				CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
+				sint32 modifierL = -1;
+				sint32 modifierR = -1;
+
+				if (sbrickParamL.ParsedOk && sbrickParamL.Value == "loot")
+					modifierL = sbrickParamL.Modifier;
+
+				if (sbrickParamR.ParsedOk && sbrickParamR.Value == "loot")
+					modifierR = sbrickParamR.Modifier;
+
+				sint32 modifier = max(modifierL, modifierR);
+
+				if (modifier >= 0 && (rand() % 1000) < modifier)
+				{
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
+					params[0].SheetId = usedSheet;
+					sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
+					sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Loot&quality=%d&quantity=%d&command=reset_all", (uint32)quality, (uint32)mp->Quantity));
+				}
+			}
+
 		}
 	}
 
@@ -19224,8 +19255,24 @@ bool CCharacter::changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntit
 		// for god mode
 		if (!_GodMode && !_Invulnerable)
 		{
-			kill(responsibleEntity);
-			return true;
+			CSheetId usedSheet;
+			CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("rez", SLOT_EQUIPMENT::NECKLACE, usedSheet);
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
+			params[0].SheetId = usedSheet;
+			uint32 randvalue = rand() % 400;
+
+			if (sbrickParam.ParsedOk && sbrickParam.Value == "lastPoint" && randvalue < sbrickParam.Modifier)
+			{
+				_PhysScores._PhysicalScores[SCORES::hit_points].Current = 1;
+				setHpBar(1);
+				sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
+				return false;
+			}
+			else
+			{
+				kill(responsibleEntity);
+				return true;
+			}
 		}
 		else
 		{
