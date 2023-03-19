@@ -1,3 +1,5 @@
+trigger: none
+
 jobs:
   - job: ubuntu18
     timeoutInMinutes: 120
