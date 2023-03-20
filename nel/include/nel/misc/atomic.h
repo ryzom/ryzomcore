@@ -242,10 +242,37 @@ public:
 private:
 	volatile long m_Flag;
 
+#ifndef NL_NO_ASM
+	NL_FORCE_INLINE long testAndSetAsm(volatile long *flag)
+	{
+		long result;
+		__asm
+		{
+#ifdef NL_DEBUG
+			push ecx
+			push eax
+#endif
+			mov ecx, flag
+			mov eax, 1
+			lock xchg [ecx], eax
+			mov [result], eax
+#ifdef NL_DEBUG
+			pop eax
+			pop ecx
+#endif
+		}
+		return result;
+	}
+#endif
+
 public:
 	NL_FORCE_INLINE bool testAndSet()
 	{
+#ifdef NL_NO_ASM
 		return _InterlockedExchange(&m_Flag, 1) != 0; // full barrier
+#else
+		return testAndSetAsm(&m_Flag) != 0; // full barrier
+#endif
 	}
 
 	NL_FORCE_INLINE void clear()
@@ -350,6 +377,89 @@ private:
 	volatile long m_Value;
 
 public:
+#ifndef NL_NO_ASM
+	NL_FORCE_INLINE static long loadAsm(volatile long *pv)
+	{
+		long result;
+		__asm
+		{
+#ifdef NL_DEBUG
+			push ecx
+			push eax
+#endif
+			mov ecx, pv
+			xor eax, eax
+			lock xadd [ecx], eax
+			mov [result], eax
+#ifdef NL_DEBUG
+			pop eax
+			pop ecx
+#endif
+		}
+		return result;
+	}
+
+	NL_FORCE_INLINE static void storeAsm(volatile long *pv, long value)
+	{
+		__asm
+		{
+#ifdef NL_DEBUG
+			push ecx
+			push eax
+#endif
+			mov ecx, pv
+			mov eax, value
+			lock xchg [ecx], eax
+#ifdef NL_DEBUG
+			pop eax
+			pop ecx
+#endif
+		}
+	}
+
+	NL_FORCE_INLINE static long fetchAddAsm(volatile long *pv, long value)
+	{
+		long result;
+		__asm
+		{
+#ifdef NL_DEBUG
+			push ecx
+			push eax
+#endif
+			mov ecx, pv
+			mov eax, value
+			lock xadd [ecx], eax
+			mov [result], eax
+#ifdef NL_DEBUG
+			pop eax
+			pop ecx
+#endif
+		}
+		return result;
+	}
+
+	NL_FORCE_INLINE static long exchangeAsm(volatile long *pv, long value)
+	{
+		long result;
+		__asm
+		{
+#ifdef NL_DEBUG
+			push ecx
+			push eax
+#endif
+			mov ecx, pv
+			mov eax, value
+			lock xchg [ecx], eax
+			mov [result], eax
+#ifdef NL_DEBUG
+			pop eax
+			pop ecx
+#endif
+		}
+		return result;
+	}
+#endif
+
 	NL_FORCE_INLINE int load(TMemoryOrder order = TMemoryOrderAcquire) const
 	{
 #ifdef NL_VOLATILE_RELAXED
@@ -360,7 +470,11 @@ public:
 		if (order <= TMemoryOrderAcquire)
 			return m_Value;
 #endif
+#ifndef NL_NO_ASM
+		return loadAsm(const_cast<volatile long *>(&m_Value)); // full barrier
+#else
 		return _InterlockedExchangeAdd(const_cast<volatile long *>(&m_Value), 0); // full barrier
+#endif
 	}
 
 	NL_FORCE_INLINE int store(int value, TMemoryOrder order = TMemoryOrderRelease)
@@ -375,18 +489,30 @@ public:
 			m_Value = value;
 		else
 #endif
-			_InterlockedExchange(&m_Value, value); // full barrier
+#ifndef NL_NO_ASM
+			storeAsm(&m_Value, value); // full barrier
+#else
+		_InterlockedExchange(&m_Value, value); // full barrier
+#endif
 		return value;
 	}
 
 	NL_FORCE_INLINE int fetchAdd(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
+#ifndef NL_NO_ASM
+		return fetchAddAsm(&m_Value, value); // full barrier
+#else
 		return _InterlockedExchangeAdd(&m_Value, value); // full barrier
+#endif
 	}
 
 	NL_FORCE_INLINE int exchange(int value, TMemoryOrder order = TMemoryOrderAcqRel)
 	{
+#ifndef NL_NO_ASM
+		return exchangeAsm(&m_Value, value); // full barrier
+#else
 		return _InterlockedExchange(&m_Value, value); // full barrier
+#endif
 	}
 #elif defined(NL_ATOMIC_GCC_CXX11)
 private:
