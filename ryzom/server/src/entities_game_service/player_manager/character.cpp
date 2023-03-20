@@ -16839,16 +16839,24 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 				{
 					_LastTickForageLoot = CTickEventHandler::getGameCycle();
 					CSheetId usedSheet;
-					CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
-					CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
+					CSheetId usedSheetL;
+					CSheetId usedSheetR;
+					CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheetL);
+					CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheetR);
 					sint32 modifierL = -1;
 					sint32 modifierR = -1;
 
 					if (sbrickParamL.ParsedOk && sbrickParamL.Value == "loot")
+					{
 						modifierL = sbrickParamL.Modifier;
+						usedSheet = usedSheetL;
+					}
 
 					if (sbrickParamR.ParsedOk && sbrickParamR.Value == "loot")
+					{
 						modifierR = sbrickParamR.Modifier;
+						usedSheet = usedSheetR;
+					}
 
 					sint32 modifier = max(modifierL, modifierR);
 					if (modifier >= 0 && rand() % 1000 < modifier)
@@ -16936,16 +16944,26 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 		uint8 bonus = 1;
 
 		CSheetId usedSheet;
-		CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
-		CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
+		CSheetId usedSheetL;
+		CSheetId usedSheetR;
+		CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheetL);
+		CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheetR);
 		sint32 modifierL = -1;
 		sint32 modifierR = -1;
 
+
 		if (sbrickParamL.ParsedOk && sbrickParamL.Value == "generic")
+		{
 			modifierL = sbrickParamL.Modifier;
+			usedSheet = usedSheetL;
+		}
 
 		if (sbrickParamR.ParsedOk && sbrickParamR.Value == "generic")
+		{
 			modifierR = sbrickParamR.Modifier;
+			usedSheet = usedSheetR;
+		}
+
 
 		sint32 modifier = max(modifierL, modifierR);
 
