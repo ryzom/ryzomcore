@@ -40,6 +40,14 @@ inline float decibelsToAmplitudeRatio(float d)
 	return powf(10.0f, d / 20.0f);
 }
 
+#define NLSOUND_ENVIRONMENT_DECAY_TIME_FLAG (1)
+#define NLSOUND_ENVIRONMENT_REFLECTIONS_FLAG (2)
+#define NLSOUND_ENVIRONMENT_REFLECTIONS_DELAY_FLAG (4)
+#define NLSOUND_ENVIRONMENT_REVERB_FLAG (8)
+#define NLSOUND_ENVIRONMENT_REVERB_DELAY_FLAG (16)
+#define NLSOUND_ENVIRONMENT_ECHO_TIME_FLAG (64)
+#define NLSOUND_ENVIRONMENT_MODULATION_TIME_FLAG (128)
+
 /**
  * \brief IReverbEffect
  * \date 2008-09-15 22:27GMT
@@ -117,14 +125,18 @@ public:
 	struct CEnvironment
 	{
 		/// Constructor with all parameters, can be used with presets, roomsize.
-		CEnvironment(float roomFilter, float roomFilterHF, 
+		CEnvironment(sint id, float roomSize,
+			float roomFilter, float roomFilterHF, 
 			float decayTime, float decayHFRatio, float reflections, 
 			float reflectionsDelay, float lateReverb, float lateReverbDelay, 
-			float diffusion, float density) : 
+			float diffusion, float density, 
+			uint8 flags) : 
+			Id(id), RoomSize(roomSize),
 			RoomFilter(roomFilter), RoomFilterHF(roomFilterHF), 
 			DecayTime(decayTime), DecayHFRatio(decayHFRatio), Reflections(reflections), 
 			ReflectionsDelay(reflectionsDelay), LateReverb(lateReverb), 
-			LateReverbDelay(lateReverbDelay), Diffusion(diffusion), Density(density) { }
+			LateReverbDelay(lateReverbDelay), Diffusion(diffusion), Density(density),
+			Flags(flags) { }
 		/// Default constructor.
 		CEnvironment() : RoomFilter(-100.00f), RoomFilterHF(0.00f), 
 			DecayTime(1.0f), DecayHFRatio(1.0f), Reflections(-100.00f), 
@@ -142,6 +154,12 @@ public:
 			LateReverbDelay((env0.LateReverbDelay * (1.0f - balance)) + (env1.LateReverbDelay * balance)), 
 			Diffusion((env0.Diffusion * (1.0f - balance)) + (env1.Diffusion * balance)), 
 			Density((env0.Density * (1.0f - balance)) + (env1.Density * balance)) { }
+
+		/// Legacy environment preset identifier
+		sint Id;
+		/// Reference environment or room size, used for resizing an environment
+		float RoomSize;
+
 		/// [-100.00, 0] in dB, default: -100.00 dB
 		float RoomFilter;
 		/// [-100.00, 0] in dB, default: 0 dB
@@ -163,6 +181,9 @@ public:
 		/// [0.0, 100.0] (percentage), default: 100.0 %
 		float Density;
 		/* This struct can *float* on water! */
+
+		/// Flags used for resizing an environment
+		uint8 Flags;
 	};
 	
 	IReverbEffect();

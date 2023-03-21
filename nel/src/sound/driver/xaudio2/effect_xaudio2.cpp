@@ -151,6 +151,12 @@ void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float
 	_ReverbParams.ReflectionsGain = environment.Reflections;
 	_ReverbParams.RoomSize = roomSize;
 
+	// FIXME: Room size affects other parameters, it might require recalculation of the other parameters
+	// See EFX-Util.h for reference sizes of presets, and the flags which specify which parameters are resized
+	// See https://wiki.thedarkmod.com/index.php?title=Setting_Reverb_Data_of_Rooms_(EAX)
+	// - In addition to specifying the raw parameters, also include the legacy environment ID, the legacy reference room size, and the flags
+	// TODO: Add a function to CEnvironment to rescale the environment to a new size
+
 	// conversions, see ReverbConvertI3DL2ToNative in case of errors
 	if (environment.DecayHFRatio >= 1.0f)
 	{
@@ -170,15 +176,18 @@ void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float
 	}
 
 	sint32 reflections_delay = (sint32)(environment.ReflectionsDelay * 1000.0f);
-	clamp(reflections_delay, XAUDIO2FX_REVERB_MIN_REFLECTIONS_DELAY, XAUDIO2FX_REVERB_MAX_REFLECTIONS_DELAY);
+	clamp(reflections_delay, XAUDIO2FX_REVERB_MIN_REFLECTIONS_DELAY + 1, XAUDIO2FX_REVERB_MAX_REFLECTIONS_DELAY - 1);
 	_ReverbParams.ReflectionsDelay = (UINT32)reflections_delay;
 	
 	sint32 reverb_delay = (sint32)(environment.LateReverbDelay * 1000.0f);
-	clamp(reverb_delay, XAUDIO2FX_REVERB_MIN_REVERB_DELAY, XAUDIO2FX_REVERB_MAX_REVERB_DELAY);
+	clamp(reverb_delay, XAUDIO2FX_REVERB_MIN_REVERB_DELAY + 1, XAUDIO2FX_REVERB_MAX_REVERB_DELAY - 1);
 	_ReverbParams.ReverbDelay = (BYTE)reverb_delay;
 
 	_ReverbParams.EarlyDiffusion = (BYTE)(environment.Diffusion * 0.15f);
 	_ReverbParams.LateDiffusion = _ReverbParams.EarlyDiffusion;
+
+	// FIXME: Scale parameters to voice sampling rate, see
+	// https://learn.microsoft.com/en-us/windows/win32/api/xaudio2fx/ns-xaudio2fx-xaudio2fx_reverb_parameters
 
 	_DryVoice->SetEffectParameters(0, &_ReverbParams, sizeof(_ReverbParams), 0);
 }
