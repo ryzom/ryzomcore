@@ -91,6 +91,8 @@ void CEffectXAudio2::release()
 
 CReverbEffectXAudio2::CReverbEffectXAudio2(CSoundDriverXAudio2 *soundDriver) : CEffectXAudio2(soundDriver, 1)
 {
+	// FIXME: Reverb must be within [20000, 48000] Hz and has limited input and output channel configurations...
+
 	if (_DryVoice)
 	{
 		HRESULT hr;
@@ -106,7 +108,7 @@ CReverbEffectXAudio2::CReverbEffectXAudio2(CSoundDriverXAudio2 *soundDriver) : C
 		_DryVoice->GetVoiceDetails(&voice_details);
 		XAUDIO2_EFFECT_DESCRIPTOR effect_descriptor;
 		effect_descriptor.InitialState = TRUE;
-		effect_descriptor.OutputChannels = voice_details.InputChannels;
+		effect_descriptor.OutputChannels = voice_details.InputChannels; // FIXME
 		effect_descriptor.pEffect = _Effect;
 		XAUDIO2_EFFECT_CHAIN effect_chain;
 		effect_chain.EffectCount = 1;
@@ -132,62 +134,68 @@ void CReverbEffectXAudio2::release()
 /// Set the environment (you have full control now, have fun)
 void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float roomSize)
 {
-	// unused params
+	CEnvironment env = environment;
+	env.resize(roomSize);
+
+	// Scale parameters to voice sampling rate, see
+	// https://learn.microsoft.com/en-us/windows/win32/api/xaudio2fx/ns-xaudio2fx-xaudio2fx_reverb_parameters
+	float scaleRate = 1.0f;
+	{
+		XAUDIO2_VOICE_DETAILS voice_details;
+		_DryVoice->GetVoiceDetails(&voice_details);
+		scaleRate = (float)voice_details.InputSampleRate / 48000.0f;
+	}
+	float invScaleRate = 1.0f / scaleRate;
+
+	// Unused params
 	_ReverbParams.LowEQCutoff = 4;
 	_ReverbParams.HighEQCutoff = 6;
-	_ReverbParams.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
+	_ReverbParams.RearDelay = (BYTE)((float)XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY * invScaleRate);
 	_ReverbParams.PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
 	_ReverbParams.PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
 	_ReverbParams.PositionMatrixLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
 	_ReverbParams.PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-	_ReverbParams.RoomFilterFreq = 5000.0f;
+	_ReverbParams.RoomFilterFreq = 5000.0f * scaleRate;
 	_ReverbParams.WetDryMix = 100.0f;
 
-	// directly mapped
-	_ReverbParams.Density = environment.Density;
-	_ReverbParams.RoomFilterMain = environment.RoomFilter;
-	_ReverbParams.RoomFilterHF = environment.RoomFilterHF;
-	_ReverbParams.ReverbGain = environment.LateReverb;
-	_ReverbParams.ReflectionsGain = environment.Reflections;
-	_ReverbParams.RoomSize = roomSize;
+	// Directly mapped
+	_ReverbParams.Density = env.Density;
+	_ReverbParams.RoomFilterMain = env.RoomFilter;
+	_ReverbParams.RoomFilterHF = env.RoomFilterHF;
+	_ReverbParams.ReverbGain = env.LateReverb;
+	_ReverbParams.ReflectionsGain = env.Reflections;
 
-	// FIXME: Room size affects other parameters, it might require recalculation of the other parameters
-	// See EFX-Util.h for reference sizes of presets, and the flags which specify which parameters are resized
-	// See https://wiki.thedarkmod.com/index.php?title=Setting_Reverb_Data_of_Rooms_(EAX)
-	// - In addition to specifying the raw parameters, also include the legacy environment ID, the legacy reference room size, and the flags
-	// TODO: Add a function to CEnvironment to rescale the environment to a new size
+	// Room size from meters to feet
+	_ReverbParams.RoomSize = env.RoomSize * 3.2808399f * invScaleRate;
 
-	// conversions, see ReverbConvertI3DL2ToNative in case of errors
-	if (environment.DecayHFRatio >= 1.0f)
+	// Conversions, see ReverbConvertI3DL2ToNative in case of errors
+	if (env.DecayHFRatio >= 1.0f)
 	{
 		_ReverbParams.HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
-		sint32 index = (sint32)(log10(environment.DecayHFRatio) * -4.0f) + 8;
+		sint32 index = (sint32)(log10(env.DecayHFRatio) * -4.0f) + 8;
 		clamp(index, XAUDIO2FX_REVERB_MIN_LOW_EQ_GAIN, XAUDIO2FX_REVERB_MAX_LOW_EQ_GAIN);
 		_ReverbParams.LowEQGain = (BYTE)index;
-		_ReverbParams.DecayTime = environment.DecayTime * environment.DecayHFRatio;
+		_ReverbParams.DecayTime = env.DecayTime * env.DecayHFRatio * invScaleRate;
 	}
 	else
 	{
 		_ReverbParams.LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
-		sint32 index = (sint32)(log10(environment.DecayHFRatio) * 4.0f) + 8;
+		sint32 index = (sint32)(log10(env.DecayHFRatio) * 4.0f) + 8;
 		clamp(index, XAUDIO2FX_REVERB_MIN_HIGH_EQ_GAIN, XAUDIO2FX_REVERB_MAX_HIGH_EQ_GAIN);
 		_ReverbParams.HighEQGain = (BYTE)index;
-		_ReverbParams.DecayTime = environment.DecayTime;
+		_ReverbParams.DecayTime = env.DecayTime * invScaleRate;
 	}
 
-	sint32 reflections_delay = (sint32)(environment.ReflectionsDelay * 1000.0f);
+	sint32 reflections_delay = (sint32)(env.ReflectionsDelay * invScaleRate * 1000.0f);
 	clamp(reflections_delay, XAUDIO2FX_REVERB_MIN_REFLECTIONS_DELAY + 1, XAUDIO2FX_REVERB_MAX_REFLECTIONS_DELAY - 1);
 	_ReverbParams.ReflectionsDelay = (UINT32)reflections_delay;
-	
-	sint32 reverb_delay = (sint32)(environment.LateReverbDelay * 1000.0f);
+
+	sint32 reverb_delay = (sint32)(env.LateReverbDelay * invScaleRate * 1000.0f);
 	clamp(reverb_delay, XAUDIO2FX_REVERB_MIN_REVERB_DELAY + 1, XAUDIO2FX_REVERB_MAX_REVERB_DELAY - 1);
 	_ReverbParams.ReverbDelay = (BYTE)reverb_delay;
 
-	_ReverbParams.EarlyDiffusion = (BYTE)(environment.Diffusion * 0.15f);
+	_ReverbParams.EarlyDiffusion = (BYTE)(env.Diffusion * 0.15f);
 	_ReverbParams.LateDiffusion = _ReverbParams.EarlyDiffusion;
-
-	// FIXME: Scale parameters to voice sampling rate, see
-	// https://learn.microsoft.com/en-us/windows/win32/api/xaudio2fx/ns-xaudio2fx-xaudio2fx_reverb_parameters
 
 	_DryVoice->SetEffectParameters(0, &_ReverbParams, sizeof(_ReverbParams), 0);
 }

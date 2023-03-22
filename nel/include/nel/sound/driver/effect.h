@@ -40,13 +40,14 @@ inline float decibelsToAmplitudeRatio(float d)
 	return powf(10.0f, d / 20.0f);
 }
 
-#define NLSOUND_ENVIRONMENT_DECAY_TIME_FLAG (1)
-#define NLSOUND_ENVIRONMENT_REFLECTIONS_FLAG (2)
-#define NLSOUND_ENVIRONMENT_REFLECTIONS_DELAY_FLAG (4)
-#define NLSOUND_ENVIRONMENT_REVERB_FLAG (8)
-#define NLSOUND_ENVIRONMENT_REVERB_DELAY_FLAG (16)
-#define NLSOUND_ENVIRONMENT_ECHO_TIME_FLAG (64)
-#define NLSOUND_ENVIRONMENT_MODULATION_TIME_FLAG (128)
+#define NLSOUND_ENVIRONMENT_DECAY_TIME_SCALE (0x1) /* The decay time is scaled by the environment size */
+#define NLSOUND_ENVIRONMENT_REFLECTIONS_SCALE (0x2) /* The reflections attenuation is scaled by the environment size */
+#define NLSOUND_ENVIRONMENT_REFLECTIONS_DELAY_SCALE (0x4) /* The reflections delay is scaled by the environment size */
+#define NLSOUND_ENVIRONMENT_LATE_REVERB_SCALE (0x8) /* The reverb attenuation is scaled by the environment size */
+#define NLSOUND_ENVIRONMENT_LATE_REVERB_DELAY_SCALE (0x10) /* The reverb delay is scaled by the environment size */
+#define NLSOUND_ENVIRONMENT_DECAY_HF_LIMIT (0x20) /* The high-frequency decay time is limited by the air absorption at high frequencies (OpenAL only) */
+// #define NLSOUND_ENVIRONMENT_ECHO_TIME_SCALE (0x40) /* The echo time is scaled by the environment size (not yet implemented) */
+// #define NLSOUND_ENVIRONMENT_MODULATION_TIME_SCALE (0x80) /* The modulation time is scaled by the environment size (not yet implemented) */
 
 /**
  * \brief IReverbEffect
@@ -80,15 +81,7 @@ public:
 			Lower diffusion seperates echoes by decreasing randomization.
 		- Density [0.0, 100.0] (percentage), default: 100.0 %
 			Lower density increases distance between late reverberations.
-		Implemented by the NeL drivers:
-		Not yet implemented:
-		- RoomSize [1.0, 100.0] meters, default 100.0 m
-			This parameter can be set seperately from the Reverb Environment structure, it adjusts several settings at once.
-			It adjust Reflections, ReflectionsDelay, LateReverb, LateReverbDelay, and DecayTime behind the scenes.
-		- RoomSizeFactor [0.0, 100.0] (percentage), default 100.0
-			Scales the influence of the RoomSize on the Reverb Environment settings.
-		- AirAbsorptionHF [-100.0, 0.0] in dB, default: 0 dB
-			High sound frequencies absorbed by the air in the environment (fog, dust, smoke, underwater, etc).
+		Flags handled by resize:
 		- DecayTimeScale [true/false], default: true
 			If true, DecayTime depends on RoomSize.
 		- ReflectionsScale [true/false], default: true
@@ -99,20 +92,31 @@ public:
 			If true, LateReverb gain depends on RoomSize. Smaller RoomSize results in louder LateReverb.
 		- LateReverbDelayScale [true/false], default: true
 			If true, LateReverbDelay depends on RoomSize. Smaller RoomSize results in shorter LateReverbDelay.
-		- RoomRolloffFactor
-			Source rolloff factor for the reverb path related  to the main listener rolloff factor. With manual rolloff, alpha per source is used.
-		Limited availability, not yet implemented:
-		- ReflectionsPan
-		- LateReverbPan
-		Not available in the APIs:
-		- DecayHFLimit [true/false], default: unknown
-			High frequency delay time stays below some value based on AirAbsorptionHF, and does not take DecayHFRatio into account.
-		- DecayLFRatio [0.1, 2.0], default: 1.0
-			DecayTime ratio for low frequencies.
+		Flags not implemented:
 		- EchoTimeScale [true/false], default: unknown
 			If true, EchoTime depends on RoomSize.
 		- ModulationTimeScale [true/false], default: unknown
 			If true, ModulationTime depends on RoomSize.
+		Implemented by the NeL drivers:
+		- RoomSize [1.0, 100.0] meters, default 100.0 m
+			This parameter can be set seperately from the Reverb Environment structure, it adjusts several settings at once.
+			It adjust Reflections, ReflectionsDelay, LateReverb, LateReverbDelay, and DecayTime behind the scenes.
+		Not yet implemented:
+		- RoomSizeFactor [0.0, 100.0] (percentage), default 100.0
+			Scales the influence of the RoomSize on the Reverb Environment settings.
+		- AirAbsorptionHF [-100.0, 0.0] in dB, default: 0 dB (AL_REVERB_AIR_ABSORPTION_GAINHF)
+			High sound frequencies absorbed by the air in the environment (fog, dust, smoke, underwater, etc).
+		- RoomRolloffFactor (AL_REVERB_ROOM_ROLLOFF_FACTOR)
+			Source rolloff factor for the reverb path related  to the main listener rolloff factor. With manual rolloff, alpha per source is used.
+		Limited availability, not yet implemented:
+		- ReflectionsPan
+		- LateReverbPan
+		OpenAL flag only:
+		- DecayHFLimit [true/false], default: unknown
+			High frequency delay time stays below some value based on AirAbsorptionHF, and does not take DecayHFRatio into account.
+		Not available in the APIs:
+		- DecayLFRatio [0.1, 2.0], default: 1.0
+			DecayTime ratio for low frequencies.
 		- EchoDepth
 		- EchoTime
 		- HFReference, 5000.0 Hz
@@ -138,10 +142,10 @@ public:
 			LateReverbDelay(lateReverbDelay), Diffusion(diffusion), Density(density),
 			Flags(flags) { }
 		/// Default constructor.
-		CEnvironment() : RoomFilter(-100.00f), RoomFilterHF(0.00f), 
+		CEnvironment() : Id(26), RoomSize(7.5f), RoomFilter(-100.00f), RoomFilterHF(0.00f), 
 			DecayTime(1.0f), DecayHFRatio(1.0f), Reflections(-100.00f), 
 			ReflectionsDelay(0.02f), LateReverb(-100.00f), LateReverbDelay(0.04f), 
-			Diffusion(100.0f), Density(100.0f) { }
+			Diffusion(100.0f), Density(100.0f), Flags(0x20) { }
 		/// Constructor to fade between two environments.
 		CEnvironment(const CEnvironment &env0, const CEnvironment &env1, float balance) :
 			RoomFilter((env0.RoomFilter * (1.0f - balance)) + (env1.RoomFilter * balance)), 
@@ -155,9 +159,12 @@ public:
 			Diffusion((env0.Diffusion * (1.0f - balance)) + (env1.Diffusion * balance)), 
 			Density((env0.Density * (1.0f - balance)) + (env1.Density * balance)) { }
 
-		/// Legacy environment preset identifier
+		/// Resize the environment to a new room size [1.0, 100.0] in meters, default 7.5 meters
+		void resize(float roomSize = 7.5f);
+
+		/// Legacy environment preset identifier, default: 26
 		sint Id;
-		/// Reference environment or room size, used for resizing an environment
+		/// Reference environment or room size, used for resizing an environment, default: 7.5 meters
 		float RoomSize;
 
 		/// [-100.00, 0] in dB, default: -100.00 dB
@@ -180,9 +187,8 @@ public:
 		float Diffusion;
 		/// [0.0, 100.0] (percentage), default: 100.0 %
 		float Density;
-		/* This struct can *float* on water! */
 
-		/// Flags used for resizing an environment
+		/// Flags used for resizing an environment, default: 0x20
 		uint8 Flags;
 	};
 	
