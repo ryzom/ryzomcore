@@ -75,6 +75,10 @@ public:
 		float			OcclusionRoomRatio;
 		/// The obsctruction att db
 		float			Obstruction;
+		/// Occlusion low pass cutoff frequency
+		float			DirectCutoffFrequency;
+		/// Occlusion low pass cutoff frequency
+		float			EffectCutoffFrequency;
 	};
 
 	/// Container for audible cluster status
@@ -89,6 +93,8 @@ public:
 		float			OcclusionLFFactor;
 		float			OcclusionRoomRatio;
 		float			Obstruction;
+		float			DirectCutoffFrequency;
+		float			EffectCutoffFrequency;
 		/// The distance acumulator
 		float			Dist;
 		/// A flag that indicate if we need to filter the unvisible child.

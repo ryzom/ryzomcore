@@ -123,6 +123,37 @@ void IReverbEffect::CEnvironment::resize(float roomSize)
 	*/
 }
 
+// To the extent possible under law, the author(s) have dedicated all
+// copyright and related and neighboring rights to this software to the
+// public domain worldwide.
+// This software is distributed without any warranty.
+CFilterParameters::CFilterParameters(float occlusion, float occlusionLfRatio, float occlusionRoomRatio, float obstruction)
+{
+	const float occlusionDirectRatio = 1.0f;
+
+	// Calculate gain for direct low-pass filter
+	float directDb = std::min(occlusionDirectRatio * occlusionLfRatio,
+		occlusionDirectRatio + occlusionLfRatio - 1.0f);
+	DirectGain = decibelsToAmplitudeRatio(directDb * obstruction);
+
+	// Set direct high-frequency gain
+	DirectGainPass = decibelsToAmplitudeRatio(occlusion) * occlusionDirectRatio;
+
+	// Calculate gain for effect low-pass filter
+	float effectDb = std::min(occlusionRoomRatio * occlusionLfRatio,
+		occlusionRoomRatio + occlusionLfRatio - 1.0f);
+	EffectGain = decibelsToAmplitudeRatio(effectDb * obstruction);
+
+	// Set effect high-frequency gain
+	EffectGainPass = decibelsToAmplitudeRatio(occlusion) * occlusionRoomRatio;
+
+	// Calculate obstruction low-pass filter parameters.
+	float obstructionGain = decibelsToAmplitudeRatio(obstruction * occlusionLfRatio);
+	float obstructionGainPass = decibelsToAmplitudeRatio(obstruction);
+	DirectGain *= obstructionGain;
+	DirectGainPass *= obstructionGainPass;
+}
+
 } /* namespace NLSOUND */
 
 /* end of file */

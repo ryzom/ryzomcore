@@ -674,8 +674,11 @@ float CSourceAL::getDirectGain() const
 /// Enable or disable the filter for the direct channel
 void CSourceAL::enableDirectFilter(bool enable)
 {
-	_DirectFilterEnabled = enable;
-	setupDirectFilter();
+	if (_DirectFilterEnabled != enable)
+	{
+		_DirectFilterEnabled = enable;
+		setupDirectFilter();
+	}
 }
 
 /// Check if the filter on the direct channel is enabled
@@ -799,8 +802,11 @@ float CSourceAL::getEffectGain() const
 /// Enable or disable the filter for the effect channel
 void CSourceAL::enableEffectFilter(bool enable)
 {
-	_EffectFilterEnabled = enable;
-	setupEffectFilter();
+	if (_EffectFilterEnabled != enable)
+	{
+		_EffectFilterEnabled = enable;
+		setupEffectFilter();
+	}
 }
 
 /// Check if the filter on the effect channel is enabled

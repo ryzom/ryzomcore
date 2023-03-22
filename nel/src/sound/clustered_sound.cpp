@@ -158,18 +158,18 @@ void CClusteredSound::init(NL3D::CScene *scene, float portalInterpolate, float m
 	// set up filter material presets
 	m_FilterMaterials.clear();
 	// clang-format off
-	m_FilterMaterials[CStringMapper::map("SINGLEWINDOW")] = CFilterMaterial(-28.0f, 0.71f, 0.43f);
-	m_FilterMaterials[CStringMapper::map("DOUBLEWINDOW")] = CFilterMaterial(-50.0f, 0.40f, 0.24f);
-	m_FilterMaterials[CStringMapper::map("THINDOOR")]     = CFilterMaterial(-18.0f, 0.66f, 0.66f);
-	m_FilterMaterials[CStringMapper::map("THICKDOOR")]    = CFilterMaterial(-44.0f, 0.64f, 0.27f);
-	m_FilterMaterials[CStringMapper::map("WOODWALL")]     = CFilterMaterial(-40.0f, 0.50f, 0.30f);
-	m_FilterMaterials[CStringMapper::map("BRICKWALL")]    = CFilterMaterial(-50.0f, 0.60f, 0.24f);
-	m_FilterMaterials[CStringMapper::map("STONEWALL")]    = CFilterMaterial(-60.0f, 0.68f, 0.20f);
-	m_FilterMaterials[CStringMapper::map("CURTAIN")]      = CFilterMaterial(-12.0f, 0.15f, 1.00f);
-	// backwards compatibility, do not use
-	m_FilterMaterials[CStringMapper::map("wood door")]	  = CFilterMaterial(-44.0f, 0.64f, 0.27f); // THICKDOOR
-	m_FilterMaterials[CStringMapper::map("brick door")]	  = CFilterMaterial(-50.0f, 0.60f, 0.24f); // BRICKWALL
+	m_FilterMaterials[CStringMapper::map("SINGLEWINDOW")] = CFilterMaterial(-28.0f, 0.71f, 0.43f, 800.0f, 1500.0f);
+	m_FilterMaterials[CStringMapper::map("DOUBLEWINDOW")] = CFilterMaterial(-50.0f, 0.40f, 0.24f, 600.0f, 1200.0f);
+	m_FilterMaterials[CStringMapper::map("THINDOOR")]     = CFilterMaterial(-18.0f, 0.66f, 0.66f, 1000.0f, 1800.0f);
+	m_FilterMaterials[CStringMapper::map("THICKDOOR")]    = CFilterMaterial(-44.0f, 0.64f, 0.27f, 500.0f, 1000.0f);
+	m_FilterMaterials[CStringMapper::map("WOODWALL")]     = CFilterMaterial(-40.0f, 0.50f, 0.30f, 400.0f, 800.0f);
+	m_FilterMaterials[CStringMapper::map("BRICKWALL")]    = CFilterMaterial(-50.0f, 0.60f, 0.24f, 300.0f, 700.0f);
+	m_FilterMaterials[CStringMapper::map("STONEWALL")]    = CFilterMaterial(-60.0f, 0.68f, 0.20f, 200.0f, 500.0f);
+	m_FilterMaterials[CStringMapper::map("CURTAIN")]      = CFilterMaterial(-12.0f, 0.15f, 1.00f, 1200.0f, 2500.0f);
 	// clang-format on
+	// backwards compatibility, do not use
+	m_FilterMaterials[CStringMapper::map("wood door")] = m_FilterMaterials[CStringMapper::map("THICKDOOR")];
+	m_FilterMaterials[CStringMapper::map("brick door")] = m_FilterMaterials[CStringMapper::map("BRICKWALL")];
 
 	// set driver option
 	m_EnableOcclusionObstruction = enableOcclusionObstruction;
@@ -410,6 +410,8 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 	css.OcclusionLFFactor = 1.0f;
 	css.OcclusionRoomRatio = 1.0f;
 	css.Obstruction = 0;
+	css.DirectCutoffFrequency = 1000.0f;
+	css.EffectCutoffFrequency = 1000.0f;
 	css.PosAlpha = 0;
 //	css.Position = CVector::Null;
 	css.Position = realListener;
@@ -503,6 +505,8 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 			css.OcclusionLFFactor = travContext.OcclusionLFFactor;
 			css.OcclusionRoomRatio = travContext.OcclusionRoomRatio;
 			css.Obstruction = travContext.Obstruction;
+			css.DirectCutoffFrequency = travContext.DirectCutoffFrequency;
+			css.EffectCutoffFrequency = travContext.EffectCutoffFrequency;
 
 			// store this cluster and it's parameters
 			_AudibleClusters.insert(make_pair(cluster, css));
@@ -560,6 +564,8 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 								css.Occlusion = travContext.Occlusion;
 								css.OcclusionLFFactor = travContext.OcclusionLFFactor;
 								css.Obstruction = travContext.Obstruction;
+								css.DirectCutoffFrequency = travContext.DirectCutoffFrequency;
+								css.EffectCutoffFrequency = travContext.EffectCutoffFrequency;
 								css.OcclusionRoomRatio = travContext.OcclusionRoomRatio;
 								css.DistFactor = css.Dist / _MaxEarDistance;
 								css.Direction = travContext.Direction;
@@ -612,6 +618,8 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 										css.Occlusion = max(NLSOUND_MIN_OCCLUSION, travContext.Occlusion + it->second.Occlusion);
 										css.OcclusionLFFactor = travContext.OcclusionLFFactor * it->second.OcclusionLFFactor;
 										css.OcclusionRoomRatio = travContext.OcclusionRoomRatio * it->second.OcclusionRoomRatio;
+										css.DirectCutoffFrequency = travContext.DirectCutoffFrequency * it->second.DirectCutoffFrequency;
+										css.EffectCutoffFrequency = travContext.EffectCutoffFrequency * it->second.EffectCutoffFrequency;
 									}
 									else
 									{
@@ -619,6 +627,8 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 										css.Occlusion = travContext.Occlusion;
 										css.OcclusionLFFactor = travContext.OcclusionLFFactor;
 										css.OcclusionRoomRatio = travContext.OcclusionRoomRatio;
+										css.DirectCutoffFrequency = travContext.DirectCutoffFrequency;
+										css.EffectCutoffFrequency = travContext.EffectCutoffFrequency;
 									}
 								}
 								else
@@ -687,6 +697,8 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 									tc.OcclusionLFFactor = css.OcclusionLFFactor;
 									tc.OcclusionRoomRatio = css.OcclusionRoomRatio;
 									tc.Obstruction = css.Obstruction;
+									tc.DirectCutoffFrequency = css.DirectCutoffFrequency;
+									tc.EffectCutoffFrequency = css.EffectCutoffFrequency;
 									tc.Direction1 = d1;
 									tc.Direction2 = d2;
 									tc.NbPortal = travContext.NbPortal+1;
@@ -731,6 +743,8 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 							css.OcclusionLFFactor = travContext.OcclusionLFFactor;
 							css.OcclusionRoomRatio = travContext.OcclusionRoomRatio;
 							css.Obstruction = travContext.Obstruction;
+							css.DirectCutoffFrequency = travContext.DirectCutoffFrequency;
+							css.EffectCutoffFrequency = travContext.EffectCutoffFrequency;
 /*							if (travContext.NbPortal == 0)
 								css.Direction = (nearPos - travContext.ListenerPos).normed();
 							else
@@ -809,6 +823,8 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 						css.OcclusionLFFactor = travContext.OcclusionLFFactor;
 						css.OcclusionRoomRatio = travContext.OcclusionRoomRatio;
 						css.Obstruction = travContext.Obstruction;
+						css.DirectCutoffFrequency = travContext.DirectCutoffFrequency;
+						css.EffectCutoffFrequency = travContext.EffectCutoffFrequency;
 						css.Position = nearPos + css.Dist * css.Direction;
 						css.PosAlpha = min(1.0f, css.Dist / _PortalInterpolate);
 

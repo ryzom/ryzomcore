@@ -1798,6 +1798,7 @@ void				CAudioMixerUser::update()
 				if (_Tracks[i]->getLogicalSource() != 0)
 				{
 					CSourceCommon *source = _Tracks[i]->getLogicalSource();
+					ISource *isource = _Tracks[i]->getPhysicalSource();
 					if (source->getCluster() != 0)
 					{
 						// need to check the cluster status
@@ -1808,9 +1809,9 @@ void				CAudioMixerUser::update()
 							float dist = (css->Position - source->getPos()).norm();
 							CVector vpos(_ListenPosition + css->Direction * (css->Dist + dist));
 //							_Tracks[i]->DrvSource->setPos(source->getPos() * (1-css->PosAlpha) + css->Position*(css->PosAlpha));
-							_Tracks[i]->getPhysicalSource()->setPos(source->getPos() * (1-css->PosAlpha) + vpos*(css->PosAlpha));
+							isource->setPos(source->getPos() * (1-css->PosAlpha) + vpos*(css->PosAlpha));
 							// update the relative gain
-							_Tracks[i]->getPhysicalSource()->setGain(source->getFinalGain() * css->Gain);
+							isource->setGain(source->getFinalGain() * css->Gain);
 #if 0
 							if (_UseEax)
 							{
@@ -1826,48 +1827,39 @@ void				CAudioMixerUser::update()
 							{
 								H_AUTO(NLSOUND_SetEaxProperties)
 
-								float occlusionLinear = pow(10, css->Occlusion / 20.0f);
-								float obstructionLinear = pow(10, css->Obstruction / 20.0f);
+								CFilterParameters params(css->Occlusion, css->OcclusionLFFactor, css->OcclusionRoomRatio, css->Obstruction);
 
-								// Translate occlusion and obstruction into direct path settings
-								// Calculate direct gain based on occlusion and obstruction
-								const float occlusionFactor = 0.5f; // TODO: Adjust this value
-								const float obstructionFactor = 0.5f; // TODO: Adjust this value
-								float directGain = 1.0f - (occlusionLinear * occlusionFactor + obstructionLinear * obstructionFactor);
-
-								// Apply direct gain
-								_Tracks[i]->getPhysicalSource()->setDirectGain(directGain);
-
-								// Set up direct filter (low-pass filter)
-								_Tracks[i]->getPhysicalSource()->enableDirectFilter(true);
-
-								// Set up the low-pass filter parameters
-								const float minFrequency = 200.0f; // TODO: Adjust this value
-								const float maxFrequency = 20000.0f; // TODO: Adjust this value
-								float lowFrequencyCutoff = minFrequency + (maxFrequency - minFrequency) * css->OcclusionLFFactor;
-								float lowFrequency = /* TODO */ 1.0f /* /* set appropriate low-frequency value */;
-								float highFrequency = /* TODO */ 1.0f /* /* set appropriate high-frequency value */;
-								_Tracks[i]->getPhysicalSource()->setDirectFilter(ISource::TFilter::FilterLowPass, lowFrequency, highFrequency, css->OcclusionLFFactor);
+								isource->setDirectGain(params.DirectGain);
+								isource->setDirectFilter(ISource::TFilter::FilterLowPass, css->DirectCutoffFrequency, css->DirectCutoffFrequency, params.DirectGainPass);
+								isource->enableDirectFilter(true);
 
 								if (m_EnableReverb)
 								{
-									// Translate OcclusionRoomRatio into effect path settings
-									// Calculate effect gain based on OcclusionRoomRatio
-									float minEffectGain = 0.0f; // TODO: Adjust this value
-									float maxEffectGain = 1.0f; // TODO: Adjust this value
-									float effectGain = minEffectGain + (maxEffectGain - minEffectGain) * css->OcclusionRoomRatio;
-
-									// Apply effect gain
-									_Tracks[i]->getPhysicalSource()->setEffectGain(effectGain);
-
-									// Set up effect filter parameters
-									_Tracks[i]->getPhysicalSource()->enableEffectFilter(true);
-
-									// Set up the effect filter parameters using OcclusionRoomRatio or other values
-									_Tracks[i]->getPhysicalSource()->setEffectFilter(ISource::TFilter::FilterLowPass, lowFrequency, highFrequency, css->OcclusionLFFactor);
+									isource->setEffectGain(params.EffectGain);
+									isource->setEffectFilter(ISource::TFilter::FilterLowPass, css->EffectCutoffFrequency, css->EffectCutoffFrequency, params.EffectGainPass);
+									isource->enableEffectFilter(true);
+								}
+								else
+								{
+									isource->enableEffectFilter(false);
 								}
 							}
+							else
+							{
+								isource->enableDirectFilter(false);
+								isource->enableEffectFilter(false);
+							}
 						}
+						else
+						{
+							isource->enableDirectFilter(false);
+							isource->enableEffectFilter(false);
+						}
+					}
+					else
+					{
+						isource->enableDirectFilter(false);
+						isource->enableEffectFilter(false);
 					}
 				}
 			}

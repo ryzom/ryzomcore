@@ -24,9 +24,9 @@
 
 namespace NLSOUND {
 
-NL_FORCE_INLINE float decibelsToAmplitudeRatio(float d)
+NL_FORCE_INLINE float decibelsToAmplitudeRatio(float d) // dbToLinearGain
 {
-	return powf(10.0f, d / 20.0f);
+	return pow(10, d / 20.0f);
 }
 
 NL_FORCE_INLINE float amplitudeRatioToDecibels(float a)
@@ -286,41 +286,44 @@ public:
 	/// that reaches the listener after being occluded by an object. (Not implemented)
 	float OcclusionRoomRatio;
 
-	/// Represents the overall reduction in the direct sound level due to the partially blocking object.
-	float Obstruction;
+	float DirectCutoffFrequency;
 
-	/// Same as `Obstruction`, but represented as linear gain.
-	float ObstructionGain;
+	float EffectCutoffFrequency;
 
 	CFilterMaterial()
 	    : Occlusion(0.0f)
 	    , OcclusionGain(1.0f)
 	    , OcclusionLFFactor(0.0f)
 	    , OcclusionRoomRatio(0.5f)
-	    , Obstruction(Occlusion)
-	    , ObstructionGain(OcclusionGain)
+		, DirectCutoffFrequency(1000.0f)
+		, EffectCutoffFrequency(1000.0f)
 	{
 	}
 
-	CFilterMaterial(float occlusion, float occlusionLFFactor, float occlusionRoomRatio)
+	CFilterMaterial(float occlusion, float occlusionLFFactor, float occlusionRoomRatio, float directCutoffFrequency, float effectCutoffFrequency)
 	    : Occlusion(occlusion)
 	    , OcclusionGain(pow(10, (double)occlusion / 20.0f))
 	    , OcclusionLFFactor(occlusionLFFactor)
 	    , OcclusionRoomRatio(occlusionRoomRatio)
-	    , Obstruction(Occlusion)
-	    , ObstructionGain(OcclusionGain)
+	    , DirectCutoffFrequency(directCutoffFrequency)
+	    , EffectCutoffFrequency(effectCutoffFrequency)
 	{
 	}
+};
 
-	CFilterMaterial(float occlusion, float occlusionLFFactor, float occlusionRoomRatio, float obstruction)
-	    : Occlusion(occlusion)
-	    , OcclusionGain(pow(10, (double)occlusion / 20.0f))
-	    , OcclusionLFFactor(occlusionLFFactor)
-	    , OcclusionRoomRatio(occlusionRoomRatio)
-	    , Obstruction(obstruction)
-	    , ObstructionGain(pow(10, (double)obstruction / 20.0f))
-	{
-	}
+/// Converts from filter material to a set of low pass filters for the direct and effect sends
+class CFilterParameters
+{
+public:
+	float DirectGain; // OpenAL EFX: AL_LOWPASS_GAIN
+	float DirectGainPass; // OpenAL EFX: AL_LOWPASS_GAINHF
+	// float DirectCutoffFrequency; // XAudio2: XAUDIO2_FILTER_PARAMETERS::Frequency, not supported in OpenAL
+	float EffectGain;
+	float EffectGainPass;
+	// float EffectCutoffFrequency;
+
+	CFilterParameters(float occlusion, float occlusionLfRatio, float occlusionRoomRatio, float obstruction);
+
 };
 
 } /* namespace NLSOUND */
