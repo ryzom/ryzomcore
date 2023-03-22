@@ -290,11 +290,12 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 	// list of supported options in this driver
 	// no adpcm, no manual rolloff (for now)
 	const sint supportedOptions = 
-		OptionEnvironmentEffects
-		| OptionSoftwareBuffer
+		OptionSoftwareBuffer
 		| OptionManualRolloff
 		| OptionLocalBufferCopy
-		| OptionHasBufferStreaming;
+		| OptionHasBufferStreaming
+		| OptionReverbEffect
+		| OptionFilterEffect;
 
 	// list of forced options in this driver
 	const sint forcedOptions = 0;
@@ -346,17 +347,17 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 
 	nldebug("AL: Max. sources: %u, Max. effects: %u", (uint32)countMaxSources(), (uint32)countMaxEffects());
 
-	if (getOption(OptionEnvironmentEffects)) 
+	if (getOption(OptionReverbEffect)) 
 	{
 		if (!AlExtEfx)
 		{
 			nlwarning("AL: ALC_EXT_EFX is required, environment effects disabled");
-			_Options = (TSoundOptions)((uint)_Options & ~OptionEnvironmentEffects);
+			_Options = (TSoundOptions)((uint)_Options & ~OptionReverbEffect);
 		}
 		else if (!countMaxEffects())
 		{		
 			nlwarning("AL: No effects available, environment effects disabled");
-			_Options = (TSoundOptions)((uint)_Options & ~OptionEnvironmentEffects);
+			_Options = (TSoundOptions)((uint)_Options & ~OptionReverbEffect);
 		}
 	}
 
@@ -560,7 +561,7 @@ uint CSoundDriverAL::countMaxSources()
 /// Return the maximum number of effects that can be created, which is only 1 in openal software mode :(
 uint CSoundDriverAL::countMaxEffects()
 {
-	if (!getOption(OptionEnvironmentEffects)) return 0;
+	if (!getOption(OptionReverbEffect)) return 0;
 	if (!AlExtEfx) return 0;
 	ALCint max_auxiliary_sends;
 	alcGetIntegerv(_AlDevice, ALC_MAX_AUXILIARY_SENDS, 1, &max_auxiliary_sends);

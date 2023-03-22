@@ -65,7 +65,7 @@ _DirectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN), _EffectFilterPassGain(N
 	}
 	
 	// create filters
-	if (soundDriver->getOption(ISoundDriver::OptionEnvironmentEffects))
+	if (soundDriver->getOption(ISoundDriver::OptionFilterEffect))
 	{
 		alGenFilters(1, &_DirectFilter);
 		alFilteri(_DirectFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);

@@ -217,7 +217,7 @@ void CAudioMixerUser::initClusteredSound(NL3D::CScene *scene, float minGain, flo
 {
 	if (!_ClusteredSound) _ClusteredSound = new CClusteredSound();
 
-	_ClusteredSound->init(scene, portalInterpolate, maxDistance, minGain);
+	_ClusteredSound->init(scene, portalInterpolate, maxDistance, minGain, m_EnableOcclusionObstruction, m_EnableReverb);
 }
 
 
@@ -393,7 +393,7 @@ void CAudioMixerUser::init(uint maxTrack, bool useEax, bool useADPCM, IProgressC
 	CInitInfo initInfo;
 	initInfo.MaxTrack = maxTrack;
 	initInfo.EnableReverb = useEax; // :)
-	initInfo.EnableOccludeObstruct = useEax; // :)
+	initInfo.EnableOcclusionObstruction = useEax; // :)
 	initInfo.UseADPCM = useADPCM;
 	initInfo.ForceSoftware = forceSoftwareBuffer;
 	initInfo.ManualRolloff = manualRolloff;
@@ -490,7 +490,8 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 
 	_profile(( "AM: ---------------------------------------------------------------" ));
 
-	_UseEax = initInfo.EnableReverb || initInfo.EnableOccludeObstruct; // [TODO KAETEMI: Fixme.]
+	m_EnableReverb = initInfo.EnableReverb;
+	m_EnableOcclusionObstruction = initInfo.EnableOcclusionObstruction;
 	_UseADPCM = initInfo.UseADPCM;
 	_AutoLoadSample = initInfo.AutoLoadSample;
 	bool manualRolloff = initInfo.ManualRolloff;
@@ -504,7 +505,8 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 
 		// the options to init the driver
 		sint driverOptions = ISoundDriver::OptionHasBufferStreaming;
-		if (_UseEax) driverOptions |= ISoundDriver::OptionEnvironmentEffects;
+		if (m_EnableReverb) driverOptions |= ISoundDriver::OptionReverbEffect;
+		if (m_EnableOcclusionObstruction) driverOptions |= ISoundDriver::OptionFilterEffect;
 		if (_UseADPCM) driverOptions |= ISoundDriver::OptionAllowADPCM;
 		if (forceSoftware) driverOptions |= ISoundDriver::OptionSoftwareBuffer;
 		if (manualRolloff) driverOptions |= ISoundDriver::OptionManualRolloff;
@@ -514,10 +516,15 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 		_SoundDriver->initDevice(deviceName, (ISoundDriver::TSoundOptions)driverOptions);
 
 		// verify the options, OptionHasBufferStreaming not checked
-		if (_UseEax && !_SoundDriver->getOption(ISoundDriver::OptionEnvironmentEffects))
+		if (m_EnableReverb && !_SoundDriver->getOption(ISoundDriver::OptionReverbEffect))
 		{
-			nlwarning("AM: OptionEnvironmentEffects not available, _UseEax = false");
-			_UseEax = false;
+			nlwarning("AM: OptionReverbEffect not available, m_EnableReverb = false");
+			m_EnableReverb = false;
+		}
+		if (m_EnableOcclusionObstruction && !_SoundDriver->getOption(ISoundDriver::OptionFilterEffect))
+		{
+			nlwarning("AM: OptionFilterEffect not available, m_EnableOcclusionObstruction = false");
+			m_EnableOcclusionObstruction = false;
 		}
 		if (_UseADPCM && !_SoundDriver->getOption(ISoundDriver::OptionAllowADPCM))
 		{
@@ -565,12 +572,12 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	_Listener.init(_SoundDriver);
 
 	// Init environment reverb effects
-	if (_UseEax)
+	if (m_EnableReverb)
 	{
 		_ReverbEffect = _SoundDriver->createReverbEffect();
 
 		if (!_ReverbEffect)
-			{ _UseEax = false; }
+			{ m_EnableReverb = false; }
 		else // createEffect succeeded, add environments
 		{ 
 			nldebug("AM: Reverb OK");
@@ -612,7 +619,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 			addEnvironment("PLATE",           IReverbEffect::CEnvironment(26,   7.5f, -10.00f,  -2.00f,  1.30f, 0.90f,    0.00f, 0.002f,   0.00f, 0.010f, 100.0f,  75.00f, 0x20));
 			// these are the default environment settings in case no environment data is available (you'll hear this one)
 			_DefaultEnvironment = getEnvironment("PLAIN");
-			_DefaultRoomSize = 42.5f; // changed from 7.5f, since 42.5f is the real default for PLAIN
+			_DefaultRoomSize = _DefaultEnvironment.RoomSize; // changed from 7.5f, since 42.5f is the real default for PLAIN
 			// note: 'no fx' generally does not use the default room size
 			_Environments[CStringMapper::map("no fx")] = _DefaultEnvironment;
 			// set the default environment now
@@ -653,9 +660,10 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	CSoundBank *soundBank = new CSoundBank();
 	_SoundBank = soundBank;
 	soundBank->load(getPackedSheetPath(), getPackedSheetUpdate());
-	nlinfo("AM: Initialized audio mixer with %u voices, %s and %s.",
+	nlinfo("AM: Initialized audio mixer with %u voices, %s, %s, and %s.",
 		(uint32)_Tracks.size(),
-		_UseEax ? "with EAX support" : "WITHOUT EAX",
+		m_EnableReverb ? "with reverb support" : "WITHOUT reverb",
+		m_EnableOcclusionObstruction ? "with occlusion and obstruction support" : "WITHOUT occlusion and obstruction",
 		_UseADPCM ? "with ADPCM sample source" : "with 16 bits PCM sample source");
 
 	// Init the sample bank manager
@@ -1803,22 +1811,62 @@ void				CAudioMixerUser::update()
 							_Tracks[i]->getPhysicalSource()->setPos(source->getPos() * (1-css->PosAlpha) + vpos*(css->PosAlpha));
 							// update the relative gain
 							_Tracks[i]->getPhysicalSource()->setGain(source->getFinalGain() * css->Gain);
-#if EAX_AVAILABLE == 1
+#if 0
 							if (_UseEax)
 							{
 								H_AUTO(NLSOUND_SetEaxProperties)
-								// update the occlusion parameters
-								_Tracks[i]->DrvSource->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSION, (void*)&css->Occlusion, sizeof(css->Occlusion));
-								_Tracks[i]->DrvSource->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSIONLFRATIO, (void*)&css->OcclusionLFFactor, sizeof(css->OcclusionLFFactor));
-	//							if (lastRatio[i] != css->OcclusionRoomRatio)
-	//							{
-									_Tracks[i]->DrvSource->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSIONROOMRATIO, (void*)&css->OcclusionRoomRatio, sizeof(css->OcclusionRoomRatio));
-	//								lastRatio[i] = css->OcclusionRoomRatio;
-	//								nldebug("Setting room ration.");
-	//							}
-								_Tracks[i]->DrvSource->setEAXProperty(DSPROPERTY_EAXBUFFER_OBSTRUCTION, (void*)&css->Obstruction, sizeof(css->Obstruction));
+									// update the occlusion parameters
+									_Tracks[i]->getPhysicalSource()->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSION, (void*)&css->Occlusion, sizeof(css->Occlusion));
+								_Tracks[i]->getPhysicalSource()->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSIONLFRATIO, (void*)&css->OcclusionLFFactor, sizeof(css->OcclusionLFFactor));
+								_Tracks[i]->getPhysicalSource()->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSIONROOMRATIO, (void*)&css->OcclusionRoomRatio, sizeof(css->OcclusionRoomRatio));
+								_Tracks[i]->getPhysicalSource()->setEAXProperty(DSPROPERTY_EAXBUFFER_OBSTRUCTION, (void*)&css->Obstruction, sizeof(css->Obstruction));
 							}
 #endif
+							if (m_EnableOcclusionObstruction)
+							{
+								H_AUTO(NLSOUND_SetEaxProperties)
+
+								float occlusionLinear = pow(10, css->Occlusion / 20.0f);
+								float obstructionLinear = pow(10, css->Obstruction / 20.0f);
+
+								// Translate occlusion and obstruction into direct path settings
+								// Calculate direct gain based on occlusion and obstruction
+								const float occlusionFactor = 0.5f; // TODO: Adjust this value
+								const float obstructionFactor = 0.5f; // TODO: Adjust this value
+								float directGain = 1.0f - (occlusionLinear * occlusionFactor + obstructionLinear * obstructionFactor);
+
+								// Apply direct gain
+								_Tracks[i]->getPhysicalSource()->setDirectGain(directGain);
+
+								// Set up direct filter (low-pass filter)
+								_Tracks[i]->getPhysicalSource()->enableDirectFilter(true);
+
+								// Set up the low-pass filter parameters
+								const float minFrequency = 200.0f; // TODO: Adjust this value
+								const float maxFrequency = 20000.0f; // TODO: Adjust this value
+								float lowFrequencyCutoff = minFrequency + (maxFrequency - minFrequency) * css->OcclusionLFFactor;
+								float lowFrequency = /* TODO */ 1.0f /* /* set appropriate low-frequency value */;
+								float highFrequency = /* TODO */ 1.0f /* /* set appropriate high-frequency value */;
+								_Tracks[i]->getPhysicalSource()->setDirectFilter(ISource::TFilter::FilterLowPass, lowFrequency, highFrequency, css->OcclusionLFFactor);
+
+								if (m_EnableReverb)
+								{
+									// Translate OcclusionRoomRatio into effect path settings
+									// Calculate effect gain based on OcclusionRoomRatio
+									float minEffectGain = 0.0f; // TODO: Adjust this value
+									float maxEffectGain = 1.0f; // TODO: Adjust this value
+									float effectGain = minEffectGain + (maxEffectGain - minEffectGain) * css->OcclusionRoomRatio;
+
+									// Apply effect gain
+									_Tracks[i]->getPhysicalSource()->setEffectGain(effectGain);
+
+									// Set up effect filter parameters
+									_Tracks[i]->getPhysicalSource()->enableEffectFilter(true);
+
+									// Set up the effect filter parameters using OcclusionRoomRatio or other values
+									_Tracks[i]->getPhysicalSource()->setEffectFilter(ISource::TFilter::FilterLowPass, lowFrequency, highFrequency, css->OcclusionLFFactor);
+								}
+							}
 						}
 					}
 				}
@@ -2637,7 +2685,7 @@ void CAudioMixerUser::changeMaxTrack(uint maxTrack)
 
 				_Tracks[i] = new CTrack();
 				_Tracks[i]->init(_SoundDriver);
-				if (_UseEax) _Tracks[i]->getPhysicalSource()->setEffect(_ReverbEffect);
+				if (m_EnableReverb) _Tracks[i]->getPhysicalSource()->setEffect(_ReverbEffect);
 				// insert in front because the last inserted wan be sofware buffer...
 				_FreeTracks.insert(_FreeTracks.begin(), _Tracks[i]);
 			}
