@@ -133,9 +133,11 @@ bool CHarvestable::writeMpInfos()
 
 	bool useGenericMats = false;
 
+
 	CSheetId usedSheet;
-	CSBrickParamJewelAttrs sbrickParam = harvester->getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
-	if (sbrickParam.ParsedOk && sbrickParam.Value == "generic")
+	CSBrickParamJewelAttrs sbrickParamL = harvester->getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
+	CSBrickParamJewelAttrs sbrickParamR = harvester->getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
+	if ((sbrickParamL.ParsedOk && sbrickParamL.Value == "generic") || (sbrickParamR.ParsedOk && sbrickParamR.Value == "generic"))
 	{
 		useGenericMats = true;
 	}
