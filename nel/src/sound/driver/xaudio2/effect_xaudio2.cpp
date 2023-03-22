@@ -131,6 +131,10 @@ void CReverbEffectXAudio2::release()
 	if (_Effect) { _Effect->Release(); _Effect = NULL; }
 }
 
+// To the extent possible under law, the author(s) have dedicated all
+// copyright and related and neighboring rights to this software to the
+// public domain worldwide.
+// This software is distributed without any warranty.
 /// Set the environment (you have full control now, have fun)
 void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float roomSize)
 {
@@ -172,7 +176,7 @@ void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float
 	if (env.DecayHFRatio >= 1.0f)
 	{
 		_ReverbParams.HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
-		sint32 index = (sint32)(log10(env.DecayHFRatio) * -4.0f) + 8;
+		sint32 index = (sint32)(log10f(env.DecayHFRatio) * -4.0f) + 8;
 		clamp(index, XAUDIO2FX_REVERB_MIN_LOW_EQ_GAIN, XAUDIO2FX_REVERB_MAX_LOW_EQ_GAIN);
 		_ReverbParams.LowEQGain = (BYTE)index;
 		_ReverbParams.DecayTime = env.DecayTime * env.DecayHFRatio * invScaleRate;
@@ -180,7 +184,7 @@ void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float
 	else
 	{
 		_ReverbParams.LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
-		sint32 index = (sint32)(log10(env.DecayHFRatio) * 4.0f) + 8;
+		sint32 index = (sint32)(log10f(env.DecayHFRatio) * 4.0f) + 8;
 		clamp(index, XAUDIO2FX_REVERB_MIN_HIGH_EQ_GAIN, XAUDIO2FX_REVERB_MAX_HIGH_EQ_GAIN);
 		_ReverbParams.HighEQGain = (BYTE)index;
 		_ReverbParams.DecayTime = env.DecayTime * invScaleRate;

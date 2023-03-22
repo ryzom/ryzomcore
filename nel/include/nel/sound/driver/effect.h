@@ -35,9 +35,14 @@ namespace NLSOUND
 //#define NLSOUND_MATERIAL_PRESET_STONEWALL     -60.00f, 0.68f
 //#define NLSOUND_MATERIAL_PRESET_CURTAIN       -12.00f, 0.15f
 
-inline float decibelsToAmplitudeRatio(float d)
+NL_FORCE_INLINE float decibelsToAmplitudeRatio(float d)
 {
 	return powf(10.0f, d / 20.0f);
+}
+
+NL_FORCE_INLINE float amplitudeRatioToDecibels(float a)
+{
+	return 20.0f * log10f(a);
 }
 
 #define NLSOUND_ENVIRONMENT_DECAY_TIME_SCALE (0x1) /* The decay time is scaled by the environment size */
@@ -148,6 +153,8 @@ public:
 			Diffusion(100.0f), Density(100.0f), Flags(0x20) { }
 		/// Constructor to fade between two environments.
 		CEnvironment(const CEnvironment &env0, const CEnvironment &env1, float balance) :
+			Id(env0.Id == env1.Id ? env0.Id : 26),
+			RoomSize((env0.RoomSize * (1.0f - balance)) + (env1.RoomSize * balance)), 
 			RoomFilter((env0.RoomFilter * (1.0f - balance)) + (env1.RoomFilter * balance)), 
 			RoomFilterHF((env0.RoomFilterHF * (1.0f - balance)) + (env1.RoomFilterHF * balance)), 
 			DecayTime((env0.DecayTime * (1.0f - balance)) + (env1.DecayTime * balance)), 
@@ -157,7 +164,8 @@ public:
 			LateReverb((env0.LateReverb * (1.0f - balance)) + (env1.LateReverb * balance)), 
 			LateReverbDelay((env0.LateReverbDelay * (1.0f - balance)) + (env1.LateReverbDelay * balance)), 
 			Diffusion((env0.Diffusion * (1.0f - balance)) + (env1.Diffusion * balance)), 
-			Density((env0.Density * (1.0f - balance)) + (env1.Density * balance)) { }
+			Density((env0.Density * (1.0f - balance)) + (env1.Density * balance)),
+			Flags(env0.Flags & env1.Flags) { }
 
 		/// Resize the environment to a new room size [1.0, 100.0] in meters, default 7.5 meters
 		void resize(float roomSize = 7.5f);

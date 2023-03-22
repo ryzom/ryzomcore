@@ -35,6 +35,10 @@ IReverbEffect::~IReverbEffect()
 {
 }
 
+// To the extent possible under law, the author(s) have dedicated all
+// copyright and related and neighboring rights to this software to the
+// public domain worldwide.
+// This software is distributed without any warranty.
 void IReverbEffect::CEnvironment::resize(float roomSize)
 {
 	// Clamp the room size to the valid range
@@ -65,7 +69,7 @@ void IReverbEffect::CEnvironment::resize(float roomSize)
 		{
 			if (!calcScaleFactorLog10)
 			{
-				scaleFactorLog10 = log10(scaleFactor);
+				scaleFactorLog10 = log10f(scaleFactor);
 				calcScaleFactorLog10 = true;
 			}
 			float reflectionsAdjust = 20.0f * scaleFactorLog10;
@@ -86,7 +90,7 @@ void IReverbEffect::CEnvironment::resize(float roomSize)
 	{
 		if (!calcScaleFactorLog10)
 		{
-			scaleFactorLog10 = log10(scaleFactor);
+			scaleFactorLog10 = log10f(scaleFactor);
 			calcScaleFactorLog10 = true;
 		}
 		// The value of 20.0f used in the scaling comes from the relationship between the decibel (dB) scale and the linear scale used to represent the intensity of sound.
