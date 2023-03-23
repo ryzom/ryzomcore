@@ -42,7 +42,7 @@ CEffectXAudio2::CEffectXAudio2(CSoundDriverXAudio2 *soundDriver, uint channels) 
 
 	// Mix voice
 	{
-		if (FAILED(hr = soundDriver->getXAudio2()->CreateSubmixVoice(&_DryVoice, channels, voice_details.InputSampleRate, 0, 4510, NULL, NULL)))
+		if (FAILED(hr = soundDriver->getXAudio2()->CreateSubmixVoice(&_DryVoice, channels, min(max(20000, (int)voice_details.InputSampleRate), 48000), 0, 4510, NULL, NULL)))
 			{ release(); _SoundDriver = NULL; nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED CreateSubmixVoice _DryVoice!"); return; }
 		
 		XAUDIO2_VOICE_SENDS voiceSends;
@@ -155,11 +155,13 @@ void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float
 	_ReverbParams.LowEQCutoff = 4;
 	_ReverbParams.HighEQCutoff = 6;
 	_ReverbParams.RearDelay = (BYTE)((float)XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY * invScaleRate);
+	clamp(_ReverbParams.RearDelay, (BYTE)0, (BYTE)5);
 	_ReverbParams.PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
 	_ReverbParams.PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
 	_ReverbParams.PositionMatrixLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
 	_ReverbParams.PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
 	_ReverbParams.RoomFilterFreq = 5000.0f * scaleRate;
+	clamp(_ReverbParams.RoomFilterFreq, XAUDIO2FX_REVERB_MIN_ROOM_FILTER_FREQ, XAUDIO2FX_REVERB_MAX_ROOM_FILTER_FREQ);
 	_ReverbParams.WetDryMix = 100.0f;
 
 	// Directly mapped
@@ -171,6 +173,7 @@ void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float
 
 	// Room size from meters to feet
 	_ReverbParams.RoomSize = env.RoomSize * 3.2808399f * invScaleRate;
+	clamp(_ReverbParams.RoomSize, XAUDIO2FX_REVERB_MIN_ROOM_SIZE, XAUDIO2FX_REVERB_MAX_ROOM_SIZE);
 
 	// Conversions, see ReverbConvertI3DL2ToNative in case of errors
 	if (env.DecayHFRatio >= 1.0f)
@@ -179,7 +182,7 @@ void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float
 		sint32 index = (sint32)(log10f(env.DecayHFRatio) * -4.0f) + 8;
 		clamp(index, XAUDIO2FX_REVERB_MIN_LOW_EQ_GAIN, XAUDIO2FX_REVERB_MAX_LOW_EQ_GAIN);
 		_ReverbParams.LowEQGain = (BYTE)index;
-		_ReverbParams.DecayTime = env.DecayTime * env.DecayHFRatio * invScaleRate;
+		_ReverbParams.DecayTime = std::max(0.1f, env.DecayTime * env.DecayHFRatio * invScaleRate);
 	}
 	else
 	{
@@ -187,7 +190,7 @@ void CReverbEffectXAudio2::setEnvironment(const CEnvironment &environment, float
 		sint32 index = (sint32)(log10f(env.DecayHFRatio) * 4.0f) + 8;
 		clamp(index, XAUDIO2FX_REVERB_MIN_HIGH_EQ_GAIN, XAUDIO2FX_REVERB_MAX_HIGH_EQ_GAIN);
 		_ReverbParams.HighEQGain = (BYTE)index;
-		_ReverbParams.DecayTime = env.DecayTime * invScaleRate;
+		_ReverbParams.DecayTime = std::max(0.1f, env.DecayTime * invScaleRate);
 	}
 
 	sint32 reflections_delay = (sint32)(env.ReflectionsDelay * invScaleRate * 1000.0f);
