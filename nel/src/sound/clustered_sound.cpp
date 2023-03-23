@@ -618,8 +618,8 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 										css.Occlusion = max(NLSOUND_MIN_OCCLUSION, travContext.Occlusion + it->second.Occlusion);
 										css.OcclusionLFFactor = travContext.OcclusionLFFactor * it->second.OcclusionLFFactor;
 										css.OcclusionRoomRatio = travContext.OcclusionRoomRatio * it->second.OcclusionRoomRatio;
-										css.DirectCutoffFrequency = travContext.DirectCutoffFrequency * it->second.DirectCutoffFrequency;
-										css.EffectCutoffFrequency = travContext.EffectCutoffFrequency * it->second.EffectCutoffFrequency;
+										css.DirectCutoffFrequency = sqrtf(travContext.DirectCutoffFrequency * it->second.DirectCutoffFrequency);
+										css.EffectCutoffFrequency = sqrtf(travContext.EffectCutoffFrequency * it->second.EffectCutoffFrequency);
 									}
 									else
 									{
