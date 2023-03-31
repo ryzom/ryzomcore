@@ -425,7 +425,7 @@ CVariable<sint16> MinFameToBuyGuildBuilding("egs","MinFameToBuyGuildBuilding", "
 CVariable<sint16> MinFameToBuyPlayerBuilding("egs","MinFameToBuyPlayerBuilding", "Minimum Fame To Buy a Player Building", 0, 0, true);
 CVariable<uint32> GuildCreationCost("egs","GuildCreationCost", "", 100, 0, true);
 CVariable<uint32> GuildMaxMemberCount("egs","GuildMaxMemberCount", "", 256, 0, true);
-CVariable<float> GuildMaxPoints("egs","GuildMaxPoints", "", 200, 0, true);
+CVariable<uint32> GuildMaxPoints("egs","GuildMaxPoints", "", 200, 0, true);
 
 
 CVariable<NLMISC::TGameCycle> TriggerRequestTimout("egs","TriggerRequestTimout", "", 300, 0, true);
