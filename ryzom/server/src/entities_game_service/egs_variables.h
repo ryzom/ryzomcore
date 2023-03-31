@@ -303,6 +303,7 @@ extern NLMISC::CVariable<sint16>				MinFameToBuyGuildBuilding;
 extern NLMISC::CVariable<sint16>				MinFameToBuyPlayerBuilding;
 extern NLMISC::CVariable<uint32>				GuildCreationCost;
 extern NLMISC::CVariable<uint32>				GuildMaxMemberCount;
+extern NLMISC::CVariable<float>				GuildMaxPoints;
 extern NLMISC::CVariable<NLMISC::TGameCycle>	TriggerRequestTimout;
 
 
