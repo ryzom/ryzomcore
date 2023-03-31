@@ -389,7 +389,8 @@ CVariable<float> ForageExtractionXPFactor( "egs", "ForageExtractionXPFactor", ""
 CVariable<float> ForageExtractionNbParticipantsXPBonusRatio( "egs", "ForageExtractionNbParticipantsXPBonusRatio", "", 0.1f, 0, true );
 CVariable<float> ForageExtractionNastyEventXPMalusRatio( "egs", "ForageExtractionNastyEventXPMalusRatio", "", 0.1f, 0, true );
 
-CVariable<uint32> ArkLootTimeBeforeNewDraw( "egs", "ArkLootTimeBeforeNewDraw", "Time need before a new ark loot draw", 120, 0, true ); // 12sec
+CVariable<uint32> ArkLootTimeBeforeNewDraw( "egs", "ArkLootTimeBeforeNewDraw", "Time need before a new Ark Loot draw", 120, 0, true ); // 12sec
+CVariable<float> ArkLootExtraModifierMultiplier( "egs", "ArkLootExtraModifierMultiplier", "Extra multiplier for Ark Loot modifier", 1.0f, 0, true ); // 12sec
 
 CVariable<float> ToxicCloudDamage( "egs","ToxicCloudDamage", "Max HP hit by a toxic cloud at ToxicCloudUpdateFrequency", 800.0f, true );
 CVariable<float> ForageExplosionDamage( "egs","ForageExplosionDamage", "Max HP hit once by a forage explosion", 4000.0f, true );
