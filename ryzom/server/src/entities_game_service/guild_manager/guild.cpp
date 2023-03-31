@@ -136,7 +136,7 @@ void CGuild::spendXP( uint32 xp )
 //----------------------------------------------------------------------------
 void CGuild::addXP( uint32 xp )
 {
-	if (_XP < 1000) // TEMPORARY LIMIT : must be removed when added more stuff to pay with guild points
+	if (_XP < GuildMaxPoints)
 	{
 		setXP( _XP + xp );
 		CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);

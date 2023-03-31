@@ -47,8 +47,9 @@ uint32 CGuildVersionAdapter::currentVersionNumber() const
 	// 3 : (01/11/2004) guild allegiance of previous existing guild setted to undefined...
 	// 4 : (07/03/2006) give full hp to all tools
 	// 5 : (13/03/2023) reset guild points
+	// 6 : (31/03/2023) set guild points to 100 (default)
 	////////////////////////////////////
-	return 5;
+	return 6;
 }
 
 
@@ -63,6 +64,7 @@ void CGuildVersionAdapter::adaptGuildFromVersion( CGuild & guild ) const
 	case 2: break; //adaptToVersion3(guild); // when we change guild save and have currentVersion = 4, we can re-active adapter (we can re-active
 	case 3: adaptToVersion4(guild);
 	case 4: adaptToVersion5(guild);
+	case 5: adaptToVersion6(guild);
 
 	default:; // the adapter at the next patch in fact...
 	}
@@ -106,6 +108,12 @@ void CGuildVersionAdapter::adaptToVersion4(CGuild & guild) const
 void CGuildVersionAdapter::adaptToVersion5(CGuild & guild) const
 {
 	guild.setPoints(0);
+}
+
+//---------------------------------------------------
+void CGuildVersionAdapter::adaptToVersion6(CGuild & guild) const
+{
+	guild.setPoints(50);
 }
 
 
