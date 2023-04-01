@@ -1054,7 +1054,7 @@ string getJewelEnchantAttr(CSheetId sbrick)
 
 
 //enchantEquipedItem 2 FingerL jloot_generic.sbrick,jboost_100x.sbrick
-//enchantEquipedItem 2 FingerL jloot_forage.sbrick,jboost_100x.sbrick
+//enchantEquipedItem 2 FingerL jloot_forage.sbrick,jboost_1000x.sbrick
 //enchantEquipedItem 2 FingerR jloot_hunt.sbrick,jboost_100x.sbrick
 //enchantEquipedItem 2 Neck jrez_lastpoint.sbrick,jboost_100x.sbrick
 //enchantEquipedItem 2 WristR jmod_focus_tryker_1.sbrick
@@ -2824,7 +2824,7 @@ NLMISC_COMMAND(setTitle, "set player title", "<uid> <title>")
 
 //setTag 2 pvpA pvp_ally_6.tga
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(setTag, "set player title", "<uid> <tag> <value>")
+NLMISC_COMMAND(setTag, "set player tags", "<uid> <tag> <value>")
 {
 	if (args.size() != 3) {
 		log.displayNL("ERR: invalid arg count");
@@ -2848,6 +2848,31 @@ NLMISC_COMMAND(setTag, "set player title", "<uid> <tag> <value>")
 		c->registerName();
 	else
 		c->updateJewelsTags(false);
+	return true;
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getTags, "get player tags", "<uid>")
+{
+	if (args.size() != 1) {
+		log.displayNL("ERR: invalid arg count");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	log.displayNL(c->getTagPvPA().c_str());
+	log.displayNL(c->getTagPvPB().c_str());
+	log.displayNL(c->getDefaultTagA().c_str());
+	log.displayNL(c->getDefaultTagB().c_str());
+	log.displayNL(c->getTagA().c_str());
+	log.displayNL(c->getTagB().c_str());
+	log.displayNL(c->getTagRightHand().c_str());
+	log.displayNL(c->getTagLeftHand().c_str());
+	log.displayNL(c->getTagHat().c_str());
+	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponRightHand);
+	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponLeftHand);
+	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.HatModel);
 	return true;
 }
 
@@ -3520,6 +3545,7 @@ NLMISC_COMMAND(setGuildPoints, "get/set the guild points", "<uid> <value>")
 				{
 					fromString(quant.substr(1), quantity);
 					points += quantity;
+					guild->addXP(quantity);
 				}
 			}
 			else if (quant[0] == '-')
@@ -3536,14 +3562,14 @@ NLMISC_COMMAND(setGuildPoints, "get/set the guild points", "<uid> <value>")
 						log.displayNL("ERR: not enough"); // No enough points
 						return true;
 					}
+					guild->spendXP(quantity);
 				}
 			}
 			else
 			{
 				fromString(quant, points);
+				guild->setPoints(points);
 			}
-
-			guild->setPoints(points);
 		}
 
 		log.displayNL("%u", points);
