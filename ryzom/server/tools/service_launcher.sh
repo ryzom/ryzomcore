@@ -80,19 +80,22 @@ do
 			then
 				touch "$SHARD_PATH/logs/ai_service_${NAME}.log"
 				"$CWD/wait_and_notify.sh" "$SHARD_PATH/logs/ai_service_${NAME}.log" "[[ARK]] AIS UP" $NAME 0 &
-				sleep 2
+				sleep 4
 			elif [[ "$NAME" == "egs" ]]
 			then
 				touch "$SHARD_PATH/logs/entities_game_service.log"
 				"$CWD/wait_and_notify.sh" "$SHARD_PATH/logs/entities_game_service.log" "onAiInstanceReady :  AI Instance 1 is up" $NAME 0 &
+				sleep 2
 			elif [[ "$NAME" == "ios" ]]
 			then
 				touch "$SHARD_PATH/logs/input_output_service.log"
 				"$CWD/wait_and_notify.sh" "$SHARD_PATH/logs/input_output_service.log" "cbDynChatAddChan: add channel : FACTION_MARAUDER" $NAME 0 &
+				sleep 2
 			elif [[ "$NAME" == "gpms" ]]
 			then
 				touch "$SHARD_PATH/logs/gpm_service.log"
 				"$CWD/wait_and_notify.sh" "$SHARD_PATH/logs/gpm_service.log" "cbCreateIndoorUnit : MSG: Creating indoor unit 256" $NAME 0 &
+				sleep 2
 			else
 				declare -A ServiceLogs
 				ServiceLogs[aes] = "admin_executor_service.log"
