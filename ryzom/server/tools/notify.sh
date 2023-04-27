@@ -71,3 +71,4 @@ then
 	fi
 fi
 
+sleep 1

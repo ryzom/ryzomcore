@@ -1054,7 +1054,7 @@ string getJewelEnchantAttr(CSheetId sbrick)
 
 
 //enchantEquipedItem 2 FingerL jloot_generic.sbrick,jboost_100x.sbrick
-//enchantEquipedItem 2 FingerL jloot_forage.sbrick,jboost_100x.sbrick
+//enchantEquipedItem 2 FingerL jloot_forage.sbrick,jboost_1000x.sbrick
 //enchantEquipedItem 2 FingerR jloot_hunt.sbrick,jboost_100x.sbrick
 //enchantEquipedItem 2 Neck jrez_lastpoint.sbrick,jboost_100x.sbrick
 //enchantEquipedItem 2 WristR jmod_focus_tryker_1.sbrick
@@ -3545,6 +3545,7 @@ NLMISC_COMMAND(setGuildPoints, "get/set the guild points", "<uid> <value>")
 				{
 					fromString(quant.substr(1), quantity);
 					points += quantity;
+					guild->addXP(quantity);
 				}
 			}
 			else if (quant[0] == '-')
@@ -3561,14 +3562,14 @@ NLMISC_COMMAND(setGuildPoints, "get/set the guild points", "<uid> <value>")
 						log.displayNL("ERR: not enough"); // No enough points
 						return true;
 					}
+					guild->spendXP(quantity);
 				}
 			}
 			else
 			{
 				fromString(quant, points);
+				guild->setPoints(points);
 			}
-
-			guild->setPoints(points);
 		}
 
 		log.displayNL("%u", points);
