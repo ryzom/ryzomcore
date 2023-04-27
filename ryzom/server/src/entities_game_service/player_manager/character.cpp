@@ -16859,12 +16859,13 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 					}
 
 					sint32 modifier = max(modifierL, modifierR);
-					if (modifier >= 0 && rand() % 1000 < modifier)
+					if (modifier >= 0 && rand() % 1000 < (uint32)(modifier * ArkLootExtraModifierMultiplier))
 					{
 						SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
 						params[0].SheetId = usedSheet;
-						sendDynamicSystemMessage(_EntityRowId, "ALLEGORY_EFFECT_TRIGGERED", params);
-						sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Forage&quality=%d%quantity=%d&command=reset_all", quality, _ForageProgress->amount()));
+						// ArkLoot script will trigger it
+						// sendDynamicSystemMessage(_EntityRowId, "ALLEGORY_EFFECT_TRIGGERED", params);
+						sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Forage&quality=%d&quantity=%d&command=reset_all", (sint32)_ForageProgress->quality(), (sint32)_ForageProgress->amount()));
 					}
 				}
 
@@ -17101,11 +17102,12 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 
 				sint32 modifier = max(modifierL, modifierR);
 
-				if (modifier >= 0 && (rand() % 1000) < modifier)
+				if (modifier >= 0 && (rand() % 1000) < (uint32)(modifier*ArkLootExtraModifierMultiplier))
 				{
 					SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
 					params[0].SheetId = usedSheet;
-					sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
+					// Arkloot script will trigger it
+					// sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
 					sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Loot&quality=%d&quantity=%d&command=reset_all", (uint32)quality, (uint32)mp->Quantity));
 				}
 			}
