@@ -2713,6 +2713,7 @@ public:
 	uint32 getLastExchangeMount() const;
 	bool getRespawnMainLandInTown() const;
 	void setRespawnMainLandInTown(bool status);
+	void setCurrentSpeedSwimBonus(uint32 speed);
 
 	const std::list<TCharacterLogTime> &getLastLogStats() const;
 	void updateConnexionStat();
@@ -3885,6 +3886,9 @@ private:
 
 	/// backup last used weight malus
 	sint32 _LastAppliedWeightMalus;
+
+	/// aqua speed bonus (used for tryker rite)
+	uint32 _CurrentSpeedSwimBonus;
 
 	/// Regenerte factor
 	float _CurrentRegenerateReposBonus;

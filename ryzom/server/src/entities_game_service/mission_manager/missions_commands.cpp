@@ -5229,3 +5229,19 @@ NLMISC_COMMAND(executePhrase,"execute a sabrina phrase","uid cyclic? [<brick ids
 	}
 	return true;
 }
+
+NLMISC_COMMAND(setSpecial,"set special values","uid special value")
+{
+	if (args.size() < 3)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	uint32 value;
+
+	if (args[1] == "speedswimbonus") {
+		NLMISC::fromString(args[2], value);
+		c->setCurrentSpeedSwimBonus(value);
+	}
+}
+

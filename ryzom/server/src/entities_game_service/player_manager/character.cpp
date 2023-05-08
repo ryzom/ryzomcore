@@ -591,6 +591,7 @@ CCharacter::CCharacter()
 	_MinPriceFilter = 0;
 	_MaxPriceFilter = ~0u;
 	_LastAppliedWeightMalus = 0;
+	_CurrentSpeedSwimBonus = 0;
 	_CurrentRegenerateReposBonus = 0;
 	_TpTicketSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	// setup timer for tickUpdate() calling
@@ -2777,6 +2778,22 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	_LastAppliedWeightMalus = getWeightMalus();
 	_PhysScores.SpeedVariationModifier += _LastAppliedWeightMalus;
 	sint16 speedVariationModifier = std::max((sint)_PhysScores.SpeedVariationModifier, (sint) - 100);
+	CSheetId aqua_speed("aqua_speed.sbrick");
+	if (isInWater() && (haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0))
+	{
+		setBonusMalusName("aqua_speed", addEffectInDB(aqua_speed, true));
+		if (_CurrentSpeedSwimBonus > 0)
+			speedVariationModifier = std::min(speedVariationModifier + (sint16)_CurrentSpeedSwimBonus, 100);
+		else
+			speedVariationModifier = std::min(speedVariationModifier + 100, 100);
+	}
+	else
+	{
+		sint8 bonus = getBonusMalusName("aqua_speed");
+		if (bonus > -1)
+			removeEffectInDB(bonus, true);
+	}
+
 	// Speed
 	// while stunned/root/mezzed etc speed is forced to 0
 	float oldCurrentSpeed;
