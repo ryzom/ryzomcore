@@ -3589,7 +3589,7 @@ NLMISC_COMMAND(resetTodayGuildPoints, "reset the today guild points", "<uid>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(addPlayerPet, "add a pet to player", "<uid> <sheetid> [size] [name]")
+NLMISC_COMMAND(addPlayerPet, "add a pet to player", "<uid> <sheetid> [size] [name] [clientsheet]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3599,19 +3599,23 @@ NLMISC_COMMAND(addPlayerPet, "add a pet to player", "<uid> <sheetid> [size] [nam
 	CSheetId ticket = CSheetId(args[1]);
 
 	uint8 size = 100;
-	if (args.size() >= 3)
+	if (args.size() > 2)
 		fromString(args[2], size);
 
 	ucstring customName;
-	if (args.size() >= 4)
+	if (args.size() >= 3)
 		customName.fromUtf8(args[3]);
+
+	string clientSheet;
+	if (args.size() > 4)
+		clientSheet = args[4];
 
 	if (ticket != CSheetId::Unknown)
 	{
 		CGameItemPtr item = c->createItemInInventoryFreeSlot(INVENTORIES::bag, 1, 1, ticket);
 		if (item != 0)
 		{
-			if (! c->addCharacterAnimal(ticket, 0, item, size, customName))
+			if (! c->addCharacterAnimal(ticket, 0, item, size, customName, clientSheet))
 			{
 				item.deleteItem();
 				log.displayNL("ERR: CAN'T ADD ANIMAL");
@@ -4310,17 +4314,39 @@ NLMISC_COMMAND(removeDp, "Update the DP", "<uid> <dp>")
 }
 
 
-NLMISC_COMMAND(addBricks, "Specified player learns given brick", "<uid> <brick1,brick2>")
+NLMISC_COMMAND(haveBricks, "Return list of player selected learned bricks", "<uid> <brick1,brick2>")
 {
 	if (args.size() != 2) return false;
 	GET_ACTIVE_CHARACTER
 
 	std::vector< std::string > bricks;
 	NLMISC::splitString(args[1], ",", bricks);
+	bool res = true;
 	for (uint32 i=0; i<bricks.size(); i++)
 	{
 		CSheetId brickId(bricks[i]);
-		c->addKnownBrick(brickId);
+		if (c->haveBrick(brickId))
+			log.displayNL(bricks[i].c_str());
+	}
+
+	return true;
+}
+
+
+NLMISC_COMMAND(addBricks, "Specified player learns given brick", "<uid> <brick1,brick2> [dont_add_again?]")
+{
+	if (args.size() < 2) return false;
+	GET_ACTIVE_CHARACTER
+
+	bool checkHave = args.size() > 2 && args[2] == "1";
+
+	std::vector< std::string > bricks;
+	NLMISC::splitString(args[1], ",", bricks);
+	for (uint32 i=0; i<bricks.size(); i++)
+	{
+		CSheetId brickId(bricks[i]);
+		if (!c->haveBrick(brickId))
+			c->addKnownBrick(brickId);
 	}
 	return true;
 }
@@ -4332,7 +4358,10 @@ NLMISC_COMMAND(delBrick, "Specified player unlearns given brick", "<uid> <brick1
 	GET_ACTIVE_CHARACTER
 
 	CSheetId brickId(args[1]);
-	c->removeKnownBrick(brickId);
+	if (c->haveBrick(brickId))
+		c->removeKnownBrick(brickId);
+	else
+		log.displayNL("ERR: don't have brick");
 
 	return true;
 }
