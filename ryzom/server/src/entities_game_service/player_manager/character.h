@@ -988,7 +988,7 @@ public:
 	void setTimeOfDeath(NLMISC::TGameTime t);
 
 	// character buy a creature
-	bool addCharacterAnimal(const NLMISC::CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size = 100, const ucstring &customName = ucstring(""));
+	bool addCharacterAnimal(const NLMISC::CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size = 100, const ucstring &customName = ucstring(""), const std::string &clientSheet = "");
 
 	// return free slot for pet spawn or -1 if there are no free slot
 	sint32 getFreePetSlot(uint8 startSlot = 0);
@@ -3024,6 +3024,9 @@ public:
 		return (_EntityState.X() != _OldPosX || _EntityState.Y() != _OldPosY);
 	}
 
+	/// apply regenerate and clip currents value
+	void applyRegenAndClipCurrentValue();
+
 	/// Kill the player
 	void killMe();
 
@@ -3078,9 +3081,6 @@ private:
 
 	/// recompute all Max value
 	void computeMaxValue();
-
-	/// apply regenerate and clip currents value
-	void applyRegenAndClipCurrentValue();
 
 	/// character is dead
 	void deathOccurs(void);

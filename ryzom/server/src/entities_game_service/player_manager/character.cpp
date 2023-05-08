@@ -6030,7 +6030,7 @@ void CCharacter::setCurrentContinent(CONTINENT::TContinent continent)
 //-----------------------------------------------
 // CCharacter::addCharacterAnimal buy a creature
 //-----------------------------------------------
-bool CCharacter::addCharacterAnimal(const CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size, const ucstring &customName)
+bool CCharacter::addCharacterAnimal(const CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size, const ucstring &customName, const string &clientSheet)
 {
 	if (!PackAnimalSystemEnabled)
 		return false;
@@ -6046,7 +6046,10 @@ bool CCharacter::addCharacterAnimal(const CSheetId &PetTicket, uint32 Price, CGa
 	if (checkAnimalCount(PetTicket, true, 1))
 	{
 		const CStaticItem* form = CSheets::getForm(PetTicket);
-		pet.PetSheetId = form->PetSheet;
+		if (!clientSheet.empty())
+			pet.PetSheetId =  CSheetId(clientSheet.c_str());
+		else
+			pet.PetSheetId = form->PetSheet;
 		pet.Satiety = form->PetHungerCount;
 		pet.MaxSatiety = form->PetHungerCount;
 		uint8 startSlot = 0;
