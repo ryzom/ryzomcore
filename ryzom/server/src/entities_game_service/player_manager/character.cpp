@@ -6373,7 +6373,7 @@ bool CCharacter::checkAnimalCount(const CSheetId &PetTicket, bool sendMessage, s
 			return false;
 		}
 
-		CPlayer* p = PlayerManager.getPlayer(PlayerManager.getPlayerId(getId()));
+		/*CPlayer* p = PlayerManager.getPlayer(PlayerManager.getPlayerId(getId()));
 		BOMB_IF(p == NULL, "Failed to find player record for character: " << getId().toString(), return 0.0);
 
 		if (p->isTrialPlayer())
@@ -6382,6 +6382,7 @@ bool CCharacter::checkAnimalCount(const CSheetId &PetTicket, bool sendMessage, s
 				sendDynamicSystemMessage(_Id, "EGS_CANT_BUY_PACKER_IS_TRIAL_PLAYER");
 			return false;
 		}
+		* */
 	}
 	else
 	{
