@@ -1998,6 +1998,8 @@ public:
 
 	/// set a fame value for the player, send info to the client.
 	void setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint32 fameMax, uint16 fameTrend);
+	void saveFameValuePlayer(uint32 factionIndex, sint32 playerFame);
+
 	// set the fame boundaries, send info to the client.
 	//  Called when some of the CVariables are changed.
 	void setFameBoundaries();
@@ -2318,6 +2320,11 @@ public:
 	CPlayerRoomInterface &getRoomInterface();
 
 	EGSPD::CFameContainerPD &getPlayerFamesContainer();
+	void setSavedFames(bool status);
+	bool getSavedFames();
+	void saveFame(uint32 i, sint32 fame);
+	void addSavedFame(uint32 i, sint32 fame);
+	sint32 restoreFame(uint32 i);
 
 	bool checkCharacterStillValide(const char* msgError);
 
@@ -3438,6 +3445,8 @@ private:
 
 	std::string _DontTranslate;
 
+	sint32 _SavedFames[PVP_CLAN::NbClans];
+	bool _SavedFame;
 
 	/// SDB path where player wins HoF points in PvP (if not empty)
 	std::string _SDBPvPPath;

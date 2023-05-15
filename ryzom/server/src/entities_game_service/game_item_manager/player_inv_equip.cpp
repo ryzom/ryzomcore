@@ -20,6 +20,7 @@
 
 #include "game_share/slot_equipment.h"
 #include "player_manager/character.h"
+#include "guild_manager/fame_manager.h"
 #include "egs_sheets/egs_sheets.h"
 
 using namespace NLMISC;
@@ -127,6 +128,12 @@ void CEquipInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags cha
 	{
 		getCharacter()->updateJewelsTags(false);
 		getCharacter()->updateJewelsModifiers();
+	}
+
+	// Update fame
+	if (getInventory()->getInventoryId() == INVENTORIES::handling)
+	{
+		CFameManager::getInstance().enforceFameCaps(getCharacter()->getId(), getCharacter()->getOrganization(), getCharacter()->getAllegiance());
 	}
 
 }
