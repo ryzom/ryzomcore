@@ -69,7 +69,7 @@ const	std::string	egsString("EGS");
 
 
 const	uint32 Default_MaxPlayers=5000;
-const	uint32 Default_MaxBotsPet=Default_MaxPlayers*4;
+const	uint32 Default_MaxBotsPet=Default_MaxPlayers*7;
 const	uint32 Default_MaxBotsFauna=40000;
 const	uint32 Default_MaxBotsNpc=20000;
 const	uint32 Default_MaxBotsFx=200;
