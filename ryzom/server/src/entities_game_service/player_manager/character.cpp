@@ -682,6 +682,8 @@ CCharacter::CCharacter()
 	_FriendVisibility = VisibleToAll;
 	_LangChannel = "rf";
 	_NewTitle = "Refugee";
+	_SavedFame = false;
+
 	initDatabase();
 
 	_PowoCell = 0;
@@ -17225,36 +17227,6 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 	{
 		if (playerFame != NO_FAME)
 		{
-			// Update Marauder fame when < 50 and other fame change
-			uint32 marauderIdx = PVP_CLAN::getFactionIndex(PVP_CLAN::Marauder);
-			sint32	marauderFame = CFameInterface::getInstance().getFameIndexed(_Id, marauderIdx);
-			if (factionIndex != marauderIdx)
-			{
-				sint32 maxOtherfame = -100*kFameMultipler;
-				for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
-				{
-					if (fameIdx == marauderIdx)
-						continue;
-
-					sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
-
-					if (fame > maxOtherfame)
-						maxOtherfame = fame;
-				}
-
-				if (marauderFame < 50*kFameMultipler)
-				{
-					if (maxOtherfame < -50*kFameMultipler) // Cap to 50
-						maxOtherfame = -50*kFameMultipler;
-					CFameManager::getInstance().setEntityFame(_Id, marauderIdx, -maxOtherfame, false);
-				}
-				else
-				{
-					if (maxOtherfame > -40*kFameMultipler)
-						CFameManager::getInstance().setEntityFame(_Id, marauderIdx, -maxOtherfame, false);
-				}
-			}
-
 			//			_PropertyDatabase.setProp( toString("FAME:PLAYER%d:VALUE", fameIndexInDatabase),
 			// sint64(float(playerFame)/FameAbsoluteMax*100) );
 			CBankAccessor_PLR::getFAME()
@@ -17282,18 +17254,11 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 
 	bool canPvp = false;
 
-	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
+	for (uint8 fameIdx = PVP_CLAN::BeginClans; fameIdx < PVP_CLAN::EndClans; fameIdx++)
 	{
-		sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
-
-		if (fame >= PVPFameRequired * 6000)
-		{
+		sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)fameIdx));
+		if ((fame >= PVPFameRequired * kFameMultipler) || (fame <= -PVPFameRequired * kFameMultipler))
 			canPvp = true;
-		}
-		else if (fame <= -PVPFameRequired * 6000)
-		{
-			canPvp = true;
-		}
 	}
 
 	if (_LoadingFinish)
@@ -17339,13 +17304,15 @@ void CCharacter::resetFameDatabase()
 		CFameManager::getInstance().enforceFameCaps(getId(), getOrganization(), getAllegiance());
 		CFameManager::getInstance().setAndEnforceTribeFameCap(getId(), getOrganization(), getAllegiance());
 	}
-
-	for (uint i = 0; i < CStaticFames::getInstance().getNbFame(); ++i)
+	else
 	{
-		// update player fame info
-		sint32 fame = fi.getFameIndexed(_Id, i, false, true);
-		sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), getOrganization(), i);
-		setFameValuePlayer(i, fame, maxFame, 0);
+		for (uint i = 0; i < CStaticFames::getInstance().getNbFame(); ++i)
+		{
+			// update player fame info
+			sint32 fame = fi.getFameIndexed(_Id, i, false, true);
+			sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), getOrganization(), i);
+			setFameValuePlayer(i, fame, maxFame, 0);
+		}
 	}
 }
 
