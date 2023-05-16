@@ -8,7 +8,6 @@ TARGET_LINK_LIBRARIES(ryzom_welcome_service
 						ryzom_adminmodules
 						${RYZOM_GAMESHARE_LIBRARIES}
 						${NELMISC_LIBRARIES}
-						${NELGEORGES_LIBRARIES}
 						${NELNET_LIBRARIES})
 
 NL_DEFAULT_PROPS(ryzom_welcome_service "Ryzom, Services: Ryzom Welcome Service (WS)")

@@ -1284,6 +1284,12 @@ inline void CCharacter::setRespawnMainLandInTown(bool status)
 {
 	_RespawnMainLandInTown = status;
 }
+
+inline void CCharacter::setCurrentSpeedSwimBonus(uint32 speed)
+{
+	_CurrentSpeedSwimBonus = speed;
+}
+
 //------------------------------------------------------------------------------
 
 inline const std::list<TCharacterLogTime>& CCharacter::getLastLogStats() const

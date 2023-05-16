@@ -131,6 +131,18 @@ bool CHarvestable::writeMpInfos()
 	if (nbMp > INVENTORIES::NbTempInvSlots)
 		nbMp = INVENTORIES::NbTempInvSlots;
 
+	bool useGenericMats = false;
+
+
+	CSheetId usedSheet;
+	CSBrickParamJewelAttrs sbrickParamL = harvester->getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
+	CSBrickParamJewelAttrs sbrickParamR = harvester->getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
+	if ((sbrickParamL.ParsedOk && sbrickParamL.Value == "generic") || (sbrickParamR.ParsedOk && sbrickParamR.Value == "generic"))
+	{
+		useGenericMats = true;
+	}
+
+
 	for (uint i = 0 ; i < nbMp ; ++i)
 	{
 		const CCreatureRawMaterial &mp = _Mps[i];
@@ -151,14 +163,21 @@ bool CHarvestable::writeMpInfos()
 		else
 		{
 			const CCreatureRawMaterial &mp = _Mps[ i ];
+			const CCreatureRawMaterial &genericMp = _GenericMps[ i ];
+			CSheetId usedMp = mp.ItemId;
+			uint16 quantity = mp.Quantity;
+			if (useGenericMats)
+				usedMp = genericMp.ItemId;
 
-			if ( mp.ItemId != CSheetId::Unknown )
+
+
+			if ( usedMp != CSheetId::Unknown )
 			{
-				invTemp->setDispQuantity(_LootSlotCount+i, mp.Quantity);
+				invTemp->setDispQuantity(_LootSlotCount+i, quantity);
 #if !FINAL_VERSION
-				nldebug("Write MP %u, Sheet = %s, qty = %u",i, mp.ItemId.toString().c_str(),mp.Quantity);
+				nldebug("Write MP %u, Sheet = %s, qty = %u",i, usedMp.toString().c_str(), quantity);
 #endif
-				if (mp.Quantity)
+				if (quantity)
 					++validMps;
 			}
 			else
@@ -169,8 +188,8 @@ bool CHarvestable::writeMpInfos()
 #endif
 			}
 
-			if( mp.Quantity > 0 )
-				invTemp->setDispSheetId(_LootSlotCount+i, mp.ItemId);
+			if( quantity > 0 )
+				invTemp->setDispSheetId(_LootSlotCount+i, usedMp);
 		}
 	}
 
@@ -186,6 +205,7 @@ bool CHarvestable::writeMpInfos()
 void CHarvestable::setMps( const vector<CStaticCreatureRawMaterial>& mps )
 {
 	_Mps.clear();
+	_GenericMps.clear();
 
 	if( IsRingShard )
 	{
@@ -222,6 +242,7 @@ void CHarvestable::setMps( const vector<CStaticCreatureRawMaterial>& mps )
 		rm.ItemId = mps[iSlot].ItemId;
 		rm.Quantity = (uint16)*QuarteringQuantityByVariable[mps[iSlot].quantityVariable()];
 		_Mps.push_back( rm );
+		_GenericMps.push_back( rm );
 	}
 	if (VerboseQuartering)
 	{
@@ -247,6 +268,8 @@ void CHarvestable::setMps( const vector<CStaticCreatureRawMaterial>& mps )
 		uint intQuantityAveragePerFilledSlot = (uint)quantityAveragePerFilledSlot;
 		float decimalPartQuantityAveragePerFilledSlot = quantityAveragePerFilledSlot - (float)floor( quantityAveragePerFilledSlot );
 
+
+		bool useGenericMats = quantityVariable < RMQVBossBegin;
 		// Randomize slots to fill and quantities
 		for ( uint i=0; i!=rndNbSlotsToFill; ++i )
 		{
@@ -288,6 +311,10 @@ void CHarvestable::setMps( const vector<CStaticCreatureRawMaterial>& mps )
 				rm.ItemId = mps[iSlot].ItemId;
 				rm.Quantity = (uint16)slotQuantity;
 				_Mps.push_back( rm );
+				if (useGenericMats)
+					rm.ItemId = CSheetId("system_mp_loot.sitem");
+				_GenericMps.push_back( rm );
+
 				if (VerboseQuartering)
 					nldebug("QRTR: %s: %u of %s", CurrentCreatureSpawningDebug.c_str(), slotQuantity, rm.ItemId.toString().c_str());
 			}

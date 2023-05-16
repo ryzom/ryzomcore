@@ -1053,9 +1053,13 @@ string getJewelEnchantAttr(CSheetId sbrick)
 }
 
 
-//enchantEquipedItem 530162 WristR jmod_focus_tryker_1.sbrick
-//enchantEquipedItem 530162 Neck tag_fyros_3.sbrick
-//enchantEquipedItem 530162 Neck jrez_fulllife_tryker.sbrick,jboost2.sbrick
+//enchantEquipedItem 2 FingerL jloot_generic.sbrick,jboost_100x.sbrick
+//enchantEquipedItem 2 FingerL jloot_forage.sbrick,jboost_1000x.sbrick
+//enchantEquipedItem 2 FingerR jloot_hunt.sbrick,jboost_100x.sbrick
+//enchantEquipedItem 2 Neck jrez_lastpoint.sbrick,jboost_100x.sbrick
+//enchantEquipedItem 2 WristR jmod_focus_tryker_1.sbrick
+//enchantEquipedItem 2 Neck tag_fyros_3.sbrick
+//enchantEquipedItem 2 Neck jrez_fulllife_tryker.sbrick,jboost2x.sbrick
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(checkInventoryItems, "Check items from a characters inventory", "<uid> <inventory> <sheetnames> <quality> <quantity>")
 {
@@ -1205,6 +1209,49 @@ NLMISC_COMMAND(getEnchantmentInEquipedItem, "getEnchantmentInEquipedItem", "<uid
 	}
 	return true;
 }
+
+//updateSheetItem 2 LEGS ikaracp_ep2_1.sitem
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(updateSheetItem, "updateSheetItem", "<uid> <slotname> <sheet>")
+{
+	if (args.size () < 3)
+	{
+		log.displayNL("ERR: Invalid number of parameters. Parameters: <uid> <slotname> <sheet>");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	string selected_slot = args[1];
+	CGameItemPtr itemPtr;
+
+	if (selected_slot == "WEAPON_LEFT")
+		itemPtr = c->getItem(INVENTORIES::handling, INVENTORIES::left);
+	else if (selected_slot == "WEAPON_RIGHT")
+		itemPtr = c->getItem(INVENTORIES::handling, INVENTORIES::right);
+	else
+		itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
+
+	if (itemPtr != NULL)
+	{
+		itemPtr->setSheetId(CSheetId(args[2]));
+
+		uint32 slot = itemPtr->getInventorySlot();
+		if (selected_slot == "WEAPON_LEFT")
+			c->equipCharacter(INVENTORIES::handling, INVENTORIES::left, slot);
+		else if  (selected_slot == "WEAPON_RIGHT")
+			c->equipCharacter(INVENTORIES::handling, INVENTORIES::left, slot);
+		else
+			c->equipCharacter(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot), slot);
+
+		log.displayNL("OK");
+	}
+	else
+		log.displayNL("ERR");
+	return true;
+}
+
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(sapLoadInEquipedItem, "reloadSapLoadInEquipedItem", "<uid> <slotname> [<value>]")
@@ -1803,7 +1850,7 @@ NLMISC_COMMAND(setFaction, "set the faction of player", "<uid> <faction> [<civ>]
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [instance] [exit_pos] [can_xp,cant_dead,can_teleport,can_speedup,can_dp,onetry] [access_room_inv,access_guild_room] [scope]")
+NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [instance] [exit_pos] [can_xp,cant_dead,can_teleport,can_speedup,can_dp,onetry,can_enchant] [access_room_inv,access_guild_room] [scope]")
 {
 	if (args.size() < 2)
 		return false;
@@ -1816,8 +1863,8 @@ NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [insta
 	else
 		building = CBuildingManager::getInstance()->getBuildingPhysicalsByName("building_instance_ZO_player_111");
 
-	string powoFlags = "000000";
-	if (args.size() > 4 && args[4].length() == 6)
+	string powoFlags = "0000000";
+	if (args.size() > 4 && args[4].length() == 7)
 		powoFlags = args[4];
 
 	string invFlags = "00";
@@ -1852,6 +1899,7 @@ NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [insta
 					c->setPowoFlag("speed", powoFlags[3] == '1');
 					c->setPowoFlag("dp", powoFlags[4] == '1');
 					c->setPowoFlag("retry", powoFlags[5] == '1');
+					c->setPowoFlag("enchant", powoFlags[6] == '1');
 
 					c->setPowoFlag("room_inv", invFlags[0] == '1');
 					c->setPowoFlag("guild_inv", invFlags[1] == '1');
@@ -2776,7 +2824,7 @@ NLMISC_COMMAND(setTitle, "set player title", "<uid> <title>")
 
 //setTag 2 pvpA pvp_ally_6.tga
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(setTag, "set player title", "<uid> <tag> <value>")
+NLMISC_COMMAND(setTag, "set player tags", "<uid> <tag> <value>")
 {
 	if (args.size() != 3) {
 		log.displayNL("ERR: invalid arg count");
@@ -2800,6 +2848,31 @@ NLMISC_COMMAND(setTag, "set player title", "<uid> <tag> <value>")
 		c->registerName();
 	else
 		c->updateJewelsTags(false);
+	return true;
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getTags, "get player tags", "<uid>")
+{
+	if (args.size() != 1) {
+		log.displayNL("ERR: invalid arg count");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	log.displayNL(c->getTagPvPA().c_str());
+	log.displayNL(c->getTagPvPB().c_str());
+	log.displayNL(c->getDefaultTagA().c_str());
+	log.displayNL(c->getDefaultTagB().c_str());
+	log.displayNL(c->getTagA().c_str());
+	log.displayNL(c->getTagB().c_str());
+	log.displayNL(c->getTagRightHand().c_str());
+	log.displayNL(c->getTagLeftHand().c_str());
+	log.displayNL(c->getTagHat().c_str());
+	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponRightHand);
+	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponLeftHand);
+	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.HatModel);
 	return true;
 }
 
@@ -2877,6 +2950,15 @@ NLMISC_COMMAND(getPlayerStats,"get player stats","<uid> <stat1,stat2,stat3..>")
 	if (i < stats.size() && stats[i] == "powo") // powo cell
 	{
 		log.displayNL("%d", c->getPowoCell());
+		i++;
+	}
+
+	if (i < stats.size() && stats[i] == "water") //in water
+	{
+		if (c->isInWater())
+			log.displayNL("1");
+		else
+			log.displayNL("0");
 		i++;
 	}
 
@@ -3463,6 +3545,7 @@ NLMISC_COMMAND(setGuildPoints, "get/set the guild points", "<uid> <value>")
 				{
 					fromString(quant.substr(1), quantity);
 					points += quantity;
+					guild->addXP(quantity);
 				}
 			}
 			else if (quant[0] == '-')
@@ -3479,14 +3562,14 @@ NLMISC_COMMAND(setGuildPoints, "get/set the guild points", "<uid> <value>")
 						log.displayNL("ERR: not enough"); // No enough points
 						return true;
 					}
+					guild->spendXP(quantity);
 				}
 			}
 			else
 			{
 				fromString(quant, points);
+				guild->setPoints(points);
 			}
-
-			guild->setPoints(points);
 		}
 
 		log.displayNL("%u", points);
@@ -3506,7 +3589,7 @@ NLMISC_COMMAND(resetTodayGuildPoints, "reset the today guild points", "<uid>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(addPlayerPet, "add a pet to player", "<uid> <sheetid> [size] [name]")
+NLMISC_COMMAND(addPlayerPet, "add a pet to player", "<uid> <sheetid> [size] [name] [clientsheet]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3516,19 +3599,23 @@ NLMISC_COMMAND(addPlayerPet, "add a pet to player", "<uid> <sheetid> [size] [nam
 	CSheetId ticket = CSheetId(args[1]);
 
 	uint8 size = 100;
-	if (args.size() >= 3)
+	if (args.size() > 2)
 		fromString(args[2], size);
 
 	ucstring customName;
-	if (args.size() >= 4)
+	if (args.size() >= 3)
 		customName.fromUtf8(args[3]);
+
+	string clientSheet;
+	if (args.size() > 4)
+		clientSheet = args[4];
 
 	if (ticket != CSheetId::Unknown)
 	{
 		CGameItemPtr item = c->createItemInInventoryFreeSlot(INVENTORIES::bag, 1, 1, ticket);
 		if (item != 0)
 		{
-			if (! c->addCharacterAnimal(ticket, 0, item, size, customName))
+			if (! c->addCharacterAnimal(ticket, 0, item, size, customName, clientSheet))
 			{
 				item.deleteItem();
 				log.displayNL("ERR: CAN'T ADD ANIMAL");
@@ -3602,9 +3689,10 @@ NLMISC_COMMAND(getPlayerPetsInfos, "get player pets infos", "<uid>")
 {
 	GET_ACTIVE_CHARACTER
 
-	string pets = c->getPetsInfos();
-
-	log.displayNL("%s", pets.c_str());
+	std::vector< std::string > lines;
+	NLMISC::splitString(c->getPetsInfos(), "\n", lines);
+	for (uint8 i = 0; i < lines.size(); i++)
+		log.displayNL("%s", lines[i].c_str());
 	return true;
 }
 
@@ -4226,17 +4314,39 @@ NLMISC_COMMAND(removeDp, "Update the DP", "<uid> <dp>")
 }
 
 
-NLMISC_COMMAND(addBricks, "Specified player learns given brick", "<uid> <brick1,brick2>")
+NLMISC_COMMAND(haveBricks, "Return list of player selected learned bricks", "<uid> <brick1,brick2>")
 {
 	if (args.size() != 2) return false;
 	GET_ACTIVE_CHARACTER
 
 	std::vector< std::string > bricks;
 	NLMISC::splitString(args[1], ",", bricks);
+	bool res = true;
 	for (uint32 i=0; i<bricks.size(); i++)
 	{
 		CSheetId brickId(bricks[i]);
-		c->addKnownBrick(brickId);
+		if (c->haveBrick(brickId))
+			log.displayNL(bricks[i].c_str());
+	}
+
+	return true;
+}
+
+
+NLMISC_COMMAND(addBricks, "Specified player learns given brick", "<uid> <brick1,brick2> [dont_add_again?]")
+{
+	if (args.size() < 2) return false;
+	GET_ACTIVE_CHARACTER
+
+	bool checkHave = args.size() > 2 && args[2] == "1";
+
+	std::vector< std::string > bricks;
+	NLMISC::splitString(args[1], ",", bricks);
+	for (uint32 i=0; i<bricks.size(); i++)
+	{
+		CSheetId brickId(bricks[i]);
+		if (!c->haveBrick(brickId))
+			c->addKnownBrick(brickId);
 	}
 	return true;
 }
@@ -4248,7 +4358,10 @@ NLMISC_COMMAND(delBrick, "Specified player unlearns given brick", "<uid> <brick1
 	GET_ACTIVE_CHARACTER
 
 	CSheetId brickId(args[1]);
-	c->removeKnownBrick(brickId);
+	if (c->haveBrick(brickId))
+		c->removeKnownBrick(brickId);
+	else
+		log.displayNL("ERR: don't have brick");
 
 	return true;
 }
@@ -4983,6 +5096,7 @@ NLMISC_COMMAND(getRpPoints, "get RP points of player (if quantity, give/take/set
 	}
 
 	log.displayNL("%u", points);
+	return true;
 }
 
 //----------------------------------------------------------------------------
@@ -5029,6 +5143,7 @@ NLMISC_COMMAND(getBattlePoints, "get Battle points of player (if quantity, give/
 	}
 
 	log.displayNL("%u", points);
+	return true;
 }
 
 //addEntitiesTrigger 2 arkai_914_Chest 50 app_arcc&nbsp&action=mScript_Run&script=11450
@@ -5070,10 +5185,92 @@ NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> 
 	string url = args[3];
 	CZoneManager::getInstance().addEntitiesTrigger(alias, distance, url);
 	log.displayNL("OK");
+	return true;
 }
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(delEntitiesTriggers, "delete all Entities triggers", "")
 {
 	CZoneManager::getInstance().delEntitiesTriggers();
+	return true;
 }
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(useConsumableItem, "use consumable item", "uid sitem quality")
+{
+
+	if (args.size() < 3)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	CSheetId sheet = CSheetId(args[1].c_str());
+
+	uint16 quality;
+	fromString(args[2], quality);
+
+	if (sheet != CSheetId::Unknown)
+	{
+		CGameItemPtr item = GameItemManager.createItem(sheet, quality, 1, 0);
+		if (item != NULL)
+		{
+			if (item->getStaticForm() != NULL)
+			{
+				CPhraseManager::getInstance().useConsumableItem(c->getEntityRowId(), item->getStaticForm(), quality);
+				item.deleteItem();
+				log.displayNL("OK");
+				return true;
+			}
+		}
+	}
+	log.displayNL("ERR");
+	return true;
+}
+
+
+//executePhrase 2 0 bspdma01.sbrick
+
+NLMISC_COMMAND(executePhrase,"execute a sabrina phrase","uid cyclic? [<brick ids>...]")
+{
+	if (args.size() < 3)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	bool cyclic;
+	NLMISC::fromString(args[1], cyclic);
+
+	if (args.size() > 3)
+	{
+		vector<CSheetId> brickIds;
+		for (uint i = 2 ; i < args.size() ; ++i)
+		{
+			CSheetId sheet(args[i]);
+			brickIds.push_back( sheet );
+		}
+
+		CPhraseManager::getInstance().executePhrase(c->getEntityRowId(), c->getTargetDataSetRow(), brickIds, cyclic);
+	}
+	else
+	{
+		CSheetId phraseSheet(args[2]);
+		CPhraseManager::getInstance().executePhrase(c->getEntityRowId(), c->getTargetDataSetRow(), phraseSheet, cyclic);
+	}
+	return true;
+}
+
+NLMISC_COMMAND(setSpecial,"set special values","uid special value")
+{
+	if (args.size() < 3)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	uint32 value;
+
+	if (args[1] == "speedswimbonus") {
+		NLMISC::fromString(args[2], value);
+		c->setCurrentSpeedSwimBonus(value);
+	}
+}
+

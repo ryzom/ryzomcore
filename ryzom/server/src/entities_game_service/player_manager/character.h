@@ -988,7 +988,7 @@ public:
 	void setTimeOfDeath(NLMISC::TGameTime t);
 
 	// character buy a creature
-	bool addCharacterAnimal(const NLMISC::CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size = 100, const ucstring &customName = ucstring(""));
+	bool addCharacterAnimal(const NLMISC::CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size = 100, const ucstring &customName = ucstring(""), const std::string &clientSheet = "");
 
 	// return free slot for pet spawn or -1 if there are no free slot
 	sint32 getFreePetSlot(uint8 startSlot = 0);
@@ -2720,6 +2720,7 @@ public:
 	uint32 getLastExchangeMount() const;
 	bool getRespawnMainLandInTown() const;
 	void setRespawnMainLandInTown(bool status);
+	void setCurrentSpeedSwimBonus(uint32 speed);
 
 	const std::list<TCharacterLogTime> &getLastLogStats() const;
 	void updateConnexionStat();
@@ -3031,6 +3032,9 @@ public:
 		return (_EntityState.X() != _OldPosX || _EntityState.Y() != _OldPosY);
 	}
 
+	/// apply regenerate and clip currents value
+	void applyRegenAndClipCurrentValue();
+
 	/// Kill the player
 	void killMe();
 
@@ -3085,9 +3089,6 @@ private:
 
 	/// recompute all Max value
 	void computeMaxValue();
-
-	/// apply regenerate and clip currents value
-	void applyRegenAndClipCurrentValue();
 
 	/// character is dead
 	void deathOccurs(void);
@@ -3673,7 +3674,8 @@ private:
 
 	/// Structure for forage sessions (NULL if there is no forage in progress)
 	CForageProgress* _ForageProgress;
-
+	NLMISC::TGameCycle _LastTickForageLoot;
+	NLMISC::TGameCycle _LastTickCreatureLoot;
 	/// Distance to current prospected deposit
 	CSEffectPtr _ProspectionLocateDepositEffect;
 
@@ -3893,6 +3895,9 @@ private:
 
 	/// backup last used weight malus
 	sint32 _LastAppliedWeightMalus;
+
+	/// aqua speed bonus (used for tryker rite)
+	uint32 _CurrentSpeedSwimBonus;
 
 	/// Regenerte factor
 	float _CurrentRegenerateReposBonus;

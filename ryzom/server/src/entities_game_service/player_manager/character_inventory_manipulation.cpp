@@ -3177,10 +3177,17 @@ void CCharacter::rechargeItem(INVENTORIES::TInventory invId, uint32 slot)
 
 // proc enchantment of an item
 // ****************************************************************************
-void CCharacter::procEnchantment()
+ void CCharacter::procEnchantment()
 {
 	if (!EnchantSystemEnabled)
 		return;
+
+	if (getPowoCell() != 0 && !getPowoFlag("enchant"))
+	{
+		sendDynamicSystemMessage(_EntityRowId, "ENCHANT_DISABLED");
+		return;
+	}
+
 
 	CInventoryPtr handlingInv = getInventory(INVENTORIES::handling);
 	nlassert(handlingInv != NULL);

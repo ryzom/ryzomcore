@@ -25,7 +25,7 @@ class CGuild;
  * \date 2004
  */
 class CGuildVersionAdapter
-{	
+{
 
 public:
 	/// getInstance
@@ -33,7 +33,7 @@ public:
 	{
 		if (_Instance == NULL)
 			_Instance = new CGuildVersionAdapter();
-		
+
 		return _Instance;
 	}
 	/// get current version number
@@ -41,13 +41,15 @@ public:
 
 	/// adapt character from given version
 	void adaptGuildFromVersion( CGuild &guild ) const;
-	
+
 private:
 	/// adapter methods
 	void adaptToVersion1(CGuild &guild) const;
 	void adaptToVersion2(CGuild &guild) const;
 	void adaptToVersion3(CGuild &guild) const;
 	void adaptToVersion4(CGuild &guild) const;
+	void adaptToVersion5(CGuild &guild) const;
+	void adaptToVersion6(CGuild &guild) const;
 
 private:
 	CGuildVersionAdapter(){}
