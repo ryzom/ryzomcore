@@ -2170,6 +2170,7 @@ function game:setInfoPlayerCharacterRace()
 end
 
 function game:arkTitlesAddClassics()
+	local current_title = getUI("ui:interface:player:header_opened:player_title").uc_hardtext
 	runAH(nil, "title_init_combobox", "")
 	local cb = getUI("ui:interface:info_player_skills:content:webinfos:title:player_title")
 	local ui = getUI("ui:interface:encyclopedia:content:htmlC")
@@ -2181,11 +2182,17 @@ function game:arkTitlesAddClassics()
 	end
 	table.sort(titles)
 	for i,title in ipairs(titles) do
-		html = html .. [[<div class="ryzom-ui-grouptemplate" id="div_ark_title" style="template:title_template;id:div_ark_title:display_title;icon:ico_amber_ball.tga;text:]]
+		local current = "_blue"
+		if tostring(current_title) == tostring(title) then
+			current = ""
+		end
+
+		html = html .. [[<div class="ryzom-ui-grouptemplate" id="div_ark_title" style="template:title_template;id:div_ark_title:display_title;icon:ico_amber_ball]]..current..[[.tga;text:]]
 		html = html .. title .. [[;titleid:]] .. title
 		html = html .. [[;color:255 255 255 255;enable:50;tooltip:"></div>]]
 	end
 	html = html .. [[<br/><br/><br/></body>]]
 	ui:renderHtml(html)
 end
+
 
