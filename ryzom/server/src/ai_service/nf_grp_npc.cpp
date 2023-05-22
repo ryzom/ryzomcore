@@ -2725,6 +2725,55 @@ void maxHitRange_f_(CStateInstance* entity, CScriptStack& stack)
 	}
 }
 
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection setEquipement_s_
+
+Arguments:  ->
+
+arg1: is the equipment list (in hex)
+
+@code
+()setEquipement("xxxxx");
+@endcode
+
+*/
+void setEquipment_s_(CStateInstance* entity, CScriptStack& stack)
+{
+	string script = stack.top();
+	stack.pop();
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+
+	std::vector<CAIActions::CArg> args;
+	std::vector<std::string> equipements;
+	NLMISC::splitString(script, ";", equipements);
+
+	CGroup* group = entity->getGroup();
+
+	FOREACH(botIt, CCont<CBot>,	group->bots())
+	{
+		CBot* bot = *botIt;
+
+		if (bot->getRyzomType() == RYZOMID::npc)
+		{
+			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+			if (botNpc==NULL)
+				return;
+			botNpc->equipmentInit();
+
+			FOREACHC(it, std::vector<std::string>, equipements)
+			{
+				botNpc->equipmentAdd(*it);
+			}
+		}
+	}
+}
+
 
 //----------------------------------------------------------------------------
 /** @page code
@@ -3370,6 +3419,7 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, setParent_s_);
 	REGISTER_NATIVE_FUNC(functions, addHealGroup_s_);
 
+	REGISTER_NATIVE_FUNC(functions, setEquipment_s_);
 	REGISTER_NATIVE_FUNC(functions, addUserModel_sss_);
 	REGISTER_NATIVE_FUNC(functions, addCustomLoot_ss_);
 	REGISTER_NATIVE_FUNC(functions, setUserModel_s_);
