@@ -129,13 +129,6 @@ void CEquipInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags cha
 		getCharacter()->updateJewelsTags(false);
 		getCharacter()->updateJewelsModifiers();
 	}
-
-	// Update fame
-	if (getInventory()->getInventoryId() == INVENTORIES::handling)
-	{
-		CFameManager::getInstance().enforceFameCaps(getCharacter()->getId(), getCharacter()->getOrganization(), getCharacter()->getAllegiance());
-	}
-
 }
 
 // ****************************************************************************
