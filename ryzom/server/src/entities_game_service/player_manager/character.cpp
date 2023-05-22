@@ -2781,13 +2781,13 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	_PhysScores.SpeedVariationModifier += _LastAppliedWeightMalus;
 	sint16 speedVariationModifier = std::max((sint)_PhysScores.SpeedVariationModifier, (sint) - 100);
 	CSheetId aqua_speed("aqua_speed.sbrick");
-	if (isInWater() && (haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0))
+	if (isInWater() && getMode() != MBEHAV::MOUNT_NORMAL && (haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0))
 	{
 		setBonusMalusName("aqua_speed", addEffectInDB(aqua_speed, true));
 		if (_CurrentSpeedSwimBonus > 0)
 			speedVariationModifier = std::min(speedVariationModifier + (sint16)_CurrentSpeedSwimBonus, 100);
 		else
-			speedVariationModifier = std::min(speedVariationModifier + 100, 100);
+			speedVariationModifier = std::min(speedVariationModifier + 33, 100);
 	}
 	else
 	{
