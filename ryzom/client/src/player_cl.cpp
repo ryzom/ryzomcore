@@ -507,15 +507,15 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 		_Instances[s].createLoading(string(), stickPoint);
 
 	// Create the instance.
-	if (item)
-	{
-		if (color != -1) {
-			_Instances[s].createLoading(shapeName, stickPoint, color);
-		} else
-			_Instances[s].createLoading(shapeName, stickPoint, item->MapVariant);
-	}
+	if (color != -1)
+		_Instances[s].createLoading(shapeName, stickPoint, color);
 	else
-		_Instances[s].createLoading(shapeName, stickPoint);
+	{
+		if (item)
+			_Instances[s].createLoading(shapeName, stickPoint, item->MapVariant);
+		else
+			_Instances[s].createLoading(shapeName, stickPoint);
+	}
 
 	// If shapeName is empty, only clear the slot
 	if(shapeName.empty())
@@ -877,10 +877,11 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 					sint instTexture;
 					fromString(tagInfos[1], instTexture);
 					equip(slot, tagInfos[0], itemSheet);
-					UInstance pInst = _Instances[slot].createLoadingFromCurrent();
+					equip(slot, tagInfos[0], itemSheet, instTexture);
+					/*UInstance pInst = _Instances[slot].createLoadingFromCurrent();
 					if(!pInst.empty())
 						pInst.selectTextureSet(instTexture);
-					_Instances[slot].TextureSet = instTexture;
+					_Instances[slot].TextureSet = instTexture;*/
 				}
 				else
 				{
@@ -939,9 +940,9 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 				{
 					sint instTexture;
 					fromString(tagInfos[1], instTexture);
-					equip(slot, tagInfos[0], itemSheet);
-					_Instances[slot].selectTextureSet(instTexture);
-					_Instances[slot].TextureSet = instTexture;
+					equip(slot, tagInfos[0], itemSheet, instTexture);
+					//_Instances[slot].selectTextureSet(instTexture);
+					//_Instances[slot].TextureSet = instTexture;
 				}
 				else
 				{
