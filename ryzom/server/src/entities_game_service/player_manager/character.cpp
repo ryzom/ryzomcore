@@ -23570,8 +23570,7 @@ void CCharacter::updateEffectInDB(uint8 index, bool bonus, NLMISC::TGameCycle ac
 
 sint32 CCharacter::getWeightMalus()
 {
-	sint32 maxWeight
-		= BaseMaxCarriedWeight + 1000 * _PhysCharacs._PhysicalCharacteristics[CHARACTERISTICS::strength].Current;
+	sint32 maxWeight = BaseMaxCarriedWeight + 1000 * _PhysCharacs._PhysicalCharacteristics[CHARACTERISTICS::strength].Current;
 	sint32 weightDiff = (maxWeight - sint32(getCarriedWeight()));
 	sint32 weightMalus = weightDiff / 1000;
 
