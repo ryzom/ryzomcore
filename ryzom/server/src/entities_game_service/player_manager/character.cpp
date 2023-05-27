@@ -591,6 +591,7 @@ CCharacter::CCharacter()
 	_MinPriceFilter = 0;
 	_MaxPriceFilter = ~0u;
 	_LastAppliedWeightMalus = 0;
+	_CurrentSpeedSwimBonus = 0;
 	_CurrentRegenerateReposBonus = 0;
 	_TpTicketSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	// setup timer for tickUpdate() calling
@@ -681,6 +682,8 @@ CCharacter::CCharacter()
 	_FriendVisibility = VisibleToAll;
 	_LangChannel = "rf";
 	_NewTitle = "Refugee";
+	_SavedFame = false;
+
 	initDatabase();
 
 	_PowoCell = 0;
@@ -2777,6 +2780,22 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	_LastAppliedWeightMalus = getWeightMalus();
 	_PhysScores.SpeedVariationModifier += _LastAppliedWeightMalus;
 	sint16 speedVariationModifier = std::max((sint)_PhysScores.SpeedVariationModifier, (sint) - 100);
+	CSheetId aqua_speed("aqua_speed.sbrick");
+	if (isInWater() && getMode() != MBEHAV::MOUNT_NORMAL && (haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0))
+	{
+		setBonusMalusName("aqua_speed", addEffectInDB(aqua_speed, true));
+		if (_CurrentSpeedSwimBonus > 0)
+			speedVariationModifier = std::min(speedVariationModifier + (sint16)_CurrentSpeedSwimBonus, 100);
+		else
+			speedVariationModifier = std::min(speedVariationModifier + 33, 100);
+	}
+	else
+	{
+		sint8 bonus = getBonusMalusName("aqua_speed");
+		if (bonus > -1)
+			removeEffectInDB(bonus, true);
+	}
+
 	// Speed
 	// while stunned/root/mezzed etc speed is forced to 0
 	float oldCurrentSpeed;
@@ -6030,7 +6049,7 @@ void CCharacter::setCurrentContinent(CONTINENT::TContinent continent)
 //-----------------------------------------------
 // CCharacter::addCharacterAnimal buy a creature
 //-----------------------------------------------
-bool CCharacter::addCharacterAnimal(const CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size, const ucstring &customName)
+bool CCharacter::addCharacterAnimal(const CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size, const ucstring &customName, const string &clientSheet)
 {
 	if (!PackAnimalSystemEnabled)
 		return false;
@@ -6046,7 +6065,10 @@ bool CCharacter::addCharacterAnimal(const CSheetId &PetTicket, uint32 Price, CGa
 	if (checkAnimalCount(PetTicket, true, 1))
 	{
 		const CStaticItem* form = CSheets::getForm(PetTicket);
-		pet.PetSheetId = form->PetSheet;
+		if (!clientSheet.empty())
+			pet.PetSheetId =  CSheetId(clientSheet.c_str());
+		else
+			pet.PetSheetId = form->PetSheet;
 		pet.Satiety = form->PetHungerCount;
 		pet.MaxSatiety = form->PetHungerCount;
 		uint8 startSlot = 0;
@@ -6353,7 +6375,7 @@ bool CCharacter::checkAnimalCount(const CSheetId &PetTicket, bool sendMessage, s
 			return false;
 		}
 
-		CPlayer* p = PlayerManager.getPlayer(PlayerManager.getPlayerId(getId()));
+		/*CPlayer* p = PlayerManager.getPlayer(PlayerManager.getPlayerId(getId()));
 		BOMB_IF(p == NULL, "Failed to find player record for character: " << getId().toString(), return 0.0);
 
 		if (p->isTrialPlayer())
@@ -6362,6 +6384,7 @@ bool CCharacter::checkAnimalCount(const CSheetId &PetTicket, bool sendMessage, s
 				sendDynamicSystemMessage(_Id, "EGS_CANT_BUY_PACKER_IS_TRIAL_PLAYER");
 			return false;
 		}
+		* */
 	}
 	else
 	{
@@ -17205,36 +17228,6 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 	{
 		if (playerFame != NO_FAME)
 		{
-			// Update Marauder fame when < 50 and other fame change
-			uint32 marauderIdx = PVP_CLAN::getFactionIndex(PVP_CLAN::Marauder);
-			sint32	marauderFame = CFameInterface::getInstance().getFameIndexed(_Id, marauderIdx);
-			if (factionIndex != marauderIdx)
-			{
-				sint32 maxOtherfame = -100*kFameMultipler;
-				for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
-				{
-					if (fameIdx == marauderIdx)
-						continue;
-
-					sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
-
-					if (fame > maxOtherfame)
-						maxOtherfame = fame;
-				}
-
-				if (marauderFame < 50*kFameMultipler)
-				{
-					if (maxOtherfame < -50*kFameMultipler) // Cap to 50
-						maxOtherfame = -50*kFameMultipler;
-					CFameManager::getInstance().setEntityFame(_Id, marauderIdx, -maxOtherfame, false);
-				}
-				else
-				{
-					if (maxOtherfame > -40*kFameMultipler)
-						CFameManager::getInstance().setEntityFame(_Id, marauderIdx, -maxOtherfame, false);
-				}
-			}
-
 			//			_PropertyDatabase.setProp( toString("FAME:PLAYER%d:VALUE", fameIndexInDatabase),
 			// sint64(float(playerFame)/FameAbsoluteMax*100) );
 			CBankAccessor_PLR::getFAME()
@@ -17262,18 +17255,11 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 
 	bool canPvp = false;
 
-	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
+	for (uint8 fameIdx = PVP_CLAN::BeginClans; fameIdx < PVP_CLAN::EndClans; fameIdx++)
 	{
-		sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
-
-		if (fame >= PVPFameRequired * 6000)
-		{
+		sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)fameIdx));
+		if ((fame >= PVPFameRequired * kFameMultipler) || (fame <= -PVPFameRequired * kFameMultipler))
 			canPvp = true;
-		}
-		else if (fame <= -PVPFameRequired * 6000)
-		{
-			canPvp = true;
-		}
 	}
 
 	if (_LoadingFinish)
@@ -17319,13 +17305,15 @@ void CCharacter::resetFameDatabase()
 		CFameManager::getInstance().enforceFameCaps(getId(), getOrganization(), getAllegiance());
 		CFameManager::getInstance().setAndEnforceTribeFameCap(getId(), getOrganization(), getAllegiance());
 	}
-
-	for (uint i = 0; i < CStaticFames::getInstance().getNbFame(); ++i)
+	else
 	{
-		// update player fame info
-		sint32 fame = fi.getFameIndexed(_Id, i, false, true);
-		sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), getOrganization(), i);
-		setFameValuePlayer(i, fame, maxFame, 0);
+		for (uint i = 0; i < CStaticFames::getInstance().getNbFame(); ++i)
+		{
+			// update player fame info
+			sint32 fame = fi.getFameIndexed(_Id, i, false, true);
+			sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), getOrganization(), i);
+			setFameValuePlayer(i, fame, maxFame, 0);
+		}
 	}
 }
 
@@ -23566,8 +23554,7 @@ void CCharacter::updateEffectInDB(uint8 index, bool bonus, NLMISC::TGameCycle ac
 
 sint32 CCharacter::getWeightMalus()
 {
-	sint32 maxWeight
-		= BaseMaxCarriedWeight + 1000 * _PhysCharacs._PhysicalCharacteristics[CHARACTERISTICS::strength].Current;
+	sint32 maxWeight = BaseMaxCarriedWeight + 1000 * _PhysCharacs._PhysicalCharacteristics[CHARACTERISTICS::strength].Current;
 	sint32 weightDiff = (maxWeight - sint32(getCarriedWeight()));
 	sint32 weightMalus = weightDiff / 1000;
 

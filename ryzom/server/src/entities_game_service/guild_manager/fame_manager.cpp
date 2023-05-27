@@ -27,6 +27,7 @@
 #include "player_manager/player.h"
 #include "guild_manager/guild.h"
 #include "guild_manager/guild_manager.h"
+#include "egs_sheets/egs_sheets.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -840,7 +841,6 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 	double fame = fow.Fames[faction];
 
 	CCharacter* character = PlayerManager.getChar( entityId );
-	bool isMarauder = (character && character->getOrganization() == 5);
 
 	if (fame == NO_FAME)
 	{
@@ -870,16 +870,26 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 			realDeltaFame = ((FAME_GAIN_FACTOR - fame) / FameAbsoluteMax) * deltaFame;
 	}
 
-	if (realDeltaFame > 3*6000)
-		realDeltaFame = 3*6000;
+	if (realDeltaFame > 3*kFameMultipler)
+		realDeltaFame = 3*kFameMultipler;
 
-	if (realDeltaFame < -3*6000)
-		realDeltaFame = -3*6000;
+	if (realDeltaFame < -3*kFameMultipler)
+		realDeltaFame = -3*kFameMultipler;
 
-	if (!isMarauder && realDeltaFame < 0)
+	if (realDeltaFame < 0)
 		realDeltaFame /= 10;
 
 	fame += realDeltaFame;
+
+	if (character && character->getSavedFames())
+	{
+		string factionName = CStaticFames::getInstance().getFactionName(faction);
+		if (factionName == "black_kami")
+			factionName = "marauder";
+		PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(factionName);
+		sint32 saveFame = character->restoreFame((uint32)theClan);
+		character->saveFame((uint32)theClan, saveFame+realDeltaFame);
+	}
 
 	fameMsgParams[2].Int = (uint32)(abs(realDeltaFame));
 
@@ -905,6 +915,7 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 			clamp(fame,FameAbsoluteMin,maxFame);
 			// Check to make sure player still qualifies to be in declared allegiances.
 			c->verifyClanAllegiance(PVP_CLAN::getClanFromIndex(faction), sint32(fame));
+			c->addSavedFame((uint32)PVP_CLAN::getClanFromIndex(faction), realDeltaFame);
 			c->setFameValuePlayer(faction, sint32(fame), maxFame, fow.LastFameChangeTrends[faction]);
 			if (deltaFame > 0)
 				CCharacter::sendDynamicSystemMessage( c->getEntityRowId(), "FAME_GAIN_CHAR", fameMsgParams );
@@ -1201,7 +1212,7 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 	if( setDirectValue )
 	{
 		// change the scale( because this value comes from a user command)
-		fame = fame*(FameAbsoluteMax/100);
+		fame = fame*kFameMultipler;
 	}
 
 	if (fame == NO_FAME)
@@ -1225,7 +1236,6 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 			oldFame = 0;
 	}
 	clamp(oldFame, FameAbsoluteMin, FameAbsoluteMax);
-
 	const sint32 deltaFame = fame - oldFame;
 	if (deltaFame == 0 && fow.Fames[faction] != NO_FAME )
 		return;
@@ -1241,6 +1251,16 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 	if(ch)
 	{
 		nldebug("FAME: set fame for character %s as P:%d", entityId.toString().c_str(), fame);
+
+
+		if (ch->getSavedFames())
+		{
+			string factionName = CStaticFames::getInstance().getFactionName(faction);
+			if (factionName == "black_kami")
+				factionName = "marauder";
+			PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(factionName);
+			ch->saveFame((uint32)theClan, fame);
+		}
 
 		sint32 maxFame = getMaxFameByFactionIndex(ch->getAllegiance(), ch->getOrganization(), faction);
 		ch->setFameValuePlayer(faction, fame, maxFame, fow.LastFameChangeTrends[faction]);
@@ -1278,6 +1298,9 @@ sint32 CFameManager::getStartFame(PVP_CLAN::TPVPClan playerClan, PVP_CLAN::TPVPC
 		return NO_FAME;
 	}
 
+	if (targetClan == PVP_CLAN::Marauder)
+		return 0;
+
 	// Parameters are within values, so return the lookup.
 	return *FameStart[playerClan-PVP_CLAN::BeginCivs][targetClan-PVP_CLAN::BeginClans];
 }
@@ -1287,14 +1310,20 @@ sint32 CFameManager::getMaxFameByClan(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TP
 {
 	if (targetClan == PVP_CLAN::Marauder)
 	{
-		if (organization == 5)
+		if (organization == 5) {
 			return 100*kFameMultipler;
-		return 30*kFameMultipler;
+		}
+
+		// None or Neutrals
+		if (playerClans.first < PVP_CLAN::BeginClans && playerClans.second < PVP_CLAN::BeginClans)
+			return 50*kFameMultipler;
+
+		return -50*kFameMultipler;
 	}
 
 	if (organization == 5) // marauder
 	{
-		return -40*kFameMultipler;
+		return -50*kFameMultipler;
 	}
 
 	// Local variables for the lookup values.
@@ -1360,12 +1389,13 @@ sint32 CFameManager::getMaxFameByClan(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TP
 
 sint32 CFameManager::getMaxFameByFactionIndex(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance, uint32 organization, uint32 factionIndex)
 {
-	PVP_CLAN::TPVPClan	pvpClan;
+	PVP_CLAN::TPVPClan pvpClan;
 
 	// try first with a clan
-	pvpClan= PVP_CLAN::getClanFromIndex(factionIndex);
+	pvpClan = PVP_CLAN::getClanFromIndex(factionIndex);
 	if(pvpClan != PVP_CLAN::Unknown)
 		return getMaxFameByClan(allegiance, organization, pvpClan);
+
 	// search for tribe
 	else
 	{
@@ -1493,110 +1523,131 @@ void CFameManager::enforceFameCaps(const NLMISC::CEntityId &entityId, uint32 org
 	sint32 fame;
 	sint32 maxFame;
 
+	bool haveWeapons = false;
 	if (ch)
 	{
-		if (organization)
+		if (organization && (theCult != PVP_CLAN::Neutral || theCiv != PVP_CLAN::Neutral))
 		{
-		if (theCult != PVP_CLAN::Neutral)
-			if (theCult != PVP_CLAN::Neutral || theCiv != PVP_CLAN::Neutral)
-			{
-				ch->setOrganization(0, false);
-				organization = 0;
-			}
-		}
-	}
-
-	if (organization == 5) // marauder
-	{
-		for (int looper = PVP_CLAN::BeginCults; looper <= PVP_CLAN::EndCults; looper++)
-		{
-			theFactionIndex = PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)looper);
-			fame = fow.Fames[theFactionIndex];
-			maxFame = -30*kFameMultipler;
-			if( fame != NO_FAME)
-			{
-				clamp(fame,FameAbsoluteMin, maxFame);
-				fow.Fames[theFactionIndex] = fame;
-			}
-			if (ch)
-			{
-				ch->setFameValuePlayer(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
-			}
-			if (gu)
-			{
-				gu->setFameValueGuild(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
-			}
+			ch->setOrganization(0, false);
+			organization = 0;
 		}
 
-		for (int looper = PVP_CLAN::BeginCivs; looper <= PVP_CLAN::EndCivs; looper++)
+		const CStaticItem *leftForm = NULL;
+		const CStaticItem *rightForm = NULL;
+
+		CGameItemPtr leftItem = ch->getLeftHandItem();
+		if (leftItem != NULL)
+			leftForm = CSheets::getForm(leftItem->getSheetId());
+
+		CGameItemPtr rightItem = ch->getRightHandItem();
+		if (rightItem != NULL)
+			rightForm = CSheets::getForm(rightItem->getSheetId());
+
+		haveWeapons = 	(leftForm && (leftForm->Family == ITEMFAMILY::MELEE_WEAPON || leftForm->Family == ITEMFAMILY::RANGE_WEAPON))
+						||
+						(rightForm && (rightForm->Family == ITEMFAMILY::MELEE_WEAPON || rightForm->Family == ITEMFAMILY::RANGE_WEAPON));
+
+		if (ch->getSavedFames() && haveWeapons)
+
+		if (haveWeapons && ch->getSavedFames())
 		{
-			theFactionIndex = PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)looper);
-			fame = fow.Fames[theFactionIndex];
-			maxFame = -30*kFameMultipler;
-			if( fame != NO_FAME)
+			ch->setSavedFames(false);
+			for (uint i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; i++)
 			{
-				clamp(fame,FameAbsoluteMin,maxFame);
-				fow.Fames[theFactionIndex] = fame;
-			}
-			if (ch)
-			{
-				ch->setFameValuePlayer(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
-			}
-			if (gu)
-			{
-				gu->setFameValueGuild(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
+				theFactionIndex = PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)i);
+				fow.Fames[theFactionIndex] = ch->restoreFame(i);
 			}
 		}
-
-		return;
 	}
 
 	// Check cults, first member of allegiance
-	if (theCult != PVP_CLAN::None)
+	for (int looper = PVP_CLAN::BeginCults; looper <= PVP_CLAN::EndCults; looper++)
 	{
-		for (int looper = PVP_CLAN::BeginCults; looper <= PVP_CLAN::EndCults; looper++)
+		theFactionIndex = PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)looper);
+		fame = fow.Fames[theFactionIndex];
+		maxFame = getMaxFameByClan(allegiance, organization, (PVP_CLAN::TPVPClan)looper);
+		if( fame != NO_FAME)
 		{
-			theFactionIndex = PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)looper);
-			fame = fow.Fames[theFactionIndex];
-			maxFame = getMaxFameByClan(allegiance, organization, (PVP_CLAN::TPVPClan)looper);
-			if( fame != NO_FAME)
+			clamp(fame,FameAbsoluteMin,maxFame);
+			fow.Fames[theFactionIndex] = fame;
+		}
+
+		if (ch)
+		{
+			// Cap to -40
+			if (!haveWeapons)
 			{
-				clamp(fame,FameAbsoluteMin,maxFame);
+				if (!ch->getSavedFames())
+					ch->saveFame(looper, fame);
+				clamp(maxFame, -40*kFameMultipler, maxFame);
+				clamp(fame, -40*kFameMultipler, fame);
 				fow.Fames[theFactionIndex] = fame;
 			}
-			if (ch)
-			{
-				ch->setFameValuePlayer(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
-			}
-			if (gu)
-			{
-				gu->setFameValueGuild(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
-			}
+
+			ch->setFameValuePlayer(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
 		}
+		if (gu)
+			gu->setFameValueGuild(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
 	}
+
+
 	// Check civs, second member of allegiance
-	if (theCiv != PVP_CLAN::None)
+	for (int looper = PVP_CLAN::BeginCivs; looper <= PVP_CLAN::EndCivs; looper++)
 	{
-		for (int looper = PVP_CLAN::BeginCivs; looper <= PVP_CLAN::EndCivs; looper++)
+		theFactionIndex = PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)looper);
+		fame = fow.Fames[theFactionIndex];
+		maxFame = getMaxFameByClan(allegiance, organization, (PVP_CLAN::TPVPClan)looper);
+		if( fame != NO_FAME)
 		{
-			theFactionIndex = PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)looper);
-			fame = fow.Fames[theFactionIndex];
-			maxFame = getMaxFameByClan(allegiance, organization, (PVP_CLAN::TPVPClan)looper);
-			if( fame != NO_FAME)
+			clamp(fame,FameAbsoluteMin,maxFame);
+			fow.Fames[theFactionIndex] = fame;
+		}
+		if (ch)
+		{
+			// Cap to -40
+			if (!haveWeapons)
 			{
-				clamp(fame,FameAbsoluteMin,maxFame);
+				if (!ch->getSavedFames())
+					ch->saveFame(looper, fame);
+				clamp(maxFame, -40*kFameMultipler, maxFame);
+				clamp(fame, -40*kFameMultipler, fame);
 				fow.Fames[theFactionIndex] = fame;
 			}
-			if (ch)
-			{
-				ch->setFameValuePlayer(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
-			}
-			if (gu)
-			{
-				gu->setFameValueGuild(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
-			}
+			ch->setFameValuePlayer(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
+		}
+		if (gu)
+		{
+			gu->setFameValueGuild(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
 		}
 	}
+
+
+	theFactionIndex = PVP_CLAN::getFactionIndex(PVP_CLAN::Marauder);
+	fame = fow.Fames[theFactionIndex];
+	maxFame = getMaxFameByClan(allegiance, organization, PVP_CLAN::Marauder);
+	if( fame != NO_FAME)
+	{
+		clamp(fame,FameAbsoluteMin,maxFame);
+		fow.Fames[theFactionIndex] = fame;
+	}
+
+	if (ch)
+	{
+		// Cap to -40
+		if (!haveWeapons)
+		{
+			if (!ch->getSavedFames())
+				ch->saveFame((uint32)PVP_CLAN::Marauder, fame);
+			clamp(maxFame, -40*kFameMultipler, maxFame);
+			clamp(fame, -40*kFameMultipler, fame);
+			fow.Fames[theFactionIndex] = fame;
+			ch->setSavedFames(true);
+		}
+		ch->setFameValuePlayer(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
+	}
+
+	if (gu)
+		gu->setFameValueGuild(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
 }
 
 void CFameManager::setAndEnforceTribeFameCap(const NLMISC::CEntityId &entityId, uint32 organization, std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance)

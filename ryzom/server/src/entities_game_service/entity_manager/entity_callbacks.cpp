@@ -453,6 +453,7 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	c->initPvpPointDb();
 	c->initOrganizationInfos();
 
+	c->resetFameDatabase();
 	c->updateOutpostAdminFlagInDB();
 
 	if ( !player->getUserPriv().empty() && !player->havePriv(":DEV:") )
