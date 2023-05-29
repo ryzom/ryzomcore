@@ -1298,6 +1298,9 @@ sint32 CFameManager::getStartFame(PVP_CLAN::TPVPClan playerClan, PVP_CLAN::TPVPC
 		return NO_FAME;
 	}
 
+	if (targetClan == PVP_CLAN::Marauder)
+		return 0;
+
 	// Parameters are within values, so return the lookup.
 	return *FameStart[playerClan-PVP_CLAN::BeginCivs][targetClan-PVP_CLAN::BeginClans];
 }
