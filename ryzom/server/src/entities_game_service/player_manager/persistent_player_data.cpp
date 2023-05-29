@@ -437,10 +437,10 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 \
 	PROP(bool,_SavedFame)\
 	LPROP_MAP2(SavedFames, string, sint32,\
-	for(uint32 i = 0; i < (PVP_CLAN::EndClans-PVP_CLAN::BeginClans+1); ++i),\
-	PVP_CLAN::toString((PVP_CLAN::TPVPClan)(i+PVP_CLAN::BeginClans)),\
+	for(uint32 i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; ++i),\
+	PVP_CLAN::toString((PVP_CLAN::TPVPClan)i),\
 	_SavedFames[i],\
-	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _SavedFames[k-PVP_CLAN::BeginClans]=val)\
+	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _SavedFames[k]=val)\
 \
 	PROP(uint32,_LastTpTick)\
 	PROP(uint32,_LastOverSpeedTick)\
