@@ -881,14 +881,18 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 
 	fame += realDeltaFame;
 
-	if (character && character->getSavedFames())
+	if (character)
 	{
 		string factionName = CStaticFames::getInstance().getFactionName(faction);
 		if (factionName == "black_kami")
 			factionName = "marauder";
 		PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(factionName);
-		sint32 saveFame = character->restoreFame((uint32)theClan);
-		character->saveFame((uint32)theClan, saveFame+realDeltaFame);
+		sint32 saveFame;
+		if (character->getSavedFames())
+			saveFame = character->restoreFame((uint32)theClan)+realDeltaFame;
+		else
+			saveFame = fame;
+		character->saveFame((uint32)theClan, saveFame);
 	}
 
 	fameMsgParams[2].Int = (uint32)(abs(realDeltaFame));
@@ -1253,14 +1257,11 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 		nldebug("FAME: set fame for character %s as P:%d", entityId.toString().c_str(), fame);
 
 
-		if (ch->getSavedFames())
-		{
-			string factionName = CStaticFames::getInstance().getFactionName(faction);
-			if (factionName == "black_kami")
-				factionName = "marauder";
-			PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(factionName);
-			ch->saveFame((uint32)theClan, fame);
-		}
+		string factionName = CStaticFames::getInstance().getFactionName(faction);
+		if (factionName == "black_kami")
+			factionName = "marauder";
+		PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(factionName);
+		ch->saveFame((uint32)theClan, fame);
 
 		sint32 maxFame = getMaxFameByFactionIndex(ch->getAllegiance(), ch->getOrganization(), faction);
 		ch->setFameValuePlayer(faction, fame, maxFame, fow.LastFameChangeTrends[faction]);
