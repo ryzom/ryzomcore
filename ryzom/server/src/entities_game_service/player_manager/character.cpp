@@ -2793,7 +2793,10 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	{
 		sint8 bonus = getBonusMalusName("aqua_speed");
 		if (bonus > -1)
+		{
+			setBonusMalusName("aqua_speed", -1);
 			removeEffectInDB(bonus, true);
+		}
 	}
 
 	// Speed
