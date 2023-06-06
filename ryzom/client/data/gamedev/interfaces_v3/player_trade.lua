@@ -30,3 +30,6 @@ function getBulk(inventory)
 	local bulk = runExpr("getItemsBulk('LOCAL:EXCHANGE:"..inventory.."', 0," .. slots .. ")");
 	return math.floor(bulk * 100) / 100;
 end
+
+-- VERSION --
+RYZOM_PLAYER_TRADE_VERSION = 10469

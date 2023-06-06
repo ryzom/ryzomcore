@@ -419,3 +419,6 @@ function webig:openWin(ui_name)
 	end
 end
 
+
+-- VERSION --
+RYZOM_ARK_LESSONS_VERSION = 10469

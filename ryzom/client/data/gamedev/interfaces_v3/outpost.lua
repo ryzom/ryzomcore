@@ -665,3 +665,6 @@ function game:outpostInitPvpJoinTimer()
 	setOnDraw(uiGroup, 'game:outpostPvpJoinTimerOnDraw()');
 end
 
+
+-- VERSION --
+RYZOM_OUTPOST_VERSION = 10469

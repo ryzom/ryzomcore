@@ -1288,3 +1288,6 @@ function arkNpcShop:Buy(id)
 	end
 	arkNpcShop:Close()
 end
+
+-- VERSION --
+RYZOM_INTERACTION_VERSION = 10469

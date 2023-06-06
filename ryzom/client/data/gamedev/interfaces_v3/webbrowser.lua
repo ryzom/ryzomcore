@@ -243,3 +243,6 @@ function WebBrowser:onClickHome()
     html:browse("home")
   end
 end
+
+-- VERSION --
+RYZOM_WEBBROWSER_VERSION = 10469

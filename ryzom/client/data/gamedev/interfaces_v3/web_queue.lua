@@ -130,3 +130,6 @@ if WebQueue.doinit then
 	addOnDbChange(getUI("ui:interface:webqueue"), "@UI:VARIABLES:CURRENT_SERVER_TICK", "WebQueue:loop()")
 end
 
+
+-- VERSION --
+RYZOM_WEB_QUEUE_VERSION = 10469

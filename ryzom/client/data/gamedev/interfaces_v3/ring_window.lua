@@ -15,3 +15,6 @@ function onRingWindowShown()
 		firstBrowseDone = true
 	end
 end
+
+-- VERSION --
+RYZOM_RING_WINDOW_VERSION = 10469

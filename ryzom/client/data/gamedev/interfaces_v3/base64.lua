@@ -200,3 +200,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------------------
 --]]
 
+
+-- VERSION --
+RYZOM_BASE64_VERSION = 10469

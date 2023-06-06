@@ -119,3 +119,6 @@ function game.RingAccessPointFilter:validate()
 end
 
 
+
+-- VERSION --
+RYZOM_RING_ACCESS_POINT_FILTER_VERSION = 10469
