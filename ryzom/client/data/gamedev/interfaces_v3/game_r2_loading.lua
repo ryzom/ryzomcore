@@ -636,3 +636,6 @@ function GameR2Loading:buildNewbielandScenarioTree()
 	tree:forceRebuild()
 end
 
+
+-- VERSION --
+RYZOM_GAME_R2_LOADING_VERSION = 10469

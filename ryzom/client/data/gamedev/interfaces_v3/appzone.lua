@@ -190,3 +190,6 @@ function AppZone:handle(cmd)
     self:launchApp(cmd)
   end
 end
+
+-- VERSION --
+RYZOM_APPZONE_VERSION = 10469

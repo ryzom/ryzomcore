@@ -269,3 +269,6 @@ game:addMapArkPoint("Vip", 4154, -3305, "vip_allegory", "", "allegory_16.tga", "
 
 -- register map overrride
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")
+
+-- VERSION --
+RYZOM_MAP_VERSION = 10469

@@ -234,3 +234,6 @@ function RyzhomePlace:close()
 	--runAH(nil, "remove_shapes", "")
 	getUI("ui:interface:webig_ryzhome_place_item").active=false
 end
+
+-- VERSION --
+RYZOM_RYZHOME_TOOLBAR_VERSION = 10469

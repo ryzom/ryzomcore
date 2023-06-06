@@ -42,3 +42,6 @@ function game:procCharselClickSlot()
 	local value = getDbProp('UI:SELECTED_SLOT')
 	runAH(nil, "proc", "proc_charsel_clickslot|"..value)
 end
+
+-- VERSION --
+RYZOM_OUT_V2_SELECT_VERSION = 10469

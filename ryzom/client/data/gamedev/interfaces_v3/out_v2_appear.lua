@@ -438,3 +438,6 @@ function outgame:loadRPBGPage()
 	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
 	getUI("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
 end
+
+-- VERSION --
+RYZOM_OUT_V2_APPEAR_VERSION = 10469

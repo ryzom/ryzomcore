@@ -248,3 +248,6 @@ end
 
 
 
+
+-- VERSION --
+RYZOM_WEBIG_VERSION = 10469
