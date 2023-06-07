@@ -200,4 +200,4 @@ function game:configInit()
 end
 
 -- VERSION --
-RYZOM_GAME_CONFIG_VERSION = 10469
+RYZOM_GAME_CONFIG_VERSION = 324

@@ -136,4 +136,4 @@ function misc:initInvObserver(
 end
 
 -- VERSION --
-RYZOM_MISC_VERSION = 10469
+RYZOM_MISC_VERSION = 324
