@@ -179,3 +179,5 @@ function bgdownloader:inGamePatchUncompleteWarning()
 	messageBoxWithHelp(i18n.get("uiBGD_InGamePatchIncomplete"), "ui:interface", tonumber(getDefine("case_normal")))
 	displaySystemInfo(i18n.get("uiBGD_InGamePatchIncompleteBC"), "BC")
 end
+-- VERSION --
+RYZOM_BG_DOWNLOADER_VERSION = 324

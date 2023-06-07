@@ -942,3 +942,6 @@ function RingAccessPoint:newScenario()
 	end
 end
 
+
+-- VERSION --
+RYZOM_RING_ACCESS_POINT_VERSION = 324

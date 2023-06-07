@@ -2196,3 +2196,6 @@ function game:arkTitlesAddClassics()
 end
 
 
+
+-- VERSION --
+RYZOM_INFO_PLAYER_VERSION = 324
