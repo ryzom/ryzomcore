@@ -376,4 +376,4 @@ function Json.decode(str)
 end
 
 -- VERSION --
-RYZOM_JSON_VERSION = 10469
+RYZOM_JSON_VERSION = 324

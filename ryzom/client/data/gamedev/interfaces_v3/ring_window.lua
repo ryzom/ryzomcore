@@ -17,4 +17,4 @@ function onRingWindowShown()
 end
 
 -- VERSION --
-RYZOM_RING_WINDOW_VERSION = 10469
+RYZOM_RING_WINDOW_VERSION = 324

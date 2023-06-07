@@ -50,4 +50,4 @@ end
 setOnDraw(getUI("ui:interface:compass"), "game:updateCompass()")
 
 -- VERSION --
-RYZOM_COMPASS_VERSION = 10469
+RYZOM_COMPASS_VERSION = 324

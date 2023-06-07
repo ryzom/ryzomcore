@@ -245,4 +245,4 @@ function WebBrowser:onClickHome()
 end
 
 -- VERSION --
-RYZOM_WEBBROWSER_VERSION = 10469
+RYZOM_WEBBROWSER_VERSION = 324
