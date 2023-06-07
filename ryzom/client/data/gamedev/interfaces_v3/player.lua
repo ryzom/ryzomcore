@@ -1030,3 +1030,6 @@ function game:fixVpx(vpx)
 	local nvpx = vpx1:sub(1, string.len(vpx1)-6)..vpx2:sub(string.len(vpx2)-5, string.len(vpx2))
 	return nvpx
 end
+
+-- VERSION --
+RYZOM_PLAYER_VERSION = 324

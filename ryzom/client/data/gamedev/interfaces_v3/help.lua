@@ -140,3 +140,6 @@ function help:continueLesson(id, url)
 end
 
 
+
+-- VERSION --
+RYZOM_HELP_VERSION = 324
