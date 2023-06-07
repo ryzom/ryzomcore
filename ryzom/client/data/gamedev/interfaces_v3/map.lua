@@ -196,7 +196,7 @@ function game:openFullMap()
 	end
 end
 
-function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, finish, openShape)
+function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, finish, openShape, text, icon)
 	local id1 = -1
 	local id2 = -1
 
@@ -217,8 +217,18 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 	game.spawnShapesByZone[continent][name] = setup
 	game.spawnShapesByZone[continent][name][8] = Json.decode(setup[8])
 
+	if not text then
+		text =  i18n.get("uiWisdomChest"):toUtf8()
+	end
+
+	if not icon then
+		icon = "ico_box"
+	end
+
 	if displayIcon == 1 then
-		game:addMapArkPoint(zone, setup[2], setup[3], setup[1], i18n.get("uiWisdomChest"):toUtf8(), "ico_box.tga")
+		game:addMapArkPoint(zone, setup[2], setup[3], setup[1], text, icon..".tga")
+	else
+	    game:delMapArkPoint(zone, setup[1])
 	end
 end
 
@@ -245,6 +255,8 @@ end
 
 game.mapRegionSections["Silan"] = {}
 game.mapRegionSections["Silan"]["newbieland_city.tga"] = true
+game.mapRegionSections["Zorai"] = {}
+game.mapRegionSections["Zorai"]["zorai_map.tga"] = true
 
 game:addMapArkPoint("Vip/Silan", 10276, -11791, "vip_silan_tryker", "", "dynicon_vip.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=nb_tryker_leader&title=fct_chief_explorer&gender=1", 150)
 game:addMapArkPoint("Vip/Silan", 10341, -11822, "vip_silan_matis",  "", "dynicon_vip.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=nb_matis_leader&title=fct_matis_master_artisan&gender=1", 150)
@@ -257,3 +269,6 @@ game:addMapArkPoint("Vip", 4154, -3305, "vip_allegory", "", "allegory_16.tga", "
 
 -- register map overrride
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")
+
+-- VERSION --
+RYZOM_MAP_VERSION = 324

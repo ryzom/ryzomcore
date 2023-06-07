@@ -129,7 +129,7 @@ function game:configShowOne(strUIToShow)
 	-- special case : if the display tab was shown, update the aspect ratio if needed
 	local generalGrp = getUI('ui:interface:game_config:content:general');
 	local uiGrp = getUI('ui:interface:game_config:content:' .. strUIToShow);
-	-- Removed the following code to solve RT n°14720
+	-- Removed the following code to solve RT nÂ°14720
 	-- The 'game_config_change_screen_ratio_custom' action handler
 	-- should only be called if the user changed the apect ratio himself
 	-- (else the edit box containing the aspect ratio may not have been initiliazed here)
@@ -198,3 +198,6 @@ function game:configInit()
 	winActive("wc_r2_scenario_control", true)
 	winActive("wc_r2_player_tracking", r2WinOn)
 end
+
+-- VERSION --
+RYZOM_GAME_CONFIG_VERSION = 324

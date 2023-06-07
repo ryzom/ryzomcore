@@ -3341,7 +3341,7 @@
 	<group id="#id" posref="MM MM" w="#w" h="45" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
 		<ctrl type="sheet" tooltip="#text" onclick_r="open_help_auto" active="#usesheet" id="sheet" value="#sheetdb" posref="MR MR" y="0" x="0" render_layer="#render_layer3" use_quality="true" use_quantity="true" />
 		<view type="bitmap" id="back" posref="ML ML" h="40" w="40" scale="true" x="0" y="0" render_layer="#render_layer1" texture="points_atys.tga" global_color="false" />
-		<view type="bitmap" id="back2" posref="MM MM" posparent="back" h="40" w="40" scale="false" x="0" y="0" render_layer="#render_layer2" texture="https://app.ryzom.com/app_arcc/data/app/Scripts//1/5/0/4/assets/mission_elyps.png" global_color="false" />
+		<view type="bitmap" id="back2" posref="MM MM" posparent="back" h="40" w="40" scale="false" x="0" y="0" render_layer="#render_layer2" texture="mission_elyps.tga" global_color="false" />
 		<view type="text" id="text1" posref="TR TL" posparent="back" x="5" y="1" format_taged="true" fontsize="8" hardtext="#text" color="#color1" shadow="true" global_color="#gc1" />
 		<view type="text" id="text2" posref="BL TL" posparent="text1" x="0" y="2" format_taged="true" fontsize="#fontsize" hardtext="#text2" color="#color2" shadow="true" global_color="#gc2" />
 		<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="ML ML" x="1" y="0" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true" w="#w" h="40" color="#ctrlcolor" col_over="#colover" col_pushed="#colover" render_layer="#render_layer2" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r"  />
