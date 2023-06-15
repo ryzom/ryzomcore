@@ -51,8 +51,8 @@ function game:addMapArkPoint(section, x, y, name, title, texture, url, h)
 end
 
 function game:delMapArkPoint(section, name)
-    if game.mapArkPoints[section] ~= nil then
-	    game.mapArkPoints[section][name] = nil
+	if game.mapArkPoints[section] ~= nil then
+		game.mapArkPoints[section][name] = nil
 	end
 end
 
@@ -241,7 +241,6 @@ function game:doSpawnShapesByZone(continent)
 			if shape[9] ~= nil and shape[9] > 0 then
 				deleteShape(shape[9])
 			end
-			if shape[10] then
 			if shape[10] ~= nil  and shape[9] > 0then
 				deleteShape(shape[10])
 			end
