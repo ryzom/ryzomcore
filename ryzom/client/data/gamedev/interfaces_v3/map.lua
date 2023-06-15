@@ -202,8 +202,7 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 	local id1 = -1
 	local id2 = -1
 
-	if game.spawnShapesByZone[continent] == nil
-	then
+	if game.spawnShapesByZone[continent] == nil then
 		game.spawnShapesByZone[continent] = {}
 	end
 
@@ -230,17 +229,18 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 	if displayIcon == 1 then
 		game:addMapArkPoint(zone, setup[2], setup[3], setup[1], text, icon..".tga")
 	else
-	    game:delMapArkPoint(zone, setup[1])
+		game:delMapArkPoint(zone, setup[1])
 	end
 end
 
 function game:doSpawnShapesByZone(continent)
 	if game.spawnShapesByZone[continent] then
 		for name, shape in pairs(game.spawnShapesByZone[continent]) do
-			if shape[9] then
+
 			if shape[9] ~= nil and shape[9] > 0 then
 				deleteShape(shape[9])
 			end
+
 			if shape[10] ~= nil  and shape[9] > 0then
 				deleteShape(shape[10])
 			end
