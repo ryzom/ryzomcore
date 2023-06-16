@@ -659,7 +659,7 @@ inline void	CCppOutput::flush(const std::string &fileName)
 			buffer.resize(fi.getFileSize(), '*');
 			fi.serialBuffer((uint8*)(&(buffer[0])), fi.getFileSize());
 
-			// search for $Id: cpp_output.h,v 1.15 2004/12/13 17:19:01 legros Exp $ string in file...
+			// search for $Id$ string in file...
 			char	*searchidstart, *searchidend;
 			char	*replaceidstart, *replaceidend;
 
