@@ -417,6 +417,7 @@
 	<action name="camera_down"			hardtext="uiCameraDown" />
 	<action name="camera_foreward"			hardtext="uiMoveForward" />
 	<action name="camera_backward"			hardtext="uiMoveBackward" />
+	<action name="toggle_free_look"			hardtext="uiToggleFreeLook" />
 </action_category>
 
 <action_category name="windows" hardtext="uiWindows" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
