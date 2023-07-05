@@ -1,3 +1,10 @@
+trigger:
+  branches:
+    include:
+      - core4
+      - feature/*
+      - main/atys-live
+
 jobs:
   - job: ubuntu18
     timeoutInMinutes: 120
