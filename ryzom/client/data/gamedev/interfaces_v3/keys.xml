@@ -36,6 +36,7 @@
   <key name="KeyNUMPAD2" action="camera_turn_right" />
   <key name="KeyDECIMAL" action="camera_turn_center" />
   <key name="KeyF5" shift="1" action="toggle_chat" />
+  <key name="N/A" action="toggle_free_look" />
  <!--  Target
   -->
   <key name="KeyF12" ctrl="0" action="no_target" />
