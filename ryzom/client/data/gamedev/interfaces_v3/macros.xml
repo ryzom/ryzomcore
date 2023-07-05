@@ -238,6 +238,7 @@
 	<action name="uimMacroExec" handler="macros_exec" icon="r2ed_tool_start.tga" />
 	<action name="uimMacroEdit" handler="macros_edit" icon="r2ed_edit_dialog_small.tga" />
 	<action name="uimMacroCopy" handler="macros_copy" icon="r2ed_tool_copy.tga" />
+	<action name="uimMacroUnassign"	handler="macros_unassign" icon="" />
 	<separator/>
 	<action name="uimMacroDel"	handler="macros_del" icon="patch_off.tga" />
 </group>
