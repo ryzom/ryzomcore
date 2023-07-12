@@ -2003,8 +2003,13 @@ NLMISC_COMMAND(slide, "slide to the powo", "<uid> x y cell [z] [h]")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(getPlayersInPowos, "get list of players in a powo", "")
+NLMISC_COMMAND(getPlayersInPowos, "get list of players in a powo", "[onlyPowoId]")
 {
+	sint32 onlyPowoId = 0;
+
+	if (args.size() >= 1)
+		fromString(args[0], onlyPowoId);
+
 	CPlayerManager::TMapPlayers::const_iterator itPlayer = PlayerManager.getPlayers().begin();
 
 	for (; itPlayer != PlayerManager.getPlayers().end(); ++itPlayer)
@@ -2015,7 +2020,7 @@ NLMISC_COMMAND(getPlayersInPowos, "get list of players in a powo", "")
 			if (player)
 			{
 				sint32 powo = player->getPowoCell();
-				if (powo != 0)
+				if (powo != 0 && (onlyPowoId == 0 || powo == onlyPowoId))
 					log.displayNL("%d: %s", powo, player->getName().toString().c_str());
 			}
 		}
@@ -3433,6 +3438,9 @@ NLMISC_COMMAND(getTeam, "get the team of a player","<uid>")
 	if (pTeam != NULL)
 	{
 		log.displayNL("%d", c->getTeamId());
+		ucstring name = CEntityIdTranslator::getInstance()->getByEntity(pTeam->getLeader());
+		CEntityIdTranslator::removeShardFromName(name);
+		log.displayNL("leader|%s", name.toUtf8().c_str());
 		for (list<CEntityId>::const_iterator it = pTeam->getTeamMembers().begin(); it != pTeam->getTeamMembers().end(); ++it)
 		{
 			ucstring name = CEntityIdTranslator::getInstance()->getByEntity((*it));
