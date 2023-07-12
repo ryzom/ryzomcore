@@ -23755,10 +23755,15 @@ void CCharacter::incAggroCount()
 
 bool CCharacter::isInWater() const
 {
-	if (!_PlayerIsInWater && (_ActionFlags.getValue() & RYZOMACTIONFLAGS::InWater))
+	nlinfo("check is in water = %d", (_EntityState.Z.getValue() & 4));
+	if (!_PlayerIsInWater && (((_EntityState.Z.getValue() & 4) != 0) || (_ActionFlags.getValue() & RYZOMACTIONFLAGS::InWater)))
 	{
 		entersWater();
 		_PlayerIsInWater = true;
+	}
+	else if (_PlayerIsInWater && (_EntityState.Z.getValue() & 4) == 0)
+	{
+		_PlayerIsInWater = false;
 	}
 
 	return (_PlayerIsInWater || (_ActionFlags.getValue() & RYZOMACTIONFLAGS::InWater));
