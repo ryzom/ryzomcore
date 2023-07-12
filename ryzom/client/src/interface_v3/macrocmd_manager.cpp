@@ -162,6 +162,12 @@ void CMacroCmd::moveDownCommand (uint cmdNb)
 	Commands[cmdNb+1] = c;
 }
 
+// ------------------------------------------------------------------------------------------------
+void CMacroCmd::unassignCombo()
+{
+	Combo.Key = KeyCount;
+	Combo.KeyButtons = noKeyButton;
+}
 
 // ------------------------------------------------------------------------------------------------
 // CMacroCmdManager
@@ -301,6 +307,19 @@ void CMacroCmdManager::delMacro(sint32 nMacNb)
 {
 	delActionManagerEntries();
 	_Macros.erase(_Macros.begin()+nMacNb);
+	addActionManagerEntries();
+}
+
+void CMacroCmdManager::unassignMacro(size_t nMacNb)
+{
+	if (nMacNb >= _Macros.size())
+	{
+		nlwarning("unassign called on out-of-bounds index %lu, (size %lu)", nMacNb, _Macros.size());
+		return;
+	}
+
+	delActionManagerEntries();
+	_Macros[nMacNb].unassignCombo();
 	addActionManagerEntries();
 }
 
@@ -1127,6 +1146,25 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacrosCopy, "macros_copy");
+
+
+// ***************************************************************************
+// Called from context menu on a macro
+class	CHandlerMacrosUnassign : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
+	{
+		sint nMacNb = getMacroFromId(pCaller->getId());
+		if (nMacNb < 0) return;
+
+		CMacroCmdManager::getInstance()->unassignMacro(nMacNb);
+		// update keybinding in macros list without calling runActionHandler("macros_open", NULL)
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(pCaller->getId() + ":" + TEMPLATE_MACRO_ELT_KEYTEXT));
+		if (pVT) pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerMacrosUnassign, "macros_unassign");
 
 // ***************************************************************************
 // Called from context menu on a macro
