@@ -23755,7 +23755,6 @@ void CCharacter::incAggroCount()
 
 bool CCharacter::isInWater() const
 {
-	nlinfo("check is in water = %d", (_EntityState.Z.getValue() & 4));
 	if (!_PlayerIsInWater && (((_EntityState.Z.getValue() & 4) != 0) || (_ActionFlags.getValue() & RYZOMACTIONFLAGS::InWater)))
 	{
 		entersWater();

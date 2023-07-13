@@ -668,6 +668,10 @@ NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <
 					item->recommended(recommended);
 				}
 
+				const CStaticItem* form = CSheets::getForm(sheet);
+				if (form != NULL && form->Family == ITEMFAMILY::ITEM_SAP_RECHARGE)
+					item->setSapLoad(quality);
+
 				log.displayNL("OK");
 				return true;
 			}
@@ -701,6 +705,13 @@ NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <
 				uint16 recommended;
 				NLMISC::fromString(quality_params[1], recommended);
 				finalItem->recommended(recommended);
+			}
+
+			const CStaticItem* form = finalItem->getStaticForm();
+
+			if (form != NULL) {
+				if (form->Family == ITEMFAMILY::ITEM_SAP_RECHARGE)
+					finalItem->setSapLoad(finalItem->quality());
 			}
 
 			if (c->addItemToInventory(getTInventory(selected_inv), finalItem))
@@ -1310,6 +1321,26 @@ NLMISC_COMMAND(getPosition, "get position of entity", "<uid>")
 
 	return true;
 }
+
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getPlayerPosition, "get position of an user", "<player name>")
+{
+	if (args.size() != 1)
+		return false;
+
+	CCharacter * player = PlayerManager.getCharacterByName(args[0]);
+	if (!player || !TheDataset.isAccessible(player->getEntityRowId()))
+	{
+		log.displayNL("ERR: user not found");
+		return true;
+	}
+
+	log.displayNL("%s", player->getPositionInfos().c_str());
+	return true;
+}
+
+
 
 
 //----------------------------------------------------------------------------
