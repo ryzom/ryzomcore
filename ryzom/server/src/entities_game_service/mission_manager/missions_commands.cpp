@@ -668,6 +668,10 @@ NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <
 					item->recommended(recommended);
 				}
 
+				const CStaticItem* form = CSheets::getForm(sheet);
+				if (form != NULL && form->Family == ITEMFAMILY::ITEM_SAP_RECHARGE)
+					item->setSapLoad(quality);
+
 				log.displayNL("OK");
 				return true;
 			}
@@ -701,6 +705,13 @@ NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <
 				uint16 recommended;
 				NLMISC::fromString(quality_params[1], recommended);
 				finalItem->recommended(recommended);
+			}
+
+			const CStaticItem* form = finalItem->getStaticForm();
+
+			if (form != NULL) {
+				if (form->Family == ITEMFAMILY::ITEM_SAP_RECHARGE)
+					finalItem->setSapLoad(finalItem->quality());
 			}
 
 			if (c->addItemToInventory(getTInventory(selected_inv), finalItem))
@@ -1310,6 +1321,26 @@ NLMISC_COMMAND(getPosition, "get position of entity", "<uid>")
 
 	return true;
 }
+
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getPlayerPosition, "get position of an user", "<player name>")
+{
+	if (args.size() != 1)
+		return false;
+
+	CCharacter * player = PlayerManager.getCharacterByName(args[0]);
+	if (!player || !TheDataset.isAccessible(player->getEntityRowId()))
+	{
+		log.displayNL("ERR: user not found");
+		return true;
+	}
+
+	log.displayNL("%s", player->getPositionInfos().c_str());
+	return true;
+}
+
+
 
 
 //----------------------------------------------------------------------------
@@ -2003,8 +2034,13 @@ NLMISC_COMMAND(slide, "slide to the powo", "<uid> x y cell [z] [h]")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(getPlayersInPowos, "get list of players in a powo", "")
+NLMISC_COMMAND(getPlayersInPowos, "get list of players in a powo", "[onlyPowoId]")
 {
+	sint32 onlyPowoId = 0;
+
+	if (args.size() >= 1)
+		fromString(args[0], onlyPowoId);
+
 	CPlayerManager::TMapPlayers::const_iterator itPlayer = PlayerManager.getPlayers().begin();
 
 	for (; itPlayer != PlayerManager.getPlayers().end(); ++itPlayer)
@@ -2015,7 +2051,7 @@ NLMISC_COMMAND(getPlayersInPowos, "get list of players in a powo", "")
 			if (player)
 			{
 				sint32 powo = player->getPowoCell();
-				if (powo != 0)
+				if (powo != 0 && (onlyPowoId == 0 || powo == onlyPowoId))
 					log.displayNL("%d: %s", powo, player->getName().toString().c_str());
 			}
 		}
@@ -3433,6 +3469,9 @@ NLMISC_COMMAND(getTeam, "get the team of a player","<uid>")
 	if (pTeam != NULL)
 	{
 		log.displayNL("%d", c->getTeamId());
+		ucstring name = CEntityIdTranslator::getInstance()->getByEntity(pTeam->getLeader());
+		CEntityIdTranslator::removeShardFromName(name);
+		log.displayNL("leader|%s", name.toUtf8().c_str());
 		for (list<CEntityId>::const_iterator it = pTeam->getTeamMembers().begin(); it != pTeam->getTeamMembers().end(); ++it)
 		{
 			ucstring name = CEntityIdTranslator::getInstance()->getByEntity((*it));
