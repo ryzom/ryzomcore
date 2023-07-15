@@ -2781,13 +2781,17 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	_PhysScores.SpeedVariationModifier += _LastAppliedWeightMalus;
 	sint16 speedVariationModifier = std::max((sint)_PhysScores.SpeedVariationModifier, (sint) - 100);
 	CSheetId aqua_speed("aqua_speed.sbrick");
+	bool usingAquaSpeed = false;
 	if (isInWater() && getMode() != MBEHAV::MOUNT_NORMAL && (haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0))
 	{
 		setBonusMalusName("aqua_speed", addEffectInDB(aqua_speed, true));
 		if (_CurrentSpeedSwimBonus > 0)
 			speedVariationModifier = std::min(speedVariationModifier + (sint16)_CurrentSpeedSwimBonus, 100);
 		else
+		{
+			usingAquaSpeed = true;
 			speedVariationModifier = std::min(speedVariationModifier + 33, 100);
+		}
 	}
 	else
 	{
@@ -2822,7 +2826,7 @@ void CCharacter::applyRegenAndClipCurrentValue()
 		CBankAccessor_PLR::getUSER().setSPEED_FACTOR(
 			_PropertyDatabase, checkedCast<uint8>(speedVariationModifier + 100.0f));
 
-		if (speedVariationModifier > 0)
+		if (speedVariationModifier > 0 && !usingAquaSpeed)
 		{
 			_LastOverSpeedTick = CTickEventHandler::getGameCycle();
 		}
