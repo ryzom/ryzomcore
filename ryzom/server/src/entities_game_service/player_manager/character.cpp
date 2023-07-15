@@ -2826,7 +2826,7 @@ void CCharacter::applyRegenAndClipCurrentValue()
 		CBankAccessor_PLR::getUSER().setSPEED_FACTOR(
 			_PropertyDatabase, checkedCast<uint8>(speedVariationModifier + 100.0f));
 
-		if (speedVariationModifier > 0 && !usingAquaSpeed)
+		if (speedVariationModifier > 0 && (!usingAquaSpeed || speedVariationModifier - 33 > 0)
 		{
 			_LastOverSpeedTick = CTickEventHandler::getGameCycle();
 		}
