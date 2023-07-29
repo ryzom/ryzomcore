@@ -3442,13 +3442,13 @@ void			CClientItemInfo::readFromImpulse(const CItemInfos &itemInfo)
 }
 
 // ***************************************************************************
-uint16				CInventoryManager::getItemSlotId(CDBCtrlSheet *ctrl)
+uint32				CInventoryManager::getItemSlotId(CDBCtrlSheet *ctrl)
 {
 	return getItemSlotId(ctrl->getSheet(), ctrl->getIndexInDB());
 }
 
 // ***************************************************************************
-uint16				CInventoryManager::getItemSlotId(const std::string &itemDb, uint slotIndex)
+uint32				CInventoryManager::getItemSlotId(const std::string &itemDb, uint slotIndex)
 {
 	// then compare to all possible inventories (ugly)
 	uint	inventoryIndex= 0;
@@ -3699,7 +3699,7 @@ void			CInventoryManager::onReceiveItemInfo(const CItemInfos &itemInfo)
 }
 
 // ***************************************************************************
-void			CInventoryManager::onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion)
+void			CInventoryManager::onRefreshItemInfoVersion(uint32 slotId, uint8 infoVersion)
 {
 	_ItemInfoMap[slotId].refreshInfoVersion(infoVersion);
 }
@@ -3765,7 +3765,7 @@ void			CInventoryManager::updateItemInfoQueue()
 					CBitMemStream out;
 					if (GenericMsgHeaderMngr.pushNameToStream("ITEM_INFO:GET", out))
 					{
-						uint16	slotId= itemSlotId;
+						uint32	slotId= itemSlotId;
 						out.serial( slotId );
 						NetMngr.push(out);
 						//nlinfo("impulseCallBack : ITEM_INFO:GET %d sent", slotId);
