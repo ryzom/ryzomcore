@@ -295,8 +295,8 @@ public:
 		bool isSpaceInBagForItem(CDBCtrlSheet *item, uint32 quantity, uint32 bagId);
 
 	// ItemExtraInfo management. From each slot is a unique uint16
-		uint16				getItemSlotId(CDBCtrlSheet *ctrl);
-		uint16				getItemSlotId(const std::string &itemDb, uint slotIndex);
+		uint32				getItemSlotId(CDBCtrlSheet *ctrl);
+		uint32				getItemSlotId(const std::string &itemDb, uint slotIndex);
 		const	CClientItemInfo	&getItemInfo(uint slotId) const;
 		// get item info from cache
 		const	CClientItemInfo *getItemInfoCache(uint32 serial, uint32 createTime) const;
@@ -313,7 +313,7 @@ public:
 		void				removeItemInfoWaiter(IItemInfoWaiter *waiter);
 		// Called on impulse
 		void				onReceiveItemInfo(const CItemInfos &itemInfo);
-		void				onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion);
+		void				onRefreshItemInfoVersion(uint32 slotId, uint8 infoVersion);
 		void				onUpdateEquipHands();
 		// Log for debug
 		void				debugItemInfoWaiters();

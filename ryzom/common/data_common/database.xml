@@ -1167,7 +1167,7 @@
       <leaf name="MONEY"
             type="I64" />
       <branch name=""
-              count="1000"
+              count="10000"
               clientonly="1">
         <!-- Common Item Data -->
         <leaf name="SHEET"

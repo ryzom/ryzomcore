@@ -2967,7 +2967,7 @@ public:
 	void incSlotVersion(INVENTORIES::TInventory invId, uint32 slot);
 
 	/// send item infos. For slotId (combination of inventory and slot), see explanation in CItemInfos
-	void sendItemInfos(uint16 slotId);
+	void sendItemInfos(uint32 slotId);
 
 	/// return true if the player wears an item with the specified sheetId
 	bool doesWear(const NLMISC::CSheetId &sheetId) const;

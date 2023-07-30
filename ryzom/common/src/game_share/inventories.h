@@ -252,7 +252,7 @@ namespace INVENTORIES
 		static const uint InventoryNbSlots [NbInventoryIds];
 		enum TSlotBitSize
 		{
-			SlotBitSize = 10
+			SlotBitSize = 16
 		};
 
 		static std::string getDbStr( TInventoryId invId );
@@ -268,7 +268,7 @@ namespace INVENTORIES
 	const uint NbBagSlots = 500;
 	const uint NbPackerSlots = 500;
 	const uint NbRoomSlots = 1000;
-	const uint NbGuildSlots = 1000;
+	const uint NbGuildSlots = 10000;
 	const uint NbTempInvSlots = 16;
 	const uint NbHotbarSlots = 5;
 

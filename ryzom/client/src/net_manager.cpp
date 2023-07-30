@@ -2910,7 +2910,7 @@ void impulseItemInfoSet (NLMISC::CBitMemStream &impulse)
 //-----------------------------------------------
 void impulseItemInfoRefreshVersion (NLMISC::CBitMemStream &impulse)
 {
-	uint16 slotId;
+	uint32 slotId;
 	uint8 infoVersion;
 	impulse.serial(slotId);
 	impulse.serial(infoVersion);

@@ -235,7 +235,7 @@ void CGuildInventoryView::updateInfoVersion(uint32 slot)
 		msgout.serial( destCharacterId );
 		GenericMsgManager.pushNameToStream( "ITEM_INFO:REFRESH_VERSION", bms );
 		nlctassert( CItemInfos::SlotIdIndexBitSize >= INVENTORIES::CInventoryCategoryForGuild::SlotBitSize );
-		uint16 slotId = ((uint16)slot) | ((uint16)(INVENTORIES::guild << CItemInfos::SlotIdIndexBitSize));
+		uint32 slotId = ((uint32)slot) | ((uint32)(INVENTORIES::guild << CItemInfos::SlotIdIndexBitSize));
 		bms.serial( slotId );
 		bms.serial( currentVersion );
 		msgout.serialBufferWithSize( (uint8*)bms.buffer(), bms.length() );
