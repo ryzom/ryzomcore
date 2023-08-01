@@ -3642,7 +3642,7 @@ NLMISC_COMMAND(addPlayerPet, "add a pet to player", "<uid> <sheetid> [size] [nam
 		fromString(args[2], size);
 
 	ucstring customName;
-	if (args.size() >= 3)
+	if (args.size() > 3)
 		customName.fromUtf8(args[3]);
 
 	string clientSheet;
