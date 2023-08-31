@@ -16,7 +16,7 @@
   <variable entry="UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE"
             type="sint32"
             value="0" />
-  <variable entry="UI:SAVE:ENABLE_RUMORS"
+  <variable entry="UI:SAVE:DISABLE_RUMORS"
             type="bool"
             value="0" />
   <!-- The Target selected -->
