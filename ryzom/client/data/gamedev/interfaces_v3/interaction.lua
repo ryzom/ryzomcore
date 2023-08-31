@@ -360,11 +360,14 @@ function game:updateTargetConsiderUI()
 	local wgPvPTag      = targetWindow:find("pvp_tags")
 	local wgHeader      = targetWindow:find("header_opened")
 	local wgLock        = targetWindow:find("lock")
+	local wginfos       = targetWindow:find("target_tinfos")
 
 	wgTargetSlotForce.active = true
 	wgTargetSlotForce.texture = "consider_bg.tga"
 	wgImpossible.active = true
 	wgTargetSlotForce.h = 16
+
+	wginfos.active = false
 
 	-- no selection ?
 	if twGetTargetLevel() == -1 then
@@ -394,7 +397,8 @@ function game:updateTargetConsiderUI()
 
 	-- if the selection is a player, then both the local & targeted player must be in PVP mode for the level to be displayed
 	if (twIsTargetPlayer()) then
-		-- don't display anything ...
+		-- don't display anything except infos ...
+		wginfos.active = true
 		wgLock.active = false
 		wgTargetSlotForce.active = false
 		wgTargetLevel.active = false
