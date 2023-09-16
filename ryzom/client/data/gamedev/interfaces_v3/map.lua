@@ -51,7 +51,9 @@ function game:addMapArkPoint(section, x, y, name, title, texture, url, h)
 end
 
 function game:delMapArkPoint(section, name)
-	game.mapArkPoints[section][name] = nil
+	if game.mapArkPoints[section] ~= nil then
+		game.mapArkPoints[section][name] = nil
+	end
 end
 
 function game:delMapArkSection(section)
@@ -196,12 +198,11 @@ function game:openFullMap()
 	end
 end
 
-function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, finish, openShape)
+function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, finish, openShape, text, icon)
 	local id1 = -1
 	local id2 = -1
 
-	if game.spawnShapesByZone[continent] == nil
-	then
+	if game.spawnShapesByZone[continent] == nil then
 		game.spawnShapesByZone[continent] = {}
 	end
 
@@ -217,23 +218,35 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 	game.spawnShapesByZone[continent][name] = setup
 	game.spawnShapesByZone[continent][name][8] = Json.decode(setup[8])
 
+	if not text then
+		text =  i18n.get("uiWisdomChest"):toUtf8()
+	end
+
+	if not icon then
+		icon = "ico_box"
+	end
+
 	if displayIcon == 1 then
-		game:addMapArkPoint(zone, setup[2], setup[3], setup[1], i18n.get("uiWisdomChest"):toUtf8(), "ico_box.tga")
+		game:addMapArkPoint(zone, setup[2], setup[3], setup[1], text, icon..".tga")
+	else
+		game:delMapArkPoint(zone, setup[1])
 	end
 end
 
 function game:doSpawnShapesByZone(continent)
 	if game.spawnShapesByZone[continent] then
 		for name, shape in pairs(game.spawnShapesByZone[continent]) do
-			if shape[9] then
+
+			if shape[9] ~= nil and shape[9] > 0 then
 				deleteShape(shape[9])
 			end
-			if shape[10] then
+
+			if shape[10] ~= nil  and shape[9] > 0then
 				deleteShape(shape[10])
 			end
 
 			local setup = shape[8]
-			game.spawnShapesByZone[continent][name][9] = SceneEditor:doSpawnShape(shape[1]..".shape", setup, shape[2], shape[3], shape[4], shape[5], shape[6], shape[7], "user", 1, true, setup["action"], setup["url"], false, false, setup["textures"], "", false)
+			game.spawnShapesByZone[continent][name][9] = SceneEditor:doSpawnShape(shape[1]..".shape", setup, shape[2], shape[3], shape[4], shape[5], shape[6], shape[7], "user", 1, false, setup["action"], setup["url"], false, false, setup["textures"], "", false)
 			if shape[11] == 0 then
 				game.spawnShapesByZone[continent][name][10] = SceneEditor:doSpawnShape("ge_mission_evenement.ps", setup, shape[2], shape[3], shape[4]+0.35, shape[5], shape[6], shape[7], "user", 1, false, setup["action"], setup["url"], false, false, setup["textures"], "", false)
 			else
@@ -245,6 +258,8 @@ end
 
 game.mapRegionSections["Silan"] = {}
 game.mapRegionSections["Silan"]["newbieland_city.tga"] = true
+game.mapRegionSections["Zorai"] = {}
+game.mapRegionSections["Zorai"]["zorai_map.tga"] = true
 
 game:addMapArkPoint("Vip/Silan", 10276, -11791, "vip_silan_tryker", "", "dynicon_vip.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=nb_tryker_leader&title=fct_chief_explorer&gender=1", 150)
 game:addMapArkPoint("Vip/Silan", 10341, -11822, "vip_silan_matis",  "", "dynicon_vip.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=nb_matis_leader&title=fct_matis_master_artisan&gender=1", 150)
@@ -257,3 +272,6 @@ game:addMapArkPoint("Vip", 4154, -3305, "vip_allegory", "", "allegory_16.tga", "
 
 -- register map overrride
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")
+
+-- VERSION --
+RYZOM_MAP_VERSION = 328

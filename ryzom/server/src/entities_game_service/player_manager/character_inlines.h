@@ -773,6 +773,34 @@ inline EGSPD::CFameContainerPD &CCharacter::getPlayerFamesContainer()
 	return *_Fames;
 }
 
+inline void CCharacter::setSavedFames(bool status)
+{
+	_SavedFame = status;
+}
+
+inline bool CCharacter::getSavedFames()
+{
+	return _SavedFame;
+}
+
+
+inline void CCharacter::saveFame(uint32 i, sint32 fame)
+{
+	_SavedFames[i] = fame;
+}
+
+inline void CCharacter::addSavedFame(uint32 i, sint32 fame)
+{
+	_SavedFames[i] += fame;
+}
+
+
+inline sint32 CCharacter::restoreFame(uint32 i)
+{
+	return _SavedFames[i];
+}
+
+
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::logXpGain() const

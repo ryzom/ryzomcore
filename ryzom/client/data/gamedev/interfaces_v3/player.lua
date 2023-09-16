@@ -42,6 +42,39 @@ if (game.BonusMalus == nil) then
 	game.BonusMalus.MalusAHList= {};
 end
 
+game.wantedScriptPlaces = {}
+game.latestValidScriptPlace = ""
+
+function game:addScriptPlace(modname, place, id)
+	if game.wantedScriptPlaces[modname] == nil then
+		game.wantedScriptPlaces[modname] = {}
+	end
+	game.wantedScriptPlaces[modname][place] = id
+end
+
+
+function game:checkScriptPlace(place)
+	for modname, vals in pairs(game.wantedScriptPlaces) do
+		if vals[place] ~= nil and game.latestValidScriptPlace ~= place then
+			game.latestValidScriptPlace = place
+			openArkScript(vals[place], nil, "place="..place)
+		end
+	end
+end
+
+
+function game:CheckPosition()
+	local x,y,z = getPlayerPos()
+	local sx = tostring(math.floor(x/10))
+	local sy = tostring(math.floor(y/10))
+	game:checkRpItemsPosition(sx, sy)
+	local cont, region, places = getPositionInfos()
+	game:checkScriptPlace(cont)
+	game:checkScriptPlace(region)
+	for place, typ in pairs(places) do
+		game:checkScriptPlace(place)
+	end
+end
 
 ------------------------------------------------------------------------------------------------------------
 -- Update player bars in function of what we wants to display (we can hide each one of the 3 bars : sap,stamina and focus)
@@ -1030,3 +1063,6 @@ function game:fixVpx(vpx)
 	local nvpx = vpx1:sub(1, string.len(vpx1)-6)..vpx2:sub(string.len(vpx2)-5, string.len(vpx2))
 	return nvpx
 end
+
+-- VERSION --
+RYZOM_PLAYER_VERSION = 328

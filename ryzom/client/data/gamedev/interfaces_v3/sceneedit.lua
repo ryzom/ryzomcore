@@ -52,56 +52,56 @@ function SceneEditor:launch_menu(id)
 	menu:updateCoords()
 	menu = menu:getRootMenu()
 	menu:reset()
-	menu:addLine(ucstring("-- SHAPE EDITION --"), "", "", "shape_header")
-	menu:addLine(ucstring("Move"), "", "", "shape_move")
+	menu:addLine(getUCtf8("-- SHAPE EDITION --"), "", "", "shape_header")
+	menu:addLine(getUCtf8("Move"), "", "", "shape_move")
 	menu:addSubMenu(1)
 	local subMenu = menu:getSubMenu(1)
-	subMenu:addIconLine(ucstring("Axe X"), "lua", "setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:move_x()')", "shape_move_x", "ark_move_x.tga")
-	subMenu:addIconLine(ucstring("Axe Y"), "lua", "setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:move_y()')", "shape_move_y", "ark_move_y.tga")
-	subMenu:addIconLine(ucstring("Axe Z"), "lua", "x, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:move_z()')", "shape_move_z", "ark_move_z.tga")
-	subMenu:addIconLine(ucstring("Axes X & Y"), "lua", "setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:move_xy()')", "shape_move_xy", "ark_move_xy.tga")
-	subMenu:addIconLine(ucstring("Axes X & Y Snap to ground"), "lua", "setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:move_xysnap()')", "shape_move_xy_snap", "ark_move_xysnap.tga")
+	subMenu:addIconLine(getUCtf8("Axe X"), "lua", "setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:move_x()\')", "shape_move_x", "ark_move_x.tga")
+	subMenu:addIconLine(getUCtf8("Axe Y"), "lua", "setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:move_y()\')", "shape_move_y", "ark_move_y.tga")
+	subMenu:addIconLine(getUCtf8("Axe Z"), "lua", "x, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:move_z()\')", "shape_move_z", "ark_move_z.tga")
+	subMenu:addIconLine(getUCtf8("Axes X & Y"), "lua", "setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:move_xy()\')", "shape_move_xy", "ark_move_xy.tga")
+	subMenu:addIconLine(getUCtf8("Axes X & Y Snap to ground      "), "lua", "setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:move_xysnap()\')", "shape_move_xy_snap", "ark_move_xysnap.tga")
 	subMenu:addSeparator()
-	subMenu:addIconLine(ucstring("Move to player"), "lua", "SceneEditor:move_player()", "shape_move_player", "ark_move_player.tga")
+	subMenu:addIconLine(getUCtf8("Move to player      "), "lua", "SceneEditor:move_player()", "shape_move_player", "ark_move_player.tga")
 
-	menu:addLine(ucstring("Rotate"), "", "", "shape_rotate")
+	menu:addLine(getUCtf8("Rotate"), "", "", "shape_rotate")
 	menu:addSubMenu(2)
 	subMenu = menu:getSubMenu(2)
-	subMenu:addIconLine(ucstring("Axe X"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:rotate(SelectedInstanceId, \"x\")')", "shape_rotate_x", "ark_rotate_x.tga")
-	subMenu:addIconLine(ucstring("Axe Y"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:rotate(SelectedInstanceId, \"y\")')", "shape_rotate_y", "ark_rotate_y.tga")
-	subMenu:addIconLine(ucstring("Axe Z"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:rotate(SelectedInstanceId, \"z\")')", "shape_rotate_z", "ark_rotate_z.tga")
+	subMenu:addIconLine(getUCtf8("Axe X"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:rotate(SelectedInstanceId, \"x\")\')", "shape_rotate_x", "ark_rotate_x.tga")
+	subMenu:addIconLine(getUCtf8("Axe Y"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:rotate(SelectedInstanceId, \"y\")\')", "shape_rotate_y", "ark_rotate_y.tga")
+	subMenu:addIconLine(getUCtf8("Axe Z      "), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:rotate(SelectedInstanceId, \"z\")\')", "shape_rotate_z", "ark_rotate_z.tga")
 
-	menu:addLine(ucstring("Scale"), "", "", "shape_scale")
+	menu:addLine(getUCtf8("Scale"), "", "", "shape_scale")
 	menu:addSubMenu(3)
 	subMenu = menu:getSubMenu(3)
-	subMenu:addIconLine(ucstring("Axe X"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:scale(SelectedInstanceId, \"x\")')", "shape_scale_x", "ark_scale_x.tga")
-	subMenu:addIconLine(ucstring("Axe Y"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:scale(SelectedInstanceId, \"y\")')", "shape_scale_y", "ark_scale_y.tga")
-	subMenu:addIconLine(ucstring("Axe Z"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:scale(SelectedInstanceId, \"z\")')", "shape_scale_z", "ark_scale_z.tga")
-	subMenu:addIconLine(ucstring("Axes X & Y & Z"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:scale(SelectedInstanceId, \"xyz\")')", "shape_scale_xyz", "ark_scale_xyz.tga")
+	subMenu:addIconLine(getUCtf8("Axe X"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:scale(SelectedInstanceId, \"x\")\')", "shape_scale_x", "ark_scale_x.tga")
+	subMenu:addIconLine(getUCtf8("Axe Y"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:scale(SelectedInstanceId, \"y\")\')", "shape_scale_y", "ark_scale_y.tga")
+	subMenu:addIconLine(getUCtf8("Axe Z"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:scale(SelectedInstanceId, \"z\")\')", "shape_scale_z", "ark_scale_z.tga")
+	subMenu:addIconLine(getUCtf8("Axes X & Y & Z      "), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:scale(SelectedInstanceId, \"xyz\")\')", "shape_scale_xyz", "ark_scale_xyz.tga")
 
-	menu:addLine(ucstring("-- COLLISION EDITION --"), "", "", "col_header")
-	menu:addLine(ucstring("Move"), "", "", "col_move")
+	menu:addLine(getUCtf8("-- COLLISION EDITION --"), "", "", "col_header")
+	menu:addLine(getUCtf8("Move"), "", "", "col_move")
 	menu:addSubMenu(5)
 	subMenu = menu:getSubMenu(5)
-	subMenu:addIconLine(ucstring("Axe X"), "lua", "setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:col_move_x()')", "col_move_x", "ark_move_x.tga")
-	subMenu:addIconLine(ucstring("Axe Y"), "lua", "setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:col_move_y()')", "col_move_y", "ark_move_y.tga")
-	subMenu:addIconLine(ucstring("Axe Z"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:col_move_z()')", "col_move_z", "ark_move_xy.tga")
-	subMenu:addIconLine(ucstring("Axe X & Y"), "lua", "setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:col_move_xy()')", "col_move_xy", "ark_move_xy.tga")
+	subMenu:addIconLine(getUCtf8("Axe X"), "lua", "setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:col_move_x()\')", "col_move_x", "ark_move_x.tga")
+	subMenu:addIconLine(getUCtf8("Axe Y"), "lua", "setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:col_move_y()\')", "col_move_y", "ark_move_y.tga")
+	subMenu:addIconLine(getUCtf8("Axe Z"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:col_move_z()\')", "col_move_z", "ark_move_xy.tga")
+	subMenu:addIconLine(getUCtf8("Axe X & Y      "), "lua", "setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:col_move_xy()\')", "col_move_xy", "ark_move_xy.tga")
 	subMenu:addSeparator()
-	subMenu:addIconLine(ucstring("Move to Shape"), "lua", "SceneEditor:col_move_to_shape()", "col_move_to_shape", "ark_move_player.tga")
+	subMenu:addIconLine(getUCtf8("Move to Shape      "), "lua", "SceneEditor:col_move_to_shape()", "col_move_to_shape", "ark_move_player.tga")
 
-	menu:addIconLine(ucstring("Rotate"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:col_rotate(SelectedInstanceId, \"x\")')", "col_rotate_x", "ark_rotate_x.tga")
+	menu:addIconLine(getUCtf8("Rotate"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:col_rotate(SelectedInstanceId, \"x\")\')", "col_rotate_x", "ark_rotate_x.tga")
 
-	menu:addLine(ucstring("Scale"), "", "", "col_scale")
+	menu:addLine(getUCtf8("Scale"), "", "", "col_scale")
 	menu:addSubMenu(7)
 	subMenu = menu:getSubMenu(7)
-	subMenu:addIconLine(ucstring("Axe X"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:col_scale(SelectedInstanceId, \"x\")')", "col_scale_x", "ark_scale_x.tga")
-	subMenu:addIconLine(ucstring("Axe Y"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:col_scale(SelectedInstanceId, \"y\")')", "col_scale_y", "ark_scale_y.tga")
-	subMenu:addIconLine(ucstring("Axe Z"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI('ui:interface:ark_scene_editor'), 'SceneEditor:col_scale(SelectedInstanceId, \"z\")')", "col_scale_z", "ark_scale_z.tga")
+	subMenu:addIconLine(getUCtf8("Axe X"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:col_scale(SelectedInstanceId, \"x\")\')", "col_scale_x", "ark_scale_x.tga")
+	subMenu:addIconLine(getUCtf8("Axe Y"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:col_scale(SelectedInstanceId, \"y\")\')", "col_scale_y", "ark_scale_y.tga")
+	subMenu:addIconLine(getUCtf8("Axe Z"), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:col_scale(SelectedInstanceId, \"z\")\')", "col_scale_z", "ark_scale_z.tga")
+	subMenu:addIconLine(getUCtf8("Axe X & Y      "), "lua", "ARK_SHAPE_LATEST_X, ARK_SHAPE_LATEST_Y = getMousePos(); setOnDraw(getUI(\'ui:interface:ark_scene_editor\'), \'SceneEditor:col_scale(SelectedInstanceId, \"xy\")\')", "col_scale_xy", "ark_scale_xyz.tga")
 
 	launchContextMenuInGame("ui:interface:ark_scene_editor_edit_menu")
 end
-
 
 function arcc_tools_check_rclick()
 	root = getUI("ui:interface")
@@ -263,8 +263,8 @@ function SceneEditor:col_scale(id, axe)
 	else
 		mx, my = getMousePos()
 		local setup = {}
-		if axe == "x" then setup["col size x"]="+"..tostring((mx-ARK_SHAPE_LATEST_X)/100) end
-		if axe == "y" then setup["col size y"]="+"..tostring((mx-ARK_SHAPE_LATEST_X)/100) end
+		if axe == "x" or axe == "xy" then setup["col size x"]="+"..tostring((mx-ARK_SHAPE_LATEST_X)/100) end
+		if axe == "y" or axe == "xy" then setup["col size y"]="+"..tostring((mx-ARK_SHAPE_LATEST_X)/100) end
 		if axe == "z" then setup["col size z"]="+"..tostring((my-ARK_SHAPE_LATEST_Y)/100) end
 		setupShape(id, setup)
 		ARK_SHAPE_LATEST_X = mx
@@ -274,9 +274,27 @@ end
 
 
 function SceneEditor:set_modified(id)
-	self.Groups[self.Shapes[id].group].props.modified=true
-	self.Shapes[id].modified = "modified"
+	if self.Shapes[id] then
+		self.Groups[self.Shapes[id].group].props.modified=true
+		self.Shapes[id].modified = "modified"
+	end
 	self.HaveUpdate = true
+	if self.repeatAdd ~= nil then
+		local d, mx, my = getMouseRightDown()
+		if d == false then
+			self.hideMenu = true
+			self:add(self.repeatAdd)
+			self.repeatAdd = nil
+		end
+	else
+		getUI("ui:interface:arkpowo_preview_shape:content:scene3d").active=1
+		local framewin = getUI("ui:interface:arkpowo_preview_shape")
+		framewin.opened=true
+		if self.hideMenu then
+			setOnDraw(getUI("ui:interface:game_context_menu"), "SceneEditor:setTopWindowShapeList()")
+			setOnDraw(getUI("ui:interface:ark_scene_editor_edit_menu"), "SceneEditor:setTopWindowShapeList()")
+		end
+	end
 end
 
 
@@ -316,7 +334,7 @@ end
 
 function SceneEditor:add(shape)
 	if self.LastEditedGroup == nil then
-		self:get_html('<font color="#aa00000">'..self.T["no_selected_group"]..'</font>', '000000')
+		self:get_html("<font color=\"#aa00000\">"..self.T["no_selected_group"].."</font>\", \"000000\"")
 	end
 	local new_shape = {}
 	new_shape.file = shape
@@ -324,11 +342,17 @@ function SceneEditor:add(shape)
 	self.Groups[new_shape.group].props.modified=true
 	new_shape.db_id = self.Groups[new_shape.group].props.count + 1
 	new_shape.modified = "added"
-	new_shape_id = addShape(shape, 0, 0, 0, "user", 1, true, "", "SceneEditor:show_menu()")
+	new_shape_id = addShape(shape, 0, 0, 0, "user", 1, true, "", "SceneEditor:show_menu()", false, false, "", "", false)
 	table.insert(self.Groups[new_shape.group], new_shape_id)
 	self.Groups[new_shape.group].props.count = self.Groups[new_shape.group].props.count + 1
 	self.Shapes[new_shape_id] = new_shape
 	self:get_html("Added")
+
+	self.move_timer = nltime.getLocalTime() + 60
+	getUI("ui:interface:arkpowo_preview_shape:content:scene3d").active=false
+	local framewin = getUI("ui:interface:arkpowo_preview_shape")
+	framewin.opened=false
+	setOnDraw(framewin, "SceneEditor:moveTimerUpdate( \'"..shape.."\', "..tostring(new_shape_id)..")")
 end
 
 
@@ -373,16 +397,36 @@ function SceneEditor:editGroup(group)
 end
 
 function SceneEditor:addFromDb(group, db_id, json_shape, edit)
-	shape = Json.decode(json_shape)
+	local shape = Json.decode(json_shape)
 	shape.db_id = db_id
 
 	shape.group = group
 	shape.modified = ""
-	if edit then
-		shape_id = addShape(shape.file, shape.pos[1], shape.pos[2], shape.pos[3], "user", 1, true, "", "SceneEditor:show_menu()")
+
+	if shape.setup["textures"] ~= nil then
+		textures = shape.setup["textures"]
 	else
-		shape_id = addShape(shape.file, shape.pos[1], shape.pos[2], shape.pos[3], "user", 1, true, "", "")
+		textures = ""
 	end
+
+	if shape.setup["context"] ~= nil then
+		context = shape.setup["context"]
+	else
+		context = ""
+	end
+
+	if shape.setup["url"] ~= nil then
+		url = shape.setup["url"]
+	else
+		url = ""
+	end
+
+	if edit then
+		shape_id = addShape(shape.file, shape.pos[1], shape.pos[2], shape.pos[3], "user", 1, true, "", "SceneEditor:show_menu()", false, false, textures, "", false)
+	else
+		shape_id = addShape(shape.file, shape.pos[1], shape.pos[2], shape.pos[3], "user", 1, true, context, url, false, false, textures, "", false)
+	end
+
 	rotateShape(shape_id, tostring(shape.rot[1]), tostring(shape.rot[2]), tostring(shape.rot[3]))
 	setupShape(shape_id, shape.setup)
 	self.Shapes[shape_id] = shape
@@ -624,3 +668,6 @@ function SceneEditor:get_html(message, message_bg)
 	end
 end
 
+
+-- VERSION --
+RYZOM_SCENEEDIT_VERSION = 328

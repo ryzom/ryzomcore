@@ -133,7 +133,7 @@
 
 
 <!-- **** Main container SKILLS PROGRESSION & ACTIONS -->
-<group type="container" id="phrase_book" title="uiPhraseBookTitle" global_color="false" opened="true" openable="false"
+<group type="container" id="phrase_book" title="uiMK_Actions" global_color="false" opened="true" openable="false"
 	movable="true" active="true" header_color="UI:SAVE:WIN:COLORS:INV"
 	on_active="proc"	on_active_params="phrase_book_opened"
 	on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:ACTIONS|value=0"

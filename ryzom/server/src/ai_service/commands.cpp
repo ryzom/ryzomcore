@@ -1680,7 +1680,7 @@ NLMISC_COMMAND(getDatasetId,"get datasetid of bots with name matchiong the given
 	if (bots.empty())
 	{
 		log.displayNL("ERR: No bot correspond to name %s", botName.c_str());
-		return false;
+		return true;
 	}
 	else
 	{

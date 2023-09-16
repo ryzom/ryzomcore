@@ -486,7 +486,7 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 			break;
 
 			case SLOTTYPE::LEFT_HAND_SLOT:
-				if(_Items[slot].Sheet && _Items[slot].Sheet->getAnimSet()=="s")
+				if((_Items[slot].Sheet && _Items[slot].Sheet->getAnimSet() == "s") || (item && item->getAnimSet() == "s"))
 					stickPoint = "Box_bouclier";
 				else
 					stickPoint = "box_arme_gauche";
@@ -507,15 +507,15 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 		_Instances[s].createLoading(string(), stickPoint);
 
 	// Create the instance.
-	if (item)
-	{
-		if (color != -1) {
-			_Instances[s].createLoading(shapeName, stickPoint, color);
-		} else
-			_Instances[s].createLoading(shapeName, stickPoint, item->MapVariant);
-	}
+	if (color != -1)
+		_Instances[s].createLoading(shapeName, stickPoint, color);
 	else
-		_Instances[s].createLoading(shapeName, stickPoint);
+	{
+		if (item)
+			_Instances[s].createLoading(shapeName, stickPoint, item->MapVariant);
+		else
+			_Instances[s].createLoading(shapeName, stickPoint);
+	}
 
 	// If shapeName is empty, only clear the slot
 	if(shapeName.empty())
@@ -853,13 +853,11 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		else
 		{
 			// No Valid item in the right hand.
-
 			SLOTTYPE::EVisualSlot slot = SLOTTYPE::RIGHT_HAND_SLOT;
 			rightHandTag = getTag(5);
 			if (!rightHandTag.empty() && rightHandTag != "_")
 			{
-				fakeRightHand = SheetMngr.getVSIndex("stake.sitem", slot);
-				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)fakeRightHand);
+
 				vector<string> tagInfos;
 				splitString(rightHandTag, string("|"), tagInfos);
 				UInstance instance;
@@ -872,15 +870,18 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 					tagInfos[0] = SheetMngr.getRpItem(itemNameId);
 				}
 
-				if (tagInfos.size() == 2)
+				if (tagInfos.size() >= 3 && tagInfos[2] == "2H")
+					fakeRightHand = SheetMngr.getVSIndex("ic_candy_stick.sitem", slot);
+				else
+					fakeRightHand = SheetMngr.getVSIndex("stake.sitem", slot);
+
+				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)fakeRightHand);
+
+				if (tagInfos.size() >= 2)
 				{
 					sint instTexture;
 					fromString(tagInfos[1], instTexture);
-					equip(slot, tagInfos[0], itemSheet);
-					UInstance pInst = _Instances[slot].createLoadingFromCurrent();
-					if(!pInst.empty())
-						pInst.selectTextureSet(instTexture);
-					_Instances[slot].TextureSet = instTexture;
+					equip(slot, tagInfos[0], itemSheet, instTexture);
 				}
 				else
 				{
@@ -928,7 +929,8 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 					tagInfos[0] = SheetMngr.getRpItem(itemNameId);
 				}
 
-				if (tagInfos.size() == 3 && tagInfos[2] == ")")
+
+				if (tagInfos.size() >= 3 && tagInfos[2] == "S")
 					fakeLeftHand = SheetMngr.getVSIndex("icbss_pvp.sitem", slot);
 				else
 					fakeLeftHand = SheetMngr.getVSIndex("icfm1pd.sitem", slot);
@@ -939,9 +941,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 				{
 					sint instTexture;
 					fromString(tagInfos[1], instTexture);
-					equip(slot, tagInfos[0], itemSheet);
-					_Instances[slot].selectTextureSet(instTexture);
-					_Instances[slot].TextureSet = instTexture;
+					equip(slot, tagInfos[0], itemSheet, instTexture);
 				}
 				else
 				{
