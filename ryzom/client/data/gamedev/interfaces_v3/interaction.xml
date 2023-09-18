@@ -16,7 +16,7 @@
   <variable entry="UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE"
             type="sint32"
             value="0" />
-  <variable entry="UI:SAVE:ENABLE_RUMORS"
+  <variable entry="UI:SAVE:DISABLE_RUMORS"
             type="bool"
             value="0" />
   <!-- The Target selected -->
@@ -304,6 +304,22 @@
             w="0"
             h="0"
             tooltip_parent="win" />
+        <ctrl type="button"
+              id="target_tinfos"
+              button_type="push_button"
+              posref="TR TR"
+              x="0"
+              y="0"
+              tx_normal="profile.tga"
+              tx_pushed="profile.tga"
+              tx_over="profile.tga"
+              global_color_normal="false"
+              global_color_over="false"
+              global_color_pushed="false"
+              onclick_l="open_title_help"
+              params_l="from=target"
+              tooltip="uimGcmInfo"
+              tooltip_parent="win" />
     </group>
 
 	<group id="pvp_tags"

@@ -460,14 +460,14 @@ void		CGameContextMenu::update()
 			fameValue = pLeafFame->getValue8();
 	}
 
-
-	bool enable_rumors = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENABLE_RUMORS")->getValueBool();
+	bool disable_rumors = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:DISABLE_RUMORS")->getValueBool();
+	bool newbie = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_NEWBIE")->getValueBool();
 
 	if (_TextNews)
-		_TextNews->setActive(enable_rumors && !UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue >= -30);
+		_TextNews->setActive(!disable_rumors && !newbie && !UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue >= -30);
 
 	if (_TextNewsAgressive)
-		_TextNewsAgressive->setActive(enable_rumors && !UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue < -30);
+		_TextNewsAgressive->setActive(!disable_rumors && !newbie && !UserEntity->isFighting() && !UserEntity->isRiding() && selection && !canAttack() && selection->isNPC() && fameValue < -30);
 
 
 	if (_TextDuel && _TextUnDuel)
@@ -521,7 +521,8 @@ void		CGameContextMenu::update()
 
 	// Disable player properties
 	if(_TextInfo)
-		_TextInfo->setActive(selection && (!selection->isForageSource()));
+		//_TextInfo->setActive(selection && (!selection->isForageSource()));
+		_TextInfo->setActive(false);
 
 	// Follow
 	if(_TextFollow)
