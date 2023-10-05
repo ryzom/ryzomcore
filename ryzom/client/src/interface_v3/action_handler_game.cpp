@@ -2500,7 +2500,7 @@ class CAHTarget : public IActionHandler
 		if (preferCompleteMatch)
 		{
 			// Try to get the entity with complete match first
-			entity = EntitiesMngr.getEntityByName (entityName, false, true);
+			entity = EntitiesMngr.getEntityByName(entityName, false, true);
 		}
 
 		if (entity == NULL && !keywords.empty())
