@@ -2747,9 +2747,6 @@ void setEquipment_s_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
-	if (!aiInstance)
-		return;
 
 	std::vector<CAIActions::CArg> args;
 	std::vector<std::string> equipements;
