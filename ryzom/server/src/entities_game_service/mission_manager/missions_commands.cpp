@@ -38,10 +38,12 @@
 #include "weather_everywhere.h"
 #include "death_penalties.h"
 #include "harvest_source.h"
+
 #include "mission_manager/mission_team.h"
 #include "mission_manager/mission_step_ai.h"
 #include "mission_manager/mission_guild.h"
 #include "shop_type/named_items.h"
+#include "modules/client_command_forwarder.h"
 #include "guild_manager/guild_manager.h"
 #include "guild_manager/guild.h"
 #include "guild_manager/guild_member_module.h"
@@ -622,10 +624,10 @@ NLMISC_COMMAND(getEid, "get entitiy id of entity", "<uid>")
 NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <sheetid> <quality> <drop=0|1> [<phraseid>|<param>=<value>,*]")
 {
 
-	GET_ACTIVE_CHARACTER
-
 	if (args.size() < 6)
 		return false;
+
+	GET_ACTIVE_CHARACTER
 
 	string selected_inv = args[1];
 
@@ -731,10 +733,10 @@ NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <
 
 NLMISC_COMMAND(spawnNamedItem, "Spawn a named Item", "<uid> <inv> <quantity> <named_item>")
 {
-	GET_ACTIVE_CHARACTER
-
 	if (args.size() < 4)
 		return false;
+
+	GET_ACTIVE_CHARACTER
 
 	string selected_inv = args[1];
 
@@ -762,6 +764,66 @@ NLMISC_COMMAND(spawnNamedItem, "Spawn a named Item", "<uid> <inv> <quantity> <na
 	log.displayNL("ERR: adding item");
 	return true;
 }
+
+// spawnCrystalItem 2 temporary allegory 150 jloot_generic.sbrick,jboost_100x.sbrick
+
+NLMISC_COMMAND(spawnCrystalItem, "Spawn a crystalized spell or allegory", "<uid> <inv> <spell|allegory> <sap_charge> <sbrick1>[,<sbrick2>,...]")
+{
+
+	GET_ACTIVE_CHARACTER
+
+	if (args.size() < 5)
+		return false;
+
+	string selected_inv = args[1];
+
+	CInventoryPtr inventory = getInventory(c, selected_inv);
+	if (inventory == NULL)
+	{
+		log.displayNL("ERR: invalid inventory");
+		return true;
+	}
+
+	bool isSpell = args[2] == "spell";
+
+	CSheetId sheet;
+	if (isSpell)
+		sheet = CSheetId("crystalized_spell.sitem");
+	else
+		sheet = CSheetId("crystalized_allegory.sitem");
+
+	uint16 sap_charge;
+	NLMISC::fromString(args[3], sap_charge);
+
+	// Get Sbricks
+	std::vector<CSheetId> sheets;
+	std::vector<string> sheet_names;
+	NLMISC::splitString(args[4], ",", sheet_names);
+	for (uint32 i=0; i<sheet_names.size(); i++)
+	{
+		CSheetId sheet = CSheetId(sheet_names[i]);
+		sheets.push_back(sheet);
+	}
+
+
+	CGameItemPtr item = GameItemManager.createItem(sheet, sap_charge, true, true);
+	if (item != NULL)
+	{
+		if (c->addItemToInventory(getTInventory(selected_inv), item))
+		{
+			item->recommended(sap_charge);
+			item->applyEnchantment(sheets);
+
+			log.displayNL("OK");
+			return true;
+		}
+		item.deleteItem();
+	}
+
+	log.displayNL("ERR: adding item");
+	return true;
+}
+
 
 
 //----------------------------------------------------------------------------
@@ -2583,11 +2645,6 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot 
 
 	uint32 nbBots;
 	fromString(args[1], nbBots);
-	if (nbBots<=0)
-	{
-		log.displayNL("ERR: invalid bot count");
-		return false;
-	}
 
 	NLMISC::CSheetId sheetId(args[2]);
 	if (sheetId == NLMISC::CSheetId::Unknown)
