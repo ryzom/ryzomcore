@@ -2357,8 +2357,19 @@ void CGrpProfileFollowPlayer::updateProfile(uint ticksSinceLastUpdate)
 		return;
 	}
 
-	_PathCont.setDestination(plrPtr->wpos());
-	_PathPos._Angle = plrPtr->theta();
+	//_PathCont.setDestination(plrPtr->wpos());
+	//_PathPos._Angle = plrPtr->theta();
+	double const distContDestToRealDest = plrPtr->wpos().toAIVector().quickDistTo(_PathCont.getDestination());
+	if (distContDestToRealDest > 4) // update only each 4 meters.
+	{
+		_PathCont.setDestination(plrPtr->wpos());
+		_PathPos._Angle = plrPtr->theta();
+	}
+
+	// Need to wait for a correct position before moving?
+	CAIVector const& dest = _PathCont.getDestination();
+	if (dest.x()==0 || dest.y()==0)
+		return;
 
 	for (uint i = 0; i < pgrp.bots().size(); ++i)
 	{
@@ -2371,33 +2382,28 @@ void CGrpProfileFollowPlayer::updateProfile(uint ticksSinceLastUpdate)
 		if (!sbot)
 			continue;
 
-		// Need to wait for a correct position before moving?
-		CAIVector const& dest = _PathCont.getDestination();
-		if (dest.x()==0 || dest.y()==0)
-			return;
-
-		static const std::string runParameter("running");
-		float	dist;
-		if (sbot->getPersistent().getOwner()->getSpawnObj()->checkProfileParameter(runParameter))
+		float dist;
+		if (sbot->getPersistent().getOwner()->getSpawnObj()->checkProfileParameter("running"))
 			dist = sbot->runSpeed()*ticksSinceLastUpdate;
 		else
 			dist = sbot->walkSpeed()*ticksSinceLastUpdate;
 
-		// Move
-		CFollowPath::TFollowStatus const status = CFollowPath::getInstance()->followPath(
-			sbot,
-			_PathPos,
-			_PathCont,
-			dist,
-			0.f,
-			0.5f);
-
-		if (status==CFollowPath::FOLLOW_NO_PATH)
+		if ((_PathCont.getDestination() - sbot->wpos().toAIVector()).quickNorm() > 6.f)
 		{
-			nlwarning("Problem with following player");
+			// Move
+			CFollowPath::TFollowStatus const status = CFollowPath::getInstance()->followPath(
+				sbot,
+				_PathPos,
+				_PathCont,
+				dist,
+				_DispersionRadius/10.f,
+				0.5f);
+
+			if (status==CFollowPath::FOLLOW_NO_PATH)
+			{
+				nlwarning("Problem with following player");
+			}
 		}
-
-
 	}
 }
 
