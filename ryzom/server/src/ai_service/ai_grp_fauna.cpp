@@ -551,6 +551,11 @@ void CSpawnGroupFauna::spawnBots(const std::string &name)
 }
 
 
+void CSpawnGroupFauna::spawnBots(const std::string &name, const std::string &vpx)
+{
+}
+
+
 void CSpawnGroupFauna::despawnBots(bool immediately)
 {
 	setDespawnImmediately(immediately);

@@ -12358,7 +12358,6 @@ void CCharacter::addRpPoints(sint32 points)
 		_LastRpPointsWin = CTickEventHandler::getGameCycle();
 	}
 
-	nlinfo("Add rp points : %d", points);
 	if (_RpPoints + points > 0)
 		_RpPoints += points;
 	else
