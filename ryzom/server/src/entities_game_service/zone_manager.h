@@ -543,21 +543,21 @@ public:
 	}
 
 	// Global Triggers for entities
-	std::map<TAIAlias, std::string>	EntitiesUrlTriggers;
-	std::map<TAIAlias, uint8>	EntitiesDistanceTriggers;
-	inline void addEntitiesTrigger(const TAIAlias alias, uint16 distance, const std::string url)
+	std::map<NLMISC::CEntityId, std::string>	EntitiesUrlTriggers;
+	std::map<NLMISC::CEntityId, uint8>	EntitiesDistanceTriggers;
+	inline void addEntitiesTrigger(const NLMISC::CEntityId &id, uint16 distance, const std::string url)
 	{
-		EntitiesUrlTriggers[alias] = url;
-		EntitiesDistanceTriggers[alias] = distance;
+		EntitiesUrlTriggers[id] = url;
+		EntitiesDistanceTriggers[id] = distance;
 	}
 
 
-	inline void delEntitiesTrigger(const TAIAlias alias)
+	inline void delEntitiesTrigger(const NLMISC::CEntityId &id)
 	{
-		std::map<TAIAlias, std::string>::const_iterator it = EntitiesUrlTriggers.find(alias);
+		std::map<NLMISC::CEntityId, std::string>::const_iterator it = EntitiesUrlTriggers.find(id);
 		if ( it != EntitiesUrlTriggers.end() )
 			EntitiesUrlTriggers.erase(it);
-		std::map<TAIAlias, uint8>::const_iterator it2 = EntitiesDistanceTriggers.find(alias);
+		std::map<NLMISC::CEntityId, uint8>::const_iterator it2 = EntitiesDistanceTriggers.find(id);
 		if ( it2 != EntitiesDistanceTriggers.end() )
 			EntitiesDistanceTriggers.erase(it2);
 	}
@@ -565,12 +565,13 @@ public:
 	inline void delEntitiesTriggers()
 	{
 		EntitiesDistanceTriggers.clear();
+		EntitiesUrlTriggers.clear();
 	}
 
-	inline std::string getEntitiesUrlTrigger(const TAIAlias alias)
+	inline std::string getEntitiesUrlTrigger(const NLMISC::CEntityId &id)
 	{
 		std::string url;
-		std::map<TAIAlias, std::string>::const_iterator it = EntitiesUrlTriggers.find(alias);
+		std::map<NLMISC::CEntityId, std::string>::const_iterator it = EntitiesUrlTriggers.find(id);
 		if ( it != EntitiesUrlTriggers.end() )
 		{
 			url = it->second;
@@ -578,10 +579,10 @@ public:
 		return url;
 	}
 
-	inline uint16 getEntitiesDistanceTrigger(const TAIAlias alias)
+	inline uint16 getEntitiesDistanceTrigger(const NLMISC::CEntityId &id)
 	{
 		uint16 distance = 0;
-		std::map<TAIAlias, uint8>::const_iterator it = EntitiesDistanceTriggers.find(alias);
+		std::map<NLMISC::CEntityId, uint8>::const_iterator it = EntitiesDistanceTriggers.find(id);
 		if ( it != EntitiesDistanceTriggers.end() )
 			distance = it->second;
 		return distance;

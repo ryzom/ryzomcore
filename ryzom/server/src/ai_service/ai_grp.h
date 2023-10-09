@@ -64,6 +64,7 @@ public:
 
 	virtual void spawnBots() = 0;
 	virtual void spawnBots(const std::string &name) = 0;
+	virtual void spawnBots(const std::string &name, const std::string &vpx) = 0;
 	virtual void despawnBots(bool immediately) = 0;
 
 	virtual void update() = 0;
@@ -215,6 +216,8 @@ public:
 
 	CAliasTreeOwner* aliasTreeOwner() { return this; }
 
+	std::string botName;
+	std::string botVpx;
 	bool _AutoDestroy;
 	void autoDestroy(bool ad) { _AutoDestroy = ad; }
 
