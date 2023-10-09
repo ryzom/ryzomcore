@@ -1832,10 +1832,10 @@ void CChatManager::sendEmoteTextToAudience(  const TDataSetRow& sender,const std
 			// ignore users in the excluded vector
 			if ( std::find( excluded.begin(),excluded.end(), (*itA) ) == excluded.end() )
 			{
+				static ucstring ucstr = ucstring("");
 				// the phrase
 				uint32 sentId = STRING_MANAGER::sendStringToClient( *itA,phraseId.c_str(),params,&IosLocalSender );
-				// send phrase id with an invalid sender, so that client dont display "toto says : toto bows"
-				sendChat2Ex( CChatGroup::say, *itA, sentId, TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) );
+				sendChat2Ex( CChatGroup::say, *itA, sentId, sender, ucstr, true );
 			}
 		}
 		// restore old chat mode
@@ -2253,7 +2253,7 @@ void CChatManager::sendChatParam( CChatGroup::TGroupType senderChatMode, const T
 //	sendChat2Ex
 //
 //-----------------------------------------------
-void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender, ucstring customTxt )
+void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender, ucstring customTxt, bool isEmote )
 {
 	CCharacterInfos * charInfos = NULL;
 	if( sender.isValid() /* != CEntityId::Unknown*/ )
@@ -2296,8 +2296,17 @@ void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDa
 				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT2", bms );
 
 				CChatMsg2 chatMsg;
-				chatMsg.CompressedIndex = sender.getCompressedIndex();
-				chatMsg.SenderNameId = charInfos ? charInfos->NameIndex : 0; // empty string if there is no sender
+				if (isEmote)
+				{
+					TDataSetRow senderFake = TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW );
+					chatMsg.CompressedIndex = senderFake.getCompressedIndex();
+					chatMsg.SenderNameId = 0;
+				}
+				else
+				{
+					chatMsg.CompressedIndex = sender.getCompressedIndex();
+					chatMsg.SenderNameId = charInfos ? charInfos->NameIndex : 0; // empty string if there is no sender
+				}
 				chatMsg.ChatMode = (uint8) senderChatMode;
 				chatMsg.PhraseId = phraseId;
 				chatMsg.CustomTxt = customTxt;
