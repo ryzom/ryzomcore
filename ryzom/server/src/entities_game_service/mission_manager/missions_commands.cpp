@@ -5253,34 +5253,34 @@ NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> 
 
 	GET_ACTIVE_CHARACTER
 
-	TAIAlias alias;
+	CEntityId id;
 
 	string e = args[1];
 	if (e == "_target_")
 	{
-		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getTarget());
+		id = c->getTarget();
 	}
 	else if (e == "_self_")
 	{
-		alias = CAIAliasTranslator::getInstance()->getAIAlias(c->getId());
+		id = c->getId();
 	}
 	else
 	{
 		vector<TAIAlias> aliases;
 		CAIAliasTranslator::getInstance()->getNPCAliasesFromName( e, aliases );
-		if ( aliases.empty() )
-		{
-			log.displayNL("ERR: no entity");
-			return true;
-		}
-		alias = aliases[0];
+		if (aliases.empty())
+			id.fromString(args[1].c_str());
+		else
+			id = CAIAliasTranslator::getInstance()->getEntityId(aliases[0]);
 	}
 
+	if (id == CEntityId::Unknown)
+		return "ERR: no entity";
 	uint16 distance;
 	fromString(args[2], distance);
 	string url = args[3];
-	CZoneManager::getInstance().addEntitiesTrigger(alias, distance, url);
-	log.displayNL("OK");
+	CZoneManager::getInstance().addEntitiesTrigger(id, distance, url);
+	log.displayNL("%s", id.toString().c_str());
 	return true;
 }
 

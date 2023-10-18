@@ -688,7 +688,6 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	_LastGroupAlias++;
 	string name = grpName.empty() ? NLMISC::toString("event_group_%u", _LastGroupAlias):grpName;
-	string botname = botsName.empty() ? name : botsName;
 	// Create a group
 	CGroupNpc* grp = new CGroupNpc(_EventNpcManager, _LastGroupAlias, name, RYAI_MAP_CRUNCH::Nothing);
 	// Register it in the manager
@@ -697,7 +696,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	grp->setAutoSpawn(false);
 
 	grp->botVpx = vpx;
-	grp->botName = botname;
+	grp->botName = botsName;
 	grp->setName(name);
 	grp->clearParameters();
 	grp->setPlayerAttackable(true);
@@ -708,7 +707,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	grp->clrBotsAreNamedFlag();
 
 	if (nbBots > 0)
-		eventCreateNpcBot(grp, nbBots, false, sheetId, pos, "", orientation, dispersionRadius, look, botname, vpx);
+		eventCreateNpcBot(grp, nbBots, false, sheetId, pos, "", orientation, dispersionRadius, look, botsName, vpx);
 
 	grp->spawn();
 	CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
@@ -746,7 +745,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	}
 
 	if (spawnBots)
-		grp->getSpawnObj()->spawnBots(botname, vpx);
+		grp->getSpawnObj()->spawnBots(botsName, vpx);
 
 	return grp;
 }
