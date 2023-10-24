@@ -337,20 +337,23 @@ end
 
 function game:checkRpItemsPosition()
 	local x,y,z = getPlayerPos()
-	local sx = tostring(math.floor(x/10))
-	local sy = tostring(math.floor(y/10))
 	local html = getUI("ui:interface:rpitems_actions"):find("html")
-	for k, v in pairs(game.wantedRpPositions) do
-		local a = html:find("action"..v)
+	for _, v in pairs(game.wantedRpPositions) do
+		vx = v[1]
+		vy = v[2]
+		id = v[3]
+		local a = html:find("action"..id)
 		if a then
-			if string.find(sx..":"..sy, k) then
+			if (vx-x)*(vx-x) + (vy-y)*(vy-y) <= 50 then
 				a:find("but").onclick_l = "lua"
 				a:find("img").texture = "grey_0.tga"
+				a:find("but").alpha = 255
 				a:find("text").alpha = 255
 			else
-				a:find("but").onclick_l = "proc"
+				a:find("but").onclick_l = ""
 				a:find("img").texture = "r2ed_toolbar_lock_small.tga"
-				a:find("text").alpha = 200
+				a:find("but").alpha = 150
+				a:find("text").alpha = 100
 			end
 		end
 	end
