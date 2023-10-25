@@ -36,15 +36,15 @@ void CSpawnGroupPet::update	()
 		if (!botPet->isSpawned() || botPet->haveToDespawn()) // must erase this bot.
 			getPersistent().bots().removeChildByIndex(botPet->getChildIndex());
 	}
-	
+
 	CEntityId const& entityId = getPersistent().getPetOwner();
 	CAIEntityPhysical* const petOwner = CAIS::instance().getEntityPhysical(CMirrors::DataSet->getDataSetRow(entityId));
-	
+
 	//	Quick hack to prevent of too much computing..
 	if (petOwner)
-	{			
+	{
 		double const distContDestToRealDest = petOwner->wpos().toAIVector().quickDistTo(_PathCont.getDestination());
-		
+
 		if (distContDestToRealDest>4)	// update only each 4 meters.
 			_PathCont.setDestination(petOwner->wpos());
 		_IsPlayerSpawned = true;
@@ -64,11 +64,11 @@ void CSpawnGroupPet::update	()
 			_IsPlayerSpawned = false;
 		}
 	}
-	
+
 	{
 		uint32 const newTime = CTimeInterface::gameCycle();
 		uint32 const dt = newTime - _LastUpdate;
-		
+
 		FOREACH(it, CCont<CBot>, bots())
 		{
 			(safe_cast<CBotPet*>(*it))->update(dt, petOwner);

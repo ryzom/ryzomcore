@@ -2415,7 +2415,9 @@ CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<string> &keywo
 		bool match = true;
 		for (uint k = 0; k < lcKeywords.size(); ++k)
 		{
-			if (lcName.find(lcKeywords[k]) == string::npos)
+			string::size_type poswc = lcKeywords[k].find_first_of("?*");
+			if ((poswc != string::npos && !testWildCard(lcName, lcKeywords[k]))
+				|| (poswc == string::npos && lcName.find(lcKeywords[k]) == string::npos))
 			{
 				match = false;
 				break;

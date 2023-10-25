@@ -1697,6 +1697,42 @@ NLMISC_COMMAND(getDatasetId,"get datasetid of bots with name matchiong the given
 	return true;
 }
 
+
+NLMISC_COMMAND(groupBots,"get number of bots (total and alive (spawned))", "<groupFilter>")
+{
+	if (args.size()!=1)
+		return false;
+
+	string const& grpName = args[0];
+	uint8 spawneds = 0;
+	uint8 total = 0;
+
+	vector<CGroup*> grps;
+	/// try to find the bot name
+	buildFilteredGroupList(grps, grpName);
+	if (!grps.empty())
+	{
+		FOREACHC(itGrp, vector<CGroup*>, grps)
+		{
+			CGroup* grp = *itGrp;
+			if (grp == NULL)
+				continue;
+
+			FOREACH(itBot, CCont<CBot>, grp->bots())
+			{
+				CBot* bot = *itBot;
+				CSpawnBot* spawnBot = bot->getSpawnObj();
+				total++;
+				if (spawnBot != NULL && spawnBot->isAlive())
+					spawneds++;
+			}
+		}
+	}
+	log.displayNL("%u/%u", spawneds, total);
+	return true;
+}
+
+
 NLMISC_COMMAND(script,"execute a script for groups matching the given filter [buffered]","<groupFilter> <code>")
 {
 	clearBufferedRetStrings();
@@ -1967,6 +2003,68 @@ NLMISC_COMMAND(displayTarget,"display bot target status for given bot(s) or play
 	}
 	return	true;
 }
+
+
+
+NLMISC_COMMAND(displayInfos,"display bot status for given bot(s) or player(s)","<bot id>[...]")
+{
+	if(args.size() <1)
+		return false;
+
+	CLogStringWriter	stringWriter(&log);
+
+	for (uint i=0;i<args.size();++i)
+	{
+		CAIEntityPhysical*	EntityPtr	=	CAIS::instance().tryToGetEntityPhysical(args[i].c_str());
+		if (!EntityPtr)
+		{
+//			log.displayNL("=> can't find entity: %s", args[i].c_str());
+			continue;
+		}
+
+		CAIEntityPhysical	*phys=EntityPtr->getTarget();
+
+		if	(!phys)
+		{
+			log.displayNL("=> bot %s have no target", args[i].c_str());
+			continue;
+		}
+
+		bool	found=false;
+
+		switch	(phys->getRyzomType())
+		{
+		case RYZOMID::npc:
+		case RYZOMID::creature:
+		case RYZOMID::pack_animal:
+			break;
+		case RYZOMID::player:
+				log.displayNL("=> target is a player");
+			break;
+		default:
+			{
+				CSpawnBot*	spawnBot=dynamic_cast<CSpawnBot*>(phys);
+				if	(spawnBot)
+				{
+					vector<string> strings = spawnBot->getPersistent().getMultiLineInfoString();
+					FOREACHC(itString, vector<string>, strings)
+						log.displayNL("%s", itString->c_str());
+					found=true;
+				}
+
+			}
+			break;
+		}
+
+		if	(!found)
+		{
+			log.displayNL("=> can't display information for the target of: %s", args[i].c_str());
+		}
+
+	}
+	return	true;
+}
+
 
 NLMISC_COMMAND(displayVision3x3,"display 3x3 cell vision centred on a given coordinate in the given aIInstance","<aiInstance> <x><y>")
 {
