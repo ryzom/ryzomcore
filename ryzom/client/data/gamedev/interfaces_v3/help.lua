@@ -185,4 +185,4 @@ function help:checkTutorialMilkoPad()
 end
 
 -- VERSION --
-RYZOM_HELP_VERSION = 324
+RYZOM_HELP_VERSION = 335
