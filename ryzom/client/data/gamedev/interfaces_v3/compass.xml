@@ -783,7 +783,7 @@
            w="24"
            h="24"
            x="4"
-           y="-30">
+           y="-20">
       <view id="envelop"
             type="bitmap"
             texture="calendar.tga"
@@ -864,8 +864,8 @@
     <!-- show/hide help -->
     <group id="help"
            posref="TR TR"
-           group_onclick_l="show_hide"
-           group_params_l="cs_browser"
+           group_onclick_l="lua"
+           group_params_l="AppZone:handle(1092)"
            tooltip="uiMk_window8"
            w="24"
            h="24"

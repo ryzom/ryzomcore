@@ -5,7 +5,7 @@ if not WebQueue then
 end
 
 function WebQueue:debug(text)
-	debugInfo(text)
+	debug(text)
 end
 
 function WebQueue:push(url, web)

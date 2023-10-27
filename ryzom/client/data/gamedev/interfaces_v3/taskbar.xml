@@ -865,7 +865,7 @@
 
 	<!-- Support -->
 	<instance template="mk_icon_text" id="help2" hardtext="uiMk_window8" posparent="help1" posref="BL TL"
-		tooltip="uiMk_window8" onclick_l="show_hide" params_l="cs_browser"
+		tooltip="uiMk_window8" onclick_l="lua" params_l="AppZone:handle(1092)"
 		tx_normal="tb_support.tga" tx_pushed="tb_support.tga" c="%color_purple" />
 
 </group>

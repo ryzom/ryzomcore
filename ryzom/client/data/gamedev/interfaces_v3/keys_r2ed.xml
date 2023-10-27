@@ -37,6 +37,7 @@
   <key name="KeyDECIMAL" action="camera_turn_center" /> 
   
   <key name="KeyF5" shift="1" action="toggle_chat" /> 
+  <key name="N/A" action="toggle_free_look" />
    
   <key name="KeyF10" shift="1" action="screen_shot" /> 
   <key name="KeyF10" ctrl="1" action="screen_shot_jpg" /> 
