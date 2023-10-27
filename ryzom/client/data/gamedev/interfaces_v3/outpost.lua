@@ -93,24 +93,25 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 function game:outpostBCOpenStateWindow()
+	getUI("ui:interface:outpost_selected").active = false
 	-- Open the State Window from the BotChat. server msg
-	runAH(nil, 'outpost_select_from_bc', '');
+	runAH(nil, "outpost_select_from_bc", "");
 
 	-- Open the window
-	runAH(nil, 'show', 'outpost_selected');
+	runAH(nil, "show", "outpost_selected");
 end
 
 ------------------------------------------------------------------------------------------------------------
 function game:outpostDeclareWar()
-	-- Send Msg to server
-	runAH(nil, 'outpost_declare_war_start', '');
-
-	-- wait a ack from server. Suppose not OK by default
-	setDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_RECEIVED", 0);
-	setDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_OK", 0);
-
-	-- Open the Declare War window
-	runAH(nil, "show", "outpost_declare_war");
+	local sheetSel = getDbProp("SERVER:OUTPOST_SELECTED:SHEET");
+	if sheetSel ~= nil then
+		local sheetSel = getSheetName(sheetSel)
+		local timeoffset = "0"
+		if getTimestampHuman ~= nil then
+			timeoffset = getTimestampHuman("%z")
+		end
+		WebQueue:push("https://app.ryzom.com/app_guild/outposts.php?action=declareWar&script=10149&command=reset_all&outpost="..sheetSel.."&timeoffset="..timeoffset)
+	end
 end
 
 ------------------------------------------------------------------------------------------------------------

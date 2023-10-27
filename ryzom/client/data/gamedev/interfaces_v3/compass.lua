@@ -4,6 +4,25 @@ if (game==nil) then
 	game= {};
 end
 
+if DynE == nil then
+	DynE = {}
+	DynE.lastWinUpdate = 0
+end
+
+if DynE.otherMapPoint == nil then
+	DynE.otherMapPoints = {}
+end
+
+function DynE:AddOtherMapPoints()
+	if DynE.otherMapPoints ~= nil then
+		for k, v in pairs(DynE.otherMapPoints) do
+			for _, point in pairs(v) do
+				addLandMark(point[1], point[2], point[3], point[4],"","","","","","")
+			end
+		end
+	end
+end
+
 
 function game:areInSilan()
 	polygons = {{8128,-10208}, {11368,-10208}, {11392,-12392}, {8096,-12368}}
