@@ -282,7 +282,7 @@
 		</group>
 	</template>
 
-	<template name="ark_empty_slot_view" posparent="parent" posref="TL TL" id="" cam_pos="0 24.5 -0.2" cam_tar="0.0 26.5 0.0" shape_pos="26" keep="true" h="150" w="150" x="0" y="0" shape="empty.shape" tooltip="" params_l="" params_over="">
+	<template name="ark_empty_slot_view" posparent="parent" posref="TL TL" id="" cam_pos="0 24.5 -0.2" cam_tar="0.0 26.5 0.0" shape_pos="0 26 0.1" shape2_pos="0 25.5 0.1" shape_rot="0 0 0" shape2_rot="0 0 0"  keep="true" h="150" w="150" x="0" y="0" shape="empty.shape" shape2="" tooltip="" params_l="" params_over="">
 		<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="">
 			<ctrl type="button" id="selection" button_type="push_button" tx_normal="blank.tga" render_layer="-5" tx_pushed="blank.tga" tx_over="blank.tga" color="50 50 50 0" col_over="50 50 50 0" col_pushed="50 50 50 200"  global_color_normal="false" global_color="false" scale="true" posref="MM MM" x="0" y="0" w="#w" h="#h" tooltip="#tooltip" tooltip_posref="BM TM" onclick_l="lua" params_l="#params_l" onover="lua" params_over="#params_over"/>
 			<scene3d id="scene" posparent="#posparent" w="#w" h="#h" x="#x" y="#y" posref="#posref" curcam="cam" curcs="env"  user_interaction="false"
@@ -290,7 +290,8 @@
 				<camera id="cam" fov="80" pos="#cam_pos" target="#cam_tar" roll="0" />
 				<light id="back" pos="0.0 28.2 1.6" color="96 64 32 255" near="2.5" far="4.0" />
 				<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
-				<shape id="shape" name="#shape" pos="0.0 #shape_pos 0.1" rot="0.0 0.0 0.0" />
+				<shape id="shape" name="#shape" pos="#shape_pos" rot="#shape_rot" />
+				<shape id="shape2" name="#shape2" pos="#shape2_pos" rot="#shape2_rot" />
 			</scene3d>
 		</group>
 	</template>

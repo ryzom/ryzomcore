@@ -404,24 +404,21 @@ void CSpawnGroupNpc::spawnBots(const std::string &name, const std::string &vpx)
 			bot->spawn();
 
 			CBotNpc *botnpc = static_cast<CBotNpc*>(bot);
-			if (botnpc)
+			if (botnpc && !vpx.empty())
 			{
 				botnpc->setVisualProperties(vpx);
 				botnpc->sendVisualProperties();
 			}
 
-			if (!ucName.empty())
+			CSpawnBot *spawnBot = bot->getSpawnObj();
+			if (spawnBot && !ucName.empty())
 			{
-				CSpawnBot *spawnBot = bot->getSpawnObj();
-				if (spawnBot)
-				{
-					TDataSetRow	row = spawnBot->dataSetRow();
-					NLNET::CMessage	msgout("CHARACTER_NAME");
-					msgout.serial(row);
-					msgout.serial(ucName);
-					sendMessageViaMirror("IOS", msgout);
-					spawnBot->getPersistent().setCustomName(ucName);
-				}
+				TDataSetRow	row = spawnBot->dataSetRow();
+				NLNET::CMessage	msgout("CHARACTER_NAME");
+				msgout.serial(row);
+				msgout.serial(ucName);
+				sendMessageViaMirror("IOS", msgout);
+				spawnBot->getPersistent().setCustomName(ucName);
 			}
 
 			if (_Cell < 0) {
