@@ -78,6 +78,16 @@ if ArkMissionCatalog == nil then
 	}
 end
 
+function openRyward(folder, event)
+	folder = "f"..tostring(folder)
+	event = tostring(event)
+	if not (rykea_selected_path_B == folder and rykea_selected_path_C == event and getUI("ui:interface:encyclopedia").active == true) then
+		ArkMissionCatalog:OpenCat("rykea","https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=10741&command=reset_all")
+	end
+	getUI(ArkMissionCatalog.window_id..":content:htmlB"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=10741&command=reset_all&pathB="..folder.."&pathC="..event)
+	getUI(ArkMissionCatalog.window_id).active = true
+end
+
 function ArkMissionCatalog:OpenWindow(urlA, urlB, dont_active)
 	local winframe = getUI(ArkMissionCatalog.window_id)
 	winframe.opened=true
@@ -199,6 +209,58 @@ function ArkMissionCatalog:showLegacyEncyclopedia(state)
 	else
 		getUI("ui:interface:legacy_encyclopedia").active=0
 	end
+end
+
+
+function ArkMissionCatalog:setup()
+	debug("Define Mission Catalag url")
+	if ArkMissionCatalog ~= nil then
+		ArkMissionCatalog.posxB = 0
+	end
+
+	local urlA = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8746&command=reset_all&no_html_header=1&ig=1"
+	getUI("ui:interface:encyclopedia:content:htmlA"):browse(urlA)
+
+	ArkMissionCatalog:startResize()
+	local continent = getContinentSheet()
+	if continent == "newbieland.continent" then
+		ArkMissionCatalog:OpenCat("academic","https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=10700&command=reset_all&no_html_header=1")
+	else
+		ArkMissionCatalog:OpenCat("storyline","https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8840&command=reset_all&no_html_header=1&show_latest=1")
+	end
+
+	debug("Open ency")
+	getUI("ui:interface:encyclopedia").opened = true;
+
+end
+
+function translateText(id, script, event)
+	framewin = getUI("ui:interface:ark_translate_lesson", false)
+	if framewin == nil then
+		createRootGroupInstance("webig_browser", "ark_translate_lesson", {h=480, w=980})
+		framewin = getUI("ui:interface:ark_translate_lesson", false)
+	end
+
+	framewin.opened = true
+	framewin.active = true
+	framewin.x = math.floor((getUI("ui:interface").w - framewin.w) / 2)
+	framewin.y = math.floor((getUI("ui:interface").h + framewin.h) / 2)
+	setTopWindow(framewin)
+	framewin:find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mTrads_Edit&event="..tostring(event).."&trad_name="..tostring(id).."&reload="..script)
+end
+
+
+function setupArkUrls()
+	debug("Setup Lm Events")
+	local ui = getUI("ui:interface:map:content:map_content:lm_events:html")
+	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8297&command=reset_all&no_html_header=1&continent="..tostring(game.currentMapContinent)
+	ui:browse("home")
+
+	debug("Setup Lm Icons")
+	ui = getUI("ui:interface:map:content:map_content:lm_dynicons:html")
+	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11158&command=reset_all&no_html_header=1"
+	ui:browse("home")
+	game.updateRpItemsUrl = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11488&command=reset_all"
 end
 
 if S2E1 == nil then
@@ -623,4 +685,4 @@ end
 
 
 -- VERSION --
-RYZOM_ARK_VERSION = 324
+RYZOM_ARK_VERSION = 335
