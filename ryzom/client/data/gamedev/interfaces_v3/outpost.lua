@@ -169,63 +169,58 @@ function game:outpostSelectSquadCapitalConfirm()
 end
 
 function game:outpostSetSquad()
-	local halfIndexSquad= tonumber(getDefine("right_squad_list_index"));
-	local MaxSquad= tonumber(getDefine("outpost_nb_max_squad_in_list"));
-	debug(getDbProp("UI:TEMP:OUTPOST:SQUAD_TO_BUY"))
-	local slot = getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")
-	if slot >= halfIndexSquad then
-		setDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED", slot - MaxSquad)
-	end
+	debug(getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED"))
 	runAH(nil, "outpost_set_squad", "line=@UI:TEMP:OUTPOST:SQUAD_TO_BUY");
 end
 
 function game:outpostRemoveSquad()
-	local Rounds = tonumber(getDefine("right_squad_list_index"));
-	local MaxSquad= tonumber(getDefine("outpost_nb_max_squad_in_list"));
-	local slot = getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")
-	if slot >= Rounds then
-		setDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED", slot - MaxSquad)
-	end
 	runAH(nil, "outpost_remove_squad", "line=@UI:TEMP:OUTPOST:SQUAD_TO_BUY");
 end
 
 function game:outpostInsertSquad()
-	local Rounds= tonumber(getDefine("right_squad_list_index"));
-	local MaxSquad= tonumber(getDefine("outpost_nb_max_squad_in_list"));
-	local slot = getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")
-	if slot >= Rounds then
-		setDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED", slot - MaxSquad)
-	end
 	runAH(nil, "outpost_insert_squad", "line=@UI:TEMP:OUTPOST:SQUAD_TO_BUY");
 end
 
 function game:outpostSetMapSquad()
-	local Rounds= tonumber(getDefine("right_squad_list_index"));
-	local MaxSquad= tonumber(getDefine("outpost_nb_max_squad_in_list"));
-	local slot = getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")
-	if slot >= Rounds then
-		setDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED", slot - MaxSquad)
-	end
 	runAH(nil, "outpost_squad_map_send", "ui:interface:squad_spawn_map:content:map_content:actual_map")
 end
 
 
 ------------------------------------------------------------------------------------------------------------
 function game:outpostToolTipTrainSquad(dbIndex)
-	local Rounds= tonumber(getDefine("right_squad_list_index"));
+	local Rounds = tonumber(getDefine("right_squad_list_index"));
 
 	-- compute the level at which the squad will spawn.
-	local	lvl;
+	local lvl
+	local elm
 	if(dbIndex < Rounds) then
-		lvl = dbIndex*2 +1 ;		-- eg: 0 => 1. 1=> 3
+		elm = getUI("ui:interface:outpost:content:squad_setup:list_next_start:list:o"..tostring(dbIndex))
+		lvl = math.ceil((dbIndex + 1)*1.3) - 1	-- eg: 0 => 1
+		if dbIndex == 3 or dbIndex == 6 then
+			elm.y = -14
+		end
 	else
-		lvl = (dbIndex-Rounds)*2 +2 ;	-- eg: 12 => 2
+		elm = getUI("ui:interface:outpost:content:squad_setup:list_next_during:list:o"..tostring(dbIndex))
+		lvl = math.ceil((dbIndex - Rounds + 1)*1.3)	-- eg: 12 => 1
+		if dbIndex == 12 or dbIndex == 15 or dbIndex == 18 then
+			elm.y = -14
+		end
 	end
 
 	-- set the tooltip
-	local text = i18n.get('uittOutpostSquadLvl');
+	local text = i18n.get("uittOutpostSquadLvl");
 	text = findReplaceAll(text, "%lvl", tostring(lvl));
 	setContextHelpText(text);
+
+	if dbIndex == 10 or dbIndex == 11 then
+		getUI("ui:interface:outpost:content:squad_setup:list_next_start:list:o"..tostring(dbIndex)).active=false
+	end
+
+	if dbIndex >= 22 then
+		getUI("ui:interface:outpost:content:squad_setup:list_next_during:list:o"..tostring(dbIndex)).active=false
+	end
+
+
 end
 
 
@@ -282,6 +277,10 @@ function	game:outpostInfoOnDbChange()
 
 	-- change path for attacker text id
 	uiGroup.global_state.outpost_attacker.name.textid_dblink= path .. ':GUILD:NAME_ATT';
+
+	for i=0,23 do
+		game:outpostToolTipTrainSquad(i)
+	end
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -415,7 +414,7 @@ function game:outpostGetStatusInfo(statusExpr, dbIndex, isTooltip)
 	if (isTooltip == 'no') then
 		path = self:outpostInfoGetDbPath(uiGroup.parent);
 	else
-		path = formatUI('SERVER:GUILD:OUTPOST:O#1', math.max(0, dbIndex));
+		path = formatUI('SERVER:GUILD:OUTPOST:O#1', math.max(0, tonumber(dbIndex)));
 	end
 
 	-- Peace
@@ -484,7 +483,6 @@ function game:outpostGetStatusInfo(statusExpr, dbIndex, isTooltip)
 	end
 
 	return uittOutpost;
-
 end
 
 ------------------------------------------------------------------------------------------------------------
