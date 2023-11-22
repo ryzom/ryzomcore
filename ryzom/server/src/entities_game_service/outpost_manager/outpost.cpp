@@ -2453,7 +2453,7 @@ uint32 COutpost::computeSquadCountA(uint32 roundLevel) const
 	if (_PVPType == OUTPOSTENUMS::GVG)
 		coef = OutpostGvGFightSquadCount.get();
 
-	return (uint32)ceil((float)(roundLevel+1)/coef);
+	return (uint32)floor((float)(roundLevel+2)/coef);
 }
 
 //----------------------------------------------------------------------------
