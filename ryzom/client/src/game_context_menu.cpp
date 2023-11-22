@@ -775,7 +775,7 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 					if (result == string("Qui etes-vous ?")
 						|| result == string("Wer bist Du?")
 						|| result == string("Who are you?")
-						|| result == string("Quién eres tú?")
+						|| result == string("¿Quién eres tú?")
 						|| result == string("Кто ты?"))
 					{
 						pVTM->setActive(false);

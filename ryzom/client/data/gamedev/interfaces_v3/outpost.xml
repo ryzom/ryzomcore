@@ -466,8 +466,8 @@
 <!--***************-->
 
 <!-- Should be HALF the value in Database -->
-<define id="outpost_nb_max_squad_in_list"  value="6" />
-<define id="right_squad_list_index"  value="12" />
+<define id="outpost_nb_max_squad_in_list" value="12" />
+<define id="right_squad_list_index" value="12" />
 <define id="outpost_selected"	value="SERVER:GUILD:OUTPOST:O[UI:TEMP:OUTPOST:SELECTION]" />
 <define id="outpost_squad_line_h" value="15" />
 <define id="outpost_squad_name_w" value="210" />
@@ -528,8 +528,9 @@
 		<ctrl style="o_spawn_button" onclick_l="proc" params_l="open_spawn_map|#index" />
 	</group>
 
-	<!-- active the line if the squad slot is here -->
-	<link expr="ne(@%outpost_selected:SQUADS:T#index:SHEET, 0)" target="#id:active" />
+	<!-- active the line if the squad slot is here
+	<link expr="and(and(and(ne(@%outpost_selected:SQUADS:T#index:SHEET, 0), ne(#index, 10)), ne(#index, 11)), gt(#index, 23))" target="#id:active" />
+	-->
 	<!-- name of the squad -->
 	<link expr="getSquadName(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:name:uc_hardtext" />
 	<!-- squad cost -->
