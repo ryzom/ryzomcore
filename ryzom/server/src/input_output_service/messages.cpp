@@ -22,6 +22,7 @@
 #include <nel/net/unified_network.h>
 
 #include "game_share/ryzom_mirror_properties.h"
+#include "server_share/mongo_wrapper.h"
 
 #include "input_output_service.h"
 /*#include "game_share/tick_event_handler.h"
@@ -683,6 +684,20 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 	{
 		ci->Language = SM->checkLanguageCode(language);
 		ci->HavePrivilege = havePrivilege;
+
+#ifdef HAVE_MONGO
+		string cids = "";
+		for ( uint i = 0; i < ignoreList.size(); i++ )
+		{
+			if (i > 0)
+				cids += toString(",%d", ignoreList[i].getShortId());
+			else
+				cids += toString("%d", ignoreList[i].getShortId());
+		}
+
+		CMongo::update("ryzom_users", toString("{ 'cid': %d}", TheDataset.getEntityId(chId).getShortId()), toString("{ $set:{ 'ignore': [%s] } }", cids.c_str()));
+#endif
+
 		IOS->getChatManager().getClient(chId).setIgnoreList(ignoreList);
 	}
 
