@@ -18,7 +18,7 @@
 #include "stdpch.h"
 #include "chat_client.h"
 #include "input_output_service.h"
-
+#include "server_share/mongo_wrapper.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -145,6 +145,9 @@ void CChatClient::setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored)
 		if( itIgnore == _IgnoreList.end() )
 		{
 			_IgnoreList.insert( id );
+#ifdef HAVE_MONGO
+		CMongo::update("ryzom_users", toString("{ 'cid': %d}", TheDataset.getEntityId(_DataSetIndex).getShortId()), toString("{ $push:{ 'ignore': %d } }", id.getShortId()));
+#endif
 		}
 
 	}
@@ -153,6 +156,9 @@ void CChatClient::setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored)
 		if( itIgnore != _IgnoreList.end() )
 		{
 			_IgnoreList.erase( itIgnore );
+#ifdef HAVE_MONGO
+		CMongo::update("ryzom_users", toString("{ 'cid': %d}", TheDataset.getEntityId(_DataSetIndex).getShortId()), toString("{ $pull:{ 'ignore': %d } }", id.getShortId()));
+#endif
 		}
 	}
 } // ignore //

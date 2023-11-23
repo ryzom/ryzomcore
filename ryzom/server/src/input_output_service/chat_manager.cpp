@@ -667,7 +667,7 @@ void CChatManager::checkNeedDeeplize( const TDataSetRow& sender, const ucstring&
 		else if (ucstr.length() > 5 && ucstr[1] == ':' && ucstr[4] == ':') // Already have filter
 			chatInGroup( grpId, ucstr, sender );
 		else
-			chatInGroup( grpId, ucstring(":"+senderLang+":")+ucstr, sender ); // Need filter
+			chatInGroup( grpId, ucstring(":"+senderLang+": ")+ucstr, sender ); // Need filter
 	}
 
 
@@ -872,9 +872,9 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 							}
 
 							if (source_lang == "en") // in RC the icon are :gb:
-								mongoText = ":gb:"+mongoText;
+								mongoText = ":gb: "+mongoText;
 							else
-								mongoText = ":"+source_lang+":"+mongoText;
+								mongoText = ":"+source_lang+": "+mongoText;
 
 							chatId = "FACTION_EN";
 							if (usedlang != SM->getLanguageCodeString(ci->Language))
@@ -977,9 +977,9 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 							}
 
 							if (source_lang == "en") // in RC the icon are :gb:
-								mongoText = ":gb:"+mongoText;
+								mongoText = ":gb: "+mongoText;
 							else
-								mongoText = ":"+source_lang+":"+mongoText;
+								mongoText = ":"+source_lang+": "+mongoText;
 						}
 						chatInGroup( grpId, ucstr.substr(1), sender );
 					}
@@ -1089,9 +1089,9 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 								}
 
 								if (source_lang == "en") // in RC the icon are :gb:
-									mongoText = ":gb:"+mongoText;
+									mongoText = ":gb: "+mongoText;
 								else
-									mongoText = ":"+source_lang+":"+mongoText;
+									mongoText = ":"+source_lang+": "+mongoText;
 							}
 						}
 						// Send for translation
@@ -2113,9 +2113,9 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 
 
 			if (source_lang == "en") // in RC the icon are :gb:
-				mongoText = ":gb:"+mongoText;
+				mongoText = ":gb: "+mongoText;
 			else
-				mongoText = ":"+source_lang+":"+mongoText;
+				mongoText = ":"+source_lang+": "+mongoText;
 
 #ifdef HAVE_MONGO
 			if (endOfOriginal != string::npos)
