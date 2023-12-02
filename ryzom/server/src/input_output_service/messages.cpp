@@ -650,7 +650,8 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 	ucstring name;
 	TSessionId sessionId;
 	string language;
-	std::vector<NLMISC::CEntityId> ignoreList;
+	std::vector<NLMISC::CEntityId> _ignoreList;
+	std::vector<uint32> ignoreList;
 	bool havePrivilege;
 	try
 	{
@@ -667,7 +668,7 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 		msgin.serial(language);
 
 		// ignoreList
-		msgin.serialCont(ignoreList);
+		msgin.serialCont(_ignoreList);
 
 		// privilege
 		msgin.serial( havePrivilege );
@@ -687,12 +688,13 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 
 #ifdef HAVE_MONGO
 		string cids = "";
-		for ( uint i = 0; i < ignoreList.size(); i++ )
+		for ( uint i = 0; i < _ignoreList.size(); i++ )
 		{
+			ignoreList.push_back((uint32)_ignoreList[i].getShortId());
 			if (i > 0)
-				cids += toString(",%d", ignoreList[i].getShortId());
+				cids += toString(",%u", _ignoreList[i].getShortId());
 			else
-				cids += toString("%d", ignoreList[i].getShortId());
+				cids += toString("%u", _ignoreList[i].getShortId());
 		}
 
 		CMongo::update("ryzom_users", toString("{ 'cid': %d}", TheDataset.getEntityId(chId).getShortId()), toString("{ $set:{ 'ignore': [%s] } }", cids.c_str()));

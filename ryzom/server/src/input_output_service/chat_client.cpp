@@ -139,14 +139,14 @@ bool CChatClient::isMuted()
 //-----------------------------------------------
 void CChatClient::setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored)
 {
-	TIgnoreListCont::iterator itIgnore = _IgnoreList.find(id);
+	TIgnoreListCont::iterator itIgnore = _IgnoreList.find(id.getShortId());
 	if (ignored)
 	{
 		if( itIgnore == _IgnoreList.end() )
 		{
-			_IgnoreList.insert( id );
+			_IgnoreList.insert( id.getShortId() );
 #ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{ 'cid': %d}", TheDataset.getEntityId(_DataSetIndex).getShortId()), toString("{ $push:{ 'ignore': %d } }", id.getShortId()));
+		CMongo::update("ryzom_users", toString("{ 'cid': %u}", TheDataset.getEntityId(_DataSetIndex).getShortId()), toString("{ $push:{ 'ignore': %u } }", id.getShortId()));
 #endif
 		}
 
@@ -157,7 +157,7 @@ void CChatClient::setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored)
 		{
 			_IgnoreList.erase( itIgnore );
 #ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{ 'cid': %d}", TheDataset.getEntityId(_DataSetIndex).getShortId()), toString("{ $pull:{ 'ignore': %d } }", id.getShortId()));
+		CMongo::update("ryzom_users", toString("{ 'cid': %u}", TheDataset.getEntityId(_DataSetIndex).getShortId()), toString("{ $pull:{ 'ignore': %u } }", id.getShortId()));
 #endif
 		}
 	}
@@ -171,15 +171,7 @@ void CChatClient::setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored)
 bool CChatClient::isInIgnoreList( const NLMISC::CEntityId &id )
 {
 	TIgnoreListCont::const_iterator itIgnore = _IgnoreList.find(id);
-	if( itIgnore != _IgnoreList.end() )
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-
+	return isInIgnoreList(id.getShortId());
 } // isInIgnoreList //
 
 
@@ -195,10 +187,20 @@ bool CChatClient::isInIgnoreList( const TDataSetRow &id )
 }
 
 //-----------------------------------------------
+//	isInIgnoreList :
+//
+//-----------------------------------------------
+bool CChatClient::isInIgnoreList( uint32 id )
+{
+	TIgnoreListCont::const_iterator itIgnore = _IgnoreList.find(id);
+	return itIgnore != _IgnoreList.end();
+}
+
+//-----------------------------------------------
 //	setIgnoreList
 //
 //-----------------------------------------------
-void CChatClient::setIgnoreList(const std::vector<NLMISC::CEntityId> &ignoreList)
+void CChatClient::setIgnoreList(const std::vector<uint32> &ignoreList)
 {
 	TIgnoreListCont ignoreListCont(ignoreList.begin(), ignoreList.end());
 	_IgnoreList.swap(ignoreListCont);
