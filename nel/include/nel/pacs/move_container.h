@@ -244,7 +244,7 @@ private:
 												CCollisionOTStaticInfo *staticColInfo);
 
 	// Add a trigger in the trigger array
-	void						newTrigger (CMovePrimitive* first, CMovePrimitive* second, const CCollisionDesc& desc, uint triggerType);
+	bool						newTrigger (CMovePrimitive* first, CMovePrimitive* second, const CCollisionDesc& desc, uint triggerType);
 
 	// Clear modified primitive list
 	void						clearModifiedList (uint8 worldImage);
