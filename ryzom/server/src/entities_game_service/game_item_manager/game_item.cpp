@@ -1276,7 +1276,10 @@ CGameItemPtr CGameItem::getItemCopy()
 	item->_RefInventorySlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	item->_CreatorId = _CreatorId;
 	item->_LockCount = 0;
-	item->_HP = item->maxDurability();
+	if (_HP == 0)
+		item->_HP = item->maxDurability();
+	else
+		item->_HP = _HP;
 
 	item->_LatencyEndDate = _LatencyEndDate;
 	item->_Enchantment = _Enchantment;
