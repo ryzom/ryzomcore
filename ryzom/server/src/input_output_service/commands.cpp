@@ -771,15 +771,21 @@ NLMISC_COMMAND(farChat, "send far message chat", "<char_name> <chat_id> <message
 		return false;
 
 	uint32 id;
+	uint32 senderCid = 0;
 	ucstring ucstr;
 	string rocketId = "";
 
 	string name = args[0];
+	vector<string> sname;
+	NLMISC::splitString(name, "#", sname);
+	if (sname.size() == 2)
+		NLMISC::fromString(sname[1], senderCid);
+
 	ucstr.fromUtf8(args[2]);
 	if (args.size() > 3)
 		rocketId = args[3];
 
-	IOS->getChatManager().sendFarChat(name, ucstr, args[1], rocketId);
+	IOS->getChatManager().sendFarChat(sname[0], ucstr, args[1], rocketId, senderCid);
 	return true;
 }
 
