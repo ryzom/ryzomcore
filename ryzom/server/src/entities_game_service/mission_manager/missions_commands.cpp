@@ -1997,6 +1997,12 @@ NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [insta
 					c->setPowoFlag("room_inv", invFlags[0] == '1');
 					c->setPowoFlag("guild_inv", invFlags[1] == '1');
 
+					if (c->getPowoFlag("room_inv"))
+						PlayerManager.sendImpulseToClient(c->getId(), "ITEM:OPEN_ROOM_INVENTORY");
+
+					if (c->getPowoFlag("guild_inv"))
+						PlayerManager.sendImpulseToClient(c->getId(), "GUILD:OPEN_INVENTORY");
+
 					if (args.size () > 3 && args[3] != "*") // Change the default exit by exit of instance building
 					{
 						std::vector< std::string > pos;
