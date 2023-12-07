@@ -86,7 +86,7 @@ public :
 	void setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored);
 
 	// Set the ignore list
-	void setIgnoreList(const std::vector<NLMISC::CEntityId> &ignoreList);
+	void setIgnoreList(const std::vector<uint32> &ignoreList);
 
 	/**
 	 * Return true if the character is in the ignore list of this client
@@ -95,6 +95,7 @@ public :
 	 */
 	bool isInIgnoreList( const NLMISC::CEntityId &id );
 	bool isInIgnoreList( const TDataSetRow &id );
+	bool isInIgnoreList( uint32 id );
 
 	/**
 	 * Add or remove a string filter
@@ -228,7 +229,7 @@ private :
 	/// mute delay (in min)
 	sint32				_MuteDelay;
 
-	typedef std::set<NLMISC::CEntityId>	TIgnoreListCont;
+	typedef std::set<uint32>	TIgnoreListCont;
 	/// this client won't see chat incoming from these characters
 //	std::set<NLMISC::CEntityId> _IgnoreList;
 	TIgnoreListCont		_IgnoreList;
