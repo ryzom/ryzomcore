@@ -170,7 +170,6 @@ void CChatClient::setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored)
 //-----------------------------------------------
 bool CChatClient::isInIgnoreList( const NLMISC::CEntityId &id )
 {
-	TIgnoreListCont::const_iterator itIgnore = _IgnoreList.find(id);
 	return isInIgnoreList(id.getShortId());
 } // isInIgnoreList //
 
