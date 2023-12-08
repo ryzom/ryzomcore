@@ -1,0 +1,14 @@
+#!/bin/sh
+
+cd /home/nevrax/tmp/xml_chars/
+while true
+do
+        inotifywait -e close_write from_appadmin
+        echo "------------"
+        echo "New command :"
+        cat from_appadmin
+        echo "------------"
+        sh from_appadmin
+        echo "" > from_appadmin
+done
+

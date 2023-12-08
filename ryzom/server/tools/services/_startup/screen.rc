@@ -1,0 +1,13 @@
+defscrollback 5000
+mousetrack on
+hardstatus on
+hardstatus alwayslastline
+# hardstatus string "%{.kW}%-w%{.bW}%t [%n]%{-}%+w %=%{..G} %H %{..Y} %Y/%m/%d %c"
+hardstatus string "%{= kG}[%{G}%H%? %1`%?%{g}][%= %{= kw}%-w%{+b yk} %n*%t%?(%u)%? %{-}%+w %=%{g}][%{B}%m/%d %{W}%C%A%{g}]"
+
+# quickly switch between regions using tab and arrows
+bindkey "^[[1;5D" prev
+bindkey "^[[1;5C" next
+
+termcapinfo xterm* 'hs:ts=\E]2;:fs=\007:ds=\E]2;screen\007:ti@:te@'
+
