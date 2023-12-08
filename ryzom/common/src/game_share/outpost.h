@@ -32,7 +32,7 @@ namespace OUTPOSTENUMS
 	const uint32 OUTPOST_MAX_SPAWN_ZONE = 16;			// Same as (#y) in the database SERVER:GUILD:OUTPOST:O#x:SPAWN_ZONE:#y see (database.xml)
 	const uint32 OUTPOST_MAX_SQUAD_SHOP = 16;			// Same as (#y) in the database SERVER:GUILD:OUTPOST:O#x:SQUAD_SHOP:#y see (database.xml)
 
-	const uint32 OUTPOST_NB_BUYABLE_SQUAD_SLOTS = 6;
+	const uint32 OUTPOST_NB_BUYABLE_SQUAD_SLOTS = 12;
 	const uint32 OUTPOST_NB_SQUAD_SLOTS = 12;
 	const uint32 OUTPOST_MAX_SQUAD_TRAINING = OUTPOST_NB_SQUAD_SLOTS * 2;	// Same as (#y) in the database SERVER:GUILD:OUTPOST:SQUADS:SP#y see (database.xml)
 	const uint32 OUTPOST_MAX_SQUAD_SPAWNED = OUTPOST_MAX_SQUAD_TRAINING;	// Same as (#y) in the database SERVER:GUILD:OUTPOST:SQUADS:T#y see (database.xml)
