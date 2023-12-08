@@ -10,7 +10,7 @@ import pymongo
 from admin_modules_itf import queryShard
 
 mongoclient = pymongo.MongoClient("mongodb://arma.ryzom.com:22110/")
-mongodb = mongoclient["megacorp_live"]
+mongodb = mongoclient["megacorp_test"]
 ryzom_chats = mongodb["ryzom_chats"]
 
 ALL_LANGS = ["de", "en", "es", "fr", "ru"]
@@ -114,6 +114,13 @@ for line in loglines:
 			domain = ""
 			prefix = ""
 
+		# suser = user.split("#")
+		# user = suser[0]
+		# if len(suser) == 2:
+			# user_cid = suser[1]
+		# else:
+			# user_cid = 0
+
 		print("User:", user)
 		print("Command:", command)
 
@@ -205,7 +212,7 @@ for line in loglines:
 
 			if source == only_lang and (channel == "universe" or channel[:8] == "FACTION_" or channel[:7] == "league_"):
 				queryShard("ios", command+" "+user+domain+" "+channel+" \""+prefix+getLang(source)+original_text+"\" "+rocket_id, False)
-			
+
 			if source == only_lang and channel[:6] == "guild:":
 				chat = { "_id": rocket_id, "username": username, "chat": getLang(source)+original_text, "chatType": "guildId", "chatId": int(channel[9:19], 16)-268435456, "date": time.time()*1000, "ig": True, "autoSub": 1}
 				ryzom_chats.insert_one(chat)
