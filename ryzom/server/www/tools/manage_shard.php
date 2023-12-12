@@ -11,7 +11,7 @@ switch($command) {
 
 	case 'test':
 		echo 'TEST...';
-		echo sendToChat('Atys are processing a reboot...', '#pub-general', 'Stagiaire d\'Atys', ':upside_down:');
+		echo sendToChat('Atys are processing a reboot...', $RocketChatGeneral, $ShardName.'\' Intern', ':upside_down:');
 	break;
 
 	case 'lock':
@@ -27,13 +27,13 @@ switch($command) {
 		@queryShard('su', 'rsm.setWSState '. $ShardId .' OPEN ""');
 		if ($option == 'players') {
 			file_put_contents('/home/nevrax/www/login/server_open_status', 'ds_open'."\n");
-			sendToChat('The shard is open for o/_--[ EVERYBODY ]--_\o', '#pub-uni', 'Stagiaire d\''.$ShardName, ':tada:');
-			sendToChat('is now open to ALL players \o/', '#pub-general', $ShardName, ':tada:');
+			sendToChat('The server is open for o/_--[ EVERYBODY ]--_\o', $RocketChatUniverse , $ShardName.'\' Intern', ':tada:');
+			sendToChat('The server is now open to ALL players \o/', $RocketChatGeneral, $ShardName.'\' Intern', ':tada:');
 		} else {
 			file_put_contents('/home/nevrax/www/login/server_open_status', 'ds_restricted'."\n");
 			if ($option != 'silent') {
-				sendToChat('The shard is open for RYZOM TEAM', '#pub-uni', $ShardName.'\' Intern', ':raised_hands:');
-				sendToChat('is now in the hands of the Customer Support Team.', '#pub-general', $ShardName, ':raised_hands:');
+				sendToChat('The server is open for RYZOM TEAM', $RocketChatUniverse, $ShardName.'\' Intern', ':raised_hands:');
+				sendToChat('The server is now in the hands of the Customer Support Team.', $RocketChatGeneral, $ShardName.'\' Intern', ':raised_hands:');
 			}
 		}
 	break;
@@ -51,7 +51,7 @@ switch($command) {
 				}
 		}
 		if ($have_player)
-			sendToChat('is killing all services...', '#pub-general', $ShardName, ':broken_heart:');
+			sendToChat('is killing all services...', $RocketChatGeneral, $ShardName, ':broken_heart:');
 	break;
 }
 

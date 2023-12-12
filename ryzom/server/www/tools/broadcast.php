@@ -10,9 +10,9 @@ $message = $argv?implode(' ', $argv):'';
 switch($shard) {
 
 	case 'live':
-		sendToChat('is starting the Shard Restart Sequence...', '#pub-general', $ShardName, ':recycle:');
-		sendToChat('is broadcasting to players', '#pub-general', $ShardName, ':loudspeaker:');
-		sendToChat('The shard will go down in 10 minutes. Please find a safe location and log out.', '#pub-universe', $ShardName.'\' Intern', ':loudspeaker:');
+		sendToChat('The server is starting the Shard Restart Sequence...',  $RocketChatGeneral, $ShardName.'\' Intern', ':recycle:');
+		sendToChat('The server is broadcasting to players to keep a safe place', $RocketChatGeneral, $ShardName.'\' Intern', ':loudspeaker:');
+		sendToChat('The shard will go down in 10 minutes. Please find a safe location and log out.', $RocketChatUniverse, $ShardName.'\' Intern', ':loudspeaker:');
 
 		if (!$message) {
 			$message = '@{F00F}[de]Der Server wird in $minutes$ Minuten heruntergefahren.\n@{FF0F}Findet eine sichere Stelle und logt aus.';
