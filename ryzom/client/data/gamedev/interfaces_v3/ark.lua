@@ -231,10 +231,9 @@ function ArkMissionCatalog:setup()
 
 	debug("Open ency")
 	getUI("ui:interface:encyclopedia").opened = true;
-
 end
 
-function translateText(id, script, event)
+function translateText(id, script, event, dst_lang)
 	framewin = getUI("ui:interface:ark_translate_lesson", false)
 	if framewin == nil then
 		createRootGroupInstance("webig_browser", "ark_translate_lesson", {h=480, w=980})
@@ -246,7 +245,10 @@ function translateText(id, script, event)
 	framewin.x = math.floor((getUI("ui:interface").w - framewin.w) / 2)
 	framewin.y = math.floor((getUI("ui:interface").h + framewin.h) / 2)
 	setTopWindow(framewin)
-	framewin:find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mTrads_Edit&event="..tostring(event).."&trad_name="..tostring(id).."&reload="..script)
+	if dst_lang then
+		dst_lang = "&dst_lang="..dst_lang
+	end
+	framewin:find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mTrads_Edit&event="..tostring(event).."&trad_name="..tostring(id).."&reload="..script..dst_lang)
 end
 
 
@@ -262,6 +264,75 @@ function setupArkUrls()
 	ui:browse("home")
 	game.updateRpItemsUrl = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11488&command=reset_all"
 end
+
+
+--------------------------------------------------------------------------------
+--- ARK EDITOR ---
+--------------------------------------------------------------------------------
+
+function ArkSwitchAdvEdition(prefix)
+	if ArkSwitchAdvEditionSwitch then
+		ArkSwitchAdvEditionSwitch = false
+		getUICaller():showDiv("advEditionDiv"..prefix, false)
+	else
+		ArkSwitchAdvEditionSwitch = true
+		getUICaller():showDiv("advEditionDiv"..prefix, true)
+	end
+end
+
+function ArkShowStageDiv(name, state)
+	getUICaller():showDiv(name, state)
+end
+
+function ArkSelectRyform(curwin, id, mod)
+	e = ArkGetStageEdit(__CURRENT_WINDOW__):find(id..":eb")
+	e.input_string = mod
+	ArkGetStageEdit(__CURRENT_WINDOW__):find("send:b"):runLeftClickAction()
+end
+
+function ArkSendForm(name)
+	ArkGetStageEdit(__CURRENT_WINDOW__):find(name.."__command:eb").input_string = "reset"
+	ArkGetStageEdit(__CURRENT_WINDOW__):find("send:b"):runLeftClickAction()
+end
+
+function ArkGetStageEdit(curwin)
+	local sid = string.split(curwin, ":")
+	local eid = sid[#sid]
+	table.remove(sid, #sid)
+	local id = sid[1]
+	for i = 2, #sid do
+		id = id .. ":" .. sid[i]
+	end
+	return getUI(id):find(eid)
+end
+
+function ArkFindUI(name)
+	local i = 0
+	local ui = getUICaller()
+	while true do
+		local found = ui:find(name)
+		if found ~= nil then
+			return found
+		else
+			ui  = ui.parent
+		end
+		i = i +1
+		if i >= 100 then
+			return nil
+		end
+	end
+end
+
+function ArkOnSelectChanged(name)
+	local text = ArkRyformV5[name][getUICaller().selection+1]
+	ArkFindUI(name..":eb").input_string = text
+end
+
+
+
+
+
+
 
 if S2E1 == nil then
 	S2E1 = {}
