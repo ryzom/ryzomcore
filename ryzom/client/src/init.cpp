@@ -772,6 +772,19 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 
 	H_AUTO(InitRZAddSearchPaths);
 
+	std::vector<string>	UserDataPath;
+	UserDataPath.push_back("user");
+	addPaths(progress, UserDataPath, true);
+
+	// if want occ event:
+	if (ClientCfg.EnableEventsBnp)
+		CPath::loadRemappedFiles("enable_events_bnp.csv");
+	// if want occ stuff:
+	if (ClientCfg.EnableOccsBnp)
+		CPath::loadRemappedFiles("enable_occs_bnp.csv");
+
+
+
 	addPaths(progress, ClientCfg.PreDataPath, true);
 
 	//nlinfo ("PROFILE: %d seconds for Add search paths Predata", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
@@ -850,7 +863,7 @@ void initLog()
 
 	rlp2.rlim_cur = std::min(value, rlp.rlim_max);
 	rlp2.rlim_max = rlp.rlim_max;
-	
+
 	if (setrlimit(RLIMIT_NOFILE, &rlp2))
 	{
 		if (errno == EINVAL)
