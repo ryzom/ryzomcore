@@ -645,7 +645,7 @@
                   handler="lua"
                   params="game:configShowOne('landmark_colors')"
                   fontsize="10"
-                  y_decal="-1" />				
+                  y_decal="-1" />
             <node id="help"
                   name="uimHelp"
                   handler="lua"
@@ -918,13 +918,27 @@
                   posref="BL TL"
                   x="0"
                   y="-2" />
+        <instance template="tgcw_checkbox"
+                  id="occeventbnps"
+                  text="uiOccEventBnps"
+                  posparent="window_snap_invert"
+                  posref="BL TL"
+                  x="-20"
+                  y="-28" />
+        <instance template="tgcw_checkbox"
+                  id="occitems"
+                  text="uiOccItems"
+                  posref="BR BL"
+                  posparent="occeventbnps"
+                  x="5"
+                  y="0" />
         <!-- wait vbl -->
         <instance template="tgcw_checkbox"
                   id="waitvbl"
                   text="uiWaitVBL"
-                  posparent="window_snap_invert"
+                  posparent="occeventbnps"
                   posref="BL TL"
-                  x="-20"
+                  x="0"
                   y="-28" />
         <!-- Special case for video modes -->
         <group id="fullscreen"
@@ -1527,7 +1541,7 @@
         </group>
         <link expr="@UI:TEMP:LANGUAGE"
               action="game_config_change_language" />
-	
+
 	<view style="sgc_title"
 	      type="text"
 	      id="translation_header_text"
@@ -2624,7 +2638,7 @@
                   posref="BL TL"
                   posparent="is_enemy_title"
                   x="0"
-                  y="-4" />                    
+                  y="-4" />
         <instance template="tgcw_checkbox"
                   id="is_enemy_guild_name"
                   text="uigcGuildName"
@@ -3376,7 +3390,7 @@
             posparent="crop"
             posref="TL TR"
             x="-8"
-            y="0" />			
+            y="0" />
       <!-- *** -->
       <group id="help"
              active="false"
@@ -3453,6 +3467,16 @@
                realtime="true"
                widget="boolbut"
                link="WaitVBL" />
+        <param ui="general:occeventbnps:c"
+               type="cfg"
+               realtime="false"
+               widget="boolbut"
+               link="EnableEventsBnp" />
+        <param ui="general:occitems:c"
+               type="cfg"
+               realtime="false"
+               widget="boolbut"
+               link="EnableOccsBnp" />
         <param ui="general:window_snap_distance:c"
                type="cfg"
                realtime="true"
@@ -3811,7 +3835,7 @@
 	       link="UI:SAVE:TRANSLATION:REGION:DISABLE"
 	       realtime="true" />
 
-	
+
 	<param ui="chat_colors:cc_say:c"
                type="db"
                widget="colbut"
@@ -4549,7 +4573,7 @@
                widget="colbut"
                link="UI:SAVE:LANDMARK:COLORS:TELEPORTER"
                realtime="true" />
-			   
+
         <param ui="help:context_help:c"
                type="db"
                widget="boolbut"

@@ -23,6 +23,7 @@
 
 <proc id="proc_startall_connect" >
 	<action handler="anim_start" params="anim=anim_connection_intro" />
+	<action handler="lua" params="get_occ_events()" />
 </proc>
 
 <proc id="proc_restart_connect" >
@@ -36,10 +37,10 @@
 <group id="connecting" w="1024" h="768" posref="MM MM" on_active="proc" on_active_params="proc_startall_connect" >
 
 	<!-- JENA BACK -->
-	<view type="bitmap" id="jena" render_layer="-1" 
+	<view type="bitmap" id="jena" render_layer="-1"
 		global_color="false" color="255 255 255 255" posref="TL TL" x="0" y="0" texture="new_launcher_bg.tga" />
 
-	
+
 	<!-- Quit Button -->
 	<ctrl style="valid_txt_button" id="finish_but" posref="BR BR" x="-40" y="130" hardtext="uiQuit"
 					onover="play_sound" params_over="name=charsel_quit_over"
@@ -47,11 +48,16 @@
 
 	<view type="text" id="title" posref="MM MM" y="24" hardtext="uiConnecting" fontsize="20"/>
 
-	
+
 	<!-- BLACK SCREEN FADE -->
 	<view type="bitmap" id="black_screen" posref="TL TL" x="0" y="0" render_layer="4" texture="blank.tga"
 		color="0 0 0 255" sizeref="wh" scale="true" global_color="false" />
 
+	<group id="html" type="webig_html" posref="MM MM" title_prefix="" sizeref="wh" x="0" y="0" w="-40" h="-40" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline">
+		<group id="black" posref="BR BR" sizeref="hw" w="0" h="0" inherit_gc_alpha="true" />
+		<view id="background_bitmap" type="bitmap" posparent="black" posref="MM MM" sizeref="wh" w="0" h="0" inherit_gc_alpha="true" scale="true" texture="blank.tga" color="0 0 0 0" global_color="false" />
+		<group id="text_list" type="list" fontsize="9" posref="TL TL" posparent="black" x="0" y="0" space="0" sizeref="hw" w="0" h="0" maxelements="2000" />
+	</group>
 
 
 

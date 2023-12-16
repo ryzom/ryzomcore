@@ -1,6 +1,7 @@
 <interface_config>
 
 <root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
 <variable entry="UI:TEMP:INTROCLICKSTEP"	type="sint64" value="-1"/>
 
 <!-- ***************** -->
@@ -22,9 +23,9 @@
 
 <!-- check if we have to skip the intro -->
 <proc id="proc_active_intro_logo">
-	<action handler="proc" cond="eq(@UI:TEMP:SKIP_INTRO,0)" params="proc_active_intro_logo_noskip" />	
+	<action handler="proc" cond="eq(@UI:TEMP:SKIP_INTRO,0)" params="proc_active_intro_logo_noskip" />
 	<action handler="set" params="target_property=ui:outgame:global_background:active|value=1" />
-	<action handler="proc" cond="ne(@UI:TEMP:SKIP_INTRO,0)" params="proc_intro_skip" />	
+	<action handler="proc" cond="ne(@UI:TEMP:SKIP_INTRO,0)" params="proc_intro_skip" />
 </proc>
 
 <proc id="proc_intro_next_step">
@@ -42,7 +43,7 @@
 <proc id="proc_tryton_fadeout_finished">
 	<action handler="set" cond="ne(@UI:TEMP:INTROCLICKSTEP,0)" params="target_property=ui:outgame:logo_intro:back:active|value=1" />
 	<action handler="set" cond="ne(@UI:TEMP:INTROCLICKSTEP,0)" params="target_property=ui:outgame:logo_intro:back_txt:active|value=1" />
-	
+
 	<action handler="set" cond="eq(@UI:TEMP:INTROCLICKSTEP,0)" params="target_property=ui:outgame:logo_intro:back:active|value=0" />
 	<action handler="set" cond="eq(@UI:TEMP:INTROCLICKSTEP,0)" params="target_property=ui:outgame:logo_intro:back_txt:active|value=0" />
 	<action handler="proc" params="proc_tryton_fadeout_finished2" />
@@ -85,21 +86,20 @@
 <!-- ***************** -->
 <!-- * INTRODUCTION  * -->
 <!-- ***************** -->
- 
+
 <group id="logo_intro" sizeref="wh" w="0" h="0" on_active="" on_active_params="" >
 
 	<!-- BLACK BACK -->
 	<view type="bitmap" id="bg" posref="MM MM" x="0" y="0" render_layer="0" texture="blank.tga" color="0 0 0 255" scale="true" global_color="false" />
 
-	
-	
+
 	<!--
 	<view type="bitmap" id="nevrax" render_layer="1" txtoffsetx="0" txtoffsety="0" txtwidth="352" txtheight="48"
 	global_color="false" color="255 255 255 255" posref="MM MM" x="0" y="0" texture="logos_intro.tga" />
 
 	<view type="bitmap" id="presents" render_layer="1" txtoffsetx="0" txtoffsety="176" txtwidth="128" txtheight="32"
 	global_color="false" color="255 255 255 255" posref="MM MM" x="0" y="0" texture="logos_intro.tga" />
-	
+
 	<view type="bitmap" id="ryzom" render_layer="1" txtoffsetx="0" txtoffsety="48" txtwidth="400" txtheight="128"
 		global_color="false" color="255 255 255 0" posref="MM MM" x="0" y="0" texture="logos_intro.tga" />
 	-->
@@ -109,30 +109,30 @@
 	<ctrl type="button" id="skip" button_type="push_button" posref="TR TR" x="-8" y="-16"
 			tx_normal="button_next.tga" tx_pushed="button_next_over.tga" tx_over="button_next_over.tga" color="255 128 0 255"
 			onclick_l="proc" params_l="proc_intro_skip"  tooltip="uiSkipIntro" />
-			
-	<view type="text" id="skip_txt" posparent="skip" posref="MR MR" x="-36" y="-1" hardtext="uiSkipTryton" shadow="true" fontsize="16" color="255 255 255 255" render_layer="2" />		
-	
+
+	<view type="text" id="skip_txt" posparent="skip" posref="MR MR" x="-36" y="-1" hardtext="uiSkipTryton" shadow="true" fontsize="16" color="255 255 255 255" render_layer="2" />
+
 	<ctrl type="button" id="next" button_type="push_button" posref="BR BR" x="-8" y="16"
 			tx_normal="button_next.tga" tx_pushed="button_next_over.tga" tx_over="button_next_over.tga" color="255 255 255 255"
 			onclick_l="proc" params_l="proc_intro_next_step"  tooltip="uiNextStep" />
-			
-	<view type="text" id="next_txt" posparent="next" posref="MR MR" x="-36" y="-1" hardtext="uiNextTryton" shadow="true" fontsize="16" color="255 255 255 255" render_layer="2" />		
-	
+
+	<view type="text" id="next_txt" posparent="next" posref="MR MR" x="-36" y="-1" hardtext="uiNextTryton" shadow="true" fontsize="16" color="255 255 255 255" render_layer="2" />
+
 	<ctrl type="button" id="back" button_type="push_button" posref="BL BL" x="8" y="16"
 			tx_normal="button_back.tga" tx_pushed="button_back_over.tga" tx_over="button_back_over.tga" color="255 255 255 0"
 			onclick_l="proc" params_l="proc_intro_back_step"  tooltip="uiPrevStep" />
-			
-	<view type="text" id="back_txt" posparent="back" posref="ML ML" x="36" y="-1" hardtext="uiBackTryton" shadow="true" fontsize="16" color="255 255 255 255" render_layer="2" />		
+
+	<view type="text" id="back_txt" posparent="back" posref="ML ML" x="36" y="-1" hardtext="uiBackTryton" shadow="true" fontsize="16" color="255 255 255 255" render_layer="2" />
 	-->
-	
-		
+
+
 	<!-- TRYTON's TEXT -->
 	<!--
 	<group type="scroll_text" id="tryton_text" sizeref="w" w="-200" child_resize_h="true" child_resize_wmargin="16" child_resize_hmargin="16" posref="MM MM" x="0" y="0" min_height="64" max_height="500" active="true" >
 		<group id="black" posref="TL TL" sizeref="hw" w="0" h="0" />
-		<group type="list" id="text_list" hardtext="uiTryton1" shadow="true" fontsize="36" justification="justified" color="255 255 255 255" space="3" 
+		<group type="list" id="text_list" hardtext="uiTryton1" shadow="true" fontsize="36" justification="justified" color="255 255 255 255" space="3"
 											posref="TL TL" posparent="black" x="8" y="-8" sizeref="hw" w="-16" h="-16" />
-	</group>	
+	</group>
 	-->
 	<!--
 	<view type="bitmap" id="tryton_text" render_layer="1" global_color="false" color="255 255 255 255"
@@ -152,17 +152,17 @@
 
 <!--
 <anim id="anim_intro_logo" duration="60.0" disable_buttons="false" >
-							
+
 	<track type="linear" target="global_background:back3d:cam:posx">
 		<key time="0.0" value="-5.0" />
 		<key time="60.0" value="-3.18"/>
 	</track>
-	
+
 	<track type="linear" target="global_background:back3d:cam:tgtx">
 		<key time="0.0" value="-25.0" />
 		<key time="60.0" value="-3.23"/>
 	</track>
-	
+
 	<track type="linear" target="global_background:back3d:cam:tgtz">
 		<key time="0.0" value="20.0" />
 		<key time="60.0" value="0"/>
@@ -172,7 +172,7 @@
 		<key time="0.0" value="-45.0" />
 		<key time="60.0" value="-13.0"/>
 	</track>
-	
+
 </anim>
 
 
@@ -181,12 +181,12 @@
 		<key time="0.0" value="0" />
 		<key time="1.0" value="255"/>
 	</track>
-	
+
 	<track type="linear" target="logo_intro:next:alpha,logo_intro:next_txt:alpha">
 		<key time="0.0" value="0" />
 		<key time="1.0" value="255"/>
 	</track>
-	
+
 	<track type="linear" target="logo_intro:back:alpha,logo_intro:back_txt:alpha">
 		<key time="0.0" value="0" />
 		<key time="1.0" value="255"/>
@@ -208,19 +208,19 @@
 		<key time="3.0" value="0"/>
 		<key time="4.0" value="255"/>
 	</track>
-	
+
 	<track type="linear" target="logo_intro:skip:alpha,logo_intro:skip_txt:alpha">
 		<key time="0.0" value="0" />
 		<key time="3.0" value="0"/>
 		<key time="4.0" value="255"/>
 	</track>
-	
+
 	<track type="linear" target="logo_intro:next:alpha,logo_intro:next_txt:alpha">
 		<key time="0.0" value="0" />
 		<key time="3.0" value="0"/>
 		<key time="4.0" value="255"/>
 	</track>
-	
+
 </anim>
 
 
@@ -229,12 +229,12 @@
 		<key time="0.0" value="255" />
 		<key time="1.0" value="0"/>
 	</track>
-	
+
 	<track type="linear" target="logo_intro:next:alpha,logo_intro:next_txt:alpha">
 		<key time="0.0" value="255" />
 		<key time="1.0" value="0"/>
 	</track>
-	
+
 	<track type="linear" target="logo_intro:back:alpha,logo_intro:back_txt:alpha">
 		<key time="0.0" value="255" />
 		<key time="1.0" value="0"/>
@@ -243,6 +243,7 @@
 -->
 
 
+<lua file="out_v2_intro.lua" />
 
 
 </interface_config>
