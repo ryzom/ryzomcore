@@ -2532,7 +2532,7 @@ void CPatchThread::run()
 			CPatchManager::SFileToPatch &rFTP = AllFilesToPatch[i];
 
 			string ext = NLMISC::CFile::getExtension(rFTP.FileName);
-			if (ext == "bnp" || ext == "snp")
+			if (ext == "bnp" || ext == "snp" || ext == "bnpe")
 			{
 				float oldCurrentFilePatched = CurrentFilePatched;
 				processFile (rFTP);
