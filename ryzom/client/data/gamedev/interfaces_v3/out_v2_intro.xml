@@ -241,10 +241,5 @@
 	</track>
 </anim>
 -->
-
-
-<lua file="out_v2_intro.lua" />
-
-
 </interface_config>
 

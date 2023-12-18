@@ -1180,7 +1180,7 @@ void CClientConfig::setValues()
 	READ_STRING_FV(WebIgMainDomain);
 	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
 		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
-		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
+		ClientCfg.WebIgMainDomain = "https://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);

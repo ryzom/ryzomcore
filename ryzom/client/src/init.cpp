@@ -57,6 +57,7 @@
 #include "init.h"
 #include "input.h"
 #include "client_cfg.h"			// Configuration of the client.
+#include "login_patch.h"
 #include "actions_client.h"
 #include "color_slot_manager.h"
 #include "movie_shooter.h"
@@ -771,6 +772,12 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 	NLMISC::TTime initPaths = ryzomGetLocalTime ();
 
 	H_AUTO(InitRZAddSearchPaths);
+
+	CConfigFile *cf = &ClientCfg.ConfigFile;
+	std::string appName = cf->getVarPtr("Application") ? cf->getVar("Application").asString(0) : "ryzom_live";
+	CPatchManager *pPM = CPatchManager::getInstance();
+	pPM->downloadFileWithCurl(ClientCfg.WebIgMainDomain+"/data/"+appName+"/enable_events_bnp.csv", "user/enable_events_bnp.csv");
+	pPM->downloadFileWithCurl(ClientCfg.WebIgMainDomain+"/data/"+appName+"/enable_occs_bnp.csv", "user/enable_occs_bnp.csv");
 
 	std::vector<string>	UserDataPath;
 	UserDataPath.push_back("user");
