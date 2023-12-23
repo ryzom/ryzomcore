@@ -160,6 +160,10 @@ jobs:
         sudo mv msquic.h /usr/include/msquic.h
         sudo mv msquic_posix.h /usr/include/msquic_posix.h
         sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
+        wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releases/download/v3.27.9/cmake-3.27.9-linux-x86_64.sh
+        sudo mkdir /opt/cmake
+        sudo sh /tmp/cmake.sh --skip-license --prefix=/opt/cmake
+        sudo ln --symbolic --force /opt/cmake/bin/cmake /usr/local/bin/cmake
       displayName: '(ubuntu) Dependencies'
       condition: eq(variables['Agent.JobName'], 'client ubuntu')
     - task: Cache@2
