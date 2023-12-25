@@ -1,6 +1,6 @@
 /** \file cdb.cpp
  *
- * $Id: cdb.cpp,v 1.1 2005/09/19 09:50:17 boucher Exp $
+ * $Id$
  */
 
 
