@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "objectviewer_dialog.h"
 
 // Qt includes
-#include <QtGui/QAction>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QColorDialog>
-#include <QtGui/QFileDialog>
+#include <QAction>
+#include <QResizeEvent>
+#include <QColorDialog>
+#include <QFileDialog>
 #include <QLabel>
 
 // NeL includes

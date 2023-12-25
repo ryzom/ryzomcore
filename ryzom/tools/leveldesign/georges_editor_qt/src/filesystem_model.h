@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef FILESYSTEM_MODEL_H
 #define FILESYSTEM_MODEL_H
 
-#include <QtGui/QFileSystemModel>
+#include <QFileSystemModel>
 
 namespace NLQT 
 {

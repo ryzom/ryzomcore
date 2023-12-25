@@ -3,8 +3,8 @@
 #include "completer_line_edit.h"
 
 #include <QKeyEvent>
-#include <QtGui/QListView>
-#include <QtGui/QStringListModel>
+#include <QListView>
+#include <QStringListModel>
 #include <QDebug>
 #include <QApplication>
 #include <QScrollBar>
