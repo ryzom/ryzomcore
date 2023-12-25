@@ -1,6 +1,6 @@
 /** \file cdb.h
  *
- * $Id: cdb.h,v 1.2 2007/01/31 16:40:36 boucher Exp $
+ * $Id$
  */
 
 
