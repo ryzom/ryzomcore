@@ -3,7 +3,7 @@
  * Read and Apply a xdelta patch to a file
  * Some of the code is inspired by the code of xdelta
  *
- * $Id: login_xdelta.h,v 1.2 2007/05/09 15:33:05 boucher Exp $
+ * $Id$
  */
 
 /* Copyright, 2004 Nevrax Ltd.
