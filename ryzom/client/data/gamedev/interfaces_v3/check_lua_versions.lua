@@ -20,6 +20,7 @@ if RYZOM_NAMES_MATIS_VERSION ~= 324 then broadcastBadLuaVersions(RYZOM_NAMES_MAT
 if RYZOM_NAMES_TRYKER_VERSION ~= 324 then broadcastBadLuaVersions(RYZOM_NAMES_TRYKER_VERSION, 324, "names_tryker") end
 if RYZOM_NAMES_ZORAI_VERSION ~= 324 then broadcastBadLuaVersions(RYZOM_NAMES_ZORAI_VERSION, 324, "names_zorai") end
 if RYZOM_OUT_V2_APPEAR_VERSION ~= 324 then broadcastBadLuaVersions(RYZOM_OUT_V2_APPEAR_VERSION, 324, "out_v2_appear") end
+if RYZOM_OUT_V2_INTRO_VERSION ~= 341 then broadcastBadLuaVersions(RYZOM_OUT_V2_INTRO_VERSION, 341, "out_v2_intro") end
 if RYZOM_OUT_V2_SELECT_VERSION ~= 324 then broadcastBadLuaVersions(RYZOM_OUT_V2_SELECT_VERSION, 324, "out_v2_select") end
 if RYZOM_OUTPOST_VERSION ~= 335 then broadcastBadLuaVersions(RYZOM_OUTPOST_VERSION, 335, "outpost") end
 if RYZOM_PLAYER_VERSION ~= 335 then broadcastBadLuaVersions(RYZOM_PLAYER_VERSION, 335, "player") end

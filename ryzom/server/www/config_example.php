@@ -24,4 +24,5 @@ $AutoCreateRingInfo = true;
 
 $RocketChatHook = '';
 $RocketChatServer = '';
-
+$RocketChatGeneral = '#General';
+$RocketChatUniverse = '#Universe';
