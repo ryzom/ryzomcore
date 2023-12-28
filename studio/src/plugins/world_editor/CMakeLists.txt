@@ -2,7 +2,7 @@ INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
 			${CMAKE_CURRENT_SOURCE_DIR}
 			${QT_INCLUDES}
 			${LIBXML2_INCLUDE_DIR}
-			${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/qtpropertybrowser
+			${QtPropertyBrowser_INCLUDE_DIR}
 			)
 
 FILE(GLOB SRC *.cpp *.h)
@@ -57,7 +57,7 @@ TARGET_LINK_LIBRARIES(	studio_plugin_world_editor
 						studio_plugin_landscape_editor 
 						nelmisc 
 						nel3d
-						qt_property_browser
+						${QtPropertyBrowser_LIBRARY}
 						${QT_LIBRARIES} 
 						${QT_QTOPENGL_LIBRARY}
 						${LIBXML2_LIBRARIES}

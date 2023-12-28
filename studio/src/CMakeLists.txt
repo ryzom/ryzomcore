@@ -61,6 +61,7 @@ add_dependencies(studio
 		studio_plugin_disp_sheet_id
 		studio_plugin_example
 		studio_plugin_georges_editor
+		studio_plugin_landscape_editor
 )
 
 INSTALL(TARGETS studio RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT runtime BUNDLE DESTINATION /Applications)

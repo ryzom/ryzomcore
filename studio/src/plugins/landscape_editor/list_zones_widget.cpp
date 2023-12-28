@@ -32,7 +32,7 @@
 #include <string>
 
 // Qt includes
-#include <QtGui/QIcon>
+#include <QIcon>
 #include <QtCore/QModelIndex>
 
 namespace LandscapeEditor
