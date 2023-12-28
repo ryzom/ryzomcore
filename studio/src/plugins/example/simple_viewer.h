@@ -27,7 +27,7 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QUndoStack>
+#include <QUndoStack>
 class QWidget;
 
 namespace Plugin
