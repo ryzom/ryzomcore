@@ -1,5 +1,4 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${QT_INCLUDES})
-INCLUDE(${QT_USE_FILE})
 
 FILE(GLOB SRC *.cpp *.h)
 
@@ -16,16 +15,16 @@ SET(QT_PROPERTY_EDITOR_RCS	qtpropertybrowser.qrc)
 
 SET(QT_USE_QTGUI TRUE)
 
-QT4_ADD_RESOURCES(QT_PROPERTY_EDITOR_RC_SRCS ${QT_PROPERTY_EDITOR_RCS})
-QT4_WRAP_CPP(QT_PROPERTY_EDITOR_MOC_SRC ${QT_PROPERTY_EDITOR_HDR})
+QT5_ADD_RESOURCES(QT_PROPERTY_EDITOR_RC_SRCS ${QT_PROPERTY_EDITOR_RCS})
+QT5_WRAP_CPP(QT_PROPERTY_EDITOR_MOC_SRC ${QT_PROPERTY_EDITOR_HDR})
 
 SOURCE_GROUP(QtResources FILES ${QT_PROPERTY_EDITOR_RCS})
 SOURCE_GROUP(QtGeneratedMocSrc FILES ${QT_PROPERTY_EDITOR_MOC_SRC})
 SOURCE_GROUP("Qt Property Editor Source" FILES ${SRC})
 
-qt4_generate_moc(qtpropertymanager.cpp ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc)
-qt4_generate_moc(qteditorfactory.cpp ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc)
-qt4_generate_moc(qttreepropertybrowser.cpp ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc)
+qt5_generate_moc(qtpropertymanager.cpp ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc)
+qt5_generate_moc(qteditorfactory.cpp ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc)
+qt5_generate_moc(qttreepropertybrowser.cpp ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc)
 
 # Need to remove these so that they are not linked as they are inline included.
 LIST(REMOVE_ITEM QT_PROPERTY_EDITOR_MOC_SRC	${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cxx
