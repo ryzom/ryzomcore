@@ -1,4 +1,4 @@
-ADD_SUBDIRECTORY(3rdparty)
+#ADD_SUBDIRECTORY(3rdparty)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${NEL_INCLUDE_DIR} ${QT_INCLUDES})
 
@@ -60,6 +60,7 @@ add_dependencies(studio
 		studio_plugin_core
 		studio_plugin_disp_sheet_id
 		studio_plugin_example
+		studio_plugin_georges_editor
 )
 
 INSTALL(TARGETS studio RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT runtime BUNDLE DESTINATION /Applications)

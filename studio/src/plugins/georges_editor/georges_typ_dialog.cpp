@@ -21,10 +21,13 @@
 
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QFileInfo>
 
 #include "nel/misc/file.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/path.h"
+#include "nel/georges/u_type.h"
+#include "nel/georges/type.h"
 
 class GeorgesTypDialogPvt
 {
