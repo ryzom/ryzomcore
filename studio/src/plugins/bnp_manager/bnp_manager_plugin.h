@@ -47,6 +47,7 @@ class m_BnpManagerWindow;
 class BNPManagerPlugin : public QObject, public ExtensionSystem::IPlugin
 {
     Q_OBJECT
+	Q_PLUGIN_METADATA(IID IPlugin_iid FILE "bnp_manager.json")
     Q_INTERFACES(ExtensionSystem::IPlugin)
 
 public:

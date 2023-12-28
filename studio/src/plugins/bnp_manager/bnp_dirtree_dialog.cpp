@@ -20,7 +20,6 @@
 #include "bnp_proxy_model.h"
 
 // Qt includes
-#include <QtGui/QWidget>
 
 // NeL includes
 #include <nel/misc/debug.h>
