@@ -57,6 +57,9 @@ namespace NLQT
 		public IObjectViewer
 	{
 		Q_OBJECT
+#ifdef USE_QT5
+		Q_PLUGIN_METADATA(IID IObjectViewer_iid FILE "object_viewer.json")
+#endif
 		Q_INTERFACES(NLQT::IObjectViewer)
 
 	public:
