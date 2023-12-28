@@ -17,3 +17,5 @@ ready-made implementations of the browser widget:
 QtTreePropertyBrowser, QtButtonPropertyBrowser and
 QtGroupBoxPropertyBrowser.
 
+also see:
+https://github.com/greenjava/QtPropertyBrowser
