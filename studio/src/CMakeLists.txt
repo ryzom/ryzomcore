@@ -54,7 +54,9 @@ ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${QT_DEFINITIONS})
 NL_DEFAULT_PROPS(studio "Tools: Studio")
 NL_ADD_RUNTIME_FLAGS(studio)
 
+ADD_SUBDIRECTORY(libqtpropertybrowser)
 ADD_SUBDIRECTORY(plugins)
+
 add_dependencies(studio
 		studio_plugin_bnp_manager
 		studio_plugin_core
@@ -62,6 +64,7 @@ add_dependencies(studio
 		studio_plugin_example
 		studio_plugin_georges_editor
 		studio_plugin_landscape_editor
+		studio_plugin_world_editor
 )
 
 INSTALL(TARGETS studio RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT runtime BUNDLE DESTINATION /Applications)
