@@ -13,7 +13,7 @@ ADD_LIBRARY(qtpropertybrowser ${SRC})
 
 ADD_LIBRARY(qtpropertybrowser::qtpropertybrowser ALIAS qtpropertybrowser)
 
-TARGET_LINK_LIBRARIES(qtpropertybrowser $${QT_LIBRARIES} {QtPropertyBrowser_LIBRARY})
+TARGET_LINK_LIBRARIES(qtpropertybrowser ${QT_LIBRARIES} ${QtPropertyBrowser_LIBRARY})
 
 INCLUDE_DIRECTORIES(
 		${CMAKE_CURRENT_SOURCE_DIR}

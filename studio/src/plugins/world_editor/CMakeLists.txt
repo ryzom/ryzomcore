@@ -57,6 +57,7 @@ TARGET_LINK_LIBRARIES(	studio_plugin_world_editor
 						studio_plugin_landscape_editor 
 						nelmisc 
 						nel3d
+						qtpropertybrowser
 						${QtPropertyBrowser_LIBRARY}
 						${QT_LIBRARIES} 
 						${QT_QTOPENGL_LIBRARY}

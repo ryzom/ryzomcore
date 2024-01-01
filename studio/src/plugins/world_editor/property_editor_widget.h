@@ -28,9 +28,9 @@
 
 
 // 3rdparty
-#include "qtvariantproperty.h"
-#include "qtpropertymanager.h"
-#include "qteditorfactory.h"
+#include <qtpropertybrowser/qtpropertymanager.h>
+#include <qtpropertybrowser/qtvariantproperty.h>
+#include <libqtpropertybrowser/QtTextPropertyManager.h>
 
 // NeL includes
 
