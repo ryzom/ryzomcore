@@ -482,6 +482,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getMouseRightDown", getMouseRightDown),
 	ls.registerFunc("isShiftDown", isShiftDown),
 	ls.registerFunc("isCtrlDown", isCtrlDown),
+	ls.registerFunc("isTabDown", isTabDown),
 	ls.registerFunc("getShapeIdAt", getShapeIdAt),
 	ls.registerFunc("getPlayerFront", getPlayerFront);
 	ls.registerFunc("getPlayerDirection", getPlayerDirection);
@@ -517,6 +518,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("isPlayerFreeTrial", isPlayerFreeTrial);
 	ls.registerFunc("isPlayerNewbie", isPlayerNewbie);
 	ls.registerFunc("isInRingMode", isInRingMode);
+	ls.registerFunc("isPlayerPrivilege", isPlayerPrivilege);
 	ls.registerFunc("getUserRace",  getUserRace);
 	ls.registerFunc("getSheet2idx",  getSheet2idx);
 	ls.registerFunc("getTargetSlot",  getTargetSlot);
@@ -1367,6 +1369,12 @@ int CLuaIHMRyzom::isCtrlDown(CLuaState &ls)
 	return 1;
 }
 
+int CLuaIHMRyzom::isTabDown(CLuaState &ls)
+{
+	ls.push(Driver->AsyncListener.isKeyDown(KeyTAB));
+	return 1;
+}
+
 
 
 int CLuaIHMRyzom::getShapeIdAt(CLuaState &ls)
@@ -1753,6 +1761,19 @@ int CLuaIHMRyzom::isInRingMode(CLuaState &ls)
 	extern bool IsInRingMode();
 	ls.push(IsInRingMode());
 	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::isPlayerPrivilege(CLuaState &ls)
+{
+	bool hasPlayerPrivilege = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeG() || hasPrivilegeEM() || hasPrivilegeEG());
+	if(hasPlayerPrivilege)
+	{
+		return 1;
+	}
+	else{
+		return 0;
+	}
 }
 
 // ***************************************************************************
