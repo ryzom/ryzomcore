@@ -92,6 +92,7 @@ private:
 	static int	getPlayerTitle(CLuaState &ls);
 	static int	getPlayerTag(CLuaState &ls);
 	static int	getPlayerMode(CLuaState &ls);
+	static int	getPlayerPrivs(CLuaState &ls);
 	static int	getTargetPos(CLuaState &ls);
 	static int	getTargetFront(CLuaState &ls);
 	static int	getTargetDirection(CLuaState &ls);

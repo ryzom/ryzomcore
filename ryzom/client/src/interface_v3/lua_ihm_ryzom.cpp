@@ -492,6 +492,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getPlayerTitle", getPlayerTitle);
 	ls.registerFunc("getPlayerTag", getPlayerTag);
 	ls.registerFunc("getPlayerMode", getPlayerMode);
+	ls.registerFunc("getPlayerPrivs", getPlayerPrivs);
 	ls.registerFunc("getTargetPos", getTargetPos);
 	ls.registerFunc("getTargetFront", getTargetFront);
 	ls.registerFunc("getTargetDirection", getTargetDirection);
@@ -1551,6 +1552,26 @@ int CLuaIHMRyzom::getPlayerMode(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerMode", 0);
 	ls.push(MBEHAV::modeToString(UserEntity->mode()));
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getPlayerPrivs(CLuaState &ls)
+{
+	std::string privsString = "";
+	
+	if (hasPrivilegeDEV()) privsString=":DEV";
+	if (hasPrivilegeSGM()) privsString+=":SGM";
+	if (hasPrivilegeGM()) privsString+=":GM";
+	if (hasPrivilegeVG()) privsString+=":VG";
+	if (hasPrivilegeSG()) privsString+=":SG";
+	if (hasPrivilegeG()) privsString+=":G";
+	if (hasPrivilegeEM()) privsString+=":EM";
+	if (hasPrivilegeEG()) privsString+=":EG";
+	if (hasPrivilegeOBSERVER()) privsString+=":OBSERVER";
+	if (hasPrivilegeOBSERVER()) privsString+=":TESTER";
+	
+	ls.push(privsString+=":");
 	return 1;
 }
 
