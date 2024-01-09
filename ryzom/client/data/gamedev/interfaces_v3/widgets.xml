@@ -3,7 +3,7 @@
 <!-- ****************************************** -->
 <interface_config>
     <root id="interface" x="0" y="0" w="800" h="600" active="true" />
-    <lua file="search_command.lua"
+    <lua file="search_command.lua" />
     <proc id="proc_nothing"></proc>
     <!-- a text with border -->
     <template name="bc_border_text" keep="true" posref="TM TM" posparent="parent" x="0" y="-20" w="-4">
