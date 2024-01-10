@@ -33,11 +33,19 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
       displayName: 'Dependencies'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | $(releaseName) | "$(Agent.OS)"'
+        path: '$(Pipeline.Workspace)/.ccache'
+      condition: contains(variables['cmakeExtra'], 'DIRECT3D=ON')
+      displayName: 'ccache'
     - script: |
         mkdir build
         cmake --version
         cd build
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
           -DWITH_MSQUIC=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
@@ -46,10 +54,14 @@ jobs:
           -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
+      env:
+        CCACHE_DIR: '$(Pipeline.Workspace)/.ccache'
     - script: |
         cd build
         ninja -j`nproc`
       displayName: 'Make'
+      env:
+        CCACHE_DIR: '$(Pipeline.Workspace)/.ccache'
     - script: |
         cd nel/tools/nel_unit_test
         ../../../build/bin/nel_unit_test
