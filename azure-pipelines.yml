@@ -119,10 +119,14 @@ jobs:
           -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
         cat CMakeCache.txt
       displayName: 'CMake'
+      env:
+        CCACHE_DIR: '$(Pipeline.Workspace)/.ccache'
     - script: |
         cd build
         ninja -j`nproc`
       displayName: 'Make'
+      env:
+        CCACHE_DIR: '$(Pipeline.Workspace)/.ccache'
     - script: |
         cd nel/tools/nel_unit_test
         ../../../build/bin/nel_unit_test
