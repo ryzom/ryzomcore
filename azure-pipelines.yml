@@ -37,7 +37,6 @@ jobs:
       inputs:
         key: 'ccache | $(releaseName) | "$(Agent.OS)"'
         path: '$(Pipeline.Workspace)/.ccache'
-      condition: contains(variables['cmakeExtra'], 'DIRECT3D=ON')
       displayName: 'ccache'
     - script: |
         mkdir build
