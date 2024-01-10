@@ -99,11 +99,18 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
       displayName: 'Dependencies'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | $(releaseName) | "$(Agent.OS)"'
+        path: '$(Pipeline.Workspace)/.ccache'
+      displayName: 'ccache'
     - script: |
         mkdir build
         cmake --version
         cd build
         cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
           -DWITH_MSQUIC=ON \
           -DWITH_LUA51=OFF -DWITH_LUA52=ON \
