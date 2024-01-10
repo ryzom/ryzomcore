@@ -217,7 +217,7 @@ end
 function SearchCommand:htmlentities(text)
     local html_help_content=""
 
-    html_help_content = Text:gsub("<", "&lt;")
+    html_help_content = text:gsub("<", "&lt;")
     
     return html_help_content
 end
