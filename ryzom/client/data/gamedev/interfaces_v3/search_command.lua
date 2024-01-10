@@ -99,16 +99,80 @@ table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:VG:PR:OBSERVER:E
 table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:TESTER:", "c_desc", "c", {{"text:<TargetName>",""}}, {{"text:<Command>",""}}})
 
 table.insert(SearchCommand.commands_list,{"shard", "player", "showOnline_desc", "showOnline", {{"1","showOnline_1_desc"}, {"2","showOnline_2_desc"},{"0","showOnline_0_desc"}}})
+table.insert(SearchCommand.commands_list,{"shard", "player", "setLeague_desc", "setLeague", {{"text:<PlayerName>",""}}})
 table.insert(SearchCommand.commands_list,{"shard", "player", "roomInvite_desc", "roomInvite", {{"text:<PlayerName>",""}}})
+table.insert(SearchCommand.commands_list,{"shard", "player", "roomKick_desc", "roomKick", {{"text:<PlayerName>",""}}})
+table.insert(SearchCommand.commands_list,{"shard", "player", "dodge_desc", "dodge"})
+table.insert(SearchCommand.commands_list,{"shard", "player", "parry_desc", "parry"})
+table.insert(SearchCommand.commands_list,{"shard", "player", "setPvPTag_desc", "setPvPTag", {{"0",""},{"1",""}}})
+table.insert(SearchCommand.commands_list,{"shard", "player", "clearGuildMessage_desc", "clearGuildMessage"})
+table.insert(SearchCommand.commands_list,{"shard", "player", "setGuildMessage_desc", "setGuildMessage", {{"text:<Message>",""}}})
 table.insert(SearchCommand.commands_list,{"shard", "player", "setDontTranslateLangs_desc", "setDontTranslateLangs", {{"codelang|codelang","setDontTranslateLangs_codelang_desc"}}})
-table.insert(SearchCommand.commands_list,{"shard", "player", "connectLangChannel_desc", "connectLangChannel",{{"fr",""},{"en",""},{"de",""},{"es",""},{"ru",""}}})
+table.insert(SearchCommand.commands_list,{"shard", "player", "connectLangChannel_desc", "connectLangChannel",{{"fr",""},{"en",""},{"de",""},{"es",""},{"ru",""}},{{"1","connectLangChannel_1_desc"}}})
+table.insert(SearchCommand.commands_list,{"shard", "player", "updateTarget_desc", "updateTarget"})
+table.insert(SearchCommand.commands_list,{"shard", "player", "teamInvite_desc", "teamInvite", {{"text:<PlayerName>",""}}})
+table.insert(SearchCommand.commands_list,{"shard", "player", "summonPet_desc", "summonPet", {{"number:<PetNumber>",""}}})
+table.insert(SearchCommand.commands_list,{"shard", "player", "setTeamLeader_desc", "setTeamLeader", {{"text:<PlayerName>",""}}})
+table.insert(SearchCommand.commands_list,{"shard", "player", "resetName_desc", "resetName"})
+
+
+if(player_priv)then
+    table.insert(SearchCommand.commands_list,{"shard", "player", "connectUserChannel_desc", "connectUserChannel", {{"text:<channelname>",""}}, {{"text:<password>",""},{"*","channel_leave_desc"},{"***","channel_remove_admin_desc"}}})
+else
+    table.insert(SearchCommand.commands_list,{"shard", "player", "connectUserChannel_desc", "connectUserChannel", {{"text:<channelname>",""}}, {{"text:<password>",""},{"*","channel_leave_desc"}}})
+end
+
+
 table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:", "Position_desc", "Position", {{"number:<posx>,<posy>[,<posz>]",""},{"text:<bot name>",""},{"text:<PlayerName>",""}}})
 table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:EM:", "eScript_desc", "eScript", {{"text:<ContinentName>@text:<EventNpcGroup>",""}}, {{"text:<ScriptCommand>",""}}})
 --END shard commands
 
 --eScript commands
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setActivity_desc", "()setActivity(\"text:<faction>\")"})
 table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAggro_desc", "()setAggro(number:<25>,number:<10>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setPlayerAttackable_desc", "()setPlayerAttackable(number:<0/1>"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setBotAttackable_desc", "()setBotAttackable(number:<0/1)>"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAttackable_desc", "()setAttackable(number:<0/1)>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setActivity_desc", "()setActivity(\"text:<no_change/escorted/guard/guard_escorted/normal/faction/faction_no_assist/bandit>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setFactionProp_desc", "()setFactionProp(\"text:<faction/ennemyFaction/friendFaction/Player/Predator/outpost:<id>:<side>>\",\"text:<FameName>FameMin|FameName<FameMax>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAggro_desc", "()setAggro(number:<25>,number:<10>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"text:<event_group_killed>\",\"text:<Url>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"text:<event_bot_killed>\",text:<Url>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"text:<running>)\""})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"text:<faction>,text:<Factionname>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"text:<fame_for_guard_attack>\",number:<6000 points per 1 fame>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "removeProfileParameter_desc", "()removeProfileParameter(\"text:<Parameter>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "clearAggroList_desc", "()clearAggroList()"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "startMoving_desc", "()startMoving(number:<XPos>,number:<YPos>,number:<Radius>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "stopMoving_desc", "()stopMoving()"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "startWander_desc", "()startWander(number:<Meter>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAutoSpawn_desc", "()setAutoSpawn(number:<0/1>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setDespawnTime_desc", "()setDespawnTime(number:<Ticks>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setRespawnTime_desc", "()setDespawnTime(number:<Ticks>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "standUp_desc", "()standUp()"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "sitDown_desc", "()sitDown()"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setZoneState_desc", "()setZoneState(\"text:<ZoneName>\",number:<0.0/1.0>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setMode_desc", "()setMode(\"text:<Normal/Sit/Eat/Rest/Alert/Hungry/Death>\""})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "aiActionSelf_desc", "()aiActionSelf(\"text:<name.aiaction>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "aiAction_desc", "()aiAction(\"text:<name.aiaction>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "emote_desc", "()emote(\"text:<Emote>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "vpx_desc", "()vpx(\"text:<VPA:HEX>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "vpx_desc", "()vpx(\"text:<VPB:HEX>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "vpx_desc", "()vpx(\"text:<VPC:HEX>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setMaxHP_desc", "()setMaxHP(number:<Hp>, number:<0/1>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "npcSay_desc", "()npcSay(\"text:<Message>\", \"text:<say/shout>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "ignoreOffensiveActions_desc", "()ignoreOffensiveActions(number:<0/1>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "maxHitRange_desc", "()maxHitRange(number:<Meter>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addHP_desc", "()addHP(number:<Hp>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setClientSheet_desc", "()setClientSheet(\"text:<Sheet>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setSheet_desc", "()setSheet(\"text:<Sheet>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setUrl_desc", "()setUrl(\"text:<MENU_NAME>\", \"text:<Url/*>\")"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "facing_desc", "()facing(rad:<3.14/-3.14>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setCanAggro_desc", "()setCanAggro(number:<0/1>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setHealer_desc", "()setHealer(number:<0/1>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setHPScale_desc", "()setHPScale(number:<0.0/..0.5../1.0>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "followPlayer_desc", "()followPlayer(number:<PlayerEID>, number:<Meter>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setFactionAttackableBelow_desc", "()setFactionAttackableBelow(\"text:<TribeName>\", number:<0/1>, number:<6000 points per 1 fame>)"})
+
 --END eScript commands
 
 function SearchCommand:find(tbl, value)
@@ -122,23 +186,29 @@ end
 
 function SearchCommand:check_prvis(command_privs)
     local player_priv = isPlayerPrivilege()
-    local command_allowed = 0
+    local command_allowed = "false"
+    local prvis = getPlayerPrivs()
     
     if(command_privs == "player" or command_privs == "")then
-        return 0
+        return "false"
     else
         if(player_priv)then
             local prvis = getPlayerPrivs()
-            for prvissubstring in prvis:gmatch("[^: ]+") do
-                for substring in command_privs:gmatch("[^: ]+") do
-                    if(substring == prvissubstring)then
-                        command_allowed = 1
+            --debug("Priv: "..prvis)
+            if(prvis ~= nil)then
+                for prvissubstring in prvis:gmatch("[^: ]+") do
+                    for substring in command_privs:gmatch("[^: ]+") do
+                        if(substring == prvissubstring)then
+                            command_allowed = "true"
+                        end
                     end
                 end
+            else
+                command_allowed = "false"
             end
             return command_allowed
         else
-            return 0
+            return "false"
         end
     end
 end
@@ -183,7 +253,7 @@ function SearchCommand:help_show_all(parameter)
         if(self.commands_list[c][2] == "player")then
             command_are_allowed = 1
         else
-            if(SearchCommand:check_prvis(self.commands_list[c][2]))then
+            if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
                 command_are_allowed = 1
             end
         end
@@ -207,9 +277,10 @@ function SearchCommand:help_show_all(parameter)
                 
                 build_content=build_content.."<tr><td width='10px'>"..count..".</td><td colspan=3>"..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.." '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."'</td></tr>"
                 build_content=build_content.."<tr><td>&nbsp;</td><td>type: "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
+                build_content=build_content.."<tr><td>&nbsp;</td><td>priv: "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
                 
                 for ac = 1, max_arguments do
-                    build_content=build_content.."<tr><td>&nbsp;</td><td>      arg"..ac.." :</td></tr>"
+                    build_content=build_content.."<tr><td>&nbsp;</td><td>arg"..ac.." :</td></tr>"
                     for pc = 1, #self.commands_list[c][4+ac] do
                         if(self.commands_list[c][4+ac][pc][2] == "")then
                             build_content=build_content.."<tr><td>&nbsp;</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"..SearchCommand:htmlentities(self.commands_list[c][4+ac][pc][1]).."</td></tr>"
@@ -220,7 +291,12 @@ function SearchCommand:help_show_all(parameter)
                 end
                 if(self.commands_list[c][4] ~= "a" and self.commands_list[c][4] ~= "b" and self.commands_list[c][4] ~= "c")then
                     if(self.commands_list[c][1] == "shard")then
-                        build_content=build_content.."<tr><td>&nbsp;</td><td colspan=3>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." , /c riasan "..SearchCommand:htmlentities(self.commands_list[c][4]).."</td></tr>"
+                        if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
+                            build_content=build_content.."<tr><td>&nbsp;</td><td colspan=3>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.." | /c riasan "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</td></tr>"
+                        else
+                            build_content=build_content.."<tr><td>&nbsp;</td><td colspan=3>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</td></tr>"
+                        end
+                        
                     end
                 end
             end
@@ -267,7 +343,7 @@ function SearchCommand:help(uiId,input)
                 if(self.commands_list[c][2] == "player")then
                     command_are_allowed = 1
                 else
-                    if(SearchCommand:check_prvis(self.commands_list[c][2]))then
+                    if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
                         command_are_allowed = 1
                     end
                 end
@@ -287,6 +363,7 @@ function SearchCommand:help(uiId,input)
                     end
                     build_content=build_content.."<tr><td>desc: "..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."</td></tr>"
                     build_content=build_content.."<tr><td>type: "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
+                    build_content=build_content.."<tr><td>priv: "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
                     build_content=build_content.."<tr><td>&nbsp;</td></tr>"
                     build_content=build_content.."<tr><td>"..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</td></tr>"
                     
@@ -302,7 +379,7 @@ function SearchCommand:help(uiId,input)
                     end
                     if(self.commands_list[c][4] ~= "a" and self.commands_list[c][4] ~= "b" and self.commands_list[c][4] ~= "c")then
                         if(self.commands_list[c][1] == "shard")then
-                            build_content=build_content.."<tr><td>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." , /c riasan "..SearchCommand:htmlentities(self.commands_list[c][4]).."</td></tr>"
+                            build_content=build_content.."<tr><td>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.." | /c riasan "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</td></tr>"
                         end
                     end
                 end
@@ -531,15 +608,6 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
     local found_command=0
     
     for c = 1, #self.commands_list do
-        local command_are_allowed = 0
-        if(self.commands_list[c][2] == "player")then
-            command_are_allowed = 1
-        else
-            if(SearchCommand:check_prvis(self.commands_list[c][2]))then
-                command_are_allowed = 1
-            end
-        end
-        
         --check if we want used a client or shared command
         if(self.command_self == "a" or self.command_self == "b" or self.command_self == "c")then
             --debug(self.commands_list[c][1])
@@ -563,6 +631,15 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
                 end
             elseif(self.commands_list[c][1] == "eScript")then
                 command_are_allowed = 0
+            end
+        end
+        
+        local command_are_allowed = 0
+        if(self.commands_list[c][2] == "player")then
+            command_are_allowed = 1
+        else
+            if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
+                command_are_allowed = 1
             end
         end
         
@@ -855,14 +932,19 @@ function SearchCommand:build_command_helper(uiId)
 end
 
 function SearchCommand:write_command_help(uiId,text)
-    --debug("write_command_help: "..text)
+    local main_chat_input =  getUI(uiId)
+    local read_prompt = main_chat_input.prompt
+    debug("write_command_help: "..text)
     local behind_help_text = getUI(uiId.."h")
+    
+    behind_help_text.prompt=read_prompt
     behind_help_text.input_string = text
 end
 
 function SearchCommand:write_command_help_clear(uiId)
     local behind_help_text = getUI(uiId.."h")
     behind_help_text.input_string = ""
+    behind_help_text.prompt = ""
 end
 
 function SearchCommand:close_modal(uiId)
@@ -957,14 +1039,14 @@ function SearchCommand:show_more_options(uiId)
     --END setup menu window
     
     --fill menu window
-    menu:addLine(ucstring("Found: "..#self.valid_commands_list), "", "", "")
+    menu:addLine(ucstring("Found: "..#self.valid_commands_list), "lua", "SearchCommand:close_modal('"..uiId.."')", "")
     
     for c = 1, display_max_found do
         menu:addLine(ucstring(c..". "..self.valid_commands_list[c]), "lua", "SearchCommand:finish_commands('"..self.valid_commands_list[c].."','"..uiId.."')", "")
     end
     
     if(#self.valid_commands_list > 9)then
-        menu:addLine(ucstring("..."), "", "", "")
+        menu:addLine(ucstring("..."), "lua", "SearchCommand:close_modal('"..uiId.."')", "")
     end
     --END fill menu window
     
@@ -978,7 +1060,7 @@ function SearchCommand:finish_commands(command_name,uiId)
     local input_search_string = getUI(uiId)
     local final_command = ""
     
-    debug("process_status: "..process_status)
+    --debug("process_status: "..process_status)
     
     for fc = 1, process_status do
         if(fc == process_status)then
@@ -995,7 +1077,7 @@ function SearchCommand:finish_commands(command_name,uiId)
     end
     
     input_search_string.input_string = "/"..final_command
-    debug("/"..final_command)
+    --debug("/"..final_command)
     
     input_search_string:setFocusOnText()
     
