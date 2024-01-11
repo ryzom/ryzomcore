@@ -35,7 +35,7 @@ jobs:
       displayName: 'Dependencies'
     - task: Cache@2
       inputs:
-        key: 'ccache | $(releaseName) | "$(Agent.OS)"'
+        key: 'ccache | Debug | ubuntu20'
         path: '$(Pipeline.Workspace)/.ccache'
       displayName: 'ccache'
     - script: |
