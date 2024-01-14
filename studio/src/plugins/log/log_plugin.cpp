@@ -30,13 +30,13 @@
 #include "../../extension_system/iplugin_spec.h"
 
 // Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
-#include <QtGui/QWidget>
+#include <QObject>
+#include <QMessageBox>
+#include <QMainWindow>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
+#include <QWidget>
 #include <QFile>
 #include <QDateTime>
 #include <QTextStream>
@@ -202,4 +202,3 @@ namespace Plugin
 		}
 	}
 }
-Q_EXPORT_PLUGIN(Plugin::CLogPlugin)
