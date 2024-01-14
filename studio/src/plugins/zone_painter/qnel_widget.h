@@ -27,8 +27,8 @@
 #include <nel/misc/event_emitter.h>
 
 // Qt includes
-#include <QtOpenGL/QGLWidget>
-#include <QtGui/QWidget>
+#include <QGLWidget>
+#include <QWidget>
 
 class QAction;
 

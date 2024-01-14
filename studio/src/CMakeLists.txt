@@ -72,6 +72,7 @@ add_dependencies(studio
 		studio_plugin_tile_editor
 #		studio_plugin_translation_manager # requires QFtp which is removed in qt5
 		studio_plugin_world_editor
+#		studio_plugin_zone_painter
 )
 
 INSTALL(TARGETS studio RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT runtime BUNDLE DESTINATION /Applications)
