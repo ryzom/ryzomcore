@@ -293,12 +293,17 @@ function SearchCommand:help_show_all(parameter)
                 build_content=build_content.."<tr><td colspan=3>&nbsp;</td></tr>"
                 
                 max_arguments = #self.commands_list[c] - 4
-                for ad = 1, max_arguments do
-                    if(ad > 1)then
-                        arg_display=arg_display.." [arg"..ad.."]"
-                    else
-                        arg_display="[arg"..ad.."]"
+                
+                if(self.commands_list[c][1] ~= "eScript")then
+                    for ad = 1, max_arguments do
+                        if(ad > 1)then
+                            arg_display=arg_display.." [arg"..ad.."]"
+                        else
+                            arg_display="[arg"..ad.."]"
+                        end
                     end
+                else
+                    arg_display = ""
                 end
                 
                 count=count+1
@@ -386,12 +391,17 @@ function SearchCommand:help(uiId,input)
                     build_content=build_content.."<tr><td><table width='100%' border=0>"
                     
                     max_arguments = #self.commands_list[c] - 4
-                    for ad = 1, max_arguments do
-                        if(ad > 1)then
-                            arg_display=arg_display.." [arg"..ad.."]"
-                        else
-                            arg_display="[arg"..ad.."]"
+                    
+                    if(self.commands_list[c][1] ~= "eScript")then
+                        for ad = 1, max_arguments do
+                            if(ad > 1)then
+                                arg_display=arg_display.." [arg"..ad.."]"
+                            else
+                                arg_display="[arg"..ad.."]"
+                            end
                         end
+                    else
+                        arg_display = ""
                     end
                     
                     build_content=build_content.."<tr><td>"..i18n.get("uiR2EDScenarioDescription"):toUtf8()..": "..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."</td></tr>"
