@@ -30,8 +30,8 @@
 #include "nel/misc/app_context.h"
 
 // Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QIcon>
+#include <QObject>
+#include <QIcon>
 
 using namespace std;
 
@@ -53,6 +53,7 @@ class CTranslationManagerContext;
 class TranslationManagerPlugin : public QObject, public ExtensionSystem::IPlugin
 {
 	Q_OBJECT
+	Q_PLUGIN_METADATA(IID IPlugin_iid FILE "plugin-metadata.json")
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
 	virtual ~TranslationManagerPlugin();

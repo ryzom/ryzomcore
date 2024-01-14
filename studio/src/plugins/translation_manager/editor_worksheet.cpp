@@ -23,13 +23,13 @@
 #include "translation_manager_constants.h"
 
 // Qt includes
-#include <QtGui/QErrorMessage>
-#include <QtGui/QTableWidgetItem>
-#include <QtCore/qfileinfo.h>
-#include <QtGui/QMessageBox>
-#include <QtGui/QCloseEvent>
-#include <QtGui/QAction>
-#include <QtGui/QMenu>
+#include <QErrorMessage>
+#include <QTableWidgetItem>
+#include <QFileInfo>
+#include <QMessageBox>
+#include <QCloseEvent>
+#include <QAction>
+#include <QMenu>
 
 using namespace std;
 

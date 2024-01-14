@@ -70,6 +70,7 @@ add_dependencies(studio
 		studio_plugin_object_viewer
 		studio_plugin_sheet_builder
 		studio_plugin_tile_editor
+#		studio_plugin_translation_manager # requires QFtp which is removed in qt5
 		studio_plugin_world_editor
 )
 

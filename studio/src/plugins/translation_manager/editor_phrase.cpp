@@ -23,14 +23,14 @@
 #include "nel/misc/diff_tool.h"
 
 // Qt includes
-#include <QtCore/QFileInfo>
-#include <QtCore/QByteArray>
-#include <QtCore/QTextCodec>
-#include <QtCore/QTextStream>
-#include <QtGui/QTextCursor>
-#include <QtGui/QErrorMessage>
-#include <QtGui/QMessageBox>
-#include <QtGui/QCloseEvent>
+#include <QFileInfo>
+#include <QByteArray>
+#include <QTextCodec>
+#include <QTextStream>
+#include <QTextCursor>
+#include <QErrorMessage>
+#include <QMessageBox>
+#include <QCloseEvent>
 
 using namespace std;
 
