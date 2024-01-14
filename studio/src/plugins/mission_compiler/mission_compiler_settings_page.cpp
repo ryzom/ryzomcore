@@ -31,10 +31,10 @@
 #include <nel/misc/path.h>
 
 // Qt includes
-#include <QtCore/QSettings>
-#include <QtGui/QWidget>
-#include <QtGui/QFileDialog>
-#include <QtGui/QTreeWidgetItem>
+#include <QSettings>
+#include <QWidget>
+#include <QFileDialog>
+#include <QTreeWidgetItem>
 
 namespace MissionCompiler
 {

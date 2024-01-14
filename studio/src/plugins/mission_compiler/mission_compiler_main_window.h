@@ -5,7 +5,7 @@
 #include <QTimer>
 #include <QLabel>
 #include <QAction>
-#include <QtGui/QUndoStack>
+#include <QUndoStack>
 #include <QStringListModel>
 #include <QSortFilterProxyModel>
 #include <QRegExp>

@@ -242,7 +242,7 @@ void MissionCompilerMainWindow::compileMission(bool publish)
 
 		NLLIGO::CPrimitives primDoc;
 		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
-		NLLIGO::loadXmlPrimitiveFile(primDoc, NLMISC::CPath::lookup(filename.toAscii().data(), false), m_ligoConfig);
+		NLLIGO::loadXmlPrimitiveFile(primDoc, NLMISC::CPath::lookup(filename.toLatin1().data(), false), m_ligoConfig);
 		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 
 		try
@@ -354,7 +354,7 @@ void MissionCompilerMainWindow::handleValidation()
 		TMissionContainer missions;
 		NLLIGO::CPrimitives primDoc;
 		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
-		NLLIGO::loadXmlPrimitiveFile(primDoc, NLMISC::CPath::lookup(filename.toAscii().data(), false), m_ligoConfig);
+		NLLIGO::loadXmlPrimitiveFile(primDoc, NLMISC::CPath::lookup(filename.toLatin1().data(), false), m_ligoConfig);
 		parsePrimForMissions(primDoc.RootNode, missions);
 
 		// Parse missions to check modification
