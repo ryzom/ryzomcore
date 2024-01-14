@@ -8,7 +8,8 @@ if not SearchCommand then
 	    commands_list = {},
 	    key_tab_down = 0,
 	    modal_open_list = {},
-	    process_list = {}
+	    process_list = {},
+	    player_list = {}
 	}
 end
 
@@ -123,56 +124,52 @@ else
 end
 
 
-table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:", "Position_desc", "Position", {{"<PosX>,<PosY>[,<PosZ>]",""},{"Text:<BotName>",""},{"Text:<PlayerName>",""}}})
+table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:", "Position_desc", "Position", {{"<PositionX>,<PositionY>[,<PositionZ>]",""},{"Text:<BotName>",""},{"Text:<PlayerName>",""}}})
 table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:EM:", "eScript_desc", "eScript", {{"Text:<ContinentName>@",""},{"Text:<EventNpcGroup>",""}}, {{"Text:<ScriptCommand>",""}}})
 --END shard commands
 
 --eScript commands
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "despawn_desc", "()despawn(<0/1>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "rename_desc", "()rename(\"Text:wk[<Name>]$#Text:wk[<Title>]$\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAggro_desc", "()setAggro(Number:<Range>,Number:<Ticks>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setPlayerAttackable_desc", "()setPlayerAttackable(<0/1>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setBotAttackable_desc", "()setBotAttackable(Number:<0/1>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAttackable_desc", "()setAttackable(Number:<0/1>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setActivity_desc", "()setActivity(\"<no_change/escorted/guard/guard_escorted/normal/faction/faction_no_assist/bandit>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setFactionProp_desc", "()setFactionProp(\"<faction/ennemyFaction/friendFaction/player/predator/outpost:<id>:<side>>\",\"Text:<FameName>FameMin|Text:<FameName>FameMax\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"event_group_killed\",\"Text:<Url>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"event_bot_killed\",Text:<Url>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"running\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"faction,Text:<Factionname>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "()addProfileParameter(\"fame_for_guard_attack\",<6000 points per 1 fame>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "removeProfileParameter_desc", "()removeProfileParameter(\"Text:<Parameter>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "clearAggroList_desc", "()clearAggroList()"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "startMoving_desc", "()startMoving(Number:<PosX>,Number:<PosY>,Number:<Radius>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "stopMoving_desc", "()stopMoving()"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "startWander_desc", "()startWander(Number:<Meter>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAutoSpawn_desc", "()setAutoSpawn(<0/1>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setDespawnTime_desc", "()setDespawnTime(Number:<Ticks>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setRespawnTime_desc", "()setDespawnTime(Number:<Ticks>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "standUp_desc", "()standUp()"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "sitDown_desc", "()sitDown()"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setZoneState_desc", "()setZoneState(\"Text:<ZoneName>\",<0.0/1.0>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setMode_desc", "()setMode(\"<Normal/Sit/Eat/Rest/Alert/Hungry/Death>\""})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "aiActionSelf_desc", "()aiActionSelf(\"Text:<NameAiaction>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "aiAction_desc", "()aiAction(\"Text:<Aame.aiaction>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "emote_desc", "()emote(\"Text:<Emote>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "vpx_desc", "()vpx(\"VPA:Hex:<Value>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "vpx_desc", "()vpx(\"VPB:Hex:<Value>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "vpx_desc", "()vpx(\"VPC:Hex:<Value>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setMaxHP_desc", "()setMaxHP(Number:<Hp>, <0/1>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "npcSay_desc", "()npcSay(\"Text:<Message>\", \"<say/shout>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "ignoreOffensiveActions_desc", "()ignoreOffensiveActions(<0/1>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "maxHitRange_desc", "()maxHitRange(Number:<Meter>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addHP_desc", "()addHP(Number:<Hp>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setClientSheet_desc", "()setClientSheet(\"Text:<Sheet>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setSheet_desc", "()setSheet(\"Text:<Sheet>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setUrl_desc", "()setUrl(\"Text:<MENU_NAME>\", \"Text:<Url/*>\")"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "facing_desc", "()facing(<3.14/-3.14>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setCanAggro_desc", "()setCanAggro(<0/1>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setHealer_desc", "()setHealer(<0/1>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setHPScale_desc", "()setHPScale(<0.0/..0.5../1.0>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "followPlayer_desc", "()followPlayer(Number:<PlayerEID>, Number:<Meter>)"})
-table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setFactionAttackableBelow_desc", "()setFactionAttackableBelow(\"Text:<TribeName>\", <0/1>, <6000 points per 1 fame>)"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "despawn_desc", "despawn(arg1)", {{"<0/1>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "rename_desc", "rename(\"arg1$#arg2$\")", {{"Text:wk[<Name>]",""}},{{"Text:wk[<Title>]",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAggro_desc", "setAggro(arg1)", {{"Number:<Range>",""}}, {{"Number:<Ticks>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setPlayerAttackable_desc", "setPlayerAttackable(arg1)", {{"<0/1>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setBotAttackable_desc", "setBotAttackable(arg1)", {{"<0/1>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAttackable_desc", "setAttackable(arg1)", {{"<0/1>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setActivity_desc", "setActivity(\"arg1\")", {{"<no_change/escorted/guard/guard_escorted/normal/faction/faction_no_assist/bandit>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setFactionProp_desc", "setFactionProp(\"arg1\",\"arg2|arg3\")", {{"<faction/ennemyFaction/friendFaction/player/predator/outpost:<id>:<side>>",""}}, {{"Text:<FameName>FameMin",""}}, {{"Text:<FameName>FameMax",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addProfileParameter_desc", "addProfileParameter(\"arg1\",\"arg2\")", {{"event_group_killed",""},{"event_bot_killed",""},{"running",""},{"faction",""}},{{"Text:<Url>",""},{"Text:<Factionname>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "removeProfileParameter_desc", "removeProfileParameter(\"arg1\")",{{"Text:<Parameter>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "clearAggroList_desc", "clearAggroList()"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "startMoving_desc", "startMoving(arg1,arg2,arg3)", {{"Number:<PositionX>",""}}, {{"Number:<PositionY>",""}}, {{"Number:<Radius>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "stopMoving_desc", "stopMoving()"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "startWander_desc", "startWander(arg1)", {{"Number:<Meter>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setAutoSpawn_desc", "setAutoSpawn(arg1)", {{"<0/1>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setDespawnTime_desc", "setDespawnTime(arg1)", {{"Number:<Ticks>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setRespawnTime_desc", "setDespawnTime(arg1)", {{"Number:<Ticks>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "standUp_desc", "standUp()"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "sitDown_desc", "sitDown()"})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setZoneState_desc", "setZoneState(\"arg1\",arg2)", {{"Text:<ZoneName>",""}}, {{"<0.0/1.0>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setMode_desc", "setMode(\"arg1\")", {{"<Normal/Sit/Eat/Rest/Alert/Hungry/Death>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "aiActionSelf_desc", "aiActionSelf(\"arg1\")", {{"Text:<NameAiaction>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "aiAction_desc", "aiAction(\"arg1\")", {{"Text:<NameAiaction>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "emote_desc", "emote(\"arg1\")", {{"Text:<Emote>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "vpx_desc", "vpx(\"VPA:arg1\")", {{"Hex:<Value>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "vpx_desc", "vpx(\"VPB:arg1\")", {{"Hex:<Value>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "vpx_desc", "vpx(\"VPC:arg1\")", {{"Hex:<Value>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setMaxHP_desc", "setMaxHP(arg1,arg2)", {{"Number:<Hp>",""}}, {{"<0/1>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "npcSay_desc", "npcSay(\"arg1\", \"arg2\")", {{"Text:<Message>",""}}, {{"<say/shout>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "ignoreOffensiveActions_desc", "ignoreOffensiveActions(arg1)", {{"<0/1>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "maxHitRange_desc", "maxHitRange(arg1)", {{"Number:<Meter>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "addHP_desc", "addHP(arg1)", {{"Number:<Hp>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setClientSheet_desc", "setClientSheet(\"arg1\")", {{"Text:<Sheet>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setSheet_desc", "setSheet(\"arg1\")", {{"Text:<Sheet>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setUrl_desc", "setUrl(\"arg1\", \"arg2\")", {{"Text:<MENU_NAME>",""}}, {{"Text:<Url>",""},{"*",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "facing_desc", "facing(arg1)", {{"<3.14/-3.14>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setCanAggro_desc", "setCanAggro(arg1)", {{"<0/1>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setHealer_desc", "setHealer(arg1)", {{"<0/1>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setHPScale_desc", "setHPScale(arg1)", {{"<0.0/..0.5../1.0>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "followPlayer_desc", "followPlayer(arg1,arg2)", {{"Number:<PlayerEID>",""}}, {{"Number:<Meter>",""}}})
+table.insert(SearchCommand.commands_list,{"eScript", ":DEV:SGM:GM:EM:", "setFactionAttackableBelow_desc", "setFactionAttackableBelow(\"arg1\",arg2,arg3)", {{"Text:<TribeName>",""}}, {{"<0/1>",""}}, {{"<6000 points per 1 fame>",""}}})
 
 --END eScript commands
 
@@ -225,9 +222,12 @@ end
 function SearchCommand:pars_command_parameter(command_parameter)
     local finish_translation_text = ""
     
-    if(string.find(string.lower(command_parameter), ":"))then
+    --debug("param: "..command_parameter)
+    
+    if(string.find(string.lower(command_parameter), ":") ~= nil and string.find(string.lower(command_parameter), ":") < 20)then
         --split text to commands
         for substring in string.gmatch(command_parameter, "([^:]+)") do
+            --debug(substring)
             if(string.find(string.lower(substring), "<"))then
             --debug(substring:match("<(.*)>"))
                 finish_translation_text=finish_translation_text.."<"..substring:gsub("<(.-)>", i18n.get("uiSearchCommand"..substring:match("<(.*)>")):toUtf8())..">"
@@ -646,6 +646,18 @@ function SearchCommand:search(uiId)
     end
 end
 
+function SearchCommand:get_command_type(command)
+    local command_type = ""
+    
+    for c = 1, #self.commands_list do
+        if(self.commands_list[c][4] == command) then
+            command_type = self.commands_list[c][1]
+        end
+    end
+    
+    return command_type
+end
+
 function SearchCommand:build_valid_command_list(command_input,uiId)
     self.valid_commands_list = {}
     local count_found=0
@@ -720,43 +732,26 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
 end
 
 function SearchCommand:build_valid_player_list(playername_input,uiId)
-    player_list = {}
-    player_list[1] = "rias"
-    player_list[2] = "uluk"
-    player_list[3] = "riasan"
-    player_list[4] = "Limay"
-    player_list[5] = "Neira"
-    player_list[6] = "Beastie"
-    player_list[7] = "Audeva"
-    player_list[8] = "Decacaon"
-    player_list[9] = "Livege"
-    player_list[10] = "Purg"
-    player_list[11] = "Xxramusxx"
-    player_list[12] = "Kronoss"
-    player_list[13] = "Livan"
-    player_list[14] = "Mifisto"
-    player_list[15] = "Progulschik"
-    player_list[16] = "Darwyn"
-    player_list[17] = "Aprak"
-    player_list[18] = "Dorothee"
-    player_list[19] = "Zillah"
-
     self.valid_commands_list = {}
     local count_found=0
     local found_playername=0
-
-    for c = 1, #player_list do
-        if(playername_input ~= "")then
-            if(string.lower(player_list[c]) == string.lower(playername_input))then
-                found_playername=c
-                count_found=1
-            else
-                if string.find(string.lower(player_list[c]), string.lower(playername_input))then
-                    table.insert(self.valid_commands_list,player_list[c])
-                    count_found=count_found+1
+    
+    if(self.player_list ~= nil)then
+        for c = 1, #self.player_list do
+            if(playername_input ~= "")then
+                if(string.lower(self.player_list[c]) == string.lower(playername_input))then
+                    found_playername=c
+                    count_found=1
+                else
+                    if string.find(string.lower(self.player_list[c]), string.lower(playername_input))then
+                        table.insert(self.valid_commands_list,self.player_list[c])
+                        count_found=count_found+1
+                    end
                 end
             end
         end
+    else
+        debug("Error")
     end
     
     if(count_found == 0)then
@@ -882,8 +877,7 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
                     argument_help=argument_help.." "..self.command_parameter_list[max_arguments+1+ma]
                 end
             end
-            
-            argument_help=argument_help.." Warning to many Arguments"
+            argument_help=argument_help.." "..i18n.get("uiSearchCommandWarningParameter"):toUtf8()
         end
         
         if(self.command_self == "a" and #self.command_parameter_list >= 2)then
@@ -976,7 +970,11 @@ function SearchCommand:build_command_helper(uiId)
             SearchCommand:search_build_command_list(uiId,self.command_parameter_list[process_status],false)
         elseif(string.find(string.lower(argu_name), string.lower("<PlayerName>")) or string.find(string.lower(argu_name), string.lower("<TargetName>")))then 
             --debug("parm is a playername")
+            
             if(player_priv)then
+                --load_current_active_player_name
+                webig:openUrlInBg("https://app.ryzom.com/get_playername_online/index.php")
+            
                 SearchCommand:search_build_player_list(uiId,self.command_parameter_list[process_status])
             else
                 SearchCommand:search_build_argument_list(uiId,self.command_self)
@@ -1113,10 +1111,45 @@ function SearchCommand:show_more_options(uiId)
     --END launche menu window
 end
 
+function SearchCommand:replace_escript_param(command_name)
+    local command_index = 0
+    local temp_command = ""
+
+    for c = 1, #self.commands_list do
+        if(self.commands_list[c][4] == command_name)then
+            command_index=c
+        end
+    end
+    
+    if(command_index ~= 0)then
+        temp_command = command_name
+        max_arguments = #self.commands_list[command_index] - 4
+        
+        for ac = 1, max_arguments do
+            
+            local load_all_param = ""
+            for pc = 1, #self.commands_list[command_index][4+ac] do
+                debug(self.commands_list[command_index][4+ac][pc][1])
+                local translation_parm = SearchCommand:pars_command_parameter(self.commands_list[command_index][4+ac][pc][1])
+                if(pc > 1)then
+                    load_all_param=load_all_param.."/"..translation_parm
+                else
+                    load_all_param=translation_parm
+                end
+            end
+            temp_command = temp_command:gsub("arg"..ac,load_all_param)
+        end
+    end
+    
+    --debug("final_temp: "..temp_command)
+    return temp_command
+end
+
 function SearchCommand:finish_commands(command_name,uiId)
     local process_status = SearchCommand:read_process_status(uiId)
     local input_search_string = getUI(uiId)
     local final_command = ""
+    local new_command_par = ""
     
     --debug("process_status: "..process_status)
     
@@ -1127,10 +1160,17 @@ function SearchCommand:finish_commands(command_name,uiId)
     end
     
     for pc = 1, #self.command_parameter_list do
+        local add_escript_prefix=""
+        if(SearchCommand:get_command_type(self.command_parameter_list[pc]) == "eScript")then
+            add_escript_prefix="()"
+            new_command_par = SearchCommand:replace_escript_param(self.command_parameter_list[pc])
+            self.command_parameter_list[pc] = new_command_par
+        end
+        
         if(final_command == "")then
-            final_command = self.command_parameter_list[pc]
+            final_command = add_escript_prefix..""..self.command_parameter_list[pc]
         else
-            final_command = final_command.." "..self.command_parameter_list[pc]
+            final_command = final_command.." "..add_escript_prefix..""..self.command_parameter_list[pc]
         end
     end
     
