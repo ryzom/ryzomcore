@@ -61,12 +61,13 @@ add_dependencies(studio
 		studio_plugin_bnp_manager
 		studio_plugin_core
 		studio_plugin_disp_sheet_id
-		studio_plugin_log
 		studio_plugin_example
-		studio_plugin_mission_compiler
-		studio_plugin_object_viewer
 		studio_plugin_georges_editor
 		studio_plugin_landscape_editor
+		studio_plugin_log
+		studio_plugin_mission_compiler
+		studio_plugin_object_viewer
+		studio_plugin_sheet_builder
 		studio_plugin_world_editor
 )
 
