@@ -89,7 +89,7 @@ TARGET_LINK_LIBRARIES(
 						nelgui
 						${QT_LIBRARIES}
 						${QT_QTOPENGL_LIBRARY}
-						qt_property_browser
+						${QtPropertyBrowser_LIBRARY}
 						)
 
 NL_DEFAULT_PROPS(studio_plugin_gui_editor "Tools: Studio Plugin: GUI Editor")

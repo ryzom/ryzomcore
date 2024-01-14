@@ -27,11 +27,11 @@
 
 #include <nel/misc/debug.h>
 
-#include <QtCore/QSettings>
-#include <QtGui/QFileDialog>
+#include <QSettings>
+#include <QFileDialog>
 #include <QDockWidget>
 #include <QMessageBox>
-#include "../../3rdparty/qtpropertybrowser/QtTreePropertyBrowser"
+#include <qtpropertybrowser/QtTreePropertyBrowser>
 
 #include "widget_properties.h"
 #include "widget_info_tree.h"
