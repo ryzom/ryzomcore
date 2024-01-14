@@ -64,6 +64,7 @@ add_dependencies(studio
 		studio_plugin_log
 		studio_plugin_example
 		studio_plugin_mission_compiler
+		studio_plugin_object_viewer
 		studio_plugin_georges_editor
 		studio_plugin_landscape_editor
 		studio_plugin_world_editor

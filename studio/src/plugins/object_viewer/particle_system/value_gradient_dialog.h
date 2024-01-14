@@ -29,16 +29,16 @@
 #include "particle_node.h"
 
 // Qt includes
-#include <QtGui/QIcon>
-#include <QtGui/QDialog>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QPainter>
+#include <QIcon>
+#include <QDialog>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QLabel>
+#include <QListWidget>
+#include <QPushButton>
+#include <QSpacerItem>
+#include <QPainter>
 
 // NeL includes
 #include <nel/3d/ps_attrib_maker_template.h>
