@@ -1,0 +1,105 @@
+name: CMake on multiple platforms
+
+on:
+  push:
+    branches: [ "core4", "feature/*" ]
+  pull_request:
+    branches: [ "core4" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+        build_type: [Release]
+        c_compiler: [gcc]
+        include:
+          - os: ubuntu-22.04
+            c_compiler: gcc
+            cpp_compiler: g++
+            ubuntu_version: 22.04
+          - os: ubuntu-20.04
+            c_compiler: gcc
+            cpp_compiler: g++
+            ubuntu_version: 20.04
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+    
+    - name: Dependencies
+      run: |
+        sudo apt update
+        sudo apt install --yes software-properties-common
+        wget --quiet https://packages.microsoft.com/config/ubuntu/${{ matrix.ubuntu_version }}/packages-microsoft-prod.deb
+        sudo dpkg --install packages-microsoft-prod.deb
+        sudo apt update
+        sudo apt install --yes \
+        cmake build-essential ninja-build ccache \
+          bison autoconf automake \
+          libpng-dev \
+          libjpeg-dev \
+          libgif-dev libfreetype6-dev \
+          freeglut3-dev \
+          liblua5.2-dev libluabind-dev libcpptest-dev \
+          libogg-dev libvorbis-dev libopenal-dev \
+          libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+          libmysqlclient-dev \
+          libxml2-dev \
+          libcurl4-openssl-dev libssl-dev \
+          libsquish-dev \
+          liblzma-dev \
+          libgsf-1-dev \
+          qtbase5-dev qttools5-dev qttools5-dev-tools \
+          libmsquic
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+        sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: >
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -G "Ninja"
+        -DCMAKE_SUPPRESS_REGENERATION=ON
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DWITH_STATIC=ON
+        -DWITH_NEL_TESTS=ON
+        -DWITH_NEL_SAMPLES=ON
+        -DWITH_LUA51=OFF
+        -DWITH_LUA52=ON
+        -DWITH_RYZOM=ON
+        -DWITH_RYZOM_SERVER=ON
+        -DWITH_RYZOM_CLIENT=ON
+        -DWITH_RYZOM_TOOLS=ON
+        -DWITH_NEL_TOOLS=ON
+        -DWITH_NELNS=ON
+        -DWITH_NELNS_LOGIN_SYSTEM=ON
+        -DWITH_NELNS_SERVER=ON
+        -DWITH_QT5=ON
+        -DWITH_LIBGSF=ON
+        -S ${{ github.workspace }}
+
+    - name: Build
+      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+    - name: Unit Tests
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+      run: ctest --build-config ${{ matrix.build_type }}
