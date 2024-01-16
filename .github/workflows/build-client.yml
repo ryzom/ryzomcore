@@ -15,6 +15,7 @@ jobs:
 
       matrix:
         os: [ubuntu-22.04, ubuntu-20.04, windows-latest, windows-2019, macos-latest, macos-11]
+        build_type: [Release]
         include:
           - os: windows-latest
             cmake_options: -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_XAUDIO2=ON
@@ -40,6 +41,10 @@ jobs:
         echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
         echo "cmake-version=3.27.9" >> "$GITHUB_OUTPUT"
         echo "cmake-install-dir=/opt/cmake-3.27.9" >> "$GITHUB_OUTPUT"
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.os }}-${{ matrix.build_type }}
 
     - name: Dependencies Linux
       if: runner.os == 'Linux'
@@ -92,11 +97,13 @@ jobs:
         cmake --version;
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         ${{ matrix.cmake_options }}
-        -DCMAKE_CONFIGURATION_TYPES=Release
-        -DFINAL_VERSION=OFF
-        -DHUNTER_CONFIGURATION_TYPES=Release
-        -DHUNTER_ENABLED=ON
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CONFIGURATION_TYPES=${{ matrix.build_type }}
+        -DHUNTER_CONFIGURATION_TYPES=${{ matrix.build_type }}
         -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
+        -DHUNTER_ENABLED=ON
+        -DFINAL_VERSION=OFF
         -DWITH_DRIVER_OPENAL=ON
         -DWITH_DRIVER_OPENGL=ON
         -DWITH_INSTALL_LIBRARIES=OFF
