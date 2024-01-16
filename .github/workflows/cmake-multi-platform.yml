@@ -36,7 +36,9 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-    
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Dependencies
       run: |
         sudo apt update
@@ -77,6 +79,8 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         -DWITH_STATIC=ON
         -DWITH_NEL_TESTS=ON
         -DWITH_NEL_SAMPLES=ON
