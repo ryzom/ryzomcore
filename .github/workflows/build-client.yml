@@ -1,0 +1,113 @@
+name: build client on multiple platforms
+
+on:
+  push:
+    branches: [ "core4", "feature/*" ]
+  pull_request:
+    branches: [ "core4" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04, windows-latest, windows-2019, macos-latest, macos-11]
+        include:
+          - os: windows-latest
+            cmake_options: -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_XAUDIO2=ON
+          - os: windows-2019
+            cmake_options: -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_XAUDIO2=ON
+          - os: ubuntu-22.04
+            ubuntu_version: 22.04
+          - os: ubuntu-20.04
+            ubuntu_version: 20.04
+          - os: macos-latest
+            cmake_options: -DWITH_LIBXML2_ICONV=OFF -GXcode
+          - os: macos-11
+            cmake_options: -DWITH_LIBXML2_ICONV=OFF -GXcode
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
+        echo "cmake-version=3.27.9" >> "$GITHUB_OUTPUT"
+        echo "cmake-install-dir=/opt/cmake-3.27.9" >> "$GITHUB_OUTPUT"
+
+    - name: Dependencies Linux
+      if: runner.os == 'Linux'
+      run: |
+        wget --quiet https://packages.microsoft.com/config/ubuntu/${{ matrix.ubuntu_version }}/packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
+        sudo apt update
+        sudo apt remove --yes man-db
+        sudo apt update
+        sudo apt install -y --no-install-recommends \
+          libasound2-dev \
+          libgl1-mesa-dev \
+          libjack-dev \
+          libpulse-dev \
+          libxrandr-dev \
+          libxrender-dev \
+          libxxf86vm-dev \
+          libmsquic
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+        sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
+        wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releases/download/v${{ steps.strings.outputs.cmake-version }}/cmake-${{ steps.strings.outputs.cmake-version }}-linux-x86_64.sh
+        sudo mkdir ${{ steps.strings.outputs.cmake-install-dir }}
+        sudo sh /tmp/cmake.sh --skip-license --prefix=${{ steps.strings.outputs.cmake-install-dir }}
+        sudo ln --symbolic --force ${{ steps.strings.outputs.cmake-install-dir }}/bin/cmake /usr/local/bin/cmake
+
+    - name: Cache Hunter Dependencies
+      uses: actions/cache@v3.3.2
+      with:
+        path: ${{ steps.strings.outputs.hunter-dir }}
+        key: ${{ matrix.os }}-hunter-cache
+
+    - name: Cache Chocolatey Dependencies
+      if: runner.os == 'Windows'
+      uses: actions/cache@v3.3.2
+      with:
+        path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+        key: ${{ runner.os }}-chocolatey-cache
+
+    - name: Dependencies Windows
+      if: runner.os == 'Windows'
+      run: >
+        choco install directx-sdk
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: >
+        cmake --version;
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        ${{ matrix.cmake_options }}
+        -DCMAKE_CONFIGURATION_TYPES=Release
+        -DFINAL_VERSION=OFF
+        -DHUNTER_CONFIGURATION_TYPES=Release
+        -DHUNTER_ENABLED=ON
+        -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
+        -DWITH_DRIVER_OPENAL=ON
+        -DWITH_DRIVER_OPENGL=ON
+        -DWITH_INSTALL_LIBRARIES=OFF
+        -DWITH_NEL_SAMPLES=OFF
+        -DWITH_NEL_TESTS=OFF
+        -DWITH_NEL_TOOLS=OFF
+        -DWITH_RYZOM_CLIENT=ON
+        -DWITH_RYZOM_SERVER=OFF
+        -DWITH_RYZOM_TOOLS=OFF
+        -S ${{ github.workspace }}
+
+    - name: Build
+      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
