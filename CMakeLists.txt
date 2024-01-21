@@ -34,9 +34,6 @@ IF(COMMAND cmake_policy)
   IF(POLICY CMP0020)
     CMAKE_POLICY(SET CMP0020 NEW)
   ENDIF()
-
-  # allow usage of Documentation.cmake
-  cmake_policy(SET CMP0106 OLD)
 ENDIF()
 
 
@@ -71,7 +68,6 @@ ENDIF()
 INCLUDE(nel)
 INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
-INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
