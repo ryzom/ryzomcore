@@ -185,7 +185,11 @@ IF(HUNTER_ENABLED)
   FIND_PACKAGE(libxml2 CONFIG REQUIRED)
   SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
 
-#  HUNTER_ADD_PACKAGE(OpenSSL)
+  # cross compiling doesn't quite work on the hunter openssl package therefor compile it separately and use it
+  FIND_PACKAGE(OpenSSL QUIET)
+  if(NOT OpenSSL_FOUND)
+    HUNTER_ADD_PACKAGE(OpenSSL)
+  endif()
   FIND_PACKAGE(OpenSSL REQUIRED)
   # TODO: is OpenSSL::Crypto only needed for WIN32?
   SET(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
