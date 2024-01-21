@@ -34,6 +34,9 @@ IF(COMMAND cmake_policy)
   IF(POLICY CMP0020)
     CMAKE_POLICY(SET CMP0020 NEW)
   ENDIF()
+
+  # allow usage of Documentation.cmake
+  cmake_policy(SET CMP0106 OLD)
 ENDIF()
 
 
