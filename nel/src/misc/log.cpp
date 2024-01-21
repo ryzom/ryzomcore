@@ -342,7 +342,7 @@ void CLog::displayString (const char *str)
 /*
  * Display the string with decoration and final new line to all attached displayers
  */
-#ifdef NL_OS_WINDOWS
+#ifdef USE_LOG_CHECK_TYPES
 void CLog::_displayNL (const char *format, ...)
 #else
 void CLog::displayNL (const char *format, ...)
@@ -367,7 +367,7 @@ void CLog::displayNL (const char *format, ...)
 /*
  * Display the string with decoration to all attached displayers
  */
-#ifdef NL_OS_WINDOWS
+#ifdef USE_LOG_CHECK_TYPES
 void CLog::_display (const char *format, ...)
 #else
 void CLog::display (const char *format, ...)
@@ -461,7 +461,7 @@ void CLog::displayRawString (const char *str)
 /*
  * Display a string (and nothing more) to all attached displayers
  */
-#ifdef NL_OS_WINDOWS
+#ifdef USE_LOG_CHECK_TYPES
 void CLog::_displayRawNL( const char *format, ... )
 #else
 void CLog::displayRawNL( const char *format, ... )
@@ -486,7 +486,7 @@ void CLog::displayRawNL( const char *format, ... )
 /*
  * Display a string (and nothing more) to all attached displayers
  */
-#ifdef NL_OS_WINDOWS
+#ifdef USE_LOG_CHECK_TYPES
 void CLog::_displayRaw( const char *format, ... )
 #else
 void CLog::displayRaw( const char *format, ... )
@@ -504,7 +504,7 @@ void CLog::displayRaw( const char *format, ... )
 }
 
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_LOG_CHECK_TYPES
 void CLog::_forceDisplayRaw (const char *format, ...)
 #else
 void CLog::forceDisplayRaw (const char *format, ...)
