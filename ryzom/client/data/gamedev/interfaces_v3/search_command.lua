@@ -1078,6 +1078,57 @@ function SearchCommand:find_argument(command,uiId)
     return argument_name
 end
 
+function SearchCommand:add_player_to_list(online_player_list)
+    for online = 1, #online_player_list do
+        --only insert a playername once
+        if(SearchCommand:find(self.player_list, online_player_list[online]) == nil)then
+            table.insert(self.player_list, online_player_list[online])
+        end
+    end
+end
+
+function SearchCommand:search_build_local_player_list()
+    local online_player_list = {}
+
+    --debug("Friends online:")
+    for i=0,1500 do
+    	local ui = getUI("ui:interface:friend_list_"..tostring(i))
+    	if ui then
+    		local online = getUI("ui:interface:friend_list_"..tostring(i)..":header_closed:online")
+    		if online.texture == "w_online.tga" then
+    		    if(SearchCommand:find(online_player_list, ui.title) == nil)then
+                    table.insert(online_player_list, ui.title)
+                end
+    		end
+    	end
+    end
+    
+    --debug("Teammembers:")
+    for i=0,5 do
+    	local ui = getUI("ui:interface:team_list_"..tostring(i))
+    	if ui then
+    	    if(SearchCommand:find(online_player_list, ui.title) == nil)then
+                table.insert(online_player_list, ui.title)
+            end
+    	end
+    end
+    
+    --debug("Guildmember online:")
+    for i=0,1500 do
+    	local ui = getUI("ui:interface:guild:content:tab_guild:list_member:guild_members:ui:interface:guild:content:tab_guild:list_member:guild_members:m"..tostring(i))
+    	if ui then
+    		local online = getUI("ui:interface:guild:content:tab_guild:list_member:guild_members:ui:interface:guild:content:tab_guild:list_member:guild_members:m"..tostring(i)..":online")
+    		if online.texture == "w_online.tga" then
+    		    if(SearchCommand:find(online_player_list, ui.name.hardtext) == nil)then
+                    table.insert(online_player_list, ui.name.hardtext)
+                end
+    		end
+    	end
+    end
+    
+    --now check and update player_list
+    SearchCommand:add_player_to_list(online_player_list)
+end
 
 function SearchCommand:build_command_helper(uiId)
     --read process_list
@@ -1110,11 +1161,16 @@ function SearchCommand:build_command_helper(uiId)
             if(player_priv)then
                 --load_current_active_player_name
                 webig:openUrlInBg("https://app.ryzom.com/get_playername_online/index.php")
-            
-                SearchCommand:search_build_player_list(uiId,self.command_parameter_list[process_status])
             else
-                SearchCommand:search_build_argument_list(uiId,self.command_self)
+                --read local playername
+                --friendslist
+                --guildlist
+                --teammember
+                SearchCommand:search_build_local_player_list()
             end
+            
+            SearchCommand:search_build_player_list(uiId,self.command_parameter_list[process_status])
+            
         elseif(string.find(string.lower(argu_name), string.lower("<ScriptCommand>")))then
             SearchCommand:search_build_command_list(uiId,self.command_parameter_list[process_status],false)
         else
