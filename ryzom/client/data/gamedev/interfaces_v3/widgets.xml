@@ -3,7 +3,7 @@
 <!-- ****************************************** -->
 <interface_config>
     <root id="interface" x="0" y="0" w="800" h="600" active="true" />
-	<lua file="search_command.lua" />
+    <lua file="search_command.lua" />
     <proc id="proc_nothing"></proc>
     <!-- a text with border -->
     <template name="bc_border_text" keep="true" posref="TM TM" posparent="parent" x="0" y="-20" w="-4">
@@ -708,7 +708,7 @@
     <!-- ********************* -->
     <!-- *  EDIT BOX WIDGET  * -->
     <!-- ********************* -->
-    <group type="menu" id="search_command_add_menu" extends="base_menu" mouse_pos="true"></group>
+    <group type="menu" id="search_command_add_menu" extends="base_menu" mouse_pos="false"></group>
     <command name="?" action="lua" params="SearchCommand:help(getUICaller().id,'+')"/>
     <template name="edit_box_widget" active="true" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" child_resize_hmargin="0" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="255" menu_r="" onchange="lua" onchange_params="SearchCommand:search(getUICaller().id)" entry_type="text" keep="true" max_historic="40" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" clear_on_escape="false" color="255 255 255 255" continuous_text_update="false" bg_texture="W_box_blank.tga" on_focus_lost="" on_focus_lost_params="" max_float_prec="5" tooltip="" tooltip_parent="" negative_filter="" render_layer="0">
         <group id="#id" active="#active" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="#child_resize_h" child_resize_hmargin="#child_resize_hmargin" sizeref="#sizeref" w="#w" h="#h" render_layer="#render_layer" >

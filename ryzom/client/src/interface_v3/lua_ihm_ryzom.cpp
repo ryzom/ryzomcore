@@ -1571,8 +1571,13 @@ int CLuaIHMRyzom::getPlayerPrivs(CLuaState &ls)
 	if (hasPrivilegeOBSERVER()) privsString+=":OBSERVER";
 	if (hasPrivilegeOBSERVER()) privsString+=":TESTER";
 	
-	ls.push(privsString+=":");
-	return 1;
+	if(privsString == ""){
+		return 0;
+	}
+	else{
+		ls.push(privsString+=":");
+		return 1;
+	}
 }
 
 // ***************************************************************************
