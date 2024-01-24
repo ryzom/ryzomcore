@@ -1,0 +1,4 @@
+services:
+  devcontainer:
+    image: "ryzomcore/devcontainer"
+    build: ./.devcontainer
