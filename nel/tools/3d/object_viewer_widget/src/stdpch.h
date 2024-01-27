@@ -52,7 +52,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #if defined(NL_OS_WINDOWS)
 #define NOMINMAX
-#include <Windows.h>
+#include <windows.h>
 #elif defined(NL_OS_MAC)
 #else
 #include <X11/Xlib.h>
