@@ -17024,14 +17024,14 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 			if (useGenericMats)
 			{
 				 // Not Named or Boss mats
-				if (genericMp->ItemId != mp->ItemId && rand() % 500 < modifier)
+				if (mp->Quantity > 0 && genericMp->ItemId != mp->ItemId && rand() % 500 < modifier)
 				{
 					SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
 					params[0].SheetId = usedSheet;
 					sendDynamicSystemMessage(_EntityRowId, "ALLEGORY_EFFECT_TRIGGERED", params);
 					bonus = 2;
 				}
-				item = createItem(quality, bonus*genericMp->Quantity, genericMp->ItemId);
+				item = createItem(quality, bonus*mp->Quantity, genericMp->ItemId);
 			}
 			else
 				item = createItem(quality, mp->Quantity, mp->ItemId);
