@@ -91,6 +91,8 @@ table.insert(SearchCommand.commands_list,{"client", "player", "4_desc", "4", {{"
 table.insert(SearchCommand.commands_list,{"client", "player", "channel_desc", "channel",{{"Text:<Channelname>",""}}, {{"Text:<Password>","channel_password_desc"},{"*","channel_leave_desc"}}})
 table.insert(SearchCommand.commands_list,{"client", "player", "tell_desc", "tell",{{"Text:<PlayerName>",""}}, {{"Text:<Message>",""}}})
 table.insert(SearchCommand.commands_list,{"client", "player", "tell_desc", "t",{{"Text:<PlayerName>",""}}, {{"Text:<Message>",""}}})
+
+table.insert(SearchCommand.commands_list,{"client", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:TESTER:", "tp_desc", "tp", {{"<PositionX>,<PositionY>[,<PositionZ>]","tp_1_desc"},{"Text:<PlayerName>",""},{"Text:<BotName>",""}}})
 --END client commands
 
 
@@ -116,8 +118,6 @@ table.insert(SearchCommand.commands_list,{"shard", "player", "summonPet_desc", "
 table.insert(SearchCommand.commands_list,{"shard", "player", "setTeamLeader_desc", "setTeamLeader", {{"Text:<PlayerName>",""}}})
 table.insert(SearchCommand.commands_list,{"shard", "player", "resetName_desc", "resetName"})
 table.insert(SearchCommand.commands_list,{"shard", "player", "lockItem_desc", "lockItem", {{"Text:<Inventory>",""}}, {{"Number:<Slot>",""}}, {{"lock=0,1",""}}})
-
-
 
 if(player_priv)then
     table.insert(SearchCommand.commands_list,{"shard", "player", "connectUserChannel_desc", "connectUserChannel", {{"Text:<Channelname>",""}}, {{"Text:<Password>",""},{"*","channel_leave_desc"},{"***","channel_remove_admin_desc"}}})
