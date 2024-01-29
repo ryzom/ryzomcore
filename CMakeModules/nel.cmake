@@ -1052,7 +1052,9 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # Fix undefined reference to `__stack_chk_fail' error
-    ADD_PLATFORM_LINKFLAGS("-lc")
+    IF(NOT MINGW)
+      ADD_PLATFORM_LINKFLAGS("-lc")
+    ENDIF()
 
     IF(NOT APPLE)
       ADD_PLATFORM_LINKFLAGS("-Wl,--no-undefined -Wl,--as-needed")
@@ -1062,7 +1064,7 @@ MACRO(NL_SETUP_BUILD)
       ENDIF()
     ENDIF()
 
-    IF(NOT APPLE)
+    IF(NOT APPLE AND NOT MINGW)
       # hardening
       ADD_PLATFORM_LINKFLAGS("-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now")
     ENDIF()

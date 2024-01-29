@@ -217,6 +217,10 @@ ELSE()
   TARGET_LINK_LIBRARIES(nelmisc ${PNG_LIBRARY})
 ENDIF()
 
+IF(WIN32)
+  TARGET_LINK_LIBRARIES(nelmisc winmm.lib dbghelp)
+ENDIF()
+
 #TODO: needed for hunter aswell?
 IF(UNIX)
   TARGET_LINK_LIBRARIES(nelmisc -lc -ldl)

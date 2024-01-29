@@ -48,7 +48,7 @@
 	#ifndef NL_COMP_MINGW
 	#	define NOMINMAX
 	#endif
-	#include <WinSock2.h>
+	#include <winsock2.h>
 	#include <windows.h>
 #endif
 
