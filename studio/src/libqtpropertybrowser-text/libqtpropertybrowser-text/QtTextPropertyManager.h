@@ -1,7 +1,7 @@
 #ifndef LIBQTPROPERTYMANAGER_TEXT_TEXT_PROPERTY_MANAGER_H
 #define LIBQTPROPERTYMANAGER_TEXT_TEXT_PROPERTY_MANAGER_H
 
-#include <qtpropertybrowser/QtStringPropertyManager>
+#include <QtStringPropertyManager>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
