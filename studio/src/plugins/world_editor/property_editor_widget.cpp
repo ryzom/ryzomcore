@@ -34,7 +34,7 @@
 #include <QLineEdit>
 #include <QMap>
 #include <qtpropertybrowser/QtLineEditFactory>
-#include <libqtpropertybrowser/QtTextEditorFactory.h>
+#include <libqtpropertybrowser-text/QtTextEditorFactory.h>
 
 #include "const_string_array_property.h"
 

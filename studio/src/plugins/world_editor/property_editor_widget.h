@@ -30,7 +30,7 @@
 // 3rdparty
 #include <qtpropertybrowser/qtpropertymanager.h>
 #include <qtpropertybrowser/qtvariantproperty.h>
-#include <libqtpropertybrowser/QtTextPropertyManager.h>
+#include <libqtpropertybrowser-text/QtTextPropertyManager.h>
 
 // NeL includes
 

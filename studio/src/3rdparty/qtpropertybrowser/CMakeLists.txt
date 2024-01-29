@@ -1,99 +1,76 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${QT_INCLUDES})
+cmake_minimum_required(VERSION 2.9)
+project(QtPropertyBrowser)
 
-FILE(GLOB SRC *.cpp *.h)
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
-SET(QT_PROPERTY_EDITOR_HDR	qtpropertybrowser.h
-				qtpropertymanager.h
-				qteditorfactory.h
-				qtvariantproperty.h
-				qttreepropertybrowser.h
-				qtbuttonpropertybrowser.h
-				qtgroupboxpropertybrowser.h
-				qtpropertybrowserutils_p.h)
+set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtbuttonpropertybrowser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qteditorfactory.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtgroupboxpropertybrowser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtpropertybrowser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtpropertybrowserutils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtpropertymanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qttreepropertybrowser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtvariantproperty.cpp
+)
+set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtbuttonpropertybrowser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qteditorfactory.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtgroupboxpropertybrowser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtpropertybrowser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtpropertybrowserutils_p.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtpropertymanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qttreepropertybrowser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/qtvariantproperty.h
+)
 
-SET(QT_PROPERTY_EDITOR_RCS	qtpropertybrowser.qrc)
+set(QRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/qtpropertybrowser.qrc)
 
-SET(QT_USE_QTGUI TRUE)
+source_group("Header Files" FILES ${HEADER_FILES})
+source_group("Source Files" FILES ${SOURCE_FILES})
 
-QT5_ADD_RESOURCES(QT_PROPERTY_EDITOR_RC_SRCS ${QT_PROPERTY_EDITOR_RCS})
-QT5_WRAP_CPP(QT_PROPERTY_EDITOR_MOC_SRC ${QT_PROPERTY_EDITOR_HDR})
+set(CMAKE_AUTORCC ON)
 
-SOURCE_GROUP(QtResources FILES ${QT_PROPERTY_EDITOR_RCS})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${QT_PROPERTY_EDITOR_MOC_SRC})
-SOURCE_GROUP("Qt Property Editor Source" FILES ${SRC})
+option(BUILD_SHARED_LIBS "Build shared library." ON)
+option(BUILD_EXAMPLES "Build examples." OFF)
 
-qt5_generate_moc(qtpropertymanager.cpp ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc)
-qt5_generate_moc(qteditorfactory.cpp ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc)
-qt5_generate_moc(qttreepropertybrowser.cpp ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+add_library(QtPropertyBrowser ${HEADER_FILES} ${SOURCE_FILES} ${QRC_FILES})
 
-# Need to remove these so that they are not linked as they are inline included.
-LIST(REMOVE_ITEM QT_PROPERTY_EDITOR_MOC_SRC	${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cxx
-						${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cxx
-						${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cxx
-						${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cxx
-						${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cxx
-						${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cxx
-						${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cxx)
+target_include_directories(QtPropertyBrowser PUBLIC
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Gui_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS}
+)
 
-# We need to add new depencencies on removed files because we need them to be still generated
-SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtbuttonpropertybrowser.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cxx)
-SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qteditorfactory.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cxx)
-SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtgroupboxpropertybrowser.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cxx)
-SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtpropertybrowser.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cxx)
-SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtpropertymanager.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cxx)
-SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qttreepropertybrowser.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cxx)
-SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtvariantproperty.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cxx)
+target_link_libraries(QtPropertyBrowser PUBLIC
+    ${Qt5Core_LIBRARIES}
+    ${Qt5Gui_LIBRARIES}
+    ${Qt5Widgets_LIBRARIES}
+)
 
-#set(
-#  qtpropertyeditor_HEADERS_ONLY_MOC
-#  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
-#  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
-#  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
-#  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp
-#  ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
-#  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
-#  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
-#  ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
-#  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
-#  ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
-#)
-#
-#set_source_files_properties(
-#  ${qtpropertyeditor_HEADERS_ONLY_MOC}
-#  PROPERTIES
-#    HEADER_FILE_ONLY true
-#)
-#
+set_target_properties(QtPropertyBrowser PROPERTIES AUTOMOC TRUE)
 
-#set(
-#  qtpropertyeditor_HEADERS_MOC
-#  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
-#)
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples/demo)
+endif()
 
-#set(
-#  qtpropertyeditor_MOC
-#  ${qtpropertyeditor_HEADERS_MOC}
-#  ${qtpropertyeditor_HEADERS_ONLY_MOC}
-#)
+include(GenerateExportHeader)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+generate_export_header(QtPropertyBrowser)
 
-ADD_LIBRARY(qt_property_browser SHARED	${SRC}
-					${QT_PROPERTY_EDITOR_MOC_SRC}
-					${QT_PROPERTY_EDITOR_RC_SRCS}
-					${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
-					${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
-					${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc)
+install(TARGETS QtPropertyBrowser
+    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+)
+install(FILES ${HEADER_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/QtPropertyBrowser)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindQtPropertyBrowser.cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qtpropertybrowser_export.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/QtPropertyBrowser)
 
-TARGET_LINK_LIBRARIES(qt_property_browser ${QT_LIBRARIES})
 
-ADD_DEFINITIONS(${QT_DEFINITIONS})
-ADD_DEFINITIONS(-DQT_DLL)
-ADD_DEFINITIONS(-DQT_QTPROPERTYBROWSER_EXPORT)
-ADD_DEFINITIONS(-DQT_PLUGIN)
-#ADD_DEFINITIONS(-DQT_NO_DEBUG)
-ADD_DEFINITIONS(-DQT_SHARED)
-
-NL_DEFAULT_PROPS(qt_property_browser "3rdParty: Qt Property Browser 2.5")
-NL_ADD_RUNTIME_FLAGS(qt_property_browser)
-NL_ADD_LIB_SUFFIX(qt_property_browser)
-
-INSTALL(TARGETS qt_property_browser LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
+option(BUILD_DOCUMENTATION "Use Doxygen to create the HTML based API documentation" OFF)
+if(BUILD_DOCUMENTATION)
+    include(doxygen/doxygen.cmake)
+endif()

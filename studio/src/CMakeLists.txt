@@ -54,7 +54,7 @@ ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${QT_DEFINITIONS})
 NL_DEFAULT_PROPS(studio "Tools: Studio")
 NL_ADD_RUNTIME_FLAGS(studio)
 
-ADD_SUBDIRECTORY(libqtpropertybrowser)
+ADD_SUBDIRECTORY(libqtpropertybrowser-text)
 ADD_SUBDIRECTORY(plugins)
 
 add_dependencies(studio
