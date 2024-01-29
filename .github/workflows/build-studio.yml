@@ -39,7 +39,7 @@ jobs:
             libsquish-dev \
             liblzma-dev \
             libgsf-1-dev \
-            qtbase5-dev qttools5-dev qttools5-dev-tools
+            qtbase5-dev qttools5-dev qttools5-dev-tools libqtpropertybrowser-dev
 
       - name: Configure CMake
         run: >
