@@ -1,9 +1,8 @@
 FROM ubuntu:22.04
 
-RUN apt update;\
-    apt install --yes software-properties-common; \
-    apt update
-RUN DEBIAN_FRONTEND=noninteractive apt install --yes \
+RUN apt update; \
+    DEBIAN_FRONTEND=noninteractive \
+    apt install --yes \
         autoconf \
         automake \
         bison \
@@ -57,16 +56,17 @@ RUN apt install --yes \
 # work arround as there is no debug version available
 RUN cp /lib/x86_64-linux-gnu/libcpptest.so /lib/x86_64-linux-gnu/libcpptestd.so
 
-RUN wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh \
-    && mkdir --parents "$CMAKE_INSTALL_DIR" \
-    && sh /tmp/cmake.sh --skip-license --prefix="$CMAKE_INSTALL_DIR" \
-    && ln --symbolic --force "$CMAKE_INSTALL_DIR/bin/cmake" /usr/local/bin/cmake
 
 ARG CMAKE_VERSION=3.27.9
 ARG CMAKE_INSTALL_DIR=/opt/cmake-$CMAKE_VERSION
 ARG USERNAME=ryzom
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
+
+RUN wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh \
+    && mkdir --parents "$CMAKE_INSTALL_DIR" \
+    && sh /tmp/cmake.sh --skip-license --prefix="$CMAKE_INSTALL_DIR" \
+    && ln --symbolic --force "$CMAKE_INSTALL_DIR/bin/cmake" /usr/local/bin/cmake
 
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
