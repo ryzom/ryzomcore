@@ -5,7 +5,7 @@ RUN sed -i -e 's/archive\.ubuntu\.com/mirrors\.digitalocean\.com/' /etc/apt/sour
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   software-properties-common aria2 wget \
-  && aria2c https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb \
+  && aria2c https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb \
   && dpkg -i packages-microsoft-prod.deb \
   && rm packages-microsoft-prod.deb \
   && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
