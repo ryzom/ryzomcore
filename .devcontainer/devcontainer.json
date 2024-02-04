@@ -1,0 +1,34 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "containerUser": "ryzom",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools-extension-pack"
+      ],
+      "settings": {
+        "cmake.configureArgs": [
+          "-DWITH_STATIC=ON",
+          "-DWITH_NEL_TESTS=OFF",
+          "-DWITH_NEL_SAMPLES=ON",
+          "-DWITH_LUA51=OFF",
+          "-DWITH_LUA52=ON",
+          "-DWITH_RYZOM=ON",
+          "-DWITH_RYZOM_SERVER=ON",
+          "-DWITH_RYZOM_CLIENT=ON",
+          "-DWITH_RYZOM_TOOLS=ON",
+          "-DWITH_NEL_TOOLS=ON",
+          "-DWITH_NELNS=ON",
+          "-DWITH_NELNS_LOGIN_SYSTEM=ON",
+          "-DWITH_NELNS_SERVER=ON",
+          "-DWITH_QT5=ON",
+          "-DWITH_LIBGSF=ON",
+          "-DWITH_MONGODB=OFF",
+          "-DWITH_PCH=OFF"
+        ]
+      }
+    }
+  }
+}
