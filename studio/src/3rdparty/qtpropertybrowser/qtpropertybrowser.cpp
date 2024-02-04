@@ -1,32 +1,86 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing/
+** This file is part of a Qt Solutions component.
+** 
+** Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+** 
+** Contact:  Qt Software Information (qt-info@nokia.com)
+** 
+** Commercial Usage  
+** Licensees holding valid Qt Commercial licenses may use this file in
+** accordance with the Qt Solutions Commercial License Agreement provided
+** with the Software or, alternatively, in accordance with the terms
+** contained in a written agreement between you and Nokia.
+** 
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+** 
+** In addition, as a special exception, Nokia gives you certain
+** additional rights. These rights are described in the Nokia Qt LGPL
+** Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
+** package.
+** 
+** GNU General Public License Usage 
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
+** 
+** Please note Third Party Software included with Qt Solutions may impose
+** additional restrictions and it is the user's responsibility to ensure
+** that they have met the licensing requirements of the GPL, LGPL, or Qt
+** Solutions Commercial license and the relevant license of the Third
+** Party Software they are using.
+** 
+** If you are unsure which license is appropriate for your use, please
+** contact the sales department at qt-sales@nokia.com.
+** 
+****************************************************************************/
+
+/****************************************************************************
+**
+** Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+** Contact: Qt Software Information (qt-info@nokia.com)
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
-** $QT_BEGIN_LICENSE:LGPL21$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see http://www.qt.io/terms-conditions. For further
-** information use the contact form at http://www.qt.io/contact-us.
+** $QT_BEGIN_LICENSE:LGPL$
+** No Commercial Usage
+** This file contains pre-release code and may not be distributed.
+** You may use this file in accordance with the terms and conditions
+** contained in the either Technology Preview License Agreement or the
+** Beta Release License Agreement.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 or version 3 as published by the Free
-** Software Foundation and appearing in the file LICENSE.LGPLv21 and
-** LICENSE.LGPLv3 included in the packaging of this file. Please review the
-** following information to ensure the GNU Lesser General Public License
-** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
-** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
 **
-** As a special exception, The Qt Company gives you certain additional
-** rights. These rights are described in The Qt Company LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+** In addition, as a special exception, Nokia gives you certain
+** additional rights. These rights are described in the Nokia Qt LGPL
+** Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
+** package.
 **
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
+**
+** If you are unsure which license is appropriate for your use, please
+** contact the sales department at qt-sales@nokia.com.
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
@@ -40,12 +94,14 @@
 #    pragma warning(disable: 4786) /* MS VS 6: truncating debug info after 255 characters */
 #endif
 
+#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
+#endif
 
 class QtPropertyPrivate
 {
 public:
-    QtPropertyPrivate(QtAbstractPropertyManager *manager) : m_enabled(true), m_modified(false), m_manager(manager) {}
+    QtPropertyPrivate(QtAbstractPropertyManager *manager) : m_enabled(true), m_modified(false), m_bold(false), m_manager(manager) {}
     QtProperty *q_ptr;
 
     QSet<QtProperty *> m_parentItems;
@@ -57,6 +113,7 @@ public:
     QString m_name;
     bool m_enabled;
     bool m_modified;
+	bool m_bold;
 
     QtAbstractPropertyManager * const m_manager;
 };
@@ -78,9 +135,6 @@ public:
 
 /*!
     \class QtProperty
-    \internal
-    \inmodule QtDesigner
-    \since 4.4
 
     \brief The QtProperty class encapsulates an instance of a property.
 
@@ -94,23 +148,23 @@ public:
     provides functions for retrieving as well as setting their values:
 
     \table
-    \header \li Getter \li Setter
+    \header \o Getter \o Setter
     \row
-    \li propertyName() \li setPropertyName()
+    \o propertyName() \o setPropertyName()
     \row
-    \li statusTip() \li setStatusTip()
+    \o statusTip() \o setStatusTip()
     \row
-    \li toolTip() \li setToolTip()
+    \o toolTip() \o setToolTip()
     \row
-    \li whatsThis() \li setWhatsThis()
+    \o whatsThis() \o setWhatsThis()
     \row
-    \li isEnabled() \li setEnabled()
+    \o isEnabled() \o setEnabled()
     \row
-    \li isModified() \li setModified()
+    \o isModified() \o setModified()
     \row
-    \li valueText() \li Nop
+    \o valueText() \o Nop
     \row
-    \li valueIcon() \li Nop
+    \o valueIcon() \o Nop
     \endtable
 
     It is also possible to nest properties: QtProperty provides the
@@ -134,8 +188,8 @@ public:
     \sa QtAbstractPropertyManager::addProperty()
 */
 QtProperty::QtProperty(QtAbstractPropertyManager *manager)
-    : d_ptr(new QtPropertyPrivate(manager))
 {
+    d_ptr = new QtPropertyPrivate(manager);
     d_ptr->q_ptr = this;
 }
 
@@ -169,6 +223,7 @@ QtProperty::~QtProperty()
         QtProperty *property = itParent.next();
         property->d_ptr->m_subItems.removeAll(this);
     }
+    delete d_ptr;
 }
 
 /*!
@@ -250,6 +305,16 @@ bool QtProperty::isEnabled() const
 bool QtProperty::isModified() const
 {
     return d_ptr->m_modified;
+}
+
+/*!
+    Returns whether the property is displayed as bold.
+
+    \sa setBold()
+*/
+bool QtProperty::isBold() const
+{
+    return d_ptr->m_bold;
 }
 
 /*!
@@ -371,6 +436,20 @@ void QtProperty::setModified(bool modified)
         return;
 
     d_ptr->m_modified = modified;
+    propertyChanged();
+}
+
+/*!
+    Sets the property's bold state according to the passed \a bold value.
+
+    \sa isBold()
+*/
+void QtProperty::setBold(bool bold)
+{
+    if (d_ptr->m_bold == bold)
+        return;
+
+    d_ptr->m_bold = bold;
     propertyChanged();
 }
 
@@ -511,9 +590,6 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
 
 /*!
     \class QtAbstractPropertyManager
-    \internal
-    \inmodule QtDesigner
-    \since 4.4
 
     \brief The QtAbstractPropertyManager provides an interface for
     property managers.
@@ -541,23 +617,23 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
     implementations are available:
 
     \list
-    \li QtBoolPropertyManager
-    \li QtColorPropertyManager
-    \li QtDatePropertyManager
-    \li QtDateTimePropertyManager
-    \li QtDoublePropertyManager
-    \li QtEnumPropertyManager
-    \li QtFlagPropertyManager
-    \li QtFontPropertyManager
-    \li QtGroupPropertyManager
-    \li QtIntPropertyManager
-    \li QtPointPropertyManager
-    \li QtRectPropertyManager
-    \li QtSizePropertyManager
-    \li QtSizePolicyPropertyManager
-    \li QtStringPropertyManager
-    \li QtTimePropertyManager
-    \li QtVariantPropertyManager
+    \o QtBoolPropertyManager
+    \o QtColorPropertyManager
+    \o QtDatePropertyManager
+    \o QtDateTimePropertyManager
+    \o QtDoublePropertyManager
+    \o QtEnumPropertyManager
+    \o QtFlagPropertyManager
+    \o QtFontPropertyManager
+    \o QtGroupPropertyManager
+    \o QtIntPropertyManager
+    \o QtPointPropertyManager
+    \o QtRectPropertyManager
+    \o QtSizePropertyManager
+    \o QtSizePolicyPropertyManager
+    \o QtStringPropertyManager
+    \o QtTimePropertyManager
+    \o QtVariantPropertyManager
     \endlist
 
     \sa QtAbstractEditorFactoryBase, QtAbstractPropertyBrowser, QtProperty
@@ -629,8 +705,9 @@ void QtAbstractPropertyManagerPrivate::propertyInserted(QtProperty *property,
     Creates an abstract property manager with the given \a parent.
 */
 QtAbstractPropertyManager::QtAbstractPropertyManager(QObject *parent)
-    : QObject(parent), d_ptr(new QtAbstractPropertyManagerPrivate)
+    : QObject(parent)
 {
+    d_ptr = new QtAbstractPropertyManagerPrivate;
     d_ptr->q_ptr = this;
 
 }
@@ -642,6 +719,7 @@ QtAbstractPropertyManager::QtAbstractPropertyManager(QObject *parent)
 QtAbstractPropertyManager::~QtAbstractPropertyManager()
 {
     clear();
+    delete d_ptr;
 }
 
 /*!
@@ -730,6 +808,11 @@ QtProperty *QtAbstractPropertyManager::addProperty(const QString &name)
     return property;
 }
 
+void QtAbstractPropertyManager::emitResetProperty(QtProperty *property)
+{
+    emit resetProperty(property);
+}
+
 /*!
     Creates a property.
 
@@ -770,7 +853,7 @@ QtProperty *QtAbstractPropertyManager::createProperty()
     property is being destroyed so that it can remove the property's
     additional attributes.
 
-    \sa clear(), propertyDestroyed()
+    \sa clear(),  propertyDestroyed()
 */
 void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
 {
@@ -781,9 +864,6 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
 
 /*!
     \class QtAbstractEditorFactoryBase
-    \internal
-    \inmodule QtDesigner
-    \since 4.4
 
     \brief The QtAbstractEditorFactoryBase provides an interface for
     editor factories.
@@ -807,17 +887,17 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     implementations are available:
 
     \list
-    \li QtCheckBoxFactory
-    \li QtDateEditFactory
-    \li QtDateTimeEditFactory
-    \li QtDoubleSpinBoxFactory
-    \li QtEnumEditorFactory
-    \li QtLineEditFactory
-    \li QtScrollBarFactory
-    \li QtSliderFactory
-    \li QtSpinBoxFactory
-    \li QtTimeEditFactory
-    \li QtVariantEditorFactory
+    \o QtCheckBoxFactory
+    \o QtDateEditFactory
+    \o QtDateTimeEditFactory
+    \o QtDoubleSpinBoxFactory
+    \o QtEnumEditorFactory
+    \o QtLineEditFactory
+    \o QtScrollBarFactory
+    \o QtSliderFactory
+    \o QtSpinBoxFactory
+    \o QtTimeEditFactory
+    \o QtVariantEditorFactory
     \endlist
 
     \sa QtAbstractPropertyManager, QtAbstractPropertyBrowser
@@ -834,7 +914,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     which also provides a pure virtual convenience overload of this
     function enabling access to the property's manager.
 
-    \sa QtAbstractEditorFactory::createEditor()
+    \sa  QtAbstractEditorFactory::createEditor()
 */
 
 /*!
@@ -867,9 +947,6 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
 
 /*!
     \class QtAbstractEditorFactory
-    \internal
-    \inmodule QtDesigner
-    \since 4.4
 
     \brief The QtAbstractEditorFactory is the base template class for editor
     factories.
@@ -883,7 +960,10 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     PropertyManager template argument class which can be any
     QtAbstractPropertyManager subclass. For example:
 
-    \snippet doc/src/snippets/code/tools_shared_qtpropertybrowser_qtpropertybrowser.cpp 0
+    \code
+        QtSpinBoxFactory *factory;
+        QSet<QtIntPropertyManager *> managers = factory->propertyManagers();
+    \endcode
 
     Note that QtSpinBoxFactory by definition creates editing widgets
     \e only for properties created by QtIntPropertyManager.
@@ -908,17 +988,17 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     are available:
 
     \list
-    \li QtCheckBoxFactory
-    \li QtDateEditFactory
-    \li QtDateTimeEditFactory
-    \li QtDoubleSpinBoxFactory
-    \li QtEnumEditorFactory
-    \li QtLineEditFactory
-    \li QtScrollBarFactory
-    \li QtSliderFactory
-    \li QtSpinBoxFactory
-    \li QtTimeEditFactory
-    \li QtVariantEditorFactory
+    \o QtCheckBoxFactory
+    \o QtDateEditFactory
+    \o QtDateTimeEditFactory
+    \o QtDoubleSpinBoxFactory
+    \o QtEnumEditorFactory
+    \o QtLineEditFactory
+    \o QtScrollBarFactory
+    \o QtSliderFactory
+    \o QtSpinBoxFactory
+    \o QtTimeEditFactory
+    \o QtVariantEditorFactory
     \endlist
 
     When deriving from the QtAbstractEditorFactory class, several pure virtual
@@ -1046,6 +1126,7 @@ void QtAbstractPropertyManager::uninitializeProperty(QtProperty *property)
     \fn virtual void QtAbstractEditorFactory::managerDestroyed(QObject *manager)
 
     \internal
+    \reimp
 */
 
 ////////////////////////////////////
@@ -1084,9 +1165,6 @@ void QtBrowserItemPrivate::removeChild(QtBrowserItem *index)
 
 /*!
     \class QtBrowserItem
-    \internal
-    \inmodule QtDesigner
-    \since 4.4
 
     \brief The QtBrowserItem class represents a property in
     a property browser instance.
@@ -1135,7 +1213,12 @@ QtBrowserItem *QtBrowserItem::parent() const
     reproduced from children items are always the same as
     reproduced from associated property' children, for example:
 
-    \snippet doc/src/snippets/code/tools_shared_qtpropertybrowser_qtpropertybrowser.cpp 1
+    \code
+        QtBrowserItem *item;
+        QList<QtBrowserItem *> childrenItems = item->children();
+
+        QList<QtProperty *> childrenProperties = item->property()->subProperties();
+    \endcode
 
     The \e childrenItems list represents the same list as \e childrenProperties.
 */
@@ -1155,13 +1238,14 @@ QtAbstractPropertyBrowser *QtBrowserItem::browser() const
 }
 
 QtBrowserItem::QtBrowserItem(QtAbstractPropertyBrowser *browser, QtProperty *property, QtBrowserItem *parent)
-    : d_ptr(new QtBrowserItemPrivate(browser, property, parent))
 {
+    d_ptr = new QtBrowserItemPrivate(browser, property, parent);
     d_ptr->q_ptr = this;
 }
 
 QtBrowserItem::~QtBrowserItem()
 {
+    delete d_ptr;
 }
 
 
@@ -1234,11 +1318,11 @@ void QtAbstractPropertyBrowserPrivate::insertSubTree(QtProperty *property,
                             QtProperty *, QtProperty *)));
         q_ptr->connect(manager, SIGNAL(propertyRemoved(QtProperty *,
                             QtProperty *)),
-                q_ptr, SLOT(slotPropertyRemoved(QtProperty*,QtProperty*)));
-        q_ptr->connect(manager, SIGNAL(propertyDestroyed(QtProperty*)),
-                q_ptr, SLOT(slotPropertyDestroyed(QtProperty*)));
-        q_ptr->connect(manager, SIGNAL(propertyChanged(QtProperty*)),
-                q_ptr, SLOT(slotPropertyDataChanged(QtProperty*)));
+                q_ptr, SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
+        q_ptr->connect(manager, SIGNAL(propertyDestroyed(QtProperty *)),
+                q_ptr, SLOT(slotPropertyDestroyed(QtProperty *)));
+        q_ptr->connect(manager, SIGNAL(propertyChanged(QtProperty *)),
+                q_ptr, SLOT(slotPropertyDataChanged(QtProperty *)));
     }
     m_managerToProperties[manager].append(property);
     m_propertyToParents[property].append(parentProperty);
@@ -1274,11 +1358,11 @@ void QtAbstractPropertyBrowserPrivate::removeSubTree(QtProperty *property,
                             QtProperty *, QtProperty *)));
         q_ptr->disconnect(manager, SIGNAL(propertyRemoved(QtProperty *,
                             QtProperty *)),
-                q_ptr, SLOT(slotPropertyRemoved(QtProperty*,QtProperty*)));
-        q_ptr->disconnect(manager, SIGNAL(propertyDestroyed(QtProperty*)),
-                q_ptr, SLOT(slotPropertyDestroyed(QtProperty*)));
-        q_ptr->disconnect(manager, SIGNAL(propertyChanged(QtProperty*)),
-                q_ptr, SLOT(slotPropertyDataChanged(QtProperty*)));
+                q_ptr, SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
+        q_ptr->disconnect(manager, SIGNAL(propertyDestroyed(QtProperty *)),
+                q_ptr, SLOT(slotPropertyDestroyed(QtProperty *)));
+        q_ptr->disconnect(manager, SIGNAL(propertyChanged(QtProperty *)),
+                q_ptr, SLOT(slotPropertyDataChanged(QtProperty *)));
 
         m_managerToProperties.remove(manager);
     }
@@ -1460,9 +1544,6 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
 
 /*!
     \class QtAbstractPropertyBrowser
-    \internal
-    \inmodule QtDesigner
-    \since 4.4
 
     \brief QtAbstractPropertyBrowser provides a base class for
     implementing property browsers.
@@ -1521,9 +1602,20 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
 
     \table 100%
     \row
-    \li
-    \snippet doc/src/snippets/code/tools_shared_qtpropertybrowser_qtpropertybrowser.cpp 2
-    \li  \image qtpropertybrowser-duplicate.png
+    \o
+    \code
+        QtProperty *property1, *property2, *property3;
+
+        property2->addSubProperty(property1);
+        property3->addSubProperty(property2);
+
+        QtAbstractPropertyBrowser *editor;
+
+        editor->addProperty(property1);
+        editor->addProperty(property2);
+        editor->addProperty(property3);
+    \endcode
+    \o  \image qtpropertybrowser-duplicate.png
     \endtable
 
     The addProperty() function returns a QtBrowserItem that uniquely
@@ -1537,8 +1629,8 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
     implementations:
 
     \list
-        \li QtGroupBoxPropertyBrowser
-        \li QtTreePropertyBrowser
+        \o QtGroupBoxPropertyBrowser
+        \o QtTreePropertyBrowser
     \endlist
 
     \sa QtAbstractPropertyManager, QtAbstractEditorFactoryBase
@@ -1554,7 +1646,23 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
 
     For example:
 
-    \snippet doc/src/snippets/code/tools_shared_qtpropertybrowser_qtpropertybrowser.cpp 3
+    \code
+        QtIntPropertyManager *intManager;
+        QtDoublePropertyManager *doubleManager;
+
+        QtProperty *myInteger = intManager->addProperty();
+        QtProperty *myDouble = doubleManager->addProperty();
+
+        QtSpinBoxFactory  *spinBoxFactory;
+        QtDoubleSpinBoxFactory *doubleSpinBoxFactory;
+
+        QtAbstractPropertyBrowser *editor;
+        editor->setFactoryForManager(intManager, spinBoxFactory);
+        editor->setFactoryForManager(doubleManager, doubleSpinBoxFactory);
+
+        editor->addProperty(myInteger);
+        editor->addProperty(myDouble);
+    \endcode
 
     In this example the \c myInteger property's value is displayed
     with a QSpinBox widget, while the \c myDouble property's value is
@@ -1633,8 +1741,9 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
     Creates an abstract property browser with the given \a parent.
 */
 QtAbstractPropertyBrowser::QtAbstractPropertyBrowser(QWidget *parent)
-    : QWidget(parent), d_ptr(new QtAbstractPropertyBrowserPrivate)
+    : QWidget(parent)
 {
+    d_ptr = new QtAbstractPropertyBrowserPrivate;
     d_ptr->q_ptr = this;
 
 }
@@ -1657,6 +1766,7 @@ QtAbstractPropertyBrowser::~QtAbstractPropertyBrowser()
     QListIterator<QtBrowserItem *> itItem(indexes);
     while (itItem.hasNext())
         d_ptr->clearIndex(itItem.next());
+    delete d_ptr;
 }
 
 /*!
@@ -1774,12 +1884,14 @@ QtBrowserItem *QtAbstractPropertyBrowser::insertProperty(QtProperty *property,
     QList<QtProperty *> pendingList = properties();
     int pos = 0;
     int newPos = 0;
+    QtProperty *properAfterProperty = 0;
     while (pos < pendingList.count()) {
         QtProperty *prop = pendingList.at(pos);
         if (prop == property)
             return 0;
         if (prop == afterProperty) {
             newPos = pos + 1;
+            properAfterProperty = afterProperty;
         }
         pos++;
     }
@@ -1859,14 +1971,7 @@ QWidget *QtAbstractPropertyBrowser::createEditor(QtProperty *property,
 
     if (!factory)
         return 0;
-    QWidget *w = factory->createEditor(property, parent);
-    // Since some editors can be QComboBoxes, and we changed their focus policy in Qt 5
-    // to make them feel more native on Mac, we need to relax the focus policy to something
-    // more permissive to keep the combo box from losing focus, allowing it to stay alive,
-    // when the user clicks on it to show the popup.
-    if (w)
-        w->setFocusPolicy(Qt::WheelFocus);
-    return w;
+    return factory->createEditor(property, parent);
 }
 
 bool QtAbstractPropertyBrowser::addFactory(QtAbstractPropertyManager *abstractManager,
@@ -1946,6 +2051,8 @@ void QtAbstractPropertyBrowser::setCurrentItem(QtBrowserItem *item)
         emit  currentItemChanged(item);
 }
 
+#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
+#endif
 
-#include "moc_qtpropertybrowser.cpp"
+#include "moc_qtpropertybrowser.cxx"

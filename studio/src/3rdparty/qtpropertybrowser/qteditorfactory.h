@@ -1,32 +1,86 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing/
+** This file is part of a Qt Solutions component.
+** 
+** Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+** 
+** Contact:  Qt Software Information (qt-info@nokia.com)
+** 
+** Commercial Usage  
+** Licensees holding valid Qt Commercial licenses may use this file in
+** accordance with the Qt Solutions Commercial License Agreement provided
+** with the Software or, alternatively, in accordance with the terms
+** contained in a written agreement between you and Nokia.
+** 
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+** 
+** In addition, as a special exception, Nokia gives you certain
+** additional rights. These rights are described in the Nokia Qt LGPL
+** Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
+** package.
+** 
+** GNU General Public License Usage 
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
+** 
+** Please note Third Party Software included with Qt Solutions may impose
+** additional restrictions and it is the user's responsibility to ensure
+** that they have met the licensing requirements of the GPL, LGPL, or Qt
+** Solutions Commercial license and the relevant license of the Third
+** Party Software they are using.
+** 
+** If you are unsure which license is appropriate for your use, please
+** contact the sales department at qt-sales@nokia.com.
+** 
+****************************************************************************/
+
+/****************************************************************************
+**
+** Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+** Contact: Qt Software Information (qt-info@nokia.com)
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
-** $QT_BEGIN_LICENSE:LGPL21$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see http://www.qt.io/terms-conditions. For further
-** information use the contact form at http://www.qt.io/contact-us.
+** $QT_BEGIN_LICENSE:LGPL$
+** No Commercial Usage
+** This file contains pre-release code and may not be distributed.
+** You may use this file in accordance with the terms and conditions
+** contained in the either Technology Preview License Agreement or the
+** Beta Release License Agreement.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 or version 3 as published by the Free
-** Software Foundation and appearing in the file LICENSE.LGPLv21 and
-** LICENSE.LGPLv3 included in the packaging of this file. Please review the
-** following information to ensure the GNU Lesser General Public License
-** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
-** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
 **
-** As a special exception, The Qt Company gives you certain additional
-** rights. These rights are described in The Qt Company LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+** In addition, as a special exception, Nokia gives you certain
+** additional rights. These rights are described in the Nokia Qt LGPL
+** Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
+** package.
 **
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
+**
+** If you are unsure which license is appropriate for your use, please
+** contact the sales department at qt-sales@nokia.com.
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
@@ -35,13 +89,14 @@
 #define QTEDITORFACTORY_H
 
 #include "qtpropertymanager.h"
-#include "qtpropertybrowser_export.h"
 
+#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
+#endif
 
 class QtSpinBoxFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtSpinBoxFactory : public QtAbstractEditorFactory<QtIntPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtSpinBoxFactory : public QtAbstractEditorFactory<QtIntPropertyManager>
 {
     Q_OBJECT
 public:
@@ -53,7 +108,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtIntPropertyManager *manager);
 private:
-    QScopedPointer<QtSpinBoxFactoryPrivate> d_ptr;
+    QtSpinBoxFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtSpinBoxFactory)
     Q_DISABLE_COPY(QtSpinBoxFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
@@ -65,7 +120,7 @@ private:
 
 class QtSliderFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtSliderFactory : public QtAbstractEditorFactory<QtIntPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtSliderFactory : public QtAbstractEditorFactory<QtIntPropertyManager>
 {
     Q_OBJECT
 public:
@@ -77,7 +132,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtIntPropertyManager *manager);
 private:
-    QScopedPointer<QtSliderFactoryPrivate> d_ptr;
+    QtSliderFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtSliderFactory)
     Q_DISABLE_COPY(QtSliderFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
@@ -89,7 +144,7 @@ private:
 
 class QtScrollBarFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtScrollBarFactory : public QtAbstractEditorFactory<QtIntPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtScrollBarFactory : public QtAbstractEditorFactory<QtIntPropertyManager>
 {
     Q_OBJECT
 public:
@@ -101,7 +156,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtIntPropertyManager *manager);
 private:
-    QScopedPointer<QtScrollBarFactoryPrivate> d_ptr;
+    QtScrollBarFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtScrollBarFactory)
     Q_DISABLE_COPY(QtScrollBarFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
@@ -113,7 +168,7 @@ private:
 
 class QtCheckBoxFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtCheckBoxFactory : public QtAbstractEditorFactory<QtBoolPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtCheckBoxFactory : public QtAbstractEditorFactory<QtBoolPropertyManager>
 {
     Q_OBJECT
 public:
@@ -125,17 +180,18 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtBoolPropertyManager *manager);
 private:
-    QScopedPointer<QtCheckBoxFactoryPrivate> d_ptr;
+    QtCheckBoxFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtCheckBoxFactory)
     Q_DISABLE_COPY(QtCheckBoxFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, bool))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(bool))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+    Q_PRIVATE_SLOT(d_func(), void slotResetProperty())
 };
 
 class QtDoubleSpinBoxFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtDoubleSpinBoxFactory : public QtAbstractEditorFactory<QtDoublePropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtDoubleSpinBoxFactory : public QtAbstractEditorFactory<QtDoublePropertyManager>
 {
     Q_OBJECT
 public:
@@ -147,7 +203,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtDoublePropertyManager *manager);
 private:
-    QScopedPointer<QtDoubleSpinBoxFactoryPrivate> d_ptr;
+    QtDoubleSpinBoxFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtDoubleSpinBoxFactory)
     Q_DISABLE_COPY(QtDoubleSpinBoxFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, double))
@@ -160,7 +216,7 @@ private:
 
 class QtLineEditFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtLineEditFactory : public QtAbstractEditorFactory<QtStringPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtLineEditFactory : public QtAbstractEditorFactory<QtStringPropertyManager>
 {
     Q_OBJECT
 public:
@@ -172,18 +228,19 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtStringPropertyManager *manager);
 private:
-    QScopedPointer<QtLineEditFactoryPrivate> d_ptr;
+    QtLineEditFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtLineEditFactory)
     Q_DISABLE_COPY(QtLineEditFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QString &))
     Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(QtProperty *, const QRegExp &))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QString &))
+    Q_PRIVATE_SLOT(d_func(), void slotEditingFinished())
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
 };
 
 class QtDateEditFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtDateEditFactory : public QtAbstractEditorFactory<QtDatePropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtDateEditFactory : public QtAbstractEditorFactory<QtDatePropertyManager>
 {
     Q_OBJECT
 public:
@@ -195,7 +252,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtDatePropertyManager *manager);
 private:
-    QScopedPointer<QtDateEditFactoryPrivate> d_ptr;
+    QtDateEditFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtDateEditFactory)
     Q_DISABLE_COPY(QtDateEditFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QDate &))
@@ -207,7 +264,7 @@ private:
 
 class QtTimeEditFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtTimeEditFactory : public QtAbstractEditorFactory<QtTimePropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtTimeEditFactory : public QtAbstractEditorFactory<QtTimePropertyManager>
 {
     Q_OBJECT
 public:
@@ -219,7 +276,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtTimePropertyManager *manager);
 private:
-    QScopedPointer<QtTimeEditFactoryPrivate> d_ptr;
+    QtTimeEditFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtTimeEditFactory)
     Q_DISABLE_COPY(QtTimeEditFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QTime &))
@@ -229,7 +286,7 @@ private:
 
 class QtDateTimeEditFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtDateTimeEditFactory : public QtAbstractEditorFactory<QtDateTimePropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtDateTimeEditFactory : public QtAbstractEditorFactory<QtDateTimePropertyManager>
 {
     Q_OBJECT
 public:
@@ -241,7 +298,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtDateTimePropertyManager *manager);
 private:
-    QScopedPointer<QtDateTimeEditFactoryPrivate> d_ptr;
+    QtDateTimeEditFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtDateTimeEditFactory)
     Q_DISABLE_COPY(QtDateTimeEditFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QDateTime &))
@@ -251,7 +308,7 @@ private:
 
 class QtKeySequenceEditorFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtKeySequenceEditorFactory : public QtAbstractEditorFactory<QtKeySequencePropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtKeySequenceEditorFactory : public QtAbstractEditorFactory<QtKeySequencePropertyManager>
 {
     Q_OBJECT
 public:
@@ -263,7 +320,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtKeySequencePropertyManager *manager);
 private:
-    QScopedPointer<QtKeySequenceEditorFactoryPrivate> d_ptr;
+    QtKeySequenceEditorFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtKeySequenceEditorFactory)
     Q_DISABLE_COPY(QtKeySequenceEditorFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QKeySequence &))
@@ -273,7 +330,7 @@ private:
 
 class QtCharEditorFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtCharEditorFactory : public QtAbstractEditorFactory<QtCharPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtCharEditorFactory : public QtAbstractEditorFactory<QtCharPropertyManager>
 {
     Q_OBJECT
 public:
@@ -285,7 +342,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtCharPropertyManager *manager);
 private:
-    QScopedPointer<QtCharEditorFactoryPrivate> d_ptr;
+    QtCharEditorFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtCharEditorFactory)
     Q_DISABLE_COPY(QtCharEditorFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QChar &))
@@ -295,7 +352,7 @@ private:
 
 class QtEnumEditorFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtEnumEditorFactory : public QtAbstractEditorFactory<QtEnumPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtEnumEditorFactory : public QtAbstractEditorFactory<QtEnumPropertyManager>
 {
     Q_OBJECT
 public:
@@ -307,7 +364,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtEnumPropertyManager *manager);
 private:
-    QScopedPointer<QtEnumEditorFactoryPrivate> d_ptr;
+    QtEnumEditorFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtEnumEditorFactory)
     Q_DISABLE_COPY(QtEnumEditorFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
@@ -317,11 +374,12 @@ private:
                         const QMap<int, QIcon> &))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(int))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+    Q_PRIVATE_SLOT(d_func(), void slotResetProperty())
 };
 
 class QtCursorEditorFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtCursorEditorFactory : public QtAbstractEditorFactory<QtCursorPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtCursorEditorFactory : public QtAbstractEditorFactory<QtCursorPropertyManager>
 {
     Q_OBJECT
 public:
@@ -333,7 +391,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtCursorPropertyManager *manager);
 private:
-    QScopedPointer<QtCursorEditorFactoryPrivate> d_ptr;
+    QtCursorEditorFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtCursorEditorFactory)
     Q_DISABLE_COPY(QtCursorEditorFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QCursor &))
@@ -343,7 +401,7 @@ private:
 
 class QtColorEditorFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtColorEditorFactory : public QtAbstractEditorFactory<QtColorPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtColorEditorFactory : public QtAbstractEditorFactory<QtColorPropertyManager>
 {
     Q_OBJECT
 public:
@@ -355,7 +413,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtColorPropertyManager *manager);
 private:
-    QScopedPointer<QtColorEditorFactoryPrivate> d_ptr;
+    QtColorEditorFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtColorEditorFactory)
     Q_DISABLE_COPY(QtColorEditorFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QColor &))
@@ -365,7 +423,7 @@ private:
 
 class QtFontEditorFactoryPrivate;
 
-class QTPROPERTYBROWSER_EXPORT QtFontEditorFactory : public QtAbstractEditorFactory<QtFontPropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT QtFontEditorFactory : public QtAbstractEditorFactory<QtFontPropertyManager>
 {
     Q_OBJECT
 public:
@@ -377,7 +435,7 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtFontPropertyManager *manager);
 private:
-    QScopedPointer<QtFontEditorFactoryPrivate> d_ptr;
+    QtFontEditorFactoryPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtFontEditorFactory)
     Q_DISABLE_COPY(QtFontEditorFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QFont &))
@@ -385,6 +443,31 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QFont &))
 };
 
+class QtTextEditorFactoryPrivate;
+
+class QT_QTPROPERTYBROWSER_EXPORT QtTextEditorFactory : public QtAbstractEditorFactory<QtTextPropertyManager>
+{
+    Q_OBJECT
+public:
+    QtTextEditorFactory(QObject *parent = 0);
+    ~QtTextEditorFactory();
+protected:
+    void connectPropertyManager(QtTextPropertyManager *manager);
+    QWidget *createEditor(QtTextPropertyManager *manager, QtProperty *property,
+                QWidget *parent);
+    void disconnectPropertyManager(QtTextPropertyManager *manager);
+private:
+    QtTextEditorFactoryPrivate *d_ptr;
+    Q_DECLARE_PRIVATE(QtTextEditorFactory)
+    Q_DISABLE_COPY(QtTextEditorFactory)
+    Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QString &))
+    Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QString &))
+    Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+    Q_PRIVATE_SLOT(d_func(), void slotResetProperty())
+};
+
+#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
+#endif
 
 #endif
