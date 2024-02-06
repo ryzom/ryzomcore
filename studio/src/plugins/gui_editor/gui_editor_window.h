@@ -21,7 +21,7 @@
 #define GUI_EDITOR_WINDOW_H
 
 #include "ui_gui_editor_window.h"
-#include <QtGui/QUndoStack>
+#include <QUndoStack>
 #include <QXmlStreamReader>
 #include <QFile>
 #include "widget_info.h"

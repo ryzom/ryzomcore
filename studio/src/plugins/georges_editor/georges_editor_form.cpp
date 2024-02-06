@@ -41,6 +41,7 @@
 #include <QFileDialog>
 #include <QToolBar>
 #include <QDebug>
+#include <QMessageBox>
 
 namespace GeorgesQt
 {

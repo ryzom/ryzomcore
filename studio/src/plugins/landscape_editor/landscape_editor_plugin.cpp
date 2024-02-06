@@ -103,4 +103,3 @@ QWidget *LandscapeEditorContext::widget()
 }
 
 }
-Q_EXPORT_PLUGIN(LandscapeEditor::LandscapeEditorPlugin)

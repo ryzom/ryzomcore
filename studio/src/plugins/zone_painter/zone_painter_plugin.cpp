@@ -85,5 +85,3 @@ void ZonePainterPlugin::addAutoReleasedObject(QObject *obj)
 }
 
 }
-
-Q_EXPORT_PLUGIN(Plugin::ZonePainterPlugin)

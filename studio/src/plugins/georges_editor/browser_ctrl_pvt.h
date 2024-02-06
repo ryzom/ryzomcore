@@ -19,6 +19,7 @@
 #define BROWSER_CTRL_PVT_H
 
 #include <QObject>
+#include <QVariant>
 
 namespace NLGEORGES
 {

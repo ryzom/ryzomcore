@@ -21,9 +21,9 @@
 #include "vegetable_appearance_page.h"
 
 // Qt includes
-#include <QtGui/QPainter>
-#include <QtGui/QColorDialog>
-#include <QtGui/QInputDialog>
+#include <QPainter>
+#include <QColorDialog>
+#include <QInputDialog>
 
 // NeL includes
 #include <nel/3d/vegetable.h>

@@ -18,7 +18,6 @@
 #define BNP_DIRTREE_DIALOG_H
 
 // Qt includes
-#include <QtGui/QWidget>
 
 // STL includes
 

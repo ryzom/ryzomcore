@@ -22,9 +22,9 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-#include <QtGui/QPainter>
-#include <QtGui/QGraphicsPixmapItem>
-#include <QtGui/QGraphicsSimpleTextItem>
+#include <QPainter>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsSimpleTextItem>
 #include <QApplication>
 
 namespace LandscapeEditor
