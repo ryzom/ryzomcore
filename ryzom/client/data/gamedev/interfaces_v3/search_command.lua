@@ -795,6 +795,18 @@ function SearchCommand:get_command_type(command)
     return command_type
 end
 
+function SearchCommand:get_command_argument_count(command)
+    local max_arguments = 0
+    
+    for c = 1, #self.commands_list do
+        if(self.commands_list[c][4] == command) then
+            max_arguments = #self.commands_list[c] - 4
+        end
+    end
+    
+    return max_arguments
+end
+
 function SearchCommand:build_valid_command_list(command_input,uiId)
     self.valid_commands_list = {}
     local count_found=0
@@ -1343,6 +1355,8 @@ function SearchCommand:finish_commands(command_name,uiId)
     local input_search_string = getUI(uiId)
     local final_command = ""
     local new_command_par = ""
+    local argument_count = 0
+    local max_aruments = 0
     
     --debug("process_status: "..process_status)
     
@@ -1367,8 +1381,31 @@ function SearchCommand:finish_commands(command_name,uiId)
         end
     end
     
-    input_search_string.input_string = "/"..final_command
     --debug("/"..final_command)
+    
+    if(self.command_parameter_list[1] == "a" and process_status > 1)then
+        max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
+        argument_count = #self.command_parameter_list - 2
+    elseif(self.command_parameter_list[1] == "b" and process_status > 1)then
+        max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
+        argument_count = #self.command_parameter_list - 2
+    elseif(self.command_parameter_list[1] == "c" and process_status > 1)then
+        max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
+        argument_count = #self.command_parameter_list - 2
+    else
+        max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[1])
+        argument_count = #self.command_parameter_list - 1
+    end
+    
+    --debug("process_status"..process_status)
+    --debug("argument_count: "..argument_count)
+    --debug("name:"..self.command_parameter_list[1].." max:"..max_aruments)
+    
+    if(argument_count < max_aruments)then
+        input_search_string.input_string = "/"..final_command.." "
+    else
+        input_search_string.input_string = "/"..final_command
+    end
     
     input_search_string:setFocusOnText()
     
