@@ -93,6 +93,7 @@ table.insert(SearchCommand.commands_list,{"client", "player", "tell_desc", "tell
 table.insert(SearchCommand.commands_list,{"client", "player", "tell_desc", "t",{{"Text:<PlayerName>",""}}, {{"Text:<Message>",""}}})
 
 table.insert(SearchCommand.commands_list,{"client", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:TESTER:", "tp_desc", "tp", {{"<PositionX>,<PositionY>[,<PositionZ>]","tp_1_desc"},{"Text:<PlayerName>",""},{"Text:<BotName>",""}}})
+table.insert(SearchCommand.commands_list,{"client", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:", "shape_desc", "shape", {{"Text:<ShapeFile>",""}}})
 --END client commands
 
 
