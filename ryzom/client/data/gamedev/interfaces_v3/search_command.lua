@@ -100,7 +100,7 @@ table.insert(SearchCommand.commands_list,{"client", ":DEV:SGM:GM:VG:PR:OBSERVER:
 --shard commands
 table.insert(SearchCommand.commands_list,{"shard", "player", "a_desc", "a", {{"Text:<Command>",""}}})
 table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:TESTER:", "b_desc", "b", {{"Text:<Command>",""}}})
-table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:TESTER:", "c_desc", "c", {{"Text:<TargetName>",""}}, {{"Text:<Command>",""}}})
+table.insert(SearchCommand.commands_list,{"shard", ":DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:TESTER:", "c_desc", "c", {{"Text:<TargetName>(Atys/Yubo/Gingo/Rendor)",""}}, {{"Text:<Command>",""}}})
 
 table.insert(SearchCommand.commands_list,{"shard", "player", "showOnline_desc", "showOnline", {{"1","showOnline_1_desc"}, {"2","showOnline_2_desc"},{"0","showOnline_0_desc"}}})
 table.insert(SearchCommand.commands_list,{"shard", "player", "setLeague_desc", "setLeague", {{"Text:<PlayerName>",""}}})
@@ -880,14 +880,6 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
                 else
                     command_display = 1
                 end
-            elseif(self.commands_list[c][1] == "eScript")then
-                if(self.command_self == "?")then
-                    command_display = 1
-                else
-                    command_display = 0
-                end
-            else
-                command_display = 1
             end
         end
         
@@ -974,7 +966,29 @@ function SearchCommand:sort_valid_command_list(found_command_name)
     self.valid_commands_list = temp_sort_list
 end
 
-function SearchCommand:build_valid_player_list(playername_input,uiId)
+function SearchCommand:get_server_name()
+    local server_name = "ERROR"
+    local application = getClientCfgVar("Application")
+    --debug(application["0"])
+    
+    if(application["0"] == "ryzom_test")then
+        server_name="Gingo"
+    elseif(application["0"] == "ryzom_dev")then
+        server_name="Yubo"
+    elseif(application["0"] == "ryzom_live")then
+        server_name="Atys"
+    elseif(application["0"] == "ryzom_beta")then
+        server_name="Atys"
+    elseif(application["0"] == "ryzom_staging")then
+        server_name="Rendor"
+    else
+        server_name="Unknow"
+    end
+    
+    return server_name
+end
+
+function SearchCommand:build_valid_player_list(playername_input,uiId,add_targetname_prefix)
     self.valid_commands_list = {}
     local count_found=0
     local found_playername=0
@@ -987,7 +1001,12 @@ function SearchCommand:build_valid_player_list(playername_input,uiId)
                     count_found=1
                 else
                     if string.find(string.lower(self.player_list[c]), string.lower(playername_input))then
-                        table.insert(self.valid_commands_list,self.player_list[c])
+                        if(add_targetname_prefix == 1)then
+                            local server_name=SearchCommand:get_server_name()
+                            table.insert(self.valid_commands_list,self.player_list[c].."("..server_name..")")
+                        else
+                            table.insert(self.valid_commands_list,self.player_list[c])
+                        end
                         count_found=count_found+1
                     end
                 end
@@ -1007,10 +1026,10 @@ function SearchCommand:build_valid_player_list(playername_input,uiId)
     return found_playername
 end
 
-function SearchCommand:search_build_player_list(uiId,playername)
+function SearchCommand:search_build_player_list(uiId,playername,add_targetname_prefix)
     local found_player=0
     local found_command=0
-    found_player=SearchCommand:build_valid_player_list(playername,uiId)
+    found_player=SearchCommand:build_valid_player_list(playername,uiId,add_targetname_prefix)
     
     SearchCommand:search_build_argument_list(uiId,self.command_self)
     
@@ -1297,6 +1316,7 @@ function SearchCommand:build_command_helper(uiId)
     local player_priv = isPlayerPrivilege()
     local argu_name = ""
     local process_status=SearchCommand:read_process_status(uiId)
+    local add_targetname_prefix=0
     
     --debug("process_status: "..process_status)
     --process_status == 0 only / identifyer found
@@ -1330,7 +1350,12 @@ function SearchCommand:build_command_helper(uiId)
                 SearchCommand:search_build_local_player_list()
             end
             
-            SearchCommand:search_build_player_list(uiId,self.command_parameter_list[process_status])
+            if(string.find(string.lower(argu_name), string.lower("<TargetName>")))then
+                --its TargetName so we need add the ServerName after the player name
+                add_targetname_prefix=1
+            end
+            
+            SearchCommand:search_build_player_list(uiId,self.command_parameter_list[process_status],add_targetname_prefix)
             
         elseif(string.find(string.lower(argu_name), string.lower("<ScriptCommand>")))then
             SearchCommand:search_build_command_list(uiId,self.command_parameter_list[process_status],false)
