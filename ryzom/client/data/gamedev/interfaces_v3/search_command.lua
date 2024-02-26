@@ -880,6 +880,14 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
                 else
                     command_display = 1
                 end
+            elseif(self.commands_list[c][1] == "eScript")then
+                if(self.command_self == "?")then
+                    command_display = 1
+                else
+                    command_display = 0
+                end
+            else
+                command_display = 1
             end
         end
         

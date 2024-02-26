@@ -42,7 +42,8 @@ namespace NL3D
 void UInstance::getShapeAABBox(NLMISC::CAABBox &bbox) const
 {
 	CTransformShape	*object = getObjectPtr();
-	object->getAABBox(bbox);
+	if (object)
+		object->getAABBox(bbox);
 }
 
 // ***************************************************************************
@@ -108,7 +109,7 @@ void		UInstance::selectTextureSet(uint id)
 void		UInstance::enableAsyncTextureMode(bool enable)
 {
 	CTransformShape	*object = getObjectPtr();
-	if(object->isMeshBaseInstance())
+	if(object && object->isMeshBaseInstance())
 	{
 		CMeshBaseInstance *mbi  = static_cast<CMeshBaseInstance *>(object);
 		mbi->enableAsyncTextureMode(enable) ;
@@ -118,7 +119,7 @@ void		UInstance::enableAsyncTextureMode(bool enable)
 bool		UInstance::getAsyncTextureMode() const
 {
 	CTransformShape	*object = getObjectPtr();
-	if(object->isMeshBaseInstance())
+	if(object && object->isMeshBaseInstance())
 	{
 		CMeshBaseInstance *mbi  = static_cast<CMeshBaseInstance *>(object);
 		return mbi->getAsyncTextureMode() ;
@@ -130,7 +131,7 @@ bool		UInstance::getAsyncTextureMode() const
 void		UInstance::startAsyncTextureLoading()
 {
 	CTransformShape	*object = getObjectPtr();
-	if(object->isMeshBaseInstance())
+	if(object && object->isMeshBaseInstance())
 	{
 		CMeshBaseInstance *mbi  = static_cast<CMeshBaseInstance *>(object);
 		mbi->startAsyncTextureLoading(getPos());
@@ -140,7 +141,7 @@ void		UInstance::startAsyncTextureLoading()
 bool		UInstance::isAsyncTextureReady()
 {
 	CTransformShape	*object = getObjectPtr();
-	if(object->isMeshBaseInstance())
+	if(object && object->isMeshBaseInstance())
 	{
 		CMeshBaseInstance *mbi  = static_cast<CMeshBaseInstance *>(object);
 		return mbi->isAsyncTextureReady();
@@ -152,7 +153,7 @@ bool		UInstance::isAsyncTextureReady()
 void		UInstance::setAsyncTextureDistance(float dist)
 {
 	CTransformShape	*object = getObjectPtr();
-	if(object->isMeshBaseInstance())
+	if(object && object->isMeshBaseInstance())
 	{
 		CMeshBaseInstance *mbi  = static_cast<CMeshBaseInstance *>(object);
 		mbi->setAsyncTextureDistance(dist);
@@ -162,7 +163,7 @@ void		UInstance::setAsyncTextureDistance(float dist)
 float		UInstance::getAsyncTextureDistance() const
 {
 	CTransformShape	*object = getObjectPtr();
-	if(object->isMeshBaseInstance())
+	if(object && object->isMeshBaseInstance())
 	{
 		CMeshBaseInstance *mbi  = static_cast<CMeshBaseInstance *>(object);
 		return mbi->getAsyncTextureDistance();
@@ -174,7 +175,7 @@ float		UInstance::getAsyncTextureDistance() const
 void		UInstance::setAsyncTextureDirty(bool flag)
 {
 	CTransformShape	*object = getObjectPtr();
-	if(object->isMeshBaseInstance())
+	if(object && object->isMeshBaseInstance())
 	{
 		CMeshBaseInstance *mbi  = static_cast<CMeshBaseInstance *>(object);
 		mbi->setAsyncTextureDirty(flag);
@@ -184,7 +185,7 @@ void		UInstance::setAsyncTextureDirty(bool flag)
 bool		UInstance::isAsyncTextureDirty() const
 {
 	CTransformShape	*object = getObjectPtr();
-	if(object->isMeshBaseInstance())
+	if(object && object->isMeshBaseInstance())
 	{
 		CMeshBaseInstance *mbi  = static_cast<CMeshBaseInstance *>(object);
 		return mbi->isAsyncTextureDirty();
