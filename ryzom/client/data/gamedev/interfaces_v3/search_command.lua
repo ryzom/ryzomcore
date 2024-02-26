@@ -357,9 +357,9 @@ function SearchCommand:pars_command_parameter(command_parameter)
             --debug(substring)
             if(string.find(string.lower(substring), "<"))then
             --debug(substring:match("<(.*)>"))
-                finish_translation_text=finish_translation_text.."<"..substring:gsub("<(.-)>", i18n.get("uiSearchCommand"..substring:match("<(.*)>")):toUtf8())..">"
+                finish_translation_text=finish_translation_text..""..substring:gsub("<(.-)>", i18n.get("uiSearchCommand"..substring:match("<(.*)>")):toUtf8())..">"
             else
-                finish_translation_text=finish_translation_text..""..i18n.get("uiSearchCommand"..substring):toUtf8()..":"
+                finish_translation_text="<"..finish_translation_text..""..i18n.get("uiSearchCommand"..substring):toUtf8()..":"
             end
         end
     else
@@ -766,6 +766,12 @@ function SearchCommand:search(uiId)
             --go and search we found a mathing command
             SearchCommand:write_command_help_clear(uiId)
             SearchCommand:build_command_helper(uiId)
+            
+            --check last string is a space
+            local last_string = string.sub(input_text, -1, -1)
+            if(last_string == " ")then
+                SearchCommand:close_modal(uiId)
+            end
         end
     else
         --check if we found the identifier
@@ -811,40 +817,69 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
     self.valid_commands_list = {}
     local count_found=0
     local found_command=0
+    local input_lengh=0
+    local first_char_commandname=""
+    local found_command_name=""
     
     for c = 1, #self.commands_list do
         local command_are_allowed = 0
         local command_display = 0
         
-        --check if we want used a client or shared command
-        if(self.command_self == "a" or self.command_self == "b" or self.command_self == "c")then
-            --debug(self.commands_list[c][1])
-            if(self.commands_list[c][1] == "shard" and self.command_parameter_list[2] ~= "eScript")then
-                command_display = 1
-            elseif(self.commands_list[c][1] == "eScript")then
-                if(self.command_parameter_list[2] == "eScript")then
+        if(#self.command_parameter_list <= 1)then
+            if(command_input == "a" or command_input == "b" or command_input == "c")then
+                if(self.commands_list[c][1] == "client" or self.commands_list[c][4] == "a" or self.commands_list[c][4] == "b" or self.commands_list[c][4] == "c")then
                     command_display = 1
                 else
                     command_display = 0
                 end
             else
-                command_display = 0
+                if(self.commands_list[c][1] == "shard")then
+                    if(self.command_self == "?")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
+                elseif(self.commands_list[c][1] == "eScript")then
+                    if(self.command_self == "?")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
+                else
+                    command_display = 1
+                end
             end
         else
-            if(self.commands_list[c][1] == "shard")then
-                if(self.command_self == "?")then
+            --check if we want used a client or shared command
+            if(self.command_self == "a" or self.command_self == "b" or self.command_self == "c")then
+                --debug(self.commands_list[c][1])
+                if(self.commands_list[c][1] == "shard" and self.command_parameter_list[2] ~= "eScript")then
                     command_display = 1
-                else
-                    command_display = 0
-                end
-            elseif(self.commands_list[c][1] == "eScript")then
-                if(self.command_self == "?")then
-                    command_display = 1
+                elseif(self.commands_list[c][1] == "eScript")then
+                    if(self.command_parameter_list[2] == "eScript")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
                 else
                     command_display = 0
                 end
             else
-                command_display = 1
+                if(self.commands_list[c][1] == "shard")then
+                    if(self.command_self == "?")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
+                elseif(self.commands_list[c][1] == "eScript")then
+                    if(self.command_self == "?")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
+                else
+                    command_display = 1
+                end
             end
         end
         
@@ -856,17 +891,44 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
             end
         end
         
+        --debug("self.commands_list[c][4]: "..self.commands_list[c][4].." self.command_self: '"..self.command_self.."' command_input: '"..command_input.."' #self.command_parameter_list: "..#self.command_parameter_list)
+        
+        if(#self.command_parameter_list >= 2)then
+            if(self.command_self == "a" or self.command_self == "b" or self.command_self == "c")then
+                if(string.lower(command_input) == "a" or string.lower(command_input) == "b" or string.lower(command_input) == "c")then
+                    if(self.commands_list[c][4] == "a" or self.commands_list[c][4] == "b" or self.commands_list[c][4] == "c")then
+                        command_display = 0
+                    end
+                end
+            end
+        end
+        
         --debug("command_are_allowed: "..command_are_allowed.." command_display: "..command_display)
         
         if(command_are_allowed == 1 and command_display == 1)then
             if(command_input ~= "")then
                 if(string.lower(self.commands_list[c][4]) == string.lower(command_input))then
                     found_command=c
-                    count_found=1
+                    found_command_name=self.commands_list[c][4]
+                    count_found=count_found+1
                 else
-                    if string.find(string.lower(self.commands_list[c][4]), string.lower(command_input))then
-                        table.insert(self.valid_commands_list,self.commands_list[c][4])
-                        count_found=count_found+1
+                    command_input_lengh = string.len(command_input)
+        
+                    if(command_input_lengh == 1)then
+                        --its the first char only search all command whats beginn with this char
+                        first_char_commandname = string.sub(self.commands_list[c][4],1,1)
+                        
+                        if (string.lower(first_char_commandname) == string.lower(command_input))then
+                            --debug("found_command: "..self.commands_list[c][4])
+                            table.insert(self.valid_commands_list,self.commands_list[c][4])
+                            count_found=count_found+1
+                        end
+                    else
+                        --input is longer as 1 char, go to full search mode, add every result where the input string are anywhere in the command name
+                        if string.find(string.lower(self.commands_list[c][4]), string.lower(command_input))then
+                            table.insert(self.valid_commands_list,self.commands_list[c][4])
+                            count_found=count_found+1
+                        end
                     end
                 end
             end
@@ -877,7 +939,31 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
         --debug("no_command_found_close_modal")
         SearchCommand:close_modal(uiId)
     end
-    return found_command
+    
+    --sort the command table
+    SearchCommand:sort_valid_command_list(found_command_name)
+    --end
+
+    return found_command,count_found
+end
+
+function SearchCommand:sort_valid_command_list(found_command_name)
+    local temp_sort_list={}
+    --sort valid command list
+    table.sort(self.valid_commands_list)
+    
+    --debug("found_command_name: "..found_command_name)
+    
+    if(found_command_name ~= "")then
+        table.insert(temp_sort_list,found_command_name)
+    end
+    
+    for c = 1, #self.valid_commands_list do
+        table.insert(temp_sort_list,self.valid_commands_list[c])
+    end
+    
+    self.valid_commands_list={}
+    self.valid_commands_list = temp_sort_list
 end
 
 function SearchCommand:build_valid_player_list(playername_input,uiId)
@@ -906,6 +992,10 @@ function SearchCommand:build_valid_player_list(playername_input,uiId)
     if(count_found == 0)then
         SearchCommand:close_modal(uiId)
     end
+    
+    --sort found player list
+    table.sort(self.valid_commands_list)
+    
     return found_playername
 end
 
@@ -915,7 +1005,7 @@ function SearchCommand:search_build_player_list(uiId,playername)
     found_player=SearchCommand:build_valid_player_list(playername,uiId)
     
     SearchCommand:search_build_argument_list(uiId,self.command_self)
-
+    
     if(found_player ~= 0)then
         SearchCommand:close_modal(uiId)
     else
@@ -926,13 +1016,20 @@ function SearchCommand:search_build_player_list(uiId,playername)
 end
 
 function SearchCommand:search_build_command_list(uiId,command,show_argument_help)
-    local found_command=0
+    local found_command_id=0
+    local found_more_possible=0
     --debug("search_build_command_list")
     
-    found_command=SearchCommand:build_valid_command_list(command,uiId)
-
-    if(found_command ~= 0)then
-        SearchCommand:close_modal(uiId)
+    found_command_id,found_more_possible=SearchCommand:build_valid_command_list(command,uiId)
+    
+    if(found_command_id ~= 0)then
+        if(found_more_possible > 1)then
+            if next(self.valid_commands_list) then
+                SearchCommand:show_more_options(uiId)
+            end
+        else
+            SearchCommand:close_modal(uiId)
+        end
     else
         if next(self.valid_commands_list) then
             SearchCommand:show_more_options(uiId)
@@ -940,7 +1037,7 @@ function SearchCommand:search_build_command_list(uiId,command,show_argument_help
     end
     
     if(show_argument_help)then
-        if(found_command ~= 0)then
+        if(found_command_id ~= 0)then
             SearchCommand:search_build_argument_list(uiId,command)
         end
     else
@@ -949,56 +1046,98 @@ function SearchCommand:search_build_command_list(uiId,command,show_argument_help
 end
 
 function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
+    --debug("search_build_argument_list")
     local argument_help=""
     local command_index=0
     local max_arguments=0
     local current_args=0
     local special_offset=0
+    local command_to_show_argument_new=""
+    
+    command_to_show_argument_new = command_to_show_argument
     
     if(command_to_show_argument == "a")then
         if(#self.command_parameter_list >= 2)then
-            command_to_show_argument=self.command_parameter_list[2]
+            command_to_show_argument_new=self.command_parameter_list[2]
             special_offset=1
         end
     end
     
     if(command_to_show_argument == "b")then
         if(#self.command_parameter_list >= 2)then
-            command_to_show_argument=self.command_parameter_list[2]
+            command_to_show_argument_new=self.command_parameter_list[2]
             special_offset=1
         end
     end
     
     if(command_to_show_argument == "c")then
         if(#self.command_parameter_list >= 3)then
-            command_to_show_argument=self.command_parameter_list[3]
+            command_to_show_argument_new=self.command_parameter_list[3]
             special_offset=2
         end
     end
     
+    --debug("default: "..command_to_show_argument.." new: "..command_to_show_argument_new)
+    
     for c = 1, #self.commands_list do
-        if(self.commands_list[c][4] == command_to_show_argument)then
-            command_index=c
+        if(self.commands_list[c][4] == command_to_show_argument_new)then
+            --check now if we want display the argument for this command
+            
+            if(command_to_show_argument == "a" or command_to_show_argument == "b" or command_to_show_argument == "c")then
+                if(command_to_show_argument == command_to_show_argument_new)then
+                    if(#self.command_parameter_list >= 2)then
+                        --debug("here: "..#self.command_parameter_list.." "..command_to_show_argument_new)
+                        if(command_to_show_argument_new ~= "a" and #self.command_parameter_list == 2)then
+                            command_index=c
+                        elseif(command_to_show_argument_new ~= "b" and #self.command_parameter_list == 2)then
+                            command_index=c
+                        elseif(command_to_show_argument_new ~= "c" and #self.command_parameter_list == 3)then
+                            command_index=c
+                        end
+                    else
+                        command_index=c
+                    end
+                else
+                    if(self.commands_list[c][1] == "shard")then
+                        if(command_to_show_argument_new ~= "a" and command_to_show_argument_new ~= "b" and command_to_show_argument_new ~= "c")then
+                            command_index=c
+                        end
+                    end
+                end
+            else
+                if(self.commands_list[c][1] == "shard")then
+                    if(self.command_self == "?")then
+                        command_index=c
+                    end
+                elseif(self.commands_list[c][1] == "eScript")then
+                    if(self.command_self == "?")then
+                        command_index=c
+                    end
+                else
+                    command_index=c
+                end
+            end
+            
+            --end
         end
     end
     
+    --debug("command_index: "..command_index)
+    
     if(command_index ~= 0)then
-        
         max_arguments = #self.commands_list[command_index] - 4
         
-        for ac = 1, max_arguments do
-            max_args=#self.command_parameter_list
+        max_args=#self.command_parameter_list
+        current_args=max_args - 1
+        
+        if(special_offset ~= 0)then
+            max_args=max_args - special_offset
             current_args=max_args - 1
-            --debug("p: "..#self.command_parameter_list.." l: "..ac)
-            
-            if(special_offset ~= 0)then
-                max_args=max_args - special_offset
-                current_args=max_args - 1
-            end
-            
-            if(max_args == ac or max_args == 1)then
+        end
+        
+        for ac = 1, max_arguments do
+            if(ac > current_args)then
                 for pc = 1, #self.commands_list[command_index][4+ac] do
-                
                     local translation_parm = SearchCommand:pars_command_parameter(self.commands_list[command_index][4+ac][pc][1])
                     
                     if(pc > 1)then
@@ -1010,8 +1149,9 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
             else
                 argument_help=argument_help.." "..self.command_parameter_list[ac+1+special_offset]
             end
-        end
             
+        end
+        
         if(current_args > max_arguments)then
             diff=current_args-max_arguments
             
@@ -1223,9 +1363,6 @@ function SearchCommand:show_more_options(uiId)
     local up_ok = 0
     local down_ok = 0
     
-    table.sort(self.valid_commands_list)
-    
-    
     base_main_chat_id = string.sub(uiId,0,string.len(uiId)-3)
     local check_main_window = getUI(base_main_chat_id)
 
@@ -1334,7 +1471,6 @@ function SearchCommand:replace_escript_param(command_name)
             
             local load_all_param = ""
             for pc = 1, #self.commands_list[command_index][4+ac] do
-                debug(self.commands_list[command_index][4+ac][pc][1])
                 local translation_parm = SearchCommand:pars_command_parameter(self.commands_list[command_index][4+ac][pc][1])
                 if(pc > 1)then
                     load_all_param=load_all_param.."/"..translation_parm
