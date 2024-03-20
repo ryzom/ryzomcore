@@ -218,7 +218,7 @@ void CDoorManager::SDoor::entityCollide(CEntityCL *pE)
 // ***************************************************************************
 void CDoorManager::SDoor::checkToClose()
 {
-	/*for (sint i = 0; i < (sint)Entities.size(); ++i)
+	for (sint i = 0; i < (sint)Entities.size(); ++i)
 	{
 		if (EntitiesMoved[i] == 0) // No trigger moved
 		{
@@ -238,7 +238,7 @@ void CDoorManager::SDoor::checkToClose()
 
 	if (Entities.empty())
 		close();
-	else*/
+	else
 		open();
 }
 
