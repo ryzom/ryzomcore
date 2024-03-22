@@ -241,7 +241,7 @@ public:
 
 	/// Return the persistent NPC alias of entity (0 if N/A).
 	uint32 npcAlias() const {return _NPCAlias; }
-	/// Set the persistent NPC alias of the entity.
+	/// Set the persistent NPC alias of the entity.	
 	void npcAlias(uint32 alias) {_NPCAlias = alias; }
 
 	/// Method to call to initialize all members of the right class.
@@ -702,7 +702,7 @@ public:
 	// todo handle NPC entities
 	// Return true if this entity is a NPC (not a fauna)
 	bool isNPC () const { return Type == NPC; }
-
+	
 	// Return true if this entity can have missions icons (humanoid NPCs (including Karavan), Kami or Bot Object)
 	bool canHaveMissionIcon() const { return isNPC() || isKami() || isUnknownRace(); }
 
@@ -949,10 +949,6 @@ protected:
 	uint32							_NameId;
 	// Primitive used for the collision in PACS
 	NLPACS::UMovePrimitive			*_Primitive;
-
-	uint64 							_LastSnapToGroup;
-	float							_CurrentZOffset;
-
 	// 3D Logic info for light request.
 	CEntityLogicInfo3D				_LogicInfo3D;
 	// Box around the entity.

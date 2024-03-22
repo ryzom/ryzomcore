@@ -740,8 +740,6 @@ void CEntityCL::init()
 		_EntityName = "Name";
 	}
 	_NameId = 0;
-	_LastSnapToGroup = 0;
-	_CurrentZOffset = 0;
 
 	_PermanentStatutIcon.clear();
 
@@ -1480,19 +1478,7 @@ void CEntityCL::pacsMove(const CVectorD &vect)
 		if ((fabs (deltaPos.x) > 0.05) || (fabs (deltaPos.y) > 0.05))
 		{
 			_HasMoved = true;
-			_Primitive->enableZOffset(false);
 			_Primitive->move (deltaPos, dynamicWI);
-		}
-		else
-		{
-			// This code force the player to move even when not moving, it's used to trigger special collissions
-			if (isUser())
-			{
-				_HasMoved = true;
-				deltaPos.x = 0.0001;
-				_Primitive->move (deltaPos, dynamicWI);
-			}
-
 		}
 	}
 	else
@@ -1726,43 +1712,6 @@ void CEntityCL::snapToGround()
 		// Change the entity position.
 		pos().z = vect.z;
 	}
-
-	if (_Primitive->haveZOffset())
-	{
-
-		if (_LastSnapToGroup > 0)
-		{
-			if (pos().z + _CurrentZOffset < _Primitive->getZFinalPosition())
-			{
-				_CurrentZOffset += (ryzomGetLocalTime() - _LastSnapToGroup)/100.0f;
-
-				if (pos().z + _CurrentZOffset > _Primitive->getZFinalPosition())
-					_CurrentZOffset = _Primitive->getZFinalPosition() - pos().z;
-			}
-
-			if (pos().z + _CurrentZOffset > _Primitive->getZFinalPosition())
-			{
-				_CurrentZOffset -= (ryzomGetLocalTime() - _LastSnapToGroup)/100.0f;
-
-				if (pos().z + _CurrentZOffset < _Primitive->getZFinalPosition())
-					_CurrentZOffset = _Primitive->getZFinalPosition() - pos().z;
-			}
-
-			pos().z += _CurrentZOffset;
-		}
-	}
-	else
-	{
-		if (_CurrentZOffset > 0)
-		{
-			_CurrentZOffset -= (ryzomGetLocalTime() - _LastSnapToGroup)/100.0f;
-
-			if (_CurrentZOffset < 0)
-				_CurrentZOffset = 0;
-			pos().z += _CurrentZOffset;
-		}
-	}
-	_LastSnapToGroup = ryzomGetLocalTime();
 
 	// Set the box position.
 	posBox(pos());
