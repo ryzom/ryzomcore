@@ -238,8 +238,10 @@ namespace NLGUI
 		std::string		getTitle () const;
 		void			setTitle (const std::string &title);
 		std::string		getTitleOpened () const;
+	    CViewText*		getTitleOpenedViewText();
 		void			setTitleOpened (const std::string &title);
 		std::string		getTitleClosed () const;
+	    CViewText*		getTitleClosedViewText();
 		void			setTitleClosed (const std::string &title);
 		std::string		getTitleColorAsString() const;
 		void			setTitleColorAsString(const std::string &col);

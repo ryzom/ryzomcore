@@ -129,6 +129,8 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	_BaseContainer->setSavable(desc.Savable);
 	_BaseContainer->setLocalize(desc.Localize);
 	_BaseContainer->setTitle(desc.PeopleListTitle);
+	_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
 	//_BaseContainer->setId("ui:interface:" + desc.Id);
 
 	// create the chat window if there's one
@@ -427,6 +429,10 @@ sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 
 	++_CurrPeopleID;
 
+	_BaseContainer->setTitle(_BaseContainer->getTitle());
+	_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+
 	return (sint) _Peoples.size() - 1;
 }
 
@@ -454,6 +460,10 @@ void CPeopleList::removePeople(uint index)
 
 	pRoot->delGroup (_Peoples[index].Container);
 	_Peoples.erase(_Peoples.begin() + index);
+
+	_BaseContainer->setTitle(_BaseContainer->getTitle());
+	_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
 }
 
 //==================================================================
