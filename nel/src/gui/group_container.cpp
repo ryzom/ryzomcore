@@ -3976,15 +3976,6 @@ namespace NLGUI
 	    return _TitleTextOpened;
     }
 
-    // ***************************************************************************
-    CViewText* CGroupContainer::getTitleOpenedViewText()
-    {
-	    if (_TitleOpened != NULL)
-	    {
-		    return _TitleOpened;
-	    }
-    }
-
 	// ***************************************************************************
 	void			CGroupContainer::setTitleOpened (const std::string &title)
 	{
@@ -3998,15 +3989,6 @@ namespace NLGUI
 	{
 		return _TitleTextClosed;
 	}
-
-    // ***************************************************************************
-    CViewText* CGroupContainer::getTitleClosedViewText()
-    {
-	    if (_TitleClosed != NULL)
-	    {
-		    return _TitleClosed;
-	    }
-    }
 
 	// ***************************************************************************
 	void			CGroupContainer::setTitleClosed (const std::string &title)
