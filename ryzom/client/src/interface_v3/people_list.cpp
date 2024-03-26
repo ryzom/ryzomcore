@@ -129,8 +129,10 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	_BaseContainer->setSavable(desc.Savable);
 	_BaseContainer->setLocalize(desc.Localize);
 	_BaseContainer->setTitle(desc.PeopleListTitle);
-	_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
-	_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	if (_BaseContainer->getTitleOpenedViewText() != NULL)
+		_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	if (_BaseContainer->getTitleClosedViewText() != NULL)
+		_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
 	//_BaseContainer->setId("ui:interface:" + desc.Id);
 
 	// create the chat window if there's one
@@ -273,7 +275,6 @@ void CPeopleList::sortEx(TSortOrder order)
 	case sort_name:
 		std::sort(_Peoples.begin(), _Peoples.end(), CPeopleList::sortExByName);
 		break;
-
 	case sort_online:
 		std::sort(_Peoples.begin(), _Peoples.end(), CPeopleList::sortExByOnline);
 		break;
@@ -430,8 +431,10 @@ sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 	++_CurrPeopleID;
 
 	_BaseContainer->setTitle(_BaseContainer->getTitle());
-	_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
-	_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	if (_BaseContainer->getTitleOpenedViewText() != NULL)
+		_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	if (_BaseContainer->getTitleClosedViewText() != NULL)
+		_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
 
 	return (sint) _Peoples.size() - 1;
 }
@@ -462,8 +465,10 @@ void CPeopleList::removePeople(uint index)
 	_Peoples.erase(_Peoples.begin() + index);
 
 	_BaseContainer->setTitle(_BaseContainer->getTitle());
-	_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
-	_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	if (_BaseContainer->getTitleOpenedViewText() != NULL)
+		_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	if (_BaseContainer->getTitleClosedViewText() != NULL)
+		_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
 }
 
 //==================================================================
