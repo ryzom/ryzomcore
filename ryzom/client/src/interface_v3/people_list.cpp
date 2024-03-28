@@ -277,15 +277,8 @@ void CPeopleList::sortEx(TSortOrder order)
 	{
 		for(cptContainers = 0; cptContainers < _GroupContainers.size(); ++cptContainers)
 		{
-			for(k = 0; k < _Peoples.size(); ++k)
-			{
-				if (_Peoples[k].Group == _GroupContainers[cptContainers].first)
-				{
-					group = _GroupContainers[cptContainers].second;
-					_BaseContainer->attachContainer(group);
-					break;
-				}
-			}
+			group = _GroupContainers[cptContainers].second;
+			_BaseContainer->attachContainer(group);
 		}
 	}
 	
@@ -295,7 +288,6 @@ void CPeopleList::sortEx(TSortOrder order)
 	{
 		if (severalGroups)
 		{
-			//std::string groupName = (_Peoples[k].Group == "" ? "General" : _Peoples[k].Group);
 			for (cptContainers = 0; cptContainers < _GroupContainers.size(); ++cptContainers)
 			{
 				if (_GroupContainers[cptContainers].first == _Peoples[k].Group)
@@ -495,36 +487,11 @@ void CPeopleList::changeGroup(uint index, const std::string &groupName)
 		nlwarning("<CPeopleList::changeGroup> bad index.");
 		return;
 	}
-
-	std::string oldGroupName = _Peoples[index].Group;
 	std::string group = groupName;
 	if (group == "General")
 		group.clear();
 	_Peoples[index].Group = group;
 	
-	// If there is no more people in the old group, destroy it.
-	/*bool destroyOldGroup = true;
-	for (uint k = 0; k < _Peoples.size(); ++k)
-	{
-		if (_Peoples[k].Group == oldGroupName)
-		{
-			destroyOldGroup = false;
-			break;
-		}
-	}
-	if (destroyOldGroup)
-	{
-		for (uint k = 0; k < _GroupContainers.size(); ++k)
-		{
-			if (_GroupContainers[k].first == oldGroupName)
-			{
-				_GroupContainers[k].first.clear();
-				_GroupContainers[k].second = NULL;
-			}
-		}
-	}*/
-
-	// If new group already exists, return. Else, create it.
 	for (uint k = 0; k < _GroupContainers.size(); ++k)
 	{
 		if (_GroupContainers[k].first == group)
@@ -594,37 +561,45 @@ void CPeopleList::readContactGroups()
 			uint nb = 0;
 			while (node)
 			{
-				CXMLAutoPtr propName;
-				propName = (char*) xmlGetProp(node, (xmlChar*)"name");
-				CXMLAutoPtr propGroup;
-				propGroup = (char*) xmlGetProp(node, (xmlChar*)"group");
-				if (propName && propGroup)
+				std::string propName = (char*) xmlGetProp(node, (xmlChar*)"name");
+				std::string propGroup = (char*) xmlGetProp(node, (xmlChar*)"group");
+				if (true)
 				{
-				        sint index = getIndexFromName(propName.str());
-					if (index < _Peoples.size())
+				    sint index = getIndexFromName(propName);
+					if (index >=0 && index < _Peoples.size())
 					{
-						_Peoples[index].Group = propGroup.str();
-						if (_GroupContainers.empty() || _GroupContainers.back().first != propGroup.str()) {
+						_Peoples[index].Group = propGroup;
+
+						bool groupAlreadyAdded = false;
+						uint k;
+						for (k = 0; k < _GroupContainers.size(); k++)
+						{
+							if (_GroupContainers[k].first == propGroup)
+								groupAlreadyAdded = true;
+						}
+
+						if (!groupAlreadyAdded) {
 							vector<pair<string, string> > properties;
 							properties.push_back(make_pair(string("posparent"), string("parent")));
 							properties.push_back(make_pair(string("id"), _ContainerID + "_group_" + toString(_GroupContainers.size())));
-							if (propGroup.str() == "")
+							if (propGroup == "")
 								properties.push_back(make_pair(string("title"), "General"));
 							else
-								properties.push_back(make_pair(string("title"), propGroup.str()));
+								properties.push_back(make_pair(string("title"), propGroup));
+
 							CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance("people_list_group_header", "ui:interface", properties, false);
 							CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
-							if (propGroup.str() == "")
+							if (propGroup == "")
 								gc->setUCTitle(ucstring("General"));
 							else
-								gc->setUCTitle(propGroup.str());
+								gc->setUCTitle(propGroup);
 							gc->setSavable(false);
 
 							CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 							pRoot->addGroup (gc);
 							_BaseContainer->attachContainer(gc);
 
-							_GroupContainers.push_back(make_pair(propGroup.str(), gc));
+							_GroupContainers.push_back(make_pair(propGroup, gc));
 						}
 					}
 				}
