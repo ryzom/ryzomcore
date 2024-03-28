@@ -495,11 +495,36 @@ void CPeopleList::changeGroup(uint index, const std::string &groupName)
 		nlwarning("<CPeopleList::changeGroup> bad index.");
 		return;
 	}
+
+	std::string oldGroupName = _Peoples[index].Group;
 	std::string group = groupName;
 	if (group == "General")
 		group.clear();
 	_Peoples[index].Group = group;
 	
+	// If there is no more people in the old group, destroy it.
+	/*bool destroyOldGroup = true;
+	for (uint k = 0; k < _Peoples.size(); ++k)
+	{
+		if (_Peoples[k].Group == oldGroupName)
+		{
+			destroyOldGroup = false;
+			break;
+		}
+	}
+	if (destroyOldGroup)
+	{
+		for (uint k = 0; k < _GroupContainers.size(); ++k)
+		{
+			if (_GroupContainers[k].first == oldGroupName)
+			{
+				_GroupContainers[k].first.clear();
+				_GroupContainers[k].second = NULL;
+			}
+		}
+	}*/
+
+	// If new group already exists, return. Else, create it.
 	for (uint k = 0; k < _GroupContainers.size(); ++k)
 	{
 		if (_GroupContainers[k].first == group)
