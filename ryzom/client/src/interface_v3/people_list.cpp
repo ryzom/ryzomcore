@@ -265,7 +265,7 @@ void CPeopleList::sortEx(TSortOrder order)
 	CGroupContainer *group = _BaseContainer;
 	uint cptContainers = 0;
 
-	// Create group containers : check each container, and add it if there's people in it.
+	// Create group containers
 	bool severalGroups = false;
 	for(k = 0; k < _Peoples.size(); ++k)
 	{
