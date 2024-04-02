@@ -479,6 +479,13 @@ static void sendSwapItemMsg(const CDBCtrlSheet *pCSSrc, const CDBCtrlSheet *pCSD
 		out.serial(dstSlotId);
 		out.serial(quantity);
 
+		nlinfo("Swap item");
+		nlinfo("srcInvId = %d", srcInvId);
+		nlinfo("srcSlotId = %d", srcSlotId);
+		nlinfo("dstInvId = %d", dstInvId);
+		nlinfo("dstSlotId = %d", dstSlotId);
+		nlinfo("quantity = %d", quantity);
+
 		// Special case for guilds that are not on the same counter as the other inventories
 		// The guild counter is global on the server so it can changes without this client
 		uint16 nGuildSessionCounter = 0;
@@ -1529,17 +1536,21 @@ class CHandlerMoveItem : public IActionHandler
 			if (nNbList > 0)
 			{
 				string sListId = getParam(sParams, "listsheet"+toString(nListIt));
+				nlinfo("To listsheet %s", sListId.c_str());
 				while (!sListId.empty())
 				{
 					IListSheetBase *pLS = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(sListId));
 					if (pLS == NULL) return;
 					// search an empty slot where to put
 					sint32 nbelt = pLS->getNbSheet();
+					nlinfo("nbelt = %d", nbelt);
 					for (sint32 i = 0; i < nbelt; ++i)
 					{
+						nlinfo("Item %d = %d", i, pLS->getSheet(i)->getIndexInDB());
 						if (pLS->getSheet(i)->getSheetId() == 0)
 						{
 							// Send swap_item
+							nlinfo("Swap to %d", i);
 							CAHManager::getInstance()->runActionHandler("swap_item", pLS->getSheet(i), "src="+toString(pCaller->getId()));
 							return;
 						}

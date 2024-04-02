@@ -107,6 +107,13 @@ public:
 	void addMoney(uint64 money);
 	/// set money
 	void setMoney(uint64 money);
+	void setChestA(const NLMISC::CEntityId &recipient, uint8 chest);
+	void setChestB(const NLMISC::CEntityId &recipient, uint8 chest);
+	void setChestParams(uint8 chest, std::string name, EGSPD::CGuildGrade::TGuildGrade gradeView, EGSPD::CGuildGrade::TGuildGrade gradePut, EGSPD::CGuildGrade::TGuildGrade gradeGet)
+	{
+		_GuildInventoryView->setChestParams(chest, name, gradeView, gradePut, gradeGet);
+	}
+
 	/// clear the guild charge points
 //	void clearChargePoints();
 	/// add an amount of charge point
@@ -162,6 +169,7 @@ public:
 	void decGradeCount( EGSPD::CGuildGrade::TGuildGrade grade );
 	/// send client datbase deltas
 	void sendClientDBDeltas();
+	void sendClientDBChest(const NLMISC::CEntityId& id);
 	/// flag a user offline ( unregister it in other system, e.g. : chat group )
 	void setMemberOffline( CGuildMember * member );
 	/// flag a user online ( register it in other system, e.g. : chat group )
@@ -227,6 +235,8 @@ public:
 	void	takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session );
 	/// put an item in guild inventory (set quantity to UINT_MAX for 'all stack')
 	void	putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session );
+	/// move an item in guild inventory (set quantity to UINT_MAX for 'all stack')
+	void	moveItem( CCharacter * user, uint32 slot, uint32 dst_slot, uint32 quantity, uint16 session );
 	/// user wanna take money
 	void	takeMoney( CCharacter * user, uint64 money, uint16 session );
 	/// user wanna put money

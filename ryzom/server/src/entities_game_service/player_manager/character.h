@@ -1385,6 +1385,9 @@ public:
 	///\set the loot container
 	void setLootContainer(CInventoryPtr lootSac);
 
+	bool isInitChest(uint8 chest);
+	void isInitChest(uint8 chest, bool value);
+
 	/// update scores infos in database
 	void updateScoresInDatabase();
 
@@ -3454,6 +3457,8 @@ private:
 	// Keep pointer on the container being looted
 	CInventoryPtr _LootContainer;
 	NLMISC::CEntityId _EntityLoot;
+
+	bool _initializedChests[20];
 
 	/// if this player has an invitation for another team, keep the team here
 	NLMISC::CEntityId _TeamInvitor;

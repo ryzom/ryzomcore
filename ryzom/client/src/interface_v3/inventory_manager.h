@@ -286,6 +286,7 @@ public:
 		static double getBranchBulk(const std::string &basePath, uint16 startItemIndex, uint16 numItems);
 		// Get the number of used and max slots
 		static void getBranchSlotCounts(const std::string &basePath, uint& nbUsedSlots, uint& nbMaxSlots );
+		static void getBranchSlotCounts(const std::string &basePath, uint16 startItemIndex, uint16 numItems, uint& nbUsedSlots, uint& nbMaxSlots );
 		// 0 bag, 1 - 6 pack animal 1 to 5, 7 temp inv
 		double getBagBulk(uint32 inventoryIndex);
 		double getMaxBagBulk(uint32 inventoryIndex);
@@ -330,7 +331,7 @@ public:
 		bool				isInventoryEmpty (INVENTORIES::TInventory invId);
 
 
-		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvPA4, InvPA5, InvPA6, InvGuild, InvRoom, InvUnknown };
+		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvPA4, InvPA5, InvPA6, InvGuild, InvGuild2, InvRoom, InvUnknown };
 		static TInvType invTypeFromString(const std::string &str);
 
 		static std::string invToDbPath(INVENTORIES::TInventory inventory);
@@ -848,6 +849,9 @@ private:
 
 #define LIST_GUILD_TEXT				"ui:interface:inv_guild:content:iil:bag_list"
 #define LIST_GUILD_ICONS			"ui:interface:inv_guild:content:iil:bag_icons"
+
+#define LIST_GUILD2_TEXT			"ui:interface:inv_guild2:content:iil:bag_list"
+#define LIST_GUILD2_ICONS			"ui:interface:inv_guild2:content:iil:bag_icons"
 
 #define LIST_PA0_TEXT				"ui:interface:inv_pa0:content:iil:bag_list"
 #define LIST_PA0_ICONS				"ui:interface:inv_pa0:content:iil:bag_icons"
