@@ -22,8 +22,10 @@
 
 #include "guild_inv.h"
 #include "player_manager/character.h"
+#include "player_manager/player_manager.h"
 #include "egs_sheets/egs_sheets.h"
 #include "guild_manager/guild_member_module.h"
+#include "guild_manager/guild_manager.h"
 #include "cdb_group.h"
 
 using namespace std;
@@ -31,6 +33,7 @@ using namespace NLMISC;
 using namespace NLNET;
 
 extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
+extern NLMISC::CVariable<uint32>	GuildChestSlots;
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
 /////////////////////////////////////////////////////////////
@@ -299,20 +302,67 @@ void CGuildInventoryView::provideUpdate( CBitMemStream& stream )
 }
 
 //-----------------------------------------------------------------------------
-void CGuildInventoryView::provideContents( CBitMemStream& stream )
+void CGuildInventoryView::provideContents( CBitMemStream& stream, const CEntityId &recipient, bool first)
 {
 	// Ensure the updater is empty, otherwise our contents would be mixed with current update
 	nlassert( _GuildInvUpdater.empty( INVENTORIES::CInventoryCategoryForGuild::GuildInvId ) );
 
 	CGuildInventory *guildInv = static_cast<CGuildInventory*>(getInventory());
-	for ( uint i=0; i!=guildInv->getSlotCount(); ++i )
+
+	if (first)
 	{
-		CGameItemPtr itemPtr = guildInv->getItem( i );
-		if ( itemPtr != NULL )
-		{
-			updateClientSlot( i );
-			_GuildInvUpdater.pushItemInfoVersion( i ); // send the current info version (no change)
-		}
+		setChestA(recipient, 0);
+		setChestB(recipient, 1);
 	}
+
+	uint8 chestA = getChestA(recipient);
+	uint8 chestB = getChestB(recipient);
+
+	CCharacter * c = PlayerManager.getChar(recipient);
+	if (!c)
+		return;
+
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (!guild)
+		return;
+
+	CGuildMember* member = guild->getMemberFromEId(c->getId());
+	if (!member)
+		return;
+
+	if (!c->isInitChest(chestA))
+	{
+		if (haveChestViewGrade(chestA, member->getGrade()))
+		{
+			for ( uint i=chestA*GuildChestSlots; i < (chestA+1)*GuildChestSlots; ++i )
+			{
+				CGameItemPtr itemPtr = guildInv->getItem( i );
+				if ( itemPtr != NULL )
+				{
+					updateClientSlot( i );
+					_GuildInvUpdater.pushItemInfoVersion( i ); // send the current info version (no change)
+				}
+			}
+		}
+		c->isInitChest(chestA, true);
+	}
+
+	if (!c->isInitChest(chestB))
+	{
+		if (haveChestViewGrade(chestB, member->getGrade()))
+		{
+			for ( uint i=chestB*GuildChestSlots; i < (chestB+1)*GuildChestSlots; ++i )
+			{
+				CGameItemPtr itemPtr = guildInv->getItem( i );
+				if ( itemPtr != NULL )
+				{
+					updateClientSlot( i );
+					_GuildInvUpdater.pushItemInfoVersion( i ); // send the current info version (no change)
+				}
+			}
+		}
+		c->isInitChest(chestB, true);
+	}
+
 	provideUpdate( stream );
 }

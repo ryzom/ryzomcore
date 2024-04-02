@@ -2549,7 +2549,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <define id="max_room_invslot"
           value_from_code="getMaxRoomInvSlot()" />
   <define id="max_guild_invslot"
-          value_from_code="getMaxGuildInvSlot()" />
+          value="100" />
   <define id="max_temp_invslot"
           value_from_code="getMaxTempInvSlot()" />
   <!--<define id="from_code_harvest"      value_from_code="getInventorySlot('harvest')"/>
@@ -2955,6 +2955,12 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:TUTORIAL_ACTIVE_INVENTORY"
             type="bool"
             value="false" />
+  <variable entry="UI:SAVE:GUILD_INVENTORY_CHEST_A"
+            type="uint8"
+            value="0" />
+  <variable entry="UI:SAVE:GUILD_INVENTORY_CHEST_B"
+            type="uint8"
+            value="1" />
    <variable entry="UI:SAVE:TUTORIAL_ACTIVE_INFO_PLAYER_JOURNAL"
             type="bool"
             value="false" />
@@ -3240,6 +3246,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:INVENTORY_GUILD_WANT_POPUP"
             type="sint32"
             value="1" />
+  <variable entry="UI:SAVE:INVENTORY_GUILD2_WANT_POPUP"
+            type="sint32"
+            value="1" />
   <variable entry="UI:SAVE:INV_BAG:SORT_TYPE"
             type="sint32"
             value="0" />
@@ -3481,7 +3490,32 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:INV_GUILD:FILTER_MISSMP"
             type="sint32"
             value="1" />
-  <variable entry="UI:SAVE:INV_GUILD:FILTER_TP"
+  <variable entry="UI:SAVE:INV_GUILD2:SORT_TYPE"
+            type="sint32"
+            value="1" />
+  <!-- 1 == SortType -->
+  <variable entry="UI:SAVE:INV_GUILD2:ICON_LIST"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_GUILD2:FILTER_ARMOR"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_GUILD2:FILTER_WEAPON"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_GUILD2:FILTER_TOOL"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_GUILD2:FILTER_PET"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_GUILD2:FILTER_MP"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_GUILD2:FILTER_MISSMP"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_GUILD2:FILTER_TP"
             type="sint32"
             value="1" />
   <variable entry="UI:SAVE:INV_ROOM:SORT_TYPE"

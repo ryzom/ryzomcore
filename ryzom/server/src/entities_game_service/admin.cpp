@@ -325,6 +325,7 @@ AdminCommandsInit[] =
 		"RyzomTime",						false,
 		"addGuildXp",						false,
 		"setGuildChargePoint",				false,
+		"setGuildInventoryChest",			true,
 		"characterInventoryDump",			true,
 		"deleteInventoryItem",				true,
 		"setSimplePhrase",					false,
@@ -4513,7 +4514,7 @@ NLMISC_COMMAND (ShowFactionChannels, "Show faction channels", "<csr id> <channel
 
 //----------------------------------------------------------------------------
 // If channel not exists create it
-NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <channel_name> [<pass>]")
+NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<eid> <channel_name> [<pass>]")
 {
 	if ((args.size() < 2) || (args.size() > 3))
 		return false;
@@ -4578,7 +4579,7 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 
 }
 
-NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang> <leave:0|1>")
+NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<eid> <lang> <leave:0|1>")
 {
 	if ((args.size() < 2) || (args.size() > 3))
 		return false;
@@ -4626,7 +4627,7 @@ NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang>
 }
 
 
-NLMISC_COMMAND (setDontTranslateLangs, "Set langs that a player dont want to see translated", "<user id> <langs>")
+NLMISC_COMMAND (setDontTranslateLangs, "Set langs that a player dont want to see translated", "<eid> <langs>")
 {
 	if (args.size() != 2)
 		return false;
@@ -4645,15 +4646,58 @@ NLMISC_COMMAND (setDontTranslateLangs, "Set langs that a player dont want to see
 	return true;
 }
 
-
-
-NLMISC_COMMAND (updateTarget, "Update current target", "<user id>")
+NLMISC_COMMAND (updateTarget, "Update current target", "<eid>")
 {
 	GET_CHARACTER
 	c->updateTarget();
 	return true;
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setGuildInventoryChest, "Set the chest of inventory", "<eid> <A|B> <chest>" )
+{
+
+	if (args.size() != 3)
+		return false;
+
+	GET_CHARACTER
+
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (guild)
+	{
+		uint8 chest;
+		NLMISC::fromString(args[2], chest);
+
+		if (args[1] == "B")
+			guild->setChestB(c->getId(), chest);
+		else
+			guild->setChestA(c->getId(), chest);
+	}
+	return true;
+}
+
+//   /a setGuildInventoryChestParams (0x0000000020:00:00:82) 3 "Toto" Leader Leader Leader
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setGuildInventoryChestParams, "Set the chest of inventory", "<eid> <chest> <name> <rank view> <rank put> <rank get>" )
+{
+
+	if (args.size() != 6)
+		return false;
+
+	GET_CHARACTER
+
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (guild)
+	{
+		uint8 chest;
+		NLMISC::fromString(args[1], chest);
+		EGSPD::CGuildGrade::TGuildGrade gradeView = EGSPD::CGuildGrade::fromString(args[3]);
+		EGSPD::CGuildGrade::TGuildGrade gradePut = EGSPD::CGuildGrade::fromString(args[4]);
+		EGSPD::CGuildGrade::TGuildGrade gradeGet = EGSPD::CGuildGrade::fromString(args[5]);
+		guild->setChestParams(chest, args[2], gradeView, gradePut, gradeGet);
+	}
+	return true;
+}
 // !!! Deprecated !!!
 NLMISC_COMMAND (webAddCommandsIds, "Add ids of commands will be run from webig", "<user id> <bot_name> <web_app_url> <indexes>")
 {

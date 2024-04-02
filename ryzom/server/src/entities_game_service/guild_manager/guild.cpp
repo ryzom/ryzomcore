@@ -185,6 +185,21 @@ void CGuild::setMoney(uint64 money)
 	CBankAccessor_GUILD::getGUILD().getINVENTORY().setMONEY(_DbGroup, _Money);
 }
 
+
+//----------------------------------------------------------------------------
+void CGuild::setChestA(const CEntityId &recipient, uint8 chest)
+{
+	_GuildInventoryView->setChestA(recipient, chest);
+	sendClientDBChest(recipient);
+}
+
+//----------------------------------------------------------------------------
+void CGuild::setChestB(const CEntityId &recipient, uint8 chest)
+{
+	_GuildInventoryView->setChestB(recipient, chest);
+	sendClientDBChest(recipient);
+}
+
 //----------------------------------------------------------------------------
 //void CGuild::clearChargePoints()
 //{
@@ -379,6 +394,13 @@ void CGuild::sendClientDBDeltas()
 	_DbGroup.sendDeltas( ~0, *_GuildInventoryView, CCDBGroup::SendDeltasToRecipients );
 }
 
+//----------------------------------------------------------------------------
+void CGuild::sendClientDBChest(const CEntityId& id)
+{
+	_DbGroup.sendDeltasToClient( *_GuildInventoryView, id );
+}
+
+
 
 //----------------------------------------------------------------------------
 void CGuild::incMemberSession()
@@ -438,6 +460,12 @@ void CGuild::initNonPDMembers()
 	_Inventory = new CGuildInventory;
 	_GuildInventoryView = new CGuildInventoryView( this ); // unfortunately this MUST be a smartptr because of smartptrs to views in CInventoryBase
 	_GuildInventoryView->init( _Inventory, &_DbGroup );
+
+	for (uint8 i=0; i < 20; i++)
+	{
+		setChestParams(i, "", EGSPD::CGuildGrade::Member, EGSPD::CGuildGrade::Officer, EGSPD::CGuildGrade::HighOfficer);
+	}
+
 }
 
 //----------------------------------------------------------------------------
@@ -494,6 +522,16 @@ void CGuild::dumpGuildInfos( NLMISC::CLog & log )
 	log.displayNL("\tIcon: 0x%016" NL_I64 "x", getIcon() );
 	log.displayNL("\tCiv Allegiance: %s", PVP_CLAN::toString(_DeclaredCiv).c_str());
 	log.displayNL("\tCult Allegiance: %s", PVP_CLAN::toString(_DeclaredCult).c_str());
+	log.displayNL("\tLast Failed PVE : %u", _LastFailedGVE);
+	for (uint8 i=0; i < 20; i++)
+	{
+		log.displayNL("\tChest '%s' Grades (View/Put/Get): %s %s %s",
+			_GuildInventoryView->getChestName(i).c_str(),
+			EGSPD::CGuildGrade::toString(_GuildInventoryView->getChestViewGrade(i)).c_str(),
+			EGSPD::CGuildGrade::toString(_GuildInventoryView->getChestPutGrade(i)).c_str(),
+			EGSPD::CGuildGrade::toString(_GuildInventoryView->getChestGetGrade(i)).c_str()
+			);
+	}
 
 	string buildingName;
 	TAIAlias buildingAlias = getBuilding();
@@ -1087,6 +1125,74 @@ void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32
 	}
 }
 
+
+//----------------------------------------------------------------------------
+void CGuild::moveItem( CCharacter * user, uint32 slot, uint32 dst_slot, uint32 quantity, uint16 session )
+{
+	// the session system works that way :
+	// As player can share this inventory, we manage a per item session value
+	// the user sends its session when he tries to manipulate the inventory. If it is higher than the targeted item session, it is okj
+	// The item session is incremented and the highest session value is then sent to the clients
+	// sessions are reseted when nobody uses the inventory
+
+	nlassert( user );
+
+	if( canAccessToGuildInventory( user ) == false )
+	{
+		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
+		return;
+	}
+
+	// check if user is trial
+	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
+	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return);
+	if ( p->isTrialPlayer() )
+	{
+		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_GUILD_INV_IS_TRIAL_PLAYER" );
+		return;
+	}
+
+
+	CGuildMemberModule * module;
+	if ( !user->getModuleParent().getModule(module) || !module->canTakeGuildItem() )
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
+		return;
+	}
+
+	// get the source item
+	CInventoryPtr srcItems = (CGuildInventory *)_Inventory;
+	if ( slot >= srcItems->getSlotCount() )
+	{
+		nlwarning( "<swapItem> user %s Invalid guild slot %u, count = %u",user->getId().toString().c_str(), slot, srcItems->getSlotCount() );
+		return;
+	}
+	CGameItemPtr srcItem = srcItems->getItem(slot);
+	if ( srcItem == NULL )
+	{
+		nlwarning( "<swapItem> user %s Invalid guild slot %u, count = %u -> NULL item",user->getId().toString().c_str(), slot, srcItems->getSlotCount() );
+		return;
+	}
+
+	// check session
+	if ( ! _GuildInventoryView->checkSession( slot, session ) )
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_BAD_SESSION" );
+		return;
+	}
+
+	// try to move the required quantity of the item
+	if ( CInventoryBase::moveItem(
+		_Inventory, slot,
+		_Inventory, dst_slot,
+		quantity ) != CInventoryBase::ior_ok )
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_PLAYER_BAG_FULL" );
+		return;
+	}
+}
+
+
 //----------------------------------------------------------------------------
 uint CGuild::selectItems(NLMISC::CSheetId itemSheetId, uint32 quality, std::vector<CItemSlotId> *itemList)
 {
@@ -1576,7 +1682,7 @@ void CGuild::updateMembersStringIds()
 {
 	// Optimized property access (part 1)
 //	static ICDBStructNode *membersArray = _DbGroup.Database.getICDBStructNodeFromName("GUILD:MEMBERS");
-	CBankAccessor_GUILD::TGUILD::TMEMBERS &memberDb = CBankAccessor_GUILD::getGUILD().getMEMBERS();
+//	CBankAccessor_GUILD::TGUILD::TMEMBERS &memberDb = CBankAccessor_GUILD::getGUILD().getMEMBERS();
 //	BOMB_IF(membersArray==NULL, "GUILD:MEMBERS not found in database.xml for guild "<< guildIdToString(getId())<<".", return);
 //	static ICDBStructNode::CTextId nameTextId = ICDBStructNode::CTextId("NAME");
 //	static ICDBStructNode *nodeOfNameOfMember0 = membersArray->getNode( 0 )->getNode(nameTextId, false);

@@ -1166,6 +1166,21 @@
             type="I32" />
       <leaf name="MONEY"
             type="I64" />
+      <branch name="CHEST">
+        <branch name=""
+              count="20">
+            <leaf name="NAME"
+                type="TEXT" />
+            <leaf name="VIEW_GRADE"
+              type="I3" />
+            <leaf name="PUT_GRADE"
+              type="I3" />
+            <leaf name="GET_GRADE"
+              type="I3" />
+            <leaf name="BULK_MAX"
+              type="I32" />
+        </branch>
+      </branch>
       <branch name=""
               count="1000"
               clientonly="1">

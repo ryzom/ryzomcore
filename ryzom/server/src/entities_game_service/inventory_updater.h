@@ -22,7 +22,7 @@
 
 /**
  * Generic inventory updater.
- * 
+ *
  * Bufferizes and sends item updates to the client.
  * The number of recipients of the updates is not fixed.
  *
@@ -99,7 +99,7 @@ protected:
 
 	/// Increment the stored "Info Version" number, but does not push it into the queue
 	void		incInfoVersion( TInventoryId invId, uint slotIndex );
-	
+
 	/// Push the "Info Version" number into the queue. It will be included in the next sending.
 	void		pushInfoVersion( TInventoryId invId, uint slotIndex );
 
@@ -125,7 +125,7 @@ protected:
 class CInventoryUpdaterForCharacter : public CInventoryUpdater<INVENTORIES::CInventoryCategoryForCharacter>
 {
 public:
-	
+
 	/// Constructor
 	CInventoryUpdaterForCharacter( CCDBSynchronised *propertyDatabase );
 
@@ -134,7 +134,7 @@ public:
 
 	/// Increment the stored "Info Version" number only if it's useful.
 	void		incInfoVersion( TInventoryId invId, uint slotIndex );
-	
+
 	/// Set the last sent info version, when the client requested to receive info sync.
 	void		syncInfoVersion( TInventoryId invId, uint slotIndex );
 
@@ -154,7 +154,7 @@ public:
 		incInfoVersion( invId, slotIndex );
 		return true;
 	}
-	
+
 	/// Set the last sent info version, when the client requested to receive info sync
 	bool		syncInfoVersion( INVENTORIES::TInventory inventory, uint slotIndex )
 	{
@@ -183,7 +183,7 @@ public:
 	{
 		TInventoryId invId = InvIdFromEInventory[inventory];
 		if ( invId != CInvCat::InvalidInvId )
-			CInventoryUpdater<CInvCat>::resetItem( invId, slotIndex );	
+			CInventoryUpdater<CInvCat>::resetItem( invId, slotIndex );
 		else
 			resetItemIntoClassicDatabase( inventory, slotIndex );
 	}
@@ -203,7 +203,7 @@ public:
 
 	/// Set an item slot, into classic database only (will not work for inventories for which isCompatibleWithInventory() is true)
 	void		setItemPropsToClassicDatabase( INVENTORIES::TInventory inventory, const INVENTORIES::CItemSlot& itemSlot );
-	
+
 	/// Set only one property of an item slot (alternate version, uses the classic databasase if the specified inventory is NOT part of CInventoryUpdater)
 	void		setOneItemProp( INVENTORIES::TInventory inventory, uint slotIndex, INVENTORIES::TItemPropId propId, sint32 value )
 	{
@@ -275,7 +275,7 @@ template <class CInventoryCategoryTemplate>
 void		CInventoryUpdater<CInventoryCategoryTemplate>::resetItem( TInventoryId invId, uint slotIndex )
 {
 	H_AUTO(IU_resetItem);
-	
+
 	// Update item update if found in the pending list
 	for ( typename CItemUpdates::iterator itu=_ItemUpdates[invId].begin(); itu!=_ItemUpdates[invId].end(); ++itu )
 	{
@@ -292,7 +292,7 @@ void		CInventoryUpdater<CInventoryCategoryTemplate>::resetItem( TInventoryId inv
 			return;
 		}
 	}
-	
+
 	// Otherwise add to list
 	CItemUpdate newItemUpdate;
 	_ItemUpdates[invId].push_back( newItemUpdate );
@@ -316,7 +316,7 @@ template <class CInventoryCategoryTemplate>
 void		CInventoryUpdater<CInventoryCategoryTemplate>::setItemProps( TInventoryId invId, const INVENTORIES::CItemSlot& itemSlot )
 {
 	H_AUTO(IU_setItemProps);
-	
+
 	// Update item update if found in the pending list
 	for ( typename CItemUpdates::iterator itu=_ItemUpdates[invId].begin(); itu!=_ItemUpdates[invId].end(); ++itu )
 	{
@@ -359,7 +359,7 @@ template <class CInventoryCategoryTemplate>
 void		CInventoryUpdater<CInventoryCategoryTemplate>::setOneItemProp( TInventoryId invId, uint slotIndex, INVENTORIES::TItemPropId propId, sint32 value )
 {
 	H_AUTO(IU_setOneItemProp);
-	
+
 	// Update itemSlot if found in the pending list
 	for ( typename CItemUpdates::iterator itu=_ItemUpdates[invId].begin(); itu!=_ItemUpdates[invId].end(); ++itu )
 	{
@@ -489,6 +489,7 @@ bool		CInventoryUpdater<CInventoryCategoryTemplate>::fillAllUpdates( NLMISC::CBi
 
 		// Number field
 		uint32 nbChanges = (uint32)_ItemUpdates[invId].size();
+		nlinfo("nbChanges= %d", nbChanges);
 		if ( nbChanges < INVENTORIES::LowNumberBound )
 		{
 			destStream.serial( nbChanges, INVENTORIES::LowNumberBits );
