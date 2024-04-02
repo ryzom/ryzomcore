@@ -49,6 +49,8 @@ CMovePrimitive::CMovePrimitive (CMoveContainer* container, uint8 firstWorldImage
 	_StaticFlags=0;
 	_RootOTInfo=NULL;
 	_LastTestTime=0xffffffff;
+	_ZOffset = 0;
+	_HaveZOffset = false;
 
 	// Ptr table alloc
 	_WorldImages=_Container->allocateWorldImagesPtrs (numWorldImage);
@@ -148,6 +150,11 @@ void CMovePrimitive::checkSortedList ()
 bool CMovePrimitive::isTriggered (CMovePrimitive& second, bool enter, bool exit)
 {
 	// Generate a trigger ?
+
+
+	// Is one of them is a stairs trigger ?
+	if ( second._StaticFlags&OverlapStairsTrigger )
+		return true;
 
 	// Is the two are not triggers ?
 	if ( ( (_StaticFlags&TriggerMask) == NotATrigger ) && ( (second._StaticFlags&TriggerMask) == NotATrigger ) )

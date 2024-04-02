@@ -461,7 +461,7 @@ void CEntityManager::initialize(uint nbMaxEntity)
 		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamUIDObserver, textId );
 		_GroupMemberUidDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
 		nlassert(_GroupMemberUidDB[i]);
-		
+
 		text = toString(TEAM_DB_PATH ":%d:NAME", i);
 		textId = ICDBNode::CTextId(text);
 		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamPresentObserver, textId );
@@ -477,13 +477,13 @@ void CEntityManager::initialize(uint nbMaxEntity)
 		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalUIDObserver, textId);
 		_BeastUidDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
 		nlassert(_BeastUidDB[i]);
-		
+
 		text = toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS", i);
 		textId = ICDBNode::CTextId(text);
 		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalStatusObserver, textId);
 		_BeastStatusDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
 		nlassert(_BeastStatusDB[i]);
-		
+
 		text = toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", i);
 		_BeastTypeDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
 		nlassert(_BeastTypeDB[i]);
@@ -550,7 +550,7 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 			primitive = PACS->addCollisionablePrimitive(dynamicWI, 1);
 			primitive->setDontSnapToGround(false);
 		}
-	
+
 		// Put instance in last deleted position if found
 		if (_LastRemovedInstance != -1)
 		{
@@ -565,7 +565,7 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 			_ShapeInstances[idx].BboxActive = !text.empty() || !url.empty();
 			_ShapeInstances[idx].Deleted = false;
 			_ShapeInstances[idx].InIGZone = inIgZone > 0;
-			
+
 			_LastRemovedInstance = _ShapeInstances[idx].LastDeleted;
 			_ShapeInstances[idx].LastDeleted = -1;
 			TIGZoneShapes::iterator it = _IgZoneShapes.find(inIgZone);
@@ -658,7 +658,7 @@ CVector CEntityManager::getInstancePos(uint32 idx)
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return  CVector(0,0,0);
-	
+
 	return instance.getPos();
 }
 
@@ -666,17 +666,17 @@ bool CEntityManager::setInstancePos(uint32 idx, CVector pos)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return false;
-	
+
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return false;
-	
+
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
 	if (primitive)
 	{
 		primitive->setGlobalPosition(_ShapeInstances[idx].PrimRelativePos + pos, dynamicWI);
 	}
-		
+
 	instance.setPos(pos);
 	return true;
 }
@@ -685,11 +685,11 @@ CVector CEntityManager::getInstanceRot(uint32 idx)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return CVector(0,0,0);
-	
+
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return  CVector(0,0,0);
-		
+
 	return instance.getRotEuler();
 }
 
@@ -697,13 +697,13 @@ bool CEntityManager::setInstanceRot(uint32 idx, CVector rot)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return false;
-	
+
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return false;
-	
+
 	instance.setRotEuler(rot);
-	
+
 	return true;
 }
 
@@ -715,7 +715,7 @@ CVector CEntityManager::getInstanceScale(uint32 idx)
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return  CVector(0,0,0);
-	
+
 	return instance.getScale();
 }
 
@@ -723,7 +723,7 @@ CVector CEntityManager::getInstanceColPos(uint32 idx)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return CVector(0,0,0);
-	
+
 	return _ShapeInstances[idx].PrimRelativePos;
 }
 
@@ -735,11 +735,11 @@ CVector CEntityManager::getInstanceColScale(uint32 idx)
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
 	if (!primitive)
 		return CVector(0,0,0);
-	
+
 	float width, depth;
 	primitive->getSize(width, depth);
 	float height = primitive->getHeight();
-	
+
 	return CVector(width, depth, height);
 }
 
@@ -747,11 +747,11 @@ double CEntityManager::getInstanceColOrient(uint32 idx)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return 0.f;
-	
+
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
 	if (!primitive)
 		return 0.f;
-	
+
 	return primitive->getOrientation(dynamicWI);
 }
 
@@ -763,21 +763,21 @@ CVector CEntityManager::getInstanceBBoxMin(uint32 idx)
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if (instance.empty())
 		return  CVector(0,0,0);
-		
+
 	NLMISC::CAABBox bbox;
 	_ShapeInstances[idx].Instance.getShapeAABBox(bbox);
-	
+
 	CVector bbox_min;
-	
+
 	if (bbox.getCenter() == CVector::Null)
 		bbox_min = CVector(-0.5f, -0.5f, -0.5f);
 	else
 		bbox_min = bbox.getMin();
-	
+
 	bbox_min.x *= _ShapeInstances[idx].Instance.getScale().x;
 	bbox_min.y *= _ShapeInstances[idx].Instance.getScale().y;
 	bbox_min.z *= _ShapeInstances[idx].Instance.getScale().z;
-	
+
 	return bbox_min+_ShapeInstances[idx].Instance.getPos();
 }
 
@@ -789,28 +789,28 @@ CVector CEntityManager::getInstanceBBoxMax(uint32 idx)
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return  CVector(0,0,0);
-	
+
 	NLMISC::CAABBox bbox;
 	_ShapeInstances[idx].Instance.getShapeAABBox(bbox);
-	
+
 	CVector bbox_max;
-	
+
 	if (bbox.getCenter() == CVector::Null)
 		bbox_max = CVector(-0.5f, -0.5f, -0.5f);
 	else
 		bbox_max = bbox.getMax();
-	
+
 	bbox_max.x *= _ShapeInstances[idx].Instance.getScale().x;
 	bbox_max.y *= _ShapeInstances[idx].Instance.getScale().y;
 	bbox_max.z *= _ShapeInstances[idx].Instance.getScale().z;
-	
+
 	return bbox_max+_ShapeInstances[idx].Instance.getPos();
 }
 
 bool CEntityManager::removeInstances()
 {
 	if (!Scene) return false;
-	
+
 	for(uint i=0; i<_ShapeInstances.size(); ++i)
 	{
 		if (!_ShapeInstances[i].InIGZone)
@@ -823,13 +823,13 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return false;
-	
+
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return false;
-	
+
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
-	
+
 	for (uint32 i=0; i < keys.size(); i++)
 	{
 		string param = keys[i];
@@ -900,7 +900,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		{
 			float v;
 			CVector pos = getInstancePos(idx);
-			
+
 			if (getRelativeFloatFromString(values[i], v))
 			{
 				updateVector(param, pos, v, true);
@@ -913,10 +913,10 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		}
 		else if (param == "rot x" || param == "rot y" || param == "rot z")
 		{
-			
+
 			float v;
 			CVector rot = getInstanceRot(idx);
-			
+
 			if (getRelativeFloatFromString(values[i], v))
 			{
 				updateVector(param, rot, v, true);
@@ -931,7 +931,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		{
 			float v;
 			CVector scale = instance.getScale();
-			
+
 			if (getRelativeFloatFromString(values[i], v))
 			{
 				updateVector(param, scale, v, true);
@@ -942,18 +942,20 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			}
 			instance.setScale(scale);
 		}
-		
+
 		// Primitive colissions setups
-		
+
 		if (!primitive) continue;
-		
+
 		if (param == "col size x" || param == "col size y" || param == "col size z")
 		{
 			float width, depth;
 			primitive->getSize(width, depth);
 			float height = primitive->getHeight();
-			
+
 			CVector size = CVector(width, depth, height);
+			if (primitive->getTriggerType() == UMovePrimitive::OverlapStairsTrigger)
+				size.z -= 10.0f;
 			float v;
 			if (getRelativeFloatFromString(values[i], v))
 			{
@@ -963,6 +965,8 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			{
 				updateVector(param, size, v, false);
 			}
+			if (primitive->getTriggerType() == UMovePrimitive::OverlapStairsTrigger)
+				size.z += 10.0f;
 			primitive->setSize(size.x, size.y);
 			primitive->setHeight(size.z);
 		}
@@ -970,7 +974,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		{
 			CVector pos = instance.getPos();
 			float v;
-			
+
 			if (getRelativeFloatFromString(values[i], v))
 			{
 				updateVector(param, _ShapeInstances[idx].PrimRelativePos, v, false);
@@ -990,10 +994,10 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		{
 			double orient = primitive->getOrientation(dynamicWI);
 			double v = 0.f;
-			
+
 			if (values[i].empty())
 				continue;
-			
+
 			if (values[i][0] == '+')
 			{
 				fromString(values[i].substr(1), v);
@@ -1004,7 +1008,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 				fromString(values[i], v);
 				orient = v;
 			}
-			
+
 			primitive->setOrientation(orient, dynamicWI);
 		}
 		else if (param == "col mask player")
@@ -1033,9 +1037,23 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			fromString(values[i], active);
 			primitive->setObstacle(active);
 		}
-		else if (param == "col obstacle")
+		else if (param == "col stairs")
 		{
-			
+			bool active;
+			fromString(values[i], active);
+			primitive->setObstacle(!active);
+			if (active)
+			{
+				primitive->setReactionType(UMovePrimitive::DoNothing);
+				primitive->setTriggerType(UMovePrimitive::OverlapStairsTrigger);
+				primitive->setGlobalPosition(instance.getPos(), dynamicWI);
+			}
+			else
+			{
+				primitive->setReactionType(UMovePrimitive::Slide);
+				primitive->setTriggerType(UMovePrimitive::NotATrigger);
+				primitive->setGlobalPosition(instance.getPos(), dynamicWI);
+			}
 		}
 	}
 
@@ -1048,7 +1066,7 @@ CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float 
 	CShapeInstanceReference selectedInstance(UInstance(), string(""), string(""));
 	_LastInstanceUnderPos= NULL;
 	idx = -1;
-	
+
 	// If not initialised, return
 	if (_ShapeInstances.empty())
 		return selectedInstance;
@@ -2397,7 +2415,9 @@ CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<string> &keywo
 		bool match = true;
 		for (uint k = 0; k < lcKeywords.size(); ++k)
 		{
-			if (lcName.find(lcKeywords[k]) == string::npos)
+			string::size_type poswc = lcKeywords[k].find_first_of("?*");
+			if ((poswc != string::npos && !testWildCard(lcName, lcKeywords[k]))
+				|| (poswc == string::npos && lcName.find(lcKeywords[k]) == string::npos))
 			{
 				match = false;
 				break;

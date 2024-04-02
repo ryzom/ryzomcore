@@ -204,7 +204,7 @@
 </template>
 
 <!-- //////////// TEMPLATE : webig_inv_item /////////// -->
-	<template name="webig_inv_item" line_maxw="40" ql0="" ql1="" ql2=""  q0="" q1="" q2="" q3="" q4="" q5="" q6="" q7="" o0="" o1="" o2="" o3="" o4="" o5="" o6="" o7="" render_layer1="1" render_layer2="2" render_layer3="3" render_layer4="4" w="43" keep="true" img1="token_basic.tga" img2="" img3="" img4="" tooltip="" quality="" quantity="" overlay="" text="" text2="" color="255 255 255 255" gc1="true" gc2="true" color2="255 255 255 255" slotbg="w_slot_item.tga" slotbg_gc="true" bg="blank2.tga" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" ctrl_color="0 0 0 0" col_over="255 255 255 50" col_pushed="255 255 255 0" params_over="" params_l="" params_r="" x="0" y="0">
+	<template name="webig_inv_item" line_maxw="40" ql0="" ql1="" ql2="" ql3="" q0="" q1="" q2="" q3="" q4="" q5="" q6="" q7="" o0="" o1="" o2="" o3="" o4="" o5="" o6="" o7="" render_layer1="1" render_layer2="2" render_layer3="3" render_layer4="4" w="43" keep="true" img1="token_basic.tga" img2="" img3="" img4="" tooltip="" quality="" quantity="" overlay="" text="" text2="" color="255 255 255 255" gc1="true" gc2="true" color2="255 255 255 255" slotbg="w_slot_item.tga" slotbg_gc="true" bg="blank2.tga" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" ctrl_color="0 0 0 0" col_over="255 255 255 50" col_pushed="255 255 255 0" params_over="" params_l="" params_r="" x="0" y="0">
 		<group id="#id" posref="MM MM" w="#w" h="43" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
 			<view type="bitmap" id="back" posref="ML ML" x="3" y="0" h="42" w="42" scale="true" render_layer="#render_layer1" texture="#slotbg" color="255 255 255 255" global_color="#slotbg_gc" />
 			<view type="bitmap" id="bg" posparent="back" posref="MM MM" x="" y="0" w="40" h="40" render_layer="#render_layer2" scale="false" texture="#bg"  global_color="false" />
@@ -215,7 +215,7 @@
 			<instance id="over" template="typo_ryzom" posref="TL TL" render_layer="6" x="4" y="-2" t0="#o0" t1="#o1" t2="#o2" t3="#o3" t4="#o4" t5="#o5" t6="#o6" t7="#o7" />
 
 			<instance id="quantity" template="typo_ryzom" posref="BL BL" typo="numbers" render_layer="5" posparent="" x="5" y="1" t0="#q0" t1="#q1" t2="#q2" t3="#q3" t4="#q4" t5="#q5" t6="#q6" t7="#q7" />
-			<instance id="quality" template="typo_ryzom" posref="BL BL" typo="numbers" render_layer="5" posparent="back" x="24" y="1" t0="#ql0" t1="#ql1" t2="#ql2" gc="true"/>
+			<instance id="quality" template="typo_ryzom" posref="BL BL" typo="numbers" render_layer="5" posparent="back" x="24" y="1" t0="#ql0" t1="#ql1" t2="#ql2" t3="#ql3" gc="true"/>
 			<view type="bitmap" id="numbers_back" posparent="" posref="BL BL" render_layer="4" x="3" y="0" h="10" w="42" scale="true" texture="blank.tga" color="0 0 0 150" global_color="false" />
 
 			<view type="text" id="text1" multi_line="true" line_maxw="#line_maxw" multi_line_maxw_only="true" posref="TR TL" posparent="back" x="3" y="1" fontsize="8" hardtext_format="#text" color="#color1" shadow="true" global_color="#gc1" />
@@ -282,7 +282,7 @@
 		</group>
 	</template>
 
-	<template name="ark_empty_slot_view" posparent="parent" posref="TL TL" id="" cam_pos="0 24.5 -0.2" cam_tar="0.0 26.5 0.0" shape_pos="26" keep="true" h="150" w="150" x="0" y="0" shape="empty.shape" tooltip="" params_l="" params_over="">
+	<template name="ark_empty_slot_view" posparent="parent" posref="TL TL" id="" cam_pos="0 24.5 -0.2" cam_tar="0.0 26.5 0.0" shape_pos="0 26 0.1" shape2_pos="0 25.5 0.1" shape_rot="0 0 0" shape2_rot="0 0 0"  keep="true" h="150" w="150" x="0" y="0" shape="empty.shape" shape2="" tooltip="" params_l="" params_over="">
 		<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="">
 			<ctrl type="button" id="selection" button_type="push_button" tx_normal="blank.tga" render_layer="-5" tx_pushed="blank.tga" tx_over="blank.tga" color="50 50 50 0" col_over="50 50 50 0" col_pushed="50 50 50 200"  global_color_normal="false" global_color="false" scale="true" posref="MM MM" x="0" y="0" w="#w" h="#h" tooltip="#tooltip" tooltip_posref="BM TM" onclick_l="lua" params_l="#params_l" onover="lua" params_over="#params_over"/>
 			<scene3d id="scene" posparent="#posparent" w="#w" h="#h" x="#x" y="#y" posref="#posref" curcam="cam" curcs="env"  user_interaction="false"
@@ -290,7 +290,8 @@
 				<camera id="cam" fov="80" pos="#cam_pos" target="#cam_tar" roll="0" />
 				<light id="back" pos="0.0 28.2 1.6" color="96 64 32 255" near="2.5" far="4.0" />
 				<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
-				<shape id="shape" name="#shape" pos="0.0 #shape_pos 0.1" rot="0.0 0.0 0.0" />
+				<shape id="shape" name="#shape" pos="#shape_pos" rot="#shape_rot" />
+				<shape id="shape2" name="#shape2" pos="#shape2_pos" rot="#shape2_rot" />
 			</scene3d>
 		</group>
 	</template>

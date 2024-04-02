@@ -179,7 +179,7 @@ public :
 	/**
 	 * Transmit a far chat message to a group
 	 */
-	void farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const ucstring &text, const ucstring &senderName);
+	void farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const ucstring &text, const ucstring &senderName, uint32 senderCid = 0);
 
 	/**
 	 * Transmit a chat message to the receiver
@@ -191,7 +191,7 @@ public :
 	/**
 	 * Transmit a chat message to the receiver
 	 */
-	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr   );
+	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr);
 	/**
 	 * Transmit a chat message to the receiver
 	 * \param sender is the id of the speaking char
@@ -395,8 +395,8 @@ public:
 	/**
 	 * Send a far chat message
 	 */
-	void sendFarChat(const std::string &name, const ucstring& ucstr, const std::string &chan, const std::string &rocketId = "");
-	void sendFarChat( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, const ucstring& ucstr, const ucstring &senderName, TChanID chanID = NLMISC::CEntityId::Unknown);
+	void sendFarChat(const std::string &name, const ucstring& ucstr, const std::string &chan, const std::string &rocketId = "", uint32 senderCid = 0);
+	void sendFarChat( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, const ucstring& ucstr, const ucstring &senderName, TChanID chanID = NLMISC::CEntityId::Unknown, uint32 senderCid = 0);
 
 	/**
 	 * Send a chat message
@@ -416,8 +416,9 @@ public:
 	 * \param phraseId the string manager string number of the chat phrase
 	 * \param sender is the id of the sender
 	 * \param customTxt is a custom text which can be added immediately after the chat message, on the same line
+	 * \param isEmote if true, change receiver to unknown so that client dont display "toto says : toto bows"
 	 */
-	void sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender = TDataSetRow(), ucstring customTxt = ucstring(""));
+	void sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender = TDataSetRow(), ucstring customTxt = ucstring(""), bool isEmote = false);
 
 	/**
 	 * Send a custom emote chat message

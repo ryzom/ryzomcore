@@ -75,19 +75,15 @@ namespace NLGUI
 		}
 		catch( const ELuaError &e )
 		{
-			std::string ryzom_version = RYZOM_VERSION;
-			if (!FINAL_VERSION || ryzom_version.find("Omega") == std::string::npos) // Omega version are the one used on live servers
+			nlwarning("--- LUA ERROR ---");
+			nlwarning(e.luaWhat().c_str());
+			std::vector<std::string> res;
+			NLMISC::explode(luaScript, std::string("\n"), res);
+			for(uint k = 0; k < res.size(); ++k)
 			{
-				nlwarning("--- LUA ERROR ---");
-				nlwarning(e.luaWhat().c_str());
-				std::vector<std::string> res;
-				NLMISC::explode(luaScript, std::string("\n"), res);
-				for(uint k = 0; k < res.size(); ++k)
-				{
-					nlwarning("%.05u %s", k, res[k].c_str());
-				}
-				nlwarning("--- ********* ---");
+				nlwarning("%.05u %s", k, res[k].c_str());
 			}
+			nlwarning("--- ********* ---");
 			return false;
 		}
 

@@ -139,7 +139,50 @@ function help:continueLesson(id, url)
 	webig:checkUrl(url)
 end
 
+function help:checkSkipTutorial()
+	local skip_tutorial = getDbProp("UI:SAVE:SKIP_TUTORIAL")
+	if skip_tutorial == 0 then
+		debug("Skip Tutorial")
+		setDbProp("UI:SAVE:SKIP_TUTORIAL", 1)
+		help:skipTutorial()
+	end
+end
 
+function help:checkSkipWelcomeTutorial()
+	getUI("ui:interface:player").active = true
+	getUI("ui:interface:target").active = true
+
+	local skip_welcome = getDbProp("UI:SAVE:SKIP_WELCOME")
+	local skip_tutorial = getDbProp("UI:SAVE:SKIP_TUTORIAL")
+	debug("Welcome : "..tostring(skip_welcome).." Tuto : "..tostring(skip_tutorial))
+	if skip_welcome == 0 or skip_tutorial == 0 then
+		debug("Skip welcome & tutorial")
+		help:skipTutorial()
+	else
+		debug("Already skiped welcome & tutorial")
+		function help:checkCapActive()
+		end
+	end
+end
+
+function help:updateRpbg(slot)
+	local rpbg_key_file = io.open("save/rpbg_"..slot..".key", "rb")
+	if rpbg_key_file then
+		debug("Setup RP BG save/rpbg_"..slot..".key")
+		rpbg_key = rpbg_key_file:read()
+		rpbg_key_file:close()
+		os.remove("save/rpbg_"..slot..".key")
+		WebQueue:push("https://app.ryzom.com/app_arcc/outgame_rpbg.php?action=save&key="..rpbg_key)
+	end
+end
+
+function help:checkTutorialMilkoPad()
+	getUI("ui:interface:cap_popup").active = false
+	removeOnDbChange(getUI("ui:interface"), "@UI:SAVE:MK_MODE")
+	if getDbProp("UI:SAVE:SKIP_TUTORIAL") == 0 then
+		addOnDbChange(getUI("ui:interface"), "@UI:SAVE:MK_MODE", "game:resizeMilkoPad()")
+	end
+end
 
 -- VERSION --
-RYZOM_HELP_VERSION = 324
+RYZOM_HELP_VERSION = 335

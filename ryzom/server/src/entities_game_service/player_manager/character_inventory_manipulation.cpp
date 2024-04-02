@@ -3584,8 +3584,10 @@ void CCharacter::applyItemModifiers(const CGameItemPtr &item)
 	}
 
 	// init all modifiers due to equipment
+	nlinfo("Current _ParryModifier = Total : %d", _ParryModifier);
 	_DodgeModifier += item->dodgeModifier();
 	_ParryModifier += item->parryModifier();
+	nlinfo("+ Item Parry = Total : + %d = %d", item->parryModifier(), _ParryModifier);
 	_AdversaryDodgeModifier += item->adversaryDodgeModifier();
 	_AdversaryParryModifier += item->adversaryParryModifier();
 	// update DB for modifiers

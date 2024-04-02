@@ -487,6 +487,9 @@ CClientConfig::CClientConfig()
 	MediaPlayerDirectory	= "music";
 	MediaPlayerAutoPlay		= false;
 
+	EnableEventsBnp			= true;
+	EnableOccsBnp			= false;
+
 //	PreDataPath.push_back("data/gamedev/language/");	// Default Path for the language data
 
 //	DataPath.push_back("data/");					// Default Path for the Data.
@@ -916,21 +919,21 @@ void CClientConfig::setValues()
 	READ_STRING_FV(FSHost)
 
 	READ_BOOL_DEV(DisplayAccountButtons)
-	
-	
+
+
 	READ_STRING_FV(CreateAccountURL)
 	READ_STRING_FV(EditAccountURL)
 	READ_STRING_FV(ForgetPwdURL)
-	
+
 	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(FreeTrialURL)
 
 	// defined in client_default.cfg
 	READ_STRING_FV(LoginSupportURL)
-	
+
 	// read NamingPolicyURL from client_default.cfg
 	//READ_STRING_FV(NamingPolicyURL)
-	
+
 	std::string languageCo = "wk";
 	CConfigFile::CVar *languageCodeVarPtr = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
 
@@ -960,7 +963,7 @@ void CClientConfig::setValues()
 			}
 		}
 	}
-	
+
 	// read NamingPolicyURL from client_default.cfg
 	//READ_STRING_FV(ConditionsTermsURL)
 	CConfigFile::CVar *coturl = ClientCfg.ConfigFile.getVarPtr("ConditionsTermsURL");
@@ -970,7 +973,7 @@ void CClientConfig::setValues()
 		for (uint i = 0; i < coturl->size(); ++i)
 		{
 			std::string entry = coturl->asString(i);
-			
+
 			if (entry.size() >= languageCo.size())
 			{
 				if (nlstricmp(entry.substr(0, languageCo.size()), languageCo) == 0)
@@ -985,7 +988,7 @@ void CClientConfig::setValues()
 			}
 		}
 	}
-	
+
 
 #ifndef RZ_NO_CLIENT
 	// if cookie is not empty, it means that the client was launch
@@ -1177,7 +1180,7 @@ void CClientConfig::setValues()
 	READ_STRING_FV(WebIgMainDomain);
 	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
 		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
-		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
+		ClientCfg.WebIgMainDomain = "https://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);
@@ -1371,6 +1374,9 @@ void CClientConfig::setValues()
 
 	//////////
 	// MISC //
+
+	READ_BOOL_FV(EnableEventsBnp);
+	READ_BOOL_FV(EnableOccsBnp);
 
 	// Pre Data Path.
 	READ_STRINGVECTOR_FV(PreDataPath);

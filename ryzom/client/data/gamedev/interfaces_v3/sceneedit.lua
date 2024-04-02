@@ -561,6 +561,21 @@ function SceneEditor:get_html_section(message, color)
 	return '<table width="100%" cellspacing="0" cellpadding="0"><tr bgcolor="'..color..'"><td align="center" valign="middle"><font color="#FFFFFF" size="12">'..message..'</font></td></tr></table>'
 end
 
+function SceneEditor:onOverShapeButton(shape_id)
+	if SceneEditor.lastColorizedCheck then
+		setupShape(SceneEditor.lastColorizedCheck, {colorize="0"})
+	end
+	SceneEditor.lastColorizedCheck = shape_id
+	setupShape(shape_id, {colorize="255 0 0 255"})
+end
+
+function SceneEditor:setupShapeButton(shape_id)
+	local button = getUI("ui:interface:ark_scene_editor:browser:content:html"):find("shape_"..shape_id):find("b")
+	button.onover = "lua"
+	button.params_over = "SceneEditor:onOverShapeButton("..shape_id..")"
+end
+
+
 function SceneEditor:get_html(message, message_bg)
 	debug("get_html :"..message)
 	local new_group = '&nbsp;&nbsp;<a class="ryzom-ui-button" href="'..self.baseUrl..'_AddGroup&amp;add_new_group=1&amp;scene_id='..self.sceneId..'"><img src="'..self.iconsUrl..'/32/chart_organisation_add.png" alt="'..self.T["add_new_group"]..'" /></a>'
@@ -627,15 +642,20 @@ function SceneEditor:get_html(message, message_bg)
 						if k % 2 == 0 then
 							color = "101010"
 						end
-						local text_color = "ef9b64"
 						if self.Shapes[shape_id].modified == "modified" then
-							 text_color = "aa5555"
+							color = "aa5555"
 						else
 							if self.Shapes[shape_id].modified == "added" then
-								 text_color = "55aa55"
+								color = "55aa55"
 							end
 						end
-						table.insert(shapes_html_dict, {id=shape.db_id, html="<tr bgcolor='#"..color.."'><td height='20px'>&nbsp;<input type='hidden' name='shape[]', value='"..SceneEditor:enc64((shape.db_id or '')..":"..Json.encode(shape)).."' />"..'#'..(shape.db_id or '0').." <a href='ah:lua:SceneEditor:launch_menu("..tostring(shape_id)..")'><font color='#"..text_color.."'>"..shape.file.."</font></a></td>\
+						table.insert(shapes_html_dict, {id=shape.db_id, html="<tr bgcolor='#"..color.."'>\
+						<td height='20px'>&nbsp;\
+							<input type='hidden' name='shape[]', value='"..SceneEditor:enc64((shape.db_id or '')..":"..Json.encode(shape)).."' />\
+							"..'#'..(shape.db_id or '0').." <a class='ryzom-ui-button' name='shape_"..tostring(shape_id).."' href='ah:lua:SceneEditor:launch_menu("..tostring(shape_id)..")'>\
+							"..shape.file.."</a>\
+							<lua>SceneEditor:setupShapeButton('"..tostring(shape_id).."')</lua>\
+						</td>\
 						<td width='30px'><a href='ah:lua:SceneEditor:editShapeProperties("..tostring(shape_id)..")'><img src='"..self.iconsUrl.."/16/layout_edit.png' /></a></td>\
 						<td width='3px'><a href='ah:lua:SceneEditor:removeShape("..tostring(shape_id)..")'><img src='"..self.iconsUrl.."/16/cross.png' /></a></td>\
 						</tr>"})
@@ -667,7 +687,6 @@ function SceneEditor:get_html(message, message_bg)
 		ui:renderHtml(html)
 	end
 end
-
 
 -- VERSION --
 RYZOM_SCENEEDIT_VERSION = 328
