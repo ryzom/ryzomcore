@@ -1418,7 +1418,7 @@ bool mainLoop()
 		MainCam.setTransformMode(UTransformable::RotQuat);
 
 		CVector cameraMoves = UserEntity->getCameraMoves();
-
+		
 		currViewPos.z += cameraMoves.z;
 		MainCam.setPos(currViewPos);
 		MainCam.setRotQuat(View.currentViewQuat());
@@ -1432,7 +1432,7 @@ bool mainLoop()
 		}
 
 		UserEntity->setCameraMoves(CVector(0, 0, 0));
-
+		
 		if (StereoHMD)
 		{
 			CMatrix camMatrix;
@@ -2979,41 +2979,15 @@ CVector PacsBox[PacsBoxPointCount] =
 	CVector(	0.5f,	0.5f,	0),	CVector(	-0.5f,	0.5f,	0),
 	CVector(	-0.5f,	0.5f,	0),	CVector(	-0.5f,	-0.5f,	0),
 
-	CVector(	-0.5f,	-0.5f,	0),	CVector(	-0.5f,	-0.5f,	1),
-	CVector(	0.5f,	-0.5f,	0),	CVector(	0.5f,	-0.5f,	1),
-	CVector(	0.5f,	0.5f,	0),	CVector(	0.5f,	0.5f,	1),
-	CVector(	-0.5f,	0.5f,	0),	CVector(	-0.5f,	0.5f,	1),
-
-	CVector(	-0.5f,	-0.5f,	1),	CVector(	0.5f,	-0.5f,	1),
-	CVector(	0.5f,	-0.5f,	1),	CVector(	0.5f,	0.5f,	1),
-	CVector(	0.5f,	0.5f,	1),	CVector(	-0.5f,	0.5f,	1),
-	CVector(	-0.5f,	0.5f,	1),	CVector(	-0.5f,	-0.5f,	1),
-};
-
-const uint PacsStairPointCount = 32;
-
-CVector PacsStair[PacsStairPointCount] =
-{
-	CVector(	-0.5f,	-0.5f,	0),	CVector(	0.5f,	-0.5f,	0),
-	CVector(	0.5f,	-0.5f,	0),	CVector(	0.5f,	0.5f,	0),
-	CVector(	0.5f,	0.5f,	0),	CVector(	-0.5f,	0.5f,	0),
-	CVector(	-0.5f,	0.5f,	0),	CVector(	-0.5f,	-0.5f,	0),
-
-	CVector(	-0.5f,	-0.5f,	0),	CVector(	-0.5f,	-0.5f,	1),
-	CVector(	0.5f,	-0.5f,	0),	CVector(	0.5f,	-0.5f,	1),
-	CVector(	0.5f,	0.5f,	0),	CVector(	0.5f,	0.5f,	1),
-	CVector(	-0.5f,	0.5f,	0),	CVector(	-0.5f,	0.5f,	1),
-
 	CVector(	-0.5f,	-0.5f,	1),	CVector(	0.5f,	-0.5f,	1),
 	CVector(	0.5f,	-0.5f,	1),	CVector(	0.5f,	0.5f,	1),
 	CVector(	0.5f,	0.5f,	1),	CVector(	-0.5f,	0.5f,	1),
 	CVector(	-0.5f,	0.5f,	1),	CVector(	-0.5f,	-0.5f,	1),
 
-	CVector(	-0.5f,	-0.5f,	1),	CVector(	0.5f,	0.5f,	1),
-	CVector(	-0.5f,	0.5f,	1),	CVector(	0.5f,	-0.5f,	1),
-	CVector(	-0.5f,	0,		1),	CVector(	0.5f,	0,		1),
-	CVector(	0,	-	0.5f,	1),	CVector(	0,		0.5f,	1),
-
+	CVector(	-0.5f,	-0.5f,	0),	CVector(	-0.5f,	-0.5f,	1),
+	CVector(	0.5f,	-0.5f,	0),	CVector(	0.5f,	-0.5f,	1),
+	CVector(	0.5f,	0.5f,	0),	CVector(	0.5f,	0.5f,	1),
+	CVector(	-0.5f,	0.5f,	0),	CVector(	-0.5f,	0.5f,	1),
 };
 
 const uint PacsCylPointCount = 48;
@@ -3067,7 +3041,6 @@ void displayPACSPrimitive()
 
 		// Distance
 		CVector position = prim->getFinalPosition(wI);
-		bool isStairs = false;
 		if ((position-UserEntity->pos()).sqrnorm() < (200*200))
 		{
 			// Choose a color
@@ -3075,14 +3048,8 @@ void displayPACSPrimitive()
 			if (prim->isCollisionable())
 			{
 				// Static collision
-				if (prim->getTriggerType() == UMovePrimitive::OverlapStairsTrigger)
+				if (prim->getReactionType() == UMovePrimitive::DoNothing)
 				{
-					line.Color0 = CRGBA::Green;
-					isStairs = true;
-					position.z -= 10.0f;
-				}
-				else if (prim->getReactionType() == UMovePrimitive::DoNothing)
- 				{
 					line.Color0 = CRGBA::Red;
 				}
 				else
@@ -3112,16 +3079,8 @@ void displayPACSPrimitive()
 			// Draw the primitive
 			if (prim->getPrimitiveType() == UMovePrimitive::_2DOrientedBox)
 			{
-				if (isStairs)
-				{
-					lines = PacsStair;
-					linecount = PacsStairPointCount/2;
-				}
-				else
-				{
-					lines = PacsBox;
-					linecount = PacsBoxPointCount/2;
-				}
+				lines = PacsBox;
+				linecount = PacsBoxPointCount/2;
 				float width;
 				float depth;
 				prim->getSize (width, depth);
