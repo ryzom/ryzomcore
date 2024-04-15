@@ -50,6 +50,7 @@ private:
 	static int  updateAllLocalisedElements(CLuaState &ls);
 	static int  isShiftDown(CLuaState &ls);
 	static int  isCtrlDown(CLuaState &ls);
+	static int  isTabDown(CLuaState &ls);
 	static int  getTimestampHuman(CLuaState &ls);
 	static int  breakPoint(CLuaState &ls);
 	static int  i18n(CLuaState &ls);			// retrieve an unicode string from CI18N
@@ -91,6 +92,7 @@ private:
 	static int	getPlayerTitle(CLuaState &ls);
 	static int	getPlayerTag(CLuaState &ls);
 	static int	getPlayerMode(CLuaState &ls);
+	static int	getPlayerPrivs(CLuaState &ls);
 	static int	getTargetPos(CLuaState &ls);
 	static int	getTargetFront(CLuaState &ls);
 	static int	getTargetDirection(CLuaState &ls);
@@ -106,6 +108,7 @@ private:
 	static int	isPlayerFreeTrial(CLuaState &ls);
 	static int	isPlayerNewbie(CLuaState &ls);
 	static int  isInRingMode(CLuaState &ls);
+	static int  isPlayerPrivilege(CLuaState &ls);
 	static int  getUserRace(CLuaState &ls);
 	static int  getSheet2idx(CLuaState &ls);
 	static int	getTargetSlot(CLuaState &ls);
@@ -136,6 +139,7 @@ private:
 	static int getShapeColScale(CLuaState &ls);
 	static int getShapeColOrient(CLuaState &ls);
 	static int deleteShape(CLuaState &ls);
+
 
 	///////////////////////////// Standard Lua stuff ends here //////////////////////////////////////////////
 
