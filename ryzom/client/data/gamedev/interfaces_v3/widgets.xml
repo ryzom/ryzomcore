@@ -1453,7 +1453,7 @@
         </group>
     </template>
 
-    <template name="tguildinv_nbslots_bulk_weight" id="" inv_branch_nb="100" inv_branch="" inv_bulk_max="" posparent="parent" posref="TL TL" x="0" y="0" selected_chest="">
+    <template name="tguildinv_nbslots_bulk_weight" id="" inv_branch_nb="500" inv_branch="" inv_bulk_max="" posparent="parent" posref="TL TL" x="0" y="0" selected_chest="">
         <group id="#id" sizeref="w" h="16" posref="#posref">
             <group id="bulk_weight" child_resize_w="true" child_resize_wmargin="4" h="16" posref="BR BR" posparent="#posparent">
                 <view type="bitmap" id="weight" posref="MR MR" x="0" texture="W_weight.tga" global_color="false" />

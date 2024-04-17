@@ -2549,7 +2549,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <define id="max_room_invslot"
           value_from_code="getMaxRoomInvSlot()" />
   <define id="max_guild_invslot"
-          value="getMaxGuildChestSlot()" />
+          value_from_code="getMaxGuildChestSlot()" />
   <define id="max_temp_invslot"
           value_from_code="getMaxTempInvSlot()" />
   <!--<define id="from_code_harvest"      value_from_code="getInventorySlot('harvest')"/>

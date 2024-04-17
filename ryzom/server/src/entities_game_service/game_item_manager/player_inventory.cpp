@@ -147,7 +147,9 @@ uint32 CInventoryBase::getInventoryWeight() const
 // ****************************************************************************
 uint32 CInventoryBase::getInventoryBulk(uint8 index) const
 {
-	return _InventoryBulk[index];
+	if (index < GUILD_NB_CHESTS)
+		return _InventoryBulk[index];
+	return 0;
 }
 
 // ****************************************************************************
@@ -197,8 +199,8 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 		if (_InventoryId == INVENTORIES::guild)
 		{
 			uint8 chest = floor((float)slot / (float)GuildChestSlots);
-			nlinfo("item stack + InventoryBulk = %u + %u = %u > getMaxBulk(%u) = %u", item->getStackBulk(), getInventoryBulk(), item->getStackBulk() + getInventoryBulk(), chest, getMaxBulk(chest));
-			if (item->getStackBulk() + getInventoryBulk() > getMaxBulk(chest))
+			nlinfo("item stack + InventoryBulk(%u) = %u + %u = %u > getMaxBulk(%u) = %u", chest, item->getStackBulk(), getInventoryBulk(chest), item->getStackBulk() + getInventoryBulk(chest), chest, getMaxBulk(chest));
+			if (item->getStackBulk() + getInventoryBulk(chest) > getMaxBulk(chest))
 				return ior_overbulk;
 
 			minSlotSearch = GuildChestSlots*chest;
