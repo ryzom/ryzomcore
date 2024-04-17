@@ -607,6 +607,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(clearHtmlUndoRedo),
 		LUABIND_FUNC(getDynString),
 		LUABIND_FUNC(isDynStringAvailable),
+		LUABIND_FUNC(getSrvString),
+		LUABIND_FUNC(isSrvStringAvailable),
 		LUABIND_FUNC(isFullyPatched),
 		LUABIND_FUNC(getSheetType),
 		LUABIND_FUNC(getSheetShape),
@@ -3787,6 +3789,34 @@ bool		CLuaIHMRyzom::isDynStringAvailable(sint32 dynStringId)
 	bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(dynStringId,   result);
 	return res;
 }
+
+#ifdef RYZOM_LUA_UCSTRING
+ucstring	CLuaIHMRyzom::getSrvString(sint32 stringId)
+{
+	//H_AUTO(Lua_CLuaIHM_getDynString)
+	string result;
+	STRING_MANAGER::CStringManagerClient::instance()->getString(stringId,   result);
+	return ucstring::makeFromUtf8(result); // Compatibility
+}
+#else
+std::string	CLuaIHMRyzom::getSrvString(sint32 stringId)
+{
+	//H_AUTO(Lua_CLuaIHM_getDynString)
+	string result;
+	STRING_MANAGER::CStringManagerClient::instance()->getString(stringId,   result);
+	return result;
+}
+#endif
+
+// ***************************************************************************
+bool		CLuaIHMRyzom::isSrvStringAvailable(sint32 stringId)
+{
+	//H_AUTO(Lua_CLuaIHM_isDynStringAvailable)
+	string result;
+	bool res = STRING_MANAGER::CStringManagerClient::instance()->getString(stringId,   result);
+	return res;
+}
+
 
 // ***************************************************************************
 bool CLuaIHMRyzom::isFullyPatched()
