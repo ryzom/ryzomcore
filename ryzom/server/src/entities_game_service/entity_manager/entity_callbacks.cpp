@@ -2615,12 +2615,6 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 	msgin.serial( slotDst );
 	msgin.serial( quantity );
 	nlinfo("slotDst = %u", inventoryDst);
-	// Inventory guild2 are a fake
-	if (inventorySrc == INVENTORIES::guild2)
-		inventorySrc == INVENTORIES::guild;
-
-	if (inventoryDst == INVENTORIES::guild2)
-		inventoryDst == INVENTORIES::guild;
 
 	CCharacter *character = PlayerManager.getChar( charId );
 	if (character == NULL)
