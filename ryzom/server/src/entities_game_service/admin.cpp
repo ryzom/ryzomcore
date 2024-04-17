@@ -4647,7 +4647,32 @@ NLMISC_COMMAND (setDontTranslateLangs, "Set langs that a player dont want to see
 
 
 
-NLMISC_COMMAND (updateTarget, "Update current target", "<user id>")
+	if (args.size() != 3)
+		return false;
+
+	GET_CHARACTER
+
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (guild)
+	{
+		uint8 chest;
+		NLMISC::fromString(args[2], chest);
+
+		if (args[1] == "B")
+			guild->setChestB(c->getId(), chest);
+		else
+			guild->setChestA(c->getId(), chest);
+	}
+	return true;
+}
+
+//   /a setGuildInventoryChestParams (0x0000000020:00:00:82) 0 "Chest 1" Member Member Member
+
+//setGuildInventoryChestParams (0x0000000020:00:00:82) 1 "Coffre 2" Member Member Member
+//setGuildInventoryChestParams (0x0000000020:00:00:82) 5 "Coffre 4" Member Member Member
+///a setGuildInventoryChestParams 0 "Chest 1" Member Member Member
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setGuildInventoryChestParams, "Set the chest of inventory", "<eid> <chest> <name> <rank view> <rank put> <rank get>" )
 {
 	GET_CHARACTER
 	c->updateTarget();

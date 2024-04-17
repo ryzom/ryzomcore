@@ -2561,6 +2561,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
           value="%set_base:TEMP" />
   <define id="guild_inv_dbentry"
           value="SERVER:GUILD:INVENTORY" />
+  <define id="guild_chests_dbentry"
+          value="SERVER:GUILD:CHEST" />
   <define id="guild_inv_money"
           value="%guild_inv_dbentry:MONEY" />
   <define id="guild_inv_bulk_max"
@@ -2955,6 +2957,12 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:TUTORIAL_ACTIVE_INVENTORY"
             type="bool"
             value="false" />
+  <variable entry="UI:SAVE:GUILD_INVENTORY_CHEST_A"
+            type="uint8"
+            value="255" />
+  <variable entry="UI:SAVE:GUILD_INVENTORY_CHEST_B"
+            type="uint8"
+            value="255" />
    <variable entry="UI:SAVE:TUTORIAL_ACTIVE_INFO_PLAYER_JOURNAL"
             type="bool"
             value="false" />

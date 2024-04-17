@@ -121,7 +121,7 @@ public:
 	/// Return the total weight of the inventory
 	uint32 getInventoryWeight() const;
 	/// Return the total bulk of the inventory
-	uint32 getInventoryBulk() const;
+	uint32 getInventoryBulk(uint8 index = 0) const;
 
 	//@{
 	//@name Item list manipulation
@@ -191,7 +191,7 @@ public:
 	//@{
 	//@name Constraints inquiries in derived class
 	/// Get the maximum bulk accepted, default is almost unlimited
-	virtual uint32 getMaxBulk() const { return UINT_MAX;};
+	virtual uint32 getMaxBulk(uint8 index = 0) const { return UINT_MAX;};
 	/// Get the maximum weight accepted, default is almost unlimited
 	virtual uint32 getMaxWeight() const { return UINT_MAX;};
 	/// Get the maximum slot accepted, default is almost unlimited
@@ -274,7 +274,7 @@ protected:
 	/// Total inventory weight
 	uint32			_InventoryWeight;
 	/// Total inventory bulk
-	uint32			_InventoryBulk;
+	uint32			_InventoryBulk[20];
 
 	/// The vector of item contained by this inventory
 	std::vector<CGameItemPtr>	_Items;

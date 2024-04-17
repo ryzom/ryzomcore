@@ -482,7 +482,7 @@ static void sendSwapItemMsg(const CDBCtrlSheet *pCSSrc, const CDBCtrlSheet *pCSD
 		// Special case for guilds that are not on the same counter as the other inventories
 		// The guild counter is global on the server so it can changes without this client
 		uint16 nGuildSessionCounter = 0;
-		if ((srcInvId == (uint16)INVENTORIES::guild) || (dstInvId == (uint16)INVENTORIES::guild))
+		if (srcInvId == (uint16)INVENTORIES::guild || dstInvId == (uint16)INVENTORIES::guild)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			nGuildSessionCounter = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
@@ -1556,6 +1556,45 @@ class CHandlerMoveItem : public IActionHandler
 				}
 			}
 		}
+		else if (sDest == "guild_other")
+		{
+			string callerId = toString(pCaller->getId());
+
+			string sChest2A = getParam(sParams, "chest2A");
+			string sChest2B = getParam(sParams, "chest2B");
+			string sListId1 = getParam(sParams, "listsheet1");
+			string sListId2 = getParam(sParams, "listsheet2");
+			if (!sChest2A.empty() && !sChest2B.empty() && !sListId1.empty() && !sListId2.empty())
+			{
+				IListSheetBase *pLS = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(sListId2));
+				if (callerId.substr(0, sChest2A.size()) == sChest2A)
+				{
+					nlinfo("guild_other, chest 2a");
+					pLS = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(sListId1));
+				}
+				if (callerId.substr(0, sChest2B.size()) == sChest2B)
+				{
+					nlinfo("guild_other, chest 2b");
+					pLS = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(sListId1));
+				}
+
+				if (pLS == NULL) return;
+				sint32 nbelt = pLS->getNbSheet();
+				nlinfo("nbelt = %d", nbelt);
+				for (sint32 i = 0; i < nbelt; ++i)
+				{
+					nlinfo("Item %d = %d", i, pLS->getSheet(i)->getIndexInDB());
+					if (pLS->getSheet(i)->getSheetId() == 0)
+					{
+						// Send swap_item
+						nlinfo("Swap to %d", i);
+						CAHManager::getInstance()->runActionHandler("swap_item", pLS->getSheet(i), "src="+toString(pCaller->getId()));
+						return;
+					}
+				}
+			}
+		}
+
 		// Test With Group of Items. YOYO: TODO: test if works
 		/*else if (sDest == "groups")
 		{
@@ -1803,6 +1842,8 @@ class CHandlerItemMenuCheck : public IActionHandler
 		CViewTextMenu	*pMoveSubMenu = dynamic_cast<CViewTextMenu*>(pMenu->getView("move"));
 		CViewTextMenu	*pMoveToBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("bag"));
 		CViewTextMenu	*pMoveToGuild = dynamic_cast<CViewTextMenu*>(pMenu->getView("guild"));
+		CViewTextMenu	*pMoveToGuild2 = dynamic_cast<CViewTextMenu*>(pMenu->getView("guild2"));
+		CViewTextMenu	*pMoveToGuildOther = dynamic_cast<CViewTextMenu*>(pMenu->getView("guild_other"));
 		CViewTextMenu	*pMoveToRoom = dynamic_cast<CViewTextMenu*>(pMenu->getView("room"));
 		CViewTextMenu	*pMoveToPa[MAX_INVENTORY_ANIMAL];
 
@@ -1831,8 +1872,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 		if(pLockUnlock) pLockUnlock->setActive(true);
 
 		const CItemSheet *pIS = pCS->asItemSheet();
-		if (invId != INVENTORIES::guild)
-		if (pIS != NULL)
+		if (pIS != NULL && invId != INVENTORIES::guild)
 		{
 			if (pCrisEnchant && pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL && !bIsLockedByOwner)
 				pCrisEnchant->setActive(true);
@@ -1976,7 +2016,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			// Disable Text entries not supported by this menu (eg: if I am the Bag, i cannot drop to myself!)
 			// Also Disable Text entries if the inventory is not present
 			if(pMoveToBag)
-				pMoveToBag->setActive(	invId!=INVENTORIES::bag &&
+				pMoveToBag->setActive(	invId != INVENTORIES::bag &&
 										invMngr.isInventoryPresent(INVENTORIES::bag) &&
 										(invId!=INVENTORIES::guild || invMngr.isInventoryPresent(INVENTORIES::guild)) );
 
@@ -1989,6 +2029,12 @@ class CHandlerItemMenuCheck : public IActionHandler
 
 			if (pMoveToGuild)
 				pMoveToGuild->setActive(invId!=INVENTORIES::guild && invMngr.isInventoryPresent(INVENTORIES::guild));
+
+			if (pMoveToGuild2)
+				pMoveToGuild2->setActive(invId!=INVENTORIES::guild && invMngr.isInventoryPresent(INVENTORIES::guild));
+
+			if (pMoveToGuildOther)
+				pMoveToGuildOther->setActive(invId==INVENTORIES::guild);
 
 			if (pMoveToRoom)
 				pMoveToRoom->setActive(invId!=INVENTORIES::player_room && invMngr.isInventoryPresent(INVENTORIES::player_room));
@@ -2186,6 +2232,11 @@ class CHandlerItemMenuCheck : public IActionHandler
 					if(pMoveToGuild && pMoveToGuild->getActive() && ClientCfg.ItemGroupAllowGuild)
 					{
 						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToGuild->getHardText(),"item_group_move",  "destination=guild|" + ahParams, name + "_guild");
+						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
+					}
+					if(pMoveToGuild2 && pMoveToGuild2->getActive() && ClientCfg.ItemGroupAllowGuild)
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToGuild2->getHardText(),"item_group_move",  "destination=guild2|" + ahParams, name + "_guild2");
 						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
 					}
 				}

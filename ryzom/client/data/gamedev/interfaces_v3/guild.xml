@@ -910,6 +910,71 @@
             params_l="guild_put_money" />
     </group>
   </group>
+
+  <group style="inv_container_guild"
+         id="inv_guild2"
+         header_color="UI:SAVE:WIN:COLORS:TRADE"
+         title="uitabInvGuild2"
+         on_close_button="set"
+         on_close_button_params="dblink=UI:SAVE:INVENTORY_GUILD2_WANT_POPUP|value=0">
+
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="12"
+           posref="TL TL"></group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           h="16"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+      <instance template="tguildinv_nbslots_bulk_weight"
+                id="ibw"
+                x="-16"
+                selected_chest="UI:SAVE:GUILD_INVENTORY_CHEST_B"
+                inv_branch="%guild_inv_dbentry" />
+    </group>
+    <group id="content"
+           h="214"
+           posref="TR TR">
+      <instance template="tinv_item_list"
+                id="iil"
+                y="-8"
+                sizeref="wh"
+                h="-8"
+                inv_branch="%guild_inv_dbentry"
+                inv_branch_nb="%max_guild_invslot"
+                start_item="0"
+                inv_type="INV_GUILD2" />
+      <instance template="argent"
+                id="money"
+                posref="BL BL"
+                x="4"
+                y="1"
+                value="%guild_inv_money" />
+      <ctrl style="new_element_header"
+            id="getmoney_but"
+            posref="MR ML"
+            posparent="money"
+            x="4"
+            wmargin="8"
+            hardtext="uittGetMoney"
+            onclick_l="proc"
+            params_l="guild_get_money" />
+      <ctrl style="new_element_header"
+            id="putmoney_but"
+            posref="MR ML"
+            posparent="getmoney_but"
+            x="4"
+            wmargin="8"
+            hardtext="uittPutMoney"
+            onclick_l="proc"
+            params_l="guild_put_money" />
+    </group>
+  </group>
+
   <link expr="and(%is_guild_present, @UI:SAVE:INVENTORY_GUILD_WANT_POPUP, @UI:TEMP:INVENTORY_GUILD_OPENED)"
         target="inv_guild:active" />
   <tree node="inv_guild" />

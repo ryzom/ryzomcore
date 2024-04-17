@@ -22,6 +22,8 @@
 #include "game_item_manager/player_inventory.h"
 #include "inventory_updater.h"
 
+#define GUILD_NB_CHESTS 20
+
 class CGuild;
 class CCDBSynchronised;
 class CCDBGroup;
@@ -68,10 +70,16 @@ public:
 	CGuildInventory();
 
 	/// Return the max bulk
-	virtual uint32 getMaxBulk() const;
+	virtual uint32 getMaxBulk(uint8 index = 0) const;
 
 	/// Return the max number of slots
 	virtual uint32 getMaxSlot() const;
+
+	void setChestMaxBulk(uint8 chest, uint32 value) { if (chest < GUILD_NB_CHESTS) _ChestsMaxBulk[chest] = value; }
+
+private:
+	uint32 _ChestsMaxBulk[GUILD_NB_CHESTS];
+
 };
 
 /**
@@ -105,6 +113,24 @@ public:
 
 	/// Return the "info version" of the specified item slot
 	uint8 getItemInfoVersion( uint32 slot ) { return _GuildInvUpdater.getItemInfoVersion( slot ); }
+
+	/// Return the subdivisions chest A,B
+	uint8 getChestA(const NLMISC::CEntityId &recipient) {
+		TPlayerChest::const_iterator it = _ChestsA.find(recipient);
+		if (it != _ChestsA.end())
+			return (*it).second;
+		return 0;
+	}
+	uint8 getChestB(const NLMISC::CEntityId &recipient) {
+		TPlayerChest::const_iterator it = _ChestsB.find(recipient);
+		if (it != _ChestsB.end())
+			return (*it).second;
+		return 1;
+	}
+
+	/// Select the subdivisions
+	uint8 setChestA(const NLMISC::CEntityId &recipient, uint8 chest) { _ChestsA[recipient] = chest; }
+	uint8 setChestB(const NLMISC::CEntityId &recipient, uint8 chest) { _ChestsB[recipient] = chest; }
 
 	/// An item has changed (can be a removing)
 	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
@@ -155,6 +181,10 @@ private:
 	CGuild					*_Guild;
 	/// client updater for guild inventory
 	CInventoryUpdaterForGuild _GuildInvUpdater;
+	/// Chests of player
+	typedef std::map<NLMISC::CEntityId, uint8> TPlayerChest;
+	TPlayerChest _ChestsA;
+	TPlayerChest _ChestsB;
 };
 
 

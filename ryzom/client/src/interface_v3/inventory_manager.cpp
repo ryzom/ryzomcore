@@ -3349,11 +3349,11 @@ class CHandlerInvTempAll : public IActionHandler
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal4))
 			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal5))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(5), pInv->getMaxBagBulk(4)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(5), pInv->getMaxBagBulk(5)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal6))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(6), pInv->getMaxBagBulk(4)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(6), pInv->getMaxBagBulk(6)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal7))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(7), pInv->getMaxBagBulk(4)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(7), pInv->getMaxBagBulk(7)));
 
 		bool bPlaceFound = true;
 
@@ -3876,7 +3876,7 @@ void CInventoryManager::sortBag()
 }
 
 // ***************************************************************************
-bool				CInventoryManager::isInventoryPresent(INVENTORIES::TInventory invId)
+bool CInventoryManager::isInventoryPresent(INVENTORIES::TInventory invId)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -3904,7 +3904,7 @@ bool				CInventoryManager::isInventoryPresent(INVENTORIES::TInventory invId)
 
 
 // ***************************************************************************
-bool				CInventoryManager::isInventoryAvailable(INVENTORIES::TInventory invId)
+bool CInventoryManager::isInventoryAvailable(INVENTORIES::TInventory invId)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 

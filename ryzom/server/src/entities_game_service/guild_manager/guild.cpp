@@ -186,6 +186,50 @@ void CGuild::setMoney(uint64 money)
 }
 
 //----------------------------------------------------------------------------
+void CGuild::setChestA(const CEntityId &recipient, uint8 chest)
+{
+	if (chest >= _Chests.size())
+		return;
+	_GuildInventoryView->setChestA(recipient, chest);
+	sendClientDBChest(recipient);
+}
+
+//----------------------------------------------------------------------------
+void CGuild::setChestB(const CEntityId &recipient, uint8 chest)
+{
+	if (chest >= _Chests.size())
+		return;
+	_GuildInventoryView->setChestB(recipient, chest);
+	sendClientDBChest(recipient);
+}
+
+void CGuild::setChestParams(uint8 chest, std::string name, EGSPD::CGuildGrade::TGuildGrade gradeView, EGSPD::CGuildGrade::TGuildGrade gradePut, EGSPD::CGuildGrade::TGuildGrade gradeGet)
+{
+	if (chest >= _Chests.size())
+		return;
+
+	_Chests[chest].Name = name;
+	_Chests[chest].ViewGrade = gradeView;
+	_Chests[chest].PutGrade = gradePut;
+	_Chests[chest].GetGrade = gradeGet;
+
+	NLMISC::TStringId strId = CStringMapper::map( name );
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, name, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, gradeView);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setPUT_GRADE(_DbGroup, gradePut);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setGET_GRADE(_DbGroup, gradeGet);
+}
+
+void CGuild::setChestBulkMax(uint8 chest, uint32 bulk)
+{
+	if (chest >= _Chests.size()) return;
+	_Chests[chest].BulkMax = bulk;
+	_Inventory->setChestMaxBulk(chest, bulk);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setBULK_MAX(_DbGroup, _Chests[chest].BulkMax);
+}
+
+
+//----------------------------------------------------------------------------
 //void CGuild::clearChargePoints()
 //{
 //	setChargesPoints( 0 );
@@ -487,13 +531,24 @@ void CGuild::dumpGuildInfos( NLMISC::CLog & log )
 //	log.displayNL("\tVillage: %hu", getVillage() );
 	log.displayNL("\tCreation date: %u", getCreationDate() );
 //	log.displayNL("\tXP: %u", getXP() );
-	log.displayNL("\tBulk: %d", _Inventory->getInventoryBulk() );
+//	log.displayNL("\tBulk: %d", _Inventory->getInventoryBulk() );
 	log.displayNL("\tMax bulk: %d", _Inventory->getMaxBulk() );
 //	log.displayNL("\tCharge points: %u", getChargesPoints() );
 	log.displayNL("\tRace: %s", EGSPD::CPeople::toString(getRace()).c_str() );
 	log.displayNL("\tIcon: 0x%016" NL_I64 "x", getIcon() );
 	log.displayNL("\tCiv Allegiance: %s", PVP_CLAN::toString(_DeclaredCiv).c_str());
 	log.displayNL("\tCult Allegiance: %s", PVP_CLAN::toString(_DeclaredCult).c_str());
+	log.displayNL("\tLast Failed PVE : %u", _LastFailedGVE);
+	for (uint8 i=0; i < GUILD_NB_CHESTS; i++)
+	{
+		log.displayNL("\tChest '%s' Grades (View/Put/Get): %s %s %s Bulk: %u",
+			getChestName(i).c_str(),
+			EGSPD::CGuildGrade::toString(getChestViewGrade(i)).c_str(),
+			EGSPD::CGuildGrade::toString(getChestPutGrade(i)).c_str(),
+			EGSPD::CGuildGrade::toString(getChestGetGrade(i)).c_str(),
+			getChestBulkMax(i)
+			);
+	}
 
 	string buildingName;
 	TAIAlias buildingAlias = getBuilding();
@@ -951,7 +1006,7 @@ bool CGuild::putItem( CGameItemPtr item )
 }
 
 //----------------------------------------------------------------------------
-void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session )
+void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 dstSlot, uint32 quantity, uint16 session )
 {
 	// the session system works that way :
 	// As player can share this inventory, we manage a per item session value
@@ -1011,12 +1066,9 @@ void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 
 	}
 
 	// try to move the required quantity of the item
-	if ( CInventoryBase::moveItem(
-		user->getInventory(srcInv), slot,
-		_Inventory,	INVENTORIES::INSERT_IN_FIRST_FREE_SLOT,
-		quantity ) != CInventoryBase::ior_ok )
+	if ( CInventoryBase::moveItem(user->getInventory(srcInv), slot, _Inventory, dstSlot, quantity ) != CInventoryBase::ior_ok )
 	{
-		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_MAX_BULK" ); // "The guild warehouse is full"
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_PLAYER_BAG_FULL" );
 		return;
 	}
 }
@@ -1086,6 +1138,73 @@ void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32
 		return;
 	}
 }
+
+//----------------------------------------------------------------------------
+void CGuild::moveItem( CCharacter * user, uint32 slot, uint32 dstSlot, uint32 quantity, uint16 session )
+{
+	// the session system works that way :
+	// As player can share this inventory, we manage a per item session value
+	// the user sends its session when he tries to manipulate the inventory. If it is higher than the targeted item session, it is okj
+	// The item session is incremented and the highest session value is then sent to the clients
+	// sessions are reseted when nobody uses the inventory
+
+	nlassert( user );
+
+	if( canAccessToGuildInventory( user ) == false )
+	{
+		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
+		return;
+	}
+
+	// check if user is trial
+	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
+	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return);
+	if ( p->isTrialPlayer() )
+	{
+		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_GUILD_INV_IS_TRIAL_PLAYER" );
+		return;
+	}
+
+
+	CGuildMemberModule * module;
+	if ( !user->getModuleParent().getModule(module) || !module->canTakeGuildItem() )
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
+		return;
+	}
+
+	// get the source item
+	CInventoryPtr srcItems = (CGuildInventory *)_Inventory;
+	if ( slot >= srcItems->getSlotCount() )
+	{
+		nlwarning( "<swapItem> user %s Invalid guild slot %u, count = %u",user->getId().toString().c_str(), slot, srcItems->getSlotCount() );
+		return;
+	}
+	CGameItemPtr srcItem = srcItems->getItem(slot);
+	if ( srcItem == NULL )
+	{
+		nlwarning( "<swapItem> user %s Invalid guild slot %u, count = %u -> NULL item",user->getId().toString().c_str(), slot, srcItems->getSlotCount() );
+		return;
+	}
+
+	// check session
+	if ( ! _GuildInventoryView->checkSession( slot, session ) )
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_BAD_SESSION" );
+		return;
+	}
+
+	// try to move the required quantity of the item
+	if ( CInventoryBase::moveItem(
+		_Inventory, slot,
+		_Inventory, dstSlot,
+		quantity ) != CInventoryBase::ior_ok )
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_PLAYER_BAG_FULL" );
+		return;
+	}
+}
+
 
 //----------------------------------------------------------------------------
 uint CGuild::selectItems(NLMISC::CSheetId itemSheetId, uint32 quality, std::vector<CItemSlotId> *itemList)
@@ -2396,7 +2515,19 @@ private:
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
+//-----------------------------------------------------------------------------
 
+#define PERSISTENT_CLASS CGuildInventoryChest
+
+#define PERSISTENT_DATA\
+	PROP(string,Name)\
+	PROP2(ViewGrade,string,EGSPD::CGuildGrade::toString(ViewGrade),ViewGrade=EGSPD::CGuildGrade::fromString(val))\
+	PROP2(PutGrade,string,EGSPD::CGuildGrade::toString(PutGrade),PutGrade=EGSPD::CGuildGrade::fromString(val))\
+	PROP2(GetGrade,string,EGSPD::CGuildGrade::toString(GetGrade),GetGrade=EGSPD::CGuildGrade::fromString(val))\
+	PROP(uint32,BulkMax)\
+
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
 #define PERSISTENT_CLASS CGuild
@@ -2411,7 +2542,18 @@ private:
 
 #define PERSISTENT_POST_APPLY\
 	CGuildVersionAdapter::getInstance()->adaptGuildFromVersion(*this);\
-
+	_Chests.resize(GUILD_NB_CHESTS);\
+	nlinfo("GUILD HAVE %u CHESTS", _Chests.size());\
+	for (uint8 chest=0; chest < _Chests.size(); chest++)\
+	{\
+		nlinfo("Send DB for chest %u", chest);\
+		_Inventory->setChestMaxBulk(chest, _Chests[chest].BulkMax);\
+		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, _Chests[chest].Name, true);\
+		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, _Chests[chest].ViewGrade, true);\
+		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setPUT_GRADE(_DbGroup, _Chests[chest].PutGrade, true);\
+		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setGET_GRADE(_DbGroup, _Chests[chest].GetGrade, true);\
+		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setBULK_MAX(_DbGroup, _Chests[chest].BulkMax, true);\
+	}\
 /*
 	Token "_Inventory" was used to save old guild inventory, we still use it to load old guild saves (DO NOT suppress it).
 	New token "GuildInventory" is now used for new inventory format.
@@ -2422,11 +2564,10 @@ private:
 	PROP2(_MessageOfTheDay,string,_MessageOfTheDay.toUtf8(),ucstring s; s.fromUtf8(val); _MessageOfTheDay=s)\
 	LSTRUCT2(_Inventory, if (0), ;/* do not store in old format anymore */, COldGuildInventoryLoader((CGuildInventory *)_Inventory).apply(pdr))\
 	STRUCT2(GuildInventory, _Inventory->store(pdr), _Inventory->apply(pdr, NULL))\
-\
 	PROP2(DeclaredCult,string,PVP_CLAN::toString(_DeclaredCult),_DeclaredCult=PVP_CLAN::fromString(val))\
 	PROP2(DeclaredCiv,string,PVP_CLAN::toString(_DeclaredCiv),_DeclaredCiv=PVP_CLAN::fromString(val))\
 	PROP_GAME_CYCLE_COMP(_LastFailedGVE)\
-
+	STRUCT_VECT(_Chests)\
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

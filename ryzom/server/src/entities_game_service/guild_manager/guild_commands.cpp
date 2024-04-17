@@ -357,7 +357,7 @@ NLMISC_COMMAND(guildFailedGVE, "get/set failed GVE of guild", "<guildName|<shard
 			guild->setLastFailedGVE(time);
 		}
 
-		log.displayNL("%d", time);
+		log.displayNL("%u", time);
 	} else {
 		log.displayNL("ERR: no guild");
 	}
