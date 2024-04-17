@@ -1345,16 +1345,6 @@
              w="0"
              h="0">
 
-	  <group type="menu"
-			 x="-16"
-			 id="menu_chests"
-			 extends="base_menu">
-		<action id="chest1" name="uimAssignKey" handler="lua" params="selectChest(1)" icon="ico_mission_casket.tga" />
-		<action id="chest2" name="uimAssignKey" handler="lua" params="selectChest(2)" icon="ico_mission_casket.tga" />
-		<action id="chest3" name="uimAssignKey" handler="lua" params="selectChest(3)" icon="ico_mission_casket.tga" />
-		<action id="chest4" name="uimAssignKey" handler="lua" params="selectChest(4)" icon="ico_mission_casket.tga" />
-	  </group>
-
         <instance template="tguildinv_nbslots_bulk_weight"
                   id="ibw"
                   x="0"
@@ -1369,7 +1359,7 @@
                   inv_branch="%guild_inv_dbentry"
                   inv_branch_nb="%max_guild_invslot"
                   start_item="0"
-                  inv_type="INV_GUILD2" />
+                  inv_type="INV_GUILD" />
         <instance template="argent"
                   id="money"
                   posref="BL BL"
@@ -1403,23 +1393,11 @@
              sizeref="wh"
              w="0"
              h="0">
-
-	<group type="menu"
-			 x="-16"
-			 id="menu_chests"
-			 extends="base_menu">
-		<action id="chest1" name="uimAssignKey" handler="lua" params="selectChest(1)" icon="ico_mission_casket.tga" />
-		<action id="chest2" name="uimAssignKey" handler="lua" params="selectChest(2)" icon="ico_mission_casket.tga" />
-		<action id="chest3" name="uimAssignKey" handler="lua" params="selectChest(3)" icon="ico_mission_casket.tga" />
-		<action id="chest4" name="uimAssignKey" handler="lua" params="selectChest(4)" icon="ico_mission_casket.tga" />
-	</group>
-
         <instance template="tguildinv_nbslots_bulk_weight"
                   id="ibw"
                   x="0"
                   selected_chest="UI:SAVE:GUILD_INVENTORY_CHEST_B"
-                  inv_branch="%guild_inv_dbentry"
-                  inv_bulk_max="%guild_inv_bulk_max" />
+                  inv_branch="%guild_inv_dbentry" />
         <instance template="tinv_item_list"
                   id="iil"
                   y="-18"
@@ -1428,7 +1406,7 @@
                   inv_branch="%guild_inv_dbentry"
                   inv_branch_nb="%max_guild_invslot"
                   start_item="0"
-                  inv_type="INV_GUILD" />
+                  inv_type="INV_GUILD2" />
         <instance template="argent"
                   id="money"
                   posref="BL BL"

@@ -1283,6 +1283,38 @@ NLMISC_COMMAND(getEnchantmentInEquipedItem, "getEnchantmentInEquipedItem", "<uid
 	return true;
 }
 
+//setGuildInventoryChestBulkMax 2 2 3000
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setGuildInventoryChestBulkMax, "Set the bulk max of chest of inventory", "<uid> <chest> <value>" )
+{
+
+	if (args.size() < 2)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (guild)
+	{
+		uint8 chest;
+		NLMISC::fromString(args[1], chest);
+		if (args.size() == 3)
+		{
+			uint32 bulkmax;
+			NLMISC::fromString(args[2], bulkmax);
+			guild->setChestBulkMax(chest, bulkmax);
+			log.displayNL("OK");
+		}
+		else
+		{
+			uint32 bulkmax = guild->getChestBulkMax(chest);
+			log.displayNL("%u", bulkmax);
+		}
+	}
+	return true;
+}
+
 //updateSheetItem 2 LEGS ikaracp_ep2_1.sitem
 
 //----------------------------------------------------------------------------

@@ -4676,7 +4676,11 @@ NLMISC_COMMAND(setGuildInventoryChest, "Set the chest of inventory", "<eid> <A|B
 	return true;
 }
 
-//   /a setGuildInventoryChestParams (0x0000000020:00:00:82) 3 "Toto" Leader Leader Leader
+//   /a setGuildInventoryChestParams (0x0000000020:00:00:82) 0 "Chest 1" Member Member Member
+
+//setGuildInventoryChestParams (0x0000000020:00:00:82) 1 "Coffre 2" Member Member Member
+//setGuildInventoryChestParams (0x0000000020:00:00:82) 5 "Coffre 4" Member Member Member
+///a setGuildInventoryChestParams 0 "Chest 1" Member Member Member
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setGuildInventoryChestParams, "Set the chest of inventory", "<eid> <chest> <name> <rank view> <rank put> <rank get>" )
 {

@@ -2614,6 +2614,13 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 	inventoryDst = INVENTORIES::TInventory(temp);
 	msgin.serial( slotDst );
 	msgin.serial( quantity );
+	nlinfo("slotDst = %u", inventoryDst);
+	// Inventory guild2 are a fake
+	if (inventorySrc == INVENTORIES::guild2)
+		inventorySrc == INVENTORIES::guild;
+
+	if (inventoryDst == INVENTORIES::guild2)
+		inventoryDst == INVENTORIES::guild;
 
 	CCharacter *character = PlayerManager.getChar( charId );
 	if (character == NULL)
@@ -2657,7 +2664,7 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 		else if (inventoryDst == (uint16) INVENTORIES::guild)
 		{
 			// Bag -> Guild
-			pGuild->putItem(character, (INVENTORIES::TInventory) inventorySrc, slotSrc, quantity, nGuildSessionCounter);
+			pGuild->putItem(character, (INVENTORIES::TInventory) inventorySrc, slotSrc, slotDst, quantity, nGuildSessionCounter);
 		}
 
 		return;

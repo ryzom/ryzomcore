@@ -22,6 +22,8 @@
 #include "game_item_manager/player_inventory.h"
 #include "inventory_updater.h"
 
+#define GUILD_NB_CHESTS 20
+
 class CGuild;
 class CCDBSynchronised;
 class CCDBGroup;
@@ -68,10 +70,16 @@ public:
 	CGuildInventory();
 
 	/// Return the max bulk
-	virtual uint32 getMaxBulk() const;
+	virtual uint32 getMaxBulk(uint8 index = 0) const;
 
 	/// Return the max number of slots
 	virtual uint32 getMaxSlot() const;
+
+	void setChestMaxBulk(uint8 chest, uint32 value) { if (chest < GUILD_NB_CHESTS) _ChestsMaxBulk[chest] = value; }
+
+private:
+	uint32 _ChestsMaxBulk[GUILD_NB_CHESTS];
+
 };
 
 /**
@@ -108,13 +116,13 @@ public:
 
 	/// Return the subdivisions chest A,B
 	uint8 getChestA(const NLMISC::CEntityId &recipient) {
-		TChest::const_iterator it = _ChestsA.find(recipient);
+		TPlayerChest::const_iterator it = _ChestsA.find(recipient);
 		if (it != _ChestsA.end())
 			return (*it).second;
 		return 0;
 	}
 	uint8 getChestB(const NLMISC::CEntityId &recipient) {
-		TChest::const_iterator it = _ChestsB.find(recipient);
+		TPlayerChest::const_iterator it = _ChestsB.find(recipient);
 		if (it != _ChestsB.end())
 			return (*it).second;
 		return 1;
@@ -123,33 +131,6 @@ public:
 	/// Select the subdivisions
 	uint8 setChestA(const NLMISC::CEntityId &recipient, uint8 chest) { _ChestsA[recipient] = chest; }
 	uint8 setChestB(const NLMISC::CEntityId &recipient, uint8 chest) { _ChestsB[recipient] = chest; }
-
-	std::string getChestName(uint8 chest) { if (chest >= 20) return ""; return _ChestNames[chest]; }
-	EGSPD::CGuildGrade::TGuildGrade getChestViewGrade(uint8 chest) { if (chest >= 20) return EGSPD::CGuildGrade::Leader; return _ChestViewGrades[chest]; }
-	EGSPD::CGuildGrade::TGuildGrade getChestPutGrade(uint8 chest) { if (chest >= 20) return EGSPD::CGuildGrade::Leader; return _ChestPutGrades[chest]; }
-	EGSPD::CGuildGrade::TGuildGrade getChestGetGrade(uint8 chest) { if (chest >= 20) return EGSPD::CGuildGrade::Leader; return _ChestGetGrades[chest]; }
-
-	void setChestParams(uint8 chest, std::string name, EGSPD::CGuildGrade::TGuildGrade gradeView, EGSPD::CGuildGrade::TGuildGrade gradePut, EGSPD::CGuildGrade::TGuildGrade gradeGet)
-	{
-		if (chest >= 20)
-			return;
-		_ChestNames[chest] = name;
-		// TODO: send to DB
-		_ChestViewGrades[chest] = gradeView;
-		_ChestPutGrades[chest] = gradePut;
-		_ChestGetGrades[chest] = gradeGet;
-
-		//CBankAccessor_GUILD::getGUILD().getINVENTORY().
-	}
-
-	bool haveChestViewGrade( uint8 chest, EGSPD::CGuildGrade::TGuildGrade grade)
-	{
-		if (chest >= 20)
-			return false;
-
-		nlinfo("Check have acces to chest %u => %u vs %u", chest, _ChestViewGrades[chest], grade);
-		return _ChestViewGrades[chest] >= grade;
-	}
 
 	/// An item has changed (can be a removing)
 	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
@@ -201,14 +182,9 @@ private:
 	/// client updater for guild inventory
 	CInventoryUpdaterForGuild _GuildInvUpdater;
 	/// Chests of player
-	typedef std::map<NLMISC::CEntityId, uint8> TChest;
-	TChest _ChestsA;
-	TChest _ChestsB;
-
-	EGSPD::CGuildGrade::TGuildGrade		_ChestViewGrades[20];
-	EGSPD::CGuildGrade::TGuildGrade		_ChestPutGrades[20];
-	EGSPD::CGuildGrade::TGuildGrade		_ChestGetGrades[20];
-	std::string							_ChestNames[20];
+	typedef std::map<NLMISC::CEntityId, uint8> TPlayerChest;
+	TPlayerChest _ChestsA;
+	TPlayerChest _ChestsB;
 };
 
 

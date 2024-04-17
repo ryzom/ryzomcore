@@ -936,8 +936,7 @@
                 id="ibw"
                 x="-16"
                 selected_chest="UI:SAVE:GUILD_INVENTORY_CHEST_B"
-                inv_branch="%guild_inv_dbentry"
-                inv_bulk_max="%guild_inv_bulk_max" />
+                inv_branch="%guild_inv_dbentry" />
     </group>
     <group id="content"
            h="214"

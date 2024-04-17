@@ -36,13 +36,29 @@ class CGuildMember;
 */
 struct TMissionHistory;
 
-
 /**
  * A guild in ryzom
  * \author Nicolas Brigand
  * \author Nevrax France
  * \date 2004
  */
+
+struct CGuildInventoryChest
+{
+public:
+	CGuildInventoryChest(): ViewGrade(EGSPD::CGuildGrade::Member), PutGrade(EGSPD::CGuildGrade::Officer), GetGrade(EGSPD::CGuildGrade::HighOfficer), BulkMax(0) {}
+
+	DECLARE_PERSISTENCE_METHODS
+
+	std::string							Name;
+	EGSPD::CGuildGrade::TGuildGrade		ViewGrade;
+	EGSPD::CGuildGrade::TGuildGrade		PutGrade;
+	EGSPD::CGuildGrade::TGuildGrade		GetGrade;
+	uint32								BulkMax;
+};
+
+typedef std::vector<CGuildInventoryChest> TChest;
+
 class CGuild :
 	public IGuild,
 	public EGSPD::CGuildPD,
@@ -109,10 +125,47 @@ public:
 	void setMoney(uint64 money);
 	void setChestA(const NLMISC::CEntityId &recipient, uint8 chest);
 	void setChestB(const NLMISC::CEntityId &recipient, uint8 chest);
-	void setChestParams(uint8 chest, std::string name, EGSPD::CGuildGrade::TGuildGrade gradeView, EGSPD::CGuildGrade::TGuildGrade gradePut, EGSPD::CGuildGrade::TGuildGrade gradeGet)
+
+	std::string getChestName(uint8 chest) { if (chest >= _Chests.size()) return ""; return _Chests[chest].Name; }
+	EGSPD::CGuildGrade::TGuildGrade getChestViewGrade(uint8 chest) { if (chest >= _Chests.size()) return EGSPD::CGuildGrade::Leader; return _Chests[chest].ViewGrade; }
+	EGSPD::CGuildGrade::TGuildGrade getChestPutGrade(uint8 chest) { if (chest >= _Chests.size()) return EGSPD::CGuildGrade::Leader; return _Chests[chest].PutGrade; }
+	EGSPD::CGuildGrade::TGuildGrade getChestGetGrade(uint8 chest) { if (chest >= _Chests.size()) return EGSPD::CGuildGrade::Leader; return _Chests[chest].GetGrade; }
+	uint32 getChestBulkMax(uint8 chest) { if (chest >= _Chests.size()) return 0; return _Chests[chest].BulkMax; }
+
+	void setChestParams(uint8 chest, std::string name, EGSPD::CGuildGrade::TGuildGrade gradeView, EGSPD::CGuildGrade::TGuildGrade gradePut, EGSPD::CGuildGrade::TGuildGrade gradeGet);
+	void setChestBulkMax(uint8 chest, uint32 bulk);
+
+	bool haveChestViewGrade(uint8 chest, EGSPD::CGuildGrade::TGuildGrade grade)
 	{
-		_GuildInventoryView->setChestParams(chest, name, gradeView, gradePut, gradeGet);
+		if (chest >= _Chests.size())
+			return false;
+
+		nlinfo("Check have acces to chest %u : %u >= %u", chest, _Chests[chest].ViewGrade, grade);
+		return _Chests[chest].ViewGrade >= grade;
 	}
+
+	bool haveChestPutGrade(uint8 chest, EGSPD::CGuildGrade::TGuildGrade grade)
+	{
+		if (chest >= _Chests.size())
+			return false;
+
+		nlinfo("Check have acces to chest %u : %u >= %u", chest, _Chests[chest].PutGrade, grade);
+		return _Chests[chest].PutGrade >= grade;
+	}
+
+	bool haveChestGetGrade(uint8 chest, EGSPD::CGuildGrade::TGuildGrade grade)
+	{
+		if (chest >= _Chests.size())
+			return false;
+
+		nlinfo("Check have acces to chest %u : %u >= %u", chest, _Chests[chest].GetGrade, grade);
+		return _Chests[chest].GetGrade >= grade;
+	}
+
+
+	TChest getChests() { return _Chests; }
+	void setChests(TChest chests) { _Chests = chests; }
+
 
 	/// clear the guild charge points
 //	void clearChargePoints();
@@ -234,9 +287,9 @@ public:
 	/// take an item from guild inventory (set quantity to UINT_MAX for 'all stack')
 	void	takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session );
 	/// put an item in guild inventory (set quantity to UINT_MAX for 'all stack')
-	void	putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session );
+	void	putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 dstSlot, uint32 quantity, uint16 session );
 	/// move an item in guild inventory (set quantity to UINT_MAX for 'all stack')
-	void	moveItem( CCharacter * user, uint32 slot, uint32 dst_slot, uint32 quantity, uint16 session );
+	void	moveItem( CCharacter * user, uint32 slot, uint32 dstSlot, uint32 quantity, uint16 session );
 	/// user wanna take money
 	void	takeMoney( CCharacter * user, uint64 money, uint16 session );
 	/// user wanna put money
@@ -403,6 +456,8 @@ private:
 	ucstring							_MessageOfTheDay;
 
 	NLMISC::TGameCycle					_LastFailedGVE;
+
+	TChest								_Chests;
 
 	// The declared Cult and Civilization information for the guild for fame purposes.
 	PVP_CLAN::TPVPClan					_DeclaredCult;
