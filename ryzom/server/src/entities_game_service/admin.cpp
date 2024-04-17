@@ -4654,7 +4654,7 @@ NLMISC_COMMAND (updateTarget, "Update current target", "<eid>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(setGuildInventoryChest, "Set the chest of inventory", "<eid> <A|B> <chest>" )
+NLMISC_COMMAND(setGuildInventoryChest, "Select the chest to display in GH A or B for the player", "<eid> <A|B> <chest>" )
 {
 
 	if (args.size() != 3)
@@ -4676,32 +4676,6 @@ NLMISC_COMMAND(setGuildInventoryChest, "Set the chest of inventory", "<eid> <A|B
 	return true;
 }
 
-//   /a setGuildInventoryChestParams (0x0000000020:00:00:82) 0 "Chest 1" Member Member Member
-
-//setGuildInventoryChestParams (0x0000000020:00:00:82) 1 "Coffre 2" Member Member Member
-//setGuildInventoryChestParams (0x0000000020:00:00:82) 5 "Coffre 4" Member Member Member
-///a setGuildInventoryChestParams 0 "Chest 1" Member Member Member
-//----------------------------------------------------------------------------
-NLMISC_COMMAND(setGuildInventoryChestParams, "Set the chest of inventory", "<eid> <chest> <name> <rank view> <rank put> <rank get>" )
-{
-
-	if (args.size() != 6)
-		return false;
-
-	GET_CHARACTER
-
-	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
-	if (guild)
-	{
-		uint8 chest;
-		NLMISC::fromString(args[1], chest);
-		EGSPD::CGuildGrade::TGuildGrade gradeView = EGSPD::CGuildGrade::fromString(args[3]);
-		EGSPD::CGuildGrade::TGuildGrade gradePut = EGSPD::CGuildGrade::fromString(args[4]);
-		EGSPD::CGuildGrade::TGuildGrade gradeGet = EGSPD::CGuildGrade::fromString(args[5]);
-		guild->setChestParams(chest, args[2], gradeView, gradePut, gradeGet);
-	}
-	return true;
-}
 // !!! Deprecated !!!
 NLMISC_COMMAND (webAddCommandsIds, "Add ids of commands will be run from webig", "<user id> <bot_name> <web_app_url> <indexes>")
 {

@@ -1215,7 +1215,7 @@ void CGuild::moveItem( CCharacter * user, uint32 slot, uint32 dstSlot, uint32 qu
 		_Inventory, dstSlot,
 		quantity ) != CInventoryBase::ior_ok )
 	{
-		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_PLAYER_BAG_FULL" );
+		CCharacter::sendDynamicSystemMessage( user->getId(), "GUILD_ITEM_MAX_BULK");
 		return;
 	}
 }
