@@ -222,6 +222,7 @@ public:
 	void decGradeCount( EGSPD::CGuildGrade::TGuildGrade grade );
 	/// send client datbase deltas
 	void sendClientDBDeltas();
+	void sendClientDBChest(const NLMISC::CEntityId& id);
 	/// flag a user offline ( unregister it in other system, e.g. : chat group )
 	void setMemberOffline( CGuildMember * member );
 	/// flag a user online ( register it in other system, e.g. : chat group )

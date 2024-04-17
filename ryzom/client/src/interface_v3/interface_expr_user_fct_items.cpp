@@ -1079,3 +1079,27 @@ static DECLARE_INTERFACE_USER_FCT(getInvSlotCounts)
 	return true;
 }
 REGISTER_INTERFACE_USER_FCT("getInvSlotCounts", getInvSlotCounts)
+
+// ***************************************************************************
+static DECLARE_INTERFACE_USER_FCT(getGuildInvSlotCounts)
+{
+	if (args.size() != 3 || !args[0].toString() || !args[1].toInteger() || !args[2].toInteger())
+	{
+		nlwarning("<getInvSlotCounts> 3 argument expected : (dbPath, init, count)");
+		return false;
+	}
+
+	// Get the counts
+	std::string	dbBranch= args[0].getString();
+	uint16 startItemIndex = (uint16) args[1].getInteger();
+	uint16 numItems = (uint16) args[2].getInteger();
+
+	uint nbUsedSlots = 0, nbMaxSlots = 0;
+	CInventoryManager::getBranchSlotCounts(dbBranch, startItemIndex, numItems, nbUsedSlots, nbMaxSlots);
+
+	// Replace in the formated text
+	std::string	str = toString("%u/%u", nbUsedSlots, numItems);
+	result.setString(str);
+	return true;
+}
+REGISTER_INTERFACE_USER_FCT("getGuildInvSlotCounts", getGuildInvSlotCounts)

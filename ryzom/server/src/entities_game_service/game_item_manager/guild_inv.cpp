@@ -22,8 +22,10 @@
 
 #include "guild_inv.h"
 #include "player_manager/character.h"
+#include "player_manager/player_manager.h"
 #include "egs_sheets/egs_sheets.h"
 #include "guild_manager/guild_member_module.h"
+#include "guild_manager/guild_manager.h"
 #include "cdb_group.h"
 
 using namespace std;
@@ -31,6 +33,7 @@ using namespace NLMISC;
 using namespace NLNET;
 
 extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
+extern NLMISC::CVariable<uint32>	GuildChestSlots;
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
 /////////////////////////////////////////////////////////////
@@ -296,13 +299,14 @@ void CGuildInventoryView::provideUpdate( CBitMemStream& stream )
 }
 
 //-----------------------------------------------------------------------------
-void CGuildInventoryView::provideContents( CBitMemStream& stream )
+void CGuildInventoryView::provideContents( CBitMemStream& stream, const CEntityId &recipient, bool first)
 {
 	// Ensure the updater is empty, otherwise our contents would be mixed with current update
 	nlassert( _GuildInvUpdater.empty( INVENTORIES::CInventoryCategoryForGuild::GuildInvId ) );
 
 	CGuildInventory *guildInv = static_cast<CGuildInventory*>(getInventory());
-	for ( uint i=0; i!=guildInv->getSlotCount(); ++i )
+
+	if (first)
 	{
 		setChestA(recipient, 0);
 		setChestB(recipient, 1);
@@ -338,6 +342,7 @@ void CGuildInventoryView::provideContents( CBitMemStream& stream )
 				}
 			}
 		}
+		c->isInitChest(chestA, true);
 	}
 
 	if (!c->isInitChest(chestB))

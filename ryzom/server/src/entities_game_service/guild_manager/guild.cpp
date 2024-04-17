@@ -185,6 +185,7 @@ void CGuild::setMoney(uint64 money)
 	CBankAccessor_GUILD::getGUILD().getINVENTORY().setMONEY(_DbGroup, _Money);
 }
 
+
 //----------------------------------------------------------------------------
 void CGuild::setChestA(const CEntityId &recipient, uint8 chest)
 {
@@ -423,6 +424,13 @@ void CGuild::sendClientDBDeltas()
 	_DbGroup.sendDeltas( ~0, *_GuildInventoryView, CCDBGroup::SendDeltasToRecipients );
 }
 
+//----------------------------------------------------------------------------
+void CGuild::sendClientDBChest(const CEntityId& id)
+{
+	_DbGroup.sendDeltasToClient( *_GuildInventoryView, id );
+}
+
+
 
 //----------------------------------------------------------------------------
 void CGuild::incMemberSession()
@@ -482,6 +490,12 @@ void CGuild::initNonPDMembers()
 	_Inventory = new CGuildInventory;
 	_GuildInventoryView = new CGuildInventoryView( this ); // unfortunately this MUST be a smartptr because of smartptrs to views in CInventoryBase
 	_GuildInventoryView->init( _Inventory, &_DbGroup );
+
+	for (uint8 i=0; i < 20; i++)
+	{
+		setChestParams(i, "", EGSPD::CGuildGrade::Member, EGSPD::CGuildGrade::Officer, EGSPD::CGuildGrade::HighOfficer);
+	}
+
 }
 
 //----------------------------------------------------------------------------
@@ -1139,6 +1153,7 @@ void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32
 	}
 }
 
+
 //----------------------------------------------------------------------------
 void CGuild::moveItem( CCharacter * user, uint32 slot, uint32 dstSlot, uint32 quantity, uint16 session )
 {
@@ -1695,7 +1710,7 @@ void CGuild::updateMembersStringIds()
 {
 	// Optimized property access (part 1)
 //	static ICDBStructNode *membersArray = _DbGroup.Database.getICDBStructNodeFromName("GUILD:MEMBERS");
-	CBankAccessor_GUILD::TGUILD::TMEMBERS &memberDb = CBankAccessor_GUILD::getGUILD().getMEMBERS();
+//	CBankAccessor_GUILD::TGUILD::TMEMBERS &memberDb = CBankAccessor_GUILD::getGUILD().getMEMBERS();
 //	BOMB_IF(membersArray==NULL, "GUILD:MEMBERS not found in database.xml for guild "<< guildIdToString(getId())<<".", return);
 //	static ICDBStructNode::CTextId nameTextId = ICDBStructNode::CTextId("NAME");
 //	static ICDBStructNode *nodeOfNameOfMember0 = membersArray->getNode( 0 )->getNode(nameTextId, false);

@@ -468,7 +468,7 @@ NLMISC_COMMAND(guildRefuseJoinInvitation,"Refuse guild Join Invitation","<user>"
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND( guildDB, "Display or set the value of a property in the guild database", "<guildName|<shardId>:<guildId> <db_entry> [<value>]" )
+NLMISC_COMMAND(guildDB, "Display or set the value of a property in the guild database", "<guildName|<shardId>:<guildId> <db_entry> [<value>]" )
 {
 	if ( args.size() != 2 && args.size() != 3 )
 		return false;

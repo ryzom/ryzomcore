@@ -185,7 +185,7 @@
             line_maxw="70"
             over_extend_view_text="true"
             posref="TL TL"
-            shadow_x="0" 
+            shadow_x="0"
             shadow_y="0"
             fontsize="10" />
         <ctrl type="button"
@@ -202,7 +202,7 @@
               global_color_normal="false"
               global_color_over="false"
               global_color_pushed="false"
-              onclick_l="enter_modal" 
+              onclick_l="enter_modal"
               params_l="group=ui:interface:remove_itemgroup_confirm"
               tooltip="uiRemove" />
         <ctrl type="button"
@@ -257,12 +257,12 @@
 	<action handler="set" cond="eq(@UI:TEMP:PREVIEWCHAR3D:PEOPLE,1)" params="target_property=ui:interface:inventory:content:equip:midsection:content:visu3d:char3d:env:name|value='outgame_matis.ig'" />
 	<action handler="set" cond="eq(@UI:TEMP:PREVIEWCHAR3D:PEOPLE,2)" params="target_property=ui:interface:inventory:content:equip:midsection:content:visu3d:char3d:env:name|value='outgame_tryker.ig'" />
 	<action handler="set" cond="eq(@UI:TEMP:PREVIEWCHAR3D:PEOPLE,3)" params="target_property=ui:interface:inventory:content:equip:midsection:content:visu3d:char3d:env:name|value='outgame_zorai.ig'" />
-  
+
       <action handler="set" cond="eq(@UI:TEMP:PREVIEWCHAR3D:PEOPLE,0)" params="target_property=ui:interface:inv_equip:content:equip:midsection:content:visu3d:char3d:env:name|value='outgame_fyros.ig'" />
 	<action handler="set" cond="eq(@UI:TEMP:PREVIEWCHAR3D:PEOPLE,1)" params="target_property=ui:interface:inv_equip:content:equip:midsection:content:visu3d:char3d:env:name|value='outgame_matis.ig'" />
 	<action handler="set" cond="eq(@UI:TEMP:PREVIEWCHAR3D:PEOPLE,2)" params="target_property=ui:interface:inv_equip:content:equip:midsection:content:visu3d:char3d:env:name|value='outgame_tryker.ig'" />
 	<action handler="set" cond="eq(@UI:TEMP:PREVIEWCHAR3D:PEOPLE,3)" params="target_property=ui:interface:inv_equip:content:equip:midsection:content:visu3d:char3d:env:name|value='outgame_zorai.ig'" />
-      
+
       <!-- make preview active -->
       <action handler="set" params="target_property=ui:interface:inventory:content:equip:midsection:content:visu3d:char3d:active|value=1" />
       <action handler="set" params="target_property=ui:interface:inv_equip:content:equip:midsection:content:visu3d:char3d:active|value=1" />
@@ -290,7 +290,7 @@
 			</group>
 			<view type="bitmap" id="septab" posparent="view_select" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
 		</group>
-            <group id="content" posref="BL TL" posparent="tab_group" w="140" h="173">      
+            <group id="content" posref="BL TL" posparent="tab_group" w="140" h="173">
                   <group id="black" posref="TL TL" sizeref="h" h="0" inherit_gc_alpha="true"/>
                   <instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
                   <!-- 3d preview -->
@@ -704,7 +704,7 @@
     </group>
   </group>
   <tree node="inv_equip" />
-  
+
   <!-- hotbar -->
   <define id="hotbar_h" value="1" />
   <define id="hotbar_v" value="2" />
@@ -761,7 +761,7 @@
     <action handler="set" params="target_property=ui:interface:inv_hotbar:content:hotbar:hotbar5:x|value='2'"/>
     <action handler="set" params="target_property=ui:interface:inv_hotbar:content:hotbar:hotbar5:y|value='0'"/>
   </proc>
-  
+
   <group type="menu" id="hotbar_menu" extends="base_menu_with_color">
     <action id="horiz" name="uiHorizontal" handler="proc" params="hotbar_proc_set|%hotbar_h"/>
     <action id="vert" name="uiVertical" handler="proc" params="hotbar_proc_set|%hotbar_v"/>
@@ -1108,8 +1108,18 @@
               onclick_l="proc"
               params_l="inventory_focus" />
         <ctrl style="tab_button_new"
-              id="tab10"
+              id="tab11"
               posparent="tab9"
+              group="content:guild2"
+              hardtext="uitabInvGuild2"
+              tooltip="uiTabInfo"
+              onclick_r="set"
+              params_r="dblink=UI:SAVE:INVENTORY_GUILD2_WANT_POPUP|value=1"
+              onclick_l="proc"
+              params_l="inventory_focus" />
+        <ctrl style="tab_button_new"
+              id="tab10"
+              posparent="tab11"
               group="content:room"
               hardtext="uitabInvRoom"
               tooltip="uiTabInfo"
@@ -1149,6 +1159,8 @@
               target="tab9:active" />
         <link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_ROOM), @UI:TEMP:INVENTORY_ROOM_OPENED)"
               target="tab10:active" />
+        <link expr="and(%is_guild_present, not(@UI:SAVE:INVENTORY_GUILD2_WANT_POPUP), @UI:TEMP:INVENTORY_GUILD_OPENED)"
+              target="tab11:active" />
       </group>
       <view type="bitmap"
             id="sep"
@@ -1336,10 +1348,15 @@
         <instance template="tguildinv_nbslots_bulk_weight"
                   id="ibw"
                   x="0"
+                  selected_chest="UI:SAVE:GUILD_INVENTORY_CHEST_A"
                   inv_branch="%guild_inv_dbentry"
                   inv_bulk_max="%guild_inv_bulk_max" />
         <instance template="tinv_item_list"
                   id="iil"
+                  y="-18"
+                  sizeref="wh"
+                  h="-16"
+                  inv_branch="%guild_inv_dbentry"
                   inv_branch_nb="%max_guild_invslot"
                   start_item="0"
                   inv_type="INV_GUILD" />
@@ -1415,6 +1432,7 @@
               onclick_l="proc"
               params_l="guild_put_money" />
       </group>
+
       <!-- room -->
       <group id="room"
              posref="TL TL"

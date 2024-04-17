@@ -867,9 +867,10 @@
            posref="TL TL"
            group_onclick_r="active_menu"
            group_params_r="menu=ui:interface:base_menu_with_color">
-      <instance template="tinv_nbslots_bulk_weight"
+      <instance template="tguildinv_nbslots_bulk_weight"
                 id="ibw"
                 x="-16"
+                selected_chest="UI:SAVE:GUILD_INVENTORY_CHEST_A"
                 inv_branch="%guild_inv_dbentry"
                 inv_bulk_max="%guild_inv_bulk_max" />
     </group>
@@ -883,6 +884,7 @@
                 h="-8"
                 inv_branch="%guild_inv_dbentry"
                 inv_branch_nb="%max_guild_invslot"
+                start_item="0"
                 inv_type="INV_GUILD" />
       <instance template="argent"
                 id="money"
@@ -977,7 +979,10 @@
 
   <link expr="and(%is_guild_present, @UI:SAVE:INVENTORY_GUILD_WANT_POPUP, @UI:TEMP:INVENTORY_GUILD_OPENED)"
         target="inv_guild:active" />
+  <link expr="and(%is_guild_present, @UI:SAVE:INVENTORY_GUILD2_WANT_POPUP, @UI:TEMP:INVENTORY_GUILD_OPENED)"
+        target="inv_guild2:active" />
   <tree node="inv_guild" />
+  <tree node="inv_guild2" />
   <!-- QUANTITY OF MONEY MODAL BOX -->
   <group type="modal"
          id="guild_inv_money"

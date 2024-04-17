@@ -25,6 +25,7 @@
 <tree node="inv_hotbar" />
 <tree node="inv_bag" />
 <tree node="inv_guild" />
+<tree node="inv_guild2" />
 <tree node="inv_room" />
 
 <!-- ************************** -->

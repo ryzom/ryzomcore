@@ -33,7 +33,7 @@
 
 namespace EGSPD
 {
-	
+
 //
 // Forward declarations
 //
@@ -54,37 +54,37 @@ public:
 
 	/// \name Accessors and Mutators methods
 	// @{
-		
+
 	/**
 	 * Use these methods to change a value, add or delete elements.
 	 */
-	
+
 	TGuildId						getId() const;
-	
+
 	uint64							getMoney() const;
 	void							setMoney(uint64 __v, bool forceWrite=false);
-	
+
 	uint32							getCreationDate() const;
 	void							setCreationDate(uint32 __v, bool forceWrite=false);
-	
+
 	uint32							getXP() const;
 	void							setXP(uint32 __v, bool forceWrite=false);
-	
+
 	uint32							getChargesPoints() const;
 	void							setChargesPoints(uint32 __v, bool forceWrite=false);
-	
+
 	CPeople::TPeople				getRace() const;
 	void							setRace(CPeople::TPeople __v, bool forceWrite=false);
-	
+
 	uint64							getIcon() const;
 	void							setIcon(uint64 __v, bool forceWrite=false);
-	
+
 	uint32							getBuilding() const;
 	void							setBuilding(uint32 __v, bool forceWrite=false);
-	
+
 	uint32							getVersion() const;
 	void							setVersion(uint32 __v, bool forceWrite=false);
-	
+
 	CGuildMemberPD*					getMembers(const TCharacterId& __k);
 	const CGuildMemberPD*			getMembers(const TCharacterId& __k) const;
 	std::map<TCharacterId, CGuildMemberPD*>::iterator	getMembersBegin();
@@ -94,14 +94,14 @@ public:
 	const std::map<TCharacterId, CGuildMemberPD*> &	getMembers() const;
 	void							setMembers(CGuildMemberPD* __v);
 	void							deleteFromMembers(const TCharacterId &__k);
-	
+
 	CGuildFameContainerPD*			getFameContainer();
 	const CGuildFameContainerPD*	getFameContainer() const;
 	void							setFameContainer(CGuildFameContainerPD* __v);
-	
+
 	CGuildContainerPD*				getParent();
 	const CGuildContainerPD*		getParent() const;
-	
+
 	// @}
 
 
@@ -109,38 +109,38 @@ public:
 
 	/// \name Public Management methods
 	// @{
-		
+
 	/**
 	 * Use these methods to create, load, unload and get
 	 * an object from database.
 	 */
-	
-	
+
+
 	/**
 	 * Clear whole object content but key (delete subobjects if there are, key is left unmodified), default clear value is 0.
 	 */
 	void							clear();
-	
+
 	/**
 	 * Cast base object to CGuildPD
 	 */
 	static CGuildPD*				cast(RY_PDS::IPDBaseData* obj);
-	
+
 	/**
 	 * Cast base object to const CGuildPD
 	 */
 	static const CGuildPD*			cast(const RY_PDS::IPDBaseData* obj);
-	
+
 	/**
 	 * Set user factory for this class (as class is indicated as derived, a home made constructor must be provided)
 	 */
 	static void						setFactory(RY_PDS::TPDFactory userFactory);
-	
+
 	/**
 	 * Create an object of the CGuildPD class, and declare it to the PDS.
 	 */
 	static CGuildPD*				create(const TGuildId &Id);
-	
+
 	// @}
 
 
@@ -148,14 +148,14 @@ public:
 
 	/// \name Public constructor
 	// @{
-		
+
 	/**
 	 * This constructor is public to allow direct instanciation of the class
 	 */
-	
+
 	CGuildPD();
 	virtual ~CGuildPD();
-	
+
 	// @}
 
 
@@ -163,10 +163,10 @@ public:
 
 	/// \name Persistent methods declaration
 	// @{
-		
+
 	void							apply(CPersistentDataRecord &__pdr);
 	void							store(CPersistentDataRecord &__pdr) const;
-	
+
 	// @}
 
 
@@ -174,14 +174,14 @@ protected:
 
 	/// \name User defined init and release methods
 	// @{
-		
+
 	/**
 	 * Overload those methods to implement init and release behaviours
 	 */
-	
+
 	virtual void					init();
 	virtual void					release();
-	
+
 	// @}
 
 
@@ -189,11 +189,11 @@ protected:
 
 	/// \name Attributes
 	// @{
-		
+
 	/**
 	 * Don't modify those value manually, use accessors and mutators above
 	 */
-	
+
 	TGuildId						_Id;
 	uint64							_Money;
 	uint32							_CreationDate;
@@ -206,7 +206,7 @@ protected:
 	std::map<TCharacterId, CGuildMemberPD*>	_Members;
 	CGuildFameContainerPD*			_FameContainer;
 	CGuildContainerPD*				_Parent;
-	
+
 	// @}
 
 
@@ -214,7 +214,7 @@ protected:
 
 	/// \name Internal Management methods
 	// @{
-		
+
 	void							pds__init(const TGuildId &Id);
 	void							pds__destroy();
 	void							pds__fetch(RY_PDS::CPData &data);
@@ -229,7 +229,7 @@ protected:
 	void							pds__unlinkMembers(TCharacterId __k);
 	void							pds__unlinkFameContainer(NLMISC::CEntityId dummy);
 	static void						pds_static__init();
-	
+
 	// @}
 
 
@@ -237,12 +237,12 @@ protected:
 
 	/// \name Default Factory and Fetch methods
 	// @{
-		
+
 	static void						pds_static__setFactory(RY_PDS::TPDFactory userFactory);
 	static bool						_FactoryInitialised;
 	static RY_PDS::CIndexAllocator	_IndexAllocator;
 	static void						pds_static__fetch(RY_PDS::IPDBaseData *object, RY_PDS::CPData &data);
-	
+
 	// @}
 
 
@@ -255,7 +255,7 @@ protected:
 	friend void EGSPD::init(uint32);
 };
 
-	
+
 } // End of EGSPD
 
 #endif

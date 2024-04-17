@@ -1,4 +1,4 @@
-// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+W// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
@@ -421,6 +421,7 @@ NLMISC::CVariable<float> KillAttribMinFactor("egs","KillAttribMinFactor", "min f
 
 
 CVariable<sint32> BaseGuildBulk("egs","BaseGuildBulk", "base bulk for a new guild building", 2000000, 0, true);
+CVariable<sint32> GuildChestSlots("egs","GuildChestSlots", "number of slots in each guild chest", 500, 0, true);
 CVariable<sint16> MinFameToBuyGuildBuilding("egs","MinFameToBuyGuildBuilding", "Minimum Fame To Buy a Guild Building", 0, 0, true);
 CVariable<sint16> MinFameToBuyPlayerBuilding("egs","MinFameToBuyPlayerBuilding", "Minimum Fame To Buy a Player Building", 0, 0, true);
 CVariable<uint32> GuildCreationCost("egs","GuildCreationCost", "", 100, 0, true);

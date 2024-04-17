@@ -92,7 +92,7 @@ public:
 
 	/// Init (the singleton of CCDBStructBanks must have been initialized before)
 	void				init( TCDBBank bank ) { Database.init( bank, true ); }
-	
+
 	/**
 	 * Add a recipient.
 	 * - recipient must be ready for writing (e.g. at state 1 of above tutorial), because it will
@@ -112,6 +112,7 @@ public:
 	/// Write and send the delta to all recipients, if there's something to write. Set maxBitSize to ~0 for no limit.
 	/// @param[in] sendFlags A combination of Flags (see enum above) indicating how the deltas are to be sent
 	void				sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint8 sendFlags);
+	void				sendDeltasToClient(IDataProvider& dataProvider, const NLMISC::CEntityId &id );
 
 	/// Simpler version
 	/// @param[in] sendFlags A combination of Flags (see enum above) indicating how the deltas are to be sent
@@ -120,7 +121,7 @@ public:
 		CFakeDataProvider dp;
 		sendDeltas( maxBitSize, dp, sendFlags );
 	}
-	
+
 
 private:
 

@@ -993,8 +993,8 @@
   <branch name="ITEM_INFO">
     <leaf name="GET"
           sendto="EGS"
-          format="u16"
-          description="the client ask for a special item info in a inventory slot: inventoryId(u8HIGH)/slotId(u8LOW)" />
+          format="u32"
+          description="the client ask for a special item info in a inventory slot: inventoryId(u16HIGH)/slotId(u16LOW)" />
     <leaf name="SET"
           description="Server answer to the previous message. A CItemInfos class is filled" />
     <leaf name="REFRESH_VERSION"

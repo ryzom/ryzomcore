@@ -45,7 +45,7 @@ public:
 	virtual	void provideUpdate( NLMISC::CBitMemStream& stream ) = 0;
 
 	/// Push all non-empty data, then provide them as update
-	virtual void provideContents( NLMISC::CBitMemStream& stream ) = 0;
+	virtual void provideContents( NLMISC::CBitMemStream& stream, const NLMISC::CEntityId &recipient = NLMISC::CEntityId::Unknown, bool first = false ) = 0;
 };
 
 class CFakeDataProvider : public IDataProvider
@@ -53,19 +53,19 @@ class CFakeDataProvider : public IDataProvider
 public:
 	/// Return true if there is a pending update to provide
 	virtual bool nonEmpty() const { return false; }
-	
+
 	/// Push data modified since the last update. May be called event if nonEmpty().
 	virtual	void provideUpdate( NLMISC::CBitMemStream& stream ) {}
-	
+
 	/// Push all non-empty data, then provide them as update
-	virtual void provideContents( NLMISC::CBitMemStream& stream ) {}
+	virtual void provideContents( NLMISC::CBitMemStream& stream, const NLMISC::CEntityId &recipient = NLMISC::CEntityId::Unknown, bool first = false ) {}
 };
 
 /** Guild inventory */
 class CGuildInventory : public CInventoryBase
 {
 public:
-	
+
 	/// Constructor
 	CGuildInventory();
 
@@ -151,7 +151,7 @@ public:
 	virtual	void provideUpdate( NLMISC::CBitMemStream& stream );
 
 	/// Push all non-empty data, for connecting members. Precondition: _GuildInvUpdater.empty() (provideUpdate() must have been called before)
-	virtual void provideContents( NLMISC::CBitMemStream& stream );
+	virtual void provideContents( NLMISC::CBitMemStream& stream, const NLMISC::CEntityId &recipient = NLMISC::CEntityId::Unknown, bool first = false);
 
 protected:
 
