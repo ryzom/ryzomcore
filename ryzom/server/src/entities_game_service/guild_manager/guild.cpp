@@ -59,6 +59,7 @@ CVariable<uint32> GuildMaxOutpostCount("egs", "GuildMaxOutpostCount", "max numbe
 extern std::string guildIdToString(uint32 guildId);
 // utility to parse a human readable string into a guild id
 extern uint32 parseGuildId(const std::string &str);
+extern NLMISC::CVariable<uint32> GuildChestSlots;
 
 extern bool IOSIsUp;
 
@@ -1049,6 +1050,20 @@ void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 
 		return;
 	}
 
+	CGuildMember* member = getMemberFromEId(user->getId());
+	if (!member)
+		return;
+
+	uint8 chest = floor((float)slot / (float)GuildChestSlots);
+
+
+	if (!haveChestViewGrade(chest, member->getGrade()) || !haveChestPutGrade(chest, member->getGrade()))
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
+		return;
+	}
+
+
 	// check if this type of item is legal in the guild inventory
 	CGameItemPtr item = srcItem;
 	if (!item->getMovable() && (
@@ -1113,9 +1128,14 @@ void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32
 		return;
 	}
 
+	CGuildMember* member = getMemberFromEId(user->getId());
+	if (!member)
+		return;
 
-	CGuildMemberModule * module;
-	if ( !user->getModuleParent().getModule(module) || !module->canTakeGuildItem() )
+	uint8 chest = floor((float)slot / (float)GuildChestSlots);
+
+
+	if (!haveChestViewGrade(chest, member->getGrade()) || !haveChestGetGrade(chest, member->getGrade()))
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
 		return;
@@ -1180,9 +1200,20 @@ void CGuild::moveItem( CCharacter * user, uint32 slot, uint32 dstSlot, uint32 qu
 		return;
 	}
 
+	CGuildMember* member = getMemberFromEId(user->getId());
+	if (!member)
+		return;
 
-	CGuildMemberModule * module;
-	if ( !user->getModuleParent().getModule(module) || !module->canTakeGuildItem() )
+	uint8 srcChest = floor((float)slot / (float)GuildChestSlots);
+	uint8 dstChest = floor((float)dstSlot / (float)GuildChestSlots);
+
+	if (!haveChestViewGrade(srcChest, member->getGrade()) || !haveChestGetGrade(srcChest, member->getGrade()))
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
+		return;
+	}
+
+	if (!haveChestViewGrade(dstChest, member->getGrade()) || !haveChestPutGrade(dstChest, member->getGrade()))
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
 		return;
@@ -1190,11 +1221,12 @@ void CGuild::moveItem( CCharacter * user, uint32 slot, uint32 dstSlot, uint32 qu
 
 	// get the source item
 	CInventoryPtr srcItems = (CGuildInventory *)_Inventory;
-	if ( slot >= srcItems->getSlotCount() )
+	if ( slot >= srcItems->getSlotCount() || dstSlot >= srcItems->getSlotCount() )
 	{
-		nlwarning( "<swapItem> user %s Invalid guild slot %u, count = %u",user->getId().toString().c_str(), slot, srcItems->getSlotCount() );
+		nlwarning( "<swapItem> user %s Invalid guild slot %u or %u, count = %u",user->getId().toString().c_str(), slot, dstSlot, srcItems->getSlotCount() );
 		return;
 	}
+
 	CGameItemPtr srcItem = srcItems->getItem(slot);
 	if ( srcItem == NULL )
 	{
@@ -2561,6 +2593,10 @@ private:
 	nlinfo("GUILD HAVE %u CHESTS", _Chests.size());\
 	for (uint8 chest=0; chest < _Chests.size(); chest++)\
 	{\
+		if (chest < 2 && _Chests[chest].BulkMax < 6000)\
+			_Chests[chest].BulkMax = 6000;\
+		if (chest < 2 && _Chests[chest].Name.empty())\
+			_Chests[chest].Name = NLMISC::toString("Chest #%u", chest+1);\
 		nlinfo("Send DB for chest %u", chest);\
 		_Inventory->setChestMaxBulk(chest, _Chests[chest].BulkMax);\
 		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, _Chests[chest].Name, true);\
