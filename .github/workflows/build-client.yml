@@ -68,14 +68,14 @@ jobs:
         sudo ln --symbolic --force ${{ steps.strings.outputs.cmake-install-dir }}/bin/cmake /usr/local/bin/cmake
 
     - name: Cache Hunter Dependencies
-      uses: actions/cache@v3.3.2
+      uses: actions/cache@v4.0.2
       with:
         path: ${{ steps.strings.outputs.hunter-dir }}
         key: ${{ matrix.os }}-hunter-cache
 
     - name: Cache Chocolatey Dependencies
       if: runner.os == 'Windows'
-      uses: actions/cache@v3.3.2
+      uses: actions/cache@v4.0.2
       with:
         path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
         key: ${{ runner.os }}-chocolatey-cache

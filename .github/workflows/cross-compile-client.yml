@@ -49,7 +49,7 @@ jobs:
         sudo make install
 
     - name: Cache Hunter Dependencies
-      uses: actions/cache@v3.3.2
+      uses: actions/cache@v4.0.2
       with:
         path: ${{ steps.strings.outputs.hunter-dir }}
         key: ubuntu-latest-hunter-cache
