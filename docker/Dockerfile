@@ -61,7 +61,7 @@ ARG APP_HOME=/app
 RUN groupadd --gid $USER_GID $USERNAME \
  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 
-COPY build/bin
+COPY build/ryzomcore-* /app
 
 USER $USERNAME
 WORKDIR $APP_HOME
