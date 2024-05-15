@@ -31,7 +31,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt install --yes software-properties-common
-        wget --quiet https://packages.microsoft.com/config/ubuntu/${{ ubuntu_version }}/packages-microsoft-prod.deb
+        wget --quiet https://packages.microsoft.com/config/ubuntu/${{ env.ubuntu_version }}/packages-microsoft-prod.deb
         sudo dpkg --install packages-microsoft-prod.deb
         sudo apt update
         sudo apt install --yes \
@@ -62,9 +62,9 @@ jobs:
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -G "Ninja"
         -DCMAKE_SUPPRESS_REGENERATION=ON
-        -DCMAKE_CXX_COMPILER=${{ cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ build_type }}
+        -DCMAKE_CXX_COMPILER=${{ env.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ env.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ env.build_type }}
         -DWITH_STATIC=ON
         -DWITH_NEL_TESTS=ON
         -DWITH_NEL_SAMPLES=ON
@@ -84,7 +84,7 @@ jobs:
         -S ${{ github.workspace }}
 
     - name: Package
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ build_type }} --target package
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ env.build_type }} --target package
 
     - name: Build the Docker image
       run: docker build . --file docker/Dockerfile --tag ryzomcore:${{ steps.strings.outputs.build-version }}
