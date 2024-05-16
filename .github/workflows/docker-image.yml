@@ -9,10 +9,14 @@ env:
   build_type: Release
   cpp_compiler: g++
   c_compiler: gcc
+  IMAGE_NAME: ryzomcore-tools
 
 jobs:
   build:
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+      contents: read
 
     steps:
     - uses: actions/checkout@v4
@@ -81,10 +85,29 @@ jobs:
         -DWITH_QT5=ON
         -DWITH_LIBGSF=ON
         -DCPACK_PACKAGE_VERSION="${{ steps.strings.outputs.build-version }}"
+        -DCPACK_GENERATOR=STGZ
         -S ${{ github.workspace }}
 
     - name: Package
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ env.build_type }} --target package
 
+    - uses: actions/upload-artifact@v4
+      with:
+        name: package
+        path: ${{ steps.strings.outputs.build-output-dir }}/ryzomcore-*
+
+
     - name: Build the Docker image
       run: docker build . --file docker/Dockerfile --tag ryzomcore:${{ steps.strings.outputs.build-version }}
+
+    - name: Log in to registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
+    - name: Push image
+      run: |
+        IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+        IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+        VERSION="${{ steps.strings.outputs.build-version }}"
+        echo IMAGE_ID=$IMAGE_ID
+        docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+        docker push $IMAGE_ID:$VERSION

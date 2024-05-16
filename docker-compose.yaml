@@ -4,3 +4,9 @@ services:
     build: ./.devcontainer
     volumes:
       - ./:/tmp/ryzomcore
+
+  tools:
+    image: "ryzomcore/tools"
+    build:
+      context: .
+      dockerfile: docker/Dockerfile

@@ -61,7 +61,9 @@ ARG APP_HOME=/app
 RUN groupadd --gid $USER_GID $USERNAME \
  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 
-COPY build/ryzomcore-* /app
+COPY build/ryzomcore-*.sh /tmp/ryzomcore.sh
+
+RUN mkdir --parent "$APP_HOME" \
+ && /tmp/ryzomcore.sh --skip-license
 
 USER $USERNAME
-WORKDIR $APP_HOME
