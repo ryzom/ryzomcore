@@ -103,3 +103,11 @@ jobs:
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest --build-config ${{ matrix.build_type }}
+
+    - name: Package
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} --target package
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: package-${{ matrix.os }}
+        path: ${{ steps.strings.outputs.build-output-dir }}/ryzomcore-*

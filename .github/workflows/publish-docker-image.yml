@@ -1,8 +1,10 @@
-name: Docker Image
+name: Publish Docker Image
 
 on:
   push:
-    branches: [ "core4", "feature/*" ]
+    branches: [ "core4" ]
+    tags:
+      - v*
 
 env:
   ubuntu_version: 22.04
@@ -74,7 +76,6 @@ jobs:
         -DCMAKE_C_COMPILER=${{ env.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ env.build_type }}
         -DWITH_STATIC=ON
-        -DWITH_NEL_TESTS=ON
         -DWITH_NEL_SAMPLES=ON
         -DWITH_LUA51=OFF
         -DWITH_LUA52=ON
@@ -99,7 +100,6 @@ jobs:
       with:
         name: package
         path: ${{ steps.strings.outputs.build-output-dir }}/ryzomcore-*
-
 
     - name: Build the Docker image
       run: docker build . --file docker/Dockerfile --tag "${{ steps.strings.outputs.docker-image-tag }}"
