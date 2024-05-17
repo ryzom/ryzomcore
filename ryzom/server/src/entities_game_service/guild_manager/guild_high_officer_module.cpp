@@ -68,10 +68,10 @@ void CGuildHighOfficerModule::buyGuildOption( const CStaticItem * form )
 
 	if ( proxy.getMoney() < form->GuildOption->MoneyCost )
 		return;
-	
+
 //	if ( guild->getXP() < form->GuildOption->XpCost )
 //		return;
-		
+
 	if ( form->GuildOption->Type == GUILD_OPTION::GuildMainBuilding )
 	{
 		CCreature * bot = proxy.getInterlocutor();
@@ -79,15 +79,15 @@ void CGuildHighOfficerModule::buyGuildOption( const CStaticItem * form )
 		{
 			nlwarning("<BUILDING> char %s bot %s is invalid",proxy.getId().toString().c_str(), proxy.getInterlocutor()->getId().toString().c_str() );
 			return;
-		}	
+		}
 
 		if ( bot->getGuildBuilding() == NULL )
 		{
 			nlwarning("<BUILDING> char %s bot %s has no building",proxy.getId().toString().c_str(), proxy.getInterlocutor()->getId().toString().c_str() );
 			return;
-		}	
-			
-		sint32 fame = CFameInterface::getInstance().getFameIndexed( guild->getEId(), bot->getForm()->getFaction());
+		}
+
+		/*sint32 fame = CFameInterface::getInstance().getFameIndexed( guild->getEId(), bot->getForm()->getFaction());
 		if ( fame < MinFameToBuyGuildBuilding )
 		{
 			SM_STATIC_PARAMS_2(params,STRING_MANAGER::integer,STRING_MANAGER::race);
@@ -95,19 +95,19 @@ void CGuildHighOfficerModule::buyGuildOption( const CStaticItem * form )
 			params[1].Enum = bot->getRace();
 			proxy.sendSystemMessage( "GUILD_BUILDING_BAD_FAME", params);
 			return;
-		}
+		}*/
 
 		guild->setBuilding( bot->getGuildBuilding()->getAlias() );
 	}
 //	else if ( guild->getBuilding() != 0 )
-//	{	
+//	{
 //		EGSPD::CSPType::TSPType type = GUILD_OPTION::toSPType( form->GuildOption->Type);
 //		if ( type == EGSPD::CSPType::EndSPType )
 //		{
 //			nlwarning("<BUILDING> char %s, sheet %s invalid sp type",proxy.getId().toString().c_str(),form->SheetId.toString().c_str() );
 //			return;
 //		}
-//		
+//
 //		if ( guild->hasRoleMaster( type ) )
 //		{
 //			proxy.sendSystemMessage( "GUILD_RM_ALREADY_BOUGHT" );
@@ -133,7 +133,7 @@ void CGuildHighOfficerModule::buyOutpostBuilding(NLMISC::CSheetId sid)
 
 	CGuildCharProxy proxy;
 	getProxy(proxy);
-	CGuild *pGuild = MODULE_CAST<CGuild*>(_GuildMemberCore->getGuild());	
+	CGuild *pGuild = MODULE_CAST<CGuild*>(_GuildMemberCore->getGuild());
 	MODULE_AST(pGuild);
 
 	// This is an outpost building trade here
@@ -225,7 +225,7 @@ COutpost::TChallengeOutpostErrors CGuildHighOfficerModule::challengeOutpost(NLMI
 			proxy.sendSystemMessage( "NEED_MORE_GUILD_MONEY" );
 		return COutpost::NotEnoughMoney;
 	}
-	
+
 	if (outpost->getAttackerGuild()!=0)
 	{
 		if (!simulate)
@@ -242,9 +242,9 @@ COutpost::TChallengeOutpostErrors CGuildHighOfficerModule::challengeOutpost(NLMI
 			);
 		return COutpost::AlreadyOwned;
 	}
-	
+
 	COutpost::TChallengeOutpostErrors ret = outpost->challengeOutpost(guild, simulate);
-	
+
 	if (!simulate && ret == COutpost::NoError)
 	{
 		uint32 remainingAmountToPay = outpost->getChallengeCost();
@@ -269,7 +269,7 @@ COutpost::TChallengeOutpostErrors CGuildHighOfficerModule::challengeOutpost(NLMI
 
 		nlassert(remainingAmountToPay == 0);
 	}
-	
+
 	return ret;
 }
 
@@ -310,10 +310,10 @@ void CGuildHighOfficerModule::outpostSetSquad(NLMISC::CSheetId outpostSheet, uin
 {
 	CGuildCharProxy proxy;
 	getProxy(proxy);
-	
+
 	CGuild * guild = MODULE_CAST<CGuild*>(_GuildMemberCore->getGuild());
 	MODULE_AST(guild);
-	
+
 	NLMISC::CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromSheet(outpostSheet);
 	if (outpost == NULL)
 		return;
@@ -356,10 +356,10 @@ void CGuildHighOfficerModule::outpostSetSquadSpawnZone(NLMISC::CSheetId outpostS
 {
 	CGuildCharProxy proxy;
 	getProxy(proxy);
-	
+
 	CGuild * guild = MODULE_CAST<CGuild*>(_GuildMemberCore->getGuild());
 	MODULE_AST(guild);
-	
+
 	NLMISC::CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromSheet(outpostSheet);
 	if (outpost == NULL)
 		return;
@@ -402,10 +402,10 @@ void CGuildHighOfficerModule::outpostInsertSquad(NLMISC::CSheetId outpostSheet, 
 {
 	CGuildCharProxy proxy;
 	getProxy(proxy);
-	
+
 	CGuild * guild = MODULE_CAST<CGuild*>(_GuildMemberCore->getGuild());
 	MODULE_AST(guild);
-	
+
 	NLMISC::CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromSheet(outpostSheet);
 	if (outpost == NULL)
 		return;
@@ -447,10 +447,10 @@ void CGuildHighOfficerModule::outpostRemoveSquad(NLMISC::CSheetId outpostSheet, 
 {
 	CGuildCharProxy proxy;
 	getProxy(proxy);
-	
+
 	CGuild * guild = MODULE_CAST<CGuild*>(_GuildMemberCore->getGuild());
 	MODULE_AST(guild);
-	
+
 	NLMISC::CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromSheet(outpostSheet);
 	if (outpost == NULL)
 		return;
@@ -492,10 +492,10 @@ void CGuildHighOfficerModule::outpostSetExpenseLimit(NLMISC::CSheetId outpostShe
 {
 	CGuildCharProxy proxy;
 	getProxy(proxy);
-	
+
 	CGuild * guild = MODULE_CAST<CGuild*>(_GuildMemberCore->getGuild());
 	MODULE_AST(guild);
-	
+
 	NLMISC::CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromSheet(outpostSheet);
 	if (outpost == NULL)
 		return;
@@ -537,14 +537,14 @@ void CGuildHighOfficerModule::outpostSetDefensePeriod(NLMISC::CSheetId outpostSh
 {
 	CGuildCharProxy proxy;
 	getProxy(proxy);
-	
+
 	CGuild * guild = MODULE_CAST<CGuild*>(_GuildMemberCore->getGuild());
 	MODULE_AST(guild);
-	
+
 	NLMISC::CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromSheet(outpostSheet);
 	if (outpost == NULL)
 		return;
-	
+
 	if (proxy.getGuildId() != outpost->getOwnerGuild())
 	{
 		nlwarning("Player %s is not allowed to edit the outpost '%s'",
@@ -553,11 +553,11 @@ void CGuildHighOfficerModule::outpostSetDefensePeriod(NLMISC::CSheetId outpostSh
 			);
 		return;
 	}
-	
+
 	// check editing concurrency
 	if (!outpost->submitEditingAccess(OUTPOSTENUMS::OutpostOwner, proxy.getId(), COutpost::EditDefenseHour))
 		return;
-	
+
 	outpost->timeSetDefenseHour(hour);
 }
 

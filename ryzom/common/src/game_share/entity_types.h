@@ -44,7 +44,7 @@ namespace CLFECOMMON {
  * Defined     -> one send every two cycles (usually 5 Hz).
  * Don't forget to adjust the variable ClientBandwidth in frontend_service.cfg.
  */
-#undef HALF_FREQUENCY_SENDING_TO_CLIENT
+#define HALF_FREQUENCY_SENDING_TO_CLIENT
 
 
 /*

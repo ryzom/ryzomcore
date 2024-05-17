@@ -392,6 +392,62 @@ void CSpawnGroupNpc::spawnBots(const std::string &name)
 	}
 }
 
+void CSpawnGroupNpc::spawnBots(const std::string &name, const std::string &vpx)
+{
+	ucstring ucName;
+	ucName.fromUtf8(name);
+
+	FOREACH(itBot, CCont<CBot>, bots())
+	{
+		CBot* bot = *itBot;
+		if (!bot->isSpawned()) {
+			bot->spawn();
+
+			CBotNpc *botnpc = static_cast<CBotNpc*>(bot);
+			if (botnpc && !vpx.empty())
+			{
+				botnpc->setVisualProperties(vpx);
+				botnpc->sendVisualProperties();
+			}
+
+			CSpawnBot *spawnBot = bot->getSpawnObj();
+			if (spawnBot && !ucName.empty())
+			{
+				TDataSetRow	row = spawnBot->dataSetRow();
+				NLNET::CMessage	msgout("CHARACTER_NAME");
+				msgout.serial(row);
+				msgout.serial(ucName);
+				sendMessageViaMirror("IOS", msgout);
+				spawnBot->getPersistent().setCustomName(ucName);
+			}
+
+			if (_Cell < 0) {
+				CEntityId id = bot->getSpawnObj()->getEntityId();
+				sint32 x = bot->getSpawnObj()->pos().x();
+				sint32 y = bot->getSpawnObj()->pos().y();
+				sint32 z = bot->getSpawnObj()->pos().h();
+				float t = bot->getSpawnObj()->pos().theta().asRadians();
+				uint8 cont = 0;
+				uint8 slide = 1;
+				NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle() + 1;
+				CMessage msgout2("ENTITY_TELEPORTATION");
+				msgout2.serial( id );
+				msgout2.serial( x );
+				msgout2.serial( y );
+				msgout2.serial( z );
+				msgout2.serial( t );
+				msgout2.serial( tick );
+				msgout2.serial( cont );
+				msgout2.serial( _Cell );
+				msgout2.serial( slide );
+
+				sendMessageViaMirror("GPMS", msgout2);
+			}
+		}
+	}
+}
+
+
 void CSpawnGroupNpc::spawnBots()
 {
 	FOREACH(itBot, CCont<CBot>, bots())
@@ -663,13 +719,13 @@ void CGroupNpc::addParameter(std::string const& parameter)
 	static std::string DESPAWN_TIME("despawn time");
 	static std::string RING("ring");
 	static std::string DENIED_ASTAR_FLAGS("denied_astar_flags");
-	
+
 	std::string key, tail;
-	
+
 	// force lowercase
 	std::string p = NLMISC::toLowerAscii(parameter);
 	AI_SHARE::stringToKeywordAndTail(p, key, tail);
-	
+
 	breakable
 	{
 		if (key == RING)

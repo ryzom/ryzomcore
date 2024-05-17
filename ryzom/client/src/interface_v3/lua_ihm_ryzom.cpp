@@ -482,6 +482,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getMouseRightDown", getMouseRightDown),
 	ls.registerFunc("isShiftDown", isShiftDown),
 	ls.registerFunc("isCtrlDown", isCtrlDown),
+	ls.registerFunc("isTabDown", isTabDown),
 	ls.registerFunc("getShapeIdAt", getShapeIdAt),
 	ls.registerFunc("getPlayerFront", getPlayerFront);
 	ls.registerFunc("getPlayerDirection", getPlayerDirection);
@@ -491,6 +492,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getPlayerTitle", getPlayerTitle);
 	ls.registerFunc("getPlayerTag", getPlayerTag);
 	ls.registerFunc("getPlayerMode", getPlayerMode);
+	ls.registerFunc("getPlayerPrivs", getPlayerPrivs);
 	ls.registerFunc("getTargetPos", getTargetPos);
 	ls.registerFunc("getTargetFront", getTargetFront);
 	ls.registerFunc("getTargetDirection", getTargetDirection);
@@ -517,6 +519,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("isPlayerFreeTrial", isPlayerFreeTrial);
 	ls.registerFunc("isPlayerNewbie", isPlayerNewbie);
 	ls.registerFunc("isInRingMode", isInRingMode);
+	ls.registerFunc("isPlayerPrivilege", isPlayerPrivilege);
 	ls.registerFunc("getUserRace",  getUserRace);
 	ls.registerFunc("getSheet2idx",  getSheet2idx);
 	ls.registerFunc("getTargetSlot",  getTargetSlot);
@@ -1367,6 +1370,12 @@ int CLuaIHMRyzom::isCtrlDown(CLuaState &ls)
 	return 1;
 }
 
+int CLuaIHMRyzom::isTabDown(CLuaState &ls)
+{
+	ls.push(Driver->AsyncListener.isKeyDown(KeyTAB));
+	return 1;
+}
+
 
 
 int CLuaIHMRyzom::getShapeIdAt(CLuaState &ls)
@@ -1544,6 +1553,31 @@ int CLuaIHMRyzom::getPlayerMode(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getPlayerMode", 0);
 	ls.push(MBEHAV::modeToString(UserEntity->mode()));
 	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getPlayerPrivs(CLuaState &ls)
+{
+	std::string privsString = "";
+	
+	if (hasPrivilegeDEV()) privsString=":DEV";
+	if (hasPrivilegeSGM()) privsString+=":SGM";
+	if (hasPrivilegeGM()) privsString+=":GM";
+	if (hasPrivilegeVG()) privsString+=":VG";
+	if (hasPrivilegeSG()) privsString+=":SG";
+	if (hasPrivilegeG()) privsString+=":G";
+	if (hasPrivilegeEM()) privsString+=":EM";
+	if (hasPrivilegeEG()) privsString+=":EG";
+	if (hasPrivilegeOBSERVER()) privsString+=":OBSERVER";
+	if (hasPrivilegeOBSERVER()) privsString+=":TESTER";
+	
+	if(privsString == ""){
+		return 0;
+	}
+	else{
+		ls.push(privsString+=":");
+		return 1;
+	}
 }
 
 // ***************************************************************************
@@ -1753,6 +1787,19 @@ int CLuaIHMRyzom::isInRingMode(CLuaState &ls)
 	extern bool IsInRingMode();
 	ls.push(IsInRingMode());
 	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::isPlayerPrivilege(CLuaState &ls)
+{
+	bool hasPlayerPrivilege = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeG() || hasPrivilegeEM() || hasPrivilegeEG());
+	if(hasPlayerPrivilege)
+	{
+		return 1;
+	}
+	else{
+		return 0;
+	}
 }
 
 // ***************************************************************************
