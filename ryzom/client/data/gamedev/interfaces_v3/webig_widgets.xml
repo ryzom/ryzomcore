@@ -9,6 +9,7 @@
 	<lua file="sceneedit.lua" />
 	<lua file="ark.lua" />
 	<lua file="ark_lessons.lua" />
+	<lua file="ark_shop.lua" />
 
 <!-- //////////// STYLE : webigchat_desc /////////// -->
 	<style style="webigchat_desc" type="text" fontsize="12" justification="dont_clip_word" color="0 0 0 255" global_color="false" multi_line="true" multi_line_space="0" line_maxw="320" multi_line_maxw_only="true" />
