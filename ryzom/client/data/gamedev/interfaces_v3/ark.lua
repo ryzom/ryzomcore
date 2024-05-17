@@ -25,6 +25,14 @@ function print_r(arr, indentLevel)
 	return str
 end
 
+function tablelength(T)
+	if T == nil then
+		return 0
+	end
+	local count = 0
+	for _ in pairs(T) do count = count + 1 end
+	return count
+end
 
 function openPageInWebIg(url)
 	getUI("ui:interface:webig:content:html"):browse(url)
