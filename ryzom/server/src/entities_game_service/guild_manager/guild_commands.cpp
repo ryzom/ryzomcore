@@ -160,6 +160,7 @@ NLMISC_COMMAND(dumpGuild, "dump a guild", "<guildName|<shardId>:<guildId>")
 
 	GET_GUILD(false);
 
+	guild->initChests();
 	guild->dumpGuildInfos( log );
 
 	return true;

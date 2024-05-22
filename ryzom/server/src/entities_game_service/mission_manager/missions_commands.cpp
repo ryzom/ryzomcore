@@ -1301,6 +1301,7 @@ NLMISC_COMMAND(setGuildInventoryChestBulkMax, "Set the bulk max of chest of inve
 		{
 			uint32 bulkmax;
 			NLMISC::fromString(args[2], bulkmax);
+			guild->initChests();
 			guild->setChestBulkMax(chest, bulkmax);
 			log.displayNL("OK");
 		}
@@ -1325,6 +1326,7 @@ NLMISC_COMMAND(setGuildInventoryChestParams, "Set the chest of inventory", "<uid
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
 	if (guild)
 	{
+		guild->initChests();
 		uint8 chest;
 		NLMISC::fromString(args[1], chest);
 		EGSPD::CGuildGrade::TGuildGrade gradeView = EGSPD::CGuildGrade::fromString(args[3]);
