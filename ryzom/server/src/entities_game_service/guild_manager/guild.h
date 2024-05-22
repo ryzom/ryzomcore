@@ -126,6 +126,17 @@ public:
 	void setChestA(const NLMISC::CEntityId &recipient, uint8 chest);
 	void setChestB(const NLMISC::CEntityId &recipient, uint8 chest);
 
+	void initChests() {
+		_Chests.resize(GUILD_NB_CHESTS);
+		for (uint8 chest=0; chest < 2; chest++)
+		{
+			if (_Chests[chest].BulkMax < 6000)
+				_Chests[chest].BulkMax = 6000;
+			if (_Chests[chest].Name.empty());
+				_Chests[chest].Name = NLMISC::toString("Chest #%u", chest+1);
+		}
+	}
+
 	std::string getChestName(uint8 chest) { if (chest >= _Chests.size()) return ""; return _Chests[chest].Name; }
 	EGSPD::CGuildGrade::TGuildGrade getChestViewGrade(uint8 chest) { if (chest >= _Chests.size()) return EGSPD::CGuildGrade::Leader; return _Chests[chest].ViewGrade; }
 	EGSPD::CGuildGrade::TGuildGrade getChestPutGrade(uint8 chest) { if (chest >= _Chests.size()) return EGSPD::CGuildGrade::Leader; return _Chests[chest].PutGrade; }
