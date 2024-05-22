@@ -66,4 +66,6 @@ COPY build/ryzomcore-*.sh /tmp/ryzomcore.sh
 RUN mkdir --parent "$APP_HOME" \
  && /tmp/ryzomcore.sh --skip-license
 
+ENV LD_LIBRARY_PATH=/usr/local/lib
+
 USER $USERNAME
