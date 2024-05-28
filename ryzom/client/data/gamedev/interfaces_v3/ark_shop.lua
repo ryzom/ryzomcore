@@ -500,3 +500,24 @@ function arkNpcShop:OpenItemWindow(id, buy)
 	framewin.active=true
 end
 
+function arkNpcShop:selectSheet(item, id)
+	html = ""
+	items = arkNpcShop.all_valid_items[item][id]
+	for i=1,#items do
+		if arkNpcShop.lockedSlots[item][items[i][5]] == nil then
+			local params = "arkNpcShop:selectSheetItem("..tostring(item)..","..tostring(id)..","..tostring(i)..")"
+			html = html..[[<div class="ryzom-ui-grouptemplate" id="ark_npc_shop_select_item_]]..item..[[" style="template:arkshop_inv_item;display:inline;id:inv_special_bag_item;usesheet:true;sheetdb:UI:TEMP:ARK:POPUP_ITEM_]]..item.."_"..id.."_"..i..[[;isvirtual:false;w:40;overlay2_active:1;gc2:true;gc1:true;col_over:0 0 0 0;params_l:]]..params..[[;params_r:]]..params..[["></div>&nbsp;]]
+		end
+	end
+
+	runAH(nil, "enter_modal", "group=ui:interface:webig_html_modal")
+	local whm = getUI("ui:interface:webig_html_modal")
+	whm.child_resize_h = false
+	whm.w = 240
+	if h == nil then
+		h = 120
+	end
+	whm.h = h
+	whm_html = getUI("ui:interface:webig_html_modal:html")
+	whm_html:renderHtml(html)
+end
