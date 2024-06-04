@@ -190,57 +190,42 @@ sint CPeopleList::getIndexFromContainerID(const std::string &id) const
 //==================================================================
 bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
 {
-	if (a.Group == b.Group)
-		return (a.ContactId < b.ContactId);
-	else
-		return (a.Group < b.Group);
+	return (a.ContactId < b.ContactId);
 }
 
 //==================================================================
 bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 {
-	if (a.Group == b.Group) {
-		return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
-	}
-	else
-	{
-		return NLMISC::compareCaseInsensitive(a.Group, b.Group) < 0; // FIXME: Locale-dependent sort
-	}
+	return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
 }
 
 //==================================================================
 bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 {
-	if (a.Group == b.Group) {
-		// We want order: online/alpha, offworld/alpha, offline/alpha
-		if (a.Online == b.Online)
-		{
-			return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
-		}
-		else
-		{
-			// Compare online status
-			switch (a.Online)
-			{
-			case ccs_online:
-				// a is > if a is online
-				return true;
-				break;
-			case ccs_online_abroad:
-				// a is > if b is offline
-				return (b.Online == ccs_offline);
-				break;
-			case ccs_offline:
-			default:
-				// b is always > if a is offline
-				return false;
-				break;
-			}
-		}
+	// We want order: online/alpha, offworld/alpha, offline/alpha
+	if (a.Online == b.Online)
+	{
+		return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
 	}
 	else
 	{
-		return -NLMISC::compareCaseInsensitive(a.Group, b.Group); // FIXME: Locale-dependent sort
+		// Compare online status
+		switch (a.Online)
+		{
+		case ccs_online:
+			// a is > if a is online
+			return true;
+			break;
+		case ccs_online_abroad:
+			// a is > if b is offline
+			return (b.Online == ccs_offline);
+			break;
+		case ccs_offline:
+		default:
+			// b is always > if a is offline
+			return false;
+			break;
+		}
 	}
 }
 
@@ -256,6 +241,7 @@ void CPeopleList::sortEx(TSortOrder order)
 		CGroupContainer *parentContainer = _Peoples[k].Container->getProprietaryContainer();
 		parentContainer->detachContainer(_Peoples[k].Container);
 	}
+	// Destroy group containers
 	for (k = 0; k < _GroupContainers.size(); ++k)
 	{
 		if (_GroupContainers[k].second->getProprietaryContainer() != NULL)
@@ -271,32 +257,47 @@ void CPeopleList::sortEx(TSortOrder order)
 	case sort_name:
 		std::sort(_Peoples.begin(), _Peoples.end(), CPeopleList::sortExByName);
 		break;
-
 	case sort_online:
 		std::sort(_Peoples.begin(), _Peoples.end(), CPeopleList::sortExByOnline);
 		break;
 	}
 
 	CGroupContainer *group = _BaseContainer;
-	uint groupIndex = 0;
+	uint cptContainers = 0;
 
+	// Create group containers
+	bool severalGroups = false;
 	for(k = 0; k < _Peoples.size(); ++k)
 	{
-		bool newGroup = false;
-		if (k == 0)
+		if (_Peoples[k].Group != "")
+			severalGroups = true;
+	}
+
+	if (severalGroups)
+	{
+		for(cptContainers = 0; cptContainers < _GroupContainers.size(); ++cptContainers)
 		{
-			newGroup = true;
-		}
-		while (groupIndex < _GroupContainers.size() && _GroupContainers[groupIndex].first != _Peoples[k].Group)
-		{
-			newGroup = true;
-			++groupIndex;
-		}
-		if (newGroup && groupIndex < _GroupContainers.size() && _GroupContainers.size() > 1)
-		{
-			group = _GroupContainers[groupIndex].second;
+			group = _GroupContainers[cptContainers].second;
 			_BaseContainer->attachContainer(group);
 		}
+	}
+	
+	// Add people in groups
+	group = _BaseContainer;
+	for(k = 0; k < _Peoples.size(); ++k)
+	{
+		if (severalGroups)
+		{
+			for (cptContainers = 0; cptContainers < _GroupContainers.size(); ++cptContainers)
+			{
+				if (_GroupContainers[cptContainers].first == _Peoples[k].Group)
+				{
+					group = _GroupContainers[cptContainers].second;
+					break;
+				}
+			}
+		}
+		
 		group->attachContainer(_Peoples[k].Container);
 	}
 }
@@ -481,7 +482,7 @@ void CPeopleList::setContactId(uint index, uint32 contactId)
 //==================================================================
 void CPeopleList::changeGroup(uint index, const std::string &groupName)
 {
-        if (index >= _Peoples.size())
+    if (index >= _Peoples.size())
 	{
 		nlwarning("<CPeopleList::changeGroup> bad index.");
 		return;
@@ -560,37 +561,45 @@ void CPeopleList::readContactGroups()
 			uint nb = 0;
 			while (node)
 			{
-				CXMLAutoPtr propName;
-				propName = (char*) xmlGetProp(node, (xmlChar*)"name");
-				CXMLAutoPtr propGroup;
-				propGroup = (char*) xmlGetProp(node, (xmlChar*)"group");
-				if (propName && propGroup)
+				std::string propName = (char*) xmlGetProp(node, (xmlChar*)"name");
+				std::string propGroup = (char*) xmlGetProp(node, (xmlChar*)"group");
+				if (true)
 				{
-				        sint index = getIndexFromName(propName.str());
-					if (index < _Peoples.size())
+				    sint index = getIndexFromName(propName);
+					if (index >=0 && index < _Peoples.size())
 					{
-						_Peoples[index].Group = propGroup.str();
-						if (_GroupContainers.empty() || _GroupContainers.back().first != propGroup.str()) {
+						_Peoples[index].Group = propGroup;
+
+						bool groupAlreadyAdded = false;
+						uint k;
+						for (k = 0; k < _GroupContainers.size(); k++)
+						{
+							if (_GroupContainers[k].first == propGroup)
+								groupAlreadyAdded = true;
+						}
+
+						if (!groupAlreadyAdded) {
 							vector<pair<string, string> > properties;
 							properties.push_back(make_pair(string("posparent"), string("parent")));
 							properties.push_back(make_pair(string("id"), _ContainerID + "_group_" + toString(_GroupContainers.size())));
-							if (propGroup.str() == "")
+							if (propGroup == "")
 								properties.push_back(make_pair(string("title"), "General"));
 							else
-								properties.push_back(make_pair(string("title"), propGroup.str()));
+								properties.push_back(make_pair(string("title"), propGroup));
+
 							CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance("people_list_group_header", "ui:interface", properties, false);
 							CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
-							if (propGroup.str() == "")
+							if (propGroup == "")
 								gc->setUCTitle(ucstring("General"));
 							else
-								gc->setUCTitle(propGroup.str());
+								gc->setUCTitle(propGroup);
 							gc->setSavable(false);
 
 							CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 							pRoot->addGroup (gc);
 							_BaseContainer->attachContainer(gc);
 
-							_GroupContainers.push_back(make_pair(propGroup.str(), gc));
+							_GroupContainers.push_back(make_pair(propGroup, gc));
 						}
 					}
 				}
@@ -610,7 +619,7 @@ void CPeopleList::readContactGroups()
 //==================================================================
 void CPeopleList::saveContactGroups()
 {
-        const std::string filename = CInterfaceManager::getInstance()->getSaveFileName("contactgroups", "xml");
+    const std::string filename = CInterfaceManager::getInstance()->getSaveFileName("contactgroups", "xml");
 	try
 	{
 		COFile fd;
