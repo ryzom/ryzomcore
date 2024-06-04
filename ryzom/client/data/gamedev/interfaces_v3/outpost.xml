@@ -466,7 +466,8 @@
 <!--***************-->
 
 <!-- Should be HALF the value in Database -->
-<define id="outpost_nb_max_squad_in_list"  value="6" />
+<define id="outpost_nb_max_squad_in_list" value="12" />
+<define id="right_squad_list_index" value="12" />
 <define id="outpost_selected"	value="SERVER:GUILD:OUTPOST:O[UI:TEMP:OUTPOST:SELECTION]" />
 <define id="outpost_squad_line_h" value="15" />
 <define id="outpost_squad_name_w" value="210" />
@@ -527,8 +528,9 @@
 		<ctrl style="o_spawn_button" onclick_l="proc" params_l="open_spawn_map|#index" />
 	</group>
 
-	<!-- active the line if the squad slot is here -->
-	<link expr="ne(@%outpost_selected:SQUADS:T#index:SHEET, 0)" target="#id:active" />
+	<!-- active the line if the squad slot is here
+	<link expr="and(and(and(ne(@%outpost_selected:SQUADS:T#index:SHEET, 0), ne(#index, 10)), ne(#index, 11)), gt(#index, 23))" target="#id:active" />
+	-->
 	<!-- name of the squad -->
 	<link expr="getSquadName(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:name:uc_hardtext" />
 	<!-- squad cost -->
@@ -641,7 +643,7 @@
 				squad_template="t_spawned_squad_line" firstindex="0"
 				header="uiOutpostSSquadStart" tooltip="uittOutpostSSquadStart" />
 			<instance template="t_squad_list" id="list_cur_during" x="10" y="0" posparent="list_cur_start" posref="TR TL"
-				squad_template="t_spawned_squad_line" firstindex="%outpost_nb_max_squad_in_list"
+				squad_template="t_spawned_squad_line" firstindex="%right_squad_list_index"
 				header="uiOutpostSSquadDuring" tooltip="uittOutpostSSquadDuring" />
 
 			<!-- Next Round -->
@@ -652,7 +654,7 @@
 				squad_template="t_training_squad_line" firstindex="0"
 				header="uiOutpostTSquadStart" tooltip="uittOutpostTSquadStart" />
 			<instance template="t_squad_list" id="list_next_during" x="10" y="0" posparent="list_next_start" posref="TR TL"
-				squad_template="t_training_squad_line" firstindex="%outpost_nb_max_squad_in_list"
+				squad_template="t_training_squad_line" firstindex="%right_squad_list_index"
 				header="uiOutpostTSquadDuring" tooltip="uittOutpostTSquadDuring" />
 
 			<!-- Capital -->
@@ -879,7 +881,7 @@
  savable="true" active_savable="false"
  title="uiSquadSpawnTitle"
  header_color="UI:SAVE:WIN:COLORS:MEM" global_color="false"
- on_deactive="outpost_squad_map_send" on_deactive_params="ui:interface:squad_spawn_map:content:map_content:actual_map"
+ on_deactive="lua" on_deactive_params="game:outpostSetMapSquad()"
  modal_parent="outpost"
 
 >
@@ -935,17 +937,17 @@
 </proc>
 
 <proc id="ss_proc_set_squad">
-	<action handler="outpost_set_squad" params="line=@UI:TEMP:OUTPOST:SQUAD_TO_BUY" />
+	<action handler="lua" params="game:outpostSetSquad()" />
 	<action handler="set" params="target_property=ui:interface:squad_shop:active|value=0" />
 </proc>
 
 <proc id="ss_proc_remove_squad">
-	<action handler="outpost_remove_squad" params="line=@UI:TEMP:OUTPOST:SQUAD_TO_BUY" />
+	<action handler="lua" params="game:outpostRemoveSquad()" />
 	<action handler="set" params="target_property=ui:interface:squad_shop:active|value=0" />
 </proc>
 
 <proc id="ss_proc_insert_squad">
-	<action handler="outpost_insert_squad" params="line=@UI:TEMP:OUTPOST:SQUAD_TO_BUY" />
+	<action handler="lua" params="game:outpostInsertSquad()" />
 	<action handler="set" params="target_property=ui:interface:squad_shop:active|value=0" />
 </proc>
 

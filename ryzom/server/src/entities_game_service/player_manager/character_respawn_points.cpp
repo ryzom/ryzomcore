@@ -153,6 +153,9 @@ void CCharacterRespawnPoints::addDefaultRespawnPoint(CONTINENT::TContinent conti
 	case CONTINENT::KITINIERE:
 		defaultPlaceName = "kitiniere_entrance";
 		break;
+	case CONTINENT::UNDERNEXUS:
+		defaultPlaceName = "place_respawn_undernexus";
+		break;
 	default:
 		defaultPlaceName = "newbie_start_point";
 	}
@@ -242,11 +245,11 @@ void CCharacterRespawnPoints::clearRingRespawnpoint()
 //-----------------------------------------------------------------------------
 bool CCharacterRespawnPoints::inR2Island() const
 {
-	
+
 	CContinent * cont = CZoneManager::getInstance().getContinent( _Char.getX(), _Char.getY() );
 	if( cont == 0 )
 		return false;
-	
+
 	CONTINENT::TContinent continent = (CONTINENT::TContinent)cont->getId();
 	return (continent == CONTINENT::R2_ROOTS ||
 			continent == CONTINENT::R2_FOREST ||
@@ -323,7 +326,7 @@ CONTINENT::TRespawnPointCounters CCharacterRespawnPoints::buildRingPoints() cons
 		const TRespawnPoint &rp = _RegularRespawnPoints[i];
 
 		const CTpSpawnZone *tsz = CZoneManager::getInstance().getTpSpawnZone(rp);
-		if (tsz != NULL 
+		if (tsz != NULL
 			/*&& (tsz->getType() == RESPAWN_POINT::KAMI || tsz->getType() == RESPAWN_POINT::KARAVAN)*/)
 		{
 			ret[tsz->getContinent()]++;
@@ -408,7 +411,7 @@ bool CCharacterRespawnPoints::isUsableRegularRespawnPoint(CONTINENT::TContinent 
 	{
 		return false;
 	}
-	
+
 	return CPVPManager2::getInstance()->isRespawnValid( &_Char, respawnPoint );
 }
 
@@ -584,6 +587,6 @@ void CCharacterRespawnPoints::dumpRespawnPoints(NLMISC::CLog & log) const
 //	{
 //		// ensure we won't try to save in old format anymore
 //		nlassertex(false, ("<RESPAWN_POINT> you should not save in old format anymore!!!") );
-//	}	
+//	}
 //}
 

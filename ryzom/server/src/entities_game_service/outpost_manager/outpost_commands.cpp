@@ -760,6 +760,21 @@ NLMISC_COMMAND(outpostSetTimer0, "Set outpost timer0", "<outpost_id> <Seconds>")
 	return true;
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(resetDefaultAttackSquads, "Reset Attack squads to Default", "<outpost_id>")
+{
+	if (args.size() != 1) return false;
+
+	// select the wanted outpost
+	CSmartPtr<COutpost> outpost = getOutpostFromString(args[0], log);
+	if (outpost == NULL)
+		return false;
+
+	outpost->resetDefaultAttackSquads();
+	return true;
+}
+
+
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryCycle>")

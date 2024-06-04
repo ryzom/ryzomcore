@@ -29,6 +29,7 @@
 #include "server_share/mail_forum_validator.h"
 #include "game_share/persistent_data_tree.h"
 #include "server_share/log_item_gen.h"
+#include "server_share/mongo_wrapper.h"
 
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
@@ -756,11 +757,6 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	TPendingGuildCreate pgc = it->second;
 	_PendingGuildCreates.erase(it);
 
-	if (result != CHARSYNC::TCharacterNameResult::cnr_ok)
-	{
-		// no valid name
-		return;
-	}
 	TLogContext_Item_CreateGuild itemContext(pgc.CreatorChar);
 
 	// Rebuild a proxy
@@ -772,6 +768,15 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	}
 
 	CGuildCharProxy proxy(character->getCharacter());
+
+	if (result != CHARSYNC::TCharacterNameResult::cnr_ok)
+	{
+		if (result == CHARSYNC::TCharacterNameResult::cnr_already_exist)
+			proxy.sendSystemMessage("GUILD_NAME_ALREADY_EXISTS");
+		else
+			proxy.sendSystemMessage("GUILD_INVALID_NAME");
+		return;
+	}
 
 	// recheck if interlocutor is ok
 	CCreature * bot = proxy.getInterlocutor();
@@ -829,6 +834,7 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	// init the guild strings
 	guild->setName(guildName);
 	guild->setDescription(pgc.Description);
+
 //	_GuildsAwaitingString.insert( std::make_pair( guildName, guild->getId() ) );
 //	_GuildsAwaitingString.insert( std::make_pair( pgc.Description, guild->getId() ) );
 //	NLMISC::CEntityId stringEId = guild->getEId();
@@ -852,6 +858,10 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 
 	// broadcast the new guild info
 	IGuildUnifier::getInstance()->guildCreated(guild);
+
+#ifdef HAVE_MONGO
+		CMongo::insert("ryzom_guilds", toString("{ 'guildId': %u, 'name': '%s', 'created': %" NL_I64 "u }", guildId, guildName.toUtf8().c_str(), CTickEventHandler::getGameCycle()));
+#endif
 
 	// close guild creation interface
 	PlayerManager.sendImpulseToClient( proxy.getId(),"GUILD:ABORT_CREATION" );
@@ -922,6 +932,11 @@ void CGuildManager::deleteGuild(uint32 id)
 		if (IShardUnifierEvent::getInstance())
 			IShardUnifierEvent::getInstance()->removeGuild(id);
 	}
+
+
+#ifdef HAVE_MONGO
+		CMongo::remove("ryzom_guilds", toString("{'guildId': %u}", id));
+#endif
 
 	_Container->deleteFromGuilds(id);
 

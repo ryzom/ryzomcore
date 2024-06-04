@@ -258,8 +258,44 @@ std::string COutpostBuilding::toString() const
 	if (_Constructing)
 		desc += "constructing ";
 
+	if (_StaticData->Type == CStaticOutpostBuilding::TypeDriller)
+	{
+		desc += "\nProduction:\n";
+		for (uint i = 0; i < _StaticData->Driller.MPQuantities.size(); ++i)
+		{
+			for (uint j = 0; j < DRILLER_NB_LEVEL; ++j)
+			{
+				if (_StaticData->Driller.QualityFactor[j])
+					desc += _StaticData->Driller.MPs[i].toString()+NLMISC::toString(" Q%d", 50*(j+1))+"\n";
+			}
+		}
+	}
+
 	return desc;
 }
+
+//----------------------------------------------------------------------------
+std::string COutpostBuilding::getProductString() const
+{
+	string desc = "";
+	if (_StaticData == NULL)
+		return desc;
+
+	if (_StaticData->Type == CStaticOutpostBuilding::TypeDriller)
+	{
+		for (uint i = 0; i < _StaticData->Driller.MPQuantities.size(); ++i)
+		{
+			for (uint j = 0; j < DRILLER_NB_LEVEL; ++j)
+			{
+				if (_StaticData->Driller.QualityFactor[j])
+					desc += _StaticData->Driller.MPs[i].toString()+NLMISC::toString(" Q%d", 50*(j+1))+",";
+			}
+		}
+	}
+
+	return desc;
+}
+
 
 //----------------------------------------------------------------------------
 void COutpostBuilding::setConstructionTime(uint32 nNbSeconds, uint32 nCurrentTime)

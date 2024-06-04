@@ -20,6 +20,7 @@
 
 #include "game_share/slot_equipment.h"
 #include "player_manager/character.h"
+#include "guild_manager/fame_manager.h"
 #include "egs_sheets/egs_sheets.h"
 
 extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
@@ -68,7 +69,7 @@ void CHandlingInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags 
 	{
 		const CGameItemPtr item = getInventory()->getItem(slot);
 		nlassert(item != NULL);
-		
+
 		updateClientSlot(slot, item);
 
 		const CStaticItem * form = CSheets::getForm( item->getSheetId() );
@@ -78,9 +79,9 @@ void CHandlingInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags 
 			return;
 		}
 		getCharacter()->addWearMalus(form->WearEquipmentMalus);
-		
+
 		getCharacter()->applyItemModifiers(item);
-		
+
 		// if equip right hand item, compute parry level and disengage if player is engaged in combat
 		if (slot == INVENTORIES::right )
 			getCharacter()->updateParry(form->Family, form->Skill);
@@ -90,7 +91,7 @@ void CHandlingInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags 
 	{
 		const CGameItemPtr item = getInventory()->getItem(slot);
 		nlassert(item != NULL);
-		
+
 		updateClientSlot(slot, item);
 	}
 
@@ -99,6 +100,13 @@ void CHandlingInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags 
 		// Cleanup the item in player inventory
 		updateClientSlot(slot, NULL);
 	}
+
+	// Update fame
+	if (getInventory()->getInventoryId() == INVENTORIES::handling)
+	{
+		CFameManager::getInstance().enforceFameCaps(getCharacter()->getId(), getCharacter()->getOrganization(), getCharacter()->getAllegiance());
+	}
+
 }
 
 // ****************************************************************************
@@ -122,11 +130,11 @@ void CHandlingInvView::updateClientSlot(uint32 clientSlot, const CGameItemPtr it
 		// unequip
 		getCharacter()->updateVisualInformation( getInventory()->getInventoryId(), uint16(clientSlot), INVENTORIES::UNDEFINED, 0, NLMISC::CSheetId::Unknown, 0 );
 	}
-	
+
 	// do nothing else if client is not ready
 	if (!getCharacter()->getEnterFlag())
 		return;
-	
+
 	if (item != NULL)
 //		getCharacter()->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:HAND:%u:INDEX_IN_BAG", clientSlot ).c_str(), item->getInventorySlot() + 1 );
 		CBankAccessor_PLR::getINVENTORY().getHAND().getArray(clientSlot).setINDEX_IN_BAG(getCharacter()->_PropertyDatabase, checkedCast<uint16>(item->getInventorySlot()+1));

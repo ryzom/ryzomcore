@@ -36,10 +36,10 @@
 <group id="connecting" w="1024" h="768" posref="MM MM" on_active="proc" on_active_params="proc_startall_connect" >
 
 	<!-- JENA BACK -->
-	<view type="bitmap" id="jena" render_layer="-1" 
+	<view type="bitmap" id="jena" render_layer="-1"
 		global_color="false" color="255 255 255 255" posref="TL TL" x="0" y="0" texture="new_launcher_bg.tga" />
 
-	
+
 	<!-- Quit Button -->
 	<ctrl style="valid_txt_button" id="finish_but" posref="BR BR" x="-40" y="130" hardtext="uiQuit"
 					onover="play_sound" params_over="name=charsel_quit_over"
@@ -47,13 +47,10 @@
 
 	<view type="text" id="title" posref="MM MM" y="24" hardtext="uiConnecting" fontsize="20"/>
 
-	
+
 	<!-- BLACK SCREEN FADE -->
 	<view type="bitmap" id="black_screen" posref="TL TL" x="0" y="0" render_layer="4" texture="blank.tga"
 		color="0 0 0 255" sizeref="wh" scale="true" global_color="false" />
-
-
-
 
 </group>
 

@@ -988,7 +988,7 @@ public:
 	void setTimeOfDeath(NLMISC::TGameTime t);
 
 	// character buy a creature
-	bool addCharacterAnimal(const NLMISC::CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size = 100, const ucstring &customName = ucstring(""));
+	bool addCharacterAnimal(const NLMISC::CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size = 100, const ucstring &customName = ucstring(""), const std::string &clientSheet = "");
 
 	// return free slot for pet spawn or -1 if there are no free slot
 	sint32 getFreePetSlot(uint8 startSlot = 0);
@@ -1085,6 +1085,7 @@ public:
 	void removeAnimal(CGameItemPtr item, CPetCommandMsg::TCommand command);
 
 	// remove pet from player corresponding to index and despawn it
+	void removeRentAMount();
 	void removeAnimalIndex(uint32 beastIndex, CPetCommandMsg::TCommand command, bool keepInventory=false);
 
 	// update coordinate for spawned pets
@@ -1326,6 +1327,15 @@ public:
 	void setOrganizationStatus(uint32 status);
 	void changeOrganizationStatus(sint32 status);
 	void changeOrganizationPoints(sint32 points);
+
+	void addBattlePoints(sint32 points);
+	void setBattlePoints(uint32 points);
+	uint32 getBattlePoints();
+
+	void addRpPoints(sint32 points);
+	uint32 getRpPoints();
+	void setRpPoints(uint32 points);
+	void sendRpPoints(std::string url);
 
 	/// send faction point gain phrase to the client
 	void sendFactionPointGainMessage(PVP_CLAN::TPVPClan clan, uint32 fpGain);
@@ -1627,7 +1637,7 @@ public:
 	std::string getEquipementInfos(INVENTORIES::TInventory invId);
 
 	/// Mount a mount
-	void mount(TDataSetRow PetRowId, bool fromArk = false);
+	void mount(TDataSetRow PetRowId, bool fromArk = false, bool skipDistance = false);
 
 	/**
 	 * Unmount a mount.
@@ -1988,6 +1998,8 @@ public:
 
 	/// set a fame value for the player, send info to the client.
 	void setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint32 fameMax, uint16 fameTrend);
+	void saveFameValuePlayer(uint32 factionIndex, sint32 playerFame);
+
 	// set the fame boundaries, send info to the client.
 	//  Called when some of the CVariables are changed.
 	void setFameBoundaries();
@@ -2308,6 +2320,11 @@ public:
 	CPlayerRoomInterface &getRoomInterface();
 
 	EGSPD::CFameContainerPD &getPlayerFamesContainer();
+	void setSavedFames(bool status);
+	bool getSavedFames();
+	void saveFame(uint32 i, sint32 fame);
+	void addSavedFame(uint32 i, sint32 fame);
+	sint32 restoreFame(uint32 i);
 
 	bool checkCharacterStillValide(const char* msgError);
 
@@ -2703,6 +2720,7 @@ public:
 	uint32 getLastExchangeMount() const;
 	bool getRespawnMainLandInTown() const;
 	void setRespawnMainLandInTown(bool status);
+	void setCurrentSpeedSwimBonus(uint32 speed);
 
 	const std::list<TCharacterLogTime> &getLastLogStats() const;
 	void updateConnexionStat();
@@ -3014,6 +3032,9 @@ public:
 		return (_EntityState.X() != _OldPosX || _EntityState.Y() != _OldPosY);
 	}
 
+	/// apply regenerate and clip currents value
+	void applyRegenAndClipCurrentValue();
+
 	/// Kill the player
 	void killMe();
 
@@ -3068,9 +3089,6 @@ private:
 
 	/// recompute all Max value
 	void computeMaxValue();
-
-	/// apply regenerate and clip currents value
-	void applyRegenAndClipCurrentValue();
 
 	/// character is dead
 	void deathOccurs(void);
@@ -3401,6 +3419,15 @@ private:
 	uint32 _OrganizationStatus;
 	uint32 _OrganizationPoints;
 
+	uint32 _BattlePoints;
+
+	uint32 _TimedUrl;
+	TDataSetRow _RequestMount;
+	uint8 _RequestMountTimer;
+	uint32 _RpPoints;
+	NLMISC::TGameCycle _FirstRpPointsWin;
+	NLMISC::TGameCycle _LastRpPointsWin;
+
 	std::string _LangChannel;
 
 	std::string _NewTitle;
@@ -3418,6 +3445,8 @@ private:
 
 	std::string _DontTranslate;
 
+	sint32 _SavedFames[PVP_CLAN::NbClans];
+	bool _SavedFame;
 
 	/// SDB path where player wins HoF points in PvP (if not empty)
 	std::string _SDBPvPPath;
@@ -3585,6 +3614,8 @@ private:
 	/// max number of beasts in the train
 	uint8 _TrainMaxSize;
 
+	TDataSetRow _RentAMount;
+
 	/// counter for the current action of the player (used for macros)
 	uint8 _ActionCounter;
 
@@ -3643,7 +3674,8 @@ private:
 
 	/// Structure for forage sessions (NULL if there is no forage in progress)
 	CForageProgress* _ForageProgress;
-
+	NLMISC::TGameCycle _LastTickForageLoot;
+	NLMISC::TGameCycle _LastTickCreatureLoot;
 	/// Distance to current prospected deposit
 	CSEffectPtr _ProspectionLocateDepositEffect;
 
@@ -3863,6 +3895,9 @@ private:
 
 	/// backup last used weight malus
 	sint32 _LastAppliedWeightMalus;
+
+	/// aqua speed bonus (used for tryker rite)
+	uint32 _CurrentSpeedSwimBonus;
 
 	/// Regenerte factor
 	float _CurrentRegenerateReposBonus;

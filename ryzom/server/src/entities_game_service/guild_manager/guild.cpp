@@ -68,6 +68,7 @@ CGuild::CGuild()
 	_Proxy = false;
 	_DeclaredCult = PVP_CLAN::Neutral;
 	_DeclaredCiv = PVP_CLAN::Neutral;
+	_LastFailedGVE = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -135,7 +136,7 @@ void CGuild::spendXP( uint32 xp )
 //----------------------------------------------------------------------------
 void CGuild::addXP( uint32 xp )
 {
-	if (_XP < 1000) // TEMPORARY LIMIT : must be removed when added more stuff to pay with guild points
+	if (_XP < GuildMaxPoints)
 	{
 		setXP( _XP + xp );
 		CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
@@ -2424,7 +2425,7 @@ private:
 \
 	PROP2(DeclaredCult,string,PVP_CLAN::toString(_DeclaredCult),_DeclaredCult=PVP_CLAN::fromString(val))\
 	PROP2(DeclaredCiv,string,PVP_CLAN::toString(_DeclaredCiv),_DeclaredCiv=PVP_CLAN::fromString(val))\
-
+	PROP_GAME_CYCLE_COMP(_LastFailedGVE)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

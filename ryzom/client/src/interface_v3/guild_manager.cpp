@@ -352,6 +352,7 @@ void CGuildManager::update()
 	// *** Need to update Names?
 	if (_NeedUpdate)
 	{
+		_NeedUpdate = false;
 		bool bAllValid = true;
 		// Update wait until all the name of members, name of the guild and description are valid
 
@@ -420,6 +421,9 @@ void CGuildManager::update()
 				uint i;
 				_Grade = EGSPD::CGuildGrade::Member;
 				string sUserName = toLower(UserEntity->getEntityName());
+				if (sUserName.empty())
+					_NeedUpdate = true;
+
 				for (i = 0; i < _GuildMembers.size(); ++i)
 				{
 					if (toLower(_GuildMembers[i].Name) == sUserName)
@@ -453,7 +457,6 @@ void CGuildManager::update()
 			}
 
 			// guild updated
-			_NeedUpdate = false;
 			_NeedUpdateMembers= false;
 		}
 	}
@@ -876,7 +879,7 @@ class CAHGuildSheetOpen : public IActionHandler
 						break;
 					}
 				}
-				
+
 				CCtrlBase *inviteButton = pLine->getCtrl("invite_button");
 				if (inviteButton != NULL)
 					inviteButton->setActive(rGuildMembers[i].Online != ccs_offline && rGuildMembers[i].Name != UserEntity->getEntityName());
@@ -900,12 +903,12 @@ class CAHGuildSheetOpen : public IActionHandler
 				pLine->setParent (pParent);
 				pParent->addChild (pLine);
 			}
-			
+
 			// update member online count view
 			CViewText	*pOnlineMember = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TEXT_GUILD_MEMBER_COUNT_ONLINE));
 			if (pOnlineMember)
  				pOnlineMember->setText(toString(member_online));
-			
+
 		}
 	}
 };
@@ -1094,7 +1097,7 @@ public:
 		MemberIndexSelected= nLineNb;
 		MemberNameSelected = rGuildMembers[nLineNb].Name;
 
-		CPeopleInterraction::displayTellInMainChat(MemberNameSelected);	
+		CPeopleInterraction::displayTellInMainChat(MemberNameSelected);
 	}
 
 	// Current selection
@@ -1118,7 +1121,7 @@ class CAHGuildSheetSetLeader : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHGuildSheetSetLeader, "guild_member_chg_to_leader");
-		
+
 // ***************************************************************************
 class CAHGuildSheetSetLeaderConfirm : public IActionHandler
 {

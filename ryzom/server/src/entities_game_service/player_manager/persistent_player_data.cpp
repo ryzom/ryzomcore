@@ -435,6 +435,13 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	_FactionPoint[i],\
 	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _FactionPoint[k-PVP_CLAN::BeginClans]=val)\
 \
+	PROP(bool,_SavedFame)\
+	LPROP_MAP2(SavedFames, string, sint32,\
+	for(uint32 i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; ++i),\
+	PVP_CLAN::toString((PVP_CLAN::TPVPClan)i),\
+	_SavedFames[i],\
+	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _SavedFames[k]=val)\
+\
 	PROP(uint32,_LastTpTick)\
 	PROP(uint32,_LastOverSpeedTick)\
 	PROP(uint32,_LastMountTick)\
@@ -449,6 +456,11 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(uint32,_Organization)\
 	PROP(uint32,_OrganizationStatus)\
 	PROP(uint32,_OrganizationPoints)\
+	PROP(uint32,_RpPoints)\
+	PROP(uint32,_BattlePoints)\
+	PROP_GAME_CYCLE_COMP(_FirstRpPointsWin)\
+	PROP_GAME_CYCLE_COMP(_LastRpPointsWin)\
+	PROP(uint32,_TimedUrl)\
 	PROP2(DeclaredCult,string,PVP_CLAN::toString(_DeclaredCult),_DeclaredCult=PVP_CLAN::fromString(val))\
 	PROP2(DeclaredCiv,string,PVP_CLAN::toString(_DeclaredCiv),_DeclaredCiv=PVP_CLAN::fromString(val))\
 \
@@ -1377,7 +1389,7 @@ private:
 	uint32 RefInventoryId = INVENTORIES::NUM_INVENTORY;\
 	uint16 slotImage = 0xffff;\
 
-// TODO: add hotbar 
+// TODO: add hotbar
 #define PERSISTENT_POST_APPLY\
 	if ( slotImage != 0xFFFF )\
 	{\

@@ -271,3 +271,7 @@ web/public_php/db_version_ring
 web/public_php/config_user.php
 nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
 nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
+
+# Configs
+ryzom/server/www/config.php
+ryzom/server/tools/config.sh

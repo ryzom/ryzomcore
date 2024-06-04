@@ -223,6 +223,7 @@ public:
 	void addContactInList(uint32 contactId, uint32 nameID, TCharConnectionState Online, uint8 nList);
 	void addContactInList(uint32 contactId, const std::string &name, TCharConnectionState Online, uint8 nList);
 	bool isContactInList(const std::string &name, uint8 nList) const;
+	bool isContactOnline(const std::string &nameIn) const;
 	// Called each frame to receive name from IOS
 	void updateWaitingContacts();
 	// server decide to remove a contact (if it does not exists anymore)

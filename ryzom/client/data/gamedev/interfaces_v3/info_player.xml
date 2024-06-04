@@ -847,13 +847,13 @@
     </group>
     <tree node="npc_web_browser" />
 
-    <template name="ark_mission" w="45" h="45" ctrl_h="44" keep="true" icon="blank.tga" tooltip="" text1="" text2="" text3="" text1_color="255 255 255 255" text2_color="255 255 255 255" text3_color="255 255 255 255" color="0 0 0 0" color_over="255 255 255 50" shadow="true" bg="w_slot_item.tga" params_l="" params_r="" tx_over="blank.tga" icon_x="0" icon_y="0" text_x="4" text_y="0">
+    <template name="ark_mission" w="45" h="45" ctrl_h="44" keep="true" icon="blank.tga" tooltip="" text1="" text2="" text3="" text1_color="255 255 255 255" text2_color="255 255 255 255" text3_color="255 255 255 255" color="0 0 0 0" color_over="255 255 255 50" shadow="true" bg="w_slot_item.tga" params_l="" params_r="" tx_over="blank.tga" icon_x="0" icon_y="0" text_x="4" text_y="0" font_size="10">
         <group id="#id" posref="MM MM" w="0" h="#h" x="0" y="0" sizeref="w">
             <view type="bitmap" id="back" posref="ML ML" x="0" y="0" h="#h" w="#w" scale="true" texture="#bg" color="#color" global_color="false" />
             <view type="bitmap" id="icon" posref="ML ML" w="40" h="40" scale="true" x="4" y="0" render_layer="3" posparent="back" texture="#icon" global_color="false" />
-            <view type="text" id="text1" x="#text_x" y="#text_y" w="0" sizeref="w" posparent="icon" posref="TR TL" color="#text1_color" shadow="#shadow" fontsize="10" hardtext="#text1" global_color="false" multi_line="true" />
-            <view type="text" id="text2" x="0" y="0" w="0" sizeref="w" posparent="text1" color="#text2_color" posref="BL TL" shadow="#shadow" fontsize="10" hardtext="#text2" global_color="false" multi_line_space="0" multi_line="true"  />
-            <view type="text" id="text3" x="0" y="0" w="0" sizeref="w" posparent="text2" color="#text3_color" posref="BL TL" shadow="#shadow" fontsize="10" hardtext="#text3" global_color="false" multi_line="false" />
+            <view type="text" id="text1" x="#text_x" y="#text_y" w="0" sizeref="w" posparent="icon" posref="TR TL" color="#text1_color" format_taged="true" shadow="#shadow" fontsize="#font_size" hardtext="#text1" global_color="false" multi_line="true" />
+            <view type="text" id="text2" x="0" y="0" w="0" sizeref="w" posparent="text1" color="#text2_color" posref="BL TL" format_taged="true" shadow="#shadow" fontsize="#font_size" hardtext="#text2" global_color="false" multi_line_space="2" multi_line="true"  />
+            <view type="text" id="text3" x="0" y="0" w="0" sizeref="w" posparent="text2" color="#text3_color" posref="BL TL" format_taged="true" shadow="#shadow" fontsize="#font_size" hardtext="#text3" global_color="false" multi_line="false" />
             <ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="ML ML" w="-6" x="1" y="0" tx_normal="#tx_over" tx_pushed="#bg" tx_over="#tx_over" scale="true" sizeref="w" h="#ctrl_h" tooltip="#tooltip" color="#color" col_over="#color_over" col_pushed="255 255 255 0" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r" />
         </group>
     </template>

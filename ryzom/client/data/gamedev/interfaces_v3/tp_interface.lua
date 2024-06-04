@@ -77,7 +77,7 @@ if artefact == nil then
         isMinimized = true,
         isLogoMinimized = false,
         web_item = "params_l:#L;template:webig_inv_item_artefact;\
-                    display:inline-block;id:pact#P;tooltip:u:#T;\
+                    display:inline-block;id:pact#P;tooltip:#T;\
                     quantity:q0;#Q;#O;img1:tp_#I.tga;\
                     bg:bk_#E.tga;col_over:255 255 255 45", -- slotbg:blank2.tga;
         uiWindow = nil,
@@ -836,3 +836,6 @@ function artefact:startInterface(cult)
 end
 --
 --
+
+-- VERSION --
+RYZOM_TP_INTERFACE_VERSION = 324

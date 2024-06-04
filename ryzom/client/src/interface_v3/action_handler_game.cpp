@@ -861,6 +861,20 @@ protected:
 REGISTER_ACTION_HANDLER( CHandlerContextFreeLook, "context_free_look");
 
 // ***************************************************************************
+class CHandlerToggleFreeLook : public IActionHandler
+{
+public:
+	void execute(CCtrlBase * /* pCaller */, const std::string & /* sParams */)
+	{
+		if (UserControls.getFreeLook())
+			UserControls.stopFreeLook();
+		else
+			UserControls.startFreeLook();
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerToggleFreeLook, "toggle_free_look");
+
+// ***************************************************************************
 // GCM Move
 // ***************************************************************************
 class CHandlerMove : public IActionHandler
@@ -2486,7 +2500,7 @@ class CAHTarget : public IActionHandler
 		if (preferCompleteMatch)
 		{
 			// Try to get the entity with complete match first
-			entity = EntitiesMngr.getEntityByName (entityName, false, true);
+			entity = EntitiesMngr.getEntityByName(entityName, false, true);
 		}
 
 		if (entity == NULL && !keywords.empty())
@@ -3819,21 +3833,37 @@ class CHandlerSetInterfaceScale : public IActionHandler
 		std::string s;
 		s = getParam(Params, "scale");
 		if (!s.empty()) {
-			float scale;
-			if (fromString(s, scale))
+			bool valid = false;
+			if (nlstricmp(s, "auto") == 0 || s == "0")
 			{
-				if (scale >= ClientCfg.InterfaceScale_min && scale <= ClientCfg.InterfaceScale_max)
+				valid = true;
+				ClientCfg.InterfaceScaleAuto = true;
+			}
+			else
+			{
+				float scale;
+				if (fromString(s, scale))
 				{
-					ClientCfg.InterfaceScale = scale;
-					ClientCfg.writeDouble("InterfaceScale", ClientCfg.InterfaceScale);
-
-					ClientCfg.IsInvalidated = true;
-					return;
+					if (scale >= ClientCfg.InterfaceScale_min && scale <= ClientCfg.InterfaceScale_max)
+					{
+						valid = true;
+						ClientCfg.InterfaceScale = scale;
+						ClientCfg.InterfaceScaleAuto = false;
+					}
 				}
+			}
+
+			if (valid)
+			{
+				ClientCfg.writeDouble("InterfaceScale", ClientCfg.InterfaceScale);
+				ClientCfg.writeBool("InterfaceScaleAuto", ClientCfg.InterfaceScaleAuto);
+				ClientCfg.IsInvalidated = true;
+				return;
 			}
 		}
 
 		string help = "/setuiscale "+toString("%.1f .. %.1f", ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
+		CInterfaceManager::getInstance()->displaySystemInfo("/setuiscale auto");
 		CInterfaceManager::getInstance()->displaySystemInfo(help);
 	}
 };

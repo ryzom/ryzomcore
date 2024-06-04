@@ -389,6 +389,9 @@ CVariable<float> ForageExtractionXPFactor( "egs", "ForageExtractionXPFactor", ""
 CVariable<float> ForageExtractionNbParticipantsXPBonusRatio( "egs", "ForageExtractionNbParticipantsXPBonusRatio", "", 0.1f, 0, true );
 CVariable<float> ForageExtractionNastyEventXPMalusRatio( "egs", "ForageExtractionNastyEventXPMalusRatio", "", 0.1f, 0, true );
 
+CVariable<uint32> ArkLootTimeBeforeNewDraw( "egs", "ArkLootTimeBeforeNewDraw", "Time need before a new Ark Loot draw", 120, 0, true ); // 12sec
+CVariable<float> ArkLootExtraModifierMultiplier( "egs", "ArkLootExtraModifierMultiplier", "Extra multiplier for Ark Loot modifier", 1.0f, 0, true ); // 12sec
+
 CVariable<float> ToxicCloudDamage( "egs","ToxicCloudDamage", "Max HP hit by a toxic cloud at ToxicCloudUpdateFrequency", 800.0f, true );
 CVariable<float> ForageExplosionDamage( "egs","ForageExplosionDamage", "Max HP hit once by a forage explosion", 4000.0f, true );
 
@@ -422,6 +425,7 @@ CVariable<sint16> MinFameToBuyGuildBuilding("egs","MinFameToBuyGuildBuilding", "
 CVariable<sint16> MinFameToBuyPlayerBuilding("egs","MinFameToBuyPlayerBuilding", "Minimum Fame To Buy a Player Building", 0, 0, true);
 CVariable<uint32> GuildCreationCost("egs","GuildCreationCost", "", 100, 0, true);
 CVariable<uint32> GuildMaxMemberCount("egs","GuildMaxMemberCount", "", 256, 0, true);
+CVariable<uint32> GuildMaxPoints("egs","GuildMaxPoints", "", 200, 0, true);
 
 
 CVariable<NLMISC::TGameCycle> TriggerRequestTimout("egs","TriggerRequestTimout", "", 300, 0, true);
@@ -583,10 +587,10 @@ CVariable<sint32> FameAbsoluteMin( "egs", "FameAbsoluteMin", "Absolute fame mini
 CVariable<sint32> FameAbsoluteMax( "egs", "FameAbsoluteMax", "Absolute fame maximum a player can have", 100*kFameMultipler, 0, true );
 
 /* Fame variables, naming:
-	The fame variables begin with the name "Fame". The next part is if the variable is a 
-	starting value, "Start", or maximum value, "Max".  The last elements indicate the groups 
-	compared.  The first group is the character's group, then a small 'v' to separate, and 
-	then the target group of the fame desired. For example: FameStartTrykervFyros is a Tryker 
+	The fame variables begin with the name "Fame". The next part is if the variable is a
+	starting value, "Start", or maximum value, "Max".  The last elements indicate the groups
+	compared.  The first group is the character's group, then a small 'v' to separate, and
+	then the target group of the fame desired. For example: FameStartTrykervFyros is a Tryker
 	character's starting Fyros fame.
 */
 
@@ -654,7 +658,7 @@ CVariable<bool> UseFemaleTitles("egs","UseFemaleTitles", "Use female titles when
 // - NPC Icons
 CVariable<uint32> ClientNPCIconRefreshTimerDelay("egs", "ClientNPCIconRefreshTimerDelay", "Max number of gamecycles between 2 refreshes of a single mission giver NPC", 60*10, 0, true, CPlayerManager::onNPCIconTimerChanged);
 
-// - Ring 
+// - Ring
 CVariable<uint32> TickFrequencyNpcControlUpdate("egs","TickFrequencyNpcControlUpdate","Min time in tick between 2 updates of udate of npc control", 6, 0, true);
 CVariable<bool> RingXpEnabled("egs", "RingXpEnabled", "Enable earning XP in Ring", false, 0, true);
 CVariable<bool> RingLootEnabled("egs", "RingLootEnabled", "Enable looting mobs in Ring", false, 0, true);

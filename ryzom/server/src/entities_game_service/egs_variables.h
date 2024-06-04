@@ -270,6 +270,8 @@ extern NLMISC::CVariable<float>					ForageProspectionXPBonusRatio;
 extern NLMISC::CVariable<float>					ForageExtractionXPFactor;
 extern NLMISC::CVariable<float>					ForageExtractionNbParticipantsXPBonusRatio;
 extern NLMISC::CVariable<float>					ForageExtractionNastyEventXPMalusRatio;
+extern NLMISC::CVariable<uint32>				ArkLootTimeBeforeNewDraw;
+extern NLMISC::CVariable<float>					ArkLootExtraModifierMultiplier;
 extern NLMISC::CVariable<float>					ForageKamiOfferingSpeed;
 extern NLMISC::CVariable<uint32>				ForageReduceDamageTimeWindow;
 extern NLMISC::CVariable<uint32>				ForageDebug;
@@ -302,6 +304,7 @@ extern NLMISC::CVariable<sint16>				MinFameToBuyGuildBuilding;
 extern NLMISC::CVariable<sint16>				MinFameToBuyPlayerBuilding;
 extern NLMISC::CVariable<uint32>				GuildCreationCost;
 extern NLMISC::CVariable<uint32>				GuildMaxMemberCount;
+extern NLMISC::CVariable<uint32>				GuildMaxPoints;
 extern NLMISC::CVariable<NLMISC::TGameCycle>	TriggerRequestTimout;
 
 
@@ -360,7 +363,7 @@ extern NLMISC::CVariable<bool>					PDRSave;
 extern NLMISC::CVariable<bool>					PDRLoad;
 extern NLMISC::CVariable<bool>					SerialSave;
 
-/// TRADE 
+/// TRADE
 extern NLMISC::CVariable<float>					ItemPriceCoeff0;
 extern NLMISC::CVariable<float>					ItemPriceCoeff1;
 extern NLMISC::CVariable<float>					ItemPriceCoeff2;
@@ -476,7 +479,7 @@ extern NLMISC::CVariable<bool>					UseFemaleTitles;
 // - NPC Icons
 extern NLMISC::CVariable<uint32>				ClientNPCIconRefreshTimerDelay;
 
-// - Ring 
+// - Ring
 extern NLMISC::CVariable<uint32>				TickFrequencyNpcControlUpdate;
 
 // scores

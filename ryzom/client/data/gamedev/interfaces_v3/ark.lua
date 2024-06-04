@@ -25,6 +25,14 @@ function print_r(arr, indentLevel)
 	return str
 end
 
+function tablelength(T)
+	if T == nil then
+		return 0
+	end
+	local count = 0
+	for _ in pairs(T) do count = count + 1 end
+	return count
+end
 
 function openPageInWebIg(url)
 	getUI("ui:interface:webig:content:html"):browse(url)
@@ -78,6 +86,16 @@ if ArkMissionCatalog == nil then
 	}
 end
 
+function openRyward(folder, event)
+	folder = "f"..tostring(folder)
+	event = tostring(event)
+	if not (rykea_selected_path_B == folder and rykea_selected_path_C == event and getUI("ui:interface:encyclopedia").active == true) then
+		ArkMissionCatalog:OpenCat("rykea","https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=10741&command=reset_all")
+	end
+	getUI(ArkMissionCatalog.window_id..":content:htmlB"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=10741&command=reset_all&pathB="..folder.."&pathC="..event)
+	getUI(ArkMissionCatalog.window_id).active = true
+end
+
 function ArkMissionCatalog:OpenWindow(urlA, urlB, dont_active)
 	local winframe = getUI(ArkMissionCatalog.window_id)
 	winframe.opened=true
@@ -101,7 +119,7 @@ function ArkMissionCatalog:OpenCat(cat, url)
 	local htmlA = getUI(ArkMissionCatalog.window_id..":content:htmlA")
 	local htmlB = getUI(ArkMissionCatalog.window_id..":content:htmlB")
 	local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
-	if cat == "title" or cat == "academic" or cat == "rykea" or cat == "workshops" then
+	if cat ~= "storyline" and cat ~= "daily" and cat ~= "achv" and cat ~= "puzzle" then
 		ArkMissionCatalog.posxB = 180
 		ArkMissionCatalog.widthB = 240
 		ArkMissionCatalog.widthC = 530
@@ -200,6 +218,129 @@ function ArkMissionCatalog:showLegacyEncyclopedia(state)
 		getUI("ui:interface:legacy_encyclopedia").active=0
 	end
 end
+
+
+function ArkMissionCatalog:setup()
+	debug("Define Mission Catalag url")
+	if ArkMissionCatalog ~= nil then
+		ArkMissionCatalog.posxB = 0
+	end
+
+	local urlA = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8746&command=reset_all&no_html_header=1&ig=1"
+	getUI("ui:interface:encyclopedia:content:htmlA"):browse(urlA)
+
+	ArkMissionCatalog:startResize()
+	local continent = getContinentSheet()
+	if continent == "newbieland.continent" then
+		ArkMissionCatalog:OpenCat("academic","https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=10700&command=reset_all&no_html_header=1")
+	else
+		ArkMissionCatalog:OpenCat("storyline","https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8840&command=reset_all&no_html_header=1&show_latest=1")
+	end
+
+	debug("Open ency")
+	getUI("ui:interface:encyclopedia").opened = true;
+end
+
+function translateText(id, script, event, dst_lang)
+	framewin = getUI("ui:interface:ark_translate_lesson", false)
+	if framewin == nil then
+		createRootGroupInstance("webig_browser", "ark_translate_lesson", {h=480, w=980})
+		framewin = getUI("ui:interface:ark_translate_lesson", false)
+	end
+
+	framewin.opened = true
+	framewin.active = true
+	framewin.x = math.floor((getUI("ui:interface").w - framewin.w) / 2)
+	framewin.y = math.floor((getUI("ui:interface").h + framewin.h) / 2)
+	setTopWindow(framewin)
+	if dst_lang then
+		dst_lang = "&dst_lang="..dst_lang
+	end
+	framewin:find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mTrads_Edit&event="..tostring(event).."&trad_name="..tostring(id).."&reload="..script..dst_lang)
+end
+
+
+function setupArkUrls()
+	debug("Setup Lm Events")
+	local ui = getUI("ui:interface:map:content:map_content:lm_events:html")
+	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8297&command=reset_all&no_html_header=1&continent="..tostring(game.currentMapContinent)
+	ui:browse("home")
+
+	debug("Setup Lm Icons")
+	ui = getUI("ui:interface:map:content:map_content:lm_dynicons:html")
+	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11158&command=reset_all&no_html_header=1"
+	ui:browse("home")
+	game.updateRpItemsUrl = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11488&command=reset_all"
+end
+
+
+--------------------------------------------------------------------------------
+--- ARK EDITOR ---
+--------------------------------------------------------------------------------
+
+function ArkSwitchAdvEdition(prefix)
+	if ArkSwitchAdvEditionSwitch then
+		ArkSwitchAdvEditionSwitch = false
+		getUICaller():showDiv("advEditionDiv"..prefix, false)
+	else
+		ArkSwitchAdvEditionSwitch = true
+		getUICaller():showDiv("advEditionDiv"..prefix, true)
+	end
+end
+
+function ArkShowStageDiv(name, state)
+	getUICaller():showDiv(name, state)
+end
+
+function ArkSelectRyform(curwin, id, mod)
+	e = ArkGetStageEdit(__CURRENT_WINDOW__):find(id..":eb")
+	e.input_string = mod
+	ArkGetStageEdit(__CURRENT_WINDOW__):find("send:b"):runLeftClickAction()
+end
+
+function ArkSendForm(name)
+	ArkGetStageEdit(__CURRENT_WINDOW__):find(name.."__command:eb").input_string = "reset"
+	ArkGetStageEdit(__CURRENT_WINDOW__):find("send:b"):runLeftClickAction()
+end
+
+function ArkGetStageEdit(curwin)
+	local sid = string.split(curwin, ":")
+	local eid = sid[#sid]
+	table.remove(sid, #sid)
+	local id = sid[1]
+	for i = 2, #sid do
+		id = id .. ":" .. sid[i]
+	end
+	return getUI(id):find(eid)
+end
+
+function ArkFindUI(name)
+	local i = 0
+	local ui = getUICaller()
+	while true do
+		local found = ui:find(name)
+		if found ~= nil then
+			return found
+		else
+			ui  = ui.parent
+		end
+		i = i +1
+		if i >= 100 then
+			return nil
+		end
+	end
+end
+
+function ArkOnSelectChanged(name)
+	local text = ArkRyformV5[name][getUICaller().selection+1]
+	ArkFindUI(name..":eb").input_string = text
+end
+
+
+
+
+
+
 
 if S2E1 == nil then
 	S2E1 = {}
@@ -621,3 +762,6 @@ function S2E1:newQuake(timer)
 end
 
 
+
+-- VERSION --
+RYZOM_ARK_VERSION = 335

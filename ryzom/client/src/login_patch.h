@@ -275,6 +275,10 @@ public:
 	bool bnpUnpack(const std::string &srcBigfile, const std::string &dstPath, std::vector<std::string> &vFilenames);
 
 	const std::string &	getServerVersion () { return ServerVersion; }
+	void downloadFileWithCurl (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = NULL);
+	void downloadFile (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = NULL);
+
+
 private:
 
 	// Methods used by patch & check threads
@@ -316,8 +320,6 @@ private:
 
 	// Get a file from the server and decompress it if zipped
 	void getServerFile (const std::string &name, bool bZipped = false, const std::string& destName="", NLMISC::IProgressCallback *progress = NULL);
-	void downloadFileWithCurl (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = NULL);
-	void downloadFile (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = NULL);
 	// Decompress zipped file override destination file
 	void decompressFile (const std::string &filename);
 	void applyDate (const std::string &sFilename, uint32 nDate);

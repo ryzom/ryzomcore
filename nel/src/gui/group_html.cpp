@@ -366,7 +366,7 @@ namespace NLGUI
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		for(uint i = 0; i < TextureIds.size(); i++)
 		{
-			rVR.reloadTexture(TextureIds[i].first, dest);
+			rVR.reloadTexture(TextureIds[i].first, dest, false);
 			TextureIds[i].second->invalidateCoords();
 		}
 	}
@@ -767,7 +767,7 @@ namespace NLGUI
 		// data:image/png;base64,AA...==
 		if (startsWith(url, "data:image/"))
 		{
-			texId = rVR.createTextureFromDataURL(url);
+			texId = rVR.createTextureFromDataURL(url, false);
 			return NULL;
 		}
 
@@ -775,7 +775,7 @@ namespace NLGUI
 		// load the image from local files/bnp
 		if (lookupLocalFile(finalUrl, std::string(CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga").c_str(), false))
 		{
-			texId = rVR.createTexture(finalUrl);
+			texId = rVR.createTexture(finalUrl, 0, 0, -1, -1, false);
 			return NULL;
 		}
 
@@ -786,7 +786,7 @@ namespace NLGUI
 		LOG_DL("add to download '%s' dest '%s'", finalUrl.c_str(), dest.c_str());
 
 		if (CFile::fileExists(dest) && CFile::getFileSize(dest) > 0)
-			texId = rVR.createTexture(dest);
+			texId = rVR.createTexture(dest, 0, 0, -1, -1, false);
 		else
 			texId = rVR.newTextureId(dest);
 
@@ -3508,8 +3508,14 @@ namespace NLGUI
 			else if (form.Entries[i].ComboBox)
 			{
 				CDBGroupComboBox *cb = form.Entries[i].ComboBox;
-				entryData = form.Entries[i].SelectValues[cb->getSelection()];
-				addEntry = true;
+				if (cb)
+				{
+					if (form.Entries[i].SelectValues.size() > 0)
+					{
+						entryData = form.Entries[i].SelectValues[cb->getSelection()];
+						addEntry = true;
+					}
+				}
 			}
 			else if (form.Entries[i].SelectBox)
 			{
@@ -5982,7 +5988,7 @@ namespace NLGUI
 					bool notfound = true;
 					for (uint i=0; i<form.Entries.size(); i++)
 					{
-						if (form.Entries[i].Name == name && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
+						if (form.Entries[i].Name == name && form.Entries[i].Checkbox != NULL && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
 						{
 							checkbox->initRBRefFromRadioButton(form.Entries[i].Checkbox);
 							notfound = false;

@@ -159,7 +159,7 @@ public:
 	inline void setGooActive(bool state) { _GooActive = state; }
 
 	void updateCenter();
-	
+
 	bool getReported() const	{ return _Reported; }
 	bool isGooPath() const { return _GooPath; }
 	bool isGooActive() const { return _GooActive; }
@@ -452,7 +452,7 @@ public:
 	 * update the position of a character
 	 * \param entityRow: row id of the chracter to update
 	 */
-	void updateCharacterPosition( CCharacter *  user );
+	void updateCharacterPosition( CCharacter *  user, uint32 elapsedTime );
 
 	///update called at each tick
 	void tickUpdate();
@@ -505,7 +505,7 @@ public:
 	void	unregisterDepositToAutoSpawnUpdate(CDeposit *);
 
 	/// get a starting point for new character. NULL if invalid
-	const CTpSpawnZone * getStartPoint( uint16 startPointIdx, TAIAlias & bot, TAIAlias & mission )
+	inline const CTpSpawnZone * getStartPoint( uint16 startPointIdx, TAIAlias & bot, TAIAlias & mission )
 	{
 		if ( startPointIdx >= _StartPoints.size() )
 		{
@@ -526,21 +526,68 @@ public:
 
 	// Global Triggers for zones
 	std::map<std::string, std::string>	_RegionTriggers;
-	void addRegionTrigger(const std::string region, const std::string url)
+	inline void addRegionTrigger(const std::string region, const std::string url)
 	{
 		_RegionTriggers[region] = url;
 	}
 
-	std::string getRegionTrigger(const std::string region)
+	inline std::string getRegionTrigger(const std::string region)
 	{
-		std::string regionName;
+		std::string url;
 		std::map<std::string, std::string>::const_iterator it = _RegionTriggers.find(region);
 		if ( it != _RegionTriggers.end() )
 		{
-			regionName = _RegionTriggers[region];
+			url = _RegionTriggers[region];
 		}
-		return regionName;
+		return url;
 	}
+
+	// Global Triggers for entities
+	std::map<NLMISC::CEntityId, std::string>	EntitiesUrlTriggers;
+	std::map<NLMISC::CEntityId, uint8>	EntitiesDistanceTriggers;
+	inline void addEntitiesTrigger(const NLMISC::CEntityId &id, uint16 distance, const std::string url)
+	{
+		EntitiesUrlTriggers[id] = url;
+		EntitiesDistanceTriggers[id] = distance;
+	}
+
+
+	inline void delEntitiesTrigger(const NLMISC::CEntityId &id)
+	{
+		std::map<NLMISC::CEntityId, std::string>::const_iterator it = EntitiesUrlTriggers.find(id);
+		if ( it != EntitiesUrlTriggers.end() )
+			EntitiesUrlTriggers.erase(it);
+		std::map<NLMISC::CEntityId, uint8>::const_iterator it2 = EntitiesDistanceTriggers.find(id);
+		if ( it2 != EntitiesDistanceTriggers.end() )
+			EntitiesDistanceTriggers.erase(it2);
+	}
+
+	inline void delEntitiesTriggers()
+	{
+		EntitiesDistanceTriggers.clear();
+		EntitiesUrlTriggers.clear();
+	}
+
+	inline std::string getEntitiesUrlTrigger(const NLMISC::CEntityId &id)
+	{
+		std::string url;
+		std::map<NLMISC::CEntityId, std::string>::const_iterator it = EntitiesUrlTriggers.find(id);
+		if ( it != EntitiesUrlTriggers.end() )
+		{
+			url = it->second;
+		}
+		return url;
+	}
+
+	inline uint16 getEntitiesDistanceTrigger(const NLMISC::CEntityId &id)
+	{
+		uint16 distance = 0;
+		std::map<NLMISC::CEntityId, uint8>::const_iterator it = EntitiesDistanceTriggers.find(id);
+		if ( it != EntitiesDistanceTriggers.end() )
+			distance = it->second;
+		return distance;
+	}
+
 
 	/// get start point vector, slow because it makes a copy
 	/// warning: this should only be used by CCharacterVersionAdapter::adaptToVersion3()

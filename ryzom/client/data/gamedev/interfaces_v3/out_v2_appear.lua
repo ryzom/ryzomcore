@@ -94,7 +94,11 @@ function outgame:procGenerateName()
 	local dbNameRace = getDbProp("UI:TEMP:NAME_RACE")
 	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME")
 	local dbNameSubRaceLastName = getDbProp("UI:TEMP:NAME_SUB_RACE_LAST_NAME")
+	local application = getClientCfgVar("Application")
+	getUI("ui:outgame:appear:job_options:generator:html"):browse("https://app.ryzom.com/app_arcc/outgame_generate_name.php?application="..tostring(application["0"]).."&dbNameRace="..dbNameRace.."&dbNameSubRaceFirstName="..dbNameSubRaceFirstName.."&dbNameSubRaceLastName="..dbNameSubRaceLastName)
+end
 
+function outgame:OLDprocGenerateName()
 	local nameResult = ""
 	local fullnameResult = ""
 
@@ -206,12 +210,12 @@ function outgame:procUpdateNameRaceLabel()
 	-- Show/Hide sex slider
 
 	uiNameGenerate.y = "-50"
-	if tonumber(dbNameRace) == 2 then
-		uiNameSexSlider.active = true
-		uiNameGenerate.y = "-65"
-	else
-		uiNameSexSlider.active = false
-	end
+	--if tonumber(dbNameRace) == 2 then
+	--	uiNameSexSlider.active = true
+	--	uiNameGenerate.y = "-65"
+	--else
+	uiNameSexSlider.active = false
+	--end
 
 	-- Show/Hide sub race slider
 	if tonumber(dbNameRace) == 5 then
@@ -227,7 +231,7 @@ function outgame:procUpdateNameRaceLabel()
 end
 
 function outgame:procUpdateNameSubRaceFirstNameLabel()
-	local nameSubRaceFirstNameType = { "uiCP_Specie_Fyros", "uiCP_Specie_Matis_Male", "uiCP_Specie_Matis_Female", "uiCP_Specie_Tryker", "uiCP_Specie_Zorai" }
+	local nameSubRaceFirstNameType = { "uiCP_Specie_Fyros", "uiCP_Specie_Matis", "uiCP_Specie_Tryker", "uiCP_Specie_Zorai" }
 	local uiNameSubRaceFirstNameText = getUI("ui:outgame:appear_name:name_sub_race_first_name_slider:name_race")
 	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME")
 
@@ -432,5 +436,7 @@ function outgame:loadRPBGPage()
 		sex = "f"
 	end
 	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
-	getUI("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
 end
+
+-- VERSION --
+RYZOM_OUT_V2_APPEAR_VERSION = 324

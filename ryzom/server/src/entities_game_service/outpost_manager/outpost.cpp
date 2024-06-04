@@ -89,6 +89,7 @@ CVariable<uint32> OutpostStateTimeOverride("egs", "OutpostStateTimeOverride", "E
 CVariable<uint32> OutpostJoinPvpTimer("egs", "OutpostJoinPvpTimer", "Max time the player has to answer the JoinPvp Window, in seconds", 10, 0, true );
 CVariable<uint32> NumberDayFactorGuildNeedForChallengeOutpost("egs","NumberDayFactorGuildNeedForChallengeOutpost","Nombre de 'level outpost / factor' jours d'existance que la guilde doit avoir pour pouvoir challenger un outpost",10,0,true);
 CVariable<sint32> NumberDaysMinusOutpostLevelForChallenge("egs","NumberDaysMinusOutpostLevelForChallenge", "Number to substract from outpost level to get oldness required to challenge an outpost",50,0,true);
+CVariable<sint32> NumberDaysGuildNeedWaitAfterGVEFail("egs","NumberDayGuildNeedWaitAfterGVEFail", "Number to days a guild need wait after a fail in GVE",7*days,0,true);
 
 extern CPlayerManager PlayerManager;
 
@@ -850,8 +851,11 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 		}
 	}
 
+	if ((getName().substr(0, 14) != "outpost_nexus_") && (attackerGuild->getLastFailedGVE() > CTickEventHandler::getGameCycle() - (NumberDaysGuildNeedWaitAfterGVEFail / CTickEventHandler::getGameTimeStep())))
+		return COutpost::FailedGVE;
+
 	if (_CurrentOutpostLevel >= computeRoundCount())
-		return COutpost::InvalidOutpost;
+		return COutpost::NeedWaitToAttack;
 
 	if(!guildAttackerValid)
 	{
@@ -1477,7 +1481,7 @@ PVP_RELATION::TPVPRelation COutpost::getPVPRelation( CCharacter * user, CEntityB
 
 	if( target->getOutpostAlias() == 0 )
 	{
-		return PVP_RELATION::Neutral;
+		return PVP_RELATION::NeutralOutpostPVP;
 	}
 
 	CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
@@ -1498,7 +1502,7 @@ PVP_RELATION::TPVPRelation COutpost::getPVPRelation( CCharacter * user, CEntityB
 
 	// One is safe but not other => NeutralPVP
 	if ((targetSafe && !actorSafe) || (actorSafe && !targetSafe)) {
-		return PVP_RELATION::NeutralPVP;
+		return PVP_RELATION::NeutralOutpostPVP;
 	}
 
 	if( user->getOutpostAlias() == target->getOutpostAlias() )
@@ -1518,7 +1522,7 @@ PVP_RELATION::TPVPRelation COutpost::getPVPRelation( CCharacter * user, CEntityB
 		}
 	}
 
-	return PVP_RELATION::Neutral;
+	return PVP_RELATION::NeutralOutpostPVP;
 
 } // getPVPRelation //
 
@@ -2449,7 +2453,7 @@ uint32 COutpost::computeSquadCountA(uint32 roundLevel) const
 	if (_PVPType == OUTPOSTENUMS::GVG)
 		coef = OutpostGvGFightSquadCount.get();
 
-	return (uint32)ceil((float)(roundLevel+1)/coef);
+	return (uint32)floor((float)(roundLevel+2)/coef);
 }
 
 //----------------------------------------------------------------------------
@@ -2766,6 +2770,8 @@ std::string COutpost::getErrorString(TChallengeOutpostErrors error)
 	case AlreadyOwned:			return "OUTPOST_ERROR_ALREADY_OWNED";
 	case TimePeriodEstimationChanged:	return "OUTPOST_ERROR_TIME_PERIOD_ESTIMATION_CHANGED";
 	case TooManyGuildOutposts:	return "OUTPOST_ERROR_TOO_MANY_GUILD_OUTPOSTS";
+	case NeedWaitToAttack:		return "OUTPOST_ERROR_NEED_WAIT_TO_ATTACK";
+	case FailedGVE:				return "OUTPOST_ERROR_FAILED_GVE";
 	case UnknownError:			return "OUTPOST_ERROR_UNKNOWN";
 	}
 	return "OUTPOST_ERROR_UNKNOWN";
@@ -3148,15 +3154,25 @@ std::string COutpost::toString() const
 		ownerName = "tribe";
 	}
 
+	string product = "";
+
+	for (uint i = 0; i < _Buildings.size(); ++i)
+	{
+		string p = _Buildings[i].getProductString();
+		if (p != "")
+			product += p;
+	}
+
 	string desc;
-	desc = NLMISC::toString("Alias: %s, Name: '%s', Sheet: '%s', State: '%s', Level: %d, Owner: %s, Type: %s",
+	desc = NLMISC::toString("Alias: %s, Name: '%s', Sheet: '%s', State: '%s', Level: %d, Owner: %s, Type: %s, Product: %s",
 		CPrimitivesParser::aliasToString( _Alias ).c_str(),
 		_Name.c_str(),
 		_Sheet.toString().c_str(),
 		OUTPOSTENUMS::toString( _State ).c_str(),
 		_CurrentOutpostLevel,
 		ownerName.c_str(),
-		OUTPOSTENUMS::toString( _PVPType ).c_str()
+		OUTPOSTENUMS::toString( _PVPType ).c_str(),
+		product.c_str()
 		);
 
 	return desc;

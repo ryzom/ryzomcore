@@ -57,6 +57,7 @@
 #include "init.h"
 #include "input.h"
 #include "client_cfg.h"			// Configuration of the client.
+#include "login_patch.h"
 #include "actions_client.h"
 #include "color_slot_manager.h"
 #include "movie_shooter.h"
@@ -772,6 +773,25 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 
 	H_AUTO(InitRZAddSearchPaths);
 
+	CConfigFile *cf = &ClientCfg.ConfigFile;
+	std::string appName = cf->getVarPtr("Application") ? cf->getVar("Application").asString(0) : "ryzom_live";
+	CPatchManager *pPM = CPatchManager::getInstance();
+	pPM->downloadFileWithCurl(ClientCfg.WebIgMainDomain+"/data/"+appName+"/enable_events_bnp.csv", "user/enable_events_bnp.csv");
+	pPM->downloadFileWithCurl(ClientCfg.WebIgMainDomain+"/data/"+appName+"/enable_occs_bnp.csv", "user/enable_occs_bnp.csv");
+
+	std::vector<string>	UserDataPath;
+	UserDataPath.push_back("user");
+	addPaths(progress, UserDataPath, true);
+
+	// if want occ event:
+	if (ClientCfg.EnableEventsBnp)
+		CPath::loadRemappedFiles("enable_events_bnp.csv");
+	// if want occ stuff:
+	if (ClientCfg.EnableOccsBnp)
+		CPath::loadRemappedFiles("enable_occs_bnp.csv");
+
+
+
 	addPaths(progress, ClientCfg.PreDataPath, true);
 
 	//nlinfo ("PROFILE: %d seconds for Add search paths Predata", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
@@ -850,7 +870,7 @@ void initLog()
 
 	rlp2.rlim_cur = std::min(value, rlp.rlim_max);
 	rlp2.rlim_max = rlp.rlim_max;
-	
+
 	if (setrlimit(RLIMIT_NOFILE, &rlp2))
 	{
 		if (errno == EINVAL)
@@ -1093,6 +1113,9 @@ void prelogInit()
 			ClientCfg.writeInt("Depth", ClientCfg.Depth, true);
 			ClientCfg.writeInt("Frequency", ClientCfg.Frequency, true);
 
+			// enable auto UI scale for new install
+			ClientCfg.writeBool("InterfaceScaleAuto", true, true);
+
 			ClientCfg.ConfigFile.save();
 		}
 		else
@@ -1312,9 +1335,7 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
-
-		CInterfaceManager::getInstance();
-		CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+		CInterfaceManager::getInstance()->setInterfaceScale(1.f, true);
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 		CWidgetManager::getInstance()->setWindowSnapInvert(ClientCfg.WindowSnapInvert);

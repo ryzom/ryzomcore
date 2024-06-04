@@ -453,6 +453,7 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	c->initPvpPointDb();
 	c->initOrganizationInfos();
 
+	c->resetFameDatabase();
 	c->updateOutpostAdminFlagInDB();
 
 	if ( !player->getUserPriv().empty() && !player->havePriv(":DEV:") )
@@ -599,7 +600,7 @@ void finalizeClientReady( uint32 userId, uint32 index )
 	c->updateSavedMissions();
 
 	// force zone update for the player to set its region
-	CZoneManager::getInstance().updateCharacterPosition(c);
+	CZoneManager::getInstance().updateCharacterPosition(c, 0);
 
 	// assign the welcome mission at the first connection
 	// assignWelcomeMission() gives the welcome mission the first time, then it does nothing

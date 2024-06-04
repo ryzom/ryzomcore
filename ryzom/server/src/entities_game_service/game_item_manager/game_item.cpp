@@ -1276,7 +1276,10 @@ CGameItemPtr CGameItem::getItemCopy()
 	item->_RefInventorySlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	item->_CreatorId = _CreatorId;
 	item->_LockCount = 0;
-	item->_HP = item->maxDurability();
+	if (_HP == 0)
+		item->_HP = item->maxDurability();
+	else
+		item->_HP = _HP;
 
 	item->_LatencyEndDate = _LatencyEndDate;
 	item->_Enchantment = _Enchantment;
@@ -4448,7 +4451,11 @@ bool CGameItem::getStats(const std::string &stats, std::string &final )
 		else if (part == "Fo")
 			final += NLMISC::toString("%s|", _Form->Name.c_str());
 		else if (part == "Ct")
-			final += NLMISC::toString("%s|", getCustomText().toString().c_str());
+		{
+			string customText = getCustomText().toUtf8();
+			while (strFindReplace(customText, "\n", "\\n"));
+			final += NLMISC::toString("%s|", customText.c_str());
+		}
 		else if (part == "Bu")
 			final += NLMISC::toString("%u|", _Form->Bulk);
 		else if (part == "We")

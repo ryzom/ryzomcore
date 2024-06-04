@@ -28,7 +28,7 @@ using namespace std;
 using namespace NLMISC;
 
 /////////////
-// GLOBALS 
+// GLOBALS
 /////////////
 CGuildVersionAdapter	*CGuildVersionAdapter::_Instance = NULL;
 
@@ -41,13 +41,15 @@ uint32 CGuildVersionAdapter::currentVersionNumber() const
 {
 	////////////////////////////////////
 	// VERSION History
-	// 0 : 
+	// 0 :
 	// 1 : (25/11/2004) saves must be updated because events mps dont have the right sheet... So we have to replace them
 	// 2 : (03/12/2004) creation dates where not saved...
 	// 3 : (01/11/2004) guild allegiance of previous existing guild setted to undefined...
 	// 4 : (07/03/2006) give full hp to all tools
+	// 5 : (13/03/2023) reset guild points
+	// 6 : (31/03/2023) set guild points to 100 (default)
 	////////////////////////////////////
-	return 4;
+	return 6;
 }
 
 
@@ -61,7 +63,9 @@ void CGuildVersionAdapter::adaptGuildFromVersion( CGuild & guild ) const
 	case 1: break; //adaptToVersion2(guild); // imply adapter can't be used for the next egs reboot, all guild are set to version 3.
 	case 2: break; //adaptToVersion3(guild); // when we change guild save and have currentVersion = 4, we can re-active adapter (we can re-active
 	case 3: adaptToVersion4(guild);
-		
+	case 4: adaptToVersion5(guild);
+	case 5: adaptToVersion6(guild);
+
 	default:; // the adapter at the next patch in fact...
 	}
 
@@ -99,4 +103,18 @@ void CGuildVersionAdapter::adaptToVersion4(CGuild & guild) const
 {
 	CCharacterVersionAdapter::getInstance()->setToolsToMaxHP( guild.getInventory() );
 }
+
+//---------------------------------------------------
+void CGuildVersionAdapter::adaptToVersion5(CGuild & guild) const
+{
+	guild.setPoints(0);
+}
+
+//---------------------------------------------------
+void CGuildVersionAdapter::adaptToVersion6(CGuild & guild) const
+{
+	guild.setPoints(50);
+}
+
+
 

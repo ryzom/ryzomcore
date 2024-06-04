@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -70,7 +70,7 @@ namespace GU
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CGuildUnifierClientSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -161,9 +161,9 @@ namespace GU
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_guildReady(__message);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -179,9 +179,9 @@ namespace GU
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_receiveForeignGuild(__message, guilds);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -197,9 +197,9 @@ namespace GU
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_updateMemberList(__message, guildId, members);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -215,9 +215,9 @@ namespace GU
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_updateMemberInfo(__message, guildId, membersInfo);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -233,9 +233,9 @@ namespace GU
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_updateGuild(__message, guildInfo);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -251,9 +251,9 @@ namespace GU
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_guildDeleted(__message, guildId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -269,9 +269,9 @@ namespace GU
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_messageToGuildMembers(__message, guildId, messageName, params);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);

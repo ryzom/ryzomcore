@@ -533,6 +533,8 @@ void CPatchManager::getInfoToDisp(SPatchInfo &piOut)
 	}
 }
 
+void stopSoundMngr();
+
 // ****************************************************************************
 // TODO : use selected categories to patch a list of files
 void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, bool applyPatch)
@@ -623,6 +625,12 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 
 						// Close opened big files
 						CBigFile::getInstance().remove(FilesToPatch[k].FileName);
+
+						if (NLMISC::startsWith(FilesToPatch[k].FileName, "sound"))
+						{
+							// Stop sound playback
+							stopSoundMngr();
+						}
 					}
 				}
 			}
@@ -1449,7 +1457,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 		curl_easy_setopt(curl, CURLOPT_URL, source.c_str());
 		if (source.length() > 8 && (source[4] == 's' || source[4] == 'S')) // 01234 https
 		{
-			NLWEB::CCurlCertificates::addCertificateFile("cacert.pem");
+			NLWEB::CCurlCertificates::addCertificateFile(ClientCfg.CurlCABundle);
 			NLWEB::CCurlCertificates::useCertificates(curl);
 			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
@@ -2524,7 +2532,7 @@ void CPatchThread::run()
 			CPatchManager::SFileToPatch &rFTP = AllFilesToPatch[i];
 
 			string ext = NLMISC::CFile::getExtension(rFTP.FileName);
-			if (ext == "bnp" || ext == "snp")
+			if (ext == "bnp" || ext == "snp" || ext == "bnpe")
 			{
 				float oldCurrentFilePatched = CurrentFilePatched;
 				processFile (rFTP);
@@ -2605,8 +2613,6 @@ public:
 	}
 };
 
-void stopSoundMngr();
-
 // ****************************************************************************
 void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 {
@@ -2617,12 +2623,6 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 	// Destination File Name (in writable directory)
 	string DestinationName;
-
-	if (NLMISC::startsWith(rFTP.FileName, "sound"))
-	{
-		// Stop sound playback
-		stopSoundMngr();
-	}
 
 	if (rFTP.ExtractPath.empty())
 	{

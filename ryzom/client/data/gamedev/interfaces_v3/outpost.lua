@@ -54,7 +54,7 @@ function game:outpostAdjustHour(uiLocal, prop)
 	local uiGroup = getUICaller();
 	local tz = getDbProp('UI:SAVE:OUTPOST:TIME_ZONE');
 	local h = runExpr(prop);
-	
+
 	-- add time zone and clamp hour
 	h = math.fmod(h + tz + 24, 24);
 	uiGroup[uiLocal].uc_hardtext = string.format('%02d:00', h);
@@ -93,24 +93,25 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 function game:outpostBCOpenStateWindow()
+	getUI("ui:interface:outpost_selected").active = false
 	-- Open the State Window from the BotChat. server msg
-	runAH(nil, 'outpost_select_from_bc', '');
+	runAH(nil, "outpost_select_from_bc", "");
 
 	-- Open the window
-	runAH(nil, 'show', 'outpost_selected');
+	runAH(nil, "show", "outpost_selected");
 end
 
 ------------------------------------------------------------------------------------------------------------
 function game:outpostDeclareWar()
-	-- Send Msg to server
-	runAH(nil, 'outpost_declare_war_start', '');
-
-	-- wait a ack from server. Suppose not OK by default
-	setDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_RECEIVED", 0);
-	setDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_OK", 0);
-
-	-- Open the Declare War window
-	runAH(nil, "show", "outpost_declare_war");
+	local sheetSel = getDbProp("SERVER:OUTPOST_SELECTED:SHEET");
+	if sheetSel ~= nil then
+		local sheetSel = getSheetName(sheetSel)
+		local timeoffset = "0"
+		if getTimestampHuman ~= nil then
+			timeoffset = getTimestampHuman("%z")
+		end
+		WebQueue:push("https://app.ryzom.com/app_guild/outposts.php?action=declareWar&script=10149&command=reset_all&outpost="..sheetSel.."&timeoffset="..timeoffset)
+	end
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -167,22 +168,59 @@ function game:outpostSelectSquadCapitalConfirm()
 	runAH(nil, "leave_modal", "");
 end
 
+function game:outpostSetSquad()
+	debug(getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED"))
+	runAH(nil, "outpost_set_squad", "line=@UI:TEMP:OUTPOST:SQUAD_TO_BUY");
+end
+
+function game:outpostRemoveSquad()
+	runAH(nil, "outpost_remove_squad", "line=@UI:TEMP:OUTPOST:SQUAD_TO_BUY");
+end
+
+function game:outpostInsertSquad()
+	runAH(nil, "outpost_insert_squad", "line=@UI:TEMP:OUTPOST:SQUAD_TO_BUY");
+end
+
+function game:outpostSetMapSquad()
+	runAH(nil, "outpost_squad_map_send", "ui:interface:squad_spawn_map:content:map_content:actual_map")
+end
+
+
 ------------------------------------------------------------------------------------------------------------
 function game:outpostToolTipTrainSquad(dbIndex)
-	local halfMaxSquad= tonumber(getDefine("outpost_nb_max_squad_in_list"));
+	local Rounds = tonumber(getDefine("right_squad_list_index"));
 
-	-- compute the level at which the squad will spawn. 
-	local	lvl;
-	if(dbIndex < halfMaxSquad) then
-		lvl= dbIndex*2 +1 ;		-- eg: 0 => 1. 1=> 3
+	-- compute the level at which the squad will spawn.
+	local lvl
+	local elm
+	if(dbIndex < Rounds) then
+		elm = getUI("ui:interface:outpost:content:squad_setup:list_next_start:list:o"..tostring(dbIndex))
+		lvl = math.ceil((dbIndex + 1)*1.3) - 1	-- eg: 0 => 1
+		if dbIndex == 3 or dbIndex == 6 then
+			elm.y = -14
+		end
 	else
-		lvl= (dbIndex-halfMaxSquad)*2 +2 ;	-- eg: 12 => 2
+		elm = getUI("ui:interface:outpost:content:squad_setup:list_next_during:list:o"..tostring(dbIndex))
+		lvl = math.ceil((dbIndex - Rounds + 1)*1.3)	-- eg: 12 => 1
+		if dbIndex == 12 or dbIndex == 15 or dbIndex == 18 then
+			elm.y = -14
+		end
 	end
 
 	-- set the tooltip
-	local text = i18n.get('uittOutpostSquadLvl');
+	local text = i18n.get("uittOutpostSquadLvl");
 	text = findReplaceAll(text, "%lvl", tostring(lvl));
 	setContextHelpText(text);
+
+	if dbIndex == 10 or dbIndex == 11 then
+		getUI("ui:interface:outpost:content:squad_setup:list_next_start:list:o"..tostring(dbIndex)).active=false
+	end
+
+	if dbIndex >= 22 then
+		getUI("ui:interface:outpost:content:squad_setup:list_next_during:list:o"..tostring(dbIndex)).active=false
+	end
+
+
 end
 
 
@@ -206,7 +244,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 function game:outpostInfoOnDraw()
 	local uiGroup= getUICaller();
-	
+
 	-- get status
 	local path= self:outpostInfoGetDbPath(uiGroup);
 	local status= getDbProp(path .. ':STATUS');
@@ -239,6 +277,10 @@ function	game:outpostInfoOnDbChange()
 
 	-- change path for attacker text id
 	uiGroup.global_state.outpost_attacker.name.textid_dblink= path .. ':GUILD:NAME_ATT';
+
+	for i=0,23 do
+		game:outpostToolTipTrainSquad(i)
+	end
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -327,7 +369,7 @@ function game:outpostActiveAttackerHourButton()
 		end
 	end
 
-	-- Force the tooltip to be up to date. important here because 
+	-- Force the tooltip to be up to date. important here because
 	-- DECLARE_WAR_ACK_TIME_RANGE_ATT(server) is received after DECLARE_WAR_ATTACK_PERIOD(local)
 	disableContextHelpForControl(uiGroup.outpost_att_hour);
 end
@@ -338,7 +380,7 @@ function game:outpostIsGuildInvolved()
 	local sheetCur;
 	-- try to get sheet id from bot object
 	local sheetSel = getDbProp('SERVER:OUTPOST_SELECTED:SHEET');
-	
+
 	if (sheetSel == 0) then
 		-- try to get sheet id from outpost manager
 		local ind = getDbProp('UI:TEMP:OUTPOST:SELECTION');
@@ -347,7 +389,7 @@ function game:outpostIsGuildInvolved()
 		end
 		sheetSel = getDbProp(formatUI('SERVER:GUILD:OUTPOST:O#1', ind) .. ':SHEET');
 	end
-	
+
 	-- check every outpost owned or challenged by the guild
 	local i;
 	for i = 0, 15 do
@@ -356,9 +398,9 @@ function game:outpostIsGuildInvolved()
 			found = 1;
 		end
 	end
-	
+
 	return found;
-	
+
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -367,18 +409,18 @@ function game:outpostGetStatusInfo(statusExpr, dbIndex, isTooltip)
 	local status = runExpr(statusExpr);
 	local uittOutpost;
 	local path;
-	
+
 	-- get outpost
 	if (isTooltip == 'no') then
 		path = self:outpostInfoGetDbPath(uiGroup.parent);
 	else
-		path = formatUI('SERVER:GUILD:OUTPOST:O#1', math.max(0, dbIndex));
+		path = formatUI('SERVER:GUILD:OUTPOST:O#1', math.max(0, tonumber(dbIndex)));
 	end
-	
+
 	-- Peace
 	if (status == self.OutpostEnums.Peace) then
 		uittOutpost = i18n.get('uittOutpostPeace');
-		
+
 	-- WarDeclaration
 	elseif (status == self.OutpostEnums.WarDeclaration) then
 		if (isTooltip == 'yes' or self:outpostIsGuildInvolved() == 1) then
@@ -404,15 +446,15 @@ function game:outpostGetStatusInfo(statusExpr, dbIndex, isTooltip)
 		else
 			uittOutpost = i18n.get('uittOutpostWarDeclaration');
 		end
-		
+
 	-- AttackBefore
 	elseif (status == self.OutpostEnums.AttackBefore) then
 		uittOutpost = i18n.get('uittOutpostAttackBefore');
-	
+
 	-- AttackRound
 	elseif (status == self.OutpostEnums.AttackRound) then
 		uittOutpost = i18n.get('uittOutpostAttackRound');
-		
+
 	-- AttackAfter
 	elseif (status == self.OutpostEnums.AttackAfter) then
 		local lvlMax = getDbProp(path .. ':ROUND_LVL_THRESHOLD');
@@ -422,26 +464,25 @@ function game:outpostGetStatusInfo(statusExpr, dbIndex, isTooltip)
 		else
 			uittOutpost = i18n.get('uittOutpostAttackAfterLoose');
 		end
-		
+
 	-- DefenseBefore
 	elseif (status == self.OutpostEnums.DefenseBefore) then
 		uittOutpost = i18n.get('uittOutpostDefenseBefore');
-	
+
 	-- DefenseRound
 	elseif (status == self.OutpostEnums.DefenseRound) then
 		uittOutpost = i18n.get('uittOutpostDefenseRound');
-		
+
 	-- DefenseAfter
 	elseif (status == self.OutpostEnums.DefenseAfter) then
 		uittOutpost = i18n.get('uittOutpostDefenseAfter');
-		
+
 	-- default
 	else
 		uittOutpost = i18n.get('uittOutpostPeace');
 	end
-	
+
 	return uittOutpost;
-	
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -623,3 +664,6 @@ function game:outpostInitPvpJoinTimer()
 	setOnDraw(uiGroup, 'game:outpostPvpJoinTimerOnDraw()');
 end
 
+
+-- VERSION --
+RYZOM_OUTPOST_VERSION = 335

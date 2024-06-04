@@ -157,6 +157,7 @@ struct CClientConfig
 	float			InterfaceScale_min;
 	float			InterfaceScale_max;
 	float			InterfaceScale_step;
+	bool			InterfaceScaleAuto;
 	bool			BilinearUI;
 
 	// Window snap
@@ -387,6 +388,9 @@ struct CClientConfig
 	// MP3 Player
 	string			MediaPlayerDirectory;
 	bool			MediaPlayerAutoPlay;
+
+	bool			EnableEventsBnp;
+	bool			EnableOccsBnp;
 
 	/// Pre Data Path.
 	std::vector<string>			PreDataPath;
