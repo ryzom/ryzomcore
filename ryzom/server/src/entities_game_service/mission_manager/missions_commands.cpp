@@ -1283,6 +1283,81 @@ NLMISC_COMMAND(getEnchantmentInEquipedItem, "getEnchantmentInEquipedItem", "<uid
 	return true;
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setGuildInventoryChestBulkMax, "Set the bulk max of chest of inventory", "<uid> <chest> <value>" )
+{
+
+	if (args.size() < 2)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (guild)
+	{
+		uint8 chest;
+		NLMISC::fromString(args[1], chest);
+		if (args.size() == 3)
+		{
+			uint32 bulkmax;
+			NLMISC::fromString(args[2], bulkmax);
+			guild->initChests();
+			guild->setChestBulkMax(chest, bulkmax);
+			log.displayNL("OK");
+		}
+		else
+		{
+			uint32 bulkmax = guild->getChestBulkMax(chest);
+			log.displayNL("%u", bulkmax);
+		}
+	}
+	return true;
+}
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setGuildInventoryChestParams, "Set the chest of inventory", "<uid> <chest> <name> <rank view> <rank put> <rank get>" )
+{
+
+	if (args.size() != 6)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (guild)
+	{
+		guild->initChests();
+		uint8 chest;
+		NLMISC::fromString(args[1], chest);
+		EGSPD::CGuildGrade::TGuildGrade gradeView = EGSPD::CGuildGrade::fromString(args[3]);
+		EGSPD::CGuildGrade::TGuildGrade gradePut = EGSPD::CGuildGrade::fromString(args[4]);
+		EGSPD::CGuildGrade::TGuildGrade gradeGet = EGSPD::CGuildGrade::fromString(args[5]);
+		guild->setChestParams(chest, args[2], gradeView, gradePut, gradeGet);
+	}
+	return true;
+}
+
+NLMISC_COMMAND(getGuildInventoryChestParams, "Get the params of a chest of inventory", "<uid> <chest>" )
+{
+	if (args.size() != 2)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (guild)
+	{
+		uint8 chest;
+		NLMISC::fromString(args[1], chest);
+
+		log.displayNL("%s", guild->getChestName(chest).c_str());
+		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestViewGrade(chest)).c_str());
+		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestPutGrade(chest)).c_str());
+		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestGetGrade(chest)).c_str());
+	}
+	return true;
+}
+
 //updateSheetItem 2 LEGS ikaracp_ep2_1.sitem
 
 //----------------------------------------------------------------------------

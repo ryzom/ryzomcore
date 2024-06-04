@@ -386,7 +386,7 @@ class CCppOutput
 public:
 
 	/// Constructor
-	CCppOutput(bool cppmode = true) :	_CppMode(cppmode), 
+	CCppOutput(bool cppmode = true) :	_CppMode(cppmode),
 										_XmlMode(false), _NewLine(true), _Indent(0), _DescriptionMode(false), _Clean(true),
 										_XmlInNode(false), _XmlLastSlash(false), _XmlGetNodeName(false), _XmlCloseNode(false), _XmlRootNode(false) {}
 

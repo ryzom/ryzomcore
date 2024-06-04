@@ -1159,6 +1159,21 @@
         <!-- tick when player entered the guild-->
       </branch>
     </branch>
+    <branch name="CHEST">
+      <branch name=""
+            count="20">
+          <leaf name="NAME"
+              type="TEXT" />
+          <leaf name="VIEW_GRADE"
+            type="I3" />
+          <leaf name="PUT_GRADE"
+            type="I3" />
+          <leaf name="GET_GRADE"
+            type="I3" />
+          <leaf name="BULK_MAX"
+            type="I32" />
+      </branch>
+    </branch>
     <branch name="INVENTORY">
       <leaf name="SESSION"
             type="I16" />
@@ -1167,7 +1182,7 @@
       <leaf name="MONEY"
             type="I64" />
       <branch name=""
-              count="1000"
+              count="10000"
               clientonly="1">
         <!-- Common Item Data -->
         <leaf name="SHEET"

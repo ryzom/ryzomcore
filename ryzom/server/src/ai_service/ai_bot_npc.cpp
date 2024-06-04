@@ -1190,7 +1190,7 @@ void CBotNpc::getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& 
 		}
 		while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
 		if (maxTries > 0 ) {
-			nlinfo("set pos %f,%f", rpos.x().asDouble(), rpos.x().asDouble());
+			nlinfo("set pos %f,%f", rpos.x().asDouble(), rpos.y().asDouble());
 			_StartPos.setXY(rpos);
 		}
 	}
