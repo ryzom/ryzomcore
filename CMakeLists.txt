@@ -41,8 +41,8 @@ OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.0.tar.gz"
-    SHA1 "a1296b351dbfaf036c92d85c1bdb461f615849fa"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.321.tar.gz"
+    SHA1 "5e53cbb0429037ea8e2592bfd92704b8ff3ab492"
     FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
   )
 
@@ -77,7 +77,7 @@ ELSE()
   SET(CURRENT_YEAR "2019")
 ENDIF()
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 1)
 SET(NL_VERSION_MINOR 1)
