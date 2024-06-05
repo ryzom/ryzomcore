@@ -18,15 +18,19 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 # install dependencies
 RUN apt update; \
     apt install --yes \
-        libgif7 \
-        libjpeg8 \
-        libpng16-16 \
-        libxml2 \
+        libcurl4 \
         libfreetype6 \
+        libgif7 \
+        libgsf-1-114 \
+        libjpeg8 \
         liblua5.2-0 \
-    	libluabind0.9.1d1 \
-    	libcurl4 \
+        libluabind0.9.1d1 \
+        libmysqlclient21 \
+        libpng16-16 \
+        libqt5widgets5 \
+        libsquish0 \
         libvorbis0a \
-        libvorbisfile3
+        libvorbisfile3 \
+        libxml2
 
 USER $USERNAME
