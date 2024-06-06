@@ -1,0 +1,112 @@
+name: Publish Docker Image
+
+on:
+  push:
+    branches: [ "core4" ]
+    tags:
+      - v*
+
+env:
+  ubuntu_version: 22.04
+  build_type: Release
+  cpp_compiler: g++
+  c_compiler: gcc
+  IMAGE_NAME: ryzomcore-tools
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+        [ "$VERSION" == "core4" ] && VERSION=latest
+        IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+        IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+        echo VERSION=$VERSION
+        echo IMAGE_ID=$IMAGE_ID
+        echo "build-version=${VERSION}" >> "$GITHUB_OUTPUT"
+        echo "docker-image-tag=${IMAGE_ID}:${VERSION}" >> "$GITHUB_OUTPUT"
+
+    - name: Dependencies
+      run: |
+        sudo apt update
+        sudo apt install --yes software-properties-common
+        wget --quiet https://packages.microsoft.com/config/ubuntu/${{ env.ubuntu_version }}/packages-microsoft-prod.deb
+        sudo dpkg --install packages-microsoft-prod.deb
+        sudo apt update
+        sudo apt install --yes \
+        cmake build-essential ninja-build ccache \
+          bison autoconf automake \
+          libpng-dev \
+          libjpeg-dev \
+          libgif-dev libfreetype6-dev \
+          freeglut3-dev \
+          liblua5.2-dev libluabind-dev libcpptest-dev \
+          libogg-dev libvorbis-dev libopenal-dev \
+          libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+          libmysqlclient-dev \
+          libxml2-dev \
+          libcurl4-openssl-dev libssl-dev \
+          libsquish-dev \
+          liblzma-dev \
+          libgsf-1-dev \
+          qtbase5-dev qttools5-dev qttools5-dev-tools \
+          libmsquic
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+        sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
+
+    - name: Configure CMake
+      run: >
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -G "Ninja"
+        -DCMAKE_SUPPRESS_REGENERATION=ON
+        -DCMAKE_CXX_COMPILER=${{ env.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ env.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ env.build_type }}
+        -DWITH_STATIC=ON
+        -DWITH_NEL_SAMPLES=ON
+        -DWITH_LUA51=OFF
+        -DWITH_LUA52=ON
+        -DWITH_RYZOM=ON
+        -DWITH_RYZOM_SERVER=ON
+        -DWITH_RYZOM_CLIENT=ON
+        -DWITH_RYZOM_TOOLS=ON
+        -DWITH_NEL_TOOLS=ON
+        -DWITH_NELNS=ON
+        -DWITH_NELNS_LOGIN_SYSTEM=ON
+        -DWITH_NELNS_SERVER=ON
+        -DWITH_QT5=ON
+        -DWITH_LIBGSF=ON
+        -DCPACK_PACKAGE_VERSION="${{ steps.strings.outputs.build-version }}"
+        -DCPACK_GENERATOR=STGZ
+        -S ${{ github.workspace }}
+
+    - name: Package
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ env.build_type }} --target package
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: package
+        path: ${{ steps.strings.outputs.build-output-dir }}/ryzomcore-*
+
+    - name: Build the Docker image
+      run: docker build . --file docker/Dockerfile --tag "${{ steps.strings.outputs.docker-image-tag }}"
+
+    - name: Log in to registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
+    - name: Push image
+      run: |
+        docker push "${{ steps.strings.outputs.docker-image-tag }}"
