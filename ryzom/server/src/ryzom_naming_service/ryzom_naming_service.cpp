@@ -97,7 +97,166 @@ void foo()
 	admin_modules_forceLink();
 }
 
+/**
+ * Manager for services instances
+ * (Moved from the TICKS to the NS)
+ * Implementable with layer 5, here implemented in NS (layer 3)
+ * \author Olivier Cado
+ * \author Nevrax France
+ * \date 2003
+ */
+class CServiceInstanceManager
+{
+public:
+	
+	/// Constructor
+	CServiceInstanceManager();
+
+	/** Add the name of a service which must not be duplicated
+	 * If uniqueOnShard is true, only one service is allowed.
+	 * If uniqueOnShard is false, one service is allowed by physical machine.
+	 */
+	void		addUniqueService( const std::string& serviceName, bool uniqueOnShard )
+	{
+		_UniqueServices.insert( std::make_pair( serviceName, uniqueOnShard ) );
+	}
+
+	/// Check if a service is allowed to start (if so, add it)
+	bool		queryStartService( const std::string& serviceName, TServiceId  serviceId, const std::vector<NLNET::CInetAddress> &addr, string& reason );
+
+	/// Release a service instance
+	void		releaseService( NLNET::TServiceId serviceId );
+
+	/// Display information
+	void		displayInfo( NLMISC::CLog *log = NLMISC::InfoLog ) const;
+
+	/// Make all controlled services quit
+	void		killAllServices();
+
+private:
+
+	/// List of restricted services
+	std::map< std::string, bool >	_UniqueServices;
+
+	/// List of granted (online) services
+	std::set< TServiceId >				_OnlineServices;
+};
+
+
 CServiceInstanceManager *SIMInstance = NULL;
+
+
+/*
+ * Constructor
+ */
+CServiceInstanceManager::CServiceInstanceManager()
+{
+	nlassert( ! SIMInstance );
+	SIMInstance = this;
+
+	// Note: addCallbackArray() done in CRangeMirrorManager::init()
+}
+
+
+/*
+ * Check if a service is allowed to start. Answer with a GSTS (Grant Start Service) message
+ */
+bool		CServiceInstanceManager::queryStartService( const std::string& serviceName, TServiceId  serviceId, const vector<CInetAddress> &addr, string& reason )
+{
+	bool grantStarting = true;
+	std::map< std::string, bool >::iterator ius = _UniqueServices.find( serviceName );
+	if ( ius != _UniqueServices.end() )
+	{
+		// Service is restricted
+		set< TServiceId >::iterator ios;
+		bool uniqueOnShard = (*ius).second;
+		for ( ios=_OnlineServices.begin(); ios!=_OnlineServices.end(); ++ios )
+		{
+			string name = getServiceName( *ios );
+			if ( name == serviceName )
+			{
+				if ( uniqueOnShard )
+				{
+					// Only one service by shard is allowed => deny
+					grantStarting = false;
+					reason = toString( "Service %s already found as %hu, must be unique on shard", serviceName.c_str(), ios->get() );
+					nlinfo( reason.c_str() );
+					break;
+				}
+				else
+				{
+					// Only one service by physical machine is allowed
+
+					// Implementation for layer5
+					//TSockId hostid1, hostid2;
+					/*CCallbackNetBase *cnb1 = CUnifiedNetwork::getInstance()->getNetBase( serviceId, hostid1 );
+					CCallbackNetBase *cnb2 = CUnifiedNetwork::getInstance()->getNetBase( *ios, hostid2 );
+					if ( cnb1->hostAddress( hostid1 ).internalIPAddress() == cnb2->hostAddress( hostid2 ).internalIPAddress() )*/
+
+					// Implementation for NS
+					if ( addr[0].getAddress() == getHostAddress( *ios ).getAddress() )
+					{
+						grantStarting = false;
+						reason = toString( "Service %s already found as %hu on same machine", serviceName.c_str(), ios->get() );
+						nlinfo( reason.c_str() );
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	if ( grantStarting )
+	{
+		_OnlineServices.insert( serviceId );
+	}
+	return grantStarting;
+}
+
+
+/*
+ * Release a service instance
+ */
+void		CServiceInstanceManager::releaseService( NLNET::TServiceId serviceId )
+{
+	_OnlineServices.erase( serviceId ); // not a problem if not found
+}
+
+
+/*
+ * Display information
+ */
+void		CServiceInstanceManager::displayInfo( NLMISC::CLog *log ) const
+{
+	log->displayNL( "Restricted services:" );
+	std::map< std::string, bool >::const_iterator ius;
+	for ( ius=_UniqueServices.begin(); ius!=_UniqueServices.end(); ++ius )
+	{
+		log->displayNL( "%s -> only one per %s", (*ius).first.c_str(), (*ius).second?"shard":"machine" );
+	}
+	log->displayNL( "Online registered services:" );
+	std::set< TServiceId >::const_iterator ios;
+	for ( ios=_OnlineServices.begin(); ios!=_OnlineServices.end(); ++ios )
+	{
+		log->displayNL( "%s", CUnifiedNetwork::getInstance()->getServiceUnifiedName( *ios ).c_str() );
+	}
+}
+
+
+/*
+ * Make all controlled services quit
+ */
+void		CServiceInstanceManager::killAllServices()
+{
+	// Send to all known online services
+	std::set< TServiceId >::const_iterator ios;
+	for ( ios=_OnlineServices.begin(); ios!=_OnlineServices.end(); ++ios )
+	{
+		doUnregisterService( (TServiceId)(*ios) );
+	}
+}
+
+
 
 //
 // Variables
@@ -108,7 +267,7 @@ list<CServiceEntry>	RegisteredServices;		/// List of all registred services
 uint16				MinBasePort = 30000;	/// Ports begin at 51000
 uint16				MaxBasePort = 30100;	/// (note: in this implementation there can be no more than 100 services)
 
-/// Allocated SIds begin at 128 (except for Agent Service)
+const TServiceId	BaseSId(128);			/// Allocated SIds begin at 128 (except for Agent Service)
 
 const TTime			UnregisterTimeout = 10000;	/// After 10s we remove an unregister service if every server didn't ACK the message
 
