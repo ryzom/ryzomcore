@@ -34,21 +34,23 @@
 // Includes
 //
 
-#include "nel/misc/types_nl.h"
+#include <nel/misc/types_nl.h>
 
 #include <list>
 #include <string>
 
-#include "nel/misc/debug.h"
-#include "nel/misc/command.h"
-#include "nel/misc/variable.h"
-#include "nel/misc/displayer.h"
+#include <nel/misc/debug.h>
+#include <nel/misc/command.h>
+#include <nel/misc/variable.h>
+#include <nel/misc/displayer.h>
 
-#include "nel/net/callback_server.h"
-#include "nel/net/service.h"
-#include "nel/net/module_manager.h"
+#include <nel/net/callback_server.h>
+#include <nel/net/service.h>
+#include <nel/net/module_manager.h>
 
-#include "service_entry.h"
+#include <nelns/naming_service/helper.h>
+#include <nelns/naming_service/service_entry.h>
+#include <nelns/naming_service/variables.h>
 
 //
 // Namespaces
@@ -75,9 +77,6 @@ NLMISC_COMMAND(test, "none", "none")
 
 // Helper that emulates layer5's send()
 //void sendToService( uint16 sid, CMessage& msgout );
-
-// Helper that emulate layer5's getServiceName()
-string getServiceName( TServiceId  sid );
 
 // Helper that returns the first address of a service
 CInetAddress getHostAddress( TServiceId  sid );
@@ -246,21 +245,6 @@ void		CServiceInstanceManager::killAllServices()
 }
 
 
-
-//
-// Variables
-//
-
-list<CServiceEntry>	RegisteredServices;		/// List of all registred services
-
-uint16				MinBasePort = 51000;	/// Ports begin at 51000
-uint16				MaxBasePort = 52000;	/// (note: in this implementation there can be no more than 1000 services)
-
-const TServiceId	BaseSId(128);			/// Allocated SIds begin at 128 (except for Agent Service)
-
-const TTime			UnregisterTimeout = 10000;	/// After 10s we remove an unregister service if every server didn't ACK the message
-
-CCallbackServer		*CallbackServer = NULL;
 
 //
 // Functions
@@ -883,23 +867,6 @@ static void cbRegisteredServices(CMessage& msgin, TSockId from, CCallbackNetBase
 		}
 	}
 }*/
-
-
-/*
- * Helper that emulate layer5's getServiceName()
- */
-string getServiceName( TServiceId  sid )
-{
-	list<CServiceEntry>::iterator it;
-	for (it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
-	{
-		if ((*it).SId == sid)
-		{
-			return (*it).Name;
-		}
-	}
-	return ""; // not found
-}
 
 
 /*
