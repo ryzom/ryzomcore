@@ -471,7 +471,7 @@ void doUnregisterService (TServiceId sid)
 	nlwarning ("Service %hu not found", sid.get());
 }
 
-void doUnregisterService (TSockId from)
+void doUnregisterService (const NLNET::TSockId &from)
 {
 	list<CServiceEntry>::iterator it;
 	for (it = RegisteredServices.begin(); it != RegisteredServices.end ();)

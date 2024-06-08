@@ -48,8 +48,12 @@
 #include <nel/net/service.h>
 #include <nel/net/module_manager.h>
 
+#include <nelns/naming_service/can_access.h>
+#include <nelns/naming_service/do_unregister_service.h>
+#include <nelns/naming_service/effectively_remove.h>
 #include <nelns/naming_service/helper.h>
 #include <nelns/naming_service/service_entry.h>
+#include <nelns/naming_service/service_instance_manager.h>
 #include <nelns/naming_service/variables.h>
 
 //
@@ -74,73 +78,13 @@ NLMISC_COMMAND(test, "none", "none")
 }
 
 
-
-// Helper that emulates layer5's send()
-//void sendToService( uint16 sid, CMessage& msgout );
-
-// Helper that returns the first address of a service
-CInetAddress getHostAddress( TServiceId  sid );
-
-// Asks a service to stop and tell every one
-void doUnregisterService (TServiceId sid);
-
-
-/**
- * Manager for services instances
- * (Moved from the TICKS to the NS)
- * Implementable with layer 5, here implemented in NS (layer 3)
- * \author Olivier Cado
- * \author Nevrax France
- * \date 2003
- */
-class CServiceInstanceManager
-{
-public:
-	
-	/// Constructor
-	CServiceInstanceManager();
-
-	/** Add the name of a service which must not be duplicated
-	 * If uniqueOnShard is true, only one service is allowed.
-	 * If uniqueOnShard is false, one service is allowed by physical machine.
-	 */
-	void		addUniqueService( const std::string& serviceName, bool uniqueOnShard )
-	{
-		_UniqueServices.insert( std::make_pair( serviceName, uniqueOnShard ) );
-	}
-
-	/// Check if a service is allowed to start (if so, add it)
-	bool		queryStartService( const std::string& serviceName, TServiceId  serviceId, const std::vector<NLNET::CInetAddress> &addr, string& reason );
-
-	/// Release a service instance
-	void		releaseService( NLNET::TServiceId serviceId );
-
-	/// Display information
-	void		displayInfo( NLMISC::CLog *log = NLMISC::InfoLog ) const;
-
-	/// Make all controlled services quit
-	void		killAllServices();
-
-private:
-
-	/// List of restricted services
-	std::map< std::string, bool >	_UniqueServices;
-
-	/// List of granted (online) services
-	std::set< TServiceId >				_OnlineServices;
-};
-
-
-CServiceInstanceManager *SIMInstance = NULL;
-
-
 /*
  * Constructor
  */
 CServiceInstanceManager::CServiceInstanceManager()
 {
-	nlassert( ! SIMInstance );
-	SIMInstance = this;
+	nlassert( ! _Instance );
+	_Instance = this;
 
 	// Note: addCallbackArray() done in CRangeMirrorManager::init()
 }
@@ -244,42 +188,18 @@ void		CServiceInstanceManager::killAllServices()
 	}
 }
 
+CServiceInstanceManager * CServiceInstanceManager::_Instance = nullptr;
 
+CServiceInstanceManager *CServiceInstanceManager::getInstance()
+{
+	nlassert( _Instance );
+	return _Instance;
+}
 
 //
 // Functions
 //
 
-bool canAccess (const vector<CInetAddress> &addr, const CServiceEntry &entry, vector<CInetAddress> &accessibleAddr)
-{
-	accessibleAddr.clear ();
-	
-	if (entry.WaitingUnregistration)
-		return false;
-
-	for (uint i = 0; i < addr.size(); i++)
-	{
-		uint32 net = addr[i].internalNetAddress();
-		for (uint j = 0; j < entry.Addr.size(); j++)
-		{
-			if (net == entry.Addr[j].internalNetAddress())
-			{
-				accessibleAddr.push_back (entry.Addr[j]);
-			}
-		}
-	}
-
-	if (accessibleAddr.empty())
-	{
-		nldebug ("service %s-%hu is not accessible by '%s'", entry.Name.c_str(), entry.SId.get(), vectorCInetAddressToString (addr).c_str ());
-	}
-	else
-	{
-		nldebug ("service %s-%hu is accessible by '%s'", entry.Name.c_str(), entry.SId.get(), vectorCInetAddressToString (accessibleAddr).c_str ());
-	}
-
-	return !accessibleAddr.empty ();
-}
 
 void displayRegisteredServices (CLog *log = InfoLog)
 {
@@ -303,137 +223,6 @@ void displayRegisteredServices (CLog *log = InfoLog)
 	log->displayNL ("End of the list");
 }
 
-
-list<CServiceEntry>::iterator effectivelyRemove (list<CServiceEntry>::iterator &it)
-{
-	// remove the service from the registered service list
-	nlinfo ("Effectively remove the service %s-%hu", (*it).Name.c_str(), it->SId.get());
-	return RegisteredServices.erase (it);
-}
-
-/*
- * Helper procedure for cbLookupAlternate and cbUnregister.
- * Note: name is used for a LOGS.
- */
-list<CServiceEntry>::iterator doRemove (list<CServiceEntry>::iterator it)
-{
-	nldebug ("Unregister the service %s-%hu '%s'", (*it).Name.c_str(), it->SId.get(), (*it).Addr[0].asString().c_str());
-	
-	// tell to everybody that this service is unregistered
-
-	CMessage msgout ("UNB");
-	msgout.serial ((*it).Name);
-	msgout.serial ((*it).SId);
-
-	vector<CInetAddress> accessibleAddress;
-	nlinfo ("Broadcast the Unregistration of %s-%hu to all registered services", (*it).Name.c_str(), it->SId.get());
-	for (list<CServiceEntry>::iterator it3 = RegisteredServices.begin(); it3 != RegisteredServices.end (); it3++)
-	{
-		if (canAccess((*it).Addr, (*it3), accessibleAddress))
-		{
-			CallbackServer->send (msgout, (*it3).SockId);
-			//CNetManager::send ("NS", msgout, (*it3).SockId);
-			nldebug ("Broadcast to %s-%hu", (*it3).Name.c_str(), it3->SId.get());
-		}
-	}
-
-	// new system, after the unregistation broadcast, we wait ACK from all services before really remove
-	// the service, before, we tag the service as 'wait before unregister'
-	// if everybody didn't answer before the time out, we remove it
-
-	(*it).SockId = NULL;
-
-	(*it).WaitingUnregistration = true;
-	(*it).WaitingUnregistrationTime = CTime::getLocalTime();
-
-	// we remove all services awaiting his ACK because this service is down so it'll never ACK
-	for (list<CServiceEntry>::iterator itr = RegisteredServices.begin(); itr != RegisteredServices.end (); itr++)
-	{
-		for (list<TServiceId>::iterator itw = (*itr).WaitingUnregistrationServices.begin(); itw != (*itr).WaitingUnregistrationServices.end ();)
-		{
-			if ((*itw) == (*it).SId)
-			{
-				itw = (*itr).WaitingUnregistrationServices.erase (itw);
-			}
-			else
-			{
-				itw++;
-			}
-		}
-	}
-
-	string res;
-	for (list<CServiceEntry>::iterator it2 = RegisteredServices.begin(); it2 != RegisteredServices.end (); it2++)
-	{
-		if (!(*it2).WaitingUnregistration)
-		{
-			(*it).WaitingUnregistrationServices.push_back ((*it2).SId);
-			res += toString((*it2).SId.get()) + " ";
-		}
-	}
-
-	nlinfo ("Before removing the service %s-%hu, we wait the ACK of '%s'", (*it).Name.c_str(), (*it).SId.get(), res.c_str());
-	
-	if ((*it).WaitingUnregistrationServices.empty())
-	{
-		return effectivelyRemove (it);
-	}
-	else
-	{
-		return ++it;
-	}
-
-	// Release from the service instance manager
-	SIMInstance->releaseService( (*it).SId );
-}
-
-void doUnregisterService (TServiceId sid)
-{
-	list<CServiceEntry>::iterator it;
-	for (it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
-	{
-		if ((*it).SId == sid)
-		{
-			// found it, remove it
-			doRemove (it);
-			return;
-		}
-	}
-	nlwarning ("Service %hu not found", sid.get());
-}
-
-void doUnregisterService (TSockId from)
-{
-	list<CServiceEntry>::iterator it;
-	for (it = RegisteredServices.begin(); it != RegisteredServices.end ();)
-	{
-		if ((*it).SockId == from)
-		{
-			// it's possible that one "from" have more than one registred service, so we have to find in all the list
-			// found it, remove it
-			it = doRemove (it);
-		}
-		else
-		{
-			it++;
-		}
-	}
-}
-
-/*void doUnregisterService (const CInetAddress &addr)
-{
-	list<CServiceEntry>::iterator it;
-	for (it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
-	{
-		if ((*it).Addr == addr)
-		{
-			// found it, remove it
-			doRemove (it);
-			return;
-		}
-	}
-	nlwarning ("Service %s not found", addr.asString().c_str());
-}*/
 
 /*
  * Helper function for cbRegister.
@@ -527,7 +316,7 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 		if (ok)
 		{
 			// Check if the instance is allowed to start, according to the restriction in the config file			
-			if ( SIMInstance->queryStartService( name, sid, addr, reason ) )
+			if ( CServiceInstanceManager::getInstance()->queryStartService( name, sid, addr, reason ) )
 			{
 				// add him in the registered list
 				RegisteredServices.push_back (CServiceEntry(from, addr, name, sid));
@@ -869,23 +658,6 @@ static void cbRegisteredServices(CMessage& msgin, TSockId from, CCallbackNetBase
 }*/
 
 
-/*
- * Helper that returns the first address of a service
- */
-CInetAddress getHostAddress( TServiceId  sid )
-{
-	list<CServiceEntry>::iterator it;
-	for (it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
-	{
-		if ((*it).SId == sid)
-		{
-			return (*it).Addr[0];
-		}
-	}
-	return CInetAddress();
-}
-
-
 //
 // Callback array
 //
@@ -1095,12 +867,12 @@ NLMISC_DYNVARIABLE(uint32, NbRegisteredServices, "display the number of service 
 
 NLMISC_COMMAND( displayServiceInstances, "SIM: Display info on service instances", "" )
 {
-	SIMInstance->displayInfo( &log );
+	CServiceInstanceManager::getInstance()->displayInfo( &log );
 	return true;
 }
 
 NLMISC_COMMAND( killAllServices, "SIM: Make all the controlled services quit", "" )
 {
-	SIMInstance->killAllServices();
+	CServiceInstanceManager::getInstance()->killAllServices();
 	return true;
 }
