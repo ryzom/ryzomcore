@@ -235,149 +235,145 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 	// Find if the service is not already registered
 	string reason;
 	uint8 ok = true;
-	bool needRegister = true;
 
-	if (needRegister)
+	if (sid.get() == 0)
 	{
-		if (sid.get() == 0)
+		// we have to find a sid
+		sid = BaseSId;
+		bool found = false;
+		while (!found)
 		{
-			// we have to find a sid
-			sid = BaseSId;
-			bool found = false;
-			while (!found)
-			{
-				list<CServiceEntry>::iterator it;
-				for (it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
-				{
-					if ((*it).SId == sid)
-					{
-						break;
-					}
-				}
-				if (it == RegisteredServices.end ())
-				{
-					// ok, we have an empty sid
-					found = true;
-				}
-				else
-				{
-					sid.set(sid.get()+1);
-					if (sid.get() == 0) // round the clock
-					{
-						nlwarning ("Service identifier allocation overflow");
-						ok = false;
-						break;
-					}
-				}
-			}
-
-		}
-		else
-		{
-			// we have to check that the user provided sid is available
 			list<CServiceEntry>::iterator it;
 			for (it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
 			{
 				if ((*it).SId == sid)
 				{
-					nlwarning ("Sid %d already used by another service", sid.get());
+					break;
+				}
+			}
+			if (it == RegisteredServices.end ())
+			{
+				// ok, we have an empty sid
+				found = true;
+			}
+			else
+			{
+				sid.set(sid.get()+1);
+				if (sid.get() == 0) // round the clock
+				{
+					nlwarning ("Service identifier allocation overflow");
 					ok = false;
 					break;
 				}
 			}
-			if (it != RegisteredServices.end ())
-			{
-				ok = true;
-			}
 		}
 
-		// if ok, register the service and send a broadcast to other people
-		if (ok)
+	}
+	else
+	{
+		// we have to check that the user provided sid is available
+		list<CServiceEntry>::iterator it;
+		for (it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
 		{
-			// Check if the instance is allowed to start, according to the restriction in the config file			
-			if ( CServiceInstanceManager::getInstance()->queryStartService( name, sid, addr, reason ) )
+			if ((*it).SId == sid)
 			{
-				// add him in the registered list
-				RegisteredServices.push_back (CServiceEntry(from, addr, name, sid));
-
-				// tell to everybody but not him that this service is registered
-				if (!reconnection)
-				{
-					CMessage msgout ("RGB");
-					TServiceId::size_type s = 1;
-					msgout.serial (s);
-					msgout.serial (const_cast<string &>(name));
-					msgout.serial (sid);
-					// we need to send all addr to all services even if the service can't access because we use the address index
-					// to know which connection comes.
-					msgout.serialCont (const_cast<vector<CInetAddress> &>(addr));
-					nlinfo ("The service is %s-%d, broadcast the Registration to everybody", name.c_str(), sid.get());
-
-					vector<CInetAddress> accessibleAddress;
-					for (list<CServiceEntry>::iterator it3 = RegisteredServices.begin(); it3 != RegisteredServices.end (); it3++)
-					{
-						// send only services that can be accessed and not itself
-						if ((*it3).SId != sid && canAccess(addr, (*it3), accessibleAddress))
-						{
-							CallbackServer->send (msgout, (*it3).SockId);
-							//CNetManager::send ("NS", msgout, (*it3).SockId);
-							nldebug ("Broadcast to %s-%hu", (*it3).Name.c_str(), it3->SId.get());
-						}
-					}
-				}
-
-				// set the sid only if it s ok
-				from->setAppId (sid.get());
-			}
-			else
-			{
-				// Reply "startup denied", and do not send registration to other services
+				nlwarning ("Sid %d already used by another service", sid.get());
 				ok = false;
+				break;
 			}
 		}
-
-		// send the message to the service to say if it s ok or not
-		if (!reconnection)
+		if (it != RegisteredServices.end ())
 		{
-			// send the answer to the client
-			CMessage msgout ("RG");
-			msgout.serial (ok);
-			if (ok)
-			{
-				msgout.serial (sid);
+			ok = true;
+		}
+	}
 
-				// send him all services available (also itself)
-				TServiceId::size_type nb = 0;
+	// if ok, register the service and send a broadcast to other people
+	if (ok)
+	{
+		// Check if the instance is allowed to start, according to the restriction in the config file
+		if ( CServiceInstanceManager::getInstance()->queryStartService( name, sid, addr, reason ) )
+		{
+			// add him in the registered list
+			RegisteredServices.push_back (CServiceEntry(from, addr, name, sid));
+
+			// tell to everybody but not him that this service is registered
+			if (!reconnection)
+			{
+				CMessage msgout ("RGB");
+				TServiceId::size_type s = 1;
+				msgout.serial (s);
+				msgout.serial (const_cast<string &>(name));
+				msgout.serial (sid);
+				// we need to send all addr to all services even if the service can't access because we use the address index
+				// to know which connection comes.
+				msgout.serialCont (const_cast<vector<CInetAddress> &>(addr));
+				nlinfo ("The service is %s-%d, broadcast the Registration to everybody", name.c_str(), sid.get());
 
 				vector<CInetAddress> accessibleAddress;
-
-				for (list<CServiceEntry>::iterator it2 = RegisteredServices.begin(); it2 != RegisteredServices.end (); it2++)
+				for (list<CServiceEntry>::iterator it3 = RegisteredServices.begin(); it3 != RegisteredServices.end (); it3++)
 				{
-					// send only services that are available
-					if (canAccess(addr, (*it2), accessibleAddress))
-						nb++;
-				}
-				msgout.serial (nb);
-
-				for (list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
-				{
-					// send only services that are available
-					if (canAccess(addr, (*it), accessibleAddress))
+					// send only services that can be accessed and not itself
+					if ((*it3).SId != sid && canAccess(addr, (*it3), accessibleAddress))
 					{
-						msgout.serial ((*it).Name);
-						msgout.serial ((*it).SId);
-						msgout.serialCont ((*it).Addr);
+						CallbackServer->send (msgout, (*it3).SockId);
+						//CNetManager::send ("NS", msgout, (*it3).SockId);
+						nldebug ("Broadcast to %s-%hu", (*it3).Name.c_str(), it3->SId.get());
 					}
 				}
 			}
-			else
-			{
-				msgout.serial( reason );
-			}
-			
-			netbase.send (msgout, from);
-			netbase.flush (from);
+
+			// set the sid only if it s ok
+			from->setAppId (sid.get());
 		}
+		else
+		{
+			// Reply "startup denied", and do not send registration to other services
+			ok = false;
+		}
+	}
+
+	// send the message to the service to say if it s ok or not
+	if (!reconnection)
+	{
+		// send the answer to the client
+		CMessage msgout ("RG");
+		msgout.serial (ok);
+		if (ok)
+		{
+			msgout.serial (sid);
+
+			// send him all services available (also itself)
+			TServiceId::size_type nb = 0;
+
+			vector<CInetAddress> accessibleAddress;
+
+			for (list<CServiceEntry>::iterator it2 = RegisteredServices.begin(); it2 != RegisteredServices.end (); it2++)
+			{
+				// send only services that are available
+				if (canAccess(addr, (*it2), accessibleAddress))
+					nb++;
+			}
+			msgout.serial (nb);
+
+			for (list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
+			{
+				// send only services that are available
+				if (canAccess(addr, (*it), accessibleAddress))
+				{
+					msgout.serial ((*it).Name);
+					msgout.serial ((*it).SId);
+					msgout.serialCont ((*it).Addr);
+				}
+			}
+		}
+		else
+		{
+			msgout.serial( reason );
+		}
+
+		netbase.send (msgout, from);
+		netbase.flush (from);
 	}
 
 	//displayRegisteredServices ();
