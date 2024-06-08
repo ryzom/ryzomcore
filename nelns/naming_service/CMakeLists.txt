@@ -1,6 +1,6 @@
-FILE(GLOB SRC *.cpp *.h)
-
-ADD_EXECUTABLE(naming_service WIN32 ${SRC})
+ADD_EXECUTABLE(naming_service WIN32
+		naming_service.cpp
+)
 
 TARGET_LINK_LIBRARIES(naming_service
 						nelmisc
