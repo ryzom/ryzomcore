@@ -83,8 +83,8 @@ NLMISC_COMMAND(test, "none", "none")
  */
 CServiceInstanceManager::CServiceInstanceManager()
 {
-	nlassert( ! _Instance );
-	_Instance = this;
+	nlassert( !_SIMInstance);
+	_SIMInstance = this;
 
 	// Note: addCallbackArray() done in CRangeMirrorManager::init()
 }
@@ -192,7 +192,7 @@ CServiceInstanceManager * CServiceInstanceManager::_Instance = nullptr;
 
 CServiceInstanceManager *CServiceInstanceManager::getInstance()
 {
-	nlassert( _Instance );
+	nlassert(_Instance);
 	return _Instance;
 }
 
