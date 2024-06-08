@@ -6,18 +6,20 @@ add_library(nelns_naming_service
         nelns/naming_service/do_unregister_service.cpp
         nelns/naming_service/effectively_remove.cpp
         nelns/naming_service/helper.cpp
+        nelns/naming_service/service_instance_manager.cpp
         nelns/naming_service/variables.cpp
 )
 add_library(nelns::ns ALIAS nelns_naming_service)
-
+target_link_libraries(nelns_naming_service
+        nelmisc
+        nelnet
+)
 
 ADD_EXECUTABLE(naming_service WIN32
         naming_service.cpp
 )
 
 TARGET_LINK_LIBRARIES(naming_service
-        nelmisc
-        nelnet
         nelns::ns
 )
 
