@@ -2,8 +2,14 @@
 
 #include <nelns/naming_service/service_instance_manager.h>
 
-TEST(CServiceInstanceManager, ShouldWork) {
-	EXPECT_STRNE("hello", "world");
-	EXPECT_EQ(7 * 6, 42);
-	CServiceInstanceManager instance;
+TEST(CServiceInstanceManager, getInstanceShouldThrowIfNotInitialized) {
+	ASSERT_DEATH({
+	    CServiceInstanceManager::getInstance();
+	}, "");
+}
+
+TEST(CServiceInstanceManager, ConstructorShouldNotThrow) {
+	EXPECT_NO_THROW({
+		CServiceInstanceManager instance;
+	});
 }
