@@ -11,7 +11,7 @@
 
 struct CServiceEntry
 {
-	CServiceEntry(NLNET::TSockId sock, const std::vector<NLNET::CInetAddress> &a, const std::string &n, NLNET::TServiceId s)
+	CServiceEntry(NLNET::TSockId sock, const std::vector<NLNET::CInetAddress> &a, const std::string &n, const NLNET::TServiceId& s)
 	    : SockId(sock)
 	    , Addr(a)
 	    , Name(n)
