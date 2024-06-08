@@ -236,27 +236,6 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 	string reason;
 	uint8 ok = true;
 	bool needRegister = true;
-	/*for (list<CServiceEntry>::iterator it = RegisteredServices.begin(); it != RegisteredServices.end (); it++)
-	{
-		if ((*it).Addr.asIPString() == addr.asIPString() )
-		{
-			// we already have a service on this address, remplace it if it's the same name
-			if ((*it).Name == name)
-			{
-				// it's the same service, replace it
-				(*it).SockId = from;
-				sid = (*it).SId;
-				nlinfo ("Replace the service %s", name.c_str());
-			}
-			else
-			{
-				nlwarning ("Try to register %s to %s but the service %s already on this address. ignore it!", name.c_str(), addr.asIPString().c_str(), (*it).Name.c_str());
-				ok = false;
-			}
-			needRegister = false;
-			break;
-		}
-	}*/
 
 	if (needRegister)
 	{
