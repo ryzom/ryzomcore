@@ -3,13 +3,16 @@
 
 #include <nel/misc/log.h>
 #include <nel/misc/mem_displayer.h>
+
 #include <nel/net/buf_sock.h>
+
 #include <nelns/naming_service/service_entry.h>
 #include <nelns/naming_service/service_instance_manager.h>
 #include <nelns/naming_service/variables.h>
 
 using ::std::string;
 using ::std::vector;
+
 using ::testing::ElementsAre;
 using ::testing::Eq;
 using ::testing::IsFalse;
@@ -21,6 +24,7 @@ using ::testing::StrEq;
 
 using ::NLMISC::CLightMemDisplayer;
 using ::NLMISC::CLog;
+
 using ::NLNET::CInetAddress;
 using ::NLNET::InvalidSockId;
 using ::NLNET::TServiceId;
