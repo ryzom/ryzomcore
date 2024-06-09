@@ -2,9 +2,7 @@
 
 #include <nel/misc/string_common.h>
 
-#include <nelns/naming_service/do_unregister_service.h>
-#include <nelns/naming_service/helper.h>
-#include <nelns/naming_service/service_entry.h>
+#include <nelns/naming_service/functions.h>
 
 using std::map;
 using std::set;

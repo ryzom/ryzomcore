@@ -7,7 +7,6 @@
 #include <nel/net/callback_net_base.h>
 #include <nel/net/callback_server.h>
 
-#include <nelns/naming_service/do_unregister_service.h>
 #include <nelns/naming_service/functions.h>
 #include <nelns/naming_service/variables.h>
 

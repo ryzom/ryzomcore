@@ -46,7 +46,6 @@
 
 #include <nel/net/service.h>
 
-#include <nelns/naming_service/do_unregister_service.h>
 #include <nelns/naming_service/functions.h>
 #include <nelns/naming_service/naming_service.h>
 #include <nelns/naming_service/service_entry.h>

@@ -1,12 +1,7 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(nelns_naming_service
-        nelns/naming_service/can_access.cpp
-        nelns/naming_service/do_remove.cpp
-        nelns/naming_service/do_unregister_service.cpp
-        nelns/naming_service/effectively_remove.cpp
         nelns/naming_service/functions.cpp
-        nelns/naming_service/helper.cpp
         nelns/naming_service/naming_service.cpp
         nelns/naming_service/service_instance_manager.cpp
         nelns/naming_service/variables.cpp

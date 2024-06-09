@@ -1,6 +1,7 @@
 #ifndef NELNS_NAMING_SERVICE_FUNCTIONS_H
 #define NELNS_NAMING_SERVICE_FUNCTIONS_H
 
+#include <list>
 #include <string>
 #include <vector>
 
@@ -10,7 +11,24 @@
 #include <nel/net/message.h>
 #include <nel/net/unified_network.h>
 
+#include <nelns/naming_service/service_entry.h>
+
+bool canAccess(const std::vector<NLNET::CInetAddress> &addr, const CServiceEntry &entry, std::vector<NLNET::CInetAddress> &accessibleAddr);
+
 void displayRegisteredServices(NLMISC::CLog *log = NLMISC::InfoLog);
+
+std::list<CServiceEntry>::iterator effectivelyRemove (std::list<CServiceEntry>::iterator &it);
+
+/*
+ * Helper procedure for cbLookupAlternate and cbUnregister.
+ * Note: name is used for a LOGS.
+ */
+std::list<CServiceEntry>::iterator doRemove(std::list<CServiceEntry>::iterator it);
+
+// Asks a service to stop and tell every one
+void doUnregisterService(const NLNET::TServiceId &sid);
+
+void doUnregisterService(const NLNET::TSockId &from);
 
 /*
  * Helper function for cbRegister.
@@ -84,5 +102,11 @@ void cbDisconnect(NLNET::TSockId from, void *arg);
  * a service is connected, send him all services infos
  */
 void cbConnect(NLNET::TSockId from, void *arg);
+
+// Helper that emulate layer5's getServiceName()
+std::string getServiceName(const NLNET::TServiceId& sid);
+
+// Helper that returns the first address of a service
+NLNET::CInetAddress getHostAddress( const NLNET::TServiceId&  sid );
 
 #endif // NELNS_NAMING_SERVICE_FUNCTIONS_H
