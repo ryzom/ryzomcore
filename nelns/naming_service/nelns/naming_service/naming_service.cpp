@@ -1,9 +1,12 @@
 #include <nelns/naming_service/naming_service.h>
 
-#include <nel/misc/string_common.h>
-#include <nel/misc/config_file.h>
 #include <nel/misc/common.h>
+#include <nel/misc/config_file.h>
+#include <nel/misc/string_common.h>
+
+#include <nel/net/callback_net_base.h>
 #include <nel/net/callback_server.h>
+
 #include <nelns/naming_service/do_unregister_service.h>
 #include <nelns/naming_service/functions.h>
 #include <nelns/naming_service/variables.h>
@@ -19,8 +22,22 @@ using NLMISC::toString;
 using NLNET::CCallbackServer;
 using NLNET::CInetAddress;
 using NLNET::CUnifiedNetwork;
+using NLNET::TCallbackItem;
 using NLNET::TServiceId;
 using NLNET::TSockId;
+
+//
+// Callback array
+//
+
+TCallbackItem CallbackArray[] = {
+	{ "RG", cbRegister },
+	{ "RRG", cbResendRegisteration },
+	{ "QP", cbQueryPort },
+	{ "UNI", cbUnregisterSId },
+	{ "ACK_UNI", cbACKUnregistration },
+	//	{ "RS", cbRegisteredServices },
+};
 
 /**
  * Init

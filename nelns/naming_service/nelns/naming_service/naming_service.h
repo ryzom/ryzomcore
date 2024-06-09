@@ -1,8 +1,9 @@
 #ifndef NELNS_NAMING_SERVICE_SERVICE_NAMING_SERVICE_H
 #define NELNS_NAMING_SERVICE_SERVICE_NAMING_SERVICE_H
 
-#include <nel/net/service.h>
 #include <nel/net/buf_net_base.h>
+#include <nel/net/service.h>
+
 #include <nelns/naming_service/service_instance_manager.h>
 
 //

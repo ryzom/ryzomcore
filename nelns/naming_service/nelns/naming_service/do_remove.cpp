@@ -1,6 +1,7 @@
 #include <nelns/naming_service/do_remove.h>
 
 #include <nel/misc/string_common.h>
+
 #include <nelns/naming_service/can_access.h>
 #include <nelns/naming_service/effectively_remove.h>
 #include <nelns/naming_service/service_instance_manager.h>

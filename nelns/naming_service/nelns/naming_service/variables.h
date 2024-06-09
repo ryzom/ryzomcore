@@ -5,8 +5,10 @@
 
 #include <nel/misc/time_nl.h>
 #include <nel/misc/types_nl.h>
+
 #include <nel/net/callback_net_base.h>
 #include <nel/net/unified_network.h>
+
 #include <nelns/naming_service/service_entry.h>
 
 //
@@ -23,7 +25,5 @@ extern const NLNET::TServiceId BaseSId; /// Allocated SIds begin at 128 (except 
 extern const NLMISC::TTime UnregisterTimeout; /// After 10s we remove an unregister service if every server didn't ACK the message
 
 extern NLNET::CCallbackServer *CallbackServer;
-
-extern NLNET::TCallbackItem CallbackArray[5];
 
 #endif // NELNS_NAMING_SERVICE_VARIABLES_H

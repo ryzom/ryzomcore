@@ -1,6 +1,13 @@
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-TEST(CNamingService, BasicAssertions) {
-	EXPECT_STRNE("hello", "world");
-	EXPECT_EQ(7 * 6, 42);
+#include <nelns/naming_service/naming_service.h>
+
+using ::testing::NotNull;
+
+
+TEST(CNamingService, ShouldInstantiateSingleton) {
+	CNamingService instance;
+
+	EXPECT_THAT(CNamingService::getInstance(), NotNull());
 }

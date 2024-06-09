@@ -1,6 +1,7 @@
 #include <nelns/naming_service/do_unregister_service.h>
 
 #include <list>
+
 #include <nelns/naming_service/do_remove.h>
 #include <nelns/naming_service/service_entry.h>
 #include <nelns/naming_service/variables.h>

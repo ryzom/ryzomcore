@@ -5,6 +5,7 @@ add_executable("${TEST_NAME}"
 )
 target_link_libraries("${TEST_NAME}"
         GTest::gtest_main
+        GTest::gmock
         nelmisc
         nelnet
         nelns::ns
