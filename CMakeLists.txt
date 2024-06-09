@@ -42,12 +42,19 @@ ENDIF()
 OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
   cmake_minimum_required(VERSION 3.24)
-  INCLUDE("CMakeModules/HunterGate.cmake")
-  HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.3.tar.gz"
-    SHA1 "0dfbc2cb5c4cf7e83533733bdfd2125ff96680cb"
-    FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
+
+  set(HUNTER_URL "https://github.com/cpp-pm/hunter/archive/v0.25.5.tar.gz")
+  set(HUNTER_SHA1 "a20151e4c0740ee7d0f9994476856d813cdead29")
+  set(HUNTER_FILEPATH_CONFIG "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake")
+
+  include(FetchContent)
+  FetchContent_Declare(
+          SetupHunter
+          GIT_REPOSITORY https://github.com/cpp-pm/gate
+          GIT_TAG 3ccad4402bd64d29e85a05a2eb8bb57d9f861bac
+          EXCLUDE_FROM_ALL
   )
+  FetchContent_MakeAvailable(SetupHunter)
 
   # default options for hunterized build
   SET(WITH_STATIC         ON CACHE BOOL "static" FORCE)
