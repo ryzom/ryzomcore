@@ -20,7 +20,7 @@ CServiceInstanceManager *CServiceInstanceManager::_Instance = nullptr;
 
 CServiceInstanceManager *CServiceInstanceManager::getInstance()
 {
-	nlassert(_Instance);
+	nlassertex(_Instance, ("No Singleton Instance existing"));
 	return _Instance;
 }
 
@@ -29,10 +29,15 @@ CServiceInstanceManager *CServiceInstanceManager::getInstance()
  */
 CServiceInstanceManager::CServiceInstanceManager()
 {
-	nlassert(!_Instance);
+	nlassertex(!_Instance, ("Singleton Instance already existing"));
 	_Instance = this;
 
 	// Note: addCallbackArray() done in CRangeMirrorManager::init()
+}
+
+CServiceInstanceManager::~CServiceInstanceManager()
+{
+	_Instance = nullptr;
 }
 
 /*

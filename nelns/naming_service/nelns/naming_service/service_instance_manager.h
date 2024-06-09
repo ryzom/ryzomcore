@@ -32,6 +32,8 @@ public:
 	/// Constructor
 	CServiceInstanceManager();
 
+	virtual ~CServiceInstanceManager();
+
 	/** Add the name of a service which must not be duplicated
 	 * If uniqueOnShard is true, only one service is allowed.
 	 * If uniqueOnShard is false, one service is allowed by physical machine.
