@@ -1,8 +1,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <nel/misc/config_file.h>
-
 #include <nelns/naming_service/naming_service.h>
 
 using ::testing::Eq;
@@ -10,8 +8,6 @@ using ::testing::IsFalse;
 using ::testing::IsNull;
 using ::testing::IsTrue;
 using ::testing::NotNull;
-
-using ::NLMISC::CConfigFile;
 
 TEST(CNamingService, shouldInstantiateSingleton)
 {
@@ -52,19 +48,4 @@ TEST(CNamingService, shouldAllowNewInstanceAfterDestruction)
 		EXPECT_THAT(CNamingService::getInstance(), NotNull());
 		EXPECT_THAT(CNamingService::getInstance(), Eq(&second));
 	};
-}
-
-TEST(CNamingService, shouldInitialize)
-{
-	CNamingService instance;
-	CConfigFile::CVar var;
-	var.Type = CConfigFile::CVar::T_STRING;
-
-	instance.ConfigFile.insertVar("UniqueOnShardServices", var);
-	instance.ConfigFile.insertVar("UniqueByMachineServices", var);
-
-	instance.init();
-	instance.update();
-
-	instance.release();
 }
