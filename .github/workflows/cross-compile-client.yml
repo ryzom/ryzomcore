@@ -19,10 +19,12 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
-        echo "cmake-version=3.27.9" >> "$GITHUB_OUTPUT"
-        echo "cmake-install-dir=/opt/cmake-3.27.9" >> "$GITHUB_OUTPUT"
         COMMIT_HASH=${{ github.sha }}
         echo "version=sha.${COMMIT_HASH:0:8}" >> "$GITHUB_OUTPUT"
+
+    - uses: lukka/get-cmake@v3.29.5
+      with:
+        cmakeVersion: 3.27.9
 
     - name: Dependencies
       run: |
@@ -38,10 +40,6 @@ jobs:
         mingw-w64 \
         mingw-w64-tools \
         ninja-build
-        wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releases/download/v${{ steps.strings.outputs.cmake-version }}/cmake-${{ steps.strings.outputs.cmake-version }}-linux-x86_64.sh
-        sudo mkdir ${{ steps.strings.outputs.cmake-install-dir }}
-        sudo sh /tmp/cmake.sh --skip-license --prefix=${{ steps.strings.outputs.cmake-install-dir }}
-        sudo ln --symbolic --force ${{ steps.strings.outputs.cmake-install-dir }}/bin/cmake /usr/local/bin/cmake
         git clone --depth 1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git
         cd openssl
         ./Configure mingw --cross-compile-prefix=i686-w64-mingw32- --prefix=/usr/i686-w64-mingw32
@@ -55,8 +53,6 @@ jobs:
         key: ubuntu-latest-hunter-cache
 
     - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         cmake --version;
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
