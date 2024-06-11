@@ -102,62 +102,41 @@ TEST(CServiceInstanceManager, addUniqueServiceShouldAddMachineUniqueService)
 	        StartsWith("Online registered services:")));
 }
 
-TEST(CServiceInstanceManager, queryStartServiceShouldAddOnlineSercie)
+TEST(CServiceInstanceManager, queryStartServiceShouldGrantSingleService)
 {
 	CServiceInstanceManager instance;
 	TServiceId serviceId(123);
 	vector<CInetAddress> addresses = { "localhost:12345" };
 	string reason;
-	CLightMemDisplayer displayer;
-	CLog log(NLMISC::CLog::LOG_ASSERT);
-	log.addDisplayer(&displayer);
 
 	EXPECT_THAT(
-	    instance.queryStartService("online-service", serviceId, addresses, reason),
+	    instance.queryStartService("single-service", serviceId, addresses, reason),
 	    IsTrue());
-
-	instance.displayInfo(&log);
-	EXPECT_THAT(
-	    displayer.lockStrings(),
-	    IsSupersetOf({ StartsWith("Online registered services:"),
-	        StartsWith(serviceId.toString()) }));
 }
 
-TEST(CServiceInstanceManager, queryStartServiceShouldAddSingleShardUnqiueService)
+TEST(CServiceInstanceManager, queryStartServiceShouldGrantSingleShardUnqiueService)
 {
 	CServiceInstanceManager instance;
 	TServiceId serviceId(123);
 	vector<CInetAddress> addresses = { "localhost:12345" };
 	string reason;
-	CLightMemDisplayer displayer;
-	CLog log(NLMISC::CLog::LOG_ASSERT);
-	log.addDisplayer(&displayer);
 	string serviceName = "unique-shard-service-name";
 	instance.addUniqueService(serviceName, true);
 
 	EXPECT_THAT(
 	    instance.queryStartService(serviceName, serviceId, addresses, reason),
 	    IsTrue());
-
-	instance.displayInfo(&log);
-	EXPECT_THAT(
-	    displayer.lockStrings(),
-	    IsSupersetOf({ StartsWith("Online registered services:"),
-	        StartsWith(serviceId.toString()) }));
 }
 
-TEST(CServiceInstanceManager, queryStartServiceShouldNotAddAdditionalShardUnqiueService)
+TEST(CServiceInstanceManager, queryStartServiceShouldNotGrantAdditionalShardUnqiueService)
 {
 	RegisteredServices.clear();
 	CServiceInstanceManager instance;
 	TServiceId serviceId(123);
 	vector<CInetAddress> addresses = { "localhost:12345" };
 	string reason;
-	CLightMemDisplayer displayer;
-	CLog log(NLMISC::CLog::LOG_ASSERT);
-	log.addDisplayer(&displayer);
 	string serviceName = "unique-shard-service-name";
-	RegisteredServices.push_back(CServiceEntry(InvalidSockId, addresses, serviceName, serviceId));
+	RegisteredServices.emplace_back(InvalidSockId, addresses, serviceName, serviceId);
 	instance.addUniqueService(serviceName, true);
 	instance.queryStartService(serviceName, serviceId, addresses, reason);
 
@@ -170,7 +149,7 @@ TEST(CServiceInstanceManager, queryStartServiceShouldNotAddAdditionalShardUnqiue
 	    StrEq("Service unique-shard-service-name already found as 123, must be unique on shard"));
 }
 
-TEST(CServiceInstanceManager, queryStartServiceShouldAddAdditionalMachineUnqiueServiceOnDifferentMachine)
+TEST(CServiceInstanceManager, queryStartServiceShouldGrantAdditionalMachineUnqiueServiceOnDifferentMachine)
 {
 	RegisteredServices.clear();
 	CServiceInstanceManager instance;
@@ -178,11 +157,8 @@ TEST(CServiceInstanceManager, queryStartServiceShouldAddAdditionalMachineUnqiueS
 	vector<CInetAddress> firstAddresses = { "127.0.0.1:12345" };
 	vector<CInetAddress> secondAddresses = { "127.0.0.2:12345" };
 	string reason;
-	CLightMemDisplayer displayer;
-	CLog log(NLMISC::CLog::LOG_ASSERT);
-	log.addDisplayer(&displayer);
 	string serviceName = "unique-machine-service-name";
-	RegisteredServices.push_back(CServiceEntry(InvalidSockId, firstAddresses, serviceName, serviceId));
+	RegisteredServices.emplace_back(InvalidSockId, firstAddresses, serviceName, serviceId);
 	instance.addUniqueService(serviceName, false);
 	instance.queryStartService(serviceName, serviceId, firstAddresses, reason);
 
@@ -191,18 +167,15 @@ TEST(CServiceInstanceManager, queryStartServiceShouldAddAdditionalMachineUnqiueS
 	    IsTrue());
 }
 
-TEST(CServiceInstanceManager, queryStartServiceShouldNotAddAdditionalMachineUnqiueService)
+TEST(CServiceInstanceManager, queryStartServiceShouldNotGrantAdditionalMachineUnqiueServiceOnSameMachine)
 {
 	RegisteredServices.clear();
 	CServiceInstanceManager instance;
 	TServiceId serviceId(123);
 	vector<CInetAddress> addresses = { "localhost:12345" };
 	string reason;
-	CLightMemDisplayer displayer;
-	CLog log(NLMISC::CLog::LOG_ASSERT);
-	log.addDisplayer(&displayer);
 	string serviceName = "unique-machine-service-name";
-	RegisteredServices.push_back(CServiceEntry(InvalidSockId, addresses, serviceName, serviceId));
+	RegisteredServices.emplace_back(InvalidSockId, addresses, serviceName, serviceId);
 	instance.addUniqueService(serviceName, false);
 	instance.queryStartService(serviceName, serviceId, addresses, reason);
 
