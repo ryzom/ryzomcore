@@ -160,11 +160,11 @@ snowballs/build/*
 ryzom/build/*
 build/*
 build-2010/*
-build/*
 install/*
 build_*
 install_*
 nel/tools/build_gamedata/configuration/buildsite.py
+cmake-build-*
 
 # Linux nel compile
 nel/build/nel-config
