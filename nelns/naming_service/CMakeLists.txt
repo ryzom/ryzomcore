@@ -1,6 +1,6 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(nelns_naming_service
+add_library(nelns_naming_service STATIC
         nelns/naming_service/functions.cpp
         nelns/naming_service/naming_service.cpp
         nelns/naming_service/service_instance_manager.cpp
