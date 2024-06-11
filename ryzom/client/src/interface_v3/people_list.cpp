@@ -433,10 +433,13 @@ sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 	++_CurrPeopleID;
 
 	_BaseContainer->setTitle(_BaseContainer->getTitle());
-	if (_BaseContainer->getTitleOpenedViewText() != NULL)
-		_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
-	if (_BaseContainer->getTitleClosedViewText() != NULL)
-		_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	if (_ContactType != CPeopleListDesc::Team)
+	{
+		if (_BaseContainer->getTitleOpenedViewText() != NULL)
+			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+		if (_BaseContainer->getTitleClosedViewText() != NULL)
+			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	}
 
 	return (sint) _Peoples.size() - 1;
 }
@@ -467,10 +470,13 @@ void CPeopleList::removePeople(uint index)
 	_Peoples.erase(_Peoples.begin() + index);
 
 	_BaseContainer->setTitle(_BaseContainer->getTitle());
-	if (_BaseContainer->getTitleOpenedViewText() != NULL)
-		_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
-	if (_BaseContainer->getTitleClosedViewText() != NULL)
-		_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	if (_ContactType != CPeopleListDesc::Team)
+	{
+		if (_BaseContainer->getTitleOpenedViewText() != NULL)
+			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+		if (_BaseContainer->getTitleClosedViewText() != NULL)
+			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+	}
 }
 
 //==================================================================
