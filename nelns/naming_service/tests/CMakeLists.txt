@@ -8,8 +8,9 @@ target_link_libraries("${TEST_NAME}"
         GTest::gmock
         nelns::ns
 )
-gtest_discover_tests("${TEST_NAME}"
-        EXTRA_ARGS "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/reports/junit-${TEST_NAME}.xml"
+add_test(
+        NAME "${TEST_NAME}"
+        COMMAND "${TEST_NAME}" "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/reports/junit-${TEST_NAME}.xml"
 )
 
 
@@ -23,7 +24,7 @@ target_link_libraries("${TEST_NAME}"
         GTest::gmock
         nelns::ns
 )
-gtest_discover_tests("${TEST_NAME}"
-        EXTRA_ARGS "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/reports/junit-${TEST_NAME}.xml"
+add_test(
+        NAME "${TEST_NAME}"
+        COMMAND "${TEST_NAME}" "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/reports/junit-${TEST_NAME}.xml"
 )
-

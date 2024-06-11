@@ -464,7 +464,7 @@ ENDIF()
 
 IF(WITH_NEL_TESTS)
   ENABLE_TESTING()
-  ADD_TEST(nel_unit_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/nel_unit_test --html)
+  ADD_TEST(NAME nel_unit_test COMMAND nel_unit_test)
   IF(BUILD_DASHBOARD)
     INCLUDE(Dart)
     SET(SVNCOMMAND svn)
