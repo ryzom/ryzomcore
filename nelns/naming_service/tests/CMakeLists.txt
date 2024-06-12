@@ -1,3 +1,11 @@
+add_test_executable(do_allocate_port_test
+        do_allocate_port.test.cpp
+)
+target_link_libraries(do_allocate_port_test
+        nelns::ns
+)
+
+
 add_test_executable(naming_service_test
         naming_service.test.cpp
 )
