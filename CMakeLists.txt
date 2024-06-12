@@ -325,7 +325,7 @@ IF(WITH_NEL)
     FIND_PACKAGE(CppTest)
 
     ENABLE_TESTING()
-    INCLUDE(FetchContent)
+    include(FetchContent)
     FetchContent_Declare(
             googletest
             URL https://github.com/google/googletest/archive/a7f443b80b105f940225332ed3c31f2790092f47.zip
@@ -333,7 +333,8 @@ IF(WITH_NEL)
     )
     SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
-    INCLUDE(GoogleTest)
+    include(GoogleTest)
+    include(CMakeModules/add_test_executable.cmake)
   ENDIF()
 
   IF(HUNTER_ENABLED)
