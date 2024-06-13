@@ -14,9 +14,15 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04, windows-latest, windows-2019, macos-latest, macos-11]
+        os:
+         - ubuntu-22.04
+         - ubuntu-20.04
+         - windows-2022
+         - windows-2019
+         - macos-14
+         - macos-11
         include:
-          - os: windows-latest
+          - os: windows-2022
             cmake_options: -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_XAUDIO2=ON
           - os: windows-2019
             cmake_options: -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_XAUDIO2=ON
@@ -24,7 +30,7 @@ jobs:
             ubuntu_version: 22.04
           - os: ubuntu-20.04
             ubuntu_version: 20.04
-          - os: macos-latest
+          - os: macos-14
             cmake_options: -DWITH_LIBXML2_ICONV=OFF -GXcode
           - os: macos-11
             cmake_options: -DWITH_LIBXML2_ICONV=OFF -GXcode
