@@ -1333,6 +1333,10 @@ NLMISC_COMMAND(setGuildInventoryChestParams, "Set the chest of inventory", "<uid
 		EGSPD::CGuildGrade::TGuildGrade gradePut = EGSPD::CGuildGrade::fromString(args[4]);
 		EGSPD::CGuildGrade::TGuildGrade gradeGet = EGSPD::CGuildGrade::fromString(args[5]);
 		guild->setChestParams(chest, args[2], gradeView, gradePut, gradeGet);
+		log.displayNL("%s", guild->getChestName(chest).c_str());
+		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestViewGrade(chest)).c_str());
+		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestPutGrade(chest)).c_str());
+		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestGetGrade(chest)).c_str());
 	}
 	return true;
 }
