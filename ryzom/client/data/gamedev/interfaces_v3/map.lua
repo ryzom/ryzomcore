@@ -241,7 +241,7 @@ function game:doSpawnShapesByZone(continent)
 				deleteShape(shape[9])
 			end
 
-			if shape[10] ~= nil  and shape[9] > 0then
+			if shape[10] ~= nil  and shape[9] > 0 then
 				deleteShape(shape[10])
 			end
 

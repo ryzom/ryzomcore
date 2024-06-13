@@ -50,7 +50,7 @@ uint32 CPetInventory::getMaxWeight() const
 	return _PetMaxWeight;
 }
 
-uint32 CPetInventory::getMaxBulk() const
+uint32 CPetInventory::getMaxBulk(uint8 index) const
 {
 	return _PetMaxBulk;
 }
@@ -88,7 +88,7 @@ void CPetInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags chang
 
 void CPetInvView::onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags)
 {
-	
+
 }
 
 

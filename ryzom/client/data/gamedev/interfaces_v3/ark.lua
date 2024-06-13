@@ -25,6 +25,14 @@ function print_r(arr, indentLevel)
 	return str
 end
 
+function tablelength(T)
+	if T == nil then
+		return 0
+	end
+	local count = 0
+	for _ in pairs(T) do count = count + 1 end
+	return count
+end
 
 function openPageInWebIg(url)
 	getUI("ui:interface:webig:content:html"):browse(url)
@@ -42,7 +50,8 @@ function broadcast(text, t)
 end
 
 function fixUrl(url)
-	return url:gsub("{amp}", "&")
+	s, n = string.gsub(url, "{amp}", "&")
+	return s
 end
 
 function openArkScript(id, winid, extra)
@@ -285,9 +294,13 @@ function ArkShowStageDiv(name, state)
 end
 
 function ArkSelectRyform(curwin, id, mod)
-	e = ArkGetStageEdit(__CURRENT_WINDOW__):find(id..":eb")
+	local curwin = getUICaller().id
+	debug(curwin)
+	debug(ArkGetStageEdit(curwin))
+	local e = ArkGetStageEdit(curwin):find(id..":eb")
+	debug(ArkGetStageEdit(curwin):find(id))
 	e.input_string = mod
-	ArkGetStageEdit(__CURRENT_WINDOW__):find("send:b"):runLeftClickAction()
+	ArkGetStageEdit(curwin):find("send:b"):runLeftClickAction()
 end
 
 function ArkSendForm(name)
@@ -310,14 +323,18 @@ function ArkFindUI(name)
 	local i = 0
 	local ui = getUICaller()
 	while true do
-		local found = ui:find(name)
-		if found ~= nil then
-			return found
+		if ui then
+			local found = ui:find(name)
+			if found ~= nil then
+				return found
+			else
+				ui = ui.parent
+			end
+			i = i +1
+			if i >= 100 then
+				return nil
+			end
 		else
-			ui  = ui.parent
-		end
-		i = i +1
-		if i >= 100 then
 			return nil
 		end
 	end

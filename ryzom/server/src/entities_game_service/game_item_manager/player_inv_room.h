@@ -30,7 +30,7 @@ public:
 
 	//@{
 	//@name Overloads from inventory base
-	virtual uint32 getMaxBulk() const;
+	virtual uint32 getMaxBulk(uint8 index = 0) const;
 	virtual uint32 getMaxSlot() const;
 
 	virtual TInventoryOpResult insertItem(CGameItemPtr &item, uint32 slot = INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, bool autoStack = false);

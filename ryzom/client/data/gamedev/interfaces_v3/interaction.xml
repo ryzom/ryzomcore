@@ -3327,8 +3327,8 @@
  <tree node="rpitems_actions" />
 
 
-<template name="arkshop_inv_item" sheetdb="UI:TEMP:ARK:ITEM:0" usesheet="false" isvirtual="true" lock="false" render_layer1="1" render_layer2="2" fontsize="8" render_layer3="3" render_layer4="4" w="45" over="grey_0.tga" keep="true" img1scale="false" img2scale="false" img1="token_basic.tga" img2="" img3="" tooltip="" quality="" quantity="" overlay="" text="" text2="" text3="" overlay_active="0"  overlay2_active="0" qualquan_active="0" color="255 255 255 255" gc1="false" gc2="false" gc3="true" ctrlcolor="0 0 0 0" color2="255 255 255 255" color3="255 255 255 255" colover="255 255 255 30" bg="w_slot_item.tga" params_l="" params_r="" x="0" y="0">
-	<group id="#id" posref="MM MM" w="#w" h="45" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
+<template name="arkshop_inv_item" sheetdb="UI:TEMP:ARK:ITEM:0" usesheet="false" isvirtual="true" lock="false" render_layer1="1" render_layer2="2" fontsize="11" fontsize2="11" fontsize3="11" render_layer3="3" render_layer4="4" w="45" over="grey_0.tga" keep="true" img1scale="false" img2scale="false" img1="token_basic.tga" img2="" img3="" tooltip="" quality="" quantity="" overlay="" text="" text2="" text3="" overlay_active="0"  overlay2_active="0" qualquan_active="0" color="255 255 255 255" gc1="false" gc2="false" gc3="false" ctrlcolor="0 0 0 0" color2="255 255 255 255" color3="255 255 255 255" colover="255 255 255 30" bg="w_slot_item.tga" params_l="" params_r="" x="0" y="0">
+	<group id="#id" posref="MM MM" w="#w" h="42" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
 		<ctrl type="sheet" tooltip="#text" onclick_r="open_help_auto" active="#usesheet" id="sheet" value="#sheetdb" posref="ML ML" y="0" x="#x" render_layer="#render_layer2" use_quality="true" use_quantity="true" />
 		<view type="bitmap" id="back" posref="ML ML" h="40" w="40" scale="true" x="#x" y="0" render_layer="#render_layer1" texture="#bg" global_color="false" />
 		<group id="virtual" active="#isvirtual" posref="MM MM" posparent="back">
@@ -3344,22 +3344,22 @@
 			<view type="text" id="quantity" posref="BL BL" posparent="ref" render_layer="#render_layer3" x="0" y="0" hardtext="#quantity" fontsize="8" color="255 255 255 255" shadow="true" global_color="false" />
 			<view type="text" id="quality" posref="BR BR" posparent="ref" render_layer="#render_layer3" x="0" y="0" hardtext="#quality" fontsize="8" color="255 255 255 255" shadow="true" global_color="true" />
 		</group>
-		<view type="bitmap" id="over" posref="ML ML" h="40" w="#w" scale="true" x="#x" y="0" render_layer="#render_layer4" texture="#over" global_color="false" />
+		<view type="bitmap" id="over" posref="MR MR" h="40" w="#w" scale="true" x="#x" y="0" render_layer="#render_layer4" texture="#over" global_color="false" />
 		<view type="bitmap" id="lock" posref="TL TL" h="16" w="16" x="0" y="0" active="#lock" render_layer="#render_layer4" texture="pin_on.tga" global_color="false" />
-		<view type="text" id="text1" posref="TR TL" posparent="back" x="5" y="1" multi_line="true" format_taged="true" fontsize="8" hardtext_format="#text" color="#color1" shadow="true" global_color="#gc1" />
-		<view type="text" id="text2" posref="BL TL" posparent="text1" x="0" y="0" multi_line="true" format_taged="true" fontsize="#fontsize" hardtext_format="#text2" color="#color2" shadow="true" global_color="#gc2" />
-		<view type="text" id="text3" posref="BL TL" posparent="text2" x="0" y="-2" multi_line="true" format_taged="true" fontsize="#fontsize" hardtext_format="#text3" color="#color3" shadow="true" global_color="#gc3" />
+		<view type="text" id="text1" posref="TR TL" posparent="back" x="5" y="1" multi_line="true" line_maxw="#w" multi_line_maxw_only="true" multi_line_space="0" format_taged="true" fontsize="#fontsize" hardtext="#text" color="#color1" shadow="true" global_color="#gc1" />
+		<view type="text" id="text2" posref="BL TL" posparent="text1" x="0" y="0" multi_line="true" line_maxw="#w" multi_line_maxw_only="true" multi_line_space="0" format_taged="true" fontsize="#fontsize2" hardtext="#text2" color="#color2" shadow="true" global_color="#gc2" />
 		<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="ML ML" x="#x" y="0" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true" w="#w" h="40" color="#ctrlcolor" col_over="#colover" col_pushed="#colover" render_layer="#render_layer2" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r"  />
+		<view type="text" id="text3" posref="BR BR" posparent="ctrl" x="-4" y="2" multi_line="true" line_maxw="#w" multi_line_maxw_only="true" format_taged="true" fontsize="#fontsize3" hardtext="#text3" color="#color3" shadow="true" global_color="#gc3" />
 	</group>
 </template>
 
-<template name="arkshop_inv_mission" sheetdb="UI:TEMP:ARK:ITEM:0" usesheet="false" usesheet_reward="false" isvirtual="true" render_layer1="1" render_layer2="2" fontsize="8" render_layer3="3" w="45" keep="true" img1="token_basic.tga" img2="" img3="" tooltip="" quality="" quantity="" overlay="" text="" text2="" text3="" color="255 255 255 255" gc1="false" gc2="false" gc3="true" ctrlcolor="0 0 0 0" color2="255 255 255 255" color3="255 255 255 255" colover="255 255 255 30" bg="w_slot_item.tga" params_l="" params_r="" x="0" y="0">
+<template name="arkshop_inv_mission" sheetdb="UI:TEMP:ARK:ITEM:0" usesheet="false" usesheet_reward="false" isvirtual="true" render_layer1="1" render_layer2="2" fontsize="10" render_layer3="3" w="45" keep="true" img1="token_basic.tga" img2="" img3="" tooltip="" quality="" quantity="" overlay="" text="" text2="" text3="" color="255 255 255 255" gc1="false" gc2="false" gc3="false" ctrlcolor="0 0 0 0" color2="255 255 255 255" color3="255 255 255 255" colover="255 255 255 30" bg="w_slot_item.tga" params_l="" params_r="" x="0" y="0">
 	<group id="#id" posref="MM MM" w="#w" h="45" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
 		<ctrl type="sheet" tooltip="#text" onclick_r="open_help_auto" active="#usesheet" id="sheet" value="#sheetdb" posref="MR MR" y="0" x="0" render_layer="#render_layer3" use_quality="true" use_quantity="true" />
 		<view type="bitmap" id="back" posref="ML ML" h="40" w="40" scale="true" x="0" y="0" render_layer="#render_layer1" texture="points_atys.tga" global_color="false" />
-		<view type="bitmap" id="back2" posref="MM MM" posparent="back" h="40" w="40" scale="false" x="0" y="0" render_layer="#render_layer2" texture="mission_elyps.tga" global_color="false" />
-		<view type="text" id="text1" posref="TR TL" posparent="back" x="5" y="1" format_taged="true" fontsize="8" hardtext="#text" color="#color1" shadow="true" global_color="#gc1" />
-		<view type="text" id="text2" posref="BL TL" posparent="text1" x="0" y="2" format_taged="true" fontsize="#fontsize" hardtext="#text2" color="#color2" shadow="true" global_color="#gc2" />
+		<view type="bitmap" id="back2" posref="MM MM" posparent="back" h="40" w="40" scale="false" x="0" y="0" render_layer="#render_layer2" texture="https://app.ryzom.com/app_arcc/data/app/Scripts//1/5/0/4/assets/mission_elyps.png" global_color="false" />
+		<view type="text" id="text1" posref="TR TL" posparent="back" x="5" y="1" format_taged="true" fontsize="#fontsize" hardtext="#text" color="#color1" shadow="true" global_color="#gc1" />
+		<view type="text" id="text2" posref="BL TL" posparent="text1" x="0" y="2" format_taged="true" multi_line="true" multi_line_maxw_only="true" multi_line_space="0" fontsize="#fontsize" hardtext="#text2" color="#color2" shadow="true" global_color="#gc2" />
 		<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="ML ML" x="1" y="0" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true" w="#w" h="40" color="#ctrlcolor" col_over="#colover" col_pushed="#colover" render_layer="#render_layer2" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r"  />
 	</group>
 </template>
