@@ -108,7 +108,8 @@ jobs:
       if: (success() || failure()) && matrix.os == 'ubuntu-22.04'
       with:
         name: test-results
-        path: "${{ steps.strings.outputs.build-output-dir }}/**/reports/junit-*.xml"
+        if-no-files-found: error
+        path: "${{ steps.strings.outputs.build-output-dir }}/**/reports/*.xml"
 
     - name: Package
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} --target package
