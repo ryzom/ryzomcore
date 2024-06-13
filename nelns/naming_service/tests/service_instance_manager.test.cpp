@@ -5,8 +5,9 @@
 #include <nel/misc/mem_displayer.h>
 
 #include <nel/net/buf_sock.h>
+#include <nel/net/inet_address.h>
+#include <nel/net/unified_network.h>
 
-#include <nelns/naming_service/service_entry.h>
 #include <nelns/naming_service/service_instance_manager.h>
 #include <nelns/naming_service/variables.h>
 
