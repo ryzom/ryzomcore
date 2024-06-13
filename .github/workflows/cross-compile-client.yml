@@ -6,12 +6,9 @@ on:
   pull_request:
     branches: [ "core4" ]
 
-env:
-  os: ubuntu-22.04
-
 jobs:
   build:
-    runs-on: ${{ env.os }}
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -53,7 +50,7 @@ jobs:
       uses: actions/cache@v4.0.2
       with:
         path: ${{ steps.strings.outputs.hunter-dir }}
-        key: ${{ env.os }}-hunter-cache
+        key: ubuntu-22.04-hunter-cache
 
     - name: Configure CMake
       run: >
