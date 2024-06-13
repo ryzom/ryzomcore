@@ -40,6 +40,8 @@ jobs:
             cmake_preset: linux-client
           - os: macos-14
             cmake_preset: macos-client
+          - os: macos-12
+            cmake_preset: macos-client
           - os: macos-11
             cmake_preset: macos-client
 
