@@ -110,6 +110,12 @@ jobs:
         -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
         -S ${{ github.workspace }}
 
+    - uses: actions/cache/save@v4
+      if: always()
+      with:
+        path: ${{ steps.strings.outputs.hunter-dir }}
+        key: ${{ matrix.os }}-hunter-cache
+
     - name: Build
       env:
         MACOSX_DEPLOYMENT_TARGET: 10.12
