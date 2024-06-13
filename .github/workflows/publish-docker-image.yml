@@ -5,6 +5,9 @@ on:
     branches: [ "core4" ]
     tags:
       - v*
+    paths-ignore:
+      - '.github/workflows/**.yml'
+      - '!.github/workflows/publish-docker-image.yml'
 
 env:
   ubuntu_version: 22.04

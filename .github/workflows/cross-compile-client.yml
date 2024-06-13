@@ -3,8 +3,14 @@ name: build 32-Bit windows client
 on:
   push:
     branches: [ "core4", "feature/*" ]
+    paths-ignore:
+      - '.github/workflows/**.yml'
+      - '!.github/workflows/cross-compile-client.yml'
   pull_request:
     branches: [ "core4" ]
+    paths-ignore:
+      - '.github/workflows/**.yml'
+      - '!.github/workflows/cross-compile-client.yml'
 
 jobs:
   build:
