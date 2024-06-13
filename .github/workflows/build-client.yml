@@ -101,6 +101,8 @@ jobs:
         choco install directx-sdk
 
     - name: Configure CMake
+      env:
+        MACOSX_DEPLOYMENT_TARGET: 10.12
       run: >
         cmake --preset ${{ matrix.cmake_preset }}
         -DHUNTER_CONFIGURATION_TYPES=Release
@@ -109,4 +111,6 @@ jobs:
         -S ${{ github.workspace }}
 
     - name: Build
+      env:
+        MACOSX_DEPLOYMENT_TARGET: 10.12
       run: cmake --build --preset client
