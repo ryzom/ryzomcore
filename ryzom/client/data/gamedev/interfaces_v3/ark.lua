@@ -50,7 +50,8 @@ function broadcast(text, t)
 end
 
 function fixUrl(url)
-	return url:gsub("{amp}", "&")
+	s, n = string.gsub(url, "{amp}", "&")
+	return s
 end
 
 function openArkScript(id, winid, extra)
