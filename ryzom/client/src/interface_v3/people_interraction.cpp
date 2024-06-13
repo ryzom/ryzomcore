@@ -569,7 +569,7 @@ void CPeopleInterraction::createFriendList()
 				   "ui:interface:friend_list_menu_online_blocked",
 				   "ui:interface:friend_list_menu_online_abroad_blocked"
 				   );
-	FriendList.setMenu("ui:interface:sort_menu");
+	//FriendList.setMenu("ui:interface:sort_menu");
 }
 
 
@@ -588,7 +588,7 @@ void CPeopleInterraction::createIgnoreList()
 	IgnoreList.create(peopleListDesc);
 	//
 	IgnoreList.setPeopleMenu("ui:interface:ignore_list_menu");
-	IgnoreList.setMenu("ui:interface:sort_menu");
+	//IgnoreList.setMenu("ui:interface:sort_menu");
 }
 
 //===========================================================================================================
@@ -1062,11 +1062,19 @@ bool CPeopleInterraction::getPeopleFromCurrentMenu(CPeopleList *&peopleList, uin
 }
 
 //===========================================================================================================
-CPeopleList *CPeopleInterraction::getPeopleListFromCurrentMenu()
+CPeopleList *CPeopleInterraction::getPeopleListFromCurrentMenu(CCtrlBase *pCaller)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	// the group that launched the modal window (the menu) must be the header of the group container that represent a people entry
-	CInterfaceGroup *header = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+	CInterfaceGroup *header;
+	if (!pCaller)
+	{
+		// the group that launched the modal window (the menu) must be the header of the group container that represent a people entry
+		header = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+	}
+	else
+	{
+		header = dynamic_cast<CInterfaceGroup *>(pCaller->getParent());
+	}
 	if (!header) return NULL;
 	// get the parent container
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(header->getParent());
@@ -2386,7 +2394,7 @@ REGISTER_ACTION_HANDLER( CHandlerChangeContactGroup, "change_contact_group");
 class CHandlerSortContacts : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * pCaller, const std::string &/* sParams */)
 	{
 		CInterfaceManager* pIM= CInterfaceManager::getInstance();
 		nlinfo("Load Order : %d", NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
@@ -2400,12 +2408,51 @@ public:
 
 		nlinfo("Save Order : %d", order);
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->setValue32((sint32)order);
-		CPeopleList *pl = PeopleInterraction.getPeopleListFromCurrentMenu();
+		CPeopleList *pl = PeopleInterraction.getPeopleListFromCurrentMenu(NULL);
 		if (pl)
 			pl->sortEx(order);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerSortContacts, "sort_contacts");
+
+//=================================================================================================================
+class CHandlerSortContactsByIndex : public IActionHandler
+{
+public:
+	void execute(CCtrlBase * pCaller, const std::string & /* sParams */)
+	{
+		CPeopleList *pl = PeopleInterraction.getPeopleListFromCurrentMenu(pCaller);
+		if (pl)
+			pl->sortEx(CPeopleList::sort_index);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerSortContactsByIndex, "sort_contacts_by_index");
+
+//=================================================================================================================
+class CHandlerSortContactsByName : public IActionHandler
+{
+public:
+	void execute(CCtrlBase * pCaller, const std::string & /* sParams */)
+	{
+		CPeopleList *pl = PeopleInterraction.getPeopleListFromCurrentMenu(pCaller);
+		if (pl)
+			pl->sortEx(CPeopleList::sort_name);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerSortContactsByName, "sort_contacts_by_name");
+
+//=================================================================================================================
+class CHandlerSortContactsByOnline : public IActionHandler
+{
+public:
+	void execute(CCtrlBase * pCaller, const std::string & /* sParams */)
+	{
+		CPeopleList *pl = PeopleInterraction.getPeopleListFromCurrentMenu(pCaller);
+		if (pl)
+			pl->sortEx(CPeopleList::sort_online);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerSortContactsByOnline, "sort_contacts_by_online");
 
 
 //=================================================================================================================
