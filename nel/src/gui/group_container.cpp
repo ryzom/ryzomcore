@@ -3970,11 +3970,11 @@ namespace NLGUI
 		setTitleClosed(title);
 	}
 
-	// ***************************************************************************
-	std::string		CGroupContainer::getTitleOpened () const
-	{
-		return _TitleTextOpened;
-	}
+    // ***************************************************************************
+    std::string CGroupContainer::getTitleOpened() const
+    {
+	    return _TitleTextOpened;
+    }
 
 	// ***************************************************************************
 	void			CGroupContainer::setTitleOpened (const std::string &title)
