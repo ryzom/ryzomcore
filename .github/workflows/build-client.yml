@@ -29,17 +29,19 @@ jobs:
          - macos-11
         include:
           - os: windows-2022
-            cmake_options: -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_XAUDIO2=ON
+            cmake_preset: windows-client
           - os: windows-2019
-            cmake_options: -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_XAUDIO2=ON
+            cmake_preset: windows-client
           - os: ubuntu-22.04
             ubuntu_version: 22.04
+            cmake_preset: linux-client
           - os: ubuntu-20.04
             ubuntu_version: 20.04
+            cmake_preset: linux-client
           - os: macos-14
-            cmake_options: -DWITH_LIBXML2_ICONV=OFF -GXcode
+            cmake_preset: macos-client
           - os: macos-11
-            cmake_options: -DWITH_LIBXML2_ICONV=OFF -GXcode
+            cmake_preset: macos-client
 
     steps:
     - uses: actions/checkout@v4
@@ -98,8 +100,7 @@ jobs:
 
     - name: Configure CMake
       run: >
-        cmake --preset client
-        ${{ matrix.cmake_options }}
+        cmake --preset ${{ matrix.cmake_preset }}
         -DHUNTER_CONFIGURATION_TYPES=Release
         -DHUNTER_ENABLED=ON
         -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}

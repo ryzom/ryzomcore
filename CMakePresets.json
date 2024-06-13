@@ -4,13 +4,39 @@
     {
       "name": "base",
       "hidden": true,
-      "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/build"
     },
     {
-      "inherits": [
-        "base"
-      ],
+      "name": "linux",
+      "inherits": "base",
+      "generator": "Ninja Multi-Config",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "windows",
+      "inherits": "base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "macos",
+      "inherits": "base",
+      "generator": "Xcode",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "inherits": "base",
       "name": "default",
       "cacheVariables": {
         "WITH_STATIC": true,
@@ -56,6 +82,34 @@
         "WITH_RYZOM_CLIENT": true,
         "WITH_RYZOM_SERVER": false,
         "WITH_RYZOM_TOOLS": false
+      }
+    },
+    {
+      "inherits": [
+        "linux",
+        "client"
+      ],
+      "name": "linux-client"
+    },
+    {
+      "inherits": [
+        "windows",
+        "client"
+      ],
+      "name": "windows-client",
+      "cacheVariables": {
+        "WITH_DRIVER_DIRECT3D": true,
+        "WITH_DRIVER_XAUDIO2": true
+      }
+    },
+    {
+      "inherits": [
+        "macos",
+        "client"
+      ],
+      "name": "macos-client",
+      "cacheVariables": {
+        "WITH_LIBXML2_ICONV": false
       }
     }
   ],
