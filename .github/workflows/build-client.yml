@@ -98,25 +98,12 @@ jobs:
 
     - name: Configure CMake
       run: >
-        cmake --version;
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        cmake --preset client
         ${{ matrix.cmake_options }}
-        -DCMAKE_CONFIGURATION_TYPES=Release
-        -DFINAL_VERSION=OFF
         -DHUNTER_CONFIGURATION_TYPES=Release
         -DHUNTER_ENABLED=ON
         -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
-        -DWITH_DRIVER_OPENAL=ON
-        -DWITH_DRIVER_OPENGL=ON
-        -DWITH_INSTALL_LIBRARIES=OFF
-        -DWITH_NEL_SAMPLES=OFF
-        -DWITH_NEL_TESTS=OFF
-        -DWITH_NEL_TOOLS=OFF
-        -DWITH_RYZOM_CLIENT=ON
-        -DWITH_RYZOM_SERVER=OFF
-        -DWITH_RYZOM_TOOLS=OFF
         -S ${{ github.workspace }}
 
     - name: Build
-      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+      run: cmake --build --preset client

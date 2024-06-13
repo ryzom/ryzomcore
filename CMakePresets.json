@@ -41,6 +41,22 @@
         "CMAKE_C_FLAGS": "--coverage",
         "CMAKE_CXX_FLAGS": "--coverage"
       }
+    },
+    {
+      "inherits": "base",
+      "name": "client",
+      "cacheVariables": {
+        "FINAL_VERSION": false,
+        "WITH_DRIVER_OPENAL": true,
+        "WITH_DRIVER_OPENGL": true,
+        "WITH_INSTALL_LIBRARIES": false,
+        "WITH_NEL_SAMPLES": false,
+        "WITH_NEL_TESTS": false,
+        "WITH_NEL_TOOLS": false,
+        "WITH_RYZOM_CLIENT": true,
+        "WITH_RYZOM_SERVER": false,
+        "WITH_RYZOM_TOOLS": false
+      }
     }
   ],
   "buildPresets": [
@@ -52,6 +68,11 @@
     {
       "name": "release",
       "configurePreset": "default",
+      "configuration": "Release"
+    },
+    {
+      "name": "client",
+      "configurePreset": "client",
       "configuration": "Release"
     }
   ],
