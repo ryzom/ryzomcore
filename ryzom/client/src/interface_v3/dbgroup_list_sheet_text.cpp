@@ -671,7 +671,7 @@ void CDBGroupListSheetText::draw ()
 
 	if (_EmptyListNotifier)
 	{
-		_EmptyListNotifier->setActive(_DownloadComplete && (_NumValidSheets == 0));		
+		_EmptyListNotifier->setActive(_DownloadComplete && (_NumValidSheets == 0));
 	}
 }
 
@@ -1125,6 +1125,23 @@ void CDBGroupListSheetText::notifyDownloadComplete(bool downloadComplete)
 	}
 }
 
+void CDBGroupListSheetText::setStartDbIndex(sint index)
+{
+	_StartDbIdx = index;
+	uint nbNodes = _DbBranch->getNbNodes();
+
+	// determine the inventory slot from the database branch id
+	int slotNum = CDBCtrlSheet::getInventorySlot( _DbBranchName );
+	nlinfo("Id = %s, _DbBranchName = %s, _StartDbIdx = %d, slotNum = %d, nbNodes = %d, sheetChildrens = %d", _Id.c_str(), _DbBranchName.c_str(), _StartDbIdx, slotNum, nbNodes, _SheetChildren.size());
+	for (uint i = 0; i < nbNodes; i++)
+	{
+		if (i < _SheetChildren.size() && _SheetChildren[i]->Ctrl)
+			_SheetChildren[i]->Ctrl->setSheetFast(_DbBranchName, _StartDbIdx+i, slotNum);
+	}
+	_NeedToSort = true;
+	invalidateCoords();
+}
+
 
 // ***************************************************************************
 // ***************************************************************************
@@ -1229,3 +1246,20 @@ class	CHandlerListSheetTextResetSelection : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerListSheetTextResetSelection, "list_sheet_text_reset_selection" );
+
+// ***************************************************************************
+class CListSheetTextChangeStartItem : public IActionHandler
+{
+public:
+	virtual void execute (CCtrlBase *pCaller, const std::string &sParams)
+	{
+		CDBGroupListSheetText *pLS = dynamic_cast<CDBGroupListSheetText*>(pCaller);
+		if (pLS== NULL) return;
+		uint index;
+		std::string idx = getParam(sParams, "index");
+		if (!fromString(idx, index)) return;
+		nlinfo("setStartDbIndex %d", index);
+		pLS->setStartDbIndex(index);
+	}
+};
+REGISTER_ACTION_HANDLER (CListSheetTextChangeStartItem, "list_sheet_text_change_start_item");

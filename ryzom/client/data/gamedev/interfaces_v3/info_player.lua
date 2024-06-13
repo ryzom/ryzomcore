@@ -1787,6 +1787,12 @@ function game:onInGameDbInitialized()
 	--getUI("ui:interface:db_loading").active=false
 	game.InGameDbInitialized = true
 	debug("IG DB initialized")
+	-- Add waiters to guild chests
+	for i=0, 19 do
+		addOnDbChange(getUI("ui:interface:inv_guild"), "@SERVER:GUILD:CHEST:"..tostring(i)..":NAME", "updateChestList()")
+	end
+	addOnDbChange(getUI("ui:interface:inv_guild"), "@SERVER:GUILD:CHEST:0:BULK_MAX", "updateChestList(true)")
+
 	-- if the journal is opened, force an update for the fixed entry text
 	-- (says if we're in start island, paying account ...) need DB flags like
 	-- IS_NEWBIE & IS_TRIAL to be received

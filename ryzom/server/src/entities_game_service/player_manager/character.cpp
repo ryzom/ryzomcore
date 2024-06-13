@@ -443,6 +443,9 @@ CCharacter::CCharacter()
 	for (uint i = 0; i < (PVP_CLAN::EndClans - PVP_CLAN::BeginClans + 1); ++i)
 		_FactionPoint[i] = 0;
 
+	for (uint i = 0; i < 20; ++i)
+		_initializedChests[i] = false;
+
 	_PvpPoint = 0;
 	_GuildPoints = 0;
 	_TodayGuildPoints = 0;
@@ -4742,8 +4745,7 @@ extern CBitMemStream DBOutput; // global to avoid reallocation
 void CCharacter::databaseUpdate()
 {
 	// Write the inventory updates
-	_InventoryUpdater.sendAllUpdates(
-		_Id); // must be before the sending of _PropertyDatabase, because it tests _PropertyDatabase.notSentYet()
+	_InventoryUpdater.sendAllUpdates(_Id); // must be before the sending of _PropertyDatabase, because it tests _PropertyDatabase.notSentYet()
 
 	// Write the character's database delta (for comment numbers, see tutorial in cdb_group.h)
 	if (_PropertyDatabase.getChangedPropertyCount() != 0) // ensures writeDelta() will return true

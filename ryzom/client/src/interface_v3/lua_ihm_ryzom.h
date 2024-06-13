@@ -246,6 +246,12 @@ private:
 	static std::string	getDynString(sint32 dynStringId);
 #endif
 	static bool	isDynStringAvailable(sint32 dynStringId);
+#ifdef RYZOM_LUA_UCSTRING
+	static ucstring	getSrvString(sint32 stringId);
+#else
+	static std::string	getSrvString(sint32 stringId);
+#endif
+	static bool	isSrvStringAvailable(sint32 stringId);
 	static bool	isFullyPatched();
 	static std::string getSheetType(const std::string &sheet);
 	static std::string getSheetShape(const std::string &sheet);
