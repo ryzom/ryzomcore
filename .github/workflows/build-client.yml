@@ -42,6 +42,7 @@ jobs:
             cmake_preset: macos-client
           - os: macos-12
             cmake_preset: macos-client
+            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
           - os: macos-11
             cmake_preset: macos-client
 
@@ -104,6 +105,7 @@ jobs:
         MACOSX_DEPLOYMENT_TARGET: 10.12
       run: >
         cmake --preset ${{ matrix.cmake_preset }}
+        ${{ matrix.cmake_options }}
         -DHUNTER_CONFIGURATION_TYPES=Release
         -DHUNTER_ENABLED=ON
         -DHUNTER_STATUS_DEBUG=ON
