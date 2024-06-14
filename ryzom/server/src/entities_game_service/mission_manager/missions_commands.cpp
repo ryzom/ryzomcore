@@ -1358,6 +1358,8 @@ NLMISC_COMMAND(getGuildInventoryChestParams, "Get the params of a chest of inven
 		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestViewGrade(chest)).c_str());
 		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestPutGrade(chest)).c_str());
 		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestGetGrade(chest)).c_str());
+		uint32 bulkmax = guild->getChestBulkMax(chest);
+		log.displayNL("%u", bulkmax);
 	}
 	return true;
 }

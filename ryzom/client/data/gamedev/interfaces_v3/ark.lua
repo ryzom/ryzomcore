@@ -295,10 +295,7 @@ end
 
 function ArkSelectRyform(curwin, id, mod)
 	local curwin = getUICaller().id
-	debug(curwin)
-	debug(ArkGetStageEdit(curwin))
 	local e = ArkGetStageEdit(curwin):find(id..":eb")
-	debug(ArkGetStageEdit(curwin):find(id))
 	e.input_string = mod
 	ArkGetStageEdit(curwin):find("send:b"):runLeftClickAction()
 end
