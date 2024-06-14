@@ -117,7 +117,6 @@ function updateChestList(init)
 		local all_str_available = true
 		for i=0, 19 do
 			local name_id = getDbProp("SERVER:GUILD:CHEST:"..tostring(i)..":NAME")
-			debug(name_id)
 			if name_id > 0 then
 				if not isSrvStringAvailable(name_id) then
 					all_str_available = false
