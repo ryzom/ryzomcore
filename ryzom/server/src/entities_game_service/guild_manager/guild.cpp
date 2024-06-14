@@ -216,7 +216,11 @@ void CGuild::setChestParams(uint8 chest, std::string name, EGSPD::CGuildGrade::T
 	_Chests[chest].GetGrade = gradeGet;
 
 	NLMISC::TStringId strId = CStringMapper::map( name );
-	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, name, true);
+	ucstring ucname;
+	ucname.fromUtf8(name);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, 0);
+	if (name == "")
+		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, ucname, true);
 	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, gradeView);
 	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setPUT_GRADE(_DbGroup, gradePut);
 	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setGET_GRADE(_DbGroup, gradeGet);
