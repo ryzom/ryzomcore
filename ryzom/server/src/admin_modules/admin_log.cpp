@@ -17,7 +17,7 @@
 
 
 #include "stdpch.h"
-#include "mission_log.h"
+#include "admin_log.h"
 #include "nel/misc/displayer.h"
 
 using namespace std;

@@ -44,10 +44,10 @@ public:
 	void display(const char *format, ...);
 
 	/// the NEL log used for in the ADMINCMDsion log
-	NLADMINCMDC::CLog			*Log;
+	NLMISC::CLog			*Log;
 private:
 	/// the file displayer used to log the ADMINCMDsion information
-	NLADMINCMDC::CFileDisplayer	_Fd;
+	NLMISC::CFileDisplayer	_Fd;
 	/// log file name
 	std::string				_LogFile;
 };
