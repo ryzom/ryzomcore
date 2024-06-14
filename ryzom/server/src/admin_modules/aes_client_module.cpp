@@ -456,7 +456,7 @@ namespace ADMIN
 
 			// retrieve the command from the input message and execute it
 			ADMINCMDLOG("'%s'", command.c_str());
-			ICommand::execute (command, IService::getInstance()->CommandLog, true);
+			ICommand::execute (command, IService::getInstance()->CommandLog);
 
 			// unhook our displayer as it's work is now done
 			IService::getInstance()->CommandLog.removeDisplayer(&stringDisplayer);
@@ -475,7 +475,7 @@ namespace ADMIN
 		{
 			// retrieve the command from the input message and execute it
 			ADMINCMDLOG("'%s'", command.c_str());
-			ICommand::execute (command, IService::getInstance()->CommandLog, true);
+			ICommand::execute (command, IService::getInstance()->CommandLog);
 		}
 	};
 
