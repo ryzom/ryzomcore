@@ -61,12 +61,3 @@ jobs:
 
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --target studio
-
-      - name: Package
-        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --target package
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os }}-studio-package
-          path: ${{ steps.strings.outputs.build-output-dir }}/ryzomcore-*
-          if-no-files-found: error
