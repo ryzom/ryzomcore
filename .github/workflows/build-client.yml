@@ -107,6 +107,7 @@ jobs:
         cmake --preset ${{ matrix.cmake_preset }}
         -DHUNTER_CONFIGURATION_TYPES=Release
         -DHUNTER_ENABLED=ON
+        -DHUNTER_STATUS_DEBUG=ON
         -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
         -S ${{ github.workspace }}
 
