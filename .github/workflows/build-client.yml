@@ -113,7 +113,6 @@ jobs:
         -S ${{ github.workspace }}
 
     - uses: actions/cache/save@v4
-      if: always()
       with:
         path: ${{ steps.strings.outputs.hunter-dir }}
         key: ${{ matrix.os }}-hunter
