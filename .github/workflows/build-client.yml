@@ -47,12 +47,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
+        echo "chocolatey-dir=${{ github.workspace }}/.choco" >> "$GITHUB_OUTPUT"
 
     - uses: lukka/get-cmake@v3.29.5
       if: runner.os == 'Linux'
@@ -90,15 +90,14 @@ jobs:
       if: runner.os == 'Windows'
       uses: actions/cache@v4.0.2
       with:
-        path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+        path: ${{ steps.strings.outputs.chocolatey-dir }}
         key: ${{ runner.os }}-chocolatey-cache
 
     - name: Dependencies Windows
       if: runner.os == 'Windows'
       run: |
-        choco cache list
+        choco cache --cache-location=${{ steps.strings.outputs.chocolatey-dir }}
         choco install directx-sdk
-        choco cache list
 
     - name: Configure CMake
       env:
