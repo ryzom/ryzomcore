@@ -97,8 +97,8 @@ jobs:
       if: runner.os == 'Windows'
       run: |
         choco cache list
-        choco cache --cachelocation
         choco install directx-sdk
+        choco cache list
 
     - name: Configure CMake
       env:
