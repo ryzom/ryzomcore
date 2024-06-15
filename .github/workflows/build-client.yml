@@ -86,19 +86,21 @@ jobs:
         path: ${{ steps.strings.outputs.hunter-dir }}
         key: ${{ matrix.os }}-hunter
 
-    - name: Cache Chocolatey Dependencies
+    - uses: actions/cache/restore@v4.0.2
       if: runner.os == 'Windows'
-      uses: actions/cache@v4.0.2
       with:
         path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
-        key: ${{ runner.os }}-chocolatey-cache
+        key: ${{ matrix.os }}-chocolatey
 
     - name: Dependencies Windows
       if: runner.os == 'Windows'
       run: |
-        choco cache list
         choco install directx-sdk
-        choco cache list
+
+    - uses: actions/cache/save@v4
+      with:
+        path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+        key: ${{ matrix.os }}-chocolatey
 
     - name: Configure CMake
       env:
