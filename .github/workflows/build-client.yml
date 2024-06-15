@@ -95,7 +95,9 @@ jobs:
 
     - name: Dependencies Windows
       if: runner.os == 'Windows'
-      run: >
+      run: |
+        choco cache list
+        choco cache --cachelocation
         choco install directx-sdk
 
     - name: Configure CMake
@@ -106,7 +108,6 @@ jobs:
         ${{ matrix.cmake_options }}
         -DHUNTER_CONFIGURATION_TYPES=Release
         -DHUNTER_ENABLED=ON
-        -DHUNTER_STATUS_DEBUG=ON
         -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
         -S ${{ github.workspace }}
 
