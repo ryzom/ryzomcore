@@ -127,10 +127,10 @@ jobs:
       if: ${{ failure() }}
       with:
         name: ${{ matrix.os }}-logs
-        path: ${{ github.workspace }}/build/**/*.log
+        path: build/**/*.log
 
     - uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.os }}-client-package
-        path: ${{ github.workspace }}/build/ryzomcore-*
+        path: build/ryzomcore-*
         if-no-files-found: error
