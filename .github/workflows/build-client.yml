@@ -26,7 +26,7 @@ jobs:
          - windows-2022
          - windows-2019
          - macos-14
-         - macos-11
+         - macos-12
         include:
           - os: windows-2022
             cmake_preset: windows-client
@@ -43,8 +43,6 @@ jobs:
           - os: macos-12
             cmake_preset: macos-client
             cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
-          - os: macos-11
-            cmake_preset: macos-client
 
     steps:
     - uses: actions/checkout@v4
@@ -88,17 +86,21 @@ jobs:
         path: ${{ steps.strings.outputs.hunter-dir }}
         key: ${{ matrix.os }}-hunter
 
-    - name: Cache Chocolatey Dependencies
+    - uses: actions/cache/restore@v4.0.2
       if: runner.os == 'Windows'
-      uses: actions/cache@v4.0.2
       with:
         path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
-        key: ${{ runner.os }}-chocolatey-cache
+        key: ${{ matrix.os }}-chocolatey
 
     - name: Dependencies Windows
       if: runner.os == 'Windows'
-      run: >
+      run: |
         choco install directx-sdk
+
+    - uses: actions/cache/save@v4
+      with:
+        path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+        key: ${{ matrix.os }}-chocolatey
 
     - name: Configure CMake
       env:
@@ -108,7 +110,6 @@ jobs:
         ${{ matrix.cmake_options }}
         -DHUNTER_CONFIGURATION_TYPES=Release
         -DHUNTER_ENABLED=ON
-        -DHUNTER_STATUS_DEBUG=ON
         -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
         -S ${{ github.workspace }}
 
@@ -121,3 +122,18 @@ jobs:
       env:
         MACOSX_DEPLOYMENT_TARGET: 10.12
       run: cmake --build --preset client
+
+    - name: Package
+      run: cmake --build --preset client --target package
+
+    - uses: actions/upload-artifact@v4
+      if: ${{ failure() }}
+      with:
+        name: ${{ matrix.os }}-logs
+        path: build/**/*.log
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os }}-client-package
+        path: build/ryzomcore-*
+        if-no-files-found: error
