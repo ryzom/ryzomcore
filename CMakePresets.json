@@ -7,8 +7,9 @@
       "binaryDir": "${sourceDir}/build"
     },
     {
-      "name": "linux",
       "inherits": "base",
+      "name": "linux",
+      "hidden": true,
       "generator": "Ninja Multi-Config",
       "condition": {
         "type": "equals",
@@ -17,8 +18,9 @@
       }
     },
     {
-      "name": "windows",
       "inherits": "base",
+      "name": "windows",
+      "hidden": true,
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -26,8 +28,9 @@
       }
     },
     {
-      "name": "macos",
       "inherits": "base",
+      "name": "macos",
+      "hidden": true,
       "generator": "Xcode",
       "condition": {
         "type": "equals",
@@ -40,7 +43,7 @@
       "name": "default",
       "cacheVariables": {
         "WITH_STATIC": true,
-        "WITH_NEL_TESTS": false,
+        "WITH_NEL_TESTS": true,
         "WITH_NEL_SAMPLES": true,
         "WITH_LUA51": false,
         "WITH_LUA52": true,
@@ -67,6 +70,13 @@
         "CMAKE_C_FLAGS": "--coverage",
         "CMAKE_CXX_FLAGS": "--coverage"
       }
+    },
+    {
+      "inherits": [
+        "linux",
+        "default"
+      ],
+      "name": "linux-default"
     },
     {
       "inherits": "base",
@@ -148,6 +158,10 @@
     }
   ],
   "packagePresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
     {
       "name": "client",
       "configurePreset": "client"
