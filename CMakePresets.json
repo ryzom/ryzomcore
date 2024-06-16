@@ -56,9 +56,7 @@
         "WITH_NELNS_LOGIN_SYSTEM": true,
         "WITH_NELNS_SERVER": true,
         "WITH_QT5": true,
-        "WITH_LIBGSF": true,
-        "WITH_MONGODB": false,
-        "WITH_PCH": false
+        "WITH_LIBGSF": true
       }
     },
     {
