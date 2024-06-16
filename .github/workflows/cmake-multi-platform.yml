@@ -107,11 +107,6 @@ jobs:
       - name: Build
         run: cmake --build --preset ${{ matrix.build_preset }}
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os }}-build
-          path: build
-
       - name: Unit Tests
         run: ctest --preset default
 
@@ -122,33 +117,18 @@ jobs:
           if-no-files-found: error
           path: ${{ needs.strings.outputs.build-output-dir }}/**/reports/*.xml
 
-
-  package:
-    runs-on: ubuntu-latest
-    needs: [ strings, build ]
-
-    steps:
-      - uses: lukka/get-cmake@v3.29.5
-
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: build-ubuntu-22.04
-          path: ${{ needs.strings.outputs.build-output-dir }}
-
       - name: Package
         run: cpack --preset default
 
       - uses: actions/upload-artifact@v4
         with:
-          name: package-ubuntu-22.04
+          name: ${{ matrix.os }}-package
           path: ${{ steps.strings.outputs.build-output-dir }}/ryzomcore-*
           if-no-files-found: error
 
   docker:
     runs-on: ubuntu-latest
-    needs: [ strings, package ]
+    needs: [ strings, build ]
     permissions:
       packages: write
       contents: read
@@ -158,7 +138,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: package-ubuntu-22.04
+          name: ubuntu-22.04-package
           path: ${{ needs.strings.outputs.build-output-dir }}
 
       - name: Build the Docker image
