@@ -81,7 +81,7 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
 
     - name: Build
-      run: cmake --build --preset ${{ matrix.build_preset }}
+      run: cmake --build --parallel $(nproc) --preset ${{ matrix.build_preset }}
 
     - uses: actions/upload-artifact@v4
       with:
