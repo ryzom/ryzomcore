@@ -156,4 +156,4 @@ jobs:
         if: github.ref == 'refs/heads/${{ env.DEFAULT_BRANCH }}'
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
-          docker push "${{ steps.strings.outputs.docker-image-tag }}"
+          docker push "${{ needs.strings.outputs.docker-image-tag }}"
