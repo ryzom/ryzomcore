@@ -123,7 +123,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-package
-          path: ${{ steps.strings.outputs.build-output-dir }}/ryzomcore-*
+          path: ${{ needs.strings.outputs.build-output-dir }}/ryzomcore-*
           if-no-files-found: error
 
   docker:
@@ -149,5 +149,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: docker
-          path: ${{ steps.strings.outputs.build-output-dir }}/docker-*
+          path: ${{ needs.strings.outputs.build-output-dir }}/docker-*
           if-no-files-found: error
