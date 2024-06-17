@@ -151,3 +151,9 @@ jobs:
           name: docker
           path: ${{ needs.strings.outputs.build-output-dir }}/docker-*
           if-no-files-found: error
+
+      - name: Push image
+        if: github.ref == 'refs/heads/${{ env.DEFAULT_BRANCH }}'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          docker push "${{ steps.strings.outputs.docker-image-tag }}"
