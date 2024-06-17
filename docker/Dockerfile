@@ -8,11 +8,6 @@ ARG APP_HOME=/app
 RUN groupadd --gid $USER_GID $USERNAME \
  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 
-COPY build/ryzomcore-*.sh /tmp/ryzomcore.sh
-
-RUN mkdir --parent "$APP_HOME" \
- && /tmp/ryzomcore.sh --skip-license
-
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
 # install dependencies
@@ -33,4 +28,12 @@ RUN apt update; \
         libvorbisfile3 \
         libxml2
 
+
+COPY build/ryzomcore-*.sh /tmp/ryzomcore.sh
+
+RUN mkdir --parent "$APP_HOME" \
+ && sh /tmp/ryzomcore.sh --skip-license
+
+
 USER $USERNAME
+WORKDIR $APP_HOME
