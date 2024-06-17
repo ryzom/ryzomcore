@@ -133,12 +133,13 @@ jobs:
             -DWITH_DRIVER_DIRECT3D=ON
             -DWITH_DRIVER_XAUDIO2=ON
             -DDXSDK_DIR=C:/DXSDK
-        macOS11:
-          vmImage: 'macOS-11'
+        macOS12:
+          vmImage: 'macOS-12'
           releaseName: 'macOS'
           MACOSX_DEPLOYMENT_TARGET: 10.12
           cmakeExtra: >-
             -DWITH_LIBXML2_ICONV=OFF
+            -DHUNTER_USE_CACHE_SERVERS=NO
             -GXcode
     timeoutInMinutes: 120
     pool:
