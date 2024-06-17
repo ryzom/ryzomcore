@@ -128,11 +128,11 @@ public:
 
 	void initChests() {
 		_Chests.resize(GUILD_NB_CHESTS);
-		for (uint8 chest=0; chest < 2; chest++)
+		for (uint8 chest=0; chest < _Chests.size(); chest++)
 		{
-			if (_Chests[chest].BulkMax < 6000)
+			if (chest < 2 && _Chests[chest].BulkMax < 6000)
 				_Chests[chest].BulkMax = 6000;
-			if (_Chests[chest].Name.empty());
+			if (_Chests[chest].Name == "")
 				_Chests[chest].Name = NLMISC::toString("Chest #%u", chest+1);
 		}
 	}

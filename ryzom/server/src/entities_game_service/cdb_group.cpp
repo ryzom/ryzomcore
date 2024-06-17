@@ -130,7 +130,6 @@ void CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint
 			DBOutput.serial( noChange, CDBChangedPropertyCountBitSize );
 		}
 		// Write additional provided data (for guild inventory)
-		nlinfo("provide update");
 		dataProvider.provideUpdate( DBOutput );
 		// Send
 		CMessage msgout( "CDB_MULTI_IMPULSION" );

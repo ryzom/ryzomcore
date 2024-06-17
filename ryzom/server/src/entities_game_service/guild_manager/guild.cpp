@@ -216,7 +216,12 @@ void CGuild::setChestParams(uint8 chest, std::string name, EGSPD::CGuildGrade::T
 	_Chests[chest].GetGrade = gradeGet;
 
 	NLMISC::TStringId strId = CStringMapper::map( name );
-	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, name, true);
+	ucstring ucname;
+	ucname.fromUtf8(name);
+	if (name == "")
+		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, 0);
+	else
+		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, ucname, true);
 	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, gradeView);
 	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setPUT_GRADE(_DbGroup, gradePut);
 	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setGET_GRADE(_DbGroup, gradeGet);
@@ -2590,14 +2595,12 @@ private:
 #define PERSISTENT_POST_APPLY\
 	CGuildVersionAdapter::getInstance()->adaptGuildFromVersion(*this);\
 	_Chests.resize(GUILD_NB_CHESTS);\
-	nlinfo("GUILD HAVE %u CHESTS", _Chests.size());\
 	for (uint8 chest=0; chest < _Chests.size(); chest++)\
 	{\
 		if (chest < 2 && _Chests[chest].BulkMax < 6000)\
 			_Chests[chest].BulkMax = 6000;\
 		if (chest < 2 && _Chests[chest].Name.empty())\
 			_Chests[chest].Name = NLMISC::toString("Chest #%u", chest+1);\
-		nlinfo("Send DB for chest %u", chest);\
 		_Inventory->setChestMaxBulk(chest, _Chests[chest].BulkMax);\
 		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, _Chests[chest].Name, true);\
 		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, _Chests[chest].ViewGrade, true);\

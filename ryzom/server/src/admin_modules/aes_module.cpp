@@ -61,7 +61,7 @@ namespace ADMIN
 	{
 		/// The slot table. Each slot accumulate the service start for a time frame
 		uint32	_Slots[CRASH_COUNTER_SLOT];
-		/** The last value read from the runner script. This is used to compute 
+		/** The last value read from the runner script. This is used to compute
 		 *	the delta value to add to the first slot
 		 */
 		uint32	_LastValueRead;
@@ -159,14 +159,14 @@ namespace ADMIN
 	};
 
 
-	class CAdminExecutorService 
+	class CAdminExecutorService
 		:	/*public CManualSingleton<CAdminExecutorService>,*/
 			public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
 			public CAdminExecutorServiceSkel,
 			public IModuleTrackerCb
 	{
 	public:
-		enum 
+		enum
 		{
 			SLOW_TO_START_THRESHOLD = 60,		// 1 mn
 			SLOW_TO_STOP_THRESHOLD = 60,		// 1 mn
@@ -174,7 +174,7 @@ namespace ADMIN
 		};
 
 	private:
-	
+
 		typedef CModuleTracker<TModuleClassPred>	TServiceTracker;
 		// tracker for admin executor client modules
 		TServiceTracker		_ServiceTracker;
@@ -197,16 +197,16 @@ namespace ADMIN
 		/// A set of data for each registered or connected service
 		struct TServiceState
 		{
-			string			ShardName;	
+			string			ShardName;
 			bool			DontUseShardOrders;
 			TRunningState	RunningState;
-			set<TRunningTag> RunningTags;	
+			set<TRunningTag> RunningTags;
 			string			LongName;
 			string			ShortName;
 			uint32			PID;
 			string			State;
 			uint32			LastStateDate;
-			uint32			StopRequestDate;	
+			uint32			StopRequestDate;
 			uint32			StartRequestDate;
 			TModuleProxyPtr	ServiceModule;
 			CRunnerLoopCounter	RunnerLoopCounter;
@@ -232,7 +232,7 @@ namespace ADMIN
 		typedef map<TAliasName, TRunningOrders>	TPersistentServiceOrders;
 		/// Persistent service state, i.e state that are restored after a stop/start of the aes
 		TPersistentServiceOrders	_PersistentServiceOrders;
-		
+
 		typedef map<TShardName, TShardOrders>	TShardsOrders;
 		/// Shard orders (set by AS)
 		TShardsOrders				_ShardOrders;
@@ -388,7 +388,7 @@ namespace ADMIN
 
 						removeList.erase(removeList.begin());
 					}
-					
+
 				}
 				// send the current status
 				sendUpServiceUpdate();
@@ -543,7 +543,7 @@ namespace ADMIN
 						// update the crash counter
 						ss.RunnerLoopCounter.updateCounter(getServiceStartLoopCounter(aliasName));
 					}
-				
+
 
 
 				}
@@ -611,7 +611,7 @@ namespace ADMIN
 					_LastNagiosReport = now;
 				}
 
-					
+
 				// update the last report date
 				_LastStateReport = now;
 			}
@@ -643,7 +643,7 @@ namespace ADMIN
 						{
 							line << "ShardOrders "<<first->first<<" "<<first->second.toString()<<"\n";
 						}
-						
+
 						fputs(line.c_str(), fp);
 					}
 
@@ -755,7 +755,7 @@ namespace ADMIN
 			for (uint i=0; i<_StopingShards.size(); ++i)
 			{
 				const TStopingShardInfo &stopShardInfo = _StopingShards[i];
-				
+
 				bool timeToStop = stopShardInfo.BeginDate + stopShardInfo.Delay <= now;
 				uint32 timeLeft = (stopShardInfo.BeginDate + stopShardInfo.Delay) - now;
 				// check every service
@@ -788,7 +788,7 @@ namespace ADMIN
 				if (timeToStop)
 				{
 					nlinfo("All local service for shard %s are stopped", stopShardInfo.ShardName.c_str());
-					// shard stopped, erase this entry 
+					// shard stopped, erase this entry
 					_StopingShards.erase(_StopingShards.begin()+i);
 					--i;
 				}
@@ -820,7 +820,7 @@ namespace ADMIN
 			return txt;
 		}
 
-		
+
 		// the following routine reads the text string contained in the "pid.state" file for this service
 		// it's used to provide a early pid information to the AES (before the service is connected)
 		uint32 getOfflineServicePID(const std::string& serviceAlias)
@@ -855,7 +855,7 @@ namespace ADMIN
 		{
 			// open the file for reading
 			FILE* f= nlfopen(getServiceLoopCounterFileName(serviceAlias), "rt");
-			if (f==NULL) 
+			if (f==NULL)
 				return 0;
 
 			// setup a buffer to hold the text read from the file
@@ -893,7 +893,7 @@ namespace ADMIN
 			return true;
 		}
 
-		
+
 		std::string getServiceStateFileName(const std::string& serviceAlias)
 		{
 			string servicePath;
@@ -1090,7 +1090,7 @@ namespace ADMIN
 //					ss.RunningTags.insert(TRunningTag::rt_locally_started);
 //					_NeedToWriteStateFile = true;
 //				}
-//				else if (_ShardOrders.find(ss.ShardName) != _ShardOrders.end() 
+//				else if (_ShardOrders.find(ss.ShardName) != _ShardOrders.end()
 //					&& _ShardOrders[ss.ShardName] == TRunningOrders::ro_stopped)
 //				{
 //					// the shard is stopped, flag the service as started
@@ -1100,7 +1100,7 @@ namespace ADMIN
 //				}
 //			}
 
-			sendUpServiceUpdate();			
+			sendUpServiceUpdate();
 		}
 		virtual void onTrackedModuleDown(IModuleProxy *moduleProxy)
 		{
@@ -1169,7 +1169,7 @@ retry_pending_command_loop:
 			}
 
 
-			sendUpServiceUpdate();			
+			sendUpServiceUpdate();
 		}
 
 		///////////////////////////////////////////////////////////////////////
@@ -1226,7 +1226,7 @@ retry_pending_command_loop:
 				std::string _Data;
 			};
 
-			nldebug("Control command from '%s' : '%s' '%s'", 
+			nldebug("Control command from '%s' : '%s' '%s'",
 				sender->getModuleName().c_str(),
 				serviceAlias.c_str(),
 				command.c_str());
@@ -1239,7 +1239,7 @@ retry_pending_command_loop:
 				as.commandResult(this, commandId, serviceAlias, "ERROR : AES : service not found will dispatching the control command");
 				return;
 			}
-			
+
 			// ok, we can execute the command concerning the service.
 			CStringDisplayer stringDisplayer;
 			IService::getInstance()->CommandLog.addDisplayer(&stringDisplayer);
@@ -1316,7 +1316,7 @@ retry_pending_command_loop:
 		virtual void graphUpdate(NLNET::IModuleProxy *sender, const TGraphDatas &graphDatas)
 		{
 			if (_AdminService != NULL)
-			{ 
+			{
 				CAdminServiceProxy as(_AdminService);
 				as.graphUpdate(this, graphDatas);
 			}
@@ -1401,14 +1401,14 @@ retry_pending_command_loop:
 			for (; first != last; ++first)
 			{
 				TServiceState &ss = first->second;
-				
+
 				ss.RunnerLoopCounter.resetCounter();
 			}
 
 			return true;
 		}
 
-		
+
 		NLMISC_CLASS_COMMAND_DECL(execScript)
 		{
 			string cmdLine("/home/nevrax/patchman/aes_runnable_script.sh");
@@ -1718,7 +1718,7 @@ retry_pending_command_loop:
 			}
 			else
 			{
-				// just update some data related the registered service				
+				// just update some data related the registered service
 				ss.ShardName = "";
 				ss.RunningTags.erase(TRunningTag::rt_locally_started);
 				ss.RunningTags.erase(TRunningTag::rt_chain_crashing);
@@ -1795,7 +1795,7 @@ retry_pending_command_loop:
 
 					bool registered = _RegisteredServices.find(aliasName) != _RegisteredServices.end();
 
-					log.displayNL("    + Service alias='%s' (%s) ShardName = '%s' RunningState='%s' RunningTag='%s'", 
+					log.displayNL("    + Service alias='%s' (%s) ShardName = '%s' RunningState='%s' RunningTag='%s'",
 						aliasName.c_str(),
 						registered ? "REGISTERED" : "NOT REGISTERED",
 						ss.ShardName.c_str(),
