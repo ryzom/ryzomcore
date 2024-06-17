@@ -46,6 +46,7 @@ jobs:
     - script: |
         ctest --preset default
       displayName: 'Unit Tests'
+
   - job: ubuntu22
     timeoutInMinutes: 120
     pool:
@@ -80,27 +81,20 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
       displayName: 'Dependencies'
-    - script: |
-        mkdir build
-        cmake --version
-        cd build
-        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
-          -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
-          -DWITH_MSQUIC=ON \
-          -DWITH_LUA51=OFF -DWITH_LUA52=ON \
-          -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
-          -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
-          -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
-        cat CMakeCache.txt
+    - script: >
+        cmake --preset linux-default
+        -DCMAKE_SUPPRESS_REGENERATION=ON
+        -DWITH_MSQUIC=ON
       displayName: 'CMake'
     - script: |
-        cd build
-        ninja -j`nproc`
+        cat build/CMakeCache.txt
+    - script: |
+        cmake --build --preset release
       displayName: 'Make'
     - script: |
-        cd nel/tools/nel_unit_test
-        ../../../build/bin/nel_unit_test
+        ctest --preset default
       displayName: 'Unit Tests'
+
   - job: client
     strategy:
       matrix:
