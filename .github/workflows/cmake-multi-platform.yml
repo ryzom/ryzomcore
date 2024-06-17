@@ -101,6 +101,7 @@ jobs:
       - name: Configure CMake
         run: >
           cmake --preset linux-default
+          -DWITH_MSQUIC=ON
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
 
