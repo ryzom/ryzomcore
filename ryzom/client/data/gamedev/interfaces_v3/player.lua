@@ -1096,4 +1096,4 @@ function game:fixVpx(vpx)
 end
 
 -- VERSION --
-RYZOM_PLAYER_VERSION = 335
+RYZOM_PLAYER_VERSION = 366
