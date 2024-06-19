@@ -306,10 +306,10 @@ function arkNpcShop:Buy(id)
 			if arkNpcShop.AtysProgressBuyLen > 0 then
 				arkNpcShop:StartProgress("nil", arkNpcShop.AtysProgressBuyMessage, arkNpcShop.AtysProgressBuyLen)
 			end
-			-- getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..id.."&item_selection="..arkNpcShop.selectedItems[id])
+			getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..id.."&item_selection="..arkNpcShop.selectedItems[id])
 		end
 	end
-	-- arkNpcShop:Close()
+	arkNpcShop:Close()
 	if arkNpcShop.window ~= "ui:interface:ark_npc_shop" then
 		getUI("ui:interface:encyclopedia").active=false
 	end
