@@ -66,10 +66,14 @@ function game:CheckPosition()
 	local cont, region, places = game:getPositionInfos()
 	game:checkScriptPlace(cont)
 	game:checkScriptPlace(region)
+	if places == nil then
+		return
+	end
 	for place, typ in pairs(places) do
 		game:checkScriptPlace(place)
 	end
 end
+
 
 function game:getPositionInfos(x, y)
 	local player_cont = ""
@@ -80,7 +84,7 @@ function game:getPositionInfos(x, y)
 	end
 
 	if game.World == nil then
-		return
+		return "", "", {}
 	end
 
 	for cont, c in pairs(game.World) do
@@ -100,6 +104,7 @@ function game:getPositionInfos(x, y)
 	end
 	return player_cont, player_region, player_places
 end
+
 
 
 ------------------------------------------------------------------------------------------------------------

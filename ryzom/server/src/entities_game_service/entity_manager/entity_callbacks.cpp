@@ -2614,7 +2614,6 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 	inventoryDst = INVENTORIES::TInventory(temp);
 	msgin.serial( slotDst );
 	msgin.serial( quantity );
-	nlinfo("slotDst = %u", slotDst);
 
 	CCharacter *character = PlayerManager.getChar( charId );
 	if (character == NULL)
