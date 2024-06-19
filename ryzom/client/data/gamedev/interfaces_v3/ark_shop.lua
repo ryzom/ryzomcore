@@ -266,10 +266,23 @@ function arkNpcShop:timer(id, len)
 		getUI("ui:interface:current_action").active=false
 		setOnDraw(getUI("ui:interface:current_action"), "")
 		local quantity = getUI("ui:interface:ark_shop_buy_item"):find("edit"):find("eb").input_string
-		getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..id.."&item_selection="..arkNpcShop.selectedItems[id])
+		if id ~= nil then
+			getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..tostring(id).."&item_selection="..arkNpcShop.selectedItems[id])
+		end
 	end
 end
 
+function arkNpcShop:StartProgress(id, text, len)
+	local message  = ucstring()
+	message:fromUtf8(text)
+	displaySystemInfo(message, "BC")
+	savedTime = nltime.getLocalTime()
+	getUI("ui:interface:current_action").active=true
+	if len > 200 then
+		len = 200
+	end
+	setOnDraw(getUI("ui:interface:current_action"), "arkNpcShop:timer("..tostring(id)..", "..tostring(len)..")")
+end
 
 function arkNpcShop:Buy(id)
 	local item = arkNpcShop.items[id]
@@ -282,24 +295,21 @@ function arkNpcShop:Buy(id)
 
 		if arkNpcShop.AtysPoint then
 			if item[8] == 0 then
-				local message  = ucstring()
-				message:fromUtf8(arkNpcShop.AtysPointsBuyMessage)
-				displaySystemInfo(message, "BC")
-				savedTime = nltime.getLocalTime()
-				getUI("ui:interface:current_action").active=true
-				local len = item[1]
-				if len > 200 then
-					len = 200
-				end
-				setOnDraw(getUI("ui:interface:current_action"), "arkNpcShop:timer("..id..", "..tostring(len)..")")
+				arkNpcShop:StartProgress(id, arkNpcShop.AtysPointsBuyMessage, item[1])
 			else
+				if arkNpcShop.AtysProgressBuyLen > 0 then
+					arkNpcShop:StartProgress("nil", arkNpcShop.AtysProgressBuyMessage, arkNpcShop.AtysProgressBuyLen)
+				end
 				getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..id.."&item_selection="..arkNpcShop.selectedItems[id])
 			end
 		else
-			getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..id.."&item_selection="..arkNpcShop.selectedItems[id])
+			if arkNpcShop.AtysProgressBuyLen > 0 then
+				arkNpcShop:StartProgress("nil", arkNpcShop.AtysProgressBuyMessage, arkNpcShop.AtysProgressBuyLen)
+			end
+			-- getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..id.."&item_selection="..arkNpcShop.selectedItems[id])
 		end
 	end
-	arkNpcShop:Close()
+	-- arkNpcShop:Close()
 	if arkNpcShop.window ~= "ui:interface:ark_npc_shop" then
 		getUI("ui:interface:encyclopedia").active=false
 	end
