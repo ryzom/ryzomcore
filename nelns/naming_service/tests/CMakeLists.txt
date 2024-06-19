@@ -20,3 +20,10 @@ add_test_executable(service_instance_manager_test
 target_link_libraries(service_instance_manager_test
         nelns::ns
 )
+
+add_test_executable(naming_service_it
+        naming_service.it.cpp
+)
+target_link_libraries(naming_service_it
+        nelns::ns
+)
