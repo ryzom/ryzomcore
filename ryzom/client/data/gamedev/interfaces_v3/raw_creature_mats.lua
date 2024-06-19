@@ -43,3 +43,6 @@ game.RawCreaturesMats = {
   kitinshell = { "m0048ccc", "m0066ckd", "m0068ckg", "m0069ckj", "m0072ckh", "m0073cke", "m0336ccb", "m0368ccn", "m0470che", "m0479ckb", "m0485cka", "m0602ckf", "m0607cki", "m0634ccl" },
   mushroom = { "m0148chl" }
 }
+
+-- VERSION --
+RYZOM_RAW_CREATURE_MATS_VERSION = 366
