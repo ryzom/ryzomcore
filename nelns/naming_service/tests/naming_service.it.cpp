@@ -16,6 +16,7 @@
 #include <nel/net/unified_network.h>
 
 #include <nelns/naming_service/naming_service.h>
+#include <nelns/naming_service/variables.h>
 
 using ::std::nullopt;
 using ::std::optional;
@@ -105,63 +106,93 @@ struct RGResponse
 	}
 };
 
-TEST(CNamingService, shouldAnswerToRegistration)
+struct RGRequest
 {
+	TServiceId serviceId;
+	string name;
+	vector<CInetAddress> addresses;
+
+	void serial(IStream &stream)
+	{
+		stream.serial(name);
+		stream.serialCont(addresses);
+		stream.serial(serviceId);
+	}
+};
+
+class CNamingServiceIT : public testing::Test
+{
+protected:
 	CCallbackClient client;
 	CNamingService instance;
-	CVar basePort;
-	basePort.Type = NLMISC::CConfigFile::CVar::T_INT;
-	basePort.setAsInt(51000);
-	CVar uniqueOnShardServices;
-	uniqueOnShardServices.Type = NLMISC::CConfigFile::CVar::T_STRING;
-	uniqueOnShardServices.setAsString((vector<string>) {});
-	CVar uniqueByMachineServices;
-	uniqueByMachineServices.Type = NLMISC::CConfigFile::CVar::T_STRING;
-	uniqueByMachineServices.setAsString((vector<string>) {});
-	CVar nsPort;
-	nsPort.Type = NLMISC::CConfigFile::CVar::T_INT;
-	int port = 50001;
-	nsPort.setAsInt(port);
-	TServiceId serviceId(123);
+	int port = 50000;
+
+	void SetUp() override
+	{
+		CVar basePort;
+		basePort.Type = NLMISC::CConfigFile::CVar::T_INT;
+		basePort.setAsInt(51000);
+		instance.ConfigFile.insertVar("BasePort", basePort);
+
+		CVar uniqueOnShardServices;
+		uniqueOnShardServices.Type = NLMISC::CConfigFile::CVar::T_STRING;
+		uniqueOnShardServices.setAsString((vector<string>) {});
+		instance.ConfigFile.insertVar("UniqueOnShardServices", uniqueOnShardServices);
+
+		CVar uniqueByMachineServices;
+		uniqueByMachineServices.Type = NLMISC::CConfigFile::CVar::T_STRING;
+		uniqueByMachineServices.setAsString((vector<string>) {});
+		instance.ConfigFile.insertVar("UniqueByMachineServices", uniqueByMachineServices);
+
+		CVar nsPort;
+		nsPort.Type = NLMISC::CConfigFile::CVar::T_INT;
+		nsPort.setAsInt(port);
+		instance.ConfigFile.insertVar("NSPort", nsPort);
+		instance.init();
+
+		CInetHost host("localhost");
+		host.setPort(port);
+		client.connect(host);
+		ASSERT_THAT(client.connected(), IsTrue());
+	}
+
+	void TearDown() override
+	{
+		client.disconnect();
+	}
+};
+
+TEST_F(CNamingServiceIT, shouldAnswerToRegistration)
+{
+	RGRequest request{
+		.serviceId = TServiceId(123),
+		.name = "test-service",
+		.addresses = {"localhost:12345"}
+	};
 	CMessage msgout("RG");
-	string name("test-service");
-	vector<CInetAddress> addresses = { "localhost:12345" };
-	msgout.serial(name);
-	msgout.serialCont(addresses);
-	msgout.serial(serviceId);
+	msgout.serial(request);
 
-	instance.ConfigFile.insertVar("BasePort", basePort);
-	instance.ConfigFile.insertVar("NSPort", nsPort);
-	instance.ConfigFile.insertVar("UniqueOnShardServices", uniqueOnShardServices);
-	instance.ConfigFile.insertVar("UniqueByMachineServices", uniqueByMachineServices);
-
-	instance.init();
-
-	CInetHost host("localhost");
-	host.setPort(port);
-	client.connect(host);
-	ASSERT_THAT(client.connected(), IsTrue());
+	RGResponse response;
 	TCallbackItem callbackArray[] = {
-		{ "RG", [](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
-		     RGResponse response;
+		{ "RG", [&response](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
 		     msgin.serial(response);
-
-		     EXPECT_THAT(response.success, IsTrue());
-		     EXPECT_THAT(response.sid, Optional(Property(&TServiceId::get, Eq(123))));
-		     EXPECT_THAT(
-		         response.content,
-		         Optional(Field(&RGBResponse::items,
-		             ElementsAre(
-		                 AllOf(
-		                     Field(&RGBResponseEntry::name, "test-service"),
-		                     Field(&RGBResponseEntry::sid, Property(&TServiceId::get, 123)),
-		                     Field(&RGBResponseEntry::addr, ElementsAre(Property(&CInetAddress::asString, "[::1]:12345"))))))));
 		 } }
 	};
-
 	client.addCallbackArray(callbackArray, sizeof(callbackArray) / sizeof(callbackArray[0]));
+
 	client.send(msgout);
-	client.update(1000);
+	client.flush();
 	instance.update();
-	client.update(1000);
+	client.update2(-1, 100);
+
+	EXPECT_THAT(response.success, IsTrue());
+	EXPECT_THAT(response.sid, Optional(Eq(request.serviceId)));
+	EXPECT_THAT(
+	    response.content,
+	    Optional(Field(&RGBResponse::items,
+	        ElementsAre(
+	            AllOf(
+	                Field(&RGBResponseEntry::name, "test-service"),
+	                Field(&RGBResponseEntry::sid, Eq(request.serviceId)),
+	                Field(&RGBResponseEntry::addr, ElementsAre(Property(&CInetAddress::asString, "[::1]:12345"))))))));
 }
