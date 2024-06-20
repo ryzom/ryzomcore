@@ -154,7 +154,7 @@ jobs:
           if-no-files-found: error
 
       - name: Push image
-        if: github.ref == 'refs/heads/${{ env.DEFAULT_BRANCH }}'
+        if: ${{ github.ref == format('refs/heads/{0}', env.DEFAULT_BRANCH) }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
           docker push "${{ needs.strings.outputs.docker-image-tag }}"
