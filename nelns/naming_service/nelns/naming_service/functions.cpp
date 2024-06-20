@@ -421,28 +421,6 @@ void cbResendRegisteration(CMessage &msgin, TSockId from, CCallbackNetBase &netb
 }
 
 /**
- * Callback for service registration.
- *
- * Message expected : RG
- * - Name of service to register (string)
- * - Address of service (CInetAddress)
- *
- * Message emitted : RG
- * - Allocated service identifier (TServiceId) or 0 if failed
- */
-void cbRegister(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
-{
-	string name;
-	vector<CInetAddress> addr;
-	TServiceId sid;
-	msgin.serial(name);
-	msgin.serialCont(addr);
-	msgin.serial(sid);
-
-	doRegister(name, addr, sid, from, netbase);
-}
-
-/**
  * Callback for service unregistration.
  *
  * Message expected : UNI

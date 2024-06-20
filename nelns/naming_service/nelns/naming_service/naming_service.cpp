@@ -18,25 +18,14 @@ using std::vector;
 using NLMISC::CConfigFile;
 using NLMISC::Exception;
 using NLMISC::toString;
+using NLNET::CCallbackNetBase;
 using NLNET::CCallbackServer;
 using NLNET::CInetAddress;
+using NLNET::CMessage;
 using NLNET::CUnifiedNetwork;
 using NLNET::TCallbackItem;
 using NLNET::TServiceId;
 using NLNET::TSockId;
-
-//
-// Callback array
-//
-
-TCallbackItem CallbackArray[] = {
-	{ "RG", cbRegister },
-	{ "RRG", cbResendRegisteration },
-	{ "QP", cbQueryPort },
-	{ "UNI", cbUnregisterSId },
-	{ "ACK_UNI", cbACKUnregistration },
-	//	{ "RS", cbRegisteredServices },
-};
 
 /**
  * Init
@@ -105,6 +94,14 @@ void CNamingService::init()
 		nsport = var->asInt();
 	}
 
+	TCallbackItem CallbackArray[] = {
+		{ "RG", [=](auto &msgin, auto from, auto &netbase) {cbRegister(msgin, from, netbase);} },
+		{ "RRG", cbResendRegisteration },
+		{ "QP", cbQueryPort },
+		{ "UNI", cbUnregisterSId },
+		{ "ACK_UNI", cbACKUnregistration },
+		//	{ "RS", cbRegisteredServices },
+	};
 	CallbackServer = new CCallbackServer;
 	CallbackServer->init(nsport);
 	CallbackServer->addCallbackArray(CallbackArray, sizeof(CallbackArray) / sizeof(CallbackArray[0]));
@@ -129,4 +126,16 @@ void CNamingService::release()
 	if (CallbackServer != NULL)
 		delete CallbackServer;
 	CallbackServer = NULL;
+}
+
+void CNamingService::cbRegister(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
+{
+	string name;
+	vector<CInetAddress> addr;
+	TServiceId sid;
+	msgin.serial(name);
+	msgin.serialCont(addr);
+	msgin.serial(sid);
+
+	doRegister(name, addr, sid, from, netbase);
 }
