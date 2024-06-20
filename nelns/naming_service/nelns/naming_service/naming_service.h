@@ -38,7 +38,7 @@ private:
 	 * Message emitted : RG
 	 * - Allocated service identifier (TServiceId) or 0 if failed
 	 */
-	void cbRegister(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
+	void cbRegister(NLNET::CMessage &msgin, NLNET::TSockId from);
 
 	/// Service instance manager singleton
 	CServiceInstanceManager _ServiceInstances;
