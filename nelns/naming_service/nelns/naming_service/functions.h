@@ -51,18 +51,6 @@ void cbACKUnregistration(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCa
 void cbResendRegisteration(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
 
 /**
- * Callback for service registration.
- *
- * Message expected : RG
- * - Name of service to register (string)
- * - Address of service (CInetAddress)
- *
- * Message emitted : RG
- * - Allocated service identifier (TServiceId) or 0 if failed
- */
-void cbRegister(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
-
-/**
  * Callback for service unregistration.
  *
  * Message expected : UNI
