@@ -127,12 +127,13 @@ protected:
 	CCallbackClient client;
 	CNamingService namingService;
 	int port = 50000;
+	int minPort = 51000;
 
 	void SetUp() override
 	{
 		CVar basePort;
 		basePort.Type = NLMISC::CConfigFile::CVar::T_INT;
-		basePort.setAsInt(51000);
+		basePort.setAsInt(minPort);
 		namingService.ConfigFile.insertVar("BasePort", basePort);
 
 		CVar uniqueOnShardServices;
@@ -213,6 +214,7 @@ TEST_F(CNamingServiceIT, shouldUpdateServiceRegistry)
 
 	client.send(msgout);
 	client.flush();
+	client.update2(-1, 200);
 	namingService.update();
 	client.update2(-1, 200);
 
@@ -224,4 +226,25 @@ TEST_F(CNamingServiceIT, shouldUpdateServiceRegistry)
 	            Field(&CServiceEntry::SId, Eq(request.serviceId)),
 				Field(&CServiceEntry::Addr, ElementsAre(Property(&CInetAddress::asString, "[::1]:12345")))
 	            )));
+}
+
+TEST_F(CNamingServiceIT, shouldAnswerToQueryPort)
+{
+	CMessage msgout("QP");
+
+	uint16 response(0);
+	TCallbackItem callbackArray[] = {
+		{ "QP", [&response](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
+		     msgin.serial(response);
+		 } }
+	};
+	client.addCallbackArray(callbackArray, sizeof(callbackArray) / sizeof(callbackArray[0]));
+
+	client.send(msgout);
+	client.flush();
+	client.update2(-1, 200);
+	namingService.update();
+	client.update2(-1, 200);
+
+	EXPECT_THAT(response, Eq(minPort));
 }
