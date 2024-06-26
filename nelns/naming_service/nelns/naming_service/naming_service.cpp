@@ -96,7 +96,7 @@ void CNamingService::init()
 
 	TCallbackItem CallbackArray[] = {
 		{ "RG", [=](auto &msgin, auto from, auto &netbase) { cbRegister(msgin, from); } },
-		{ "RRG", cbResendRegisteration },
+		{ "RRG", [=](auto &msgin, auto from, auto &netbase) { cbResendRegisteration(msgin, from); } },
 		{ "QP", cbQueryPort },
 		{ "UNI", cbUnregisterSId },
 		{ "ACK_UNI", cbACKUnregistration },
@@ -139,3 +139,16 @@ void CNamingService::cbRegister(CMessage &msgin, TSockId from)
 
 	doRegister(name, addr, sid, from, *CallbackServer);
 }
+
+void CNamingService::cbResendRegisteration(CMessage &msgin, TSockId from)
+{
+	string name;
+	vector<CInetAddress> addr;
+	TServiceId sid;
+	msgin.serial(name);
+	msgin.serialCont(addr);
+	msgin.serial(sid);
+
+	doRegister(name, addr, sid, from, *CallbackServer, true);
+}
+

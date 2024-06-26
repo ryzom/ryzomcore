@@ -214,6 +214,7 @@ TEST_F(CNamingServiceIT, shouldUpdateServiceRegistry)
 	client.send(msgout);
 	client.flush();
 	namingService.update();
+	client.update2(-1, 200);
 
 	EXPECT_THAT(
 	    RegisteredServices,

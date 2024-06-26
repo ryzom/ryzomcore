@@ -40,6 +40,11 @@ private:
 	 */
 	void cbRegister(NLNET::CMessage &msgin, NLNET::TSockId from);
 
+	/**
+	 * Callback for service registration when the naming service goes down and up (don't need to broadcast)
+	 */
+	void cbResendRegisteration(NLNET::CMessage &msgin, NLNET::TSockId from);
+
 	/// Service instance manager singleton
 	CServiceInstanceManager _ServiceInstances;
 };

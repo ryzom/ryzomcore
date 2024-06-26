@@ -406,21 +406,6 @@ void cbACKUnregistration(CMessage &msgin, TSockId from, CCallbackNetBase &netbas
 }
 
 /**
- * Callback for service registration when the naming service goes down and up (don't need to broadcast)
- */
-void cbResendRegisteration(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
-{
-	string name;
-	vector<CInetAddress> addr;
-	TServiceId sid;
-	msgin.serial(name);
-	msgin.serialCont(addr);
-	msgin.serial(sid);
-
-	doRegister(name, addr, sid, from, netbase, true);
-}
-
-/**
  * Callback for service unregistration.
  *
  * Message expected : UNI
