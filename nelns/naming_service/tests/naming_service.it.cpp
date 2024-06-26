@@ -15,6 +15,7 @@
 #include <nel/net/message.h>
 #include <nel/net/unified_network.h>
 
+#include <nelns/naming_service/service_entry.h>
 #include <nelns/naming_service/naming_service.h>
 #include <nelns/naming_service/variables.h>
 
@@ -124,7 +125,7 @@ class CNamingServiceIT : public testing::Test
 {
 protected:
 	CCallbackClient client;
-	CNamingService instance;
+	CNamingService namingService;
 	int port = 50000;
 
 	void SetUp() override
@@ -132,23 +133,23 @@ protected:
 		CVar basePort;
 		basePort.Type = NLMISC::CConfigFile::CVar::T_INT;
 		basePort.setAsInt(51000);
-		instance.ConfigFile.insertVar("BasePort", basePort);
+		namingService.ConfigFile.insertVar("BasePort", basePort);
 
 		CVar uniqueOnShardServices;
 		uniqueOnShardServices.Type = NLMISC::CConfigFile::CVar::T_STRING;
 		uniqueOnShardServices.setAsString((vector<string>) {});
-		instance.ConfigFile.insertVar("UniqueOnShardServices", uniqueOnShardServices);
+		namingService.ConfigFile.insertVar("UniqueOnShardServices", uniqueOnShardServices);
 
 		CVar uniqueByMachineServices;
 		uniqueByMachineServices.Type = NLMISC::CConfigFile::CVar::T_STRING;
 		uniqueByMachineServices.setAsString((vector<string>) {});
-		instance.ConfigFile.insertVar("UniqueByMachineServices", uniqueByMachineServices);
+		namingService.ConfigFile.insertVar("UniqueByMachineServices", uniqueByMachineServices);
 
 		CVar nsPort;
 		nsPort.Type = NLMISC::CConfigFile::CVar::T_INT;
 		nsPort.setAsInt(port);
-		instance.ConfigFile.insertVar("NSPort", nsPort);
-		instance.init();
+		namingService.ConfigFile.insertVar("NSPort", nsPort);
+		namingService.init();
 
 		CInetHost host("localhost");
 		host.setPort(port);
@@ -159,15 +160,18 @@ protected:
 	void TearDown() override
 	{
 		client.disconnect();
+		client.update2(-1, 200);
+		namingService.release();
+		RegisteredServices.clear();
 	}
 };
 
 TEST_F(CNamingServiceIT, shouldAnswerToRegistration)
 {
-	RGRequest request{
+	RGRequest request {
 		.serviceId = TServiceId(123),
-		.name = "test-service",
-		.addresses = {"localhost:12345"}
+		.name = "test register service",
+		.addresses = { "localhost:12345" }
 	};
 	CMessage msgout("RG");
 	msgout.serial(request);
@@ -182,8 +186,8 @@ TEST_F(CNamingServiceIT, shouldAnswerToRegistration)
 
 	client.send(msgout);
 	client.flush();
-	instance.update();
-	client.update2(-1, 100);
+	namingService.update();
+	client.update2(-1, 200);
 
 	EXPECT_THAT(response.success, IsTrue());
 	EXPECT_THAT(response.sid, Optional(Eq(request.serviceId)));
@@ -192,7 +196,31 @@ TEST_F(CNamingServiceIT, shouldAnswerToRegistration)
 	    Optional(Field(&RGBResponse::items,
 	        ElementsAre(
 	            AllOf(
-	                Field(&RGBResponseEntry::name, "test-service"),
+	                Field(&RGBResponseEntry::name, Eq(request.name)),
 	                Field(&RGBResponseEntry::sid, Eq(request.serviceId)),
 	                Field(&RGBResponseEntry::addr, ElementsAre(Property(&CInetAddress::asString, "[::1]:12345"))))))));
+}
+
+TEST_F(CNamingServiceIT, shouldUpdateServiceRegistry)
+{
+	RGRequest request {
+		.serviceId = TServiceId(123),
+		.name = "test re-register service",
+		.addresses = { "localhost:12345" }
+	};
+	CMessage msgout("RRG");
+	msgout.serial(request);
+
+	client.send(msgout);
+	client.flush();
+	namingService.update();
+
+	EXPECT_THAT(
+	    RegisteredServices,
+	    ElementsAre(
+	        AllOf(
+	            Field(&CServiceEntry::Name, Eq(request.name)),
+	            Field(&CServiceEntry::SId, Eq(request.serviceId)),
+				Field(&CServiceEntry::Addr, ElementsAre(Property(&CInetAddress::asString, "[::1]:12345")))
+	            )));
 }
