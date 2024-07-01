@@ -96,8 +96,8 @@ void CNamingService::init()
 
 	TCallbackItem CallbackArray[] = {
 		{ "RG", [=](auto &msgin, auto from, auto &netbase) { cbRegister(msgin, from); } },
-		{ "RRG", [=](auto &msgin, auto from, auto &netbase) { cbResendRegisteration(msgin, from); } },
-		{ "QP", cbQueryPort },
+		{ "RRG", [=](auto &msgin, auto from, auto &netbase) { cbResendRegistration(msgin, from); } },
+		{ "QP", [=](auto &msgin, auto from, auto &netbase) { cbQueryPort(msgin, from); } },
 		{ "UNI", cbUnregisterSId },
 		{ "ACK_UNI", cbACKUnregistration },
 		//	{ "RS", cbRegisteredServices },
@@ -140,7 +140,7 @@ void CNamingService::cbRegister(CMessage &msgin, TSockId from)
 	doRegister(name, addr, sid, from, *CallbackServer);
 }
 
-void CNamingService::cbResendRegisteration(CMessage &msgin, TSockId from)
+void CNamingService::cbResendRegistration(NLNET::CMessage &msgin, TSockId from)
 {
 	string name;
 	vector<CInetAddress> addr;
@@ -152,3 +152,15 @@ void CNamingService::cbResendRegisteration(CMessage &msgin, TSockId from)
 	doRegister(name, addr, sid, from, *CallbackServer, true);
 }
 
+void CNamingService::cbQueryPort(CMessage &msgin, TSockId from)
+{
+	// Allocate port
+	uint16 port = doAllocatePort(CallbackServer->hostAddress(from));
+
+	// Send port back
+	CMessage msgout("QP");
+	msgout.serial(port);
+	CallbackServer->send(msgout, from);
+
+	nlinfo("The service got port %hu", port);
+}

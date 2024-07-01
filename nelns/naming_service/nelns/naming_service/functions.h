@@ -46,11 +46,6 @@ void checkWaitingUnregistrationServices();
 void cbACKUnregistration(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
 
 /**
- * Callback for service registration when the naming service goes down and up (don't need to broadcast)
- */
-void cbResendRegisteration(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
-
-/**
  * Callback for service unregistration.
  *
  * Message expected : UNI
@@ -64,20 +59,6 @@ void cbUnregisterSId(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallba
  * \warning QueryPort + Registration is not atomic so more than one service could ask a port before register
  */
 uint16 doAllocatePort(const NLNET::CInetAddress &addr);
-
-/**
- * Callback for port allocation
- * Note: if a service queries a port but does not register itself to the naming service, the
- * port will remain allocated and unused.
- *
- * Message expected : QP
- * - Name of service to register (string)
- * - Address of service (CInetAddress) (its port can be 0)
- *
- * Message emitted : QP
- * - Allocated port number (uint16)
- */
-void cbQueryPort(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
 
 /*
  * Unregisters a service if it has not been done before.

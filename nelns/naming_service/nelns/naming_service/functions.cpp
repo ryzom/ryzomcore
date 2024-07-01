@@ -452,31 +452,6 @@ uint16 doAllocatePort(const CInetAddress &addr)
 	return nextAvailablePort++;
 }
 
-/**
- * Callback for port allocation
- * Note: if a service queries a port but does not register itself to the naming service, the
- * port will remain allocated and unused.
- *
- * Message expected : QP
- * - Name of service to register (string)
- * - Address of service (CInetAddress) (its port can be 0)
- *
- * Message emitted : QP
- * - Allocated port number (uint16)
- */
-void cbQueryPort(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
-{
-	// Allocate port
-	uint16 port = doAllocatePort(netbase.hostAddress(from));
-
-	// Send port back
-	CMessage msgout("QP");
-	msgout.serial(port);
-	netbase.send(msgout, from);
-
-	nlinfo("The service got port %hu", port);
-}
-
 /*
  * Unregisters a service if it has not been done before.
  * Note: this callback is called whenever someone disconnects from the NS.
