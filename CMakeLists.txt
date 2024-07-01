@@ -44,8 +44,8 @@ IF(HUNTER_ENABLED)
   cmake_minimum_required(VERSION 3.24)
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.5.tar.gz"
-    SHA1 "a20151e4c0740ee7d0f9994476856d813cdead29"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.25.6.tar.gz"
+    SHA1 "69e4a05bd514bb05cb2c5aa02ce8ac420516aaf7"
     FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
   )
 
