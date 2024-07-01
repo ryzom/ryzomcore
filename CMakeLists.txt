@@ -334,7 +334,7 @@ IF(WITH_NEL)
     SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
     include(GoogleTest)
-    include(CMakeModules/add_test_executable.cmake)
+    include(cmake/add_test_executable.cmake)
   ENDIF()
 
   IF(HUNTER_ENABLED)
