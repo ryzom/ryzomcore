@@ -134,7 +134,7 @@ protected:
 	CInetHost host = CInetHost("localhost");
 	int port = 50000;
 	int minPort = 51000;
-	std::chrono::seconds defaultTimeout = std::chrono::seconds(1);
+	std::chrono::seconds defaultTimeout = std::chrono::seconds(10);
 
 	void SetUp() override
 	{
@@ -183,29 +183,47 @@ TEST_F(CNamingServiceIT, shouldAnswerToRegistration)
 	CMessage msgout("RG");
 	msgout.serial(request);
 
-	RGResponse response;
+	std::promise<RGResponse> response_promise;
+	std::future<RGResponse> response = response_promise.get_future();
 	TCallbackItem callbackArray[] = {
-		{ "RG", [&response](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
+		{ "RG", [&response_promise](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
+		     RGResponse response;
 		     msgin.serial(response);
+		     response_promise.set_value(response);
 		 } }
 	};
 	client.addCallbackArray(callbackArray, sizeof(callbackArray) / sizeof(callbackArray[0]));
 
 	client.send(msgout);
-	client.flush();
-	namingService.update();
-	client.update2(-1, 200);
+	auto updateClient = std::async(std::launch::async, [=, &response]() {
+		while (response.valid())
+		{
+			client.update();
+			nlSleep(1);
+		}
+	});
+	auto updateNamingService = std::async(std::launch::async, [=, &response]() {
+		while (response.valid())
+		{
+			namingService.update();
+			nlSleep(1);
+		}
+	});
 
-	EXPECT_THAT(response.success, IsTrue());
-	EXPECT_THAT(response.sid, Optional(Eq(request.serviceId)));
-	EXPECT_THAT(
-	    response.content,
-	    Optional(Field(&RGBResponse::items,
-	        ElementsAre(
-	            AllOf(
-	                Field(&RGBResponseEntry::name, Eq(request.name)),
-	                Field(&RGBResponseEntry::sid, Eq(request.serviceId)),
-	                Field(&RGBResponseEntry::addr, ElementsAre(Property(&CInetAddress::asString, "[::1]:12345"))))))));
+	auto state = response.wait_for(defaultTimeout);
+	ASSERT_THAT(state, Eq(std::future_status::ready));
+	EXPECT_THAT(response.get(),
+	    AllOf(
+	        Field(&RGResponse::success, IsTrue()),
+	        Field(&RGResponse::sid, Optional(Eq(request.serviceId))),
+	        Field(
+	            &RGResponse::content,
+	            Optional(Field(&RGBResponse::items,
+	                ElementsAre(
+	                    AllOf(
+	                        Field(&RGBResponseEntry::name, Eq(request.name)),
+	                        Field(&RGBResponseEntry::sid, Eq(request.serviceId)),
+	                        Field(&RGBResponseEntry::addr, ElementsAre(Property(&CInetAddress::asString, "[::1]:12345"))))))))));
 }
 
 TEST_F(CNamingServiceIT, shouldUpdateServiceRegistry)
