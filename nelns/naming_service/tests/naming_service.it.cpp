@@ -1,6 +1,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <chrono>
+#include <future>
 #include <optional>
 #include <string>
 #include <vector>
@@ -13,6 +15,7 @@
 #include <nel/net/inet_address.h>
 #include <nel/net/inet_host.h>
 #include <nel/net/message.h>
+#include <nel/net/naming_client.h>
 #include <nel/net/unified_network.h>
 
 #include <nelns/naming_service/service_entry.h>
@@ -40,11 +43,13 @@ using ::testing::StrEq;
 
 using CVar = ::NLMISC::CConfigFile::CVar;
 using ::NLMISC::IStream;
+using ::NLMISC::nlSleep;
 using ::NLNET::CCallbackClient;
 using ::NLNET::CCallbackNetBase;
 using ::NLNET::CInetAddress;
 using ::NLNET::CInetHost;
 using ::NLNET::CMessage;
+using ::NLNET::CNamingClient;
 using ::NLNET::TCallbackItem;
 using ::NLNET::TServiceId;
 using ::NLNET::TSockId;
@@ -126,8 +131,10 @@ class CNamingServiceIT : public testing::Test
 protected:
 	CCallbackClient client;
 	CNamingService namingService;
+	CInetHost host = CInetHost("localhost");
 	int port = 50000;
 	int minPort = 51000;
+	std::chrono::seconds defaultTimeout = std::chrono::seconds(1);
 
 	void SetUp() override
 	{
@@ -152,7 +159,6 @@ protected:
 		namingService.ConfigFile.insertVar("NSPort", nsPort);
 		namingService.init();
 
-		CInetHost host("localhost");
 		host.setPort(port);
 		client.connect(host);
 		ASSERT_THAT(client.connected(), IsTrue());
@@ -230,21 +236,18 @@ TEST_F(CNamingServiceIT, shouldUpdateServiceRegistry)
 
 TEST_F(CNamingServiceIT, shouldAnswerToQueryPort)
 {
-	CMessage msgout("QP");
+	vector<CInetAddress> addresses{ "localhost:12345" };
+	CNamingClient::connect(host, NLNET::CCallbackNetBase::Off, addresses);
 
-	uint16 response(0);
-	TCallbackItem callbackArray[] = {
-		{ "QP", [&response](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
-		     msgin.serial(response);
-		 } }
-	};
-	client.addCallbackArray(callbackArray, sizeof(callbackArray) / sizeof(callbackArray[0]));
+	auto response = std::async(std::launch::async, &CNamingClient::queryServicePort);
+	auto update = std::async(std::launch::async, [=, &response](){
+		while (response.valid())
+		{
+			namingService.update();
+			nlSleep (1);
+		}
+	});
 
-	client.send(msgout);
-	client.flush();
-	client.update2(-1, 200);
-	namingService.update();
-	client.update2(-1, 200);
-
-	EXPECT_THAT(response, Eq(minPort));
+	response.wait_for(defaultTimeout );
+	EXPECT_THAT(response.get(), Eq(minPort));
 }
