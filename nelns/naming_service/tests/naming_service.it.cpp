@@ -230,24 +230,24 @@ TEST_F(CNamingServiceIT, shouldUpdateServiceRegistry)
 	        AllOf(
 	            Field(&CServiceEntry::Name, Eq(request.name)),
 	            Field(&CServiceEntry::SId, Eq(request.serviceId)),
-				Field(&CServiceEntry::Addr, ElementsAre(Property(&CInetAddress::asString, "[::1]:12345")))
-	            )));
+	            Field(&CServiceEntry::Addr, ElementsAre(Property(&CInetAddress::asString, "[::1]:12345"))))));
 }
 
 TEST_F(CNamingServiceIT, shouldAnswerToQueryPort)
 {
-	vector<CInetAddress> addresses{ "localhost:12345" };
+	vector<CInetAddress> addresses { "localhost:12345" };
 	CNamingClient::connect(host, NLNET::CCallbackNetBase::Off, addresses);
 
 	auto response = std::async(std::launch::async, &CNamingClient::queryServicePort);
-	auto update = std::async(std::launch::async, [=, &response](){
+	auto update = std::async(std::launch::async, [=, &response]() {
 		while (response.valid())
 		{
 			namingService.update();
-			nlSleep (1);
+			nlSleep(1);
 		}
 	});
 
-	response.wait_for(defaultTimeout );
+	auto state = response.wait_for(defaultTimeout);
+	ASSERT_THAT(state, Eq(std::future_status::ready));
 	EXPECT_THAT(response.get(), Eq(minPort));
 }
