@@ -1443,7 +1443,7 @@
                 <instance template="text_tt" tooltip="uittInventoryWeight" posparent="weight_txt" />
                 <link expr="identity(getItemsWeight('#inv_branch',0,#inv_branch_nb),@#inv_branch)" target="weight_txt:hardtext" />
                 <view type="bar" id="encombrement" mini="true" posparent="weight_txt" posref="ML MR" x="-4" range="#inv_bulk_max" color="%bulk_color" />
-                <ctrl type="tooltip" id="encombrement_tt" posparent="encombrement" sizeref="wh" w="0" h="0" on_tooltip="get_tt_bulk" on_tooltip_params="dbbranch=#inv_branch|dbmax=#inv_bulk_max" />
+                <ctrl type="tooltip" id="encombrement_tt" posparent="encombrement" sizeref="wh" w="0" h="0" on_tooltip="get_tt_bulk" on_tooltip_params="dbbranch=#inv_branch|dbmax=@#inv_bulk_max" />
                 <link expr="identity(getItemsBulk('#inv_branch',0,#inv_branch_nb),@#inv_branch)" target="encombrement:value" />
             </group>
             <view type="text" id="slots_nb" posparent="bulk_weight" posref="BL BR" color="255 255 255 255" global_color="false" shadow="true" fontsize="10" />

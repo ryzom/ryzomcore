@@ -34,6 +34,27 @@ function tablelength(T)
 	return count
 end
 
+function table_compare(t1, t2)
+	local ty1 = type(t1)
+	local ty2 = type(t2)
+	if ty1 ~= ty2 then return false end
+	-- non-table types can be directly compared
+	if ty1 ~= 'table' and ty2 ~= 'table' then return t1 == t2 end
+	-- as well as tables which have the metamethod __eq
+	local mt = getmetatable(t1)
+	if not ignore_mt and mt and mt.__eq then return t1 == t2 end
+
+	for k1, v1 in pairs(t1) do
+		local v2 = t2[k1]
+		if v2 == nil or v1 ~= v2 then return false end
+	end
+	for k2,v2 in pairs(t2) do
+		local v1 = t1[k2]
+		if v1 == nil or v2 ~= v1 then return false end
+	end
+	return true
+end
+
 function openPageInWebIg(url)
 	getUI("ui:interface:webig:content:html"):browse(url)
 	getUI("ui:interface:webig").active = true
@@ -75,6 +96,68 @@ function getArkScript(id, selected)
 		url = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..id.."&_hideWindow=1&command=reset_all"
 	end
 	return url
+end
+
+
+--------------------------------------------------------------------------------
+--- ARK DYNE ---
+--------------------------------------------------------------------------------
+
+if DynE == nil then
+	DynE = {}
+	DynE.lastWinUpdate = 0
+	DynE.otherMapPoints = {}
+end
+
+function DynE:OpenStoryline(season, episode)
+	ArkMissionCatalog:OpenCat("storyline", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8840&season="..season.."&episode="..tostring(episode+1))
+	getUI("ui:interface:encyclopedia").opened = true
+	getUI("ui:interface:encyclopedia").active = true
+end
+
+function DynE:SetMap(name, x, y, desc)
+	local link = getUI(DynEWindowId):find(name)
+	if link ~= nil then
+		link = link:find(":b")
+		link.onover = "lua"
+		link.params_over = "DynE:OpenMap("..x..","..y..")"
+	end
+end
+
+function DynE:OpenMap(x, y)
+	local html = [[<img src="https://api.bmsite.net/maps/static?flags=0&language=]]..tostring(getClientCfg("LanguageCode"))..[[&markers=icon:lm_marker|]]..x..[[,]]..y..[[&maptype=atys&size=380x90"/>]]..tostring(i18n.get("uiMovingTargetWarning"))
+	runAH(nil, "enter_modal", "group=ui:interface:webig_html_modal")
+	local whm = getUI("ui:interface:webig_html_modal")
+	whm.child_resize_h=false
+	whm_html = getUI("ui:interface:webig_html_modal:html")
+	if whm_html ~= nil then
+		whm.w = 410
+		whm.h = 150
+		whm_html:renderHtml(html)
+	end
+end
+
+function DynE:RunMission(script, posX, posY)
+	local html = getUI("ui:interface:web_transactions"):find("html")
+	html:browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..script.."&command=reset_all&PosX="..posX.."&PosY="..posY.."&FlagName=Go+to".."&MissionText=Go")
+end
+
+function DynE:OpenHelp(img)
+	local html = getUI("ui:interface:web_transactions"):find("html")
+	html:browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9600&command=reset_all&img="..img)
+end
+
+function DynE:UpdateMapWindow()
+	if (nltime.getLocalTime() - DynE.lastWinUpdate) > 60000 then
+		local win_html = getUI("ui:interface:app2453:browser:content:html")
+		local map_html = getUI("ui:interface:map:content:map_content:lm_events:html")
+		map_html:browse("home")
+		if win_html ~= nil then
+			win_html:renderHtml(map_html.html)
+		end
+
+		DynE.lastWinUpdate = nltime.getLocalTime()
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -342,10 +425,27 @@ function ArkOnSelectChanged(name)
 	ArkFindUI(name..":eb").input_string = text
 end
 
+function ArkV5GetSelectEntity(prefix, input)
+	name = getTargetName()
+	if name == "" then
+		name = getTargetTitle()
+	end
+	if name ~= "" and name ~= nil then
+		webig:openUrlInBg("https://app.ryzom.com/app_arcc/scripts/get_bot.php?action=ark_editor&ui="..encodeURLParam(getUICaller().id).."&prefix="..tostring(prefix).."&input="..tostring(input).."&bot="..encodeURLParam(base64.encode(name)))
+	end
+end
+
+function fixUrl(url)
+	s, n = string.gsub(url, "{amp}", "&")
+	return s
+end
+
+function openUrlInBg(url)
+	getUI("ui:interface:web_transactions"):find("html"):browse(fixUrl(url))
+end
 
 
-
-
+-- S2E1 STUFF --
 
 
 if S2E1 == nil then
@@ -767,7 +867,5 @@ function S2E1:newQuake(timer)
 
 end
 
-
-
 -- VERSION --
-RYZOM_ARK_VERSION = 335
+RYZOM_ARK_VERSION = 366
