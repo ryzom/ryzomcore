@@ -556,22 +556,24 @@ void CPeopleList::readContactGroups()
 
 			if (!root) return;
 
-			xmlNodePtr node = root->children;
+			xmlNodePtr nodeType = root->children;
 			uint nb = 0;
-			while (node)
+			while (nodeType)
 			{
-				CXMLAutoPtr propName;
-				propName = (char*) xmlGetProp(node, (xmlChar*)"name");
-				CXMLAutoPtr propGroup;
-				propGroup = (char*) xmlGetProp(node, (xmlChar*)"group");
-				if (propName && propGroup)
+
+				CXMLAutoPtr propTypeName;
+				propTypeName = (char *)xmlGetProp(nodeType, (xmlChar *)"type");
+
+				if (propTypeName && propTypeName.str() == "groups")
 				{
-				        sint index = getIndexFromName(propName.str());
-					if (index < _Peoples.size())
+					xmlNodePtr node = nodeType->children;
+					while (node)
 					{
-						_Peoples[index].Group = propGroup.str();
-						if (_GroupContainers.empty() || _GroupContainers.back().first != propGroup.str()) {
-							vector<pair<string, string> > properties;
+						CXMLAutoPtr propGroup;
+						propGroup = (char *)xmlGetProp(node, (xmlChar *)"group");
+						if (propGroup)
+						{
+							vector<pair<string, string>> properties;
 							properties.push_back(make_pair(string("posparent"), string("parent")));
 							properties.push_back(make_pair(string("id"), _ContainerID + "_group_" + toString(_GroupContainers.size())));
 							if (propGroup.str() == "")
@@ -586,16 +588,81 @@ void CPeopleList::readContactGroups()
 								gc->setUCTitle(propGroup.str());
 							gc->setSavable(false);
 
-							CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
-							pRoot->addGroup (gc);
+							CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
+							pRoot->addGroup(gc);
 							_BaseContainer->attachContainer(gc);
 
 							_GroupContainers.push_back(make_pair(propGroup.str(), gc));
 						}
+						node = node->next;
 					}
 				}
-				node = node->next;
-				nb++;
+
+				if (!propTypeName || propTypeName.str() == "contacts")
+				{
+					xmlNodePtr node;
+					if (!propTypeName)
+						node = root->children;
+					else
+						node = nodeType->children;
+					
+					while (node)
+					{
+						CXMLAutoPtr propName;
+						propName = (char *)xmlGetProp(node, (xmlChar *)"name");
+						CXMLAutoPtr propGroup;
+						propGroup = (char *)xmlGetProp(node, (xmlChar *)"group");
+						if (propName && propGroup)
+						{
+							sint index = getIndexFromName(propName.str());
+							if (index < _Peoples.size())
+							{
+								_Peoples[index].Group = propGroup.str();
+								// search if contact group exists in group container, create it if not.
+								bool groupFound = false;
+								uint i = 0;
+								for (i = 0; i < _GroupContainers.size(); i++)
+								{
+									if (propGroup.str() == _GroupContainers[i].first.c_str())
+									{
+										groupFound = true;
+										break;
+									}
+								}
+								// If group container is empty, create at least the general group.
+								if (_GroupContainers.empty() || !groupFound)
+								{
+									vector<pair<string, string>> properties;
+									properties.push_back(make_pair(string("posparent"), string("parent")));
+									properties.push_back(make_pair(string("id"), _ContainerID + "_group_" + toString(_GroupContainers.size())));
+									if (propGroup.str() == "")
+										properties.push_back(make_pair(string("title"), "General"));
+									else
+										properties.push_back(make_pair(string("title"), propGroup.str()));
+									CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance("people_list_group_header", "ui:interface", properties, false);
+									CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
+									if (propGroup.str() == "")
+										gc->setUCTitle(ucstring("General"));
+									else
+										gc->setUCTitle(propGroup.str());
+									gc->setSavable(false);
+
+									CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
+									pRoot->addGroup(gc);
+									_BaseContainer->attachContainer(gc);
+
+									_GroupContainers.push_back(make_pair(propGroup.str(), gc));
+								}
+							}
+						}
+						node = node->next;
+						nb++;
+					}
+					if (!propTypeName)
+						break;
+				}
+
+				nodeType = nodeType->next;
 			}
 			fd.close();
 		}
@@ -623,13 +690,29 @@ void CPeopleList::saveContactGroups()
 			xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar*)"contact_groups", NULL);
 			xmlDocSetRootElement(doc, node);
 			
+			// Save groups
+			xmlNodePtr newNode = xmlNewChild(node, NULL, (const xmlChar *)"type", NULL);
+			xmlSetProp(newNode, (const xmlChar *)"type", (const xmlChar *)"groups");
+			for (uint k = 0; k < _GroupContainers.size(); ++k)
+			{
+				xmlNodePtr newNodeGroup = xmlNewChild(newNode, NULL, (const xmlChar *)"group", NULL);
+
+				xmlSetProp(newNodeGroup, (const xmlChar *)"group", (const xmlChar *)_GroupContainers[k].first.c_str());
+				//xmlSetProp(newNode, (const xmlChar *)"second", (const xmlChar *)_GroupContainers[k].second.c_str());
+			}
+
+			// Save contacts
+			newNode = xmlNewChild(node, NULL, (const xmlChar *)"type", NULL);
+			xmlSetProp(newNode, (const xmlChar *)"type", (const xmlChar *)"contacts");
 			for (uint k = 0; k < _Peoples.size(); ++k)
 			{
-				xmlNodePtr newNode = xmlNewChild(node, NULL, (const xmlChar*)"contact", NULL);
+				xmlNodePtr newNodeContact = xmlNewChild(newNode, NULL, (const xmlChar *)"contact", NULL);
 				
-				xmlSetProp(newNode, (const xmlChar*)"name", (const xmlChar*)_Peoples[k].getName().c_str());
-				xmlSetProp(newNode, (const xmlChar*)"group", (const xmlChar*)_Peoples[k].Group.c_str());
+				xmlSetProp(newNodeContact, (const xmlChar *)"name", (const xmlChar *)_Peoples[k].getName().c_str());
+				xmlSetProp(newNodeContact, (const xmlChar *)"group", (const xmlChar *)_Peoples[k].Group.c_str());
 			}
+
+
 			stream.flush();
 			fd.close();
 		}
