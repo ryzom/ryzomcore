@@ -324,23 +324,23 @@ IF(WITH_MSQUIC)
   FIND_PACKAGE(msquic REQUIRED)
 ENDIF()
 
+IF(WITH_NEL_TESTS)
+  FIND_PACKAGE(CppTest)
+
+  ENABLE_TESTING()
+  include(FetchContent)
+  FetchContent_Declare(
+          googletest
+          URL https://github.com/google/googletest/archive/a7f443b80b105f940225332ed3c31f2790092f47.zip
+          EXCLUDE_FROM_ALL
+  )
+  SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(googletest)
+  include(GoogleTest)
+  include(cmake/add_test_executable.cmake)
+ENDIF()
+
 IF(WITH_NEL)
-  IF(WITH_NEL_TESTS)
-    FIND_PACKAGE(CppTest)
-
-    ENABLE_TESTING()
-    include(FetchContent)
-    FetchContent_Declare(
-            googletest
-            URL https://github.com/google/googletest/archive/a7f443b80b105f940225332ed3c31f2790092f47.zip
-            EXCLUDE_FROM_ALL
-    )
-    SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(googletest)
-    include(GoogleTest)
-    include(cmake/add_test_executable.cmake)
-  ENDIF()
-
   IF(HUNTER_ENABLED)
     IF(WITH_GUI)
       HUNTER_ADD_PACKAGE(luabind)
