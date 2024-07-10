@@ -38,7 +38,7 @@ jobs:
           - os: ubuntu-20.04
             ubuntu_version: 20.04
             cmake_preset: linux-client
-          - os: macos-14
+          - os: macos-13
             cmake_preset: macos-client
           - os: macos-12
             cmake_preset: macos-client
