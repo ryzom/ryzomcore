@@ -23,7 +23,7 @@ IF(WITH_3D)
     FIND_PACKAGE(freetype CONFIG REQUIRED)
     SET(FREETYPE_LIBRARIES freetype::freetype)
   ELSE()
-    FIND_PACKAGE(FreeType)
+    FIND_PACKAGE(Freetype)
   ENDIF() #hunter
 
   IF(WITH_NEL_CEGUI)
