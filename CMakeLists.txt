@@ -238,27 +238,6 @@ IF(WITH_STATIC)
   IF(WINSOCK2_LIB)
     SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${WINSOCK2_LIB})
   ENDIF()
-
-  IF(UNIX AND NOT HUNTER_ENABLED)
-    # under Linux and OS X, recent libxml2 versions are linked against liblzma
-    FIND_PACKAGE(LibLZMA)
-    IF(LIBLZMA_LIBRARIES)
-      SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${LIBLZMA_LIBRARIES})
-    ENDIF()
-
-    # under Linux and OS X, recent libxml2 versions are linked against libicu
-    FIND_PACKAGE(ICU COMPONENTS data uc)
-    IF(ICU_FOUND)
-      IF(ICU_UC_FOUND)
-        MESSAGE(STATUS "ICU uc was found: ${ICU_LIBRARIES}")
-      ENDIF()
-      IF(ICU_DATA_FOUND)
-        MESSAGE(STATUS "ICU data was found: ${ICU_LIBRARIES}")
-      ENDIF()
-      SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ICU::data ICU::uc)
-    ENDIF()
-
-  ENDIF()
 ENDIF()
 
 IF(FINAL_VERSION)
