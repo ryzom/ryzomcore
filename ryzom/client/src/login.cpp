@@ -2727,6 +2727,8 @@ string checkLogin(const string &login, const string &password, const string &cli
 	if(!HttpClient.connectToLogin())
 		return "Can't connect (error code 1)";
 
+	HttpClient.setUserAgent(getUserAgent());
+
 	if(pPM->isVerboseLog()) nlinfo("Connected");
 
 	string res;
