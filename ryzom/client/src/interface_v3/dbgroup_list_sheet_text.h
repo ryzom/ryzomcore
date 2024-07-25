@@ -202,6 +202,9 @@ public:
 
 	CGroupContainer *getContainer();
 
+	sint getStartDbIndex() const { return _StartDbIdx; }
+	void setStartDbIndex(sint index);
+
 protected:
 	friend struct CSheetChild;
 
@@ -274,7 +277,7 @@ protected:
 	bool						_ClickWhenPushed;
 
 
-	uint						_NumValidSheets; 
+	uint						_NumValidSheets;
 
 	// List of sheet child to update when dynstring received
 	std::set< CSheetChild* >	_NameIdToUpdate;

@@ -1014,6 +1014,24 @@ static DECLARE_INTERFACE_USER_FCT(getItemsBulkUserFct)
 REGISTER_INTERFACE_USER_FCT("getItemsBulk", getItemsBulkUserFct)
 
 // ***************************************************************************
+static DECLARE_INTERFACE_USER_FCT(getChestMaxBulkUserFct)
+{
+	if (args.size() != 2 || !args[0].toString() || !args[1].toInteger())
+	{
+		nlwarning("<getChestMaxBulk> 2 arguments expected : (dbPath, chest)");
+		return false;
+	}
+	const std::string &basePath = args[0].getString();
+	uint8 chest = (uint16) args[1].getInteger();
+	CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp(basePath+NLMISC::toString(":%u:BULK_MAX", chest));
+	if (!prop) return false;
+	uint32 bulkMax = prop->getValue32();
+	result.setInteger(bulkMax);
+	return true;
+}
+REGISTER_INTERFACE_USER_FCT("getChestMaxBulk", getChestMaxBulkUserFct)
+
+// ***************************************************************************
 // return bulk/bulkmax
 static DECLARE_INTERFACE_USER_FCT(getBulkStrUserFct)
 {
@@ -1034,7 +1052,7 @@ static DECLARE_INTERFACE_USER_FCT(getBulkStrUserFct)
 	sint32	maxVal= (sint32)args[1].getInteger();
 
 	// Replace in the formated text.
-	std::string		str= toString("%d/%d", val, maxVal);
+	std::string str= toString("%d/%d", val, maxVal);
 	result.setString(str);
 
 	return true;
@@ -1056,8 +1074,32 @@ static DECLARE_INTERFACE_USER_FCT(getInvSlotCounts)
 	CInventoryManager::getBranchSlotCounts(dbBranch, nbUsedSlots, nbMaxSlots);
 
 	// Replace in the formated text
-	std::string	str = toString("%u/%u", nbUsedSlots, nbMaxSlots);
+	std::string str = toString("%u/%u", nbUsedSlots, nbMaxSlots);
 	result.setString(str);
 	return true;
 }
 REGISTER_INTERFACE_USER_FCT("getInvSlotCounts", getInvSlotCounts)
+
+// ***************************************************************************
+static DECLARE_INTERFACE_USER_FCT(getGuildInvSlotCounts)
+{
+	if (args.size() != 3 || !args[0].toString() || !args[1].toInteger() || !args[2].toInteger())
+	{
+		nlwarning("<getInvSlotCounts> 3 argument expected : (dbPath, init, count)");
+		return false;
+	}
+
+	// Get the counts
+	std::string	dbBranch= args[0].getString();
+	uint16 startItemIndex = (uint16) args[1].getInteger();
+	uint16 numItems = (uint16) args[2].getInteger();
+
+	uint nbUsedSlots = 0, nbMaxSlots = 0;
+	CInventoryManager::getBranchSlotCounts(dbBranch, startItemIndex, numItems, nbUsedSlots, nbMaxSlots);
+
+	// Replace in the formated text
+	std::string	str = toString("%u/%u", nbUsedSlots, numItems);
+	result.setString(str);
+	return true;
+}
+REGISTER_INTERFACE_USER_FCT("getGuildInvSlotCounts", getGuildInvSlotCounts)

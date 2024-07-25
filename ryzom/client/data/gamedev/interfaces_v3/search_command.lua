@@ -1581,3 +1581,5 @@ function SearchCommand:finish_commands(command_name,uiId)
     SearchCommand:close_modal(uiId)
     SearchCommand:search(uiId)
 end
+-- VERSION --
+RYZOM_SEARCH_COMMAND_VERSION = 366

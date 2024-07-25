@@ -211,7 +211,7 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 		id2 = game.spawnShapesByZone[continent][name][10]
 	end
 
-	table.insert(setup, id1)
+	table.insert(setup, id1) -- 3
 	table.insert(setup, id2)
 	table.insert(setup, finish)
 	table.insert(setup, openShape)
@@ -227,9 +227,9 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 	end
 
 	if displayIcon == 1 then
-		game:addMapArkPoint(zone, setup[2], setup[3], setup[1], text, icon..".tga")
+		game:addMapArkPoint(zone, setup[2], setup[3], name, text, icon..".tga")
 	else
-		game:delMapArkPoint(zone, setup[1])
+		game:delMapArkPoint(zone, name)
 	end
 end
 
@@ -241,7 +241,7 @@ function game:doSpawnShapesByZone(continent)
 				deleteShape(shape[9])
 			end
 
-			if shape[10] ~= nil  and shape[9] > 0then
+			if shape[10] ~= nil  and shape[9] > 0 then
 				deleteShape(shape[10])
 			end
 
@@ -274,4 +274,4 @@ game:addMapArkPoint("Vip", 4154, -3305, "vip_allegory", "", "allegory_16.tga", "
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")
 
 -- VERSION --
-RYZOM_MAP_VERSION = 328
+RYZOM_MAP_VERSION = 366

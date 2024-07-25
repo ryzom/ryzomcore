@@ -1385,6 +1385,9 @@ public:
 	///\set the loot container
 	void setLootContainer(CInventoryPtr lootSac);
 
+	bool isInitChest(uint8 chest);
+	void isInitChest(uint8 chest, bool value);
+
 	/// update scores infos in database
 	void updateScoresInDatabase();
 
@@ -2967,7 +2970,7 @@ public:
 	void incSlotVersion(INVENTORIES::TInventory invId, uint32 slot);
 
 	/// send item infos. For slotId (combination of inventory and slot), see explanation in CItemInfos
-	void sendItemInfos(uint16 slotId);
+	void sendItemInfos(uint32 slotId);
 
 	/// return true if the player wears an item with the specified sheetId
 	bool doesWear(const NLMISC::CSheetId &sheetId) const;
@@ -3454,6 +3457,8 @@ private:
 	// Keep pointer on the container being looted
 	CInventoryPtr _LootContainer;
 	NLMISC::CEntityId _EntityLoot;
+
+	bool _initializedChests[20];
 
 	/// if this player has an invitation for another team, keep the team here
 	NLMISC::CEntityId _TeamInvitor;

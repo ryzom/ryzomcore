@@ -266,10 +266,23 @@ function arkNpcShop:timer(id, len)
 		getUI("ui:interface:current_action").active=false
 		setOnDraw(getUI("ui:interface:current_action"), "")
 		local quantity = getUI("ui:interface:ark_shop_buy_item"):find("edit"):find("eb").input_string
-		getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..id.."&item_selection="..arkNpcShop.selectedItems[id])
+		if id ~= nil then
+			getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..tostring(id).."&item_selection="..arkNpcShop.selectedItems[id])
+		end
 	end
 end
 
+function arkNpcShop:StartProgress(id, text, len)
+	local message  = ucstring()
+	message:fromUtf8(text)
+	displaySystemInfo(message, "BC")
+	savedTime = nltime.getLocalTime()
+	getUI("ui:interface:current_action").active=true
+	if len > 200 then
+		len = 200
+	end
+	setOnDraw(getUI("ui:interface:current_action"), "arkNpcShop:timer("..tostring(id)..", "..tostring(len)..")")
+end
 
 function arkNpcShop:Buy(id)
 	local item = arkNpcShop.items[id]
@@ -282,20 +295,17 @@ function arkNpcShop:Buy(id)
 
 		if arkNpcShop.AtysPoint then
 			if item[8] == 0 then
-				local message  = ucstring()
-				message:fromUtf8(arkNpcShop.AtysPointsBuyMessage)
-				displaySystemInfo(message, "BC")
-				savedTime = nltime.getLocalTime()
-				getUI("ui:interface:current_action").active=true
-				local len = item[1]
-				if len > 200 then
-					len = 200
-				end
-				setOnDraw(getUI("ui:interface:current_action"), "arkNpcShop:timer("..id..", "..tostring(len)..")")
+				arkNpcShop:StartProgress(id, arkNpcShop.AtysPointsBuyMessage, item[1])
 			else
+				if arkNpcShop.AtysProgressBuyLen > 0 then
+					arkNpcShop:StartProgress("nil", arkNpcShop.AtysProgressBuyMessage, arkNpcShop.AtysProgressBuyLen)
+				end
 				getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..id.."&item_selection="..arkNpcShop.selectedItems[id])
 			end
 		else
+			if arkNpcShop.AtysProgressBuyLen > 0 then
+				arkNpcShop:StartProgress("nil", arkNpcShop.AtysProgressBuyMessage, arkNpcShop.AtysProgressBuyLen)
+			end
 			getUI("ui:interface:web_transactions"):find("html"):browse(arkNpcShop.ValidateUrl..quantity.."&item_id="..id.."&item_selection="..arkNpcShop.selectedItems[id])
 		end
 	end
@@ -327,7 +337,6 @@ function arkNpcShop:generateMp(mps)
 			end
 
 			for sheet in string.gmatch(sheets, "([^|]+)") do
-				debug(sheet)
 				if string.sub(sheet, 1, 1) == "#" then
 					local all_sheets = game.RawCreaturesMats[string.sub(sheet, 2)]
 					if sheets ~= nil then
@@ -375,7 +384,7 @@ function arkNpcShop:getHtmlIcon(id, item)
 		addDbProp("UI:TEMP:ARK:SELECTITEM:USER_COLOR", item[9])
 		return [[<div class="ryzom-ui-grouptemplate" style="template:arkshop_inv_item;id:inv_special_bag_item;usesheet:true;isvirtual:false;sheetdb:UI:TEMP:ARK:SELECTITEM;w:40;params_r:arkNpcShop:OpenSheetInfosWindow(]]..id..[[);"></div>]]
 	else
-		return [[<div class="ryzom-ui-grouptemplate" style="template:arkshop_inv_item;id:inv_special_bag_item;usesheet:false;isvirtual:true;w:44;quantity: ;quality:]]..item[4]..[[;tooltip:]]..item[6]..[[;gc2:true;gc1:true;img1:]]..item[2]..[[;col_over:0 0 0 0"></div>]]
+		return [[<div class="ryzom-ui-grouptemplate" style="template:arkshop_inv_item;id:inv_special_bag_item;usesheet:false;isvirtual:true;w:44;quantity: ;quality:]]..tostring(item[4])..[[;tooltip:]]..tostring(item[6])..[[;gc2:true;gc1:true;img1:]]..tostring(item[2])..[[;col_over:0 0 0 0"></div>]]
 	end
 end
 
@@ -521,3 +530,24 @@ function arkNpcShop:selectSheet(item, id)
 	whm_html = getUI("ui:interface:webig_html_modal:html")
 	whm_html:renderHtml(html)
 end
+
+function arkNpcShop:updateTexts(id, ctrl, text1, text2, text3)
+	local shop_item = getUI(arkNpcShop.window):find("ark_npc_shop_item_"..id)
+	if shop_item then
+		if ctrl then
+			shop_item:find("ctrl").tooltip = getUCtf8(ctrl)
+		else
+			shop_item:find("ctrl").tooltip = ""
+		end
+		shop_item:find("text1").uc_hardtext_format = text1
+		shop_item:find("text2").uc_hardtext_format = getUCtf8(text2)
+		if text3 then
+			shop_item:find("text3").uc_hardtext_format = getUCtf8(text3)
+		else
+			shop_item:find("text3").uc_hardtext_format = ""
+		end
+	end
+end
+
+-- VERSION --
+RYZOM_ARK_SHOP_VERSION = 366
