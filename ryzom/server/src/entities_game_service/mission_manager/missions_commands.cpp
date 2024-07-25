@@ -4477,6 +4477,25 @@ NLMISC_COMMAND(addXp, "Gain experience in a given skills", "<uid> <xp> <skill> [
 	return true;
 }
 
+
+//getPlayerSkills 2 SC SH SHFFA SHFFAEM
+
+NLMISC_COMMAND(getPlayerSkills, "getPlayerSkills","<uid> <skill1> <skill2> ...")
+{
+	if (args.size() < 2) return false;
+
+	GET_ACTIVE_CHARACTER
+
+	for(int i = 0; i < SKILLS::NUM_SKILLS; ++i)
+	{
+		SSkill skill = c->getSkills()._Skills[i];
+		if (find(args.begin(), args.end(), SKILLS::toString(i)) != args.end())
+			log.displayNL("%s|%d|%d|%d|%d|%.0f|%.0f", SKILLS::toString(i).c_str(), skill.Base, skill.Modifier, skill.Current, skill.MaxLvlReached, skill.Xp, skill.XpNextLvl);
+	}
+
+	return true;
+}
+
 NLMISC_COMMAND(removeDp, "Update the DP", "<uid> <dp>")
 {
 	if (args.size() < 2) return false;
