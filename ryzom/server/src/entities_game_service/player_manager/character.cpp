@@ -8199,7 +8199,7 @@ void CCharacter::addGuildPoints(uint32 points)
 // addXpToSkillInternal : Add amount of xp gain to a skill
 //---------------------------------------------------
 double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSkill, TAddXpToSkillMode addXpMode,
-										std::map<SKILLS::ESkills, CXpProgressInfos> &gainBySkill, bool silent)
+										std::map<SKILLS::ESkills, CXpProgressInfos> &gainBySkill, bool silent, bool useCats)
 {
 	H_AUTO(CCharacter_addXpToSkill);
 
@@ -8323,9 +8323,9 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 	uint32 ringCatalyserLvl = 0;
 	uint32 ringCatalyserCount = 0;
 	// Don't take away cats if free trial limit reached and there is no DP.
-	bool bConsumeCats = !(bFreeTrialLimitReached && _DeathPenalties->isNull());
+	bool bConsumeCats = useCats && !(bFreeTrialLimitReached && _DeathPenalties->isNull()) && addXpMode != AddXpToSkillBranch;
 
-	if (bConsumeCats && (addXpMode != AddXpToSkillBranch))
+	if (bConsumeCats)
 	{
 		if (_XpCatalyserSlot != INVENTORIES::INVALID_INVENTORY_SLOT)
 		{
@@ -8424,6 +8424,8 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 	// For AddXpToSkillBranch mode
 	double XpGainTruncated = XpGain;
 	double XpGainRemainder = 0.0;
+
+	nlinfo("<CCharacter::addXpToSkill> Skill %s Reach needed amount xp ( xp %f / xp Needed %d ) for progress", skillName.c_str(), skill->Xp, stage->XpForPointSkill);
 
 	if (skill->Xp > stage->XpForPointSkill)
 	{
@@ -22928,10 +22930,10 @@ void CCharacter::setProspectionLocateDepositEffect(CSEffectPtr effect)
 
 //------------------------------------------------------------------------------
 
-void CCharacter::addXpToSkill(double XpGain, const std::string &Skill, bool silent)
+void CCharacter::addXpToSkill(double XpGain, const std::string &Skill, bool silent, bool useCats)
 {
 	std::map<SKILLS::ESkills, CXpProgressInfos> dummy;
-	XpGain = addXpToSkillInternal(XpGain, Skill, AddXpToSkillSingle, dummy, silent);
+	XpGain = addXpToSkillInternal(XpGain, Skill, AddXpToSkillSingle, dummy, silent, useCats);
 	if (XpGain > 0)
 	{
 		do

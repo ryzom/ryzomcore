@@ -4447,7 +4447,7 @@ NLMISC_COMMAND(getPlayerGuild, "get player guild informations", "<uid>")
 	return true;
 }
 
-NLMISC_COMMAND(addXp, "Gain experience in a given skills", "<uid> <xp> <skill> [<count>]")
+NLMISC_COMMAND(addXp, "Gain experience in a given skills", "<uid> <xp> <skill> [<count>] [<usecats]")
 {
 	if (args.size() < 3) return false;
 
@@ -4464,11 +4464,15 @@ NLMISC_COMMAND(addXp, "Gain experience in a given skills", "<uid> <xp> <skill> [
 	else
 		NLMISC::fromString(args[3], count);
 
+	bool useCats = true;
+	if (args.size() > 4)
+		useCats = args[4] == "1";
+
 	count = min(count, (uint)100);
 
 	uint i;
 	for (i=0; i<count; ++i)
-		c->addXpToSkill((double)xp, skill, true);
+		c->addXpToSkill((double)xp, skill, true, useCats);
 
 	return true;
 }
@@ -5197,6 +5201,33 @@ NLMISC_COMMAND(despawnTargetSource, "Despawn the target source", "<uid>")
 	log.displayNL("ERR");
 	return true;
 }
+
+NLMISC_COMMAND(getTargetSourceInfos, "Get infos about the target source", "<uid>")
+{
+	if (args.size() < 1) return false;
+
+	GET_ACTIVE_CHARACTER
+	const CEntityId &target = c->getTarget();
+	if (target.getType() == RYZOMID::forageSource)
+	{
+		TDataSetRow sourceRowId = c->getTargetDataSetRow();
+		CHarvestSource	*source = CHarvestSourceManager::getInstance()->getEntity( sourceRowId );
+		if (source)
+		{
+			CVector2f pos = source->pos();
+			float maxQ = 0;
+			const CRecentForageSite *forageSite = source->forageSite();
+			if (forageSite)
+				maxQ = forageSite->deposit()->maxQuality();
+			log.displayNL("%s|%u|%f|%f,%f", source->materialSheet().toString().c_str(), source->getStatQuality(), maxQ, pos.x, pos.y);
+			return true;
+		}
+	}
+
+	log.displayNL("ERR");
+	return true;
+}
+
 
 
 //----------------------------------------------------------------------------
