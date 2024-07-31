@@ -550,9 +550,9 @@ void CGuild::dumpGuildInfos( NLMISC::CLog & log )
 	log.displayNL("\tMoney: %" NL_I64 "u", getMoney() );
 //	log.displayNL("\tVillage: %hu", getVillage() );
 	log.displayNL("\tCreation date: %u", getCreationDate() );
-//	log.displayNL("\tXP: %u", getXP() );
+	log.displayNL("\tXP: %u", getXP() );
 //	log.displayNL("\tBulk: %d", _Inventory->getInventoryBulk() );
-	log.displayNL("\tMax bulk: %d", _Inventory->getMaxBulk() );
+//	log.displayNL("\tMax bulk: %d", _Inventory->getMaxBulk() );
 //	log.displayNL("\tCharge points: %u", getChargesPoints() );
 	log.displayNL("\tRace: %s", EGSPD::CPeople::toString(getRace()).c_str() );
 	log.displayNL("\tIcon: 0x%016" NL_I64 "x", getIcon() );

@@ -93,11 +93,11 @@ void CTeamManager::joinLeagueProposal( CCharacter * leader, const CEntityId &tar
 		CCharacter::sendDynamicSystemMessage( leader->getId(),"INVALID_LEAGUE_TARGET" );
 		return;
 	}
-	
+
 	// god player are forbidden to team
 	if (leader->godMode() || invitedPlayer->godMode())
 	{
-		nlwarning("<CTeamManager joinLeagueProposal> Player %s invited %s, but at least on of them is god, forbidden", 
+		nlwarning("<CTeamManager joinLeagueProposal> Player %s invited %s, but at least on of them is god, forbidden",
 			leaderId.toString().c_str(),
 			targetId.toString().c_str());
 		CCharacter::sendDynamicSystemMessage( leader->getId(),"TEAM_GOD_FORBIDDEN" );
@@ -143,12 +143,12 @@ void CTeamManager::joinLeagueProposal( CCharacter * leader, const CEntityId &tar
 	invitedPlayer->setLeagueInvitor(leaderId);
 
 	CEntityId msgTargetEId = targetId;
-	
+
 	//send the appropriate string to the client
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 	params[0].setEIdAIAlias( leaderId, CAIAliasTranslator::getInstance()->getAIAlias(leaderId) );
 	uint32 txt = STRING_MANAGER::sendStringToClient(TheDataset.getDataSetRow(targetId), "LEAGUE_PROPOSAL", params );
-	
+
 	CMessage msgout( "IMPULSION_ID" );
 	msgout.serial( const_cast<CEntityId&>(msgTargetEId) );
 	CBitMemStream bms;
@@ -159,8 +159,8 @@ void CTeamManager::joinLeagueProposal( CCharacter * leader, const CEntityId &tar
 
 	params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias( targetId ) );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(leader->getEntityRowId(), "LEAGUE_INVITE", params);
-	
-	leader->updateTarget();	
+
+	leader->updateTarget();
 }
 
 //---------------------------------------------------
@@ -182,10 +182,10 @@ void CTeamManager::joinLeagueDecline( const NLMISC::CEntityId &charId)
 	}
 
 	//inform both players
-	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);	
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 	params[0].setEIdAIAlias( charId, CAIAliasTranslator::getInstance()->getAIAlias( charId) );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(invited->getTeamInvitor()), "LEAGUE_DECLINE", params);
-	
+
 	params[0].setEIdAIAlias( invited->getTeamInvitor(), CAIAliasTranslator::getInstance()->getAIAlias( invited->getTeamInvitor() ) );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(invited->getEntityRowId(), "LEAGUE_YOU_DECLINE", params);
 
@@ -223,7 +223,7 @@ void CTeamManager::joinLeagueAccept( const NLMISC::CEntityId &charId)
 		return;
 	}
 	invitor->setAfkState(false);
-	
+
 	//cancel the proposal
 	invited->setLeagueInvitor( CEntityId::Unknown );
 
@@ -232,20 +232,20 @@ void CTeamManager::joinLeagueAccept( const NLMISC::CEntityId &charId)
 	//if the invited player had a fake team, remove it
 	teamInvited = getRealTeam(invited->getTeamId());
 	teamInvitor = getRealTeam(invitor->getTeamId());
-	
+
 	if ( !teamInvitor )
 	{
 		nlwarning("<CTeamManager joinLeagueAccept>character %s, invitor id %s, the invited or invitor player is not in a valid team. ",charId.toString().c_str(),invitor->getId().toString().c_str() );
 		return;
 	}
-	
-	
+
+
 	// check that the invitor team have league else create them
 	if (teamInvitor->getLeagueId() == DYN_CHAT_INVALID_CHAN )
 	{
 		teamInvitor->setLeague("League");
 	}
-	
+
 	if (teamInvited) {
 		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(invited->getId()).toString();
 		CPVPManager2::getInstance()->broadcastMessage(teamInvitor->getLeagueId(), string("<TEAM>"), "<-- "+playerName);
@@ -256,7 +256,7 @@ void CTeamManager::joinLeagueAccept( const NLMISC::CEntityId &charId)
 		CPVPManager2::getInstance()->broadcastMessage(teamInvitor->getLeagueId(), string("<PLAYER>"), "<-- "+playerName);
 		invited->setLeagueId(teamInvitor->getLeagueId(), true);
 	}
-	
+
 } // joinLeagueAccept //
 
 
@@ -282,11 +282,11 @@ void CTeamManager::joinProposal( CCharacter * leader, const CEntityId &targetId)
 		CCharacter::sendDynamicSystemMessage( leader->getId(),"INVALID_LEAGUE_TARGET" );
 		return;
 	}
-	
+
 	// god player are forbidden to team
 	if (leader->godMode() || invitedPlayer->godMode())
 	{
-		nlwarning("<CTeamManager joinProposal> Player %s invited %s, but at least on of them is god, forbidden", 
+		nlwarning("<CTeamManager joinProposal> Player %s invited %s, but at least on of them is god, forbidden",
 			leaderId.toString().c_str(),
 			targetId.toString().c_str());
 		CCharacter::sendDynamicSystemMessage( leader->getId(),"TEAM_GOD_FORBIDDEN" );
@@ -353,11 +353,11 @@ void CTeamManager::joinProposal( CCharacter * leader, const CEntityId &targetId)
 //	TVectorParamCheck params;
 //	params.resize(1);
 
-	// inform the team leader	
-//	params[0].Type = STRING_MANAGER::player;	
+	// inform the team leader
+//	params[0].Type = STRING_MANAGER::player;
 	params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias( targetId ) );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(leader->getEntityRowId(), "TEAM_INVITE", params);
-	
+
 	leader->updateTarget();
 } // joinProposal //
 
@@ -380,10 +380,10 @@ void CTeamManager::joinDecline( const NLMISC::CEntityId &charId)
 	}
 
 	//inform both players
-	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);	
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 	params[0].setEIdAIAlias( charId, CAIAliasTranslator::getInstance()->getAIAlias( charId) );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(invited->getTeamInvitor()), "TEAM_DECLINE", params);
-	
+
 	params[0].setEIdAIAlias( invited->getTeamInvitor(), CAIAliasTranslator::getInstance()->getAIAlias( invited->getTeamInvitor() ) );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(invited->getEntityRowId(), "TEAM_YOU_DECLINE", params);
 
@@ -421,29 +421,46 @@ void CTeamManager::joinAccept( const NLMISC::CEntityId &charId)
 		return;
 	}
 	invitor->setAfkState(false);
+
+	CTeam * team = getTeam(invitor->getTeamId());
+
+	if (team)
+	{
+		CCharacter *leader = PlayerManager.getOnlineChar( team->getLeader() );
+		if (!leader)
+		{
+			nlwarning("<CTeamManager joinAccept>character %s, Invalid team leader id %s",charId.toString().c_str(),team->getLeader().toString().c_str());
+			return;
+		}
+
+		if (team->getLeader() != invitorId) {
+			//cancel the proposal
+			invited->setTeamInvitor( CEntityId::Unknown );
+			return;
+		}
+	}
+
 	//cancel the proposal
 	invited->setTeamInvitor( CEntityId::Unknown );
 
-	CTeam *team;
 	//if the invited player had a fake team, remove it
-	team = getTeam( invited->getTeamId() );
-	
-	if ( team )
+	CTeam *teamInvited = getTeam( invited->getTeamId() );
+
+	if ( teamInvited )
 	{
 		// if the team is not fake, there is a problem...
-		if ( !team->isFake() )
+		if ( !teamInvited->isFake() )
 		{
 			nlwarning("<CTeamManager joinAccept>character %s, invitor id %s, the invited player is in a valid team. ",charId.toString().c_str(),invitor->getId().toString().c_str() );
 			return ;
 		}
 		else
 		{
-			team->release();
+			teamInvited->release();
 			removeTeam( invited->getTeamId() );
 		}
 	}
 
-	team = getTeam(invitor->getTeamId());
 	//  create the team if it does not exist
 	if ( !team )
 	{
@@ -504,9 +521,9 @@ void CTeamManager::kickCharacter( CCharacter * leader, uint8 memberIndex )
 	// check must be done before
 	nlassert(leader);
 	const NLMISC::CEntityId & leaderId = leader->getId();
-	
+
 	// get the leader's team
-	CTeam * team = getRealTeam( leader->getTeamId() );	
+	CTeam * team = getRealTeam( leader->getTeamId() );
 	if ( team == NULL )
 	{
 		nlwarning("<CTeamManager kickCharacter> Player %s has an invalid team id %d", leaderId.toString().c_str(), leader->getTeamId() );
@@ -548,17 +565,17 @@ void CTeamManager::kickCharacter( CCharacter * leader, uint8 memberIndex )
 
 
 	// inform the kicked player
-	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);	
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 	params[0].setEIdAIAlias( leaderId, CAIAliasTranslator::getInstance()->getAIAlias( leaderId ) );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(*it), "TEAM_KICKED_YOU", params);
-	
+
 	// inform other team members
 	params[0].setEIdAIAlias( *it, CAIAliasTranslator::getInstance()->getAIAlias( *it ) );
 	set<CEntityId> exclude;
 	exclude.insert(*it);
 	team->sendDynamicMessageToMembers("TEAM_KICKED", params, exclude);
 
-	//  remove the kicked player from team	
+	//  remove the kicked player from team
 	team->removeCharacter( kickedChar );
 
 	leader->updateTarget();
@@ -576,7 +593,7 @@ void CTeamManager::kickCharacter( CCharacter * leader, uint8 memberIndex )
 	*/
 
 	CMissionManager::getInstance()->updateEscortTeam( kickedChar->getId() );
-	
+
 }// kickCharacter
 
 //---------------------------------------------------
@@ -591,7 +608,7 @@ void CTeamManager::removeCharacter( const CEntityId &charId )
 		return;
 	}
 	player->setAfkState(false);
-	CTeam * team = getRealTeam( player->getTeamId() );	
+	CTeam * team = getRealTeam( player->getTeamId() );
 	if ( team == NULL )
 	{
 		nlwarning("<CTeamManager removeCharacter> Player %s has an invalid team id %d", charId.toString().c_str(), player->getTeamId() );
@@ -611,7 +628,7 @@ void CTeamManager::removeCharacter( const CEntityId &charId )
 		else
 		{
 			const list<CEntityId> &members = team->getTeamMembers();
-			
+
 			CEntityId eId(team->getSuccessor());
 			params[0].setEIdAIAlias( eId, CAIAliasTranslator::getInstance()->getAIAlias(eId) );
 			PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(charId), "TEAM_YOU_LEAVE_LEADER", params);
@@ -662,7 +679,7 @@ void CTeamManager::addFakeTeam(CCharacter * player)
 			{
 				_Teams[i].setNextFreeId( i + 1 );
 			}
-		}	
+		}
 		_Teams[_FirstFreeTeamId].setAsFake();
 		// update the new leader
 		player->setTeamId(_FirstFreeTeamId);
@@ -705,23 +722,23 @@ CTeamManager::TInviteRetCode CTeamManager::isLeagueInvitableBy(CCharacter * invi
 
 	if ( !TheDataset.isAccessible(invited->getEntityRowId()) || !TheDataset.isAccessible(invitor->getEntityRowId()))
 		return CantInvite;
-	
+
 	// check that the invitor is in team
 	CTeam * team = getRealTeam( invitor->getTeamId() );
 	if (!team)
 		return CantInvite;
-	
+
 	// check that the invitor is the leader
 	if (team->getLeader() != invitor->getId() )
 		return CantInvite;
-		
+
 	// check that the invited don't have league
 	if (invited->getLeagueId() !=  DYN_CHAT_INVALID_CHAN)
 		return AlreadyInLeague;
-	  
+
 	// check if target is not already invited
 	if( invited->getLeagueInvitor() != CEntityId::Unknown )
-		return AlreadyInvited;	
+		return AlreadyInvited;
 
 	// get the target team
 	team = getRealTeam( invited->getTeamId() );
@@ -757,10 +774,10 @@ CTeamManager::TInviteRetCode CTeamManager::isInvitableBy(CCharacter * invited, C
 	{
 		return AlreadyInTeam;
 	}
-	
+
 	// check that the invitor is alone or a group leader
 	team = getRealTeam( invitor->getTeamId() );
-	
+
 	if (team && team->getLeader()!= invitor->getId())
 	{
 		return CantInvite;
@@ -797,21 +814,21 @@ void CTeamManager::pvpAttackOccursInTeam( CCharacter * actor, CCharacter * targe
 				if( CPVPManager2::getInstance()->factionWarOccurs( actor->getAllegiance(), target->getAllegiance() ) )
 				{
 					// attack is made in PvP faction context, kick aggressor
-			
+
 					// inform the kicked player
-					SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);	
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 					params[0].setEIdAIAlias( actor->getId(), CAIAliasTranslator::getInstance()->getAIAlias( actor->getId() ) );
 					PHRASE_UTILITIES::sendDynamicSystemMessage(actor->getEntityRowId(), "TEAM_PVP_ATTACKER_KICKED_YOU", params);
-					
+
 					// inform other team members
-					SM_STATIC_PARAMS_2(params2, STRING_MANAGER::player, STRING_MANAGER::player);	
+					SM_STATIC_PARAMS_2(params2, STRING_MANAGER::player, STRING_MANAGER::player);
 					params2[0].setEIdAIAlias( actor->getId(), CAIAliasTranslator::getInstance()->getAIAlias( actor->getId() ) );
 					params2[1].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias( target->getId() ) );
 					set<CEntityId> exclude;
 					exclude.insert( actor->getId() );
 					team->sendDynamicMessageToMembers("TEAM_PVP_ATTACKER_KICKED", params2, exclude);
 
-					//  remove the kicked player from team	
+					//  remove the kicked player from team
 					removeCharacter( actor->getId() );
 				}
 			}
@@ -839,21 +856,21 @@ void CTeamManager::pvpHelpOccursInTeam( CCharacter * actor, CCharacter * target 
 				if( CPVPManager2::getInstance()->isFactionInWar( actor->getAllegiance().first ) || CPVPManager2::getInstance()->isFactionInWar( actor->getAllegiance().second ) )
 				{
 					// help is made in PvP faction context, on an external character of team
-			
+
 					// inform the kicked player
-					SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);	
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 					params[0].setEIdAIAlias( actor->getId(), CAIAliasTranslator::getInstance()->getAIAlias( actor->getId() ) );
 					PHRASE_UTILITIES::sendDynamicSystemMessage(actor->getEntityRowId(), "TEAM_PVP_HELPER_KICKED_YOU", params);
-					
+
 					// inform other team members
-					SM_STATIC_PARAMS_2(params2, STRING_MANAGER::player, STRING_MANAGER::player);	
+					SM_STATIC_PARAMS_2(params2, STRING_MANAGER::player, STRING_MANAGER::player);
 					params2[0].setEIdAIAlias( actor->getId(), CAIAliasTranslator::getInstance()->getAIAlias( actor->getId() ) );
 					params2[1].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias( target->getId() ) );
 					set<CEntityId> exclude;
 					exclude.insert( actor->getId() );
 					team->sendDynamicMessageToMembers("TEAM_PVP_HELPER_KICKED", params2, exclude);
 
-					//  remove the kicked player from team	
+					//  remove the kicked player from team
 					removeCharacter( actor->getId() );
 				}
 			}
@@ -884,7 +901,7 @@ void CTeamManager::removeTeam( uint16 teamId )
 {
 	BOMB_IF(teamId==CTEAM::InvalidTeamId,"removeTeam(): Invalid team Id",return);
 	BOMB_IF(teamId>=_Teams.size(),"removeTeam(): Invalid team Id",return);
-	
+
 	_Teams[teamId].setNextFreeId( _FirstFreeTeamId );
 	_FirstFreeTeamId = teamId;
 }// removeTeam
