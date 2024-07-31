@@ -726,7 +726,7 @@ void CInventoryBase::updateWeightAndBulk(const CGameItemPtr &item, sint32 deltaQ
 		{
 			nlwarning("Inventory '%s' : weight is overload", INVENTORIES::toString(_InventoryId).c_str());
 		}
-		if (deltaQt > 0 && _InventoryBulk[chest] > getMaxBulk(chest))
+		if (deltaQt > 0 && _InventoryBulk[chest] > getMaxBulk(chest) && _InventoryId != INVENTORIES::guild)
 		{
 			nlwarning("Inventory '%s' : bulk is overload", INVENTORIES::toString(_InventoryId).c_str());
 		}
