@@ -13,16 +13,23 @@ on:
       - '!.github/workflows/build-studio.yml'
 
 jobs:
-  build:
+  strings:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
       - name: Set reusable strings
         id: strings
         shell: bash
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs:
+      - strings
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Dependencies
         run: |
@@ -49,7 +56,7 @@ jobs:
 
       - name: Configure CMake
         run: >
-          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          cmake -B ${{ needs.strings.outputs.build-output-dir }}
           -G "Ninja"
           -DWITH_QT5=ON
           -DWITH_STUDIO=ON
@@ -60,4 +67,51 @@ jobs:
           -S ${{ github.workspace }}
 
       - name: Build
-        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --target studio
+        run: cmake --build ${{ needs.strings.outputs.build-output-dir }} --target studio
+
+  build-static:
+    needs:
+      - strings
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependencies
+        run: |
+          sudo apt update
+          sudo apt install --yes software-properties-common
+          sudo apt update
+          sudo apt install --yes \
+          cmake build-essential ninja-build ccache \
+            bison autoconf automake \
+            libpng-dev \
+            libjpeg-dev \
+            libgif-dev libfreetype6-dev \
+            freeglut3-dev \
+            liblua5.2-dev libluabind-dev libcpptest-dev \
+            libogg-dev libvorbis-dev libopenal-dev \
+            libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+            libmysqlclient-dev \
+            libxml2-dev \
+            libcurl4-openssl-dev libssl-dev \
+            libsquish-dev \
+            liblzma-dev \
+            libgsf-1-dev \
+            qtbase5-dev qttools5-dev qttools5-dev-tools libqtpropertybrowser-dev
+
+      - name: Configure CMake
+        run: >
+          cmake -B ${{ needs.strings.outputs.build-output-dir }}
+          -G "Ninja"
+          -DWITH_QT5=ON
+          -DWITH_STUDIO=ON
+          -DWITH_STATIC=ON
+          -DWITH_RYZOM=OFF
+          -DWITH_NEL_TOOLS=OFF
+          -DWITH_NEL_SAMPLES=OFF
+          -DWITH_NEL_TESTS=OFF
+          -S ${{ github.workspace }}
+
+      - name: Build
+        run: cmake --build ${{ needs.strings.outputs.build-output-dir }} --target studio
