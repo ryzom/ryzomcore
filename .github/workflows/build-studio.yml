@@ -15,7 +15,8 @@ on:
 jobs:
   strings:
     runs-on: ubuntu-latest
-
+    outputs:
+      build-output-dir: ${{ steps.strings.outputs.build-output-dir }}
     steps:
       - name: Set reusable strings
         id: strings
