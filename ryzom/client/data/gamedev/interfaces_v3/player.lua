@@ -88,8 +88,8 @@ function game:getPositionInfos(x, y)
 	end
 
 	for cont, c in pairs(game.World) do
-		player_cont = cont
 		if point_inside_poly(x, y, c[2]) then
+			player_cont = cont
 			for region, r in pairs(c[3]) do
 				if point_inside_poly(x, y, r[2]) then
 					player_region = region

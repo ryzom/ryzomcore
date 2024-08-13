@@ -384,9 +384,11 @@ function ArkSelectRyform(curwin, id, mod)
 end
 
 function ArkSendForm(name)
-	ArkGetStageEdit(__CURRENT_WINDOW__):find(name.."__command:eb").input_string = "reset"
-	ArkGetStageEdit(__CURRENT_WINDOW__):find("send:b"):runLeftClickAction()
+	local ui = getUICaller().id
+	ArkGetStageEdit(ui):find(name.."__command:eb").input_string = "reset"
+	ArkGetStageEdit(ui):find("send:b"):runLeftClickAction()
 end
+
 
 function ArkGetStageEdit(curwin)
 	local sid = string.split(curwin, ":")
