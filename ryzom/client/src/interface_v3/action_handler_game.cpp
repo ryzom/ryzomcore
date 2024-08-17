@@ -3869,6 +3869,48 @@ class CHandlerSetInterfaceScale : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CHandlerSetInterfaceScale, "set_ui_scale");
 
+// ***************************************************************************
+class CHandlerSetMouseScale : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	{
+		std::string s;
+		s = getParam(Params, "scale");
+		if (!s.empty()) {
+			bool valid = false;
+			if (nlstricmp(s, "auto") == 0 || s == "0")
+			{
+				valid = true;
+				ClientCfg.HardwareCursorScale = 0;
+			}
+			else
+			{
+				float scale;
+				if (fromString(s, scale))
+				{
+					if (scale > 0)
+					{
+						valid = true;
+						ClientCfg.HardwareCursorScale = scale;
+					}
+				}
+			}
+
+			if (valid)
+			{
+				ClientCfg.writeDouble("HardwareCursorScale", ClientCfg.HardwareCursorScale);
+				ClientCfg.IsInvalidated = true;
+				return;
+			}
+		}
+
+		string help = "/setmousescale 1";
+		CInterfaceManager::getInstance()->displaySystemInfo("/setmousescale auto");
+		CInterfaceManager::getInstance()->displaySystemInfo(help);
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerSetMouseScale, "set_mouse_scale");
+
 
 // ***************************************************************************
 class CHandlerGameMissionAbandon : public IActionHandler

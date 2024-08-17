@@ -178,44 +178,13 @@ void CDriverD3D::addCursor(const std::string &name, const NLMISC::CBitmap &curso
 	CCursor &curs = _Cursors[name];
 	curs = CCursor(); // erase possible previous cursor
 
-	uint destWidth = GetSystemMetrics(SM_CXCURSOR);
-	uint destHeight = GetSystemMetrics(SM_CYCURSOR);
-
-	// build a square bitmap
-	uint tmpSize = std::max(maxX - minX + 1, maxY - minY + 1);
-	curs.Src.resize(tmpSize, tmpSize);
-	// blit at top left corner
+	//// blit at top left corner
+	curs.Src.resize(cursorBitmap.getWidth(), cursorBitmap.getHeight());
 	curs.Src.blit(cursorBitmap, minX, minY, maxX - minX + 1, maxY - minY + 1, 0, 0);
 
 	curs.OrigHeight = cursorBitmap.getHeight();
 	curs.HotspotOffsetX = minX;
 	curs.HotspotOffsetY = minY;
-	//
-	curs.HotspotScale = _CursorScale;
-	clamp(curs.HotspotScale, 0.f, 1.f);
-	// first resampling, same for all cursors
-	tmpSize = (uint) (tmpSize * curs.HotspotScale);
-	if (tmpSize == 0) tmpSize = 1;
-
-	if (curs.HotspotScale < 1.f)
-	{
-		curs.Src.resample(tmpSize, tmpSize);
-	}
-
-	// shrink if necessary
-	if (tmpSize > destWidth || tmpSize > destHeight) // need to shrink ?
-	{
-		// constraint proportions
-		curs.HotspotScale *= std::min(float(destWidth) / tmpSize, float(destHeight) / tmpSize);
-		curs.Src.resample(destWidth, destHeight);
-	}
-	else
-	{
-		CBitmap final;
-		final.resize(destWidth, destHeight);
-		final.blit(&curs.Src, 0, 0);
-		curs.Src.swap(final);
-	}
 
 	if (name == _CurrName)
 	{
@@ -268,9 +237,10 @@ void CDriverD3D::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot
 	{
 		// Update cursor if modified or not already built
 		CCursor &curs = it->second;
-		hotSpotX = (sint) (curs.HotspotScale * (hotSpotX - curs.HotspotOffsetX));
-		hotSpotY = (sint) (curs.HotspotScale * ((curs.OrigHeight - hotSpotY) - curs.HotspotOffsetY));
+		hotSpotX = (sint) (hotSpotX - curs.HotspotOffsetX);
+		hotSpotY = (sint) ((curs.OrigHeight - hotSpotY) - curs.HotspotOffsetY);
 		if (curs.Cursor == EmptyCursor ||
+			curs.HotspotScale != _CursorScale ||
 			curs.HotSpotX != hotSpotX ||
 			curs.HotSpotY != hotSpotY ||
 			curs.Col != col ||
@@ -283,6 +253,7 @@ void CDriverD3D::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot
 			curs.Cursor = buildCursor(curs.Src, col, rot, hotSpotX, hotSpotY);
 			curs.Col = col;
 			curs.Rot = rot;
+			curs.HotspotScale = _CursorScale;
 			curs.HotSpotX = hotSpotX;
 			curs.HotSpotY = hotSpotY;
 			curs.ColorDepth = _ColorDepth;
@@ -312,8 +283,17 @@ nlCursor CDriverD3D::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 ro
 {
 	nlassert(isAlphaBlendedCursorSupported());
 
-	uint mouseW = GetSystemMetrics(SM_CXCURSOR);
-	uint mouseH = GetSystemMetrics(SM_CYCURSOR);
+	// use size from mouse texture
+	uint mouseW = src.getWidth();
+	uint mouseH = src.getHeight();
+
+	if (_CursorScale != 1.f)
+	{
+		mouseW *= _CursorScale;
+		mouseH *= _CursorScale;
+		hotSpotX *= _CursorScale;
+		hotSpotY *= _CursorScale;
+	}
 
 	CBitmap rotSrc = src;
 	if (rot > 3) rot = 3; // mimic behavior of 'CViewRenderer::drawRotFlipBitmapTiled' (why not rot & 3 ??? ...)

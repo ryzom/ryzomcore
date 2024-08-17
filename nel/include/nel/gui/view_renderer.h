@@ -334,6 +334,7 @@ namespace NLGUI
 		sint32 getTextureIdFromName (const std::string &sName) const;
 		std::string getTextureNameFromId (sint32 TxID);
 		void getTextureSizeFromId (sint32 id, sint32 &width, sint32 &height);
+		float getTextureScaleFromId (sint32 id) const;
 		NLMISC::CRGBA getTextureColor(sint32 id, sint32 x, sint32 y);
 
 
@@ -500,6 +501,11 @@ namespace NLGUI
 
 		// SImage accessors
 		SImage	*getSImage(sint32 textureId)
+		{
+			return &(*(_SImageIterators[textureId]));
+		}
+
+		SImage	*getSImage(sint32 textureId) const
 		{
 			return &(*(_SImageIterators[textureId]));
 		}

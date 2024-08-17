@@ -210,7 +210,7 @@ struct CClientConfig
 
 	/// Use a hardware cursor
 	bool			HardwareCursor;
-	float			HardwareCursorScale; // scale for hardware cursor bitmap (in ]0, 1])
+	float			HardwareCursorScale; // scale for hardware cursor bitmap, 0 = use gui scale
 	float			CursorSpeed;
 	uint			CursorAcceleration;
 	float			FreeLookSpeed;

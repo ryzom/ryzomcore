@@ -128,6 +128,7 @@
 	<command name="webdev" action="browse" params="name=ui:interface:webig:content:html|url=http://localhost/index.html"/>
 
 	<command name="setuiscale" action="set_ui_scale" params="scale=$"/>
+	<command name="setmousescale" action="set_mouse_scale" params="scale=$"/>
 
 	<command name="skiptutorial" action="lua" params="help:skipTutorial()"/>
 </interface_config>
