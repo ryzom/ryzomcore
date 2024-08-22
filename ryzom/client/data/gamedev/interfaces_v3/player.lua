@@ -105,6 +105,14 @@ function game:getPositionInfos(x, y)
 	return player_cont, player_region, player_places
 end
 
+function game:getTargetDistance()
+	local px,py = getPlayerPos()
+	local tx,ty = getTargetPos()
+	if tx == nil then
+		return 99999999
+	end
+	return math.sqrt((px-tx)*(px-tx)+(py-ty)*(py-ty))
+end
 
 
 ------------------------------------------------------------------------------------------------------------

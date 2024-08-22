@@ -1780,6 +1780,18 @@ function game:onMainLoopBegin()
 	debug("MainLoop")
 end
 
+function game:checkRpItemsUpdate()
+	if game.initializedRpItems == 0 then
+		if nltime.getLocalTime() > game.initializedRpItems + 10 then
+			game.initializedRpItems = nltime.getLocalTime()
+			game.usedRpRightItem = "xx"
+			game:updateRpItems()
+		end
+	else
+		setOnDraw(getUI("ui:interface:rpitems_actions"), "")
+	end
+
+end
 
 --------------------------------------------------------------------------------------------------------------
 -- handler called by C++ to tell that all initial value have been set in the db
@@ -1792,6 +1804,11 @@ function game:onInGameDbInitialized()
 		addOnDbChange(getUI("ui:interface:inv_guild"), "@SERVER:GUILD:CHEST:"..tostring(i)..":NAME", "updateChestList()")
 	end
 	addOnDbChange(getUI("ui:interface:inv_guild"), "@SERVER:GUILD:CHEST:0:BULK_MAX", "updateChestList(true)")
+
+	game.initializedRpItems = nltime.getLocalTime()
+	game.usedRpRightItem = "xx"
+	game:updateRpItems()
+	setOnDraw(getUI("ui:interface:rpitems_actions"), "game:checkRpItemsUpdate()")
 
 	-- if the journal is opened, force an update for the fixed entry text
 	-- (says if we're in start island, paying account ...) need DB flags like

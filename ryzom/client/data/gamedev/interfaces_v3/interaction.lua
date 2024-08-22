@@ -787,6 +787,7 @@ end
 
 function game:openGuildSpecialBag()
 	runAH(nil, "browse_home", "name=ui:interface:guild:content:tab_special_bag:inv:html")
+	getUI("ui:interface:guild:content:tab_special_bag:inv:html"):renderHtml("<table width='100%'><td height='100px'><tr></td></tr><tr><td align='center' style='font-size: 18px; font-color: lightgreen'>"..tostring(i18n.get("uiPleaseWait")).."</td></tr></table>")
 end
 
 
