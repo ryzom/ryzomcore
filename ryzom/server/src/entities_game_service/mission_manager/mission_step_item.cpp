@@ -238,12 +238,14 @@ class CMissionStepForage : public IMissionStepItem
 			if ( eventSpe.Sheet == itemSheet && eventSpe.Quality >= quality )
 			{
 				LOGMISSIONSTEPSUCCESS("forage");
-				if (!webAppUrl.empty() && _SubSteps[subStepIndex].Quantity > quantity)
+				if (!webAppUrl.empty())
 				{
-					/// TODO : Check it
-
-					_SubSteps[subStepIndex].Quantity = 0;
-					_User->validateDynamicMissionStep(webAppUrl);
+					 if (eventSpe.Quantity >= quantity) {
+						_User->validateDynamicMissionStep(webAppUrl+toString("&quality_items=%u&result=FINISHED", eventSpe.Quality));
+						_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_CALLBACK", "");
+						return 1000;
+					}
+					return 0;
 				}
 				return eventSpe.Quantity;
 			}
@@ -400,7 +402,7 @@ uint CMissionStepLootRm::processEvent( const TDataSetRow & userRow, const CMissi
 		}
 
 		CMissionEventLootRm & eventSpe = (CMissionEventLootRm&)event;
-		nlinfo("Sheet : %s, Quality : %d / %d, Quantity: %d / %d", eventSpe.Sheet.toString().c_str(), eventSpe.Quality, quality, eventSpe.Quantity, quantity);
+		nlinfo("Loot RM : Sheet : %s, Quality : %d / %d, Quantity: %d / %d", eventSpe.Sheet.toString().c_str(), eventSpe.Quality, quality, eventSpe.Quantity, quantity);
 		if ( eventSpe.Sheet == itemSheet && eventSpe.Quality >= quality )
 		{
 			if (!webAppUrl.empty())

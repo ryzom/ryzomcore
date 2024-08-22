@@ -957,7 +957,7 @@ public:
 	 * \param XpGain is the amount of xp added to a skill / speciality
 	 * \param Skill is the name of used skill for action (or associated skill ofr specialized action used)
 	 */
-	void addXpToSkill(double XpGain, const std::string &Skill, bool silent = false);
+	void addXpToSkill(double XpGain, const std::string &Skill, bool silent = false, bool useCats = true);
 
 	/**
 	 * addXpToSkillAndBuffer add xpGain to a skill. Do not send messages to clients, but buffer the messages
@@ -3274,7 +3274,7 @@ private:
 	 *	may even be bigger than the original XpGain!
 	 */
 	double addXpToSkillInternal(double XpGain, const std::string &ContSkill, TAddXpToSkillMode addXpMode,
-								std::map<SKILLS::ESkills, CXpProgressInfos> &gainBySkill, bool silent=false);
+								std::map<SKILLS::ESkills, CXpProgressInfos> &gainBySkill, bool silent=false, bool useCats = true);
 
 	/// Initialize the specified pet inventory, if it is valid
 	bool initPetInventory(uint8 index);
