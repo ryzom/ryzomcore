@@ -2402,6 +2402,21 @@ NLMISC_COMMAND(teleportMe, "teleport", "<uid> [x,y,z,h|player name|bot name] tel
 				log.displayNL("ERR: INVALID_CREATURE");
 			}
 		}
+		else if (value.find("spawn:") != string::npos)
+		{
+
+			uint16 spawnPoint = CZoneManager::getInstance().getTpSpawnZoneIdByName(value.substr(6));
+			const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(spawnPoint);
+
+			if ( zone == NULL )
+			{
+				log.displayNL("ERR: INVALID_SPAWN_POINT");
+			}
+			else
+			{
+				zone->getRandomPoint(x, y, z, h);
+			}
+		}
 		else
 		{
 
