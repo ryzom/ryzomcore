@@ -17,7 +17,7 @@
 
 
 #include "stdpch.h"
-#include "mission_log.h"
+#include "admin_log.h"
 #include "nel/misc/displayer.h"
 
 using namespace std;
@@ -63,5 +63,5 @@ void CAdminCommandLog::display(const char *format, ...)
 	string toDisp = str;
 	toDisp = string(IDisplayer::dateToHumanString()) + string(" ") + toDisp;
 
-	Log->displayRawNL(toDisp.c_str());
+	Log->displayRawNL("%s", toDisp.c_str());
 }

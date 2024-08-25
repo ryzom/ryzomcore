@@ -45,6 +45,9 @@ public:
 	/// For a https server, call this with true to check for server certificate and host
 	bool verifyServer(bool verify);
 
+	/// Setup the user agent
+	void setUserAgent(const std::string& userAgent);
+
 	/// Send a 'get' request
 	bool sendGet(const std::string &url, const std::string &params = std::string(), bool verbose = false);
 
@@ -80,6 +83,7 @@ private:
 
 	std::vector<uint8>	_ReceiveBuffer;
 	std::string			_Auth; // must be kept here because curl only stores the char pointer
+	std::string	_UserAgent;
 
 	std::vector<char> m_ErrorBuf;
 	bool m_Verify;

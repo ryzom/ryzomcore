@@ -88,6 +88,11 @@ bool CCurlHttpClient::verifyServer(bool verify)
 	return true;
 }
 
+void CCurlHttpClient::setUserAgent(const std::string& userAgent)
+{
+	_UserAgent = userAgent;
+}
+
 // ***************************************************************************
 bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string &url, const std::string &cookieName, const std::string &cookieValue, const std::string& postParams, bool verbose)
 {
@@ -120,6 +125,8 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 
 	// Include the header in the response
 	curl_easy_setopt(_Curl, CURLOPT_HEADER, 1);
+	if (!_UserAgent.empty())
+		curl_easy_setopt(_Curl, CURLOPT_USERAGENT, _UserAgent.c_str());
 
 	// Register the receive callback
 	curl_easy_setopt(_Curl, CURLOPT_WRITEFUNCTION, CCurlHttpClient::writeDataFromCurl);

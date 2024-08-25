@@ -218,8 +218,9 @@ void CGuild::setChestParams(uint8 chest, std::string name, EGSPD::CGuildGrade::T
 	NLMISC::TStringId strId = CStringMapper::map( name );
 	ucstring ucname;
 	ucname.fromUtf8(name);
-	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, 0);
 	if (name == "")
+		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, 0);
+	else
 		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, ucname, true);
 	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, gradeView);
 	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setPUT_GRADE(_DbGroup, gradePut);
@@ -549,9 +550,9 @@ void CGuild::dumpGuildInfos( NLMISC::CLog & log )
 	log.displayNL("\tMoney: %" NL_I64 "u", getMoney() );
 //	log.displayNL("\tVillage: %hu", getVillage() );
 	log.displayNL("\tCreation date: %u", getCreationDate() );
-//	log.displayNL("\tXP: %u", getXP() );
+	log.displayNL("\tXP: %u", getXP() );
 //	log.displayNL("\tBulk: %d", _Inventory->getInventoryBulk() );
-	log.displayNL("\tMax bulk: %d", _Inventory->getMaxBulk() );
+//	log.displayNL("\tMax bulk: %d", _Inventory->getMaxBulk() );
 //	log.displayNL("\tCharge points: %u", getChargesPoints() );
 	log.displayNL("\tRace: %s", EGSPD::CPeople::toString(getRace()).c_str() );
 	log.displayNL("\tIcon: 0x%016" NL_I64 "x", getIcon() );
@@ -2594,14 +2595,12 @@ private:
 #define PERSISTENT_POST_APPLY\
 	CGuildVersionAdapter::getInstance()->adaptGuildFromVersion(*this);\
 	_Chests.resize(GUILD_NB_CHESTS);\
-	nlinfo("GUILD HAVE %u CHESTS", _Chests.size());\
 	for (uint8 chest=0; chest < _Chests.size(); chest++)\
 	{\
 		if (chest < 2 && _Chests[chest].BulkMax < 6000)\
 			_Chests[chest].BulkMax = 6000;\
 		if (chest < 2 && _Chests[chest].Name.empty())\
 			_Chests[chest].Name = NLMISC::toString("Chest #%u", chest+1);\
-		nlinfo("Send DB for chest %u", chest);\
 		_Inventory->setChestMaxBulk(chest, _Chests[chest].BulkMax);\
 		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, _Chests[chest].Name, true);\
 		CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, _Chests[chest].ViewGrade, true);\

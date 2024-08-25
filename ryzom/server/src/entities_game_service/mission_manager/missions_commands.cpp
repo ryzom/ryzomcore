@@ -1358,6 +1358,8 @@ NLMISC_COMMAND(getGuildInventoryChestParams, "Get the params of a chest of inven
 		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestViewGrade(chest)).c_str());
 		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestPutGrade(chest)).c_str());
 		log.displayNL("%s", EGSPD::CGuildGrade::toString(guild->getChestGetGrade(chest)).c_str());
+		uint32 bulkmax = guild->getChestBulkMax(chest);
+		log.displayNL("%u", bulkmax);
 	}
 	return true;
 }
@@ -4445,7 +4447,7 @@ NLMISC_COMMAND(getPlayerGuild, "get player guild informations", "<uid>")
 	return true;
 }
 
-NLMISC_COMMAND(addXp, "Gain experience in a given skills", "<uid> <xp> <skill> [<count>]")
+NLMISC_COMMAND(addXp, "Gain experience in a given skills", "<uid> <xp> <skill> [<count>] [<usecats]")
 {
 	if (args.size() < 3) return false;
 
@@ -4462,11 +4464,34 @@ NLMISC_COMMAND(addXp, "Gain experience in a given skills", "<uid> <xp> <skill> [
 	else
 		NLMISC::fromString(args[3], count);
 
+	bool useCats = true;
+	if (args.size() > 4)
+		useCats = args[4] == "1";
+
 	count = min(count, (uint)100);
 
 	uint i;
 	for (i=0; i<count; ++i)
-		c->addXpToSkill((double)xp, skill, true);
+		c->addXpToSkill((double)xp, skill, true, useCats);
+
+	return true;
+}
+
+
+//getPlayerSkills 2 SC SH SHFFA SHFFAEM
+
+NLMISC_COMMAND(getPlayerSkills, "getPlayerSkills","<uid> <skill1> <skill2> ...")
+{
+	if (args.size() < 2) return false;
+
+	GET_ACTIVE_CHARACTER
+
+	for(int i = 0; i < SKILLS::NUM_SKILLS; ++i)
+	{
+		SSkill skill = c->getSkills()._Skills[i];
+		if (find(args.begin(), args.end(), SKILLS::toString(i)) != args.end())
+			log.displayNL("%s|%d|%d|%d|%d|%.0f|%.0f", SKILLS::toString(i).c_str(), skill.Base, skill.Modifier, skill.Current, skill.MaxLvlReached, skill.Xp, skill.XpNextLvl);
+	}
 
 	return true;
 }
@@ -5195,6 +5220,33 @@ NLMISC_COMMAND(despawnTargetSource, "Despawn the target source", "<uid>")
 	log.displayNL("ERR");
 	return true;
 }
+
+NLMISC_COMMAND(getTargetSourceInfos, "Get infos about the target source", "<uid>")
+{
+	if (args.size() < 1) return false;
+
+	GET_ACTIVE_CHARACTER
+	const CEntityId &target = c->getTarget();
+	if (target.getType() == RYZOMID::forageSource)
+	{
+		TDataSetRow sourceRowId = c->getTargetDataSetRow();
+		CHarvestSource	*source = CHarvestSourceManager::getInstance()->getEntity( sourceRowId );
+		if (source)
+		{
+			CVector2f pos = source->pos();
+			float maxQ = 0;
+			const CRecentForageSite *forageSite = source->forageSite();
+			if (forageSite)
+				maxQ = forageSite->deposit()->maxQuality();
+			log.displayNL("%s|%u|%f|%f,%f", source->materialSheet().toString().c_str(), source->getStatQuality(), maxQ, pos.x, pos.y);
+			return true;
+		}
+	}
+
+	log.displayNL("ERR");
+	return true;
+}
+
 
 
 //----------------------------------------------------------------------------

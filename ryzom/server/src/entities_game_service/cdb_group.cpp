@@ -130,7 +130,6 @@ void CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint
 			DBOutput.serial( noChange, CDBChangedPropertyCountBitSize );
 		}
 		// Write additional provided data (for guild inventory)
-		nlinfo("provide update");
 		dataProvider.provideUpdate( DBOutput );
 		// Send
 		CMessage msgout( "CDB_MULTI_IMPULSION" );
@@ -190,7 +189,6 @@ void CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint
 
 void CCDBGroup::sendDeltasToClient(IDataProvider& dataProvider, const CEntityId &id )
 {
-	nlinfo("sendDeltasToClient");
 	DBOutput.resetBufPos();
 	GenericMsgManager.pushNameToStream( "DB_GROUP:UPDATE_BANK", DBOutput );
 	// Write the server tick, to ensure old DB update are not applied after newer
@@ -208,7 +206,6 @@ void CCDBGroup::sendDeltasToClient(IDataProvider& dataProvider, const CEntityId 
 		DBOutput.serial( noInitialDelta, 16 );
 	}
 	// Write additional provided data (for guild inventory)
-	nlinfo("provide contents to %s", id.toString().c_str());
 	dataProvider.provideContents( DBOutput, id );
 	// Send
 	CMessage msgout( "CDB_IMPULSION" );
