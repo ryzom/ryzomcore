@@ -87,7 +87,7 @@ void CInventoryBase::setSlotCount(uint size)
 	_InventoryBulk[0] = 0;
 	if (_InventoryId == INVENTORIES::guild)
 	{
-		nlinfo("init %u _InventoryBulk with %u items", GUILD_NB_CHESTS, _Items.size());
+		//nlinfo("init %u _InventoryBulk with %u items", GUILD_NB_CHESTS, _Items.size());
 		for (uint8 i = 1; i < GUILD_NB_CHESTS; i++)
 			_InventoryBulk[i] = 0;
 	}

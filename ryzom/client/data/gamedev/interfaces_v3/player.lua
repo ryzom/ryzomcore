@@ -88,8 +88,8 @@ function game:getPositionInfos(x, y)
 	end
 
 	for cont, c in pairs(game.World) do
-		player_cont = cont
 		if point_inside_poly(x, y, c[2]) then
+			player_cont = cont
 			for region, r in pairs(c[3]) do
 				if point_inside_poly(x, y, r[2]) then
 					player_region = region
@@ -105,6 +105,14 @@ function game:getPositionInfos(x, y)
 	return player_cont, player_region, player_places
 end
 
+function game:getTargetDistance()
+	local px,py = getPlayerPos()
+	local tx,ty = getTargetPos()
+	if tx == nil then
+		return 99999999
+	end
+	return math.sqrt((px-tx)*(px-tx)+(py-ty)*(py-ty))
+end
 
 
 ------------------------------------------------------------------------------------------------------------
