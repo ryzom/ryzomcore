@@ -6,55 +6,47 @@ jobs:
     steps:
     - script: |
         sudo apt update
-        sudo apt install -y software-properties-common
-        wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
-        sudo dpkg -i packages-microsoft-prod.deb
+        sudo apt install --yes software-properties-common
+        wget --quiet https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+        sudo dpkg --install packages-microsoft-prod.deb
         sudo apt update
-        sudo apt install cmake build-essential ninja-build ccache -y
-        sudo apt install bison autoconf automake -y
-        sudo apt install libpng-dev -y
-        sudo apt install libjpeg-dev -y
-        sudo apt install libgif-dev libfreetype6-dev -y
-        sudo apt install freeglut3-dev -y
-        sudo apt install liblua5.2-dev libluabind-dev libcpptest-dev -y
-        sudo apt install libogg-dev libvorbis-dev libopenal-dev -y
-        sudo apt install libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev -y
-        sudo apt install libmysqlclient-dev -y
-        sudo apt install libxml2-dev -y
-        sudo apt install libcurl4-openssl-dev libssl-dev -y
-        sudo apt install libsquish-dev -y
-        sudo apt install liblzma-dev -y
-        sudo apt install libgsf-1-dev -y
-        sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
-        sudo apt install libmsquic
+        sudo apt install --yes \
+          cmake build-essential ninja-build ccache \
+          bison autoconf automake \
+          libpng-dev \
+          libjpeg-dev \
+          libgif-dev libfreetype6-dev \
+          freeglut3-dev \
+          liblua5.2-dev libluabind-dev libcpptest-dev \
+          libogg-dev libvorbis-dev libopenal-dev \
+          libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+          libmysqlclient-dev \
+          libxml2-dev \
+          libcurl4-openssl-dev libssl-dev \
+          libsquish-dev \
+          liblzma-dev \
+          libgsf-1-dev \
+          qtbase5-dev qttools5-dev qttools5-dev-tools \
+          libmsquic
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
-        sudo mv msquic.h /usr/include/msquic.h
-        sudo mv msquic_posix.h /usr/include/msquic_posix.h
-        sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
+        sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
       displayName: 'Dependencies'
-    - script: |
-        mkdir build
-        cmake --version
-        cd build
-        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
-          -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
-          -DWITH_MSQUIC=ON \
-          -DWITH_LUA51=OFF -DWITH_LUA52=ON \
-          -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
-          -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
-          -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
-        cat CMakeCache.txt
+    - script: >
+        cmake --preset linux-default
+        -DCMAKE_SUPPRESS_REGENERATION=ON
+        -DWITH_MSQUIC=ON
       displayName: 'CMake'
     - script: |
-        cd build
-        ninja -j`nproc`
+        cat build/CMakeCache.txt
+    - script: |
+        cmake --build --preset release
       displayName: 'Make'
     - script: |
-        cd nel/tools/nel_unit_test
-        ../../../build/bin/nel_unit_test
+        ctest --preset default
       displayName: 'Unit Tests'
+
   - job: ubuntu22
     timeoutInMinutes: 120
     pool:
@@ -62,55 +54,47 @@ jobs:
     steps:
     - script: |
         sudo apt update
-        sudo apt install -y software-properties-common
-        wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
-        sudo dpkg -i packages-microsoft-prod.deb
+        sudo apt install --yes software-properties-common
+        wget --quiet https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
+        sudo dpkg --install packages-microsoft-prod.deb
         sudo apt update
-        sudo apt install cmake build-essential ninja-build ccache -y
-        sudo apt install bison autoconf automake -y
-        sudo apt install libpng-dev -y
-        sudo apt install libjpeg-dev -y
-        sudo apt install libgif-dev libfreetype6-dev -y
-        sudo apt install freeglut3-dev -y
-        sudo apt install liblua5.2-dev libluabind-dev libcpptest-dev -y
-        sudo apt install libogg-dev libvorbis-dev libopenal-dev -y
-        sudo apt install libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev -y
-        sudo apt install libmysqlclient-dev -y
-        sudo apt install libxml2-dev -y
-        sudo apt install libcurl4-openssl-dev libssl-dev -y
-        sudo apt install libsquish-dev -y
-        sudo apt install liblzma-dev -y
-        sudo apt install libgsf-1-dev -y
-        sudo apt install qtbase5-dev qttools5-dev qttools5-dev-tools
-        sudo apt install libmsquic
+        sudo apt install --yes \
+          cmake build-essential ninja-build ccache \
+            bison autoconf automake \
+            libpng-dev \
+            libjpeg-dev \
+            libgif-dev libfreetype6-dev \
+            freeglut3-dev \
+            liblua5.2-dev libluabind-dev libcpptest-dev \
+            libogg-dev libvorbis-dev libopenal-dev \
+            libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+            libmysqlclient-dev \
+            libxml2-dev \
+            libcurl4-openssl-dev libssl-dev \
+            libsquish-dev \
+            liblzma-dev \
+            libgsf-1-dev \
+            qtbase5-dev qttools5-dev qttools5-dev-tools \
+            libmsquic
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
-        sudo mv msquic.h /usr/include/msquic.h
-        sudo mv msquic_posix.h /usr/include/msquic_posix.h
-        sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
+        sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
       displayName: 'Dependencies'
-    - script: |
-        mkdir build
-        cmake --version
-        cd build
-        cmake -G "Ninja" -DCMAKE_SUPPRESS_REGENERATION=ON \
-          -DWITH_STATIC=ON -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON \
-          -DWITH_MSQUIC=ON \
-          -DWITH_LUA51=OFF -DWITH_LUA52=ON \
-          -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON \
-          -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON \
-          -DWITH_QT5=ON -DWITH_LIBGSF=ON ..
-        cat CMakeCache.txt
+    - script: >
+        cmake --preset linux-default
+        -DCMAKE_SUPPRESS_REGENERATION=ON
+        -DWITH_MSQUIC=ON
       displayName: 'CMake'
     - script: |
-        cd build
-        ninja -j`nproc`
+        cat build/CMakeCache.txt
+    - script: |
+        cmake --build --preset release
       displayName: 'Make'
     - script: |
-        cd nel/tools/nel_unit_test
-        ../../../build/bin/nel_unit_test
+        ctest --preset default
       displayName: 'Unit Tests'
+
   - job: client
     strategy:
       matrix:
@@ -135,12 +119,13 @@ jobs:
             -DWITH_DRIVER_DIRECT3D=ON
             -DWITH_DRIVER_XAUDIO2=ON
             -DDXSDK_DIR=C:/DXSDK
-        macOS11:
-          vmImage: 'macOS-11'
+        macOS12:
+          vmImage: 'macOS-12'
           releaseName: 'macOS'
           MACOSX_DEPLOYMENT_TARGET: 10.12
           cmakeExtra: >-
             -DWITH_LIBXML2_ICONV=OFF
+            -DHUNTER_USE_CACHE_SERVERS=NO
             -GXcode
     timeoutInMinutes: 120
     pool:

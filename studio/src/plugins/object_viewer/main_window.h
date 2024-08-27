@@ -23,9 +23,9 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QMainWindow>
-#include <QtGui/QLabel>
-#include <QtGui/QUndoStack>
+#include <QMainWindow>
+#include <QLabel>
+#include <QUndoStack>
 
 // NeL includes
 #include <nel/misc/config_file.h>

@@ -198,6 +198,17 @@ public:
 		_CurrentTime = time;
 	}
 
+	sint64 deltaTimeInMilliseconds() const
+	{
+		return _CurrentTime - _LastTime;
+	}
+
+	float deltaTimeInSeconds() const
+	{
+		return deltaTimeInMilliseconds() * 0.001f;
+	}
+
+
 	void changeControlMode()
 	{
 		_MouseFree = ! _MouseFree;

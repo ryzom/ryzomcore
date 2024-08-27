@@ -17,6 +17,8 @@
 
 #include "georges_dock_widget.h"
 #include <QMessageBox>
+#include <QCloseEvent>
+#include <QTime>
 
 GeorgesDockWidget::GeorgesDockWidget( QWidget *parent ) :
 QDockWidget( parent )

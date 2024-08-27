@@ -26,8 +26,8 @@
 // Qt includes
 #include <QtCore/QDir>
 #include <QtGui/QIcon>
-#include <QtGui/QStyle>
-#include <QtGui/QTreeWidgetItem>
+#include <QStyle>
+#include <QTreeWidgetItem>
 #include <QMessageBox>
 #include <QFileDialog>
 

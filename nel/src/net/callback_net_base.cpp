@@ -206,7 +206,7 @@ void CCallbackNetBase::processOneMessage ()
 	}
 	else
 	{
-		LNETL3_DEBUG ("LNETL3NB_CB: Calling callback (%s)%s", msgin.getName().c_str(), (cb==_DefaultCallback)?" DEFAULT_CB":"");
+		LNETL3_DEBUG ("LNETL3NB_CB: Calling callback (%s)", msgin.getName().c_str());
 
 		if (_PreDispatchCallback != NULL)
 		{

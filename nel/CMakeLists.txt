@@ -1,3 +1,11 @@
+IF (COMMAND cmake_policy)
+  IF (POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+  ENDIF ()
+ENDIF ()
+
+project(NeL VERSION ${RyzomCore_VERSION} LANGUAGES CXX C)
+
 IF(WITH_STATIC_DRIVERS)
   ADD_DEFINITIONS(-DNL_STATIC)
 ENDIF()
@@ -15,7 +23,7 @@ IF(WITH_3D)
     FIND_PACKAGE(freetype CONFIG REQUIRED)
     SET(FREETYPE_LIBRARIES freetype::freetype)
   ELSE()
-    FIND_PACKAGE(FreeType)
+    FIND_PACKAGE(Freetype)
   ENDIF() #hunter
 
   IF(WITH_NEL_CEGUI)

@@ -1,0 +1,89 @@
+name: build 32-Bit windows client
+
+on:
+  push:
+    branches: [ "core4", "feature/*" ]
+    paths-ignore:
+      - '.github/workflows/**.yml'
+      - '!.github/workflows/cross-compile-client.yml'
+  pull_request:
+    branches: [ "core4" ]
+    paths-ignore:
+      - '.github/workflows/**.yml'
+      - '!.github/workflows/cross-compile-client.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
+        COMMIT_HASH=${{ github.sha }}
+        echo "version=sha.${COMMIT_HASH:0:8}" >> "$GITHUB_OUTPUT"
+
+    - uses: lukka/get-cmake@v3.29.5
+      with:
+        cmakeVersion: 3.27.9
+
+    - name: Dependencies
+      run: |
+        sudo apt update
+        sudo apt install --yes \
+        libasound2-dev \
+        libgl1-mesa-dev \
+        libjack-dev \
+        libpulse-dev \
+        libxrandr-dev \
+        libxrender-dev \
+        libxxf86vm-dev \
+        mingw-w64 \
+        mingw-w64-tools \
+        ninja-build
+        git clone --depth 1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git
+        cd openssl
+        ./Configure mingw --cross-compile-prefix=i686-w64-mingw32- --prefix=/usr/i686-w64-mingw32
+        make
+        sudo make install
+
+    - name: Cache Hunter Dependencies
+      uses: actions/cache@v4.0.2
+      with:
+        path: ${{ steps.strings.outputs.hunter-dir }}
+        key: ubuntu-22.04-hunter-cache
+
+    - name: Configure CMake
+      run: >
+        cmake --version;
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -G Ninja
+        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/CMakeModules/toolchain-mingw.cmake
+        -DCMAKE_CONFIGURATION_TYPES=Release
+        -DFINAL_VERSION=OFF
+        -DHUNTER_CONFIGURATION_TYPES=Release
+        -DHUNTER_ENABLED=ON
+        -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
+        -DWITH_DRIVER_OPENAL=ON
+        -DWITH_DRIVER_OPENGL=ON
+        -DWITH_INSTALL_LIBRARIES=OFF
+        -DWITH_NEL_SAMPLES=OFF
+        -DWITH_NEL_TESTS=OFF
+        -DWITH_NEL_TOOLS=OFF
+        -DWITH_RYZOM_CLIENT=ON
+        -DWITH_RYZOM_SERVER=OFF
+        -DWITH_RYZOM_TOOLS=OFF
+        -S ${{ github.workspace }}
+
+    - name: Build
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ryzom-client-win32-${{ steps.strings.outputs.version }}
+        path: ${{ steps.strings.outputs.build-output-dir }}/bin

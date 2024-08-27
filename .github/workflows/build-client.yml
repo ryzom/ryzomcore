@@ -1,0 +1,140 @@
+name: build client on multiple platforms
+
+on:
+  push:
+    branches: [ "core4", "feature/*" ]
+    paths-ignore:
+      - '.github/workflows/**.yml'
+      - '!.github/workflows/build-client.yml'
+  pull_request:
+    branches: [ "core4" ]
+    paths-ignore:
+      - '.github/workflows/**.yml'
+      - '!.github/workflows/build-client.yml'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os:
+         - ubuntu-22.04
+         - ubuntu-20.04
+         - windows-2022
+         - windows-2019
+         - macos-13
+         - macos-12
+        include:
+          - os: windows-2022
+            cmake_preset: windows-client
+          - os: windows-2019
+            cmake_preset: windows-client
+          - os: ubuntu-22.04
+            ubuntu_version: 22.04
+            cmake_preset: linux-client
+          - os: ubuntu-20.04
+            ubuntu_version: 20.04
+            cmake_preset: linux-client
+          - os: macos-13
+            cmake_preset: macos-client
+            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
+          - os: macos-12
+            cmake_preset: macos-client
+            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
+
+    - uses: lukka/get-cmake@v3.29.5
+      if: runner.os == 'Linux'
+      with:
+        cmakeVersion: 3.27.9
+
+    - name: Dependencies Linux
+      if: runner.os == 'Linux'
+      run: |
+        wget --quiet https://packages.microsoft.com/config/ubuntu/${{ matrix.ubuntu_version }}/packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
+        sudo apt update
+        sudo apt remove --yes man-db
+        sudo apt update
+        sudo apt install -y --no-install-recommends \
+          libasound2-dev \
+          libgl1-mesa-dev \
+          libjack-dev \
+          libpulse-dev \
+          libxrandr-dev \
+          libxrender-dev \
+          libxxf86vm-dev \
+          libmsquic
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+        sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
+
+    - uses: actions/cache/restore@v4.0.2
+      with:
+        path: ${{ steps.strings.outputs.hunter-dir }}
+        key: ${{ matrix.os }}-hunter
+
+    - uses: actions/cache/restore@v4.0.2
+      if: runner.os == 'Windows'
+      with:
+        path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+        key: ${{ matrix.os }}-chocolatey
+
+    - name: Dependencies Windows
+      if: runner.os == 'Windows'
+      run: |
+        choco install directx-sdk
+
+    - uses: actions/cache/save@v4
+      with:
+        path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+        key: ${{ matrix.os }}-chocolatey
+
+    - name: Configure CMake
+      env:
+        MACOSX_DEPLOYMENT_TARGET: 10.12
+      run: >
+        cmake --preset ${{ matrix.cmake_preset }}
+        ${{ matrix.cmake_options }}
+        -DHUNTER_CONFIGURATION_TYPES=Release
+        -DHUNTER_ENABLED=ON
+        -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
+        -S ${{ github.workspace }}
+
+    - uses: actions/cache/save@v4
+      with:
+        path: ${{ steps.strings.outputs.hunter-dir }}
+        key: ${{ matrix.os }}-hunter
+
+    - name: Build
+      env:
+        MACOSX_DEPLOYMENT_TARGET: 10.12
+      run: cmake --build --preset client
+
+    - name: Package
+      run: cmake --build --preset client --target package
+
+    - uses: actions/upload-artifact@v4
+      if: ${{ failure() }}
+      with:
+        name: ${{ matrix.os }}-logs
+        path: build/**/*.log
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os }}-client-package
+        path: build/ryzomcore-*
+        if-no-files-found: error

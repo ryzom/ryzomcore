@@ -93,9 +93,11 @@ public:
 	/// Find the process name if nobody call setProcessName before
 	static void setDefaultProcessName ();
 
+#if defined(NL_OS_WINDOWS) && !defined(__GNUC__)
+#define USE_LOG_CHECK_TYPES
+#endif
 
-#ifdef NL_OS_WINDOWS
-
+#ifdef USE_LOG_CHECK_TYPES
 #define CHECK_TYPES2(__a,__b) \
 	inline __a(const char *fmt) { __b(fmt); } \
 	template<class A> __a(const char *fmt, A a) { _check(a); __b(fmt, a); } \

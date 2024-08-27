@@ -1,7 +1,6 @@
-ADD_SUBDIRECTORY(3rdparty)
+#ADD_SUBDIRECTORY(3rdparty)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${NEL_INCLUDE_DIR} ${QT_INCLUDES})
-INCLUDE( ${QT_USE_FILE} )
 
 CONFIGURE_FILE(translations/translations.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc COPYONLY)
 
@@ -31,10 +30,10 @@ IF(WIN32)
   SET(STUDIO_RC studio.rc)
 ENDIF()
 
-QT4_ADD_TRANSLATION(STUDIO_QM ${STUDIO_TS})
-QT4_ADD_RESOURCES( STUDIO_RC_SRCS ${STUDIO_RCS})
-QT4_WRAP_CPP( STUDIO_MOC_SRCS ${STUDIO_HDR} )
-QT4_WRAP_UI( STUDIO_PLUGIN_UI_HDRS ${STUDIO_PLUGIN_UIS})
+QT5_ADD_TRANSLATION(STUDIO_QM ${STUDIO_TS})
+QT5_ADD_RESOURCES( STUDIO_RC_SRCS ${STUDIO_RCS})
+QT5_WRAP_CPP( STUDIO_MOC_SRCS ${STUDIO_HDR} )
+QT5_WRAP_UI( STUDIO_PLUGIN_UI_HDRS ${STUDIO_PLUGIN_UIS})
 
 SOURCE_GROUP(QtResources FILES ${STUDIO_RCS} ${STUDIO_PLUGIN_UIS} )
 SOURCE_GROUP(QtGeneratedMocQrcSrc FILES ${STUDIO_MOC_SRCS} ${STUDIO_RC_SRCS})
@@ -55,6 +54,25 @@ ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${QT_DEFINITIONS})
 NL_DEFAULT_PROPS(studio "Tools: Studio")
 NL_ADD_RUNTIME_FLAGS(studio)
 
+ADD_SUBDIRECTORY(libqtpropertybrowser-text)
 ADD_SUBDIRECTORY(plugins)
+
+add_dependencies(studio
+		studio_plugin_bnp_manager
+		studio_plugin_core
+		studio_plugin_disp_sheet_id
+		studio_plugin_example
+		studio_plugin_georges_editor
+		studio_plugin_gui_editor
+		studio_plugin_landscape_editor
+		studio_plugin_log
+		studio_plugin_mission_compiler
+		studio_plugin_object_viewer
+		studio_plugin_sheet_builder
+		studio_plugin_tile_editor
+#		studio_plugin_translation_manager # requires QFtp which is removed in qt5
+		studio_plugin_world_editor
+#		studio_plugin_zone_painter
+)
 
 INSTALL(TARGETS studio RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT runtime BUNDLE DESTINATION /Applications)

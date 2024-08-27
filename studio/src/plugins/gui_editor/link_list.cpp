@@ -76,7 +76,7 @@ namespace GUIEditor
 			item->setData( 3, Qt::UserRole, itr->first );
 			linkTree->addTopLevelItem( item );
 		}
-		linkTree->sortByColumn( 0 );
+		linkTree->sortByColumn( 0, Qt::AscendingOrder );
 	}
 
 	void LinkList::onAddButtonClicked()

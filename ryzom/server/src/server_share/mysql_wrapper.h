@@ -29,8 +29,8 @@
 #include "nel/net/module_common.h"
 #include "game_share/utils.h"
 #ifdef NL_OS_WINDOWS
-# include <WinSock2.h>
-# include <Windows.h>
+# include <winsock2.h>
+# include <windows.h>
 typedef unsigned long ulong;
 #endif
 #ifdef NL_OS_MAC
