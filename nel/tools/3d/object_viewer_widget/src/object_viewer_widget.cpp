@@ -47,10 +47,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
 
-#ifndef USE_QT5
-Q_EXPORT_PLUGIN2(object_viewer_widget_qt, NLQT::CObjectViewerWidget)
-#endif
-
 #if defined(NL_OS_WINDOWS)
 	typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 #elif defined(NL_OS_MAC)
@@ -743,8 +739,6 @@ namespace NLQT
 		_Scene->animate ( fdelta);
 	}
 
-#ifdef USE_QT5
-
 	bool CObjectViewerWidget::nativeEvent(const QByteArray &eventType, void *message, long *result)
 	{
 		if (getDriver() && getDriver()->isActive())
@@ -769,64 +763,5 @@ namespace NLQT
 
 		return false;
 	}
-
-#else
-
-#if defined(NL_OS_WINDOWS)
-
-	bool CObjectViewerWidget::winEvent(MSG *message, long *result)
-	{
-		if (getDriver() && getDriver()->isActive())
-		{
-			NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser*>(getDriver())->getDriver();
-			if (driver)
-			{
-				winProc proc = (winProc)driver->getWindowProc();
-				return proc(driver, message->hwnd, message->message, message->wParam, message->lParam);
-			}
-		}
-
-		return false;
-	}
-
-#elif defined(NL_OS_MAC)
-
-	bool CObjectViewerWidget::macEvent(EventHandlerCallRef caller, EventRef event)
-	{
-		if(caller)
-			nlerror("You are using QtCarbon! Only QtCocoa supported, please upgrade Qt");
-
-		if (getDriver() && getDriver()->isActive())
-		{
-			NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser*>(getDriver())->getDriver();
-			if (driver)
-			{
-				cocoaProc proc = (cocoaProc)driver->getWindowProc();
-				return proc(driver, event);
-			}
-		}
-
-		return false;
-	}
-
-#elif defined(NL_OS_UNIX)
-
-	bool CObjectViewerWidget::x11Event(XEvent *event)
-	{
-		if (getDriver() && getDriver()->isActive())
-		{
-			NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser*>(getDriver())->getDriver();
-			if (driver)
-			{
-				x11Proc proc = (x11Proc)driver->getWindowProc();
-				return proc(driver, event);
-			}
-		}
-
-		return false;
-	}
-#endif
-
-#endif
 
 } /* namespace NLQT */
