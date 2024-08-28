@@ -426,6 +426,16 @@ function webig:openWin(ui_name)
 	end
 end
 
+function getVpx(vpx)
+	while string.len(vpx) < 16 do
+		vpx = "0"..vpx
+	end
+	local vpx1 = string.format("%06d", tonumber(vpx:sub(1, string.len(vpx)-2), 16)*256)
+	local vpx2 = string.format("%06d", tonumber(vpx:sub(string.len(vpx)-1, string.len(vpx)), 16)+tonumber(vpx1:sub(string.len(vpx1)-5, string.len(vpx1))))
+	local nvpx = vpx1:sub(1, string.len(vpx1)-6)..vpx2:sub(string.len(vpx2)-5, string.len(vpx2))
+	return nvpx
+end
+
 
 -- VERSION --
 RYZOM_ARK_LESSONS_VERSION = 324
