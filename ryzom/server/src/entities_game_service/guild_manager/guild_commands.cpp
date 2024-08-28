@@ -160,6 +160,7 @@ NLMISC_COMMAND(dumpGuild, "dump a guild", "<guildName|<shardId>:<guildId>")
 
 	GET_GUILD(false);
 
+	guild->initChests();
 	guild->dumpGuildInfos( log );
 
 	return true;
@@ -357,7 +358,7 @@ NLMISC_COMMAND(guildFailedGVE, "get/set failed GVE of guild", "<guildName|<shard
 			guild->setLastFailedGVE(time);
 		}
 
-		log.displayNL("%d", time);
+		log.displayNL("%u", time);
 	} else {
 		log.displayNL("ERR: no guild");
 	}
@@ -468,7 +469,7 @@ NLMISC_COMMAND(guildRefuseJoinInvitation,"Refuse guild Join Invitation","<user>"
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND( guildDB, "Display or set the value of a property in the guild database", "<guildName|<shardId>:<guildId> <db_entry> [<value>]" )
+NLMISC_COMMAND(guildDB, "Display or set the value of a property in the guild database", "<guildName|<shardId>:<guildId> <db_entry> [<value>]" )
 {
 	if ( args.size() != 2 && args.size() != 3 )
 		return false;

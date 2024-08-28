@@ -194,7 +194,7 @@ struct CStatThread : public NLMISC::IRunnable
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 		if (url.length() > 8 && (url[4] == 's' || url[4] == 'S')) // 01234 https
 		{
-			NLWEB::CCurlCertificates::addCertificateFile("cacert.pem");
+			NLWEB::CCurlCertificates::addCertificateFile(ClientCfg.CurlCABundle);
 			NLWEB::CCurlCertificates::useCertificates(curl);
 			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);

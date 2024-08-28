@@ -2644,6 +2644,7 @@ void rename_s_(CStateInstance* entity, CScriptStack& stack)
 	ucstring name;
 	name.fromUtf8(newName);
 	CGroup* group = entity->getGroup();
+	group->botName = newName;
 
 	if (group->isSpawned())
 	{
@@ -2676,6 +2677,7 @@ void vpx_s_(CStateInstance* entity, CScriptStack& stack)
 	string vpx = (string)stack.top(); stack.pop();
 
 	CGroup* group = entity->getGroup();
+	group->botVpx = vpx;
 
 	if (group->isSpawned())
 	{
@@ -2721,6 +2723,52 @@ void maxHitRange_f_(CStateInstance* entity, CScriptStack& stack)
 		{
 			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
 			botNpc->setMaxHitRangeForPlayer(maxHitRange);
+		}
+	}
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection setEquipement_s_
+
+Arguments:  ->
+
+arg1: is the equipment list (in hex)
+
+@code
+()setEquipement("xxxxx");
+@endcode
+
+*/
+void setEquipment_s_(CStateInstance* entity, CScriptStack& stack)
+{
+	string script = stack.top();
+	stack.pop();
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+
+	std::vector<CAIActions::CArg> args;
+	std::vector<std::string> equipements;
+	NLMISC::splitString(script, ";", equipements);
+
+	CGroup* group = entity->getGroup();
+
+	FOREACH(botIt, CCont<CBot>,	group->bots())
+	{
+		CBot* bot = *botIt;
+
+		if (bot->getRyzomType() == RYZOMID::npc)
+		{
+			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+			if (botNpc==NULL)
+				return;
+			botNpc->equipmentInit();
+
+			FOREACHC(it, std::vector<std::string>, equipements)
+			{
+				botNpc->equipmentAdd(*it);
+			}
 		}
 	}
 }
@@ -3196,7 +3244,50 @@ void resetHealGroups_(CStateInstance* entity, CScriptStack& stack)
 //----------------------------------------------------------------------------
 /** @page code
 
-@subsection spawnGroup_fsssffff_
+@subsection spawnGroup_ffsssffff_
+Spawn new group.
+
+Arguments: f(NbrBots), f(spawnBot), s(Sheet), s(Name), s(Look), f(x), f(y), f(orientation), f(dispersion) ->
+
+@code
+
+@endcode
+
+*/
+void spawnGroup_ffsssffff_(CStateInstance* entity, CScriptStack& stack)
+{
+	double dispersionRadius = (double)(float)stack.top(); stack.pop();
+	double orientation = (double)(float)stack.top(); stack.pop();
+	double y = (double)(float)stack.top(); stack.pop();
+	double x = (double)(float)stack.top(); stack.pop();
+	string look = (string)stack.top(); stack.pop();
+	string name = (string)stack.top(); stack.pop();
+	CSheetId sheetId((string)stack.top()); stack.pop();
+	bool spawn = (float&)stack.top()!=0.0f; stack.pop();
+	uint nbBots = (uint)(float)stack.top(); stack.pop();
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+
+	CGroupNpc* grp = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if (grp)
+	{
+		CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
+		CGroupNpc* npcGroup;
+		if (spawnGroup)
+			npcGroup = aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look, spawnGroup->getCell());
+		else
+			npcGroup = aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look);
+	}
+}
+
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection spawnGroup_fsssfffff_c
 Spawn new group.
 
 Arguments: f(NbrBots), f(spawnBot) s(Sheet), s(Name), s(Look), f(x), f(y), f(orientation), f(dispersion) ->
@@ -3209,32 +3300,15 @@ Arguments: f(NbrBots), f(spawnBot) s(Sheet), s(Name), s(Look), f(x), f(y), f(ori
 // CGroup
 void spawnGroup_ffsssffff_c(CStateInstance* entity, CScriptStack& stack)
 {
-	double dispersionRadius = (double)(float)stack.top();
-	stack.pop();
-
-	double orientation = (double)(float)stack.top();
-	stack.pop();
-
-	double y = (double)(float)stack.top();
-	stack.pop();
-
-	double x = (double)(float)stack.top();
-	stack.pop();
-
-	string look = (string)stack.top();
-	stack.pop();
-
-	string name = (string)stack.top();
-	stack.pop();
-
-	CSheetId sheetId((string)stack.top());
-	stack.pop();
-
-	bool spawn = (float&)stack.top()!=0.0f;
-	stack.pop();
-
-	uint nbBots = (uint)(float)stack.top();
-	stack.pop();
+	double dispersionRadius = (double)(float)stack.top(); stack.pop();
+	double orientation = (double)(float)stack.top(); stack.pop();
+	double y = (double)(float)stack.top(); stack.pop();
+	double x = (double)(float)stack.top(); stack.pop();
+	string look = (string)stack.top(); stack.pop();
+	string name = (string)stack.top(); stack.pop();
+	CSheetId sheetId((string)stack.top()); stack.pop();
+	bool spawn = (float&)stack.top()!=0.0f; stack.pop();
+	uint nbBots = (uint)(float)stack.top(); stack.pop();
 
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
@@ -3242,47 +3316,52 @@ void spawnGroup_ffsssffff_c(CStateInstance* entity, CScriptStack& stack)
 		return;
 
 	CGroupNpc* grp = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc* npcGroup;
 	if (grp)
 	{
 		CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
-		CGroupNpc* npcGroup;
 		if (spawnGroup)
 			npcGroup = aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look, spawnGroup->getCell());
-		else
-			npcGroup = aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look);
-		if (npcGroup)
-			stack.push(npcGroup->getPersistentStateInstance());
 	}
+
+	if (!npcGroup)
+		npcGroup = aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look);
+
+	if (npcGroup)
+		stack.push(npcGroup->getPersistentStateInstance());
+
+	return;
+
 }
 
-void spawnGroup_ffsssffff_(CStateInstance* entity, CScriptStack& stack)
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection spawnGroup_ffsssssffff_c
+Create a group with bots (not spawned)
+
+Arguments: f(NbrBots), f(spawnBot), s(Sheet), s(Name), s(BotName), s(Look), s(vpx), f(x), f(y), f(orientation), f(dispersion) ->
+
+@code
+
+@endcode
+
+*/
+// CGroup
+void spawnGroup_ffsssssffff_c(CStateInstance* entity, CScriptStack& stack)
 {
-	double dispersionRadius = (double)(float)stack.top();
-	stack.pop();
-
-	double orientation = (double)(float)stack.top();
-	stack.pop();
-
-	double y = (double)(float)stack.top();
-	stack.pop();
-
-	double x = (double)(float)stack.top();
-	stack.pop();
-
-	string look = (string)stack.top();
-	stack.pop();
-
-	string name = (string)stack.top();
-	stack.pop();
-
-	CSheetId sheetId((string)stack.top());
-	stack.pop();
-
-	bool spawn = (float&)stack.top()!=0.0f;
-	stack.pop();
-
-	uint nbBots = (uint)(float)stack.top();
-	stack.pop();
+	sint32 cell = (sint32)(float)stack.top(); stack.pop();
+	double dispersionRadius = (double)(float)stack.top(); stack.pop();
+	double orientation = (double)(float)stack.top(); stack.pop();
+	double y = (double)(float)stack.top(); stack.pop();
+	double x = (double)(float)stack.top(); stack.pop();
+	string vpx = (string)stack.top(); stack.pop();
+	string look = (string)stack.top(); stack.pop();
+	string botname = (string)stack.top(); stack.pop();
+	string name = (string)stack.top(); stack.pop();
+	CSheetId sheetId((string)stack.top()); stack.pop();
+	bool spawn = (float&)stack.top()!=0.0f; stack.pop();
+	uint nbBots = (uint)(float)stack.top(); stack.pop();
 
 	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
@@ -3290,17 +3369,22 @@ void spawnGroup_ffsssffff_(CStateInstance* entity, CScriptStack& stack)
 		return;
 
 	CGroupNpc* grp = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc* npcGroup;
 	if (grp)
 	{
 		CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
-		CGroupNpc* npcGroup;
 		if (spawnGroup)
-			npcGroup = aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look, spawnGroup->getCell());
-		else
-			npcGroup = aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look);
+			npcGroup = aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look, spawnGroup->getCell(), botname, vpx);
 	}
-}
 
+	if (!npcGroup)
+		npcGroup = aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawn, orientation, name, look, 0, botname, vpx);
+
+	if (npcGroup)
+		stack.push(npcGroup->getPersistentStateInstance());
+
+	return;
+}
 
 std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 {
@@ -3370,6 +3454,7 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, setParent_s_);
 	REGISTER_NATIVE_FUNC(functions, addHealGroup_s_);
 
+	REGISTER_NATIVE_FUNC(functions, setEquipment_s_);
 	REGISTER_NATIVE_FUNC(functions, addUserModel_sss_);
 	REGISTER_NATIVE_FUNC(functions, addCustomLoot_ss_);
 	REGISTER_NATIVE_FUNC(functions, setUserModel_s_);
@@ -3377,6 +3462,7 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 
 	REGISTER_NATIVE_FUNC(functions, spawnGroup_ffsssffff_);
 	REGISTER_NATIVE_FUNC(functions, spawnGroup_ffsssffff_c);
+	REGISTER_NATIVE_FUNC(functions, spawnGroup_ffsssssffff_c);
 
 //	REGISTER_NATIVE_FUNC(functions, hideMissionStepIcon_b_);
 //	REGISTER_NATIVE_FUNC(functions, hideMissionGiverIcon_b_);

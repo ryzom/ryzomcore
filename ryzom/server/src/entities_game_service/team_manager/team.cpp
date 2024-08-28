@@ -67,17 +67,17 @@ void CTeam::init( CCharacter*  leader, uint16 teamId )
 	msgout.serial( idGroupe );
 	msgout.serialEnum( typeGroupe );
 	sendMessageViaMirror( "IOS", msgout );
-	
+
 	// Add leader to chat group
 	CMessage msgAdd("ADD_TO_GROUP");
 	msgAdd.serial( idGroupe );
 	msgAdd.serial( const_cast<CEntityId&> (leader->getId()) );
 	sendMessageViaMirror( "IOS", msgAdd );
-	
+
 	// inform the new team leader
 	PHRASE_UTILITIES::sendDynamicSystemMessage( leader->getEntityRowId(), "TEAM_CREATE");
 	//CCharacter::sendMessageToClient(_LeaderId,"OPS_CREATE_TEAM");
-	
+
 	// update leader DB
 //	leader->_PropertyDatabase.setProp( "USER:TEAM_MEMBER", 1 );
 	CBankAccessor_PLR::getUSER().setTEAM_MEMBER(leader->_PropertyDatabase, true);
@@ -106,7 +106,7 @@ void CTeam::release()
 			_RewardSharing->giveAllItems( TheDataset.getDataSetRow( *_TeamMembers.begin()));
 		}
 		delete _RewardSharing;
-		_RewardSharing = NULL;		
+		_RewardSharing = NULL;
 	}
 	const uint size = (uint)_Missions.size();
 	for ( uint i = 0; i < size; i++ )
@@ -177,7 +177,7 @@ void CTeam::addCharacter(CCharacter *newCharacter)
 		uint8 index = getSuccessorIndex();
 		CBankAccessor_PLR::getGROUP().setSUCCESSOR_INDEX(newCharacter->_PropertyDatabase, index);
 	}
-	
+
 	// update all member's DB
 //	char buffer[256];
 	uint position = (uint)_TeamMembers.size()-1;
@@ -239,7 +239,7 @@ void CTeam::addCharacter(CCharacter *newCharacter)
 				hp = (uint8)  ( ( float(TeamMembersStatusMaxValue) * ( character->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Current ) ) / ( character->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Max ) );
 			else
 				hp = 0;
-				
+
 			if ( character->getPhysScores()._PhysicalScores[ SCORES::sap ].Max != 0)
 				sap = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( character->getPhysScores()._PhysicalScores[ SCORES::sap ].Current ) ) / ( character->getPhysScores()._PhysicalScores[ SCORES::sap ].Max ) );
 			else
@@ -257,7 +257,7 @@ void CTeam::addCharacter(CCharacter *newCharacter)
 //			sprintf(buffer, "GROUP:%d:HP",i );
 //			newCharacter->_PropertyDatabase.setProp( buffer, hp );
 			newArrayItem.setHP(newCharacter->_PropertyDatabase, hp);
-				
+
 //			sprintf(buffer, "GROUP:%d:SAP",i );
 //			newCharacter->_PropertyDatabase.setProp( buffer, sap );
 			newArrayItem.setSAP(newCharacter->_PropertyDatabase, sap);
@@ -287,7 +287,7 @@ void CTeam::addCharacter(CCharacter *newCharacter)
 	// insert new member
 	_TeamMembers.push_back( newCharacter->getId() );
 	++_NbMembers;
-	
+
 	// set the character team
 	newCharacter->setTeamId(_TeamId);
 
@@ -300,7 +300,7 @@ void CTeam::addCharacter(CCharacter *newCharacter)
 	msgout.serial( idGroupe );
 	msgout.serial( const_cast<CEntityId&> (newCharacter->getId()) );
 	sendMessageViaMirror( "IOS", msgout );
-	
+
 	// send messages to members
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 
@@ -308,7 +308,7 @@ void CTeam::addCharacter(CCharacter *newCharacter)
 	//CCharacter::sendMessageToClient(newCharacter->getId(),"OPS_JOIN_TEAM_E",_LeaderId);
 	params[0].setEId(  _LeaderId );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(newCharacter->getEntityRowId(), "TEAM_YOU_JOIN", params);
-	
+
 	params[0].setEIdAIAlias( newCharacter->getId(), CAIAliasTranslator::getInstance()->getAIAlias( newCharacter->getId()) );
 
 	set<CEntityId> exclude;
@@ -335,7 +335,7 @@ void CTeam::addCharacter(CCharacter *newCharacter)
 	string msgName = "OPS_JOIN_TEAM_ACCEPT_E";
 	CMessage msggroup("STATIC_STRING");
 	msggroup.serial( groupId );
-	
+
 	msggroup.serialCont( exclude);
 	msggroup.serial( msgName );
 	msggroup.serial( const_cast<CEntityId&>(newCharacter->getId()) );
@@ -414,10 +414,10 @@ void CTeam::removeCharacter( CCharacter * player )
 			_Missions[0]->onFailure(true);
 			count++;
 		}
-		
+
 		// send a message to the last team member
 		PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(_TeamMembers.front()), "TEAM_DISOLVED");
-		
+
 		// clear the player DB
 		clearPlayerTeamDB( *_TeamMembers.begin() );
 		CCharacter * lastPlayer = PlayerManager.getOnlineChar( *_TeamMembers.begin() );
@@ -440,7 +440,7 @@ void CTeam::removeCharacter( CCharacter * player )
 		CMessage msgRemoveGroup("REMOVE_GROUP");
 		msgRemoveGroup.serial( idGroupe );
 		sendMessageViaMirror( "IOS", msgRemoveGroup );
-	
+
 		// release the team
 		release();
 		//remove the team from the manager
@@ -491,11 +491,11 @@ void CTeam::removeCharacter( CCharacter * player )
 			for (std::list<NLMISC::CEntityId>::iterator it2 = _TeamMembers.begin() ; it2 != _TeamMembers.end() ; ++it2)
 			{
 				if ( (*it) == (*it2) )
-					continue;	
+					continue;
 
 				CBankAccessor_PLR::TGROUP::TArray &groupItem = CBankAccessor_PLR::getGROUP().getArray(pos);
 
-				CCharacter * ch2 = PlayerManager.getOnlineChar( (*it2) );	
+				CCharacter * ch2 = PlayerManager.getOnlineChar( (*it2) );
 				if (ch2 != NULL)
 				{
 					// update new char for old char
@@ -511,22 +511,22 @@ void CTeam::removeCharacter( CCharacter * player )
 						stamina = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( ch2->getPhysScores()._PhysicalScores[ SCORES::stamina ].Current ) ) / ( ch2->getPhysScores()._PhysicalScores[ SCORES::stamina ].Max ) );
 					else
 						stamina = 0;
-					
+
 					CMirrorPropValueRO<uint32> nameIndexValue( TheDataset, ch2->getId(), "NameIndex" );
 					nameId = nameIndexValue();
-									
+
 //					sprintf(buffer, "GROUP:%d:HP",pos );
 //					ch1->_PropertyDatabase.setProp( buffer, hp );
 					groupItem.setHP(ch1->_PropertyDatabase, hp);
-					
+
 //					sprintf(buffer, "GROUP:%d:SAP",pos );
 //					ch1->_PropertyDatabase.setProp( buffer, sap );
 					groupItem.setSAP(ch1->_PropertyDatabase, sap);
-					
+
 //					sprintf(buffer, "GROUP:%d:STA",pos );
 //					ch1->_PropertyDatabase.setProp( buffer, stamina );
 					groupItem.setSTA(ch1->_PropertyDatabase, stamina);
-					
+
 //					sprintf(buffer, "GROUP:%d:NAME",pos );
 //					ch1->_PropertyDatabase.setProp( buffer, nameId );
 					groupItem.setNAME(ch1->_PropertyDatabase, nameId);
@@ -534,7 +534,7 @@ void CTeam::removeCharacter( CCharacter * player )
 //					sprintf(buffer, "GROUP:%d:UID",pos );
 //					ch1->_PropertyDatabase.setProp( buffer, ch2->getEntityRowId().getCompressedIndex() );
 					groupItem.setUID(ch1->_PropertyDatabase, ch2->getEntityRowId().getCompressedIndex());
-					
+
 //					sprintf(buffer, "GROUP:%d:PRESENT",pos );
 //					ch1->_PropertyDatabase.setProp( buffer, (uint8)1 );
 					groupItem.setPRESENT(ch1->_PropertyDatabase, true);
@@ -560,12 +560,12 @@ void CTeam::removeCharacter( CCharacter * player )
 		_RewardSharing->resetCandidates(this);
 
 	// update positions
-	updateMembersPositions();
+	updateMembersPositions(true);
 
 	// remove character from chat group
-	TGroupId idGroupe = CHAT_GROUPS_IDS::getTeamChatGroupId(_TeamId);
+	TGroupId idGroup = CHAT_GROUPS_IDS::getTeamChatGroupId(_TeamId);
 	CMessage msgRemoveGroup("REMOVE_FROM_GROUP");
-	msgRemoveGroup.serial( idGroupe );
+	msgRemoveGroup.serial( idGroup );
 	msgRemoveGroup.serial( const_cast<CEntityId&> ( charId ) );
 	sendMessageViaMirror( "IOS", msgRemoveGroup );
 
@@ -596,7 +596,7 @@ void CTeam::setLeague(const string &leagueName)
 		// set historic size of the newly created channel
 		DynChatEGS.setHistoricSize(_LeagueId, 100);
 	}
-	
+
 	updateLeague();
 }
 
@@ -634,12 +634,12 @@ void CTeam::setLeader(CEntityId id, bool bMessage)
 	_TeamMembers.insert(_TeamMembers.begin(), _LeaderId);
 
 	// inform the new leader
-	SM_STATIC_PARAMS_1(params1, STRING_MANAGER::player);		
+	SM_STATIC_PARAMS_1(params1, STRING_MANAGER::player);
 	params1[0].setEId( id );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(_LeaderId), "TEAM_YOU_NEW_LEADER", params1);
 
-	// inform the group 
-	SM_STATIC_PARAMS_2(params, STRING_MANAGER::player, STRING_MANAGER::player);		
+	// inform the group
+	SM_STATIC_PARAMS_2(params, STRING_MANAGER::player, STRING_MANAGER::player);
 	params[0].setEId( id );
 	params[1].setEId( _LeaderId );
 
@@ -743,7 +743,7 @@ void CTeam::setSuccessor( uint8 memberIdx, bool bMessage)
 //---------------------------------------------------
 sint16 CTeam::findCharacterPosition( const NLMISC::CEntityId &charId ) const
 {
-	
+
 	list<CEntityId>::const_iterator it = _TeamMembers.begin();
 	sint16 i = 0;
 	for (; it != _TeamMembers.end(); ++it)
@@ -777,12 +777,12 @@ void CTeam::updateCharacterScore(const CCharacter *player, SCORES::TScores score
 		{
 			if ( (*it) == player->getId())
 				continue;
-			
+
 			if ( charPosition > i )
 				position = charPosition - 1 ;
 			else
 				position = charPosition;
-							
+
 			character = PlayerManager.getOnlineChar( (*it) );
 			if (character != NULL)
 			{
@@ -807,9 +807,9 @@ void CTeam::updateCharacterScore(const CCharacter *player, SCORES::TScores score
 			{
 				nlwarning("<CTeam::updateCharacterScore> Unknown character %s", player->getId().toString().c_str() );
 			}
-			
+
 			++i;
-		}		
+		}
 	}
 } // updateCharacterScore //
 
@@ -829,9 +829,9 @@ void CTeam::clearPlayerTeamDB( const NLMISC::CEntityId &charId )
 		CBankAccessor_PLR::getUSER().setTEAM_MEMBER(character->_PropertyDatabase, 0);
 //		character->_PropertyDatabase.setProp( "USER:TEAM_LEADER", 0 );
 		CBankAccessor_PLR::getUSER().setTEAM_LEADER(character->_PropertyDatabase, 0);
-		
+
 		for (uint8 i = 0; i < CTEAM::TeamMaxNbMembers - (uint8)1 ; ++i)
-		{			
+		{
 			CBankAccessor_PLR::TGROUP::TArray &groupItem = CBankAccessor_PLR::getGROUP().getArray(i);
 //			sprintf(buffer, "GROUP:%d:PRESENT",i );
 //			character->_PropertyDatabase.setProp( buffer, (uint8)0 );
@@ -935,7 +935,7 @@ bool CTeam::processTeamMissionStepEvent(std::list< CMissionEvent* > & eventList,
 		return false;
 	else if ( result == CMissionEvent::MissionFailed )
 		return true;
-	
+
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
 	nlassert( templ );
 	if ( result == CMissionEvent::MissionEnds )
@@ -955,7 +955,7 @@ bool CTeam::processTeamMissionStepEvent(std::list< CMissionEvent* > & eventList,
 
 		CMissionManager::getInstance()->missionDoneOnce(templ);
 		mission->stopChildren();
-		
+
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || mission->isChained() || templ->Tags.AutoRemove )
 		{
@@ -1003,7 +1003,7 @@ void CTeam::rewardSharing(CRewardSharing * reward)
 				CMessage msgout ("IMPULSION_ID");
 				msgout.serial ((CEntityId&)(*it));
 				CBitMemStream bms;
-				
+
 				if (!GenericMsgManager.pushNameToStream ("TEAM:SHARE_OPEN", bms))
 					nlstopex (("Missing TEAM:SHARE_OPEN in msg.xml"));
 				msgout.serialBufferWithSize ((uint8*)bms.buffer(), bms.length());
@@ -1018,7 +1018,7 @@ void CTeam::rewardSharing(CRewardSharing * reward)
 struct TUpdatedMemberPosition
 {
 	sint64 Pos;
-	
+
 	TUpdatedMemberPosition(sint32 x, sint32 y) { Pos = (sint64(x)<<32) + y; }
 };
 
@@ -1044,15 +1044,15 @@ void CTeam::updateMembersPositions(bool forceUpdate)
 			nlwarning("<CTeam::updateCharacterScore> Unknown character %s", (*it).toString().c_str() );
 			continue;
 		}
-		
+
 		const sint32 lastX = (sint32)(character->getLastPosXInDB() * 0.001f);
 		const sint32 lastY = (sint32)(character->getLastPosYInDB() * 0.001f);
-		
+
 		const sint32 posX = (sint32)(character->getX() * 0.001f);
 		const sint32 posY = (sint32)(character->getY() * 0.001f);
-		
+
 		const sint32 member1Delta = (sint32)CVector2d(posX - lastX, posY - lastY).sqrnorm();
-		
+
 		sint16 j = i;
 		list<CEntityId>::const_iterator it2 = it;
 		++it2;
@@ -1064,26 +1064,26 @@ void CTeam::updateMembersPositions(bool forceUpdate)
 				nlwarning("<CTeam::updateCharacterScore> Unknown character %s", (*it2).toString().c_str() );
 				continue;
 			}
-			
+
 			const sint32 lastXMember2 = (sint32)(member2->getLastPosXInDB() * 0.001f);
 			const sint32 lastYMember2 = (sint32)(member2->getLastPosYInDB() * 0.001f);
-			
+
 			const sint32 posXMember2 = (sint32)(member2->getX() * 0.001f);
 			const sint32 posYMember2 = (sint32)(member2->getY() * 0.001f);
-			
+
 			// get distance between the two players
 			const sint32 dist = (sint32)CVector2d(posXMember2 - posX, posYMember2 - posY).sqrnorm();
 			// distance between new and old pos for player 2
 			const sint32 member2Delta = (sint32)CVector2d(posXMember2 - lastXMember2, posYMember2 - lastYMember2).sqrnorm();
-			
+
 			// update first player DB if member2Delta is important enough
-			if ( ( ( member2Delta<<5 > dist || member2Delta > (80*80) ) && dist > 1 ) || forceUpdate) 
+			if ( ( ( member2Delta<<5 > dist || member2Delta > (80*80) ) && dist > 1 ) || forceUpdate)
 			{
 				UpdatedMemberPos.insert( make_pair( member2->getId(), TUpdatedMemberPosition(member2->getX(), member2->getY())));
 				member2->setLastPosXInDB(member2->getX());
 				member2->setLastPosYInDB(member2->getY());
 			}
-			
+
 			// update member2  DB is member1Delta is important enough
 			if ( ( ( member1Delta<<5 > dist || member1Delta > (80*80) ) && dist > 1 ) || forceUpdate )
 			{
@@ -1094,7 +1094,7 @@ void CTeam::updateMembersPositions(bool forceUpdate)
 			++j;
 		}
 		++i;
-	}		
+	}
 
 	i=0;
 	for (list<CEntityId>::const_iterator it = _TeamMembers.begin() ; it != itEnd ; ++it)
@@ -1137,7 +1137,7 @@ void CTeam::updateMembersPositions(bool forceUpdate)
 			++j;
 		}
 		++i;
-	}		
+	}
 } // updateCharacterScore //
 
 CMissionTeam* CTeam::getMissionByAlias( TAIAlias missionAlias )
@@ -1165,7 +1165,7 @@ void CTeam::updateMembersDb()
 		{
 			CBankAccessor_PLR::getGROUP().setLEADER_INDEX(ch1->_PropertyDatabase, 0xf);
 		}
-		else 
+		else
 		{
 			CBankAccessor_PLR::getGROUP().setLEADER_INDEX(ch1->_PropertyDatabase, 0);
 		}
@@ -1175,11 +1175,11 @@ void CTeam::updateMembersDb()
 			for (std::list<NLMISC::CEntityId>::iterator it2 = _TeamMembers.begin() ; it2 != _TeamMembers.end() ; ++it2)
 			{
 				if ( (*it) == (*it2) )
-					continue;	
+					continue;
 
 				CBankAccessor_PLR::TGROUP::TArray &groupItem = CBankAccessor_PLR::getGROUP().getArray(pos);
 
-				CCharacter * ch2 = PlayerManager.getOnlineChar( (*it2) );	
+				CCharacter * ch2 = PlayerManager.getOnlineChar( (*it2) );
 				if (ch2 != NULL)
 				{
 					// update new char for old char
@@ -1195,10 +1195,10 @@ void CTeam::updateMembersDb()
 						stamina = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( ch2->getPhysScores()._PhysicalScores[ SCORES::stamina ].Current ) ) / ( ch2->getPhysScores()._PhysicalScores[ SCORES::stamina ].Max ) );
 					else
 						stamina = 0;
-					
+
 					CMirrorPropValueRO<uint32> nameIndexValue( TheDataset, ch2->getId(), "NameIndex" );
 					nameId = nameIndexValue();
-									
+
 					groupItem.setHP(ch1->_PropertyDatabase, hp);
 					groupItem.setSAP(ch1->_PropertyDatabase, sap);
 					groupItem.setSTA(ch1->_PropertyDatabase, stamina);

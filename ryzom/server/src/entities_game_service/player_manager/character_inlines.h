@@ -295,6 +295,19 @@ inline CInventoryPtr CCharacter::getLootContainer()
 	return _LootContainer;
 }
 
+
+inline bool CCharacter::isInitChest(uint8 chest)
+{
+	if (chest < 20)
+		return _initializedChests[chest];
+}
+
+inline void CCharacter::isInitChest(uint8 chest, bool value)
+{
+	if (chest < 20)
+		_initializedChests[chest] = value;
+}
+
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::staticActionInProgress() const
@@ -772,6 +785,34 @@ inline EGSPD::CFameContainerPD &CCharacter::getPlayerFamesContainer()
 {
 	return *_Fames;
 }
+
+inline void CCharacter::setSavedFames(bool status)
+{
+	_SavedFame = status;
+}
+
+inline bool CCharacter::getSavedFames()
+{
+	return _SavedFame;
+}
+
+
+inline void CCharacter::saveFame(uint32 i, sint32 fame)
+{
+	_SavedFames[i] = fame;
+}
+
+inline void CCharacter::addSavedFame(uint32 i, sint32 fame)
+{
+	_SavedFames[i] += fame;
+}
+
+
+inline sint32 CCharacter::restoreFame(uint32 i)
+{
+	return _SavedFames[i];
+}
+
 
 //------------------------------------------------------------------------------
 
@@ -1256,6 +1297,12 @@ inline void CCharacter::setRespawnMainLandInTown(bool status)
 {
 	_RespawnMainLandInTown = status;
 }
+
+inline void CCharacter::setCurrentSpeedSwimBonus(uint32 speed)
+{
+	_CurrentSpeedSwimBonus = speed;
+}
+
 //------------------------------------------------------------------------------
 
 inline const std::list<TCharacterLogTime>& CCharacter::getLastLogStats() const

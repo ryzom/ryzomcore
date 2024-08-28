@@ -60,6 +60,7 @@
 #include "game_item_manager/player_inventory.h"
 #include "guild_manager/guild.h"
 #include "guild_manager/guild_manager.h"
+#include "guild_manager/fame_manager.h"
 #include "mission_manager/mission_guild.h"
 #include "mission_manager/mission_solo.h"
 #include "mission_manager/mission_team.h"
@@ -820,8 +821,7 @@ void CCharacter::destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 
 }
 
 // ****************************************************************************
-void CCharacter::moveItem(
-	INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVENTORIES::TInventory dstInvId, uint32 dstSlot, uint32 quantity)
+void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVENTORIES::TInventory dstInvId, uint32 dstSlot, uint32 quantity)
 {
 	// cannot move an item in the same inventory
 	if (srcInvId == dstInvId)
@@ -960,6 +960,8 @@ void CCharacter::moveItem(
 			sendDynamicSystemMessage(_EntityRowId, "TOO_ENCUMBERED");
 		else if (dstInvId == INVENTORIES::player_room)
 			sendDynamicSystemMessage(_EntityRowId, "ROOM_TOO_ENCUMBERED");
+		else if (dstInvId == INVENTORIES::guild)
+			sendDynamicSystemMessage(_EntityRowId, "GUILD_ITEM_MAX_BULK");
 		else if (dstInvId >= INVENTORIES::pet_animal && dstInvId < INVENTORIES::max_pet_animal)
 			sendDynamicSystemMessage(_EntityRowId, "ANIMAL_PACKER_TOO_ENCUMBERED");
 
@@ -1222,11 +1224,8 @@ void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bo
 		CBankAccessor_PLR::getCHARACTER_INFO().getPARRY().setCurrent(
 			_PropertyDatabase, checkedCast<uint16>(_CurrentParryLevel));
 		CPhraseManager::getInstance().disengage(_EntityRowId, true);
-	}
 
-	// Remove enchant weapon effects as they are linked to equipped item
-	if (invId == INVENTORIES::handling && slot == 0)
-	{
+		// Remove enchant weapon effects as they are linked to equipped item
 		CSEffectPtr const effect = lookForActiveEffect(EFFECT_FAMILIES::PowerEnchantWeapon);
 
 		if (effect)
@@ -2462,7 +2461,7 @@ void CCharacter::incSlotVersion(INVENTORIES::TInventory invId, uint32 slot)
 }
 
 // ****************************************************************************
-void CCharacter::sendItemInfos(uint16 slotId)
+void CCharacter::sendItemInfos(uint32 slotId)
 {
 	TLogNoContext_Item noContext;
 
@@ -3165,7 +3164,7 @@ void CCharacter::rechargeItem(INVENTORIES::TInventory invId, uint32 slot)
 			sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_FULLY_RECHARGED", params);
 			return;
 		}
-		
+
 		rightHandItem->reloadSapLoad(sapRechargeItem->sapLoad());
 		// consume sap recharge (destroy it)
 		inv->deleteStackItem(slot, 1);

@@ -389,6 +389,7 @@ void processMirrorUpdates()
 				{
 					user->entersWater();
 				}
+				user->applyRegenAndClipCurrentValue();
 			}
 		}
 		TheDataset.endChangedValuesForProp();
@@ -672,7 +673,7 @@ string getServerInfos(float x, float y)
 	pos.y = y;
 	pos.z = 0;
 	CRyzomTime::EWeather weather = WeatherEverywhere.getWeather(pos, CTimeDateSeasonManager::getRyzomTimeReference());
-	
+
 	return toString("%f|%d|%s|%u",
 		CTimeDateSeasonManager::getRyzomTimeReference().getRyzomTime(),
 		CTimeDateSeasonManager::getRyzomTimeReference().getRyzomDay(),
@@ -1642,7 +1643,7 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 // {
 // 	if( args.size() == 0 )
 // 		return false;
-// 
+//
 // 	NLMEMORY::StatisticsReport( args[0].c_str(), args.size() > 1 );
 // 	return true;
 //}
@@ -2047,7 +2048,7 @@ void cbMirrorUp( const std::string &serviceName, NLNET::TServiceId serviceId, vo
 		IOSIsUp = true;
 		nlinfo("IOS connection, serviceId %d",serviceId.get());
 		DynChatEGS.iosConnection();
-		
+
 		CGuildManager::getInstance()->onIOSConnection();
 		CPVPManager2::getInstance()->onIOSMirrorUp();
 

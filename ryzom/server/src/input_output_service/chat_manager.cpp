@@ -667,7 +667,7 @@ void CChatManager::checkNeedDeeplize( const TDataSetRow& sender, const ucstring&
 		else if (ucstr.length() > 5 && ucstr[1] == ':' && ucstr[4] == ':') // Already have filter
 			chatInGroup( grpId, ucstr, sender );
 		else
-			chatInGroup( grpId, ucstring(":"+senderLang+":")+ucstr, sender ); // Need filter
+			chatInGroup( grpId, ucstring(":"+senderLang+": ")+ucstr, sender ); // Need filter
 	}
 
 
@@ -872,9 +872,9 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 							}
 
 							if (source_lang == "en") // in RC the icon are :gb:
-								mongoText = ":gb:"+mongoText;
+								mongoText = ":gb: "+mongoText;
 							else
-								mongoText = ":"+source_lang+":"+mongoText;
+								mongoText = ":"+source_lang+": "+mongoText;
 
 							chatId = "FACTION_EN";
 							if (usedlang != SM->getLanguageCodeString(ci->Language))
@@ -977,9 +977,9 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 							}
 
 							if (source_lang == "en") // in RC the icon are :gb:
-								mongoText = ":gb:"+mongoText;
+								mongoText = ":gb: "+mongoText;
 							else
-								mongoText = ":"+source_lang+":"+mongoText;
+								mongoText = ":"+source_lang+": "+mongoText;
 						}
 						chatInGroup( grpId, ucstr.substr(1), sender );
 					}
@@ -1089,9 +1089,9 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, strin
 								}
 
 								if (source_lang == "en") // in RC the icon are :gb:
-									mongoText = ":gb:"+mongoText;
+									mongoText = ":gb: "+mongoText;
 								else
-									mongoText = ":"+source_lang+":"+mongoText;
+									mongoText = ":"+source_lang+": "+mongoText;
 							}
 						}
 						// Send for translation
@@ -1362,7 +1362,7 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 
 } // chatInGroup //
 
-void CChatManager::farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const ucstring &text, const ucstring &senderName)
+void CChatManager::farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const ucstring &text, const ucstring &senderName, uint32 senderCid)
 {
 	map< TGroupId, CChatGroup >::iterator itGrp = _Groups.find( grpId );
 	if( itGrp != _Groups.end() )
@@ -1398,7 +1398,7 @@ void CChatManager::farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const u
 			if (EnableDeepL && !usedlang.empty() && usedlang != SM->getLanguageCodeString(charInfo->Language))
 				continue;
 
-			sendFarChat( itGrp->second.Type, *itM, text.substr(startPos), senderName );
+			sendFarChat(itGrp->second.Type, *itM, text.substr(startPos), senderName, CEntityId::Unknown, senderCid);
 		}
 	}
 	else
@@ -1832,10 +1832,10 @@ void CChatManager::sendEmoteTextToAudience(  const TDataSetRow& sender,const std
 			// ignore users in the excluded vector
 			if ( std::find( excluded.begin(),excluded.end(), (*itA) ) == excluded.end() )
 			{
+				static ucstring ucstr = ucstring("");
 				// the phrase
 				uint32 sentId = STRING_MANAGER::sendStringToClient( *itA,phraseId.c_str(),params,&IosLocalSender );
-				// send phrase id with an invalid sender, so that client dont display "toto says : toto bows"
-				sendChat2Ex( CChatGroup::say, *itA, sentId, TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) );
+				sendChat2Ex( CChatGroup::say, *itA, sentId, sender, ucstr, true );
 			}
 		}
 		// restore old chat mode
@@ -2061,7 +2061,7 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 
 } // sendChat //
 
-void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const string &chan, const string &rocketId)
+void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const string &chan, const string &rocketId, uint32 senderCid)
 {
 	const TChanID *chanId = _ChanNames.getA(chan);
 	if (chanId || chan == "universe" || chan.substr(0, 6) == "guild:")
@@ -2113,9 +2113,9 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 
 
 			if (source_lang == "en") // in RC the icon are :gb:
-				mongoText = ":gb:"+mongoText;
+				mongoText = ":gb: "+mongoText;
 			else
-				mongoText = ":"+source_lang+":"+mongoText;
+				mongoText = ":"+source_lang+": "+mongoText;
 
 #ifdef HAVE_MONGO
 			if (endOfOriginal != string::npos)
@@ -2131,13 +2131,13 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 		if (chan == "universe")
 		{
 			TGroupId grpId = CEntityId(RYZOMID::chatGroup, 0);
-			farChatInGroup(grpId, 0, ucstr, ucstring("~")+ucstring(name));
+			farChatInGroup(grpId, 0, ucstr, ucstring("~"+name), senderCid);
 		}
 		else if (chan.substr(0, 6) == "guild:")
 		{
-			TGroupId groupId = CEntityId::Unknown;
-			groupId.fromString(chan.substr(6).c_str());
-			farChatInGroup(groupId, 0, ucstr, ucstring("~")+ucstring(name));
+			TGroupId grpId = CEntityId::Unknown;
+			grpId.fromString(chan.substr(6).c_str());
+			farChatInGroup(grpId, 0, ucstr, ucstring("~"+name), senderCid);
 		}
 		else
 		{
@@ -2145,18 +2145,17 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 			CDynChatSession *dcc = _DynChat.getChan(*chanId)->getFirstSession();
 			while (dcc)
 			{
-
 				NLMISC::CEntityId receiverId = TheDataset.getEntityId(dcc->getClient()->getID());
 				CCharacterInfos* co = IOS->getCharInfos(receiverId);
 				if (!EnableDeepL || usedlang.empty() || (co != NULL && usedlang == SM->getLanguageCodeString(co->Language)))
-					sendFarChat((CChatGroup::TGroupType)12, dcc->getClient()->getID(), ucstr.substr(startPos), ucstring("~")+ucstring(name), *chanId);
+					sendFarChat((CChatGroup::TGroupType)12, dcc->getClient()->getID(), ucstr.substr(startPos), ucstring("~"+name), *chanId, senderCid);
 				dcc = dcc->getNextChannelSession(); // next session in this channel
 			}
 		}
 	}
 }
 
-void CChatManager::sendFarChat( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, const ucstring& ucstr, const ucstring &senderName, TChanID chanID)
+void CChatManager::sendFarChat( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, const ucstring& ucstr, const ucstring &senderName, TChanID chanID, uint32 senderCid)
 {
 	CCharacterInfos * receiverInfos = IOS->getCharInfos( TheDataset.getEntityId(receiver) );
 	if( receiverInfos )
@@ -2166,6 +2165,9 @@ void CChatManager::sendFarChat( CChatGroup::TGroupType senderChatMode, const TDa
 		{
 			if (itCl->second->getId().getType() == RYZOMID::player)
 			{
+				if (senderCid > 0 && itCl->second->isInIgnoreList(senderCid))
+					return;
+
 				uint32 senderNameIndex = SM->storeString( senderName );
 
 				// send the string to FE
@@ -2253,7 +2255,7 @@ void CChatManager::sendChatParam( CChatGroup::TGroupType senderChatMode, const T
 //	sendChat2Ex
 //
 //-----------------------------------------------
-void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender, ucstring customTxt )
+void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender, ucstring customTxt, bool isEmote )
 {
 	CCharacterInfos * charInfos = NULL;
 	if( sender.isValid() /* != CEntityId::Unknown*/ )
@@ -2296,8 +2298,17 @@ void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDa
 				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT2", bms );
 
 				CChatMsg2 chatMsg;
-				chatMsg.CompressedIndex = sender.getCompressedIndex();
-				chatMsg.SenderNameId = charInfos ? charInfos->NameIndex : 0; // empty string if there is no sender
+				if (isEmote)
+				{
+					TDataSetRow senderFake = TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW );
+					chatMsg.CompressedIndex = senderFake.getCompressedIndex();
+					chatMsg.SenderNameId = 0;
+				}
+				else
+				{
+					chatMsg.CompressedIndex = sender.getCompressedIndex();
+					chatMsg.SenderNameId = charInfos ? charInfos->NameIndex : 0; // empty string if there is no sender
+				}
 				chatMsg.ChatMode = (uint8) senderChatMode;
 				chatMsg.PhraseId = phraseId;
 				chatMsg.CustomTxt = customTxt;
@@ -2744,34 +2755,6 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 			// check if the sender is CSR is not in the ignore list of the receiver
 			if((senderInfos && senderInfos->HavePrivilege) || !itCl->second->isInIgnoreList(senderCharId) )
 			{
-				// check if user is afk
-//				if ( receiverInfos->DataSetIndex.isValid() && TheDataset.isDataSetRowStillValid( receiverInfos->DataSetIndex ) )
-//				{
-//					CMirrorPropValue<uint16> mirrorValue( TheDataset, receiverInfos->DataSetIndex, DSPropertyCONTEXTUAL );
-//					CProperties prop(mirrorValue);
-//					if ( prop.afk() )
-//					{
-//						// send special message to user
-//						SM_STATIC_PARAMS_1( vect, STRING_MANAGER::player );
-//						vect[0].setEId( receiverInfos->EntityId );
-//						uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_AFK", vect, &IosLocalSender );
-//						sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
-//						return;
-//					}
-//					if ( _UsersIgnoringTells.find( receiverInfos->EntityId ) != _UsersIgnoringTells.end() )
-//					{
-//						// send special message to user (same message as if the receiver was offline)
-//						SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-//						vect[0].Literal = ucstring( receiver );
-//						uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
-//						sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
-//						return;
-//					}
-//				}
-
-				// info for log the chat message
-//				string senderName = senderInfos->Name.toString();
-
 				// info for log the chat message
 				string receiverName = receiverInfos->Name.toString();
 
@@ -3125,6 +3108,7 @@ void CChatManager::update()
 			string chatId;
 			string rocketId;
 			string usedlang;
+			uint32 sender_cid;
 			double date;
 			bool ig;
 
@@ -3134,6 +3118,7 @@ void CChatManager::update()
 			chatId = obj.getStringField("chatId");
 			rocketId = obj.getStringField("rocketId");
 			usedlang = obj.getStringField("lang");
+			sender_cid = obj.getIntField("sender_cid");
 			date = obj.getField("date").numberDouble();
 
 			if(date > last_mongo_chat_date)
@@ -3160,7 +3145,7 @@ void CChatManager::update()
 			{
 				if (EnableDeepL && chatId.substr(0, 8) == "FACTION_")
 				{
-					_Log.displayNL("[%s]%s|%s|*|%s-*|%s", rocketId.c_str(), chatId.c_str(), string("~"+name).c_str(), toLower(usedlang).c_str(), text.toUtf8().c_str());
+					_Log.displayNL("[%s]%s|~%s#%u|*|%s-*|%s", rocketId.c_str(), chatId.c_str(), name.c_str(), sender_cid, toLower(usedlang).c_str(), text.toUtf8().c_str());
 				}
 				else
 				{
@@ -3176,7 +3161,7 @@ void CChatManager::update()
 							{
 								CDynChatClient *dccClient = dcc->getClient();
 								if (dccClient)
-									sendFarChat((CChatGroup::TGroupType)12, dccClient->getID(), text, ucstring("~")+ucstring(name), *chanId);
+									sendFarChat((CChatGroup::TGroupType)12, dccClient->getID(), text, ucstring("~"+name), *chanId, sender_cid);
 
 								dcc = dcc->getNextChannelSession(); // next session in this channel
 							}
@@ -3190,7 +3175,7 @@ void CChatManager::update()
 				// Send to Deepl
 				if (EnableDeepL)
 				{
-					_Log.displayNL("[%s]%s|%s|wk|wk-*|%s", rocketId.c_str(), "universe", name.c_str(), chat.c_str());
+					_Log.displayNL("[%s]universe|%s#%u|wk|wk-*|%s", rocketId.c_str(), sender_cid, name.c_str(), chat.c_str());
 					continue;
 				}
 			}
@@ -3201,12 +3186,12 @@ void CChatManager::update()
 				else
 					chatId = chatId+"(Atys)";
 
-				farTell(CEntityId(uint64(0)), ucstring("~")+ucstring(name), false, ucstring(chatId), text);
+				farTell(CEntityId(0, uint64(sender_cid)), ucstring("~"+name), false, ucstring(chatId), text);
 				continue;
 			}
 
 			if (chatId != "user-unmuted" && chatId != "user-muted")
-				farChatInGroup(grpId, 0, text, ucstring("~")+ucstring(name));
+				farChatInGroup(grpId, 0, text, ucstring("~"+name), sender_cid);
 		}
 	}
 	catch(const DBException& e)

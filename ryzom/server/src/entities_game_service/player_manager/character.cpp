@@ -443,6 +443,9 @@ CCharacter::CCharacter()
 	for (uint i = 0; i < (PVP_CLAN::EndClans - PVP_CLAN::BeginClans + 1); ++i)
 		_FactionPoint[i] = 0;
 
+	for (uint i = 0; i < 20; ++i)
+		_initializedChests[i] = false;
+
 	_PvpPoint = 0;
 	_GuildPoints = 0;
 	_TodayGuildPoints = 0;
@@ -591,6 +594,7 @@ CCharacter::CCharacter()
 	_MinPriceFilter = 0;
 	_MaxPriceFilter = ~0u;
 	_LastAppliedWeightMalus = 0;
+	_CurrentSpeedSwimBonus = 0;
 	_CurrentRegenerateReposBonus = 0;
 	_TpTicketSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	// setup timer for tickUpdate() calling
@@ -681,6 +685,8 @@ CCharacter::CCharacter()
 	_FriendVisibility = VisibleToAll;
 	_LangChannel = "rf";
 	_NewTitle = "Refugee";
+	_SavedFame = false;
+
 	initDatabase();
 
 	_PowoCell = 0;
@@ -1113,13 +1119,17 @@ uint32 CCharacter::tickUpdate()
 	// Check Death of player and manage pact if death occurs
 	if (currentHp() <= 0 && !_IsDead && !teleportInProgress())
 	{
-
 		CSheetId usedSheet;
 		CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("rez", SLOT_EQUIPMENT::NECKLACE, usedSheet);
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
 		params[0].SheetId = usedSheet;
-		if (sbrickParam.ParsedOk && sbrickParam.Value == "lastPoint" && (rand() % 200) < sbrickParam.Modifier)
+		uint32 randvalue = rand() % 400;
+
+		if (sbrickParam.ParsedOk && sbrickParam.Value == "lastPoint" && randvalue < sbrickParam.Modifier)
+		{
 			_PhysScores._PhysicalScores[SCORES::hit_points].Current = 1;
+			sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
+		}
 		else
 		{
 			kill();
@@ -2773,6 +2783,29 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	_LastAppliedWeightMalus = getWeightMalus();
 	_PhysScores.SpeedVariationModifier += _LastAppliedWeightMalus;
 	sint16 speedVariationModifier = std::max((sint)_PhysScores.SpeedVariationModifier, (sint) - 100);
+	CSheetId aqua_speed("aqua_speed.sbrick");
+	bool usingAquaSpeed = false;
+	if (isInWater() && getMode() != MBEHAV::MOUNT_NORMAL && (haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0))
+	{
+		setBonusMalusName("aqua_speed", addEffectInDB(aqua_speed, true));
+		if (_CurrentSpeedSwimBonus > 0)
+			speedVariationModifier = std::min(speedVariationModifier + (sint16)_CurrentSpeedSwimBonus, 100);
+		else
+		{
+			usingAquaSpeed = true;
+			speedVariationModifier = std::min(speedVariationModifier + 33, 100);
+		}
+	}
+	else
+	{
+		sint8 bonus = getBonusMalusName("aqua_speed");
+		if (bonus > -1)
+		{
+			setBonusMalusName("aqua_speed", -1);
+			removeEffectInDB(bonus, true);
+		}
+	}
+
 	// Speed
 	// while stunned/root/mezzed etc speed is forced to 0
 	float oldCurrentSpeed;
@@ -2796,7 +2829,7 @@ void CCharacter::applyRegenAndClipCurrentValue()
 		CBankAccessor_PLR::getUSER().setSPEED_FACTOR(
 			_PropertyDatabase, checkedCast<uint8>(speedVariationModifier + 100.0f));
 
-		if (speedVariationModifier > 0)
+		if (speedVariationModifier > 0 && (!usingAquaSpeed || speedVariationModifier - 33 > 0))
 		{
 			_LastOverSpeedTick = CTickEventHandler::getGameCycle();
 		}
@@ -4712,8 +4745,7 @@ extern CBitMemStream DBOutput; // global to avoid reallocation
 void CCharacter::databaseUpdate()
 {
 	// Write the inventory updates
-	_InventoryUpdater.sendAllUpdates(
-		_Id); // must be before the sending of _PropertyDatabase, because it tests _PropertyDatabase.notSentYet()
+	_InventoryUpdater.sendAllUpdates(_Id); // must be before the sending of _PropertyDatabase, because it tests _PropertyDatabase.notSentYet()
 
 	// Write the character's database delta (for comment numbers, see tutorial in cdb_group.h)
 	if (_PropertyDatabase.getChangedPropertyCount() != 0) // ensures writeDelta() will return true
@@ -6026,7 +6058,7 @@ void CCharacter::setCurrentContinent(CONTINENT::TContinent continent)
 //-----------------------------------------------
 // CCharacter::addCharacterAnimal buy a creature
 //-----------------------------------------------
-bool CCharacter::addCharacterAnimal(const CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size, const ucstring &customName)
+bool CCharacter::addCharacterAnimal(const CSheetId &PetTicket, uint32 Price, CGameItemPtr ptr, uint8 size, const ucstring &customName, const string &clientSheet)
 {
 	if (!PackAnimalSystemEnabled)
 		return false;
@@ -6042,7 +6074,10 @@ bool CCharacter::addCharacterAnimal(const CSheetId &PetTicket, uint32 Price, CGa
 	if (checkAnimalCount(PetTicket, true, 1))
 	{
 		const CStaticItem* form = CSheets::getForm(PetTicket);
-		pet.PetSheetId = form->PetSheet;
+		if (!clientSheet.empty())
+			pet.PetSheetId =  CSheetId(clientSheet.c_str());
+		else
+			pet.PetSheetId = form->PetSheet;
 		pet.Satiety = form->PetHungerCount;
 		pet.MaxSatiety = form->PetHungerCount;
 		uint8 startSlot = 0;
@@ -6349,7 +6384,7 @@ bool CCharacter::checkAnimalCount(const CSheetId &PetTicket, bool sendMessage, s
 			return false;
 		}
 
-		CPlayer* p = PlayerManager.getPlayer(PlayerManager.getPlayerId(getId()));
+		/*CPlayer* p = PlayerManager.getPlayer(PlayerManager.getPlayerId(getId()));
 		BOMB_IF(p == NULL, "Failed to find player record for character: " << getId().toString(), return 0.0);
 
 		if (p->isTrialPlayer())
@@ -6358,6 +6393,7 @@ bool CCharacter::checkAnimalCount(const CSheetId &PetTicket, bool sendMessage, s
 				sendDynamicSystemMessage(_Id, "EGS_CANT_BUY_PACKER_IS_TRIAL_PLAYER");
 			return false;
 		}
+		* */
 	}
 	else
 	{
@@ -8157,8 +8193,6 @@ void CCharacter::addGuildPoints(uint32 points)
 		guild->addXP(1);
 		_GuildPoints = 0;
 	}
-
-	nlinfo("_TodayGuildPoints, wantedPoints, _GuildPoints = %u, %u, %u", _TodayGuildPoints, wantedPoints, _GuildPoints);
 }
 
 //---------------------------------------------------
@@ -12326,7 +12360,6 @@ void CCharacter::addRpPoints(sint32 points)
 		_LastRpPointsWin = CTickEventHandler::getGameCycle();
 	}
 
-	nlinfo("Add rp points : %d", points);
 	if (_RpPoints + points > 0)
 		_RpPoints += points;
 	else
@@ -14448,21 +14481,15 @@ void CCharacter::botChatMissionAdvance(uint8 index)
 	}
 
 
-	nlinfo("_CurrentInterlocutor = %d", _CurrentInterlocutor.toString().c_str());
-	nlinfo("_Target = %d", getTarget().toString().c_str());
-
 	uint idx = 0;
-	nlinfo("index = %d", index);
 
 	for (map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it)
 	{
 		std::vector<CMission::CBotChat> botchats;
 		(*it).second->getBotChatOptions(_EntityRowId, TheDataset.getDataSetRow(_CurrentInterlocutor), botchats);
 
-		nlinfo("botchats.size = %d", botchats.size());
 		for (uint j = 0; j < botchats.size();)
 		{
-			nlinfo("idx = %d", idx);
 			if (idx == index)
 			{
 				if (!botchats[j].Gift)
@@ -16785,7 +16812,7 @@ void CCharacter::getMatchingMissionLootRequirements(uint16 itemLevel, const std:
 	// (note: If he can get, it doesn't mean it will get)
 	if ((!foundMatchingOK) && foundMatchingExceptLevel)
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage(getEntityRowId(), "AUTO_LOOT_LEVEL_TOO_LOW");
+		PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "AUTO_LOOT_LEVEL_TOO_LOW");
 	}
 }
 
@@ -16836,20 +16863,40 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 					params[0].Int = (sint32)_ForageProgress->amount();
 					params[1].SheetId = _ForageProgress->material();
 					params[2].Int = (sint32)_ForageProgress->quality();
-					PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "HARVEST_SUCCESS", params);
+					sendDynamicSystemMessage(_EntityRowId, "HARVEST_SUCCESS", params);
 				}
 
 				if ((CTickEventHandler::getGameCycle() - _LastTickForageLoot) > ArkLootTimeBeforeNewDraw)
 				{
 					_LastTickForageLoot = CTickEventHandler::getGameCycle();
 					CSheetId usedSheet;
-					CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
-					if (sbrickParam.ParsedOk && sbrickParam.Value == "loot" && (rand() % 1000) < sbrickParam.Modifier)
+					CSheetId usedSheetL;
+					CSheetId usedSheetR;
+					CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheetL);
+					CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheetR);
+					sint32 modifierL = -1;
+					sint32 modifierR = -1;
+
+					if (sbrickParamL.ParsedOk && sbrickParamL.Value == "loot")
+					{
+						modifierL = sbrickParamL.Modifier;
+						usedSheet = usedSheetL;
+					}
+
+					if (sbrickParamR.ParsedOk && sbrickParamR.Value == "loot")
+					{
+						modifierR = sbrickParamR.Modifier;
+						usedSheet = usedSheetR;
+					}
+
+					sint32 modifier = max(modifierL, modifierR);
+					if (modifier >= 0 && rand() % 1000 < (uint32)(modifier * ArkLootExtraModifierMultiplier))
 					{
 						SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
 						params[0].SheetId = usedSheet;
-						sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
-						sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Forage&quality=%d%quantity=%d&command=reset_all", quality, _ForageProgress->amount()));
+						// ArkLoot script will trigger it
+						// sendDynamicSystemMessage(_EntityRowId, "ALLEGORY_EFFECT_TRIGGERED", params);
+						sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Forage&quality=%d&quantity=%d&command=reset_all", (sint32)_ForageProgress->quality(), (sint32)_ForageProgress->amount()));
 					}
 				}
 
@@ -16925,22 +16972,34 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 			}
 		}
 
-		bool useGenericMats = false;
+
 		uint8 bonus = 1;
 
 		CSheetId usedSheet;
-		CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheet);
-		if (sbrickParam.ParsedOk && sbrickParam.Value == "generic")
+		CSheetId usedSheetL;
+		CSheetId usedSheetR;
+		CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheetL);
+		CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheetR);
+		sint32 modifierL = -1;
+		sint32 modifierR = -1;
+
+
+		if (sbrickParamL.ParsedOk && sbrickParamL.Value == "generic")
 		{
-			useGenericMats = true;
-			if ((rand() % 1000) < sbrickParam.Modifier)
-			{
-				SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
-				params[0].SheetId = usedSheet;
-				sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
-				bonus = 2;
-			}
+			modifierL = sbrickParamL.Modifier;
+			usedSheet = usedSheetL;
 		}
+
+		if (sbrickParamR.ParsedOk && sbrickParamR.Value == "generic")
+		{
+			modifierR = sbrickParamR.Modifier;
+			usedSheet = usedSheetR;
+		}
+
+
+		sint32 modifier = max(modifierL, modifierR);
+
+		bool useGenericMats = modifier >= 0;
 
 
 		// first slots are filled with loot items, quarter items are not in temp inv but only info in DB
@@ -16962,10 +17021,20 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 
 		if (quality != 0)
 		{
-			// Create and stack the item in the bag (use genericMp beca
+			// Create and stack the item in the bag
 			CGameItemPtr item;
 			if (useGenericMats)
-				item = createItem(quality, bonus*genericMp->Quantity, genericMp->ItemId);
+			{
+				 // Not Named or Boss mats
+				if (mp->Quantity > 0 && genericMp->ItemId != mp->ItemId && rand() % 500 < modifier)
+				{
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
+					params[0].SheetId = usedSheet;
+					sendDynamicSystemMessage(_EntityRowId, "ALLEGORY_EFFECT_TRIGGERED", params);
+					bonus = 2;
+				}
+				item = createItem(quality, bonus*mp->Quantity, genericMp->ItemId);
+			}
 			else
 				item = createItem(quality, mp->Quantity, mp->ItemId);
 
@@ -17019,21 +17088,6 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 					}
 				}
 			}
-
-			if ((CTickEventHandler::getGameCycle() - _LastTickCreatureLoot) > ArkLootTimeBeforeNewDraw)
-			{
-				_LastTickCreatureLoot = CTickEventHandler::getGameCycle();
-				CSheetId usedSheet;
-				CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheet);
-				if ((sbrickParam.ParsedOk && sbrickParam.Value == "loot" && (rand() % 1000) < sbrickParam.Modifier))
-				{
-					SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
-					params[0].SheetId = usedSheet;
-					sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
-					sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Loot&quality=%d&quantity=%d&command=reset_all", (uint32)quality, (uint32)mp->Quantity));
-				}
-			}
-
 		}
 
 		// remove the quantity of mp harvested from the ressource
@@ -17054,6 +17108,41 @@ bool CCharacter::pickUpRawMaterial(uint32 indexInTempInv, bool* lastMaterial)
 		{
 			if (lastMaterial)
 				*lastMaterial = true;
+			if ((CTickEventHandler::getGameCycle() - _LastTickCreatureLoot) > ArkLootTimeBeforeNewDraw)
+			{
+				_LastTickCreatureLoot = CTickEventHandler::getGameCycle();
+				CSheetId usedSheetL;
+				CSheetId usedSheetR;
+
+				CSBrickParamJewelAttrs sbrickParamL = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERL, usedSheetL);
+				CSBrickParamJewelAttrs sbrickParamR = getJewelAttrs("arkloot", SLOT_EQUIPMENT::FINGERR, usedSheetR);
+				sint32 modifierL = -1;
+				sint32 modifierR = -1;
+
+				if (sbrickParamL.ParsedOk && sbrickParamL.Value == "loot")
+				{
+					modifierL = sbrickParamL.Modifier;
+					usedSheet = usedSheetL;
+				}
+
+				if (sbrickParamR.ParsedOk && sbrickParamR.Value == "loot")
+				{
+					modifierR = sbrickParamR.Modifier;
+					usedSheet = usedSheetR;
+				}
+
+				sint32 modifier = max(modifierL, modifierR);
+
+				if (modifier >= 0 && (rand() % 1000) < (uint32)(modifier*ArkLootExtraModifierMultiplier))
+				{
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
+					params[0].SheetId = usedSheet;
+					// Arkloot script will trigger it
+					// sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
+					sendUrl(toString("app_arcc action=mScript_Run&script_name=ArkLoot&type=Loot&quality=%d&quantity=%d&command=reset_all", (uint32)quality, (uint32)mp->Quantity));
+				}
+			}
+
 		}
 	}
 
@@ -17147,36 +17236,6 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 	{
 		if (playerFame != NO_FAME)
 		{
-			// Update Marauder fame when < 50 and other fame change
-			uint32 marauderIdx = PVP_CLAN::getFactionIndex(PVP_CLAN::Marauder);
-			sint32	marauderFame = CFameInterface::getInstance().getFameIndexed(_Id, marauderIdx);
-			if (factionIndex != marauderIdx)
-			{
-				sint32 maxOtherfame = -100*kFameMultipler;
-				for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
-				{
-					if (fameIdx == marauderIdx)
-						continue;
-
-					sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
-
-					if (fame > maxOtherfame)
-						maxOtherfame = fame;
-				}
-
-				if (marauderFame < 50*kFameMultipler)
-				{
-					if (maxOtherfame < -50*kFameMultipler) // Cap to 50
-						maxOtherfame = -50*kFameMultipler;
-					CFameManager::getInstance().setEntityFame(_Id, marauderIdx, -maxOtherfame, false);
-				}
-				else
-				{
-					if (maxOtherfame > -40*kFameMultipler)
-						CFameManager::getInstance().setEntityFame(_Id, marauderIdx, -maxOtherfame, false);
-				}
-			}
-
 			//			_PropertyDatabase.setProp( toString("FAME:PLAYER%d:VALUE", fameIndexInDatabase),
 			// sint64(float(playerFame)/FameAbsoluteMax*100) );
 			CBankAccessor_PLR::getFAME()
@@ -17204,18 +17263,11 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 
 	bool canPvp = false;
 
-	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
+	for (uint8 fameIdx = PVP_CLAN::BeginClans; fameIdx < PVP_CLAN::EndClans; fameIdx++)
 	{
-		sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
-
-		if (fame >= PVPFameRequired * 6000)
-		{
+		sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)fameIdx));
+		if ((fame >= PVPFameRequired * kFameMultipler) || (fame <= -PVPFameRequired * kFameMultipler))
 			canPvp = true;
-		}
-		else if (fame <= -PVPFameRequired * 6000)
-		{
-			canPvp = true;
-		}
 	}
 
 	if (_LoadingFinish)
@@ -17261,13 +17313,15 @@ void CCharacter::resetFameDatabase()
 		CFameManager::getInstance().enforceFameCaps(getId(), getOrganization(), getAllegiance());
 		CFameManager::getInstance().setAndEnforceTribeFameCap(getId(), getOrganization(), getAllegiance());
 	}
-
-	for (uint i = 0; i < CStaticFames::getInstance().getNbFame(); ++i)
+	else
 	{
-		// update player fame info
-		sint32 fame = fi.getFameIndexed(_Id, i, false, true);
-		sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), getOrganization(), i);
-		setFameValuePlayer(i, fame, maxFame, 0);
+		for (uint i = 0; i < CStaticFames::getInstance().getNbFame(); ++i)
+		{
+			// update player fame info
+			sint32 fame = fi.getFameIndexed(_Id, i, false, true);
+			sint32 maxFame = CFameManager::getInstance().getMaxFameByFactionIndex(getAllegiance(), getOrganization(), i);
+			setFameValuePlayer(i, fame, maxFame, 0);
+		}
 	}
 }
 
@@ -19223,8 +19277,24 @@ bool CCharacter::changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntit
 		// for god mode
 		if (!_GodMode && !_Invulnerable)
 		{
-			kill(responsibleEntity);
-			return true;
+			CSheetId usedSheet;
+			CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("rez", SLOT_EQUIPMENT::NECKLACE, usedSheet);
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
+			params[0].SheetId = usedSheet;
+			uint32 randvalue = rand() % 400;
+
+			if (sbrickParam.ParsedOk && sbrickParam.Value == "lastPoint" && randvalue < sbrickParam.Modifier)
+			{
+				_PhysScores._PhysicalScores[SCORES::hit_points].Current = 1;
+				setHpBar(1);
+				sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
+				return false;
+			}
+			else
+			{
+				kill(responsibleEntity);
+				return true;
+			}
 		}
 		else
 		{
@@ -23491,8 +23561,7 @@ void CCharacter::updateEffectInDB(uint8 index, bool bonus, NLMISC::TGameCycle ac
 
 sint32 CCharacter::getWeightMalus()
 {
-	sint32 maxWeight
-		= BaseMaxCarriedWeight + 1000 * _PhysCharacs._PhysicalCharacteristics[CHARACTERISTICS::strength].Current;
+	sint32 maxWeight = BaseMaxCarriedWeight + 1000 * _PhysCharacs._PhysicalCharacteristics[CHARACTERISTICS::strength].Current;
 	sint32 weightDiff = (maxWeight - sint32(getCarriedWeight()));
 	sint32 weightMalus = weightDiff / 1000;
 
@@ -23690,10 +23759,14 @@ void CCharacter::incAggroCount()
 
 bool CCharacter::isInWater() const
 {
-	if (!_PlayerIsInWater && (_ActionFlags.getValue() & RYZOMACTIONFLAGS::InWater))
+	if (!_PlayerIsInWater && (((_EntityState.Z.getValue() & 4) != 0) || (_ActionFlags.getValue() & RYZOMACTIONFLAGS::InWater)))
 	{
 		entersWater();
 		_PlayerIsInWater = true;
+	}
+	else if (_PlayerIsInWater && (_EntityState.Z.getValue() & 4) == 0)
+	{
+		_PlayerIsInWater = false;
 	}
 
 	return (_PlayerIsInWater || (_ActionFlags.getValue() & RYZOMACTIONFLAGS::InWater));

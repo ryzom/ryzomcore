@@ -26,16 +26,19 @@
 #include "nel/net/service.h"
 
 #include "admin_modules_itf.h"
+#include "admin_log.h"
 
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
+CVariable<string> LogPath("aes","LogPath", "path of logs", "../logs", 0, true);
+
 void aesclient_forceLink() {}
 
 namespace ADMIN
 {
-	class CAdminExecutorServiceClient 
+	class CAdminExecutorServiceClient
 		:	/*public CManualSingleton<CAdminExecutorService>,*/
 			public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
 			public CAdminExecutorServiceClientSkel
@@ -89,9 +92,9 @@ namespace ADMIN
 			 *	nearest integer second.
 			 *	For 'high rez' var, the service buffer
 			 *	the relative timestamp in ms at each
-			 *	tick loop and send update every seconds 
+			 *	tick loop and send update every seconds
 			 *	to the AES service.
-			 *	In addition, HighRez var are also sent 
+			 *	In addition, HighRez var are also sent
 			 *	every second as normal sample.
 			 */
 			uint32	MeanSamplePeriod;
@@ -126,7 +129,8 @@ namespace ADMIN
 				_ProcessUsedMemory(0)
 		{
 			CAdminExecutorServiceClientSkel::init(this);
-
+			std::string	logPath = LogPath.get();
+			AdminCommandLog.init(CPath::standardizePath(logPath)+"admin_commands.log");
 		}
 
 		std::string makeServiceAlias()
@@ -217,8 +221,8 @@ namespace ADMIN
 //				if (serviceAlias.empty())
 //					serviceAlias = getModuleFullyQualifiedName();
 //
-//				aes.serviceConnected(this, 
-//					IService::getInstance()->getServiceLongName(), 
+//				aes.serviceConnected(this,
+//					IService::getInstance()->getServiceLongName(),
 //					IService::getInstance()->getServiceShortName(),
 //					serviceAlias,
 //					pid);
@@ -283,7 +287,7 @@ namespace ADMIN
 					_ProcessUsedMemory = 0;
 				}
 
-				// at least one second as passed, check for updates to send to 
+				// at least one second as passed, check for updates to send to
 				// AES
 
 				TGraphDatas	graphDatas;
@@ -324,7 +328,7 @@ namespace ADMIN
 							// we have some sample collected, just use the last one
 							gd.setValue(gvi.Samples.back().SampleValue);
 						}
-						
+
 						// if it's a high rez sampler, send the complete buffer
 						if (gvi.MeanSamplePeriod < 1000 && _AdminExecutorService != NULL)
 						{
@@ -364,7 +368,7 @@ namespace ADMIN
 					CAdminExecutorServiceProxy aes(_AdminExecutorService);
 					aes.graphUpdate(this, graphDatas);
 				}
-						
+
 				// update the last report date
 				_LastStateReport = now;
 			}
@@ -421,7 +425,7 @@ namespace ADMIN
 				status << "\t" << IService::getInstance()->getServiceStatusString();
 			}
 
-			if ((status != _LastSentStatus || (now - _LastStatusStringReport) > MAX_DELAY_BETWEEN_REPORT) 
+			if ((status != _LastSentStatus || (now - _LastStatusStringReport) > MAX_DELAY_BETWEEN_REPORT)
 				&& _AdminExecutorService != NULL)
 			{
 				CAdminExecutorServiceProxy aes(_AdminExecutorService);
@@ -454,7 +458,7 @@ namespace ADMIN
 			IService::getInstance()->CommandLog.addDisplayer(&stringDisplayer);
 
 			// retrieve the command from the input message and execute it
-			nlinfo ("ADMIN: Executing command from network : '%s'", command.c_str());
+			ADMINCMDLOG("'%s'", command.c_str());
 			ICommand::execute (command, IService::getInstance()->CommandLog);
 
 			// unhook our displayer as it's work is now done
@@ -473,7 +477,7 @@ namespace ADMIN
 		virtual void serviceCmdNoReturn(NLNET::IModuleProxy *sender, const std::string &command)
 		{
 			// retrieve the command from the input message and execute it
-			nlinfo ("ADMIN: Executing command from network : '%s'", command.c_str());
+			ADMINCMDLOG("'%s'", command.c_str());
 			ICommand::execute (command, IService::getInstance()->CommandLog);
 		}
 	};

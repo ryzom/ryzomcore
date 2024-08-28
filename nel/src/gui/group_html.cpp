@@ -3521,8 +3521,14 @@ namespace NLGUI
 			else if (form.Entries[i].ComboBox)
 			{
 				CDBGroupComboBox *cb = form.Entries[i].ComboBox;
-				entryData = form.Entries[i].SelectValues[cb->getSelection()];
-				addEntry = true;
+				if (cb)
+				{
+					if (form.Entries[i].SelectValues.size() > 0)
+					{
+						entryData = form.Entries[i].SelectValues[cb->getSelection()];
+						addEntry = true;
+					}
+				}
 			}
 			else if (form.Entries[i].SelectBox)
 			{

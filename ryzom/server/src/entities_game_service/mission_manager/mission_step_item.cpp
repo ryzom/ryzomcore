@@ -157,7 +157,7 @@ inline void IMissionStepItem::getTextParams(uint & nbSubSteps, TVectorParamCheck
 
 				if (params.size() > 2)
 					NLMISC::fromString(params[2], quantity);
-						
+
 				if (status.size() > 0) // Use saved step quantity
 					NLMISC::fromString(status[0], quantity);
 
@@ -165,7 +165,7 @@ inline void IMissionStepItem::getTextParams(uint & nbSubSteps, TVectorParamCheck
 					NLMISC::fromString(params[3], quality);
 				}
 
-				nlinfo("Sheet : %s, Quality : %d, Quantity: %d", itemSheet.toString().c_str(), quality, quantity);
+				//nlinfo("Sheet : %s, Quality : %d, Quantity: %d", itemSheet.toString().c_str(), quality, quantity);
 				////
 			}
 
@@ -200,7 +200,7 @@ class CMissionStepForage : public IMissionStepItem
 	{
 		string webAppUrl;
 		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
-		
+
 		if ( event.Type == CMissionEvent::Forage )
 		{
 			CMissionEventForage & eventSpe = (CMissionEventForage&)event;
@@ -208,7 +208,7 @@ class CMissionStepForage : public IMissionStepItem
 			uint16 quality;
 			uint32 quantity;
 
-			
+
 			if (_SubSteps[subStepIndex].Dynamic.empty()) {
 				itemSheet = _SubSteps[subStepIndex].Sheet;
 				quality = _SubSteps[subStepIndex].Quality;
@@ -275,7 +275,7 @@ class CMissionStepLootItem : public IMissionStepItem
 		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
 
 		nlinfo("ok");
-		
+
 		if ( event.Type == CMissionEvent::LootItem )
 		{
 			nlinfo("ok");
@@ -307,14 +307,14 @@ class CMissionStepLootItem : public IMissionStepItem
 
 				if (status.size() == 0) // If no saved quantity => use mission param
 					status.push_back(params[2]);
-				
+
 				NLMISC::fromString(status[0], quantity); // Use saved quantity
 
 				if (params.size() > 3)
 					NLMISC::fromString(params[3], quality);
 			}
 
-		
+
 			CMissionEventLootItem & eventSpe = (CMissionEventLootItem&)event;
 			nlinfo("Sheet : %s, Quality : %d / %d, Quantity: %d / %d", eventSpe.Sheet.toString().c_str(), eventSpe.Quality, quality, eventSpe.Quantity, quantity);
 			if ( eventSpe.Sheet == itemSheet && eventSpe.Quality >= quality )
@@ -334,7 +334,7 @@ class CMissionStepLootItem : public IMissionStepItem
 							_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", NLMISC::toString("%d", quantity-eventSpe.Quantity));
 						}
 					}
-				
+
 				LOGMISSIONSTEPSUCCESS("loot_item");
 				return eventSpe.Quantity;
 			}
@@ -392,13 +392,13 @@ uint CMissionStepLootRm::processEvent( const TDataSetRow & userRow, const CMissi
 
 			if (status.size() == 0) // If no saved quantity => use mission param
 				status.push_back(params[2]);
-			
+
 			NLMISC::fromString(status[0], quantity); // Use saved quantity
 
 			if (params.size() > 3)
 				NLMISC::fromString(params[3], quality);
 		}
-		
+
 		CMissionEventLootRm & eventSpe = (CMissionEventLootRm&)event;
 		nlinfo("Sheet : %s, Quality : %d / %d, Quantity: %d / %d", eventSpe.Sheet.toString().c_str(), eventSpe.Quality, quality, eventSpe.Quantity, quantity);
 		if ( eventSpe.Sheet == itemSheet && eventSpe.Quality >= quality )
@@ -418,7 +418,7 @@ uint CMissionStepLootRm::processEvent( const TDataSetRow & userRow, const CMissi
 						_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", NLMISC::toString("%d", quantity-eventSpe.Quantity));
 					}
 				}
-			
+
 			LOGMISSIONSTEPSUCCESS("loot_mp");
 			return eventSpe.Quantity;
 		}

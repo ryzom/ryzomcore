@@ -90,7 +90,6 @@ ylwrap
 *.mk
 
 # Visual Studio garbage
-.vscode/
 *.opensdf
 UpgradeLog*.XML
 _UpgradeReport_Files

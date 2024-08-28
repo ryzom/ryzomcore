@@ -2784,9 +2784,9 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 				{
 					uint32 slotIndex;
 					impulse.serial( slotIndex, CInventoryCategoryTemplate::SlotBitSize );
-
+					nlinfo("Slot %d", slotIndex);
 					// Access the database leaf
-					CCDBNodeBranch *slotNode = safe_cast<CCDBNodeBranch*>(inventoryNode->getNode( (uint16)slotIndex ));
+					CCDBNodeBranch *slotNode = safe_cast<CCDBNodeBranch*>(inventoryNode->getNode( (uint32)slotIndex ));
 					CCDBNodeLeaf *leafNode = type_cast<CCDBNodeLeaf*>(slotNode->find( INVENTORIES::InfoVersionStr ));
 					BOMB_IF( !leafNode, "Inventory slot property missing in database", continue );
 
@@ -2910,7 +2910,7 @@ void impulseItemInfoSet (NLMISC::CBitMemStream &impulse)
 //-----------------------------------------------
 void impulseItemInfoRefreshVersion (NLMISC::CBitMemStream &impulse)
 {
-	uint16 slotId;
+	uint32 slotId;
 	uint8 infoVersion;
 	impulse.serial(slotId);
 	impulse.serial(infoVersion);

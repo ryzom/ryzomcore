@@ -42,6 +42,70 @@ if (game.BonusMalus == nil) then
 	game.BonusMalus.MalusAHList= {};
 end
 
+game.wantedScriptPlaces = {}
+game.latestValidScriptPlace = ""
+
+function game:addScriptPlace(modname, place, id)
+	if game.wantedScriptPlaces[modname] == nil then
+		game.wantedScriptPlaces[modname] = {}
+	end
+	game.wantedScriptPlaces[modname][place] = id
+end
+
+function game:checkScriptPlace(place)
+	for modname, vals in pairs(game.wantedScriptPlaces) do
+		if vals[place] ~= nil and game.latestValidScriptPlace ~= place then
+			game.latestValidScriptPlace = place
+			openArkScript(vals[place], nil, "place="..place)
+		end
+	end
+end
+
+function game:CheckPosition()
+	game:checkRpItemsPosition()
+	local cont, region, places = game:getPositionInfos()
+	game:checkScriptPlace(cont)
+	game:checkScriptPlace(region)
+	if places == nil then
+		return
+	end
+	for place, typ in pairs(places) do
+		game:checkScriptPlace(place)
+	end
+end
+
+
+function game:getPositionInfos(x, y)
+	local player_cont = ""
+	local player_region = ""
+	local player_places = {}
+	if x == nil or y == nil then
+		x,y,z = getPlayerPos()
+	end
+
+	if game.World == nil then
+		return "", "", {}
+	end
+
+	for cont, c in pairs(game.World) do
+		player_cont = cont
+		if point_inside_poly(x, y, c[2]) then
+			for region, r in pairs(c[3]) do
+				if point_inside_poly(x, y, r[2]) then
+					player_region = region
+					for place, p in pairs(r[3]) do
+						if point_inside_poly(x, y, p[2]) then
+							player_places[place] = p[3]
+						end
+					end
+				end
+			end
+		end
+	end
+	return player_cont, player_region, player_places
+end
+
+
 
 ------------------------------------------------------------------------------------------------------------
 -- Update player bars in function of what we wants to display (we can hide each one of the 3 bars : sap,stamina and focus)
@@ -1030,3 +1094,6 @@ function game:fixVpx(vpx)
 	local nvpx = vpx1:sub(1, string.len(vpx1)-6)..vpx2:sub(string.len(vpx2)-5, string.len(vpx2))
 	return nvpx
 end
+
+-- VERSION --
+RYZOM_PLAYER_VERSION = 366

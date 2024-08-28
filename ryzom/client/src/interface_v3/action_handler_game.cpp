@@ -863,6 +863,20 @@ protected:
 REGISTER_ACTION_HANDLER( CHandlerContextFreeLook, "context_free_look");
 
 // ***************************************************************************
+class CHandlerToggleFreeLook : public IActionHandler
+{
+public:
+	void execute(CCtrlBase * /* pCaller */, const std::string & /* sParams */)
+	{
+		if (UserControls.getFreeLook())
+			UserControls.stopFreeLook();
+		else
+			UserControls.startFreeLook();
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerToggleFreeLook, "toggle_free_look");
+
+// ***************************************************************************
 // GCM Move
 // ***************************************************************************
 class CHandlerMove : public IActionHandler
@@ -2488,7 +2502,7 @@ class CAHTarget : public IActionHandler
 		if (preferCompleteMatch)
 		{
 			// Try to get the entity with complete match first
-			entity = EntitiesMngr.getEntityByName (entityName, false, true);
+			entity = EntitiesMngr.getEntityByName(entityName, false, true);
 		}
 
 		if (entity == NULL && !keywords.empty())
@@ -4289,22 +4303,40 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string	dbBranch= getParam(sParams, "dbbranch");
+		string	dbStart= getParam(sParams, "dbstart");
+		string	dbCount= getParam(sParams, "dbcount");
 		string	dbMax= getParam(sParams, "dbmax");
 
+		uint32 start = 0;
+		uint32 count = 10000;
+		uint32 max = 0;
+		if (dbStart != "")
+		{
+			sint64 valstart;
+			CInterfaceExpr::evalAsInt(dbStart, valstart);
+			start = (uint32)valstart;
+		}
+		if (dbCount != "")
+		{
+			sint64 valcount;
+			CInterfaceExpr::evalAsInt(dbCount, valcount);
+			count = (uint32)valcount;
+		}
+		if (dbMax != "")
+		{
+			sint64 valmax;
+			CInterfaceExpr::evalAsInt(dbMax, valmax);
+			max = (uint32)valmax;
+		}
 		// Get the sum of the bulk for this db branch
 		const double epsilon = 0.001;
-		float val = CInventoryManager::getBranchBulk(dbBranch, 0, 10000) + epsilon;
-
-		// Get the Max value
-		sint32	maxVal= 0;
-		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(dbMax, false);
-		if(node)
-			maxVal= node->getValue32();
+		nlinfo("Start = %s, %d, Count = %s, %d, Max = %s, %d", dbStart.c_str(), start, dbCount.c_str(), count, dbMax.c_str(), max);
+		float val = CInventoryManager::getBranchBulk(dbBranch, start, count) + epsilon;
 
 		// Replace in the formated text
 		string	str= CI18N::get("uittBulkFormat");
-		strFindReplace(str, "%v", toString("%.2f", val) );
-		strFindReplace(str, "%m", toString(maxVal) );
+		strFindReplace(str, "%v", toString("%.2f", val));
+		strFindReplace(str, "%m", toString(max) );
 		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };

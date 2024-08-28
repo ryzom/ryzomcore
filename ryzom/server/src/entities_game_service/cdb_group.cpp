@@ -48,7 +48,7 @@ void	CCDBGroup::addRecipient( const CCDBRecipient& recipient )
 	// done since the latest sendDeltas(), one of which is from the 'permanent
 	// changes')
 	_NewRecipients.push_back( recipient );
-	
+
 	LOG( "CDB: %s added into group", recipient.toString().c_str() );
 }
 
@@ -102,7 +102,7 @@ void	CCDBGroup::removeRecipient( const CCDBRecipient& recipient )
 /*
  *
  */
-void	CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint8 sendFlags )
+void CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint8 sendFlags )
 {
 	// Check if there are changes
 	if ( (Database.getChangedPropertyCount() != 0) ||
@@ -142,7 +142,7 @@ void	CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint
 		{
 			msgout.serialCont( _Recipients );	// Explicit multi-recipients
 		}
-	
+
 		msgout.serialBufferWithSize( (uint8*)DBOutput.buffer(), DBOutput.length() );
 		CUnifiedNetwork::getInstance()->send( "FS", msgout, false ); // viaMirror not needed because sending entity ids instead of datasetrows
 		LOG( "Sent CDB_MULTI_IMPULSION to all FS (%u bytes)", msgout.length() );
@@ -152,7 +152,7 @@ void	CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint
 	for ( std::vector<CCDBRecipient>::const_iterator inr=_NewRecipients.begin(); inr!=_NewRecipients.end(); ++inr )
 	{
 		const CCDBRecipient& recipient = (*inr);
-		
+
 		// Sent history of what was modified before its arrival in the group
 		// As this is a specific message, the client can react differently from an update
 		DBOutput.resetBufPos();
@@ -172,16 +172,44 @@ void	CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint
 			DBOutput.serial( noInitialDelta, 16 );
 		}
 		// Write additional provided data (for guild inventory)
-		dataProvider.provideContents( DBOutput ); // provideUpdate() must have been called before, otherwise would not be empty()
+		nlinfo("provide contents to %s", recipient.toString().c_str());
+		dataProvider.provideContents( DBOutput, const_cast<CEntityId&>(recipient), true); // provideUpdate() must have been called before, otherwise would not be empty()
 		// Send
 		CMessage msgout( "CDB_IMPULSION" );
 		msgout.serial( const_cast<CEntityId&>(recipient) );
 		msgout.serialBufferWithSize( (uint8*)DBOutput.buffer(), DBOutput.length() );
 		CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(recipient.getDynamicId()), msgout );
-		
+
 		// Add to normal recipient list
 		if ( ! _Recipients.insert( recipient ).second )
 			nlwarning( "Recipient %s added twice into CDBGroup", recipient.toString().c_str() );
 	}
 	_NewRecipients.clear();
+}
+
+void CCDBGroup::sendDeltasToClient(IDataProvider& dataProvider, const CEntityId &id )
+{
+	DBOutput.resetBufPos();
+	GenericMsgManager.pushNameToStream( "DB_GROUP:UPDATE_BANK", DBOutput );
+	// Write the server tick, to ensure old DB update are not applied after newer
+	TGameCycle serverTick = CTickEventHandler::getGameCycle();
+	DBOutput.serial( serverTick );
+	// Encode the bank
+	uint32 bank = (uint32)Database.bank();
+	uint nbits;
+	FILL_nbits_WITH_NB_BITS_FOR_CDBBANK
+	DBOutput.serial( bank, nbits );
+	// Write the shared database delta (from the beginning)
+	if ( ! Database.writePermanentDelta( DBOutput ) )
+	{
+		uint32 noInitialDelta = 1;
+		DBOutput.serial( noInitialDelta, 16 );
+	}
+	// Write additional provided data (for guild inventory)
+	dataProvider.provideContents( DBOutput, id );
+	// Send
+	CMessage msgout( "CDB_IMPULSION" );
+	msgout.serial( const_cast<CEntityId&>(id) );
+	msgout.serialBufferWithSize( (uint8*)DBOutput.buffer(), DBOutput.length() );
+	CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(id.getDynamicId()), msgout );
 }

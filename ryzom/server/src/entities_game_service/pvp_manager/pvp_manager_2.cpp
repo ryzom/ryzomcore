@@ -646,7 +646,11 @@ void CPVPManager2::playerConnects(CCharacter * user)
 	if (pos != string::npos)
 		playerName = playerName.substr(0, pos);
 
-	CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'online': true} }", user->getId().getShortId(), user->getGuildId()), true);
+	CPlayer* player = PlayerManager.getPlayer(PlayerManager.getPlayerId(user->getId()));
+	if (player == NULL)
+		CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'rzlang': 'en', 'online': true} }", user->getId().getShortId(), user->getGuildId()), true);
+	else
+		CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'rzlang': '%s', 'online': true} }", user->getId().getShortId(), user->getGuildId(), player->getUserLanguage().c_str()), true);
 #endif
 
 	std::vector<TChanID> currentChannels = getCharacterUserChannels(user);
@@ -848,7 +852,7 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		}
 		////////////////////////////////////////////////////////
 	}
-	
+
 	bool is_ennemy = false;
 	bool is_neutral_op = false;
 	uint i;
@@ -867,7 +871,7 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		// Ennemy has the highest priority after outpost
 		if( relationTmp == PVP_RELATION::Ennemy )
 			is_ennemy = true;
-			
+
 		// Neutral pvp
 		if( relationTmp == PVP_RELATION::NeutralPVP )
 			relation = PVP_RELATION::NeutralPVP;
@@ -876,10 +880,10 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		if (relationTmp == PVP_RELATION::Ally && relation != PVP_RELATION::NeutralPVP)
 			relation = PVP_RELATION::Ally;
 	}
-	
+
 	if (is_neutral_op)
 		return PVP_RELATION::NeutralPVP;
-	
+
 	if (is_ennemy)
 		return PVP_RELATION::Ennemy;
 

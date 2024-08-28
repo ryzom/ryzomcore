@@ -453,6 +453,7 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	c->initPvpPointDb();
 	c->initOrganizationInfos();
 
+	c->resetFameDatabase();
 	c->updateOutpostAdminFlagInDB();
 
 	if ( !player->getUserPriv().empty() && !player->havePriv(":DEV:") )
@@ -2644,7 +2645,11 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 			return;
 		}
 
-		if (inventorySrc == (uint16) INVENTORIES::guild)
+		if (inventorySrc == (uint16) INVENTORIES::guild && inventoryDst == (uint16) INVENTORIES::guild)
+		{
+			pGuild->moveItem(character, slotSrc, slotDst, quantity, nGuildSessionCounter);
+		}
+		else if (inventorySrc == (uint16) INVENTORIES::guild)
 		{
 			// Guild -> Bag
 			pGuild->takeItem(character, (INVENTORIES::TInventory) inventoryDst, slotSrc, quantity, nGuildSessionCounter);
@@ -2652,7 +2657,7 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 		else if (inventoryDst == (uint16) INVENTORIES::guild)
 		{
 			// Bag -> Guild
-			pGuild->putItem(character, (INVENTORIES::TInventory) inventorySrc, slotSrc, quantity, nGuildSessionCounter);
+			pGuild->putItem(character, (INVENTORIES::TInventory) inventorySrc, slotSrc, slotDst, quantity, nGuildSessionCounter);
 		}
 
 		return;
@@ -2668,7 +2673,10 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 	else
 	{
 		// autostack by default (ignore destination slot furnished by client)
-		character->moveItem(inventorySrc, slotSrc, inventoryDst, INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, quantity);
+		if (inventoryDst == (uint16) INVENTORIES::guild)
+			character->moveItem(inventorySrc, slotSrc, inventoryDst, slotDst, quantity);
+		else
+			character->moveItem(inventorySrc, slotSrc, inventoryDst, INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, quantity);
 	}
 }
 

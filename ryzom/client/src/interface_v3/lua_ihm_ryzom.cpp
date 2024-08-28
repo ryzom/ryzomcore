@@ -482,6 +482,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getMouseRightDown", getMouseRightDown),
 	ls.registerFunc("isShiftDown", isShiftDown),
 	ls.registerFunc("isCtrlDown", isCtrlDown),
+	ls.registerFunc("isTabDown", isTabDown),
 	ls.registerFunc("getShapeIdAt", getShapeIdAt),
 	ls.registerFunc("getPlayerFront", getPlayerFront);
 	ls.registerFunc("getPlayerDirection", getPlayerDirection);
@@ -491,6 +492,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getPlayerTitle", getPlayerTitle);
 	ls.registerFunc("getPlayerTag", getPlayerTag);
 	ls.registerFunc("getPlayerMode", getPlayerMode);
+	ls.registerFunc("getPlayerPrivs", getPlayerPrivs);
 	ls.registerFunc("getTargetPos", getTargetPos);
 	ls.registerFunc("getTargetFront", getTargetFront);
 	ls.registerFunc("getTargetDirection", getTargetDirection);
@@ -517,6 +519,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("isPlayerFreeTrial", isPlayerFreeTrial);
 	ls.registerFunc("isPlayerNewbie", isPlayerNewbie);
 	ls.registerFunc("isInRingMode", isInRingMode);
+	ls.registerFunc("isPlayerPrivilege", isPlayerPrivilege);
 	ls.registerFunc("getUserRace",  getUserRace);
 	ls.registerFunc("getSheet2idx",  getSheet2idx);
 	ls.registerFunc("getTargetSlot",  getTargetSlot);
@@ -604,6 +607,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(clearHtmlUndoRedo),
 		LUABIND_FUNC(getDynString),
 		LUABIND_FUNC(isDynStringAvailable),
+		LUABIND_FUNC(getSrvString),
+		LUABIND_FUNC(isSrvStringAvailable),
 		LUABIND_FUNC(isFullyPatched),
 		LUABIND_FUNC(getSheetType),
 		LUABIND_FUNC(getSheetShape),
@@ -1367,6 +1372,12 @@ int CLuaIHMRyzom::isCtrlDown(CLuaState &ls)
 	return 1;
 }
 
+int CLuaIHMRyzom::isTabDown(CLuaState &ls)
+{
+	ls.push(Driver->AsyncListener.isKeyDown(KeyTAB));
+	return 1;
+}
+
 
 
 int CLuaIHMRyzom::getShapeIdAt(CLuaState &ls)
@@ -1544,6 +1555,31 @@ int CLuaIHMRyzom::getPlayerMode(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getPlayerMode", 0);
 	ls.push(MBEHAV::modeToString(UserEntity->mode()));
 	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getPlayerPrivs(CLuaState &ls)
+{
+	std::string privsString = "";
+	
+	if (hasPrivilegeDEV()) privsString=":DEV";
+	if (hasPrivilegeSGM()) privsString+=":SGM";
+	if (hasPrivilegeGM()) privsString+=":GM";
+	if (hasPrivilegeVG()) privsString+=":VG";
+	if (hasPrivilegeSG()) privsString+=":SG";
+	if (hasPrivilegeG()) privsString+=":G";
+	if (hasPrivilegeEM()) privsString+=":EM";
+	if (hasPrivilegeEG()) privsString+=":EG";
+	if (hasPrivilegeOBSERVER()) privsString+=":OBSERVER";
+	if (hasPrivilegeOBSERVER()) privsString+=":TESTER";
+	
+	if(privsString == ""){
+		return 0;
+	}
+	else{
+		ls.push(privsString+=":");
+		return 1;
+	}
 }
 
 // ***************************************************************************
@@ -1753,6 +1789,19 @@ int CLuaIHMRyzom::isInRingMode(CLuaState &ls)
 	extern bool IsInRingMode();
 	ls.push(IsInRingMode());
 	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::isPlayerPrivilege(CLuaState &ls)
+{
+	bool hasPlayerPrivilege = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeG() || hasPrivilegeEM() || hasPrivilegeEG());
+	if(hasPlayerPrivilege)
+	{
+		return 1;
+	}
+	else{
+		return 0;
+	}
 }
 
 // ***************************************************************************
@@ -3739,6 +3788,34 @@ bool		CLuaIHMRyzom::isDynStringAvailable(sint32 dynStringId)
 	bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(dynStringId,   result);
 	return res;
 }
+
+#ifdef RYZOM_LUA_UCSTRING
+ucstring	CLuaIHMRyzom::getSrvString(sint32 stringId)
+{
+	//H_AUTO(Lua_CLuaIHM_getDynString)
+	string result;
+	STRING_MANAGER::CStringManagerClient::instance()->getString(stringId,   result);
+	return ucstring::makeFromUtf8(result); // Compatibility
+}
+#else
+std::string	CLuaIHMRyzom::getSrvString(sint32 stringId)
+{
+	//H_AUTO(Lua_CLuaIHM_getDynString)
+	string result;
+	STRING_MANAGER::CStringManagerClient::instance()->getString(stringId,   result);
+	return result;
+}
+#endif
+
+// ***************************************************************************
+bool		CLuaIHMRyzom::isSrvStringAvailable(sint32 stringId)
+{
+	//H_AUTO(Lua_CLuaIHM_isDynStringAvailable)
+	string result;
+	bool res = STRING_MANAGER::CStringManagerClient::instance()->getString(stringId,   result);
+	return res;
+}
+
 
 // ***************************************************************************
 bool CLuaIHMRyzom::isFullyPatched()

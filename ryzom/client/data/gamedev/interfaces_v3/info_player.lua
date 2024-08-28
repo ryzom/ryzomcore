@@ -16,7 +16,7 @@ game.PrevSessionMission = - 1
 game.InGameDbInitialized = false
 
 game.WebMissionLastDesc = {}
-game.ArkLessonUsedWindowUrl = "https://app.ryzom.com/app_arcc/index.php?action=mLesson_Run&script="
+
 ------------------------------------------------------------------------------------------------------------
 -- CAP
 ------------------------------------------------------------------------------------------------------------
@@ -368,12 +368,20 @@ end
 function game:onDbChangeAppPage()
 	if getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK") > self.NpcWebPage.Timeout then
 		local npcName = getTargetName()
-
 		local message  = ucstring()
-
-		local text = game:getOpenAppPageMessage()
-		message:fromUtf8(text)
-		displaySystemInfo(message, "AMB")
+		local text  = ""
+		if game.appNpcMessages[npcName] ~= nil then
+			text = game.appNpcMessages[npcName]
+		else
+			text = game:getOpenAppPageMessage()
+		end
+		if text == "" then
+			text = "w_magic_sep2.tga|"
+		else
+			text = findReplaceAll(text, "%s", npcName)
+		end
+		message:fromUtf8(game:parseLangText(text))
+		displaySystemInfo(message, "ZON")
 		removeOnDbChange(getUI("ui:interface:npc_web_browser"),"@UI:VARIABLES:CURRENT_SERVER_TICK")
 	end
 end
@@ -1579,103 +1587,6 @@ function game:setNextUrl(url)
 	game.CapNextUrl = url
 end
 
-function ArkOpenLesson(id)
-	if id ~= 0 and id ~= nil then
-		local win = getUI("ui:interface:web_transaction_lessons")
-		if win then
-			win:find("html"):browse(game.ArkLessonUsedWindowUrl..id)
-		else
-			getUI("ui:interface:web_transactions"):find("html"):browse(game.ArkLessonUsedWindowUrl..id)
-		end
-	end
-end
-
-function ArkRevealLesson(id, i, total)
-	if i == game.ArkLessonRevealStep[id] then
-		game.ArkLessonRevealStep[id] = game.ArkLessonRevealStep[id] + 1
-		game:ArkLessonCallback("step", id, i)
-		game:ArkRevealLessonInfos(id, i, total)
-		if i == total then
-			game:ArkAcceptLesson()
-		end
-	end
-end
-
-function game:ArkRevealLessonInfos(id, i, total)
-	local ui = getUI("ui:interface:ArkLessonWin"..tostring(id))
-	if ui ~= nil  then
-		local html = ui:find("html")
-		html:showDiv("enabled_"..tostring(i), false)
-		html:showDiv("disabled_"..tostring(i), false)
-		html:showDiv("current_"..tostring(i), true)
-		if i > 1 then
-			if i ~= total+1 then
-				html:showDiv("current_"..tostring(i-1), false)
-				html:showDiv("enabled_"..tostring(i-1), true)
-			end
-		end
-		if game.ArkLessonRevealCaps and game.ArkLessonRevealCaps[id] then
-			if total > i then
-				setCap(game.ArkLessonRevealCaps[id], "p", math.floor((100*i)/total), tostring(i).." / "..tostring(total))
-			else
-				setCap(game.ArkLessonRevealCaps[id], "p", 100, "")
-			end
-		end
-	end
-end
-
-
-function ArkLessonUpdateHtml(win, scriptid, title, progression, started, finished, requirement, reward)
-	win = getUI(win)
-	win = win:find("div_lesson_"..scriptid..":html")
-	if requirement ~= [[]] then
-		requirement = game.ArkLessonNeedRequirement
-	else
-		requirement = ""
-	end
-
-	local progressionHtml = "<td><table><tr><td><table style=\'background-color: black;\'><tr><td></td></tr></table></td></tr></table></td>"
-	local height = "50"
-	if progression then
-		height = "12"
-		pogressionHtml = "<tr><td height=\'12px\' align=\'left\' >"..progression.."</td></tr>"
-	end
-
-	local color = "AAA"
-	if started then
-		if finished then
-			color = "FFFFFF"
-		else
-			color = "FFDD4AFF"
-		end
-	end
-
-	win:renderHtml([[
-		<td height="60px">
-		<table cellspacing="0" cellpadding="0">
-		<tr>
-			<td width="2px"></td>
-			<td width="407px" align="left" valign="top">
-				<table width="407px" cellspacing="0" cellpadding="0">
-					<tr>
-						<td height="]]..height..[[px" valign="middle"><strong style="color: #]]..color..[[">]]..title..[[</strong></td>
-					</tr>
-					<tr>
-						<td height="12px" style="font-size: 11px; color: pink">]]..requirement..[[</td>
-					</tr>
-					]]..pogressionHtml..[[
-				</table>
-			</td>
-			<td width="6px"></td>
-			<td align="left" valign="top" height="80px" width="46px">]]..reward..[[</td>
-		</tr>
-		</table>
-	</td>
-	]])
-end
-
-
-
 function setCap(id, element, a, b)
 	if element == nil then
 		game.CapId = id
@@ -1714,7 +1625,7 @@ end
 
 
 function game:openMissionsCatalog()
-	-- Setup this function in webig
+	getUI("ui:interface:web_transactions"):find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8747&command=reset_all")
 end
 
 
@@ -1876,6 +1787,12 @@ function game:onInGameDbInitialized()
 	--getUI("ui:interface:db_loading").active=false
 	game.InGameDbInitialized = true
 	debug("IG DB initialized")
+	-- Add waiters to guild chests
+	for i=0, 19 do
+		addOnDbChange(getUI("ui:interface:inv_guild"), "@SERVER:GUILD:CHEST:"..tostring(i)..":NAME", "updateChestList()")
+	end
+	addOnDbChange(getUI("ui:interface:inv_guild"), "@SERVER:GUILD:CHEST:0:BULK_MAX", "updateChestList(true)")
+
 	-- if the journal is opened, force an update for the fixed entry text
 	-- (says if we're in start island, paying account ...) need DB flags like
 	-- IS_NEWBIE & IS_TRIAL to be received
@@ -2267,6 +2184,7 @@ function game:setInfoPlayerCharacterRace()
 end
 
 function game:arkTitlesAddClassics()
+	local current_title = getUI("ui:interface:player:header_opened:player_title").uc_hardtext
 	runAH(nil, "title_init_combobox", "")
 	local cb = getUI("ui:interface:info_player_skills:content:webinfos:title:player_title")
 	local ui = getUI("ui:interface:encyclopedia:content:htmlC")
@@ -2278,7 +2196,12 @@ function game:arkTitlesAddClassics()
 	end
 	table.sort(titles)
 	for i,title in ipairs(titles) do
-		html = html .. [[<div class="ryzom-ui-grouptemplate" id="div_ark_title" style="template:title_template;id:div_ark_title:display_title;icon:ico_amber_ball.tga;text:]]
+		local current = "_blue"
+		if tostring(current_title) == tostring(title) then
+			current = ""
+		end
+
+		html = html .. [[<div class="ryzom-ui-grouptemplate" id="div_ark_title" style="template:title_template;id:div_ark_title:display_title;icon:ico_amber_ball]]..current..[[.tga;text:]]
 		html = html .. title .. [[;titleid:]] .. title
 		html = html .. [[;color:255 255 255 255;enable:50;tooltip:"></div>]]
 	end
@@ -2286,3 +2209,7 @@ function game:arkTitlesAddClassics()
 	ui:renderHtml(html)
 end
 
+
+
+-- VERSION --
+RYZOM_INFO_PLAYER_VERSION = 335

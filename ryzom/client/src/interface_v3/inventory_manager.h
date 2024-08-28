@@ -44,6 +44,7 @@ const uint MAX_EQUIPINV_ENTRIES = 19;
 const uint MAX_HOTBARINV_ENTRIES = INVENTORIES::NbHotbarSlots;
 const uint MAX_ANIMALINV_ENTRIES = INVENTORIES::NbPackerSlots;
 const uint MAX_GUILDINV_ENTRIES = INVENTORIES::NbGuildSlots;
+const uint MAX_GUILDCHEST_ENTRIES = INVENTORIES::NbGuildChestSlots;
 const uint MAX_ROOMINV_ENTRIES = INVENTORIES::NbRoomSlots;
 // This is the personal player inventory max (bag and animal)
 const uint MAX_PLAYER_INV_ENTRIES = std::max(MAX_BAGINV_ENTRIES, MAX_ANIMALINV_ENTRIES);
@@ -286,6 +287,7 @@ public:
 		static double getBranchBulk(const std::string &basePath, uint16 startItemIndex, uint16 numItems);
 		// Get the number of used and max slots
 		static void getBranchSlotCounts(const std::string &basePath, uint& nbUsedSlots, uint& nbMaxSlots );
+		static void getBranchSlotCounts(const std::string &basePath, uint16 startItemIndex, uint16 numItems, uint& nbUsedSlots, uint& nbMaxSlots );
 		// 0 bag, 1 - 6 pack animal 1 to 5, 7 temp inv
 		double getBagBulk(uint32 inventoryIndex);
 		double getMaxBagBulk(uint32 inventoryIndex);
@@ -295,8 +297,8 @@ public:
 		bool isSpaceInBagForItem(CDBCtrlSheet *item, uint32 quantity, uint32 bagId);
 
 	// ItemExtraInfo management. From each slot is a unique uint16
-		uint16				getItemSlotId(CDBCtrlSheet *ctrl);
-		uint16				getItemSlotId(const std::string &itemDb, uint slotIndex);
+		uint32				getItemSlotId(CDBCtrlSheet *ctrl);
+		uint32				getItemSlotId(const std::string &itemDb, uint slotIndex);
 		const	CClientItemInfo	&getItemInfo(uint slotId) const;
 		// get item info from cache
 		const	CClientItemInfo *getItemInfoCache(uint32 serial, uint32 createTime) const;
@@ -313,7 +315,7 @@ public:
 		void				removeItemInfoWaiter(IItemInfoWaiter *waiter);
 		// Called on impulse
 		void				onReceiveItemInfo(const CItemInfos &itemInfo);
-		void				onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion);
+		void				onRefreshItemInfoVersion(uint32 slotId, uint8 infoVersion);
 		void				onUpdateEquipHands();
 		// Log for debug
 		void				debugItemInfoWaiters();
@@ -330,7 +332,7 @@ public:
 		bool				isInventoryEmpty (INVENTORIES::TInventory invId);
 
 
-		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvPA4, InvPA5, InvPA6, InvGuild, InvRoom, InvUnknown };
+		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvPA4, InvPA5, InvPA6, InvGuild, InvGuild2, InvRoom, InvUnknown };
 		static TInvType invTypeFromString(const std::string &str);
 
 		static std::string invToDbPath(INVENTORIES::TInventory inventory);
@@ -848,6 +850,9 @@ private:
 
 #define LIST_GUILD_TEXT				"ui:interface:inv_guild:content:iil:bag_list"
 #define LIST_GUILD_ICONS			"ui:interface:inv_guild:content:iil:bag_icons"
+
+#define LIST_GUILD2_TEXT			"ui:interface:inv_guild2:content:iil:bag_list"
+#define LIST_GUILD2_ICONS			"ui:interface:inv_guild2:content:iil:bag_icons"
 
 #define LIST_PA0_TEXT				"ui:interface:inv_pa0:content:iil:bag_list"
 #define LIST_PA0_ICONS				"ui:interface:inv_pa0:content:iil:bag_icons"

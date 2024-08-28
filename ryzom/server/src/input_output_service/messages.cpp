@@ -25,6 +25,7 @@
 #include <nel/net/unified_network.h>
 
 #include "game_share/ryzom_mirror_properties.h"
+#include "server_share/mongo_wrapper.h"
 
 #include "input_output_service.h"
 /*#include "game_share/tick_event_handler.h"
@@ -652,7 +653,8 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 	ucstring name;
 	TSessionId sessionId;
 	string language;
-	std::vector<NLMISC::CEntityId> ignoreList;
+	std::vector<NLMISC::CEntityId> _ignoreList;
+	std::vector<uint32> ignoreList;
 	bool havePrivilege;
 	try
 	{
@@ -669,7 +671,7 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 		msgin.serial(language);
 
 		// ignoreList
-		msgin.serialCont(ignoreList);
+		msgin.serialCont(_ignoreList);
 
 		// privilege
 		msgin.serial( havePrivilege );
@@ -686,6 +688,21 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 	{
 		ci->Language = SM->checkLanguageCode(language);
 		ci->HavePrivilege = havePrivilege;
+
+#ifdef HAVE_MONGO
+		string cids = "";
+		for ( uint i = 0; i < _ignoreList.size(); i++ )
+		{
+			ignoreList.push_back((uint32)_ignoreList[i].getShortId());
+			if (i > 0)
+				cids += toString(",%u", _ignoreList[i].getShortId());
+			else
+				cids += toString("%u", _ignoreList[i].getShortId());
+		}
+
+		CMongo::update("ryzom_users", toString("{ 'cid': %d}", TheDataset.getEntityId(chId).getShortId()), toString("{ $set:{ 'ignore': [%s] } }", cids.c_str()));
+#endif
+
 		IOS->getChatManager().getClient(chId).setIgnoreList(ignoreList);
 	}
 

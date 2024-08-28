@@ -2907,7 +2907,7 @@ void cbClientSetCharacterTitle( NLNET::CMessage& msgin, const std::string & serv
 void cbClientItemInfos( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
 {
 	CEntityId	userId;
-	uint16		slotId;
+	uint32		slotId;
 	msgin.serial(userId,slotId);
 	CCharacter * user = PlayerManager.getChar(userId);
 	if ( user && user->getEnterFlag() && TheDataset.isAccessible( user->getEntityRowId() ) )

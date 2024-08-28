@@ -2453,7 +2453,7 @@ uint32 COutpost::computeSquadCountA(uint32 roundLevel) const
 	if (_PVPType == OUTPOSTENUMS::GVG)
 		coef = OutpostGvGFightSquadCount.get();
 
-	return (uint32)ceil((float)(roundLevel+1)/coef);
+	return (uint32)floor((float)(roundLevel+2)/coef);
 }
 
 //----------------------------------------------------------------------------
@@ -3154,15 +3154,25 @@ std::string COutpost::toString() const
 		ownerName = "tribe";
 	}
 
+	string product = "";
+
+	for (uint i = 0; i < _Buildings.size(); ++i)
+	{
+		string p = _Buildings[i].getProductString();
+		if (p != "")
+			product += p;
+	}
+
 	string desc;
-	desc = NLMISC::toString("Alias: %s, Name: '%s', Sheet: '%s', State: '%s', Level: %d, Owner: %s, Type: %s",
+	desc = NLMISC::toString("Alias: %s, Name: '%s', Sheet: '%s', State: '%s', Level: %d, Owner: %s, Type: %s, Product: %s",
 		CPrimitivesParser::aliasToString( _Alias ).c_str(),
 		_Name.c_str(),
 		_Sheet.toString().c_str(),
 		OUTPOSTENUMS::toString( _State ).c_str(),
 		_CurrentOutpostLevel,
 		ownerName.c_str(),
-		OUTPOSTENUMS::toString( _PVPType ).c_str()
+		OUTPOSTENUMS::toString( _PVPType ).c_str(),
+		product.c_str()
 		);
 
 	return desc;

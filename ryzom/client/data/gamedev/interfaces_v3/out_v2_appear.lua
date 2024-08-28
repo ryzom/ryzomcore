@@ -276,17 +276,14 @@ function outgame:buildActionPack()
 
 	local slot = getDbProp("UI:TEMP:CHARSELSLOT")
 	local lang = getClientCfg("LanguageCode")
+	local login = getClientCfgVar("LastLogin")
 	local sex = "m"
 	if getDbProp("UI:TEMP:CHAR3D:VPA:SEX") == 1 then
 		sex = "f"
 	end
-	rpbg_key = tostring(nltime.getSecondsSince1970())..":"..tostring(math.random(100000, 429496729))
-	local dst = io.open("save/rpbg_"..tostring(slot)..".key", "wb")
-	dst:write(rpbg_key)
-	dst:close()
 
 	getUI("ui:outgame:appear:finish_but").frozen = 1
-	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
+	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&login="..login.."&slot="..tostring(slot).."&sex="..sex)
 
 
 	local uiDesc = getUI("ui:outgame:appear:job_options:options:desc")
@@ -431,10 +428,13 @@ end
 function outgame:loadRPBGPage()
 	local slot = getDbProp("UI:TEMP:CHARSELSLOT")
 	local lang = getClientCfg("LanguageCode")
+	local login = getClientCfgVar("LastLogin")
 	local sex = "m"
 	if getDbProp("UI:TEMP:CHAR3D:VPA:SEX") == 1 then
 		sex = "f"
 	end
-	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
-	getUI("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&slot="..tostring(slot).."&sex="..sex.."&key="..rpbg_key)
+	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&login="..login.."&slot="..tostring(slot).."&sex="..sex)
 end
+
+-- VERSION --
+RYZOM_OUT_V2_APPEAR_VERSION = 324

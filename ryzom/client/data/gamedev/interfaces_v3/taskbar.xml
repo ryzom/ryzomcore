@@ -455,7 +455,7 @@
 
 						<!-- Ency -->
 						<instance template="mk_icon_text" id="window5" hardtext="uiMk_Encyclopedia" posparent="window4" posref="BL TL" c="%color_orange"
-							tooltip="uiMk_Encyclopedia" onclick_l="show_hide" params_l="encyclopedia" tx_normal="tb_encyclopedia.tga" tx_pushed="tb_encyclopedia.tga"/>
+							tooltip="uiMk_Encyclopedia" onclick_l="show_hide" params_l="encyclopedia" tx_normal="tb_actions.tga" tx_pushed="tb_actions.tga"/>
 
 						<!-- Tasks -->
 						<instance template="mk_icon_text" id="window6" hardtext="uiMk_window4" posparent="window5" posref="BL TL" c="%color_turquoise"
@@ -616,7 +616,7 @@
 				<!-- Encyclopedia -->
 				<instance template="mk_icon" id="window5" tooltip="uiMk_Encyclopedia" posparent="window4" posref="BL TL"
 					onclick_l="show_hide" params_l="encyclopedia"
-					tx_normal="tb_encyclopedia.tga" tx_pushed="tb_encyclopedia.tga"/>
+					tx_normal="tb_actions.tga" tx_pushed="tb_actions.tga"/>
 
 				<!-- Tasks -->
 				<instance template="mk_icon" id="window6" tooltip="uiMk_window4" posparent="window5" posref="BL TL"
@@ -722,7 +722,7 @@
 				<!-- Encyclopedia -->
 				<instance template="mk_icon" id="window5" tooltip="uiMk_Encyclopedia" posparent="window4" posref="TR TL"
 					onclick_l="show_hide" params_l="encyclopedia"
-					tx_normal="tb_encyclopedia.tga" tx_pushed="tb_encyclopedia.tga"/>
+					tx_normal="tb_actions.tga" tx_pushed="tb_actions.tga"/>
 
 				<!-- Tasks -->
 				<instance template="mk_icon" id="window6" tooltip="uiMk_window4" posparent="window5" posref="TR TL"
@@ -865,7 +865,7 @@
 
 	<!-- Support -->
 	<instance template="mk_icon_text" id="help2" hardtext="uiMk_window8" posparent="help1" posref="BL TL"
-		tooltip="uiMk_window8" onclick_l="show_hide" params_l="cs_browser"
+		tooltip="uiMk_window8" onclick_l="lua" params_l="AppZone:handle(1092)"
 		tx_normal="tb_support.tga" tx_pushed="tb_support.tga" c="%color_purple" />
 
 </group>
@@ -1057,7 +1057,7 @@
 		<instance template="win_button" id="invent" color="UI:SAVE:WIN:COLORS:INV" text="uimwInventory" posparent="hotbar" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:INVENTORY" win_name="inventory" />
 
-		<instance template="win_button" id="action_book" color="UI:SAVE:WIN:COLORS:INV" text="uiPhraseBookTitle" posparent="invent" posref="BL TL" x="0" y="-4"
+		<instance template="win_button" id="action_book" color="UI:SAVE:WIN:COLORS:INV" text="uiMK_Actions" posparent="invent" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:ACTIONS" win_name="phrase_book" />
 
 		<instance template="win_button" id="links" color="UI:SAVE:WIN:COLORS:INV" text="uiLinksTitle" posparent="action_book" posref="BL TL" x="0" y="-4"
