@@ -142,7 +142,7 @@ public:
 		CInitInfo() 
 			: MaxTrack(32), 
 			EnableReverb(false), 
-			EnableOccludeObstruct(false), 
+			EnableOcclusionObstruction(false), 
 			UseADPCM(false), 
 			ForceSoftware(false), 
 			ManualRolloff(true)
@@ -155,7 +155,7 @@ public:
 		bool EnableReverb;
 
 		/// Enable occlusion and obstruction lowpass filters from walls and objects. Default: false.
-		bool EnableOccludeObstruct;
+		bool EnableOcclusionObstruction;
 		
 		/// Use lower quality ADPCM encoded sources for lower memory usage. Default: false.
 		bool UseADPCM;

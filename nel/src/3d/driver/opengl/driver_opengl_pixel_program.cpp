@@ -1,7 +1,7 @@
 /** \file driver_opengl_pixel_program.cpp
  * OpenGL driver implementation for pixel program manipulation.
  *
- * $Id: driver_opengl_pixel_program.cpp,v 1.1.2.4 2007/07/09 15:29:00 legallo Exp $
+ * $Id$
  *
  * \todo manage better the init/release system (if a throw occurs in the init, we must release correctly the driver)
  */

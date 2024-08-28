@@ -18,9 +18,11 @@
 #   * To build binary archive, use the 'package' target.
 #     To build source archive, use the 'package_source' target.
 
+CMAKE_MINIMUM_REQUIRED(VERSION 3.22)
+
 #-----------------------------------------------------------------------------
 # Load some macros.
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
 #-----------------------------------------------------------------------------
 # Set CMake 2.6 Policies.
 IF(COMMAND cmake_policy)
@@ -32,6 +34,10 @@ IF(COMMAND cmake_policy)
   IF(POLICY CMP0020)
     CMAKE_POLICY(SET CMP0020 NEW)
   ENDIF()
+
+  IF (POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+  ENDIF ()
 ENDIF()
 
 
@@ -39,10 +45,11 @@ ENDIF()
 # Downloads and install Hunger into HUNTER_ROOT directory.
 OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
+  cmake_minimum_required(VERSION 3.24)
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.321.tar.gz"
-    SHA1 "5e53cbb0429037ea8e2592bfd92704b8ff3ab492"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.25.6.tar.gz"
+    SHA1 "69e4a05bd514bb05cb2c5aa02ce8ac420516aaf7"
     FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
   )
 
@@ -65,7 +72,6 @@ ENDIF()
 INCLUDE(nel)
 INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
-INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
@@ -79,12 +85,11 @@ ELSE()
   SET(CURRENT_YEAR "2019")
 ENDIF()
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(RyzomCore CXX C)
-SET(NL_VERSION_MAJOR 4)
-SET(NL_VERSION_MINOR 1)
-SET(NL_VERSION_PATCH 0 CACHE STRING "Patch version")
-SET(NL_VERSION_BUILD 0 CACHE STRING "Build number")
+PROJECT(RyzomCore VERSION 4.1.0.0 LANGUAGES CXX C)
+SET(NL_VERSION_MAJOR ${RyzomCore_VERSION_MAJOR})
+SET(NL_VERSION_MINOR ${RyzomCore_VERSION_MINOR})
+SET(NL_VERSION_PATCH ${RyzomCore_VERSION_PATCH} CACHE STRING "Patch version")
+SET(NL_VERSION_BUILD ${RyzomCore_VERSION_TWEAK} CACHE STRING "Build number")
 SET(YEAR "2001-${CURRENT_YEAR}")
 SET(AUTHOR "Winch Gate and The Ryzom Core Community")
 
@@ -187,7 +192,10 @@ IF(HUNTER_ENABLED)
   FIND_PACKAGE(libxml2 CONFIG REQUIRED)
   SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
 
-  HUNTER_ADD_PACKAGE(OpenSSL)
+  # cross compiling doesn't quite work on the hunter openssl package therefor compile it separately and use it
+  IF(NOT CMAKE_CROSSCOMPILING)
+    HUNTER_ADD_PACKAGE(OpenSSL)
+  ENDIF()
   FIND_PACKAGE(OpenSSL REQUIRED)
   # TODO: is OpenSSL::Crypto only needed for WIN32?
   SET(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
@@ -232,28 +240,6 @@ IF(WITH_STATIC)
   # libxml2 could need winsock2 library
   IF(WINSOCK2_LIB)
     SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${WINSOCK2_LIB})
-  ENDIF()
-
-  IF(UNIX AND NOT HUNTER_ENABLED)
-    # under Linux and OS X, recent libxml2 versions are linked against liblzma
-    FIND_PACKAGE(LibLZMA)
-    IF(LIBLZMA_LIBRARIES)
-      SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${LIBLZMA_LIBRARIES})
-    ENDIF()
-
-    # under Linux and OS X, recent libxml2 versions are linked against libicu
-    # FIND_PACKAGE(Icu)
-    FIND_LIBRARY(ICU_LIBRARY icuuc)
-    IF(ICU_LIBRARY)
-       FIND_LIBRARY(ICU_DATA_LIBRARY icudata)
-       IF(ICU_LIBRARY)
-         MESSAGE(STATUS "ICU UC was found: ${ICU_LIBRARY}")
-       ELSE()
-         MESSAGE(STATUS "ICU UC was NOT found")
-       ENDIF()
-       SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICU_DATA_LIBRARY} ${ICU_LIBRARY})
-    ENDIF()
-
   ENDIF()
 ENDIF()
 
@@ -319,11 +305,23 @@ IF(WITH_MSQUIC)
   FIND_PACKAGE(msquic REQUIRED)
 ENDIF()
 
-IF(WITH_NEL)
-  IF(WITH_NEL_TESTS)
-    FIND_PACKAGE(CppTest)
-  ENDIF()
+IF(WITH_NEL_TESTS)
+  FIND_PACKAGE(CppTest)
 
+  ENABLE_TESTING()
+  include(FetchContent)
+  FetchContent_Declare(
+          googletest
+          URL https://github.com/google/googletest/archive/a7f443b80b105f940225332ed3c31f2790092f47.zip
+          EXCLUDE_FROM_ALL
+  )
+  SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(googletest)
+  include(GoogleTest)
+  include(cmake/add_test_executable.cmake)
+ENDIF()
+
+IF(WITH_NEL)
   IF(HUNTER_ENABLED)
     IF(WITH_GUI)
       HUNTER_ADD_PACKAGE(luabind)
@@ -453,7 +451,7 @@ ENDIF()
 
 IF(WITH_NEL_TESTS)
   ENABLE_TESTING()
-  ADD_TEST(nel_unit_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/nel_unit_test --html)
+  ADD_TEST(NAME nel_unit_test COMMAND nel_unit_test)
   IF(BUILD_DASHBOARD)
     INCLUDE(Dart)
     SET(SVNCOMMAND svn)
@@ -472,14 +470,13 @@ SET(CPACK_PACKAGE_VERSION_MINOR "${NL_VERSION_MINOR}")
 SET(CPACK_PACKAGE_VERSION_PATCH "${NL_VERSION_PATCH}")
 SET(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};NeL;ALL;/")
 SET(CPACK_PACKAGE_EXECUTABLES "ryzomcore${NL_VERSION}" "ryzomcore")
-SET(CPACK_SET_DESTDIR TRUE)
 
 # NSIS Specific Packing Setup
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "RyzomCore")
 SET(CPACK_NSIS_MODIFY_PATH "ON")
-SET(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/resources/nevraxpill.ico)
-SET(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/resources/nevraxpill.ico)
-SET(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/resources\\\\nel.bmp)
+SET(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
+SET(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
+SET(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/nel/resources\\\\nel.bmp)
 SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} RyzomCore")
 SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\dev.ryzom.com")
 SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel\\\\wiki")
@@ -493,7 +490,8 @@ IF(WIN32)
   SET(CPACK_GENERATOR "NSIS;ZIP")
   SET(CPACK_SOURCE_GENERATOR "ZIP")
 ELSE()
-  SET(CPACK_GENERATOR "TGZ")
+  SET(CPACK_SET_DESTDIR TRUE)
+  SET(CPACK_GENERATOR "TGZ;STGZ")
   SET(CPACK_SOURCE_GENERATOR "TGZ")
 ENDIF()
 set(CPACK_SOURCE_IGNORE_FILES

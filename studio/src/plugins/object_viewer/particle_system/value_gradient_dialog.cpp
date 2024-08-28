@@ -23,7 +23,7 @@
 #include "value_gradient_dialog.h"
 
 // Qt include
-#include <QtGui/QMessageBox>
+#include <QMessageBox>
 
 // NeL includes
 #include <nel/3d/texture_grouped.h>

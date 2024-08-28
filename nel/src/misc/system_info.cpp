@@ -22,7 +22,7 @@
 #include "nel/misc/system_info.h"
 
 #ifdef NL_OS_WINDOWS
-#	include <WinNT.h>
+#	include <winnt.h>
 #	include <tchar.h>
 #	include <intrin.h>
 #	define nlcpuid(regs, idx) __cpuid(regs, idx)

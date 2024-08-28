@@ -25,13 +25,13 @@
 #include <nel/ligo/primitive.h>
 
 // Qt includes
-#include <QtGui/QAction>
-#include <QtGui/QTreeView>
+#include <QAction>
+#include <QTreeView>
 #include <QtCore/QModelIndex>
 #include <QtCore/QVariant>
 #include <QtCore/QSignalMapper>
-#include <QtGui/QUndoStack>
-#include <QtGui/QItemSelection>
+#include <QUndoStack>
+#include <QItemSelection>
 
 namespace LandscapeEditor
 {

@@ -348,7 +348,8 @@ public:
 	virtual void getMusicExtensions(std::vector<std::string> &extensions);
 
 	inline IReverbEffect *getReverbEffect() { return _ReverbEffect; }
-	inline bool useEnvironmentEffects() const { return _UseEax; }
+	inline bool useReverb() const { return m_EnableReverb; }
+	inline bool useOcclusionObstruction() const { return m_EnableOcclusionObstruction; }
 
 	//@{
 	//\name Reverb environment functions
@@ -486,7 +487,8 @@ private:
 	/// flag for usage of ADPCM mixing
 	bool						_UseADPCM;
 	/// flag for usage of eax
-	bool						_UseEax;
+	bool						m_EnableReverb;
+	bool						m_EnableOcclusionObstruction;
 
 	/// The vector of curently free tracks.
 	std::vector<CTrack *>		_FreeTracks;

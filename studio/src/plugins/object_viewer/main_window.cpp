@@ -23,7 +23,9 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QtGui>
+#include <QtGui>
+#include <QStatusBar>
+#include <QFileDialog>
 
 // NeL includes
 #include <nel/3d/u_driver.h>

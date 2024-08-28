@@ -26,8 +26,8 @@
 #include <nel/ligo/zone_region.h>
 
 // Qt includes
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QGraphicsSceneMouseEvent>
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 
 namespace LandscapeEditor
 {

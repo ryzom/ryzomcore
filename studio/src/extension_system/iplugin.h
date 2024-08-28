@@ -100,6 +100,7 @@ public:
 
 }; //namespace ExtensionSystem
 
+#define IPlugin_iid "dev.ryzom.com.ObjectViewerQt.IPlugin/0.9.2"
 Q_DECLARE_INTERFACE(ExtensionSystem::IPlugin, "dev.ryzom.com.ObjectViewerQt.IPlugin/0.9.2")
 
 #endif // IPLUGIN_H

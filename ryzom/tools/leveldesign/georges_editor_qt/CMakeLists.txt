@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 #
 #   Georges Editor Qt
-#   Copyright (C) 2010 Adrian Jäkel <aj at elane2k dot com>
+#   Copyright (C) 2010 Adrian JÃ¤kel <aj at elane2k dot com>
 #
 #-----------------------------------------------------------------------------
 

@@ -409,7 +409,8 @@ void CSoundDriverDSound::initDevice(const std::string &device, ISoundDriver::TSo
 	const sint supportedOptions = 
 		OptionAllowADPCM
 #if EAX_AVAILABLE
-		| OptionEnvironmentEffects
+		| OptionReverbEffect
+		| OptionFilterEffect
 #endif
 		| OptionSoftwareBuffer
 		| OptionManualRolloff
@@ -430,7 +431,7 @@ void CSoundDriverDSound::initDevice(const std::string &device, ISoundDriver::TSo
 
     // Create a DirectSound object and set the cooperative level.
 #if EAX_AVAILABLE
-	if (getOption(OptionEnvironmentEffects))
+	if (getOption(OptionReverbEffect) || getOption(OptionFilterEffect))
 	{
 		if (EAXDirectSoundCreate8(NULL, &_DirectSound, NULL) != DS_OK)
 		{
@@ -478,7 +479,7 @@ void CSoundDriverDSound::initDevice(const std::string &device, ISoundDriver::TSo
 	// check if wa can honor eax request
 	if (countHw3DBuffers() > 10)
 	{
-		_UseEAX = getOption(OptionEnvironmentEffects);
+		_UseEAX = getOption(OptionReverbEffect) || getOption(OptionFilterEffect);
 	}
 	else
 	{

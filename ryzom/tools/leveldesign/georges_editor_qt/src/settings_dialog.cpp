@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "settings_dialog.h"
 
 // Qt includes
-#include <QtGui/QWidget>
-#include <QtGui/QMessageBox>
-#include <QtGui/QFileDialog>
+#include <QWidget>
+#include <QMessageBox>
+#include <QFileDialog>
 
 // NeL includes
 #include <nel/misc/path.h>

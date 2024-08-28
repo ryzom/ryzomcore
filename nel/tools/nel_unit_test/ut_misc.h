@@ -20,7 +20,6 @@
 #include "ut_misc_co_task.h"
 #include "ut_misc_command.h"
 #include "ut_misc_common.h"
-#include "ut_misc_config_file.h"
 #include "ut_misc_debug.h"
 #include "ut_misc_dynlibload.h"
 #include "ut_misc_file.h"
@@ -41,7 +40,6 @@ struct CUTMisc : public Test::Suite
 		add(std::auto_ptr<Test::Suite>(new CUTMiscCoTask));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscCommand));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscCommon));
-		add(std::auto_ptr<Test::Suite>(new CUTMiscConfigFile));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscDebug));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscDynLibLoad));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscFile));

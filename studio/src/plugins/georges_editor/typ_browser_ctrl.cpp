@@ -17,10 +17,10 @@
 
 #include "typ_browser_ctrl.h"
 
-#include "3rdparty/qtpropertybrowser/qttreepropertybrowser.h"
-#include "3rdparty/qtpropertybrowser/qtvariantproperty.h"
-#include "3rdparty/qtpropertybrowser/qtpropertymanager.h"
-#include "3rdparty/qtpropertybrowser/qteditorfactory.h"
+#include <qtpropertybrowser/qttreepropertybrowser.h>
+#include <qtpropertybrowser/qtvariantproperty.h>
+#include <qtpropertybrowser/qtpropertymanager.h>
+#include <qtpropertybrowser/qteditorfactory.h>
 
 #include "nel/georges/type.h"
 

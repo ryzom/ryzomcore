@@ -1,5 +1,5 @@
 FROM --platform=linux/amd64 ubuntu:jammy
-MAINTAINER Ryzom Core <https://wiki.ryzom.dev/>
+LABEL org.opencontainers.image.authors="Ryzom Core <https://wiki.ryzom.dev/>"
 
 RUN sed -i -e 's/archive\.ubuntu\.com/mirrors\.digitalocean\.com/' /etc/apt/sources.list
 

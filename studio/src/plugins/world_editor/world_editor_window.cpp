@@ -39,9 +39,9 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QFileDialog>
-#include <QtGui/QStatusBar>
-#include <QtGui/QMessageBox>
+#include <QFileDialog>
+#include <QStatusBar>
+#include <QMessageBox>
 #include <QPersistentModelIndex>
 
 namespace WorldEditor

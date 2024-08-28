@@ -1,0 +1,160 @@
+name: CMake on multiple platforms
+
+on:
+  push:
+    branches: [ "core4", "feature/*" ]
+    paths-ignore:
+      - '.github/workflows/**.yml'
+      - '!.github/workflows/cmake-multi-platform.yml'
+  pull_request:
+    branches: [ "core4" ]
+    paths-ignore:
+      - '.github/workflows/**.yml'
+      - '!.github/workflows/cmake-multi-platform.yml'
+
+env:
+  DEFAULT_BRANCH: core4
+  IMAGE_NAME: ryzomcore-tools
+
+jobs:
+  strings:
+    runs-on: ubuntu-latest
+    outputs:
+      build-output-dir: ${{ steps.strings.outputs.build-output-dir }}
+      build-version: ${{ steps.strings.outputs.build-version }}
+      docker-image-tag: ${{ steps.strings.outputs.docker-image-tag }}
+    steps:
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+          COMMIT_HASH=${{ github.sha }}
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "$DEFAULT_BRANCH" ] && VERSION=latest
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          echo VERSION=$VERSION
+          echo IMAGE_ID=$IMAGE_ID
+          echo "build-version=${VERSION}+sha.${COMMIT_HASH:0:8}" >> "$GITHUB_OUTPUT"
+          echo "docker-image-tag=${IMAGE_ID}:${VERSION}" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: [ strings ]
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      matrix:
+        os: [ ubuntu-22.04, ubuntu-20.04 ]
+        build_type: [ Release ]
+        build_preset: [ release ]
+        c_compiler: [ gcc ]
+        include:
+          - os: ubuntu-22.04
+            c_compiler: gcc
+            cpp_compiler: g++
+            ubuntu_version: 22.04
+          - os: ubuntu-20.04
+            c_compiler: gcc
+            cpp_compiler: g++
+            ubuntu_version: 20.04
+
+    steps:
+      - uses: lukka/get-cmake@v3.29.5
+
+      - uses: actions/checkout@v4
+
+      - name: Dependencies
+        run: |
+          sudo apt update
+          sudo apt install --yes software-properties-common
+          wget --quiet https://packages.microsoft.com/config/ubuntu/${{ matrix.ubuntu_version }}/packages-microsoft-prod.deb
+          sudo dpkg --install packages-microsoft-prod.deb
+          sudo apt update
+          sudo apt install --yes \
+            build-essential ccache \
+            bison autoconf automake \
+            libpng-dev \
+            libjpeg-dev \
+            libgif-dev libfreetype6-dev \
+            freeglut3-dev \
+            liblua5.2-dev libluabind-dev libcpptest-dev \
+            libogg-dev libvorbis-dev libopenal-dev \
+            libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+            libmysqlclient-dev \
+            libxml2-dev \
+            libcurl4-openssl-dev libssl-dev \
+            libsquish-dev \
+            liblzma-dev \
+            libgsf-1-dev \
+            qtbase5-dev qttools5-dev qttools5-dev-tools \
+            libmsquic
+          wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+          wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+          wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+          sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
+
+      - name: Configure CMake
+        run: >
+          cmake --preset linux-default
+          -DWITH_MSQUIC=ON
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.build_preset }}
+
+      - name: Unit Tests
+        run: ctest --preset default
+
+      - uses: actions/upload-artifact@v4
+        if: (success() || failure()) && matrix.os == 'ubuntu-22.04'
+        with:
+          name: test-results
+          if-no-files-found: error
+          path: ${{ needs.strings.outputs.build-output-dir }}/**/reports/*.xml
+
+      - name: Package
+        run: cpack --preset default
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-package
+          path: ${{ needs.strings.outputs.build-output-dir }}/ryzomcore-*
+          if-no-files-found: error
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [ strings, build ]
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ubuntu-22.04-package
+          path: ${{ needs.strings.outputs.build-output-dir }}
+
+      - name: Build the Docker image
+        run: |
+          docker build . --file docker/Dockerfile --tag "${{ needs.strings.outputs.docker-image-tag }}"
+          docker save --output=${{ needs.strings.outputs.build-output-dir }}/docker-$IMAGE_NAME-${{ needs.strings.outputs.build-version }} "${{ needs.strings.outputs.docker-image-tag }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker
+          path: ${{ needs.strings.outputs.build-output-dir }}/docker-*
+          if-no-files-found: error
+
+      - name: Push image
+        if: ${{ github.ref == format('refs/heads/{0}', env.DEFAULT_BRANCH) }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          docker push "${{ needs.strings.outputs.docker-image-tag }}"

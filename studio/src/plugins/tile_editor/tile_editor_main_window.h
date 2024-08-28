@@ -26,7 +26,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/sheet_id.h"
 
-#include <QtGui/QUndoStack>
+#include <QUndoStack>
 #include <QSignalMapper>
 
 namespace Ui {

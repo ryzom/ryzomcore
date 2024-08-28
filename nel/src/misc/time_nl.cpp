@@ -24,7 +24,7 @@
 #include "nel/misc/thread.h"
 
 #ifdef NL_OS_WINDOWS
-#	include <MMSystem.h>
+#	include <mmsystem.h>
 #elif defined (NL_OS_UNIX)
 #	include <sys/time.h>
 #	include <unistd.h>
