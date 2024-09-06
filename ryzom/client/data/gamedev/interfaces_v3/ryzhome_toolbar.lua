@@ -1,6 +1,6 @@
 RyzhomeBar = {
 	id = "ui:interface:webig_ryzhome_toolbar",
-	saveuri = "https://app.ryzom.com/app_ryzhome/index.php?action=toolbar_save",
+	saveuri = "https://://app.ryzom.com/app_ryzhome/index.php?action=toolbar_save",
 	selectedPage = 1
 }
 
