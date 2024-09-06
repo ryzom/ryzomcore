@@ -1849,6 +1849,7 @@ function game:onWebIgReady()
 	setOnDraw(cap, "game:onOverCap()")
 	ArkLessons:init()
 
+	setOnDraw(getUI("ui:interface:ryzhomeMain"), "RyzhomeBar:close()")
 end
 
 --------------------------------------------------------------------------------------------------------------

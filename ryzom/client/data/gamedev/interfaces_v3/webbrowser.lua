@@ -37,7 +37,7 @@ end
 
 function WebBrowser:openWindow(id, url)
   -- default value if url is not set
-  url = url or "http://app.ryzom.com/"
+  url = url or "https://://app.ryzom.com/"
 
   local newWindow = false
   local app = self:findAppById(id)

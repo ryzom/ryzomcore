@@ -1059,7 +1059,7 @@ void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 
 	if (!member)
 		return;
 
-	uint8 chest = floor((float)slot / (float)GuildChestSlots);
+	uint8 chest = floor((float)dstSlot / (float)GuildChestSlots);
 
 
 	if (!haveChestViewGrade(chest, member->getGrade()) || !haveChestPutGrade(chest, member->getGrade()))
