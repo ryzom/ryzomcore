@@ -1,8 +1,6 @@
 <interface_config>
 <root id="interface" x="0" y="0" w="800" h="600" active="true" />
 
- <lua file="ryzhome_toolbar.lua" />
-
  <style style="button_over"
 	type="button"
 	id="button_over"
@@ -16,6 +14,23 @@
 	tx_over="W_button_32_over.tga"
 	global_color_normal="false"
 	global_color_pushed="false" />
+
+<group type="container" id="ryzhomeMain" active="false" posref="MM MM" movable="true" title="" pop_max_h="80" pop_min_h="80" pop_min_w="200" pop_max_w="200" opened="false" openable="false" options="compass" onclick_l="lua" params_l="" onclick_r="lua" params_r="" header_active="true" right_button="false">
+	<group id="html" type="html" posref="TL TL" url="" title_prefix="" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="patch_off.tga" checkbox_bitmap_pushed="patch_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
+		<group id="black" posref="BR BR" sizeref="hw" inherit_gc_alpha="true"/>
+		<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+		<ctrl style="skin_scroll" id="scroll_bar" />
+	</group>
+</group>
+
+<group type="container" id="ryzhomeItems" active="false" w="300" h="500" pop_min_w="300" pop_min_h="300" title="Ryzhome" openable="false" opened="true" movable="true">
+	<group id="header_closed" w="64" h="16" posref="TL TL" />
+	<group id="header_opened" h="16" w="480" posref="TL TL" >
+	</group>
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
+		<instance template="webig_html_noborder" />
+	</group>
+</group>
 
 <group type="container"
 	id="webig_ryzhome_toolbar"
@@ -149,6 +164,8 @@
 	</group>
 </group>
 
+<tree node="ryzhomeMain"></tree>
+<tree node="ryzhomeItems"></tree>
 <tree node="webig_ryzhome_toolbar"></tree>
 
 
@@ -425,5 +442,7 @@
 </group>
 
 <tree node="webig_ryzhome_place_item"></tree>
+
+<lua file="ryzhome_toolbar.lua" />
 
 </interface_config>
