@@ -2311,6 +2311,15 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 
 			_Tags = STRING_MANAGER::CStringManagerClient::getTitleInfos(_TitleRaw, womanTitle);
 
+
+			vector<string> listInfos;
+			splitString(_TitleRaw, string("#"), listInfos);
+
+			string title = _TitleRaw;
+			if (!listInfos.empty())
+				title = listInfos[0];
+
+
 			if (!replacement.empty() || !ClientCfg.DebugStringManager)
 			{
 				// build the final name
@@ -2320,7 +2329,8 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 				_NameEx = replacement;
 				newtitle = _NameEx;
 			}
-			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw );
+
+			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( title );
 			if ( titleEnum >= CHARACTER_TITLE::BeginGmTitle && titleEnum <= CHARACTER_TITLE::EndGmTitle )
 			{
 				_GMTitle = titleEnum - CHARACTER_TITLE::BeginGmTitle;
