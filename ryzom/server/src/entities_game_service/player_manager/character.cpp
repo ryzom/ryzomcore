@@ -6710,9 +6710,10 @@ void CCharacter::onAnimalSpawned(CPetSpawnConfirmationMsg::TSpawnError SpawnStat
 		if (PetIdx == 8)
 		{
 			CCreature* c = CreatureManager.getCreature(TheDataset.getEntityId(PetMirrorRow));
-			if (c)
+			if (c) {
 				c->setIsAPet(true);
-			c->setName("pet_of_"+getName().toString());
+				c->setName("pet_of_"+getName().toString());
+			}
 
 			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
 			freeSpeedMode = true;

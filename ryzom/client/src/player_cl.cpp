@@ -727,8 +727,7 @@ void CPlayerCL::computeAnimSet(sint32 fakeLeftHand, sint32 fakeRightHand)
 	if (fakeRightHand >= 0)
 		rightHand = SheetMngr.getItem(SLOTTYPE::RIGHT_HAND_SLOT, fakeRightHand);
 
-	if(!::computeAnimSet(_CurrentAnimSet[MOVE], _Mode, _PlayerSheet->GenderInfos[_Gender].AnimSetBaseName, leftHand, rightHand, !modeWithHiddenItems()))
-		nlwarning("PL:computeAnimSet:%d: pb when computing the animset.", _Slot);
+	::computeAnimSet(_CurrentAnimSet[MOVE], _Mode, _PlayerSheet->GenderInfos[_Gender].AnimSetBaseName, leftHand, rightHand, !modeWithHiddenItems());
 
 }// computeAnimSet //
 

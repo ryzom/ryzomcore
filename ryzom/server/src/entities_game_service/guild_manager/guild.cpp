@@ -141,6 +141,7 @@ void CGuild::addXP( uint32 xp )
 	{
 		setXP( _XP + xp );
 		CBankAccessor_GUILD::getGUILD().setXP(_DbGroup, _XP);
+		sendMessageToGuildMembers( "GUILD_XP_GAIN" );
 	}
 //	setClientDBProp( "GUILD:XP", _XP );
 }
@@ -1102,7 +1103,7 @@ void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 
 	// try to move the required quantity of the item
 	if ( CInventoryBase::moveItem(user->getInventory(srcInv), slot, _Inventory, dstSlot, quantity ) != CInventoryBase::ior_ok )
 	{
-		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_PLAYER_BAG_FULL" );
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_MAX_BULK" );
 		return;
 	}
 }

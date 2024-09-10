@@ -179,9 +179,9 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 
 		if (EGSPD::CPeople::toString(Race) != raceStr)
 		{
-			debug(toString("In sheet '%s': invalid race '%s', race is set to unknow",
+			nlwarning("In sheet '%s': invalid race '%s', race is set to unknow",
 				Id.toString().c_str(),
-				raceStr.c_str()));
+				raceStr.c_str());
 		}
 	}
 	else
