@@ -1568,7 +1568,11 @@ public:
 			UserEntity->moveTo(UserEntity->selection(),3.0,CUserEntity::Mount);
 		}
 		else
+		{
+			if ( orderStr == "unmount" )
+				UserEntity->selection(CLFECOMMON::INVALID_SLOT);
 			beastOrder (getParam(Params,"order"), getParam(Params,"beast_index"), true);
+		}
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerBeastOrder, "beast_order")
