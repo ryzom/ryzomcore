@@ -938,7 +938,7 @@ CVector CUserEntity::getVelocity() const
 {
 	static const CVector lateral(0,0,1);
 	static CVector velocity;
-	velocity =  front() * _FrontVelocity + ( lateral ^ front()) * _LateralVelocity;
+	velocity = front() * _FrontVelocity + ( lateral ^ front()) * _LateralVelocity;
 	velocity.normalize();
 	// User is Dead
 	if(isDead())
@@ -1763,7 +1763,6 @@ bool CUserEntity::msgForCombatPos(NLMISC::CBitMemStream &out)
 	return false;
 }// msgForCombatPos //
 
-
 //-----------------------------------------------
 // checkPos :
 // Check the User Position according to the server code.
@@ -1772,6 +1771,8 @@ bool CUserEntity::msgForCombatPos(NLMISC::CBitMemStream &out)
 //-----------------------------------------------
 void CUserEntity::checkPos()
 {
+	CCharacterCL *mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(_Mount));
+
 	if(PACS && _Primitive)
 	{
 		// Is in water ?
@@ -1800,7 +1801,6 @@ void CUserEntity::checkPos()
 						{
 							mode(MBEHAV::MOUNT_SWIM);
 							// also change mounted entity mode
-							CCharacterCL *mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(_Mount));
 							if(mount)
 							{
 								// Set the mount.
@@ -1829,7 +1829,6 @@ void CUserEntity::checkPos()
 					{
 						mode(MBEHAV::MOUNT_NORMAL);
 						// also change mounted entity mode
-						CCharacterCL *mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(_Mount));
 						if(mount)
 						{
 							// Set the mount.
@@ -1875,6 +1874,23 @@ void CUserEntity::checkPos()
 			}
 			else
 			{
+				if (mount && mount->getSheet()->Race == EGSPD::CPeople::WaterFauna)
+				{
+					//Test here the move and validate it. If it's not water => no move
+					UGlobalPosition gPos;
+					_CheckPrimitive->getGlobalPosition(gPos, dynamicWI);
+					float waterHeight;
+					if (!GR->isWaterPosition(gPos, waterHeight))
+					{
+						_HasMoved = false;
+						pacsPos(_LastPositionValidated,_LastGPosValidated);
+						if (mount)
+							mount->setAnim(CAnimationStateSheet::StaticStateCount);
+						setAnim(CAnimationStateSheet::StaticStateCount);
+						return;
+					}
+				}
+
 				_LastPositionValidated = _Primitive->getFinalPosition(dynamicWI);
 				_Primitive->getGlobalPosition(_LastGPosValidated, dynamicWI);
 			}
