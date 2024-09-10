@@ -2320,6 +2320,8 @@ void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 							// remember the mount state
 							if (petIndex != -1)
 								_PlayerPets[petIndex].IsMounted = true;
+							else
+								_RentAMount = PetRowId;
 							//							_PropertyDatabase.setProp( "USER:MOUNT_WALK_SPEED",
 							//(sint64)(sint)(e->getPhysScores().CurrentWalkSpeed() * 1000.0f) );
 							CBankAccessor_PLR::getUSER().setMOUNT_WALK_SPEED(_PropertyDatabase,
@@ -2386,6 +2388,10 @@ void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 							}
 
 							return;
+						}
+						else
+						{
+							PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "ANIMAL_TOO_FAR");
 						}
 					}
 
@@ -2785,15 +2791,26 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	sint16 speedVariationModifier = std::max((sint)_PhysScores.SpeedVariationModifier, (sint) - 100);
 	CSheetId aqua_speed("aqua_speed.sbrick");
 	bool usingAquaSpeed = false;
-	if (isInWater() && getMode() != MBEHAV::MOUNT_NORMAL && (haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0))
+	if (isInWater())
 	{
-		setBonusMalusName("aqua_speed", addEffectInDB(aqua_speed, true));
-		if (_CurrentSpeedSwimBonus > 0)
-			speedVariationModifier = std::min(speedVariationModifier + (sint16)_CurrentSpeedSwimBonus, 100);
-		else
+		if (TheDataset.isAccessible(_EntityMounted()))
 		{
-			usingAquaSpeed = true;
-			speedVariationModifier = std::min(speedVariationModifier + 33, 100);
+			CCreature* creature = CreatureManager.getCreature(_EntityMounted);
+			if (creature->_Race == EGSPD::CPeople::WaterFauna)
+			{
+				speedVariationModifier = 100;
+			}
+		}
+		else if (getMode() != MBEHAV::MOUNT_NORMAL && haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0)
+		{
+			setBonusMalusName("aqua_speed", addEffectInDB(aqua_speed, true));
+			if (_CurrentSpeedSwimBonus > 0)
+				speedVariationModifier = std::min(speedVariationModifier + (sint16)_CurrentSpeedSwimBonus, 100);
+			else
+			{
+				usingAquaSpeed = true;
+				speedVariationModifier = std::min(speedVariationModifier + 33, 100);
+			}
 		}
 	}
 	else
@@ -4020,7 +4037,7 @@ void CCharacter::setTargetBotchatProgramm(CEntityBase* target, const CEntityId &
 	// set bot chat programms and npcs special options
 	CCreature* c = NULL;
 
-	if (targetId.getType() == RYZOMID::npc)
+	if (targetId.getType() >= RYZOMID::bot_ai_begin && targetId.getType() <= RYZOMID::bot_ai_end)
 	{
 		c = dynamic_cast<CCreature*>(target);
 
@@ -6185,6 +6202,7 @@ string CCharacter::getPetsInfos()
 	{
 		string sheet = _PlayerPets[i].PetSheetId.toString();
 		string ticketSheet = _PlayerPets[i].TicketPetSheetId.toString();
+		string spawnedPet = TheDataset.getEntityId(_PlayerPets[i].SpawnedPets).toString();
 
 		uint32 timeBeforeDespawn = 0;
 		if (CTickEventHandler::getGameCycle() <= _PlayerPets[i].DeathTick + 3 * 24 * 36000)
@@ -6226,8 +6244,10 @@ string CCharacter::getPetsInfos()
 		uint32 weight = _Inventory[packInv]->getInventoryWeight();
 		uint32 max_weight = _Inventory[packInv]->getMaxWeight();
 
-		pets += sheet+"|"+ticketSheet+"|"+type+"|"+state+"|"+toString("%d", _PlayerPets[i].Size)+"|"+toString("%d", _PlayerPets[i].StableId)+"|"+toString("%d,%d,%d", _PlayerPets[i].Landscape_X, _PlayerPets[i].Landscape_Y, _PlayerPets[i].Landscape_Z)+"|"+toString("%u", timeBeforeDespawn)+"|"+toString("%f/%f", _PlayerPets[i].Satiety, _PlayerPets[i].MaxSatiety)+"|"+toString("%u|%u/%u|%u/%u", slots, bulk, max_bulk, weight, max_weight)+"|"+inBag+"|"+spawnFlag+"|"+name+"\n";
+		pets += sheet+"|"+ticketSheet+"|"+type+"|"+state+"|"+toString("%d", _PlayerPets[i].Size)+"|"+toString("%d", _PlayerPets[i].StableId)+"|"+toString("%d,%d,%d", _PlayerPets[i].Landscape_X, _PlayerPets[i].Landscape_Y, _PlayerPets[i].Landscape_Z)+"|"+toString("%u", timeBeforeDespawn)+"|"+toString("%f/%f", _PlayerPets[i].Satiety, _PlayerPets[i].MaxSatiety)+"|"+toString("%u|%u/%u|%u/%u", slots, bulk, max_bulk, weight, max_weight)+"|"+inBag+"|"+spawnFlag+"|"+name+"|"+spawnedPet+"\n";
 	}
+
+	pets += TheDataset.getEntityId(_RentAMount).toString();
 
 	return pets;
 }
@@ -6705,19 +6725,19 @@ void CCharacter::onAnimalSpawned(CPetSpawnConfirmationMsg::TSpawnError SpawnStat
 {
 	CPetAnimal &animal = _PlayerPets[PetIdx];
 
-	if (SpawnStatus == CPetSpawnConfirmationMsg::NO_ERROR_SPAWN)
+	if (SpawnStatus == CPetSpawnConfirmationMsg::NO_ERROR_SPAWN
+		|| (SpawnStatus == CPetSpawnConfirmationMsg::PET_ALREADY_SPAWNED && PetIdx == MAX_INVENTORY_ANIMAL))
 	{
-		if (PetIdx == 8)
+		if (PetIdx == MAX_INVENTORY_ANIMAL) // Special case of RentAMount
 		{
 			CCreature* c = CreatureManager.getCreature(TheDataset.getEntityId(PetMirrorRow));
-			if (c)
+			if (c) {
 				c->setIsAPet(true);
-			c->setName("pet_of_"+getName().toString());
-
+				c->setName("pet_of_"+getName().toString());
+			}
 			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
 			freeSpeedMode = true;
 			_RentAMount = PetMirrorRow;
-
 		}
 		else if (PetIdx < MAX_INVENTORY_ANIMAL)
 		{

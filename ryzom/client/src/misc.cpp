@@ -378,8 +378,8 @@ bool computeAnimSet(const CAnimationSet *&animSet, MBEHAV::EMode mode, const str
 		// Up to 100 missing anim set (security).
 		if(UnknownAnimSet.size() < 100)
 		{
-			if(UnknownAnimSet.insert(result).second)
-				nlwarning("computeAnimSet: unknown Anim Set '%s' ('%u' unkowns).", result.c_str(), UnknownAnimSet.size());
+			UnknownAnimSet.insert(result).second;
+			//	nlwarning("computeAnimSet: unknown Anim Set '%s' ('%u' unkowns).", result.c_str(), UnknownAnimSet.size());
 		}
 		// Try to compute the default one
 		result = animSetBaseName + "_" + "default" + "__";
@@ -391,8 +391,8 @@ bool computeAnimSet(const CAnimationSet *&animSet, MBEHAV::EMode mode, const str
 			// Up to 100 missing anim set (security).
 			if(UnknownAnimSet.size() < 100)
 			{
-				if(UnknownAnimSet.insert(result).second)
-					nlwarning("computeAnimSet: unknown Anim Set '%s' ('%u' unkowns).", result.c_str(), UnknownAnimSet.size());
+				UnknownAnimSet.insert(result).second;
+					//nlwarning("computeAnimSet: unknown Anim Set '%s' ('%u' unkowns).", result.c_str(), UnknownAnimSet.size());
 			}
 		}
 	}
@@ -1535,12 +1535,12 @@ bool getRelativeFloatFromString(const std::string src, float &dst)
 	dst = 0;
 	if (src.empty())
 		return false;
-	
+
 	if (src[0] == '+')
 		return fromString(src.substr(1), dst);
 	else
 		fromString(src, dst);
-	
+
 	return false;
 }
 
@@ -1549,7 +1549,7 @@ void updateVector(const string part, CVector &dst, float value, bool add /* = fa
 	string p = part;
 	if (part.size() > 1)
 		p = part.substr(part.size()-1, 1);
-		
+
 	if (add)
 	{
 		if (p == "x")
@@ -1559,7 +1559,7 @@ void updateVector(const string part, CVector &dst, float value, bool add /* = fa
 		else if (p == "z")
 			dst.z += value;
 	}
-	else 
+	else
 	{
 		if (p == "x")
 			dst.x = value;
