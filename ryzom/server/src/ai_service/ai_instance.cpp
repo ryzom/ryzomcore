@@ -1030,7 +1030,7 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 			if (botEId==CEntityId::Unknown)
 				return;
 			CAIEntityPhysical* entity = CAIEntityPhysicalLocator::getInstance()->getEntity(botEId);
-			CSpawnBotNpc* bot = dynamic_cast<CSpawnBotNpc*>(entity);
+			CSpawnBot* bot = dynamic_cast<CSpawnBot*>(entity);
 			if (!bot)
 				return;
 			if (!bot->getPersistent().getOwner())

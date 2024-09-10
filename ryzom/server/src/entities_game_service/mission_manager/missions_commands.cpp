@@ -2909,69 +2909,96 @@ NLMISC_COMMAND(grpScript, "executes a script on an event npc group", "<uid> <gro
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(setUrl, "changes the url of a bot", "<uid> <groupname> [<url>] [<name>]")
+NLMISC_COMMAND(setUrl, "changes the url of a bot", "<uid|@_ai_instance> <groupname> [<url>] [<name>]")
 {
 	if (args.size () < 2) return false;
 
-	GET_ACTIVE_CHARACTER
+	uint32 instanceNumber;
+	CEntityId botId;
 
-	uint32 instanceNumber = c->getInstanceNumber();
-
-	string groupname = args[1];
-	if (! getAIInstanceFromGroupName(groupname, instanceNumber))
+	if (args[0][0] == '@')
 	{
-		log.displayNL("ERR: INVALID_AI_INSTANCE");
-		return false;
+		instanceNumber = CUsedContinent::instance().getInstanceForContinent(args[0].substr(1));
+	}
+	else
+	{
+		GET_ACTIVE_CHARACTER
+		instanceNumber = c->getInstanceNumber();
 	}
 
-
-	// try to find the bot name
-	vector<TAIAlias> aliases;
-
-	log.displayNL("NAME: %s", groupname.c_str());
-	CAIAliasTranslator::getInstance()->getNPCAliasesFromName(groupname, aliases);
-	if (aliases.empty())
+	if (args[1][0] == '@')
 	{
-		log.displayNL("ERR: INVALID_BOT");
-		return false;
+		CEntityId entityId(args[1].substr(1));
+		botId = entityId;
+	}
+	else
+	{
+
+		string groupname = args[1];
+		if (! getAIInstanceFromGroupName(groupname, instanceNumber))
+		{
+			log.displayNL("ERR: INVALID_AI_INSTANCE");
+			return true;
+		}
+
+
+		// try to find the bot name
+		vector<TAIAlias> aliases;
+
+		log.displayNL("NAME: %s", groupname.c_str());
+		CAIAliasTranslator::getInstance()->getNPCAliasesFromName(groupname, aliases);
+		if (aliases.empty())
+		{
+			log.displayNL("ERR: INVALID_BOT");
+			return true;
+		}
+
+		TAIAlias alias = aliases[0];
+
+		botId = CAIAliasTranslator::getInstance()->getEntityId (alias);
 	}
 
-	TAIAlias alias = aliases[0];
-
-	const CEntityId & botId = CAIAliasTranslator::getInstance()->getEntityId (alias);
 	if (botId != CEntityId::Unknown)
 	{
 
 		CCreature* creature = CreatureManager.getCreature(botId);
 
-		uint32 program = creature->getBotChatProgram();
-		if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+		if (creature)
 		{
-			program |= 1 << BOTCHATTYPE::WebPageFlag;
-			creature->setBotChatProgram(program);
-		}
+			uint32 program = creature->getBotChatProgram();
+			if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+			{
+				program |= 1 << BOTCHATTYPE::WebPageFlag;
+				creature->setBotChatProgram(program);
+			}
 
-		const string &wp = creature->getWebPage();
-		if (args.size() < 3)
-		{
-			(string &)wp = "";
-			program &= ~(1 << BOTCHATTYPE::WebPageFlag);
-			creature->setBotChatProgram(program);
+			const string &wp = creature->getWebPage();
+			if (args.size() < 3)
+			{
+				(string &)wp = "";
+				program &= ~(1 << BOTCHATTYPE::WebPageFlag);
+				creature->setBotChatProgram(program);
+			}
+			else
+			{
+				(string &)wp = args[2];
+				if (args.size() > 3)
+				{
+					const string &wpn = creature->getWebPageName();
+					(string &)wpn = args[3];
+				}
+			}
 		}
 		else
 		{
-			(string &)wp = args[2];
-			if (args.size() > 3)
-			{
-				const string &wpn = creature->getWebPageName();
-				(string &)wpn = args[3];
-			}
+			log.displayNL("ERR: INVALID_BOT");
+			return true;
 		}
 	}
 	else
 	{
 		log.displayNL("ERR: BOT_NOT_SPAWNED");
-		return false;
+		return true;
 	}
 
 	return true;
@@ -3504,7 +3531,7 @@ NLMISC_COMMAND(mount,"mount the target","<uid>")
 
 // spawnMount 2 sagass_mount_00.creature "Mount$#Property of Ulukyn"
 //-----------------------------------------------
-NLMISC_COMMAND(spawnMount,"spawn a mount close to player","<uid> <mount sheet name> [<pet custom name>]")
+NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet custom name>] [x,-y,z] [cell]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3512,42 +3539,73 @@ NLMISC_COMMAND(spawnMount,"spawn a mount close to player","<uid> <mount sheet na
 	GET_ACTIVE_CHARACTER;
 
 	const float distFromPlayer = 2000.f;
-	CPetSpawnMsg msg;
-
-	SGameCoordinate destination;
-	destination.X = c->getState().X;
-	destination.Y = c->getState().Y;
-	destination.Z = c->getState().Z;
 	TDataSetRow dsr = c->getEntityRowId();
-	CMirrorPropValueRO<TYPE_CELL> mirrorCell(TheDataset, dsr, DSPropertyCELL);
-	destination.Cell = mirrorCell;
-
-	msg.SpawnMode = CPetSpawnMsg::NEAR_POINT;
-	msg.Coordinate_X = destination.X - sint32(cos(c->getHeading()) * distFromPlayer);
-	msg.Coordinate_Y = destination.Y - sint32(sin(c->getHeading()) * distFromPlayer);
-	msg.Coordinate_H = destination.Z;
-	msg.Heading = c->getHeading();
-	msg.CharacterMirrorRow = dsr;
-	msg.PetSheetId = CSheetId(args[1]);
-	msg.PetIdx = 8;
-	msg.Cell = destination.Cell;
 	ucstring customName;
 	if (args.size() >= 3)
 		customName.fromUtf8(args[2]);
+
+	CPetSpawnMsg msg;
+	msg.CharacterMirrorRow = dsr;
+	msg.SpawnMode = CPetSpawnMsg::NEAR_POINT;
+	msg.PetSheetId = CSheetId(args[1]);
+	msg.PetIdx = MAX_INVENTORY_ANIMAL;
 	msg.CustomName = customName;
 
+	// Position from command
+	if (args.size() >= 4)
+	{
+		std::vector< std::string > pos;
+		NLMISC::splitString(args[3], ",", pos);
 
-	CContinent * continent = CZoneManager::getInstance().getContinent(destination.X, destination.Y);
-	if (!continent) {
+		if (pos.size() < 2)
+		{
+			log.displayNL("ERR: invalid position");
+			return true;
+		}
+
+		fromString(pos[0], msg.Coordinate_X);
+		fromString(pos[1], msg.Coordinate_Y);
+
+		if (pos.size() >= 3)
+			fromString(pos[2], msg.Coordinate_H);
+
+	}
+	else
+	{
+		SGameCoordinate destination;
+		destination.X = c->getState().X;
+		destination.Y = c->getState().Y;
+		destination.Z = c->getState().Z;
+		msg.Coordinate_X = destination.X - sint32(cos(c->getHeading()) * distFromPlayer);
+		msg.Coordinate_Y = destination.Y - sint32(sin(c->getHeading()) * distFromPlayer);
+		msg.Coordinate_H = destination.Z;
+		msg.Heading = c->getHeading();
+	}
+
+
+	if (args.size() >= 5)
+	{
+		fromString(args[4], msg.Cell);
+	}
+	else
+	{
+		CMirrorPropValueRO<TYPE_CELL> mirrorCell(TheDataset, dsr, DSPropertyCELL);
+		msg.Cell = mirrorCell;
+	}
+
+
+	CContinent * continent = CZoneManager::getInstance().getContinent(msg.Coordinate_X, msg.Coordinate_Y);
+	if (!continent)
+	{
 		log.displayNL("ERR: invalid continent");
-		return false;
+		return true;
 	}
 
 	uint32 aiInstance = CUsedContinent::instance().getInstanceForContinent((CONTINENT::TContinent)continent->getId());
 	if (aiInstance == ~0)
 	{
 		log.displayNL("ERR: invalid continent");
-		return false;
+		return true;
 	}
 	msg.AIInstanceId = (uint16)aiInstance;
 	CWorldInstances::instance().msgToAIInstance(msg.AIInstanceId, msg);
@@ -3555,7 +3613,6 @@ NLMISC_COMMAND(spawnMount,"spawn a mount close to player","<uid> <mount sheet na
 
 	return true;
 }
-
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(getPlayerVar, "get the value of a variable of player","<uid> <var>")
@@ -3927,7 +3984,7 @@ NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInvento
 	uint32 index;
 	fromString(args[1], index);
 
-	if (index == 8)
+	if (index >= MAX_INVENTORY_ANIMAL)
 	{
 		c->removeRentAMount();
 		return true;

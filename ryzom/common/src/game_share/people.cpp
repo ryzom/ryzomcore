@@ -562,7 +562,7 @@ void getMatchingClassificationType(CPeople::TPeople people, vector<CClassificati
 		break;
 
 	// fishs
-	case CPeople:: Balduse:
+	case CPeople:: WaterFauna:
 	case CPeople:: Clapclap:
 	case CPeople:: GooBalduse:
 	case CPeople:: GooClapclap:

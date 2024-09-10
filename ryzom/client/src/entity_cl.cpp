@@ -1683,7 +1683,9 @@ void CEntityCL::snapToGround()
 					}
 					else // creature
 					{
-						vect.z = waterHeight + ClientCfg.WaterOffsetCreature;
+						CCharacterCL * c = dynamic_cast<CCharacterCL*>(this);
+						if (c && c->getSheet()->Race != EGSPD::CPeople::WaterFauna)
+							vect.z = waterHeight + ClientCfg.WaterOffsetCreature;
 					}
 
 					needSnap= false;
