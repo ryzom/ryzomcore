@@ -2389,6 +2389,10 @@ void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 
 							return;
 						}
+						else
+						{
+							PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "ANIMAL_TOO_FAR");
+						}
 					}
 
 					return;
