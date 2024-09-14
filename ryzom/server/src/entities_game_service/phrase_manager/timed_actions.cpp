@@ -69,14 +69,14 @@ bool CTimedAction::testCancelOnHit( sint32 attackSkillValue, CEntityBase * attac
 		{
 			nlwarning( "<MAGIC>invalid creature form %s in entity %s", defender->getType().toString().c_str(), defender->getId().toString().c_str() );
 			return false;
-		}	
+		}
 		defenderValue = form->getAttackLevel();
 	}
-	
+
 	//test if the spell is broken
 	const uint8 chances = CStaticSuccessTable::getSuccessChance( SUCCESS_TABLE_TYPE::BreakCastResist, defenderValue - attackSkillValue);
 	const uint8 roll = (uint8) RandomGenerator.rand(99);
-	
+
 	if ( roll >= chances )
 		return true;
 	else
@@ -201,7 +201,7 @@ void CTPTimedAction::stopAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 CGameItemPtr CTPTimedAction::getAndUnlockTP(CEntityBase *actor)
 {
 	if (!actor) return NULL;
-	
+
 	// must be used by a player
 	CCharacter *character = dynamic_cast<CCharacter *> (actor);
 	if (!character)
@@ -209,7 +209,7 @@ CGameItemPtr CTPTimedAction::getAndUnlockTP(CEntityBase *actor)
 		nlwarning("Error, cannot cast actor in CCharacter *, actor Id %s", actor->getId().toString().c_str());
 		return NULL;
 	}
-	
+
 	// get used TP ticket
 	uint32 ticketSlot = character->getTpTicketSlot();
 	if (ticketSlot == INVENTORIES::INVALID_INVENTORY_SLOT)
@@ -217,7 +217,7 @@ CGameItemPtr CTPTimedAction::getAndUnlockTP(CEntityBase *actor)
 		//nlwarning("Error, player %s, TpTicketSlot should be != INVALID_INVENTORY_SLOT", character->getId().toString().c_str());
 		return NULL;
 	}
-	
+
 	// get ticket item
 	CGameItemPtr item = character->getItem( INVENTORIES::bag, ticketSlot);
 	if ( item == NULL)
@@ -231,7 +231,7 @@ CGameItemPtr CTPTimedAction::getAndUnlockTP(CEntityBase *actor)
 		nlwarning("Item found in slot %d in bag for player %s  is NOT a tp ticket!! BUG", ticketSlot, character->getId().toString().c_str());
 		return NULL;
 	}
-	
+
 	// unlock item, Tp player and destroy item
 	character->unLockItem(INVENTORIES::bag, ticketSlot,1);
 
@@ -304,6 +304,7 @@ void CDisconnectTimedAction::stopBeforeExecution(CTimedActionPhrase *phrase, CEn
 bool CMountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	CBypassCheckFlags bypassCheckFlags;
+	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::InWater, true);
 	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::Invulnerability, true);
 
 	if (!actor || !phrase || !actor->canEntityUseAction(bypassCheckFlags) )
@@ -321,7 +322,7 @@ bool CMountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 	}
 
 	_EntityToMount = phrase->getTarget();
-	
+
 	CEntityBase * e = CEntityBaseManager::getEntityBasePtr( _EntityToMount );
 	if( e )
 	{
@@ -359,7 +360,7 @@ bool CMountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 			nlwarning("<cbAnimalMount> %d Can't found static form sheet for entity %s %s !!", CTickEventHandler::getGameCycle(), e->getId().toString().c_str(), e->getType().toString().c_str() );
 		}
 	}
-	
+
 	CMessage msgout( "IMPULSION_ID" );
 	msgout.serial( const_cast<CEntityId&> (playerChar->getId()) );
 	CBitMemStream bms;
@@ -418,6 +419,7 @@ void CMountTimedAction::stopBeforeExecution(CTimedActionPhrase *phrase, CEntityB
 bool CUnmountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	CBypassCheckFlags bypassCheckFlags;
+	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::InWater, true);
 	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::OnMount, true);
 	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::Invulnerability, true);
 
@@ -477,7 +479,7 @@ bool CConsumeItemTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *
 
 	if (form->ConsumableItem->Flags.Swim != 0)
 		bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::InWater, true);
-	
+
 	if (form->ConsumableItem->Flags.StandUp == false)
 	{
 		// check player is sit, on a mektoub or swimming otherwise return false
@@ -493,7 +495,7 @@ bool CConsumeItemTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *
 		return false;
 
 	//NB: overdose timer is checked before lauching this action
-	
+
 	return true;
 }
 
@@ -501,7 +503,7 @@ bool CConsumeItemTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *
 void CConsumeItemTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	BOMB_IF(!actor, "Actor is NULL", return);
-	
+
 	CCharacter *playerChar = dynamic_cast<CCharacter*> (actor);
 	if (!playerChar)
 		return;
@@ -512,7 +514,7 @@ void CConsumeItemTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBas
 		return;
 
 	uint16 quality = consumedItem->quality();
-	
+
 	_Form = consumedItem->getStaticForm();
 	if (!_Form || !_Form->ConsumableItem)
 		return;
@@ -520,10 +522,10 @@ void CConsumeItemTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBas
 	// destroy consumed item
 	playerChar->destroyConsumedItem();
 	playerChar->disableConsumableFamily(_Form->ConsumableItem->Family, CTickEventHandler::getGameCycle() + TGameCycle(_Form->ConsumableItem->OverdoseTimer /  CTickEventHandler::getGameTimeStep()) );
-	
+
 	// execute power
 	CPhraseManager::getInstance().useConsumableItem(actor->getEntityRowId(), _Form, quality);
-	
+
 }
 
 //-----------------------------------------------

@@ -54,14 +54,14 @@ void CMgrPet::update()
 {
 	// call the update methods for all of the groups in the manager
 	uint32 const timeOffset = CTimeInterface::gameCycle();
-	
+
 	FOREACH(it, CCont<CGroup>, groups())
 	{
 		CGrpPet* const grpPet = NLMISC::safe_cast<CGrpPet*>(*it);
-		
+
 		if (grpPet->isSpawned() && ((grpPet->getChildIndex()+timeOffset)&3)==1)
 			grpPet->getSpawnObj()->update();
-		
+
 		if (grpPet->bots().isEmpty())
 			grpPet->getPetManager().removePetGroup(grpPet->getPetOwner());
 	}
@@ -70,7 +70,7 @@ void CMgrPet::update()
 void CMgrPet::createPetGroup(CEntityId const& petOwnerId)
 {
 	nlassert(_EntityIdToIndex.find(petOwnerId)==_EntityIdToIndex.end());
-	
+
 	CSmartPtr<CGrpPet> const petGroup = new CGrpPet(this, petOwnerId);
 	groups().addChild(petGroup);
 	_EntityIdToIndex.insert(std::make_pair(petOwnerId,petGroup->getChildIndex()));
@@ -80,9 +80,9 @@ CGrpPet* CMgrPet::getPetGroup(CEntityId const& petOwnerId)
 {
 	CGrpPet* grp = NULL;
 	TEntityIdMapUint32::iterator const it = _EntityIdToIndex.find(petOwnerId);
-	
+
 	if (it!=_EntityIdToIndex.end())
-	{		
+	{
 		grp = NLMISC::type_cast<CGrpPet*>(groups()[it->second]);
 		if (!grp)
 			_EntityIdToIndex.erase(it);
@@ -95,7 +95,7 @@ void CMgrPet::removePetGroup(NLMISC::CEntityId const& petOwnerId)
 	TEntityIdMapUint32::iterator const it = _EntityIdToIndex.find(petOwnerId);
 	if (it==_EntityIdToIndex.end())
 		return;
-	
+
 	groups().removeChildByIndex(it->second);
 	_EntityIdToIndex.erase(it);
 }
@@ -108,11 +108,11 @@ void CBotPet::changeOwner(NLMISC::CEntityId const& newOwner)
 {
 	if (newOwner==CEntityId::Unknown)
 		return;
-	
+
 	CMgrPet* const petMgr = getAIInstance()->getPetMgr();
-	
+
 	CGrpPet* grp = petMgr->getPetGroup(newOwner);
-	
+
 	if (!grp)
 	{
 		petMgr->createPetGroup(newOwner);
@@ -126,7 +126,7 @@ void CBotPet::changeOwner(NLMISC::CEntityId const& newOwner)
 		if (!grp->isSpawned())
 			return;
 	}
-	
+
 	//	To Update. It s Ugly and the correct way to do that may be:
 	//	a method call on the new player bot container giving the child and the new player as params.
 	//	it reflects that to have a full autonomous architecture, with should have a container / owner relationship.
@@ -140,7 +140,7 @@ void CBotPet::changeOwner(NLMISC::CEntityId const& newOwner)
 			getSpawnObj()->setSpawnGroup(grp->getSpawnObj());
 		grp->bots().addChild(this);
 		lastOwner->bots().removeChildByIndex(lastIndex);
-				
+
 		//	REmove Group if no more used ..
 		if (lastOwner->bots().size()==0)
 			lastOwner->getPetManager().removePetGroup(lastOwner->getPetOwner());
@@ -155,7 +155,7 @@ CPetOwner::~CPetOwner()
 {
 	if (_petGroup.isNull())
 		return;
-	
+
 	NLMISC::safe_cast<CMgrPet*>(_petGroup->getOwner())->groups().removeChildByIndex(_petGroup->getChildIndex());
 }
 
@@ -167,10 +167,10 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 {
 	CAIInstance* aiInstance = NULL;
 	CPetSpawnConfirmationMsg confirmMsg;
-	
+
 	confirmMsg.CharacterMirrorRow = CharacterMirrorRow;
 	confirmMsg.PetIdx = PetIdx;
-	
+
 	switch(SpawnMode)
 	{
 	case NEAR_PLAYER:
@@ -178,7 +178,7 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 		{
 			CAIInstance* const aiInstance = CAIS::instance().getAIInstance(AIInstanceId);	//	gets the AIInstance.
 			CEntityId const petOwnerId = CMirrors::getEntityId(CharacterMirrorRow);
-			
+
 			if (petOwnerId.isUnknownId() || !aiInstance)
 			{
 				confirmMsg.SpawnError = CPetSpawnConfirmationMsg::CHARATER_UNKNOWN;
@@ -188,14 +188,14 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 #endif
 				return;
 			}
-			
+
 			CGrpPet* petGrp = aiInstance->getPetMgr()->getPetGroup(petOwnerId);
 			if (!petGrp)
 			{
 				aiInstance->getPetMgr()->createPetGroup(petOwnerId);
 				petGrp = aiInstance->getPetMgr()->getPetGroup(petOwnerId);
 			}
-			
+
 			if (!petGrp)
 			{
 				confirmMsg.SpawnError = CPetSpawnConfirmationMsg::INTERNAL_ERROR;
@@ -207,18 +207,19 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 #endif
 				return;
 			}
-			
+
 			CBotPet* botPet = NULL;
 			if (PetIdx<petGrp->bots().size())
 				botPet = static_cast<CBotPet*>(petGrp->bots()[PetIdx]);
-			
+
 			if (botPet && botPet->isSpawned())
 			{
+				confirmMsg.PetMirrorRow = botPet->getSpawn()->dataSetRow();
 				confirmMsg.SpawnError = CPetSpawnConfirmationMsg::PET_ALREADY_SPAWNED;
 				confirmMsg.send("EGS");
 				return;
 			}
-			
+
 			if (!petGrp->isSpawned())
 				petGrp->spawn();
 			botPet = safe_cast<CBotPet*>(petGrp->bots().addChild(new CBotPet(petGrp),PetIdx));
@@ -235,11 +236,11 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 			}
 
 			CAIPos position;
-		
+
 			//	calc a valid spawn position.
 			{
 				CAIEntityPhysical const* const phys = CAIS::instance().getEntityPhysical(CMirrors::DataSet->getDataSetRow(petOwnerId));
-				
+
 				//	TSpawnMode
 				switch (SpawnMode)
 				{
@@ -263,7 +264,7 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 					position = CAIPos(Coordinate_X*0.001f, Coordinate_Y*0.001f, (sint32)(Coordinate_H*0.001f), Heading);
 					break;
 				}
-				
+
 				CWorldPosition spawnPos;
 				if (!CWorldContainer::calcNearestWPosFromPosAnRadius(position.h(), spawnPos, position, 16, 300, CWorldContainer::CPosValidatorDefault()))
 				{
@@ -283,23 +284,23 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 				position = CAIPos(spawnPos.toAIVector(), spawnPos.getMetricHeight(), position.theta());
 				botPet->setSpawnPos(position);
 			}
-			
+
 			AISHEETS::ICreatureCPtr const sheet = AISHEETS::CSheets::getInstance()->lookup(PetSheetId);
-			
+
 			if (!sheet)
 			{
 				confirmMsg.SpawnError = CPetSpawnConfirmationMsg::INTERNAL_ERROR;
 				confirmMsg.send("EGS");
 				return;
 			}
-			
+
 			botPet->setSheet(sheet);
 
 			if (!CustomName.empty())
 			{
 				botPet->setCustomName(CustomName);
 			}
-			
+
 			if (!botPet->spawn())
 			{
 				confirmMsg.SpawnError = CPetSpawnConfirmationMsg::INTERNAL_ERROR;
@@ -311,7 +312,7 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 #endif
 				return;
 			}
-			
+
 			if (!botPet->getSpawn())
 			{
 				confirmMsg.SpawnError = CPetSpawnConfirmationMsg::INTERNAL_ERROR; // the creation failed coz of an internal error.
@@ -345,9 +346,9 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 			sendMessageViaMirror("GPMS", msgout2);
 
 			botPet->getSpawn()->setAIProfile(new CAIPetProfileStand(botPet->getSpawn()));
-			
+
 			confirmMsg.PetMirrorRow = botPet->getSpawn()->dataSetRow();
-			
+
 			if (!confirmMsg.PetMirrorRow.isValid()) // creation failed.
 			{
 				confirmMsg.SpawnError = CPetSpawnConfirmationMsg::INTERNAL_ERROR;
@@ -359,7 +360,7 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 #endif
 				return;
 			}
-			
+
 			confirmMsg.SpawnError = CPetSpawnConfirmationMsg::NO_ERROR_SPAWN;
 			confirmMsg.send("EGS");
 		}
@@ -384,11 +385,11 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 void CPetSetOwnerImp::callback(std::string const& name, NLNET::TServiceId id)
 {
 	CEntityId const& petOwner = CMirrors::getEntityId(OwnerMirrorRow);
-	
+
 	CSpawnBotPet* const petSpawnPtr = NLMISC::type_cast<CSpawnBotPet*>(CAIS::instance().getEntityPhysical(PetMirrorRow));
 	if (!petSpawnPtr)
 		return;
-	
+
 	petSpawnPtr->getPersistent().changeOwner(petOwner);
 }
 
@@ -401,49 +402,49 @@ void CPetCommandMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 	CAIEntityPhysical* petEntPtr = CAIS::instance().getEntityPhysical(PetMirrorRow);
 	if (!petEntPtr)
 		return;
-	
+
 	CSpawnBotPet* petSpawnPtr = NLMISC::type_cast<CSpawnBotPet*>(petEntPtr);
 	if (!petSpawnPtr)
 		return;
 
 	CAIPos const position(Coordinate_X*0.001f, Coordinate_Y*0.001f, Coordinate_H, 0);
-	
+
 	switch (Command)
 	{
 	case STAND:
 		petSpawnPtr->setAIProfile(new CAIPetProfileStand(petSpawnPtr));
 		break;
-		
+
 	case FOLLOW:
 		petSpawnPtr->setAIProfile(new CAIPetProfileFollowPlayer(petSpawnPtr, CharacterMirrorRow));
 		break;
-		
+
 	case GOTO_POINT:
 		{
 			CAIPetProfileGotoPoint* const profile = new CAIPetProfileGotoPoint(petSpawnPtr, position, petSpawnPtr->getAStarFlag());
-			
+
 			if (profile->isValid())
 				petSpawnPtr->setAIProfile(profile);
 			else
 				CPetCommandConfirmationMsg(CPetCommandConfirmationMsg::POSITION_COLLISION_NOT_VALID, *this).send("EGS");
 		}
 		break;
-		
+
 	case GOTO_POINT_DESPAWN:
 		{
 			CAIPetProfileGotoPoint* const profile = new CAIPetProfileGotoPoint(petSpawnPtr, position, petSpawnPtr->getAStarFlag(), true);
-			
+
 			if (profile->isValid())
 				petSpawnPtr->setAIProfile(profile);
 			else
 				CPetCommandConfirmationMsg(CPetCommandConfirmationMsg::POSITION_COLLISION_NOT_VALID,*this).send("EGS");
 		}
 		break;
-		
+
 	case LIBERATE:	//	not really implemented for now ..
 		petSpawnPtr->getPersistent().setDespawn();
 		break;
-		
+
 	case DESPAWN:
 		petSpawnPtr->getPersistent().setDespawn();
 		break;

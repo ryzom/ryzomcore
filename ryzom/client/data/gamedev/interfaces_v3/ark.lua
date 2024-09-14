@@ -180,6 +180,17 @@ function openRyward(folder, event)
 	getUI(ArkMissionCatalog.window_id).active = true
 end
 
+function openRykea(folder, event)
+	folder = "f"..tostring(folder)
+	event = tostring(event)
+	if not (rykea_selected_path_B == folder and rykea_selected_path_C == event and getUI("ui:interface:encyclopedia").active == true) then
+		ArkMissionCatalog:OpenCat("rykea","https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11938&command=reset_all")
+	end
+	getUI(ArkMissionCatalog.window_id..":content:htmlB"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11938&command=reset_all&pathB="..folder.."&pathC="..event)
+	getUI(ArkMissionCatalog.window_id).active = true
+end
+
+
 function ArkMissionCatalog:OpenWindow(urlA, urlB, dont_active)
 	local winframe = getUI(ArkMissionCatalog.window_id)
 	winframe.opened=true
@@ -384,9 +395,11 @@ function ArkSelectRyform(curwin, id, mod)
 end
 
 function ArkSendForm(name)
-	ArkGetStageEdit(__CURRENT_WINDOW__):find(name.."__command:eb").input_string = "reset"
-	ArkGetStageEdit(__CURRENT_WINDOW__):find("send:b"):runLeftClickAction()
+	local ui = getUICaller().id
+	ArkGetStageEdit(ui):find(name.."__command:eb").input_string = "reset"
+	ArkGetStageEdit(ui):find("send:b"):runLeftClickAction()
 end
+
 
 function ArkGetStageEdit(curwin)
 	local sid = string.split(curwin, ":")
@@ -434,6 +447,18 @@ function ArkV5GetSelectEntity(prefix, input)
 		webig:openUrlInBg("https://app.ryzom.com/app_arcc/scripts/get_bot.php?action=ark_editor&ui="..encodeURLParam(getUICaller().id).."&prefix="..tostring(prefix).."&input="..tostring(input).."&bot="..encodeURLParam(base64.encode(name)))
 	end
 end
+
+function getVpx(vpx)
+	while string.len(vpx) < 16 do
+		vpx = "0"..vpx
+	end
+
+	local vpx1 = string.format("%06d", tonumber(vpx:sub(1, string.len(vpx)-2), 16)*256)
+	local vpx2 = string.format("%06d", tonumber(vpx:sub(string.len(vpx)-1, string.len(vpx)), 16)+tonumber(vpx1:sub(string.len(vpx1)-5, string.len(vpx1))))
+	local nvpx = vpx1:sub(1, string.len(vpx1)-6)..vpx2:sub(string.len(vpx2)-5, string.len(vpx2))
+	return nvpx
+end
+
 
 function fixUrl(url)
 	s, n = string.gsub(url, "{amp}", "&")

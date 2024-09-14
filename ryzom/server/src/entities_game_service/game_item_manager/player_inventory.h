@@ -258,6 +258,8 @@ public:
 protected:
 	/// look for the first empty slot (assert if no free slot)
 	uint32 getFirstFreeSlot(uint32 start=0, uint32 end=INVENTORIES::INSERT_IN_FIRST_FREE_SLOT) const;
+	/// look for the first empty slot in guild chests (assert if no free slot)
+	uint32 getFirstFreeChestSlot(const CGameItemPtr &item);
 	/// Recompute weight and bulk according to item qt variation
 	void updateWeightAndBulk(const CGameItemPtr &item, sint32 deltaQt);
 	/// Copy the inventory content from this inventory to another

@@ -1124,7 +1124,7 @@ void CCharacterCL::computeAnimSet(sint32 fakeLeftHand, sint32 fakeRightHand)
 	// Use the generic method to compute the animation set.
 	if(!::computeAnimSet(_CurrentAnimSet[MOVE], _Mode, _Sheet->getAnimSetBaseName(), _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet, _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet, !modeWithHiddenItems()))
 	{
-		nlwarning("CH:computeAnimSet:%d: pb when trying to compute the animset. Sheet Id '%u(%s)'.", _Slot, _SheetId.asInt(), _SheetId.toString().c_str());
+		//nlwarning("CH:computeAnimSet:%d: pb when trying to compute the animset. Sheet Id '%u(%s)'.", _Slot, _SheetId.asInt(), _SheetId.toString().c_str());
 	}
 
 }// computeAnimSet //
