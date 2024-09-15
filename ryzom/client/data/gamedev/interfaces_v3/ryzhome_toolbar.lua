@@ -1,6 +1,6 @@
 RyzhomeBar = {
 	id = "ui:interface:webig_ryzhome_toolbar",
-	saveuri = "https://://app.ryzom.com/app_ryzhome/index.php?action=toolbar_save",
+	saveuri = "https://app.ryzom.com/app_ryzhome/index.php?action=toolbar_save",
 	selectedPage = 1
 }
 
@@ -12,22 +12,22 @@ function RyzhomeBar:close()
 end
 
 function RyzhomeBar:addItems()
-	local url = "https://://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=add"
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=add"
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
 function RyzhomeBar:moveItems()
-	local url = "https://://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=move"
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=move"
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
 function RyzhomeBar:removeItems()
-	local url = "https://://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=remove"
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_LuaListItems&command=remove"
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
 function RyzhomeBar:inviteFriend()
-	local url = "https://://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_InviteFriend"
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_InviteFriend"
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
