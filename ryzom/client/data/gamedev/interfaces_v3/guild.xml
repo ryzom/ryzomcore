@@ -40,7 +40,7 @@
 
   <proc id="select_guild_island">
     <action handler="set" params="target='ui:interface:guild:w'|value=600" />
-    <action handler="lua" params="game:openGuildIsland('https://://app.ryzom.com/app_guild/island.php?')" />
+    <action handler="lua" params="game:openGuildIsland('https://app.ryzom.com/app_guild/island.php?')" />
   </proc>
 
   <proc id="select_guild_special_bag">
@@ -596,7 +596,7 @@
           h="245"
           posref="TL TL"
           sizeref="w">
-          <instance template="webig_html" home="https://://app.ryzom.com/app_arcc/index.php?action=mItem_DisplayGuildItems" browse_redo="" browse_undo="" browse_refresh="" bg_color="0 0 0 0"/>
+          <instance template="webig_html" home="https://app.ryzom.com/app_arcc/index.php?action=mItem_DisplayGuildItems" browse_redo="" browse_undo="" browse_refresh="" bg_color="0 0 0 0"/>
         </group>
       </group>
       <group id="tab_special_bag"
@@ -612,7 +612,7 @@
           h="350"
           posref="TL TL"
           sizeref="w">
-          <instance template="webig_html" home="https://://app.ryzom.com/app_arcc/index.php?action=mItem_DisplayGuildSpecialItems" browse_redo="" browse_undo="" browse_refresh="" bg_color="0 0 0 0"/>
+          <instance template="webig_html" home="https://app.ryzom.com/app_arcc/index.php?action=mItem_DisplayGuildSpecialItems" browse_redo="" browse_undo="" browse_refresh="" bg_color="0 0 0 0"/>
         </group>
       </group>
     </group>
