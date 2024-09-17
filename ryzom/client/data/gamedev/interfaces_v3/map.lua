@@ -269,6 +269,12 @@ game:addMapArkPoint("Vip/Silan", 10304, -11719, "vip_silan_ranger", "", "dynicon
 
 game:addMapArkPoint("Vip", 4154, -3305, "vip_allegory", "", "allegory_16.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=allegory_vip&title=fct_allegory_maker&gender=1", 150)
 
+--Special Map Marker for the 20th Anniversary event
+game:addMapArkPoint("Vip/zorai_newbie", 8210, -5008, "vip_zorai_newbie", "Cuai Zhei-Jeo", "teammate_map.tga")
+game:addMapArkPoint("Vip/tryker_newbie", 22022, -34295, "vip_tryker_newbie", "Be'Keanin Bremen", "teammate_map.tga")
+game:addMapArkPoint("Vip/matis_newbie", 1483, -7251, "vip_matis_newbie", "Danibona Cuilli", "teammate_map.tga")
+game:addMapArkPoint("Vip/fyros_newbie", 21645, -26177, "vip_fyros_newbie", "Metis Medos", "teammate_map.tga")
+
 
 -- register map overrride
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")
