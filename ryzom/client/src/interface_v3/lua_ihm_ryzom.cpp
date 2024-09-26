@@ -542,6 +542,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("updateUserLandMarks",  updateUserLandMarks);
 	ls.registerFunc("delArkPoints",  delArkPoints);
 	ls.registerFunc("addRespawnPoint",  addRespawnPoint);
+	ls.registerFunc("centerMap",  centerMap);
 	ls.registerFunc("setArkPowoOptions",  setArkPowoOptions);
 	ls.registerFunc("getActualMapZoom",  getActualMapZoom);
 	ls.registerFunc("setActualMapZoom",  setActualMapZoom);
@@ -1561,7 +1562,7 @@ int CLuaIHMRyzom::getPlayerMode(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerPrivs(CLuaState &ls)
 {
 	std::string privsString = "";
-	
+
 	if (hasPrivilegeDEV()) privsString=":DEV";
 	if (hasPrivilegeSGM()) privsString+=":SGM";
 	if (hasPrivilegeGM()) privsString+=":GM";
@@ -1572,7 +1573,7 @@ int CLuaIHMRyzom::getPlayerPrivs(CLuaState &ls)
 	if (hasPrivilegeEG()) privsString+=":EG";
 	if (hasPrivilegeOBSERVER()) privsString+=":OBSERVER";
 	if (hasPrivilegeOBSERVER()) privsString+=":TESTER";
-	
+
 	if(privsString == ""){
 		return 0;
 	}
@@ -4598,12 +4599,12 @@ int CLuaIHMRyzom::removeLandMarks(CLuaState &ls)
 }
 
 // ***************************************************************************
-// addLandMark(10000, -4000, "Hello Atys!", "ico_over_homin.tga","","","","")
+// addLandMark(3000, -2500, "Hello Atys!", "ico_over_homin.tga","","","","", "", "", "FFFF", "")
 int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 {
 	const char* funcName = "addLandMark";
 	CLuaIHM::checkArgMin(ls, funcName, 4);
-	CLuaIHM::checkArgMax(ls, funcName, 11);
+	CLuaIHM::checkArgMax(ls, funcName, 12);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER); // x
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER); // y
 	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING); // title
@@ -4615,6 +4616,7 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 9, LUA_TSTRING); // over click action
 	CLuaIHM::checkArgType(ls, funcName, 10, LUA_TSTRING); // over click params
 	// 11 : Color
+	// 12 : Map name
 
 	CArkPoint point;
 	point.x = (sint32)(ls.toNumber(1)*1000.f);
@@ -4629,20 +4631,63 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 	point.OverClickParam = ls.toString(10);
 
 	point.Color = CRGBA(255,255,255,255);
-
+	bool center = false;
+	string mapid = "ui:interface:map:content:map_content:actual_map";
 	if (ls.getTop() >= 11)
 		CLuaIHM::pop(ls, point.Color);
 
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (ls.getTop() >= 12)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 12, LUA_TSTRING);
+		mapid = ls.toString(12);
+	}
+
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
 	if (pMap != NULL)
 		pMap->addArkPoint(point);
+
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::centerMap(CLuaState &ls)
+{
+	const char* funcName = "centerMap";
+	CLuaIHM::checkArgMin(ls, funcName, 2);
+	CLuaIHM::checkArgMax(ls, funcName, 3);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER); // x
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER); // y
+
+	CVector2f point;
+	point.x = (sint32)(ls.toNumber(1));
+	point.y = (sint32)(ls.toNumber(2));
+
+	string mapid = "ui:interface:map:content:map_content:actual_map";
+	if (ls.getTop() >= 3)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
+		mapid = ls.toString(3);
+	}
+
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
+	if (pMap != NULL)
+		pMap->centerOnWorldPos(point);
 	return 0;
 }
 
 // ***************************************************************************
 int CLuaIHMRyzom::delArkPoints(CLuaState &ls)
 {
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	const char* funcName = "delArkPoints";
+	string mapid = "ui:interface:map:content:map_content:actual_map";
+
+	if (ls.getTop() >= 1)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		mapid = ls.toString(1);
+	}
+
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
 	if (pMap != NULL)
 		pMap->delArkPoints();
 	return 0;
