@@ -486,11 +486,16 @@ string CFileContainer::lookup (const string &filename, bool throwException, bool
 		that no mutator is called while async loading
 	*/
 
+	map<string, string>::iterator itss;
 
 	// If the file already contains a @, it means that a lookup already proceed and returning a big file, do nothing
 	if (filename.find ("@") != string::npos)
 	{
 		NL_DISPLAY_PATH("PATH: CPath::lookup(%s):	already found", filename.c_str());
+		itss = _RemappedFiles.find(filename);
+		if (itss != _RemappedFiles.end())
+			return itss->second;
+
 		return filename;
 	}
 
@@ -505,7 +510,7 @@ string CFileContainer::lookup (const string &filename, bool throwException, bool
 		str.resize (str.size()-1);
 	}
 
-	map<string, string>::iterator itss = _RemappedFiles.find(str);
+	itss = _RemappedFiles.find(str);
 	if (itss != _RemappedFiles.end())
 		str = itss->second;
 

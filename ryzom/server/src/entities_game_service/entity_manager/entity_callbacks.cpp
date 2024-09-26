@@ -2649,17 +2649,18 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 		{
 			pGuild->moveItem(character, slotSrc, slotDst, quantity, nGuildSessionCounter);
 		}
-		else if (inventorySrc == (uint16) INVENTORIES::guild)
+		else if (inventorySrc == (uint16) INVENTORIES::guild && inventoryDst == (uint16) INVENTORIES::bag)
 		{
 			// Guild -> Bag
 			pGuild->takeItem(character, (INVENTORIES::TInventory) inventoryDst, slotSrc, quantity, nGuildSessionCounter);
 		}
-		else if (inventoryDst == (uint16) INVENTORIES::guild)
+		else if (inventoryDst == (uint16) INVENTORIES::guild && inventorySrc == (uint16) INVENTORIES::bag)
 		{
 			// Bag -> Guild
 			pGuild->putItem(character, (INVENTORIES::TInventory) inventorySrc, slotSrc, slotDst, quantity, nGuildSessionCounter);
 		}
 
+		nlwarning("%s user trying to use bad inventory !!!!.", sDebug.c_str());
 		return;
 	}
 	else if (inventorySrc == INVENTORIES::temporary || inventoryDst == INVENTORIES::temporary)
@@ -2673,7 +2674,7 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 	else
 	{
 		// autostack by default (ignore destination slot furnished by client)
-		if (inventoryDst == (uint16) INVENTORIES::guild)
+		if (inventoryDst == (uint16) INVENTORIES::guild) // possible???
 			character->moveItem(inventorySrc, slotSrc, inventoryDst, slotDst, quantity);
 		else
 			character->moveItem(inventorySrc, slotSrc, inventoryDst, INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, quantity);
