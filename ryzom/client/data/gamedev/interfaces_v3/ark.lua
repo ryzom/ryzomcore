@@ -469,6 +469,11 @@ function openUrlInBg(url)
 	getUI("ui:interface:web_transactions"):find("html"):browse(fixUrl(url))
 end
 
+function arkWindowCloseMe(url)
+	local framewin = getUICaller()
+	framewin.parent.active = false
+	framewin:browse(fixUrl(url))
+end
 
 -- S2E1 STUFF --
 
