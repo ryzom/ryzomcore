@@ -302,6 +302,7 @@ private:
 	static int addLandMark(CLuaState &ls);
 	static int updateUserLandMarks(CLuaState &ls);
 	static int addRespawnPoint(CLuaState &ls);
+	static int centerMap(CLuaState &ls);
 	static int delArkPoints(CLuaState &ls);
 	static int setArkPowoOptions(CLuaState &ls);
 	static int getActualMapZoom(CLuaState &ls);
