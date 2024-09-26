@@ -17,3 +17,7 @@ indent_size = 4
 [*.py]
 indent_style = tab
 indent_size = 4
+
+[*.cfg]
+indent_style = tab
+indent_size = 4

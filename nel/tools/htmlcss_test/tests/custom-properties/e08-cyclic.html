@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+div {
+	--one: calc(var(--two) + 20px);
+	--two: calc(var(--one) - 20px);
+	--ok: 'ok';
+}
+		</style>
+		<div data-ruleset="--ok: 'ok';"
+			data-ruleunset="--one: 1; --two: 1;" />
+	</body>
+</html>

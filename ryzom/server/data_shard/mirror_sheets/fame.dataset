@@ -1,0 +1,741 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <STRUCT>
+    <ARRAY Name="properties">
+      <STRUCT>
+        <ATOM Name="name" Value="Civilisation"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Guild"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FameMemory"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_0"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_1"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_2"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_3"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_4"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_5"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_6"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_7"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_8"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_9"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_10"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_11"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_12"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_13"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_14"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_15"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_16"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_17"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_18"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_19"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_20"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_21"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_22"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_23"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_24"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_25"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_26"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_27"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_28"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_29"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_30"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_31"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_32"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_33"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_34"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_35"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_36"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_37"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_38"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_39"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_40"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_41"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_42"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_43"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_44"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_45"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_46"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_47"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_48"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_49"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_50"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_51"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_52"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_53"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_54"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_55"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_56"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_57"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_58"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_59"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_60"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_61"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_62"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_63"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_64"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_65"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_66"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_67"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_68"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_69"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_70"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_71"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_72"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_73"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_74"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_75"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_76"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_77"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_78"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_79"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_80"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_81"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_82"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_83"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_84"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_85"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_86"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_87"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_88"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_89"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_90"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_91"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_92"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_93"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_94"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_95"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_96"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_97"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_98"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fame_99"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+    </ARRAY>
+    <ATOM Name="max number of rows or entities" Value="16000"/>
+    <ARRAY Name="entity types">
+      <ATOM Value="player"/>
+      <ATOM Value="guild"/>
+      <ATOM Value="civilisation"/>
+      <ATOM Value="fame_memory"/>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Dec 12 14:17:11 2003 (saffray) .entity types[1] = 13
+Fri Dec 12 14:17:11 2003 (saffray) .entity types[2] = 14</LOG>
+</FORM>
