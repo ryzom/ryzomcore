@@ -270,7 +270,13 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 					}
 
 					slotSearch++;
-					if (slotSearch == getSlotCount()) slotSearch = 0;
+					if (slotSearch == getSlotCount())
+					{
+						if (_InventoryId == INVENTORIES::guild)
+							break;
+						else
+							slotSearch = 0;
+					}
 				}
 				while (slotSearch != slotEnd);
 
@@ -619,9 +625,13 @@ CInventoryBase::TInventoryOpResult CInventoryBase::moveItem(
 	uint32 quantity, bool bestEffort )
 {
 
+	if (srcInv == NULL || dstInv == NULL)
+		return ior_error;
+
 	CGameItemPtr srcItem = srcInv->getItem( srcSlot );
 	if (srcItem == NULL)
 		return ior_error;
+
 
 	log_Item_Move(srcItem->getItemId(), srcInv->getInventoryId(), dstInv->getInventoryId());
 
