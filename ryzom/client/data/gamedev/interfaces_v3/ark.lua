@@ -98,6 +98,50 @@ function getArkScript(id, selected)
 	return url
 end
 
+function ArkUpdateItemVariant(db, id, vp, val, skin)
+	local item
+	if db then
+		runAH(nil, "set", "dblink=UI:TEMP:ARK_RYWARD_CHAR3D_"..db..":"..vp.."|value="..val)
+		item = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..db)
+	else
+		item = getUI("ui:interface:encyclopedia:content:htmlC"):find(vp)
+		local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find(vp):find("scene")
+		local shape = scene:getElement("shape#0")
+		if skin and skin ~= "" then
+			shape.name = skin
+		end
+		shape.textures = val
+		for token in string.gmatch(vp, "[^_]*") do
+			db = tonumber(token)
+		end
+	end
+
+	item:find("resell").active = false
+	item:find("apply").active = false
+	item:find("v").hardtext = id
+	item:find("infos").hardtext = i18n.get("uiPhraseTotal"):toUtf8().." = 0"
+
+	if db ~= nil then
+		if ArkItemVariantQuantities[db] ~= nil and ArkItemVariantQuantities[db][id] ~= nil then
+			ArkSelectedItemVariant[db] = id
+			if ArkItemVariantQuantities[db][id] > 0 then
+				if item:find("apply") ~= nil then
+					item:find("apply").active = true
+				end
+				if item:find("infos") ~= nil then
+					item:find("infos").hardtext = i18n.get("uiPhraseTotal"):toUtf8().." = "..tostring(ArkItemVariantQuantities[db][id])
+				end
+			end
+			if ArkItemVariantQuantities[db][id] >= ArkItemVariantMinToSell[db] then
+				if item:find("resell") ~= nil then
+					item:find("resell").active = true
+				end
+			end
+		end
+	end
+end
+
+
 
 --------------------------------------------------------------------------------
 --- ARK DYNE ---
@@ -148,17 +192,12 @@ function DynE:OpenHelp(img)
 end
 
 function DynE:UpdateMapWindow()
-	if (nltime.getLocalTime() - DynE.lastWinUpdate) > 60000 then
-		local win_html = getUI("ui:interface:app2453:browser:content:html")
-		local map_html = getUI("ui:interface:map:content:map_content:lm_events:html")
-		map_html:browse("home")
-		if win_html ~= nil then
-			win_html:renderHtml(map_html.html)
-		end
-
+	if (nltime.getLocalTime() - DynE.lastWinUpdate) > 10000 then
 		DynE.lastWinUpdate = nltime.getLocalTime()
+		openUrlInBg("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=12517&command=reset_all")
 	end
 end
+
 
 --------------------------------------------------------------------------------
 --- ARK MISSION CATALOG ---
@@ -350,6 +389,8 @@ function translateText(id, script, event, dst_lang)
 	setTopWindow(framewin)
 	if dst_lang then
 		dst_lang = "&dst_lang="..dst_lang
+	else
+		dst_lang = ""
 	end
 	framewin:find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mTrads_Edit&event="..tostring(event).."&trad_name="..tostring(id).."&reload="..script..dst_lang)
 end
@@ -358,7 +399,7 @@ end
 function setupArkUrls()
 	debug("Setup Lm Events")
 	local ui = getUI("ui:interface:map:content:map_content:lm_events:html")
-	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8297&command=reset_all&no_html_header=1&continent="..tostring(game.currentMapContinent)
+	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=12517&command=reset_all&no_html_header=1&continent=&posx=$posx$&posy=$posy$"
 	ui:browse("home")
 
 	debug("Setup Lm Icons")
@@ -366,6 +407,9 @@ function setupArkUrls()
 	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11158&command=reset_all&no_html_header=1"
 	ui:browse("home")
 	game.updateRpItemsUrl = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11488&command=reset_all"
+
+	local ui = getUI("ui:interface:map")
+	addOnDbChange(ui, "@UI:VARIABLES:CURRENT_SERVER_TICK", "DynE:UpdateMapWindow()")
 end
 
 
@@ -459,12 +503,6 @@ function getVpx(vpx)
 	return nvpx
 end
 
-
-function fixUrl(url)
-	s, n = string.gsub(url, "{amp}", "&")
-	return s
-end
-
 function openUrlInBg(url)
 	getUI("ui:interface:web_transactions"):find("html"):browse(fixUrl(url))
 end
@@ -472,7 +510,13 @@ end
 function arkWindowCloseMe(url)
 	local framewin = getUICaller()
 	framewin.parent.active = false
-	framewin:browse(fixUrl(url))
+	if url then
+		framewin:browse(fixUrl(url))
+	end
+end
+
+function game:displayWhatsUp()
+	getUI("ui:interface:npc_web_browser:content:html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11154&command=reset_all")
 end
 
 -- S2E1 STUFF --
