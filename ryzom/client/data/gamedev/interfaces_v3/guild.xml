@@ -1427,6 +1427,10 @@
     <instance template="webig_html"/>
   </group>
 
+  <group type="container" id="web_transactions_dyne" active="false">
+    <instance template="webig_html"/>
+  </group>
+
   <group type="container" id="web_lua_action" active="false">
     <group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
       <instance template="webig_html"/>
@@ -1437,5 +1441,6 @@
   <tree node="web_transactions" />
   <tree node="web_transactions_lessons" />
   <tree node="web_transactions_cap" />
+  <tree node="web_transactions_dyne" />
   <tree node="web_lua_action" />
 </interface_config>

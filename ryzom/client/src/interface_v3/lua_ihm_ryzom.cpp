@@ -4735,7 +4735,16 @@ int CLuaIHMRyzom::setArkPowoOptions(CLuaState &ls)
 // ***************************************************************************
 int CLuaIHMRyzom::getActualMapZoom(CLuaState &ls)
 {
-	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	const char* funcName = "getActualMapZoom";
+	string mapid = "ui:interface:map:content:map_content:actual_map";
+
+	if (ls.getTop() >= 1)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		mapid = ls.toString(1);
+	}
+
+	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
 	if (gm != NULL)
 		ls.push(gm->getScale());
 	else
@@ -4750,8 +4759,16 @@ int CLuaIHMRyzom::setActualMapZoom(CLuaState &ls)
 	const char* funcName = "setActualMapZoom";
 	CLuaIHM::checkArgMin(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+	string mapid = "ui:interface:map:content:map_content:actual_map";
+
+	if (ls.getTop() >= 2)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		mapid = ls.toString(2);
+	}
+
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
 	if (gm != NULL)
 	{
 		CVector2f center;

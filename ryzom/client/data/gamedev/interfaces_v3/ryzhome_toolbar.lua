@@ -167,21 +167,24 @@ function RyzhomeBar:callFriendUrl(action, target)
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
+
 function RyzhomeBar:spawnItems()
 	runAH(nil, "remove_shapes", "")
 	for k,v in pairs(RyzhomeBar.spawnedItems) do
-		-- "shape", .x, .y, .z, .a, .b, .c, .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton"
+		-- spawnedItem = {shape,x,y,z,a,b,c,scale,url,text,textures}
+		-- addShape("shape", .x, .y, .z, "angle", .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton", "inIgZone?")
 		if v[2] ~= "" and v[3] ~= "" and v[4] ~= "" and v[5] ~= "" and tonumber(v[8]) ~= nil then
 			id = addShape(v[1], tonumber(v[2]), tonumber(v[3]), tonumber(v[4]), "user", tonumber(v[8]), false, v[9], v[10], false, false, v[11])
+			RyzhomeBar.spawnedItems[k][12] = id
 			rotateShape(id, v[6], v[7], v[5])
 			local setup = {}
 			setup["col size x"] = "0"
 			setup["col size y"] = "0"
 			setup["col size z"] = "0"
-			--setupShape(id, setup)
 		end
 	end
 end
+
 
 function RyzhomeBar:setupItems()
 	for k = 1, 8 do
@@ -218,9 +221,26 @@ function RyzhomePlace:move(x, y, z)
 	RyzhomePlace:update()
 end
 
-function RyzhomePlace:rot(a)
-	pos_a=pos_a+a
-	RyzhomePlace:update()
+function RyzhomePlace:rot(b, c, a)
+	pos_a = pos_a + a
+	pos_b = pos_b + b
+	pos_c = pos_c + c
+
+	local mx = "+0"
+	local my = "+0"
+	local mz = "+0"
+	if x ~= 0 then
+		mx = "+"..tostring(a)
+	end
+	if y ~= 0 then
+		my = "+"..tostring(b)
+	end
+	if z ~= 0 then
+		mz = "+"..tostring(c)
+	end
+	 if RyzhomeBar.spawnedItems[RyzhomeBar.editShapeId] then
+		rotateShape(RyzhomeBar.editShapeId, my, mz, mx)
+	end
 end
 
 function RyzhomePlace:reset()
@@ -245,6 +265,12 @@ function RyzhomePlace:close()
 	--runAH(nil, "remove_shapes", "")
 	getUI("ui:interface:webig_ryzhome_place_item").active=false
 	getUI("ui:interface:ryzhomeItems").active=false
+end
+
+function RyzhomePlace:hl(id)
+	local ui = getUI("ui:interface:ryzhomeItems"):find("item_"..tostring(id))
+	ui.onover="lua"
+	ui.params_over="arkRyzhomeHighlightItem("..tostring(id)..")"
 end
 
 -- VERSION --
