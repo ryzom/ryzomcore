@@ -1047,9 +1047,12 @@
   <variable entry="UI:BEAST_SELECTED"
             type="sint64"
             value="0" />
+  <!-- ******************************************* -->
+  <!-- Mod Code: modified x and y for the new icon -->
+  <!-- ******************************************* -->
   <group type="container"
          id="animal_global"
-         w="236"
+         w="250"
          h="96"
          title="uiAnimalsTitle"
          opened="true"
@@ -1059,8 +1062,8 @@
          active="false"
          pop_min_h="62"
          pop_max_h="512"
-         min_w="236"
-         max_w="236"
+         min_w="250"
+         max_w="250"
          on_active="set"
          on_active_params="dblink=UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL|value=1"
          on_deactive="set"
@@ -1171,7 +1174,7 @@
               id="jauges"
               posref="MR MR"
               mini="true"
-              x="-16"
+              x="-29"
               color1="%bulk_color"
               range1="#beast_db_entry:BULK_MAX"
               color2="255 255 255 255"
@@ -1185,7 +1188,7 @@
               instant_help="true"
               posparent="jauges"
               posref="TL TL"
-              x="0"
+              x="-13"
               y="0"
               sizeref="wh"
               tooltip="uittAnimalBar"
@@ -1195,7 +1198,7 @@
               id="death_timer"
               posref="MR MR"
               mini="true"
-              x="-16"
+              x="-30"
               color="255 255 255 255"
               value="#beast_db_entry:DESPAWN"
               range="71" />
@@ -1215,7 +1218,7 @@
         <view type="bitmap"
               id="animal_alive_landscape"
               posref="MR MR"
-              x="-124"
+              x="-137"
               w="14"
               h="14"
               scale="true"
@@ -1229,7 +1232,7 @@
         <view type="bitmap"
               id="animal_stable"
               posref="MR MR"
-              x="-124"
+              x="-137"
               w="14"
               h="14"
               scale="true"
@@ -1243,7 +1246,7 @@
         <view type="bitmap"
               id="animal_dead"
               posref="MR MR"
-              x="-124"
+              x="-137"
               w="14"
               h="14"
               scale="true"
@@ -1257,7 +1260,7 @@
         <view type="bitmap"
               id="animal_in_bag"
               posref="MR MR"
-              x="-124"
+              x="-137"
               w="14"
               h="14"
               scale="true"
@@ -1271,7 +1274,7 @@
         <view type="bitmap"
               id="weight"
               posref="MR MR"
-              x="-84"
+              x="-98"
               texture="W_weight.tga" />
         <ctrl type="tooltip"
               id="tt_weight"
@@ -1307,7 +1310,7 @@
               id="open_inv"
               button_type="push_button"
               posref="MR MR"
-              x="-1"
+              x="-14"
               w="14"
               h="14"
               scale="true"
@@ -1327,7 +1330,7 @@
               button_type="push_button"
               posref="ML ML"
               sizeref="wh"
-              w="-16"
+              w="-28"
               h="0"
               scale="true"
               tx_normal="blank.tga"
@@ -1338,6 +1341,30 @@
               col_over="255 255 255 32"
               onclick_l="animal_target"
               params_l="#index" />
+        <!-- *********************************************** -->
+        <!-- Mod Code: Show Animal position on a tooltip map -->
+        <!-- *********************************************** -->
+        <ctrl type="button"
+              id="animal_pos"
+              button_type="push_button"
+              posref="MR MR"
+              x="0"
+              w="14"
+              h="14"
+              scale="true"
+              tx_normal="location.tga"
+              tx_pushed="location.tga"
+              tx_over="location.png"
+              global_color_normal="false"
+              global_color_over="true"
+              global_color_pushed="true"
+              onover="lua"
+              params_over="game:animalShowTooltipMap(#index)"
+              tooltip="uittLocation_of_the_animal"
+              tooltip_parent="win" />        
+        <!-- *********************************************** -->
+        <!-- End of Mod Code -->
+        <!-- *********************************************** -->
       </group>
       <!-- links to change the name color if it is the target -->
       <link expr="ifthenelse(eq(@#beast_db_entry:UID,@UI:VARIABLES:TARGET:UID),
