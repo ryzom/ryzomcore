@@ -1049,6 +1049,7 @@
             value="0" />
   <!-- ******************************************* -->
   <!-- Mod Code: modified x and y for the new icon -->
+  <!-- Thanks to Syphox-->
   <!-- ******************************************* -->
   <group type="container"
          id="animal_global"
@@ -1343,6 +1344,7 @@
               params_l="#index" />
         <!-- *********************************************** -->
         <!-- Mod Code: Show Animal position on a tooltip map -->
+        <!-- Thanks to Syphox -->
         <!-- *********************************************** -->
         <ctrl type="button"
               id="animal_pos"
