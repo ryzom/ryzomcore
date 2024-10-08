@@ -1105,6 +1105,7 @@ end
 
 --***********************************************
 --Mod Code: Show Animal position on a tooltip map
+--Thanks to Syphox
 --***********************************************
 if (game.Animal == nil) then
 	game.Animal = {};
@@ -1155,7 +1156,12 @@ function game:animalClose_modal_by_leav_over()
 end
 -------------------------------------------------------------------
 function game:animalClose_modal()
-    runAH(nil, "leave_modal", "group=ui:interface:webig_html_modal")
+	runAH(nil, "leave_modal", "group=ui:interface:webig_html_modal")
+	if game.Animal.mouse_old_x  and game.Animal.mouse_old_y then
+		setOnDraw(getUI("ui:interface:webig_html_modal"), "")
+	end
+	game.Animal.mouse_old_x = nil
+	game.Animal.mouse_old_y = nil
 end
 -------------------------------------------------------------------
 -- general function to get the 3d vector from i64
