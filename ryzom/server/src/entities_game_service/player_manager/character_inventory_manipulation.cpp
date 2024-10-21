@@ -821,8 +821,7 @@ void CCharacter::destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 
 }
 
 // ****************************************************************************
-void CCharacter::moveItem(
-	INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVENTORIES::TInventory dstInvId, uint32 dstSlot, uint32 quantity)
+void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVENTORIES::TInventory dstInvId, uint32 dstSlot, uint32 quantity)
 {
 	// cannot move an item in the same inventory
 	if (srcInvId == dstInvId)
@@ -961,6 +960,8 @@ void CCharacter::moveItem(
 			sendDynamicSystemMessage(_EntityRowId, "TOO_ENCUMBERED");
 		else if (dstInvId == INVENTORIES::player_room)
 			sendDynamicSystemMessage(_EntityRowId, "ROOM_TOO_ENCUMBERED");
+		else if (dstInvId == INVENTORIES::guild)
+			sendDynamicSystemMessage(_EntityRowId, "GUILD_ITEM_MAX_BULK");
 		else if (dstInvId >= INVENTORIES::pet_animal && dstInvId < INVENTORIES::max_pet_animal)
 			sendDynamicSystemMessage(_EntityRowId, "ANIMAL_PACKER_TOO_ENCUMBERED");
 
@@ -3584,10 +3585,8 @@ void CCharacter::applyItemModifiers(const CGameItemPtr &item)
 	}
 
 	// init all modifiers due to equipment
-	nlinfo("Current _ParryModifier = Total : %d", _ParryModifier);
 	_DodgeModifier += item->dodgeModifier();
 	_ParryModifier += item->parryModifier();
-	nlinfo("+ Item Parry = Total : + %d = %d", item->parryModifier(), _ParryModifier);
 	_AdversaryDodgeModifier += item->adversaryDodgeModifier();
 	_AdversaryParryModifier += item->adversaryParryModifier();
 	// update DB for modifiers

@@ -66,10 +66,14 @@ function game:CheckPosition()
 	local cont, region, places = game:getPositionInfos()
 	game:checkScriptPlace(cont)
 	game:checkScriptPlace(region)
+	if places == nil then
+		return
+	end
 	for place, typ in pairs(places) do
 		game:checkScriptPlace(place)
 	end
 end
+
 
 function game:getPositionInfos(x, y)
 	local player_cont = ""
@@ -80,12 +84,12 @@ function game:getPositionInfos(x, y)
 	end
 
 	if game.World == nil then
-		return
+		return "", "", {}
 	end
 
 	for cont, c in pairs(game.World) do
-		player_cont = cont
 		if point_inside_poly(x, y, c[2]) then
+			player_cont = cont
 			for region, r in pairs(c[3]) do
 				if point_inside_poly(x, y, r[2]) then
 					player_region = region
@@ -99,6 +103,15 @@ function game:getPositionInfos(x, y)
 		end
 	end
 	return player_cont, player_region, player_places
+end
+
+function game:getTargetDistance()
+	local px,py = getPlayerPos()
+	local tx,ty = getTargetPos()
+	if tx == nil then
+		return 99999999
+	end
+	return math.sqrt((px-tx)*(px-tx)+(py-ty)*(py-ty))
 end
 
 
@@ -1090,5 +1103,100 @@ function game:fixVpx(vpx)
 	return nvpx
 end
 
+--***********************************************
+--Mod Code: Show Animal position on a tooltip map
+--***********************************************
+if (game.Animal == nil) then
+	game.Animal = {};
+	game.Animal.mouse_old_y = 0;
+	game.Animal.mouse_old_x = 0;
+	game.Animal.zoom = 8;
+	game.Animal.index_old = 0;
+end
+
+-------------------------------------------------------------------
+function game:animalMouse_over_map_over(x_pos, y_pos, zoom, index)
+    --save_old_mouse_pos
+    game.Animal.mouse_old_x, game.Animal.mouse_old_y = getMousePos()
+
+    runAH(nil, "enter_modal", "group=ui:interface:webig_html_modal")
+    local whm = getUI("ui:interface:webig_html_modal")
+
+    whm.child_resize_h=false
+    local whm_html = getUI("ui:interface:webig_html_modal:html")
+
+    local html_display_map_img = ""
+    html_display_map_img = [[<table width="100%">
+                <tr align="left">
+                    <td><img src="https://api.bmsite.net/maps/static?center=]]..x_pos..[[,]]..y_pos..[[&zoom=]]..game.Animal.zoom..[[&markers=icon:mektoub|color:0x00ff00|label:]]..game:animalGetName(index)..[[|]]..x_pos..[[,]]..y_pos..[[&maptype=atys&mapmode=server&size=200x200" /></td>
+                </tr>
+            </table>]]
+
+    whm.w = 240
+    whm.h = 235
+
+    whm_html:renderHtml(html_display_map_img)
+
+    framewin_modal = getUI("ui:interface:webig_html_modal")
+    setOnDraw(framewin_modal, "game:animalClose_modal_by_leav_over()")
+end
+
+-------------------------------------------------------------------
+function game:animalClose_modal_by_leav_over()
+    if(getUI("ui:interface:webig_html_modal").active)then
+        local mouse_new_x, mouse_new_y = getMousePos()
+        local diff_x = math.abs(mouse_new_x - game.Animal.mouse_old_x)
+        local diff_y = math.abs(mouse_new_y - game.Animal.mouse_old_y)
+
+        if(diff_x > 14 or diff_y > 14)then
+            game:animalClose_modal()
+        end
+    end
+end
+-------------------------------------------------------------------
+function game:animalClose_modal()
+    runAH(nil, "leave_modal", "group=ui:interface:webig_html_modal")
+end
+-------------------------------------------------------------------
+-- general function to get the 3d vector from i64
+-------------------------------------------------------------------
+function game:animalGetPos(encodedValue)
+    local x = encodedValue >> 32
+    local y = (encodedValue - (x << 32)) - (2^32)
+
+    local scaleFactor = 1000.0
+    x = x / scaleFactor
+    y = y / scaleFactor
+    z = getGroundZ(x, y)
+
+    return {x = x, y = y, z = z}
+end
+-------------------------------------------------------------------
+function game:animalGetName(index)
+    local name = tostring(i18n.get(getUI("ui:interface"):find("userpa" .. index).title))
+    name = name:gsub(" ", "%%20")
+    
+    return name
+end
+-------------------------------------------------------------------
+function game:animalShowTooltipMap(index)
+    if(game.Animal.index_old ~= index)then
+        game:animalClose_modal()
+    end
+    
+    if(not getUI("ui:interface:webig_html_modal").active)then
+        local i64Pos = getDbProp64("SERVER:PACK_ANIMAL:BEAST" .. tostring(index - 1) .. ":POS")
+        local pos = game:animalGetPos(i64Pos)
+
+        game:animalMouse_over_map_over(pos.x, pos.y, game.Animal.zoom, index)
+        game.Animal.index_old = index
+    end
+end
+
+--***********************************************
+--End of Mod Code 
+--***********************************************
+
+
 -- VERSION --
-RYZOM_PLAYER_VERSION = 335
+RYZOM_PLAYER_VERSION = 367

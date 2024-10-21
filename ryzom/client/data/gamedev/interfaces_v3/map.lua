@@ -211,7 +211,7 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 		id2 = game.spawnShapesByZone[continent][name][10]
 	end
 
-	table.insert(setup, id1)
+	table.insert(setup, id1) -- 3
 	table.insert(setup, id2)
 	table.insert(setup, finish)
 	table.insert(setup, openShape)
@@ -227,9 +227,9 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 	end
 
 	if displayIcon == 1 then
-		game:addMapArkPoint(zone, setup[2], setup[3], setup[1], text, icon..".tga")
+		game:addMapArkPoint(zone, setup[2], setup[3], name, text, icon..".tga")
 	else
-		game:delMapArkPoint(zone, setup[1])
+		game:delMapArkPoint(zone, name)
 	end
 end
 
@@ -241,7 +241,7 @@ function game:doSpawnShapesByZone(continent)
 				deleteShape(shape[9])
 			end
 
-			if shape[10] ~= nil  and shape[9] > 0then
+			if shape[10] ~= nil  and shape[9] > 0 then
 				deleteShape(shape[10])
 			end
 
@@ -269,9 +269,15 @@ game:addMapArkPoint("Vip/Silan", 10304, -11719, "vip_silan_ranger", "", "dynicon
 
 game:addMapArkPoint("Vip", 4154, -3305, "vip_allegory", "", "allegory_16.tga", "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=9894&vip=allegory_vip&title=fct_allegory_maker&gender=1", 150)
 
+--Special Map Marker for the 20th Anniversary event
+game:addMapArkPoint("Vip/zorai_newbie", 8210, -5008, "vip_zorai_newbie", "Cuai Zhei-Jeo", "teammate_map.tga")
+game:addMapArkPoint("Vip/tryker_newbie", 22022, -34295, "vip_tryker_newbie", "Be'Keanin Bremen", "teammate_map.tga")
+game:addMapArkPoint("Vip/matis_newbie", 1483, -7251, "vip_matis_newbie", "Danibona Cuilli", "teammate_map.tga")
+game:addMapArkPoint("Vip/fyros_newbie", 21645, -26177, "vip_fyros_newbie", "Metis Medos", "teammate_map.tga")
+
 
 -- register map overrride
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")
 
 -- VERSION --
-RYZOM_MAP_VERSION = 328
+RYZOM_MAP_VERSION = 366

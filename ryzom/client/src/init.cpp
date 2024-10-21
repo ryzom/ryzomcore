@@ -776,6 +776,7 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 	CConfigFile *cf = &ClientCfg.ConfigFile;
 	std::string appName = cf->getVarPtr("Application") ? cf->getVar("Application").asString(0) : "ryzom_live";
 	CPatchManager *pPM = CPatchManager::getInstance();
+	pPM->downloadFileWithCurl(ClientCfg.WebIgMainDomain+"/data/"+appName+"/special_events.csv", "user/special_events.csv");
 	pPM->downloadFileWithCurl(ClientCfg.WebIgMainDomain+"/data/"+appName+"/enable_events_bnp.csv", "user/enable_events_bnp.csv");
 	pPM->downloadFileWithCurl(ClientCfg.WebIgMainDomain+"/data/"+appName+"/enable_occs_bnp.csv", "user/enable_occs_bnp.csv");
 
@@ -783,6 +784,8 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 	UserDataPath.push_back("user");
 	addPaths(progress, UserDataPath, true);
 
+	// special event remapping:
+	CPath::loadRemappedFiles("special_events.csv");
 	// if want occ event:
 	if (ClientCfg.EnableEventsBnp)
 		CPath::loadRemappedFiles("enable_events_bnp.csv");

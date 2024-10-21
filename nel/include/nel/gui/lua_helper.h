@@ -221,7 +221,7 @@ namespace NLGUI
 		void				clear() { setTop(0); }
 		int					getTop();
 		bool				empty() { return getTop() == 0; }
-		void				pushGlobalTable();		
+		void				pushGlobalTable();
 		void				pushValue(int index);  // copie nth element of stack to the top of the stack
 		void				remove(int index);     // remove nth element of stack
 		void				insert(int index);     // insert last element of the stack before the given position
@@ -380,7 +380,9 @@ namespace NLGUI
 		static const char *			_NELSmallScriptTableName;
 
 #ifdef _WIN32
+#ifdef NL_DEBUG
 		HMODULE m_LuaSocket;
+#endif
 #endif
 
 	private:

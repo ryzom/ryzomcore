@@ -226,8 +226,15 @@ function ArkLessons:ArkRevealLessonInfos(scriptid, i, total)
 	end
 end
 
-function openArkLessonScript(i, script_id, url)
+function openArkLessonScript(i, script_id, url, rp_item, rp_item_url)
 	if i == ArkLessons.RevealStep[script_id] then
+		local right = getPlayerTag(5)
+		if getDbProp("LOCAL:INVENTORY:HAND:0:INDEX_IN_BAG") ~= 0 then
+			right = "_"
+		end
+		if rp_item ~= nil and rp_item_url ~= nil and right ~= rp_item then
+			WebQueue:push(rp_item_url)
+		end
 		getUI("ui:interface:ArkLessonWin"..tostring(script_id)).active = false
 		WebQueue:push(url)
 	end
@@ -418,7 +425,6 @@ function webig:openWin(ui_name)
 		ui.active = true
 	end
 end
-
 
 -- VERSION --
 RYZOM_ARK_LESSONS_VERSION = 324

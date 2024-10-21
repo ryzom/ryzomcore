@@ -3,6 +3,7 @@
 <!-- ****************************************** -->
 <interface_config>
     <root id="interface" x="0" y="0" w="800" h="600" active="true" />
+    <lua file="search_command.lua" />
     <proc id="proc_nothing"></proc>
     <!-- a text with border -->
     <template name="bc_border_text" keep="true" posref="TM TM" posparent="parent" x="0" y="-20" w="-4">
@@ -357,6 +358,12 @@
     <proc id="move_to_guild">
         <action handler="move_item" params="to=lists|nblist=1|listsheet0=ui:interface:inventory:content:guild:iil:bag_icons" />
     </proc>
+    <proc id="move_to_guild2">
+        <action handler="move_item" params="to=lists|nblist=1|listsheet0=ui:interface:inventory:content:guild2:iil:bag_icons" />
+    </proc>
+    <proc id="move_to_guild_other">
+        <action handler="move_item" params="to=guild_other|chest2A=ui:interface:inv_guild2|chest2B=ui:interface:inventory:content:guild2|listsheet1=ui:interface:inventory:content:guild:iil:bag_icons|listsheet2=ui:interface:inventory:content:guild2:iil:bag_icons" />
+    </proc>
     <!-- item menu when we are in bags (do not modify hierarchy or ids if you do not modify the code) -->
     <group type="menu" id="item_menu_in_bag" extends="base_menu" on_deactive="item_menu_deactivate" on_active="item_menu_check">
         <action id="cris_enchant" name="uimCristalEnchant" handler="item_cristal_enchant" icon="cristal_spell.tga"/>
@@ -379,6 +386,8 @@
             <action id="pa5" name="uiPABagTitleMount5" handler="proc" params="move_to_pa|5" icon="spe_beast.tga"/>
             <action id="pa6" name="uiPABagTitleMount6" handler="proc" params="move_to_pa|6" icon="spe_beast.tga"/>
             <action id="guild" name="uimMtGuild" handler="proc" params="move_to_guild" icon="spe_memory.tga"/>
+            <action id="guild2" name="uimMtGuild2" handler="proc" params="move_to_guild2" icon="spe_memory.tga"/>
+            <action id="guild_other" name="uimMtGuildOther" handler="proc" params="move_to_guild_other" icon="spe_memory.tga"/>
             <action id="room" name="uimMtRoom" handler="proc" params="move_to_room" icon="building_state2.tga"/>
         </action>
         <!--<action id="drop"           name="uimDrop"          handler="proc"  params="drop_item_proc" />-->
@@ -447,11 +456,11 @@
             child_resize_h="true"
             display_empty_slot="true"
             onclick_l="inv_drop"
-            params_l="src=ctrl_launch_modal" 
-            onclick_r="open_help_auto" 
-            lmargin="10" rmargin="6" 
-            tmargin="10" bmargin="6" 
-            column_max="4" 
+            params_l="src=ctrl_launch_modal"
+            onclick_r="open_help_auto"
+            lmargin="10" rmargin="6"
+            tmargin="10" bmargin="6"
+            column_max="4"
             rowmax="6"
 		    maxitem="%max_bag_invslot" >
             <!-- the scroll -->
@@ -707,8 +716,13 @@
     <!-- ********************* -->
     <!-- *  EDIT BOX WIDGET  * -->
     <!-- ********************* -->
-    <template name="edit_box_widget" active="true" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" child_resize_hmargin="0" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="40" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" clear_on_escape="false" color="255 255 255 255" continuous_text_update="false" bg_texture="W_box_blank.tga" on_focus_lost="" on_focus_lost_params="" max_float_prec="5" tooltip="" tooltip_parent="" negative_filter="" render_layer="0">
+    <group type="menu" id="search_command_add_menu" extends="base_menu" mouse_pos="false"></group>
+    <command name="?" action="lua" params="SearchCommand:help(getUICaller().id,'+')"/>
+    <template name="edit_box_widget" active="true" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" child_resize_hmargin="0" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="&gt;" enter_recover_focus="true" max_num_chars="255" menu_r="" onchange="lua" onchange_params="SearchCommand:search(getUICaller().id)" entry_type="text" keep="true" max_historic="40" fontsize="10" shadow="true" shadow_x="1" shadow_y="1" shadow_color="0 0 0 255" shadow_outline="false" backup_father_container_pos="false" want_return="false" clear_on_escape="false" color="255 255 255 255" continuous_text_update="false" bg_texture="W_box_blank.tga" on_focus_lost="" on_focus_lost_params="" max_float_prec="5" tooltip="" tooltip_parent="" negative_filter="" render_layer="0">
         <group id="#id" active="#active" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="#child_resize_h" child_resize_hmargin="#child_resize_hmargin" sizeref="#sizeref" w="#w" h="#h" render_layer="#render_layer" >
+            <group type="edit_box" sizeref="w" w="-8" id="ebh" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" clear_on_escape="#clear_on_escape" backup_father_container_pos="#backup_father_container_pos" on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" max_float_prec="#max_float_prec" tooltip="#tooltip" tooltip_parent="#tooltip_parent" negative_filter="#negative_filter" render_layer="#render_layer">
+                <view id="edit_text" type="text" continuous_update="#continuous_text_update" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="255 255 255 100" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false" render_layer="#render_layer" />
+            </group>
             <group type="edit_box" sizeref="w" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" clear_on_escape="#clear_on_escape" backup_father_container_pos="#backup_father_container_pos" on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" max_float_prec="#max_float_prec" tooltip="#tooltip" tooltip_parent="#tooltip_parent" negative_filter="#negative_filter" render_layer="#render_layer">
                 <view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="#bg_texture" inherit_gc_alpha="true" render_layer="#render_layer" />
                 <view id="edit_text" type="text" continuous_update="#continuous_text_update" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false" render_layer="#render_layer" />
@@ -1429,12 +1443,34 @@
                 <instance template="text_tt" tooltip="uittInventoryWeight" posparent="weight_txt" />
                 <link expr="identity(getItemsWeight('#inv_branch',0,#inv_branch_nb),@#inv_branch)" target="weight_txt:hardtext" />
                 <view type="bar" id="encombrement" mini="true" posparent="weight_txt" posref="ML MR" x="-4" range="#inv_bulk_max" color="%bulk_color" />
-                <ctrl type="tooltip" id="encombrement_tt" posparent="encombrement" sizeref="wh" w="0" h="0" on_tooltip="get_tt_bulk" on_tooltip_params="dbbranch=#inv_branch|dbmax=#inv_bulk_max" />
+                <ctrl type="tooltip" id="encombrement_tt" posparent="encombrement" sizeref="wh" w="0" h="0" on_tooltip="get_tt_bulk" on_tooltip_params="dbbranch=#inv_branch|dbmax=@#inv_bulk_max" />
                 <link expr="identity(getItemsBulk('#inv_branch',0,#inv_branch_nb),@#inv_branch)" target="encombrement:value" />
             </group>
             <view type="text" id="slots_nb" posparent="bulk_weight" posref="BL BR" color="255 255 255 255" global_color="false" shadow="true" fontsize="10" />
             <ctrl type="tooltip" id="slots_tt" posparent="slots_nb" sizeref="wh" tooltip="uittInvSlots" />
             <link expr="identity(getInvSlotCounts('#inv_branch'),@#inv_branch)" target="slots_nb:hardtext" />
+            <!-- uses identity(x,@branch) to add an observer on branch -->
+        </group>
+    </template>
+
+    <template name="tguildinv_nbslots_bulk_weight" id="" inv_branch_nb="500" inv_branch="" inv_bulk_max="" posparent="parent" posref="TL TL" x="0" y="0" selected_chest="">
+        <group id="#id" sizeref="w" h="16" posref="#posref">
+            <group id="bulk_weight" child_resize_w="true" child_resize_wmargin="4" h="16" posref="BR BR" posparent="#posparent">
+                <view type="bitmap" id="weight" posref="MR MR" x="0" texture="W_weight.tga" global_color="false" />
+                <view type="text" id="weight_txt" posparent="weight" posref="ML MR" y="-2" x="-2" color="255 255 255 255" global_color="false" shadow="true" fontsize="10" />
+                <instance template="text_tt" tooltip="uittInventoryWeight" posparent="weight_txt" />
+                <link expr="identity(getItemsWeight('#inv_branch',mul(%max_guild_invslot, @#selected_chest),#inv_branch_nb),@#inv_branch)" target="weight_txt:hardtext" />
+                <view type="bar" id="encombrement" mini="true" posparent="weight_txt" posref="ML MR" x="-4" range="0" color="%bulk_color" />
+                <ctrl type="tooltip" id="encombrement_tt" posparent="encombrement" sizeref="wh" w="0" h="0" on_tooltip="get_tt_bulk" on_tooltip_params="dbbranch=#inv_branch|dbStart=mul(%max_guild_invslot,@#selected_chest)|dbCount=#inv_branch_nb|dbmax=getChestMaxBulk('%guild_chests_dbentry',@#selected_chest)" />
+                <link expr="identity(getItemsBulk('#inv_branch',mul(%max_guild_invslot, @#selected_chest),#inv_branch_nb),@#inv_branch)" target="encombrement:value" />
+                <link expr="identity(getChestMaxBulk('%guild_chests_dbentry',@#selected_chest),@#selected_chest)" target="encombrement:range" />
+            </group>
+            <view type="text" id="slots_nb" posparent="bulk_weight" posref="BL BR" color="255 255 255 255" global_color="false" shadow="true" fontsize="10" />
+            <ctrl type="tooltip" id="slots_tt" posparent="slots_nb" sizeref="wh" tooltip="uittInvSlots" />
+            <link expr="identity(getGuildInvSlotCounts('#inv_branch', mul(%max_guild_invslot, @#selected_chest), #inv_branch_nb),@#inv_branch)" target="slots_nb:hardtext" />
+            <group type="combo_box" id="chest" active="true" child_resize_w="true" child_resize_wmargin="2" h="16" posparent="slots_nb" posref="ML MR" x="-5" linked_to_db="false" on_change="lua" on_change_params="updateChest()">
+				<instance template="combo_box_def1" />
+			</group>
             <!-- uses identity(x,@branch) to add an observer on branch -->
         </group>
     </template>
@@ -1464,17 +1500,17 @@
         <link expr="@#dblink" target="but_#id:pushed" />
     </template>
     <!-- template for the list of items -->
-    <template name="tinv_item_list" id="" animal_status="" inv_branch_nb="256" inv_branch="" inv_type="" posparent="parent" posref="TL TL" x="0" y="0" sizeparent="parent" sizeref="wh" w="0" h="0">
+    <template name="tinv_item_list" id="" animal_status="" inv_branch_nb="256" inv_branch="" inv_type="" start_item="0" posparent="parent" posref="TL TL" x="0" y="0" sizeparent="parent" sizeref="wh" w="0" h="0">
         <group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" sizeparent="#sizeparent" sizeref="#sizeref" w="#w" h="#h">
             <!-- Bag Type -->
             <!-- Bags : icon list -->
-            <group type="list_icon_bag" id="bag_icons" array="false" sizeref="wh" w="0" h="-24" posref="TL TL" x="0" y="0" child_resize_h="false" value="#inv_branch" maxitem="#inv_branch_nb" inv_type="#inv_type" sort_type="UI:SAVE:#inv_type:SORT_TYPE" filter_armor="UI:SAVE:#inv_type:FILTER_ARMOR" filter_weapon="UI:SAVE:#inv_type:FILTER_WEAPON" filter_tool="UI:SAVE:#inv_type:FILTER_TOOL" filter_pet="UI:SAVE:#inv_type:FILTER_PET" filter_mp="UI:SAVE:#inv_type:FILTER_MP" filter_missmp="UI:SAVE:#inv_type:FILTER_MISSMP" filter_tp="UI:SAVE:#inv_type:FILTER_TP" wspace="2" hspace="2" startitem="0" selection_group="inventory_selection" auto_grayed="true" dragable="true" oncandrag="inv_can_drag" ondrag="inv_drag" params_drag="from_icon_list" oncandrop="inv_can_drop" ondrop="inv_drop" menu_r="ui:interface:item_menu_in_bag" instant_help="false" lmargin="10" rmargin="0" tmargin="1" bmargin="0" column_center="false" db_animal_status="#animal_status">
+            <group type="list_icon_bag" id="bag_icons" array="false" sizeref="wh" w="0" h="-24" posref="TL TL" x="0" y="0" child_resize_h="false" value="#inv_branch" maxitem="#inv_branch_nb" inv_type="#inv_type" sort_type="UI:SAVE:#inv_type:SORT_TYPE" filter_armor="UI:SAVE:#inv_type:FILTER_ARMOR" filter_weapon="UI:SAVE:#inv_type:FILTER_WEAPON" filter_tool="UI:SAVE:#inv_type:FILTER_TOOL" filter_pet="UI:SAVE:#inv_type:FILTER_PET" filter_mp="UI:SAVE:#inv_type:FILTER_MP" filter_missmp="UI:SAVE:#inv_type:FILTER_MISSMP" filter_tp="UI:SAVE:#inv_type:FILTER_TP" wspace="2" hspace="2" startitem="#start_item" selection_group="inventory_selection" auto_grayed="true" dragable="true" oncandrag="inv_can_drag" ondrag="inv_drag" params_drag="from_icon_list" oncandrop="inv_can_drop" ondrop="inv_drop" menu_r="ui:interface:item_menu_in_bag" instant_help="false" lmargin="10" rmargin="0" tmargin="1" bmargin="0" column_center="false" db_animal_status="#animal_status">
                 <ctrl style="skin_scroll" id="scroll_row" posref="TL TL" target_stepy="44" />
             </group>
             <view type="bitmap" id="sep1" x="0" y="0" posparent="bag_icons" posref="BL TL" scale="true" h="2" sizeref="w" texture="W_line_hor.tga" />
             <link expr="eq(@UI:SAVE:#inv_type:ICON_LIST, 1)" target="bag_icons:active,sep1:active" />
             <!-- Bags : detailed list -->
-            <group type="list_sheet_bag" id="bag_list" array="false" sizeref="wh" w="0" h="-34" posref="TL TL" x="0" y="-10" child_resize_h="false" value="#inv_branch" maxitem="#inv_branch_nb" inv_type="#inv_type" sort_type="UI:SAVE:#inv_type:SORT_TYPE" filter_armor="UI:SAVE:#inv_type:FILTER_ARMOR" filter_weapon="UI:SAVE:#inv_type:FILTER_WEAPON" filter_tool="UI:SAVE:#inv_type:FILTER_TOOL" filter_pet="UI:SAVE:#inv_type:FILTER_PET" filter_mp="UI:SAVE:#inv_type:FILTER_MP" filter_missmp="UI:SAVE:#inv_type:FILTER_MISSMP" filter_tp="UI:SAVE:#inv_type:FILTER_TP" hspace="2" xitem="2" yitem="-2" xtext="46" ytext="-2" selection_group="inventory_selection" selection="false" auto_grayed="true" dragable="true" oncandrag="inv_can_drag" ondrag="inv_drag" params_drag="from_text_list" oncandrop="inv_can_drop" ondrop="inv_drop" menu_r="ui:interface:item_menu_in_bag" instant_help="false" over_color="%bot_chat_sheet_selection_normal" over_col_pushed="%bot_chat_sheet_selection_pushed" over_col_over="%bot_chat_sheet_selection_over" color="255 255 255 255" fontsize="8" shadow="true" multi_line="true" multi_line_space="0" db_animal_status="#animal_status">
+            <group type="list_sheet_bag" id="bag_list" array="false" sizeref="wh" w="0" h="-34" posref="TL TL" x="0" y="-10" child_resize_h="false" value="#inv_branch" maxitem="#inv_branch_nb" inv_type="#inv_type" sort_type="UI:SAVE:#inv_type:SORT_TYPE" filter_armor="UI:SAVE:#inv_type:FILTER_ARMOR" filter_weapon="UI:SAVE:#inv_type:FILTER_WEAPON" filter_tool="UI:SAVE:#inv_type:FILTER_TOOL" filter_pet="UI:SAVE:#inv_type:FILTER_PET" filter_mp="UI:SAVE:#inv_type:FILTER_MP" filter_missmp="UI:SAVE:#inv_type:FILTER_MISSMP" filter_tp="UI:SAVE:#inv_type:FILTER_TP" hspace="2" startitem="#start_item" xitem="2" yitem="-2" xtext="46" ytext="-2" selection_group="inventory_selection" selection="false" auto_grayed="true" dragable="true" oncandrag="inv_can_drag" ondrag="inv_drag" params_drag="from_text_list" oncandrop="inv_can_drop" ondrop="inv_drop" menu_r="ui:interface:item_menu_in_bag" instant_help="false" over_color="%bot_chat_sheet_selection_normal" over_col_pushed="%bot_chat_sheet_selection_pushed" over_col_over="%bot_chat_sheet_selection_over" color="255 255 255 255" fontsize="8" shadow="true" multi_line="true" multi_line_space="0" db_animal_status="#animal_status">
                 <!-- the scroll -->
                 <ctrl style="skin_scroll" id="scroll_row" posref="TL TL" target_stepy="44" />
                 <!-- the group to scroll -->

@@ -421,11 +421,12 @@ NLMISC::CVariable<float> KillAttribMinFactor("egs","KillAttribMinFactor", "min f
 
 
 CVariable<sint32> BaseGuildBulk("egs","BaseGuildBulk", "base bulk for a new guild building", 2000000, 0, true);
+CVariable<sint32> GuildChestSlots("egs","GuildChestSlots", "number of slots in each guild chest", 500, 0, true);
 CVariable<sint16> MinFameToBuyGuildBuilding("egs","MinFameToBuyGuildBuilding", "Minimum Fame To Buy a Guild Building", 0, 0, true);
 CVariable<sint16> MinFameToBuyPlayerBuilding("egs","MinFameToBuyPlayerBuilding", "Minimum Fame To Buy a Player Building", 0, 0, true);
 CVariable<uint32> GuildCreationCost("egs","GuildCreationCost", "", 100, 0, true);
 CVariable<uint32> GuildMaxMemberCount("egs","GuildMaxMemberCount", "", 256, 0, true);
-CVariable<uint32> GuildMaxPoints("egs","GuildMaxPoints", "", 200, 0, true);
+CVariable<uint32> GuildMaxPoints("egs","GuildMaxPoints", "", 2000, 0, true);
 
 
 CVariable<NLMISC::TGameCycle> TriggerRequestTimout("egs","TriggerRequestTimout", "", 300, 0, true);

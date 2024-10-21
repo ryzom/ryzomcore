@@ -33,6 +33,7 @@ using namespace NLMISC;
 using namespace std;
 using namespace NLNET;
 
+extern NLMISC::CVariable<uint32>	GuildChestSlots;
 
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
 
@@ -83,13 +84,24 @@ void CInventoryBase::setSlotCount(uint size)
 	// recompute free slot, weight and bulk
 	_FreeSlotCount = 0;
 	_InventoryWeight = 0;
-	_InventoryBulk = 0;
+	_InventoryBulk[0] = 0;
+	if (_InventoryId == INVENTORIES::guild)
+	{
+		//nlinfo("init %u _InventoryBulk with %u items", GUILD_NB_CHESTS, _Items.size());
+		for (uint8 i = 1; i < GUILD_NB_CHESTS; i++)
+			_InventoryBulk[i] = 0;
+	}
 	for (uint i=0; i<_Items.size(); ++i)
 	{
 		if (_Items[i] != NULL)
 		{
 			_InventoryWeight += _Items[i]->getStackWeight();
-			_InventoryBulk += _Items[i]->getStackBulk();
+			uint8 chest = 0;
+			if (_InventoryId == INVENTORIES::guild)
+			{
+				chest = floor((float)_Items[i]->getInventorySlot() / (float)GuildChestSlots);
+			}
+			_InventoryBulk[chest] += _Items[i]->getStackBulk();
 		}
 		else
 		{
@@ -126,9 +138,11 @@ uint32 CInventoryBase::getInventoryWeight() const
 }
 
 // ****************************************************************************
-uint32 CInventoryBase::getInventoryBulk() const
+uint32 CInventoryBase::getInventoryBulk(uint8 index) const
 {
-	return _InventoryBulk;
+	if (index < GUILD_NB_CHESTS)
+		return _InventoryBulk[index];
+	return 0;
 }
 
 // ****************************************************************************
@@ -141,6 +155,23 @@ CInventoryBase::TInventoryOpResult CInventoryBase::insertItem(CGameItemPtr &item
 void CInventoryBase::forceLoadItem(CGameItemPtr &item, uint32 slot)
 {
 	doInsertItem(item, slot, false, true);
+}
+
+uint32 CInventoryBase::getFirstFreeChestSlot(const CGameItemPtr &item)
+{
+	uint8 chest;
+	uint32 foundSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
+	for (chest=0; chest < GUILD_NB_CHESTS; chest++)
+	{
+		uint32 freeSlot = getFirstFreeSlot(GuildChestSlots*chest, GuildChestSlots*(chest + 1));
+		if (freeSlot != INVENTORIES::INVALID_INVENTORY_SLOT
+			&& getInventoryBulk(chest) + item->getStackBulk() <= getMaxBulk(chest))
+		{
+			foundSlot = freeSlot;
+			break;
+		}
+	}
+	return foundSlot;
 }
 
 /** Insert an item in the inventory
@@ -159,9 +190,9 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 
 	nlassert(item != NULL);
 	nlassert(item->getInventory() == NULL);
-	nlassert(slot < _Items.size() || slot == INVENTORIES::INSERT_IN_FIRST_FREE_SLOT);
+	nlassert(slot < _Items.size() || slot == INVENTORIES::INSERT_IN_FIRST_FREE_SLOT || _InventoryId == INVENTORIES::guild);
 
-	if (!ignoreWeightAndBulk)
+	if (_InventoryId != INVENTORIES::guild && !ignoreWeightAndBulk)
 	{
 		if (item->getStackWeight() + getInventoryWeight() > getMaxWeight())
 			return ior_overweight;
@@ -172,26 +203,41 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 	if (autoStack)
 	{
 		H_AUTO(AutoStack);
-		// If slot provided check we can stack if we can't find an empty slot
-		if (slot != INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
-			if (canStackItem(item, slot) != ior_ok)
-				slot = INVENTORIES::INSERT_IN_FIRST_FREE_SLOT;
 
-		uint32 slotBegin = slot;
-		uint32 slotSearch;
-		uint32 itemStackSize = item->getStackSize();
-
-		// get first compatible stack
-		if (slot == INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
-			slotBegin = 0;
-		slotSearch = slotBegin;
 		// Modification to do : (slot to put item, stack size to put)
 		vector< pair<uint32,uint32> > Modifs;
+		uint32 itemStackSize = item->getStackSize();
+		uint32 slotSearch = 0;
+		uint32 slotEnd = 0;
+		uint32 bulkMax = 0;
+		uint8 chest = 0;
+
+		if (slot != INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
+		{
+			// Guild inv only use slot to know the chest. But we always insert in first free slot
+			if (_InventoryId == INVENTORIES::guild)
+			{
+				chest = floor((float)slot / (float)GuildChestSlots);
+				slotSearch = GuildChestSlots*chest;
+				slotEnd = GuildChestSlots*(chest+1);
+			}
+			// If slot provided check we can stack if we can't find an empty slot
+			else
+			{
+				if (canStackItem(item, slot) != ior_ok)
+					slot = INVENTORIES::INSERT_IN_FIRST_FREE_SLOT;
+				else
+				{
+					slotSearch = slot;
+					slotEnd = slot;
+				}
+			}
+		}
 
 		// If slot provided is NULL directly insert item in it
-		if (_Items[slotBegin] == NULL && slot != INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
+		if (_InventoryId != INVENTORIES::guild && _Items[slotEnd] == NULL && slot != INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
 		{
-			Modifs.push_back(make_pair(slotBegin, itemStackSize));
+			Modifs.push_back(make_pair(slotEnd, itemStackSize));
 		}
 		else
 		{
@@ -202,18 +248,37 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 				bool bFound = false;
 				do
 				{
-					if (   (_Items[slotSearch] != NULL)
+					if ((_Items[slotSearch] != NULL)
 						&& (_Items[slotSearch]->getStackSize() < _Items[slotSearch]->getMaxStackSize())
 						&& (CGameItem::areStackable(item, _Items[slotSearch]))) // no check on stack size here
 					{
-						bFound = true;
-						break;
+						// Guild inv require a check of bulk of the chest
+						if (_InventoryId == INVENTORIES::guild)
+						{
+							uint8 chest = floor((float)slotSearch / (float)GuildChestSlots);
+							if (getInventoryBulk(chest) + item->getStackBulk() <= getMaxBulk(chest))
+							{
+								bFound = true;
+								break;
+							}
+						}
+						else
+						{
+							bFound = true;
+							break;
+						}
 					}
 
 					slotSearch++;
-					if (slotSearch == getSlotCount()) slotSearch = 0;
+					if (slotSearch == getSlotCount())
+					{
+						if (_InventoryId == INVENTORIES::guild)
+							break;
+						else
+							slotSearch = 0;
+					}
 				}
-				while (slotSearch != slotBegin);
+				while (slotSearch != slotEnd);
 
 				if (bFound)
 				{
@@ -226,7 +291,7 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 						Modifs.push_back(make_pair(slotSearch, sizePut));
 						slotSearch++;
 						if (slotSearch == getSlotCount()) slotSearch = 0;
-						if (slotSearch != slotBegin)
+						if (slotSearch != slotEnd)
 							continue; // if we have not finished the loop try the next slot
 					}
 					else
@@ -236,10 +301,31 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 					}
 				}
 
-				// Can't insert item in an already existing stack
-				if (getFreeSlotCount() == 0)
-					return ior_no_free_slot; // No more empty slot in this inventory !!!
-				slotSearch = getFirstFreeSlot();
+				// Stackable slot not found, search for a free slot
+				if (_InventoryId == INVENTORIES::guild)
+				{
+					uint32 foundSlot;
+					// INSERT_IN_FIRST_FREE_SLOT will search in all chest of Guild Inv
+					// if a slot is provided that's mean we want put the item in a specific chest
+					// and so limit the search to this chest
+					if (slot == INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
+						slotSearch = getFirstFreeChestSlot(item);
+					else
+					{
+						if (getInventoryBulk(chest) + item->getStackBulk() > getMaxBulk(chest))
+							return ior_overbulk;
+						slotSearch = getFirstFreeSlot(slotEnd-GuildChestSlots, slotEnd);
+					}
+
+					if (slotSearch == INVENTORIES::INVALID_INVENTORY_SLOT)
+						return ior_overbulk; // No more empty slot in this inventory !!!
+				}
+				else
+				{
+					if (getFreeSlotCount() == 0)
+						return ior_no_free_slot; // No more empty slot in this inventory !!!
+					slotSearch = getFirstFreeSlot();
+				}
 				Modifs.push_back(make_pair(slotSearch, itemStackSize));
 				break; // finished
 			}
@@ -258,12 +344,13 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 				// which update weight and bulk
 				item->setStackSize(sizeModif);
 
-				// update weight and bulk "manually"
-				updateWeightAndBulk(item, sizeModif);
-
 				// put the item in the inventory
 				_Items[slotModif] = item;
 				item->setInventory(CInventoryPtr(this), slotModif);
+
+				// update weight and bulk "manually"
+				updateWeightAndBulk(item, sizeModif);
+
 				--_FreeSlotCount;
 				onItemChanged(slotModif, INVENTORIES::itc_inserted);
 				bInserted = true;
@@ -394,11 +481,13 @@ CGameItemPtr CInventoryBase::removeItem(uint32 slot, uint32 quantity, TInventory
 			{
 				_Items[slot]->getRefInventory()->removeItem(_Items[slot]->getRefInventorySlot());
 			}
+
+			updateWeightAndBulk(ret, -sint32(ret->getStackSize()));
+
 			// unlink the item
 			_Items[slot]->setInventory(CInventoryPtr(NULL), INVENTORIES::INVALID_INVENTORY_SLOT);
 			_Items[slot] = NULL;
 			++_FreeSlotCount;
-			updateWeightAndBulk(ret, -sint32(ret->getStackSize()));
 		}
 		else // we want to remove a part of a stack
 		{
@@ -536,9 +625,13 @@ CInventoryBase::TInventoryOpResult CInventoryBase::moveItem(
 	uint32 quantity, bool bestEffort )
 {
 
+	if (srcInv == NULL || dstInv == NULL)
+		return ior_error;
+
 	CGameItemPtr srcItem = srcInv->getItem( srcSlot );
 	if (srcItem == NULL)
 		return ior_error;
+
 
 	log_Item_Move(srcItem->getItemId(), srcInv->getInventoryId(), dstInv->getInventoryId());
 
@@ -668,14 +761,18 @@ void CInventoryBase::updateWeightAndBulk(const CGameItemPtr &item, sint32 deltaQ
 
 	if (form != NULL)
 	{
-		_InventoryBulk = uint32(max(sint32(0), sint32(_InventoryBulk + form->Bulk*deltaQt)));
+		uint8 chest = 0;
+		if (_InventoryId == INVENTORIES::guild)
+			chest = floor((float)item->getInventorySlot() / (float)GuildChestSlots);
+
+		_InventoryBulk[chest] = uint32(max(sint32(0), sint32(_InventoryBulk[chest] + form->Bulk*deltaQt)));
 		_InventoryWeight = uint32(max(sint32(0), sint32(_InventoryWeight + item->weight()*deltaQt)));
 
 		if (_InventoryWeight > getMaxWeight())
 		{
 			nlwarning("Inventory '%s' : weight is overload", INVENTORIES::toString(_InventoryId).c_str());
 		}
-		if (_InventoryBulk > getMaxBulk())
+		if (deltaQt > 0 && _InventoryBulk[chest] > getMaxBulk(chest) && _InventoryId != INVENTORIES::guild)
 		{
 			nlwarning("Inventory '%s' : bulk is overload", INVENTORIES::toString(_InventoryId).c_str());
 		}
@@ -789,20 +886,19 @@ void CInventoryBase::forceViewUpdateOfInventory(bool skipEmptySlots)
 }
 
 // ****************************************************************************
-uint32 CInventoryBase::getFirstFreeSlot() const
+uint32 CInventoryBase::getFirstFreeSlot(uint32 start, uint32 end) const
 {
 	nlassert(_FreeSlotCount > 0);
-
 	// look for a valid slot
-	for (uint i=0; i<_Items.size(); ++i)
+	for (uint i = start; i < end; ++i)
 	{
+		if (i >= _Items.size())
+			break;
+
 		if (_Items[i] == NULL)
-		{
 			return i;
-		}
 	}
 
-	nlassertex(false, ("There are free slot, but I can't find them"));
 	return INVENTORIES::INVALID_INVENTORY_SLOT;
 }
 
@@ -813,7 +909,13 @@ void CInventoryBase::dumpInventory(NLMISC::CLog & log, bool dumpItems) const
 	log.displayNL("Inventory: %s", INVENTORIES::toString(_InventoryId).c_str());
 	log.displayRawNL("Slots: max=%u, count=%u, free=%u", getMaxSlot(), _SlotCount, _FreeSlotCount);
 	log.displayRawNL("Weight: %u", _InventoryWeight);
-	log.displayRawNL("Bulk: %u", _InventoryBulk);
+	if (_InventoryId == INVENTORIES::guild)
+	{
+		for (uint8 i = 0; i < GUILD_NB_CHESTS; i++)
+			log.displayRawNL("Bulk #%u: %u", i, _InventoryBulk[i]);
+	}
+	else
+		log.displayRawNL("Bulk: %u", _InventoryBulk[0]);
 	log.displayRawNL("Nb views: %u", _InventoryViews.size());
 
 	log.displayNL("(DEBUG) _Items.size() = %u", _Items.size());
@@ -888,6 +990,7 @@ CInventoryBase::TInventoryOpResult CRefInventory::doInsertItem(CGameItemPtr &ite
 	// insert and link the new item
 	_Items[slot] = item;
 	item->setRefInventory(CInventoryPtr(this), slot);
+
 	updateWeightAndBulk(item, item->getStackSize());
 	--_FreeSlotCount;
 
@@ -926,7 +1029,6 @@ CGameItemPtr CRefInventory::removeItem(uint32 slot, uint32 quantity, TInventoryO
 		CGameItemPtr item = _Items[slot];
 		_Items[slot] = NULL;
 		++_FreeSlotCount;
-
 		updateWeightAndBulk(ret, -sint32(ret->getStackSize()));
 
 		// callbacks for derived class
