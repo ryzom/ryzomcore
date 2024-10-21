@@ -22,8 +22,10 @@
 
 #include "guild_inv.h"
 #include "player_manager/character.h"
+#include "player_manager/player_manager.h"
 #include "egs_sheets/egs_sheets.h"
 #include "guild_manager/guild_member_module.h"
+#include "guild_manager/guild_manager.h"
 #include "cdb_group.h"
 
 using namespace std;
@@ -31,6 +33,7 @@ using namespace NLMISC;
 using namespace NLNET;
 
 extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
+extern NLMISC::CVariable<uint32>	GuildChestSlots;
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
 /////////////////////////////////////////////////////////////
@@ -41,14 +44,16 @@ extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 CGuildInventory::CGuildInventory()
 {
 	H_AUTO(CGuildInventory);
-	setSlotCount( getMaxSlot() );
 	setInventoryId( INVENTORIES::guild );
+	setSlotCount( getMaxSlot() );
 }
 
 //-----------------------------------------------------------------------------
-uint32 CGuildInventory::getMaxBulk() const
+uint32 CGuildInventory::getMaxBulk(uint8 index) const
 {
-	return BaseGuildBulk; /* keep this until players are able to increase guild max bulk */
+	if (index < GUILD_NB_CHESTS)
+		return _ChestsMaxBulk[index]*1000;
+	return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -71,11 +76,7 @@ void CGuildInventoryView::init( CGuildInventory *inventory, CCDBGroup *guildInvD
 		H_AUTO(resizeGuildInventoryInit);
 		_ItemsSessions.resize( getInventory()->getSlotCount(), 0 );
 	}
-	nlassert( INVENTORIES::NbGuildSlots == getInventory()->getSlotCount() );
 	_GuildInvDb = guildInvDb;
-//	_GuildInvDb->setProp( "GUILD:INVENTORY:BULK_MAX", getInventory()->getMaxBulk() / 1000 );
-	CBankAccessor_GUILD::getGUILD().getINVENTORY().setBULK_MAX(*_GuildInvDb, getInventory()->getMaxBulk() / 1000 );
-//	_GuildInvDb->setProp( "GUILD:INVENTORY:SESSION", _InventorySession );
 	CBankAccessor_GUILD::getGUILD().getINVENTORY().setSESSION(*_GuildInvDb, _InventorySession );
 }
 
@@ -149,8 +150,8 @@ void CGuildInventoryView::updateClientSlot(uint32 slot)
 	itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );
 	itemSlot.setItemProp( INVENTORIES::Quantity, item->getStackSize() );
 	itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
-	itemSlot.setItemProp( INVENTORIES::CreateTime, itemId.getCreateTime() );
-	itemSlot.setItemProp( INVENTORIES::Serial, itemId.getSerialNumber() );
+	//itemSlot.setItemProp( INVENTORIES::CreateTime, itemId.getCreateTime() );
+	//itemSlot.setItemProp( INVENTORIES::Serial, itemId.getSerialNumber() );
 	itemSlot.setItemProp( INVENTORIES::Locked, item->getLockCount()>0?1:0 );
 	itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );
 	itemSlot.setItemProp( INVENTORIES::NameId, 0 ); // TODO: name of guild (item->sendNameId())
@@ -234,8 +235,7 @@ void CGuildInventoryView::updateInfoVersion(uint32 slot)
 		CEntityId destCharacterId = proxy.getId();
 		msgout.serial( destCharacterId );
 		GenericMsgManager.pushNameToStream( "ITEM_INFO:REFRESH_VERSION", bms );
-		nlctassert( CItemInfos::SlotIdIndexBitSize >= INVENTORIES::CInventoryCategoryForGuild::SlotBitSize );
-		uint32 slotId = ((uint32)slot) | ((uint32)(INVENTORIES::guild << CItemInfos::SlotIdIndexBitSize));
+		uint16 slotId = ((uint16)slot) | ((uint16)(INVENTORIES::guild << CItemInfos::SlotIdIndexBitSize));
 		bms.serial( slotId );
 		bms.serial( currentVersion );
 		msgout.serialBufferWithSize( (uint8*)bms.buffer(), bms.length() );
@@ -299,20 +299,69 @@ void CGuildInventoryView::provideUpdate( CBitMemStream& stream )
 }
 
 //-----------------------------------------------------------------------------
-void CGuildInventoryView::provideContents( CBitMemStream& stream )
+void CGuildInventoryView::provideContents( CBitMemStream& stream, const CEntityId &recipient, bool first)
 {
 	// Ensure the updater is empty, otherwise our contents would be mixed with current update
 	nlassert( _GuildInvUpdater.empty( INVENTORIES::CInventoryCategoryForGuild::GuildInvId ) );
 
 	CGuildInventory *guildInv = static_cast<CGuildInventory*>(getInventory());
-	for ( uint i=0; i!=guildInv->getSlotCount(); ++i )
+
+	if (first)
 	{
-		CGameItemPtr itemPtr = guildInv->getItem( i );
-		if ( itemPtr != NULL )
-		{
-			updateClientSlot( i );
-			_GuildInvUpdater.pushItemInfoVersion( i ); // send the current info version (no change)
-		}
+		setChestA(recipient, 0);
+		setChestB(recipient, 1);
 	}
+
+	uint8 chestA = getChestA(recipient);
+	uint8 chestB = getChestB(recipient);
+
+	CCharacter * c = PlayerManager.getChar(recipient);
+	if (!c)
+		return;
+
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (!guild)
+		return;
+
+	CGuildMember* member = guild->getMemberFromEId(c->getId());
+	if (!member)
+		return;
+
+	if (!c->isInitChest(chestA))
+	{
+		if (guild->haveChestViewGrade(chestA, member->getGrade()))
+		{
+			nlinfo("Access authorized");
+			for ( uint i=chestA*GuildChestSlots; i < (chestA+1)*GuildChestSlots; ++i )
+			{
+				CGameItemPtr itemPtr = guildInv->getItem( i );
+				if ( itemPtr != NULL )
+				{
+					updateClientSlot( i );
+					_GuildInvUpdater.pushItemInfoVersion( i ); // send the current info version (no change)
+				}
+			}
+		}
+		c->isInitChest(chestA, true);
+	}
+
+	if (!c->isInitChest(chestB))
+	{
+		if (guild->haveChestViewGrade(chestB, member->getGrade()))
+		{
+			nlinfo("Access authorized");
+			for ( uint i=chestB*GuildChestSlots; i < (chestB+1)*GuildChestSlots; ++i )
+			{
+				CGameItemPtr itemPtr = guildInv->getItem( i );
+				if ( itemPtr != NULL )
+				{
+					updateClientSlot( i );
+					_GuildInvUpdater.pushItemInfoVersion( i ); // send the current info version (no change)
+				}
+			}
+		}
+		c->isInitChest(chestB, true);
+	}
+
 	provideUpdate( stream );
 }

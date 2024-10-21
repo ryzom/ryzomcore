@@ -269,6 +269,7 @@ namespace INVENTORIES
 	const uint NbPackerSlots = 500;
 	const uint NbRoomSlots = 1000;
 	const uint NbGuildSlots = 10000;
+	const uint NbGuildChestSlots = 500;
 	const uint NbTempInvSlots = 16;
 	const uint NbHotbarSlots = 5;
 
