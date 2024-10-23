@@ -7287,12 +7287,15 @@ void CCharacter::removeAnimal(CGameItemPtr item, CPetCommandMsg::TCommand mode)
 	}
 }
 
-void CCharacter::removeRentAMount()
+void CCharacter::removeRentAMount(TDataSetRow rentamount)
 {
 	CPetCommandMsg msg;
 	msg.Command = CPetCommandMsg::DESPAWN;
 	msg.CharacterMirrorRow = _EntityRowId;
-	msg.PetMirrorRow = _RentAMount;
+	if (rentamount == INVALID_DATASET_INDEX)
+		msg.PetMirrorRow = _RentAMount;
+	else
+		msg.PetMirrorRow = rentamount;
 	msg.Coordinate_X = _EntityState.X;
 	msg.Coordinate_Y = _EntityState.Y;
 	msg.Coordinate_H = _EntityState.Z;
