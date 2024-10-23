@@ -3974,7 +3974,7 @@ NLMISC_COMMAND(spawnPlayerPet, "spawn player pet", "<uid> <slot>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInventory=0|1>]")
+NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInventory=0|1>|<entittyid>]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3986,7 +3986,18 @@ NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInvento
 
 	if (index >= MAX_INVENTORY_ANIMAL)
 	{
-		c->removeRentAMount();
+
+		if (args.size() > 2)
+		{
+			CEntityId entityId(args[2]);
+			if (entityId != CEntityId::Unknown)
+			{
+				TDataSetRow row = TheDataset.getDataSetRow(entityId);
+				c->removeRentAMount(row);
+				return true;
+			}
+		}
+		c->removeRentAMount(TDataSetRow());
 		return true;
 	}
 
