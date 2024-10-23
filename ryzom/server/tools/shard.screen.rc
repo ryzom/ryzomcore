@@ -66,7 +66,7 @@ screen -t Zor /bin/bash $SHARD_PATH/tools/service_launcher.sh ais_zorai ../sbin/
 screen -t Pri /bin/bash $SHARD_PATH/tools/service_launcher.sh ais_roots ../sbin/ryzom_ai_service -C../cfgs -L../logs -Nais_roots --nobreak --writepid -mCommon:Nexus:Bagne:RouteGouffre:Sources:Terre:Kitiniere:Undernexus:Post
 
 #ais_ark
-screen -t Ark /bin/bash $SHARD_PATH/tools/service_launcher.sh ais_ark ../sbin/ryzom_ai_service -C../cfgs -L../logs -Nais_ark --nobreak --writepid -mCommon:Indoors::R2Desert:R2Roots:R2Jungle:R2Forest:R2Lakes:Post
+screen -t Ark /bin/bash $SHARD_PATH/tools/service_launcher.sh ais_ark ../sbin/ryzom_ai_service -C../cfgs -L../logs -Nais_ark --nobreak --writepid -mCommon:Indoors::R2Desert:R2Roots:R2Jungle:R2Forest:R2Lakes:CorruptedMoor:Post
 
 
 # aes
