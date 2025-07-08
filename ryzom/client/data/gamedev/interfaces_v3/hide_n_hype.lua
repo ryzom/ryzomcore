@@ -441,8 +441,6 @@ function Ryzhide:check_for_update_server_config(json_data_from_join)
 	end
 end
 
-hide_n_hype_forbidden_regions_txt = "forbidden_regions"
-
 --###################################### START load and start at login function #######################################
 
 
@@ -791,7 +789,7 @@ function Ryzhide:build_invite_window()
 			</tr>
 
 			<tr>
-				<td colspan="4" align="center"><font color="orange">]]..hide_n_hype_forbidden_regions_txt..[[</font></td>
+				<td colspan="4" align="center"><font color="orange">]]..Ryzhide:load_translation("hide_n_hype_forbidden_regions")..[[</font></td>
 			</tr>
 
 			<tr>
@@ -1483,7 +1481,7 @@ function Ryzhide:build_most_wanted_window()
 			</tr>
 
 			<tr>
-				<td align="center" colspan="3"><h4><font color="orange">4. ]]..hide_n_hype_forbidden_regions_txt..[[</font></h4></td>
+				<td align="center" colspan="3"><h4><font color="orange">4. ]]..Ryzhide:load_translation("hide_n_hype_forbidden_regions")..[[</font></h4></td>
 			</tr>
 
 			<tr>
