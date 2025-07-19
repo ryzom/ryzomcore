@@ -653,6 +653,7 @@ CCharacter::CCharacter()
 	_ChannelAdded = false;
 	_DuelOpponent = NULL;
 	_LastTpTick = 0;
+	_LastRespawnTick = 0;
 	_LastOverSpeedTick = 0;
 	_LastMountTick = 0;
 	_LastUnMountTick = 0;
@@ -2078,6 +2079,9 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 	// remove character of vision of other PC
 	CMessage msgout("ENTITY_TELEPORTATION");
 	msgout.serial(_Id);
+
+	// save Last Respawn Tick if player respawns
+	_LastRespawnTick = CTickEventHandler::getGameCycle();
 
 	if (IsRingShard)
 	{
@@ -5973,6 +5977,9 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 
 	if (_IntangibleEndDate != ~0 && !fromVortex) // Don't save Last Tp Tick if player respawns or teleport from Vortex
 		_LastTpTick = CTickEventHandler::getGameCycle();
+	
+	if (_IntangibleEndDate == ~0) // save Last Respawn Tick if player respawns with a teleport
+		_LastRespawnTick = CTickEventHandler::getGameCycle();
 
 	_TpCoordinate.X = x;
 	_TpCoordinate.Y = y;
