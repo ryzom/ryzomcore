@@ -2715,6 +2715,7 @@ public:
 
 	uint32 getOrganization() const;
 	uint32 getOrganizationStatus() const;
+	uint32 getLastRespawnTick() const;
 	uint32 getLastTpTick() const;
 	uint32 getLastOverSpeedTick() const;
 	uint32 getLastUnMountTick() const;
