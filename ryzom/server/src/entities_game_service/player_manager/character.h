@@ -4244,7 +4244,8 @@ private:
 
 	bool _PowoCanAccesRoomInv;
 	bool _PowoCanAccessGuildInv;
-
+	
+	uint32 _LastRespawnTick;
 	uint32 _LastTpTick;
 	uint32 _LastOverSpeedTick;
 	uint32 _LastMountTick;
