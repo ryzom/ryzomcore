@@ -652,6 +652,7 @@ CCharacter::CCharacter()
 	_SelectedOutpost = 0;
 	_ChannelAdded = false;
 	_DuelOpponent = NULL;
+	_IsTeleportFromRespawn = false;
 	_LastTpTick = 0;
 	_LastRespawnTick = 0;
 	_LastOverSpeedTick = 0;
@@ -2109,6 +2110,8 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 //---------------------------------------------------
 void CCharacter::applyRespawnEffects(bool applyDP)
 {
+	_IsTeleportFromRespawn = true;
+	
 	CSheetId usedSheet;
 	CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("rez", SLOT_EQUIPMENT::NECKLACE, usedSheet);
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
@@ -5975,11 +5978,14 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 		}
 	}
 
-	if (_IntangibleEndDate != ~0 && !fromVortex) // Don't save Last Tp Tick if player respawns or teleport from Vortex
-		_LastTpTick = CTickEventHandler::getGameCycle();
-	
-	if (_IntangibleEndDate == ~0) // save Last Respawn Tick if player respawns with a teleport
+	if (_IsTeleportFromRespawn && !fromVortex)
+	{
 		_LastRespawnTick = CTickEventHandler::getGameCycle();
+	}
+	else if (!_IsTeleportFromRespawn && !fromVortex)
+	{
+		_LastTpTick = CTickEventHandler::getGameCycle();
+	}
 
 	_TpCoordinate.X = x;
 	_TpCoordinate.Y = y;
@@ -6033,6 +6039,8 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 	//	respawnMsg.send("AIS");
 	// backup the who sees me property and set it to 0
 	CMirrorPropValue<TYPE_WHO_SEES_ME> whoSeesMe(TheDataset, _EntityRowId, DSPropertyWHO_SEES_ME);
+
+	_IsTeleportFromRespawn = false;
 
 	/*
 	FOR AIS the change of property value AIInstance is handled before the sendAggro message send by setWhoSeesMe

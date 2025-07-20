@@ -4245,6 +4245,8 @@ private:
 	bool _PowoCanAccesRoomInv;
 	bool _PowoCanAccessGuildInv;
 	
+	bool _IsTeleportFromRespawn;
+	
 	uint32 _LastRespawnTick;
 	uint32 _LastTpTick;
 	uint32 _LastOverSpeedTick;
@@ -4252,7 +4254,7 @@ private:
 	uint32 _LastUnMountTick;
 	uint32 _LastFreeMount;
 	uint32 _LastExchangeMount;
-
+	
 public:
 	void setWebCommandIndex(uint32 index)
 	{
