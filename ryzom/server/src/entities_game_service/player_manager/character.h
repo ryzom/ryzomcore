@@ -2715,6 +2715,7 @@ public:
 
 	uint32 getOrganization() const;
 	uint32 getOrganizationStatus() const;
+	uint32 getLastRespawnTick() const;
 	uint32 getLastTpTick() const;
 	uint32 getLastOverSpeedTick() const;
 	uint32 getLastUnMountTick() const;
@@ -4243,14 +4244,17 @@ private:
 
 	bool _PowoCanAccesRoomInv;
 	bool _PowoCanAccessGuildInv;
-
+	
+	bool _IsTeleportFromRespawn;
+	
+	uint32 _LastRespawnTick;
 	uint32 _LastTpTick;
 	uint32 _LastOverSpeedTick;
 	uint32 _LastMountTick;
 	uint32 _LastUnMountTick;
 	uint32 _LastFreeMount;
 	uint32 _LastExchangeMount;
-
+	
 public:
 	void setWebCommandIndex(uint32 index)
 	{
