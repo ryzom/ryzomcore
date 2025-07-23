@@ -1849,6 +1849,18 @@ function game:initWebIg()
 		local cap = getUI("ui:interface:cap")
 		setOnDraw(cap, "game:onOverCap()")
 		ArkLessons:init()
+		forceResetInterfaceTimer = 1
+		-- if ui:interface:web_transactions_cap is active, the player have a ALL WINDOWS OPENED bug
+		-- So we will force a reset of the interface
+		setOnDraw(getUI("ui:interface:web_transactions_cap"), "game:forceResetInterface()")
+	end
+end
+
+function game:forceResetInterface()
+	forceResetInterfaceTimer = forceResetInterfaceTimer - 1
+	if forceResetInterfaceTimer <= 0 then
+		forceResetInterfaceTimer = 100
+		runAH(nil, "milko_menu_do_reset_interface", "")
 	end
 end
 
