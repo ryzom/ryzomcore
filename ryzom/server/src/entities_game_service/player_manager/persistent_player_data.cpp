@@ -442,6 +442,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	_SavedFames[i],\
 	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _SavedFames[k]=val)\
 \
+	PROP(uint32,_LastRespawnTick)\
 	PROP(uint32,_LastTpTick)\
 	PROP(uint32,_LastOverSpeedTick)\
 	PROP(uint32,_LastMountTick)\

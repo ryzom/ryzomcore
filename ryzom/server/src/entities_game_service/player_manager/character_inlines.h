@@ -1258,6 +1258,11 @@ inline uint32 CCharacter::getOrganizationStatus() const
 	return _OrganizationStatus;
 }
 
+inline uint32 CCharacter::getLastRespawnTick() const
+{
+	return _LastRespawnTick;
+}
+
 inline uint32 CCharacter::getLastTpTick() const
 {
 	return _LastTpTick;
