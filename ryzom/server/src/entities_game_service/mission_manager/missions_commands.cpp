@@ -3417,6 +3417,19 @@ NLMISC_COMMAND(getLastTpTick,"get tick of last teleport","<uid>")
 }
 
 //-----------------------------------------------
+NLMISC_COMMAND(getLastRespawnTick,"get tick of last respawn","<uid>")
+{
+	if (args.size() != 1)
+		return false;
+
+	GET_ACTIVE_CHARACTER;
+
+	log.displayNL("%d", c->getLastRespawnTick());
+
+	return true;
+}
+
+//-----------------------------------------------
 NLMISC_COMMAND(getLastOverSpeedTick,"get tick of last over speed","<uid>")
 {
 	if (args.size() != 1)
