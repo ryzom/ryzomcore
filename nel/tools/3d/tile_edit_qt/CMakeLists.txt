@@ -1,5 +1,3 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-
 FILE(GLOB TILE_EDIT_SRC *.cpp *.h)
 FILE(GLOB PIC_SRC pic/*.c pic/*.cpp)
 SET(TILE_EDIT_HDR items_edit_dlg.h tile_browser_dlg.h tile_edit_dlg.h tile_rotation_dlg.h tiles_model.h tile_widget.h)
@@ -27,6 +25,8 @@ SOURCE_GROUP(QtGeneratedUiHdr FILES ${TILE_EDIT_UI_HDRS})
 SOURCE_GROUP(QtGeneratedMocSrc FILES ${TILE_EDIT_MOC_SRCS})
 
 ADD_EXECUTABLE(tile_edit_qt WIN32 ${TILE_EDIT_SRC} ${TILE_EDIT_MOC_SRCS} ${TILE_EDIT_RC_SRCS} ${TILE_EDIT_UI_HDRS})
+
+TARGET_INCLUDE_DIRECTORIES(tile_edit_qt PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(tile_edit_qt ${QT_LIBRARIES} nelmisc nel3d)
 NL_DEFAULT_PROPS(tile_edit_qt "NeL, Tools, 3D: Qt Tile Editor")
