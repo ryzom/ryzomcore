@@ -5,7 +5,7 @@ FILE(GLOB HEADERS ../../include/nel/georges/*.h)
 
 NL_TARGET_LIB(nelgeorges ${HEADERS} ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(nelgeorges PRIVATE ${LIBXML2_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nelgeorges nelmisc)
 NL_DEFAULT_PROPS(nelgeorges "NeL, Library: NeL Georges")
@@ -13,7 +13,7 @@ NL_ADD_RUNTIME_FLAGS(nelgeorges)
 
 NL_ADD_LIB_SUFFIX(nelgeorges)
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(nelgeorges PRIVATE ${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
   target_precompile_headers(nelgeorges PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdgeorges.h)
