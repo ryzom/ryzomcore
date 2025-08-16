@@ -17,9 +17,6 @@ if (NOT GLIB2_FOUND)
 	MESSAGE(FATAL_ERROR "GLIB2 not found!")
 ENDIF (NOT GLIB2_FOUND)
 
-INCLUDE_DIRECTORIES(${GLIB2_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${LIBGSF_INCLUDE_DIR})
-
 FILE(GLOB SRCS *.cpp builtin/*.cpp builtin/storage/*.cpp update1/*.cpp epoly/*.cpp)
 FILE(GLOB HDRS *.h builtin/*.h builtin/storage/*.h update1/*.h epoly/*.h)
 
@@ -27,6 +24,12 @@ NL_TARGET_LIB(pipeline_max
 	${SRCS}
 	${HDRS}
 	)
+
+TARGET_INCLUDE_DIRECTORIES(pipeline_max
+		PRIVATE
+		${GLIB2_INCLUDE_DIRS}
+		${LIBGSF_INCLUDE_DIR}
+)
 
 TARGET_LINK_LIBRARIES(pipeline_max
 	${LIBGSF_LIBRARIES}
