@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 NL_TARGET_LIB(ryzom_adminmodules ${SRC})
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_adminmodules PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_adminmodules nelmisc nelnet)
 NL_DEFAULT_PROPS(ryzom_adminmodules "Ryzom, Library: Service Admin Modules")
