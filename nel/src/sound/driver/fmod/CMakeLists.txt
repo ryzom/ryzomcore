@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
 NL_TARGET_DRIVER(nel_drv_fmod_win ${SRC})
 
-INCLUDE_DIRECTORIES(${FMOD_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(nel_drv_fmod_win PRIVATE ${FMOD_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nel_drv_fmod_win ${FMOD_LIBRARY} nelmisc nelsnd_lowlevel)
 
 NL_DEFAULT_PROPS(nel_drv_fmod_win "NeL, Driver, Sound: FMOD")
