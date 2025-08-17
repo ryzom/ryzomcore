@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(csv_transform ${SRC})
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+TARGET_INCLUDE_DIRECTORIES(csv_transform PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(csv_transform nelmisc)
 NL_DEFAULT_PROPS(csv_transform "Ryzom, Tools, Misc: CSV Transform")

@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(r2_islands_textures ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
+TARGET_INCLUDE_DIRECTORIES(r2_islands_textures PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(r2_islands_textures
 					ryzom_gameshare
