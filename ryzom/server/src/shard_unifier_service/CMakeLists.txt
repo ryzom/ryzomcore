@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(ryzom_shard_unifier_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_shard_unifier_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_shard_unifier_service
 						ryzom_adminmodules
@@ -15,7 +15,7 @@ TARGET_LINK_LIBRARIES(ryzom_shard_unifier_service
 NL_DEFAULT_PROPS(ryzom_shard_unifier_service "Ryzom, Services: Shard Unifier Service (SUS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_shard_unifier_service)
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(ryzom_shard_unifier_service PRIVATE ${LIBXML2_DEFINITIONS})
 
 IF(MSVC)
 	SET_TARGET_PROPERTIES(ryzom_shard_unifier_service PROPERTIES COMPILE_FLAGS "/bigobj")
