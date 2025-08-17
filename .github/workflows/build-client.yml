@@ -37,9 +37,6 @@ jobs:
           - os: ubuntu-24.04
             ubuntu_version: 24.04
             cmake_preset: linux-client
-          - os: macos-14
-            cmake_preset: macos-client
-            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
           - os: macos-13
             cmake_preset: macos-client
             cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
