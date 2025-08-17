@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(build_world_packed_col ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
+TARGET_INCLUDE_DIRECTORIES(build_world_packed_col PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(build_world_packed_col	
 					ryzom_gameshare
