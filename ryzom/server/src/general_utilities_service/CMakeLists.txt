@@ -126,7 +126,7 @@ SOURCE_GROUP("GUS Core" FILES	gus_chat.cpp
 
 ADD_EXECUTABLE(ryzom_general_utilities_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${NEL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_general_utilities_service PRIVATE ${RZ_SERVER_SRC_DIR} ${NEL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_general_utilities_service
 						ryzom_adminmodules

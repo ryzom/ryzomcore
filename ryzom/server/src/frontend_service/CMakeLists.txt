@@ -12,7 +12,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(ryzom_frontend_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${MYSQL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_frontend_service PRIVATE ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_frontend_service
 						ryzom_adminmodules
@@ -24,7 +24,7 @@ TARGET_LINK_LIBRARIES(ryzom_frontend_service
 						nelligo)
 
 IF(WITH_MSQUIC)
-  INCLUDE_DIRECTORIES(${msquic_INCLUDE_DIRS})
+  TARGET_INCLUDE_DIRECTORIES(ryzom_frontend_service PRIVATE ${msquic_INCLUDE_DIRS})
   TARGET_LINK_LIBRARIES(ryzom_frontend_service ${msquic_LIBRARIES})
 ENDIF()
 

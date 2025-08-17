@@ -4,7 +4,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(ryzom_entity_view_service ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${NEL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_entity_view_service PRIVATE ${RZ_SERVER_SRC_DIR} ${NEL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_entity_view_service
 						ryzom_adminmodules
