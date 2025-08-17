@@ -1,5 +1,3 @@
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/nel/3rdparty/seven_zip)
-
 SET(MAIN_SRC patch_gen_common.cpp patch_gen_main.cpp patch_gen_main.h patch_gen.rc)
 SET(SERVICE_SRC patch_gen_common.cpp patch_gen_service.cpp patch_gen_service.h patch_gen_service.rc)
 
