@@ -4,7 +4,7 @@ LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/service.cpp ${CMAKE_CURRENT_SOU
 
 ADD_EXECUTABLE(ryzom_dynamic_scenario_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_dynamic_scenario_service PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_dynamic_scenario_service
 						ryzom_adminmodules
