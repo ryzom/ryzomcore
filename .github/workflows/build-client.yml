@@ -23,10 +23,14 @@ jobs:
         os:
          - ubuntu-24.04
          - ubuntu-22.04
+         - windows-2025
          - windows-2022
+         - macos-14-large
          - macos-13
         include:
           - os: windows-2022
+            cmake_preset: windows-client
+          - os: windows-2025
             cmake_preset: windows-client
           - os: ubuntu-22.04
             ubuntu_version: 22.04
@@ -34,6 +38,9 @@ jobs:
           - os: ubuntu-24.04
             ubuntu_version: 24.04
             cmake_preset: linux-client
+          - os: macos-14-large
+            cmake_preset: macos-client
+            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
           - os: macos-13
             cmake_preset: macos-client
             cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
