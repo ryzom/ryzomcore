@@ -5,9 +5,9 @@ FILE(GLOB LIBSRC mission_compiler.cpp
   steps.cpp
   variables.cpp)
 
-INCLUDE_DIRECTORIES(${NEL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-
 NL_TARGET_LIB(ryzom_mission_compiler_lib ${LIBSRC})
+
+TARGET_INCLUDE_DIRECTORIES(ryzom_mission_compiler_lib PRIVATE ${NEL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_mission_compiler_lib nelmisc nelligo)
 NL_DEFAULT_PROPS(ryzom_mission_compiler_lib "Ryzom, Library: Mission Compiler")

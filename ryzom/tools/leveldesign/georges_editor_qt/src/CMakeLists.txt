@@ -1,9 +1,3 @@
-INCLUDE_DIRECTORIES(
-		${CMAKE_CURRENT_BINARY_DIR}
-		${CMAKE_CURRENT_SOURCE_DIR}
-		${NEL_INCLUDE_DIR}
-		../../../../../nel/tools/3d/object_viewer_widget/src)
-
 FILE(GLOB GEORGES_EDITOR_SRC *.cpp *.h)
 
 SET(GEORGES_EDITOR_HDR
@@ -52,6 +46,14 @@ ENDIF()
 
 ADD_EXECUTABLE(georges_editor_qt WIN32 MACOSX_BUNDLE ${GEORGES_EDITOR_SRC} ${GEORGES_EDITOR_MOC_SRCS} ${GEORGES_EDITOR_RC_SRCS} ${GEORGES_EDITOR_UI_HDRS})
 
+TARGET_INCLUDE_DIRECTORIES(georges_editor_qt
+		PRIVATE
+		${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${NEL_INCLUDE_DIR}
+		../../../../../nel/tools/3d/object_viewer_widget/src)
+
+
 TARGET_LINK_LIBRARIES(georges_editor_qt
 		nelmisc
 		nel3d
@@ -60,7 +62,7 @@ TARGET_LINK_LIBRARIES(georges_editor_qt
 		${QT_QTOPENGL_LIBRARY}
 		${QT_QTMAIN_LIBRARY})
 
-ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(georges_editor_qt PRIVATE QT_NO_KEYWORDS ${QT_DEFINITIONS})
 NL_DEFAULT_PROPS(georges_editor_qt "Ryzom, Tools, World: Georges Editor Qt")
 NL_ADD_RUNTIME_FLAGS(georges_editor_qt)
 
