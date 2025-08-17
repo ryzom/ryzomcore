@@ -96,7 +96,7 @@ jobs:
     - name: Dependencies Windows
       if: runner.os == 'Windows'
       run: |
-        choco install directx-sdk
+        choco install directx-sdk nsis
 
     - uses: actions/cache/save@v4
       with:
