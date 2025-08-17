@@ -25,7 +25,6 @@ jobs:
          - ubuntu-22.04
          - windows-2025
          - windows-2022
-         - macos-14
          - macos-13
         include:
           - os: windows-2022
