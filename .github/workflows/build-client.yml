@@ -5,11 +5,13 @@ on:
     branches: [ "core4", "feature/*" ]
     paths-ignore:
       - '.github/workflows/**.yml'
+      - 'snowballs2/**'
       - '!.github/workflows/build-client.yml'
   pull_request:
     branches: [ "core4" ]
     paths-ignore:
       - '.github/workflows/**.yml'
+      - 'snowballs2/**'
       - '!.github/workflows/build-client.yml'
 
 jobs:
