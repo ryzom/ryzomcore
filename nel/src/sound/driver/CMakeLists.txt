@@ -2,6 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 FILE(GLOB HEADERS ../../../include/nel/sound/driver/*.h)
 
 NL_TARGET_LIB(nelsnd_lowlevel ${HEADERS} ${SRC})
+add_project_library_alias(nelsnd_lowlevel snd_lowlevel)
 
 TARGET_LINK_LIBRARIES(nelsnd_lowlevel nelmisc)
 NL_DEFAULT_PROPS(nelsnd_lowlevel "NeL, Library: Sound Lowlevel")
@@ -15,7 +16,7 @@ IF(WITH_PCH)
 ENDIF()
 
 IF((WITH_INSTALL_LIBRARIES AND WITH_STATIC) OR NOT WITH_STATIC)
-  INSTALL(TARGETS nelsnd_lowlevel LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
+  INSTALL(TARGETS nelsnd_lowlevel EXPORT "${project_export_name}" LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
 ENDIF()
 
 IF(WITH_DRIVER_OPENAL)

@@ -6,6 +6,9 @@ ENDIF ()
 
 project(NeL VERSION ${RyzomCore_VERSION} LANGUAGES CXX C)
 
+set(project_export_name "${PROJECT_NAME}-targets")
+include(../cmake/add_project_library_alias.cmake)
+
 IF(WITH_STATIC_DRIVERS)
   ADD_DEFINITIONS(-DNL_STATIC)
 ENDIF()
@@ -80,3 +83,37 @@ IF(WITH_NEL_SAMPLES)
 ENDIF()
 
 ADD_SUBDIRECTORY(tools)
+
+
+# packaging
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+IF(WITH_INSTALL_LIBRARIES)
+  set(project_namespace "${PROJECT_NAME}")
+  set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+  set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+  set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+  set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+  set(package_components 3d georges ligo misc net pacs sevenzip sound snd_lowlevel)
+
+  install(EXPORT "${project_export_name}"
+          COMPONENT libraries
+          NAMESPACE "${project_namespace}::"
+          DESTINATION "${config_install_dir}"
+  )
+
+  write_basic_package_version_file(
+          "${version_config}" COMPATIBILITY SameMajorVersion
+  )
+
+  configure_package_config_file("../cmake/config.cmake.in"
+          "${project_config}"
+          INSTALL_DESTINATION "${config_install_dir}"
+  )
+
+  install(FILES "${project_config}" "${version_config}"
+          COMPONENT libraries
+          DESTINATION "${config_install_dir}"
+  )
+ENDIF()

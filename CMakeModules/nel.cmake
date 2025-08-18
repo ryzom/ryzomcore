@@ -353,6 +353,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_NEL_MAXPLUGIN       "Build NeL 3dsMax Plugin"                       OFF)
   OPTION(WITH_NEL_SAMPLES         "Build NeL Samples"                             ON )
   OPTION(WITH_NEL_TESTS           "Build NeL Unit Tests"                          ON )
+  OPTION(WITH_TESTING             "Build Tests"                                   ON )
 
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)

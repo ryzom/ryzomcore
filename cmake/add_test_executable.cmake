@@ -1,4 +1,6 @@
-add_custom_target(unit_test)
+if (NOT TARGET unit_test)
+    add_custom_target(unit_test)
+endif()
 
 function(add_test_executable name)
     add_executable(${ARGV})

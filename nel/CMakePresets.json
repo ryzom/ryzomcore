@@ -1,0 +1,67 @@
+{
+  "version": 6,
+  "include": [
+    "../cmake/CMakePresets.base.json",
+    "../cmake/CMakePresets.os.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "nel",
+      "binaryDir": "${sourceDir}/build/nel",
+      "installDir": "${sourceDir}/build/install",
+      "cacheVariables": {
+        "WITH_STATIC": true,
+        "WITH_NEL": true,
+        "WITH_NEL_TESTS": true,
+        "WITH_NEL_SAMPLES": true,
+        "WITH_NEL_TOOLS": true,
+        "WITH_DRIVER_OPENAL": true,
+        "WITH_DRIVER_OPENGL": true,
+        "WITH_NELNS": false,
+        "WITH_LUA51": false,
+        "WITH_LUA52": true,
+        "WITH_RYZOM": false,
+        "WITH_SNOWBALLS": false,
+        "WITH_STUDIO": false,
+        "WITH_TOOLS": false,
+        "WITH_QT5": true,
+        "WITH_LIBGSF": true,
+        "CPACK_PACKAGE_NAME": "nel"
+      }
+    },
+    {
+      "inherits": [
+        "linux",
+        "nel"
+      ],
+      "name": "linux-nel"
+    },
+    {
+      "inherits": [
+        "windows",
+        "nel"
+      ],
+      "name": "windows-nel"
+    }
+  ],
+  "buildPresets": [
+    {
+      "inherits": "release",
+      "name": "nel",
+      "configurePreset": "nel"
+    }
+  ],
+  "testPresets": [
+    {
+      "inherits": "default",
+      "name": "nel",
+      "configurePreset": "nel"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "nel",
+      "configurePreset": "nel"
+    }
+  ]
+}
