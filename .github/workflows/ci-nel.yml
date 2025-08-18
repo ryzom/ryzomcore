@@ -57,8 +57,6 @@ jobs:
         with:
           cmakeVersion: "^3.29.5"
 
-      - uses: lukka/run-vcpkg@v11.5
-
       - name: Dependencies Linux
         if: runner.os == 'Linux'
         run: |
@@ -73,6 +71,7 @@ jobs:
             libogg-dev libvorbis-dev libopenal-dev \
             libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
             libmysqlclient-dev \
+            libxml2-dev \
             libcurl4-openssl-dev libssl-dev \
             libsquish-dev \
             liblzma-dev \
