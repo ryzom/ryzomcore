@@ -14,14 +14,23 @@
         "WITH_SNOWBALLS_SERVER": true,
         "WITH_SNOWBALLS_PACKAGE": true,
         "WITH_TESTING": true,
-        "WITH_NEL": false,
+        "WITH_NEL": true,
         "WITH_NEL_TESTS": false,
         "WITH_NELNS": false,
         "WITH_RYZOM": false,
         "WITH_STUDIO": false,
         "WITH_TOOLS": false,
         "WITH_QT5": true,
-        "CPACK_PACKAGE_NAME": "snowballs",
+        "CPACK_PACKAGE_NAME": "snowballs"
+      }
+    },
+    {
+      "name": "ci-snowballs",
+      "hidden": true,
+      "cacheVariables": {
+        "WITH_NEL": false,
+        "WITH_NEL_TESTS": false,
+        "WITH_NELNS": false,
         "CMAKE_PREFIX_PATH": "${sourceDir}/build/install"
       }
     },
@@ -31,6 +40,14 @@
         "snowballs"
       ],
       "name": "linux-snowballs"
+    },
+    {
+      "inherits": [
+        "linux",
+        "snowballs",
+        "ci-snowballs"
+      ],
+      "name": "ci-linux-snowballs"
     },
     {
       "inherits": [
