@@ -44,8 +44,8 @@
     {
       "inherits": [
         "linux",
-        "snowballs",
-        "ci-snowballs"
+        "ci-snowballs",
+        "snowballs"
       ],
       "name": "ci-linux-snowballs"
     },
