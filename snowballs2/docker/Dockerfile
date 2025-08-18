@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-ARG USERNAME=ryzom
+ARG USERNAME=snowballs
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 ARG APP_HOME=/app
@@ -27,13 +27,13 @@ RUN apt update; \
         libxml2
 
 
-COPY build/ryzomcore-*.sh /tmp/install.sh
+COPY build/snowballs/snowballs-*.sh /tmp/install.sh
 
-RUN mkdir --parent "$APP_HOME/ryzomcore" \
- && sh /tmp/install.sh --skip-license --prefix="$APP_HOME/ryzomcore"
+RUN mkdir --parent "$APP_HOME/snowballs" \
+ && sh /tmp/install.sh --skip-license --prefix="$APP_HOME/snowballs"
 
-ENV LD_LIBRARY_PATH=$APP_HOME/ryzomcore/lib
-ENV PATH=$APP_HOME/ryzomcore/sbin:$APP_HOME/ryzomcore/bin:$PATH
+ENV LD_LIBRARY_PATH=$APP_HOME/snowballs/lib
+ENV PATH=$APP_HOME/snowballs/sbin:$APP_HOME/snowballs/bin:$PATH
 
 RUN mkdir --parent "$APP_HOME/logs" \
     && chown $USERNAME:$USERNAME "$APP_HOME/logs"

@@ -32,6 +32,8 @@ IF(WITH_SNOWBALLS_SERVER)
 ENDIF()
 
 IF(WITH_SNOWBALLS_PACKAGE)
+  include(GNUInstallDirs)
+  include(CMakePackageConfigHelpers)
   INCLUDE(CMakePackaging.txt)
 ENDIF()
 

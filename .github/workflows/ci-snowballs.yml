@@ -21,30 +21,39 @@ on:
     types:
       - completed
 
+env:
+  DEFAULT_BRANCH: core4
+  IMAGE_NAME: ryzomcore-snowballs
+
 jobs:
   strings:
     runs-on: ubuntu-latest
     outputs:
       build-dir: ${{ steps.strings.outputs.build-dir }}
+      build-output-dir: ${{ steps.strings.outputs.build-output-dir }}
       install-dir: ${{ steps.strings.outputs.install-dir }}
       build-version: ${{ steps.strings.outputs.build-version }}
       project-name: ${{ steps.strings.outputs.project-name }}
+      docker-image-tag: ${{ steps.strings.outputs.docker-image-tag }}
     steps:
       - name: Set reusable strings
         id: strings
         shell: bash
         run: |
           BUILD_DIR=${{ github.workspace }}/build
-          echo "build-output-dir=${BUILD_DIR}/snowballs" >> "$GITHUB_OUTPUT"
           echo "build-dir=${BUILD_DIR}" >> "$GITHUB_OUTPUT"
+          echo "build-output-dir=${BUILD_DIR}/snowballs" >> "$GITHUB_OUTPUT"
           echo "install-dir=${BUILD_DIR}/install" >> "$GITHUB_OUTPUT"
           COMMIT_HASH=${{ github.sha }}
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          [ "$VERSION" == "main" ] && VERSION=latest
-          VERSION="$VERSION+sha.${COMMIT_HASH:0:8}"
+          [ "$VERSION" == "$DEFAULT_BRANCH" ] && VERSION=latest
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           echo VERSION=$VERSION
-          echo "build-version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo IMAGE_ID=$IMAGE_ID
+          echo "build-version=${VERSION}+sha.${COMMIT_HASH:0:8}" >> "$GITHUB_OUTPUT"
+          echo "docker-image-tag=${IMAGE_ID}:${VERSION}" >> "$GITHUB_OUTPUT"
           echo "project-name=snowballs" >> "$GITHUB_OUTPUT"
 
   build:
@@ -98,11 +107,11 @@ jobs:
           if_no_artifact_found: ignore
 
       - uses: dawidd6/action-download-artifact@v6
-        if: ${{ ! steps.download-from-branch.outputs.found_artifact }}
+        if: ${{ steps.download-from-branch.outputs.found_artifact != 'true' }}
         with:
           workflow: ci-nel.yml
           workflow_conclusion: success
-          branch: "core4"
+          branch: "${{ env.DEFAULT_BRANCH }}"
           event: push
           name: package-nel-${{ matrix.os }}-.*
           name_is_regexp: true
@@ -133,3 +142,34 @@ jobs:
           name: package-${{ needs.strings.outputs.project-name }}-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-output-dir }}/${{ needs.strings.outputs.project-name }}-*
 
+  docker:
+    runs-on: ubuntu-latest
+    needs: [ strings, build ]
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: package-${{ needs.strings.outputs.project-name }}-ubuntu-24.04-${{ needs.strings.outputs.build-version }}
+          path: ${{ needs.strings.outputs.build-output-dir }}
+
+      - name: Build the Docker image
+        run: |
+          docker build . --file snowballs2/docker/Dockerfile --tag "${{ needs.strings.outputs.docker-image-tag }}"
+          docker save --output=${{ needs.strings.outputs.build-output-dir }}/docker-$IMAGE_NAME-${{ needs.strings.outputs.build-version }} "${{ needs.strings.outputs.docker-image-tag }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker
+          path: ${{ needs.strings.outputs.build-output-dir }}/docker-*
+          if-no-files-found: error
+
+      - name: Push image
+        if: ${{ github.ref == format('refs/heads/{0}', env.DEFAULT_BRANCH) }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          docker push "${{ needs.strings.outputs.docker-image-tag }}"
