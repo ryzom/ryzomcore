@@ -16,6 +16,10 @@ on:
       - snowballs2/**
       - CMakeLists.txt
       - CMakePresets.json
+  workflow_run:
+    workflows: [ NeL: CI / CD ]
+    types:
+      - completed
 
 jobs:
   strings:
@@ -88,7 +92,7 @@ jobs:
           workflow_conclusion: success
           branch: "${{ github.ref }}"
           event: push
-          name: package-nel-.*
+          name: package-nel-${{ matrix.os }}-.*
           name_is_regexp: true
           path: build
           if_no_artifact_found: ignore
@@ -100,7 +104,7 @@ jobs:
           workflow_conclusion: success
           branch: "core4"
           event: push
-          name: package-nel-.*
+          name: package-nel-${{ matrix.os }}-.*
           name_is_regexp: true
           path: build
 
