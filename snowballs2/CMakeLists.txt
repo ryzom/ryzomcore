@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.27)
 
 project(Snowballs VERSION 2.0.0 LANGUAGES CXX)
 
+find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS 3d misc net pacs)
+
 IF(WIN32)
   SET(SNOWBALLS_CONFIG_FILE "." CACHE FILEPATH "Snowballs config file location")
 ELSE()

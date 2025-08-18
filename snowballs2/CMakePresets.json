@@ -1,0 +1,63 @@
+{
+  "version": 6,
+  "include": [
+    "../cmake/CMakePresets.base.json",
+    "../cmake/CMakePresets.os.json"
+  ],
+  "configurePresets": [
+    {
+      "binaryDir": "${sourceDir}/build/snowballs",
+      "name": "snowballs",
+      "cacheVariables": {
+        "WITH_SNOWBALLS": true,
+        "WITH_SNOWBALLS_CLIENT": true,
+        "WITH_SNOWBALLS_SERVER": true,
+        "WITH_SNOWBALLS_PACKAGE": true,
+        "WITH_TESTING": true,
+        "WITH_NEL": false,
+        "WITH_NEL_TESTS": false,
+        "WITH_NELNS": false,
+        "WITH_RYZOM": false,
+        "WITH_STUDIO": false,
+        "WITH_TOOLS": false,
+        "WITH_QT5": true,
+        "CPACK_PACKAGE_NAME": "snowballs",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/build/install"
+      }
+    },
+    {
+      "inherits": [
+        "linux",
+        "snowballs"
+      ],
+      "name": "linux-snowballs"
+    },
+    {
+      "inherits": [
+        "windows",
+        "snowballs"
+      ],
+      "name": "windows-snowballs"
+    }
+  ],
+  "buildPresets": [
+    {
+      "inherits": "release",
+      "name": "snowballs",
+      "configurePreset": "snowballs"
+    }
+  ],
+  "testPresets": [
+    {
+      "inherits": "default",
+      "name": "snowballs",
+      "configurePreset": "snowballs"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "snowballs",
+      "configurePreset": "snowballs"
+    }
+  ]
+}
