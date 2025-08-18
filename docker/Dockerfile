@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
+RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel --remove ubuntu
 
 ARG USERNAME=ryzom
 ARG USER_UID=1000

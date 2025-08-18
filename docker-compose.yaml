@@ -10,3 +10,9 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+
+  snowballs:
+    image: "ryzomcore/snowballs"
+    build:
+      context: .
+      dockerfile: snowballs2/docker/Dockerfile

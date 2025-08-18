@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
+RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel --remove ubuntu
 
 ARG USERNAME=snowballs
 ARG USER_UID=1000
@@ -36,7 +37,7 @@ ENV LD_LIBRARY_PATH=$APP_HOME/snowballs/lib
 ENV PATH=$APP_HOME/snowballs/sbin:$APP_HOME/snowballs/bin:$PATH
 
 RUN mkdir --parent "$APP_HOME/logs" \
-    && chown $USERNAME:$USERNAME "$APP_HOME/logs"
+ && chown $USERNAME:$USERNAME "$APP_HOME/logs"
 
 USER $USERNAME
 WORKDIR $APP_HOME
