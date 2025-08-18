@@ -45,10 +45,10 @@ jobs:
 
     strategy:
       matrix:
-        os: [ ubuntu-22.04 ]
+        os: [ ubuntu-22.04, ubuntu-24.04 ]
         include:
           - os: ubuntu-22.04
-            preset: linux-${{ needs.strings.outputs.project-name }}
+          - os: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -79,7 +79,8 @@ jobs:
             qtbase5-dev qttools5-dev qttools5-dev-tools \
 
       - name: Configure CMake
-        run: cmake --preset ${{ matrix.preset }}
+        if: runner.os == 'Linux'
+        run: cmake --preset linux-${{ needs.strings.outputs.project-name }}
 
       - name: Build
         run: cmake --build --preset ${{ needs.strings.outputs.project-name }}
