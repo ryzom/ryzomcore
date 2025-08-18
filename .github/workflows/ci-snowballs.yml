@@ -17,7 +17,7 @@ on:
       - CMakeLists.txt
       - CMakePresets.json
   workflow_run:
-    workflows: [ NeL: CI / CD ]
+    workflows: [ "NeL: CI / CD" ]
     types:
       - completed
 
