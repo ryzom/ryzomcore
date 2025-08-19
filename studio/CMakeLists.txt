@@ -4,6 +4,15 @@
 #   Copyright (C) 2010 Dzmitry Kamiahin <dnk-88@tut.by>
 #
 #-----------------------------------------------------------------------------
+cmake_minimum_required(VERSION 3.27)
+
+project(Studio VERSION ${RyzomCore_VERSION} LANGUAGES CXX)
+
+find_package(CURL REQUIRED)
+if(NOT TARGET CURL::libcurl)
+  message(FATAL_ERROR "has no curl target ${CURL_Found}")
+endif ()
+find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS misc net)
 
 # This tells the application(s) where to find the installed data.
 IF(WIN32)

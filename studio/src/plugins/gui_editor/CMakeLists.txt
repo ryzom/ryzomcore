@@ -40,7 +40,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	expr_link_dlg.h
 	new_gui_dlg.h
 	)
-	
+
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 	gui_editor_window.ui
 	widget_properties.ui
@@ -81,22 +81,21 @@ ADD_LIBRARY(studio_plugin_gui_editor MODULE ${SRC}
             ${OVQT_PLUGIN_GUI_EDITOR_RC_SRCS}
             )
 
-TARGET_LINK_LIBRARIES(
-						studio_plugin_gui_editor
-						studio_plugin_core
-						nelmisc
-						nel3d
-						nelgui
-						${QT_LIBRARIES}
-						${QT_QTOPENGL_LIBRARY}
-						${QtPropertyBrowser_LIBRARY}
-						)
+TARGET_LINK_LIBRARIES(studio_plugin_gui_editor
+        studio_plugin_core
+		NeL::misc
+		NeL::3d
+		NeL::gui
+        ${QT_LIBRARIES}
+        ${QT_QTOPENGL_LIBRARY}
+        ${QtPropertyBrowser_LIBRARY}
+)
 
 NL_DEFAULT_PROPS(studio_plugin_gui_editor "Tools: Studio Plugin: GUI Editor")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_gui_editor)
 NL_ADD_LIB_SUFFIX(studio_plugin_gui_editor)
 
-ADD_DEFINITIONS(-DGUI_EDITOR_LIBRARY ${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_gui_editor PRIVATE GUI_EDITOR_LIBRARY ${LIBXML2_DEFINITIONS} QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 IF(WIN32)
   IF(WITH_INSTALL_LIBRARIES)

@@ -37,13 +37,13 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/src)
 
 ADD_LIBRARY(studio_plugin_mission_compiler MODULE ${SRC} ${OVQT_PLUG_MISSION_COMPILER_MOC_SRC} ${OVQT_PLUG_MISSION_COMPILER_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_MISSION_COMPILER_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_mission_compiler studio_plugin_core nelmisc nelligo ryzom_mission_compiler_lib ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(studio_plugin_mission_compiler studio_plugin_core NeL::misc NeL::ligo ryzom_mission_compiler_lib ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
 
 NL_DEFAULT_PROPS(studio_plugin_mission_compiler "Tools: Studio Plugin: Mission Compiler")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_mission_compiler)
 NL_ADD_LIB_SUFFIX(studio_plugin_mission_compiler)
 
-ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_mission_compiler PRIVATE QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 
 

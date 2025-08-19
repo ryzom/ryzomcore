@@ -52,23 +52,23 @@ ADD_LIBRARY(studio_plugin_world_editor MODULE ${SRC}
 						${OVQT_PLUGIN_WORLD_EDITOR_UI_HDRS}
 						${OVQT_PLUGIN_WORLD_EDITOR_RC_SRCS})
 
-TARGET_LINK_LIBRARIES(	studio_plugin_world_editor 
-						studio_plugin_core 
-						studio_plugin_landscape_editor 
-						nelmisc 
-						nel3d
-						${QtPropertyBrowser_LIBRARY}
-						QtPropertyBrowser::Text
-						${QT_LIBRARIES}
-						${QT_QTOPENGL_LIBRARY}
-						${LIBXML2_LIBRARIES}
+TARGET_LINK_LIBRARIES(studio_plugin_world_editor
+		studio_plugin_core
+		studio_plugin_landscape_editor
+		NeL::misc
+		NeL::3d
+		${QtPropertyBrowser_LIBRARY}
+		QtPropertyBrowser::Text
+		${QT_LIBRARIES}
+		${QT_QTOPENGL_LIBRARY}
+		${LIBXML2_LIBRARIES}
 )
 
 NL_DEFAULT_PROPS(studio_plugin_world_editor "Tools: Studio Plugin: World Editor")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_world_editor)
 NL_ADD_LIB_SUFFIX(studio_plugin_world_editor)
 
-ADD_DEFINITIONS(-DWORLD_EDITOR_LIBRARY -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_world_editor PRIVATE WORLD_EDITOR_LIBRARY QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 IF(WIN32)
   IF(WITH_INSTALL_LIBRARIES)
