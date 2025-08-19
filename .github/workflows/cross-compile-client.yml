@@ -3,16 +3,22 @@ name: build 32-Bit windows client
 on:
   push:
     branches: [ "core4", "feature/*" ]
-    paths-ignore:
-      - '.github/workflows/**.yml'
-      - 'snowballs2/**'
-      - '!.github/workflows/cross-compile-client.yml'
+    paths:
+      - .github/workflows/cross-compile-client.yml
+      # TODO use nel package instead
+      - nel/**
+      - ryzom/**
+      - CMakeLists.txt
+      - CMakePresets.json
   pull_request:
     branches: [ "core4" ]
-    paths-ignore:
-      - '.github/workflows/**.yml'
-      - 'snowballs2/**'
-      - '!.github/workflows/cross-compile-client.yml'
+    paths:
+      - .github/workflows/cross-compile-client.yml
+      # TODO use nel package instead
+      - nel/**
+      - ryzom/**
+      - CMakeLists.txt
+      - CMakePresets.json
 
 jobs:
   build:
