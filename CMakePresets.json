@@ -3,6 +3,7 @@
   "include": [
     "cmake/CMakePresets.base.json",
     "nel/CMakePresets.json",
+    "nelns/CMakePresets.json",
     "snowballs2/CMakePresets.json"
   ]
 }

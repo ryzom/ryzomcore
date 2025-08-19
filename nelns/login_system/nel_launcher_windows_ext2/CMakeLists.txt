@@ -7,8 +7,8 @@ ENDIF()
 ADD_DEFINITIONS(-DNL_LAUNCHER_CFG="${NL_ETC_PREFIX}/")
 
 TARGET_LINK_LIBRARIES(nel_launcher_ext2
-						nelnet
-						nelmisc
+						NeL::net
+						NeL::misc
 						${ZLIB_LIBRARY}
 						${CURL_LIBRARIES})
 

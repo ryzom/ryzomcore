@@ -7,8 +7,8 @@ TARGET_INCLUDE_DIRECTORIES(admin_service PRIVATE ${MYSQL_INCLUDE_DIR} ${ZLIB_INC
 TARGET_LINK_LIBRARIES(admin_service
 						${MYSQL_LIBRARIES}
 						${ZLIB_LIBRARIES}
-						nelmisc
-						nelnet)
+						NeL::misc
+						NeL::net)
 
 NL_DEFAULT_PROPS(admin_service "NelNS, Services: Admin Service")
 NL_ADD_RUNTIME_FLAGS(admin_service)

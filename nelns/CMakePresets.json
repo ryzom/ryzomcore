@@ -6,26 +6,26 @@
   ],
   "configurePresets": [
     {
-      "binaryDir": "${sourceDir}/build/snowballs",
-      "name": "snowballs",
+      "binaryDir": "${sourceDir}/build/nelns",
+      "installDir": "${sourceDir}/build/install",
+      "name": "nelns",
       "cacheVariables": {
-        "WITH_SNOWBALLS": true,
-        "WITH_SNOWBALLS_CLIENT": true,
-        "WITH_SNOWBALLS_SERVER": true,
-        "WITH_SNOWBALLS_PACKAGE": true,
+        "WITH_NELNS": true,
+        "WITH_NELNS_SERVER": true,
+        "WITH_NELNS_LOGIN_SYSTEM": true,
         "WITH_TESTING": true,
+        "WITH_NEL_TESTS": true,
         "WITH_NEL": true,
-        "WITH_NEL_TESTS": false,
-        "WITH_NELNS": false,
         "WITH_RYZOM": false,
+        "WITH_SNOWBALLS": false,
         "WITH_STUDIO": false,
         "WITH_TOOLS": false,
         "WITH_QT5": true,
-        "CPACK_PACKAGE_NAME": "snowballs"
+        "CPACK_PACKAGE_NAME": "nelns"
       }
     },
     {
-      "name": "ci-snowballs",
+      "name": "ci-nelns",
       "hidden": true,
       "cacheVariables": {
         "WITH_NEL": false,
@@ -35,44 +35,44 @@
     {
       "inherits": [
         "linux",
-        "snowballs"
+        "nelns"
       ],
-      "name": "linux-snowballs"
+      "name": "linux-nelns"
     },
     {
       "inherits": [
         "linux",
-        "ci-snowballs",
+        "ci-nelns",
         "snowballs"
       ],
-      "name": "ci-linux-snowballs"
+      "name": "ci-linux-nelns"
     },
     {
       "inherits": [
         "windows",
-        "snowballs"
+        "nelns"
       ],
-      "name": "windows-snowballs"
+      "name": "windows-nelns"
     }
   ],
   "buildPresets": [
     {
       "inherits": "release",
-      "name": "snowballs",
-      "configurePreset": "snowballs"
+      "name": "nelns",
+      "configurePreset": "nelns"
     }
   ],
   "testPresets": [
     {
       "inherits": "default",
-      "name": "snowballs",
-      "configurePreset": "snowballs"
+      "name": "nelns",
+      "configurePreset": "nelns"
     }
   ],
   "packagePresets": [
     {
-      "name": "snowballs",
-      "configurePreset": "snowballs"
+      "name": "nelns",
+      "configurePreset": "nelns"
     }
   ]
 }
