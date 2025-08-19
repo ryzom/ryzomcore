@@ -1,0 +1,25 @@
+name: "Cleanup: delete untagged container versions"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 0'
+
+jobs:
+  delete_versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          min-versions-to-keep: 10
+          package-name: ryzomcore-nelns
+          package-type: container
+      - uses: actions/delete-package-versions@v5
+        with:
+          min-versions-to-keep: 10
+          package-name: ryzomcore-snowballs
+          package-type: container
+      - uses: actions/delete-package-versions@v5
+        with:
+          min-versions-to-keep: 10
+          package-name: ryzomcore-tools
+          package-type: container
