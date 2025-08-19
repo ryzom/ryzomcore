@@ -462,7 +462,6 @@ ENDIF()
 
 IF(WITH_NEL_TESTS)
   ENABLE_TESTING()
-  ADD_TEST(NAME nel_unit_test COMMAND nel_unit_test)
   IF(BUILD_DASHBOARD)
     INCLUDE(Dart)
     SET(SVNCOMMAND svn)

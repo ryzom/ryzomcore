@@ -3,6 +3,7 @@ FILE(GLOB SRC *.cpp *.h)
 ADD_EXECUTABLE(nel_unit_test
         nel_unit_test.cpp
 )
+ADD_TEST(NAME nel_unit_test COMMAND nel_unit_test)
 
 TARGET_INCLUDE_DIRECTORIES(nel_unit_test PRIVATE ${CPPTEST_INCLUDE_DIR})
 
