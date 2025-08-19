@@ -272,8 +272,7 @@ static void cbClientChooseShard(CMessage &msgin, TSockId from, CCallbackNetBase 
 			break;
 		}
 
-		ucstring name;
-		name.fromUtf8(row[0]);
+		string name = row[0];
 
 		CLoginCookie lc;
 		lc.setFromString(cookie);
