@@ -43,7 +43,7 @@
       "inherits": [
         "linux",
         "ci-nelns",
-        "snowballs"
+        "nelns"
       ],
       "name": "ci-linux-nelns"
     },
