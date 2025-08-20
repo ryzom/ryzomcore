@@ -96,6 +96,7 @@ IF(WITH_INSTALL_LIBRARIES)
   set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
   set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
   set(package_components 3d georges ligo misc net pacs sevenzip sound snd_lowlevel)
+  set(package_required_dependencies CURL)
 
   install(EXPORT "${project_export_name}"
           COMPONENT libraries

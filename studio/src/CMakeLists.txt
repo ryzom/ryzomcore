@@ -63,10 +63,8 @@ add_dependencies(studio
 		studio_plugin_disp_sheet_id
 		studio_plugin_example
 		studio_plugin_georges_editor
-		studio_plugin_gui_editor
 		studio_plugin_landscape_editor
 		studio_plugin_log
-		studio_plugin_mission_compiler
 		studio_plugin_object_viewer
 		studio_plugin_sheet_builder
 		studio_plugin_tile_editor
@@ -74,5 +72,15 @@ add_dependencies(studio
 		studio_plugin_world_editor
 #		studio_plugin_zone_painter
 )
+IF(WITH_GUI)
+	add_dependencies(studio
+			studio_plugin_gui_editor
+	)
+ENDIF()
+IF(WITH_RYZOM AND WITH_RYZOM_TOOLS)
+	add_dependencies(studio
+			studio_plugin_mission_compiler
+	)
+ENDIF()
 
 INSTALL(TARGETS studio RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT runtime BUNDLE DESTINATION /Applications)
