@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.27)
 
 project(Studio VERSION ${RyzomCore_VERSION} LANGUAGES CXX)
 
-find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS misc net)
+find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS 3d georges gui ligo misc sound)
 
 # This tells the application(s) where to find the installed data.
 IF(WIN32)
