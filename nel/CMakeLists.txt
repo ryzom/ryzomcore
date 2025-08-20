@@ -95,7 +95,7 @@ IF(WITH_INSTALL_LIBRARIES)
   set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
   set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
   set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
-  set(package_components 3d georges ligo misc net pacs sevenzip sound snd_lowlevel)
+  set(package_components 3d georges gui ligo misc net pacs sevenzip sound snd_lowlevel) # TODO append in components to have actual list of build targets
   set(package_required_dependencies CURL)
 
   install(EXPORT "${project_export_name}"
