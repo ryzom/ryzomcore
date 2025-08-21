@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "core4", "feature/*" ]
     paths:
-      - ci-studio.yml
+      - .github/workflows/ci-studio.yml
       # TODO use ryzom package instead
       - ryzom/**
       - studio/**
@@ -14,7 +14,7 @@ on:
   pull_request:
     branches: [ "core4" ]
     paths:
-      - ci-studio.yml
+      - .github/workflows/ci-studio.yml
       # TODO use ryzom package instead
       - ryzom/**
       - studio/**
