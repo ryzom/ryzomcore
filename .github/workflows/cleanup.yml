@@ -1,4 +1,4 @@
-name: "Cleanup: delete untagged container versions"
+name: "Cleanup: delete untagged container"
 on:
   workflow_dispatch:
   schedule:
