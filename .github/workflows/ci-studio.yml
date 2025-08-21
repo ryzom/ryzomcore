@@ -10,6 +10,7 @@ on:
       - studio/**
       - CMakeLists.txt
       - CMakePresets.json
+
   pull_request:
     branches: [ "core4" ]
     paths:
@@ -19,6 +20,9 @@ on:
       - studio/**
       - CMakeLists.txt
       - CMakePresets.json
+
+  workflow_dispatch:
+
 env:
   project-name: studio
 
@@ -89,7 +93,7 @@ jobs:
           workflow_conclusion: success
           branch: "${{ github.ref }}"
           event: push
-          name: "${{ env.nel-package }}-.*"
+          name: package-nel-${{ matrix.os }}-.*
           name_is_regexp: true
           path: build
           if_no_artifact_found: ignore

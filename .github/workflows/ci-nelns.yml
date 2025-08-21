@@ -16,14 +16,11 @@ on:
       - nelns/**
       - CMakeLists.txt
       - CMakePresets.json
-  workflow_run:
-    workflows: [ "NeL: CI / CD" ]
-    types:
-      - completed
+
+  workflow_dispatch:
 
 env:
-  DEFAULT_BRANCH: core4
-  PROJECT_NAME: nelns
+  project-name: nelns
   IMAGE_NAME: ryzomcore-nelns
 
 jobs:
@@ -42,12 +39,12 @@ jobs:
         run: |
           BUILD_DIR=${{ github.workspace }}/build
           echo "build-dir=${BUILD_DIR}" >> "$GITHUB_OUTPUT"
-          echo "build-output-dir=${BUILD_DIR}/$PROJECT_NAME" >> "$GITHUB_OUTPUT"
+          echo "build-output-dir=${BUILD_DIR}/${{ env.project-name }}" >> "$GITHUB_OUTPUT"
           echo "install-dir=${BUILD_DIR}/install" >> "$GITHUB_OUTPUT"
           COMMIT_HASH=${{ github.sha }}
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          [ "$VERSION" == "$DEFAULT_BRANCH" ] && VERSION=latest
+          [ "$VERSION" == "${{ github.event.repository.default_branch }}" ] && VERSION=latest
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           echo VERSION=$VERSION
@@ -62,9 +59,6 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-22.04, ubuntu-24.04 ]
-        include:
-          - os: ubuntu-22.04
-          - os: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +85,7 @@ jobs:
             libsquish-dev \
             liblzma-dev \
             libgsf-1-dev \
-            qtbase5-dev qttools5-dev qttools5-dev-tools \
+            qtbase5-dev qttools5-dev qttools5-dev-tools
 
       - uses: dawidd6/action-download-artifact@v6
         id: download-from-branch
@@ -110,7 +104,7 @@ jobs:
         with:
           workflow: ci-nel.yml
           workflow_conclusion: success
-          branch: "${{ env.DEFAULT_BRANCH }}"
+          branch: "${{ github.event.repository.default_branch }}"
           event: push
           name: package-nel-${{ matrix.os }}-.*
           name_is_regexp: true
@@ -125,21 +119,21 @@ jobs:
 
       - name: Configure CMake
         if: runner.os == 'Linux'
-        run: cmake --preset ci-linux-${{ env.PROJECT_NAME }}
+        run: cmake --preset ci-linux-${{ env.project-name }}
 
       - name: Build
-        run: cmake --build --preset ${{ env.PROJECT_NAME }}
+        run: cmake --build --preset ${{ env.project-name }}
 
       - name: Test
-        run: ctest --preset ${{ env.PROJECT_NAME }}
+        run: ctest --preset ${{ env.project-name }}
 
       - name: Package
-        run: cpack --preset ${{ env.PROJECT_NAME }} -R "${{ needs.strings.outputs.build-version }}"
+        run: cpack --preset ${{ env.project-name }} -R "${{ needs.strings.outputs.build-version }}"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: package-${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
-          path: ${{ needs.strings.outputs.build-output-dir }}/${{ env.PROJECT_NAME }}-*
+          name: package-${{ env.project-name }}-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
+          path: ${{ needs.strings.outputs.build-output-dir }}/${{ env.project-name }}-*
 
   docker:
     runs-on: ubuntu-latest
@@ -153,7 +147,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: package-${{ env.PROJECT_NAME }}-ubuntu-24.04-${{ needs.strings.outputs.build-version }}
+          name: package-${{ env.project-name }}-ubuntu-24.04-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-output-dir }}
 
       - name: Build the Docker image
@@ -168,7 +162,7 @@ jobs:
           if-no-files-found: error
 
       - name: Push image
-        if: ${{ github.ref == format('refs/heads/{0}', env.DEFAULT_BRANCH) }}
+        if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch ) }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
           docker push "${{ needs.strings.outputs.docker-image-tag }}"
