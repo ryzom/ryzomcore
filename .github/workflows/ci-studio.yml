@@ -57,7 +57,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-24.04 ]
-        static: [ true, false ]
+        linking: [ static, shared ]
 
     steps:
       - uses: actions/checkout@v4
@@ -118,11 +118,11 @@ jobs:
           --prefix=${{ needs.strings.outputs.install-dir }}
 
       - name: Configure CMake
-        if: runner.os == 'Linux' && matrix.static == false
+        if: runner.os == 'Linux' && matrix.linking == 'shared'
         run: cmake --preset ci-linux-${{ env.project-name }}
 
       - name: Configure CMake
-        if: runner.os == 'Linux' && matrix.static == true
+        if: runner.os == 'Linux' && matrix.linking == 'static'
         run: cmake --preset ci-linux-${{ env.project-name }}-static
 
       - name: Build
@@ -133,5 +133,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: package-${{ env.project-name }}-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
+          name: package-${{ env.project-name }}-${{ matrix.os }}-${{ matrix.linking }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-output-dir }}/${{ env.project-name }}-*
