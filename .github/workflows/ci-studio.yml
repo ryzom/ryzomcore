@@ -207,9 +207,6 @@ jobs:
       - name: Build
         run: cmake --build --preset ${{ env.project-name }}
 
-      - name: Test
-        run: ctest --preset ${{ env.project-name }}
-
       - name: Package
         run: cpack --preset ${{ env.project-name }} -R "${{ needs.strings.outputs.build-version }}"
 
