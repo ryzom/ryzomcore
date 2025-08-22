@@ -57,11 +57,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-24.04 ]
-        include:
-          - os: ubuntu-24.04
-            static: true
-          - os: ubuntu-24.04
-            static: false
+        static: [ true, false ]
 
     steps:
       - uses: actions/checkout@v4
