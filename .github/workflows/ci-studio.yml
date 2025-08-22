@@ -57,6 +57,11 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-24.04 ]
+        include:
+          - os: ubuntu-24.04
+            static: true
+          - os: ubuntu-24.04
+            static: false
 
     steps:
       - uses: actions/checkout@v4
@@ -117,91 +122,11 @@ jobs:
           --prefix=${{ needs.strings.outputs.install-dir }}
 
       - name: Configure CMake
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.static == false
         run: cmake --preset ci-linux-${{ env.project-name }}
 
-      - name: Build
-        run: cmake --build --preset ${{ env.project-name }}
-
-      - name: Test
-        run: ctest --preset ${{ env.project-name }}
-
-      - name: Package
-        run: cpack --preset ${{ env.project-name }} -R "${{ needs.strings.outputs.build-version }}"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: package-${{ env.project-name }}-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
-          path: ${{ needs.strings.outputs.build-output-dir }}/${{ env.project-name }}-*
-
-  build-static:
-    needs: [ strings ]
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ ubuntu-24.04 ]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: "^3.29.5"
-
-      - name: Dependencies Linux
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt install --yes \
-            build-essential ccache \
-            bison autoconf automake \
-            libpng-dev \
-            libjpeg-dev \
-            libgif-dev libfreetype6-dev \
-            freeglut3-dev \
-            liblua5.2-dev libluabind-dev libcpptest-dev \
-            libogg-dev libvorbis-dev libopenal-dev \
-            libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
-            libmysqlclient-dev \
-            libxml2-dev \
-            libcurl4-openssl-dev libssl-dev \
-            libsquish-dev \
-            liblzma-dev \
-            libgsf-1-dev \
-            qtbase5-dev qttools5-dev qttools5-dev-tools libqtpropertybrowser-dev
-
-      - uses: dawidd6/action-download-artifact@v6
-        id: download-from-branch
-        with:
-          workflow: ci-nel.yml
-          workflow_conclusion: success
-          branch: "${{ github.ref }}"
-          event: push
-          name: "${{ env.nel-package }}-.*"
-          name_is_regexp: true
-          path: build
-          if_no_artifact_found: ignore
-
-      - uses: dawidd6/action-download-artifact@v6
-        if: ${{ steps.download-from-branch.outputs.found_artifact != 'true' }}
-        with:
-          workflow: ci-nel.yml
-          workflow_conclusion: success
-          branch: "${{ github.event.repository.default_branch }}"
-          event: push
-          name: package-nel-${{ matrix.os }}-.*
-          name_is_regexp: true
-          path: build
-
-      - name: Install Dependency
-        run: >
-          sh ${{ needs.strings.outputs.build-dir }}/package-nel-*/nel-*.sh
-          --skip-license
-          --include-subdir
-          --prefix=${{ needs.strings.outputs.install-dir }}
-
       - name: Configure CMake
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.static == true
         run: cmake --preset ci-linux-${{ env.project-name }}-static
 
       - name: Build
