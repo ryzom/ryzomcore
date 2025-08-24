@@ -387,3 +387,4 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
           find ${{ needs.strings.outputs.build-dir }} -type f -iname *-docker-* -exec docker load --input {} \;
           docker push "${{ needs.strings.outputs.image-group }}/ryzomcore-nelns"
+          docker push "${{ needs.strings.outputs.image-group }}/ryzomcore-snowballs"
