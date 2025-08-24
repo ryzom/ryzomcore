@@ -23,10 +23,8 @@ jobs:
         id: strings
         shell: bash
         run: |
-          BUILD_DIR=${{ github.workspace }}/build
-          echo "build-dir=${BUILD_DIR}" >> "$GITHUB_OUTPUT"
-          echo "build-output-dir=${BUILD_DIR}/${{ env.project-name }}" >> "$GITHUB_OUTPUT"
-          echo "install-dir=${BUILD_DIR}/install" >> "$GITHUB_OUTPUT"
+          echo "build-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+          echo "install-dir=${{ github.workspace }}/build/install" >> "$GITHUB_OUTPUT"
           COMMIT_HASH=${{ github.sha }}
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
@@ -108,6 +106,7 @@ jobs:
         with:
           name: nel-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
+
 
   nelns:
     name: "NeL Network Services"
@@ -192,6 +191,91 @@ jobs:
         with:
           name: nelns-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
+
+
+  snowballs:
+    name: "Snowballs"
+    needs: [ strings, nel ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, ubuntu-24.04 ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          key: snowballs-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'snowballs2/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          path: ${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-*
+
+      - uses: actions/download-artifact@v4
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          pattern: nel-${{ matrix.os }}-*
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
+
+      - uses: lukka/get-cmake@latest
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          cmakeVersion: "^3.29.5"
+
+      - name: Dependencies Linux
+        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt install --yes \
+            build-essential ccache \
+            bison autoconf automake \
+            libpng-dev \
+            libjpeg-dev \
+            libgif-dev libfreetype6-dev \
+            freeglut3-dev \
+            liblua5.2-dev libluabind-dev libcpptest-dev \
+            libogg-dev libvorbis-dev libopenal-dev \
+            libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+            libmysqlclient-dev \
+            libcurl4-openssl-dev libssl-dev \
+            libsquish-dev \
+            liblzma-dev \
+            libgsf-1-dev \
+            qtbase5-dev qttools5-dev qttools5-dev-tools
+
+      - name: Install Dependency
+        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
+        run: >
+          sh ${{ needs.strings.outputs.build-dir }}/nel-*.sh
+          --skip-license
+          --include-subdir
+          --prefix=${{ needs.strings.outputs.install-dir }}
+
+      - name: Configure CMake
+        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
+        run: cmake --preset ci-linux-snowballs
+
+      - name: Build
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cmake --build --preset snowballs
+
+      - name: Test
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: ctest --preset snowballs
+
+      - uses: actions/upload-artifact@v4
+        if: ( !cancelled() ) && matrix.os == 'ubuntu-24.04' && steps.cache.outputs.cache-hit != 'true'
+        with:
+          name: snowballs-test-results
+          if-no-files-found: error
+          path: ${{ needs.strings.outputs.build-dir }}/reports/*.xml
+
+      - name: Package
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cpack --preset snowballs -R "${{ needs.strings.outputs.build-version }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snowballs-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
+          path: ${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-*
 
 
   studio:
