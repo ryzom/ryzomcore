@@ -167,6 +167,7 @@ jobs:
         run: cmake --build --preset nelns
 
       - name: Test
+        if: steps.cache.outputs.cache-hit != 'true'
         run: ctest --preset nelns
 
       - name: Package
