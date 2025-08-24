@@ -366,3 +366,25 @@ jobs:
         with:
           name: studio-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/studio/studio-*
+
+
+  publish:
+    needs: [ strings, nelns, snowballs ]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch ) }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: "*-ubuntu-24.04-*"
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
+      - run: find ${{ needs.strings.outputs.build-dir }}
+      - name: Push image
+        run: |
+          IMAGE="${{ needs.strings.outputs.image-group }}/ryzomcore-snowballs"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          docker load --input ${{ needs.strings.outputs.build-dir }}/nelns/nelns-docker-*
+          docker push "${IMAGE}"
