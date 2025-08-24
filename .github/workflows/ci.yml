@@ -108,6 +108,11 @@ jobs:
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
           if-no-files-found: error
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nel-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}.sh
+          path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*.sh
+
 
   nelns:
     name: "NeL Network Services"
@@ -193,7 +198,7 @@ jobs:
         run: |
           IMAGE_TAG="${{ needs.strings.outputs.image-group }}/ryzomcore-nelns:${{ needs.strings.outputs.image-version }}"
           docker build . --file nelns/docker/Dockerfile --tag "${IMAGE_TAG}"
-          docker save --output=${{ needs.strings.outputs.build-dir }}/nelns/nelns-docker-${{ needs.strings.outputs.build-version }} "${IMAGE_TAG}"
+          docker save --output=${{ needs.strings.outputs.build-dir }}/nelns/nelns-docker-${{ needs.strings.outputs.build-version }}.tar "${IMAGE_TAG}"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -286,7 +291,7 @@ jobs:
         run: |
           IMAGE_TAG="${{ needs.strings.outputs.image-group }}/ryzomcore-snowballs:${{ needs.strings.outputs.image-version }}"
           docker build . --file snowballs2/docker/Dockerfile --tag "${IMAGE_TAG}"
-          docker save --output=${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-docker-${{ needs.strings.outputs.build-version }} "${IMAGE_TAG}"
+          docker save --output=${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-docker-${{ needs.strings.outputs.build-version }}.tar "${IMAGE_TAG}"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -386,5 +391,5 @@ jobs:
         run: |
           IMAGE="${{ needs.strings.outputs.image-group }}/ryzomcore-snowballs"
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
-          docker load --input ${{ needs.strings.outputs.build-dir }}/nelns/nelns-docker-*
+          docker load --input $(realpath ${{ needs.strings.outputs.build-dir }}/nelns/nelns-docker-*)
           docker push "${IMAGE}"
