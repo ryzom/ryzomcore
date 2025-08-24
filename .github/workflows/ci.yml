@@ -98,7 +98,7 @@ jobs:
         with:
           name: nel-test-results
           if-no-files-found: error
-          path: ${{ needs.strings.outputs.build-dir }}/nel/**/reports/*.xml
+          path: ${{ needs.strings.outputs.build-dir }}/reports/*.xml
 
       - name: Package
         if: steps.cache.outputs.cache-hit != 'true'
@@ -182,7 +182,7 @@ jobs:
         with:
           name: nelns-test-results
           if-no-files-found: error
-          path: ${{ needs.strings.outputs.build-dir }}/nelns/**/reports/*.xml
+          path: ${{ needs.strings.outputs.build-dir }}/reports/*.xml
 
       - name: Package
         if: steps.cache.outputs.cache-hit != 'true'
