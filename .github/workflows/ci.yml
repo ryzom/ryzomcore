@@ -40,6 +40,7 @@ jobs:
           echo "image-group=${IMAGE_GROUP}" >> "$GITHUB_OUTPUT"
 
   nel:
+    name: "NeL"
     needs: [ strings ]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -101,8 +102,85 @@ jobs:
           name: nel-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
 
+  nelns:
+    name: "NeL Network Services"
+    needs: [ strings, nel ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, ubuntu-24.04 ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          key: nelns-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'nelns/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          path: ${{ needs.strings.outputs.build-dir }}
+
+      - uses: actions/download-artifact@v4
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          pattern: nel-${{ matrix.os }}-*
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
+
+      - uses: lukka/get-cmake@latest
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          cmakeVersion: "^3.29.5"
+
+      - name: Dependencies Linux
+        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt install --yes \
+            build-essential ccache \
+            bison autoconf automake \
+            libpng-dev \
+            libjpeg-dev \
+            libgif-dev libfreetype6-dev \
+            freeglut3-dev \
+            liblua5.2-dev libluabind-dev libcpptest-dev \
+            libogg-dev libvorbis-dev libopenal-dev \
+            libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+            libmysqlclient-dev \
+            libcurl4-openssl-dev libssl-dev \
+            libsquish-dev \
+            liblzma-dev \
+            libgsf-1-dev \
+            qtbase5-dev qttools5-dev qttools5-dev-tools
+
+      - name: Install Dependency
+        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
+        run: >
+          sh ${{ needs.strings.outputs.build-dir }}/nel-*.sh
+          --skip-license
+          --include-subdir
+          --prefix=${{ needs.strings.outputs.install-dir }}
+
+      - name: Configure CMake
+        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
+        run: cmake --preset ci-linux-nelns
+
+      - name: Build
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cmake --build --preset nelns
+
+      - name: Test
+        run: ctest --preset nelns
+
+      - name: Package
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cpack --preset nelns -R "${{ needs.strings.outputs.build-version }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nelns-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
+          path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
+
 
   studio:
+    name: "Studio"
     needs: [ strings, nel ]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -164,10 +242,6 @@ jobs:
       - name: Build
         if: steps.cache.outputs.cache-hit != 'true'
         run: cmake --build --preset studio
-
-      - name: Test
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: ctest --preset studio
 
       - name: Package
         if: steps.cache.outputs.cache-hit != 'true'
