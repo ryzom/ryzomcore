@@ -188,22 +188,17 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: cpack --preset nelns -R "${{ needs.strings.outputs.build-version }}"
 
+      - name: Build Docker image
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          IMAGE_TAG="${{ needs.strings.outputs.image-group }}/ryzomcore-nelns:${{ needs.strings.outputs.image-version }}"
+          docker build . --file nelns/docker/Dockerfile --tag "${IMAGE_TAG}"
+          docker save --output=${{ needs.strings.outputs.build-dir }}/nelns/nelns-docker-${{ needs.strings.outputs.build-version }} "${IMAGE_TAG}"
+
       - uses: actions/upload-artifact@v4
         with:
           name: nelns-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
-          if-no-files-found: error
-
-      - name: Build Docker image
-        run: |
-          IMAGE_TAG="${{ needs.strings.outputs.image-group }}/ryzomcore-nelns:${{ needs.strings.outputs.image-version }}"
-          docker build . --file nelns/docker/Dockerfile --tag "${IMAGE_TAG}"
-          docker save --output=${{ needs.strings.outputs.build-dir }}/docker-nelns-${{ needs.strings.outputs.build-version }} "${IMAGE_TAG}"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: docker
-          path: ${{ needs.strings.outputs.build-dir }}/docker-*
           if-no-files-found: error
 
 
@@ -285,6 +280,13 @@ jobs:
       - name: Package
         if: steps.cache.outputs.cache-hit != 'true'
         run: cpack --preset snowballs -R "${{ needs.strings.outputs.build-version }}"
+
+      - name: Build Docker image
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          IMAGE_TAG="${{ needs.strings.outputs.image-group }}/ryzomcore-snowballs:${{ needs.strings.outputs.image-version }}"
+          docker build . --file snowballs2/docker/Dockerfile --tag "${IMAGE_TAG}"
+          docker save --output=${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-docker-${{ needs.strings.outputs.build-version }} "${IMAGE_TAG}"
 
       - uses: actions/upload-artifact@v4
         with:
