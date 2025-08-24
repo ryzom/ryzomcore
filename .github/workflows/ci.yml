@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v4
         with:
           key: nel-${{ matrix.os }}-${{ hashFiles('nel/**', 'CMakeLists.txt', 'CMakePresets.json') }}
-          path: ${{ needs.strings.outputs.build-dir }}
+          path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
 
       - uses: lukka/get-cmake@latest
         if: steps.cache.outputs.cache-hit != 'true'
@@ -116,7 +116,7 @@ jobs:
         uses: actions/cache@v4
         with:
           key: nelns-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'nelns/**', 'CMakeLists.txt', 'CMakePresets.json') }}
-          path: ${{ needs.strings.outputs.build-dir }}
+          path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
 
       - uses: actions/download-artifact@v4
         if: steps.cache.outputs.cache-hit != 'true'
@@ -193,7 +193,7 @@ jobs:
         uses: actions/cache@v4
         with:
           key: studio-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'studio/**', 'CMakeLists.txt', 'CMakePresets.json') }}
-          path: ${{ needs.strings.outputs.build-dir }}
+          path: ${{ needs.strings.outputs.build-dir }}/studio/studio-*
 
       - uses: actions/download-artifact@v4
         if: steps.cache.outputs.cache-hit != 'true'
