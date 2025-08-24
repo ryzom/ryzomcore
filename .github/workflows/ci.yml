@@ -106,6 +106,7 @@ jobs:
         with:
           name: nel-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
+          if-no-files-found: error
 
 
   nelns:
@@ -191,6 +192,19 @@ jobs:
         with:
           name: nelns-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
+          if-no-files-found: error
+
+      - name: Build Docker image
+        run: |
+          IMAGE_TAG="${{ needs.strings.outputs.image-group }}/ryzomcore-nelns:${{ needs.strings.outputs.image-version }}"
+          docker build . --file nelns/docker/Dockerfile --tag "${IMAGE_TAG}"
+          docker save --output=${{ needs.strings.outputs.build-dir }}/docker-nelns-${{ needs.strings.outputs.build-version }} "${IMAGE_TAG}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker
+          path: ${{ needs.strings.outputs.build-dir }}/docker-*
+          if-no-files-found: error
 
 
   snowballs:
