@@ -82,19 +82,19 @@ jobs:
 
       - name: Configure CMake
         if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: cmake --preset linux-${{ needs.strings.outputs.project-name }}
+        run: cmake --preset linux-nel
 
       - name: Build
         if: steps.cache.outputs.cache-hit != 'true'
-        run: cmake --build --preset ${{ needs.strings.outputs.project-name }}
+        run: cmake --build --preset nel
 
       - name: Test
         if: steps.cache.outputs.cache-hit != 'true'
-        run: ctest --preset ${{ needs.strings.outputs.project-name }}
+        run: ctest --preset nel
 
       - name: Package
         if: steps.cache.outputs.cache-hit != 'true'
-        run: cpack --preset ${{ needs.strings.outputs.project-name }} -R "${{ needs.strings.outputs.build-version }}"
+        run: cpack --preset nel -R "${{ needs.strings.outputs.build-version }}"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -159,19 +159,19 @@ jobs:
 
       - name: Configure CMake
         if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: cmake --preset ci-linux-${{ env.project-name }}
+        run: cmake --preset ci-linux-studio
 
       - name: Build
         if: steps.cache.outputs.cache-hit != 'true'
-        run: cmake --build --preset ${{ env.project-name }}
+        run: cmake --build --preset studio
 
       - name: Test
         if: steps.cache.outputs.cache-hit != 'true'
-        run: ctest --preset ${{ env.project-name }}
+        run: ctest --preset studio
 
       - name: Package
         if: steps.cache.outputs.cache-hit != 'true'
-        run: cpack --preset ${{ env.project-name }} -R "${{ needs.strings.outputs.build-version }}"
+        run: cpack --preset studio -R "${{ needs.strings.outputs.build-version }}"
 
       - uses: actions/upload-artifact@v4
         with:
