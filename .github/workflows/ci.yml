@@ -339,10 +339,11 @@ jobs:
           pattern: "*-ubuntu-24.04-*"
           merge-multiple: true
           path: ${{ needs.strings.outputs.build-dir }}
-      - run: find ${{ needs.strings.outputs.build-dir }}
+
+      - run: find ${{ needs.strings.outputs.build-dir }} -type f -iname *-docker-* -exec docker load --input {} \;
+
       - name: Push image
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
-          find ${{ needs.strings.outputs.build-dir }} -type f -iname *-docker-* -exec docker load --input {} \;
           docker push "${{ needs.strings.outputs.image-group }}/ryzomcore-nelns"
           docker push "${{ needs.strings.outputs.image-group }}/ryzomcore-snowballs"
