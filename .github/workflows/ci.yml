@@ -5,11 +5,15 @@ on:
     branches: [ "core4", "feature/*" ]
     paths-ignore:
       - '.devcontainer/**'
+      - '.github/workflows/**'
+      - '!.github/workflows/ci.yml'
 
   pull_request:
     branches: [ "core4" ]
     paths-ignore:
       - '.devcontainer/**'
+      - '.github/workflows/**'
+      - '!.github/workflows/ci.yml'
 
   workflow_dispatch:
 
