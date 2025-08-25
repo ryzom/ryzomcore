@@ -340,7 +340,7 @@ jobs:
           merge-multiple: true
           path: ${{ needs.strings.outputs.build-dir }}
 
-      - run: find ${{ needs.strings.outputs.build-dir }} -type f -iname *-docker-* -exec docker load --input {} \;
+      - run: find ${{ needs.strings.outputs.build-dir }} -type f -iname *-docker-*.tar -exec docker load --input {} \;
 
       - name: Push image
         run: |
