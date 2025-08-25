@@ -48,7 +48,6 @@ runs:
           libmysqlclient-dev \
           libcurl4-openssl-dev libssl-dev \
           libsquish-dev \
-          liblzma-dev \
           libgsf-1-dev \
           qtbase5-dev qttools5-dev qttools5-dev-tools
 
