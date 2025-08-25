@@ -173,78 +173,18 @@ jobs:
       - id: cache
         uses: actions/cache@v4
         with:
-          key: snowballs-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'snowballs2/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: snowballs-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'snowballs2/**', '.github/snowballs/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-*
 
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/snowballs
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          pattern: nel-${{ matrix.os }}-*
-          merge-multiple: true
-          path: ${{ needs.strings.outputs.build-dir }}
-
-      - uses: lukka/get-cmake@latest
-        if: steps.cache.outputs.cache-hit != 'true'
-        with:
-          cmakeVersion: "^3.29.5"
-
-      - name: Dependencies Linux
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: |
-          sudo apt install --yes \
-            build-essential ccache \
-            bison autoconf automake \
-            libpng-dev \
-            libjpeg-dev \
-            libgif-dev libfreetype6-dev \
-            freeglut3-dev \
-            liblua5.2-dev libluabind-dev libcpptest-dev \
-            libogg-dev libvorbis-dev libopenal-dev \
-            libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
-            libmysqlclient-dev \
-            libcurl4-openssl-dev libssl-dev \
-            libsquish-dev \
-            liblzma-dev \
-            libgsf-1-dev \
-            qtbase5-dev qttools5-dev qttools5-dev-tools
-
-      - name: Install Dependency
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: >
-          sh ${{ needs.strings.outputs.build-dir }}/nel-*.sh
-          --skip-license
-          --include-subdir
-          --prefix=${{ needs.strings.outputs.install-dir }}
-
-      - name: Configure CMake
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: cmake --preset ci-linux-snowballs
-
-      - name: Build
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: cmake --build --preset snowballs
-
-      - name: Test
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: ctest --preset snowballs
-
-      - uses: actions/upload-artifact@v4
-        if: ( !cancelled() ) && matrix.os == 'ubuntu-24.04' && steps.cache.outputs.cache-hit != 'true'
-        with:
-          name: snowballs-test-results
-          if-no-files-found: error
-          path: ${{ needs.strings.outputs.build-dir }}/reports/*.xml
-
-      - name: Package
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: cpack --preset snowballs -R "${{ needs.strings.outputs.build-version }}"
-
-      - name: Build Docker image
-        if: matrix.os == 'ubuntu-24.04' && steps.cache.outputs.cache-hit != 'true'
-        run: |
-          IMAGE_TAG="${{ needs.strings.outputs.image-group }}/ryzomcore-snowballs:${{ needs.strings.outputs.image-version }}"
-          docker build . --file snowballs2/docker/Dockerfile --tag "${IMAGE_TAG}"
-          docker save --output=${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-docker-${{ needs.strings.outputs.build-version }}.tar "${IMAGE_TAG}"
+          os: ${{ matrix.os }}
+          install-dir: ${{ needs.strings.outputs.install-dir }}
+          image-group: ${{ needs.strings.outputs.image-group }}
+          image-version: ${{ needs.strings.outputs.image-version }}
+          build-dir: ${{ needs.strings.outputs.build-dir }}
+          build-version: ${{ needs.strings.outputs.build-version }}
 
       - uses: actions/upload-artifact@v4
         with:
