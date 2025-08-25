@@ -50,57 +50,15 @@ jobs:
       - id: cache
         uses: actions/cache@v4
         with:
-          key: nel-${{ matrix.os }}-${{ hashFiles('nel/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: nel-${{ matrix.os }}-${{ hashFiles('nel/**', '.github/nel/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
 
-      - uses: lukka/get-cmake@latest
+      - uses: ./.github/nel
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          cmakeVersion: "^3.29.5"
-
-      - name: Dependencies Linux
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: |
-          sudo apt install --yes \
-            build-essential ccache \
-            bison autoconf automake \
-            libpng-dev \
-            libjpeg-dev \
-            libgif-dev libfreetype6-dev \
-            freeglut3-dev \
-            liblua5.2-dev libluabind-dev libcpptest-dev \
-            libogg-dev libvorbis-dev libopenal-dev \
-            libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
-            libmysqlclient-dev \
-            libxml2-dev \
-            libcurl4-openssl-dev libssl-dev \
-            libsquish-dev \
-            liblzma-dev \
-            libgsf-1-dev \
-            qtbase5-dev qttools5-dev qttools5-dev-tools
-
-      - name: Configure CMake
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: cmake --preset linux-nel
-
-      - name: Build
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: cmake --build --preset nel
-
-      - name: Test
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: ctest --preset nel
-
-      - uses: actions/upload-artifact@v4
-        if: ( !cancelled() ) && matrix.os == 'ubuntu-24.04' && steps.cache.outputs.cache-hit != 'true'
-        with:
-          name: nel-test-results
-          if-no-files-found: error
-          path: ${{ needs.strings.outputs.build-dir }}/reports/*.xml
-
-      - name: Package
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: cpack --preset nel -R "${{ needs.strings.outputs.build-version }}"
+          build-dir: ${{ needs.strings.outputs.build-dir }}
+          build-version: ${{ needs.strings.outputs.build-version }}
+          os: ${{ matrix.os }}
 
       - uses: actions/upload-artifact@v4
         with:

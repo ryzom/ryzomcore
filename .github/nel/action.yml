@@ -1,0 +1,60 @@
+name: build
+description: build
+inputs:
+  build-dir:
+    description: build directory
+    required: true
+  build-version:
+    description: build version
+    required: true
+  os:
+    description: os
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "^3.29.5"
+
+    - name: Dependencies Linux
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt install --yes \
+          build-essential ccache \
+          bison autoconf automake \
+          libpng-dev \
+          libjpeg-dev \
+          libgif-dev libfreetype6-dev \
+          freeglut3-dev \
+          liblua5.2-dev libluabind-dev libcpptest-dev \
+          libogg-dev libvorbis-dev libopenal-dev \
+          libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+          libmysqlclient-dev \
+          libxml2-dev \
+          libcurl4-openssl-dev libssl-dev \
+          libsquish-dev \
+          liblzma-dev \
+          libgsf-1-dev \
+          qtbase5-dev qttools5-dev qttools5-dev-tools
+
+    - name: Configure CMake
+      if: runner.os == 'Linux'
+      run: cmake --preset linux-nel
+
+    - name: Build
+      run: cmake --build --preset nel
+
+    - name: Test
+      run: ctest --preset nel
+
+    - uses: actions/upload-artifact@v4
+      if: ( !cancelled() )
+      with:
+        name: nel-${{ inputs.os }}-test-results
+        if-no-files-found: error
+        path: ${{ inputs.build-dir }}/reports/*.xml
+
+    - name: Package
+      run: cpack --preset nel -R "${{ needs.strings.outputs.build-version }}"
+
