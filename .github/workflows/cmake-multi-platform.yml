@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "core4" ]
     paths-ignore:
-      - '.github/workflows/**.yml'
+      - '.github/**.yml'
       - 'snowballs2/**'
       - '!.github/workflows/cmake-multi-platform.yml'
   workflow_dispatch:
