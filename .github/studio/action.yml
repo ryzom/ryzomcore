@@ -1,0 +1,71 @@
+name: build
+description: build
+inputs:
+  install-dir:
+    description: install directory
+    required: true
+  build-dir:
+    description: build directory
+    required: true
+  build-version:
+    description: build version
+    required: true
+  os:
+    description: os
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: nel-${{ inputs.os }}-*
+        merge-multiple: true
+        path: ${{ inputs.build-dir }}
+
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "^3.29.5"
+
+    - name: Dependencies Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt install --yes \
+          build-essential ccache \
+          bison autoconf automake \
+          libpng-dev \
+          libjpeg-dev \
+          libgif-dev libfreetype6-dev \
+          freeglut3-dev \
+          liblua5.2-dev libluabind-dev libcpptest-dev \
+          libogg-dev libvorbis-dev libopenal-dev \
+          libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+          libmysqlclient-dev \
+          libcurl4-openssl-dev libssl-dev \
+          libsquish-dev \
+          liblzma-dev \
+          libgsf-1-dev \
+          qtbase5-dev qttools5-dev qttools5-dev-tools libqtpropertybrowser-dev
+
+    - name: Install Dependency
+      if: runner.os == 'Linux'
+      shell: bash
+      run: >
+        sh ${{ inputs.build-dir }}/nel-*.sh
+        --skip-license
+        --include-subdir
+        --prefix=${{ inputs.install-dir }}
+
+    - name: Configure CMake
+      if: runner.os == 'Linux'
+      shell: bash
+      run: cmake --preset ci-linux-studio
+
+    - name: Build
+      shell: bash
+      run: cmake --build --preset studio
+
+    - name: Package
+      shell: bash
+      run: cpack --preset studio -R "${{ inputs.build-version }}"
+

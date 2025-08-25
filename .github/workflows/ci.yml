@@ -265,60 +265,16 @@ jobs:
       - id: cache
         uses: actions/cache@v4
         with:
-          key: studio-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'studio/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: studio-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'studio/**', '.github/studio/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/studio/studio-*
 
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/studio
         if: steps.cache.outputs.cache-hit != 'true'
         with:
-          pattern: nel-${{ matrix.os }}-*
-          merge-multiple: true
-          path: ${{ needs.strings.outputs.build-dir }}
-
-      - uses: lukka/get-cmake@latest
-        if: steps.cache.outputs.cache-hit != 'true'
-        with:
-          cmakeVersion: "^3.29.5"
-
-      - name: Dependencies Linux
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: |
-          sudo apt install --yes \
-            build-essential ccache \
-            bison autoconf automake \
-            libpng-dev \
-            libjpeg-dev \
-            libgif-dev libfreetype6-dev \
-            freeglut3-dev \
-            liblua5.2-dev libluabind-dev libcpptest-dev \
-            libogg-dev libvorbis-dev libopenal-dev \
-            libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
-            libmysqlclient-dev \
-            libcurl4-openssl-dev libssl-dev \
-            libsquish-dev \
-            liblzma-dev \
-            libgsf-1-dev \
-            qtbase5-dev qttools5-dev qttools5-dev-tools libqtpropertybrowser-dev
-
-      - name: Install Dependency
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: >
-          sh ${{ needs.strings.outputs.build-dir }}/nel-*.sh
-          --skip-license
-          --include-subdir
-          --prefix=${{ needs.strings.outputs.install-dir }}
-
-      - name: Configure CMake
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: cmake --preset ci-linux-studio
-
-      - name: Build
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: cmake --build --preset studio
-
-      - name: Package
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: cpack --preset studio -R "${{ needs.strings.outputs.build-version }}"
+          install-dir: ${{ needs.strings.outputs.install-dir }}
+          build-dir: ${{ needs.strings.outputs.build-dir }}
+          build-version: ${{ needs.strings.outputs.build-version }}
+          os: ${{ matrix.os }}
 
       - uses: actions/upload-artifact@v4
         with:
