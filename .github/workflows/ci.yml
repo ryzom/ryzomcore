@@ -345,5 +345,6 @@ jobs:
       - name: Push image
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          docker images
           docker push "${{ needs.strings.outputs.image-group }}/ryzomcore-nelns"
           docker push "${{ needs.strings.outputs.image-group }}/ryzomcore-snowballs"
