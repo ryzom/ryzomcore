@@ -3,9 +3,13 @@ name: "Ryzom Core: CI / CD"
 on:
   push:
     branches: [ "core4", "feature/*" ]
+    paths-ignore:
+      - '.devcontainer/**'
 
   pull_request:
     branches: [ "core4" ]
+    paths-ignore:
+      - '.devcontainer/**'
 
   workflow_dispatch:
 
