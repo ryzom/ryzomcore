@@ -61,5 +61,5 @@ runs:
 
     - name: Package
       shell: bash
-      run: cpack --preset nel -R "${{ needs.strings.outputs.build-version }}"
+      run: cpack --preset nel -R "${{ inputs.build-version }}"
 
