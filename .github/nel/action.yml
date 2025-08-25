@@ -19,6 +19,7 @@ runs:
 
     - name: Dependencies Linux
       if: runner.os == 'Linux'
+      shell: bash
       run: |
         sudo apt install --yes \
           build-essential ccache \
@@ -40,12 +41,15 @@ runs:
 
     - name: Configure CMake
       if: runner.os == 'Linux'
+      shell: bash
       run: cmake --preset linux-nel
 
     - name: Build
+      shell: bash
       run: cmake --build --preset nel
 
     - name: Test
+      shell: bash
       run: ctest --preset nel
 
     - uses: actions/upload-artifact@v4
@@ -56,5 +60,6 @@ runs:
         path: ${{ inputs.build-dir }}/reports/*.xml
 
     - name: Package
+      shell: bash
       run: cpack --preset nel -R "${{ needs.strings.outputs.build-version }}"
 
