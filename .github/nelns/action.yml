@@ -37,15 +37,7 @@ runs:
       shell: bash
       run: |
         sudo apt install --yes \
-          build-essential ccache \
-          bison autoconf automake \
-          libpng-dev \
-          libjpeg-dev \
-          libgif-dev libfreetype6-dev \
-          freeglut3-dev \
-          liblua5.2-dev libluabind-dev libcpptest-dev \
-          libogg-dev libvorbis-dev libopenal-dev \
-          libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+          build-essential \
           libmysqlclient-dev \
           libcurl4-openssl-dev libssl-dev \
           libsquish-dev \
