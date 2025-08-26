@@ -213,7 +213,7 @@ QVariant CParticleTreeModel::data(const QModelIndex &index, int role) const
 		return QFont("SansSerif", 9, QFont::Normal);
 	}
 	if (role == Qt::DecorationRole)
-		return qVariantFromValue(getIcon(index));
+		return QVariant::fromValue(getIcon(index));
 
 	return QVariant();
 }
@@ -421,7 +421,7 @@ bool CParticleTreeModel::removeRows(int position, const QModelIndex &parent)
 {
 	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(parent.internalPointer())->child(position);
 	while (item->childCount() != 0)
-		removeRows(0, parent.child(position, 0));
+		removeRows(0, QAbstractItemModel::index(position, 0, parent));
 
 	beginRemoveRows(parent, position, position);
 	static_cast<CParticleTreeItem *>(parent.internalPointer())->deleteChild(position);

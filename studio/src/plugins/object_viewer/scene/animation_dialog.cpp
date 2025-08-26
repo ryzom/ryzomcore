@@ -51,7 +51,7 @@ CAnimationDialog::CAnimationDialog(QWidget *parent)
 
 	// init QTimeLine
 	_timeLine = new QTimeLine(_ui.endSpinBox->value() * _frameRate, this);
-	_timeLine->setCurveShape(QTimeLine::LinearCurve);
+	_timeLine->setEasingCurve(QEasingCurve::Linear);
 	_timeLine->setUpdateInterval(25);
 	_timeLine->setFrameRange(_ui.startSpinBox->value(), _ui.endSpinBox->value());
 
