@@ -421,7 +421,7 @@ bool CParticleTreeModel::removeRows(int position, const QModelIndex &parent)
 {
 	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(parent.internalPointer())->child(position);
 	while (item->childCount() != 0)
-		removeRows(0, QAbstractItemModel::index(position, 0, parent));
+		removeRows(0, parent.child(position, 0));
 
 	beginRemoveRows(parent, position, position);
 	static_cast<CParticleTreeItem *>(parent.internalPointer())->deleteChild(position);
