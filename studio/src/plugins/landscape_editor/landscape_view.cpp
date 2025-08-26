@@ -71,7 +71,7 @@ void LandscapeView::setVisibleText(bool visible)
 void LandscapeView::wheelEvent(QWheelEvent *event)
 {
 	//How fast we zoom
-	float numSteps = (( event->angleDelta() / 8 ) / 15) * 1.2;
+	float numSteps = (( event->angleDelta().y() / 8 ) / 15) * 1.2;
 
 	QTransform mat = transform();
 	QPointF mousePosition = event->position();
