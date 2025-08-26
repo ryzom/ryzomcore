@@ -1,23 +1,16 @@
-IF(WITH_QT)
-  INCLUDE_DIRECTORIES(${QT_INCLUDES})
-  INCLUDE(${QT_USE_FILE})
-ENDIF()
-
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-
 FILE(GLOB MESSAGE_BOX_SRC *.cpp *.h *.rc)
 
 SOURCE_GROUP("" FILES ${MESSAGE_BOX_SRC})
 
-SET( QT_USE_QT3SUPPORT TRUE)
-SET( QT_USE_QTXML TRUE)
-
-ADD_EXECUTABLE(message_box_qt WIN32 ${MESSAGE_BOX_SRC})
-TARGET_LINK_LIBRARIES(message_box_qt ${QT_LIBRARIES} nelmisc)
+ADD_EXECUTABLE(message_box_qt WIN32)
+target_sources(message_box_qt
+        PRIVATE
+        main.cpp
+        main.rc
+)
+TARGET_LINK_LIBRARIES(message_box_qt Qt::Core Qt::Widgets nelmisc)
 NL_DEFAULT_PROPS(message_box_qt "NeL, Tools, Misc: Qt Message Box")
 NL_ADD_RUNTIME_FLAGS(message_box_qt)
-
-ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 INSTALL(TARGETS message_box_qt RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT toolsmisc)
 

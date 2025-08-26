@@ -13,10 +13,8 @@ IF(WITH_NEL_TOOLS)
   ADD_SUBDIRECTORY(xml_packer)
   ADD_SUBDIRECTORY(utf_generator)
 
-  IF(WITH_QT)
-    ADD_SUBDIRECTORY(message_box_qt)
-  ENDIF()
   IF(WITH_QT5)
+    ADD_SUBDIRECTORY(message_box_qt)
     ADD_SUBDIRECTORY(words_dic_qt)
   ENDIF()
 
