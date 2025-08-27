@@ -85,6 +85,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nel-${{ matrix.os }}-*
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
+
       - id: cache
         uses: actions/cache@v4
         with:
@@ -118,6 +124,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nel-${{ matrix.os }}-*
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
+
       - id: cache
         uses: actions/cache@v4
         with:
@@ -149,6 +161,12 @@ jobs:
         os: [ ubuntu-22.04, ubuntu-24.04 ]
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nel-${{ matrix.os }}-*
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
 
       - id: cache
         uses: actions/cache@v4
