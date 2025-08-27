@@ -306,10 +306,13 @@ IF(WITH_NEL_TESTS OR WITH_TESTING)
   FIND_PACKAGE(CppTest)
 
   ENABLE_TESTING()
+  # GoogleTest requires at least C++17
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
   include(FetchContent)
   FetchContent_Declare(
           googletest
-          URL https://github.com/google/googletest/archive/a7f443b80b105f940225332ed3c31f2790092f47.zip
+          URL https://github.com/google/googletest/archive/54915d462bb64e9b2bd1a3f0e70c00e6f5d817fb.zip
           EXCLUDE_FROM_ALL
   )
   SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)

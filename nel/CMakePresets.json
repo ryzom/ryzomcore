@@ -8,7 +8,7 @@
     {
       "name": "nel",
       "binaryDir": "${sourceDir}/build/nel",
-      "installDir": "${sourceDir}/build/install",
+      "installDir": "${sourceDir}/build/install/nel",
       "cacheVariables": {
         "WITH_STATIC": true,
         "WITH_NEL": true,
