@@ -6,6 +6,12 @@ add_library(nelns_naming_service STATIC
 )
 add_library(nelns::ns ALIAS nelns_naming_service)
 
+target_compile_features( nelns_naming_service
+        PRIVATE
+        cxx_lambdas
+        cxx_return_type_deduction
+)
+
 target_include_directories(nelns_naming_service PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(nelns_naming_service
