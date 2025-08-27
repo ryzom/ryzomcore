@@ -8,6 +8,7 @@ function(add_test_executable name)
             GTest::gtest_main
             GTest::gmock
     )
+    target_compile_features("${name}" PRIVATE cxx_std_17)
 
     add_test(NAME "${name}" COMMAND "${name}")
 
