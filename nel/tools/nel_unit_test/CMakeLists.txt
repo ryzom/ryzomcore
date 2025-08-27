@@ -1,5 +1,3 @@
-FILE(GLOB SRC *.cpp *.h)
-
 ADD_EXECUTABLE(nel_unit_test
         nel_unit_test.cpp
 )
