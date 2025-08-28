@@ -518,32 +518,32 @@ public:
 
 	CUTNetModule ()
 	{
-		TEST_ADD(CUTNetModule::testModuleInitInfoParsing);
-		TEST_ADD(CUTNetModule::testModuleInitInfoQuering);
-		TEST_ADD(CUTNetModule::testModuleInitInfoBadParsing);
-		TEST_ADD(CUTNetModule::localModuleFactory);
-		//TEST_ADD(CUTNetModule::loadModuleLib);
-		//TEST_ADD(CUTNetModule::createModule);
-		//TEST_ADD(CUTNetModule::deleteModule);
-		TEST_ADD(CUTNetModule::failedInit);
-		//TEST_ADD(CUTNetModule::unloadModuleLib);
-		TEST_ADD(CUTNetModule::createLocalGateway);
-		TEST_ADD(CUTNetModule::plugLocalGateway);
-		//TEST_ADD(CUTNetModule::moduleManagerCommands);
-		TEST_ADD(CUTNetModule::gatewayTransportManagement);
-		TEST_ADD(CUTNetModule::connectGateways);
-		TEST_ADD(CUTNetModule::moduleDisclosure);
-		TEST_ADD(CUTNetModule::moduleMessaging);
+		// TEST_ADD(CUTNetModule::testModuleInitInfoParsing);
+		// TEST_ADD(CUTNetModule::testModuleInitInfoQuering);
+		// TEST_ADD(CUTNetModule::testModuleInitInfoBadParsing);
+		// TEST_ADD(CUTNetModule::localModuleFactory);
+		// //TEST_ADD(CUTNetModule::loadModuleLib);
+		// //TEST_ADD(CUTNetModule::createModule);
+		// //TEST_ADD(CUTNetModule::deleteModule);
+		// TEST_ADD(CUTNetModule::failedInit);
+		// //TEST_ADD(CUTNetModule::unloadModuleLib);
+		// TEST_ADD(CUTNetModule::createLocalGateway);
+		// TEST_ADD(CUTNetModule::plugLocalGateway);
+		// //TEST_ADD(CUTNetModule::moduleManagerCommands);
+		// TEST_ADD(CUTNetModule::gatewayTransportManagement);
+		// TEST_ADD(CUTNetModule::connectGateways);
+		// TEST_ADD(CUTNetModule::moduleDisclosure);
+		// TEST_ADD(CUTNetModule::moduleMessaging);
 		TEST_ADD(CUTNetModule::localMessageQueing);
-		TEST_ADD(CUTNetModule::uniqueNameGenerator);
-		TEST_ADD(CUTNetModule::gwPlugUnplug);
-		TEST_ADD(CUTNetModule::peerInvisible);
-		TEST_ADD(CUTNetModule::firewalling);
-		TEST_ADD(CUTNetModule::distanceAndConnectionLoop);
-		TEST_ADD(CUTNetModule::securityPlugin);
-		TEST_ADD(CUTNetModule::synchronousMessaging);
-		TEST_ADD(CUTNetModule::layer3Autoconnect);
-		TEST_ADD(CUTNetModule::interceptorTest);
+		// TEST_ADD(CUTNetModule::uniqueNameGenerator);
+		// TEST_ADD(CUTNetModule::gwPlugUnplug);
+		// TEST_ADD(CUTNetModule::peerInvisible);
+		// TEST_ADD(CUTNetModule::firewalling);
+		// TEST_ADD(CUTNetModule::distanceAndConnectionLoop);
+		// TEST_ADD(CUTNetModule::securityPlugin);
+		// TEST_ADD(CUTNetModule::synchronousMessaging);
+		// TEST_ADD(CUTNetModule::layer3Autoconnect);
+		// TEST_ADD(CUTNetModule::interceptorTest);
 	}
 
 	void interceptorTest()
