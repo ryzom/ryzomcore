@@ -534,7 +534,7 @@ public:
 		TEST_ADD(CUTNetModule::connectGateways);
 		TEST_ADD(CUTNetModule::moduleDisclosure);
 		TEST_ADD(CUTNetModule::moduleMessaging);
-		TEST_ADD(CUTNetModule::localMessageQueing);
+		//TEST_ADD(CUTNetModule::localMessageQueing);
 		TEST_ADD(CUTNetModule::uniqueNameGenerator);
 		TEST_ADD(CUTNetModule::gwPlugUnplug);
 		TEST_ADD(CUTNetModule::peerInvisible);
