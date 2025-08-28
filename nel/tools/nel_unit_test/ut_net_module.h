@@ -537,10 +537,10 @@ public:
 		TEST_ADD(CUTNetModule::localMessageQueing);
 		TEST_ADD(CUTNetModule::uniqueNameGenerator);
 		TEST_ADD(CUTNetModule::gwPlugUnplug);
-		// TEST_ADD(CUTNetModule::peerInvisible);
-		// TEST_ADD(CUTNetModule::firewalling);
-		// TEST_ADD(CUTNetModule::distanceAndConnectionLoop);
-		// TEST_ADD(CUTNetModule::securityPlugin);
+		TEST_ADD(CUTNetModule::peerInvisible);
+		TEST_ADD(CUTNetModule::firewalling);
+		TEST_ADD(CUTNetModule::distanceAndConnectionLoop);
+		TEST_ADD(CUTNetModule::securityPlugin);
 		TEST_ADD(CUTNetModule::synchronousMessaging);
 		TEST_ADD(CUTNetModule::layer3Autoconnect);
 		TEST_ADD(CUTNetModule::interceptorTest);
