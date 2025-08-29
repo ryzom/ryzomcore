@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <ostream>
 #include <string>
 #include <set>
 #include <vector>
@@ -205,6 +206,12 @@ public:
 };
 NLNET_REGISTER_MODULE_FACTORY(CModuleAsync, "ModuleAsync");
 
+namespace NLNET {
+void PrintTo(IModuleProxy * proxy, std::ostream *os)
+{
+	*os << "( moduleClassName: " << proxy->getModuleClassName() << ", moduleName: " << proxy->getModuleName() << " )";
+}
+}
 
 class CUTNetModule : public testing::Test
 {
@@ -220,19 +227,6 @@ protected:
 
 	void TearDown() override
 	{
-	}
-
-	// utility to look for a specified proxy in a vector of proxy
-	// return true if the proxy if found
-	bool lookForModuleProxy(const vector<NLNET::IModuleProxy *> proxList, const std::string &modName)
-	{
-		for (uint i = 0; i < proxList.size(); ++i)
-		{
-			if (proxList[i]->getModuleName().find(modName) == (proxList[i]->getModuleName().size() - modName.size()))
-				return true;
-		}
-
-		return false;
 	}
 
 	NLNET::IModuleProxy *retrieveModuleProxy(NLNET::IModuleGateway *gw, const std::string &modName)
@@ -285,7 +279,6 @@ TEST_F(CUTNetModule, localMessageQueing)
 	gws->getModuleProxyList(proxiesC);
 	ASSERT_TRUE(proxiesC.size() == 2);
 	ASSERT_THAT(proxiesC, Contains(Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m2"))));
-	ASSERT_TRUE(lookForModuleProxy(proxiesC, "m2"));
 	NLNET::IModuleProxy *pm2 = retrieveModuleProxy(gws, "m2");
 	ASSERT_TRUE(pm2 != nullptr);
 	NLNET::CMessage aMessage("DEBUG_MOD_PING");
@@ -294,7 +287,7 @@ TEST_F(CUTNetModule, localMessageQueing)
 	proxiesC.clear();
 	gws->getModuleProxyList(proxiesC);
 	ASSERT_TRUE(proxiesC.size() == 2);
-	ASSERT_TRUE(lookForModuleProxy(proxiesC, "m1"));
+	ASSERT_THAT(proxiesC, Contains(Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m1"))));
 	NLNET::IModuleProxy *pm1 = retrieveModuleProxy(gws, "m1");
 	ASSERT_TRUE(pm1 != nullptr);
 	aMessage = NLNET::CMessage("DEBUG_MOD_PING");
