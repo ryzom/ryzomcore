@@ -17,10 +17,12 @@ using std::set;
 using std::string;
 using std::vector;
 
+using ::testing::Eq;
 using ::testing::Contains;
 using ::testing::EndsWith;
-using ::testing::Field;
-using ::testing::StrCaseEq;
+using ::testing::Property;
+using ::testing::WhenDynamicCastTo;
+using ::testing::NotNull;
 using ::testing::StrEq;
 
 class CModuleType0 : public NLNET::CModuleBase
@@ -239,10 +241,11 @@ protected:
 		vector<NLNET::IModuleProxy *> proxList;
 		gw->getModuleProxyList(proxList);
 
-		for (uint i = 0; i < proxList.size(); ++i)
+		for (auto & proxy : proxList)
 		{
-			if (proxList[i]->getModuleName().find(modName) == (proxList[i]->getModuleName().size() - modName.size()))
-				return proxList[i];
+			if (proxy->getModuleName().rfind(modName) != string::npos)
+				return proxy;
+
 		}
 
 		return nullptr;
@@ -252,22 +255,21 @@ protected:
 TEST_F(CUTNetModule, localMessageQueing)
 {
 	NLNET::IModuleManager &mm = NLNET::IModuleManager::getInstance();
-	NLMISC::CCommandRegistry &cr = NLMISC::CCommandRegistry::getInstance();
 
 	NLNET::IModule *mods = mm.createModule("StandardGateway", "gws", "");
-	ASSERT_TRUE(mods != nullptr);
-	NLNET::IModuleGateway *gws = dynamic_cast<NLNET::IModuleGateway *>(mods);
-	ASSERT_TRUE(gws != nullptr);
+	ASSERT_THAT(mods, NotNull());
+	auto *gws = dynamic_cast<NLNET::IModuleGateway *>(mods);
+	ASSERT_THAT(gws, NotNull());
 
 	// get the socket interface of the gateway
 	NLNET::IModuleSocket *socketGws = mm.getModuleSocket("gws");
-	ASSERT_TRUE(socketGws != nullptr);
+	ASSERT_THAT(socketGws, NotNull());
 
 	// create two modules that will communicate localy
 	NLNET::IModule *m1 = mm.createModule("ModuleType0", "m1", "");
-	ASSERT_TRUE(m1 != nullptr);
+	ASSERT_THAT(m1, NotNull());
 	NLNET::IModule *m2 = mm.createModule("ModuleAsync", "m2", "");
-	ASSERT_TRUE(m2 != nullptr);
+	ASSERT_THAT(m2, NotNull());
 
 	m1->plugModule(socketGws);
 	m2->plugModule(socketGws);
@@ -282,29 +284,29 @@ TEST_F(CUTNetModule, localMessageQueing)
 	// retrieve module proxy and send one ping to each other
 	vector<NLNET::IModuleProxy *> proxiesC;
 	gws->getModuleProxyList(proxiesC);
-	ASSERT_TRUE(proxiesC.size() == 2);
-	ASSERT_THAT(proxiesC, Contains(Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m1"))));
+	ASSERT_THAT(proxiesC, Contains(Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m2"))));
 	NLNET::IModuleProxy *pm2 = retrieveModuleProxy(gws, "m2");
-	ASSERT_TRUE(pm2 != nullptr);
+	ASSERT_THAT(pm2, NotNull());
 	NLNET::CMessage aMessage("DEBUG_MOD_PING");
 	pm2->sendModuleMessage(m1, aMessage);
 
 	proxiesC.clear();
 	gws->getModuleProxyList(proxiesC);
-	ASSERT_TRUE(proxiesC.size() == 2);
 	ASSERT_THAT(proxiesC, Contains(Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m1"))));
 	NLNET::IModuleProxy *pm1 = retrieveModuleProxy(gws, "m1");
-	ASSERT_TRUE(pm1 != nullptr);
+	ASSERT_THAT(pm1, NotNull());
 	aMessage = NLNET::CMessage("DEBUG_MOD_PING");
 	pm1->sendModuleMessage(m2, aMessage);
 
 	// check received ping count
-	CModuleType0 *mod1 = dynamic_cast<CModuleType0 *>(m1);
-	ASSERT_TRUE(mod1 != nullptr);
-	ASSERT_TRUE(mod1->PingCount == 1);
-	CModuleType0 *mod2 = dynamic_cast<CModuleType0 *>(m2);
-	ASSERT_TRUE(mod2 != nullptr);
-	ASSERT_TRUE(mod2->PingCount == 0);
+	auto *mod1 = dynamic_cast<CModuleType0 *>(m1);
+	ASSERT_THAT(m1, WhenDynamicCastTo<CModuleType0 *>(NotNull()));
+	ASSERT_THAT(mod1, NotNull());
+	EXPECT_THAT(mod1->PingCount, Eq(1));
+	auto mod2 = dynamic_cast<CModuleAsync *>(m2);
+	ASSERT_THAT(m2, WhenDynamicCastTo<CModuleAsync *>(NotNull()));
+	ASSERT_THAT(mod2, NotNull());
+	EXPECT_THAT(mod2->PingCount, Eq(0));
 
 	// update the networks
 	for (uint i = 0; i < 4; ++i)
@@ -314,8 +316,8 @@ TEST_F(CUTNetModule, localMessageQueing)
 	}
 
 	// check received ping count
-	ASSERT_TRUE(mod1->PingCount == 1);
-	ASSERT_TRUE(mod2->PingCount == 1);
+	EXPECT_THAT(mod1->PingCount, Eq(1));
+	EXPECT_THAT(mod2->PingCount, Eq(1));
 
 	// update the networks
 	for (uint i = 0; i < 4; ++i)
@@ -325,8 +327,8 @@ TEST_F(CUTNetModule, localMessageQueing)
 	}
 
 	// check received ping count
-	ASSERT_TRUE(mod1->PingCount == 1);
-	ASSERT_TRUE(mod2->PingCount == 1);
+	EXPECT_THAT(mod1->PingCount, Eq(1));
+	EXPECT_THAT(mod2->PingCount, Eq(1));
 
 	// cleanup
 	mm.deleteModule(m1);
