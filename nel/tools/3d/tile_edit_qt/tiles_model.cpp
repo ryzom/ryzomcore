@@ -86,7 +86,7 @@ void tiles_model::addTile(const TileModel &tile)
 {
 
     int row;
-    if (int(2.0*qrand()/(RAND_MAX+1.0)) == 1)
+    if (int(2.0*QRandomGenerator::global()->generate()/(RAND_MAX+1.0)) == 1)
         row = 0;
     else
         row = tiles.size();

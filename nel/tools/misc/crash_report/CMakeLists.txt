@@ -22,9 +22,9 @@ target_sources(crash_report
 TARGET_INCLUDE_DIRECTORIES(crash_report PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 TARGET_LINK_LIBRARIES(crash_report
         PRIVATE
-        Qt6::Core
-        Qt6::Network
-        Qt6::Widgets
+        Qt::Core
+        Qt::Network
+        Qt::Widgets
 )
 
 NL_DEFAULT_PROPS(crash_report "NeL, Tools, Misc: Crash Report")
