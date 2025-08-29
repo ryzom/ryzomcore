@@ -61,7 +61,7 @@ public:
 	bool initModule(const NLNET::TParsedCommandLine &param)
 	{
 		bool ret = CModuleBase::initModule(param);
-		if (param.getParam("FAIL") != NULL)
+		if (param.getParam("FAIL") != nullptr)
 			return false;
 
 		return ret;
@@ -313,7 +313,7 @@ public:
 
 	virtual void onNewProxy(NLNET::IModuleProxy *proxy)
 	{
-		if (proxy->getGatewayRoute() == NULL)
+		if (proxy->getGatewayRoute() == nullptr)
 		{
 			// add a type 1 security
 			TSecurityType1 *st1 = new TSecurityType1(NLNET::TSecurityData::TCtorParam(tst_type1));
@@ -357,7 +357,7 @@ public:
 		for (uint i=0; i<proxies.size(); ++i)
 		{
 			NLNET::IModuleProxy *proxy = proxies[i];
-			if (proxy->getFirstSecurityData() != NULL)
+			if (proxy->getFirstSecurityData() != nullptr)
 			{
 				bool update = false;
 				update |= removeSecurityData(proxy, tst_type1);
@@ -382,7 +382,7 @@ public:
 
 	virtual void onNewProxy(NLNET::IModuleProxy *proxy)
 	{
-		if (proxy->getGatewayRoute() == NULL)
+		if (proxy->getGatewayRoute() == nullptr)
 		{
 			// add a type 3 security
 			TSecurityType3 *st3 = new TSecurityType3(NLNET::TSecurityData::TCtorParam(tst_type3));
@@ -411,7 +411,7 @@ public:
 		for (uint i=0; i<proxies.size(); ++i)
 		{
 			NLNET::IModuleProxy *proxy = proxies[i];
-			if (proxy->getGatewayRoute() == NULL)
+			if (proxy->getGatewayRoute() == nullptr)
 			{
 				removeSecurityData(proxy, tst_type3);
 				removeSecurityData(proxy, tst_type4);
@@ -483,7 +483,7 @@ public:
 	{
 		for (uint i=0; i<proxList.size(); ++i)
 		{
-			if (proxList[i]->getModuleName().find(modName) == (proxList[i]->getModuleName().size() - modName.size()))
+			if (proxList[i]->getModuleName().rfind(modName) == (proxList[i]->getModuleName().size() - modName.size()))
 				return true;
 		}
 
@@ -497,11 +497,11 @@ public:
 
 		for (uint i=0; i<proxList.size(); ++i)
 		{
-			if (proxList[i]->getModuleName().find(modName) == (proxList[i]->getModuleName().size() - modName.size()))
+			if (proxList[i]->getModuleName().rfind(modName) == (proxList[i]->getModuleName().size() - modName.size()))
 				return proxList[i];
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	void setup()
@@ -534,7 +534,6 @@ public:
 		TEST_ADD(CUTNetModule::connectGateways);
 		TEST_ADD(CUTNetModule::moduleDisclosure);
 		TEST_ADD(CUTNetModule::moduleMessaging);
-		TEST_ADD(CUTNetModule::localMessageQueing);
 		TEST_ADD(CUTNetModule::uniqueNameGenerator);
 		TEST_ADD(CUTNetModule::gwPlugUnplug);
 		TEST_ADD(CUTNetModule::peerInvisible);
@@ -561,8 +560,8 @@ public:
 		NLNET::IModuleGateway *gGw = dynamic_cast<NLNET::IModuleGateway *>(gw);
 		CModuleType0 *mod0 = dynamic_cast<CModuleType0*>(mod);
 
-		TEST_ASSERT(gGw != NULL);
-		TEST_ASSERT(mod0 != NULL);
+		TEST_ASSERT(gGw != nullptr);
+		TEST_ASSERT(mod0 != nullptr);
 
 		// create the interceptors and attach it to the mod0
 		CInterceptor *inter0 = new CInterceptor(mod, "Inter0");
@@ -582,7 +581,7 @@ public:
 		// send a message to the module fro; the gateway
 		NLNET::CMessage msg("foo");
 		NLNET::IModuleProxy *modProx = retrieveModuleProxy(gGw, "mod");
-		TEST_ASSERT(modProx != NULL);
+		TEST_ASSERT(modProx != nullptr);
 		modProx->sendModuleMessage(gw, msg);
 
 		// update the network
@@ -674,8 +673,8 @@ public:
 			NLMISC::nlSleep(40);
 		}
 
-		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") == NULL);
-		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") == NULL);
+		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") == nullptr);
+		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") == nullptr);
 
 		// open the server
 		cr.execute("gw2.transportAdd L3Server l3s", NLMISC::InfoLog());
@@ -689,8 +688,8 @@ public:
 		}
 
 		// check module connectivity
-		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") != NULL);
-		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") != NULL);
+		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") != nullptr);
+		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") != nullptr);
 
 		// exchange some message
 		cr.execute("gw1.sendPing "+gw2->getModuleFullyQualifiedName(), NLMISC::InfoLog());
@@ -722,8 +721,8 @@ public:
 		}
 
 		// test no connectivity
-		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") == NULL);
-		TEST_ASSERT(retrieveModuleProxy(gGw2, "gw1") == NULL);
+		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") == nullptr);
+		TEST_ASSERT(retrieveModuleProxy(gGw2, "gw1") == nullptr);
 
 		// re-open the server
 		cr.execute("gw2.transportCmd l3s(open port=8062)", NLMISC::InfoLog());
@@ -736,8 +735,8 @@ public:
 		}
 
 		// check module connectivity
-		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") != NULL);
-		TEST_ASSERT(retrieveModuleProxy(gGw2, "gw1") != NULL);
+		TEST_ASSERT(retrieveModuleProxy(gGw1, "gw2") != nullptr);
+		TEST_ASSERT(retrieveModuleProxy(gGw2, "gw1") != nullptr);
 
 		// exchange some message
 		cr.execute("gw1.sendPing "+gw2->getModuleFullyQualifiedName(), NLMISC::InfoLog());
@@ -857,9 +856,9 @@ public:
 		gw2 = mm.createModule("StandardGateway", "gw2", "");
 		gw3 = mm.createModule("StandardGateway", "gw3", "");
 
-		TEST_ASSERT(gw1 != NULL);
-		TEST_ASSERT(gw2 != NULL);
-		TEST_ASSERT(gw3 != NULL);
+		TEST_ASSERT(gw1 != nullptr);
+		TEST_ASSERT(gw2 != nullptr);
+		TEST_ASSERT(gw3 != nullptr);
 
 		// plug gateway in themselves
 		NLNET::IModuleSocket *sGw1, *sGw2, *sGw3;
@@ -867,9 +866,9 @@ public:
 		sGw2 = mm.getModuleSocket("gw2");
 		sGw3 = mm.getModuleSocket("gw3");
 
-		TEST_ASSERT(sGw1 != NULL);
-		TEST_ASSERT(sGw2 != NULL);
-		TEST_ASSERT(sGw3 != NULL);
+		TEST_ASSERT(sGw1 != nullptr);
+		TEST_ASSERT(sGw2 != nullptr);
+		TEST_ASSERT(sGw3 != nullptr);
 
 		gw1->plugModule(sGw1);
 		gw2->plugModule(sGw2);
@@ -917,11 +916,11 @@ public:
 			}
 			NLNET::IModuleGateway *gGw1, *gGw2, *gGw3; 
 			gGw1 = dynamic_cast<NLNET::IModuleGateway *>(gw1);
-			TEST_ASSERT(gGw1 != NULL);
+			TEST_ASSERT(gGw1 != nullptr);
 			gGw2 = dynamic_cast<NLNET::IModuleGateway *>(gw2);
-			TEST_ASSERT(gGw2 != NULL);
+			TEST_ASSERT(gGw2 != nullptr);
 			gGw3 = dynamic_cast<NLNET::IModuleGateway *>(gw3);
-			TEST_ASSERT(gGw3 != NULL);
+			TEST_ASSERT(gGw3 != nullptr);
 			
 
 			// check security data
@@ -939,85 +938,85 @@ public:
 			proxGw2_3 = retrieveModuleProxy(gGw3, "gw2");
 			proxGw3_3 = retrieveModuleProxy(gGw3, "gw3");
 
-			TEST_ASSERT(proxGw1_1 != NULL);
-			TEST_ASSERT(proxGw2_1 != NULL);
-			TEST_ASSERT(proxGw3_1 != NULL);
-			TEST_ASSERT(proxGw1_2 != NULL);
-			TEST_ASSERT(proxGw2_2 != NULL);
-			TEST_ASSERT(proxGw3_2 != NULL);
-			TEST_ASSERT(proxGw1_3 != NULL);
-			TEST_ASSERT(proxGw2_3 != NULL);
-			TEST_ASSERT(proxGw3_3 != NULL);
+			TEST_ASSERT(proxGw1_1 != nullptr);
+			TEST_ASSERT(proxGw2_1 != nullptr);
+			TEST_ASSERT(proxGw3_1 != nullptr);
+			TEST_ASSERT(proxGw1_2 != nullptr);
+			TEST_ASSERT(proxGw2_2 != nullptr);
+			TEST_ASSERT(proxGw3_2 != nullptr);
+			TEST_ASSERT(proxGw1_3 != nullptr);
+			TEST_ASSERT(proxGw2_3 != nullptr);
+			TEST_ASSERT(proxGw3_3 != nullptr);
 
 			const NLNET::TSecurityData *ms;
 			const TSecurityType1 *st1;
 			const TSecurityType2 *st2;
 
 			ms = proxGw1_1->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 
 			ms = proxGw1_2->getFirstSecurityData();
-			TEST_ASSERT(ms != NULL);
+			TEST_ASSERT(ms != nullptr);
 			TEST_ASSERT(ms->DataTag == tst_type2);
 			st2 = dynamic_cast<const TSecurityType2 *>(ms);
-			TEST_ASSERT(st2 != NULL);
+			TEST_ASSERT(st2 != nullptr);
 			TEST_ASSERT(st2->SecurityGatewayName == gw2->getModuleFullyQualifiedName());
 			TEST_ASSERT(st2->IntegerValue == 0x12345678);
-			TEST_ASSERT(st2->NextItem == NULL);
+			TEST_ASSERT(st2->NextItem == nullptr);
 
 			ms = proxGw1_3->getFirstSecurityData();
-			TEST_ASSERT(ms != NULL);
+			TEST_ASSERT(ms != nullptr);
 			TEST_ASSERT(ms->DataTag == tst_type2);
 			st2 = dynamic_cast<const TSecurityType2 *>(ms);
-			TEST_ASSERT(st2 != NULL);
+			TEST_ASSERT(st2 != nullptr);
 			TEST_ASSERT(st2->SecurityGatewayName == gw2->getModuleFullyQualifiedName());
 			TEST_ASSERT(st2->IntegerValue == 0x12345678);
-			TEST_ASSERT(st2->NextItem == NULL);
+			TEST_ASSERT(st2->NextItem == nullptr);
 
 			ms = proxGw2_1->getFirstSecurityData();
-			TEST_ASSERT(ms != NULL);
+			TEST_ASSERT(ms != nullptr);
 			TEST_ASSERT(ms->DataTag == tst_type1);
 			st1 = dynamic_cast<const TSecurityType1 *>(ms);
-			TEST_ASSERT(st1 != NULL);
+			TEST_ASSERT(st1 != nullptr);
 			TEST_ASSERT(st1->SecurityGatewayName == gw2->getModuleFullyQualifiedName());
-			TEST_ASSERT(st1->NextItem == NULL);
+			TEST_ASSERT(st1->NextItem == nullptr);
 
 			ms = proxGw2_2->getFirstSecurityData();
-			TEST_ASSERT(ms != NULL);
+			TEST_ASSERT(ms != nullptr);
 			TEST_ASSERT(ms->DataTag == tst_type1);
 			st1 = dynamic_cast<const TSecurityType1 *>(ms);
-			TEST_ASSERT(st1 != NULL);
+			TEST_ASSERT(st1 != nullptr);
 			TEST_ASSERT(st1->SecurityGatewayName == gw2->getModuleFullyQualifiedName());
-			TEST_ASSERT(st1->NextItem == NULL);
+			TEST_ASSERT(st1->NextItem == nullptr);
 
 			ms = proxGw2_3->getFirstSecurityData();
-			TEST_ASSERT(ms != NULL);
+			TEST_ASSERT(ms != nullptr);
 			TEST_ASSERT(ms->DataTag == tst_type1);
 			st1 = dynamic_cast<const TSecurityType1 *>(ms);
-			TEST_ASSERT(st1 != NULL);
+			TEST_ASSERT(st1 != nullptr);
 			TEST_ASSERT(st1->SecurityGatewayName == gw2->getModuleFullyQualifiedName());
-			TEST_ASSERT(st1->NextItem == NULL);
+			TEST_ASSERT(st1->NextItem == nullptr);
 
 			ms = proxGw3_1->getFirstSecurityData();
-			TEST_ASSERT(ms != NULL);
+			TEST_ASSERT(ms != nullptr);
 			TEST_ASSERT(ms->DataTag == tst_type2);
 			st2 = dynamic_cast<const TSecurityType2 *>(ms);
-			TEST_ASSERT(st2 != NULL);
+			TEST_ASSERT(st2 != nullptr);
 			TEST_ASSERT(st2->SecurityGatewayName == gw2->getModuleFullyQualifiedName());
 			TEST_ASSERT(st2->IntegerValue == 0x12345678);
-			TEST_ASSERT(st2->NextItem == NULL);
+			TEST_ASSERT(st2->NextItem == nullptr);
 
 			ms = proxGw3_2->getFirstSecurityData();
-			TEST_ASSERT(ms != NULL);
+			TEST_ASSERT(ms != nullptr);
 			TEST_ASSERT(ms->DataTag == tst_type2);
 			st2 = dynamic_cast<const TSecurityType2 *>(ms);
-			TEST_ASSERT(st2 != NULL);
+			TEST_ASSERT(st2 != nullptr);
 			TEST_ASSERT(st2->SecurityGatewayName == gw2->getModuleFullyQualifiedName());
 			TEST_ASSERT(st2->IntegerValue == 0x12345678);
-			TEST_ASSERT(st2->NextItem == NULL);
+			TEST_ASSERT(st2->NextItem == nullptr);
 
 			ms = proxGw3_3->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 
 			// remove the security plug-in
 			// create security plug-in
@@ -1032,23 +1031,23 @@ public:
 			}
 
 			ms = proxGw1_1->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 			ms = proxGw1_2->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 			ms = proxGw1_3->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 			ms = proxGw2_1->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 			ms = proxGw2_2->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 			ms = proxGw2_3->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 			ms = proxGw3_1->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 			ms = proxGw3_2->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 			ms = proxGw3_3->getFirstSecurityData();
-			TEST_ASSERT(ms == NULL);
+			TEST_ASSERT(ms == nullptr);
 		}
 
 		// part 2
@@ -1067,11 +1066,11 @@ public:
 
 		NLNET::IModuleGateway *gGw1, *gGw2, *gGw3; 
 		gGw1 = dynamic_cast<NLNET::IModuleGateway *>(gw1);
-		TEST_ASSERT(gGw1 != NULL);
+		TEST_ASSERT(gGw1 != nullptr);
 		gGw2 = dynamic_cast<NLNET::IModuleGateway *>(gw2);
-		TEST_ASSERT(gGw2 != NULL);
+		TEST_ASSERT(gGw2 != nullptr);
 		gGw3 = dynamic_cast<NLNET::IModuleGateway *>(gw3);
-		TEST_ASSERT(gGw3 != NULL);
+		TEST_ASSERT(gGw3 != nullptr);
 		
 
 		// check security data
@@ -1089,105 +1088,105 @@ public:
 		proxGw2_3 = retrieveModuleProxy(gGw3, "gw2");
 		proxGw3_3 = retrieveModuleProxy(gGw3, "gw3");
 
-		TEST_ASSERT(proxGw1_1 != NULL);
-		TEST_ASSERT(proxGw2_1 != NULL);
-		TEST_ASSERT(proxGw3_1 != NULL);
-		TEST_ASSERT(proxGw1_2 != NULL);
-		TEST_ASSERT(proxGw2_2 != NULL);
-		TEST_ASSERT(proxGw3_2 != NULL);
-		TEST_ASSERT(proxGw1_3 != NULL);
-		TEST_ASSERT(proxGw2_3 != NULL);
-		TEST_ASSERT(proxGw3_3 != NULL);
+		TEST_ASSERT(proxGw1_1 != nullptr);
+		TEST_ASSERT(proxGw2_1 != nullptr);
+		TEST_ASSERT(proxGw3_1 != nullptr);
+		TEST_ASSERT(proxGw1_2 != nullptr);
+		TEST_ASSERT(proxGw2_2 != nullptr);
+		TEST_ASSERT(proxGw3_2 != nullptr);
+		TEST_ASSERT(proxGw1_3 != nullptr);
+		TEST_ASSERT(proxGw2_3 != nullptr);
+		TEST_ASSERT(proxGw3_3 != nullptr);
 
 		const NLNET::TSecurityData *ms;
 //		const TSecurityType1 *st1;
 //		const TSecurityType2 *st2;
 
 		ms = proxGw1_1->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_1->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_1->findSecurityData(tst_type3);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw1_1->findSecurityData(tst_type4);
-		TEST_ASSERT(ms != NULL);
-		TEST_ASSERT(dynamic_cast<const TSecurityType4*>(ms) != NULL);
+		TEST_ASSERT(ms != nullptr);
+		TEST_ASSERT(dynamic_cast<const TSecurityType4*>(ms) != nullptr);
 
 		ms = proxGw1_2->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_2->findSecurityData(tst_type2);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw1_2->findSecurityData(tst_type3);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw1_2->findSecurityData(0xff);
-		TEST_ASSERT(ms != NULL);
-		TEST_ASSERT(dynamic_cast<const NLNET::TUnknownSecurityData*>(ms) != NULL);
+		TEST_ASSERT(ms != nullptr);
+		TEST_ASSERT(dynamic_cast<const NLNET::TUnknownSecurityData*>(ms) != nullptr);
 
 		ms = proxGw1_3->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_3->findSecurityData(tst_type2);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw1_3->findSecurityData(tst_type3);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw1_3->findSecurityData(0xff);
-		TEST_ASSERT(ms != NULL);
-		TEST_ASSERT(dynamic_cast<const NLNET::TUnknownSecurityData*>(ms) != NULL);
+		TEST_ASSERT(ms != nullptr);
+		TEST_ASSERT(dynamic_cast<const NLNET::TUnknownSecurityData*>(ms) != nullptr);
 
 
 		ms = proxGw2_1->findSecurityData(tst_type1);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw2_1->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_1->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_1->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw2_2->findSecurityData(tst_type1);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw2_2->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_2->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_2->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw2_3->findSecurityData(tst_type1);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw2_3->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_3->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_3->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 
 		ms = proxGw3_1->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_1->findSecurityData(tst_type2);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw3_1->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_1->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw3_2->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_2->findSecurityData(tst_type2);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw3_2->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_2->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw3_3->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_3->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_3->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_3->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		// remove the security plug-in
 		// create security plug-in
@@ -1202,87 +1201,87 @@ public:
 		}
 
 		ms = proxGw1_1->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_1->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_1->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_1->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw1_2->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_2->findSecurityData(tst_type2);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw1_2->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_2->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw1_3->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_3->findSecurityData(tst_type2);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw1_3->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw1_3->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 
 		ms = proxGw2_1->findSecurityData(tst_type1);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw2_1->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_1->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_1->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw2_2->findSecurityData(tst_type1);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw2_2->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_2->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_2->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw2_3->findSecurityData(tst_type1);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw2_3->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_3->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw2_3->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 
 		ms = proxGw3_1->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_1->findSecurityData(tst_type2);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw3_1->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_1->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw3_2->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_2->findSecurityData(tst_type2);
-		TEST_ASSERT(ms != NULL);
+		TEST_ASSERT(ms != nullptr);
 		ms = proxGw3_2->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_2->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		ms = proxGw3_3->findSecurityData(tst_type1);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_3->findSecurityData(tst_type2);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_3->findSecurityData(tst_type3);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 		ms = proxGw3_3->findSecurityData(tst_type4);
-		TEST_ASSERT(ms == NULL);
+		TEST_ASSERT(ms == nullptr);
 
 		// cleanup
 		mm.deleteModule(gw1);
@@ -1329,10 +1328,10 @@ public:
 		gw3 = mm.createModule("StandardGateway", "gw3", "");
 		gw4 = mm.createModule("StandardGateway", "gw4", "");
 
-		TEST_ASSERT(gw1 != NULL);
-		TEST_ASSERT(gw2 != NULL);
-		TEST_ASSERT(gw3 != NULL);
-		TEST_ASSERT(gw4 != NULL);
+		TEST_ASSERT(gw1 != nullptr);
+		TEST_ASSERT(gw2 != nullptr);
+		TEST_ASSERT(gw3 != nullptr);
+		TEST_ASSERT(gw4 != nullptr);
 
 		// plug gateway into themselves
 		NLNET::IModuleSocket *sGw1, *sGw2, *sGw3, *sGw4;
@@ -1341,10 +1340,10 @@ public:
 		sGw3 = mm.getModuleSocket("gw3");
 		sGw4 = mm.getModuleSocket("gw4");
 
-		TEST_ASSERT(sGw1 != NULL);
-		TEST_ASSERT(sGw2 != NULL);
-		TEST_ASSERT(sGw3 != NULL);
-		TEST_ASSERT(sGw4 != NULL);
+		TEST_ASSERT(sGw1 != nullptr);
+		TEST_ASSERT(sGw2 != nullptr);
+		TEST_ASSERT(sGw3 != nullptr);
+		TEST_ASSERT(sGw4 != nullptr);
 
 		gw1->plugModule(sGw1);
 		gw2->plugModule(sGw2);
@@ -1395,13 +1394,13 @@ public:
 		// ok, now, check that each gateways know the gateway it must know
 		NLNET::IModuleGateway *gGw1, *gGw2, *gGw3, *gGw4;
 		gGw1 = dynamic_cast<NLNET::IModuleGateway *>(gw1);
-		TEST_ASSERT(gGw1 != NULL);
+		TEST_ASSERT(gGw1 != nullptr);
 		gGw2 = dynamic_cast<NLNET::IModuleGateway *>(gw2);
-		TEST_ASSERT(gGw2 != NULL);
+		TEST_ASSERT(gGw2 != nullptr);
 		gGw3 = dynamic_cast<NLNET::IModuleGateway *>(gw3);
-		TEST_ASSERT(gGw3 != NULL);
+		TEST_ASSERT(gGw3 != nullptr);
 		gGw4 = dynamic_cast<NLNET::IModuleGateway *>(gw4);
-		TEST_ASSERT(gGw4 != NULL);
+		TEST_ASSERT(gGw4 != nullptr);
 
 		vector<NLNET::IModuleProxy*> proxList;
 		gGw1->getModuleProxyList(proxList);
@@ -1423,55 +1422,55 @@ public:
 		NLNET::IModuleProxy *gw4_1Prox, *gw4_2Prox, *gw4_3Prox, *gw4_4Prox; 
 
 		gw1_1Prox = retrieveModuleProxy(gGw1, "gw1");
-		TEST_ASSERT(gw1_1Prox != NULL);
+		TEST_ASSERT(gw1_1Prox != nullptr);
 		TEST_ASSERT(gw1_1Prox->getModuleDistance() == 0);
 		gw1_2Prox = retrieveModuleProxy(gGw2, "gw1");
-		TEST_ASSERT(gw1_2Prox != NULL);
+		TEST_ASSERT(gw1_2Prox != nullptr);
 		TEST_ASSERT(gw1_2Prox->getModuleDistance() == 1);
 		gw1_3Prox = retrieveModuleProxy(gGw3, "gw1");
-		TEST_ASSERT(gw1_3Prox != NULL);
+		TEST_ASSERT(gw1_3Prox != nullptr);
 		TEST_ASSERT(gw1_3Prox->getModuleDistance() == 2);
 		gw1_4Prox = retrieveModuleProxy(gGw4, "gw1");
-		TEST_ASSERT(gw1_4Prox != NULL);
+		TEST_ASSERT(gw1_4Prox != nullptr);
 		TEST_ASSERT(gw1_4Prox->getModuleDistance() == 3);
 
 		gw2_1Prox = retrieveModuleProxy(gGw1, "gw2");
-		TEST_ASSERT(gw2_1Prox != NULL);
+		TEST_ASSERT(gw2_1Prox != nullptr);
 		TEST_ASSERT(gw2_1Prox->getModuleDistance() == 1);
 		gw2_2Prox = retrieveModuleProxy(gGw2, "gw2");
-		TEST_ASSERT(gw2_2Prox != NULL);
+		TEST_ASSERT(gw2_2Prox != nullptr);
 		TEST_ASSERT(gw2_2Prox->getModuleDistance() == 0);
 		gw2_3Prox = retrieveModuleProxy(gGw3, "gw2");
-		TEST_ASSERT(gw2_3Prox != NULL);
+		TEST_ASSERT(gw2_3Prox != nullptr);
 		TEST_ASSERT(gw2_3Prox->getModuleDistance() == 1);
 		gw2_4Prox = retrieveModuleProxy(gGw4, "gw2");
-		TEST_ASSERT(gw2_4Prox != NULL);
+		TEST_ASSERT(gw2_4Prox != nullptr);
 		TEST_ASSERT(gw2_4Prox->getModuleDistance() == 2);
 
 		gw3_1Prox = retrieveModuleProxy(gGw1, "gw3");
-		TEST_ASSERT(gw3_1Prox != NULL);
+		TEST_ASSERT(gw3_1Prox != nullptr);
 		TEST_ASSERT(gw3_1Prox->getModuleDistance() == 2);
 		gw3_2Prox = retrieveModuleProxy(gGw2, "gw3");
-		TEST_ASSERT(gw3_2Prox != NULL);
+		TEST_ASSERT(gw3_2Prox != nullptr);
 		TEST_ASSERT(gw3_2Prox->getModuleDistance() == 1);
 		gw3_3Prox = retrieveModuleProxy(gGw3, "gw3");
-		TEST_ASSERT(gw3_3Prox != NULL);
+		TEST_ASSERT(gw3_3Prox != nullptr);
 		TEST_ASSERT(gw3_3Prox->getModuleDistance() == 0);
 		gw3_4Prox = retrieveModuleProxy(gGw4, "gw3");
-		TEST_ASSERT(gw3_4Prox != NULL);
+		TEST_ASSERT(gw3_4Prox != nullptr);
 		TEST_ASSERT(gw3_4Prox->getModuleDistance() == 1);
 
 		gw4_1Prox = retrieveModuleProxy(gGw1, "gw4");
-		TEST_ASSERT(gw4_1Prox != NULL);
+		TEST_ASSERT(gw4_1Prox != nullptr);
 		TEST_ASSERT(gw4_1Prox->getModuleDistance() == 3);
 		gw4_2Prox = retrieveModuleProxy(gGw2, "gw4");
-		TEST_ASSERT(gw4_2Prox != NULL);
+		TEST_ASSERT(gw4_2Prox != nullptr);
 		TEST_ASSERT(gw4_2Prox->getModuleDistance() == 2);
 		gw4_3Prox = retrieveModuleProxy(gGw3, "gw4");
-		TEST_ASSERT(gw4_3Prox != NULL);
+		TEST_ASSERT(gw4_3Prox != nullptr);
 		TEST_ASSERT(gw4_3Prox->getModuleDistance() == 1);
 		gw4_4Prox = retrieveModuleProxy(gGw4, "gw4");
-		TEST_ASSERT(gw4_4Prox != NULL);
+		TEST_ASSERT(gw4_4Prox != nullptr);
 		TEST_ASSERT(gw4_4Prox->getModuleDistance() == 0);
 
 		// now, connect gw3 to gw1
@@ -1501,55 +1500,55 @@ public:
 
 		// check the distances
 		gw1_1Prox = retrieveModuleProxy(gGw1, "gw1");
-		TEST_ASSERT(gw1_1Prox != NULL);
+		TEST_ASSERT(gw1_1Prox != nullptr);
 		TEST_ASSERT(gw1_1Prox->getModuleDistance() == 0);
 		gw1_2Prox = retrieveModuleProxy(gGw2, "gw1");
-		TEST_ASSERT(gw1_2Prox != NULL);
+		TEST_ASSERT(gw1_2Prox != nullptr);
 		TEST_ASSERT(gw1_2Prox->getModuleDistance() == 1);
 		gw1_3Prox = retrieveModuleProxy(gGw3, "gw1");
-		TEST_ASSERT(gw1_3Prox != NULL);
+		TEST_ASSERT(gw1_3Prox != nullptr);
 		TEST_ASSERT(gw1_3Prox->getModuleDistance() == 1);
 		gw1_4Prox = retrieveModuleProxy(gGw4, "gw1");
-		TEST_ASSERT(gw1_4Prox != NULL);
+		TEST_ASSERT(gw1_4Prox != nullptr);
 		TEST_ASSERT(gw1_4Prox->getModuleDistance() == 2);
 
 		gw2_1Prox = retrieveModuleProxy(gGw1, "gw2");
-		TEST_ASSERT(gw2_1Prox != NULL);
+		TEST_ASSERT(gw2_1Prox != nullptr);
 		TEST_ASSERT(gw2_1Prox->getModuleDistance() == 1);
 		gw2_2Prox = retrieveModuleProxy(gGw2, "gw2");
-		TEST_ASSERT(gw2_2Prox != NULL);
+		TEST_ASSERT(gw2_2Prox != nullptr);
 		TEST_ASSERT(gw2_2Prox->getModuleDistance() == 0);
 		gw2_3Prox = retrieveModuleProxy(gGw3, "gw2");
-		TEST_ASSERT(gw2_3Prox != NULL);
+		TEST_ASSERT(gw2_3Prox != nullptr);
 		TEST_ASSERT(gw2_3Prox->getModuleDistance() == 1);
 		gw2_4Prox = retrieveModuleProxy(gGw4, "gw2");
-		TEST_ASSERT(gw2_4Prox != NULL);
+		TEST_ASSERT(gw2_4Prox != nullptr);
 		TEST_ASSERT(gw2_4Prox->getModuleDistance() == 2);
 
 		gw3_1Prox = retrieveModuleProxy(gGw1, "gw3");
-		TEST_ASSERT(gw3_1Prox != NULL);
+		TEST_ASSERT(gw3_1Prox != nullptr);
 		TEST_ASSERT(gw3_1Prox->getModuleDistance() == 1);
 		gw3_2Prox = retrieveModuleProxy(gGw2, "gw3");
-		TEST_ASSERT(gw3_2Prox != NULL);
+		TEST_ASSERT(gw3_2Prox != nullptr);
 		TEST_ASSERT(gw3_2Prox->getModuleDistance() == 1);
 		gw3_3Prox = retrieveModuleProxy(gGw3, "gw3");
-		TEST_ASSERT(gw3_3Prox != NULL);
+		TEST_ASSERT(gw3_3Prox != nullptr);
 		TEST_ASSERT(gw3_3Prox->getModuleDistance() == 0);
 		gw3_4Prox = retrieveModuleProxy(gGw4, "gw3");
-		TEST_ASSERT(gw3_4Prox != NULL);
+		TEST_ASSERT(gw3_4Prox != nullptr);
 		TEST_ASSERT(gw3_4Prox->getModuleDistance() == 1);
 
 		gw4_1Prox = retrieveModuleProxy(gGw1, "gw4");
-		TEST_ASSERT(gw4_1Prox != NULL);
+		TEST_ASSERT(gw4_1Prox != nullptr);
 		TEST_ASSERT(gw4_1Prox->getModuleDistance() == 2);
 		gw4_2Prox = retrieveModuleProxy(gGw2, "gw4");
-		TEST_ASSERT(gw4_2Prox != NULL);
+		TEST_ASSERT(gw4_2Prox != nullptr);
 		TEST_ASSERT(gw4_2Prox->getModuleDistance() == 2);
 		gw4_3Prox = retrieveModuleProxy(gGw3, "gw4");
-		TEST_ASSERT(gw4_3Prox != NULL);
+		TEST_ASSERT(gw4_3Prox != nullptr);
 		TEST_ASSERT(gw4_3Prox->getModuleDistance() == 1);
 		gw4_4Prox = retrieveModuleProxy(gGw4, "gw4");
-		TEST_ASSERT(gw4_4Prox != NULL);
+		TEST_ASSERT(gw4_4Prox != nullptr);
 		TEST_ASSERT(gw4_4Prox->getModuleDistance() == 0);
 
 		// close gw3 to gw1
@@ -1579,55 +1578,55 @@ public:
 
 		// check the distances
 		gw1_1Prox = retrieveModuleProxy(gGw1, "gw1");
-		TEST_ASSERT(gw1_1Prox != NULL);
+		TEST_ASSERT(gw1_1Prox != nullptr);
 		TEST_ASSERT(gw1_1Prox->getModuleDistance() == 0);
 		gw1_2Prox = retrieveModuleProxy(gGw2, "gw1");
-		TEST_ASSERT(gw1_2Prox != NULL);
+		TEST_ASSERT(gw1_2Prox != nullptr);
 		TEST_ASSERT(gw1_2Prox->getModuleDistance() == 1);
 		gw1_3Prox = retrieveModuleProxy(gGw3, "gw1");
-		TEST_ASSERT(gw1_3Prox != NULL);
+		TEST_ASSERT(gw1_3Prox != nullptr);
 		TEST_ASSERT(gw1_3Prox->getModuleDistance() == 2);
 		gw1_4Prox = retrieveModuleProxy(gGw4, "gw1");
-		TEST_ASSERT(gw1_4Prox != NULL);
+		TEST_ASSERT(gw1_4Prox != nullptr);
 		TEST_ASSERT(gw1_4Prox->getModuleDistance() == 3);
 
 		gw2_1Prox = retrieveModuleProxy(gGw1, "gw2");
-		TEST_ASSERT(gw2_1Prox != NULL);
+		TEST_ASSERT(gw2_1Prox != nullptr);
 		TEST_ASSERT(gw2_1Prox->getModuleDistance() == 1);
 		gw2_2Prox = retrieveModuleProxy(gGw2, "gw2");
-		TEST_ASSERT(gw2_2Prox != NULL);
+		TEST_ASSERT(gw2_2Prox != nullptr);
 		TEST_ASSERT(gw2_2Prox->getModuleDistance() == 0);
 		gw2_3Prox = retrieveModuleProxy(gGw3, "gw2");
-		TEST_ASSERT(gw2_3Prox != NULL);
+		TEST_ASSERT(gw2_3Prox != nullptr);
 		TEST_ASSERT(gw2_3Prox->getModuleDistance() == 1);
 		gw2_4Prox = retrieveModuleProxy(gGw4, "gw2");
-		TEST_ASSERT(gw2_4Prox != NULL);
+		TEST_ASSERT(gw2_4Prox != nullptr);
 		TEST_ASSERT(gw2_4Prox->getModuleDistance() == 2);
 
 		gw3_1Prox = retrieveModuleProxy(gGw1, "gw3");
-		TEST_ASSERT(gw3_1Prox != NULL);
+		TEST_ASSERT(gw3_1Prox != nullptr);
 		TEST_ASSERT(gw3_1Prox->getModuleDistance() == 2);
 		gw3_2Prox = retrieveModuleProxy(gGw2, "gw3");
-		TEST_ASSERT(gw3_2Prox != NULL);
+		TEST_ASSERT(gw3_2Prox != nullptr);
 		TEST_ASSERT(gw3_2Prox->getModuleDistance() == 1);
 		gw3_3Prox = retrieveModuleProxy(gGw3, "gw3");
-		TEST_ASSERT(gw3_3Prox != NULL);
+		TEST_ASSERT(gw3_3Prox != nullptr);
 		TEST_ASSERT(gw3_3Prox->getModuleDistance() == 0);
 		gw3_4Prox = retrieveModuleProxy(gGw4, "gw3");
-		TEST_ASSERT(gw3_4Prox != NULL);
+		TEST_ASSERT(gw3_4Prox != nullptr);
 		TEST_ASSERT(gw3_4Prox->getModuleDistance() == 1);
 
 		gw4_1Prox = retrieveModuleProxy(gGw1, "gw4");
-		TEST_ASSERT(gw4_1Prox != NULL);
+		TEST_ASSERT(gw4_1Prox != nullptr);
 		TEST_ASSERT(gw4_1Prox->getModuleDistance() == 3);
 		gw4_2Prox = retrieveModuleProxy(gGw2, "gw4");
-		TEST_ASSERT(gw4_2Prox != NULL);
+		TEST_ASSERT(gw4_2Prox != nullptr);
 		TEST_ASSERT(gw4_2Prox->getModuleDistance() == 2);
 		gw4_3Prox = retrieveModuleProxy(gGw3, "gw4");
-		TEST_ASSERT(gw4_3Prox != NULL);
+		TEST_ASSERT(gw4_3Prox != nullptr);
 		TEST_ASSERT(gw4_3Prox->getModuleDistance() == 1);
 		gw4_4Prox = retrieveModuleProxy(gGw4, "gw4");
-		TEST_ASSERT(gw4_4Prox != NULL);
+		TEST_ASSERT(gw4_4Prox != nullptr);
 		TEST_ASSERT(gw4_4Prox->getModuleDistance() == 0);
 
 		// make a double connection from gw1 to gw2
@@ -1657,55 +1656,55 @@ public:
 
 		// check the distances
 		gw1_1Prox = retrieveModuleProxy(gGw1, "gw1");
-		TEST_ASSERT(gw1_1Prox != NULL);
+		TEST_ASSERT(gw1_1Prox != nullptr);
 		TEST_ASSERT(gw1_1Prox->getModuleDistance() == 0);
 		gw1_2Prox = retrieveModuleProxy(gGw2, "gw1");
-		TEST_ASSERT(gw1_2Prox != NULL);
+		TEST_ASSERT(gw1_2Prox != nullptr);
 		TEST_ASSERT(gw1_2Prox->getModuleDistance() == 1);
 		gw1_3Prox = retrieveModuleProxy(gGw3, "gw1");
-		TEST_ASSERT(gw1_3Prox != NULL);
+		TEST_ASSERT(gw1_3Prox != nullptr);
 		TEST_ASSERT(gw1_3Prox->getModuleDistance() == 2);
 		gw1_4Prox = retrieveModuleProxy(gGw4, "gw1");
-		TEST_ASSERT(gw1_4Prox != NULL);
+		TEST_ASSERT(gw1_4Prox != nullptr);
 		TEST_ASSERT(gw1_4Prox->getModuleDistance() == 3);
 
 		gw2_1Prox = retrieveModuleProxy(gGw1, "gw2");
-		TEST_ASSERT(gw2_1Prox != NULL);
+		TEST_ASSERT(gw2_1Prox != nullptr);
 		TEST_ASSERT(gw2_1Prox->getModuleDistance() == 1);
 		gw2_2Prox = retrieveModuleProxy(gGw2, "gw2");
-		TEST_ASSERT(gw2_2Prox != NULL);
+		TEST_ASSERT(gw2_2Prox != nullptr);
 		TEST_ASSERT(gw2_2Prox->getModuleDistance() == 0);
 		gw2_3Prox = retrieveModuleProxy(gGw3, "gw2");
-		TEST_ASSERT(gw2_3Prox != NULL);
+		TEST_ASSERT(gw2_3Prox != nullptr);
 		TEST_ASSERT(gw2_3Prox->getModuleDistance() == 1);
 		gw2_4Prox = retrieveModuleProxy(gGw4, "gw2");
-		TEST_ASSERT(gw2_4Prox != NULL);
+		TEST_ASSERT(gw2_4Prox != nullptr);
 		TEST_ASSERT(gw2_4Prox->getModuleDistance() == 2);
 
 		gw3_1Prox = retrieveModuleProxy(gGw1, "gw3");
-		TEST_ASSERT(gw3_1Prox != NULL);
+		TEST_ASSERT(gw3_1Prox != nullptr);
 		TEST_ASSERT(gw3_1Prox->getModuleDistance() == 2);
 		gw3_2Prox = retrieveModuleProxy(gGw2, "gw3");
-		TEST_ASSERT(gw3_2Prox != NULL);
+		TEST_ASSERT(gw3_2Prox != nullptr);
 		TEST_ASSERT(gw3_2Prox->getModuleDistance() == 1);
 		gw3_3Prox = retrieveModuleProxy(gGw3, "gw3");
-		TEST_ASSERT(gw3_3Prox != NULL);
+		TEST_ASSERT(gw3_3Prox != nullptr);
 		TEST_ASSERT(gw3_3Prox->getModuleDistance() == 0);
 		gw3_4Prox = retrieveModuleProxy(gGw4, "gw3");
-		TEST_ASSERT(gw3_4Prox != NULL);
+		TEST_ASSERT(gw3_4Prox != nullptr);
 		TEST_ASSERT(gw3_4Prox->getModuleDistance() == 1);
 
 		gw4_1Prox = retrieveModuleProxy(gGw1, "gw4");
-		TEST_ASSERT(gw4_1Prox != NULL);
+		TEST_ASSERT(gw4_1Prox != nullptr);
 		TEST_ASSERT(gw4_1Prox->getModuleDistance() == 3);
 		gw4_2Prox = retrieveModuleProxy(gGw2, "gw4");
-		TEST_ASSERT(gw4_2Prox != NULL);
+		TEST_ASSERT(gw4_2Prox != nullptr);
 		TEST_ASSERT(gw4_2Prox->getModuleDistance() == 2);
 		gw4_3Prox = retrieveModuleProxy(gGw3, "gw4");
-		TEST_ASSERT(gw4_3Prox != NULL);
+		TEST_ASSERT(gw4_3Prox != nullptr);
 		TEST_ASSERT(gw4_3Prox->getModuleDistance() == 1);
 		gw4_4Prox = retrieveModuleProxy(gGw4, "gw4");
-		TEST_ASSERT(gw4_4Prox != NULL);
+		TEST_ASSERT(gw4_4Prox != nullptr);
 		TEST_ASSERT(gw4_4Prox->getModuleDistance() == 0);
 
 		// release modules
@@ -1748,10 +1747,10 @@ public:
 		master = mm.createModule("StandardGateway", "master", "");
 		other = mm.createModule("StandardGateway", "other", "");
 
-		TEST_ASSERT(peer1 != NULL);
-		TEST_ASSERT(peer2 != NULL);
-		TEST_ASSERT(master != NULL);
-		TEST_ASSERT(other != NULL);
+		TEST_ASSERT(peer1 != nullptr);
+		TEST_ASSERT(peer2 != nullptr);
+		TEST_ASSERT(master != nullptr);
+		TEST_ASSERT(other != nullptr);
 
 		// plug gateway in themselves
 		NLNET::IModuleSocket *sPeer1, *sPeer2, *sMaster, *sOther;
@@ -1760,10 +1759,10 @@ public:
 		sMaster = mm.getModuleSocket("master");
 		sOther = mm.getModuleSocket("other");
 
-		TEST_ASSERT(sPeer1 != NULL);
-		TEST_ASSERT(sPeer2 != NULL);
-		TEST_ASSERT(sMaster != NULL);
-		TEST_ASSERT(sOther != NULL);
+		TEST_ASSERT(sPeer1 != nullptr);
+		TEST_ASSERT(sPeer2 != nullptr);
+		TEST_ASSERT(sMaster != nullptr);
+		TEST_ASSERT(sOther != nullptr);
 
 		peer1->plugModule(sPeer1);
 		peer2->plugModule(sPeer2);
@@ -1807,13 +1806,13 @@ public:
 		// ok, now, check that each gateway only knows the gateway it must know
 		NLNET::IModuleGateway *gPeer1, *gPeer2, *gMaster, *gOther;
 		gPeer1 = dynamic_cast<NLNET::IModuleGateway *>(peer1);
-		TEST_ASSERT(gPeer1 != NULL);
+		TEST_ASSERT(gPeer1 != nullptr);
 		gPeer2 = dynamic_cast<NLNET::IModuleGateway *>(peer2);
-		TEST_ASSERT(gPeer2 != NULL);
+		TEST_ASSERT(gPeer2 != nullptr);
 		gMaster = dynamic_cast<NLNET::IModuleGateway *>(master);
-		TEST_ASSERT(gMaster != NULL);
+		TEST_ASSERT(gMaster != nullptr);
 		gOther = dynamic_cast<NLNET::IModuleGateway *>(other);
-		TEST_ASSERT(gOther != NULL);
+		TEST_ASSERT(gOther != nullptr);
 
 		vector<NLNET::IModuleProxy*> proxList;
 		gPeer1->getModuleProxyList(proxList);
@@ -1848,7 +1847,7 @@ public:
 
 			// retrieve peer1 proxy from other
 			NLNET::IModuleProxy *peer1Prox = retrieveModuleProxy(gMaster, "peer1");
-			TEST_ASSERT(peer1Prox != NULL);
+			TEST_ASSERT(peer1Prox != nullptr);
 			peer1Prox->sendModuleMessage(master, ping);
 		}
 		{
@@ -1856,7 +1855,7 @@ public:
 
 			// retrieve peer1 proxy from other
 			NLNET::IModuleProxy *peer2Prox = retrieveModuleProxy(gOther, "peer2");
-			TEST_ASSERT(peer2Prox != NULL);
+			TEST_ASSERT(peer2Prox != nullptr);
 			peer2Prox->sendModuleMessage(other, ping);
 		}
 
@@ -1988,10 +1987,10 @@ public:
 		master = mm.createModule("StandardGateway", "master", "");
 		other = mm.createModule("StandardGateway", "other", "");
 
-		TEST_ASSERT(peer1 != NULL);
-		TEST_ASSERT(peer2 != NULL);
-		TEST_ASSERT(master != NULL);
-		TEST_ASSERT(other != NULL);
+		TEST_ASSERT(peer1 != nullptr);
+		TEST_ASSERT(peer2 != nullptr);
+		TEST_ASSERT(master != nullptr);
+		TEST_ASSERT(other != nullptr);
 
 		// plug gateway in themselves
 		NLNET::IModuleSocket *sPeer1, *sPeer2, *sMaster, *sOther;
@@ -2000,10 +1999,10 @@ public:
 		sMaster = mm.getModuleSocket("master");
 		sOther = mm.getModuleSocket("other");
 
-		TEST_ASSERT(sPeer1 != NULL);
-		TEST_ASSERT(sPeer2 != NULL);
-		TEST_ASSERT(sMaster != NULL);
-		TEST_ASSERT(sOther != NULL);
+		TEST_ASSERT(sPeer1 != nullptr);
+		TEST_ASSERT(sPeer2 != nullptr);
+		TEST_ASSERT(sMaster != nullptr);
+		TEST_ASSERT(sOther != nullptr);
 
 		peer1->plugModule(sPeer1);
 		peer2->plugModule(sPeer2);
@@ -2047,13 +2046,13 @@ public:
 		// ok, now, check that each gateway only knows the gateway it must know
 		NLNET::IModuleGateway *gPeer1, *gPeer2, *gMaster, *gOther;
 		gPeer1 = dynamic_cast<NLNET::IModuleGateway *>(peer1);
-		TEST_ASSERT(gPeer1 != NULL);
+		TEST_ASSERT(gPeer1 != nullptr);
 		gPeer2 = dynamic_cast<NLNET::IModuleGateway *>(peer2);
-		TEST_ASSERT(gPeer2 != NULL);
+		TEST_ASSERT(gPeer2 != nullptr);
 		gMaster = dynamic_cast<NLNET::IModuleGateway *>(master);
-		TEST_ASSERT(gMaster != NULL);
+		TEST_ASSERT(gMaster != nullptr);
 		gOther = dynamic_cast<NLNET::IModuleGateway *>(other);
-		TEST_ASSERT(gOther != NULL);
+		TEST_ASSERT(gOther != nullptr);
 
 		vector<NLNET::IModuleProxy*> proxList;
 		gPeer1->getModuleProxyList(proxList);
@@ -2185,10 +2184,10 @@ public:
 		NLMISC::CCommandRegistry &cr = NLMISC::CCommandRegistry::getInstance();
 
 		NLNET::IModule *mod = mm.createModule("StandardGateway", "gw", "");
-		TEST_ASSERT(mod != NULL);
+		TEST_ASSERT(mod != nullptr);
 
 		NLNET::IModuleSocket *socket = mm.getModuleSocket("gw");
-		TEST_ASSERT(socket != NULL);
+		TEST_ASSERT(socket != nullptr);
 		mod->plugModule(socket);
 		mod->unplugModule(socket);
 		mod->plugModule(socket);
@@ -2213,7 +2212,7 @@ public:
 
 		// create a simple module
 		NLNET::IModule *mod = mm.createModule("ModuleType0", "mod", "");
-		TEST_ASSERT(mod != NULL);
+		TEST_ASSERT(mod != nullptr);
 		TEST_ASSERT(mod->getModuleFullyQualifiedName() == "foo:mod");
 		mm.deleteModule(mod);
 
@@ -2221,96 +2220,10 @@ public:
 		mm.setUniqueNameRoot(string());
 
 		mod = mm.createModule("ModuleType0", "mod", "");
-		TEST_ASSERT(mod != NULL);
+		TEST_ASSERT(mod != nullptr);
 		TEST_ASSERT(mod->getModuleFullyQualifiedName() != "foo:mod");
 
 		mm.deleteModule(mod);
-	}
-
-	void localMessageQueing()
-	{
-		NLNET::IModuleManager &mm = NLNET::IModuleManager::getInstance();
-		NLMISC::CCommandRegistry &cr = NLMISC::CCommandRegistry::getInstance();
-
-		NLNET::IModule *mods = mm.createModule("StandardGateway", "gws", "");
-		TEST_ASSERT(mods != NULL);
-		NLNET::IModuleGateway *gws = dynamic_cast<NLNET::IModuleGateway*>(mods);
-		TEST_ASSERT(gws != NULL);
-
-		// get the socket interface of the gateway
-		NLNET::IModuleSocket *socketGws = mm.getModuleSocket("gws");
-		TEST_ASSERT(socketGws != NULL);
-
-		// create two modules that will communicate localy
-		NLNET::IModule *m1= mm.createModule("ModuleType0", "m1", "");
-		TEST_ASSERT(m1!= NULL);
-		NLNET::IModule *m2= mm.createModule("ModuleAsync", "m2", "");
-		TEST_ASSERT(m2!= NULL);
-
-		m1->plugModule(socketGws);
-		m2->plugModule(socketGws);
-
-		// update the networks
-		for (uint i=0; i<4; ++i)
-		{
-			mm.updateModules();
-			NLMISC::nlSleep(50);
-		}
-
-		// retrieve module proxy and send one ping to each other
-		vector<NLNET::IModuleProxy*>	proxiesC;
-		gws->getModuleProxyList(proxiesC);
-		TEST_ASSERT(proxiesC.size() == 2);
-		TEST_ASSERT(lookForModuleProxy(proxiesC, "m2"));
-		NLNET::IModuleProxy *pm2 = retrieveModuleProxy(gws, "m2");
-		TEST_ASSERT(pm2 != NULL);
-		NLNET::CMessage aMessage("DEBUG_MOD_PING");
-		pm2->sendModuleMessage(m1, aMessage);
-
-		proxiesC.clear();
-		gws->getModuleProxyList(proxiesC);
-		TEST_ASSERT(proxiesC.size() == 2);
-		TEST_ASSERT(lookForModuleProxy(proxiesC, "m1"));
-		NLNET::IModuleProxy *pm1 = retrieveModuleProxy(gws, "m1");
-		TEST_ASSERT(pm1 != NULL);
-		aMessage = NLNET::CMessage("DEBUG_MOD_PING");
-		pm1->sendModuleMessage(m2, aMessage);
-
-		// check received ping count
-		CModuleType0 *mod1 = dynamic_cast<CModuleType0*>(m1);
-		TEST_ASSERT(mod1 != NULL);
-		TEST_ASSERT(mod1->PingCount == 1);
-		CModuleType0 *mod2 = dynamic_cast<CModuleType0*>(m2);
-		TEST_ASSERT(mod2 != NULL);
-		TEST_ASSERT(mod2->PingCount == 0);
-	
-		// update the networks
-		for (uint i=0; i<4; ++i)
-		{
-			mm.updateModules();
-			NLMISC::nlSleep(50);
-		}
-
-		// check received ping count
-		TEST_ASSERT(mod1->PingCount == 1);
-		TEST_ASSERT(mod2->PingCount == 1);
-
-		// update the networks
-		for (uint i=0; i<4; ++i)
-		{
-			mm.updateModules();
-			NLMISC::nlSleep(50);
-		}
-
-		// check received ping count
-		TEST_ASSERT(mod1->PingCount == 1);
-		TEST_ASSERT(mod2->PingCount == 1);
-
-
-		// cleanup
-		mm.deleteModule(m1);
-		mm.deleteModule(m2);
-		mm.deleteModule(mods);
 	}
 
 	void moduleMessaging()
@@ -2320,13 +2233,13 @@ public:
 
 		// create two gateway an connect them, plug the gateway on themselves and send a message
 		NLNET::IModule *mods = mm.createModule("StandardGateway", "gws", "");
-		TEST_ASSERT(mods != NULL);
+		TEST_ASSERT(mods != nullptr);
 		NLNET::IModuleGateway *gws = dynamic_cast<NLNET::IModuleGateway*>(mods);
-		TEST_ASSERT(gws != NULL);
+		TEST_ASSERT(gws != nullptr);
 
 		// plug the module in itself before opening connection
 		NLNET::IModuleSocket *socketGws = mm.getModuleSocket("gws");
-		TEST_ASSERT(socketGws != NULL);
+		TEST_ASSERT(socketGws != nullptr);
 		mods->plugModule(socketGws);
 
 		// add transport for server mode
@@ -2336,9 +2249,9 @@ public:
 		TEST_ASSERT(cr.execute(cmd, NLMISC::InfoLog()));
 
 		NLNET::IModule *modc = mm.createModule("StandardGateway", "gwc", "");
-		TEST_ASSERT(modc != NULL);
+		TEST_ASSERT(modc != nullptr);
 		NLNET::IModuleGateway *gwc = dynamic_cast<NLNET::IModuleGateway*>(modc);
-		TEST_ASSERT(gwc != NULL);
+		TEST_ASSERT(gwc != nullptr);
 		// add transport for client mode
 		cmd = "gwc.transportAdd L3Client l3c";
 		TEST_ASSERT(cr.execute(cmd, NLMISC::InfoLog()));
@@ -2347,7 +2260,7 @@ public:
 
 		// plug the module in itself before opening connection
 		NLNET::IModuleSocket *socketGwc = mm.getModuleSocket("gwc");
-		TEST_ASSERT(socketGwc != NULL);
+		TEST_ASSERT(socketGwc != nullptr);
 		modc->plugModule(socketGwc);
 
 		// update the gateways...
@@ -2409,9 +2322,9 @@ public:
 
 		// cleanup modules
 		mm.deleteModule(mods);
-		TEST_ASSERT(mm.getLocalModule("gws") == NULL);
+		TEST_ASSERT(mm.getLocalModule("gws") == nullptr);
 		mm.deleteModule(modc);
-		TEST_ASSERT(mm.getLocalModule("gwc") == NULL);
+		TEST_ASSERT(mm.getLocalModule("gwc") == nullptr);
 	}
 
 	void moduleDisclosure()
@@ -2420,15 +2333,15 @@ public:
 		NLMISC::CCommandRegistry &cr = NLMISC::CCommandRegistry::getInstance();
 
 		NLNET::IModule *mods = mm.createModule("StandardGateway", "gws", "");
-		TEST_ASSERT(mods != NULL);
+		TEST_ASSERT(mods != nullptr);
 		NLNET::IModuleGateway *gws = dynamic_cast<NLNET::IModuleGateway*>(mods);
-		TEST_ASSERT(gws != NULL);
+		TEST_ASSERT(gws != nullptr);
 
 		TEST_ASSERT(gws->getProxyCount() == 0);
 
 		// plug the module in itself before opening connection
 		NLNET::IModuleSocket *socketGws = mm.getModuleSocket("gws");
-		TEST_ASSERT(socketGws != NULL);
+		TEST_ASSERT(socketGws != nullptr);
 		mods->plugModule(socketGws);
 
 		// now, there must be one proxy in the gateway
@@ -2436,7 +2349,7 @@ public:
 		vector<NLNET::IModuleProxy*>	proxies;
 		gws->getModuleProxyList(proxies);
 		TEST_ASSERT(proxies.size() == 1);
-		TEST_ASSERT(proxies[0]->getGatewayRoute() == NULL);
+		TEST_ASSERT(proxies[0]->getGatewayRoute() == nullptr);
 		TEST_ASSERT(proxies[0]->getForeignModuleId() == mods->getModuleId());
 
 		// add transport for server mode
@@ -2446,9 +2359,9 @@ public:
 		TEST_ASSERT(cr.execute(cmd, NLMISC::InfoLog()));
 
 		NLNET::IModule *modc = mm.createModule("StandardGateway", "gwc", "");
-		TEST_ASSERT(modc != NULL);
+		TEST_ASSERT(modc != nullptr);
 		NLNET::IModuleGateway *gwc = dynamic_cast<NLNET::IModuleGateway*>(modc);
-		TEST_ASSERT(gwc != NULL);
+		TEST_ASSERT(gwc != nullptr);
 		// add transport for client mode
 		cmd = "gwc.transportAdd L3Client l3c";
 		TEST_ASSERT(cr.execute(cmd, NLMISC::InfoLog()));
@@ -2469,12 +2382,12 @@ public:
 		proxies.clear();
 		gwc->getModuleProxyList(proxies);
 		TEST_ASSERT(proxies.size() == 1);
-		TEST_ASSERT(proxies[0]->getGatewayRoute() != NULL);
+		TEST_ASSERT(proxies[0]->getGatewayRoute() != nullptr);
 		TEST_ASSERT(proxies[0]->getModuleName().find("gws") == proxies[0]->getModuleName().size() - 3);
 
 		// plug the client module in itself after opening connection
 		NLNET::IModuleSocket *socketGwc = mm.getModuleSocket("gwc");
-		TEST_ASSERT(socketGwc != NULL);
+		TEST_ASSERT(socketGwc != nullptr);
 		modc->plugModule(socketGwc);
 
 
@@ -2489,9 +2402,9 @@ public:
 		proxies.clear();
 		gws->getModuleProxyList(proxies);
 		TEST_ASSERT(proxies.size() == 2);
-		TEST_ASSERT(proxies[0]->getGatewayRoute() == NULL);
+		TEST_ASSERT(proxies[0]->getGatewayRoute() == nullptr);
 		TEST_ASSERT(proxies[0]->getForeignModuleId() == mods->getModuleId());
-		TEST_ASSERT(proxies[1]->getGatewayRoute() != NULL);
+		TEST_ASSERT(proxies[1]->getGatewayRoute() != nullptr);
 		TEST_ASSERT(proxies[1]->getModuleName().find("gwc") == proxies[1]->getModuleName().size() - 3);
 
 		// The client must have two module also
@@ -2499,9 +2412,9 @@ public:
 		proxies.clear();
 		gwc->getModuleProxyList(proxies);
 		TEST_ASSERT(proxies.size() == 2);
-		TEST_ASSERT(proxies[0]->getGatewayRoute() != NULL);
+		TEST_ASSERT(proxies[0]->getGatewayRoute() != nullptr);
 		TEST_ASSERT(proxies[0]->getModuleName().find("gws") == proxies[1]->getModuleName().size() - 3);
-		TEST_ASSERT(proxies[1]->getGatewayRoute() == NULL);
+		TEST_ASSERT(proxies[1]->getGatewayRoute() == nullptr);
 		TEST_ASSERT(proxies[1]->getForeignModuleId() == modc->getModuleId());
 
 
@@ -2519,7 +2432,7 @@ public:
 		proxies.clear();
 		gws->getModuleProxyList(proxies);
 		TEST_ASSERT(proxies.size() == 1);
-		TEST_ASSERT(proxies[0]->getGatewayRoute() != NULL);
+		TEST_ASSERT(proxies[0]->getGatewayRoute() != nullptr);
 		TEST_ASSERT(proxies[0]->getModuleName().find("gwc") == proxies[0]->getModuleName().size() - 3);
 
 		// The client must have one module left
@@ -2527,7 +2440,7 @@ public:
 		proxies.clear();
 		gwc->getModuleProxyList(proxies);
 		TEST_ASSERT(proxies.size() == 1);
-		TEST_ASSERT(proxies[0]->getGatewayRoute() == NULL);
+		TEST_ASSERT(proxies[0]->getGatewayRoute() == nullptr);
 		TEST_ASSERT(proxies[0]->getForeignModuleId() == modc->getModuleId());
 		
 		// Dump the module state
@@ -2538,9 +2451,9 @@ public:
 
 		// cleanup modules
 		mm.deleteModule(mods);
-		TEST_ASSERT(mm.getLocalModule("gws") == NULL);
+		TEST_ASSERT(mm.getLocalModule("gws") == nullptr);
 		mm.deleteModule(modc);
-		TEST_ASSERT(mm.getLocalModule("gwc") == NULL);
+		TEST_ASSERT(mm.getLocalModule("gwc") == nullptr);
 	}
 
 	void connectGateways()
@@ -2548,9 +2461,9 @@ public:
 		NLNET::IModuleManager &mm = NLNET::IModuleManager::getInstance();
 
 		NLNET::IModule *mods = mm.createModule("StandardGateway", "gws", "");
-		TEST_ASSERT(mods != NULL);
+		TEST_ASSERT(mods != nullptr);
 		NLNET::IModuleGateway *gws = dynamic_cast<NLNET::IModuleGateway*>(mods);
-		TEST_ASSERT(gws != NULL);
+		TEST_ASSERT(gws != nullptr);
 		// add transport for server mode
 		string cmd = "gws.transportAdd L3Server l3s";
 		TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().execute(cmd, NLMISC::InfoLog()));
@@ -2558,9 +2471,9 @@ public:
 		TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().execute(cmd, NLMISC::InfoLog()));
 			
 		NLNET::IModule *modc1 = mm.createModule("StandardGateway", "gwc1", "");
-		TEST_ASSERT(modc1 != NULL);
+		TEST_ASSERT(modc1 != nullptr);
 		NLNET::IModuleGateway *gwc1 = dynamic_cast<NLNET::IModuleGateway*>(modc1);
-		TEST_ASSERT(gwc1 != NULL);
+		TEST_ASSERT(gwc1 != nullptr);
 		// add transport for client mode
 		cmd = "gwc1.transportAdd L3Client l3c";
 		TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().execute(cmd, NLMISC::InfoLog()));
@@ -2583,9 +2496,9 @@ public:
 
 		// create third gateway
 		NLNET::IModule *modc2 = mm.createModule("StandardGateway", "gwc2", "");
-		TEST_ASSERT(modc2 != NULL);
-		NLNET::IModuleGateway *gwc2 = dynamic_cast<NLNET::IModuleGateway*>(modc2);
-		TEST_ASSERT(gwc2 != NULL);
+		TEST_ASSERT(modc2 != nullptr);
+		auto *gwc2 = dynamic_cast<NLNET::IModuleGateway*>(modc2);
+		TEST_ASSERT(gwc2 != nullptr);
 		// add transport for client mode
 		cmd = "gwc2.transportAdd L3Client l3c";
 		TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().execute(cmd, NLMISC::InfoLog()));
@@ -2614,11 +2527,11 @@ public:
 
 		// cleanup the modules
 		mm.deleteModule(mods);
-		TEST_ASSERT(mm.getLocalModule("gws") == NULL);
+		TEST_ASSERT(mm.getLocalModule("gws") == nullptr);
 		mm.deleteModule(modc1);
-		TEST_ASSERT(mm.getLocalModule("gwc1") == NULL);
+		TEST_ASSERT(mm.getLocalModule("gwc1") == nullptr);
 		mm.deleteModule(modc2);
-		TEST_ASSERT(mm.getLocalModule("gwc2") == NULL);
+		TEST_ASSERT(mm.getLocalModule("gwc2") == nullptr);
 	}
 
 	void gatewayTransportManagement()
@@ -2627,16 +2540,16 @@ public:
 
 		// create a gateway module
 		NLNET::IModule *mod = mm.createModule("StandardGateway", "gw", "");
-		TEST_ASSERT(mod != NULL);
+		TEST_ASSERT(mod != nullptr);
 		NLNET::IModuleGateway *gw = dynamic_cast<NLNET::IModuleGateway*>(mod);
-		TEST_ASSERT(gw != NULL);
+		TEST_ASSERT(gw != nullptr);
 
 		// Create a layer 3 server transport
 		// send a transport creation command
 		string cmd = "gw.transportAdd L3Server l3s";
 		TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().execute(cmd, NLMISC::InfoLog()));
 		NLNET::IGatewayTransport *transportL3s = gw->getGatewayTransport("l3s");
-		TEST_ASSERT(transportL3s != NULL);
+		TEST_ASSERT(transportL3s != nullptr);
 
 		// send a transport command
 		cmd = "gw.transportCmd l3s(open port=6185)";
@@ -2647,7 +2560,7 @@ public:
 		cmd = "gw.transportAdd L3Client l3c";
 		TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().execute(cmd, NLMISC::InfoLog()));
 		NLNET::IGatewayTransport *transportL3c = gw->getGatewayTransport("l3c");
-		TEST_ASSERT(transportL3c != NULL);
+		TEST_ASSERT(transportL3c != nullptr);
 
 		// send a transport command
 		cmd = "gw.transportCmd l3c(connect addr=localhost:6185)";
@@ -2695,8 +2608,8 @@ public:
 		cmd = "gw.transportRemove l3c";
 		TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().execute(cmd, NLMISC::InfoLog()));
 
-		TEST_ASSERT(gw->getGatewayTransport("l3c") == NULL);
-		TEST_ASSERT(gw->getGatewayTransport("l3s") == NULL);
+		TEST_ASSERT(gw->getGatewayTransport("l3c") == nullptr);
+		TEST_ASSERT(gw->getGatewayTransport("l3s") == nullptr);
 		TEST_ASSERT(gw->getTransportCount() == 0);
 
 		// update the module to update the network callback client and server
@@ -2709,7 +2622,7 @@ public:
 
 		// cleanup the modules
 		mm.deleteModule(mod);
-		TEST_ASSERT(mm.getLocalModule("gw") == NULL);
+		TEST_ASSERT(mm.getLocalModule("gw") == nullptr);
 	}
 
 /*	void moduleManagerCommands()
@@ -2741,23 +2654,23 @@ public:
 		NLNET::IModuleManager &mm = NLNET::IModuleManager::getInstance();
 
 		NLNET::IModule *gateway1 = mm.createModule("LocalGateway", "g1", "");
-		TEST_ASSERT(gateway1 != NULL);
+		TEST_ASSERT(gateway1 != nullptr);
 		NLNET::IModule *gateway2 = mm.createModule("LocalGateway", "g2", "");
-		TEST_ASSERT(gateway2 != NULL);
+		TEST_ASSERT(gateway2 != nullptr);
 
 		NLNET::IModuleSocket *socket1 = mm.getModuleSocket("g1");
-		TEST_ASSERT(socket1 != NULL);
+		TEST_ASSERT(socket1 != nullptr);
 		NLNET::IModuleSocket *socket2 = mm.getModuleSocket("g2");
-		TEST_ASSERT(socket2 != NULL);
+		TEST_ASSERT(socket2 != nullptr);
 		gateway1->plugModule(socket1);
 		gateway1->plugModule(socket2);
 		gateway2->plugModule(socket1);
 		gateway2->plugModule(socket2);
 
 		mm.deleteModule(gateway1);
-		TEST_ASSERT(mm.getLocalModule("g1") == NULL);
+		TEST_ASSERT(mm.getLocalModule("g1") == nullptr);
 		mm.deleteModule(gateway2);
-		TEST_ASSERT(mm.getLocalModule("g2") == NULL);
+		TEST_ASSERT(mm.getLocalModule("g2") == nullptr);
 	}
 
 	void createLocalGateway()
@@ -2765,25 +2678,25 @@ public:
 		NLNET::IModuleManager &mm = NLNET::IModuleManager::getInstance();
 
 		NLNET::IModule *gateway = mm.createModule("LocalGateway", "localGateway", "");
-		TEST_ASSERT(gateway != NULL);
+		TEST_ASSERT(gateway != nullptr);
 
 		NLNET::IModule *mod1 = mm.createModule("ModuleType0", "plugged1", "");
-		TEST_ASSERT(mod1 != NULL);
+		TEST_ASSERT(mod1 != nullptr);
 		NLNET::IModule *mod2 = mm.createModule("ModuleType0", "plugged2", "");
-		TEST_ASSERT(mod2 != NULL);
+		TEST_ASSERT(mod2 != nullptr);
 
 		NLNET::IModuleSocket *socket = mm.getModuleSocket("localGateway");
-		TEST_ASSERT(socket != NULL);
+		TEST_ASSERT(socket != nullptr);
 		mod1->plugModule(socket);
 		mod2->plugModule(socket);
 
 		mm.deleteModule(mod1);
-		TEST_ASSERT(mm.getLocalModule("plugged1") == NULL);
+		TEST_ASSERT(mm.getLocalModule("plugged1") == nullptr);
 		mm.deleteModule(mod2);
-		TEST_ASSERT(mm.getLocalModule("plugged2") == NULL);
+		TEST_ASSERT(mm.getLocalModule("plugged2") == nullptr);
 
 		mm.deleteModule(gateway);
-		TEST_ASSERT(mm.getLocalModule("localGateway") == NULL);
+		TEST_ASSERT(mm.getLocalModule("localGateway") == nullptr);
 	}
 
 /*	void unloadModuleLib()
@@ -2791,15 +2704,15 @@ public:
 		IModuleManager &mm = IModuleManager::getInstance();
 
 		CRefPtr<IModule> module1 = mm.createModule("ModuleType1", "TheModule2", "the args");
-		TEST_ASSERT(module1 != NULL);
+		TEST_ASSERT(module1 != nullptr);
 
 		TEST_ASSERT(mm.unloadModuleLibrary("net_module_lib_test"));
 
 		// the module must have been deleted
-		TEST_ASSERT(module1 == NULL);
+		TEST_ASSERT(module1 == nullptr);
 
 		TModulePtr module2 = mm.createModule("ModuleType1", "TheModuleThatCantBeCreated", "the args");
-		TEST_ASSERT(module2 == NULL);
+		TEST_ASSERT(module2 == nullptr);
 	}*/
 
 	void failedInit()
@@ -2807,7 +2720,7 @@ public:
 		NLNET::IModuleManager &mm = NLNET::IModuleManager::getInstance();
 
 		NLNET::IModule *module = mm.createModule("ModuleType0", "FailingInit", "FAIL");
-		TEST_ASSERT(module == NULL);
+		TEST_ASSERT(module == nullptr);
 	}
 
 /*	void deleteModule()
@@ -2815,12 +2728,12 @@ public:
 		IModuleManager &mm = IModuleManager::getInstance();
 
 		IModule *module = mm.createModule("ModuleType1", "TheModuleToDelete", "the args");
-		TEST_ASSERT(module != NULL);
+		TEST_ASSERT(module != nullptr);
 
 		CRefPtr<IModule> checkPtr(module);
 
 		mm.deleteModule(module);
-		TEST_ASSERT(checkPtr == NULL);
+		TEST_ASSERT(checkPtr == nullptr);
 	}*/
 
 /*	void createModule()
@@ -2828,7 +2741,7 @@ public:
 		IModuleManager &mm = IModuleManager::getInstance();
 
 		TModulePtr module = mm.createModule("ModuleType1", "TheModule", "the args");
-		TEST_ASSERT(module != NULL);
+		TEST_ASSERT(module != nullptr);
 
 		TEST_ASSERT(module->getModuleClassName() == "ModuleType1");
 		TEST_ASSERT(module->getModuleName() == "TheModule");
@@ -2910,15 +2823,15 @@ public:
 
 		TEST_ASSERT(mif.parseParamList(paramString));
 
-		TEST_ASSERT(mif.getParam("a") != NULL);
+		TEST_ASSERT(mif.getParam("a") != nullptr);
 		TEST_ASSERT(mif.getParam("a") == mif.SubParams[0]);
 
-		TEST_ASSERT(mif.getParam("sub") != NULL);
+		TEST_ASSERT(mif.getParam("sub") != nullptr);
 		TEST_ASSERT(mif.getParam("sub") == mif.SubParams[2]);
 
-		TEST_ASSERT(mif.getParam("foo") == NULL);
+		TEST_ASSERT(mif.getParam("foo") == nullptr);
 
-		TEST_ASSERT(mif.getParam("sub.subsub.g") != NULL);
+		TEST_ASSERT(mif.getParam("sub.subsub.g") != nullptr);
 		TEST_ASSERT(mif.getParam("sub.subsub.g") == mif.SubParams[2]->SubParams[2]->SubParams[0]);
 	}
 

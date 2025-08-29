@@ -6,6 +6,12 @@ add_library(nelns_naming_service STATIC
 )
 add_library(nelns::ns ALIAS nelns_naming_service)
 
+target_compile_features( nelns_naming_service
+        PRIVATE
+        cxx_lambdas
+        cxx_return_type_deduction
+)
+
 target_include_directories(nelns_naming_service PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(nelns_naming_service
@@ -27,6 +33,6 @@ NL_ADD_RUNTIME_FLAGS(naming_service)
 INSTALL(TARGETS naming_service RUNTIME DESTINATION sbin COMPONENT ns)
 INSTALL(FILES naming_service.cfg common.cfg DESTINATION ${NL_ETC_PREFIX}/nelns COMPONENT ns)
 
-IF (WITH_NEL_TESTS)
+IF (WITH_NEL_TESTS OR WITH_TESTING)
     ADD_SUBDIRECTORY(tests)
 ENDIF ()

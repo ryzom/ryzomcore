@@ -21,6 +21,7 @@ runs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
+        sudo apt update
         sudo apt install --yes \
           build-essential ccache \
           bison autoconf automake \

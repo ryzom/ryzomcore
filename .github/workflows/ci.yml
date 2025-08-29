@@ -50,6 +50,7 @@ jobs:
     needs: [ strings ]
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ ubuntu-22.04, ubuntu-24.04 ]
     steps:
@@ -78,12 +79,19 @@ jobs:
   nelns:
     name: "NeL Network Services"
     needs: [ strings, nel ]
+    timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ ubuntu-22.04, ubuntu-24.04 ]
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nel-${{ matrix.os }}-*
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
 
       - id: cache
         uses: actions/cache@v4
@@ -118,6 +126,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nel-${{ matrix.os }}-*
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
+
       - id: cache
         uses: actions/cache@v4
         with:
@@ -149,6 +163,12 @@ jobs:
         os: [ ubuntu-22.04, ubuntu-24.04 ]
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nel-${{ matrix.os }}-*
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
 
       - id: cache
         uses: actions/cache@v4
