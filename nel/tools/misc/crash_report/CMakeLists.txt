@@ -2,29 +2,30 @@ FILE(GLOB CRASHREPORT_SRC *.cpp *.rc)
 FILE(GLOB CRASHREPORT_HDR *.h)
 
 SET(CRASHREPORT_QRC resources.qrc)
+SET(CRASHREPORT_UI crash_report_widget.ui)
 
-SET(CRASHREPORT_MOC_HDR
-crash_report_socket.h
-crash_report_widget.h
-)
-
-SET(CRASHREPORT_UI
-crash_report_widget.ui
-)
-
-QT5_ADD_RESOURCES(CRASHREPORT_QRC_SRCS ${CRASHREPORT_QRC})
-QT5_WRAP_CPP(CRASHREPORT_MOC_SRC ${CRASHREPORT_MOC_HDR})
-QT5_WRAP_UI(CRASHREPORT_UI_HDR ${CRASHREPORT_UI})
-
-SOURCE_GROUP(QtResources FILES ${CRASHREPORT_UI} ${CRASHREPORT_QRC_SRCS})
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${CRASHREPORT_UI_HDR})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${CRASHREPORT_MOC_SRC})
+SOURCE_GROUP(QtResources FILES ${CRASHREPORT_UI} ${CRASHREPORT_QRC})
 SOURCE_GROUP("source files" FILES ${CRASHREPORT_SRC})
 SOURCE_GROUP("header files" FILES ${CRASHREPORT_HDR})
 
-ADD_EXECUTABLE(crash_report WIN32 ${CRASHREPORT_SRC} ${CRASHREPORT_HDR} ${CRASHREPORT_MOC_SRC} ${CRASHREPORT_UI_HDR} ${CRASHREPORT_QRC_SRCS})
+ADD_EXECUTABLE(crash_report WIN32)
+target_sources(crash_report
+        PRIVATE
+        crash_report.cpp
+        crash_report.rc
+        crash_report_socket.cpp
+        crash_report_widget.cpp
+        crash_report_widget.ui
+        resources.qrc
+)
+
 TARGET_INCLUDE_DIRECTORIES(crash_report PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-TARGET_LINK_LIBRARIES(crash_report ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(crash_report
+        PRIVATE
+        Qt::Core
+        Qt::Network
+        Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(crash_report "NeL, Tools, Misc: Crash Report")
 NL_ADD_RUNTIME_FLAGS(crash_report)
