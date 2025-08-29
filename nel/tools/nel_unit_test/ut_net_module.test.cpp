@@ -259,6 +259,7 @@ TEST_F(CUTNetModule, localMessageQueing)
 	NLNET::IModule *mods = mm.createModule("StandardGateway", "gws", "");
 	ASSERT_THAT(mods, NotNull());
 	auto *gws = dynamic_cast<NLNET::IModuleGateway *>(mods);
+	ASSERT_THAT(mods, WhenDynamicCastTo<NLNET::IModuleGateway *>(NotNull()));
 	ASSERT_THAT(gws, NotNull());
 
 	// get the socket interface of the gateway
