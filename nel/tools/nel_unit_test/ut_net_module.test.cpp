@@ -251,7 +251,7 @@ protected:
 
 		for (auto &proxy : proxList)
 		{
-			if (proxy->getModuleName().rfind(modName) != string::npos)
+			if (proxy->getModuleName().rfind(modName) == (proxy->getModuleName().size() - modName.size()))
 				return proxy;
 		}
 
