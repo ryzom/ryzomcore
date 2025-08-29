@@ -207,9 +207,14 @@ public:
 NLNET_REGISTER_MODULE_FACTORY(CModuleAsync, "ModuleAsync");
 
 namespace NLNET {
-void PrintTo(IModuleProxy * proxy, std::ostream *os)
+void PrintTo(IModuleProxy *proxy, std::ostream *os)
 {
-	*os << "( moduleClassName: " << proxy->getModuleClassName() << ", moduleName: " << proxy->getModuleName() << " )";
+	*os << "("
+	    << " ID: " << proxy->getModuleProxyId() << ","
+	    << " foreign ID : " << proxy->getForeignModuleId() << ","
+	    << " name : '" << proxy->getModuleName() << "',"
+	    << " class : '" << proxy->getModuleClassName() << "'"
+	    << " )";
 }
 }
 
@@ -278,7 +283,7 @@ TEST_F(CUTNetModule, localMessageQueing)
 	vector<NLNET::IModuleProxy *> proxiesC;
 	gws->getModuleProxyList(proxiesC);
 	ASSERT_TRUE(proxiesC.size() == 2);
-	ASSERT_THAT(proxiesC, Contains(Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m2"))));
+	ASSERT_THAT(proxiesC, Contains(Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m1"))));
 	NLNET::IModuleProxy *pm2 = retrieveModuleProxy(gws, "m2");
 	ASSERT_TRUE(pm2 != nullptr);
 	NLNET::CMessage aMessage("DEBUG_MOD_PING");
