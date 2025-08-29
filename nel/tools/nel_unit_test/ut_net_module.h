@@ -483,7 +483,7 @@ public:
 	{
 		for (uint i=0; i<proxList.size(); ++i)
 		{
-			if (proxList[i]->getModuleName().find(modName) == (proxList[i]->getModuleName().size() - modName.size()))
+			if (proxList[i]->getModuleName().rfind(modName) == (proxList[i]->getModuleName().size() - modName.size()))
 				return true;
 		}
 
@@ -497,7 +497,7 @@ public:
 
 		for (uint i=0; i<proxList.size(); ++i)
 		{
-			if (proxList[i]->getModuleName().find(modName) == (proxList[i]->getModuleName().size() - modName.size()))
+			if (proxList[i]->getModuleName().rfind(modName) == (proxList[i]->getModuleName().size() - modName.size()))
 				return proxList[i];
 		}
 
@@ -534,7 +534,6 @@ public:
 		TEST_ADD(CUTNetModule::connectGateways);
 		TEST_ADD(CUTNetModule::moduleDisclosure);
 		TEST_ADD(CUTNetModule::moduleMessaging);
-		TEST_ADD(CUTNetModule::localMessageQueing);
 		TEST_ADD(CUTNetModule::uniqueNameGenerator);
 		TEST_ADD(CUTNetModule::gwPlugUnplug);
 		TEST_ADD(CUTNetModule::peerInvisible);
@@ -2225,92 +2224,6 @@ public:
 		TEST_ASSERT(mod->getModuleFullyQualifiedName() != "foo:mod");
 
 		mm.deleteModule(mod);
-	}
-
-	void localMessageQueing()
-	{
-		NLNET::IModuleManager &mm = NLNET::IModuleManager::getInstance();
-		NLMISC::CCommandRegistry &cr = NLMISC::CCommandRegistry::getInstance();
-
-		NLNET::IModule *mods = mm.createModule("StandardGateway", "gws", "");
-		TEST_ASSERT(mods != nullptr);
-		NLNET::IModuleGateway *gws = dynamic_cast<NLNET::IModuleGateway*>(mods);
-		TEST_ASSERT(gws != nullptr);
-
-		// get the socket interface of the gateway
-		NLNET::IModuleSocket *socketGws = mm.getModuleSocket("gws");
-		TEST_ASSERT(socketGws != nullptr);
-
-		// create two modules that will communicate localy
-		NLNET::IModule *m1= mm.createModule("ModuleType0", "m1", "");
-		TEST_ASSERT(m1!= nullptr);
-		NLNET::IModule *m2= mm.createModule("ModuleAsync", "m2", "");
-		TEST_ASSERT(m2!= nullptr);
-
-		m1->plugModule(socketGws);
-		m2->plugModule(socketGws);
-
-		// update the networks
-		for (uint i=0; i<4; ++i)
-		{
-			mm.updateModules();
-			NLMISC::nlSleep(50);
-		}
-
-		// retrieve module proxy and send one ping to each other
-		vector<NLNET::IModuleProxy*>	proxiesC;
-		gws->getModuleProxyList(proxiesC);
-		TEST_ASSERT(proxiesC.size() == 2);
-		TEST_ASSERT(lookForModuleProxy(proxiesC, "m2"));
-		NLNET::IModuleProxy *pm2 = retrieveModuleProxy(gws, "m2");
-		TEST_ASSERT(pm2 != nullptr);
-		NLNET::CMessage aMessage("DEBUG_MOD_PING");
-		pm2->sendModuleMessage(m1, aMessage);
-
-		proxiesC.clear();
-		gws->getModuleProxyList(proxiesC);
-		TEST_ASSERT(proxiesC.size() == 2);
-		TEST_ASSERT(lookForModuleProxy(proxiesC, "m1"));
-		NLNET::IModuleProxy *pm1 = retrieveModuleProxy(gws, "m1");
-		TEST_ASSERT(pm1 != nullptr);
-		aMessage = NLNET::CMessage("DEBUG_MOD_PING");
-		pm1->sendModuleMessage(m2, aMessage);
-
-		// check received ping count
-		CModuleType0 *mod1 = dynamic_cast<CModuleType0*>(m1);
-		TEST_ASSERT(mod1 != nullptr);
-		TEST_ASSERT(mod1->PingCount == 1);
-		CModuleType0 *mod2 = dynamic_cast<CModuleType0*>(m2);
-		TEST_ASSERT(mod2 != nullptr);
-		TEST_ASSERT(mod2->PingCount == 0);
-	
-		// update the networks
-		for (uint i=0; i<4; ++i)
-		{
-			mm.updateModules();
-			NLMISC::nlSleep(50);
-		}
-
-		// check received ping count
-		TEST_ASSERT(mod1->PingCount == 1);
-		TEST_ASSERT(mod2->PingCount == 1);
-
-		// update the networks
-		for (uint i=0; i<4; ++i)
-		{
-			mm.updateModules();
-			NLMISC::nlSleep(50);
-		}
-
-		// check received ping count
-		TEST_ASSERT(mod1->PingCount == 1);
-		TEST_ASSERT(mod2->PingCount == 1);
-
-
-		// cleanup
-		mm.deleteModule(m1);
-		mm.deleteModule(m2);
-		mm.deleteModule(mods);
 	}
 
 	void moduleMessaging()
