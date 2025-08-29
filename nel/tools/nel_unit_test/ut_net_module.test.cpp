@@ -17,13 +17,14 @@ using std::set;
 using std::string;
 using std::vector;
 
-using ::testing::Eq;
 using ::testing::Contains;
 using ::testing::EndsWith;
-using ::testing::Property;
-using ::testing::WhenDynamicCastTo;
+using ::testing::Eq;
+using ::testing::Field;
 using ::testing::NotNull;
+using ::testing::Property;
 using ::testing::StrEq;
+using ::testing::WhenDynamicCastTo;
 
 class CModuleType0 : public NLNET::CModuleBase
 {
@@ -211,12 +212,19 @@ NLNET_REGISTER_MODULE_FACTORY(CModuleAsync, "ModuleAsync");
 namespace NLNET {
 void PrintTo(IModuleProxy *proxy, std::ostream *os)
 {
-	*os << "("
-	    << " ID: " << proxy->getModuleProxyId() << ","
-	    << " foreign ID : " << proxy->getForeignModuleId() << ","
-	    << " name : '" << proxy->getModuleName() << "',"
-	    << " class : '" << proxy->getModuleClassName() << "'"
-	    << " )";
+	if (proxy == nullptr)
+	{
+		*os << "is NULL";
+	}
+	else
+	{
+		*os << "("
+		    << " ID: " << proxy->getModuleProxyId() << ","
+		    << " foreign ID : " << proxy->getForeignModuleId() << ","
+		    << " name : '" << proxy->getModuleName() << "',"
+		    << " class : '" << proxy->getModuleClassName() << "'"
+		    << " )";
+	}
 }
 }
 
@@ -241,11 +249,10 @@ protected:
 		vector<NLNET::IModuleProxy *> proxList;
 		gw->getModuleProxyList(proxList);
 
-		for (auto & proxy : proxList)
+		for (auto &proxy : proxList)
 		{
 			if (proxy->getModuleName().rfind(modName) != string::npos)
 				return proxy;
-
 		}
 
 		return nullptr;
@@ -287,7 +294,7 @@ TEST_F(CUTNetModule, localMessageQueing)
 	gws->getModuleProxyList(proxiesC);
 	ASSERT_THAT(proxiesC, Contains(Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m2"))));
 	NLNET::IModuleProxy *pm2 = retrieveModuleProxy(gws, "m2");
-	ASSERT_THAT(pm2, NotNull());
+	ASSERT_THAT(pm2, Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m2")));
 	NLNET::CMessage aMessage("DEBUG_MOD_PING");
 	pm2->sendModuleMessage(m1, aMessage);
 
@@ -295,19 +302,17 @@ TEST_F(CUTNetModule, localMessageQueing)
 	gws->getModuleProxyList(proxiesC);
 	ASSERT_THAT(proxiesC, Contains(Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m1"))));
 	NLNET::IModuleProxy *pm1 = retrieveModuleProxy(gws, "m1");
-	ASSERT_THAT(pm1, NotNull());
+	ASSERT_THAT(pm1, Property("getModuleName", &NLNET::IModuleProxy::getModuleName, EndsWith("m1")));
 	aMessage = NLNET::CMessage("DEBUG_MOD_PING");
 	pm1->sendModuleMessage(m2, aMessage);
 
 	// check received ping count
+	ASSERT_THAT(m1, WhenDynamicCastTo<CModuleType0 *>(Field("PingCount", &CModuleType0::PingCount, Eq(1))));
+	ASSERT_THAT(m2, WhenDynamicCastTo<CModuleType0 *>(Field("PingCount", &CModuleType0::PingCount, Eq(0))));
 	auto *mod1 = dynamic_cast<CModuleType0 *>(m1);
-	ASSERT_THAT(m1, WhenDynamicCastTo<CModuleType0 *>(NotNull()));
-	ASSERT_THAT(mod1, NotNull());
-	EXPECT_THAT(mod1->PingCount, Eq(1));
 	auto mod2 = dynamic_cast<CModuleAsync *>(m2);
-	ASSERT_THAT(m2, WhenDynamicCastTo<CModuleAsync *>(NotNull()));
+	ASSERT_THAT(mod1, NotNull());
 	ASSERT_THAT(mod2, NotNull());
-	EXPECT_THAT(mod2->PingCount, Eq(0));
 
 	// update the networks
 	for (uint i = 0; i < 4; ++i)
