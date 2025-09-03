@@ -21,6 +21,7 @@ add_test_executable(nel_misc_config_file_test
         ut_misc_config_file.test.cpp
 )
 target_link_libraries(nel_misc_config_file_test
+        PRIVATE
         nelmisc
 )
 target_compile_definitions(nel_misc_config_file_test
@@ -33,5 +34,6 @@ add_test_executable(nel_net_module_test
         ut_net_module.test.cpp
 )
 target_link_libraries(nel_net_module_test
+        PRIVATE
         nelmisc nelnet
 )

@@ -7,5 +7,6 @@ target_include_directories(snowballs_server_position_physics_test
         ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 target_link_libraries(snowballs_server_position_physics_test
+        PRIVATE
         NeL::misc
 )
