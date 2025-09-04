@@ -1,31 +1,51 @@
 FILE(GLOB SRC src/*.cpp src/*.h resources/*.rc)
 
-FILE(GLOB CLIENT_CONFIG_HDR src/*.h)
 FILE(GLOB CLIENT_CONFIG_UIS ui/*.ui)
 FILE(GLOB CLIENT_CONFIG_BASE_TRANS translations/qtbase_*.ts)
 FILE(GLOB CLIENT_CONFIG_TRANS translations/ryzom_configuration_*.ts)
 
 CONFIGURE_FILE(translations/translations.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc COPYONLY)
-SET(CLIENT_CONFIG_RCS resources/resources.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc )
 
 #  uncomment this line if you want to update original translations
 #  QT5_CREATE_TRANSLATION(CLIENT_CONFIG_QM ${CLIENT_CONFIG_UIS} ${SRC} ${CLIENT_CONFIG_TRANS} OPTIONS -I ${CMAKE_CURRENT_SOURCE_DIR})
 QT5_ADD_TRANSLATION(CLIENT_CONFIG_QM ${CLIENT_CONFIG_TRANS} ${CLIENT_CONFIG_BASE_TRANS})
-QT5_ADD_RESOURCES(CLIENT_CONFIG_RC_SRCS ${CLIENT_CONFIG_RCS})
-QT5_WRAP_CPP(CLIENT_CONFIG_MOC_SRC ${CLIENT_CONFIG_HDR})
-QT5_WRAP_UI(CLIENT_CONFIG_UI_HDRS ${CLIENT_CONFIG_UIS})
 
 SOURCE_GROUP("Resources" FILES ${CLIENT_CONFIG_RCS})
 SOURCE_GROUP("Forms" FILES ${CLIENT_CONFIG_UIS})
-SOURCE_GROUP("Generated Files" FILES ${CLIENT_CONFIG_UI_HDRS} ${CLIENT_CONFIG_MOC_SRC})
-SOURCE_GROUP("Translation Files" FILES ${CLIENT_CONFIG_TRANS} ${CLIENT_CONFIG_BASE_TRANS})
 
-ADD_EXECUTABLE(ryzom_configuration_qt WIN32 ${SRC} ${CLIENT_CONFIG_MOC_SRC} ${CLIENT_CONFIG_UI_HDRS} ${CLIENT_CONFIG_RC_SRCS} ${CLIENT_CONFIG_TRANS} ${CLIENT_CONFIG_BASE_TRANS} ${CLIENT_CONFIG_QM})
+ADD_EXECUTABLE(ryzom_configuration_qt WIN32)
+
+target_sources(ryzom_configuration_qt
+        PRIVATE
+        resources/resources.qrc
+        resources/client_config_qt.rc
+        ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc
+        ${CLIENT_CONFIG_QM}
+        ${CLIENT_CONFIG_UIS}
+        src/client_config_dialog.cpp
+        src/config.cpp
+        src/display_settings_advanced_widget.cpp
+        src/display_settings_details_widget.cpp
+        src/display_settings_widget.cpp
+        src/general_settings_widget.cpp
+        src/main.cpp
+        src/sound_settings_widget.cpp
+        src/stdpch.cpp
+        src/sys_info_d3d_widget.cpp
+        src/sys_info_opengl_widget.cpp
+        src/sys_info_widget.cpp
+        src/system.cpp
+)
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_configuration_qt
-        PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+        PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${NEL_INCLUDE_DIR}
+)
+
+set_property(TARGET ryzom_configuration_qt PROPERTY AUTOUIC_SEARCH_PATHS
+        "${CMAKE_CURRENT_SOURCE_DIR}/ui"
 )
 
 IF(WITH_RYZOM_STEAM)
