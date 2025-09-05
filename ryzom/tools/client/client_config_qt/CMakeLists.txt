@@ -1,3 +1,5 @@
+FIND_PACKAGE(OpenGL REQUIRED COMPONENTS OpenGL)
+
 FILE(GLOB SRC src/*.cpp src/*.h resources/*.rc)
 
 FILE(GLOB CLIENT_CONFIG_UIS ui/*.ui)
@@ -61,7 +63,7 @@ TARGET_LINK_LIBRARIES(ryzom_configuration_qt
         NeL::misc
         NeL::3d
         ${QT_LIBRARIES}
-        ${OPENGL_gl_LIBRARY}
+        OpenGL::OpenGL
 )
 
 IF (WITH_PCH)
