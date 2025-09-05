@@ -5,12 +5,14 @@ ADD_EXECUTABLE(ryzom_log_analyser_service WIN32 ${SRC})
 TARGET_INCLUDE_DIRECTORIES(ryzom_log_analyser_service PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_log_analyser_service
-						ryzom_adminmodules
-						ryzom_gameshare
-						ryzom_pd
-						nelmisc
-						nelnet
-						nelgeorges)
+        PRIVATE
+        ryzom_adminmodules
+        ryzom_gameshare
+        ryzom_pd
+        NeL::misc
+        NeL::net
+        NeL::georges
+)
 
 NL_DEFAULT_PROPS(ryzom_log_analyser_service "Ryzom, Services: Log Analyzer Service (LAS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_log_analyser_service)
