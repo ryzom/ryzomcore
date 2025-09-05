@@ -64,13 +64,6 @@ runs:
       shell: bash
       run: cmake --build --preset ryzom
 
-    - uses: actions/upload-artifact@v4
-      if: ( !cancelled() )
-      with:
-        name: ryzom-${{ inputs.os }}-test-results
-        if-no-files-found: error
-        path: ${{ inputs.build-dir }}/reports/*.xml
-
     - name: Package
       shell: bash
       run: cpack --preset ryzom -R "${{ inputs.build-version }}"
