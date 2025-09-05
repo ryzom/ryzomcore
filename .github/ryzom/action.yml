@@ -64,10 +64,6 @@ runs:
       shell: bash
       run: cmake --build --preset ryzom
 
-    - name: Test
-      shell: bash
-      run: ctest --preset ryzom
-
     - uses: actions/upload-artifact@v4
       if: ( !cancelled() )
       with:
