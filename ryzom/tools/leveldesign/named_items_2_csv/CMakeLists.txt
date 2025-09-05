@@ -2,7 +2,10 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(named2csv ${SRC})
 
-TARGET_LINK_LIBRARIES(named2csv nelmisc)
+TARGET_LINK_LIBRARIES(named2csv
+        PRIVATE
+        NeL::misc
+)
 
 NL_DEFAULT_PROPS(named2csv "Ryzom, Tools: Named Items to CSV")
 NL_ADD_RUNTIME_FLAGS(named2csv)
