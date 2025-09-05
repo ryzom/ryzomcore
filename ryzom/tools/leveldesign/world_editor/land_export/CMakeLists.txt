@@ -4,7 +4,12 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(land_export ${SRC})
 
-TARGET_LINK_LIBRARIES(land_export nelmisc nelligo ryzom_landexport)
+TARGET_LINK_LIBRARIES(land_export
+        PRIVATE
+        NeL::misc
+        NeL::ligo
+        ryzom_landexport
+)
 
 NL_DEFAULT_PROPS(land_export "Ryzom, Tools, World: Land Export")
 NL_ADD_RUNTIME_FLAGS(land_export)

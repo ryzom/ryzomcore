@@ -3,7 +3,15 @@ FILE(GLOB PRIV_H *.h)
 
 NL_TARGET_LIB(ryzom_landexport ${PRIV_H} ${SRC})
 
-TARGET_LINK_LIBRARIES(ryzom_landexport ryzom_export nelmisc nelligo nelgeorges nel3d nelpacs)
+TARGET_LINK_LIBRARIES(ryzom_landexport
+        PUBLIC
+        ryzom_export
+        NeL::misc
+        NeL::ligo
+        NeL::georges
+        NeL::3d
+        NeL::pacs
+)
 NL_DEFAULT_PROPS(ryzom_landexport "Ryzom, Library, World: Land Export")
 NL_ADD_RUNTIME_FLAGS(ryzom_landexport)
 NL_ADD_LIB_SUFFIX(ryzom_landexport)
