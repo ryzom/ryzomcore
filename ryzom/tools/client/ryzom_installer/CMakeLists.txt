@@ -62,10 +62,19 @@ ENDIF()
 NL_DEFAULT_PROPS(ryzom_installer_qt "Ryzom, Tools: Ryzom Installer" )
 NL_ADD_RUNTIME_FLAGS(ryzom_installer_qt)
 NL_ADD_LIB_SUFFIX(ryzom_installer_qt)
-TARGET_LINK_LIBRARIES(ryzom_installer_qt nelmisc nel_sevenzip ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(ryzom_installer_qt
+        PRIVATE
+        NeL::misc
+        NeL::sevenzip
+        ${QT_LIBRARIES}
+)
 
 IF(WIN32)
-  TARGET_LINK_LIBRARIES(ryzom_installer_qt nelmisc ${WINSDK_LIBRARY_DIR}/Version.lib)
+  TARGET_LINK_LIBRARIES(ryzom_installer_qt
+          PRIVATE
+          NeL::misc
+          ${WINSDK_LIBRARY_DIR}/Version.lib
+  )
 ENDIF()
 
 IF(WITH_PCH)

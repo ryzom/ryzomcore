@@ -55,9 +55,10 @@ TARGET_INCLUDE_DIRECTORIES(georges_editor_qt
 
 
 TARGET_LINK_LIBRARIES(georges_editor_qt
-		nelmisc
-		nel3d
-		nelgeorges
+		PRIVATE
+		NeL::misc
+		NeL::3d
+		NeL::georges
 		${QT_LIBRARIES}
 		${QT_QTOPENGL_LIBRARY}
 		${QT_QTMAIN_LIBRARY})

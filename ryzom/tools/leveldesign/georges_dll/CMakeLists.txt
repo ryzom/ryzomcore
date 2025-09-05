@@ -12,7 +12,11 @@ TARGET_INCLUDE_DIRECTORIES(georges_dll
         ${LIBXML2_INCLUDE_DIR}
 )
 
-TARGET_LINK_LIBRARIES(georges_dll nelmisc nelgeorges)
+TARGET_LINK_LIBRARIES(georges_dll
+        PUBLIC
+        NeL::misc
+        NeL::georges
+)
 NL_DEFAULT_PROPS(georges_dll "Ryzom, Tools, Georges: Georges Dll")
 NL_ADD_RUNTIME_FLAGS(georges_dll)
 NL_ADD_LIB_SUFFIX(georges_dll)
