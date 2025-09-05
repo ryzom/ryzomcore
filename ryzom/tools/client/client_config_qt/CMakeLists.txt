@@ -35,6 +35,7 @@ target_sources(ryzom_configuration_qt
         src/sys_info_opengl_widget.cpp
         src/sys_info_widget.cpp
         src/system.cpp
+        src/widget_base.h
 )
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_configuration_qt
