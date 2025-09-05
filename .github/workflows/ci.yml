@@ -116,6 +116,45 @@ jobs:
           if-no-files-found: error
 
 
+  ryzom:
+    name: "Ryzom"
+    needs: [ strings, nel ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-24.04 ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nel-${{ matrix.os }}-*
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
+
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          key: ryzom-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'ryzom/**', '.github/ryzom/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          path: ${{ needs.strings.outputs.build-dir }}/ryzom/ryzom-*
+
+      - uses: ./.github/ryzom
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          os: ${{ matrix.os }}
+          install-dir: ${{ needs.strings.outputs.install-dir }}
+          image-group: ${{ needs.strings.outputs.image-group }}
+          image-version: ${{ needs.strings.outputs.image-version }}
+          build-dir: ${{ needs.strings.outputs.build-dir }}
+          build-version: ${{ needs.strings.outputs.build-version }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ryzom-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
+          path: ${{ needs.strings.outputs.build-dir }}/ryzom/ryzom-*
+          if-no-files-found: error
+
+
   snowballs:
     name: "Snowballs"
     needs: [ strings, nel ]
