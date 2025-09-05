@@ -38,7 +38,14 @@ NL_TARGET_LIB(ryzom_gameshare ${HEADER} ${PRIV_TIME_H} ${SRC} ${SRC_TIME} ${R2})
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_gameshare PRIVATE ${LIBXML2_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
-TARGET_LINK_LIBRARIES(ryzom_gameshare ${NELMISC_LIBRARIES} ${NELNET_LIBRARIES} ${NELLIGO_LIBRARIES} ${NELGEORGES_LIBRARIES})
+TARGET_LINK_LIBRARIES(ryzom_gameshare
+		PUBLIC
+		NeL::misc
+		NeL::net
+		NeL::ligo
+		NeL::georges
+)
+
 NL_DEFAULT_PROPS(ryzom_gameshare "Ryzom, Library: Game Share")
 NL_ADD_RUNTIME_FLAGS(ryzom_gameshare)
 NL_ADD_LIB_SUFFIX(ryzom_gameshare)

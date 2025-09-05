@@ -216,17 +216,18 @@ IF(WITH_RYZOM_CLIENT)
   ENDIF()
 
   TARGET_LINK_LIBRARIES(ryzom_client
-              nelmisc
-              nelnet
-              nelligo
-              nelgeorges
-              nel3d
-              nelgui
-              nelsound
-              nel_sevenzip
+              PRIVATE
+              NeL::misc
+              NeL::net
+              NeL::ligo
+              NeL::georges
+              NeL::3d
+              NeL::gui
+              NeL::sound
+              NeL::sevenzip
               ryzom_clientsheets
               ryzom_gameshare
-              nelpacs
+              NeL::pacs
               ${LUA_LIBRARIES}
               ${LUABIND_LIBRARIES}
               ${CURL_LIBRARIES}

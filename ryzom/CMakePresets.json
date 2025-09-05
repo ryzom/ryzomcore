@@ -6,24 +6,27 @@
   ],
   "configurePresets": [
     {
-      "binaryDir": "${sourceDir}/build/studio",
-      "installDir": "${sourceDir}/build/install/studio",
-      "name": "studio",
+      "binaryDir": "${sourceDir}/build/ryzom",
+      "installDir": "${sourceDir}/build/install/ryzom",
+      "name": "ryzom",
       "cacheVariables": {
-        "WITH_STUDIO": true,
+        "WITH_RYZOM": true,
+        "WITH_RYZOM_CLIENT": true,
+        "WITH_RYZOM_SERVER": true,
+        "WITH_RYZOM_TOOLS": true,
         "WITH_TESTING": true,
+        "WITH_NEL_TESTS": true,
         "WITH_NEL": true,
-        "WITH_NEL_TESTS": false,
         "WITH_NELNS": false,
-        "WITH_RYZOM": false,
         "WITH_SNOWBALLS": false,
+        "WITH_STUDIO": false,
         "WITH_TOOLS": false,
         "WITH_QT5": true,
-        "CPACK_PACKAGE_NAME": "studio"
+        "CPACK_PACKAGE_NAME": "ryzom"
       }
     },
     {
-      "name": "ci-studio",
+      "name": "ci-ryzom",
       "hidden": true,
       "cacheVariables": {
         "WITH_NEL": false,
@@ -33,55 +36,44 @@
     {
       "inherits": [
         "linux",
-        "studio"
+        "ryzom"
       ],
-      "name": "linux-studio"
+      "name": "linux-ryzom"
     },
     {
       "inherits": [
         "linux",
-        "ci-studio",
-        "studio"
+        "ci-ryzom",
+        "ryzom"
       ],
-      "name": "ci-linux-studio"
-    },
-    {
-      "inherits": [
-        "linux",
-        "ci-studio",
-        "studio"
-      ],
-      "name": "ci-linux-studio-static",
-      "cacheVariables": {
-        "WITH_STATIC": true
-      }
+      "name": "ci-linux-ryzom"
     },
     {
       "inherits": [
         "windows",
-        "studio"
+        "ryzom"
       ],
-      "name": "windows-studio"
+      "name": "windows-ryzom"
     }
   ],
   "buildPresets": [
     {
       "inherits": "release",
-      "name": "studio",
-      "configurePreset": "studio"
+      "name": "ryzom",
+      "configurePreset": "ryzom"
     }
   ],
   "testPresets": [
     {
       "inherits": "default",
-      "name": "studio",
-      "configurePreset": "studio"
+      "name": "ryzom",
+      "configurePreset": "ryzom"
     }
   ],
   "packagePresets": [
     {
-      "name": "studio",
-      "configurePreset": "studio"
+      "name": "ryzom",
+      "configurePreset": "ryzom"
     }
   ]
 }

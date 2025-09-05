@@ -4,7 +4,11 @@ NL_TARGET_LIB(ryzom_adminmodules ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_adminmodules PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-TARGET_LINK_LIBRARIES(ryzom_adminmodules nelmisc nelnet)
+TARGET_LINK_LIBRARIES(ryzom_adminmodules
+        PUBLIC
+        NeL::misc
+        NeL::net
+)
 NL_DEFAULT_PROPS(ryzom_adminmodules "Ryzom, Library: Service Admin Modules")
 NL_ADD_RUNTIME_FLAGS(ryzom_adminmodules)
 NL_ADD_LIB_SUFFIX(ryzom_adminmodules)

@@ -7,7 +7,7 @@
   "configurePresets": [
     {
       "binaryDir": "${sourceDir}/build/nelns",
-      "installDir": "${sourceDir}/build/install",
+      "installDir": "${sourceDir}/build/install/nelns",
       "name": "nelns",
       "cacheVariables": {
         "WITH_NELNS": true,
