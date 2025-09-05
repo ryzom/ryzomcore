@@ -5,10 +5,12 @@ ADD_EXECUTABLE(ryzom_welcome_service WIN32 ${SRC})
 TARGET_INCLUDE_DIRECTORIES(ryzom_welcome_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_welcome_service
-						ryzom_adminmodules
-						ryzom_gameshare
-						nelmisc 
-						nelnet)
+        PRIVATE
+        ryzom_adminmodules
+        ryzom_gameshare
+        NeL::misc
+        NeL::net
+)
 
 NL_DEFAULT_PROPS(ryzom_welcome_service "Ryzom, Services: Ryzom Welcome Service (WS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_welcome_service)

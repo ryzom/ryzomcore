@@ -49,17 +49,23 @@ set_property(TARGET ryzom_configuration_qt PROPERTY AUTOUIC_SEARCH_PATHS
         "${CMAKE_CURRENT_SOURCE_DIR}/ui"
 )
 
-IF(WITH_RYZOM_STEAM)
-  TARGET_COMPILE_DEFINITIONS(ryzom_configuration_qt PRIVATE RZ_USE_STEAM)
-ENDIF()
+IF (WITH_RYZOM_STEAM)
+    TARGET_COMPILE_DEFINITIONS(ryzom_configuration_qt PRIVATE RZ_USE_STEAM)
+ENDIF ()
 
-NL_DEFAULT_PROPS(ryzom_configuration_qt "Ryzom, Tools: Ryzom Configuration Qt" )
-NL_ADD_RUNTIME_FLAGS( ryzom_configuration_qt )
-NL_ADD_LIB_SUFFIX( ryzom_configuration_qt )
-TARGET_LINK_LIBRARIES( ryzom_configuration_qt nelmisc nel3d ${QT_LIBRARIES} ${OPENGL_gl_LIBRARY})
+NL_DEFAULT_PROPS(ryzom_configuration_qt "Ryzom, Tools: Ryzom Configuration Qt")
+NL_ADD_RUNTIME_FLAGS(ryzom_configuration_qt)
+NL_ADD_LIB_SUFFIX(ryzom_configuration_qt)
+TARGET_LINK_LIBRARIES(ryzom_configuration_qt
+        PRIVATE
+        NeL::misc
+        NeL::3d
+        ${QT_LIBRARIES}
+        ${OPENGL_gl_LIBRARY}
+)
 
-IF(WITH_PCH)
-  target_precompile_headers(ryzom_configuration_qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.h)
-ENDIF()
+IF (WITH_PCH)
+    target_precompile_headers(ryzom_configuration_qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.h)
+ENDIF ()
 
 INSTALL(TARGETS ryzom_configuration_qt RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client)
