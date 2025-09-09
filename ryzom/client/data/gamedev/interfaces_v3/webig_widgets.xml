@@ -18,6 +18,8 @@
 	<lua file="emotes_es.lua" />
 	<lua file="emotes_ru.lua" />
 	<lua file="search_command.lua" />
+	<lua file="rygif_global_dispatcher.lua" />
+	
 
 <!-- //////////// STYLE : webigchat_desc /////////// -->
 	<style style="webigchat_desc" type="text" fontsize="12" justification="dont_clip_word" color="0 0 0 255" global_color="false" multi_line="true" multi_line_space="0" line_maxw="320" multi_line_maxw_only="true" />
@@ -351,5 +353,50 @@
 		</scene3d>
 		</group>
 	</template>
+
+<!-- //////////// TEMPLATE : for rygif player /////////// -->
+		<template name="rygif_player" render_layer1="1" render_layer2="2" keep="true" tooltip="" w="40" h="40" stop_play="" texture_img="" x="0" y="0" stop_play_x="0" stop_play_y="0" lua_left_function="" lua_over_function="" lua_right_function="" ctrl_active="true" >
+			<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
+				<view type="bitmap" posref="ML ML" render_layer="#render_layer1"
+					id="texture_img"
+					x="0"
+					y="0"
+					w="#w"
+					h="#h"
+					scale="true"
+					resize="true"
+					texture="#texture_img"
+					global_color="false" />
+				<view type="bitmap" posref="ML ML" render_layer="#render_layer2"
+					id="stop_play"
+					x="#stop_play_x"
+					y="#stop_play_y"
+					w="#w"
+					h="#h"
+					scale="true"
+					resize="true"
+					texture="#stop_play"
+					global_color="false" />
+				<ctrl id="ctrl" active="#ctrl_active" type="button" button_type="push_button" global_color_normal="false" posref="ML ML" x="1" y="0"
+					tx_normal="W_slot_blason_over.tga"
+					tx_over="W_slot_blason_over.tga"
+					tx_pushed="W_slot_blason_over.tga"
+					scale="true"
+					w="#w"
+					h="#h"
+					tooltip="#tooltip"
+					color="255 255 255 0"
+					col_over="255 255 255 255"
+					col_pushed="255 255 255 255"
+					render_layer="0"
+					onclick_l="lua"
+					params_l="#lua_left_function('#id')" 
+					onover="lua"
+					params_over="#lua_over_function('#id')"
+					onclick_r="lua"
+					params_r="#lua_right_function('#id')"/>
+		</group>
+	</template>
+
 
 </interface_config>

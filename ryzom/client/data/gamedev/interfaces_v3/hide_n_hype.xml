@@ -124,8 +124,8 @@
 			<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
 				<view type="bitmap" posref="ML ML" render_layer="#render_layer1"
 					id="img1"
-					x="0"
-					y="0"
+					x="#x"
+					y="#y"
 					w="#w"
 					h="#h"
 					scale="true"
