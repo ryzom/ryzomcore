@@ -5,7 +5,7 @@ Minimal pipeline runner:
 - Accept a video path + optional parameters (fps, scale, quality, base/output).
 - Execute two commands:
   1) ffmpeg -> extract frames into <frames_dir>/frame_%05d.jpg
-  2) build_spritesheet.py -> build (multi) spritesheet(s) from frames
+  2) create_spritesheet.py -> build (multi) spritesheet(s) from frames
 
 Defaults:
 - fps = 20
@@ -16,9 +16,9 @@ Defaults:
 - frames_dir = <output_dir>/<base>
 
 Notes:
-- This script expects build_spritesheet.py to be accessible.
+- This script expects create_spritesheet.py to be accessible.
   By default, it looks in the current working directory.
-  You can override with --builder "path\to\build_spritesheet.py".
+  You can override with --builder "path\to\create_spritesheet.py".
 - ffmpeg must be on PATH, or pass --ffmpeg "C:\path\to\ffmpeg.exe".
 """
 
@@ -52,7 +52,7 @@ def sanitize_token(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.-]+", "_", s)
 
 def main():
-    ap = argparse.ArgumentParser(description="Run ffmpeg to extract frames, then call build_spritesheet.py")
+    ap = argparse.ArgumentParser(description="Run ffmpeg to extract frames, then call create_spritesheet.py")
     ap.add_argument("video", help="Input video file (e.g., MP4).")
     ap.add_argument("--base", help="Base name for output files (default: video stem).")
     ap.add_argument("--output-dir", help="Directory for output atlases (default: same as video).")
@@ -62,7 +62,7 @@ def main():
     ap.add_argument("--quality", default="medium", help="JPEG quality: low|medium|high or 1..31 (default: medium~3).")
     ap.add_argument("--format", choices=["png", "tga"], default="png", help="Output image format (default: png).")
     ap.add_argument("--max-size", type=int, default=2048, help="Max atlas size (default: 2048; use 4096 for huge sheets).")
-    ap.add_argument("--builder", default="build_spritesheet.py", help="Path to build_spritesheet.py (default: in CWD).")
+    ap.add_argument("--builder", default="create_spritesheet.py", help="Path to create_spritesheet.py (default: in CWD).")
     ap.add_argument("--ffmpeg", default="ffmpeg", help="ffmpeg executable path (default: 'ffmpeg' on PATH).")
     ap.add_argument("--overwrite", action="store_true", help="Delete frames directory if it exists before extracting.")
     args = ap.parse_args()
@@ -122,8 +122,8 @@ def main():
         print(f"Error: ffmpeg failed with exit code {e.returncode}", file=sys.stderr)
         sys.exit(e.returncode)
 
-    # 2) Call build_spritesheet.py with important defaults
-    #    python build_spritesheet.py <output_image> <frames_dir> --max-size <N>
+    # 2) Call create_spritesheet.py with important defaults
+    #    python create_spritesheet.py <output_image> <frames_dir> --max-size <N>
     builder_cmd = [
         sys.executable,                  # use current Python to run builder
         str(builder_path),
