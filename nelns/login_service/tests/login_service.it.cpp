@@ -41,6 +41,12 @@ void insertConfigVariable(NLMISC::CConfigFile& configFile, const std::string& na
 	configFile.insertVar(name, var);
 }
 
+void insertConfigVariable(NLMISC::CConfigFile& configFile, const std::string& name, const bool& value)
+{
+	const std::string stringValue = value ? "true" : "false";
+	insertConfigVariable(configFile, name, stringValue);
+}
+
 void insertConfigVariable(NLMISC::CConfigFile& configFile, const std::string& name, const int& value)
 {
 	CVar var;
@@ -60,8 +66,9 @@ protected:
 
 	void SetUp() override
 	{
-		insertConfigVariable(loginService.ConfigFile, "ForceDatabaseReconnection", "true");
+		insertConfigVariable(loginService.ConfigFile, "ForceDatabaseReconnection", false);
 		insertConfigVariable(loginService.ConfigFile, "ClientsPort", port);
+		insertConfigVariable(loginService.ConfigFile, "UseDirectClient", true);
 		insertConfigVariable(loginService.ConfigFile, "DatabaseName", "dbname");
 		insertConfigVariable(loginService.ConfigFile, "DatabaseHost", "dbhost");
 		insertConfigVariable(loginService.ConfigFile, "DatabaseLogin", "dbuser");
