@@ -30,12 +30,15 @@
 typedef unsigned long ulong;
 #endif
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <nel/misc/types_nl.h>
 #include <nel/net/service.h>
 #include <nel/net/unified_network.h>
+
+#include <nelns/login_service/persistence.h>
 
 // Structures
 
@@ -72,6 +75,7 @@ class CLoginService : public NLNET::IService
 public:
 
 	CLoginService();
+	explicit CLoginService(std::shared_ptr<IPersistence>&& persistence);
 
 	~CLoginService() override = default;
 
@@ -85,6 +89,7 @@ public:
 
 private:
 	bool UseDirectClient;
+	std::shared_ptr<IPersistence> m_persistence;
 
 };
 

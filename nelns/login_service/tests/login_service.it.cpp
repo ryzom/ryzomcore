@@ -55,10 +55,17 @@ void insertConfigVariable(NLMISC::CConfigFile& configFile, const std::string& na
 	configFile.insertVar(name, var);
 }
 
+class MockPersistence : public IPersistence
+{
+public:
+	void init() override {}
+};
+
 class CLoginServiceIT : public testing::Test
 {
 protected:
-	CLoginService loginService;
+	std::shared_ptr<MockPersistence> persistence = std::make_shared<MockPersistence>();
+	CLoginService loginService = CLoginService(persistence);
 	CCallbackClient client;
 	CInetHost host = CInetHost("localhost");
 	int port = 51000;
@@ -66,24 +73,19 @@ protected:
 
 	void SetUp() override
 	{
-		insertConfigVariable(loginService.ConfigFile, "ForceDatabaseReconnection", false);
 		insertConfigVariable(loginService.ConfigFile, "ClientsPort", port);
 		insertConfigVariable(loginService.ConfigFile, "UseDirectClient", true);
-		insertConfigVariable(loginService.ConfigFile, "DatabaseName", "dbname");
-		insertConfigVariable(loginService.ConfigFile, "DatabaseHost", "dbhost");
-		insertConfigVariable(loginService.ConfigFile, "DatabaseLogin", "dbuser");
-		insertConfigVariable(loginService.ConfigFile, "DatabasePassword", "dbpassword");
 
-		//loginService.init(); // requires database to start
+		loginService.init(); // requires database to start
 
 		host.setPort(port);
-		//client.connect(host);
-		//ASSERT_THAT(client.connected(), IsTrue());
+		client.connect(host);
+		ASSERT_THAT(client.connected(), IsTrue());
 	}
 
 	void TearDown() override
 	{
-		//loginService.release();
+		loginService.release();
 	}
 };
 

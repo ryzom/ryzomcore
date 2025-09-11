@@ -27,7 +27,9 @@
 #include <nelns/login_service/connection_web.h>
 #include <nelns/login_service/functions.h>
 #include <nelns/login_service/variables.h>
-#include <nelns/login_service/mysql_helper.h>
+#include <nelns/login_service/mysql_persistence.h>
+
+#include <utility>
 
 //
 // Namespaces
@@ -38,7 +40,15 @@ using NLMISC::CLog;
 using NLNET::IService;
 
 
-CLoginService::CLoginService () : UseDirectClient(false) { }
+CLoginService::CLoginService () :
+	UseDirectClient(false),
+	m_persistence(std::make_shared<CMysqlPersistence>())
+{ }
+
+CLoginService::CLoginService (std::shared_ptr<IPersistence>&& persistence) :
+	UseDirectClient(false),
+	m_persistence(std::move(persistence))
+{ }
 
 /// Init the service, load the universal time.
 void CLoginService::init ()
@@ -58,7 +68,7 @@ void CLoginService::init ()
 	if (WindowDisplayer) Output->addDisplayer (WindowDisplayer);
 
 	// Initialize the database access
-	sqlInit();
+	m_persistence->init();
 
 	connectionWSInit ();
 
