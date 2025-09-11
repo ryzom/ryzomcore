@@ -25,7 +25,7 @@ target_link_libraries(nelns_login_service
 )
 
 ADD_EXECUTABLE(login_service WIN32
-        nelns/login_service/login_service.cpp
+        login_service.cpp
 )
 
 TARGET_LINK_LIBRARIES(login_service

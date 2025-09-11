@@ -30,14 +30,12 @@
 typedef unsigned long ulong;
 #endif
 
-#include <mysql.h>
+#include <string>
+#include <vector>
 
 #include <nel/misc/types_nl.h>
-#include <nel/misc/debug.h>
-#include <nel/misc/config_file.h>
-#include <nel/misc/displayer.h>
-#include <nel/misc/log.h>
 #include <nel/net/service.h>
+#include <nel/net/unified_network.h>
 
 // Structures
 
