@@ -32,14 +32,12 @@ typedef unsigned long ulong;
 
 #include <mysql.h>
 
-#include "nel/misc/types_nl.h"
-
+#include <nel/misc/types_nl.h>
 #include "nel/misc/debug.h"
-#include "nel/misc/config_file.h"
-#include "nel/misc/displayer.h"
-#include "nel/misc/log.h"
-
-#include "nel/net/service.h"
+#include <nel/misc/config_file.h>
+#include <nel/misc/displayer.h>
+#include <nel/misc/log.h>
+#include <nel/net/service.h>
 
 using namespace std;
 using namespace NLMISC;
@@ -91,6 +89,26 @@ void beep (uint freq = 400, uint nb = 2, uint beepDuration = 100, uint pauseDura
 //void disconnectClient (CUser &user, bool disconnectClient, bool disconnectShard);
 
 
+class CLoginService : public NLNET::IService
+{
+public:
+
+	CLoginService();
+
+	~CLoginService() override = default;
+
+	/// Init the service, load the universal time.
+	void init();
+
+	bool update();
+
+	/// release the service, save the universal time
+	void release();
+
+private:
+	bool UseDirectClient;
+
+};
 
 #endif // NL_LOGIN_SERVICE_H
 

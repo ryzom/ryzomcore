@@ -9,6 +9,7 @@
 class CLoginServiceIT : public testing::Test
 {
 protected:
+	CLoginService loginService;
 	std::chrono::seconds defaultTimeout = std::chrono::seconds(10);
 
 	void SetUp() override

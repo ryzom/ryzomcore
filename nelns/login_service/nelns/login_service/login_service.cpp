@@ -286,66 +286,59 @@ void beep (uint freq, uint nb, uint beepDuration, uint pauseDuration)
 #endif // NL_OS_WINDOWS
 }
 
-class CLoginService : public IService
+CLoginService::CLoginService () : UseDirectClient(false) { }
+
+/// Init the service, load the universal time.
+void CLoginService::init ()
 {
-public:
-	
-	bool UseDirectClient;
+	beep ();
 
-	CLoginService () : UseDirectClient(false) { }
+	Output = new CLog;
 
-	/// Init the service, load the universal time.
-	void init ()
-	{
-		beep ();
+	if(ConfigFile.exists("UseDirectClient"))
+		UseDirectClient = ConfigFile.getVar("UseDirectClient").asBool();
 
-		Output = new CLog;
+	string fn = IService::getInstance()->SaveFilesDirectory;
+	fn += "login_service.stat";
+	nlinfo("Login stat in directory '%s'", fn.c_str());
+	Fd = new NLMISC::CFileDisplayer(fn);
+	Output->addDisplayer (Fd);
+	if (WindowDisplayer) Output->addDisplayer (WindowDisplayer);
 
-		if(ConfigFile.exists("UseDirectClient"))
-			UseDirectClient = ConfigFile.getVar("UseDirectClient").asBool();
+	// Initialize the database access
+	sqlInit();
 
-		string fn = IService::getInstance()->SaveFilesDirectory;
-		fn += "login_service.stat";
-		nlinfo("Login stat in directory '%s'", fn.c_str());
-		Fd = new NLMISC::CFileDisplayer(fn);
-		Output->addDisplayer (Fd);
-		if (WindowDisplayer) Output->addDisplayer (WindowDisplayer);
+	connectionWSInit ();
 
-		// Initialize the database access
-		sqlInit();
+	if(UseDirectClient)
+		connectionClientInit ();
+	else
+		connectionWebInit ();
 
-		connectionWSInit ();
+	Output->displayNL ("Login Service initialized");
+}
 
-		if(UseDirectClient)
-			connectionClientInit ();
-		else
-			connectionWebInit ();
+bool CLoginService::update ()
+{
+	connectionWSUpdate ();
+	if(UseDirectClient)
+		connectionClientUpdate ();
+	else
+		connectionWebUpdate ();
+	return true;
+}
 
-		Output->displayNL ("Login Service initialized");
-	}
+/// release the service, save the universal time
+void CLoginService::release ()
+{
+	connectionWSRelease ();
+	if(UseDirectClient)
+		connectionClientRelease ();
+	else
+		connectionWebRelease ();
 
-	bool update ()
-	{
-		connectionWSUpdate ();
-		if(UseDirectClient)
-			connectionClientUpdate ();
-		else
-			connectionWebUpdate ();
-		return true;
-	}
-
-	/// release the service, save the universal time
-	void release ()
-	{
-		connectionWSRelease ();
-		if(UseDirectClient)
-			connectionClientRelease ();
-		else
-			connectionWebRelease ();
-		
-		Output->displayNL ("Login Service released");
-	}
-};
+	Output->displayNL ("Login Service released");
+}
 
 // Service instantiation
 NLNET_SERVICE_MAIN (CLoginService, "LS", "login_service", 49999, EmptyCallbackArray, NELNS_CONFIG, NELNS_LOGS);
