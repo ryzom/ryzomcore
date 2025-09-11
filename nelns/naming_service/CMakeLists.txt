@@ -6,7 +6,7 @@ add_library(nelns_naming_service STATIC
 )
 add_library(nelns::ns ALIAS nelns_naming_service)
 
-target_compile_features( nelns_naming_service
+target_compile_features(nelns_naming_service
         PRIVATE
         cxx_lambdas
         cxx_return_type_deduction

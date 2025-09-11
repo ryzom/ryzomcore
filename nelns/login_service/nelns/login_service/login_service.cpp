@@ -56,7 +56,6 @@
 #include "connection_web.h"
 #include "mysql_helper.h"
 
-
 //
 // Namespaces
 //

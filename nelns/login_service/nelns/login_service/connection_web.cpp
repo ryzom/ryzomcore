@@ -37,7 +37,6 @@
 #include "login_service.h"
 #include "connection_ws.h"
 
-
 //
 // Namespaces
 //

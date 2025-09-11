@@ -42,7 +42,6 @@
 #include "login_service.h"
 #include "mysql_helper.h"
 
-
 //
 // Namespaces
 //
