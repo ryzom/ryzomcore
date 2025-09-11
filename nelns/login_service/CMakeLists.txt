@@ -2,8 +2,10 @@ add_library(nelns_login_service STATIC
         nelns/login_service/connection_client.cpp
         nelns/login_service/connection_web.cpp
         nelns/login_service/connection_ws.cpp
+        nelns/login_service/functions.cpp
         nelns/login_service/login_service.cpp
         nelns/login_service/mysql_helper.cpp
+        nelns/login_service/variables.cpp
 )
 add_library(nelns::ls ALIAS nelns_login_service)
 

@@ -39,8 +39,10 @@
 #include <nel/net/service.h>
 #include <nel/net/login_cookie.h>
 
-#include "login_service.h"
-#include "mysql_helper.h"
+#include <nelns/login_service/login_service.h>
+#include <nelns/login_service/functions.h>
+#include <nelns/login_service/variables.h>
+#include <nelns/login_service/mysql_helper.h>
 
 //
 // Namespaces
