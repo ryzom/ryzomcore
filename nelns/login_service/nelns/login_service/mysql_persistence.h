@@ -31,6 +31,8 @@ public:
 	void init() override;
 
 	std::pair<std::optional<LoginUserProjection>, std::string> findUserByLogin(const std::string& login) override;
+
+	std::string authorizeUser(sint32 uid, const NLNET::CLoginCookie & cookie) override;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H

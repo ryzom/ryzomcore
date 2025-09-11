@@ -119,12 +119,6 @@ retry:
 			}
 		}
 
-		if(nbrow != 1)
-		{
-			reason = toString("Too much login '%s' exists", login.toUtf8().c_str());
-			break;
-		}
-
 		// now the user is on the database
 		auto user = maybeUser.first.value();
 		uid = user.uid;
@@ -153,7 +147,7 @@ retry:
 		CLoginCookie c;
 		c.set((uint32)(uintptr_t)from, rand(), uid);
 
-		reason = sqlQuery("update user set state='Authorized', Cookie='"+c.setToString()+"' where UId=" + NLMISC::toString(uid));
+		reason = persistence->authorizeUser(uid, c);
 		if(!reason.empty()) break;
 
 		reason = sqlQuery("select * from shard where Online>0 and ClientApplication='"+application+"'", nbrow, row, result);

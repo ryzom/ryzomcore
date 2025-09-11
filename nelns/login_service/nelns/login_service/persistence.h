@@ -17,6 +17,8 @@
 #ifndef NELNS_LOGIN_SERVICE_PERSISTENCE_H
 #define NELNS_LOGIN_SERVICE_PERSISTENCE_H
 
+#include "nel/net/login_cookie.h"
+
 #include <optional>
 #include <string>
 #include <utility>
@@ -40,6 +42,8 @@ public:
 	virtual void init() = 0;
 
 	virtual std::pair<std::optional<LoginUserProjection>, std::string> findUserByLogin(const std::string& login) = 0;
+
+	virtual std::string authorizeUser(sint32 uid, const NLNET::CLoginCookie & cookie) = 0;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H

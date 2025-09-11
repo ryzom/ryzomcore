@@ -12,8 +12,21 @@
 
 #include <nelns/login_service/login_service.h>
 
+using testing::AllOf;
+using testing::ElementsAre;
 using testing::Eq;
+using testing::Field;
+using testing::FieldsAre;
+using testing::IsFalse;
+using testing::IsEmpty;
+using testing::IsNull;
 using testing::IsTrue;
+using testing::Not;
+using testing::NotNull;
+using testing::Optional;
+using testing::Property;
+using testing::SizeIs;
+using testing::StrEq;
 
 using CVar = NLMISC::CConfigFile::CVar;
 using NLMISC::IStream;
@@ -42,11 +55,16 @@ struct VLPRequest
 struct VLPResponse
 {
 	std::string reason;
-	sint32 shardCount = 0;
+	std::optional<sint32> shardCount = std::nullopt;
 	void serial(IStream &stream)
 	{
 		stream.serial(reason);
-		stream.serial(shardCount);
+		if ( reason.empty())
+		{
+			sint32 readShardCount;
+			stream.serial(readShardCount);
+			shardCount = readShardCount;
+		}
 	}
 
 };
@@ -80,8 +98,16 @@ public:
 
 	std::pair<std::optional<LoginUserProjection>, std::string> findUserByLogin(const std::string &login) override
 	{
-		return std::make_pair(std::nullopt, "mock error");
+		return std::make_pair(user, reason);
 	}
+
+	std::string authorizeUser(sint32 uid, const NLNET::CLoginCookie &cookie) override
+	{
+		return "mock error authorizeUser";
+	}
+
+	std::optional<LoginUserProjection> user = std::nullopt;
+	std::string reason = "";
 };
 
 class CLoginServiceIT : public testing::Test
@@ -99,6 +125,7 @@ protected:
 	{
 		insertConfigVariable(loginService.ConfigFile, "ClientsPort", port);
 		insertConfigVariable(loginService.ConfigFile, "UseDirectClient", true);
+		insertConfigVariable(loginService.ConfigFile, "AcceptUnknownUsers", false);
 
 		loginService.init(); // requires database to start
 
@@ -116,19 +143,27 @@ protected:
 
 TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 {
+	LoginUserProjection user{
+		.uid = 123,
+		.password = "password",
+		.state = "Offline"
+	};
 	VLPRequest request {
 		.login = ucstring::makeFromUtf8("test-login"),
-		.cpassword = "test-password",
+		.cpassword = user.password,
 		.application = "test-application"
 	};
+	persistence->user = user;
 	CMessage msgout("VLP");
 	msgout.serial(request);
 
-	std::promise<void> response_promise;
-	std::future<void> response = response_promise.get_future();
+	std::promise<VLPResponse> response_promise;
+	std::future<VLPResponse> response = response_promise.get_future();
 	TCallbackItem callbackArray[] = {
 		{ "VLP", [&response_promise](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
-			response_promise.set_value();
+			VLPResponse response;
+			msgin.serial(response);
+			response_promise.set_value(response);
 		} }
 	};
 	client.addCallbackArray(callbackArray, std::size(callbackArray));
@@ -152,4 +187,10 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 	auto state = response.wait_for(defaultTimeout);
 	running = false;
 	ASSERT_THAT(state, Eq(std::future_status::ready));
+	EXPECT_THAT(response.get(),
+		AllOf(
+			Field("reason", &VLPResponse::reason, IsEmpty()),
+			Field("shardCount", &VLPResponse::shardCount, Optional(Eq(1)))
+		)
+	);
 }

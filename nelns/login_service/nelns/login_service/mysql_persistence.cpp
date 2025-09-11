@@ -19,23 +19,22 @@
 #include <nel/misc/string_common.h>
 #include <nelns/login_service/mysql_helper.h>
 
+using NLMISC::toString;
 using std::optional;
 using std::pair;
 using std::string;
-using NLMISC::toString;
-
 
 void CMysqlPersistence::init()
 {
 	sqlInit();
 }
 
-std::pair<std::optional<LoginUserProjection>, std::string>  CMysqlPersistence::findUserByLogin(const std::string& login)
+std::pair<std::optional<LoginUserProjection>, std::string> CMysqlPersistence::findUserByLogin(const std::string &login)
 {
 	CMysqlResult queryResult;
 	MYSQL_ROW row;
 	sint32 nbrow;
-	string reason = sqlQuery("select uid, password, state from user where Login='"+login+"'", nbrow, row, queryResult);
+	string reason = sqlQuery("select uid, password, state from user where Login='" + login + "'", nbrow, row, queryResult);
 
 	if (!reason.empty())
 	{
@@ -60,4 +59,9 @@ std::pair<std::optional<LoginUserProjection>, std::string>  CMysqlPersistence::f
 	NLMISC::fromString(row[0], result.uid);
 
 	return std::make_pair(std::make_optional(result), "");
+}
+
+std::string CMysqlPersistence::authorizeUser(sint32 uid, const NLNET::CLoginCookie &cookie)
+{
+	return sqlQuery("update user set state='Authorized', Cookie='" + cookie.setToString() + "' where UId=" + toString(uid));
 }
