@@ -52,10 +52,12 @@ std::pair<std::optional<LoginUserProjection>, std::string>  CMysqlPersistence::f
 		return std::make_pair(std::nullopt, toString("Too much login '%s' exists", login.c_str()));
 	}
 
-	LoginUserProjection result;
+	LoginUserProjection result {
+		.uid = -1,
+		.password = row[1],
+		.state = row[2]
+	};
 	NLMISC::fromString(row[0], result.uid);
-	result.password = row[1];
-	result.state = row[2];
 
 	return std::make_pair(std::make_optional(result), "");
 }

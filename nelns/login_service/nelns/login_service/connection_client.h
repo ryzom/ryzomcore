@@ -20,6 +20,7 @@
 #include <memory>
 
 #include <nel/net/buf_net_base.h>
+#include <nel/net/callback_net_base.h>
 #include <nel/net/message.h>
 
 #include <nelns/login_service/persistence.h>
@@ -35,6 +36,11 @@ public:
 	void sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId);
 
 private:
+	void cbClientVerifyLoginPassword(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
+	void cbClientChooseShard(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
+	void cbClientConnection (NLNET::TSockId from);
+	void cbClientDisconnection (NLNET::TSockId from);
+
 	std::shared_ptr<IPersistence> persistence;
 };
 

@@ -65,12 +65,6 @@ static CCallbackServer *ClientsServer = 0;
 // Functions
 //
 
-void sendToClient(CMessage &msgout, TSockId sockId)
-{
-	nlassert(ClientsServer != 0);
-	ClientsServer->send(msgout, sockId);
-}
-
 void string_escape(string &str)
 {
 	string::size_type pos = 0;
@@ -80,7 +74,8 @@ void string_escape(string &str)
 	}
 }
 
-static void cbClientVerifyLoginPassword(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
+
+void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 {
 	//
 	// S03: check the validity of the client login/password and send "VLP" message to client
@@ -102,10 +97,11 @@ static void cbClientVerifyLoginPassword(CMessage &msgin, TSockId from, CCallback
 		sint32 nbrow;
 		//const CInetAddress &ia = netbase.hostAddress (from);
 retry:
-		reason = sqlQuery("select * from user where Login='"+login.toUtf8()+"'", nbrow, row, result);
+		auto maybeUser = persistence->findUserByLogin(login.toUtf8());
+		reason = maybeUser.second;
 		if(!reason.empty()) break;
 
-		if(nbrow == 0)
+		if(!maybeUser.first.has_value())
 		{
 			if(IService::getInstance ()->ConfigFile.getVar("AcceptUnknownUsers").asInt () == 1)
 			{
@@ -130,16 +126,16 @@ retry:
 		}
 
 		// now the user is on the database
+		auto user = maybeUser.first.value();
+		uid = user.uid;
 
-		NLMISC::fromString(row[0], uid);
-
-		if(cpassword != row[2])
+		if(cpassword != user.password)
 		{
 			reason = toString("Bad password");
 			break;
 		}
 
-		if(row[4] != string("Offline"))
+		if(user.state != string("Offline"))
 		{
 			// 2 players are trying to play with the same id, disconnect all
 			//reason = sqlQuery(string("update user set state='Offline', ShardId=-1 where UId=")+uid);
@@ -195,7 +191,7 @@ retry:
 	//		netbase.disconnect (from);
 }
 
-static void cbClientChooseShard(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
+void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 {
 	//
 	// S06: receive "CS" message from client
@@ -294,7 +290,7 @@ static void cbClientChooseShard(CMessage &msgin, TSockId from, CCallbackNetBase 
 	//			netbase.disconnect (from);
 }
 
-static void cbClientConnection (TSockId from, void *arg)
+void ConnectionClient::cbClientConnection (TSockId from)
 {
 	CCallbackNetBase *cnb = ClientsServer;
 	const CInetAddress &ia = cnb->hostAddress (from);
@@ -303,7 +299,7 @@ static void cbClientConnection (TSockId from, void *arg)
 	cnb->authorizeOnly ("VLP", from);
 }
 
-static void cbClientDisconnection (TSockId from, void *arg)
+void ConnectionClient::cbClientDisconnection (TSockId from)
 {
 	CCallbackNetBase *cnb = ClientsServer;
 	const CInetAddress &ia = cnb->hostAddress (from);
@@ -341,13 +337,6 @@ static void cbClientDisconnection (TSockId from, void *arg)
 		row = mysql_fetch_row(result);
 	}
 }
-
-
-const TCallbackItem ClientCallbackArray[] =
-{
-	{ "VLP", cbClientVerifyLoginPassword },
-	{ "CS", cbClientChooseShard },
-};
 
 
 static void cbWSShardChooseShard (CMessage &msgin, const std::string &serviceName, TServiceId sid)
@@ -417,15 +406,6 @@ static const TUnifiedCallbackItem WSCallbackArray[] =
 //
 
 
-void connectionClientRelease ()
-{
-	nlassert(ClientsServer != 0);
-
-	delete ClientsServer;
-	ClientsServer = 0;
-}
-
-
 ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence) :
 	persistence(std::move(persistence))
 {}
@@ -436,12 +416,19 @@ void ConnectionClient::connectionClientInit()
 	ClientsServer = new CCallbackServer();
 	nlassert(ClientsServer != 0);
 	uint16 port = (uint16)IService::getInstance()->ConfigFile.getVar("ClientsPort").asInt();
+
+	const TCallbackItem ClientCallbackArray[] =
+	{
+		{ "VLP",  [=](auto &msgin, auto from, auto &netbase) { cbClientVerifyLoginPassword(msgin, from, netbase); } },
+		{ "CS", [=](auto &msgin, auto from, auto &netbase) { cbClientChooseShard(msgin, from, netbase); } },
+	};
 	ClientsServer->init(port);
-	ClientsServer->addCallbackArray(ClientCallbackArray, sizeof(ClientCallbackArray) / sizeof(ClientCallbackArray[0]));
-	ClientsServer->setConnectionCallback(cbClientConnection, 0);
-	ClientsServer->setDisconnectionCallback(cbClientDisconnection, 0);
+	ClientsServer->addCallbackArray(ClientCallbackArray, std::size(ClientCallbackArray));
+	ClientsServer->setConnectionCallback([=](auto from, auto arg) { cbClientConnection(from); }, nullptr);
+	ClientsServer->setDisconnectionCallback([=](auto from, auto arg) { cbClientDisconnection(from); }, nullptr);
+
 	// catch the messages from Welcome Service to know if the user can connect or not
-	CUnifiedNetwork::getInstance()->addCallbackArray(WSCallbackArray, sizeof(WSCallbackArray) / sizeof(WSCallbackArray[0]));
+	CUnifiedNetwork::getInstance()->addCallbackArray(WSCallbackArray, std::size(WSCallbackArray));
 }
 
 void ConnectionClient::connectionClientUpdate()
@@ -456,12 +443,14 @@ void ConnectionClient::connectionClientUpdate()
 		nlwarning("Error during update: '%s'", e.what());
 	}
 }
+
 void ConnectionClient::connectionClientRelease()
 {
 	nlassert(ClientsServer != 0);
 	delete ClientsServer;
 	ClientsServer = 0;
 }
+
 void ConnectionClient::sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId)
 {
 	nlassert(ClientsServer != 0);
