@@ -16,22 +16,9 @@
 
 #include <nelns/login_service/login_service.h>
 
-#include "nel/misc/types_nl.h"
 
-#include <cstdio>
-#include <ctype.h>
-#include <cmath>
-
-#include <vector>
-#include <map>
-
-#include <nel/misc/debug.h>
-#include <nel/misc/config_file.h>
-#include <nel/misc/displayer.h>
-#include <nel/misc/command.h>
-#include <nel/misc/log.h>
+#include <nel/misc/types_nl.h>
 #include <nel/misc/window_displayer.h>
-#include <nel/misc/path.h>
 #include <nel/net/service.h>
 #include <nel/net/login_cookie.h>
 
@@ -46,9 +33,9 @@
 // Namespaces
 //
 
-using namespace std;
-using namespace NLMISC;
-using namespace NLNET;
+using std::string;
+using NLMISC::CLog;
+using NLNET::IService;
 
 
 CLoginService::CLoginService () : UseDirectClient(false) { }
