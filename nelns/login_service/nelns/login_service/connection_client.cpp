@@ -416,37 +416,6 @@ static const TUnifiedCallbackItem WSCallbackArray[] =
 //
 //
 
-void connectionClientInit ()
-{
-	nlassert(ClientsServer == 0);
-
-	ClientsServer = new CCallbackServer();
-	nlassert(ClientsServer != 0);
-
-	uint16 port = (uint16) IService::getInstance ()->ConfigFile.getVar ("ClientsPort").asInt();
-	ClientsServer->init (port);
-
-	ClientsServer->addCallbackArray(ClientCallbackArray, sizeof(ClientCallbackArray)/sizeof(ClientCallbackArray[0]));
-	ClientsServer->setConnectionCallback(cbClientConnection, 0);
-	ClientsServer->setDisconnectionCallback(cbClientDisconnection, 0);
-
-	// catch the messages from Welcome Service to know if the user can connect or not
-	CUnifiedNetwork::getInstance ()->addCallbackArray (WSCallbackArray, sizeof(WSCallbackArray)/sizeof(WSCallbackArray[0]));
-}
-
-void connectionClientUpdate ()
-{
-	nlassert(ClientsServer != 0);
-
-	try
-	{
-		ClientsServer->update();
-	}
-	catch (Exception &e)
-	{
-		nlwarning ("Error during update: '%s'", e.what ());
-	}
-}
 
 void connectionClientRelease ()
 {
@@ -463,18 +432,38 @@ ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence) :
 
 void ConnectionClient::connectionClientInit()
 {
-	::connectionClientInit();
+	nlassert(ClientsServer == 0);
+	ClientsServer = new CCallbackServer();
+	nlassert(ClientsServer != 0);
+	uint16 port = (uint16)IService::getInstance()->ConfigFile.getVar("ClientsPort").asInt();
+	ClientsServer->init(port);
+	ClientsServer->addCallbackArray(ClientCallbackArray, sizeof(ClientCallbackArray) / sizeof(ClientCallbackArray[0]));
+	ClientsServer->setConnectionCallback(cbClientConnection, 0);
+	ClientsServer->setDisconnectionCallback(cbClientDisconnection, 0);
+	// catch the messages from Welcome Service to know if the user can connect or not
+	CUnifiedNetwork::getInstance()->addCallbackArray(WSCallbackArray, sizeof(WSCallbackArray) / sizeof(WSCallbackArray[0]));
 }
 
 void ConnectionClient::connectionClientUpdate()
 {
-	::connectionClientUpdate();
+	nlassert(ClientsServer != 0);
+	try
+	{
+		ClientsServer->update();
+	}
+	catch (Exception &e)
+	{
+		nlwarning("Error during update: '%s'", e.what());
+	}
 }
 void ConnectionClient::connectionClientRelease()
 {
-	::connectionClientRelease();
+	nlassert(ClientsServer != 0);
+	delete ClientsServer;
+	ClientsServer = 0;
 }
 void ConnectionClient::sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId)
 {
-	::sendToClient(msgout, sockId);
+	nlassert(ClientsServer != 0);
+	ClientsServer->send(msgout, sockId);
 }

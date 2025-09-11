@@ -24,11 +24,6 @@
 
 #include <nelns/login_service/persistence.h>
 
-void connectionClientInit();
-void connectionClientUpdate();
-void connectionClientRelease();
-void sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId);
-
 class ConnectionClient
 {
 public:

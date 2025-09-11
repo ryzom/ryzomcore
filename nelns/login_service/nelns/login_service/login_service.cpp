@@ -75,7 +75,7 @@ void CLoginService::init ()
 	if(UseDirectClient)
 	{
 		m_connection_client = std::make_unique<ConnectionClient>(m_persistence);
-		connectionClientInit ();
+		m_connection_client->connectionClientInit();
 	}
 	else
 	{
@@ -89,7 +89,7 @@ bool CLoginService::update ()
 {
 	connectionWSUpdate ();
 	if(UseDirectClient)
-		connectionClientUpdate ();
+		m_connection_client->connectionClientUpdate ();
 	else
 		connectionWebUpdate ();
 	return true;
@@ -100,7 +100,7 @@ void CLoginService::release ()
 {
 	connectionWSRelease ();
 	if(UseDirectClient)
-		connectionClientRelease ();
+		m_connection_client->connectionClientRelease ();
 	else
 		connectionWebRelease ();
 
