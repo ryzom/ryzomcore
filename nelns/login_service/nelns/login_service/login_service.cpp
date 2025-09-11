@@ -73,9 +73,14 @@ void CLoginService::init ()
 	connectionWSInit ();
 
 	if(UseDirectClient)
+	{
+		m_connection_client = std::make_unique<ConnectionClient>(m_persistence);
 		connectionClientInit ();
+	}
 	else
+	{
 		connectionWebInit ();
+	}
 
 	Output->displayNL ("Login Service initialized");
 }

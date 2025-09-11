@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <nelns/login_service/connection_client.h>
 
 //
 // Includes
@@ -453,4 +454,27 @@ void connectionClientRelease ()
 
 	delete ClientsServer;
 	ClientsServer = 0;
+}
+
+
+ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence) :
+	persistence(std::move(persistence))
+{}
+
+void ConnectionClient::connectionClientInit()
+{
+	::connectionClientInit();
+}
+
+void ConnectionClient::connectionClientUpdate()
+{
+	::connectionClientUpdate();
+}
+void ConnectionClient::connectionClientRelease()
+{
+	::connectionClientRelease();
+}
+void ConnectionClient::sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId)
+{
+	::sendToClient(msgout, sockId);
 }

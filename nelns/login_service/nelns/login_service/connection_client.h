@@ -17,11 +17,30 @@
 #ifndef NL_CONNECTION_CLIENT_H
 #define NL_CONNECTION_CLIENT_H
 
+#include <memory>
+
+#include <nel/net/buf_net_base.h>
+#include <nel/net/message.h>
+
+#include <nelns/login_service/persistence.h>
+
 void connectionClientInit();
 void connectionClientUpdate();
 void connectionClientRelease();
 void sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId);
 
-#endif // NL_CONNECTION_CLIENT_H
+class ConnectionClient
+{
+public:
+	explicit ConnectionClient(std::shared_ptr<IPersistence> persistence);
 
-/* End of connection_client.h */
+	void connectionClientInit();
+	void connectionClientUpdate();
+	void connectionClientRelease();
+	void sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId);
+
+private:
+	std::shared_ptr<IPersistence> persistence;
+};
+
+#endif // NL_CONNECTION_CLIENT_H

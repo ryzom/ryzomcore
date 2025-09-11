@@ -39,6 +39,7 @@ typedef unsigned long ulong;
 #include <nel/net/unified_network.h>
 
 #include <nelns/login_service/persistence.h>
+#include <nelns/login_service/connection_client.h>
 
 // Structures
 
@@ -90,6 +91,7 @@ public:
 private:
 	bool UseDirectClient;
 	std::shared_ptr<IPersistence> m_persistence;
+	std::unique_ptr<ConnectionClient> m_connection_client;
 
 };
 

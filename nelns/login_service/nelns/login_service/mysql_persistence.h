@@ -17,7 +17,10 @@
 #ifndef NELNS_LOGIN_SERVICE_MYSQL_PERSISTENCE_H
 #define NELNS_LOGIN_SERVICE_MYSQL_PERSISTENCE_H
 
+#include <string>
+
 #include <nelns/login_service/persistence.h>
+
 
 class CMysqlPersistence : public IPersistence
 {
@@ -26,6 +29,8 @@ public:
 	~CMysqlPersistence () override = default;
 
 	void init() override;
+
+	std::pair<std::optional<LoginUserProjection>, std::string> findUserByLogin(const std::string& login) override;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H

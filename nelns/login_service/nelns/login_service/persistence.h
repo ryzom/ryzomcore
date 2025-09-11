@@ -17,13 +17,29 @@
 #ifndef NELNS_LOGIN_SERVICE_PERSISTENCE_H
 #define NELNS_LOGIN_SERVICE_PERSISTENCE_H
 
+#include <optional>
+#include <string>
+#include <utility>
+
+#include <nel/misc/types_nl.h>
+
+struct LoginUserProjection
+{
+	sint32 uid;
+	std::string password;
+	std::string state;
+};
+
 class IPersistence
 {
 public:
+
 	IPersistence () = default;
 	virtual ~IPersistence () = default;
 
 	virtual void init() = 0;
+
+	virtual std::pair<std::optional<LoginUserProjection>, std::string> findUserByLogin(const std::string& login) = 0;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H

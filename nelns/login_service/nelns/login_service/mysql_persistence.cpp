@@ -14,14 +14,48 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "mysql_helper.h"
-
 #include <nelns/login_service/mysql_persistence.h>
 
+#include <nel/misc/string_common.h>
+#include <nelns/login_service/mysql_helper.h>
 
-#include <nelns/login_service/mysql_persistence.h>
+using std::optional;
+using std::pair;
+using std::string;
+using NLMISC::toString;
+
 
 void CMysqlPersistence::init()
 {
 	sqlInit();
+}
+
+std::pair<std::optional<LoginUserProjection>, std::string>  CMysqlPersistence::findUserByLogin(const std::string& login)
+{
+	CMysqlResult queryResult;
+	MYSQL_ROW row;
+	sint32 nbrow;
+	string reason = sqlQuery("select uid, password, state from user where Login='"+login+"'", nbrow, row, queryResult);
+
+	if (!reason.empty())
+	{
+		return std::make_pair(std::nullopt, reason);
+	}
+
+	if (nbrow <= 0)
+	{
+		return std::make_pair(std::nullopt, "");
+	}
+
+	if (nbrow > 1)
+	{
+		return std::make_pair(std::nullopt, toString("Too much login '%s' exists", login.c_str()));
+	}
+
+	LoginUserProjection result;
+	NLMISC::fromString(row[0], result.uid);
+	result.password = row[1];
+	result.state = row[2];
+
+	return std::make_pair(std::make_optional(result), "");
 }
