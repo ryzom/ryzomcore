@@ -33,6 +33,8 @@ public:
 	std::pair<std::optional<LoginUserProjection>, std::string> findUserByLogin(const std::string& login) override;
 
 	std::string authorizeUser(sint32 uid, const NLNET::CLoginCookie & cookie) override;
+
+	std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string &application) override;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H

@@ -31,10 +31,10 @@ void CMysqlPersistence::init()
 
 std::pair<std::optional<LoginUserProjection>, std::string> CMysqlPersistence::findUserByLogin(const std::string &login)
 {
-	CMysqlResult queryResult;
+	CMysqlResult result;
 	MYSQL_ROW row;
 	sint32 nbrow;
-	string reason = sqlQuery("select uid, password, state from user where Login='" + login + "'", nbrow, row, queryResult);
+	string reason = sqlQuery("select uid, password, state from user where Login='" + login + "'", nbrow, row, result);
 
 	if (!reason.empty())
 	{
@@ -51,17 +51,46 @@ std::pair<std::optional<LoginUserProjection>, std::string> CMysqlPersistence::fi
 		return std::make_pair(std::nullopt, toString("Too much login '%s' exists", login.c_str()));
 	}
 
-	LoginUserProjection result {
+	LoginUserProjection user {
 		.uid = -1,
 		.password = row[1],
 		.state = row[2]
 	};
-	NLMISC::fromString(row[0], result.uid);
+	NLMISC::fromString(row[0], user.uid);
 
-	return std::make_pair(std::make_optional(result), "");
+	return std::make_pair(std::make_optional(user), "");
 }
 
 std::string CMysqlPersistence::authorizeUser(sint32 uid, const NLNET::CLoginCookie &cookie)
 {
 	return sqlQuery("update user set state='Authorized', Cookie='" + cookie.setToString() + "' where UId=" + toString(uid));
+}
+
+std::pair<std::vector<OnlineShardProjection>, std::string> CMysqlPersistence::findOnlineShardsByApplication(const string &application)
+{
+	CMysqlResult result;
+	MYSQL_ROW row;
+	sint32 nbrow;
+	std::vector<OnlineShardProjection> shards;
+	string reason = sqlQuery("select shardid, name, nbplayers from shard where Online>0 and ClientApplication='"+application+"'", nbrow, row, result);
+	if(!reason.empty())
+	{
+		return std::make_pair(shards, reason);
+	}
+
+
+	// send address and name of all online shards
+	while(row != nullptr)
+	{
+		// serial the name of the shard
+
+		shards.push_back({
+			.sid = (static_cast<uint32>(atoi(row[0]))),
+			.name = (ucstring::makeFromUtf8(row[3])),
+			.nbplayers = (static_cast<uint8>(atoi(row[2]))),
+		});
+		row = mysql_fetch_row(result);
+	}
+
+	return std::make_pair(shards, "");
 }

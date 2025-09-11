@@ -150,24 +150,21 @@ retry:
 		reason = persistence->authorizeUser(uid, c);
 		if(!reason.empty()) break;
 
-		reason = sqlQuery("select * from shard where Online>0 and ClientApplication='"+application+"'", nbrow, row, result);
+		auto maybeShards = persistence->findOnlineShardsByApplication(application);
+		reason = maybeShards.second;
 		if(!reason.empty()) break;
 
 		// Send success message
 		CMessage msgout ("VLP");
+		nbrow = maybeShards.first.size();
 		msgout.serial(reason);
 		msgout.serial(nbrow);
 
 		// send address and name of all online shards
-		while(row != 0)
+		for (auto shard : maybeShards.first)
 		{
 			// serial the name of the shard
-			ucstring shardname;
-			shardname.fromUtf8(row[3]);
-			uint8 nbplayers = atoi(row[2]);
-			uint32 sid = atoi(row[0]);
-			msgout.serial (shardname, nbplayers, sid);
-			row = mysql_fetch_row(result);
+			msgout.serial (shard.name, shard.nbplayers, shard.sid);
 		}
 		netbase.send (msgout, from);
 		netbase.authorizeOnly ("CS", from);

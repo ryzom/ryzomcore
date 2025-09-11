@@ -17,8 +17,8 @@ using testing::ElementsAre;
 using testing::Eq;
 using testing::Field;
 using testing::FieldsAre;
-using testing::IsFalse;
 using testing::IsEmpty;
+using testing::IsFalse;
 using testing::IsNull;
 using testing::IsTrue;
 using testing::Not;
@@ -31,10 +31,10 @@ using testing::StrEq;
 using CVar = NLMISC::CConfigFile::CVar;
 using NLMISC::IStream;
 using NLMISC::nlSleep;
-using NLNET::CMessage;
 using NLNET::CCallbackClient;
 using NLNET::CCallbackNetBase;
 using NLNET::CInetHost;
+using NLNET::CMessage;
 using NLNET::TCallbackItem;
 using NLNET::TSockId;
 
@@ -49,27 +49,30 @@ struct VLPRequest
 		stream.serial(cpassword);
 		stream.serial(application);
 	}
-
 };
 
 struct VLPResponse
 {
 	std::string reason;
-	std::optional<sint32> shardCount = std::nullopt;
+	std::vector<OnlineShardProjection> shards;
 	void serial(IStream &stream)
 	{
 		stream.serial(reason);
-		if ( reason.empty())
+		if (reason.empty())
 		{
 			sint32 readShardCount;
 			stream.serial(readShardCount);
-			shardCount = readShardCount;
+			for (auto i = 0; i < readShardCount; ++i)
+			{
+				OnlineShardProjection shard;
+				stream.serial(shard.name, shard.nbplayers, shard.sid);
+				shards.push_back(shard);
+			}
 		}
 	}
-
 };
 
-void insertConfigVariable(NLMISC::CConfigFile& configFile, const std::string& name, const std::string& value)
+void insertConfigVariable(NLMISC::CConfigFile &configFile, const std::string &name, const std::string &value)
 {
 	CVar var;
 	var.Type = NLMISC::CConfigFile::CVar::T_STRING;
@@ -77,13 +80,13 @@ void insertConfigVariable(NLMISC::CConfigFile& configFile, const std::string& na
 	configFile.insertVar(name, var);
 }
 
-void insertConfigVariable(NLMISC::CConfigFile& configFile, const std::string& name, const bool& value)
+void insertConfigVariable(NLMISC::CConfigFile &configFile, const std::string &name, const bool &value)
 {
 	const std::string stringValue = value ? "true" : "false";
 	insertConfigVariable(configFile, name, stringValue);
 }
 
-void insertConfigVariable(NLMISC::CConfigFile& configFile, const std::string& name, const int& value)
+void insertConfigVariable(NLMISC::CConfigFile &configFile, const std::string &name, const int &value)
 {
 	CVar var;
 	var.Type = NLMISC::CConfigFile::CVar::T_INT;
@@ -94,7 +97,7 @@ void insertConfigVariable(NLMISC::CConfigFile& configFile, const std::string& na
 class MockPersistence : public IPersistence
 {
 public:
-	void init() override {}
+	void init() override { }
 
 	std::pair<std::optional<LoginUserProjection>, std::string> findUserByLogin(const std::string &login) override
 	{
@@ -103,11 +106,16 @@ public:
 
 	std::string authorizeUser(sint32 uid, const NLNET::CLoginCookie &cookie) override
 	{
-		return "mock error authorizeUser";
+		return reason;
+	}
+	std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string &application) override
+	{
+		return std::make_pair(shards, reason);
 	}
 
 	std::optional<LoginUserProjection> user = std::nullopt;
-	std::string reason = "";
+	std::string reason;
+	std::vector<OnlineShardProjection> shards;
 };
 
 class CLoginServiceIT : public testing::Test
@@ -143,10 +151,15 @@ protected:
 
 TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 {
-	LoginUserProjection user{
+	LoginUserProjection user {
 		.uid = 123,
 		.password = "password",
 		.state = "Offline"
+	};
+	OnlineShardProjection shard {
+		.sid = 456,
+		.name = ucstring::makeFromUtf8("test shard"),
+		.nbplayers = 111
 	};
 	VLPRequest request {
 		.login = ucstring::makeFromUtf8("test-login"),
@@ -154,6 +167,7 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 		.application = "test-application"
 	};
 	persistence->user = user;
+	persistence->shards.push_back(shard);
 	CMessage msgout("VLP");
 	msgout.serial(request);
 
@@ -161,10 +175,10 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 	std::future<VLPResponse> response = response_promise.get_future();
 	TCallbackItem callbackArray[] = {
 		{ "VLP", [&response_promise](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
-			VLPResponse response;
-			msgin.serial(response);
-			response_promise.set_value(response);
-		} }
+		     VLPResponse response;
+		     msgin.serial(response);
+		     response_promise.set_value(response);
+		 } }
 	};
 	client.addCallbackArray(callbackArray, std::size(callbackArray));
 
@@ -188,9 +202,15 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 	running = false;
 	ASSERT_THAT(state, Eq(std::future_status::ready));
 	EXPECT_THAT(response.get(),
-		AllOf(
-			Field("reason", &VLPResponse::reason, IsEmpty()),
-			Field("shardCount", &VLPResponse::shardCount, Optional(Eq(1)))
-		)
+	    AllOf(
+	        Field("reason", &VLPResponse::reason, IsEmpty()),
+	        Field("shards", &VLPResponse::shards, ElementsAre(
+	        	AllOf(
+	        		Field(&OnlineShardProjection::sid, Eq(shard.sid)),
+					Field(&OnlineShardProjection::name, Eq(shard.name)),
+					Field(&OnlineShardProjection::nbplayers, Eq(shard.nbplayers))
+	        	)
+	        ))
+	    )
 	);
 }

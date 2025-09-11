@@ -22,6 +22,7 @@
 #include <optional>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <nel/misc/types_nl.h>
 
@@ -30,6 +31,13 @@ struct LoginUserProjection
 	sint32 uid;
 	std::string password;
 	std::string state;
+};
+
+struct OnlineShardProjection
+{
+	uint32 sid;
+	ucstring name;
+	uint8 nbplayers;
 };
 
 class IPersistence
@@ -44,6 +52,8 @@ public:
 	virtual std::pair<std::optional<LoginUserProjection>, std::string> findUserByLogin(const std::string& login) = 0;
 
 	virtual std::string authorizeUser(sint32 uid, const NLNET::CLoginCookie & cookie) = 0;
+
+	virtual std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string& application) = 0;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H
