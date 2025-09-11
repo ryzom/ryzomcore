@@ -2,6 +2,13 @@ name: CMake on multiple platforms
 
 on:
   push:
+    branches: [ "core4", "feature/*" ]
+    paths-ignore:
+      - '.devcontainer/**'
+      - '.github/**.yml'
+      - 'snowballs2/**'
+      - '!.github/workflows/cmake-multi-platform.yml'
+  pull_request:
     branches: [ "core4" ]
     paths-ignore:
       - '.devcontainer/**'

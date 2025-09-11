@@ -27,7 +27,7 @@ TARGET_LINK_LIBRARIES(ryzom_frontend_service
 
 IF (WITH_MSQUIC)
     TARGET_INCLUDE_DIRECTORIES(ryzom_frontend_service PRIVATE ${msquic_INCLUDE_DIRS})
-    TARGET_LINK_LIBRARIES(ryzom_frontend_service ${msquic_LIBRARIES})
+    TARGET_LINK_LIBRARIES(ryzom_frontend_service PRIVATE ${msquic_LIBRARIES})
 ENDIF ()
 
 NL_DEFAULT_PROPS(ryzom_frontend_service "Ryzom, Services: Frontend Service (FS)")
