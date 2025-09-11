@@ -46,6 +46,11 @@ ENDIF()
 OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
   cmake_minimum_required(VERSION 3.24)
+
+  IF (POLICY CMP0144)
+    cmake_policy(SET CMP0144 NEW)
+  ENDIF ()
+
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.26.1.tar.gz"
