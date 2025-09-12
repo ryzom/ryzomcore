@@ -11,6 +11,12 @@ services:
       context: .
       dockerfile: docker/Dockerfile
 
+  nelns:
+    image: "ryzomcore/nelns"
+    build:
+      context: .
+      dockerfile: nelns/docker/Dockerfile
+
   snowballs:
     image: "ryzomcore/snowballs"
     build:
