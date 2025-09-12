@@ -30,7 +30,7 @@
 class ConnectionClient
 {
 public:
-	explicit ConnectionClient(std::shared_ptr<IPersistence> persistence);
+	explicit ConnectionClient(IPersistence& persistence);
 
 	~ConnectionClient() = default;
 
@@ -45,7 +45,7 @@ private:
 
 	void cbWSShardChooseShard(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
 
-	std::shared_ptr<IPersistence> persistence;
+	IPersistence& persistence;
 	NLNET::CCallbackServer ClientsServer;
 };
 

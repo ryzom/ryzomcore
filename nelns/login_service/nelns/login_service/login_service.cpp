@@ -73,7 +73,7 @@ void CLoginService::init ()
 
 	if(UseDirectClient)
 	{
-		m_connection_client = std::make_unique<ConnectionClient>(m_persistence);
+		m_connection_client = std::make_unique<ConnectionClient>(*m_persistence);
 	}
 	else
 	{

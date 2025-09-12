@@ -89,7 +89,7 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 	breakable
 	{
 		// const CInetAddress &ia = netbase.hostAddress (from);
-		auto maybeUser = persistence->findUserByLogin(login.toUtf8());
+		auto maybeUser = persistence.findUserByLogin(login.toUtf8());
 		reason = maybeUser.second;
 		if (!reason.empty()) break;
 
@@ -98,7 +98,7 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 			if (IService::getInstance()->ConfigFile.getVar("AcceptUnknownUsers").asInt() == 1)
 			{
 				// we accept new users, add it
-				maybeUser = persistence->createUser(login.toUtf8(), cpassword);
+				maybeUser = persistence.createUser(login.toUtf8(), cpassword);
 				reason = maybeUser.second;
 				if (!reason.empty()) break;
 				nlinfo("The user %s was inserted in the database for the application '%s'!", login.toUtf8().c_str(), application.c_str());
@@ -138,10 +138,10 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 		CLoginCookie c;
 		c.set((uint32)(uintptr_t)from, rand(), uid);
 
-		reason = persistence->authorizeUser(uid, c);
+		reason = persistence.authorizeUser(uid, c);
 		if (!reason.empty()) break;
 
-		auto maybeShards = persistence->findOnlineShardsByApplication(application);
+		auto maybeShards = persistence.findOnlineShardsByApplication(application);
 		reason = maybeShards.second;
 		if (!reason.empty()) break;
 
@@ -378,8 +378,8 @@ void ConnectionClient::cbWSShardChooseShard(CMessage &msgin, const std::string &
 //
 //
 
-ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence)
-    : persistence(std::move(persistence))
+ConnectionClient::ConnectionClient(IPersistence& persistence)
+    : persistence(persistence)
 {
 	uint16 port = (uint16)IService::getInstance()->ConfigFile.getVar("ClientsPort").asInt();
 	ClientsServer.init(port);
