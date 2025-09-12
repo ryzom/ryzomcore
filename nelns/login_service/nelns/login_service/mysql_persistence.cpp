@@ -87,7 +87,7 @@ pair<vector<OnlineShardProjection>, string> CMysqlPersistence::findOnlineShardsB
 
 		shards.push_back({
 			.sid = (static_cast<uint32>(atoi(row[0]))),
-			.name = (ucstring::makeFromUtf8(row[3])),
+			.name = (ucstring::makeFromUtf8(row[1])),
 			.nbplayers = (static_cast<uint8>(atoi(row[2]))),
 		});
 		row = mysql_fetch_row(result);
