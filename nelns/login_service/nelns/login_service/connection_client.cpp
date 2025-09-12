@@ -224,10 +224,11 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 		sint32 shardid;
 		msgin.serial(shardid);
 
-		reason = sqlQuery("select * from shard where ShardId=" + toString(shardid), nbrow, row, result);
+		auto shardExists = persistence.existsShardById(shardid);
+		reason = shardExists.second;
 		if (!reason.empty()) break;
 
-		if (nbrow == 0)
+		if (!shardExists.first)
 		{
 			reason = "This shard is not available";
 			break;

@@ -48,6 +48,13 @@ struct OnlineShardProjection
 	uint8 nbplayers;
 };
 
+struct ShardProjection
+{
+	uint32 sid;
+	ucstring name;
+	uint8 nbplayers;
+};
+
 class IPersistence
 {
 public:
@@ -66,6 +73,8 @@ public:
 	virtual std::pair<std::vector<AuthorizedUserProjection>, std::string> findAuthorizedUsers() = 0;
 
 	virtual std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string& application) = 0;
+
+	virtual std::pair<bool, std::string> existsShardById(const sint32& shardid) = 0;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H

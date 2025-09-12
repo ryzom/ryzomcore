@@ -77,12 +77,14 @@ struct VLPResponse
 
 struct CSRequest
 {
+	sint32 shardid;
 	void serial(IStream &stream)
 	{
+		stream.serial(shardid);
 	}
 };
 
-struct CSResponse
+struct SCSResponse
 {
 	std::string reason;
 	void serial(IStream &stream)
@@ -130,6 +132,8 @@ public:
 	MOCK_METHOD((std::pair<std::vector<AuthorizedUserProjection>, std::string>), findAuthorizedUsers, (), (override));
 
 	MOCK_METHOD((std::pair<std::vector<OnlineShardProjection>, std::string>), findOnlineShardsByApplication, (const std::string &application), (override));
+
+	MOCK_METHOD((std::pair<bool, std::string>), existsShardById, (const sint32& shardid), (override));
 };
 
 class CLoginServiceIT : public testing::Test
@@ -311,7 +315,7 @@ TEST_F(CLoginServiceIT, shouldReturnErrorWhenNotAuthorizedToSelectAShard)
 	ASSERT_THAT(sendMessage<VLPResponse>("VLP", verifyLogin), Field("reason", &VLPResponse::reason, IsEmpty()));
 
 	sendMessage("CS", chooseShard);
-	auto response = receiveMessage<CSResponse>("SCS");
+	auto response = receiveMessage<SCSResponse>("SCS");
 
-	EXPECT_THAT(response, Field("reason", &CSResponse::reason, StrEq("You are not authorized to select a shard")));
+	EXPECT_THAT(response, Field("reason", &SCSResponse::reason, StrEq("You are not authorized to select a shard")));
 }

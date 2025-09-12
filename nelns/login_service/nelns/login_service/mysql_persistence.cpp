@@ -140,3 +140,16 @@ pair<vector<AuthorizedUserProjection>, string> CMysqlPersistence::findAuthorized
 
 	return std::make_pair(users, "");
 }
+
+pair<bool, string> CMysqlPersistence::existsShardById(const sint32& shardid) {
+	CMysqlResult result;
+	MYSQL_ROW row;
+	sint32 nbrow;
+	string reason = sqlQuery("select ShardId from shard where ShardId=" + toString(shardid), nbrow, row, result);
+	if (!reason.empty())
+	{
+		return std::make_pair(false, reason);
+	}
+
+	return std::make_pair(nbrow != 0, reason);
+}

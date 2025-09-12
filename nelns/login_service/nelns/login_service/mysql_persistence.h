@@ -39,6 +39,8 @@ public:
 	std::pair<std::vector<AuthorizedUserProjection>, std::string> findAuthorizedUsers() override;
 
 	std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string &application) override;
+
+	std::pair<bool, std::string> existsShardById(const sint32& shardid) override;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H
