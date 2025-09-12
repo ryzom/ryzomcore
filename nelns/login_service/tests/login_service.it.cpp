@@ -151,20 +151,20 @@ protected:
 
 TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 {
+	VLPRequest request {
+		.login = ucstring::makeFromUtf8("test-login"),
+		.cpassword = "test-password",
+		.application = "test-application"
+	};
 	LoginUserProjection user {
 		.uid = 123,
-		.password = "password",
+		.password = request.cpassword,
 		.state = "Offline"
 	};
 	OnlineShardProjection shard {
 		.sid = 456,
 		.name = ucstring::makeFromUtf8("test shard"),
 		.nbplayers = 111
-	};
-	VLPRequest request {
-		.login = ucstring::makeFromUtf8("test-login"),
-		.cpassword = user.password,
-		.application = "test-application"
 	};
 	persistence->user = user;
 	persistence->shards.push_back(shard);
@@ -183,16 +183,10 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 	client.addCallbackArray(callbackArray, std::size(callbackArray));
 
 	client.send(msgout);
-	auto updateClient = std::async(std::launch::async, [=, &response]() {
+	auto update = std::async(std::launch::async, [=, &response]() {
 		while (response.valid() && running)
 		{
 			client.update();
-			nlSleep(1);
-		}
-	});
-	auto updateNamingService = std::async(std::launch::async, [=, &response]() {
-		while (response.valid() && running)
-		{
 			loginService.update();
 			nlSleep(1);
 		}
@@ -213,4 +207,42 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 	        ))
 	    )
 	);
+}
+
+TEST_F(CLoginServiceIT, shouldReturrnErrorWhenUserDoesNotExist)
+{
+	VLPRequest request {
+		.login = ucstring::makeFromUtf8("test-login"),
+		.cpassword = "test password",
+		.application = "test-application"
+	};
+	persistence->user = std::nullopt;
+	CMessage msgout("VLP");
+	msgout.serial(request);
+
+	std::promise<VLPResponse> response_promise;
+	std::future<VLPResponse> response = response_promise.get_future();
+	TCallbackItem callbackArray[] = {
+		{ "VLP", [&response_promise](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
+		     VLPResponse response;
+		     msgin.serial(response);
+		     response_promise.set_value(response);
+		 } }
+	};
+	client.addCallbackArray(callbackArray, std::size(callbackArray));
+
+	client.send(msgout);
+	auto update = std::async(std::launch::async, [=, &response]() {
+		while (response.valid() && running)
+		{
+			client.update();
+			loginService.update();
+			nlSleep(1);
+		}
+	});
+
+	auto state = response.wait_for(defaultTimeout);
+	running = false;
+	ASSERT_THAT(state, Eq(std::future_status::ready));
+	EXPECT_THAT(response.get(), Field("reason", &VLPResponse::reason, StrEq("Login 'test-login' doesn't exist")));
 }
