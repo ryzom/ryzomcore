@@ -234,8 +234,9 @@ void cbShardComesIn (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 }
 */
 
-// 
-static void cbWSIdentification (CMessage &msgin, const std::string &serviceName, TServiceId sid)
+//
+
+void ConnectionWS::cbWSIdentification (CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	TSockId from;
 	CCallbackNetBase *cnb = CUnifiedNetwork::getInstance ()->getNetBase (sid, from);
@@ -593,17 +594,6 @@ static void	cbWSSetShardOpen(CMessage &msgin, const std::string &serviceName, TS
 }
 
 
-static const TUnifiedCallbackItem WSCallbackArray[] =
-{
-	{ "CC",					cbWSClientConnected },
-	{ "WS_IDENT",			cbWSIdentification },
-
-	{ "REPORT_FS_STATE",	cbWSReportFSState },
-	{ "REPORT_NO_PATCH",	cbWSReportNoPatch },
-	{ "SET_SHARD_OPEN",		cbWSSetShardOpen },
-};
-
-
 //
 // Functions
 //
@@ -612,6 +602,15 @@ ConnectionWS::ConnectionWS()
     : NbPlayers(0)
     , RecordNbPlayers(0)
 {
+	const TUnifiedCallbackItem WSCallbackArray[] =
+	{
+		{ "CC",					[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSClientConnected(msgin, serviceName, sid); } },
+		{ "WS_IDENT",			[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSIdentification(msgin, serviceName, sid); } },
+
+		{ "REPORT_FS_STATE",	[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSReportFSState(msgin, serviceName, sid); } },
+		{ "REPORT_NO_PATCH",	[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSReportNoPatch(msgin, serviceName, sid); } },
+		{ "SET_SHARD_OPEN",		[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSSetShardOpen(msgin, serviceName, sid); } },
+	};
 	CUnifiedNetwork::getInstance ()->addCallbackArray (WSCallbackArray, std::size(WSCallbackArray));
 
 	CUnifiedNetwork::getInstance ()->setServiceUpCallback ("WS", [=](auto &serviceName, const auto& sid, auto *arg) { cbWSConnection(serviceName, sid, arg); });

@@ -19,6 +19,7 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/net/callback_server.h>
+#include <nel/net/message.h>
 #include <nel/net/unified_network.h>
 
 // extern NLNET::CCallbackServer *WSServer;
@@ -36,6 +37,7 @@ public:
 	void release();
 
 private:
+	void cbWSIdentification (NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
 	void cbWSConnection (const std::string &serviceName, NLNET::TServiceId sid, void *arg);
 	void cbWSDisconnection (const std::string &serviceName, NLNET::TServiceId sid, void *arg);
 
