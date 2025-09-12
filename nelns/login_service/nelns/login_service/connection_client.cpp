@@ -53,27 +53,34 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
+ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence)
+    : persistence(std::move(persistence))
+{
+}
 //
 // Variables
 //
 
 static CCallbackServer *ClientsServer = 0;
 
-
 //
 // Functions
 //
 
+void ConnectionClient::sendToClient(CMessage &msgout, TSockId sockId)
+{
+	nlassert(ClientsServer != 0);
+	ClientsServer->send(msgout, sockId);
+}
+
 void string_escape(string &str)
 {
 	string::size_type pos = 0;
-	while((pos=str.find('\'')) != string::npos)
+	while ((pos = str.find('\'')) != string::npos)
 	{
 		str.replace(pos, 1, " ");
 	}
 }
-
 
 void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 {
@@ -86,27 +93,27 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 	sint32 uid = -1;
 	ucstring login;
 	string cpassword, application;
-	msgin.serial (login);
-	msgin.serial (cpassword);
-	msgin.serial (application);
+	msgin.serial(login);
+	msgin.serial(cpassword);
+	msgin.serial(application);
 
 	breakable
 	{
 		CMysqlResult result;
 		MYSQL_ROW row;
 		sint32 nbrow;
-		//const CInetAddress &ia = netbase.hostAddress (from);
-retry:
+		// const CInetAddress &ia = netbase.hostAddress (from);
+	retry:
 		auto maybeUser = persistence->findUserByLogin(login.toUtf8());
 		reason = maybeUser.second;
-		if(!reason.empty()) break;
+		if (!reason.empty()) break;
 
-		if(!maybeUser.first.has_value())
+		if (!maybeUser.first.has_value())
 		{
-			if(IService::getInstance ()->ConfigFile.getVar("AcceptUnknownUsers").asInt () == 1)
+			if (IService::getInstance()->ConfigFile.getVar("AcceptUnknownUsers").asInt() == 1)
 			{
 				// we accept new users, add it
-				string query = "insert into user (Login, Password) values ('"+login.toUtf8()+"', '"+cpassword+"')";
+				string query = "insert into user (Login, Password) values ('" + login.toUtf8() + "', '" + cpassword + "')";
 				reason = sqlQuery(query, nbrow, row, result);
 				if (!reason.empty()) break;
 				nlinfo("The user %s was inserted in the database for the application '%s'!", login.toUtf8().c_str(), application.c_str());
@@ -123,17 +130,17 @@ retry:
 		auto user = maybeUser.first.value();
 		uid = user.uid;
 
-		if(cpassword != user.password)
+		if (cpassword != user.password)
 		{
 			reason = toString("Bad password");
 			break;
 		}
 
-		if(user.state != string("Offline"))
+		if (user.state != string("Offline"))
 		{
 			// 2 players are trying to play with the same id, disconnect all
-			//reason = sqlQuery(string("update user set state='Offline', ShardId=-1 where UId=")+uid);
-			//if(!reason.empty()) break;
+			// reason = sqlQuery(string("update user set state='Offline', ShardId=-1 where UId=")+uid);
+			// if(!reason.empty()) break;
 
 			// send a message to the already connected player to disconnect
 			CMessage msgout("DC");
@@ -148,14 +155,14 @@ retry:
 		c.set((uint32)(uintptr_t)from, rand(), uid);
 
 		reason = persistence->authorizeUser(uid, c);
-		if(!reason.empty()) break;
+		if (!reason.empty()) break;
 
 		auto maybeShards = persistence->findOnlineShardsByApplication(application);
 		reason = maybeShards.second;
-		if(!reason.empty()) break;
+		if (!reason.empty()) break;
 
 		// Send success message
-		CMessage msgout ("VLP");
+		CMessage msgout("VLP");
 		nbrow = maybeShards.first.size();
 		msgout.serial(reason);
 		msgout.serial(nbrow);
@@ -164,17 +171,17 @@ retry:
 		for (auto shard : maybeShards.first)
 		{
 			// serial the name of the shard
-			msgout.serial (shard.name, shard.nbplayers, shard.sid);
+			msgout.serial(shard.name, shard.nbplayers, shard.sid);
 		}
-		netbase.send (msgout, from);
-		netbase.authorizeOnly ("CS", from);
+		netbase.send(msgout, from);
+		netbase.authorizeOnly("CS", from);
 
 		return;
 	}
 
 	// Manage error
 	CMessage msgout("VLP");
-	if(reason.empty()) reason = "Unknown error";
+	if (reason.empty()) reason = "Unknown error";
 	msgout.serial(reason);
 	netbase.send(msgout, from);
 	// FIX: On GNU/Linux, when we disconnect now, sometime the other side doesn't receive the message sent just before.
@@ -196,20 +203,20 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 		MYSQL_ROW row;
 		sint32 nbrow;
 		reason = sqlQuery("select UId, Cookie, Privilege, ExtendedPrivilege from user where State='Authorized'", nbrow, row, result);
-		if(!reason.empty()) break;
+		if (!reason.empty()) break;
 
-		if(nbrow == 0)
+		if (nbrow == 0)
 		{
 			reason = "You are not authorized to select a shard";
 			break;
 		}
 
 		bool ok = false;
-		while(row != 0)
+		while (row != 0)
 		{
 			CLoginCookie lc;
 			lc.setFromString(row[1]);
-			if(lc.getUserAddr() == (uint32)(uintptr_t)from)
+			if (lc.getUserAddr() == (uint32)(uintptr_t)from)
 			{
 				ok = true;
 				break;
@@ -217,7 +224,7 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 			row = mysql_fetch_row(result);
 		}
 
-		if(!ok)
+		if (!ok)
 		{
 			reason = "You are not authorized to select a shard";
 			break;
@@ -232,16 +239,16 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 		sint32 shardid;
 		msgin.serial(shardid);
 
-		reason = sqlQuery("select * from shard where ShardId="+toString(shardid), nbrow, row, result);
-		if(!reason.empty()) break;
+		reason = sqlQuery("select * from shard where ShardId=" + toString(shardid), nbrow, row, result);
+		if (!reason.empty()) break;
 
-		if(nbrow == 0)
+		if (nbrow == 0)
 		{
 			reason = "This shard is not available";
 			break;
 		}
 
-		sint32 s = findShard (shardid);
+		sint32 s = findShard(shardid);
 		if (s == -1)
 		{
 			reason = "Cannot find the shard internal id";
@@ -249,13 +256,13 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 		}
 		TServiceId sid = Shards[s].SId;
 
-		reason = sqlQuery("update user set State='Waiting', ShardId="+toString(shardid)+" where UId="+uid);
-		if(!reason.empty()) break;
+		reason = sqlQuery("update user set State='Waiting', ShardId=" + toString(shardid) + " where UId=" + uid);
+		if (!reason.empty()) break;
 
-		reason = sqlQuery("select Login from user where UId="+uid, nbrow, row, result);
-		if(!reason.empty()) break;
+		reason = sqlQuery("select Login from user where UId=" + uid, nbrow, row, result);
+		if (!reason.empty()) break;
 
-		if(nbrow == 0)
+		if (nbrow == 0)
 		{
 			reason = "Cannot retrieve the username";
 			break;
@@ -281,21 +288,21 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 	//			netbase.disconnect (from);
 }
 
-void ConnectionClient::cbClientConnection (TSockId from)
+void ConnectionClient::cbClientConnection(TSockId from)
 {
 	CCallbackNetBase *cnb = ClientsServer;
-	const CInetAddress &ia = cnb->hostAddress (from);
-	nldebug("new client connection: %s", ia.asString ().c_str ());
-	Output->displayNL ("CCC: Connection from %s", ia.asString ().c_str ());
-	cnb->authorizeOnly ("VLP", from);
+	const CInetAddress &ia = cnb->hostAddress(from);
+	nldebug("new client connection: %s", ia.asString().c_str());
+	Output->displayNL("CCC: Connection from %s", ia.asString().c_str());
+	cnb->authorizeOnly("VLP", from);
 }
 
-void ConnectionClient::cbClientDisconnection (TSockId from)
+void ConnectionClient::cbClientDisconnection(TSockId from)
 {
 	CCallbackNetBase *cnb = ClientsServer;
-	const CInetAddress &ia = cnb->hostAddress (from);
+	const CInetAddress &ia = cnb->hostAddress(from);
 
-	nldebug("new client disconnection: %s", ia.asString ().c_str ());
+	nldebug("new client disconnection: %s", ia.asString().c_str());
 
 	string reason;
 
@@ -303,25 +310,25 @@ void ConnectionClient::cbClientDisconnection (TSockId from)
 	MYSQL_ROW row;
 	sint32 nbrow;
 	reason = sqlQuery("select UId, State, Cookie from user where State!='Offline'", nbrow, row, result);
-	if(!reason.empty()) return;
+	if (!reason.empty()) return;
 
-	if(nbrow == 0)
+	if (nbrow == 0)
 	{
 		return;
 	}
 
-	while(row != 0)
+	while (row != 0)
 	{
 		CLoginCookie lc;
 		string str = row[2];
-		if(!str.empty())
+		if (!str.empty())
 		{
 			lc.setFromString(str);
-			if(lc.getUserAddr() == (uint32)(uintptr_t)from)
+			if (lc.getUserAddr() == (uint32)(uintptr_t)from)
 			{
 				// got it, if he is not in waiting state, it s not normal, remove all
-				if(row[1] == string("Authorized"))
-					sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where UId="+string(row[0]));
+				if (row[1] == string("Authorized"))
+					sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where UId=" + string(row[0]));
 				return;
 			}
 		}
@@ -329,8 +336,7 @@ void ConnectionClient::cbClientDisconnection (TSockId from)
 	}
 }
 
-
-static void cbWSShardChooseShard (CMessage &msgin, const std::string &serviceName, TServiceId sid)
+static void cbWSShardChooseShard(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	//
 	// S10: receive "SCS" message from WS
@@ -342,10 +348,10 @@ static void cbWSShardChooseShard (CMessage &msgin, const std::string &serviceNam
 
 	breakable
 	{
-		msgin.serial (reason);
-		msgin.serial (cookie);
+		msgin.serial(reason);
+		msgin.serial(cookie);
 
-		if(!reason.empty())
+		if (!reason.empty())
 		{
 			nldebug("SCS from WS failed: %s", reason.c_str());
 			sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where Cookie='" + cookie.setToString() + "'");
@@ -355,14 +361,14 @@ static void cbWSShardChooseShard (CMessage &msgin, const std::string &serviceNam
 		CMysqlResult result;
 		MYSQL_ROW row;
 		sint32 nbrow;
-		reason = sqlQuery("select UId, Cookie, Privilege, ExtendedPrivilege from user where Cookie='"+cookie.setToString()+"'", nbrow, row, result);
-		if(!reason.empty()) break;
-		if(nbrow != 1)
+		reason = sqlQuery("select UId, Cookie, Privilege, ExtendedPrivilege from user where Cookie='" + cookie.setToString() + "'", nbrow, row, result);
+		if (!reason.empty()) break;
+		if (nbrow != 1)
 		{
 			reason = "More than one row was found";
 			nldebug("SCS from WS failed with duplicate cookies, sending disconnect messages.");
 			// disconnect them all
-			while(row != 0)
+			while (row != 0)
 			{
 				CMessage msgout("DC");
 				uint32 uid = atoui(row[0]);
@@ -374,20 +380,19 @@ static void cbWSShardChooseShard (CMessage &msgin, const std::string &serviceNam
 		}
 
 		msgout.serial(reason);
-		string str = cookie.setToString ();
-		msgout.serial (str);
+		string str = cookie.setToString();
+		msgout.serial(str);
 		string addr;
-		msgin.serial (addr);
-		msgout.serial (addr);
-		ClientsServer->send (msgout, (TSockId)cookie.getUserAddr ()); // FIXME: 64-bit
+		msgin.serial(addr);
+		msgout.serial(addr);
+		ClientsServer->send(msgout, (TSockId)cookie.getUserAddr()); // FIXME: 64-bit
 		return;
 	}
 	msgout.serial(reason);
-	ClientsServer->send (msgout, (TSockId)cookie.getUserAddr ()); // FIXME: 64-bit
+	ClientsServer->send(msgout, (TSockId)cookie.getUserAddr()); // FIXME: 64-bit
 }
 
-static const TUnifiedCallbackItem WSCallbackArray[] =
-{
+static const TUnifiedCallbackItem WSCallbackArray[] = {
 	{ "SCS", cbWSShardChooseShard },
 };
 
@@ -396,24 +401,20 @@ static const TUnifiedCallbackItem WSCallbackArray[] =
 //
 //
 
-
-ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence) :
-	persistence(std::move(persistence))
-{}
-
 void ConnectionClient::connectionClientInit()
 {
 	nlassert(ClientsServer == 0);
+
 	ClientsServer = new CCallbackServer();
 	nlassert(ClientsServer != 0);
-	uint16 port = (uint16)IService::getInstance()->ConfigFile.getVar("ClientsPort").asInt();
 
-	const TCallbackItem ClientCallbackArray[] =
-	{
-		{ "VLP",  [=](auto &msgin, auto from, auto &netbase) { cbClientVerifyLoginPassword(msgin, from, netbase); } },
+	uint16 port = (uint16)IService::getInstance()->ConfigFile.getVar("ClientsPort").asInt();
+	ClientsServer->init(port);
+
+	const TCallbackItem ClientCallbackArray[] = {
+		{ "VLP", [=](auto &msgin, auto from, auto &netbase) { cbClientVerifyLoginPassword(msgin, from, netbase); } },
 		{ "CS", [=](auto &msgin, auto from, auto &netbase) { cbClientChooseShard(msgin, from, netbase); } },
 	};
-	ClientsServer->init(port);
 	ClientsServer->addCallbackArray(ClientCallbackArray, std::size(ClientCallbackArray));
 	ClientsServer->setConnectionCallback([=](auto from, auto arg) { cbClientConnection(from); }, nullptr);
 	ClientsServer->setDisconnectionCallback([=](auto from, auto arg) { cbClientDisconnection(from); }, nullptr);
@@ -425,6 +426,7 @@ void ConnectionClient::connectionClientInit()
 void ConnectionClient::connectionClientUpdate()
 {
 	nlassert(ClientsServer != 0);
+
 	try
 	{
 		ClientsServer->update();
@@ -438,12 +440,7 @@ void ConnectionClient::connectionClientUpdate()
 void ConnectionClient::connectionClientRelease()
 {
 	nlassert(ClientsServer != 0);
+
 	delete ClientsServer;
 	ClientsServer = 0;
-}
-
-void ConnectionClient::sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId)
-{
-	nlassert(ClientsServer != 0);
-	ClientsServer->send(msgout, sockId);
 }
