@@ -53,11 +53,6 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence)
-    : persistence(std::move(persistence)), ClientsServer(0)
-{
-	connectionClientInit();
-}
 //
 // Functions
 //
@@ -390,11 +385,9 @@ void ConnectionClient::cbWSShardChooseShard(CMessage &msgin, const std::string &
 //
 //
 
-void ConnectionClient::connectionClientInit()
+ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence)
+	: persistence(std::move(persistence)), m_ClientsServer(), ClientsServer(&m_ClientsServer)
 {
-	nlassert(ClientsServer == 0);
-
-	ClientsServer = new CCallbackServer();
 	nlassert(ClientsServer != 0);
 
 	uint16 port = (uint16)IService::getInstance()->ConfigFile.getVar("ClientsPort").asInt();
@@ -415,7 +408,7 @@ void ConnectionClient::connectionClientInit()
 	CUnifiedNetwork::getInstance()->addCallbackArray(WSCallbackArray, std::size(WSCallbackArray));
 }
 
-void ConnectionClient::connectionClientUpdate()
+void ConnectionClient::update()
 {
 	nlassert(ClientsServer != 0);
 
@@ -431,12 +424,7 @@ void ConnectionClient::connectionClientUpdate()
 
 ConnectionClient::~ConnectionClient()
 {
-	connectionClientRelease();
-}
-void ConnectionClient::connectionClientRelease()
-{
 	nlassert(ClientsServer != 0);
 
-	delete ClientsServer;
 	ClientsServer = 0;
 }

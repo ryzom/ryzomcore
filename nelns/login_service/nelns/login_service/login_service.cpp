@@ -87,7 +87,7 @@ bool CLoginService::update ()
 {
 	connectionWSUpdate ();
 	if(UseDirectClient)
-		m_connection_client->connectionClientUpdate ();
+		m_connection_client->update ();
 	else
 		connectionWebUpdate ();
 	return true;

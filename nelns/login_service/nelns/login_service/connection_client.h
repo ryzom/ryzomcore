@@ -34,13 +34,10 @@ public:
 
 	~ConnectionClient();
 
-	void connectionClientUpdate();
+	void update();
 	void sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId);
 
 private:
-	void connectionClientInit();
-	void connectionClientRelease();
-
 	void cbClientVerifyLoginPassword(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
 	void cbClientChooseShard(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
 	void cbClientConnection (NLNET::TSockId from);
@@ -49,6 +46,7 @@ private:
 	void cbWSShardChooseShard(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
 
 	std::shared_ptr<IPersistence> persistence;
+	NLNET::CCallbackServer m_ClientsServer;
 	NLNET::CCallbackServer *ClientsServer;
 
 };
