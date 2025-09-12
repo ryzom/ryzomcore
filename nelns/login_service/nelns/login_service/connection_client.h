@@ -32,7 +32,7 @@ class ConnectionClient
 public:
 	explicit ConnectionClient(std::shared_ptr<IPersistence> persistence);
 
-	~ConnectionClient();
+	~ConnectionClient() = default;
 
 	void update();
 	void sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId);
@@ -46,8 +46,7 @@ private:
 	void cbWSShardChooseShard(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
 
 	std::shared_ptr<IPersistence> persistence;
-	NLNET::CCallbackServer m_ClientsServer;
-	NLNET::CCallbackServer *ClientsServer;
+	NLNET::CCallbackServer ClientsServer;
 
 };
 

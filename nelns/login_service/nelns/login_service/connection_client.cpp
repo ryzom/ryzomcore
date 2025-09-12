@@ -59,8 +59,7 @@ using namespace NLNET;
 
 void ConnectionClient::sendToClient(CMessage &msgout, TSockId sockId)
 {
-	nlassert(ClientsServer != 0);
-	ClientsServer->send(msgout, sockId);
+	ClientsServer.send(msgout, sockId);
 }
 
 void string_escape(string &str)
@@ -280,16 +279,15 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 
 void ConnectionClient::cbClientConnection(TSockId from)
 {
-	const CInetAddress &ia = ClientsServer->hostAddress(from);
+	const CInetAddress &ia = ClientsServer.hostAddress(from);
 	nldebug("new client connection: %s", ia.asString().c_str());
 	Output->displayNL("CCC: Connection from %s", ia.asString().c_str());
-	ClientsServer->authorizeOnly("VLP", from);
+	ClientsServer.authorizeOnly("VLP", from);
 }
 
 void ConnectionClient::cbClientDisconnection(TSockId from)
 {
-	CCallbackNetBase *cnb = ClientsServer;
-	const CInetAddress &ia = cnb->hostAddress(from);
+	const CInetAddress &ia = ClientsServer.hostAddress(from);
 
 	nldebug("new client disconnection: %s", ia.asString().c_str());
 
@@ -374,11 +372,11 @@ void ConnectionClient::cbWSShardChooseShard(CMessage &msgin, const std::string &
 		string addr;
 		msgin.serial(addr);
 		msgout.serial(addr);
-		ClientsServer->send(msgout, (TSockId)cookie.getUserAddr()); // FIXME: 64-bit
+		ClientsServer.send(msgout, (TSockId)cookie.getUserAddr()); // FIXME: 64-bit
 		return;
 	}
 	msgout.serial(reason);
-	ClientsServer->send(msgout, (TSockId)cookie.getUserAddr()); // FIXME: 64-bit
+	ClientsServer.send(msgout, (TSockId)cookie.getUserAddr()); // FIXME: 64-bit
 }
 
 //
@@ -386,20 +384,18 @@ void ConnectionClient::cbWSShardChooseShard(CMessage &msgin, const std::string &
 //
 
 ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence)
-	: persistence(std::move(persistence)), m_ClientsServer(), ClientsServer(&m_ClientsServer)
+	: persistence(std::move(persistence))
 {
-	nlassert(ClientsServer != 0);
-
 	uint16 port = (uint16)IService::getInstance()->ConfigFile.getVar("ClientsPort").asInt();
-	ClientsServer->init(port);
+	ClientsServer.init(port);
 
 	const TCallbackItem ClientCallbackArray[] = {
 		{ "VLP", [=](auto &msgin, auto from, auto &netbase) { cbClientVerifyLoginPassword(msgin, from, netbase); } },
 		{ "CS", [=](auto &msgin, auto from, auto &netbase) { cbClientChooseShard(msgin, from, netbase); } },
 	};
-	ClientsServer->addCallbackArray(ClientCallbackArray, std::size(ClientCallbackArray));
-	ClientsServer->setConnectionCallback([=](auto from, auto arg) { cbClientConnection(from); }, nullptr);
-	ClientsServer->setDisconnectionCallback([=](auto from, auto arg) { cbClientDisconnection(from); }, nullptr);
+	ClientsServer.addCallbackArray(ClientCallbackArray, std::size(ClientCallbackArray));
+	ClientsServer.setConnectionCallback([=](auto from, auto arg) { cbClientConnection(from); }, nullptr);
+	ClientsServer.setDisconnectionCallback([=](auto from, auto arg) { cbClientDisconnection(from); }, nullptr);
 
 	// catch the messages from Welcome Service to know if the user can connect or not
 	const TUnifiedCallbackItem WSCallbackArray[] = {
@@ -410,21 +406,12 @@ ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence)
 
 void ConnectionClient::update()
 {
-	nlassert(ClientsServer != 0);
-
 	try
 	{
-		ClientsServer->update();
+		ClientsServer.update();
 	}
 	catch (Exception &e)
 	{
 		nlwarning("Error during update: '%s'", e.what());
 	}
-}
-
-ConnectionClient::~ConnectionClient()
-{
-	nlassert(ClientsServer != 0);
-
-	ClientsServer = 0;
 }
