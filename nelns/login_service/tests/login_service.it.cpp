@@ -123,6 +123,7 @@ class MockPersistence : public IPersistence
 public:
 	MOCK_METHOD(void, init, (), (override));
 
+	// user
 	MOCK_METHOD((std::pair<std::optional<LoginUserProjection>, std::string>), findUserByLogin, (const std::string &login), (override));
 
 	MOCK_METHOD(std::string, authorizeUser, (sint32 uid, const NLNET::CLoginCookie &cookie), (override));
@@ -135,7 +136,10 @@ public:
 
 	MOCK_METHOD((std::pair<std::optional<std::string>, std::string>), findUserLoginById, (const std::string& uid), (override));
 
+	MOCK_METHOD((std::pair<std::vector<NotOfflineUserProjection>, std::string>), findNotOfflineUsers, (), (override));
 
+
+	// shard
 	MOCK_METHOD((std::pair<std::vector<OnlineShardProjection>, std::string>), findOnlineShardsByApplication, (const std::string &application), (override));
 
 	MOCK_METHOD((std::pair<bool, std::string>), existsShardById, (const sint32& shardid), (override));
@@ -342,7 +346,6 @@ TEST_F(CLoginServiceIT, shouldReturnErrorWhenUserHasWrongAddressToSelectAShard)
 	EXPECT_CALL(*persistence, findAuthorizedUsers)
 	    .After(userAuthorized)
 	    .WillRepeatedly(Return(std::make_pair(std::vector { authorizedUser }, "")));
-	;
 	ASSERT_THAT(sendMessage<VLPResponse>("VLP", verifyLogin), Field("reason", &VLPResponse::reason, IsEmpty()));
 
 	sendMessage("CS", chooseShard);

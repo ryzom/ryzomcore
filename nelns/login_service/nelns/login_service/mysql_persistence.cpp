@@ -175,3 +175,33 @@ pair<optional<string>, string> CMysqlPersistence::findUserLoginById(const string
 
 	return std::make_pair(std::make_optional(row[0]), reason);
 }
+
+pair<vector<NotOfflineUserProjection>, string> CMysqlPersistence::findNotOfflineUsers()
+{
+	CMysqlResult result;
+	MYSQL_ROW row;
+	sint32 nbrow;
+	vector<NotOfflineUserProjection> users;
+	string reason = sqlQuery("select UId, State, Cookie from user where State!='Offline'", nbrow, row, result);
+	if (!reason.empty())
+	{
+		return std::make_pair(users, reason);
+	}
+
+	while (row != nullptr)
+	{
+		// serial the name of the shard
+		CLoginCookie cookie;
+		cookie.setFromString(row[2]);
+
+		users.push_back({
+			.uid = row[0],
+			.state = row[1],
+			.cookie = cookie
+		});
+		row = mysql_fetch_row(result);
+	}
+
+	return std::make_pair(users, "");
+}
+

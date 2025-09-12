@@ -41,6 +41,13 @@ struct AuthorizedUserProjection
 	std::string extendedPrivilege;
 };
 
+struct NotOfflineUserProjection
+{
+	std::string uid;
+	std::string state;
+	NLNET::CLoginCookie cookie;
+};
+
 struct OnlineShardProjection
 {
 	uint32 sid;
@@ -75,6 +82,8 @@ public:
 	virtual std::string updateUserWaitingOnShard(const std::string& uid, const sint32& shardid) = 0;
 
 	virtual std::pair<std::optional<std::string>, std::string> findUserLoginById(const std::string& uid) = 0;
+
+	virtual std::pair<std::vector<NotOfflineUserProjection>, std::string> findNotOfflineUsers() = 0;
 
 
 	virtual std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string& application) = 0;
