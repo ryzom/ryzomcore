@@ -22,9 +22,9 @@ using testing::IsEmpty;
 using testing::IsFalse;
 using testing::IsNull;
 using testing::IsTrue;
+using testing::NiceMock;
 using testing::Not;
 using testing::NotNull;
-using testing::NiceMock;
 using testing::Optional;
 using testing::Property;
 using testing::Return;
@@ -108,7 +108,7 @@ public:
 
 	MOCK_METHOD((std::pair<std::vector<OnlineShardProjection>, std::string>), findOnlineShardsByApplication, (const std::string &application), (override));
 
-	MOCK_METHOD((std::pair<std::optional<LoginUserProjection>, std::string>), createUser, (const std::string& login, const std::string& cpassword), (override));
+	MOCK_METHOD((std::pair<std::optional<LoginUserProjection>, std::string>), createUser, (const std::string &login, const std::string &cpassword), (override));
 };
 
 class CLoginServiceIT : public testing::Test
@@ -128,7 +128,7 @@ protected:
 		insertConfigVariable(loginService.ConfigFile, "UseDirectClient", true);
 		insertConfigVariable(loginService.ConfigFile, "AcceptUnknownUsers", 0);
 
-		loginService.init(); // requires database to start
+		loginService.init();
 
 		host.setPort(port);
 		client.connect(host);
@@ -139,6 +139,44 @@ protected:
 	{
 		running = false;
 		loginService.release();
+	}
+
+	template <typename RequestType>
+	void sendMessage(const std::string &key, RequestType &request)
+	{
+		ASSERT_THAT(client.connected(), IsTrue());
+		CMessage msgout(key);
+		msgout.serial(request);
+		client.send(msgout);
+	}
+
+	template <typename ResponseType, typename RequestType>
+	std::future<ResponseType> sendMessage(const std::string &key, RequestType &request)
+	{
+		return std::async(std::launch::async, [=, &request]() {
+			CMessage msgout(key);
+			msgout.serial(request);
+
+			bool pending = true;
+			ResponseType payload;
+			TCallbackItem callbackArray[] = {
+				{ key.c_str(), [&payload, &pending](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
+				     msgin.serial(payload);
+				     pending = false;
+				 } }
+			};
+			client.addCallbackArray(callbackArray, std::size(callbackArray));
+			client.send(msgout);
+
+			while (pending)
+			{
+				client.update();
+				loginService.update();
+				nlSleep(1);
+			}
+
+			return payload;
+		});
 	}
 };
 
@@ -160,11 +198,9 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 		.nbplayers = 111
 	};
 	EXPECT_CALL(*persistence, findUserByLogin)
-		.WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
+	    .WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
 	EXPECT_CALL(*persistence, findOnlineShardsByApplication)
-		.WillRepeatedly(Return(std::make_pair(std::vector{shard}, "")));
-	CMessage msgout("VLP");
-	msgout.serial(request);
+	    .WillRepeatedly(Return(std::make_pair(std::vector { shard }, "")));
 
 	std::promise<VLPResponse> response_promise;
 	std::future<VLPResponse> response = response_promise.get_future();
@@ -177,7 +213,7 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 	};
 	client.addCallbackArray(callbackArray, std::size(callbackArray));
 
-	client.send(msgout);
+	sendMessage("VLP", request);
 	auto update = std::async(std::launch::async, [=, &response]() {
 		while (response.valid() && running)
 		{
@@ -193,15 +229,7 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 	EXPECT_THAT(response.get(),
 	    AllOf(
 	        Field("reason", &VLPResponse::reason, IsEmpty()),
-	        Field("shards", &VLPResponse::shards, ElementsAre(
-	        	AllOf(
-	        		Field(&OnlineShardProjection::sid, Eq(shard.sid)),
-					Field(&OnlineShardProjection::name, Eq(shard.name)),
-					Field(&OnlineShardProjection::nbplayers, Eq(shard.nbplayers))
-	        	)
-	        ))
-	    )
-	);
+	        Field("shards", &VLPResponse::shards, ElementsAre(AllOf(Field(&OnlineShardProjection::sid, Eq(shard.sid)), Field(&OnlineShardProjection::name, Eq(shard.name)), Field(&OnlineShardProjection::nbplayers, Eq(shard.nbplayers)))))));
 }
 
 TEST_F(CLoginServiceIT, shouldReturrnErrorWhenUserDoesNotExist)
@@ -212,7 +240,7 @@ TEST_F(CLoginServiceIT, shouldReturrnErrorWhenUserDoesNotExist)
 		.application = "test-application"
 	};
 	EXPECT_CALL(*persistence, findUserByLogin)
-		.WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
+	    .WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
 	CMessage msgout("VLP");
 	msgout.serial(request);
 
@@ -257,11 +285,11 @@ TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
 		.state = "Offline"
 	};
 	EXPECT_CALL(*persistence, findUserByLogin)
-		.Times(1)
-		.WillOnce(Return(std::make_pair(std::nullopt, "")));
+	    .Times(1)
+	    .WillOnce(Return(std::make_pair(std::nullopt, "")));
 	Expectation userCreated = EXPECT_CALL(*persistence, createUser)
-		.WillOnce(Return(std::make_pair(std::make_optional(user), "")))
-		.WillRepeatedly(Return(std::make_pair(std::nullopt, "mock: user already created")));
+	                              .WillOnce(Return(std::make_pair(std::make_optional(user), "")))
+	                              .WillRepeatedly(Return(std::make_pair(std::nullopt, "mock: user already created")));
 	CMessage msgout("VLP");
 	msgout.serial(request);
 
