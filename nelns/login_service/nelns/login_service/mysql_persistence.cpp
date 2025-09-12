@@ -162,6 +162,10 @@ string CMysqlPersistence::logoutUserById(const string& uid) {
 	return sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where UId=" + uid);
 }
 
+string CMysqlPersistence::logoutUserByCookie(const CLoginCookie& cookie) {
+	return sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where Cookie='" + cookie.setToString() + "'");
+}
+
 pair<optional<string>, string> CMysqlPersistence::findUserLoginById(const string& uid) {
 	CMysqlResult result;
 	MYSQL_ROW row;

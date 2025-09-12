@@ -38,11 +38,13 @@ public:
 
 	std::pair<std::vector<AuthorizedUserProjection>, std::string> findAuthorizedUsers() override;
 
-	std::string updateUserWaitingOnShard(const std::string &uid, const sint32 &shardid);
+	std::string updateUserWaitingOnShard(const std::string &uid, const sint32 &shardid) override;
 
-	std::string logoutUserById(const std::string &uid);
+	std::string logoutUserById(const std::string &uid) override;
 
-	std::pair<std::optional<std::string>, std::string> findUserLoginById(const std::string &uid);
+	std::string logoutUserByCookie(const NLNET::CLoginCookie& cookie) override;
+
+	std::pair<std::optional<std::string>, std::string> findUserLoginById(const std::string &uid) override;
 
 	std::pair<std::vector<NotOfflineUserProjection>, std::string> findNotOfflineUsers() override;
 

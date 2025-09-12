@@ -136,6 +136,8 @@ public:
 
 	MOCK_METHOD(std::string, logoutUserById, (const std::string& uid), (override));
 
+	MOCK_METHOD(std::string, logoutUserByCookie, (const NLNET::CLoginCookie &cookie), (override));
+
 	MOCK_METHOD((std::pair<std::optional<std::string>, std::string>), findUserLoginById, (const std::string& uid), (override));
 
 	MOCK_METHOD((std::pair<std::vector<NotOfflineUserProjection>, std::string>), findNotOfflineUsers, (), (override));
@@ -172,7 +174,9 @@ protected:
 		.name = ucstring::makeFromUtf8("test shard"),
 		.nbplayers = 111
 	};
-	CSRequest chooseShard {};
+	CSRequest chooseShard {
+		.shardid = 456
+	};
 	AuthorizedUserProjection authorizedUser {
 		.uid = "test user id",
 		.cookie = NLNET::CLoginCookie(),

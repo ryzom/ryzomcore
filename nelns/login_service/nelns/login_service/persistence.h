@@ -83,6 +83,8 @@ public:
 
 	virtual std::string logoutUserById(const std::string& uid) = 0;
 
+	virtual std::string logoutUserByCookie(const NLNET::CLoginCookie& cookie) = 0;
+
 	virtual std::pair<std::optional<std::string>, std::string> findUserLoginById(const std::string& uid) = 0;
 
 	virtual std::pair<std::vector<NotOfflineUserProjection>, std::string> findNotOfflineUsers() = 0;

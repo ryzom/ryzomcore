@@ -330,7 +330,7 @@ void ConnectionClient::cbWSShardChooseShard(CMessage &msgin, const std::string &
 		if (!reason.empty())
 		{
 			nldebug("SCS from WS failed: %s", reason.c_str());
-			sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where Cookie='" + cookie.setToString() + "'");
+			persistence.logoutUserByCookie(cookie);
 			break;
 		}
 
