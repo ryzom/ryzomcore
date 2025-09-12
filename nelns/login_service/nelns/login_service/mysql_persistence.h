@@ -40,6 +40,8 @@ public:
 
 	std::string updateUserWaitingOnShard(const std::string &uid, const sint32 &shardid);
 
+	std::string logoutUserById(const std::string &uid);
+
 	std::pair<std::optional<std::string>, std::string> findUserLoginById(const std::string &uid);
 
 	std::pair<std::vector<NotOfflineUserProjection>, std::string> findNotOfflineUsers() override;

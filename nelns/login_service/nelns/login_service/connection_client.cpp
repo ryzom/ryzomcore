@@ -284,35 +284,31 @@ void ConnectionClient::cbClientDisconnection(TSockId from)
 
 	nldebug("new client disconnection: %s", ia.asString().c_str());
 
-	string reason;
+	auto users = persistence.findNotOfflineUsers();
+	string reason = users.second;
+	if (!reason.empty()) {
+		nlerror("cannot get user to disconnect: %s", reason.c_str());
+	}
 
-	CMysqlResult result;
-	MYSQL_ROW row;
-	sint32 nbrow;
-	reason = sqlQuery("select UId, State, Cookie from user where State!='Offline'", nbrow, row, result);
-	if (!reason.empty()) return;
-
-	if (nbrow == 0)
+	if (users.first.empty())
 	{
 		return;
 	}
 
-	while (row != 0)
+	for (const auto& user : users.first)
 	{
-		CLoginCookie lc;
-		string str = row[2];
-		if (!str.empty())
+		if (user.cookie.isValid())
 		{
-			lc.setFromString(str);
-			if (lc.getUserAddr() == (uint32)(uintptr_t)from)
+			if (user.cookie.getUserAddr() == (uint32)(uintptr_t)from)
 			{
 				// got it, if he is not in waiting state, it s not normal, remove all
-				if (row[1] == string("Authorized"))
-					sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where UId=" + string(row[0]));
+				if (user.state == string("Authorized"))
+				{
+					persistence.logoutUserById(user.uid);
+				}
 				return;
 			}
 		}
-		row = mysql_fetch_row(result);
 	}
 }
 

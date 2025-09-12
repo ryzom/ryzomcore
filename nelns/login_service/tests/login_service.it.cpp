@@ -134,6 +134,8 @@ public:
 
 	MOCK_METHOD(std::string, updateUserWaitingOnShard, (const std::string& uid, const sint32& shardid), (override));
 
+	MOCK_METHOD(std::string, logoutUserById, (const std::string& uid), (override));
+
 	MOCK_METHOD((std::pair<std::optional<std::string>, std::string>), findUserLoginById, (const std::string& uid), (override));
 
 	MOCK_METHOD((std::pair<std::vector<NotOfflineUserProjection>, std::string>), findNotOfflineUsers, (), (override));

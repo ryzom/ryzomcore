@@ -158,6 +158,10 @@ string CMysqlPersistence::updateUserWaitingOnShard(const string& uid, const sint
 	return sqlQuery("update user set State='Waiting', ShardId=" + toString(shardid) + " where UId=" + uid);
 }
 
+string CMysqlPersistence::logoutUserById(const string& uid) {
+	return sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where UId=" + uid);
+}
+
 pair<optional<string>, string> CMysqlPersistence::findUserLoginById(const string& uid) {
 	CMysqlResult result;
 	MYSQL_ROW row;
