@@ -290,11 +290,10 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 
 void ConnectionClient::cbClientConnection(TSockId from)
 {
-	CCallbackNetBase *cnb = ClientsServer;
-	const CInetAddress &ia = cnb->hostAddress(from);
+	const CInetAddress &ia = ClientsServer->hostAddress(from);
 	nldebug("new client connection: %s", ia.asString().c_str());
 	Output->displayNL("CCC: Connection from %s", ia.asString().c_str());
-	cnb->authorizeOnly("VLP", from);
+	ClientsServer->authorizeOnly("VLP", from);
 }
 
 void ConnectionClient::cbClientDisconnection(TSockId from)
@@ -395,7 +394,6 @@ static void cbWSShardChooseShard(CMessage &msgin, const std::string &serviceName
 static const TUnifiedCallbackItem WSCallbackArray[] = {
 	{ "SCS", cbWSShardChooseShard },
 };
-
 
 //
 //
