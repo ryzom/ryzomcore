@@ -23,8 +23,10 @@ using testing::IsNull;
 using testing::IsTrue;
 using testing::Not;
 using testing::NotNull;
+using testing::NiceMock;
 using testing::Optional;
 using testing::Property;
+using testing::Return;
 using testing::SizeIs;
 using testing::StrEq;
 
@@ -97,31 +99,19 @@ void insertConfigVariable(NLMISC::CConfigFile &configFile, const std::string &na
 class MockPersistence : public IPersistence
 {
 public:
-	void init() override { }
+	MOCK_METHOD(void, init, (), (override));
 
-	std::pair<std::optional<LoginUserProjection>, std::string> findUserByLogin(const std::string &login) override
-	{
-		return std::make_pair(user, reason);
-	}
+	MOCK_METHOD((std::pair<std::optional<LoginUserProjection>, std::string>), findUserByLogin, (const std::string &login), (override));
 
-	std::string authorizeUser(sint32 uid, const NLNET::CLoginCookie &cookie) override
-	{
-		return reason;
-	}
-	std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string &application) override
-	{
-		return std::make_pair(shards, reason);
-	}
+	MOCK_METHOD(std::string, authorizeUser, (sint32 uid, const NLNET::CLoginCookie &cookie), (override));
 
-	std::optional<LoginUserProjection> user = std::nullopt;
-	std::string reason;
-	std::vector<OnlineShardProjection> shards;
+	MOCK_METHOD((std::pair<std::vector<OnlineShardProjection>, std::string>), findOnlineShardsByApplication, (const std::string &application), (override));
 };
 
 class CLoginServiceIT : public testing::Test
 {
 protected:
-	std::shared_ptr<MockPersistence> persistence = std::make_shared<MockPersistence>();
+	std::shared_ptr<NiceMock<MockPersistence>> persistence = std::make_shared<NiceMock<MockPersistence>>();
 	CLoginService loginService = CLoginService(persistence);
 	CCallbackClient client;
 	CInetHost host = CInetHost("localhost");
@@ -133,7 +123,7 @@ protected:
 	{
 		insertConfigVariable(loginService.ConfigFile, "ClientsPort", port);
 		insertConfigVariable(loginService.ConfigFile, "UseDirectClient", true);
-		insertConfigVariable(loginService.ConfigFile, "AcceptUnknownUsers", false);
+		insertConfigVariable(loginService.ConfigFile, "AcceptUnknownUsers", 0);
 
 		loginService.init(); // requires database to start
 
@@ -166,8 +156,10 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 		.name = ucstring::makeFromUtf8("test shard"),
 		.nbplayers = 111
 	};
-	persistence->user = user;
-	persistence->shards.push_back(shard);
+	EXPECT_CALL(*persistence, findUserByLogin)
+		.WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
+	EXPECT_CALL(*persistence, findOnlineShardsByApplication)
+		.WillRepeatedly(Return(std::make_pair(std::vector{shard}, "")));
 	CMessage msgout("VLP");
 	msgout.serial(request);
 
@@ -216,7 +208,8 @@ TEST_F(CLoginServiceIT, shouldReturrnErrorWhenUserDoesNotExist)
 		.cpassword = "test password",
 		.application = "test-application"
 	};
-	persistence->user = std::nullopt;
+	EXPECT_CALL(*persistence, findUserByLogin)
+		.WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
 	CMessage msgout("VLP");
 	msgout.serial(request);
 
@@ -245,4 +238,44 @@ TEST_F(CLoginServiceIT, shouldReturrnErrorWhenUserDoesNotExist)
 	running = false;
 	ASSERT_THAT(state, Eq(std::future_status::ready));
 	EXPECT_THAT(response.get(), Field("reason", &VLPResponse::reason, StrEq("Login 'test-login' doesn't exist")));
+}
+
+TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
+{
+	loginService.ConfigFile.getVar("AcceptUnknownUsers").setAsInt(1);
+	VLPRequest request {
+		.login = ucstring::makeFromUtf8("test-login"),
+		.cpassword = "test password",
+		.application = "test-application"
+	};
+	EXPECT_CALL(*persistence, findUserByLogin)
+		.WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
+	CMessage msgout("VLP");
+	msgout.serial(request);
+
+	std::promise<VLPResponse> response_promise;
+	std::future<VLPResponse> response = response_promise.get_future();
+	TCallbackItem callbackArray[] = {
+		{ "VLP", [&response_promise](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
+		     VLPResponse response;
+		     msgin.serial(response);
+		     response_promise.set_value(response);
+		 } }
+	};
+	client.addCallbackArray(callbackArray, std::size(callbackArray));
+
+	client.send(msgout);
+	auto update = std::async(std::launch::async, [=, &response]() {
+		while (response.valid() && running)
+		{
+			client.update();
+			loginService.update();
+			nlSleep(1);
+		}
+	});
+
+	auto state = response.wait_for(defaultTimeout);
+	running = false;
+	ASSERT_THAT(state, Eq(std::future_status::ready));
+	EXPECT_THAT(response.get(), Field("reason", &VLPResponse::reason, IsEmpty()));
 }
