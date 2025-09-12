@@ -195,7 +195,7 @@ protected:
 	}
 };
 
-TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
+TEST_F(CLoginServiceIT, shouldReturnAvaialbleShardsOnSuccessfulLogin)
 {
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
