@@ -183,9 +183,6 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 
 	breakable
 	{
-		CMysqlResult result;
-		MYSQL_ROW row;
-		sint32 nbrow;
 		auto users = persistence.findAuthorizedUsers();
 		reason = users.second;
 		if (!reason.empty()) break;
@@ -197,16 +194,21 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 		}
 
 		bool ok = false;
-		while (row != 0)
+		CLoginCookie cookie;
+		string uid;
+		string priv;
+		string expriv;
+		for (auto user : users.first)
 		{
-			CLoginCookie lc;
-			lc.setFromString(row[1]);
-			if (lc.getUserAddr() == (uint32)(uintptr_t)from)
+			if (user.cookie.getUserAddr() == (uint32)(uintptr_t)from)
 			{
 				ok = true;
+				uid = user.uid;
+				cookie = user.cookie;
+				priv = user.privilege;
+				expriv = user.extendedPrivilege;
 				break;
 			}
-			row = mysql_fetch_row(result);
 		}
 
 		if (!ok)
@@ -214,11 +216,6 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 			reason = "You are not authorized to select a shard";
 			break;
 		}
-
-		string uid = row[0];
-		string cookie = row[1];
-		string priv = row[2];
-		string expriv = row[3];
 
 		// it is ok, so we find the wanted shard
 		sint32 shardid;
@@ -242,24 +239,23 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 		}
 		TServiceId sid = Shards[s].SId;
 
-		reason = sqlQuery("update user set State='Waiting', ShardId=" + toString(shardid) + " where UId=" + uid);
+		reason = persistence.updateUserWaitingOnShard(uid, shardid);
 		if (!reason.empty()) break;
 
-		reason = sqlQuery("select Login from user where UId=" + uid, nbrow, row, result);
+		auto maybeUserLogin = persistence.findUserLoginById(uid);
+		reason = maybeUserLogin.second;
 		if (!reason.empty()) break;
 
-		if (nbrow == 0)
+		if (!maybeUserLogin.first.has_value())
 		{
 			reason = "Cannot retrieve the username";
 			break;
 		}
 
-		string name = row[0];
+		string name = maybeUserLogin.first.value();
 
-		CLoginCookie lc;
-		lc.setFromString(cookie);
 		CMessage msgout("CS");
-		msgout.serial(lc, name, priv, expriv);
+		msgout.serial(cookie, name, priv, expriv);
 		CUnifiedNetwork::getInstance()->send(sid, msgout);
 
 		return;

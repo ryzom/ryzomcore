@@ -153,3 +153,25 @@ pair<bool, string> CMysqlPersistence::existsShardById(const sint32& shardid) {
 
 	return std::make_pair(nbrow != 0, reason);
 }
+
+string CMysqlPersistence::updateUserWaitingOnShard(const string& uid, const sint32& shardid) {
+	return sqlQuery("update user set State='Waiting', ShardId=" + toString(shardid) + " where UId=" + uid);
+}
+
+pair<optional<string>, string> CMysqlPersistence::findUserLoginById(const string& uid) {
+	CMysqlResult result;
+	MYSQL_ROW row;
+	sint32 nbrow;
+	string reason = sqlQuery("select Login from user where UId=" + uid, nbrow, row, result);
+	if (!reason.empty())
+	{
+		return std::make_pair(std::nullopt, reason);
+	}
+
+	if (nbrow == 0)
+	{
+		return std::make_pair(std::nullopt, reason);
+	}
+
+	return std::make_pair(std::make_optional(row[0]), reason);
+}

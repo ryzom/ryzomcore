@@ -72,6 +72,11 @@ public:
 
 	virtual std::pair<std::vector<AuthorizedUserProjection>, std::string> findAuthorizedUsers() = 0;
 
+	virtual std::string updateUserWaitingOnShard(const std::string& uid, const sint32& shardid) = 0;
+
+	virtual std::pair<std::optional<std::string>, std::string> findUserLoginById(const std::string& uid) = 0;
+
+
 	virtual std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string& application) = 0;
 
 	virtual std::pair<bool, std::string> existsShardById(const sint32& shardid) = 0;

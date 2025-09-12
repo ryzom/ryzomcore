@@ -38,6 +38,10 @@ public:
 
 	std::pair<std::vector<AuthorizedUserProjection>, std::string> findAuthorizedUsers() override;
 
+	std::string updateUserWaitingOnShard(const std::string& uid, const sint32& shardid);
+
+	std::pair<std::optional<std::string>, std::string> findUserLoginById(const std::string& uid);
+
 	std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string &application) override;
 
 	std::pair<bool, std::string> existsShardById(const sint32& shardid) override;

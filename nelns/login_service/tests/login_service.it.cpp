@@ -131,6 +131,11 @@ public:
 
 	MOCK_METHOD((std::pair<std::vector<AuthorizedUserProjection>, std::string>), findAuthorizedUsers, (), (override));
 
+	MOCK_METHOD(std::string, updateUserWaitingOnShard, (const std::string& uid, const sint32& shardid), (override));
+
+	MOCK_METHOD((std::pair<std::optional<std::string>, std::string>), findUserLoginById, (const std::string& uid), (override));
+
+
 	MOCK_METHOD((std::pair<std::vector<OnlineShardProjection>, std::string>), findOnlineShardsByApplication, (const std::string &application), (override));
 
 	MOCK_METHOD((std::pair<bool, std::string>), existsShardById, (const sint32& shardid), (override));
@@ -163,6 +168,12 @@ protected:
 		.nbplayers = 111
 	};
 	CSRequest chooseShard {};
+	AuthorizedUserProjection authorizedUser {
+		.uid = "test user id",
+		.cookie = NLNET::CLoginCookie(),
+		.privilege = "test privilege",
+		.extendedPrivilege = "test extended privilege",
+	};
 
 	void SetUp() override
 	{
@@ -303,7 +314,7 @@ TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
 	EXPECT_THAT(response, Field("reason", &VLPResponse::reason, IsEmpty()));
 }
 
-TEST_F(CLoginServiceIT, shouldReturnErrorWhenNotAuthorizedToSelectAShard)
+TEST_F(CLoginServiceIT, shouldReturnErrorWhenNoAuthorizedUserExistsToSelectAShard)
 {
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
@@ -312,6 +323,26 @@ TEST_F(CLoginServiceIT, shouldReturnErrorWhenNotAuthorizedToSelectAShard)
 	Expectation userAuthorized = EXPECT_CALL(*persistence, authorizeUser);
 	EXPECT_CALL(*persistence, findAuthorizedUsers)
 	    .After(userAuthorized);
+	ASSERT_THAT(sendMessage<VLPResponse>("VLP", verifyLogin), Field("reason", &VLPResponse::reason, IsEmpty()));
+
+	sendMessage("CS", chooseShard);
+	auto response = receiveMessage<SCSResponse>("SCS");
+
+	EXPECT_THAT(response, Field("reason", &SCSResponse::reason, StrEq("You are not authorized to select a shard")));
+}
+
+TEST_F(CLoginServiceIT, shouldReturnErrorWhenUserHasWrongAddressToSelectAShard)
+{
+	authorizedUser.cookie.setFromString("00112233|44556677|8899aabb");
+	EXPECT_CALL(*persistence, findUserByLogin)
+	    .WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
+	EXPECT_CALL(*persistence, findOnlineShardsByApplication)
+	    .WillRepeatedly(Return(std::make_pair(std::vector { shard }, "")));
+	Expectation userAuthorized = EXPECT_CALL(*persistence, authorizeUser);
+	EXPECT_CALL(*persistence, findAuthorizedUsers)
+	    .After(userAuthorized)
+	    .WillRepeatedly(Return(std::make_pair(std::vector { authorizedUser }, "")));
+	;
 	ASSERT_THAT(sendMessage<VLPResponse>("VLP", verifyLogin), Field("reason", &VLPResponse::reason, IsEmpty()));
 
 	sendMessage("CS", chooseShard);
