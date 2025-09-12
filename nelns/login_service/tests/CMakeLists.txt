@@ -1,7 +1,7 @@
-add_test_executable(nelns_login_service_it
-        login_service.it.cpp
+add_test_executable(nelns_login_service_client_connection_it
+        login_service_client_connection.it.cpp
 )
-target_link_libraries(nelns_login_service_it
+target_link_libraries(nelns_login_service_client_connection_it
         PRIVATE
         nelns::ls
 )

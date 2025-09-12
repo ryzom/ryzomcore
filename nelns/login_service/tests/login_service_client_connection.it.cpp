@@ -149,7 +149,7 @@ public:
 	MOCK_METHOD((std::pair<bool, std::string>), existsShardById, (const sint32& shardid), (override));
 };
 
-class CLoginServiceIT : public testing::Test
+class CLoginService_ClientConnectionIT : public testing::Test
 {
 protected:
 	std::shared_ptr<NiceMock<MockPersistence>> persistence = std::make_shared<NiceMock<MockPersistence>>();
@@ -282,7 +282,7 @@ protected:
 	}
 };
 
-TEST_F(CLoginServiceIT, shouldReturnAvaialbleShardsOnSuccessfulLogin)
+TEST_F(CLoginService_ClientConnectionIT, shouldReturnAvaialbleShardsOnSuccessfulLogin)
 {
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
@@ -297,7 +297,7 @@ TEST_F(CLoginServiceIT, shouldReturnAvaialbleShardsOnSuccessfulLogin)
 	        Field("shards", &VLPResponse::shards, ElementsAre(AllOf(Field(&OnlineShardProjection::sid, Eq(shard.sid)), Field(&OnlineShardProjection::name, Eq(shard.name)), Field(&OnlineShardProjection::nbplayers, Eq(shard.nbplayers)))))));
 }
 
-TEST_F(CLoginServiceIT, shouldReturnErrorWhenUserDoesNotExist)
+TEST_F(CLoginService_ClientConnectionIT, shouldReturnErrorWhenUserDoesNotExist)
 {
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
@@ -307,7 +307,7 @@ TEST_F(CLoginServiceIT, shouldReturnErrorWhenUserDoesNotExist)
 	EXPECT_THAT(response, Field("reason", &VLPResponse::reason, StrEq("Login 'test-login' doesn't exist")));
 }
 
-TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
+TEST_F(CLoginService_ClientConnectionIT, shouldAcceptUnknownUsersIfEnabled)
 {
 	loginService.ConfigFile.getVar("AcceptUnknownUsers").setAsInt(1);
 	EXPECT_CALL(*persistence, findUserByLogin)
@@ -322,7 +322,7 @@ TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
 	EXPECT_THAT(response, Field("reason", &VLPResponse::reason, IsEmpty()));
 }
 
-TEST_F(CLoginServiceIT, shouldReturnErrorWhenNoAuthorizedUserExistsToSelectAShard)
+TEST_F(CLoginService_ClientConnectionIT, shouldReturnErrorWhenNoAuthorizedUserExistsToSelectAShard)
 {
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
@@ -339,7 +339,7 @@ TEST_F(CLoginServiceIT, shouldReturnErrorWhenNoAuthorizedUserExistsToSelectAShar
 	EXPECT_THAT(response, Field("reason", &SCSResponse::reason, StrEq("You are not authorized to select a shard")));
 }
 
-TEST_F(CLoginServiceIT, shouldReturnErrorWhenUserHasWrongAddressToSelectAShard)
+TEST_F(CLoginService_ClientConnectionIT, shouldReturnErrorWhenUserHasWrongAddressToSelectAShard)
 {
 	authorizedUser.cookie.setFromString("00112233|44556677|8899aabb");
 	EXPECT_CALL(*persistence, findUserByLogin)
