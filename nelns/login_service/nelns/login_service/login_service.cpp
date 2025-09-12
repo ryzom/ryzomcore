@@ -22,8 +22,6 @@
 #include <nel/net/service.h>
 #include <nel/net/login_cookie.h>
 
-#include <nelns/login_service/connection_client.h>
-#include <nelns/login_service/connection_ws.h>
 #include <nelns/login_service/connection_web.h>
 #include <nelns/login_service/functions.h>
 #include <nelns/login_service/variables.h>
@@ -69,7 +67,7 @@ void CLoginService::init ()
 	// Initialize the database access
 	m_persistence->init();
 
-	connectionWSInit ();
+	m_connection_ws = std::make_unique<ConnectionWS>();
 
 	if(UseDirectClient)
 	{
@@ -85,7 +83,7 @@ void CLoginService::init ()
 
 bool CLoginService::update ()
 {
-	connectionWSUpdate ();
+	m_connection_ws->update ();
 	if(UseDirectClient)
 		m_connection_client->update ();
 	else
@@ -96,7 +94,7 @@ bool CLoginService::update ()
 /// release the service, save the universal time
 void CLoginService::release ()
 {
-	connectionWSRelease ();
+	m_connection_ws = nullptr;
 	if(UseDirectClient)
 		m_connection_client = nullptr;
 	else

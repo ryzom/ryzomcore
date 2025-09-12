@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/misc/types_nl.h"
+#include <nelns/login_service/connection_ws.h>
 
 #include <cstdio>
 #include <ctype.h>
@@ -607,7 +607,16 @@ static const TUnifiedCallbackItem WSCallbackArray[] =
 //
 // Functions
 //
+void connectionWSInit();
+void connectionWSUpdate();
+void connectionWSRelease();
 
+ConnectionWS::ConnectionWS()
+    : NbPlayers(0)
+    , RecordNbPlayers(0)
+{
+	::connectionWSInit();
+}
 void connectionWSInit ()
 {
 	CUnifiedNetwork::getInstance ()->addCallbackArray (WSCallbackArray, sizeof(WSCallbackArray)/sizeof(WSCallbackArray[0]));
@@ -616,10 +625,17 @@ void connectionWSInit ()
 	CUnifiedNetwork::getInstance ()->setServiceDownCallback ("WS", cbWSDisconnection);
 }
 
+void ConnectionWS::update()
+{
+	::connectionWSUpdate();
+}
 void connectionWSUpdate ()
 {
 }
-
+ConnectionWS::~ConnectionWS()
+{
+	::connectionWSRelease();
+}
 void connectionWSRelease ()
 {
 	nlinfo ("I'm going down, clean the database");

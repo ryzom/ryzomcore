@@ -17,15 +17,27 @@
 #ifndef NL_CONNECTION_WS_H
 #define NL_CONNECTION_WS_H
 
-#include "nel/misc/types_nl.h"
-#include "nel/net/callback_server.h"
+#include <nel/misc/types_nl.h>
+#include <nel/net/callback_server.h>
 
-//extern NLNET::CCallbackServer *WSServer;
+// extern NLNET::CCallbackServer *WSServer;
 extern uint NbPlayers;
 
-void connectionWSInit ();
-void connectionWSUpdate ();
-void connectionWSRelease ();
+class ConnectionWS
+{
+public:
+	ConnectionWS();
+
+	~ConnectionWS();
+
+	void init();
+	void update();
+	void release();
+
+private:
+	uint NbPlayers;
+	uint RecordNbPlayers;
+};
 
 #endif // NL_CONNECTION_WS_H
 
