@@ -22,6 +22,7 @@
 using NLMISC::toString;
 using std::optional;
 using std::pair;
+using std::vector;
 using std::string;
 
 void CMysqlPersistence::init()
@@ -29,7 +30,7 @@ void CMysqlPersistence::init()
 	sqlInit();
 }
 
-std::pair<std::optional<LoginUserProjection>, std::string> CMysqlPersistence::findUserByLogin(const std::string &login)
+pair<optional<LoginUserProjection>, string> CMysqlPersistence::findUserByLogin(const string &login)
 {
 	CMysqlResult result;
 	MYSQL_ROW row;
@@ -61,12 +62,12 @@ std::pair<std::optional<LoginUserProjection>, std::string> CMysqlPersistence::fi
 	return std::make_pair(std::make_optional(user), "");
 }
 
-std::string CMysqlPersistence::authorizeUser(sint32 uid, const NLNET::CLoginCookie &cookie)
+string CMysqlPersistence::authorizeUser(sint32 uid, const NLNET::CLoginCookie &cookie)
 {
 	return sqlQuery("update user set state='Authorized', Cookie='" + cookie.setToString() + "' where UId=" + toString(uid));
 }
 
-std::pair<std::vector<OnlineShardProjection>, std::string> CMysqlPersistence::findOnlineShardsByApplication(const string &application)
+pair<vector<OnlineShardProjection>, string> CMysqlPersistence::findOnlineShardsByApplication(const string &application)
 {
 	CMysqlResult result;
 	MYSQL_ROW row;
@@ -93,4 +94,13 @@ std::pair<std::vector<OnlineShardProjection>, std::string> CMysqlPersistence::fi
 	}
 
 	return std::make_pair(shards, "");
+}
+
+string CMysqlPersistence::createUser(const std::string& login, const std::string& cpassword)
+{
+	CMysqlResult result;
+	MYSQL_ROW row;
+	sint32 nbrow;
+
+	return sqlQuery("insert into user (Login, Password) values ('" + login + "', '" + cpassword + "')", nbrow, row, result);
 }

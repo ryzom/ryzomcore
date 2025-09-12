@@ -15,6 +15,7 @@
 using testing::AllOf;
 using testing::ElementsAre;
 using testing::Eq;
+using testing::Expectation;
 using testing::Field;
 using testing::FieldsAre;
 using testing::IsEmpty;
@@ -106,6 +107,8 @@ public:
 	MOCK_METHOD(std::string, authorizeUser, (sint32 uid, const NLNET::CLoginCookie &cookie), (override));
 
 	MOCK_METHOD((std::pair<std::vector<OnlineShardProjection>, std::string>), findOnlineShardsByApplication, (const std::string &application), (override));
+
+	MOCK_METHOD(std::string, createUser, (const std::string& login, const std::string& cpassword), (override));
 };
 
 class CLoginServiceIT : public testing::Test
@@ -248,8 +251,19 @@ TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
 		.cpassword = "test password",
 		.application = "test-application"
 	};
+	LoginUserProjection user {
+		.uid = 123,
+		.password = request.cpassword,
+		.state = "Offline"
+	};
 	EXPECT_CALL(*persistence, findUserByLogin)
-		.WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
+		.WillOnce(Return(std::make_pair(std::nullopt, "")));
+	Expectation userCreated = EXPECT_CALL(*persistence, createUser)
+		.WillOnce(Return(""))
+		.WillRepeatedly(Return("mock: user already created"));
+	EXPECT_CALL(*persistence, findUserByLogin)
+		.After(userCreated)
+		.WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
 	CMessage msgout("VLP");
 	msgout.serial(request);
 
