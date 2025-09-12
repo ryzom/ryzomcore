@@ -67,7 +67,7 @@ void refuseShard (TServiceId sid, const char *format, ...)
 	CUnifiedNetwork::getInstance ()->send (sid, msgout);
 }
 
-static void cbWSConnection (const std::string &serviceName, TServiceId sid, void *arg)
+void ConnectionWS::cbWSConnection(const std::string &serviceName, TServiceId sid, void *arg)
 {
 	TSockId from;
 	CCallbackNetBase *cnb = CUnifiedNetwork::getInstance ()->getNetBase (sid, from);
@@ -101,7 +101,7 @@ static void cbWSConnection (const std::string &serviceName, TServiceId sid, void
 	}
 }
 
-static void cbWSDisconnection (const std::string &serviceName, TServiceId sid, void *arg)
+void ConnectionWS::cbWSDisconnection (const std::string &serviceName, TServiceId sid, void *arg)
 {
 	TSockId from;
 	CCallbackNetBase *cnb = CUnifiedNetwork::getInstance ()->getNetBase (sid, from);
@@ -607,36 +607,22 @@ static const TUnifiedCallbackItem WSCallbackArray[] =
 //
 // Functions
 //
-void connectionWSInit();
-void connectionWSUpdate();
-void connectionWSRelease();
 
 ConnectionWS::ConnectionWS()
     : NbPlayers(0)
     , RecordNbPlayers(0)
 {
-	::connectionWSInit();
-}
-void connectionWSInit ()
-{
-	CUnifiedNetwork::getInstance ()->addCallbackArray (WSCallbackArray, sizeof(WSCallbackArray)/sizeof(WSCallbackArray[0]));
-	
-	CUnifiedNetwork::getInstance ()->setServiceUpCallback ("WS", cbWSConnection);
-	CUnifiedNetwork::getInstance ()->setServiceDownCallback ("WS", cbWSDisconnection);
+	CUnifiedNetwork::getInstance ()->addCallbackArray (WSCallbackArray, std::size(WSCallbackArray));
+
+	CUnifiedNetwork::getInstance ()->setServiceUpCallback ("WS", [=](auto &serviceName, const auto& sid, auto *arg) { cbWSConnection(serviceName, sid, arg); });
+	CUnifiedNetwork::getInstance ()->setServiceDownCallback ("WS", [=](auto &serviceName, const auto& sid, auto *arg) { cbWSDisconnection(serviceName, sid, arg); });
 }
 
 void ConnectionWS::update()
 {
-	::connectionWSUpdate();
 }
-void connectionWSUpdate ()
-{
-}
+
 ConnectionWS::~ConnectionWS()
-{
-	::connectionWSRelease();
-}
-void connectionWSRelease ()
 {
 	nlinfo ("I'm going down, clean the database");
 
