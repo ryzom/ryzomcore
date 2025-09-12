@@ -44,6 +44,11 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
+//
+// Variables
+//
+
+uint NbPlayers = 0;
 
 //
 // Functions
@@ -591,8 +596,7 @@ void ConnectionWS::cbWSSetShardOpen(CMessage &msgin, const std::string &serviceN
 //
 
 ConnectionWS::ConnectionWS()
-    : NbPlayers(0)
-    , RecordNbPlayers(0)
+    : RecordNbPlayers(0)
 {
 	const TUnifiedCallbackItem WSCallbackArray[] =
 	{

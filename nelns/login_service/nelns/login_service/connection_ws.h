@@ -21,6 +21,7 @@
 #include <nel/net/message.h>
 #include <nel/net/unified_network.h>
 
+extern uint NbPlayers;
 
 class ConnectionWS
 {
@@ -42,7 +43,6 @@ private:
 	void cbWSConnection (const std::string &serviceName, NLNET::TServiceId sid, void *arg);
 	void cbWSDisconnection (const std::string &serviceName, NLNET::TServiceId sid, void *arg);
 
-	uint NbPlayers;
 	uint RecordNbPlayers;
 };
 

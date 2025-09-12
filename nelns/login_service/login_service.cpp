@@ -38,7 +38,6 @@
 #include <nelns/login_service/functions.h>
 #include <nelns/login_service/login_service.h>
 #include <nelns/login_service/variables.h>
-#include <nelns/login_service/connection_ws.h>
 #include <nelns/login_service/mysql_helper.h>
 
 //
