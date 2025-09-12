@@ -96,11 +96,17 @@ pair<vector<OnlineShardProjection>, string> CMysqlPersistence::findOnlineShardsB
 	return std::make_pair(shards, "");
 }
 
-string CMysqlPersistence::createUser(const std::string& login, const std::string& cpassword)
+pair<optional<LoginUserProjection>, string> CMysqlPersistence::createUser(const std::string& login, const std::string& cpassword)
 {
 	CMysqlResult result;
 	MYSQL_ROW row;
 	sint32 nbrow;
+	string reason = sqlQuery("insert into user (Login, Password) values ('" + login + "', '" + cpassword + "')", nbrow, row, result);
 
-	return sqlQuery("insert into user (Login, Password) values ('" + login + "', '" + cpassword + "')", nbrow, row, result);
+	if (!reason.empty())
+	{
+		return std::make_pair(std::nullopt, reason);
+	}
+
+	return findUserByLogin(login);
 }

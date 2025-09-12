@@ -108,7 +108,7 @@ public:
 
 	MOCK_METHOD((std::pair<std::vector<OnlineShardProjection>, std::string>), findOnlineShardsByApplication, (const std::string &application), (override));
 
-	MOCK_METHOD(std::string, createUser, (const std::string& login, const std::string& cpassword), (override));
+	MOCK_METHOD((std::pair<std::optional<LoginUserProjection>, std::string>), createUser, (const std::string& login, const std::string& cpassword), (override));
 };
 
 class CLoginServiceIT : public testing::Test
@@ -259,8 +259,8 @@ TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
 	EXPECT_CALL(*persistence, findUserByLogin)
 		.WillOnce(Return(std::make_pair(std::nullopt, "")));
 	Expectation userCreated = EXPECT_CALL(*persistence, createUser)
-		.WillOnce(Return(""))
-		.WillRepeatedly(Return("mock: user already created"));
+		.WillOnce(Return(std::make_pair(std::make_optional(user), "")))
+		.WillRepeatedly(Return(std::make_pair(std::nullopt, "mock: user already created")));
 	EXPECT_CALL(*persistence, findUserByLogin)
 		.After(userCreated)
 		.WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));

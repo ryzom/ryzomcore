@@ -55,7 +55,7 @@ public:
 
 	virtual std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string& application) = 0;
 
-	virtual std::string createUser(const std::string& login, const std::string& cpassword) = 0;
+	virtual std::pair<std::optional<LoginUserProjection>, std::string> createUser(const std::string& login, const std::string& cpassword) = 0;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H

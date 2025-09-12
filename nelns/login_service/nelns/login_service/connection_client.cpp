@@ -99,7 +99,7 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 			if (IService::getInstance()->ConfigFile.getVar("AcceptUnknownUsers").asInt() == 1)
 			{
 				// we accept new users, add it
-				reason = persistence->createUser(login.toUtf8(), cpassword);
+				reason = persistence->createUser(login.toUtf8(), cpassword).second;
 				if (!reason.empty()) break;
 				nlinfo("The user %s was inserted in the database for the application '%s'!", login.toUtf8().c_str(), application.c_str());
 				goto retry;

@@ -36,7 +36,7 @@ public:
 
 	std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string &application) override;
 
-	std::string createUser(const std::string& login, const std::string& cpassword) override;
+	std::pair<std::optional<LoginUserProjection>, std::string> createUser(const std::string& login, const std::string& cpassword) override;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H
