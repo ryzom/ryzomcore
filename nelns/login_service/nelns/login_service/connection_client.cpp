@@ -186,10 +186,11 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 		CMysqlResult result;
 		MYSQL_ROW row;
 		sint32 nbrow;
-		reason = sqlQuery("select UId, Cookie, Privilege, ExtendedPrivilege from user where State='Authorized'", nbrow, row, result);
+		auto users = persistence.findAuthorizedUsers();
+		reason = users.second;
 		if (!reason.empty()) break;
 
-		if (nbrow == 0)
+		if (users.first.empty())
 		{
 			reason = "You are not authorized to select a shard";
 			break;

@@ -75,6 +75,25 @@ struct VLPResponse
 	}
 };
 
+struct CSRequest
+{
+	void serial(IStream &stream)
+	{
+	}
+};
+
+struct CSResponse
+{
+	std::string reason;
+	void serial(IStream &stream)
+	{
+		stream.serial(reason);
+		if (reason.empty())
+		{
+		}
+	}
+};
+
 void insertConfigVariable(NLMISC::CConfigFile &configFile, const std::string &name, const std::string &value)
 {
 	CVar var;
@@ -106,9 +125,11 @@ public:
 
 	MOCK_METHOD(std::string, authorizeUser, (sint32 uid, const NLNET::CLoginCookie &cookie), (override));
 
-	MOCK_METHOD((std::pair<std::vector<OnlineShardProjection>, std::string>), findOnlineShardsByApplication, (const std::string &application), (override));
-
 	MOCK_METHOD((std::pair<std::optional<LoginUserProjection>, std::string>), createUser, (const std::string &login, const std::string &cpassword), (override));
+
+	MOCK_METHOD((std::pair<std::vector<AuthorizedUserProjection>, std::string>), findAuthorizedUsers, (), (override));
+
+	MOCK_METHOD((std::pair<std::vector<OnlineShardProjection>, std::string>), findOnlineShardsByApplication, (const std::string &application), (override));
 };
 
 class CLoginServiceIT : public testing::Test
@@ -122,14 +143,14 @@ protected:
 	std::chrono::seconds defaultTimeout = std::chrono::seconds(10);
 	bool running = true;
 
-	VLPRequest request {
+	VLPRequest verifyLogin {
 		.login = ucstring::makeFromUtf8("test-login"),
 		.cpassword = "test password",
 		.application = "test-application"
 	};
 	LoginUserProjection user {
 		.uid = 123,
-		.password = request.cpassword,
+		.password = verifyLogin.cpassword,
 		.state = "Offline"
 	};
 	OnlineShardProjection shard {
@@ -137,6 +158,7 @@ protected:
 		.name = ucstring::makeFromUtf8("test shard"),
 		.nbplayers = 111
 	};
+	CSRequest chooseShard {};
 
 	void SetUp() override
 	{
@@ -193,6 +215,48 @@ protected:
 
 		return response.get();
 	}
+
+	template <typename RequestType>
+	void sendMessage(const std::string &key, RequestType &messageRequest)
+	{
+		CMessage msgout(key);
+		msgout.serial(messageRequest);
+
+		client.send(msgout);
+	}
+
+	template <typename ResponseType>
+	ResponseType receiveMessage(const std::string &key)
+	{
+		auto response = std::async(std::launch::async, [=]() {
+			bool pending = true;
+			ResponseType messageResponse;
+			TCallbackItem callbackArray[] = {
+				{ key.c_str(), [&messageResponse, &pending](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
+				     msgin.serial(messageResponse);
+				     pending = false;
+				 } }
+			};
+			client.addCallbackArray(callbackArray, std::size(callbackArray));
+
+			while (pending)
+			{
+				client.update();
+				loginService.update();
+				nlSleep(1);
+			}
+
+			return messageResponse;
+		});
+		auto state = response.wait_for(defaultTimeout);
+
+		if (state != std::future_status::ready)
+		{
+			throw std::runtime_error("timeout waiting for response");
+		}
+
+		return response.get();
+	}
 };
 
 TEST_F(CLoginServiceIT, shouldReturnAvaialbleShardsOnSuccessfulLogin)
@@ -202,19 +266,19 @@ TEST_F(CLoginServiceIT, shouldReturnAvaialbleShardsOnSuccessfulLogin)
 	EXPECT_CALL(*persistence, findOnlineShardsByApplication)
 	    .WillRepeatedly(Return(std::make_pair(std::vector { shard }, "")));
 
-	auto response = sendMessage<VLPResponse>("VLP", request);
+	auto response = sendMessage<VLPResponse>("VLP", verifyLogin);
 	EXPECT_THAT(response,
 	    AllOf(
 	        Field("reason", &VLPResponse::reason, IsEmpty()),
 	        Field("shards", &VLPResponse::shards, ElementsAre(AllOf(Field(&OnlineShardProjection::sid, Eq(shard.sid)), Field(&OnlineShardProjection::name, Eq(shard.name)), Field(&OnlineShardProjection::nbplayers, Eq(shard.nbplayers)))))));
 }
 
-TEST_F(CLoginServiceIT, shouldReturrnErrorWhenUserDoesNotExist)
+TEST_F(CLoginServiceIT, shouldReturnErrorWhenUserDoesNotExist)
 {
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
 
-	auto response = sendMessage<VLPResponse>("VLP", request);
+	auto response = sendMessage<VLPResponse>("VLP", verifyLogin);
 
 	EXPECT_THAT(response, Field("reason", &VLPResponse::reason, StrEq("Login 'test-login' doesn't exist")));
 }
@@ -229,7 +293,21 @@ TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
 	    .WillOnce(Return(std::make_pair(std::make_optional(user), "")))
 	    .WillRepeatedly(Return(std::make_pair(std::nullopt, "mock: user already created")));
 
-	auto response = sendMessage<VLPResponse>("VLP", request);
+	auto response = sendMessage<VLPResponse>("VLP", verifyLogin);
 
 	EXPECT_THAT(response, Field("reason", &VLPResponse::reason, IsEmpty()));
+}
+
+TEST_F(CLoginServiceIT, shouldReturnErrorWhenNotAuthorizedToSelectAShard)
+{
+	EXPECT_CALL(*persistence, findUserByLogin)
+	    .WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
+	EXPECT_CALL(*persistence, findOnlineShardsByApplication)
+	    .WillRepeatedly(Return(std::make_pair(std::vector { shard }, "")));
+	ASSERT_THAT(sendMessage<VLPResponse>("VLP", verifyLogin), Field("reason", &VLPResponse::reason, IsEmpty()));
+
+	sendMessage("CS", chooseShard);
+	auto response = receiveMessage<CSResponse>("SCS");
+
+	EXPECT_THAT(response, Field("reason", &CSResponse::reason, StrEq("You are not authorized to select a shard")));
 }

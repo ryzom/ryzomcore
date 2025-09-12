@@ -20,10 +20,11 @@
 #include <nelns/login_service/mysql_helper.h>
 
 using NLMISC::toString;
+using NLNET::CLoginCookie;
 using std::optional;
 using std::pair;
-using std::vector;
 using std::string;
+using std::vector;
 
 void CMysqlPersistence::init()
 {
@@ -73,22 +74,21 @@ pair<vector<OnlineShardProjection>, string> CMysqlPersistence::findOnlineShardsB
 	MYSQL_ROW row;
 	sint32 nbrow;
 	std::vector<OnlineShardProjection> shards;
-	string reason = sqlQuery("select shardid, name, nbplayers from shard where Online>0 and ClientApplication='"+application+"'", nbrow, row, result);
-	if(!reason.empty())
+	string reason = sqlQuery("select shardid, name, nbplayers from shard where Online>0 and ClientApplication='" + application + "'", nbrow, row, result);
+	if (!reason.empty())
 	{
 		return std::make_pair(shards, reason);
 	}
 
-
 	// send address and name of all online shards
-	while(row != nullptr)
+	while (row != nullptr)
 	{
 		// serial the name of the shard
 
 		shards.push_back({
-			.sid = (static_cast<uint32>(atoi(row[0]))),
-			.name = (ucstring::makeFromUtf8(row[1])),
-			.nbplayers = (static_cast<uint8>(atoi(row[2]))),
+		    .sid = (static_cast<uint32>(atoi(row[0]))),
+		    .name = (ucstring::makeFromUtf8(row[1])),
+		    .nbplayers = (static_cast<uint8>(atoi(row[2]))),
 		});
 		row = mysql_fetch_row(result);
 	}
@@ -96,7 +96,7 @@ pair<vector<OnlineShardProjection>, string> CMysqlPersistence::findOnlineShardsB
 	return std::make_pair(shards, "");
 }
 
-pair<optional<LoginUserProjection>, string> CMysqlPersistence::createUser(const std::string& login, const std::string& cpassword)
+pair<optional<LoginUserProjection>, string> CMysqlPersistence::createUser(const std::string &login, const std::string &cpassword)
 {
 	CMysqlResult result;
 	MYSQL_ROW row;
@@ -109,4 +109,34 @@ pair<optional<LoginUserProjection>, string> CMysqlPersistence::createUser(const 
 	}
 
 	return findUserByLogin(login);
+}
+
+pair<vector<AuthorizedUserProjection>, string> CMysqlPersistence::findAuthorizedUsers()
+{
+	CMysqlResult result;
+	MYSQL_ROW row;
+	sint32 nbrow;
+	vector<AuthorizedUserProjection> users;
+	string reason = sqlQuery("select UId, Cookie, Privilege, ExtendedPrivilege from user where State='Authorized'", nbrow, row, result);
+	if (!reason.empty())
+	{
+		return std::make_pair(users, reason);
+	}
+
+	while (row != nullptr)
+	{
+		// serial the name of the shard
+		CLoginCookie cookie;
+		cookie.setFromString(row[1]);
+
+		users.push_back({
+		    .uid = row[0],
+		    .cookie = cookie,
+		    .privilege = row[2],
+		    .extendedPrivilege = row[3],
+		});
+		row = mysql_fetch_row(result);
+	}
+
+	return std::make_pair(users, "");
 }

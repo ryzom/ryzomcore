@@ -33,6 +33,14 @@ struct LoginUserProjection
 	std::string state;
 };
 
+struct AuthorizedUserProjection
+{
+	std::string uid;
+	NLNET::CLoginCookie cookie;
+	std::string privilege;
+	std::string extendedPrivilege;
+};
+
 struct OnlineShardProjection
 {
 	uint32 sid;
@@ -53,9 +61,11 @@ public:
 
 	virtual std::string authorizeUser(sint32 uid, const NLNET::CLoginCookie & cookie) = 0;
 
-	virtual std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string& application) = 0;
-
 	virtual std::pair<std::optional<LoginUserProjection>, std::string> createUser(const std::string& login, const std::string& cpassword) = 0;
+
+	virtual std::pair<std::vector<AuthorizedUserProjection>, std::string> findAuthorizedUsers() = 0;
+
+	virtual std::pair<std::vector<OnlineShardProjection>, std::string> findOnlineShardsByApplication(const std::string& application) = 0;
 };
 
 #endif // NELNS_LOGIN_SERVICE_PERSISTENCE_H
