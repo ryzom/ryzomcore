@@ -88,9 +88,6 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 
 	breakable
 	{
-		CMysqlResult result;
-		MYSQL_ROW row;
-		sint32 nbrow;
 		// const CInetAddress &ia = netbase.hostAddress (from);
 	retry:
 		auto maybeUser = persistence->findUserByLogin(login.toUtf8());
@@ -151,9 +148,9 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 
 		// Send success message
 		CMessage msgout("VLP");
-		nbrow = maybeShards.first.size();
+		sint32 shardCount = maybeShards.first.size();
 		msgout.serial(reason);
-		msgout.serial(nbrow);
+		msgout.serial(shardCount);
 
 		// send address and name of all online shards
 		for (auto shard : maybeShards.first)
