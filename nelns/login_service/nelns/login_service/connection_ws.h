@@ -38,6 +38,10 @@ public:
 
 private:
 	void cbWSIdentification (NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
+	void cbWSClientConnected (NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
+	void cbWSReportFSState (NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
+	void cbWSReportNoPatch (NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
+	void cbWSSetShardOpen (NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
 	void cbWSConnection (const std::string &serviceName, NLNET::TServiceId sid, void *arg);
 	void cbWSDisconnection (const std::string &serviceName, NLNET::TServiceId sid, void *arg);
 

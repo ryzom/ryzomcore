@@ -335,7 +335,7 @@ void ConnectionWS::cbWSIdentification (CMessage &msgin, const std::string &servi
 	nlstop;
 }
 
-static void cbWSClientConnected (CMessage &msgin, const std::string &serviceName, TServiceId sid)
+void ConnectionWS::cbWSClientConnected (CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	//
 	// S16: Receive "CC" message from WS
@@ -451,7 +451,7 @@ static void cbWSClientConnected (CMessage &msgin, const std::string &serviceName
 }
 
 
-static void	cbWSReportFSState(CMessage &msgin, const std::string &serviceName, TServiceId sid)
+void ConnectionWS::cbWSReportFSState(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	sint	shardPos = findShardWithSId (sid);
 
@@ -542,7 +542,7 @@ static void	cbWSReportFSState(CMessage &msgin, const std::string &serviceName, T
 	}
 }
 
-static void	cbWSReportNoPatch(CMessage &msgin, const std::string &serviceName, TServiceId sid)
+void ConnectionWS::cbWSReportNoPatch(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	sint	shardPos = findShardWithSId (sid);
 
@@ -569,7 +569,7 @@ static void	cbWSReportNoPatch(CMessage &msgin, const std::string &serviceName, T
 	}
 }
 
-static void	cbWSSetShardOpen(CMessage &msgin, const std::string &serviceName, TServiceId sid)
+void ConnectionWS::cbWSSetShardOpen(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	sint	shardPos = findShardWithSId (sid);
 
