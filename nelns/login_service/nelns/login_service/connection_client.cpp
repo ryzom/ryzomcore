@@ -384,7 +384,7 @@ void ConnectionClient::cbWSShardChooseShard(CMessage &msgin, const std::string &
 //
 
 ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence)
-	: persistence(std::move(persistence))
+    : persistence(std::move(persistence))
 {
 	uint16 port = (uint16)IService::getInstance()->ConfigFile.getVar("ClientsPort").asInt();
 	ClientsServer.init(port);

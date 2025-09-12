@@ -40,14 +40,13 @@ public:
 private:
 	void cbClientVerifyLoginPassword(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
 	void cbClientChooseShard(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
-	void cbClientConnection (NLNET::TSockId from);
-	void cbClientDisconnection (NLNET::TSockId from);
+	void cbClientConnection(NLNET::TSockId from);
+	void cbClientDisconnection(NLNET::TSockId from);
 
 	void cbWSShardChooseShard(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
 
 	std::shared_ptr<IPersistence> persistence;
 	NLNET::CCallbackServer ClientsServer;
-
 };
 
 #endif // NL_CONNECTION_CLIENT_H
