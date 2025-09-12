@@ -156,7 +156,6 @@ protected:
 	CInetHost host = CInetHost("localhost");
 	int port = 51000;
 	std::chrono::seconds defaultTimeout = std::chrono::seconds(10);
-	bool running = true;
 
 	VLPRequest verifyLogin {
 		.login = ucstring::makeFromUtf8("test-login"),
@@ -196,7 +195,6 @@ protected:
 
 	void TearDown() override
 	{
-		running = false;
 		loginService.release();
 	}
 
