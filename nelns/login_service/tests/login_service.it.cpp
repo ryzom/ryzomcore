@@ -267,6 +267,7 @@ TEST_F(CLoginServiceIT, shouldReturnAvaialbleShardsOnSuccessfulLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::vector { shard }, "")));
 
 	auto response = sendMessage<VLPResponse>("VLP", verifyLogin);
+
 	EXPECT_THAT(response,
 	    AllOf(
 	        Field("reason", &VLPResponse::reason, IsEmpty()),
@@ -304,6 +305,9 @@ TEST_F(CLoginServiceIT, shouldReturnErrorWhenNotAuthorizedToSelectAShard)
 	    .WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
 	EXPECT_CALL(*persistence, findOnlineShardsByApplication)
 	    .WillRepeatedly(Return(std::make_pair(std::vector { shard }, "")));
+	Expectation userAuthorized = EXPECT_CALL(*persistence, authorizeUser);
+	EXPECT_CALL(*persistence, findAuthorizedUsers)
+	    .After(userAuthorized);
 	ASSERT_THAT(sendMessage<VLPResponse>("VLP", verifyLogin), Field("reason", &VLPResponse::reason, IsEmpty()));
 
 	sendMessage("CS", chooseShard);
