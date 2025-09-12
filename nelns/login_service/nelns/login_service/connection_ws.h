@@ -18,12 +18,9 @@
 #define NL_CONNECTION_WS_H
 
 #include <nel/misc/types_nl.h>
-#include <nel/net/callback_server.h>
 #include <nel/net/message.h>
 #include <nel/net/unified_network.h>
 
-// extern NLNET::CCallbackServer *WSServer;
-extern uint NbPlayers;
 
 class ConnectionWS
 {

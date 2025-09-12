@@ -46,14 +46,6 @@ using namespace NLNET;
 
 
 //
-// Variables
-//
-
-static uint RecordNbPlayers = 0;
-uint NbPlayers = 0;
-
-
-//
 // Functions
 //
 
