@@ -21,6 +21,8 @@
 
 #include <nel/net/buf_net_base.h>
 #include <nel/net/callback_net_base.h>
+#include <nel/net/callback_server.h>
+#include <nel/net/unified_network.h>
 #include <nel/net/message.h>
 
 #include <nelns/login_service/persistence.h>
@@ -30,18 +32,25 @@ class ConnectionClient
 public:
 	explicit ConnectionClient(std::shared_ptr<IPersistence> persistence);
 
-	void connectionClientInit();
+	~ConnectionClient();
+
 	void connectionClientUpdate();
-	void connectionClientRelease();
 	void sendToClient(NLNET::CMessage &msgout, NLNET::TSockId sockId);
 
 private:
+	void connectionClientInit();
+	void connectionClientRelease();
+
 	void cbClientVerifyLoginPassword(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
 	void cbClientChooseShard(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
 	void cbClientConnection (NLNET::TSockId from);
 	void cbClientDisconnection (NLNET::TSockId from);
 
+	void cbWSShardChooseShard(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
+
 	std::shared_ptr<IPersistence> persistence;
+	NLNET::CCallbackServer *ClientsServer;
+
 };
 
 #endif // NL_CONNECTION_CLIENT_H

@@ -54,15 +54,10 @@ using namespace NLMISC;
 using namespace NLNET;
 
 ConnectionClient::ConnectionClient(std::shared_ptr<IPersistence> persistence)
-    : persistence(std::move(persistence))
+    : persistence(std::move(persistence)), ClientsServer(0)
 {
+	connectionClientInit();
 }
-//
-// Variables
-//
-
-static CCallbackServer *ClientsServer = 0;
-
 //
 // Functions
 //
@@ -335,7 +330,7 @@ void ConnectionClient::cbClientDisconnection(TSockId from)
 	}
 }
 
-static void cbWSShardChooseShard(CMessage &msgin, const std::string &serviceName, TServiceId sid)
+void ConnectionClient::cbWSShardChooseShard(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	//
 	// S10: receive "SCS" message from WS
@@ -391,10 +386,6 @@ static void cbWSShardChooseShard(CMessage &msgin, const std::string &serviceName
 	ClientsServer->send(msgout, (TSockId)cookie.getUserAddr()); // FIXME: 64-bit
 }
 
-static const TUnifiedCallbackItem WSCallbackArray[] = {
-	{ "SCS", cbWSShardChooseShard },
-};
-
 //
 //
 //
@@ -418,6 +409,9 @@ void ConnectionClient::connectionClientInit()
 	ClientsServer->setDisconnectionCallback([=](auto from, auto arg) { cbClientDisconnection(from); }, nullptr);
 
 	// catch the messages from Welcome Service to know if the user can connect or not
+	const TUnifiedCallbackItem WSCallbackArray[] = {
+		{ "SCS", [=](auto &msgin, auto &serviceName, auto sid) { cbWSShardChooseShard(msgin, serviceName, sid); } },
+	};
 	CUnifiedNetwork::getInstance()->addCallbackArray(WSCallbackArray, std::size(WSCallbackArray));
 }
 
@@ -435,6 +429,10 @@ void ConnectionClient::connectionClientUpdate()
 	}
 }
 
+ConnectionClient::~ConnectionClient()
+{
+	connectionClientRelease();
+}
 void ConnectionClient::connectionClientRelease()
 {
 	nlassert(ClientsServer != 0);

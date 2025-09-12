@@ -41,8 +41,7 @@ using NLNET::IService;
 
 
 CLoginService::CLoginService () :
-	UseDirectClient(false),
-	m_persistence(std::make_shared<CMysqlPersistence>())
+	CLoginService(std::make_shared<CMysqlPersistence>())
 { }
 
 CLoginService::CLoginService (std::shared_ptr<IPersistence>&& persistence) :
@@ -75,7 +74,6 @@ void CLoginService::init ()
 	if(UseDirectClient)
 	{
 		m_connection_client = std::make_unique<ConnectionClient>(m_persistence);
-		m_connection_client->connectionClientInit();
 	}
 	else
 	{
@@ -100,7 +98,7 @@ void CLoginService::release ()
 {
 	connectionWSRelease ();
 	if(UseDirectClient)
-		m_connection_client->connectionClientRelease ();
+		m_connection_client = nullptr;
 	else
 		connectionWebRelease ();
 
