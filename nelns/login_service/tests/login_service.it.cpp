@@ -122,6 +122,22 @@ protected:
 	std::chrono::seconds defaultTimeout = std::chrono::seconds(10);
 	bool running = true;
 
+	VLPRequest request {
+		.login = ucstring::makeFromUtf8("test-login"),
+		.cpassword = "test password",
+		.application = "test-application"
+	};
+	LoginUserProjection user {
+		.uid = 123,
+		.password = request.cpassword,
+		.state = "Offline"
+	};
+	OnlineShardProjection shard {
+		.sid = 456,
+		.name = ucstring::makeFromUtf8("test shard"),
+		.nbplayers = 111
+	};
+
 	void SetUp() override
 	{
 		insertConfigVariable(loginService.ConfigFile, "ClientsPort", port);
@@ -142,17 +158,17 @@ protected:
 	}
 
 	template <typename ResponseType, typename RequestType>
-	ResponseType sendMessage(const std::string &key, RequestType &request)
+	ResponseType sendMessage(const std::string &key, RequestType &messageRequest)
 	{
-		auto response = std::async(std::launch::async, [=, &request]() {
+		auto response = std::async(std::launch::async, [=, &messageRequest]() {
 			CMessage msgout(key);
-			msgout.serial(request);
+			msgout.serial(messageRequest);
 
 			bool pending = true;
-			ResponseType payload;
+			ResponseType messageResponse;
 			TCallbackItem callbackArray[] = {
-				{ key.c_str(), [&payload, &pending](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
-				     msgin.serial(payload);
+				{ key.c_str(), [&messageResponse, &pending](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
+				     msgin.serial(messageResponse);
 				     pending = false;
 				 } }
 			};
@@ -166,7 +182,7 @@ protected:
 				nlSleep(1);
 			}
 
-			return payload;
+			return messageResponse;
 		});
 		auto state = response.wait_for(defaultTimeout);
 
@@ -181,21 +197,6 @@ protected:
 
 TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 {
-	VLPRequest request {
-		.login = ucstring::makeFromUtf8("test-login"),
-		.cpassword = "test-password",
-		.application = "test-application"
-	};
-	LoginUserProjection user {
-		.uid = 123,
-		.password = request.cpassword,
-		.state = "Offline"
-	};
-	OnlineShardProjection shard {
-		.sid = 456,
-		.name = ucstring::makeFromUtf8("test shard"),
-		.nbplayers = 111
-	};
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
 	EXPECT_CALL(*persistence, findOnlineShardsByApplication)
@@ -210,11 +211,6 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 
 TEST_F(CLoginServiceIT, shouldReturrnErrorWhenUserDoesNotExist)
 {
-	VLPRequest request {
-		.login = ucstring::makeFromUtf8("test-login"),
-		.cpassword = "test password",
-		.application = "test-application"
-	};
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
 
@@ -226,16 +222,6 @@ TEST_F(CLoginServiceIT, shouldReturrnErrorWhenUserDoesNotExist)
 TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
 {
 	loginService.ConfigFile.getVar("AcceptUnknownUsers").setAsInt(1);
-	VLPRequest request {
-		.login = ucstring::makeFromUtf8("test-login"),
-		.cpassword = "test password",
-		.application = "test-application"
-	};
-	LoginUserProjection user {
-		.uid = 123,
-		.password = request.cpassword,
-		.state = "Offline"
-	};
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .Times(1)
 	    .WillOnce(Return(std::make_pair(std::nullopt, "")));
