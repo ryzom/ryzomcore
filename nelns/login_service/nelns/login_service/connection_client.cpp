@@ -89,7 +89,6 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 	breakable
 	{
 		// const CInetAddress &ia = netbase.hostAddress (from);
-	retry:
 		auto maybeUser = persistence->findUserByLogin(login.toUtf8());
 		reason = maybeUser.second;
 		if (!reason.empty()) break;
@@ -99,10 +98,10 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 			if (IService::getInstance()->ConfigFile.getVar("AcceptUnknownUsers").asInt() == 1)
 			{
 				// we accept new users, add it
-				reason = persistence->createUser(login.toUtf8(), cpassword).second;
+				maybeUser = persistence->createUser(login.toUtf8(), cpassword);
+				reason = maybeUser.second;
 				if (!reason.empty()) break;
 				nlinfo("The user %s was inserted in the database for the application '%s'!", login.toUtf8().c_str(), application.c_str());
-				goto retry;
 			}
 			else
 			{

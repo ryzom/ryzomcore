@@ -257,13 +257,11 @@ TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
 		.state = "Offline"
 	};
 	EXPECT_CALL(*persistence, findUserByLogin)
+		.Times(1)
 		.WillOnce(Return(std::make_pair(std::nullopt, "")));
 	Expectation userCreated = EXPECT_CALL(*persistence, createUser)
 		.WillOnce(Return(std::make_pair(std::make_optional(user), "")))
 		.WillRepeatedly(Return(std::make_pair(std::nullopt, "mock: user already created")));
-	EXPECT_CALL(*persistence, findUserByLogin)
-		.After(userCreated)
-		.WillRepeatedly(Return(std::make_pair(std::make_optional(user), "")));
 	CMessage msgout("VLP");
 	msgout.serial(request);
 
