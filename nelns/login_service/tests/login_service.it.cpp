@@ -141,19 +141,10 @@ protected:
 		loginService.release();
 	}
 
-	template <typename RequestType>
-	void sendMessage(const std::string &key, RequestType &request)
-	{
-		ASSERT_THAT(client.connected(), IsTrue());
-		CMessage msgout(key);
-		msgout.serial(request);
-		client.send(msgout);
-	}
-
 	template <typename ResponseType, typename RequestType>
-	std::future<ResponseType> sendMessage(const std::string &key, RequestType &request)
+	ResponseType sendMessage(const std::string &key, RequestType &request)
 	{
-		return std::async(std::launch::async, [=, &request]() {
+		auto response = std::async(std::launch::async, [=, &request]() {
 			CMessage msgout(key);
 			msgout.serial(request);
 
@@ -177,6 +168,14 @@ protected:
 
 			return payload;
 		});
+		auto state = response.wait_for(defaultTimeout);
+
+		if (state != std::future_status::ready)
+		{
+			throw std::runtime_error("timeout waiting for response");
+		}
+
+		return response.get();
 	}
 };
 
@@ -202,31 +201,8 @@ TEST_F(CLoginServiceIT, shouldAnswerToVerifyLoginPassword)
 	EXPECT_CALL(*persistence, findOnlineShardsByApplication)
 	    .WillRepeatedly(Return(std::make_pair(std::vector { shard }, "")));
 
-	std::promise<VLPResponse> response_promise;
-	std::future<VLPResponse> response = response_promise.get_future();
-	TCallbackItem callbackArray[] = {
-		{ "VLP", [&response_promise](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
-		     VLPResponse response;
-		     msgin.serial(response);
-		     response_promise.set_value(response);
-		 } }
-	};
-	client.addCallbackArray(callbackArray, std::size(callbackArray));
-
-	sendMessage("VLP", request);
-	auto update = std::async(std::launch::async, [=, &response]() {
-		while (response.valid() && running)
-		{
-			client.update();
-			loginService.update();
-			nlSleep(1);
-		}
-	});
-
-	auto state = response.wait_for(defaultTimeout);
-	running = false;
-	ASSERT_THAT(state, Eq(std::future_status::ready));
-	EXPECT_THAT(response.get(),
+	auto response = sendMessage<VLPResponse>("VLP", request);
+	EXPECT_THAT(response,
 	    AllOf(
 	        Field("reason", &VLPResponse::reason, IsEmpty()),
 	        Field("shards", &VLPResponse::shards, ElementsAre(AllOf(Field(&OnlineShardProjection::sid, Eq(shard.sid)), Field(&OnlineShardProjection::name, Eq(shard.name)), Field(&OnlineShardProjection::nbplayers, Eq(shard.nbplayers)))))));
@@ -241,34 +217,10 @@ TEST_F(CLoginServiceIT, shouldReturrnErrorWhenUserDoesNotExist)
 	};
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
-	CMessage msgout("VLP");
-	msgout.serial(request);
 
-	std::promise<VLPResponse> response_promise;
-	std::future<VLPResponse> response = response_promise.get_future();
-	TCallbackItem callbackArray[] = {
-		{ "VLP", [&response_promise](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
-		     VLPResponse response;
-		     msgin.serial(response);
-		     response_promise.set_value(response);
-		 } }
-	};
-	client.addCallbackArray(callbackArray, std::size(callbackArray));
+	auto response = sendMessage<VLPResponse>("VLP", request);
 
-	client.send(msgout);
-	auto update = std::async(std::launch::async, [=, &response]() {
-		while (response.valid() && running)
-		{
-			client.update();
-			loginService.update();
-			nlSleep(1);
-		}
-	});
-
-	auto state = response.wait_for(defaultTimeout);
-	running = false;
-	ASSERT_THAT(state, Eq(std::future_status::ready));
-	EXPECT_THAT(response.get(), Field("reason", &VLPResponse::reason, StrEq("Login 'test-login' doesn't exist")));
+	EXPECT_THAT(response, Field("reason", &VLPResponse::reason, StrEq("Login 'test-login' doesn't exist")));
 }
 
 TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
@@ -287,35 +239,11 @@ TEST_F(CLoginServiceIT, shouldAcceptUnknownUsersIfEnabled)
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .Times(1)
 	    .WillOnce(Return(std::make_pair(std::nullopt, "")));
-	Expectation userCreated = EXPECT_CALL(*persistence, createUser)
-	                              .WillOnce(Return(std::make_pair(std::make_optional(user), "")))
-	                              .WillRepeatedly(Return(std::make_pair(std::nullopt, "mock: user already created")));
-	CMessage msgout("VLP");
-	msgout.serial(request);
+	EXPECT_CALL(*persistence, createUser)
+	    .WillOnce(Return(std::make_pair(std::make_optional(user), "")))
+	    .WillRepeatedly(Return(std::make_pair(std::nullopt, "mock: user already created")));
 
-	std::promise<VLPResponse> response_promise;
-	std::future<VLPResponse> response = response_promise.get_future();
-	TCallbackItem callbackArray[] = {
-		{ "VLP", [&response_promise](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
-		     VLPResponse response;
-		     msgin.serial(response);
-		     response_promise.set_value(response);
-		 } }
-	};
-	client.addCallbackArray(callbackArray, std::size(callbackArray));
+	auto response = sendMessage<VLPResponse>("VLP", request);
 
-	client.send(msgout);
-	auto update = std::async(std::launch::async, [=, &response]() {
-		while (response.valid() && running)
-		{
-			client.update();
-			loginService.update();
-			nlSleep(1);
-		}
-	});
-
-	auto state = response.wait_for(defaultTimeout);
-	running = false;
-	ASSERT_THAT(state, Eq(std::future_status::ready));
-	EXPECT_THAT(response.get(), Field("reason", &VLPResponse::reason, IsEmpty()));
+	EXPECT_THAT(response, Field("reason", &VLPResponse::reason, IsEmpty()));
 }
