@@ -6,8 +6,9 @@
   ],
   "configurePresets": [
     {
-      "binaryDir": "${sourceDir}/build/snowballs",
       "name": "snowballs",
+      "binaryDir": "${sourceDir}/build/snowballs",
+      "installDir": "${sourceDir}/build/install/nelns",
       "cacheVariables": {
         "WITH_SNOWBALLS": true,
         "WITH_SNOWBALLS_CLIENT": true,
