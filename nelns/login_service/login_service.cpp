@@ -67,7 +67,8 @@ NLMISC_DYNVARIABLE(uint, OnlineUsersNumber, "number of actually connected users"
 		//	if (Users[i].State == CUser::Online)
 		//		nbusers++;
 		//}
-		*pointer = NbPlayers;
+		auto loginService = dynamic_cast<CLoginService*>(IService::getInstance());
+		*pointer = loginService->nbPlayers();
 	}
 }
 

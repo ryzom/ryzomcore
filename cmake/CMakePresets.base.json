@@ -31,10 +31,8 @@
       }
     },
     {
-      "inherits": [
-        "default"
-      ],
-      "name": "default-coverage",
+      "name": "coverage",
+      "hidden": true,
       "cacheVariables": {
         "CMAKE_C_FLAGS": "--coverage",
         "CMAKE_CXX_FLAGS": "--coverage"

@@ -89,6 +89,11 @@ public:
 	/// release the service, save the universal time
 	void release();
 
+	uint nbPlayers() const
+	{
+		return m_connection_ws->nbPlayers();
+	}
+
 private:
 	bool UseDirectClient;
 	std::shared_ptr<IPersistence> m_persistence;
