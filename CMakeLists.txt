@@ -18,7 +18,7 @@
 #   * To build binary archive, use the 'package' target.
 #     To build source archive, use the 'package_source' target.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.22)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.22..4.1.1)
 
 #-----------------------------------------------------------------------------
 # Load some macros.
