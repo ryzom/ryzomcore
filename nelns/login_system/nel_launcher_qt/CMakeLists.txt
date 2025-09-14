@@ -24,8 +24,6 @@ target_link_libraries(nel_launcher_qt
 NL_DEFAULT_PROPS(nel_launcher_qt "NelNS, Launcher: NeL Launcher Qt")
 NL_ADD_RUNTIME_FLAGS(nel_launcher_qt)
 
-TARGET_COMPILE_DEFINITIONS(nel_launcher_qt PRIVATE ${QT_DEFINITIONS})
-
 INSTALL(TARGETS nel_launcher_qt RUNTIME DESTINATION bin COMPONENT launcher)
 IF (WIN32)
     INSTALL(FILES nel_launcher.cfg DESTINATION bin COMPONENT launcher)
