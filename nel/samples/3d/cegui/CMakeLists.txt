@@ -4,7 +4,10 @@ ADD_EXECUTABLE(nl_sample_cegui WIN32 ${SRC})
 
 TARGET_COMPILE_DEFINITIONS(nl_sample_cegui PRIVATE "CEGUI_DATA_DIR=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_cegui/datafiles/\"")
 
-INCLUDE_DIRECTORIES(${CEGUI_INCLUDE_DIRS})
+TARGEt_INCLUDE_DIRECTORIES(nl_sample_cegui
+        PRIVATE
+        ${CEGUI_INCLUDE_DIRS}
+)
 
 TARGET_LINK_LIBRARIES(nl_sample_cegui ${CEGUI_LIBRARY} nelmisc nel3d)
 NL_DEFAULT_PROPS(nl_sample_cegui "NeL, Samples, 3D: NeL CEGUI Demo")
