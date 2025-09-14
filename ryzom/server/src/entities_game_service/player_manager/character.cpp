@@ -2083,7 +2083,7 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 
 	// save Last Respawn Tick if player respawns
 	_LastRespawnTick = CTickEventHandler::getGameCycle();
-	
+
 	if (IsRingShard)
 	{
 		nlinfo("Asking GPMS to TP character %s to (0,0) for respawn", _Id.toString().c_str());
