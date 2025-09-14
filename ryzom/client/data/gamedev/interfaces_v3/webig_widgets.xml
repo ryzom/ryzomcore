@@ -18,6 +18,7 @@
 	<lua file="emotes_es.lua" />
 	<lua file="emotes_ru.lua" />
 	<lua file="search_command.lua" />
+	<lua file="rygif.lua" />
 	<lua file="rygif_global_dispatcher.lua" />
 	
 
