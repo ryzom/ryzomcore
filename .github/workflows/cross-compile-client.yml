@@ -8,6 +8,8 @@ on:
       # TODO use nel package instead
       - nel/**
       - ryzom/**
+      - cmake/**
+      - CMakeModules/**
       - CMakeLists.txt
       - CMakePresets.json
   pull_request:
@@ -17,6 +19,8 @@ on:
       # TODO use nel package instead
       - nel/**
       - ryzom/**
+      - cmake/**
+      - CMakeModules/**
       - CMakeLists.txt
       - CMakePresets.json
 
