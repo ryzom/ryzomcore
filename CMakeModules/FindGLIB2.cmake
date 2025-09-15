@@ -1,217 +1,164 @@
-# - Try to find GLib2
-# Once done this will define
-#
-#  GLIB2_FOUND - system has GLib2
-#  GLIB2_INCLUDE_DIRS - the GLib2 include directory
-#  GLIB2_LIBRARIES - Link these to use GLib2
-#
-#  HAVE_GLIB_GREGEX_H  glib has gregex.h header and 
-#                      supports g_regex_match_simple
-#
-#  Copyright (c) 2006 Andreas Schneider <mail@cynapses.org>
-#  Copyright (c) 2006 Philippe Bernery <philippe.bernery@gmail.com>
-#  Copyright (c) 2007 Daniel Gollub <dgollub@suse.de>
-#  Copyright (c) 2007 Alban Browaeys <prahal@yahoo.com>
-#  Copyright (c) 2008 Michael Bell <michael.bell@web.de>
-#  Copyright (c) 2008 Bjoern Ricks <bjoern.ricks@googlemail.com>
-#
-#  Redistribution and use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
+#[=======================================================================[.rst:
+FindGLIB2
+-------
 
-IF (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
-  # in cache already
-  SET(GLIB2_FOUND TRUE)
-ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
+Finds the GLIB2 library.
 
-  INCLUDE(FindPkgConfig)
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-  ## Glib
-  IF ( GLIB2_FIND_REQUIRED )
-    SET( _pkgconfig_REQUIRED "REQUIRED" )
-  ELSE ( GLIB2_FIND_REQUIRED )
-    SET( _pkgconfig_REQUIRED "" )
-  ENDIF ( GLIB2_FIND_REQUIRED )
+This module provides the following imported targets, if found:
 
-  IF ( GLIB2_MIN_VERSION )
-    PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0>=${GLIB2_MIN_VERSION} )
-  ELSE ( GLIB2_MIN_VERSION )
-    PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0 )
-  ENDIF ( GLIB2_MIN_VERSION )
-  IF ( PKG_CONFIG_FOUND )
-    IF ( GLIB2_FOUND )
-      SET ( GLIB2_CORE_FOUND TRUE )
-    ELSE ( GLIB2_FOUND )
-      SET ( GLIB2_CORE_FOUND FALSE )
-    ENDIF ( GLIB2_FOUND )
-  ENDIF ( PKG_CONFIG_FOUND )
+``GLIB2::GLIB2``
+  The GLIB2 library
 
-  # Look for glib2 include dir and libraries w/o pkgconfig
-  IF ( NOT GLIB2_FOUND AND NOT PKG_CONFIG_FOUND )
-    FIND_PATH(
-      _glibconfig_include_DIR
-    NAMES
-      glibconfig.h
-    PATHS
-      /opt/gnome/lib64
-      /opt/gnome/lib
-      /opt/lib/
-      /opt/local/lib
-      /sw/lib/
-      /usr/lib64
-      /usr/lib
-      /usr/local/include
-      ${CMAKE_LIBRARY_PATH}
-    PATH_SUFFIXES
-      glib-2.0/include
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This will define the following variables:
+
+``GLIB2_FOUND``
+  True if the system has the GLIB2 library.
+``GLIB2_VERSION``
+  The version of the GLIB2 library which was found.
+``GLIB2_INCLUDE_DIRS``
+  Include directories needed to use GLIB2.
+``GLIB2_LIBRARIES``
+  Libraries needed to link to GLIB2.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``GLIB2_INCLUDE_DIR``
+  The directory containing ``glib.h``.
+``GLIB2_LIBRARY``
+  The path to the GLIB2 library.
+
+#]=======================================================================]
+
+include(FindPackageHandleStandardArgs)
+
+# Try to use pkg-config first
+find_package(PkgConfig QUIET)
+if (PKG_CONFIG_FOUND)
+    pkg_check_modules(PC_GLIB2 QUIET glib-2.0)
+endif ()
+
+# Find the header files
+find_path(GLIB2_INCLUDE_DIR
+        NAMES glib.h
+        HINTS ${PC_GLIB2_INCLUDEDIR} ${PC_GLIB2_INCLUDE_DIRS}
+        PATH_SUFFIXES glib-2.0
+)
+
+find_path(GLIB2_CONFIG_INCLUDE_DIR
+        NAMES glibconfig.h
+        HINTS ${PC_GLIB2_INCLUDEDIR} ${PC_GLIB2_INCLUDE_DIRS}
+        PATH_SUFFIXES glib-2.0/include
+)
+
+# Find the library
+find_library(GLIB2_LIBRARY
+        NAMES glib-2.0 glib
+        HINTS ${PC_GLIB2_LIBDIR} ${PC_GLIB2_LIBRARY_DIRS}
+)
+
+# Set version from pkg-config if available
+set(GLIB2_VERSION ${PC_GLIB2_VERSION})
+
+# Handle dependencies through pkg-config
+set(GLIB2_DEPS_FOUND TRUE)
+set(GLIB2_DEPS_LIBRARIES)
+set(GLIB2_DEPS_INCLUDE_DIRS)
+
+# Only manually check for deps if pkg-config didn't provide them
+if (NOT PC_GLIB2_FOUND)
+    # Check for libintl
+    find_library(LIBINTL_LIBRARY NAMES intl)
+    find_path(LIBINTL_INCLUDE_DIR NAMES libintl.h)
+
+    if (LIBINTL_LIBRARY AND LIBINTL_INCLUDE_DIR)
+        list(APPEND GLIB2_DEPS_LIBRARIES ${LIBINTL_LIBRARY})
+        list(APPEND GLIB2_DEPS_INCLUDE_DIRS ${LIBINTL_INCLUDE_DIR})
+    endif ()
+
+    # Check for libiconv
+    find_library(LIBICONV_LIBRARY NAMES iconv)
+    find_path(LIBICONV_INCLUDE_DIR NAMES iconv.h)
+
+    if (LIBICONV_LIBRARY AND LIBICONV_INCLUDE_DIR)
+        list(APPEND GLIB2_DEPS_LIBRARIES ${LIBICONV_LIBRARY})
+        list(APPEND GLIB2_DEPS_INCLUDE_DIRS ${LIBICONV_INCLUDE_DIR})
+    endif ()
+endif ()
+
+# Set the include directories
+set(GLIB2_INCLUDE_DIRS ${GLIB2_INCLUDE_DIR})
+if (GLIB2_CONFIG_INCLUDE_DIR)
+    list(APPEND GLIB2_INCLUDE_DIRS ${GLIB2_CONFIG_INCLUDE_DIR})
+endif ()
+if (GLIB2_DEPS_INCLUDE_DIRS)
+    list(APPEND GLIB2_INCLUDE_DIRS ${GLIB2_DEPS_INCLUDE_DIRS})
+endif ()
+
+# Set the libraries
+set(GLIB2_LIBRARIES ${GLIB2_LIBRARY})
+if (GLIB2_DEPS_LIBRARIES)
+    list(APPEND GLIB2_LIBRARIES ${GLIB2_DEPS_LIBRARIES})
+endif ()
+
+# Check for regex support
+if (GLIB2_INCLUDE_DIRS)
+    include(CheckIncludeFiles)
+    set(CMAKE_REQUIRED_INCLUDES ${GLIB2_INCLUDE_DIRS})
+    check_include_files("glib.h;glib/gregex.h" HAVE_GLIB_GREGEX_H)
+    unset(CMAKE_REQUIRED_INCLUDES)
+endif ()
+
+# Standard find_package handling
+find_package_handle_standard_args(GLIB2
+        REQUIRED_VARS
+        GLIB2_LIBRARY
+        GLIB2_INCLUDE_DIR
+        VERSION_VAR
+        GLIB2_VERSION
+)
+
+# Create imported target
+if (GLIB2_FOUND AND NOT TARGET GLIB2::GLIB2)
+    add_library(GLIB2::GLIB2 UNKNOWN IMPORTED)
+    set_target_properties(GLIB2::GLIB2 PROPERTIES
+            IMPORTED_LOCATION "${GLIB2_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${GLIB2_INCLUDE_DIRS}"
     )
 
-    FIND_PATH(
-      _glib2_include_DIR
-    NAMES
-      glib.h
-    PATHS
-      /opt/gnome/include
-      /opt/local/include
-      /sw/include
-      /usr/include
-      /usr/local/include
-    PATH_SUFFIXES
-      glib-2.0
-    )
+    # Add compile options from pkg-config if available
+    if (PC_GLIB2_FOUND AND PC_GLIB2_CFLAGS_OTHER)
+        set_property(TARGET GLIB2::GLIB2 PROPERTY
+                INTERFACE_COMPILE_OPTIONS "${PC_GLIB2_CFLAGS_OTHER}"
+        )
+    endif ()
 
-    #MESSAGE(STATUS "Glib headers: ${_glib2_include_DIR}")
+    # Add dependencies if not already provided by pkg-config
+    if (GLIB2_DEPS_LIBRARIES)
+        set_property(TARGET GLIB2::GLIB2 APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES "${GLIB2_DEPS_LIBRARIES}"
+        )
+    endif ()
+endif ()
 
-    FIND_LIBRARY(
-      _glib2_link_DIR
-    NAMES
-      glib-2.0
-      glib
-    PATHS
-      /opt/gnome/lib
-      /opt/local/lib
-      /sw/lib
-      /usr/lib
-      /usr/local/lib
-    )
-    IF ( _glib2_include_DIR AND _glib2_link_DIR )
-        SET ( _glib2_FOUND TRUE )
-    ENDIF ( _glib2_include_DIR AND _glib2_link_DIR )
-
-
-    IF ( _glib2_FOUND )
-        SET ( GLIB2_INCLUDE_DIRS ${_glib2_include_DIR} ${_glibconfig_include_DIR} )
-        SET ( GLIB2_LIBRARIES ${_glib2_link_DIR} )
-        SET ( GLIB2_CORE_FOUND TRUE )
-    ELSE ( _glib2_FOUND )
-        SET ( GLIB2_CORE_FOUND FALSE )
-    ENDIF ( _glib2_FOUND )
-
-    # Handle dependencies
-    # libintl
-    IF ( NOT LIBINTL_FOUND )
-      FIND_PATH(LIBINTL_INCLUDE_DIR
-      NAMES
-        libintl.h
-      PATHS
-        /opt/gnome/include
-        /opt/local/include
-        /sw/include
-        /usr/include
-        /usr/local/include
-      )
-
-      FIND_LIBRARY(LIBINTL_LIBRARY
-      NAMES
-        intl
-      PATHS
-        /opt/gnome/lib
-        /opt/local/lib
-        /sw/lib
-        /usr/local/lib
-        /usr/lib
-      )
-
-      IF (LIBINTL_LIBRARY AND LIBINTL_INCLUDE_DIR)
-        SET (LIBINTL_FOUND TRUE)
-      ENDIF (LIBINTL_LIBRARY AND LIBINTL_INCLUDE_DIR)
-    ENDIF ( NOT LIBINTL_FOUND )
-
-    # libiconv
-    IF ( NOT LIBICONV_FOUND )
-      FIND_PATH(LIBICONV_INCLUDE_DIR
-      NAMES
-        iconv.h
-      PATHS
-        /opt/gnome/include
-        /opt/local/include
-        /opt/local/include
-        /sw/include
-        /sw/include
-        /usr/local/include
-        /usr/include
-      PATH_SUFFIXES
-        glib-2.0
-      )
-
-      FIND_LIBRARY(LIBICONV_LIBRARY
-      NAMES
-        iconv
-      PATHS
-        /opt/gnome/lib
-        /opt/local/lib
-        /sw/lib
-        /usr/lib
-        /usr/local/lib
-      )
-
-      IF (LIBICONV_LIBRARY AND LIBICONV_INCLUDE_DIR)
-        SET (LIBICONV_FOUND TRUE)
-      ENDIF (LIBICONV_LIBRARY AND LIBICONV_INCLUDE_DIR)
-    ENDIF ( NOT LIBICONV_FOUND )
-
-    IF (LIBINTL_FOUND)
-      SET (GLIB2_LIBRARIES ${GLIB2_LIBRARIES} ${LIBINTL_LIBRARY})
-      SET (GLIB2_INCLUDE_DIRS ${GLIB2_INCLUDE_DIRS} ${LIBINTL_INCLUDE_DIR})
-    ENDIF (LIBINTL_FOUND)
-
-    IF (LIBICONV_FOUND)
-      SET (GLIB2_LIBRARIES ${GLIB2_LIBRARIES} ${LIBICONV_LIBRARY})
-      SET (GLIB2_INCLUDE_DIRS ${GLIB2_INCLUDE_DIRS} ${LIBICONV_INCLUDE_DIR})
-    ENDIF (LIBICONV_FOUND)
-
-  ENDIF ( NOT GLIB2_FOUND AND NOT PKG_CONFIG_FOUND )
-  ##
-
-  IF (GLIB2_CORE_FOUND AND GLIB2_INCLUDE_DIRS AND GLIB2_LIBRARIES)
-    SET (GLIB2_FOUND TRUE)
-  ENDIF (GLIB2_CORE_FOUND AND GLIB2_INCLUDE_DIRS AND GLIB2_LIBRARIES)
-
-  IF (GLIB2_FOUND)
-    IF (NOT GLIB2_FIND_QUIETLY)
-      MESSAGE (STATUS "Found GLib2: ${GLIB2_LIBRARIES} ${GLIB2_INCLUDE_DIRS}")
-    ENDIF (NOT GLIB2_FIND_QUIETLY)
-  ELSE (GLIB2_FOUND)
-    IF (GLIB2_FIND_REQUIRED)
-      MESSAGE (SEND_ERROR "Could not find GLib2")
-    ENDIF (GLIB2_FIND_REQUIRED)
-  ENDIF (GLIB2_FOUND)
-
-  # show the GLIB2_INCLUDE_DIRS and GLIB2_LIBRARIES variables only in the advanced view
-  MARK_AS_ADVANCED(GLIB2_INCLUDE_DIRS GLIB2_LIBRARIES)
-  MARK_AS_ADVANCED(LIBICONV_INCLUDE_DIR LIBICONV_LIBRARY)
-  MARK_AS_ADVANCED(LIBINTL_INCLUDE_DIR LIBINTL_LIBRARY)
-
-ENDIF (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS)
-
-IF ( GLIB2_FOUND )
-	# Check if system has a newer version of glib
-	# which supports g_regex_match_simple
-	INCLUDE( CheckIncludeFiles )
-	SET( CMAKE_REQUIRED_INCLUDES ${GLIB2_INCLUDE_DIRS} )
-	CHECK_INCLUDE_FILES ( glib/gregex.h HAVE_GLIB_GREGEX_H )
-	# Reset CMAKE_REQUIRED_INCLUDES
-	SET( CMAKE_REQUIRED_INCLUDES "" )
-ENDIF( GLIB2_FOUND )
+# Hide advanced variables
+mark_as_advanced(
+        GLIB2_INCLUDE_DIR
+        GLIB2_CONFIG_INCLUDE_DIR
+        GLIB2_LIBRARY
+        LIBINTL_INCLUDE_DIR
+        LIBINTL_LIBRARY
+        LIBICONV_INCLUDE_DIR
+        LIBICONV_LIBRARY
+)
