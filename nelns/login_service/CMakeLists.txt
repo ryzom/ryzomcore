@@ -20,7 +20,6 @@ target_include_directories(nelns_login_service PUBLIC ${ZLIB_INCLUDE_DIR} ${CMAK
 
 target_link_libraries(nelns_login_service
         MySQL::MySQL
-        ${ZLIB_LIBRARIES}
         NeL::misc
         NeL::net
 )

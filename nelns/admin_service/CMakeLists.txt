@@ -2,13 +2,12 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(admin_service WIN32 ${SRC})
 
-TARGET_INCLUDE_DIRECTORIES(admin_service PRIVATE ${ZLIB_INCLUDE_DIR})
-
 TARGET_LINK_LIBRARIES(admin_service
-						MySQL::MySQL
-						${ZLIB_LIBRARIES}
-						NeL::misc
-						NeL::net)
+        PRIVATE
+        MySQL::MySQL
+        NeL::misc
+        NeL::net
+)
 
 NL_DEFAULT_PROPS(admin_service "NelNS, Services: Admin Service")
 NL_ADD_RUNTIME_FLAGS(admin_service)
