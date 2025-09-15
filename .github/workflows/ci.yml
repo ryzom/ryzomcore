@@ -59,7 +59,7 @@ jobs:
       - id: cache
         uses: actions/cache@v4
         with:
-          key: nel-${{ matrix.os }}-${{ hashFiles('nel/**', '.github/nel/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: nel-${{ matrix.os }}-${{ hashFiles('nel/**', '.github/nel/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
 
       - uses: ./.github/nel
@@ -96,7 +96,7 @@ jobs:
       - id: cache
         uses: actions/cache@v4
         with:
-          key: nelns-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'nelns/**', '.github/nelns/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: nelns-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'nelns/**', '.github/nelns/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
 
       - uses: ./.github/nelns
@@ -135,7 +135,7 @@ jobs:
       - id: cache
         uses: actions/cache@v4
         with:
-          key: ryzom-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'ryzom/**', '.github/ryzom/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: ryzom-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'ryzom/**', '.github/ryzom/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/ryzom/ryzom-*
 
       - uses: ./.github/ryzom
@@ -174,7 +174,7 @@ jobs:
       - id: cache
         uses: actions/cache@v4
         with:
-          key: snowballs-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'snowballs2/**', '.github/snowballs/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: snowballs-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'snowballs2/**', '.github/snowballs/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-*
 
       - uses: ./.github/snowballs
@@ -212,7 +212,7 @@ jobs:
       - id: cache
         uses: actions/cache@v4
         with:
-          key: studio-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'studio/**', '.github/studio/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: studio-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'studio/**', '.github/studio/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/studio/studio-*
 
       - uses: ./.github/studio
