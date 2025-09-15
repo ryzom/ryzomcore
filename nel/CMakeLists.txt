@@ -25,6 +25,7 @@ IF(WITH_3D)
     HUNTER_ADD_PACKAGE(freetype)
     FIND_PACKAGE(freetype CONFIG REQUIRED)
     SET(FREETYPE_LIBRARIES freetype::freetype)
+    add_library(Freetype::Freetype ALIAS freetype::freetype)
   ELSE()
     FIND_PACKAGE(Freetype)
   ENDIF() #hunter
