@@ -402,20 +402,8 @@ IF(WITH_NEL)
   SET(NELGUI_LIBRARIES NeL::gui)
   SET(NELSOUND_LIBRARIES NeL::sound)
 
-  # wrap find_package to be able to use local projects as dependencies the same way if it where used from installation
-  set(subprojects
-          NeL
-          CACHE STRING "Subprojects to use directly from source"
-  )
-  macro(find_package)
-    IF (POLICY CMP0057)
-      cmake_policy(SET CMP0057 NEW)
-    ENDIF ()
-
-    if (NOT "${ARGV0}" IN_LIST subprojects)
-      _find_package(${ARGV})
-    endif ()
-  endmacro()
+  # allow find_package to find projects from within the mono repo
+  list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/nel/internal")
 ELSE()
 #  FIND_PACKAGE(NeL COMPONENTS 3d misc pacs sound nimp REQUIRED)
   FIND_PACKAGE(NeL REQUIRED)
