@@ -23,6 +23,7 @@ on:
       - CMakeModules/**
       - CMakeLists.txt
       - CMakePresets.json
+  workflow_dispatch:
 
 jobs:
   build:
