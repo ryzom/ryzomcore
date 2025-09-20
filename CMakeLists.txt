@@ -193,6 +193,8 @@ IF(HUNTER_ENABLED)
   HUNTER_ADD_PACKAGE(libxml2)
   FIND_PACKAGE(libxml2 CONFIG REQUIRED)
   SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
+  # add compatibility with cmake find module
+  add_library(LibXml2::LibXml2 ALIAS libxml2::libxml2)
 
   # cross compiling doesn't quite work on the hunter openssl package therefor compile it separately and use it
   IF(NOT CMAKE_CROSSCOMPILING)
