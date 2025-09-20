@@ -229,19 +229,20 @@ ENDIF()
 NL_CONFIGURE_CHECKS()
 
 IF(WITH_STATIC_LIBXML2)
-  ADD_DEFINITIONS(-DLIBXML_STATIC)
+  ADD_DEFINITIONS(-D)
+  if(TARGET LibXml2::LibXml2)
+      set_property(TARGET LibXml2::LibXml2
+              APPEND
+              PROPERTY INTERFACE_COMPILE_DEFINITIONS
+              LIBXML_STATIC
+      )
+  endif ()
 ENDIF()
 
 FIND_PACKAGE(Iconv QUIET)
 IF(ICONV_FOUND)
   INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
-  if(TARGET libxml2::libxml2)
-      set_property(TARGET libxml2::libxml2
-              APPEND
-              PROPERTY INTERFACE_LINK_LIBRARIES
-              ${ICONV_LIBRARIES}
-      )
-  else ()
+  if(TARGET LibXml2::LibXml2)
       set_property(TARGET LibXml2::LibXml2
             APPEND
             PROPERTY INTERFACE_LINK_LIBRARIES
