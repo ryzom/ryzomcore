@@ -192,7 +192,6 @@ IF(HUNTER_ENABLED)
 
   HUNTER_ADD_PACKAGE(libxml2)
   FIND_PACKAGE(libxml2 CONFIG REQUIRED)
-  SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
   # add compatibility with cmake find module
   add_library(LibXml2::LibXml2 ALIAS libxml2::libxml2)
 
@@ -206,7 +205,6 @@ IF(HUNTER_ENABLED)
 
   # for precompiled headers, not needed if using TARGET_PRECOMPILE_HEADERS() from cmake 3.16+
   SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
-  SET(LIBXML2_INCLUDE_DIR ${LIBXML2_ROOT}/include/libxml2)
 ELSE()
 FIND_PACKAGE(ZLIB REQUIRED)
 FIND_PACKAGE(LibXml2 REQUIRED)
@@ -237,13 +235,29 @@ ENDIF()
 FIND_PACKAGE(Iconv QUIET)
 IF(ICONV_FOUND)
   INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
-  SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
+  if(TARGET libxml2::libxml2)
+      set_property(TARGET libxml2::libxml2
+              APPEND
+              PROPERTY INTERFACE_LINK_LIBRARIES
+              ${ICONV_LIBRARIES}
+      )
+  else ()
+      set_property(TARGET LibXml2::LibXml2
+            APPEND
+            PROPERTY INTERFACE_LINK_LIBRARIES
+            ${ICONV_LIBRARIES}
+      )
+  endif ()
 ENDIF()
 
 IF(WITH_STATIC)
   # libxml2 could need winsock2 library
   IF(WINSOCK2_LIB)
-    SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${WINSOCK2_LIB})
+    set_property(TARGET LibXml2::LibXml2
+            APPEND
+            PROPERTY INTERFACE_LINK_LIBRARIES
+            ${WINSOCK2_LIB}
+    )
   ENDIF()
 ENDIF()
 
