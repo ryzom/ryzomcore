@@ -263,7 +263,7 @@ IF(WITH_STATIC)
             APPEND
             PROPERTY INTERFACE_LINK_LIBRARIES
             ${WINSOCK2_LIB}
-    )
+      )
   ENDIF()
 ENDIF()
 

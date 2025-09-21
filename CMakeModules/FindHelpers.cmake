@@ -708,13 +708,20 @@ MACRO(FIND_LIBXML2)
     FIND_PACKAGE(LibXml2 REQUIRED)
 
     IF(WIN32 OR WITH_STATIC_LIBXML2)
-      LIST(APPEND LIBXML2_DEFINITIONS -DLIBXML_STATIC)
+      set_property(TARGET LibXml2::LibXml2
+              APPEND
+              PROPERTY INTERFACE_COMPILE_DEFINITIONS
+              LIBXML_STATIC
+      )
     ENDIF()
 
     FIND_PACKAGE(Iconv QUIET)
     IF(ICONV_FOUND)
-#      LIST(APPEND CURL_INCLUDE_DIRS ${ICONV_INCLUDE_DIR})
-      LIST(APPEND LIBXML2_LIBRARIES ${ICONV_LIBRARIES})
+      set_property(TARGET LibXml2::LibXml2
+              APPEND
+              PROPERTY INTERFACE_LINK_LIBRARIES
+              ${ICONV_LIBRARIES}
+      )
     ENDIF()
 
     IF(WITH_STATIC)
@@ -723,20 +730,32 @@ MACRO(FIND_LIBXML2)
         FIND_LIBRARY(WINSOCK2_LIB ws2_32)
       
         IF(WINSOCK2_LIB)
-          LIST(APPEND LIBXML2_LIBRARIES ${WINSOCK2_LIB})
+          set_property(TARGET LibXml2::LibXml2
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${WINSOCK2_LIB}
+          )
         ENDIF()
 
         FIND_LIBRARY(CRYPT32_LIB Crypt32)
 
         IF(CRYPT32_LIB)
-          LIST(APPEND LIBXML2_LIBRARIES ${CRYPT32_LIB})
+          set_property(TARGET LibXml2::LibXml2
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${CRYPT32_LIB}
+          )
         ENDIF()
       ELSEIF(NOT HUNTER_ENABLED)
         # under Linux and OS X, recent libxml2 versions are linked against liblzma
         FIND_PACKAGE(LibLZMA)
 
         IF(LIBLZMA_LIBRARIES)
-          LIST(APPEND LIBXML2_LIBRARIES ${LIBLZMA_LIBRARIES})
+          set_property(TARGET LibXml2::LibXml2
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${LIBLZMA_LIBRARIES}
+          )
         ENDIF()
       ENDIF()
     ENDIF()
