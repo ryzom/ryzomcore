@@ -130,15 +130,11 @@ IF(FFMPEG_FOUND)
 ENDIF()
 
 
-TARGET_INCLUDE_DIRECTORIES(nelsound PRIVATE ${LIBXML2_INCLUDE_DIR})
-
 TARGET_LINK_LIBRARIES(nelsound nelmisc nelligo nelgeorges nel3d nelsnd_lowlevel)
 NL_DEFAULT_PROPS(nelsound "NeL, Library: NeL Sound")
 NL_ADD_RUNTIME_FLAGS(nelsound)
 
 NL_ADD_LIB_SUFFIX(nelsound)
-
-TARGET_COMPILE_DEFINITIONS(nelsound PRIVATE ${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
   target_precompile_headers(nelsound PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdsound.h)
