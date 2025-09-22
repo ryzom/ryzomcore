@@ -201,7 +201,6 @@ IF(WITH_RYZOM_CLIENT)
   TARGET_INCLUDE_DIRECTORIES(ryzom_client
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${LIBXML2_INCLUDE_DIR}
         ${LUA_INCLUDE_DIR}
         ${LUABIND_INCLUDE_DIR}
         ${CURL_INCLUDE_DIRS}
@@ -228,6 +227,7 @@ IF(WITH_RYZOM_CLIENT)
               ryzom_clientsheets
               ryzom_gameshare
               NeL::pacs
+              LibXml2::LibXml2
               ${LUA_LIBRARIES}
               ${LUABIND_LIBRARIES}
               ${CURL_LIBRARIES}
@@ -247,7 +247,7 @@ IF(WITH_RYZOM_CLIENT)
     TARGET_LINK_LIBRARIES(ryzom_client PRIVATE ${msquic_LIBRARIES})
   ENDIF()
 
-  TARGET_COMPILE_DEFINITIONS(ryzom_client PRIVATE ${LIBXML2_DEFINITIONS} ${CURL_DEFINITIONS} ${LUABIND_DEFINITIONS})
+  TARGET_COMPILE_DEFINITIONS(ryzom_client PRIVATE ${CURL_DEFINITIONS} ${LUABIND_DEFINITIONS})
 
   NL_DEFAULT_PROPS(ryzom_client "Ryzom, Client: Ryzom Core 4")
   NL_ADD_RUNTIME_FLAGS(ryzom_client)
