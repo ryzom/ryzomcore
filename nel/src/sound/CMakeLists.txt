@@ -116,21 +116,30 @@ TARGET_INCLUDE_DIRECTORIES(nelsound
 		${OGG_INCLUDE_DIR}
 )
 
-TARGET_LINK_LIBRARIES(nelsound ${VORBISFILE_LIBRARY} ${VORBIS_LIBRARY})
+TARGET_LINK_LIBRARIES(nelsound PUBLIC ${VORBISFILE_LIBRARY} ${VORBIS_LIBRARY})
 
 IF(WITH_STATIC OR ${VORBISFILE_LIBRARY} MATCHES "\\.a")
   # Add libogg dependency only if target is static because to libvorbisfile
-  TARGET_LINK_LIBRARIES(nelsound ${OGG_LIBRARY})
+  TARGET_LINK_LIBRARIES(nelsound PUBLIC ${OGG_LIBRARY})
 ENDIF()
 
 IF(FFMPEG_FOUND)
 	TARGET_COMPILE_DEFINITIONS(nelsound PRIVATE FFMPEG_ENABLED)
 	TARGET_INCLUDE_DIRECTORIES(nelsound PRIVATE ${FFMPEG_INCLUDE_DIRS})
-	TARGET_LINK_LIBRARIES(nelsound ${FFMPEG_LIBRARIES})
+	TARGET_LINK_LIBRARIES(nelsound PUBLIC ${FFMPEG_LIBRARIES})
 ENDIF()
 
 
-TARGET_LINK_LIBRARIES(nelsound nelmisc nelligo nelgeorges nel3d nelsnd_lowlevel)
+TARGET_LINK_LIBRARIES(nelsound
+        PUBLIC
+        nelmisc
+        nelligo
+        nelgeorges
+        nel3d
+        nelsnd_lowlevel
+        PRIVATE
+        LibXml2::LibXml2
+)
 NL_DEFAULT_PROPS(nelsound "NeL, Library: NeL Sound")
 NL_ADD_RUNTIME_FLAGS(nelsound)
 
