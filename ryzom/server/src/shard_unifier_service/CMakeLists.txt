@@ -17,8 +17,6 @@ TARGET_LINK_LIBRARIES(ryzom_shard_unifier_service
 NL_DEFAULT_PROPS(ryzom_shard_unifier_service "Ryzom, Services: Shard Unifier Service (SUS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_shard_unifier_service)
 
-TARGET_COMPILE_DEFINITIONS(ryzom_shard_unifier_service PRIVATE ${LIBXML2_DEFINITIONS})
-
 IF (MSVC)
     SET_TARGET_PROPERTIES(ryzom_shard_unifier_service PROPERTIES COMPILE_FLAGS "/bigobj")
 ENDIF ()
