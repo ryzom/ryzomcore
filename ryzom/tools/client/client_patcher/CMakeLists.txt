@@ -7,14 +7,10 @@ FILE(GLOB SRC main.cpp
         ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.h
 )
 
-# always enable custom patch server
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
-
 ADD_EXECUTABLE(ryzom_client_patcher ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_client_patcher
         PRIVATE
-        ${LIBXML2_INCLUDE_DIR}
         ${CURL_INCLUDE_DIRS}
         ${ZLIB_INCLUDE_DIR}
         ${CMAKE_SOURCE_DIR}/ryzom/client/src
