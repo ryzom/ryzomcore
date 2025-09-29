@@ -1,85 +1,15 @@
--- ## a smale fake gif player
+-- =================== rygif.lua (auto-frame + spritesheet support) ===================
 
-local rygif = {}
+rygif = {}
 rygif.__index = rygif
 
 -- =================== Global loader state ===================
--- Shared across all rygif instances.
-local LoadedStems   = {}
-local PendingStems  = {}
-local MaxAtlasesPerFrame = 1
-local LoadTimeBudgetSec  = 0.002
+LoadedStems   = {}
+PendingStems  = {}
+MaxAtlasesPerFrame = 1
+LoadTimeBudgetSec  = 0.002
 
 -- =================== Utility ===================
-local function file_exists(path)
-    local f = io.open(path, "r")
-    if f then f:close() return true end
-    return false
-end
-
-local function first_existing_path(candidates)
-    for _, p in ipairs(candidates) do
-        local f = io.open(p, "r")
-        if f then f:close(); return p end
-    end
-    return nil
-end
-
-local function list_uv_packs(base)
-    local packs = {}
-    local i = 1
-
-    -- Try multi-pack: base_1.txt, base_2.txt, ...
-    while true do
-        local uv = first_existing_path({
-            ("user/%s_%d.txt"):format(base, i),  -- prefer user/
-            ("%s_%d.txt"):format(base, i),       -- fallback: root
-        })
-        if not uv then break end
-
-        -- Stem = filename without path + ".txt" (e.g., "trailer_2")
-        local stem = uv:match("([^/\\]+)%.txt$")
-        table.insert(packs, { stem = stem, uv = uv })
-        i = i + 1
-    end
-
-    -- Fallback: single-pack base.txt
-    if #packs == 0 then
-        local uv_single = first_existing_path({
-            ("user/%s.txt"):format(base),        -- prefer user/
-            ("%s.txt"):format(base),             -- fallback: root
-        })
-        if uv_single then
-            local stem = uv_single:match("([^/\\]+)%.txt$")
-            packs = { { stem = stem, uv = uv_single } }
-        end
-    end
-
-    return packs
-end
-
-local function extract_num(s)
-    local n = tostring(s):match("(%d+)%.[^%.]+$")
-    return n and tonumber(n) or nil
-end
-
-local function sort_frames_natural(frames)
-    local keyed, all_num = {}, true
-    for _, name in ipairs(frames) do
-        local n = extract_num(name)
-        if not n then all_num = false break end
-        table.insert(keyed, { n = n, name = name })
-    end
-    if all_num then
-        table.sort(keyed, function(a,b) return a.n < b.n end)
-        local out = {}
-        for _, it in ipairs(keyed) do table.insert(out, it.name) end
-        return out
-    end
-    return frames
-end
-
--- Per-instance warm (touches a texture once so the engine uploads it to VRAM)
 local function warm_texture_once_for(targetGroupPath, targetGroupId, texname)
     local grp = getUI(targetGroupPath)
     if grp then
@@ -121,14 +51,11 @@ end
 local function pump_loader_slice()
     local start_clock = os.clock()
     local loaded_this_frame = 0
-
     while loaded_this_frame < MaxAtlasesPerFrame and #PendingStems > 0 do
         local elapsed = os.clock() - start_clock
-        if loaded_this_frame > 0 and elapsed >= LoadTimeBudgetSec then
-            break
-        end
+        if loaded_this_frame > 0 and elapsed >= LoadTimeBudgetSec then break end
         local stem = table.remove(PendingStems, 1)
-        loadTextures(stem, true) -- loads <stem>.png + <stem>.txt
+        loadTextures(stem, true) -- ⚠️ client call
         LoadedStems[stem] = true
         loaded_this_frame = loaded_this_frame + 1
     end
@@ -148,66 +75,51 @@ function rygif.setLoadBudgets(max_per_frame, time_budget_ms)
 end
 
 -- =================== Player ===================
--- opts (optional): { groupPath = "...", groupId = "..." }
-function rygif.new(base, fps, x, y, loop, opts)
+function rygif.new(base, fps, loop, opts)
     local self = setmetatable({}, rygif)
     self.fps  = fps or 12
-    self.x    = x or 0
-    self.y    = y or 0
     self.loop = (loop ~= false)
-    self.base = base
-
-    -- Per-instance UI targets
     self.targetGroupPath = (opts and opts.groupPath)
     self.targetGroupId   = (opts and opts.groupId)
 
-    self.frames = {}
-    self.frameCount = 0
-    self.ready = false
-    self.warmed = false
-    self.playAfterReady = true
-
-    -- Playback/pausing state
-    self.startTime   = os.clock()
-    self.paused      = false
-    self.pauseStart  = 0
-    self.pauseAccum  = 0
-    self.currentIndex = 1
-    self.pausedIndex  = 1
-
-    -- 1) Find packs and enqueue
-    self.packs = list_uv_packs(base)
-    assert(#self.packs > 0, ("No UV files found for '%s' (expected %s.txt or user/%s.txt, ...)"):format(base, base, base))
-
-    local stems = {}
-    for _, p in ipairs(self.packs) do table.insert(stems, p.stem) end
-    enqueue_stems(stems, true)
-
-    -- 2) Read UVs
-    for _, p in ipairs(self.packs) do
-        local f = assert(io.open(p.uv, "r"), "Cannot open: " .. p.uv)
-        for line in f:lines() do
-            line = line:match("^%s*(.-)%s*$")
-            if line ~= "" and line:sub(1,1) ~= "#" then
-                local fname = line:match("([^%s]+)")
-                if fname then table.insert(self.frames, fname) end
-            end
-        end
-        f:close()
+    if not (opts and opts.frameCount and opts.sheetCount) then
+        error("You must provide opts.frameCount and opts.sheetCount")
     end
 
-    self.frames = sort_frames_natural(self.frames)
-    self.frameCount = #self.frames
-    assert(self.frameCount > 0, "No frames found in UV files.")
+    local prefix = base:gsub("%.jpg$", "") -- strip accidental .jpg
+
+    -- 🎯 generate frame list
+    self.frames = {}
+    for i = 1, opts.frameCount do
+        local fname = string.format("%s_%05d.jpg", prefix, i)
+        table.insert(self.frames, fname)
+    end
+
+    -- 🎯 enqueue all spritesheets (without extension, client adds .png)
+    local stems = {}
+    for s = 1, opts.sheetCount do
+        table.insert(stems, string.format("%s_%d", prefix, s))
+    end
+    enqueue_stems(stems, true)
+
+    self.frameCount   = #self.frames
+    self.ready        = false
+    self.warmed       = false
+    self.playAfterReady = true
+
+    self.startTime    = os.clock()
+    self.paused       = false
+    self.pauseStart   = 0
+    self.pauseAccum   = 0
+    self.currentIndex = 1
+    self.pausedIndex  = 1
 
     return self
 end
 
 function rygif:isReady()
-    for _, p in ipairs(self.packs) do
-        if LoadedStems[p.stem] ~= true then
-            return false
-        end
+    for stem, state in pairs(LoadedStems) do
+        if state ~= true then return false end
     end
     return true
 end
@@ -235,7 +147,6 @@ function rygif:pause()
         end
         self.currentIndex = idx
         self.pausedIndex = idx
-
         self.paused = true
         self.pauseStart = now
     end
@@ -254,10 +165,7 @@ function rygif:reset()
 end
 
 function rygif:draw()
-    -- Pump loader a bit each frame
     pump_loader_slice()
-
-    -- Wait for readiness
     if not self.ready then
         if self:isReady() then
             self.ready = true
@@ -267,24 +175,19 @@ function rygif:draw()
             end
             if self.playAfterReady then self.paused = false end
         else
-            -- Not ready yet: show first frame as a stand-in
             if #self.frames > 0 then
-                self:TextureDraw(self.frames[1], self.x, self.y)
+                self:TextureDraw(self.frames[1])
             end
             return
         end
     end
-
-    -- If paused, draw the frozen frame captured when pausing
     if self.paused then
         local idx = self.pausedIndex or 1
         if idx < 1 then idx = 1 end
         if idx > self.frameCount then idx = self.frameCount end
-        self:TextureDraw(self.frames[idx], self.x, self.y)
+        self:TextureDraw(self.frames[idx])
         return
     end
-
-    -- Running: compute current frame index and draw it
     local now = os.clock()
     local elapsed = now - self.startTime - (self.pauseAccum or 0)
     local idx = math.floor(elapsed * (self.fps or 12))
@@ -294,10 +197,10 @@ function rygif:draw()
         idx = math.min(idx + 1, self.frameCount)
     end
     self.currentIndex = idx
-    self:TextureDraw(self.frames[idx], self.x, self.y)
+    self:TextureDraw(self.frames[idx])
 end
 
-function rygif:TextureDraw(texture_img, x, y)
+function rygif:TextureDraw(texture_img)
     local main_ui = getUI(self.targetGroupPath)
     if not main_ui then return end
     local group = main_ui:find(self.targetGroupId)
@@ -307,4 +210,58 @@ function rygif:TextureDraw(texture_img, x, y)
     img.texture = texture_img
 end
 
-return rygif
+-- =================== Global Dispatcher ===================
+_G._GIFPLAYERS = _G._GIFPLAYERS or {}
+
+function GIF_Register(player)
+    if not player or not player.targetGroupId then return end
+    _GIFPLAYERS[player.targetGroupId] = player
+end
+
+function GIF_UnregisterById(groupId)
+    _GIFPLAYERS[groupId] = nil
+end
+
+function GIF_DrawAll()
+    for _, p in pairs(_GIFPLAYERS) do
+        p:draw()
+    end
+end
+
+function GIF_Play(groupId)
+    local p = _GIFPLAYERS[groupId]
+    if p then p:play() end
+end
+
+function GIF_Pause(groupId)
+    local p = _GIFPLAYERS[groupId]
+    if p then p:pause() end
+end
+
+function GIF_ShowPause(groupId)
+    --TODO add a Pause or Play Icon
+end
+
+function GIF_Reset(groupId)
+    local p = _GIFPLAYERS[groupId]
+    if p then p:reset() end
+end
+
+function GIF_Toggle(groupId)
+    local p = _GIFPLAYERS[groupId]
+    if p.paused then
+        p:play()
+    else
+        p:pause()
+    end
+end
+
+function GIF_IsPaused(groupId)
+    local p = _GIFPLAYERS[groupId]
+    return p and p.paused == true or false
+end
+
+function GIF_SetFPS(groupId, fps)
+    local p = _GIFPLAYERS[groupId]
+    if p then p:setFPS(tonumber(fps) or 12) end
+end
