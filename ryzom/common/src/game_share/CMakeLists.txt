@@ -50,8 +50,6 @@ NL_DEFAULT_PROPS(ryzom_gameshare "Ryzom, Library: Game Share")
 NL_ADD_RUNTIME_FLAGS(ryzom_gameshare)
 NL_ADD_LIB_SUFFIX(ryzom_gameshare)
 
-TARGET_COMPILE_DEFINITIONS(ryzom_gameshare)
-
 IF(WITH_PCH)
   target_precompile_headers(ryzom_gameshare PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
