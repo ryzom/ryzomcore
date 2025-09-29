@@ -89,7 +89,7 @@ ADD_EXECUTABLE(ryzom_entities_game_service WIN32
 	${SRC_STABLES}
 	${SRC_TEAM_MANAGER})
 
-TARGET_INCLUDE_DIRECTORIES(ryzom_entities_game_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_entities_game_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 		                PRIVATE
@@ -108,8 +108,6 @@ TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 
 NL_DEFAULT_PROPS(ryzom_entities_game_service "Ryzom, Services: Entities Game Service (EGS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)
-
-TARGET_COMPILE_DEFINITIONS(ryzom_entities_game_service PRIVATE ${LIBXML2_DEFINITIONS})
 
 IF(MSVC)
 	SET_TARGET_PROPERTIES(ryzom_entities_game_service PROPERTIES COMPILE_FLAGS "/bigobj")
