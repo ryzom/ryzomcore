@@ -677,14 +677,22 @@ MACRO(FIND_LIBCURL)
         # CURL can depend on libidn
         FIND_LIBRARY(IDN_LIBRARY idn)
         IF(IDN_LIBRARY)
-          LIST(APPEND CURL_LIBRARIES ${IDN_LIBRARY})
+          set_property(TARGET CURL::libcurl
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${IDN_LIBRARY}
+          )
         ENDIF()
 
         # CURL Macports version can depend on libidn, libintl and libiconv too
         IF(APPLE)
           FIND_LIBRARY(INTL_LIBRARY intl)
           IF(INTL_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${INTL_LIBRARY})
+            set_property(TARGET CURL::libcurl
+                    APPEND
+                    PROPERTY INTERFACE_LINK_LIBRARIES
+                    ${INTL_LIBRARY}
+            )
           ENDIF()
         ELSE()
           # Only used by libcurl under Linux
@@ -695,8 +703,16 @@ MACRO(FIND_LIBCURL)
           #ENDIF()
 
           # Only Linux version of libcurl depends on OpenSSL
-          LIST(APPEND CURL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
-          LIST(APPEND CURL_LIBRARIES ${OPENSSL_LIBRARIES})
+          set_property(TARGET CURL::libcurl
+                  APPEND
+                  PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+                  ${OPENSSL_INCLUDE_DIR}
+          )
+          set_property(TARGET CURL::libcurl
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${OPENSSL_LIBRARIES}
+          )
         ENDIF()
       ENDIF()
     ENDIF()

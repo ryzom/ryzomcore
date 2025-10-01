@@ -230,7 +230,7 @@ IF(WITH_RYZOM_CLIENT)
               LibXml2::LibXml2
               ${LUA_LIBRARIES}
               ${LUABIND_LIBRARIES}
-              ${CURL_LIBRARIES}
+              CURL::libcurl
               ${OPENSSL_LIBRARIES}
   )
 

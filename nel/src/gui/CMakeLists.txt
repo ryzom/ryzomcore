@@ -21,8 +21,8 @@ TARGET_LINK_LIBRARIES(nelgui
         nel3d
         ${LUA_LIBRARIES}
         ${LUABIND_LIBRARIES}
-        ${CURL_LIBRARIES}
         PRIVATE
+        CURL::libcurl
         LibXml2::LibXml2
 )
 
