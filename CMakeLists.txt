@@ -245,13 +245,12 @@ IF(WITH_STATIC_LIBXML2)
 ENDIF()
 
 FIND_PACKAGE(Iconv QUIET)
-IF(ICONV_FOUND)
-  INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
+IF(Iconv_FOUND)
   if(TARGET LibXml2::LibXml2 AND NOT HUNTER_ENABLED)
       set_property(TARGET LibXml2::LibXml2
             APPEND
             PROPERTY INTERFACE_LINK_LIBRARIES
-            ${ICONV_LIBRARIES}
+            Iconv::Iconv
       )
   endif ()
 ENDIF()
