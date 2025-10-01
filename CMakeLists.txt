@@ -188,12 +188,17 @@ IF(HUNTER_ENABLED)
   HUNTER_ADD_PACKAGE(ZLIB)
 
   FIND_PACKAGE(ZLIB CONFIG REQUIRED)
-  SET(ZLIB_LIBRARY ZLIB::zlib)
+  # add compatibility with cmake findZLIB module
+  if(ZLIB_FOUND AND NOT TARGET ZLIB::ZLIB)
+      add_library(ZLIB::ZLIB ALIAS ZLIB::zlib)
+  endif()
 
   HUNTER_ADD_PACKAGE(libxml2)
   FIND_PACKAGE(libxml2 CONFIG REQUIRED)
   # add compatibility with cmake find module
-  add_library(LibXml2::LibXml2 ALIAS libxml2::libxml2)
+  if(libxml2_FOUND AND NOT TARGET LibXml2::LibXml2)
+      add_library(LibXml2::LibXml2 ALIAS libxml2::libxml2)
+  endif()
 
   # cross compiling doesn't quite work on the hunter openssl package therefor compile it separately and use it
   IF(NOT CMAKE_CROSSCOMPILING)

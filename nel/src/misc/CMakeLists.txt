@@ -245,7 +245,14 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ../../3rdparty)
 TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE config_file)
 
-TARGET_LINK_LIBRARIES(nelmisc PUBLIC ${CMAKE_THREAD_LIBS_INIT} LibXml2::LibXml2 ${ZLIB_LIBRARY} nel_sevenzip)
+TARGET_LINK_LIBRARIES(nelmisc
+        PUBLIC
+        ${CMAKE_THREAD_LIBS_INIT}
+        LibXml2::LibXml2
+        nel_sevenzip
+        PRIVATE
+        ZLIB::ZLIB
+)
 
 NL_DEFAULT_PROPS(nelmisc "NeL, Library: NeL Misc")
 NL_ADD_RUNTIME_FLAGS(nelmisc)
