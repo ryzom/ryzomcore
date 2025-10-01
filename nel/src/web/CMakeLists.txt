@@ -7,7 +7,6 @@ NL_TARGET_LIB(nelweb ${HEADERS} ${SRC})
 add_project_library_alias(nelweb web)
 
 TARGET_INCLUDE_DIRECTORIES(nelweb PRIVATE ../../3rdparty)
-TARGET_INCLUDE_DIRECTORIES(nelweb PRIVATE ${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nelweb
         PUBLIC
@@ -15,7 +14,7 @@ TARGET_LINK_LIBRARIES(nelweb
         nel_sevenzip
         PRIVATE
         CURL::libcurl
-        ${OPENSSL_LIBRARIES}
+        OpenSSL::SSL
         LibXml2::LibXml2
 )
 
@@ -23,8 +22,6 @@ NL_DEFAULT_PROPS(nelweb "NeL, Library: NeL Web")
 NL_ADD_RUNTIME_FLAGS(nelweb)
 
 NL_ADD_LIB_SUFFIX(nelweb)
-
-TARGET_COMPILE_DEFINITIONS(nelweb PRIVATE ${CURL_DEFINITIONS})
 
 IF(WITH_PCH)
   target_precompile_headers(nelweb PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdweb.h)
