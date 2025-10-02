@@ -14,7 +14,7 @@ TARGET_LINK_LIBRARIES(nelweb
         nel_sevenzip
         PRIVATE
         CURL::libcurl
-        OpenSSL::SSL
+        ${OPENSSL_LIBRARIES}
         LibXml2::LibXml2
 )
 
