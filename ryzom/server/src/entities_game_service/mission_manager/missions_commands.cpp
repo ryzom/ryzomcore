@@ -3738,6 +3738,19 @@ NLMISC_COMMAND(setTrigger, "set a custom trigger", "<trigger> [<web_app>] [<args
 	return true;
 }
 
+/*
+setRegionTrigger uiR2_Jungle18 app_arcc action=mScript_Run&script=7624&command=reset_all
+*/
+NLMISC_COMMAND(setRegionTrigger,"set region trigger","<region_name> <app> <params>")
+{
+	if (args.size() == 3)
+	{
+		CZoneManager::getInstance().addRegionTrigger(args[0], args[1]+" "+args[2]);
+		return true;
+	}
+	return false;
+}
+
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(muteUser, "mute a user", "<player name> <duration> [<universe>?]")
 {
