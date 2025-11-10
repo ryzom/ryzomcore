@@ -1601,21 +1601,6 @@ void CPatchManager::downloadFile (const string &source, const string &dest, NLMI
 	}
 }
 
-std::string removeExtension(const std::string &filename)
-{
-	if (filename.size() < 5)
-		return filename;
-
-	if (filename.size() >= 5 && filename.compare(filename.size() - 5, 5, ".bnpe") == 0)
-		return filename.substr(0, filename.size() - 5);
-
-	if (filename.size() >= 4 && filename.compare(filename.size() - 4, 4, ".bnp") == 0)
-		return filename.substr(0, filename.size() - 4);
-
-	return filename;
-}
-
-
 // ****************************************************************************
 // TODO : Review this uncompress routine to uncompress in a temp file before overwriting destination file
 
@@ -1644,7 +1629,7 @@ void CPatchManager::decompressFile (const string &filename)
 		deleteFile (filename);
 		throw Exception (err);
 	}
-	std::string dest = removeExtension(filename);
+	std::string dest = NLMISC::CFile::getFilenameWithoutExtension(filename);
 
 	setRWAccess(dest, false);
 	//if(isVerboseLog()) nlinfo("Calling nlfopen('%s','wb')", dest.c_str());
@@ -2847,7 +2832,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			string PatchName;
 			try
 			{
-				std::string dest = removeExtension(rFTP.FileName);
+				std::string dest = NLMISC::CFile::getFilenameWithoutExtension(rFTP.FileName);
 
 				PatchName = toString("%05d/", rFTP.Patches[j]) + dest + toString("_%05d", rFTP.Patches[j]) + ".patch";
 				sTranslate = CI18N::get("uiLoginGetFile") + " " + PatchName;
@@ -2866,7 +2851,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			catch (...)
 			{
 				// fallback to patch root directory
-				PatchName = rFTP.FileName.substr(0, rFTP.FileName.size()-4);
+				PatchName = NLMISC::CFile::getFilenameWithoutExtension(rFTP.FileName);
 				PatchName += toString("_%05d", rFTP.Patches[j]) + ".patch";
 				sTranslate = CI18N::get("uiLoginGetFile") + " " + PatchName;
 				pPM->setState(true, sTranslate);
