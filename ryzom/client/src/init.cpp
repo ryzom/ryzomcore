@@ -1338,7 +1338,7 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
-		CInterfaceManager::getInstance()->setInterfaceScale(1.f, true);
+		CInterfaceManager::getInstance()->setInterfaceScale(1.f, true, true);
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 		CWidgetManager::getInstance()->setWindowSnapInvert(ClientCfg.WindowSnapInvert);
