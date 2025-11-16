@@ -22,3 +22,9 @@ services:
     build:
       context: .
       dockerfile: snowballs2/docker/Dockerfile
+
+  web:
+    image: "ryzomcore/web"
+    build: "./web"
+    ports:
+      - "8080:8080"
