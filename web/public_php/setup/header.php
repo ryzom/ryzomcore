@@ -90,6 +90,7 @@ function update_database_structure($continue_r, $con, $file) {
 			printalert("danger", "Cannot read <em>" . $file . "</em>");
 			$continue = false;
 		} else {
+			printalert("info", "Running script <em>" . $file . "</em>");
 			if (mysqli_multi_query($con, $sql)) {
 				printalert("success", "Database structure updated using <em>" . $file . "</em>");
 				while (mysqli_more_results($con) && mysqli_next_result($con)) {
