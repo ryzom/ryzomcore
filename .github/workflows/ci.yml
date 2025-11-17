@@ -228,9 +228,33 @@ jobs:
           name: studio-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/studio/studio-*
 
+  web:
+    name: "Web"
+    needs: [ strings ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          key: studio-${{ matrix.os }}-${{ hashFiles('web/**', '.github/web/**') }}
+          path: ${{ needs.strings.outputs.build-dir }}/web/web-*
+
+      - uses: ./.github/web
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          build-dir: ${{ needs.strings.outputs.build-dir }}
+          build-version: ${{ needs.strings.outputs.build-version }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-${{ needs.strings.outputs.build-version }}
+          path: ${{ needs.strings.outputs.build-dir }}/web/web-*
+
 
   publish:
-    needs: [ strings, nelns, snowballs ]
+    needs: [ strings, nelns, snowballs, web ]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -240,6 +264,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           pattern: "*-ubuntu-24.04-*"
+          merge-multiple: true
+          path: ${{ needs.strings.outputs.build-dir }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: "web-docker-*"
           merge-multiple: true
           path: ${{ needs.strings.outputs.build-dir }}
 
@@ -253,3 +283,4 @@ jobs:
           docker images
           docker push "${{ needs.strings.outputs.image-group }}/ryzomcore-nelns"
           docker push "${{ needs.strings.outputs.image-group }}/ryzomcore-snowballs"
+          docker push "${{ needs.strings.outputs.image-group }}/ryzomcore-web"
