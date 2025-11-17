@@ -271,7 +271,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: "web-docker-*"
+          pattern: "web-*"
           merge-multiple: true
           path: ${{ needs.strings.outputs.build-dir }}
 
