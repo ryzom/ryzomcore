@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.20
-FROM trafex/php-nginx:latest
+FROM serversideup/php:8.4-fpm-apache
 
-COPY --parents docs private_php /app/
-COPY --exclude=config*.php public_php /var/www/html
+COPY --chown=www-data:www-data --parents docs private_php /var/www/html/
+COPY --chown=www-data:www-data public_php /var/www/html/public/

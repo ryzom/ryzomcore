@@ -28,3 +28,23 @@ services:
     build: "./web"
     ports:
       - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ryzom
+      MARIADB_USER: ryzom
+      MARIADB_PASSWORD: ryzom
+      MARIADB_DATABASE: ryzom
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
