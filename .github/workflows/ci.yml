@@ -246,6 +246,8 @@ jobs:
         with:
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
+          image-group: ${{ needs.strings.outputs.image-group }}
+          image-version: ${{ needs.strings.outputs.image-version }}
 
       - uses: actions/upload-artifact@v4
         with:
