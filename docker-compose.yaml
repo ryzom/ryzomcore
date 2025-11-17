@@ -28,6 +28,10 @@ services:
     build: "./web"
     ports:
       - "8080:8080"
+    volumes:
+      - ./web/docs:/var/www/html/docs
+      - ./web/private_php:/var/www/html/private_php
+      - ./web/public_php:/var/www/html/public
     depends_on:
       db:
         condition: service_healthy
