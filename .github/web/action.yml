@@ -16,10 +16,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Build
-      shell: bash
-      run: cmake --build --preset snowballs
-
     - name: Build Docker image
       shell: bash
       run: |
