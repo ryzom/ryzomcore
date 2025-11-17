@@ -31,7 +31,7 @@ services:
     volumes:
       - ./web/docs:/var/www/html/docs
       - ./web/private_php:/var/www/html/private_php
-      - ./web/public_php:/var/www/html/public
+      - ./web/public_php:/var/www/html/public # needs to be writable by the web server
     depends_on:
       db:
         condition: service_healthy
