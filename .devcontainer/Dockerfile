@@ -54,8 +54,16 @@ RUN apt install --yes \
         libxrandr-dev \
         wget
 
+
 # work arround as there is no debug version available
 RUN cp /lib/x86_64-linux-gnu/libcpptest.so /lib/x86_64-linux-gnu/libcpptestd.so
+
+# install msquic
+RUN wget --output-document=/tmp/msquic.deb https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb \
+    && dpkg --install /tmp/msquic.deb \
+    && apt update \
+    && apt install --yes \
+      libmsquic
 
 
 ARG CMAKE_VERSION=3.29.5
