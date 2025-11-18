@@ -27,6 +27,11 @@ RUN apt update; \
         libvorbisfile3 \
         libxml2
 
+RUN curl --output /tmp/microsoft.deb https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb \
+ && dpkg --install /tmp/microsoft.deb \
+ && apt update \
+ && apt install --yes \
+    libmsquic
 
 COPY build/ryzomcore-*.sh /tmp/install.sh
 

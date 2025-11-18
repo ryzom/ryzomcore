@@ -59,11 +59,15 @@ RUN apt install --yes \
 RUN cp /lib/x86_64-linux-gnu/libcpptest.so /lib/x86_64-linux-gnu/libcpptestd.so
 
 # install msquic
-RUN wget --output-document=/tmp/msquic.deb https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb \
-    && dpkg --install /tmp/msquic.deb \
+RUN wget --output-document=/tmp/microsoft.deb https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb \
+    && dpkg --install /tmp/microsoft.deb \
     && apt update \
     && apt install --yes \
-      libmsquic
+      libmsquic \
+    && wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h \
+    && wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h \
+    && wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h \
+    && sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
 
 ARG CMAKE_VERSION=3.29.5
