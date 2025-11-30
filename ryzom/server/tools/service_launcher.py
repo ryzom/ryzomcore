@@ -46,7 +46,7 @@ class ShardService(Service):
 	def spawnService(self):
 		os.chdir("/home/nevrax/shard/run")
 		lock_file = "/tmp/updating_primitives.lock"
-		if self.service_name == "egs" or self.service_name[:4] == "ais_":
+		if self.shard == "Gingo" and (self.service_name == "egs" or self.service_name[:4] == "ais_"):
 			if self.service_name == "egs" or not os.path.isfile(lock_file):
 				Path(lock_file).touch()
 				print("Reset git primitives...")
