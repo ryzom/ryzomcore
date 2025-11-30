@@ -137,7 +137,7 @@
 #include "pvp_manager/pvp_manager_2.h"
 #include "server_share/log_character_gen.h"
 #include "server_share/log_item_gen.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 #include "shop_type/character_shopping_list.h"
 #include "shop_type/items_for_sale.h"
 #include "shop_type/offline_character_command.h"
@@ -2083,7 +2083,7 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 
 	// save Last Respawn Tick if player respawns
 	_LastRespawnTick = CTickEventHandler::getGameCycle();
-	
+
 	if (IsRingShard)
 	{
 		nlinfo("Asking GPMS to TP character %s to (0,0) for respawn", _Id.toString().c_str());
@@ -2111,7 +2111,7 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 void CCharacter::applyRespawnEffects(bool applyDP)
 {
 	_IsTeleportFromRespawn = true;
-	
+
 	CSheetId usedSheet;
 	CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("rez", SLOT_EQUIPMENT::NECKLACE, usedSheet);
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
@@ -12076,6 +12076,11 @@ void CCharacter::setLangChannel(const string &lang)
 //-----------------------------------------------------------------------------
 void CCharacter::setNewTitle(const string &title)
 {
+
+#ifdef HAVE_MEMCACHED
+	if (title != _NewTitle)
+		CMemC::setWithIndex("Shard-Command", toString("setNewTitle:%s:%s", getName().toString().c_str(), title.c_str()));
+#endif
 	_NewTitle = title;
 }
 
@@ -22731,9 +22736,13 @@ bool CCharacter::setGuildId(uint32 guildId)
 			IShardUnifierEvent::getInstance()->onUpdateCharGuild(_Id, guildId);
 
 		_GuildId = guildId;
-#ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{'cid': %" NL_I64 "u}", _Id.getShortId()),
-					   toString("{ $set: {'guildId': %d} }", guildId));
+
+#ifdef HAVE_MEMCACHED
+		ucstring name = CEntityIdTranslator::getInstance()->getByEntity(getId());
+		CEntityIdTranslator::removeShardFromName(name);
+		CGuild* guild = CGuildManager::getInstance()->getGuildFromId(guildId);
+		if (guild)
+			CMemC::setWithIndex("Shard-Command", toString("setUserGuild:%s:%s", name.toUtf8().c_str(), guild->getName().toUtf8().c_str()));
 #endif
 		return true;
 	}
