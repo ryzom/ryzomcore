@@ -53,7 +53,7 @@ client = None
 def stopService(name):
 	global client
 	if not client:
-		client = requests_openapi.Client().load_spec_from_file(shard_path+"/tools/services/dagu_api.yaml")
+		client = requests_openapi.Client().load_spec_from_file(shard_path+"/tools/dagu_api.yaml")
 		client.set_server(requests_openapi.Server(url="http://gingo.ryzom.com:9888/api/v2"))
 
 	infos = client.getDAGDetails(fileName="Ryzom_"+name).json()
