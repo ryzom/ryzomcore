@@ -30,7 +30,7 @@
 #include "game_share/msg_client_server.h"
 #include "game_share/fame.h"
 #include "game_share/send_chat.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 #include "pvp_manager/pvp_manager_2.h"
 #include "pvp_manager/pvp_manager.h"
@@ -41,6 +41,8 @@
 #include "player_manager/character.h"
 #include "team_manager/team.h"
 #include "team_manager/team_manager.h"
+#include "guild_manager/guild_manager.h"
+#include "guild_manager/guild.h"
 #include "egs_globals.h"
 #include "stat_db.h"
 #include "admin.h"
@@ -471,19 +473,15 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 	{
 		if (DynChatEGS.addSession(channel, user->getEntityRowId(), writeRight))
 		{
-#ifdef HAVE_MONGO
-			string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
-			string::size_type pos = playerName.find('(');
-			if (pos != string::npos)
-				playerName = playerName.substr(0, pos);
-#endif
 			std::vector<TChanID> currentChannels = getCharacterRegisteredChannels(user);
 			currentChannels.push_back(channel);
 			_CharacterChannels.erase(user->getId());
 			_CharacterChannels.insert( make_pair(user->getId(), currentChannels) );
-#ifdef HAVE_MONGO
+			ucstring playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId());
+			CEntityIdTranslator::removeShardFromName(playerName);
+#ifdef HAVE_MEMCACHED
 			string channelName = DynChatEGS.getChanNameFromID(channel);
-			CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{ $addToSet: {'channels': '%s'} }", channelName.c_str()), true, false);
+			CMemC::setWithIndex("Shard-Command", toString("addFactionChannelToCharacter:%s:%s", playerName.toUtf8().c_str(), channelName.c_str()));
 #endif
 			if (userChannel)
 			{
@@ -504,11 +502,7 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 					(*it).second.push_back(user->getId());
 				}
 
-#ifndef HAVE_MONGO
-				const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
-#endif
-				broadcastMessage(channel, string("<INFO>"), "<-- "+playerName);
-
+				broadcastMessage(channel, string("<INFO>"), "<-- "+playerName.toUtf8());
 				sendChannelUsers(channel, user);
 			}
 		}
@@ -518,35 +512,18 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 //----------------------------------------------------------------------------
 void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter * user, bool userChannel)
 {
+	ucstring playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId());
+	CEntityIdTranslator::removeShardFromName(playerName);
 	std::vector<TChanID> currentChannels;
-#ifdef HAVE_MONGO
-	const string channelName = DynChatEGS.getChanNameFromID(channel);
-	string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
-	string::size_type pos = playerName.find('(');
-	if (pos != string::npos)
-		playerName = playerName.substr(0, pos);
-#endif
-
-
 	if (channel == DYN_CHAT_INVALID_CHAN) // Send leaves message to all user channels
 	{
 		currentChannels = getCharacterUserChannels(user);
 		for (uint i = 0; i < currentChannels.size(); i++)
-		{
-#ifndef HAVE_MONGO
-			const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
-#endif
-			broadcastMessage(currentChannels[i], string("<INFO>"), playerName+" -->[]");
-		}
+			broadcastMessage(currentChannels[i], string("<INFO>"), playerName.toUtf8()+" -->[]");
 	}
 
 	if (userChannel)
-	{
-#ifndef HAVE_MONGO
-		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
-#endif
-		broadcastMessage(channel, string("<INFO>"), playerName+" -->[]");
-	}
+		broadcastMessage(channel, string("<INFO>"), playerName.toUtf8()+" -->[]");
 
 	currentChannels = getCharacterRegisteredChannels(user);
 	for (uint i = 0; i < currentChannels.size(); i++)
@@ -615,8 +592,12 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 		}
 	}
 
-#ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{ $pull: {channels: '%s'} }", channelName.c_str()));
+#ifdef HAVE_MEMCACHED
+	if (channel != DYN_CHAT_INVALID_CHAN)
+	{
+		string channelName = DynChatEGS.getChanNameFromID(channel);
+		CMemC::setWithIndex("Shard-Command", toString("removeFactionChannelForCharacter:%s:%s", playerName.toUtf8().c_str(), channelName.c_str()));
+	}
 #endif
 }
 
@@ -640,27 +621,19 @@ void CPVPManager2::addRemoveFactionChannelToUserWithPriviledge(TChanID channel, 
 //----------------------------------------------------------------------------
 void CPVPManager2::playerConnects(CCharacter * user)
 {
-#ifdef HAVE_MONGO
-	string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
-	string::size_type pos = playerName.find('(');
-	if (pos != string::npos)
-		playerName = playerName.substr(0, pos);
-
-	CPlayer* player = PlayerManager.getPlayer(PlayerManager.getPlayerId(user->getId()));
-	if (player == NULL)
-		CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'rzlang': 'en', 'online': true} }", user->getId().getShortId(), user->getGuildId()), true);
+	ucstring playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId());
+	CEntityIdTranslator::removeShardFromName(playerName);
+#ifdef HAVE_MEMCACHED
+	CGuild* guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+	if (guild)
+		CMemC::setWithIndex("Shard-Command", toString("playerConnects:%s:%s:%s", playerName.toUtf8().c_str(), user->getNewTitle().c_str(), guild->getName().toUtf8().c_str()));
 	else
-		CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'rzlang': '%s', 'online': true} }", user->getId().getShortId(), user->getGuildId(), player->getUserLanguage().c_str()), true);
+		CMemC::setWithIndex("Shard-Command", toString("playerConnects:%s:%s:", playerName.toUtf8().c_str(), user->getNewTitle().c_str()));
 #endif
 
 	std::vector<TChanID> currentChannels = getCharacterUserChannels(user);
 	for (uint i = 0; i < currentChannels.size(); i++)
-	{
-#ifndef HAVE_MONGO
-		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
-#endif
-		broadcastMessage(currentChannels[i], string("<INFO>"), "<-- "+playerName);
-	}
+		broadcastMessage(currentChannels[i], string("<INFO>"), "<-- "+playerName.toUtf8());
 }
 
 //----------------------------------------------------------------------------
@@ -670,8 +643,10 @@ void CPVPManager2::playerDisconnects(CCharacter * user)
 	removeDuelInvitor(user->getId());
 	endDuel(user, "DUEL_DISCONNECT", "");
 
-#ifdef HAVE_MONGO
-	CMongo::update("ryzom_users", toString("{'cid': %" NL_I64 "u}", user->getId().getShortId()), "{ $set: {'online': false} }");
+#ifdef HAVE_MEMCACHED
+	ucstring playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId());
+	CEntityIdTranslator::removeShardFromName(playerName);
+	CMemC::setWithIndex("Shard-Command", toString("playerDisconnects:%s", playerName.toUtf8().c_str()));
 #endif
 
 	CPVPManager::getInstance()->playerDisconnects(user);
@@ -1212,17 +1187,6 @@ bool CPVPManager2::addFactionWar( PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan c
 /// create the faction chat channel when IOS mirror ready
 void CPVPManager2::onIOSMirrorUp()
 {
-#ifdef HAVE_MONGO
-	CMongo::init();
-#endif
-
-	// create extra factions channels
-	/*
-	createExtraFactionChannel("hominists");
-	createExtraFactionChannel("urasies");
-	createExtraFactionChannel("agnos");
-	*/
-
 	createExtraFactionChannel("marauders");
 	createExtraFactionChannel("ranger");
 
@@ -1232,45 +1196,30 @@ void CPVPManager2::onIOSMirrorUp()
 	createExtraFactionChannel("de", true);
 	createExtraFactionChannel("ru", true);
 	createExtraFactionChannel("es", true);
-
-	createExtraFactionChannel("usr_en", true);
-	createExtraFactionChannel("usr_fr", true);
-	createExtraFactionChannel("usr_de", true);
-	createExtraFactionChannel("usr_ru", true);
-	createExtraFactionChannel("usr_es", true);
-
 	createExtraFactionChannel("rf", true);
-	createExtraFactionChannel("rf-fr", true);
-	createExtraFactionChannel("rf-en", true);
-	createExtraFactionChannel("rf-es", true);
-	createExtraFactionChannel("rf-de", true);
-	createExtraFactionChannel("rf-ru", true);
-
-#ifdef HAVE_MONGO
-	CUniquePtr<DBClientCursor> cursor = CMongo::query("ryzom_channels", toString("{}"));
-	if (cursor.get())
-	{
-		while (cursor->more())
-		{
-			mongo::BSONObj obj = cursor->next();
-			nlinfo("mongo: new dyn channel to parse '%s'", obj.jsonString().c_str());
-
-			string name;
-			string password;
-
-			name = obj.getStringField("name");
-			password = obj.getStringField("password");
-
-			createUserChannel(name, password);
-		}
-	}
-#endif
 
 	for (uint i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; i++)
 	{
-		//createFactionChannel(PVP_CLAN::getClanFromIndex(i));
 		createFactionChannel((PVP_CLAN::TPVPClan)i);
 	}
+
+#ifdef HAVE_MEMCACHED
+	CMemC:init();
+	string nbr_usrchannels = CMemC::get("Shard-UserChannels-Nbr");
+	uint32 nbr;
+	NLMISC::fromString(nbr_usrchannels, nbr);
+	for (uint32 i=1; i <= nbr; i++)
+	{
+		string usr_channel = CMemC::get(toString("Shard-UserChannel-%d", i));
+		vector<std::string> infos;
+		if (usr_channel.length() > 2)
+		{
+			NLMISC::splitString(usr_channel, ":", infos);
+			if (infos.size() >= 2)
+				createUserChannel(infos[0], infos[1], i);
+		}
+	}
+#endif
 
 	for( CPlayerManager::TMapPlayers::const_iterator it = PlayerManager.getPlayers().begin(); it != PlayerManager.getPlayers().end(); ++it )
 	{
@@ -1324,7 +1273,7 @@ void CPVPManager2::createExtraFactionChannel(const std::string & channelName, bo
 	}
 }
 
-TChanID CPVPManager2::createUserChannel(const std::string & channelName, const std::string & pass)
+TChanID CPVPManager2::createUserChannel(const std::string & channelName, const std::string & pass, uint32 cacheIndex)
 {
 	// Don't allow channels called "GM" (to not clash with the /who gm command)
 	if (NLMISC::nlstricmp( channelName.c_str() , "GM" ) == 0)
@@ -1356,8 +1305,14 @@ TChanID CPVPManager2::createUserChannel(const std::string & channelName, const s
 		TChanID factionChannelId = DynChatEGS.addChan(channelName, channelTitle);
 		if (factionChannelId != DYN_CHAT_INVALID_CHAN)
 		{
-#ifdef HAVE_MONGO
-			CMongo::update("ryzom_channels", toString("{'name': '%s'}", channelName.c_str()), toString("{ $set: {'ryzomId': '%s', 'password': '%s', 'last_access': %d} }", factionChannelId.toString().c_str(), pass.c_str(), CTime::getSecondsSince1970()), true, false);
+
+#ifdef HAVE_MEMCACHED
+			nlinfo("createUserChannel");
+			if (cacheIndex == 0)
+				cacheIndex = CMemC::incr("Shard-UserChannels-Nbr");
+			nlinfo("With index = %d", cacheIndex);
+			CMemC::set(toString("Shard-UserChannel-%d", cacheIndex), toString("%s:%s", channelName.c_str(), pass.c_str()));
+			CMemC::set(toString("Shard-UserChannelId-%s", channelName.c_str()), toString("%d", cacheIndex));
 #endif
 			DynChatEGS.setHistoricSize( factionChannelId, FactionChannelHistoricSize );
 
@@ -1375,9 +1330,12 @@ void CPVPManager2::deleteUserChannel(const std::string & channelName)
 	TMAPExtraFactionChannel::iterator it = _UserChannel.find(channelName);
 	if( it != _UserChannel.end() )
 	{
-#ifdef HAVE_MONGO
-		CMongo::remove("ryzom_channels", toString("{'name': '%s'}", channelName.c_str()));
+#ifdef HAVE_MEMCACHED
+			string channelId = CMemC::get(toString("Shard-UserChannelId-%s", channelName.c_str()));
+			CMemC::set(toString("Shard-UserChannel-%s", channelId.c_str()), "");
+			CMemC::set(toString("Shard-UserChannelId-%s", channelName.c_str()), "", 1);
 #endif
+
 		DynChatEGS.removeChan( (*it).second );
 		TMAPPassChannel::iterator it2 = _PassChannels.find((*it).second);
 		if( it2 != _PassChannels.end() )
