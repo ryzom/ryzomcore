@@ -30,12 +30,12 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
-bool getPosFromZoneName(const std::string &name,NLMISC::CVector2f &dest)
+bool getPosFromZoneName(const std::string &name, NLMISC::CVector2f &dest)
 {
 
 	if (name.empty())
 	{
-		nlwarning ("getPosFromZoneName(): empty name, can't getPosFromZoneName");
+		//nlwarning ("getPosFromZoneName(): empty name, can't getPosFromZoneName");
 		return false;
 	}
 
@@ -71,7 +71,7 @@ bool getZonePosFromZoneName(const std::string &name, sint &x, sint &y)
 
 	if (name.empty())
 	{
-		nlwarning ("getPosFromZoneName(): empty name, can't getPosFromZoneName");
+		//nlwarning ("getPosFromZoneName(): empty name, can't getPosFromZoneName");
 		return false;
 	}
 
@@ -101,5 +101,18 @@ bool getZonePosFromZoneName(const std::string &name, sint &x, sint &y)
 	return true;
 }
 
+uint16 getZoneIdFromName(const string &name)
+{
+	uint16 zoneId = 0;
+	NLMISC::CVector2f pos;
+	if (getPosFromZoneName(name, pos))
+	{
+		uint x = (uint)pos.x / 160;
+		uint y = -(uint)pos.y / 160;
+		zoneId = (x&255) + (y<<8);
+	}
+
+	return zoneId;
+}
 
 
