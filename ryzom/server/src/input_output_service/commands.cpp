@@ -710,6 +710,7 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message> [<
 	else if (args[1].substr(0, 5) == "team:")
 	{
 		mode = CChatGroup::team;
+		nlinfo("chat team : %s", args[1].substr(5).c_str());
 		groupId.fromString(args[1].substr(5).c_str());
 	}
 	else

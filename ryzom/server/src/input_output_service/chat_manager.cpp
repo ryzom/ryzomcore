@@ -866,8 +866,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 				string langs;
 				uint nbrReceivers;
 				checkNeedDeeplize(sender, ucstr, senderLang, langs, nbrReceivers, grpId);
-				if (nbrReceivers > 0)
-					_Log.displayNL("team:%s|%s|%s|%s|%s", grpId.toString().c_str(), fullName.c_str(), senderLang.c_str(), langs.c_str(), ucstr.toUtf8().c_str() );
+				_Log.displayNL("team:%s|%s|%s|%s|%s", grpId.toString().c_str(), fullName.c_str(), senderLang.c_str(), langs.c_str(), ucstr.toUtf8().c_str() );
 			}
 			break;
 
