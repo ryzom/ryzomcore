@@ -81,8 +81,7 @@ def query_shard(service_name, full_cmd, wait_callback=True, is_control=False):
 
 	admin_service = CAdminServiceWeb()
 
-	connected, res = admin_service.connect("127.0.0.1", 46700)
-	if connected:
+	if admin_service.connect("127.0.0.1", 46700):
 		if isinstance(full_cmd, str):
 			if is_control:
 				admin_service.control_cmd(service_name, full_cmd)
