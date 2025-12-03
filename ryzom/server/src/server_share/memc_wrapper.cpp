@@ -30,18 +30,18 @@ void CMemC::init()
 	if (memc != NULL) return;
 	memc = memcached_create(NULL);
 	if (!memc)
-		nlerror("memcached: init failed, cannot create it");
+		nlinfo("memcached: init failed, cannot create it");
 
 	memcached_return rc;
 	memcached_server_st* servers = memcached_server_list_append(NULL, "127.0.0.1", 11211, &rc);
 	if (rc != MEMCACHED_SUCCESS)
-		nlerror("memcached: init failed, cannot access it");
+		nlinfo("memcached: init failed, cannot access it");
 
 	rc = memcached_server_push(memc, servers);
 	memcached_server_list_free(servers);
 
 	if (rc != MEMCACHED_SUCCESS)
-		nlerror("memcached: init failed, connection failed");
+		nlinfo("memcached: init failed, connection failed");
 }
 
 void CMemC::disconnect()
@@ -57,7 +57,7 @@ bool CMemC::set(const string& key, const string& value, time_t expiration)
 {
 	if (!memc)
 	{
-		nlerror("memcached: not connected");
+		nlinfo("memcached: not connected");
 		return false;
 	}
 
@@ -71,6 +71,7 @@ bool CMemC::set(const string& key, const string& value, time_t expiration)
 
 bool CMemC::setWithIndex(const string& key, const string& value)
 {
+	nlinfo("MemC: Set With Index %s-Last = %s", key.c_str(), value.c_str());
 	string last = key+"-Last";
 	uint64 lastId = incr(last);
 	if (lastId == 0)
@@ -86,7 +87,7 @@ string CMemC::get(const string& key)
 {
 	if (!memc)
 	{
-		nlerror("memcached: not connected");
+		nlinfo("memcached: not connected");
 		return "";
 	}
 
@@ -119,12 +120,11 @@ string CMemC::getWithIndex(const string& key)
 
 }
 
-
 uint64 CMemC::incr(const string& key, uint32 offset)
 {
 	if (!memc)
 	{
-		nlerror("memcached: not connected");
+		nlinfo("memcached: not connected");
 		return 0;
 	}
 
@@ -138,7 +138,10 @@ uint64 CMemC::incr(const string& key, uint32 offset)
 		return 0;
 	}
 	if (rc != MEMCACHED_SUCCESS)
-		nlerror("memcached: increment error");
+	{
+		nlinfo("memcached: increment error");
+		return 0;
+	}
 	nlinfo("MemC: Incr %s =  %" NL_I64 "d", key.c_str(), new_value);
 	return new_value;
 }
