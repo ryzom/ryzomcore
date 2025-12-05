@@ -89,6 +89,9 @@ ylwrap
 *.mk
 *.tmp
 
+# makeall build
+.mode_static
+
 # Visual Studio garbage
 .vscode/
 *.opensdf
@@ -275,5 +278,7 @@ nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
 # Configs
 ryzom/server/www/config.php
 ryzom/server/tools/config.sh
+
+*.tmp
 
 *.out
