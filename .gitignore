@@ -282,3 +282,5 @@ ryzom/server/tools/config.sh
 *.tmp
 
 *.out
+
+setup.ini

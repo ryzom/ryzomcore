@@ -31,11 +31,11 @@ from ryzom_service import RyzomService
 
 
 OWNER_GROUP=10
-PLAYER_GROUP=50
-CUSTOM_PROFILE_TRANSLATIONS="10"
-CUSTOM_PROFILE_TITLE="11"
-CUSTOM_PROFILE_GUILD="12"
-INGAME_FOLDER_ID=3
+PLAYER_GROUP=73
+CUSTOM_PROFILE_TRANSLATIONS="1"
+CUSTOM_PROFILE_TITLE="2"
+CUSTOM_PROFILE_GUILD="3"
+INGAME_FOLDER_ID=2
 
 class ShardCommands(RyzomService):
 
@@ -58,17 +58,7 @@ class ShardCommands(RyzomService):
 		self.domain = "("+self.shard[0].upper()+self.shard[1:]+")"
 		self.updateStats()
 		self.db = None
-		return
-		try:
-			self.db = mysql.connector.connect(
-				host = self.config["DB_zulip"]["host"],
-				user = self.config["DB_zulip"]["user"],
-				passwd = self.config["DB_zulip"]["pass"],
-				database = "webig",
-			)
-			print("MySQL Database connection successful")
-		except mysql.connector.Error as err:
-			print(f"Error: '{err}'")
+
 		
 	def updateStats(self):
 		self.infos = f"[orange1]Shard: [/orange1]{self.shard}"

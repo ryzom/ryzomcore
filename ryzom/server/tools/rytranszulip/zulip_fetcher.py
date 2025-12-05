@@ -23,9 +23,21 @@
 import os
 import sys
 import json
+import re
 from time import time
 
 from zulip_service import ZulipService, RyzomMessage
+
+ZULIP_BASE_URL = "https://chat.ryzom.com"
+
+def convert_zulip_upload_links(text: str) -> str:
+	if not text:
+		return text
+	pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
+	def repl(match):
+		return f"{ZULIP_BASE_URL}{match.group(1)}"
+	return pattern.sub(repl, text)
+
 
 class ZulipFetcher(ZulipService):
 
@@ -38,27 +50,17 @@ class ZulipFetcher(ZulipService):
 		self.stats = {"messages": 0}
 		self.admin_id = self.zulip.get_profile()["user_id"]
 		self.last_update_guilds = 0
-		self.guilds = {}
-
-	def updateGuilds(self):
-		with open("/tmp/dump_guilds.json") as file:
-			try:
-				self.guilds = json.load(file)
-			except:
-				print("dump guilds error")
-				pass
+		self.shard = sys.argv[1].lower()
+		self.guilds_prefixes = {"atys": "0x00165", "gingo": "0x002f5"}
 
 	def checkMessages(self, event):
-		if time() > self.last_update_guilds + 60:
-			self.updateGuilds()
-			self.last_update_guilds = time()
-				
 		msg = event["message"]
 		print(msg)
 		if "local_message_id" in event and event["local_message_id"] == "ryzom-ig":
 			return
 
-		message = msg["content"]
+		raw_msg = msg["content"]
+		message = convert_zulip_upload_links(raw_msg)
 		sender = msg["sender_full_name"]
 		dest = msg["display_recipient"]
 		if msg["type"] == "private":
@@ -74,13 +76,20 @@ class ZulipFetcher(ZulipService):
 		else:
 			stream_id = msg["stream_id"]
 			stream = self.zulip.call_endpoint(url=f"streams/{stream_id}", method="GET")
+			if stream["result"] == "error":
+				print(f"Error stream {stream_id}", stream["msg"])
+				return
 			print(stream)
-			if stream["stream"]["creator_id"] != self.admin_id or msg["subject"] != "general chat":
+			if stream["stream"]["creator_id"] != self.admin_id: # or msg["subject"] != "general chat":
 				return
 			channel = dest.lower()
 			if channel[0] == u"🔰":
-				gid = channel.split("(")[1][:-1]
-				channel_id = "guild:(0x002f5"+gid+":09:00:00)"
+				gid = channel.split("(")
+				if len(gid) > 1:
+					gid = gid[1][:-1]
+				else:
+					gid = ""
+				channel_id = "guild:("+self.guilds_prefixes[self.shard]+gid+":09:00:00)"
 			elif channel[0] == u"💠":
 				channel_id = "FACTION_RF"
 			elif channel[0] == "⚜":
@@ -92,7 +101,6 @@ class ZulipFetcher(ZulipService):
 			
 			lang = msg["translation_lang"] if "translation_lang" in msg else "en"
 			message = RyzomMessage("zulip", sender.lower(), channel, channel_id, lang, "*", message, source_message_id=msg["id"])
-			print(message.pprint())
 			self.addRyzomMessage(message)
 			
 	
