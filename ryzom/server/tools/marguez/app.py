@@ -362,7 +362,10 @@ class Marguez(App):
 	def getDagProc(self, dagRunId):
 		proc = None
 		for p in psutil.process_iter():
-			cmd = p.cmdline()
+			try:
+				cmd = p.cmdline()
+			except:
+				cmd = ""
 			if len(cmd) > 2 and cmd[0] == "/usr/local/bin/dagu":
 				if cmd[2] == "--run-id="+dagRunId or cmd[3] == "--run-id="+dagRunId:
 					proc = p

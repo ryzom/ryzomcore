@@ -1,5 +1,5 @@
 [deepl]
-auth_key: d8d46b41-5a26-d1d2-90e0-b3ab3e736fe6
+auth_key: xxx
 
 [memcached]
 pool_interval: 0.005

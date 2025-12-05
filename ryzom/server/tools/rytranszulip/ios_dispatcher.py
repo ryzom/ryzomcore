@@ -4,7 +4,7 @@
 #  \______   \__    ___/\____    /
 #   |       _/ |    |     /     / 
 #   |    |   \ |    |    /     /_ 
-#   |____|_  / |____|   /_______ \
+#   |____|_  / |____|   /_______ \\
 #          \/                   \/
 # 
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
@@ -22,10 +22,35 @@
 
 import os
 import sys
+import re
 
 from time import sleep, time
 from pynel.admin_modules_itf import CAdminServiceWeb
 from ryzom_service import RyzomService, RyzomMessage
+
+
+ZULIP_BASE_URL = "https://zulip.ryzom.com"
+
+
+def convert_zulip_upload_links(text: str) -> str:
+	"""Convert Zulip-style markdown upload links to plain URLs.
+
+	Example:
+		[image.png](/user_uploads/2/c0/....../image.png)
+	becomes:
+		https://zulip.ryzom.com/user_uploads/2/c0/....../image.png
+	"""
+	if not text:
+		return text
+
+	pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
+
+	def repl(match: re.Match) -> str:
+		path = match.group(1)
+		return f"{ZULIP_BASE_URL}{path}"
+
+	return pattern.sub(repl, text)
+
 
 class IosDispatcher(RyzomService):
 
@@ -66,13 +91,21 @@ class IosDispatcher(RyzomService):
 		prefix = ">" if command == "chat" else ""
 		source_lang = ":"+m.source_lang.lower()+":"
 		translated_lang = ":"+m.translated_lang.lower()+":"
-		text = m.text.replace("\"", "''")
-		translation = m.translation.replace("\"", "''")
+
+		# First, normalize potential Zulip upload markdown links to plain URLs
+		clean_text = convert_zulip_upload_links(m.text)
+		clean_translation = convert_zulip_upload_links(m.translation)
+
+		# Then escape quotes as before
+		text = clean_text.replace("\"", "''") if clean_text is not None else ""
+		translation = clean_translation.replace("\"", "''") if clean_translation is not None else ""
+
 		if command == "chat" and m.channel == "player":
 			return True
 		if m.translated_lang == "WK":
 			if m.channel == "player":
 				self.runIOSCommand(command+" "+sender.lower()+" "+m.channel_id+self.domain+" \""+text+"\"")
+				self.runIOSCommand(command+" "+m.channel_id.split(":")[1].lower()+" tell:"+sender+self.domain+" \"\n@{FF0F}"+sender+": "+text+"\"")
 			elif command == "farChat": # Messages from zulip
 				self.runIOSCommand(command+" "+m.sender+" "+m.channel_id+" \""+source_lang+text+"\"")
 			elif m.channel_id.split(":")[0] == "faction": # FIXME on IOS
@@ -119,5 +152,3 @@ if __name__ == "__main__":
 	dispatcher = IosDispatcher()
 	dispatcher.register()
 	dispatcher.run()
-
-

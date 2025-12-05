@@ -18,7 +18,8 @@
 # - A monitoring who restart the script if sources files changed (not otpimal but working)
 
 SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
-echo "--- $$ ---"
+CURRENT_PID=$$
+echo "--- $CURRENT_PID ---"
 
 cd $WORKING_DIR
 
@@ -33,16 +34,25 @@ do
 		kill -9 $PID
 	done
 
-	bash $SCRIPT_DIR/monitor_python.sh "python3 $*" &
+	bash $SCRIPT_DIR/monitor_python.sh "python3 $*" $CURRENT_PID &
 
 	echo "Starting python3 $*..."
 	DATE_START=$(date +%s)
 
-	python3 $*
+	python3 $* > /dev/null
 
 	DATE_END=$(date +%s)
 	DATE_DIFF=$(expr $DATE_END - $DATE_START)
 	echo "End of script : $DATE_DIFF"
+	echo "Kill monitor python..."
+	ps aux | grep -v grep | grep "inotifywait" | grep "$SCRIPT_DIR"
+
+	for PID in $(ps aux | grep -v grep | grep "inotifywait " | grep "$SCRIPT_DIR" | tr -s " " | cut -d" " -f2)
+	do
+			echo "Killing $PID..."
+			kill -9 $PID
+	done
+
 	if (( $DATE_DIFF < 5 ))
 	then
 		echo "sleep $(expr 5 - $DATE_DIFF)"

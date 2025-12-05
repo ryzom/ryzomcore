@@ -19,7 +19,7 @@ SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 
 echo "Waiting for process $1..."
 PID=$(ps aux | grep -v grep | grep -v monitor_ | grep "$1" | head -n1 | tr -s " " | cut -d" " -f2)
-#ps aux | grep -v grep | grep -v monitor_ | grep "$1" | head -n1
+ps aux | grep -v grep | grep -v monitor_ | grep "$1" | head -n1
 while [[ -z $PID ]]
 do
 	PID=$(ps aux | grep -v grep | grep "$1" | tr -s " " | cut -d" " -f2)
