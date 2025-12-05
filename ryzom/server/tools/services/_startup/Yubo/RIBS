@@ -1,4 +1,0 @@
-#!/bin/bash
-
-cd ~/ribs/server
-./start_server.sh

@@ -62,8 +62,7 @@ log.txt
 *.dlm
 *.dlu
 
-# makeall build
-.mode_static
+.zuliprc
 
 # cmake build files & directories
 CMakeFiles
@@ -88,6 +87,10 @@ ltmain.sh
 missing
 ylwrap
 *.mk
+*.tmp
+
+# makeall build
+.mode_static
 
 # Visual Studio garbage
 .vscode/
@@ -277,3 +280,5 @@ ryzom/server/www/config.php
 ryzom/server/tools/config.sh
 
 *.tmp
+
+*.out
