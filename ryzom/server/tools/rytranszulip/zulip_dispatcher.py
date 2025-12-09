@@ -147,7 +147,7 @@ class ZulipDispatcher(ZulipService):
 						message = messages[i]
 
 						result = False
-						if message and message.channel not in ("say", "shout", "around", "region", "dyn", "team") and message.translated_lang.lower() == lang:
+						if message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and message.translated_lang.lower() == lang:
 							if lang == "wk":
 								if message.source != "zulip":
 									print(lang, "New message {}".format(i), message, "=>", result)
