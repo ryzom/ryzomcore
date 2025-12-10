@@ -282,3 +282,7 @@ ryzom/server/tools/config.sh
 *.tmp
 
 *.out
+
+setup.ini
+
+ryzom/server/www/login/server_open_status

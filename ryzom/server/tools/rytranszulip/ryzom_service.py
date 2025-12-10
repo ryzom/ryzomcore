@@ -92,7 +92,7 @@ class RyzomService(Service):
 		return None
 
 	def getRyzomCommand(self, i):
-		cmd = self.client.get("Shard-Command-"+str(i)).decode("utf-8")
+		cmd = self.client.get("Shard-Command-"+str(i))
 		if cmd:
-			return cmd.split(":")
+			return cmd.decode("utf-8", errors="ignore").split(":")
 		return None
