@@ -155,5 +155,5 @@ class ZulipService(RyzomService):
 		self.client.set("Zulip-Chat-"+lang+"-"+str(self.last_chat_id), message.get(), 24*60*60)
 		return self.last_chat_id
 
-	def getZulipMessage(self, i):
+	def getZulipMessage(self, i, lang):
 		return self.client.get("Zulip-Chat-"+lang+"-"+str(i))
