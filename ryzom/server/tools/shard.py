@@ -54,7 +54,7 @@ def stopService(name):
 	global client
 	if not client:
 		client = requests_openapi.Client().load_spec_from_file(shard_path+"/tools/dagu_api.yaml")
-		client.set_server(requests_openapi.Server(url="http://gingo.ryzom.com:9888/api/v2"))
+		client.set_server(requests_openapi.Server(url="http://arma.ryzom.com:9888/api/v2"))
 
 	infos = client.getDAGDetails(fileName="Ryzom_"+name).json()
 	print("Terminate:", name)
@@ -69,7 +69,11 @@ def cleanService(name):
 	python = None
 	for proc in psutil.process_iter():
 		n = proc.name()
-		if cmd in " ".join(proc.cmdline()):
+		try:
+			check_cmd = " ".join(proc.cmdline())
+		except:
+			check_cmd = "xxx"
+		if cmd in check_cmd:
 			if n == "schroot":
 				schroot = proc
 			elif n == "python3":

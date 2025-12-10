@@ -22,6 +22,7 @@ import os
 import sys
 import time
 import html
+import re
 import json
 import urllib.parse
 import urllib.request
@@ -36,6 +37,29 @@ flags = {
 	"fr": ":flag_france:",
 	"ru": ":flag_russia:",
 }
+
+ZULIP_BASE_URL = "https://chat.ryzom.com"
+
+
+def convert_zulip_upload_links(text: str) -> str:
+	"""Convert Zulip-style markdown upload links to plain URLs.
+
+	Example:
+		[image.png](/user_uploads/2/c0/....../image.png)
+	becomes:
+		https://zulip.ryzom.com/user_uploads/2/c0/....../image.png
+	"""
+	if not text:
+		return text
+
+	pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
+
+	def repl(match: re.Match) -> str:
+		path = match.group(1)
+		return f"{ZULIP_BASE_URL}{path}"
+
+	return pattern.sub(repl, text)
+
 
 class ZulipDispatcher(ZulipService):
 	def __init__(self):
@@ -61,7 +85,9 @@ class ZulipDispatcher(ZulipService):
 	def sendMessage(self, m):
 		message_type = "stream"
 		user = m.sender
-		content = user[0].upper()+user[1:]+":"+m.text
+		# Normalize potential Zulip-style upload markdown to plain URLs before sending
+		clean_text = convert_zulip_upload_links(m.text)
+		content = user[0].upper()+user[1:]+":"+(clean_text if clean_text is not None else "")
 		if m.channel == "player":
 			message_type = "private"
 			channel = m.channel_id.lower()+"@ig.ryzom.com"
@@ -72,7 +98,7 @@ class ZulipDispatcher(ZulipService):
 		request = {
 			"type": message_type,
 			"to": channel,
-			"topic": "general chat",
+			"topic": "",
 			"content": content,
 			"local_id": "ryzom-ig",
 			"queue_id": self.getZulipQueueId(),
@@ -89,9 +115,11 @@ class ZulipDispatcher(ZulipService):
 	def sendTranslation(self, message_id, m):
 		print(m.output(), m.source_lang)
 		if message_id > 0 and m.translation and m.source_lang:
+			# Normalize Zulip-style upload markdown in translation as well
+			clean_translation = convert_zulip_upload_links(m.translation)
 			request = {
 				"message_id": message_id,
-				"content": "<["+m.translated_lang+"]>"+flags[m.source_lang]+" "+m.translation,
+				"content": "<["+m.translated_lang+"]>"+flags[m.source_lang]+" "+(clean_translation if clean_translation is not None else ""),
 			}
 			result = self.zulip.update_message(request)
 			print("Sent translation to Zulip", request, result)
@@ -119,7 +147,7 @@ class ZulipDispatcher(ZulipService):
 						message = messages[i]
 
 						result = False
-						if message and message.channel not in ("say", "shout", "around", "region", "dyn", "team") and message.translated_lang.lower() == lang:
+						if message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and message.translated_lang.lower() == lang:
 							if lang == "wk":
 								if message.source != "zulip":
 									print(lang, "New message {}".format(i), message, "=>", result)

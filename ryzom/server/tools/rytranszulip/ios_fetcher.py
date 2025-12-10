@@ -43,6 +43,7 @@ class IosFetcher(RyzomService):
 		self.shard = sys.argv[1]
 		self.domain = "("+self.shard[0].upper()+self.shard[1:]+")"
 		self.updateStats()
+		self.guilds = {}
 		
 		self.db = None
 		try:
@@ -61,10 +62,6 @@ class IosFetcher(RyzomService):
 		file_size = os.stat(self.logname).st_size
 		last_update_guilds = 0
 		while True:
-			if time() > last_update_guilds + 60:
-				self.updateGuilds()
-				last_update_guilds = time()
-
 			line = thefile.readline()
 			if line:
 				self.stats["lines"] += 1
@@ -107,6 +104,17 @@ class IosFetcher(RyzomService):
 				return guilds[0][0]
 		return 0
 
+	def getGuildName(self, gid):
+		cursor = self.db.cursor()
+		try:
+			cursor.execute("SELECT * FROM guilds WHERE guild_id='"+gid+"' AND deleted = 0")
+		except mysql.connector.Error as err:
+			print("Error", err)
+		else:
+			guilds = cursor.fetchall()
+			if guilds:
+				return guilds[0][2]
+		return ""
 
 	def updateStats(self):
 		lines = self.stats["lines"]
@@ -133,11 +141,9 @@ class IosFetcher(RyzomService):
 				return
 
 			if channel == "guild":
-				gid = channel_id[8:-10]
-				guild_name = "UNK_"+gid
-				if gid in self.guilds:
-					guild_name = self.guilds[gid][0]
-				channel = "🔰 "+guild_name+" ("+gid+")"
+				gid = str(int(channel_id[8:-10], 16)+0x6500000)
+				guild_name = self.getGuildName(gid)
+				channel = "🔰 "+guild_name+" ("+channel_id[8:-10]+")"
 				channel_id = "guild:"+channel_id
 			elif channel == "universe":
 				channel = "🌐 Universe"
@@ -161,6 +167,8 @@ class IosFetcher(RyzomService):
 				channel_id = channel
 			elif channel == "region":
 				channel_id = "region:"+channel_id
+			elif channel == "team":
+				channel_id = "team:"+channel_id
 			else:
 				channel_id = channel
 			ssender = sender.split("@")

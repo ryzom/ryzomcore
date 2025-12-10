@@ -19,6 +19,7 @@
 . $RIBS_PATH/ryzom_utils.sh
 . $RIBS_PATH/ryzom_prefs.sh
 
+echo "-- $WEB_PATH --"
 if [[ ! "$RIBS_GROUPS" == *":dev:"* ]]
 then
 	echo "No soup for you"
@@ -174,7 +175,7 @@ echo ""
 
 bash $SHARD_PATH/tools/shard.sh start $SHARD_PATH
 
-bash $SHARD_PATH/tools/notify.sh ShardStarting
+#bash $SHARD_PATH/tools/notify.sh ShardStarting
 
 if [ ! -f $SHARD_PATH/data/leveldesign/egs_items.packed_sheets ]
 then
