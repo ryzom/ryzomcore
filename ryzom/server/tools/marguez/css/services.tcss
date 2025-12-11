@@ -1,0 +1,46 @@
+
+ServicesPanel {
+	height: 100%;
+	margin: 1 0;
+	padding: 0 0;
+	dock: left;
+	width: 22;
+	content-align: left top;
+}
+
+ServicesPanel Horizontal {
+	height: 1;
+}
+
+ServicesPanel Button {
+	color: orange;
+	margin: 0 0;
+	padding: 0 0;
+	border: hidden white;
+	text-align: left;
+	content-align-horizontal: left;
+	background: black;
+}
+
+ServicesPanel Button:hover {
+	background: #222;
+	color: white;
+}
+
+ServicesPanel Label {
+	margin: 0 0;
+	padding: 0 0;
+	border: hidden white;
+}
+
+.project.selected {
+	color: #08c;
+	text-style: bold;
+}
+
+.project {
+	background: black;
+	text-style: bold;
+	padding: 0;
+	margin: 0;
+}

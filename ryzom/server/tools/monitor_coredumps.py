@@ -17,15 +17,19 @@ class OnWriteHandler(pyinotify.ProcessEvent):
 			stdout_data = p.communicate(input="bt\n")[0]
 			for line in stdout_data.split("\n"):
 				if "Command Line" in line:
-					line = line.split("../sbin/")[1]
-					sbin = line.split(" ")[0]
-					if sbin == "ryzom_ai_service":
-						sbin += "_"+line.split(" -N")[1].split(" ")[0]
-					is_bad = False
+					sline = line.split("../sbin/")
+					if len(sline) > 1:
+						line = line[1]
+						sbin = line.split(" ")[0]
+						if sbin == "ryzom_ai_service":
+							sbin += "_"+line.split(" -N")[1].split(" ")[0]
+						is_bad = False
+					else:
+						return
 			time.sleep(1)
 		with open("/home/nevrax/shard/crashs/"+sbin+"_"+datetime.today().strftime("%Y_%m_%d_%H_%M_%S.log"), "w") as f:
 			f.write(stdout_data)
-		os.unlink(event.path+"/"+event.name)
+		Popen(["rm_coredump", event.name])
 
 def monitor(path):
 	wm = pyinotify.WatchManager()
