@@ -42,7 +42,7 @@
 #include "game_share/mainland_summary.h"
 #include "game_share/shard_names.h"
 #include "server_share/testing_tool_structures.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 #include "server_share/r2_vision.h"
 #include "game_share/r2_share_itf.h"
@@ -1203,19 +1203,19 @@ void cbDeleteChar( CMessage& msgin, const std::string &serviceName, NLNET::TServ
 		return;
 	}
 
-	string charName;
-	sint32 index = characterIndex;
+
+	ucstring charName;
 	CCharacter *character = player->getCharacter(characterIndex);
 	if (character != NULL)
-		charName = character->getName().toUtf8();
+	{
+		charName = character->getName();
+		CEntityIdTranslator::removeShardFromName(charName);
+#ifdef HAVE_MEMCACHED
+		CMemC::setWithIndex("Shard-Command", toString("cbDeleteChar:%s", charName.toUtf8().c_str()));
+#endif
+	}
 
-	#ifdef HAVE_MONGO
-		string::size_type pos = charName.find('(');
-		if (pos != string::npos)
-			charName = charName.substr(0, pos);
-		CMongo::remove("ryzom_users", toString("{'name': '%s'}", charName.c_str()));
-	#endif
-
+	sint32 index = characterIndex;
 	PlayerManager.deleteCharacter( userId, index );
 
 	// update the ring database
@@ -1256,7 +1256,7 @@ void cbDeleteChar( CMessage& msgin, const std::string &serviceName, NLNET::TServ
 	BsiGlobal.deleteFile( fileName );
 
 	// log this event
-	log_Character_Delete(userId, CEntityId(RYZOMID::player, (userId<<4)+index), charName);
+	log_Character_Delete(userId, CEntityId(RYZOMID::player, (userId<<4)+index), charName.toUtf8());
 
 } // cbDeleteChar //
 
