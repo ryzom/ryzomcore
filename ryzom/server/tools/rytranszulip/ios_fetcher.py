@@ -91,19 +91,6 @@ class IosFetcher(RyzomService):
 			except:
 				pass
 	
-	def getGuildId(self, name):
-		cursor = self.db.cursor()
-		try:
-			cursor.execute("SELECT * FROM guilds WHERE name='"+name+"' AND deleted = 0")
-			print("Database created successfully")
-		except mysql.connector.Error as err:
-			print("Error", err)
-		else:
-			guilds = cursor.fetchall()
-			if guilds:
-				return guilds[0][0]
-		return 0
-
 	def getGuildName(self, gid):
 		cursor = self.db.cursor()
 		try:
