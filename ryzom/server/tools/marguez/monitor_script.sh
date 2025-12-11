@@ -39,7 +39,7 @@ do
 	echo "Starting python3 $*..."
 	DATE_START=$(date +%s)
 
-	python3 $* > /dev/null
+	python3 $* 2>&1 1>/dev/null
 
 	DATE_END=$(date +%s)
 	DATE_DIFF=$(expr $DATE_END - $DATE_START)
