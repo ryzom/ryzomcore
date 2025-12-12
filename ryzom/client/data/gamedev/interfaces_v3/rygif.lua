@@ -55,7 +55,7 @@ local function pump_loader_slice()
         local elapsed = os.clock() - start_clock
         if loaded_this_frame > 0 and elapsed >= LoadTimeBudgetSec then break end
         local stem = table.remove(PendingStems, 1)
-        loadTextures(stem, true) -- ⚠️ client call
+        loadTextures(stem, true)
         LoadedStems[stem] = true
         loaded_this_frame = loaded_this_frame + 1
     end
@@ -88,14 +88,14 @@ function rygif.new(base, fps, loop, opts)
 
     local prefix = base:gsub("%.jpg$", "") -- strip accidental .jpg
 
-    -- 🎯 generate frame list
+    -- generate frame list
     self.frames = {}
     for i = 1, opts.frameCount do
         local fname = string.format("%s_%05d.jpg", prefix, i)
         table.insert(self.frames, fname)
     end
 
-    -- 🎯 enqueue all spritesheets (without extension, client adds .png)
+    -- enqueue all spritesheets (without extension, client adds .png)
     local stems = {}
     for s = 1, opts.sheetCount do
         table.insert(stems, string.format("%s_%d", prefix, s))
@@ -208,6 +208,48 @@ function rygif:TextureDraw(texture_img)
     local img = group:find("texture_img")
     if not img then return end
     img.texture = texture_img
+end
+
+function rygif:open_resize_window(window_id, win_h, win_w, render_html_content, close_window_id)
+	local mainui = getUI(window_id)
+	local mainui_html = mainui:find("html")
+	local mainui_close_button = mainui:find("rightbut")
+
+	mainui.active = true
+	
+	if(mainui.active == false)then
+		mainui.active = true
+	end
+	
+	if(mainui.opened == false)then
+		mainui.opened = true
+	end
+	
+	if(close_window_id == "")then
+		mainui_close_button.active = false
+		mainui_close_button.onclick_l = ""
+		mainui_close_button.params_l =  ""
+	else
+		mainui_close_button.active = true
+		mainui_close_button.onclick_l = "lua"
+		mainui_close_button.params_l = "rygif:close_window('"..close_window_id.."')"
+	end
+	
+	mainui.h = win_h
+	mainui.w = win_w
+
+	mainui_heade_open = mainui:find("header_opened")
+	mainui_heade_open.h = 10
+	mainui_heade_open.w = win_w
+	
+	mainui_html:renderHtml(render_html_content)
+end
+
+function rygif:close_window(window_id)
+	if(getUI(window_id) ~= nil)then
+		getUI(window_id).active=false
+		GIF_UnregisterById(window_id)
+	end
 end
 
 -- =================== Global Dispatcher ===================
