@@ -72,6 +72,9 @@ public:
 	/// Load & setup all continent.
 	void load();
 
+	void loadZoneLua(const std::string &zone);
+	void loadZonesLua(const std::vector<std::string> &zone);
+
 	// reset all datas
 	void reset();
 

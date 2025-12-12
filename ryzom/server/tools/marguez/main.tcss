@@ -1,0 +1,26 @@
+
+#service_name {
+	width: 100%;
+	color: #08c;
+	text-align: center;
+	content-align-horizontal: center;
+}
+
+
+
+
+#blank {
+	max-width: 100%;
+}
+
+#selected_section {
+	width: 22;
+	text-align: right;
+}
+
+#log_sections {
+	height: 1;
+}
+
+
+

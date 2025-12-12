@@ -108,6 +108,11 @@ IF(WITH_MONGODB)
   ADD_DEFINITIONS(${MONGO_DEFINITIONS})
 ENDIF()
 
+IF(WITH_MEMCACHED)
+  TARGET_LINK_LIBRARIES(ryzom_entities_game_service ${MEMCACHED_LIBRARIES})
+  ADD_DEFINITIONS(${MEMCACHED_DEFINITIONS})
+ENDIF()
+
 NL_DEFAULT_PROPS(ryzom_entities_game_service "Ryzom, Services: Entities Game Service (EGS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)
 
