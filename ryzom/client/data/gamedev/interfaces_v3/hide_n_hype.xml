@@ -4,7 +4,7 @@
 <interface_config>
 	<root id="interface" x="0" y="0" w="800" h="600" active="true" />
 
-<group type="container" id="hide_n_hype_main" w="0" h="0" title="" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:COM" resizer="true" pop_min_w="0" pop_min_h="0" pop_max_w="2000" pop_max_h="1600" title_bar_open="false" lockable="true" openable="false" opened="false" movable="true" active="false">
+<group type="container" id="hide_n_hype_main" w="0" h="0" title="" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:COM" resizer="true" pop_min_w="0" pop_min_h="0" pop_max_w="2000" pop_max_h="1600" title_bar_open="false" lockable="true" openable="false" opened="false" movable="true" active="false" savable="false">
 	<group id="header_closed" x="0" y="0" h="10" posref="TL TL"/>
 	<group id="header_opened" x="0" y="0" w="0" h="10" posref="TL TL"/>
 	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
@@ -18,7 +18,7 @@
 	</group>
 </group>
 
-<group type="container" id="hide_n_hype_asked_abort" w="0" h="0" title="" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:COM" resizer="true" pop_min_w="0" pop_min_h="0" pop_max_w="2000" pop_max_h="1600" title_bar_open="false" lockable="true" openable="false" opened="false" movable="true" active="false">
+<group type="container" id="hide_n_hype_asked_abort" w="0" h="0" title="" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:COM" resizer="true" pop_min_w="0" pop_min_h="0" pop_max_w="2000" pop_max_h="1600" title_bar_open="false" lockable="true" openable="false" opened="false" movable="true" active="false" savable="false">
 	<group id="header_closed" x="0" y="0" h="10" posref="TL TL"/>
 	<group id="header_opened" x="0" y="0" w="0" h="10" posref="TL TL"/>
 	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
@@ -44,7 +44,8 @@
 		active="false"
 		resizer="false"
 		opened="false"
-		openable="false">
+		openable="false"
+		savable="false">
 		
 		<view type="bitmap" posref="MM MM" id="display_loading_img" w="36" h="36" y="0" x="0" texture="ico_time.tga" />
 </group>
@@ -53,12 +54,12 @@
 <tree node="hide_n_hype_asked_abort"></tree>
 <tree node="load_pars_json" />
 
-<template name="hide_n_hype_timer" keep="true" x="0" y="0" font_size="30" text_color="0 185 0 255" timer="00:00" id="">
-			<group id="#id" posref="MM MM" w="100" h="50" x="#x" y="#y" sizeref="" render_layer="1">
+<template name="hide_n_hype_timer" keep="true" w="100" h="50" x="0" y="-5" font_size="30" text_color="0 185 0 255" timer="00:00" id="">
+			<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="" render_layer="1">
 				<view type="text" posref="TL TL"
 					id="text"
-					x="0"
-					y="-5"
+					x="#x"
+					y="#y"
 					hardtext="#timer"
 					fontsize="#font_size"
 					color="#text_color"
@@ -71,8 +72,8 @@
 			<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="" render_layer="1">
 				<view type="text" posref="TL TL"
 					id="text"
-					x="0"
-					y="0"
+					x="#x"
+					y="#y"
 					hardtext="#hardtext"
 					fontsize="#font_size"
 					color="#text_color"
