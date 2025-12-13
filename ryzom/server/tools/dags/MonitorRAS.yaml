@@ -1,0 +1,15 @@
+name: MonitorRAS
+description: Monitoring of Ryzom Admin Service (Autokill)
+group: Shard
+timeoutSec: 0
+env:
+  - MARGUEZ_PRIO: "99"
+  - PYTHONPATH: /home/nevrax/shard/tools/
+steps:
+  - name: run
+    command: bash /home/nevrax/shard/tools/monitor_ras.sh
+    retryPolicy:
+      limit: 10000000000
+      intervalSec: 5
+
+

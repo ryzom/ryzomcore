@@ -2,6 +2,7 @@ name: Arma_AES
 description: Ryzom Admin Service
 tags: P_00
 group: Shard
+maxActiveRuns: -1
 env:
   - LC_ALL: "C"
   - LANGUAGE: ""
@@ -18,6 +19,6 @@ handlerOn:
   cancel:
     command: echo "Canceled"
   failure:
-    command: sh /home/nevrax/shard/tools/start_service.sh AES
+    command: bash /home/nevrax/shard/tools/start_service.sh AES
   success:
-    command: sh /home/nevrax/shard/tools/start_service.sh AES
+    command: bash /home/nevrax/shard/tools/start_service.sh AES
