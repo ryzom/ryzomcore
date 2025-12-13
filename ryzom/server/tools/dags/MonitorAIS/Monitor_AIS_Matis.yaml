@@ -1,4 +1,4 @@
-name: Logs AIS MATIS
+name: Logs_AIS_MATIS
 description: Check Logs of Ryzom Ai Service
 group: Services
 env:

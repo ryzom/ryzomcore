@@ -1,4 +1,4 @@
-name: Logs AIS ZORAI
+name: Logs_AIS_ZORAI
 description: Check Logs of Ryzom Ai Service
 group: Services
 env:

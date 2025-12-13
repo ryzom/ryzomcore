@@ -1,4 +1,4 @@
-name: Logs AIS NEWBIELAND
+name: Logs_AIS_NEWBIELAND
 description: Check Logs of Ryzom Ai Service
 group: Services
 env:

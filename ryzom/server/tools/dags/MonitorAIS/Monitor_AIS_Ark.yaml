@@ -1,4 +1,4 @@
-name: Logs AIS ARK
+name: Logs_AIS_ARK
 description: Check Logs of Ryzom Ai Service
 group: Services
 env:

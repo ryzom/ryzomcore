@@ -1,4 +1,4 @@
-name: DeepL RU
+name: DeepL.RU
 description: Translate messages to RU using DeepL
 group: RTZ
 timeoutSec: 0
