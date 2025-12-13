@@ -3,19 +3,19 @@
 #############################################
 #  _______________________________
 #  \______   \__    ___/\____    /
-#   |       _/ |    |     /     / 
-#   |    |   \ |    |    /     /_ 
+#   |       _/ |    |     /     /
+#   |    |   \ |    |    /     /_
 #   |____|_  / |____|   /_______ \
 #          \/                   \/
-# 
+#
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom Shard Commands ==-
-# 
+#
 # This script wait in a loop for all commands put by shard in memecached
-# 
+#
 
 
 import os
@@ -54,12 +54,21 @@ class ShardCommands(RyzomService):
 		self.scriptfile = __file__
 		self.log_sections["messages"] = ("db", "Shard-Command-Last", "Shard-Command-{}", "")
 		self.stats = {"commands": 0}
-		self.shard = sys.argv[1]
+		self.shard = host = self.config["shard"]["name"]
 		self.domain = "("+self.shard[0].upper()+self.shard[1:]+")"
 		self.updateStats()
 		self.db = None
+		try:
+			self.db = mysql.connector.connect(
+				host = self.config["DB_webig"]["host"],
+				user = self.config["DB_webig"]["user"],
+				passwd = self.config["DB_webig"]["pass"],
+				database = "webig",
+			)
+			print("MySQL Database connection successful")
+		except mysql.connector.Error as err:
+			print(f"Error: '{err}'")
 
-		
 	def updateStats(self):
 		self.infos = f"[orange1]Shard: [/orange1]{self.shard}"
 		self.updateInfos()
@@ -69,10 +78,24 @@ class ShardCommands(RyzomService):
 			url=f"/users/{user}?include_custom_profile_fields=true",
 			method="GET",
 		)
-		
+
 		if ret["result"] == "success":
 			return ret["user"]
 		return None
+
+	def getGuildId(self, name):
+		cursor = self.db.cursor()
+		try:
+			cursor.execute("SELECT * FROM guilds WHERE name=%s AND deleted = 0", (name,))
+			print("Database created successfully")
+		except mysql.connector.Error as err:
+			print("Error", err)
+		else:
+			guilds = cursor.fetchall()
+			print(guilds)
+			if guilds:
+				return guilds[0][1]
+		return 0
 
 	def addSubscription(self, user, sub):
 		return self.zulip.add_subscriptions(
@@ -97,15 +120,15 @@ class ShardCommands(RyzomService):
 			title=""
 
 			user = self.getUser(user_email)
-			
+
 			print("User", user)
 			if user and "profile_data" in user:
 				if CUSTOM_PROFILE_GUILD in user["profile_data"]:
 					old_guild = user["profile_data"][CUSTOM_PROFILE_GUILD]["value"]
 				if CUSTOM_PROFILE_TITLE in user["profile_data"]:
 					title = user["profile_data"][CUSTOM_PROFILE_TITLE]["value"]
-			
-			
+
+
 			if command[2]:
 				print("Current Title:", title, "New:", command[2])
 				if not title:
@@ -118,24 +141,25 @@ class ShardCommands(RyzomService):
 						url="/users/"+user_email+"?profile_data="+urllib.parse.quote_plus("[{\"id\":"+CUSTOM_PROFILE_TITLE+", \"value\": \""+command[2]+"\"}]"),
 						method="PATCH",
 					))
-							
+
 			if len(command) >= 4 and command[3]:
-				new_guild = "🔰 "+command[3]
-				
+				gid = int(self.getGuildId(command[3]))-0x6500000
+				new_guild = "🔰 "+command[3]+f" ({gid:0>5X})"
+
 			print(old_guild, "vs", new_guild)
-			if new_guild and new_guild != old_guild:
+			if new_guild:
 				print(self.addSubscription(user_email, new_guild))
-		
+
 			if old_guild and new_guild != old_guild:
 				print("Remove", self.zulip.remove_subscriptions([old_guild], principals = [user_email]))
-			
+
 			if new_guild != old_guild:
 				print(self.zulip.call_endpoint(
 					url="/users/"+user_email+"?profile_data="+urllib.parse.quote_plus("[{\"id\":"+CUSTOM_PROFILE_GUILD+", \"value\": \""+new_guild+"\"}]"),
 					method="PATCH",
 				))
 
-	
+
 	def addFactionChannelToCharacter(self, command):
 		if len(command) >= 3 and command[2] != "FACTION_RF":
 			if command[2][:8] == "FACTION_":
@@ -145,7 +169,7 @@ class ShardCommands(RyzomService):
 			print("Add sub:", self.addSubscription(command[1].lower()+"@ig.ryzom.com", name))
 			return True
 		return False
-	
+
 	def removeFactionChannelForCharacter(self, command):
 		if len(command) >= 3 and command[2] != "FACTION_RF":
 			if command[2][:8] == "FACTION_":
@@ -158,14 +182,21 @@ class ShardCommands(RyzomService):
 
 	def deleteMember(self, command):
 		if len(command) >= 3:
-			print(self.zulip.remove_subscriptions(["🔰 "+command[1]], principals = [command[2].lower()+"@ig.ryzom.com"]))
+			user_email = command[2].lower()+"@ig.ryzom.com"
+			gid = int(self.getGuildId(command[1]))-0x6500000
+			guild = "🔰 "+command[1]+f" ({gid:0>5X})"
+			print(self.zulip.remove_subscriptions([guild], principals = [user_email]))
+			print(self.zulip.call_endpoint(
+					url="/users/"+user_email+"?profile_data="+urllib.parse.quote_plus("[{\"id\":"+CUSTOM_PROFILE_GUILD+", \"value\": \"""\"}]"),
+					method="PATCH",
+				))
 			return True
 		return False
 
 	def checkMessages(self):
 		last_id = self.getLastCommandID()
-		if self.current_id+1 != last_id+1:
-			print("Current:", self.current_id+1, "Last:", last_id)
+		#if self.current_id+1 != last_id+1:
+		#	print("Current:", self.current_id+1, "Last:", last_id)
 		for i in range(self.current_id+1, last_id+1, 1):
 			command = self.getRyzomCommand(i)
 			#command = self.fake_command
@@ -180,13 +211,19 @@ class ShardCommands(RyzomService):
 
 			self.setLastManagedCommandID(i)
 		self.current_id = self.next_id
-	
+
 	def run(self):
 		#self.fake_command = ["playerConnects", "Ulueta", "YES"]
 		#self.fake_command = ["addFactionChannelToCharacter", "Ulueta", "DYN1"]
 		#self.fake_command = ["removeFactionChannelForCharacter", "Ulueta", "DYN1"]
 		#self.fake_command = ["playerConnects", "Ulueta", ""]
+		#self.fake_command = ['deleteMember', 'Les Senseis Atysiens', 'Ulueta']
 		self.current_id = self.getLastManagedCommandID()
+		last_id = self.getLastCommandID()
+		if self.current_id > last_id:
+			print("Fix current id")
+			self.setLastManagedCommandID(last_id)
+			self.current_id = self.getLastManagedCommandID()
 		self.next_id = self.current_id
 		print("Managing shard commands...")
 		while True:

@@ -1,4 +1,4 @@
-name: Zulip Fetcher
+name: Zulip.Fetcher
 description: Get messages from Zulip
 group: RTZ
 timeoutSec: 0

@@ -1,7 +1,8 @@
-name: Ryzom SU
+name: Arma_SU
 description: Ryzom Shard Unifier Service
 tags: P_84
 group: Shard
+maxActiveRuns: -1
 env:
   - LC_ALL: "C"
   - LANGUAGE: ""
@@ -18,6 +19,6 @@ handlerOn:
   cancel:
     command: echo "Canceled"
   failure:
-    command: sh /home/nevrax/shard/tools/start_service.sh SU
+    command: bash /home/nevrax/shard/tools/start_service.sh SU
   success:
-    command: sh /home/nevrax/shard/tools/start_service.sh SU
+    command: bash /home/nevrax/shard/tools/start_service.sh SU

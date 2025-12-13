@@ -6,7 +6,7 @@ names = []
 for ai in ["ark", "fyros", "matis", "tryker", "zorai", "newbieland", "roots"]:
 	ai_upper = ai.upper()
 	source = (
-f'name: Logs AIS {ai_upper}\n'
+f'name: Logs_AIS_{ai_upper}\n'
 f'description: Check Logs of Ryzom Ai Service\n'
 f'group: Services\n'
 f'env:\n'

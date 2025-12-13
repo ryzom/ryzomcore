@@ -1,7 +1,8 @@
-name: Ryzom AIS_MATIS
+name: Arma_AIS_MATIS
 description: Ryzom Ai Service
 tags: P_87
 group: Shard
+maxActiveRuns: -1
 env:
   - LC_ALL: "C"
   - LANGUAGE: ""
@@ -18,6 +19,6 @@ handlerOn:
   cancel:
     command: echo "Canceled"
   failure:
-    command: sh /home/nevrax/shard/tools/start_service.sh AIS_MATIS
+    command: bash /home/nevrax/shard/tools/start_service.sh AIS_MATIS
   success:
-    command: sh /home/nevrax/shard/tools/start_service.sh AIS_MATIS
+    command: bash /home/nevrax/shard/tools/start_service.sh AIS_MATIS

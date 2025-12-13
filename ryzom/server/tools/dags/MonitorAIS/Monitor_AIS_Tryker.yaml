@@ -1,4 +1,4 @@
-name: Logs AIS TRYKER
+name: Logs_AIS_TRYKER
 description: Check Logs of Ryzom Ai Service
 group: Services
 env:

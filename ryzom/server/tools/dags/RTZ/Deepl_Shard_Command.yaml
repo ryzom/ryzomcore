@@ -1,4 +1,4 @@
-name: Shard Command
+name: Shard.Command
 description: Manage commands from shard
 group: RTZ
 timeoutSec: 0
@@ -10,6 +10,6 @@ env:
   - PYTHONPATH: /home/nevrax/shard/tools/
 steps:
   - name: run
-    command: bash /home/nevrax/repos/ryzom-core/ryzom/server/tools/marguez/monitor_script.sh shard_commands.py $(hostname -s)
+    command: bash /home/nevrax/repos/ryzom-core/ryzom/server/tools/marguez/monitor_script.sh shard_commands.py
 
 
