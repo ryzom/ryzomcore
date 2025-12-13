@@ -24,7 +24,7 @@ def getServiceLog(service):
 		"ts" : "tick_service",
 		"rms" : "monitor_service",
 	}
-	
+
 	if service[:4] == "ais_" :
 		return "ai_service_"+service
 	else:
@@ -67,6 +67,7 @@ f'name: {shard}_{NAME}\n'
 f'description: {desc}\n'
 f'tags: P_{prio}\n'
 f'group: Shard\n'
+f'maxActiveRuns: -1\n'
 f'env:\n'
 f'  - LC_ALL: "C"\n'
 f'  - LANGUAGE: ""\n'
@@ -83,9 +84,9 @@ f'handlerOn:\n'
 f'  cancel:\n'
 f'    command: echo "Canceled"\n'
 f'  failure:\n'
-f'    command: sh {SHARD_PATH}tools/start_service.sh {NAME}\n'
+f'    command: bash {SHARD_PATH}tools/start_service.sh {NAME}\n'
 f'  success:\n'
-f'    command: sh {SHARD_PATH}tools/start_service.sh {NAME}\n'
+f'    command: bash {SHARD_PATH}tools/start_service.sh {NAME}\n'
 )
 			names.append(NAME)
 			with open(shard+"_"+NAME+".yaml", "w") as f:

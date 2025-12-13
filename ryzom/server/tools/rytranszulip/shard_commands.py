@@ -147,7 +147,7 @@ class ShardCommands(RyzomService):
 				new_guild = "🔰 "+command[3]+f" ({gid:0>5X})"
 
 			print(old_guild, "vs", new_guild)
-			if new_guild and new_guild != old_guild:
+			if new_guild:
 				print(self.addSubscription(user_email, new_guild))
 
 			if old_guild and new_guild != old_guild:

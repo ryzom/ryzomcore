@@ -135,7 +135,13 @@ if __name__ == "__main__":
 				if sleep == i:
 					total += 1
 					print("Starting:", name)
-					subprocess.Popen(["dagu", "enqueue", shard+"_"+name, "-q", "-c", "/etc/dagu.yaml"])
+					with open(shard+"_"+name+"_dagu_stdout.log", "w") as out, open(shard+"_"+name+"_dagu_stderr.log", "w") as err:
+						process = subprocess.Popen(
+							["dagu", "start", shard+"_"+name, "-q", "-c", "/etc/dagu.yaml"],
+							stdout=out,
+							stderr=err,
+							start_new_session=True
+						)
 			if total >= len(services):
 				break
 

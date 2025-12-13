@@ -1,0 +1,31 @@
+#!/bin/bash
+echo "0" > /tmp/killras.count
+
+while true
+do
+	RAS_PID=$(ps aux | grep "../sbin/ryzom_admin_service --" | grep -v python3 | grep -v "schroot" | grep -v grep | awk '{print $2}')
+	if [[ ! -z "$RAS_PID" ]]
+	then
+		RAS_CPU=$(top -b -n 1 -p $RAS_PID | tail -1 | awk '{print $9}' | cut -d"," -f1)
+		echo -n "$RAS_CPU "
+		if (( RAS_CPU >= 150 ))
+		then
+			count=$(cat /tmp/killras.count)
+			if (( count > 5 ))
+			then
+				date
+				echo "$RAS_PID : KILLED!"
+				kill $RAS_PID
+				echo "0" > /tmp/killras.count
+			else
+				date
+				echo "$RAS_PID $RAS_CPU : HOT"
+				let count++
+				echo "$count" > /tmp/killras.count
+			fi
+		else
+			echo "0" > /tmp/killras.count
+		fi
+	fi
+	sleep 1
+done
