@@ -1,4 +1,4 @@
-name: DeepL FR
+name: DeepL.FR
 description: Translate messages to FR using DeepL
 group: RTZ
 timeoutSec: 0

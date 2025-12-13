@@ -1,4 +1,4 @@
-import os
+import os, sys
 
 SHARD_PATH="/home/nevrax/shard/"
 DAGS_PATH="/home/data/dagu/dags/"
@@ -44,7 +44,11 @@ def getPriority(service):
 		return prios[service]
 	else:
 		return "00"
-	
+
+if len(sys.argv) < 2:
+    sys.exit(1)
+
+shard = sys.argv[1]
 
 with open("shard.screen.rc") as f:
 	lines = f.read().split("\n")
@@ -59,7 +63,7 @@ with open("shard.screen.rc") as f:
 			log = SHARD_PATH+"logs/"+getServiceLog(sline[5])+".log"
 			prio = getPriority(name)
 			source = (
-f'name: Ryzom {NAME}\n'
+f'name: {shard}_{NAME}\n'
 f'description: {desc}\n'
 f'tags: P_{prio}\n'
 f'group: Shard\n'
@@ -84,7 +88,7 @@ f'  success:\n'
 f'    command: sh {SHARD_PATH}tools/start_service.sh {NAME}\n'
 )
 			names.append(NAME)
-			with open("Ryzom_"+NAME+".yaml", "w") as f:
+			with open(shard+"_"+NAME+".yaml", "w") as f:
 				f.write(source)
 	names.sort()
 	for n in names:

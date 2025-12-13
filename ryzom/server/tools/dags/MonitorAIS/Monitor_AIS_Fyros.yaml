@@ -1,4 +1,4 @@
-name: Logs AIS FYROS
+name: Logs_AIS_FYROS
 description: Check Logs of Ryzom Ai Service
 group: Services
 env:

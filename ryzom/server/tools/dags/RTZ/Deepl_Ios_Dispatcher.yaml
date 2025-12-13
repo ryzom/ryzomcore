@@ -1,4 +1,4 @@
-name: Ios Dispatcher
+name: Ios.Dispatcher
 description: Send messages to IOS
 group: RTZ
 timeoutSec: 0
@@ -10,6 +10,6 @@ env:
   - PYTHONPATH: /home/nevrax/shard/tools/
 steps:
   - name: run
-    command: bash /home/nevrax/repos/ryzom-core/ryzom/server/tools/marguez/monitor_script.sh ios_dispatcher.py $(hostname -s)
+    command: bash /home/nevrax/repos/ryzom-core/ryzom/server/tools/marguez/monitor_script.sh ios_dispatcher.py
 
 

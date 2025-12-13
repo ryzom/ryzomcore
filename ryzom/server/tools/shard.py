@@ -8,6 +8,7 @@ import time
 import glob
 import psutil
 import shutil
+import socket
 
 import subprocess
 import requests_openapi
@@ -49,31 +50,33 @@ services = (
 )
 
 client = None
+domain = socket.gethostname()
+shard = domain.split(".")[0].title()
 
 def stopService(name):
 	global client
 	if not client:
 		client = requests_openapi.Client().load_spec_from_file(shard_path+"/tools/dagu_api.yaml")
-		client.set_server(requests_openapi.Server(url="http://arma.ryzom.com:9888/api/v2"))
+		client.set_server(requests_openapi.Server(url=f"http://{domain}:9888/api/v2"))
 
-	infos = client.getDAGDetails(fileName="Ryzom_"+name).json()
+	infos = client.getDAGDetails(fileName=shard+"_"+name).json()
 	print("Terminate:", name)
 	client.dequeueDAGRun(name=infos["dag"]["name"], dagRunId=infos["latestDAGRun"]["dagRunId"])
 	client.terminateDAGRun(name=infos["dag"]["name"], dagRunId=infos["latestDAGRun"]["dagRunId"])
 
 def cleanService(name):
-	with open(dagu_path+"dags/Ryzom_"+name+".yaml", "r") as file:
+	with open(dagu_path+"dags/"+shard+"_"+name+".yaml", "r") as file:
 		config = yaml.safe_load(file)
 	cmd = config["steps"][0]["command"].split(" ", 3)[3]
 	schroot = None
 	python = None
 	for proc in psutil.process_iter():
-		n = proc.name()
 		try:
 			check_cmd = " ".join(proc.cmdline())
 		except:
 			check_cmd = "xxx"
 		if cmd in check_cmd:
+			n = proc.name()
 			if n == "schroot":
 				schroot = proc
 			elif n == "python3":
@@ -101,10 +104,10 @@ def cleanService(name):
 			pass
 		sys.stdout.flush()
 
-	shutil.rmtree(dagu_path+"history/queue/Ryzom "+name, True)
-	shutil.rmtree(dagu_path+"history/proc/Ryzom "+name, True)
+	shutil.rmtree(dagu_path+"history/queue/"+shard+"_"+name, True)
+	shutil.rmtree(dagu_path+"history/proc/"+shard+"_"+name, True)
 	import glob, os
-	for f in glob.glob("/tmp/@dagu_Ryzom_"+name+"_*.sock"):
+	for f in glob.glob("/tmp/@dagu_"+shard+"_"+name+"_*.sock"):
 		os.remove(f)
 
 def stopServices(services):
@@ -132,7 +135,7 @@ if __name__ == "__main__":
 				if sleep == i:
 					total += 1
 					print("Starting:", name)
-					subprocess.Popen(["dagu", "enqueue", "Ryzom_"+name, "-c", "/etc/dagu.yaml"])
+					subprocess.Popen(["dagu", "enqueue", shard+"_"+name, "-q", "-c", "/etc/dagu.yaml"])
 			if total >= len(services):
 				break
 

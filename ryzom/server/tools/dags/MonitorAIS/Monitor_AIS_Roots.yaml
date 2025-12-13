@@ -1,4 +1,4 @@
-name: Logs AIS ROOTS
+name: Logs_AIS_ROOTS
 description: Check Logs of Ryzom Ai Service
 group: Services
 env:

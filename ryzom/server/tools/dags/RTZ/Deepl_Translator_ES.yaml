@@ -1,4 +1,4 @@
-name: DeepL ES
+name: DeepL.ES
 description: Translate messages to ES using DeepL
 group: RTZ
 timeoutSec: 0

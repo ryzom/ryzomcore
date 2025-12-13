@@ -2,23 +2,23 @@
 #############################################
 #  _______________________________
 #  \______   \__    ___/\____    /
-#   |       _/ |    |     /     / 
-#   |    |   \ |    |    /     /_ 
+#   |       _/ |    |     /     /
+#   |    |   \ |    |    /     /_
 #   |____|_  / |____|   /_______ \
 #          \/                   \/
-# 
+#
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom IOS Fetcher ==-
-# 
+#
 # This script wait in a loop for all lines send to chat.log, parse them and fill the memcached server
-# 
+#
 # Message in format:  2025/05/17 01:42:18 INF 4155664128 IOS-136 : player:~Ulukyn|Ulueta|en|*|hello my friend
 # Message out format: (SENDER, CHANNEL, CHANNEL_ID, SOURCE_LANG, DST_LANGS, TEXT)
 #     ex. ("Ulueta", "player", "~Ulukyn", "en", "*", "hello my friend")
-# 
+#
 
 import os
 import sys
@@ -40,11 +40,11 @@ class IosFetcher(RyzomService):
 		self.log_sections["messages"] = ("db", "Ryzom-Chat-LastID", "Ryzom-Chat-{}", "")
 		self.stats = {"filesize": 0, "seek": 0, "lines": 0}
 		self.logfile = open(self.logname, "r", encoding="utf-8", errors="replace")
-		self.shard = sys.argv[1]
+		self.shard = host = self.config["shard"]["name"]
 		self.domain = "("+self.shard[0].upper()+self.shard[1:]+")"
 		self.updateStats()
 		self.guilds = {}
-		
+
 		self.db = None
 		try:
 			self.db = mysql.connector.connect(
@@ -83,14 +83,14 @@ class IosFetcher(RyzomService):
 				self.updateStats()
 				self.updateActivity()
 				sleep(0.01)
-	
+
 	def updateGuilds(self):
 		with open("/tmp/dump_guilds.json") as file:
 			try:
 				self.guilds = json.load(file)
 			except:
 				pass
-	
+
 	def getGuildName(self, gid):
 		cursor = self.db.cursor()
 		try:
@@ -110,7 +110,7 @@ class IosFetcher(RyzomService):
 		self.infos += f"[orange1]Size of logfile:[/orange1] {filesize}  \t[orange1]Lines parsed:[/orange1] {lines}\n"
 		self.infos += f"[orange1]Shard: [/orange1]{self.shard}"
 		self.updateInfos()
-	
+
 	def updateLogs(self, line):
 		sline = line.strip().split(" ", 6)
 		if len(sline) >= 5:
@@ -148,7 +148,7 @@ class IosFetcher(RyzomService):
 					channel_id = "dyn:"+channel_id
 			elif channel == "tell":
 				channel = "player"
-				channel_id = channel_id[1:]
+				#channel_id = channel_id[1:]
 			elif channel == "arround":
 				message = message[5:]
 				channel_id = channel
@@ -166,7 +166,7 @@ class IosFetcher(RyzomService):
 			message = RyzomMessage("ios", sender, channel, channel_id, source_lang, langs, message)
 			last_id = self.addRyzomMessage(message)
 			print("last_id", last_id)
-	
+
 	def run(self):
 		loglines = self.follow(self.logfile)
 		print("Fetching IOS log file")
