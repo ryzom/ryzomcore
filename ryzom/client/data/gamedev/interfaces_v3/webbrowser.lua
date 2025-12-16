@@ -161,7 +161,6 @@ function WebBrowser:restoreWindow(app)
 	end
 end
 
-
 ------------------------------------------------------------------------------------------------------------
 --
 function WebBrowser:saveWindowPop(app)

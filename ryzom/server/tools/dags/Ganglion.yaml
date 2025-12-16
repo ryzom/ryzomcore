@@ -1,0 +1,6 @@
+name: Ganglion
+description: Textual Ganglion Server
+group: Services
+steps:
+  - name: run
+    command: /home/nevrax/.local/bin/ganglion serve --config /etc/ganglion.toml

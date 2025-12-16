@@ -282,7 +282,7 @@ function outgame:buildActionPack()
 		sex = "f"
 	end
 
-	getUI("ui:outgame:appear:finish_but").frozen = 1
+	getUI("ui:outgame:appear:finish_but").frozen = false
 	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&login="..login.."&slot="..tostring(slot).."&sex="..sex)
 
 

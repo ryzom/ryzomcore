@@ -75,7 +75,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 --Send Guild invite from guildwindow
 function game:invToGuild()
-	player = getUI('ui:interface:add_guild'):find('edit_text').hardtext:split(">")[2]
+	player = getUI('ui:interface:add_guild'):find('eb').input_string
 	if(player ~= '')then
 		runAH(nil, 'talk', 'mode=0|text=/guildinvite ' .. player)
 	end

@@ -364,11 +364,17 @@ function SearchCommand:pars_all_emotes()
 	for emote_id,emote_data in pairs(emot_list) do
 		--do a dirty hack and used the description to pass path data for emotes only
 		local emote_infos = emote_data["path"].."|"..emote_id
-		table.insert(SearchCommand.commands_list,{"emotes", "player", emote_infos, emote_data["translated"], "", {{":",""},{"Text:<CustomEmoteText>",""},{"none",""}}, {{"Text:<MoreCustomEmoteText>",""}}})
+		local emotes_name_fixed = string.gsub(emote_data["translated"], " ", "_")
+		
+		table.insert(SearchCommand.commands_list,{"emotes", "player", emote_infos, emotes_name_fixed, "", {{":",""},{"Text:<CustomEmoteText>",""},{"none",""}}, {{"Text:<MoreCustomEmoteText>",""}}})
 	end
 end
 
 function SearchCommand:build_emote_preview(emote_id)
+    --debug("here!!!!!!!")
+	--debug("emote_id"..emote_id)
+
+
 	if(self.player_name_local == "")then
 		self.player_name_local=getPlayerName()
 	end
@@ -576,6 +582,7 @@ function SearchCommand:pars_help_on_window(content_of_window,height)
 end
 
 function SearchCommand:help_show_all(parameter)
+    --debug("SearchCommand:help_show_all")
 	local count = 0
 	local build_content = ""
 	
@@ -671,6 +678,8 @@ function SearchCommand:help_show_all(parameter)
 end
 
 function SearchCommand:help(uiId,input)
+    --debug("SearchCommand:help"..input)
+
 	--##check if player turn off using auto complate by settings
 	local used_searchcommand_by_config = getDbProp("UI:SAVE:CHAT:CHAT_AUTOCOMPLETE")
 	if(used_searchcommand_by_config == 0)then
@@ -701,12 +710,15 @@ function SearchCommand:help(uiId,input)
 		end
 	else
 	
+	--debug("check_parent")
+	
 	local found_command_for_help = {}
 	
 	if(command_split[1]:match("^%**$") ~= nil)then
 		displaySystemInfo(ucstring(command_split[1].." : "..i18n.get("uiCommandNotExists"):toUtf8()), "SYS")
 		do return end
 	else
+	    --debug("here_inside")
 		found_command_for_help = SearchCommand:search_string(command_split[1], self.commands_list)
 		
 		for c = 1, #self.commands_list do
@@ -715,15 +727,17 @@ function SearchCommand:help(uiId,input)
 				if(self.commands_list[c][5] ~= "")then
 					--split parent /child to add all members
 					local child_parents = SearchCommand:split(self.commands_list[c][5], "|")
-					for i, command_name_child_parent in ipairs(child_parents) do
-						if not (SearchCommand:contains(found_command_for_help, command_name_child_parent))then
-						table.insert(found_command_for_help, command_name_child_parent) 
-					end
+    					for i, command_name_child_parent in ipairs(child_parents) do
+    						if not (SearchCommand:contains(found_command_for_help, command_name_child_parent))then
+    						table.insert(found_command_for_help, command_name_child_parent) 
+    					end
 					end
 				end
 			end
 		end
 	end
+	
+	--debug("build_html")
 	
 		build_content=build_content.."<table width='100%' border=0>"
 		build_content=build_content.."<tr><td colspan=3>######################## "..i18n.get("uiSearchCommandHelp"):toUtf8().." <font size=14><strong>'"..command_split[1].."'</strong></font> / "..#found_command_for_help.." #######################</td></tr>"
@@ -765,6 +779,7 @@ function SearchCommand:help(uiId,input)
 					
                     build_content=build_content.."<tr><td width='10px'>"..count..".</td><td colspan=3><font size=13><strong>"..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</strong></font></td></tr>"
     				if(self.commands_list[c][1] == "emotes")then
+    				    --debug("self.commands_list[c][3]"..self.commands_list[c][3])
     					local path_parts = SearchCommand:split(self.commands_list[c][3], "|")
     					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiEM_Emotes"):toUtf8()..": '"..i18n.get("uiEM_Emotes"):toUtf8().. " > " ..SearchCommand:htmlentities(tostring(i18n.get(path_parts[2]))).." > ".. SearchCommand:htmlentities(SearchCommand:firstToUpper(self.commands_list[c][4])) .."'</td></tr>"
     					build_content=build_content.."<tr><td>&nbsp;</td><td>".. SearchCommand:build_emote_preview(path_parts[4]).."</td></tr>"
