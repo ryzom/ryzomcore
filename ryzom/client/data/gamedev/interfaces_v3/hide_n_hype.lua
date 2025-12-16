@@ -97,7 +97,8 @@ if not Ryzhide then
 		duration_time_hint_3 = 150,
 		duration_time_claim_reward = 180,
 		duration_time_most_wanted_offline = 180,
-		needed_player_amount_to_start = 4
+		needed_player_amount_to_start = 4,
+		type_data = ""
 	}
 end
 
@@ -367,8 +368,12 @@ function Ryzhide:htmlentities(text)
 	html_trans_content = html_client_translation:gsub("<NotExist:", "{")
 	html_trans_content = html_trans_content:gsub(">", "}")
 	html_trans_content = html_trans_content:gsub("'", "`")
-
-	return html_trans_content
+    
+    if(html_trans_content == "" or html_trans_content == " ")then
+        return Ryzhide:shorten("!:"..text,26)
+    else
+        return html_trans_content
+    end
 end
 
 function Ryzhide:check_local_player_name()
@@ -394,7 +399,7 @@ function Ryzhide:check_have_team_member()
 
 	local have_team_member = getUI("ui:interface:team_list_0")
 	if(have_team_member.active ~= nil)then
-		Ryzhide:display_debug_messanges("member: "..tostring(have_team_member.active))
+		--Ryzhide:display_debug_messanges("member: "..tostring(have_team_member.active))
 		if(have_team_member.active ~= false)then
 			Ryzhide:display_debug_messanges("player_join_a_team"..tostring(have_team_member.active))
 			team_member_return = "true"
@@ -439,7 +444,29 @@ function Ryzhide:check_for_update_server_config(json_data_from_join)
 	if(self.duration_time_most_wanted_offline ~= tonumber(json_data_from_join.duration_time_most_wanted_offline))then
 		self.duration_time_most_wanted_offline = tonumber(json_data_from_join.duration_time_most_wanted_offline)
 	end
+	
+	if(self.type_data ~= json_data_from_join.type_data)then
+		self.type_data = json_data_from_join.type_data
+	end
 end
+
+function Ryzhide:split(str, sep)
+	sep = sep or ","
+	local result = {}
+	for part in string.gmatch(str, "([^" .. sep .. "]+)") do
+		table.insert(result, part)
+	end
+	return result
+end
+
+function Ryzhide:shorten(str, max)
+	max = max or 6
+	if #str > max then
+		return string.sub(str, 1, max) .. "..."
+	end
+	return str
+end
+
 
 --###################################### START load and start at login function #######################################
 
@@ -1451,6 +1478,33 @@ function Ryzhide:build_hunter_window()
 	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_hunter, "", "")
 end
 
+function Ryzhide:build_object_table()
+    Ryzhide:display_debug_messanges("type_data: "..self.type_data)
+	local split_type_data = Ryzhide:split(self.type_data, ",")
+	local out = {}
+	
+	out[#out+1] = '<table width="' .. tostring(table_width) .. '" border="' .. tostring(self.debug_window_border) .. '">'
+
+	for i, obj in ipairs(split_type_data) do
+		if (i % 2) == 1 then
+			out[#out+1] = '<tr>'
+		end
+
+		out[#out+1] = '<td align="center"><a href="ah:lua&Ryzhide:spawn_object(\'' .. obj .. '\')">' ..self:load_translation(obj) .. '</a></td>'
+
+		if (i % 2) == 0 then
+			out[#out+1] = '</tr>'
+		end
+	end
+
+	if (#split_type_data % 2) == 1 then
+		out[#out+1] = '</tr>'
+	end
+
+	out[#out+1] = '</table>'
+	return table.concat(out)
+end
+
 function Ryzhide:build_most_wanted_window()
 	local window_height = 530
 	local window_width = 415
@@ -1494,36 +1548,7 @@ function Ryzhide:build_most_wanted_window()
 
 			<tr>
 				<td align="center" colspan="3">
-					<table width="]]..table_width..[[" border="]]..self.debug_window_border..[[">
-						<tr>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_totem_kitin_sel_nocollision')">]]..Ryzhide:load_translation("object_totem_kitin_sel_nocollision")..[[</a></td>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_tent_sel_nocollision')">]]..Ryzhide:load_translation("object_tent_sel_nocollision")..[[</a></td>
-						</tr>
-						<tr>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_spot_goo_sel_nocollision')">]]..Ryzhide:load_translation("object_spot_goo_sel_nocollision")..[[</a></td>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_tent_zorai_sel_nocollision')">]]..Ryzhide:load_translation("object_tent_zorai_sel_nocollision")..[[</a></td>
-						</tr>
-						<tr>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_giant_skull_b_lokness_c_sel_nocollision')">]]..Ryzhide:load_translation("object_giant_skull_b_lokness_c_sel_nocollision")..[[</a></td>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_tent_tryker_sel_nocollision')">]]..Ryzhide:load_translation("object_tent_tryker_sel_nocollision")..[[</a></td>
-						</tr>
-						<tr>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_1_crate_sel_nocollision')">]]..Ryzhide:load_translation("object_1_crate_sel_nocollision")..[[</a></td>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_tent_matis_sel_nocollision')">]]..Ryzhide:load_translation("object_tent_matis_sel_nocollision")..[[</a></td>
-						</tr>
-						<tr>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_1_barrel_sel_nocollision')">]]..Ryzhide:load_translation("object_1_barrel_sel_nocollision")..[[</a></td>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_tent_fyros_sel_nocollision')">]]..Ryzhide:load_translation("object_tent_fyros_sel_nocollision")..[[</a></td>
-						</tr>
-						<tr>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_fo_s2_bigroot_c_sel_nocollision')">]]..Ryzhide:load_translation("object_fo_s2_bigroot_c_sel_nocollision")..[[</a></td>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_ju_s3_dead_tree_sel_nocollision')">]]..Ryzhide:load_translation("object_ju_s3_dead_tree_sel_nocollision")..[[</a></td>
-						</tr>
-						<tr>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_fy_s1_burnedtree_d_sel_nocollision')">]]..Ryzhide:load_translation("object_fy_s1_burnedtree_d_sel_nocollision")..[[</a></td>
-							<td align="center"><a href="ah:lua&Ryzhide:spawn_object('object_tr_s2_lokness_c_sel_nocollision')">]]..Ryzhide:load_translation("object_tr_s2_lokness_c_sel_nocollision")..[[</a></td>
-						</tr>
-					</table>
+					]]..Ryzhide:build_object_table(table_width)..[[
 				</td>
 			</tr>
 
@@ -1618,7 +1643,7 @@ function Ryzhide:game_running_timer_stopped()
 	self.json_data_ready = 0
 
 	DynE.otherMapPoints["hidenhype_hunter"] = {}
-    delArkPoints()
+	delArkPoints()
 	DynE:AddOtherMapPoints()
 
 	Ryzhide:build_wait_start_window()
@@ -1650,20 +1675,20 @@ function Ryzhide:check_player_are_in_special_state()
 	if(self.json_pull_counter > 6)then
 		--now the tatus need to be fine and not allow to break
 		if(current_player_invisible == 0)then
-		    Ryzhide:display_debug_messanges("you_are_no_longer_invisible")
-		    valid_a_check = valid_a_check + 1
+			Ryzhide:display_debug_messanges("you_are_no_longer_invisible")
+			valid_a_check = valid_a_check + 1
 		end
 
 		if(current_player_mode ~= "REST")then
-		    if(current_player_mode ~= "SIT")then
-		        Ryzhide:display_debug_messanges("player_no_longer_rest_or_sit")
-		        valid_a_check = valid_a_check + 1
-		    end
+			if(current_player_mode ~= "SIT")then
+				Ryzhide:display_debug_messanges("player_no_longer_rest_or_sit")
+				valid_a_check = valid_a_check + 1
+			end
 		end
 	end
 
 	if(valid_a_check >= 1)then
-	    player_special_state = 69
+		player_special_state = 69
 	end
 
 	return player_special_state
@@ -1720,7 +1745,7 @@ function Ryzhide:display_hunter_on_map(hunter_pos_array)
 		delArkPoints()
 		DynE:AddOtherMapPoints()
 	else
-	    DynE.otherMapPoints["hidenhype_hunter"] = {}
+		DynE.otherMapPoints["hidenhype_hunter"] = {}
 
 		for _, positions in ipairs(hunter_pos_array) do
 			local xpos_hunter, ypos_hunter = positions:match("([^,]+),([^,]+)")
@@ -1731,7 +1756,7 @@ function Ryzhide:display_hunter_on_map(hunter_pos_array)
 		end
 
 		delArkPoints()
-        DynE:AddOtherMapPoints()
+		DynE:AddOtherMapPoints()
 	end
 end
 
@@ -2136,12 +2161,12 @@ function Ryzhide:game_over_most_wanted_not_found(most_wanted_name,current_round_
 	else
 		Ryzhide:display_debug_messanges("already_close"..self.closed_most_wanted_not_found_hunter)
 		if(self.closed_most_wanted_not_found_hunter == 0)then
-		    local xpos_most_wanted, ypos_most_wanted = most_wanted_position:match("([^,]+),([^,]+)")
+			local xpos_most_wanted, ypos_most_wanted = most_wanted_position:match("([^,]+),([^,]+)")
 			if(tonumber(xpos_most_wanted) ~= 0 or tonumber(ypos_most_wanted)~= 0)then
-		       Ryzhide:build_most_wanted_not_found_hunter(most_wanted_name,tonumber(xpos_most_wanted),tonumber(ypos_most_wanted))
-		    else
-		        Ryzhide:build_most_wanted_not_found_hunter(most_wanted_name,0,0)
-		    end
+			   Ryzhide:build_most_wanted_not_found_hunter(most_wanted_name,tonumber(xpos_most_wanted),tonumber(ypos_most_wanted))
+			else
+				Ryzhide:build_most_wanted_not_found_hunter(most_wanted_name,0,0)
+			end
 		end
 	end
 end
@@ -2195,10 +2220,10 @@ function Ryzhide:game_over_most_wanted_found(hunter_name,most_wanted_name,curren
 
 			local xpos_most_wanted, ypos_most_wanted = most_wanted_position:match("([^,]+),([^,]+)")
 			if(tonumber(xpos_most_wanted) ~= 0 or tonumber(ypos_most_wanted)~= 0)then
-		       Ryzhide:build_loos_hunter(hunter_name,most_wanted_name,tonumber(xpos_most_wanted),tonumber(ypos_most_wanted))
-		    else
-		       Ryzhide:build_loos_hunter(hunter_name,most_wanted_name,0,0)
-		    end
+			   Ryzhide:build_loos_hunter(hunter_name,most_wanted_name,tonumber(xpos_most_wanted),tonumber(ypos_most_wanted))
+			else
+			   Ryzhide:build_loos_hunter(hunter_name,most_wanted_name,0,0)
+			end
 		end
 	end
 end
@@ -2310,7 +2335,7 @@ function Ryzhide:build_loos_hunter(hunter_name,most_wanted_name,pox_mostwanted,p
 	local show_map_or_not = 0
 
 	if(tonumber(pox_mostwanted) ~= 0 or tonumber(poy_mostwanted)~= 0)then
-	    show_map_or_not = 1
+		show_map_or_not = 1
 	end
 
 	local html_loos_hunter_without_map=""
@@ -2358,13 +2383,13 @@ function Ryzhide:build_loos_hunter(hunter_name,most_wanted_name,pox_mostwanted,p
 			</table>]]
 
 	if(show_map_or_not == 0)then
-	    --dont show map bad pos
-	    Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_loos_hunter_without_map, "click_close_button", "close_window_build_loos_hunter")
-    else
-        window_height = 470
-        --show map good pos
-        Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_loos_hunter_with_map, "click_close_button", "close_window_build_loos_hunter")
-    end
+		--dont show map bad pos
+		Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_loos_hunter_without_map, "click_close_button", "close_window_build_loos_hunter")
+	else
+		window_height = 470
+		--show map good pos
+		Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_loos_hunter_with_map, "click_close_button", "close_window_build_loos_hunter")
+	end
 end
 
 function Ryzhide:build_most_wanted_not_found_hunter(most_wanted_name,pox_mostwanted,poy_mostwanted)
@@ -2373,7 +2398,7 @@ function Ryzhide:build_most_wanted_not_found_hunter(most_wanted_name,pox_mostwan
 	local show_map_or_not = 0
 
 	if(tonumber(pox_mostwanted) ~= 0 or tonumber(poy_mostwanted)~= 0)then
-	    show_map_or_not = 1
+		show_map_or_not = 1
 	end
 
 	local html_most_wanted_not_found_hunter_without_map=""
@@ -2421,13 +2446,13 @@ function Ryzhide:build_most_wanted_not_found_hunter(most_wanted_name,pox_mostwan
 			</table>]]
 
 	if(show_map_or_not == 0)then
-	    --dont show map bad pos
-	    Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_most_wanted_not_found_hunter_without_map, "click_close_button", "close_window_build_most_wanted_not_found_hunter")
-    else
-        window_height = 470
-        --show map good pos
-        Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_most_wanted_not_found_hunter_with_map, "click_close_button", "close_window_build_most_wanted_not_found_hunter")
-    end
+		--dont show map bad pos
+		Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_most_wanted_not_found_hunter_without_map, "click_close_button", "close_window_build_most_wanted_not_found_hunter")
+	else
+		window_height = 470
+		--show map good pos
+		Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_most_wanted_not_found_hunter_with_map, "click_close_button", "close_window_build_most_wanted_not_found_hunter")
+	end
 end
 
 function Ryzhide:build_most_wanted_not_found_most_wanted()
@@ -2745,5 +2770,3 @@ function Ryzhide:click_icon_abort(trigger_id)
 end
 
 --###################################### END asked_for_abort #######################################
-
-debug("!!! Hide n Hype overload from Payload !!!!")
