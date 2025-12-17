@@ -1,4 +1,4 @@
-name: Manage Coredumps
+name: Manage_Coredumps
 description: Extract backtrace and delete coredumps
 group: Services
 steps:
