@@ -1,5 +1,5 @@
 <!-- ****************************************** -->
-<!-- *            Hide n Hype               * -->
+<!-- *				Hide n Hype					* -->
 <!-- ****************************************** -->
 <interface_config>
 	<root id="interface" x="0" y="0" w="800" h="600" active="true" />
@@ -65,7 +65,7 @@
 					color="#text_color"
 					shadow="true"
 					global_color="false" />
-		   </group>
+			</group>
 		</template>
 		
 		<template name="hide_n_hype_text" keep="true" x="0" y="0" font_size="30" text_color="0 185 0 255" hardtext="" id="" w="60" h="20">
@@ -79,7 +79,7 @@
 					color="#text_color"
 					shadow="true"
 					global_color="false" />
-		   </group>
+			</group>
 		</template>
 		
 			<template name="hide_n_hype_button_images" render_layer1="1" render_layer2="2" keep="true" tooltip="" w="40" h="40" bg="" img1="" x="0" y="0" lua_function="" ctrl_active="true" >
@@ -104,7 +104,7 @@
 					resize="true"
 					texture="#img1"
 					global_color="false" />
-			   <ctrl id="ctrl" active="#ctrl_active" type="button" button_type="push_button" global_color_normal="false" posref="ML ML" x="1" y="0"
+				<ctrl id="ctrl" active="#ctrl_active" type="button" button_type="push_button" global_color_normal="false" posref="ML ML" x="1" y="0"
 					tx_normal="W_slot_blason_over.tga"
 					tx_over="W_slot_blason_over.tga"
 					tx_pushed="W_slot_blason_over.tga"
@@ -118,7 +118,7 @@
 					render_layer="0"
 					onclick_l="lua"
 					params_l="Ryzhide:#lua_function('#id')" />
-		   </group>
+			</group>
 		</template>
 		
 		<template name="hide_n_hype_only_images" render_layer1="1" keep="true" tooltip="" w="16" h="16" img1="" x="0" y="0" >
@@ -140,6 +140,24 @@
 					tooltip="#tooltip"
 					color="0 0 0 0"
 					render_layer="0" />
+			</group>
+		</template>
+		
+		<template name="hide_n_hype_3d_preview" keep="true" id="" shape="">
+			<group id="#id" w="200" h="300" pop_max_w="200" pop_max_h="300" pop_min_w="64" pop_min_h="32" header_color="UI:SAVE:WIN:COLORS:COM" posref="TL TL" title="S.E. Shape List" global_color="true" global_color_over="true" right_button="true" movable="true" lockable="true" active="false" openable="true" opened="true" resizer="true" on_active="lua" on_active_params="WebBrowser:onActive()">
+				<scene3d id="scene3d" x="-10" y="-10"  sizeref="wh" posref="MR MR" curcam="cam" curcs="env" render_layer="-2"
+					user_interaction="true" rotz_factor="0.017"
+					roty_factor="0.005" roty_limit_min="-80" roty_limit_max="90"
+					dist_factor="0.05" dist_limit_min="15.0" dist_limit_max="20.0"
+					ambient="255 255 255" sun_ambient="255 255 255" sun_diffuse="255 255 255" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+					
+					<camera id="cam" fov="80" pos="0.0 0 0" target="0.0 0 0" roll="0" />
+					<light id="back" pos="0.0 1 1" color="255 255 255" near="1" far="4.0" />
+					<light id="back2" pos="0.0 1 2" color="255 255 255" near="1" far="4.0" />
+					<light id="lgt" pos="0.0 -1 1" color="255 255 255" near="1" far="4.0" />
+					<light id="lgt2" pos="0.0 -1 2" color="255 255 255" near="1" far="4.0" />
+					<shape id="object" name="#shape" pos="0.0 0 0" rot="0.0 0.0 2.0" />
+				</scene3d>
 			</group>
 		</template>
 		
