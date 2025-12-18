@@ -310,7 +310,7 @@ mainui.active = true
 	else
 		mainui_close_button.active = true
 		mainui_close_button.onclick_l = "lua"
-		mainui_close_button.params_l = "Ryzhide:"..close_function_id.."("..close_function_parameter..")"
+		mainui_close_button.params_l = "Ryzhide:"..close_function_id.."('"..close_function_parameter.."')"
 	end
 
 	mainui.h = win_h
@@ -334,6 +334,7 @@ function Ryzhide:close_window(window_id, function_id)
 end
 
 function Ryzhide:click_close_button(window_id)
+
 	if(window_id == "close_window_build_most_wanted_not_found_hunter")then
 		self.closed_most_wanted_not_found_hunter = 1
 	end
@@ -349,9 +350,13 @@ function Ryzhide:click_close_button(window_id)
 	if(window_id == "close_window_register_window")then
 		removeOnDbChange(getUI(self.main_window_name),self.timer_str)
 	end
-
-	if(getUI(self.main_window_name) ~= nil)then
-		getUI(self.main_window_name).active=false
+    
+    if(window_id == "close_build_3d_preview")then
+		getUI(self.abort_window_name).active=false
+	else
+	    if(getUI(self.main_window_name) ~= nil)then
+		    getUI(self.main_window_name).active=false
+	    end
 	end
 end
 
@@ -516,6 +521,7 @@ function Ryzhide:pars_json_data_login()
 				self.duration_time_hint_3 = tonumber(self.hide_n_hide_json_data.duration_time_hint_3)
 				self.duration_time_claim_reward = tonumber(self.hide_n_hide_json_data.duration_time_claim_reward)
 				self.duration_time_most_wanted_offline = tonumber(self.hide_n_hide_json_data.duration_time_most_wanted_offline)
+				self.type_data = self.hide_n_hide_json_data.type_data
 
 				Ryzhide:display_debug_messanges("ready: "..self.hide_n_hide_json_data.ready)
 				Ryzhide:display_debug_messanges("player_round_id: "..self.hide_n_hide_json_data.player_round_id)
@@ -1457,7 +1463,7 @@ function Ryzhide:pars_json_data_wait_for_most_wanted()
 end
 
 function Ryzhide:build_hunter_window()
-	local window_height = 170
+	local window_height = 190
 	local window_width = 365
 
 
@@ -1472,6 +1478,11 @@ function Ryzhide:build_hunter_window()
 
 			<tr>
 				<td colspan="3" align="center"><h3>]]..Ryzhide:load_translation("hide_n_hype_wait_for_most_wanted")..[[</h3></td>
+			</tr>
+			
+			<tr>
+				<td align="center" width="40"><img src="ico_self_damage.png" width="40"></td>
+				<td colspan="2" align="center"><h3><a href="ah:lua&Ryzhide:build_3d_preview()">]]..Ryzhide:load_translation("hide_n_hype_inspect_spawn_objects")..[[</a></h3></td>
 			</tr>
 			</table>]]
 
@@ -1537,13 +1548,17 @@ function Ryzhide:build_most_wanted_window()
 			<tr>
 				<td align="center" colspan="3"><h4><font color="orange">4. ]]..Ryzhide:load_translation("hide_n_hype_forbidden_regions")..[[</font></h4></td>
 			</tr>
-
+			
+			<tr>
+				<td align="center" colspan="3"><h4>5.<a href="ah:lua&Ryzhide:build_3d_preview()">]]..Ryzhide:load_translation("hide_n_hype_inspect_spawn_objects")..[[</a></h4></td>
+			</tr>
+			
 			<tr>
 				<td colspan="3">&nbsp;</td>
 			</tr>
-
+			
 			<tr>
-				<td  align="center" colspan="3">]]..Ryzhide:load_translation("hide_n_hype_avaible_objects")..[[</td>
+				<td align="center" colspan="3">]]..Ryzhide:load_translation("hide_n_hype_avaible_objects")..[[</td>
 			</tr>
 
 			<tr>
@@ -1677,13 +1692,6 @@ function Ryzhide:check_player_are_in_special_state()
 		if(current_player_invisible == 0)then
 			Ryzhide:display_debug_messanges("you_are_no_longer_invisible")
 			valid_a_check = valid_a_check + 1
-		end
-
-		if(current_player_mode ~= "REST")then
-			if(current_player_mode ~= "SIT")then
-				Ryzhide:display_debug_messanges("player_no_longer_rest_or_sit")
-				valid_a_check = valid_a_check + 1
-			end
 		end
 	end
 
@@ -2769,4 +2777,75 @@ function Ryzhide:click_icon_abort(trigger_id)
 	Ryzhide:close_window(self.abort_window_name, "")
 end
 
---###################################### END asked_for_abort #######################################
+--###################################### START asked_for_abort #######################################
+
+--###################################### START build_3d_preview #######################################
+function Ryzhide:build_3d_preview()
+	local window_height = 380
+	local window_width = 450
+    
+    local default_sheet = Ryzhide:got_first_sheet_object()
+    
+    default_shape = getSheetShape(default_sheet..'.creature')
+    
+	local html_build_3d_preview = ""
+	html_build_3d_preview=[[<title>]]..Ryzhide:load_translation("hide_n_hype_preview")..[[</title>
+		<table width="100%" height="100%" cellpadding="2" cellspacing="2" border="1">
+			<tr>
+			    <td width="200px">
+			        <table width="100%" height="100%" cellpadding="2" cellspacing="2" border="]]..self.debug_window_border..[[">
+    			       ]]..Ryzhide:build_object_preview()..[[
+			        </table>
+			    </td>
+			    <td>
+			        <table width="100%" height="100%" cellpadding="2" cellspacing="2" border="]]..self.debug_window_border..[[">
+    			        <tr>
+    			            <td><div class="ryzom-ui-grouptemplate" id="window_3d_previes" style="display:inline-block;template:hide_n_hype_3d_preview;id:hide_n_hype_3d_preview;shape:]]..default_shape..[[;"></div></td>
+    			        </tr>
+			        </table>
+			    </td>
+			</tr>
+		</table>]]
+		Ryzhide:open_resize_window(self.abort_window_name, window_height, window_width, html_build_3d_preview, "click_close_button", "close_build_3d_preview")
+		Ryzhide:load_3d_preview(default_sheet)
+end
+
+function Ryzhide:build_object_preview()
+    Ryzhide:display_debug_messanges("type_data: "..self.type_data)
+	local split_type_data = Ryzhide:split(self.type_data, ",")
+	local out = {}
+	
+	for i, obj in ipairs(split_type_data) do
+		out[#out+1] = '<tr><td><a href="ah:lua&Ryzhide:load_3d_preview(\''.. obj .. '\')">'.. self:load_translation(obj)..'</a></td></tr>'
+	end
+
+	return table.concat(out)
+end
+
+function Ryzhide:got_first_sheet_object()
+    if(self.type_data == "")then
+        return "object_1_crate_sel_nocollision"
+    else
+	    local split_type_data = Ryzhide:split(self.type_data, ",")
+	    
+        return split_type_data[1]
+	end
+end
+
+function Ryzhide:load_3d_preview(sheet_id)
+
+    shape_id = getSheetShape(sheet_id..'.creature')
+    
+    local object = getUI(self.abort_window_name):find("window_3d_previes"):find("scene3d").object
+    object.name=shape_id
+    
+    local shape = getUI(self.abort_window_name):find("window_3d_previes"):find("scene3d"):getElement("shape#0")
+	local camera = getUI(self.abort_window_name):find("window_3d_previes"):find("scene3d"):getElement("camera#0")
+	    if shape then
+		    shape.posz = - shape.getBBoxSizeZ / 3
+			max_size = math.max(shape.getBBoxSizeY, shape.getBBoxSizeZ) + 1
+			shape.posy = max_size
+			camera.tgty = max_size
+		end
+end
+--###################################### END build_3d_preview #######################################
