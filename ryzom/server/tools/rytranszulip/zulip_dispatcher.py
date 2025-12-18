@@ -2,20 +2,20 @@
 #############################################
 #  _______________________________
 #  \______   \__    ___/\____    /
-#   |       _/ |    |     /     / 
-#   |    |   \ |    |    /     /_ 
+#   |       _/ |    |     /     /
+#   |    |   \ |    |    /     /_
 #   |____|_  / |____|   /_______ \
 #          \/                   \/
-# 
+#
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # M.A.R.G.U.E.Z (Make Awesome all Ryzom's Gossips with the Unreasonable Empowerment of Zulip... and a touch of Deepl :D)
 # Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Zulip Dispatcher ==-
-# 
+#
 # This script dispatche messages to Zulip chat
-# 
+#
 
 
 import os
@@ -38,29 +38,6 @@ flags = {
 	"ru": ":flag_russia:",
 }
 
-ZULIP_BASE_URL = "https://chat.ryzom.com"
-
-
-def convert_zulip_upload_links(text: str) -> str:
-	"""Convert Zulip-style markdown upload links to plain URLs.
-
-	Example:
-		[image.png](/user_uploads/2/c0/....../image.png)
-	becomes:
-		https://zulip.ryzom.com/user_uploads/2/c0/....../image.png
-	"""
-	if not text:
-		return text
-
-	pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
-
-	def repl(match: re.Match) -> str:
-		path = match.group(1)
-		return f"{ZULIP_BASE_URL}{path}"
-
-	return pattern.sub(repl, text)
-
-
 class ZulipDispatcher(ZulipService):
 	def __init__(self):
 		super().__init__()
@@ -77,7 +54,7 @@ class ZulipDispatcher(ZulipService):
 		channels = {
 			"FACTION_RF" : "Forge"
 		}
-		
+
 		if channel in channels:
 			return channels[channel]
 		return channel
@@ -86,7 +63,7 @@ class ZulipDispatcher(ZulipService):
 		message_type = "stream"
 		user = m.sender
 		# Normalize potential Zulip-style upload markdown to plain URLs before sending
-		clean_text = convert_zulip_upload_links(m.text)
+		clean_text = self.convert_zulip_upload_links(m.text)
 		content = user[0].upper()+user[1:]+":"+(clean_text if clean_text is not None else "")
 		if m.channel == "player":
 			message_type = "private"
@@ -116,7 +93,7 @@ class ZulipDispatcher(ZulipService):
 		print(m.output(), m.source_lang)
 		if message_id > 0 and m.translation and m.source_lang:
 			# Normalize Zulip-style upload markdown in translation as well
-			clean_translation = convert_zulip_upload_links(m.translation)
+			clean_translation = self.convert_zulip_upload_links(m.translation)
 			request = {
 				"message_id": message_id,
 				"content": "<["+m.translated_lang+"]>"+flags[m.source_lang]+" "+(clean_translation if clean_translation is not None else ""),
@@ -134,7 +111,7 @@ class ZulipDispatcher(ZulipService):
 		for lang in ALL_LANGS:
 			last_ids[lang] = self.getLastChatLangID(lang)
 			print(lang, last_ids[lang])
-		
+
 		while True:
 			chat_id = self.getLastChatID()
 			if last_ids[lang]+1 < chat_id+1:
@@ -152,7 +129,7 @@ class ZulipDispatcher(ZulipService):
 								if message.source != "zulip":
 									print(lang, "New message {}".format(i), message, "=>", result)
 									result = self.sendMessage(message)
-									if result != None: 
+									if result != None:
 										self.addZulipMessageId(i, result)
 										print("Added to DB")
 							else:

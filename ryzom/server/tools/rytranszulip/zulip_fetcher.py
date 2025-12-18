@@ -28,17 +28,6 @@ from time import time
 
 from zulip_service import ZulipService, RyzomMessage
 
-ZULIP_BASE_URL = "https://chat.ryzom.com"
-
-def convert_zulip_upload_links(text: str) -> str:
-	if not text:
-		return text
-	pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
-	def repl(match):
-		return f"{ZULIP_BASE_URL}{match.group(1)}"
-	return pattern.sub(repl, text)
-
-
 class ZulipFetcher(ZulipService):
 
 	def __init__(self):
@@ -60,7 +49,7 @@ class ZulipFetcher(ZulipService):
 			return
 
 		raw_msg = msg["content"]
-		message = convert_zulip_upload_links(raw_msg)
+		message = self.convert_zulip_upload_links(raw_msg)
 		sender = msg["sender_full_name"]
 		dest = msg["display_recipient"]
 		if msg["type"] == "private":
