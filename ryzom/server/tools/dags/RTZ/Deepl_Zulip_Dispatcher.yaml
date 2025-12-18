@@ -1,5 +1,5 @@
 name: Zulip.Dispatcher
-description: Send messages to IOS
+description: Send messages to Zulip
 group: RTZ
 timeoutSec: 0
 env:
