@@ -1,7 +1,8 @@
-name: Ryzom BMS_MASTER
+name: Arma_BMS_MASTER
 description: Ryzom Backup Service
 tags: P_00
 group: Shard
+maxActiveRuns: -1
 env:
   - LC_ALL: "C"
   - LANGUAGE: ""
@@ -18,6 +19,6 @@ handlerOn:
   cancel:
     command: echo "Canceled"
   failure:
-    command: sh /home/nevrax/shard/tools/start_service.sh BMS_MASTER
+    command: bash /home/nevrax/shard/tools/start_service.sh BMS_MASTER
   success:
-    command: sh /home/nevrax/shard/tools/start_service.sh BMS_MASTER
+    command: bash /home/nevrax/shard/tools/start_service.sh BMS_MASTER

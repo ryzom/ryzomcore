@@ -2,23 +2,23 @@
 #############################################
 #  _______________________________
 #  \______   \__    ___/\____    /
-#   |       _/ |    |     /     / 
-#   |    |   \ |    |    /     /_ 
+#   |       _/ |    |     /     /
+#   |    |   \ |    |    /     /_
 #   |____|_  / |____|   /_______ \\
 #          \/                   \/
-# 
+#
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # M.A.R.G.U.E.Z (Make Awesome all Ryzom's Gossips with the Unreasonable Empowerment of Zulip... and a touch of Deepl :D)
 # Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom Dispatcher ==-
-# 
+#
 # This script dispatche messages to Ryzom IOS service
 # This dispatcher is used 2 times.
 # 1) When a message comes from a Fetcher, the original is sent without delay to IOS
 # 2) When a message are translated by Deepl, the translation is sent to IOS
-# 
+#
 
 import os
 import sys
@@ -27,30 +27,6 @@ import re
 from time import sleep, time
 from pynel.admin_modules_itf import CAdminServiceWeb
 from ryzom_service import RyzomService, RyzomMessage
-
-
-ZULIP_BASE_URL = "https://zulip.ryzom.com"
-
-
-def convert_zulip_upload_links(text: str) -> str:
-	"""Convert Zulip-style markdown upload links to plain URLs.
-
-	Example:
-		[image.png](/user_uploads/2/c0/....../image.png)
-	becomes:
-		https://zulip.ryzom.com/user_uploads/2/c0/....../image.png
-	"""
-	if not text:
-		return text
-
-	pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
-
-	def repl(match: re.Match) -> str:
-		path = match.group(1)
-		return f"{ZULIP_BASE_URL}{path}"
-
-	return pattern.sub(repl, text)
-
 
 class IosDispatcher(RyzomService):
 
@@ -63,7 +39,7 @@ class IosDispatcher(RyzomService):
 		self.ryzomAS_ok = False
 		self.log_sections["messages"] = ("db", "Ryzom-Chat-LastID", "Ryzom-Chat-{}", "")
 		self.stats = {"messages": 0, "messages_to_ios": 0}
-		self.shard = sys.argv[1]
+		self.shard = host = self.config["shard"]["name"]
 		self.domain = "("+self.shard[0].upper()+self.shard[1:]+")"
 		self.updateStats()
 
@@ -80,12 +56,12 @@ class IosDispatcher(RyzomService):
 		if self.ryzomAS.connect("127.0.0.1", 46700):
 			print("▶️ ", command, "[", self.ryzomAS.service_cmd("ios", command) ,"]")
 			self.ryzomAS.close()
-			return True 
+			return True
 		else:
 			print("🛑 Connextion failed")
 		return False
 
-	def sendToService(self, m): 
+	def sendToService(self, m):
 		command = "chat" if m.source == "ios" else "farChat"
 		sender = m.sender + (self.domain if m.source == "ios" else "")
 		prefix = ">" if command == "chat" else ""
@@ -93,8 +69,8 @@ class IosDispatcher(RyzomService):
 		translated_lang = ":"+m.translated_lang.lower()+":"
 
 		# First, normalize potential Zulip upload markdown links to plain URLs
-		clean_text = convert_zulip_upload_links(m.text)
-		clean_translation = convert_zulip_upload_links(m.translation)
+		clean_text = self.convert_zulip_upload_links(m.text)
+		clean_translation = self.convert_zulip_upload_links(m.translation)
 
 		# Then escape quotes as before
 		text = clean_text.replace("\"", "''") if clean_text is not None else ""
@@ -112,7 +88,7 @@ class IosDispatcher(RyzomService):
 				self.runIOSCommand(command+" "+sender+" dyn:"+m.channel_id.split(":")[1]+" \""+prefix+source_lang+text+"\"")
 			elif m.channel_id.split(":")[0] == "dyn":
 				self.runIOSCommand(command+" "+sender+" "+m.channel_id+" \">"+source_lang+text+"\"")
-			
+
 		else:
 			if m.channel == "arround":
 				self.runIOSCommand(command+" "+sender+" "+m.channel_id+" \""+prefix+translated_lang+"&EMT&{"+source_lang+text+"}@{ "+translation+"\"")
@@ -121,7 +97,7 @@ class IosDispatcher(RyzomService):
 			else:
 				self.runIOSCommand(command+" "+sender+" "+m.channel_id+" \""+prefix+translated_lang+"{"+source_lang+text+"}@{ "+translation+"\"")
 		return True
-	
+
 	def checkMessages(self):
 		last_id = self.getLastChatID()
 		for i in range(self.current_id+1, last_id+1, 1):
@@ -137,7 +113,7 @@ class IosDispatcher(RyzomService):
 				status = "✅" if status else "🛑"
 				self.next_id = i
 		self.current_id = self.next_id
-	
+
 	def run(self):
 		self.current_id = self.getLastChatID()
 		self.next_id = self.current_id

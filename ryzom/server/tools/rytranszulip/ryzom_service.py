@@ -51,7 +51,7 @@ class RyzomService(Service):
 	def __init__(self):
 		super().__init__()
 		self.config = configparser.ConfigParser()
-		self.config.read("setup.ini")
+		self.config.read("/etc/ryzom/rtz.ini")
 	
 	def getLastChatID(self):
 		self.last_chat_id = self.client.get("Ryzom-Chat-LastID")
