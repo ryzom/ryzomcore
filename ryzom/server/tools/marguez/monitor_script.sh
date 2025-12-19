@@ -26,43 +26,41 @@ cd $WORKING_DIR
 echo "LOOP"
 while true
 do
-	python3 $* 2>&1 1>/dev/null
-	if false
-	then
+	date
+	python3 $*
+	#ps aux | grep -v grep | grep "python3 $*"
+	#echo "Looking for Running script $*:"
+	#ps aux | grep -v grep | grep "python3 $*"
+	#for PID in $(ps aux | grep -v grep | grep "python3 $*" | tr -s " " | cut -d" " -f2)
+	#do
+		#echo "Found it! Killing $PID..."
+		#kill -9 $PID
+	#done
 
-		date
-		ps aux | grep -v grep | grep "python3 $*"
-		for PID in $(ps aux | grep -v grep | grep "python3 $*" | tr -s " " | cut -d" " -f2)
-		do
-			echo "Killing $PID..."
-			kill -9 $PID
-		done
+	#echo "Starting monitoring of python script..."
+	#bash $SCRIPT_DIR/monitor_python.sh "python3 $*" $CURRENT_PID &
 
-		bash $SCRIPT_DIR/monitor_python.sh "python3 $*" $CURRENT_PID &
+	#echo "Starting python3 $*..."
+	#DATE_START=$(date +%s)
 
-		echo "Starting python3 $*..."
-		DATE_START=$(date +%s)
+	#python3 $* 1>/dev/null
 
-		python3 $*
-		# 2>&1 1>/dev/null
+	#DATE_END=$(date +%s)
+	#DATE_DIFF=$(expr $DATE_END - $DATE_START)
+	#echo "End of script : $DATE_DIFF"
+	#echo "Kill monitor python..."
+	#ps aux | grep -v grep | grep "inotifywait" | grep "$SCRIPT_DIR"
 
-		DATE_END=$(date +%s)
-		DATE_DIFF=$(expr $DATE_END - $DATE_START)
-		echo "End of script : $DATE_DIFF"
-		echo "Kill monitor python..."
-		ps aux | grep -v grep | grep "inotifywait" | grep "$SCRIPT_DIR"
+	#for PID in $(ps aux | grep -v grep | grep "inotifywait " | grep "$SCRIPT_DIR" | tr -s " " | cut -d" " -f2)
+	#do
+			#echo "Killing $PID..."
+			#kill -9 $PID
+	#done
 
-		for PID in $(ps aux | grep -v grep | grep "inotifywait " | grep "$SCRIPT_DIR" | tr -s " " | cut -d" " -f2)
-		do
-				echo "Killing $PID..."
-				kill -9 $PID
-		done
-	fi
-
-	if (( $DATE_DIFF < 5 ))
-	then
-		echo "sleep $(expr 5 - $DATE_DIFF)"
-		sleep $(expr 5 - $DATE_DIFF)
-	fi
+	#if (( $DATE_DIFF < 5 ))
+	#then
+		#echo "sleep $(expr 5 - $DATE_DIFF)"
+		#sleep $(expr 5 - $DATE_DIFF)
+	#fi
 done
 

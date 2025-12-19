@@ -15,7 +15,7 @@ f'  - LANGUAGE: ""\n'
 f'  - LOG_FILE: "/home/nevrax/shard/logs/ai_service_ais_{ai}.log"\n'
 f'steps:\n'
 f'  - name: run\n'
-f'    dir: /home/nevrax/shard/tools/\n'
+f'    dir: /home/nevrax/shard/tools/Monitoring\n'
 f'    command: python3 monitor_ais.py ${{LOG_FILE}}\n'
 )
 	print(ai)
