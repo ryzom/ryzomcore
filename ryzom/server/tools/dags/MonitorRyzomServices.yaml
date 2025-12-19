@@ -7,7 +7,7 @@ env:
   - PYTHONPATH: /home/nevrax/shard/tools/
 steps:
   - name: run
-    command: python3 /home/nevrax/shard/tools/monitor_services.py
+    command: python3 /home/nevrax/shard/tools/Monitoring/monitor_services.py
     retryPolicy:
       limit: 10000000000
       intervalSec: 5

@@ -6,4 +6,4 @@ env:
   - PYTHONPATH: /home/nevrax/shard/tools/
 steps:
   - name: run
-    command: python3 /home/nevrax/shard/tools/monitor_outposts.py /home/nevrax/shard/logs/entities_game_service.log
+    command: python3 /home/nevrax/shard/tools/Monitoring/monitor_outposts.py /home/nevrax/shard/logs/entities_game_service.log

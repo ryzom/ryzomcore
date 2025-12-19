@@ -26,7 +26,6 @@ import subprocess
 
 from pathlib import Path
 from marguez.service import Service
-from pynel.admin_modules_itf import CAdminServiceWeb
 
 class ShardService(Service):
 

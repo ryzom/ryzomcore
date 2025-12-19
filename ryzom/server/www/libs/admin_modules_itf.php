@@ -455,6 +455,7 @@ $message->serialString($serviceAlias);
 		$p_result	= null;
 
 		$adminService = new MyAdminService;
+		$service_command = '!!!NOT CONNECTED!!!';
 
 		if ($adminService->connect($name, '46700', $res) !== false) {
 			$command_return_data	= '';
