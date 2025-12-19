@@ -40,11 +40,13 @@ fi
 if [ "$CMD" = "stop" ]
 then
 	python3 $SHARD_PATH/tools/shard.py stop
+	bash $SHARD_PATH/tools/notify.sh ShardStopped
 fi
 
 if [ "$CMD" = "start" ]
 then
 	python3 $SHARD_PATH/tools/shard.py start
+	bash $SHARD_PATH/tools/notify.sh ShardStarting
 fi
 
 

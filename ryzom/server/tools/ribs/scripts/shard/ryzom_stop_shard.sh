@@ -91,7 +91,7 @@ then
 	for schroot in $(mount | grep /run/schroot/mount/ | grep /home | cut -d/ -f 7)
 	do
 		echo $schroot;
-		schroot --end-session -c $schroot 2> /dev/null 
+		schroot --end-session -c $schroot 2> /dev/null
 	done
 
 	if [ "$BACKUP_LOGS" == "1" ]
