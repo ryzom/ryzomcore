@@ -10,13 +10,17 @@ RYZOMSERVERDATA_PATH="/home/nevrax/repos/ryzom-private-data"
 RYZOMEXTERNALS_PATH="/home/nevrax/repos/ryzom-externals"
 SERVER_NEL_PATH=""
 WEB_PATH="/home/nevrax/www"
-SHARD_NAME="gingo"
-SHARD_HOST="Gingo"
-SHARD_DESC="(Test Shard)"
-SHARD_ID="501"
-SHARD_DOMAIN="ryzom_test"
+SHARD_NAME=$(get_ini_var shard name /etc/ryzom/shard.ini)
+SHARD_HOST=${SHARD_NAME^}
+SHARD_DESC=$(get_ini_var shard desc /etc/ryzom/shard.ini)
+SHARD_ID=$(get_ini_var shard id /etc/ryzom/shard.ini)
+SHARD_DOMAIN=$(get_ini_var shard domain /etc/ryzom/shard.ini)
+SHARD_IS_DEV=$(get_ini_var shard name /etc/ryzom/shard.ini)
+if [ "$SHARD_IS_DEV" == "1" ]; then
 SHARD_TYPE="test"
-WEB_URL="https://Gingo"
+else
+SHARD_TYPE="live"
+fi
 RELEASENOTE_TOKEN="xxx"
 DB_HOST=$(get_ini_var db_ring host /etc/ryzom/shard.ini)
 DB_RING=$(get_ini_var db_ring name /etc/ryzom/shard.ini)
