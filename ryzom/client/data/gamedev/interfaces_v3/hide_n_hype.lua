@@ -1463,7 +1463,7 @@ function Ryzhide:pars_json_data_wait_for_most_wanted()
 end
 
 function Ryzhide:build_hunter_window()
-	local window_height = 190
+	local window_height = 210
 	local window_width = 365
 
 
@@ -1517,7 +1517,7 @@ function Ryzhide:build_object_table()
 end
 
 function Ryzhide:build_most_wanted_window()
-	local window_height = 530
+	local window_height = 550
 	local window_width = 415
 	local table_width = window_width + 15
 
@@ -2080,19 +2080,19 @@ function Ryzhide:build_game_running_hunter_window()
 			</tr>
 			<tr>
 				<td align="center"><h3>]]..Ryzhide:load_translation("hide_n_hype_hint_1")..[[</h3></td>
-				<td align="center"><div id="hint_1" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_text;id:hint_1;font_size:16;text_color:255 0 0 255;hardtext:????;w:250;'></div></td>
+				<td align="center"><div id="hint_1" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_text;id:hint_1;font_size:16;text_color:255 0 0 255;hardtext:????;w:350;'></div></td>
 			</tr>
 			<tr>
 				<td align="center"><h3>]]..Ryzhide:load_translation("hide_n_hype_hint_2")..[[</h3></td>
-				<td align="center"><div id="hint_2" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_text;id:hint_2;font_size:16;text_color:255 0 0 255;hardtext:????;w:250;'></div></td>
+				<td align="center"><div id="hint_2" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_text;id:hint_2;font_size:16;text_color:255 0 0 255;hardtext:????;w:350;'></div></td>
 			</tr>
 			<tr>
 				<td align="center"><h3>]]..Ryzhide:load_translation("hide_n_hype_hint_3")..[[</h3></td>
-				<td align="center"><div id="hint_3" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_text;id:hint_3;font_size:16;text_color:255 0 0 255;hardtext:????;w:250;'></div></td>
+				<td align="center"><div id="hint_3" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_text;id:hint_3;font_size:16;text_color:255 0 0 255;hardtext:????;w:350;'></div></td>
 			</tr>
 			<tr>
 				<td align="center"><h3>]]..Ryzhide:load_translation("hide_n_hype_hint_4")..[[</h3></td>
-				<td align="center"><div id="hint_4" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_text;id:hint_4;font_size:16;text_color:255 0 0 255;hardtext:????;w:250;'></div></td>
+				<td align="center"><div id="hint_4" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_text;id:hint_4;font_size:16;text_color:255 0 0 255;hardtext:????;w:350;'></div></td>
 			</tr>
 
 			<tr>
@@ -2503,7 +2503,7 @@ end
 --###################################### Start error handling #######################################
 
 function Ryzhide:build_most_wanted_bad_position()
-	local window_height = 180
+	local window_height = 200
 	local window_width = 400
 
 
