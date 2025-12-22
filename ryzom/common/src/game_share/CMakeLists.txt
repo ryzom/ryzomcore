@@ -44,6 +44,8 @@ TARGET_LINK_LIBRARIES(ryzom_gameshare
 		NeL::net
 		NeL::ligo
 		NeL::georges
+		PRIVATE
+		ZLIB::ZLIB
 )
 
 NL_DEFAULT_PROPS(ryzom_gameshare "Ryzom, Library: Game Share")
