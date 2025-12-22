@@ -6,5 +6,5 @@ env:
   - PYTHONPATH: /home/nevrax/shard/tools/
 steps:
   - name: run
-    command: bash /home/nevrax/shard/tools/monitor_ras.sh
+    command: bash /home/nevrax/shard/tools/Monitoring/monitor_ras.sh
 

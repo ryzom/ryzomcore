@@ -32,7 +32,7 @@ class MonitorServices():
 	def __init__(self):
 		self.client = Client("localhost")
 		self.ryzomAS = CAdminServiceWeb()
-		self.ryzomAsStatus = self.ryzomAS.connect("127.0.0.1", 46700, "")
+		self.ryzomAsStatus = self.ryzomAS.connect("127.0.0.1", 46700)
 
 	def parseState(self, state):
 		values = {}
@@ -56,15 +56,18 @@ class MonitorServices():
 
 				with open("/home/nevrax/www/login/server_open_status", "r") as f:
 					server_open_status = f.read().strip()
+					print("Server Open Status =", server_open_status)
 
 				if not self.ryzomAsStatus:
+					print("RAS not connected")
 					self.client.set("Dag-MORS-Services", json.dumps([server_open_status]))
-					self.ryzomAsStatus = self.ryzomAS.connect("127.0.0.1", 46700, "")
+					self.ryzomAsStatus = self.ryzomAS.connect("127.0.0.1", 46700)
 
 				if self.ryzomAsStatus:
 					try:
-						states = self.ryzomAS.getStates()
-					except:
+						states = self.ryzomAS.get_states()
+					except Exception as e:
+						print("Error getting states", e)
 						self.ryzomAS.close()
 						self.ryzomAsStatus = False
 						time.sleep(1)
@@ -88,7 +91,7 @@ class MonitorServices():
 						infos["speed"] = vals["tickspeedloop"] if "tickspeedloop" in vals else "-"
 						infos["state"] = vals["state"] if "state" in vals else "?"
 						infos["lastupdate"] = time.time()-noReportSince
-						
+
 						if infos["state"] == "Online":
 							if noReportSince > 10:
 								status = icons["stopped"]
@@ -103,8 +106,8 @@ class MonitorServices():
 								status = icons[infos["state"]]
 							else:
 								status = icons["starting"]
-						
-						
+
+
 						infos["noreportsince"] = noReportSince
 						uptime = vals["uptime"] if "uptime" in vals else "-"
 						infos_out = "[orange1]State:[/orange1] "+infos["state"]+"\t[orange1]Uptime:[/orange1] "+uptime+\
