@@ -5641,7 +5641,7 @@ NLMISC_COMMAND(setSpecial,"set special values","uid special value")
 				c->setWhoSeesMe(0);
 				c->setAggroableOverride(false);
 				c->setAggroableSave(false);
-				c->setAfkState(true);
+				//c->setAfkState(true);
 				log.displayNL("OK");
 			}
 			else
@@ -5653,7 +5653,7 @@ NLMISC_COMMAND(setSpecial,"set special values","uid special value")
 			c->setWhoSeesMe(~0);
 			c->setAggroableOverride(true);
 			c->setAggroableSave(true);
-			c->setAfkState(false);
+			//c->setAfkState(false);
 			log.displayNL("OK");
 		}
 	}
