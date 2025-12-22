@@ -1642,8 +1642,19 @@ uint32 CCharacter::tickUpdate()
 		nextUpdate = 8;
 	}
 
+
+	if (hasMoved() && !haveAnyPrivilege() && getInvisibility())
+	{
+		nlinfo("Not Priv, Not afk and Invisible => made visible");
+		setInvisibility(false);
+		setWhoSeesMe(~0);
+		setAggroableOverride(true);
+		setAggroableSave(true);
+	}
+
 	_SavedPosX = _EntityState.X();
 	_SavedPosY = _EntityState.Y();
+
 	// ARK Check Position
 	vector<string> missionToRemove;
 
@@ -19178,15 +19189,6 @@ void CCharacter::setAfkState(bool isAfk)
 				setMode(MBEHAV::NORMAL);
 			}
 		}
-	}
-
-	if (isAfk == false && !haveAnyPrivilege() && getInvisibility())
-	{
-		nlinfo("Not Priv, Not afk and Invisible => made visible");
-		setInvisibility(false);
-		setWhoSeesMe(~0);
-		setAggroableOverride(true);
-		setAggroableSave(true);
 	}
 }
 
