@@ -122,7 +122,6 @@ class ZulipService(RyzomService):
 
 	def __init__(self):
 		super().__init__()
-		self.base_url = self.config["zulip"]["site"]
 		while True:
 			try:
 				self.zulip = ZulipClient(config_file=".zuliprc")#email=self.config["zulip"]["email"], api_key=self.config["zulip"]["key"], site=self.base_url)
@@ -166,10 +165,3 @@ class ZulipService(RyzomService):
 	def getZulipMessage(self, i, lang):
 		return self.client.get("Zulip-Chat-"+lang+"-"+str(i))
 
-	def convert_zulip_upload_links(self, text):
-		if not text:
-			return text
-		pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
-		def repl(match):
-			return f"{self.base_url}{match.group(1)}"
-		return pattern.sub(repl, text)

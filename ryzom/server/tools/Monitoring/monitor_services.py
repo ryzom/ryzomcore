@@ -74,6 +74,7 @@ class MonitorServices():
 						continue
 
 					if not states:
+						print("NO STATES")
 						self.ryzomAsStatus = False
 						time.sleep(1)
 						continue
@@ -82,7 +83,7 @@ class MonitorServices():
 					for state in states:
 						vals = self.parseState(state)
 						name = vals["aliasname"]
-						if name == "Gingo.LAS":
+						if "LAS" in name:
 							name = "las"
 						services.append(name)
 						noReportSince = int(vals["noreportsince"]) if "noreportsince" in vals else -1
