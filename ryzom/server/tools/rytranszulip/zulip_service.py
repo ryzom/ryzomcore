@@ -1,11 +1,12 @@
+
 #############################################
 #  _______________________________
 #  \______   \__    ___/\____    /
-#   |       _/ |    |     /     / 
-#   |    |   \ |    |    /     /_ 
+#   |       _/ |    |     /     /
+#   |    |   \ |    |    /     /_
 #   |____|_  / |____|   /_______ \
 #          \/                   \/
-# 
+#
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
@@ -13,8 +14,10 @@
 # Base class for Ryzom <-> Deepl <-> Zulip system
 #
 
+import re
 import time
 import zulip
+import requests
 
 from ryzom_service import RyzomService, RyzomMessage
 
@@ -34,7 +37,7 @@ class ZulipClient(zulip.Client):
 				self.last_event_id = res["last_event_id"]
 				print(self.queue_id)
 				return self.queue_id
-				
+
 	def call(self, callback, event_types, narrow, **kwargs):
 		if narrow is None:
 			narrow = []
@@ -109,31 +112,35 @@ class ZulipClient(zulip.Client):
 
 	def manageMessages(self, callback, **kwargs):
 		def event_callback(event):
+			print(event)
 			if event["type"] == "message":
 				callback(event)
 		self.call(event_callback, ["message"], None, **kwargs)
 
 
 class ZulipService(RyzomService):
-		
+
 	def __init__(self):
 		super().__init__()
 		while True:
 			try:
-				self.zulip = ZulipClient(config_file=".zuliprc")
-			except:
-				print("Zulip server not available. Retrying...")
+				self.zulip = ZulipClient(config_file=".zuliprc")#email=self.config["zulip"]["email"], api_key=self.config["zulip"]["key"], site=self.base_url)
+			except Exception as e:
+				print("Error Zulip server", self.config["zulip"]["site"])
+				print(e)
+				print("Retrying...")
 				time.sleep(1)
 			else:
 				break
-		print("Connected!")
-	
+		print("Connected! to", self.base_url, "!")
+
+
 	def setZulipQueueId(self, queue_id):
 		self.client.set("Zulip-Queue-Id", self.zulip.queue_id)
-	
+
 	def getZulipQueueId(self):
 		return self.client.get("Zulip-Queue-Id")
-	
+
 	def getLastChatLangID(self, lang):
 		lastid = self.client.get("Zulip-Chat-"+lang+"-LastID")
 		if lastid != None:
@@ -143,13 +150,13 @@ class ZulipService(RyzomService):
 
 	def setLastChatLangID(self, lang, value):
 		self.client.set("Zulip-Chat-"+lang+"-LastID", value)
-		
+
 	def addZulipMessageId(self, chat_id, message_id):
 		self.client.set("Zulip-"+str(chat_id)+"-MessageID", message_id, 24*60*60)
 
 	def getZulipMessageId(self, chat_id):
 		return self.client.get("Zulip-"+str(chat_id)+"-MessageID")
-		
+
 	def addZulipMessage(self, message, lang):
 		self.last_chat_id = self.client.incr("Zulip-Chat-"+lang+"-LastID", 1)
 		self.client.set("Zulip-Chat-"+lang+"-"+str(self.last_chat_id), message.get(), 24*60*60)
@@ -157,3 +164,4 @@ class ZulipService(RyzomService):
 
 	def getZulipMessage(self, i, lang):
 		return self.client.get("Zulip-Chat-"+lang+"-"+str(i))
+

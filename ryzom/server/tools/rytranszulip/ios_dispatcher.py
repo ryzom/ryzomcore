@@ -28,30 +28,6 @@ from time import sleep, time
 from pynel.admin_modules_itf import CAdminServiceWeb
 from ryzom_service import RyzomService, RyzomMessage
 
-
-ZULIP_BASE_URL = "https://zulip.ryzom.com"
-
-
-def convert_zulip_upload_links(text: str) -> str:
-	"""Convert Zulip-style markdown upload links to plain URLs.
-
-	Example:
-		[image.png](/user_uploads/2/c0/....../image.png)
-	becomes:
-		https://zulip.ryzom.com/user_uploads/2/c0/....../image.png
-	"""
-	if not text:
-		return text
-
-	pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
-
-	def repl(match: re.Match) -> str:
-		path = match.group(1)
-		return f"{ZULIP_BASE_URL}{path}"
-
-	return pattern.sub(repl, text)
-
-
 class IosDispatcher(RyzomService):
 
 	def __init__(self):
@@ -93,8 +69,8 @@ class IosDispatcher(RyzomService):
 		translated_lang = ":"+m.translated_lang.lower()+":"
 
 		# First, normalize potential Zulip upload markdown links to plain URLs
-		clean_text = convert_zulip_upload_links(m.text)
-		clean_translation = convert_zulip_upload_links(m.translation)
+		clean_text = self.convert_zulip_upload_links(m.text)
+		clean_translation = self.convert_zulip_upload_links(m.translation)
 
 		# Then escape quotes as before
 		text = clean_text.replace("\"", "''") if clean_text is not None else ""

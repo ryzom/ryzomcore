@@ -141,6 +141,7 @@ private:
 	static int getShapeColOrient(CLuaState &ls);
 	static int deleteShape(CLuaState &ls);
 
+	static int loadTextures(CLuaState &ls);
 
 	///////////////////////////// Standard Lua stuff ends here //////////////////////////////////////////////
 

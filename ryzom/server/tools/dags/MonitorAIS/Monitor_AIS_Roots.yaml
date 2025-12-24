@@ -7,5 +7,5 @@ env:
   - LOG_FILE: "/home/nevrax/shard/logs/ai_service_ais_roots.log"
 steps:
   - name: run
-    dir: /home/nevrax/shard/tools/
+    dir: /home/nevrax/shard/tools/Monitoring
     command: python3 monitor_ais.py ${LOG_FILE}
