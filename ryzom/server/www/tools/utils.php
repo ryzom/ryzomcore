@@ -15,8 +15,7 @@ function sendToChat($texts, $channel='', $username='', $icon='') {
 		'token' => $ini['notify']['token'],
 		'channel' => $channel,
 		'username' => $username,
-		'icon' => $icon,
-		'text' => $text,
+		'text' => $icon.' '.$text,
 		'json' => 1
 		];
 	$ch = curl_init($ini['notify']['url']);
