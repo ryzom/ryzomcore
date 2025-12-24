@@ -483,7 +483,7 @@ public:
 	{
 		for (uint i=0; i<proxList.size(); ++i)
 		{
-			if (proxList[i]->getModuleName().find(modName) == (proxList[i]->getModuleName().size() - modName.size()))
+			if (proxList[i]->getModuleName().rfind(modName) == (proxList[i]->getModuleName().size() - modName.size()))
 				return true;
 		}
 
@@ -497,7 +497,7 @@ public:
 
 		for (uint i=0; i<proxList.size(); ++i)
 		{
-			if (proxList[i]->getModuleName().find(modName) == (proxList[i]->getModuleName().size() - modName.size()))
+			if (proxList[i]->getModuleName().rfind(modName) == (proxList[i]->getModuleName().size() - modName.size()))
 				return proxList[i];
 		}
 

@@ -29,7 +29,7 @@
 #include "server_share/mail_forum_validator.h"
 #include "game_share/persistent_data_tree.h"
 #include "server_share/log_item_gen.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
@@ -861,8 +861,8 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	// broadcast the new guild info
 	IGuildUnifier::getInstance()->guildCreated(guild);
 
-#ifdef HAVE_MONGO
-		CMongo::insert("ryzom_guilds", toString("{ 'guildId': %u, 'name': '%s', 'created': %" NL_I64 "u }", guildId, guildName.toUtf8().c_str(), CTickEventHandler::getGameCycle()));
+#ifdef HAVE_MEMCACHED
+	CMemC::setWithIndex("Shard-Command", toString("createGuildStep2:%s", guildName.toUtf8().c_str()));
 #endif
 
 	// close guild creation interface
@@ -935,9 +935,8 @@ void CGuildManager::deleteGuild(uint32 id)
 			IShardUnifierEvent::getInstance()->removeGuild(id);
 	}
 
-
-#ifdef HAVE_MONGO
-		CMongo::remove("ryzom_guilds", toString("{'guildId': %u}", id));
+#ifdef HAVE_MEMCACHED
+	CMemC::setWithIndex("Shard-Command", toString("deleteGuild:%s", guild->getName().toUtf8().c_str()));
 #endif
 
 	_Container->deleteFromGuilds(id);
