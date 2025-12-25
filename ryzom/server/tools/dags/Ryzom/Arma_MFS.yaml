@@ -1,0 +1,24 @@
+name: Arma_MFS
+description: Ryzom Mail Forum Service
+tags: P_00
+group: Shard
+maxActiveRuns: -1
+env:
+  - LC_ALL: "C"
+  - LANGUAGE: ""
+  - LOG_FILE: "/home/nevrax/shard/logs/mail_forum_service.log"
+  - LOG_FORMAT_REGEX: "([0-9\/]+ [0-9:]+) (INF|WRN)?[^:]+: (.*)"
+  - LOG_FORMAT_FINAL: "[white]\\1[/white][\\2] \\3[/\\2]"
+  - LOG_FORMAT_SUBST: "{'[]': '[bright_white]', '[/]': '[/bright_white]', 'INF': 'bright_yellow', 'WRN': 'deep_pink2'}"
+  - STATUS_UPDATER: "Dag-mfs-"
+steps:
+  - name: run
+    dir: /home/nevrax/shard/run/
+    command: python3 /home/nevrax/shard/tools/service_launcher.py mfs ../sbin/ryzom_mail_forum_service -C../cfgs -L../logs --nobreak --writepid
+handlerOn:
+  cancel:
+    command: echo "Canceled"
+  failure:
+    command: bash /home/nevrax/shard/tools/start_service.sh MFS
+  success:
+    command: bash /home/nevrax/shard/tools/start_service.sh MFS

@@ -1456,7 +1456,8 @@ namespace NLGUI
 	void CGroupSubMenu::openSubMenu (sint32 nb)
 	{
 		hideSubMenus ();
-		_SubMenus[nb]->setActive (true);
+		if (nb < _SubMenus.size() && _SubMenus[nb])
+			_SubMenus[nb]->setActive(true);
 	}
 
 	// ------------------------------------------------------------------------------------------------

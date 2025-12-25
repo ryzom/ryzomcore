@@ -1798,7 +1798,9 @@ end
 function game:onInGameDbInitialized()
 	--getUI("ui:interface:db_loading").active=false
 	game.InGameDbInitialized = true
-	debug("IG DB initialized")
+	debugInfo("IG DB initialized")
+	game:initWebIg()
+
 	-- Add waiters to guild chests
 	for i=0, 19 do
 		addOnDbChange(getUI("ui:interface:inv_guild"), "@SERVER:GUILD:CHEST:"..tostring(i)..":NAME", "updateChestList()")
@@ -1831,27 +1833,47 @@ function game:onInGameDbInitialized()
 	end
 end
 
-function game:onWebIgReady()
-	-- Call init webig
-	debug("Webig ready")
-	game.webigInitialized = true
-	setOnDraw(getUI("ui:interface:encyclopedia"), "ArkMissionCatalog:startResize()")
-	getUI("ui:interface:webig:content:html"):browse("home")
-	if getDbProp("UI:SAVE:SKIP_TUTORIAL") == 0 then
-		addOnDbChange(getUI("ui:interface"), "@UI:SAVE:MK_MODE", "game:resizeMilkoPad()")
-		help:initWelcome()
+function game:initWebIg()
+	if not game.webigInitialized then
+		game.webigInitialized = true
+		openUrlInBg("https://app.ryzom.com/index.php?init_webig=1")
+
+		if getDbProp("UI:SAVE:SKIP_TUTORIAL") == 0 then
+			addOnDbChange(getUI("ui:interface"), "@UI:SAVE:MK_MODE", "game:resizeMilkoPad()")
+			help:initWelcome()
+		end
+
+		game.setupWebigWithDBInitialized = true
+		help:displayWelcome()
+		game:onCapResize()
+		local cap = getUI("ui:interface:cap")
+		setOnDraw(cap, "game:onOverCap()")
+		ArkLessons:init()
+		forceResetInterfaceTimer = 1
+		-- if ui:interface:web_transactions_cap is active, the player have a ALL WINDOWS OPENED bug
+		-- So we will force a reset of the interface
+		setOnDraw(getUI("ui:interface:web_transactions_cap"), "game:forceResetInterface()")
 	end
-
-	game.setupWebigWithDBInitialized = true
-	help:displayWelcome()
-	game:onCapResize()
-	local cap = getUI("ui:interface:cap")
-	setOnDraw(cap, "game:onOverCap()")
-	ArkLessons:init()
-
-	setOnDraw(getUI("ui:interface:ryzhomeMain"), "RyzhomeBar:close()")
 end
 
+function game:forceResetInterface()
+	forceResetInterfaceTimer = forceResetInterfaceTimer - 1
+	if forceResetInterfaceTimer <= 0 then
+		forceResetInterfaceTimer = 100
+		runAH(nil, "milko_menu_do_reset_interface", "")
+	end
+end
+
+function game:onLoadedUi()
+	debugInfo("On Loaded Ui")
+	getUI("ui:interface:webig:content:html"):browse("home")
+	setOnDraw(getUI("ui:interface:ryzhomeMain"), "RyzhomeBar:close()")
+	setOnDraw(getUI("ui:interface:encyclopedia"), "ArkMissionCatalog:startResize()")
+end
+
+function game:onWebIgReady()
+	-- Deprecated
+end
 --------------------------------------------------------------------------------------------------------------
 -- handler called by C++ at the start of a far TP (log to char selection or far tp)
 function game:onFarTpStart()

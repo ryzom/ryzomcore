@@ -250,7 +250,7 @@ void	setOutGameFullScreen()
 	}
 
 	// Enable auto scaling in login window
-	CInterfaceManager::getInstance()->setInterfaceScale(1.0f, true);
+	CInterfaceManager::getInstance()->setInterfaceScale(1.0f, true, true);
 }
 
 // ------------------------------------------------------------------------------------------------

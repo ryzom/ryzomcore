@@ -318,6 +318,8 @@ void updateFromClientCfg()
 		}
 	}
 
+	if (ClientCfg.HardwareCursorScale != LastClientCfg.HardwareCursorScale)
+		CViewRenderer::hwCursorScale = ClientCfg.HardwareCursorScale;
 
 	// SOUND
 	//---------------------------------------------------

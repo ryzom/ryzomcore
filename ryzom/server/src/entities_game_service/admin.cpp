@@ -59,7 +59,7 @@
 #include "game_share/shard_names.h"
 #include "server_share/log_command_gen.h"
 #include "server_share/r2_vision.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 #include "egs_sheets/egs_sheets.h"
 #include "egs_sheets/egs_static_rolemaster_phrase.h"
@@ -4667,6 +4667,7 @@ NLMISC_COMMAND(setGuildInventoryChest, "Select the chest to display in GH A or B
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
 	if (guild)
 	{
+		guild->initChests();
 		uint8 chest;
 		NLMISC::fromString(args[2], chest);
 
@@ -7724,8 +7725,8 @@ NLMISC_COMMAND(chanList, "display the list of all channels", "<>")
 	DynChatEGS.getChans(chans);
 	for(uint k = 0; k < chans.size(); ++k)
 	{
-		ucstring name = DynChatEGS.getChanNameFromID(chans[k]->getID());
-		nlinfo("Channel name : %s, num sessions = %d, historic size = %d", name.toString().c_str(), (int) chans[k]->getSessionCount(), (int) chans[k]->HistoricSize);
+		string name = DynChatEGS.getChanNameFromID(chans[k]->getID());
+		nlinfo("Channel name : %s, num sessions = %d, historic size = %d", name.c_str(), (int) chans[k]->getSessionCount(), (int) chans[k]->HistoricSize);
 	}
 	return true;
 }

@@ -894,8 +894,6 @@ namespace NLGUI
 
 		_GlobalTextures.push_back (gt);
 
-		driver->setCursorScale( CViewRenderer::hwCursorScale );
-
 		char bufTmp[256], tgaName[256];
 		tgaName[0] = 0;
 		string sTGAname;
@@ -948,10 +946,6 @@ namespace NLGUI
 						CBitmap curs;
 						curs.resize(x1 - x0, y1 - y0);
 						curs.blit(*texDatas, x0, y0, (x1 - x0), (y1 - y0), 0, 0);
-						// TODO: scaled cursors not supported
-						if (gt.Scale > 1.f) {
-							curs.resample((sint)(curs.getWidth() / gt.Scale), (sint)(curs.getHeight() / gt.Scale));
-						}
 						driver->addCursor(image.Name, curs);
 					}
 				}
@@ -1543,6 +1537,20 @@ namespace NLGUI
 			height = (sint32)(((rImage.UVMax.V - rImage.UVMin.V)*rImage.GlobalTexturePtr->Height / rImage.GlobalTexturePtr->Scale)+0.5f);
 		}
 	}
+
+	float CViewRenderer::getTextureScaleFromId (sint32 id) const
+	{
+		if ((id < 0) || (id >= (sint32)_SImageIterators.size()))
+		{
+			return 1;
+		}
+		else
+		{
+			SImage &rImage = *getSImage(id);
+			return rImage.GlobalTexturePtr->Scale;
+		}
+	}
+
 	/*
 	 * getTextureColor
 	 */

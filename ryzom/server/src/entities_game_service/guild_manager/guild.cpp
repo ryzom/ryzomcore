@@ -40,7 +40,7 @@
 /// todo guild remove entity id translator
 #include "nel/misc/eid_translator.h"
 #include "chat_groups_ids.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -194,6 +194,11 @@ void CGuild::setChestA(const CEntityId &recipient, uint8 chest)
 	if (chest >= _Chests.size())
 		return;
 	_GuildInventoryView->setChestA(recipient, chest);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, _Chests[chest].Name, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, _Chests[chest].ViewGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setPUT_GRADE(_DbGroup, _Chests[chest].PutGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setGET_GRADE(_DbGroup, _Chests[chest].GetGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setBULK_MAX(_DbGroup, _Chests[chest].BulkMax, true);
 	sendClientDBChest(recipient);
 }
 
@@ -203,6 +208,11 @@ void CGuild::setChestB(const CEntityId &recipient, uint8 chest)
 	if (chest >= _Chests.size())
 		return;
 	_GuildInventoryView->setChestB(recipient, chest);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, _Chests[chest].Name, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, _Chests[chest].ViewGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setPUT_GRADE(_DbGroup, _Chests[chest].PutGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setGET_GRADE(_DbGroup, _Chests[chest].GetGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setBULK_MAX(_DbGroup, _Chests[chest].BulkMax, true);
 	sendClientDBChest(recipient);
 }
 
@@ -1481,11 +1491,18 @@ void CGuild::deleteMember( CGuildMember* member )
 	nlassert(member);
 	nlassert( uint(member->getGrade()) < _GradeCounts.size() );
 
-#ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{'cid':%" NL_I64 "u}", member->getIngameEId().getShortId()), "{$set:{'guildId':0}}");
+#ifdef HAVE_MEMCACHED
+	ucstring charName;
+	CCharacter *character = PlayerManager.getChar(member->getIngameEId());
+	if (character != NULL)
+	{
+		charName = character->getName().toUtf8();
+		CEntityIdTranslator::removeShardFromName(charName);
+		CMemC::setWithIndex("Shard-Command", toString("deleteMember:%s:%s", getName().toUtf8().c_str(), charName.toUtf8().c_str()));
+	}
 #endif
 
-	if (PlayerManager.getChar(member->getIngameEId()) != NULL)
+	if (character != NULL)
 		setMemberOffline( member );
 	incMemberSession();
 	uint16 idx = member->getMemberIndex();

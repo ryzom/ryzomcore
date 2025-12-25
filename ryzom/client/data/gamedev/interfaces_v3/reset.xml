@@ -320,6 +320,7 @@
 	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:TELL|value=makeRGB(170,170,170)" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:DYN|value=makeRGB(162,255,173)" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:ENTER_DONT_QUIT_CB|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:CHAT_AUTOCOMPLETE|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB|value=0" />
 

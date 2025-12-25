@@ -46,7 +46,7 @@ struct ci_less
 	{
 		bool operator() (const unsigned char& c1, const unsigned char& c2) const
 		{
-			return tolower (c1) < tolower (c2); 
+			return tolower (c1) < tolower (c2);
 		}
 	};
 	bool operator() (const std::string & s1, const std::string & s2) const
@@ -161,7 +161,7 @@ public:
 	// create an extra faction channel if not already exist (for marauders, agnos, urasiens and hominits)
 	void createExtraFactionChannel(const std::string & channelName, bool universalChannel = false);
 	// create an user channel if not already exist
-	TChanID createUserChannel(const std::string & channelName, const std::string & pass);
+	TChanID createUserChannel(const std::string & channelName, const std::string & pass, uint32 cacheIndex = 0);
 	// remove a user channel
 	void deleteUserChannel(const std::string & channelName);
 	// remove a fation channel if faction is no more involved in a war

@@ -1340,7 +1340,7 @@ void prelogInit()
 		resetTextContext("ryzom.ttf", true);
 		//resetTextContext("uiFontSans", true); // TODO: read fonts from UI translation
 
-		CInterfaceManager::getInstance()->setInterfaceScale(1.f, true);
+		CInterfaceManager::getInstance()->setInterfaceScale(1.f, true, true);
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 		CWidgetManager::getInstance()->setWindowSnapInvert(ClientCfg.WindowSnapInvert);

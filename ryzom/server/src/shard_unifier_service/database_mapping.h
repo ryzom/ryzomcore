@@ -2201,7 +2201,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -2233,8 +2233,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -2336,7 +2335,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
@@ -2370,8 +2369,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -3698,7 +3696,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
@@ -3734,8 +3732,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -3837,7 +3834,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
@@ -3871,8 +3868,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -3973,7 +3969,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -4005,8 +4001,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4107,7 +4102,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -4139,8 +4134,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4243,7 +4237,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
@@ -4279,8 +4273,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4962,7 +4955,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
@@ -4996,8 +4989,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -5098,7 +5090,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -5130,8 +5122,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -6104,7 +6095,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
@@ -6140,8 +6131,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -7352,7 +7342,7 @@ namespace RSMGR
 			end_of_enum,
 
 			invalid_val,
-
+			
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
@@ -7384,8 +7374,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}

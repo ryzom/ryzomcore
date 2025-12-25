@@ -315,7 +315,7 @@ CClientConfig::CClientConfig()
 	InterfaceScale_min	= 0.8f;
 	InterfaceScale_max	= 2.0f;
 	InterfaceScale_step	= 0.05;
-	InterfaceScaleAuto  = false;
+	InterfaceScaleAuto  = true;
 	BilinearUI			= true;
 
 	WindowSnapInvert	= false;
@@ -358,7 +358,7 @@ CClientConfig::CClientConfig()
 	ForceDeltaTime		= 0;						// Default ForceDeltaTime, disabled by default
 
 	HardwareCursor			= true;					// Default HardwareCursor
-	HardwareCursorScale     = 0.85f;
+	HardwareCursorScale     = 1.f;
 	CursorSpeed				= 1.f;					// Default CursorSpeed
 	CursorAcceleration		= 0;					// Default CursorAcceleration
 	FreeLookSpeed			= 0.001f;				// Default FreeLookSpeed

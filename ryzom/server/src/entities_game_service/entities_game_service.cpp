@@ -50,7 +50,7 @@
 #include "game_share/mainland_summary.h"
 #include "game_share/shard_names.h"
 #include "server_share/handy_commands.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 // egs
 #include "game_item_manager/game_item_manager.h"
@@ -1333,7 +1333,7 @@ void CPlayerService::init()
 	// Init CSheetId
 	CSheetId::init(0);
 
-    // Init singleton manager
+	// Init singleton manager
 	CSingletonRegistry::getInstance()->init();
 
 	// register the NLLIGO classes
@@ -1346,10 +1346,9 @@ void CPlayerService::init()
 
 	initAdmin ();
 
-#ifdef HAVE_MONGO
-	CMongo::init();
+#ifdef HAVE_MEMCACHED
+	CMemC::init();
 #endif
-
 	//uint16 i = SKILLS::NUM_SKILLS;
 
 	// Init mirror

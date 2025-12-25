@@ -500,9 +500,22 @@ namespace NLGUI
 		}
 		else
 		{
-			// set new cursor for the hardware mouse
+			// TODO: check if window is active and only set cursor once when its changed
+
 			std::string name = rVR.getTextureNameFromId(texId);
-			rVR.getDriver()->setCursor(name, col, rot, (uint32) std::max(getX() - xPos, (sint32) 0), (uint32) std::max(getY() - yPos, (sint32) 0));
+			float scale = rVR.getTextureScaleFromId(texId);
+			uint32 xHotspot = (uint32) (std::max(getX() - xPos, (sint32) 0) * scale);
+			uint32 yHotspot = (uint32) (std::max(getY() - yPos, (sint32) 0) * scale);
+
+			if (CViewRenderer::hwCursorScale == 0.f)
+			{
+				rVR.getDriver()->setCursorScale(rVR.getInterfaceScale() / scale);
+			}
+			else
+			{
+				rVR.getDriver()->setCursorScale(CViewRenderer::hwCursorScale / scale);
+			}
+			rVR.getDriver()->setCursor(name, col, rot, xHotspot, yHotspot);
 		}
 	}
 
