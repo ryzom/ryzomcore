@@ -46,7 +46,7 @@ runs:
     - name: Configure CMake
       if: runner.os == 'Linux'
       shell: bash
-      run: cmake --preset linux-nel-${{ inputs.build-type }}
+      run: cmake --preset ci-linux-nel-${{ inputs.build-type }}
 
     - name: Build
       shell: bash
