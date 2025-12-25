@@ -38,6 +38,12 @@
     },
     {
       "inherits": [
+        "linux-nel"
+      ],
+      "name": "ci-linux-nel"
+    },
+    {
+      "inherits": [
         "windows",
         "nel"
       ],
@@ -49,6 +55,18 @@
       "inherits": "release",
       "name": "nel",
       "configurePreset": "nel"
+    },
+    {
+      "inherits": "nel",
+      "name": "ci-linux-nel",
+      "configurePreset": "ci-linux-nel"
+    },
+    {
+      "inherits": "ci-linux-nel",
+      "name": "ci-linux-nel/install",
+      "targets": [
+        "nel/install"
+      ]
     }
   ],
   "testPresets": [
@@ -63,5 +81,24 @@
       "name": "nel",
       "configurePreset": "nel"
     }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ci-linux-nel",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-linux-nel"
+        },
+        {
+          "type": "build",
+          "name": "ci-linux-nel"
+        },
+        {
+          "type": "build",
+          "name": "ci-linux-nel/install"
+        }
+      ]
+   }
   ]
 }
