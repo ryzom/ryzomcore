@@ -126,6 +126,7 @@ jobs:
     needs: [ strings, nel ]
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ ubuntu-24.04 ]
         build-type: ["static", "dynamic"]

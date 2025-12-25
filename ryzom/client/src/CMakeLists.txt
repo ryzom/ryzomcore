@@ -204,7 +204,6 @@ IF(WITH_RYZOM_CLIENT)
         ${LUA_INCLUDE_DIR}
         ${LUABIND_INCLUDE_DIR}
         ${CURL_INCLUDE_DIRS}
-        ${ZLIB_INCLUDE_DIR}
         ${OPENSSL_INCLUDE_DIR}
   )
 
@@ -232,6 +231,7 @@ IF(WITH_RYZOM_CLIENT)
               ${LUABIND_LIBRARIES}
               CURL::libcurl
               ${OPENSSL_LIBRARIES}
+              ZLIB::ZLIB
   )
 
   IF(NOT APPLE AND NOT WIN32)
