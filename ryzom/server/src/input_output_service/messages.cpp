@@ -690,7 +690,6 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 		ci->Language = SM->checkLanguageCode(language);
 		ci->HavePrivilege = havePrivilege;
 
-#ifdef HAVE_MEMCACHED
 		string cids = "";
 		for ( uint i = 0; i < _ignoreList.size(); i++ )
 		{
@@ -700,6 +699,7 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 			else
 				cids += toString("%u", _ignoreList[i].getShortId());
 		}
+#ifdef HAVE_MEMCACHED
 		CEntityIdTranslator::removeShardFromName(name);
 		CMemC::set(toString("IOS-User-%s-IgnoreList", name.toUtf8().c_str()), cids);
 #endif
