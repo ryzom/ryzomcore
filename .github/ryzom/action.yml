@@ -4,9 +4,9 @@ inputs:
   os:
     description: os
     required: true
-  cmake-options:
-    description: cmake options
-    required: false
+  build-type:
+    description: link statically or dynamically value  should be static | dynamic
+    required: true
   install-dir:
     description: install directory
     required: true
@@ -61,7 +61,7 @@ runs:
     - name: Configure CMake
       if: runner.os == 'Linux'
       shell: bash
-      run: cmake --preset ci-linux-ryzom ${{ inputs.cmake-options }}
+      run: cmake --preset ci-linux-ryzom-${{ inputs.build-type }}
 
     - name: Build
       shell: bash

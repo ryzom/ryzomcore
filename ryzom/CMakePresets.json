@@ -46,7 +46,21 @@
         "ci-ryzom",
         "ryzom"
       ],
-      "name": "ci-linux-ryzom"
+      "name": "ci-linux-ryzom-static",
+      "cacheVariables": {
+        "WITH_STATIC": true
+      }
+    },
+    {
+      "inherits": [
+        "linux",
+        "ci-ryzom",
+        "ryzom"
+      ],
+      "name": "ci-linux-ryzom-dynamic",
+      "cacheVariables": {
+        "WITH_STATIC": false
+      }
     },
     {
       "inherits": [

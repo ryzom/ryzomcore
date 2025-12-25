@@ -123,7 +123,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-24.04 ]
-        cmake-options: ["-DWITH_STATIC=ON", "-DWITH_STATIC=OFF"]
+        build-type: ["static", "dynamic"]
     steps:
       - uses: actions/checkout@v4
 
@@ -143,7 +143,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           os: ${{ matrix.os }}
-          cmake-options: ${{ matrix.cmake-options }}
+          build-type: ${{ matrix.build-type }}
           install-dir: ${{ needs.strings.outputs.install-dir }}
           image-group: ${{ needs.strings.outputs.image-group }}
           image-version: ${{ needs.strings.outputs.image-version }}
@@ -151,6 +151,7 @@ jobs:
           build-version: ${{ needs.strings.outputs.build-version }}
 
       - uses: actions/upload-artifact@v4
+        if: matrix.build-type == 'static'
         with:
           name: ryzom-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/ryzom/ryzom-*
