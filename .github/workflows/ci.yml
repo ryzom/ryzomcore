@@ -2,7 +2,7 @@ name: "Ryzom Core: CI / CD"
 
 on:
   push:
-    branches: [ "core4", "feature/*" ]
+    branches: [ "core4", "feature/*", "bugfix/*" ]
     paths-ignore:
       - '.devcontainer/**'
       - '.github/workflows/**'
