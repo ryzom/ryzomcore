@@ -59,7 +59,7 @@ runs:
     - uses: actions/upload-artifact@v4
       if: ( !cancelled() )
       with:
-        name: nel-${{ inputs.os }}-test-results
+        name: nel-${{ inputs.os }}-${{ inputs.build-type }}-test-results
         if-no-files-found: error
         path: ${{ inputs.build-dir }}/reports/*.xml
 
