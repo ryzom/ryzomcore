@@ -176,10 +176,11 @@ bool CDynChatEGS::removeChan(TChanID chanID)
 	const string *chanName = _ChanNames.getB(chanID);
 	if (chanName)
 	{
+		string nameCopy = *chanName;
 		_ChanNames.removeWithA(chanID);
 
 #ifdef HAVE_MEMCACHED
-		CMemC::setWithIndex("Shard-Command", "removeChan:"+*chanName);
+		CMemC::setWithIndex("Shard-Command", "removeChan:"+nameCopy);
 #endif
 	}
 
