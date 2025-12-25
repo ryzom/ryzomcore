@@ -174,7 +174,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: nel-${{ matrix.os }}-*
+          pattern: nel-${{ matrix.os }}-static-*
           merge-multiple: true
           path: ${{ needs.strings.outputs.build-dir }}
 
@@ -212,7 +212,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: nel-${{ matrix.os }}-*
+          pattern: nel-${{ matrix.os }}-static-*
           merge-multiple: true
           path: ${{ needs.strings.outputs.build-dir }}
 
