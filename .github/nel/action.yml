@@ -1,14 +1,17 @@
 name: build
 description: build
 inputs:
+  os:
+    description: os
+    required: true
+  build-type:
+    description: link statically or dynamically value  should be static | dynamic
+    required: true
   build-dir:
     description: build directory
     required: true
   build-version:
     description: build version
-    required: true
-  os:
-    description: os
     required: true
 runs:
   using: composite
@@ -43,7 +46,7 @@ runs:
     - name: Configure CMake
       if: runner.os == 'Linux'
       shell: bash
-      run: cmake --preset linux-nel
+      run: cmake --preset linux-nel-${{ inputs.build-type }}
 
     - name: Build
       shell: bash

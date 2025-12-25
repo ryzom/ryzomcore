@@ -75,6 +75,18 @@
       "inherits": "release",
       "name": "ryzom",
       "configurePreset": "ryzom"
+    },
+    {
+      "inherits": "ryzom",
+      "name": "ci-linux-ryzom",
+      "configurePreset": "ci-linux-ryzom-dynamic"
+    },
+    {
+      "inherits": "ci-linux-ryzom",
+      "name": "ci-linux-ryzom/install",
+      "targets": [
+        "ryzom/install"
+      ]
     }
   ],
   "testPresets": [
@@ -88,6 +100,25 @@
     {
       "name": "ryzom",
       "configurePreset": "ryzom"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ci-linux-ryzom",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-linux-ryzom-dynamic"
+        },
+        {
+          "type": "build",
+          "name": "ci-linux-ryzom"
+        },
+        {
+          "type": "build",
+          "name": "ci-linux-ryzom/install"
+        }
+      ]
     }
   ]
 }

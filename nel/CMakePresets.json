@@ -40,7 +40,19 @@
       "inherits": [
         "linux-nel"
       ],
-      "name": "ci-linux-nel"
+      "name": "ci-linux-nel-static",
+      "cacheVariables": {
+        "WITH_STATIC": true
+      }
+    },
+    {
+      "inherits": [
+        "linux-nel"
+      ],
+      "name": "ci-linux-nel-dynamic",
+      "cacheVariables": {
+        "WITH_STATIC": false
+      }
     },
     {
       "inherits": [
@@ -59,7 +71,7 @@
     {
       "inherits": "nel",
       "name": "ci-linux-nel",
-      "configurePreset": "ci-linux-nel"
+      "configurePreset": "ci-linux-nel-dynamic"
     },
     {
       "inherits": "ci-linux-nel",
@@ -88,7 +100,7 @@
       "steps": [
         {
           "type": "configure",
-          "name": "ci-linux-nel"
+          "name": "ci-linux-nel-dynamic"
         },
         {
           "type": "build",
