@@ -68,12 +68,9 @@ IF(WITH_NEL_TOOLS AND WITH_3D)
     ENDIF()
   ENDIF()
 
-  IF(WITH_QT OR WITH_QT5)
+  IF(WITH_QT5)
     ADD_SUBDIRECTORY(tile_edit_qt)
     ADD_SUBDIRECTORY(object_viewer_widget)
-  ENDIF()
-
-  IF(WITH_QT5)
     ADD_SUBDIRECTORY(shared_widgets)
     ADD_SUBDIRECTORY(panoply_preview)
   ENDIF()

@@ -1,0 +1,79 @@
+{
+  "version": 6,
+  "include": [
+    "../cmake/CMakePresets.base.json",
+    "../cmake/CMakePresets.os.json"
+  ],
+  "configurePresets": [
+    {
+      "binaryDir": "${sourceDir}/build/ryzom",
+      "installDir": "${sourceDir}/build/install/ryzom",
+      "name": "ryzom",
+      "cacheVariables": {
+        "WITH_RYZOM": true,
+        "WITH_RYZOM_CLIENT": true,
+        "WITH_RYZOM_SERVER": true,
+        "WITH_RYZOM_TOOLS": true,
+        "WITH_TESTING": true,
+        "WITH_NEL_TESTS": true,
+        "WITH_NEL": true,
+        "WITH_NELNS": false,
+        "WITH_SNOWBALLS": false,
+        "WITH_STUDIO": false,
+        "WITH_TOOLS": false,
+        "WITH_QT5": true,
+        "CPACK_PACKAGE_NAME": "ryzom"
+      }
+    },
+    {
+      "name": "ci-ryzom",
+      "hidden": true,
+      "cacheVariables": {
+        "WITH_NEL": false,
+        "CMAKE_PREFIX_PATH": "${sourceDir}/build/install"
+      }
+    },
+    {
+      "inherits": [
+        "linux",
+        "ryzom"
+      ],
+      "name": "linux-ryzom"
+    },
+    {
+      "inherits": [
+        "linux",
+        "ci-ryzom",
+        "ryzom"
+      ],
+      "name": "ci-linux-ryzom"
+    },
+    {
+      "inherits": [
+        "windows",
+        "ryzom"
+      ],
+      "name": "windows-ryzom"
+    }
+  ],
+  "buildPresets": [
+    {
+      "inherits": "release",
+      "name": "ryzom",
+      "configurePreset": "ryzom"
+    }
+  ],
+  "testPresets": [
+    {
+      "inherits": "default",
+      "name": "ryzom",
+      "configurePreset": "ryzom"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "ryzom",
+      "configurePreset": "ryzom"
+    }
+  ]
+}

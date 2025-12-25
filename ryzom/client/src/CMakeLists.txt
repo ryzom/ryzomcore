@@ -8,18 +8,6 @@ IF(WITH_RYZOM_CLIENT)
     MESSAGE(FATAL_ERROR "The client cannot be built without the NeL GUI Library (WITH_GUI)")
   ENDIF()
 
-  # Patch should never be enabled on Steam
-  IF(WITH_RYZOM_STEAM)
-    ADD_DEFINITIONS(-DRZ_USE_STEAM)
-    FIND_PACKAGE(Steam)
-  ELSEIF(WITH_RYZOM_PATCH)
-    ADD_DEFINITIONS(-DRZ_USE_PATCH)
-
-    IF(WITH_RYZOM_CUSTOM_PATCH_SERVER)
-      ADD_DEFINITIONS(-DRZ_USE_CUSTOM_PATCH_SERVER)
-    ENDIF()
-  ENDIF()
-
   FILE(GLOB CFG ../*.cfg)
   FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc *.manifest)
   FILE(GLOB SRC_INTERFACE interface_v3/*.h interface_v3/*.cpp)
@@ -131,6 +119,18 @@ IF(WITH_RYZOM_CLIENT)
 
   ADD_EXECUTABLE(ryzom_client WIN32 MACOSX_BUNDLE ${SRC} ${SRC_INTERFACE} ${SRC_MODE} ${SRC_R2})
 
+  # Patch should never be enabled on Steam
+  IF(WITH_RYZOM_STEAM)
+    TARGET_COMPILE_DEFINITIONS(ryzom_client PRIVATE RZ_USE_STEAM)
+    FIND_PACKAGE(Steam)
+  ELSEIF(WITH_RYZOM_PATCH)
+    TARGET_COMPILE_DEFINITIONS(ryzom_client PRIVATE RZ_USE_PATCH)
+
+    IF(WITH_RYZOM_CUSTOM_PATCH_SERVER)
+      TARGET_COMPILE_DEFINITIONS(ryzom_client PRIVATE RZ_USE_CUSTOM_PATCH_SERVER)
+    ENDIF()
+  ENDIF()
+
   IF(APPLE)
     SET_TARGET_PROPERTIES(ryzom_client PROPERTIES OUTPUT_NAME ${MACOSX_BUNDLE_BUNDLE_NAME})
     SET_TARGET_PROPERTIES(ryzom_client PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${MAC_RESOURCES_DIR}/Info.plist)
@@ -198,9 +198,9 @@ IF(WITH_RYZOM_CLIENT)
     ENDIF()
   ENDIF()
 
-  INCLUDE_DIRECTORIES(
+  TARGET_INCLUDE_DIRECTORIES(ryzom_client
+        PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${LIBXML2_INCLUDE_DIR}
         ${LUA_INCLUDE_DIR}
         ${LUABIND_INCLUDE_DIR}
         ${CURL_INCLUDE_DIRS}
@@ -208,44 +208,46 @@ IF(WITH_RYZOM_CLIENT)
         ${OPENSSL_INCLUDE_DIR}
   )
 
-  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/nel/3rdparty)
+  TARGET_INCLUDE_DIRECTORIES(ryzom_client PRIVATE ${CMAKE_SOURCE_DIR}/nel/3rdparty)
 
   IF(STEAM_FOUND)
-    INCLUDE_DIRECTORIES(${STEAM_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(ryzom_client PRIVATE ${STEAM_INCLUDE_DIRS})
   ENDIF()
 
   TARGET_LINK_LIBRARIES(ryzom_client
-              nelmisc
-              nelnet
-              nelligo
-              nelgeorges
-              nel3d
-              nelgui
-              nelsound
-              nel_sevenzip
+              PRIVATE
+              NeL::misc
+              NeL::net
+              NeL::ligo
+              NeL::georges
+              NeL::3d
+              NeL::gui
+              NeL::sound
+              NeL::sevenzip
               ryzom_clientsheets
               ryzom_gameshare
-              nelpacs
+              NeL::pacs
+              LibXml2::LibXml2
               ${LUA_LIBRARIES}
               ${LUABIND_LIBRARIES}
-              ${CURL_LIBRARIES}
+              CURL::libcurl
               ${OPENSSL_LIBRARIES}
   )
 
   IF(NOT APPLE AND NOT WIN32)
-    TARGET_LINK_LIBRARIES(ryzom_client ${X11_LIBRARIES})
+    TARGET_LINK_LIBRARIES(ryzom_client PRIVATE ${X11_LIBRARIES})
   ENDIF()
 
   IF(APPLE)
-    TARGET_LINK_LIBRARIES(ryzom_client ${FOUNDATION_FRAMEWORK})
+    TARGET_LINK_LIBRARIES(ryzom_client PRIVATE ${FOUNDATION_FRAMEWORK})
   ENDIF()
 
   IF(WITH_MSQUIC)
-    INCLUDE_DIRECTORIES(${msquic_INCLUDE_DIRS})
-    TARGET_LINK_LIBRARIES(ryzom_client ${msquic_LIBRARIES})
+    TARGET_INCLUDE_DIRECTORIES(ryzom_client PRIVATE ${msquic_INCLUDE_DIRS})
+    TARGET_LINK_LIBRARIES(ryzom_client PRIVATE ${msquic_LIBRARIES})
   ENDIF()
 
-  ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${CURL_DEFINITIONS} ${LUABIND_DEFINITIONS})
+  TARGET_COMPILE_DEFINITIONS(ryzom_client PRIVATE ${CURL_DEFINITIONS} ${LUABIND_DEFINITIONS})
 
   NL_DEFAULT_PROPS(ryzom_client "Ryzom, Client: Ryzom Client")
   NL_ADD_RUNTIME_FLAGS(ryzom_client)

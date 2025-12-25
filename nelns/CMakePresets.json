@@ -1,0 +1,78 @@
+{
+  "version": 6,
+  "include": [
+    "../cmake/CMakePresets.base.json",
+    "../cmake/CMakePresets.os.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "nelns",
+      "binaryDir": "${sourceDir}/build/nelns",
+      "installDir": "${sourceDir}/build/install/nelns",
+      "cacheVariables": {
+        "WITH_NELNS": true,
+        "WITH_NELNS_SERVER": true,
+        "WITH_NELNS_LOGIN_SYSTEM": true,
+        "WITH_TESTING": true,
+        "WITH_NEL_TESTS": true,
+        "WITH_NEL": true,
+        "WITH_RYZOM": false,
+        "WITH_SNOWBALLS": false,
+        "WITH_STUDIO": false,
+        "WITH_TOOLS": false,
+        "WITH_QT5": true,
+        "CPACK_PACKAGE_NAME": "nelns"
+      }
+    },
+    {
+      "name": "ci-nelns",
+      "hidden": true,
+      "cacheVariables": {
+        "WITH_NEL": false,
+        "CMAKE_PREFIX_PATH": "${sourceDir}/build/install"
+      }
+    },
+    {
+      "inherits": [
+        "linux",
+        "nelns"
+      ],
+      "name": "linux-nelns"
+    },
+    {
+      "inherits": [
+        "linux",
+        "ci-nelns",
+        "nelns"
+      ],
+      "name": "ci-linux-nelns"
+    },
+    {
+      "inherits": [
+        "windows",
+        "nelns"
+      ],
+      "name": "windows-nelns"
+    }
+  ],
+  "buildPresets": [
+    {
+      "inherits": "release",
+      "name": "nelns",
+      "configurePreset": "nelns"
+    }
+  ],
+  "testPresets": [
+    {
+      "inherits": "default",
+      "name": "nelns",
+      "configurePreset": "nelns"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "nelns",
+      "configurePreset": "nelns"
+    }
+  ]
+}

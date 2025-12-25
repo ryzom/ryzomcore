@@ -19,7 +19,3 @@ ALTER TABLE `user`
 
 ALTER TABLE `permission`
   ADD UNIQUE KEY `UserShard` (`UId`,`ShardId`) USING BTREE;
-
-ALTER TABLE `user`
-  ADD PRIMARY KEY (`UId`),
-  ADD KEY `Login` (`Login`);

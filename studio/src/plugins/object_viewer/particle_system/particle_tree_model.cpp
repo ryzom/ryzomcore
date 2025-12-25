@@ -213,7 +213,7 @@ QVariant CParticleTreeModel::data(const QModelIndex &index, int role) const
 		return QFont("SansSerif", 9, QFont::Normal);
 	}
 	if (role == Qt::DecorationRole)
-		return qVariantFromValue(getIcon(index));
+		return QVariant::fromValue(getIcon(index));
 
 	return QVariant();
 }

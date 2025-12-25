@@ -2,11 +2,11 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(welcome_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${NELMISC_INCLUDE_DIRS})
-
 TARGET_LINK_LIBRARIES(welcome_service
-						nelmisc
-						nelnet)
+        PRIVATE
+        NeL::misc
+        NeL::net
+)
 
 NL_DEFAULT_PROPS(welcome_service "NeLNS, Services: Welcome Service")
 NL_ADD_RUNTIME_FLAGS(welcome_service)

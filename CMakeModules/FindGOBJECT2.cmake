@@ -1,51 +1,121 @@
-# - Try to find GObject2 
-# Find GObject2 headers, libraries and the answer to all questions.
-#
-#  GOBJECT2_FOUND               True if GOBJECT2 got found
-#  GOBJECT2_INCLUDE_DIRS        Location of GOBJECT2 headers 
-#  GOBJECT2_LIBRARIES           List of libraries to use GOBJECT2 
-#
-# Copyright (c) 2008 Bjoern Ricks <bjoern.ricks@googlemail.com>
-#
-#  Redistribution and use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
-INCLUDE( FindPkgConfig )
+#[=======================================================================[.rst:
+FindGOBJECT2
+-------
 
-IF ( GOBJECT2_FIND_REQUIRED )
-	SET( _pkgconfig_REQUIRED "REQUIRED" )
-ELSE( GOBJECT2_FIND_REQUIRED )
-	SET( _pkgconfig_REQUIRED "" )	
-ENDIF ( GOBJECT2_FIND_REQUIRED )
+Finds the GOBJECT2 library.
 
-IF ( GOBJECT2_MIN_VERSION )
-	PKG_SEARCH_MODULE( GOBJECT2 ${_pkgconfig_REQUIRED} gobject-2.0>=${GOBJECT2_MIN_VERSION} )
-ELSE ( GOBJECT2_MIN_VERSION )
-	PKG_SEARCH_MODULE( GOBJECT2 ${_pkgconfig_REQUIRED} gobject-2.0 )
-ENDIF ( GOBJECT2_MIN_VERSION )
+Imported Targets
+^^^^^^^^^^^^^^^^
 
+This module provides the following imported targets, if found:
 
-IF( NOT GOBJECT2_FOUND AND NOT PKG_CONFIG_FOUND )
-	FIND_PATH( GOBJECT2_INCLUDE_DIRS gobject/gobject.h PATH_SUFFIXES glib-2.0)
-	FIND_LIBRARY( GOBJECT2_LIBRARIES gobject-2.0 )
+``GOBJECT2::GOBJECT2``
+  The GOBJECT2 library
 
-	# Report results
-	IF ( GOBJECT2_LIBRARIES AND GOBJECT2_INCLUDE_DIRS )	
-		SET( GOBJECT2_FOUND 1 )
-		IF ( NOT GOBJECT2_FIND_QUIETLY )
-			MESSAGE( STATUS "Found GOBJECT2: ${GOBJECT2_LIBRARIES}" )
-		ENDIF ( NOT GOBJECT2_FIND_QUIETLY )
-	ELSE ( GOBJECT2_LIBRARIES AND GOBJECT2_INCLUDE_DIRS )	
-		IF ( GOBJECT2_FIND_REQUIRED )
-			MESSAGE( SEND_ERROR "Could NOT find GOBJECT2" )
-		ELSE ( GOBJECT2_FIND_REQUIRED )
-			IF ( NOT GOBJECT2_FIND_QUIETLY )
-				MESSAGE( STATUS "Could NOT find GOBJECT2" )	
-			ENDIF ( NOT GOBJECT2_FIND_QUIETLY )
-		ENDIF ( GOBJECT2_FIND_REQUIRED )
-	ENDIF ( GOBJECT2_LIBRARIES AND GOBJECT2_INCLUDE_DIRS )
-ENDIF( NOT GOBJECT2_FOUND AND NOT PKG_CONFIG_FOUND )
+Result Variables
+^^^^^^^^^^^^^^^^
 
-MARK_AS_ADVANCED( GOBJECT2_LIBRARIES GOBJECT2_INCLUDE_DIRS )
+This will define the following variables:
+
+``GOBJECT2_FOUND``
+  True if the system has the GOBJECT2 library.
+``GOBJECT2_VERSION``
+  The version of the GOBJECT2 library which was found.
+``GOBJECT2_INCLUDE_DIRS``
+  Include directories needed to use GOBJECT2.
+``GOBJECT2_LIBRARIES``
+  Libraries needed to link to GOBJECT2.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``GOBJECT2_INCLUDE_DIR``
+  The directory containing ``gobject/gobject.h``.
+``GOBJECT2_LIBRARY``
+  The path to the GOBJECT2 library.
+
+#]=======================================================================]
+
+include(FindPackageHandleStandardArgs)
+
+# Try to use pkg-config first
+find_package(PkgConfig QUIET)
+if (PKG_CONFIG_FOUND)
+    pkg_check_modules(PC_GOBJECT2 QUIET gobject-2.0)
+endif ()
+
+# Find the header files
+find_path(GOBJECT2_INCLUDE_DIR
+        NAMES gobject/gobject.h
+        HINTS ${PC_GOBJECT2_INCLUDEDIR} ${PC_GOBJECT2_INCLUDE_DIRS}
+        PATH_SUFFIXES glib-2.0
+)
+
+# Find the library
+find_library(GOBJECT2_LIBRARY
+        NAMES gobject-2.0
+        HINTS ${PC_GOBJECT2_LIbDIR} ${PC_GOBJECT2_LIBRARY_DIRS}
+)
+
+# Set version from pkg-config if available
+set(GOBJECT2_VERSION ${PC_GOBJECT2_VERSION})
+
+# Handle dependencies through pkg-config
+set(GOBJECT2_DEPS_FOUND TRUE)
+set(GOBJECT2_DEPS_LIBRARIES)
+set(GOBJECT2_DEPS_INCLUDE_DIRS)
+
+# Set the include directories
+set(GOBJECT2_INCLUDE_DIRS ${GOBJECT2_INCLUDE_DIR})
+if (GOBJECT2_DEPS_INCLUDE_DIRS)
+    list(APPEND GOBJECT2_INCLUDE_DIRS ${GOBJECT2_DEPS_INCLUDE_DIRS})
+endif ()
+
+# Set the libraries
+set(GOBJECT2_LIBRARIES ${GOBJECT2_LIBRARY})
+if (GOBJECT2_DEPS_LIBRARIES)
+    list(APPEND GOBJECT2_LIBRARIES ${GOBJECT2_DEPS_LIBRARIES})
+endif ()
+
+# Standard find_package handling
+find_package_handle_standard_args(GOBJECT2
+        REQUIRED_VARS
+        GOBJECT2_LIBRARY
+        GOBJECT2_INCLUDE_DIR
+        VERSION_VAR
+        GOBJECT2_VERSION
+)
+
+# Create imported target
+if (GOBJECT2_FOUND AND NOT TARGET GOBJECT2::GOBJECT2)
+    add_library(GOBJECT2::GOBJECT2 UNKNOWN IMPORTED)
+    set_target_properties(GOBJECT2::GOBJECT2 PROPERTIES
+            IMPORTED_LOCATION "${GOBJECT2_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${GOBJECT2_INCLUDE_DIR}"
+    )
+
+    # Add compile options from pkg-config if available
+    if (PC_GOBJECT2_FOUND AND PC_GOBJECT2_CFLAGS_OTHER)
+        set_property(TARGET GOBJECT2::GOBJECT2 PROPERTY
+                INTERFACE_COMPILE_OPTIONS "${PC_GOBJECT2_CFLAGS_OTHER}"
+        )
+    endif ()
+
+    # Add dependencies if not already provided by pkg-config
+    if (GOBJECT2_DEPS_LIBRARIES)
+        set_property(TARGET GOBJECT2::GOBJECT2 APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES "${GOBJECT2_DEPS_LIBRARIES}"
+        )
+    endif ()
+endif ()
+
+# Hide advanced variables
+mark_as_advanced(
+        GOBJECT2_INCLUDE_DIR
+        GOBJECT2_LIBRARY
+)

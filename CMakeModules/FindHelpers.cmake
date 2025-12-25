@@ -677,14 +677,22 @@ MACRO(FIND_LIBCURL)
         # CURL can depend on libidn
         FIND_LIBRARY(IDN_LIBRARY idn)
         IF(IDN_LIBRARY)
-          LIST(APPEND CURL_LIBRARIES ${IDN_LIBRARY})
+          set_property(TARGET CURL::libcurl
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${IDN_LIBRARY}
+          )
         ENDIF()
 
         # CURL Macports version can depend on libidn, libintl and libiconv too
         IF(APPLE)
           FIND_LIBRARY(INTL_LIBRARY intl)
           IF(INTL_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${INTL_LIBRARY})
+            set_property(TARGET CURL::libcurl
+                    APPEND
+                    PROPERTY INTERFACE_LINK_LIBRARIES
+                    ${INTL_LIBRARY}
+            )
           ENDIF()
         ELSE()
           # Only used by libcurl under Linux
@@ -695,8 +703,16 @@ MACRO(FIND_LIBCURL)
           #ENDIF()
 
           # Only Linux version of libcurl depends on OpenSSL
-          LIST(APPEND CURL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
-          LIST(APPEND CURL_LIBRARIES ${OPENSSL_LIBRARIES})
+          set_property(TARGET CURL::libcurl
+                  APPEND
+                  PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+                  ${OPENSSL_INCLUDE_DIR}
+          )
+          set_property(TARGET CURL::libcurl
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${OPENSSL_LIBRARIES}
+          )
         ENDIF()
       ENDIF()
     ENDIF()
@@ -708,13 +724,20 @@ MACRO(FIND_LIBXML2)
     FIND_PACKAGE(LibXml2 REQUIRED)
 
     IF(WIN32 OR WITH_STATIC_LIBXML2)
-      LIST(APPEND LIBXML2_DEFINITIONS -DLIBXML_STATIC)
+      set_property(TARGET LibXml2::LibXml2
+              APPEND
+              PROPERTY INTERFACE_COMPILE_DEFINITIONS
+              LIBXML_STATIC
+      )
     ENDIF()
 
     FIND_PACKAGE(Iconv QUIET)
     IF(ICONV_FOUND)
-#      LIST(APPEND CURL_INCLUDE_DIRS ${ICONV_INCLUDE_DIR})
-      LIST(APPEND LIBXML2_LIBRARIES ${ICONV_LIBRARIES})
+      set_property(TARGET LibXml2::LibXml2
+              APPEND
+              PROPERTY INTERFACE_LINK_LIBRARIES
+              ${ICONV_LIBRARIES}
+      )
     ENDIF()
 
     IF(WITH_STATIC)
@@ -723,20 +746,32 @@ MACRO(FIND_LIBXML2)
         FIND_LIBRARY(WINSOCK2_LIB ws2_32)
       
         IF(WINSOCK2_LIB)
-          LIST(APPEND LIBXML2_LIBRARIES ${WINSOCK2_LIB})
+          set_property(TARGET LibXml2::LibXml2
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${WINSOCK2_LIB}
+          )
         ENDIF()
 
         FIND_LIBRARY(CRYPT32_LIB Crypt32)
 
         IF(CRYPT32_LIB)
-          LIST(APPEND LIBXML2_LIBRARIES ${CRYPT32_LIB})
+          set_property(TARGET LibXml2::LibXml2
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${CRYPT32_LIB}
+          )
         ENDIF()
       ELSEIF(NOT HUNTER_ENABLED)
         # under Linux and OS X, recent libxml2 versions are linked against liblzma
         FIND_PACKAGE(LibLZMA)
 
         IF(LIBLZMA_LIBRARIES)
-          LIST(APPEND LIBXML2_LIBRARIES ${LIBLZMA_LIBRARIES})
+          set_property(TARGET LibXml2::LibXml2
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${LIBLZMA_LIBRARIES}
+          )
         ENDIF()
       ENDIF()
     ENDIF()
@@ -802,7 +837,15 @@ MACRO(ADD_QT_SYSTEM_LIBRARY _NAME)
 ENDMACRO()
 
 MACRO(FIND_QT5)
-  CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11 FATAL_ERROR)
+  CMAKE_MINIMUM_REQUIRED(VERSION 3.22..4.1.1 FATAL_ERROR)
+
+  # qt5 required cxx 11, not the whole project depends on qt though
+  #set(CMAKE_CXX_STANDARD 11)
+  #set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  set(CMAKE_AUTOMOC ON)
+  set(CMAKE_AUTORCC ON)
+  set(CMAKE_AUTOUIC ON)
 
   SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QTDIR} $ENV{QTDIR})
 
@@ -843,7 +886,7 @@ MACRO(FIND_QT5)
 
     IF(QT_STATIC)
       FIND_PACKAGE(PNG REQUIRED)
-      FIND_PACKAGE(Jpeg REQUIRED)
+      FIND_PACKAGE(JPEG REQUIRED)
 
       ADD_DEFINITIONS(-DQT_STATICPLUGIN)
 
@@ -953,7 +996,7 @@ MACRO(FIND_QT5)
 
       ADD_QT_PLUGIN(accessible qtaccessiblewidgets)
 
-      LIST(APPEND QT_LIBRARIES ${PNG_LIBRARIES} ${JPEG_LIBRARY})
+      LIST(APPEND QT_LIBRARIES ${PNG_LIBRARIES} JPEG::JPEG)
 
       # Network
       LIST(APPEND QT_LIBRARIES Qt5::Network Qt5::Xml)

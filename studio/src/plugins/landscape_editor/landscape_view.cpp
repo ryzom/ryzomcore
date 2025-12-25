@@ -71,10 +71,10 @@ void LandscapeView::setVisibleText(bool visible)
 void LandscapeView::wheelEvent(QWheelEvent *event)
 {
 	//How fast we zoom
-	float numSteps = (( event->delta() / 8 ) / 15) * 1.2; 
+	float numSteps = (( event->angleDelta().y() / 8 ) / 15) * 1.2;
 
-	QMatrix mat = matrix();
-	QPointF mousePosition = event->pos();
+	QTransform mat = transform();
+	QPointF mousePosition = event->position();
 
 	mat.translate((width() / 2) - mousePosition.x(), (height() / 2) - mousePosition.y());
 
@@ -86,7 +86,7 @@ void LandscapeView::wheelEvent(QWheelEvent *event)
 	mat.translate(mousePosition.x() - (width() / 2), mousePosition.y() - (height() / 2));
 	
 	//Adjust to the new center for correct zooming
-	setMatrix(mat);
+	setTransform(mat);
 	event->accept();
 }
 

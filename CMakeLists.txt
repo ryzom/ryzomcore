@@ -46,10 +46,15 @@ ENDIF()
 OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
   cmake_minimum_required(VERSION 3.24)
+
+  IF (POLICY CMP0144)
+    cmake_policy(SET CMP0144 NEW)
+  ENDIF ()
+
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.6.tar.gz"
-    SHA1 "69e4a05bd514bb05cb2c5aa02ce8ac420516aaf7"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.26.1.tar.gz"
+    SHA1 "e41ac7a18c49b35ebac99ff2b5244317b2638a65"
     FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
   )
 
@@ -186,11 +191,17 @@ IF(HUNTER_ENABLED)
   HUNTER_ADD_PACKAGE(ZLIB)
 
   FIND_PACKAGE(ZLIB CONFIG REQUIRED)
-  SET(ZLIB_LIBRARY ZLIB::zlib)
+  # add compatibility with cmake findZLIB module
+  if(ZLIB_FOUND AND NOT TARGET ZLIB::ZLIB)
+      add_library(ZLIB::ZLIB ALIAS ZLIB::zlib)
+  endif()
 
   HUNTER_ADD_PACKAGE(libxml2)
   FIND_PACKAGE(libxml2 CONFIG REQUIRED)
-  SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
+  # add compatibility with cmake find module
+  if(libxml2_FOUND AND NOT TARGET LibXml2::LibXml2)
+      add_library(LibXml2::LibXml2 ALIAS libxml2::libxml2)
+  endif()
 
   # cross compiling doesn't quite work on the hunter openssl package therefor compile it separately and use it
   IF(NOT CMAKE_CROSSCOMPILING)
@@ -202,14 +213,13 @@ IF(HUNTER_ENABLED)
 
   # for precompiled headers, not needed if using TARGET_PRECOMPILE_HEADERS() from cmake 3.16+
   SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
-  SET(LIBXML2_INCLUDE_DIR ${LIBXML2_ROOT}/include/libxml2)
 ELSE()
 FIND_PACKAGE(ZLIB REQUIRED)
 FIND_PACKAGE(LibXml2 REQUIRED)
 FIND_PACKAGE(PNG REQUIRED)
 FIND_PACKAGE(OpenSSL REQUIRED)
 FIND_PACKAGE(GIF)
-FIND_PACKAGE(Jpeg)
+FIND_PACKAGE(JPEG)
 
 IF(WIN32)
   SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
@@ -227,19 +237,40 @@ ENDIF()
 NL_CONFIGURE_CHECKS()
 
 IF(WITH_STATIC_LIBXML2)
-  ADD_DEFINITIONS(-DLIBXML_STATIC)
+  if(HUNTER_ENABLED)
+      set_property(TARGET libxml2::libxml2
+              APPEND
+              PROPERTY INTERFACE_COMPILE_DEFINITIONS
+              LIBXML_STATIC
+      )
+  else()
+      set_property(TARGET LibXml2::LibXml2
+              APPEND
+              PROPERTY INTERFACE_COMPILE_DEFINITIONS
+              LIBXML_STATIC
+      )
+  endif ()
 ENDIF()
 
 FIND_PACKAGE(Iconv QUIET)
-IF(ICONV_FOUND)
-  INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
-  SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
+IF(Iconv_FOUND)
+  if(TARGET LibXml2::LibXml2 AND NOT HUNTER_ENABLED)
+      set_property(TARGET LibXml2::LibXml2
+            APPEND
+            PROPERTY INTERFACE_LINK_LIBRARIES
+            Iconv::Iconv
+      )
+  endif ()
 ENDIF()
 
 IF(WITH_STATIC)
   # libxml2 could need winsock2 library
-  IF(WINSOCK2_LIB)
-    SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${WINSOCK2_LIB})
+  IF(WINSOCK2_LIB AND TARGET LibXml2::LibXml2 AND NOT HUNTER_ENABLED)
+      set_property(TARGET LibXml2::LibXml2
+            APPEND
+            PROPERTY INTERFACE_LINK_LIBRARIES
+            ${WINSOCK2_LIB}
+      )
   ENDIF()
 ENDIF()
 
@@ -289,13 +320,6 @@ IF(WITH_QT5)
   FIND_QT5()
 ENDIF()
 
-IF(WITH_QT)
-  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QTDIR} $ENV{QTDIR})
-
-  # Use Qt 4
-  FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED)
-ENDIF()
-
 #TODO: hunter assimp package
 IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)
@@ -305,14 +329,17 @@ IF(WITH_MSQUIC)
   FIND_PACKAGE(msquic REQUIRED)
 ENDIF()
 
-IF(WITH_NEL_TESTS)
+IF(WITH_NEL_TESTS OR WITH_TESTING)
   FIND_PACKAGE(CppTest)
 
   ENABLE_TESTING()
+  # GoogleTest requires at least C++17 not the whole project depends on google test though
+  # set(CMAKE_CXX_STANDARD 17)
+  # set(CMAKE_CXX_STANDARD_REQUIRED ON)
   include(FetchContent)
   FetchContent_Declare(
           googletest
-          URL https://github.com/google/googletest/archive/a7f443b80b105f940225332ed3c31f2790092f47.zip
+          URL https://github.com/google/googletest/archive/54915d462bb64e9b2bd1a3f0e70c00e6f5d817fb.zip
           EXCLUDE_FROM_ALL
   )
   SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -330,18 +357,12 @@ IF(WITH_NEL)
 
     HUNTER_ADD_PACKAGE(CURL)
     FIND_PACKAGE(CURL CONFIG REQUIRED)
-    # TODO: for nelgui
-    SET(CURL_LIBRARIES CURL::libcurl libxml2::libxml2)
   ELSE()
     IF(WITH_GUI)
       FIND_PACKAGE(Luabind REQUIRED)
     ENDIF()
 
     FIND_PACKAGE(CURL REQUIRED)
-    # if cmake finds config-file package, ie FIND_PACKAGE(CURL CONFIG), then CURL_LIBRARIES is not defined
-    IF(TARGET CURL::libcurl)
-      SET(CURL_LIBRARIES CURL::libcurl)
-    ENDIF()
 
     IF((WIN32 OR CURL_LIBRARIES MATCHES "\\.a") AND WITH_STATIC_CURL)
       SET(CURL_STATIC ON)
@@ -350,43 +371,82 @@ IF(WITH_NEL)
     ENDIF()
 
     IF(CURL_STATIC)
-      SET(CURL_DEFINITIONS -DCURL_STATICLIB)
-
-      LIST(APPEND CURL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
-      LIST(APPEND CURL_LIBRARIES ${OPENSSL_LIBRARIES})
+      set_property(TARGET CURL::libcurl
+              APPEND
+              PROPERTY INTERFACE_COMPILE_DEFINITIONS
+              CURL_STATICLIB
+      )
+      set_property(TARGET CURL::libcurl
+              APPEND
+              PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+              ${OPENSSL_INCLUDE_DIR}
+      )
+      set_property(TARGET CURL::libcurl
+              APPEND
+              PROPERTY INTERFACE_LINK_LIBRARIES
+              ${OPENSSL_LIBRARIES}
+      )
 
       IF(WIN32)
-        LIST(APPEND CURL_LIBRARIES Crypt32 Cryptui)
+        set_property(TARGET CURL::libcurl
+                APPEND
+                PROPERTY INTERFACE_LINK_LIBRARIES
+                Crypt32 Cryptui
+        )
       ELSE()
         # CURL depends on libidn
         FIND_LIBRARY(IDN_LIBRARY idn)
         IF(IDN_LIBRARY)
-          LIST(APPEND CURL_LIBRARIES ${IDN_LIBRARY})
+          set_property(TARGET CURL::libcurl
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${IDN_LIBRARY}
+          )
         ENDIF()
 
         # CURL Macports version can depend on libidn, libidn2, libintl, libpsl and libiconv too
         IF(APPLE)
           FIND_LIBRARY(INTL_LIBRARY intl)
           IF(INTL_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${INTL_LIBRARY})
+            set_property(TARGET CURL::libcurl
+                    APPEND
+                    PROPERTY INTERFACE_LINK_LIBRARIES
+                    ${INTL_LIBRARY}
+            )
           ENDIF()
 
           FIND_LIBRARY(IDN2_LIBRARY idn2)
           IF(IDN2_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${IDN2_LIBRARY})
+            set_property(TARGET CURL::libcurl
+                    APPEND
+                    PROPERTY INTERFACE_LINK_LIBRARIES
+                    ${IDN2_LIBRARY}
+            )
           ENDIF()
 
           FIND_LIBRARY(PSL_LIBRARY psl)
           IF(PSL_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${PSL_LIBRARY})
+            set_property(TARGET CURL::libcurl
+                    APPEND
+                    PROPERTY INTERFACE_LINK_LIBRARIES
+                    ${PSL_LIBRARY}
+            )
           ENDIF()
 
           FIND_LIBRARY(UNISTRING_LIBRARY unistring)
           IF(UNISTRING_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${UNISTRING_LIBRARY})
+            set_property(TARGET CURL::libcurl
+                    APPEND
+                    PROPERTY INTERFACE_LINK_LIBRARIES
+                    ${UNISTRING_LIBRARY}
+            )
           ENDIF()
 
-          LIST(APPEND CURL_LIBRARIES ${SECURITY_FRAMEWORK})
+          set_property(TARGET CURL::libcurl
+                  APPEND
+                  PROPERTY INTERFACE_LINK_LIBRARIES
+                  ${SECURITY_FRAMEWORK}
+          )
         ENDIF()
       ENDIF()
     ENDIF()
@@ -396,14 +456,16 @@ IF(WITH_NEL)
   ADD_SUBDIRECTORY(nel)
 
   # Aliases for targets
-  SET(NELMISC_LIBRARIES nelmisc)
-  SET(NELNET_LIBRARIES nelnet)
-  SET(NELLIGO_LIBRARIES nelligo)
-  SET(NELGEORGES_LIBRARIES nelgeorges)
-  SET(NEL3D_LIBRARIES nel3d)
-  SET(NELGUI_LIBRARIES nelgui)
-  SET(NELSOUND_LIBRARIES nelsound)
-  SET(NELPACS_LIBRARIES nelpacs)
+  SET(NELMISC_LIBRARIES NeL::misc)
+  SET(NELNET_LIBRARIES NeL::net)
+  SET(NELLIGO_LIBRARIES NeL::ligo)
+  SET(NELGEORGES_LIBRARIES NeL::georges)
+  SET(NEL3D_LIBRARIES NeL::3d)
+  SET(NELGUI_LIBRARIES NeL::gui)
+  SET(NELSOUND_LIBRARIES NeL::sound)
+
+  # allow find_package to find projects from within the mono repo
+  list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/nel/internal")
 ELSE()
 #  FIND_PACKAGE(NeL COMPONENTS 3d misc pacs sound nimp REQUIRED)
   FIND_PACKAGE(NeL REQUIRED)
@@ -451,7 +513,6 @@ ENDIF()
 
 IF(WITH_NEL_TESTS)
   ENABLE_TESTING()
-  ADD_TEST(NAME nel_unit_test COMMAND nel_unit_test)
   IF(BUILD_DASHBOARD)
     INCLUDE(Dart)
     SET(SVNCOMMAND svn)
@@ -463,16 +524,16 @@ ENDIF()
 # packaging information
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ryzom Core MMORPG Framework")
 SET(CPACK_PACKAGE_VENDOR "Ryzom Core")
+string(TOLOWER ${CMAKE_PROJECT_NAME} PROJECT_NAME_LOWER)
+SET(CPACK_PACKAGE_NAME ${PROJECT_NAME_LOWER} CACHE STRING "")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/README.md)
 SET(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/COPYING)
-SET(CPACK_PACKAGE_VERSION_MAJOR "${NL_VERSION_MAJOR}")
-SET(CPACK_PACKAGE_VERSION_MINOR "${NL_VERSION_MINOR}")
-SET(CPACK_PACKAGE_VERSION_PATCH "${NL_VERSION_PATCH}")
 SET(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};NeL;ALL;/")
 SET(CPACK_PACKAGE_EXECUTABLES "ryzomcore${NL_VERSION}" "ryzomcore")
 
 # NSIS Specific Packing Setup
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "RyzomCore")
+SET(CPACK_PACKAGE_VERSION ${PROJECT_VERSION}) # to include tweak part of version
 SET(CPACK_NSIS_MODIFY_PATH "ON")
 SET(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
 SET(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
@@ -483,14 +544,14 @@ SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel\\\\
 SET(CPACK_NSIS_CONTACT "matt.raykowski@gmail.com")
 
 ## Source Packages
-SET(CPACK_PACKAGE_FILE_NAME "ryzomcore-${NL_VERSION}")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "ryzomcore-${NL_VERSION}")
+# remove os part of file name
+SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 IF(WIN32)
   #SET(CPACK_GENERATOR "NSIS")
   SET(CPACK_GENERATOR "NSIS;ZIP")
   SET(CPACK_SOURCE_GENERATOR "ZIP")
 ELSE()
-  SET(CPACK_SET_DESTDIR TRUE)
   SET(CPACK_GENERATOR "TGZ;STGZ")
   SET(CPACK_SOURCE_GENERATOR "TGZ")
 ENDIF()

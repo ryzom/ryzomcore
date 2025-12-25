@@ -1,8 +1,9 @@
-FILE(GLOB SRC *.cpp *.h)
+ADD_EXECUTABLE(make_anim_by_race main.cpp)
 
-ADD_EXECUTABLE(make_anim_by_race ${SRC})
-
-TARGET_LINK_LIBRARIES(make_anim_by_race nelmisc)
+TARGET_LINK_LIBRARIES(make_anim_by_race
+        PRIVATE
+        NeL::misc
+)
 
 NL_DEFAULT_PROPS(make_anim_by_race "Ryzom, Tools, Misc: Make Anim By Race")
 NL_ADD_RUNTIME_FLAGS(make_anim_by_race)

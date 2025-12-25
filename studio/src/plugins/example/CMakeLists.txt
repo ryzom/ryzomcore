@@ -29,13 +29,13 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_example MODULE ${SRC} ${OVQT_PLUG_EXAMPLE_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_EXAMPLE_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_example studio_plugin_core nelmisc nel3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(studio_plugin_example studio_plugin_core NeL::misc NeL::3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
 
 NL_DEFAULT_PROPS(studio_plugin_example "Tools: Studio Plugin: Example")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_example)
 NL_ADD_LIB_SUFFIX(studio_plugin_example)
 
-ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_example PRIVATE QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 IF(WIN32)
   IF(WITH_INSTALL_LIBRARIES)

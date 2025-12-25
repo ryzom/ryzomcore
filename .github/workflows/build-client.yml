@@ -3,14 +3,26 @@ name: build client on multiple platforms
 on:
   push:
     branches: [ "core4", "feature/*" ]
-    paths-ignore:
-      - '.github/workflows/**.yml'
-      - '!.github/workflows/build-client.yml'
+    paths:
+      - .github/workflows/build-client.yml
+      # TODO use nel package instead
+      - nel/**
+      - ryzom/**
+      - cmake/**
+      - CMakeModules/**
+      - CMakeLists.txt
+      - CMakePresets.json
   pull_request:
     branches: [ "core4" ]
-    paths-ignore:
-      - '.github/workflows/**.yml'
-      - '!.github/workflows/build-client.yml'
+    paths:
+      - .github/workflows/build-client.yml
+      # TODO use nel package instead
+      - nel/**
+      - ryzom/**
+      - cmake/**
+      - CMakeModules/**
+      - CMakeLists.txt
+      - CMakePresets.json
 
 jobs:
   build:
@@ -21,27 +33,23 @@ jobs:
 
       matrix:
         os:
+         - ubuntu-24.04
          - ubuntu-22.04
-         - ubuntu-20.04
+         - windows-2025
          - windows-2022
-         - windows-2019
          - macos-13
-         - macos-12
         include:
           - os: windows-2022
             cmake_preset: windows-client
-          - os: windows-2019
+          - os: windows-2025
             cmake_preset: windows-client
           - os: ubuntu-22.04
             ubuntu_version: 22.04
             cmake_preset: linux-client
-          - os: ubuntu-20.04
-            ubuntu_version: 20.04
+          - os: ubuntu-24.04
+            ubuntu_version: 24.04
             cmake_preset: linux-client
           - os: macos-13
-            cmake_preset: macos-client
-            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
-          - os: macos-12
             cmake_preset: macos-client
             cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
 
@@ -82,12 +90,12 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
-    - uses: actions/cache/restore@v4.0.2
+    - uses: actions/cache/restore@v4
       with:
         path: ${{ steps.strings.outputs.hunter-dir }}
         key: ${{ matrix.os }}-hunter
 
-    - uses: actions/cache/restore@v4.0.2
+    - uses: actions/cache/restore@v4
       if: runner.os == 'Windows'
       with:
         path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
@@ -96,7 +104,7 @@ jobs:
     - name: Dependencies Windows
       if: runner.os == 'Windows'
       run: |
-        choco install directx-sdk
+        choco install directx-sdk nsis
 
     - uses: actions/cache/save@v4
       with:
@@ -105,7 +113,7 @@ jobs:
 
     - name: Configure CMake
       env:
-        MACOSX_DEPLOYMENT_TARGET: 10.12
+        MACOSX_DEPLOYMENT_TARGET: 10.13
       run: >
         cmake --preset ${{ matrix.cmake_preset }}
         ${{ matrix.cmake_options }}
@@ -121,7 +129,7 @@ jobs:
 
     - name: Build
       env:
-        MACOSX_DEPLOYMENT_TARGET: 10.12
+        MACOSX_DEPLOYMENT_TARGET: 10.13
       run: cmake --build --preset client
 
     - name: Package

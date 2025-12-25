@@ -4,12 +4,14 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(ai_build_wmap ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
+TARGET_INCLUDE_DIRECTORIES(ai_build_wmap PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ai_build_wmap
-					ryzom_gameshare
-					ryzom_aishare
-					nelmisc)
+        PRIVATE
+        ryzom_gameshare
+        ryzom_aishare
+        NeL::misc
+)
 
 NL_DEFAULT_PROPS(ai_build_wmap "Ryzom, Tools, Server: AI Build World Map")
 NL_ADD_RUNTIME_FLAGS(ai_build_wmap)

@@ -20,6 +20,7 @@
 #include "stdpch.h"
 #include "hoverpoints.h"
 
+#include <algorithm>
 #include <QApplication>
 
 #define printf
@@ -410,9 +411,9 @@ void HoverPoints::firePointChange()
 		}
 
 		if (m_sortType == XSort)
-			qSort(m_points.begin(), m_points.end(), x_less_than);
+			std::sort(m_points.begin(), m_points.end(), x_less_than);
 		else if (m_sortType == YSort)
-			qSort(m_points.begin(), m_points.end(), y_less_than);
+			std::sort(m_points.begin(), m_points.end(), y_less_than);
 
 		// Compensate for changed order...
 		if (m_currentIndex != -1)

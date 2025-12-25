@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
+RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel --remove ubuntu
 
 ARG USERNAME=ryzom
 ARG USER_UID=1000
@@ -7,8 +8,6 @@ ARG APP_HOME=/app
 
 RUN groupadd --gid $USER_GID $USERNAME \
  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
-
-ENV LD_LIBRARY_PATH=/usr/local/lib
 
 # install dependencies
 RUN apt update; \
@@ -28,12 +27,26 @@ RUN apt update; \
         libvorbisfile3 \
         libxml2
 
+RUN apt install --yes \
+        curl \
+        wget
 
-COPY build/ryzomcore-*.sh /tmp/ryzomcore.sh
+RUN curl --output /tmp/microsoft.deb https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb \
+ && dpkg --install /tmp/microsoft.deb \
+ && apt update \
+ && apt install --yes \
+    libmsquic
 
-RUN mkdir --parent "$APP_HOME" \
- && sh /tmp/ryzomcore.sh --skip-license
+COPY build/ryzomcore-*.sh /tmp/install.sh
 
+RUN mkdir --parent "$APP_HOME/ryzomcore" \
+ && sh /tmp/install.sh --skip-license --prefix="$APP_HOME/ryzomcore"
+
+ENV LD_LIBRARY_PATH=$APP_HOME/ryzomcore/lib
+ENV PATH=$APP_HOME/ryzomcore/sbin:$APP_HOME/ryzomcore/bin:$PATH
+
+RUN mkdir --parent "$APP_HOME/logs" \
+    && chown $USERNAME:$USERNAME "$APP_HOME/logs"
 
 USER $USERNAME
 WORKDIR $APP_HOME

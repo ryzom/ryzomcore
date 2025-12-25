@@ -4,13 +4,18 @@ on:
   push:
     branches: [ "core4", "feature/*" ]
     paths-ignore:
-      - '.github/workflows/**.yml'
+      - '.devcontainer/**'
+      - '.github/**.yml'
+      - 'snowballs2/**'
       - '!.github/workflows/cmake-multi-platform.yml'
   pull_request:
     branches: [ "core4" ]
     paths-ignore:
-      - '.github/workflows/**.yml'
+      - '.devcontainer/**'
+      - '.github/**.yml'
+      - 'snowballs2/**'
       - '!.github/workflows/cmake-multi-platform.yml'
+  workflow_dispatch:
 
 env:
   DEFAULT_BRANCH: core4
@@ -49,8 +54,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ ubuntu-22.04, ubuntu-20.04 ]
-        build_type: [ Release ]
+        os: [ ubuntu-22.04, ubuntu-24.04 ]
         build_preset: [ release ]
         c_compiler: [ gcc ]
         include:
@@ -58,10 +62,10 @@ jobs:
             c_compiler: gcc
             cpp_compiler: g++
             ubuntu_version: 22.04
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
             c_compiler: gcc
             cpp_compiler: g++
-            ubuntu_version: 20.04
+            ubuntu_version: 24.04
 
     steps:
       - uses: lukka/get-cmake@v3.29.5
@@ -112,7 +116,7 @@ jobs:
         run: ctest --preset default
 
       - uses: actions/upload-artifact@v4
-        if: (success() || failure()) && matrix.os == 'ubuntu-22.04'
+        if: (success() || failure()) && matrix.os == 'ubuntu-24.04'
         with:
           name: test-results
           if-no-files-found: error
@@ -139,7 +143,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: ubuntu-22.04-package
+          name: ubuntu-24.04-package
           path: ${{ needs.strings.outputs.build-output-dir }}
 
       - name: Build the Docker image

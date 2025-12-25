@@ -288,7 +288,6 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   # GUI toolkits
   ###
   OPTION(WITH_GTK                 "With GTK Support"                              OFF)
-  OPTION(WITH_QT                  "With Qt 4 Support"                             OFF)
   OPTION(WITH_QT5                 "With Qt 5 Support"                             OFF)
 
   IF(WIN32 AND MFC_FOUND)
@@ -320,7 +319,6 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
 
   OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            ON)
 
-  OPTION(WITH_MONGODB             "Compile server with MongoDB support"           ON)
   OPTION(WITH_PATCHMAN_SERVICE    "Compile Ryzom server patchman service"         OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
@@ -357,6 +355,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_NEL_MAXPLUGIN       "Build NeL 3dsMax Plugin"                       OFF)
   OPTION(WITH_NEL_SAMPLES         "Build NeL Samples"                             ON )
   OPTION(WITH_NEL_TESTS           "Build NeL Unit Tests"                          ON )
+  OPTION(WITH_TESTING             "Build Tests"                                   ON )
 
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)

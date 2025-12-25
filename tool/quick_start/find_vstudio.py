@@ -141,12 +141,13 @@ for vs in list(FoundVisualStudio):
 		for dir in os.listdir(toolsPath):
 			if "." in dir and not dir.startswith("."):
 				versions[dir] = True
+	bvremap = [ 0, 1, 2, 3, 3 ]
 	highest = [ 0, 0, 0, 0 ]
 	found = [ "14.0", "14.16", "14.29", "14.30" ]
 	for v in versions:
 		spl = v.split(".")
 		if spl[0] == "14":
-			bv = int(spl[1][0])
+			bv = bvremap[int(spl[1][0])]
 			sub = int(spl[1])
 			if sub > highest[bv]:
 				highest[bv] = sub

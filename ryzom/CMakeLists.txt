@@ -1,3 +1,9 @@
+cmake_minimum_required(VERSION 3.27)
+
+project(Ryzom VERSION ${RyzomCore_VERSION} LANGUAGES CXX)
+
+find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS misc net ligo georges 3d gui sound sevenzip pacs)
+
 #-----------------------------------------------------------------------------
 #Platform specifics
 

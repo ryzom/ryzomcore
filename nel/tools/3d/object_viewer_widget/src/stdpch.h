@@ -32,14 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QtCore>
 #include <QtGui/QtGui>
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-#define USE_QT5
-#endif
-
-#ifdef USE_QT5
 #include <QtWidgets/QtWidgets>
 #include <QtConcurrent/QtConcurrent>
-#endif
 
 #include <map>
 #include <memory>

@@ -1,0 +1,26 @@
+name: build
+description: build
+inputs:
+  build-dir:
+    description: build directory
+    required: true
+  build-version:
+    description: build version
+    required: true
+  image-group:
+    description: image group
+    required: true
+  image-version:
+    description: image version
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Build Docker image
+      shell: bash
+      run: |
+        mkdir --parents ${{ inputs.build-dir }}/web
+        IMAGE_TAG="${{ inputs.image-group }}/ryzomcore-web:${{ inputs.image-version }}"
+        docker build web --tag "${IMAGE_TAG}"
+        docker save --output=${{ inputs.build-dir }}/web/web-docker-${{ inputs.build-version }}.tar "${IMAGE_TAG}"
+
