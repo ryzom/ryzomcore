@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel --remove ubuntu
 
-RUN apt update; \
+RUN apt update && \
     DEBIAN_FRONTEND=noninteractive \
     apt install --yes \
         autoconf \
@@ -52,7 +52,8 @@ RUN apt install --yes \
         git \
         graphviz \
         libxrandr-dev \
-        wget
+        wget \
+        sudo
 
 
 # work arround as there is no debug version available

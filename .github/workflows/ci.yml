@@ -123,6 +123,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-24.04 ]
+        cmake-options: ["-DWITH_STATIC=ON", "-DWITH_STATIC=OFF"]
     steps:
       - uses: actions/checkout@v4
 
@@ -142,6 +143,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           os: ${{ matrix.os }}
+          cmake-options: ${{ matrix.cmake-options }}
           install-dir: ${{ needs.strings.outputs.install-dir }}
           image-group: ${{ needs.strings.outputs.image-group }}
           image-version: ${{ needs.strings.outputs.image-version }}
