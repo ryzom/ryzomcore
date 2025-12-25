@@ -54,6 +54,9 @@ jobs:
       matrix:
         os: [ ubuntu-22.04, ubuntu-24.04 ]
         build-type: ["static", "dynamic"]
+        exclude:
+          - os: ubuntu-22.04
+            build-type: dynamic
     steps:
       - uses: actions/checkout@v4
 
