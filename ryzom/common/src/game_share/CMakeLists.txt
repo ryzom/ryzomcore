@@ -36,7 +36,7 @@ LIST(REMOVE_ITEM HEADER ${CMAKE_CURRENT_SOURCE_DIR}/enum_template.h)
 
 NL_TARGET_LIB(ryzom_gameshare ${HEADER} ${PRIV_TIME_H} ${SRC} ${SRC_TIME} ${R2})
 
-TARGET_INCLUDE_DIRECTORIES(ryzom_gameshare PRIVATE ${ZLIB_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_gameshare PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_gameshare
 		PUBLIC
@@ -44,8 +44,8 @@ TARGET_LINK_LIBRARIES(ryzom_gameshare
 		NeL::net
 		NeL::ligo
 		NeL::georges
-		#PRIVATE
-		#ZLIB::ZLIB
+		PRIVATE
+		ZLIB::ZLIB
 )
 
 NL_DEFAULT_PROPS(ryzom_gameshare "Ryzom, Library: Game Share")
