@@ -1861,6 +1861,8 @@ NLMISC_COMMAND(getPvpPoints, "get pvp points of player (if quantity, give/take/s
 	}
 
 	log.displayNL("%u", points);
+
+	return true;
 }
 
 
