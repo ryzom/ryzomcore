@@ -9098,6 +9098,8 @@ NLMISC_COMMAND(openTargetApp, "open target app", "<user_id>")
 	{
 		c->sendUrl(creature->getWebPage());
 	}
+
+	return true;
 }
 
 //----------------------------------------------------------------------------
@@ -9116,6 +9118,8 @@ NLMISC_COMMAND(openTargetUrl, "Open target url", "<user_id> [bullying]")
 		c->sendUrl("app_arcc action=mScript_Run&script_name=TalkNpc&bullying=1&command=reset_all");
 	else
 		c->sendUrl("app_arcc action=mScript_Run&script_name=TalkNpc&command=reset_all");
+
+	return true;
 }
 
 
