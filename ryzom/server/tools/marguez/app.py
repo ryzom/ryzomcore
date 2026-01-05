@@ -27,6 +27,7 @@ import select
 import asyncio
 import importlib
 import subprocess
+import configparser
 import requests_openapi
 
 from .lib.infos_panel import InfosPanel
@@ -143,10 +144,14 @@ class Marguez(App):
 				self.is_web = True
 
 	def register(self, shard_path, dagu_path):
+		self.config = configparser.ConfigParser()
+		self.config.read("/etc/ryzom/shard.ini")
 		self.shard_path = shard_path
 		self.dagu_path = dagu_path
 		self.dagu_client = requests_openapi.Client().load_spec_from_file(shard_path+"/tools/dagu_api.yaml")
-		self.dagu_client.set_server(requests_openapi.Server(url="http://gingo.ryzom.com:9888/api/v2"))
+		self.shard = self.config["shard"]["name"]
+		self.hostname = self.config["shard"]["hostname"]
+		self.dagu_client.set_server(requests_openapi.Server(url="http://"+self.hostname+":9888/api/v2"))
 		self.client = Client("localhost", serde=serde.pickle_serde)
 		self.services = {}
 		self.services_status = {}
@@ -489,7 +494,7 @@ class Marguez(App):
 		self.refresh_bindings() 
 	
 	def action_restart(self):
-		self.app.open_url("http://gingo.ryzom.com", new_tab=False)
+		self.app.open_url("http://"+self.hostname, new_tab=False)
 		self.exit()
 
 	def action_logs(self):

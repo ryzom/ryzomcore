@@ -81,7 +81,10 @@ class ZulipDispatcher(ZulipService):
 			"queue_id": self.getZulipQueueId(),
 		}
 		print("Send message to Zulip", request)
-		result = self.zulip.send_message(request)
+		try:
+			result = self.zulip.send_message(request)
+		except Exception as e:
+			print("Error sending message", e)
 		print("Result:", result)
 		if result["result"] == "success":
 			return result["id"]
@@ -90,20 +93,22 @@ class ZulipDispatcher(ZulipService):
 		return None
 
 	def sendTranslation(self, message_id, m):
-		print(m.output(), m.source_lang)
 		if message_id > 0 and m.translation and m.source_lang:
+			print(m.output(), m.source_lang)
 			# Normalize Zulip-style upload markdown in translation as well
 			clean_translation = self.convert_zulip_upload_links(m.translation)
 			request = {
 				"message_id": message_id,
 				"content": "<["+m.translated_lang+"]>"+flags[m.source_lang]+" "+(clean_translation if clean_translation is not None else ""),
 			}
-			result = self.zulip.update_message(request)
-			print("Sent translation to Zulip", request, result)
-			return True
-			return result["result"] == "success"
-		else:
-			return True
+			try:
+				result = self.zulip.update_message(request)
+			except Exception as e:
+				print("Error update message", e)
+				return False
+			else:
+				print("Sent translation to Zulip", request, result)
+		return True
 
 	def run(self):
 		last_ids = {}
@@ -112,10 +117,11 @@ class ZulipDispatcher(ZulipService):
 			last_ids[lang] = self.getLastChatLangID(lang)
 			print(lang, last_ids[lang])
 
+		chat_id = self.getLastChatID()
+		print("chat id", chat_id)
 		while True:
 			chat_id = self.getLastChatID()
 			if last_ids[lang]+1 < chat_id+1:
-				#print("chat_id", chat_id)
 				for lang in ALL_LANGS:
 					#print(lang, "{} -> {}".format(last_ids[lang]+1, chat_id+1))
 					for i in range(last_ids[lang]+1, chat_id+1):
@@ -152,6 +158,8 @@ class ZulipDispatcher(ZulipService):
 									result = self.sendTranslation(int(message_id), message)
 								else:
 									result = True
+						else:
+							result = True
 
 						if result:
 							last_ids[lang] = i
