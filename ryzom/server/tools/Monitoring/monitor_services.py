@@ -50,13 +50,16 @@ class MonitorServices():
 		icons = {"?": "⛔️", "ds_closed" : "🚷", "ds_dev" : "♻️", "ds_restricted" : "🕵🏽", "ds_open" : "✅", "started" : "✅", "ds_start" : "🚀", "starting" : "🚀", "shard_stoppped" : "😵", "slow" : "🥵", "WaitingMirrorReady" : "🚀", "Online" : "✅", "ReadWrite" : "✅", "Mapping names": "🚀", "Open" : "✅", "stopped" : "😵️"}
 
 		name = ""
+		server_open_status = ""
 		while(True):
 			if time.time() - last_ras_update > 1:
 				updates += 1
 
 				with open("/home/nevrax/www/login/server_open_status", "r") as f:
-					server_open_status = f.read().strip()
-					print("Server Open Status =", server_open_status)
+					new_open_status = f.read().strip()
+					if server_open_status != new_open_status:
+						print("Server Open Status =", new_open_status)
+					server_open_status = new_open_status
 
 				if not self.ryzomAsStatus:
 					print("RAS not connected")
@@ -124,6 +127,7 @@ class MonitorServices():
 			time.sleep(0.01)
 
 if __name__ == "__main__":
+	print("Start Monitoring Ryzom Services...")
 	service = MonitorServices()
 	service.run()
 
