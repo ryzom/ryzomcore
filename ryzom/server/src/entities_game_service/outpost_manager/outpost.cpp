@@ -819,7 +819,8 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 
 	nlassert( attackerGuild->getId() != 0 );
 
-	if (!attackerGuild->canAddOutpost())
+
+	if ((getName().substr(0, 14) != "outpost_nexus_") && !attackerGuild->canAddOutpost())
 		return COutpost::TooManyGuildOutposts;
 
 	// validate guild attacker
