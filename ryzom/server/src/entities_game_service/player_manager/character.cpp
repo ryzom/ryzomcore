@@ -382,6 +382,7 @@ CCharacter::CCharacter()
 	//	_CarriedWeight = 0;
 	_GuildId = 0;
 	_LastGuildId = 0;
+	_GuildEnterEra = 0;
 	_GuildEnterTime = 0;
 	_UseFactionSymbol = false;
 	_SavedVersion = 0;
@@ -715,6 +716,7 @@ void CCharacter::clear()
 	_GuildId = 0;
 	_LastGuildId = 0;
 	_GuildEnterTime = 0;
+	_GuildEnterEra = 0;
 	_CreationPointsRepartition = 0;
 	_ForbidAuraUseStartDate = 0;
 	_ForbidAuraUseEndDate = 0;
@@ -21624,10 +21626,15 @@ void CCharacter::outpostSideChosen(bool neutral, OUTPOSTENUMS::TPVPSide side)
 			if (outpost->getName().substr(0, 14) != "outpost_nexus_")
 			{
 				CGuildMember* member = guild->getMemberFromEId(_Id);
-				if (member != NULL && ((CTickEventHandler::getGameCycle() - member->getEnterTime()) / (86400/CTickEventHandler::getGameTimeStep())) < OutpostDaysForGvX.get())
+				if (member != NULL)
 				{
-					side = OUTPOSTENUMS::UnknownPVPSide;
-					nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+					nlinfo("Check Need days = 21, %"NL_I64"u, %"NL_I64"u", NLMISC::CTime::getSeconds64bSince1970(), member->getRealEnterTimestamp());
+					if (((NLMISC::CTime::getSeconds64bSince1970() - member->getRealEnterTimestamp()) / 86400) < OutpostDaysForGvX.get())
+					{
+						side = OUTPOSTENUMS::UnknownPVPSide;
+						nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+						sendDynamicSystemMessage(_EntityRowId, "OUTPOST_CANT_PARTICIPATE_21DAYS");
+					}
 				}
 			}
 

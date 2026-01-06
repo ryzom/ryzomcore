@@ -21,6 +21,7 @@
 #ifndef CHARACTER_INLINES_H
 #define CHARACTER_INLINES_H
 
+extern NLMISC::CVariable<uint32> CurrentEra;
 
 //------------------------------------------------------------------------------
 
@@ -851,9 +852,15 @@ inline NLMISC::TGameCycle CCharacter::getGuildEnterTime() const
 	return _GuildEnterTime;
 }
 
+inline NLMISC::TGameCycle CCharacter::getGuildEnterEra() const
+{
+	return _GuildEnterEra;
+}
+
 inline void CCharacter::setGuildEnterTime(NLMISC::TGameCycle time)
 {
 	_GuildEnterTime = time;
+	_GuildEnterEra = CurrentEra;
 }
 
 

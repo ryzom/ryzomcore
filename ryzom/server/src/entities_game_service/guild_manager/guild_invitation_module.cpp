@@ -100,8 +100,9 @@ void CGuildInvitationModule::accept()
 		if (c->getLastGuildId() == guild->getId())
 		{
 			NLMISC::TGameCycle enterTime = c->getGuildEnterTime();
-			nlinfo("back to guild and use last enter time: %u", enterTime);
-			memberCore = _Invitation->getGuild()->newMember(proxy.getId(), enterTime);
+			uint32 enterEra = c->getGuildEnterEra();
+			nlinfo("back to guild and use last enter time: %u %u", enterTime, enterEra);
+			memberCore = _Invitation->getGuild()->newMember(proxy.getId(), enterTime, enterEra);
 		}
 	}
 

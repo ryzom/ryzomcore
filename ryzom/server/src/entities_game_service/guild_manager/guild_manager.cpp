@@ -446,6 +446,7 @@ CGuild *CGuildManager::createGuildProxy(uint32 guildId, const ucstring & guildNa
 //	guild->setVillage(place);
 	guild->setRace(race);
 	guild->setCreationDate( creationDate);
+	guild->setCreationEra( CurrentEra);
 
 //	for ( uint i = 0; i < EGSPD::CSPType::EndSPType; i++ )
 //	{
@@ -825,6 +826,7 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 //	guild->setVillage(place);
 	guild->setRace(bot->getRace());
 	guild->setCreationDate( CTickEventHandler::getGameCycle() );
+	guild->setCreationEra( CurrentEra );
 
 //	for ( uint i = 0; i < EGSPD::CSPType::EndSPType; i++ )
 //	{
@@ -851,6 +853,7 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 //	guild->incGradeCount( EGSPD::CGuildGrade::Leader );
 	nlassert( memberCore );
 	memberCore->setEnterTime( CTickEventHandler::getGameCycle() );
+	memberCore->setEnterEra( CurrentEra );
 	STOP_IF(!guild->setMemberGrade(memberCore, EGSPD::CGuildGrade::Leader), "Failed to set grade to leader for new guild"<<guildId<<" creator "<<character->getId().toString());
 //	memberCore->setMemberGrade( EGSPD::CGuildGrade::Leader );
 
@@ -1003,7 +1006,7 @@ void CGuildManager::characterDeleted( CCharacter & user )
 			// check if the current member is the successor
 			if ( successor == NULL ||
 				member->getGrade() < successor->getGrade() ||
-				( member->getGrade() == successor->getGrade() && member->getEnterTime() < successor->getEnterTime() ) )
+				( member->getGrade() == successor->getGrade() && member->getRealEnterTime() < successor->getRealEnterTime() ) )
 			{
 				successor = member;
 			}

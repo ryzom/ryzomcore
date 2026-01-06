@@ -112,6 +112,7 @@ void CGuildMemberModule::quitGuild()
 	proxy.cancelAFK();
 	clearOnlineGuildProperties();
 	uint32 enterTime = _GuildMemberCore->getEnterTime();
+	uint32 enterEra = _GuildMemberCore->getEnterEra();
 	guild->deleteMember( _GuildMemberCore );
 	if ( guild->getMembersBegin() == guild->getMembersEnd() )
 	{
