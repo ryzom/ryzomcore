@@ -103,6 +103,9 @@ CVariable<uint32>			FameMemoryInterpolation("egs","FameMemoryInterpolation", "Gu
 // fame trend reset delay.
 CVariable<uint32>			FameTrendResetDelay("egs","FameTrendResetDelay", "Guild fame trend reset delay in ticks", 18000, 0, true );
 
+CVariable<uint32> CurrentEra("egs", "CurrentEra", "current Era used by creation_date and enter_time", 1, 0, true);
+
+
 CVariable<uint32> AutoSpawnForageSourcePeriodOverride(
     "egs",
 	"AutoSpawnForageSourcePeriodOverride",
