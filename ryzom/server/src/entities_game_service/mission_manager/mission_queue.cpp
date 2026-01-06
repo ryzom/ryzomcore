@@ -155,7 +155,7 @@ void CMissionQueue::removePlayer(const NLMISC::CEntityId &id)
 			break;
 		}
 	}
-	
+
 	//decrease the position of remaining players
 	for ( ; it != _Entities.end() ; ++it)
 	{
@@ -163,7 +163,7 @@ void CMissionQueue::removePlayer(const NLMISC::CEntityId &id)
 
 		if (wasOnline && wasAwake)
 			--(*it).PositionOnline;
-	
+
 		if ( (*it).Mission != NULL )
 			(*it).Mission->updateUsersJournalEntry();
 	}
@@ -195,7 +195,7 @@ void CMissionQueue::removePlayer(const NLMISC::CEntityId &id)
 				return;
 			}
 			msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
-			CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(id.getDynamicId()), msgout );			
+			CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(id.getDynamicId()), msgout );
 		}
 	}
 
@@ -214,7 +214,7 @@ void CMissionQueue::disconnectPlayer(const NLMISC::CEntityId &id)
 			break;
 		}
 	}
-	
+
 	//decrease the online position of remaining players
 	if ( it != _Entities.end() && (*it).Awake )
 		changeNbOnlineWaiters( ++it, false);
@@ -264,7 +264,7 @@ void CMissionQueue::tickUpdate()
 				}
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(_AskedEntityId.getDynamicId()), msgout );
-				
+
 				//
 				CCharacter *character = PlayerManager.getChar(_AskedEntityId);
 				if (character)
@@ -299,7 +299,7 @@ void CMissionQueue::tickUpdate()
 				{
 					nlwarning("Failed to find player character %s", _AskedEntityId.toString().c_str());
 				}
-				
+
 				break;
 			}
 		}
@@ -328,7 +328,7 @@ void CMissionQueue::tickUpdate()
 		}
 
 		_AskedEntityId = CEntityId::Unknown;
-		
+
 		playerLeavesCriticalArea();
 	}
 
@@ -372,7 +372,7 @@ void CMissionQueue::tickUpdate()
 					nlwarning( "mission %u  has a NULL instance (index %u) ", _MissionAlias, i);
 			}
 		}
-			
+
 		// get next entity in queue
 		playerLeavesCriticalArea();
 	}
@@ -416,14 +416,14 @@ void CMissionQueue::addPlayer( const NLMISC::CEntityId &id, CMission *mission, b
 			else if (mission)
 			{
 				string prefix;
-				
+
 				if ( templ->Type  == MISSION_DESC::Solo )
 //					prefix = "";
 					CBankAccessor_PLR::getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, ((*it).Awake?0:1));
 				else //if ( templ->Type  == MISSION_DESC::Group )
 //					prefix = "GROUP:";
 					CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, ((*it).Awake?0:1));
-					
+
 //				player->_PropertyDatabase.setProp( toString("%sMISSIONS:%u:SLEEP",prefix.c_str(),mission->getClientIndex()), ((*it).Awake?0:1) );
 			}
 
@@ -432,7 +432,7 @@ void CMissionQueue::addPlayer( const NLMISC::CEntityId &id, CMission *mission, b
 			(*it).PositionOnline = nbOnline;
 			(*it).Position = nbTotal;
 			(*it).Mission = mission;
-						
+
 			if (forceTopOfQueue)
 			{
 				_Entities.push_front(*it);
@@ -442,10 +442,10 @@ void CMissionQueue::addPlayer( const NLMISC::CEntityId &id, CMission *mission, b
 			//increase the online position of remaining players
 			if ( (*it).Awake )
 				changeNbOnlineWaiters( ++it, true);
-				
+
 			return;
 		}
-	
+
 		if ((*it).Online && (*it).Awake)
 			++nbOnline;
 
@@ -467,14 +467,14 @@ void CMissionQueue::addPlayer( const NLMISC::CEntityId &id, CMission *mission, b
 	else if (mission)
 	{
 		string prefix;
-		
+
 		if ( templ->Type  == MISSION_DESC::Solo )
 //			prefix = "";
 			CBankAccessor_PLR::getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, 0);
 		else //if ( templ->Type  == MISSION_DESC::Group )
 //			prefix = "GROUP:";
 			CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, 0);
-		
+
 //		player->_PropertyDatabase.setProp( toString("%sMISSIONS:%u:SLEEP",prefix.c_str(),mission->getClientIndex()), 0);
 	}
 
@@ -538,7 +538,7 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 			{
 				--(*it).Position;
 				--(*it).PositionOnline;
-	
+
 				if ( (*it).Mission != NULL )
 					(*it).Mission->updateUsersJournalEntry();
 			}
@@ -562,7 +562,7 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 		}
 
 		//remove entry
-		_Entities.erase(itPlayerCritical);		
+		_Entities.erase(itPlayerCritical);
 	}
 	else
 	{
@@ -575,7 +575,7 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 				(*it).Awake = false;
 				mission = (*it).Mission;
 				BOMB_IF(mission == NULL, "mission == NULL, should not happen",;);
-				// indicate to player he is now in sleep mode		
+				// indicate to player he is now in sleep mode
 				if (mission && player)
 				{
 //					string prefix;
@@ -585,7 +585,7 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 					else //if ( templ->Type  == MISSION_DESC::Group )
 //						prefix = "GROUP:";
 						CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, 1);
-						
+
 //					if (player)
 //					{
 //						player->_PropertyDatabase.setProp( toString("%sMISSIONS:%u:SLEEP",prefix.c_str(),mission->getClientIndex()), 1);
@@ -598,18 +598,18 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 				break;
 			}
 		}
-		
+
 		// send player a message
 		if (mission != NULL)
 		{
 			const TDataSetRow rowId = TheDataset.getDataSetRow(_AskedEntityId);
 			const TDataSetRow giverRow = TheDataset.getDataSetRow( CAIAliasTranslator::getInstance()->getEntityId( mission->getGiver() ) );
-			
+
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::dyn_string_id);
 			params[0].StringId = templ->sendTitleText(rowId, giverRow);
 			CCharacter::sendDynamicSystemMessage( _AskedEntityId, "MISSION_ENTER_CRITITAL_PART_DECLINE" ,params );
 		}
-		
+
 		playerLeavesCriticalArea();
 	}
 }
@@ -649,7 +649,7 @@ void CMissionQueue::playerLeavesCriticalArea()
 		{
 			const TDataSetRow rowId = TheDataset.getDataSetRow(_AskedEntityId);
 			const TDataSetRow giverRow = TheDataset.getDataSetRow( CAIAliasTranslator::getInstance()->getEntityId( nextEntity.Mission->getGiver() ) );
-						
+
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::dyn_string_id);
 			params[0].StringId = templ->sendTitleText(rowId, giverRow);
 
@@ -690,7 +690,7 @@ const CWaitingEntity &CMissionQueue::getNextCandidateInQueue() const
 {
 	if (_Entities.empty())
 		return CWaitingEntity::Unknown;
-	
+
 	for ( list<CWaitingEntity>::const_iterator it = _Entities.begin() ; it != _Entities.end() ; ++it)
 	{
 		if ( (*it).Online && (*it).Awake )
@@ -739,7 +739,7 @@ void CMissionQueue::changePlayerAwakeState(const NLMISC::CEntityId &id, bool wak
 				return;
 
 			(*it).Awake = wakeUp;
-			
+
 			CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(_MissionAlias);
 			if (!templ)
 			{
@@ -748,7 +748,7 @@ void CMissionQueue::changePlayerAwakeState(const NLMISC::CEntityId &id, bool wak
 			else if ((*it).Mission != NULL)
 			{
 //				string prefix;
-				
+
 				CCharacter *character = PlayerManager.getChar(id);
 				if (character)
 				{
@@ -758,7 +758,7 @@ void CMissionQueue::changePlayerAwakeState(const NLMISC::CEntityId &id, bool wak
 					else //if ( templ->Type  == MISSION_DESC::Group )
 //						prefix = "GROUP:";
 						CBankAccessor_PLR::getGROUP().getMISSIONS().getArray((*it).Mission->getClientIndex()).setSLEEP(character->_PropertyDatabase, (wakeUp?0:1));
-					
+
 //					CCharacter *character = PlayerManager.getChar(id);
 //					if (character)
 //					{
@@ -805,7 +805,7 @@ bool CMissionQueue::getPlayerPositions(const NLMISC::CEntityId &id, uint16 &posi
 
 			position = (*it).Position;
 			onlinePosition = (*it).PositionOnline;
-			
+
 			return true;
 		}
 	}
@@ -818,13 +818,13 @@ void CMissionQueue::dump()
 {
 	nlinfo("Queue name = %s, Id = %u", _QueueName.c_str(), _QueueId);
 	nlinfo("\tsize = %u",_Entities.size());
-	
+
 	for ( list<CWaitingEntity>::iterator it = _Entities.begin() ; it != _Entities.end() ; ++it)
 	{
 		nlinfo("\tPlayer %s, awake = %u, online = %u, position = %u", (*it).Id.toString().c_str(), uint((*it).Awake), uint((*it).Online),(*it).Position );
 	}
 	nlinfo("\n");
-}	
+}
 
 // ----------------------------------------------------------------------------
 // If the following macro is defined then the macros such as PERSISTENT_CLASS, PERSISTENT_DATA, PERSISTENT_PRE_STORE, etc
@@ -859,22 +859,22 @@ void CMissionQueue::dump()
 
 #define PERSISTENT_PRE_STORE\
 	H_AUTO(CMissionQueueStore);\
-	
+
 #define PERSISTENT_PRE_APPLY\
 	H_AUTO(CMissionQueueApply);\
 
 #define PERSISTENT_POST_APPLY\
 	postApply();\
-	
+
 #define PERSISTENT_DATA\
 	PROP(string, _QueueName)\
 	PROP(uint32, _QueueId)\
 	PROP(uint16, _CreateQueueStepIndex)\
-	PROP_GAME_CYCLE_COMP(_MaxTimeInCriticalPart)\
+	PROP_GAME_CYCLE_OR_0(_MaxTimeInCriticalPart)\
 	PROP(TAIAlias, _MissionAlias)\
 	PROP(CEntityId, _CriticalPartEntityId)\
 	STRUCT_LIST(CWaitingEntity,_Entities)\
 	PROP_VECT(CEntityId, _PlayersToRollBackInSteps)\
-	
+
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

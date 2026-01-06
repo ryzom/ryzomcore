@@ -125,6 +125,18 @@ void							CGuildPD::setVersion(uint32 __v, bool forceWrite)
 	}
 	_Version = __v;
 }
+uint32							CGuildPD::getCreationEra() const
+{
+	return _CreationEra;
+}
+void							CGuildPD::setCreationEra(uint32 __v, bool forceWrite)
+{
+	if ((_CreationEra != __v) || forceWrite)
+	{
+		PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(9), __v);
+	}
+	_CreationEra = __v;
+}
 CGuildMemberPD*					CGuildPD::getMembers(const TCharacterId& __k)
 {
 	std::map<TCharacterId, CGuildMemberPD*>::iterator _it = _Members.find(__k);
@@ -232,6 +244,8 @@ void							CGuildPD::clear()
 	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(7), 0);
 	_Version = 0;
 	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(8), 0);
+	_CreationEra = 0;
+	PDSLib.set(4, __BaseRow, (RY_PDS::TColumnIndex)(9), 0);
 	for (std::map<TCharacterId, CGuildMemberPD*>::iterator __it=_Members.begin(); __it!=_Members.end(); )
 	{
 		std::map<TCharacterId, CGuildMemberPD*>::iterator __itr=__it++;
@@ -280,6 +294,7 @@ void							CGuildPD::apply(CPersistentDataRecord &__pdr)
 	uint16	__TokIcon = __pdr.addString("Icon");
 	uint16	__TokBuilding = __pdr.addString("Building");
 	uint16	__TokVersion = __pdr.addString("Version");
+	uint16	__TokCreationEra = __pdr.addString("CreationEra");
 	uint16	__TokMembers = __pdr.addString("Members");
 	uint16	__TokFameContainer = __pdr.addString("FameContainer");
 	_Parent = NULL;
@@ -325,6 +340,10 @@ void							CGuildPD::apply(CPersistentDataRecord &__pdr)
 		else if (__pdr.peekNextToken() == __TokVersion)
 		{
 			__pdr.pop(__TokVersion, _Version);
+		}
+		else if (__pdr.peekNextToken() == __TokCreationEra)
+		{
+			__pdr.pop(__TokCreationEra, _CreationEra);
 		}
 		// apply Members
 		else if (__pdr.peekNextToken() == __TokMembers)
@@ -408,6 +427,7 @@ void							CGuildPD::store(CPersistentDataRecord &__pdr) const
 	uint16	__TokIcon = __pdr.addString("Icon");
 	uint16	__TokBuilding = __pdr.addString("Building");
 	uint16	__TokVersion = __pdr.addString("Version");
+	uint16	__TokCreationEra = __pdr.addString("CreationEra");
 	uint16	__TokMembers = __pdr.addString("Members");
 	uint16	__TokFameContainer = __pdr.addString("FameContainer");
 	__pdr.push(__TokId, _Id);
@@ -422,6 +442,7 @@ void							CGuildPD::store(CPersistentDataRecord &__pdr) const
 	__pdr.push(__TokIcon, _Icon);
 	__pdr.push(__TokBuilding, _Building);
 	__pdr.push(__TokVersion, _Version);
+	__pdr.push(__TokCreationEra, _CreationEra);
 	// store Members
 	__pdr.pushStructBegin(__TokMembers);
 	for (std::map<TCharacterId, CGuildMemberPD*>::const_iterator it=_Members.begin(); it!=_Members.end(); ++it)
@@ -470,6 +491,7 @@ void							CGuildPD::pds__init(const TGuildId &Id)
 	_Icon = (uint64)0;
 	_Building = 0;
 	_Version = 0;
+	_CreationEra = 0;
 	_FameContainer = NULL;
 	_Parent = NULL;
 }
@@ -504,6 +526,7 @@ void							CGuildPD::pds__fetch(RY_PDS::CPData &data)
 	data.serial(_Icon);
 	data.serial(_Building);
 	data.serial(_Version);
+	data.serial(_CreationEra);
 	RY_PDS::TTableIndex	tableIndex;
 	RY_PDS::TRowIndex	rowIndex;
 	do

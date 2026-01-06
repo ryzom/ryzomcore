@@ -175,73 +175,108 @@
 #define PERSISTENT_GAME_CYCLE_INLINE_DEFINED
 #include "tick_event_handler.h"
 #include "nel/misc/hierarchical_timer.h"
-inline uint32 saveGameCycleToSecond(NLMISC::TGameCycle tick)
-{
-    // Evaluate the UTC of this event (with the current date of save). Suppose that 1 second==10 tick
-    // NB: result should be positive since no event should have been launched before 1970!
-    if (tick < CTickEventHandler::getGameCycle())
-    {
-        NLMISC::TGameCycle tick_dt = CTickEventHandler::getGameCycle() - tick;
-        uint32 s_dt = tick_dt / 10;
-        return NLMISC::CTime::getSecondsSince1970() - s_dt;
-    }
-    else
-    {
-        NLMISC::TGameCycle tick_dt = tick - CTickEventHandler::getGameCycle();
-        uint32 s_dt = tick_dt / 10;
-        return NLMISC::CTime::getSecondsSince1970() + s_dt;
-    }
-}
-inline NLMISC::TGameCycle loadSecondToGameCycle(uint32 second)
-{
-    if (second < NLMISC::CTime::getSecondsSince1970())
-    {
-        uint32 s_dt = NLMISC::CTime::getSecondsSince1970() - second;
-        NLMISC::TGameCycle tick_dt = s_dt * 10;
-        return CTickEventHandler::getGameCycle() - tick_dt;
-    }
-    else
-    {
-        uint32 s_dt = second - NLMISC::CTime::getSecondsSince1970();
-        NLMISC::TGameCycle tick_dt = s_dt * 10;
-        return CTickEventHandler::getGameCycle() + tick_dt;
-    }
-}
 
-/*inline uint32 saveGameCycleToSecond(NLMISC::TGameCycle tick)
+inline uint64 saveGameCycleToSecond(NLMISC::TGameCycle tick)
 {
-	sint32 dt = CTickEventHandler::getGameCycle() - tick;
-
-
 	// Evaluate the UTC of this event (with the current date of save). Suppose that 1 second==10 tick
-	if (tick < CTickEventHandler::getGameCycle())
-		return NLMISC::CTime::getSecondsSince1970();
-	else
-		return  NLMISC::CTime::getSecondsSince1970() + (tick - CTickEventHandler::getGameCycle())/10;
 	// NB: result should be positive since no event should have been launched before 1970!
+	if (tick < CTickEventHandler::getGameCycle())
+	{
+		NLMISC::TGameCycle tick_dt = CTickEventHandler::getGameCycle() - tick;
+		uint32 s_dt = tick_dt / 10;
+		return NLMISC::CTime::getSeconds64bSince1970() - s_dt;
+	}
+	else
+	{
+		NLMISC::TGameCycle tick_dt = tick - CTickEventHandler::getGameCycle();
+		uint32 s_dt = tick_dt / 10;
+		return NLMISC::CTime::getSeconds64bSince1970() + s_dt;
+	}
 }
 
-inline NLMISC::TGameCycle loadSecondToGameCycle(uint32 second)
+inline NLMISC::TGameCycle loadSecondToGameCycle(uint64 second, bool default_to_zero=true)
 {
-	if (second < NLMISC::CTime::getSecondsSince1970())
-		return 0;
-	
-	// Convert UTC of the event to game cycle. Suppose that 1 second==10 tick
-	return CTickEventHandler::getGameCycle() + (second - NLMISC::CTime::getSecondsSince1970())*10;
-}*/
+	if (second < NLMISC::CTime::getSeconds64bSince1970())
+	{
+		if (NLMISC::CTime::getSeconds64bSince1970() - second < 0xFFFFFFFF)
+		{
+			uint32 s_dt = static_cast<uint32>(NLMISC::CTime::getSeconds64bSince1970() - second);
+			NLMISC::TGameCycle tick_dt = s_dt * 10;
+			if (CTickEventHandler::getGameCycle() - tick_dt <= CTickEventHandler::getGameCycle())
+			{
+				return CTickEventHandler::getGameCycle() - tick_dt;
+			}
+		}
+		if (default_to_zero)
+		{
+			return 0;
+		} else {
+			return CTickEventHandler::getGameCycle();
+		}
+	}
+	else
+	{
+		uint32 s_dt = 0;
+		if (second - NLMISC::CTime::getSeconds64bSince1970() < 0xFFFFFFFF) {
+			s_dt = second - NLMISC::CTime::getSeconds64bSince1970();
+		}
+		NLMISC::TGameCycle tick_dt = s_dt * 10;
+		if (CTickEventHandler::getGameCycle() + tick_dt >= CTickEventHandler::getGameCycle()) {
+			return CTickEventHandler::getGameCycle() + tick_dt;
+		}
+
+		if (default_to_zero)
+		{
+			return 0;
+		} else {
+			return CTickEventHandler::getGameCycle();
+		}
+	}
+}
+
+inline NLMISC::TGameCycle loadSecondToEraGameCycle(uint64 second)
+{
+	uint64 s_dt64 = (NLMISC::CTime::getSeconds64bSince1970() - second)*10;
+	uint32 tick_dt = static_cast<uint32>(s_dt64 & 0xFFFFFFFF);
+	return CTickEventHandler::getGameCycle() - tick_dt;
+}
+
+
+inline uint32 loadSecondToEra(uint64 second)
+{
+	uint64 s_dt64 = (NLMISC::CTime::getSeconds64bSince1970() - second)*10;
+	return static_cast<uint32>((s_dt64 >> 32) & 0xFFFFFFFF);
+}
+
+
+inline uint64 saveEraGameCycleToSecond(uint32 era, NLMISC::TGameCycle tick)
+{
+	uint64 s_dt64 = static_cast<uint64>(era);
+	s_dt64 = s_dt64 << 32;
+
+	NLMISC::TGameCycle tick_dt = CTickEventHandler::getGameCycle() - tick;
+	uint32 s_dt = tick_dt / 10;
+	s_dt64 |= (static_cast<uint64>(s_dt) & 0xFFFFFFFF);
+	return NLMISC::CTime::getSeconds64bSince1970() - s_dt64;
+}
+
 #endif
 
-// GameCycle property (saved as a UTC of the current game cycle, support server migration)
-#define PROP_GAME_CYCLE(varName)\
+// GameCycle property with Backward compatibility (saved as a UTC of the current game cycle, support server migration)
+#define PROP_GAME_CYCLE(eraName, varName)\
 	/* read and write, in UTC seconds. if result is negative, clamp to 0 */ \
-	PROP2(UTC_##varName, uint32, saveGameCycleToSecond(varName), varName=loadSecondToGameCycle(val))
+	PROP2(UTC_##varName, uint64, saveEraGameCycleToSecond(eraName, varName), varName=loadSecondToEraGameCycle(val); eraName=loadSecondToEra(val))
 
 // GameCycle property with Backward compatibility (saved as a UTC of the current game cycle, support server migration)
-#define PROP_GAME_CYCLE_COMP(varName)\
-	/* don't write (old variable name), but direct read if in pdr */ \
-	LPROP2(varName, NLMISC::TGameCycle, if(0), 0, varName=val) \
+#define PROP_GAME_CYCLE_OR_0(varName)\
 	/* read and write, in UTC seconds. if result is negative, clamp to 0 */ \
-	PROP2(UTC_##varName, uint32, saveGameCycleToSecond(varName), varName=loadSecondToGameCycle(val))
+	PROP2(UTC_##varName, uint64,  saveGameCycleToSecond(varName), varName=loadSecondToGameCycle(val, true))
+
+// GameCycle property with Backward compatibility (saved as a UTC of the current game cycle, support server migration)
+#define PROP_GAME_CYCLE_OR_CURRENT(varName)\
+	/* read and write, in UTC seconds. if result is negative, clamp to 0 */ \
+	PROP2(UTC_##varName, uint64, saveGameCycleToSecond(varName), varName=loadSecondToGameCycle(val, false))
+
 
 // SideNotes:
 // if the server where we load the game cycle is different from the one from where we saved, and if he is younger,

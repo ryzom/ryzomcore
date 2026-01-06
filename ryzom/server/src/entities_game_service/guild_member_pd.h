@@ -33,7 +33,7 @@
 
 namespace EGSPD
 {
-	
+
 //
 // Forward declarations
 //
@@ -54,22 +54,26 @@ public:
 
 	/// \name Accessors and Mutators methods
 	// @{
-		
+
 	/**
 	 * Use these methods to change a value, add or delete elements.
 	 */
-	
+
 	TCharacterId					getId() const;
-	
+
 	CGuildGrade::TGuildGrade		getGrade() const;
 	void							setGrade(CGuildGrade::TGuildGrade __v, bool forceWrite=false);
-	
+
 	uint32							getEnterTime() const;
 	void							setEnterTime(uint32 __v, bool forceWrite=false);
-	
+
+	uint32							getEnterEra() const;
+	void							setEnterEra(uint32 __v, bool forceWrite=false);
+
 	CGuildPD*						getGuild();
 	const CGuildPD*					getGuild() const;
-	
+
+
 	// @}
 
 
@@ -77,38 +81,38 @@ public:
 
 	/// \name Public Management methods
 	// @{
-		
+
 	/**
 	 * Use these methods to create, load, unload and get
 	 * an object from database.
 	 */
-	
-	
+
+
 	/**
 	 * Clear whole object content but key (delete subobjects if there are, key is left unmodified), default clear value is 0.
 	 */
 	void							clear();
-	
+
 	/**
 	 * Cast base object to CGuildMemberPD
 	 */
 	static CGuildMemberPD*			cast(RY_PDS::IPDBaseData* obj);
-	
+
 	/**
 	 * Cast base object to const CGuildMemberPD
 	 */
 	static const CGuildMemberPD*	cast(const RY_PDS::IPDBaseData* obj);
-	
+
 	/**
 	 * Set user factory for this class (as class is indicated as derived, a home made constructor must be provided)
 	 */
 	static void						setFactory(RY_PDS::TPDFactory userFactory);
-	
+
 	/**
 	 * Create an object of the CGuildMemberPD class, and declare it to the PDS.
 	 */
 	static CGuildMemberPD*			create(const TCharacterId &Id);
-	
+
 	// @}
 
 
@@ -116,14 +120,14 @@ public:
 
 	/// \name Public constructor
 	// @{
-		
+
 	/**
 	 * This constructor is public to allow direct instanciation of the class
 	 */
-	
+
 	CGuildMemberPD();
 	virtual ~CGuildMemberPD();
-	
+
 	// @}
 
 
@@ -131,10 +135,10 @@ public:
 
 	/// \name Persistent methods declaration
 	// @{
-		
+
 	void							apply(CPersistentDataRecord &__pdr);
 	void							store(CPersistentDataRecord &__pdr) const;
-	
+
 	// @}
 
 
@@ -142,14 +146,14 @@ protected:
 
 	/// \name User defined init and release methods
 	// @{
-		
+
 	/**
 	 * Overload those methods to implement init and release behaviours
 	 */
-	
+
 	virtual void					init();
 	virtual void					release();
-	
+
 	// @}
 
 
@@ -157,16 +161,17 @@ protected:
 
 	/// \name Attributes
 	// @{
-		
+
 	/**
 	 * Don't modify those value manually, use accessors and mutators above
 	 */
-	
+
 	TCharacterId					_Id;
 	CGuildGrade::TGuildGrade		_Grade;
 	uint32							_EnterTime;
+	uint32							_EnterEra;
 	CGuildPD*						_Guild;
-	
+
 	// @}
 
 
@@ -174,7 +179,7 @@ protected:
 
 	/// \name Internal Management methods
 	// @{
-		
+
 	void							pds__init(const TCharacterId &Id);
 	void							pds__destroy();
 	void							pds__fetch(RY_PDS::CPData &data);
@@ -187,7 +192,7 @@ protected:
 	void							pds__notifyInit();
 	void							pds__notifyRelease();
 	static void						pds_static__init();
-	
+
 	// @}
 
 
@@ -195,12 +200,12 @@ protected:
 
 	/// \name Default Factory and Fetch methods
 	// @{
-		
+
 	static void						pds_static__setFactory(RY_PDS::TPDFactory userFactory);
 	static bool						_FactoryInitialised;
 	static RY_PDS::CIndexAllocator	_IndexAllocator;
 	static void						pds_static__fetch(RY_PDS::IPDBaseData *object, RY_PDS::CPData &data);
-	
+
 	// @}
 
 
@@ -212,7 +217,7 @@ protected:
 	friend void EGSPD::init(uint32);
 };
 
-	
+
 } // End of EGSPD
 
 #endif
