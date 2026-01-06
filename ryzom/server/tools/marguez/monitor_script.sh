@@ -26,7 +26,10 @@ cd $WORKING_DIR
 echo "LOOP"
 while true
 do
+	echo "Starting script : $*"
+	echo "------------------"
 	date
+	echo "------------------"
 	python3 $*
 	#ps aux | grep -v grep | grep "python3 $*"
 	#echo "Looking for Running script $*:"
@@ -62,5 +65,8 @@ do
 		#echo "sleep $(expr 5 - $DATE_DIFF)"
 		#sleep $(expr 5 - $DATE_DIFF)
 	#fi
+	echo "--------- END ---------"
+	echo ""
+	echo ""
 done
 
