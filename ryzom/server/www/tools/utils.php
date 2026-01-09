@@ -22,22 +22,6 @@ function sendToChat($texts, $channel='', $username='', $icon='') {
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
 	$response = json_decode(curl_exec($ch), true);
-	$id = $response[1]['id'];
-	var_dump($id);
-	if (is_array($texts)) {
-		foreach($texts as $lang => $message) {
-			if ($lang != 'en') {
-				$post_data = [
-					'token' => $ini['notify']['token'],
-					'id' => $id,
-					'text' => $message,
-					];
-				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
-				$response = curl_exec($ch);
-				var_dump($response);
-			}
-		}
-	}
 	curl_close($ch);
 }
 

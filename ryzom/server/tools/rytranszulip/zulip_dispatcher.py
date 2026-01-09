@@ -80,7 +80,16 @@ class ZulipDispatcher(ZulipService):
 			"local_id": "ryzom-ig",
 			"queue_id": self.getZulipQueueId(),
 		}
-		print("Send message to Zulip", request)
+
+		zipped_request = {
+			"type": message_type,
+			"to": channel,
+			"topic": "",
+			"content": "".join([ s[0] for s in  content.split() ]),
+			"local_id": "ryzom-ig",
+			"queue_id": self.getZulipQueueId(),
+		}
+		print("Send message to Zulip", zipped_request)
 		try:
 			result = self.zulip.send_message(request)
 		except Exception as e:
@@ -94,7 +103,6 @@ class ZulipDispatcher(ZulipService):
 
 	def sendTranslation(self, message_id, m):
 		if message_id > 0 and m.translation and m.source_lang:
-			print(m.output(), m.source_lang)
 			# Normalize Zulip-style upload markdown in translation as well
 			clean_translation = self.convert_zulip_upload_links(m.translation)
 			request = {
@@ -107,6 +115,7 @@ class ZulipDispatcher(ZulipService):
 				print("Error update message", e)
 				return False
 			else:
+				request["content"] = "".join([ s[0] for s in  request["content"].split() ])
 				print("Sent translation to Zulip", request, result)
 		return True
 
@@ -133,15 +142,12 @@ class ZulipDispatcher(ZulipService):
 						if message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and message.translated_lang.lower() == lang:
 							if lang == "wk":
 								if message.source != "zulip":
-									print(lang, "New message {}".format(i), message, "=>", result)
 									result = self.sendMessage(message)
 									if result != None:
 										self.addZulipMessageId(i, result)
-										print("Added to DB")
 							else:
 								message_id = None
 								tries = 50
-								print("Get Zulip message id from chat", message.source_message_id)
 								while not message_id:
 									if message.source == "zulip":
 										source_message = self.getRyzomMessage(message.source_message_id)
@@ -153,7 +159,6 @@ class ZulipDispatcher(ZulipService):
 									if tries <= 0:
 										break
 
-								print(lang, "New translation {}".format(i), message, "<=", message_id)
 								if message_id:
 									result = self.sendTranslation(int(message_id), message)
 								else:

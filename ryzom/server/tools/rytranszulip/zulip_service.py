@@ -112,7 +112,7 @@ class ZulipClient(zulip.Client):
 
 	def manageMessages(self, callback, **kwargs):
 		def event_callback(event):
-			print(event)
+			#print(event)
 			if event["type"] == "message":
 				callback(event)
 		self.call(event_callback, ["message"], None, **kwargs)

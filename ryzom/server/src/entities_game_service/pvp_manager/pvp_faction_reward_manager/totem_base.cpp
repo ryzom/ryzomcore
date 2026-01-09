@@ -35,7 +35,7 @@ using namespace EFFECT_FAMILIES;
 using namespace NLNET;
 
 CVariable<uint32> TotemBuildTime( "egs", "TotemBuildTime", "Time needed to build a spire (in ticks)", 6000, 0, true  );
-CVariable<uint32> TotemRebuildWait( "egs", "TotemRebuildWait", "Time to wait to rebuild a spire (in ticks)", 72000, 0, true ); 
+CVariable<uint32> TotemRebuildWait( "egs", "TotemRebuildWait", "Time to wait to rebuild a spire (in ticks)", 72000, 0, true );
 
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
 
@@ -70,11 +70,11 @@ CTotemBase::CTotemBase( std::string const& name )
 CTotemBase::TRewardCategory CTotemBase::_GetRewardCatergory( CCharacter* user ) const
 {
 	pair< PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan > allegiance = user->getAllegiance();
-	
+
 	if( allegiance.first == _OwnerFaction || allegiance.second == _OwnerFaction )
 		return FACTION_MEMBER;
 
-	if( CPVPManager2::getInstance()->factionWarOccurs( allegiance.first, _OwnerFaction ) || 
+	if( CPVPManager2::getInstance()->factionWarOccurs( allegiance.first, _OwnerFaction ) ||
 		CPVPManager2::getInstance()->factionWarOccurs( allegiance.second, _OwnerFaction ) )
 		return FACTION_ENEMY;
 
@@ -104,7 +104,7 @@ void CTotemBase::getTotemEffect( CCharacter* user, vector<CSEffect*>& outEffects
 	case NEUTRAl_GUILD :
 		effectValue /= 2;
 		break;
-		
+
 	case NEUTRAL_STRICT :
 		effectValue /= 5;
 		break;
@@ -135,7 +135,7 @@ void CTotemBase::getTotemEffect( CCharacter* user, vector<CSEffect*>& outEffects
 		case TotemRegenSta :
 		case TotemRegenFoc :
 		case TotemMiscMov :
-			pEffect = new CTotemCharacEffect( user->getEntityRowId(), user->getEntityRowId(), 
+			pEffect = new CTotemCharacEffect( user->getEntityRowId(), user->getEntityRowId(),
 											 _TotemEffect, effectValue );
 			break;
 
@@ -143,7 +143,7 @@ void CTotemBase::getTotemEffect( CCharacter* user, vector<CSEffect*>& outEffects
 		case TotemHarvestAgg :
 		case TotemHarvestQty :
 		case TotemHarvestZRs :
-		
+
 		// craft
 		case TotemCraftSuc :
 
@@ -158,14 +158,14 @@ void CTotemBase::getTotemEffect( CCharacter* user, vector<CSEffect*>& outEffects
 		case TotemCombatDS :
 		case TotemCombatArm :
 		case TotemCombatPoZ :
-			pEffect = new CTotemEffect( user->getEntityRowId(), user->getEntityRowId(), 
+			pEffect = new CTotemEffect( user->getEntityRowId(), user->getEntityRowId(),
 				                        _TotemEffect, effectValue );
 			break;
 
 		default :
 			pEffect = NULL;
 		}
-		
+
 		if ( pEffect != NULL )
 			outEffects.push_back( pEffect );
 	}
@@ -190,7 +190,7 @@ void CTotemBase::startBuilding( CCharacter * builder )
 	{
 		_BotObject->getScores()._PhysicalScores[SCORES::hit_points].Current = 1;
 		_TotemCurrentHP = 1;
-		
+
 		_BotObject->getPhysCharacs()._PhysicalCharacteristics[SCharacteristicsAndScores::current_regenerate].Base = 0;
 
 		_TotemMaxHP = (float)_BotObject->getScores()._PhysicalScores[SCORES::hit_points].Max;
@@ -204,7 +204,7 @@ void CTotemBase::setBotObject( CCreature* botObject )
 {
 	if ( !botObject )
 		return;
-	
+
 	_BotObject = botObject;
 
 	// if the totem is totem is currently building, it means
@@ -220,7 +220,7 @@ void CTotemBase::setBotObject( CCreature* botObject )
 //----------------------------------------------------------------------------
 
 void CTotemBase::destroyTotem()
-{	
+{
 	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase( 0, _OwnerFaction, CPVPFactionHOF::destroyed_spire, 1);
 
 	_IsBuildingFinished = true;
@@ -230,11 +230,11 @@ void CTotemBase::destroyTotem()
 	if ( _BotObject )
 	{
 		_BotObject->getPhysCharacs()._PhysicalCharacteristics[SCORES::hit_points].CurrentRegenerate = 0;
-		_BotObject->getScores()._PhysicalScores[SCORES::hit_points].Current = 
+		_BotObject->getScores()._PhysicalScores[SCORES::hit_points].Current =
 			_BotObject->getScores()._PhysicalScores[SCORES::hit_points].Max;
-		
+
 		// change the used sheet
-	
+
 		uint32 messageVersion = 3;
 		bool bAutoSpawnDespawn = false;
 		string botName = toString( _BotObject->getId() );
@@ -245,7 +245,7 @@ void CTotemBase::destroyTotem()
 		{
 			nlwarning("Unknown sheet id '%s'", "spire_neutral.creature" );
 		}
-		
+
 		CMessage msgout("EVENT_BOT_SHEET");
 		msgout.serial(messageVersion);
 		msgout.serial(botName);
@@ -265,7 +265,7 @@ bool CTotemBase::tickUpdate()
 		return false;
 
 	NLMISC::TGameCycle currentCycle = CTickEventHandler::getGameCycle();
-	
+
 	_TotemCurrentHP += ( currentCycle - _LastTickUpdate ) * _BuildHpGain;
 
 	if ( _TotemCurrentHP > _TotemMaxHP )
@@ -276,7 +276,7 @@ bool CTotemBase::tickUpdate()
 		_BotObject->getScores()._PhysicalScores[SCORES::hit_points].Current = (sint32)_TotemCurrentHP;
 		nlinfo( "Totem %d HP : %d", _RegionAlias, _BotObject->currentHp() );
 	}
-	
+
 	if ( currentCycle - _BuildingStartTime >= TotemBuildTime )
 	{
 		// the totem has finished building
@@ -288,14 +288,14 @@ bool CTotemBase::tickUpdate()
 	if ( ( currentCycle % 100 ) == 0 )
 	{
 		string sFilePath = toString( "totems/totems_%d.bin", _RegionAlias );
-				
+
 		static CPersistentDataRecordRyzomStore pdr;
 		pdr.clear();
 
 		store( pdr );
 
 		CBackupMsgSaveFile msg( sFilePath, CBackupMsgSaveFile::SaveFile, Bsi );
-		
+
 		uint32 bufSize= pdr.totalDataSize();
 		vector<char> buffer;
 		buffer.resize( bufSize );
@@ -345,11 +345,11 @@ void CTotemBase::loadFromPDR()
 
 //	string sFilePath = Bsi.getLocalPath();
 //	sFilePath += toString( "totems/totems_%d.bin", _RegionAlias );
-//	
+//
 //	if ( !CFile::fileExists( sFilePath ) )
 //		// file does not exist, there is nothing to load
 //		return;
-	
+
 //	static CPersistentDataRecordRyzomStore pdr;
 //	pdr.clear();
 //	pdr.readFromFile( sFilePath );
@@ -366,7 +366,7 @@ bool CTotemBase::canStartBuilding( CCharacter* actor )
 		nlwarning("Can't build totem: totem not neutral");
 		return false;
 	}
-	
+
 	pair< PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan > allegiance = actor->getAllegiance();
 	NLMISC::TGameCycle currentCycle = CTickEventHandler::getGameCycle();
 
@@ -409,11 +409,11 @@ bool CTotemBase::canStartBuilding( CCharacter* actor )
 #define PERSISTENT_DATA\
 	PROP2(_OwnerFaction, string, PVP_CLAN::toString( _OwnerFaction ), _OwnerFaction = PVP_CLAN::fromString( val ); )\
 	PROP(bool,			_IsBuildingFinished)\
-	PROP_GAME_CYCLE_COMP(_BuildingStartTime)\
-	PROP_GAME_CYCLE_COMP(_LastTickUpdate)\
+	PROP_GAME_CYCLE_OR_CURRENT(_BuildingStartTime)\
+	PROP_GAME_CYCLE_OR_CURRENT(_LastTickUpdate)\
 	PROP(float,			_BuildHpGain)\
 	PROP(float,			_TotemMaxHP)\
 	PROP(float,			_TotemCurrentHP)\
-	
+
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

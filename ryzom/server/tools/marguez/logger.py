@@ -1,12 +1,12 @@
 #############################################
-#   __   __  _______  ______    _______  __   __  _______  _______ 
+#   __   __  _______  ______    _______  __   __  _______  _______
 #  |  |_|  ||   _   ||    _ |  |       ||  | |  ||       ||       |
 #  |       ||  |_|  ||   | ||  |    ___||  | |  ||    ___||____   |
 #  |       ||       ||   |_||_ |   | __ |  |_|  ||   |___  ____|  |
 #  |       ||       ||    __  ||   ||  ||       ||    ___|| ______|
-#  | ||_|| ||   _   ||   |  | ||   |_| ||       ||   |___ | |_____ 
+#  | ||_|| ||   _   ||   |  | ||   |_| ||       ||   |___ | |_____
 #  |_|   |_||__| |__||___|  |_||_______||_______||_______||_______|
-# 
+#
 # M.A.R.G.U.E.Z (The Dyslexic Merguez)
 # Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
 #
@@ -27,7 +27,7 @@ from rich.text import Text
 from inspect import currentframe, getframeinfo
 
 class MarguezPrint():
-	
+
 	def __init__(self):
 		self.print_buffer = io.StringIO()
 		self.builtins_print = builtins.print
@@ -36,7 +36,7 @@ class MarguezPrint():
 		self.stdout = None
 		self.stderr = None
 		self.last_out_file = ""
-	
+
 	def setStdOut(self):
 		if self.stdout:
 			self.stdout.close()
@@ -56,7 +56,7 @@ class MarguezPrint():
 			os.remove(self.err_file)
 		sys.stderr = open(self.err_file, "a")
 		self.last_err_file = self.err_file
-	
+
 	def print(self, *args, **kwargs):
 		x = datetime.now()
 		time = x.strftime("%Y-%m-%d %H:%M:%S")

@@ -34,7 +34,7 @@ NL_INSTANCE_COUNTER_IMPL(CTradeBase);
 
 //-----------------------------------------------------------------------------
 CItemForSale::CItemForSale()
-{ 
+{
 	_Available = false;
 	_ItemPtr = 0;
 }
@@ -61,7 +61,7 @@ void CItemForSale::itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr i
 	if( item != NULL )
 	{
 		// TODO : check if this 'detach' is needed
-//		item->detachFromParent(); 
+//		item->detachFromParent();
 		RYMSG::TPriceInfo pi;
 		_PriceInfo.setCurrency(RYMSG::TTradeCurrency::tc_dappers);
 		_PriceInfo.setAmount(price);
@@ -73,7 +73,7 @@ void CItemForSale::itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr i
 		_Owner = id;
 		_Continent = continent;
 		_Identifier = identifier;
-	}	
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -102,7 +102,7 @@ void CItemForSale::setAvailable( bool a )
 //	f.serialEnum( _Continent );
 //	f.serial( _Quantity );
 //	f.serial( _Identifier );
-//	
+//
 //	if( f.isReading() )
 //	{
 //		_ItemPtr.newItem();
@@ -176,7 +176,7 @@ TGameCycle CItemForSale::getGameCycleLeft() const
 #define PERSISTENT_DATA\
 	PROP2(_Price, uint32, _PriceInfo.getAmount(), _PriceInfo.setCurrency(RYMSG::TTradeCurrency::tc_dappers); _PriceInfo.setAmount(val))\
 	PROP(uint32,_RetirePrice)\
-	PROP_GAME_CYCLE_COMP(_StartSaleCycle)\
+	PROP_GAME_CYCLE_OR_CURRENT(_StartSaleCycle)\
 	PROP(CEntityId,_Owner)\
 	PROP2(_Continent,string,CONTINENT::toString(_Continent),_Continent=CONTINENT::toContinent(val))\
 	PROP(uint32,_Quantity)\

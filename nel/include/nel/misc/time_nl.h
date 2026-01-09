@@ -72,6 +72,7 @@ public:
 	 * This values is the same on all computer if computers are synchronized (with NTP for example).
 	 */
 	static uint32	getSecondsSince1970 ();
+	static uint64	getSeconds64bSince1970 ();
 
 	/** Return the number of second since midnight (00:00:00), January 1, 1970,
 	 * coordinated universal time, according to the system clock.
