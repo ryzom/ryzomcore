@@ -44,7 +44,6 @@ class ZulipFetcher(ZulipService):
 
 	def checkMessages(self, event):
 		msg = event["message"]
-		print(msg)
 		if "local_message_id" in event and event["local_message_id"] == "ryzom-ig":
 			return
 
@@ -68,7 +67,6 @@ class ZulipFetcher(ZulipService):
 			if stream["result"] == "error":
 				print(f"Error stream {stream_id}", stream["msg"])
 				return
-			print(stream)
 			if stream["stream"]["creator_id"] != self.admin_id: # or msg["subject"] != "general chat":
 				return
 			channel = dest.lower()
