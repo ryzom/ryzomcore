@@ -1,0 +1,71 @@
+/** @file
+	@brief Ryzom AI service documentation start page
+	
+	(C) 2005 - Doub
+	- 2005/01/12 - Doub - Created
+*/
+/**
+@mainpage ryzomAis Ryzom AI service documentation start page
+
+@section architecture AIS architecture
+
+@subsection arch_role General AIS role
+
+The role of the AIS is to manage entities in the Ryzom games which are computer controled. These objects are thus considered as AI controlled, and are called bots. Any bot has a specialization which can be of one of the following types : @em NPC, @em fauna, @em pet, @em player. @em NPC represent a humanoid bot with smart behaviour. @em fauna represent an animal with a basic behaviour. @em pet represents an animal following orders issued by a player. @em player is a special type of bot which is not controled by the AIS but rather by a player through other services (the important thing to not is that it is controlled from outside of the AIS). @em fauna bots represent roughly 80% of the total bot count, and @em NPCs most of the rest, other types representing minorities. @em fauna and @em NPC bots each use half of the computing power of the AIS (@em NPC are much more consumming than @em fauna).
+
+@subsection arch_bots Bots
+
+To simplify, a bot can do two things. It can move, and it can fight (which may imply to also move to the target). While it moves it can do auxiliary things (like talking, looking at another bot, etc.). When it fights, it moves toward its target to get in range (depending the actions he can do), and repeatedly trigger its actions. Each bot has a special data structure called an aggro list which define the state of the bot. If the aggro list is empty the bot is in the move state. If the aggro list contains entries the bot is in fight profile. @sa @ref aggro
+
+@subsection arch_classes Class structure
+
+The AIS is a NeL service. The AIS uses a hierarchical structure of objects. Each object can have one or several containers of children objects. Each container can contain only a single type of object, but also object of types derived from the declared contained type. Each object can have only a single type of parent (although through inheritance and interfaces an object can be the child of several types of other objects). Each object have a single parent (whatever its type).
+
+@subsubsection arch_classes_containers Containers and children
+
+The object containers are objects of type CCont or CAliasCont. CCont is a template class which parameter is the contained type. CAliasCont is a special CCont where children must have an alias and are thus accessible by alias. An alias is a unique identifier for an object in the AIS. It has the notation (A:x:y) where x and y are positive integers. Aliases are read from data files. Currently the alias is encoded on single 32bits integer, but this may be changed in the future. The special null alias (A:0:0) which is encoded as integer 0 is given to any object that don't have an alias, and may thus be used by several objects. Only one object can have a given non-null alias.
+
+Child objects must inherit from the class CChild. CChild is a template class whose type is the parent type. The constructor of the CChild object is given a pointer to the parent object. A child may have no parent, although this is not recommended as most of the old code do not always verify for parent existence and thus may refer to it directly and generate null pointer access errors. On the same principle, an object can change its parent, but this is higly dangerous, as there is some very strong relations between some parent/child couples.
+
+@subsubsection arch_classes_instances CAIS and CAIInstance
+
+The NeL service class is CAIS. CAIS class is thus a singleton. CAIS object is a container of CAIInstance objects.
+
+CAIInstance is a container of CContinent and CManager. An AI instance is a kind of super-container for a section of the Ryzom AI. The objects from an AI instance cannot interact with objects from another AI instance. Any entity in the Ryzom world is linked to a single AI instance. AI instances are each responsible for a geographical part of the Ryzom world. As their content are totally independant, AI instances can be handled by several AI services, each service handling one or more AI instances. This is useful to split system ressources consumption accross multiple physical machines.
+
+CContinent is the base class of dynamic bot instanciation system. @sa @ref dynamic_bots
+
+@subsubsection arch_classes_managers Managers
+
+CManager is a very important class in the AIS. Primary role of a manager is to contain bot groups. CManager is thus a container of CGroup objects. CManager class is derived in CMgrNpc and CMgrFauna classes which are specifically designed for @em NPC and @em fauna bots. Both of these manager types contain a CStateMachine object (@em pet and @em player managers don't). Although being distinct, CManager and CStateMachine are closely related and they are both represented with a single object in data files (other managers that @em NPC and @em fauna are not represented in data files).
+
+@subsubsection arch_classes_groups Groups
+
+CGroup is also a very important class. Its purpose is to group bots. In fact most of the behaviour of bots is defined in the group. The CGroup class derives from the CStateInstance class which closes the relation between managers, groups and the state machine. The parent/child relation between the manager and the group is very strong and shouldn't be broken during the lifetime of the group. A state instance is a kind of link between the group and a state in the state machine. It holds the parameters of the group which depends on its current state. Like CManager, there is specialization of the group in CGrpNpc and CGrpFauna. The main difference between @em fauna and @em NPC bots starts here. CGrpFauna contains a predefined behaviour which can have parameters but which is always basically the same.
+
+CGrpNpc on the other hand is entirely defined in data files. The class itself is a holder for profiles. Each NPC group always has 3 profiles. An @em activity profile defines the way the bots takes aggro. A @em movement profile defines the way the bots will move in move state. A @em fight profile defines the way the bots will fight in fight state. The fight profile is in fact a singleton, all @em NPC bots fighting the same way. The @em activity and @em movement profiles can be repalced dynamically during group life. The common way to change the profiles is to associate a profile pair to a state in the group manager state machine, and to link the group to that state. The profiles defined in a state are in fact only set to the group when the group switch to that state, but they can be changed without changing the state (via script native functions for example).
+
+CGroup is also a container for CBot objects. CBot is the base class for every bot controlled by the AIS (which exclude @em player bots). CBot also has a link to a profile like its group parent. In fact the group profiles define the bot profile. Bot profiles are either a movement profile or a fight profile (fight profile manage some movement too).
+
+@section threading Threading and update chain
+
+Being a multi agent system the AIS supports multithreading. Threading architecture in AIS is a kind of (non-preemptive) cooperative hierarchical scheduling. There is only a single operating system thread. In that thread there is a loop that calls repeatedly the update method of the CAIS singleton. That method is responsible for updating the whole AIS state and to advance it of a single step.
+
+Almost every object in the AIS has an update method, if it needs to have its own thread. The update method of objects in the AIS are responsible to call the update method of the objects they own. In particular the containers are responsible to update their children. That way CAIS::update calls CAIInstance::update which calls CManager::update, and so on.
+
+The update method of the CAIS is called once per shard tick. This is the case for almost all objects of the AIS. However some objects don't need to be updated every tick, so a container may not update all its children on each tick. Especially the group objects don't update all the bots every single tick but every n ticks where n depends on the proximity of players from that bot group.
+
+In a single AIS there is usualy about 30,000 or 35,000 bots. These bots are splitted in about 3,000-5,000 groups. The number of bots by far surpass the count of any other object kind in the AIS, and although bots don't need the most computing power, that is the one of the two classes that are not updated every tick (with the addition of all objects owned by the bot, that is its profile). The other class is the group profile class. Group profile is the most demanding part of the AIS, so it's only updated when necessary, also depending on player proximity.
+
+@section others Other documents
+
+Here is the presentation of the AIS. The main sections are :
+- @ref aggro
+- @ref dynamic_bots
+- @ref path_finding
+- @ref primitive_parsing
+- @ref positions
+- @ref fight (may be obsolete)
+
+*/
+

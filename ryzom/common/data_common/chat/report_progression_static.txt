@@ -1,0 +1,16 @@
+# these sentences are used in the xp gain system
+
+OPS_XP_NO_GAINXP_SKILL_S "&RG&you don't gain experience in '$0s', this action is too easy."
+OPS_XP_LITTLE_GAINXP_SKILL_S "&JA&you gain a little experience in '$0s'."
+OPS_XP_NORMAL_GAINXP_SKILL_S "&JA&you gain experience in '$0s'."
+OPS_XP_BIG_GAINXP_SKILL_S "&JA&you gain much experience in '$0s'."
+OPS_XP_MISSION_GAINXP_SKILL_S "&JA&the success of this mission has given you experience for the '$0s' skill."
+
+OPS_XP_PROGRESS_SKILL_S "&JA&your '$0s' skill improves."
+OPS_XP_PROGRESS_CHARACTERISTIC_S "&JA&your '$0s' progresses."
+OPS_XP_PROGRESS_HP "&JA&your life force increases."
+OPS_XP_PROGRESS_STAMINA "&JA&your endurance increases."
+OPS_XP_PROGRESS_SAP "&JA&your Sap increases."
+OPS_XP_PROGRESS_RESIST_S "&JA&your '$0s' resistance increases."
+
+EGS_NEW_SKILL_UNLOCKED_S "&JA&Well done! You gain the new advanced skill '$0s'."

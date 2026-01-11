@@ -1,0 +1,96 @@
+<generator header_tag="ENTITY_LOCATOR_ITF">
+
+	<include file="nel/misc/entity_id.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="ENTITYLOC">
+
+		<!-- ############################################################## -->
+		<class name="TConnectedCharInfo">
+			<doc line="Info about a connected character, used for block tranfert"/>
+		
+			<!-- activate serial generation -->
+			<serial/>	
+
+			<property type="NLMISC::CEntityId"	name="CharEId"		byref="true"	doc="The entity id the the character"/>
+			<property type="uint32"				name="LastDisconnectionDate"		doc="the date of last disconnection of the character"/>
+		</class>
+
+		<!-- ############################################################## -->
+		<module_interface name="CEntityLocator">
+			<doc line="Interface used by EGS and implemented in the SU"/>
+			<doc line="Used by EGS to send player, characters and guild run time information"/>
+			<doc line="for localizing character and guild accross the domain shards."/>
+
+			<!-- ========================================================== -->
+			<method name="initState" msg="EL_IS">
+				<doc line="The locator client send the initial state of active player and character connections"/>
+
+				<param type="std::vector &lt; uint32 &gt;"				name="connectedUsers"	serial="Cont" byref="true"/>
+				<param type="std::vector &lt; TConnectedCharInfo &gt;"	name="connectedChars"	serial="Cont" byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="playerConnected" msg="EL_PC">
+				<doc line="A player has connected on a shard"/>
+
+				<param type="uint32"		name="userId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="playerDisconnected" msg="EL_PD">
+				<doc line="A player has disconnected from a shard"/>
+
+				<param type="uint32"		name="userId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="charConnected" msg="EL_CC">
+				<doc line="A character has connected"/>
+
+				<param type="NLMISC::CEntityId"	name="charEId"		byref="true"/>
+				<param type="uint32"			name="lastDisconnectionDate"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="charDisconnected" msg="EL_CD">
+				<doc line="A character has disconnected"/>
+
+				<param type="NLMISC::CEntityId"	name="charEId"		byref="true"/>
+			</method>
+
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<class name="TCharConnectionEvent">
+			<doc line="Info dis/connection of a character"/>
+		
+			<!-- activate serial generation -->
+			<serial/>	
+
+			<property type="uint32"			name="CharId"		doc="The character id the the character"/>
+			<property type="bool"			name="Connection"	doc="Type of the event : true for a connection, false otherwise"/>
+			<property type="std::string"	name="Privilege"	doc="The privilege of the character (e.g :GM:DEV:)"/>
+			<property type="uint32"			name="lastConnectionDate"		doc="Last Connection Date"/>
+		</class>
+
+
+		<!-- ############################################################## -->
+		<module_interface name="CEntityLocatorClient">
+			<doc line="Interface used by SU and implemented in the EGS"/>
+			<doc line="Used by SU to send character online status to all EGS"/>
+
+			<!-- ========================================================== -->
+			<method name="connectionEvents" msg="ELC_CE" broadcast="true">
+				<doc line="The entity locator send a list of connection event to EGS"/>
+
+				<param type="std::vector &lt; TCharConnectionEvent &gt;"	name="events"	serial="Cont" byref="true"/>
+			</method>
+
+		</module_interface>
+
+
+	</namespace>
+</generator>
+
+

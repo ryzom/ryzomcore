@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+:root { --not-a-color: 20px; }
+p { background-color: red; }
+p { background-color: var(--not-a-color); }
+		</style>
+		<!-- this should have 'red' because var() has invalid value for color -->
+		<!-- TODO: not really supported by NEL currently -->
+		<div data-ruleset="background-color: red;" />
+	</body>
+</html>

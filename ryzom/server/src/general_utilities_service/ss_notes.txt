@@ -1,0 +1,155 @@
+Module name:		Shard Script
+Short name:			SSS
+Associated modules:	None
+Requires:			Naming Service
+
+Description
+-----------
+
+Todo
+----
+
+
+****************************************************************************************************
+* The following block is a possible better implementation of the core of the script system
+****************************************************************************************************
+
+
+#if 0
+//-------------------------------------------------------------------------------------------------
+// class IScriptLine
+//-------------------------------------------------------------------------------------------------
+
+class IScriptLine: public NLMISC::CRefCount
+{
+public:
+	virtual ~IScriptLine() {}
+	virtual void execute()=0;
+};
+typedef NLMISC::CSmartPtr<IScriptLine> TScriptLinePtr;
+
+
+//-------------------------------------------------------------------------------------------------
+// class CScriptLineCmd
+//-------------------------------------------------------------------------------------------------
+
+class CScriptLineCmd: public IScriptLine
+{
+private:
+	CScriptLineCmd(uint32 delay,const NLMISC::CSString& service,const NLMISC::CSString& cmdLine);
+public:
+	static CScriptLineCmd* buildNew(const NLMISC::CSString& txt);
+	virtual void execute();
+private:
+	uint32 _Delay;
+	NLMISC::CSString _Service;
+	NLMISC::CSString _CmdLine;
+};
+
+CScriptLineCmd::CScriptLineCmd(uint32 delay,const NLMISC::CSString& service,const NLMISC::CSString& cmdLine)
+{
+	_Delay= delay;
+	_Service= service;
+	_CmdLine= cmdLine;
+}
+
+CScriptLineCmd* CScriptLineCmd::buildNew(const NLMISC::CSString& txt)
+{
+	todo(" convert command line to components");
+	return new CScriptLineCmd(0,txt,txt);
+}
+
+void CScriptLineCmd::execute()
+{
+	CCommandExecutor::getInstance()->addCommand(_Delay,_Service,_CmdLine);
+}
+
+
+//-------------------------------------------------------------------------------------------------
+// class CScriptLineSetVar
+//-------------------------------------------------------------------------------------------------
+
+class CScriptLineSetVar: public IScriptLine
+{
+private:
+	CScriptLineSetVar(const NLMISC::CSString& keyVarName,const NLMISC::CSString& keyValue,const NLMISC::CSString& targetVarName);
+public:
+	static CScriptLineSetVar* buildNew(const NLMISC::CSString& txt);
+	virtual void execute();
+private:
+	NLMISC::CSString _KeyVarName;
+	NLMISC::CSString _KeyValue;
+	NLMISC::CSString _TargetVarName;
+};
+
+CScriptLineSetVar::CScriptLineSetVar(const NLMISC::CSString& keyVarName,const NLMISC::CSString& keyValue,const NLMISC::CSString& targetVarName)
+{
+	_KeyVarName= keyVarName;
+	_KeyValue= keyValue;
+	_TargetVarName= targetVarName;
+}
+
+CScriptLineSetVar* CScriptLineSetVar::buildNew(const NLMISC::CSString& txt)
+{
+	todo("split up the call into its components");
+	return new CScriptLineSetVar(txt,txt,txt);
+}
+
+void CScriptLineSetVar::execute()
+{
+	todo("...todo...");
+}
+
+
+//-------------------------------------------------------------------------------------------------
+// class CScriptLineCall
+//-------------------------------------------------------------------------------------------------
+
+class CScriptLineCall: public IScriptLine
+{
+private:
+	CScriptLineCall(const NLMISC::CSString& scriptName);
+public:
+	static CScriptLineCall* buildNew(const NLMISC::CSString& txt);
+	virtual void execute();
+private:
+	NLMISC::CSString _ScriptName;
+};
+
+CScriptLineCall::CScriptLineCall(const NLMISC::CSString& scriptName)
+{
+	_ScriptName= scriptName;
+}
+
+CScriptLineCall* CScriptLineCall::buildNew(const NLMISC::CSString& txt)
+{
+	if (txt.countWords()!=1)
+	{
+		nlwarning("the following is not a valid routine name: %s",txt.c_str());
+		return NULL;
+	}
+	return new CScriptLineCall(txt);
+}
+
+void CScriptLineCall::execute()
+{
+	CScriptManager::getInstance()->runScript(_ScriptName);
+}
+
+
+//-------------------------------------------------------------------------------------------------
+// IScriptLine factory: buildScriptLine()
+//-------------------------------------------------------------------------------------------------
+
+static TScriptLinePtr buildScriptLine(const NLMISC::CSString& txt)
+{
+	NLMISC::CSString keyword= txt.firstWordConst().strip();
+	NLMISC::CSString rawArgs= txt.tailFromFirstWord().strip();
+
+	if (keyword=="cmd")		return CScriptLineCmd::buildNew(rawArgs);
+	if (keyword=="setVar")	return CScriptLineSetVar::buildNew(rawArgs);
+	if (keyword=="runScript")	return CScriptLineCall::buildNew(rawArgs);
+
+	return NULL;
+}
+#endif

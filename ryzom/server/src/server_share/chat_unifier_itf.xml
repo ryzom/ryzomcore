@@ -1,0 +1,161 @@
+<generator header_tag="CHAT_UNIFIER_ITF">
+
+	<include file="nel/misc/entity_id.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="CHATUNI">
+
+		<!-- ############################################################## -->
+		<enum name="TFailInfo">
+			<doc line="The player locator is not available, could'nt do the job"/>
+			<item name="fi_no_entity_locator"/>
+
+			<doc line="No IOS module for the addresse hosting shard"/>
+			<item name="fi_no_ios_module"/>
+
+			<doc line="No character synchronizer to retreive sender name"/>
+			<item name="fi_no_char_sync"/>
+
+			<doc line="The sender character is unknown"/>
+			<item name="fi_sender_char_unknown"/>
+
+			<doc line="The addressee character is unknown"/>
+			<item name="fi_dest_char_unknown"/>
+
+			<doc line="The addressee character is offline"/>
+			<item name="fi_char_offline"/>
+
+		</enum>
+
+		<!-- ############################################################## -->
+		<module_interface name="CChatUnifier">
+			<doc line="Interface used by IOS, implemented by SU to send"/>
+			<doc line="char related message to unifier."/>
+
+			<!-- ========================================================== -->
+			<method name="sendFarTell" msg="CUSFT">
+				<doc line="IOS forward a tell message to the unifier"/>
+				<doc line="If IOS can't find the player localy, it forward"/>
+				<doc line="the tell to the unifier"/>
+
+				<param type="NLMISC::CEntityId"		name="senderCharId" byref="true"/>
+				<param type="bool"			name="havePrivilege" />
+				<param type="ucstring"		name="destName"		byref="true"/>
+				<param type="ucstring"		name="text"			byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+<!--			<method name="sendFarGuildChat" msg="CUSFGC">
+				<doc line="IOS forward a guild chat message to the unifier"/>
+
+				<param type="NLMISC::CEntityId"		name="senderCharId" byref="true"/>
+				<param type="uint32"		name="guildId"/>
+				<param type="ucstring"		name="text"		byref="true"/>
+			</method>
+-->
+			<!-- ========================================================== -->
+<!--			<method name="sendFarGuildChat2" msg="CUSFGC2">
+				<doc line="IOS forward a guild chat message to the unifier"/>
+				<doc line="This version use a translated string name as chat content"/>
+
+				<param type="NLMISC::CEntityId"		name="senderCharId" byref="true"/>
+				<param type="uint32"		name="guildId"/>
+				<param type="ucstring"		name="phraseName"	byref="true"/>
+			</method>
+-->
+
+			<!-- ========================================================== -->
+<!--			<method name="sendFarGuildChat2Ex" msg="CUSFGC2E">
+				<doc line="IOS forward a guild chat message to the unifier"/>
+				<doc line="This version use a translated string ID as chat content"/>
+
+				<param type="NLMISC::CEntityId"		name="senderCharId" byref="true"/>
+				<param type="uint32"		name="guildId"/>
+				<param type="uint32"		name="phraseId"/>
+			</method>
+-->
+
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<module_interface name="CChatUnifierClient">
+			<doc line="Interface used by SU, implemented by IOS to send"/>
+			<doc line="char related message to IOS."/>
+
+			<!-- ========================================================== -->
+			<method name="recvFarTellFail" msg="CURFTF">
+				<doc line="SU send a far tell failure to IOS. This mean that the player is offline or unknow"/>
+
+				<param type="NLMISC::CEntityId"		name="senderCharId" byref="true"/>
+				<param type="ucstring"		name="destName"	byref="true"/>
+				<param type="TFailInfo"		name="failInfo" enum="start"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="recvFarTell" msg="CURFT">
+				<doc line="SU send a far tell to the IOS hosting the addresse character"/>
+
+				<param type="NLMISC::CEntityId"		name="senderCharId" byref="true"/>
+				<param type="ucstring"		name="senderName"	byref="true"/>
+				<param type="bool"			name="havePrivilege"/>
+				<param type="ucstring"		name="destName"		byref="true"/>
+				<param type="ucstring"		name="text"			byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="farGuildChat" msg="CURFGC" broadcast="true">
+				<doc line="IOS forward a guild chat message to the IOS"/>
+
+				<param type="ucstring"			name="senderName"	byref="true"/>
+				<param type="uint32"			name="guildId"/>
+				<param type="ucstring"			name="text"			byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="farGuildChat2" msg="CURFGC2" broadcast="true">
+				<doc line="IOS forward a guild chat message to the IOS"/>
+
+				<param type="ucstring"			name="senderName"	byref="true"/>
+				<param type="uint32"			name="guildId"/>
+				<param type="ucstring"			name="phraseName"	byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="farGuildChat2Ex" msg="CURFGC2E" broadcast="true">
+				<doc line="IOS forward a guild chat message to the IOS"/>
+
+				<param type="ucstring"			name="senderName"	byref="true"/>
+				<param type="uint32"			name="guildId"/>
+				<param type="uint32"			name="phraseId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="universeBroadcast" msg="CURUB" broadcast="true">
+				<doc line="IOS forward a univers chat message to the IOSs"/>
+
+				<param type="ucstring"			name="senderName"	byref="true"/>
+				<param type="uint32"			name="senderHomeSession"/>
+				<param type="ucstring"			name="text"			byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="dynChanBroadcast" msg="CUDCB" broadcast="true">
+				<doc line="IOS forward a dyn chat chat message to the IOSs"/>
+
+				<param type="NLMISC::CEntityId"	name="chanId"		byref="true"/>
+				<param type="ucstring"			name="senderName"	byref="true"/>
+				<param type="ucstring"			name="text"			byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="recvBroadcastMessage" msg="CURBM">
+				<doc line="SU send a broadcast message to the IOS"/>
+
+				<param type="ucstring"			name="message"		byref="true"/>
+			</method>
+
+		</module_interface>
+
+	</namespace>
+</generator>
+

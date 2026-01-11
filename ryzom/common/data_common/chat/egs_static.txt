@@ -1,0 +1,573 @@
+#####################
+# tracking
+#####################
+EGS_TRACKING_START_E		"&BL&You start tracking $0e."
+EGS_TRACKING_END_E		"&BL&You stop tracking $0e."
+EGS_TRACKING_DIRECTION_ES	"&BL&$0e is $1s from your position."
+EGS_TRACKING_TOO_FAR		"&RG&Your target is too far and you have lost track of it."
+
+#####################
+# training
+#####################
+EGS_TRAINING_INVALID_MODE	"&RG&You cannot start a training action while in combat."
+EGS_TRAINING_NOT_ENOUGH_STAMINA "&RG&You don't have enough stamina to start training."
+
+EGS_TRAINING_NOT_ENOUGH_SAP 	"&RG&You don't have enough sap to start training."
+EGS_TRAINING_BEGIN_S		"&BL&You start to train yourself with your $0s."
+EGS_TRAINING_FAILED_S		"&RG&You failed to train yourself with your $0s."
+EGS_TRAINING_CANCEL		"&RG&Your training action has been cancelled."
+EGS_TRAINING_SUCCESS		"&JA&You successfully trained yourself."
+
+EGS_TRAINING_HIGH_DIFFICULTY	"&RG&The quality of your training tool is too high for your skill value, your chances of success are minimized."
+EGS_TRAINING_LOW_QUALITY_TOOL	"&RG&The quality of your training tool is too low for your skill value, you have little chance of gaining experience using it."
+
+#####################
+# general
+#####################
+EGS_U_LOSE_STA_EI		"&RG&$0e makes you lose $1i stamina points."
+EGS_LOSE_STA_EI			"&RG&You make $0e lose $1i stamina points."
+EGS_U_LOSE_SAP_EI		"&RG&$0e makes you lose $1i sap points."
+EGS_LOSE_SAP_EI			"&RG&You make $0e lose $1i sap points."
+
+# EGS_USE_LAST_AMMO		"&RG&You have used your last ammo."
+
+EGS_ITEM_QUALITY_DECREASE_SI	"&RG&Your object $0s is losing quality which is now at $1i."
+
+EGS_BAD_EFFECT_ALREADY_PRESENT_E	"&RG&$0e already suffers your spell's effect. You won't gain experience for this action."
+EGS_GOOD_EFFECT_ALREADY_PRESENT_E	"&RG&$0e already benefits from your spell's effect. You won't gain experience for this action."
+EGS_YOU_EFFECT_ALREADY_PRESENT		"&RG&Your spell's effect is already active on you. You won't gain experience for this action."
+
+# when damage is done to/by an entity
+EGS_COMBAT_HIT_EEIS 			"&BC&$0e hits $1e for $2i damage using the strategy $3s."
+EGS_COMBAT_YOU_HIT_EIS 			"&BC&You inflict $1i points of damage on $0e using the strategy $2s."
+EGS_COMBAT_HITS_YOU_EIS			"&RG&$0e hits you for $1i damage using the strategy $2s."
+EGS_COMBAT_HIT_NULL_EES			"&BC&$0e uses the strategy $1s and hits $1e but does no damage."
+EGS_COMBAT_YOU_HIT_NULL_ES		"&BC&You use the strategy $1s and hit $0e but do no damage."
+EGS_COMBAT_HITS_YOU_NULL_ES 		"&RG&$0e uses the strategy $1s and hits you but does no damage."
+
+
+#####################
+# combat generic
+#####################
+EGS_ACTOR_COMBAT_PARRY_E		"&RG&$0e has parried your attack."
+EGS_TARGET_COMBAT_PARRY_E		"&BC&You parry $0e's attack."
+EGS_SPECTATORS_COMBAT_PARRY_EE		"&RG&$0e has parried $1e's attack."
+
+EGS_ACTOR_COMBAT_DODGE_E		"&RG&$0e has dodged your attack."
+EGS_TARGET_COMBAT_DODGE_E		"&BC&You dodged $0e's attack."
+EGS_SPECTATORS_COMBAT_DODGE_EE		"&RG&$0e has dodged $1e's attack."
+
+EGS_ACTOR_COMBAT_BRICK_S	 	"&BL&You try the special blow $0s on your target."
+EGS_TARGET_COMBAT_BRICK_ES	 	"&RG&$0e gets ready to use a special blow $1s against you."
+EGS_SPECTATORS_COMBAT_BRICK_ESE	 	"&BL&$0e prepares a special blow $1s against $2e."
+
+EGS_ACTOR_COMBAT_CYCLIC_BRICK_S	 	"&BL&You get ready to use the $0s fighting style on your target."
+EGS_TARGET_COMBAT_CYCLIC_BRICK_ES	"&RG&$0e gets ready to use the $1s fighting style on you."
+EGS_SPECTATORS_COMBAT_CYCLIC_BRICK_ESE	"&BL&$0e gets ready to use the $1s fighting style on $2e."
+
+EGS_ACTOR_COMBAT_BRICK_SUCCESS_S 	"&BC&The $0s special blow hit your target."
+EGS_TARGET_COMBAT_BRICK_SUCCESS_ES 	"&RG&$0e hit you with the $1s special blow."
+EGS_ACTOR_COMBAT_BRICK_SUCCESS_EES	"&BC&$0e hit $1e with the $2s special blow."
+
+EGS_ACTOR_COMBAT_BRICK_FAIL_S 		"&RG&You missed your $0s special blow."
+EGS_TARGET_COMBAT_BRICK_FAIL_ES 	"&RG&$0e missed his $1s special blow."
+EGS_SPECTATORS_COMBAT_BRICK_FAIL_ES 	"&BC&$0e missed his $1s special blow."
+
+EGS_ACTOR_COMBAT_BRICK_CYCLIC_SUCCESS_S		"&BC&The $0s fighting style hit your target."
+EGS_TARGET_COMBAT_BRICK_CYCLIC_SUCCESS_ES	"&RG&$0e hit you with the $1s fighting style."
+EGS_SPECTATORS_COMBAT_BRICK_CYCLIC_SUCCESS_EES	"&BC&$0e hit $1e with the $2s fighting style."
+
+EGS_ACTOR_COMBAT_BRICK_CYCLIC_FAIL_S		"&BC&You missed your $0s fighting style."
+EGS_TARGET_COMBAT_BRICK_CYCLIC_FAIL_ES		"&RG&$0e missed his $1s fighting style."
+EGS_SPECTATORS_COMBAT_BRICK_CYCLIC_FAIL_ES	"&BC&$0e missed his $1s fighting style."
+
+EGS_ACTOR_HIT_HEAD_EI		"&BC&You hit $0e on his head for $1i damage."
+EGS_TARGET_HIT_HEAD_EI		"&RG&$0e hits your head for $1i damage."
+EGS_SPECTATORS_HIT_HEAD_EEI	"&RG&$0e hits $1e's head for $2i damage."
+
+EGS_ACTOR_HIT_CHEST_EI		"&BC&You hit $0e's chest for $1i damage."
+EGS_TARGET_HIT_CHEST_EI		"&RG&$0e hits your chest for $1i damage."
+EGS_SPECTATORS_HIT_CHEST_EEI	"&RG&$0e hits $1e's chest for $2i damage."
+
+
+EGS_ACTOR_HIT_LARM_EI		"&BC&You hit $0e's left arm for $1i damage."
+EGS_TARGET_HIT_LARM_EI		"&RG&$0e hits your left arm for $1i damage."
+EGS_SPECTATORS_HIT_LARM_EEI	"&RG&$0e hits $1e's left arm for $2i damage."
+EGS_ACTOR_HIT_RARM_EI		"&BC&You hit $0e's right arm for $1i damage."
+EGS_TARGET_HIT_RARM_EI		"&RG&$0e hits your right arm for $1i damage."
+EGS_SPECTATORS_HIT_RARM_EEI	"&RG&$0e hits $1e's right arm for $2i damage."
+
+EGS_ACTOR_HIT_RLEG_EI		"&BC&You hit $0e's right leg for $1i damage."
+EGS_TARGET_HIT_RLEG_EI		"&RG&$0e hits your right leg for $1i damage."
+EGS_SPECTATORS_HIT_RLEG_EEI	"&RG&$0e hits $1e's right leg for $2i damage."
+EGS_ACTOR_HIT_LLEG_EI		"&BC&You hit $0e's left leg for $1i damage."
+EGS_TARGET_HIT_LLEG_EI		"&RG&$0e hits your left leg for $1i damage."
+EGS_SPECTATORS_HIT_LLEG_EEI	"&RG&$0e hits $1e's left leg for $2i damage."
+
+EGS_ACTOR_HIT_LFOOT_EI		"&BC&You hit $0e's left foot for $1i damage."
+EGS_TARGET_HIT_LFOOT_EI		"&RG&$0e hits your left foot for $1i damage."
+EGS_SPECTATORS_HIT_LFOOT_EEI	"&RG&$0e hits $1e's left foot for $2i damage."
+EGS_ACTOR_HIT_RFOOT_EI		"&BC&You hit $0e's right foot for $1i damage."
+EGS_TARGET_HIT_RFOOT_EI		"&RG&$0e hits your right foot for $1i damage."
+EGS_SPECTATORS_HIT_RFOOT_EEI	"&RG&$0e hits $1e's right foot for $2i damage."
+
+# EGS_OPENING_SUCCESS		"&BC&You successfully take the opening."
+
+
+#####################
+# magic generic
+#####################
+EGS_ACTOR_BEGIN_CASTING_BAD_E		"&BL&You invoke an offensive spell on $0e."
+EGS_ACTOR_BEGIN_CASTING_NEUTRAL_E 	"&BL&You invoke a neutral spell on $0e."
+EGS_ACTOR_BEGIN_CASTING_GOOD_E 		"&BL&You invoke a beneficial spell on $0e."
+
+EGS_ACTOR_BEGIN_SELFCAST_GOOD		"&BL&You invoke a beneficial spell on yourself."
+EGS_ACTOR_BEGIN_SELFCAST_NEUTRAL	"&BL&You invoke a neutral spell on yourself."
+EGS_ACTOR_BEGIN_SELFCAST_BAD		"&BL&You invoke a offensive spell on yourself."
+
+EGS_ACTOR_END_SUCCESS			"&BL&You succesfully cast your spell."
+EGS_ACTOR_END_FAILED			"&BL&You failed your incantation."
+EGS_ACTOR_END_FUMBLE			"&BL&You fumbled your incantation."
+
+EGS_TARGET_BEGIN_CASTING_BAD_E		"&BL&$0e invokes an offensive spell on you."
+EGS_TARGET_BEGIN_CASTING_NEUTRAL_E 	"&BL&$0e invokes a neutral spell on you."
+EGS_TARGET_BEGIN_CASTING_GOOD_E	 	"&BL&$0e invokes a beneficial spell on you."
+
+EGS_SPECT_BEGIN_CASTING_BAD_EE		"&BL&$0e invokes an offensive spell on $1e."
+EGS_SPECT_BEGIN_CASTING_NEUTRAL_EE 	"&BL&$0e invokes a neutral spell on $1e."
+EGS_SPECT_BEGIN_CASTING_GOOD_EE	 	"&BL&$0e invokes a beneficial spell on $1e."
+
+EGS_SPECT_BEGIN_SELFCASTING_BAD_E	"&BL&$0e invokes an offensive spell on himself."
+EGS_SPECT_BEGIN_SELFCASTING_NEUTRAL_E 	"&BL&$0e invokes a neutral spell on himself."
+EGS_SPECT_BEGIN_SELFCASTING_GOOD_E	"&BL&$0e invokes a beneficial spell on himself."
+
+
+EGS_ACTOR_CAST_END_SUCCESS		"&BL&You successfully cast your spell."
+EGS_ACTOR_CAST_END_FAILED		"&BL&You failed your incantation."
+EGS_ACTOR_CAST_END_FUMBLE		"&BL&You fumbled your incantation."
+
+EGS_TARGET_CAST_END_SUCCESS_E		"&BL&$0e successfully casts a spell on you."
+EGS_TARGET_CAST_END_FAILED_E		"&BL&$0e's incantation failed."
+EGS_TARGET_CAST_END_FUMBLE_E		"&BL&$0e's incantation fumbled."
+
+EGS_SPECT_CAST_END_SUCCESS_EE		"&BL&$0e successfully casts a spell on $1e."
+EGS_SPECT_CAST_END_FAILED_E		"&BL&$0e's incantation failed."
+EGS_SPECT_CAST_END_FUMBLE_E		"&BL&$0e's incantation fumbled."
+
+
+EGS_ACTOR_CASTING_RESIST_E 		"&RG&$0e resists the effects of your spell."
+EGS_TARGET_CASTING_RESIST_E	 	"&BC&You resist the effects of the spell invoked by $0e."
+EGS_SPECTATORS_CASTING_RESIST_EE	"&BC&$0e resists the effects of the spell invoked by $1e."
+
+
+# EGS_MAGIC_TARGET_OUT_OF_RANGE		"&RG&Your target is out of range for your spell."
+# EGS_MAGIC_BAD_TARGET			"&RG&Target missing or invalid."
+
+EGS_MAGIC_CASTER_NEW_LINK_E		"You have created a new magic link with $0e."
+EGS_MAGIC_TARGET_NEW_LINK_E		"$0e has created a new magic link with you."
+EGS_MAGIC_CASTER_REMOVE_LINK_E		"A link you created with $0e has been broken."
+EGS_MAGIC_TARGET_REMOVE_LINK_E		"A link created with you by $0e has been broken."
+
+
+
+
+
+EGS_ACTOR_BEGIN_CASTING_S	"&BL&You invoke the $0s formula."
+EGS_TARGET_BEGIN_CASTING_ES	"&RG&$0e invokes the spell $1s on you."
+EGS_SPECTATORS_BEGIN_CASTING_ES	"&BL&$0e invokes the $1s formula."
+
+EGS_ACTOR_CASTING_FAIL_S	"&RG&You failed to invoke the $0s spell."
+EGS_TARGET_CASTING_FAIL_ES	"&RG&$0e failed to invoke the $1s spell."
+EGS_SPECTATORS_CASTING_FAIL_ES	"&BC&$0e failed to invoke the $1s spell."
+
+# EGS_ACTOR_CASTING_INTERUPT		"&RG&The incantation of your spell is broken."
+EGS_ACTOR_CASTING_INTERUPT_S		"&RG&The incantation of your $0s spell is broken."
+EGS_TARGET_CASTING_INTERUPT_ES		"&RG&$0e failed to invoke the $1s spell."
+EGS_SPECTATORS_CASTING_INTERUPT_ES	"&BC&$0e failed to invoke the $1s spell."
+
+EGS_ACTOR_CASTING_SUCCESS_S		"&BC&Your $0s spell is affecting your target ."
+EGS_TARGET_CASTING_SUCCESS_SE		"&RG&The $0s spell cast by $0e is affecting you."
+EGS_SPECTATORS_CASTING_SUCCESS_SEE	"&BC&The $0s spell cast by $1e is affecting $2e."
+
+EGS_ACTOR_CASTING_RESIST_ES 		"&RG&$0e resists the effects of your $1s spell."
+EGS_TARGET_CASTING_RESIST_SE	 	"&BC&You resist the effects of the $0s spell invoked by $1e."
+EGS_SPECTATORS_CASTING_RESIST_ESE	"&BC&$0e resists the effects of the $1s sell invoked by $2e."
+
+EGS_ACTOR_CASTING_CRITICAL_SUCCESS_S	"&BC&You succeeded a critical incantation of the $0s spell."
+EGS_TARGET_CASTING_CRITICAL_SUCCESS_ES	"&RG&$0e succeeded a critical incantation of the $1s spell."
+EGS_SPECTATORS_CASTING_CRITICAL_SUCCESS_ES	"&BC&$0e succeeded a critical incantation of the $1s spell."
+
+EGS_ACTOR_CASTING_FUMBLE_S		"&RG&You made a blunder in the incantation of the $0s spell."
+EGS_TARGET_CASTING_FUMBLE_ES		"&RG&$0e made a blunder in the incantation of the $1s spell."
+EGS_SPECTATORS_CASTING_FUMBLE_ES	"&BC&$0e made a blunder in the incantation of the $1s spell."
+
+
+# EGS_ACTOR_VAMPIRISE_EI			"&BL&You vampirise $1s from $0e"
+
+
+#####################
+# range fighter msg
+#####################
+EGS_RANGE_AIM_LEGS_RANGE_E	"&BL&You aim at the legs of $0e."
+EGS_RANGE_HIT_LEGS_RANGE_E	"&BC&You hit the legs of $0e, he is now slowed."
+
+EGS_RANGE_AIM_ARM_E		"&BL&You aim at the arms of $0e."
+EGS_RANGE_HIT_ARM_E		"&BC&You hit the arms of $0e, his fighting skills decreased."
+
+EGS_RANGE_AIM_HEAD_E		"&BL&You aim at the head of $0e."
+EGS_RANGE_HIT_HEAD_E		"&BC&You hit the head of $0e."
+
+EGS_RANGE_AIM_TORSO_E		"&BL&You aim at the chest of $0e."
+EGS_RANGE_HIT_TORSO_E		"&BC&You hit the chest of $0e."
+
+# nb : the stun effect msg is managed direclty by the stun functionality
+
+EGS_RANGE_AIM_E				"&BL&You aim at $0e."
+EGS_RANGE_AIM_POINT_BLANK_E		"&BL&You aim at $0e at point blank range."
+#EGS_RANGE_HIT_E			"&BL&You shoot at $0e."
+
+EGS_RANGE_AIM_LIGHT_ARMOR_DEFECT_E	"&BL&You aim at the weak spot in the light armor of $0e."
+#EGS_RANGE_HIT_LIGHT_ARMOR_DEFECT_E	"&BC&You hit the weak spot in the light armor of $0e."
+
+EGS_RANGE_AIM_MEDIUM_ARMOR_DEFECT_E	"&BL&You aim at the weak spot in the medium armor of $0e."
+#EGS_RANGE_AIM_MEDIUM_ARMOR_DEFECT_E	"&BC&You hit the weak spot in the medium armor of $0e."
+
+EGS_RANGE_AIM_HEAVY_ARMOR_DEFECT_E	"&BL&You aim at the weak spot in the heavy armor of $0e."
+#EGS_RANGE_AIM_MEDIUM_ARMOR_DEFECT_E	"&BC&You hit the weak spot in the medium armor of $0e."
+
+EGS_RANGE_QUICK_THROW_GRENADE_S		"&BC&You quickly throw a $0s."
+EGS_RANGE_FAR_THROW_GRENADE_S		"&BC&You have thrown your $0s far."
+EGS_RANGE_MASSIVE_THROW_GRENADE_S	"&BC&You have thrown a packet of $0s."
+EGS_RANGE_FAST_SHOT_E			"&BC&You have blasted $0e."
+EGS_RANGE_SHOOT_AND_RUN_E		"&BC&You shoot fast at $0e."
+
+#####################
+# melee fighter msg
+#####################
+EGS_MELEE_YOU_DEFLECT			"&BC&You take a defensive stance to deflect your adversary’s blows onto your armour."
+EGS_MELEE_DEFLECT_E			"&RG&$0e takes a defensive stance to deflect your blows onto his armour."
+EGS_MELEE_DEFLECT_INEFFECTIVE		"&RG&Your defensive stance is ineffective against these attacks." 
+EGS_MELEE_YOU_SPINNING_STROKE		"&BC&You perform a spinning stroke."
+EGS_MELEE_SPINNING_STROKE_E		"&RG&$0e performs a spinning stroke."
+EGS_MELEE_YOU_SPINNING_STROKE_END	"&BC&You stop your spinning stroke."
+EGS_MELEE_SPINNING_STROKE_END_E		"&RG&$0e stops his spinning stroke."
+
+EGS_MELEE_YOU_WHIRLING_BLOW		"&BC& You perform a whirling stroke."
+EGS_MELEE_WHIRLING_BLOW_E		"&RG&$0e performs a whirling stroke."
+EGS_MELEE_YOU_WHIRLING_BLOW_END		"&BC&You stop your whirling stroke."
+EGS_MELEE_WHIRLING_BLOW_END_E		"&RG&$0e stops his spinning stroke."
+
+# bestial rage
+EGS_MELEE_YOU_BESTIAL_RAGE		"&BC&You go into a besial rage."
+EGS_MELEE_BESTIAL_RAGE_E		"&RG&$0e goes into a besial rage."
+EGS_MELEE_YOU_BESTIAL_RAGE_END		"&BC&Your bestial rage stops, you regain your composure."
+
+# blind fury
+EGS_MELEE_YOU_BLIND_FURY		"&BC&You go into a blind fury."
+EGS_MELEE_BLIND_FURY_E			"&RG&$0e goes into a blind fury."
+EGS_MELEE_YOU_BLIND_FURY_END		"&BC&Your blind fury stops, you regain your composure."
+
+# thrust of ebony (percer la garde)
+EGS_MELEE_YOU_THRUST_OF_EBONY		"&BC&Your thrust of ebony gets through your adversary’s defense."
+EGS_MELEE_THRUST_OF_EBONY_E		"&RG&$0e’s thrust of ebony gets through your defense."
+EGS_MELEE_YOU_THRUST_OF_EBONY_END	"&BC&You stop your thrust of ebony attacks."
+EGS_MELEE_THRUST_OF_EBONY_END_E		"&RG&$0e stops his thrust of ebony attacks."
+
+# kami fist/ major kami fist (coup minor/coup major)
+EGS_MELEE_YOU_KAMI_FIST			"&BC&Kamis Fist surges in you."
+EGS_MELEE_KAMI_FIST_E			"&RG&Kamis Fist surges in $0e."
+EGS_MELEE_YOU_KAMI_FIST_END		"&BC&Kamis Fist vanish from you."
+EGS_MELEE_KAMI_FIST_END_E		"&RG&Kamis Fist vanishes from $0e."
+
+# mandrake fist/ major mandrake fist 
+EGS_MELEE_YOU_MANDRAKE_FIST		"&BC&Mandrake Fist surges in you."
+EGS_MELEE_MANDRAKE_FIST_E		"&RG&Mandrake Fist surges in $0e."
+EGS_MELEE_YOU_MANDRAKE_FIST_END		"&BC&Mandrake Fist vanish from you."
+EGS_MELEE_MANDRAKE_FIST_END_E		"&RG&Mandrake Fist vanishes from $0e."
+
+#####################
+# harvester msg
+#####################
+EGS_HARVEST_YOU_TRACK_E			"&BL&You track $0e."
+EGS_HARVEST_YOU_TRACK_E_END		"&BL&You stop tracking $0e."
+
+EGS_HARVEST_YOU_STUN_E_BEGIN		"&BL&You try to clobber $0e."
+EGS_HARVEST_YOU_STUN_E_APPLY		"&BC&You clobber $0e."
+
+EGS_HARVEST_YOU_HURT_E_BEGIN		"&BL&You wound $0e."
+EGS_HARVEST_YOU_HURT_E_APPLY		"&BC&You wounded $0e."
+
+#####################
+# caster Healer msg
+#####################
+
+#Common
+EGS_CH_MINOR_LIFE_HEAL_SELF_I			"&BC&You healed yourself at the cost of $0i life points."
+EGS_CH_SPECTATORS_MINOR_LIFE_HEAL_SELF_EI	"&BC&$0e healed himself at the cost of $1i life points."
+EGS_CH_MINOR_U_LIFE_HEAL_EI			"&BC& You healed $0e at the cost $1i life points."
+EGS_CH_MINOR_LIFE_HEAL_EI			"&BC&$0e healed you at the cost of $1i life points."
+EGS_CH_SPECTATORS_MINOR_LIFE_HEAL_EEI		"&BC&$0e healed $1e at the cost of $2i life points."
+
+EGS_CH_MINOR_STAMINA_HEAL_SELF_I		"&BC& You healed yourself at the cost of $0i stamina points."
+EGS_CH_SPECTATORS_MINOR_STAMINA_HEAL_SELF_EI	"&BC&$0e healed himself at the cost of $1i stamina points."
+EGS_CH_MINOR_U_STAMINA_HEAL_EI			"&BC& You healed $0e at the cost of $1i stamina points."
+EGS_CH_MINOR_STAMINA_HEAL_EI			"&BC&$0e healed you at the cost of $1i stamina points."
+EGS_CH_SPECTATORS_MINOR_STAMINA_HEAL_EEI	"&BC&$0e healed $1e at the cost of $2i stamina points."
+
+EGS_CH_MINOR_SAP_HEAL_SELF_I			"&BC& You healed yourself at the cost of $0i sap points."
+EGS_CH_SPECTATORS_MINOR_SAP_HEAL_SELF_EI	"&BC&$0e healed himself at the cost of $1i sap points."
+EGS_CH_MINOR_U_SAP_HEAL_EI			"&BC& You healed $0e at the cost of $1i sap points."
+EGS_CH_MINOR_SAP_HEAL_EI			"&BC&$0e healed you at the cost of $1i sap points."
+EGS_CH_SPECTATORS_MINOR_SAP_HEAL_EEI		"&BC&$0e healed $1e at the cost of $2i sap points."
+
+EGS_CH_MINOR_U_REGEN_LIFE_E			"&VE&You accelerate the natural healing process of $0e."
+EGS_CH_MINOR_REGEN_LIFE_E			"&VE&$0e accelerates your natural healing process."
+EGS_CH_MINOR_U_REGEN_STAMINA_E			"&VE& You accelerate the natural stamina recovery process of $0e."
+EGS_CH_MINOR_REGEN_STAMINA_E			"&VE&$0e accelerates your natural stamina recovery process."
+EGS_CH_MINOR_U_REGEN_SAP_E			"&VE& You accelerate the natural sap recovery process of $0e."
+EGS_CH_MINOR_REGEN_SAP_E			"&VE&$0e accelerates your natural sap recovery process."
+
+
+# Fyros
+EGS_CH_MINOR_U_ALCHEMY_STA_EI			"&BC&You transfer $1i stamina points to $0e."
+EGS_CH_MINOR_ALCHEMY_STA_EI			"&BC&$0e gives you $1i stamina points."
+EGS_CH_HIGH_U_REGEN_STAMINA_E			"&BC& You accelerate the regeneration of life points and stamina of $0e."
+EGS_CH_HIGH_REGEN_STAMINA_E			"&BC&$0e accelerates your regeneration of life points and stamina."
+
+# Matis
+EGS_CH_MINOR_U_STEAL_STAMINA_EI			"&BC&You stole $1i stamina points from $0e."
+EGS_CH_MINOR_STEAL_STAMINA_EI			"&RG&$0e magically stole $1i stamina points from  you."
+EGS_CH_MINOR_U_STEAL_HP_EI			"&BC& You stole $1i life points from $0e."
+EGS_CH_MINOR_STEAL_HP_EI			"&RG&$0e magically stole $1i life points from you."
+EGS_CH_MINOR_U_STEAL_SAP_EI			"&BC& You stole $1i sap points from $0e."
+EGS_CH_MINOR_STEAL_SAP_EI			"&RG&$0e magically stole $1i sap points from you."
+EGS_CH_MAJOR_U_STEAL_STAMINA_E			"&BC& You accelerate the regeneration of stamina and reducing that of $0e."
+EGS_CH_MAJOR_STEAL_STAMINA_E			"&RG&$0e reduces your regeneration of stamina."
+EGS_CH_MAJOR_STEAL_STAMINA_END			"&BC&The effects of the theft of stamina regeneration have ceased."
+EGS_CH_MAJOR_U_STEAL_HP_E			"&BC& You accelerate the regeneration of life points et and reducing those of $0e."
+EGS_CH_MAJOR_STEAL_HP_E				"&RG&$0e reduces your regeneration of life points."
+EGS_CH_MAJOR_STEAL_HP_END			"&BC& The effects of the theft of life point regeneration have ceased."
+EGS_CH_MAJOR_U_STEAL_SAP_E			"&BC& You accelerate the regeneration of sap points et and reducing those of $0e."
+EGS_CH_MAJOR_STEAL_SAP_E			"&RG&$0e reduces your regeneration of sap points."
+EGS_CH_MAJOR_STEAL_SAP_END			"&BC& The effects of the theft of sap regeneration have ceased."
+
+
+# Tryker
+EGS_CH_MINOR_U_ALCHEMY_HP_EI			"&BC&You tansfer $1i life points to $0e."
+EGS_CH_MINOR_ALCHEMY_HP_EI			"&BC&$0e gives you $1i life points."
+EGS_CH_HIGH_U_REGEN_LIFE_E			"&VE& You accelerate the regeneration of life points and stamina of $0e."
+EGS_CH_HIGH_REGEN_LIFE_E			"&VE&$0e accelerates your regeneration of life points and stamina."
+
+# Zorai
+EGS_CH_MINOR_U_ALCHEMY_SAP_EI			"&BC& You transfer $1i sap points to $0e."
+EGS_CH_MINOR_ALCHEMY_SAP_EI			"&BC&$0e gives you $1i sap points."
+EGS_CH_HIGH_U_REGEN_SAP_E			"&VE& You accelerate the regeneration of life points and sap of $0e."
+EGS_CH_HIGH_REGEN_SAP_E				"&VE&$0e accelerates your regeneration of life points and sap."
+
+#####################
+# suffix msg
+#####################
+
+EGS_DARK_MAGIC						"&RG&You sense the rumblings of the wrath of the kamis"
+
+#####################
+# temp msg
+#####################
+
+EGS_TMP_GENERIC_EFFECT_BEGIN		"&BC&$0e casts the $1s effect at you"
+EGS_TMP_GENERIC_EFFECT_END			"&BC&The $0s effect has been dissipated "
+
+#####################
+# Digging deposit msg
+#####################
+WOS_KAMI_ALERTE						"&RG& Homin, beware of my wrath if thou do pillage my domain."
+WOS_KAMI_ANGRY						"&RG& Homin, why for thou plunder Atys ?"
+WOS_KAMI_FURY						"&RG& Homin, you have given me to wrath !"
+WOS_KAMI_BLACK_KAMI					"&RG& The enemies of the Kamis shall pay dearly !"
+
+#####################
+# taming
+#####################
+EGS_TAMING_CONVOY_SUCCESS 		"&JA&You have managed to make this pack animal obey your orders."
+EGS_TAMING_CONVOY_FAIL  		"&RG&This pack animal refuses to obey your orders and becomes stubborn for some time."
+EGS_TAMING_CONVOY_END  			"&RG&Your caravan has been broken up." 
+EGS_TAMING_TOOL_NEEDED_S 		"&RG&You need a $0s to use this ability."
+EGS_TAMING_INVALID_MODE_COMBAT 		"&RG&You cannot use a taming tool while in combat."
+EGS_TAMING_CONVOY_REFUSE 		"&RG&This pack animal is stubborn and refuses to obey any orders, try later."
+
+#####################
+#locations related messages
+#####################
+EGS_LEAVE_PLACE				"&JA&You leave $0s."
+EGS_ENTER_PLACE				"&JA&You enter $0s."
+EGS_LEAVE_REGION			"&JA&You leave the $0s area."
+EGS_ENTER_REGION 			"&JA&You enter the $0s area."
+EGS_ENTER_CONTINENT			"&JA&You enter the $0s continent."
+EGS_LEAVE_CONTINENT			"&JA&You leave the $0s continent."	
+
+EGS_ANSWER_WHERE			"&JA&You are in $2s, in the $1s area, in the $0s continent."
+EGS_ANSWER_WHERE_NO_PLACE		"&JA&You are in the $1s area, located in the $0s continent."
+EGS_ANSWER_WHERE_BUILDING		"&JA&You are in a building."
+
+#####################
+#team related messages
+#####################
+OPS_ALREADY_HAS_A_TEAM 		"&RG&You already belong to a team, leave your present team before joining another one."
+OPS_CREATE_TEAM 		"&BC&You have created a new team."
+OPS_TEAM_INVITE_E 		"&BC&You offer $0e to join your team"
+OPS_JOIN_TEAM_PROPOSAL_M_E 	"&JA&$0e offers you to join his team."
+OPS_JOIN_TEAM_PROPOSAL_F_E 	"&JA&$0e offers you to join her team."
+OPS_JOIN_TEAM_ACCEPT_E		"&BC&$0e joins your team."
+OPS_JOIN_TEAM_DECLINE_E		"&BC&$0e declines your offer to join your team."
+OPS_JOIN_TEAM_U_DECLINE_E	"&BC&You refuse to join the team of $0e."
+OPS_JOIN_TEAM_E			"&BC&You join the team of $0e"
+OPS_U_LEAVE_TEAM_E		"&BC&You left the team of $0e"
+OPS_LEAVE_TEAM_E		"&JA&$0e left your team."
+OPS_TEAM_DISOLVED		"&RG&Your were the last member of your team, so it has been disolved and you no longer belong to a team."
+OPS_TEAM_U_NEW_LEADER		"&JA&Your team leader has left the team, you are the new leader."
+OPS_TEAM_NEW_LEADER_EE		"&JA&Your team leader, $0e, has left the team, $1e is the new leader."
+
+OPS_U_KICKED_TEAM_E		"&JA&You have been kicked out of the team of $0e."
+OPS_KICKED_TEAM_E		"&JA&$0e has been kicked out of your team."
+
+OPS_TEAM_MAX_SIZE_REACHED	"&JA&The team has reached its size limit and cannot accept anymore players."
+OPS_TEAM_NOT_A_PLAYER_E		"&RG&$0e isn't a player. Only players can be teammates."
+OPS_ALREADY_HAS_TEAM_E		"&RG&$0e already belongs to a team."
+OPS_ALREADY_HAS_PROPOSAL_E	"&RG&$0e is already answering an invitation."
+
+#####################
+#spell effect related messages
+#####################
+OPS_EFFECT_SLOW_BEGIN		"&RG&You move more slowly."
+OPS_EFFECT_SLOW_END			"&BC&You no longer move slowly."
+
+OPS_EFFECT_SLOW_BEGIN_E		"&BC&$0e moves more slowly."
+OPS_EFFECT_SLOW_END_E		"&BC&$0e no longer moves slowly."
+
+OPS_EFFECT_STUN_BEGIN 		"&RG&You are stunned."
+OPS_EFFECT_STUN_END			"&BC&You are no longer stunned."
+
+OPS_EFFECT_STUN_BEGIN_E		"&BC&$0e is stunned."
+OPS_EFFECT_STUN_END_E		"&BC&$0e is no longer stunned."
+
+#####################
+#system related message
+#####################
+# OPS_WELCOME					"&JA&Welcome to Ryzom !"
+
+#####################
+#trade related message
+#####################
+# OPS_NOT_ENOUGHT_SEED 		"&RG&You are not rich enough to buy this."
+# EGS_NOT_ENOUGHT_SP		"&RG&You do not have enough skill points to buy this."
+OPS_BUY_REPORT_U 		"&JA&You have paid $0u seeds for your purchase."
+OPS_SALE_REPORT_U 		"&JA&You have received $0u seeds for the sale."
+# EGS_CANT_SELL_ANYTHING 		"&JA&I have nothing of interest for you to buy, sorry but come back later."
+# EGS_ALREADY_HAVE_MOUNT 		"&RG&You can only have one mektoub mount."
+# EGS_CANT_BUY_ANOTHER_PACKER 	"&JA&You can't buy another mektoub packer."
+
+EGS_LEARN_BRICK_S 		"&JA&You learn the skill : $0s."
+EGS_LEARN_PLAN_S 		"&JA&You learn crafting plan $0s."
+EGS_BRICKS_ALREADY_KNOWN_S 	"&JA&You already know the skill $0s, it is not worth you learning it again."
+EGS_PLAN_ALREADY_KNOWN_S 	"&JA&You already know plan $0s, it is not worth you learning it again."
+
+
+#####################
+#pact related message
+#####################
+# OPS_PACT_GAIN_U			"&JA&You have won a survival pact of level $0u."
+
+#####################
+#exchange related message
+#####################
+# OPS_EXCHANGE_IMPOSSIBLE		"&RG&You can't invite someone to exchange if you are already trading"
+OPS_EXCHANGE_BUSY		"&RG&$0e is already busy"
+OPS_EXCHANGE_DECLINE		"&RG&$0e doesn't want to exchange with you"
+OPS_EXCHANGE_END		"&BC&$0e ended exchange"
+OPS_EXCHANGE_OK			"&BC&exchange accepted on both sides"
+OPS_EXCHANGE_LOCKED		"&BC&$0e already accepted the exchange, cancel or acccept"
+OPS_EXCHANGE_HAND		"&RG&you cannot exchange an item that you got from the ground. Put it in your bag first!!"
+OPS_EXCHANGE_TOO_FAR	"&RG&You are too far from $0e to exchange something with him"
+OPS_EXCHANGE_ACCEPT_TOO_FAR	"&RG&$0e accepted the exchange but is too far from you"
+
+#####################
+#sentence latency not yet finished
+#####################
+EGS_SENTENCE_LATENT		"&RG&One or more bricks in this sentence are still latent, execution impossible."
+
+#####################
+#Jobs management message
+#####################
+EGS_NOT_HAVE_JOB		"&JA&You do not know the job $0s."
+EGS_NOT_SET_JOB_STATUS		"&JA&You can't change the job status at this time for job $0s."
+
+#####################
+#Missions messages
+#####################
+# EGS_MISSION_STEP_SUCCESS	"&JA&You have finished a mission step"
+# EGS_MISSION_SUCCESS		"&JA&You have completed a mission"
+EGS_MISSION_FAILED		"&JA&You failed to accomplish a mission."
+
+#####################
+#Guild messages
+#####################
+
+EGS_GUILD_INVALID				"&RG&Invalid guild"
+EGS_GUILD_NAME_EXISTS				"&RG&Guild name already used or invalid"
+EGS_ALREADY_IN_A_GUILD				"&RG&You are already in a guild"
+EGS_NO_ROOM_FOR_FLAG				"&RG&You have no room in you bag for the guild flag. Free a bag slot"
+
+EGS_GUILD_LEADER_DISMISS			"&RG&You are not the guild anymore"
+EGS_GUILD_LEADER_CANT_DISMISS			"&RG&You are alone in your guild, so you cannot abandon the leadership. Quit the Guild to Destroy it"
+EGS_SET_SUCCESSOR_FAIL				"&RG&You are alone in your guild, so you cannot name a successor"
+EGS_ABANDON_TITLE_FAILED			"&RG&Command reserved to guild officers"
+EGS_NAME_OFFICER_FAILED				"&RG&Only basic members of your guild can be named Officers, Only $0i officers are allowed"
+EGS_REMOVE_OFFICER_FAILED			"&RG&The targetPlayer is not an officer"
+EGS_NOT_GUILD_LEADER				"&RG&Command reserved to guild leaders"
+EGS_NOT_GUILD_LEADER_NOR_OFFICER		"&RG&Command reserved to guild leaders and officers"
+EGS_NOT_GUILD_MEMBER				"&RG&You are not a guild member"
+EGS_GUILD_KICKER				"&RG&You were kicked from your guild by $0s"
+EGS_GUILD_KICK_FAILED				"&RG&You can only kick basic members of your guild"
+EGS_GUILD_LEAVE					"&RG&You left your guild"
+EGS_ALREADY_GUILD_MEMBER			"&RG&$0e is already a member of a guild"
+EGS_ALREADY_HAS_JOIN_PROPOSAL			"&RG&$0e already has a guild proposition. He must cancel it to receive yours"
+EGS_GUILD_JOIN_PROPOSAL				"&RG&$0s Offers you to join the guild '$1s'."
+EGS_NO_GUILD_JOIN_PROPOSAL			"&RG&Nobody invited you in a guild"
+EGS_INVALID_GUILD_JOIN_PROPOSAL			"&RG&The guild that invited you doesn't exist anymore"
+EGS_GUILD_JOIN_DECLINE_OK			"&RG&You refused to join guild $0s"
+
+EGS_GUILD_CREATED				"&JA&guild $0s has been created"
+EGS_GUILD_EVENT_LOG				"&JA&Recent events of your guild :"
+
+EGS_GUILD_ENTER_LIFT				"&JA&$You have entered a lift"
+EGS_GUILD_LEAVE_LIFT				"&JA&$You have left a lift"
+
+
+
+EGS_GUILD_EVENT_QUITGUILD				"&JA&$0s left your guild"
+EGS_GUILD_EVENT_ACCEPTJOINPROPOSAL		"&JA&$0s becomes member of your guild"
+EGS_GUILD_EVENT_DECLINEJOINPROPOSAL		"&JA&$0s refuse to join your guild"
+
+EGS_GUILD_EVENT_QUITGUILD_SELF				"&JA&$You left your guild"
+EGS_GUILD_EVENT_ACCEPTJOINPROPOSAL_SELF		"&JA&$You join a guild"
+EGS_GUILD_EVENT_DECLINEJOINPROPOSAL_SELF	"&JA&$You refused to join this guild"
+
+
+EGS_GUILD_EVENT_QUITLEADERSHIP			"&JA&$0s is not the leader of your guild anymore. $1s succeeds him"
+EGS_GUILD_EVENT_KICKMEMBER				"&JA&$0s kicked $1s out of your guild"
+EGS_GUILD_EVENT_JOINPROPOSAL			"&JA&$0s proposed $1s to join your guild"
+
+EGS_GUILD_EVENT_QUITLEADERSHIP_SRC_SELF	"&JA&$You are not the leader of your guild anymore. $1s succeeds you"
+EGS_GUILD_EVENT_KICKMEMBER_SRC_SELF	"&JA&$You kicked $1s out of your guild"
+EGS_GUILD_EVENT_JOINPROPOSAL_SRC_SELF	"&JA&$You proposed $1s to join your guild"
+
+EGS_GUILD_EVENT_QUITLEADERSHIP			"&JA&$0s is not the leader of your guild anymore. You succeed him"
+EGS_GUILD_EVENT_KICKMEMBER				"&JA&$0s kicked you out of the guild"
+EGS_GUILD_EVENT_JOINPROPOSAL			"&JA&$0s proposed you to join his guild"
+
+
+
+
+#EGS_GUILD_EVENT_FRIENDPROPOSAL
+#EGS_GUILD_EVENT_DECLINEFRIENDPROPOSAL
+#EGS_GUILD_EVENT_ACCEPTFRIENDPROPOSAL

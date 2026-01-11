@@ -1,0 +1,4 @@
+# these sentences are used in the news system
+
+IOS_NEWS_FOOTBALL_SHORT_EEII "The last football match result between $0e and $1e is $2i-$3i"
+IOS_NEWS_FOOTBALL_LONG_EEII "The last football match result between $0e and $1e is $2i-$3i. yeah, that's great ! "

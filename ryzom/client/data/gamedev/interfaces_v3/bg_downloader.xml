@@ -1,0 +1,74 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+<lua file="bg_downloader.lua" />
+
+<proc id="bg_downloader_active">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:BG_DOWNLOADER|value=1" />
+	
+</proc>
+
+<proc id="bg_downloader_deactive">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:BG_DOWNLOADER|value=0" />
+</proc>
+
+
+<!-- Window for the background downloader -->
+<group type="container" id="bg_downloader" title="uiBGD_WindowTitle" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false"	
+	pop_min_w="410" pop_min_h="100" pop_max_w="410" pop_max_h="100"	
+	h="100"
+	w="410"
+	active="false"	
+	savable="true"
+	header_color="UI:SAVE:WIN:COLORS:OPT"
+	on_deactive="proc"	on_deactive_params="bg_downloader_deactive"
+	on_active="proc" on_active_params="bg_downloader_active"
+>	
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="800" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >				
+		<view type="text" id="text"	active="true" y="-12" posref="TM TM"	hardtext="" fontsize="10" color="255 255 255 255"
+		 auto_clamp="true"
+		 global_color="false"
+		/>
+		<view type="text" id="ellipsis"	active="true" y="0" posref="BR BL"	posparent="text" hardtext="" fontsize="13" color="255 255 255 255"
+		 global_color="false"
+		/>
+
+		<view type="bitmap" id="bm" active="false" y="1" x="-1" texture="W_answer_16_valid.tga" posparent="text" posref="ML MR"
+		 global_color="false"
+		/>
+		<view type="bar" id="progress" parent="" active="true" posparent="text" posref="BM TM" y="-2"
+		 global_color="false"
+		/>	
+
+		<group type="combo_box" id="prio" sizeref="w" w="32" x="0" y="-8" child_resize_h="true" child_resize_hmargin="6" linked_to_db="false" 
+		 posref="BM TM"
+		 posparent="progress"
+		 on_change="lua:bgdownloader:onChangePriority()" on_change_params=""
+		 tooltip="uiBGD_PriorityTooltip"
+		 global_color="false"
+		>		
+			<instance template="combo_box_def1" tooltip="uiBGD_PriorityTooltip"/>			
+			<combo_text name="uiBGD_Paused" />
+			<combo_text name="uiBGD_LowPriority" />
+			<combo_text name="uiBGD_NormalPriority" />			
+		</group>
+	</group>
+</group>
+
+<tree node="bg_downloader"/>
+
+</interface_config>

@@ -1,0 +1,77 @@
+
+/* Messages reçus par le GPMS */
+
+ADD_ENTITY( CEntityId id, sint32 x, sint32 y, sint32 z, float theta, uint32 sheetid, uint8 continent, sint32 cell )
+ADD_ENTITIES(uint32 entitiesCount, [CEntityId id, sint32 x, sint32 y, sint32 z, float theta, uint32 sheetid]+ )
+REPLACE_ENTITY( CEntityId, CEntityId id, sint32 x, sint32 y, sint32 z, float theta, uint32 sheetid, uint8 continent, sint32 cell )
+ADD_IA_OBJECT( CEntityId id, sint32 x, sint32 y, sint32 z, float theta, uint32 sheetid, uint8 continent, sint32 cell )
+REMOVE_ENTITY( CEntityId id )
+REMOVE_ENTITIES( list<CEntityId> ids )
+
+LOAD_CONTINENT( uint8 continentIndex, string name, string filePrefix )
+REMOVE_CONTINENT( uint8 continentIndex )
+CREATE_INDOOR_UNIT( uint32 cell )
+CREATE_BUILDING( uint8 continent, string buildingId, CVectorD position )
+
+CREATE_OBSTACLE( [string id, string file, CVectorD position, float angle]+ )
+SET_OBSTACLE( [string id, bool obstacle]+ )
+REMOVE_OBSTACLE( [string id]+ )
+
+CREATE_CYL_TRIGGER( CEntityId id, uint8 continent, CVectorD position, float radius, float height )
+TRIGGER_SUBSCRIBE( string patatName, uint16 patatId )					// patatId = user patat id associated to patatName, will be used for following messages instead of patatName
+TRIGGER_UNSUBSCRIBE( uint16 patatId )
+
+UPDATE_ENTITY_POS( Sid sid, sint32 x, sint32 y, sint32 z, float theta, TGameCycle tick )
+UPDATE_ENTITIES_POSITIONS( uint16 entitiesCount, [Sid sid, sint32 x, sint32 y, sint32 z, float theta, TGameCycle tick]+ )
+UPDATE_ENTITIES_POS( [Sid sid, sint32 x, sint32 y, sint32 z, float theta, TGameCycle tick]+ )
+ENTITY_TELEPORTATION( Sid sid, sint32 x, sint32 y, sint32 z, float theta, TGameCycle tick, uint8 continent, sint32 cell )
+ENTITY_POS( Sid sid )
+
+ATTACH( CEntityId father, CEntityId child, sint32 localX, sint32 localY, sint32 localZ )
+DETACH( CEntityId child )
+ACQUIRE_CONTROL( CEntityId slave, CEntityId master, sint32 localX, sint32 localY, sint32 localZ )
+LEAVE_CONTROL( CEntityId master )
+
+ACTIV_SELF( CEntityId player )
+DESACTIV_SELF( CEntityId player )
+
+ASK_VISION_ARROUND_ENTITY( CEntityId id, list<string> propertiesSubstrcribe )
+UNASK_VISION_ARROUND_ENTITY( CEntityId id )
+
+DATA_CONNECTION( string propertyName, uint64 time, ... )
+ASK_VISION_ZONE( )
+AGENT_VISON( uint64 agentId, [sint32 zoneX, sint32 zoneY]+ )
+
+VISION_REQUEST( sint32 requestId, sint32 x, sint32 y, sint32 range )	// all x, y and range expressed in mm
+
+/* Messages envoyes par le GPMS */
+
+ADD_CREATURE( CEntityId id, uint32 sheetId )							// -> OPS
+ADD_CREATURES( [CEntityId id, uint32 sheetId]+ )						// -> OPS
+REMOVE_CREATURE( CEntityId id )											// -> OPS
+
+CORRECT_PLAYER_POSITION( CEntityId id, sint32 x, sint32 y, sint32 z)	// -> IOS
+ENTITY_POS( CEntityId id, sint32 x, sint32 y, sint32 z, float theta)	// in answer to ENTITY_POS
+
+VISION_DELTA_2( CMessage msg )											// -> FS,  msg to decode using CPlayerVisionDelta: CPlayerVisionDelta::decodeVisionDelta(CMessage msg, list<CPlayerVisionDelta>)
+VISIONS_ARROUND_ENTITIES( CMessage msg )								// -> CMS, msg to decode using CCombatVisionDelta: CCombatVisionDelta::decodeVisionDelta(CMessage msg, list<CCombatVisionDelta>)
+
+REMOVE_ENTITY( CEntityId id )											// -> AgS
+VAR_CONNECTION( uint8 frequencyUpdate, list<string> properties )		// -> AgS
+ACK_VISION_ZONE( )														// -> AgS, in answer to ASK_VISION_ZONE
+AGENT_VISION( [CEntityId id, CVectorD position, CVector heading, float speed, uint32 sheetId]+ )
+
+PTRIG_IN( sint32 triggerId, TDataSetRow entityIndex, CVectorD triggerPos )	// -> EGS
+PTRIG_OUT( sint32 triggerId, TDataSetRow entityIndex )					// -> EGS
+
+TRIG_IN( CEntityId triggerId, CEntityId entityId )
+TRIG_OUT( CEntityId triggerId, CEntityId entityId )
+
+TRIGGER_IN( [uint16 patatId, vector<CEntityId> entitiesIn]+ )
+TRIGGER_OUT( [uint16 patatId, vector<CEntityId> entitiesOut]+ )
+
+VISION_ANSWER( sint32 requestId, [CEntityId id, sint32 range]* )		// range in mm, cf. VISION_REQUEST
+
+USED_CONTINENTS ( vector< string > )								// vecteur contenant les noms de continents untilisés. L'index dans le vecteur est leur id de continent
+
+ENTER_CONTINENT ( CEntityId playerId ,  uint8 continentId )

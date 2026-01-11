@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="notes" Type="Type" Filename="bigedit.typ"/>
+  <ELEMENT Name="level offset" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="repeat action" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="repeat action type" Type="Type" Filename="action_typ.typ"/>
+  <ELEMENT Name="punctual action 1 phrase" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="punctual action 1 repeat rate" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="punctual action 1 type" Type="Type" Filename="action_typ.typ"/>
+  <ELEMENT Name="punctual action 2 phrase" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="punctual action 2 repeat rate" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="punctual action 2 type" Type="Type" Filename="action_typ.typ"/>
+  <ELEMENT Name="Actor Setting" Type="Type" Filename="filename.typ" FilenameExt="*.player"/>
+  <ELEMENT Name="Target" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="TargetDistance" Type="Type" Filename="float.typ"/>
+  <LOG>Wed Sep 25 10:36:12 2002 (miller) Dfn Structure = 
+Wed Sep 25 10:45:31 2002 (miller) Dfn Structure = 
+Wed Sep 25 10:51:04 2002 (miller) Dfn Structure = 
+Wed Sep 25 10:51:50 2002 (miller) Dfn Structure = 
+Wed Sep 25 15:51:11 2002 (miller) Dfn Structure = 
+Mon Oct 21 11:04:34 2002 (saffray) Dfn Structure = 
+Mon Oct 21 11:38:02 2002 (saffray) Dfn Structure = 
+Mon Oct 21 11:53:16 2002 (saffray) Dfn Structure = 
+Mon Oct 21 11:54:07 2002 (saffray) Dfn Structure = 
+Mon Oct 21 11:55:48 2002 (saffray) Dfn Structure = 
+Fri Dec 13 19:33:13 2002 (brigand) Dfn Structure = </LOG>
+</DFN>

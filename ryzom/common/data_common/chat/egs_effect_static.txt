@@ -1,0 +1,115 @@
+# entity resists to a STUN
+EGS_EFFECT_U_STUN_RESIST_E		"&BC&You resist a stunning shot from $0e."
+EGS_EFFECT_STUN_RESIST			"&RG&Your enemy resists the shock and is not stunned."
+
+# furie meurtrière /  murderous frenzy
+EGS_EFFECT_U_ENTER_FRENZY		"&BC&You enter a fury."
+EGS_EFFECT_ENTER_FRENZY_E		"&BC&$0e enters a fury."
+
+EGS_EFFECT_U_LEAVE_FRENZY		"&BC&Your fury ends, your mind is clear again."
+EGS_EFFECT_LEAVES_FRENZY_E		"&BC&$0e leaves fury."
+
+EGS_EFFECT_U_FEAR_FRENZY_E		"&RG&$0e's rage makes you panic !"
+EGS_EFFECT_FEAR_FRENZY			"&BC&Your enemy panics at your rage."
+
+EGS_EFFECT_U_RESIST_FEAR_FRENZY_E	"&BC&You keep cool before $0e's rage."
+EGS_EFFECT_RESIST_FEAR_FRENZY		"&RG&Your enemy keeps cool before your rage."
+
+EGS_EFFECT_U_FEAR_FRENZY_END		"&BC&The fear effect ceases and you regain your cool."
+EGS_EFFECT_FEAR_FRENZY_END		"&RG&Your enemy regains his cool."
+
+
+
+# coup saignant
+EGS_EFFECT_U_RESIST_BLEED_E		"&BC&You resist a Bloody Strike from $0e."
+EGS_EFFECT_RESISTS_BLEED		"&RG&Your enemy has resisted and doesn't bleed."
+
+EGS_EFFECT_U_BLEED_E			"&RG&You bleed as a result of $0e's blow "
+EGS_EFFECT_BLEED			"&BC&You bleed."
+
+EGS_EFFECT_U_BLEED_END			"&BC&You stop bleeding."
+EGS_EFFECT_BLEED_END			"&BC&Your enemy stops bleeding."
+
+EGS_EFFECT_U_LOSE_HP_BLEED		"&RG&You lose hit points as a result of your bleeding."
+EGS_EFFECT_LOSE_HP_BLEED		"&BC&Your enemy loses hit points because of his bleeding."
+
+# EGS_EFFECT_U_FEAR_FRENZY_END		"&BC&The fear effect ceases and you regain your cool."
+# EGS_EFFECT_FEAR_FRENZY_END		"&RG&Your enemy regains his cool."
+
+# Peur (lacération)
+EGS_EFFECT_U_RESIST_FEAR_E		"&BC&You overcome your fear of $0e."
+EGS_EFFECT_RESISTS_FEAR			"&RG&Your enemy resists and is not affraid of you"
+
+EGS_EFFECT_U_FEAR_E			"&RG&You are affraid of $0e"
+EGS_EFFECT_FEAR				"&BC&Your enemy is affraid of you"
+
+EGS_EFFECT_U_FEAR_END			"&BC&Your fear ends."
+EGS_EFFECT_FEAR_END			"&RG&Your enemy's fear ends."
+
+# Furious boost
+EGS_EFFECT_YOU_FURIOUS_BOOST		"&VE&Your organism regenerates more quickly."
+EGS_EFFECT_FURIOUS_BOOST_E		"&VE&The organism of $0e regenerates more quickly."
+EGS_EFFECT_YOU_FURIOUS_BOOST_END	"&BC&The regeneration of your organism is back to normal."
+EGS_EFFECT_FURIOUS_BOOST_END_E		"&BC&The  organism of $0e no longer regenerates more quickly."
+
+# Major Furious boost
+EGS_EFFECT_YOU_MAJOR_FURIOUS_BOOST	"&VE&Your organism regenerates more quickly."
+EGS_EFFECT_MAJOR_FURIOUS_BOOST_E	"&VE&The organism of $0e regenerates more quickly."
+EGS_EFFECT_YOU_MAJOR_FURIOUS_BOOST_END	"&BC&The regeneration of your organism is back to normal."
+EGS_EFFECT_MAJOR_FURIOUS_BOOST_END_E	"&BC&The  organism of $0e no longer regenerates more quickly."
+
+
+# Rapid Burst
+EGS_EFFECT_YOU_RAPID_BURST		"&VE&Your stamina regenerates more quickly."
+EGS_EFFECT_RAPID_BURST_E		"&VE&The stamina of $0e regenerates more quickly."
+EGS_EFFECT_YOU_RAPID_BURST_END		"&BC&The regeneration of your stamina is back to normal."
+EGS_EFFECT_RAPID_BURST_END_E		"&BC&The  stamina of $0e no longer regenerates more quickly."
+
+# Major Rapid Burst
+EGS_EFFECT_YOU_MAJOR_RAPID_BURST	"&VE&Your stamina regenerates very quickly."
+EGS_EFFECT_MAJOR_RAPID_BURST_E		"&VE&The stamina of $0e regenerates very quickly."
+EGS_EFFECT_YOU_MAJOR_RAPID_BURST_END	"&BC&The regeneration of your stamina is back to normal."
+EGS_EFFECT_MAJOR_RAPID_BURST_END_E	"&BC&The stamina of $0e no longer regenerates very quickly."
+
+# Wind Shear (combat en milieu lacustre)
+EGS_EFFECT_YOU_WIND_SHEAR		"&BC&You have lured your enemy onto difficult ground, the enemy’s attacks are diminished."
+EGS_EFFECT_WIND_SHEAR_E			"&RG&$0e has lured you onto difficult ground, your attacks are diminished."
+EGS_EFFECT_YOU_WIND_SHEAR_END		"&RG&Your enemy recovers his balance."
+EGS_EFFECT_WIND_SHEAR_END		"&BC&You recover your balance."
+
+# Wind buffet (desequilibre en milieu lacustre)
+EGS_EFFECT_YOU_WIND_BUFFET		"&BC&Your enemy is off balance, his strikes are less powerful."
+EGS_EFFECT_WIND_BUFFET_E		"&RG&$0e throws you off balance, your strikes lose force."
+EGS_EFFECT_YOU_WIND_BUFFET_END		"&RG&Your enemy recovers his balance."
+EGS_EFFECT_WIND_BUFFET_END		"&BC&You recover your balance."
+
+
+# bullyragging (insultes)
+EGS_EFFECT_YOU_BULLYRAGGING		"&BC&Your insults destabilize your enemy."
+EGS_EFFECT_BULLYRAGGING_E		"&RG&$0e throws you off balance, your strikes are less powerful."
+EGS_EFFECT_YOU_BULLYRAGGING_END		"&RG&Your enemy recovers his balance."
+EGS_EFFECT_BULLYRAGGING_END		"&BC&You recover your balance."
+
+# bullyragging blast (grosse insulte)
+EGS_EFFECT_YOU_BULLYRAGGING_BLAST	"&BC&Your insults destabilize your enemy."
+EGS_EFFECT_BULLYRAGGING_BLAST_E		"&RG&$0e throws you off balance, your strikes are less powerful."
+EGS_EFFECT_YOU_BULLYRAGGING_BLAST_END	"&RG&Your enemy recovers his balance."
+EGS_EFFECT_BULLYRAGGING_BLAST_END	"&BC&You recover your balance."
+
+# blinding blade parry (parade mineure à la main gauche)
+EGS_EFFECT_YOU_BLINDING_BLADE_PARRY	"&BC&You start parrying attacks against you."
+EGS_EFFECT_BLINDING_BLADE_PARRY_E	"&RG&$0e starts parrying your attacks."
+EGS_EFFECT_YOU_BLINDING_BLADE_PARRY_END	"&BC&You stop parrying the attacks against you."
+EGS_EFFECT_BLINDING_BLADE_PARRY_END_E	"&BC&$0e stops parrying your attacks against him."
+
+# lightning parry (parade majeure à la main gauche/tous les ennemis)
+EGS_EFFECT_YOU_LIGHTNING_PARRY		"&BC&You start parrying attacks against you."
+EGS_EFFECT_LIGHTNING_PARRY_E		"&RG&$0e starts parrying your attacks."
+EGS_EFFECT_YOU_LIGHTNING_PARRY_END	"&BC&You stop parrying the attacks against you."
+EGS_EFFECT_LIGHTNING_PARRY_END_E	"&BC&$0e stops parrying your attacks against him."
+
+# minor/major sylphic sideslip (esquive mineure/majeure)
+EGS_EFFECT_U_SYLPHIC_SIDESLIP		"&BC&Your sharp reflexes enable you to dodge the blows."
+EGS_EFFECT_SYLPHIC_SIDESLIP_E		"&RG&$0e dodges the blows against him."
+EGS_EFFECT_U_SYLPHIC_SIDESLIP_END	"&BC&You stop dodging the blows."
+EGS_EFFECT_SYLPHIC_SIDESLIP_END_E	"&BC&$0e stops dodging the blows."

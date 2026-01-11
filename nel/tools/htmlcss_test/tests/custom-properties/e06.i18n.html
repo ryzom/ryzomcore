@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+a:lang(en) {--lang: 'en';}
+a:lang(de) {--lang: 'de';}
+a { test: var(--lang); }
+		</style>
+
+		<a lang="en" data-ruleset="test: 'en';">link</a>
+
+		<a lang="de" data-ruleset="test: 'de';">link</a>
+
+	</body>
+</html>

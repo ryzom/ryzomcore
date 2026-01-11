@@ -1,0 +1,1 @@
+set RC_ROOT=..

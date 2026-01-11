@@ -1,0 +1,36 @@
+# always compile crash report
+IF(WITH_QT OR WITH_QT5)
+  ADD_SUBDIRECTORY(crash_report)
+ENDIF()
+
+IF(WITH_NEL_TOOLS)
+  ADD_SUBDIRECTORY(bnp_make)
+  ADD_SUBDIRECTORY(snp_make)
+  ADD_SUBDIRECTORY(disp_sheet_id)
+  ADD_SUBDIRECTORY(extract_filename)
+  ADD_SUBDIRECTORY(lock)
+  ADD_SUBDIRECTORY(make_sheet_id)
+  ADD_SUBDIRECTORY(xml_packer)
+  ADD_SUBDIRECTORY(utf_generator)
+
+  IF(WITH_QT OR WITH_QT5)
+    ADD_SUBDIRECTORY(words_dic_qt)
+    ADD_SUBDIRECTORY(message_box_qt)
+  ENDIF()
+
+  IF(WIN32)
+    ADD_SUBDIRECTORY(exec_timeout)
+    ADD_SUBDIRECTORY(message_box)
+    ADD_SUBDIRECTORY(multi_cd_setup_fix)
+
+    IF(MFC_FOUND)
+      ADD_SUBDIRECTORY(branch_patcher)
+      ADD_SUBDIRECTORY(data_mirror)
+      ADD_SUBDIRECTORY(log_analyser)
+      ADD_SUBDIRECTORY(log_analyser_plug_ins)
+      ADD_SUBDIRECTORY(words_dic)
+    ENDIF()
+  ENDIF()
+
+  ADD_SUBDIRECTORY(probe_timers)
+ENDIF()

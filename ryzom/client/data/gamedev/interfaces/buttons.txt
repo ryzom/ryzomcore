@@ -1,0 +1,173 @@
+// Parameters :
+//-------------
+// BG_Mode_On:				{none, plain, stretch}		for the button when On
+// BG_Mode_Off:				{none, plain, stretch}		for the button when Off
+// BG_Mode_Dis:				{none, plain, stretch}		for the button when Disable
+// t_On:					'texture number'			for the button when On
+// t_Off:					'texture number'			for the button when Off
+// t_Dis:					'texture number'			for the button when Disable
+// RGBA_On:					4 numbers [0-255] (RGBA)	for the button when On
+// RGBA_Off:				4 numbers [0-255] (RGBA)	for the button when Off
+// RGBA_Dis:				4 numbers [0-255] (RGBA)	for the button when Disable
+
+
+// Default
+[...] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On:  4 t_Off:  4 t_Dis:  0 RGBA_On: 255 255 255 255 RGBA_Off: 150 150 255 255 RGBA_Dis: 100 100 100 255
+
+[1] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On:  993 t_Off:  994 t_Dis:  0 RGBA_On:  255 255 255 255 RGBA_Off:  255 255 255 255 RGBA_Dis: 100 100 100 255
+[2] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On:  993 t_Off:  994 t_Dis:  0 RGBA_On:  255 255 255 255 RGBA_Off:  255 255 255 255 RGBA_Dis: 100 100 100 255
+[3] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On:  993 t_Off:  994 t_Dis:  0 RGBA_On:  255 255 255 255 RGBA_Off:  255 255 255 255 RGBA_Dis: 100 100 100 255
+[4] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On:  995 t_Off:  996 t_Dis:  0 RGBA_On:  255 255 255 255 RGBA_Off:  255 255 255 255 RGBA_Dis: 100 100 100 255
+
+[6] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On:  997 t_Off:  998 t_Dis:  0 RGBA_On:  255 255 255 255 RGBA_Off:  255 255 255 255 RGBA_Dis: 100 100 100 255
+[7] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On:  997 t_Off:  998 t_Dis:  0 RGBA_On:  255 255 255 255 RGBA_Off:  255 255 255 255 RGBA_Dis: 100 100 100 255
+
+[9] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On:  997 t_Off:  12 t_Dis:  0 RGBA_On:  255 255 255 255 RGBA_Off:  255 255 255 255 RGBA_Dis: 100 100 100 255
+
+
+[102] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On:  4 t_Off:  3 t_Dis:  0 RGBA_On:  55 100 150 255 RGBA_Off:  50 200 150 255 RGBA_Dis: 100 100 100 255
+[24]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 22 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+[25]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 22 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+[26]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 22 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+[27]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 23 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+
+[28]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 25 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+[29]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 25 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+[30]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 25 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+[31]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 25 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+[32]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 25 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+
+[35]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 24 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+
+//lock/unlock (unlock = unselected, lock = selected)
+[37]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 26 t_Off: 27 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+// team
+[58]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 22 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+// family
+[60]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 22 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+
+//create team
+[61]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 21 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+//leave team
+[62]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 21 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+// create clade
+[67]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 23 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+//leave clade
+[68]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 23 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+// clade
+[70]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 22 t_Off:  0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255   0 RGBA_Dis: 100 100 100 255
+
+// the vote button
+[71]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 32 t_Off: 31 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+
+
+/***********POP-UP***************/
+// join team request
+[57]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 69 t_Off: 69 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+// invite to team
+[39]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 39 t_Off: 39 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+// invite to clade
+[69]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 69 t_Off: 69 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+
+// use preprog
+[42]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 42 t_Off: 42 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+// preprog1
+[43]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 44 t_Off: 43 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+[44]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 44 t_Off: 43 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+[45]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 44 t_Off: 43 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+[46]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 44 t_Off: 43 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+[47]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 48 t_Off: 47 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+
+
+
+
+//////////// Clade creation interface
+/ public
+[204]BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 201 t_Off: 202 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255 
+/secret
+[205]BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 203 t_Off: 204 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+/ create
+[207]BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 205 t_Off: 205 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+/ cancel
+[208]BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 206 t_Off: 206 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 255
+
+
+// Vote button in the election/vote interface
+[312]  BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 312 t_Off: 312 t_Dis:  313 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 255 255 255 128
+
+// Buttons for the inventory
+[405] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[406] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[407] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[408] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+
+[409] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[410] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[411] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[412] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+
+[413] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[414] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[415] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+
+[416] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[417] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+[418] BG_Mode_On: none  BG_Mode_Off: none RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255
+
+// Login OSD
+[703] BG_Mode_On: stretch t_On: 703 RGBA_On: 255 255 255 255 BG_Mode_Off: none RGBA_Off: 255 255 255 255
+
+// Character choice OSD.
+[801] BG_Mode_On: stretch t_On: 703 RGBA_On: 255 255 255 255 BG_Mode_Off: none RGBA_Off: 255 255 255 255
+
+[803] BG_Mode_Off: none BG_Mode_On: stretch t_On: 801 RGBA_On: 255 255 255 128
+[804] BG_Mode_Off: none BG_Mode_On: stretch t_On: 801 RGBA_On: 255 255 255 128
+[805] BG_Mode_Off: none BG_Mode_On: stretch t_On: 801 RGBA_On: 255 255 255 128
+[806] BG_Mode_Off: none BG_Mode_On: stretch t_On: 801 RGBA_On: 255 255 255 128
+[807] BG_Mode_Off: none BG_Mode_On: stretch t_On: 801 RGBA_On: 255 255 255 128
+[808] BG_Mode_Off: none BG_Mode_On: stretch t_On: 801 RGBA_On: 255 255 255 128
+[809] BG_Mode_Off: none BG_Mode_On: stretch t_On: 801 RGBA_On: 255 255 255 128
+
+// the accept buttons
+[1001] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 34 t_Off: 34 t_Dis:  0 RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255 RGBA_Dis: 100 100 100 255
+[1101] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 34 t_Off: 34 t_Dis:  0 RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255 RGBA_Dis: 100 100 100 255
+
+
+// the infos buttons
+[1002] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 36 t_Off: 36 t_Dis:  0 RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255 RGBA_Dis: 100 100 100 255
+[1102] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 36 t_Off: 36 t_Dis:  0 RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255 RGBA_Dis: 100 100 100 255
+
+
+// the reject buttons
+[1003] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 35 t_Off: 35 t_Dis:  0 RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255 RGBA_Dis: 100 100 100 255
+[1103] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 35 t_Off: 35 t_Dis:  0 RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255 RGBA_Dis: 100 100 100 255
+
+
+///////////////
+/ spell list
+[4012] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4099 t_Off: 0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 0 RGBA_Dis: 100 100 100 128
+[4013] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4013 t_Off: 4013 t_Dis:  4014 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 255 255 255 128
+[4016] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4013 t_Off: 4013 t_Dis:  4014 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 255 255 255 128
+
+/ scroll left
+[4113] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4113 t_Off: 4113 t_Dis:  0 RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255 RGBA_Dis: 100 100 100 255
+/ scroll right
+[4114] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4114 t_Off: 4114 t_Dis:  0 RGBA_On: 255 255 255 255 RGBA_Off: 255 255 255 255 RGBA_Dis: 100 100 100 255
+
+/ cancel button
+[4050] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4050 t_Off: 4050 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 128
+/ test
+[4051] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4051 t_Off: 4051 t_Dis:  4052 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 128
+/ validate
+[4052] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4051 t_Off: 4051 t_Dis:  4052 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 128
+
+
+/***************** Momorized spell list
+/ spell list
+[4310] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4099 t_Off: 0 t_Dis:  0 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 0 RGBA_Dis: 100 100 100 128 
+/ delete
+[4311] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4311 t_Off: 4311 t_Dis:  4311 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 128 
+/ close-cancel
+[4312] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4311 t_Off: 4311 t_Dis:  4311 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 128 
+/ cast
+[4313] BG_Mode_On: stretch BG_Mode_Off: stretch BG_Mode_Dis: stretch t_On: 4311 t_Off: 4311 t_Dis:  4311 RGBA_On: 255 255 255 128 RGBA_Off: 255 255 255 128 RGBA_Dis: 100 100 100 128 

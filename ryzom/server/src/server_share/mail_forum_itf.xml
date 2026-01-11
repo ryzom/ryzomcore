@@ -1,0 +1,61 @@
+<generator header_tag="MAIL_FORUM_ITF">
+
+	<include file="nel/misc/entity_id.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="MFS">
+
+		<!-- ############################################################## -->
+		<module_interface name="CMailForumNotifier">
+
+			<!-- ========================================================== -->
+			<method name="notifyMail" msg="MFS_NM">
+				<doc line="A character have received a mail"/>
+
+				<param type="uint32"						name="charId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="notifyForumMessage" msg="MFS_NFM">
+				<doc line="A new message have been posted in a guild forum"/>
+				<doc line="the notifier client send a notification for each member character"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="uint32"		name="guildId"/>
+				<param type="uint32"		name="threadId"/>
+			</method>
+
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<callback_interface name="CMailForumWeb" caller="php">
+			<doc line="Callback interface used by web server during 'outgame' operation"/>
+
+			<!-- ========================================================== -->
+			<!-- Generic reponse -->
+			<return name="invokeResult" msg="MFS_RET">
+				<doc line="Generic response to invoke."/>
+				<doc line="result contains 0 if no error, more than 0 in case of error"/>
+				<param type="uint32"		name="resultCode"/>
+				<param type="std::string"	name="resultString" php_serial="String" byref="true"/>
+			</return>
+		
+			<!-- ========================================================== -->
+			<invoke name="notifyMail" msg="MFS_NM">
+				<doc line="A character have received a mail"/>
+
+				<param type="uint32"		name="charId"/>
+			</invoke>
+
+			<!-- ========================================================== -->
+			<invoke name="notifyForumMessage" msg="MFS_NFM">
+				<doc line="A new message have been posted in a guild forum "/>
+
+				<param type="uint32"		name="guildId"/>
+				<param type="uint32"		name="forumId"/>
+			</invoke>
+
+		</callback_interface>
+	</namespace>
+</generator>
+

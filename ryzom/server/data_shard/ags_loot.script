@@ -1,0 +1,10 @@
+
+! AGS loot script
+
+		cmd	actorCreatePattern line
+		cmd	actorCreateSpacing 3
+		cmd	actorSetAttackDistance 1.000001
+		cmd	actorSetOrientation 135
+		cmd	actorCreatePosition 4647 -3207
+		cmd	actorCreateStationary
+		cmd	actorCreateGroup cuttroath_ma_tribe_lvl_01.creature darthvader 2

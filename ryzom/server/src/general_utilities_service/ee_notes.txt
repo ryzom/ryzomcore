@@ -1,0 +1,8 @@
+Module name:		Event Executor
+Short name:			EE
+Associated modules: EM (event manager)
+Requires:			Local SS Module
+
+Description
+-----------
+This module is responsible for installing files for events and for staring and stopping the events

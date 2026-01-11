@@ -1,0 +1,11 @@
+Module name:		Contest Executor
+Short name:			CE
+Associated modules:	CC (Contest Controler)
+Requires:			Naming Service
+
+Description
+-----------
+
+Todo
+----
+

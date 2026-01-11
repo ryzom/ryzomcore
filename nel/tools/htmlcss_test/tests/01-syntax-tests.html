@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+:lang(en) { --text: '(en)'; }
+:lang(de-DE) { --text: '(de-DE)'; }
+a { test: " (" var(--lang) ")"}
+
+div {
+	/* '--a' and '--b' are both 'initial' */
+	--should-not-exist: var(--a, var(--b, ( "p() " ) ), { "b" [ "r" ] });
+	/* 'before -var- after' */
+	--concate-test: 'before' var(--exists) 'after';
+	--exists: '-var-';
+	/* fallback should be at least one char */
+	--invalid-fallback: var(--exists,);
+	/* using fallback */
+	--fallback: var(--a, 'ok');
+}
+		</style>
+		<div data-ruleset="--concate-test: 'before' '-var-' 'after'; --exists: '-var-'; --fallback: 'ok';"
+			data-ruleunset="--should-not-exists: 1; --invalid-fallback: 1;" />
+
+		<a lang="en" data-ruleset="--text: '(en)';">link</a>
+		<a lang="de" data-ruleunset="--text: 1;">link</a>
+
+	</body>
+</html>

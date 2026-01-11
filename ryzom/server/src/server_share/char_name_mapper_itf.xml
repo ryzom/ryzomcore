@@ -1,0 +1,54 @@
+<generator header_tag="CHAR_NAME_MAPPER_ITF">
+
+	<include file="nel/misc/entity_id.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<!-- Interface used to communicate beween IOS and EGS -->
+	<namespace name="CNM">
+
+		<class name="TCharNameInfo">
+			<serial/>
+
+			<property type="NLMISC::CEntityId"	name="CharEid" byref="true"/>
+			<property type="ucstring"			name="CharName" byref="true"/>
+
+		</class>
+
+		<class name="TCharMappedInfo">
+			<serial/>
+
+			<property type="NLMISC::CEntityId"	name="CharEid" byref="true"/>
+			<property type="uint32"				name="StringId"/>
+
+		</class>
+
+		<!-- ############################################################## -->
+		<module_interface name="CCharNameMapper">
+			<doc line="Implemented by IOS, support the mapping of a set of name"/>
+
+			<!-- ========================================================== -->
+			<method name="mapCharNames" msg="MCN">
+				<doc line=""/>
+
+				<param type="std::vector &lt; TCharNameInfo &gt;"		name="charNameInfos"	byref="true" serial="Cont"/>
+			</method>
+
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<module_interface name="CCharNameMapperClient">
+			<doc line="Implemented by EGS, for returning the result of name mapping"/>
+			<doc line="(i.e the integer stringId mapped to each string)"/>
+
+			<!-- ========================================================== -->
+			<method name="charNamesMapped" msg="MCN">
+				<doc line=""/>
+
+				<param type="std::vector &lt; TCharMappedInfo &gt;"		name="charMappedInfos"	byref="true" serial="Cont"/>
+			</method>
+
+		</module_interface>
+
+	</namespace>
+</generator>
+

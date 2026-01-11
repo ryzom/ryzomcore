@@ -1,0 +1,27 @@
+<generator header_tag="COMMAND_EXECUTOR_ITF">
+
+	<include file="nel/misc/entity_id.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="CMDEXE">
+
+		<!-- ############################################################## -->
+		<module_interface name="CCommandExecutor">
+			<doc line=""/>
+
+			<!-- ========================================================== -->
+			<method name="sendCommand" msg="CE_SC">
+				<doc line=""/>
+
+				<param type="std::string"		name="commandName"	byref="true"/>
+				<param type="NLMISC::CEntityId"	name="senderEId"	byref="true"/>
+				<param type="bool"				name="haveTarget"/>
+				<param type="NLMISC::CEntityId"	name="targetEId"	byref="true"/>
+				<param type="std::string"		name="arg"			byref="true"/>
+			</method>
+
+		</module_interface>
+
+	</namespace>
+</generator>
+

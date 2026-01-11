@@ -1,0 +1,387 @@
+<generator header_tag="DATABASE_MAPPING">
+
+	<include file="ring_session_manager.h"/>
+	<include file="game_share/ring_session_manager_itf.h"/>
+	<include file="game_share/character_sync_itf.h"/>
+	<cpp-include file="stdpch.h"/>
+	<namespace name="RSMGR">
+
+		<enum name="TUserType">
+			<item name="ut_character" value="1"/>
+			<item name="ut_pioneer"/>
+		</enum>
+
+		<enum name="TKnownUserRelation">
+			<item name="rt_friend" value="1"/>
+			<item name="rt_banned"/>
+			<item name="rt_friend_dm"/>
+		</enum>
+
+		<class name="CKnownUser">
+			<database table="known_users"/>
+
+			<parent	class="CRingUser"		child_name="KnownUsers" relation="one-to-many" db_col="owner" cont="vector"/>
+			<parent	class="CCharacter"		child_name="KnownBy"	relation="one-to-many" db_col="targer_user" cont="vector"/>
+
+			<property type="uint32"			name="RelationId"	db_col="Id" unique_id="true" autogen="true"/>
+			<property type="uint32"			name="OwnerId"		db_col="owner"/>
+			<property type="uint32"			name="TargetUser"	db_col="targer_user"/>
+			<property type="uint32"			name="TargetCharacter"	db_col="targer_character"/>
+			<property type="TKnownUserRelation"	name="Relation"	db_col="relation_type"	enum="true"/>
+			<property type="std::string"	name="Comments"		db_col="comments"		byref="true"/>
+		</class>
+		
+		<class name="CSessionParticipant">
+			<database table="session_participant"/>
+
+			<parent	class="CCharacter"		child_name="SessionParticipants" relation="one-to-many" db_col="char_id" cont="vector"/>
+			<parent	class="CSession"		child_name="SessionParticipants" relation="one-to-many" db_col="session_id"	cont="vector"/>
+
+			<property type="uint32"			name="Id"			db_col="Id"			unique_id="true" autogen="true"/>
+			<property type="TSessionId"		name="SessionId"	db_col="session_id"/>
+			<property type="uint32"			name="CharId"		db_col="char_id"/>
+			<property type="TSessionPartStatus"	name="Status"	db_col="status"			enum="smart"/>
+			<property type="bool"			name="Kicked"		db_col="kicked"			default="false"/>
+
+		</class>
+
+		<class name="CCharacter">
+			<database table="characters"/>
+
+			<parent	class="CRingUser"		child_name="Characters"		relation="one-to-many" db_col="user_id"		cont="map"/>
+			<parent	class="CGuild"			child_name="Characters"		relation="one-to-many" db_col="guild_id"	cont="vector"/>
+
+			<property type="uint32"			name="CharId"		db_col="char_id" unique_id="true"/>
+			<property type="std::string"	name="CharName"		db_col="char_name" byref="true"/>
+			<property type="uint32"			name="UserId"		db_col="user_id"/>
+			<property type="uint32"			name="GuildId"		db_col="guild_id" default="0"/>
+			<property type="uint32"			name="BestCombatLevel"		db_col="best_combat_level" default="0"/>
+			<property type="uint32"			name="HomeMainlandSessionId" db_col="home_mainland_session_id" default="0"/>
+			<property type="std::string"	name="RingAccess"	db_col="ring_access" byref="true"/>
+			<property type="CHARSYNC::TRace"			name="Race"			db_col="race"	enum="smart"/>
+			<property type="CHARSYNC::TCivilisation"	name="Civilisation"	db_col="civilisation" enum="smart"/>
+			<property type="CHARSYNC::TCult"			name="Cult"			db_col="cult"	enum="smart"/>
+			<property type="uint32"			name="CurrentSession"			db_col="current_session" default="0"/>
+			<property type="uint32"			name="RRPAM"				db_col="rrp_am"			default="0"/>
+			<property type="uint32"			name="RRPMasterless"		db_col="rrp_masterless"	default="0"/>
+			<property type="uint32"			name="RRPAuthor"			db_col="rrp_author"		default="0"/>
+			<property type="bool"			name="Newcomer"				db_col="newcomer"		default="1"/>
+			<property type="uint32"			name="CreationDate"			db_col="creation_date"			date="true"/>
+			<property type="uint32"			name="LastPlayedDate"	db_col="last_played_date"	date="true"	default="0"/>
+
+
+			<child_class	type="CSession"				name="Sessions"			relation="one-to-many" cont="vector"/>
+			<child_class	type="CSessionParticipant"	name="SessionParticipants"	relation="one-to-many" cont="vector"	on-delete="cascade"/>
+			<child_class	type="CKnownUser"			name="KnownBy"				relation="one-to-many" cont="vector"	on-delete="cascade"/>
+			<child_class	type="CPlayerRating"		name="PlayerRatings"		relation="one-to-many" cont="vector"	on-delete="update"/>
+		</class>
+
+
+		<enum name="TCurrentActivity">
+			<item name="ca_none" value="1"/>
+			<item name="ca_play"/>
+			<item name="ca_edit"/>
+			<item name="ca_anim"/>
+		</enum>
+
+		<enum name="TCurrentStatus">
+			<item name="cs_offline" value="1"/>
+			<item name="cs_logged"/>
+			<item name="cs_online"/>
+		</enum>
+
+		<enum name="TPublicLevel">
+			<item name="ul_none" value="1"/>
+			<item name="ul_public"/>
+		</enum>
+
+		<enum name="TAccountType">
+			<item name="at_normal" value="1"/>
+			<item name="at_gold"/>
+		</enum>
+
+		<enum name="TLanguage">
+			<item name="lang_en" value="1"/>
+			<item name="lang_fr"/>
+			<item name="lang_de"/>
+			<item name="lang_other"/>
+		</enum>
+
+
+		<class name="CRingUser">
+			<!-- activate database code generation -->
+			<database table="ring_users"/>
+			<property type="uint32"			name="UserId"			db_col="user_id"			unique_id="true"/>
+			<property type="std::string"	name="UserName"			db_col="user_name"			byref="true"/>
+			<property type="uint32"			name="CurrentCharacter"	db_col="current_char"/>
+			<property type="uint32"			name="CurrentSession"	db_col="current_session"/>
+			<property type="TCurrentActivity"	name="CurrentActivity"	db_col="current_activity"	enum="smart"/>
+			<property type="TCurrentStatus"	name="CurrentStatus"	db_col="current_status"		enum="smart"/>
+			<property type="TPublicLevel"	name="PublicLevel"		db_col="public_level"		enum="smart"/>
+			<property type="TAccountType"	name="AccountType"		db_col="account_type"		enum="smart"/>
+			<property type="std::string"	name="ContentAccessLevel" db_col="content_access_level"	byref="true"/>
+			<property type="std::string"	name="Description"		db_col="description"		byref="true"/>
+			<property type="TLanguage"		name="Lang"				db_col="lang"				enum="true"/>
+			<property type="std::string"	name="Cookie"			db_col="cookie"				byref="true"/>
+			<property type="sint32"			name="CurrentDomainId"	db_col="current_domain_id"	/>
+			<property type="std::string"	name="AddedPrivileges"	db_col="add_privileges"		byref="true"/>
+
+			<child_class	type="CKnownUser"		name="KnownUsers"		relation="one-to-many" cont="vector"	on-delete="cascade"/>
+			<child_class	type="CCharacter"		name="Characters"		relation="one-to-many" cont="map"		on-delete="cascade"/>
+<!--		<child_class	type="CSession"			name="Sessions"			relation="one-to-many" cont="vector"/>-->
+<!--		<child_class	type="CPlayerRating"	name="PlayerRatings"	relation="one-to-many" cont="vector" />-->
+			<child_class	type="CFolder"			name="Folders"			relation="one-to-many" cont="vector"	on-delete="update"/>
+			<child_class	type="CFolderAccess"	name="FolderAccess"		relation="one-to-many" cont="vector"	on-delete="update"/>
+			<child_class	type="CGmStatus"		name="GMStatus"			relation="one-to-one" on-delete="cascade"/>
+			
+		</class>
+
+
+		<enum name="TRelationToParent">
+			<item name="rtp_same" value="1"/>
+			<item name="rtp_variant"/>
+			<item name="rtp_different"/>
+		</enum>
+
+		<enum name="TPlayType">
+			<item name="pt_rp" value="1"/>
+			<item name="pt_pvp"/>
+		</enum>
+
+<!--		<class name="CScenarioDesc">
+-->			<!-- activate database code generation -->
+<!--			<database table="scenario_desc"/>
+
+			<parent	class="CSession"		child_name="ScenarioDesc" relation="one-to-one"	db_col="session_id"/>
+
+			<property type="TSessionId"		name="SessionId"		db_col="session_id"		unique_id="true"/>
+			<property type="uint32"			name="ParentScenario"	db_col="parent_scenario"/>
+			<property type="std::string"	name="Description"		db_col="description"	byref="true"/>
+			<property type="TRelationToParent"	name="RelationToParent"	db_col="relation_to_parent"		enum="true"/>
+			<property type="std::string"	name="Title"			db_col="title"			byref="true"/>
+			<property type="uint32"			name="NumPlayer"		db_col="num_player"/>
+			<property type="std::string"	name="ContentAccessLevel"	db_col="content_access_level" byref="true"/>
+
+		</class>
+-->
+		<class name="CSession">
+			<!-- activate database code generation -->
+			<database table="sessions"/>
+
+<!--			<parent	class="CRingUser"		child_name="Sessions"	relation="one-to-many"	db_col="owner"		cont="vector"/>-->
+			<parent	class="CCharacter"		child_name="Sessions"	relation="one-to-many"	db_col="owner"		cont="vector"/>
+			<parent	class="CFolder"			child_name="Sessions"	relation="one-to-many"	db_col="folder_id"	cont="vector"/>
+
+			<property type="TSessionId"		name="SessionId"			db_col="session_id"		unique_id="true" autogen="true"/>
+			<property type="TSessionType"	name="SessionType"			db_col="session_type"	enum="true"/>
+			<property type="std::string"	name="Title"				db_col="title"			byref="true"/>
+			<property type="uint32"			name="OwnerId"				db_col="owner"		/>
+			<property type="uint32"			name="PlanDate"				db_col="plan_date"		date="true"/>
+			<property type="uint32"			name="StartDate"			db_col="start_date"		date="true"/>
+			<property type="std::string"	name="Description"			db_col="description"	byref="true"/>
+			<property type="TSessionOrientation"	name="Orientation"		db_col="orientation" enum="true"/>
+			<property type="R2::TSessionLevel"	name="Level"				db_col="level"			enum="true"/>
+			<property type="TRuleType"		name="RuleType"				db_col="rule_type"		enum="true"/>
+			<property type="TAccessType"	name="AccessType"			db_col="access_type"	enum="true"		default="TAccessType::at_private"/>
+			<property type="TSessionState"	name="State"				db_col="state"			enum="true"/>
+			<property type="uint32"			name="HostShardId"			db_col="host_shard_id"/>
+			<property type="uint32"			name="SubscriptionSlots"	db_col="subscription_slots"	/>
+			<property type="uint32"			name="ReservedSlots"		db_col="reserved_slots"	/>
+			<property type="TEstimatedDuration"	name="EstimatedDuration"	db_col="estimated_duration"		enum="true"/>
+			<property type="uint32"			name="FinalDuration"		db_col="final_duration"	/>
+			<property type="uint32"			name="FolderId"				db_col="folder_id"	/>
+			<property type="std::string"	name="Lang"					db_col="lang"			byref="true"/>
+			<property type="std::string"	name="Icone"				db_col="icone"			byref="true"/>
+			<property type="TAnimMode"		name="AnimMode"				db_col="anim_mode"		enum="smart"/>
+			<property type="TRaceFilter"	name="RaceFilter"			db_col="race_filter"	enum="smart"/>
+			<property type="TReligionFilter"	name="ReligionFilter"	db_col="religion_filter"	enum="smart"/>
+			<property type="TGuildFilter"	name="GuildFilter"			db_col="guild_filter"	enum="smart"/>
+			<property type="TShardFilter"	name="ShardFilter"			db_col="shard_filter"	enum="smart"/>
+			<property type="TLevelFilter"	name="LevelFilter"			db_col="level_filter"	enum="smart"/>
+			<property type="bool"			name="SubscriptionClosed"	db_col="subscription_closed"	/>
+			<property type="bool"			name="Newcomer"				db_col="newcomer"		default="1"/>
+
+<!--			<child_class	type="CScenarioDesc"			name="ScenarioDesc"				relation="one-to-one"					on-delete="cascade"/>-->
+			<child_class	type="CSessionParticipant"		name="SessionParticipants"		relation="one-to-many" cont="vector"	on-delete="cascade"/>
+			<child_class	type="CGuildInvite"				name="GuildInvites"				relation="one-to-many" cont="vector"	on-delete="cascade"/>
+			<child_class	type="CJournalEntry"			name="JournalEntries"			relation="one-to-many" cont="vector"	on-delete="cascade"/>
+		</class>
+
+		<enum name="TAccessLevel">
+			<item name="ds_close"/>
+			<item name="ds_dev"/>
+			<item name="ds_restricted"/>
+			<item name="ds_open"/>
+		</enum>
+
+		<class name="CShard">
+			<!-- activate database code generation -->
+			<database table="shard"/>
+
+			<property type="uint32"			name="ShardId"			db_col="shard_id"	unique_id="true"/>
+			<property type="bool"			name="WSOnline"			db_col="WSOnline"		default="false"/>
+			<property type="TAccessLevel"	name="RequiredState"	db_col="RequiredState"	byref="true"	enum="smart"/>
+			<property type="std::string"	name="MOTD"				db_col="MOTD"			byref="true"/>
+
+			<child_class	type="CGuild"					name="Guilds"			relation="one-to-many" cont="map"	on-delete="cacacde"/>
+		</class>
+
+<!--		<class name="CShard">
+-->			<!-- activate database code generation -->
+<!--			<database table="shard"/>
+
+			<property type="uint32"			name="ShardId"		db_col="shard_id"	unique_id="true"/>
+
+		</class>-->
+
+		<class name="CGuild">
+			<!-- activate database code generation -->
+			<database table="guilds"/>
+
+			<parent	class="CShard"			child_name="Guilds"	relation="one-to-many"	db_col="shard_id"	cont="map"/>
+
+			<property type="uint32"			name="GuildId"		db_col="guild_id"	unique_id="true"/>
+			<property type="std::string"	name="GuildName"	db_col="guild_name" byref="true"/>
+			<property type="uint32"			name="ShardId"		db_col="shard_id" />
+
+			<child_class	type="CCharacter"				name="Characters"		relation="one-to-many" cont="vector"	on-delete="update"/>
+			<child_class	type="CGuildInvite"				name="Invites"			relation="one-to-many" cont="vector"	on-delete="cascade"/>
+		</class>
+
+		<class name="CGuildInvite">
+			<!-- activate database code generation -->
+			<database table="guild_invites"/>
+
+			<parent	class="CGuild"			child_name="Invites"		relation="one-to-many"	db_col="guild_id"	cont="vector"/>
+			<parent	class="CSession"		child_name="GuildInvites"	relation="one-to-many"	db_col="session_id"	cont="vector"/>
+
+			<property type="uint32"			name="Id"			db_col="Id"		unique_id="true" autogen="true"/>
+			<property type="uint32"			name="GuildId"		db_col="guild_id"/>
+			<property type="TSessionId"		name="SessionId"	db_col="session_id"		/>
+			
+		</class>
+
+		<class name="CPlayerRating">
+			<!-- activate database code generation -->
+			<database table="player_rating"/>
+
+			<parent	class="CScenario"		child_name="PlayerRatings" relation="one-to-many"	db_col="scenario_id"	cont="vector"/>
+			<parent	class="CCharacter"		child_name="PlayerRatings" relation="one-to-many"	db_col="author"		cont="vector"/>
+
+			<property type="uint32"			name="Id"			db_col="Id"		unique_id="true" autogen="true"/>
+			<property type="uint32"			name="ScenarioId"	db_col="scenario_id"/>
+			<property type="uint32"			name="Author"		db_col="author"	/>
+			<property type="uint32"			name="RateFun"		db_col="rate_fun"	/>
+			<property type="uint32"			name="RateDifficulty"		db_col="rate_difficulty"	/>
+			<property type="uint32"			name="RateAccessibility"	db_col="rate_accessibility"	/>
+			<property type="uint32"			name="RateOriginality"		db_col="rate_originality"	/>
+			<property type="uint32"			name="RateDirection"		db_col="rate_direction"	/>
+			
+		</class>
+
+		<enum name="TJournalEntryType">
+			<item name="jet_credits" value="1"/>
+			<item name="jet_notes"/>
+		</enum>
+
+		<class name="CJournalEntry">
+			<!-- activate database code generation -->
+			<database table="journal_entry"/>
+
+			<parent	class="CSession"		child_name="JournalEntries"		relation="one-to-many"	db_col="session_id"	cont="vector"/>
+
+			<property type="uint32"			name="Id"			db_col="Id"		unique_id="true" autogen="true"/>
+			<property type="TSessionId"		name="SessionId"	db_col="session_id"/>
+			<property type="uint32"			name="Author"		db_col="author"	/>
+			<property type="TJournalEntryType"	name="Type"		db_col="type"	enum="smart"/>
+			<property type="std::string"	name="Text"			db_col="text"	byref="true"/>
+			<property type="uint32"			name="TimeStamp"	db_col="time_stamp" date="true"/>
+			
+		</class>
+
+		<class name="CFolder">
+			<!-- activate database code generation -->
+			<database table="folder"/>
+
+			<parent	class="CRingUser"		child_name="Folders" relation="one-to-many"	db_col="author"	cont="vector"/>
+
+			<property type="uint32"			name="Id"			db_col="Id"		unique_id="true" autogen="true"/>
+			<property type="uint32"			name="Author"		db_col="author"	/>
+			<property type="std::string"	name="Title"		db_col="title"		byref="true"/>
+			<property type="std::string"	name="Comments"		db_col="comments"	byref="true"/>
+
+			<child_class	type="CFolderAccess"	name="FolderAccess"	relation="one-to-many" cont="vector"	on-delete="cascade"/>
+			<child_class	type="CSession"			name="Sessions"		relation="one-to-many" cont="vector"	on-delete="update"/>
+			
+		</class>
+
+		<class name="CFolderAccess">
+			<!-- activate database code generation -->
+			<database table="folder_access"/>
+
+			<parent	class="CRingUser"		child_name="FolderAccess"	relation="one-to-many"	db_col="user_id"	cont="vector"/>
+			<parent	class="CFolder"			child_name="FolderAccess"	relation="one-to-many"	db_col="folder_id"	cont="vector"/>
+
+			<property type="uint32"			name="Id"			db_col="Id"		unique_id="true" autogen="true"/>
+			<property type="uint32"			name="FolderId"		db_col="folder_id"	/>
+			<property type="uint32"			name="UserId"		db_col="user_id"	/>
+			
+		</class>
+
+
+
+		<class name="CScenario">
+			<!-- activate database code generation -->
+			<database table="scenario"/>
+
+			<property type="uint32"			name="Id"			db_col="id"		unique_id="true" autogen="true"/>
+			<property type="NLMISC::CHashKeyMD5"	name="MD5"	db_col="md5"			byref="true"	md5="true"/>
+			<property type="std::string"	name="Title"		db_col="title"			byref="true"/>
+			<property type="std::string"	name="Description"	db_col="description"	byref="true"/>
+			<property type="std::string"	name="Author"		db_col="author"			byref="true"/>
+			<property type="uint32"			name="RRPTotal"		db_col="rrp_total"		default="0"/>
+			<property type="TAnimMode"		name="AnimMode"		db_col="anim_mode"		enum="smart"/>
+			<property type="std::string"	name="Language"		db_col="language"		byref="true"/>
+			<property type="TSessionOrientation"	name="Orientation"	db_col="orientation"	enum="smart"/>
+			<property type="R2::TSessionLevel"	name="Level"		db_col="level"					enum="smart"/>
+			<property type="bool"			name="AllowFreeTrial"	db_col="allow_free_trial" default="false"/>
+			
+			<child_class	type="CSessionLog"		name="SessionLogs"		relation="one-to-many" cont="vector"	on-delete="cascade"/>
+			<child_class	type="CPlayerRating"	name="PlayerRatings"	relation="one-to-many" cont="vector"	on-delete="cascade"/>
+
+		</class>
+
+		<class name="CSessionLog">
+			<!-- activate database code generation -->
+			<database table="session_log"/>
+
+			<parent	class="CScenario"		child_name="SessionLogs"	relation="one-to-many"	db_col="scenario_id"	cont="vector"/>
+
+			<property type="uint32"			name="Id"			db_col="id"		unique_id="true"/>
+			<property type="uint32"			name="ScenarioId"	db_col="scenario_id"/>
+			<property type="uint32"			name="RRPScored"	db_col="rrp_scored"						default="0"/>
+			<property type="uint32"			name="ScenarioPointScored"	db_col="scenario_point_scored"	default="0"/>
+			<property type="uint32"			name="TimeTaken"	db_col="time_taken"						default="0"/>
+			<property type="std::string"	name="Participants"	db_col="participants"	byref="true"/>
+			<property type="uint32"			name="LaunchDate"	db_col="launch_date"	date="true"/>
+			<property type="std::string"	name="Owner"		db_col="owner"			byref="true"/>
+			<property type="std::string"	name="GuildName"	db_col="guild_name"		byref="true"/>
+
+		</class>
+
+		<class name="CGmStatus">
+			<!-- activate database code generation -->
+			<database table="gm_status"/>
+
+			<parent	class="CRingUser"		child_name="GMStatus"	relation="one-to-one"	db_col="user_id"/>
+
+			<property type="uint32"			name="UserId"		db_col="user_id"		unique_id="true"/>
+			<property type="bool"			name="Available"	db_col="available"	default="1"/>
+
+		</class>
+
+
+
+	</namespace>
+</generator>
+

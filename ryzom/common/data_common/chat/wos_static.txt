@@ -1,0 +1,2 @@
+WOS_MISSION_SUCCESS_S 		"&JA&You succeeded in accomplishing the mission $0s."
+WOS_MISSION_FAILURE_S 		"&RG&You failed to accomplish the mission $0s."

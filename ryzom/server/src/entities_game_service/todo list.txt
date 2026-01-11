@@ -1,0 +1,41 @@
+\\ TODO
+
+
+
+
+
+/////////////////
+Malkav:
+/////////////////
+
+- In CActiveEffects : change the serial so that the function pointers are serialized too and cen be restored at reading.
+ also remove all unused stuff about delta update, clean the class.
+
+- In getTargetPassiveCombatResistance() load the file melee_skills.typ and add the skills in it instead of having hard coded skills !!!!
+
+- In CDynamicModifierEvaluator::evalValue() : use the real formulas for SAP Default, STA Default, HP Default...
+load the real formulas from formulae.typ !!!!
+
+- In testSuccess() method
+get the charac associated with the skill used by the sentence, get the right charac level
+
+- faire une méthode pour annuler le 'repeat' d'une phrase dans le brique manager
+
+- gestion de la file d'execution des phrases a revoir avec Eric
+
+
+Pour les MPs :
+à la création, si quality <=5 -> set Category to Generic, else -> Special (et si Exotic alors on garde Exotic)
+lecture du champ 'Use' (faber, upgrade, none)
+
+
+
+
+
+
+
+
+// For new sabrina system
+all durations expressed in TICKS (convertion during loading)
+CEntityId-> TDataSetRow	
+??? : distinction left/right arm/hand for malus on attacks ....

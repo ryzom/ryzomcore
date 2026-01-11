@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+:root {
+	--foo: if(x > 5) this.width = 10;
+}
+/* The rest of the CSS file */
+#foo h1 {
+	test: var(--foo)
+}
+		</style>
+		<div id="foo">
+			<h1 data-ruleset="test: if(x > 5) this.width = 10;">Header</h1>
+		</div>
+	</body>
+</html>

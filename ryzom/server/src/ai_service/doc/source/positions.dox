@@ -1,0 +1,36 @@
+/** @file
+	@brief Positions in Ryzom AI
+	
+	(C) 2005 - Doub
+*/
+/** @page positions Positions in Ryzom AI
+
+The positions in the AIS is a real mess. CAIVector, CAIVectorMirror, CAIPos, CAIPosMirror, RYAI_MAP_CRUNCH::CMapPosition, RYAI_MAP_CRUNCH::CWorldPosition are all position classes. Each of these classes is widely used, each having a specificity. Thus many conversions occurs in all parts of the AIS depending of the specific class needed. A single class or maybe two could replace all that.
+
+@section description Description of each class
+
+@subsection vector CAIVector
+
+@copydoc CAIVector
+
+@subsection vector_mirror CAIVectorMirror
+
+@copydoc CAIVectorMirror
+
+@subsection pos CAIPos
+
+@copydoc CAIPos
+
+@subsection pos_mirror CAIPosMirror
+
+@copydoc CAIPosMirror
+
+@subsection map_position RYAI_MAP_CRUNCH::CMapPosition
+
+@copydoc RYAI_MAP_CRUNCH::CMapPosition
+
+@subsection world_position RYAI_MAP_CRUNCH::CWorldPosition
+
+@copydoc RYAI_MAP_CRUNCH::CWorldPosition
+
+*/

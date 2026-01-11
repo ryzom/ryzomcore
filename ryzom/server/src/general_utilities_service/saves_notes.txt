@@ -1,0 +1,55 @@
+Module name:		Shard Saves Module
+Short name:			SAVES
+Associated modules:	RS
+Requires:			Nothing
+Syntax:				ModulesAdd saves <shard name> <type> <directory>
+					- where <shard name> is the name of the shard that the saves are for
+					- where <type> is one of 'shard' or 'www' and gives the save type ('shard' is for character saves, guild saves, etc)
+					- where <directory> is the root directory for the save set
+
+TODO
+----
+- CShardSavesModule
+	void processMsgRegister(uint32 sender,CMsgSavesRegister& msgBody);
+	void processMsgUnregister(uint32 sender,CMsgSavesUnregister& msgBody);
+	void processMsgFileRequest(uint32 sender,CMsgSavesFileRequest& msgBody);
+	void processMsgUpload(uint32 sender,CMsgSavesUpload& msgBody);
+	void processMsgDelete(uint32 sender,CMsgSavesDelete& msgBody);
+	void processMsgDelete(uint32 sender,CMsgSavesMove& msgBody);
+
+- CShardSavesManager
+
+
+Description
+-----------
+This module allows other modules to access the save files for shards
+the 'shard' or 'www' keywords determine the 
+
+
+Implementation
+--------------
+	class CShardSavesModule;		// a module representing the save set under a given root directory
+	class CShardSavesManager;		// singleton manager class for all of the local CShardSavesModule objects
+
+CShardSavesModule
+	A dumb executor object
+	Each update perfoms a single operation chosen from:
+	- rescanning a directory for files and sending updates to all subscribers
+	- reading a file and sending it to the requestor
+	- sending a directory content listing to a requestor
+
+CShardSavesManager
+	Responsible for limiting hard disk thashing by GUSes
+	Each tick allows n updates by cycling through the instantiated ShardSaves modules
+
+
+SAVES Module Messages
+---------------------
+	CMsgSavesRegister		()
+	CMsgSavesUnregister		()
+	CMsgSavesFileRequest	(requestId,fileName)
+	CMsgSavesFileUpload		(requestId,fileName,fileBody)
+	CMsgSavesFileDelete		(requestId,fileName)
+	CMsgSavesFileMove		(requestId,fileName,destination)
+
+

@@ -1,0 +1,59 @@
+﻿<html>
+<head>
+<title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+
+<body bgcolor="#333333" text="#FFFFFF" link="#00FF00" vlink="#FF0000" alink="#0000FF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+
+
+<table width="100%" border="0" cellspacing="4" cellpadding="0">
+  <tr> 
+    <td align="center"> 
+      <h1>Echange avec un PNJ</h1>
+    </td>
+  </tr>
+</table>
+
+<BR>
+<P>
+Cette interface vous permet d'acheter et vendre des items à un PNJ.
+</P>
+<P>
+<h4>Liste de Vente</h4>
+La liste '<i>uiSellTo</i>' vous permet de vendre vos items (de votre sac, ou d'un de vos animaux).<BR>
+Lorsque vous vendez un item à un PNJ, ce PNJ va le mettre en vente aux autres joueurs sous certaines conditions :<BR>
+	- Les matières premières peuvent toujours être mise en vente de la sorte<BR>
+	- Les nouveaux items peuvent être vendus (pas les items endommagés)<BR>
+<BR>
+Lorsque vous vendez un item à un PNJ, il vous sera demandé un '<i>uiResaleHeader</i>' qui est par défaut le '<i>uiImmediatePrice</i>' multiplié par 2. 
+Le 'Prix de revente' est le prix auquel les autres joueurs vont pouvoir acheter votre item.<BR>
+Les règles suivante sont appliquées sur ces prix :<BR>
+	- Lorsque vous vendez l'item au PNJ, vous recevez immédiatement le '<i>uiImmediatePrice</i>'<BR>
+	- Vous recevrez la différence '<i>uiResaleHeader</i>' - '<i>uiImmediatePrice</i>' une fois l'item vendu à un autre joueur<BR>
+<BR>
+Note: vous pouvez vendre votre item à n'importe quel PNJ. Par exemple vendre votre épée au marchand de matières premières.<BR>
+<BR>
+
+<h4>Liste d'Achat</h4>
+La liste '<i>uiBuyFrom</i>' vous permet d'acheter des items au PNJ. Il y a 2 listes :<BR>
+- '<i>uitabBuyResaleAndNpc</i>' montre tous les items mis en ventes par tous les
+joueurs ainsi que ceux vendus par le PNJ.<br>
+Note: Vous ne verrez que les items du type et de la qualité en relation avec le
+marchand (ex : une épée 200 ne pourra pas être vue chez le marchand de matières
+premières, ni chez un marchand d'épées de qualité 100-150)<br>
+Note: Les items des PNJ sont généralement d'un prix plus élevé et de moindre
+intérêt que les items des joueurs.<br>
+- '<i>uitabBuyPlayer</i>' montre tous les items que vous avez vendus et qui attendent
+d'être revendu. NB: Contrairement à '<i>uitabBuyResaleAndNpc</i>' vous voyez tous vos
+items vendus NON filtrés par qualité ou type.<br>
+<BR>
+Dans l'onglet '<i>uitabBuyPlayer</i>' (et parfois dans l'onglet '<i>uitabBuyResaleAndNpc</i>'), vous verrez les items que vous vendez (affichés en Jaune). Vous pouvez les enlever pour changer le '<i>uiResaleHeader</i>'.<br>
+<BR>
+Note: Les items de joueurs sont en ventes pour un certain temps. Vous pouvez voir le temps restant de chaque item dans la liste '<i>uiBuyFrom</i>'. Une fois le temps écoulé, l'item sera 'perdu' (garder par le PNJ).
+</P>
+
+
+</body>
+</html>
+

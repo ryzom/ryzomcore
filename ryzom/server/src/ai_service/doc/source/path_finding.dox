@@ -1,0 +1,48 @@
+/** @file
+	@brief Ryzom AI path finding description
+	
+	(C) 2005 - Doub
+*/
+/** @page path_finding Path finding systems in Ryzom
+
+One of the most important part of the AIS role is to make bots move. For that purpose bots are using a pathfinding algorithm.
+
+@section algorithm Algorithm and technical presentation
+
+@subsection constraints Constraints considerations
+
+The pathfinding in AIS is a critical part. Usually, pathfinding is a very computing intensive task, and basic approaches increase quadratically with the bot count because increased bot count also implies increased world size and thus increased path length. Each Ryzom AIS having a consequent bot count, a basic approach of pathfinding has been chose.
+
+@subsection Astar A*
+
+The pathfinding in AIS is based on A* algorithm. This algorithm is based on bitmaped topology of the world, where the world is divided according to a sqare grid with a fixed number of neighbours for each grid cell, and in which each cell has a boolean status of either accessible or not. With this approach the A* algorithm based on a well tuned heuristic is one of the most efficients. It's less precise than vectorial approaches, but it's far less computing intensive.
+
+A path on a bitmap topology consist of either a list of cells to be visited or a list of directions to follow, which is basically the same. One of the particularity of Ryzom topology is that it's a 2.5D topology. The data is represented as a 2D bitmap topology, however the world surface is divided in 16x16 meters supercells, and each supercell may have several layers which extends in a third dimension.
+
+A path is defined by its start point and its end point. The A* algorithm consist in exploring the bitmap around the start point. Initially every neighbour of the start point are given a value which roughly represent the length of the closest path going through that point. This value is computed based on an heuristic that take into account the distance from the start point and that to the end point. The distance may be either cartesian or based on the real linear cell to cell movement distance necessary to go through to reach the cell. The real distance to the start point and the cartesian distance to the end point are often used as it authorizes some optimisations.
+
+@subsection in_ryzom Ryzom algorithm
+
+@subsubsection grids Dual grid
+
+In Ryzom the pathfinding is done in two steps. The topology bitmap is dual. A first layer represent the connectivity of 16x16 meters supercells. Each supercell has a list of its possible neighbours. Each supercell has four 2D neighbours, but each grid patch may have several layers, up to three, so each supercell may have up to twelve neighbours. In fact each super cell also have 4 special points in it, and the connectivity is done with these points. This is done to support the splitting of the supercell in two independant sub-parts each side of a big obstacle. The second layer is based on one meter cells. Each one meter cell is either occupied by some obstacle or not. This defines which cell are accessible from a neighbour cell.
+
+The grid is represented in memory as a compressed bitmap. The full grid does in fact span accross a tree structure similar to a quadtree but where each node has about 256 (16x16) children, which greatly reduces the tree size. Each node can then be considered as filled with obstacles, which eliminates the need for that node to have children and compresses the whole bitmap. This method is similar to a two dimensionnal RLE algorithm. The drawback of such a method is that having moving obstacles implies recomputing permanently the compression of the bitmap. A single AIS having up to 40,000 or 50,000 moving bots, the bitmap is never updated.
+
+@subsubsection passes 2 passes
+
+An initial pathfind is done between the start point and the end point but only at the supercell level. For each super cell a special point has been selected. The second pass then compute a path between each special point in the one meter grid. When the complete list of cells of the path has been determined, this list is returned to the calling object.
+
+There is no link between the path and the topology, so once the path is computed it cannot be adjusted. This is why its not currently possible to take into account moving obstacles, even if the bitmap update was possible in real time.
+
+@subsubsection following Path following
+
+Once the path has been computed, the bot has to follow it. To do that the bot gives the control of its position to the path itself telling it how much to advance, and the path moves the bot along itself.
+
+@subsubsection implementation Implementation details
+
+The AIS pathfinding is implemented partly in ai_share in partly in ai_service. The topology bitmap is defined in ai_share. The A* algorithm is in ai_service.
+
+The A* algorithm is based on a heap-style implementation.
+
+*/

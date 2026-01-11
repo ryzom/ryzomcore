@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+/* In the component’s style: */
+.component .header {
+	color: var(--header-color, blue);
+}
+.component .text {
+	color: var(--text-color, black);
+}
+
+/* In the larger application’s style: */
+.component {
+	--text-color: #080;
+	/* header-color isn’t set, and so remains blue, the fallback value */
+}
+		</style>
+		<div class="component">
+			<h1 class="header" data-ruleset="color: blue;">header</h1>
+			<p class="text" data-ruleset="color: #080;">text</p>
+		</div>
+	</body>
+</html>

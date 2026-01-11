@@ -1,0 +1,10 @@
+Module name:		Remote Shard Saves Module
+Short name:			RS
+Associated modules:	SAVES
+Requires:			Nothing
+Syntax:				ModulesAdd remote_saves <shard name>
+
+Description
+-----------
+This is a module to be run on a local machine in order to access shard saves handled
+by a SAVES module (most likely on another machine)

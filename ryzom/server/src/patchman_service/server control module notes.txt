@@ -1,0 +1,189 @@
+notes:
+------
+
+test strategy...
+1. on module up ... do the guys see eachother
+2. file transfer in single block
+3. File transfer as multi-part
+4. Multi part transfer with more blocks than max block count
+5. file data failure
+6. complete breakpoint coverage
+7. treat case where a file exeists and is then deleted, making it inaccessible -> needs to be handled cleanly by readError()
+
+
+Todo:
+- repository needs to be proactive relative to downloaders - needs to broadcast its updates
+
+
+** Olivier - allow FES to try several addresses and to select one that they succeed in opening...
+** this will allow us to have a single FES cfg used many times
+
+** note nllog.h is in game_share
+** backup modules are in game shre
+
+AMS
+	- add delta() system + upload in 2 steps
+	- test generated screen file
+	- test aes cfg file
+	- update the database directly
+
+	DAM - domain admin module
+	- get the domain description out of the database
+	- interface for ATM
+		- status / variables
+	- interface for AEM
+
+	AEM - admin executor module
+	- singleton for holding running service threads
+	- the running service thread (launch, stop, etc)
+	- api for singleton for use by AEM module
+	- interface for ATM
+	- interface for DAM
+	- interface for SPA
+		- msg to download new database script file
+		- msg to request transmit of script files
+
+	ATM - admin terminal module
+	- interface for DAM
+		- status / variables of services
+
+PATCHMAN
+	SPT
+	- add 'spa_list'
+	- add 'spa_get' and 'spa_put' commands for sending / retrieving files
+	- add 'spa_exec' command to execute a command on a remote spa module
+	- display summary messages for the different dommains saying which proportion of machines are ready to go, which are up, etc
+
+	PATCH_GEN
+	- generate patches with delta / ref management
+	- introduce weekly auto ref update / directory change
+	- update minver for re / rr to be a 4 week old version
+	- send a broadcast of some kind to spm* to set 'daily' (or other) install patch version to latest patch version
+	- synchronise client and server patch generation
+	- move server patches onto a different machine
+	=> when 'daily' latest number is incremented, the server and client patch gen need to update themselves
+	=> need to ensure that the process of assembling file set for patch generation is serialised (and not parellelised) with patch make
+
+
+------------------------
+A Simple example module
+------------------------
+
+/** \file spt_server_patch_terminal.cpp
+ *
+ *
+ */
+
+//-----------------------------------------------------------------------------
+// includes
+//-----------------------------------------------------------------------------
+
+// nel
+#include "nel/net/module.h"
+#include "nel/net/module_builder_parts.h"
+#include "nel/net/module_manager.h"
+
+// game share
+#include "game_share/utils.h"
+
+// local
+#include "spt_module_itf.h"
+
+
+//-------------------------------------------------------------------------------------------------
+// namespaces
+//-------------------------------------------------------------------------------------------------
+
+using namespace std;
+using namespace NLMISC;
+using namespace NLNET;
+using namespace PATCHMAN;
+
+
+//-----------------------------------------------------------------------------
+// class CServerPatchTerminal
+//-----------------------------------------------------------------------------
+
+class CServerPatchTerminal:
+	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
+	public CServerPatchTerminalSkel
+{
+public:
+	// IModule specialisation implementation
+	void initModule(const TParsedCommandLine &initInfo);
+	void onProcessModuleMessage(IModuleProxy *sender, const CMessage &msg);
+
+	void onModuleUp(IModuleProxy *module);
+	void onModuleDown(IModuleProxy *module);
+
+	const std::string &getModuleManifest() const;
+
+private:
+	// private data
+	mutable NLMISC::CSString _Manifest;
+
+	// some macros for setting up the possiblity of having my own NLMISC_COMMAND scope
+	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CServerPatchTerminal, CModuleBase)
+		NLMISC_COMMAND_HANDLER_ADD(CServerPatchTerminal, dump, "Dump the current emiter status", "no args")
+	NLMISC_COMMAND_HANDLER_TABLE_END
+
+	NLMISC_CLASS_COMMAND_DECL(dump);
+};
+
+
+//-----------------------------------------------------------------------------
+// methods CServerPatchTerminal - basics
+//-----------------------------------------------------------------------------
+
+CServerPatchTerminal::CServerPatchTerminal()
+{
+}
+
+void CServerPatchTerminal::onProcessModuleMessage(IModuleProxy *sender, const CMessage &msg)
+{
+	if (CServerPatchTerminalSkel::onDispatchMessage(sender, msg))
+		return;
+
+	// unhandled message....
+
+	BOMB("CServerPatchTerminal::onProcessModuleMessage : received unhandled message '"<<msg.getName()<<"'", return);
+
+}
+	
+void CServerPatchTerminal::initModule(const TParsedCommandLine &initInfo)
+{
+	CModuleBase::initModule(initInfo);
+	nlinfo("SPM: Initialising");
+}
+
+const std::string &CServerPatchTerminal::getModuleManifest() const
+{
+	_Manifest = "";
+	return _Manifest;
+}
+
+
+//-----------------------------------------------------------------------------
+// CServerPatchTerminal message callbacks
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+// CServerPatchTerminal NLMISC_COMMANDs
+//-----------------------------------------------------------------------------
+
+NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, dump)
+{
+	NLMISC_CLASS_COMMAND_CALL_BASE(CModuleBase, dump);
+
+	log.displayNL("%s",getName().c_str());
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// CServerPatchTerminal registration
+//-----------------------------------------------------------------------------
+
+NLNET_REGISTER_MODULE_FACTORY(CServerPatchTerminal,"ServerPatchTerminal");

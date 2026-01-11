@@ -1,0 +1,120 @@
+// scripts for guild systems
+separated file "entities_game_service/log_pd"
+{
+
+	logmsg	ExecuteActionMagic(CEntityId player, string hl, uint32 ql, string hr, uint32 qr, float factor)
+	{
+		"[EAE] $player$ executes action magic with $hl$ (quality $ql$) in left hand and $hr$ (quality $qr$) in right hand (factor=$factor$)"
+	}
+
+	logmsg	ExecuteActionFight(CEntityId player, string hl, uint32 ql, string hr, uint32 qr, bool success, string skill, sint32 levelInSkill)
+	{
+		"[EAE] $player$ executes action fight with $hl$ (quality $ql$) in left hand and $hr$ (quality $qr$) in right hand (success=$success$), skill=$skill$ levelInSkill=$levelInSkill$"
+	}
+
+	logmsg	ExecuteActionFaber(CEntityId player, string hl, uint32 ql, string hr, uint32 qr, float factor, string skill, sint32 levelInSkill)
+	{
+		"[EAA] $player$ executes action faber with $hl$ (quality $ql$) in left hand and $hr$ (quality $qr$) in right hand (successFactor=$factor$), skill=$skill$ levelInSkill=$levelInSkill$"
+	}
+
+
+	logmsg	UseActionAchete(CEntityId player, string action, string sheet)
+	{
+		"[UAA] $player$ used bought action $action$ (sheet $sheet$)"
+	}
+
+	logmsg	BuyAction(CEntityId player, string phraseId, uint32 price)
+	{
+		"[AA] $player$ bought action phrase $phraseId$ for $price$"
+	}
+
+
+
+	logmsg	UserConnected(uint32 userId, string userName, string userPriv, string language, string from, string cookie)
+	{
+		"[UC] $userId$ connected as $userName$ (priv=$userPriv$, lang=$language$), from $from$ with cookie $cookie$"
+	}
+
+	logmsg	UserDisconnected(uint32 userId, bool crashed)
+	{
+		"[UD] $userId$ disconnected (crashed=$crashed$)"
+	}
+
+	logmsg	PCDead(CEntityId player, string continent, string region, string place, CEntityId killerId, string killer)
+	{
+		"[PJM] Playable character $player$ killed by $killerId$ ($killer$) on $continent$, $region$, $place$"
+	}
+
+	logmsg	CreatePlayerCharacter(CEntityId player, TPeople race, uint8 gender, uint32 fighterPoints, uint32 casterPoints, uint32 crafterPoints, uint32 harvesterPoints, string startingPoint)
+	{
+		"[CPJ] Created playable character $player$, race $race$, gender $gender$ (0=m, 1=f, 2=n), at $startingPoint$, starting skillpoints are: fighter=$fighterPoints$ caster=$casterPoints$ crafter=$crafterPoints$ harvester=$harvesterPoints$"
+	}
+
+
+	logmsg	XPGained(CEntityId player, float xpgain, float currentxp, string skill, uint32 skillValue, uint32 neededXpForNext)
+	{
+		"[XP] $player$ gained $xpgain$ in $skill$ (current xp $currentxp$), skillValue=$skillValue$, neededXpForNext=$neededXpForNext$"
+	}
+
+	logmsg	SkillProgessed(CEntityId player, string skill, uint32 skillValue)
+	{
+		"[SKILLP] $player$ progressed in skill $skill$ (skillValue=$skillValue$)"
+	}
+
+
+
+	logmsg	SellItem(CEntityId seller, string item, uint32 quality, uint32 quantity, uint32 basePrice, uint32 sellPrice)
+	{
+		"[VI] $seller$ sold $quantity$ item(s) $item$, quality $quality$ for $sellPrice$ dappers (base price is $basePrice$)"
+	}
+
+	logmsg	BuyItem(CEntityId buyer, string item, uint32 quality, uint32 quantity, uint32 totalPrice)
+	{
+		"[AI] $buyer$ bought $quantity$ item(s) $item$, quality $quality$ for a total of $totalPrice$ dappers"
+	}
+
+	logmsg	DestroyItem(CEntityId player, string sheet, uint32 quality, uint32 quantity)
+	{
+		"[DI] $player$ destroyed $quantity$ item(s) $sheet$, quality $quality$"
+	}
+
+	logmsg	EquipItem(CEntityId player, string sheet, uint32 quality, string inventory, string equipslot)
+	{
+		"[ITE] $player$ equips item $sheet$, quality $quality$, in inventory $inventory$, slot $equipslot$"
+	}
+
+	logmsg	UnequipItem(CEntityId player, string sheet, uint32 quality, string inventory, string equipslot)
+	{
+		"[ITU] $player$ unequips item $sheet$, quality $quality$, in inventory $inventory$, slot $equipslot$"
+	}
+
+
+
+	logmsg	MissionLog(string sublog, CEntityId player, string missionname)
+	{
+		"[MI$sublog$] player=$player$ mission=$missionname$"
+	}
+
+	logmsg	MissionTeamLog(string sublog, uint32 teamid, string missionname)
+	{
+		"[MIT$sublog$] team=$teamid$, mission=$missionname$"
+	}
+
+
+
+
+	logmsg	ForageKamiWrathPunishment(CEntityId player, string deposit, float wrathLevel)
+	{
+		"[FKWP] $player$ is punished for foraging on deposit $deposit$, wrath $wrathLevel$"
+	}
+
+	logmsg	ForageKamiItemOffering(CEntityId player, string deposit, float wrathLevel, float wrathDecrease, string itemSheet)
+	{
+		"[FKIO] $player$ is offered item $itemSheet$ for foraging on deposit '$deposit$' (wrathLevel=$wrathLevel$, wrathDecrease=$wrathDecrease$)"
+	}
+
+
+
+
+
+}

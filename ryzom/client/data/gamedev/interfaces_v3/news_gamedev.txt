@@ -1,0 +1,106 @@
+//
+Ecrire dans la database pour tout les swap (même quand rien ne change) => pouvoir forcer l'update
+Voir avec Olivier le pb d'init d'interfaces qui envoit un message reseau alors que la couche reseau n'est pas initialisée.
+
+
+Les sources sont balisées avec des TODO_GAMEDEV pour indiquer les endroits à modifier ou checker par le gamedev
+
+// Done: Il faudra revenir sur le checksum et le remplacer par un compteur d'action
+*  database.xml: SERVER:BUILDING_SENTENCE:BRICKS  supprimé.
+	Plus de communication server vers client pour la construction de la sentence courante.
+	Le client envoie toujours les messages SENTENCE:ADDBRICK etc... mais seulement pour que le serveur:
+		- se mette à jour
+		- renplisse VALID, COST, STRING, comme avant
+		- remplisse CHECKSUM qui est calculé avec 
+			CDBCheckSum.add(RootSheetId)
+			CDBCheckSum.addVector(MandatorySheetId)  Taille du tableau en accord avec la RootBrick
+			CDBCheckSum.addVector(OptionalSheetId)   Taille du tableau en accord avec la RootBrick
+		NB: sheetId en sint32. Si une brique optionnelle n'est pas voulu, 0 est ajouté au checksum.
+
+	Ainsi le client ne peut valider la sentence que si CHECKSUM et VALID sont bons.
+
+	Le CHECKSUM sert pour éviter que le client, après VALID=1 du serveur, change une brique, puis clique OK tout de suite (avant possible invalidation)
+
+// Done: Ne pas oublier de mettre à jour la database avec la quand un perso monte de niveau ou acquiere un nouveau metier
+* database.xml: SERVER:CHARACTER_INFO:CAREER modifiée.
+	- LEVEL indique le level de la carriere (0,carriere non entreprise) (1-25,carriere valide)
+	- JOB0 à JOB7 correcpondent a tout les metier d'une carriere
+		- LEVEL pareil que pour la carriere mais pour le metier
+		- PROGRESS est l'indice de progression du metier (pour les progress bar des skills ?)
+
+// Done
+* message ITEM:SWAP doit marcher pas seulement de main à autre mais de n'importe quel inventory a nimporte quel autre
+
+// Done
+* message SENTENCE:MEMORIZE
+
+	Il faut maintenant rajouter un numéro de slot pour la mémorisation des sorts (car fait par un glisser/deplacer now):
+
+
+/ Ok
+* Note: sentences.name a changé de format... (c deja codé)
+
+
+* FABER: changements:
+	- le joueur ne peut choisir que le meme nombre de MP requis par la formule.
+
+	par consequent le message SENTENCE:CLEAR doit le remettre à 0
+
+	- De la meme facon qu'avec la magie, 
+		SERVER:BUILDING_SENTENCE:TOOL  et
+		SERVER:BUILDING_SENTENCE:MPS
+
+	sont supprimés, car la gestion est faite sur le client. VALID, STRING et COST (cout en stamina) sont remplis de la meme facon
+
+		CHECKSUM est calculé selon:
+			CDBCheckSum.add(OptionalSheetId)   	(sint32) Taille du tableau en accord avec la RootBrick. 0 si brique optionnelle non voulue
+			CDBCheckSum.addVector(Mps-Quality)  	(sint32) Taille du tableau en accord avec la RootBrick
+			CDBCheckSum.add(OBJECT:SHEET)		(sint32) sheetId de l'obet à créer
+			CDBCheckSum.add(OBJECT:QUANTITY)	(sint32) quantités de l'obet à créer (objets stackables)
+		
+	Ainsi le client ne peut valider que si le client et le serveurs sont raccords et que la sentence est valide.
+
+	- FABER:ADD_MP et FABER:REMOVE_MP sont remplacés par 
+
+		FABER:SET_MP_QUALITY
+		format="u16 u8"	=> "Quality  MpSlot"
+
+		Ainsi le serveur doit verifier que le client a ce qu'il faut dans son inventaire pour selectionner le MP.
+		L'execution de la sentence devra enlever "au mieux" les MPs, si necessaire en supprimant plusieurs slots
+
+	- Pour les items stackable (fleches etc...) on peut en créer plusieurs d'un coup (Les MPs sont multipliés)
+		Le message FABER:SET_NUM_ITEM (format="u8") permet de changer le nombre voulu d'items.
+		il devra aussi surement changer tout ce qui est cout en stamina etc...
+		Le message SENTENCE:CLEAR reset le nombre d'items du Faber à 1
+
+
+	- Ya pas de briques racines de FABER! Pour la création, à la place de l'ADD_BRICK du root, 
+		avant le message FABER:EXECUTE, un message est envoyé:
+
+		FABER:START_CREATE
+		format="u32"		=> "SheetId"
+
+	- pour la réparation et le rafinage, l'objet n'est pas enlevé de l'inventaire. A la place de l'ADD_BRICK du root, et
+		avant le message FABER:EXECUTE, un message est envoyé:
+		
+		FABER:START_REPAIR
+		format="u16 u16"	=> "InventoryId  SlotId"
+
+		ou
+		FABER:START_REFINE
+		format="u16 u16"	=> "InventoryId  SlotId"
+
+
+		L'objet est alors locked (fait par le serveur)
+		(à voir pour plus tard quand les swap_items se feront sur le client, c'est le client qui devra locker)
+		L'objet doit etre delocké sur un SENTENCE:CLEAR
+
+	- INFO: Pour La selection du tool je scan les sheaths et le bag (dans l'ordre)
+	- INFO: Pour La selection des MP, je scan seulement les bag
+
+	NOTE: msg.xml n'est pas modifié!
+
+
+* A voir : pour les cheveux il n'y a pas de difference dans le character summary entre tete et cheveux
+
+

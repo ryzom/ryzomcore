@@ -1,0 +1,2351 @@
+
+// ***************************************************************************
+// ***************************************************************************
+// INTERFACE COMMANDS
+// ***************************************************************************
+// ***************************************************************************
+
+
+
+Fichier de definition des commandes et paramtres de l'interface
+
+
+Note: dans la syntaxe et la description des parmptres, la valeur indique est la valeur par dffaut
+
+Note: le X va vers la droite, le Y vers le haut. Les valeurs sont en pixels
+
+Note: DERIVANT DE veut dire qu'on peut mettre les meme parametres que celui de qui on derive
+				les modifiables sont aussi herites
+
+Note: MODIFIABLE veut dire que l'on peut modifier un paramtres dans le script (avec un link par exemple)
+
+Note: OBLIGATOIRE veut dire que l'option doit tre presente sinon il y a crash ou non fonctionnement
+
+Note: Identifiant de localisation local de type string (fait reference a un id de en.uxt par exemple)
+	  Identifiant de localisation reseau de type integer
+
+// ***************************************************************************
+// ***************************************************************************
+// BASICS
+// ***************************************************************************
+// ***************************************************************************
+
+chaque vue, control, ou group DERIVE DE interface_element et peut avoir les parametres suivant:
+
+<view_ctrl_group 
+	id=""				// id de l element. OBLIGATOIRE
+	active="true"		// affiche ou pas
+	x="0"				// position en X relative  posref et posparent
+	y="0"				// position en Y relative  posref et posparent
+	w="0"				// Taille de l element. Si l element possde un parent, prend le W du parent par defaut
+	h="0"				// Taille de l element. Si l element possde un parent, prend le H du parent par defaut
+	posref="BL BL"		// position de reference (Bottom Left, MiddleMiddle etc...)
+						// Se lit "PositionDuParent MaPosition"
+						// Ex: "BL TR" signifie "mon Top Right est fixé sur le Bottom Left du parent"
+	posparent="parent"	// Definit le parent de l element pour ce qui est du positionnement
+	sizeref=""			// valeurs possibles: "w", "h", "wh", "w?h?" ou ? est un facteur entre 1 et 9.
+						// Dans ce cas la taille du parent est multiplie par ce facteur puis divisee par 10.
+						// Au moment de l affichage, ajoute la taille du parent  W ou/et H a celle definit par 
+						// w="" et h="". example: "w2h" implique que WAffiche = W + 2*parentW/10 et que 
+						// HAffiche = H + parentH
+	sizeparent=""		// Indique le parent que l on prend pour le calcul des tailles WAffiche et HAffiche si cette 
+						// valeur n est  pas specifiee alors on prends le posparent pour le calcul de la taille
+	global_color="true"	// si true modulate la couleur par la couleur globale
+
+	render_layer="0"	// valeur de -16 à +14 decale l ordre de rendu de l élement.
+	avoid_resize_parent="false" // Si cette valeur est mise a true, un group ayant un child_resize_x ne 
+								// prendra pas en compte cet element pour se resizer
+/>
+
+MODIFIABLE: active		(bool)
+			x, y, w, h	(int)
+
+// ***************************************************************************
+// ***************************************************************************
+// VIEWS
+// ***************************************************************************
+// ***************************************************************************
+
+Une vue a un type qui est dfinit par le parametre type="".
+
+<view type="" />
+
+MODIFIABLE: alpha (int)
+
+// ***************************************************************************
+// <view type="bitmap" />
+// ***************************************************************************
+
+BUT: 
+affiche une bitmap
+
+SYNTAXE:
+<view type="bitmap" 
+	color="255 255 255 255"		// couleur (modulate) de la bitmap
+	texture=""					// fichier de la texture
+	scale="false"				// si false, le W et le H sont forcs 7 etre de la taille de la texture
+	rot="0"						// definit valeur de rotation de la bitmap
+	flip="false"
+	tile="false"
+	align="0"
+/>
+
+MODIFIABLE:	color			(string)
+			color_as_int	(int)
+			color_rgba		(rgba)
+			texture			(string)
+			alpha			(int)
+
+// ***************************************************************************
+// <view type="background" />
+// ***************************************************************************
+
+Vue DERIVANT DE <view type="bitmap" />
+
+BUT: 
+affiche une bitmap dans des textures non condenses (plusieurs textures dans une seule)
+
+SYNTAXE:
+<view type="background" 
+	txtoffsetx="0"			// offset dans la texture (en haut a gauche et positif vers le bas a droite)
+	txtoffsety="24"			// offset dans la texture
+	txtwidth="800"			// taille de la texture
+	txtheight="488"
+/>
+
+texture sert pour le nom de la texture toute seule
+
+// ***************************************************************************
+// <view type="text" />
+// ***************************************************************************
+
+BUT: 
+affiche un text
+
+SYNTAXE:
+<view type="text" 
+	color="255 255 255 255"		// couleur (modulate) du text
+	fontsize="12"
+	shadow="false"
+	shadow_color="0 0 0 255"	// la couleur de l ombre du texte
+	hardtext=""					// si present definit le text  afficher. (Identifiant de localisation local)
+	multi_line="false"
+	multi_line_space="8"
+	justification="dont_clip_word" 	// clip_word : pas de justification
+									// dont_clip_word : Mots non coupés et non justifiés
+									// justified : Mots non coupés et justifiés
+	underlined="false"			// sous ligne la phrase
+	case_mode="0"				// Regle de majuscule	
+								// 0 : CaseNormal	Pas de modification majuscule minuscule
+								// 1 : CaseLower	Toutes les lettres sont force en minuscule
+								// 2 : CaseUpper	Toutes les lettres sont forcees en majuscule
+								// 3 : CaseFirstStringLetterUp		La premiere lettre de la string est en majuscule
+								// 4 : CaseFirstSentenceLetterUp	La premiere lettre de la string et des phrases 
+								//									suivantes (separes par un .) sont en majuscule
+								// 5 : CaseFirstWordLetterUp		La premiere lettre de chaque mot est en majuscule
+
+	line_maxw="16384"				// maximum size of the line (multiline: minimized with the current wreal of the parent)
+	multi_line_maxw_only="false"	// multiline: don t minimize linemaxw with parent wreal. Use only linemaxw
+
+	over_extend_view_text="false"	// usefull only if some line_maxw specified. if true and if the text is clipped cause 
+									// of line_maxw, and if the mouse over the view text, then a special tooltip will be 
+									// displayed over, to show all the text
+	over_extend_parent_rect="false"	// true to use in conjunction of over_extend_view_text: the over area is the parent, not the view
+	auto_clamp="true"               // when set to true, dots '...' will be added to the end of the line if the text is clipped by its parent (single line only)
+	continuous_update="true"        // multiline text justification is recomputed continuously as the window parent is resized (not when the left button is released only)
+	                                // default is "false"
+/>
+
+MODIFIABLE:	hardtext	(string)
+			uc_hardtext (ucstring)
+			color		(string ('#r #g #b #a'))
+			color_rgba	(rgba)
+			alpha		(int)
+
+NOTE: IL NE FAUT PAS mettre de sizeref sur une vue texte.
+
+NOTE: Les vue textes peuvent prendre la forme de "TextFormatTagged".
+	MAIS SEULES les vues textes multilignes interprètent correctement les tags. 
+	Les Tags possibles sont:
+	@{F3DF}			Tag De couleur (en hexadecimal, défintion avec 0 à F (0 à 15 maxi only donc) pour chaque composante RGBA)
+	@{T10}			Tag de Tabulation. Le chiffre indique l'espacement minimum (en nombre de caractère '_')
+
+NOTE: Il n'est pas posssible de préciser un TextFormatTaged, autrement que par code C++, ou via la fonction LUA:
+	setTextFormatTaged()
+
+
+// ***************************************************************************
+// <view type="text_id" />
+// ***************************************************************************
+
+BUT: 
+Vue DERIVANT DE <view type="text" />
+affiche un text en fonction d'un identifiant reseau (c'est une chaine de character equivalent a set_server_string (ah))
+
+SYNTAXE:
+<view type="text" 
+	textid=""				// lien database vers un identifiant ("UI:TEMP:VAR1") ou identifiant lui meme ("654123")
+	dynamic_string="true"	// si true la phrase est composee		(CStringManagerClient::getDynString), 
+							// sinon c est un identifiant server	(CStringManagerClient::getString)
+/>
+
+MODIFIABLE:	textid			(int)
+			textid_dblink	(string)
+
+// ***************************************************************************
+// <view type="text_number" />
+// ***************************************************************************
+
+BUT: 
+Vue DERIVANT DE <view type="text" />
+Affiche une entre de la database (un nombre entier) sous forme de text
+
+SYNTAXE:
+<view type="text_number" 
+	value=""				 // Lien vers la database pour lire la valeur OBLIGATOIRE.
+	positive="true"
+	suffix=""
+	prefix=""
+	format="false"			// make the number thousands formatted 
+/>
+
+
+// ***************************************************************************
+// <view type="text_formated" />
+// ***************************************************************************
+
+BUT: 
+Vue DERIVANT DE <view type="text" />
+Affiche un texte. Si le texte contient les caracteres speciaux suivant, il y a un traitement particulier
+$p -> remplace par le nom du joueur
+$P -> remplace par le nom du joueur en lettre capitale
+$b -> remplace par le nom du NPC auquel le joueur est en train de parler
+$s -> remplace par le nom du NPC auquel le joueur est en train de parler (sans le titre)
+ui... -> remplace par la traduction i18n (puis effectue les remplacements precedent)
+
+SYNTAXE:
+<view type="text_formated"
+	format="$b"					// chaine a remplacer (par defaut chaine vide)
+/>
+
+// ***************************************************************************
+// <view type="text_id_formated" />
+// ***************************************************************************
+
+BUT: 
+Vue DERIVANT DE <view type="text_id" />
+Un peu dans le meme esprit que la vue text_formated. Elle possede les memes traitements particuliers que
+text_formated auxquels il faut y rajouter :
+$t -> remplace par la valeur du text id
+
+SYNTAXE:
+<view type="text_id_formated" 
+	format="$t"					// Par defaut
+	textid="SERVER:BOTCHAT:DM_CHOICE2:TITLE"
+/>
+
+// ***************************************************************************
+// <view type="text_quantity" />
+// ***************************************************************************
+
+BUT: 
+Vue DERIVANT DE <view type="text" />
+Affiche un nombre de la database sous la forme "8/10" (avec donc une valeur max de la database). 
+Si le nombre est  0, cela affiche la string emptytext. 
+Par defaut emptytext="", et dans ce cas, "0/80" est affich (80 est la vraie valeur max en fait)
+
+SYNTAXE:
+<view type="text_quantity" 
+	value=""				// Lien vers la database pour lire la valeur OBLIGATOIRE.
+	valuemax=""				// Lien vers la database pour lire la valeur Max. OBLIGATOIRE.
+	emptytext=""			// quand valeur==0, string  afficher. "" veut dire affiche 0/valeurMax
+/>
+
+NB : emptytext contient un identifiant de localization local
+
+// ***************************************************************************
+// <view type="digit" />
+// ***************************************************************************
+
+BUT:
+Vue speciale qui affiche un nombre avec des digits speciaux (bitmaps).
+
+SYNTAXE:
+<view type="digit"
+    value="SERVER:...."				// lien sur la database. OBLIGATOIRE
+    numdigit="2"					// nombre de digit affichs (eg 00 si la valeur est nulle). Defaut:2. Min:1 et Max: 10
+    wspace="-1"						// espacement en pixel entre chaque digit. Defaut: -1
+    color="255 255 255 255"			// comme les boutons, blanc par defaut
+/>
+
+La taille totale est automatiquement calcule en fonction du digit 0 et du nombre de digit. 
+bien sur, x,y,posref etc... marche toujours
+
+
+// ***************************************************************************
+// <view type="bar" />
+// ***************************************************************************
+ 
+BUT:
+Vue DERIVANT DE <view type="bitmap" />
+affiche une valeur sous forme de bar. Pour l instant 4 versions : (normal, mini, ultra_mini et mini_thick)
+les bitmaps utilisees sont hardcodees en c++
+
+SYNTAXE:
+<view type="bar"
+	value=""						// valeur courante (Valeur ou Lien DB)
+	range=""						// range  (Valeur ou Lien DB)
+	reference=""					// Valeur soustraire de value et range (exemple: gestion de temps).(Valeur ou Lien DB)
+	color_negative=""				// couleur quand les valeurs sont negatives
+	mini="true"						// Affiche la version mini
+	ultra_mini="true"				// Affiche la version ultra mini
+	mini_thick="true"				// Affiche la version mini thick
+/>
+
+MODIFIABLE:
+		value		(int)
+		range		(int)
+		reference	(int)
+		value_dblink		(string)
+		range_dblink		(string)
+		reference_dblink	(string)
+
+// ***************************************************************************
+// <view type="bar3" />
+// ***************************************************************************
+ 
+BUT:
+Vue DERIVANT DE <view type="bitmap" />
+un peu dans le meme esprit que "bar" mais affiche directement 3 barres
+
+SYNTAXE:
+<view type="bar3"
+	value1=""
+	value2=""
+	value3=""
+	range1=""
+	range2=""
+	range3=""
+	color1=""
+	color2=""
+	color3=""
+	color1_negative=""
+	color2_negative=""
+	color3_negative=""
+	mini="true"
+/>
+
+MODIFIABLE:
+		value1	(int)
+		value2	(int)
+		value3	(int)
+		range1	(int)
+		range2	(int)
+		range3	(int)
+
+// ***************************************************************************
+// ***************************************************************************
+// CONTROLS
+// ***************************************************************************
+// ***************************************************************************
+
+DERIVE DE <view type="" />
+Un control a un type qui est définit par le paramètre type="".
+
+<ctrl type="" 
+	tooltip=""						// aide contextuelle par defuat
+	tooltip_i18n=""					// idem tooltip, mais cherche forcément la définition dans le wk.uxt,
+									// même si le texte ne commence pas par "ui"
+	on_tooltip=""					// action handler qui permet de mettre une autre aide contextuelle
+	on_tooltip_params=""			// les parametres de l action handler
+	instant_help="true"				// Est ce que l aide contextuelle a affichee est affichee directement
+
+	tooltip_parent="ctrl"			// "ctrl", "win" ou "mouse". Définit le parent relatif lors de l affichage
+									// du tooltip.
+											"ctrl" veut dire que le tooltip est callé par rapport à ce control
+											"win" veut dire que le tooltip est affiché par rapport à la fenetre
+													contenant le control
+											"mouse" veut dire que le tooltip est callé par rapport à la souris
+	tooltip_posref="auto"			// Position de référence du tooltip par rapport à son parent (cf tooltip_parent)
+											"auto" la posution de référence est chosie intelligement suivant le
+													type de parent:
+													"ctrl": "TL BR" ou "TR BL" suivant que la fenetre contenant
+														le control est plus à gauche ou à droite
+													"win": "TL BL" ou "BL TL" suivant que la fenetre contenant
+														le control est plus en haut ou en bas
+													"mouse": "BL BL"
+											"TL BR" (ou toute autre position de référence possible): calage fixe
+
+/>
+
+MODIFIABLE:	alpha (int)
+
+// ***************************************************************************
+// <ctrl type="tooltip" />
+// ***************************************************************************
+
+BUT:
+Control qui dérive simplement de ctrl_base, et qui ne gère aucun évenement et n'affiche rien.
+Son seul but est d'avoir une zone pour afficher un tooltip quand on passe dessus.
+
+SYNTAXE:
+<ctrl type="tooltip" />
+
+
+// ***************************************************************************
+// <ctrl type="button" />
+// ***************************************************************************
+
+BUT:
+boutton, push, radio ou toggle.
+
+SYNTAXE:
+<ctrl type="button" 
+	button_type="toggle_button"			// type du boutton: "toggle_button", "push_button" ou "radio_button"
+	pushed="false"						// etat pushed par defaut
+	color="255 255 255 255"				// couleur etat normal
+	col_pushed="255 255 255 255"		// couleur quand pushed
+	col_over="255 255 255 255"			// couelur quand over
+	global_color_normal=""				// remplace le setup global_color pour l etat normal du bouton
+	global_color_pushed=""				// remplace le setup global_color pour l etat pushed du bouton
+	global_color_over=""				// remplace le setup global_color pour l etat over du bouton
+	tx_normal=""						// texture etat normal
+	tx_pushed=""						// texture etat pushed
+	tx_over=""							// texture etat over
+	scale="false"
+	onclick_l=""						// action à lancer sur un click gauche
+	params_l=""							// parametres de l action à lancer sur un click gauche
+	onlongclick_l=""					// action a lancer sur un click long
+	params_longclick_l=""
+	onclick_r=""						// action à lancer sur un click droit
+	params_r=""							// parametres de l action à lancer sur un click droit
+	align=""							// si pas de scale et que zone définie plus grande que l image
+	menu_l=""							// context menu à afficher sur un click bouton gauche (voir group de type menu)
+	menu_r=""							// context menu à afficher sur un click bouton droit (voir group de type menu)
+	menu_b=""							// context menu à afficher sur un click bouton droit ou gauche (voir group de type menu)
+	frozen="false"						// button is frozen
+/>
+
+MODIFIABLE:	pushed			(bool)
+			col_normal		(string ('#r #g #b #a'))
+			col_over		(string ('#r #g #b #a'))
+			col_pushed		(string ('#r #g #b #a'))
+			col_normal_rgba	(rgba)
+			col_over_rgba	(rgba)
+			col_pushed_rgba	(rgba)
+			frozen			(bool)
+			params_l		(string)
+
+			texture			(string)
+			texture_pushed	(string)
+			texture_over	(string)
+
+
+// ***************************************************************************
+// <ctrl type="text_button" />
+// ***************************************************************************
+
+BUT:
+boutton, push, radio ou toggle.
+
+SYNTAXE:
+<ctrl type="text_button" 
+	button_type="toggle_button"			// type du boutton: "toggle_button", "push_button" ou "radio_button"
+	pushed="false"						// etat pushed par defaut
+	color="255 255 255 255"				// couleur etat normal
+	col_pushed="255 255 255 255"		// couleur quand pushed
+	col_over="255 255 255 255"			// couelur quand over
+	global_color_normal=""				// remplace le setup global_color pour l etat normal du bouton
+	global_color_pushed=""				// remplace le setup global_color pour l etat pushed du bouton
+	global_color_over=""				// remplace le setup global_color pour l etat over du bouton
+
+	//  Textures: 
+	// contrairement aux boutons, ici il faut mettre seulement "textb_normal" par exemple. 
+	// les "_l.tga", "_m.tga", "_r.tga" etant ajoutees automatiquement pour trouver respectivement les parties
+	// gauches, millieu (celle qui est scalée en X) et droite.
+
+	tx_normal=""						// texture etat normal. 
+	tx_pushed=""						// texture etat pushed.
+	tx_over=""							// texture etat over.
+	onclick_l=""						// action à lancer sur un click gauche
+	params_l=""							// parametres de l action à lancer sur un click gauche
+	onlongclick_l=""					// action a lancer sur un click long
+	params_longclick_l=""
+	onclick_r=""						// action à lancer sur un click droit
+	params_r=""							// parametres de l action à lancer sur un click droit
+	menu_l=""							// context menu à afficher sur un click bouton gauche (voir group de type menu)
+	menu_r=""							// context menu à afficher sur un click bouton droit (voir group de type menu)
+	menu_b=""							// context menu à afficher sur un click bouton droit ou gauche (voir group de type menu)
+
+	// Texte infos:
+	hardtext=""
+	fontsize=""
+	shadow=""
+	underlined=""
+
+	// Comportement Special des Couleurs des Textes
+	text_color_normal="255 255 255 255"
+	text_color_pushed="255 255 255 255"
+	text_color_over="255 255 255 255"
+	text_shadow_color_normal="0 0 0 255"
+	text_shadow_color_pushed="0 0 0 255"
+	text_shadow_color_over="0 0 0 255"
+	text_global_color_normal=""
+	text_global_color_pushed=""
+	text_global_color_over=""
+
+	// Special:
+	text_y=""							// décalage du texte en Y rapport au bouton (-2)
+	wmargin=""							// taille à ajouter au texte pour avoir la taille du bouton
+	wmin=""								// taille minimum du bouton
+
+/>
+
+MODIFIABLE:	pushed			(bool)
+			col_normal		(string ('#r #g #b #a'))
+			col_over		(string ('#r #g #b #a'))
+			col_pushed		(string ('#r #g #b #a'))
+			col_normal_rgba	(rgba)
+			col_over_rgba	(rgba)
+			col_pushed_rgba	(rgba)
+			frozen			(bool)
+			params_l		(string)
+
+			uc_hardtext		(ucstring telle quelle)
+			hardtext		(string qui va etre localisee)
+
+
+// ***************************************************************************
+// <ctrl type="scroll" />
+// ***************************************************************************
+
+BUT:
+scroll bar.
+
+SYNTAXE:
+<ctrl type="scroll"
+
+	tx_bottomleft=""		// Les textures du bouton (pas de background affiche) (bottom or left)
+	tx_middle=""
+	tx_topright=""			// top or right (ca depends si la sb est verticale)
+
+	vertical=""				// Est ce que c est une sb verticale ou horizontale
+	align=""				// T, B, L ou R
+	
+	value=""				// Value entree de DB ou nombre (si pas present alors la sb est linke a une target)
+	min=""					// Si la sb n est pas linke a une target alors le nombre qu elle 
+							// represente varie de min a max
+	tracksize=""			// Taille de la track bar (le boutton)
+	
+	onscroll=""				// Action Handler appele lorsque la sb est deplacee
+	onscrollend=""			// Appele quand on arrete de scroller
+	params=""
+	
+	target=""				// Si la sb n est pas linke a une value alors elle peut etre linke a un group. Dans ce cas
+							// le group est se deplace dans la limite de ses max_w et max_h relativement a ses w et h.
+	target_stepx=""			// Donne la quantite de pixel a deplacer en une fois. Ce qui permet par exemple dans les 
+	target_stepy=""			// listes de sheet d etre cale sur un sheet
+	step_value=""
+/>
+
+// ***************************************************************************
+// <ctrl type="sheet" />
+// ***************************************************************************
+
+BUT:
+affiche un boutton spécial d'item, brique etc...
+
+SYNTAXE:
+<ctrl type="sheet"
+	value=""							// Lien vers la database. OBLIGATOIRE.
+										// example: SERVER:INVENTORY:8:1. NB: lien vers une branche de la database
+										// qui DOIT contenir SHEET, et peut avoir QUANTITY et/ou QUALITY
+	nature="item"						// "item", "brick", "spell"
+	brick_type=""						// "COMBAT", "MAGIC". may be important for some filter (memory...)
+										// Can also put multiple filter like this: "COMBAT|MAGIC|HARVEST"
+	tx_noitem=""
+	col_noitem="true"					// "true": quand pas d item, modulate la couleur avec la couelur globale
+
+	onclick_l=""						// action à lancer sur un click gauche
+	params_l=""							// parametres de l action à lancer sur un click gauche
+	onclick_r=""						// action à lancer sur un click droit
+	params_r=""							// parametres de l action à lancer sur un click droit
+
+	menu_l=""							// context menu à afficher sur un click bouton gauche (voir group de type menu)
+	menu_r=""							// context menu à afficher sur un click bouton droit (voir group de type menu)
+	menu_b=""							// context menu à afficher sur un click bouton droit ou gauche (voir group de type menu)
+
+	dragable="false"					// drag and drop able?
+	oncandrop=""						// Action a lancer pour savoir si on peut Droper sur moi.
+	params_candrop=""
+	ondrop=""							// Action a lancer sur un drop sur moi
+	params_drop=""
+
+	use_quantity="true"					// display the Item Quantity
+	use_quality="true"					// display the Item Quality
+	duplicate_on_drag="false"			// when drag a sheet (item only), leave the bitmap in the original slot
+	use_slot_type_db_entry="false"		// Automatic Type.
+
+	grayed="false"						// init the sheet as grayed or not
+	auto_grayed="false"					// Gray auto the sheet according to Item LOCKED state or Brick LATENT state
+	slot="true"							// Draw the slot
+/>
+
+MODIFIABLE:
+		sheet			(string) (correspond a la value le lien vers la DB)
+		color1			(rgba)
+		color2			(rgba)
+		back			(int)
+		symbol			(int)
+		invert_symbol	(bool)
+
+
+// ***************************************************************************
+// <ctrl type="colpick" />
+// ***************************************************************************
+
+BUT:
+affiche une image pour choisir que l on puisse choisir une couleur dedans
+
+SYNTAXE:
+<ctrl type="colpick" 
+	texture="color_palette.tga"			// La texture a utiliser (texture non groupee!)
+	onchange="proc"						// Action a lancer des que la couleur selectionnee change
+	onchange_params="proc_col_change"	// Les parametres de l action
+	dbcolr="UI:TEMP:COL:R"				// .
+	dbcolg="UI:TEMP:COL:G"				// .
+	dbcolb="UI:TEMP:COL:B"				// .
+	dbcola="UI:TEMP:COL:A"				// Liens direct avec la database de la couleur selectionnee
+/>
+
+MODIFIABLE:	r, g, b, a (int) les composantes de la couleur selectionnee
+			color (string ('#r #g #b #a'))
+
+
+
+// ***************************************************************************
+// ***************************************************************************
+// GROUPS
+// ***************************************************************************
+// ***************************************************************************
+
+// ***************************************************************************
+// <group>
+// ***************************************************************************
+
+BUT:
+DERIVE DE <ctrl type=""/>
+Définit un group qui pourra contenir des groups, des controls ou des vues.
+Aucun affichage n'est fait sinon celui des fils
+Pour qu'un groupe soit affiché, il faut qu'il apparaisse dans les <tree node="">
+
+SYNTAXE:
+<group
+	overlappable="true"			// Recupere les evenements	
+	child_resize_w="false"		// si true, resize le groupe en W selon ses fils.
+	child_resize_h="false"		// si true, resize le groupe en H selon ses fils.
+	child_resize_wmargin="0"	// si child_resize_w="true" ajoute une marge à la largeur totale des fils
+	child_resize_hmargin="0"	// si child_resize_h="true" ajoute une marge à la hauteur totale des fils
+	on_active=""				// nom d un handler appelé quand la fenetre est activée
+	on_active_params=""			// parametre passé au handler quand la fenetre est activée
+	on_deactive=""				// nom d un handler appelé quand la fenetre est désactivée
+	on_deactive_params=""		// parametre passé au handler quand la fenetre est sactivée
+	on_enter=""					// windows et modal only: Gere l evenement entree : Quand on appuie sur enter (return)
+	on_enter_params=""			// windows et modal only: Les parametres de l evenement entree
+	escapable="false"			// windows only: true : ferme la fenetre si ESC appuyée.
+
+	max_w=""					// max_w et max_h definisse la taille maximum a afficher tandis que w et h definsse la
+	max_h=""					// taille du document (qui est a l interieur et peut donc etre scolle)
+	max_sizeref=""
+	max_sizeparent=""
+	group_onclick_r=""
+	group_params_r=""
+	group_onclick_l=""
+	group_params_l=""
+	win_priority=""
+	use_cursor=""
+/>
+
+MODIFIABLE:	ofsx (int)
+			ofsy (int)
+
+// ***************************************************************************
+// <group type="list">
+// ***************************************************************************
+
+BUT:
+
+SYNTAXE:
+<group type="list"
+	maxelements="10"
+	addelt="B"				// "B", "T", "L" ou "R"
+	align="L"				// "B", "T", "L" ou "R"
+	space="0"
+	chat="false"
+	
+	// Text options
+	color=""
+	fontsize=""
+	shadow=""
+	shadow_color=""
+	line_at_bottom=""
+	multi_line=""
+	justification=""
+	multi_line_space=""
+
+	over="false"			// doit on afficher la selection sous la souris
+	col_over="255 255 255 32" // la couleur de la selection
+
+	// Initial text
+	hardtext="uiAZE"		// init la liste avec un texte a identifiant de localisation local
+	textid="654"			// init la liste avec un texte a identifiant de localisation reseau
+/>
+
+
+// ***************************************************************************
+// <group type="container">
+// ***************************************************************************
+
+Herite de group
+
+BUT:
+Afficher un container
+
+SYNTAXE:
+<group type="container"
+	localize=""					// Def:true est ce que le titre doit etre localise ?
+	title=""
+	title_opened=""
+	title_closed=""
+	header_active="true"
+	header_color="UI:SAVE:MYCOLOR"	// db col entry
+	right_button="true"
+	movable="false"				// true == on peut bouger la fenetre
+	popable="false"				// true == la fenetre peut se detacher de son container parent
+	lockable=""					// Def:true
+	locked=""					// Def:false
+	openable="true"				// peut on ouvrir le container en clickant sur la barre de titre
+	opened="false"				// l etat initial en ouverture
+	open_when_popup="false"		// Ouvre le container quand on le popup (le ferme quand popin)
+	resizer="true"				// est ce que l on peut resizer la fenetre
+	
+	on_open=""					// nom dun handler appelé quand le container est ouvert
+	on_open_params=""			// parametre passé au handler quand le container est ouvert
+	on_close=""					// nom dun handler appelé quand le container est fermé
+	on_close_params=""			// parametre passé au handler quand le container est fermé
+
+	on_deactive_check=""	
+	on_deactive_check_params=""	
+
+	max_w=""
+	min_w=""
+
+	pop_max_w=""
+	pop_min_w=""
+	pop_max_h=""
+	pop_min_h=""
+
+	movable_in_parent_list=""
+	savable="true"				// true == la fenetre est sauvegardée sur disque et est dépendente des modes.
+	active_savable=""
+	modal_parent=""
+	options=""					// nom des options a utilisees (pas fonction d un layer)
+/>
+
+MODIFIABLE: title, title_opened, title_closed (string)
+			uc_title_opened, uc_title_closed, uc_title (ucstring)
+			title_color (string)
+			pop_max_h (int)
+			openable, opened (bool)
+			lockable, locked (bool)
+
+Note: si global_color est à true le bouton et le titre sont colorés par la couleur globale
+
+// ***************************************************************************
+// <group type="frame">
+// ***************************************************************************
+
+Herite de group
+
+BUT:
+comme un group mais affiche un cadre et un fond (fixé: bitmaps de la modal).
+
+SYNTAXE:
+<group type="frame"
+	display="false"					// si false n affiche pas la frame (true par defaut)
+	color="255 255 255 255"
+/>
+
+MODIFIABLE: color (string ('#r #g #b #a'))
+
+// ***************************************************************************
+// <group type="modal">
+// ***************************************************************************
+
+Herite du group de type "frame" (affiche donc un cadre)
+
+BUT:
+Affiche une fenetre qui pourra etre ouverte sur une action. Cachée par defaut (active=false)
+NOTE: un group modal NE DOIT PAS être défini dans les <tree node="">.
+En fait ils sont automatiquement ajoutés
+NB: par defaut les modals sont ESCAPABLE
+
+SYNTAXE:
+<group type="modal"
+	mouse_pos="true"				// si "true", Spawn la fenetre sur la position de la souris, en suivant posref""
+									// par exemple posref="BL TL" positionnera le coin TL de la fenetre sur la souris.
+									// NB: BL (posref du parent) est donc ignorée ici
+	exit_click_out="true"			// si "true" la fenetre modal est fermeé si on clique à l exteriru
+	exit_click_l="false"			// si "true" la fenetre modal est fermeé si on clique sur le bouton gauche 
+									// (après lancement eventuelle action de la modal)
+	exit_click_r="false"			// si "true" la fenetre modal est fermeé si on clique sur le bouton droit
+									// (après lancement eventuelle action de la modal)
+	exit_click_b="false"			// equivalent à exit_click_l="val" ET exit_click_r="val" (val: true ou false)
+	exit_key_pushed="false"			// Close the modal if a key is pushed
+
+	force_inside_screen="false"		// Clip la fenetre à l interieur de l ecran. Note: automatique si mouse_pos="true"
+	onclick_out=""
+	onclick_out_params=""
+/>
+
+certains actions handlers prennent un id de window en paramètre (eg: "ui:interface:taskbar"). L'id spécial
+se nommant "ctrl_launch_modal" désigne en fait le bouton ou le control qui a fait ouvrir la fenetre modal.
+
+eg:
+Un control sheet dans une fenetre modal echange son sheet id avec le ctrl sheet qui a ouvert la modal:
+<ctrl type="sheet" onclick_l="exchange" params_l="src=ctrl_launch_modal">
+
+Dans le xml, il faut bien faire attention a ce que les modals soient a la racine sinon elles peuvent 
+etre affichées plusieurs fois. Il ne faut pas non plus qu'elles soient ajoutées en tant que node dans un <tree>
+
+
+// ***************************************************************************
+// <group type="menu">
+// ***************************************************************************
+
+Herite du groupe de type "modal"
+
+BUT:
+Affiche un menu contextuel
+Caché par défaut
+
+SYNTAXE:
+<group type="menu" id="cm_byes" 
+	context="true"						// "false" si doit etre utilisé (et donc affiché) dans un autre groupe
+										// et non tout seul (sur un menu_r de bouton par exemple)
+	color="255 255 255 255"				// couleur du texte
+	shadow_color="0 0 0 255"			// couleur de l ombre du texte (noire par defaut)
+	fontsize="12"
+	shadow="false"
+	color_over="255 255 255 255"		// couleur du texte quand survole de la souris dessus
+	shadow_color_over="0 0 0 255"		// couleur de l ombre du texte quand survole de la souris (noire par defaut)
+	highlight_over="128 0 0 255"		// higlight sous le texte quand survolé. Mettre A=0 pour rien.
+	color_grayed="128 128 128 255"		// couleur du texte quand celui ci est inactif
+	shadow_color_grayed="0 0 0 255"		// couleur de l ombre du texte quand celui ci est inactif
+	>
+		<action				// Une action est une ligne de menu (ou de sous menu) (ici cette action possède un sous menu)
+			id="aze"		// Identifiant facultatif si absent, l id est la position dans le menu (a partir de 0)
+			name="Action1"	// Nom localise et affiche
+			handler=""		// handler appele si la ligne est clickee (meme en cas de sous menu)
+			params=""		// Les paramètres du handler
+			grayed="true"	// est ce que la ligne est grisée ? facultatif
+			usergroup_l=""			// Nom d un template pour mettre un groupe a gauche du texte
+			usergroup_params_l=""	// Parametres du template delimites par des | (...params_l="posref=TL TL|x=5" )
+			usergroup_r=""			// Pareil a droite
+			usergroup_params_r=""
+		>
+			<action name="imbriquee" handler="" params="" /> // Ligne simple
+		</action>
+
+
+	...
+</group>
+
+MODIFIABLE: pour une action : grayed, checked et tous les modifiables d une vue texte
+on peut recuperer les usergroup en faisant comme d'habitude menuid:actionid:usergroupid
+
+// ***************************************************************************
+// <group type="list_sheet">
+// ***************************************************************************
+
+BUT:
+affiche une liste variable de ctrl_sheet
+
+SYNTAXE:
+<group type="list_sheet" id="pipo0" 
+
+	value="SERVER:INVENTORY:8"	// Pointe sur une branche de la database. OBLIGATOIRE
+								// Les fils doivent etre de type #number:SHEET (optionnel #number:QUALITY et #number:QUANTITY).
+
+	wspace="2" hspace="2"		// donne l espacement entre chaque slot. 0 par defaut
+
+	maxitem="12"				// donne le nombre maximum d item lu dans la branch (eg: 6 pour un bag). 
+								// Nb: temporaire??, normalement c la database qui donne ce nombre. Defaut: infini
+
+	startitem="12"				// donne l id de départ dans la database. utile pour les bag (bag0: 0, bag1: 6, bag2: 12, etc...)
+
+	array="false"				// si "false", les sheet vides ne sont pas affichés. defaut: "true"
+
+	lmargin="12"				// Marges left, right Top et bottom des slots par rapport au group. Defaut:0. Il Faut en mettre si ya une scrollBar et des bouton +- forcément...
+	rmargin="2"
+	tmargin="12"
+	bmargin="2"
+
+	rowmin="0"					// Nombre de ligne minium affichées. Defaut: 1. 
+								// Important si on veut par exemple afficher la liste des malus vide sans que le groupe se resize à H=0 (vide)
+
+	rowmax="2"					// Nombre de ligne maximum affichés. Defaut: infini. 
+								// Important si on veut afficher qu une seule ligne toujours (pour les malus par exemple) 
+								// quelque soit la largeur du parent. C est cette valeur qui est éditée par les boutons +- (si présents)
+
+	column_max="4294967295"		// taille maximum du nombre de sheet par ligne
+	column_factor="1"			// si 3 par exemple, le nombre de sheet par ligne ne pourra etre que 3,6,9...
+	column_center="false"		// si true, centre les sheet en X suivant le WReal donnée par list_sheet
+
+	// Paramètres communs au ctrl type="sheet". Voir ce control pour les détails
+
+	nature=""
+	tx_noitem=""
+	onclick_l=""
+	params_l=""
+	onclick_r=""
+	params_r=""
+	dragable=""
+	oncandrop=""
+	params_candrop=""
+	ondrop=""
+	params_drop=""
+	menu_l=""
+	menu_r=""
+	menu_b=""
+
+	// Filters
+
+	onfilter=""
+	params_filter=""
+	>
+
+	// Le mode "Resize" n'existe pas en fait. Le scripteur est libre de mettre ou pas une scroll bar et/ou des boutons qui permettent de changer rowmax
+
+	<ctrl type="button" id="add_row" button_type="push_button" posref="TR TR" tx_normal="W_arrow_up_3.tga" tx_pushed="W_arrow_up_3.tga" tx_over="W_button_08_over.tga" />
+	<ctrl type="button" id="sub_row" button_type="push_button" posparent="add_row" posref="TL TR" tx_normal="W_arrow_down_3.tga" tx_pushed="W_arrow_down_3.tga" tx_over="W_button_08_over.tga" />
+	
+	// Setup tyipque de scrollBar. L'alignement est hardocé pour etre Top. Le y devrait etre egal à "-tmargin" du group list_sheet
+
+	<ctrl type="scroll" id="scroll_row" posref="TL TL" w="8" x="2" y="12" 
+		<!-- choix des textures de la scroll -->
+		tx_bottomleft= "w_scroll_l123_b.tga"
+		tx_middle= "w_scroll_l123_m.tga"
+		tx_topright= "w_scroll_l123_t.tga"
+	/>
+
+</group>
+
+MODIFIABLE:	nbelt (int en lecture seul !) le nombre d'element valide si array=false sinon maxelt
+
+// ***************************************************************************
+// <group type="list_job">
+// ***************************************************************************
+
+BUT:
+affiche un tableau de familles de métier avec la bonne brick.
+sont grand pere DOIT etre un container (pour initialiser son nom)
+
+SYNTAXE:
+<group type="list_job" 
+
+	brick_type=""				// MAGIC, COMBAT, FABER,... Obligatoire!!
+	career=""					// index OBLIGATOIRE de la carriere
+	job=""						// index OBLIGATOIRE du job. -1 si "all"
+	level=""					// varaible database qui donne le level du joueur dans ce job. OBLIGATOIRE
+	wspace="0"					// donne l espacement entre chaque slot. 0 par defaut
+	hspace="0"					// donne l espacement entre chaque slot. 0 par defaut
+	lmargin="0"					// Marges left, right Top et bottom des slots par rapport au group. Il Faut en mettre si ya des bouton +- forcément...
+	rmargin="0"
+	tmargin="0"
+	bmargin="0"
+
+	list_sentence=""			// Pour la magie Pointe vers un group de type="list_sentence". Utilise pour savoir
+								// ou sont ajoutés les sentences nouvelles.
+
+	// Paramètres communs au ctrl type="sheet". Voir ce control pour les détails
+
+	nature=""					// la nature n est pas necessaire ici. C est FORCEMENT une "brick"
+	tx_noitem=""
+	onclick_l=""
+	params_l=""
+	onclick_r=""
+	params_r=""
+	dragable=""
+	oncandrop=""
+	params_candrop=""
+	ondrop=""
+	params_drop=""
+
+	/>
+
+	// Boutons pour changer le niveau de brick voulu
+
+	<ctrl type="button" id="add_level" button_type="push_button" posref="TR TR" tx_normal="W_arrow_up_3.tga" tx_pushed="W_arrow_up_3.tga" tx_over="W_button_08_over.tga" />
+	<ctrl type="button" id="sub_level" button_type="push_button" posparent="add_row" posref="TL TR" tx_normal="W_arrow_down_3.tga" tx_pushed="W_arrow_down_3.tga" tx_over="W_button_08_over.tga" />
+	
+	// vue qui affiche le niveau selectionné
+
+	<view type="text" id="view_level" />
+
+	// group de décoration qui affiche un fond derriere le texte (sert pour le scroll des levels à la molette)
+	<group id="box_text" />
+</group>
+
+// ***************************************************************************
+// <group type="select_number">
+// ***************************************************************************
+
+BUT:
+widget qui sert pour augmenter et diminuer un nombre de la database
+
+SYNTAXE:
+<group type="select_number" 
+	value=""				// lien vers la database. OBLIGATOIRE
+	loop="true" 
+	min="0" 
+	max="9" 
+	/>
+	<view type="text" id="number" />				// une vue qui permettra d'afficher le nombre
+	<ctrl type="button" id="arrow_up" />			// boutton pour incrémenter
+	<ctrl type="button" id="arrow_down" />			// boutton pour décrémenter
+</group>
+
+
+// ***************************************************************************
+// <group type="scroll_text">
+// ***************************************************************************
+
+BUT:
+widget servant à afficher des lignes de chat ou autres défilant, avec une scrollBar et des boutons pour augmenter
+la taille  de la fenetre
+
+SYNTAXE:
+<group type="scroll_text" 
+	min_height="16"
+	max_height="128"
+	invert_scroll_bar="true" 
+	>
+	<ctrl type="scroll" id="scroll_bar"/>
+	<ctrl type="button" id="button_add"/>
+	<ctrl type="button" id="button_sub"/>
+	<group type="list"  id="text_list"/>
+</group>
+
+
+// ***************************************************************************
+// <group type="editbox" />
+// ***************************************************************************
+
+BUT:
+edition de texte
+
+SYNTAXE:
+<group type="edit_box" 
+	onenter=""							// Action a lancer quand ENTER est pressé
+	params=""							// paramètres de l Action a lancer quand ENTER est pressé
+	onchange=""
+	onchange_params=""
+	enter_loose_focus="true"			// si enter perd le focus
+	max_num_chars="oo"					// chars maxi (infini par defaut)
+	prompt=">"
+	entry_type=""						// text, integer, positive_integer, alpha, alpha_num, password
+	menu_r=""
+	max_historic="0"					// Si !=0 enable l historique de l editBox (4Dos like). Sinon donne la taille de l historique
+	>
+	<view id="edit_text" type="text">
+</group>
+
+MODIFIABLE:	input_string (string)
+			uc_input_string (ucstring)
+
+
+// ***************************************************************************
+// <group type="build_sentence_magic" />
+// ***************************************************************************
+
+BUT:
+Widget de composition de magie
+
+SYNTAXE:
+<group type="build_sentence_magic" >
+	// Brick racine
+	<ctrl type="sheet" id="root_brick" nature="brick" />		
+	// Brick mandatory
+	<vector template="ctrl_brick_mandatory" id="mandatory_brick$i" _size="%BRICKS_PER_SENTENCE" index="$i" />
+	// Brick optional
+	<vector template="ctrl_brick_optional" id="optional_brick$i" _size="%BRICKS_PER_SENTENCE" index="$i" />
+
+	// bouton de validation
+	<ctrl type="button" id="valid_button" />
+</group>
+
+
+// ***************************************************************************
+// <group type="build_sentence_faber" />
+// ***************************************************************************
+
+BUT:
+Widget de composition de magie
+
+SYNTAXE:
+<group type="build_sentence_faber" >
+	// Brick racine
+	<ctrl type="sheet" id="root_brick" nature="brick" />		
+	// Brick optional
+	<vector template="ctrl_brick_optional" id="optional_brick$i" _size="%BRICKS_PER_SENTENCE" index="$i" />
+	// bouton de validation
+	<ctrl type="button" id="valid_button" />
+
+	// Tool
+	<ctrl type="sheet" id="tool" nature="item" />
+	// MPs
+	<vector template="ctrl_faber_mp" id="mp$i" _size="%MAX_FABER_REQ_MP" index="$i" />
+	// Select number
+	<group type="select_number" id="select_num_items" value="bricks:faber:num_items" loop="false" min="1" max="1" >
+	</group>
+</group>
+
+
+
+// ***************************************************************************
+// <group type="list_sentence" />
+// ***************************************************************************
+
+BUT:
+Widget d'affichage des sentence connues. cf list_job pour le lien "list_sentence"
+
+
+SYNTAXE:
+<group type="list_sentence" id="pipo0" 
+
+	wspace="2" hspace="2"		// donne l espacement entre chaque slot. 0 par defaut
+
+	lmargin="12"				// Marges left, right Top et bottom des slots par rapport au group. Defaut:0. Il Faut en mettre si ya une scrollBar et des bouton +- forcément...
+	rmargin="2"
+	tmargin="12"
+	bmargin="2"
+
+	rowmin="0"					// Nombre de ligne minium affichées. Defaut: 1. 
+								// Important si on veut par exemple afficher la liste des malus vide sans que le groupe se resize à H=0 (vide)
+
+	rowmax="2"					// Nombre de ligne maximum affichés. Defaut: infini. 
+								// Important si on veut afficher qu une seule ligne toujours (pour les malus par exemple) 
+								// quelque soit la largeur du parent. C est cette valeur qui est éditée par les boutons +- (si présents)
+
+	sep_slot0=""				// Image pour le separateur Root-Mandatory
+	sep_slot1=""				// Image pour le separateur Mandatory-Optional
+	sep_w0="0"					// décalage Root-Mandatory
+	sep_w1="0"					// décalage Mandatory-Optional
+
+	selected_color="255 255 255 255"	// couleur du highlight de la sentence selectionnée
+
+	// Paramètres communs au ctrl type="sheet". Voir ce control pour les détails
+
+	nature=""					// forcé en type brick
+	tx_noitem=""
+	onclick_l=""
+	params_l=""
+	onclick_r=""
+	params_r=""
+	dragable=""
+	oncandrop=""
+	params_candrop=""
+	ondrop=""
+	params_drop=""
+	menu_l=""
+	menu_r=""
+	menu_b=""
+	>
+
+	// Le mode "Resize" n'existe pas en fait. Le scripteur est libre de mettre ou pas une scroll bar et/ou des boutons qui permettent de changer rowmax
+
+	<ctrl type="button" id="add_row" button_type="push_button" posref="TR TR" tx_normal="W_arrow_up_3.tga" tx_pushed="W_arrow_up_3.tga" tx_over="W_button_08_over.tga" />
+	<ctrl type="button" id="sub_row" button_type="push_button" posparent="add_row" posref="TL TR" tx_normal="W_arrow_down_3.tga" tx_pushed="W_arrow_down_3.tga" tx_over="W_button_08_over.tga" />
+	
+	// Setup tyipque de scrollBar. L'alignement est hardocé pour etre Top. Le y devrait etre egal à "-tmargin" du group list_sheet
+
+	<ctrl type="scroll" id="scroll_row" posref="TL TL" w="8" x="2" y="12" 
+		<!-- choix des textures de la scroll -->
+		tx_bottomleft= "w_scroll_l123_b.tga"
+		tx_middle= "w_scroll_l123_m.tga"
+		tx_topright= "w_scroll_l123_t.tga"
+
+</group>
+
+// ***************************************************************************
+// <group type="combo_box" />
+// ***************************************************************************
+
+BUT:
+affiche une combo_box. Un bouton sur un texte qui fait apparaitre un menu de selection de texte quand on clique dessus
+
+
+SYNTAXE:
+<group type="combo_box" 
+	value=""					// Valeur de la database qui indique l index de selection de la comboBox.
+	on_select_start=""			// optionnel. ActionHandler appelé après ouverture des choix de la combo box
+	>
+	// Text qui affiche le choix courant.
+	<view type="text" id="text" />
+	// Boutton qui sert pour ouvrir la liste.
+	<ctrl type="button" button_type="push_button" id="select" />
+	// ajoute un choix pour la combo_box
+	<combo_text	name="" />		
+</group>
+
+Note: il faut que "ui:interface:combo_box_select_menu" soit définie comme un <group type="menu"> avec
+les paramètres d'aspect que l'on veut. Les champs actions sont remplies quand la combo_box est ouverte
+
+EXEMPLE:
+Ce setup permet de faire une combo box ou le bouton est invisible et recouvre en fait tout le group:
+si on clique sur le texte, on ouvre alors la liste de choix.
+
+<group type="combo_box" id="combo1" w="100" h="18"
+	value="UI:COMBO_SELECT1"
+	>
+	// un cadre juste pour faire joli
+	<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+
+	// notre text
+	<view type="text" id="text" posref="ML ML" x="2" />
+	// Note pas de texture définie sauf l'over: c fait exprès.
+	<ctrl type="button" button_type="push_button" id="select" sizeref="wh" w="0" h="0" col_over="255 255 255 128" tx_over="blank.tga" scale="true" />
+
+	<combo_text	name="choix 1" />		
+	<combo_text	name="choix 2" />		
+	<combo_text	name="choix 3" />		
+	<combo_text	name="choix 4" />		
+
+</group>
+
+// ***************************************************************************
+// <group type="tree" />
+// ***************************************************************************
+
+hérite de group
+
+BUT:
+affiche un arbre (comme un menu)
+
+EXEMPLE:
+<group type="tree" id="pipo" col_over="255 255 255 128" col_select="255 128 128 128" fontsize="12" >
+	<node id="invit"	name="uimGcmInvit" handler="" params="" />
+	<node id="harvest1"	name="uimGcmHarvest" opened="true" >
+		<node id="dig"		name="uimGcmDigging"/>
+		<node id="har"		name="uimGcmHarvesting"/>
+	</node>
+</group>
+
+Sur les nodes qui contiennent des fils on peut setuper la valeur de départ à ouvert ou fermé
+
+// ***************************************************************************
+// <group type="html" />
+// ***************************************************************************
+
+<group type="html" 
+	error_color="255 0 0"				// Error color
+	link_color="128 128 255"			// Link color
+	text_color="255 255 255"			// Text color
+	h1_color="128 255 255"				// Headline 1 color
+	h2_color="255 128 255"				// Headline 2 color
+	h3_color="255 255 128"				// Headline 3 color
+	h4_color="255 255 255"				// Headline 4 color
+	h5_color="255 255 255"				// Headline 5 color
+	h6_color="255 255 255"				// Headline 6 color
+	error_color_global_color="false"	// Error uses global color
+	link_color_global_color="false"		// Link uses global color
+	text_color_global_color="false"		// Text uses global color
+	h1_color_global_color="false"		// Headline 1 uses global color
+	h2_color_global_color="false"		// Headline 2 uses global color
+	h3_color_global_color="false"		// Headline 3 uses global color
+	h4_color_global_color="false"		// Headline 4 uses global color
+	h5_color_global_color="false"		// Headline 5 uses global color
+	h6_color_global_color="false"		// Headline 6 uses global color
+	text_font_size="12"					// Text font size
+	h1_font_size="24"					// Headline 1 font size
+	h2_font_size="20" 					// Headline 2 font size
+	h3_font_size="16" 					// Headline 3 font size
+	h4_font_size="16" 					// Headline 4 font size
+	h5_font_size="16" 					// Headline 5 font size
+	h6_font_size="16"					// Headline 6 font size
+	paragraph_begin_space="12"			// Space between paragraphs
+	multi_line_space_factor="0.25"		// Space between 2 lines of a paragraph. Factor of the font size
+	td_begin_space="0"					// Space at the beginning of a table cell
+	li_begin_space="4"					// H space when "<IL>"
+	ul_begin_space="12"					// H space when "<UL>"
+	li_indent="-10"						// W space when "<LI>"
+	ul_indent="30"						// W space when "<UL>"
+	form_text_area_group="edit_box_widget"		// The group to instanciate for a form edit box. It must have a child group CGroupEditBox* with the id "eb"
+	checkbox_bitmap_normal="checkbox_normal.tga"	// The "off" bitmap use in form checkbox
+	checkbox_bitmap_pushed="checkbox_pushed.tga"	// The "on" bitmap use in form checkbox
+	checkbox_bitmap_over="checkbox_over.tga"		// The "over" bitmap use in form checkbox
+	background_bitmap_view="bg"			// The name of the child bitmap view used for background
+	home="http://www.nevrax.org"		// The home url (you can browsse to the home url with the url "home"
+	browse_next_time="false"			// If true, the url is browsed when the group is created
+>
+</group>
+
+// ***************************************************************************
+// <group type="quick_help" /> (derived from HTML)
+// ***************************************************************************
+
+<group type="quick_help" 
+	non_selected_color="255 0 0"		// The unselected paragraphes color
+	non_selected_link_color"0 0 128"	// The unselected link color
+	non_selected_global_color="true"	// The unselected paragraphes uses gobal color
+	non_selected_font_size="10"			// The unselected paragraphes font size
+>
+</group>
+
+// ***************************************************************************
+// <group type="in_scene" /> (derived from group)
+// ***************************************************************************
+
+<group type="in_scene" 
+	in_scene_offset_x="12"				// Offset in pixels
+	in_scene_offset_y="12"				// Offset in pixels
+>
+</group>
+
+// ***************************************************************************
+// <group type="table" /> (derived from group)
+// ***************************************************************************
+
+a html-like table :
+
+The table is essentially an array. Each line must have the same number of cells.
+The width of the table can be arbitrary. Either sizeref="w" or a fixed w can be used. 
+using child_resize_w has undefined results.
+The height or the table is imposed by its children cells (like with html table)
+
+Table is specified using the standard <TR> & <TD>
+
+// option for the table :
+border : the same the html tables 'border'
+cellpadding : the same the html tables 'cellpadding'
+cellspacing : the same the html tables 'cellspacing'
+bgcolor     : background color with format "R G B A" ("255 0 0 255" for example)
+width		: wanted width of table in pixels (same than html "width"). could be a ratio like "100%"
+			  usually the table will specify sizeref="w" or w and width="100%"
+continuous_update : whan set to true, the table will be updated continuously has its parent container is resized, and not when mouse left button is released only
+
+// options for the cells (<TD> tag)
+Cells can have an id. If none is given a id like cell_1_2 id generated (first number is column, second is row)
+align  : horizontal alignment of cell content. Can be "left", "right" or "center" (same than HTML 'align')
+valign : vertical alignment of cell content. Can be 'top", "middle" or "bottom" (same than HTML 'valign')
+left_margin : offset added to the x position of the cell content
+nowrap : same then htlm table 'nowrap'
+bgcolor : color of the cell background (with the "R G B A" format)
+width : same then htlm table 'width' : gives width of column for that cell, or a percentage
+add_child_w : take the wanted size from the size of the children (equivalent to child_resize_h), and add the 'width' (not added if a percentage)
+height : minimum height of the cell
+ignore_max_width : if "true", the cell content max_used_w is ignored when computing the width of the cell
+ignore_min_width : if "true", the cell content min_used_w is ignored when computing the width of the cell
+
+
+
+<group type="table" id="my_table" posref="TL TL" sizeref="w" width="100%" border="2" bgcolor="0 255 0 255" y="-4"
+			 cellspacing="1"
+			 cellpadding="0"
+			 continuous_update="true"
+			> 
+		<!-- test 1 -->							
+		<TR>
+			<TD width="30%" bgcolor="0 0 0 127" height="30" align="center" valign="middle" id="optionnal_id">
+				<view type="text" id="mon_text" global_color="true" fontsize="20" shadow="true" hardtext="cell 1 cell 1 cell 1 cell 1"
+				 multi_line="true"
+				/>					
+			</TD>
+			<TD bgcolor="255 0 0 127" height="30" align="center" valign="middle">
+				<view type="text" id="mon_text" global_color="true" fontsize="20" shadow="true" hardtext="cell 2"/>
+			</TD>
+		</TR>
+		<TR>
+			<TD width="30%" bgcolor="0 0 0 192" height="30" align="center" valign="middle">
+				<view type="text" id="mon_text" global_color="true" fontsize="20" shadow="true" hardtext="cell 3"/>
+			</TD>
+			<TD bgcolor="0 0 255 192" height="30" align="center" valign="middle">
+				<view type="text" id="mon_text" global_color="true" fontsize="20" shadow="true" hardtext="cell 4"/>
+			</TD>
+		</TR>			
+		<!--			
+		<TR>				
+			<TD width="100%" bgcolor="255 0 0 127" height="30">
+				<view type="text" posref="TL TL" global_color="true" fontsize="20" shadow="true" hardtext="cell 2"/>
+			</TD>
+		</TR>			
+		-->
+	</group>		
+</group>
+
+// ***************************************************************************
+// ***************************************************************************
+// MISC: DEFINE, PROCEDURES, TEMPLATES, ANIM, SCENE3D, ...
+// ***************************************************************************
+// ***************************************************************************
+
+
+// ***************************************************************************
+// <define>
+// ***************************************************************************
+
+BUT:
+Permet de definir une constante.
+
+SYNTAXE:
+<define id="id_du_define" value="valeur_a_remplacer" />
+
+EXAMPLE:
+<define id="pipo_title" value="yoyo" />
+....
+<group type="container" id="player" title="Hello %pipo_title" >
+ 
+ 
+Comme ca "Hello %pipo_title" est remplacé par "Hello yoyo"
+ 
+L'id du define ne peut contenir que les charactères:
+    'a' à 'z'    
+    'A' à 'Z'
+    '0' à '9'
+    '_'
+
+ 
+Du coup si vous voulez vraiment afficher un % dans une string (par exemple "25 %"), il faut l'ecrire en double "25 %%"
+
+
+// ***************************************************************************
+// <proc>
+// ***************************************************************************
+
+BUT:
+Definit un action handler special qui lance des action handlers à la suite
+
+
+SYNTAXE:
+<proc id="nom_procedure" >
+	<action	handler="action_handler0" params="" />
+	<action	handler="action_handler1" params="" />
+	<action	handler="action_handler2" params="@0|@1" />
+</proc>
+
+les paramètres sont optionnels.
+un action handler peut etre lui meme une autre procedure (attention recursivité :))
+
+La procédure se lance en utilisant l'action handler "proc" avec comme paramètre "nom_procedure"
+
+La procédure peut prendre des paramètres en entrée (voir l'action handler proc pour comment faire).
+Pour chaque action, le champ params="" est parsé. Tout chaine de type @#, ou # est un numéro 
+(à N chiffres) copiera alors le paramètre (simple copie de chaine) au moment de l'appel.
+
+Note: de la même facon que les % dans les define, un double @ permet de ne pas considérer l'@ comme un descripteur
+de paramètre
+
+EXAMPLE:
+<proc id="select_quit_modal" >
+	<action	handler="exchange" params="src=ctrl_launch_modal" />
+	<action	handler="leave_modal" />
+</proc>
+
+....
+
+<ctrl type="button" onclick_l="proc" params_l="select_quit_modal">
+
+
+EXAMPLE paramètres:
+<proc id="set_quit_modal" >
+	<action	handler="set" params="dblink=SERVER:PIPO|value=@0" />
+	<action	handler="leave_modal" />
+</proc>
+
+....
+
+<ctrl type="button" onclick_l="proc" params_l="set_quit_modal|10">
+
+Dans cet exemple, sur un cliok gauche du bouton, set sera appelé avec une valeur de 10!!
+Notez que l'index des paramètres commence à 0.
+
+
+
+// ***************************************************************************
+// <template>
+// ***************************************************************************
+
+BUT:
+Definit un patron qui permet d'instancier des groups, ctrls ou vues qui se ressemblent.
+
+SYNTAXE:
+Definition du template:
+<template name="nom_du_template" ...paramètres du template...>
+	corps du template (group, controls etc...) qui reference les paramètres du template avec #
+</template>
+
+Instanciation du template:
+<instance template="nom_du_template" paramètres du template remplis />
+
+EXAMPLE:
+<!--Definit un template de nom "SNH" qui attend des paramètres id, value, loop etc... (si "" est mis à un paramètres, 
+	celui-ci doit etre défini à l'instanciation)
+-->
+<template name="SNH" id="" value="" loop="true" min="0" max="9" posparent="parent" posref="MM MM" x="0" y="0" w="26" h="16" >
+	<group type="select_number" id="#id" value="#value" loop="#loop" min="#min" max="#max" x="#x" y="#y" w="#w" h="#h" posparent="#posparent" posref="#posref" >
+		<view type="bitmap" id="slot_number" posref="TL TL" texture="W_slot_number.tga" />
+		<view type="text" id="number" posparent="slot_number" posref="MM MM" color="255 255 255 255" fontsize="12" shadow="true" hardtext="0" />
+		<ctrl type="button" id="arrow_up" button_type="push_button" posref="TR TR" tx_normal="W_arrow_up_3.tga" tx_pushed="W_arrow_up_3.tga" tx_over="W_button_08_over.tga" />
+		<ctrl type="button" id="arrow_down" button_type="push_button" posref="BR BR" tx_normal="W_arrow_down_3.tga" tx_pushed="W_arrow_down_3.tga" tx_over="W_button_08_over.tga" />
+	</group>
+</template>
+
+<!--Instancie le template SNH
+-->
+<instance template="SNH" id="shortnumber" value="SERVER:USER:SAP" loop="true" min="0" max="9" posref="ML ML" />
+
+
+// ***************************************************************************
+// <vector>
+// ***************************************************************************
+
+BUT:
+Create an array of template's instances (mutli instance version of <instance>)
+
+SYNTAXE:
+<vector
+	template="template_name"		// as in <instance....
+	_size=""						// required. number of isntance to create
+	_firstindex="0"					// optional to begin the index of instance to a number!=0
+
+	// Next ones are required only if the template is a serie of interface elements (group, view....)
+	// that need to be sticked against each other (eg: a vertical array of view text)
+	_firstpos=""					// posref (TL TL...) of the first element, sticked to the parent
+	_nextpos=""						// posref (TR TL...) of next elements, sticked to the previous one
+	_xfirst=""						// special x of the first element
+	_yfirst=""						// special y of the first element
+/>
+
+Then for each instance created, All properties of the XML node are parsed, and $i are replaced with the index of the instance
+
+EXAMPLE:
+<template name="temp_tab" keep="true" nb="" id="" posparent="" posref="" x="" >
+	<ctrl style="tab_button_new" id="#id" posparent="#posparent" posref="#posref" 
+		group="content:group#nb" text="TabNo#nb" />
+</template>
+
+<vector template="temp_tab" _size="16" _firstpos="TR TL" _nextpos="TR TL" _xfirst="4" x="1" id="tab_array0_$i" nb="$i" posparent="tabref" />
+
+This will create 16 instances of ctrls (tab_array0_0, tab_array0_1, tab_array0_2....)
+	The first one will be placed on right of "tabref", but with a x of 4 (_firstpos="TR TL" _xfirst="4")
+	The next ones will be placed on right of each other, but sticked with a x of 1 (_nextpos="TR TL" x="1" )
+
+NB: if '_xfirst' is not defined, then 'x' will be taken for the first position also
+NB: if '_yfirst' is not defined, then 'y' will be taken for the first position also
+NB: Both _firstpos/_nextpos must be defined in order for the "stick system" to work
+	also you must declare id="", posparent="" and posref="" in the template definition.
+
+
+// ***************************************************************************
+// <variable>
+// ***************************************************************************
+
+BUT: 
+crée une variable et associe une valeur
+
+SYNTAXE:
+<variable 
+	entry=""			// Obligatoire. lien vers la database.
+	type=""				// Obligatoire. sint32, sint64, float, double, bool, rgba, hotspot. 
+						// float et double on le meme effet
+	value=""			// valeur à mettre
+	size=""				// Si définit, alors <variable> sert à définir un tableau.
+/>
+
+EXAMPLE:
+<variable entry="UI:MODE" type="sint32" value="0"/>
+
+Dans le cas de définition d'un tableau, le premier "$i" rencontré est remplacé par l'index de 0 à size-1.
+<variable entry="UI:LIST:$i:SHEET" type="sint32" value="0" size="4" />
+
+// ***************************************************************************
+// <link>
+// ***************************************************************************
+BUT:
+lié une expression à une valeur d'une vue (target). L'expression doit dependre d'entrée de la database. A chaque fois qu'une
+entrée de la database est updatée, l'expression est recalculée, et le target est updatée.
+
+SYNTAXE:
+
+<link 
+ expr=""     // obligatoire : expression a évaluer. L'expression doit dépendre au moins d'une entrée de la database
+ target=""   // valeurs auxquelles doit etre affectée le résultat de l expression, relatif au groupe qui contient le link, ou considéré comme une adresse absolue si non trouvé
+ action=""   // facultatif  : un action handler a appeller en cas d update
+ params=""   // facultatif  : paramètre pour l action handler
+ cond=""	 // facultatif  : condition à l'execution de l'action handler
+/>
+
+EXAMPLE:
+
+<view type="bitmap" id="my_view" >
+<link expr="ne(@my_db_entry, 0)" target="my_view:active,my_other_view:active"/> // si l entrée de database 'my_db_view' ne vaut pas 0, alors my_view:active est mis à true
+
+CREATION DYNAMIQUE DE LIEN:
+Elle est utile si on veut que les update ne soient pris en compte qu'à un moment précis (par exemple dans une boite modale)
+C'est sutout bien dans le cas de test couteux ou si des textes non visibles sont updatés pour rien.
+
+// création :
+handler="add_link" params="id=identifier_unique|expr=expression_a_evaluer|target=dest_de_lexpression"
+
+// supression:
+handler="remove_link" params="id=identifier_unique|expr=expression_a_evaluer|target=dest_de_lexpression"
+
+
+par exemple, en reprenant l exemple precedent:
+
+handler="add_link" params="id=mon_lien|expr=ne(@my_db_entry, 0)|target=my_view:active" 
+handler="remove_link" params="id=mon_lien"
+
+// ***************************************************************************
+// <anim> <track> <key>
+// ***************************************************************************
+
+<anim 
+	id="specie_in"			// nom du timer
+	duration="3.0"			// temps en seconde pour faire varier l entree dans la database
+	loop="true"				// est ce que l anim doit boucler ?
+	reverse="false"			// est ce que l anim doit etre jouee a l envers 
+	on_finish="ahwhenfini"	// action handler a lancer quand le timer arrive a la fin
+	on_finish_params="ahp"	// les parametres de l action handler
+/>
+
+<track 
+	type="linear"			// linear, bezier, tcb
+	target="specie:race:y"	// all the targets affected may be more than one
+	dynamic="true"			// (def:false) si true evalue tous les parametres des cles lors du lancement de l anim
+/>
+
+Si la track est de type linear :
+<key
+	time="1.0"				// Une valeur de temps comprise entre 0 et la duration de l anim
+	value="15"				// la valeur que prennent les targets au temps : time
+/>
+
+Si la track est de type bezier :
+<key
+	time="1.0"				// Une valeur de temps comprise entre 0 et la duration de l anim
+	value="15"				// la valeur que prennent les targets au temps : time
+	intan="0.0"				// float facultatif def:0		???? aucune idee de ce a quoi ca peut servir
+	outtan="0.0"			// float facultatif def:0		???? aucune idee de ce a quoi ca peut servir
+	step="true"				// bool  facultatif def:false	???? aucune idee de ce a quoi ca peut servir
+/>
+
+Si la track est de type TCB :
+<key
+	time="1.0"				// Une valeur de temps comprise entre 0 et la duration de l anim
+	value="15"				// la valeur que prennent les targets au temps : time
+	tension="1.0"			// float facultatif def:0
+	continuity="0.0"		// float facultatif def:0
+	bias="1.0"				// float facultatif def:0
+	easeto="0.1"			// float facultatif def:0
+	easefrom="0.3"			// float facultatif def:0
+/>
+
+
+	
+
+un exemple typique est :
+
+<group id="specie" sizeref="wh" on_active="anim_start" on_active_params="anim=t1">
+	<group id="race" posref="BL BL" x="16" y="64">
+	</group>
+</group>
+
+<anim id ="t1" duration="3.0" >
+	<track type="linear" target="specie:race:y">
+		<key time="0.0" value="-16"/>
+		<key time="3.0" value="64"/>
+	</track>
+</anim>
+
+quand on va activer le groupe specie cela va lancer l'animation  t1. la valeur
+specie:race:y va etre modifiee -> cela va faire monter le groupe specie:race
+
+
+// ***************************************************************************
+// <scene3d> <character3d> <ig> <camera> <light>
+// ***************************************************************************
+
+// ---------------------------------------------------------------------------
+<scene3d
+	reference="id_scene3d"		// Donne la reference sur une autre scene 3d (dans ce cas la c est juste une vue sur une autre scene)
+	ambient="0 0 0" 
+	sun_ambient="50 50 50" 
+	sun_diffuse="255 255 255" 
+	sun_specular="255 255 255" 
+	sun_direction="-1.0 1.0 -1.0"
+	curcam="id_camera"			// Camera courante
+	curcs="id_camera"			// Cluster system courant (un ig avec des clusters)
+
+	user_interaction="true"		// Interaction camera (qui doit etre callée en y (ie camx=tgtx & camz=tgtz)
+	rotz_factor="0.005"			// Facteur de vitesse lors d une rotation autour
+	rotz_limit_min="-45"		// Limites d angles
+	rotz_limit_max="45"
+	roty_factor="0.005"			// Facteur de vitesse lors d une rotation haut-bas
+	roty_limit_min="-20"
+	roty_limit_max="20"
+	dist_factor="0.005"			// Facteur de vitesse lors d un deplacement de distance
+	dist_limit_min="0.1"		// Limites de distances en metres
+	dist_limit_max="20"
+
+/>
+
+DERIVANT DE <group>
+
+MODIFIABLE: curcam (string)
+			curcs (string)
+			rotzfactor (float)
+
+// ---------------------------------------------------------------------------
+<character3d
+	dblink="UI:TEMP:CHAR3D"
+	pos="1.0 2.0 3.0"
+	rot="0.0 0.0 90.0"
+/>
+
+MODIFIABLE: headx, heady, headz (float la position de la tete apres au moins une frame d animation)
+			posx, posy, posz (float la position)
+			rotx, roty, rotz (float angle en degres)
+			anim (int)
+
+// ---------------------------------------------------------------------------
+<ig
+	name="ig_name.ig"
+	pos="1.0 2.0 3.0"
+	rot="1.0 2.0 3.0"
+/>
+
+MODIFIABLE: posx, posy, posz (float la position)
+			posx, posy, posz (float l orientation en degree)
+			name (string)
+
+// ---------------------------------------------------------------------------
+<shape
+	name="shape_name.shape"
+	pos="1.0 2.0 3.0"
+	rot="1.0 2.0 3.0"
+/>
+
+MODIFIABLE: posx, posy, posz (float la position)
+			posx, posy, posz (float l orientation en degree)
+			name (string)
+
+// ---------------------------------------------------------------------------
+<camera
+	pos="1.0 2.0 3.0"
+	target="2.0 3.0 4.0"
+	fov="50.0"
+	roll="0.0"
+/>
+
+MODIFIABLE: posx, posy, posz (float la position)
+			tgtx, tgty, tgtz (float la position de la target)
+			fov (float angle en degree)
+			roll (float angle en degree)
+
+// ---------------------------------------------------------------------------
+<light
+	pos="1.0 2.0 3.0"
+	near="3.0"
+	far="10.0"
+	color="127 255 64 255"
+/>
+
+MODIFIABLE: posx, posy, posz (float la position)
+			near, far (float)
+			colr, colg, colb (int)
+
+// ---------------------------------------------------------------------------
+<fx
+	name="sp_cast_loop.ps"
+	pos="1.0 2.0 3.0"
+	rot="0.0 0.0 0.0"
+/>
+
+MODIFIABLE: posx, posy, posz (float la position)
+			rotx, roty, rotz (float la rotation)
+			started (bool le fx est il en train d etre joue ?)
+
+
+un exemple typique :
+
+<scene3d id="char3d" x="576" y="-32" w="576" h="488" posref="TR TR" curcam="cam" 
+					ambient="0 0 0" sun_ambient="50 50 50" sun_diffuse="255 255 255" sun_specular="255 255 255" sun_direction="-1.0 1.0 -1.0" >
+
+	<character3d id="char" dblink="UI:TEMP:CHAR3D" pos="0.07 26.52 0.85" rot="0.0 0.0 -90.0" />
+
+	<camera id="cam" fov="45" pos="0.01 22.29 2.5" target="0.01 37.9 1.53" roll="0" />
+
+	<light id="l1" pos="-1.0 24.29 2.0" color="0 255 0" near="1.0" far="5.0" />
+
+	<ig id="env" name="matis.ig" pos="0 0 0" />
+
+	<fx id="fx1" pos="0.0 0.0 0.0" name="Sp_Cast_Loop.ps" />
+
+</scene3d>
+
+// ***************************************************************************
+// <action_category > 
+//		<action> 
+//			<parameter> 
+//				<value>
+// ***************************************************************************
+
+// Definition d'une category d'action
+<action_category 
+	hardtext="uiUI"			// Nom de la category localisé (defaut : "")
+/>
+
+// ---------------------------------------------------------------------------
+
+// Une definition d'action de base
+<action 
+	repeat="0"				// 1 : l'action est répétée avec la répétition clavier, 0 : elle n'est pas répétée. (defaut : 0)
+	name="screenshot"		// Nom de l'action handler utilisé par l'action (defaut : "")
+	hardtext="uiTakeScreenshot"			// Nom localisé de l'action (defaut : "")
+/>
+
+// ---------------------------------------------------------------------------
+
+// Un paramètre d'action de base
+<parameter
+	type="action_param_constant"	// Type de paramètre :
+									// action_param_hidden : le paramètre est caché à l'utillisateur
+									// action_param_constant : le paramètre est une valeur prédéterminée (voir <value>)
+									// action_param_user : le paramètre est entré par l'utilisateur. Tous les characters sont permis.
+									// action_param_user_name : le paramètre est entré par l'utilisateur. Uniquement les characters permis dans les noms sont utilisés.
+									// (defaut : action_param_constant)
+	name="filename"				// Nom du paramètre (defaut : "")
+	hardtext="uiFilename"		// Nom localisé du paramètre (defaut : "")
+	value=""					// La valeur par defaut du paramètre (defaut : "")
+/>
+
+// ---------------------------------------------------------------------------
+
+// Une valeur prédéfinie de paramètre d'action de base
+<value
+	value="toto"				// La valeur (defaut : "")
+	hardtext="uiToto"			// Le nom localisé de la valeur (defaut : "")
+>
+
+Exemple :
+
+<action_category hardtext="uiDivers">
+
+	// Action pour envoyer un message à un joueur
+	<action repeat="0" name="tell" hardText="uiTell">
+		<parameter type="action_param_user_name" name="user" hardText="uiUsername" visible="1"/>
+		<parameter type="action_param_user" name="message" hardText="uiMessage" visible="1"/>
+	</action>
+
+	// Action pour passer en mode labo
+	<action name="set_mode" hardText="uiModelabo">
+		<parameter value="2" visible="0"/>
+	</action>
+
+	// Action pour ouvrir un inventaire de sac
+	<action repeat="0" name="open_window" hardText="uiOpenWindow">
+		<parameter type="action_param_constant" name="" hardText="uiWindow" visible="1">
+			<value value="UI:BAG1" hardtext="uiBag1"/>
+			<value value="UI:BAG2" hardtext="uiBag2"/>
+			<value value="UI:BAG3" hardtext="uiBag3"/>
+		</parameter>
+	</action>
+
+</action_category>
+
+// ***************************************************************************
+// <key> 
+// ***************************************************************************
+
+<key name="Key1" ctrl="0" shift="0" menu="0" action="run_shortcut" params="1"/>
+
+Bind a key combo to an action handler.
+
+// ***************************************************************************
+// ***************************************************************************
+// ACTIONS
+// ***************************************************************************
+// ***************************************************************************
+
+
+<action="enter_modal" params="group=ui:interface:yoyo_modal1">
+affiche la fenetre modal ui:interface:yoyo_modal1 ici.
+
+<action="leave_modal">
+cache la fenetre modal courante
+
+<action="proc" params="nom_procedure|arg0|arg1|...">
+lance une procédure. Les arguments sont séparés du nom de la procédure par des "|".
+
+<action="set" params="dblink=liendatabase|value=expr">
+set un sint32, resultat de l'evaluation de expr, dans la database.
+
+<action="set" params="target_property=target0,target1,...,targetn|value=expr">
+affecte le resultat de l'evaluation de expr a chacun des target (valeur exportée des elements de l'interface telle que 'active')
+
+<action="copy" params="dbdst=liendatabase|dbsrc=liendatabase">
+copie une valeur de la database dans une autre
+
+<oncandrop="isitem" params="">
+test si dropable est un item
+
+<oncandrop="isitem_slot" params="type=itemslot">
+test si dropable est un item d'un certain type (HEAD, ARMS...)
+
+<onfilter="filter_item" params_filter="type=itemslot">
+test si le ctrlSheet est un item d'un certain type (HEAD, ARMS...)
+à mettre sur les props de list_sheet
+
+<action="set_keyboard_focus" params="target=ui:interface_my_edit_box|select_all=true">
+Met le focus sur l'edit box en target. Selectionne tout le texte si select_all vaut true
+
+<on_active="timer_start" on_active_params="timer=specie_in">
+Lance un timer (voir <timer>)
+
+
+<action="set_server_id" params="value=@%user_name_id|target=player_name:uc_hardtext">
+Affecte une value a une target. La value represente un identifiant de mot reseau (nom des jouers par exemple)
+
+<action="set_server_string" params="value=@%user_name_id|target=player_name:uc_hardtext">
+Affecte une value a une target. La value represente un identifiant de chaine reseau (phrase composee de plusieurs mots)
+
+// ***************************************************************************
+// ***************************************************************************
+// COMMON EXPRESSIONS
+// ***************************************************************************
+// ***************************************************************************
+
+// ***************************************************************************
+add
+	arguments : 2
+	return (arg1 + arg2)
+
+// ***************************************************************************
+sub
+	arguments : 2
+	return (arg1 - arg2)
+
+// ***************************************************************************
+mul
+	arguments : 2
+	return (arg1 * arg2)
+
+// ***************************************************************************
+div
+	arguments : 2
+	return (arg1 / arg2)
+
+// ***************************************************************************
+mod
+	arguments : 2
+	return (arg1 % arg2)
+
+// ***************************************************************************
+abs
+	arguments : 1
+	return abs(arg1) (valeur absolue de arg1)
+
+// ***************************************************************************
+identity
+	arguments : 1
+	return (arg1)
+
+// ***************************************************************************
+ne
+	arguments : 2
+	return (arg1 != arg2)
+
+// ***************************************************************************
+eq
+	arguments : 2
+	return (arg1 == arg2)
+
+// ***************************************************************************
+lt
+	arguments : 2
+	return (arg1 <  arg2)
+
+// ***************************************************************************
+le
+	arguments : 2
+	return (arg1 <= arg2)
+
+// ***************************************************************************
+gt
+	arguments : 2
+	return (arg1 >  arg2)
+
+// ***************************************************************************
+ge
+	arguments : 2
+	return (arg1 >= arg2)
+
+// ***************************************************************************
+or
+	arguments : n > 0
+	return (arg1 || arg2 || ... || argn)
+
+// ***************************************************************************
+and
+	arguments : n > 0
+	return (arg1 && arg2 && ... && argn)
+
+// ***************************************************************************
+not
+	arguments : 1
+	return (!arg0)
+
+// ***************************************************************************
+str
+	arguments : n > 0
+	converti tous les arguments en string et return arg1_str + arg2_str + ... + argn_str
+
+// ***************************************************************************
+int
+	arguments : 1
+	converti l'argument en entier
+
+// ***************************************************************************
+ifthenelse
+	arguments : 2 ou 3 (1er argument de type bool)
+	retourne le 2eme argument si le 1er est vrai
+	sinon retourne le 3eme argument (si il existe)
+
+// ***************************************************************************
+switch
+	arguments : au moins 2 (1er argument de type int)
+	retourne le n ieme argument ou n est la valeur du premier argument +1
+	si arg1 vaut 0 on retourne arg2
+	si arg1 vaut 1 on retourne arg3
+	et ainsi de suite
+
+// ***************************************************************************
+ilinear
+	arguments : 3 double (1er == interpolant (0 - 1.0)) (a 0 arg2 max, a 1 arg3 max)
+	retourne arg2 + arg1 * (arg3 - arg2)
+
+// ***************************************************************************
+getbit
+	arguments : 2 entiers (1er == valeur, 2nd == numero du bit desire)
+	retourne le arg2_ieme bits de la valeur arg1
+
+// ***************************************************************************
+rand
+	arguments : 2 double
+	retourne une valeur comprise entre arg1 et arg2
+
+// ***************************************************************************
+dbcount
+	arguments : 1 (string) (exemple : dbcount('SERVER:MODIFIERS:BONUS:$:SHEET')
+	compte le nombre d occurences dans la database.
+	si l entree est un noeud alors detecte qu il ne soit pas egal a zero
+	il faut obligatoirement un $ (qui sera remplace par 0,1,2,...)
+
+// ***************************************************************************
+getprop
+	arguments : 1 (string) (exemple : getprop('ui:interface:define_day_color:pick:b'))
+	retourne la valeur MODIFIABLE d un element d interface
+
+// ***************************************************************************
+intToColor
+	arguments : 1 (integer)
+	retourne la meme valeur en rgba
+
+// ***************************************************************************
+getRed
+	arguments : 1 (rgba)
+	retourne la meme valeur du rouge
+
+// ***************************************************************************
+getGreen
+	arguments : 1 (rgba)
+	retourne la meme valeur du vert
+
+// ***************************************************************************
+getBlue
+	arguments : 1 (rgba)
+	retourne la meme valeur du bleu
+
+// ***************************************************************************
+getAlpha
+	arguments : 1 (rgba)
+	retourne la meme valeur de l alpha
+
+// ***************************************************************************
+makeRGB
+	arguments : 3 ou 4 (int)
+	retourne un rgb ou rgba
+
+// ***************************************************************************
+min
+	arguments : n>0 (int ou double)
+	retourne la valeur minimum de tous les arguments
+
+// ***************************************************************************
+max
+	arguments : n>0 (int ou double)
+	retourne la valeur maximum de tous les arguments
+
+// ***************************************************************************
+depends
+	arguments : aucun
+	retourne zero
+	sert uniquement a creer des dependances sur des elements de database pour appeler des actions
+
+// ***************************************************************************
+identity
+	arguments : n>0
+	retourne le premier argument
+	sert un peu comme depends mais en plus permet un setup direct d une target
+
+// ***************************************************************************
+band
+	arguments : n>=0
+	retourne AND bit à bit de tous les arguments. 0 si nargs==0.
+
+// ***************************************************************************
+bor
+	arguments : n>=0
+	retourne OR bit à bit de tous les arguments. 0 si nargs==0.
+
+// ***************************************************************************
+bxor
+	arguments : n==2
+	retourne XOR bit à bit des 2 arguments.
+
+// ***************************************************************************
+bnot
+	arguments : n==1
+	retourne NOT bit à bit de l'argument.
+
+
+
+// ***************************************************************************
+// ***************************************************************************
+// GAME EXPRESSIONS
+// ***************************************************************************
+// ***************************************************************************
+
+// ***************************************************************************
+isOpen
+	TODO
+	TODO
+
+// ***************************************************************************
+getCompassText
+	arguments : 1
+	convertit l'argument de type float (angle radian) en text
+
+// ***************************************************************************
+getPactText
+	arguments : 1 entier
+	convertit l'argument qui represente le numero du type de pacte en chaine de character
+
+// ***************************************************************************
+getDateText
+	arguments : 1 entier
+	convertit un jour ryzom (entier) en date sous le fromat 06 / 02 /03
+
+// ***************************************************************************
+getDifficultyText
+	arguments : 1 entier
+	retourne en ucstring le texte de difficulte internationalise
+
+// ***************************************************************************
+isCharSelSlotEmpty
+	arguments : 1 entier
+	retourne un booleen qui dit si le arg1_ieme (0-5) slot de character summary est vide ou non
+
+// ***************************************************************************
+getClientActionTypeText
+	TODO
+	TODO
+
+// ***************************************************************************
+getClientActionTypeColor
+	TODO
+	TODO
+
+// ***************************************************************************
+is2HandItem
+	arguments : 1
+	true si le sheetId définit un item à 2 mains
+
+// ***************************************************************************
+getSmoothServerTick
+	arguments : 1
+	convert a serverTick in smoothServerTick
+
+// ***************************************************************************
+getVSIndex
+	arguments : 2 strings (exemple : getVSIndex('fy_cheveux_shave01.sitem','HEAD'))
+	retourne (int) l index de visual slot en fonction d un nom d item et d un type de slot
+
+// ***************************************************************************
+getRoleId
+	arguments : 1 string
+	retourne un entier qui est le numero de la carriere (dans l enum)
+
+// ***************************************************************************
+getLightLevel
+	arguments : 0
+	donne le facteur de blend jour/nuit (un double de 0.0 a 1.0)
+
+// ***************************************************************************
+strToIntFlag
+	arguments : 1 string (exemple : strToIntFlag('Combat'))
+	retourne (int) le numero du flag correspondant a la string
+
+// ***************************************************************************
+getSheathSlot
+	arguments : 1 string (exemple : getSheathSlot('ammo1'))
+	retourne (int) le numero du fourreau en fonction de son nom
+
+// ***************************************************************************
+getInventorySlot
+	arguments : 1 string (exemple : getInventorySlot('pack_animal1'))
+	retourne (int) le numero du slot d inventaire en fonction de son nom
+
+// ***************************************************************************
+getEquipmentSlot
+	arguments : 1 string (exemple : getEquipmentSlot('FingerL'))
+	retourne (int) le numero du slot d equipement en fonction de son nom
+
+// ***************************************************************************
+getChatWin
+	TODO
+	TODO
+
+// ***************************************************************************
+// ***************************************************************************
+// USER EXPRESSIONS
+// ***************************************************************************
+// ***************************************************************************
+
+// ***************************************************************************
+getSelectedItemPrice
+	arguments : 0
+	Get the price of the current selected item (should come from bot inventory)
+
+// ***************************************************************************
+getDraggedSheet
+	arguments : 0
+	Get ptr object on the current dragged sheet
+
+// ***************************************************************************
+getSelectedSheet
+	arguments : 0
+	Get ptr object on the current selected sheet
+
+// ***************************************************************************
+getMenuItemSheet
+	arguments : 0
+	Get ptr object on the last sheet that trigerred menu.
+
+// ***************************************************************************
+getSheetID
+	From a pointer on a sheet, get its sheetID
+
+// ***************************************************************************
+getSheetSelectionGroup
+	From a pointer on a sheet, get its selection group name
+
+// ***************************************************************************
+getSheetName
+	From a pointer on a sheet, or a sheet ID, get its name
+
+// ***************************************************************************
+getSheetIndex
+	From a pointer on a sheet, get its index in the parent sheet list
+
+// ***************************************************************************
+getSheetQuantity
+	From a pointer on a sheet, retrieve its quantity
+
+// ***************************************************************************
+getSheetQuality
+	From a pointer on a sheet, retrieve its quality
+
+// ***************************************************************************
+isStackable
+	From a pointer on a sheet, get its index in the parent sheet list
+
+// ***************************************************************************
+isTeleport
+	From a pointer on a sheet or a sheet ID, test if an item is a teleport item
+
+// ***************************************************************************
+isPlainItem
+	From a pointer on a sheet or a sheet ID, test if an item is a plain item (not a teleport, not a brick, not a pact)
+
+// ***************************************************************************
+isBrick
+	From a sheet ID, test if an item is a brick
+
+// ***************************************************************************
+isPact
+	From a sheet ID, test if an item is a pact
+
+// ***************************************************************************
+isRangeWeapon
+	From a pointer on a sheet or a sheet ID, test if an item is a ran,ged weapon
+
+// ***************************************************************************
+isRoomLeftFor
+	From a sheet ID, test if there's room for it in the inventory
+
+// ***************************************************************************
+getSelectionGroupNameFromId
+	Get the name of a selection group from its id
+
+// ***************************************************************************
+getSelectionGroupIdFromName
+	Get the id of a selection group from its name
+
+// ***************************************************************************
+getItemsWeight(basePath, firstItem, numItem)
+	Get the sum of all item's weight at the given db path
+
+// ***************************************************************************
+getItemBranchsWeight(baseBranch, firstBranch, numBranch)
+	Get the sum of all items located in several branchs
+
+// ***************************************************************************
+getSeedsWeight()
+	Returns the weight of the seeds owned by the player
+
+// ***************************************************************************
+getArmoursWeight()
+	Returns the weight of all armours pieces worn by the player
+
+// ***************************************************************************
+getInventoryWeight()
+	Returns the weight of the whole inventory, not including beasts'inventory of course
+
+// ***************************************************************************
+getSheathWeight()
+	Returns the weight of the sheaths
+
+// ***************************************************************************
+getBranchSheetCategory()
+	return the types of items that are contained in a branch (with the enum CDBCtrlSheet::TSheetCategory
+
+// ***************************************************************************
+copySheet
+	param 0 = pointer on a sheet, param 1 = dbAdress. 
+	This copy characteristics of a sheet (quantity, quality, sheet id) at the given database adress
+
+
+

@@ -1,0 +1,47 @@
+// scripts for guild systems
+file "entities_game_service/fame_pd"
+{
+	enum TFameTrend
+	{
+		FameUpward,
+		FameDownward,
+		FameSteady,
+	}EndFameTrend
+		
+	class CFameContainerEntryPD key(Sheet)
+	{
+		CSheetId								Sheet;
+		sint32									Fame;
+		sint32									FameMemory;
+		TFameTrend								LastFameChangeTrend;
+		hidden parent CFameContainerPD:Entries	Parent;
+	}
+
+	mapped class CFameContainerPD key(ContId)
+	{
+		CEntityId								ContId;
+		CFameContainerEntryPD:Parent<>			Entries;
+		/// Date of last guild status change (for player)
+		uint32									LastGuildStatusChange;
+		/// Date of last fame variation (used to reset variation indicator after a timeout)
+		uint32									LastFameChangeDate;
+	}
+
+	class CGuildFameContainerPD : CFameContainerPD
+	{
+		parent CGuildPD:FameContainer			Parent;
+	}
+
+
+/*
+	class CFameContainerHolder
+	{
+		CFameContainer:Holder<>					FameContainers;
+	}
+
+	class CGuildPD : CFameContainerHolder
+	{
+	}
+	*/
+
+}

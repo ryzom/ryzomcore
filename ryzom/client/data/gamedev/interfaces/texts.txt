@@ -1,0 +1,526 @@
+[0]!!! BAD TEXT !!!
+[1]Fyros
+[2]Tryker
+[3]Kalab
+[4]Matis
+[5]Male
+[6]Female
+[7]Create
+[8]Name
+[9]Character Creation
+[10]Character
+[11]Enter
+[12]Delete
+[13]Login
+[14]Connect
+
+
+// Empty desc
+[50000]
+
+/*************************************************/
+// TEXT for the OSD 111.txt
+/*************************************************/
+[15]Live Chat
+[16]Add
+
+[24]W
+[25]S
+[26]SH
+
+[27]Unmute All
+[28]1
+[29]2
+[30]3
+[31]4
+[32]5
+
+[33]Rec.  
+
+//[34]Speech
+//[35]Vote
+[36]Min
+
+/lock, unlock : empty string
+[37]
+
+[39]Invite to Team
+
+//[40]add to contact list
+//[41]propose to join clade
+[42]use preprog
+
+//[48]Clade 1
+//[49]Clade 2
+//[50]Clade 3
+//[51]Clade 4
+//[52]Clade 5
+
+//[53]Leave Speech
+//[54]Create Group
+
+/ to speech
+//[55]S
+/ to public chat
+//[56]P
+
+[57]Join Team Request
+
+/ to team
+[58]Team
+/ to clade
+[59]C
+/ to family
+[60]Family
+
+/ the create team button
+[61]Create Team
+/ the leave team button
+[62]Leave Team
+
+[66]Clear
+[67]Create Clade
+[68]Leave Clade
+[69]Join Clade Proposal
+
+[70]Clade
+[71]Vote
+
+/***********************************************/
+/	CREATE CLADE INTERFACE (OSD 200)	/
+/***********************************************/
+[201]Clade Creation
+[204]Public
+[205]Secret
+
+[207]CREATE
+[208]CANCEL
+
+
+
+/***********************************************/
+/		VOTE INTERFACE			/
+/***********************************************/
+[300]Vote
+[309]Territory Chief Election
+[310]Countdown
+[312]Vote
+
+
+/**************************************************************/
+/ TRADE (YOU) (OSD 500).
+/*************************************************************/
+[500]Trade
+[501]Cancel
+
+
+/**************************************************************/
+/ LOGIN (OSD 700).
+/*************************************************************/
+[700]Ok
+
+
+/**************************************************************/
+/ CHARACTER CHOICE (OSD 800).
+/*************************************************************/
+[800]NEW CHARACTER
+
+
+/**************************************************************/
+/ TRADE (YOU) (OSD 900).
+/*************************************************************/
+[900]Buy
+[901]Cancel
+
+
+/***********************************************/
+[99]close
+[1000]Join Team Proposition
+[1001]ACCEPT
+[1002]View Player Infos
+[1003]REJECT
+
+[1004]Join
+[1005]Create
+
+[1100]Join Team Request
+
+/**********************************************/
+/ 	JOIN CLADE PROPOSAL POP-UP	       /
+/**********************************************/
+[1170]Join Clade Proposal
+
+
+/***********************************************************/
+/ 		Spell Creation Interface (4000)
+/***********************************************************/
+[4000]Spell Creation
+[4002]Bricks
+[4011]Known Spells
+[4013]Memorize
+[4021]Spell creation
+[4050]CLOSE
+[4051]TEST
+[4052]VALIDATE
+[4053]Cost :
+
+
+/***********************************************************/
+/ 		Spell Information (Pop Up) (4100)
+/***********************************************************/
+[4100]Spell Information
+[4110]Spell Name
+[4111]Syllables
+[4115]Difficulty :
+[4117]Comment : 
+
+/***********************************************************/
+/ 		Brick Information (Pop Up) (4200)
+/***********************************************************/
+[4200]Brick Information
+[4210]Brick Name
+[4213]Syllable
+[4214]Effect...
+
+/***********************************************************/
+/ 		Memorized Spell List (4300)
+/***********************************************************/
+[4300]Memorized Spells
+[4311]Delete
+[4312]Close
+[4313]Cast
+
+
+
+/***********************************************************/
+/ 			casting bar
+/***********************************************************/
+[4400]Casting Time
+
+/***********************************************************/
+/ 			Bars
+/***********************************************************/
+[5000]HP
+[5100]SAP
+[5200]STAMINA
+[6000]Target
+
+/***********************************************************/
+/			Carac                                           /
+/***********************************************************/
+[30000]Intelligence
+[30001]Agility
+[30002]Well Balanced
+[30003]Constitution
+[30004]Strenght
+[30005]Will
+[30006]Perception
+[30007]Charisme
+[30008]Empathie
+[30009]Caracteristiques
+
+
+/ Description 
+[31000]Intelligence
+[31001]Agility
+[31002]Well Balanced 
+[31003]Constitution 
+[31004]Strenght 
+[31005]Will 
+[31006]Perception 
+[31007]Charisme 
+[31008]Empathie 
+[31009]Caracteristiques 
+//
+[32009]Left points 
+[32010]Validate name
+[32011]Generate random name
+[32012]Enter your name here
+[32013]Guilde name
+//
+[32014]Name
+[32015]Left points
+
+
+
+
+
+
+/***********************************************************/
+/			Race										    /
+/***********************************************************/
+[30010]Race
+[30011]Fyros
+[30012]Matis
+[30013]Tryker
+[30014]Zorai
+
+
+/ Description
+[31010]Race 
+[31011]Fyros 
+[31012]Matis 
+[31013]Tryker 
+[31014]Zorai 
+
+/***********************************************************/
+/			Sex											    /
+/***********************************************************/
+[30090] Sex
+[30091] Male
+[30092] Female
+
+[31090] Sex  
+[31091] Male 
+[31092] Female 
+
+/***********************************************************/
+/			Carriere									    /
+/***********************************************************/
+[30020]Carriere
+[30021]Buffer caster
+[30022]Healer caster
+[30023]Attack caster
+[30024]Melee attack
+[30025]Range attack
+[30026]Harvester
+[30027]Shopkeeper
+
+[31020]Carriere 
+[31021]Buffer caster 
+[31022]Healer caster 
+[31023]Attack caster 
+[31024]Melee attack 
+[31025]Range attack 
+[31026]Harvester
+[31027]Shopkeeper
+
+
+/*****************************************/
+/               Skills categories         /
+/*****************************************/
+[80000]Harvest Competences
+[80001]Surviving Knowledges
+[80002]Civilization Knowledges
+[80003]Training Characteristics
+[80004]Training Resists
+[80005]Ryzom Knowledge
+[80006]Melee Fight
+[80007]Melee Fight Specializations
+[80008]Range Fight
+[80009]Range Fight Specializations
+[80010]Magic Knowledge
+[80011]Magic Specializations
+[80012]Moves
+[80013]Animals
+[80014]Faber
+
+/*****************************************/
+/               Skills                    /
+/*****************************************/
+[70000]Harvest
+[70001]Quartering
+[70002]Fishing
+[70003]Diving
+[70004]Digging
+
+//survivingknowledges
+[70005]Desert
+[70006]Jungle
+[70007]Lake
+[70008]Forest
+[70009]PrimaryRoots
+[70010]FirstAid
+[70011]HominOpponentConsider
+[70012]Camouflage
+
+
+//civilizationsknowledges
+[70013]Fyros
+[70014]Tryker
+[70015]Matis
+[70016]Zorai
+[70017]Kitin
+[70018]Dragon
+
+
+//trainingcaracteristics
+[70019]TrainingStrength
+[70020]TrainingConstitution
+[70021]TrainingAgility
+[70022]TrainingPerception
+[70023]TrainingWill
+[70024]TrainingWellBalanced
+[70025]TrainingIntelligence
+[70026]TrainingCharisme
+[70027]TrainingEmpathie
+[70028]TrainingHp
+[70029]TrainingSeve
+[70030]TrainingStamina
+
+//trainingresist
+[70031]TrainingMagicResist
+[70032]TrainingImpactResist
+[70033]TrainingDiseaseResist
+[70034]TrainingTechnoResist
+[70035]TrainingFearResist
+
+
+//ryzomknowledges
+[70036]Caravan
+[70037]Rocktabou
+[70038]Goo
+[70039]Kami
+[70040]TrykerMystery
+[70041]MatisMystery
+[70042]ZoraiMystery
+
+
+//meleefight
+[70043]Dagger
+[70044]Sword
+[70045]TwoHandsSword
+[70046]Axe
+[70047]Mass
+[70048]Stick
+[70059]GreatAxe
+[70050]GreatMass
+[70051]Pike
+[70052]HandToHand
+[70053]BersekAttack
+[70054]Kick
+[70055]OnHorseBackMelee
+[70056]Rondache
+[70057]Shield
+[70058]DualWield
+[70059]Dodging
+[70060]HeavyArmourWear
+[70061]MediumArmourWear
+[70062]LightArmourWear
+
+
+//meleefightspecializations
+[70063]FyrosSword
+[70064]FyrosLongSword
+[70065]FyrosTwoHandsSword
+[70066]FyrosSaber
+[70067]FyrosDagger
+[70068]FyrosHeavyArmourWear
+[70069]FyrosMediumArmourWear
+[70070]FyrosLightArmourWear
+[70071]FyrosShield
+[70072]FyrosRondache
+
+
+
+//rangefight
+[70073]BowPistol
+[70074]BowRifle
+[70075]Pistol
+[70076]Rifle
+[70077]HeavyWeapon
+[70078]Rocket
+[70079]Grenade
+[70080]HarpoonGun
+[70081]OnHorseBackShoot
+
+
+// range_fight_specializations,
+[70082]FyrosBowPistol
+[70083]FyrosRifle
+[70084]FyrosPistol
+[70085]MatisBowPistol
+[70086]MatisRifle
+[70087]MatisPistol
+[70088]TrykerBow_Pistol
+[70089]TrykerRifle
+[70090]TrykerPistol
+[70091]ZoraiBow_Pistol
+[70092]ZoraiRifle
+[70093]ZoraiPistol
+
+
+//magicknowledge
+[70094]Mandragore
+[70095]Dryade
+[70096]Sylve
+[70097]MajorMandragore
+[70098]MajorDryade
+[70099]MajorSylve
+[70100]MagicTransfert
+[70101]MagicObjects
+
+//magicspecializations
+[70102]MandragoreSpring
+[70103]MandragoreSummer
+[70104]MandragoreAutomn
+[70105]MandragoreWinter
+[70106]SylveSpring
+[70107]SylveSummer
+[70108]SylveAutomn
+[70109]SylveWinter
+[70110]DryadeSpring
+[70111]DryadeSummer
+[70112]DryadeAutomn
+[70113]DryadeWinter
+[70115]MajorMandragoreSpring
+[70116]MajorMandragoreSummer
+[70117]MajorMandragoreAutomn
+[70118]MajorMandragoreWinter
+[70119]MajorSylveSpring
+[70120]MajorSylveSummer
+[70121]MajorSylveAutomn
+[70122]MajorSylveWinter
+[70123]MajorDryadeSpring
+[70124]MajorDryadeSummer
+[70125]MajorDryadeAutomn
+[70126]MajorDryadeWinter
+
+
+//moves
+[70127]Running
+[70128]Swimming
+[70129]Riding
+
+//animals
+[70130]TrainAnimal
+[70131]LeadAnimal
+
+//faber
+[70132]WeaponsCutting
+[70133]MakeThrowingWeapons
+[70134]Blacksmithing
+[70135]ClothTailoring
+[70136]LeatherTailoring
+[70137]Jewellery
+[70138]Cooking
+[70139]Mechanic
+[70140]Building
+[70141]Apothecary
+[70142]MakeShiftRepair
+[70143]ArmorAndWeaponSmithing
+
+/***********************************************/
+/	      SELECT  CHARACTER INTERFACE           /
+/***********************************************/
+[90000]Create new character
+[90001]NEW CHARACTER
+[90002]Select/Create character
+
+
+/***********************************************/
+/	                 MISC                       /
+/***********************************************/
+[100000] Gabarits
+[100001] Hair model
+[100002] Morphology
+[100003] Tattoo
+[100004] Please enter a name without whitespaces!
+[100005] Erase
+[100006] OK
+[100007] CANCEL
+[100008] Are you sure you want to erase this character ?
+
+
+
+

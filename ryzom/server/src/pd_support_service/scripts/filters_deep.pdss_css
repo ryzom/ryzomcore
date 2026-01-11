@@ -1,0 +1,10 @@
+infoExtractor Name
+infoExtractor PlayTime
+infoExtractor ActivityDuration
+infoExtractor FirstActivityDate
+infoExtractor LastActivityDate
+
+inputFileRule AddFilesFromFdcCache
+inputFileRule Since 1/1/2006
+inputFileRule FileAge 14
+inputFileRule LargestFile

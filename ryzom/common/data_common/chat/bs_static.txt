@@ -1,0 +1,15 @@
+# code for sentence difficulty
+BS_CHILD_PLAY	"&VE&Child's play"
+BS_REAL_EASY	"&VE&Really Easy"
+BS_EASY		"&BL&Easy"
+BS_FAIRLY_EASY	"&BL&Fairly easy"
+BS_AVERAGE	"&BC&Average"
+BS_QUITE_DIFF	"&BC&Quite difficult"
+BS_DIFFICULT	"&JA&Difficult"
+BS_REALLY_DIFF	"&JA&Really Difficult"
+BS_HARSH	"&RG&Harsh"
+BS_EXTR_DIFF	"&RG&Keep dreaming!"
+
+BS_SENTENCE_FAILED			"&RG&You failed to use this formula or action phrase."
+BS_SENTENCE_FAILED_S			"&RG&You failed to use the brick $0s."
+BS_SENTENCE_MAGIC_FAILED_S		"&RG&You failed to cast the spell $0s."

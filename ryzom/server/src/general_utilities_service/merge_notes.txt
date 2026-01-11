@@ -1,0 +1,39 @@
+Module name:		Shard Merge Commands
+Short name:			MERGE
+Associated modules:	None
+Requires:			Nothing
+
+Description
+-----------
+This is less of a module and more a set of utility commands for use in shard merge procedures
+
+
+command: mergeGuildIdFix
+------------------------
+Run through all of the guild saves in a given directory and set their 'guild id' property to the
+number extracted from their file name
+
+command: mergeChangeCharacterNames
+----------------------------------
+Run through the entries in the ./character_names.txt file in the given directory and fixup the
+name fields in the character saves in the ./characters/ directory
+
+command: mergeBuildCharacterNamesFromCSV
+----------------------------------------
+Rebuild the character names file from a CSV file containing columns: account, accountSlot, name
+
+command: mergeIdentifyOverlappingCharacters
+-------------------------------------------
+Run through the character_names.txt files for several shards, generating a list of overlapping
+account ids and character names
+
+
+
+TODO
+----
+	- test mergeChangeCharacterNames
+	- test mergeBuildCharacterNamesFromCSV
+	- test mergeIdentifyOverlappingCharacters
+
+	- retrieve the saves from the distant shard - sorting characters into old and new + apply delta t to given fields? (and record fdc record with time stamps, etc)
+	- retrieve the mails and forums from the distant shard (and record fdc record with time stamps, etc)

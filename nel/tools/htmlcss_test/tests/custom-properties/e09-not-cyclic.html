@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<style>
+one   { --foo: 10px; }
+two   { --bar: calc(var(--foo) + 10px); }
+three { --foo: calc(var(--bar) + 10px); }
+		</style>
+		<one data-ruleset="--foo: 10px;">
+			<two data-ruleset="--bar: calc( 10px + 10px);">
+				<three data-ruleset="--foo: calc( calc( 10px + 10px) + 10px);"/>
+			</two>
+		</one>
+	</body>
+</html>

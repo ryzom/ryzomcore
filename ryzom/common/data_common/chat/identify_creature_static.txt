@@ -1,0 +1,9 @@
+# these sentences are used in the xp gain system
+
+OPS_CONS_FOUR_LEVEL_AND_MORE_ABOVE "&RG&This adversary is beyond your strength."
+OPS_CONS_TWO_THREE_LEVEL_ABOVE "&JA&This adversary is a formidable foe."
+OPS_CONS_ONE_LEVEL_ABOVE "&BC&This adversary will be tough to overwhelm."
+OPS_CONS_SAME_LEVEL "&BC&This adversary is of equal strength."
+OPS_CONS_ONE_LEVEL_LESS "&BL&You can handle this adversary."
+OPS_CONS_TWO_THREE_LEVEL_LESS "&BL&This adversary presents little danger to you."
+OPS_CONS_FOUR_LEVEL_AND_MORE_LESS "&VE&This adversary is beneath your contempt."

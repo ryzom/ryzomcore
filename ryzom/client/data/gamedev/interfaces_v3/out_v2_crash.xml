@@ -1,0 +1,32 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="1024" h="768" active="false" />
+
+<proc id="proc_startall_crash" >
+</proc>
+
+
+<group id="crashing" w="1024" h="768" posref="MM MM" on_active="" on_active_params="" >
+
+	<!-- JENA BACK -->
+	<view type="bitmap" id="jena" render_layer="-1" 
+		global_color="false" color="255 255 255 255" posref="TL TL" x="0" y="0" texture="new_launcher_bg.tga" />
+
+	
+	<!-- Quit Button -->
+	<ctrl style="valid_txt_button" id="quit" posref="BR BR" x="-40" y="130" hardtext="uiQuit"
+					onover="play_sound" params_over="name=charsel_quit_over"
+					onclick_l="proc" params_l="proc_con_quit"/>
+
+	<view type="text" id="title1" posref="MM MM" y="48" hardtext="uiCrashing1" fontsize="20"/>
+	<view type="text" id="title2" posref="MM MM" y="24" hardtext="uiCrashing2" fontsize="20"/>
+	<view type="text" id="title3" posref="MM MM" y="0"  hardtext="uiCrashing3" fontsize="20"/>
+</group>
+
+<!-- This link is used to display the right screen among the outgame screens -->
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_crashing)" target="crashing:active" />
+
+<!-- ANIMATIONS -->
+
+</interface_config>
+
