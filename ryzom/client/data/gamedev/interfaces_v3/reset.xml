@@ -64,9 +64,8 @@
 
 
 	<!-- Cap -->
-	<action handler="set" params="target='ui:interface:cap:x'|value=4" />
-	<action handler="set" params="target='ui:interface:cap:y'|value=sub(sub(sub(getprop('ui:interface:h'),getprop('ui:interface:player:h')),getprop('ui:interface:target:h')),12)" />
-	<action handler="set" params="target='ui:interface:cap:w'|value=64" />
+	<action handler="set" params="target='ui:interface:cap:x'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:compass:w')),4)" />
+	<action handler="set" params="target='ui:interface:cap:y'|value=sub(sub(getprop('ui:interface:h'),getprop('ui:interface:compass:h')),4)" />
 	<action handler="set_alpha" params="target=ui:interface:cap|alpha=255" />
 
 	<!-- Info Player Journal -->
