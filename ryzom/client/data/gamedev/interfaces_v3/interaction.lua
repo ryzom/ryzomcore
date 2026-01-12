@@ -991,4 +991,4 @@ function game:TalkWithNpc(bullying)
 end
 
 -- VERSION --
-RYZOM_INTERACTION_VERSION = 184
+RYZOM_INTERACTION_VERSION = 122

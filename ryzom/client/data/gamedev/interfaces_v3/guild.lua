@@ -98,4 +98,4 @@ function game:guildDeactive()
 end
 
 -- VERSION --
-RYZOM_GUILD_VERSION = 184
+RYZOM_GUILD_VERSION = 31
