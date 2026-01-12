@@ -280,4 +280,4 @@ game:addMapArkPoint("Vip/fyros_newbie", 21645, -26177, "vip_fyros_newbie", "Meti
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")
 
 -- VERSION --
-RYZOM_MAP_VERSION = 366
+FILE_MAP_VERSION = 101
