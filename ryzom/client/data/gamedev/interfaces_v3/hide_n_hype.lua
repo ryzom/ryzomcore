@@ -2850,4 +2850,4 @@ function Ryzhide:load_3d_preview(sheet_id)
 end
 --###################################### END build_3d_preview #######################################
 -- VERSION --
-RYZOM_HIDE_N_HYPE_VERSION = 181
+FILE_HIDE_N_HYPE_VERSION = 181

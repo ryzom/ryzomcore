@@ -44,4 +44,4 @@ function game:procCharselClickSlot()
 end
 
 -- VERSION --
-RYZOM_OUT_V2_SELECT_VERSION = 31
+FILE_OUT_V2_SELECT_VERSION = 31
