@@ -527,7 +527,7 @@ end
 
 
 function setupArkUrls()
-	debug("Setup Lm Events")
+	debug("Setup Lm Events v2")
 	local ui = getUI("ui:interface:map:content:map_content:lm_events:html")
 	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=12517&command=reset_all&no_html_header=1&continent=&posx=$posx$&posy=$posy$"
 	ui:browse("home")
