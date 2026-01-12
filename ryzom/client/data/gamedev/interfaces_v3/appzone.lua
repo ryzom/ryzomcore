@@ -192,4 +192,4 @@ function AppZone:handle(cmd)
 end
 
 -- VERSION --
-RYZOM_APPZONE_VERSION = 183
+RYZOM_APPZONE_VERSION = 184

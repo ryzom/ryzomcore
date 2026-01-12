@@ -139,4 +139,4 @@ function updateChestList(init)
 end
 
 -- VERSION --
-RYZOM_INVENTORY_VERSION = 183
+RYZOM_INVENTORY_VERSION = 184

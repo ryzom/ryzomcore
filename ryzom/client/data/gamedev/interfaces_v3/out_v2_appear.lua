@@ -439,4 +439,4 @@ function outgame:loadRPBGPage()
 end
 
 -- VERSION --
-RYZOM_OUT_V2_APPEAR_VERSION = 183
+RYZOM_OUT_V2_APPEAR_VERSION = 184

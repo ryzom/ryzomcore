@@ -550,4 +550,4 @@ function arkNpcShop:updateTexts(id, ctrl, text1, text2, text3)
 end
 
 -- VERSION --
-RYZOM_ARK_SHOP_VERSION = 183
+RYZOM_ARK_SHOP_VERSION = 184
