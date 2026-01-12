@@ -64,4 +64,4 @@ function game:bcMissionsUpdate()
 end
 
 -- VERSION --
-FILE_BOT_CHAT_V4_VERSION = 31
+RYZOM_BOT_CHAT_V4_VERSION = 183

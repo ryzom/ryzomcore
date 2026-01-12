@@ -1922,4 +1922,4 @@ SearchCommand:pars_all_emotes()
 --##############END Pars now all Emotes and add it to command table
 
 -- VERSION --
-FILE_SEARCH_COMMAND_VERSION = 122
+RYZOM_SEARCH_COMMAND_VERSION = 183

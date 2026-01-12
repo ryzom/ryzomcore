@@ -32,4 +32,4 @@ function getBulk(inventory)
 end
 
 -- VERSION --
-FILE_PLAYER_TRADE_VERSION = 31
+RYZOM_PLAYER_TRADE_VERSION = 183

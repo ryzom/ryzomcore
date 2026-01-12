@@ -689,4 +689,4 @@ function SceneEditor:get_html(message, message_bg)
 end
 
 -- VERSION --
-FILE_SCENEEDIT_VERSION = 43
+RYZOM_SCENEEDIT_VERSION = 183

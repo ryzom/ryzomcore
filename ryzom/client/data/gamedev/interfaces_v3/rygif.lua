@@ -309,4 +309,4 @@ function GIF_SetFPS(groupId, fps)
 end
 
 -- VERSION --
-FILE_RYGIF_VERSION = 137
+RYZOM_RYGIF_VERSION = 183
