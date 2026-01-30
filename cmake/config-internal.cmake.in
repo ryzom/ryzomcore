@@ -12,8 +12,3 @@ endforeach()
 
 
 check_required_components(@PROJECT_NAME@)
-
-include(CMakeFindDependencyMacro)
-foreach(_dependency IN ITEMS @package_required_dependencies@)
-    find_dependency(${_dependency} REQUIRED)
-endforeach()

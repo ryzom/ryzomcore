@@ -93,6 +93,7 @@ set(project_namespace "${PROJECT_NAME}")
 set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 set(package_components 3d georges gui ligo misc net pacs sevenzip sound snd_lowlevel) # TODO append in components to have actual list of build targets
 set(package_required_dependencies CURL Freetype)
+set(package_gui_dependencies Lua Luabind)
 
 
 set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
