@@ -38,7 +38,7 @@ MACRO(FIND_CORRECT_LUA_VERSION)
 
     IF(NOT LUALIB_FOUND)
       # check for Lua 5.2
-      SET(LUA52_LIBRARIES liblua5.2 liblua-5.2 liblua.so.5.2)
+      SET(LUA52_LIBRARIES liblua5.2 liblua5.2.so liblua-5.2 liblua.so.5.2)
 
       FOREACH(_LIB ${LUA52_LIBRARIES})
         CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
@@ -99,15 +99,6 @@ MACRO(FIND_CORRECT_LUA_VERSION)
       FIND_PACKAGE(Lua REQUIRED 5.0)
     ENDIF()
   ENDIF()
-  if(Lua_FOUND AND NOT TARGET Lua::Lua)
-      add_library(Lua::Lua INTERFACE IMPORTED)
-      set_target_properties(
-              Lua::Lua
-              PROPERTIES
-              INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}"
-              INTERFACE_LINK_LIBRARIES "${LUA_LIBRARIES}"
-      )
-  endif()
 ENDMACRO()
 
 IF(LUABIND_LIBRARIES AND LUABIND_INCLUDE_DIR)
@@ -198,6 +189,7 @@ IF(LUABIND_INCLUDE_DIR AND Boost_INCLUDE_DIR)
 ENDIF()
 
 IF(LUABIND_FOUND)
+  SET(Luabind_FOUND TRUE)
   SET(LUABIND_INCLUDE_DIR ${LUABIND_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
   # Check if luabind/version.hpp exists
   FIND_FILE(LUABIND_VERSION_FILE luabind/version.hpp PATHS ${LUABIND_INCLUDE_DIR})

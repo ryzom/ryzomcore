@@ -3,9 +3,14 @@ ADD_EXECUTABLE(nel_unit_test
 )
 ADD_TEST(NAME nel_unit_test COMMAND nel_unit_test)
 
-TARGET_INCLUDE_DIRECTORIES(nel_unit_test PRIVATE ${CPPTEST_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(nel_unit_test
+        PRIVATE
+        CppTest::CppTest
+        NeL::misc
+        NeL::net
+        NeL::ligo
+)
 
-TARGET_LINK_LIBRARIES(nel_unit_test ${CPPTEST_LIBRARIES} nelmisc nelnet nelligo)
 NL_DEFAULT_PROPS(nel_unit_test "Unit Tests")
 NL_ADD_RUNTIME_FLAGS(nel_unit_test)
 
@@ -22,7 +27,7 @@ add_test_executable(nel_misc_config_file_test
 )
 target_link_libraries(nel_misc_config_file_test
         PRIVATE
-        nelmisc
+        NeL::misc
 )
 target_compile_definitions(nel_misc_config_file_test
         PUBLIC
@@ -35,5 +40,6 @@ add_test_executable(nel_net_module_test
 )
 target_link_libraries(nel_net_module_test
         PRIVATE
-        nelmisc nelnet
+        NeL::misc
+        NeL::net
 )

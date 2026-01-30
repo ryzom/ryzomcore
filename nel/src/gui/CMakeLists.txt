@@ -7,18 +7,17 @@ NL_TARGET_LIB(nelgui ${SRC} ${HEADERS})
 add_project_library_alias(nelgui gui)
 
 TARGET_INCLUDE_DIRECTORIES(nelgui
-        PUBLIC
-        ${LUA_INCLUDE_DIR}
         PRIVATE
+        ${LUA_INCLUDE_DIR}
         ${LUABIND_INCLUDE_DIR}
         ${CURL_INCLUDE_DIRS}
 )
 
 TARGET_LINK_LIBRARIES(nelgui
         PUBLIC
-        nelmisc
-        nelweb
-        nel3d
+        NeL::misc
+        NeL::web
+        NeL::3d
         ${LUA_LIBRARIES}
         ${LUABIND_LIBRARIES}
         PRIVATE
