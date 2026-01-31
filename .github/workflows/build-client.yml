@@ -1,4 +1,4 @@
-name: build client on multiple platforms
+name: "Ryzom Client: build on multiple platforms (hunter)"
 
 on:
   push:
@@ -64,7 +64,6 @@ jobs:
         echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
 
     - uses: lukka/get-cmake@latest
-      if: runner.os == 'Linux'
       with:
         cmakeVersion: 3.31.6
 

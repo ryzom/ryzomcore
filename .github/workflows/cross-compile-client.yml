@@ -1,4 +1,4 @@
-name: build 32-Bit windows client
+name: "Ryzom Client: cross compile 32-Bit windows client (hunter)"
 
 on:
   push:
