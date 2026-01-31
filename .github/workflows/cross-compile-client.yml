@@ -41,9 +41,9 @@ jobs:
         COMMIT_HASH=${{ github.sha }}
         echo "version=sha.${COMMIT_HASH:0:8}" >> "$GITHUB_OUTPUT"
 
-    - uses: lukka/get-cmake@v3.29.5
+    - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: 3.27.9
+        cmakeVersion: 3.31.6
 
     - name: Dependencies
       run: |

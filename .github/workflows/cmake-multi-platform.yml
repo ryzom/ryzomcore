@@ -68,7 +68,9 @@ jobs:
             ubuntu_version: 24.04
 
     steps:
-      - uses: lukka/get-cmake@v3.29.5
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.31.6
 
       - uses: actions/checkout@v4
 

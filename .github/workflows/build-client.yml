@@ -63,10 +63,10 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
 
-    - uses: lukka/get-cmake@v3.29.5
+    - uses: lukka/get-cmake@latest
       if: runner.os == 'Linux'
       with:
-        cmakeVersion: 3.27.9
+        cmakeVersion: 3.31.6
 
     - name: Dependencies Linux
       if: runner.os == 'Linux'
