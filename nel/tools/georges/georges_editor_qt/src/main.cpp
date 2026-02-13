@@ -14,6 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// Define GEORGES_USE_NATIVE_STYLE to 1 to use the OS-native look and feel
+// instead of the dark Fusion palette. By default, the dark Fusion palette
+// from shared_widgets/common.h (matching the Panoply Preview tool) is used.
+#ifndef GEORGES_USE_NATIVE_STYLE
+#define GEORGES_USE_NATIVE_STYLE 0
+#endif
+
 #include <nel/misc/types_nl.h>
 #include <nel/misc/app_context.h>
 #include <nel/misc/debug.h>

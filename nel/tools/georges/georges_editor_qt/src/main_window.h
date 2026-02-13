@@ -17,13 +17,6 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-// Define GEORGES_USE_NATIVE_STYLE to 1 to use the OS-native look and feel
-// instead of the dark Fusion palette. By default, the dark Fusion palette
-// from shared_widgets/common.h (matching the Panoply Preview tool) is used.
-#ifndef GEORGES_USE_NATIVE_STYLE
-#define GEORGES_USE_NATIVE_STYLE 0
-#endif
-
 #include <QMainWindow>
 #include <QMdiArea>
 #include <QMdiSubWindow>
