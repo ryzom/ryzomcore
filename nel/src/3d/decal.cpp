@@ -27,6 +27,7 @@
 #include "nel/3d/decal.h"
 
 #include "nel/3d/texture_file.h"
+#include "nel/3d/texture_mem.h"
 #include "nel/3d/scene.h"
 #include "nel/3d/driver.h"
 #include "nel/3d/clip_trav.h"
@@ -40,7 +41,11 @@ using namespace NLMISC;
 
 
 // ***************************************************************************
-CDecalContext::CDecalContext() : ClipMode(DecalClipGeometry), DestTris(NULL) {}
+CDecalContext::CDecalContext() : ClipMode(DecalClipGeometry), DestTris(NULL), ClipDownFacing(false) {}
+
+// ***************************************************************************
+// Static mask texture (shared across all decals)
+NLMISC::CSmartPtr<ITexture> CDecal::_MaskTexture;
 
 
 // ***************************************************************************
@@ -49,6 +54,8 @@ _MaterialId(0),
 _Touched(true),
 _StableFrameCount(0),
 _IsStatic(false),
+_Priority(0),
+_ClipDownFacing(false),
 _UV1(CUV(0, 0)),
 _UV2(CUV(1, 1)),
 _Diffuse(CRGBA::White),
@@ -56,7 +63,8 @@ _Emissive(CRGBA::Black),
 _BottomBlendZMin(-1e10f),
 _BottomBlendZMax(-1e10f),
 _TopBlendZMin(1e10f),
-_TopBlendZMax(1e10f)
+_TopBlendZMax(1e10f),
+_CustomUVMatrixEnabled(false)
 {
 setOpacity(true);
 setTransparency(false);
@@ -282,6 +290,7 @@ context.WorldClipPlanes[i].invert();
 }
 
 context.WorldMatrix = getWorldMatrix();
+context.ClipDownFacing = _ClipDownFacing;
 
 // Clear and collect triangles via visual collision (objects/meshes)
 _Vertices.clear();
@@ -315,6 +324,7 @@ computeColors(0.f, 1.f);
 // ***************************************************************************
 // UV coordinate generation (see PDF 4.5.3)
 // Uses inverse world matrix to project world-space vertices back to unit-cube local space.
+// Supports custom UV matrix and texture matrix overrides.
 // Also builds the worldToUV matrix for the VP path.
 void CDecal::generateUVs()
 {
@@ -325,19 +335,39 @@ return;
 
 // Compute worldToUV matrix: maps world position to [0,1] UV in local decal space
 CMatrix invWorld = getWorldMatrix().inverted();
-_WorldToUVMatrix = invWorld;
+
+if (_CustomUVMatrixEnabled)
+{
+	// Custom UV matrix overrides the entire UV generation pipeline
+	_WorldToUVMatrix = _CustomUVMatrix;
+}
+else
+{
+	// Default: texture matrix × reverse UV matrix × inverse world
+	CMatrix reverseUV = getReverseUVMatrix();
+	_WorldToUVMatrix = _TextureMatrix * reverseUV * invWorld;
+}
 
 for (uint i = 0; i < _Vertices.size(); ++i)
 {
-// Transform world vertex to local decal space
-CVector local = invWorld * _Vertices[i];
+	float u, v;
+	if (_CustomUVMatrixEnabled)
+	{
+		// Custom matrix outputs UVs directly
+		CVector uvCoord = _WorldToUVMatrix * _Vertices[i];
+		u = uvCoord.x;
+		v = uvCoord.y;
+	}
+	else
+	{
+		// Map local X,Y to UV sub-region
+		CVector local = invWorld * _Vertices[i];
+		u = _UV1.U + local.x * (_UV2.U - _UV1.U);
+		v = _UV1.V + (1.0f - local.y) * (_UV2.V - _UV1.V);
+	}
 
-// Map local X,Y to UV, respecting the UV sub-region
-float u = _UV1.U + local.x * (_UV2.U - _UV1.U);
-float v = _UV1.V + (1.0f - local.y) * (_UV2.V - _UV1.V);
-
-_UVs[i].U = u;
-_UVs[i].V = v;
+	_UVs[i].U = u;
+	_UVs[i].V = v;
 }
 }
 
@@ -391,4 +421,86 @@ void CDecal::setUVCoord(const CUV uv1, const CUV uv2)
 _UV1 = uv1;
 _UV2 = uv2;
 _Touched = true;
+}
+
+
+// ***************************************************************************
+void CDecal::setCustomUVMatrix(bool on, const CMatrix &matrix)
+{
+_CustomUVMatrixEnabled = on;
+_CustomUVMatrix = matrix;
+_Touched = true;
+}
+
+
+// ***************************************************************************
+void CDecal::setTextureMatrix(const CMatrix &matrix)
+{
+_TextureMatrix = matrix;
+_Touched = true;
+}
+
+
+// ***************************************************************************
+void CDecal::setWorldMatrixForArrow(const NLMISC::CVector2f &start, const NLMISC::CVector2f &end, float halfWidth)
+{
+CMatrix matrix;
+CVector I = CVector(end.x, end.y, 0.f) - CVector(start.x, start.y, 0.f);
+CVector J = 2.f * halfWidth * CVector::K ^ I.normed();
+matrix.setRot(I, J, CVector::K);
+matrix.setPos(CVector(start.x, start.y, 0.f) - 0.5f * J);
+setMatrix(matrix);
+_Touched = true;
+}
+
+
+// ***************************************************************************
+void CDecal::setWorldMatrixForSpot(const NLMISC::CVector2f &pos, float radius, float angleInRadians)
+{
+CMatrix matrix;
+matrix.rotateZ(angleInRadians);
+matrix.setScale(2.f * radius);
+matrix.setPos(CVector(pos.x - radius, pos.y - radius, 0.f));
+setMatrix(matrix);
+_Touched = true;
+}
+
+
+// ***************************************************************************
+ITexture *CDecal::getMaskTexture()
+{
+if (_MaskTexture != NULL)
+	return _MaskTexture;
+
+// Generate a 4×4 RGBA texture: opaque white in the 2×2 center, transparent black at edges
+const uint32 maskSize = 4;
+const uint32 maskCenterMin = 1; // inclusive: center region starts at pixel 1
+const uint32 maskCenterMax = 2; // inclusive: center region ends at pixel 2
+uint32 dataSize = maskSize * maskSize * 4; // RGBA
+uint8 *data = new uint8[dataSize];
+memset(data, 0, dataSize);
+for (uint y = 0; y < maskSize; ++y)
+{
+	for (uint x = 0; x < maskSize; ++x)
+	{
+		uint idx = (y * maskSize + x) * 4;
+		// Center pixels are opaque white
+		if (x >= maskCenterMin && x <= maskCenterMax && y >= maskCenterMin && y <= maskCenterMax)
+		{
+			data[idx + 0] = 255; // R
+			data[idx + 1] = 255; // G
+			data[idx + 2] = 255; // B
+			data[idx + 3] = 255; // A
+		}
+		// Edge pixels are transparent (already 0)
+	}
+}
+
+CTextureMem *tex = new CTextureMem(data, dataSize, true, false, maskSize, maskSize, CBitmap::RGBA);
+tex->setWrapS(ITexture::Clamp);
+tex->setWrapT(ITexture::Clamp);
+tex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
+tex->setUploadFormat(ITexture::RGBA8888);
+_MaskTexture = tex;
+return _MaskTexture;
 }

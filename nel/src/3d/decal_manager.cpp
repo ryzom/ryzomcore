@@ -29,9 +29,19 @@
 #include "nel/3d/decal_manager.h"
 #include "nel/3d/scene.h"
 
+#include <algorithm>
+
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
+
+
+// ***************************************************************************
+// Comparator for sorting decals by priority (lower priority value = rendered first)
+static bool decalPriorityCompare(const CDecal *a, const CDecal *b)
+{
+	return a->getPriority() < b->getPriority();
+}
 
 
 // ***************************************************************************
@@ -226,6 +236,9 @@ void CDecalManager::flush(CScene *sc)
 
 		if (decals.empty())
 			continue;
+
+		// Sort decals by priority within this material group (lower priority first)
+		std::sort(decals.begin(), decals.end(), decalPriorityCompare);
 
 		// Find the registered material for this ID
 		CMaterial *mat = NULL;

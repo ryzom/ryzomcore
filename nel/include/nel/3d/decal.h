@@ -94,6 +94,7 @@ public:
 	CMatrix					WorldMatrix;
 	std::vector<CVector>	*DestTris;
 	TDecalClipMode			ClipMode;
+	bool					ClipDownFacing;
 };
 
 
@@ -203,6 +204,56 @@ public:
 	/// Return whether this decal is marked static.
 	bool isStatic() const { return _IsStatic; }
 
+	/** Set the render priority (0 = highest, 7 = lowest).
+	  * Decals with lower priority values are rendered first within their material group.
+	  * \param priority Value in [0, 7]
+	  */
+	void setPriority(uint8 priority) { _Priority = (priority < 8) ? priority : 7; }
+
+	/// Get the current render priority.
+	uint8 getPriority() const { return _Priority; }
+
+	/** Set whether downward-facing surfaces should be clipped.
+	  * When enabled, triangles whose normal has a negative Z component
+	  * are excluded from the decal projection.
+	  * \param clipDownFacing true to clip down-facing surfaces
+	  */
+	void setClipDownFacing(bool clipDownFacing) { _ClipDownFacing = clipDownFacing; }
+
+	/// Get whether down-facing clip is enabled.
+	bool getClipDownFacing() const { return _ClipDownFacing; }
+
+	/** Set a custom UV matrix (world → UV transform).
+	  * When enabled, this matrix replaces the default inverse-world UV generation.
+	  * \param on true to enable, false to return to default UV generation
+	  * \param matrix The world-to-UV matrix (only used when on=true)
+	  */
+	void setCustomUVMatrix(bool on, const CMatrix &matrix = CMatrix::Identity);
+
+	/** Set the texture coordinate transform matrix.
+	  * Applied to the UV generation pipeline (multiplied with the inverse-world matrix).
+	  * \param matrix The texture transform matrix
+	  */
+	void setTextureMatrix(const CMatrix &matrix);
+
+	/** Set the world matrix for an arrow-shaped decal.
+	  * Convenience method that computes a world matrix for a decal stretched
+	  * from start to end with the given half-width.
+	  * \param start 2D start position
+	  * \param end 2D end position
+	  * \param halfWidth Half-width of the arrow
+	  */
+	void setWorldMatrixForArrow(const NLMISC::CVector2f &start, const NLMISC::CVector2f &end, float halfWidth);
+
+	/** Set the world matrix for a spot-shaped decal.
+	  * Convenience method that computes a world matrix for a circular decal
+	  * centered at pos with given radius and optional rotation.
+	  * \param pos 2D center position
+	  * \param radius Radius of the spot
+	  * \param angleInRadians Optional rotation angle
+	  */
+	void setWorldMatrixForSpot(const NLMISC::CVector2f &pos, float radius, float angleInRadians = 0.f);
+
 	/** Set the diffuse color applied to the decal.
 	  * The RGB components tint the texture, alpha is a base opacity.
 	  * \param diffuse RGBA diffuse color
@@ -299,6 +350,8 @@ private:
 	std::vector<CUV>			_UVs;
 	std::vector<NLMISC::CRGBA>	_Colors;
 	bool						_IsStatic;
+	uint8						_Priority;
+	bool						_ClipDownFacing;
 
 	CUV							_UV1;
 	CUV							_UV2;
@@ -312,6 +365,13 @@ private:
 	float						_TopBlendZMax;
 
 	CMatrix						_WorldToUVMatrix;
+	CMatrix						_TextureMatrix;
+	bool						_CustomUVMatrixEnabled;
+	CMatrix						_CustomUVMatrix;
+
+	/// Static mask texture for DecalClipMask mode (generated once, shared)
+	static NLMISC::CSmartPtr<ITexture>	_MaskTexture;
+	static ITexture *getMaskTexture();
 };
 
 }//NL3D

@@ -151,7 +151,7 @@ private:
 		uint32		Id;
 	};
 
-	/// Decals grouped by material ID
+	/// Decals grouped by material ID, sorted by priority within each group
 	typedef std::map<uint32, std::vector<CDecal*> > TDecalMap;
 	TDecalMap								_Decals;
 

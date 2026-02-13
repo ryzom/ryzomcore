@@ -613,6 +613,14 @@ void CShadowPolyReceiver::receiveDecal(CDecalContext &cdc, const CVector &vertDe
 		for (uint triIndex = 0; triIndex < visibleTris.size(); ++triIndex)
 		{
 			CTriangleId &triId = *visibleTris[triIndex];
+
+			// Skip down-facing triangles if requested
+			if (cdc.ClipDownFacing)
+			{
+				CVector triNormal = (_Vertices[triId.Vertex[1]] - _Vertices[triId.Vertex[0]]) ^ (_Vertices[triId.Vertex[2]] - _Vertices[triId.Vertex[0]]);
+				if (triNormal.z < 0.f) continue;
+			}
+
 			clippedTri.Vertices.resize(3);
 			clippedTri.Vertices[0] = _Vertices[triId.Vertex[0]];
 			clippedTri.Vertices[1] = _Vertices[triId.Vertex[1]];
@@ -635,6 +643,14 @@ void CShadowPolyReceiver::receiveDecal(CDecalContext &cdc, const CVector &vertDe
 		for (uint triIndex = 0; triIndex < visibleTris.size(); ++triIndex)
 		{
 			CTriangleId &triId = *visibleTris[triIndex];
+
+			// Skip down-facing triangles if requested
+			if (cdc.ClipDownFacing)
+			{
+				CVector triNormal = (_Vertices[triId.Vertex[1]] - _Vertices[triId.Vertex[0]]) ^ (_Vertices[triId.Vertex[2]] - _Vertices[triId.Vertex[0]]);
+				if (triNormal.z < 0.f) continue;
+			}
+
 			cdc.DestTris->push_back(_Vertices[triId.Vertex[0]] + vertDelta);
 			cdc.DestTris->push_back(_Vertices[triId.Vertex[1]] + vertDelta);
 			cdc.DestTris->push_back(_Vertices[triId.Vertex[2]] + vertDelta);

@@ -27,6 +27,8 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/uv.h"
+#include "nel/misc/matrix.h"
+#include "nel/misc/vector_2f.h"
 #include "nel/3d/u_transform.h"
 
 
@@ -77,6 +79,24 @@ public:
 
 	/// Set the top Z-blend region (fade from 1 at zMin to 0 at zMax)
 	void			setTopBlend(float zMin, float zMax);
+
+	/// Set the render priority (0 = highest/first, 7 = lowest/last)
+	void			setPriority(uint8 priority);
+
+	/// Set whether downward-facing surfaces should be clipped
+	void			setClipDownFacing(bool clipDownFacing);
+
+	/// Set a custom UV matrix (world → UV transform), replacing default UV generation
+	void			setCustomUVMatrix(bool on, const NLMISC::CMatrix &matrix = NLMISC::CMatrix::Identity);
+
+	/// Set the texture coordinate transform matrix
+	void			setTextureMatrix(const NLMISC::CMatrix &matrix);
+
+	/// Set the world matrix for an arrow-shaped decal
+	void			setWorldMatrixForArrow(const NLMISC::CVector2f &start, const NLMISC::CVector2f &end, float halfWidth);
+
+	/// Set the world matrix for a spot-shaped decal
+	void			setWorldMatrixForSpot(const NLMISC::CVector2f &pos, float radius, float angleInRadians = 0.f);
 };
 
 

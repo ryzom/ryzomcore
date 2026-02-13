@@ -100,4 +100,46 @@ void UDecal::setTopBlend(float zMin, float zMax)
 	object->setTopBlend(zMin, zMax);
 }
 
+// ***************************************************************************
+void UDecal::setPriority(uint8 priority)
+{
+	CDecal *object = getObjectPtr();
+	object->setPriority(priority);
+}
+
+// ***************************************************************************
+void UDecal::setClipDownFacing(bool clipDownFacing)
+{
+	CDecal *object = getObjectPtr();
+	object->setClipDownFacing(clipDownFacing);
+}
+
+// ***************************************************************************
+void UDecal::setCustomUVMatrix(bool on, const NLMISC::CMatrix &matrix)
+{
+	CDecal *object = getObjectPtr();
+	object->setCustomUVMatrix(on, matrix);
+}
+
+// ***************************************************************************
+void UDecal::setTextureMatrix(const NLMISC::CMatrix &matrix)
+{
+	CDecal *object = getObjectPtr();
+	object->setTextureMatrix(matrix);
+}
+
+// ***************************************************************************
+void UDecal::setWorldMatrixForArrow(const NLMISC::CVector2f &start, const NLMISC::CVector2f &end, float halfWidth)
+{
+	CDecal *object = getObjectPtr();
+	object->setWorldMatrixForArrow(start, end, halfWidth);
+}
+
+// ***************************************************************************
+void UDecal::setWorldMatrixForSpot(const NLMISC::CVector2f &pos, float radius, float angleInRadians)
+{
+	CDecal *object = getObjectPtr();
+	object->setWorldMatrixForSpot(pos, radius, angleInRadians);
+}
+
 } // NL3D

@@ -446,6 +446,16 @@ void		CVisualCollisionMesh::receiveDecal(const NLMISC::CMatrix &instanceMatrix, 
 		// if triangle not clipped, add the triangle
 		if( (triFlag & NL3D_VCM_SHADOW_NUM_CLIP_PLANE_MASK)==0 )
 		{
+			// Skip down-facing triangles if requested
+			if (decalContext.ClipDownFacing)
+			{
+				CVector v0 = instanceMatrix * _Vertices[triId[0]];
+				CVector v1 = instanceMatrix * _Vertices[triId[1]];
+				CVector v2 = instanceMatrix * _Vertices[triId[2]];
+				CVector normal = (v1 - v0) ^ (v2 - v0);
+				if (normal.z < 0.f) continue;
+			}
+
 			if(decalContext.ClipMode == DecalClipGeometry)
 			{
 				// Geometry clipping: clip vertices against bounding box planes (saves fillrate)
