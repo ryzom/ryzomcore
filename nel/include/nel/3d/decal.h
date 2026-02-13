@@ -108,6 +108,9 @@ public:
  * Face selection uses quad-grid + clip-plane refinement via CVisualCollisionMesh.
  * UV coordinates are generated from the inverse world matrix of the unit cube (§4.5.3).
  *
+ * Supports a vertex program for distance-based attenuation, bottom/top Z blending,
+ * and per-vertex diffuse color (ported from the legacy CLegacyDecal system).
+ *
  * \author Christopher Tarento
  * \author Nevrax France
  * \date 2007
@@ -168,6 +171,14 @@ public:
 	  */
 	const std::vector<CUV> &getUVs() const { return _UVs; }
 
+	/** Get per-vertex RGBA colors corresponding to the vertices.
+	  * Valid after calling getVertices(). Contains diffuse color + computed alpha
+	  * (distance attenuation × bottom blend × top blend).
+	  * Used by the CPU fallback path when vertex programs are not available.
+	  * \return vector of RGBA colors (one per vertex)
+	  */
+	const std::vector<NLMISC::CRGBA> &getColors() const { return _Colors; }
+
 	/** Set UV sub-region within a texture atlas.
 	  * \param uv1 Top-left UV coordinate
 	  * \param uv2 Bottom-right UV coordinate
@@ -191,6 +202,53 @@ public:
 
 	/// Return whether this decal is marked static.
 	bool isStatic() const { return _IsStatic; }
+
+	/** Set the diffuse color applied to the decal.
+	  * The RGB components tint the texture, alpha is a base opacity.
+	  * \param diffuse RGBA diffuse color
+	  */
+	void setDiffuse(NLMISC::CRGBA diffuse) { _Diffuse = diffuse; }
+
+	/// Get the current diffuse color.
+	NLMISC::CRGBA getDiffuse() const { return _Diffuse; }
+
+	/** Set the emissive color added to the decal.
+	  * Added on top of the texture × diffuse result.
+	  * \param emissive RGBA emissive color
+	  */
+	void setEmissive(NLMISC::CRGBA emissive);
+
+	/// Get the current emissive color.
+	NLMISC::CRGBA getEmissive() const { return _Emissive; }
+
+	/** Set the bottom Z-blend region.
+	  * Decal alpha fades from 0 at zMin to 1 at zMax (bottom edge).
+	  * \param zMin Altitude below which the decal is fully transparent
+	  * \param zMax Altitude above which bottom blend is fully opaque
+	  */
+	void setBottomBlend(float zMin, float zMax);
+
+	/** Set the top Z-blend region.
+	  * Decal alpha fades from 1 at zMin to 0 at zMax (top edge).
+	  * \param zMin Altitude below which top blend is fully opaque
+	  * \param zMax Altitude above which the decal is fully transparent
+	  */
+	void setTopBlend(float zMin, float zMax);
+
+	/// Get bottom blend zMin.
+	float getBottomBlendZMin() const { return _BottomBlendZMin; }
+	/// Get bottom blend zMax.
+	float getBottomBlendZMax() const { return _BottomBlendZMax; }
+	/// Get top blend zMin.
+	float getTopBlendZMin() const { return _TopBlendZMin; }
+	/// Get top blend zMax.
+	float getTopBlendZMax() const { return _TopBlendZMax; }
+
+	/** Get the world-to-UV matrix rows for the vertex program.
+	  * Row 0 maps world X to U, Row 1 maps world Y to V.
+	  * Set up during generateUVs() for the VP path.
+	  */
+	const CMatrix &getWorldToUVMatrix() const { return _WorldToUVMatrix; }
 
 	/** Get the Matrix that transforms local coordinates to UV coordinates.
 	  * Maps (x,y)=(0,0) to (u,v)=(0,1) and (x,y)=(0,1) to (u,v)=(0,0)
@@ -220,6 +278,13 @@ private:
 	  */
 	void generateUVs();
 
+	/** Compute per-vertex colors for the CPU fallback path.
+	  * Applies diffuse color, distance attenuation, and bottom/top Z blending.
+	  * \param distScale Linear distance attenuation scale factor
+	  * \param distBias Linear distance attenuation bias
+	  */
+	void computeColors(float distScale, float distBias);
+
 private:
 	CMaterial					_Mat;
 	uint32						_MaterialId;
@@ -232,11 +297,21 @@ private:
 
 	std::vector<CVector>		_Vertices;
 	std::vector<CUV>			_UVs;
+	std::vector<NLMISC::CRGBA>	_Colors;
 	bool						_IsStatic;
 
 	CUV							_UV1;
 	CUV							_UV2;
 	CDecalContext				_DecalContext;
+
+	NLMISC::CRGBA				_Diffuse;
+	NLMISC::CRGBA				_Emissive;
+	float						_BottomBlendZMin;
+	float						_BottomBlendZMax;
+	float						_TopBlendZMin;
+	float						_TopBlendZMax;
+
+	CMatrix						_WorldToUVMatrix;
 };
 
 }//NL3D

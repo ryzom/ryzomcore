@@ -25,6 +25,7 @@
 #define NL_U_DECAL_H
 
 #include "nel/misc/types_nl.h"
+#include "nel/misc/rgba.h"
 #include "nel/misc/uv.h"
 #include "nel/3d/u_transform.h"
 
@@ -64,6 +65,18 @@ public:
 
 	/// Mark this decal as static (only recomputed once)
 	void			setStatic(bool isStatic);
+
+	/// Set the diffuse color (RGB tints texture, A is base opacity)
+	void			setDiffuse(NLMISC::CRGBA diffuse);
+
+	/// Set the emissive color (added to texture × diffuse)
+	void			setEmissive(NLMISC::CRGBA emissive);
+
+	/// Set the bottom Z-blend region (fade from 0 at zMin to 1 at zMax)
+	void			setBottomBlend(float zMin, float zMax);
+
+	/// Set the top Z-blend region (fade from 1 at zMin to 0 at zMax)
+	void			setTopBlend(float zMin, float zMax);
 };
 
 

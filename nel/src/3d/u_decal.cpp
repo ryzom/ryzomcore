@@ -72,4 +72,32 @@ void UDecal::setStatic(bool isStatic)
 	object->setStatic(isStatic);
 }
 
+// ***************************************************************************
+void UDecal::setDiffuse(NLMISC::CRGBA diffuse)
+{
+	CDecal *object = getObjectPtr();
+	object->setDiffuse(diffuse);
+}
+
+// ***************************************************************************
+void UDecal::setEmissive(NLMISC::CRGBA emissive)
+{
+	CDecal *object = getObjectPtr();
+	object->setEmissive(emissive);
+}
+
+// ***************************************************************************
+void UDecal::setBottomBlend(float zMin, float zMax)
+{
+	CDecal *object = getObjectPtr();
+	object->setBottomBlend(zMin, zMax);
+}
+
+// ***************************************************************************
+void UDecal::setTopBlend(float zMin, float zMax)
+{
+	CDecal *object = getObjectPtr();
+	object->setTopBlend(zMin, zMax);
+}
+
 } // NL3D

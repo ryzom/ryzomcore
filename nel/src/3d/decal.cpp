@@ -50,7 +50,13 @@ _Touched(true),
 _StableFrameCount(0),
 _IsStatic(false),
 _UV1(CUV(0, 0)),
-_UV2(CUV(1, 1))
+_UV2(CUV(1, 1)),
+_Diffuse(CRGBA::White),
+_Emissive(CRGBA::Black),
+_BottomBlendZMin(-1e10f),
+_BottomBlendZMax(-1e10f),
+_TopBlendZMin(1e10f),
+_TopBlendZMax(1e10f)
 {
 setOpacity(true);
 setTransparency(false);
@@ -64,13 +70,28 @@ _Mat.setDstBlend(CMaterial::invsrcalpha);
 _Mat.setZWrite(false);
 _Mat.setDoubleSided(true);
 _Mat.setZBias(-0.06f);
+_Mat.setAlphaTest(true);
+_Mat.setAlphaTestThreshold(1.f / 255.f);
 
-// Texture environment: output = texture color/alpha
-_Mat.texConstantColor(0, CRGBA::White);
-_Mat.texEnvOpRGB(0, CMaterial::Replace);
+// Stage 0: diffuse color applied to texture
+// RGB = Texture * Diffuse, Alpha = Diffuse * Texture
+_Mat.texEnvOpRGB(0, CMaterial::Modulate);
 _Mat.texEnvArg0RGB(0, CMaterial::Texture, CMaterial::SrcColor);
-_Mat.texEnvOpAlpha(0, CMaterial::Replace);
-_Mat.texEnvArg0Alpha(0, CMaterial::Texture, CMaterial::SrcAlpha);
+_Mat.texEnvArg1RGB(0, CMaterial::Diffuse, CMaterial::SrcColor);
+_Mat.texEnvOpAlpha(0, CMaterial::Modulate);
+_Mat.texEnvArg0Alpha(0, CMaterial::Diffuse, CMaterial::SrcAlpha);
+_Mat.texEnvArg1Alpha(0, CMaterial::Texture, CMaterial::SrcAlpha);
+
+// Stage 1: add emissive color
+// RGB = Previous + Constant, Alpha = Previous * Constant
+_Mat.texEnvOpRGB(1, CMaterial::Add);
+_Mat.texEnvArg0RGB(1, CMaterial::Previous, CMaterial::SrcColor);
+_Mat.texEnvArg1RGB(1, CMaterial::Constant, CMaterial::SrcColor);
+_Mat.texEnvOpAlpha(1, CMaterial::Modulate);
+_Mat.texEnvArg0Alpha(1, CMaterial::Previous, CMaterial::SrcAlpha);
+_Mat.texEnvArg1Alpha(1, CMaterial::Constant, CMaterial::SrcAlpha);
+
+setEmissive(CRGBA::Black);
 
 // Default clipping mode: geometry clipping (best fillrate, see PDF 4.5.2)
 _DecalContext.ClipMode = DecalClipGeometry;
@@ -105,6 +126,33 @@ tex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapLinear);
 tex->setWrapS(ITexture::Clamp);
 tex->setWrapT(ITexture::Clamp);
 _Mat.setTexture(0, tex);
+}
+
+
+// ***************************************************************************
+void CDecal::setEmissive(NLMISC::CRGBA emissive)
+{
+_Emissive = emissive;
+// Set the stage 1 constant color to the emissive value
+_Mat.texConstantColor(1, CRGBA(emissive.R, emissive.G, emissive.B, 255));
+}
+
+
+// ***************************************************************************
+void CDecal::setBottomBlend(float zMin, float zMax)
+{
+if (zMin > zMax) std::swap(zMin, zMax);
+_BottomBlendZMin = zMin;
+_BottomBlendZMax = zMax;
+}
+
+
+// ***************************************************************************
+void CDecal::setTopBlend(float zMin, float zMax)
+{
+if (zMin > zMax) std::swap(zMin, zMax);
+_TopBlendZMin = zMin;
+_TopBlendZMax = zMax;
 }
 
 
@@ -253,13 +301,21 @@ lm->Landscape.getShadowPolyReceiver().receiveDecal(context, vertDelta);
 
 // Generate UV coordinates from collected vertices
 generateUVs();
+
+// Compute per-vertex colors for CPU fallback path
+if (!useVertexProgram)
+{
+CDecalManager &mgr = sc->getRenderTrav().getDecalManager();
+(void)mgr; // distScale/distBias set externally
+computeColors(0.f, 1.f);
+}
 }
 
 
 // ***************************************************************************
 // UV coordinate generation (see PDF 4.5.3)
 // Uses inverse world matrix to project world-space vertices back to unit-cube local space.
-// Camera position is subtracted for numerical stability (4.6.1).
+// Also builds the worldToUV matrix for the VP path.
 void CDecal::generateUVs()
 {
 _UVs.resize(_Vertices.size());
@@ -269,6 +325,7 @@ return;
 
 // Compute worldToUV matrix: maps world position to [0,1] UV in local decal space
 CMatrix invWorld = getWorldMatrix().inverted();
+_WorldToUVMatrix = invWorld;
 
 for (uint i = 0; i < _Vertices.size(); ++i)
 {
@@ -281,6 +338,49 @@ float v = _UV1.V + (1.0f - local.y) * (_UV2.V - _UV1.V);
 
 _UVs[i].U = u;
 _UVs[i].V = v;
+}
+}
+
+
+// ***************************************************************************
+// Compute per-vertex colors for CPU fallback path
+// Applies diffuse color, distance attenuation, and bottom/top Z blending.
+void CDecal::computeColors(float distScale, float distBias)
+{
+_Colors.resize(_Vertices.size());
+
+if (_Vertices.empty())
+return;
+
+const CVector camPos = getOwnerScene()->getCam()->getMatrix().getPos();
+
+float bottomBlendScale = 1.f / NLMISC::favoid0(_BottomBlendZMax - _BottomBlendZMin);
+float topBlendScale = 1.f / NLMISC::favoid0(_TopBlendZMin - _TopBlendZMax);
+
+for (uint i = 0; i < _Vertices.size(); ++i)
+{
+const CVector &v = _Vertices[i];
+
+// Distance attenuation
+float dist = (camPos - v).norm();
+float intensity = dist * distScale + distBias;
+clamp(intensity, 0.f, 1.f);
+
+// Bottom blend
+float bottomBlend = (v.z - _BottomBlendZMin) * bottomBlendScale;
+clamp(bottomBlend, 0.f, 1.f);
+intensity *= bottomBlend;
+
+// Top blend
+float topBlend = (v.z - _TopBlendZMax) * topBlendScale;
+clamp(topBlend, 0.f, 1.f);
+intensity *= topBlend;
+
+// Apply to diffuse color
+_Colors[i].R = _Diffuse.R;
+_Colors[i].G = _Diffuse.G;
+_Colors[i].B = _Diffuse.B;
+_Colors[i].A = (uint8)((float)_Diffuse.A * intensity);
 }
 }
 

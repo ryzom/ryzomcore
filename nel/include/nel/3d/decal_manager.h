@@ -32,6 +32,7 @@
 #include "nel/3d/decal.h"
 #include "nel/3d/material.h"
 #include "nel/3d/vertex_buffer.h"
+#include "nel/3d/vertex_program.h"
 #include "nel/3d/driver.h"
 
 
@@ -48,12 +49,54 @@ const uint32 NL3D_DECAL_VB_MAX_VERTICES = 4096 * 3;
 
 // ***************************************************************************
 /**
+ * Vertex program for decal distance attenuation, bottom/top Z blending,
+ * and diffuse color modulation.
+ *
+ * Ported from the legacy CLegacyDecal system's DecalAttenuationVertexProgram.
+ *
+ * Constants:
+ *   c[0-3]: ModelViewProjection matrix
+ *   c[4]:   WorldToUV row 0 (world X,Y,Z,W → U)
+ *   c[5]:   WorldToUV row 1 (world X,Y,Z,W → V)
+ *   c[6]:   Camera position (world space, relative to model origin)
+ *   c[7]:   DistScaleBias (x=scale, y=bias, z=0.0, w=1.0)
+ *   c[8]:   Diffuse color (RGB normalized to [0,1])
+ *   c[11]:  BlendScale (x=bottomScale, y=bottomBias, z=topScale, w=topBias)
+ */
+class CVertexProgramDecalAttenuation : public CVertexProgram
+{
+public:
+	struct CIdx
+	{
+		uint WorldToUV0;
+		uint WorldToUV1;
+		uint RefCamDist;
+		uint DistScaleBias;
+		uint Diffuse;
+		uint BlendScale;
+	};
+
+	CVertexProgramDecalAttenuation();
+	~CVertexProgramDecalAttenuation();
+	virtual void buildInfo();
+	inline const CIdx &idx() const { return m_Idx; }
+
+private:
+	CIdx m_Idx;
+};
+
+
+// ***************************************************************************
+/**
  * Decal Manager: collects decals per material and renders them in batched draw calls.
  *
  * Each frame, CDecal::traverseRender() registers decals here. At flush time,
  * the manager iterates per-material groups, fills a fixed-size AGP volatile
- * vertex buffer (position + UV), and issues renderRawTriangles() calls.
+ * vertex buffer (position + UV + color), and issues renderRawTriangles() calls.
  * If the buffer overflows mid-decal, it is flushed and refilled (see PDF §.6.3).
+ *
+ * Supports a vertex program path (attenuation, Z blending, diffuse) and a CPU
+ * fallback path using per-vertex colors.
  *
  * \author Christopher Tarento
  * \author Nevrax France
@@ -92,6 +135,14 @@ public:
 	  */
 	void setVertexProgram(const bool b) { _UseVertexProgram = b; }
 
+	/** Set distance attenuation parameters (affects all decals).
+	  * At distance d from camera: alpha *= d * scale + bias.
+	  * Typically scale = -factor/maxDist, bias = factor.
+	  * \param scale Distance scale factor
+	  * \param bias Distance bias
+	  */
+	void setDistAttenuation(float scale, float bias) { _DistScale = scale; _DistBias = bias; }
+
 private:
 	/// A registered material with its ID
 	struct CRegisteredMaterial
@@ -109,9 +160,14 @@ private:
 	uint32									_NextMaterialId;
 
 	bool									_UseVertexProgram;
+	float									_DistScale;
+	float									_DistBias;
 
-	/// Fixed-size AGP volatile vertex buffer (Position + TexCoord0)
+	/// Fixed-size AGP volatile vertex buffer (Position + TexCoord0 + PrimaryColor)
 	CVertexBuffer							_VB;
+
+	/// The decal attenuation vertex program (shared instance)
+	NLMISC::CSmartPtr<CVertexProgramDecalAttenuation>	_VertexProgram;
 };
 
 
