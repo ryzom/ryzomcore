@@ -44,6 +44,10 @@
 #include "nel/3d/u_animation.h"
 #include "nel/3d/u_scene.h"
 #include "nel/3d/u_track.h"
+#include "nel/3d/scene_user.h"
+#include "nel/3d/mesh_base.h"
+#include "nel/3d/mesh_base_instance.h"
+#include "nel/3d/texture_file.h"
 
 #include "nel/ligo/primitive.h"
 
@@ -5745,6 +5749,109 @@ NLMISC_COMMAND(dumpContinentCorners, "dump max dist for shapes", "")
 	return true;
 }
 
+
+NLMISC_COMMAND(dumpLightmapInfo, "Dump lightmap info for a shape to help diagnose lightmap issues (e.g. missing sunlight)", "<shape_name.shape>")
+{
+	if (args.size() != 1) return false;
+	if (!Scene) return false;
+
+	// Access the internal scene to get light group colors
+	NL3D::CScene &internalScene = (static_cast<NL3D::CSceneUser *>(Scene))->getScene();
+
+	// Dump scene light group colors
+	nlinfo("=== Scene Light Group Colors ===");
+	for (uint g = 0; g < internalScene.getNumLightGroup(); ++g)
+	{
+		NLMISC::CRGBA col = internalScene.getLightmapGroupColor(g);
+		nlinfo("  LightGroup %u: R=%u G=%u B=%u A=%u", g, col.R, col.G, col.B, col.A);
+	}
+
+	// Create a temporary instance to inspect its lightmap properties
+	NL3D::UInstance inst = Scene->createInstance(args[0]);
+	if (inst.empty())
+	{
+		nlwarning("dumpLightmapInfo: cannot create instance for shape '%s'", args[0].c_str());
+		return false;
+	}
+
+	nlinfo("=== Lightmap Info for shape '%s' ===", args[0].c_str());
+
+	// Access the internal mesh base to dump lightmap data
+	NL3D::CMeshBaseInstance *mbi = dynamic_cast<NL3D::CMeshBaseInstance *>(inst.getObjectPtr());
+	if (mbi)
+	{
+		NL3D::CMeshBase *mb = dynamic_cast<NL3D::CMeshBase *>((NL3D::IShape *)(mbi->Shape));
+		if (mb)
+		{
+			nlinfo("  Shape isLightable: %s", mb->isLightable() ? "true" : "false");
+
+			// Dump _LightInfos
+			nlinfo("  --- LightInfos (animated lightmap layers) ---");
+			if (mb->_LightInfos.empty())
+			{
+				nlinfo("  (no LightInfos - lightmap factors will not be animated)");
+			}
+			for (uint li = 0; li < mb->_LightInfos.size(); ++li)
+			{
+				const NL3D::CMeshBase::CLightMapInfoList &info = mb->_LightInfos[li];
+				nlinfo("  LightInfo[%u]: AnimatedLight='%s' LightGroup=%u", li, info.AnimatedLight.c_str(), info.LightGroup);
+				std::list<NL3D::CMeshBase::CLightMapInfoList::CMatStage>::const_iterator itStage;
+				for (itStage = info.StageList.begin(); itStage != info.StageList.end(); ++itStage)
+				{
+					nlinfo("    MatId=%u StageId=%u", (uint)itStage->MatId, (uint)itStage->StageId);
+				}
+			}
+		}
+
+		// Dump material lightmap info
+		nlinfo("  --- Materials ---");
+		for (uint m = 0; m < mbi->Materials.size(); ++m)
+		{
+			NL3D::CMaterial &mat = mbi->Materials[m];
+			if (mat.getShader() == NL3D::CMaterial::LightMap)
+			{
+				nlinfo("  Material[%u]: shader=LightMap, Mulx2=%s", m, mat._LightMapsMulx2 ? "true" : "false");
+				for (uint lm = 0; lm < mat._LightMaps.size(); ++lm)
+				{
+					NL3D::ITexture *tex = mat._LightMaps[lm].Texture;
+					NLMISC::CRGBA factor = mat._LightMaps[lm].Factor;
+					NLMISC::CRGBA lmcAmb = mat._LightMaps[lm].LMCAmbient;
+					NLMISC::CRGBA lmcDiff = mat._LightMaps[lm].LMCDiffuse;
+					std::string texName = "NULL";
+					std::string texFmt = "N/A";
+					if (tex)
+					{
+						NL3D::CTextureFile *tf = dynamic_cast<NL3D::CTextureFile *>((NL3D::ITexture *)tex);
+						if (tf) texName = tf->getFileName();
+						if (tex->getUploadFormat() == NL3D::ITexture::Luminance)
+							texFmt = "Luminance(8bit)";
+						else if (tex->getUploadFormat() == NL3D::ITexture::RGB565)
+							texFmt = "RGB565(16bit)";
+						else
+							texFmt = NLMISC::toString("fmt(%d)", (int)tex->getUploadFormat());
+					}
+					nlinfo("    LightMap[%u]: tex='%s' format=%s", lm, texName.c_str(), texFmt.c_str());
+					nlinfo("      Factor: R=%u G=%u B=%u A=%u", factor.R, factor.G, factor.B, factor.A);
+					nlinfo("      LMCAmbient: R=%u G=%u B=%u A=%u", lmcAmb.R, lmcAmb.G, lmcAmb.B, lmcAmb.A);
+					nlinfo("      LMCDiffuse: R=%u G=%u B=%u A=%u", lmcDiff.R, lmcDiff.G, lmcDiff.B, lmcDiff.A);
+				}
+			}
+			else
+			{
+				nlinfo("  Material[%u]: shader=%d (not LightMap)", m, (int)mat.getShader());
+			}
+		}
+	}
+	else
+	{
+		nlwarning("  Instance is not a CMeshBaseInstance");
+	}
+
+	Scene->deleteInstance(inst);
+	nlinfo("=== End Lightmap Info ===");
+
+	return true;
+}
 
 #if !FINAL_VERSION
 NLMISC_COMMAND(setMission, "locally set a mission text for test", "<mission index><text>")
