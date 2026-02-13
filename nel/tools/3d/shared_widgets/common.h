@@ -49,11 +49,8 @@ namespace NLQT {
 
 inline QString nli18n(const char *label)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-	return QString::fromUtf16(reinterpret_cast<const char16_t *>(NLMISC::CI18N::get(label).c_str()));
-#else
-	return QString::fromUtf16(NLMISC::CI18N::get(label).c_str());
-#endif
+	// CI18N::get() returns const std::string & (UTF-8 encoded)
+	return QString::fromUtf8(NLMISC::CI18N::get(label).c_str());
 }
 
 namespace {
