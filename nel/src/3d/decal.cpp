@@ -52,6 +52,7 @@ NLMISC::CSmartPtr<ITexture> CDecal::_MaskTexture;
 CDecal::CDecal() :
 _MaterialId(0),
 _Touched(true),
+_FirstFrame(true),
 _StableFrameCount(0),
 _IsStatic(false),
 _Priority(0),
@@ -211,6 +212,19 @@ getOwnerScene()->getRenderTrav().getDecalManager().addDecal(this, _MaterialId);
 std::vector<CVector> &CDecal::getVertices(const bool useVertexProgram)
 {
 const NLMISC::CVector &camPos = getOwnerScene()->getCam()->getMatrix().getPos();
+
+// First-frame skip: matrices are incorrect on the first traversal (PDF §4.6.4).
+// Return empty vertices and defer computation to the next frame.
+if (_FirstFrame)
+{
+	_FirstFrame = false;
+	_LastCamPos = camPos;
+	_Touched = true;
+	_Vertices.clear();
+	_UVs.clear();
+	_Colors.clear();
+	return _Vertices;
+}
 
 if (_IsStatic)
 {
@@ -421,6 +435,23 @@ void CDecal::setUVCoord(const CUV uv1, const CUV uv2)
 _UV1 = uv1;
 _UV2 = uv2;
 _Touched = true;
+
+// Mipmap limiting for texture atlases (PDF §4.6.2):
+// When using a sub-region, mipmaps can bleed into neighboring portions.
+// Disable mipmaps on the texture to prevent this.
+ITexture *tex = _Mat.getTexture(0);
+if (tex)
+{
+	bool isSubRegion = (fabsf(uv1.U) > 1e-6f || fabsf(uv1.V) > 1e-6f || fabsf(uv2.U - 1.f) > 1e-6f || fabsf(uv2.V - 1.f) > 1e-6f);
+	if (isSubRegion)
+	{
+		tex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
+	}
+	else
+	{
+		tex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapLinear);
+	}
+}
 }
 
 

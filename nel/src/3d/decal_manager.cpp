@@ -268,6 +268,8 @@ void CDecalManager::flush(CScene *sc)
 		}
 
 		uint32 count = 0; // current position in VB
+		bool vbLocked = false;
+		CVertexBufferReadWrite vba;
 
 		for (uint d = 0; d < decals.size(); ++d)
 		{
@@ -322,6 +324,13 @@ void CDecalManager::flush(CScene *sc)
 			const std::vector<CRGBA> &colors = decal->getColors();
 			bool hasColors = (colors.size() == verts.size());
 
+			// Ensure VB is locked before copying
+			if (!vbLocked)
+			{
+				_VB.lock(vba);
+				vbLocked = true;
+			}
+
 			while (offset < length)
 			{
 				uint32 remaining = length - offset;
@@ -330,51 +339,47 @@ void CDecalManager::flush(CScene *sc)
 				if (remaining > space)
 				{
 					// Not enough space: fill what we can, render, reset
+					for (uint32 i = 0; i < space; ++i)
 					{
-						CVertexBufferReadWrite vba;
-						_VB.lock(vba);
-						for (uint32 i = 0; i < space; ++i)
+						*vba.getVertexCoordPointer(count + i) = verts[offset + i];
+						if (offset + i < uvs.size())
+							*vba.getTexCoordPointer(count + i, 0) = uvs[offset + i];
+						if (!vpActive && hasColors)
 						{
-							*vba.getVertexCoordPointer(count + i) = verts[offset + i];
-							if (offset + i < uvs.size())
-								*vba.getTexCoordPointer(count + i, 0) = uvs[offset + i];
-							if (!vpActive && hasColors)
-							{
-								*(CRGBA *)vba.getColorPointer(count + i) = colors[offset + i];
-							}
-							else
-							{
-								*(CRGBA *)vba.getColorPointer(count + i) = CRGBA::White;
-							}
+							*(CRGBA *)vba.getColorPointer(count + i) = colors[offset + i];
+						}
+						else
+						{
+							*(CRGBA *)vba.getColorPointer(count + i) = CRGBA::White;
 						}
 					}
 					offset += space;
 					count += space;
 
-					// Render the full buffer
+					// Unlock, render, re-lock
+					vba.unlock();
+					vbLocked = false;
 					nlassert(count % 3 == 0);
 					drv->renderRawTriangles(*mat, 0, count / 3);
 					count = 0;
+					_VB.lock(vba);
+					vbLocked = true;
 				}
 				else
 				{
 					// Enough space: copy all remaining
+					for (uint32 i = 0; i < remaining; ++i)
 					{
-						CVertexBufferReadWrite vba;
-						_VB.lock(vba);
-						for (uint32 i = 0; i < remaining; ++i)
+						*vba.getVertexCoordPointer(count + i) = verts[offset + i];
+						if (offset + i < uvs.size())
+							*vba.getTexCoordPointer(count + i, 0) = uvs[offset + i];
+						if (!vpActive && hasColors)
 						{
-							*vba.getVertexCoordPointer(count + i) = verts[offset + i];
-							if (offset + i < uvs.size())
-								*vba.getTexCoordPointer(count + i, 0) = uvs[offset + i];
-							if (!vpActive && hasColors)
-							{
-								*(CRGBA *)vba.getColorPointer(count + i) = colors[offset + i];
-							}
-							else
-							{
-								*(CRGBA *)vba.getColorPointer(count + i) = CRGBA::White;
-							}
+							*(CRGBA *)vba.getColorPointer(count + i) = colors[offset + i];
+						}
+						else
+						{
+							*(CRGBA *)vba.getColorPointer(count + i) = CRGBA::White;
 						}
 					}
 					count += remaining;
@@ -383,7 +388,12 @@ void CDecalManager::flush(CScene *sc)
 			}
 		}
 
-		// Render any remaining vertices for this material
+		// Unlock and render any remaining vertices for this material
+		if (vbLocked)
+		{
+			vba.unlock();
+			vbLocked = false;
+		}
 		if (count > 0)
 		{
 			nlassert(count % 3 == 0);

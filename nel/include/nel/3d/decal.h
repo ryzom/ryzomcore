@@ -341,6 +341,7 @@ private:
 	uint32						_MaterialId;
 
 	bool						_Touched;
+	bool						_FirstFrame;	///< True until the first frame has been traversed (matrices invalid on frame 0, see PDF §4.6.4)
 	uint32						_StableFrameCount;
 
 	CVector						_LastCamPos;
