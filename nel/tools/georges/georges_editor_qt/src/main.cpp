@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// Define GEORGES_USE_NATIVE_STYLE to 1 to use the OS-native look and feel
-// instead of the dark Fusion palette. By default, the dark Fusion palette
-// from shared_widgets/common.h (matching the Panoply Preview tool) is used.
-#ifndef GEORGES_USE_NATIVE_STYLE
-#define GEORGES_USE_NATIVE_STYLE 0
+// Define GEORGES_USE_DARK_THEME to enable the dark Fusion palette from
+// shared_widgets/common.h (matching Panoply Preview and nel_qt sample).
+// The default is enabled. Set to 0 to use the OS-native look and feel.
+#ifndef GEORGES_USE_DARK_THEME
+#define GEORGES_USE_DARK_THEME 1
 #endif
 
 #include <nel/misc/types_nl.h>
@@ -39,11 +39,13 @@ int main(int argc, char *argv[])
 	// use log.log if NEL_LOG_IN_FILE defined as 1
 	createDebug(NULL, false, false);
 
+#if GEORGES_USE_DARK_THEME
 	NLQT::preApplication();
+#endif
 	QApplication app(argc, argv);
 	app.setApplicationName("Georges Editor Qt");
 	app.setOrganizationName("NeL");
-#if !GEORGES_USE_NATIVE_STYLE
+#if GEORGES_USE_DARK_THEME
 	NLQT::postApplication();
 #endif
 
