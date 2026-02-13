@@ -85,7 +85,7 @@ static const char *DecalAttenuationVertexProgramCode =
 	MAX R1.x, R1.x, c[7].z;\n\
 	MUL R0.w, R1.x, R0.w;\n\
 	#apply vertex alpha\n\
-	MUL o[COL0].w, v[3], R0.w;\n\
+	MUL o[COL0].w, v[3].w, R0.w;\n\
 	END \n";
 
 
