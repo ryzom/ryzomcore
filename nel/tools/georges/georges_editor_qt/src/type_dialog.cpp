@@ -52,7 +52,6 @@ void TypeDialog::setupUi()
 	_typeCombo->addItem(tr("Double"));
 	_typeCombo->addItem(tr("String"));
 	_typeCombo->addItem(tr("Color"));
-	_typeCombo->addItem(tr("Filename"));
 	formLayout->addRow(tr("Type:"), _typeCombo);
 
 	_uiTypeCombo = new QComboBox(propsGroup);
