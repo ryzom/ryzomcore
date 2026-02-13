@@ -27,7 +27,7 @@
 #include <nel/georges/type.h>
 #include <nel/georges/form.h>
 #include <nel/georges/form_dfn.h>
-#include <nel/georges/u_form_loader.h>
+#include <nel/georges/form_loader.h>
 
 class GeorgesEditorDoc;
 
@@ -104,7 +104,7 @@ public:
 
 	NLGEORGES::CType *getTypePtr() { return _type; }
 	NLGEORGES::CFormDfn *getDfnPtr() { return _dfn; }
-	NLGEORGES::CForm *getFormPtr() { return _form; }
+	NLGEORGES::CForm *getFormPtr() { return dynamic_cast<NLGEORGES::CForm *>((NLGEORGES::UForm *)_form); }
 	const NLGEORGES::CFileHeader *getHeaderPtr() const;
 	NLGEORGES::CFileHeader *getHeaderPtr();
 
@@ -130,11 +130,11 @@ private:
 	bool _modified;
 	QString _filePath;
 
-	NLGEORGES::CType *_type;
-	NLGEORGES::CFormDfn *_dfn;
-	NLGEORGES::CForm *_form;
+	NLMISC::CSmartPtr<NLGEORGES::CType> _type;
+	NLMISC::CSmartPtr<NLGEORGES::CFormDfn> _dfn;
+	NLMISC::CSmartPtr<NLGEORGES::UForm> _form;
 
-	NLGEORGES::UFormLoader *_loader;
+	NLGEORGES::CFormLoader _loader;
 
 	CGeorgesEditDocSub _docTree;
 };

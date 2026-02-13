@@ -22,7 +22,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/i_xml.h>
 #include <nel/misc/o_xml.h>
-#include <nel/georges/u_form_loader.h>
+#include <nel/georges/form_loader.h>
 
 using namespace NLGEORGES;
 using namespace NLMISC;
@@ -150,15 +150,12 @@ int CGeorgesEditDocSub::getItemImage(GeorgesEditorDoc *doc) const
 // ---- GeorgesEditorDoc ----
 
 GeorgesEditorDoc::GeorgesEditorDoc()
-	: _docType(TypeDoc), _modified(false), _type(nullptr), _dfn(nullptr), _form(nullptr), _loader(nullptr)
+	: _docType(TypeDoc), _modified(false)
 {
 }
 
 GeorgesEditorDoc::~GeorgesEditorDoc()
 {
-	// UForm, UFormDfn, UType are managed by the form loader cache
-	if (_loader)
-		UFormLoader::releaseLoader(_loader);
 }
 
 bool GeorgesEditorDoc::open(const QString &path)
@@ -167,10 +164,6 @@ bool GeorgesEditorDoc::open(const QString &path)
 	QFileInfo fi(path);
 	QString ext = fi.suffix().toLower();
 
-	_loader = UFormLoader::createLoader();
-	if (!_loader)
-		return false;
-
 	std::string stdPath = path.toUtf8().constData();
 
 	try
@@ -178,24 +171,22 @@ bool GeorgesEditorDoc::open(const QString &path)
 		if (ext == "typ")
 		{
 			_docType = TypeDoc;
-			UType *utype = _loader->loadFormType(stdPath.c_str());
-			_type = dynamic_cast<CType *>(utype);
+			_type = _loader.loadType(stdPath.c_str());
 			if (!_type)
 				return false;
 		}
 		else if (ext == "dfn")
 		{
 			_docType = DfnDoc;
-			UFormDfn *udfn = _loader->loadFormDfn(stdPath.c_str());
-			_dfn = dynamic_cast<CFormDfn *>(udfn);
+			_dfn = _loader.loadFormDfn(stdPath.c_str(), false);
 			if (!_dfn)
 				return false;
 		}
 		else
 		{
 			_docType = FormDoc;
-			UForm *uform = _loader->loadForm(stdPath.c_str());
-			_form = dynamic_cast<CForm *>(uform);
+			UForm *uform = _loader.loadForm(stdPath.c_str());
+			_form = uform;
 			if (!_form)
 				return false;
 		}
@@ -240,7 +231,9 @@ bool GeorgesEditorDoc::save(const QString &path)
 		}
 		else if (_docType == FormDoc && _form)
 		{
-			_form->write(xml.getDocument(), stdPath);
+			CForm *form = dynamic_cast<CForm *>((UForm *)_form);
+			if (form)
+				form->write(xml.getDocument(), stdPath);
 		}
 
 		xml.flush();
@@ -280,7 +273,11 @@ const CFileHeader *GeorgesEditorDoc::getHeaderPtr() const
 	if (_docType == DfnDoc && _dfn)
 		return &_dfn->Header;
 	if (_docType == FormDoc && _form)
-		return &_form->Header;
+	{
+		const CForm *form = dynamic_cast<const CForm *>((const UForm *)_form);
+		if (form)
+			return &form->Header;
+	}
 	return nullptr;
 }
 
@@ -291,7 +288,11 @@ CFileHeader *GeorgesEditorDoc::getHeaderPtr()
 	if (_docType == DfnDoc && _dfn)
 		return &_dfn->Header;
 	if (_docType == FormDoc && _form)
-		return &_form->Header;
+	{
+		CForm *form = dynamic_cast<CForm *>((UForm *)_form);
+		if (form)
+			return &form->Header;
+	}
 	return nullptr;
 }
 
