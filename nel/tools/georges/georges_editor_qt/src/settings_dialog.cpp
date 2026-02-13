@@ -87,6 +87,11 @@ void SettingsDialog::setupUi()
 	_startExpandedCheck->setChecked(true);
 	optLayout->addRow("", _startExpandedCheck);
 
+	// Remember Window State
+	_rememberWindowStateCheck = new QCheckBox(tr("Remember Window State"), optGroup);
+	_rememberWindowStateCheck->setChecked(false);
+	optLayout->addRow("", _rememberWindowStateCheck);
+
 	mainLayout->addWidget(optGroup);
 
 	// Button box
@@ -108,6 +113,7 @@ void SettingsDialog::loadSettings()
 	_rememberListSpin->setValue(settings.value("rememberListSize", 10).toInt());
 	_maxUndoSpin->setValue(settings.value("maxUndo", 50).toInt());
 	_startExpandedCheck->setChecked(settings.value("startExpanded", true).toBool());
+	_rememberWindowStateCheck->setChecked(settings.value("rememberWindowState", false).toBool());
 }
 
 void SettingsDialog::saveSettings()
@@ -120,6 +126,7 @@ void SettingsDialog::saveSettings()
 	settings.setValue("rememberListSize", _rememberListSpin->value());
 	settings.setValue("maxUndo", _maxUndoSpin->value());
 	settings.setValue("startExpanded", _startExpandedCheck->isChecked());
+	settings.setValue("rememberWindowState", _rememberWindowStateCheck->isChecked());
 }
 
 QString SettingsDialog::rootSearchPath() const
@@ -155,6 +162,11 @@ int SettingsDialog::maxUndo() const
 bool SettingsDialog::startExpanded() const
 {
 	return _startExpandedCheck->isChecked();
+}
+
+bool SettingsDialog::rememberWindowState() const
+{
+	return _rememberWindowStateCheck->isChecked();
 }
 
 void SettingsDialog::onBrowseRootPath()

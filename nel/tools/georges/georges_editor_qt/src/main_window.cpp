@@ -71,10 +71,13 @@ MainWindow::MainWindow(QWidget *parent)
 	// Initialize NeL search paths from saved settings
 	initSearchPaths();
 
-	// Restore window geometry and dock state
+	// Restore window geometry and dock state if enabled
 	QSettings settings("NeL", "Georges Editor Qt");
-	restoreGeometry(settings.value("windowGeometry").toByteArray());
-	restoreState(settings.value("windowState").toByteArray());
+	if (settings.value("rememberWindowState", false).toBool())
+	{
+		restoreGeometry(settings.value("windowGeometry").toByteArray());
+		restoreState(settings.value("windowState").toByteArray());
+	}
 }
 
 MainWindow::~MainWindow()
@@ -83,10 +86,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-	// Save window geometry and dock state
+	// Save window geometry and dock state if enabled
 	QSettings settings("NeL", "Georges Editor Qt");
-	settings.setValue("windowGeometry", saveGeometry());
-	settings.setValue("windowState", saveState());
+	if (settings.value("rememberWindowState", false).toBool())
+	{
+		settings.setValue("windowGeometry", saveGeometry());
+		settings.setValue("windowState", saveState());
+	}
 	event->accept();
 }
 

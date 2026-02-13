@@ -41,6 +41,7 @@ public:
 	int rememberListSize() const;
 	int maxUndo() const;
 	bool startExpanded() const;
+	bool rememberWindowState() const;
 
 	void loadSettings();
 	void saveSettings();
@@ -60,6 +61,7 @@ private:
 	QSpinBox *_rememberListSpin;
 	QSpinBox *_maxUndoSpin;
 	QCheckBox *_startExpandedCheck;
+	QCheckBox *_rememberWindowStateCheck;
 };
 
 #endif // SETTINGS_DIALOG_H
