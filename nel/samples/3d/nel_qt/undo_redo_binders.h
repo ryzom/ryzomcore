@@ -24,7 +24,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtGui/QColor>
-#include <QtGui/QUndoCommand>
+#include <QtWidgets/QUndoCommand>
 
 // NeL includes
 
