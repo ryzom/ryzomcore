@@ -45,6 +45,9 @@
 
 
 
+// use the dark Fusion theme (same as Panoply Preview and other tools)
+// #define NLQT_USE_DARK_THEME 1
+
 // use the low fragmentation heap (windows feature)
 // #define NLQT_LOW_FRAGMENTATION_HEAP 1
 
@@ -75,6 +78,10 @@
 #endif
 #if !defined (NLQT_USE_LOG)
 #	define NLQT_USE_LOG 1
+#endif
+
+#if !defined (NLQT_USE_DARK_THEME)
+#	define NLQT_USE_DARK_THEME 0
 #endif
 
 #if !defined (NLQT_LOW_FRAGMENTATION_HEAP)
