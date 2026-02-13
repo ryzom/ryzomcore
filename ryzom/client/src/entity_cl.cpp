@@ -3253,27 +3253,7 @@ void CEntityCL::updateCastShadowMap()
 		{
 			if(!_Instances[i].Current.empty())
 			{
-				if(shadowOn)
-				{
-					_Instances[i].Current.setUserLightable(true);
-					_Instances[i].Current.enableCastShadowMap(true);
-				}
-				else
-				{
-					_Instances[i].Current.enableCastShadowMap(false);
-				}
-			}
-			if(!_Instances[i].Loading.empty())
-			{
-				if(shadowOn)
-				{
-					_Instances[i].Loading.setUserLightable(true);
-					_Instances[i].Loading.enableCastShadowMap(true);
-				}
-				else
-				{
-					_Instances[i].Loading.enableCastShadowMap(false);
-				}
+				_Instances[i].Current.enableCastShadowMap(shadowOn);
 			}
 		}
 
@@ -3296,11 +3276,6 @@ void CEntityCL::updateCastShadowMap()
 				{
 					_Instances[i].Current.setShadowMapDirectionZThreshold(_ShadowMapZDirClamp);
 					_Instances[i].Current.setShadowMapMaxDepth(_ShadowMapMaxDepth);
-				}
-				if(!_Instances[i].Loading.empty())
-				{
-					_Instances[i].Loading.setShadowMapDirectionZThreshold(_ShadowMapZDirClamp);
-					_Instances[i].Loading.setShadowMapMaxDepth(_ShadowMapMaxDepth);
 				}
 			}
 		}
