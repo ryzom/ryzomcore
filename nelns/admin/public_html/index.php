@@ -62,46 +62,46 @@
 			$tid = (int)substr($var, 10);
 		else if (strncmp($var, "upd_annot_button_", 17) == 0)
 		{
-			$shard = substr($var, 17);
+			$shard = sqlescape(substr($var, 17));
 			
 			if ($shardLockState[$shard]['lock_state'] == 1)
 			{
-				$annot = $GLOBALS["upd_annot_text_".$shard];
+				$annot = sqlescape($GLOBALS["upd_annot_text_".$shard]);
 				
 				$result = sqlquery("SELECT shard FROM shard_annotation WHERE shard='$shard'");
 				if (!$result || sqlnumrows($result) == 0)
 					sqlquery("INSERT INTO shard_annotation SET shard='$shard'");
 	
-				sqlquery("UPDATE shard_annotation SET annotation='$annot', user='$uid', post_date=NOW() WHERE shard='$shard'");
+				sqlquery("UPDATE shard_annotation SET annotation='$annot', user='".intval($uid)."', post_date=NOW() WHERE shard='$shard'");
 				
 				$updatedShardAnnot = true;
 			}
 		}
 		else if (strncmp($var, "upd_lock_button_", 16) == 0)
 		{
-			$shard = substr($var, 16);
+			$shard = sqlescape(substr($var, 16));
 
 			if ($shardLockState[$shard]['lock_state'] != 1)
 			{
 				$result = sqlquery("SELECT shard FROM shard_annotation WHERE shard='$shard'");
 	
 				if (!$result || sqlnumrows($result) == 0)
-					sqlquery("INSERT INTO shard_annotation SET shard='$shard', annotation='locked by $admlogin', user='$uid', post_date=NOW()");
+					sqlquery("INSERT INTO shard_annotation SET shard='$shard', annotation='locked by ".sqlescape($admlogin)."', user='".intval($uid)."', post_date=NOW()");
 	
-				sqlquery("UPDATE shard_annotation SET lock_user='$uid', lock_ip='$REMOTE_ADDR', lock_date=NOW() WHERE shard='$shard'");
+				sqlquery("UPDATE shard_annotation SET lock_user='".intval($uid)."', lock_ip='".sqlescape($REMOTE_ADDR)."', lock_date=NOW() WHERE shard='$shard'");
 				
 				$updatedShardAnnot = true;
 			}
 		}
 		else if (strncmp($var, "upd_unlock_button_", 18) == 0)
 		{
-			$shard = substr($var, 18);
+			$shard = sqlescape(substr($var, 18));
 
 			if ($shardLockState[$shard]['lock_state'] == 1)
 			{
 				$result = sqlquery("SELECT shard FROM shard_annotation WHERE shard='$shard'");
 				if (!$result || sqlnumrows($result) == 0)
-					sqlquery("INSERT INTO shard_annotation SET shard='$shard', annotation='locked by $admlogin', user='$uid', post_date=NOW()");
+					sqlquery("INSERT INTO shard_annotation SET shard='$shard', annotation='locked by ".sqlescape($admlogin)."', user='".intval($uid)."', post_date=NOW()");
 	
 				sqlquery("UPDATE shard_annotation SET lock_user='0' WHERE shard='$shard'");
 				

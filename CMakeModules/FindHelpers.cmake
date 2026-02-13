@@ -856,6 +856,7 @@ MACRO(FIND_QT5)
     GET_TARGET_PROPERTY(_FILE Qt5::Core IMPORTED_LOCATION_RELEASE)
 
     SET(QT_VERSION "${Qt5Core_VERSION_STRING}")
+    SET(QT_VERSION_MAJOR 5)
     SET(_VERSION "${QT_VERSION}")
 
     IF(_FILE MATCHES "\\.(lib|a)$")
@@ -1044,5 +1045,119 @@ MACRO(FIND_QT5)
     ENDIF()
   ELSE()
     MESSAGE(WARNING "Unable to find Qt 5")
+  ENDIF()
+ENDMACRO()
+
+MACRO(FIND_QT6)
+  CMAKE_MINIMUM_REQUIRED(VERSION 3.22..4.1.1 FATAL_ERROR)
+
+  set(CMAKE_AUTOMOC ON)
+  set(CMAKE_AUTORCC ON)
+  set(CMAKE_AUTOUIC ON)
+
+  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QTDIR} $ENV{QTDIR})
+
+  FIND_PACKAGE(Qt6Core QUIET)
+
+  IF(Qt6Core_FOUND)
+    # Check if we are using Qt static or shared libraries
+    GET_TARGET_PROPERTY(_FILE Qt6::Core IMPORTED_LOCATION_RELEASE)
+
+    # Qt6 uses standard CMake _VERSION variable (not _VERSION_STRING like Qt5)
+    SET(QT_VERSION "${Qt6Core_VERSION}")
+    SET(QT_VERSION_MAJOR 6)
+    SET(_VERSION "${QT_VERSION}")
+
+    IF(_FILE MATCHES "\\.(lib|a)$")
+      SET(QT_STATIC ON)
+      SET(_VERSION "${_VERSION} static version")
+    ELSE()
+      SET(QT_STATIC OFF)
+      SET(_VERSION "${_VERSION} shared version")
+    ENDIF()
+
+    MESSAGE(STATUS "Found Qt ${_VERSION}")
+
+    # These variables are not defined with Qt6 CMake modules
+    GET_TARGET_PROPERTY(_qt6Core_install_prefix Qt6::Core IMPORT_PREFIX)
+    IF(NOT _qt6Core_install_prefix)
+      GET_TARGET_PROPERTY(_qt6Core_location Qt6::Core LOCATION)
+      GET_FILENAME_COMPONENT(_qt6Core_install_prefix "${_qt6Core_location}" DIRECTORY)
+      GET_FILENAME_COMPONENT(_qt6Core_install_prefix "${_qt6Core_install_prefix}" DIRECTORY)
+    ENDIF()
+    SET(QT_BINARY_DIR "${_qt6Core_install_prefix}/bin")
+    SET(QT_LIBRARY_DIR "${_qt6Core_install_prefix}/lib")
+    SET(QT_PLUGINS_DIR "${_qt6Core_install_prefix}/plugins")
+    SET(QT_TRANSLATIONS_DIR "${_qt6Core_install_prefix}/translations")
+
+    # Fix wrong include directories under Mac OS X
+    INCLUDE_DIRECTORIES("${_qt6Core_install_prefix}/include")
+
+    FIND_PACKAGE(Qt6Gui)
+    FIND_PACKAGE(Qt6Widgets)
+    FIND_PACKAGE(Qt6OpenGLWidgets QUIET)
+    FIND_PACKAGE(Qt6OpenGL QUIET)
+    FIND_PACKAGE(Qt6Xml)
+    FIND_PACKAGE(Qt6LinguistTools QUIET)
+    FIND_PACKAGE(Qt6Network)
+
+    IF(QT_STATIC)
+      FIND_PACKAGE(PNG REQUIRED)
+      FIND_PACKAGE(JPEG REQUIRED)
+
+      ADD_DEFINITIONS(-DQT_STATICPLUGIN)
+
+      # Qt6 handles transitive dependencies much better than Qt5,
+      # so the static library list is simpler.
+      SET(QT_LIBRARIES Qt6::Widgets Qt6::Gui Qt6::Network Qt6::Xml Qt6::Core)
+
+      IF(TARGET Qt6::OpenGLWidgets)
+        LIST(APPEND QT_LIBRARIES Qt6::OpenGLWidgets)
+      ENDIF()
+      IF(TARGET Qt6::OpenGL)
+        LIST(APPEND QT_LIBRARIES Qt6::OpenGL)
+      ENDIF()
+
+      LIST(APPEND QT_LIBRARIES ${PNG_LIBRARIES} JPEG::JPEG)
+      LIST(APPEND QT_LIBRARIES ${ZLIB_LIBRARIES})
+
+      IF(WIN32)
+        LIST(APPEND QT_LIBRARIES
+          ${WINSDK_LIBRARY_DIR}/Imm32.lib
+          ${WINSDK_LIBRARY_DIR}/OpenGL32.lib
+          ${WINSDK_LIBRARY_DIR}/WinMM.Lib
+          ${WINSDK_LIBRARY_DIR}/Crypt32.lib
+          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib
+          ${WINSDK_LIBRARY_DIR}/IPHlpApi.Lib)
+      ELSEIF(APPLE)
+        FIND_LIBRARY(IOKIT_FRAMEWORK IOKit)
+        FIND_LIBRARY(COCOA_FRAMEWORK Cocoa)
+        FIND_LIBRARY(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
+        FIND_LIBRARY(OPENGL_FRAMEWORK NAMES OpenGL)
+
+        LIST(APPEND QT_LIBRARIES
+          ${COCOA_FRAMEWORK}
+          ${SYSTEMCONFIGURATION_FRAMEWORK}
+          ${IOKIT_FRAMEWORK}
+          ${OPENGL_FRAMEWORK})
+      ELSE()
+        FIND_PACKAGE(Threads)
+        LIST(APPEND QT_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
+      ENDIF()
+
+      IF(OPENSSL_FOUND)
+        LIST(APPEND QT_LIBRARIES ${OPENSSL_LIBRARIES})
+      ENDIF()
+    ELSE()
+      SET(QT_LIBRARIES Qt6::Widgets Qt6::Network Qt6::Xml Qt6::Gui Qt6::Core)
+      IF(TARGET Qt6::OpenGLWidgets)
+        LIST(APPEND QT_LIBRARIES Qt6::OpenGLWidgets)
+      ENDIF()
+      IF(TARGET Qt6::OpenGL)
+        LIST(APPEND QT_LIBRARIES Qt6::OpenGL)
+      ENDIF()
+    ENDIF()
+  ELSE()
+    MESSAGE(WARNING "Unable to find Qt 6")
   ENDIF()
 ENDMACRO()

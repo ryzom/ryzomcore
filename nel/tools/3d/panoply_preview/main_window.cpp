@@ -22,7 +22,6 @@
 // Qt includes
 #include <QtGui>
 #include <QTreeView>
-#include <QDirModel>
 #include <QUndoStack>
 #include <QScrollArea>
 #include <QApplication>
@@ -53,7 +52,11 @@ namespace {
 
 QString nli18n(const char *label)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+	return QString::fromUtf16(reinterpret_cast<const char16_t *>(CI18N::get(label).c_str()));
+#else
 	return QString::fromUtf16((const ushort *)CI18N::get(label).c_str());
+#endif
 }
 
 } /* anonymous namespace */
