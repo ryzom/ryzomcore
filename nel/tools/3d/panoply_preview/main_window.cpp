@@ -48,19 +48,6 @@ using namespace NLMISC;
 
 namespace NLTOOLS {
 
-namespace {
-
-QString nli18n(const char *label)
-{
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-	return QString::fromUtf16(reinterpret_cast<const char16_t *>(CI18N::get(label).c_str()));
-#else
-	return QString::fromUtf16((const ushort *)CI18N::get(label).c_str());
-#endif
-}
-
-} /* anonymous namespace */
-
 CMainWindow::CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent, Qt::WindowFlags flags)
 	: QMainWindow(parent, flags),
 	m_PanoplyPreview(NULL), 

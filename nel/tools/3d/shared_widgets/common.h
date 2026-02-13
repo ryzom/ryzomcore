@@ -38,12 +38,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QStyleFactory>
 #include <QDir>
 #include <QPalette>
+#include <QString>
 
 // NeL includes
+#include <nel/misc/i18n.h>
 
 // Project includes
 
 namespace NLQT {
+
+inline QString nli18n(const char *label)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+	return QString::fromUtf16(reinterpret_cast<const char16_t *>(NLMISC::CI18N::get(label).c_str()));
+#else
+	return QString::fromUtf16(NLMISC::CI18N::get(label).c_str());
+#endif
+}
+
 namespace {
 
 void preApplication()
