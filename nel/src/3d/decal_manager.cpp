@@ -61,7 +61,7 @@ void CDecalManager::clearAllDecals()
 // ***************************************************************************
 void CDecalManager::addDecal(CDecal *decal, const string &texName)
 {
-	TDecalMap::iterator itEnd = _Decals.begin();
+	TDecalMap::iterator itEnd = _Decals.end();
 	TDecalMap::iterator it    = _Decals.find(texName);
 	if (it!=itEnd)///this key exist, add decal to vector
 	{

@@ -197,7 +197,10 @@ void CDecal::computeDecal(const bool useVertexProgram)
 	/// Verify that coll manager exists
 	CVisualCollisionManager *vcm;
 	if( !(vcm=sc->getVisualCollisionManagerForShadow()) )
-		nlassert("VisualCollisionManager does NOT exist, NO decal rendering");
+	{
+		nlerror("VisualCollisionManager does NOT exist, NO decal rendering");
+		return;
+	}
 	
 
 	///Preparing shadow map clipping planes

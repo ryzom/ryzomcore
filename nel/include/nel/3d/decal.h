@@ -93,7 +93,7 @@ public:
 class CDecal : public CTransform
 {
 public:
-	/** Contructor
+	/** Constructor
 	  */
 	CDecal();
 
@@ -101,7 +101,7 @@ public:
 	  */
 	~CDecal();
 
-	/** Initilization
+	/** Initialization
 	  * Implementation for Ctransform
 	  */
 	void initModel();
