@@ -317,6 +317,10 @@ IF(WITH_QT5)
   FIND_QT5()
 ENDIF()
 
+IF(WITH_QT6)
+  FIND_QT6()
+ENDIF()
+
 #TODO: hunter assimp package
 IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)

@@ -66,7 +66,7 @@
 		$userId = $row["user_id"];
 		$domainId = $row["current_domain_id"];
 //		$charId = ($userId*16) + (getCharSlot()) & 0xf;
-		$charId = $userId*16 + getCharSlot();
+		$charId = intval($userId*16 + getCharSlot());
 		
 		return true;
 	}
@@ -75,9 +75,9 @@
 	{
 		global $_GET, $_POST;		
 		if (isset($_GET["charSlot"]))
-			return $_GET["charSlot"];
+			return intval($_GET["charSlot"]);
 		else if (isset($_POST["charSlot"]))
-			return $_POST["charSlot"];
+			return intval($_POST["charSlot"]);
 		else
 			return 0; // temp dev: use 0 as the "ring character"
 	}

@@ -21,13 +21,13 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QWidget>
-#include <QtGui/QCheckBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QGroupBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 
 // NeL includes
 #include <nel/misc/config_file.h>
@@ -60,8 +60,8 @@ public:
 	void incbTranslate();
 
 	inline bool getGraphicsEnabled() const { return m_Enabled->isChecked(); }
-	inline std::string getGraphicsDriver() const { std::string v = std::string(m_Driver->currentText().toAscii()); return v; }
-	inline std::string getFontName() const { std::string v = std::string(m_FontName->text().toAscii()); return v; }
+	inline std::string getGraphicsDriver() const { std::string v = std::string(m_Driver->currentText().toLatin1()); return v; }
+	inline std::string getFontName() const { std::string v = std::string(m_FontName->text().toLatin1()); return v; }
 	
 	inline NLMISC::CRGBA getBackgroundColor() const { QColor c = m_BackgroundColor->currentColor(); NLMISC::CRGBA v(c.red(), c.green(), c.blue()); return v; }
 	inline bool getFontShadow() const { return m_FontShadow->isChecked(); }

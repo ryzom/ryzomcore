@@ -71,7 +71,7 @@ function domain_management_hook_get_db()
         try {
 
             $dbs = new DBLayer( 'shard' );
-            $dbs->update("domain", Array( 'domain_name' => $_POST['domain_name'], 'status' => $_POST['status'], 'patch_version' => $_POST['patch_version'],'backup_patch_url' => $_POST['backup_patch_url'],'patch_urls' => $_POST['patch_urls'],'login_address' => $_POST['login_address'],'session_manager_address' => $_POST['session_manager_address'],'ring_db_name' => $_POST['ring_db_name'],'web_host' => $_POST['web_host'],'web_host_php' => $_POST['web_host_php'],'description' => $_POST['description'],),'`domain_id` = '.$_GET['edit_domain']);
+            $dbs->update("domain", Array( 'domain_name' => $_POST['domain_name'], 'status' => $_POST['status'], 'patch_version' => $_POST['patch_version'],'backup_patch_url' => $_POST['backup_patch_url'],'patch_urls' => $_POST['patch_urls'],'login_address' => $_POST['login_address'],'session_manager_address' => $_POST['session_manager_address'],'ring_db_name' => $_POST['ring_db_name'],'web_host' => $_POST['web_host'],'web_host_php' => $_POST['web_host_php'],'description' => $_POST['description'],),'`domain_id` = '.intval($_GET['edit_domain']));
 
             }
         catch ( Exception $e ) {
@@ -113,11 +113,11 @@ function domain_management_hook_get_db()
 
          if ( isset( $_GET['edit_domain'] ) ) {
             // get permissions
-            $statement = $db -> executeWithoutParams( "SELECT * FROM `domain` WHERE `domain_id` = '" . $_GET['edit_domain'] . "'" );
+            $statement = $db -> execute( "SELECT * FROM `domain` WHERE `domain_id` = :domain_id", array('domain_id' => intval($_GET['edit_domain'])) );
              $rows = $statement -> fetchAll();
              $domain_management_return_set['domains'] = $rows;
 
-             $statement = $db -> executeWithoutParams( "SELECT * FROM `permission` WHERE `DomainId` = '" . $_GET['edit_domain'] . "'" );
+             $statement = $db -> execute( "SELECT * FROM `permission` WHERE `DomainId` = :domain_id", array('domain_id' => intval($_GET['edit_domain'])) );
              $rows = $statement -> fetchAll();
              $domain_management_return_set['permissions'] = $rows;
 

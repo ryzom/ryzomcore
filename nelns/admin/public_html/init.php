@@ -34,13 +34,13 @@ $userData['groupname'] = $usersData[$userData['gid']]['login'];
 $variableData = retrieveTable("variable", "vid");
 
 // retrieve user variables
-$uservariableData = retrieveTable("user_variable", "vid", "uid='$uid' OR uid='$gid'");
+$uservariableData = retrieveTable("user_variable", "vid", "uid='".intval($uid)."' OR uid='".intval($gid)."'");
 
 // retrieve shard list info
 $shardList = retrieveTable("service", "shard", "", "DISTINCT shard");
 
 // retrieve shard access info
-$shardAccess = retrieveTable("shard_access", "shard", "uid='$uid' OR uid='$gid'", "DISTINCT shard");
+$shardAccess = retrieveTable("shard_access", "shard", "uid='".intval($uid)."' OR uid='".intval($gid)."'", "DISTINCT shard");
 
 
 function getUserVariableRights($uid, $gid)
@@ -54,7 +54,7 @@ function getUserVariableRights($uid, $gid)
 	}
 	
 	// override from group settings
-	$result = sqlquery("SELECT vid, privilege FROM user_variable WHERE uid='$gid'");
+	$result = sqlquery("SELECT vid, privilege FROM user_variable WHERE uid='".intval($gid)."'");
 	while ($result && ($array = sqlfetch($result)))
 	{
 		$uservariablerights[$array["vid"]][0] = 2;
@@ -62,7 +62,7 @@ function getUserVariableRights($uid, $gid)
 	}
 	
 	// override from user settings
-	$result = sqlquery("SELECT vid, privilege FROM user_variable WHERE uid='$uid'");
+	$result = sqlquery("SELECT vid, privilege FROM user_variable WHERE uid='".intval($uid)."'");
 	while ($result && ($array = sqlfetch($result)))
 	{
 		$uservariablerights[$array["vid"]][0] = 3;

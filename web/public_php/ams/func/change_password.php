@@ -51,9 +51,9 @@ function change_password(){
 
                     }else{
 
-                        $result['prevCurrentPass'] = filter_var($_POST["CurrentPass"], FILTER_SANITIZE_STRING);
-                        $result['prevNewPass'] = filter_var($_POST["NewPass"], FILTER_SANITIZE_STRING);
-                        $result['prevConfirmNewPass'] = filter_var($_POST["ConfirmNewPass"], FILTER_SANITIZE_STRING);
+                        $result['prevCurrentPass'] = filter_var($_POST["CurrentPass"], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                        $result['prevNewPass'] = filter_var($_POST["NewPass"], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                        $result['prevConfirmNewPass'] = filter_var($_POST["ConfirmNewPass"], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                         $result['permission'] =  unserialize($_SESSION['ticket_user'])->getPermission();
                         $result['no_visible_elements'] = 'FALSE';
                         $result['username'] = $_SESSION['user'];

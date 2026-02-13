@@ -27,7 +27,7 @@
 	// remove user, ask for confirmation
 	if (isset($rmUid) && isset($uuid) && $uuid!=$uid)
 	{
-		$result = sqlquery("SELECT login FROM user WHERE uid='$uuid'");
+		$result = sqlquery("SELECT login FROM user WHERE uid='".intval($uuid)."'");
 		if ($result && mysql_num_rows($result) == 1)
 		{
 			htmlProlog($_SERVER['PHP_SELF'], "Administration");
@@ -42,12 +42,12 @@
 	// remove effectively user
 	else if (isset($confirmRmUid) && $confirmRmUid!=$uid)
 	{
-		sqlquery("DELETE FROM user WHERE uid='$confirmRmUid'");
+		sqlquery("DELETE FROM user WHERE uid='".intval($confirmRmUid)."'");
 		$numUserDeleted = mysql_affected_rows();
-		sqlquery("DELETE FROM user_variable WHERE uid='$confirmRmUid'");
+		sqlquery("DELETE FROM user_variable WHERE uid='".intval($confirmRmUid)."'");
 
-		$result = sqlquery("SELECT tid FROM view_table WHERE uid='$confirmRmUid'");
-		sqlquery("DELETE FROM view_table WHERE uid='$confirmRmUid'");
+		$result = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($confirmRmUid)."'");
+		sqlquery("DELETE FROM view_table WHERE uid='".intval($confirmRmUid)."'");
 
 		while ($result && ($arr=mysql_fetch_array($result)))
 		{
@@ -58,7 +58,7 @@
 	// force user password
 	else if (isset($forcePass))
 	{
-		sqlquery("UPDATE user SET password='".crypt($forcedPass, "NL")."' WHERE uid='$forcePass'");
+		sqlquery("UPDATE user SET password='".sqlescape(crypt($forcedPass, "NL"))."' WHERE uid='".intval($forcePass)."'");
 	}
 	// update user variables
 	else if (isset($updVars) && isset($editUser))
@@ -77,9 +77,9 @@
 			if ($value == $ovalue)
 				continue;
 
-			sqlquery("DELETE FROM user_variable WHERE uid='$editUser' AND vid='$vid'");
+			sqlquery("DELETE FROM user_variable WHERE uid='".intval($editUser)."' AND vid='".intval($vid)."'");
 			if ($value != "inv")
-				sqlquery("INSERT INTO user_variable SET privilege='$value', uid='$editUser', vid='$vid'");
+				sqlquery("INSERT INTO user_variable SET privilege='".sqlescape($value)."', uid='".intval($editUser)."', vid='".intval($vid)."'");
 
 			/*
 			// get all
@@ -106,7 +106,7 @@
 		}
 		else
 		{
-			$result = sqlquery("INSERT INTO user SET login='$nulogin', password='".crypt($nupassword, "NL")."', gid='$nugroup', allowed_ip='$nuallowedIp'");
+			$result = sqlquery("INSERT INTO user SET login='".sqlescape($nulogin)."', password='".sqlescape(crypt($nupassword, "NL"))."', gid='".sqlescape($nugroup)."', allowed_ip='".sqlescape($nuallowedIp)."'");
 			if (mysql_affected_rows() != 1)
 			{
 				$error .= "Can't create user '$nulogin', database request failed (already used login?)<br>\n";
@@ -125,7 +125,7 @@
 	// reset user variables
 	else if ($resetVars)
 	{
-		$result = sqlquery("DELETE FROM user_variable WHERE uid='$editUser'");
+		$result = sqlquery("DELETE FROM user_variable WHERE uid='".intval($editUser)."'");
 	}
 	// import user var setup
 /*	else if ($impVarSetup && isset($editUser) && isset($impUid))
@@ -155,19 +155,19 @@
 	// update user group
 	else if (isset($updUid) && isset($chugroup))
 	{
-		sqlquery("UPDATE user SET gid='$chugroup' WHERE uid='$updUid'");
+		sqlquery("UPDATE user SET gid='".sqlescape($chugroup)."' WHERE uid='".intval($updUid)."'");
 		$editUsers=true;
 	}
 	// update user cookie
 	else if (isset($updUid) && isset($chucookie))
 	{
-		sqlquery("UPDATE user SET useCookie='$chucookie' WHERE uid='$updUid'");
+		sqlquery("UPDATE user SET useCookie='".sqlescape($chucookie)."' WHERE uid='".intval($updUid)."'");
 		$editUsers=true;
 	}
 	// update user allowed ip
 	else if (isset($allowIp) && isset($allowedIp))
 	{
-		sqlquery("UPDATE user SET allowed_ip='$allowedIp' WHERE uid='$allowIp'");
+		sqlquery("UPDATE user SET allowed_ip='".sqlescape($allowedIp)."' WHERE uid='".intval($allowIp)."'");
 		$editUsers=true;
 	}
 
@@ -175,15 +175,15 @@
 	else if (isset($rmVar) && isset($vid))
 	{
 		$editVariables = true;
-		sqlquery("DELETE FROM variable WHERE vid='$vid'");
+		sqlquery("DELETE FROM variable WHERE vid='".intval($vid)."'");
 		if (mysql_affected_rows() != 1)
 		{
 			$error .= "Couldn't remove variable $vid/$chVarName, database request failed.<br>\n";
 		}
 		else
 		{
-			sqlquery("DELETE FROM user_variable WHERE vid='$vid'");
-			sqlquery("DELETE FROM view_row WHERE vid='$vid'");
+			sqlquery("DELETE FROM user_variable WHERE vid='".intval($vid)."'");
+			sqlquery("DELETE FROM view_row WHERE vid='".intval($vid)."'");
 			$error .= "Removed effectively variable $vid/$chVarName/$chVarPath/$chVarState<br>\n";
 		}
 	}
@@ -191,7 +191,7 @@
 	else if (isset($createVid) && isset($nvname) && isset($nvpath) && isset($nvstate) && isset($chVarGroup) && isset($nvgraphupdate))
 	{
 		$editVariables = true;
-		$result = sqlquery("INSERT INTO variable SET name='$nvname', vgid='$chVarGroup', path='$nvpath', state='$nvstate', warning_bound='$nvwarning', error_bound='$nverror', alarm_order='$nvorder', graph_update='$nvgraphupdate', command=".(isset($nvvartype) ? "'variable'" : "'command'"));
+		$result = sqlquery("INSERT INTO variable SET name='".sqlescape($nvname)."', vgid='".sqlescape($chVarGroup)."', path='".sqlescape($nvpath)."', state='".sqlescape($nvstate)."', warning_bound='".sqlescape($nvwarning)."', error_bound='".sqlescape($nverror)."', alarm_order='".sqlescape($nvorder)."', graph_update='".sqlescape($nvgraphupdate)."', command=".(isset($nvvartype) ? "'variable'" : "'command'"));
 		if (mysql_affected_rows() != 1)
 		{
 			$error .= "Can't create variable '$nvname', database request failed (already used variable name?)<br>\n";
@@ -201,7 +201,7 @@
 		else
 		{
 			$error .= "Effectively created variable '$nvname'<br>\n";
-			$result = sqlquery("SELECT vid FROM variable WHERE name='$nvname' AND vgid='$chVarGroup' AND path='$nvpath' AND state='$nvstate'");
+			$result = sqlquery("SELECT vid FROM variable WHERE name='".sqlescape($nvname)."' AND vgid='".sqlescape($chVarGroup)."' AND path='".sqlescape($nvpath)."' AND state='".sqlescape($nvstate)."'");
 			if ($result && ($arr=sqlfetch($result)))
 			{
 				$vid = $arr["vid"];
@@ -221,7 +221,7 @@
 					$error .= "Set right '$priv' to users of group '$id':";
 
 					//$result = sqlquery("SELECT uid, login FROM user WHERE gid='$id'");
-					$query = "INSERT INTO user_variable VALUES ('$id', '$vid', '$priv')";
+					$query = "INSERT INTO user_variable VALUES ('".intval($id)."', '".intval($vid)."', '".sqlescape($priv)."')";
 					/*$first = true;
 					while ($result && ($arr=sqlfetch($result)))
 					{
@@ -243,41 +243,41 @@
 	else if (isset($chVar) && isset($vid) && isset($chVarName) && isset($chVarPath) && isset($chVarState) && isset($chVarGraphUpdate))
 	{
 		$editVariables = true;
-		$result = sqlquery("UPDATE variable SET name='$chVarName', vgid='$chVarGroup', path='$chVarPath', state='$chVarState', warning_bound='$chVarWarning', error_bound='$chVarError', alarm_order='$chVarOrder', graph_update='$chVarGraphUpdate', command=".(isset($chVarType) ? "'variable'" : "'command'")." WHERE vid='$vid'");
+		$result = sqlquery("UPDATE variable SET name='".sqlescape($chVarName)."', vgid='".sqlescape($chVarGroup)."', path='".sqlescape($chVarPath)."', state='".sqlescape($chVarState)."', warning_bound='".sqlescape($chVarWarning)."', error_bound='".sqlescape($chVarError)."', alarm_order='".sqlescape($chVarOrder)."', graph_update='".sqlescape($chVarGraphUpdate)."', command=".(isset($chVarType) ? "'variable'" : "'command'")." WHERE vid='".intval($vid)."'");
 		if (mysql_affected_rows() == -1)
 		{
 			$error .= "Can't update variable $vid properties, database query failed (name changed to already used?)<br>\n";
 		}
 		else if ($chVarState == "rd")
 		{
-			sqlquery("UPDATE user_variable SET privilege='rd' WHERE privilege='rw' AND vid='$vid'");
+			sqlquery("UPDATE user_variable SET privilege='rd' WHERE privilege='rw' AND vid='".intval($vid)."'");
 		}
 	}
 	// create var group
 	else if (isset($createVarGroup))
 	{
-		sqlquery("INSERT INTO variable_group SET name='$createVarGroup'");
+		sqlquery("INSERT INTO variable_group SET name='".sqlescape($createVarGroup)."'");
 	}
 	// remove var group
 	else if (isset($rmVarGroup) && $rmVarGRoup!='1')
 	{
-		sqlquery("DELETE FROM variable_group WHERE vgid='$rmVarGroup'");
-		sqlquery("UPDATE variable SET vgid='1' WHERE vgid='$rmVarGroup'");
+		sqlquery("DELETE FROM variable_group WHERE vgid='".intval($rmVarGroup)."'");
+		sqlquery("UPDATE variable SET vgid='1' WHERE vgid='".intval($rmVarGroup)."'");
 	}
 	// add shard access
 	else if (isset($nshardaccess) && isset($editUser))
 	{
-		sqlquery("INSERT INTO shard_access SET uid='$editUser', shard='$nshardaccess'");
+		sqlquery("INSERT INTO shard_access SET uid='".intval($editUser)."', shard='".sqlescape($nshardaccess)."'");
 	}
 	// remove shard access
 	else if (isset($rmShardAccess) && isset($editUser))
 	{
-		sqlquery("DELETE FROM shard_access WHERE uid='$editUser' AND shard='$rmShardAccess'");
+		sqlquery("DELETE FROM shard_access WHERE uid='".intval($editUser)."' AND shard='".sqlescape($rmShardAccess)."'");
 	}
 	// update shard access
 	else if (isset($chShardAccess) && isset($editUser))
 	{
-		sqlquery("DELETE FROM shard_access WHERE uid='$editUser'");
+		sqlquery("DELETE FROM shard_access WHERE uid='".intval($editUser)."'");
 		$query = "INSERT INTO shard_access VALUES";
 		$first = true;
 		if (isset($shardAccesses))
@@ -287,66 +287,66 @@
 				if (!$first)
 					$query .= ", ";
 				$first = false;
-				$query .= "('$editUser', '$shard')";
+				$query .= "('".intval($editUser)."', '".sqlescape($shard)."')";
 			}
 			sqlquery($query);
 		}
 	}
 	else if (isset($crViewCommand) && isset($nViewCommand) && isset($nViewCommandName) && isset($editTid))
 	{
-		sqlquery("INSERT INTO view_command SET name='$nViewCommandName', command='$nViewCommand', tid='$editTid'");
+		sqlquery("INSERT INTO view_command SET name='".sqlescape($nViewCommandName)."', command='".sqlescape($nViewCommand)."', tid='".intval($editTid)."'");
 	}
 	else if (isset($rmViewCommand) && isset($viewCommand) && isset($editTid))
 	{
-		sqlquery("DELETE FROM view_command WHERE name='$viewCommand' AND tid='$editTid'");
+		sqlquery("DELETE FROM view_command WHERE name='".sqlescape($viewCommand)."' AND tid='".intval($editTid)."'");
 	}
 
 	// create server
 	else if (isset($createServer) && isset($serverName) && isset($serverIP))
 	{
-		sqlquery("INSERT INTO server SET name='$serverName', address='$serverIP'");
+		sqlquery("INSERT INTO server SET name='".sqlescape($serverName)."', address='".sqlescape($serverIP)."'");
 	}
 	// delete server
 	else if (isset($rmServer) && isset($serverName))
 	{
-		sqlquery("DELETE FROM server WHERE name='$serverName'");
+		sqlquery("DELETE FROM server WHERE name='".sqlescape($serverName)."'");
 	}
 	// update server name
 	else if (isset($updServerName) && isset($newServerName))
 	{
-		sqlquery("UPDATE server SET name='$newServerName' WHERE name='$updServerName'");
-		sqlquery("UPDATE service SET server='$newServerName' WHERE server='$updServerName'");
+		sqlquery("UPDATE server SET name='".sqlescape($newServerName)."' WHERE name='".sqlescape($updServerName)."'");
+		sqlquery("UPDATE service SET server='".sqlescape($newServerName)."' WHERE server='".sqlescape($updServerName)."'");
 	}
 	// update server ip
 	else if (isset($updServerIP) && isset($newServerIP))
 	{
-		sqlquery("UPDATE server SET address='$newServerIP' WHERE name='$updServerIP'");
+		sqlquery("UPDATE server SET address='".sqlescape($newServerIP)."' WHERE name='".sqlescape($updServerIP)."'");
 	}
 	
 	// create service
 	else if (isset($createService) && isset($shardName) && isset($serverName) && isset($serviceName))
 	{
-		sqlquery("INSERT INTO service SET shard='$shardName', server='$serverName', name='$serviceName'");
+		sqlquery("INSERT INTO service SET shard='".sqlescape($shardName)."', server='".sqlescape($serverName)."', name='".sqlescape($serviceName)."'");
 	}
 	// delete service
 	else if (isset($rmService) && isset($serviceId))
 	{
-		sqlquery("DELETE FROM service WHERE service_id='$serviceId'");
+		sqlquery("DELETE FROM service WHERE service_id='".intval($serviceId)."'");
 	}
 	// update shard name
 	else if (isset($newShardName) && isset($serviceId))
 	{
-		sqlquery("UPDATE service SET shard='$newShardName' WHERE service_id='$serviceId'");
+		sqlquery("UPDATE service SET shard='".sqlescape($newShardName)."' WHERE service_id='".intval($serviceId)."'");
 	}
 	// update server name
 	else if (isset($newServerName) && isset($serviceId))
 	{
-		sqlquery("UPDATE service SET server='$newServerName' WHERE service_id='$serviceId'");
+		sqlquery("UPDATE service SET server='".sqlescape($newServerName)."' WHERE service_id='".intval($serviceId)."'");
 	}
 	// update service name
 	else if (isset($newServiceName) && isset($serviceId))
 	{
-		sqlquery("UPDATE service SET name='$newServiceName' WHERE service_id='$serviceId'");
+		sqlquery("UPDATE service SET name='".sqlescape($newServiceName)."' WHERE service_id='".intval($serviceId)."'");
 	}
 	
 	else if ($editServices == 'update' && isset($updateList))
@@ -390,7 +390,7 @@
 			{
 				foreach ($insertList as $l)
 				{
-					$query = "SELECT * FROM service WHERE shard='".$l['shard']."' AND server='".$l['server']."' AND name='".$l['service']."'";
+					$query = "SELECT * FROM service WHERE shard='".sqlescape($l['shard'])."' AND server='".sqlescape($l['server'])."' AND name='".sqlescape($l['service'])."'";
 					$result = sqlquery($query);
 					if ($result && sqlnumrows($result) == 0)
 					{
@@ -411,7 +411,7 @@
 				{
 					foreach ($insertList as $l)
 					{
-						$query = "INSERT INTO service SET shard='".$l['shard']."', server='".$l['server']."', name='".$l['service']."'";
+						$query = "INSERT INTO service SET shard='".sqlescape($l['shard'])."', server='".sqlescape($l['server'])."', name='".sqlescape($l['service'])."'";
 						//echo $query."<br>\n";
 						sqlquery($query);
 						++$insertSuccess;
@@ -469,7 +469,7 @@
 			{
 				foreach ($insertList as $l)
 				{
-					$query = "SELECT * FROM server WHERE name='".$l['server']."' AND address='".$l['ip']."'";
+					$query = "SELECT * FROM server WHERE name='".sqlescape($l['server'])."' AND address='".sqlescape($l['ip'])."'";
 					$result = sqlquery($query);
 					if ($result && sqlnumrows($result) == 0)
 					{
@@ -490,7 +490,7 @@
 				{
 					foreach ($insertList as $l)
 					{
-						$query = "INSERT INTO server SET name='".$l['server']."', address='".$l['ip']."'";
+						$query = "INSERT INTO server SET name='".sqlescape($l['server'])."', address='".sqlescape($l['ip'])."'";
 						//echo $query."<br>\n";
 						sqlquery($query);
 						++$insertSuccess;
@@ -532,7 +532,7 @@
 	{
 		$resURL = $_SERVER['PHP_SELF']."?editUser=$editUser&selGroup=$selGroup";
 
-		$result = sqlquery("SELECT * FROM user WHERE uid='$editUser'");
+		$result = sqlquery("SELECT * FROM user WHERE uid='".intval($editUser)."'");
 		if ($result && ($arr=mysql_fetch_array($result)))
 		{
 			$editLogin = $arr["login"];
@@ -560,14 +560,14 @@
 				$groups[$arr["vgid"]] = $arr["name"];
 			}
 
-			$result = sqlquery("SELECT vid, variable.name AS name, path, state, variable.vgid AS vgid, variable_group.name AS group_name FROM variable, variable_group WHERE variable.vgid=variable_group.vgid".($selGroup>0 ? " AND variable.vgid='$selGroup'" : "")." ORDER BY group_name, name");
+			$result = sqlquery("SELECT vid, variable.name AS name, path, state, variable.vgid AS vgid, variable_group.name AS group_name FROM variable, variable_group WHERE variable.vgid=variable_group.vgid".($selGroup>0 ? " AND variable.vgid='".intval($selGroup)."'" : "")." ORDER BY group_name, name");
 			while ($result && ($arr=mysql_fetch_array($result)))
 			{
 				$arr["priv"] = "inv";
 				$vars[] = $arr;
 			}
 			
-			$result = sqlquery("SELECT vid, privilege FROM user_variable WHERE uid='$editUser'");
+			$result = sqlquery("SELECT vid, privilege FROM user_variable WHERE uid='".intval($editUser)."'");
 			while ($result && ($arr=mysql_fetch_array($result)))
 			{
 				for ($i=0; $i<count($vars) && $vars[$i]["vid"] != $arr["vid"]; ++$i)
@@ -662,7 +662,7 @@
 				echo "<table border=1>\n";
 				echo "<tr><th>Shard accesses</th></tr>\n";
 				// get user accesses
-				$res = sqlquery("SELECT shard FROM shard_access WHERE uid='$editUser'");
+				$res = sqlquery("SELECT shard FROM shard_access WHERE uid='".intval($editUser)."'");
 				unset($shards);
 				while ($res && ($arr=sqlfetch($res)))
 					$shards[$arr["shard"]] = true;
@@ -688,7 +688,7 @@
 			echo "<tr><form method=post action='$resURL'><input type=hidden name=editUser value='$editUser'>\n";
 			echo "<td align=right><b>Import</b> variables setup from user&nbsp;</td>\n";
 			echo "<td><select name=impUid>\n";
-			$result = sqlquery("SELECT login, uid FROM user WHERE uid!='$editUser' ORDER BY login");
+			$result = sqlquery("SELECT login, uid FROM user WHERE uid!='".intval($editUser)."' ORDER BY login");
 			while ($result && ($arr=mysql_fetch_array($result)))
 			{
 				echo "<option value='".$arr["uid"]."'>".$arr["login"]."\n";
@@ -708,7 +708,7 @@
 			echo "<table><tr valign=top><td>\n";
 
 			echo "<table border=1 cellpadding=2><tr><th>Views</th></tr>\n";
-			$result = sqlquery("SELECT name, tid FROM view_table WHERE uid='$editUser' ORDER BY ordering");
+			$result = sqlquery("SELECT name, tid FROM view_table WHERE uid='".intval($editUser)."' ORDER BY ordering");
 			while ($result && ($arr=sqlfetch($result)))
 			{
 				$disp = "<a href='$resURL&editTid=".$arr["tid"]."'>".$arr["name"]."</a>";
@@ -728,7 +728,7 @@
 			{
 				echo "<b>Variables</b><br>\n";
 				echo "<table border=1 cellpadding=2><tr><th>User name</th><th>System name</th><th>Path</th><th>User filter</th></tr>\n";
-				$result = sqlquery("SELECT view_row.name AS name, variable.name AS sname, path, filter FROM view_row, variable WHERE tid='$editTid' AND view_row.vid=variable.vid ORDER BY ordering");
+				$result = sqlquery("SELECT view_row.name AS name, variable.name AS sname, path, filter FROM view_row, variable WHERE tid='".intval($editTid)."' AND view_row.vid=variable.vid ORDER BY ordering");
 				while ($result && ($arr=sqlfetch($result)))
 				{
 					echo "<tr><td>".$arr["name"]."</td><td>".$arr["sname"]."</td><td>".$arr["path"]."</td><td>".$arr["filter"]."</td></tr>\n";
@@ -737,7 +737,7 @@
 				
 				echo "<b>Commands</b><br>\n";
 				echo "<table border=1 cellpadding=2><tr><th>Name</th><th colspan=2>Service command</th></tr>\n";
-				$result = sqlquery("SELECT name, command FROM view_command WHERE tid='$editTid' ORDER BY name");
+				$result = sqlquery("SELECT name, command FROM view_command WHERE tid='".intval($editTid)."' ORDER BY name");
 				while ($result && ($arr=sqlfetch($result)))
 				{
 					echo "<tr><form method=post action='$resURL&editTid=$editTid'><td>".$arr["name"]."</td><td>".$arr["command"]."</td><td><input type=hidden name=viewCommand value='".$arr["name"]."'><input type=submit name='rmViewCommand' value='Delete'></td></form></tr>\n";
@@ -796,7 +796,7 @@
 		if (!isset($uViewGroups) ||  $uViewGroups == '')
 			$query = "SELECT uuser.login AS login, uuser.uid AS uid, uuser.useCookie AS useCookie, uuser.gid AS gid, ugroup.login AS gname, uuser.allowed_ip AS allowed_ip FROM user AS uuser, user AS ugroup WHERE uuser.gid=ugroup.uid ORDER BY uid";
 		else
-			$query = "SELECT uuser.login AS login, uuser.uid AS uid, uuser.useCookie AS useCookie, uuser.gid AS gid, ugroup.login AS gname, uuser.allowed_ip AS allowed_ip FROM user AS uuser, user AS ugroup WHERE uuser.gid=ugroup.uid AND uuser.gid='$uViewGroups' ORDER BY uid";
+			$query = "SELECT uuser.login AS login, uuser.uid AS uid, uuser.useCookie AS useCookie, uuser.gid AS gid, ugroup.login AS gname, uuser.allowed_ip AS allowed_ip FROM user AS uuser, user AS ugroup WHERE uuser.gid=ugroup.uid AND uuser.gid='".intval($uViewGroups)."' ORDER BY uid";
 		$result = sqlquery($query);
 		while ($result && ($arr=mysql_fetch_array($result)))
 		{
@@ -870,13 +870,13 @@
 						continue;
 					list($vname, $vpath, $vstate, $vgname, $vwarn, $verr, $valarm, $vgraph, $vcmd) = explode("|", $varSetup);
 					
-					$result = sqlquery("SELECT count(*) as count FROM variable WHERE name='$vname'");
+					$result = sqlquery("SELECT count(*) as count FROM variable WHERE name='".sqlescape($vname)."'");
 					if ($result && ($arr=sqlfetch($result)) && $arr["count"] == 0)
 					{
 						if (!isset($groupnames[$vgname]))
 						{
-							sqlquery("INSERT INTO variable_group SET name='$vgname'");
-							$result = sqlquery("SELECT vgid FROM variable_group WHERE name='$vgname'");
+							sqlquery("INSERT INTO variable_group SET name='".sqlescape($vgname)."'");
+							$result = sqlquery("SELECT vgid FROM variable_group WHERE name='".sqlescape($vgname)."'");
 							if ($result && ($arr=sqlfetch($result)))
 							{
 								$vgid = $arr["vgid"];
@@ -892,7 +892,7 @@
 							
 						if ($vgid != -1)
 						{
-							sqlquery("INSERT INTO variable SET name='$vname', path='$vpath', state='$vstate', vgid='$vgid', warning_bound='$vwarn', error_bound='$verr', alarm_order='$valarm', graph_update='$vgraph', command='$vcmd'");
+							sqlquery("INSERT INTO variable SET name='".sqlescape($vname)."', path='".sqlescape($vpath)."', state='".sqlescape($vstate)."', vgid='".intval($vgid)."', warning_bound='".sqlescape($vwarn)."', error_bound='".sqlescape($verr)."', alarm_order='".sqlescape($valarm)."', graph_update='".sqlescape($vgraph)."', command='".sqlescape($vcmd)."'");
 						}
 					}
 				}
@@ -913,7 +913,7 @@
 		if ($varGroup=="-1")
 			$result = sqlquery("SELECT * FROM variable ORDER BY vgid, name");
 		else
-			$result = sqlquery("SELECT * FROM variable WHERE vgid='$varGroup' ORDER BY name");
+			$result = sqlquery("SELECT * FROM variable WHERE vgid='".intval($varGroup)."' ORDER BY name");
 		echo "<table border=1>\n";
 		echo "<tr><th>Name</th><th>Vid</th><th>Group</th><th>Path</th><th>State</th><th>Warning</th><th>Error</th><th>Order</th><th>Graph</th><th>Variable</th><th colspan=2>Commands</th></tr>\n";
 
@@ -1051,10 +1051,10 @@
 
 		echo "<table cellpadding=0 cellspacing=0><tr valign=top><td>\n";
 		
-		if (!isset($serverOrder))
+		if (!isset($serverOrder) || !in_array($serverOrder, array('name', 'address')))
 			$serverOrder = "name";
 
-		if (!isset($serviceOrder))
+		if (!isset($serviceOrder) || !in_array($serviceOrder, array('shard, server, name', 'shard', 'server', 'name', 'service_id')))
 			$serviceOrder = "shard, server, name";
 			
 		unset($servers);
@@ -1079,7 +1079,7 @@
 		else if ($fshard == "*")
 			$result = sqlquery("SELECT * FROM service ORDER BY $serviceOrder");
 		else
-			$result = sqlquery("SELECT * FROM service WHERE shard LIKE '%$fshard%' ORDER BY $serviceOrder");
+			$result = sqlquery("SELECT * FROM service WHERE shard LIKE '%".sqlescape($fshard)."%' ORDER BY $serviceOrder");
 
 		echo "<table border=1><tr><form method=post action='".$_SERVER['PHP_SELF']."?editShards=true'><th>Shard ";
 		echo "<select name=fshard onChange='submit()'>";

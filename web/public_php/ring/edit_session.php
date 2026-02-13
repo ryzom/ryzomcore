@@ -24,7 +24,7 @@
 	// Find out if the character has an open editing session
 	$query = "SELECT session_id, state ";
 	$query .= " FROM sessions";
-	$query .= " WHERE (owner = '".$charId."')";
+	$query .= " WHERE (owner = '".intval($charId)."')";
 	$query .= " AND (session_type = 'st_edit')";
 	$query .= " AND (NOT (state IN ('ss_closed', 'ss_locked')))";
 	$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
@@ -39,7 +39,7 @@
 	if ($num == 0)
 	{
 		// Not found => first, create an editing session for this character, start the session and invite himself
-		$query = "SELECT char_name FROM characters WHERE char_id = $charId";
+		$query = "SELECT char_name FROM characters WHERE char_id = ".intval($charId);
 		$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
 		$num = mysqli_num_rows($result);
 		$characterName = "";
@@ -77,7 +77,7 @@
 	}
 	
 	// check that we character have a participation in the session and invite him if needed
-	$query = "SELECT count(*) FROM session_participant WHERE session_id = $sessionId AND char_id = $charId";
+	$query = "SELECT count(*) FROM session_participant WHERE session_id = ".intval($sessionId)." AND char_id = ".intval($charId);
 	$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
 	$num = mysqli_num_rows($result);
 	if ($num != 1)
