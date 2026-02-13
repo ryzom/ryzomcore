@@ -446,8 +446,9 @@ void		CVisualCollisionMesh::receiveDecal(const NLMISC::CMatrix &instanceMatrix, 
 		// if triangle not clipped, add the triangle
 		if( (triFlag & NL3D_VCM_SHADOW_NUM_CLIP_PLANE_MASK)==0 )
 		{
-			if(decalContext.Clipping)
+			if(decalContext.ClipMode == DecalClipGeometry)
 			{
+				// Geometry clipping: clip vertices against bounding box planes (saves fillrate)
 				static CPolygon clippedTri;
 				clippedTri.Vertices.resize(3);
 				clippedTri.Vertices[0] = instanceMatrix * _Vertices[triId[0]];
@@ -456,7 +457,7 @@ void		CVisualCollisionMesh::receiveDecal(const NLMISC::CMatrix &instanceMatrix, 
 				clippedTri.clip(decalContext.WorldClipPlanes);
 
 				if (clippedTri.Vertices.size() >= 3)
-				{					
+				{
 					for(uint k=0; k<clippedTri.Vertices.size() - 2; ++k)
 					{
 						decalContext.DestTris->push_back( clippedTri.Vertices[0]     );
@@ -464,15 +465,14 @@ void		CVisualCollisionMesh::receiveDecal(const NLMISC::CMatrix &instanceMatrix, 
 						decalContext.DestTris->push_back( clippedTri.Vertices[k + 2] );
 					}
 				}
-
 			}
 			else
 			{
+				// No clipping or Mask clipping: use faces as-is (mask handles edges via texture stage)
 				decalContext.DestTris->push_back( instanceMatrix * _Vertices[triId[0]] );
 				decalContext.DestTris->push_back( instanceMatrix * _Vertices[triId[1]] );
 				decalContext.DestTris->push_back( instanceMatrix * _Vertices[triId[2]] );
 			}
-
 		}
 
 	}

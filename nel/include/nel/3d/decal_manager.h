@@ -1,7 +1,8 @@
 /** \file decal_manager.h
- * 
+ * Batched decal rendering manager for NeL 3D.
  *
- * $Id$
+ * Collects decals sorted by material and renders them in batched draw calls
+ * using a fixed-size AGP volatile vertex buffer. See PDF §4.5.4 and §.6.3.
  */
 
 /* Copyright, 2007 Nevrax Ltd.
@@ -26,23 +27,12 @@
 #ifndef NL_DECAL_MANAGER_H
 #define NL_DECAL_MANAGER_H
 
-#include <nel/misc/string_mapper.h>
-
 #include "nel/3d/transform.h"
 
 #include "nel/3d/decal.h"
 #include "nel/3d/material.h"
 #include "nel/3d/vertex_buffer.h"
-#include "nel/3d/index_buffer.h"
 #include "nel/3d/driver.h"
-
-
-
-
-namespace NLMISC
-{
-	class CPlane;
-}
 
 
 namespace NL3D
@@ -51,11 +41,20 @@ namespace NL3D
 class CScene;
 
 
+/// Maximum number of vertices in the batching array buffer (see PDF §4.5.4).
+/// When exceeded, the buffer is flushed and refilled.
+const uint32 NL3D_DECAL_VB_MAX_VERTICES = 4096 * 3;
 
 
 // ***************************************************************************
 /**
- * Decal Manager contains decal and computes batch rendering
+ * Decal Manager: collects decals per material and renders them in batched draw calls.
+ *
+ * Each frame, CDecal::traverseRender() registers decals here. At flush time,
+ * the manager iterates per-material groups, fills a fixed-size AGP volatile
+ * vertex buffer (position + UV), and issues renderRawTriangles() calls.
+ * If the buffer overflows mid-decal, it is flushed and refilled (see PDF §.6.3).
+ *
  * \author Christopher Tarento
  * \author Nevrax France
  * \date 2007
@@ -64,58 +63,55 @@ class CDecalManager
 {
 
 public:
-	/** Constructor
-	  */
 	CDecalManager();
-	
-	/** Destructor
-	  */
 	~CDecalManager();
-	
-	/** Render all decals
-	  * \param sc Owner scene
+
+	/** Render all registered decals in batched draw calls.
+	  * Iterates per-material, fills the VB, and renders. See PDF §.6.3.
+	  * \param sc Owner scene (for driver access)
 	  */
 	void flush(CScene *sc);
-	
-	/** Add a decal to the manager
-	  * \param decal Decal to add to the manager
-	  * \param texName Name of the decal's texture
-	  */
-	void addDecal(CDecal *decal, const std::string &texName);
 
-	/** Clear all the decals of the manager
-	  *
+	/** Register a decal for rendering this frame.
+	  * \param decal The decal to add
+	  * \param materialId Material ID for batching (decals with same ID are grouped)
 	  */
+	void addDecal(CDecal *decal, uint32 materialId);
+
+	/** Register a material for use by decals.
+	  * \param mat The material to register
+	  * \return The material ID to use when creating decals
+	  */
+	uint32 registerMaterial(const CMaterial &mat);
+
+	/// Clear all registered decals (called at start of each frame).
 	void clearAllDecals();
 
-	/** Indicates if we must recompute decals position
-	  * \param b true or false
+	/** Set whether vertex programs should be used.
+	  * \param b true to use vertex programs
 	  */
-	void setTouched(const bool b){_Touched = b;}
-
-	/** Indicates if we must use vertex program for rendering
-	  * \param b true or false
-	  */
-	void setVertexProgram(const bool b){_UseVertexProgram = b;}
+	void setVertexProgram(const bool b) { _UseVertexProgram = b; }
 
 private:
-	///tmp
-	void computeBatch();
-	void renderStatic();
-	void renderDynamic();
+	/// A registered material with its ID
+	struct CRegisteredMaterial
+	{
+		CMaterial	Mat;
+		uint32		Id;
+	};
 
-private:
-	typedef CHashMap<std::string, std::vector<CDecal*> > TDecalMap;
+	/// Decals grouped by material ID
+	typedef std::map<uint32, std::vector<CDecal*> > TDecalMap;
 	TDecalMap								_Decals;
 
+	/// Registered materials by ID
+	std::vector<CRegisteredMaterial>		_Materials;
+	uint32									_NextMaterialId;
+
 	bool									_UseVertexProgram;
-	
-	std::vector<CDecal*>					_StaticDecals;
-	std::vector<CDecal*>					_DynamicDecals;
-	CVertexBuffer							_VBRaw;//static, sorted by material
-	CVertexBuffer							_VB;//dynamic
-	uint									_UsedVertices;
-	bool									_Touched;///someone has moved ?
+
+	/// Fixed-size AGP volatile vertex buffer (Position + TexCoord0)
+	CVertexBuffer							_VB;
 };
 
 

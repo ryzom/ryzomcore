@@ -1,10 +1,8 @@
 /** \file u_decal.h
- * TODO: File description
- *
- * $Id$
+ * User interface for projected texture decals.
  */
 
-/* Copyright, 2001 Nevrax Ltd.
+/* Copyright, 2007 Nevrax Ltd.
  *
  * This file is part of NEVRAX NEL.
  * NEVRAX NEL is free software; you can redistribute it and/or modify
@@ -27,41 +25,45 @@
 #define NL_U_DECAL_H
 
 #include "nel/misc/types_nl.h"
-#include "nel/3d/viewport.h"
-#include "nel/3d/scissor.h"
-#include "nel/3d/frustum.h"
-#include "nel/misc/geom_ext.h"
-#include "nel/misc/matrix.h"
-#include "nel/misc/rgba.h"
-#include "nel/misc/rect.h"
-#include "nel/misc/bitmap.h"
-#include "nel/misc/event_server.h"
-#include "nel/misc/event_listener.h"
-#include "nel/misc/hierarchical_timer.h"
-#include "nel/3d/primitive_profile.h"
+#include "nel/misc/uv.h"
 #include "nel/3d/u_transform.h"
-
 
 
 namespace NL3D
 {
 
+class CDecal;
+
 class UDecal : public UTransform
 {
-public:	
+public:
 
 	/// Constructors
 	UDecal() { _Object = NULL; }
-	UDecal(class CDecal *object) { _Object = (ITransformable*)object; };
+	UDecal(class CDecal *object) { _Object = (ITransformable*)object; }
 	/// Attach an object to this proxy
 	void			attach(class CDecal *object) { _Object = (ITransformable*)object; }
 	/// Detach the object
 	void			detach() { _Object = NULL; }
 	/// Return true if the proxy is empty() (not attached)
-	bool			empty() const {return _Object==NULL;}
+	bool			empty() const { return _Object == NULL; }
 	/// For advanced usage, get the internal object ptr
-	class CDecal	*getObjectPtr() const {return (CDecal*)_Object;}
+	class CDecal	*getObjectPtr() const { return (CDecal*)_Object; }
 
+	/// Set the decal texture from a filename
+	void			setTexture(const std::string &filename);
+
+	/// Set the material ID for batching (from CDecalManager::registerMaterial)
+	void			setMaterialId(uint32 id);
+
+	/// Set the UV sub-region within a texture atlas
+	void			setUVCoord(const NLMISC::CUV &uv1, const NLMISC::CUV &uv2);
+
+	/// Set the clipping mode (0=None, 1=Mask, 2=Geometry)
+	void			setClippingMode(uint mode);
+
+	/// Mark this decal as static (only recomputed once)
+	void			setStatic(bool isStatic);
 };
 
 

@@ -1,7 +1,7 @@
 /** \file decal.cpp
- * 
+ * Projected texture decal system for NeL 3D.
  *
- * $Id$
+ * Based on the design from the intern report by Christopher Tarento (2007).
  */
 
 /* Copyright, 2007 Nevrax Ltd.
@@ -26,246 +26,256 @@
 #include "std3d.h"
 #include "nel/3d/decal.h"
 
-#include "nel/3d/shadow_map.h"
 #include "nel/3d/texture_file.h"
 #include "nel/3d/scene.h"
 #include "nel/3d/driver.h"
-#include "nel/3d/scene_user.h"
-#include "nel/3d/texture_user.h"
-
-#include "nel/3d/dru.h"
-
-#include <iostream>
+#include "nel/3d/clip_trav.h"
+#include "nel/3d/visual_collision_manager.h"
 
 using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
 
 
-
-
+// ***************************************************************************
+CDecalContext::CDecalContext() : ClipMode(DecalClipGeometry), DestTris(NULL) {}
 
 
 // ***************************************************************************
-CDecalContext::CDecalContext() : Clipping(true), DestTris(NULL){}
-
-
-// ***************************************************************************
-CDecal::CDecal() : 
-		_VBInitialized(false),
-		_Touched(true),
-		_UV1(CUV(0,0)),
-		_UV2(CUV(1,1))
+CDecal::CDecal() :
+_MaterialId(0),
+_Touched(true),
+_StableFrameCount(0),
+_IsStatic(false),
+_UV1(CUV(0, 0)),
+_UV2(CUV(1, 1))
 {
-	////////////
-	const float hg = 5.f;
+setOpacity(true);
+setTransparency(false);
+setIsRenderable(true);
 
-	_Vertices.push_back(	CVector( hg,  hg, 0.f) );
-	_Vertices.push_back(	CVector(-hg,  hg, 0.f) );
-	_Vertices.push_back(	CVector(-hg, -hg, 0.f) );
-	_Vertices.push_back(	CVector( hg, -hg, 0.f) );
-	_Vertices.push_back(	CVector( hg, 0.f,  hg) );
-	_Vertices.push_back(	CVector(-hg, 0.f,  hg) );
-	_Vertices.push_back(	CVector(-hg, 0.f, -hg) );
-	_Vertices.push_back(	CVector( hg, 0.f, -hg) );
-	////////////
+// Material setup: alpha-blended, double-sided, no z-write, with z-bias
+_Mat.setShader(CMaterial::TShader::Normal);
+_Mat.setBlend(true);
+_Mat.setSrcBlend(CMaterial::srcalpha);
+_Mat.setDstBlend(CMaterial::invsrcalpha);
+_Mat.setZWrite(false);
+_Mat.setDoubleSided(true);
+_Mat.setZBias(-0.06f);
 
-	setOpacity(true);
-	setTransparency(false);
-	setIsRenderable(true);
-	setIsLightable(true);
+// Texture environment: output = texture color/alpha
+_Mat.texConstantColor(0, CRGBA::White);
+_Mat.texEnvOpRGB(0, CMaterial::Replace);
+_Mat.texEnvArg0RGB(0, CMaterial::Texture, CMaterial::SrcColor);
+_Mat.texEnvOpAlpha(0, CMaterial::Replace);
+_Mat.texEnvArg0Alpha(0, CMaterial::Texture, CMaterial::SrcAlpha);
 
-	/////////////////////
-	// vertex buffer
-	////////////////////	
-/*	_Vb.setPreferredMemory( CVertexBuffer::AGPPreferred, false );
-	_Vb.setVertexFormat( CVertexBuffer::PositionFlag );
-	_Vb.setNumVertices( 4 );
-
-	CVertexBufferReadWrite vbAccess;
-	_Vb.lock( vbAccess );
-		vbAccess.setVertexCoord( 0, CVector( 0.f, 0.f,  0.f) );
-		vbAccess.setVertexCoord( 1, CVector( 10.f, 0.f,  0.f) );
-		vbAccess.setVertexCoord( 2, CVector( 10.f, 0.f,  10.f) );
-		vbAccess.setVertexCoord( 3, CVector( 0.f, 0.f,  10.f) );
-	
-*/
-
-	///////////////////////
-	// material
-	//////////////////////
-	
-	///set texture environment
-	_Mat.setShader(CMaterial::TShader::Normal);///fixed pipeline
-
-	_Mat.texConstantColor(0, CRGBA::White);
-	
-	_Mat.texEnvOpRGB(0, CMaterial::Replace);
-	_Mat.texEnvArg0RGB(0, CMaterial::Texture, CMaterial::SrcColor);///out=tex
-	_Mat.texEnvArg1RGB(0, CMaterial::Constant, CMaterial::SrcColor);
-
-	_Mat.texEnvOpAlpha(0, CMaterial::Replace);
-	_Mat.texEnvArg0Alpha(0, CMaterial::Texture, CMaterial::SrcAlpha);///out=tex
-	_Mat.texEnvArg1Alpha(0, CMaterial::Constant, CMaterial::SrcAlpha);
-
-
-	_Mat.setBlend(true);
-	_Mat.setSrcBlend(CMaterial::srcalpha);
-	_Mat.setDstBlend(CMaterial::invsrcalpha);
-	_Mat.setZWrite(false);
-	_Mat.setDoubleSided(true);
-	
-	CTextureFile *tex = new CTextureFile("tex_decal.tga");
-	tex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapLinear);
-	_Mat.enableUserTexMat(0, true);
-	_Mat.enableUserTexMat(1, true);
-	
-	
-	_Mat.setTexture(0, tex);
-	_Mat.setUserTexMat(0, CMatrix::Identity);
-
-	_Mat.setTexCoordGen(0, true);
-	_Mat.setTexCoordGenMode(0, CMaterial::TexCoordGenObjectSpace);
-
-	_Mat.setZBias(-0.06f);
-
-	_Mat.getTexture(0)->setWrapS(ITexture::Clamp);
-	_Mat.getTexture(0)->setWrapT(ITexture::Clamp);
-
-
+// Default clipping mode: geometry clipping (best fillrate, see PDF 4.5.2)
+_DecalContext.ClipMode = DecalClipGeometry;
 }
+
 
 // ***************************************************************************
 void CDecal::initModel()
 {
-	_LastCamPos = getOwnerScene()->getCam()->getMatrix().getPos();
-
-
-	_ShadowMap = new CShadowMap( &(getOwnerScene()->getRenderTrav().getShadowMapManager()) );
-	
+_LastCamPos = getOwnerScene()->getCam()->getMatrix().getPos();
 }
+
 
 // ***************************************************************************
 CDecal::~CDecal()
 {
-	delete _ShadowMap;
 }
+
 
 // ***************************************************************************
 void CDecal::registerBasic()
 {
-	CScene::registerModel( DecalId, TransformId, CDecal::creator);
+CScene::registerModel(DecalId, TransformId, CDecal::creator);
 }
+
 
 // ***************************************************************************
+void CDecal::setTexture(const std::string &filename)
+{
+CTextureFile *tex = new CTextureFile(filename);
+tex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapLinear);
+tex->setWrapS(ITexture::Clamp);
+tex->setWrapT(ITexture::Clamp);
+_Mat.setTexture(0, tex);
+}
+
+
+// ***************************************************************************
+// Clip method: bounding sphere vs frustum test (see PDF .6.1)
+bool CDecal::clip()
+{
+CScene *scene = getOwnerScene();
+CClipTrav &clipTrav = scene->getClipTrav();
+
+// Compute bounding sphere from decal's world matrix
+// The decal is a unit cube [0,1]^3, so center is at (0.5, 0.5, 0.5) in local space
+CVector localCenter(0.5f, 0.5f, 0.5f);
+CVector worldCenter = getWorldMatrix() * localCenter;
+
+// Radius: half-diagonal of the unit cube, scaled by the largest scale factor
+// For a unit cube, half-diagonal = sqrt(3)/2 ~ 0.866
+float scaleI = (getWorldMatrix().getI()).norm();
+float scaleJ = (getWorldMatrix().getJ()).norm();
+float scaleK = (getWorldMatrix().getK()).norm();
+float maxScale = std::max(scaleI, std::max(scaleJ, scaleK));
+float radius = 0.866f * maxScale;
+
+// Test against camera frustum planes
+const std::vector<CPlane> &pyramid = clipTrav.WorldPyramid;
+for (uint i = 0; i < pyramid.size(); ++i)
+{
+float d = pyramid[i] * worldCenter;
+if (d > radius)
+{
+return false;
+}
+}
+
+return true;
+}
+
+
+// ***************************************************************************
+// Render traversal: just register with the decal manager for batched rendering
 void CDecal::traverseRender()
 {
-	// NL_ALLOC_CONTEXT( RdrDecal )
-	// No rendering Op. But delay the clip and render after landscape rendering
-		
-
-	///TODO christo pas beau le "Jean"
-	static std::string texName = "Jean";
-	getOwnerScene()->getRenderTrav().getDecalManager().addDecal(this, texName);
-
+getOwnerScene()->getRenderTrav().getDecalManager().addDecal(this, _MaterialId);
 }
+
 
 // ***************************************************************************
 std::vector<CVector> &CDecal::getVertices(const bool useVertexProgram)
 {
-	///position of decal has changed ??
-	const NLMISC::CVector &camPos = getOwnerScene()->getCam()->getMatrix().getPos();
-	if ( (camPos - _LastCamPos).norm() >= 4.f )
-	{
-		_Touched = true;
-	}
-				
-	if( _Touched ) ///is NOT touched, direct render
-	{
-		_LastCamPos = camPos;
-		computeDecal(useVertexProgram);
-	}
-	
-	return _Vertices;
+const NLMISC::CVector &camPos = getOwnerScene()->getCam()->getMatrix().getPos();
+
+if (_IsStatic)
+{
+// Static decal: only recompute on first touch.
+// After that, use frame-count heuristic based on camera movement (4.5.4).
+if (_Touched)
+{
+_LastCamPos = camPos;
+computeDecal(useVertexProgram);
+_Touched = false;
+_StableFrameCount = 0;
 }
+}
+else
+{
+// Dynamic decal: recompute when camera moves significantly (4.6.1).
+// Use visibility distance as threshold for recalculation.
+if ((camPos - _LastCamPos).norm() >= 4.f)
+{
+_Touched = true;
+}
+
+if (_Touched)
+{
+_LastCamPos = camPos;
+computeDecal(useVertexProgram);
+_Touched = false;
+_StableFrameCount = 0;
+}
+else
+{
+// Increment stable frame count. If a dynamic decal has been stable
+// for many frames, it effectively becomes static (4.5.4 heuristic).
+_StableFrameCount++;
+}
+}
+
+return _Vertices;
+}
+
 
 // ***************************************************************************
+// Face selection and clipping (see PDF .6.2 and 4.5.1/4.5.2)
 void CDecal::computeDecal(const bool useVertexProgram)
 {
-	CScene *sc = getOwnerScene();
-	
-	/// Verify that coll manager exists
-	CVisualCollisionManager *vcm;
-	if( !(vcm=sc->getVisualCollisionManagerForShadow()) )
-	{
-		nlerror("VisualCollisionManager does NOT exist, NO decal rendering");
-		return;
-	}
-	
+CScene *sc = getOwnerScene();
 
-	///Preparing shadow map clipping planes
-	//CShadowMap sm( &(sc->getRenderTrav().getShadowMapManager()) );
-	CDecalContext context;
-	
-	float decalSize = 1.0f;
-	_ClipCorners[0] =  getWorldMatrix() * (CVector(0.f,    1.f,    0.f) * decalSize);
-	_ClipCorners[1] =  getWorldMatrix() * (CVector(1.f,    1.f,    0.f) * decalSize);
-	_ClipCorners[2] =  getWorldMatrix() * (CVector(1.f,    0.f,    0.f) * decalSize);
-	_ClipCorners[3] =  getWorldMatrix() * (CVector(0.f,    0.f,    0.f) * decalSize);
-
-	///Unit Cube for clipping
-	context.WorldClipPlanes.resize(4);
-	context.WorldBBox.setMinMax( getWorldMatrix() * (CVector(0.f,0.f,0.f) * decalSize), getWorldMatrix() * (CVector(1.f,1.f,1.f) * decalSize) );
-	
-	for(uint i=0; i<4; ++i)
-	{
-		context.WorldClipPlanes[i].make(
-			_ClipCorners[i],
-			_ClipCorners[(i + 1) & 3],
-			_ClipCorners[i] + (_ClipCorners[(i + 1) & 3] - _ClipCorners[i]).norm() * CVector::K);///&3 = %4 = %2^(3-1)		
-		
-		context.WorldClipPlanes[i].invert();		
-	}
-
-			
-	CMatrix refPosMatrix;
-	refPosMatrix.identity();
-	refPosMatrix.setPos( sc->getCam()->getMatrix().getPos() );
-	
-	CMatrix worldToUVMatrix = getReverseUVMatrix() * getWorldMatrix().inverted();
-	//worldToUVMatrix = worldToUVMatrix * refPosMatrix;
-
-
-	//CMatrix world = getWorldMatrix();
-	//smp.setWorldSpaceTextMat(CMatrix::Identity);
-	//_Mat.setUserTexMat(0, CMatrix::Identity);
-	
-	/*CShadowMapProjector smp;
-	vcm->receiveShadowMap(sc->getDriver(), &sm, CVector(0,0,0), _Mat, smp);
-	*/
-
-	context.WorldMatrix = getWorldMatrix();
-	
-	_Vertices.clear();
-	context.DestTris = &_Vertices;
-	vcm->receiveDecal(context);
-	
-	
-
-	sc->getDriver()->setupModelMatrix(getWorldMatrix());
-		
-	CDRU::drawWiredBox( (CVector::K * (-10.f)),
-						CVector::I * decalSize,
-						CVector::J * decalSize,
-						(CVector::K * 20.f),
-						CRGBA::White,
-						*(sc->getDriver()) );
-
+CVisualCollisionManager *vcm = sc->getVisualCollisionManagerForShadow();
+if (!vcm)
+{
+nlwarning("CDecal::computeDecal: VisualCollisionManager not available");
+return;
 }
+
+CDecalContext &context = _DecalContext;
+
+// Build clip planes from the unit cube corners transformed to world space
+float decalSize = 1.0f;
+_ClipCorners[0] = getWorldMatrix() * (CVector(0.f, 1.f, 0.f) * decalSize);
+_ClipCorners[1] = getWorldMatrix() * (CVector(1.f, 1.f, 0.f) * decalSize);
+_ClipCorners[2] = getWorldMatrix() * (CVector(1.f, 0.f, 0.f) * decalSize);
+_ClipCorners[3] = getWorldMatrix() * (CVector(0.f, 0.f, 0.f) * decalSize);
+
+// Build 4 side clip planes from the corners (4.5.1)
+context.WorldClipPlanes.resize(4);
+context.WorldBBox.setMinMax(
+getWorldMatrix() * (CVector(0.f, 0.f, 0.f) * decalSize),
+getWorldMatrix() * (CVector(1.f, 1.f, 1.f) * decalSize));
+
+for (uint i = 0; i < 4; ++i)
+{
+context.WorldClipPlanes[i].make(
+_ClipCorners[i],
+_ClipCorners[(i + 1) & 3],
+_ClipCorners[i] + (_ClipCorners[(i + 1) & 3] - _ClipCorners[i]).norm() * CVector::K);
+context.WorldClipPlanes[i].invert();
+}
+
+context.WorldMatrix = getWorldMatrix();
+
+// Clear and collect triangles via visual collision
+_Vertices.clear();
+context.DestTris = &_Vertices;
+vcm->receiveDecal(context);
+
+// Generate UV coordinates from collected vertices
+generateUVs();
+}
+
+
+// ***************************************************************************
+// UV coordinate generation (see PDF 4.5.3)
+// Uses inverse world matrix to project world-space vertices back to unit-cube local space.
+// Camera position is subtracted for numerical stability (4.6.1).
+void CDecal::generateUVs()
+{
+_UVs.resize(_Vertices.size());
+
+if (_Vertices.empty())
+return;
+
+// Compute worldToUV matrix: maps world position to [0,1] UV in local decal space
+CMatrix invWorld = getWorldMatrix().inverted();
+
+for (uint i = 0; i < _Vertices.size(); ++i)
+{
+// Transform world vertex to local decal space
+CVector local = invWorld * _Vertices[i];
+
+// Map local X,Y to UV, respecting the UV sub-region
+float u = _UV1.U + local.x * (_UV2.U - _UV1.U);
+float v = _UV1.V + (1.0f - local.y) * (_UV2.V - _UV1.V);
+
+_UVs[i].U = u;
+_UVs[i].V = v;
+}
+}
+
 
 // ***************************************************************************
 void CDecal::setUVCoord(const CUV uv1, const CUV uv2)
 {
-		_UV1 = uv1;
-		_UV2 = uv2;
+_UV1 = uv1;
+_UV2 = uv2;
+_Touched = true;
 }

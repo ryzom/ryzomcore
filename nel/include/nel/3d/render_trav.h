@@ -256,8 +256,6 @@ public:
 
 	// add a landscape. Special for CLandscapeModel::traverseRender();
 	void			addRenderLandscape(CLandscapeModel *model);
-	// add a decal. Special for CDecal::traverseRender();
-	void			addRenderDecal(CDecal *decal);
 
 
 	/// \name Temp Debug
