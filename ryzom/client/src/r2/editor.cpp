@@ -2988,7 +2988,7 @@ void CEditor::initDecals()
 
 
 // *********************************************************************************************************
-void CEditor::showPrimRender(CPrimRender &dest, const NLMISC::CAABBox &localBox, const NLMISC::CMatrix &worldMat, const CDecalAnim &refDecalAnim)
+void CEditor::showPrimRender(CPrimRender &dest, const NLMISC::CAABBox &localBox, const NLMISC::CMatrix &worldMat, const CLegacyDecalAnim &refDecalAnim)
 {
 	//H_AUTO(R2_CEditor_showPrimRender)
 	CHECK_EDITOR
@@ -3055,7 +3055,7 @@ void CEditor::showHighlightDecal(const NLMISC::CVector &pos, float scale)
 }
 
 // *********************************************************************************************************
-void CEditor::showDecal(const NLMISC::CVector2f &pos, float scale, CDecal &decal, const CDecalAnim &decalAnim)
+void CEditor::showDecal(const NLMISC::CVector2f &pos, float scale, CLegacyDecal &decal, const CLegacyDecalAnim &decalAnim)
 {
 	//H_AUTO(R2_CEditor_showDecal)
 	CHECK_EDITOR
@@ -4713,7 +4713,7 @@ void CEditor::updateBeforeRender()
 }
 
 // *********************************************************************************************************
-void CEditor::updateDecalBlendRegion(CDecal &decal, const NLMISC::CVector &pos)
+void CEditor::updateDecalBlendRegion(CLegacyDecal &decal, const NLMISC::CVector &pos)
 {
 	//H_AUTO(R2_CEditor_updateDecalBlendRegion)
 	float topBlendDist = CV_DecalTopBlendStartDist.get();

@@ -35,6 +35,7 @@ class IDriver;
 class CShadowMap;
 class CShadowMapProjector;
 class CMaterial;
+class CDecalContext;
 
 
 // ***************************************************************************
@@ -150,6 +151,10 @@ public:
 	 */
 	void						removeMeshCollision(uint id);
 
+	/** Use the MeshInstance Collision to render Decal on them 
+	* \param cdc Decal Context which contains useful informations for computing decals 
+	*/
+	void						receiveDecal(CDecalContext &cdc);
 
 	/** Use the MeshInstance Collision to rended a ShadowMap on them.
 	 *	NB: only the minimum faces touched by the shadowmap are rendered
@@ -195,6 +200,9 @@ private:
 
 		/// receive a shadow map
 		void		receiveShadowMap(const CVisualCollisionMesh::CShadowContext &shadowContext);
+
+		/// receive a decal
+		void		receiveDecal(CDecalContext &cdc);
 	};
 
 	// The map of Meshes Instance

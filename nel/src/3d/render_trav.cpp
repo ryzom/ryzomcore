@@ -226,6 +226,10 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		// Clear any landscape
 		clearRenderLandscapeList();
 
+		// Clear any decal
+		_DecalManager.clearAllDecals();
+
+
 		// Start LodCharacter Manager render.
 		CLodCharacterManager	*clodMngr= Scene->getLodCharacterManager();
 		if(clodMngr)
@@ -302,6 +306,10 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		{
 			Scene->getLandscapePolyDrawingCallback()->endPolyDrawing();
 		}
+
+		// Render the decals
+		_DecalManager.flush(Scene);
+
 
 		// Profile this frame?
 		if(Scene->isNextRenderProfile())

@@ -33,6 +33,7 @@ class IDriver;
 class CShadowMap;
 class CShadowMapProjector;
 class CMaterial;
+class CDecalContext;
 
 
 // ***************************************************************************
@@ -60,10 +61,8 @@ public:
 
 	public:
 		CShadowContext(CMaterial &mat, CIndexBuffer &ib, CShadowMapProjector &smp) :
-		  ShadowMapProjector(smp), ShadowMaterial(mat), IndexBuffer(ib)
+			Driver(NULL), ShadowMap(NULL), ShadowMapProjector(smp), ShadowMaterial(mat), IndexBuffer(ib)
 		{
-			Driver= NULL;
-			ShadowMap= NULL;
 		}
 	};
 
@@ -87,6 +86,9 @@ public:
 
 	/// compute the world bbox of an instance
 	NLMISC::CAABBox	computeWorldBBox(const NLMISC::CMatrix &instanceMatrix);
+
+	/// receive a decal. compute the triangles that intersect the decal
+	void		receiveDecal(const NLMISC::CMatrix &instanceMatrix, CDecalContext &decalContext);
 
 	/// receive a shadowMap. render in driver the triangles that intersect the shadow
 	void		receiveShadowMap(const NLMISC::CMatrix &instanceMatrix, const CShadowContext &shadowContext);

@@ -90,7 +90,7 @@ private:
 	bool				 _Extending;
 	bool				 _Commited;
 	bool				 _ForceShowPrims;
-	CDecal				 _TestDecal;
+	CLegacyDecal				 _TestDecal;
 private:
 	void commit();
 	void setPrimLook(bool closed, bool lastSegmentValid, bool valid);

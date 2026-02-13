@@ -23,8 +23,10 @@
 #include "nel/3d/u_instance.h"
 #include "nel/3d/u_camera.h"
 #include "nel/3d/u_skeleton.h"
+#include "nel/3d/u_decal.h"
 #include "nel/3d/scene_user.h"
 #include "nel/3d/skeleton_model.h"
+#include "nel/3d/decal.h"
 #include "nel/3d/coarse_mesh_manager.h"
 #include "nel/3d/point_light_model.h"
 #include "nel/3d/lod_character_manager.h"
@@ -48,6 +50,7 @@ H_AUTO_DECL( NL3D_UI_Scene )
 H_AUTO_DECL( NL3D_Misc_Scene_CreateDel_Element )
 H_AUTO_DECL( NL3D_CreateOrLoad_Instance )
 H_AUTO_DECL( NL3D_CreateOrLoad_Skeleton )
+H_AUTO_DECL( NL3D_CreateOrLoad_Decal )
 H_AUTO_DECL( NL3D_Load_CLodOrCoarseMesh )
 H_AUTO_DECL( NL3D_Load_AsyncIG )
 
@@ -55,6 +58,7 @@ H_AUTO_DECL( NL3D_Load_AsyncIG )
 #define	NL3D_HAUTO_ELT_SCENE					H_AUTO_USE( NL3D_Misc_Scene_CreateDel_Element )
 #define	NL3D_HAUTO_CREATE_INSTANCE				H_AUTO_USE( NL3D_CreateOrLoad_Instance )
 #define	NL3D_HAUTO_CREATE_SKELETON				H_AUTO_USE( NL3D_CreateOrLoad_Skeleton )
+#define	NL3D_HAUTO_CREATE_DECAL					H_AUTO_USE( NL3D_CreateOrLoad_Decal )
 #define	NL3D_HAUTO_LOAD_LOD						H_AUTO_USE( NL3D_Load_CLodOrCoarseMesh )
 #define	NL3D_HAUTO_ASYNC_IG						H_AUTO_USE( NL3D_Load_AsyncIG )
 
@@ -329,6 +333,35 @@ void			CSceneUser::deletePointLight(UPointLight &light)
 	// The component is auto added/deleted to _Scene in ctor/dtor.
 	_Scene.deleteModel (light.getObjectPtr());
 	light.detach ();
+}
+
+// ***************************************************************************
+
+UDecal		CSceneUser::createDecal()
+{
+	NL3D_HAUTO_CREATE_DECAL;
+
+	CTransform *t = _Scene.createModel(DecalId);
+	if (t)
+	{
+		CDecal	*decal= safe_cast<CDecal*> (t);
+		return UDecal(decal);
+	}
+	else
+	{
+		return UDecal();
+	}
+}
+
+// ***************************************************************************
+
+void			CSceneUser::deleteDecal(UDecal &decal)
+{
+	NL3D_HAUTO_ELT_SCENE;
+
+	// The component is auto added/deleted to _Scene in ctor/dtor.
+	_Scene.deleteModel(decal.getObjectPtr());
+	decal.detach ();
 }
 
 
