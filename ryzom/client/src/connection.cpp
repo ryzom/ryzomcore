@@ -38,6 +38,7 @@
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/stereo_display.h"
 #include "nel/3d/bloom_effect.h"
+#include "nel/3d/fxaa.h"
 // Game Share
 //#include "game_share/gd_time.h"		// \todo GUIGUI : TO DELETE/CHANGE
 #include "game_share/gender.h"
