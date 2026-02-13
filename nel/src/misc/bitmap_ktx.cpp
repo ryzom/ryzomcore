@@ -162,6 +162,7 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 
 	bool compressed = (glType == 0 && glFormat == 0);
 	uint8 imageDepth = 0;
+	uint32 srcBpp = 0; // source bytes per pixel for uncompressed formats
 
 	if (compressed)
 	{
@@ -199,11 +200,13 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 		case GL_RGBA_:
 			PixelFormat = RGBA;
 			imageDepth = 32;
+			srcBpp = 4;
 			break;
 		case GL_RGB_:
 			// We will expand RGB to RGBA
 			PixelFormat = RGBA;
 			imageDepth = 24;
+			srcBpp = 3;
 			break;
 		case GL_LUMINANCE_:
 			if (_LoadGrayscaleAsAlpha)
@@ -216,14 +219,17 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 				PixelFormat = Luminance;
 				imageDepth = 8;
 			}
+			srcBpp = 1;
 			break;
 		case GL_ALPHA_:
 			PixelFormat = Alpha;
 			imageDepth = 8;
+			srcBpp = 1;
 			break;
 		case GL_LUMINANCE_ALPHA_:
 			PixelFormat = AlphaLuminance;
 			imageDepth = 16;
+			srcBpp = 2;
 			break;
 		default:
 			nlwarning("KTX: unsupported uncompressed glBaseInternalFormat 0x%x", glBaseInternalFormat);
@@ -295,17 +301,6 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 		else
 		{
 			// For uncompressed data, read and convert to our internal format
-			uint32 srcBpp = 0;
-			switch (glBaseInternalFormat)
-			{
-			case GL_RGBA_:           srcBpp = 4; break;
-			case GL_RGB_:            srcBpp = 3; break;
-			case GL_LUMINANCE_ALPHA_: srcBpp = 2; break;
-			case GL_LUMINANCE_:      srcBpp = 1; break;
-			case GL_ALPHA_:          srcBpp = 1; break;
-			default:                 srcBpp = 4; break;
-			}
-
 			uint32 srcSize = w * h * srcBpp;
 			if (imageSize < srcSize)
 			{
