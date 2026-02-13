@@ -5760,10 +5760,13 @@ NLMISC_COMMAND(dumpLightmapInfo, "Dump lightmap info for a shape to help diagnos
 
 	// Dump scene light group colors
 	nlinfo("=== Scene Light Group Colors ===");
-	for (uint g = 0; g < internalScene.getNumLightGroup(); ++g)
+	uint numGroups = internalScene.getNumLightGroup();
+	nlinfo("  NumLightGroups: %u", numGroups);
+	for (uint g = 0; g < std::max(numGroups, 6u); ++g)
 	{
 		NLMISC::CRGBA col = internalScene.getLightmapGroupColor(g);
-		nlinfo("  LightGroup %u: R=%u G=%u B=%u A=%u", g, col.R, col.G, col.B, col.A);
+		nlinfo("  LightGroup %u: R=%u G=%u B=%u A=%u%s", g, col.R, col.G, col.B, col.A,
+			g >= numGroups ? " (default, not explicitly set)" : "");
 	}
 
 	// Create a temporary instance to inspect its lightmap properties
@@ -5789,12 +5792,16 @@ NLMISC_COMMAND(dumpLightmapInfo, "Dump lightmap info for a shape to help diagnos
 			nlinfo("  --- LightInfos (animated lightmap layers) ---");
 			if (mb->_LightInfos.empty())
 			{
-				nlinfo("  (no LightInfos - lightmap factors will not be animated)");
+				nlinfo("  (no LightInfos - lightmap factors will not be animated by day/night cycle)");
 			}
 			for (uint li = 0; li < mb->_LightInfos.size(); ++li)
 			{
 				const NL3D::CMeshBase::CLightMapInfoList &info = mb->_LightInfos[li];
-				nlinfo("  LightInfo[%u]: AnimatedLight='%s' LightGroup=%u", li, info.AnimatedLight.c_str(), info.LightGroup);
+				sint animLightIdx = internalScene.getAnimatedLightNameToIndex(info.AnimatedLight);
+				NLMISC::CRGBA effectiveFactor = internalScene.getAnimatedLightFactor(animLightIdx, info.LightGroup);
+				nlinfo("  LightInfo[%u]: AnimatedLight='%s' LightGroup=%u AnimIndex=%d", li, info.AnimatedLight.c_str(), info.LightGroup, animLightIdx);
+				nlinfo("    EffectiveFactor: R=%u G=%u B=%u A=%u%s", effectiveFactor.R, effectiveFactor.G, effectiveFactor.B, effectiveFactor.A,
+					(effectiveFactor.R == 0 && effectiveFactor.G == 0 && effectiveFactor.B == 0) ? " *** ZERO - layer will be invisible! ***" : "");
 				std::list<NL3D::CMeshBase::CLightMapInfoList::CMatStage>::const_iterator itStage;
 				for (itStage = info.StageList.begin(); itStage != info.StageList.end(); ++itStage)
 				{
@@ -5804,6 +5811,7 @@ NLMISC_COMMAND(dumpLightmapInfo, "Dump lightmap info for a shape to help diagnos
 		}
 
 		// Dump material lightmap info
+		// Note: _LightMaps and _LightMapsMulx2 are public members of CMaterial (for driver use)
 		nlinfo("  --- Materials ---");
 		for (uint m = 0; m < mbi->Materials.size(); ++m)
 		{
@@ -5811,12 +5819,15 @@ NLMISC_COMMAND(dumpLightmapInfo, "Dump lightmap info for a shape to help diagnos
 			if (mat.getShader() == NL3D::CMaterial::LightMap)
 			{
 				nlinfo("  Material[%u]: shader=LightMap, Mulx2=%s", m, mat._LightMapsMulx2 ? "true" : "false");
+				uint activeLayers = 0;
 				for (uint lm = 0; lm < mat._LightMaps.size(); ++lm)
 				{
 					NL3D::ITexture *tex = mat._LightMaps[lm].Texture;
 					NLMISC::CRGBA factor = mat._LightMaps[lm].Factor;
 					NLMISC::CRGBA lmcAmb = mat._LightMaps[lm].LMCAmbient;
 					NLMISC::CRGBA lmcDiff = mat._LightMaps[lm].LMCDiffuse;
+					bool factorIsZero = (factor.R == 0 && factor.G == 0 && factor.B == 0);
+					if (!factorIsZero) activeLayers++;
 					std::string texName = "NULL";
 					std::string texFmt = "N/A";
 					if (tex)
@@ -5831,10 +5842,12 @@ NLMISC_COMMAND(dumpLightmapInfo, "Dump lightmap info for a shape to help diagnos
 							texFmt = NLMISC::toString("fmt(%d)", (int)tex->getUploadFormat());
 					}
 					nlinfo("    LightMap[%u]: tex='%s' format=%s", lm, texName.c_str(), texFmt.c_str());
-					nlinfo("      Factor: R=%u G=%u B=%u A=%u", factor.R, factor.G, factor.B, factor.A);
+					nlinfo("      Factor: R=%u G=%u B=%u A=%u%s", factor.R, factor.G, factor.B, factor.A,
+						factorIsZero ? " *** ZERO - layer skipped by renderer! ***" : "");
 					nlinfo("      LMCAmbient: R=%u G=%u B=%u A=%u", lmcAmb.R, lmcAmb.G, lmcAmb.B, lmcAmb.A);
 					nlinfo("      LMCDiffuse: R=%u G=%u B=%u A=%u", lmcDiff.R, lmcDiff.G, lmcDiff.B, lmcDiff.A);
 				}
+				nlinfo("    Active layers (non-zero factor): %u / %u", activeLayers, (uint)mat._LightMaps.size());
 			}
 			else
 			{
