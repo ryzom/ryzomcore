@@ -1,27 +1,10 @@
 FILE(GLOB GEORGES_EDITOR_SRC src/*.cpp src/*.h)
 
-SET(GEORGES_EDITOR_HDR
-	src/main_window.h
-	src/georges_dock_widget.h
-	src/georges_editor_doc.h
-	src/type_dialog.h
-	src/dfn_dialog.h
-	src/form_dialog.h
-	src/header_dialog.h
-	src/file_browser_dock.h
-	src/output_console_dock.h
-	src/settings_dialog.h)
-
 SET(GEORGES_EDITOR_RCS src/resources.qrc)
 
-SET(QT_USE_QTGUI TRUE)
-
-QT5_WRAP_CPP(GEORGES_EDITOR_MOC_SRCS ${GEORGES_EDITOR_HDR})
-
 SOURCE_GROUP(QtResources FILES ${GEORGES_EDITOR_RCS})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${GEORGES_EDITOR_MOC_SRCS})
 
-ADD_EXECUTABLE(georges_editor_qt WIN32 MACOSX_BUNDLE ${GEORGES_EDITOR_SRC} ${GEORGES_EDITOR_MOC_SRCS} ${GEORGES_EDITOR_RCS})
+ADD_EXECUTABLE(georges_editor_qt WIN32 MACOSX_BUNDLE ${GEORGES_EDITOR_SRC} ${GEORGES_EDITOR_RCS})
 
 TARGET_INCLUDE_DIRECTORIES(georges_editor_qt
 		PRIVATE
