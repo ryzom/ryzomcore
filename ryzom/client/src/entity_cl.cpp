@@ -3255,6 +3255,8 @@ void CEntityCL::updateCastShadowMap()
 			{
 				_Instances[i].Current.enableCastShadowMap(shadowOn);
 			}
+			if(!_Instances[i].Loading.empty())
+				_Instances[i].Loading.enableCastShadowMap(shadowOn);
 		}
 
 		_SomeInstanceCastShadowMap= shadowOn;
@@ -3276,6 +3278,11 @@ void CEntityCL::updateCastShadowMap()
 				{
 					_Instances[i].Current.setShadowMapDirectionZThreshold(_ShadowMapZDirClamp);
 					_Instances[i].Current.setShadowMapMaxDepth(_ShadowMapMaxDepth);
+				}
+				if(!_Instances[i].Loading.empty())
+				{
+					_Instances[i].Loading.setShadowMapDirectionZThreshold(_ShadowMapZDirClamp);
+					_Instances[i].Loading.setShadowMapMaxDepth(_ShadowMapMaxDepth);
 				}
 			}
 		}
