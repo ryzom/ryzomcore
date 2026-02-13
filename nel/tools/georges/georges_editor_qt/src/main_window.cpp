@@ -237,7 +237,6 @@ void MainWindow::createMenus()
 	_recentMenu = _fileMenu->addMenu(tr("Recent Files"));
 	for (int i = 0; i < MaxRecentFiles; ++i)
 		_recentMenu->addAction(_recentFileActions[i]);
-	_recentSeparator = _recentMenu->addSeparator();
 
 	_fileMenu->addSeparator();
 	_fileMenu->addAction(_saveAction);

@@ -143,7 +143,6 @@ private:
 	// Recent files
 	enum { MaxRecentFiles = 10 };
 	QAction *_recentFileActions[MaxRecentFiles];
-	QAction *_recentSeparator;
 	QMenu *_recentMenu;
 
 	// Menus
