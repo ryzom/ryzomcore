@@ -83,7 +83,7 @@ function smarty_function_html_select_time($params, &$smarty)
 
     if ($display_hours) {
         $hours       = $use_24_hours ? range(0, 23) : range(1, 12);
-        $hour_fmt = $use_24_hours ? '%H' : '%I';
+        $hour_fmt = $use_24_hours ? 'H' : 'h';
         for ($i = 0, $for_max = count($hours); $i < $for_max; $i++)
             $hours[$i] = sprintf('%02d', $hours[$i]);
         $html_result .= '<select name=';
@@ -101,7 +101,7 @@ function smarty_function_html_select_time($params, &$smarty)
         $html_result .= '>'."\n";
         $html_result .= smarty_function_html_options(array('output'          => $hours,
                                                            'values'          => $hours,
-                                                           'selected'      => strftime($hour_fmt, $time),
+                                                           'selected'      => date($hour_fmt, $time),
                                                            'print_result' => false),
                                                      $smarty);
         $html_result .= "</select>\n";
@@ -111,7 +111,7 @@ function smarty_function_html_select_time($params, &$smarty)
         $all_minutes = range(0, 59);
         for ($i = 0, $for_max = count($all_minutes); $i < $for_max; $i+= $minute_interval)
             $minutes[] = sprintf('%02d', $all_minutes[$i]);
-        $selected = intval(floor(strftime('%M', $time) / $minute_interval) * $minute_interval);
+        $selected = intval(floor(date('i', $time) / $minute_interval) * $minute_interval);
         $html_result .= '<select name=';
         if (null !== $field_array) {
             $html_result .= '"' . $field_array . '[' . $prefix . 'Minute]"';
@@ -138,7 +138,7 @@ function smarty_function_html_select_time($params, &$smarty)
         $all_seconds = range(0, 59);
         for ($i = 0, $for_max = count($all_seconds); $i < $for_max; $i+= $second_interval)
             $seconds[] = sprintf('%02d', $all_seconds[$i]);
-        $selected = intval(floor(strftime('%S', $time) / $second_interval) * $second_interval);
+        $selected = intval(floor(date('s', $time) / $second_interval) * $second_interval);
         $html_result .= '<select name=';
         if (null !== $field_array) {
             $html_result .= '"' . $field_array . '[' . $prefix . 'Second]"';
@@ -180,7 +180,7 @@ function smarty_function_html_select_time($params, &$smarty)
         
         $html_result .= smarty_function_html_options(array('output'          => array('AM', 'PM'),
                                                            'values'          => array('am', 'pm'),
-                                                           'selected'      => strtolower(strftime('%p', $time)),
+                                                           'selected'      => date('a', $time),
                                                            'print_result' => false),
                                                      $smarty);
         $html_result .= "</select>\n";

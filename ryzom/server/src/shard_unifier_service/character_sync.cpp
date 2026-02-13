@@ -851,7 +851,7 @@ namespace CHARSYNC
 			breakable
 			{
 				// first, create an erase series
-				string query = "INSERT INTO mfs_erased_mail_series (erased_char_id, erased_char_name, erase_date) VALUES("+toString(charId)+", '"+character->getCharName()+"', '"+MSW::encodeDate(CTime::getSecondsSince1970())+"')";
+				string query = "INSERT INTO mfs_erased_mail_series (erased_char_id, erased_char_name, erase_date) VALUES("+toString(charId)+", '"+MSW::escapeString(character->getCharName(), _RingDB)+"', '"+MSW::encodeDate(CTime::getSecondsSince1970())+"')";
 				DROP_IF(!_RingDB.query(query), "ERROR : failed to create an mail erase series", break;);
 
 				uint32 eraseSeries = _RingDB.getLastGeneratedId();

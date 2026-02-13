@@ -23,7 +23,7 @@ function display_mailbox_content($shard, $user)
 	echo "-- MAILBOX $user ($udir)\n";
 	$dir = opendir($udir);
 	while ($dir && ($file = readdir($dir)))
-		if (ereg("^mail_([0-9]*)\.html", $file) || ereg("^_mail_([0-9]*)\.html", $file))
+		if (preg_match('/^mail_([0-9]*)\.html/', $file) || preg_match('/^_mail_([0-9]*)\.html/', $file))
 			echo "FILE:$file\n";
 	echo "-- END MAILBOX $user\n";
 }
@@ -35,7 +35,7 @@ function display_forum_content($shard, $user)
 	echo "-- FORUM $user ($udir)\n";
 	$dir = opendir($udir);
 	while ($dir && ($file = readdir($dir)))
-		if (ereg("^thread_([0-9]*)\.index", $file) || ereg("^_thread_([0-9]*)\.index", $file))
+		if (preg_match('/^thread_([0-9]*)\.index/', $file) || preg_match('/^_thread_([0-9]*)\.index/', $file))
 			echo "FILE:$file\n";
 	echo "-- END FORUM $user\n";
 }
@@ -43,7 +43,7 @@ function display_forum_content($shard, $user)
 function display_thread_content($shard, $forum, $thread)
 {
 	$udir = get_user_dir($forum, $shard);
-	read_index($udir.$thread, &$header, &$array);
+	read_index($udir.$thread, $header, $array);
 	
 	$a = explode("%%", $header);
 

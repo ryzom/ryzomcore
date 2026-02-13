@@ -5,6 +5,79 @@
  * @subpackage plugins
  */
 
+if (!function_exists('_smarty_strftime_compat')) {
+    /**
+     * strftime() replacement for PHP 8.1+ compatibility.
+     * Converts a strftime()-style format string and returns a formatted date using date().
+     *
+     * @param string   $format    strftime format string
+     * @param int|null $timestamp Unix timestamp (default: current time)
+     * @return string
+     */
+    function _smarty_strftime_compat($format, $timestamp = null)
+    {
+        if ($timestamp === null) {
+            $timestamp = time();
+        }
+        $date_format = '';
+        $len = strlen($format);
+        $i = 0;
+        while ($i < $len) {
+            if ($format[$i] === '%' && $i + 1 < $len) {
+                $spec = $format[$i + 1];
+                switch ($spec) {
+                    case 'a': $date_format .= 'D'; break;
+                    case 'A': $date_format .= 'l'; break;
+                    case 'b': $date_format .= 'M'; break;
+                    case 'B': $date_format .= 'F'; break;
+                    case 'h': $date_format .= 'M'; break;
+                    case 'd': $date_format .= 'd'; break;
+                    case 'e': $date_format .= sprintf('%2d', date('j', $timestamp)); break;
+                    case 'G': $date_format .= 'o'; break;
+                    case 'H': $date_format .= 'H'; break;
+                    case 'I': $date_format .= 'h'; break;
+                    case 'k': $date_format .= sprintf('%2d', date('G', $timestamp)); break;
+                    case 'l': $date_format .= sprintf('%2d', date('g', $timestamp)); break;
+                    case 'm': $date_format .= 'm'; break;
+                    case 'M': $date_format .= 'i'; break;
+                    case 'n': $date_format .= "\n"; break;
+                    case 'p': $date_format .= 'A'; break;
+                    case 'P': $date_format .= 'a'; break;
+                    case 'r': $date_format .= 'h:i:s A'; break;
+                    case 'R': $date_format .= 'H:i'; break;
+                    case 'S': $date_format .= 's'; break;
+                    case 't': $date_format .= "\t"; break;
+                    case 'T': $date_format .= 'H:i:s'; break;
+                    case 'u': $date_format .= 'N'; break;
+                    case 'V': $date_format .= 'W'; break;
+                    case 'w': $date_format .= 'w'; break;
+                    case 'y': $date_format .= 'y'; break;
+                    case 'Y': $date_format .= 'Y'; break;
+                    case 'z': $date_format .= 'O'; break;
+                    case 'Z': $date_format .= 'T'; break;
+                    case 'D': $date_format .= 'm/d/y'; break;
+                    case 'F': $date_format .= 'Y-m-d'; break;
+                    case 'c': $date_format .= 'D M j H:i:s Y'; break;
+                    case 'x': $date_format .= 'm/d/y'; break;
+                    case 'X': $date_format .= 'H:i:s'; break;
+                    case '%': $date_format .= '%'; break;
+                    default: break;
+                }
+                $i += 2;
+            } else {
+                $ch = $format[$i];
+                if (ctype_alpha($ch)) {
+                    $date_format .= '\\' . $ch;
+                } else {
+                    $date_format .= $ch;
+                }
+                $i++;
+            }
+        }
+        return date($date_format, $timestamp);
+    }
+}
+
 /**
  * Smarty {html_select_date} plugin
  *
@@ -42,7 +115,7 @@ function smarty_function_html_select_date($params, &$smarty)
     require_once $smarty->_get_plugin_filepath('function','html_options');
     /* Default values. */
     $prefix          = "Date_";
-    $start_year      = strftime("%Y");
+    $start_year      = date("Y");
     $end_year        = $start_year;
     $display_days    = true;
     $display_months  = true;
@@ -142,8 +215,8 @@ function smarty_function_html_select_date($params, &$smarty)
         $time = $found[1];
     } else {
         // use smarty_make_timestamp to get an unix timestamp and
-        // strftime to make yyyy-mm-dd
-        $time = strftime('%Y-%m-%d', smarty_make_timestamp($time));
+        // date to make yyyy-mm-dd
+        $time = date('Y-m-d', smarty_make_timestamp($time));
     }
     // Now split this in pieces, which later can be used to set the select
     $time = explode("-", $time);
@@ -151,16 +224,16 @@ function smarty_function_html_select_date($params, &$smarty)
     // make syntax "+N" or "-N" work with start_year and end_year
     if (preg_match('!^(\+|\-)\s*(\d+)$!', $end_year, $match)) {
         if ($match[1] == '+') {
-            $end_year = strftime('%Y') + $match[2];
+            $end_year = date('Y') + $match[2];
         } else {
-            $end_year = strftime('%Y') - $match[2];
+            $end_year = date('Y') - $match[2];
         }
     }
     if (preg_match('!^(\+|\-)\s*(\d+)$!', $start_year, $match)) {
         if ($match[1] == '+') {
-            $start_year = strftime('%Y') + $match[2];
+            $start_year = date('Y') + $match[2];
         } else {
-            $start_year = strftime('%Y') - $match[2];
+            $start_year = date('Y') - $match[2];
         }
     }
     if (strlen($time[0]) > 0) {
@@ -188,8 +261,8 @@ function smarty_function_html_select_date($params, &$smarty)
             $month_values[''] = '';
         }
         for ($i = 1; $i <= 12; $i++) {
-            $month_names[$i] = strftime($month_format, mktime(0, 0, 0, $i, 1, 2000));
-            $month_values[$i] = strftime($month_value_format, mktime(0, 0, 0, $i, 1, 2000));
+            $month_names[$i] = _smarty_strftime_compat($month_format, mktime(0, 0, 0, $i, 1, 2000));
+            $month_values[$i] = _smarty_strftime_compat($month_value_format, mktime(0, 0, 0, $i, 1, 2000));
         }
 
         $month_result .= '<select name=';
@@ -211,7 +284,7 @@ function smarty_function_html_select_date($params, &$smarty)
 
         $month_result .= smarty_function_html_options(array('output'     => $month_names,
                                                             'values'     => $month_values,
-                                                            'selected'   => (int)$time[1] ? strftime($month_value_format, mktime(0, 0, 0, (int)$time[1], 1, 2000)) : '',
+                                                            'selected'   => (int)$time[1] ? _smarty_strftime_compat($month_value_format, mktime(0, 0, 0, (int)$time[1], 1, 2000)) : '',
                                                             'print_result' => false),
                                                       $smarty);
         $month_result .= '</select>';

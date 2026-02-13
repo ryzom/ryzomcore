@@ -9,6 +9,80 @@
  * Include the {@link shared.make_timestamp.php} plugin
  */
 require_once $smarty->_get_plugin_filepath('shared', 'make_timestamp');
+
+if (!function_exists('_smarty_strftime_compat')) {
+    /**
+     * strftime() replacement for PHP 8.1+ compatibility.
+     * Converts a strftime()-style format string and returns a formatted date using date().
+     *
+     * @param string   $format    strftime format string
+     * @param int|null $timestamp Unix timestamp (default: current time)
+     * @return string
+     */
+    function _smarty_strftime_compat($format, $timestamp = null)
+    {
+        if ($timestamp === null) {
+            $timestamp = time();
+        }
+        $date_format = '';
+        $len = strlen($format);
+        $i = 0;
+        while ($i < $len) {
+            if ($format[$i] === '%' && $i + 1 < $len) {
+                $spec = $format[$i + 1];
+                switch ($spec) {
+                    case 'a': $date_format .= 'D'; break;
+                    case 'A': $date_format .= 'l'; break;
+                    case 'b': $date_format .= 'M'; break;
+                    case 'B': $date_format .= 'F'; break;
+                    case 'h': $date_format .= 'M'; break;
+                    case 'd': $date_format .= 'd'; break;
+                    case 'e': $date_format .= sprintf('%2d', date('j', $timestamp)); break;
+                    case 'G': $date_format .= 'o'; break;
+                    case 'H': $date_format .= 'H'; break;
+                    case 'I': $date_format .= 'h'; break;
+                    case 'k': $date_format .= sprintf('%2d', date('G', $timestamp)); break;
+                    case 'l': $date_format .= sprintf('%2d', date('g', $timestamp)); break;
+                    case 'm': $date_format .= 'm'; break;
+                    case 'M': $date_format .= 'i'; break;
+                    case 'n': $date_format .= "\n"; break;
+                    case 'p': $date_format .= 'A'; break;
+                    case 'P': $date_format .= 'a'; break;
+                    case 'r': $date_format .= 'h:i:s A'; break;
+                    case 'R': $date_format .= 'H:i'; break;
+                    case 'S': $date_format .= 's'; break;
+                    case 't': $date_format .= "\t"; break;
+                    case 'T': $date_format .= 'H:i:s'; break;
+                    case 'u': $date_format .= 'N'; break;
+                    case 'V': $date_format .= 'W'; break;
+                    case 'w': $date_format .= 'w'; break;
+                    case 'y': $date_format .= 'y'; break;
+                    case 'Y': $date_format .= 'Y'; break;
+                    case 'z': $date_format .= 'O'; break;
+                    case 'Z': $date_format .= 'T'; break;
+                    case 'D': $date_format .= 'm/d/y'; break;
+                    case 'F': $date_format .= 'Y-m-d'; break;
+                    case 'c': $date_format .= 'D M j H:i:s Y'; break;
+                    case 'x': $date_format .= 'm/d/y'; break;
+                    case 'X': $date_format .= 'H:i:s'; break;
+                    case '%': $date_format .= '%'; break;
+                    default: break;
+                }
+                $i += 2;
+            } else {
+                $ch = $format[$i];
+                if (ctype_alpha($ch)) {
+                    $date_format .= '\\' . $ch;
+                } else {
+                    $date_format .= $ch;
+                }
+                $i++;
+            }
+        }
+        return date($date_format, $timestamp);
+    }
+}
+
 /**
  * Smarty date_format modifier plugin
  *
@@ -50,7 +124,7 @@ function smarty_modifier_date_format($string, $format = '%b %e, %Y', $default_da
         }
         $format = str_replace($_win_from, $_win_to, $format);
     }
-    return strftime($format, $timestamp);
+    return _smarty_strftime_compat($format, $timestamp);
 }
 
 /* vim: set expandtab: */

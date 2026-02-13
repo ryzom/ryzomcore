@@ -594,7 +594,7 @@
 
 	function lvcmp($a, $b)
 	{
-		return ($a["path"] == $b["path"] ? 0 : $a["path"] < $b["path"] ? -1 : 1);
+		return ($a["path"] == $b["path"] ? 0 : ($a["path"] < $b["path"] ? -1 : 1));
 	}
 
 	if (isset($tid) && $tid != "" && count($listPath) > 0)

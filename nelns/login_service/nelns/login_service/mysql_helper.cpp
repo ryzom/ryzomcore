@@ -58,6 +58,16 @@ string sqlQuery(const string &query)
 	return sqlQuery(query, nbrow, row, result);
 }
 
+string sqlEscape(const string &str)
+{
+	nlassert(DatabaseConnection);
+	string buffer;
+	buffer.resize(str.size() * 2 + 1);
+	unsigned long resultSize = mysql_real_escape_string(DatabaseConnection, &buffer[0], str.data(), (unsigned long)str.size());
+	buffer.resize(resultSize);
+	return buffer;
+}
+
 string sqlQuery(const string &query, sint32 &nbRow, MYSQL_ROW &firstRow, CMysqlResult &result)
 {
 	nlassert(DatabaseConnection);
