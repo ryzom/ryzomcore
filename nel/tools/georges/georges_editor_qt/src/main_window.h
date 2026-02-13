@@ -48,6 +48,9 @@ public:
 
 	void outputString(const QString &message);
 
+protected:
+	void closeEvent(QCloseEvent *event) override;
+
 private slots:
 	void onNewType();
 	void onNewDfn();
@@ -73,6 +76,7 @@ private slots:
 	void onSettings();
 	void onAbout();
 	void onSubWindowActivated(QMdiSubWindow *window);
+	void onOpenRecentFile();
 	void updateMenus();
 
 private:
@@ -81,7 +85,12 @@ private:
 	void createToolBars();
 	void createStatusBar();
 	void createDockWidgets();
+	void initSearchPaths();
 	QMdiSubWindow *findMdiChild(const QString &fileName) const;
+
+	// Recent files
+	void addRecentFile(const QString &filePath);
+	void updateRecentFileActions();
 
 	QMdiArea *_mdiArea;
 	FileBrowserDock *_fileBrowser;
@@ -130,6 +139,12 @@ private:
 
 	// Help menu actions
 	QAction *_aboutAction;
+
+	// Recent files
+	enum { MaxRecentFiles = 10 };
+	QAction *_recentFileActions[MaxRecentFiles];
+	QAction *_recentSeparator;
+	QMenu *_recentMenu;
 
 	// Menus
 	QMenu *_fileMenu;

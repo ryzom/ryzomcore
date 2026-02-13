@@ -26,9 +26,11 @@
 #include <QDockWidget>
 #include <QCloseEvent>
 #include <QSettings>
+#include <QFileInfo>
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/misc/path.h>
 
 // Project includes
 #include "georges_editor_doc.h"
@@ -64,10 +66,49 @@ MainWindow::MainWindow(QWidget *parent)
 	createDockWidgets();
 
 	updateMenus();
+	updateRecentFileActions();
+
+	// Initialize NeL search paths from saved settings
+	initSearchPaths();
+
+	// Restore window geometry and dock state
+	QSettings settings("NeL", "Georges Editor Qt");
+	restoreGeometry(settings.value("windowGeometry").toByteArray());
+	restoreState(settings.value("windowState").toByteArray());
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	// Save window geometry and dock state
+	QSettings settings("NeL", "Georges Editor Qt");
+	settings.setValue("windowGeometry", saveGeometry());
+	settings.setValue("windowState", saveState());
+	event->accept();
+}
+
+void MainWindow::initSearchPaths()
+{
+	QSettings settings("NeL", "Georges Editor Qt");
+	QString rootPath = settings.value("rootSearchPath", "").toString();
+
+	if (!rootPath.isEmpty())
+	{
+		// Clear and re-add search paths, matching MFC Georges initCfg() behavior
+		NLMISC::CPath::removeAllAlternativeSearchPath();
+		try
+		{
+			NLMISC::CPath::addSearchPath(rootPath.toUtf8().constData(), true, true);
+			nlinfo("Search path initialized: %s", rootPath.toUtf8().constData());
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			nlwarning("Failed to add search path '%s': %s", rootPath.toUtf8().constData(), e.what());
+		}
+	}
 }
 
 void MainWindow::createActions()
@@ -107,6 +148,14 @@ void MainWindow::createActions()
 	_exitAction = new QAction(tr("E&xit"), this);
 	_exitAction->setShortcut(QKeySequence::Quit);
 	connect(_exitAction, &QAction::triggered, qApp, &QApplication::closeAllWindows);
+
+	// Recent file actions
+	for (int i = 0; i < MaxRecentFiles; ++i)
+	{
+		_recentFileActions[i] = new QAction(this);
+		_recentFileActions[i]->setVisible(false);
+		connect(_recentFileActions[i], &QAction::triggered, this, &MainWindow::onOpenRecentFile);
+	}
 
 	// Edit actions
 	_undoAction = new QAction(tr("&Undo"), this);
@@ -183,6 +232,13 @@ void MainWindow::createMenus()
 	_fileMenu->addAction(_newFormAction);
 	_fileMenu->addSeparator();
 	_fileMenu->addAction(_openAction);
+
+	// Recent files submenu
+	_recentMenu = _fileMenu->addMenu(tr("Recent Files"));
+	for (int i = 0; i < MaxRecentFiles; ++i)
+		_recentMenu->addAction(_recentFileActions[i]);
+	_recentSeparator = _recentMenu->addSeparator();
+
 	_fileMenu->addSeparator();
 	_fileMenu->addAction(_saveAction);
 	_fileMenu->addAction(_saveAllAction);
@@ -356,6 +412,7 @@ void MainWindow::openDocument(const QString &path)
 	subWindow->show();
 
 	nlinfo("Opened: %s", path.toUtf8().constData());
+	addRecentFile(path);
 	updateMenus();
 }
 
@@ -597,6 +654,8 @@ void MainWindow::onSettings()
 	if (dlg.exec() == QDialog::Accepted)
 	{
 		dlg.saveSettings();
+		// Re-initialize search paths with new settings
+		initSearchPaths();
 		_fileBrowser->refresh();
 	}
 }
@@ -635,4 +694,46 @@ void MainWindow::updateMenus()
 	_renameAction->setEnabled(hasMdiChild);
 	_expandAllAction->setEnabled(hasMdiChild);
 	_collapseAllAction->setEnabled(hasMdiChild);
+}
+
+void MainWindow::addRecentFile(const QString &filePath)
+{
+	QSettings settings("NeL", "Georges Editor Qt");
+	QStringList files = settings.value("recentFiles").toStringList();
+
+	files.removeAll(filePath);
+	files.prepend(filePath);
+	while (files.size() > MaxRecentFiles)
+		files.removeLast();
+
+	settings.setValue("recentFiles", files);
+	updateRecentFileActions();
+}
+
+void MainWindow::updateRecentFileActions()
+{
+	QSettings settings("NeL", "Georges Editor Qt");
+	QStringList files = settings.value("recentFiles").toStringList();
+
+	int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
+
+	for (int i = 0; i < numRecentFiles; ++i)
+	{
+		QString text = tr("&%1 %2").arg(i + 1).arg(QFileInfo(files[i]).fileName());
+		_recentFileActions[i]->setText(text);
+		_recentFileActions[i]->setData(files[i]);
+		_recentFileActions[i]->setToolTip(files[i]);
+		_recentFileActions[i]->setVisible(true);
+	}
+	for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
+		_recentFileActions[j]->setVisible(false);
+
+	_recentMenu->setEnabled(numRecentFiles > 0);
+}
+
+void MainWindow::onOpenRecentFile()
+{
+	QAction *action = qobject_cast<QAction *>(sender());
+	if (action)
+		openDocument(action->data().toString());
 }
