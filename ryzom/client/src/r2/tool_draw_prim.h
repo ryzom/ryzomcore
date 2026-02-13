@@ -22,7 +22,7 @@
 
 #include "tool.h"
 #include "prim_render.h"
-#include "../decal.h"
+#include "../legacy_decal.h"
 //
 #include "nel/misc/vector.h"
 

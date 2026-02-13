@@ -22,7 +22,7 @@
 
 #include "displayer_visual.h"
 #include "instance.h"
-#include "../decal.h"
+#include "../legacy_decal.h"
 #include "nel/gui/lua_object.h"
 #include "instance_map_deco.h"
 

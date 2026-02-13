@@ -19,7 +19,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include "decal.h"
+#include "legacy_decal.h"
 //
 #include "nel/3d/shadow_map.h"
 #include "nel/3d/texture_file.h"

@@ -25,7 +25,7 @@
 #include "nel/misc/vectord.h"
 #include "nel/misc/rgba.h"
 //
-#include "../decal.h"
+#include "../legacy_decal.h"
 
 class CGroupInScene;
 

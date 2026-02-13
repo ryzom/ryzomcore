@@ -21,7 +21,7 @@
 #define R2_TOOL_CHOOSE_POS_H
 
 #include "tool.h"
-#include "../decal.h"
+#include "../legacy_decal.h"
 #include "prim_render.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/polygon.h"

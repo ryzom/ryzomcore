@@ -90,8 +90,8 @@ IF(WITH_RYZOM_CLIENT)
   )
   SOURCE_GROUP("outposts" FILES ${RZCLIENT_OUTPOSTS})
   FILE(GLOB RZCLIENT_DECALS
-    decal.cpp decal.h
-    decal*.cpp decal_*.h
+    legacy_decal.cpp legacy_decal.h
+    legacy_decal*.cpp legacy_decal_*.h
   )
   SOURCE_GROUP("decals" FILES ${RZCLIENT_DECALS})
 

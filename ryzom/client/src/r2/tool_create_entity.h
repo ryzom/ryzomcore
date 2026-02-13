@@ -23,7 +23,7 @@
 #include "tool_choose_pos.h"
 #include "nel/misc/vector.h"
 #include "prim_render.h"
-#include "../decal.h"
+#include "../legacy_decal.h"
 #include "auto_group.h"
 #include "displayer_visual_entity.h"
 

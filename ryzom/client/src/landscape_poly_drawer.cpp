@@ -27,7 +27,7 @@
 #include "nel/3d/driver_user.h"
 
 // client
-#include "decal.h"
+#include "legacy_decal.h"
 
 using namespace NLMISC;
 using namespace NL3D;

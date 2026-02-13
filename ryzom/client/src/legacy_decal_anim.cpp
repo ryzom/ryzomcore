@@ -19,8 +19,8 @@
 
 #include "stdpch.h"
 //
-#include "decal_anim.h"
-#include "decal.h"
+#include "legacy_decal_anim.h"
+#include "legacy_decal.h"
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/lua_object.h"
 //

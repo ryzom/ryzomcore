@@ -18,7 +18,7 @@
 #define R2_DISPLAYER_VISUAL_ACTIVITY_SEQUENCE_H
 
 #include "displayer_visual.h"
-#include "../decal.h"
+#include "../legacy_decal.h"
 #include "editor.h"
 #include "nel/misc/line.h"
 //
