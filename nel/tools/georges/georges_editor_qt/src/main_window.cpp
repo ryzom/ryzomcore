@@ -450,7 +450,7 @@ void MainWindow::onOpen()
 	QString fileName = QFileDialog::getOpenFileName(this,
 		tr("Open Georges File"),
 		QString(),
-		tr("All Georges Files (*.typ *.dfn *.*);;Type Files (*.typ);;DFN Files (*.dfn);;All Files (*.*)"));
+		tr("All Georges Files (*.typ *.dfn);;Type Files (*.typ);;DFN Files (*.dfn);;All Files (*.*)"));
 	if (!fileName.isEmpty())
 		openDocument(fileName);
 }
@@ -469,7 +469,7 @@ void MainWindow::onSave()
 			QString fileName = QFileDialog::getSaveFileName(this,
 				tr("Save Georges File"),
 				QString(),
-				tr("All Georges Files (*.typ *.dfn *.*);;Type Files (*.typ);;DFN Files (*.dfn);;All Files (*.*)"));
+				tr("All Georges Files (*.typ *.dfn);;Type Files (*.typ);;DFN Files (*.dfn);;All Files (*.*)"));
 			if (fileName.isEmpty())
 				return;
 			doc->save(fileName);

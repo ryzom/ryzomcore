@@ -56,10 +56,10 @@ private:
 
 	QComboBox *_typeCombo;
 	QComboBox *_uiTypeCombo;
-	QComboBox *_defaultEdit;
-	QComboBox *_minEdit;
-	QComboBox *_maxEdit;
-	QComboBox *_incrementEdit;
+	QComboBox *_defaultCombo;
+	QComboBox *_minCombo;
+	QComboBox *_maxCombo;
+	QComboBox *_incrementCombo;
 	QTableWidget *_predefTable;
 };
 

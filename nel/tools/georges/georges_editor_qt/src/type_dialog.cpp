@@ -65,21 +65,21 @@ void TypeDialog::setupUi()
 	_uiTypeCombo->addItem(tr("IconWidget"));
 	formLayout->addRow(tr("UI Type:"), _uiTypeCombo);
 
-	_defaultEdit = new QComboBox(propsGroup);
-	_defaultEdit->setEditable(true);
-	formLayout->addRow(tr("Default:"), _defaultEdit);
+	_defaultCombo = new QComboBox(propsGroup);
+	_defaultCombo->setEditable(true);
+	formLayout->addRow(tr("Default:"), _defaultCombo);
 
-	_minEdit = new QComboBox(propsGroup);
-	_minEdit->setEditable(true);
-	formLayout->addRow(tr("Min:"), _minEdit);
+	_minCombo = new QComboBox(propsGroup);
+	_minCombo->setEditable(true);
+	formLayout->addRow(tr("Min:"), _minCombo);
 
-	_maxEdit = new QComboBox(propsGroup);
-	_maxEdit->setEditable(true);
-	formLayout->addRow(tr("Max:"), _maxEdit);
+	_maxCombo = new QComboBox(propsGroup);
+	_maxCombo->setEditable(true);
+	formLayout->addRow(tr("Max:"), _maxCombo);
 
-	_incrementEdit = new QComboBox(propsGroup);
-	_incrementEdit->setEditable(true);
-	formLayout->addRow(tr("Increment:"), _incrementEdit);
+	_incrementCombo = new QComboBox(propsGroup);
+	_incrementCombo->setEditable(true);
+	formLayout->addRow(tr("Increment:"), _incrementCombo);
 
 	mainLayout->addWidget(propsGroup);
 
@@ -105,10 +105,10 @@ void TypeDialog::setupUi()
 	// Connections
 	connect(_typeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TypeDialog::onTypeChanged);
 	connect(_uiTypeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TypeDialog::onUITypeChanged);
-	connect(_defaultEdit, &QComboBox::currentTextChanged, this, &TypeDialog::onDefaultChanged);
-	connect(_minEdit, &QComboBox::currentTextChanged, this, &TypeDialog::onMinChanged);
-	connect(_maxEdit, &QComboBox::currentTextChanged, this, &TypeDialog::onMaxChanged);
-	connect(_incrementEdit, &QComboBox::currentTextChanged, this, &TypeDialog::onIncrementChanged);
+	connect(_defaultCombo, &QComboBox::currentTextChanged, this, &TypeDialog::onDefaultChanged);
+	connect(_minCombo, &QComboBox::currentTextChanged, this, &TypeDialog::onMinChanged);
+	connect(_maxCombo, &QComboBox::currentTextChanged, this, &TypeDialog::onMaxChanged);
+	connect(_incrementCombo, &QComboBox::currentTextChanged, this, &TypeDialog::onIncrementChanged);
 	connect(_predefTable, &QTableWidget::cellChanged, this, &TypeDialog::onPredefValueChanged);
 	connect(addBtn, &QPushButton::clicked, this, &TypeDialog::onAddPredefValue);
 	connect(removeBtn, &QPushButton::clicked, this, &TypeDialog::onRemovePredefValue);
@@ -130,18 +130,18 @@ void TypeDialog::updateFromDocument()
 	// Block signals during update
 	_typeCombo->blockSignals(true);
 	_uiTypeCombo->blockSignals(true);
-	_defaultEdit->blockSignals(true);
-	_minEdit->blockSignals(true);
-	_maxEdit->blockSignals(true);
-	_incrementEdit->blockSignals(true);
+	_defaultCombo->blockSignals(true);
+	_minCombo->blockSignals(true);
+	_maxCombo->blockSignals(true);
+	_incrementCombo->blockSignals(true);
 	_predefTable->blockSignals(true);
 
 	_typeCombo->setCurrentIndex((int)type->Type);
 	_uiTypeCombo->setCurrentIndex((int)type->UIType);
-	_defaultEdit->setEditText(QString::fromUtf8(type->Default.c_str()));
-	_minEdit->setEditText(QString::fromUtf8(type->Min.c_str()));
-	_maxEdit->setEditText(QString::fromUtf8(type->Max.c_str()));
-	_incrementEdit->setEditText(QString::fromUtf8(type->Increment.c_str()));
+	_defaultCombo->setEditText(QString::fromUtf8(type->Default.c_str()));
+	_minCombo->setEditText(QString::fromUtf8(type->Min.c_str()));
+	_maxCombo->setEditText(QString::fromUtf8(type->Max.c_str()));
+	_incrementCombo->setEditText(QString::fromUtf8(type->Increment.c_str()));
 
 	// Predefined values
 	_predefTable->setRowCount((int)type->Definitions.size());
@@ -153,10 +153,10 @@ void TypeDialog::updateFromDocument()
 
 	_typeCombo->blockSignals(false);
 	_uiTypeCombo->blockSignals(false);
-	_defaultEdit->blockSignals(false);
-	_minEdit->blockSignals(false);
-	_maxEdit->blockSignals(false);
-	_incrementEdit->blockSignals(false);
+	_defaultCombo->blockSignals(false);
+	_minCombo->blockSignals(false);
+	_maxCombo->blockSignals(false);
+	_incrementCombo->blockSignals(false);
 	_predefTable->blockSignals(false);
 }
 
