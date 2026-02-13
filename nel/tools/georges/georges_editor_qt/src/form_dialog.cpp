@@ -133,20 +133,21 @@ void FormDialog::buildFormWidgets(CGeorgesEditDocSub *sub)
 			if (result)
 				combo->setEditText(QString::fromUtf8(value.c_str()));
 
-			// Color coding based on where the value comes from
+			// Color coding based on where the value comes from.
+			// Colors chosen to be legible on both dark Fusion and native palettes.
 			switch (where)
 			{
 			case NLGEORGES::UFormElm::ValueForm:
-				combo->setStyleSheet("QComboBox { color: black; }");
+				combo->setStyleSheet("QComboBox { color: #e0e0e0; }");
 				break;
 			case NLGEORGES::UFormElm::ValueParentForm:
-				combo->setStyleSheet("QComboBox { color: gray; }");
+				combo->setStyleSheet("QComboBox { color: #909090; }");
 				break;
 			case NLGEORGES::UFormElm::ValueDefaultDfn:
-				combo->setStyleSheet("QComboBox { color: blue; }");
+				combo->setStyleSheet("QComboBox { color: #6699ff; }");
 				break;
 			case NLGEORGES::UFormElm::ValueDefaultType:
-				combo->setStyleSheet("QComboBox { color: green; }");
+				combo->setStyleSheet("QComboBox { color: #66cc66; }");
 				break;
 			}
 

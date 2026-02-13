@@ -20,20 +20,28 @@
 #include <nel/misc/path.h>
 
 #include <QApplication>
+#include <QStyleFactory>
 
+#include "../../3d/shared_widgets/common.h"
 #include "main_window.h"
 
 int main(int argc, char *argv[])
 {
 	NLMISC::CApplicationContext appContext;
 
-	NLMISC::CDebug::init();
+	// use log.log if NEL_LOG_IN_FILE defined as 1
+	createDebug(NULL, false, false);
 
+	NLQT::preApplication();
 	QApplication app(argc, argv);
 	app.setApplicationName("Georges Editor Qt");
 	app.setOrganizationName("NeL");
+#if !GEORGES_USE_NATIVE_STYLE
+	NLQT::postApplication();
+#endif
 
 	MainWindow mainWindow;
+	mainWindow.resize(1024, 768);
 	mainWindow.show();
 
 	// Open files passed on command line

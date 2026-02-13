@@ -14,16 +14,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <nel/misc/types_nl.h>
 #include "main_window.h"
 
+// Qt includes
 #include <QApplication>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSplitter>
 #include <QStackedWidget>
+#include <QDockWidget>
 #include <QCloseEvent>
 #include <QSettings>
 
+// NeL includes
+#include <nel/misc/debug.h>
+
+// Project includes
 #include "georges_editor_doc.h"
 #include "georges_dock_widget.h"
 #include "type_dialog.h"
@@ -31,14 +38,17 @@
 #include "form_dialog.h"
 #include "header_dialog.h"
 #include "file_browser_dock.h"
-#include "output_console_dock.h"
 #include "settings_dialog.h"
+#include "../../3d/shared_widgets/command_log.h"
 
 MainWindow::MainWindow(QWidget *parent)
-	: QMainWindow(parent)
+	: QMainWindow(parent),
+	_mdiArea(NULL),
+	_fileBrowser(NULL),
+	_commandLog(NULL), _commandLogDock(NULL)
 {
-	setWindowTitle("Georges Editor Qt");
-	resize(1024, 768);
+	setObjectName("MainWindow");
+	setWindowTitle(tr("Georges Editor Qt"));
 
 	_mdiArea = new QMdiArea(this);
 	_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -153,11 +163,6 @@ void MainWindow::createActions()
 	_fileBrowserAction->setChecked(true);
 	connect(_fileBrowserAction, &QAction::triggered, this, &MainWindow::onToggleFileBrowser);
 
-	_outputConsoleAction = new QAction(tr("&Output Console"), this);
-	_outputConsoleAction->setCheckable(true);
-	_outputConsoleAction->setChecked(true);
-	connect(_outputConsoleAction, &QAction::triggered, this, &MainWindow::onToggleOutputConsole);
-
 	_refreshAction = new QAction(tr("&Refresh"), this);
 	_refreshAction->setShortcut(QKeySequence("F5"));
 	connect(_refreshAction, &QAction::triggered, this, &MainWindow::onRefresh);
@@ -214,7 +219,7 @@ void MainWindow::createMenus()
 
 	_viewMenu = menuBar()->addMenu(tr("&View"));
 	_viewMenu->addAction(_fileBrowserAction);
-	_viewMenu->addAction(_outputConsoleAction);
+	// Console toggle action is added by createDockWidgets()
 	_viewMenu->addSeparator();
 	_viewMenu->addAction(_refreshAction);
 	_viewMenu->addAction(_settingsAction);
@@ -249,8 +254,16 @@ void MainWindow::createDockWidgets()
 	addDockWidget(Qt::LeftDockWidgetArea, _fileBrowser);
 	connect(_fileBrowser, &FileBrowserDock::fileDoubleClicked, this, &MainWindow::openDocument);
 
-	_outputConsole = new OutputConsoleDock(this);
-	addDockWidget(Qt::BottomDockWidgetArea, _outputConsole);
+	// Console dock using shared CCommandLogDisplayer (same as Panoply Preview)
+	{
+		_commandLogDock = new QDockWidget(this);
+		_commandLogDock->setWindowTitle(tr("Console"));
+		_commandLogDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+		_commandLog = new NLQT::CCommandLogDisplayer(_commandLogDock);
+		_commandLogDock->setWidget(_commandLog);
+		addDockWidget(Qt::BottomDockWidgetArea, _commandLogDock);
+		_viewMenu->addAction(_commandLogDock->toggleViewAction());
+	}
 }
 
 void MainWindow::openDocument(const QString &path)
@@ -266,7 +279,7 @@ void MainWindow::openDocument(const QString &path)
 	GeorgesEditorDoc *doc = new GeorgesEditorDoc();
 	if (!doc->open(path))
 	{
-		_outputConsole->outputString(tr("Failed to open: %1").arg(path));
+		nlwarning("Failed to open: %s", path.toUtf8().constData());
 		delete doc;
 		return;
 	}
@@ -342,7 +355,7 @@ void MainWindow::openDocument(const QString &path)
 	subWindow->setProperty("documentPtr", QVariant::fromValue(static_cast<void *>(doc)));
 	subWindow->show();
 
-	_outputConsole->outputString(tr("Opened: %1").arg(path));
+	nlinfo("Opened: %s", path.toUtf8().constData());
 	updateMenus();
 }
 
@@ -478,7 +491,7 @@ void MainWindow::onSave()
 		{
 			doc->save();
 		}
-		_outputConsole->outputString(tr("Saved: %1").arg(doc->getFilePath()));
+		nlinfo("Saved: %s", doc->getFilePath().toUtf8().constData());
 	}
 }
 
@@ -569,7 +582,7 @@ void MainWindow::onToggleFileBrowser()
 
 void MainWindow::onToggleOutputConsole()
 {
-	_outputConsole->setVisible(_outputConsoleAction->isChecked());
+	_commandLogDock->setVisible(!_commandLogDock->isVisible());
 }
 
 void MainWindow::onRefresh()
@@ -592,6 +605,11 @@ void MainWindow::onAbout()
 {
 	QMessageBox::about(this, tr("About Georges Editor Qt"),
 		tr("Georges Editor Qt\n\nA Qt-based editor for NeL Georges files (.typ, .dfn, forms).\n\nPart of the NeL MMORPG Framework."));
+}
+
+void MainWindow::outputString(const QString &message)
+{
+	nlinfo("%s", message.toUtf8().constData());
 }
 
 void MainWindow::onSubWindowActivated(QMdiSubWindow *window)

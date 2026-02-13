@@ -17,6 +17,13 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+// Define GEORGES_USE_NATIVE_STYLE to 1 to use the OS-native look and feel
+// instead of the dark Fusion palette. By default, the dark Fusion palette
+// from shared_widgets/common.h (matching the Panoply Preview tool) is used.
+#ifndef GEORGES_USE_NATIVE_STYLE
+#define GEORGES_USE_NATIVE_STYLE 0
+#endif
+
 #include <QMainWindow>
 #include <QMdiArea>
 #include <QMdiSubWindow>
@@ -27,8 +34,11 @@
 #include <QStatusBar>
 
 class FileBrowserDock;
-class OutputConsoleDock;
 class GeorgesEditorDoc;
+
+namespace NLQT {
+	class CCommandLogDisplayer;
+}
 
 class MainWindow : public QMainWindow
 {
@@ -43,7 +53,7 @@ public:
 	void createNewDfn();
 	void createNewForm(const QString &dfnName = QString());
 
-	OutputConsoleDock *outputConsole() const { return _outputConsole; }
+	void outputString(const QString &message);
 
 private slots:
 	void onNewType();
@@ -82,7 +92,10 @@ private:
 
 	QMdiArea *_mdiArea;
 	FileBrowserDock *_fileBrowser;
-	OutputConsoleDock *_outputConsole;
+
+	// Console dock using shared_widgets CCommandLogDisplayer
+	NLQT::CCommandLogDisplayer *_commandLog;
+	QDockWidget *_commandLogDock;
 
 	// File menu actions
 	QAction *_newTypeAction;
@@ -119,7 +132,6 @@ private:
 
 	// View menu actions
 	QAction *_fileBrowserAction;
-	QAction *_outputConsoleAction;
 	QAction *_refreshAction;
 	QAction *_settingsAction;
 
