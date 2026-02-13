@@ -257,6 +257,9 @@ public:
 	// add a landscape. Special for CLandscapeModel::traverseRender();
 	void			addRenderLandscape(CLandscapeModel *model);
 
+	/// Get list of landscape models registered this frame (for decal face collection).
+	const std::vector<CLandscapeModel*>	&getLandscapeRenderList() const { return _LandscapeRenderList; }
+
 
 	/// \name Temp Debug
 	//@{

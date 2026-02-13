@@ -30,6 +30,7 @@ namespace NL3D {
 class	IDriver;
 class	CMaterial;
 class	CShadowMap;
+class	CDecalContext;
 
 
 // ***************************************************************************
@@ -98,6 +99,14 @@ public:
 	void			computeClippedTrisWithPolyClip(const CShadowMap *shadowMap, const CVector &casterPos, const CVector &vertDelta, const NLMISC::CPolygon2D &vertices,
 												   std::vector<CRGBAVertex> &destTris, bool colorUpfacingVertices);
 
+
+	/** Collect triangles for a projected decal.
+	  * Selects triangles from the quad grid, clips per the decal context's planes,
+	  * and outputs raw CVector triangles to CDecalContext::DestTris.
+	  * \param cdc Decal context with clip planes, bounding box, and destination output.
+	  * \param vertDelta Offset to add to vertices (for landscape tile positioning).
+	  */
+	void			receiveDecal(CDecalContext &cdc, const CVector &vertDelta);
 
 	/** Use the triangles added for camera 3rd person collision
 	 *	return a [0,1] value. 0 => collision at start. 1 => no collision.

@@ -31,6 +31,8 @@
 #include "nel/3d/driver.h"
 #include "nel/3d/clip_trav.h"
 #include "nel/3d/visual_collision_manager.h"
+#include "nel/3d/render_trav.h"
+#include "nel/3d/landscape_model.h"
 
 using namespace std;
 using namespace NL3D;
@@ -233,10 +235,21 @@ context.WorldClipPlanes[i].invert();
 
 context.WorldMatrix = getWorldMatrix();
 
-// Clear and collect triangles via visual collision
+// Clear and collect triangles via visual collision (objects/meshes)
 _Vertices.clear();
 context.DestTris = &_Vertices;
 vcm->receiveDecal(context);
+
+// Also collect triangles from landscape's shadow poly receiver (terrain)
+CRenderTrav &renderTrav = sc->getRenderTrav();
+const std::vector<CLandscapeModel*> &landscapes = renderTrav.getLandscapeRenderList();
+for (uint i = 0; i < landscapes.size(); ++i)
+{
+CLandscapeModel *lm = landscapes[i];
+if (!lm) continue;
+CVector vertDelta = -lm->Landscape.getPZBModelPosition();
+lm->Landscape.getShadowPolyReceiver().receiveDecal(context, vertDelta);
+}
 
 // Generate UV coordinates from collected vertices
 generateUVs();
