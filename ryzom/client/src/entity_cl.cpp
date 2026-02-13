@@ -3253,10 +3253,16 @@ void CEntityCL::updateCastShadowMap()
 		{
 			if(!_Instances[i].Current.empty())
 			{
+				if(shadowOn)
+					_Instances[i].Current.setUserLightable(true);
 				_Instances[i].Current.enableCastShadowMap(shadowOn);
 			}
 			if(!_Instances[i].Loading.empty())
+			{
+				if(shadowOn)
+					_Instances[i].Loading.setUserLightable(true);
 				_Instances[i].Loading.enableCastShadowMap(shadowOn);
+			}
 		}
 
 		_SomeInstanceCastShadowMap= shadowOn;
