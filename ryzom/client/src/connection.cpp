@@ -37,6 +37,7 @@
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/stereo_display.h"
+#include "nel/3d/bloom_effect.h"
 // Game Share
 //#include "game_share/gd_time.h"		// \todo GUIGUI : TO DELETE/CHANGE
 #include "game_share/gender.h"
@@ -85,6 +86,7 @@
 
 #include "bg_downloader_access.h"
 #include "main_loop.h"
+#include "global.h"
 
 #include "misc.h"
 
@@ -1031,6 +1033,17 @@ TInterfaceState globalMenu()
 		// Update the DT T0 and T1 global variables
 		updateClientTime();
 		CInputHandlerManager::getInstance()->pumpEvents();
+		bool haveEffects = Driver->getPolygonMode() == UDriver::Filled
+			&& (ClientCfg.Bloom || FXAA);
+		if (haveEffects)
+		{
+			Driver->beginDefaultRenderTarget();
+			if (ClientCfg.Bloom)
+			{
+				CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
+				CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
+			}
+		}
 		Driver->clearBuffers(CRGBA::Black);
 		Driver->setMatrixMode2D11();
 
@@ -1042,6 +1055,13 @@ TInterfaceState globalMenu()
 		pIM->updateFrameViews(NULL);
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
+		if (haveEffects)
+		{
+			Driver->setMatrixMode2D11();
+			if (FXAA) FXAA->applyEffect();
+			if (ClientCfg.Bloom) CBloomEffect::instance().applyBloom();
+			Driver->endDefaultRenderTarget(NULL);
+		}
 
 		// Movie shooter
 		globalMenuMovieShooter();
