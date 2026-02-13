@@ -1059,7 +1059,7 @@ TInterfaceState globalMenu()
 		{
 			Driver->setMatrixMode2D11();
 			if (FXAA) FXAA->applyEffect();
-			if (ClientCfg.Bloom) CBloomEffect::instance().applyBloom();
+			if (ClientCfg.Bloom) CBloomEffect::getInstance().applyBloom();
 			Driver->endDefaultRenderTarget(NULL);
 		}
 
