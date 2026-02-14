@@ -26,6 +26,11 @@
 #include <QToolBar>
 #include <QStatusBar>
 
+#include <nel/misc/config_file.h>
+
+#include "configuration.h"
+#include "internationalization.h"
+
 class FileBrowserDock;
 class GeorgesEditorDoc;
 
@@ -45,8 +50,6 @@ public:
 	void createNewType();
 	void createNewDfn();
 	void createNewForm(const QString &dfnName = QString());
-
-	void outputString(const QString &message);
 
 protected:
 	void closeEvent(QCloseEvent *event) override;
@@ -73,7 +76,6 @@ private slots:
 	void onToggleFileBrowser();
 	void onToggleOutputConsole();
 	void onRefresh();
-	void onSettings();
 	void onAbout();
 	void onSubWindowActivated(QMdiSubWindow *window);
 	void onOpenRecentFile();
@@ -85,12 +87,29 @@ private:
 	void createToolBars();
 	void createStatusBar();
 	void createDockWidgets();
-	void initSearchPaths();
 	QMdiSubWindow *findMdiChild(const QString &fileName) const;
+
+	// Translation methods (called on language change)
+	void translateActions();
+	void translateMenus();
+	void translateToolBars();
+	void translateDockWindows();
+
+	// Configuration callbacks
+	void cfcbQtStyle(NLMISC::CConfigFile::CVar &var);
+	void cfcbQtPalette(NLMISC::CConfigFile::CVar &var);
+
+	// Internationalization callback
+	void incbLanguageCode();
 
 	// Recent files
 	void addRecentFile(const QString &filePath);
 	void updateRecentFileActions();
+
+	// NeL configuration and i18n (following nel_qt pattern)
+	NLQT::CConfiguration m_Configuration;
+	NLQT::CInternationalization m_Internationalization;
+	QPalette m_OriginalPalette;
 
 	QMdiArea *_mdiArea;
 	FileBrowserDock *_fileBrowser;
@@ -135,7 +154,6 @@ private:
 	// View menu actions
 	QAction *_fileBrowserAction;
 	QAction *_refreshAction;
-	QAction *_settingsAction;
 
 	// Help menu actions
 	QAction *_aboutAction;

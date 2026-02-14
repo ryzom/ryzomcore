@@ -27,6 +27,7 @@
 #include <QCloseEvent>
 #include <QSettings>
 #include <QFileInfo>
+#include <QStyleFactory>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -40,8 +41,10 @@
 #include "form_dialog.h"
 #include "header_dialog.h"
 #include "file_browser_dock.h"
-#include "settings_dialog.h"
 #include "../../3d/shared_widgets/command_log.h"
+#include "../../3d/shared_widgets/common.h"
+
+using namespace NLQT;
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent),
@@ -50,7 +53,20 @@ MainWindow::MainWindow(QWidget *parent)
 	_commandLog(NULL), _commandLogDock(NULL)
 {
 	setObjectName("MainWindow");
-	setWindowTitle(tr("Georges Editor Qt"));
+
+	// Initialize NeL configuration (loads .cfg file, sets up search paths)
+	m_Configuration.init();
+
+	// Save original palette before any style changes
+	m_OriginalPalette = QApplication::palette();
+
+	// Register configuration callbacks (matching nel_qt pattern)
+	m_Configuration.setAndCallback("QtStyle", CConfigCallback(this, &MainWindow::cfcbQtStyle));
+	m_Configuration.setAndCallback("QtPalette", CConfigCallback(this, &MainWindow::cfcbQtPalette));
+
+	// Initialize internationalization
+	m_Internationalization.init(&m_Configuration);
+	m_Internationalization.enableCallback(CEmptyCallback(this, &MainWindow::incbLanguageCode));
 
 	_mdiArea = new QMdiArea(this);
 	_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -65,16 +81,16 @@ MainWindow::MainWindow(QWidget *parent)
 	createStatusBar();
 	createDockWidgets();
 
+	// Trigger initial language translation
+	incbLanguageCode();
+
 	updateMenus();
 	updateRecentFileActions();
 
-	// Initialize NeL search paths from saved settings
-	initSearchPaths();
-
 	// Restore window geometry and dock state if enabled
-	QSettings settings("NeL", "Georges Editor Qt");
-	if (settings.value("rememberWindowState", false).toBool())
+	if (m_Configuration.getValue("RememberWindowState", false))
 	{
+		QSettings settings("NeL", "Georges Editor Qt");
 		restoreGeometry(settings.value("windowGeometry").toByteArray());
 		restoreState(settings.value("windowState").toByteArray());
 	}
@@ -82,76 +98,148 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+	// Drop callbacks in reverse order of registration (matching nel_qt pattern)
+	m_Internationalization.disableCallback(CEmptyCallback(this, &MainWindow::incbLanguageCode));
+	m_Internationalization.release();
+	m_Configuration.dropCallback("QtPalette");
+	m_Configuration.dropCallback("QtStyle");
+	m_Configuration.release();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	// Save window geometry and dock state if enabled
-	QSettings settings("NeL", "Georges Editor Qt");
-	if (settings.value("rememberWindowState", false).toBool())
+	if (m_Configuration.getValue("RememberWindowState", false))
 	{
+		QSettings settings("NeL", "Georges Editor Qt");
 		settings.setValue("windowGeometry", saveGeometry());
 		settings.setValue("windowState", saveState());
 	}
 	event->accept();
 }
 
-void MainWindow::initSearchPaths()
-{
-	QSettings settings("NeL", "Georges Editor Qt");
-	QString rootPath = settings.value("rootSearchPath", "").toString();
+// --- Configuration callbacks (matching nel_qt pattern) ---
 
-	if (!rootPath.isEmpty())
-	{
-		// Clear and re-add search paths, matching MFC Georges initCfg() behavior
-		NLMISC::CPath::removeAllAlternativeSearchPath();
-		try
-		{
-			NLMISC::CPath::addSearchPath(rootPath.toUtf8().constData(), true, true);
-			nlinfo("Search path initialized: %s", rootPath.toUtf8().constData());
-		}
-		catch (const NLMISC::Exception &e)
-		{
-			nlwarning("Failed to add search path '%s': %s", rootPath.toUtf8().constData(), e.what());
-		}
-	}
+void MainWindow::cfcbQtStyle(NLMISC::CConfigFile::CVar &var)
+{
+	QApplication::setStyle(QStyleFactory::create(var.asString().c_str()));
+}
+
+void MainWindow::cfcbQtPalette(NLMISC::CConfigFile::CVar &var)
+{
+	if (var.asBool())
+		QApplication::setPalette(QApplication::style()->standardPalette());
+	else
+		QApplication::setPalette(m_OriginalPalette);
+}
+
+// --- Internationalization callback ---
+
+void MainWindow::incbLanguageCode()
+{
+	setWindowTitle(nli18n("GeWindowTitle"));
+	translateActions();
+	translateMenus();
+	translateToolBars();
+	translateDockWindows();
+}
+
+// --- Translation methods ---
+
+void MainWindow::translateActions()
+{
+	_newTypeAction->setText(nli18n("GeActionNewType"));
+	_newDfnAction->setText(nli18n("GeActionNewDfn"));
+	_newFormAction->setText(nli18n("GeActionNewForm"));
+	_openAction->setText(nli18n("GeActionOpen"));
+	_saveAction->setText(nli18n("GeActionSave"));
+	_saveAllAction->setText(nli18n("GeActionSaveAll"));
+	_closeAction->setText(nli18n("GeActionClose"));
+	_closeAllAction->setText(nli18n("GeActionCloseAll"));
+	_exitAction->setText(nli18n("GeActionExit"));
+
+	_undoAction->setText(nli18n("GeActionUndo"));
+	_redoAction->setText(nli18n("GeActionRedo"));
+	_cutAction->setText(nli18n("GeActionCut"));
+	_copyAction->setText(nli18n("GeActionCopy"));
+	_pasteAction->setText(nli18n("GeActionPaste"));
+	_insertAction->setText(nli18n("GeActionInsert"));
+	_deleteAction->setText(nli18n("GeActionDelete"));
+	_renameAction->setText(nli18n("GeActionRename"));
+	_expandAllAction->setText(nli18n("GeActionExpandAll"));
+	_collapseAllAction->setText(nli18n("GeActionCollapseAll"));
+
+	_hold1Action->setText(nli18n("GeActionHold1"));
+	_hold2Action->setText(nli18n("GeActionHold2"));
+	_hold3Action->setText(nli18n("GeActionHold3"));
+	_hold4Action->setText(nli18n("GeActionHold4"));
+	_fetch1Action->setText(nli18n("GeActionFetch1"));
+	_fetch2Action->setText(nli18n("GeActionFetch2"));
+	_fetch3Action->setText(nli18n("GeActionFetch3"));
+	_fetch4Action->setText(nli18n("GeActionFetch4"));
+
+	_fileBrowserAction->setText(nli18n("GeActionFileBrowser"));
+	_refreshAction->setText(nli18n("GeActionRefresh"));
+
+	_aboutAction->setText(nli18n("GeActionAbout"));
+}
+
+void MainWindow::translateMenus()
+{
+	_fileMenu->setTitle(nli18n("GeMenuFile"));
+	_editMenu->setTitle(nli18n("GeMenuEdit"));
+	_viewMenu->setTitle(nli18n("GeMenuView"));
+	_helpMenu->setTitle(nli18n("GeMenuHelp"));
+	_recentMenu->setTitle(nli18n("GeMenuRecentFiles"));
+}
+
+void MainWindow::translateToolBars()
+{
+	_fileToolBar->setWindowTitle(nli18n("GeBarFile"));
+	_editToolBar->setWindowTitle(nli18n("GeBarEdit"));
+}
+
+void MainWindow::translateDockWindows()
+{
+	_commandLogDock->setWindowTitle(nli18n("GeWidgetConsole"));
+	_fileBrowser->setWindowTitle(nli18n("GeWidgetFileBrowser"));
 }
 
 void MainWindow::createActions()
 {
 	// File actions
-	_newTypeAction = new QAction(tr("New &Type"), this);
+	_newTypeAction = new QAction(this);
 	_newTypeAction->setShortcut(QKeySequence("Ctrl+T"));
 	connect(_newTypeAction, &QAction::triggered, this, &MainWindow::onNewType);
 
-	_newDfnAction = new QAction(tr("New &DFN"), this);
+	_newDfnAction = new QAction(this);
 	_newDfnAction->setShortcut(QKeySequence("Ctrl+D"));
 	connect(_newDfnAction, &QAction::triggered, this, &MainWindow::onNewDfn);
 
-	_newFormAction = new QAction(tr("New &Form"), this);
+	_newFormAction = new QAction(this);
 	_newFormAction->setShortcut(QKeySequence("Ctrl+N"));
 	connect(_newFormAction, &QAction::triggered, this, &MainWindow::onNewForm);
 
-	_openAction = new QAction(tr("&Open..."), this);
+	_openAction = new QAction(this);
 	_openAction->setShortcut(QKeySequence::Open);
 	_openAction->setIcon(QIcon(":/icons/worldbuilder.ico"));
 	connect(_openAction, &QAction::triggered, this, &MainWindow::onOpen);
 
-	_saveAction = new QAction(tr("&Save"), this);
+	_saveAction = new QAction(this);
 	_saveAction->setShortcut(QKeySequence::Save);
 	connect(_saveAction, &QAction::triggered, this, &MainWindow::onSave);
 
-	_saveAllAction = new QAction(tr("Save A&ll"), this);
+	_saveAllAction = new QAction(this);
 	connect(_saveAllAction, &QAction::triggered, this, &MainWindow::onSaveAll);
 
-	_closeAction = new QAction(tr("&Close"), this);
+	_closeAction = new QAction(this);
 	_closeAction->setShortcut(QKeySequence::Close);
 	connect(_closeAction, &QAction::triggered, this, &MainWindow::onClose);
 
-	_closeAllAction = new QAction(tr("Close All"), this);
+	_closeAllAction = new QAction(this);
 	connect(_closeAllAction, &QAction::triggered, this, &MainWindow::onCloseAll);
 
-	_exitAction = new QAction(tr("E&xit"), this);
+	_exitAction = new QAction(this);
 	_exitAction->setShortcut(QKeySequence::Quit);
 	connect(_exitAction, &QAction::triggered, qApp, &QApplication::closeAllWindows);
 
@@ -164,75 +252,72 @@ void MainWindow::createActions()
 	}
 
 	// Edit actions
-	_undoAction = new QAction(tr("&Undo"), this);
+	_undoAction = new QAction(this);
 	_undoAction->setShortcut(QKeySequence::Undo);
 	connect(_undoAction, &QAction::triggered, this, &MainWindow::onUndo);
 
-	_redoAction = new QAction(tr("&Redo"), this);
+	_redoAction = new QAction(this);
 	_redoAction->setShortcut(QKeySequence::Redo);
 	connect(_redoAction, &QAction::triggered, this, &MainWindow::onRedo);
 
-	_cutAction = new QAction(tr("Cu&t"), this);
+	_cutAction = new QAction(this);
 	_cutAction->setShortcut(QKeySequence::Cut);
 	connect(_cutAction, &QAction::triggered, this, &MainWindow::onCut);
 
-	_copyAction = new QAction(tr("&Copy"), this);
+	_copyAction = new QAction(this);
 	_copyAction->setShortcut(QKeySequence::Copy);
 	connect(_copyAction, &QAction::triggered, this, &MainWindow::onCopy);
 
-	_pasteAction = new QAction(tr("&Paste"), this);
+	_pasteAction = new QAction(this);
 	_pasteAction->setShortcut(QKeySequence::Paste);
 	connect(_pasteAction, &QAction::triggered, this, &MainWindow::onPaste);
 
-	_insertAction = new QAction(tr("&Insert"), this);
+	_insertAction = new QAction(this);
 	_insertAction->setShortcut(QKeySequence("Ins"));
 	connect(_insertAction, &QAction::triggered, this, &MainWindow::onInsert);
 
-	_deleteAction = new QAction(tr("&Delete"), this);
+	_deleteAction = new QAction(this);
 	_deleteAction->setShortcut(QKeySequence::Delete);
 	connect(_deleteAction, &QAction::triggered, this, &MainWindow::onDelete);
 
-	_renameAction = new QAction(tr("Re&name"), this);
+	_renameAction = new QAction(this);
 	_renameAction->setShortcut(QKeySequence("F2"));
 	connect(_renameAction, &QAction::triggered, this, &MainWindow::onRename);
 
 	// Hold/Fetch actions
-	_hold1Action = new QAction(tr("Hold 1"), this);
-	_hold2Action = new QAction(tr("Hold 2"), this);
-	_hold3Action = new QAction(tr("Hold 3"), this);
-	_hold4Action = new QAction(tr("Hold 4"), this);
-	_fetch1Action = new QAction(tr("Fetch 1"), this);
-	_fetch2Action = new QAction(tr("Fetch 2"), this);
-	_fetch3Action = new QAction(tr("Fetch 3"), this);
-	_fetch4Action = new QAction(tr("Fetch 4"), this);
+	_hold1Action = new QAction(this);
+	_hold2Action = new QAction(this);
+	_hold3Action = new QAction(this);
+	_hold4Action = new QAction(this);
+	_fetch1Action = new QAction(this);
+	_fetch2Action = new QAction(this);
+	_fetch3Action = new QAction(this);
+	_fetch4Action = new QAction(this);
 
-	_expandAllAction = new QAction(tr("&Expand All"), this);
+	_expandAllAction = new QAction(this);
 	connect(_expandAllAction, &QAction::triggered, this, &MainWindow::onExpandAll);
 
-	_collapseAllAction = new QAction(tr("Co&llapse All"), this);
+	_collapseAllAction = new QAction(this);
 	connect(_collapseAllAction, &QAction::triggered, this, &MainWindow::onCollapseAll);
 
 	// View actions
-	_fileBrowserAction = new QAction(tr("&File Browser"), this);
+	_fileBrowserAction = new QAction(this);
 	_fileBrowserAction->setCheckable(true);
 	_fileBrowserAction->setChecked(true);
 	connect(_fileBrowserAction, &QAction::triggered, this, &MainWindow::onToggleFileBrowser);
 
-	_refreshAction = new QAction(tr("&Refresh"), this);
+	_refreshAction = new QAction(this);
 	_refreshAction->setShortcut(QKeySequence("F5"));
 	connect(_refreshAction, &QAction::triggered, this, &MainWindow::onRefresh);
 
-	_settingsAction = new QAction(tr("&Settings..."), this);
-	connect(_settingsAction, &QAction::triggered, this, &MainWindow::onSettings);
-
 	// Help actions
-	_aboutAction = new QAction(tr("&About"), this);
+	_aboutAction = new QAction(this);
 	connect(_aboutAction, &QAction::triggered, this, &MainWindow::onAbout);
 }
 
 void MainWindow::createMenus()
 {
-	_fileMenu = menuBar()->addMenu(tr("&File"));
+	_fileMenu = menuBar()->addMenu("");
 	_fileMenu->addAction(_newTypeAction);
 	_fileMenu->addAction(_newDfnAction);
 	_fileMenu->addAction(_newFormAction);
@@ -240,7 +325,7 @@ void MainWindow::createMenus()
 	_fileMenu->addAction(_openAction);
 
 	// Recent files submenu
-	_recentMenu = _fileMenu->addMenu(tr("Recent Files"));
+	_recentMenu = _fileMenu->addMenu("");
 	for (int i = 0; i < MaxRecentFiles; ++i)
 		_recentMenu->addAction(_recentFileActions[i]);
 
@@ -253,7 +338,7 @@ void MainWindow::createMenus()
 	_fileMenu->addSeparator();
 	_fileMenu->addAction(_exitAction);
 
-	_editMenu = menuBar()->addMenu(tr("&Edit"));
+	_editMenu = menuBar()->addMenu("");
 	_editMenu->addAction(_undoAction);
 	_editMenu->addAction(_redoAction);
 	_editMenu->addSeparator();
@@ -278,24 +363,23 @@ void MainWindow::createMenus()
 	_editMenu->addAction(_expandAllAction);
 	_editMenu->addAction(_collapseAllAction);
 
-	_viewMenu = menuBar()->addMenu(tr("&View"));
+	_viewMenu = menuBar()->addMenu("");
 	_viewMenu->addAction(_fileBrowserAction);
 	// Console toggle action is added by createDockWidgets()
 	_viewMenu->addSeparator();
 	_viewMenu->addAction(_refreshAction);
-	_viewMenu->addAction(_settingsAction);
 
-	_helpMenu = menuBar()->addMenu(tr("&Help"));
+	_helpMenu = menuBar()->addMenu("");
 	_helpMenu->addAction(_aboutAction);
 }
 
 void MainWindow::createToolBars()
 {
-	_fileToolBar = addToolBar(tr("File"));
+	_fileToolBar = addToolBar("");
 	_fileToolBar->addAction(_openAction);
 	_fileToolBar->addAction(_saveAction);
 
-	_editToolBar = addToolBar(tr("Edit"));
+	_editToolBar = addToolBar("");
 	_editToolBar->addAction(_undoAction);
 	_editToolBar->addAction(_redoAction);
 	_editToolBar->addSeparator();
@@ -306,7 +390,7 @@ void MainWindow::createToolBars()
 
 void MainWindow::createStatusBar()
 {
-	statusBar()->showMessage(tr("Ready"));
+	statusBar()->showMessage(nli18n("GeStatusReady"));
 }
 
 void MainWindow::createDockWidgets()
@@ -318,7 +402,6 @@ void MainWindow::createDockWidgets()
 	// Console dock using shared CCommandLogDisplayer (same as Panoply Preview)
 	{
 		_commandLogDock = new QDockWidget(this);
-		_commandLogDock->setWindowTitle(tr("Console"));
 		_commandLogDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 		_commandLog = new NLQT::CCommandLogDisplayer(_commandLogDock);
 		_commandLogDock->setWidget(_commandLog);
@@ -424,7 +507,6 @@ void MainWindow::openDocument(const QString &path)
 void MainWindow::createNewType()
 {
 	GeorgesEditorDoc *doc = new GeorgesEditorDoc();
-	// Create empty type document (stub)
 	QSplitter *splitter = new QSplitter(Qt::Horizontal);
 	GeorgesDockWidget *treeView = new GeorgesDockWidget(splitter);
 	treeView->setDocument(doc);
@@ -441,7 +523,7 @@ void MainWindow::createNewType()
 	splitter->setStretchFactor(1, 2);
 
 	QMdiSubWindow *subWindow = _mdiArea->addSubWindow(splitter);
-	subWindow->setWindowTitle(tr("Untitled.typ"));
+	subWindow->setWindowTitle(nli18n("GeUntitledTyp"));
 	subWindow->setProperty("documentPtr", QVariant::fromValue(static_cast<void *>(doc)));
 	subWindow->show();
 }
@@ -465,7 +547,7 @@ void MainWindow::createNewDfn()
 	splitter->setStretchFactor(1, 2);
 
 	QMdiSubWindow *subWindow = _mdiArea->addSubWindow(splitter);
-	subWindow->setWindowTitle(tr("Untitled.dfn"));
+	subWindow->setWindowTitle(nli18n("GeUntitledDfn"));
 	subWindow->setProperty("documentPtr", QVariant::fromValue(static_cast<void *>(doc)));
 	subWindow->show();
 }
@@ -490,7 +572,7 @@ void MainWindow::createNewForm(const QString &dfnName)
 	splitter->setStretchFactor(1, 2);
 
 	QMdiSubWindow *subWindow = _mdiArea->addSubWindow(splitter);
-	subWindow->setWindowTitle(tr("Untitled Form"));
+	subWindow->setWindowTitle(nli18n("GeUntitledForm"));
 	subWindow->setProperty("documentPtr", QVariant::fromValue(static_cast<void *>(doc)));
 	subWindow->show();
 }
@@ -523,9 +605,9 @@ void MainWindow::onNewForm()
 void MainWindow::onOpen()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
-		tr("Open Georges File"),
+		nli18n("GeOpenFileTitle"),
 		QString(),
-		tr("All Georges Files (*.typ *.dfn);;Type Files (*.typ);;DFN Files (*.dfn);;All Files (*.*)"));
+		nli18n("GeOpenFileFilter"));
 	if (!fileName.isEmpty())
 		openDocument(fileName);
 }
@@ -542,9 +624,9 @@ void MainWindow::onSave()
 		if (doc->getFilePath().isEmpty())
 		{
 			QString fileName = QFileDialog::getSaveFileName(this,
-				tr("Save Georges File"),
+				nli18n("GeSaveFileTitle"),
 				QString(),
-				tr("All Georges Files (*.typ *.dfn);;Type Files (*.typ);;DFN Files (*.dfn);;All Files (*.*)"));
+				nli18n("GeSaveFileFilter"));
 			if (fileName.isEmpty())
 				return;
 			doc->save(fileName);
@@ -652,28 +734,9 @@ void MainWindow::onRefresh()
 	_fileBrowser->refresh();
 }
 
-void MainWindow::onSettings()
-{
-	SettingsDialog dlg(this);
-	dlg.loadSettings();
-	if (dlg.exec() == QDialog::Accepted)
-	{
-		dlg.saveSettings();
-		// Re-initialize search paths with new settings
-		initSearchPaths();
-		_fileBrowser->refresh();
-	}
-}
-
 void MainWindow::onAbout()
 {
-	QMessageBox::about(this, tr("About Georges Editor Qt"),
-		tr("Georges Editor Qt\n\nA Qt-based editor for NeL Georges files (.typ, .dfn, forms).\n\nPart of the NeL MMORPG Framework."));
-}
-
-void MainWindow::outputString(const QString &message)
-{
-	nlinfo("%s", message.toUtf8().constData());
+	QMessageBox::about(this, nli18n("GeAboutTitle"), nli18n("GeAboutText"));
 }
 
 void MainWindow::onSubWindowActivated(QMdiSubWindow *window)
@@ -708,7 +771,9 @@ void MainWindow::addRecentFile(const QString &filePath)
 
 	files.removeAll(filePath);
 	files.prepend(filePath);
-	while (files.size() > MaxRecentFiles)
+
+	int maxRecent = m_Configuration.getValue("MaxRecentFiles", (int)MaxRecentFiles);
+	while (files.size() > maxRecent)
 		files.removeLast();
 
 	settings.setValue("recentFiles", files);
@@ -724,7 +789,7 @@ void MainWindow::updateRecentFileActions()
 
 	for (int i = 0; i < numRecentFiles; ++i)
 	{
-		QString text = tr("&%1 %2").arg(i + 1).arg(QFileInfo(files[i]).fileName());
+		QString text = QString("&%1 %2").arg(i + 1).arg(QFileInfo(files[i]).fileName());
 		_recentFileActions[i]->setText(text);
 		_recentFileActions[i]->setData(files[i]);
 		_recentFileActions[i]->setToolTip(files[i]);

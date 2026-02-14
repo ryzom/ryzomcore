@@ -1,0 +1,79 @@
+﻿LanguageName [English]
+
+// Window
+GeWindowTitle [Georges Editor Qt]
+
+// Widgets
+GeWidgetConsole [Console]
+GeWidgetFileBrowser [File Browser]
+
+// Menus
+GeMenuFile [&File]
+GeMenuEdit [&Edit]
+GeMenuView [&View]
+GeMenuHelp [&Help]
+GeMenuRecentFiles [Recent Files]
+
+// Toolbars
+GeBarFile [File]
+GeBarEdit [Edit]
+
+// File Actions
+GeActionNewType [New &Type]
+GeActionNewDfn [New &DFN]
+GeActionNewForm [New &Form]
+GeActionOpen [&Open...]
+GeActionSave [&Save]
+GeActionSaveAll [Save A&ll]
+GeActionClose [&Close]
+GeActionCloseAll [Close All]
+GeActionExit [E&xit]
+
+// Edit Actions
+GeActionUndo [&Undo]
+GeActionRedo [&Redo]
+GeActionCut [Cu&t]
+GeActionCopy [&Copy]
+GeActionPaste [&Paste]
+GeActionInsert [&Insert]
+GeActionDelete [&Delete]
+GeActionRename [Re&name]
+GeActionExpandAll [&Expand All]
+GeActionCollapseAll [Co&llapse All]
+
+// Hold/Fetch Actions
+GeActionHold1 [Hold 1]
+GeActionHold2 [Hold 2]
+GeActionHold3 [Hold 3]
+GeActionHold4 [Hold 4]
+GeActionFetch1 [Fetch 1]
+GeActionFetch2 [Fetch 2]
+GeActionFetch3 [Fetch 3]
+GeActionFetch4 [Fetch 4]
+
+// View Actions
+GeActionFileBrowser [&File Browser]
+GeActionRefresh [&Refresh]
+
+// Help Actions
+GeActionAbout [&About]
+
+// Status
+GeStatusReady [Ready]
+
+// Dialogs
+GeOpenFileTitle [Open Georges File]
+GeOpenFileFilter [All Georges Files (*.typ *.dfn);;Type Files (*.typ);;DFN Files (*.dfn);;All Files (*.*)]
+GeSaveFileTitle [Save Georges File]
+GeSaveFileFilter [All Georges Files (*.typ *.dfn);;Type Files (*.typ);;DFN Files (*.dfn);;All Files (*.*)]
+
+// Untitled documents
+GeUntitledTyp [Untitled.typ]
+GeUntitledDfn [Untitled.dfn]
+GeUntitledForm [Untitled Form]
+
+// About
+GeAboutTitle [About Georges Editor Qt]
+GeAboutText [Georges Editor Qt\n\nA Qt-based editor for NeL Georges files (.typ, .dfn, forms).\n\nPart of the NeL MMORPG Framework.]
+
+// end of file

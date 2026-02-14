@@ -14,21 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// Define GEORGES_USE_DARK_THEME to enable the dark Fusion palette from
-// shared_widgets/common.h (matching Panoply Preview and nel_qt sample).
-// The default is enabled. Set to 0 to use the OS-native look and feel.
-#ifndef GEORGES_USE_DARK_THEME
-#define GEORGES_USE_DARK_THEME 1
-#endif
-
 #include <nel/misc/types_nl.h>
 #include <nel/misc/app_context.h>
 #include <nel/misc/debug.h>
 #include <nel/misc/path.h>
+#include <nel/misc/file.h>
 
 #include <QApplication>
-#include <QStyleFactory>
 
+#include "georges_editor_qt_config.h"
 #include "../../3d/shared_widgets/common.h"
 #include "main_window.h"
 
@@ -36,18 +30,35 @@ int main(int argc, char *argv[])
 {
 	NLMISC::CApplicationContext appContext;
 
-	// use log.log if NEL_LOG_IN_FILE defined as 1
-	createDebug(NULL, false, false);
+	// use log.log if NEL_LOG_IN_FILE and NLQT_USE_LOG_LOG defined as 1
+	createDebug(NULL, NLQT_USE_LOG_LOG, false);
 
-#if GEORGES_USE_DARK_THEME
-	NLQT::preApplication();
+#if NLQT_USE_LOG
+	// create tool log file
+	static NLMISC::CFileDisplayer *s_FileDisplayer = NULL;
+	if (NLQT_ERASE_LOG && NLMISC::CFile::isExists(NLQT_LOG_FILE))
+		NLMISC::CFile::deleteFile(NLQT_LOG_FILE);
+	s_FileDisplayer = new NLMISC::CFileDisplayer();
+	s_FileDisplayer->setParam(NLQT_LOG_FILE, NLQT_ERASE_LOG);
+	NLMISC::DebugLog->addDisplayer(s_FileDisplayer);
+	NLMISC::InfoLog->addDisplayer(s_FileDisplayer);
+	NLMISC::WarningLog->addDisplayer(s_FileDisplayer);
+	NLMISC::AssertLog->addDisplayer(s_FileDisplayer);
+	NLMISC::ErrorLog->addDisplayer(s_FileDisplayer);
 #endif
+
+	nlinfo("Welcome to Georges Editor Qt!");
+
+	// Qt library path setup
+	NLQT::preApplication();
+
 	QApplication app(argc, argv);
 	app.setApplicationName("Georges Editor Qt");
 	app.setOrganizationName("NeL");
-#if GEORGES_USE_DARK_THEME
+
+	// Dark Fusion palette as the default — will be overridden
+	// by QtStyle/QtPalette config callbacks in MainWindow constructor
 	NLQT::postApplication();
-#endif
 
 	MainWindow mainWindow;
 	mainWindow.resize(1024, 768);
