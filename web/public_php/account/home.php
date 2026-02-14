@@ -173,7 +173,7 @@ ob_start();
 									<?php endif; ?>
 								</td>
 								<td><?php echo (int)$shard['NbPlayers']; ?></td>
-								<td style="color:#8899a6; font-size:0.85rem;"><?php echo h($shard['MOTD'] ?: '—'); ?></td>
+								<td style="color:#8899a6; font-size:0.85rem;"><?php echo $shard['MOTD'] ? h($shard['MOTD']) : '&mdash;'; ?></td>
 							</tr>
 							<?php endforeach; ?>
 						</tbody>

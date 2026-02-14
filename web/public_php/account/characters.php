@@ -69,7 +69,7 @@ ob_start();
 	<?php else: ?>
 		<?php foreach ($charactersByDomain as $entry): ?>
 			<div class="card">
-				<h2><?php echo h($entry['domain']['domain_name']); ?> — Characters</h2>
+				<h2><?php echo h($entry['domain']['domain_name']); ?> &mdash; Characters</h2>
 				<?php if (isset($entry['error'])): ?>
 					<div class="alert alert-error"><?php echo h($entry['error']); ?></div>
 				<?php else: ?>
@@ -123,9 +123,9 @@ ob_start();
 								<?php foreach ($entry['characters'] as $char): ?>
 								<tr>
 									<td style="color:#ecf0f1; font-weight:600;"><?php echo h($char['char_name']); ?></td>
-									<td><?php echo h($char['race'] ?: '—'); ?></td>
-									<td><?php echo h($char['civilisation'] ?: '—'); ?></td>
-									<td><?php echo h($char['cult'] ?: '—'); ?></td>
+									<td><?php echo $char['race'] ? h($char['race']) : '&mdash;'; ?></td>
+									<td><?php echo $char['civilisation'] ? h($char['civilisation']) : '&mdash;'; ?></td>
+									<td><?php echo $char['cult'] ? h($char['cult']) : '&mdash;'; ?></td>
 									<td>
 										<?php if ($char['ring_access']): ?>
 											<span class="badge badge-blue"><?php echo h($char['ring_access']); ?></span>
@@ -133,7 +133,7 @@ ob_start();
 											<span class="badge badge-gray">None</span>
 										<?php endif; ?>
 									</td>
-									<td style="color:#8899a6; font-size:0.85rem;"><?php echo h($char['creation_date'] ?: '—'); ?></td>
+									<td style="color:#8899a6; font-size:0.85rem;"><?php echo $char['creation_date'] ? h($char['creation_date']) : '&mdash;'; ?></td>
 								</tr>
 								<?php endforeach; ?>
 							</tbody>

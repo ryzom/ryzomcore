@@ -11,7 +11,7 @@ $actionError = '';
 $error = '';
 $success = '';
 
-// Handle session actions (close, invite, remove) — process before loading data
+// Handle session actions (close, invite, remove) -- process before loading data
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 	$action = isset($_POST['session_action']) ? $_POST['session_action'] : '';
 	$domainRingDb = isset($_POST['ring_db_name']) ? $_POST['ring_db_name'] : '';
@@ -261,13 +261,13 @@ ob_start();
 		<?php foreach ($sessionsByDomain as $entry): ?>
 			<?php if (isset($entry['error'])): ?>
 				<div class="card">
-					<h2><?php echo h($entry['domain']['domain_name']); ?> — Sessions</h2>
+					<h2><?php echo h($entry['domain']['domain_name']); ?> &mdash; Sessions</h2>
 					<div class="alert alert-error"><?php echo h($entry['error']); ?></div>
 				</div>
 			<?php else: ?>
 				<!-- Owned Sessions -->
 				<div class="card">
-					<h2><?php echo h($entry['domain']['domain_name']); ?> — Your Sessions</h2>
+					<h2><?php echo h($entry['domain']['domain_name']); ?> &mdash; Your Sessions</h2>
 					<?php if (empty($entry['owned_sessions'])): ?>
 						<div class="empty-state"><p>You have no sessions in this domain.</p></div>
 					<?php else: ?>
@@ -367,7 +367,7 @@ ob_start();
 				<!-- Participating Sessions -->
 				<?php if (!empty($entry['participating_sessions'])): ?>
 				<div class="card">
-					<h2><?php echo h($entry['domain']['domain_name']); ?> — Sessions You're In</h2>
+					<h2><?php echo h($entry['domain']['domain_name']); ?> &mdash; Sessions You're In</h2>
 					<table>
 						<thead>
 							<tr>
@@ -410,7 +410,7 @@ ob_start();
 				<!-- Open Sessions in this domain (browseable) -->
 				<?php if (!empty($entry['open_sessions'])): ?>
 				<div class="card">
-					<h2><?php echo h($entry['domain']['domain_name']); ?> — Open Sessions</h2>
+					<h2><?php echo h($entry['domain']['domain_name']); ?> &mdash; Open Sessions</h2>
 					<p style="color:#8899a6; font-size:0.85rem; margin-bottom:0.75rem;">Sessions hosted by other players that are currently open or planned.</p>
 					<table>
 						<thead>
