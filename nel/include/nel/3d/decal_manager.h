@@ -143,6 +143,12 @@ public:
 	  */
 	void setDistAttenuation(float scale, float bias) { _DistScale = scale; _DistBias = bias; }
 
+	/// Get distance attenuation scale factor.
+	float getDistScale() const { return _DistScale; }
+
+	/// Get distance attenuation bias.
+	float getDistBias() const { return _DistBias; }
+
 private:
 	/// A registered material with its ID
 	struct CRegisteredMaterial

@@ -180,24 +180,11 @@ uint32 CDecalManager::registerMaterial(const CMaterial &mat)
 
 
 // ***************************************************************************
-// Helper: avoid division by zero for blend scale computation
-static inline float decal_favoid0(float f)
-{
-	return NLMISC::favoid0(f);
-}
-
-
-// ***************************************************************************
 // Rendering: implements the pseudocode from PDF §.6.3
 //
-// With vertex program path:
-//   - VP handles MVP transform, UV generation, distance attenuation,
-//     bottom/top Z blending, diffuse color modulation
-//   - Per-decal VP constants set before each decal's vertices are flushed
-//
-// Without vertex program (CPU fallback):
-//   - UVs and per-vertex colors precomputed by CDecal::computeDecal()
-//   - Written directly into the VB alongside positions
+// All UVs and per-vertex colors are precomputed on the CPU by CDecal::computeDecal().
+// The manager batches decals that share the same texture into single draw calls,
+// only flushing the VB when the texture pointer changes or the buffer overflows.
 void CDecalManager::flush(CScene *sc)
 {
 	if (_Decals.empty())
@@ -205,25 +192,13 @@ void CDecalManager::flush(CScene *sc)
 
 	IDriver *drv = sc->getRenderTrav().getDriver();
 
-	// Try to compile and activate the vertex program
-	bool vpActive = false;
-	CVertexProgramDecalAttenuation *vp = _VertexProgram;
-	if (_UseVertexProgram && vp && drv->compileVertexProgram(vp))
-	{
-		drv->activeVertexProgram(vp);
-		// Set distance attenuation constants (shared across all decals)
-		drv->setUniform4f(IDriver::VertexProgram, vp->idx().DistScaleBias, _DistScale, _DistBias, 0.f, 1.f);
-		vpActive = true;
-	}
-	else
-	{
-		drv->activeVertexProgram(NULL);
-	}
-
+	// No vertex program in the batched path — UVs and colors are CPU-precomputed.
+	// This is the key to batching: VP constants are per-decal, which would force
+	// a VB flush per decal, defeating the purpose. CPU precomputation lets us
+	// batch freely across decals sharing the same texture.
+	drv->activeVertexProgram(NULL);
 	drv->activeVertexBuffer(_VB);
 	drv->setupModelMatrix(CMatrix::Identity);
-
-	const CVector &camPos = sc->getCam()->getMatrix().getPos();
 
 	// Iterate over each material group
 	TDecalMap::iterator matIt = _Decals.begin();
@@ -231,7 +206,6 @@ void CDecalManager::flush(CScene *sc)
 
 	for (; matIt != matEnd; ++matIt)
 	{
-		uint32 materialId = matIt->first;
 		std::vector<CDecal*> &decals = matIt->second;
 
 		if (decals.empty())
@@ -240,52 +214,27 @@ void CDecalManager::flush(CScene *sc)
 		// Sort decals by priority within this material group (lower priority first)
 		std::sort(decals.begin(), decals.end(), decalPriorityCompare);
 
-		// Find the registered material for this ID
-		CMaterial *mat = NULL;
-		for (uint m = 0; m < _Materials.size(); ++m)
-		{
-			if (_Materials[m].Id == materialId)
-			{
-				mat = &_Materials[m].Mat;
-				break;
-			}
-		}
-
-		// If no registered material found, use the first decal's material
-		CMaterial fallbackMat;
-		if (!mat)
-		{
-			if (!decals.empty())
-			{
-				fallbackMat = decals[0]->getMaterial();
-			}
-			else
-			{
-				fallbackMat.initUnlit();
-				fallbackMat.setDoubleSided(true);
-			}
-			mat = &fallbackMat;
-		}
-
 		uint32 count = 0; // current position in VB
 		bool vbLocked = false;
 		CVertexBufferReadWrite vba;
+		CMaterial *currentMat = NULL; // track current material for batching
 
 		for (uint d = 0; d < decals.size(); ++d)
 		{
 			CDecal *decal = decals[d];
 
-			// Get this decal's computed vertices and UVs
-			std::vector<CVector> &verts = decal->getVertices(vpActive);
+			// Get this decal's precomputed vertices, UVs, and colors
+			std::vector<CVector> &verts = decal->getVertices(false);
 			const std::vector<CUV> &uvs = decal->getUVs();
+			const std::vector<NLMISC::CRGBA> &colors = decal->getColors();
 
 			if (verts.empty())
 				continue;
 
-			// Each decal has its own material (with its own texture).
-			// Flush when the material changes or when using VP (VP constants are per-decal).
 			CMaterial *decalMat = &decal->getMaterial();
-			if (count > 0 && (decalMat != mat || vpActive))
+
+			// Flush when the material pointer changes (different texture)
+			if (count > 0 && decalMat != currentMat)
 			{
 				if (vbLocked)
 				{
@@ -293,46 +242,14 @@ void CDecalManager::flush(CScene *sc)
 					vbLocked = false;
 				}
 				nlassert(count % 3 == 0);
-				drv->renderRawTriangles(*mat, 0, count / 3);
+				drv->renderRawTriangles(*currentMat, 0, count / 3);
 				count = 0;
 			}
 
-			// Use this decal's own material (which has its texture set)
-			mat = decalMat;
-
-			// If using VP, set per-decal constants before we start copying vertices
-			if (vpActive)
-			{
-				// WorldToUV: rows of the worldToUV matrix for UV generation.
-				// The matrix already includes the reverse UV (V flip) from generateUVs().
-				// Extract rows the same way the legacy system does via CMatrix::get() into float[4][4]:
-				// M[16] is column-major, so row R is at indices [R], [4+R], [8+R], [12+R].
-				const CMatrix &worldToUV = decal->getWorldToUVMatrix();
-				const float *m = worldToUV.get();
-				drv->setUniform4f(IDriver::VertexProgram, vp->idx().WorldToUV0, m[0], m[4], m[8], m[12]);
-				drv->setUniform4f(IDriver::VertexProgram, vp->idx().WorldToUV1, m[1], m[5], m[9], m[13]);
-
-				// Camera position (world space)
-				drv->setUniform4f(IDriver::VertexProgram, vp->idx().RefCamDist, camPos.x, camPos.y, camPos.z, 1.f);
-
-				// Diffuse color (normalized to [0,1])
-				CRGBA diff = decal->getDiffuse();
-				drv->setUniform4f(IDriver::VertexProgram, vp->idx().Diffuse, diff.R * (1.f / 255.f), diff.G * (1.f / 255.f), diff.B * (1.f / 255.f), 1.f);
-
-				// Bottom & top blend scale/bias
-				float bottomBlendScale = 1.f / decal_favoid0(decal->getBottomBlendZMax() - decal->getBottomBlendZMin());
-				float topBlendScale = 1.f / decal_favoid0(decal->getTopBlendZMin() - decal->getTopBlendZMax());
-				drv->setUniform4f(IDriver::VertexProgram, vp->idx().BlendScale,
-					bottomBlendScale, -bottomBlendScale * decal->getBottomBlendZMin(),
-					topBlendScale, -topBlendScale * decal->getTopBlendZMax());
-
-				// MVP matrix
-				drv->setUniformMatrix(IDriver::VertexProgram, vp->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
-			}
+			currentMat = decalMat;
 
 			uint32 length = (uint32)verts.size();
 			uint32 offset = 0;
-			const std::vector<CRGBA> &colors = decal->getColors();
 			bool hasColors = (colors.size() == verts.size());
 
 			// Ensure VB is locked before copying
@@ -355,14 +272,7 @@ void CDecalManager::flush(CScene *sc)
 						*vba.getVertexCoordPointer(count + i) = verts[offset + i];
 						if (offset + i < uvs.size())
 							*vba.getTexCoordPointer(count + i, 0) = uvs[offset + i];
-						if (!vpActive && hasColors)
-						{
-							*(CRGBA *)vba.getColorPointer(count + i) = colors[offset + i];
-						}
-						else
-						{
-							*(CRGBA *)vba.getColorPointer(count + i) = CRGBA::White;
-						}
+						*(CRGBA *)vba.getColorPointer(count + i) = hasColors ? colors[offset + i] : CRGBA::White;
 					}
 					offset += space;
 					count += space;
@@ -371,7 +281,7 @@ void CDecalManager::flush(CScene *sc)
 					vba.unlock();
 					vbLocked = false;
 					nlassert(count % 3 == 0);
-					drv->renderRawTriangles(*mat, 0, count / 3);
+					drv->renderRawTriangles(*currentMat, 0, count / 3);
 					count = 0;
 					_VB.lock(vba);
 					vbLocked = true;
@@ -384,14 +294,7 @@ void CDecalManager::flush(CScene *sc)
 						*vba.getVertexCoordPointer(count + i) = verts[offset + i];
 						if (offset + i < uvs.size())
 							*vba.getTexCoordPointer(count + i, 0) = uvs[offset + i];
-						if (!vpActive && hasColors)
-						{
-							*(CRGBA *)vba.getColorPointer(count + i) = colors[offset + i];
-						}
-						else
-						{
-							*(CRGBA *)vba.getColorPointer(count + i) = CRGBA::White;
-						}
+						*(CRGBA *)vba.getColorPointer(count + i) = hasColors ? colors[offset + i] : CRGBA::White;
 					}
 					count += remaining;
 					offset = length; // done with this decal
@@ -399,22 +302,16 @@ void CDecalManager::flush(CScene *sc)
 			}
 		}
 
-		// Unlock and render any remaining vertices for the last decal
+		// Unlock and render any remaining vertices
 		if (vbLocked)
 		{
 			vba.unlock();
 			vbLocked = false;
 		}
-		if (count > 0)
+		if (count > 0 && currentMat)
 		{
 			nlassert(count % 3 == 0);
-			drv->renderRawTriangles(*mat, 0, count / 3);
+			drv->renderRawTriangles(*currentMat, 0, count / 3);
 		}
-	}
-
-	// Deactivate vertex program
-	if (vpActive)
-	{
-		drv->activeVertexProgram(NULL);
 	}
 }

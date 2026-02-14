@@ -327,13 +327,10 @@ lm->Landscape.getShadowPolyReceiver().receiveDecal(context, vertDelta);
 // Generate UV coordinates from collected vertices
 generateUVs();
 
-// Compute per-vertex colors for CPU fallback path
-if (!useVertexProgram)
-{
+// Always compute per-vertex colors on CPU for batched rendering.
+// This allows the manager to batch decals without per-decal VP constant changes.
 CDecalManager &mgr = sc->getRenderTrav().getDecalManager();
-(void)mgr; // distScale/distBias set externally
-computeColors(0.f, 1.f);
-}
+computeColors(mgr.getDistScale(), mgr.getDistBias());
 }
 
 
