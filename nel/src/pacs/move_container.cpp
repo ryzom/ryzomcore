@@ -1140,7 +1140,11 @@ void CMoveContainer::newCollision (CMovePrimitive* first, const CCollisionSurfac
 
 
 	// Time of the collision.
-	time-=NELPACS_DIST_BACK/wI->getSpeed().norm();
+	// Only back up collision time when moving into the surface normal.
+	const double collisionTimeEpsilon = 1e-6;
+	const double inwardSpeed = -(desc.ContactNormal * wI->getSpeed());
+	if (inwardSpeed > collisionTimeEpsilon)
+		time -= NELPACS_DIST_BACK/inwardSpeed;
 	time=std::max(time, beginTime);
 	double ratio=(time-beginTime)/(_DeltaTime-beginTime);
 
