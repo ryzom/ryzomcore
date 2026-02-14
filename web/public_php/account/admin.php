@@ -29,16 +29,28 @@ try {
 		if (isset($_POST['save_privileges'])) {
 			$targetUid = (int)$_POST['target_uid'];
 			$newPrivilege = trim($_POST['privilege']);
-			// Ensure privilege format is correct: colon-delimited, e.g. ":DEV:GM:"
-			if ($newPrivilege !== '' && $newPrivilege[0] !== ':') {
-				$newPrivilege = ':' . $newPrivilege;
-			}
-			if ($newPrivilege !== '' && substr($newPrivilege, -1) !== ':') {
-				$newPrivilege .= ':';
+			// Validate: parse and keep only known privilege codes
+			$knownPrivs = array('DEV', 'SGM', 'GM', 'VG', 'SG', 'G', 'EM', 'EG', 'CM', 'OBSERVER', 'PR');
+			if ($newPrivilege !== '') {
+				$codes = parsePrivileges($newPrivilege);
+				$validCodes = array();
+				$invalidCodes = array();
+				foreach ($codes as $code) {
+					if (in_array(strtoupper($code), $knownPrivs)) {
+						$validCodes[] = strtoupper($code);
+					} else {
+						$invalidCodes[] = $code;
+					}
+				}
+				if (!empty($invalidCodes)) {
+					$error = 'Unknown privilege codes ignored: ' . implode(', ', $invalidCodes);
+				}
+				$newPrivilege = !empty($validCodes) ? ':' . implode(':', $validCodes) . ':' : '';
 			}
 			$stmt = $db->prepare('UPDATE user SET Privilege = :priv WHERE UId = :uid');
 			$stmt->execute(array(':priv' => $newPrivilege, ':uid' => $targetUid));
-			$success = 'Privileges updated.';
+			$success = 'Privileges updated.' . ($error ? ' ' . $error : '');
+			$error = '';
 			$editUid = $targetUid;
 		}
 		if (isset($_POST['add_permission'])) {
@@ -46,7 +58,8 @@ try {
 			$domainId = (int)$_POST['domain_id'];
 			$shardId = (int)$_POST['shard_id'];
 			$accessPriv = trim($_POST['access_privilege']);
-			if ($accessPriv === '') {
+			$validAccess = array('OPEN', 'DEV', 'RESTRICTED');
+			if (!in_array($accessPriv, $validAccess)) {
 				$accessPriv = 'OPEN';
 			}
 			// Check if permission already exists
@@ -89,8 +102,10 @@ try {
 
 	// Search or list users
 	if ($searchQuery !== '') {
+		// Escape SQL LIKE wildcard characters in search input
+		$escapedQuery = str_replace(array('%', '_'), array('\\%', '\\_'), $searchQuery);
 		$stmt = $db->prepare('SELECT UId, Login, Email, Privilege, State FROM user WHERE Login LIKE :q OR Email LIKE :q2 ORDER BY Login LIMIT 50');
-		$stmt->execute(array(':q' => '%' . $searchQuery . '%', ':q2' => '%' . $searchQuery . '%'));
+		$stmt->execute(array(':q' => '%' . $escapedQuery . '%', ':q2' => '%' . $escapedQuery . '%'));
 		$users = $stmt->fetchAll();
 	} elseif (!$editUser) {
 		$stmt = $db->query('SELECT UId, Login, Email, Privilege, State FROM user ORDER BY UId LIMIT 50');
