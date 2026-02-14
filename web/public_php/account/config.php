@@ -118,7 +118,11 @@ function connectToRSM($sessionManagerAddress)
 	}
 	$rsm = new AccountRSMCallback();
 	$res = '';
-	$rsm->connect($addr[0], $addr[1], $res);
+	$port = (int)$addr[1];
+	if ($port < 1 || $port > 65535) {
+		return false;
+	}
+	$rsm->connect($addr[0], $port, $res);
 	if ($res !== '') {
 		return false;
 	}

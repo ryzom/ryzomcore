@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 			} elseif ($action === 'invite') {
 				$inviteCharName = isset($_POST['invite_char_name']) ? trim($_POST['invite_char_name']) : '';
 				$inviteCharId = isset($_POST['invite_char_id']) ? (int)$_POST['invite_char_id'] : 0;
+				$invCharName = '';
 
 				// Look up character by name if name was provided
 				if ($inviteCharName !== '' && !$inviteCharId) {
@@ -61,9 +62,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 					$found = $stmt->fetch();
 					if ($found) {
 						$inviteCharId = (int)$found['char_id'];
-						$inviteCharName = $found['char_name'];
+						$invCharName = $found['char_name'];
 					} else {
 						$actionError = 'Character "' . $inviteCharName . '" not found.';
+					}
+				} elseif ($inviteCharId) {
+					// Verify the character exists when invited by ID
+					$stmt = $ringDb->prepare('SELECT char_id, char_name FROM characters WHERE char_id = :cid');
+					$stmt->execute(array(':cid' => $inviteCharId));
+					$found = $stmt->fetch();
+					if ($found) {
+						$invCharName = $found['char_name'];
+					} else {
+						$actionError = 'Character not found.';
 					}
 				}
 
@@ -73,37 +84,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 					$stmt->execute(array(':sid' => $sessionId, ':uid' => $uid));
 					$session = $stmt->fetch();
 					if ($session) {
-						// Verify the invited character exists
-						$stmt = $ringDb->prepare('SELECT char_id, char_name FROM characters WHERE char_id = :cid');
-						$stmt->execute(array(':cid' => $inviteCharId));
-						$invChar = $stmt->fetch();
-						if (!$invChar) {
-							$actionError = 'Character not found.';
-						} else {
-							$charRole = new RSMGR_TSessionPartStatus();
-							$charRole->fromString(($session['session_type'] === 'st_edit') ? 'sps_edit_invited' : 'sps_anim_invited');
+						$charRole = new RSMGR_TSessionPartStatus();
+						$charRole->fromString(($session['session_type'] === 'st_edit') ? 'sps_edit_invited' : 'sps_anim_invited');
 
-							// Route through the RSM for permission validation
-							$rsm = connectToRSM($rsmAddress);
-							if ($rsm !== false) {
-								$rsm->inviteCharacter((int)$session['owner'], $sessionId, $inviteCharId, $charRole);
-								if ($rsm->waitCallback() && $rsm->resultCode == 0) {
-									$actionResult = 'Character "' . $invChar['char_name'] . '" invited to session (via RSM).';
-								} else {
-									$actionError = 'Invite failed: ' . ($rsm->resultString ?: 'RSM rejected the request.');
-								}
+						// Route through the RSM for permission validation
+						$rsm = connectToRSM($rsmAddress);
+						if ($rsm !== false) {
+							$rsm->inviteCharacter((int)$session['owner'], $sessionId, $inviteCharId, $charRole);
+							if ($rsm->waitCallback() && $rsm->resultCode == 0) {
+								$actionResult = 'Character "' . $invCharName . '" invited to session (via RSM).';
 							} else {
-								// RSM not reachable -- fall back to direct SQL for planned sessions
-								$stmt = $ringDb->prepare('SELECT session_id FROM session_participant WHERE session_id = :sid AND char_id = :cid');
-								$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId));
-								if ($stmt->fetch()) {
-									$actionError = 'This character is already in the session.';
-								} else {
-									$status = ($session['session_type'] === 'st_edit') ? 'sps_edit_invited' : 'sps_anim_invited';
-									$stmt = $ringDb->prepare('INSERT INTO session_participant (session_id, char_id, status, kicked) VALUES (:sid, :cid, :status, 0)');
-									$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId, ':status' => $status));
-									$actionResult = 'Character "' . $invChar['char_name'] . '" invited (RSM not reachable, added directly).';
-								}
+								$actionError = 'Invite failed: ' . ($rsm->resultString ?: 'RSM rejected the request (code: ' . $rsm->resultCode . ').');
+							}
+						} else {
+							// RSM not reachable -- fall back to direct SQL for planned sessions
+							$stmt = $ringDb->prepare('SELECT session_id FROM session_participant WHERE session_id = :sid AND char_id = :cid');
+							$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId));
+							if ($stmt->fetch()) {
+								$actionError = 'This character is already in the session.';
+							} else {
+								$status = ($session['session_type'] === 'st_edit') ? 'sps_edit_invited' : 'sps_anim_invited';
+								$stmt = $ringDb->prepare('INSERT INTO session_participant (session_id, char_id, status, kicked) VALUES (:sid, :cid, :status, 0)');
+								$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId, ':status' => $status));
+								$actionResult = 'Character "' . $invCharName . '" invited (RSM not reachable, added directly).';
 							}
 						}
 					} else {
