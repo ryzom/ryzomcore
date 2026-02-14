@@ -56,7 +56,7 @@
 <variable entry="UI:VARIABLES:UNIVERSE_CHANEL_WARNING_DONE" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:UNIVERSE_CHANEL_WARNING_WANTED" type="sint32" value="0" />
 <proc id="universe_chanel_warning_close">
-	<action handler="hide" params="target='ui:interface:universe_chanel_warning'" />
+	<action handler="hide" params="universe_chanel_warning" />
 	<action handler="set" params="dblink=UI:VARIABLES:UNIVERSE_CHANEL_WARNING_DONE|value=1" />
 	<action handler="set" params="dblink=UI:VARIABLES:UNIVERSE_CHANEL_WARNING_WANTED|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:UNIVERSE_CHANEL_WARNING_AVOID|value=@UI:VARIABLES:TEMP_UNIVERSE_CHANEL_WARNING_AVOID" />
@@ -84,7 +84,7 @@
 <variable entry="UI:VARIABLES:DEATH_WARNING_DONE" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:DEATH_WARNING_WANTED" type="sint32" value="0" />
 <proc id="death_warning_close">
-	<action handler="hide" params="target='ui:interface:death_warning'" />
+	<action handler="hide" params="death_warning" />
 	<action handler="set" params="dblink=UI:VARIABLES:DEATH_WARNING_DONE|value=0" />
 	<action handler="set" params="dblink=UI:VARIABLES:DEATH_WARNING_WANTED|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:DEATH_WARNING_AVOID|value=@UI:VARIABLES:TEMP_DEATH_WARNING_AVOID" />
@@ -111,7 +111,7 @@
 <variable entry="UI:VARIABLES:NIGHT_WARNING_DONE" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:NIGHT_WARNING_WANTED" type="sint32" value="0" />
 <proc id="night_warning_close">
-	<action handler="hide" params="target='ui:interface:night_warning'" />
+	<action handler="hide" params="night_warning" />
 	<action handler="set" params="dblink=UI:VARIABLES:NIGHT_WARNING_DONE|value=0" />
 	<action handler="set" params="dblink=UI:VARIABLES:NIGHT_WARNING_WANTED|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:NIGHT_WARNING_AVOID|value=@UI:VARIABLES:TEMP_NIGHT_WARNING_AVOID" />
