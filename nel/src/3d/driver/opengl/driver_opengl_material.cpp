@@ -1041,6 +1041,7 @@ void			CDriverGL::setupLightMapPass(uint pass)
 				uint wlm = _LightMapLUT[lmId + li];
 				CRGBA lmapFactor = mat._LightMaps[wlm].Factor;
 				CRGBA lmcDiff = mat._LightMaps[wlm].LMCDiffuse;
+				// Compute factor * diffuse as float, using (x + x>>7) to approximate x * (256/255) for proper [0,255]->[0,1] mapping
 				float r = ((float)lmapFactor.R * ((float)lmcDiff.R + (lmcDiff.R >> 7))) / (255.f * 255.f);
 				float g = ((float)lmapFactor.G * ((float)lmcDiff.G + (lmcDiff.G >> 7))) / (255.f * 255.f);
 				float b = ((float)lmapFactor.B * ((float)lmcDiff.B + (lmcDiff.B >> 7))) / (255.f * 255.f);
@@ -1459,7 +1460,11 @@ void			CDriverGL::setupSpecularPass(uint pass)
 	else if (ARBSpecularShader || ARBSpecularShaderNoTex)
 	{
 		// Use ARB fragment program fallback for single pass specular
-		GLuint shader = (mat.getTexture(0) != NULL && ARBSpecularShader) ? ARBSpecularShader : ARBSpecularShaderNoTex;
+		GLuint shader = 0;
+		if (mat.getTexture(0) != NULL)
+			shader = ARBSpecularShader; // use texture variant if base texture exists
+		if (!shader)
+			shader = ARBSpecularShaderNoTex; // fallback to no-texture variant
 		if (shader)
 		{
 			nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, shader);
