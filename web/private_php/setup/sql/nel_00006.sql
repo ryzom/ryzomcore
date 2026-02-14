@@ -1,10 +1,10 @@
-CREATE TABLE IF NOT EXISTS `nel_setting` (
+CREATE TABLE IF NOT EXISTS `setting` (
   `setting` VARCHAR(64) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `value` VARCHAR(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`setting`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO `nel_setting` (`setting`, `value`) VALUES
+INSERT INTO `setting` (`setting`, `value`) VALUES
   ('admin_privileges', ':DEV:SGM:GM:'),
   ('settings_privilege', ':DEV:'),
   ('default_privileges', ''),

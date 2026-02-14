@@ -47,7 +47,7 @@ try {
 	}
 
 	// Load current settings
-	$stmt = $db->query('SELECT setting, value FROM nel_setting');
+	$stmt = $db->query('SELECT setting, value FROM setting');
 	$rows = $stmt->fetchAll();
 	foreach ($rows as $row) {
 		$settings[$row['setting']] = $row['value'];
@@ -69,7 +69,7 @@ ob_start();
 	<div class="card">
 		<h2>Dev Settings</h2>
 		<p style="font-size:0.85rem; color:#8899a6; margin-bottom:1rem;">
-			These settings are stored in the <code style="color:#5dade2;">nel_setting</code> table and
+			These settings are stored in the <code style="color:#5dade2;">setting</code> table and
 			control account management behavior. Changes take effect immediately.
 		</p>
 		<form method="post" action="index.php?page=dev_settings">

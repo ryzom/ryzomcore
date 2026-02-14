@@ -326,13 +326,13 @@ function privilegeLabel($code)
 }
 
 /**
- * Get a nel_setting value from the database, with a fallback default.
+ * Get a setting value from the database, with a fallback default.
  */
 function getSetting($key, $default = '')
 {
 	try {
 		$db = getNelDatabase();
-		$stmt = $db->prepare('SELECT value FROM nel_setting WHERE setting = :key');
+		$stmt = $db->prepare('SELECT value FROM setting WHERE setting = :key');
 		$stmt->execute(array(':key' => $key));
 		$row = $stmt->fetch();
 		return $row ? $row['value'] : $default;
@@ -342,13 +342,13 @@ function getSetting($key, $default = '')
 }
 
 /**
- * Set a nel_setting value in the database.
+ * Set a setting value in the database.
  */
 function setSetting($key, $value)
 {
 	try {
 		$db = getNelDatabase();
-		$stmt = $db->prepare('INSERT INTO nel_setting (setting, value) VALUES (:key, :val) ON DUPLICATE KEY UPDATE value = :val2');
+		$stmt = $db->prepare('INSERT INTO setting (setting, value) VALUES (:key, :val) ON DUPLICATE KEY UPDATE value = :val2');
 		$stmt->execute(array(':key' => $key, ':val' => $value, ':val2' => $value));
 	} catch (PDOException $e) {
 		// Setting save failed silently; caller should handle via getSetting fallback
