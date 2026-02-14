@@ -82,7 +82,7 @@ void FileBrowserDock::refresh()
 	QString searchDir = rootPath;
 	if (!subDir.isEmpty())
 	{
-		searchDir = rootPath + "/" + subDir;
+		searchDir = QDir::cleanPath(rootPath + QDir::separator() + subDir);
 	}
 
 	if (!searchDir.isEmpty() && QDir(searchDir).exists())
