@@ -979,6 +979,7 @@ TInterfaceState globalMenu()
 	TGameCycle serverTick = NetMngr.getCurrentServerTick();
 	bool PlayerWantToGoInGame = false;
 	bool firewallTimeout = false;
+	bool outgameScenePostProcessPass = false;
 
 	ProgressBar.finish(); // no progress while selecting character
 
@@ -1055,7 +1056,8 @@ TInterfaceState globalMenu()
 		CInputHandlerManager::getInstance()->pumpEvents();
 		resetInterface3DScenePostProcessWanted();
 		bool haveEffects = Driver->getPolygonMode() == UDriver::Filled
-			&& (ClientCfg.Bloom || FXAA);
+			&& (ClientCfg.Bloom || FXAA)
+			&& outgameScenePostProcessPass;
 		if (haveEffects)
 		{
 			Driver->beginDefaultRenderTarget();
@@ -1076,16 +1078,17 @@ TInterfaceState globalMenu()
 		pIM->updateFrameViews(NULL);
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
+		outgameScenePostProcessPass = isInterface3DScenePostProcessWanted();
 		if (haveEffects)
 		{
 			Driver->setMatrixMode2D11();
-			if (isInterface3DScenePostProcessWanted())
+			if (outgameScenePostProcessPass)
 			{
 				if (FXAA) FXAA->applyEffect();
 				if (ClientCfg.Bloom) CBloomEffect::getInstance().applyBloom();
 			}
 			Driver->endDefaultRenderTarget(NULL);
-			if (isInterface3DScenePostProcessWanted())
+			if (outgameScenePostProcessPass)
 			{
 				// Redraw UI without scene3d to keep 2D widgets/text unaffected by post-process.
 				CInterface3DSceneSkipRenderGuard skipScene3D;
