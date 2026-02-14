@@ -364,26 +364,19 @@ else
 	_WorldToUVMatrix = _TextureMatrix * reverseUV * invWorld;
 }
 
+// Use the worldToUV matrix to generate UVs, matching the VP path.
+// Row 0 of the matrix gives U, Row 1 gives V.
+const float *m = _WorldToUVMatrix.get();
 for (uint i = 0; i < _Vertices.size(); ++i)
 {
-	float u, v;
-	if (_CustomUVMatrixEnabled)
-	{
-		// Custom matrix outputs UVs directly
-		CVector uvCoord = _WorldToUVMatrix * _Vertices[i];
-		u = uvCoord.x;
-		v = uvCoord.y;
-	}
-	else
-	{
-		// Map local X,Y to UV sub-region
-		CVector local = invWorld * _Vertices[i];
-		u = _UV1.U + local.x * (_UV2.U - _UV1.U);
-		v = _UV1.V + (1.0f - local.y) * (_UV2.V - _UV1.V);
-	}
+	const CVector &vtx = _Vertices[i];
+	// DP4 equivalent: dot product of matrix row with (vx, vy, vz, 1)
+	float u = m[0] * vtx.x + m[4] * vtx.y + m[8] * vtx.z + m[12];
+	float v = m[1] * vtx.x + m[5] * vtx.y + m[9] * vtx.z + m[13];
 
-	_UVs[i].U = u;
-	_UVs[i].V = v;
+	// Apply UV sub-region mapping (for texture atlases)
+	_UVs[i].U = _UV1.U + u * (_UV2.U - _UV1.U);
+	_UVs[i].V = _UV1.V + v * (_UV2.V - _UV1.V);
 }
 }
 

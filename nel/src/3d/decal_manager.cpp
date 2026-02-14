@@ -303,21 +303,14 @@ void CDecalManager::flush(CScene *sc)
 			// If using VP, set per-decal constants before we start copying vertices
 			if (vpActive)
 			{
-				// WorldToUV: rows of the inverse world matrix for UV generation
+				// WorldToUV: rows of the worldToUV matrix for UV generation.
+				// The matrix already includes the reverse UV (V flip) from generateUVs().
+				// Extract rows the same way the legacy system does via CMatrix::get() into float[4][4]:
+				// M[16] is column-major, so row R is at indices [R], [4+R], [8+R], [12+R].
 				const CMatrix &worldToUV = decal->getWorldToUVMatrix();
-				float row0[4], row1[4];
-				// Row 0: maps world position to U coordinate
-				row0[0] = worldToUV.get()[0]; // column 0, row 0
-				row0[1] = worldToUV.get()[4]; // column 1, row 0
-				row0[2] = worldToUV.get()[8]; // column 2, row 0
-				row0[3] = worldToUV.get()[12]; // column 3, row 0 (translation)
-				// Row 1: maps world position to V coordinate (inverted Y for UV)
-				row1[0] = -worldToUV.get()[1];
-				row1[1] = -worldToUV.get()[5];
-				row1[2] = -worldToUV.get()[9];
-				row1[3] = 1.0f - (-worldToUV.get()[13]); // offset for V flip
-				drv->setUniform4f(IDriver::VertexProgram, vp->idx().WorldToUV0, row0[0], row0[1], row0[2], row0[3]);
-				drv->setUniform4f(IDriver::VertexProgram, vp->idx().WorldToUV1, row1[0], row1[1], row1[2], row1[3]);
+				const float *m = worldToUV.get();
+				drv->setUniform4f(IDriver::VertexProgram, vp->idx().WorldToUV0, m[0], m[4], m[8], m[12]);
+				drv->setUniform4f(IDriver::VertexProgram, vp->idx().WorldToUV1, m[1], m[5], m[9], m[13]);
 
 				// Camera position (world space)
 				drv->setUniform4f(IDriver::VertexProgram, vp->idx().RefCamDist, camPos.x, camPos.y, camPos.z, 1.f);
