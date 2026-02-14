@@ -32,7 +32,7 @@
 	}
 
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 ?>
