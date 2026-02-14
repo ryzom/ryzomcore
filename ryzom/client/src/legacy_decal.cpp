@@ -92,7 +92,7 @@ static const char *DecalAttenuationVertexProgramCode =
 	MUL o[COL0].w, v[3].w, R0.w;														\n\
 	END \n";
 
-class CVertexProgramDecalAttenuation : public CVertexProgram
+class CLegacyVertexProgramDecalAttenuation : public CVertexProgram
 {
 public:
 	struct CIdx
@@ -107,7 +107,7 @@ public:
 		// 10
 		uint BlendScale; // 11
 	};
-	CVertexProgramDecalAttenuation()
+	CLegacyVertexProgramDecalAttenuation()
 	{
 		// nelvp
 		{
@@ -126,7 +126,7 @@ public:
 		}
 		// TODO_VP_GLSL
 	}
-	~CVertexProgramDecalAttenuation()
+	~CLegacyVertexProgramDecalAttenuation()
 	{
 		
 	}
@@ -150,7 +150,7 @@ private:
 	CIdx m_Idx;
 };
 
-static NLMISC::CSmartPtr<CVertexProgramDecalAttenuation> DecalAttenuationVertexProgram;
+static NLMISC::CSmartPtr<CLegacyVertexProgramDecalAttenuation> DecalAttenuationVertexProgram;
 
 
 typedef CShadowPolyReceiver::CRGBAVertex CRGBAVertex;
@@ -160,7 +160,7 @@ CLegacyDecal::CLegacyDecal()
 {
 	if (!DecalAttenuationVertexProgram)
 	{
-		DecalAttenuationVertexProgram = new CVertexProgramDecalAttenuation();
+		DecalAttenuationVertexProgram = new CLegacyVertexProgramDecalAttenuation();
 	}
 
 	// initialized in render() as depends on scene
@@ -379,7 +379,7 @@ void CLegacyDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceive
 	drv.setupModelMatrix(modelMat);
 	if (useVertexProgram)
 	{
-		CVertexProgramDecalAttenuation *program = DecalAttenuationVertexProgram;
+		CLegacyVertexProgramDecalAttenuation *program = DecalAttenuationVertexProgram;
 		{
 			CVertexBufferReadWrite vba;
 			_VB.setNumVertices((uint32)_TriCache.size());
