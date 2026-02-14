@@ -29,8 +29,8 @@
 #include <nel/3d/u_particle_system_sound.h>
 
 // Project includes
-#include "configuration.h"
-#include "internationalization.h"
+#include "../../../tools/3d/shared_widgets/configuration.h"
+#include "../../../tools/3d/shared_widgets/internationalization.h"
 #include "graphics_viewport.h"
 
 using namespace std;

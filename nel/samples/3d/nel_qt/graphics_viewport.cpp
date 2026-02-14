@@ -34,7 +34,7 @@
 
 // Project includes
 #include "../../../tools/3d/shared_widgets/common.h"
-#include "internationalization.h"
+#include "../../../tools/3d/shared_widgets/internationalization.h"
 #include "graphics_config.h"
 
 using namespace std;

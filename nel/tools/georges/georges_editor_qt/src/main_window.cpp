@@ -34,6 +34,7 @@
 #include <nel/misc/path.h>
 
 // Project includes
+#include "georges_editor_qt_config.h"
 #include "georges_editor_doc.h"
 #include "georges_dock_widget.h"
 #include "type_dialog.h"
@@ -55,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
 	setObjectName("MainWindow");
 
 	// Initialize NeL configuration (loads .cfg file, sets up search paths)
-	m_Configuration.init();
+	m_Configuration.init(NLQT_CONFIG_FILE);
 
 	// Save original palette before any style changes
 	m_OriginalPalette = QApplication::palette();
@@ -65,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_Configuration.setAndCallback("QtPalette", CConfigCallback(this, &MainWindow::cfcbQtPalette));
 
 	// Initialize internationalization
-	m_Internationalization.init(&m_Configuration);
+	m_Internationalization.init(&m_Configuration, NLQT_VERSION);
 	m_Internationalization.enableCallback(CEmptyCallback(this, &MainWindow::incbLanguageCode));
 
 	_mdiArea = new QMdiArea(this);

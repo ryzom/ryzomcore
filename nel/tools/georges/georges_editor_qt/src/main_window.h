@@ -28,8 +28,8 @@
 
 #include <nel/misc/config_file.h>
 
-#include "configuration.h"
-#include "internationalization.h"
+#include "../../3d/shared_widgets/configuration.h"
+#include "../../3d/shared_widgets/internationalization.h"
 
 class FileBrowserDock;
 class GeorgesEditorDoc;
