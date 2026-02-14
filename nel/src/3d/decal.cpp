@@ -320,8 +320,9 @@ for (uint i = 0; i < landscapes.size(); ++i)
 {
 CLandscapeModel *lm = landscapes[i];
 if (!lm) continue;
-CVector vertDelta = -lm->Landscape.getPZBModelPosition();
-lm->Landscape.getShadowPolyReceiver().receiveDecal(context, vertDelta);
+// Shadow poly receiver stores vertices in world space (EndPos from tessellation).
+// We render with Identity model matrix, so no offset needed.
+lm->Landscape.getShadowPolyReceiver().receiveDecal(context, CVector::Null);
 }
 
 // Generate UV coordinates from collected vertices
