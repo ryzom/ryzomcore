@@ -2149,6 +2149,9 @@ TEX base, fragment.texcoord[3], texture[3], 2D;\n\
 MUL result.color.rgb, base, prev;\n\
 MOV result.color.a, base.a;\n\
 END\n";
+
+// ***************************************************************************
+/** Load a ARB_fragment_program_code, and ensure it is loaded natively
   */
 uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativePrograms)
 {
