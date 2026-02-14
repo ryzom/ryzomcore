@@ -34,6 +34,7 @@
     "Jom": "external/utils"
   },
   "WorkingDirs": {
+    "georges_editor_qt": ".nel/tools",
     "crash_report": "pipeline/client_dev",
     "ryzom_client": "pipeline/client_dev",
     "ryzom_configuration_qt": "pipeline/client_dev",
