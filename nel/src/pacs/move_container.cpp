@@ -31,6 +31,7 @@ using namespace NLMISC;
 
 #define NELPACS_ALLOC_DYNAMIC_INFO 100
 #define NELPACS_ALLOC_STATIC_INFO 100
+#define NELPACS_COLLISION_TIME_EPSILON 1e-6
 
 H_AUTO_DECL ( NLPACS_Eval_Collision )
 #define	NLPACS_HAUTO_EVAL_COLLISION	H_AUTO_USE ( NLPACS_Eval_Collision )
@@ -1141,10 +1142,11 @@ void CMoveContainer::newCollision (CMovePrimitive* first, const CCollisionSurfac
 
 	// Time of the collision.
 	// Only back up collision time when moving into the surface normal.
-	const double collisionTimeEpsilon = 1e-6;
-	const double inwardSpeed = -(desc.ContactNormal * wI->getSpeed());
-	if (inwardSpeed > collisionTimeEpsilon)
-		time -= NELPACS_DIST_BACK/inwardSpeed;
+	// Keep tiny inward projections as tangential noise.
+	// Positive value means moving into the contact normal.
+	const double inwardVelocity = -(desc.ContactNormal * wI->getSpeed());
+	if (inwardVelocity > NELPACS_COLLISION_TIME_EPSILON)
+		time -= NELPACS_DIST_BACK/inwardVelocity;
 	time=std::max(time, beginTime);
 	double ratio=(time-beginTime)/(_DeltaTime-beginTime);
 
