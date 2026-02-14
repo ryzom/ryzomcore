@@ -27,7 +27,7 @@ function getDatabase($host, $port, $user, $pass, $name)
 	static $connections = array();
 	$key = $host . ':' . $port . '/' . $name;
 	if (!isset($connections[$key])) {
-		$dsn = "mysql:host=$host;port=$port;dbname=$name;charset=utf8";
+		$dsn = "mysql:host=$host;port=$port;dbname=$name;charset=utf8mb4";
 		$connections[$key] = new PDO($dsn, $user, $pass, array(
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
