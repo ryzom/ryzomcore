@@ -77,9 +77,12 @@ ob_start();
 					<?php else: ?>
 						<span class="badge badge-gray">Offline</span>
 					<?php endif; ?>
-					<?php if ($userInfo['Privilege']): ?>
-						<span class="badge badge-blue"><?php echo h($userInfo['Privilege']); ?></span>
-					<?php endif; ?>
+					<?php if ($userInfo['Privilege']):
+						$privCodes = parsePrivileges($userInfo['Privilege']);
+						foreach ($privCodes as $pc): ?>
+							<span class="badge badge-blue" title="<?php echo h(privilegeLabel($pc)); ?>"><?php echo h($pc); ?></span>
+						<?php endforeach;
+					endif; ?>
 				</div>
 			</div>
 		</div>

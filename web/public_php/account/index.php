@@ -25,7 +25,7 @@ if ($logged_in && ($page === '' || $page === 'login' || $page === 'register')) {
 }
 
 // Route to the appropriate page
-$valid_pages = array('login', 'register', 'home', 'characters', 'sessions', 'settings', 'logout');
+$valid_pages = array('login', 'register', 'home', 'characters', 'sessions', 'settings', 'admin', 'logout');
 
 if (!in_array($page, $valid_pages)) {
 	$page = $logged_in ? 'home' : 'login';
@@ -36,6 +36,11 @@ if ($page === 'logout') {
 	session_destroy();
 	header('Location: index.php?page=login');
 	exit;
+}
+
+// Gate admin page behind privilege check
+if ($page === 'admin' && !isAdmin()) {
+	$page = 'home';
 }
 
 // Process the page
@@ -63,6 +68,9 @@ function renderLayout($title, $content, $currentPage, $loggedIn)
 			'sessions' => 'Sessions',
 			'settings' => 'Settings',
 		);
+		if (isAdmin()) {
+			$pages['admin'] = 'Admin';
+		}
 		foreach ($pages as $key => $label) {
 			$active = ($currentPage === $key) ? ' class="active"' : '';
 			$navItems .= '<a href="index.php?page=' . $key . '"' . $active . '>' . $label . '</a>';

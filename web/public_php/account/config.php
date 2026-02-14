@@ -167,6 +167,93 @@ function verifyPassword($password, $hash)
 }
 
 /**
+ * Check if a privilege string contains a specific privilege.
+ * Matches the server-side havePriv() logic: privileges are stored as
+ * colon-delimited strings like ":DEV:SGM:GM:" and checked via substring match.
+ *
+ * @param string $privileges  The user's privilege string (e.g. ":DEV:SGM:")
+ * @param string $priv        The privilege to check for (e.g. ":DEV:")
+ * @return bool
+ */
+function hasPriv($privileges, $priv)
+{
+	if (empty($privileges) || empty($priv)) {
+		return false;
+	}
+	return strpos($privileges, $priv) !== false;
+}
+
+/**
+ * Check if a privilege string contains any of the given privileges.
+ *
+ * @param string $privileges  The user's privilege string
+ * @param array  $privList    Array of privilege strings to check
+ * @return bool
+ */
+function hasAnyPriv($privileges, $privList)
+{
+	foreach ($privList as $priv) {
+		if (hasPriv($privileges, $priv)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Check if the current session user has admin privileges.
+ * Admin = DEV, SGM, or GM privilege in the nel user.Privilege field.
+ */
+function isAdmin()
+{
+	$priv = isset($_SESSION['account_privilege']) ? $_SESSION['account_privilege'] : '';
+	return hasAnyPriv($priv, array(':DEV:', ':SGM:', ':GM:'));
+}
+
+/**
+ * Parse a privilege string into an array of individual privilege names.
+ *
+ * @param string $privileges  e.g. ":DEV:SGM:GM:"
+ * @return array              e.g. array("DEV", "SGM", "GM")
+ */
+function parsePrivileges($privileges)
+{
+	if (empty($privileges)) {
+		return array();
+	}
+	$parts = explode(':', $privileges);
+	$result = array();
+	foreach ($parts as $part) {
+		$part = trim($part);
+		if ($part !== '') {
+			$result[] = $part;
+		}
+	}
+	return $result;
+}
+
+/**
+ * Get a human-readable label for a privilege code.
+ */
+function privilegeLabel($code)
+{
+	$labels = array(
+		'DEV' => 'Developer',
+		'SGM' => 'Senior GM',
+		'GM' => 'Game Master',
+		'VG' => 'Venue Guardian',
+		'SG' => 'Senior Guide',
+		'G' => 'Guide',
+		'EM' => 'Event Manager',
+		'EG' => 'Event Guide',
+		'CM' => 'Community Manager',
+		'OBSERVER' => 'Observer',
+		'PR' => 'Press',
+	);
+	return isset($labels[$code]) ? $labels[$code] : $code;
+}
+
+/**
  * Redirect to a page within the account tool.
  */
 function redirect($page)

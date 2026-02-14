@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
 		} else {
 			try {
 				$db = getNelDatabase();
-				$stmt = $db->prepare('SELECT UId, Login, Password, Email FROM user WHERE Login = :login');
+				$stmt = $db->prepare('SELECT UId, Login, Password, Email, Privilege FROM user WHERE Login = :login');
 				$stmt->execute(array(':login' => $login));
 				$user = $stmt->fetch();
 
@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
 					$_SESSION['account_uid'] = (int)$user['UId'];
 					$_SESSION['account_login'] = $user['Login'];
 					$_SESSION['account_email'] = $user['Email'];
+					$_SESSION['account_privilege'] = isset($user['Privilege']) ? $user['Privilege'] : '';
 					redirect('home');
 				} else {
 					$error = 'Invalid username or password.';
