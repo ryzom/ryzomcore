@@ -130,7 +130,7 @@
 	if ($allowDownload)
 	{
 		echo "<table border=1>";
-		echo "<form method='post' action='$_SERVER['PHP_SELF']'>";
+		echo "<form method='post' action='".$_SERVER['PHP_SELF']."'>";
 		echo "<tr><td bgcolor=#DDDDEE>Download file</td><tr>";
 		echo "<td>";
 		echo "<input type=text name='file' size=40 maxlength=255 value='$file'/>";
@@ -146,7 +146,7 @@
 	if ($allowUpload)
 	{
 		echo "<table border=1>";
-		echo "<form enctype='multipart/form-data' method='post' action='$_SERVER['PHP_SELF']'>";
+		echo "<form enctype='multipart/form-data' method='post' action='".$_SERVER['PHP_SELF']."'>";
 		echo "<tr><td bgcolor=#DDDDEE>Upload file</td><tr>";
 		echo "<td>";
 		echo "<input type=file name='upld_file' size=40 maxlength=255/><br>";

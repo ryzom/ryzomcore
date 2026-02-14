@@ -20,10 +20,10 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QUndoStack>
-#include <QtGui/QAbstractButton>
-#include <QtGui/QLineEdit>
-#include <QtGui/QComboBox>
+#include <QtWidgets/QUndoStack>
+#include <QtWidgets/QAbstractButton>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QComboBox>
 
 // NeL includes
 #include <nel/misc/debug.h>

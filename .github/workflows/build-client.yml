@@ -37,7 +37,7 @@ jobs:
          - ubuntu-22.04
          - windows-2025
          - windows-2022
-         - macos-13
+         - macos-15
         include:
           - os: windows-2022
             cmake_preset: windows-client
@@ -49,9 +49,9 @@ jobs:
           - os: ubuntu-24.04
             ubuntu_version: 24.04
             cmake_preset: linux-client
-          - os: macos-13
+          - os: macos-15
             cmake_preset: macos-client
-            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
+            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO -DCMAKE_HAVE_LIBC_PTHREAD=ON
 
     steps:
     - uses: actions/checkout@v4

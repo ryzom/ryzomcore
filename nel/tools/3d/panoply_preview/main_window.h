@@ -36,7 +36,6 @@
 // ...
 
 class QTreeView;
-class QDirModel;
 class QUndoStack;
 class QScrollArea;
 

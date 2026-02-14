@@ -18,7 +18,7 @@ function show_queue(){
         if( Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
 
             //the  queue you want to see.
-            $result['queue_view'] = filter_var($_GET['get'], FILTER_SANITIZE_STRING);
+            $result['queue_view'] = filter_var($_GET['get'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $user_id = unserialize($_SESSION['ticket_user'])->getTUserId();
             $queueArray = array();
             $queue_handler = new  Ticket_Queue_handler();
@@ -44,9 +44,9 @@ function show_queue(){
             if(isset($_GET['get']) && ($_GET['get'] == "create") && isset($_GET['userid']) && isset($_GET['groupid']) && isset($_GET['what']) && isset($_GET['how']) && isset($_GET['who'])){
                 $userid = filter_var($_GET['userid'], FILTER_SANITIZE_NUMBER_INT);
                 $groupid = filter_var($_GET['groupid'], FILTER_SANITIZE_NUMBER_INT);
-                $what = filter_var($_GET['what'], FILTER_SANITIZE_STRING);
-                $how = filter_var($_GET['how'], FILTER_SANITIZE_STRING);
-                $who = filter_var($_GET['who'], FILTER_SANITIZE_STRING);
+                $what = filter_var($_GET['what'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $how = filter_var($_GET['how'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $who = filter_var($_GET['who'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                 //create the custom queue
                 $queue_handler->CreateQueue($userid, $groupid, $what, $how, $who);
 
@@ -87,9 +87,9 @@ function show_queue(){
                         } else {
                             $groupid = 0;
                         }
-                        $what = filter_var($_POST['what'], FILTER_SANITIZE_STRING);
-                        $how = filter_var($_POST['how'], FILTER_SANITIZE_STRING);
-                        $who = filter_var($_POST['who'], FILTER_SANITIZE_STRING);
+                        $what = filter_var($_POST['what'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                        $how = filter_var($_POST['how'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                        $who = filter_var($_POST['who'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                         //create the custom queue
                         $queue_handler->CreateQueue($userid, $groupid, $what, $how, $who);
                         if (Helpers::check_if_game_client()) {

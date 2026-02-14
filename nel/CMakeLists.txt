@@ -1,9 +1,3 @@
-IF (COMMAND cmake_policy)
-  IF (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-  ENDIF ()
-ENDIF ()
-
 project(NeL VERSION ${RyzomCore_VERSION} LANGUAGES CXX C)
 
 set(project_export_name "${PROJECT_NAME}-targets")

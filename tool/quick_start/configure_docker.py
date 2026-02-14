@@ -30,9 +30,9 @@ def BuildSteamRuntime(image, source, platform):
 		return
 	print("DOCKER BUILD " + image)
 	os.chdir(NeLTempDir)
-	subprocess.run(["aria2c", "https://repo.steampowered.com/steamrt-images-scout/snapshots/latest-steam-client-general-availability/" + source + ".Dockerfile"])
-	subprocess.run(["aria2c", "https://repo.steampowered.com/steamrt-images-scout/snapshots/latest-steam-client-general-availability/" + source + ".tar.gz"])
-	subprocess.run(["docker", "build", "--platform", platform, "-f", source + ".Dockerfile", "-t", image + ":latest", "."])
+	subprocess.run(["aria2c", "https://repo.steampowered.com/steamrt-images-scout/snapshots/latest-steam-client-general-availability/" + source + ".Dockerfile"], check=True)
+	subprocess.run(["aria2c", "https://repo.steampowered.com/steamrt-images-scout/snapshots/latest-steam-client-general-availability/" + source + ".tar.gz"], check=True)
+	subprocess.run(["docker", "build", "--platform", platform, "-f", source + ".Dockerfile", "-t", image + ":latest", "."], check=True)
 	os.remove(source + ".Dockerfile")
 	os.remove(source + ".tar.gz")
 
@@ -42,7 +42,7 @@ def BuildImage(image):
 		return
 	print("DOCKER BUILD " + image)
 	dockerFile = os.path.join(os.path.join(dockerDir, image), "Dockerfile")
-	subprocess.run(["docker", "build",  "-t", image, "-f", dockerFile, NeLCodeDir])
+	subprocess.run(["docker", "build",  "-t", image, "-f", dockerFile, NeLCodeDir], check=True)
 	subprocess.run(["docker", "volume",  "rm", image + "_hunter"], stderr=subprocess.DEVNULL)
 
 def BuildImages():

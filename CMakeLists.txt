@@ -18,45 +18,31 @@
 #   * To build binary archive, use the 'package' target.
 #     To build source archive, use the 'package_source' target.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.22)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.28)
 
 #-----------------------------------------------------------------------------
 # Load some macros.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
 #-----------------------------------------------------------------------------
-# Set CMake 2.6 Policies.
-IF(COMMAND cmake_policy)
-  # Works around warnings libraries linked against that don't
-  # have absolute paths (e.g. -lpthread)
-  cmake_policy(SET CMP0003 NEW)
-
-  # allow to link to qtmain automatically under Windows
-  IF(POLICY CMP0020)
-    CMAKE_POLICY(SET CMP0020 NEW)
-  ENDIF()
-
-  IF (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-  ENDIF ()
-ENDIF()
-
-
-#-----------------------------------------------------------------------------
-# Downloads and install Hunger into HUNTER_ROOT directory.
+# Downloads and install Hunter into HUNTER_ROOT directory.
 OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
-  cmake_minimum_required(VERSION 3.24)
-
-  IF (POLICY CMP0144)
-    cmake_policy(SET CMP0144 NEW)
-  ENDIF ()
 
   INCLUDE("CMakeModules/HunterGate.cmake")
-  HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.26.1.tar.gz"
-    SHA1 "e41ac7a18c49b35ebac99ff2b5244317b2638a65"
-    FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
-  )
+  IF(APPLE)
+    # Use newer Hunter on macOS for Xcode 16+ compatibility (ZLIB fix)
+    HunterGate(
+      URL "https://github.com/cpp-pm/hunter/archive/v0.26.6.tar.gz"
+      SHA1 "e70c29f878f5d5f5cdf1b9ccd628fb872e8624a8"
+      FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
+    )
+  ELSE()
+    HunterGate(
+      URL "https://github.com/cpp-pm/hunter/archive/v0.26.1.tar.gz"
+      SHA1 "e41ac7a18c49b35ebac99ff2b5244317b2638a65"
+      FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
+    )
+  ENDIF()
 
   # default options for hunterized build
   SET(WITH_STATIC         ON CACHE BOOL "static" FORCE)
@@ -315,6 +301,10 @@ INCLUDE(FindHelpers)
 #TODO: hunter qt package
 IF(WITH_QT5)
   FIND_QT5()
+ENDIF()
+
+IF(WITH_QT6)
+  FIND_QT6()
 ENDIF()
 
 #TODO: hunter assimp package

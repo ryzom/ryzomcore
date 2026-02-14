@@ -20,7 +20,7 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -33,6 +33,7 @@
 #include <nel/3d/u_text_context.h>
 
 // Project includes
+#include "../../../tools/3d/shared_widgets/common.h"
 #include "internationalization.h"
 #include "graphics_config.h"
 
@@ -41,15 +42,6 @@ using namespace NLMISC;
 using namespace NL3D;
 
 namespace NLQT {
-
-namespace {
-
-QString nli18n(const char *label)
-{
-	return QString::fromUtf16(CI18N::get(label).c_str());
-}
-
-} /* anonymous namespace */
 
 CGraphicsViewport::CGraphicsViewport(QWidget *parent) 
 	: QWidget(parent),

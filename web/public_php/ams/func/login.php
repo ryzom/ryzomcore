@@ -9,8 +9,8 @@ function login(){
 	global $INGAME_WEBPATH;
 	global $WEBPATH;
 	try{
-		$login_value = filter_var($_POST['LoginValue'],FILTER_SANITIZE_STRING);
-		$password = filter_var($_POST['Password'],FILTER_SANITIZE_STRING);
+		$login_value = filter_var($_POST['LoginValue'],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+		$password = filter_var($_POST['Password'],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
 		//check if the filtered sent POST data returns a match with the DB
 		$result = WebUsers::checkLoginMatch($login_value, $password);

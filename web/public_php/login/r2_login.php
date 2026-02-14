@@ -49,7 +49,8 @@
 
 				$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
 				mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
-				$query = "SELECT * FROM domain WHERE domain_id=$domainId";
+				$domainId = intval($domainId);
+			$query = "SELECT * FROM domain WHERE domain_id=$domainId";
 				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 				if( mysqli_num_rows($result) != 1)

@@ -274,3 +274,4 @@ nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
 
 # machine specific files
 CMakeUserPresets.json
+.claude/settings.local.json
