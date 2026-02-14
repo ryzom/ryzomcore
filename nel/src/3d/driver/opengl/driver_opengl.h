@@ -1584,6 +1584,12 @@ private:
 
 			GLuint ARBWaterShader[4]; // water support on R300, NV30 & the like
 
+			// Fragment program fallback for combine4/combine3 on hardware lacking those extensions
+			GLuint ARBSpecularShader;       // specular pass with base texture: tex1 * prev.a + prev
+			GLuint ARBSpecularShaderNoTex;  // specular pass without base texture: tex1 + primary
+			GLuint ARBPPLStage0Shader;      // PPL stage 0: cubemap * constant + primary
+			GLuint ARBPPLStage2Shader;      // PPL stage 2: cubemap * constant + previous
+			GLuint ARBLightmapShader[3];    // lightmap: base + N lightmap stages (N=1,2,3)
 
 			void   initFragmentShaders();
 			void   deleteFragmentShaders();
