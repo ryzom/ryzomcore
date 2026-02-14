@@ -827,7 +827,7 @@
 	
 	
 	<!-- vue 3D du perso -->
-	<scene3d id="char3d" x="576" y="-32" sizeref="wh" w="-224" h="-112" posref="TR TR" curcam="cam" curcs="env"
+	<scene3d id="char3d" x="576" y="-32" sizeref="wh" w="-224" h="-112" posref="TR TR" curcam="cam" curcs="env" post_process_effects="true"
 						user_interaction="true" rotz_factor="0.017"
 						roty_factor="0.005" roty_limit_min="-10" roty_limit_max="15"
 						dist_factor="0.005" dist_limit_min="3.0" dist_limit_max="4.0"	
@@ -1324,4 +1324,3 @@
 <!-- ROTATION OF THE CHARACTER -->
 
 </interface_config>
-

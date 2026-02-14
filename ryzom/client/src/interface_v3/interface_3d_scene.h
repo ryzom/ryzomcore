@@ -35,6 +35,9 @@ class CInterface3DCamera;
 class CInterface3DLight;
 class CInterface3DFX;
 
+void resetInterface3DScenePostProcessWanted();
+bool isInterface3DScenePostProcessWanted();
+
 namespace NL3D
 {
 	class UParticleSystemInstance;
@@ -122,6 +125,7 @@ protected:
 
 	// Mouse event handling
 	bool _UserInteraction;
+	bool _PostProcessEffects;
 	float _RotZLimitMin, _RotZLimitMax;
 	float _RotZFactor;
 	float _RotYLimitMin, _RotYLimitMax;
@@ -553,5 +557,4 @@ protected:
 #endif // RZ_INTERFACE_SCENE_3D_H
 
 /* end of interface_3d_scene.h */
-
 

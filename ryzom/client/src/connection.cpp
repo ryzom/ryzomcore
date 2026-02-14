@@ -38,7 +38,6 @@
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/stereo_display.h"
 #include "nel/3d/bloom_effect.h"
-#include "nel/3d/fxaa.h"
 // Game Share
 //#include "game_share/gd_time.h"		// \todo GUIGUI : TO DELETE/CHANGE
 #include "game_share/gender.h"
@@ -71,6 +70,7 @@
 // Interface part
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/character_3d.h"
+#include "interface_v3/interface_3d_scene.h"
 #include "nel/gui/ctrl_button.h"
 #include "interface_v3/input_handler_manager.h"
 #include "nel/gui/group_editbox.h"
@@ -1034,6 +1034,7 @@ TInterfaceState globalMenu()
 		// Update the DT T0 and T1 global variables
 		updateClientTime();
 		CInputHandlerManager::getInstance()->pumpEvents();
+		resetInterface3DScenePostProcessWanted();
 		bool haveEffects = Driver->getPolygonMode() == UDriver::Filled
 			&& (ClientCfg.Bloom || FXAA);
 		if (haveEffects)
@@ -1059,8 +1060,11 @@ TInterfaceState globalMenu()
 		if (haveEffects)
 		{
 			Driver->setMatrixMode2D11();
-			if (FXAA) FXAA->applyEffect();
-			if (ClientCfg.Bloom) CBloomEffect::getInstance().applyBloom();
+			if (isInterface3DScenePostProcessWanted())
+			{
+				if (FXAA) FXAA->applyEffect();
+				if (ClientCfg.Bloom) CBloomEffect::getInstance().applyBloom();
+			}
 			Driver->endDefaultRenderTarget(NULL);
 		}
 

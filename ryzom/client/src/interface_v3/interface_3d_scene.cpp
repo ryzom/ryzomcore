@@ -43,6 +43,18 @@ using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
 
+static bool Interface3DScenePostProcessWanted = false;
+
+void resetInterface3DScenePostProcessWanted()
+{
+	Interface3DScenePostProcessWanted = false;
+}
+
+bool isInterface3DScenePostProcessWanted()
+{
+	return Interface3DScenePostProcessWanted;
+}
+
 // ----------------------------------------------------------------------------
 // CInterface3DScene
 // ----------------------------------------------------------------------------
@@ -56,6 +68,7 @@ CInterface3DScene::CInterface3DScene(const TCtorParam &param)
 	_MouseLDown = false;
 	_MouseRDown = false;
 	_UserInteraction = false;
+	_PostProcessEffects = false;
 	_RotYFactor = _RotZFactor = 0.005f;
 	_RotYLimitMin = _RotZLimitMin = -(float)(180.0f / NLMISC::Pi);
 	_RotYLimitMax = _RotZLimitMax = (float)(180.0f / NLMISC::Pi);
@@ -117,6 +130,8 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	// Check for user interaction properties
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"user_interaction" );
 	if (ptr) _UserInteraction = convertBool(ptr);
+	ptr = (char*) xmlGetProp( cur, (xmlChar*)"post_process_effects" );
+	if (ptr) _PostProcessEffects = convertBool(ptr);
 
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"rotz_limit_min" );
 	if (ptr)
@@ -408,6 +423,11 @@ void CInterface3DScene::draw ()
 	// This is not a reference view !
 	if (pDisp->_Scene == NULL)
 		return;
+
+	if (_PostProcessEffects)
+	{
+		Interface3DScenePostProcessWanted = true;
+	}
 
 	CInterface3DCamera *pI3DCam = pDisp->_Cameras[_CurrentCamera];
 

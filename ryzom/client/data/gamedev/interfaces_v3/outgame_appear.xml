@@ -792,7 +792,7 @@
 
 
 	<!-- vue 3D du perso -->
-	<scene3d id="char3d" x="0" y="-32" w="800" h="488" posref="TL TL" curcam="cam" render_layer="-2"
+	<scene3d id="char3d" x="0" y="-32" w="800" h="488" posref="TL TL" curcam="cam" render_layer="-2" post_process_effects="true"
 						user_interaction="true" rotz_factor="0.017"
 						roty_factor="0.005" roty_limit_min="-10" roty_limit_max="15"
 						dist_factor="0.005" dist_limit_min="2.0" dist_limit_max="3.0"	
@@ -819,7 +819,7 @@
 
 
 
-	<scene3d id="char3dface" x="400" y="-32" w="400" h="244" posref="TR TR" reference="char3d" curcam="camface" render_layer="-2"
+	<scene3d id="char3dface" x="400" y="-32" w="400" h="244" posref="TR TR" reference="char3d" curcam="camface" render_layer="-2" post_process_effects="true"
 						user_interaction="true" rotz_factor="0.017"
 						roty_factor="0.005" roty_limit_min="-10" roty_limit_max="15"
 						dist_factor="0.005" dist_limit_min="0.9" dist_limit_max="1.5" >
