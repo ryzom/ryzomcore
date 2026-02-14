@@ -535,3 +535,13 @@ tex->setUploadFormat(ITexture::RGBA8888);
 _MaskTexture = tex;
 return _MaskTexture;
 }
+
+
+// ***************************************************************************
+bool CDecal::contains(const NLMISC::CVector2f &pos) const
+{
+	CMatrix invMat = getWorldMatrix();
+	invMat.invert();
+	CVector posIn = invMat * CVector(pos.x, pos.y, 0.f);
+	return posIn.x >= 0.f && posIn.x <= 1.f && posIn.y >= 0.f && posIn.y <= 1.f;
+}

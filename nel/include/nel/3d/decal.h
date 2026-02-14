@@ -254,6 +254,13 @@ public:
 	  */
 	void setWorldMatrixForSpot(const NLMISC::CVector2f &pos, float radius, float angleInRadians = 0.f);
 
+	/** Test if a 2D point is contained within this decal's projection area.
+	  * Used by R2 editor tools for hit-testing.
+	  * \param pos 2D point to test (world XY)
+	  * \return true if the point falls within the unit-cube projection
+	  */
+	bool contains(const NLMISC::CVector2f &pos) const;
+
 	/** Set the diffuse color applied to the decal.
 	  * The RGB components tint the texture, alpha is a base opacity.
 	  * \param diffuse RGBA diffuse color

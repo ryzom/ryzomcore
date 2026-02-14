@@ -97,6 +97,9 @@ public:
 
 	/// Set the world matrix for a spot-shaped decal
 	void			setWorldMatrixForSpot(const NLMISC::CVector2f &pos, float radius, float angleInRadians = 0.f);
+
+	/// Test if a 2D point is contained within this decal's projection area (for hit-testing)
+	bool			contains(const NLMISC::CVector2f &pos) const;
 };
 
 

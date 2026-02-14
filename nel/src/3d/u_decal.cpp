@@ -142,4 +142,11 @@ void UDecal::setWorldMatrixForSpot(const NLMISC::CVector2f &pos, float radius, f
 	object->setWorldMatrixForSpot(pos, radius, angleInRadians);
 }
 
+// ***************************************************************************
+bool UDecal::contains(const NLMISC::CVector2f &pos) const
+{
+	CDecal *object = (CDecal*)_Object;
+	return object->contains(pos);
+}
+
 } // NL3D

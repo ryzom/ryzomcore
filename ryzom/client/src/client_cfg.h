@@ -299,6 +299,9 @@ struct CClientConfig
 	bool			SquareBloom;
 	float			DensityBloom;
 
+	/// Use the new engine-level decal system instead of the legacy client-side one
+	bool			NewDecalSystem;
+
 	/// Movie Shooter
 	uint			MovieShooterMemory;
 	string			MovieShooterPath;

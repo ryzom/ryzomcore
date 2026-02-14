@@ -28,6 +28,7 @@
 
 // client
 #include "legacy_decal.h"
+#include "client_cfg.h"
 
 using namespace NLMISC;
 using namespace NL3D;
@@ -309,8 +310,12 @@ void CLandscapePolyDrawer::renderLandscapePolyPart()
 	// render decals on landscape only
 	Driver->stencilFunc(UDriver::equal, 0x80, 0x80);
 
-	// call to render the decals just before the projected polygons on landscape
-	CLegacyDecalRenderList::getInstance().renderAllDecals();
+	// call to render the legacy decals just before the projected polygons on landscape
+	// (when new decal system is active, rendering is handled by CDecalManager::flush() in render traversal)
+	if (!ClientCfg.NewDecalSystem)
+	{
+		CLegacyDecalRenderList::getInstance().renderAllDecals();
+	}
 
 	// disable stencil test
 	Driver->enableStencilTest(false);
