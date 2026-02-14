@@ -5,6 +5,8 @@
 
 $pageTitle = 'Admin';
 $uid = $_SESSION['account_uid'];
+$myPrivilege = isset($_SESSION['account_privilege']) ? $_SESSION['account_privilege'] : '';
+$myRank = highestPrivRank($myPrivilege);
 
 $users = array();
 $editUser = null;
@@ -48,7 +50,7 @@ try {
 				foreach ($codes as $code) {
 					if (in_array(strtoupper($code), $knownPrivs)) {
 						// Hierarchy check: can't assign privileges at or above own rank
-						if (privRank(strtoupper($code)) >= highestPrivRank(isset($_SESSION['account_privilege']) ? $_SESSION['account_privilege'] : '')) {
+						if (privRank(strtoupper($code)) >= $myRank) {
 							$invalidCodes[] = $code . ' (rank too high)';
 						} else {
 							$validCodes[] = strtoupper($code);

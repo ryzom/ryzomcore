@@ -346,9 +346,13 @@ function getSetting($key, $default = '')
  */
 function setSetting($key, $value)
 {
-	$db = getNelDatabase();
-	$stmt = $db->prepare('INSERT INTO nel_setting (setting, value) VALUES (:key, :val) ON DUPLICATE KEY UPDATE value = :val2');
-	$stmt->execute(array(':key' => $key, ':val' => $value, ':val2' => $value));
+	try {
+		$db = getNelDatabase();
+		$stmt = $db->prepare('INSERT INTO nel_setting (setting, value) VALUES (:key, :val) ON DUPLICATE KEY UPDATE value = :val2');
+		$stmt->execute(array(':key' => $key, ':val' => $value, ':val2' => $value));
+	} catch (PDOException $e) {
+		// Setting save failed silently; caller should handle via getSetting fallback
+	}
 }
 
 /**

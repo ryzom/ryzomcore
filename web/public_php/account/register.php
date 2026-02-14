@@ -59,16 +59,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
 
 					// Create default permissions based on domain access setting
 					$accessSetting = getSetting('default_access_domains', 'ds_open');
-					$accessStatuses = array_map('trim', explode(',', $accessSetting));
-					$domains = $db->query("SELECT domain_id, status FROM domain");
-					foreach ($domains as $domain) {
-						if (in_array($domain['status'], $accessStatuses)) {
-							$pstmt = $db->prepare('INSERT INTO permission (UId, DomainId, AccessPrivilege) VALUES (:uid, :did, :priv)');
-							$pstmt->execute(array(
-								':uid' => $uid,
-								':did' => (int)$domain['domain_id'],
-								':priv' => 'OPEN',
-							));
+					$accessStatuses = array_filter(array_map('trim', explode(',', $accessSetting)), 'strlen');
+					if (!empty($accessStatuses)) {
+						$domains = $db->query("SELECT domain_id, status FROM domain");
+						foreach ($domains as $domain) {
+							if (in_array($domain['status'], $accessStatuses)) {
+								$pstmt = $db->prepare('INSERT INTO permission (UId, DomainId, AccessPrivilege) VALUES (:uid, :did, :priv)');
+								$pstmt->execute(array(
+									':uid' => $uid,
+									':did' => (int)$domain['domain_id'],
+									':priv' => 'OPEN',
+								));
+							}
 						}
 					}
 

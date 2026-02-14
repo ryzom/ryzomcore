@@ -105,7 +105,7 @@ ob_start();
 					<?php foreach ($settings as $k => $v): ?>
 					<tr>
 						<td style="color:#ecf0f1;"><code><?php echo h($k); ?></code></td>
-						<td><?php echo $v !== '' ? h($v) : '<span style="color:#8899a6;">(empty)</span>'; ?></td>
+						<td><?php echo ($v !== '' && $v !== null) ? h($v) : '<span style="color:#8899a6;">(empty)</span>'; ?></td>
 					</tr>
 					<?php endforeach; ?>
 				</tbody>
