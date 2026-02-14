@@ -142,6 +142,11 @@ CDecalManager::CDecalManager() :
 	_VB.setPreferredMemory(CVertexBuffer::AGPVolatile, true);
 	_VB.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::PrimaryColorFlag);
 	_VB.setNumVertices(NL3D_DECAL_VB_MAX_VERTICES);
+	// Route texture stage 1 to use TexCoord0 (same as stage 0).
+	// The material uses 2 texture stages with the same texture, and both
+	// need valid UVs. Without this, the driver looks for TexCoord1 (not present)
+	// and disables tex coords for stage 1, zeroing out the alpha.
+	_VB.setUVRouting(1, 0);
 
 	// Create the vertex program instance
 	_VertexProgram = new CVertexProgramDecalAttenuation();
