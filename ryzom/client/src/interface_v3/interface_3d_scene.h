@@ -37,6 +37,7 @@ class CInterface3DFX;
 
 void resetInterface3DScenePostProcessWanted();
 bool isInterface3DScenePostProcessWanted();
+void setInterface3DSceneSkipRender(bool skip);
 
 namespace NL3D
 {
@@ -557,4 +558,3 @@ protected:
 #endif // RZ_INTERFACE_SCENE_3D_H
 
 /* end of interface_3d_scene.h */
-

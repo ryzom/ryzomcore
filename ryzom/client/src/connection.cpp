@@ -1066,6 +1066,12 @@ TInterfaceState globalMenu()
 				if (ClientCfg.Bloom) CBloomEffect::getInstance().applyBloom();
 			}
 			Driver->endDefaultRenderTarget(NULL);
+			if (isInterface3DScenePostProcessWanted())
+			{
+				setInterface3DSceneSkipRender(true);
+				pIM->drawViews(NULL);
+				setInterface3DSceneSkipRender(false);
+			}
 		}
 
 		// Movie shooter

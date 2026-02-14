@@ -44,6 +44,7 @@ using namespace NL3D;
 using namespace NLMISC;
 
 static bool Interface3DScenePostProcessWanted = false;
+static bool Interface3DSceneSkipRender = false;
 
 void resetInterface3DScenePostProcessWanted()
 {
@@ -53,6 +54,11 @@ void resetInterface3DScenePostProcessWanted()
 bool isInterface3DScenePostProcessWanted()
 {
 	return Interface3DScenePostProcessWanted;
+}
+
+void setInterface3DSceneSkipRender(bool skip)
+{
+	Interface3DSceneSkipRender = skip;
 }
 
 // ----------------------------------------------------------------------------
@@ -400,6 +406,9 @@ void CInterface3DScene::draw ()
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
 	if ( Driver == NULL)
+		return;
+
+	if (Interface3DSceneSkipRender)
 		return;
 
 	// No Op if screen minimized
