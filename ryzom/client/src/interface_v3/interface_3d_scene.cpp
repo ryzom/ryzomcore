@@ -406,10 +406,14 @@ void CInterface3DScene::draw ()
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
 	if ( Driver == NULL)
+	{
 		return;
+	}
 
 	if (Interface3DSceneSkipRender)
+	{
 		return;
+	}
 
 	// No Op if screen minimized
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();

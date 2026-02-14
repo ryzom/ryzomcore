@@ -102,6 +102,25 @@ using namespace std;
 using namespace RSMGR;
 using namespace R2;
 
+namespace
+{
+class CInterface3DSceneSkipRenderGuard
+{
+public:
+	CInterface3DSceneSkipRenderGuard(const CInterface3DSceneSkipRenderGuard &) = delete;
+	CInterface3DSceneSkipRenderGuard &operator=(const CInterface3DSceneSkipRenderGuard &) = delete;
+
+	CInterface3DSceneSkipRenderGuard()
+	{
+		setInterface3DSceneSkipRender(true);
+	}
+	~CInterface3DSceneSkipRenderGuard()
+	{
+		setInterface3DSceneSkipRender(false);
+	}
+};
+}
+
 
 
 /////////////
@@ -1068,9 +1087,9 @@ TInterfaceState globalMenu()
 			Driver->endDefaultRenderTarget(NULL);
 			if (isInterface3DScenePostProcessWanted())
 			{
-				setInterface3DSceneSkipRender(true);
+				// Redraw UI without scene3d to keep 2D widgets/text unaffected by post-process.
+				CInterface3DSceneSkipRenderGuard skipScene3D;
 				pIM->drawViews(NULL);
-				setInterface3DSceneSkipRender(false);
 			}
 		}
 
