@@ -83,6 +83,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 	opts += [ "-DWITH_EXTERNAL=OFF" ]
 	opts += [ "-DWITH_STLPORT=OFF" ]
 	opts += [ "-DWITH_NEL_TESTS=OFF" ]
+	opts += [ "-DWITH_TESTING=OFF" ]
 	opts += [ "-DWITH_STATIC=ON" ]
 	
 	if len(FilterExternalDirs([ "ffmpeg" ], filteredPrefix)) > 0:
