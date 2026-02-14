@@ -45,18 +45,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
 					// Create the user directly in the nel user table
 					$hashedPassword = hashPassword($password);
 
-					$stmt = $db->prepare('INSERT INTO user (Login, Password, Email) VALUES (:login, :pass, :email)');
+					// Get default privileges from settings
+					$defaultPriv = getSetting('default_privileges', '');
+
+					$stmt = $db->prepare('INSERT INTO user (Login, Password, Email, Privilege) VALUES (:login, :pass, :email, :priv)');
 					$stmt->execute(array(
 						':login' => $login,
 						':pass' => $hashedPassword,
 						':email' => $email,
+						':priv' => $defaultPriv,
 					));
 					$uid = (int)$db->lastInsertId();
 
-					// Create default permissions for all open domains
+					// Create default permissions based on domain access setting
+					$accessSetting = getSetting('default_access_domains', 'ds_open');
+					$accessStatuses = array_map('trim', explode(',', $accessSetting));
 					$domains = $db->query("SELECT domain_id, status FROM domain");
 					foreach ($domains as $domain) {
-						if ($domain['status'] === 'ds_open') {
+						if (in_array($domain['status'], $accessStatuses)) {
 							$pstmt = $db->prepare('INSERT INTO permission (UId, DomainId, AccessPrivilege) VALUES (:uid, :did, :priv)');
 							$pstmt->execute(array(
 								':uid' => $uid,

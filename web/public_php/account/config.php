@@ -202,12 +202,36 @@ function hasAnyPriv($privileges, $privList)
 
 /**
  * Check if the current session user has admin privileges.
- * Admin = DEV, SGM, or GM privilege in the nel user.Privilege field.
+ * Uses the `admin_privileges` setting (default: :DEV:SGM:GM:).
  */
 function isAdmin()
 {
 	$priv = isset($_SESSION['account_privilege']) ? $_SESSION['account_privilege'] : '';
-	return hasAnyPriv($priv, array(':DEV:', ':SGM:', ':GM:'));
+	$adminPrivs = getSetting('admin_privileges', ':DEV:SGM:GM:');
+	$adminCodes = parsePrivileges($adminPrivs);
+	foreach ($adminCodes as $code) {
+		if (hasPriv($priv, ':' . $code . ':')) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Check if the current session user has the settings privilege.
+ * Uses the `settings_privilege` setting (default: :DEV:).
+ */
+function canEditSettings()
+{
+	$priv = isset($_SESSION['account_privilege']) ? $_SESSION['account_privilege'] : '';
+	$settingsPrivs = getSetting('settings_privilege', ':DEV:');
+	$settingsCodes = parsePrivileges($settingsPrivs);
+	foreach ($settingsCodes as $code) {
+		if (hasPriv($priv, ':' . $code . ':')) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
@@ -233,6 +257,54 @@ function parsePrivileges($privileges)
 }
 
 /**
+ * Privilege rank order, highest to lowest.
+ * Matches server-side: DEV > SGM > EM > GM > EG > VG > SG > G > OBSERVER > PR
+ */
+function privRank($code)
+{
+	$ranks = array(
+		'DEV' => 100,
+		'SGM' => 90,
+		'EM' => 80,
+		'GM' => 70,
+		'EG' => 60,
+		'VG' => 50,
+		'SG' => 40,
+		'G' => 30,
+		'CM' => 25,
+		'OBSERVER' => 20,
+		'PR' => 10,
+	);
+	return isset($ranks[$code]) ? $ranks[$code] : 0;
+}
+
+/**
+ * Get the highest privilege rank from a privilege string.
+ */
+function highestPrivRank($privileges)
+{
+	$codes = parsePrivileges($privileges);
+	$max = 0;
+	foreach ($codes as $code) {
+		$r = privRank($code);
+		if ($r > $max) { $max = $r; }
+	}
+	return $max;
+}
+
+/**
+ * Check if the current user can edit a target user based on privilege hierarchy.
+ * A user can only edit users with strictly lower privilege rank.
+ */
+function canEditUser($targetPrivilege)
+{
+	$myPriv = isset($_SESSION['account_privilege']) ? $_SESSION['account_privilege'] : '';
+	$myRank = highestPrivRank($myPriv);
+	$targetRank = highestPrivRank($targetPrivilege);
+	return $myRank > $targetRank;
+}
+
+/**
  * Get a human-readable label for a privilege code.
  */
 function privilegeLabel($code)
@@ -251,6 +323,32 @@ function privilegeLabel($code)
 		'PR' => 'Press',
 	);
 	return isset($labels[$code]) ? $labels[$code] : $code;
+}
+
+/**
+ * Get a nel_setting value from the database, with a fallback default.
+ */
+function getSetting($key, $default = '')
+{
+	try {
+		$db = getNelDatabase();
+		$stmt = $db->prepare('SELECT value FROM nel_setting WHERE setting = :key');
+		$stmt->execute(array(':key' => $key));
+		$row = $stmt->fetch();
+		return $row ? $row['value'] : $default;
+	} catch (PDOException $e) {
+		return $default;
+	}
+}
+
+/**
+ * Set a nel_setting value in the database.
+ */
+function setSetting($key, $value)
+{
+	$db = getNelDatabase();
+	$stmt = $db->prepare('INSERT INTO nel_setting (setting, value) VALUES (:key, :val) ON DUPLICATE KEY UPDATE value = :val2');
+	$stmt->execute(array(':key' => $key, ':val' => $value, ':val2' => $value));
 }
 
 /**

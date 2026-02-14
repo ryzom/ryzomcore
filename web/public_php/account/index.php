@@ -25,7 +25,7 @@ if ($logged_in && ($page === '' || $page === 'login' || $page === 'register')) {
 }
 
 // Route to the appropriate page
-$valid_pages = array('login', 'register', 'home', 'characters', 'sessions', 'settings', 'admin', 'logout');
+$valid_pages = array('login', 'register', 'home', 'characters', 'sessions', 'settings', 'admin', 'dev_settings', 'logout');
 
 if (!in_array($page, $valid_pages)) {
 	$page = $logged_in ? 'home' : 'login';
@@ -40,6 +40,11 @@ if ($page === 'logout') {
 
 // Gate admin page behind privilege check
 if ($page === 'admin' && !isAdmin()) {
+	$page = 'home';
+}
+
+// Gate dev settings page behind settings privilege check
+if ($page === 'dev_settings' && !canEditSettings()) {
 	$page = 'home';
 }
 
@@ -70,6 +75,9 @@ function renderLayout($title, $content, $currentPage, $loggedIn)
 		);
 		if (isAdmin()) {
 			$pages['admin'] = 'Admin';
+		}
+		if (canEditSettings()) {
+			$pages['dev_settings'] = 'Dev';
 		}
 		foreach ($pages as $key => $label) {
 			$active = ($currentPage === $key) ? ' class="active"' : '';

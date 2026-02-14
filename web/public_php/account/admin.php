@@ -14,6 +14,8 @@ $shards = array();
 $searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
 $editUid = isset($_GET['uid']) ? (int)$_GET['uid'] : 0;
 
+$editCanManage = false;
+
 try {
 	$db = getNelDatabase();
 
@@ -28,6 +30,14 @@ try {
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 		if (isset($_POST['save_privileges'])) {
 			$targetUid = (int)$_POST['target_uid'];
+			// Check privilege hierarchy: load target's current privileges first
+			$stmt = $db->prepare('SELECT Privilege FROM user WHERE UId = :uid');
+			$stmt->execute(array(':uid' => $targetUid));
+			$targetRow = $stmt->fetch();
+			if ($targetRow && !canEditUser($targetRow['Privilege'])) {
+				$error = 'You cannot edit a user with equal or higher privileges.';
+				$editUid = $targetUid;
+			} else {
 			$newPrivilege = trim($_POST['privilege']);
 			// Validate: parse and keep only known privilege codes
 			$knownPrivs = array('DEV', 'SGM', 'GM', 'VG', 'SG', 'G', 'EM', 'EG', 'CM', 'OBSERVER', 'PR');
@@ -37,13 +47,18 @@ try {
 				$invalidCodes = array();
 				foreach ($codes as $code) {
 					if (in_array(strtoupper($code), $knownPrivs)) {
-						$validCodes[] = strtoupper($code);
+						// Hierarchy check: can't assign privileges at or above own rank
+						if (privRank(strtoupper($code)) >= highestPrivRank(isset($_SESSION['account_privilege']) ? $_SESSION['account_privilege'] : '')) {
+							$invalidCodes[] = $code . ' (rank too high)';
+						} else {
+							$validCodes[] = strtoupper($code);
+						}
 					} else {
 						$invalidCodes[] = $code;
 					}
 				}
 				if (!empty($invalidCodes)) {
-					$error = 'Unknown privilege codes ignored: ' . implode(', ', $invalidCodes);
+					$error = 'Codes not applied: ' . implode(', ', $invalidCodes);
 				}
 				$newPrivilege = !empty($validCodes) ? ':' . implode(':', $validCodes) . ':' : '';
 			}
@@ -52,9 +67,17 @@ try {
 			$success = 'Privileges updated.' . ($error ? ' ' . $error : '');
 			$error = '';
 			$editUid = $targetUid;
+			}
 		}
 		if (isset($_POST['add_permission'])) {
 			$targetUid = (int)$_POST['target_uid'];
+			// Check privilege hierarchy
+			$stmt = $db->prepare('SELECT Privilege FROM user WHERE UId = :uid');
+			$stmt->execute(array(':uid' => $targetUid));
+			$targetRow = $stmt->fetch();
+			if ($targetRow && !canEditUser($targetRow['Privilege'])) {
+				$error = 'You cannot edit a user with equal or higher privileges.';
+			} else {
 			$domainId = (int)$_POST['domain_id'];
 			$shardId = (int)$_POST['shard_id'];
 			$accessPriv = trim($_POST['access_privilege']);
@@ -74,15 +97,24 @@ try {
 				$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId, ':priv' => $accessPriv));
 			}
 			$success = 'Permission added.';
+			}
 			$editUid = $targetUid;
 		}
 		if (isset($_POST['remove_permission'])) {
 			$targetUid = (int)$_POST['target_uid'];
+			// Check privilege hierarchy
+			$stmt = $db->prepare('SELECT Privilege FROM user WHERE UId = :uid');
+			$stmt->execute(array(':uid' => $targetUid));
+			$targetRow = $stmt->fetch();
+			if ($targetRow && !canEditUser($targetRow['Privilege'])) {
+				$error = 'You cannot edit a user with equal or higher privileges.';
+			} else {
 			$domainId = (int)$_POST['domain_id'];
 			$shardId = (int)$_POST['shard_id'];
 			$stmt = $db->prepare('DELETE FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
 			$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId));
 			$success = 'Permission removed.';
+			}
 			$editUid = $targetUid;
 		}
 	}
@@ -94,6 +126,7 @@ try {
 		$editUser = $stmt->fetch();
 
 		if ($editUser) {
+			$editCanManage = canEditUser($editUser['Privilege']);
 			$stmt = $db->prepare('SELECT perm.DomainId, perm.ShardId, perm.AccessPrivilege, d.domain_name FROM permission perm LEFT JOIN domain d ON perm.DomainId = d.domain_id WHERE perm.UId = :uid');
 			$stmt->execute(array(':uid' => $editUid));
 			$editPerms = $stmt->fetchAll();
@@ -157,10 +190,6 @@ ob_start();
 
 	<div class="card">
 		<h2>Privileges</h2>
-		<p style="font-size:0.85rem; color:#8899a6; margin-bottom:0.75rem;">
-			Privileges are colon-delimited, e.g. <code style="color:#5dade2;">:DEV:GM:</code>.
-			Known codes: DEV, SGM, GM, VG, SG, G, EM, EG, CM, OBSERVER, PR.
-		</p>
 		<?php
 		$currentPrivs = parsePrivileges($editUser['Privilege']);
 		if (!empty($currentPrivs)): ?>
@@ -169,7 +198,15 @@ ob_start();
 					<span class="badge badge-blue" title="<?php echo h(privilegeLabel($pc)); ?>"><?php echo h($pc); ?></span>
 				<?php endforeach; ?>
 			</div>
+		<?php else: ?>
+			<p style="color:#8899a6; font-size:0.85rem; margin-bottom:0.75rem;">No privileges assigned.</p>
 		<?php endif; ?>
+		<?php if ($editCanManage): ?>
+		<p style="font-size:0.85rem; color:#8899a6; margin-bottom:0.75rem;">
+			Privileges are colon-delimited, e.g. <code style="color:#5dade2;">:DEV:GM:</code>.
+			Known codes: DEV, SGM, GM, VG, SG, G, EM, EG, CM, OBSERVER, PR.
+			You can only assign privileges below your own rank.
+		</p>
 		<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>">
 			<?php echo csrfField(); ?>
 			<input type="hidden" name="target_uid" value="<?php echo (int)$editUser['UId']; ?>">
@@ -181,6 +218,9 @@ ob_start();
 				<button type="submit" name="save_privileges" class="btn btn-primary btn-sm">Save Privileges</button>
 			</div>
 		</form>
+		<?php else: ?>
+		<p style="font-size:0.85rem; color:#f5b7b1;">This user has equal or higher privileges. You cannot edit their privileges.</p>
+		<?php endif; ?>
 	</div>
 
 	<div class="card">
@@ -192,7 +232,7 @@ ob_start();
 						<th>Domain</th>
 						<th>Shard</th>
 						<th>Access</th>
-						<th></th>
+						<?php if ($editCanManage): ?><th></th><?php endif; ?>
 					</tr>
 				</thead>
 				<tbody>
@@ -212,6 +252,7 @@ ob_start();
 							<?php endif; ?>
 						</td>
 						<td><span class="badge badge-green"><?php echo h($perm['AccessPrivilege']); ?></span></td>
+						<?php if ($editCanManage): ?>
 						<td>
 							<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>" style="display:inline;">
 								<?php echo csrfField(); ?>
@@ -221,6 +262,7 @@ ob_start();
 								<button type="submit" name="remove_permission" class="btn btn-danger btn-sm">Remove</button>
 							</form>
 						</td>
+						<?php endif; ?>
 					</tr>
 					<?php endforeach; ?>
 				</tbody>
@@ -229,6 +271,7 @@ ob_start();
 			<p style="color:#8899a6; font-size:0.85rem; margin-bottom:0.75rem;">No permissions assigned.</p>
 		<?php endif; ?>
 
+		<?php if ($editCanManage): ?>
 		<div style="margin-top:1rem; padding-top:1rem; border-top:1px solid #2c3e50;">
 			<h3 style="font-size:0.9rem; color:#ecf0f1; margin-bottom:0.5rem;">Add Permission</h3>
 			<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>">
@@ -264,6 +307,7 @@ ob_start();
 				</div>
 			</form>
 		</div>
+		<?php endif; ?>
 	</div>
 
 	<?php else: ?>
@@ -326,7 +370,11 @@ ob_start();
 							<?php endif; ?>
 						</td>
 						<td>
-							<a href="index.php?page=admin&amp;uid=<?php echo (int)$u['UId']; ?>" class="btn btn-secondary btn-sm">Manage</a>
+							<?php if (canEditUser($u['Privilege'])): ?>
+								<a href="index.php?page=admin&amp;uid=<?php echo (int)$u['UId']; ?>" class="btn btn-secondary btn-sm">Manage</a>
+							<?php else: ?>
+								<span class="btn btn-secondary btn-sm" style="opacity:0.4; cursor:not-allowed;">Manage</span>
+							<?php endif; ?>
 						</td>
 					</tr>
 					<?php endforeach; ?>
