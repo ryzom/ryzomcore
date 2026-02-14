@@ -57,6 +57,75 @@ function getRingDatabase($ringDbName = null)
 }
 
 /**
+ * Include the Ring Session Manager PHP interface for RSM RPC calls.
+ * These files provide CRingSessionManagerWeb which communicates with the
+ * RSM service via a custom binary socket protocol.
+ *
+ * The ring scripts use relative includes, so we add the ring and tools
+ * directories to the include path before loading them.
+ */
+$_accountIncludePath = get_include_path();
+set_include_path(
+	dirname(dirname(__FILE__)) . '/ring' . PATH_SEPARATOR .
+	dirname(dirname(__FILE__)) . '/tools' . PATH_SEPARATOR .
+	dirname(dirname(__FILE__)) . PATH_SEPARATOR .
+	$_accountIncludePath
+);
+require_once('nel_message.php');
+require_once('ring_session_manager_itf.php');
+set_include_path($_accountIncludePath);
+unset($_accountIncludePath);
+
+/**
+ * Callback handler for RSM session actions (close, invite, remove, kick).
+ * Captures the result code and message from the RSM response.
+ */
+class AccountRSMCallback extends CRingSessionManagerWeb
+{
+	public $resultCode = -1;
+	public $resultString = '';
+	public $sessionId = 0;
+
+	function invokeResult($userId, $resultCode, $resultString)
+	{
+		$this->resultCode = $resultCode;
+		$this->resultString = $resultString;
+	}
+
+	function scheduleSessionResult($charId, $sessionId, $result, $resultString)
+	{
+		$this->resultCode = $result;
+		$this->resultString = $resultString;
+		$this->sessionId = $sessionId;
+	}
+}
+
+/**
+ * Connect to the Ring Session Manager for a given domain.
+ * Returns an AccountRSMCallback object on success, or false on failure.
+ *
+ * @param string $sessionManagerAddress  "host:port" from the domain table
+ * @return AccountRSMCallback|false
+ */
+function connectToRSM($sessionManagerAddress)
+{
+	if (empty($sessionManagerAddress)) {
+		return false;
+	}
+	$addr = explode(':', $sessionManagerAddress);
+	if (count($addr) < 2) {
+		return false;
+	}
+	$rsm = new AccountRSMCallback();
+	$res = '';
+	$rsm->connect($addr[0], $addr[1], $res);
+	if ($res !== '') {
+		return false;
+	}
+	return $rsm;
+}
+
+/**
  * Generate a crypt-compatible salt.
  */
 function generateSalt()

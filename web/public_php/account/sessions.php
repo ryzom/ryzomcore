@@ -16,19 +16,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 	$action = isset($_POST['session_action']) ? $_POST['session_action'] : '';
 	$domainRingDb = isset($_POST['ring_db_name']) ? $_POST['ring_db_name'] : '';
 	$sessionId = isset($_POST['session_id']) ? (int)$_POST['session_id'] : 0;
+	$rsmAddress = isset($_POST['rsm_address']) ? $_POST['rsm_address'] : '';
 
 	if ($action && $domainRingDb && $sessionId) {
 		try {
 			$ringDb = getRingDatabase($domainRingDb);
 
 			if ($action === 'close') {
-				// Verify the user owns this session
-				$stmt = $ringDb->prepare('SELECT s.session_id FROM sessions s JOIN characters c ON s.owner = c.char_id WHERE s.session_id = :sid AND c.user_id = :uid');
+				// Verify the user owns this session and get the owner char_id
+				$stmt = $ringDb->prepare('SELECT s.session_id, s.owner FROM sessions s JOIN characters c ON s.owner = c.char_id WHERE s.session_id = :sid AND c.user_id = :uid');
 				$stmt->execute(array(':sid' => $sessionId, ':uid' => $uid));
-				if ($stmt->fetch()) {
-					$stmt = $ringDb->prepare("UPDATE sessions SET state = 'ss_closed' WHERE session_id = :sid AND state != 'ss_closed'");
-					$stmt->execute(array(':sid' => $sessionId));
-					$actionResult = 'Session closed.';
+				$sess = $stmt->fetch();
+				if ($sess) {
+					// Route through the RSM so it can notify the DSS to gracefully stop the scenario
+					$rsm = connectToRSM($rsmAddress);
+					if ($rsm !== false) {
+						$rsm->closeSession((int)$sess['owner'], $sessionId);
+						if ($rsm->waitCallback() && $rsm->resultCode == 0) {
+							$actionResult = 'Session close requested (RSM notified).';
+						} else {
+							// RSM returned an error -- the session may not be running
+							// Fall back to direct SQL for planned/locked sessions
+							$stmt = $ringDb->prepare("UPDATE sessions SET state = 'ss_closed' WHERE session_id = :sid AND state != 'ss_closed'");
+							$stmt->execute(array(':sid' => $sessionId));
+							$actionResult = 'Session closed.';
+						}
+					} else {
+						// RSM not reachable -- direct SQL fallback for offline management
+						$stmt = $ringDb->prepare("UPDATE sessions SET state = 'ss_closed' WHERE session_id = :sid AND state != 'ss_closed'");
+						$stmt->execute(array(':sid' => $sessionId));
+						$actionResult = 'Session closed (RSM not reachable, updated database directly).';
+					}
 				} else {
 					$actionError = 'You can only close your own sessions.';
 				}
@@ -43,34 +61,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 					$found = $stmt->fetch();
 					if ($found) {
 						$inviteCharId = (int)$found['char_id'];
+						$inviteCharName = $found['char_name'];
 					} else {
 						$actionError = 'Character "' . $inviteCharName . '" not found.';
 					}
 				}
 
 				if ($inviteCharId && $sessionId && !$actionError) {
-					// Verify the user owns this session
-					$stmt = $ringDb->prepare('SELECT s.session_id, s.session_type FROM sessions s JOIN characters c ON s.owner = c.char_id WHERE s.session_id = :sid AND c.user_id = :uid');
+					// Verify the user owns this session and get the owner char_id
+					$stmt = $ringDb->prepare('SELECT s.session_id, s.session_type, s.owner FROM sessions s JOIN characters c ON s.owner = c.char_id WHERE s.session_id = :sid AND c.user_id = :uid');
 					$stmt->execute(array(':sid' => $sessionId, ':uid' => $uid));
 					$session = $stmt->fetch();
 					if ($session) {
-						$status = ($session['session_type'] === 'st_edit') ? 'sps_edit_invited' : 'sps_anim_invited';
-						// Check if already participating
-						$stmt = $ringDb->prepare('SELECT session_id FROM session_participant WHERE session_id = :sid AND char_id = :cid');
-						$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId));
-						if ($stmt->fetch()) {
-							$actionError = 'This character is already in the session.';
+						// Verify the invited character exists
+						$stmt = $ringDb->prepare('SELECT char_id, char_name FROM characters WHERE char_id = :cid');
+						$stmt->execute(array(':cid' => $inviteCharId));
+						$invChar = $stmt->fetch();
+						if (!$invChar) {
+							$actionError = 'Character not found.';
 						} else {
-							// Verify the character exists
-							$stmt = $ringDb->prepare('SELECT char_id, char_name FROM characters WHERE char_id = :cid');
-							$stmt->execute(array(':cid' => $inviteCharId));
-							$invChar = $stmt->fetch();
-							if (!$invChar) {
-								$actionError = 'Character not found.';
+							$charRole = new RSMGR_TSessionPartStatus();
+							$charRole->fromString(($session['session_type'] === 'st_edit') ? 'sps_edit_invited' : 'sps_anim_invited');
+
+							// Route through the RSM for permission validation
+							$rsm = connectToRSM($rsmAddress);
+							if ($rsm !== false) {
+								$rsm->inviteCharacter((int)$session['owner'], $sessionId, $inviteCharId, $charRole);
+								if ($rsm->waitCallback() && $rsm->resultCode == 0) {
+									$actionResult = 'Character "' . $invChar['char_name'] . '" invited to session (via RSM).';
+								} else {
+									$actionError = 'Invite failed: ' . ($rsm->resultString ?: 'RSM rejected the request.');
+								}
 							} else {
-								$stmt = $ringDb->prepare('INSERT INTO session_participant (session_id, char_id, status, kicked) VALUES (:sid, :cid, :status, 0)');
-								$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId, ':status' => $status));
-								$actionResult = 'Character "' . $invChar['char_name'] . '" invited to session.';
+								// RSM not reachable -- fall back to direct SQL for planned sessions
+								$stmt = $ringDb->prepare('SELECT session_id FROM session_participant WHERE session_id = :sid AND char_id = :cid');
+								$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId));
+								if ($stmt->fetch()) {
+									$actionError = 'This character is already in the session.';
+								} else {
+									$status = ($session['session_type'] === 'st_edit') ? 'sps_edit_invited' : 'sps_anim_invited';
+									$stmt = $ringDb->prepare('INSERT INTO session_participant (session_id, char_id, status, kicked) VALUES (:sid, :cid, :status, 0)');
+									$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId, ':status' => $status));
+									$actionResult = 'Character "' . $invChar['char_name'] . '" invited (RSM not reachable, added directly).';
+								}
 							}
 						}
 					} else {
@@ -82,13 +115,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 			} elseif ($action === 'remove') {
 				$removeCharId = isset($_POST['remove_char_id']) ? (int)$_POST['remove_char_id'] : 0;
 				if ($removeCharId && $sessionId) {
-					// Verify the user owns this session
-					$stmt = $ringDb->prepare('SELECT s.session_id FROM sessions s JOIN characters c ON s.owner = c.char_id WHERE s.session_id = :sid AND c.user_id = :uid');
+					// Verify the user owns this session and get the owner char_id
+					$stmt = $ringDb->prepare('SELECT s.session_id, s.owner FROM sessions s JOIN characters c ON s.owner = c.char_id WHERE s.session_id = :sid AND c.user_id = :uid');
 					$stmt->execute(array(':sid' => $sessionId, ':uid' => $uid));
-					if ($stmt->fetch()) {
-						$stmt = $ringDb->prepare('DELETE FROM session_participant WHERE session_id = :sid AND char_id = :cid');
-						$stmt->execute(array(':sid' => $sessionId, ':cid' => $removeCharId));
-						$actionResult = 'Participant removed from session.';
+					$sess = $stmt->fetch();
+					if ($sess) {
+						// Route through the RSM for proper participant removal
+						$rsm = connectToRSM($rsmAddress);
+						if ($rsm !== false) {
+							$rsm->removeInvitedCharacter((int)$sess['owner'], $sessionId, $removeCharId);
+							if ($rsm->waitCallback() && $rsm->resultCode == 0) {
+								$actionResult = 'Participant removed from session (via RSM).';
+							} else {
+								// RSM error -- fall back to direct SQL
+								$stmt = $ringDb->prepare('DELETE FROM session_participant WHERE session_id = :sid AND char_id = :cid');
+								$stmt->execute(array(':sid' => $sessionId, ':cid' => $removeCharId));
+								$actionResult = 'Participant removed from session.';
+							}
+						} else {
+							// RSM not reachable -- direct SQL fallback
+							$stmt = $ringDb->prepare('DELETE FROM session_participant WHERE session_id = :sid AND char_id = :cid');
+							$stmt->execute(array(':sid' => $sessionId, ':cid' => $removeCharId));
+							$actionResult = 'Participant removed (RSM not reachable, removed directly).';
+						}
 					} else {
 						$actionError = 'You can only manage your own sessions.';
 					}
@@ -288,6 +337,7 @@ ob_start();
 											<?php echo csrfField(); ?>
 											<input type="hidden" name="session_action" value="close">
 											<input type="hidden" name="ring_db_name" value="<?php echo h($entry['domain']['ring_db_name']); ?>">
+											<input type="hidden" name="rsm_address" value="<?php echo h($entry['domain']['session_manager_address']); ?>">
 											<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
 											<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Close this session?');">Close</button>
 										</form>
@@ -327,6 +377,7 @@ ob_start();
 																	<?php echo csrfField(); ?>
 																	<input type="hidden" name="session_action" value="remove">
 																	<input type="hidden" name="ring_db_name" value="<?php echo h($entry['domain']['ring_db_name']); ?>">
+																	<input type="hidden" name="rsm_address" value="<?php echo h($entry['domain']['session_manager_address']); ?>">
 																	<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
 																	<input type="hidden" name="remove_char_id" value="<?php echo (int)$part['char_id']; ?>">
 																	<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remove this participant?');" style="padding:0.1rem 0.4rem; font-size:0.75rem;">Remove</button>
@@ -346,6 +397,7 @@ ob_start();
 										<?php echo csrfField(); ?>
 										<input type="hidden" name="session_action" value="invite">
 										<input type="hidden" name="ring_db_name" value="<?php echo h($entry['domain']['ring_db_name']); ?>">
+										<input type="hidden" name="rsm_address" value="<?php echo h($entry['domain']['session_manager_address']); ?>">
 										<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
 										<div class="form-group">
 											<label>Invite by character name</label>
