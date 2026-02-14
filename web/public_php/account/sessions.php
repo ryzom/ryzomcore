@@ -33,19 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 					if ($rsm !== false) {
 						$rsm->closeSession((int)$sess['owner'], $sessionId);
 						if ($rsm->waitCallback() && $rsm->resultCode == 0) {
-							$actionResult = 'Session close requested (RSM notified).';
+							$actionResult = 'Session close requested.';
 						} else {
-							// RSM returned an error -- the session may not be running
-							// Fall back to direct SQL for planned/locked sessions
-							$stmt = $ringDb->prepare("UPDATE sessions SET state = 'ss_closed' WHERE session_id = :sid AND state != 'ss_closed'");
-							$stmt->execute(array(':sid' => $sessionId));
-							$actionResult = 'Session closed.';
+							$actionError = 'Close failed: ' . ($rsm->resultString ?: 'RSM rejected the request (code: ' . $rsm->resultCode . ').');
 						}
 					} else {
-						// RSM not reachable -- direct SQL fallback for offline management
-						$stmt = $ringDb->prepare("UPDATE sessions SET state = 'ss_closed' WHERE session_id = :sid AND state != 'ss_closed'");
-						$stmt->execute(array(':sid' => $sessionId));
-						$actionResult = 'Session closed (RSM not reachable, updated database directly).';
+						$actionError = 'Could not connect to the session manager service. Please try again later.';
 					}
 				} else {
 					$actionError = 'You can only close your own sessions.';
@@ -92,22 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 						if ($rsm !== false) {
 							$rsm->inviteCharacter((int)$session['owner'], $sessionId, $inviteCharId, $charRole);
 							if ($rsm->waitCallback() && $rsm->resultCode == 0) {
-								$actionResult = 'Character "' . $invCharName . '" invited to session (via RSM).';
+								$actionResult = 'Character "' . $invCharName . '" invited to session.';
 							} else {
 								$actionError = 'Invite failed: ' . ($rsm->resultString ?: 'RSM rejected the request (code: ' . $rsm->resultCode . ').');
 							}
 						} else {
-							// RSM not reachable -- fall back to direct SQL for planned sessions
-							$stmt = $ringDb->prepare('SELECT session_id FROM session_participant WHERE session_id = :sid AND char_id = :cid');
-							$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId));
-							if ($stmt->fetch()) {
-								$actionError = 'This character is already in the session.';
-							} else {
-								$status = ($session['session_type'] === 'st_edit') ? 'sps_edit_invited' : 'sps_anim_invited';
-								$stmt = $ringDb->prepare('INSERT INTO session_participant (session_id, char_id, status, kicked) VALUES (:sid, :cid, :status, 0)');
-								$stmt->execute(array(':sid' => $sessionId, ':cid' => $inviteCharId, ':status' => $status));
-								$actionResult = 'Character "' . $invCharName . '" invited (RSM not reachable, added directly).';
-							}
+							$actionError = 'Could not connect to the session manager service. Please try again later.';
 						}
 					} else {
 						$actionError = 'You can only invite to your own sessions.';
@@ -128,18 +111,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 						if ($rsm !== false) {
 							$rsm->removeInvitedCharacter((int)$sess['owner'], $sessionId, $removeCharId);
 							if ($rsm->waitCallback() && $rsm->resultCode == 0) {
-								$actionResult = 'Participant removed from session (via RSM).';
-							} else {
-								// RSM error -- fall back to direct SQL
-								$stmt = $ringDb->prepare('DELETE FROM session_participant WHERE session_id = :sid AND char_id = :cid');
-								$stmt->execute(array(':sid' => $sessionId, ':cid' => $removeCharId));
 								$actionResult = 'Participant removed from session.';
+							} else {
+								$actionError = 'Remove failed: ' . ($rsm->resultString ?: 'RSM rejected the request (code: ' . $rsm->resultCode . ').');
 							}
 						} else {
-							// RSM not reachable -- direct SQL fallback
-							$stmt = $ringDb->prepare('DELETE FROM session_participant WHERE session_id = :sid AND char_id = :cid');
-							$stmt->execute(array(':sid' => $sessionId, ':cid' => $removeCharId));
-							$actionResult = 'Participant removed (RSM not reachable, removed directly).';
+							$actionError = 'Could not connect to the session manager service. Please try again later.';
 						}
 					} else {
 						$actionError = 'You can only manage your own sessions.';
