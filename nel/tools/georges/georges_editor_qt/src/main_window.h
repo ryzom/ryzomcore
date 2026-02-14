@@ -51,6 +51,8 @@ public:
 	void createNewDfn();
 	void createNewForm(const QString &dfnName = QString());
 
+	NLQT::CConfiguration &getConfiguration() { return m_Configuration; }
+
 protected:
 	void closeEvent(QCloseEvent *event) override;
 
@@ -98,6 +100,7 @@ private:
 	// Configuration callbacks
 	void cfcbQtStyle(NLMISC::CConfigFile::CVar &var);
 	void cfcbQtPalette(NLMISC::CConfigFile::CVar &var);
+	void cfcbRootSearchDirectory(NLMISC::CConfigFile::CVar &var);
 
 	// Internationalization callback
 	void incbLanguageCode();

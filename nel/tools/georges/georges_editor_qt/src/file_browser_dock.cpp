@@ -20,9 +20,9 @@
 #include <QHeaderView>
 #include <QDir>
 #include <QFileInfo>
-#include <QSettings>
 
 #include "main_window.h"
+#include "../../3d/shared_widgets/configuration.h"
 
 FileBrowserDock::FileBrowserDock(MainWindow *mainWindow, QWidget *parent)
 	: QDockWidget(tr("File Browser"), parent), _mainWindow(mainWindow)
@@ -74,9 +74,10 @@ void FileBrowserDock::refresh()
 	_dfnTree->clear();
 	_formTree->clear();
 
-	QSettings settings("NeL", "Georges Editor Qt");
-	QString rootPath = settings.value("rootSearchPath", "").toString();
-	QString subDir = settings.value("typeDfnSubDir", "").toString();
+	// Read paths from CConfiguration (matching MFC georges.cfg variable names)
+	NLQT::CConfiguration &config = _mainWindow->getConfiguration();
+	QString rootPath = QString::fromUtf8(config.getValue("RootSearchDirectory", std::string("")).c_str());
+	QString subDir = QString::fromUtf8(config.getValue("TypDfnSubFolder", std::string("")).c_str());
 
 	QString searchDir = rootPath;
 	if (!subDir.isEmpty())

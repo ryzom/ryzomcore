@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
 	// Register configuration callbacks (matching nel_qt pattern)
 	m_Configuration.setAndCallback("QtStyle", CConfigCallback(this, &MainWindow::cfcbQtStyle));
 	m_Configuration.setAndCallback("QtPalette", CConfigCallback(this, &MainWindow::cfcbQtPalette));
+	m_Configuration.setAndCallback("RootSearchDirectory", CConfigCallback(this, &MainWindow::cfcbRootSearchDirectory));
 
 	// Initialize internationalization
 	m_Internationalization.init(&m_Configuration, NLQT_VERSION);
@@ -102,6 +103,7 @@ MainWindow::~MainWindow()
 	// Drop callbacks in reverse order of registration (matching nel_qt pattern)
 	m_Internationalization.disableCallback(CEmptyCallback(this, &MainWindow::incbLanguageCode));
 	m_Internationalization.release();
+	m_Configuration.dropCallback("RootSearchDirectory");
 	m_Configuration.dropCallback("QtPalette");
 	m_Configuration.dropCallback("QtStyle");
 	m_Configuration.release();
@@ -132,6 +134,18 @@ void MainWindow::cfcbQtPalette(NLMISC::CConfigFile::CVar &var)
 		QApplication::setPalette(QApplication::style()->standardPalette());
 	else
 		QApplication::setPalette(m_OriginalPalette);
+}
+
+void MainWindow::cfcbRootSearchDirectory(NLMISC::CConfigFile::CVar &var)
+{
+	// Matches MFC initCfg() — add root search directory recursively
+	NLMISC::CPath::removeAllAlternativeSearchPath();
+	std::string rootDir = var.asString();
+	if (!rootDir.empty())
+	{
+		nlinfo("Adding search path: %s", rootDir.c_str());
+		NLMISC::CPath::addSearchPath(rootDir, true, true);
+	}
 }
 
 // --- Internationalization callback ---
