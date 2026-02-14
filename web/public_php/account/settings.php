@@ -6,6 +6,9 @@ $pageTitle = 'Settings';
 $uid = $_SESSION['account_uid'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	if (!csrfValidate()) {
+		$error = 'Invalid form submission. Please try again.';
+	} else {
 	$action = isset($_POST['settings_action']) ? $_POST['settings_action'] : '';
 
 	try {
@@ -71,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	} catch (PDOException $e) {
 		$error = 'Update failed. Please try again later.';
 	}
+	}
 }
 
 ob_start();
@@ -87,6 +91,7 @@ ob_start();
 		<div class="card">
 			<h2>Change Password</h2>
 			<form method="post" action="index.php?page=settings">
+				<?php echo csrfField(); ?>
 				<input type="hidden" name="settings_action" value="change_password">
 				<div class="form-group">
 					<label for="current_password">Current Password</label>
@@ -110,6 +115,7 @@ ob_start();
 			<h2>Change Email</h2>
 			<p style="color:#8899a6; font-size:0.85rem; margin-bottom:1rem;">Current email: <?php echo h($_SESSION['account_email']); ?></p>
 			<form method="post" action="index.php?page=settings">
+				<?php echo csrfField(); ?>
 				<input type="hidden" name="settings_action" value="change_email">
 				<div class="form-group">
 					<label for="new_email">New Email</label>

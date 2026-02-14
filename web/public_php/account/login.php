@@ -5,28 +5,33 @@
 $pageTitle = 'Sign In';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
-	$login = isset($_POST['login']) ? trim($_POST['login']) : '';
-	$password = isset($_POST['password']) ? $_POST['password'] : '';
-
-	if ($login === '' || $password === '') {
-		$error = 'Please enter your username and password.';
+	if (!csrfValidate()) {
+		$error = 'Invalid form submission. Please try again.';
 	} else {
-		try {
-			$db = getNelDatabase();
-			$stmt = $db->prepare('SELECT UId, Login, Password, Email FROM user WHERE Login = :login');
-			$stmt->execute(array(':login' => $login));
-			$user = $stmt->fetch();
+		$login = isset($_POST['login']) ? trim($_POST['login']) : '';
+		$password = isset($_POST['password']) ? $_POST['password'] : '';
 
-			if ($user && verifyPassword($password, $user['Password'])) {
-				$_SESSION['account_uid'] = (int)$user['UId'];
-				$_SESSION['account_login'] = $user['Login'];
-				$_SESSION['account_email'] = $user['Email'];
-				redirect('home');
-			} else {
-				$error = 'Invalid username or password.';
+		if ($login === '' || $password === '') {
+			$error = 'Please enter your username and password.';
+		} else {
+			try {
+				$db = getNelDatabase();
+				$stmt = $db->prepare('SELECT UId, Login, Password, Email FROM user WHERE Login = :login');
+				$stmt->execute(array(':login' => $login));
+				$user = $stmt->fetch();
+
+				if ($user && verifyPassword($password, $user['Password'])) {
+					session_regenerate_id(true);
+					$_SESSION['account_uid'] = (int)$user['UId'];
+					$_SESSION['account_login'] = $user['Login'];
+					$_SESSION['account_email'] = $user['Email'];
+					redirect('home');
+				} else {
+					$error = 'Invalid username or password.';
+				}
+			} catch (PDOException $e) {
+				$error = 'Database connection failed. Please try again later.';
 			}
-		} catch (PDOException $e) {
-			$error = 'Database connection failed. Please try again later.';
 		}
 	}
 }
@@ -41,6 +46,7 @@ ob_start();
 			<div class="alert alert-error"><?php echo h($error); ?></div>
 		<?php endif; ?>
 		<form method="post" action="index.php?page=login">
+			<?php echo csrfField(); ?>
 			<div class="form-group">
 				<label for="login">Username</label>
 				<input type="text" id="login" name="login" required autofocus

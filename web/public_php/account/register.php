@@ -5,10 +5,13 @@
 $pageTitle = 'Create Account';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
-	$login = isset($_POST['login']) ? trim($_POST['login']) : '';
-	$email = isset($_POST['email']) ? trim($_POST['email']) : '';
-	$password = isset($_POST['password']) ? $_POST['password'] : '';
-	$confirm = isset($_POST['confirm']) ? $_POST['confirm'] : '';
+	if (!csrfValidate()) {
+		$error = 'Invalid form submission. Please try again.';
+	} else {
+		$login = isset($_POST['login']) ? trim($_POST['login']) : '';
+		$email = isset($_POST['email']) ? trim($_POST['email']) : '';
+		$password = isset($_POST['password']) ? $_POST['password'] : '';
+		$confirm = isset($_POST['confirm']) ? $_POST['confirm'] : '';
 
 	// Validate inputs
 	if ($login === '' || $email === '' || $password === '' || $confirm === '') {
@@ -64,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
 					}
 
 					// Log the user in immediately
+					session_regenerate_id(true);
 					$_SESSION['account_uid'] = $uid;
 					$_SESSION['account_login'] = $login;
 					$_SESSION['account_email'] = $email;
@@ -73,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
 		} catch (PDOException $e) {
 			$error = 'Registration failed. Please try again later.';
 		}
+	}
 	}
 }
 
@@ -86,6 +91,7 @@ ob_start();
 			<div class="alert alert-error"><?php echo h($error); ?></div>
 		<?php endif; ?>
 		<form method="post" action="index.php?page=register">
+			<?php echo csrfField(); ?>
 			<div class="form-group">
 				<label for="login">Username</label>
 				<input type="text" id="login" name="login" required autofocus

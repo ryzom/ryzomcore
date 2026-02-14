@@ -71,7 +71,7 @@ try {
 }
 
 // Handle session actions (close, invite)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 	$action = isset($_POST['session_action']) ? $_POST['session_action'] : '';
 	$domainRingDb = isset($_POST['ring_db_name']) ? $_POST['ring_db_name'] : '';
 	$sessionId = isset($_POST['session_id']) ? (int)$_POST['session_id'] : 0;
@@ -233,6 +233,7 @@ ob_start();
 										<td>
 											<?php if ($sess['state'] !== 'ss_closed'): ?>
 												<form method="post" action="index.php?page=sessions" style="display:inline;">
+													<?php echo csrfField(); ?>
 													<input type="hidden" name="session_action" value="close">
 													<input type="hidden" name="ring_db_name" value="<?php echo h($entry['domain']['ring_db_name']); ?>">
 													<input type="hidden" name="session_id" value="<?php echo (int)$sess['session_id']; ?>">
@@ -246,6 +247,7 @@ ob_start();
 										<td></td>
 										<td colspan="4">
 											<form method="post" action="index.php?page=sessions" class="form-inline">
+												<?php echo csrfField(); ?>
 												<input type="hidden" name="session_action" value="invite">
 												<input type="hidden" name="ring_db_name" value="<?php echo h($entry['domain']['ring_db_name']); ?>">
 												<input type="hidden" name="session_id" value="<?php echo (int)$sess['session_id']; ?>">
