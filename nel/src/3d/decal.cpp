@@ -71,8 +71,8 @@ setOpacity(true);
 setTransparency(false);
 setIsRenderable(true);
 
-// Material setup: alpha-blended, double-sided, no z-write, with z-bias
-_Mat.setShader(CMaterial::TShader::Normal);
+// Material setup: unlit, alpha-blended, double-sided, no z-write, with z-bias
+_Mat.initUnlit();
 _Mat.setBlend(true);
 _Mat.setSrcBlend(CMaterial::srcalpha);
 _Mat.setDstBlend(CMaterial::invsrcalpha);
@@ -135,6 +135,8 @@ tex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapLinear);
 tex->setWrapS(ITexture::Clamp);
 tex->setWrapT(ITexture::Clamp);
 _Mat.setTexture(0, tex);
+// Stage 1 also needs the texture for the emissive add operation to work correctly
+_Mat.setTexture(1, tex);
 }
 
 

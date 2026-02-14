@@ -282,6 +282,24 @@ void CDecalManager::flush(CScene *sc)
 			if (verts.empty())
 				continue;
 
+			// Each decal has its own material (with its own texture).
+			// Flush when the material changes or when using VP (VP constants are per-decal).
+			CMaterial *decalMat = &decal->getMaterial();
+			if (count > 0 && (decalMat != mat || vpActive))
+			{
+				if (vbLocked)
+				{
+					vba.unlock();
+					vbLocked = false;
+				}
+				nlassert(count % 3 == 0);
+				drv->renderRawTriangles(*mat, 0, count / 3);
+				count = 0;
+			}
+
+			// Use this decal's own material (which has its texture set)
+			mat = decalMat;
+
 			// If using VP, set per-decal constants before we start copying vertices
 			if (vpActive)
 			{
@@ -388,7 +406,7 @@ void CDecalManager::flush(CScene *sc)
 			}
 		}
 
-		// Unlock and render any remaining vertices for this material
+		// Unlock and render any remaining vertices for the last decal
 		if (vbLocked)
 		{
 			vba.unlock();
