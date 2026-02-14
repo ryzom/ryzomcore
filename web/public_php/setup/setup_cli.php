@@ -87,6 +87,18 @@ if (!$publicPhpDir) {
 
 chdir($publicPhpDir);
 
+// Define printalert for CLI mode (used by database.php and header.php functions)
+function printalert($type, $message)
+{
+	$message = strip_tags($message);
+	switch ($type) {
+		case 'success': cli_ok($message); break;
+		case 'danger': cli_err($message); break;
+		case 'info': cli_info($message); break;
+		default: cli_info($message); break;
+	}
+}
+
 if ($command === 'upgrade') {
 	run_upgrade();
 } else {
@@ -257,36 +269,32 @@ function run_install($opts)
 	}
 
 	// Write config.php
-	$config = file_get_contents(realpath($privatePhp) . '/setup/config/config.php');
+	require_once('setup/config_generation.php');
+	require_once('setup/version.php');
+	$config = generate_install_config(
+		realpath($privatePhp) . '/setup/config/config.php',
+		array(
+			'privatePhpDirectory' => realpath($cwd . '/' . $privatePhp),
+			'publicPhpDirectory'  => realpath($cwd),
+			'nelSqlHostname'      => $sqlHost,
+			'nelSqlPort'          => $sqlPort,
+			'nelSqlUsername'       => $sqlUser,
+			'nelSqlPassword'      => $sqlPass,
+			'nelDatabase'         => $nelDb,
+			'toolDatabase'        => $toolDb,
+			'amsDatabase'         => $amsDb,
+			'amsLibDatabase'      => $amsLibDb,
+			'nelSetupPassword'    => $setupPass,
+			'domainDatabase'      => $domainDb,
+			'domainUsersDir'      => $usersDir,
+			'nelDomainName'       => $domainName,
+			'nelSetupVersion'     => $NEL_SETUP_VERSION,
+		)
+	);
 	if (!$config) {
 		cli_err("Cannot read config template from private PHP directory.");
 		exit(1);
 	}
-
-	$cwd = getcwd();
-	$cryptKeyLength = 16;
-	$cryptKey = substr(str_replace(array('+', '/', '='), '', base64_encode(random_bytes($cryptKeyLength * 2))), 0, $cryptKeyLength);
-	$cryptKeyIMAP = substr(str_replace(array('+', '/', '='), '', base64_encode(random_bytes($cryptKeyLength * 2))), 0, $cryptKeyLength);
-
-	$config = str_replace('%privatePhpDirectory%', addslashes(realpath($cwd . '/' . $privatePhp)), $config);
-	$config = str_replace('%publicPhpDirectory%', addslashes(realpath($cwd)), $config);
-	$config = str_replace('%nelSqlHostname%', addslashes($sqlHost), $config);
-	$config = str_replace('%nelSqlPort%', addslashes($sqlPort), $config);
-	$config = str_replace('%nelSqlUsername%', addslashes($sqlUser), $config);
-	$config = str_replace('%nelSqlPassword%', addslashes($sqlPass), $config);
-	$config = str_replace('%nelDatabase%', addslashes($nelDb), $config);
-	$config = str_replace('%toolDatabase%', addslashes($toolDb), $config);
-	$config = str_replace('%amsDatabase%', addslashes($amsDb), $config);
-	$config = str_replace('%amsLibDatabase%', addslashes($amsLibDb), $config);
-	$config = str_replace('%nelSetupPassword%', addslashes($setupPass), $config);
-	$config = str_replace('%domainDatabase%', addslashes($domainDb), $config);
-	$config = str_replace('%domainUsersDir%', addslashes($usersDir), $config);
-	$config = str_replace('%nelDomainName%', addslashes($domainName), $config);
-	$config = str_replace('%cryptKey%', addslashes($cryptKey), $config);
-	$config = str_replace('%cryptKeyIMAP%', addslashes($cryptKeyIMAP), $config);
-
-	require_once('setup/version.php');
-	$config = str_replace('%nelSetupVersion%', addslashes($NEL_SETUP_VERSION), $config);
 
 	if (!file_put_contents('config.php', $config)) {
 		cli_err("Cannot write config.php");
@@ -303,19 +311,6 @@ function run_install($opts)
 
 	// Load config to get $cfg and path variables
 	require_once('config.php');
-
-	// Use the web-based setup helper functions in CLI-compatible mode
-	// Override printalert to work in CLI
-	function printalert($type, $message)
-	{
-		$message = strip_tags($message);
-		switch ($type) {
-			case 'success': cli_ok($message); break;
-			case 'danger': cli_err($message); break;
-			case 'info': cli_info($message); break;
-			default: cli_info($message); break;
-		}
-	}
 
 	require_once('setup/database.php');
 
@@ -397,18 +392,6 @@ function run_upgrade()
 
 	cli_info("Upgrading from version $NEL_SETUP_VERSION_CONFIGURED to $NEL_SETUP_VERSION");
 
-	// Override printalert to work in CLI
-	function printalert($type, $message)
-	{
-		$message = strip_tags($message);
-		switch ($type) {
-			case 'success': cli_ok($message); break;
-			case 'danger': cli_err($message); break;
-			case 'info': cli_info($message); break;
-			default: cli_info($message); break;
-		}
-	}
-
 	require_once('setup/database.php');
 
 	$continue = true;
@@ -425,28 +408,19 @@ function run_upgrade()
 
 	// Rewrite config.php with updated version
 	if ($continue) {
-		$config = file_get_contents($PRIVATE_PHP_PATH . '/setup/config/config.php');
+		require_once('setup/config_generation.php');
+		$config = generate_upgrade_config(
+			$PRIVATE_PHP_PATH . '/setup/config/config.php',
+			$cfg, $PRIVATE_PHP_PATH, $PUBLIC_PHP_PATH,
+			$NEL_SETUP_PASSWORD, $NEL_DOMAIN_NAME, $NEL_SETUP_VERSION,
+			$cfg['crypt']['key'], $SUPPORT_GROUP_IMAP_CRYPTKEY,
+			$cfg['db']['ring']['name'], $USERS_DIR,
+			$NEL_SETUP_VERSION_CONFIGURED
+		);
 		if (!$config) {
 			cli_err("Cannot read config template");
 			$continue = false;
 		} else {
-			$config = str_replace('%privatePhpDirectory%', addslashes($PRIVATE_PHP_PATH), $config);
-			$config = str_replace('%publicPhpDirectory%', addslashes($PUBLIC_PHP_PATH), $config);
-			$config = str_replace('%nelSqlHostname%', addslashes($cfg['db']['shard']['host']), $config);
-			$config = str_replace('%nelSqlPort%', addslashes($cfg['db']['shard']['port']), $config);
-			$config = str_replace('%nelSqlUsername%', addslashes($cfg['db']['shard']['user']), $config);
-			$config = str_replace('%nelSqlPassword%', addslashes($cfg['db']['shard']['pass']), $config);
-			$config = str_replace('%nelDatabase%', addslashes($cfg['db']['shard']['name']), $config);
-			$config = str_replace('%toolDatabase%', addslashes($cfg['db']['tool']['name']), $config);
-			$config = str_replace('%amsDatabase%', addslashes($cfg['db']['web']['name']), $config);
-			$config = str_replace('%amsLibDatabase%', addslashes($cfg['db']['lib']['name']), $config);
-			$config = str_replace('%nelSetupPassword%', addslashes($NEL_SETUP_PASSWORD), $config);
-			$config = str_replace('%nelDomainName%', addslashes($NEL_DOMAIN_NAME), $config);
-			$config = str_replace('%nelSetupVersion%', addslashes($NEL_SETUP_VERSION), $config);
-			$config = str_replace('%cryptKey%', addslashes($cfg['crypt']['key']), $config);
-			$config = str_replace('%cryptKeyIMAP%', addslashes($SUPPORT_GROUP_IMAP_CRYPTKEY), $config);
-			$config = str_replace('%domainDatabase%', addslashes($cfg['db']['ring']['name']), $config);
-			$config = str_replace('%domainUsersDir%', addslashes($USERS_DIR), $config);
 			if (file_put_contents('config.php', $config)) {
 				cli_ok("Updated config.php to version $NEL_SETUP_VERSION");
 			} else {

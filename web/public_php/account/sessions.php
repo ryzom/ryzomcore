@@ -34,16 +34,16 @@ try {
 				$charMap[(int)$c['char_id']] = $c['char_name'];
 			}
 
-			// Get sessions owned by this user
-			$stmt = $ringDb->prepare('SELECT s.session_id, s.session_type, s.title, s.description, s.state, s.host_shard_id, s.subscription_slots, s.owner, c.char_name as owner_name FROM sessions s LEFT JOIN characters c ON s.owner = c.char_id WHERE s.owner IN (SELECT char_id FROM characters WHERE user_id = :uid) ORDER BY s.session_id DESC');
+			// Get sessions owned by this user (exclude mainland sessions which represent shards)
+			$stmt = $ringDb->prepare('SELECT s.session_id, s.session_type, s.title, s.description, s.state, s.host_shard_id, s.subscription_slots, s.owner, c.char_name as owner_name FROM sessions s LEFT JOIN characters c ON s.owner = c.char_id WHERE s.session_type != \'st_mainland\' AND s.owner IN (SELECT char_id FROM characters WHERE user_id = :uid) ORDER BY s.session_id DESC');
 			$stmt->execute(array(':uid' => $uid));
 			$ownedSessions = $stmt->fetchAll();
 
-			// Get sessions the user is participating in (through any character)
+			// Get sessions the user is participating in (through any character, exclude mainland)
 			$participatingSessions = array();
 			if (!empty($charIds)) {
 				$placeholders = implode(',', array_fill(0, count($charIds), '?'));
-				$stmt = $ringDb->prepare("SELECT sp.session_id, sp.char_id, sp.status, sp.kicked, s.session_type, s.title, s.state, s.owner, c.char_name as owner_name FROM session_participant sp JOIN sessions s ON sp.session_id = s.session_id LEFT JOIN characters c ON s.owner = c.char_id WHERE sp.char_id IN ($placeholders) ORDER BY sp.session_id DESC");
+				$stmt = $ringDb->prepare("SELECT sp.session_id, sp.char_id, sp.status, sp.kicked, s.session_type, s.title, s.state, s.owner, c.char_name as owner_name FROM session_participant sp JOIN sessions s ON sp.session_id = s.session_id LEFT JOIN characters c ON s.owner = c.char_id WHERE s.session_type != 'st_mainland' AND sp.char_id IN ($placeholders) ORDER BY sp.session_id DESC");
 				$stmt->execute($charIds);
 				$participatingSessions = $stmt->fetchAll();
 			}

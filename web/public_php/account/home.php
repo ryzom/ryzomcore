@@ -87,6 +87,44 @@ ob_start();
 	<?php endif; ?>
 
 	<div class="card">
+		<h2>Your Permissions</h2>
+		<?php if (empty($permissions)): ?>
+			<div class="empty-state"><p>You have no domain or shard permissions.</p></div>
+		<?php else: ?>
+			<table>
+				<thead>
+					<tr>
+						<th>Domain</th>
+						<th>Shard</th>
+						<th>Access Privilege</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($permissions as $perm): ?>
+					<tr>
+						<td style="color:#ecf0f1;"><?php echo h($perm['domain_name'] ?: '#' . $perm['DomainId']); ?></td>
+						<td>
+							<?php if ($perm['ShardId'] > 0): ?>
+								<?php
+								$shardName = null;
+								foreach ($shards as $s) {
+									if ((int)$s['ShardId'] === (int)$perm['ShardId']) { $shardName = $s['Name']; break; }
+								}
+								?>
+								<span style="color:#ecf0f1;"><?php echo h($shardName ?: '#' . $perm['ShardId']); ?></span>
+							<?php else: ?>
+								<span class="badge badge-gray">All Shards</span>
+							<?php endif; ?>
+						</td>
+						<td><span class="badge badge-green"><?php echo h($perm['AccessPrivilege']); ?></span></td>
+					</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+	</div>
+
+	<div class="card">
 		<h2>Domains &amp; Shards</h2>
 		<?php if (empty($domains)): ?>
 			<div class="empty-state"><p>No domains configured.</p></div>
