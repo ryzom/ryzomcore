@@ -356,6 +356,74 @@ function setSetting($key, $value)
 }
 
 /**
+ * Check if the current session is impersonating another user.
+ */
+function isImpersonating()
+{
+	return !empty($_SESSION['impersonate_admin_uid']);
+}
+
+/**
+ * Start impersonating a target user. Saves the admin's session and
+ * switches identity to the target. Requires the admin to outrank the target.
+ *
+ * @param array $targetUser  Row from the `user` table (UId, Login, Email, Privilege)
+ * @return bool  True if impersonation started
+ */
+function startImpersonation($targetUser)
+{
+	if (isImpersonating()) {
+		return false; // Already impersonating
+	}
+	if (!canEditUser($targetUser['Privilege'])) {
+		return false; // Can't impersonate equal or higher rank
+	}
+	// Save admin identity
+	$_SESSION['impersonate_admin_uid'] = $_SESSION['account_uid'];
+	$_SESSION['impersonate_admin_login'] = $_SESSION['account_login'];
+	$_SESSION['impersonate_admin_privilege'] = $_SESSION['account_privilege'];
+	// Switch to target user
+	$_SESSION['account_uid'] = (int)$targetUser['UId'];
+	$_SESSION['account_login'] = $targetUser['Login'];
+	$_SESSION['account_email'] = $targetUser['Email'];
+	$_SESSION['account_privilege'] = $targetUser['Privilege'];
+	return true;
+}
+
+/**
+ * Stop impersonating and restore the admin's session.
+ *
+ * @return bool  True if impersonation was stopped
+ */
+function stopImpersonation()
+{
+	if (!isImpersonating()) {
+		return false;
+	}
+	// Restore admin identity
+	$_SESSION['account_uid'] = $_SESSION['impersonate_admin_uid'];
+	$_SESSION['account_login'] = $_SESSION['impersonate_admin_login'];
+	// Restore the admin's email from the database
+	try {
+		$db = getNelDatabase();
+		$stmt = $db->prepare('SELECT Email FROM user WHERE UId = :uid');
+		$stmt->execute(array(':uid' => $_SESSION['impersonate_admin_uid']));
+		$row = $stmt->fetch();
+		if ($row) {
+			$_SESSION['account_email'] = $row['Email'];
+		}
+	} catch (PDOException $e) {
+		// Non-fatal; email will be refreshed on next login
+	}
+	$_SESSION['account_privilege'] = $_SESSION['impersonate_admin_privilege'];
+	// Clear impersonation state
+	unset($_SESSION['impersonate_admin_uid']);
+	unset($_SESSION['impersonate_admin_login']);
+	unset($_SESSION['impersonate_admin_privilege']);
+	return true;
+}
+
+/**
  * Redirect to a page within the account tool.
  */
 function redirect($page)

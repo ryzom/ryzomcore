@@ -38,6 +38,18 @@ if ($page === 'logout') {
 	exit;
 }
 
+// Handle stop impersonation
+if (isset($_GET['stop_impersonate']) && $logged_in && isImpersonating()) {
+	stopImpersonation();
+	header('Location: index.php?page=admin');
+	exit;
+}
+
+// Gate admin and dev_settings pages while impersonating (force exit first)
+if (isImpersonating() && ($page === 'admin' || $page === 'dev_settings')) {
+	$page = 'home';
+}
+
 // Gate admin page behind privilege check
 if ($page === 'admin' && !isAdmin()) {
 	$page = 'home';
@@ -65,6 +77,7 @@ renderLayout($pageTitle, $content, $page, $logged_in);
 function renderLayout($title, $content, $currentPage, $loggedIn)
 {
 	$navItems = '';
+	$impersonationBanner = '';
 	if ($loggedIn) {
 		$user = h($_SESSION['account_login']);
 		$pages = array(
@@ -73,18 +86,27 @@ function renderLayout($title, $content, $currentPage, $loggedIn)
 			'sessions' => 'Sessions',
 			'settings' => 'Settings',
 		);
-		if (isAdmin()) {
-			$pages['admin'] = 'Admin';
-		}
-		if (canEditSettings()) {
-			$pages['dev_settings'] = 'Dev';
+		if (!isImpersonating()) {
+			if (isAdmin()) {
+				$pages['admin'] = 'Admin';
+			}
+			if (canEditSettings()) {
+				$pages['dev_settings'] = 'Dev';
+			}
 		}
 		foreach ($pages as $key => $label) {
 			$active = ($currentPage === $key) ? ' class="active"' : '';
 			$navItems .= '<a href="index.php?page=' . $key . '"' . $active . '>' . $label . '</a>';
 		}
-		$navItems .= '<a href="index.php?page=logout" class="nav-right">Sign Out</a>';
-		$navItems .= '<span class="nav-right nav-user">' . $user . '</span>';
+		if (isImpersonating()) {
+			$adminLogin = h($_SESSION['impersonate_admin_login']);
+			$impersonationBanner = '<div class="impersonate-bar">Viewing as <strong>' . $user . '</strong> &mdash; Logged in as ' . $adminLogin . ' &mdash; <a href="index.php?stop_impersonate=1">Exit</a></div>';
+			$navItems .= '<a href="index.php?stop_impersonate=1" class="nav-right" style="color:#f5b7b1;">Exit View</a>';
+			$navItems .= '<span class="nav-right nav-user">' . $user . '</span>';
+		} else {
+			$navItems .= '<a href="index.php?page=logout" class="nav-right">Sign Out</a>';
+			$navItems .= '<span class="nav-right nav-user">' . $user . '</span>';
+		}
 	}
 
 ?><!DOCTYPE html>
@@ -165,10 +187,15 @@ table tr:last-child td { border-bottom: none; }
 
 .form-inline { display: flex; gap: 0.5rem; align-items: flex-end; flex-wrap: wrap; }
 .form-inline .form-group { margin-bottom: 0; }
+
+.impersonate-bar { background: #7d6608; color: #f9e79f; text-align: center; padding: 0.4rem 1rem; font-size: 0.85rem; }
+.impersonate-bar a { color: #fff; font-weight: 700; text-decoration: underline; }
+.impersonate-bar a:hover { color: #f5b7b1; }
 </style>
 </head>
 <body>
 <?php if ($loggedIn): ?>
+<?php echo $impersonationBanner; ?>
 <nav class="navbar">
 	<span class="brand">Ryzom Core</span>
 	<?php echo $navItems; ?>

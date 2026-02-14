@@ -30,6 +30,18 @@ try {
 
 	// Handle POST actions
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
+		if (isset($_POST['impersonate'])) {
+			$targetUid = (int)$_POST['target_uid'];
+			$stmt = $db->prepare('SELECT UId, Login, Email, Privilege FROM user WHERE UId = :uid');
+			$stmt->execute(array(':uid' => $targetUid));
+			$targetUser = $stmt->fetch();
+			if ($targetUser && startImpersonation($targetUser)) {
+				header('Location: index.php?page=home');
+				exit;
+			} else {
+				$error = 'Cannot view as this user (equal or higher privileges).';
+			}
+		}
 		if (isset($_POST['save_privileges'])) {
 			$targetUid = (int)$_POST['target_uid'];
 			// Check privilege hierarchy: load target's current privileges first
@@ -188,6 +200,15 @@ ob_start();
 				</div>
 			</div>
 		</div>
+		<?php if ($editCanManage): ?>
+		<div style="margin-top:1rem;">
+			<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>" style="display:inline;">
+				<?php echo csrfField(); ?>
+				<input type="hidden" name="target_uid" value="<?php echo (int)$editUser['UId']; ?>">
+				<button type="submit" name="impersonate" class="btn btn-sm" style="background:#7d6608; color:#f9e79f;">View as User</button>
+			</form>
+		</div>
+		<?php endif; ?>
 	</div>
 
 	<div class="card">
@@ -374,6 +395,11 @@ ob_start();
 						<td>
 							<?php if (canEditUser($u['Privilege'])): ?>
 								<a href="index.php?page=admin&amp;uid=<?php echo (int)$u['UId']; ?>" class="btn btn-secondary btn-sm">Manage</a>
+								<form method="post" action="index.php?page=admin" style="display:inline;">
+									<?php echo csrfField(); ?>
+									<input type="hidden" name="target_uid" value="<?php echo (int)$u['UId']; ?>">
+									<button type="submit" name="impersonate" class="btn btn-sm" style="background:#7d6608; color:#f9e79f;">View as User</button>
+								</form>
 							<?php else: ?>
 								<span class="btn btn-secondary btn-sm" style="opacity:0.4; cursor:not-allowed;">Manage</span>
 							<?php endif; ?>
