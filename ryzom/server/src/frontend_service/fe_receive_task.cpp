@@ -122,17 +122,27 @@ CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptabl
 	_BoundPort = actualPort;
 	nlinfo( "Binding all network interfaces on port %hu (%hu asked)", actualPort, firstAcceptablePort );
 
-	// Set a receive timeout so recvfrom() doesn't block forever.
-	// This ensures the receive thread can periodically check for exit/rebind requests
-	// and prevents the thread from getting permanently stuck if the socket enters a bad state.
+	setRecvTimeout();
+}
+
+
+/*
+ * Set a receive timeout on the UDP socket so recvfrom() doesn't block forever.
+ * This ensures the receive thread can periodically check for exit/rebind requests
+ * and prevents the thread from getting permanently stuck if the socket enters a bad state.
+ */
+void CFEReceiveTask::setRecvTimeout()
+{
 #ifdef NL_OS_WINDOWS
 	DWORD tv = 1000; // milliseconds
-	setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
+	if (setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv)) != 0)
+		nlwarning("Failed to set SO_RCVTIMEO on UDP socket");
 #elif defined NL_OS_UNIX
 	struct timeval tv;
 	tv.tv_sec = 1;
 	tv.tv_usec = 0;
-	setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+	if (setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) != 0)
+		nlwarning("Failed to set SO_RCVTIMEO on UDP socket: %s", strerror(errno));
 #endif
 }
 
@@ -257,16 +267,7 @@ void CFEReceiveTask::rebindSocket()
 		return;
 	}
 
-	// Set the receive timeout on the new socket
-#ifdef NL_OS_WINDOWS
-	DWORD tv = 1000;
-	setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
-#elif defined NL_OS_UNIX
-	struct timeval tv;
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
-	setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-#endif
+	setRecvTimeout();
 
 	nlinfo("UDP socket successfully rebound on port %hu", _BoundPort);
 }

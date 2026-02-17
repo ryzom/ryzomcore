@@ -131,6 +131,9 @@ private:
 	/// Close and rebind the UDP socket to recover from persistent failure
 	void			rebindSocket();
 
+	/// Set SO_RCVTIMEO on the UDP socket
+	void			setRecvTimeout();
+
 	/// Datagram length
 	uint										_DatagramLength;
 
