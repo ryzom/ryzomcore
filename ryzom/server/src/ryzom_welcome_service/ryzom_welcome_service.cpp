@@ -273,7 +273,7 @@ enum TFESState
 
 struct CFES
 {
-	CFES (TServiceId sid) : SId(sid), NbPendingUsers(0), NbUser(0), State(PatchOnly) { }
+	CFES (TServiceId sid) : SId(sid), NbPendingUsers(0), NbUser(0), State(PatchOnly), UDPAlive(true) { }
 
 	TServiceId	SId;				// Connection to the front end
 	uint32		NbPendingUsers;		// Number of not yet connected users (but rooted to this frontend)
@@ -281,6 +281,7 @@ struct CFES
 
 	TFESState	State;				// State of frontend (patching/accepting clients)
 	std::string	PatchAddress;		// Address of frontend patching server
+	bool		UDPAlive;			// true if FES reports healthy UDP communication
 
 	uint32		getUsersCountHeuristic() const
 	{
@@ -342,8 +343,11 @@ CFES *findBestFES ( uint& totalNbUsers )
 		CFES &fes = *it;
 		if (fes.State == AcceptClientOnly)
 		{
-			if (best == NULL || best->getUsersCountHeuristic() > fes.getUsersCountHeuristic())
-				best = &fes;
+			if (fes.UDPAlive)
+			{
+				if (best == NULL || best->getUsersCountHeuristic() > fes.getUsersCountHeuristic())
+					best = &fes;
+			}
 
 			totalNbUsers += fes.NbUser;
 		}
@@ -680,6 +684,30 @@ void	cbFESNbPlayers2(CMessage &msgin, const std::string &serviceName, TServiceId
 		CWelcomeServiceMod::getInstance()->updateConnectedPlayerCount(totalNbOnlineUsers, totalNbPendingUsers);
 }
 
+
+// FES reports its UDP communication health
+void	cbFESUDPAlive(CMessage &msgin, const std::string &serviceName, TServiceId  sid)
+{
+	bool	udpAlive;
+	msgin.serial(udpAlive);
+
+	for (list<CFES>::iterator it = FESList.begin(); it != FESList.end(); it++)
+	{
+		if ((*it).SId == sid)
+		{
+			if ((*it).UDPAlive != udpAlive)
+			{
+				(*it).UDPAlive = udpAlive;
+				if (udpAlive)
+					nlinfo("Frontend '%d' reported UDP communication restored", sid.get());
+				else
+					nlwarning("Frontend '%d' reported UDP communication failure, will not route new clients to it", sid.get());
+			}
+			break;
+		}
+	}
+}
+
 /*
  * Set Shard open state
  */
@@ -873,6 +901,7 @@ TUnifiedCallbackItem FESCallbackArray[] =
 	{ "FEPA",				cbFESPatchAddress },
 	{ "NBPLAYERS",			cbFESNbPlayers },
 	{ "NBPLAYERS2",			cbFESNbPlayers2 },
+	{ "FS_UDP_ALIVE",		cbFESUDPAlive },
 
 	{ "SET_SHARD_OPEN",		cbSetShardOpen },
 	{ "RESTORE_SHARD_OPEN",	cbRestoreShardOpen },

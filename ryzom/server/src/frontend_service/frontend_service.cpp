@@ -1545,6 +1545,17 @@ bool CFrontEndService::update()
 		{
 			// raise the alert for a limited time
 			addStatusTag("CheckUDPComm");
+
+			// notify the WS to stop routing new clients to this FES
+			if (_UDPAlive)
+			{
+				_UDPAlive = false;
+				CMessage	msgout("FS_UDP_ALIVE");
+				bool		alive = false;
+				msgout.serial(alive);
+				CUnifiedNetwork::getInstance()->send("WS", msgout);
+				nlwarning("UDP communication failure detected, notified WS to stop routing clients");
+			}
 		}
 	}
 
@@ -1552,6 +1563,17 @@ bool CFrontEndService::update()
 	{
 		// clear the UDP alert tag (if set)
 		removeStatusTag("CheckUDPComm");
+
+		// notify the WS to resume routing new clients to this FES
+		if (!_UDPAlive)
+		{
+			_UDPAlive = true;
+			CMessage	msgout("FS_UDP_ALIVE");
+			bool		alive = true;
+			msgout.serial(alive);
+			CUnifiedNetwork::getInstance()->send("WS", msgout);
+			nlinfo("UDP communication restored, notified WS to resume routing clients");
+		}
 	}
 
 	return true;

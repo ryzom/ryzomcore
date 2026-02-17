@@ -138,7 +138,8 @@ public:
 		_SendSub(),
 		_History(),
 		_GCCount(0),
-		_GCRatio(1)
+		_GCRatio(1),
+		_UDPAlive(true)
 		{}
 
 	/// Called when there is a tick
@@ -265,6 +266,9 @@ private:
 
 	/// Game cycle ratio
 	sint						_GCRatio;
+
+	/// True if UDP communication is working (reported to WS)
+	bool						_UDPAlive;
 
 	virtual const std::string &getCommandHandlerName() const
 	{
