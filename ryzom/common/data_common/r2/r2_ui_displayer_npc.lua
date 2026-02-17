@@ -2208,12 +2208,12 @@ end
 function r2:buildAllEquipmentPalette()
 	local outfitSlots = { "helmet", "chest_plate", "legs", "boots", "gloves", "arms_guard" }
 	local merged = {}
-	for _, slot in pairs(outfitSlots) do
+	for _, slot in ipairs(outfitSlots) do
 		merged[slot] = {}
 		local seen = {} -- track by itemFile to avoid duplicates
 		for equId, equTable in pairs(r2.equipmentPalette) do
-			if equTable[slot] then
-				for _, item in pairs(equTable[slot]) do
+			if equId ~= r2.allEquipmentId and equTable[slot] then
+				for _, item in ipairs(equTable[slot]) do
 					if item.itemFile and not seen[item.itemFile] then
 						seen[item.itemFile] = true
 						table.insert(merged[slot], {["trad"]=item.trad, ["itemFile"]=item.itemFile})
@@ -2226,9 +2226,9 @@ function r2:buildAllEquipmentPalette()
 
 	-- Build lookup tables for the merged palette
 	r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId] = {}
-	for _, slot in pairs(outfitSlots) do
+	for _, slot in ipairs(outfitSlots) do
 		r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot] = {}
-		for _, item in pairs(merged[slot]) do
+		for _, item in ipairs(merged[slot]) do
 			local itemIndex = getSheetId(item.itemFile)
 			r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot][itemIndex] = item.trad
 		end
