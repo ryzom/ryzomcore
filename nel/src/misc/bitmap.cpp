@@ -3683,18 +3683,18 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		// skip remaining 8 bytes of KTX identifier
 		f.seek(8, IStream::current);
 
-		// read endianness indicator
+		// read endianness indicator using raw read (KTX has its own endianness handling)
 		uint32 endianness;
-		f.serial(endianness);
+		f.serialBuffer((uint8 *)&endianness, 4);
 		bool mustSwap = (endianness == 0x01020304);
 
 		// skip glType, glTypeSize, glFormat, glInternalFormat, glBaseInternalFormat (5 uint32s)
 		f.seek(5 * 4, IStream::current);
 
-		// read pixelWidth and pixelHeight
+		// read pixelWidth and pixelHeight using raw reads
 		uint32 w, h;
-		f.serial(w);
-		f.serial(h);
+		f.serialBuffer((uint8 *)&w, 4);
+		f.serialBuffer((uint8 *)&h, 4);
 
 		if (mustSwap)
 		{
@@ -3703,7 +3703,8 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		}
 
 		retWidth = w;
-		retHeight = h;
+		// Per spec: pixelHeight 0 means 1D texture, treat as height 1
+		retHeight = (h == 0) ? 1 : h;
 	}
 	// assuming it's TGA
 	else

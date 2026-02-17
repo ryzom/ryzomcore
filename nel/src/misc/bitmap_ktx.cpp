@@ -49,6 +49,13 @@ static void ktxSwap32(uint32 &val)
 	val = ((val & 0xFF) << 24) | ((val & 0xFF00) << 8) | ((val & 0xFF0000) >> 8) | ((val & 0xFF000000) >> 24);
 }
 
+// Read a raw uint32 from stream without any platform byte-swapping.
+// KTX files have their own endianness handling via the endianness field.
+static void ktxReadRaw32(NLMISC::IStream &f, uint32 &val)
+{
+	f.serialBuffer((uint8 *)&val, 4);
+}
+
 /*-------------------------------------------------------------------*\
 							readKTX
 \*-------------------------------------------------------------------*/
@@ -72,6 +79,8 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 	}
 
 	//-------------- Read KTX header fields
+	// Use raw reads (serialBuffer) to avoid platform byte-swapping by IStream::serial().
+	// KTX files can be either little-endian or big-endian, determined by the endianness field.
 
 	uint32 endianness;
 	uint32 glType;
@@ -87,21 +96,35 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 	uint32 numberOfMipmapLevels;
 	uint32 bytesOfKeyValueData;
 
-	f.serial(endianness);
-	bool mustSwap = (endianness == 0x01020304);
+	ktxReadRaw32(f, endianness);
 
-	f.serial(glType);
-	f.serial(glTypeSize);
-	f.serial(glFormat);
-	f.serial(glInternalFormat);
-	f.serial(glBaseInternalFormat);
-	f.serial(pixelWidth);
-	f.serial(pixelHeight);
-	f.serial(pixelDepth);
-	f.serial(numberOfArrayElements);
-	f.serial(numberOfFaces);
-	f.serial(numberOfMipmapLevels);
-	f.serial(bytesOfKeyValueData);
+	bool mustSwap;
+	if (endianness == 0x04030201)
+	{
+		mustSwap = false;
+	}
+	else if (endianness == 0x01020304)
+	{
+		mustSwap = true;
+	}
+	else
+	{
+		nlwarning("KTX: invalid endianness field 0x%08x", endianness);
+		return 0;
+	}
+
+	ktxReadRaw32(f, glType);
+	ktxReadRaw32(f, glTypeSize);
+	ktxReadRaw32(f, glFormat);
+	ktxReadRaw32(f, glInternalFormat);
+	ktxReadRaw32(f, glBaseInternalFormat);
+	ktxReadRaw32(f, pixelWidth);
+	ktxReadRaw32(f, pixelHeight);
+	ktxReadRaw32(f, pixelDepth);
+	ktxReadRaw32(f, numberOfArrayElements);
+	ktxReadRaw32(f, numberOfFaces);
+	ktxReadRaw32(f, numberOfMipmapLevels);
+	ktxReadRaw32(f, bytesOfKeyValueData);
 
 	if (mustSwap)
 	{
@@ -138,11 +161,15 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 		return 0;
 	}
 
-	if (pixelWidth == 0 || pixelHeight == 0)
+	if (pixelWidth == 0)
 	{
-		nlwarning("KTX: invalid texture dimensions");
+		nlwarning("KTX: invalid texture width (0)");
 		return 0;
 	}
+
+	// Per spec: for 1D textures pixelHeight must be 0, treat as 1
+	if (pixelHeight == 0)
+		pixelHeight = 1;
 
 	// 0 means 1 mipmap level (auto-generate)
 	if (numberOfMipmapLevels == 0)
@@ -260,7 +287,7 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 			{
 				// Read imageSize for this mipmap level
 				uint32 imageSize;
-				f.serial(imageSize);
+				ktxReadRaw32(f, imageSize);
 				if (mustSwap) ktxSwap32(imageSize);
 
 				// Skip the data + padding
@@ -286,7 +313,7 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 	for (uint8 m = 0; m < _MipMapCount; m++)
 	{
 		uint32 imageSize;
-		f.serial(imageSize);
+		ktxReadRaw32(f, imageSize);
 		if (mustSwap) ktxSwap32(imageSize);
 
 		uint32 w = max(_Width >> m, 1u);
@@ -300,11 +327,14 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 		}
 		else
 		{
-			// For uncompressed data, read and convert to our internal format
-			uint32 srcSize = w * h * srcBpp;
+			// Per KTX spec: uncompressed pixel data uses GL_UNPACK_ALIGNMENT of 4,
+			// meaning each row is padded to a multiple of 4 bytes.
+			uint32 rowBytes = w * srcBpp;
+			uint32 rowStride = (rowBytes + 3) & ~3u;
+			uint32 srcSize = rowStride * h;
 			if (imageSize < srcSize)
 			{
-				nlwarning("KTX: imageSize %u too small for %ux%u with %u bpp", imageSize, w, h, srcBpp);
+				nlwarning("KTX: imageSize %u too small for %ux%u with %u bpp (expected %u)", imageSize, w, h, srcBpp, srcSize);
 				return 0;
 			}
 
@@ -317,18 +347,31 @@ uint8 CBitmap::readKTX( NLMISC::IStream &f, uint mipMapSkip )
 
 			if (glBaseInternalFormat == GL_RGB_)
 			{
-				// Expand RGB to RGBA
-				for (uint32 p = 0; p < w * h; p++)
+				// Expand RGB to RGBA, accounting for row stride
+				for (uint32 y = 0; y < h; y++)
 				{
-					_Data[m][p * 4 + 0] = srcData[p * 3 + 0];
-					_Data[m][p * 4 + 1] = srcData[p * 3 + 1];
-					_Data[m][p * 4 + 2] = srcData[p * 3 + 2];
-					_Data[m][p * 4 + 3] = 255;
+					for (uint32 x = 0; x < w; x++)
+					{
+						uint32 srcOffset = y * rowStride + x * 3;
+						uint32 dstOffset = (y * w + x) * 4;
+						_Data[m][dstOffset + 0] = srcData[srcOffset + 0];
+						_Data[m][dstOffset + 1] = srcData[srcOffset + 1];
+						_Data[m][dstOffset + 2] = srcData[srcOffset + 2];
+						_Data[m][dstOffset + 3] = 255;
+					}
+				}
+			}
+			else if (rowBytes != rowStride)
+			{
+				// Copy row by row to strip padding
+				for (uint32 y = 0; y < h; y++)
+				{
+					memcpy(_Data[m].getPtr() + y * w * dstBpp, &srcData[y * rowStride], rowBytes);
 				}
 			}
 			else
 			{
-				// Direct copy (RGBA, Luminance, Alpha, LuminanceAlpha)
+				// No row padding, direct copy (RGBA, Luminance, Alpha, LuminanceAlpha)
 				memcpy(_Data[m].getPtr(), &srcData[0], dstSize);
 			}
 		}
