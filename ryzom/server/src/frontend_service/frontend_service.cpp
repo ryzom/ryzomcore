@@ -62,6 +62,7 @@
 #include "module_manager.h"
 #include "client_host.h"
 #include "fe_stat.h"
+#include "quic_transceiver.h"
 
 #include "id_impulsions.h"
 #include "uid_impulsions.h"
@@ -1559,6 +1560,13 @@ bool CFrontEndService::update()
 				// Request the receive task to rebind its socket to recover
 				// from persistent kernel socket state corruption
 				_ReceiveSub.receiveTask()->requireRebind();
+
+				// Also restart the QUIC listener in case it has failed
+				CQuicTransceiver *quic = _ReceiveSub.quicTransceiver();
+				if (quic && quic->isConfigEnabled() && !quic->listening())
+				{
+					quic->restart();
+				}
 			}
 		}
 	}
@@ -1577,6 +1585,22 @@ bool CFrontEndService::update()
 			msgout.serial(alive);
 			CUnifiedNetwork::getInstance()->send("WS", msgout);
 			nlinfo("UDP communication restored, notified WS to resume routing clients");
+		}
+	}
+
+	// Check QUIC listener health independently of UDP comm status.
+	// If QUIC was enabled but the listener stopped unexpectedly, restart it.
+	// Throttle to avoid continuous restart attempts (check once per DelayBeforeUPDAlert period).
+	{
+		static uint32 lastQuicCheck = 0;
+		if (now - lastQuicCheck > DelayBeforeUPDAlert)
+		{
+			lastQuicCheck = now;
+			CQuicTransceiver *quic = _ReceiveSub.quicTransceiver();
+			if (quic && quic->isConfigEnabled() && !quic->listening())
+			{
+				quic->restart();
+			}
 		}
 	}
 
