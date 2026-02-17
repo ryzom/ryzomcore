@@ -120,10 +120,16 @@ public:
 	/// Require exit (thread-safe because atomic assignment)
 	void			requireExit() { _ExitRequired = true; }
 
+	/// Request the receive task to close and rebind its socket to recover from persistent failure
+	void			requireRebind() { _RebindRequired = true; }
+
 	/// Return the number of rejected datagrams since the last call (thread-safe because atomic assignment)
 	uint			nbNewRejectedDatagrams()	{ uint nb=_NbRejectedDatagrams; _NbRejectedDatagrams=0; return nb; }
 
 private:
+
+	/// Close and rebind the UDP socket to recover from persistent failure
+	void			rebindSocket();
 
 	/// Datagram length
 	uint										_DatagramLength;
@@ -139,6 +145,12 @@ private:
 
 	/// Exit required
 	volatile bool								_ExitRequired;
+
+	/// Rebind required (set by main thread when persistent socket failure detected)
+	volatile bool								_RebindRequired;
+
+	/// Port the socket is bound to
+	uint16										_BoundPort;
 
 public:
 	

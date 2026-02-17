@@ -1555,6 +1555,10 @@ bool CFrontEndService::update()
 				msgout.serial(alive);
 				CUnifiedNetwork::getInstance()->send("WS", msgout);
 				nlwarning("UDP communication failure detected, notified WS to stop routing clients");
+
+				// Request the receive task to rebind its socket to recover
+				// from persistent kernel socket state corruption
+				_ReceiveSub.receiveTask()->requireRebind();
 			}
 		}
 	}

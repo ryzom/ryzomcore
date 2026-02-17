@@ -156,6 +156,7 @@ public:
 	TClientIdCont&		clientIdCont()				{ return *_ClientIdCont; }
 	CClientHost*		getClientHost(TClientId id)	{ return (*_ClientIdCont)[id]; }
 	NLNET::CUdpSock		*dataSock()					{ return _ReceiveTask->DataSock; }
+	CFEReceiveTask		*receiveTask()				{ return _ReceiveTask; }
 
 
 	// Swap receive queues (to avoid high contention between the receive thread and the reading thread)

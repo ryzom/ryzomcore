@@ -82,7 +82,9 @@ CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptabl
 	_WriteQueue( "WriteQueue" ), // value unspecified
 	_DatagramLength( msgsize ),
 	_ExitRequired( false ),
-	_NbRejectedDatagrams( 0 )
+	_RebindRequired( false ),
+	_NbRejectedDatagrams( 0 ),
+	_BoundPort( 0 )
 {
 	// Socket
 	DataSock = new CUdpSock( false );
@@ -117,7 +119,21 @@ CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptabl
 	}
 	if ( actualPort > lastAcceptablePort )
 		nlerror( "Could not find an available port between %hu and %hu", firstAcceptablePort, lastAcceptablePort );
+	_BoundPort = actualPort;
 	nlinfo( "Binding all network interfaces on port %hu (%hu asked)", actualPort, firstAcceptablePort );
+
+	// Set a receive timeout so recvfrom() doesn't block forever.
+	// This ensures the receive thread can periodically check for exit/rebind requests
+	// and prevents the thread from getting permanently stuck if the socket enters a bad state.
+#ifdef NL_OS_WINDOWS
+	DWORD tv = 1000; // milliseconds
+	setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
+#elif defined NL_OS_UNIX
+	struct timeval tv;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
+	setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+#endif
 }
 
 
@@ -157,6 +173,13 @@ void CFEReceiveTask::run()
 		}
 
 #endif
+		// Check if the main thread has requested a socket rebind to recover from persistent failure
+		if ( _RebindRequired )
+		{
+			rebindSocket();
+			_RebindRequired = false;
+		}
+
 		try
 		{
 			// Receive into _ReceivedMessage
@@ -172,9 +195,11 @@ void CFEReceiveTask::run()
 		}
 		catch (const ESocket&)
 		{
-			// Remove the client corresponding to the address
-			_ReceivedMessage.setTypeEvent( TReceivedMessage::RemoveClient );
-			_DatagramLength = 0;
+			// This can be triggered by SO_RCVTIMEO timeout (EAGAIN/EWOULDBLOCK)
+			// or by a real socket error. In both cases, just continue the loop.
+			// The SO_RCVTIMEO ensures we don't block forever, allowing the thread
+			// to check for exit/rebind requests.
+			continue;
 		}
 
 		// Check the size. Consider a big size as a hacked message
@@ -201,6 +226,49 @@ void CFEReceiveTask::run()
 	}
 
 	nlinfo( "Exiting from front-end receive task" );
+}
+
+
+/*
+ * Close and rebind the UDP socket to recover from persistent failure.
+ * This resets any corrupted kernel socket state that may have accumulated
+ * over months of runtime.
+ */
+void CFEReceiveTask::rebindSocket()
+{
+	nlwarning("Rebinding UDP socket on port %hu to recover from persistent failure", _BoundPort);
+
+	// Close and delete the old socket
+	DataSock->close();
+	delete DataSock;
+
+	// Create a new socket and bind to the same port
+	DataSock = new CUdpSock( false );
+	nlassert( DataSock );
+
+	try
+	{
+		DataSock->bind( _BoundPort );
+	}
+	catch (const ESocket &e)
+	{
+		nlwarning("Failed to rebind UDP socket on port %hu: %s", _BoundPort, e.what());
+		// Socket is now in a bad state, but we'll keep trying on next rebind request
+		return;
+	}
+
+	// Set the receive timeout on the new socket
+#ifdef NL_OS_WINDOWS
+	DWORD tv = 1000;
+	setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
+#elif defined NL_OS_UNIX
+	struct timeval tv;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
+	setsockopt(DataSock->descriptor(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+#endif
+
+	nlinfo("UDP socket successfully rebound on port %hu", _BoundPort);
 }
 
 
