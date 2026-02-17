@@ -58,15 +58,22 @@ extern CVariable<bool> EGSLight;
 CSheets CSheets::_StaticSheets;		// the singleton instance
 bool CSheets::_Initialised=false;	// - set true by constructor
 bool CSheets::_Destroyed=false;		// - set true by destructor
+std::string CSheets::_WriteDirectory;
 
-#ifndef NO_EGS_VARS
+void CSheets::setWriteDirectory(const std::string &dir)
+{
+	_WriteDirectory = dir;
+}
+
+const std::string &CSheets::getWriteDirectory()
+{
+	return _WriteDirectory;
+}
+
 static std::string writeDirectory()
 {
-	return IService::getInstance()->WriteFilesDirectory.toString();
+	return CSheets::getWriteDirectory();
 }
-#else
-extern std::string writeDirectory();
-#endif
 
 //---------------------------------------------------
 // scanDirectoriesForFiles : utility routine for init()

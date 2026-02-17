@@ -80,6 +80,17 @@ public :
 public:
 
 	/**
+	 * Set the write directory for packed sheets output.
+	 * Must be called before init().
+	 */
+	static void setWriteDirectory(const std::string &dir);
+
+	/**
+	 * Get the write directory for packed sheets output.
+	 */
+	static const std::string &getWriteDirectory();
+
+	/**
 	 * Init the manager (register callbacks)
 	 */
 	static void init();
@@ -295,6 +306,7 @@ private:
 	static CSheets _StaticSheets;	//the singleton instance
 	static bool _Initialised;		//default =false - set true by constructor
 	static bool _Destroyed;			//default =false - set true by destructor
+	static std::string _WriteDirectory;	// write directory for packed sheets
 };
 
 #endif // SHEETS_H

@@ -1487,6 +1487,7 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 	CDynamicSheetManager::getInstance();
 
 	// Init Sheets manager
+	CSheets::setWriteDirectory(IService::getInstance()->WriteFilesDirectory.toString());
 	CSheets::init();
 	//CCharacter::initMountInventoryBulkMax(); // must be called after CSheets::init()
 	// Init item manager

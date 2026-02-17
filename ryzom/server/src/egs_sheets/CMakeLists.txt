@@ -4,8 +4,6 @@ NL_TARGET_LIB(ryzom_egs_sheets ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_egs_sheets PRIVATE ${CMAKE_SOURCE_DIR}/ryzom/common/src ${CMAKE_SOURCE_DIR}/ryzom/server/src ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service)
 
-TARGET_COMPILE_DEFINITIONS(ryzom_egs_sheets PRIVATE NO_EGS_VARS)
-
 TARGET_LINK_LIBRARIES(ryzom_egs_sheets
         PUBLIC
         ryzom_gameshare
