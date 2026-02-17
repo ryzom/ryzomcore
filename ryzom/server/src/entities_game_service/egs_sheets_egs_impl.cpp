@@ -31,11 +31,9 @@
 #include "egs_variables.h"
 #include "egs_globals.h"
 #include "game_item_manager/weapon_craft_parameters.h"
-#include "nel/net/service.h"
 
 using namespace std;
 using namespace NLMISC;
-using namespace NLNET;
 
 // ***************************************************************************
 // CStaticItem::getBaseWeight
@@ -240,7 +238,7 @@ const CStaticLootSet *CStaticLootTable::selectRandomCustomLootSet() const
 // ***************************************************************************
 // QuarteringQuantityByVariable - EGS-specific initialization
 // ***************************************************************************
-extern const float QuarteringForcedQuantities [6];
+static const float QuarteringForcedQuantities [6] = { 0, 1.0f, 2.0f, 3.0f, 4.0f, 0.5f };
 
 const float *QuarteringQuantityByVariable [NBRMQuantityVariables] =
 {

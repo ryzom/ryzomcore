@@ -31,8 +31,6 @@ using namespace NLGEORGES;
 const uint8 NbRawMaterials = 10;
 
 
-extern const float QuarteringForcedQuantities [6] = { 0, 1.0f, 2.0f, 3.0f, 4.0f, 0.5f };
-
 CVariable<bool> VerboseQuartering( "egs", "VerboseQuartering", "", false, 0, true );
 
 //--------------------------------------------------------------
