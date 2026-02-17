@@ -291,11 +291,11 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 		editNotes.input_string = ""
 	end
 
-	-- reset "all equipment" checkbox
-	r2.allEquipmentEnabled = false
+	-- restore "all equipment" checkbox from NPC state
+	r2.allEquipmentEnabled = (instance.UseAllEquipment == 1)
 	local allEquipToggle = npcUI:find("all_equipment")
 	if allEquipToggle then
-		allEquipToggle.toggle_butt.pushed = true
+		allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
 	end
 
 	-- update avoidable equipment
@@ -316,7 +316,11 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 	local leftHandIndex = instance.WeaponLeftHand
 
 	local handsKey = rightHandIndex..":"..leftHandIndex..":"..handsLevel
-	local weaponsName = r2.itemIndexEquipmentToSelectionText[instance.Equipment][comboBox.Env.nameComboBox][handsKey] 
+	local effId = r2:getEffectiveEquipmentId(instance, comboBox.Env.nameComboBox)
+	local weaponsName = r2.itemIndexEquipmentToSelectionText[effId][comboBox.Env.nameComboBox][handsKey]
+	if weaponsName == nil then
+		weaponsName = r2.itemIndexEquipmentToSelectionText[instance.Equipment][comboBox.Env.nameComboBox][handsKey]
+	end
 	comboBox.Env.locked = true
 	comboBox.selection_text = weaponsName
 	comboBox.Env.locked = false
@@ -611,6 +615,16 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 		toggleB.pushed = not link
 	end
 
+	-- USE ALL EQUIPMENT
+	if attributeName == "UseAllEquipment" then
+		r2.allEquipmentEnabled = (instance.UseAllEquipment == 1)
+		local allEquipToggle = npcUI:find("all_equipment")
+		if allEquipToggle then
+			allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
+		end
+		r2:updateEquipment(instance, false)
+	end
+
 	-- BODY SETS / FACE SETS/ FACE MORPH
 	local sliderUIPath = body_sliders[attributeName]
 	if sliderUIPath then
@@ -640,7 +654,11 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 		local leftHandIndex = instance.WeaponLeftHand
 
 		local handsKey = rightHandIndex..":"..leftHandIndex..":"..handsLevel
-		local weaponsName = r2.itemIndexEquipmentToSelectionText[instance.Equipment][weaponsCB.Env.nameComboBox][handsKey] 
+		local effId = r2:getEffectiveEquipmentId(instance, weaponsCB.Env.nameComboBox)
+		local weaponsName = r2.itemIndexEquipmentToSelectionText[effId][weaponsCB.Env.nameComboBox][handsKey]
+		if weaponsName == nil then
+			weaponsName = r2.itemIndexEquipmentToSelectionText[instance.Equipment][weaponsCB.Env.nameComboBox][handsKey]
+		end
 		if weaponsName then
 			weaponsCB.Env.locked = true
 			weaponsCB.selection_text = weaponsName
@@ -2203,8 +2221,36 @@ function r2.addR2PlayerEquipment(paletteElt, equipmentTable)
 end
 
 -----------------------------------------------------------------------------------------------
+-- Classify an equipment ID into a combat category for weapon grouping.
+-- Returns a category string: "melee", "magic", "healer", "guard", "civil", or "player".
+function r2:getEquipmentCombatCategory(equipmentId)
+	if equipmentId == nil or equipmentId == "" then return nil end
+	-- player race equipment (fyros_equipment, matis_equipment, etc.) has no hands slot
+	if string.find(equipmentId, "_equipment") == nil then return nil end
+	if string.find(equipmentId, "melee_dd_") or string.find(equipmentId, "melee_tank_")
+	   or string.find(equipmentId, "light_melee_") then
+		return "melee"
+	elseif string.find(equipmentId, "mage_") then
+		return "magic"
+	elseif string.find(equipmentId, "healer_") then
+		return "healer"
+	elseif string.find(equipmentId, "guard_") then
+		return "guard"
+	elseif string.find(equipmentId, "civil_") then
+		return "civil"
+	end
+	-- player race equipment types
+	local playerRaces = { "fyros_equipment", "matis_equipment", "tryker_equipment", "zorai_equipment" }
+	for _, race in ipairs(playerRaces) do
+		if equipmentId == race then return "player" end
+	end
+	return nil
+end
+
+-----------------------------------------------------------------------------------------------
 -- Build a merged equipment palette containing all outfit items from every equipment palette.
--- Weapons (hands) are excluded because melee, range, and magic require different action profiles.
+-- Also builds merged weapon palettes per combat category so that "all equipment" mode
+-- expands weapon choices within the same combat type across all races and levels.
 function r2:buildAllEquipmentPalette()
 	local outfitSlots = { "helmet", "chest_plate", "legs", "boots", "gloves", "arms_guard" }
 	local merged = {}
@@ -2212,7 +2258,7 @@ function r2:buildAllEquipmentPalette()
 		merged[slot] = {}
 		local seen = {} -- track by itemFile to avoid duplicates
 		for equId, equTable in pairs(r2.equipmentPalette) do
-			if equId ~= r2.allEquipmentId and equTable[slot] then
+			if equId ~= r2.allEquipmentId and not string.find(equId, "r2_all_weapons_") and equTable[slot] then
 				for _, item in ipairs(equTable[slot]) do
 					if item.itemFile and not seen[item.itemFile] then
 						seen[item.itemFile] = true
@@ -2224,7 +2270,7 @@ function r2:buildAllEquipmentPalette()
 	end
 	r2.equipmentPalette[r2.allEquipmentId] = merged
 
-	-- Build lookup tables for the merged palette
+	-- Build lookup tables for the merged outfit palette
 	r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId] = {}
 	for _, slot in ipairs(outfitSlots) do
 		r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot] = {}
@@ -2234,15 +2280,88 @@ function r2:buildAllEquipmentPalette()
 		end
 		r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot][0] = r2.noPiece
 	end
+
+	-- Build merged weapon palettes per combat category
+	r2.allWeaponsCategories = {}
+	for equId, equTable in pairs(r2.equipmentPalette) do
+		if equId ~= r2.allEquipmentId and not string.find(equId, "r2_all_weapons_") then
+			local category = r2:getEquipmentCombatCategory(equId)
+			if category and equTable["hands"] then
+				if not r2.allWeaponsCategories[category] then
+					r2.allWeaponsCategories[category] = {}
+				end
+				local seen = r2.allWeaponsCategories[category]
+				for _, item in ipairs(equTable["hands"]) do
+					-- dedup by the full weapon key (rightHand:leftHand:handsLevel)
+					local key = (item.rightHand or "") .. ":" .. (item.leftHand or "") .. ":" .. (item.handsLevel or "")
+					if not seen[key] then
+						seen[key] = true
+					end
+				end
+			end
+		end
+	end
+
+	-- Build actual merged weapon palette tables per category
+	for category, _ in pairs(r2.allWeaponsCategories) do
+		local weaponPaletteId = "r2_all_weapons_" .. category
+		local mergedHands = {}
+		local seen = {}
+		for equId, equTable in pairs(r2.equipmentPalette) do
+			if equId ~= r2.allEquipmentId and not string.find(equId, "r2_all_weapons_") then
+				local cat = r2:getEquipmentCombatCategory(equId)
+				if cat == category and equTable["hands"] then
+					for _, item in ipairs(equTable["hands"]) do
+						local key = (item.rightHand or "") .. ":" .. (item.leftHand or "") .. ":" .. (item.handsLevel or "")
+						if not seen[key] then
+							seen[key] = true
+							table.insert(mergedHands, {
+								["trad"] = item.trad,
+								["rightHand"] = item.rightHand,
+								["leftHand"] = item.leftHand,
+								["handsLevel"] = item.handsLevel
+							})
+						end
+					end
+				end
+			end
+		end
+		r2.equipmentPalette[weaponPaletteId] = { ["hands"] = mergedHands }
+
+		-- Build lookup tables for the merged weapon palette
+		r2.itemIndexEquipmentToSelectionText[weaponPaletteId] = {}
+		r2.itemIndexEquipmentToSelectionText[weaponPaletteId]["hands"] = {}
+		for _, item in ipairs(mergedHands) do
+			local rightHandIndex = getSheetId(item.rightHand)
+			local leftHandIndex = getSheetId(item.leftHand)
+			local handsKey = rightHandIndex .. ":" .. leftHandIndex .. ":" .. item.handsLevel
+			r2.itemIndexEquipmentToSelectionText[weaponPaletteId]["hands"][handsKey] = item.trad
+		end
+		r2.itemIndexEquipmentToSelectionText[weaponPaletteId]["hands"][0] = r2.noPiece
+	end
 end
 
 -----------------------------------------------------------------------------------------------
--- Returns the effective equipment ID for outfit (non-weapon) slots.
--- When "all equipment" is enabled, returns the merged palette ID for outfit slots.
--- Always returns the NPC's actual equipment ID for weapon slots.
+-- Returns the effective equipment ID for a given slot.
+-- When "all equipment" is enabled:
+--   - For outfit slots: returns the merged all-outfit palette ID.
+--   - For "hands" slot: returns the merged weapon palette for the NPC's combat category,
+--     which expands weapon choices across all races and levels within the same combat type.
+-- When "all equipment" is disabled, always returns the NPC's actual equipment ID.
 function r2:getEffectiveEquipmentId(instance, slotName)
-	if r2.allEquipmentEnabled and slotName ~= "hands" then
-		return r2.allEquipmentId
+	if r2.allEquipmentEnabled then
+		if slotName == "hands" then
+			local category = r2:getEquipmentCombatCategory(instance.Equipment)
+			if category then
+				local weaponPaletteId = "r2_all_weapons_" .. category
+				if r2.equipmentPalette[weaponPaletteId] then
+					return weaponPaletteId
+				end
+			end
+			return instance.Equipment
+		else
+			return r2.allEquipmentId
+		end
 	end
 	return instance.Equipment
 end
@@ -2258,8 +2377,12 @@ function r2:toggleAllEquipment()
 	assert(toggleB)
 	r2.allEquipmentEnabled = not toggleB.pushed
 
+	-- persist the state to the NPC instance
 	local selection = r2:getSelectedInstance()
 	if selection then
+		local val = 0
+		if r2.allEquipmentEnabled then val = 1 end
+		r2:setNpcAttribute(selection.InstanceId, "UseAllEquipment", val)
 		r2:updateEquipment(selection, false)
 	end
 end
@@ -2475,7 +2598,8 @@ function r2:updateWeapons()
 	local equipmentType = hands.selection_text
 
 	local handsTable
-	for k, v in pairs(r2.equipmentPalette[selection.Equipment][hands.Env.nameComboBox]) do
+	local effId = r2:getEffectiveEquipmentId(selection, hands.Env.nameComboBox)
+	for k, v in pairs(r2.equipmentPalette[effId][hands.Env.nameComboBox]) do
 		if v.trad == equipmentType then handsTable = v break end
 	end
 	assert(handsTable)
