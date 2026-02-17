@@ -2225,8 +2225,6 @@ end
 -- Returns a category string: "melee", "magic", "healer", "guard", "civil", or "player".
 function r2:getEquipmentCombatCategory(equipmentId)
 	if equipmentId == nil or equipmentId == "" then return nil end
-	-- player race equipment (fyros_equipment, matis_equipment, etc.) has no hands slot
-	if string.find(equipmentId, "_equipment") == nil then return nil end
 	if string.find(equipmentId, "melee_dd_") or string.find(equipmentId, "melee_tank_")
 	   or string.find(equipmentId, "light_melee_") then
 		return "melee"
@@ -2239,12 +2237,18 @@ function r2:getEquipmentCombatCategory(equipmentId)
 	elseif string.find(equipmentId, "civil_") then
 		return "civil"
 	end
-	-- player race equipment types
+	-- player race equipment types (no hands slot, but categorize for completeness)
 	local playerRaces = { "fyros_equipment", "matis_equipment", "tryker_equipment", "zorai_equipment" }
 	for _, race in ipairs(playerRaces) do
 		if equipmentId == race then return "player" end
 	end
 	return nil
+end
+
+-----------------------------------------------------------------------------------------------
+-- Helper: build a dedup key for a weapon entry (rightHand:leftHand:handsLevel).
+local function weaponDedupKey(item)
+	return (item.rightHand or "") .. ":" .. (item.leftHand or "") .. ":" .. (item.handsLevel or "")
 end
 
 -----------------------------------------------------------------------------------------------
@@ -2281,29 +2285,19 @@ function r2:buildAllEquipmentPalette()
 		r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot][0] = r2.noPiece
 	end
 
-	-- Build merged weapon palettes per combat category
-	r2.allWeaponsCategories = {}
+	-- Discover which combat categories exist
+	local categoriesFound = {}
 	for equId, equTable in pairs(r2.equipmentPalette) do
 		if equId ~= r2.allEquipmentId and not string.find(equId, "r2_all_weapons_") then
 			local category = r2:getEquipmentCombatCategory(equId)
 			if category and equTable["hands"] then
-				if not r2.allWeaponsCategories[category] then
-					r2.allWeaponsCategories[category] = {}
-				end
-				local seen = r2.allWeaponsCategories[category]
-				for _, item in ipairs(equTable["hands"]) do
-					-- dedup by the full weapon key (rightHand:leftHand:handsLevel)
-					local key = (item.rightHand or "") .. ":" .. (item.leftHand or "") .. ":" .. (item.handsLevel or "")
-					if not seen[key] then
-						seen[key] = true
-					end
-				end
+				categoriesFound[category] = true
 			end
 		end
 	end
 
-	-- Build actual merged weapon palette tables per category
-	for category, _ in pairs(r2.allWeaponsCategories) do
+	-- Build merged weapon palette tables per category
+	for category, _ in pairs(categoriesFound) do
 		local weaponPaletteId = "r2_all_weapons_" .. category
 		local mergedHands = {}
 		local seen = {}
@@ -2312,7 +2306,7 @@ function r2:buildAllEquipmentPalette()
 				local cat = r2:getEquipmentCombatCategory(equId)
 				if cat == category and equTable["hands"] then
 					for _, item in ipairs(equTable["hands"]) do
-						local key = (item.rightHand or "") .. ":" .. (item.leftHand or "") .. ":" .. (item.handsLevel or "")
+						local key = weaponDedupKey(item)
 						if not seen[key] then
 							seen[key] = true
 							table.insert(mergedHands, {
