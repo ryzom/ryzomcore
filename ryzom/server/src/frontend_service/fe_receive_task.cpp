@@ -164,6 +164,11 @@ void CFEReceiveTask::run()
 			_ReceivedMessage.resizeData( _DatagramLength );
 			_ReceivedMessage.setTypeEvent( TReceivedMessage::User );
 			DataSock->receivedFrom( _ReceivedMessage.userDataW(), _DatagramLength, _ReceivedMessage.AddrFrom );
+
+			// Only update the last datagram receive date on successful receive.
+			// On socket errors, the timestamp stays stale so that CheckUDPComm
+			// can detect persistent socket failures and notify the WS.
+			LastUDPPacketReceived = CTime::getSecondsSince1970();
 		}
 		catch (const ESocket&)
 		{
@@ -171,9 +176,6 @@ void CFEReceiveTask::run()
 			_ReceivedMessage.setTypeEvent( TReceivedMessage::RemoveClient );
 			_DatagramLength = 0;
 		}
-		
-		// update the last datagram receive date
-		LastUDPPacketReceived = CTime::getSecondsSince1970();
 
 		// Check the size. Consider a big size as a hacked message
 //		if ( _DatagramLength < 512 )
